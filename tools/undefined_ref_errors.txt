@@ -1,0 +1,255 @@
+mips-linux-gnu-ld: build/asm/1000.o: in function `func_8002687C':
+(.text+0xcd0): undefined reference to `D_800B6288'
+mips-linux-gnu-ld: (.text+0xcd8): undefined reference to `D_800B6288'
+mips-linux-gnu-ld: (.text+0xd80): undefined reference to `D_800B6288'
+mips-linux-gnu-ld: (.text+0xd88): undefined reference to `D_800B6288'
+mips-linux-gnu-ld: build/asm/1000.o: in function `func_80026CC4':
+(.text+0x1204): undefined reference to `D_800BAA00'
+mips-linux-gnu-ld: (.text+0x1208): undefined reference to `D_800BAA00'
+mips-linux-gnu-ld: (.text+0x146c): undefined reference to `D_800B620C'
+mips-linux-gnu-ld: (.text+0x1470): undefined reference to `D_800B620C'
+mips-linux-gnu-ld: (.text+0x15e0): undefined reference to `D_800B621C'
+mips-linux-gnu-ld: (.text+0x15e4): undefined reference to `D_800B621C'
+mips-linux-gnu-ld: (.text+0x173c): undefined reference to `D_800B622C'
+mips-linux-gnu-ld: (.text+0x1740): undefined reference to `D_800B622C'
+mips-linux-gnu-ld: (.text+0x188c): undefined reference to `D_800B623C'
+mips-linux-gnu-ld: (.text+0x1890): undefined reference to `D_800B623C'
+mips-linux-gnu-ld: build/asm/1000.o: in function `func_80029250':
+(.text+0x3694): undefined reference to `D_800B67A4'
+mips-linux-gnu-ld: (.text+0x3698): undefined reference to `D_800B67A4'
+mips-linux-gnu-ld: (.text+0x36c4): undefined reference to `D_800B67A4'
+mips-linux-gnu-ld: (.text+0x36c8): undefined reference to `D_800B67A4'
+mips-linux-gnu-ld: build/asm/1000.o: in function `func_800292FC':
+(.text+0x3730): undefined reference to `D_800B67A4'
+mips-linux-gnu-ld: build/asm/1000.o:(.text+0x3738): more undefined references to `D_800B67A4' follow
+mips-linux-gnu-ld: build/asm/1000.o: in function `.L8002FE78':
+(.text+0xac80): undefined reference to `D_800B7790'
+mips-linux-gnu-ld: (.text+0xac84): undefined reference to `D_800B7790'
+mips-linux-gnu-ld: build/asm/1000.o: in function `func_80031AF4':
+(.text+0xc874): undefined reference to `D_800B7790'
+mips-linux-gnu-ld: (.text+0xc87c): undefined reference to `D_800B7790'
+mips-linux-gnu-ld: (.text+0xc8b8): undefined reference to `D_800B7798'
+mips-linux-gnu-ld: (.text+0xc8c0): undefined reference to `D_800B7798'
+mips-linux-gnu-ld: build/asm/1000.o: in function `func_800328E0':
+(.text+0xcd3c): undefined reference to `D_800B7790'
+mips-linux-gnu-ld: (.text+0xcd40): undefined reference to `D_800B7790'
+mips-linux-gnu-ld: build/asm/1000.o: in function `func_8003E004':
+(.text+0x18408): undefined reference to `D_800BAA00'
+mips-linux-gnu-ld: (.text+0x1840c): undefined reference to `D_800BAA00'
+mips-linux-gnu-ld: (.text+0x18678): undefined reference to `D_800BA888'
+mips-linux-gnu-ld: (.text+0x18680): undefined reference to `D_800BA888'
+mips-linux-gnu-ld: build/asm/1000.o: in function `func_8003E314':
+(.text+0x18778): undefined reference to `D_800BA888'
+mips-linux-gnu-ld: (.text+0x1877c): undefined reference to `D_800BA888'
+mips-linux-gnu-ld: build/asm/1000.o: in function `func_8003E628':
+(.text+0x18a2c): undefined reference to `D_800BA9A8'
+mips-linux-gnu-ld: (.text+0x18a34): undefined reference to `D_800BA9A8'
+mips-linux-gnu-ld: build/asm/1000.o: in function `func_8003E648':
+(.text+0x18a48): undefined reference to `D_800BA9A8'
+mips-linux-gnu-ld: (.text+0x18a4c): undefined reference to `D_800BA9A8'
+mips-linux-gnu-ld: build/asm/1000.o: in function `func_8003E6C0':
+(.text+0x18c98): undefined reference to `D_800BA9A8'
+mips-linux-gnu-ld: build/asm/1000.o:(.text+0x18c9c): more undefined references to `D_800BA9A8' follow
+mips-linux-gnu-ld: build/asm/1000.o: in function `func_8004018C':
+(.text+0x1a5b8): undefined reference to `D_800BB040'
+mips-linux-gnu-ld: (.text+0x1a5c0): undefined reference to `D_800BB040'
+mips-linux-gnu-ld: build/asm/1000.o: in function `.L800402A0':
+(.text+0x1a6a8): undefined reference to `D_800BB040'
+mips-linux-gnu-ld: (.text+0x1a6b0): undefined reference to `D_800BB040'
+mips-linux-gnu-ld: build/asm/1000.o: in function `func_800427E8':
+(.text+0x1d140): undefined reference to `D_800BAA00'
+mips-linux-gnu-ld: (.text+0x1d144): undefined reference to `D_800BAA00'
+mips-linux-gnu-ld: build/asm/1000.o: in function `func_800469EC':
+(.text+0x20e34): undefined reference to `D_800BAA04'
+mips-linux-gnu-ld: (.text+0x20e38): undefined reference to `D_800BAA04'
+mips-linux-gnu-ld: (.text+0x21178): undefined reference to `D_800BAA04'
+mips-linux-gnu-ld: (.text+0x2117c): undefined reference to `D_800BAA04'
+mips-linux-gnu-ld: (.text+0x21340): undefined reference to `D_800BAA04'
+mips-linux-gnu-ld: build/asm/1000.o:(.text+0x21344): more undefined references to `D_800BAA04' follow
+mips-linux-gnu-ld: build/asm/1000.o: in function `func_8004CDA0':
+(.text+0x271c4): undefined reference to `D_800BE6D8'
+mips-linux-gnu-ld: (.text+0x271c8): undefined reference to `D_800BE6D8'
+mips-linux-gnu-ld: (.text+0x271dc): undefined reference to `D_800BE6D8'
+mips-linux-gnu-ld: (.text+0x271e0): undefined reference to `D_800BE6D8'
+mips-linux-gnu-ld: build/asm/1000.o: in function `func_8004D148':
+(.text+0x2755c): undefined reference to `D_800BE6D8'
+mips-linux-gnu-ld: build/asm/1000.o:(.text+0x27560): more undefined references to `D_800BE6D8' follow
+mips-linux-gnu-ld: build/asm/1000.o: in function `func_8004E924':
+(.text+0x28de4): undefined reference to `D_800C0C30'
+mips-linux-gnu-ld: (.text+0x28de8): undefined reference to `D_800C0C30'
+mips-linux-gnu-ld: (.text+0x28df0): undefined reference to `D_800C0C38'
+mips-linux-gnu-ld: (.text+0x28df4): undefined reference to `D_800C0C38'
+mips-linux-gnu-ld: build/asm/1000.o: in function `func_80051FCC':
+(.text+0x2c404): undefined reference to `D_800C1B28'
+mips-linux-gnu-ld: (.text+0x2c410): undefined reference to `D_800C1B28'
+mips-linux-gnu-ld: build/asm/1000.o: in function `func_80052FE0':
+(.text+0x2d40c): undefined reference to `D_800C1D28'
+mips-linux-gnu-ld: (.text+0x2d414): undefined reference to `D_800C1D28'
+mips-linux-gnu-ld: build/asm/1000.o: in function `func_800530FC':
+(.text+0x2d528): undefined reference to `D_800BAA00'
+mips-linux-gnu-ld: (.text+0x2d52c): undefined reference to `D_800BAA00'
+mips-linux-gnu-ld: build/asm/1000.o: in function `func_80057914':
+(.text+0x31db8): undefined reference to `D_800BAA00'
+mips-linux-gnu-ld: (.text+0x31dbc): undefined reference to `D_800BAA00'
+mips-linux-gnu-ld: build/asm/1000.o: in function `func_80058D04':
+(.text+0x33290): undefined reference to `D_800C1F58'
+mips-linux-gnu-ld: (.text+0x33298): undefined reference to `D_800C1F58'
+mips-linux-gnu-ld: (.text+0x33320): undefined reference to `D_800C1F5C'
+mips-linux-gnu-ld: (.text+0x33328): undefined reference to `D_800C1F5C'
+mips-linux-gnu-ld: (.text+0x33400): undefined reference to `D_800C1F60'
+mips-linux-gnu-ld: (.text+0x33408): undefined reference to `D_800C1F60'
+mips-linux-gnu-ld: build/asm/1000.o: in function `func_8005A580':
+(.text+0x34ae0): undefined reference to `D_800C2014'
+mips-linux-gnu-ld: (.text+0x34ae4): undefined reference to `D_800C2014'
+mips-linux-gnu-ld: build/asm/1000.o: in function `func_8005C674':
+(.text+0x36cbc): undefined reference to `D_800C28FC'
+mips-linux-gnu-ld: (.text+0x36cc0): undefined reference to `D_800C28FC'
+mips-linux-gnu-ld: (.text+0x36d00): undefined reference to `D_800C29B8'
+mips-linux-gnu-ld: (.text+0x36d08): undefined reference to `D_800C29B8'
+mips-linux-gnu-ld: build/asm/1000.o: in function `func_8005CEE0':
+(.text+0x37338): undefined reference to `D_800C29B8'
+mips-linux-gnu-ld: (.text+0x37340): undefined reference to `D_800C29B8'
+mips-linux-gnu-ld: build/asm/1000.o: in function `func_8005D9A0':
+(.text+0x37ec0): undefined reference to `D_800C2BD4'
+mips-linux-gnu-ld: (.text+0x37ec4): undefined reference to `D_800C2BD4'
+mips-linux-gnu-ld: build/asm/1000.o: in function `func_8005DAD4':
+(.text+0x37ef0): undefined reference to `D_800C2BD4'
+mips-linux-gnu-ld: (.text+0x37ef8): undefined reference to `D_800C2BD4'
+mips-linux-gnu-ld: build/asm/1000.o: in function `.L8005DC1C':
+(.text+0x3803c): undefined reference to `D_800C2BD4'
+mips-linux-gnu-ld: build/asm/1000.o:(.text+0x38040): more undefined references to `D_800C2BD4' follow
+mips-linux-gnu-ld: build/asm/1000.o: in function `func_8005DC50':
+(.text+0x380a8): undefined reference to `D_800C1FF4'
+mips-linux-gnu-ld: (.text+0x380ac): undefined reference to `D_800C1FF4'
+mips-linux-gnu-ld: build/asm/1000.o: in function `func_8005DCDC':
+(.text+0x380fc): undefined reference to `D_800C2BD4'
+mips-linux-gnu-ld: (.text+0x38100): undefined reference to `D_800C2BD4'
+mips-linux-gnu-ld: build/asm/1000.o: in function `func_8005DD10':
+(.text+0x38130): undefined reference to `D_800C2BD4'
+mips-linux-gnu-ld: (.text+0x38134): undefined reference to `D_800C2BD4'
+mips-linux-gnu-ld: build/asm/1000.o: in function `func_8005DD44':
+(.text+0x38164): undefined reference to `D_800C2BD4'
+mips-linux-gnu-ld: build/asm/1000.o:(.text+0x38168): more undefined references to `D_800C2BD4' follow
+mips-linux-gnu-ld: build/asm/1000.o: in function `func_8005EC48':
+(.text+0x390ac): undefined reference to `D_800C2FFC'
+mips-linux-gnu-ld: (.text+0x390b0): undefined reference to `D_800C2FFC'
+mips-linux-gnu-ld: build/asm/1000.o: in function `func_8005EDD0':
+(.text+0x391e8): undefined reference to `D_800C2FFC'
+mips-linux-gnu-ld: (.text+0x391ec): undefined reference to `D_800C2FFC'
+mips-linux-gnu-ld: build/asm/1000.o: in function `func_8005EF88':
+(.text+0x3938c): undefined reference to `D_800C2FFC'
+mips-linux-gnu-ld: build/asm/1000.o:(.text+0x39390): more undefined references to `D_800C2FFC' follow
+mips-linux-gnu-ld: build/asm/1000.o: in function `func_8005F1C8':
+(.text+0x395e0): undefined reference to `D_800C3078'
+mips-linux-gnu-ld: (.text+0x395e4): undefined reference to `D_800C3078'
+mips-linux-gnu-ld: build/asm/1000.o: in function `func_80060190':
+(.text+0x3a590): undefined reference to `D_800BAA04'
+mips-linux-gnu-ld: (.text+0x3a594): undefined reference to `D_800BAA04'
+mips-linux-gnu-ld: build/asm/1000.o: in function `.L800612A4':
+(.text+0x3b808): undefined reference to `D_800BAA04'
+mips-linux-gnu-ld: (.text+0x3b80c): undefined reference to `D_800BAA04'
+mips-linux-gnu-ld: build/asm/1000.o: in function `func_80067D74':
+(.text+0x422c4): undefined reference to `D_800C3604'
+mips-linux-gnu-ld: (.text+0x422cc): undefined reference to `D_800C3604'
+mips-linux-gnu-ld: build/asm/1000.o: in function `func_800695F8':
+(.text+0x43d54): undefined reference to `D_800C1434'
+mips-linux-gnu-ld: (.text+0x43d5c): undefined reference to `D_800C1434'
+mips-linux-gnu-ld: (.text+0x43d60): undefined reference to `D_800BAA04'
+mips-linux-gnu-ld: (.text+0x43d64): undefined reference to `D_800BAA04'
+mips-linux-gnu-ld: build/asm/1000.o: in function `func_8006DEB4':
+(.text+0x482e0): undefined reference to `D_800BAA04'
+mips-linux-gnu-ld: (.text+0x482e4): undefined reference to `D_800BAA04'
+mips-linux-gnu-ld: build/asm/1000.o: in function `func_8006F5E0':
+(.text+0x49a98): undefined reference to `D_800C42E0'
+mips-linux-gnu-ld: (.text+0x49a9c): undefined reference to `D_800C42E0'
+mips-linux-gnu-ld: build/asm/1000.o: in function `func_8006F734':
+(.text+0x49b7c): undefined reference to `D_800C42E0'
+mips-linux-gnu-ld: (.text+0x49b80): undefined reference to `D_800C42E0'
+mips-linux-gnu-ld: (.text+0x49ba0): undefined reference to `D_800C42E0'
+mips-linux-gnu-ld: build/asm/1000.o:(.text+0x49ba4): more undefined references to `D_800C42E0' follow
+mips-linux-gnu-ld: build/asm/1000.o: in function `func_80080688':
+(.text+0x5ab5c): undefined reference to `D_800C1434'
+mips-linux-gnu-ld: (.text+0x5ab64): undefined reference to `D_800C1434'
+mips-linux-gnu-ld: build/asm/1000.o: in function `func_8008085C':
+(.text+0x5ae0c): undefined reference to `D_800C59DC'
+mips-linux-gnu-ld: (.text+0x5ae10): undefined reference to `D_800C59DC'
+mips-linux-gnu-ld: build/asm/1000.o: in function `func_80080E7C':
+(.text+0x5b484): undefined reference to `D_800C59DC'
+mips-linux-gnu-ld: (.text+0x5b488): undefined reference to `D_800C59DC'
+mips-linux-gnu-ld: (.text+0x5b4ac): undefined reference to `D_800C59DC'
+mips-linux-gnu-ld: build/asm/1000.o:(.text+0x5b4b4): more undefined references to `D_800C59DC' follow
+mips-linux-gnu-ld: build/asm/1000.o: in function `func_80088BDC':
+(.text+0x632a4): undefined reference to `D_800C5E88'
+mips-linux-gnu-ld: (.text+0x632a8): undefined reference to `D_800C5E88'
+mips-linux-gnu-ld: (.text+0x632b0): undefined reference to `D_800C5E88'
+mips-linux-gnu-ld: (.text+0x632b4): undefined reference to `D_800C5E88'
+mips-linux-gnu-ld: (.text+0x632c4): undefined reference to `D_800C5E88'
+mips-linux-gnu-ld: build/asm/1000.o:(.text+0x632c8): more undefined references to `D_800C5E88' follow
+mips-linux-gnu-ld: build/asm/1000.o: in function `func_80088BDC':
+(.text+0x632e4): undefined reference to `D_800C5E84'
+mips-linux-gnu-ld: (.text+0x632e8): undefined reference to `D_800C5E84'
+mips-linux-gnu-ld: (.text+0x632f0): undefined reference to `D_800C5E84'
+mips-linux-gnu-ld: (.text+0x632f4): undefined reference to `D_800C5E84'
+mips-linux-gnu-ld: (.text+0x63304): undefined reference to `D_800C5E84'
+mips-linux-gnu-ld: build/asm/1000.o:(.text+0x63308): more undefined references to `D_800C5E84' follow
+mips-linux-gnu-ld: build/asm/1000.o: in function `func_80088BDC':
+(.text+0x633a0): undefined reference to `D_800C5E70'
+mips-linux-gnu-ld: (.text+0x633a4): undefined reference to `D_800C5E70'
+mips-linux-gnu-ld: (.text+0x633a8): undefined reference to `D_800C5E74'
+mips-linux-gnu-ld: (.text+0x633ac): undefined reference to `D_800C5E74'
+mips-linux-gnu-ld: (.text+0x633d4): undefined reference to `D_800C5E78'
+mips-linux-gnu-ld: (.text+0x633d8): undefined reference to `D_800C5E78'
+mips-linux-gnu-ld: (.text+0x633dc): undefined reference to `D_800C5E7C'
+mips-linux-gnu-ld: (.text+0x633e0): undefined reference to `D_800C5E7C'
+mips-linux-gnu-ld: (.text+0x633e4): undefined reference to `D_800C5E80'
+mips-linux-gnu-ld: (.text+0x633e8): undefined reference to `D_800C5E80'
+mips-linux-gnu-ld: build/asm/1000.o: in function `func_8008D100':
+(.text+0x675a0): undefined reference to `D_800BAA00'
+mips-linux-gnu-ld: (.text+0x675a4): undefined reference to `D_800BAA00'
+mips-linux-gnu-ld: build/asm/1000.o: in function `func_8008D3F4':
+(.text+0x67df0): undefined reference to `D_800C6920'
+mips-linux-gnu-ld: (.text+0x67df8): undefined reference to `D_800C6920'
+mips-linux-gnu-ld: (.text+0x67e8c): undefined reference to `D_800C6924'
+mips-linux-gnu-ld: (.text+0x67e94): undefined reference to `D_800C6924'
+mips-linux-gnu-ld: build/asm/1000.o: in function `func_8008DDDC':
+(.text+0x68468): undefined reference to `D_800C6C74'
+mips-linux-gnu-ld: (.text+0x6846c): undefined reference to `D_800C6C74'
+mips-linux-gnu-ld: build/asm/1000.o: in function `func_8008E1B4':
+(.text+0x68614): undefined reference to `D_800C5F18'
+mips-linux-gnu-ld: (.text+0x6861c): undefined reference to `D_800C5F18'
+mips-linux-gnu-ld: build/asm/1000.o: in function `.L8008EAAC':
+(.text+0x68eb4): undefined reference to `D_800C6CD0'
+mips-linux-gnu-ld: (.text+0x68eb8): undefined reference to `D_800C6CD0'
+mips-linux-gnu-ld: build/asm/1000.o: in function `.L8008EC90':
+(.text+0x69098): undefined reference to `D_800C6CD0'
+mips-linux-gnu-ld: (.text+0x6909c): undefined reference to `D_800C6CD0'
+mips-linux-gnu-ld: (.text+0x690b4): undefined reference to `D_800C6CD0'
+mips-linux-gnu-ld: build/asm/1000.o:(.text+0x690b8): more undefined references to `D_800C6CD0' follow
+mips-linux-gnu-ld: build/asm/1000.o: in function `.L8008EC90':
+(.text+0x695c0): undefined reference to `D_800C6CD4'
+mips-linux-gnu-ld: (.text+0x695c4): undefined reference to `D_800C6CD4'
+mips-linux-gnu-ld: (.text+0x6960c): undefined reference to `D_800C6CD8'
+mips-linux-gnu-ld: (.text+0x69610): undefined reference to `D_800C6CD8'
+mips-linux-gnu-ld: build/asm/1000.o: in function `func_8008FF20':
+(.text+0x6a8d0): undefined reference to `D_800BAA00'
+mips-linux-gnu-ld: (.text+0x6a8d4): undefined reference to `D_800BAA00'
+mips-linux-gnu-ld: build/asm/1000.o: in function `func_8009351C':
+(.text+0x6db7c): undefined reference to `D_800C7310'
+mips-linux-gnu-ld: (.text+0x6db80): undefined reference to `D_800C7310'
+mips-linux-gnu-ld: build/asm/1000.o: in function `func_800939E8':
+(.text+0x6dde8): undefined reference to `D_800C7310'
+mips-linux-gnu-ld: (.text+0x6ddec): undefined reference to `D_800C7310'
+mips-linux-gnu-ld: (.text+0x6de30): undefined reference to `D_800C7310'
+mips-linux-gnu-ld: build/asm/1000.o:(.text+0x6de34): more undefined references to `D_800C7310' follow
+mips-linux-gnu-ld: build/asm/1000.o: in function `func_800967F4':
+(.text+0x70dac): undefined reference to `D_800C73D0'
+mips-linux-gnu-ld: (.text+0x70db0): undefined reference to `D_800C73D0'
+mips-linux-gnu-ld: (.text+0x70dc4): undefined reference to `D_800C73D4'
+mips-linux-gnu-ld: (.text+0x70dc8): undefined reference to `D_800C73D4'
+mips-linux-gnu-ld: (.text+0x70df4): undefined reference to `D_800C73D8'
+mips-linux-gnu-ld: (.text+0x70df8): undefined reference to `D_800C73D8'
+mips-linux-gnu-ld: build/asm/1000.o: in function `func_800B1970':
+(.text+0x8bd78): undefined reference to `D_800C9500'
+mips-linux-gnu-ld: (.text+0x8bd7c): undefined reference to `D_800C9500'
+mips-linux-gnu-ld: build/asm/1000.o: in function `D_800C9560':
+(.text+0xa3960): undefined reference to `D_800C9500'

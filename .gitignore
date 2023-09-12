@@ -1,0 +1,34 @@
+# Python bytecode
+__pycache__/
+*.py[cod]
+*.py.class
+
+# Environments
+.env
+.venv
+env/
+venv
+ENV/
+env.bak/
+venv.bak/
+
+# IDE-specific files
+.vs/
+.vscode/
+
+# Private files
+private/
+
+# Build generated folders
+asm/
+bin/
+assets/
+build/
+
+# Object files
+*.o
+
+# N64 ROM files
+*.z64
+*.n64
+*.v64
