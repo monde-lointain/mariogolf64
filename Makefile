@@ -172,8 +172,12 @@ endif
 clean:
 	$(RM) -r $(BUILD_DIR)
 
-distclean: clean
-	$(RM) -r asm/ bin/ linker_scripts/
+src-clean:
+	$(MAKE) clean
+	$(RM) -r build asm/ bin/ linker_scripts/
+
+dist-clean:
+	$(RM) -r asm/ assets/ bin/ linker_scripts/
 	$(MAKE) -C tools distclean
 
 setup:
