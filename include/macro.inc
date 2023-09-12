@@ -3,6 +3,15 @@
     \label:
 .endm
 
+.macro dlabel label
+    .global \label
+    \label:
+.endm
+
+.macro jlabel label
+    \label:
+.endm
+
 # COP0 register aliases
 
 .set Index,         $0

@@ -7,7 +7,7 @@ linker script so the program can successfully link when the linker is ran again.
 """
 
 LINKER_SCRIPT_PATH = "linker_scripts/undefined_syms_auto.ld"
-ERROR_MESSAGE_PATH = "tools/error.txt"
+ERROR_MESSAGE_PATH = "tools/undefined_ref_errors.txt"
 
 import re
 
