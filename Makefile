@@ -174,26 +174,25 @@ clean:
 
 src-clean:
 	$(MAKE) clean
-	$(RM) -r asm/ bin/ linker_scripts/
+	$(RM) -r asm bin
 
 dist-clean:
-	$(RM) -r asm/ bin/ linker_scripts/
+	$(RM) -r asm bin
 	$(MAKE) -C tools distclean
 
 setup:
 	$(MAKE) -C tools
 
 extract:
-	$(RM) -r asm bin linker_scripts
-	mkdir linker_scripts
+	$(RM) -r asm bin
 	$(SPLAT) $(SPLAT_YAML)
 
 patch-refs:
 	$(UNDEFINED_REF_SCRIPT)
 
 diff-init:
-	$(RM) -rf expected/
-	mkdir -p expected/
+	$(RM) -rf expected
+	mkdir -p expected
 	cp -r $(BUILD_DIR) expected/$(BUILD_DIR)
 
 init:
@@ -216,11 +215,17 @@ $(ROM): $(ELF)
 	$(OBJCOPY) -O binary $< $@
 	$(OBJCOPY) -O binary --gap-fill 0xFF --pad-to 0x2000000 $< $@
 
-$(ELF): $(O_FILES) $(LD_SCRIPT) $(BUILD_DIR)/linker_scripts/undefined_funcs_auto.ld $(BUILD_DIR)/linker_scripts/undefined_syms_auto.ld
-#	$(LD) $(LDFLAGS) -T $(LD_SCRIPT) $(BUILD_DIR)/linker_scripts/undefined_funcs_auto.ld -T $(BUILD_DIR)/linker_scripts/undefined_syms_auto.ld -T -Map $(LD_MAP) -o $@
-	$(LD) $(LDFLAGS) -T $(LD_SCRIPT) $(BUILD_DIR)/linker_scripts/undefined_funcs_auto.ld -T $(BUILD_DIR)/linker_scripts/undefined_syms_auto.ld -o $@
+$(ELF): $(O_FILES) $(LD_SCRIPT) $(BUILD_DIR)/linker_scripts/libultra_symbols.ld $(BUILD_DIR)/linker_scripts/hardware_regs.ld $(BUILD_DIR)/linker_scripts/undefined_syms.ld
+#	$(LD) $(LDFLAGS) -T $(LD_SCRIPT) \
+#		-T $(BUILD_DIR)/auto/undefined_syms_auto.ld -T $(BUILD_DIR)/auto/undefined_funcs_auto.ld \
+#		-T $(BUILD_DIR)/linker_scripts/libultra_symbols.ld -T $(BUILD_DIR)/linker_scripts/hardware_regs.ld -T $(BUILD_DIR)/linker_scripts/undefined_syms.ld \
+#		-Map $(LD_MAP) -o $@
+	$(LD) $(LDFLAGS) -T $(LD_SCRIPT) \
+		-T $(BUILD_DIR)/linker_scripts/undefined_syms_auto.ld -T $(BUILD_DIR)/linker_scripts/undefined_funcs_auto.ld \
+		-T $(BUILD_DIR)/linker_scripts/libultra_symbols.ld -T $(BUILD_DIR)/linker_scripts/hardware_regs.ld -T $(BUILD_DIR)/linker_scripts/undefined_syms.ld \
+		-o $@
 
-$(BUILD_DIR)/linker_scripts/%.ld: linker_scripts/%.ld
+$(BUILD_DIR)/%.ld: %.ld
 	$(CPP) $(CPPFLAGS) $< > $@
 
 $(BUILD_DIR)/%.o: %.bin
