@@ -47,7 +47,7 @@ BUILD_DIR := build
 ROM       := $(BUILD_DIR)/$(TARGET).z64
 ELF       := $(BUILD_DIR)/$(TARGET).elf
 LD_SCRIPT := $(BUILD_DIR)/$(TARGET).ld
-# LD_MAP    := $(BUILD_DIR)/$(TARGET).map
+LD_MAP    := $(BUILD_DIR)/$(TARGET).map
 
 
 
@@ -63,18 +63,15 @@ MAKE = make
 CPPFLAGS += -fno-dollars-in-identifiers -P
 LDFLAGS  := --no-check-sections --accept-unknown-input-arch --emit-relocs
 
+UNAME_S := $(shell uname -s)
 ifeq ($(OS),Windows_NT)
-	DETECTED_OS=windows
-else
-	UNAME_S := $(shell uname -s)
-	ifeq ($(UNAME_S),Linux)
-		DETECTED_OS=linux
-	endif
-	ifeq ($(UNAME_S),Darwin)
-		DETECTED_OS=macos
-		MAKE=gmake
-		CPPFLAGS += -xc++
-	endif
+$(error Native Windows is currently unsupported for building this repository, use WSL instead c:)
+else ifeq ($(UNAME_S),Linux)
+    DETECTED_OS := linux
+else ifeq ($(UNAME_S),Darwin)
+    DETECTED_OS := mac
+    MAKE := gmake
+    CPPFLAGS += -xc++
 endif
 
 
@@ -158,7 +155,7 @@ O_FILES       := $(foreach f,$(C_FILES:.c=.o),$(BUILD_DIR)/$f) \
 DEP_FILES := $(O_FILES:.o=.asmproc.d)
 
 # Create directories
-$(shell mkdir -p $(BUILD_DIR)/linker_scripts $(foreach dir,$(SRC_DIRS) $(ASM_DIRS) $(BIN_DIRS),$(BUILD_DIR)/$(dir)))
+$(shell mkdir -p $(BUILD_DIR)/linker_scripts $(BUILD_DIR)/linker_scripts/auto $(foreach dir,$(SRC_DIRS) $(ASM_DIRS) $(BIN_DIRS),$(BUILD_DIR)/$(dir)))
 
 
 
@@ -171,14 +168,11 @@ ifeq ($(COMPARE),1)
 endif
 
 clean:
-	$(RM) -r $(BUILD_DIR)
+	$(RM) -r $(BUILD_DIR)/asm $(BUILD_DIR)/bin $(BUILD_DIR)/src $(ROM) $(ELF)
 
-src-clean:
-	$(MAKE) clean
-	$(RM) -r asm bin
-
-dist-clean:
-	$(RM) -r asm bin
+distclean: clean
+	$(RM) -r $(BUILD_DIR) asm/ bin/ .splat/
+	$(RM) -r linker_scripts/auto $(LD_SCRIPT)
 	$(MAKE) -C tools distclean
 
 setup:
@@ -191,9 +185,9 @@ extract:
 patch-refs:
 	$(UNDEFINED_REF_SCRIPT)
 
-diff-init:
-	$(RM) -rf expected
-	mkdir -p expected
+diff-init: uncompressed
+	$(RM) -rf expected/
+	mkdir -p expected/
 	cp -r $(BUILD_DIR) expected/$(BUILD_DIR)
 
 init:
@@ -216,15 +210,11 @@ $(ROM): $(ELF)
 	$(OBJCOPY) -O binary $< $@
 	$(OBJCOPY) -O binary --gap-fill 0xFF --pad-to 0x2000000 $< $@
 
-$(ELF): $(O_FILES) $(LD_SCRIPT) $(BUILD_DIR)/linker_scripts/libultra_symbols.ld $(BUILD_DIR)/linker_scripts/hardware_regs.ld $(BUILD_DIR)/linker_scripts/undefined_syms.ld
-#	$(LD) $(LDFLAGS) -T $(LD_SCRIPT) \
-#		-T $(BUILD_DIR)/auto/undefined_syms_auto.ld -T $(BUILD_DIR)/auto/undefined_funcs_auto.ld \
-#		-T $(BUILD_DIR)/linker_scripts/libultra_symbols.ld -T $(BUILD_DIR)/linker_scripts/hardware_regs.ld -T $(BUILD_DIR)/linker_scripts/undefined_syms.ld \
-#		-Map $(LD_MAP) -o $@
+$(ELF): $(O_FILES) $(LD_SCRIPT) $(BUILD_DIR)/linker_scripts/libultra_symbols.ld $(BUILD_DIR)/linker_scripts/hardware_regs.ld $(BUILD_DIR)/linker_scripts/pif_syms.ld $(BUILD_DIR)/linker_scripts/undefined_syms.ld
 	$(LD) $(LDFLAGS) -T $(LD_SCRIPT) \
-		-T $(BUILD_DIR)/linker_scripts/undefined_syms_auto.ld -T $(BUILD_DIR)/linker_scripts/undefined_funcs_auto.ld \
-		-T $(BUILD_DIR)/linker_scripts/libultra_symbols.ld -T $(BUILD_DIR)/linker_scripts/hardware_regs.ld -T $(BUILD_DIR)/linker_scripts/undefined_syms.ld \
-		-o $@
+		-T $(BUILD_DIR)/linker_scripts/auto/undefined_syms_auto.ld -T $(BUILD_DIR)/linker_scripts/auto/undefined_funcs_auto.ld \
+		-T $(BUILD_DIR)/linker_scripts/libultra_symbols.ld -T $(BUILD_DIR)/linker_scripts/hardware_regs.ld -T $(BUILD_DIR)/linker_scripts/pif_syms.ld -T $(BUILD_DIR)/linker_scripts/undefined_syms.ld \
+		-Map $(LD_MAP) -o $@
 
 $(BUILD_DIR)/%.ld: %.ld
 	$(CPP) $(CPPFLAGS) $< > $@

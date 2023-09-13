@@ -1,24 +1,16 @@
-// rom header
-
-osTvType = 0x80000300; // size:0x4 type:u32 defined:True
-osRomType = 0x80000304; // size:0x4 type:u32 defined:True
-osRomBase = 0x80000308; // size:0x4 type:u32 defined:True
-osResetType = 0x8000030C; // size:0x4 type:u32 defined:True
-osCicId = 0x80000310; // size:0x4 type:u32 defined:True
-osVersion = 0x80000314; // size:0x4 type:u32 defined:True
-osRomType = 0x80000304; // size:0x4 type:u32 defined:True
-osMemSize = 0x80000318; // size:0x4 type:u32 defined:True
-osAppNmiBuffer = 0x8000031C; // size:0x40 type:u8 defined:True
-
 // text
 
 _start                 = 0x80025C00; // type:func rom:0x1000
 
-boot_game              = 0x800994B0; // type:func rom:0x748B0
+main                   = 0x800994B0; // type:func rom:0x748B0
+
+boot_thread_entry      = 0x8009951C; // type:func rom:0x7491C
 
 __osPiCreateAccessQueue = 0x800A39B0; // type:func rom:0x7EDB0
 __osPiGetAccess        = 0x800A3A04; // type:func rom:0x7EE04
 __osPiRelAcces         = 0x800A3A70; // type:func rom:0x7EE70
+
+osAiSetFrequency       = 0x800A3AC0; // type:func rom:0x7EEC0
 
 alCopy                 = 0x800A6F70; // type:func rom:0x82370
 
