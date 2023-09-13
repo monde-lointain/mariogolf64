@@ -1,0 +1,54 @@
+// Text
+
+osCreatePiManager      = 0x800A3000; // type:func rom:0x7E400
+__osEPiRawStartDma     = 0x800A3190; // type:func rom:0x7E590
+
+__osDevMgrMain         = 0x800A35F0; // type:func rom:0x7E9F0
+
+osCreateThread         = 0x800AC200; // type:func rom:0x87600
+osStartThread          = 0x800AC4A0; // type:func rom:0x878A0
+osSetThreadPri         = 0x800AC3D0; // type:func rom:0x877D0
+osCreateMesgQueue      = 0x800AAEB0; // type:func rom:0x862B0
+osRecvMesg             = 0x800AB020; // type:func rom:0x86420
+osSendMesg             = 0x800AB150; // type:func rom:0x86550
+osSetEventMesg         = 0x800AB280; // type:func rom:0x86680
+
+__osExceptionPreamble  = 0x800AFB90; // type:func rom:0x8AF90
+__osException          = 0x800AFBA0; // type:func rom:0x8AFA0
+send_mesg              = 0x800B011C; // type:func rom:0x8B51C
+handle_CpU             = 0x800B01D8; // type:func rom:0x8B5D8
+__osEnqueueAndYield    = 0x800B020C; // type:func rom:0x8B60C
+__osEnqueueThread      = 0x800B0314; // type:func rom:0x8B714
+__osPopThread          = 0x800B035C; // type:func rom:0x8B75C
+__osDispatchThread     = 0x800B036C; // type:func rom:0x8B76C
+
+__osDisableInt         = 0x800B0500; // type:func rom:0x8B900
+__osRestoreInt         = 0x800B0570; // type:func rom:0x8B970
+
+__osSetGlobalIntMask   = 0x800B0590; // type:func rom:0x8B990
+__osResetGlobalIntMask = 0x800B05D0; // type:func rom:0x8B9D0
+
+__osPiRawStartDma      = 0x800B0620; // type:func rom:0x8BA20
+
+__osEPiRawWriteIo      = 0x800B0880; // type:func rom:0x8BC80
+
+
+
+// Data
+
+__osPiDevMgr      = 0x800C7E70; // rom:0xA3270 size:0x1C
+__osPreNMI        = 0x800C81F0; // rom:0xA35F0
+dp_busy           = 0x800C8204; // rom:0xA3604
+__osThreadTail    = 0x800C8220; // rom:0xA3620 size:0x8
+__osRunQueue      = 0x800C8228; // rom:0xA3628
+__osActiveQueue   = 0x800C822C; // rom:0xA362C
+__osRunningThread = 0x800C8230; // rom:0xA3630
+__osFaultedThread = 0x800C8234; // rom:0xA3634
+dpCount           = 0x8000F3F8; // rom:0xA3608
+D_8000F3FC        = 0x8000F3FC; // rom:0xA360C
+osClockRate       = 0x800C9460; // rom:0xA4860 size:0x8
+osViClock         = 0x800C9468; // rom:0xA4868
+__osShutdown      = 0x800C946C; // rom:0xA486C
+__OSGlobalIntMask = 0x800C9470; // rom:0xA4870
+piThread          = 0x800F97E0; // rom:0xD4BE0 size:0x1B0
+__osEventStateTab = 0x801B7078; // rom:0x192478 size:0x78

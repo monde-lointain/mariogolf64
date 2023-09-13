@@ -116,13 +116,14 @@ else
 endif
 
 # TODO: determine
-OPTFLAGS := -O2 -g3
-ASFLAGS := -march=vr4300 -32 $(IINC)
-MIPS_VERSION := -mips2
+OPTFLAGS        := -O2 -g3
+ASFLAGS         := -march=vr4300 -32 $(IINC)
+RELEASE_DEFINES := -D_FINALROM
+MIPS_VERSION    := -mips2
 
 # Surpress the warnings with -woff.
 # CFLAGS += -G 0 -non_shared -fullwarn -verbose -Xcpluscomm $(IINC) -nostdinc -Wab,-r4300_mul -woff 624,649,838,712,516
-CFLAGS += -G 0 $(IINC)
+CFLAGS += -G 0 $(IINC) $(RELEASE_DEFINES)
 
 # Use relocations and abi fpr names in the dump
 OBJDUMP_FLAGS := --disassemble --reloc --disassemble-zeroes -Mreg-names=32
