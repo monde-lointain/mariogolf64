@@ -15,6 +15,7 @@ venv.bak/
 # IDE-specific files
 .vs/
 .vscode/
+.swp
 
 # Private files
 private/

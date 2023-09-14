@@ -97,6 +97,7 @@ SPLAT_YAML ?= $(TARGET).yaml
 UNDEFINED_REF_SCRIPT ?= tools/undefined_ref_patcher.py
 
 IINC       := -Iinclude
+IINC       += -Ilib/ultralib/include -Ilib/ultralib/include/PR -Ilib/ultralib/include/gcc
 
 # Check code syntax with host compiler
 CHECK_WARNINGS := -Wall -Wextra -Wno-unknown-pragmas -Wno-missing-braces
@@ -170,6 +171,9 @@ endif
 clean:
 	$(RM) -r $(BUILD_DIR)/asm $(BUILD_DIR)/bin $(BUILD_DIR)/src $(ROM) $(ELF)
 
+libclean:
+	$(RM) -r $(BUILD_DIR)/lib
+
 distclean: clean
 	$(RM) -r $(BUILD_DIR) asm/ bin/ .splat/
 	$(RM) -r linker_scripts/auto $(LD_SCRIPT)
@@ -181,6 +185,9 @@ setup:
 extract:
 	$(RM) -r asm bin
 	$(SPLAT) $(SPLAT_YAML)
+
+lib:
+	$(MAKE) -C lib
 
 patch-refs:
 	$(UNDEFINED_REF_SCRIPT)
@@ -197,7 +204,7 @@ init:
 	$(MAKE) all
 	$(MAKE) diff-init
 
-.PHONY: all clean distclean setup extract diff-init init
+.PHONY: all clean libclean distclean setup extract lib diff-init init
 .DEFAULT_GOAL := all
 # Prevent removing intermediate files
 .SECONDARY:
