@@ -1,0 +1,13 @@
+// text
+
+_start                 = 0x80025C00; // type:func rom:0x1000
+
+mg64_main              = 0x800994B0; // type:func rom:0x748B0
+
+boot_thread_entry      = 0x8009951C; // type:func rom:0x7491C
+
+// bss
+
+boot_thread    = 0x800E4CD0; // size:0x1B0
+main_thread    = 0x800E4E80; // size:0x1B0
+boot_thread_sp = 0x800E7030; // 

@@ -1,11 +1,5 @@
 // text
 
-_start                 = 0x80025C00; // type:func rom:0x1000
-
-main                   = 0x800994B0; // type:func rom:0x748B0
-
-boot_thread_entry      = 0x8009951C; // type:func rom:0x7491C
-
 __osPiCreateAccessQueue = 0x800A39B0; // type:func rom:0x7EDB0
 __osPiGetAccess        = 0x800A3A04; // type:func rom:0x7EE04
 __osPiRelAcces         = 0x800A3A70; // type:func rom:0x7EE70

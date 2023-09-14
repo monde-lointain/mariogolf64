@@ -1,0 +1,14 @@
+---
+BasedOnStyle: Mozilla
+AccessModifierOffset: -4
+AlwaysBreakAfterDefinitionReturnType: None
+AlwaysBreakAfterReturnType: None
+BinPackArguments: false
+BreakBeforeBinaryOperators: NonAssignment
+BreakBeforeBraces: Allman
+BreakConstructorInitializers: BeforeColon
+ContinuationIndentWidth: 4
+Cpp11BracedListStyle: false
+IndentWidth: 4
+PointerAlignment: Right
+TabWidth: 4

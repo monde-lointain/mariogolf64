@@ -81,7 +81,7 @@ ifneq ($(shell type $(MIPS_BINUTILS_PREFIX)ld >/dev/null 2>/dev/null; echo $$?),
   $(error Please install or build $(MIPS_BINUTILS_PREFIX))
 endif
 
-# TODO: set CC
+CC         := COMPILER_PATH=tools/cc tools/cc/gcc
 
 AS         := $(MIPS_BINUTILS_PREFIX)as
 LD         := $(MIPS_BINUTILS_PREFIX)ld
@@ -113,15 +113,15 @@ else
 	CC_CHECK := @:
 endif
 
-# TODO: determine
-OPTFLAGS        := -O2 -g3
+OPTFLAGS        := -O0 # Possibly only for the entry point
+
 ASFLAGS         := -march=vr4300 -32 $(IINC)
-RELEASE_DEFINES := -D_FINALROM
-MIPS_VERSION    := -mips2
+AS_DEFINES      := -DMIPSEB -D_LANGUAGE_ASSEMBLY -D_ULTRA64
+MIPS_VERSION    := -mips3
 
 # Surpress the warnings with -woff.
 # CFLAGS += -G 0 -non_shared -fullwarn -verbose -Xcpluscomm $(IINC) -nostdinc -Wab,-r4300_mul -woff 624,649,838,712,516
-CFLAGS += -G 0 $(IINC) $(RELEASE_DEFINES)
+CFLAGS += -nostdinc -G 0 -mgp32 -mfp32 $(IINC) -D_LANGUAGE_C -Wall
 
 # Use relocations and abi fpr names in the dump
 OBJDUMP_FLAGS := --disassemble --reloc --disassemble-zeroes -Mreg-names=32
@@ -141,7 +141,7 @@ endif
 $(shell mkdir -p asm bin)
 
 SRC_DIRS := $(shell find src -type d)
-ASM_DIRS := $(shell find asm -type d)
+ASM_DIRS := $(shell find asm -type d -not -path "asm/nonmatchings/*")
 BIN_DIRS := $(shell find bin -type d)
 
 C_FILES       := $(foreach dir,$(SRC_DIRS),$(wildcard $(dir)/*.c))
@@ -230,12 +230,13 @@ $(BUILD_DIR)/%.o: %.bin
 	$(OBJCOPY) -I binary -O elf32-big $< $@
 
 $(BUILD_DIR)/%.o: %.s
-	$(CPP) $(CPPFLAGS) $(IINC) $< | $(AS) $(ASFLAGS) -o $@
+	$(CPP) $(CPPFLAGS) $(IINC) $(AS_DEFINES) $(IINC) $< | $(AS) $(ASFLAGS) -o $@
 	$(OBJDUMP_CMD)
 
 $(BUILD_DIR)/%.o: %.c
 	$(CC_CHECK) $<
-	$(CC) -c $(CFLAGS) $(MIPS_VERSION) $(OPTFLAGS) -o $@ $<
+	$(CC) -c $(CFLAGS) -I $(dir $*) $(MIPS_VERSION) $(OPTFLAGS) -o $@ $<
+	$(STRIP) $@ -N dummy-symbol-name
 	$(OBJDUMP_CMD)
 	$(RM_MDEBUG)
 
