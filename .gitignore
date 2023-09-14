@@ -34,3 +34,8 @@ build/
 *.z64
 *.n64
 *.v64
+
+# M2C files
+ctx.c
+ctx_includes.c
+

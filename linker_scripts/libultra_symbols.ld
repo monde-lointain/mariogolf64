@@ -47,6 +47,8 @@ __osInsertTimer        = 0x800ACA30; // type:func rom:0x87E30
 
 __osProbeTLB           = 0x800ACC00; // type:func rom:0x88000
 
+osViSetEvent           = 0x800AD150; // type:func rom:0x86B40
+osViSetSpecialFeatures = 0x800AD200; // type:func rom:0x88600
 __osViSwapContext      = 0x800AD410; // type:func rom:0x88810
 
 __osInitialize_common  = 0x800AF8A0; // type:func rom:0x8ACA0
