@@ -1,5 +1,16 @@
 // text
 
+osSetIntMask           = 0x800A2F60; // type:func rom:0x7E360
+
+osCreatePiManager      = 0x800A3000; // type:func rom:0x7E400
+__osEPiRawStartDma     = 0x800A3190; // type:func rom:0x7E590
+osEPiStartDma          = 0x800A3380; // type:func rom:0x7E780
+osEPiLinkHandle        = 0x800A3420; // type:func rom:0x7E820
+
+osCartRomInit          = 0x800A3470; // type:func rom:0x7E870
+
+__osDevMgrMain         = 0x800A35F0; // type:func rom:0x7E9F0
+
 __osPiCreateAccessQueue = 0x800A39B0; // type:func rom:0x7EDB0
 __osPiGetAccess        = 0x800A3A04; // type:func rom:0x7EE04
 __osPiRelAcces         = 0x800A3A70; // type:func rom:0x7EE70
@@ -8,15 +19,12 @@ osAiSetFrequency       = 0x800A3AC0; // type:func rom:0x7EEC0
 
 alCopy                 = 0x800A6F70; // type:func rom:0x82370
 
+osInvalDCache          = 0x800A6FB0; // type:func rom:0x823B0
+
 osWritebackDCache      = 0x800A70E0; // type:func rom:0x824E0
 osWritebackDCacheAll   = 0x800A7160; // type:func rom:0x82560
 
 osVirtualToPhysical    = 0x800A7720; // type:func rom:0x82B20
-
-osCreatePiManager      = 0x800A3000; // type:func rom:0x7E400
-__osEPiRawStartDma     = 0x800A3190; // type:func rom:0x7E590
-
-__osDevMgrMain         = 0x800A35F0; // type:func rom:0x7E9F0
 
 bzero                  = 0x800AACC0; // type:func rom:0x860C0
 
@@ -48,6 +56,7 @@ __osInsertTimer        = 0x800ACA30; // type:func rom:0x87E30
 __osProbeTLB           = 0x800ACC00; // type:func rom:0x88000
 
 osViSetEvent           = 0x800AD150; // type:func rom:0x86B40
+osViSwapBuffer         = 0x800AD3C0; // type:func rom:0x887C0
 osViSetSpecialFeatures = 0x800AD200; // type:func rom:0x88600
 __osViSwapContext      = 0x800AD410; // type:func rom:0x88810
 
@@ -113,6 +122,8 @@ __osTimerList            = 0x800C8240; // rom:0xA3640
 
 dpCount                  = 0x8000F3F8; // rom:0xA3608
 D_8000F3FC               = 0x8000F3FC; // rom:0xA360C
+
+__osPiTable              = 0x800C7E8C; // rom:0xA328C
 
 osClockRate              = 0x800C9460; // rom:0xA4860 size:0x8
 osViClock                = 0x800C9468; // rom:0xA4868

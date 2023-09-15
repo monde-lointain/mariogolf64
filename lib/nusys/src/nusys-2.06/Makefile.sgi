@@ -1,0 +1,46 @@
+#!smake -k
+#
+# 	NuSYS Makefile for NINTENDO64
+#
+#	Copyright (C) 1997, NINTENDO Co,Ltd.
+#
+
+include $(ROOT)/usr/include/make/PRdefs
+
+
+
+TARGETS		=	all
+OPTIMIZER	=	-g
+MAKE		=	smake
+MFLSGS		=
+RM		=	rm -f
+AR		=	ar
+ARFLAGS		=	cr
+SUBDIRS		=	nusys nualsgi nualstl3
+
+#
+# compile
+#
+
+default:	$(TARGETS)
+
+all:
+	for i in $(SUBDIRS) ;\
+	do \
+		(cd $$i ; echo "make" "in $(CURRENT_DIR)/$$i..."; \
+			$(MAKE) $(MFLAGS)); \
+	done
+
+clean::
+	for i in $(SUBDIRS) ;\
+	do \
+		(cd $$i ; echo "cleaning" "in $(CURRENT_DIR)/$$i..."; \
+			$(MAKE) $(MFLAGS) clean); \
+	done
+
+install::
+	for i in $(SUBDIRS) ;\
+	do \
+		(cd $$i ; echo "installing" "in $(CURRENT_DIR)/$$i..."; \
+			$(MAKE) $(MFLAGS) install); \
+	done

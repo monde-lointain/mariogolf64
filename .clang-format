@@ -3,7 +3,7 @@ BasedOnStyle: Mozilla
 AccessModifierOffset: -4
 AlwaysBreakAfterDefinitionReturnType: None
 AlwaysBreakAfterReturnType: None
-BinPackArguments: false
+BinPackParameters: false
 BreakBeforeBinaryOperators: NonAssignment
 BreakBeforeBraces: Allman
 BreakConstructorInitializers: BeforeColon

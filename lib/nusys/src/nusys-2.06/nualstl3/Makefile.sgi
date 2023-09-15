@@ -1,0 +1,131 @@
+#!smake -k
+#
+# 	NuSystem Makefile for NINTENDO64
+#
+#	Copyright (C) 1998, NINTENDO Co,Ltd.
+#
+include $(ROOT)/usr/include/make/PRdefs
+
+TARGETS		=	all
+MAKE		=	make
+OPTIMIZER	=	$(OPTMZ)
+RM		=	rm -f
+AR		=	ar
+ARFLAGS		=	cr
+ROMOBJDIR	=	libnualstl
+DEBUGOBJDIR	=	libnualstl_d
+NROMOBJDIR	=	libnualstl_n
+NDEBUGOBJDIR	=	libnualstl_n_d
+
+#
+# NuSystem Install Directory
+#
+N64KITDIR	= 	/usr/local/n64kit
+NUSYSDIR	=	$(N64KITDIR)/nusys
+NUSYSLIBDIR	=	$(NUSYSDIR)/lib
+NUSYSINCDIR	=	$(NUSYSDIR)/include
+
+#
+# NUSYS LIBRARY
+#
+#
+LIBALSTLSRC	=	nuaustlmgr.c			\
+			nuaustlinit.c			\
+			nuaustlptrbankinit.c		\
+			nuaustlptrbankset.c		\
+			nuaustlseqplayerinit.c		\
+			nuaustlseqplayerdataset.c	\
+			nuaustlseqplayerplay.c		\
+			nuaustlsndplayerinit.c		\
+			nuaustlsndplayerdataset.c	\
+			nuaustlsndplayerplay.c		\
+			nuauprenmifuncset.c		\
+			nuauprenmiproc.c		\
+			nuaustlheap.c
+
+ROMLIB		=	libnualstl.a
+DEBUGLIB	=	libnualstl_d.a
+NROMLIB		=	libnualstl_n.a
+NDEBUGLIB	=	libnualstl_n_d.a
+
+
+LIBALSTLOBJ	=	$(LIBALSTLSRC:.c=.o)
+
+
+LCDEFS		=	$(MOPTDEF) -DNU_SYSTEM  -DUSE_EPI $(MUCODE)
+LCINCS 		= 	-I.. -I$(NUSYSINCDIR) -I$(ROOT)/usr/include/PR
+
+LCOPTS		=	-mips2 -Xcpluscomm -fullwarn -wlint,-f -woff 813,818,819,826,827,852 -non_shared -G 0
+
+LDFLAGS	=	$(MKDEPOPT) -nostdlib -L$(ROOT)/usr/lib
+
+LDIRT	=	$(APP)
+
+.PATH:	..
+
+
+#
+#	compile 
+#
+
+default:	$(TARGETS)
+
+all:		makedir nualstl nualstl_n
+
+makedir:
+	for i in $(ROMOBJDIR) $(DEBUGOBJDIR) $(NROMOBJDIR) $(NDEBUGOBJDIR); \
+	do ( if [ ! -d $$i ]; then mkdir $$i; fi ); \
+	done
+
+
+nualstl:
+	cd $(ROMOBJDIR) ; \
+	$(MAKE) -f ../Makefile OPTMZ=-O2 $(ROMLIB) ; \
+	cd .. ; \
+	cd $(DEBUGOBJDIR) ; \
+	$(MAKE) -f ../Makefile OPTMZ=-g MOPTDEF=-DNU_DEBUG $(DEBUGLIB) ; \
+	cd ..
+
+nualstl_n:
+	cd $(NROMOBJDIR) ; \
+	$(MAKE) -f ../Makefile OPTMZ=-O2 MUCODE=-DN_AUDIO $(NROMLIB) ; \
+	cd .. ; \
+	cd $(NDEBUGOBJDIR) ; \
+	$(MAKE) -f ../Makefile OPTMZ=-g MOPTDEF=-DNU_DEBUG MUCODE=-DN_AUDIO $(NDEBUGLIB) ; \
+	cd ..
+
+$(ROMLIB):	$(LIBALSTLOBJ) nualstl.h
+	$(AR) $(ARFLAGS) ../$(ROMLIB) $(LIBALSTLOBJ)
+
+$(DEBUGLIB):	$(LIBALSTLOBJ) nualstl.h
+	$(AR) $(ARFLAGS) ../$(DEBUGLIB) $(LIBALSTLOBJ)
+
+$(NROMLIB):	$(LIBALSTLOBJ) nualstl.h
+	$(AR) $(ARFLAGS) ../$(NROMLIB) $(LIBALSTLOBJ)
+
+$(NDEBUGLIB):	$(LIBALSTLOBJ) nualstl.h
+	$(AR) $(ARFLAGS) ../$(NDEBUGLIB) $(LIBALSTLOBJ)
+
+install:
+	install -m 644 -O -F $(NUSYSINCDIR) nualstl.h
+	install -m 644 -O -F $(NUSYSINCDIR) nualstl_n.h
+	install -m 644 -O -F $(NUSYSLIBDIR) $(ROMLIB)
+	install -m 644 -O -F $(NUSYSLIBDIR) $(DEBUGLIB)
+	install -m 644 -O -F $(NUSYSLIBDIR) $(NROMLIB)
+	install -m 644 -O -F $(NUSYSLIBDIR) $(NDEBUGLIB)
+
+
+clean:
+	cd $(ROMOBJDIR) ; \
+	$(RM) $(LIBALSTLOBJ) Makedepend ; \
+	cd .. ; \
+	cd $(DEBUGOBJDIR) ; \
+	$(RM) $(LIBALSTLOBJ) Makedepend ; \
+	cd .. ; \
+	cd $(NROMOBJDIR) ; \
+	$(RM) $(LIBALSTLOBJ) Makedepend ; \
+	cd .. ; \
+	cd $(NDEBUGOBJDIR) ; \
+	$(RM) $(LIBALSTLOBJ) Makedepend ; \
+	cd .. ; \
+	$(RM) $(NROMLIB) $(NDEBUGLIB) $(ROMLIB) $(DEBUGLIB)

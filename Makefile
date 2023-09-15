@@ -100,7 +100,7 @@ IINC       := -Iinclude
 IINC       += -Ilib/ultralib/include -Ilib/ultralib/include/PR -Ilib/ultralib/include/gcc
 
 # Check code syntax with host compiler
-CHECK_WARNINGS := -Wall -Wextra -Wno-unknown-pragmas -Wno-missing-braces
+CHECK_WARNINGS := -Wall -Wextra -Wno-unused-parameter
 ifneq ($(RUN_CC_CHECK),0)
 # Have CC_CHECK pretend to be a MIPS compiler
 	MIPS_BUILTIN_DEFS := -D_MIPS_ISA_MIPS2=2 -D_MIPS_ISA=_MIPS_ISA_MIPS2 -D_ABIO32=1 -D_MIPS_SIM=_ABIO32 -D_MIPS_SZINT=32 -D_MIPS_SZLONG=32 -D_MIPS_SZPTR=32
@@ -113,7 +113,7 @@ else
 	CC_CHECK := @:
 endif
 
-OPTFLAGS        := -O0 # Possibly only for the entry point
+OPTFLAGS        := -O2
 
 ASFLAGS         := -march=vr4300 -32 $(IINC)
 AS_DEFINES      := -DMIPSEB -D_LANGUAGE_ASSEMBLY -D_ULTRA64
@@ -157,6 +157,11 @@ DEP_FILES := $(O_FILES:.o=.asmproc.d)
 
 # Create directories
 $(shell mkdir -p $(BUILD_DIR)/linker_scripts $(BUILD_DIR)/linker_scripts/auto $(foreach dir,$(SRC_DIRS) $(ASM_DIRS) $(BIN_DIRS),$(BUILD_DIR)/$(dir)))
+
+
+
+#### Individual File Flags ####
+$(BUILD_DIR)/src/main.o: OPTFLAGS := -O0
 
 
 
@@ -217,9 +222,9 @@ $(ROM): $(ELF)
 	$(OBJCOPY) -O binary $< $@
 	$(OBJCOPY) -O binary --gap-fill 0xFF --pad-to 0x2000000 $< $@
 
-$(ELF): $(O_FILES) $(LD_SCRIPT) $(BUILD_DIR)/linker_scripts/libultra_symbols.ld $(BUILD_DIR)/linker_scripts/hardware_regs.ld $(BUILD_DIR)/linker_scripts/pif_syms.ld $(BUILD_DIR)/linker_scripts/undefined_syms.ld
+$(ELF): $(O_FILES) $(LD_SCRIPT) $(BUILD_DIR)/linker_scripts/libultra_symbols.ld $(BUILD_DIR)/linker_scripts/nusys_symbols.ld $(BUILD_DIR)/linker_scripts/hardware_regs.ld $(BUILD_DIR)/linker_scripts/pif_syms.ld $(BUILD_DIR)/linker_scripts/undefined_syms.ld
 	$(LD) $(LDFLAGS) -T $(LD_SCRIPT) \
-		-T $(BUILD_DIR)/linker_scripts/auto/undefined_syms_auto.ld -T $(BUILD_DIR)/linker_scripts/auto/undefined_funcs_auto.ld \
+		-T $(BUILD_DIR)/linker_scripts/auto/undefined_syms_auto.ld -T $(BUILD_DIR)/linker_scripts/auto/undefined_funcs_auto.ld -T $(BUILD_DIR)/linker_scripts/nusys_symbols.ld \
 		-T $(BUILD_DIR)/linker_scripts/libultra_symbols.ld -T $(BUILD_DIR)/linker_scripts/hardware_regs.ld -T $(BUILD_DIR)/linker_scripts/pif_syms.ld -T $(BUILD_DIR)/linker_scripts/undefined_syms.ld \
 		-Map $(LD_MAP) -o $@
 

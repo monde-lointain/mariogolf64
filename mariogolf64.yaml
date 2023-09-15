@@ -16,6 +16,7 @@ options:
   undefined_syms_auto_path: build/linker_scripts/auto/undefined_syms_auto.ld
   symbol_addrs_path:
     - linker_scripts/libultra_symbols.ld
+    - linker_scripts/nusys_symbols.ld
     - linker_scripts/hardware_regs.ld
     - linker_scripts/symbol_addrs.txt
 
@@ -57,6 +58,7 @@ segments:
     subsegments:
       - [0x1000, hasm, _start]
 
+  # TODO: find nusys files
   - name: main
     type: code
     start: 0x1050
@@ -64,14 +66,14 @@ segments:
     follows_vram: entry
     bss_size: 0x122100
     subsegments:
-      - [0x1050, asm]
+      - [0x1050, asm, nusys/nupireadrom]
       - [0x1130, asm]
       - [0x17B0, asm]
-      - [0x3700, asm]
-      - [0x37B0, asm]
+      - [0x3700, asm, nusys/nugfxinit]
+      - [0x37B0, asm, nusys/nusched]
       - [0x4650, asm]
-      - [0x4840, asm]
-      - [0x4CE0, asm]
+      - [0x4840, asm, nusys/nugfxtaskmgr]
+      - [0x4CE0, asm, main]
       - [0x5A40, asm]
       - [0xDCE0, asm]
       - [0xE260, asm]
@@ -109,7 +111,8 @@ segments:
       - [0x68500, asm]
       - [0x70E10, asm]
       - [0x74890, asm]
-      - [0x748B0, c, main]
+      - [0x748B0, asm, nusys/nuboot]
+      - [0x749F0, asm]
       - [0x74DF0, asm]
       - [0x78330, asm]
       - [0x78D10, asm]
@@ -132,14 +135,16 @@ segments:
       - [0x7C6D0, asm]
       - [0x7C720, asm]
       - [0x7C7F0, asm]
-      - [0x7C830, asm]
+      - [0x7C830, asm, nusys/nugfxthread]
       - [0x7C960, asm]
-      - [0x7C9A0, asm]
-      - [0x7C9E0, asm]
-      - [0x7CA00, asm]
+      - [0x7C9A0, asm, nusys/nugfxswapcfbfuncset]
+      - [0x7C9E0, asm, nusys/nugfxswapcfb]
+      - [0x7CA00, asm, nusys/nugfxtaskallendwait]
       - [0x7CA20, asm]
       - [0x7CAA0, asm]
       - [0x7CAD0, asm]
+      - [0x7CAE0, asm, nusys/nupiinit]
+      - [0x7CB20, asm, nusys/nupiinitsram]
       - [0x7CBD0, asm]
       - [0x7CC90, asm]
       - [0x7CCD0, asm]

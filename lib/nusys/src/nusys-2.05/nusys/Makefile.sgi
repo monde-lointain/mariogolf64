@@ -1,0 +1,213 @@
+#!make -k
+#
+# 	NuSystem Makefile for Nintendo64
+#
+#	Copyright (C) 1997,1998,1999 NINTENDO Co,Ltd.
+#
+
+include $(ROOT)/usr/include/make/PRdefs
+
+
+TARGETS		=	all
+MAKE		=	smake
+OPTIMIZER	=	$(OPTMZ)
+RM		=	rm -f
+AR		=	ar
+ARFLAGS		=	cr
+ROMOBJDIR	=	libnusys
+DEBUGOBJDIR	=	libnusys_d
+
+#
+# NuSystem Install Directory
+#
+N64KITDIR	= 	/usr/local/n64kit
+NUSYSDIR	=	$(N64KITDIR)/nusys
+NUSYSLIBDIR	=	$(NUSYSDIR)/lib
+NUSYSINCDIR	=	$(NUSYSDIR)/include
+
+#
+# NUSYS LIBRARY
+#
+#
+NUBOOTSRC	=	nuboot.c
+NUBOOTOBJ	=	$(NUBOOTSRC:.c=.o)
+NUBOOTLIB	= 	nusys.o
+
+#
+#	Library source files
+#
+
+
+
+LIBSYSSRC	=	nusched.c 			\
+			nuprenmifuncset.c		\
+			nurdpoutput.c 			\
+			nuyieldbuf.c 			\
+			nudramstack.c 			\
+			nuidlefuncset.c 		\
+			nugfxthread.c 			\
+			nugfxtaskmgr.c 			\
+			nugfxinit.c  			\
+			nugfxfuncset.c 			\
+			nugfxprenmifuncset.c 		\
+			nugfxtaskendfuncset.c 		\
+			nugfxswapcfbfuncset.c		\
+			nugfxswapcfb.c			\
+			nugfxtaskallendwait.c		\
+			nugfxretracewait.c		\
+			nugfxsetcfb.c			\
+			nugfxdisplayoff.c 		\
+			nugfxdisplayon.c 		\
+			nudebtaskperfbar0.c		\
+			nudebtaskperfbar1.c		\
+			nudebload.c			\
+			nudebconsole.c			\
+			nudebconputc.c			\
+			nudebconcputs.c			\
+			nudebconwindowset.c		\
+			nudebconwindowpos.c		\
+			nudebconwindowsize.c		\
+			nudebconwindowshow.c		\
+			nudebcontextcolor.c		\
+			nudebcontextattr.c		\
+			nudebcontextpos.c		\
+			nudebconscroll.c		\
+			nudebconclear.c			\
+			nudebconprintf.c		\
+			nusimgr.c			\
+			nusicallbackadd.c		\
+			nusicallbackremove.c		\
+			nusisendmesgnw.c		\
+			nupiinit.c			\
+			nupireadrom.c			\
+			nupiinitsram.c			\
+			nupiinitddrom.c			\
+			nupireadwritesram.c		\
+			nudebconbuf.c			\
+			nudebcondisp.c			\
+			nudebcondisp_ex2.c		\
+			nugfxinit_ex2.c			\
+			nudebtaskperfbar0_ex2.c		\
+			nudebtaskperfbar1_ex2.c		\
+			nucontmgr.c 			\
+			nucontinit.c 			\
+			nucontdatalock.c		\
+			nucontdataread.c		\
+			nucontdatareadwait.c 		\
+			nucontdatareadstart.c 		\
+			nucontdataget.c			\
+			nucontdatagetall.c		\
+			nucontdatagetex.c		\
+			nucontdatagetexall.c		\
+			nucontqueryread.c		\
+			nucontreadfuncset.c		\
+			nucontpakmgr.c			\
+			nucontpakjiston64.c		\
+			nucontpakopen.c			\
+			nucontpakgetfree.c		\
+			nucontpakrepairid.c		\
+			nucontpakfileopen.c		\
+			nucontpakfileopenjis.c		\
+			nucontpakcodeset.c		\
+			nucontpakfilereadwrite.c	\
+			nucontpakfiledelete.c		\
+			nucontpakfiledeletejis.c	\
+			nucontpakfilestate.c		\
+			nucontpakfilenum.c		\
+			nucontrmbmgr.c			\
+			nucontrmbstart.c		\
+			nucontrmbstop.c			\
+			nucontrmbcheck.c		\
+			nucontrmbmodeset.c		\
+			nucontrmbforcestop.c		\
+			nucontrmbforcestopend.c		\
+			nucontrmbsearchtimeset.c	\
+			nueeprommgr.c			\
+			nucontgbpakmgr.c		\
+			nucontgbpakopen.c		\
+			nucontgbpakgetstatus.c		\
+			nucontgbpakpower.c		\
+			nucontgbpakreadid.c		\
+			nucontgbpakreadwrite.c		\
+			nucontgbpakcheck.c		\
+			nucontgbpakfread.c		\
+			nucontgbpakfwrite.c		\
+			nucontgbpakregwrite.c		\
+			nucontpakfilefread.c		\
+			nucontpakfilefwrite.c		\
+			nuvrsmgr.c			\
+			nuvrsopen.c			\
+			nuvrscleardictionary.c		\
+			nuvrssetword.c			\
+			nuvrsmaskdictionary.c		\
+			nuvrsstartreaddata.c		\
+			nuvrsgetreaddata.c		\
+			nuvrsstopreaddata.c		\
+			nuvrscontrolgain.c		\
+			numark.c			\
+			nudebperfmarkset.c		\
+			nudebtaskperfintervalset.c	\
+			nufont.c
+
+
+
+LIBSYSOBJ	=	$(LIBSYSSRC:.c=.o)
+
+ROMLIB		=	libnusys.a
+DEBUGLIB	=	libnusys_d.a
+BOOTOBJ		=	nusys.o
+
+LCDEFS		=	$(MOPTDEF) -DUSE_EPI
+
+LCINCS		=	-I. -I..
+
+LCOPTS		=	-Xcpluscomm -fullwarn -wlint,-f -woff 813,818,819,822,826,827,852 -non_shared -G 0 -mips2
+
+LDFLAGS		=	$(MKDEPOPT) -nostdlib -L$(ROOT)/usr/lib  -ln_audio -lultra_d -lnusys
+
+LDIRT		=	$(APP)
+.PATH:		..
+
+#
+# compile
+#
+default:	$(TARGETS)
+
+all:		$(NUBOOTLIB) nusys
+
+
+nusys:
+		$(MAKE) nusys.o ; \
+		cd $(ROMOBJDIR) ; \
+		$(MAKE) -f ../Makefile OPTMZ=-O2 $(ROMLIB) ; \
+		cd .. ; \
+		cd $(DEBUGOBJDIR) ; \
+		$(MAKE) -f ../Makefile OPTMZ=-g MOPTDEF=-DNU_DEBUG $(DEBUGLIB) ; \
+		cd ..
+
+nusys.o:	$(NUBOOTOBJ) nusys.h
+	$(LD) -o $(NUBOOTLIB) -r $(NUBOOTOBJ)  $(MKDEPOPT) -nostdlib
+
+nuboo.o:	$(NUBOOTSRC) nusys.h
+
+
+$(ROMLIB):	$(LIBSYSOBJ) nusys.h
+	$(AR) $(ARFLAGS) ../$(ROMLIB) $(LIBSYSOBJ)
+
+$(DEBUGLIB):	$(LIBSYSOBJ) nusys.h
+	$(AR) $(ARFLAGS) ../$(DEBUGLIB) $(LIBSYSOBJ)
+
+install:
+	install -m 644 -O -F $(NUSYSINCDIR) nusys.h
+	install -m 644 -O -F $(NUSYSLIBDIR) $(BOOTOBJ)
+	install -m 644 -O -F $(NUSYSLIBDIR) $(ROMLIB)
+	install -m 644 -O -F $(NUSYSLIBDIR) $(DEBUGLIB)
+
+clean:
+	cd $(ROMOBJDIR) ; \
+	$(RM) $(LIBSYSOBJ) Makedepend; \
+	cd .. ; \
+	cd $(DEBUGOBJDIR) ; \
+	$(RM) $(LIBSYSOBJ) Makedepend; \
+	cd .. ; \
+	$(RM) $(NUBOOTLIB) $(NUBOOTOBJ) $(ROMLIB) $(DEBUGLIB) Makedepend

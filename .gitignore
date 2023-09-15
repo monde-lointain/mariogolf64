@@ -39,3 +39,7 @@ build/
 ctx.c
 ctx_includes.c
 
+# Permuter files
+nonmatchings/
+permuter_settings.toml
+

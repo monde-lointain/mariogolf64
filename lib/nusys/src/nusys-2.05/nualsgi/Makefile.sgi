@@ -1,0 +1,154 @@
+#!smake -k
+################################################################
+#
+# 	NuSystem Makefile for NINTENDO64			
+#
+#	Copyright (C) 1998, NINTENDO Co,Ltd.
+#
+################################################################
+include $(ROOT)/usr/include/make/PRdefs
+
+
+################################################################
+#	DEFINE							
+################################################################
+TARGETS		=	all
+MAKE		=	make
+OPTIMIZER	=	$(OPTMZ)
+
+RM		=	rm -f
+AR		=	ar
+ARFLAGS		=	cr
+
+################################################################
+#	Target	Library 
+################################################################
+# for audio micro code
+ROMLIB		=	libnualsgi.a
+DEBUGLIB	=	libnualsgi_d.a
+
+# for naudio micro code
+NROMLIB		=	libnualsgi_n.a
+NDEBUGLIB	=	libnualsgi_n_d.a
+
+
+################################################################
+#	Install Directory
+################################################################
+N64KITDIR	= 	/usr/local/n64kit
+NUSYSDIR	=	$(N64KITDIR)/nusys
+NUSYSLIBDIR	=	$(NUSYSDIR)/lib
+NUSYSINCDIR	=	$(NUSYSDIR)/include
+
+################################################################
+#	object temporary						
+################################################################
+#	for audio micro-code
+ROMOBJDIR	=	libnualsgi
+DEBUGOBJDIR	=	libnualsgi_d
+
+#	for n_audio micro-code
+NROMOBJDIR	=	libnualsgi_n
+NDEBUGOBJDIR	=	libnualsgi_n_d
+
+################################################################
+# Library Source
+################################################################
+LIBALSGISRC	=	nuauinit.c			\
+			nuauinitex.c			\
+			nuauseqplayerinit.c		\
+			nuauseqplayerbankset.c		\
+			nuauseqplayerseqset.c		\
+			nuauseqplayersetno.c		\
+			nuauseqplayerplay.c		\
+			nuauseqplayerfadeout.c		\
+			nuausndplayerinit.c		\
+			nuausndplayerbankset.c		\
+			nuausndplayerplay.c		\
+			nuauprenmifuncset.c             \
+			nuauprenmiproc.c		\
+			nuaumgrfuncset.c		\
+			nuauseqplayercontrol.c		\
+			nuaumgrex.c			\
+			nuaumgr.c			\
+			nuaudma.c			\
+			nuauconfig.c			\
+			nuaumgrparams.c			\
+			nuauheap.c
+
+LIBALSGIOBJ	=	$(LIBALSGISRC:.c=.o)
+
+LCDEFS		=	$(MOPTDEF) -DNU_SYSTEM  -DUSE_EPI $(MUCODE) 
+LCINCS 		= 	-I.. -I$(NUSYSINCDIR) -I$(ROOT)/usr/include/PR 
+
+LCOPTS		= 	-mips2 -Xcpluscomm -fullwarn -wlint,-f -woff 813,818,819,822,826,827,852 -non_shared -G 0 
+
+LDFLAGS		=	$(MKDEPOPT) -nostdlib -L$(ROOT)/usr/lib  -lultra_d -lnusys
+
+LDIRT		=	$(APP)
+
+.PATH:	..
+
+
+################################################################
+#	Compile 						
+################################################################
+default:	$(TARGETS)
+
+all:		makedir nualsgi nualsgi_n
+
+makedir:
+	for i in $(ROMOBJDIR) $(DEBUGOBJDIR) $(NROMOBJDIR) $(NDEBUGOBJDIR); \
+	do ( if [ ! -d $$i ]; then mkdir $$i; fi ); \
+	done
+
+nualsgi:
+	cd $(ROMOBJDIR) ; \
+	$(MAKE) -f ../Makefile OPTMZ=-O2 $(ROMLIB) ; \
+	cd .. ; \
+	cd $(DEBUGOBJDIR) ; \
+	$(MAKE) -f ../Makefile OPTMZ=-g MOPTDEF=-DNU_DEBUG $(DEBUGLIB) ; \
+	cd ..
+
+nualsgi_n:
+	cd $(NROMOBJDIR) ; \
+	$(MAKE) -f ../Makefile OPTMZ=-O2 MUCODE=-DN_AUDIO $(NROMLIB) ; \
+	cd .. ; \
+	cd $(NDEBUGOBJDIR) ; \
+	$(MAKE) -f ../Makefile OPTMZ=-g MOPTDEF=-DNU_DEBUG MUCODE=-DN_AUDIO $(NDEBUGLIB) ; \
+	cd ..
+
+$(ROMLIB):	$(LIBALSGIOBJ) ../nualsgi.h
+	$(AR) $(ARFLAGS) ../$(ROMLIB) $(LIBALSGIOBJ)
+
+$(DEBUGLIB):	$(LIBALSGIOBJ) ../nualsgi.h
+	$(AR) $(ARFLAGS) ../$(DEBUGLIB) $(LIBALSGIOBJ)
+
+$(NROMLIB):	$(LIBALSGIOBJ) ../nualsgi.h ../nualsgi_n.h
+	$(AR) $(ARFLAGS) ../$(NROMLIB) $(LIBALSGIOBJ)
+
+$(NDEBUGLIB):	$(LIBALSGIOBJ) ../nualsgi.h ../nualsgi_n.h
+	$(AR) $(ARFLAGS) ../$(NDEBUGLIB) $(LIBALSGIOBJ)
+
+install:
+	install -m 644 -O -F $(NUSYSINCDIR) nualsgi.h
+	install -m 644 -O -F $(NUSYSINCDIR) nualsgi_n.h
+	install -m 644 -O -F $(NUSYSLIBDIR) $(ROMLIB)
+	install -m 644 -O -F $(NUSYSLIBDIR) $(DEBUGLIB)
+	install -m 644 -O -F $(NUSYSLIBDIR) $(NROMLIB)
+	install -m 644 -O -F $(NUSYSLIBDIR) $(NDEBUGLIB)
+
+clean:
+	cd $(ROMOBJDIR) ; \
+	$(RM) *.o Makedepend; \
+	cd .. ; \
+	cd $(DEBUGOBJDIR) ; \
+	$(RM) *.o Makedepend; \
+	cd .. ; \
+	cd $(NROMOBJDIR) ; \
+	$(RM) *.o Makedepend; \
+	cd .. ; \
+	cd $(NDEBUGOBJDIR) ; \
+	$(RM) *.o Makedepend; \
+	cd .. ; \
+	$(RM) *.a
