@@ -28,6 +28,13 @@ osVirtualToPhysical    = 0x800A7720; // type:func rom:0x82B20
 
 bzero                  = 0x800AACC0; // type:func rom:0x860C0
 
+sprintf                = 0x800AADF0; // type:func rom:0x861F0
+proutSprintf           = 0x800AAE48; // type:func rom:0x86248
+
+strchr                 = 0x800AAD60; // type:func rom:0x86160
+strlen                 = 0x800AADA0; // type:func rom:0x861A0
+memcpy                 = 0x800AADC4; // type:func rom:0x861C4
+
 osCreateMesgQueue      = 0x800AAEB0; // type:func rom:0x862B0
 osJamMesg              = 0x800AAEE0; // type:func rom:0x862E0
 osRecvMesg             = 0x800AB020; // type:func rom:0x86420
@@ -60,6 +67,9 @@ osViSwapBuffer         = 0x800AD3C0; // type:func rom:0x887C0
 osViSetSpecialFeatures = 0x800AD200; // type:func rom:0x88600
 __osViSwapContext      = 0x800AD410; // type:func rom:0x88810
 
+osSyncPrintf           = 0x800AAE80; // type:func rom:0x86280
+rmonPrintf             = 0x800AAE94; // type:func rom:0x86294
+
 __osInitialize_common  = 0x800AF8A0; // type:func rom:0x8ACA0
 
 __osExceptionPreamble  = 0x800AFB90; // type:func rom:0x8AF90
@@ -80,6 +90,8 @@ __osResetGlobalIntMask = 0x800B05D0; // type:func rom:0x8B9D0
 __osPiRawStartDma      = 0x800B0620; // type:func rom:0x8BA20
 
 __osEPiRawWriteIo      = 0x800B0880; // type:func rom:0x8BC80
+
+_Printf                = 0x800B0B30; // type:func rom:0x8BF30
 
 __osGetCause           = 0x800B1620; // type:func rom:0x8CA20
 __osGetSR              = 0x800B1630; // type:func rom:0x8CA30

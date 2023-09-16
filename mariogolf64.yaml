@@ -27,6 +27,10 @@ options:
 
   do_c_func_detection: True
   o_as_suffix: True
+
+  generated_c_preamble: |
+    #include "ultra64.h"
+    #include "include_asm.h"
   asm_inc_header: ""
   use_legacy_include_asm: False
   mips_abi_float_regs: o32
@@ -67,13 +71,13 @@ segments:
     bss_size: 0x122100
     subsegments:
       - [0x1050, asm, nusys/nupireadrom]
-      - [0x1130, asm]
+      - [0x1130, c, 1130]
       - [0x17B0, asm]
       - [0x3700, asm, nusys/nugfxinit]
       - [0x37B0, asm, nusys/nusched]
       - [0x4650, asm]
       - [0x4840, asm, nusys/nugfxtaskmgr]
-      - [0x4CE0, asm, main]
+      - [0x4CE0, c, main]
       - [0x5A40, asm]
       - [0xDCE0, asm]
       - [0xE260, asm]
@@ -215,7 +219,7 @@ segments:
       - [0x85CD0, asm, libultra/gu/translate]
       - [0x85DA0, hasm, libultra/libc/bcopy]
       - [0x860C0, hasm, libultra/libc/bzero]
-      - [0x86160, asm]
+      - [0x86160, asm, libultra/libc/string]
       - [0x861F0, asm, libultra/libc/sprintf]
       - [0x86280, asm, libultra/libc/syncprintf]
       - [0x862B0, asm, libultra/os/createmesgqueue]
@@ -284,7 +288,7 @@ segments:
       - [0x8BDF0, asm, libultra/io/ai]
       - [0x8BE10, hasm, libultra/gu/sqrtf]
       - [0x8BE20, hasm, libultra/gu/bcmp]
-      - [0x8BF30, asm]
+      - [0x8BF30, asm, libultra/libc/xprintf]
       - [0x8C980, asm, libultra/io/dpsetnextbuf]
       - [0x8CA20, hasm, libultra/os/getcause]
       - [0x8CA30, hasm, libultra/os/getsr]
