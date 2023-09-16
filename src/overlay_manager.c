@@ -17,7 +17,7 @@ typedef struct st_OverlayInfo
 } OverlayInfo;
 
 extern void func_80080DCC();
-extern func_801FD624();
+extern void func_801FD624();
 extern s32 func_800299F4(u32);
 
 extern OverlayInfo overlays[17];
