@@ -24,6 +24,8 @@ osInvalDCache          = 0x800A6FB0; // type:func rom:0x823B0
 osWritebackDCache      = 0x800A70E0; // type:func rom:0x824E0
 osWritebackDCacheAll   = 0x800A7160; // type:func rom:0x82560
 
+osContInit             = 0x800A7410; // type:func rom:0x82810
+
 osVirtualToPhysical    = 0x800A7720; // type:func rom:0x82B20
 
 bzero                  = 0x800AACC0; // type:func rom:0x860C0

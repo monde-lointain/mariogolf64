@@ -23,7 +23,7 @@
 #endif
 __asm__(".include \"include/labels.inc\"\n");
 #else
-#define INCLUDE_ASM(TYPE, FOLDER, NAME, ARGS...)
+#define INCLUDE_ASM(FOLDER, NAME)
 #endif
 
 #endif
