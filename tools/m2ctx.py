@@ -8,7 +8,6 @@ import tempfile
 
 script_dir = os.path.dirname(os.path.realpath(__file__))
 root_dir = os.path.abspath(os.path.join(script_dir, ".."))
-src_dir = root_dir + "src/"
 
 # Project-specific
 CPP_FLAGS = [
@@ -17,14 +16,21 @@ CPP_FLAGS = [
     "-Ilib/ultralib/include/gcc",
     "-Ilib/ultralib/include/PR",
     "-Ilib/ultralib/src",
+    "-Ilib/nusys/include",
+    "-Ilib/nusys/src",
     "-D_LANGUAGE_C",
-    "-DF3DEX_GBI",
+    "-D__USE_ISOC99",
     "-D_MIPS_SZLONG=32",
-    "-DSCRIPT(...)={}"
-    "-D__attribute__(...)=",
-    "-D__asm__(...)=",
+    "-D_FINALROM",
+    "-DF3DEX_GBI",
+    "-DSCRIPT(test...)="
+    "-D__attribute__(test...)=",
+    "-D__asm__(test...)=",
     "-ffreestanding",
     "-DM2CTX",
+    "-DCC_CHECK=1",
+    "-DNON_MATCHING"
+    "-std=gnu89",
 ]
 
 def import_c_file(in_file) -> str:

@@ -34,6 +34,7 @@ options:
   asm_inc_header: ""
   use_legacy_include_asm: False
   mips_abi_float_regs: o32
+  mnemonic_ljust: 11
   
   rodata_string_guesser_level: 2
   data_string_guesser_level: 2
@@ -313,7 +314,7 @@ segments:
       - [0x8DF10, asm, libultra/io/dp]
       - [0x8DF30, asm, libultra/io/si]
       - [0x8DF50, asm, libultra/libc/ldiv]
-      # Some of this is likely data
+      # Some of these could be data, or maybe they're just libc functions that weren't found
       - [0x8E110, asm]
       - [0x8E550, asm]
       - [0x8E620, asm]
@@ -328,6 +329,8 @@ segments:
       - [0x8F250, data]
 
       - [0xA4A90, rodata]
+      - [0xA5360, .rodata, overlay_manager]
+      - [0xA54D0, rodata]
 
       - { start: 0xADD30, type: bss, vram: 0x800D2930 }
 

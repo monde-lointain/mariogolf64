@@ -95,7 +95,7 @@ SPLAT_YAML ?= $(TARGET).yaml
 UNDEFINED_REF_SCRIPT ?= tools/undefined_ref_patcher.py
 
 IINC       := -Iinclude
-IINC       += -Ilib/ultralib/include -Ilib/ultralib/include/PR -Ilib/ultralib/include/gcc
+IINC       += -Ilib/ultralib/include -Ilib/ultralib/include/PR -Ilib/ultralib/include/gcc -Ilib/nusys/include
 
 # Check code syntax with host compiler
 CHECK_WARNINGS := -Wall -Wextra -Wno-unused-parameter

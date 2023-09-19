@@ -70,4 +70,3 @@
 .set $fs4f,         $f29
 .set $fs5,          $f30
 .set $fs5f,         $f31
-

@@ -9,7 +9,7 @@
 /* Ver 1.2	98/07/12	Modified by Kensaku Ohki(SLANP)		*/
 /* Ver 2.0	90/01/23	Modified by Kensaku Ohki(SLANP)		*/
 /*----------------------------------------------------------------------*/
-/* $Id: nusys.h,v 1.29 1999/07/16 13:27:31 ohki Exp $			*/
+/* $Id: nusys.h,v 1.21 1999/01/26 02:33:26 ohki Exp $		*/
 /*======================================================================*/
 #ifndef _NUSYS_H_
 #define _NUSYS_H_
@@ -17,10 +17,8 @@
 #if defined(_LANGUAGE_C) || defined(_LANGUAGE_C_PLUS_PLUS)
 
 #ifndef F3DEX_GBI
-#ifndef F3DEX_GBI_2
-#define F3DEX_GBI_2
-#endif	/* F3DEX_GBI_2	*/
-#endif	/* F3DEX_GBI	*/
+#define	F3DEX_GBI
+#endif	/* F3DEX_GBI */
 
 #include <ultra64.h>
 #include <PR/gs2dex.h>
@@ -35,7 +33,7 @@ extern "C" {
 /*	DEFINE								*/
 /*----------------------------------------------------------------------*/
 /*----------------------------------------------------------------------*/
-#define NU_VERSION		"2.05"
+#define NU_VERSION		"1.0"
 
 /*--------------------------------------*/
 /* NuSystem spec define			*/
@@ -45,10 +43,10 @@ extern "C" {
 #define NU_SPEC_BOOT_STACK	nuMainStack + NU_SPEC_BOOT_STACK_SIZE
 
 /*--------------------------------------*/
-/* Thread ID for DEBUG (To make sure)	*/
+/* Thread ID for DEBUG（一応のため）	*/
 /*--------------------------------------*/
 #define NU_IDLE_THREAD_ID	1
-#define NU_RMON_THREAD_ID	2	/* no use */
+#define NU_RMON_THERAD_ID	2	/* no use */
 #define NU_MAIN_THREAD_ID	3
 
 									
@@ -63,7 +61,6 @@ extern "C" {
 /* NUSYS STACK SIZE			*/
 /*--------------------------------------*/
 #define NU_IDLE_STACK_SIZE	0x2000			/* Idle thread */
-#define	NU_RMON_STACK_SIZE	0x2000			/* Rmon thread */
 #define NU_MAIN_STACK_SIZE	NU_SPEC_BOOT_STACK_SIZE	/* Main thread */
 
 
@@ -72,10 +69,10 @@ extern "C" {
 /*----------------------------------------------------------------------*/
 /* SCHEDULER DEFINE							*/
 /*----------------------------------------------------------------------*/
-#define NU_SC_STACK_SIZE	0x2000		/* Thread stack size */
-#define NU_SC_NOSWAPBUFFER	0x0000		/* No switch		*/
-#define NU_SC_SWAPBUFFER	0x0001		/* Switching frame buffer*/
-#define NU_SC_NORDP		0x0002		/* Don't wait for RDP end*/
+#define NU_SC_STACK_SIZE	0x2000		/* スレッドスタックサイズ */
+#define NU_SC_NOSWAPBUFFER	0x0000		/* 切り替えなし		*/
+#define NU_SC_SWAPBUFFER	0x0001		/* フレームバッファの切り替え*/
+#define NU_SC_NORDP		0x0002		/* RDP終了待ちしない	*/
 #define	NU_SC_UCODE_XBUS	0x0004		/* XBUS Ucode		*/
 #define	NU_SC_TASK_YIELDED	(OS_TASK_YIELEDE<<16)
 #define	NU_SC_TASK_DP_WAIT	(OS_TASK_DP_WAIT<<16)	/* RDP WAIT	*/
@@ -83,84 +80,82 @@ extern "C" {
 #define	NU_SC_TASK_SP_ONLY	(OS_TASK_SP_ONLY<<16)	/* SP ONLY	*/
 
 							   
-#define NU_SC_RETRACE_MSG	0x0001		/* Retrace message */
-#define NU_SC_PRENMI_MSG	0x0002		/* NMI message */
-#define NU_SC_SWAPBUFFER_MSG	0x0004		/* Switching frame buffer */
-						/* The message*/ 
-#define NU_SC_GTASKEND_MSG	0x0008		/* Task end message */
-#define NU_SC_MAX_MESGS		8		/* Message buffer size */
+#define NU_SC_RETRACE_MSG	0x0001		/* リトレースメッセージ */
+#define NU_SC_PRENMI_MSG	0x0002		/* ＮＭＩメッセージ */
+#define NU_SC_SWAPBUFFER_MSG	0x0004		/* フレームバッファ切り替え */
+						/* メッセージ*/ 
+#define NU_SC_GTASKEND_MSG	0x0008		/* タスク終了メッセージ */
+#define NU_SC_MAX_MESGS		8		/* メッセージバッファサイズ */
 
 #define NU_SC_HANDLER_PRI	120	/* EVENT HANDLER THREAD PRORITY */
 #define NU_SC_AUDIO_PRI		110	/* AUDIO DISPATCHER THREAD PRORITY */
 #define NU_SC_GRAPHICS_PRI	100	/* GFX DISPATCHER THREAD PRORITY */
-#define NU_SC_HANDLER_THREAD_ID	19
-#define NU_SC_AUDIO_THREAD_ID	18
-#define NU_SC_GRAPHICS_THREAD_ID 17   
-#define	NU_SC_PRENMI_YET	0	/* PRE NMI has not occured */
-#define	NU_SC_PRENMI_GET	1	/* Flag that received the PRE NMI */
-#define	NU_SC_BEFORE_RESET 	2	/* Flag immediately preceding the frame before RESET */
-#define	NU_SC_BEFORE_RESET_FRAME 2	/* Number of frames before the RESET that the BEFORE_RESET flag is set */
+#define	NU_SC_PRENMI_YET	0	/* PRE NMIが発生していない*/
+#define	NU_SC_PRENMI_GET	1	/* PRE NMIを受けたフラグ */
+#define	NU_SC_BEFORE_RESET 	2	/* RESET前フレーム前のフラグ */
+#define	NU_SC_BEFORE_RESET_FRAME 2	/* BEFORE_RESETフラグを立てるRESET前の
+					   フレーム数*/
 /*----------------------------------------------------------------------*/
 /* GRAFIC THREAD DEFINE							*/
 /*----------------------------------------------------------------------*/
 #define NU_GFX_THREAD_ID	4	
 #define NU_GFX_TASKMGR_THREAD_ID 5
-#define NU_GFX_STACK_SIZE	0x2000		/* Thread stack size */
-#define	NU_GFX_MESGS		8		/* GFX message queue */
-#define NU_GFX_TASKMGR_STACK_SIZE 0x2000	/* Stack size */
-#define	NU_GFX_TASKMGR_MESGS	8		/* Task manager queue */
-#define NU_GFX_THREAD_PRI	50	/* GFX thread priority	*/
-#define NU_GFX_TASKMGR_THREAD_PRI 60	/* Task Manager priority */
+#define NU_GFX_STACK_SIZE	0x2000		/* スレッドスタックサイズ */
+#define	NU_GFX_MESGS		8		/* GFXメッセージキュー*/
+#define NU_GFX_TASKMGR_STACK_SIZE 0x2000	/* スタックサイズ */
+#define	NU_GFX_TASKMGR_MESGS	8		/*タスクマネージャのキュー*/
+#define NU_GFX_THREAD_PRI	50	/* GFXスレッドのプライオリティ	*/
+#define NU_GFX_TASKMGR_THREAD_PRI 60	/* タスクマネージャのプライオリティ */
 
 /*----------------------------------------------------------------------*/
 /* GRAFIC MANEGER DEFINE						*/
 /*----------------------------------------------------------------------*/
 #ifdef F3DEX_GBI_2
-#define	NU_GFX_UCODE_F3DEX2	0		/* F3DEX microcode  */
-#define	NU_GFX_UCODE_F3DEX2_NON	1		/* F3DEX.NoN microcode  */
-#define	NU_GFX_UCODE_F3DEX2_REJ	2		/* F3DEX.NoN microcode  */
-#define	NU_GFX_UCODE_F3DLX2_REJ	3		/* F3DEX.ReJ microcode  */
-#define	NU_GFX_UCODE_L3DEX2	4		/* L3DEX microcode  */
-#define	NU_GFX_UCODE_S2DEX2	5		/* S2DEX microcode  */
+#define	NU_GFX_UCODE_F3DEX2	0		/* F3DEXマイクロコード  */
+#define	NU_GFX_UCODE_F3DEX2_NON	1		/* F3DEX.NoNマイクロコード  */
+#define	NU_GFX_UCODE_F3DEX2_REJ	2		/* F3DEX.NoNマイクロコード  */
+#define	NU_GFX_UCODE_F3DLX2_REJ	3		/* F3DEX.ReJマイクロコード  */
+#define	NU_GFX_UCODE_L3DEX2	4		/* L3DEXマイクロコード  */
+#define	NU_GFX_UCODE_S2DEX2	5		/* S2DEXマイクロコード  */
     
-#define	NU_GFX_UCODE_F3DEX	0		/* For compatibility	*/
-#define	NU_GFX_UCODE_F3DEX_NON	1		/* For compatibility	*/
-#define	NU_GFX_UCODE_F3DLX	0		/* For compatibility	*/
-#define	NU_GFX_UCODE_F3DLX_NON	1		/* For compatibility	*/
-#define	NU_GFX_UCODE_F3DLX_REJ	4		/* For compatibility	*/
-#define	NU_GFX_UCODE_F3DLP_REJ	3		/* For compatibility	*/
-#define	NU_GFX_UCODE_L3DEX	4		/* For compatibility	*/
-#define	NU_GFX_UCODE_S2DEX	5		/* For compatibility	*/
-#define	NU_GFX_UCODE_S2DEX_D	5		/* For compatibility	*/
+#define	NU_GFX_UCODE_F3DEX	0		/* 互換性のため		*/
+#define	NU_GFX_UCODE_F3DEX_NON	1		/* 互換性のため		*/
+#define	NU_GFX_UCODE_F3DLX	0		/* 互換性のため		*/
+#define	NU_GFX_UCODE_F3DLX_NON	1		/* 互換性のため		*/
+#define	NU_GFX_UCODE_F3DLX_REJ	4		/* 互換性のため		*/
+#define	NU_GFX_UCODE_F3DLP_REJ	3		/* 互換性のため		*/
+#define	NU_GFX_UCODE_L3DEX	4		/* 互換性のため		*/
+#define	NU_GFX_UCODE_S2DEX	5		/* 互換性のため		*/
+#define	NU_GFX_UCODE_S2DEX_D	5		/* 互換性のため		*/
 
 #else    
-#define	NU_GFX_UCODE_F3DEX	0		/* F3DEX microcode  */
-#define	NU_GFX_UCODE_F3DEX_NON	1		/* F3DEX.NoN microcode  */
-#define	NU_GFX_UCODE_F3DLX	2		/* F3DLX microcode  */
-#define	NU_GFX_UCODE_F3DLX_NON	3		/* F3DLX.NoN microcode  */
-#define	NU_GFX_UCODE_F3DLX_REJ	4		/* F3DEX.ReJ microcode  */
-#define	NU_GFX_UCODE_F3DLP_REJ	5		/* F3DLP.Rej microcode  */
-#define	NU_GFX_UCODE_L3DEX	6		/* L3DEX microcode  */
-#define	NU_GFX_UCODE_S2DEX	7		/* S2DEX microcode  */
-#define	NU_GFX_UCODE_S2DEX_D	8		/* S2DEX microcode  */
+#define	NU_GFX_UCODE_F3DEX	0		/* F3DEXマイクロコード  */
+#define	NU_GFX_UCODE_F3DEX_NON	1		/* F3DEX.NoNマイクロコード  */
+#define	NU_GFX_UCODE_F3DLX	2		/* F3DLXマイクロコード  */
+#define	NU_GFX_UCODE_F3DLX_NON	3		/* F3DLX.NoNマイクロコード  */
+#define	NU_GFX_UCODE_F3DLX_REJ	4		/* F3DEX.ReJマイクロコード  */
+#define	NU_GFX_UCODE_F3DLP_REJ	5		/* F3DLP.Rejマイクロコード  */
+#define	NU_GFX_UCODE_L3DEX	6		/* L3DEXマイクロコード  */
+#define	NU_GFX_UCODE_S2DEX	7		/* S2DEXマイクロコード  */
+#define	NU_GFX_UCODE_S2DEX_D	8		/* S2DEXマイクロコード  */
 #endif /* F3DEX_GBI_2 */
 
     
 /*--------------------------------------*/
-/* Please set the number of graphic             */
-/* task structures so it is larger than         */
-/* the size of the Scheduler's message buffer.  */
-/* Otherwise, task structures will be available */
-/* for use while they are being used.	*/
+/* グラフィックタスク構造体の数は	*/
+/* スケジューラのメッセージバッファサイズ*/
+/* 以上にしてください。			*/
+/* そうしないと,使用中のタスク構造体を  */
+/* 使う可能性があります			*/
 /*--------------------------------------*/
-#define NU_GFX_TASK_NUM		10	/* The number of graphic task structure	*/
-#define	NU_GFX_RDP_OUTPUTBUFF_SIZE	0x20000	/* fifo buffer size	*/
+#define NU_GFX_TASK_NUM		10	/* グラフィックタスク構造体数 	*/
+#define	NU_GFX_RDP_OUTPUTBUFF_SIZE	0x20000	/* fifoバッファサイズ	*/
 
 /*--------------------------------------*/
-/* Default frame buffer.                   */
-/* By default, the frame buffer is mapped  */
-/* to the highest location in RDRAM.       */
-/* Set to 320x240 16bit triple buffer.	*/
+/* デフォルトのフレームバッファ		*/
+/* デフォルトではフレームバッファは	*/
+/* RDRAMの最上位に配置			*/
+/* 320x240 16bitトリプルバッファに設定	*/
 /*--------------------------------------*/
 #define NU_GFX_FRAMEBUFFER_NUM		3
 #define NU_GFX_FRAMEBUFFER_ADDR		(0x80400000-320*240*2*3)
@@ -172,17 +167,16 @@ extern "C" {
 #define NU_GFX_INIT_SCREEN_HT		240
 
 /*--------------------------------------*/
-/* By default, the Z buffer is mapped to  */
-/* the lowest location in memory.	*/
+/* デフォルトではZバッファは		*/
+/*   メモリの最下位に配置		*/
 /*--------------------------------------*/    
 #define NU_GFX_ZBUFFER_ADDR		0x80000400
 					   
-#define	NU_GFX_DISPLAY_OFF		0	/* Display OFF */    
-#define	NU_GFX_DISPLAY_ON		1	/* Display ON	*/
-#define	NU_GFX_DISPLAY_ON_TRIGGER	0x80	/* Trigger	*/
+#define	NU_GFX_DISPLAY_OFF		0	/* ディスプレイの非表示 */    
+#define	NU_GFX_DISPLAY_ON		1	/* ディスプレイの表示	*/
+#define	NU_GFX_DISPLAY_ON_TRIGGER	0x80	/* トリガー		*/
 
-#define NU_GFX_YIELD_BUF_SIZE		(OS_YIELD_DATA_SIZE + 0x10)
-
+					   
 /*----------------------------------------------------------------------*/
 /* SI MANAGER DEFINE							*/
 /*----------------------------------------------------------------------*/
@@ -210,14 +204,14 @@ extern "C" {
 #define NU_CONT_MAXCONTROLLERS		MAXCONTROLLERS
 #define	NU_CONT_STACK_SIZE		0x2000
 #define	NU_CONT_MESG_MAX		8
-#define NU_CONT_THREAD_ID		6
+#define NU_CONT_THREAD_ID		5
 #define NU_CONT_THREAD_PRI		115
 #define	NU_CONT_DATA_UNLOCK		0
 #define	NU_CONT_DATA_LOCK		1
 
 
 /*----------------------------------------------------------------------*/
-/* Definitions of messages to the controller manager			*/
+/* コントローラマネージャへのメッセージ定義 				*/
 /*----------------------------------------------------------------------*/
 #define	NU_CONT_MSG_BASE		NU_SI_MAJOR_NO_CONT
 #define	NU_CONT_RETRACE_MSG		(NU_CONT_MSG_BASE+0)
@@ -240,14 +234,14 @@ extern "C" {
 #define NU_CONT_PAK_MODE_NOCREATE	0
 #define NU_CONT_PAK_MODE_CREATE		1
 #define	NU_CONT_PAK_TYPE_NONE		0
-#define	NU_CONT_PAK_TYPE_PAK		1	/* Controller pak	*/
-#define	NU_CONT_PAK_TYPE_RUMBLE		2	/* Rumble pak 		*/
-#define	NU_CONT_PAK_TYPE_GBPAK		3	/* 64GB pak		*/
+#define	NU_CONT_PAK_TYPE_PAK		1	/* コントローラパック	*/
+#define	NU_CONT_PAK_TYPE_RUMBLE		2	/* 振動パック 		*/
+#define	NU_CONT_PAK_TYPE_GBPAK		3	/* 64GBパック		*/
 #define NU_CONT_PAK_READ		PFS_READ
 #define	NU_CONT_PAK_WRITE		PFS_WRITE
 
 /*----------------------------------------------------------------------*/
-/* Rumble Pak control 							*/
+/* 振動パック制御 							*/
 /*----------------------------------------------------------------------*/
 #define NU_CONT_RMB_STATE_STOP		0x00
 #define NU_CONT_RMB_STATE_STOPPING	0x01
@@ -303,7 +297,7 @@ extern "C" {
 #define NU_CONT_GBPAK_MBC_REG3_ADDR		0x6000	/* Register 3	*/
 
 /*----------------------------------------------------------------------*/
-/* Voice Recognition System Manager					*/
+/* 音声認識システム Manager						*/
 /*----------------------------------------------------------------------*/
 #define NU_VRS_MSG_BASE			NU_SI_MAJOR_NO_VRS
 #define	NU_VRS_RETRACE_MSG		(NU_VRS_MSG_BASE+0)
@@ -325,25 +319,21 @@ extern "C" {
 /*----------------------------------------------------------------------*/
 /* DEBUG 								*/
 /*----------------------------------------------------------------------*/
-#define NU_DEB_PERF_BUF_NUM		3
-#define	NU_DEB_PERF_GFXTASK_CNT		8	/* Graphic task count number */
-#define	NU_DEB_PERF_AUTASK_CNT		4	/* Audio task count number */
-#define NU_DEB_PERF_RUNNING		0	/* Sampling		*/
-#define NU_DEB_PERF_STOP		1	/* Stop sampling	*/
-#define NU_DEB_PERF_START		2	/* Start sampling	*/
-#define NU_DEB_DP_CLOCK_CTR		0	/* RDP internal counter	*/
-#define	NU_DEB_DP_CMD_CTR		1	/* CMD counter		*/
-#define NU_DEB_DP_PIPE_CTR		2	/* PIPE counter		*/
-#define	NU_DEB_DP_TMEM_CTR		3	/* TMEM counter		*/
-#define NU_DEB_BAR_FRAME1		0	/* Maxium display number for */
-#define NU_DEB_BAR_FRAME2		1	/* performance bar	*/
+#define	NU_DEB_PERF_GFXTASK_CNT		8	/* グラフィックタスク計測数 */
+#define	NU_DEB_PERF_AUTASK_CNT		4	/* オーディオタスク計測数 */
+#define NU_DEB_DP_CLOCK_CTR		0	/* RDP内部カウンタ	*/
+#define	NU_DEB_DP_CMD_CTR		1	/* CMDカウンタ		*/
+#define NU_DEB_DP_PIPE_CTR		2	/* PIPEカウンタ		*/
+#define	NU_DEB_DP_TMEM_CTR		3	/* TMEMカウンタ		*/
+#define NU_DEB_BAR_FRAME1		0	/* パフォーマンスバーの */
+#define NU_DEB_BAR_FRAME2		1	/* 表示最大数		*/
 #define NU_DEB_BAR_FRAME3		2
 #define NU_DEB_BAR_FRAME4		3
 #define NU_DEB_BAR_FRAME5		4
 #define NU_DEB_BAR_FRAME6		5
 #define NU_DEB_BAR_FRAME7		6
-#define	NU_DEB_CON_ROW_MAX		40	/* Number of console rows */
-#define NU_DEB_CON_COLUMN_MAX		30 	/* Number of console columns */
+#define	NU_DEB_CON_ROW_MAX		40	/* コンソールの列数 */
+#define NU_DEB_CON_COLUMN_MAX		30 	/* コンソールの行数 */
 #define NU_DEB_CON_TEXT_SIZE		(NU_DEB_CON_ROW_MAX*NU_DEB_CON_COLUMN_MAX)
 #define NU_DEB_CON_WIDTH		320
 #define NU_DEB_CON_WINDOW_NUM		4
@@ -351,33 +341,31 @@ extern "C" {
 #define NU_DEB_CON_WINDOW1		1
 #define NU_DEB_CON_WINDOW2		2
 #define NU_DEB_CON_WINDOW3		3
-#define	NU_DEB_CON_TEXT_BLACK		0	/* Black */
-#define NU_DEB_CON_TEXT_BLUE		1	/* Blue */
-#define NU_DEB_CON_TEXT_GREEN		2	/* Green */
-#define NU_DEB_CON_TEXT_CYAN		3	/* Cyan */
-#define NU_DEB_CON_TEXT_RED		4	/* Red */
-#define NU_DEB_CON_TEXT_MAGENTA		5	/* Magenta */
-#define NU_DEB_CON_TEXT_YELLOW		6	/* Yellow */
-#define NU_DEB_CON_TEXT_WHITE		7	/* White */
-#define	NU_DEB_CON_TEXT_LIGHTBLACK	8	/* Gray */
-#define NU_DEB_CON_TEXT_LIGHTBLUE	9	/* Light blue */
-#define NU_DEB_CON_TEXT_LIGTHBLUE	9	/* Light blue for spell miss*/
-#define NU_DEB_CON_TEXT_LIGHTGREEN	10	/* Light green */
-#define NU_DEB_CON_TEXT_LIGHTCYAN	11	/* Light cyan */
-#define NU_DEB_CON_TEXT_LIGHTRED	12	/* Light red */
-#define NU_DEB_CON_TEXT_LIGHTMAGENTA	13	/* Light magenta */
-#define NU_DEB_CON_TEXT_LIGHTYELLOW	14	/* Light yellow */
-#define NU_DEB_CON_TEXT_LIGHTWHITE	15	/* White */
-#define NU_DEB_CON_ATTR_NORMAL		0x0	/* No attribute */
-#define NU_DEB_CON_ATTR_BLINK		0x1	/* Blink	*/
-#define	NU_DEB_CON_ATTR_REVERSE		0x2	/* Reversed character*/
+#define	NU_DEB_CON_TEXT_BLACK		0	/* 黒 */
+#define NU_DEB_CON_TEXT_BLUE		1	/* 青 */
+#define NU_DEB_CON_TEXT_GREEN		2	/* 緑 */
+#define NU_DEB_CON_TEXT_CYAN		3	/* シアン */
+#define NU_DEB_CON_TEXT_RED		4	/* 赤 */
+#define NU_DEB_CON_TEXT_MAGENTA		5	/* マゼンタ */
+#define NU_DEB_CON_TEXT_YELLOW		6	/* 黄 */
+#define NU_DEB_CON_TEXT_WHITE		7	/* 白 */
+#define	NU_DEB_CON_TEXT_LIGHTBLACK	8	/* 灰 */
+#define NU_DEB_CON_TEXT_LIGHTBLUE	9	/* 明るい青 */
+#define NU_DEB_CON_TEXT_LIGTHBLUE	9	/* 明るい青 for spell miss*/
+#define NU_DEB_CON_TEXT_LIGHTGREEN	10	/* 明るい緑 */
+#define NU_DEB_CON_TEXT_LIGHTCYAN	11	/* 明るいシアン */
+#define NU_DEB_CON_TEXT_LIGHTRED	12	/* 明るい赤 */
+#define NU_DEB_CON_TEXT_LIGHTMAGENTA	13	/* 明るいマゼンタ */
+#define NU_DEB_CON_TEXT_LIGHTYELLOW	14	/* 明るい黄 */
+#define NU_DEB_CON_TEXT_LIGHTWHITE	15	/* 白 */
+#define NU_DEB_CON_ATTR_NORMAL		0x0	/* アトリビュート無し */
+#define NU_DEB_CON_ATTR_BLINK		0x1	/* 点滅		*/
+#define	NU_DEB_CON_ATTR_REVERSE		0x2	/* 反転文字	*/
 #define NU_DEB_CON_SCROLL_ON		1
 #define NU_DEB_CON_SCROLL_OFF		0
 #define NU_DEB_CON_WINDOW_OFF		0
 #define NU_DEB_CON_WINDOW_ON		1    
     
-#define NU_DEB_MARKER_NUM		10
-
 #if defined(_LANGUAGE_C) || defined(_LANGUAGE_C_PLUS_PLUS)
 /*----------------------------------------------------------------------*/
 /*----------------------------------------------------------------------*/
@@ -387,39 +375,39 @@ extern "C" {
 /*--------------------------------------*/
 /* Scheduler sturcter			*/
 /*--------------------------------------*/
-typedef short	NUScMsg;		/* Scheduler message type */
+typedef short	NUScMsg;		/* スケジューラメッセージタイプ */
 
-typedef struct	st_SCClient {		/* Client list structure */
-    struct st_SCClient*	next;		/* Pointer to the next client */
-    OSMesgQueue*	msgQ;		/* Message sent to the client */
-    NUScMsg		msgType;	/* Message type		*/
-					/* NU_SC_RETRACE_MSG or	*/
+typedef struct	st_SCClient {		/* クライアントリスト構造体 */
+    struct st_SCClient*	next;		/* 次のクライアントへのポインタ */
+    OSMesgQueue*	msgQ;		/* クライアントに送信するメッセージ */
+    NUScMsg		msgType;	/* メッセージの種類		*/
+					/* NU_SC_RETRACE_MSG または	*/
     					/* NU_SC_PRENMI_MSG		*/
 } NUScClient;
 
-typedef struct st_SCTask {		/* Task structure */
+typedef struct st_SCTask {		/* タスク構造体 */
     struct st_SCTask	*next;
     u32		state;
     u32		flags;
-    void	*framebuffer;		/* For the graphic task */
+    void	*framebuffer;		/* グラフィックスタスク用 */
     OSTask	list;
     OSMesgQueue	*msgQ;
     OSMesg	msg;
 } NUScTask;
 
-typedef struct st_Sched { /* Define the scheduler structure */
+typedef struct st_Sched { /* スケジューラ構造体の定義 */
 
-    /* Message */
+    /* メッセージ */
     NUScMsg	retraceMsg;
     NUScMsg	prenmiMsg;
 
-    /* Define the task request queue */
+    /* タスクリクエストキューの定義 */
     OSMesgQueue	audioRequestMQ;
     OSMesg	audioRequestBuf[NU_SC_MAX_MESGS];
     OSMesgQueue graphicsRequestMQ;
     OSMesg	graphicsRequestBuf[NU_SC_MAX_MESGS];
 
-    /* Define the message queue */
+    /* メッセージキューの定義 */
     OSMesgQueue	retraceMQ;
     OSMesg	retraceMsgBuf[NU_SC_MAX_MESGS];
     OSMesgQueue	rspMQ;
@@ -427,26 +415,26 @@ typedef struct st_Sched { /* Define the scheduler structure */
     OSMesgQueue rdpMQ;
     OSMesg	rdpMsgBuf[NU_SC_MAX_MESGS];
 
-    /* Use for waiting for the next retrace-signal */
+    /* 次のリトレース信号を待つために使用 */
     OSMesgQueue	waitMQ;
     OSMesg	waitMsgBuf[NU_SC_MAX_MESGS];
 
-    /* Define threads */
-    OSThread	schedulerThread;	/* Main thread */
-    OSThread	audioThread;		/* Audio */
-    OSThread	graphicsThread;		/* Graphics */
+    /* スレッドの定義 */
+    OSThread	schedulerThread;	/* メインスレッド */
+    OSThread	audioThread;		/* オーディオ */
+    OSThread	graphicsThread;		/* グラフィックス */
 
-    /* Client list */
+    /* クライアントリスト  */
     NUScClient	*clientList;
 
-    /* Executing graphics task  */
+    /* 実行中のグラフィックスタスク  */
     NUScTask	*curGraphicsTask;
     NUScTask 	*curAudioTask;
     NUScTask	*graphicsTaskSuspended;
 
     u32		retraceCount;
     u8		frameRate;
-    u8		frameBufferNum;		/* The number of frame buffers */
+    u8		frameBufferNum;		/* フレームバッファ数 */
 
 
 } NUSched;
@@ -463,35 +451,19 @@ typedef struct  st_Ucode {
 /*--------------------------------------*/
 /* CALL BACK Function	typedef		*/
 /*--------------------------------------*/
-typedef void (*NUIdleFunc)(void);	/* Idle callback function pointer */
-typedef void (*NUScPreNMIFunc)(void);	/* PRENMI callback function pointer */
-typedef void (*NUGfxFunc)(u32);		/* PRENMI callback function pointer */
-typedef void (*NUGfxPreNMIFunc)(void);	/* GFX PRENMI callback function pointer */
+typedef void (*NUIdleFunc)(void);	/* アイドルコールバック関数ポインタ*/
+typedef void (*NUScPreNMIFunc)(void);	/* PRENMIコールバック関数ポインタ */
+typedef void (*NUGfxFunc)(u32);		/* GFX リトレースコールバック関数ポインタ */
+typedef void (*NUGfxPreNMIFunc)(void);	/* GFX PRENMIコールバック関数ポインタ */
 
-typedef void (*NUGfxSwapCfbFunc)(void*);/* SWAPBUF callback function pointer*/
-typedef void (*NUGfxTaskEndFunc)(void*);/* TASKEND callback function pointer*/
-typedef void (*NUContReadFunc)(u32);	/* Callback function pointer	*/
-					/* for Controller read end	*/
-typedef void (*NUContPakFunc)(void*);	/* Callback the Controller Pak control function */
-typedef void (*NUContRmbFunc)(void*);	/* Callback the Rumble Pak control function */
-typedef s32 (*NUCallBackFunc)(void*);	/* Callback function */
+typedef void (*NUGfxSwapCfbFunc)(void*);/* SWAPBUF コールバック関数ポインタ*/
+typedef void (*NUGfxTaskEndFunc)(void*);/* TASKEND コールバック関数ポインタ*/
+typedef void (*NUContReadFunc)(u32);	/* コントローラ読み込み終了の	*/
+					/* コールバック関数ポインタ	*/
+typedef void (*NUContPakFunc)(void*);	/* コントローラパック制御関数コールバック */
+typedef void (*NUContRmbFunc)(void*);	/* 振動パック制御関数コールバック */
+typedef s32 (*NUCallBackFunc)(void*);	/* コールバック関数 */
 
-
-
-/*--------------------------------------*/
-/* PI Common Message 			*/
-/*--------------------------------------*/
-typedef struct st_PiOverlaySegment {
-    u8* romStart;	/* The starting offset of ROM for the segment*/
-    u8* romEnd;		/* The ending offset of ROM for the segment */
-    u8*	ramStart;	/* The starting offset of CPU for the segment */    
-    u8* textStart;	/* The starting offset of DRAM with text attribute */
-    u8* textEnd;	/* The ending offset of DRAM with text attribute */
-    u8* dataStart;	/* The starting offset of DRAM with data attribute */
-    u8* dataEnd;	/* The ending offset of DRAM with data attribute */
-    u8* bssStart;	/* The starting offset of DRAM with bss attribute */
-    u8*	bssEnd;		/* The ending offset of DRAM with bss attribute */
-} NUPiOverlaySegment;
 
 /*--------------------------------------*/
 /* SI Common Message 			*/
@@ -507,17 +479,17 @@ typedef struct st_SiCommonMesg {
 /* controller typedef			*/
 /*--------------------------------------*/
 typedef struct st_ContRead {
-    NUScMsg	mesg;			/* Message type */
+    NUScMsg	mesg;			/* メッセージの種類 */
     OSMesgQueue* rtnMesgQ;
     OSContPad*	pad;
 } NUContReadMesg;
 
 typedef struct st_ContData {
     u16	button;			/* A,B,C,Z,L,R,START,PAD ,button 	*/
-    s8	stick_x;		/* Actual used range -61 <= stick X <= 61*/
-    s8	stick_y;		/* Actual used range -63 <= stick Y <= 63*/
-    u8	errno;			/* Error				*/
-    u16	trigger;		/* Button's trigger data		*/
+    s8	stick_x;		/* 実使用範囲 -61 <= stick X <= 61	*/
+    s8	stick_y;		/* 実使用範囲 -63 <= stick Y <= 63	*/
+    u8	errno;			/* エラー				*/
+    u16	trigger;		/* button のトリガーデータ		*/
 } NUContData;
 
 typedef struct st_ContQuery {
@@ -574,7 +546,7 @@ typedef struct st_ContPakIsPlugMesg {
 } NUContPakIsPlugMesg;
 
 typedef struct st_ContRmbCtl {
-    u16			freq;		/* Rumble frequency */
+    u16			freq;		/* 振動周波数 */
     u16			frame;
     u16			counter;
     u8			state;
@@ -621,37 +593,36 @@ typedef struct stVrsMesg {
 /* Debug				*/
 /*--------------------------------------*/
 typedef struct st_GfxTaskTime {
-    s64		rspStart;		/* RSP task start time*/
-    s64		rspEnd;			/* RSP task end time*/
-    s64		rdpEnd;			/* RDP end time		*/
-    u32		dpCnt[4];		/* RDP internal counter	*/
+    s64		rspStart;		/* RSPタスクスタート時間*/
+    s64		rspEnd;			/* RSPタスク終了時間	*/
+    s64		rdpEnd;			/* RDP終了時間		*/
+    u32		dpCnt[4];		/* RDP内部カウンタ	*/
 } NUDebTaskTime;
 
 typedef struct st_DebTaskPerf {
-    s64		retraceTime;		/* Retrace event time*/
-    s64		markerTime[NU_DEB_MARKER_NUM];
-    u8		gfxTaskCnt;		/* The number of graphic tasks */
-    u8		auTaskCnt;		/* The number of audio tasks */
+    s64		retraceTime;		/* リトレースイベントタイム */
+    u8		gfxTaskCnt;		/* グラフィックタスク数 */
+    u8		auTaskCnt;		/* オーディオタスク数 */
     u8		gfxTaskStart;
     NUDebTaskTime	gfxTaskTime[NU_DEB_PERF_GFXTASK_CNT];
     NUDebTaskTime	auTaskTime[NU_DEB_PERF_AUTASK_CNT];
 } NUDebTaskPerf;
 
-/* Console window structure */
+/* コンソールウインドウ構造体 */
 typedef struct st_DebConWindow {
-    u8	windowFlag;	/* Console window show/hide flag*/
-    u16	scroll;		/* Scroll value 			*/
-    u8	scrollFlag;	/* Scroll enable/disable 		*/
-    u8	textColor;	/* Text color 				*/
-    u8	attribute;	/* Attribute				*/
-    u16	posX;		/* Row position for writing text	*/
-    u16	posY;		/* Column position for writing text	*/
-    u16	index;		/* Position for writing text buffer	*/
-    u16	winX;		/* X coordinate for console window display*/
-    u16	winY;		/* Y coordinate for console window display*/
-    u16	winW;		/* Number of rows in console display	*/
-    u16	winH;		/* Number of columns in console display	*/
-    u16	text[NU_DEB_CON_TEXT_SIZE];	/*Text buffer */    
+    u8	windowFlag;	/* コンソールウインドウ表示/非表示フラグ*/
+    u16	scroll;		/* スクロール値 			*/
+    u8	scrollFlag;	/* スクロール許可/不許可 		*/
+    u8	textColor;	/* 文字色 				*/
+    u8	attribute;	/* アトリビュート			*/
+    u16	posX;		/* 文字書き込み桁位置			*/
+    u16	posY;		/* 文字書き込み行位置			*/
+    u16	index;		/* 文字バッファ書き込み位置 		*/
+    u16	winX;		/* コンソールウインドウの表示X座標 	*/
+    u16	winY;		/* コンソールウインドウの表示Y座標 	*/
+    u16	winW;		/* コンソール表示桁数 			*/
+    u16	winH;		/* コンソール表示行数 			*/
+    u16	text[NU_DEB_CON_TEXT_SIZE];	/*文字バッファ*/    
 } NUDebConWindow;
 
 /*----------------------------------------------------------------------*/
@@ -660,47 +631,43 @@ typedef struct st_DebConWindow {
 /*----------------------------------------------------------------------*/
 /*----------------------------------------------------------------------*/    
 
-extern u8	nuRDPOutputBuf[];
-extern u8	nuDramStack[];
-extern u8	nuYieldBuf[];
-extern NUSched	nusched;		/* Scheduler structure */
+extern u8	nuRDPOutputBuf[NU_GFX_RDP_OUTPUTBUFF_SIZE];
+extern u8	nuDramStack[SP_DRAM_STACK_SIZE8];
+extern u8	nuYieldBuf[OS_YIELD_DATA_SIZE];
+extern NUSched	nusched;		/* スケジューラ構造体 */
 extern OSMesgQueue nuGfxMesgQ;		/* graphic thread  queue */
-extern u32	nuScRetraceCounter;    /* Retrace counter */
+extern u32	nuScRetraceCounter;    /* リトレースカウンター */
 extern u8	nuScPreNMIFlag;
 /*--------------------------------------*/
 /*  graphics variables 			*/
 /*--------------------------------------*/
-extern NUUcode*		nuGfxUcode;	/* Pointer to GFX microcode structure*/
-extern u16**		nuGfxCfb;/* Pointer to the frame buffer pointer array*/
-extern u16*		nuGfxCfb_ptr;	/* Frame buffer pointer */
-extern u32		nuGfxCfbNum;		/* The number of frame buffers*/
-extern u16*		nuGfxZBuffer;		/* Z buffer pointer*/
-extern volatile u32	nuGfxTaskSpool;		/* Number of tasks in the queue */
-extern u32		nuGfxDisplay;		/* Screen display ON/OFF flag*/
-extern u32		nuGfxCfbCounter;	/* For switching fame buffers*/
-extern OSMesgQueue	nuGfxMesgQ;
-extern OSThread		nuGfxThread;			/* graphic thread */
-extern s32		nuGfxUcodeFifoSize; 	/* FIFO buffer size -1: Size undetermined */
-extern u64*		nuGfxUcodeFifoPtr;	/* Pointer to FIFO buffer */
+extern NUUcode*		nuGfxUcode;	/* GFXマイクロコード構造体のポインタ*/
+extern u16**		nuGfxCfb;/* フレームバッファのポインタ配列のポインタ */
+extern u16*		nuGfxCfb_ptr;	/* フレームバッファのポインタ */
+extern u32		nuGfxCfbNum;		/* フレームバッファ数 */
+extern u16*		nuGfxZBuffer;		/* Zバッファのポインタ*/
+extern volatile u32	nuGfxTaskSpool;		/* キューにあるタスク数 */
+extern u32		nuGfxDisplay;		/* 画面の表示/非表示フラグ */
+extern u32		nuGfxCfbCounter;	/* フレームバッファ切り替え用*/
 
 /*--------------------------------------*/
 /*  controller manager variables 	*/
 /*--------------------------------------*/
-extern OSContStatus	nuContStatus[];
-extern OSContPad	nuContData[];
-extern u32		nuContNum;	/* The number of connected Controllers */
-extern u32		nuContDataLockKey; /* Lock the Controller data */
-extern OSMesgQueue	nuContWaitMesgQ;/* Wait for Controller read */
-extern OSPfs		nuContPfs[];
+extern OSContStatus	nuContStatus[NU_CONT_MAXCONTROLLERS];
+extern OSContPad	nuContData[NU_CONT_MAXCONTROLLERS];
+extern u32		nuContNum;	/* 接続されているコントローラの数 */
+extern u32		nuContDataLockKey; /* コントローラデータのロック */
+extern OSMesgQueue	nuContWaitMesgQ;/* コントローラリード待ち */
+extern OSPfs		nuContPfs[4];
 extern NUCallBackList	nuContCallBack;
-extern u16		nuContPakCompanyCode;	/* Company code */
-extern u32		nuContPakGameCode;	/* Game code */
+extern u16		nuContPakCompanyCode;	/* 会社コード */
+extern u32		nuContPakGameCode;	/* ゲームコード */
 extern NUCallBackList	nuContPakCallBack;
 
 /*--------------------------------------*/
 /*  RUMBUL manager variables 		*/
 /*--------------------------------------*/
-extern NUContRmbCtl	nuContRmbCtl[];
+extern NUContRmbCtl	nuContRmbCtl[4];
 extern u32		nuContRmbSearchTime;
 extern NUCallBackList	nuContRmbCallBack;
 
@@ -723,17 +690,16 @@ extern NUCallBackList	nuVrsCallBack;
 /*--------------------------------------*/
 /*  si variables 			*/
 /*--------------------------------------*/
-extern OSMesgQueue	nuSiMesgQ;	/* SI event message queue*/
-extern OSMesgQueue	nuSiMgrMesgQ;	/* SI manager queue*/
-extern NUCallBackList*	nuSiCallBackList;	/* Callback function list */
+extern OSMesgQueue	nuSiMesgQ;	/* SIイベントメッセージキュー */
+extern OSMesgQueue	nuSiMgrMesgQ;	/* SIマネージャのキュー */
+extern NUCallBackList*	nuSiCallBackList;	/* コールバック関数リスト */
 
 /*--------------------------------------*/
 /*  pi variables 			*/
 /*--------------------------------------*/
 extern OSPiHandle*	nuPiCartHandle;
 extern OSPiHandle*	nuPiSramHandle;
-extern OSPiHandle*	nuPiDDRomHandle;
-
+    
 /*--------------------------------------*/
 /* CALL BACK Function pointer 		*/
 /*--------------------------------------*/
@@ -743,19 +709,13 @@ extern NUGfxSwapCfbFunc	nuGfxSwapCfbFunc; 	/* swapbuf callback pointer  */
 extern NUGfxFunc	nuGfxFunc;		/* callback pointer 	*/
 extern NUGfxPreNMIFunc	nuGfxPreNMIFunc;	/* callback pointer 	*/
 extern NUGfxTaskEndFunc	nuGfxTaskEndFunc; 	/* task end callback  ptr */
-extern NUContReadFunc	nuContReadFunc;		/* Callback function when*/
-						/* Controller read ends	*/
+extern NUContReadFunc	nuContReadFunc;		/* コントローラリード終了時の*/
+						/* コールバック関数	*/
 /*--------------------------------------*/
 /* Debug 		 		*/
 /*--------------------------------------*/
-
 extern NUDebTaskPerf*	nuDebTaskPerfPtr;
 extern NUDebConWindow	nuDebConWin[];
-extern NUDebTaskPerf	nuDebTaskPerf[];
-extern u32		nuDebTaskPerfInterval;
-extern volatile u32	nuDebTaskPerfCnt;
-extern volatile u32	nuDebTaskPerfEnd;
-
 
 /*----------------------------------------------------------------------*/    
 /*----------------------------------------------------------------------*/
@@ -774,6 +734,7 @@ extern void nuScCreateScheduler(u8 videoMode, u8 numFields);
 extern void nuScAddClient(NUScClient *c, OSMesgQueue *mq, NUScMsg msgType);
 extern void nuScRemoveClient(NUScClient *client);
 extern void nuScResetClientMesgType(NUScClient* client, NUScMsg msgType);
+extern void nuPreNMIFuncSet(NUScPreNMIFunc func);
 extern OSMesgQueue* nuScGetGfxMQ(void);
 extern OSMesgQueue* nuScGetAudioMQ(void);
 extern void nuScSetFrameBufferNum(u8 frameBufferNum);
@@ -798,7 +759,7 @@ extern void nuGfxTaskAllEndWait(void);
 extern void nuGfxRetraceWait(u32 retrace_num);
 extern void nuGfxDisplayOff(void);
 extern void nuGfxDisplayOn(void);
-extern void nuGfxSetUcodeFifo(void* fifoBufPtr, s32 size);
+
 #ifdef F3DEX_GBI_2
 #define	nuGfxInit()	nuGfxInitEX2()
 #endif /* F3DEX_GBI_2 */
@@ -898,7 +859,6 @@ extern void nuPiReadRom(u32 rom_addr, void* buf_ptr, u32 size);
 extern void nuPiInitSram(void);
 extern void nuPiInitDDrom(void);
 extern void nuPiReadWriteSram(u32 addr, void* buf_ptr, u32 size, s32 flag);
-extern void nuPiReadRomOverlay(NUPiOverlaySegment* segment);
 
 /*--------------------------------------*/
 /* si function				*/
@@ -928,24 +888,15 @@ extern s32 nuVrsMaskDictionary(NUVrsHandle* handle, u8* maskpattern, s32 size);
 /* dubug function			*/
 /*--------------------------------------*/
 #ifdef NDEBUG
-#define nuDebTaskPerfBar0(EX0 ,EX1 ,EX2)	((void)0)
-#define nuDebTaskPerfBar1(EX0 ,EX1 ,EX2)	((void)0)
-#define nuDebTaskPerfBar0EX2(EX0 ,EX1 ,EX2)	((void)0)
-#define nuDebTaskPerfBar1EX2(EX0 ,EX1 ,EX2)	((void)0)
-#define	nuDebPerfMarkSet(EX0)			((void)0)
-#define nuDebTaskPerfIntervalSet(EX0)		((void)0)
+#define nuDebTaskPerfBar0(EX0 ,EX1 ,EX2)       ((void)0)
+#define nuDebTaskPerfBar1(EX0 ,EX1 ,EX2)       ((void)0)
+#define nuDebTaskPerfBar0EX2(EX0 ,EX1 ,EX2)       ((void)0)
+#define nuDebTaskPerfBar1EX2(EX0 ,EX1 ,EX2)       ((void)0)
 #else
 extern void nuDebTaskPerfBar0(u32 frameNum, u32 y, u32 flag);
 extern void nuDebTaskPerfBar1(u32 frameNum, u32 y, u32 flag);
 extern void nuDebTaskPerfBar0EX2(u32 frameNum, u32 y, u32 flag);
 extern void nuDebTaskPerfBar1EX2(u32 frameNum, u32 y, u32 flag);
-extern u32 nuDebPerfMarkSet(s32 markNo);
-extern void nuDebTaskPerfIntervalSet(u32 interval);
-#ifdef F3DEX_GBI_2
-#define nuDebTaskPerfBar0(a, b, c)	nuDebTaskPerfBar0EX2(a, b, c)
-#define nuDebTaskPerfBar1(a, b, c)	nuDebTaskPerfBar1EX2(a, b, c)
-#endif	/* F3DEX_GBI_2 */
-					   
 #endif /* NDEBUG */
 
 extern void nuDebConDisp(u32 flag);
@@ -967,9 +918,10 @@ extern void nuDebConPutc(u32 wndNo, u32  c);
 extern void nuDebTaskPerfLoad(void);
 extern void nuDebConPrintf(u32 wndNo, const char* fmt, ...);
 
-
 #ifdef F3DEX_GBI_2
 #define	nuDebConDisp(flag)		nuDebConDispEX2(flag)
+#define nuDebTaskPerfBar0(a, b, c)	nuDebTaskPerfBar0EX2(a, b, c)
+#define nuDebTaskPerfBar1(a, b, c)	nuDebTaskPerfBar1EX2(a, b, c)
 #endif	/* F3DEX_GBI_2 */
 
 /*----------------------------------------------------------------------*/
@@ -979,24 +931,24 @@ extern void nuDebConPrintf(u32 wndNo, const char* fmt, ...);
 /*----------------------------------------------------------------------*/
 
 /*----------------------------------------------------------------------*/
-/*	Register the graphics microcode					*/
-/*	IN:	Pointer to the graphics microcode NUUcode array		*/
+/*	グラフィックマイクロコードの登録				*/
+/*	IN:	グラフィックスマイクロコードのNUUcode配列のポインタ	*/
 /*----------------------------------------------------------------------*/
 #define nuGfxSetUcode(ucode)						\
 {									\
     nuGfxUcode = ucode;							\
 }
 /*----------------------------------------------------------------------*/
-/*	Set the Z buffer						*/
-/*	IN:	Z buffer pointer					*/
+/*	Zバッファの設定							*/
+/*	IN:	Zバッファのポインタ					*/
 /*----------------------------------------------------------------------*/
 #define nuGfxSetZBuffer(ZBuf_p)						\
 {									\
     nuGfxZBuffer = ZBuf_p;						\
 }
 /*----------------------------------------------------------------------*/
-/*	Remove the callback function					*/
-/*	IN:	None							*/
+/*	コールバック関数の削除						*/
+/*	IN:	なし							*/
 /*----------------------------------------------------------------------*/
 #define	nuPreNmiFuncRemove()		nuPreNmiFuncSet(NULL)
 #define nuGfxFuncRemove()		nuGfxFuncSet(NULL)
@@ -1006,11 +958,11 @@ extern void nuDebConPrintf(u32 wndNo, const char* fmt, ...);
 #define nuContReadFuncRemove()		nuContReadFuncSet(NULL)
 
 /*----------------------------------------------------------------------*/
-/*	nuContDataGet - Get the Controller data				*/
-/*	Get the read data from the Controller manager			*/
+/*	nuContDataGet - コントローラデータの取得			*/
+/*	読み込まれたデータをコントローラマネージャから取得する		*/
 /*									*/
-/*	IN:	*contpad Controller structure pointer			*/
-/* 		cont_no  Controller number				*/
+/*	IN:	*contpad コントローラ構造体のポインタ			*/
+/* 		cont_no  コントローラの番号				*/
 /*----------------------------------------------------------------------*/
 #if 0
 #define	nuContDataGet(contpad, cont_no)					\
@@ -1019,11 +971,11 @@ extern void nuDebConPrintf(u32 wndNo, const char* fmt, ...);
 }
 
 /*----------------------------------------------------------------------*/
-/*	nuContDataGetAll - Get the Controller data			*/
-/*	Get the read data from the Controller manager. 			*/
-/*	Copy all four buffers						*/
-/*	IN:	*contpad Controller structure pointer			*/
-/* 		cont_no  Controller number				*/
+/*	nuContDataGetAll - コントローラデータの取得			*/
+/*	読み込まれたデータをコントローラマネージャから取得する		*/
+/*	４つ全部のバッファをコピーする					*/
+/*	IN:	*contpad コントローラ構造体のポインタ			*/
+/* 		cont_no  コントローラの番号				*/
 /*----------------------------------------------------------------------*/
 #define nuContDataGetAll(contpad)					\
 {									\
@@ -1031,32 +983,32 @@ extern void nuDebConPrintf(u32 wndNo, const char* fmt, ...);
 }
 #endif
 /*----------------------------------------------------------------------*/
-/*	nuContPakFileFind - Find the node				*/
+/*	nuContPakFileFind - ノードの検索				*/
 /*----------------------------------------------------------------------*/
 #define nuContPakFileFind(file, nodeName, extName)			\
     nuContPakFileOpen(file, nodeNname, extName, NU_CONT_PAK_NOCREAT, 0)\
 
 
 /*----------------------------------------------------------------------*/
-/*	nuContPakFileFindJis - Find the note				*/
+/*	nuContPakFileFindJis - ノートの検索				*/
 /*----------------------------------------------------------------------*/
 #define nuContPakFileFindJis(file, nodeName, extName)			\
     nuContPakFileOpenJis(file, nodeNname, extName, NU_CONT_PAK_NOCREAT, 0)\
 
 /*----------------------------------------------------------------------*/
-/*	nuContPakFileRead - Read to the note				*/
+/*	nuContPakFileRead - ノートの読み込み				*/
 /*----------------------------------------------------------------------*/
 #define nuContPakFileRead(file, offset, size, buf)			\
     nuContPakFileReadWrite(file, offset, size, buf, PFS_READ)		\
 
 /*----------------------------------------------------------------------*/
-/*	nuContPakFileWrite - Write to the note				*/
+/*	nuContPakFileWrite - ノートの書き込み				*/
 /*----------------------------------------------------------------------*/
 #define nuContPakFileWrite(file, offset, size, buf)			\
     nuContPakFileReadWrite(file, offset, size, buf, PFS_WRITE)		\
 
 /*----------------------------------------------------------------------*/
-/*	nuDebConPuts - Output character string (with line feeds)	*/
+/*	nuDebConPuts - 文字列の出力(改行付)				*/
 /*----------------------------------------------------------------------*/
 #define  nuDebConPuts(wndNo, s)						\
 {									\
@@ -1065,36 +1017,34 @@ extern void nuDebConPrintf(u32 wndNo, const char* fmt, ...);
 }
 
 /*----------------------------------------------------------------------*/
-/*	nuContGBPakRead - Read the GB Game Pak				*/
+/*	nuContGBPakRead - GBカートリッジの読み込み			*/
 /*----------------------------------------------------------------------*/
 #define nuContGBPakRead(file, address, buf, size)			\
     nuContGBPakReadWrite(file, OS_READ, address, buf, size)
 
 /*----------------------------------------------------------------------*/
-/*	nuContGBPakWrite - Write to the GB Game Pak			*/
+/*	nuContGBPakWrite - GBカートリッジの書き込み			*/
 /*----------------------------------------------------------------------*/
 #define nuContGBPakWrite(file, address, buf, size)			\
     nuContGBPakReadWrite(file, OS_WRITE, address, buf, size)
 
 /*----------------------------------------------------------------------*/
-/*	nuPiReadSram - Read from SRAM					*/
+/*	nuPiReadSram - SRAMからの読み込み				*/
 /*----------------------------------------------------------------------*/
 #define nuPiReadSram(addr, buf_ptr, size)				\
 	nuPiReadWriteSram(addr, buf_ptr, size, OS_READ)
     
 /*----------------------------------------------------------------------*/
-/*	nuPiWriteSram - Write to SRAM					*/
+/*	nuPiWriteSram - SRAMへの書き込み				*/
 /*----------------------------------------------------------------------*/
 #define nuPiWriteSram(addr, buf_ptr, size)				\
     nuPiReadWriteSram(addr, buf_ptr, size, OS_WRITE)
 	
 /*----------------------------------------------------------------------*/
-/*	Voice Recognition Macro Definitions				*/
+/*	音声認識関係のマクロ定義					*/
 /*----------------------------------------------------------------------*/
 #define	nuVrsCheckWord		osVoiceCheckWord
 #define	nuVrsCountSyllables	osVoiceCountSyllables
-
-
 
 #endif  /* defined(_LANGUAGE_C) || defined(_LANGUAGE_C_PLUS_PLUS) */
 #ifdef _LANGUAGE_C_PLUS_PLUS

@@ -1,9 +1,10 @@
 // text
 
-_start            = 0x80025C00; // type:func rom:0x1000
+_start = 0x80025C00; // type:func rom:0x1000
 
+get_segment_index = 0x80025EC8; // type:func
 mainproc = 0x80029C34; // type:func rom:0x5034
 
 // data
 
-overlays = 0x800B5F58; // size:0x2A8
+segments = 0x800B5F58; // size:0x2A8

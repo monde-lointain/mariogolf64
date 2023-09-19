@@ -43,3 +43,6 @@ ctx_includes.c
 nonmatchings/
 permuter_settings.toml
 
+# Makefile options
+.make_options
+
