@@ -9,20 +9,20 @@ typedef struct
     /* 0x4 */  s8 *unk_0x4;
     /* 0x8 */  u32 rom_start_addr;
     /* 0xC */  u32 rom_end_addr;
-    /* 0x10 */ void *segment_start_addr;
+    /* 0x10 */ void *overlay_start_addr;
     /* 0x14 */ void *data_start_addr;
     /* 0x18 */ void *bss_start_addr;
-    /* 0x1C */ void *segment_end_addr;
+    /* 0x1C */ void *overlay_end_addr;
     /* 0x20 */ void (*constructor)(void); /* These likely take some void ptr arguments... */
     /* 0x24 */ void (*destructor)(void);
-} MGSegmentInfo;
+} MGOverlayInfo;
 
 extern void func_80080DCC();
 extern void func_801FD624();
 extern s32 func_800299F4(u32);
 extern void nuPiReadRom(u32 rom_addr, void* buf_ptr, u32 size);
 
-MGSegmentInfo segments[17];
+MGOverlayInfo overlays[17];
 extern u32 D_8012CFC0[64];
 extern s32 D_800B67F0;
 extern u8 D_800FC858[64];
@@ -62,10 +62,10 @@ void func_80025D8C(void)
     /* Process structs */
     for (i = 0; (u32)i < OVERLAY_COUNT; i++)
     {
-        const s32 segment_index = i;
+        const s32 overlay_index = i;
 
         /* Get address of data pointed to by the next overlay */
-        byte_arr_ptr = segments[segment_index].unk_0x4;
+        byte_arr_ptr = overlays[overlay_index].unk_0x4;
 
         /* Check if data valid */
         if (*byte_arr_ptr != -1)
@@ -93,60 +93,59 @@ void func_80025D8C(void)
     }
 }
 
-s32 get_segment_index(s32 segment_num)
+s32 compute_overlay_index(s32 overlay_num)
 {
-    s32 segment_index;
+    s32 overlay_index;
 
-    if (segment_num < 0x100 || (u32)segment_num >= 0x111U)
+    if (overlay_num < 0x100 || (u32)overlay_num >= 0x111U)
     {
         LOG_INFO("Illegal ModuleSetNo.\n");
-        segment_index = 0;
+        overlay_index = 0;
     }
     else
     {
-        segment_index = segment_num & 0xFF;
+        overlay_index = overlay_num & 0xFF;
     }
 
-    return segment_index;
+    return overlay_index;
 }
 
-bool func_80025F18(s32 arg0)
+bool func_80025F18(s32 new_overlay_index)
 {
-    u32 segment_index;
-    u32 new_segment_index;
+    s32 overlay_index;
     u32 byte_index;
     s8 *bytes;
     s8 byte;
 
-    new_segment_index = get_segment_index(arg0);
+    new_overlay_index = compute_overlay_index(new_overlay_index);
 
-    if (segments[new_segment_index].active)
+    if (overlays[new_overlay_index].active)
     {
         LOG_INFO("Already Loaded\n");
         return true;
     }
 
-    for (segment_index = 0; segment_index < OVERLAY_COUNT; segment_index++)
+    for (overlay_index = 0; (u32)overlay_index < OVERLAY_COUNT; overlay_index++)
     {
-        if (segment_index == new_segment_index
-            || segments[segment_index].segment_start_addr > segments[new_segment_index].segment_end_addr
-            || segments[segment_index].segment_end_addr < segments[new_segment_index].segment_start_addr)
+        if (overlay_index == new_overlay_index
+            || overlays[overlay_index].overlay_start_addr > overlays[new_overlay_index].overlay_end_addr
+            || overlays[overlay_index].overlay_end_addr < overlays[new_overlay_index].overlay_start_addr)
         {
             /* discard */
             continue;
         }
-        
-        if (segments[segment_index].active)
+
+        if (overlays[overlay_index].active)
         {
-            LOG_INFO2("Conflicting %d m.s. and other moduleset[%x] is alive\n",
-                      new_segment_index,
-                      segment_index);
+            LOG_INFO2("Conflicting %d m.s. and other moduleset[%x] is alive\n", 
+                      new_overlay_index, 
+                      overlay_index);
             return false;
         }
 
         /* ??? */
-        bytes = segments[segment_index].unk_0x4;
-        
+        bytes = overlays[overlay_index].unk_0x4;
+
         for (byte_index = 0; bytes[byte_index] != -1; byte_index++)
         {
             byte = bytes[byte_index];
@@ -154,8 +153,8 @@ bool func_80025F18(s32 arg0)
             if (D_800B67F0 - D_8012CFC0[byte] < 2)
             {
                 LOG_INFO3("Conflicting %d m.s. and other module[%x-%x]'s RDP request\n",
-                          new_segment_index,
-                          segment_index,
+                          new_overlay_index,
+                          overlay_index,
                           byte_index);
                 return false;
             }
@@ -165,111 +164,104 @@ bool func_80025F18(s32 arg0)
     return true;
 }
 
-#ifdef NON_MATCHING
-bool func_800260C4(s32 arg0)
+bool load_overlay(s32 overlay_index)
 {
-    void (*initialize_segment)(void);
     bool success;
-    u32 segment_index;
-    MGSegmentInfo *segment;
+    MGOverlayInfo *overlay;
+    u32 byte_index;
     s8 *byte_arr_ptr;
-    s8 *cursor;
+    s8 byte;
 
-    if (func_80025F18(arg0))
+    if (func_80025F18(overlay_index))
     {
-        segment_index = get_segment_index(arg0);
-        LOG_INFO1("Load ModuleSet %x (absolute No.)\n", segment_index);
+        overlay_index = compute_overlay_index(overlay_index);
+        LOG_INFO1("Load ModuleSet %x (absolute No.)\n", overlay_index);
 
-        segment = &segments[segment_index];
-        byte_arr_ptr = segment->unk_0x4;
+        overlay = &overlays[overlay_index];
+        byte_arr_ptr = overlay->unk_0x4;
 
         osWritebackDCacheAll();
-        nuPiReadRom(segment->rom_start_addr,
-                    segment->segment_start_addr,
-                    segment->rom_end_addr - segment->rom_start_addr);
-        bzero(segment->bss_start_addr, segment->segment_end_addr - segment->bss_start_addr);
-        osWritebackDCache(segment->bss_start_addr, segment->segment_end_addr - segment->bss_start_addr);
-        osInvalICache(segment->segment_start_addr, segment->data_start_addr - segment->segment_start_addr);
+        nuPiReadRom(overlay->rom_start_addr,
+                    overlay->overlay_start_addr,
+                    overlay->rom_end_addr - overlay->rom_start_addr);
+        bzero(overlay->bss_start_addr, overlay->overlay_end_addr - overlay->bss_start_addr);
+        osWritebackDCache(overlay->bss_start_addr, overlay->overlay_end_addr - overlay->bss_start_addr);
+        osInvalICache(overlay->overlay_start_addr, overlay->data_start_addr - overlay->overlay_start_addr);
 
-        initialize_segment = segment->constructor;
-        if (initialize_segment != NULL)
+        if (overlay->constructor != NULL)
         {
-            initialize_segment();
+            overlay->constructor();
         }
-
+        
         if (*byte_arr_ptr != -1)
-        {
-            for (cursor = byte_arr_ptr; *cursor != -1; cursor++)
+        {  
+            for(byte_index = 0; byte_arr_ptr[byte_index] != -1; byte_index++)
             {
-                D_800FC858[*cursor] = 1;
+                byte = byte_arr_ptr[byte_index];
+                D_800FC858[byte] = 1;
             }
         }
+        
+        overlay->active = true;
 
-        segment->active = true;
-
-        LOG_INFO1("Complete Load ModuleSet %x (absolute No.)\n", segment_index);
+        LOG_INFO1("Complete Load ModuleSet %x (absolute No.)\n", overlay_index);
         success = true;
     }
     else
     {
-        LOG_INFO1("Can't Load ModuleSet %x (logical No.)\n", arg0);
+        LOG_INFO1("Can't Load ModuleSet %x (logical No.)\n", overlay_index);
         success = false;
     }
 
     return success;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/overlay_manager", func_800260C4);
-#endif
 
-#ifdef NON_MATCHING
-void func_80026230(s32 arg0)
+void unload_overlay(s32 overlay_index)
 {
-    void (*segment_destructor)();
-    s32 segment_index;
-    MGSegmentInfo *segment;
+    MGOverlayInfo *overlay;
+    u32 byte_index;
     s8 *byte_arr_ptr;
-    s8 *cursor;
+    s8 byte;
 
-    segment_index = get_segment_index(arg0);
-
-    segment = &segments[segment_index];
-    if (!segment->active)
+    overlay_index = compute_overlay_index(overlay_index);
+    overlay = &overlays[overlay_index];
+    if (!overlay->active)
     {
         return;
     }
     
-    segment_destructor = segment->destructor;
-    if (segment_destructor != NULL)
+    if (overlay->destructor != NULL)
     {
-        segment_destructor();
+        overlay->destructor();
     }
     
-    byte_arr_ptr = segment->unk_0x4;
-    segment->active = false;
-    LOG_INFO1("Moduleset %x Disposed\n", arg0);
-    
-    if (*byte_arr_ptr != -1)
+    byte_arr_ptr = overlay->unk_0x4;
+    overlay->active = false;
+    if (!func_800299F4(0x4DU)) /* Doesn't match with the macro :( */
     {
-        for (cursor = byte_arr_ptr; *cursor != -1; cursor++)
+        osSyncPrintf("Moduleset %x Disposed\n", overlay_index);
+    }
+
+    if (*byte_arr_ptr != -1)
+    {  
+        for(byte_index = 0; byte_arr_ptr[byte_index] != -1; byte_index++)
         {
-            D_800FC858[*cursor] = 0;
+            byte = byte_arr_ptr[byte_index];
+            D_800FC858[byte] = 0;
         }
     }
     
     osWritebackDCacheAll();
     
-    if ((D_800B67C0 != 0) && (osVirtualToPhysical(segment->segment_start_addr) <= 0x3FFFFFU))
+    if ((D_800B67C0 != 0) && (osVirtualToPhysical(overlay->overlay_start_addr) <= 0x3FFFFFU))
     {
-        bzero(segment->segment_start_addr, segment->data_start_addr - segment->segment_start_addr);
-        osWritebackDCache(segment->segment_start_addr, segment->data_start_addr - segment->segment_start_addr);
-        osInvalICache(segment->segment_start_addr, segment->data_start_addr - segment->segment_start_addr);
+        bzero(overlay->overlay_start_addr, overlay->data_start_addr - overlay->overlay_start_addr);
+        osWritebackDCache(overlay->overlay_start_addr, overlay->data_start_addr - overlay->overlay_start_addr);
+        osInvalICache(overlay->overlay_start_addr, overlay->data_start_addr - overlay->overlay_start_addr);
     }
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/overlay_manager", func_80026230);
-#endif
 
+/* Likely unused */
 s32 func_80026358(void)
 {
     LOG_INFO("Module %d not alive !!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
