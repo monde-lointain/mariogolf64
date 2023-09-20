@@ -1,5 +1,6 @@
+#include "overlay_manager.h"
+
 #include "include_asm.h"
-#include "mg_type.h"
 #include "mg_log.h"
 #include "ultra64.h"
 
@@ -19,8 +20,8 @@ typedef struct
 
 extern void func_80080DCC();
 extern void func_801FD624();
-extern s32 func_800299F4(u32);
-extern void nuPiReadRom(u32 rom_addr, void* buf_ptr, u32 size);
+extern bool bit_is_set(u32);
+extern void nuPiReadRom(u32 rom_addr, void *buf_ptr, u32 size);
 
 MGOverlayInfo overlays[17];
 extern u32 D_8012CFC0[64];
@@ -49,7 +50,7 @@ void func_80025D8C(void)
 {
     s32 i;
     s8 *byte_arr_ptr;
-    s8 *byte_ptr;
+    s8 *cursor;
 
     /* Initialize arrays to their default values */
     for (i = 0; i < 0x40; i++)
@@ -71,14 +72,14 @@ void func_80025D8C(void)
         if (*byte_arr_ptr != -1)
         {
             /* Process bytes pointed to by pointer */
-            for (byte_ptr = byte_arr_ptr; *byte_ptr != -1; byte_ptr++)
+            for (cursor = byte_arr_ptr; *cursor != -1; cursor++)
             {
-                if (D_800D2930[*byte_ptr] != -1)
+                if (D_800D2930[*cursor] != -1)
                 {
                     LOG_INFO("OverlayManager\n");
                 }
 
-                D_800D2930[*byte_ptr] = i;
+                D_800D2930[*cursor] = i;
             }
         }
     }
@@ -93,7 +94,7 @@ void func_80025D8C(void)
     }
 }
 
-s32 compute_overlay_index(s32 overlay_num)
+s32 func_80025EC8(s32 overlay_num)
 {
     s32 overlay_index;
 
@@ -117,7 +118,7 @@ bool func_80025F18(s32 new_overlay_index)
     s8 *bytes;
     s8 byte;
 
-    new_overlay_index = compute_overlay_index(new_overlay_index);
+    new_overlay_index = func_80025EC8(new_overlay_index);
 
     if (overlays[new_overlay_index].active)
     {
@@ -169,16 +170,16 @@ bool load_overlay(s32 overlay_index)
     bool success;
     MGOverlayInfo *overlay;
     u32 byte_index;
-    s8 *byte_arr_ptr;
+    s8 *bytes;
     s8 byte;
 
     if (func_80025F18(overlay_index))
     {
-        overlay_index = compute_overlay_index(overlay_index);
+        overlay_index = func_80025EC8(overlay_index);
         LOG_INFO1("Load ModuleSet %x (absolute No.)\n", overlay_index);
 
         overlay = &overlays[overlay_index];
-        byte_arr_ptr = overlay->unk_0x4;
+        bytes = overlay->unk_0x4;
 
         osWritebackDCacheAll();
         nuPiReadRom(overlay->rom_start_addr,
@@ -193,11 +194,11 @@ bool load_overlay(s32 overlay_index)
             overlay->constructor();
         }
         
-        if (*byte_arr_ptr != -1)
+        if (*bytes != -1)
         {  
-            for(byte_index = 0; byte_arr_ptr[byte_index] != -1; byte_index++)
+            for(byte_index = 0; bytes[byte_index] != -1; byte_index++)
             {
-                byte = byte_arr_ptr[byte_index];
+                byte = bytes[byte_index];
                 D_800FC858[byte] = 1;
             }
         }
@@ -220,10 +221,10 @@ void unload_overlay(s32 overlay_index)
 {
     MGOverlayInfo *overlay;
     u32 byte_index;
-    s8 *byte_arr_ptr;
+    s8 *bytes;
     s8 byte;
 
-    overlay_index = compute_overlay_index(overlay_index);
+    overlay_index = func_80025EC8(overlay_index);
     overlay = &overlays[overlay_index];
     if (!overlay->active)
     {
@@ -235,18 +236,18 @@ void unload_overlay(s32 overlay_index)
         overlay->destructor();
     }
     
-    byte_arr_ptr = overlay->unk_0x4;
+    bytes = overlay->unk_0x4;
     overlay->active = false;
-    if (!func_800299F4(0x4DU)) /* Doesn't match with the macro :( */
+    if (!bit_is_set(0x4DU)) /* Doesn't match with the macro :( */
     {
         osSyncPrintf("Moduleset %x Disposed\n", overlay_index);
     }
 
-    if (*byte_arr_ptr != -1)
+    if (*bytes != -1)
     {  
-        for(byte_index = 0; byte_arr_ptr[byte_index] != -1; byte_index++)
+        for(byte_index = 0; bytes[byte_index] != -1; byte_index++)
         {
-            byte = byte_arr_ptr[byte_index];
+            byte = bytes[byte_index];
             D_800FC858[byte] = 0;
         }
     }

@@ -2,11 +2,13 @@
 
 _start = 0x80025C00; // type:func rom:0x1000
 
-compute_overlay_index = 0x80025EC8; // type:func
 load_overlay = 0x800260C4; // type:func
 unload_overlay = 0x80026230; // type:func
+
+bit_is_set = 0x800299F4; // type:func rom:0x4DF4
 mainproc = 0x80029C34; // type:func rom:0x5034
 
 // data
 
+game_flags = 0x801052F8; // size:0x100
 overlays = 0x800B5F58; // size:0x2A8

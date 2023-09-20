@@ -1,4 +1,6 @@
 #include "include_asm.h"
+#include "overlay_manager.h"
+#include "mg_type.h"
 
 INCLUDE_ASM("asm/nonmatchings/main", func_800298E0);
 
@@ -6,7 +8,20 @@ INCLUDE_ASM("asm/nonmatchings/main", func_80029900);
 
 INCLUDE_ASM("asm/nonmatchings/main", func_800299D0);
 
-INCLUDE_ASM("asm/nonmatchings/main", func_800299F4);
+extern u8 game_flags[32];
+
+bool bit_is_set(u32 index)
+{
+    if (index >= 0x100U)
+    {
+        return false;
+    }
+
+    /* Find the correct byte in the array by shifting the index right, then
+     * extract the correct bit with a mask. Return true if the bit is set. 
+     */
+    return (game_flags[index >> 3] & (0x80 >> (index & 0x7))) != 0;
+}
 
 INCLUDE_ASM("asm/nonmatchings/main", func_80029A30);
 

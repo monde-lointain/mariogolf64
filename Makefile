@@ -159,7 +159,6 @@ $(shell mkdir -p $(BUILD_DIR)/linker_scripts $(BUILD_DIR)/linker_scripts/auto $(
 
 
 #### Individual File Flags ####
-$(BUILD_DIR)/src/main.o: OPTFLAGS := -O0
 
 
 
