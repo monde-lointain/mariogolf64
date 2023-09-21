@@ -145,7 +145,7 @@ segments:
       - [0x7C9A0, asm, nusys/nugfxswapcfbfuncset]
       - [0x7C9E0, asm, nusys/nugfxswapcfb]
       - [0x7CA00, asm, nusys/nugfxtaskallendwait]
-      - [0x7CA20, asm]
+      - [0x7CA20, asm, nusys/nugfxretracewait]
       - [0x7CAA0, asm]
       - [0x7CAD0, asm]
       - [0x7CAE0, asm, nusys/nupiinit]

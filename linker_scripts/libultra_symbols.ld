@@ -28,6 +28,7 @@ osContInit             = 0x800A7410; // type:func rom:0x82810
 
 osVirtualToPhysical    = 0x800A7720; // type:func rom:0x82B20
 
+bcopy                  = 0x800AA9A0; // type:func rom:0x85DA0
 bzero                  = 0x800AACC0; // type:func rom:0x860C0
 
 sprintf                = 0x800AADF0; // type:func rom:0x861F0
@@ -43,7 +44,10 @@ osRecvMesg             = 0x800AB020; // type:func rom:0x86420
 osSendMesg             = 0x800AB150; // type:func rom:0x86550
 osSetEventMesg         = 0x800AB280; // type:func rom:0x86680
 
+osDpSetStatus          = 0x800AB330; // type:func rom:0x86730
+osDpGetCounters        = 0x800AB340; // type:func rom:0x86740
 osGetCount             = 0x800AB390; // type:func rom:0x86790
+osSpTaskLoad           = 0x800AB3A0; // type:func rom:0x867A0
 
 osCreateThread         = 0x800AC200; // type:func rom:0x87600
 osDestroyThread        = 0x800AC2D0; // type:func rom:0x876D0
@@ -64,10 +68,13 @@ __osInsertTimer        = 0x800ACA30; // type:func rom:0x87E30
 
 __osProbeTLB           = 0x800ACC00; // type:func rom:0x88000
 
+osCreateViManager      = 0x800ACE10; // type:func rom:0x88210
 osViSetEvent           = 0x800AD150; // type:func rom:0x86B40
+osViSetMode            = 0x800AD1B0; // type:func rom:0x885B0
 osViSwapBuffer         = 0x800AD3C0; // type:func rom:0x887C0
 osViSetSpecialFeatures = 0x800AD200; // type:func rom:0x88600
 __osViSwapContext      = 0x800AD410; // type:func rom:0x88810
+osViBlack              = 0x800AD720; // type:func rom:0x88B20
 
 osSyncPrintf           = 0x800AAE80; // type:func rom:0x86280
 rmonPrintf             = 0x800AAE94; // type:func rom:0x86294
@@ -101,9 +108,12 @@ __osSetCompare         = 0x800B1640; // type:func rom:0x8CA40
 __osSetFpcCsr          = 0x800B1650; // type:func rom:0x8CA50
 __osSetSR              = 0x800B1660; // type:func rom:0x8CA60
 __osSetWatchLo         = 0x800B1670; // type:func rom:0x8CA70
+__osSpSetStatus        = 0x800B16B0; // type:func rom:0x8CAB0
+__osSpSetPc            = 0x800B16C0; // type:func rom:0x8CAC0
 
 __osSiRawReadIo        = 0x800B1780; // type:func rom:0x8CB80
 __osSiRawWriteIo       = 0x800B17D0; // type:func rom:0x8CBD0
+__osViInit             = 0x800B1970; // type:func rom:0x8CD70
 __osSiDeviceBusy       = 0x800B2B30; // type:func rom:0x8DF30
 
 osInvalICache          = 0x800A7060; // type:func rom:0x82460
@@ -112,9 +122,12 @@ osUnmapTLBAll          = 0x800ACD00; // type:func rom:0x88100
 
 __createSpeedParam     = 0x800AFAD0; // type:func rom:0x8AED0
 
+__osSpDeviceBusy       = 0x800B1680; // type:func rom:0x8CA80
+__osSpRawStartDma      = 0x800B16F0; // type:func rom:0x8CAF0
 osMapTLBRdb            = 0x800B1910; // type:func rom:0x8CD10
 
 __udivdi3              = 0x800B3BC0; // type:func rom:0x8EFC0
+
 
 
 // data
