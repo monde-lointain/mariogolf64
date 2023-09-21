@@ -2,6 +2,7 @@
 
 #include "include_asm.h"
 #include "mg_log.h"
+#include "mg.h"
 #include "ultra64.h"
 
 typedef struct
@@ -20,7 +21,7 @@ typedef struct
 
 extern void func_80080DCC();
 extern void func_801FD624();
-extern bool bit_is_set(u32);
+extern bool flag_is_set(u32);
 extern void nuPiReadRom(u32 rom_addr, void *buf_ptr, u32 size);
 
 MGOverlayInfo overlays[17];
@@ -28,7 +29,6 @@ extern u32 D_8012CFC0[64];
 extern s32 D_800B67F0;
 extern u8 D_800FC858[64];
 extern s8 D_800D2930[64];
-extern s8 D_800B67C0;
 
 #define OVERLAY_COUNT 17U
 
@@ -238,7 +238,7 @@ void unload_overlay(s32 overlay_index)
     
     bytes = overlay->unk_0x4;
     overlay->active = false;
-    if (!bit_is_set(0x4DU)) /* Doesn't match with the macro :( */
+    if (!flag_is_set(0x4DU)) /* Doesn't match with the macro :( */
     {
         osSyncPrintf("Moduleset %x Disposed\n", overlay_index);
     }
@@ -254,7 +254,7 @@ void unload_overlay(s32 overlay_index)
     
     osWritebackDCacheAll();
     
-    if ((D_800B67C0 != 0) && (osVirtualToPhysical(overlay->overlay_start_addr) <= 0x3FFFFFU))
+    if (debug_mode && (osVirtualToPhysical(overlay->overlay_start_addr) <= 0x3FFFFFU))
     {
         bzero(overlay->overlay_start_addr, overlay->data_start_addr - overlay->overlay_start_addr);
         osWritebackDCache(overlay->overlay_start_addr, overlay->data_start_addr - overlay->overlay_start_addr);

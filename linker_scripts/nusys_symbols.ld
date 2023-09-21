@@ -14,6 +14,7 @@ nuGfxThreadStart = 0x800A1500; // type:func rom:0x7C900
 nuPiInit = 0x800A16E0; // type:func rom:0x7CAE0
 nuPiInitSram = 0x800A1720; // type:func rom:0x7CB20
 gfxThread = 0x800A1430; // type:func rom:0x7C830
+nuGfxFuncSet = 0x800A1560; // type:func rom:0x7C960
 nuGfxSwapCfbFuncSet = 0x800A15A0; // type:func rom:0x7C9A0
 nuGfxSwapCfb = 0x800A15E0; // type:func rom:0x7C9E0
 nuContInit = 0x800A1890; // type:func rom:0x7CC90
@@ -25,6 +26,7 @@ nuContMgrInit = 0x800A2B90; // type:func rom:0x7DF90
 // bss
 
 nugfx_ucode = 0x800B6680;
+nuGfxFunc = 0x800C7DC0;
 MainThread = 0x800E4E80; // size:0x1B0
 IdleThread = 0x800E4CD0; // size:0x1B0
 nuGfxThread = 0x800E72F0; // size:0x1B0

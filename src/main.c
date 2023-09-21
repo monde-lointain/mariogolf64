@@ -8,9 +8,9 @@ INCLUDE_ASM("asm/nonmatchings/main", func_80029900);
 
 INCLUDE_ASM("asm/nonmatchings/main", func_800299D0);
 
-extern u8 game_flags[32];
+extern u8 debug_flags[32]; /* 0x100 long bitfield */
 
-bool bit_is_set(u32 index)
+bool flag_is_set(u32 index)
 {
     if (index >= 0x100U)
     {
@@ -20,7 +20,7 @@ bool bit_is_set(u32 index)
     /* Find the correct byte in the array by shifting the index right, then
      * extract the correct bit with a mask. Return true if the bit is set. 
      */
-    return (game_flags[index >> 3] & (0x80 >> (index & 0x7))) != 0;
+    return (debug_flags[index >> 3] & (0x80 >> (index & 0x7))) != 0;
 }
 
 INCLUDE_ASM("asm/nonmatchings/main", func_80029A30);
