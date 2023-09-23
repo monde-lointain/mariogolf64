@@ -16,6 +16,7 @@ typedef struct st_unk_0x800DC6E0
 extern st_unk_0x800DC6E0 D_800DC6E0[];
 extern s8 D_800BFEE4;
 extern s8 D_800DAF60[0x4B0];
+extern const char D_800CCA90;
 
 void func_8004D9C0();
 void func_8004DA24(s8*, u32, u32);
@@ -138,11 +139,113 @@ void func_8004DDE4(s32 arg0)
     D_800DC6E0[arg0].unk_0x14 = -1;
 }
 
-INCLUDE_ASM("asm/nonmatchings/28590", func_8004DE44);
+s32 func_8004DE44(s32 arg0)
+{
+    return D_800DC6E0[arg0].unk_0x10;
+}
 
-INCLUDE_ASM("asm/nonmatchings/28590", func_8004DE60);
+s32 func_8004DE60(s32 arg0)
+{
+    return D_800DC6E0[arg0].unk_0x14;
+}
 
+#ifdef NON_MATCHING
+/* This function appears to be a general purpose memory allocator. It searches
+ * through the memory arena and identifies the first available free space block
+ * which is large enough to fit the requested memory size.
+ */
+s32 *func_8004DE7C(s32 arg0, s32 arg1)
+{
+    u32 block_size;
+    st_unk_0x800DC6E0 *block;
+    st_unk_0x800DC6E0 *current_block;
+    st_unk_0x800DC6E0 *new_block;
+    st_unk_0x800DC6E0 *best_block;
+    u32 mask;
+    u32 requested_size;
+    u32 size_difference;
+    u32 best_size;
+    u32 max_block;
+
+    do
+    {
+        current_block = &D_800DC6E0[arg0];
+        best_block = NULL;
+        new_block = NULL;
+        max_block = 0;
+        
+        requested_size = (arg1 + 0x17) & (~7);
+        mask = osSetIntMask(0x00000001);
+        best_size = 0x7FFFFFFF;
+
+        block = current_block->unk_0x8;
+
+        while (block != current_block)
+        {
+            if (block->unk_0x4 != 0)
+            {
+                block = block->unk_0x8;
+                continue;
+            }
+
+            block_size = block->unk_0x0;
+            if (block_size >= requested_size)
+            {
+                if (block_size < best_size)
+                {
+                    if ((max_block < best_size) && (best_size != 0x7FFFFFFF))
+                    {
+                        max_block = best_size;
+                    }
+                    best_size = block_size;
+                    size_difference = best_size - requested_size;
+                    if (max_block < size_difference)
+                    {
+                        max_block = size_difference;
+                    }
+                    best_block = block;
+                }
+                else if (max_block < block_size)
+                {
+                    max_block = block_size;
+                }
+            }
+            block = block->unk_0x8;
+        }
+
+        D_800DC6E0[arg0].unk_0x14 = max_block;
+
+        if (best_block == NULL)
+        {
+            osSetIntMask(mask);
+            osSyncPrintf(&D_800CCA90);
+            return NULL;
+        }
+        
+        if ((best_block->unk_0x0 - requested_size) >= 0x11U)
+        {
+            D_800DC6E0[arg0].unk_0x10 -= requested_size;
+            new_block->unk_0x0 = best_block->unk_0x0;
+            new_block->unk_0x0 = new_block->unk_0x0 - requested_size;
+            new_block->unk_0x4 = 0;
+            best_block->unk_0x8->unk_0xC = new_block;
+            new_block->unk_0x8 = best_block->unk_0x8;
+            best_block->unk_0x8 = new_block;
+            new_block->unk_0xC = best_block;
+            best_block->unk_0x0 = requested_size;
+        }
+        else
+        {
+            D_800DC6E0[arg0].unk_0x10 -= best_size;
+        }
+    } while (0);
+    best_block->unk_0x4 = 0x12345678;
+    osSetIntMask(mask);
+    return &best_block->unk_0x10;
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/28590", func_8004DE7C);
+#endif
 
 INCLUDE_ASM("asm/nonmatchings/28590", func_8004E058);
 
