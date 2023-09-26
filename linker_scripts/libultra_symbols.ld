@@ -1,5 +1,10 @@
 // text
 
+guMtxF2L               = 0x80067B00; // type:func rom:0x42F00
+guMtxL2F               = 0x80067C0C; // type:func rom:0x4300C
+guMtxIdentF            = 0x80067CB4; // type:func rom:0x430B4
+guMtxIdent             = 0x80067D04; // type:func rom:0x43104
+
 osSetIntMask           = 0x800A2F60; // type:func rom:0x7E360
 
 osCreatePiManager      = 0x800A3000; // type:func rom:0x7E400
@@ -16,6 +21,10 @@ __osPiGetAccess        = 0x800A3A04; // type:func rom:0x7EE04
 __osPiRelAcces         = 0x800A3A70; // type:func rom:0x7EE70
 
 osAiSetFrequency       = 0x800A3AC0; // type:func rom:0x7EEC0
+
+alEnvmixerPull         = 0x800A50D0; // type:func rom:0x804D0
+alEnvmixerParam        = 0x800A55D0; // type:func rom:0x809D0
+_pullSubFrame          = 0x800A56A4; // type:func rom:0x80AA4
 
 alCopy                 = 0x800A6F70; // type:func rom:0x82370
 
@@ -118,7 +127,25 @@ __osSiDeviceBusy       = 0x800B2B30; // type:func rom:0x8DF30
 
 osInvalICache          = 0x800A7060; // type:func rom:0x82460
 
+osContStartReadData    = 0x800A7230; // type:func rom:0x82630
+osContGetReadData      = 0x800A72B8; // type:func rom:0x826B8
+
+guLookAtHiliteF        = 0x800A8380; // type:func rom:0x83780
+guLookAtHiliteF        = 0x800A8D04; // type:func rom:0x84104
+
+osCreateScheduler      = 0x800AB650; // type:func rom:0x86A50
+
 osUnmapTLBAll          = 0x800ACD00; // type:func rom:0x88100
+
+__osContRamWrite       = 0x800AF610; // type:func rom:0x8AA10
+osGbpakInit            = 0x800AD780; // type:func rom:0x88B80
+osGbpakGetStatus       = 0x800AD980; // type:func rom:0x88D80
+osGbpakPower           = 0x800ADAA0; // type:func rom:0x88EA0
+osGbpakReadWrite       = 0x800ADBC0; // type:func rom:0x88FC0
+osGbpakReadId          = 0x800ADD90; // type:func rom:0x89190
+osGbpakCheckConnector  = 0x800ADF20; // type:func rom:0x89320
+
+osAfterPreNMI          = 0x800AF880; // type:func rom:0x8AC80
 
 __createSpeedParam     = 0x800AFAD0; // type:func rom:0x8AED0
 

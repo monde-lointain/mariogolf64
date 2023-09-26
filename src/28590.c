@@ -13,10 +13,22 @@ typedef struct st_unk_0x800DC6E0
     /* 0x14 */ s32 unk_0x14;
 } st_unk_0x800DC6E0;
 
+/* Almost certainly the same as st_unk_0x800DC6E0 */
+typedef struct MemoryBlockDescriptor
+{
+    s32 unk_0x0;
+    s32 unk_0x4;
+    void *start_addr;
+    void *end_addr;
+    u32 size;
+    s32 unk_0x1C;
+} MemoryBlockDescriptor;
+
 extern st_unk_0x800DC6E0 D_800DC6E0[];
 extern s8 D_800BFEE4;
 extern s8 D_800DAF60[0x4B0];
 extern const char D_800CCA90;
+void *D_800DC728;
 
 void func_8004D9C0();
 void func_8004DA24(s8*, u32, u32);
@@ -251,7 +263,34 @@ INCLUDE_ASM("asm/nonmatchings/28590", func_8004E058);
 
 INCLUDE_ASM("asm/nonmatchings/28590", func_8004E184);
 
+void *func_8004E184(void *, void *); 
+
+#ifdef NON_MATCHING
+void func_8004E1E0(s32 arg0,
+                    struct MemoryBlockDescriptor *a,
+                    struct MemoryBlockDescriptor *b)
+{
+    a = (struct MemoryBlockDescriptor *)(&D_800DC728);
+    b = NULL;
+
+    a->unk_0x4 = -1;
+    a->end_addr = a;
+    a->unk_0x0 = 0;
+    a->size = 0;
+    a->start_addr = a->end_addr;
+
+    func_8004E184((void *)0x8025D800, (void *)0x802EA000);
+
+    if (arg0 == 1)
+    {
+        b = func_8004E184((void *)0x80600000, (void *)0x80800000);
+    }
+
+    a->unk_0x1C = -1;
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/28590", func_8004E1E0);
+#endif
 
 INCLUDE_ASM("asm/nonmatchings/28590", func_8004E27C);
 
