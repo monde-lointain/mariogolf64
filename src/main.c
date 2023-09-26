@@ -2,10 +2,6 @@
 #include "overlay_manager.h"
 #include "mg_type.h"
 
-INCLUDE_ASM("asm/nonmatchings/main", func_800298E0);
-
-INCLUDE_ASM("asm/nonmatchings/main", func_80029900);
-
 INCLUDE_ASM("asm/nonmatchings/main", func_800299D0);
 
 extern u8 debug_flags[32]; /* 0x100 long bitfield */

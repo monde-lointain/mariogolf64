@@ -271,7 +271,6 @@ void func_8004E1E0(s32 arg0,
                     struct MemoryBlockDescriptor *b)
 {
     a = (struct MemoryBlockDescriptor *)(&D_800DC728);
-    b = NULL;
 
     a->unk_0x4 = -1;
     a->end_addr = a;

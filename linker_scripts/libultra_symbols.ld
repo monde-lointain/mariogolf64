@@ -1,5 +1,9 @@
 // text
 
+__assert               = 0x800298E0; // type:func rom:0x4CE0
+
+guNormalize            = 0x80029900; // type:func rom:0x4D00
+
 guMtxF2L               = 0x80067B00; // type:func rom:0x42F00
 guMtxL2F               = 0x80067C0C; // type:func rom:0x4300C
 guMtxIdentF            = 0x80067CB4; // type:func rom:0x430B4
@@ -26,6 +30,14 @@ alEnvmixerPull         = 0x800A50D0; // type:func rom:0x804D0
 alEnvmixerParam        = 0x800A55D0; // type:func rom:0x809D0
 _pullSubFrame          = 0x800A56A4; // type:func rom:0x80AA4
 
+alSynNew               = 0x80051E34;
+
+alInit                 = 0x800A6E30; // type:func rom:0x82230
+alClose                = 0x800A6E5C; // type:func rom:0x8225C
+alLink                 = 0x800A6E8C; // type:func rom:0x8228C
+alUnlink               = 0x800A6EAC; // type:func rom:0x822AC
+alHeapInit             = 0x800A6EE0; // type:func rom:0x822E0
+alHeapDBAlloc          = 0x800A6F20; // type:func rom:0x82320
 alCopy                 = 0x800A6F70; // type:func rom:0x82370
 
 osInvalDCache          = 0x800A6FB0; // type:func rom:0x823B0
@@ -36,6 +48,36 @@ osWritebackDCacheAll   = 0x800A7160; // type:func rom:0x82560
 osContInit             = 0x800A7410; // type:func rom:0x82810
 
 osVirtualToPhysical    = 0x800A7720; // type:func rom:0x82B20
+
+guAlignF               = 0x800A7780; // type:func rom:0x82B80
+
+cosf                   = 0x800A7B20; // type:func rom:0x82F20
+
+guLookAtF              = 0x800A7C70; // type:func rom:0x83070
+guLookAtReflectF       = 0x800A8DE0; // type:func rom:0x841E0
+guLookAtReflect        = 0x800A9358; // type:func rom:0x84758
+guMtxCatF              = 0x800A93D0; // type:func rom:0x847D0
+guMtxXFMF              = 0x800A94AC; // type:func rom:0x848AC
+guMtxCatL              = 0x800A9560; // type:func rom:0x84960
+guMtxXFML              = 0x800A95D4; // type:func rom:0x849D4
+guOrthoF               = 0x800A9660; // type:func rom:0x84A60
+guOrtho                = 0x800A9790; // type:func rom:0x84B90
+guPerspectiveF         = 0x800A98E0; // type:func rom:0x84CE0
+guPerspective          = 0x800A8A90; // type:func rom:0x84E90
+guPositionF            = 0x800A9C60; // type:func rom:0x85060
+guPosition             = 0x800A9E38; // type:func rom:0x85238
+guRandom               = 0x800AA020; // type:func rom:0x85420
+guRotateF              = 0x800AA050; // type:func rom:0x85450
+guRotate               = 0x800AA1AC; // type:func rom:0x855AC
+guRotateRPYF           = 0x800AA330; // type:func rom:0x85730
+guRotateRPY            = 0x800AA4B8; // type:func rom:0x858B8
+guScaleF               = 0x800AA650; // type:func rom:0x85A50
+guScale                = 0x800AA6B0; // type:func rom:0x85AB0
+
+sinf                   = 0x800AA730; // type:func rom:0x85B30
+
+guTranslateF           = 0x800AA8D0; // type:func rom:0x85CD0
+guTranslate            = 0x800AA924; // type:func rom:0x85D24
 
 bcopy                  = 0x800AA9A0; // type:func rom:0x85DA0
 bzero                  = 0x800AACC0; // type:func rom:0x860C0
@@ -130,8 +172,9 @@ osInvalICache          = 0x800A7060; // type:func rom:0x82460
 osContStartReadData    = 0x800A7230; // type:func rom:0x82630
 osContGetReadData      = 0x800A72B8; // type:func rom:0x826B8
 
+guAlignF               = 0x800A7780; // type:func rom:0x82B80
 guLookAtHiliteF        = 0x800A8380; // type:func rom:0x83780
-guLookAtHiliteF        = 0x800A8D04; // type:func rom:0x84104
+guLookAtHilite         = 0x800A8D04; // type:func rom:0x84104
 
 osCreateScheduler      = 0x800AB650; // type:func rom:0x86A50
 
