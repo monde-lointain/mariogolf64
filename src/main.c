@@ -19,7 +19,14 @@ bool flag_is_set(u32 index)
     return (debug_flags[index >> 3] & (0x80 >> (index & 0x7))) != 0;
 }
 
-INCLUDE_ASM("asm/nonmatchings/main", func_80029A30);
+//INCLUDE_ASM("asm/nonmatchings/main", func_80029A30);
+
+void func_80029A30(u32 index) {
+
+    if (index < 0x100) {
+        debug_flags[index / 8] |= (0x80 >> (index & 7));
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/main", func_80029A6C);
 
