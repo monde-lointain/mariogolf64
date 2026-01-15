@@ -46,3 +46,6 @@ permuter_settings.toml
 # Makefile options
 .make_options
 
+# Claude
+.claude
+
