@@ -9,6 +9,9 @@ BASENAME := mariogolf64
 TARGET := $(BASENAME).z64
 LD_SCRIPT := $(BASENAME).ld
 
+# NONMATCHING mode - compiles WIP C code and skips md5 check
+NONMATCHING ?= 0
+
 # Directories
 BUILD_DIR := build
 ASM_DIR := asm
@@ -30,6 +33,9 @@ ASFLAGS := -march=vr4300 -32 -I include --no-pad-sections
 CPPFLAGS := -fno-dollars-in-identifiers -P
 AS_DEFINES := -DMIPSEB -D_LANGUAGE_ASSEMBLY -D_ULTRA64
 CFLAGS := -nostdinc -G 0 -mips2 -mgp32 -mfp32 -mno-abicalls -O2 -I include
+ifeq ($(NONMATCHING),1)
+CFLAGS += -DNONMATCHING
+endif
 
 # Directories
 SRC_DIR := src
@@ -48,7 +54,9 @@ O_FILES := $(ASM_O_FILES) $(BIN_O_FILES) $(C_O_FILES)
 
 # Default target
 all: $(BUILD_DIR)/$(TARGET)
+ifneq ($(NONMATCHING),1)
 	@md5sum -c $(BASENAME).md5
+endif
 
 clean:
 	rm -rf $(BUILD_DIR)
