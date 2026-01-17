@@ -172,7 +172,6 @@ osInvalICache          = 0x800A7060; // type:func rom:0x82460
 osContStartReadData    = 0x800A7230; // type:func rom:0x82630
 osContGetReadData      = 0x800A72B8; // type:func rom:0x826B8
 
-guAlignF               = 0x800A7780; // type:func rom:0x82B80
 guLookAtHiliteF        = 0x800A8380; // type:func rom:0x83780
 guLookAtHilite         = 0x800A8D04; // type:func rom:0x84104
 

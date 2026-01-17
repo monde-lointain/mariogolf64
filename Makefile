@@ -185,6 +185,8 @@ setup:
 extract:
 	$(RM) -r asm bin
 	$(SPLAT) $(SPLAT_YAML)
+# Fix local jump table labels in rodata (splat 0.37+ uses .L prefix which can't be globalized)
+	find asm -name '*.rodata.s' -exec sed -i 's/\.word \.L\([0-9A-Fa-f]\+\)/.word 0x\1/g' {} \;
 
 lib:
 	$(MAKE) -C lib

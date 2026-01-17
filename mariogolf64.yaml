@@ -40,7 +40,7 @@ options:
   data_string_guesser_level: 2
 
   section_order: [".text", ".data", ".rodata", ".bss"]
-  auto_all_sections: [".text", ".data", ".rodata", ".bss"]
+  auto_link_sections: [".text", ".data", ".rodata", ".bss"]
 
   rom_address_padding: True
   dump_symbols: True
@@ -85,15 +85,15 @@ segments:
       - [0xDCE0, asm]
       - [0xE260, asm]
       - [0x142B0, asm]
-      - [0x193D0, asm]
-      - [0x1B4A0, asm]
-      - [0x1EEF0, asm]
-      - [0x207E0, asm]
+      - [0x193D0, c, 193D0]
+      - [0x1B4A0, c, 1B4A0]
+      - [0x1EEF0, c, 1EEF0]
+      - [0x207E0, c, 207E0]
       - [0x28590, c, 28590]
       - [0x299A0, asm]
       - [0x2B4E0, asm]
       - [0x2B800, asm]
-      - [0x2BFF0, asm]
+      - [0x2BFF0, c, 2BFF0]
       - [0x2D290, asm]
       - [0x2D5C0, asm]
       - [0x2E3E0, asm]
@@ -115,8 +115,8 @@ segments:
       - [0x526B0, asm]
       - [0x52FF0, asm]
       - [0x53D10, asm]
-      - [0x5B620, asm]
-      - [0x68500, asm]
+      - [0x5B620, c, 5B620]
+      - [0x68500, c, 68500]
       - [0x70E10, asm]
       - [0x74890, asm]
       - [0x748B0, asm, nusys/nuboot]
