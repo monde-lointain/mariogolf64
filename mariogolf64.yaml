@@ -30,6 +30,7 @@ options:
 
   symbol_addrs_path:
     - symbol_addrs.txt
+    - ghidra_symbols.txt
   reloc_addrs_path:
     - reloc_addrs.txt
 
@@ -280,14 +281,15 @@ segments:
       - [0x8E620, asm]
       - [0x8EAD0, asm]
       - [0x8EBE0, asm]
+      - [0x8EC88, c, udivmoddi4]
       - [0x8EE50, asm]
       - [0x8EFC0, asm]
       - [0x8EFE0, asm]
       - [0x8F140, asm]
       - [0x8F240, asm]
       - [0x8F250, asm]
-      - [0x8F440, databin, main_data]
-      - [0xA5668, rodatabin, main_rodata]
+      - [0x8F440, data, main_data]
+      - [0xA5668, rodata, main_rodata]
       - { type: bss, vram: 0x800D2930 }
 
   - type: bin
