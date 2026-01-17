@@ -50,6 +50,9 @@ setup:
 
 extract:
 	./venv/bin/python3 -m splat split $(BASENAME).yaml
+# Fix databin/rodatabin: use objcopy'd binaries instead of assembled .incbin (avoids MIPS 16-byte alignment)
+	sed -i 's|build/asm/data/main_data.o(.data)|build/assets/main_data.databin.o(.data)|' $(LD_SCRIPT)
+	sed -i 's|build/asm/data/main_rodata.o(.rodata)|build/assets/main_rodata.rodatabin.o(.data)|' $(LD_SCRIPT)
 
 .PHONY: all clean distclean setup extract
 
@@ -60,8 +63,8 @@ $(shell mkdir -p $(BUILD_DIR)/$(ASM_DIR)/data $(BUILD_DIR)/$(ASSETS_DIR))
 $(BUILD_DIR)/$(TARGET): $(BUILD_DIR)/$(BASENAME).elf
 	$(OBJCOPY) -O binary $< $@
 
-$(BUILD_DIR)/$(BASENAME).elf: $(O_FILES) $(LD_SCRIPT)
-	$(LD) -T $(LD_SCRIPT) -Map $(BUILD_DIR)/$(BASENAME).map -o $@
+$(BUILD_DIR)/$(BASENAME).elf: $(O_FILES) $(LD_SCRIPT) undefined_funcs_auto.txt undefined_syms_auto.txt hardware_regs.txt extern_syms.txt
+	$(LD) --no-check-sections --omagic -T hardware_regs.txt -T undefined_funcs_auto.txt -T undefined_syms_auto.txt -T extern_syms.txt -T $(LD_SCRIPT) -Map $(BUILD_DIR)/$(BASENAME).map -o $@
 
 # Assemble
 $(BUILD_DIR)/$(ASM_DIR)/%.o: $(ASM_DIR)/%.s

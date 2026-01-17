@@ -1,0 +1,9 @@
+/* External symbols not in ROM - RSP microcode and jump tables in binary blobs */
+
+/* RSP microcode functions */
+func_84001008 = 0x84001008;
+func_84001064 = 0x84001064;
+func_840010BC = 0x840010BC;
+
+/* Jump tables in rodata binary blob */
+jtbl_800CA268 = 0x800CA268;

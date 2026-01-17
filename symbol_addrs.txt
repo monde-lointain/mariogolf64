@@ -1,3 +1,11 @@
 // Visit https://github.com/ethteck/splat/wiki/Adding-Symbols for documentation about this file
 entrypoint = 0x80025C00; // type:func
 main = 0x800994B0; // type:func
+
+// RSP microcode functions (external refs)
+func_84001008 = 0x84001008; // type:func defined:true
+func_84001064 = 0x84001064; // type:func defined:true
+func_840010BC = 0x840010BC; // type:func defined:true
+
+// Jump tables in rodata binary (defined:true since in databin blob)
+jtbl_800CA268 = 0x800CA268; // type:jtbl defined:true
