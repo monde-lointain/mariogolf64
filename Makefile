@@ -89,10 +89,8 @@ STRIP      := $(MIPS_BINUTILS_PREFIX)strip
 GCC        := $(MIPS_BINUTILS_PREFIX)gcc
 CPP        := $(MIPS_BINUTILS_PREFIX)cpp
 
-SPLAT      ?= tools/splat/split.py
+SPLAT      ?= splat split
 SPLAT_YAML ?= $(TARGET).yaml
-
-UNDEFINED_REF_SCRIPT ?= tools/undefined_ref_patcher.py
 
 IINC       := -Iinclude
 IINC       += -Ilib/ultralib/include -Ilib/ultralib/include/PR -Ilib/ultralib/include/gcc -Ilib/nusys/include
@@ -190,9 +188,6 @@ extract:
 
 lib:
 	$(MAKE) -C lib
-
-patch-refs:
-	$(UNDEFINED_REF_SCRIPT)
 
 diff-init: uncompressed
 	$(RM) -rf expected/
