@@ -68,7 +68,7 @@ SECTIONS
 
     main_ROM_START = __romPos;
     main_VRAM = ADDR(.main);
-    .main entry_VRAM_END : AT(main_ROM_START) SUBALIGN(4)
+    .main entry_VRAM_END : AT(main_ROM_START) SUBALIGN(16)
     {
         FILL(0x00000000);
         main_TEXT_START = .;
@@ -515,6 +515,7 @@ SECTIONS
         build/asm/8F240.o(.data);
         build/asm/8F250.o(.data);
         build/asm/data/main_data.data.o(.data);
+        . = ALIGN(., 16);
         main_DATA_END = .;
         main_DATA_SIZE = ABSOLUTE(main_DATA_END - main_DATA_START);
         main_RODATA_START = .;
@@ -977,19 +978,640 @@ SECTIONS
     main_ROM_END = __romPos;
     main_VRAM_END = .;
 
-    ADD30_ROM_START = __romPos;
-    ADD30_VRAM = ADDR(.ADD30);
-    .ADD30 main_VRAM_END : AT(ADD30_ROM_START) SUBALIGN(16)
+    overlay_0_ROM_START = __romPos;
+    overlay_0_VRAM = ADDR(.overlay_0);
+    .overlay_0 0x801F4A30 : AT(overlay_0_ROM_START) SUBALIGN(16)
     {
         FILL(0x00000000);
-        ADD30_DATA_START = .;
-        build/assets/ADD30.o(.data);
-        ADD30_DATA_END = .;
-        ADD30_DATA_SIZE = ABSOLUTE(ADD30_DATA_END - ADD30_DATA_START);
+        overlay_0_TEXT_START = .;
+        build/asm/ADD30.o(.text);
+        . = ALIGN(., 16);
+        overlay_0_TEXT_END = .;
+        overlay_0_TEXT_SIZE = ABSOLUTE(overlay_0_TEXT_END - overlay_0_TEXT_START);
+        overlay_0_DATA_START = .;
+        build/asm/ADD30.o(.data);
+        build/asm/data/D8F70.data.o(.data);
+        . = ALIGN(., 16);
+        overlay_0_DATA_END = .;
+        overlay_0_DATA_SIZE = ABSOLUTE(overlay_0_DATA_END - overlay_0_DATA_START);
+        overlay_0_RODATA_START = .;
+        build/asm/ADD30.o(.rodata);
+        . = ALIGN(., 16);
+        overlay_0_RODATA_END = .;
+        overlay_0_RODATA_SIZE = ABSOLUTE(overlay_0_RODATA_END - overlay_0_RODATA_START);
     }
-    __romPos += SIZEOF(.ADD30);
-    ADD30_ROM_END = __romPos;
-    ADD30_VRAM_END = .;
+    overlay_0_bss_VRAM = ADDR(.overlay_0_bss);
+    .overlay_0_bss (NOLOAD) : SUBALIGN(16)
+    {
+        FILL(0x00000000);
+        overlay_0_BSS_START = .;
+        build/asm/ADD30.o(.bss);
+        build/asm/data/DE9B0.bss.o(.bss);
+        . = ALIGN(., 16);
+        overlay_0_BSS_END = .;
+        overlay_0_BSS_SIZE = ABSOLUTE(overlay_0_BSS_END - overlay_0_BSS_START);
+    }
+    __romPos += SIZEOF(.overlay_0);
+    __romPos = ALIGN(__romPos, 16);
+    . = ALIGN(., 16);
+    overlay_0_ROM_END = __romPos;
+    overlay_0_VRAM_END = .;
+
+    overlay_3_ROM_START = __romPos;
+    overlay_3_VRAM = ADDR(.overlay_3);
+    .overlay_3 0x801F4A30 : AT(overlay_3_ROM_START) SUBALIGN(16)
+    {
+        FILL(0x00000000);
+        overlay_3_TEXT_START = .;
+        build/asm/DE9B0.o(.text);
+        . = ALIGN(., 16);
+        overlay_3_TEXT_END = .;
+        overlay_3_TEXT_SIZE = ABSOLUTE(overlay_3_TEXT_END - overlay_3_TEXT_START);
+        overlay_3_DATA_START = .;
+        build/asm/DE9B0.o(.data);
+        build/asm/data/115D80.data.o(.data);
+        . = ALIGN(., 16);
+        overlay_3_DATA_END = .;
+        overlay_3_DATA_SIZE = ABSOLUTE(overlay_3_DATA_END - overlay_3_DATA_START);
+        overlay_3_RODATA_START = .;
+        build/asm/DE9B0.o(.rodata);
+        . = ALIGN(., 16);
+        overlay_3_RODATA_END = .;
+        overlay_3_RODATA_SIZE = ABSOLUTE(overlay_3_RODATA_END - overlay_3_RODATA_START);
+    }
+    overlay_3_bss_VRAM = ADDR(.overlay_3_bss);
+    .overlay_3_bss (NOLOAD) : SUBALIGN(16)
+    {
+        FILL(0x00000000);
+        overlay_3_BSS_START = .;
+        build/asm/DE9B0.o(.bss);
+        build/asm/data/11BA50.bss.o(.bss);
+        . = ALIGN(., 16);
+        overlay_3_BSS_END = .;
+        overlay_3_BSS_SIZE = ABSOLUTE(overlay_3_BSS_END - overlay_3_BSS_START);
+    }
+    __romPos += SIZEOF(.overlay_3);
+    __romPos = ALIGN(__romPos, 16);
+    . = ALIGN(., 16);
+    overlay_3_ROM_END = __romPos;
+    overlay_3_VRAM_END = .;
+
+    overlay_gap_ROM_START = __romPos;
+    overlay_gap_VRAM = ADDR(.overlay_gap);
+    .overlay_gap 0x80451A50 : AT(overlay_gap_ROM_START) SUBALIGN(16)
+    {
+        FILL(0x00000000);
+        overlay_gap_TEXT_START = .;
+        build/asm/11BA50.o(.text);
+        . = ALIGN(., 16);
+        overlay_gap_TEXT_END = .;
+        overlay_gap_TEXT_SIZE = ABSOLUTE(overlay_gap_TEXT_END - overlay_gap_TEXT_START);
+        overlay_gap_DATA_START = .;
+        build/asm/11BA50.o(.data);
+        . = ALIGN(., 16);
+        overlay_gap_DATA_END = .;
+        overlay_gap_DATA_SIZE = ABSOLUTE(overlay_gap_DATA_END - overlay_gap_DATA_START);
+        overlay_gap_RODATA_START = .;
+        build/asm/11BA50.o(.rodata);
+        . = ALIGN(., 16);
+        overlay_gap_RODATA_END = .;
+        overlay_gap_RODATA_SIZE = ABSOLUTE(overlay_gap_RODATA_END - overlay_gap_RODATA_START);
+    }
+    overlay_gap_bss_VRAM = ADDR(.overlay_gap_bss);
+    .overlay_gap_bss (NOLOAD) : SUBALIGN(16)
+    {
+        FILL(0x00000000);
+        overlay_gap_BSS_START = .;
+        build/asm/11BA50.o(.bss);
+        . = ALIGN(., 16);
+        overlay_gap_BSS_END = .;
+        overlay_gap_BSS_SIZE = ABSOLUTE(overlay_gap_BSS_END - overlay_gap_BSS_START);
+    }
+    __romPos += SIZEOF(.overlay_gap);
+    __romPos = ALIGN(__romPos, 16);
+    . = ALIGN(., 16);
+    overlay_gap_ROM_END = __romPos;
+    overlay_gap_VRAM_END = .;
+
+    overlay_4_ROM_START = __romPos;
+    overlay_4_VRAM = ADDR(.overlay_4);
+    .overlay_4 0x8024D800 : AT(overlay_4_ROM_START) SUBALIGN(16)
+    {
+        FILL(0x00000000);
+        overlay_4_TEXT_START = .;
+        build/asm/128580.o(.text);
+        . = ALIGN(., 16);
+        overlay_4_TEXT_END = .;
+        overlay_4_TEXT_SIZE = ABSOLUTE(overlay_4_TEXT_END - overlay_4_TEXT_START);
+        overlay_4_DATA_START = .;
+        build/asm/128580.o(.data);
+        build/asm/data/12F020.data.o(.data);
+        . = ALIGN(., 16);
+        overlay_4_DATA_END = .;
+        overlay_4_DATA_SIZE = ABSOLUTE(overlay_4_DATA_END - overlay_4_DATA_START);
+        overlay_4_RODATA_START = .;
+        build/asm/128580.o(.rodata);
+        . = ALIGN(., 16);
+        overlay_4_RODATA_END = .;
+        overlay_4_RODATA_SIZE = ABSOLUTE(overlay_4_RODATA_END - overlay_4_RODATA_START);
+    }
+    overlay_4_bss_VRAM = ADDR(.overlay_4_bss);
+    .overlay_4_bss (NOLOAD) : SUBALIGN(16)
+    {
+        FILL(0x00000000);
+        overlay_4_BSS_START = .;
+        build/asm/128580.o(.bss);
+        build/asm/data/1300A0.bss.o(.bss);
+        . = ALIGN(., 16);
+        overlay_4_BSS_END = .;
+        overlay_4_BSS_SIZE = ABSOLUTE(overlay_4_BSS_END - overlay_4_BSS_START);
+    }
+    __romPos += SIZEOF(.overlay_4);
+    __romPos = ALIGN(__romPos, 16);
+    . = ALIGN(., 16);
+    overlay_4_ROM_END = __romPos;
+    overlay_4_VRAM_END = .;
+
+    overlay_5_ROM_START = __romPos;
+    overlay_5_VRAM = ADDR(.overlay_5);
+    .overlay_5 0x8024D800 : AT(overlay_5_ROM_START) SUBALIGN(16)
+    {
+        FILL(0x00000000);
+        overlay_5_TEXT_START = .;
+        build/asm/1300A0.o(.text);
+        . = ALIGN(., 16);
+        overlay_5_TEXT_END = .;
+        overlay_5_TEXT_SIZE = ABSOLUTE(overlay_5_TEXT_END - overlay_5_TEXT_START);
+        overlay_5_DATA_START = .;
+        build/asm/1300A0.o(.data);
+        build/asm/data/1363F0.data.o(.data);
+        . = ALIGN(., 16);
+        overlay_5_DATA_END = .;
+        overlay_5_DATA_SIZE = ABSOLUTE(overlay_5_DATA_END - overlay_5_DATA_START);
+        overlay_5_RODATA_START = .;
+        build/asm/1300A0.o(.rodata);
+        . = ALIGN(., 16);
+        overlay_5_RODATA_END = .;
+        overlay_5_RODATA_SIZE = ABSOLUTE(overlay_5_RODATA_END - overlay_5_RODATA_START);
+    }
+    overlay_5_bss_VRAM = ADDR(.overlay_5_bss);
+    .overlay_5_bss (NOLOAD) : SUBALIGN(16)
+    {
+        FILL(0x00000000);
+        overlay_5_BSS_START = .;
+        build/asm/1300A0.o(.bss);
+        build/asm/data/136BA0.bss.o(.bss);
+        . = ALIGN(., 16);
+        overlay_5_BSS_END = .;
+        overlay_5_BSS_SIZE = ABSOLUTE(overlay_5_BSS_END - overlay_5_BSS_START);
+    }
+    __romPos += SIZEOF(.overlay_5);
+    __romPos = ALIGN(__romPos, 16);
+    . = ALIGN(., 16);
+    overlay_5_ROM_END = __romPos;
+    overlay_5_VRAM_END = .;
+
+    overlay_6_ROM_START = __romPos;
+    overlay_6_VRAM = ADDR(.overlay_6);
+    .overlay_6 0x8024D800 : AT(overlay_6_ROM_START) SUBALIGN(16)
+    {
+        FILL(0x00000000);
+        overlay_6_TEXT_START = .;
+        build/asm/136BA0.o(.text);
+        . = ALIGN(., 16);
+        overlay_6_TEXT_END = .;
+        overlay_6_TEXT_SIZE = ABSOLUTE(overlay_6_TEXT_END - overlay_6_TEXT_START);
+        overlay_6_DATA_START = .;
+        build/asm/136BA0.o(.data);
+        build/asm/data/137090.data.o(.data);
+        . = ALIGN(., 16);
+        overlay_6_DATA_END = .;
+        overlay_6_DATA_SIZE = ABSOLUTE(overlay_6_DATA_END - overlay_6_DATA_START);
+        overlay_6_RODATA_START = .;
+        build/asm/136BA0.o(.rodata);
+        . = ALIGN(., 16);
+        overlay_6_RODATA_END = .;
+        overlay_6_RODATA_SIZE = ABSOLUTE(overlay_6_RODATA_END - overlay_6_RODATA_START);
+    }
+    overlay_6_bss_VRAM = ADDR(.overlay_6_bss);
+    .overlay_6_bss (NOLOAD) : SUBALIGN(16)
+    {
+        FILL(0x00000000);
+        overlay_6_BSS_START = .;
+        build/asm/136BA0.o(.bss);
+        build/asm/data/1370B0.bss.o(.bss);
+        . = ALIGN(., 16);
+        overlay_6_BSS_END = .;
+        overlay_6_BSS_SIZE = ABSOLUTE(overlay_6_BSS_END - overlay_6_BSS_START);
+    }
+    __romPos += SIZEOF(.overlay_6);
+    __romPos = ALIGN(__romPos, 16);
+    . = ALIGN(., 16);
+    overlay_6_ROM_END = __romPos;
+    overlay_6_VRAM_END = .;
+
+    overlay_7_ROM_START = __romPos;
+    overlay_7_VRAM = ADDR(.overlay_7);
+    .overlay_7 0x801F4A30 : AT(overlay_7_ROM_START) SUBALIGN(16)
+    {
+        FILL(0x00000000);
+        overlay_7_TEXT_START = .;
+        build/asm/1370B0.o(.text);
+        . = ALIGN(., 16);
+        overlay_7_TEXT_END = .;
+        overlay_7_TEXT_SIZE = ABSOLUTE(overlay_7_TEXT_END - overlay_7_TEXT_START);
+        overlay_7_DATA_START = .;
+        build/asm/1370B0.o(.data);
+        build/asm/data/14D2C0.data.o(.data);
+        . = ALIGN(., 16);
+        overlay_7_DATA_END = .;
+        overlay_7_DATA_SIZE = ABSOLUTE(overlay_7_DATA_END - overlay_7_DATA_START);
+        overlay_7_RODATA_START = .;
+        build/asm/1370B0.o(.rodata);
+        . = ALIGN(., 16);
+        overlay_7_RODATA_END = .;
+        overlay_7_RODATA_SIZE = ABSOLUTE(overlay_7_RODATA_END - overlay_7_RODATA_START);
+    }
+    overlay_7_bss_VRAM = ADDR(.overlay_7_bss);
+    .overlay_7_bss (NOLOAD) : SUBALIGN(16)
+    {
+        FILL(0x00000000);
+        overlay_7_BSS_START = .;
+        build/asm/1370B0.o(.bss);
+        build/asm/data/14EA70.bss.o(.bss);
+        . = ALIGN(., 16);
+        overlay_7_BSS_END = .;
+        overlay_7_BSS_SIZE = ABSOLUTE(overlay_7_BSS_END - overlay_7_BSS_START);
+    }
+    __romPos += SIZEOF(.overlay_7);
+    __romPos = ALIGN(__romPos, 16);
+    . = ALIGN(., 16);
+    overlay_7_ROM_END = __romPos;
+    overlay_7_VRAM_END = .;
+
+    overlay_8_ROM_START = __romPos;
+    overlay_8_VRAM = ADDR(.overlay_8);
+    .overlay_8 0x801F4A30 : AT(overlay_8_ROM_START) SUBALIGN(16)
+    {
+        FILL(0x00000000);
+        overlay_8_TEXT_START = .;
+        build/asm/14EA70.o(.text);
+        . = ALIGN(., 16);
+        overlay_8_TEXT_END = .;
+        overlay_8_TEXT_SIZE = ABSOLUTE(overlay_8_TEXT_END - overlay_8_TEXT_START);
+        overlay_8_DATA_START = .;
+        build/asm/14EA70.o(.data);
+        build/asm/data/14F960.data.o(.data);
+        . = ALIGN(., 16);
+        overlay_8_DATA_END = .;
+        overlay_8_DATA_SIZE = ABSOLUTE(overlay_8_DATA_END - overlay_8_DATA_START);
+        overlay_8_RODATA_START = .;
+        build/asm/14EA70.o(.rodata);
+        . = ALIGN(., 16);
+        overlay_8_RODATA_END = .;
+        overlay_8_RODATA_SIZE = ABSOLUTE(overlay_8_RODATA_END - overlay_8_RODATA_START);
+    }
+    overlay_8_bss_VRAM = ADDR(.overlay_8_bss);
+    .overlay_8_bss (NOLOAD) : SUBALIGN(16)
+    {
+        FILL(0x00000000);
+        overlay_8_BSS_START = .;
+        build/asm/14EA70.o(.bss);
+        build/asm/data/14FB50.bss.o(.bss);
+        . = ALIGN(., 16);
+        overlay_8_BSS_END = .;
+        overlay_8_BSS_SIZE = ABSOLUTE(overlay_8_BSS_END - overlay_8_BSS_START);
+    }
+    __romPos += SIZEOF(.overlay_8);
+    __romPos = ALIGN(__romPos, 16);
+    . = ALIGN(., 16);
+    overlay_8_ROM_END = __romPos;
+    overlay_8_VRAM_END = .;
+
+    overlay_9_ROM_START = __romPos;
+    overlay_9_VRAM = ADDR(.overlay_9);
+    .overlay_9 0x801F4A30 : AT(overlay_9_ROM_START) SUBALIGN(16)
+    {
+        FILL(0x00000000);
+        overlay_9_TEXT_START = .;
+        build/asm/14FB50.o(.text);
+        . = ALIGN(., 16);
+        overlay_9_TEXT_END = .;
+        overlay_9_TEXT_SIZE = ABSOLUTE(overlay_9_TEXT_END - overlay_9_TEXT_START);
+        overlay_9_DATA_START = .;
+        build/asm/14FB50.o(.data);
+        build/asm/data/150890.data.o(.data);
+        . = ALIGN(., 16);
+        overlay_9_DATA_END = .;
+        overlay_9_DATA_SIZE = ABSOLUTE(overlay_9_DATA_END - overlay_9_DATA_START);
+        overlay_9_RODATA_START = .;
+        build/asm/14FB50.o(.rodata);
+        . = ALIGN(., 16);
+        overlay_9_RODATA_END = .;
+        overlay_9_RODATA_SIZE = ABSOLUTE(overlay_9_RODATA_END - overlay_9_RODATA_START);
+    }
+    overlay_9_bss_VRAM = ADDR(.overlay_9_bss);
+    .overlay_9_bss (NOLOAD) : SUBALIGN(16)
+    {
+        FILL(0x00000000);
+        overlay_9_BSS_START = .;
+        build/asm/14FB50.o(.bss);
+        build/asm/data/1508D0.bss.o(.bss);
+        . = ALIGN(., 16);
+        overlay_9_BSS_END = .;
+        overlay_9_BSS_SIZE = ABSOLUTE(overlay_9_BSS_END - overlay_9_BSS_START);
+    }
+    __romPos += SIZEOF(.overlay_9);
+    __romPos = ALIGN(__romPos, 16);
+    . = ALIGN(., 16);
+    overlay_9_ROM_END = __romPos;
+    overlay_9_VRAM_END = .;
+
+    overlay_10_ROM_START = __romPos;
+    overlay_10_VRAM = ADDR(.overlay_10);
+    .overlay_10 0x801F4A30 : AT(overlay_10_ROM_START) SUBALIGN(16)
+    {
+        FILL(0x00000000);
+        overlay_10_TEXT_START = .;
+        build/asm/1508D0.o(.text);
+        . = ALIGN(., 16);
+        overlay_10_TEXT_END = .;
+        overlay_10_TEXT_SIZE = ABSOLUTE(overlay_10_TEXT_END - overlay_10_TEXT_START);
+        overlay_10_DATA_START = .;
+        build/asm/1508D0.o(.data);
+        . = ALIGN(., 16);
+        overlay_10_DATA_END = .;
+        overlay_10_DATA_SIZE = ABSOLUTE(overlay_10_DATA_END - overlay_10_DATA_START);
+        overlay_10_RODATA_START = .;
+        build/asm/1508D0.o(.rodata);
+        . = ALIGN(., 16);
+        overlay_10_RODATA_END = .;
+        overlay_10_RODATA_SIZE = ABSOLUTE(overlay_10_RODATA_END - overlay_10_RODATA_START);
+    }
+    overlay_10_bss_VRAM = ADDR(.overlay_10_bss);
+    .overlay_10_bss (NOLOAD) : SUBALIGN(16)
+    {
+        FILL(0x00000000);
+        overlay_10_BSS_START = .;
+        build/asm/1508D0.o(.bss);
+        build/asm/data/150990.bss.o(.bss);
+        . = ALIGN(., 16);
+        overlay_10_BSS_END = .;
+        overlay_10_BSS_SIZE = ABSOLUTE(overlay_10_BSS_END - overlay_10_BSS_START);
+    }
+    __romPos += SIZEOF(.overlay_10);
+    __romPos = ALIGN(__romPos, 16);
+    . = ALIGN(., 16);
+    overlay_10_ROM_END = __romPos;
+    overlay_10_VRAM_END = .;
+
+    overlay_11_ROM_START = __romPos;
+    overlay_11_VRAM = ADDR(.overlay_11);
+    .overlay_11 0x80241800 : AT(overlay_11_ROM_START) SUBALIGN(16)
+    {
+        FILL(0x00000000);
+        overlay_11_TEXT_START = .;
+        build/asm/150990.o(.text);
+        . = ALIGN(., 16);
+        overlay_11_TEXT_END = .;
+        overlay_11_TEXT_SIZE = ABSOLUTE(overlay_11_TEXT_END - overlay_11_TEXT_START);
+        overlay_11_DATA_START = .;
+        build/asm/150990.o(.data);
+        build/asm/data/15B5E0.data.o(.data);
+        . = ALIGN(., 16);
+        overlay_11_DATA_END = .;
+        overlay_11_DATA_SIZE = ABSOLUTE(overlay_11_DATA_END - overlay_11_DATA_START);
+        overlay_11_RODATA_START = .;
+        build/asm/150990.o(.rodata);
+        . = ALIGN(., 16);
+        overlay_11_RODATA_END = .;
+        overlay_11_RODATA_SIZE = ABSOLUTE(overlay_11_RODATA_END - overlay_11_RODATA_START);
+    }
+    overlay_11_bss_VRAM = ADDR(.overlay_11_bss);
+    .overlay_11_bss (NOLOAD) : SUBALIGN(16)
+    {
+        FILL(0x00000000);
+        overlay_11_BSS_START = .;
+        build/asm/150990.o(.bss);
+        build/asm/data/15BB50.bss.o(.bss);
+        . = ALIGN(., 16);
+        overlay_11_BSS_END = .;
+        overlay_11_BSS_SIZE = ABSOLUTE(overlay_11_BSS_END - overlay_11_BSS_START);
+    }
+    __romPos += SIZEOF(.overlay_11);
+    __romPos = ALIGN(__romPos, 16);
+    . = ALIGN(., 16);
+    overlay_11_ROM_END = __romPos;
+    overlay_11_VRAM_END = .;
+
+    overlay_12_ROM_START = __romPos;
+    overlay_12_VRAM = ADDR(.overlay_12);
+    .overlay_12 0x80241800 : AT(overlay_12_ROM_START) SUBALIGN(16)
+    {
+        FILL(0x00000000);
+        overlay_12_TEXT_START = .;
+        build/asm/15BB50.o(.text);
+        . = ALIGN(., 16);
+        overlay_12_TEXT_END = .;
+        overlay_12_TEXT_SIZE = ABSOLUTE(overlay_12_TEXT_END - overlay_12_TEXT_START);
+        overlay_12_DATA_START = .;
+        build/asm/15BB50.o(.data);
+        build/asm/data/15F160.data.o(.data);
+        . = ALIGN(., 16);
+        overlay_12_DATA_END = .;
+        overlay_12_DATA_SIZE = ABSOLUTE(overlay_12_DATA_END - overlay_12_DATA_START);
+        overlay_12_RODATA_START = .;
+        build/asm/15BB50.o(.rodata);
+        . = ALIGN(., 16);
+        overlay_12_RODATA_END = .;
+        overlay_12_RODATA_SIZE = ABSOLUTE(overlay_12_RODATA_END - overlay_12_RODATA_START);
+    }
+    overlay_12_bss_VRAM = ADDR(.overlay_12_bss);
+    .overlay_12_bss (NOLOAD) : SUBALIGN(16)
+    {
+        FILL(0x00000000);
+        overlay_12_BSS_START = .;
+        build/asm/15BB50.o(.bss);
+        build/asm/data/15F250.bss.o(.bss);
+        . = ALIGN(., 16);
+        overlay_12_BSS_END = .;
+        overlay_12_BSS_SIZE = ABSOLUTE(overlay_12_BSS_END - overlay_12_BSS_START);
+    }
+    __romPos += SIZEOF(.overlay_12);
+    __romPos = ALIGN(__romPos, 16);
+    . = ALIGN(., 16);
+    overlay_12_ROM_END = __romPos;
+    overlay_12_VRAM_END = .;
+
+    overlay_13_ROM_START = __romPos;
+    overlay_13_VRAM = ADDR(.overlay_13);
+    .overlay_13 0x80241800 : AT(overlay_13_ROM_START) SUBALIGN(16)
+    {
+        FILL(0x00000000);
+        overlay_13_TEXT_START = .;
+        build/asm/15F250.o(.text);
+        . = ALIGN(., 16);
+        overlay_13_TEXT_END = .;
+        overlay_13_TEXT_SIZE = ABSOLUTE(overlay_13_TEXT_END - overlay_13_TEXT_START);
+        overlay_13_DATA_START = .;
+        build/asm/15F250.o(.data);
+        build/asm/data/161870.data.o(.data);
+        . = ALIGN(., 16);
+        overlay_13_DATA_END = .;
+        overlay_13_DATA_SIZE = ABSOLUTE(overlay_13_DATA_END - overlay_13_DATA_START);
+        overlay_13_RODATA_START = .;
+        build/asm/15F250.o(.rodata);
+        . = ALIGN(., 16);
+        overlay_13_RODATA_END = .;
+        overlay_13_RODATA_SIZE = ABSOLUTE(overlay_13_RODATA_END - overlay_13_RODATA_START);
+    }
+    overlay_13_bss_VRAM = ADDR(.overlay_13_bss);
+    .overlay_13_bss (NOLOAD) : SUBALIGN(16)
+    {
+        FILL(0x00000000);
+        overlay_13_BSS_START = .;
+        build/asm/15F250.o(.bss);
+        build/asm/data/1619A0.bss.o(.bss);
+        . = ALIGN(., 16);
+        overlay_13_BSS_END = .;
+        overlay_13_BSS_SIZE = ABSOLUTE(overlay_13_BSS_END - overlay_13_BSS_START);
+    }
+    __romPos += SIZEOF(.overlay_13);
+    __romPos = ALIGN(__romPos, 16);
+    . = ALIGN(., 16);
+    overlay_13_ROM_END = __romPos;
+    overlay_13_VRAM_END = .;
+
+    overlay_14_ROM_START = __romPos;
+    overlay_14_VRAM = ADDR(.overlay_14);
+    .overlay_14 0x80241800 : AT(overlay_14_ROM_START) SUBALIGN(16)
+    {
+        FILL(0x00000000);
+        overlay_14_TEXT_START = .;
+        build/asm/1619A0.o(.text);
+        . = ALIGN(., 16);
+        overlay_14_TEXT_END = .;
+        overlay_14_TEXT_SIZE = ABSOLUTE(overlay_14_TEXT_END - overlay_14_TEXT_START);
+        overlay_14_DATA_START = .;
+        build/asm/1619A0.o(.data);
+        build/asm/data/165970.data.o(.data);
+        . = ALIGN(., 16);
+        overlay_14_DATA_END = .;
+        overlay_14_DATA_SIZE = ABSOLUTE(overlay_14_DATA_END - overlay_14_DATA_START);
+        overlay_14_RODATA_START = .;
+        build/asm/1619A0.o(.rodata);
+        . = ALIGN(., 16);
+        overlay_14_RODATA_END = .;
+        overlay_14_RODATA_SIZE = ABSOLUTE(overlay_14_RODATA_END - overlay_14_RODATA_START);
+    }
+    overlay_14_bss_VRAM = ADDR(.overlay_14_bss);
+    .overlay_14_bss (NOLOAD) : SUBALIGN(16)
+    {
+        FILL(0x00000000);
+        overlay_14_BSS_START = .;
+        build/asm/1619A0.o(.bss);
+        build/asm/data/165BC0.bss.o(.bss);
+        . = ALIGN(., 16);
+        overlay_14_BSS_END = .;
+        overlay_14_BSS_SIZE = ABSOLUTE(overlay_14_BSS_END - overlay_14_BSS_START);
+    }
+    __romPos += SIZEOF(.overlay_14);
+    __romPos = ALIGN(__romPos, 16);
+    . = ALIGN(., 16);
+    overlay_14_ROM_END = __romPos;
+    overlay_14_VRAM_END = .;
+
+    overlay_15_ROM_START = __romPos;
+    overlay_15_VRAM = ADDR(.overlay_15);
+    .overlay_15 0x801F4A30 : AT(overlay_15_ROM_START) SUBALIGN(16)
+    {
+        FILL(0x00000000);
+        overlay_15_TEXT_START = .;
+        build/asm/165BC0.o(.text);
+        . = ALIGN(., 16);
+        overlay_15_TEXT_END = .;
+        overlay_15_TEXT_SIZE = ABSOLUTE(overlay_15_TEXT_END - overlay_15_TEXT_START);
+        overlay_15_DATA_START = .;
+        build/asm/165BC0.o(.data);
+        build/asm/data/16CCB0.data.o(.data);
+        . = ALIGN(., 16);
+        overlay_15_DATA_END = .;
+        overlay_15_DATA_SIZE = ABSOLUTE(overlay_15_DATA_END - overlay_15_DATA_START);
+        overlay_15_RODATA_START = .;
+        build/asm/165BC0.o(.rodata);
+        . = ALIGN(., 16);
+        overlay_15_RODATA_END = .;
+        overlay_15_RODATA_SIZE = ABSOLUTE(overlay_15_RODATA_END - overlay_15_RODATA_START);
+    }
+    overlay_15_bss_VRAM = ADDR(.overlay_15_bss);
+    .overlay_15_bss (NOLOAD) : SUBALIGN(16)
+    {
+        FILL(0x00000000);
+        overlay_15_BSS_START = .;
+        build/asm/165BC0.o(.bss);
+        build/asm/data/16D650.bss.o(.bss);
+        . = ALIGN(., 16);
+        overlay_15_BSS_END = .;
+        overlay_15_BSS_SIZE = ABSOLUTE(overlay_15_BSS_END - overlay_15_BSS_START);
+    }
+    __romPos += SIZEOF(.overlay_15);
+    __romPos = ALIGN(__romPos, 16);
+    . = ALIGN(., 16);
+    overlay_15_ROM_END = __romPos;
+    overlay_15_VRAM_END = .;
+
+    overlay_16_ROM_START = __romPos;
+    overlay_16_VRAM = ADDR(.overlay_16);
+    .overlay_16 0x801F4A30 : AT(overlay_16_ROM_START) SUBALIGN(16)
+    {
+        FILL(0x00000000);
+        overlay_16_TEXT_START = .;
+        build/asm/16D650.o(.text);
+        . = ALIGN(., 16);
+        overlay_16_TEXT_END = .;
+        overlay_16_TEXT_SIZE = ABSOLUTE(overlay_16_TEXT_END - overlay_16_TEXT_START);
+        overlay_16_DATA_START = .;
+        build/asm/16D650.o(.data);
+        build/asm/data/1715C0.data.o(.data);
+        . = ALIGN(., 16);
+        overlay_16_DATA_END = .;
+        overlay_16_DATA_SIZE = ABSOLUTE(overlay_16_DATA_END - overlay_16_DATA_START);
+        overlay_16_RODATA_START = .;
+        build/asm/16D650.o(.rodata);
+        . = ALIGN(., 16);
+        overlay_16_RODATA_END = .;
+        overlay_16_RODATA_SIZE = ABSOLUTE(overlay_16_RODATA_END - overlay_16_RODATA_START);
+    }
+    overlay_16_bss_VRAM = ADDR(.overlay_16_bss);
+    .overlay_16_bss (NOLOAD) : SUBALIGN(16)
+    {
+        FILL(0x00000000);
+        overlay_16_BSS_START = .;
+        build/asm/16D650.o(.bss);
+        build/asm/data/171770.bss.o(.bss);
+        . = ALIGN(., 16);
+        overlay_16_BSS_END = .;
+        overlay_16_BSS_SIZE = ABSOLUTE(overlay_16_BSS_END - overlay_16_BSS_START);
+    }
+    __romPos += SIZEOF(.overlay_16);
+    __romPos = ALIGN(__romPos, 16);
+    . = ALIGN(., 16);
+    overlay_16_ROM_END = __romPos;
+    overlay_16_VRAM_END = .;
+
+    assets_ROM_START = __romPos;
+    assets_VRAM = ADDR(.assets);
+    .assets : AT(assets_ROM_START) SUBALIGN(16)
+    {
+        FILL(0x00000000);
+        assets_DATA_START = .;
+        build/assets/assets.o(.data);
+        assets_DATA_END = .;
+        assets_DATA_SIZE = ABSOLUTE(assets_DATA_END - assets_DATA_START);
+    }
+    __romPos += SIZEOF(.assets);
+    assets_ROM_END = __romPos;
+    assets_VRAM_END = .;
 
     /DISCARD/ :
     {
