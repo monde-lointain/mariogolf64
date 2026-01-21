@@ -162,7 +162,10 @@ def disassemble_overlay(block):
     addr_set = currentProgram.getAddressFactory().getAddressSet(start, end)
 
     cmd = DisassembleCommand(addr_set, None)
-    cmd.applyTo(currentProgram, monitor)
+    success = cmd.applyTo(currentProgram, monitor)
+
+    if not success:
+        return 0
 
     return cmd.getDisassembledAddressSet().getNumAddresses()
 
@@ -210,7 +213,7 @@ def run():
             # Disassemble code block
             try:
                 disasm_count = disassemble_overlay(block)
-                println("  Disassembled %d instructions" % disasm_count)
+                println("  Disassembled %d addresses" % disasm_count)
             except Exception as e:
                 println("  Disassembly error: %s" % str(e))
 
