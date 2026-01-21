@@ -5,19 +5,20 @@
 
 from ghidra.program.model.mem import MemoryBlockType
 from java.io import ByteArrayInputStream, File, FileInputStream
+import jarray
 import struct
 import re
 
 def read_file(path):
     """Read entire file as byte array."""
     f = File(path)
-    size = f.length()
+    size = int(f.length())
     fis = FileInputStream(f)
-    data = bytearray(size)
-    # Jython: read into Java byte array then convert
-    jbytes = jarray.zeros(size, 'b')
-    fis.read(jbytes)
-    fis.close()
+    try:
+        jbytes = jarray.zeros(size, 'b')
+        fis.read(jbytes)
+    finally:
+        fis.close()
     # Convert signed Java bytes to unsigned Python bytes
     return bytes(bytearray([b & 0xFF for b in jbytes]))
 
