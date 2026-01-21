@@ -122,6 +122,37 @@ def find_overlay_sections(sections):
 
     return by_vma
 
+def create_overlay_block(name, vma, data, is_bss=False):
+    """Create a Ghidra overlay memory block.
+
+    Args:
+        name: Block name (e.g., 'overlay_3')
+        vma: Virtual memory address
+        data: Byte data (ignored if is_bss=True)
+        is_bss: If True, create uninitialized block
+
+    Returns:
+        Created MemoryBlock
+    """
+    mem = currentProgram.getMemory()
+    addr_factory = currentProgram.getAddressFactory()
+    addr = addr_factory.getAddress("0x%X" % vma)
+
+    if is_bss:
+        block = mem.createUninitializedBlock(name, addr, len(data), True)
+    else:
+        # Convert Python bytes to Java byte array
+        jbytes = jarray.array([((b if b < 128 else b - 256)) for b in bytearray(data)], 'b')
+        stream = ByteArrayInputStream(jbytes)
+        block = mem.createInitializedBlock(name, addr, stream, len(data), monitor, True)
+
+    # Set permissions - overlays contain executable code
+    block.setRead(True)
+    block.setWrite(True)
+    block.setExecute(not is_bss)
+
+    return block
+
 def run():
     elf_path = askFile("Select ELF file", "Open")
     if elf_path is None:
@@ -132,13 +163,52 @@ def run():
     data = read_file(str(elf_path))
 
     sections = parse_all_sections(data)
-    println("Found %d sections" % len(sections))
-
     by_vma = find_overlay_sections(sections)
+
     println("\nOverlays grouped by VMA:")
     for vma in sorted(by_vma.keys()):
         overlay_nums = [str(num) for num, _, _ in by_vma[vma]]
         println("  0x%08X: overlays %s" % (vma, ", ".join(overlay_nums)))
+
+    # Create overlay blocks
+    created_count = 0
+    for vma in sorted(by_vma.keys()):
+        overlays_at_vma = by_vma[vma]
+
+        for i, (num, code_sec, bss_sec) in enumerate(overlays_at_vma):
+            if i == 0:
+                # First overlay at this VMA - already in main memory from ELF import
+                println("\nSkipping overlay_%d (first at 0x%08X, use existing block)" % (num, vma))
+                continue
+
+            # Create code block
+            code_name = "overlay_%d" % num
+            code_data = data[code_sec['offset']:code_sec['offset'] + code_sec['size']]
+
+            println("\nCreating %s at 0x%08X (0x%X bytes)" % (code_name, vma, len(code_data)))
+            try:
+                block = create_overlay_block(code_name, vma, code_data)
+                println("  Created: %s" % block.getName())
+                created_count += 1
+            except Exception as e:
+                println("  ERROR: %s" % str(e))
+                continue
+
+            # Create BSS block if present
+            if bss_sec:
+                bss_name = "overlay_%d_bss" % num
+                bss_vma = bss_sec['addr']
+                bss_size = bss_sec['size']
+
+                println("  Creating %s at 0x%08X (0x%X bytes)" % (bss_name, bss_vma, bss_size))
+                try:
+                    # BSS is uninitialized, just needs size
+                    bss_block = create_overlay_block(bss_name, bss_vma, bytearray(bss_size), is_bss=True)
+                    println("    Created: %s" % bss_block.getName())
+                except Exception as e:
+                    println("    ERROR: %s" % str(e))
+
+    println("\n=== Created %d overlay blocks ===" % created_count)
 
 if __name__ == "__main__":
     run()
