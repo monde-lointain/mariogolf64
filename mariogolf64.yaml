@@ -43,7 +43,7 @@ options:
   data_string_guesser_level: 2
   # libultra_symbols: True
   hardware_regs: True
-  # gfx_ucode: # one of [f3d, f3db, f3dex, f3dexb, f3dex2]
+  gfx_ucode: f3dex2
 segments:
   - name: header
     type: header
@@ -290,8 +290,213 @@ segments:
       - [0xA5668, rodata, main_rodata]
       - { type: bss, vram: 0x800D2930 }
 
-  - type: bin
+  # Overlay 0 (shared ROM with 1,2)
+  - name: overlay_0
+    type: code
     start: 0xADD30
-    follows_vram: main
+    vram: 0x801F4A30
+    bss_size: 0x7FF0
+    exclusive_ram_id: ovl0
+    symbol_name_format: ovl0_$VRAM
+    subsegments:
+      - [0xADD30, asm]
+      - [0xD8F70, data]
+      - { start: 0xDE9B0, type: bss, vram: 0x802256B0 }
+
+  # Overlay 3
+  - name: overlay_3
+    type: code
+    start: 0xDE9B0
+    vram: 0x801F4A30
+    bss_size: 0xD320
+    exclusive_ram_id: ovl3
+    symbol_name_format: ovl3_$VRAM
+    subsegments:
+      - [0xDE9B0, asm]
+      - [0x115D80, data]
+      - { start: 0x11BA50, type: bss, vram: 0x80231AD0 }
+
+  # Gap (unknown overlay) - references external data at 0x8040XXXX
+  - name: overlay_gap
+    type: code
+    start: 0x11BA50
+    vram: 0x80451A50
+    exclusive_ram_id: ovlgap
+    symbol_name_format: ovlgap_$VRAM
+    subsegments:
+      - [0x11BA50, asm]
+
+  # Overlay 4
+  - name: overlay_4
+    type: code
+    start: 0x128580
+    vram: 0x8024D800
+    bss_size: 0x8040
+    exclusive_ram_id: ovl4
+    symbol_name_format: ovl4_$VRAM
+    subsegments:
+      - [0x128580, asm]
+      - [0x12F020, data]
+      - { start: 0x1300A0, type: bss, vram: 0x80255320 }
+
+  # Overlay 5
+  - name: overlay_5
+    type: code
+    start: 0x1300A0
+    vram: 0x8024D800
+    bss_size: 0x85B0
+    exclusive_ram_id: ovl5
+    symbol_name_format: ovl5_$VRAM
+    subsegments:
+      - [0x1300A0, asm]
+      - [0x1363F0, data]
+      - { start: 0x136BA0, type: bss, vram: 0x80254300 }
+
+  # Overlay 6
+  - name: overlay_6
+    type: code
+    start: 0x136BA0
+    vram: 0x8024D800
+    bss_size: 0x2E60
+    exclusive_ram_id: ovl6
+    symbol_name_format: ovl6_$VRAM
+    subsegments:
+      - [0x136BA0, asm]
+      - [0x137090, data]
+      - { start: 0x1370B0, type: bss, vram: 0x8024DD10 }
+
+  # Overlay 7
+  - name: overlay_7
+    type: code
+    start: 0x1370B0
+    vram: 0x801F4A30
+    bss_size: 0x1FEC0
+    exclusive_ram_id: ovl7
+    symbol_name_format: ovl7_$VRAM
+    subsegments:
+      - [0x1370B0, asm]
+      - [0x14D2C0, data]
+      - { start: 0x14EA70, type: bss, vram: 0x8020C3F0 }
+
+  # Overlay 8
+  - name: overlay_8
+    type: code
+    start: 0x14EA70
+    vram: 0x801F4A30
+    bss_size: 0x36320
+    exclusive_ram_id: ovl8
+    symbol_name_format: ovl8_$VRAM
+    subsegments:
+      - [0x14EA70, asm]
+      - [0x14F960, data]
+      - { start: 0x14FB50, type: bss, vram: 0x801F5B10 }
+
+  # Overlay 9
+  - name: overlay_9
+    type: code
+    start: 0x14FB50
+    vram: 0x801F4A30
+    bss_size: 0xA590
+    exclusive_ram_id: ovl9
+    symbol_name_format: ovl9_$VRAM
+    subsegments:
+      - [0x14FB50, asm]
+      - [0x150890, data]
+      - { start: 0x1508D0, type: bss, vram: 0x801F57B0 }
+
+  # Overlay 10
+  - name: overlay_10
+    type: code
+    start: 0x1508D0
+    vram: 0x801F4A30
+    bss_size: 0x10
+    exclusive_ram_id: ovl10
+    symbol_name_format: ovl10_$VRAM
+    subsegments:
+      - [0x1508D0, asm]
+      - { start: 0x150990, type: bss, vram: 0x801F4AF0 }
+
+  # Overlay 11
+  - name: overlay_11
+    type: code
+    start: 0x150990
+    vram: 0x80241800
+    bss_size: 0x580
+    exclusive_ram_id: ovl11
+    symbol_name_format: ovl11_$VRAM
+    subsegments:
+      - [0x150990, asm]
+      - [0x15B5E0, data]
+      - { start: 0x15BB50, type: bss, vram: 0x8024C9C0 }
+
+  # Overlay 12
+  - name: overlay_12
+    type: code
+    start: 0x15BB50
+    vram: 0x80241800
+    bss_size: 0x5E00
+    exclusive_ram_id: ovl12
+    symbol_name_format: ovl12_$VRAM
+    subsegments:
+      - [0x15BB50, asm]
+      - [0x15F160, data]
+      - { start: 0x15F250, type: bss, vram: 0x80244F00 }
+
+  # Overlay 13
+  - name: overlay_13
+    type: code
+    start: 0x15F250
+    vram: 0x80241800
+    bss_size: 0xB0
+    exclusive_ram_id: ovl13
+    symbol_name_format: ovl13_$VRAM
+    subsegments:
+      - [0x15F250, asm]
+      - [0x161870, data]
+      - { start: 0x1619A0, type: bss, vram: 0x80243F50 }
+
+  # Overlay 14
+  - name: overlay_14
+    type: code
+    start: 0x1619A0
+    vram: 0x80241800
+    bss_size: 0xD0
+    exclusive_ram_id: ovl14
+    symbol_name_format: ovl14_$VRAM
+    subsegments:
+      - [0x1619A0, asm]
+      - [0x165970, data]
+      - { start: 0x165BC0, type: bss, vram: 0x80245A20 }
+
+  # Overlay 15
+  - name: overlay_15
+    type: code
+    start: 0x165BC0
+    vram: 0x801F4A30
+    bss_size: 0x110
+    exclusive_ram_id: ovl15
+    symbol_name_format: ovl15_$VRAM
+    subsegments:
+      - [0x165BC0, asm]
+      - [0x16CCB0, data]
+      - { start: 0x16D650, type: bss, vram: 0x801FC4C0 }
+
+  # Overlay 16
+  - name: overlay_16
+    type: code
+    start: 0x16D650
+    vram: 0x801F4A30
+    bss_size: 0x2ACC0
+    exclusive_ram_id: ovl16
+    symbol_name_format: ovl16_$VRAM
+    subsegments:
+      - [0x16D650, asm]
+      - [0x1715C0, data]
+      - { start: 0x171770, type: bss, vram: 0x801F8B50 }
+
+  # Assets after overlays
+  - name: assets
+    type: bin
+    start: 0x171770
 
   - [0x2000000]

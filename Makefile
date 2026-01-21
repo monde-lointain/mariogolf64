@@ -82,7 +82,7 @@ $(BUILD_DIR)/$(TARGET): $(BUILD_DIR)/$(BASENAME).elf
 	$(OBJCOPY) -O binary $< $@
 
 $(BUILD_DIR)/$(BASENAME).elf: $(O_FILES) $(LD_SCRIPT) undefined_funcs_auto.txt undefined_syms_auto.txt hardware_regs.txt extern_syms.txt
-	$(LD) --no-check-sections --omagic -T hardware_regs.txt -T undefined_funcs_auto.txt -T undefined_syms_auto.txt -T extern_syms.txt -T $(LD_SCRIPT) -Map $(BUILD_DIR)/$(BASENAME).map -o $@
+	$(LD) --no-check-sections --omagic --allow-multiple-definition -T hardware_regs.txt -T undefined_funcs_auto.txt -T undefined_syms_auto.txt -T extern_syms.txt -T $(LD_SCRIPT) -Map $(BUILD_DIR)/$(BASENAME).map -o $@
 
 # Assemble (CPP preprocess, then assemble with system as)
 $(BUILD_DIR)/$(ASM_DIR)/%.o: $(ASM_DIR)/%.s
