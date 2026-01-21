@@ -291,6 +291,28 @@ segments:
       - [0x8F250, asm]
       - [0x8F440, data, main_data]
       - [0xA5668, rodata, main_rodata]
+      - [0xA5CE0, rodata]
+      - [0xA5D30, rodata]
+      - [0xA5FD0, rodata]
+      - [0xAC760, rodata]
+      - [0xAC770, rodata]
+      - [0xACAD0, rodata]
+      - [0xACD00, rodata]
+      - [0xAD490, rodata]
+      - [0xAD520, rodata]
+      - [0xAD590, rodata]
+      - [0xAD5A0, rodata]
+      - [0xAD5E0, rodata]
+      - [0xAD6B0, rodata]
+      - [0xAD6F0, rodata]
+      - [0xAD8C0, rodata]
+      - [0xAD910, rodata]
+      - [0xAD9C0, rodata]
+      - [0xAD9F0, rodata]
+      - [0xADA40, rodata]
+      - [0xADBD0, rodata]
+      - [0xADC40, rodata]
+      - [0xADCA0, rodata]
       - { type: bss, vram: 0x800D2930 }
 
   # Overlay 0 (shared ROM with 1,2)
@@ -303,6 +325,15 @@ segments:
     symbol_name_format: ovl0_$VRAM
     subsegments:
       - [0xADD30, asm]
+      - [0xADD40, asm]
+      - [0xB68F0, asm]
+      - [0xBBD00, asm]
+      - [0xC7A40, asm]
+      - [0xCFE10, asm]
+      - [0xD1FC0, asm]
+      - [0xD4330, asm]
+      - [0xD71D0, asm]
+      - [0xD7850, asm]
       - [0xD8F70, data]
       - { start: 0xDE9B0, type: bss, vram: 0x802256B0 }
 
@@ -316,6 +347,14 @@ segments:
     symbol_name_format: ovl3_$VRAM
     subsegments:
       - [0xDE9B0, asm]
+      - [0xDE9C0, asm]
+      - [0xF3480, asm]
+      - [0xF7F90, asm]
+      - [0xFD310, asm]
+      - [0xFF940, asm]
+      - [0x101830, asm]
+      - [0x109570, asm]
+      - [0x110670, asm]
       - [0x115D80, data]
       - { start: 0x11BA50, type: bss, vram: 0x80231AD0 }
 
@@ -378,6 +417,9 @@ segments:
     symbol_name_format: ovl7_$VRAM
     subsegments:
       - [0x1370B0, asm]
+      - [0x1370C0, asm]
+      - [0x145A30, asm]
+      - [0x148D00, asm]
       - [0x14D2C0, data]
       - { start: 0x14EA70, type: bss, vram: 0x8020C3F0 }
 
@@ -391,6 +433,8 @@ segments:
     symbol_name_format: ovl8_$VRAM
     subsegments:
       - [0x14EA70, asm]
+      - [0x14EA80, asm]
+      - [0x14F5E0, asm]
       - [0x14F960, data]
       - { start: 0x14FB50, type: bss, vram: 0x801F5B10 }
 
@@ -404,6 +448,7 @@ segments:
     symbol_name_format: ovl9_$VRAM
     subsegments:
       - [0x14FB50, asm]
+      - [0x14FB60, asm]
       - [0x150890, data]
       - { start: 0x1508D0, type: bss, vram: 0x801F57B0 }
 
@@ -417,6 +462,7 @@ segments:
     symbol_name_format: ovl10_$VRAM
     subsegments:
       - [0x1508D0, asm]
+      - [0x1508E0, asm]
       - { start: 0x150990, type: bss, vram: 0x801F4AF0 }
 
   # Overlay 11
@@ -429,6 +475,7 @@ segments:
     symbol_name_format: ovl11_$VRAM
     subsegments:
       - [0x150990, asm]
+      - [0x153560, asm]
       - [0x15B5E0, data]
       - { start: 0x15BB50, type: bss, vram: 0x8024C9C0 }
 
@@ -481,6 +528,8 @@ segments:
     symbol_name_format: ovl15_$VRAM
     subsegments:
       - [0x165BC0, asm]
+      - [0x165BD0, asm]
+      - [0x16C590, asm]
       - [0x16CCB0, data]
       - { start: 0x16D650, type: bss, vram: 0x801FC4C0 }
 
@@ -494,6 +543,7 @@ segments:
     symbol_name_format: ovl16_$VRAM
     subsegments:
       - [0x16D650, asm]
+      - [0x16D660, asm]
       - [0x1715C0, data]
       - { start: 0x171770, type: bss, vram: 0x801F8B50 }
 

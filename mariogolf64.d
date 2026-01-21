@@ -664,6 +664,28 @@ build/mariogolf64.elf: \
     build/asm/8F240.o \
     build/asm/8F250.o \
     build/asm/data/main_rodata.rodata.o \
+    build/asm/data/A5CE0.rodata.o \
+    build/asm/data/A5D30.rodata.o \
+    build/asm/data/A5FD0.rodata.o \
+    build/asm/data/AC760.rodata.o \
+    build/asm/data/AC770.rodata.o \
+    build/asm/data/ACAD0.rodata.o \
+    build/asm/data/ACD00.rodata.o \
+    build/asm/data/AD490.rodata.o \
+    build/asm/data/AD520.rodata.o \
+    build/asm/data/AD590.rodata.o \
+    build/asm/data/AD5A0.rodata.o \
+    build/asm/data/AD5E0.rodata.o \
+    build/asm/data/AD6B0.rodata.o \
+    build/asm/data/AD6F0.rodata.o \
+    build/asm/data/AD8C0.rodata.o \
+    build/asm/data/AD910.rodata.o \
+    build/asm/data/AD9C0.rodata.o \
+    build/asm/data/AD9F0.rodata.o \
+    build/asm/data/ADA40.rodata.o \
+    build/asm/data/ADBD0.rodata.o \
+    build/asm/data/ADC40.rodata.o \
+    build/asm/data/ADCA0.rodata.o \
     build/asm/1050.o \
     build/asm/1130.o \
     build/asm/17B0.o \
@@ -885,16 +907,84 @@ build/mariogolf64.elf: \
     build/asm/8F250.o \
     build/asm/data/ADD30.bss.o \
     build/asm/ADD30.o \
+    build/asm/ADD40.o \
+    build/asm/B68F0.o \
+    build/asm/BBD00.o \
+    build/asm/C7A40.o \
+    build/asm/CFE10.o \
+    build/asm/D1FC0.o \
+    build/asm/D4330.o \
+    build/asm/D71D0.o \
+    build/asm/D7850.o \
     build/asm/ADD30.o \
+    build/asm/ADD40.o \
+    build/asm/B68F0.o \
+    build/asm/BBD00.o \
+    build/asm/C7A40.o \
+    build/asm/CFE10.o \
+    build/asm/D1FC0.o \
+    build/asm/D4330.o \
+    build/asm/D71D0.o \
+    build/asm/D7850.o \
     build/asm/data/D8F70.data.o \
     build/asm/ADD30.o \
+    build/asm/ADD40.o \
+    build/asm/B68F0.o \
+    build/asm/BBD00.o \
+    build/asm/C7A40.o \
+    build/asm/CFE10.o \
+    build/asm/D1FC0.o \
+    build/asm/D4330.o \
+    build/asm/D71D0.o \
+    build/asm/D7850.o \
     build/asm/ADD30.o \
+    build/asm/ADD40.o \
+    build/asm/B68F0.o \
+    build/asm/BBD00.o \
+    build/asm/C7A40.o \
+    build/asm/CFE10.o \
+    build/asm/D1FC0.o \
+    build/asm/D4330.o \
+    build/asm/D71D0.o \
+    build/asm/D7850.o \
     build/asm/data/DE9B0.bss.o \
     build/asm/DE9B0.o \
+    build/asm/DE9C0.o \
+    build/asm/F3480.o \
+    build/asm/F7F90.o \
+    build/asm/FD310.o \
+    build/asm/FF940.o \
+    build/asm/101830.o \
+    build/asm/109570.o \
+    build/asm/110670.o \
     build/asm/DE9B0.o \
+    build/asm/DE9C0.o \
+    build/asm/F3480.o \
+    build/asm/F7F90.o \
+    build/asm/FD310.o \
+    build/asm/FF940.o \
+    build/asm/101830.o \
+    build/asm/109570.o \
+    build/asm/110670.o \
     build/asm/data/115D80.data.o \
     build/asm/DE9B0.o \
+    build/asm/DE9C0.o \
+    build/asm/F3480.o \
+    build/asm/F7F90.o \
+    build/asm/FD310.o \
+    build/asm/FF940.o \
+    build/asm/101830.o \
+    build/asm/109570.o \
+    build/asm/110670.o \
     build/asm/DE9B0.o \
+    build/asm/DE9C0.o \
+    build/asm/F3480.o \
+    build/asm/F7F90.o \
+    build/asm/FD310.o \
+    build/asm/FF940.o \
+    build/asm/101830.o \
+    build/asm/109570.o \
+    build/asm/110670.o \
     build/asm/data/11BA50.bss.o \
     build/asm/11BA50.o \
     build/asm/11BA50.o \
@@ -919,33 +1009,65 @@ build/mariogolf64.elf: \
     build/asm/136BA0.o \
     build/asm/data/1370B0.bss.o \
     build/asm/1370B0.o \
+    build/asm/1370C0.o \
+    build/asm/145A30.o \
+    build/asm/148D00.o \
     build/asm/1370B0.o \
+    build/asm/1370C0.o \
+    build/asm/145A30.o \
+    build/asm/148D00.o \
     build/asm/data/14D2C0.data.o \
     build/asm/1370B0.o \
+    build/asm/1370C0.o \
+    build/asm/145A30.o \
+    build/asm/148D00.o \
     build/asm/1370B0.o \
+    build/asm/1370C0.o \
+    build/asm/145A30.o \
+    build/asm/148D00.o \
     build/asm/data/14EA70.bss.o \
     build/asm/14EA70.o \
+    build/asm/14EA80.o \
+    build/asm/14F5E0.o \
     build/asm/14EA70.o \
+    build/asm/14EA80.o \
+    build/asm/14F5E0.o \
     build/asm/data/14F960.data.o \
     build/asm/14EA70.o \
+    build/asm/14EA80.o \
+    build/asm/14F5E0.o \
     build/asm/14EA70.o \
+    build/asm/14EA80.o \
+    build/asm/14F5E0.o \
     build/asm/data/14FB50.bss.o \
     build/asm/14FB50.o \
+    build/asm/14FB60.o \
     build/asm/14FB50.o \
+    build/asm/14FB60.o \
     build/asm/data/150890.data.o \
     build/asm/14FB50.o \
+    build/asm/14FB60.o \
     build/asm/14FB50.o \
+    build/asm/14FB60.o \
     build/asm/data/1508D0.bss.o \
     build/asm/1508D0.o \
+    build/asm/1508E0.o \
     build/asm/1508D0.o \
+    build/asm/1508E0.o \
     build/asm/1508D0.o \
+    build/asm/1508E0.o \
     build/asm/1508D0.o \
+    build/asm/1508E0.o \
     build/asm/data/150990.bss.o \
     build/asm/150990.o \
+    build/asm/153560.o \
     build/asm/150990.o \
+    build/asm/153560.o \
     build/asm/data/15B5E0.data.o \
     build/asm/150990.o \
+    build/asm/153560.o \
     build/asm/150990.o \
+    build/asm/153560.o \
     build/asm/data/15BB50.bss.o \
     build/asm/15BB50.o \
     build/asm/15BB50.o \
@@ -966,16 +1088,28 @@ build/mariogolf64.elf: \
     build/asm/1619A0.o \
     build/asm/data/165BC0.bss.o \
     build/asm/165BC0.o \
+    build/asm/165BD0.o \
+    build/asm/16C590.o \
     build/asm/165BC0.o \
+    build/asm/165BD0.o \
+    build/asm/16C590.o \
     build/asm/data/16CCB0.data.o \
     build/asm/165BC0.o \
+    build/asm/165BD0.o \
+    build/asm/16C590.o \
     build/asm/165BC0.o \
+    build/asm/165BD0.o \
+    build/asm/16C590.o \
     build/asm/data/16D650.bss.o \
     build/asm/16D650.o \
+    build/asm/16D660.o \
     build/asm/16D650.o \
+    build/asm/16D660.o \
     build/asm/data/1715C0.data.o \
     build/asm/16D650.o \
+    build/asm/16D660.o \
     build/asm/16D650.o \
+    build/asm/16D660.o \
     build/asm/data/171770.bss.o \
     build/assets/assets.o
 build/asm/header.o:
@@ -1643,6 +1777,28 @@ build/asm/8F140.o:
 build/asm/8F240.o:
 build/asm/8F250.o:
 build/asm/data/main_rodata.rodata.o:
+build/asm/data/A5CE0.rodata.o:
+build/asm/data/A5D30.rodata.o:
+build/asm/data/A5FD0.rodata.o:
+build/asm/data/AC760.rodata.o:
+build/asm/data/AC770.rodata.o:
+build/asm/data/ACAD0.rodata.o:
+build/asm/data/ACD00.rodata.o:
+build/asm/data/AD490.rodata.o:
+build/asm/data/AD520.rodata.o:
+build/asm/data/AD590.rodata.o:
+build/asm/data/AD5A0.rodata.o:
+build/asm/data/AD5E0.rodata.o:
+build/asm/data/AD6B0.rodata.o:
+build/asm/data/AD6F0.rodata.o:
+build/asm/data/AD8C0.rodata.o:
+build/asm/data/AD910.rodata.o:
+build/asm/data/AD9C0.rodata.o:
+build/asm/data/AD9F0.rodata.o:
+build/asm/data/ADA40.rodata.o:
+build/asm/data/ADBD0.rodata.o:
+build/asm/data/ADC40.rodata.o:
+build/asm/data/ADCA0.rodata.o:
 build/asm/1050.o:
 build/asm/1130.o:
 build/asm/17B0.o:
@@ -1864,16 +2020,84 @@ build/asm/8F240.o:
 build/asm/8F250.o:
 build/asm/data/ADD30.bss.o:
 build/asm/ADD30.o:
+build/asm/ADD40.o:
+build/asm/B68F0.o:
+build/asm/BBD00.o:
+build/asm/C7A40.o:
+build/asm/CFE10.o:
+build/asm/D1FC0.o:
+build/asm/D4330.o:
+build/asm/D71D0.o:
+build/asm/D7850.o:
 build/asm/ADD30.o:
+build/asm/ADD40.o:
+build/asm/B68F0.o:
+build/asm/BBD00.o:
+build/asm/C7A40.o:
+build/asm/CFE10.o:
+build/asm/D1FC0.o:
+build/asm/D4330.o:
+build/asm/D71D0.o:
+build/asm/D7850.o:
 build/asm/data/D8F70.data.o:
 build/asm/ADD30.o:
+build/asm/ADD40.o:
+build/asm/B68F0.o:
+build/asm/BBD00.o:
+build/asm/C7A40.o:
+build/asm/CFE10.o:
+build/asm/D1FC0.o:
+build/asm/D4330.o:
+build/asm/D71D0.o:
+build/asm/D7850.o:
 build/asm/ADD30.o:
+build/asm/ADD40.o:
+build/asm/B68F0.o:
+build/asm/BBD00.o:
+build/asm/C7A40.o:
+build/asm/CFE10.o:
+build/asm/D1FC0.o:
+build/asm/D4330.o:
+build/asm/D71D0.o:
+build/asm/D7850.o:
 build/asm/data/DE9B0.bss.o:
 build/asm/DE9B0.o:
+build/asm/DE9C0.o:
+build/asm/F3480.o:
+build/asm/F7F90.o:
+build/asm/FD310.o:
+build/asm/FF940.o:
+build/asm/101830.o:
+build/asm/109570.o:
+build/asm/110670.o:
 build/asm/DE9B0.o:
+build/asm/DE9C0.o:
+build/asm/F3480.o:
+build/asm/F7F90.o:
+build/asm/FD310.o:
+build/asm/FF940.o:
+build/asm/101830.o:
+build/asm/109570.o:
+build/asm/110670.o:
 build/asm/data/115D80.data.o:
 build/asm/DE9B0.o:
+build/asm/DE9C0.o:
+build/asm/F3480.o:
+build/asm/F7F90.o:
+build/asm/FD310.o:
+build/asm/FF940.o:
+build/asm/101830.o:
+build/asm/109570.o:
+build/asm/110670.o:
 build/asm/DE9B0.o:
+build/asm/DE9C0.o:
+build/asm/F3480.o:
+build/asm/F7F90.o:
+build/asm/FD310.o:
+build/asm/FF940.o:
+build/asm/101830.o:
+build/asm/109570.o:
+build/asm/110670.o:
 build/asm/data/11BA50.bss.o:
 build/asm/11BA50.o:
 build/asm/11BA50.o:
@@ -1898,33 +2122,65 @@ build/asm/136BA0.o:
 build/asm/136BA0.o:
 build/asm/data/1370B0.bss.o:
 build/asm/1370B0.o:
+build/asm/1370C0.o:
+build/asm/145A30.o:
+build/asm/148D00.o:
 build/asm/1370B0.o:
+build/asm/1370C0.o:
+build/asm/145A30.o:
+build/asm/148D00.o:
 build/asm/data/14D2C0.data.o:
 build/asm/1370B0.o:
+build/asm/1370C0.o:
+build/asm/145A30.o:
+build/asm/148D00.o:
 build/asm/1370B0.o:
+build/asm/1370C0.o:
+build/asm/145A30.o:
+build/asm/148D00.o:
 build/asm/data/14EA70.bss.o:
 build/asm/14EA70.o:
+build/asm/14EA80.o:
+build/asm/14F5E0.o:
 build/asm/14EA70.o:
+build/asm/14EA80.o:
+build/asm/14F5E0.o:
 build/asm/data/14F960.data.o:
 build/asm/14EA70.o:
+build/asm/14EA80.o:
+build/asm/14F5E0.o:
 build/asm/14EA70.o:
+build/asm/14EA80.o:
+build/asm/14F5E0.o:
 build/asm/data/14FB50.bss.o:
 build/asm/14FB50.o:
+build/asm/14FB60.o:
 build/asm/14FB50.o:
+build/asm/14FB60.o:
 build/asm/data/150890.data.o:
 build/asm/14FB50.o:
+build/asm/14FB60.o:
 build/asm/14FB50.o:
+build/asm/14FB60.o:
 build/asm/data/1508D0.bss.o:
 build/asm/1508D0.o:
+build/asm/1508E0.o:
 build/asm/1508D0.o:
+build/asm/1508E0.o:
 build/asm/1508D0.o:
+build/asm/1508E0.o:
 build/asm/1508D0.o:
+build/asm/1508E0.o:
 build/asm/data/150990.bss.o:
 build/asm/150990.o:
+build/asm/153560.o:
 build/asm/150990.o:
+build/asm/153560.o:
 build/asm/data/15B5E0.data.o:
 build/asm/150990.o:
+build/asm/153560.o:
 build/asm/150990.o:
+build/asm/153560.o:
 build/asm/data/15BB50.bss.o:
 build/asm/15BB50.o:
 build/asm/15BB50.o:
@@ -1945,15 +2201,27 @@ build/asm/1619A0.o:
 build/asm/1619A0.o:
 build/asm/data/165BC0.bss.o:
 build/asm/165BC0.o:
+build/asm/165BD0.o:
+build/asm/16C590.o:
 build/asm/165BC0.o:
+build/asm/165BD0.o:
+build/asm/16C590.o:
 build/asm/data/16CCB0.data.o:
 build/asm/165BC0.o:
+build/asm/165BD0.o:
+build/asm/16C590.o:
 build/asm/165BC0.o:
+build/asm/165BD0.o:
+build/asm/16C590.o:
 build/asm/data/16D650.bss.o:
 build/asm/16D650.o:
+build/asm/16D660.o:
 build/asm/16D650.o:
+build/asm/16D660.o:
 build/asm/data/1715C0.data.o:
 build/asm/16D650.o:
+build/asm/16D660.o:
 build/asm/16D650.o:
+build/asm/16D660.o:
 build/asm/data/171770.bss.o:
 build/assets/assets.o:
