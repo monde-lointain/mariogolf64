@@ -15,8 +15,6 @@ options:
 
   ld_script_path: mariogolf64.ld
   ld_dependencies: True
-  ld_align_section_vram_end: False
-  subalign: null
 
   find_file_boundaries: True
   header_encoding: ASCII
@@ -25,8 +23,8 @@ options:
   use_legacy_include_asm: False
   mips_abi_float_regs: o32
 
-  section_order: [".text", ".data", ".rodata", ".bss"]
-  auto_link_sections: [".text", ".data", ".rodata", ".bss"]
+  # section_order: [".text", ".data", ".rodata", ".bss"]
+  # auto_link_sections: [".data", ".rodata", ".bss"]
 
   symbol_addrs_path:
     - symbol_addrs.txt
@@ -290,6 +288,7 @@ segments:
       - [0x8F250, asm]
       - [0x8F440, data, main_data]
       - [0xA5668, rodata, main_rodata]
+      - [0x8F440, data]
       - { type: bss, vram: 0x800D2930 }
 
   - type: bin

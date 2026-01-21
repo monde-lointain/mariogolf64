@@ -200,6 +200,7 @@ SECTIONS
         build/asm/85B30.o(.text);
         build/asm/85DA0.o(.text);
         build/asm/860C0.o(.text);
+        build/src/libultra_string.o(.text);
         build/asm/861F0.o(.text);
         build/asm/86280.o(.text);
         build/asm/862B0.o(.text);
@@ -280,6 +281,7 @@ SECTIONS
         build/asm/8E620.o(.text);
         build/asm/8EAD0.o(.text);
         build/asm/8EBE0.o(.text);
+        build/src/udivmoddi4.o(.text);
         build/asm/8EE50.o(.text);
         build/asm/8EFC0.o(.text);
         build/asm/8EFE0.o(.text);
@@ -421,6 +423,7 @@ SECTIONS
         build/asm/85B30.o(.data);
         build/asm/85DA0.o(.data);
         build/asm/860C0.o(.data);
+        build/src/libultra_string.o(.data);
         build/asm/861F0.o(.data);
         build/asm/86280.o(.data);
         build/asm/862B0.o(.data);
@@ -501,13 +504,14 @@ SECTIONS
         build/asm/8E620.o(.data);
         build/asm/8EAD0.o(.data);
         build/asm/8EBE0.o(.data);
+        build/src/udivmoddi4.o(.data);
         build/asm/8EE50.o(.data);
         build/asm/8EFC0.o(.data);
         build/asm/8EFE0.o(.data);
         build/asm/8F140.o(.data);
         build/asm/8F240.o(.data);
         build/asm/8F250.o(.data);
-        build/assets/main_data.databin.o(.data);
+        build/asm/data/main_data.data.o(.data);
         main_DATA_END = .;
         main_DATA_SIZE = ABSOLUTE(main_DATA_END - main_DATA_START);
         main_RODATA_START = .;
@@ -643,6 +647,7 @@ SECTIONS
         build/asm/85B30.o(.rodata);
         build/asm/85DA0.o(.rodata);
         build/asm/860C0.o(.rodata);
+        build/src/libultra_string.o(.rodata);
         build/asm/861F0.o(.rodata);
         build/asm/86280.o(.rodata);
         build/asm/862B0.o(.rodata);
@@ -723,13 +728,14 @@ SECTIONS
         build/asm/8E620.o(.rodata);
         build/asm/8EAD0.o(.rodata);
         build/asm/8EBE0.o(.rodata);
+        build/src/udivmoddi4.o(.rodata);
         build/asm/8EE50.o(.rodata);
         build/asm/8EFC0.o(.rodata);
         build/asm/8EFE0.o(.rodata);
         build/asm/8F140.o(.rodata);
         build/asm/8F240.o(.rodata);
         build/asm/8F250.o(.rodata);
-        build/assets/main_rodata.rodatabin.o(.data);
+        build/asm/data/main_rodata.rodata.o(.rodata);
         main_RODATA_END = .;
         main_RODATA_SIZE = ABSOLUTE(main_RODATA_END - main_RODATA_START);
     }
@@ -870,6 +876,7 @@ SECTIONS
         build/asm/85B30.o(.bss);
         build/asm/85DA0.o(.bss);
         build/asm/860C0.o(.bss);
+        build/src/libultra_string.o(.bss);
         build/asm/861F0.o(.bss);
         build/asm/86280.o(.bss);
         build/asm/862B0.o(.bss);
@@ -950,6 +957,7 @@ SECTIONS
         build/asm/8E620.o(.bss);
         build/asm/8EAD0.o(.bss);
         build/asm/8EBE0.o(.bss);
+        build/src/udivmoddi4.o(.bss);
         build/asm/8EE50.o(.bss);
         build/asm/8EFC0.o(.bss);
         build/asm/8EFE0.o(.bss);

@@ -137,6 +137,7 @@ build/mariogolf64.elf: \
     build/asm/85B30.o \
     build/asm/85DA0.o \
     build/asm/860C0.o \
+    build/src/libultra_string.o \
     build/asm/861F0.o \
     build/asm/86280.o \
     build/asm/862B0.o \
@@ -217,6 +218,7 @@ build/mariogolf64.elf: \
     build/asm/8E620.o \
     build/asm/8EAD0.o \
     build/asm/8EBE0.o \
+    build/src/udivmoddi4.o \
     build/asm/8EE50.o \
     build/asm/8EFC0.o \
     build/asm/8EFE0.o \
@@ -355,6 +357,7 @@ build/mariogolf64.elf: \
     build/asm/85B30.o \
     build/asm/85DA0.o \
     build/asm/860C0.o \
+    build/src/libultra_string.o \
     build/asm/861F0.o \
     build/asm/86280.o \
     build/asm/862B0.o \
@@ -435,13 +438,14 @@ build/mariogolf64.elf: \
     build/asm/8E620.o \
     build/asm/8EAD0.o \
     build/asm/8EBE0.o \
+    build/src/udivmoddi4.o \
     build/asm/8EE50.o \
     build/asm/8EFC0.o \
     build/asm/8EFE0.o \
     build/asm/8F140.o \
     build/asm/8F240.o \
     build/asm/8F250.o \
-    build/asm/data/main_data.o \
+    build/asm/data/main_data.data.o \
     build/asm/1050.o \
     build/asm/1130.o \
     build/asm/17B0.o \
@@ -574,6 +578,7 @@ build/mariogolf64.elf: \
     build/asm/85B30.o \
     build/asm/85DA0.o \
     build/asm/860C0.o \
+    build/src/libultra_string.o \
     build/asm/861F0.o \
     build/asm/86280.o \
     build/asm/862B0.o \
@@ -654,13 +659,14 @@ build/mariogolf64.elf: \
     build/asm/8E620.o \
     build/asm/8EAD0.o \
     build/asm/8EBE0.o \
+    build/src/udivmoddi4.o \
     build/asm/8EE50.o \
     build/asm/8EFC0.o \
     build/asm/8EFE0.o \
     build/asm/8F140.o \
     build/asm/8F240.o \
     build/asm/8F250.o \
-    build/asm/data/main_rodata.o \
+    build/asm/data/main_rodata.rodata.o \
     build/asm/1050.o \
     build/asm/1130.o \
     build/asm/17B0.o \
@@ -793,6 +799,7 @@ build/mariogolf64.elf: \
     build/asm/85B30.o \
     build/asm/85DA0.o \
     build/asm/860C0.o \
+    build/src/libultra_string.o \
     build/asm/861F0.o \
     build/asm/86280.o \
     build/asm/862B0.o \
@@ -873,6 +880,7 @@ build/mariogolf64.elf: \
     build/asm/8E620.o \
     build/asm/8EAD0.o \
     build/asm/8EBE0.o \
+    build/src/udivmoddi4.o \
     build/asm/8EE50.o \
     build/asm/8EFC0.o \
     build/asm/8EFE0.o \
@@ -1019,6 +1027,7 @@ build/asm/85A50.o:
 build/asm/85B30.o:
 build/asm/85DA0.o:
 build/asm/860C0.o:
+build/src/libultra_string.o:
 build/asm/861F0.o:
 build/asm/86280.o:
 build/asm/862B0.o:
@@ -1099,6 +1108,7 @@ build/asm/8E550.o:
 build/asm/8E620.o:
 build/asm/8EAD0.o:
 build/asm/8EBE0.o:
+build/src/udivmoddi4.o:
 build/asm/8EE50.o:
 build/asm/8EFC0.o:
 build/asm/8EFE0.o:
@@ -1237,6 +1247,7 @@ build/asm/85A50.o:
 build/asm/85B30.o:
 build/asm/85DA0.o:
 build/asm/860C0.o:
+build/src/libultra_string.o:
 build/asm/861F0.o:
 build/asm/86280.o:
 build/asm/862B0.o:
@@ -1317,13 +1328,14 @@ build/asm/8E550.o:
 build/asm/8E620.o:
 build/asm/8EAD0.o:
 build/asm/8EBE0.o:
+build/src/udivmoddi4.o:
 build/asm/8EE50.o:
 build/asm/8EFC0.o:
 build/asm/8EFE0.o:
 build/asm/8F140.o:
 build/asm/8F240.o:
 build/asm/8F250.o:
-build/asm/data/main_data.o:
+build/asm/data/main_data.data.o:
 build/asm/1050.o:
 build/asm/1130.o:
 build/asm/17B0.o:
@@ -1456,6 +1468,7 @@ build/asm/85A50.o:
 build/asm/85B30.o:
 build/asm/85DA0.o:
 build/asm/860C0.o:
+build/src/libultra_string.o:
 build/asm/861F0.o:
 build/asm/86280.o:
 build/asm/862B0.o:
@@ -1536,13 +1549,14 @@ build/asm/8E550.o:
 build/asm/8E620.o:
 build/asm/8EAD0.o:
 build/asm/8EBE0.o:
+build/src/udivmoddi4.o:
 build/asm/8EE50.o:
 build/asm/8EFC0.o:
 build/asm/8EFE0.o:
 build/asm/8F140.o:
 build/asm/8F240.o:
 build/asm/8F250.o:
-build/asm/data/main_rodata.o:
+build/asm/data/main_rodata.rodata.o:
 build/asm/1050.o:
 build/asm/1130.o:
 build/asm/17B0.o:
@@ -1675,6 +1689,7 @@ build/asm/85A50.o:
 build/asm/85B30.o:
 build/asm/85DA0.o:
 build/asm/860C0.o:
+build/src/libultra_string.o:
 build/asm/861F0.o:
 build/asm/86280.o:
 build/asm/862B0.o:
@@ -1755,6 +1770,7 @@ build/asm/8E550.o:
 build/asm/8E620.o:
 build/asm/8EAD0.o:
 build/asm/8EBE0.o:
+build/src/udivmoddi4.o:
 build/asm/8EE50.o:
 build/asm/8EFC0.o:
 build/asm/8EFE0.o:
