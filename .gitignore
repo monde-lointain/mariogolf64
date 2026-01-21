@@ -69,3 +69,6 @@ Sessionx.vim
 tags
 # Persistent undo
 [._]*.un~
+
+# Ghidra scripts (local only)
+ghidra/
