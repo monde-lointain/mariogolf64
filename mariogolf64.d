@@ -35,7 +35,7 @@ build/mariogolf64.elf: \
     build/asm/40180.o \
     build/asm/414A0.o \
     build/asm/43140.o \
-    build/asm/43810.o \
+    build/src/lz_decompress.o \
     build/asm/45400.o \
     build/asm/456C0.o \
     build/asm/49E90.o \
@@ -137,7 +137,6 @@ build/mariogolf64.elf: \
     build/asm/85B30.o \
     build/asm/85DA0.o \
     build/asm/860C0.o \
-    build/src/libultra_string.o \
     build/asm/861F0.o \
     build/asm/86280.o \
     build/asm/862B0.o \
@@ -255,7 +254,7 @@ build/mariogolf64.elf: \
     build/asm/40180.o \
     build/asm/414A0.o \
     build/asm/43140.o \
-    build/asm/43810.o \
+    build/src/lz_decompress.o \
     build/asm/45400.o \
     build/asm/456C0.o \
     build/asm/49E90.o \
@@ -357,7 +356,6 @@ build/mariogolf64.elf: \
     build/asm/85B30.o \
     build/asm/85DA0.o \
     build/asm/860C0.o \
-    build/src/libultra_string.o \
     build/asm/861F0.o \
     build/asm/86280.o \
     build/asm/862B0.o \
@@ -476,7 +474,7 @@ build/mariogolf64.elf: \
     build/asm/40180.o \
     build/asm/414A0.o \
     build/asm/43140.o \
-    build/asm/43810.o \
+    build/src/lz_decompress.o \
     build/asm/45400.o \
     build/asm/456C0.o \
     build/asm/49E90.o \
@@ -578,7 +576,6 @@ build/mariogolf64.elf: \
     build/asm/85B30.o \
     build/asm/85DA0.o \
     build/asm/860C0.o \
-    build/src/libultra_string.o \
     build/asm/861F0.o \
     build/asm/86280.o \
     build/asm/862B0.o \
@@ -697,7 +694,7 @@ build/mariogolf64.elf: \
     build/asm/40180.o \
     build/asm/414A0.o \
     build/asm/43140.o \
-    build/asm/43810.o \
+    build/src/lz_decompress.o \
     build/asm/45400.o \
     build/asm/456C0.o \
     build/asm/49E90.o \
@@ -799,7 +796,6 @@ build/mariogolf64.elf: \
     build/asm/85B30.o \
     build/asm/85DA0.o \
     build/asm/860C0.o \
-    build/src/libultra_string.o \
     build/asm/861F0.o \
     build/asm/86280.o \
     build/asm/862B0.o \
@@ -925,7 +921,7 @@ build/asm/396C0.o:
 build/asm/40180.o:
 build/asm/414A0.o:
 build/asm/43140.o:
-build/asm/43810.o:
+build/src/lz_decompress.o:
 build/asm/45400.o:
 build/asm/456C0.o:
 build/asm/49E90.o:
@@ -1027,7 +1023,6 @@ build/asm/85A50.o:
 build/asm/85B30.o:
 build/asm/85DA0.o:
 build/asm/860C0.o:
-build/src/libultra_string.o:
 build/asm/861F0.o:
 build/asm/86280.o:
 build/asm/862B0.o:
@@ -1145,7 +1140,7 @@ build/asm/396C0.o:
 build/asm/40180.o:
 build/asm/414A0.o:
 build/asm/43140.o:
-build/asm/43810.o:
+build/src/lz_decompress.o:
 build/asm/45400.o:
 build/asm/456C0.o:
 build/asm/49E90.o:
@@ -1247,7 +1242,6 @@ build/asm/85A50.o:
 build/asm/85B30.o:
 build/asm/85DA0.o:
 build/asm/860C0.o:
-build/src/libultra_string.o:
 build/asm/861F0.o:
 build/asm/86280.o:
 build/asm/862B0.o:
@@ -1366,7 +1360,7 @@ build/asm/396C0.o:
 build/asm/40180.o:
 build/asm/414A0.o:
 build/asm/43140.o:
-build/asm/43810.o:
+build/src/lz_decompress.o:
 build/asm/45400.o:
 build/asm/456C0.o:
 build/asm/49E90.o:
@@ -1468,7 +1462,6 @@ build/asm/85A50.o:
 build/asm/85B30.o:
 build/asm/85DA0.o:
 build/asm/860C0.o:
-build/src/libultra_string.o:
 build/asm/861F0.o:
 build/asm/86280.o:
 build/asm/862B0.o:
@@ -1587,7 +1580,7 @@ build/asm/396C0.o:
 build/asm/40180.o:
 build/asm/414A0.o:
 build/asm/43140.o:
-build/asm/43810.o:
+build/src/lz_decompress.o:
 build/asm/45400.o:
 build/asm/456C0.o:
 build/asm/49E90.o:
@@ -1689,7 +1682,6 @@ build/asm/85A50.o:
 build/asm/85B30.o:
 build/asm/85DA0.o:
 build/asm/860C0.o:
-build/src/libultra_string.o:
 build/asm/861F0.o:
 build/asm/86280.o:
 build/asm/862B0.o:

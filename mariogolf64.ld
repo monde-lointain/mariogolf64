@@ -3,7 +3,7 @@ SECTIONS
     __romPos = 0;
     header_ROM_START = __romPos;
     header_VRAM = ADDR(.header);
-    .header : AT(header_ROM_START)
+    .header : AT(header_ROM_START) SUBALIGN(16)
     {
         FILL(0x00000000);
         header_DATA_START = .;
@@ -17,7 +17,7 @@ SECTIONS
 
     ipl3_ROM_START = __romPos;
     ipl3_VRAM = ADDR(.ipl3);
-    .ipl3 : AT(ipl3_ROM_START)
+    .ipl3 : AT(ipl3_ROM_START) SUBALIGN(16)
     {
         FILL(0x00000000);
         ipl3_DATA_START = .;
@@ -31,28 +31,32 @@ SECTIONS
 
     entry_ROM_START = __romPos;
     entry_VRAM = ADDR(.entry);
-    .entry 0x80025C00 : AT(entry_ROM_START)
+    .entry 0x80025C00 : AT(entry_ROM_START) SUBALIGN(16)
     {
         FILL(0x00000000);
         entry_TEXT_START = .;
         build/asm/1000.o(.text);
+        . = ALIGN(., 16);
         entry_TEXT_END = .;
         entry_TEXT_SIZE = ABSOLUTE(entry_TEXT_END - entry_TEXT_START);
         entry_DATA_START = .;
         build/asm/1000.o(.data);
+        . = ALIGN(., 16);
         entry_DATA_END = .;
         entry_DATA_SIZE = ABSOLUTE(entry_DATA_END - entry_DATA_START);
         entry_RODATA_START = .;
         build/asm/1000.o(.rodata);
+        . = ALIGN(., 16);
         entry_RODATA_END = .;
         entry_RODATA_SIZE = ABSOLUTE(entry_RODATA_END - entry_RODATA_START);
     }
     entry_bss_VRAM = ADDR(.entry_bss);
-    .entry_bss (NOLOAD) :
+    .entry_bss (NOLOAD) : SUBALIGN(16)
     {
         FILL(0x00000000);
         entry_BSS_START = .;
         build/asm/1000.o(.bss);
+        . = ALIGN(., 16);
         entry_BSS_END = .;
         entry_BSS_SIZE = ABSOLUTE(entry_BSS_END - entry_BSS_START);
     }
@@ -64,7 +68,7 @@ SECTIONS
 
     main_ROM_START = __romPos;
     main_VRAM = ADDR(.main);
-    .main entry_VRAM_END : AT(main_ROM_START)
+    .main entry_VRAM_END : AT(main_ROM_START) SUBALIGN(4)
     {
         FILL(0x00000000);
         main_TEXT_START = .;
@@ -98,7 +102,7 @@ SECTIONS
         build/asm/40180.o(.text);
         build/asm/414A0.o(.text);
         build/asm/43140.o(.text);
-        build/asm/43810.o(.text);
+        build/src/lz_decompress.o(.text);
         build/asm/45400.o(.text);
         build/asm/456C0.o(.text);
         build/asm/49E90.o(.text);
@@ -200,7 +204,6 @@ SECTIONS
         build/asm/85B30.o(.text);
         build/asm/85DA0.o(.text);
         build/asm/860C0.o(.text);
-        build/src/libultra_string.o(.text);
         build/asm/861F0.o(.text);
         build/asm/86280.o(.text);
         build/asm/862B0.o(.text);
@@ -288,6 +291,7 @@ SECTIONS
         build/asm/8F140.o(.text);
         build/asm/8F240.o(.text);
         build/asm/8F250.o(.text);
+        . = ALIGN(., 16);
         main_TEXT_END = .;
         main_TEXT_SIZE = ABSOLUTE(main_TEXT_END - main_TEXT_START);
         main_DATA_START = .;
@@ -321,7 +325,7 @@ SECTIONS
         build/asm/40180.o(.data);
         build/asm/414A0.o(.data);
         build/asm/43140.o(.data);
-        build/asm/43810.o(.data);
+        build/src/lz_decompress.o(.data);
         build/asm/45400.o(.data);
         build/asm/456C0.o(.data);
         build/asm/49E90.o(.data);
@@ -423,7 +427,6 @@ SECTIONS
         build/asm/85B30.o(.data);
         build/asm/85DA0.o(.data);
         build/asm/860C0.o(.data);
-        build/src/libultra_string.o(.data);
         build/asm/861F0.o(.data);
         build/asm/86280.o(.data);
         build/asm/862B0.o(.data);
@@ -545,7 +548,7 @@ SECTIONS
         build/asm/40180.o(.rodata);
         build/asm/414A0.o(.rodata);
         build/asm/43140.o(.rodata);
-        build/asm/43810.o(.rodata);
+        build/src/lz_decompress.o(.rodata);
         build/asm/45400.o(.rodata);
         build/asm/456C0.o(.rodata);
         build/asm/49E90.o(.rodata);
@@ -647,7 +650,6 @@ SECTIONS
         build/asm/85B30.o(.rodata);
         build/asm/85DA0.o(.rodata);
         build/asm/860C0.o(.rodata);
-        build/src/libultra_string.o(.rodata);
         build/asm/861F0.o(.rodata);
         build/asm/86280.o(.rodata);
         build/asm/862B0.o(.rodata);
@@ -736,11 +738,12 @@ SECTIONS
         build/asm/8F240.o(.rodata);
         build/asm/8F250.o(.rodata);
         build/asm/data/main_rodata.rodata.o(.rodata);
+        . = ALIGN(., 16);
         main_RODATA_END = .;
         main_RODATA_SIZE = ABSOLUTE(main_RODATA_END - main_RODATA_START);
     }
     main_bss_VRAM = ADDR(.main_bss);
-    .main_bss (NOLOAD) :
+    .main_bss (NOLOAD) : SUBALIGN(16)
     {
         FILL(0x00000000);
         main_BSS_START = .;
@@ -774,7 +777,7 @@ SECTIONS
         build/asm/40180.o(.bss);
         build/asm/414A0.o(.bss);
         build/asm/43140.o(.bss);
-        build/asm/43810.o(.bss);
+        build/src/lz_decompress.o(.bss);
         build/asm/45400.o(.bss);
         build/asm/456C0.o(.bss);
         build/asm/49E90.o(.bss);
@@ -876,7 +879,6 @@ SECTIONS
         build/asm/85B30.o(.bss);
         build/asm/85DA0.o(.bss);
         build/asm/860C0.o(.bss);
-        build/src/libultra_string.o(.bss);
         build/asm/861F0.o(.bss);
         build/asm/86280.o(.bss);
         build/asm/862B0.o(.bss);
@@ -965,6 +967,7 @@ SECTIONS
         build/asm/8F240.o(.bss);
         build/asm/8F250.o(.bss);
         build/asm/data/ADD30.bss.o(.bss);
+        . = ALIGN(., 16);
         main_BSS_END = .;
         main_BSS_SIZE = ABSOLUTE(main_BSS_END - main_BSS_START);
     }
@@ -976,7 +979,7 @@ SECTIONS
 
     ADD30_ROM_START = __romPos;
     ADD30_VRAM = ADDR(.ADD30);
-    .ADD30 main_VRAM_END : AT(ADD30_ROM_START)
+    .ADD30 main_VRAM_END : AT(ADD30_ROM_START) SUBALIGN(16)
     {
         FILL(0x00000000);
         ADD30_DATA_START = .;
