@@ -1,4 +1,20 @@
-# Ghidra script to create overlay address spaces for N64 overlays
+# Mario Golf 64 Overlay Creator for Ghidra
+#
+# Creates overlay address spaces for N64 overlays that share the same VMA.
+# Ghidra's ELF loader clobbers overlapping sections, so this script reads
+# bytes directly from the ELF file and creates proper Ghidra overlay blocks.
+#
+# Usage:
+# 1. Import build/mariogolf64.elf into Ghidra
+# 2. Run this script
+# 3. Select the same ELF file when prompted
+# 4. New overlay address spaces will appear in Window -> Memory Map
+#
+# The game has 17 overlays at 3 shared addresses:
+# - 0x801F4A30: overlays 0, 3, 7, 8, 9, 10, 15, 16
+# - 0x8024D800: overlays 4, 5, 6
+# - 0x80241800: overlays 11, 12, 13, 14
+#
 # @author Claude
 # @category N64
 # @runtime Jython
@@ -232,6 +248,10 @@ def run():
                     println("    ERROR: %s" % str(e))
 
     println("\n=== Created %d overlay blocks ===" % created_count)
+    println("\n=== Summary ===")
+    println("Overlays are now accessible via their overlay address space.")
+    println("Navigate using: Go To -> overlay_N::ADDRESS")
+    println("Example: overlay_3::801f4a30")
 
 if __name__ == "__main__":
     run()
