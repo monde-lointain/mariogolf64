@@ -153,6 +153,19 @@ def create_overlay_block(name, vma, data, is_bss=False):
 
     return block
 
+def disassemble_overlay(block):
+    """Trigger disassembly on an overlay block."""
+    from ghidra.app.cmd.disassemble import DisassembleCommand
+
+    start = block.getStart()
+    end = block.getEnd()
+    addr_set = currentProgram.getAddressFactory().getAddressSet(start, end)
+
+    cmd = DisassembleCommand(addr_set, None)
+    cmd.applyTo(currentProgram, monitor)
+
+    return cmd.getDisassembledAddressSet().getNumAddresses()
+
 def run():
     elf_path = askFile("Select ELF file", "Open")
     if elf_path is None:
@@ -193,6 +206,13 @@ def run():
             except Exception as e:
                 println("  ERROR: %s" % str(e))
                 continue
+
+            # Disassemble code block
+            try:
+                disasm_count = disassemble_overlay(block)
+                println("  Disassembled %d instructions" % disasm_count)
+            except Exception as e:
+                println("  Disassembly error: %s" % str(e))
 
             # Create BSS block if present
             if bss_sec:
