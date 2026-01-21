@@ -97,7 +97,7 @@ segments:
       - [0x40180, asm]
       - [0x414A0, asm]
       - [0x43140, asm]
-      - [0x43810, asm]
+      - [0x43810, c, lz_decompress]
       - [0x45400, asm]
       - [0x456C0, asm]
       - [0x49E90, asm]
@@ -288,7 +288,6 @@ segments:
       - [0x8F250, asm]
       - [0x8F440, data, main_data]
       - [0xA5668, rodata, main_rodata]
-      - [0x8F440, data]
       - { type: bss, vram: 0x800D2930 }
 
   - type: bin
