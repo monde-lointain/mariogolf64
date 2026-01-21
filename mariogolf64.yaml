@@ -44,6 +44,9 @@ options:
   # libultra_symbols: True
   hardware_regs: True
   gfx_ucode: f3dex2
+  subalign: null
+  ld_align_section_vram_end: False
+  ld_align_segment_vram_end: False
 segments:
   - name: header
     type: header
