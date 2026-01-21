@@ -76,6 +76,52 @@ def parse_all_sections(data):
 
     return sections
 
+def find_overlay_sections(sections):
+    """Find overlay sections and group by VMA.
+    Returns dict: vma -> [(name, file_offset, size, bss_size), ...]
+    """
+    # Pattern: .overlay_N (code/data) and .overlay_N_bss
+    overlay_pattern = re.compile(r'^\.overlay_(\d+)$')
+    bss_pattern = re.compile(r'^\.overlay_(\d+)_bss$')
+
+    # First pass: collect all overlays
+    overlays = {}  # overlay_num -> {'code': section, 'bss': section}
+
+    for sec in sections:
+        match = overlay_pattern.match(sec['name'])
+        if match:
+            num = int(match.group(1))
+            if num not in overlays:
+                overlays[num] = {}
+            overlays[num]['code'] = sec
+            continue
+
+        match = bss_pattern.match(sec['name'])
+        if match:
+            num = int(match.group(1))
+            if num not in overlays:
+                overlays[num] = {}
+            overlays[num]['bss'] = sec
+
+    # Group by VMA (code section address)
+    by_vma = {}  # vma -> [(overlay_num, code_sec, bss_sec), ...]
+
+    for num in sorted(overlays.keys()):
+        ovl = overlays[num]
+        if 'code' not in ovl:
+            continue
+
+        code_sec = ovl['code']
+        bss_sec = ovl.get('bss')
+        vma = code_sec['addr']
+
+        if vma not in by_vma:
+            by_vma[vma] = []
+
+        by_vma[vma].append((num, code_sec, bss_sec))
+
+    return by_vma
+
 def run():
     elf_path = askFile("Select ELF file", "Open")
     if elf_path is None:
@@ -88,11 +134,11 @@ def run():
     sections = parse_all_sections(data)
     println("Found %d sections" % len(sections))
 
-    # Print overlay sections
-    for sec in sections:
-        if sec['name'].startswith('.overlay'):
-            println("  %s: addr=0x%08X size=0x%X offset=0x%X" % (
-                sec['name'], sec['addr'], sec['size'], sec['offset']))
+    by_vma = find_overlay_sections(sections)
+    println("\nOverlays grouped by VMA:")
+    for vma in sorted(by_vma.keys()):
+        overlay_nums = [str(num) for num, _, _ in by_vma[vma]]
+        println("  0x%08X: overlays %s" % (vma, ", ".join(overlay_nums)))
 
 if __name__ == "__main__":
     run()
