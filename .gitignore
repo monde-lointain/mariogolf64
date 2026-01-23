@@ -38,6 +38,11 @@ build/
 # M2C files
 ctx.c
 ctx_includes.c
+*.ctx.c
+debug_source.c
+
+# Extracted assembly (generated)
+asm_extracted/
 
 # Permuter files
 nonmatchings/
