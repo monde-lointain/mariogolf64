@@ -1,5 +1,6 @@
 #include "common.h"
 #include "PR/gbi.h"
+#include "PR/ultratypes.h"
 
 /**
  * Texture entry - 28 bytes (0x1C)
@@ -65,21 +66,58 @@ typedef struct BoneEntry {
 } BoneEntry; // size = 0xC
 
 /**
- * Bone list entry - 52 bytes (0x34)
+ * Quaternion stored as fixed-point s16 values (scaled by 65536)
  */
-typedef struct BoneListEntry {
-    /* 0x00 */ s16 bone_id;
-    /* 0x02 */ u8 pad02[0x1E];
-    /* 0x20 */ s16 cache0;
-    /* 0x22 */ s16 cache1;
-    /* 0x24 */ u8 pad24[0x02];
-    /* 0x26 */ s16 cache2;
-    /* 0x28 */ s16 cache3;
-    /* 0x2A */ u8 pad2A[0x02];
-    /* 0x2C */ s16 cache4;
-    /* 0x2E */ s16 cache5;
-    /* 0x30 */ u8 pad30[0x04];
-} BoneListEntry; // size = 0x34
+typedef struct Quat16 {
+    s16 x, y, z, w;
+} Quat16; // size = 0x8
+
+/**
+ * Position keyframe - 12 bytes (3 floats)
+ */
+typedef struct PosKeyframe {
+    f32 x, y, z;
+} PosKeyframe; // size = 0xC
+
+/**
+ * Scale keyframe - 12 bytes (3 floats)
+ */
+typedef struct ScaleKeyframe {
+    f32 x, y, z;
+} ScaleKeyframe; // size = 0xC
+
+/**
+ * Bone animation data entry - 52 bytes (0x34)
+ * Contains keyframe data and interpolation cache for one bone
+ */
+typedef struct BoneAnimEntry {
+    /* 0x00 */ s16 bone_id;                    // -1 = end of list sentinel
+    /* 0x02 */ s16 num_rot_keyframes;          // Number of rotation keyframes
+    /* 0x04 */ s16 num_scale_keyframes;        // Number of scale keyframes
+    /* 0x06 */ u8 pad06[0x02];
+    /* 0x08 */ s16* pos_keyframe_times;        // Array of position keyframe times
+    /* 0x0C */ s16* rot_keyframe_times;        // Array of rotation keyframe times
+    /* 0x10 */ s16* scale_keyframe_times;      // Array of scale keyframe times
+    /* 0x14 */ PosKeyframe* pos_data;          // Position keyframe data (x,y,z floats)
+    /* 0x18 */ Quat16* rot_data;               // Rotation keyframe data (quaternions)
+    /* 0x1C */ ScaleKeyframe* scale_data;      // Scale keyframe data (x,y,z floats)
+    /* 0x20 */ s16 cache_pos_start;            // Cached position keyframe start time
+    /* 0x22 */ s16 cache_pos_end;              // Cached position keyframe end time
+    /* 0x24 */ s16 cache_pos_index;            // Cached position keyframe index
+    /* 0x26 */ s16 cache_rot_start;            // Cached rotation keyframe start time
+    /* 0x28 */ s16 cache_rot_end;              // Cached rotation keyframe end time
+    /* 0x2A */ s16 cache_rot_index;            // Cached rotation keyframe index
+    /* 0x2C */ s16 cache_scale_start;          // Cached scale keyframe start time
+    /* 0x2E */ s16 cache_scale_end;            // Cached scale keyframe end time
+    /* 0x30 */ s16 cache_scale_index;          // Cached scale keyframe index
+    /* 0x32 */ u8 pad32[0x02];
+} BoneAnimEntry; // size = 0x34
+
+/**
+ * Bone list entry - 52 bytes (0x34)
+ * Alias for backwards compatibility
+ */
+typedef BoneAnimEntry BoneListEntry;
 
 /**
  * Character animation state - 396 bytes (0x18C)
@@ -147,8 +185,23 @@ extern void func_8005342C(s32 a0, s32 a1, s32 a2, s32 a3);
 extern void func_800AADC4(void* dest, void* src, s32 size);
 extern s32 func_800299F4(s32 debug_flag);
 extern void func_80055788(s32 character_id);
-extern void func_80053604(s32 character_id);
 extern CharacterAnimState* get_character_anim_state(s32 character_id);  // func_80054354
+
+// Matrix functions
+extern void build_translation_matrix(f32* out, f32 x, f32 y, f32 z);    // func_800AA8D0
+extern void build_scale_matrix(f32* out, f32 x, f32 y, f32 z);          // func_800AA650
+extern void mtx_multiply(f32* a, f32* b, f32* out);                      // func_800A93D0
+extern void concat_and_output_matrix(f32* local, void* out);             // func_80067B00
+extern f32 acosf_approx(f32 x);                                          // func_80059BC0
+extern f32 sinf2(f32 angle);
+
+// Constants
+extern f64 D_800D0478;  // 1.0 double constant
+extern f64 D_800D0480;  // SLERP epsilon threshold
+
+// Forward declarations
+void update_vertex_texture_coords(s32 character_id);
+void calculate_bone_matrices(s32 character_id);
 
 // Debug strings
 extern const char D_800D070C[];  // "model already loaded"
@@ -314,19 +367,19 @@ void load_character_model(s32 character_id, s32 model_variant, s32 lod_level) {
     func_80055788(character_id);
 
     // Calculate initial bone matrices
-    func_80053604(character_id);
+    calculate_bone_matrices(character_id);
 
-    // Initialize bone attachment point cache to -1
+    // Initialize bone keyframe cache to -1
     anim_data = anim_state->anim_data;
     bone_list = (BoneListEntry*)anim_data->bone_list;
     if (bone_list->bone_id != -1) {
         do {
-            bone_list->cache0 = -1;
-            bone_list->cache1 = -1;
-            bone_list->cache2 = -1;
-            bone_list->cache3 = -1;
-            bone_list->cache4 = -1;
-            bone_list->cache5 = -1;
+            bone_list->cache_pos_start = -1;
+            bone_list->cache_pos_end = -1;
+            bone_list->cache_rot_start = -1;
+            bone_list->cache_rot_end = -1;
+            bone_list->cache_scale_start = -1;
+            bone_list->cache_scale_end = -1;
             bone_list++;
         } while (bone_list->bone_id != -1);
     }
@@ -472,4 +525,343 @@ void update_vertex_texture_coords(s32 character_id) {
         texture_index++;
         tex_entry = anim_state->anim_data->texture_array[texture_index];
     } while (tex_entry != NULL);
+}
+
+#define FIXED_TO_FLOAT (1.0f / 65536.0f)
+
+/**
+ * Calculate transformation matrices for all bones in a character's skeleton.
+ *
+ * For each bone, interpolates position, rotation (quaternion SLERP), and scale
+ * keyframes based on current animation frame. Builds local transform matrix
+ * and concatenates with parent bone's matrix.
+ *
+ * @param character_id Character slot index
+ */
+void calculate_bone_matrices(s32 character_id) {
+    CharacterAnimState* state;
+    AnimData* anim_data;
+    BoneAnimEntry* bone;
+    BoneAnimEntry* bone_base;
+    void* out_mtx;
+    s32 needs_interp;
+    s32 keyframe_idx;
+    s32 next_idx;
+    s16 num_keyframes;
+    s16* times;
+    f32 current_frame;
+    f32 lerp_t;
+    f32 pos_x, pos_y, pos_z;
+    f32 scale_x, scale_y, scale_z;
+    f32 quat[4];  // x, y, z, w
+    f32 translation_mtx[16];
+    f32 rotation_mtx[16];
+    f32 scale_mtx[16];
+    f32 dot, omega, sin_omega, weight1, weight2;
+    f32 one_minus_t;
+    PosKeyframe* pos_curr;
+    PosKeyframe* pos_next;
+    ScaleKeyframe* scale_curr;
+    ScaleKeyframe* scale_next;
+    Quat16* rot_curr;
+    Quat16* rot_next;
+
+    state = get_character_anim_state(character_id);
+    anim_data = state->anim_data;
+    bone_base = (BoneAnimEntry*)anim_data->bone_list;
+
+    // Check for empty bone list
+    if (bone_base->bone_id == -1) {
+        return;
+    }
+
+    out_mtx = D_80105210;
+    bone = bone_base;
+
+    // Process each bone
+    do {
+        current_frame = D_800FBDF8;
+
+        // ====================================================================
+        // POSITION INTERPOLATION
+        // ====================================================================
+        needs_interp = 1;
+
+        // Check if frame is within cached keyframe range
+        if ((f32)bone->cache_pos_end < current_frame ||
+            current_frame < (f32)bone->cache_pos_start) {
+
+            // Search for correct keyframe
+            times = bone->pos_keyframe_times;
+            num_keyframes = times[0];
+
+            if (current_frame < (f32)num_keyframes) {
+                // Before first keyframe - use keyframe 0 directly
+                pos_curr = &bone->pos_data[0];
+                pos_x = pos_curr->x;
+                pos_y = pos_curr->y;
+                pos_z = pos_curr->z;
+                needs_interp = 0;
+            } else {
+                // Search for keyframe
+                keyframe_idx = 1;
+                while (keyframe_idx < bone_base->bone_id) {
+                    if (current_frame < (f32)times[keyframe_idx]) {
+                        // Found it - update cache
+                        bone->cache_pos_index = keyframe_idx - 1;
+                        bone->cache_pos_start = times[keyframe_idx - 1];
+                        bone->cache_pos_end = times[keyframe_idx];
+                        goto pos_interpolate;
+                    }
+                    keyframe_idx++;
+                }
+
+                // At or past last keyframe
+                if (keyframe_idx == bone_base->bone_id) {
+                    keyframe_idx--;
+                    pos_curr = &bone->pos_data[keyframe_idx];
+                    pos_x = pos_curr->x;
+                    pos_y = pos_curr->y;
+                    pos_z = pos_curr->z;
+                    needs_interp = 0;
+                }
+            }
+        }
+
+pos_interpolate:
+        if (needs_interp) {
+            // Check if past animation end
+            if (D_800FE430 < bone->cache_pos_end) {
+                keyframe_idx = bone->cache_pos_index;
+                pos_curr = &bone->pos_data[keyframe_idx];
+                pos_x = pos_curr->x;
+                pos_y = pos_curr->y;
+                pos_z = pos_curr->z;
+            } else {
+                // Interpolate between keyframes
+                lerp_t = (current_frame - (f32)bone->cache_pos_start) /
+                         (f32)(bone->cache_pos_end - bone->cache_pos_start);
+                one_minus_t = 1.0 - (f64)lerp_t;
+
+                keyframe_idx = bone->cache_pos_index;
+                next_idx = keyframe_idx + 1;
+                pos_curr = &bone->pos_data[keyframe_idx];
+                pos_next = &bone->pos_data[next_idx];
+
+                pos_x = one_minus_t * pos_curr->x + lerp_t * pos_next->x;
+                pos_y = one_minus_t * pos_curr->y + lerp_t * pos_next->y;
+                pos_z = one_minus_t * pos_curr->z + lerp_t * pos_next->z;
+            }
+        }
+
+        // Build translation matrix
+        build_translation_matrix(translation_mtx, pos_x, pos_y, pos_z);
+
+        // ====================================================================
+        // ROTATION INTERPOLATION (Quaternion SLERP)
+        // ====================================================================
+        needs_interp = 1;
+
+        if ((f32)bone->cache_rot_end < current_frame ||
+            current_frame < (f32)bone->cache_rot_start) {
+
+            times = bone->rot_keyframe_times;
+            num_keyframes = times[0];
+
+            if (current_frame < (f32)num_keyframes) {
+                // Use first keyframe directly
+                rot_curr = &bone->rot_data[0];
+                quat[0] = (f32)rot_curr->x * FIXED_TO_FLOAT;
+                quat[1] = (f32)rot_curr->y * FIXED_TO_FLOAT;
+                quat[2] = (f32)rot_curr->z * FIXED_TO_FLOAT;
+                quat[3] = (f32)rot_curr->w * FIXED_TO_FLOAT;
+                needs_interp = 0;
+            } else {
+                // Search for keyframe
+                keyframe_idx = 1;
+                while (keyframe_idx < bone->num_rot_keyframes) {
+                    if (current_frame < (f32)times[keyframe_idx]) {
+                        bone->cache_rot_index = keyframe_idx - 1;
+                        bone->cache_rot_start = times[keyframe_idx - 1];
+                        bone->cache_rot_end = times[keyframe_idx];
+                        goto rot_interpolate;
+                    }
+                    keyframe_idx++;
+                }
+
+                // At last keyframe
+                if (keyframe_idx == bone->num_rot_keyframes) {
+                    keyframe_idx--;
+                    rot_curr = &bone->rot_data[keyframe_idx];
+                    quat[0] = (f32)rot_curr->x * FIXED_TO_FLOAT;
+                    quat[1] = (f32)rot_curr->y * FIXED_TO_FLOAT;
+                    quat[2] = (f32)rot_curr->z * FIXED_TO_FLOAT;
+                    quat[3] = (f32)rot_curr->w * FIXED_TO_FLOAT;
+                    needs_interp = 0;
+                }
+            }
+        }
+
+rot_interpolate:
+        if (needs_interp) {
+            if (D_800FE430 < bone->cache_rot_end) {
+                // Past end - use cached keyframe
+                keyframe_idx = bone->cache_rot_index;
+                rot_curr = &bone->rot_data[keyframe_idx];
+                quat[0] = (f32)rot_curr->x * FIXED_TO_FLOAT;
+                quat[1] = (f32)rot_curr->y * FIXED_TO_FLOAT;
+                quat[2] = (f32)rot_curr->z * FIXED_TO_FLOAT;
+                quat[3] = (f32)rot_curr->w * FIXED_TO_FLOAT;
+            } else {
+                // SLERP between quaternions
+                keyframe_idx = bone->cache_rot_index;
+                next_idx = keyframe_idx + 1;
+                rot_curr = &bone->rot_data[keyframe_idx];
+                rot_next = &bone->rot_data[next_idx];
+
+                // Calculate dot product
+                dot = ((f32)rot_curr->x * (f32)rot_next->x +
+                       (f32)rot_curr->y * (f32)rot_next->y +
+                       (f32)rot_curr->z * (f32)rot_next->z +
+                       (f32)rot_curr->w * (f32)rot_next->w) * (FIXED_TO_FLOAT * FIXED_TO_FLOAT);
+
+                lerp_t = (current_frame - (f32)bone->cache_rot_start) /
+                         (f32)(bone->cache_rot_end - bone->cache_rot_start);
+
+                // Check if quaternions are nearly parallel
+                if ((1.0 - (f64)dot) < D_800D0480) {
+                    // Linear interpolation (nlerp)
+                    weight1 = 1.0 - (f64)lerp_t;
+                    weight2 = lerp_t;
+                } else {
+                    // Full SLERP
+                    omega = acosf_approx(dot);
+                    sin_omega = sinf2(omega);
+                    weight1 = sinf2((1.0f - lerp_t) * omega) / sin_omega;
+                    weight2 = sinf2(lerp_t * omega) / sin_omega;
+                }
+
+                // Apply weights
+                quat[0] = weight1 * (f32)rot_curr->x * FIXED_TO_FLOAT +
+                          weight2 * (f32)rot_next->x * FIXED_TO_FLOAT;
+                quat[1] = weight1 * (f32)rot_curr->y * FIXED_TO_FLOAT +
+                          weight2 * (f32)rot_next->y * FIXED_TO_FLOAT;
+                quat[2] = weight1 * (f32)rot_curr->z * FIXED_TO_FLOAT +
+                          weight2 * (f32)rot_next->z * FIXED_TO_FLOAT;
+                quat[3] = weight1 * (f32)rot_curr->w * FIXED_TO_FLOAT +
+                          weight2 * (f32)rot_next->w * FIXED_TO_FLOAT;
+            }
+        }
+
+        // Convert quaternion to rotation matrix
+        {
+            f32 qx = quat[0], qy = quat[1], qz = quat[2], qw = quat[3];
+            f32 mag_sq = qx*qx + qy*qy + qz*qz + qw*qw;
+            f32 s = (mag_sq > 0.0f) ? (2.0f / mag_sq) : 0.0f;
+            f32 xs = qx * s, ys = qy * s, zs = qz * s;
+            f32 wx = qw * xs, wy = qw * ys, wz = qw * zs;
+            f32 xx = qx * xs, xy = qx * ys, xz = qx * zs;
+            f32 yy = qy * ys, yz = qy * zs, zz = qz * zs;
+
+            rotation_mtx[0]  = 1.0f - (yy + zz);  // M[0][0]
+            rotation_mtx[1]  = xy + wz;            // M[1][0]
+            rotation_mtx[2]  = xz - wy;            // M[2][0]
+            rotation_mtx[3]  = 0.0f;               // M[3][0]
+            rotation_mtx[4]  = xy - wz;            // M[0][1]
+            rotation_mtx[5]  = 1.0f - (xx + zz);  // M[1][1]
+            rotation_mtx[6]  = yz + wx;            // M[2][1]
+            rotation_mtx[7]  = 0.0f;               // M[3][1]
+            rotation_mtx[8]  = xz + wy;            // M[0][2]
+            rotation_mtx[9]  = yz - wx;            // M[1][2]
+            rotation_mtx[10] = 1.0f - (xx + yy);  // M[2][2]
+            rotation_mtx[11] = 0.0f;               // M[3][2]
+            rotation_mtx[12] = 0.0f;               // M[0][3]
+            rotation_mtx[13] = 0.0f;               // M[1][3]
+            rotation_mtx[14] = 0.0f;               // M[2][3]
+            rotation_mtx[15] = 1.0f;               // M[3][3]
+        }
+
+        // ====================================================================
+        // SCALE INTERPOLATION
+        // ====================================================================
+        needs_interp = 1;
+
+        if ((f32)bone->cache_scale_end < current_frame ||
+            current_frame < (f32)bone->cache_scale_start) {
+
+            times = bone->scale_keyframe_times;
+            num_keyframes = times[0];
+
+            if (current_frame < (f32)num_keyframes) {
+                scale_curr = &bone->scale_data[0];
+                scale_x = scale_curr->x;
+                scale_y = scale_curr->y;
+                scale_z = scale_curr->z;
+                needs_interp = 0;
+            } else {
+                keyframe_idx = 1;
+                while (keyframe_idx < bone->num_scale_keyframes) {
+                    if (current_frame < (f32)times[keyframe_idx]) {
+                        bone->cache_scale_index = keyframe_idx - 1;
+                        bone->cache_scale_start = times[keyframe_idx - 1];
+                        bone->cache_scale_end = times[keyframe_idx];
+                        goto scale_interpolate;
+                    }
+                    keyframe_idx++;
+                }
+
+                if (keyframe_idx == bone->num_scale_keyframes) {
+                    keyframe_idx--;
+                    scale_curr = &bone->scale_data[keyframe_idx];
+                    scale_x = scale_curr->x;
+                    scale_y = scale_curr->y;
+                    scale_z = scale_curr->z;
+                    needs_interp = 0;
+                }
+            }
+        }
+
+scale_interpolate:
+        if (needs_interp) {
+            if (D_800FE430 < bone->cache_scale_end) {
+                keyframe_idx = bone->cache_scale_index;
+                scale_curr = &bone->scale_data[keyframe_idx];
+                scale_x = scale_curr->x;
+                scale_y = scale_curr->y;
+                scale_z = scale_curr->z;
+            } else {
+                lerp_t = (current_frame - (f32)bone->cache_scale_start) /
+                         (f32)(bone->cache_scale_end - bone->cache_scale_start);
+                one_minus_t = 1.0 - (f64)lerp_t;
+
+                keyframe_idx = bone->cache_scale_index;
+                next_idx = keyframe_idx + 1;
+                scale_curr = &bone->scale_data[keyframe_idx];
+                scale_next = &bone->scale_data[next_idx];
+
+                scale_x = one_minus_t * scale_curr->x + lerp_t * scale_next->x;
+                scale_y = one_minus_t * scale_curr->y + lerp_t * scale_next->y;
+                scale_z = one_minus_t * scale_curr->z + lerp_t * scale_next->z;
+            }
+        }
+
+        // Build scale matrix
+        build_scale_matrix(scale_mtx, scale_x, scale_y, scale_z);
+
+        // ====================================================================
+        // COMBINE MATRICES: out = parent * translation * rotation * scale
+        // ====================================================================
+        // rotation = rotation * scale
+        mtx_multiply(scale_mtx, rotation_mtx, rotation_mtx);
+
+        // rotation = rotation * translation
+        mtx_multiply(rotation_mtx, translation_mtx, rotation_mtx);
+
+        // Concatenate with parent and output
+        concat_and_output_matrix(rotation_mtx, out_mtx);
+
+        // Advance to next bone
+        bone++;
+        out_mtx = (void*)((u8*)out_mtx + 0x40);  // sizeof(Mtx) = 64
+    } while (bone->bone_id != -1);
 }
