@@ -16,6 +16,14 @@ typedef signed long long s64;
 typedef float f32;
 typedef double f64;
 
+typedef struct {
+    f32 x, y, z;
+} Vec3f;
+
+typedef struct {
+    s32 x, y, z;
+} Vec3i;
+
 typedef struct LzDecompressState {
     /* 0x00 */ u8* src_cur;         // current read position
     /* 0x04 */ u8* dst_start;       // output buffer start
