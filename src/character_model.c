@@ -1,6 +1,31 @@
 #include "common.h"
-#include "PR/gbi.h"
-#include "PR/ultratypes.h"
+
+// N64 SDK types (from PR/ultratypes.h and PR/gbi.h)
+typedef u64 Mtx[8];  // Fixed-point 4x4 matrix (8 double-words)
+
+typedef struct {
+    s16 ob[3];  // Position
+    u16 flag;
+    s16 s, t;   // Texture coords accessible by name
+    u8 cn[4];   // Color/normal
+} Vtx_t;
+
+typedef u64 Gfx;
+
+// GBI macros (simplified for compilation - use separate statements)
+#define G_IM_FMT_RGBA    0
+#define G_IM_SIZ_16b     2
+#define G_TX_LOADTILE    7
+#define G_TX_NOMIRROR    0
+#define G_TX_CLAMP       2
+#define G_TX_NOLOD       0
+
+#define gDPSetTextureImage(pkt, fmt, siz, width, addr) (void)(*(pkt) = 0)
+#define gDPSetTile(pkt, fmt, siz, line, tmem, tile, palette, cmt, maskt, shiftt, cms, masks, shifts) (void)(*(pkt) = 0)
+#define gDPLoadSync(pkt) (void)(*(pkt) = 0)
+#define gDPLoadBlock(pkt, tile, uls, ult, lrs, dxt) (void)(*(pkt) = 0)
+#define gDPPipeSync(pkt) (void)(*(pkt) = 0)
+#define gDPSetTileSize(pkt, tile, uls, ult, lrs, lrt) (void)(*(pkt) = 0)
 
 /**
  * Texture entry - 28 bytes (0x1C)
@@ -30,14 +55,28 @@ typedef struct TileDescriptor {
  * Animation data entry - 88 bytes (0x58)
  * Stored in D_800CCCC8 (low LOD) and D_800CFE48 (high LOD) arrays
  */
+/**
+ * Bone position entry - 20 bytes (0x14)
+ * Named marker position within a coordinate frame defined by matrix chain.
+ * Multiple entries can share the same chain with different translations.
+ */
+typedef struct BonePosEntry {
+    /* 0x00 */ s16* matrix_chain;    // Bone matrix indices to multiply, -1 terminated
+    /* 0x04 */ f32 trans_x;          // Translation X within coordinate frame
+    /* 0x08 */ f32 trans_y;          // Translation Y within coordinate frame
+    /* 0x0C */ f32 trans_z;          // Translation Z within coordinate frame
+    /* 0x10 */ s16 bone_id;          // Bone identifier (lookup key)
+    /* 0x12 */ u8 pad12[0x02];
+} BonePosEntry; // size = 0x14
+
 typedef struct AnimData {
     /* 0x00 */ u32 rom_start;
     /* 0x04 */ u32 rom_end;
     /* 0x08 */ void* display_list;
     /* 0x0C */ u8 pad0C[0x08];
-    /* 0x14 */ void* bone_hierarchy;
-    /* 0x18 */ u8 pad18[0x04];
-    /* 0x1C */ void* bone_list;
+    /* 0x14 */ void* bone_anim_header;        // BoneEntry array (frame bounds per bone)
+    /* 0x18 */ BonePosEntry* bone_pos_array;  // BonePosEntry array (parent chains + rest pose)
+    /* 0x1C */ void* bone_list;               // BoneAnimEntry array (keyframes)
     /* 0x20 */ u8 pad20[0x04];
     /* 0x24 */ TextureEntry** texture_array;  // NULL-terminated array of texture entry ptrs
     /* 0x28 */ TileDescriptor* tile_array;    // Array of tile descriptors
@@ -167,13 +206,14 @@ extern AnimData D_800CCCC8[];  // Low LOD animation bank
 extern AnimData D_800CFE48[];  // High LOD animation bank
 
 // Global state
-extern s32 D_800C1DEC;   // g_current_anim_index
-extern void* D_800C1DF4; // g_vertex_buffer
-extern s32 D_800C1DF0;   // g_current_bone
-extern void* D_80105210; // g_current_vtx_buffer
-extern f32 D_800FBDF8;   // g_anim_frame
-extern s32 D_80104B80;   // g_start_frame
-extern s32 D_800FE430;   // g_end_frame
+extern s32 g_current_anim_index;    // D_800C1DEC
+extern void* g_vertex_buffer;       // D_800C1DF4
+extern s32 g_current_bone;          // D_800C1DF0
+extern void* g_bone_matrix_buffer;  // D_80105210
+extern f32 g_anim_frame;            // D_800FBDF8
+extern s32 g_start_frame;           // D_80104B80
+extern s32 g_end_frame;             // D_800FE430
+extern void* D_800C1DF4;            // Decompression buffer
 
 // External functions
 extern s32 func_800542A0(s32 character_id);
@@ -188,20 +228,26 @@ extern void func_80055788(s32 character_id);
 extern CharacterAnimState* get_character_anim_state(s32 character_id);  // func_80054354
 
 // Matrix functions
-extern void build_translation_matrix(f32* out, f32 x, f32 y, f32 z);    // func_800AA8D0
-extern void build_scale_matrix(f32* out, f32 x, f32 y, f32 z);          // func_800AA650
-extern void mtx_multiply(f32* a, f32* b, f32* out);                      // func_800A93D0
-extern void concat_and_output_matrix(f32* local, void* out);             // func_80067B00
+extern void guTranslateF(f32* out, f32 x, f32 y, f32 z);
+extern void guScaleF(f32* out, f32 x, f32 y, f32 z);
+extern void guMtxCatF(f32* a, f32* b, f32* out);
+extern void guMtxF2L(f32* mtxF, void* mtx);
+extern void guMtxIdent(Mtx* m);
+extern void guTranslate(Mtx* m, f32 x, f32 y, f32 z);
+extern void guMtxCatL(Mtx* a, Mtx* b, Mtx* out);
+extern void guMtxXFML(Mtx* m, f32 x, f32 y, f32 z, f32* ox, f32* oy, f32* oz);
+extern u32 osVirtualToPhysical(void* addr);
 extern f32 acosf_approx(f32 x);                                          // func_80059BC0
-extern f32 sinf2(f32 angle);
+extern f32 sinf(f32 angle);
 
 // Constants
-extern f64 D_800D0478;  // 1.0 double constant
-extern f64 D_800D0480;  // SLERP epsilon threshold
+extern f64 D_800D0478;          // 1.0 double constant
+extern f64 SLERP_EPSILON;       // D_800D0480 - threshold for nlerp vs slerp
 
 // Forward declarations
 void update_vertex_texture_coords(s32 character_id);
 void calculate_bone_matrices(s32 character_id);
+s32 get_bone_world_position(s32 character_id, s16 bone_id, f32* out_pos);
 
 // Debug strings
 extern const char D_800D070C[];  // "model already loaded"
@@ -239,13 +285,13 @@ void load_character_model(s32 character_id, s32 model_variant, s32 lod_level) {
         // Animation index = (lod_level & 3) * 36 + (model_variant % 72)
         anim_index = ((lod_level & 3) * 36) + (model_variant % 72);
         anim_data = &D_800CCCC8[anim_index];
-        D_800C1DEC = anim_index;
+        g_current_anim_index = anim_index;
     } else {
         // High detail LOD - use D_800CFE48 bank
         // Animation index = model_variant % 18
         anim_index = model_variant % 18;
         anim_data = &D_800CFE48[anim_index];
-        D_800C1DEC = anim_index;
+        g_current_anim_index = anim_index;
     }
 
     anim_state->anim_data = anim_data;
@@ -284,8 +330,8 @@ void load_character_model(s32 character_id, s32 model_variant, s32 lod_level) {
     anim_state->blend_frames = 27;
     anim_state->extra_flags_0 = 0;
     anim_state->extra_flags_1 = 0;
-    anim_state->current_anim = D_800C1DEC;
-    D_800C1DF4 = anim_state->vertex_buffer;
+    anim_state->current_anim = g_current_anim_index;
+    g_vertex_buffer = anim_state->vertex_buffer;
 
     // Decompress model data from ROM
     if (needs_extended_decompress) {
@@ -305,7 +351,7 @@ void load_character_model(s32 character_id, s32 model_variant, s32 lod_level) {
     }
 
     // Relocate pointers in decompressed data
-    heap_ptr = func_800A7720(D_800C1DF4);
+    heap_ptr = func_800A7720(g_vertex_buffer);
 
     // Initialize bone matrix buffer
     func_8005342C(0, 0, 0x20, 0x2000000);
@@ -330,29 +376,29 @@ void load_character_model(s32 character_id, s32 model_variant, s32 lod_level) {
     func_800AADC4(anim_state->vtx_buffer_2, anim_state->vtx_buffer_0, vtx_size);
 
     // Set current vertex buffer
-    D_800C1DF0 = anim_state->bone_index;
-    D_80105210 = anim_state->vtx_buffer_0;  // vtx_buffers[buffer_index]
+    g_current_bone = anim_state->bone_index;
+    g_bone_matrix_buffer = anim_state->vtx_buffer_0;  // vtx_buffers[buffer_index]
 
     // Debug output
     if (func_800299F4(0x41)) {
         anim_data = anim_state->anim_data;
-        func_800AAE80(D_800D076C, anim_data->bone_hierarchy);
+        func_800AAE80(D_800D076C, anim_data->bone_anim_header);
     }
 
     // Read animation frame bounds from bone entry
     anim_data = anim_state->anim_data;
-    bone_hierarchy = (BoneEntry*)anim_data->bone_hierarchy;
-    anim_state->start_frame = bone_hierarchy[D_800C1DF0].start_frame;
+    bone_hierarchy = (BoneEntry*)anim_data->bone_anim_header;
+    anim_state->start_frame = bone_hierarchy[g_current_bone].start_frame;
     anim_state->current_frame = (f32)anim_state->start_frame;
-    anim_state->end_frame = anim_state->start_frame + bone_hierarchy[D_800C1DF0].frame_count;
+    anim_state->end_frame = anim_state->start_frame + bone_hierarchy[g_current_bone].frame_count;
 
     // Store frame info to globals
-    D_800FBDF8 = anim_state->current_frame;
-    D_80104B80 = anim_state->start_frame;
-    D_800FE430 = anim_state->end_frame;
+    g_anim_frame = anim_state->current_frame;
+    g_start_frame = anim_state->start_frame;
+    g_end_frame = anim_state->end_frame;
 
     if (func_800299F4(0x41)) {
-        func_800AAE80(D_800D0788, D_800C1DF0, D_80104B80, D_800FE430);
+        func_800AAE80(D_800D0788, g_current_bone, g_start_frame, g_end_frame);
     }
 
     // Initialize vertex buffers for triple buffering
@@ -385,7 +431,7 @@ void load_character_model(s32 character_id, s32 model_variant, s32 lod_level) {
     }
 
     // Copy render parameters from anim_data to anim_state
-    anim_state->vtx_ptr = D_80105210;
+    anim_state->vtx_ptr = g_bone_matrix_buffer;
     anim_data = anim_state->anim_data;
     anim_state->display_list = anim_data->display_list;
     anim_state->scale_x = *anim_data->scale_x_ptr;
@@ -397,7 +443,7 @@ void load_character_model(s32 character_id, s32 model_variant, s32 lod_level) {
     anim_state->flags = anim_data->flags;
 
     // Count bones in hierarchy
-    bone_hierarchy = (BoneEntry*)anim_data->bone_hierarchy;
+    bone_hierarchy = (BoneEntry*)anim_data->bone_anim_header;
     bone_count = 0;
     while (bone_hierarchy->data != NULL) {
         bone_count++;
@@ -407,7 +453,7 @@ void load_character_model(s32 character_id, s32 model_variant, s32 lod_level) {
     anim_state->playback_speed = 1.0f;
 
     if (func_800299F4(0x41)) {
-        func_800AAE80(D_800D07B0, D_800C1DEC);
+        func_800AAE80(D_800D07B0, g_current_anim_index);
     }
 }
 
@@ -516,7 +562,7 @@ void update_vertex_texture_coords(s32 character_id) {
         // Copy UV coordinates to vertices (3 per triangle)
         for (i = 0; i < 3; i++) {
             vtx_buffer = (&anim_state->vtx_buffer_0)[anim_state->buffer_index];
-            vertex = (Vtx*)(((tex_entry->vertex_base_addr + (i * 16)) & ADDRESS_MASK) + (u32)vtx_buffer);
+            vertex = (Vtx_t*)(((tex_entry->vertex_base_addr + (i * 16)) & ADDRESS_MASK) + (u32)vtx_buffer);
             vertex->s = tex_entry->u[i];
             vertex->t = tex_entry->v[i];
         }
@@ -575,12 +621,12 @@ void calculate_bone_matrices(s32 character_id) {
         return;
     }
 
-    out_mtx = D_80105210;
+    out_mtx = g_bone_matrix_buffer;
     bone = bone_base;
 
     // Process each bone
     do {
-        current_frame = D_800FBDF8;
+        current_frame = g_anim_frame;
 
         // ====================================================================
         // POSITION INTERPOLATION
@@ -605,7 +651,7 @@ void calculate_bone_matrices(s32 character_id) {
             } else {
                 // Search for keyframe
                 keyframe_idx = 1;
-                while (keyframe_idx < bone_base->bone_id) {
+                while (keyframe_idx < bone->bone_id) {
                     if (current_frame < (f32)times[keyframe_idx]) {
                         // Found it - update cache
                         bone->cache_pos_index = keyframe_idx - 1;
@@ -631,7 +677,7 @@ void calculate_bone_matrices(s32 character_id) {
 pos_interpolate:
         if (needs_interp) {
             // Check if past animation end
-            if (D_800FE430 < bone->cache_pos_end) {
+            if (g_end_frame < bone->cache_pos_end) {
                 keyframe_idx = bone->cache_pos_index;
                 pos_curr = &bone->pos_data[keyframe_idx];
                 pos_x = pos_curr->x;
@@ -655,7 +701,7 @@ pos_interpolate:
         }
 
         // Build translation matrix
-        build_translation_matrix(translation_mtx, pos_x, pos_y, pos_z);
+        guTranslateF(translation_mtx, pos_x, pos_y, pos_z);
 
         // ====================================================================
         // ROTATION INTERPOLATION (Quaternion SLERP)
@@ -704,7 +750,7 @@ pos_interpolate:
 
 rot_interpolate:
         if (needs_interp) {
-            if (D_800FE430 < bone->cache_rot_end) {
+            if (g_end_frame < bone->cache_rot_end) {
                 // Past end - use cached keyframe
                 keyframe_idx = bone->cache_rot_index;
                 rot_curr = &bone->rot_data[keyframe_idx];
@@ -729,16 +775,16 @@ rot_interpolate:
                          (f32)(bone->cache_rot_end - bone->cache_rot_start);
 
                 // Check if quaternions are nearly parallel
-                if ((1.0 - (f64)dot) < D_800D0480) {
+                if ((1.0 - (f64)dot) < SLERP_EPSILON) {
                     // Linear interpolation (nlerp)
                     weight1 = 1.0 - (f64)lerp_t;
                     weight2 = lerp_t;
                 } else {
                     // Full SLERP
                     omega = acosf_approx(dot);
-                    sin_omega = sinf2(omega);
-                    weight1 = sinf2((1.0f - lerp_t) * omega) / sin_omega;
-                    weight2 = sinf2(lerp_t * omega) / sin_omega;
+                    sin_omega = sinf(omega);
+                    weight1 = sinf((1.0f - lerp_t) * omega) / sin_omega;
+                    weight2 = sinf(lerp_t * omega) / sin_omega;
                 }
 
                 // Apply weights
@@ -823,7 +869,7 @@ rot_interpolate:
 
 scale_interpolate:
         if (needs_interp) {
-            if (D_800FE430 < bone->cache_scale_end) {
+            if (g_end_frame < bone->cache_scale_end) {
                 keyframe_idx = bone->cache_scale_index;
                 scale_curr = &bone->scale_data[keyframe_idx];
                 scale_x = scale_curr->x;
@@ -846,22 +892,126 @@ scale_interpolate:
         }
 
         // Build scale matrix
-        build_scale_matrix(scale_mtx, scale_x, scale_y, scale_z);
+        guScaleF(scale_mtx, scale_x, scale_y, scale_z);
 
         // ====================================================================
         // COMBINE MATRICES: out = parent * translation * rotation * scale
         // ====================================================================
-        // rotation = rotation * scale
-        mtx_multiply(scale_mtx, rotation_mtx, rotation_mtx);
+        // rotation = scale * rotation
+        guMtxCatF(scale_mtx, rotation_mtx, rotation_mtx);
 
         // rotation = rotation * translation
-        mtx_multiply(rotation_mtx, translation_mtx, rotation_mtx);
+        guMtxCatF(rotation_mtx, translation_mtx, rotation_mtx);
 
-        // Concatenate with parent and output
-        concat_and_output_matrix(rotation_mtx, out_mtx);
+        // Convert float matrix to fixed-point and output
+        guMtxF2L(rotation_mtx, out_mtx);
 
         // Advance to next bone
         bone++;
         out_mtx = (void*)((u8*)out_mtx + 0x40);  // sizeof(Mtx) = 64
     } while (bone->bone_id != -1);
+}
+
+#define BONE_TO_WORLD_SCALE 0.01f
+
+/**
+ * Get the world-space position of a specific bone in a character's skeleton.
+ *
+ * Searches the bone hierarchy for the specified bone, accumulates parent
+ * transforms, applies the bone's local translation, then transforms the
+ * origin through the matrix to get the final world position.
+ *
+ * @param character_id Character slot index
+ * @param bone_id Target bone ID to find in hierarchy
+ * @param out_pos Pointer to Vec3f to receive world position
+ * @return 0 on success, 1 if bone not found, -1 if invalid character
+ */
+s32 get_bone_world_position(s32 character_id, s16 bone_id, f32* out_pos) {
+    CharacterAnimState* anim_state;
+    AnimData* anim_data;
+    BonePosEntry* bone_hierarchy;
+    BonePosEntry* bone_entry;
+    s16* matrix_chain;
+    Mtx accumulated_mtx;
+    Mtx translation_mtx;
+    s16 parent_idx;
+    Mtx* bone_matrices;
+
+    anim_state = get_character_anim_state(character_id);
+    if (anim_state == NULL) {
+        out_pos[0] = 0.0f;
+        out_pos[1] = 0.0f;
+        out_pos[2] = 0.0f;
+        return -1;
+    }
+
+    // Convert vertex buffer to physical address for DMA
+    osVirtualToPhysical(anim_state->vertex_buffer);
+
+    // Initialize bone matrix buffer
+    func_8005342C(0, 0, 0x20, 0x2000000);
+
+    // Get bone position array from AnimData (offset 0x18)
+    anim_data = anim_state->anim_data;
+    bone_hierarchy = anim_data->bone_pos_array;
+
+    // Check for empty hierarchy
+    if (bone_hierarchy->matrix_chain == NULL) {
+        out_pos[0] = 0.0f;
+        out_pos[1] = 0.0f;
+        out_pos[2] = 0.0f;
+        return 1;
+    }
+
+    // Search for matching bone_id
+    bone_entry = bone_hierarchy;
+    while (bone_entry->matrix_chain != NULL) {
+        if (bone_entry->bone_id == bone_id) {
+            break;
+        }
+        bone_entry++;
+    }
+
+    // Check if bone was found
+    if (bone_entry->matrix_chain == NULL) {
+        out_pos[0] = 0.0f;
+        out_pos[1] = 0.0f;
+        out_pos[2] = 0.0f;
+        return 1;
+    }
+
+    // Initialize accumulated matrix to identity
+    guMtxIdent(&accumulated_mtx);
+
+    // Get parent chain and accumulate parent bone matrices
+    matrix_chain = bone_entry->matrix_chain;
+    parent_idx = matrix_chain[0];
+
+    if (parent_idx != -1) {
+        bone_matrices = (Mtx*)anim_state->vtx_ptr;
+
+        // Walk parent chain, concatenating bone matrices
+        while (parent_idx != -1) {
+            guMtxCatL(&bone_matrices[parent_idx], &accumulated_mtx, &accumulated_mtx);
+            matrix_chain++;
+            parent_idx = matrix_chain[0];
+        }
+    }
+
+    // Build translation matrix from bone's local position
+    guMtxIdent(&translation_mtx);
+    guTranslate(&translation_mtx, bone_entry->trans_x, bone_entry->trans_y, bone_entry->trans_z);
+
+    // Concatenate: accumulated = translation * accumulated
+    guMtxCatL(&translation_mtx, &accumulated_mtx, &accumulated_mtx);
+
+    // Transform origin (0,0,0) through accumulated matrix to get world position
+    guMtxXFML(&accumulated_mtx, 0.0f, 0.0f, 0.0f, &out_pos[0], &out_pos[1], &out_pos[2]);
+
+    // Scale from internal units to world units
+    out_pos[0] *= BONE_TO_WORLD_SCALE;
+    out_pos[1] *= BONE_TO_WORLD_SCALE;
+    out_pos[2] *= BONE_TO_WORLD_SCALE;
+
+    return 0;
 }
