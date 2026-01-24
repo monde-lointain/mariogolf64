@@ -1,3 +1,0 @@
-// Visit https://github.com/ethteck/splat/wiki/Adding-Symbols for documentation about this file
-entrypoint = 0x80025C00; // type:func
-main = 0x800994B0; // type:func
