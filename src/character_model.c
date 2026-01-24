@@ -76,7 +76,7 @@ typedef struct AnimData {
     /* 0x0C */ u8 pad0C[0x08];
     /* 0x14 */ void* bone_anim_header;        // BoneEntry array (frame bounds per bone)
     /* 0x18 */ BonePosEntry* bone_pos_array;  // BonePosEntry array (parent chains + rest pose)
-    /* 0x1C */ void* bone_list;               // BoneAnimEntry array (keyframes)
+    /* 0x1C */ void* bone_list;               // BoneListEntry array (keyframes)
     /* 0x20 */ u8 pad20[0x04];
     /* 0x24 */ TextureEntry** texture_array;  // NULL-terminated array of texture entry ptrs
     /* 0x28 */ TileDescriptor* tile_array;    // Array of tile descriptors
@@ -129,8 +129,8 @@ typedef struct ScaleKeyframe {
  * Bone animation data entry - 52 bytes (0x34)
  * Contains keyframe data and interpolation cache for one bone
  */
-typedef struct BoneAnimEntry {
-    /* 0x00 */ s16 bone_id;                    // -1 = end of list sentinel
+typedef struct BoneListEntry {
+    /* 0x00 */ s16 num_pos_keyframes;          // Number of position keyframes (-1 = end sentinel)
     /* 0x02 */ s16 num_rot_keyframes;          // Number of rotation keyframes
     /* 0x04 */ s16 num_scale_keyframes;        // Number of scale keyframes
     /* 0x06 */ u8 pad06[0x02];
@@ -150,13 +150,7 @@ typedef struct BoneAnimEntry {
     /* 0x2E */ s16 cache_scale_end;            // Cached scale keyframe end time
     /* 0x30 */ s16 cache_scale_index;          // Cached scale keyframe index
     /* 0x32 */ u8 pad32[0x02];
-} BoneAnimEntry; // size = 0x34
-
-/**
- * Bone list entry - 52 bytes (0x34)
- * Alias for backwards compatibility
- */
-typedef BoneAnimEntry BoneListEntry;
+} BoneListEntry; // size = 0x34
 
 /**
  * Character animation state - 396 bytes (0x18C)
@@ -418,7 +412,7 @@ void load_character_model(s32 character_id, s32 model_variant, s32 lod_level) {
     // Initialize bone keyframe cache to -1
     anim_data = anim_state->anim_data;
     bone_list = (BoneListEntry*)anim_data->bone_list;
-    if (bone_list->bone_id != -1) {
+    if (bone_list->num_pos_keyframes != -1) {
         do {
             bone_list->cache_pos_start = -1;
             bone_list->cache_pos_end = -1;
@@ -427,7 +421,7 @@ void load_character_model(s32 character_id, s32 model_variant, s32 lod_level) {
             bone_list->cache_scale_start = -1;
             bone_list->cache_scale_end = -1;
             bone_list++;
-        } while (bone_list->bone_id != -1);
+        } while (bone_list->num_pos_keyframes != -1);
     }
 
     // Copy render parameters from anim_data to anim_state
@@ -587,8 +581,8 @@ void update_vertex_texture_coords(s32 character_id) {
 void calculate_bone_matrices(s32 character_id) {
     CharacterAnimState* state;
     AnimData* anim_data;
-    BoneAnimEntry* bone;
-    BoneAnimEntry* bone_base;
+    BoneListEntry* bone;
+    BoneListEntry* bone_base;
     void* out_mtx;
     s32 needs_interp;
     s32 keyframe_idx;
@@ -614,10 +608,10 @@ void calculate_bone_matrices(s32 character_id) {
 
     state = get_character_anim_state(character_id);
     anim_data = state->anim_data;
-    bone_base = (BoneAnimEntry*)anim_data->bone_list;
+    bone_base = (BoneListEntry*)anim_data->bone_list;
 
     // Check for empty bone list
-    if (bone_base->bone_id == -1) {
+    if (bone_base->num_pos_keyframes == -1) {
         return;
     }
 
@@ -651,7 +645,7 @@ void calculate_bone_matrices(s32 character_id) {
             } else {
                 // Search for keyframe
                 keyframe_idx = 1;
-                while (keyframe_idx < bone->bone_id) {
+                while (keyframe_idx < bone->num_pos_keyframes) {
                     if (current_frame < (f32)times[keyframe_idx]) {
                         // Found it - update cache
                         bone->cache_pos_index = keyframe_idx - 1;
@@ -663,7 +657,7 @@ void calculate_bone_matrices(s32 character_id) {
                 }
 
                 // At or past last keyframe
-                if (keyframe_idx == bone_base->bone_id) {
+                if (keyframe_idx == bone_base->num_pos_keyframes) {
                     keyframe_idx--;
                     pos_curr = &bone->pos_data[keyframe_idx];
                     pos_x = pos_curr->x;
@@ -909,7 +903,7 @@ scale_interpolate:
         // Advance to next bone
         bone++;
         out_mtx = (void*)((u8*)out_mtx + 0x40);  // sizeof(Mtx) = 64
-    } while (bone->bone_id != -1);
+    } while (bone->num_pos_keyframes != -1);
 }
 
 #define BONE_TO_WORLD_SCALE 0.01f

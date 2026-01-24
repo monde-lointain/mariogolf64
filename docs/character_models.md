@@ -50,7 +50,7 @@ Two banks exist in ROM data section:
 | 0x08 | void* | display_list | Segment-relative display list ptr |
 | 0x14 | BoneEntry* | bone_anim_header | Frame bounds per bone (segment addr) |
 | 0x18 | BonePosEntry* | bone_pos_array | Bone rest pose + parent chains (segment addr) |
-| 0x1C | BoneAnimEntry* | bone_list | Keyframe data per bone (segment addr) |
+| 0x1C | BoneListEntry* | bone_list | Keyframe data per bone (segment addr) |
 | 0x24 | TextureEntry** | texture_array | Texture entry pointers (segment addr) |
 | 0x28 | TileDescriptor* | tile_array | Texture tile descriptors (segment addr) |
 | 0x2C | f32* | scale_x_ptr | Pointer to X scale value |
@@ -87,12 +87,12 @@ bone_id=5: chain=[0,1,3,4,5,6,7,8] trans=(44.93, -19.88, 617.94)
 ```
 These bones share the same matrix chain but have different translations.
 
-#### BoneAnimEntry (0x34 bytes)
+#### BoneListEntry (0x34 bytes)
 Keyframe animation data for each bone.
 
 | Offset | Type | Name | Description |
 |--------|------|------|-------------|
-| 0x00 | s16 | bone_id | Bone ID (-1 = end sentinel) |
+| 0x00 | s16 | num_pos_keyframes | Position keyframe count (-1 = end sentinel) |
 | 0x02 | s16 | num_rot_keyframes | Rotation keyframe count |
 | 0x04 | s16 | num_scale_keyframes | Scale keyframe count |
 | 0x08 | s16* | pos_keyframe_times | Position keyframe timestamps |
@@ -199,7 +199,7 @@ world transform. The hierarchy is only resolved on-demand when querying world po
 
 ### calculate_bone_matrices(character_id)
 
-Iterates through `bone_list` (BoneAnimEntry array) and for each bone:
+Iterates through `bone_list` (BoneListEntry array) and for each bone:
 
 1. **Position interpolation** - Linear interpolation between position keyframes
 2. **Rotation interpolation** - Quaternion SLERP between rotation keyframes
@@ -245,11 +245,63 @@ The system uses triple-buffered vertex data for smooth animation:
 
 ## Compression
 
-Model data uses a custom LZ compression scheme (see `lz_decompress.c`):
+Model data uses a custom LZ77 variant with halfword (16-bit) granularity.
 
-- Standard decompression via `lz_decompress_dma()`
-- Extended variant for larger models using `lz_compress_extended_dma()`
+### ROM Layout
+
+**AnimData Tables (ROM offsets):**
+- Low LOD bank: `0xA80C8` (144 entries × 0x58 bytes)
+- High LOD bank: `0xAB1F8` (18 entries × 0x58 bytes)
+
+**Compressed model data:** Scattered in ROM ~`0x01500000`+ (not contiguous)
+
+Example entries from low LOD bank:
+| Entry | ROM Start | ROM End | Compressed Size | DL Offset |
+|-------|-----------|---------|-----------------|-----------|
+| 0 | 0x01652EB0 | 0x0165BD50 | 36512 | 0x10F60 |
+| 1 | 0x015EE790 | 0x015F6EC0 | 34608 | 0x10C80 |
+| 2 | 0x01606090 | 0x0160ED90 | 36096 | 0x12BB0 |
+
+### LZ Algorithm
+
+**Header:** 4 bytes (skipped during decompression)
+
+**Control loop:**
+```
+while not end_of_stream:
+    Read u16 command
+    If command == 0x0000:
+        Copy next 32 (0x20) bytes verbatim
+    Else:
+        For each bit in command (MSB to LSB, 16 bits):
+            If bit == 0: Copy 2 bytes verbatim from input
+            If bit == 1: Back-reference
+                Read u16 copy_info
+                If copy_info == 0x0000: END OF STREAM
+                distance = (copy_info >> 5) * 2   (max 4094 bytes back)
+                length = (copy_info & 0x1F) * 2 + 4   (range: 4-66 bytes)
+                Copy `length` bytes from output[-distance]
+```
+
+**Encoding format:**
+```
+Copy-forward halfword: 0xXXXX
+  Bits 15-5 (11 bits): distance / 2
+  Bits 4-0  (5 bits):  (length - 4) / 2
+```
+
+### Decompression Functions
+
+- `lz_decompress_dma()` - Standard decompression via DMA
+- `lz_decompress_extended_dma()` - Extended variant for larger models (uses auxiliary data)
 - Decompressed data lands at `vertex_buffer` address
+
+### Key Insight
+
+Display lists are **embedded inside compressed model data**, not directly accessible in ROM. To extract:
+1. Read AnimData entry to get `rom_start`/`rom_end`
+2. Decompress the LZ data
+3. Display list is at segment offset within decompressed data (from `AnimData.display_list & 0x00FFFFFF`)
 
 ## Texture System
 
@@ -272,6 +324,38 @@ Model data uses a custom LZ compression scheme (see `lz_decompress.c`):
 | 0x05 | u8 | height | Texture height in texels |
 
 ## Tools
+
+### mg64_decompress.py
+
+Decompresses character model data directly from ROM:
+
+```bash
+# Decompress by raw ROM offset
+mg64_decompress.py baserom.z64 0x01652EB0 -o model.bin -v
+
+# List all AnimData entries
+mg64_decompress.py baserom.z64 0 --list
+
+# Decompress by AnimData entry index
+mg64_decompress.py baserom.z64 0 --entry 0 -o plum.bin
+
+# Use high LOD bank
+mg64_decompress.py baserom.z64 0 --list --high-lod
+```
+
+After decompression, display lists can be extracted with gfxdis:
+```bash
+gfxdis.f3dex2 -i -f model.bin -a 0x10F60 -n 50
+```
+
+### extract_dlist.py
+
+Extracts F3DEX2 display list hierarchy from RAM dump:
+
+```bash
+# Extract with auto-detected segment base
+extract_dlist.py ram.bin 0x80320F60 --prefix plum -o plum.model.inc
+```
 
 ### mg64_bone_dump.py
 
