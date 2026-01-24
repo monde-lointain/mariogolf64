@@ -3,6 +3,10 @@
 
 #include "include_asm.h"
 
+#ifndef NULL
+#define NULL ((void*)0)
+#endif
+
 typedef unsigned char u8;
 typedef unsigned short u16;
 typedef unsigned int u32;
