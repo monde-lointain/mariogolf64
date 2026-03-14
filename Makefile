@@ -114,7 +114,7 @@ endif
 OPTFLAGS        := -O2
 
 ASFLAGS         := -march=vr4300 -32 $(IINC)
-AS_DEFINES      := -DMIPSEB -D_LANGUAGE_ASSEMBLY -D_ULTRA64
+AS_DEFINES := -DMIPSEB -D_LANGUAGE_ASSEMBLY -D_ULTRA64 -D'nonmatching(...)=' -D'enddlabel(...)='
 MIPS_VERSION    := -mips3
 
 # Surpress the warnings with -woff.

@@ -1,4 +1,4 @@
-.include "labels.inc"
+.include "include/labels.inc"
 
 # COP0 register aliases
 
@@ -73,3 +73,10 @@
 
 #define nonmatching(...)
 #define enddlabel(...)
+
+.macro nonmatching name, size
+.space \size
+.endm
+
+.macro enddlabel name
+.endm
