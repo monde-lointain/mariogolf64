@@ -12,7 +12,6 @@
         "\t.globl\t"#NAME"\n" \
         "\t.type "#NAME", @function\n" \
         "\t.ent\t"#NAME"\n" \
-        #NAME ":\n" \
         "\t.include \""FOLDER"/"#NAME".s\"\n" \
         "\t.set reorder\n" \
         "\t.set at\n" \
@@ -22,6 +21,7 @@
     );
 #endif
 __asm__(".include \"include/labels.inc\"\n");
+__asm__(".include \"include/macro.inc\"\n");
 #else
 #define INCLUDE_ASM(FOLDER, NAME)
 #endif
