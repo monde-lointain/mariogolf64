@@ -46,3 +46,6 @@ permuter_settings.toml
 # Makefile options
 .make_options
 
+
+# decomp-permuter - cloned separately, not a submodule
+tools/decomp-permuter/
