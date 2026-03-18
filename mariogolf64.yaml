@@ -32,6 +32,7 @@ options:
     #include "ultra64.h"
     #include "include_asm.h"
   asm_inc_header: ""
+  include_macro_inc: False
   use_legacy_include_asm: False
   mips_abi_float_regs: o32
   mnemonic_ljust: 11
@@ -68,7 +69,6 @@ segments:
     type: code
     start: 0x1050
     vram: 0x80025C50
-    follows_vram: entry
     bss_size: 0x122100
     subsegments:
       - [0x1050, asm, nusys/nupireadrom]

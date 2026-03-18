@@ -114,7 +114,7 @@ endif
 OPTFLAGS        := -O2
 
 ASFLAGS         := -march=vr4300 -32 $(IINC)
-AS_DEFINES := -DMIPSEB -D_LANGUAGE_ASSEMBLY -D_ULTRA64 -D'nonmatching(...)=' -D'enddlabel(...)='
+AS_DEFINES      := -DMIPSEB -D_LANGUAGE_ASSEMBLY -D_ULTRA64
 MIPS_VERSION    := -mips3
 
 # Surpress the warnings with -woff.
@@ -187,6 +187,7 @@ setup:
 extract:
 	$(RM) -r asm bin
 	$(SPLAT) $(SPLAT_YAML)
+	python3 tools/fix_gas_pc16_bug.py
 
 lib:
 	$(MAKE) -C lib
@@ -232,7 +233,7 @@ $(BUILD_DIR)/%.o: %.bin
 	$(OBJCOPY) -I binary -O elf32-big $< $@
 
 $(BUILD_DIR)/%.o: %.s
-	$(CPP) $(CPPFLAGS) $(IINC) $(AS_DEFINES) $(IINC) $< | $(AS) $(ASFLAGS) -o $@
+	(grep -q '\.include "macro.inc"' $< || echo '.include "macro.inc"'; cat $<) | $(CPP) $(CPPFLAGS) $(IINC) $(AS_DEFINES) - | cat include/gas_macros.inc - | $(AS) $(ASFLAGS) -o $@
 	$(OBJDUMP_CMD)
 
 $(BUILD_DIR)/%.o: %.c
