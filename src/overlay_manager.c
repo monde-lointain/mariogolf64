@@ -39,7 +39,11 @@ void func_80025D30(void)
 }
 
 /* Constructor of overlay #6 */
-INCLUDE_ASM("asm/nonmatchings/overlay_manager", func_80025D54);
+/* Constructor of overlay #6 */
+void func_80025D54(void) {
+    func_802033B0();
+    func_801F5018();
+}
 
 s32 func_80025D78(s32 index)
 {

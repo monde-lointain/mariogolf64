@@ -16,6 +16,7 @@ class SpimdisasmDisassembler(disassembler.Disassembler):
         spimdisasm.common.GlobalConfig.TRUST_USER_FUNCTIONS = True
         spimdisasm.common.GlobalConfig.TRUST_JAL_FUNCTIONS = True
         spimdisasm.common.GlobalConfig.GLABEL_ASM_COUNT = False
+        spimdisasm.common.GlobalConfig.ASM_NM_LABEL = ""
 
         if opts.rom_address_padding:
             spimdisasm.common.GlobalConfig.ASM_COMMENT_OFFSET_WIDTH = 6
