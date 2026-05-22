@@ -268,7 +268,7 @@ SECTIONS
         build/asm/8CC20.o(.text);
         build/asm/8CD10.o(.text);
         build/asm/8CD70.o(.text);
-        build/asm/8CE80.o(.text);
+        build/src/8CE80.o(.text);
         build/asm/8CE90.o(.text);
         build/asm/8D230.o(.text);
         build/asm/8DF10.o(.text);
@@ -490,7 +490,7 @@ SECTIONS
         build/asm/8CC20.o(.data);
         build/asm/8CD10.o(.data);
         build/asm/8CD70.o(.data);
-        build/asm/8CE80.o(.data);
+        build/src/8CE80.o(.data);
         build/asm/8CE90.o(.data);
         build/asm/8D230.o(.data);
         build/asm/8DF10.o(.data);
@@ -713,7 +713,7 @@ SECTIONS
         build/asm/8CC20.o(.rodata);
         build/asm/8CD10.o(.rodata);
         build/asm/8CD70.o(.rodata);
-        build/asm/8CE80.o(.rodata);
+        build/src/8CE80.o(.rodata);
         build/asm/8CE90.o(.rodata);
         build/asm/8D230.o(.rodata);
         build/asm/8DF10.o(.rodata);
@@ -963,7 +963,7 @@ SECTIONS
         build/asm/8CC20.o(.bss);
         build/asm/8CD10.o(.bss);
         build/asm/8CD70.o(.bss);
-        build/asm/8CE80.o(.bss);
+        build/src/8CE80.o(.bss);
         build/asm/8CE90.o(.bss);
         build/asm/8D230.o(.bss);
         build/asm/8DF10.o(.bss);
