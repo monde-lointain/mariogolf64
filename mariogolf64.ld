@@ -276,7 +276,8 @@ SECTIONS
         build/asm/8DF50.o(.text);
         build/asm/8E110.o(.text);
         build/asm/8E550.o(.text);
-        build/asm/8E620.o(.text);
+        build/src/libkmc/rand.o(.text);
+        build/asm/8E660.o(.text);
         build/asm/8EAD0.o(.text);
         build/asm/8EBE0.o(.text);
         build/asm/8EC88.o(.text);
@@ -498,7 +499,8 @@ SECTIONS
         build/asm/8DF50.o(.data);
         build/asm/8E110.o(.data);
         build/asm/8E550.o(.data);
-        build/asm/8E620.o(.data);
+        build/src/libkmc/rand.o(.data);
+        build/asm/8E660.o(.data);
         build/asm/8EAD0.o(.data);
         build/asm/8EBE0.o(.data);
         build/asm/8EC88.o(.data);
@@ -721,7 +723,8 @@ SECTIONS
         build/asm/8DF50.o(.rodata);
         build/asm/8E110.o(.rodata);
         build/asm/8E550.o(.rodata);
-        build/asm/8E620.o(.rodata);
+        build/src/libkmc/rand.o(.rodata);
+        build/asm/8E660.o(.rodata);
         build/asm/8EAD0.o(.rodata);
         build/asm/8EBE0.o(.rodata);
         build/asm/8EC88.o(.rodata);
@@ -971,7 +974,8 @@ SECTIONS
         build/asm/8DF50.o(.bss);
         build/asm/8E110.o(.bss);
         build/asm/8E550.o(.bss);
-        build/asm/8E620.o(.bss);
+        build/src/libkmc/rand.o(.bss);
+        build/asm/8E660.o(.bss);
         build/asm/8EAD0.o(.bss);
         build/asm/8EBE0.o(.bss);
         build/asm/8EC88.o(.bss);

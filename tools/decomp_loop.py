@@ -39,7 +39,7 @@ NONMATCHINGS_DIR = ROOT_DIR / "nonmatchings"
 SYMBOL_FILES = [ROOT_DIR / "symbol_addrs.txt", ROOT_DIR / "ghidra_symbols.txt"]
 
 OBJDUMP = os.environ.get("OBJDUMP", "mips-linux-gnu-objdump")
-PLACEHOLDER_RE = re.compile(r"^func_[0-9A-Fa-f]{8}$")
+PLACEHOLDER_RE = re.compile(r"^(?:func_[0-9A-Fa-f]{8}|[A-Za-z_][A-Za-z0-9_]*)$")
 GLABEL_RE = re.compile(r"^\s*glabel\s+(\S+)\s*$")
 SYM_LINE_RE = re.compile(r"^\s*(\w+)\s*=\s*0x([0-9A-Fa-f]+)\s*;")
 
@@ -72,10 +72,13 @@ def asmdiff_available() -> None:
 
 
 def resolve_placeholder(name: str) -> str:
-    """Return the func_XXXXXXXX placeholder for `name`.
+    """Return the label name to drive the loop against.
 
-    Accepts either a placeholder already, or a curated name that appears
-    in symbol_addrs.txt / ghidra_symbols.txt. Does NOT call Ghidra MCP;
+    Accepts either a func_XXXXXXXX placeholder, or a curated name that
+    appears in symbol_addrs.txt / ghidra_symbols.txt. Splat uses the
+    curated name verbatim in asm output (`glabel rand`, not
+    `glabel func_800B3220`), so for curated inputs we return the name
+    unchanged after confirming it is known. Does NOT call Ghidra MCP;
     that's the slash command's job upstream.
     """
     if PLACEHOLDER_RE.match(name):
@@ -89,11 +92,10 @@ def resolve_placeholder(name: str) -> str:
                 continue
             m = SYM_LINE_RE.match(stripped)
             if m and m.group(1) == name:
-                vram = int(m.group(2), 16)
-                return f"func_{vram:08X}"
+                return name
     fail(
-        f"could not resolve '{name}' to a func_XXXXXXXX placeholder; not "
-        f"present in {[str(f) for f in SYMBOL_FILES]} and not in placeholder form. "
+        f"could not resolve '{name}' to a known function; not present in "
+        f"{[str(f) for f in SYMBOL_FILES]} and not in placeholder form. "
         "Run /decomp from a slash command (which queries Ghidra MCP) or pass the placeholder directly."
     )
     raise SystemExit(1)  # unreachable; for type checker
@@ -136,11 +138,41 @@ def ensure_reference_object(seg_stem: str) -> Path:
     return target
 
 
-def compile_candidate(placeholder: str) -> tuple[bool, str, Path]:
-    """Run `make nonmatching-func FUNC=<placeholder>`. Returns (ok, log_text, current_o)."""
+LIBKMC_SRC = Path.home() / "development" / "repos" / "libkmc" / "src"
+
+
+def detect_libkmc_profile(placeholder: str) -> bool:
+    """True if <placeholder> appears as a function definition in libkmc upstream.
+
+    libkmc was built with `gcc -O` (not -O2); the project Makefile carves a
+    libkmc-only compile profile via LIBKMC_CFLAGS. The loop must mirror that
+    to produce ground-truth bytes — see CLAUDE.md "libkmc compile profile is `-O`".
+    """
+    if not LIBKMC_SRC.exists():
+        return False
+    # Match either K&R `int rand()` or prototype `int rand(void)` at line start.
+    pat = re.compile(
+        rf"^[A-Za-z_][A-Za-z0-9_ *]*\b{re.escape(placeholder)}\s*\(",
+        re.MULTILINE,
+    )
+    for f in LIBKMC_SRC.glob("*.c"):
+        try:
+            text = f.read_text(encoding="utf-8", errors="replace")
+        except OSError:
+            continue
+        if pat.search(text):
+            return True
+    return False
+
+
+def compile_candidate(placeholder: str, libkmc: bool) -> tuple[bool, str, Path]:
+    """Run `make nonmatching-func FUNC=<placeholder> [LIBKMC=1]`."""
     current_o = NONMATCHINGS_DIR / placeholder / "current.o"
+    cmd = ["make", "nonmatching-func", f"FUNC={placeholder}"]
+    if libkmc:
+        cmd.append("LIBKMC=1")
     proc = subprocess.run(
-        ["make", "nonmatching-func", f"FUNC={placeholder}"],
+        cmd,
         cwd=ROOT_DIR,
         capture_output=True,
         text=True,
@@ -271,6 +303,13 @@ def main() -> None:
         action="store_true",
         help="Skip mismatch detail; just report score/percent.",
     )
+    parser.add_argument(
+        "--profile",
+        choices=["auto", "libkmc", "default"],
+        default="auto",
+        help="Compile profile. auto = detect libkmc by upstream-src presence; "
+             "libkmc = force -O; default = force -O2.",
+    )
     args = parser.parse_args()
 
     asmdiff_available()
@@ -282,7 +321,16 @@ def main() -> None:
     reference_o = ensure_reference_object(seg_stem)
     log(f"[reference] {reference_o.relative_to(ROOT_DIR)}")
 
-    ok, compile_log, current_o = compile_candidate(placeholder)
+    if args.profile == "libkmc":
+        libkmc = True
+    elif args.profile == "default":
+        libkmc = False
+    else:
+        libkmc = detect_libkmc_profile(placeholder)
+    if libkmc:
+        log(f"[profile] libkmc (-O) — placeholder found in {LIBKMC_SRC}")
+
+    ok, compile_log, current_o = compile_candidate(placeholder, libkmc)
     if not ok:
         emit({
             "compile_ok": False,

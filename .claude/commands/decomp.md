@@ -58,13 +58,15 @@ All subsequent MCP calls in this command **must** pass `program="baserom.z64"`. 
 ## Step 3 — Resolve the function name
 
 <resolution-rules>
-- If `$ARGUMENTS` matches `^func_[0-9A-Fa-f]{8}$`, use it directly as the placeholder.
-- Else, look it up in this order:
-  1. `symbol_addrs.txt` (maintainer overrides)
-  2. `ghidra_symbols.txt` (Ghidra sync state)
-  3. Ghidra MCP via the discovered symbol-lookup tool, with `program="baserom.z64"`
-- Derive the placeholder as `func_{VRAM_UPPER_HEX}` from the resolved vram.
+- The placeholder is **whatever splat emitted in asm** — splat uses the curated name verbatim (e.g. `glabel rand`) for any symbol present in `ghidra_symbols.txt` or `symbol_addrs.txt`, and falls back to `func_<VRAM>` only for unnamed functions. So:
+  - If `$ARGUMENTS` matches `^func_[0-9A-Fa-f]{8}$`, use it directly.
+  - Else look up `$ARGUMENTS` in this order:
+    1. `symbol_addrs.txt` (maintainer overrides)
+    2. `ghidra_symbols.txt` (Ghidra sync state)
+    3. Ghidra MCP via the discovered symbol-lookup tool, with `program="baserom.z64"`
+  - If found in `symbol_addrs.txt` or `ghidra_symbols.txt`, the placeholder is the curated name itself (Step 4 will then find `glabel rand`, not `glabel func_<VRAM>`). If resolved only via Ghidra MCP and not yet synced, derive `func_{VRAM_UPPER_HEX}` from the resolved vram — that's what splat used in asm.
 - If still unresolved, abort with a single line stating which sources were checked.
+- `seed_c.py` and `decomp_loop.py` accept either placeholder form (curated name or `func_<VRAM>`); both grep `glabel <name>` against the asm.
 </resolution-rules>
 
 ## Step 4 — Resolve the subsegment
@@ -74,7 +76,7 @@ Grep `asm/*.s` for `glabel <placeholder>` to find the asm file. The file's stem 
 | Subsegment type | Action |
 | --- | --- |
 | `hasm` | Abort: "func lives in a handwritten-asm (hasm) subsegment; INCLUDE_ASM is permanent." |
-| `asm` | Print the splat-flip instructions (set the subsegment to `c` in `mariogolf64.yaml`, run `make extract`) and STOP. This command does not modify yaml. Before STOPping, **also probe the libultra/libkmc upstreams** (`find ~/development/repos/libultra_modern/src -name "*.c" \| xargs grep -l "<curated>"; find ~/development/repos/libkmc/src -name "*.c" \| xargs grep -l "<curated>"` — only when a curated name was resolved at Step 3). If a hit lands, recommend `/decomp-libupstream <curated>` instead and include the exact path qualifier (e.g. `c, libultra/shared/system/afterprenmi`) the user should write into the yaml. No probe runs for raw `func_XXXXXXXX` placeholders. |
+| `asm` | Print the splat-flip instructions (set the subsegment to `c` in `mariogolf64.yaml`, run `make extract`) and STOP. This command does not modify yaml. Before STOPping, **also probe the libultra/libkmc upstreams** (`find ~/development/repos/libultra_modern/src -name "*.c" \| xargs grep -l "<curated>"; find ~/development/repos/libkmc/src -name "*.c" \| xargs grep -l "<curated>"` — only when a curated name was resolved at Step 3). If a hit lands, **also `grep -nE '^\s*static\b[^=]*;\s*$' <upstream-path>`** to check for file-scope statics: if no statics, recommend `/decomp-libupstream <curated>` instead and include the exact path qualifier (e.g. `c, libultra/shared/system/afterprenmi`); if statics are present, mention the upstream exists but `/decomp-libupstream` is blocked by BSS-layout-conflict (see CLAUDE.md), and fall through to the plain `c` flip so `/decomp` can take over with the `static` dropped. No probe runs for raw `func_XXXXXXXX` placeholders. |
 | `c` | Proceed. |
 
 ## Step 5 — Locate the parent C file

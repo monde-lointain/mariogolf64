@@ -44,7 +44,7 @@ NONMATCHINGS_DIR = ROOT_DIR / "nonmatchings"
 M2CTX_PATH = SCRIPT_DIR / "m2ctx.py"
 M2C_PATH = SCRIPT_DIR / "m2c" / "m2c.py"
 
-PLACEHOLDER_RE = re.compile(r"^func_[0-9A-Fa-f]{8}$")
+PLACEHOLDER_RE = re.compile(r"^(?:func_[0-9A-Fa-f]{8}|[A-Za-z_][A-Za-z0-9_]*)$")
 GLABEL_RE = re.compile(r"^\s*glabel\s+(\S+)\s*$")
 HI_LO_REF_RE = re.compile(r"%(?:hi|lo)\(([A-Za-z_][\w.]*)\)")
 INCLUDE_ASM_RE = re.compile(r'INCLUDE_ASM\([^,]+,\s*([A-Za-z_][\w]*)\s*\)\s*;')
@@ -477,8 +477,7 @@ def main() -> None:
     args = parser.parse_args()
 
     if not PLACEHOLDER_RE.match(args.func):
-        fail(f"--func must match {PLACEHOLDER_RE.pattern}; got {args.func!r}. "
-             "(seed_c.py expects the placeholder; slash command resolves curated names.)")
+        fail(f"--func must be a func_XXXXXXXX placeholder or a valid C identifier; got {args.func!r}.")
     placeholder = args.func
 
     out_dir = NONMATCHINGS_DIR / placeholder

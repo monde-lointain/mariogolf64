@@ -37,6 +37,12 @@ ifeq ($(NONMATCHING),1)
 CFLAGS += -DNONMATCHING
 endif
 
+# libkmc upstream was built with `gcc -O` (not -O2) per ~/development/repos/libkmc/src/genn64.bat.
+# The instruction scheduler at -O differs from -O2: e.g., rand.c stores `next` between
+# the two addiu's at -O, vs after both at -O2. Matching the original ROM requires -O.
+# libultra was built with -O2, so this override is libkmc-only.
+LIBKMC_CFLAGS := $(subst -O2,-O,$(CFLAGS))
+
 # Directories
 SRC_DIR := src
 
@@ -128,6 +134,16 @@ $(BUILD_DIR)/$(SRC_DIR)/%.o: $(SRC_DIR)/%.c
 	$(STRIP) $@ -N dummy-symbol-name
 	rm $@.s $@.tmp
 
+# libkmc compile profile: same pipeline as above, but with -O instead of -O2
+# (see LIBKMC_CFLAGS comment). Pattern-rule specificity puts this above the
+# generic src/% rule when both match.
+$(BUILD_DIR)/$(SRC_DIR)/libkmc/%.o: $(SRC_DIR)/libkmc/%.c
+	$(CC) -S $(LIBKMC_CFLAGS) -o $@.s $<
+	tools/cc/as -EB -mips2 -I include -o $@.tmp $@.s
+	cp $@.tmp $@
+	$(STRIP) $@ -N dummy-symbol-name
+	rm $@.s $@.tmp
+
 # === /decomp loop targets =====================================================
 # Driven by tools/decomp_loop.py inside the iteration loop, and by /decomp's
 # in-tree spot-check step. Mirrors decomp.me's KMC GCC compile so the resulting
@@ -137,9 +153,9 @@ $(BUILD_DIR)/$(SRC_DIR)/%.o: $(SRC_DIR)/%.c
 # base.c has no INCLUDE_ASM directives, so single-step is safe (no need to route
 # through system `as`). Always defines NONMATCHING.
 nonmatching-func:
-	@test -n "$(FUNC)" || { echo "Usage: make nonmatching-func FUNC=<func_XXXXXXXX>" >&2; exit 1; }
+	@test -n "$(FUNC)" || { echo "Usage: make nonmatching-func FUNC=<func_XXXXXXXX> [LIBKMC=1]" >&2; exit 1; }
 	@test -f nonmatchings/$(FUNC)/base.c || { echo "nonmatchings/$(FUNC)/base.c not found; run tools/seed_c.py first" >&2; exit 1; }
-	$(CC) -c $(CFLAGS) -DNONMATCHING -o nonmatchings/$(FUNC)/current.o nonmatchings/$(FUNC)/base.c
+	$(CC) -c $(if $(LIBKMC),$(LIBKMC_CFLAGS),$(CFLAGS)) -DNONMATCHING -o nonmatchings/$(FUNC)/current.o nonmatchings/$(FUNC)/base.c
 
 # In-tree spot-check build. Compiles src/$(SEG).c.spotcheck (a temporary copy
 # of the parent with the target function's INCLUDE_ASM wrapped in
