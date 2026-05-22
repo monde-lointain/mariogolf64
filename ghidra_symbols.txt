@@ -310,6 +310,7 @@ __osSetGlobalIntMask     = 0x800B0590; // type:func
 __osResetGlobalIntMask   = 0x800B05D0; // type:func
 __osPiRawStartDma        = 0x800B0620; // type:func
 __osEPiRawWriteIo        = 0x800B0880; // type:func
+__osAiDeviceBusy         = 0x800B09F0; // type:func
 _Printf                  = 0x800B0B30; // type:func
 _Putfld                  = 0x800B10B0; // type:func
 __osGetCause             = 0x800B1620; // type:func

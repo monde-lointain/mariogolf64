@@ -255,7 +255,7 @@ SECTIONS
         build/asm/8B990.o(.text);
         build/asm/8BA20.o(.text);
         build/asm/8BC80.o(.text);
-        build/asm/8BDF0.o(.text);
+        build/src/libultra/monegi/ai/ai.o(.text);
         build/asm/8BE10.o(.text);
         build/asm/8BE20.o(.text);
         build/asm/8CA20.o(.text);
@@ -478,7 +478,7 @@ SECTIONS
         build/asm/8B990.o(.data);
         build/asm/8BA20.o(.data);
         build/asm/8BC80.o(.data);
-        build/asm/8BDF0.o(.data);
+        build/src/libultra/monegi/ai/ai.o(.data);
         build/asm/8BE10.o(.data);
         build/asm/8BE20.o(.data);
         build/asm/8CA20.o(.data);
@@ -702,7 +702,7 @@ SECTIONS
         build/asm/8B990.o(.rodata);
         build/asm/8BA20.o(.rodata);
         build/asm/8BC80.o(.rodata);
-        build/asm/8BDF0.o(.rodata);
+        build/src/libultra/monegi/ai/ai.o(.rodata);
         build/asm/8BE10.o(.rodata);
         build/asm/8BE20.o(.rodata);
         build/asm/8CA20.o(.rodata);
@@ -953,7 +953,7 @@ SECTIONS
         build/asm/8B990.o(.bss);
         build/asm/8BA20.o(.bss);
         build/asm/8BC80.o(.bss);
-        build/asm/8BDF0.o(.bss);
+        build/src/libultra/monegi/ai/ai.o(.bss);
         build/asm/8BE10.o(.bss);
         build/asm/8BE20.o(.bss);
         build/asm/8CA20.o(.bss);
