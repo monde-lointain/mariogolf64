@@ -375,6 +375,7 @@ g_abRosterUnlockOrder    = 0x800C2968; // type:s16 size:0x2
 rng_seed                 = 0x800C3FB0; // type:u32 size:0x4
 frame_counter            = 0x800C52B4; // type:u32 size:0x4
 funcList                 = 0x800C7DD4; // type:u32 size:0x4
+__osRunningThread        = 0x800C8230; // type:u32 size:0x4
 __osViCurr               = 0x800C9560; // type:u32 size:0x4
 __osViNext               = 0x800C9564; // type:u32 size:0x4
 s32_sat_threshold_2_31   = 0x800D1410; // type:u64 size:0x8
