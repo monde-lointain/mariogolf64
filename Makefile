@@ -43,7 +43,12 @@ SRC_DIR := src
 # Find all source files
 ASM_FILES := $(wildcard $(ASM_DIR)/*.s) $(wildcard $(ASM_DIR)/data/*.s)
 BIN_FILES := $(wildcard $(ASSETS_DIR)/*.bin)
-# Recurse into src/ so libultra/* and other nested layouts get picked up.
+# IMPORTANT: this MUST be a recursive `find`, NOT `$(wildcard $(SRC_DIR)/*.c)`.
+# Library code lives at nested paths: src/libultra/vi/<file>.c, src/libkmc/<file>.c,
+# and future SDK upstream mirrors will follow the same pattern. `$(wildcard)` is
+# non-recursive and silently drops those files from the build, producing
+# linker-time "undefined reference" errors that are hard to trace back to a
+# Makefile glob. Do NOT "simplify" this line back to wildcard.
 C_FILES := $(shell find $(SRC_DIR) -name '*.c')
 
 # Object files
@@ -85,8 +90,13 @@ sync-names:
 
 .PHONY: all clean distclean setup extract sync-names nonmatching-func spotcheck-build clean-nonmatchings
 
-# Create build directories. Mirror C_O_FILES' parent dirs so nested layouts
-# like build/src/libultra/vi/ exist before the pattern rule writes there.
+# Create build directories. The trailing `$(sort $(dir $(C_O_FILES)))` is
+# REQUIRED: when C_FILES recursively picks up src/libultra/vi/<file>.c, the
+# pattern rule writes to build/src/libultra/vi/<file>.o, and that nested
+# parent dir must exist. Without this expansion, the as-step fails opaquely
+# with "No such file or directory" on the .o.tmp output and the linker reports
+# the missing .o as an undefined-reference error. Do NOT remove the $(sort)
+# block.
 $(shell mkdir -p $(BUILD_DIR)/$(ASM_DIR)/data $(BUILD_DIR)/$(ASSETS_DIR) $(BUILD_DIR)/$(SRC_DIR) $(sort $(dir $(C_O_FILES))))
 
 # Link

@@ -155,9 +155,11 @@ Outcome becomes **Subseg-alignment unsupported**. All four 8-aligned-only subseg
 
 1. **Inline the body into `src/<seg>.c`.** Replace the `INCLUDE_ASM(...)` line with the verbatim C body from `nonmatchings/<placeholder>/base.c`. Strip the seed-comment scaffold (`// === Function body ===`, `// === Externs ===`, the `#if 0` m2c reference block, the DLIST_HINT) — those live in `base.c` only.
 
-2. **Run `clang-format -i src/<seg>.c`.** The project's `.clang-format` is `BasedOnStyle: Google`. No exceptions.
+2. **Run `clang-format -i src/<seg>.c` UNLESS the target lives under `src/libultra/` or `src/libkmc/`.** Both library trees carry a local `.clang-format` with `DisableFormat: true` because their files are verbatim upstream copies; reformatting them defeats cross-referencing. If `<seg>.c`'s path starts with `src/libultra/` or `src/libkmc/`, skip this step entirely. The project's `.clang-format` for all other paths is `BasedOnStyle: Google`. No other exceptions.
 
-3. **Full build: `make`.** Output must end with `build/mariogolf64.z64: OK` (the md5 check passes). Confirm with `sha1sum build/mariogolf64.z64` — expected `e2c4e7a905b29529b49a1619a401fe699224829b` (baserom SHA-1). If the ROM doesn't match, the function did **not** match. Loop back to Step 7 or diagnose the gap. KMC `as` auto-pads `.text` to 16 — so trailing padding is handled automatically; subseg-alignment cases are caught by the guard above; what remains is genuine codegen mismatch.
+3. **Build with cache forced clean for the target object: `rm -f build/$(realpath_from_repo src/<seg>.c).o; make`.** The bare `make` is not enough — stale `.o` files from prior layouts (e.g., a renamed subseg path) can hide a broken build. The targeted `rm` forces re-compile of just the file we touched. Output must end with `build/mariogolf64.z64: OK`. Confirm with `sha1sum build/mariogolf64.z64` — expected `e2c4e7a905b29529b49a1619a401fe699224829b` (baserom SHA-1). If the ROM doesn't match, the function did **not** match. Loop back to Step 7 or diagnose the gap. KMC `as` auto-pads `.text` to 16 — so trailing padding is handled automatically; subseg-alignment cases are caught by the guard above; what remains is genuine codegen mismatch.
+
+4. **`git status --short`.** Any files listed beyond `src/<seg>.c` and `nonmatchings/` paths is unexpected drift — surface them in the final report under "Working-tree drift" before declaring Match. This catches the failure mode where prior turns left files in a half-finished state that this run accidentally completes or breaks.
 
 ## Step 10 — Final report
 

@@ -51,13 +51,23 @@ Any output → the working tree has uncommitted changes to one of these files. *
 
 This prevents `--write-in-place` from clobbering in-progress work.
 
-## Step 4 — Invoke the export
+## Step 4 — Pre-flight + invoke the export
+
+**Pre-flight check** (before invoking the script): the chosen interpreter must be able to `import mcp`. If not, surface a clean install instruction; don't let `sync_decomp_names.py` bury the error in its own SystemExit message.
 
 ```bash
 GHIDRA_REPO="${MARIOGOLF64_GHIDRA_REPO:-$HOME/development/reversing/ghidra/mariogolf64}"
 SYNC_PY="$GHIDRA_REPO/venv/bin/python3"
 [ -x "$SYNC_PY" ] || SYNC_PY="./venv/bin/python3"
 [ -x "$SYNC_PY" ] || SYNC_PY="python3"
+
+if ! "$SYNC_PY" -c "import mcp" 2>/dev/null; then
+    # Lock has been released by an earlier path; abort with a fix-it line.
+    echo "/sync-names: mcp Python package not installed in $SYNC_PY." >&2
+    echo "  Install with: $SYNC_PY -m pip install mcp" >&2
+    exit 1
+fi
+
 "$SYNC_PY" "$GHIDRA_REPO/scripts/sync_decomp_names.py" \
   --export-to-decomp --decomp-root . --write-in-place
 ```
@@ -104,11 +114,15 @@ funcs: +N renamed=R; globals: +G retyped=T; removed=X; skipped: overrides=O coll
 
 Plus `git diff --stat ghidra_symbols.txt` for line-level corroboration.
 
-### Next-step suggestion (only if Synced)
+### Next-step suggestion (only if Synced) — **MANDATORY USER ACTION**
 
 ```
 make extract && make
 ```
+
+This is not optional. Any code that already references the curated names (e.g., a `src/libultra/...` file using `__osViCurr`) will fail to link until `make extract` regenerates the asm/data tables with the new name. The slash command does not run `make extract` itself by design (project convention) — but the final report MUST make this loud:
+
+> "Next: `make extract && make`. The build will fail to link until this runs."
 
 If `make extract` errors on `ghidra_symbols.txt` (splat rejects a line), roll back via `git checkout -- ghidra_symbols.txt` and report the offending line. splat is the only real validator — there is no dry-run mode.
 
