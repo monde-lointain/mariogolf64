@@ -23,6 +23,14 @@ options:
   use_legacy_include_asm: False
   mips_abi_float_regs: o32
 
+  # Disable splat's regeneration of include/macro.inc, include_asm.h, and
+  # labels.inc. Default behavior overwrites those files on every `make
+  # extract` from a hardcoded template that emits `.internal
+  # _MACRO_INC_GUARD` — a directive KMC binutils 2.6 `as` (which we use
+  # for src/%) does not understand. We maintain those files by hand; splat
+  # generated them once at project init and that's enough.
+  generate_asm_macros_files: False
+
   # section_order: [".text", ".data", ".rodata", ".bss"]
   # auto_link_sections: [".data", ".rodata", ".bss"]
 
