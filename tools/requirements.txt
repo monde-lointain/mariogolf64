@@ -1,1 +1,7 @@
 splat64[mips]>=0.37.1,<1.0.0
+
+# asm-differ (tools/asm-differ submodule). Deps from its pyproject.toml.
+colorama
+watchdog
+levenshtein
+cxxfilt
