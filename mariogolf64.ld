@@ -268,7 +268,7 @@ SECTIONS
         build/asm/8CC20.o(.text);
         build/asm/8CD10.o(.text);
         build/asm/8CD70.o(.text);
-        build/src/8CE80.o(.text);
+        build/src/libultra/vi/vigetcurrcontext.o(.text);
         build/asm/8CE90.o(.text);
         build/asm/8D230.o(.text);
         build/asm/8DF10.o(.text);
@@ -284,7 +284,7 @@ SECTIONS
         build/asm/8EFC0.o(.text);
         build/asm/8EFE0.o(.text);
         build/asm/8F140.o(.text);
-        build/src/8F240.o(.text);
+        build/src/libkmc/matherr.o(.text);
         build/asm/8F250.o(.text);
         main_TEXT_END = .;
         main_TEXT_SIZE = ABSOLUTE(main_TEXT_END - main_TEXT_START);
@@ -490,7 +490,7 @@ SECTIONS
         build/asm/8CC20.o(.data);
         build/asm/8CD10.o(.data);
         build/asm/8CD70.o(.data);
-        build/src/8CE80.o(.data);
+        build/src/libultra/vi/vigetcurrcontext.o(.data);
         build/asm/8CE90.o(.data);
         build/asm/8D230.o(.data);
         build/asm/8DF10.o(.data);
@@ -506,7 +506,7 @@ SECTIONS
         build/asm/8EFC0.o(.data);
         build/asm/8EFE0.o(.data);
         build/asm/8F140.o(.data);
-        build/src/8F240.o(.data);
+        build/src/libkmc/matherr.o(.data);
         build/asm/8F250.o(.data);
         build/asm/data/main_data.data.o(.data);
         main_DATA_END = .;
@@ -713,7 +713,7 @@ SECTIONS
         build/asm/8CC20.o(.rodata);
         build/asm/8CD10.o(.rodata);
         build/asm/8CD70.o(.rodata);
-        build/src/8CE80.o(.rodata);
+        build/src/libultra/vi/vigetcurrcontext.o(.rodata);
         build/asm/8CE90.o(.rodata);
         build/asm/8D230.o(.rodata);
         build/asm/8DF10.o(.rodata);
@@ -729,7 +729,7 @@ SECTIONS
         build/asm/8EFC0.o(.rodata);
         build/asm/8EFE0.o(.rodata);
         build/asm/8F140.o(.rodata);
-        build/src/8F240.o(.rodata);
+        build/src/libkmc/matherr.o(.rodata);
         build/asm/8F250.o(.rodata);
         build/asm/data/main_rodata.rodata.o(.rodata);
         build/asm/data/A5CE0.rodata.o(.rodata);
@@ -963,7 +963,7 @@ SECTIONS
         build/asm/8CC20.o(.bss);
         build/asm/8CD10.o(.bss);
         build/asm/8CD70.o(.bss);
-        build/src/8CE80.o(.bss);
+        build/src/libultra/vi/vigetcurrcontext.o(.bss);
         build/asm/8CE90.o(.bss);
         build/asm/8D230.o(.bss);
         build/asm/8DF10.o(.bss);
@@ -979,7 +979,7 @@ SECTIONS
         build/asm/8EFC0.o(.bss);
         build/asm/8EFE0.o(.bss);
         build/asm/8F140.o(.bss);
-        build/src/8F240.o(.bss);
+        build/src/libkmc/matherr.o(.bss);
         build/asm/8F250.o(.bss);
         build/asm/data/ADD30.bss.o(.bss);
         main_BSS_END = .;

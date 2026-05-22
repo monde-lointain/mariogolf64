@@ -43,7 +43,8 @@ SRC_DIR := src
 # Find all source files
 ASM_FILES := $(wildcard $(ASM_DIR)/*.s) $(wildcard $(ASM_DIR)/data/*.s)
 BIN_FILES := $(wildcard $(ASSETS_DIR)/*.bin)
-C_FILES := $(wildcard $(SRC_DIR)/*.c)
+# Recurse into src/ so libultra/* and other nested layouts get picked up.
+C_FILES := $(shell find $(SRC_DIR) -name '*.c')
 
 # Object files
 ASM_O_FILES := $(patsubst $(ASM_DIR)/%.s,$(BUILD_DIR)/$(ASM_DIR)/%.o,$(ASM_FILES))
@@ -84,8 +85,9 @@ sync-names:
 
 .PHONY: all clean distclean setup extract sync-names nonmatching-func spotcheck-build clean-nonmatchings
 
-# Create build directories
-$(shell mkdir -p $(BUILD_DIR)/$(ASM_DIR)/data $(BUILD_DIR)/$(ASSETS_DIR) $(BUILD_DIR)/$(SRC_DIR))
+# Create build directories. Mirror C_O_FILES' parent dirs so nested layouts
+# like build/src/libultra/vi/ exist before the pattern rule writes there.
+$(shell mkdir -p $(BUILD_DIR)/$(ASM_DIR)/data $(BUILD_DIR)/$(ASSETS_DIR) $(BUILD_DIR)/$(SRC_DIR) $(sort $(dir $(C_O_FILES))))
 
 # Link
 $(BUILD_DIR)/$(TARGET): $(BUILD_DIR)/$(BASENAME).elf
