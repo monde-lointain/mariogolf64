@@ -32,7 +32,7 @@ CC := COMPILER_PATH=tools/cc tools/cc/gcc
 ASFLAGS := -march=vr4300 -32 -I include --no-pad-sections
 CPPFLAGS := -fno-dollars-in-identifiers -P
 AS_DEFINES := -DMIPSEB -D_LANGUAGE_ASSEMBLY -D_ULTRA64
-CFLAGS := -nostdinc -G 0 -mips2 -mgp32 -mfp32 -mno-abicalls -O2 -I include -I include/libultra -I include/libkmc -DINCLUDE_ASM_USE_MACRO_INC -D_LANGUAGE_C
+CFLAGS := -nostdinc -G 0 -mips2 -mgp32 -mfp32 -mno-abicalls -O2 -I include -I include/libultra -I include/libultra/internal -I include/libkmc -DINCLUDE_ASM_USE_MACRO_INC -D_LANGUAGE_C
 ifeq ($(NONMATCHING),1)
 CFLAGS += -DNONMATCHING
 endif
