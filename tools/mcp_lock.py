@@ -6,10 +6,12 @@ series of separate Bash tool calls. `exec 9>lockfile; flock -n 9` releases
 the lock the instant the bash subshell exits — i.e. after the first call.
 A PID-based lockfile doesn't help either; each call has its own PID.
 
-This script implements a directory-mutex (`mkdir` is atomic) with a TTL +
-stale-PID check, so consecutive Bash calls within one slash-command run all
-see the lock as held, while a crashed previous run is automatically
-reclaimable after the TTL.
+This script implements a directory-mutex (`mkdir` is atomic) with both a TTL
+and a PID-liveness probe (`os.kill(pid, 0)`). Consecutive Bash calls within
+one slash-command run all see the lock as held; a crashed previous run is
+reclaimed immediately if its PID is gone, or after the TTL otherwise. The
+PID probe is best-effort — unknown PIDs are treated as alive (conservative
+refuse beats wrongful reclaim).
 
 Usage:
   tools/mcp_lock.py acquire --command decomp --identifier func_800B3E40
@@ -76,6 +78,22 @@ def is_stale(holder: dict, ttl_minutes: int) -> tuple[bool, str]:
     return False, ""
 
 
+def is_pid_alive(pid: object) -> tuple[bool, str]:
+    """Best-effort liveness check. Returns (alive, note). Unknown PIDs are
+    treated as alive — conservative refuse beats wrongful reclaim."""
+    if not isinstance(pid, int) or pid <= 0:
+        return True, "no usable pid in holder.json"
+    try:
+        os.kill(pid, 0)
+    except ProcessLookupError:
+        return False, f"pid {pid} not running"
+    except PermissionError:
+        return True, f"pid {pid} alive (different uid)"
+    except OSError as err:
+        return True, f"pid {pid} probe error: {err}"
+    return True, f"pid {pid} alive"
+
+
 def _wipe_lock_path() -> None:
     """Remove whatever sits at LOCK_DIR — file (legacy) or dir."""
     if LOCK_DIR.is_dir() and not LOCK_DIR.is_symlink():
@@ -98,14 +116,18 @@ def acquire(args: argparse.Namespace) -> int:
             _wipe_lock_path()
         else:
             stale, reason = is_stale(existing, args.ttl_minutes)
-            if not stale:
+            alive, alive_note = is_pid_alive(existing.get("pid"))
+            if not stale and alive:
                 sys.stderr.write(
                     f"mcp_lock: held by {existing.get('command','?')}"
                     f" for {existing.get('identifier','?')} since {existing.get('started','?')}\n"
                 )
                 sys.stderr.write("mcp_lock: refuse acquire — release the current holder first\n")
                 return 1
-            sys.stderr.write(f"mcp_lock: reclaiming stale lock ({reason})\n")
+            if not alive:
+                sys.stderr.write(f"mcp_lock: reclaiming dead-PID lock ({alive_note})\n")
+            else:
+                sys.stderr.write(f"mcp_lock: reclaiming stale lock ({reason})\n")
             _wipe_lock_path()
         try:
             LOCK_DIR.mkdir()

@@ -74,7 +74,7 @@ Grep `asm/*.s` for `glabel <placeholder>` to find the asm file. The file's stem 
 | Subsegment type | Action |
 | --- | --- |
 | `hasm` | Abort: "func lives in a handwritten-asm (hasm) subsegment; INCLUDE_ASM is permanent." |
-| `asm` | Print the splat-flip instructions (set the subsegment to `c` in `mariogolf64.yaml`, run `make extract`) and STOP. This command does not modify yaml. |
+| `asm` | Print the splat-flip instructions (set the subsegment to `c` in `mariogolf64.yaml`, run `make extract`) and STOP. This command does not modify yaml. Before STOPping, **also probe the libultra/libkmc upstreams** (`find ~/development/repos/libultra_modern/src -name "*.c" \| xargs grep -l "<curated>"; find ~/development/repos/libkmc/src -name "*.c" \| xargs grep -l "<curated>"` — only when a curated name was resolved at Step 3). If a hit lands, recommend `/decomp-libupstream <curated>` instead and include the exact path qualifier (e.g. `c, libultra/shared/system/afterprenmi`) the user should write into the yaml. No probe runs for raw `func_XXXXXXXX` placeholders. |
 | `c` | Proceed. |
 
 ## Step 5 — Locate the parent C file

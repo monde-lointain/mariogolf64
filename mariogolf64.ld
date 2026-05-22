@@ -248,7 +248,7 @@ SECTIONS
         build/asm/89D90.o(.text);
         build/asm/8A820.o(.text);
         build/asm/8AA10.o(.text);
-        build/asm/8AC80.o(.text);
+        build/src/libultra/shared/system/afterprenmi.o(.text);
         build/asm/8ACA0.o(.text);
         build/asm/8AF90.o(.text);
         build/asm/8B900.o(.text);
@@ -268,7 +268,7 @@ SECTIONS
         build/asm/8CC20.o(.text);
         build/asm/8CD10.o(.text);
         build/asm/8CD70.o(.text);
-        build/src/libultra/vi/vigetcurrcontext.o(.text);
+        build/src/libultra/monegi/vi/vigetcurrcontext.o(.text);
         build/asm/8CE90.o(.text);
         build/asm/8D230.o(.text);
         build/asm/8DF10.o(.text);
@@ -470,7 +470,7 @@ SECTIONS
         build/asm/89D90.o(.data);
         build/asm/8A820.o(.data);
         build/asm/8AA10.o(.data);
-        build/asm/8AC80.o(.data);
+        build/src/libultra/shared/system/afterprenmi.o(.data);
         build/asm/8ACA0.o(.data);
         build/asm/8AF90.o(.data);
         build/asm/8B900.o(.data);
@@ -490,7 +490,7 @@ SECTIONS
         build/asm/8CC20.o(.data);
         build/asm/8CD10.o(.data);
         build/asm/8CD70.o(.data);
-        build/src/libultra/vi/vigetcurrcontext.o(.data);
+        build/src/libultra/monegi/vi/vigetcurrcontext.o(.data);
         build/asm/8CE90.o(.data);
         build/asm/8D230.o(.data);
         build/asm/8DF10.o(.data);
@@ -693,7 +693,7 @@ SECTIONS
         build/asm/89D90.o(.rodata);
         build/asm/8A820.o(.rodata);
         build/asm/8AA10.o(.rodata);
-        build/asm/8AC80.o(.rodata);
+        build/src/libultra/shared/system/afterprenmi.o(.rodata);
         build/asm/8ACA0.o(.rodata);
         build/asm/8AF90.o(.rodata);
         build/asm/8B900.o(.rodata);
@@ -713,7 +713,7 @@ SECTIONS
         build/asm/8CC20.o(.rodata);
         build/asm/8CD10.o(.rodata);
         build/asm/8CD70.o(.rodata);
-        build/src/libultra/vi/vigetcurrcontext.o(.rodata);
+        build/src/libultra/monegi/vi/vigetcurrcontext.o(.rodata);
         build/asm/8CE90.o(.rodata);
         build/asm/8D230.o(.rodata);
         build/asm/8DF10.o(.rodata);
@@ -943,7 +943,7 @@ SECTIONS
         build/asm/89D90.o(.bss);
         build/asm/8A820.o(.bss);
         build/asm/8AA10.o(.bss);
-        build/asm/8AC80.o(.bss);
+        build/src/libultra/shared/system/afterprenmi.o(.bss);
         build/asm/8ACA0.o(.bss);
         build/asm/8AF90.o(.bss);
         build/asm/8B900.o(.bss);
@@ -963,7 +963,7 @@ SECTIONS
         build/asm/8CC20.o(.bss);
         build/asm/8CD10.o(.bss);
         build/asm/8CD70.o(.bss);
-        build/src/libultra/vi/vigetcurrcontext.o(.bss);
+        build/src/libultra/monegi/vi/vigetcurrcontext.o(.bss);
         build/asm/8CE90.o(.bss);
         build/asm/8D230.o(.bss);
         build/asm/8DF10.o(.bss);
