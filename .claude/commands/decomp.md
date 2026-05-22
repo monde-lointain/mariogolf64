@@ -102,6 +102,8 @@ Deterministic two-step (do not parallelize — the seed depends on ghidra.c bein
 
 **Type discipline**: never let raw `int` / `long` / `volatile unsigned long long` etc. land in base.c. Use the ultra64.h typedefs (`s8`/`s16`/`s32`/`s64`/`u8`/`u16`/`u32`/`u64`, `f32`/`f64`, `vs8`–`vu64`). `sanitize_ghidra_body` covers the common Ghidra→ultra64 mappings; anything else the agent leaves on the table is its responsibility to convert before declaring a match.
 
+**Trivial-getter shortcut**: For 1–3 instruction functions that are clearly getters/setters (single global load+return, or single global store), the agent should skip m2c iteration and hand-write the body from the asm directly after `seed_c.py` lays down the scaffold. The seed's `extern` and `#include` framing still applies; just overwrite the function body in one shot and jump straight to step 7's `decomp_loop.py` invocation. Saves several iteration cycles.
+
 ## Step 7 — Iterate
 
 ```

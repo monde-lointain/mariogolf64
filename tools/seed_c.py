@@ -50,6 +50,9 @@ HI_LO_REF_RE = re.compile(r"%(?:hi|lo)\(([A-Za-z_][\w.]*)\)")
 INCLUDE_ASM_RE = re.compile(r'INCLUDE_ASM\([^,]+,\s*([A-Za-z_][\w]*)\s*\)\s*;')
 EXTERN_LINE_RE = re.compile(r"^\s*extern\s+[^;]+;\s*$")
 DATA_LABEL_RE = re.compile(r"^\s*([A-Za-z_][\w.]*)\s*:\s*$")
+DLABEL_RE = re.compile(r"^\s*dlabel\s+([A-Za-z_][\w.]*)\s*$")
+ENDDLABEL_RE = re.compile(r"^\s*enddlabel\b")
+WORD_SYM_RE = re.compile(r"\.word\s+([A-Za-z_][\w.]*)\s*$")
 
 
 def emit(payload: dict) -> None:
@@ -115,56 +118,87 @@ def collect_hi_lo_labels(target_asm_path: Path) -> set[str]:
     return set(HI_LO_REF_RE.findall(text))
 
 
-def slice_rodata(labels: set[str], out_path: Path) -> tuple[Path | None, list[str]]:
-    """Extract each label's contents from asm/data/*.{rodata,data}.s into out_path.
+def slice_rodata(
+    labels: set[str], out_path: Path
+) -> tuple[Path | None, list[str], set[str]]:
+    """Extract each label's contents from asm/data/*.{rodata,data}.s.
 
-    Returns (path_or_None, missing_labels).
+    Recognizes splat's `dlabel <name>` ... `enddlabel <name>` form (what
+    spimdisasm emits for this project) in addition to C-style `name:` labels.
+
+    Slices `.rodata` content into out_path (for m2c). For `.data` labels,
+    records presence but does NOT slice — m2c doesn't want writable data in
+    rodata, and the type info we glean from the body is enough.
+
+    Returns (path_or_None, missing_labels, pointer_labels).
+      - missing_labels: labels not found in ANY asm/data/*.s file (rodata or
+        data). Labels found in `.data` are NOT considered missing.
+      - pointer_labels: labels whose body is exactly one `.word <SYMBOL>` —
+        a relocation, not a hex immediate. These are almost certainly
+        pointer-typed globals, used by auto_externs_for_hi_lo to emit
+        `extern void *<sym>;` instead of `extern u32 <sym>;`.
     """
     if not labels:
-        return None, []
+        return None, [], set()
     if not ASM_DATA_DIR.exists():
-        return None, sorted(labels)
+        return None, sorted(labels), set()
 
-    found: dict[str, list[str]] = {}
-    missing = set(labels)
+    found_rodata: dict[str, list[str]] = {}
+    found_anywhere: set[str] = set()
+    pointer_labels: set[str] = set()
 
     for data_file in sorted(ASM_DATA_DIR.glob("*.s")):
+        is_rodata = ".rodata." in data_file.name
         try:
             lines = data_file.read_text(encoding="utf-8", errors="replace").splitlines()
         except OSError:
             continue
         i = 0
         while i < len(lines):
-            m = DATA_LABEL_RE.match(lines[i])
-            if not m or m.group(1) not in missing:
+            line = lines[i]
+            dl = DLABEL_RE.match(line)
+            cl = DATA_LABEL_RE.match(line) if dl is None else None
+            label = (dl or cl).group(1) if (dl or cl) else None
+            if label is None or label not in labels:
                 i += 1
                 continue
-            label = m.group(1)
-            chunk: list[str] = [lines[i]]
+            found_anywhere.add(label)
+            chunk: list[str] = [line]
+            body_lines: list[str] = []
             i += 1
             while i < len(lines):
-                next_lbl = DATA_LABEL_RE.match(lines[i])
-                if next_lbl is not None:
+                nxt = lines[i]
+                if ENDDLABEL_RE.match(nxt):
+                    chunk.append(nxt)
+                    i += 1
                     break
-                if lines[i].lstrip().startswith(".section"):
+                if DLABEL_RE.match(nxt) or DATA_LABEL_RE.match(nxt):
                     break
-                if lines[i].lstrip().startswith("glabel"):
+                stripped = nxt.lstrip()
+                if stripped.startswith(".section") or stripped.startswith("glabel"):
                     break
-                chunk.append(lines[i])
+                chunk.append(nxt)
+                body_lines.append(nxt)
                 i += 1
-            found[label] = chunk
-            missing.discard(label)
+            # Pointer detection: exactly one `.word` line in the body, and
+            # its operand is a symbol (not a hex immediate).
+            word_lines = [b for b in body_lines if ".word" in b]
+            if len(word_lines) == 1 and WORD_SYM_RE.search(word_lines[0]):
+                pointer_labels.add(label)
+            if is_rodata:
+                found_rodata[label] = chunk
 
-    if not found:
-        return None, sorted(missing)
+    missing = sorted(set(labels) - found_anywhere)
 
-    out_lines = [".section .rodata", ""]
-    for label in labels:
-        if label in found:
-            out_lines.extend(found[label])
-            out_lines.append("")
-    out_path.write_text("\n".join(out_lines) + "\n", encoding="utf-8")
-    return out_path, sorted(missing)
+    if found_rodata:
+        out_lines = [".section .rodata", ""]
+        for label in labels:
+            if label in found_rodata:
+                out_lines.extend(found_rodata[label])
+                out_lines.append("")
+        out_path.write_text("\n".join(out_lines) + "\n", encoding="utf-8")
+        return out_path, missing, pointer_labels
+    return None, missing, pointer_labels
 
 
 def run_m2ctx(parent: Path, out_path: Path) -> bool:
@@ -324,15 +358,21 @@ def auto_externs_for_hi_lo(
     placeholder: str,
     sibling_asm_names: list[str],
     parent_externs: list[str],
+    pointer_labels: set[str] | None = None,
 ) -> list[str]:
-    """Emit fallback `extern char` decls for %hi/%lo labels not yet declared.
+    """Emit fallback `extern` decls for %hi/%lo labels not yet declared.
 
     Skips: the placeholder itself, sibling INCLUDE_ASM names (already declared
     elsewhere in this seed), names already in parent externs, known hardware
     registers (declared by <PR/rcp.h>), and rodata jtbl_* labels emitted
-    inline. Type is `char` — wrong but compilable; the agent refines during
-    iteration.
+    inline.
+
+    `pointer_labels` carries the output of slice_rodata's pointer-detection
+    pass: labels whose body is a single `.word <SYMBOL>`. These get
+    `extern void *<sym>;` (no TODO comment — pointer-ness is solid signal).
+    Everything else still gets `extern u32 <sym>; // TODO: refine ...`.
     """
+    pointer_labels = pointer_labels or set()
     already = set(sibling_asm_names) | {placeholder} | HW_REG_NAMES
     for line in parent_externs:
         for tok in re.findall(r"\b([A-Za-z_]\w*)\b", line):
@@ -349,7 +389,10 @@ def auto_externs_for_hi_lo(
         elif label.startswith("func_") and re.match(r"^func_[0-9A-Fa-f]{8}$", label):
             out.append(f"extern void {label}(void); // TODO: refine signature from MCP")
         elif label.startswith("D_") and re.match(r"^D_[0-9A-Fa-f]{8}$", label):
-            out.append(f"extern u32 {label}; // TODO: refine type from MCP")
+            if label in pointer_labels:
+                out.append(f"extern void *{label};")
+            else:
+                out.append(f"extern u32 {label}; // TODO: refine type from MCP")
         else:
             out.append(f"extern char {label}[]; // TODO: refine from MCP/parent header")
     return out
@@ -451,13 +494,18 @@ def main() -> None:
     # Rodata slicing (best-effort)
     rodata_path: Path | None = None
     missing_rodata: list[str] = []
+    pointer_labels: set[str] = set()
     if not args.no_rodata:
         labels = collect_hi_lo_labels(target_asm)
         log(f"[seed] {len(labels)} %hi/%lo labels referenced")
         if labels:
-            rodata_path, missing_rodata = slice_rodata(labels, out_dir / "target.rodata.s")
+            rodata_path, missing_rodata, pointer_labels = slice_rodata(
+                labels, out_dir / "target.rodata.s"
+            )
             if rodata_path is not None:
                 log(f"[seed] target.rodata.s written ({len(labels) - len(missing_rodata)} labels)")
+            if pointer_labels:
+                log(f"[seed] pointer-typed globals: {len(pointer_labels)}")
             if missing_rodata:
                 log(f"[seed] WARN: {len(missing_rodata)} labels not found in asm/data/")
 
@@ -491,7 +539,7 @@ def main() -> None:
     # sibling INCLUDE_ASM. Type defaults to `char` — agent refines.
     hi_lo_labels = collect_hi_lo_labels(target_asm)
     auto_externs = auto_externs_for_hi_lo(
-        hi_lo_labels, placeholder, sibling_asm_names, externs
+        hi_lo_labels, placeholder, sibling_asm_names, externs, pointer_labels
     )
     if auto_externs:
         log(f"[seed] auto-extern: {len(auto_externs)} %hi/%lo label(s)")
