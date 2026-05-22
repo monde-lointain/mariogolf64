@@ -117,7 +117,7 @@ The agent reads the top mismatch context (instruction pairs ± 3 lines), updates
 
 ## Step 8 — In-tree spot-check (only if score 0)
 
-This step proves the match survives the parent-file context:
+This step proves the match survives the parent-file context. Compare **bytes**, not disassembly mnemonics — `00001021` and `00001025` both render as `move v0,zero` in objdump but encode different instructions.
 
 ```bash
 cp src/<seg>.c src/<seg>.c.spotcheck
@@ -130,14 +130,34 @@ cp src/<seg>.c src/<seg>.c.spotcheck
 #       <C body from nonmatchings/<placeholder>/base.c>
 #   #endif
 make spotcheck-build FUNC=<placeholder> SEG=<seg>
-# diff build/src/<seg>.spotcheck.o symbol vs build/asm/<seg>.o symbol via decomp_loop helpers
+
+# Byte-level compare:
+mips-linux-gnu-objcopy -O binary -j .text build/asm/<seg>.o /tmp/<seg>.ref.bin
+mips-linux-gnu-objcopy -O binary -j .text build/src/<seg>.spotcheck.o /tmp/<seg>.now.bin
+cmp /tmp/<seg>.ref.bin /tmp/<seg>.now.bin
 ```
 
-If the spot-check diff is empty → genuine match → proceed to step 9. If non-empty → the in-tree compile diverges; record the new diff as the authoritative one and resume the iteration loop at step 7.
+If `cmp` is silent → genuine match → proceed to step 9. If `cmp` reports a difference → the in-tree compile diverges (cross-function regalloc/scheduling, or a KMC-`as`-vs-modern-`as` codegen divergence not yet handled — diagnose against the original KMC binutils 2.6 source under `~/development/repos/mips-binutils-2.6/`).
 
-**Always** clean up: `rm -f src/<seg>.c.spotcheck build/src/<seg>.spotcheck.o` before returning, even on error. Both paths are gitignored as belt-and-suspenders.
+**Always** clean up: `rm -f src/<seg>.c.spotcheck build/src/<seg>.spotcheck.o /tmp/<seg>.ref.bin /tmp/<seg>.now.bin` before returning, even on error. The src/build paths are gitignored as belt-and-suspenders.
 
-## Step 9 — Final report
+## Step 9 — Finalize the match (only if Step 8 passed)
+
+Spot-check passing is **not** the same as "the function is in the ROM-matching build." Three steps must complete before Step 10 declares Match.
+
+**Guard (run before step 1)**: compute the subseg size from `mariogolf64.yaml` as `next_subseg_offset - this_subseg_offset`. If that size is not a multiple of 16, ABORT finalization and emit:
+
+> "subseg `[0x<this>, c]` size 0x\<size> is not 16-aligned. KMC `as` auto-pads `.text` to 16-byte alignment, which will over-pad this subseg by 0x\<delta> and shift every subsequent object. To proceed: either split this subseg in `mariogolf64.yaml` so the C-only portion ends at a 16-byte boundary, or add an explicit `__asm__(".balign 8\n");` after the function. Both are user actions."
+
+Outcome becomes **Subseg-alignment unsupported**. All four 8-aligned-only subsegs in the current yaml are asm-to-asm, so this guard does not fire on any present `c` subseg — it's future-proofing for if a user tries to match a function in one of those exceptional subsegs.
+
+1. **Inline the body into `src/<seg>.c`.** Replace the `INCLUDE_ASM(...)` line with the verbatim C body from `nonmatchings/<placeholder>/base.c`. Strip the seed-comment scaffold (`// === Function body ===`, `// === Externs ===`, the `#if 0` m2c reference block, the DLIST_HINT) — those live in `base.c` only.
+
+2. **Run `clang-format -i src/<seg>.c`.** The project's `.clang-format` is `BasedOnStyle: Google`. No exceptions.
+
+3. **Full build: `make`.** Output must end with `build/mariogolf64.z64: OK` (the md5 check passes). Confirm with `sha1sum build/mariogolf64.z64` — expected `e2c4e7a905b29529b49a1619a401fe699224829b` (baserom SHA-1). If the ROM doesn't match, the function did **not** match. Loop back to Step 7 or diagnose the gap. KMC `as` auto-pads `.text` to 16 — so trailing padding is handled automatically; subseg-alignment cases are caught by the guard above; what remains is genuine codegen mismatch.
+
+## Step 10 — Final report
 
 Before emitting the report, release the MCP lock:
 
@@ -145,7 +165,7 @@ Before emitting the report, release the MCP lock:
 tools/mcp_lock.py release --identifier $ARGUMENTS
 ```
 
-The release call MUST run on every exit path (Match / Stuck-near / Stuck-far / Spot-check failed / any early abort from Steps 1–8).
+The release call MUST run on every exit path (Match / Stuck-near / Stuck-far / Spot-check failed / Finalize failed / Subseg-alignment unsupported / any early abort from Steps 1–8). Step 9 completion is required for a Match outcome — if any of Step 9's substeps or its guard failed, the outcome is one of the non-Match states even if the spot-check passed.
 
 
 Emit one final response with these sections in this exact order, authored per `PROMPT_GUIDELINES.md` (concise, no preamble, no validation phrasing):
@@ -154,25 +174,26 @@ Emit one final response with these sections in this exact order, authored per `P
 ### Outcome
 
 One of:
-- **Match** — both isolated and in-tree clean.
+- **Match** — isolated + spot-check + Step 9 finalization (inline + clang-format + full `make`) all clean, and `sha1sum build/mariogolf64.z64` equals `e2c4e7a905b29529b49a1619a401fe699224829b`.
 - **Stuck-near** — score > 0, last `percent` ≥ 0.97.
 - **Stuck-far** — score > 0, last `percent` < 0.97.
 - **Spot-check failed** — isolated matched, in-tree didn't (cross-function regalloc/scheduling divergence).
+- **Finalize failed** — spot-check matched but Step 9's full `make` didn't produce a checksum-OK ROM (genuine codegen drift not caught by isolated/spot-check).
+- **Subseg-alignment unsupported** — Step 9 guard fired: this subseg is not 16-byte aligned and KMC `as`'s auto-pad would over-pad. User must split the yaml or insert explicit `.balign`.
 
-### Patches (only if Match)
+### Applied changes (only if Match)
 
-1. Replace in `src/<seg>.c`:
-   ```c
-   INCLUDE_ASM("asm/<seg>", <placeholder>);
-   ```
-   With the final C body verbatim.
+Report what Step 9 wrote:
+1. `src/<seg>.c` — inlined `<placeholder>`'s body, dropped its `INCLUDE_ASM` line, ran clang-format.
+2. `build/mariogolf64.z64` SHA-1 matches baserom.
 
-2. Add to `symbol_addrs.txt` (if a curated name was used):
-   ```
-   <curated_name> = 0x<vram>; // type:func
-   ```
+### Patch to propose (only if Match)
 
-The agent does NOT apply these. User reviews and applies.
+If Ghidra had a curated name, propose adding to `symbol_addrs.txt`:
+```
+<curated_name> = 0x<vram>; // type:func
+```
+The agent does NOT apply this — user reviews and applies (per the cross-repo sync flow in `CLAUDE.md`).
 
 ### Next-step suggestion (only if Stuck-near at ≥ 0.97)
 

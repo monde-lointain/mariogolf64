@@ -160,10 +160,10 @@ This project decompiles Mario Golf 64 (N64) one function at a time. Tooling: spl
 
 ## Slash commands
 
-- **`/decomp <func>`** — Tactical. Match-decompiles one function (placeholder or curated name). Runs `seed C → KMC GCC → objdump → asm-differ` until byte-exact, then in-tree spot-checks. Stops and proposes patches (does not apply them). Always ends with a numbered "Suggested workflow improvements" section the user can selectively apply in-conversation.
+- **`/decomp <func>`** — Tactical. Match-decompiles one function (placeholder or curated name). Runs `seed C → KMC GCC → objdump → asm-differ` until byte-exact, spot-checks in-tree by byte-level cmp, then **finalizes**: moves the body into `src/<seg>.c`, runs `clang-format`, and does a full `make` whose ROM SHA-1 must equal the baserom. Only then does it declare Match and propose the symbol-name patch. Always ends with a numbered "Suggested workflow improvements" section.
 - **`/decomp-lead [scope]`** — Strategic. Reads project state and rewrites `docs/decomp_roadmap.md` (strategy, next 5 targets, subsegments to flip, sync status). Never dispatches `/decomp`. Optional scope arg filters to a subsystem.
 
-Only one of these may run at a time — they share the Ghidra MCP slot via a `flock` on `nonmatchings/.mcp.lock`.
+Only one of these may run at a time — they share the Ghidra MCP slot via `tools/mcp_lock.py` (directory mutex w/ 30-min stale-TTL; replaces an earlier `flock` design that didn't survive across multiple Bash tool calls).
 
 ## Conventions
 
@@ -180,6 +180,9 @@ Only one of these may run at a time — they share the Ghidra MCP slot via a `fl
 - **C naming conventions**: follow the convention table at the top of this file (functions/variables/struct-members `lower_case`; types `CamelCase`; global/static const `kCamelCase`). When stitching m2c output into base.c, rename m2c's `temp_*` / `local_*` / `arg_*` synthetics before promoting.
 - **Prompt authoring**: any time `/decomp` or `/decomp-lead` (or any other slash command in this project) is created or modified, the prompt text follows `PROMPT_GUIDELINES.md` at the project root.
 - **Isolated-compile caveat**: `/decomp` compiles `nonmatchings/<func>/base.c` standalone. KMC GCC's regalloc/scheduling can differ from the in-tree compile — that's why every match runs an in-tree spot-check before being declared. If iteration mismatches cluster around extern address loads (HI/LO16 relocs against project-local symbols), those are isolation-only — the spot-check is the truth.
+- **`src/%` is assembled by KMC `as` (`tools/cc/as`)**, not modern `mips-linux-gnu-as`. The original assembler emits `addu` for `move dst,zero` (encoding `0x...1021`, matching the original ROM, vs modern as's `0x...1025` from `or`) and auto-pads `.text` to its 16-byte section alignment. `asm/%` continues to use modern as because raw asm uses modern-only directives (`.set gp=64`, `.internal`). `include/macro.inc` had its `.internal _MACRO_INC_GUARD` line removed so KMC `as` parses it cleanly; the `.set _MACRO_INC_GUARD, 1` on the next line still guards the include. `permuter_settings.toml` mirrors the Makefile's src/% pipeline.
+- **Spot-check via byte-level `cmp` only**: `mips-linux-gnu-objdump` renders both `0x...1021` and `0x...1025` as `move v0,zero`, so mnemonic-level diff silently false-positives. Always `cmp` raw `.text` bytes.
+- **Match finalization is three steps**: inline body into `src/<seg>.c` → `clang-format -i src/<seg>.c` → full `make` until ROM SHA-1 matches baserom. Spot-check passing ≠ ROM matching; the final `make` is what proves the match. See memory `match-finalization-checklist`.
 - **Workflow retrospection**: every `/decomp` run ends with a numbered "Suggested workflow improvements" section in the agent's final chat response. No file is written. User replies with which numbered items to apply; agent edits CLAUDE.md / seed_c.py / decomp_loop.py / decomp.md within the same session.
 
 ## Cross-repo sync (Ghidra workspace at `~/development/reversing/ghidra/mariogolf64/`)

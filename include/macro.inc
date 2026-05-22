@@ -1,9 +1,10 @@
 # This file is used by modern gas.
 # Defines the expected assembly macros
 
-# Evaluate this file only once in case it's included more than once
+# Evaluate this file only once in case it's included more than once.
+# (No `.internal` directive — KMC binutils 2.6 doesn't recognize it; the
+# `.set` below is the actual guard.)
 .ifndef _MACRO_INC_GUARD
-.internal _MACRO_INC_GUARD
 .set _MACRO_INC_GUARD, 1
 
 # A function symbol.

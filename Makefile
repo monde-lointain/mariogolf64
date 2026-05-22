@@ -94,12 +94,15 @@ $(BUILD_DIR)/$(ASM_DIR)/%.o: $(ASM_DIR)/%.s
 $(BUILD_DIR)/$(ASSETS_DIR)/%.o: $(ASSETS_DIR)/%.bin
 	$(OBJCOPY) -I binary -O elf32-tradbigmips $< $@
 
-# Compile C (KMC GCC → .s, then system as → .o)
-# Two-step to use system as which handles .include correctly
+# Compile C (KMC GCC → .s, then KMC binutils 2.6 `as` → .o).
+# Using the original assembler (tools/cc/as) gives us the KMC `move dst,zero`
+# → `addu dst,zero,zero` encoding natively, AND auto-pads .text to its 16-byte
+# section alignment. Modern `mips-linux-gnu-as` is kept for asm/% (it
+# understands modern-only directives like .set gp=64 that raw asm uses).
 $(BUILD_DIR)/$(SRC_DIR)/%.o: $(SRC_DIR)/%.c
 	$(CC) -S $(CFLAGS) -o $@.s $<
-	$(AS) $(ASFLAGS) -o $@.tmp $@.s
-	$(OBJCOPY) --set-section-alignment .text=4 $@.tmp $@
+	tools/cc/as -EB -mips2 -I include -o $@.tmp $@.s
+	cp $@.tmp $@
 	$(STRIP) $@ -N dummy-symbol-name
 	rm $@.s $@.tmp
 
@@ -128,8 +131,8 @@ spotcheck-build:
 	@test -n "$(FUNC)" || { echo "Usage: make spotcheck-build SEG=<seg> FUNC=<func_XXXXXXXX>" >&2; exit 1; }
 	@test -f src/$(SEG).c.spotcheck || { echo "src/$(SEG).c.spotcheck not found (created by /decomp step 10)" >&2; exit 1; }
 	$(CC) -x c -S $(CFLAGS) -DNONMATCHING -o $(BUILD_DIR)/$(SRC_DIR)/$(SEG).spotcheck.s src/$(SEG).c.spotcheck
-	$(AS) $(ASFLAGS) -o $(BUILD_DIR)/$(SRC_DIR)/$(SEG).spotcheck.tmp $(BUILD_DIR)/$(SRC_DIR)/$(SEG).spotcheck.s
-	$(OBJCOPY) --set-section-alignment .text=4 $(BUILD_DIR)/$(SRC_DIR)/$(SEG).spotcheck.tmp $(BUILD_DIR)/$(SRC_DIR)/$(SEG).spotcheck.o
+	tools/cc/as -EB -mips2 -I include -o $(BUILD_DIR)/$(SRC_DIR)/$(SEG).spotcheck.tmp $(BUILD_DIR)/$(SRC_DIR)/$(SEG).spotcheck.s
+	cp $(BUILD_DIR)/$(SRC_DIR)/$(SEG).spotcheck.tmp $(BUILD_DIR)/$(SRC_DIR)/$(SEG).spotcheck.o
 	$(STRIP) $(BUILD_DIR)/$(SRC_DIR)/$(SEG).spotcheck.o -N dummy-symbol-name
 	rm $(BUILD_DIR)/$(SRC_DIR)/$(SEG).spotcheck.s $(BUILD_DIR)/$(SRC_DIR)/$(SEG).spotcheck.tmp
 
