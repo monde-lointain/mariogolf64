@@ -32,12 +32,14 @@ Do not "best-effort" sanitize. Reject and stop.
 ## Step 1 — Acquire the MCP lock
 
 ```bash
-mkdir -p nonmatchings
-exec 9>nonmatchings/.mcp.lock
-flock -n 9 || { echo "another /decomp or /decomp-lead is already running. aborting."; exit 1; }
+tools/mcp_lock.py acquire --command decomp --identifier $ARGUMENTS
 ```
 
-The lock is held for the lifetime of the slash command's shell — it releases automatically on exit. The lock file itself is not a sentinel; only the kernel-side flock state matters.
+Non-zero exit means another `/decomp` or `/decomp-lead` already holds it — abort with the message printed by `mcp_lock.py` on stderr.
+
+`tools/mcp_lock.py` writes `nonmatchings/.mcp.lock/holder.json` and survives across Bash tool calls (unlike `flock`, which only lives for the lifetime of a single subshell). The lock self-reclaims after a 30-minute TTL so a crashed slash command doesn't strand the slot. **Step 9 MUST end with `tools/mcp_lock.py release --identifier $ARGUMENTS`** — explicit release is the contract; the TTL is only a safety net.
+
+If the slash command takes an early abort path (subseg is `hasm`, subseg is still `asm`, MCP is down, etc.) the release call MUST still run before returning the abort message.
 
 ## Step 2 — MCP discovery
 
@@ -81,17 +83,30 @@ Grep `asm/*.s` for `glabel <placeholder>` to find the asm file. The file's stem 
 
 ## Step 6 — Seed `nonmatchings/<placeholder>/base.c`
 
-In parallel:
-- Call the Ghidra MCP decompile tool (discovered name) for `<placeholder>` with `program="baserom.z64"`. Save the body to `nonmatchings/<placeholder>/ghidra.c`.
-- Run `python3 tools/seed_c.py --func <placeholder> --parent <parent.c>`.
+Deterministic two-step (do not parallelize — the seed depends on ghidra.c being on disk):
 
-`seed_c.py` does the m2ctx + m2c + rodata slicing + parent-extern collection + base.c stitching. The Ghidra body lands at `nonmatchings/<placeholder>/ghidra.c` before stitching; `seed_c.py` picks it up automatically.
+1. **Fetch Ghidra decompile and write `nonmatchings/<placeholder>/ghidra.c` first.**
+
+   - Resolve `<placeholder>`'s VRAM (the hex tail of the placeholder).
+   - Call `mcp__ghidra__decompile_function` with `address=0x<VRAM>` and `program="baserom.z64"`.
+   - Strip the leading `{"result":"..."}` JSON envelope and unescape, then write the raw decompile body verbatim to `nonmatchings/<placeholder>/ghidra.c`. `mkdir -p` the dir first.
+   - Do NOT hand-clean the body here — `seed_c.py` runs `sanitize_ghidra_body` (Ghidra-type → ultra64.h-type substitution, function-symbol rename to `<placeholder>`, audit-header strip).
+
+2. **Run the seed:**
+
+   ```bash
+   venv/bin/python3 tools/seed_c.py --func <placeholder> --parent <parent.c>
+   ```
+
+`seed_c.py` does the m2ctx + m2c + rodata slicing + parent-extern collection + auto-extern emission for `%hi/%lo` labels + Ghidra-body sanitization + base.c stitching. Always invoke via `venv/bin/python3` (project policy — keeps asm-differ deps in scope; the script also self-promotes if invoked from system python).
+
+**Type discipline**: never let raw `int` / `long` / `volatile unsigned long long` etc. land in base.c. Use the ultra64.h typedefs (`s8`/`s16`/`s32`/`s64`/`u8`/`u16`/`u32`/`u64`, `f32`/`f64`, `vs8`–`vu64`). `sanitize_ghidra_body` covers the common Ghidra→ultra64 mappings; anything else the agent leaves on the table is its responsibility to convert before declaring a match.
 
 ## Step 7 — Iterate
 
 ```
 for iteration in 1..25:
-    result = python3 tools/decomp_loop.py --func <placeholder>
+    result = venv/bin/python3 tools/decomp_loop.py --func <placeholder>
     if result.score == 0:        break (candidate match)
     if 5 consecutive compile_ok == False:
         report "seed appears fundamentally broken" and stop
@@ -123,6 +138,15 @@ If the spot-check diff is empty → genuine match → proceed to step 9. If non-
 **Always** clean up: `rm -f src/<seg>.c.spotcheck build/src/<seg>.spotcheck.o` before returning, even on error. Both paths are gitignored as belt-and-suspenders.
 
 ## Step 9 — Final report
+
+Before emitting the report, release the MCP lock:
+
+```bash
+tools/mcp_lock.py release --identifier $ARGUMENTS
+```
+
+The release call MUST run on every exit path (Match / Stuck-near / Stuck-far / Spot-check failed / any early abort from Steps 1–8).
+
 
 Emit one final response with these sections in this exact order, authored per `PROMPT_GUIDELINES.md` (concise, no preamble, no validation phrasing):
 

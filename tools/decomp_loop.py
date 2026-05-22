@@ -12,16 +12,26 @@ Stderr: human-readable progress messages.
 """
 from __future__ import annotations
 
-import argparse
-import json
 import os
-import re
-import subprocess
 import sys
 from pathlib import Path
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 ROOT_DIR = SCRIPT_DIR.parent
+
+# --- venv re-exec ----------------------------------------------------------
+# Project policy: all Python tooling runs out of ./venv (which carries the
+# asm-differ deps: watchdog, levenshtein, colorama). If we were launched from
+# a different interpreter (e.g. system python3), self-promote.
+_VENV_PY = ROOT_DIR / "venv" / "bin" / "python3"
+if _VENV_PY.exists() and Path(sys.executable).resolve() != _VENV_PY.resolve():
+    os.execv(str(_VENV_PY), [str(_VENV_PY), __file__, *sys.argv[1:]])
+# ---------------------------------------------------------------------------
+
+import argparse
+import json
+import re
+import subprocess
 ASMDIFF_DIR = SCRIPT_DIR / "asm-differ"
 ASM_DIR = ROOT_DIR / "asm"
 BUILD_ASM_DIR = ROOT_DIR / "build" / "asm"
@@ -203,39 +213,52 @@ def run_asm_differ(base_dump: str, my_dump: str) -> dict:
 
 
 def score_diff(raw: dict, max_mismatches: int = 5) -> dict:
-    """Distill the asm-differ raw dict into a structured score + top mismatches."""
+    """Distill the asm-differ raw dict into a structured score + top mismatches.
+
+    asm-differ already computes `current_score` (0 = perfect) and `max_score`
+    in the raw PythonFormatter dict; mirror those directly. Rows are compared
+    by `row["key"]` (canonical pre-normalized form) — when base/current keys
+    match, the instructions are equivalent modulo whitespace.
+    """
     rows = raw.get("rows", [])
     total = len(rows)
     match_count = 0
     mismatches: list[dict] = []
     for idx, row in enumerate(rows):
-        # asm-differ's PythonFormatter row schema:
-        #   row = {"key": ..., "base": {"text": [...], "kind": "..."}, "current": {...}, ...}
-        # 'kind' values include 'DiffMatch', 'DiffDelete', 'DiffInsert', 'DiffMove', etc.
         base = row.get("base") or {}
         current = row.get("current") or {}
-        base_kind = base.get("key") or base.get("kind") or ""
-        cur_kind = current.get("key") or current.get("kind") or ""
-        if base_kind == "" and cur_kind == "":
+        if not base and not current:
             continue
-        is_match = (base_kind == cur_kind) and (base.get("text", []) == current.get("text", []))
+        # asm-differ marks identity via matching `key` on both sides.
+        is_match = bool(base) and bool(current) and (base.get("key") == current.get("key"))
         if is_match:
             match_count += 1
         elif len(mismatches) < max_mismatches:
+            def _flat(d):
+                t = d.get("text", []) if isinstance(d, dict) else []
+                if isinstance(t, list):
+                    return "".join(seg.get("text", "") if isinstance(seg, dict) else str(seg) for seg in t)
+                return str(t)
             mismatches.append({
                 "row_idx": idx,
-                "base_kind": base_kind,
-                "current_kind": cur_kind,
-                "base_text": "".join(seg.get("text", "") for seg in base.get("text", []) if isinstance(seg, dict)) or str(base.get("text", "")),
-                "current_text": "".join(seg.get("text", "") for seg in current.get("text", []) if isinstance(seg, dict)) or str(current.get("text", "")),
+                "base_text": _flat(base),
+                "current_text": _flat(current),
             })
-    percent = (match_count / total) if total else 0.0
-    score = 0 if (total > 0 and match_count == total) else (total - match_count)
+    current_score = int(raw.get("current_score", -1))
+    max_score = int(raw.get("max_score", 0))
+    # Prefer asm-differ's own score; fall back to row-counting if unavailable.
+    if current_score >= 0:
+        score = current_score
+        percent = 1.0 - (current_score / max_score) if max_score > 0 else (1.0 if total else 0.0)
+    else:
+        score = 0 if (total > 0 and match_count == total) else (total - match_count)
+        percent = (match_count / total) if total else 0.0
     return {
         "score": score,
         "percent": percent,
         "total_rows": total,
         "match_count": match_count,
+        "max_score": max_score,
         "top_mismatches": mismatches,
     }
 

@@ -32,7 +32,7 @@ CC := COMPILER_PATH=tools/cc tools/cc/gcc
 ASFLAGS := -march=vr4300 -32 -I include --no-pad-sections
 CPPFLAGS := -fno-dollars-in-identifiers -P
 AS_DEFINES := -DMIPSEB -D_LANGUAGE_ASSEMBLY -D_ULTRA64
-CFLAGS := -nostdinc -G 0 -mips2 -mgp32 -mfp32 -mno-abicalls -O2 -I include -DINCLUDE_ASM_USE_MACRO_INC
+CFLAGS := -nostdinc -G 0 -mips2 -mgp32 -mfp32 -mno-abicalls -O2 -I include -DINCLUDE_ASM_USE_MACRO_INC -D_LANGUAGE_C
 ifeq ($(NONMATCHING),1)
 CFLAGS += -DNONMATCHING
 endif
@@ -127,7 +127,7 @@ spotcheck-build:
 	@test -n "$(SEG)" || { echo "Usage: make spotcheck-build SEG=<seg> FUNC=<func_XXXXXXXX>" >&2; exit 1; }
 	@test -n "$(FUNC)" || { echo "Usage: make spotcheck-build SEG=<seg> FUNC=<func_XXXXXXXX>" >&2; exit 1; }
 	@test -f src/$(SEG).c.spotcheck || { echo "src/$(SEG).c.spotcheck not found (created by /decomp step 10)" >&2; exit 1; }
-	$(CC) -S $(CFLAGS) -DNONMATCHING -o $(BUILD_DIR)/$(SRC_DIR)/$(SEG).spotcheck.s src/$(SEG).c.spotcheck
+	$(CC) -x c -S $(CFLAGS) -DNONMATCHING -o $(BUILD_DIR)/$(SRC_DIR)/$(SEG).spotcheck.s src/$(SEG).c.spotcheck
 	$(AS) $(ASFLAGS) -o $(BUILD_DIR)/$(SRC_DIR)/$(SEG).spotcheck.tmp $(BUILD_DIR)/$(SRC_DIR)/$(SEG).spotcheck.s
 	$(OBJCOPY) --set-section-alignment .text=4 $(BUILD_DIR)/$(SRC_DIR)/$(SEG).spotcheck.tmp $(BUILD_DIR)/$(SRC_DIR)/$(SEG).spotcheck.o
 	$(STRIP) $(BUILD_DIR)/$(SRC_DIR)/$(SEG).spotcheck.o -N dummy-symbol-name

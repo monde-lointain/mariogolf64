@@ -284,7 +284,7 @@ SECTIONS
         build/asm/8EFC0.o(.text);
         build/asm/8EFE0.o(.text);
         build/asm/8F140.o(.text);
-        build/asm/8F240.o(.text);
+        build/src/8F240.o(.text);
         build/asm/8F250.o(.text);
         main_TEXT_END = .;
         main_TEXT_SIZE = ABSOLUTE(main_TEXT_END - main_TEXT_START);
@@ -506,7 +506,7 @@ SECTIONS
         build/asm/8EFC0.o(.data);
         build/asm/8EFE0.o(.data);
         build/asm/8F140.o(.data);
-        build/asm/8F240.o(.data);
+        build/src/8F240.o(.data);
         build/asm/8F250.o(.data);
         build/asm/data/main_data.data.o(.data);
         main_DATA_END = .;
@@ -729,7 +729,7 @@ SECTIONS
         build/asm/8EFC0.o(.rodata);
         build/asm/8EFE0.o(.rodata);
         build/asm/8F140.o(.rodata);
-        build/asm/8F240.o(.rodata);
+        build/src/8F240.o(.rodata);
         build/asm/8F250.o(.rodata);
         build/asm/data/main_rodata.rodata.o(.rodata);
         build/asm/data/A5CE0.rodata.o(.rodata);
@@ -979,7 +979,7 @@ SECTIONS
         build/asm/8EFC0.o(.bss);
         build/asm/8EFE0.o(.bss);
         build/asm/8F140.o(.bss);
-        build/asm/8F240.o(.bss);
+        build/src/8F240.o(.bss);
         build/asm/8F250.o(.bss);
         build/asm/data/ADD30.bss.o(.bss);
         main_BSS_END = .;

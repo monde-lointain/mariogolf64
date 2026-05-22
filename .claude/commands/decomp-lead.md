@@ -29,10 +29,10 @@ Empty `$ARGUMENTS` is valid — it means "full project review".
 ## Step 1 — Acquire the MCP lock
 
 ```bash
-mkdir -p nonmatchings
-exec 9>nonmatchings/.mcp.lock
-flock -n 9 || { echo "another /decomp or /decomp-lead is already running. aborting."; exit 1; }
+tools/mcp_lock.py acquire --command decomp-lead --identifier ${ARGUMENTS:-full}
 ```
+
+Non-zero exit means another `/decomp` or `/decomp-lead` already holds it — abort with `mcp_lock.py`'s stderr message. The lock survives across Bash tool calls (see `tools/mcp_lock.py --help`); Step 7 must end with `tools/mcp_lock.py release --identifier ${ARGUMENTS:-full}`. The release call must also run on any early-abort path (MCP down, write check failure, etc.).
 
 Same flock as `/decomp` — there's only one Ghidra slot.
 
@@ -132,7 +132,11 @@ If `docs/` does not exist yet, create it. Atomic-overwrite the roadmap file. Ver
 
 ## Step 7 — Final report
 
-One short message in the chat (per `PROMPT_GUIDELINES.md` — concise, no preamble):
+Release the lock, then emit one short message in the chat (per `PROMPT_GUIDELINES.md` — concise, no preamble):
+
+```bash
+tools/mcp_lock.py release --identifier ${ARGUMENTS:-full}
+```
 
 ```
 Roadmap updated: docs/decomp_roadmap.md

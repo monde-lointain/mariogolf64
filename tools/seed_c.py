@@ -18,17 +18,26 @@ Stderr: human-readable progress.
 """
 from __future__ import annotations
 
-import argparse
-import importlib.util
-import json
 import os
-import re
-import subprocess
 import sys
 from pathlib import Path
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 ROOT_DIR = SCRIPT_DIR.parent
+
+# --- venv re-exec ----------------------------------------------------------
+# Project policy: all Python tooling runs out of ./venv. If we were launched
+# from a different interpreter (e.g. system python3), self-promote.
+_VENV_PY = ROOT_DIR / "venv" / "bin" / "python3"
+if _VENV_PY.exists() and Path(sys.executable).resolve() != _VENV_PY.resolve():
+    os.execv(str(_VENV_PY), [str(_VENV_PY), __file__, *sys.argv[1:]])
+# ---------------------------------------------------------------------------
+
+import argparse
+import importlib.util
+import json
+import re
+import subprocess
 ASM_DIR = ROOT_DIR / "asm"
 ASM_DATA_DIR = ASM_DIR / "data"
 NONMATCHINGS_DIR = ROOT_DIR / "nonmatchings"
@@ -204,6 +213,96 @@ def run_m2c(
     return True
 
 
+# Ghidra "undefined*" / generic names → ultra64.h equivalents.
+# Use the project's typed aliases; never let int/long/etc. through.
+GHIDRA_TYPE_MAP = {
+    r"\bundefined8\b": "u64",
+    r"\bundefined4\b": "u32",
+    r"\bundefined2\b": "u16",
+    r"\bundefined1\b": "u8",
+    r"\bundefined\b": "u8",
+    r"\bulonglong\b": "u64",
+    r"\blonglong\b": "s64",
+    r"\bulong\b": "u32",
+    r"\buint\b": "u32",
+    r"\bushort\b": "u16",
+    r"\bsbyte\b": "s8",
+    r"\bbyte\b": "u8",
+    r"\bword\b": "u16",
+    r"\bdword\b": "u32",
+    r"\bqword\b": "u64",
+}
+
+# Hardware registers are declared in <PR/rcp.h> (pulled in via <ultra64.h>);
+# do not auto-extern these. Conservative list — anything ending in _REG plus a
+# few unsuffixed standards.
+HW_REG_NAMES = {
+    "AI_STATUS_REG", "AI_DRAM_ADDR_REG", "AI_LEN_REG", "AI_CONTROL_REG",
+    "AI_DACRATE_REG", "AI_BITRATE_REG",
+    "DPC_STATUS_REG", "DPC_START_REG", "DPC_END_REG", "DPC_CURRENT_REG",
+    "DPC_CLOCK_REG", "DPC_BUFBUSY_REG", "DPC_PIPEBUSY_REG", "DPC_TMEM_REG",
+    "SI_STATUS_REG", "SI_DRAM_ADDR_REG", "SI_PIF_ADDR_RD64B_REG",
+    "SI_PIF_ADDR_WR64B_REG",
+    "MI_MODE_REG", "MI_VERSION_REG", "MI_INTR_REG", "MI_INTR_MASK_REG",
+    "VI_STATUS_REG", "VI_DRAM_ADDR_REG", "VI_WIDTH_REG", "VI_INTR_REG",
+    "VI_CURRENT_REG", "VI_BURST_REG", "VI_V_SYNC_REG", "VI_H_SYNC_REG",
+    "VI_LEAP_REG", "VI_H_START_REG", "VI_V_START_REG", "VI_V_BURST_REG",
+    "VI_X_SCALE_REG", "VI_Y_SCALE_REG",
+    "PI_STATUS_REG", "PI_DRAM_ADDR_REG", "PI_CART_ADDR_REG",
+    "PI_RD_LEN_REG", "PI_WR_LEN_REG",
+    "PI_BSD_DOM1_LAT_REG", "PI_BSD_DOM1_PWD_REG",
+    "PI_BSD_DOM1_PGS_REG", "PI_BSD_DOM1_RLS_REG",
+    "PI_BSD_DOM2_LAT_REG", "PI_BSD_DOM2_PWD_REG",
+    "PI_BSD_DOM2_PGS_REG", "PI_BSD_DOM2_RLS_REG",
+    "SP_STATUS_REG", "SP_MEM_ADDR_REG", "SP_DRAM_ADDR_REG",
+    "SP_RD_LEN_REG", "SP_WR_LEN_REG", "SP_DMA_FULL_REG",
+    "SP_DMA_BUSY_REG", "SP_SEMAPHORE_REG", "SP_PC_REG", "SP_IBIST_REG",
+    "AI_STATUS", "DPC_STATUS", "SI_STATUS", "MI_STATUS",  # Ghidra often drops _REG
+}
+
+GHIDRA_HEADER_RE = re.compile(r"^/\*\s*\[MM\d+\][^*]*\*+/\s*$", re.MULTILINE)
+
+
+def sanitize_ghidra_body(text: str, placeholder: str) -> str:
+    """Make a Ghidra decompile suitable for KMC GCC compilation.
+
+    - Map Ghidra synthetic types (`undefined8`, `byte`, `ulonglong`, …) to the
+      project's ultra64.h aliases (`u64`, `u8`, `s64`, …).
+    - Rename the declared function symbol to <placeholder> (Ghidra often emits
+      a curated name like `returns_0` — decomp is authoritative, but only AFTER
+      the match lands; until then base.c needs the placeholder so symbol
+      resolution against build/asm/<seg>.o lines up).
+    - Strip the leading `/* [MMxx] copied from ELF … */` Ghidra audit header.
+    """
+    # Strip Ghidra audit header(s).
+    text = GHIDRA_HEADER_RE.sub("", text)
+
+    # Type substitutions.
+    for pattern, replacement in GHIDRA_TYPE_MAP.items():
+        text = re.sub(pattern, replacement, text)
+
+    # Rename the function symbol. Look for `<retty> <name>(...)` (1-line decl)
+    # or `<retty>\n<name>(...)` (Ghidra's 2-line style).
+    # The placeholder MUST appear as the function name in base.c so that
+    # objdump --disassemble=<placeholder> finds it.
+    def _rename(match: "re.Match[str]") -> str:
+        return match.group(1) + placeholder + match.group(3)
+
+    # Match: identifier( before optional whitespace + opening paren, where the
+    # identifier is preceded by a return type (last whitespace-separated token
+    # on the previous non-empty stretch). Conservative: only rename if the
+    # candidate name is followed by `(` and the line looks like a function
+    # definition (not a call).
+    func_def_re = re.compile(
+        r"((?:^|\n)\s*(?:[A-Za-z_][\w\s\*]*?\s|\*\s*))"   # return-type group
+        r"([A-Za-z_]\w*)"                                  # candidate name
+        r"(\s*\([^;]*?\)\s*\{)",                           # (...) {
+        re.MULTILINE,
+    )
+    text = func_def_re.sub(_rename, text, count=1)
+    return text.strip() + "\n"
+
+
 def collect_parent_externs(parent: Path) -> tuple[list[str], list[str]]:
     """Return (extern_decls, include_asm_names) from the parent .c."""
     if parent is None or not parent.exists():
@@ -220,11 +319,48 @@ def collect_parent_externs(parent: Path) -> tuple[list[str], list[str]]:
     return externs, asm_names
 
 
+def auto_externs_for_hi_lo(
+    labels: set[str],
+    placeholder: str,
+    sibling_asm_names: list[str],
+    parent_externs: list[str],
+) -> list[str]:
+    """Emit fallback `extern char` decls for %hi/%lo labels not yet declared.
+
+    Skips: the placeholder itself, sibling INCLUDE_ASM names (already declared
+    elsewhere in this seed), names already in parent externs, known hardware
+    registers (declared by <PR/rcp.h>), and rodata jtbl_* labels emitted
+    inline. Type is `char` — wrong but compilable; the agent refines during
+    iteration.
+    """
+    already = set(sibling_asm_names) | {placeholder} | HW_REG_NAMES
+    for line in parent_externs:
+        for tok in re.findall(r"\b([A-Za-z_]\w*)\b", line):
+            already.add(tok)
+
+    out: list[str] = []
+    for label in sorted(labels):
+        if label in already:
+            continue
+        if label.startswith("jtbl_"):
+            # Jump tables: declare as void* table; agent likely needs to add
+            # an extern_syms entry instead, but this at least compiles.
+            out.append(f"extern void *{label}[]; // TODO: confirm jtbl type")
+        elif label.startswith("func_") and re.match(r"^func_[0-9A-Fa-f]{8}$", label):
+            out.append(f"extern void {label}(void); // TODO: refine signature from MCP")
+        elif label.startswith("D_") and re.match(r"^D_[0-9A-Fa-f]{8}$", label):
+            out.append(f"extern u32 {label}; // TODO: refine type from MCP")
+        else:
+            out.append(f"extern char {label}[]; // TODO: refine from MCP/parent header")
+    return out
+
+
 def stitch_base_c(
     out_dir: Path,
     placeholder: str,
     externs: list[str],
     sibling_asm_names: list[str],
+    auto_externs: list[str],
     m2c_path: Path,
     ghidra_path: Path,
     missing_rodata: list[str],
@@ -247,7 +383,7 @@ def stitch_base_c(
             lines.append(f"//   ...and {len(missing_rodata) - 10} more")
         lines.append("")
 
-    if externs or sibling_asm_names:
+    if externs or sibling_asm_names or auto_externs:
         lines.append("// === Externs from parent file ===")
         for e in externs:
             lines.append(e)
@@ -255,6 +391,10 @@ def stitch_base_c(
             if name == placeholder:
                 continue
             lines.append(f"extern void {name}(void); // TODO: refine signature from MCP")
+        if auto_externs:
+            lines.append("// --- auto-extern (refine types during iteration) ---")
+            for e in auto_externs:
+                lines.append(e)
         lines.append("")
 
     if m2c_path.exists():
@@ -268,7 +408,8 @@ def stitch_base_c(
 
     lines.append("// === Function body ============================================")
     if ghidra_path.exists():
-        body = ghidra_path.read_text(encoding="utf-8", errors="replace").rstrip()
+        body = ghidra_path.read_text(encoding="utf-8", errors="replace")
+        body = sanitize_ghidra_body(body, placeholder).rstrip()
         lines.append(body)
     else:
         lines.append(f"// TODO: agent — paste Ghidra MCP `decompile_function` output for {placeholder}")
@@ -346,8 +487,18 @@ def main() -> None:
     # Ghidra body (written by slash command, not this script)
     ghidra_path = out_dir / "ghidra.c"
 
+    # Auto-extern any %hi/%lo label not already covered by parent externs or
+    # sibling INCLUDE_ASM. Type defaults to `char` — agent refines.
+    hi_lo_labels = collect_hi_lo_labels(target_asm)
+    auto_externs = auto_externs_for_hi_lo(
+        hi_lo_labels, placeholder, sibling_asm_names, externs
+    )
+    if auto_externs:
+        log(f"[seed] auto-extern: {len(auto_externs)} %hi/%lo label(s)")
+
     base_path = stitch_base_c(
-        out_dir, placeholder, externs, sibling_asm_names, m2c_path, ghidra_path, missing_rodata,
+        out_dir, placeholder, externs, sibling_asm_names, auto_externs,
+        m2c_path, ghidra_path, missing_rodata,
     )
     log(f"[seed] {base_path.relative_to(ROOT_DIR)} written")
 

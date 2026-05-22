@@ -286,7 +286,7 @@ segments:
       - [0x8EFC0, asm]
       - [0x8EFE0, asm]
       - [0x8F140, asm]
-      - [0x8F240, asm]
+      - [0x8F240, c]
       - [0x8F250, asm]
       - [0x8F440, data, main_data]
       - [0xA5668, rodata, main_rodata]

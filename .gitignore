@@ -30,6 +30,9 @@ build/
 # Object files
 *.o
 
+# Make dependency files
+*.d
+
 # N64 ROM files
 *.z64
 *.n64
