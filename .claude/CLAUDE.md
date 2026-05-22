@@ -170,7 +170,7 @@ Only one of `/decomp`, `/decomp-lead`, or `/sync-names` may run at a time — th
 
 - **One function per `/decomp` run.** You pick the target.
 - **Scratch dir**: `nonmatchings/<func>/` (gitignored, shared with permuter).
-- **Ghidra MCP** is assumed running via `~/development/reversing/ghidra/start-headless.sh` (port 8089). All MCP calls pass `program="baserom.z64"`; `mariogolf64.elf` is reserved for `sync_decomp_names.py`.
+- **Ghidra MCP** is assumed running via `~/development/reversing/ghidra/start-headless.sh` (port 8089). All MCP calls pass `program="baserom.z64"` (including `sync_decomp_names.py`).
 - **File-level matching**: a source file matches only when every function in it matches. Splat generates `src/<seg>.c` with `INCLUDE_ASM` stubs; promoting a match means replacing one stub with the C body. Don't expect md5 wins until the last stub in a file is gone.
 - **`symbol_addrs.txt`/`reloc_addrs.txt`** are sacrosanct — never delete (existing rule, reinforced here). `ghidra_symbols.txt` is owned by `sync_decomp_names.py`; do not hand-edit. Maintainer overrides go in `symbol_addrs.txt`; the two files must be disjoint (splat errors on duplicates).
 - **Subsegment flips** (`asm` → `c`) and the first `make extract` for a new file are **user actions**, not agent actions.
