@@ -213,7 +213,7 @@ SECTIONS
         build/asm/86A50.o(.text);
         build/asm/87510.o(.text);
         build/asm/87600.o(.text);
-        build/asm/877B0.o(.text);
+        build/src/libultra/monegi/thread/getthreadpri.o(.text);
         build/asm/877D0.o(.text);
         build/asm/878A0.o(.text);
         build/asm/879C0.o(.text);
@@ -272,7 +272,7 @@ SECTIONS
         build/asm/8CE90.o(.text);
         build/asm/8D230.o(.text);
         build/asm/8DF10.o(.text);
-        build/asm/8DF30.o(.text);
+        build/src/libultra/monegi/si/si.o(.text);
         build/asm/8DF50.o(.text);
         build/asm/8E110.o(.text);
         build/asm/8E550.o(.text);
@@ -435,7 +435,7 @@ SECTIONS
         build/asm/86A50.o(.data);
         build/asm/87510.o(.data);
         build/asm/87600.o(.data);
-        build/asm/877B0.o(.data);
+        build/src/libultra/monegi/thread/getthreadpri.o(.data);
         build/asm/877D0.o(.data);
         build/asm/878A0.o(.data);
         build/asm/879C0.o(.data);
@@ -494,7 +494,7 @@ SECTIONS
         build/asm/8CE90.o(.data);
         build/asm/8D230.o(.data);
         build/asm/8DF10.o(.data);
-        build/asm/8DF30.o(.data);
+        build/src/libultra/monegi/si/si.o(.data);
         build/asm/8DF50.o(.data);
         build/asm/8E110.o(.data);
         build/asm/8E550.o(.data);
@@ -658,7 +658,7 @@ SECTIONS
         build/asm/86A50.o(.rodata);
         build/asm/87510.o(.rodata);
         build/asm/87600.o(.rodata);
-        build/asm/877B0.o(.rodata);
+        build/src/libultra/monegi/thread/getthreadpri.o(.rodata);
         build/asm/877D0.o(.rodata);
         build/asm/878A0.o(.rodata);
         build/asm/879C0.o(.rodata);
@@ -717,7 +717,7 @@ SECTIONS
         build/asm/8CE90.o(.rodata);
         build/asm/8D230.o(.rodata);
         build/asm/8DF10.o(.rodata);
-        build/asm/8DF30.o(.rodata);
+        build/src/libultra/monegi/si/si.o(.rodata);
         build/asm/8DF50.o(.rodata);
         build/asm/8E110.o(.rodata);
         build/asm/8E550.o(.rodata);
@@ -908,7 +908,7 @@ SECTIONS
         build/asm/86A50.o(.bss);
         build/asm/87510.o(.bss);
         build/asm/87600.o(.bss);
-        build/asm/877B0.o(.bss);
+        build/src/libultra/monegi/thread/getthreadpri.o(.bss);
         build/asm/877D0.o(.bss);
         build/asm/878A0.o(.bss);
         build/asm/879C0.o(.bss);
@@ -967,7 +967,7 @@ SECTIONS
         build/asm/8CE90.o(.bss);
         build/asm/8D230.o(.bss);
         build/asm/8DF10.o(.bss);
-        build/asm/8DF30.o(.bss);
+        build/src/libultra/monegi/si/si.o(.bss);
         build/asm/8DF50.o(.bss);
         build/asm/8E110.o(.bss);
         build/asm/8E550.o(.bss);

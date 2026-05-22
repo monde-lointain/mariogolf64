@@ -48,16 +48,57 @@ Get the canonical curated name via Ghidra MCP (`mcp__ghidra__get_function_by_add
 
 - `hasm` — abort: "func lives in `hasm`; INCLUDE_ASM is permanent."
 - `c` — proceed.
-- `asm` — **before** emitting flip instructions, run Step 3's upstream search **now** so you can hand the user the exact yaml path qualifier in one step. Emit:
+- `asm` — **before** emitting flip instructions, run **Step 3** (find upstream), then **Step 3.5** (static-detection pre-flight), then **Step 2.5** (symbol scout) so you can hand the user the exact yaml path qualifier *and* a heads-up list of unsynced symbol refs in one shot. Order: Step 3 → Step 3.5 → Step 2.5 → emit. Emit:
 
   ```
   /decomp-libupstream: subseg [0x<seg>, asm] needs to be `c` first. Suggested flip:
   -      - [0x<seg>, asm]
   +      - [0x<seg>, c, lib<name>/<exact-upstream-rel-path>/<basename>]
+
+  <Step 2.5 heads-up block, if any — omit section entirely if empty>
+
   Then run `make extract` and re-run /decomp-libupstream <curated>.
   ```
 
-  Replace `<exact-upstream-rel-path>` with the upstream's path relative to its `src/` root (verbatim — preserve `shared/`, `monegi/`, `nintendo/` variant dirs). If the upstream search returns nothing, fall back to the **No-upstream-source** abort. Either way, STOP — `/decomp-libupstream` does not modify yaml on the flip-needed path.
+  Replace `<exact-upstream-rel-path>` with the upstream's path relative to its `src/` root (verbatim — preserve `shared/`, `monegi/`, `nintendo/` variant dirs). If the upstream search returns nothing, fall back to the **No-upstream-source** abort and skip Step 2.5. If Step 3.5 finds a file-scope static, fall back to its **BSS-layout-conflict** abort instead and skip Step 2.5 + the flip suggestion. On every exit path here, **release the lock** (`tools/mcp_lock.py release --identifier $ARGUMENTS`) before stopping — `/decomp-libupstream` does not modify yaml on the flip-needed path.
+
+## Step 2.5 — Pre-flip symbol scout (asm path only)
+
+Runs only when Step 2 hits the `asm` case and Step 3 found an upstream. Scans the placeholder's asm body for `%hi/%lo`/`jal` operands and surfaces any symbol not yet in `ghidra_symbols.txt`/`symbol_addrs.txt`. Saves a round-trip: after the user flips the subseg, the *next* `/decomp-libupstream` run can land symbol proposals with everything pre-identified.
+
+```bash
+seg="<seg-rom-hex>"           # e.g. 877B0
+curated="<curated_name>"      # e.g. osGetThreadPri
+
+# Pull function body (glabel..endlabel) and extract %hi/%lo data syms + jal targets.
+awk "/glabel ${curated}\$/,/endlabel ${curated}\$/" asm/${seg}.s \
+  | grep -oE '%(hi|lo)\([A-Za-z_][A-Za-z0-9_]+\)|jal[[:space:]]+[A-Za-z_][A-Za-z0-9_]+' \
+  | sed -E 's/^%(hi|lo)\(([^)]+)\).*/\2/; s/^jal[[:space:]]+//' \
+  | sort -u
+```
+
+Filter the result:
+- Drop `.L*` local jump labels (not real symbols — won't appear, but be defensive).
+- Drop `func_[0-9A-Fa-f]{8}` callee placeholders (handled by `/sync-names`/`/decomp` on the callee, not here).
+- Drop anything already in `ghidra_symbols.txt` or `symbol_addrs.txt` (grep `^<sym>[[:space:]]*=`).
+
+For each survivor, query Ghidra MCP (`get_function_by_address` for `func_*` survivors that slipped the filter, `list_data_items_by_xrefs` or direct addr lookup for `D_*`) to pre-fill the curated name + splat type. If Ghidra has no curated name yet, still report the raw `D_<addr>` with the asm line where it appears.
+
+Emit (inside the Step 2 abort block) a heads-up section formatted like:
+
+```
+Heads-up for the next run
+
+The body references N symbol(s) not yet in ghidra_symbols.txt/symbol_addrs.txt:
+
+- D_<addr>  (loaded at <rom-offset>/<vram>)  → likely <curated_name>; next-run proposal:
+    <curated_name> = 0x<vram>; // type:<splat-type> size:0x<n>
+- <jal-target>  (called at <rom-offset>/<vram>)  → <curated_or_placeholder>
+```
+
+If zero survivors, omit the heads-up section entirely (don't print an empty header).
+
+**No file edits in this step.** The flip remains the user's action; this is read-only intelligence so Step 6 of the next run has zero work to propose.
 
 ## Step 3 — Find the upstream file
 
@@ -76,6 +117,27 @@ If multiple matches, prefer the one whose filename matches the curated name (e.g
 /decomp-libupstream: no upstream source found for <curated_name>. This function may be project-specific.
 Run /decomp <placeholder> instead. Aborting.
 ```
+
+## Step 3.5 — Static-detection pre-flight (BSS-layout conflict guard)
+
+Before copying anything, scan the upstream file for file-scope `static` declarations. These produce section-relative relocs (`R_MIPS_HI16 .bss` against a local symbol) that the linker cannot place at a specific vram — the resulting .bss insertion shifts every subsequent splat-emitted BSS symbol and breaks 10k+ ROM bytes. `/decomp-libupstream` cannot match such files verbatim.
+
+```bash
+grep -nE '^\s*static\b[^=]*;\s*$' <upstream-path> | grep -v '^\s*//' | grep -v '^\s*\*'
+```
+
+If any line matches (file-scope statics — function-local statics inside `{...}` are fine and won't be caught by the leading `^\s*static`), release the lock and abort with **BSS-layout-conflict**:
+
+```
+/decomp-libupstream: <upstream-path> has file-scope `static` global(s):
+  <line>: <matched line>
+This produces section-relative .bss relocs that shift splat-emitted BSS symbols
+after linking, breaking the ROM match. Run /decomp <curated> instead — the C
+body can drop the `static` so the symbol resolves to the splat-side global.
+Aborting.
+```
+
+Then `tools/mcp_lock.py release --identifier $ARGUMENTS` and stop. Saves a ~5-minute make-extract / make-clean / make-rebuild round trip for a known-bad path.
 
 ## Step 4 — Determine destination + verify required headers
 
@@ -145,7 +207,15 @@ ROM SHA-1 must equal `e2c4e7a905b29529b49a1619a401fe699224829b`. If not, the ups
 tools/mcp_lock.py release --identifier $ARGUMENTS
 ```
 
-Must run on every exit path.
+Must run on **every** exit path — success, abort, error. The abort paths that need to release explicitly before stopping:
+
+- Step 2 `hasm` abort
+- Step 2 `asm` flip-needed exit (already noted there)
+- Step 3 **No-upstream-source** abort
+- Step 3.5 **BSS-layout-conflict** abort
+- Step 7 **Codegen-divergence** outcome
+
+Releasing a lock you don't own is a no-op, so it's safe to call once before each abort `return`.
 
 Final report sections in this order:
 
@@ -156,7 +226,8 @@ One of:
 - **Repositioned** — upstream copy in place, yaml updated, headers OK, symbol_addrs.txt entries proposed, build matches baserom SHA-1.
 - **Pending user action** — files in place, build will FAIL until user applies the proposed `symbol_addrs.txt` entries and runs `make extract && make clean && make`.
 - **No-upstream-source** — function isn't in libultra/libkmc; use `/decomp` instead.
-- **Codegen-divergence** — upstream copy compiled but ROM SHA-1 mismatches; upstream SDK version differs from this ROM's. Hand-decompile via `/decomp`.
+- **BSS-layout-conflict** — upstream has a file-scope `static` global; section-relative BSS reloc would shift splat-emitted symbols and break the ROM. Use `/decomp` and drop the `static`.
+- **Codegen-divergence** — upstream copy compiled but ROM SHA-1 mismatches for reasons other than file-scope statics (e.g., SDK version skew). Hand-decompile via `/decomp`.
 
 ### Applied changes
 
