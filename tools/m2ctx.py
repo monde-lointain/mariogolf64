@@ -9,27 +9,23 @@ import tempfile
 script_dir = os.path.dirname(os.path.realpath(__file__))
 root_dir = os.path.abspath(os.path.join(script_dir, ".."))
 
-# Project-specific
+# Project-specific. libultra + libnusys headers live under include/ (copied from
+# ~/development/repos/libultra_modern and ~/development/repos/n64sdkmod), so a
+# single -Iinclude covers them all (PR/, n64/nusys/, top-level).
 CPP_FLAGS = [
     "-Iinclude",
-    "-Ilib/ultralib/include",
-    "-Ilib/ultralib/include/gcc",
-    "-Ilib/ultralib/include/PR",
-    "-Ilib/ultralib/src",
-    "-Ilib/nusys/include",
-    "-Ilib/nusys/src",
     "-D_LANGUAGE_C",
     "-D__USE_ISOC99",
     "-D_MIPS_SZLONG=32",
     "-D_FINALROM",
     "-DF3DEX_GBI",
-    "-DSCRIPT(test...)="
+    "-DSCRIPT(test...)=",
     "-D__attribute__(test...)=",
     "-D__asm__(test...)=",
     "-ffreestanding",
     "-DM2CTX",
     "-DCC_CHECK=1",
-    "-DNON_MATCHING"
+    "-DNON_MATCHING",
     "-std=gnu89",
 ]
 
