@@ -35,7 +35,7 @@ build/mariogolf64.elf: \
     build/asm/40180.o \
     build/asm/414A0.o \
     build/asm/43140.o \
-    build/src/lz_decompress.o \
+    build/asm/43810.o \
     build/asm/45400.o \
     build/asm/456C0.o \
     build/asm/49E90.o \
@@ -217,7 +217,7 @@ build/mariogolf64.elf: \
     build/asm/8E620.o \
     build/asm/8EAD0.o \
     build/asm/8EBE0.o \
-    build/src/udivmoddi4.o \
+    build/asm/8EC88.o \
     build/asm/8EE50.o \
     build/asm/8EFC0.o \
     build/asm/8EFE0.o \
@@ -254,7 +254,7 @@ build/mariogolf64.elf: \
     build/asm/40180.o \
     build/asm/414A0.o \
     build/asm/43140.o \
-    build/src/lz_decompress.o \
+    build/asm/43810.o \
     build/asm/45400.o \
     build/asm/456C0.o \
     build/asm/49E90.o \
@@ -436,7 +436,7 @@ build/mariogolf64.elf: \
     build/asm/8E620.o \
     build/asm/8EAD0.o \
     build/asm/8EBE0.o \
-    build/src/udivmoddi4.o \
+    build/asm/8EC88.o \
     build/asm/8EE50.o \
     build/asm/8EFC0.o \
     build/asm/8EFE0.o \
@@ -474,7 +474,7 @@ build/mariogolf64.elf: \
     build/asm/40180.o \
     build/asm/414A0.o \
     build/asm/43140.o \
-    build/src/lz_decompress.o \
+    build/asm/43810.o \
     build/asm/45400.o \
     build/asm/456C0.o \
     build/asm/49E90.o \
@@ -656,7 +656,7 @@ build/mariogolf64.elf: \
     build/asm/8E620.o \
     build/asm/8EAD0.o \
     build/asm/8EBE0.o \
-    build/src/udivmoddi4.o \
+    build/asm/8EC88.o \
     build/asm/8EE50.o \
     build/asm/8EFC0.o \
     build/asm/8EFE0.o \
@@ -716,7 +716,7 @@ build/mariogolf64.elf: \
     build/asm/40180.o \
     build/asm/414A0.o \
     build/asm/43140.o \
-    build/src/lz_decompress.o \
+    build/asm/43810.o \
     build/asm/45400.o \
     build/asm/456C0.o \
     build/asm/49E90.o \
@@ -898,7 +898,7 @@ build/mariogolf64.elf: \
     build/asm/8E620.o \
     build/asm/8EAD0.o \
     build/asm/8EBE0.o \
-    build/src/udivmoddi4.o \
+    build/asm/8EC88.o \
     build/asm/8EE50.o \
     build/asm/8EFC0.o \
     build/asm/8EFE0.o \
@@ -1148,7 +1148,7 @@ build/asm/396C0.o:
 build/asm/40180.o:
 build/asm/414A0.o:
 build/asm/43140.o:
-build/src/lz_decompress.o:
+build/asm/43810.o:
 build/asm/45400.o:
 build/asm/456C0.o:
 build/asm/49E90.o:
@@ -1330,7 +1330,7 @@ build/asm/8E550.o:
 build/asm/8E620.o:
 build/asm/8EAD0.o:
 build/asm/8EBE0.o:
-build/src/udivmoddi4.o:
+build/asm/8EC88.o:
 build/asm/8EE50.o:
 build/asm/8EFC0.o:
 build/asm/8EFE0.o:
@@ -1367,7 +1367,7 @@ build/asm/396C0.o:
 build/asm/40180.o:
 build/asm/414A0.o:
 build/asm/43140.o:
-build/src/lz_decompress.o:
+build/asm/43810.o:
 build/asm/45400.o:
 build/asm/456C0.o:
 build/asm/49E90.o:
@@ -1549,7 +1549,7 @@ build/asm/8E550.o:
 build/asm/8E620.o:
 build/asm/8EAD0.o:
 build/asm/8EBE0.o:
-build/src/udivmoddi4.o:
+build/asm/8EC88.o:
 build/asm/8EE50.o:
 build/asm/8EFC0.o:
 build/asm/8EFE0.o:
@@ -1587,7 +1587,7 @@ build/asm/396C0.o:
 build/asm/40180.o:
 build/asm/414A0.o:
 build/asm/43140.o:
-build/src/lz_decompress.o:
+build/asm/43810.o:
 build/asm/45400.o:
 build/asm/456C0.o:
 build/asm/49E90.o:
@@ -1769,7 +1769,7 @@ build/asm/8E550.o:
 build/asm/8E620.o:
 build/asm/8EAD0.o:
 build/asm/8EBE0.o:
-build/src/udivmoddi4.o:
+build/asm/8EC88.o:
 build/asm/8EE50.o:
 build/asm/8EFC0.o:
 build/asm/8EFE0.o:
@@ -1829,7 +1829,7 @@ build/asm/396C0.o:
 build/asm/40180.o:
 build/asm/414A0.o:
 build/asm/43140.o:
-build/src/lz_decompress.o:
+build/asm/43810.o:
 build/asm/45400.o:
 build/asm/456C0.o:
 build/asm/49E90.o:
@@ -2011,7 +2011,7 @@ build/asm/8E550.o:
 build/asm/8E620.o:
 build/asm/8EAD0.o:
 build/asm/8EBE0.o:
-build/src/udivmoddi4.o:
+build/asm/8EC88.o:
 build/asm/8EE50.o:
 build/asm/8EFC0.o:
 build/asm/8EFE0.o:

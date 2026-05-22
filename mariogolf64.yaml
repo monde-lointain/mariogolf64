@@ -28,7 +28,6 @@ options:
 
   symbol_addrs_path:
     - symbol_addrs.txt
-    - ghidra_symbols.txt
   reloc_addrs_path:
     - reloc_addrs.txt
 
@@ -100,7 +99,7 @@ segments:
       - [0x40180, asm]
       - [0x414A0, asm]
       - [0x43140, asm]
-      - [0x43810, c, lz_decompress]
+      - [0x43810, asm]
       - [0x45400, asm]
       - [0x456C0, asm]
       - [0x49E90, asm]
@@ -282,7 +281,7 @@ segments:
       - [0x8E620, asm]
       - [0x8EAD0, asm]
       - [0x8EBE0, asm]
-      - [0x8EC88, c, udivmoddi4]
+      - [0x8EC88, asm]
       - [0x8EE50, asm]
       - [0x8EFC0, asm]
       - [0x8EFE0, asm]

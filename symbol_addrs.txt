@@ -1,0 +1,1 @@
+main = 0x800994B0; // type:func

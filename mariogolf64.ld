@@ -97,7 +97,7 @@ SECTIONS
         build/asm/40180.o(.text);
         build/asm/414A0.o(.text);
         build/asm/43140.o(.text);
-        build/src/lz_decompress.o(.text);
+        build/asm/43810.o(.text);
         build/asm/45400.o(.text);
         build/asm/456C0.o(.text);
         build/asm/49E90.o(.text);
@@ -279,7 +279,7 @@ SECTIONS
         build/asm/8E620.o(.text);
         build/asm/8EAD0.o(.text);
         build/asm/8EBE0.o(.text);
-        build/src/udivmoddi4.o(.text);
+        build/asm/8EC88.o(.text);
         build/asm/8EE50.o(.text);
         build/asm/8EFC0.o(.text);
         build/asm/8EFE0.o(.text);
@@ -319,7 +319,7 @@ SECTIONS
         build/asm/40180.o(.data);
         build/asm/414A0.o(.data);
         build/asm/43140.o(.data);
-        build/src/lz_decompress.o(.data);
+        build/asm/43810.o(.data);
         build/asm/45400.o(.data);
         build/asm/456C0.o(.data);
         build/asm/49E90.o(.data);
@@ -501,7 +501,7 @@ SECTIONS
         build/asm/8E620.o(.data);
         build/asm/8EAD0.o(.data);
         build/asm/8EBE0.o(.data);
-        build/src/udivmoddi4.o(.data);
+        build/asm/8EC88.o(.data);
         build/asm/8EE50.o(.data);
         build/asm/8EFC0.o(.data);
         build/asm/8EFE0.o(.data);
@@ -542,7 +542,7 @@ SECTIONS
         build/asm/40180.o(.rodata);
         build/asm/414A0.o(.rodata);
         build/asm/43140.o(.rodata);
-        build/src/lz_decompress.o(.rodata);
+        build/asm/43810.o(.rodata);
         build/asm/45400.o(.rodata);
         build/asm/456C0.o(.rodata);
         build/asm/49E90.o(.rodata);
@@ -724,7 +724,7 @@ SECTIONS
         build/asm/8E620.o(.rodata);
         build/asm/8EAD0.o(.rodata);
         build/asm/8EBE0.o(.rodata);
-        build/src/udivmoddi4.o(.rodata);
+        build/asm/8EC88.o(.rodata);
         build/asm/8EE50.o(.rodata);
         build/asm/8EFC0.o(.rodata);
         build/asm/8EFE0.o(.rodata);
@@ -792,7 +792,7 @@ SECTIONS
         build/asm/40180.o(.bss);
         build/asm/414A0.o(.bss);
         build/asm/43140.o(.bss);
-        build/src/lz_decompress.o(.bss);
+        build/asm/43810.o(.bss);
         build/asm/45400.o(.bss);
         build/asm/456C0.o(.bss);
         build/asm/49E90.o(.bss);
@@ -974,7 +974,7 @@ SECTIONS
         build/asm/8E620.o(.bss);
         build/asm/8EAD0.o(.bss);
         build/asm/8EBE0.o(.bss);
-        build/src/udivmoddi4.o(.bss);
+        build/asm/8EC88.o(.bss);
         build/asm/8EE50.o(.bss);
         build/asm/8EFC0.o(.bss);
         build/asm/8EFE0.o(.bss);
