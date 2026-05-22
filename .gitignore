@@ -44,15 +44,19 @@ debug_source.c
 # Extracted assembly (generated)
 asm_extracted/
 
-# Permuter files
+# Permuter + /decomp loop scratch dirs
 nonmatchings/
 permuter_settings.toml
+
+# /decomp in-tree spot-check scratch (created and removed by /decomp step 10)
+src/*.c.spotcheck
+build/src/*.spotcheck.o
 
 # Makefile options
 .make_options
 
-# Claude
-.claude
+# Claude local settings
+.claude/settings.local.json
 
 # Swap
 [._]*.s[a-v][a-z]
