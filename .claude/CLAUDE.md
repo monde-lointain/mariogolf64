@@ -162,8 +162,9 @@ This project decompiles Mario Golf 64 (N64) one function at a time. Tooling: spl
 
 - **`/decomp <func>`** — Tactical. Match-decompiles one function (placeholder or curated name). Runs `seed C → KMC GCC → objdump → asm-differ` until byte-exact, spot-checks in-tree by byte-level cmp, then **finalizes**: moves the body into `src/<seg>.c`, runs `clang-format`, and does a full `make` whose ROM SHA-1 must equal the baserom. Only then does it declare Match and propose the symbol-name patch. Always ends with a numbered "Suggested workflow improvements" section.
 - **`/decomp-lead [scope]`** — Strategic. Reads project state and rewrites `docs/decomp_roadmap.md` (strategy, next 5 targets, subsegments to flip, sync status). Never dispatches `/decomp`. Optional scope arg filters to a subsystem.
+- **`/sync-names`** — Pulls curated function + data names from the Ghidra workspace into `ghidra_symbols.txt`. Filters splat placeholders, Ghidra defaults (`FUN_/DAT_/LAB_/…`), `_NON_MATCHING` mirrors, and section-boundary labels. Respects `symbol_addrs.txt` overrides. Equivalent to `make sync-names`. No args.
 
-Only one of these may run at a time — they share the Ghidra MCP slot via `tools/mcp_lock.py` (directory mutex w/ 30-min stale-TTL; replaces an earlier `flock` design that didn't survive across multiple Bash tool calls).
+Only one of `/decomp`, `/decomp-lead`, or `/sync-names` may run at a time — they share the Ghidra MCP slot via `tools/mcp_lock.py` (machine-global directory mutex at `~/.cache/mariogolf64/mcp.lock/`, 30-min stale-TTL; the lock is shared across git worktrees of the same repo).
 
 ## Conventions
 
@@ -187,7 +188,8 @@ Only one of these may run at a time — they share the Ghidra MCP slot via `tool
 
 ## Cross-repo sync (Ghidra workspace at `~/development/reversing/ghidra/mariogolf64/`)
 
-- **Names**: agent proposes `symbol_addrs.txt` edits in its final response. User applies, then runs `python3 ~/development/reversing/ghidra/mariogolf64/scripts/sync_decomp_names.py --import-from-decomp` followed by `make extract` and `make`. `ghidra_symbols.txt` is sync-owned — never hand-edit.
+- **Names (Ghidra → decomp)**: `make sync-names` (or `/sync-names`) pulls curated function + data names into `ghidra_symbols.txt`. The agent edits `ghidra_symbols.txt` ONLY through this tool — direct hand-edits remain forbidden, as does editing from any other slash command. `symbol_addrs.txt` stays hand-curated; the sync skips any address already in it (the two files must be disjoint).
+- **Names (decomp → Ghidra)**: agent proposes `symbol_addrs.txt` edits in its final response. User applies, then runs `python3 ~/development/reversing/ghidra/mariogolf64/scripts/sync_decomp_names.py --import-from-decomp` followed by `make extract` and `make`.
 - **Structs**: agent pulls from Ghidra MCP, cross-checks against `re_tracking/structs.yml`, appends to `include/structs.h` (created on first use; flat layout, reshape later). Discrepancies between MCP-live and the snapshot are surfaced in the final response and block the write.
 - **Memory map**: read-only on both sides for the agent. Drift is reported in `/decomp-lead`'s roadmap.
-- **Forbidden agent edits**: `ghidra_symbols.txt`, `mariogolf64.yaml`, `mariogolf64.ld`, `re_tracking/*.yml`, `symbol_addrs.txt` (unless explicitly approved), `reloc_addrs.txt`.
+- **Forbidden agent edits**: `ghidra_symbols.txt` (hand-edit forbidden; modify only via `make sync-names` or `/sync-names`), `mariogolf64.yaml`, `mariogolf64.ld`, `re_tracking/*.yml`, `symbol_addrs.txt` (unless explicitly approved), `reloc_addrs.txt`.

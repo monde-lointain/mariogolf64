@@ -72,7 +72,17 @@ setup:
 extract:
 	./venv/bin/python3 -m splat split $(BASENAME).yaml
 
-.PHONY: all clean distclean setup extract nonmatching-func spotcheck-build clean-nonmatchings
+sync-names:
+	@tools/mcp_lock.py acquire --command sync-names --identifier export
+	-GHIDRA_REPO="$${MARIOGOLF64_GHIDRA_REPO:-$$HOME/development/reversing/ghidra/mariogolf64}"; \
+	  SYNC_PY="$$GHIDRA_REPO/venv/bin/python3"; \
+	  [ -x "$$SYNC_PY" ] || SYNC_PY=./venv/bin/python3; \
+	  [ -x "$$SYNC_PY" ] || SYNC_PY=python3; \
+	  "$$SYNC_PY" "$$GHIDRA_REPO/scripts/sync_decomp_names.py" \
+	    --export-to-decomp --decomp-root . --write-in-place
+	@tools/mcp_lock.py release --identifier export
+
+.PHONY: all clean distclean setup extract sync-names nonmatching-func spotcheck-build clean-nonmatchings
 
 # Create build directories
 $(shell mkdir -p $(BUILD_DIR)/$(ASM_DIR)/data $(BUILD_DIR)/$(ASSETS_DIR) $(BUILD_DIR)/$(SRC_DIR))

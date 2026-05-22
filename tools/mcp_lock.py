@@ -46,7 +46,9 @@ import errno
 import json
 import shutil
 
-LOCK_DIR = ROOT_DIR / "nonmatchings" / ".mcp.lock"
+_XDG_CACHE = Path(os.environ.get("XDG_CACHE_HOME", "")).expanduser() \
+    if os.environ.get("XDG_CACHE_HOME") else Path.home() / ".cache"
+LOCK_DIR = _XDG_CACHE / "mariogolf64" / "mcp.lock"
 HOLDER_FILE = LOCK_DIR / "holder.json"
 DEFAULT_TTL_MINUTES = 30
 
