@@ -282,7 +282,7 @@ segments:
       - [0x8CE80, c, libultra/monegi/vi/vigetcurrcontext]
       - [0x8CE90, asm]
       - [0x8D230, asm]
-      - [0x8DF10, asm]
+      - [0x8DF10, c, libultra/monegi/rdp/dp]
       - [0x8DF30, c, libultra/monegi/si/si]
       - [0x8DF50, asm]
       - [0x8E110, asm]

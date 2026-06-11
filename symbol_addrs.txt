@@ -1,1 +1,2 @@
 main = 0x800994B0; // type:func
+__osDpDeviceBusy = 0x800B2B10; // type:func
