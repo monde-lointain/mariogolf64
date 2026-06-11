@@ -16,7 +16,7 @@ Tactical command. Drives a tight `seed C → KMC GCC → objdump → asm-differ`
 - Ghidra MCP must be running: `~/development/reversing/ghidra/start-headless.sh` (verify with `ss -tln | grep 8089`).
 - Only one `/decomp` (or `/decomp-lead`) may hold the Ghidra slot at a time. The flock at `nonmatchings/.mcp.lock` is the gate.
 - `tools/asm-differ` submodule must be initialized.
-- The target function's subsegment must already be flipped from `asm` → `c` in `mariogolf64.yaml` (a one-time user action; `/decomp` prints the flip instructions if it is not).
+- The target function's subsegment must be `c` in `mariogolf64.yaml`. Inside a sprint the `/sprint-plan` gate already flipped it; for an ad-hoc run on a still-`asm` subseg, `/decomp` performs the flip itself (edit the yaml line `asm` → `c`, splitting a multi-file pack at the boundary if needed, then `make extract`) before Step 1 — the subseg flip/split is an agent action, not a user action.
 </command-prereqs>
 
 ## Step 0 — Validate argument
@@ -151,7 +151,7 @@ Spot-check passing is **not** the same as "the function is in the ROM-matching b
 
 **Guard (run before step 1)**: compute the subseg size from `mariogolf64.yaml` as `next_subseg_offset - this_subseg_offset`. If that size is not a multiple of 16, ABORT finalization and emit:
 
-> "subseg `[0x<this>, c]` size 0x\<size> is not 16-aligned. KMC `as` auto-pads `.text` to 16-byte alignment, which will over-pad this subseg by 0x\<delta> and shift every subsequent object. To proceed: either split this subseg in `mariogolf64.yaml` so the C-only portion ends at a 16-byte boundary, or add an explicit `__asm__(".balign 8\n");` after the function. Both are user actions."
+> "subseg `[0x<this>, c]` size 0x\<size> is not 16-aligned. KMC `as` auto-pads `.text` to 16-byte alignment, which will over-pad this subseg by 0x\<delta> and shift every subsequent object. To proceed: either split this subseg in `mariogolf64.yaml` so the C-only portion ends at a 16-byte boundary, or add an explicit `__asm__(".balign 8\n");` after the function. Both are agent actions — apply the fix, re-run `make extract` if you split the yaml, then re-run finalization."
 
 Outcome becomes **Subseg-alignment unsupported**. All four 8-aligned-only subsegs in the current yaml are asm-to-asm, so this guard does not fire on any present `c` subseg — it's future-proofing for if a user tries to match a function in one of those exceptional subsegs.
 
@@ -174,6 +174,8 @@ tools/mcp_lock.py release --identifier $ARGUMENTS
 The release call MUST run on every exit path (Match / Stuck-near / Stuck-far / Spot-check failed / Finalize failed / Subseg-alignment unsupported / any early abort from Steps 1–8). Step 9 completion is required for a Match outcome — if any of Step 9's substeps or its guard failed, the outcome is one of the non-Match states even if the spot-check passed.
 
 
+**Sprint bookkeeping (only if a sprint is active).** If `SPRINT.md` exists at the repo root, this run is part of a sprint (`CLAUDE.md ## Scrum operating model`): (1) append one line to its `## Standup log` — `<func> — <outcome> — <next target or "review">`; (2) append this run's numbered "Suggested workflow improvements" to its `## Suggestion buffer` and **do not apply them now** — they are applied at the `/sprint-review` gate so the sprint's matching behavior stays fixed. Outside a sprint (no `SPRINT.md`), keep the old apply-in-session behavior.
+
 Emit one final response with these sections in this exact order, authored per `PROMPT_GUIDELINES.md` (concise, no preamble, no validation phrasing):
 
 <final-report-template>
@@ -193,13 +195,14 @@ Report what Step 9 wrote:
 1. `src/<seg>.c` — inlined `<placeholder>`'s body, dropped its `INCLUDE_ASM` line, ran clang-format.
 2. `build/mariogolf64.z64` SHA-1 matches baserom.
 
-### Patch to propose (only if Match)
+### Symbol name (only if Match)
 
-If Ghidra had a curated name, propose adding to `symbol_addrs.txt`:
-```
-<curated_name> = 0x<vram>; // type:func
-```
-The agent does NOT apply this — user reviews and applies (per the cross-repo sync flow in `CLAUDE.md`).
+If Ghidra has a curated name for this function not already in `ghidra_symbols.txt`/`symbol_addrs.txt`, give it that name now (the rename is an agent action):
+1. Add `<curated_name> = 0x<vram>; // type:func` to `symbol_addrs.txt` (add-only; keep disjoint from `ghidra_symbols.txt`).
+2. Rename the just-inlined function in `src/<seg>.c` from `func_<VRAM>` to `<curated_name>`.
+3. `rm -f build/<seg>.o; make extract && make` — confirm `build/mariogolf64.z64` SHA-1 stays `e2c4e7a905b29529b49a1619a401fe699224829b`.
+
+Propagating the name into the Ghidra workspace (`sync_decomp_names.py --import-from-decomp`) remains a cross-repo follow-up per `CLAUDE.md`; note it here.
 
 ### Next-step suggestion (only if Stuck-near at ≥ 0.97)
 
@@ -224,5 +227,5 @@ A numbered list of concrete, actionable changes that would have made this run fa
 3. /decomp should pre-fetch callers via MCP before iteration 0.
 ```
 
-User replies with the numbers to apply (e.g. "apply 1, 3"). Agent then edits the named files in this session. No retro file is written; suggestions live in the conversation.
+**Inside a sprint** (`SPRINT.md` exists): the sprint-bookkeeping note above records these into `SPRINT.md`'s suggestion buffer; they are applied at the `/sprint-review` gate — not in this session. **Outside a sprint**: the user replies with the numbers to apply (e.g. "apply 1, 3") and the agent edits the named files in this session.
 </final-report-template>

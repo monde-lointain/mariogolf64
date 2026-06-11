@@ -10,14 +10,14 @@ args:
 
 TARGET = `$ARGUMENTS`
 
-Tactical command. Skips `/decomp`'s match loop entirely when the target function maps to a known upstream SDK source. Pipeline: identify upstream file → copy verbatim into `src/lib<name>/...` → update yaml subseg path qualifier → propose `symbol_addrs.txt` entries → `make extract && make clean && make` → verify ROM SHA-1.
+Tactical command. Skips `/decomp`'s match loop entirely when the target function maps to a known upstream SDK source. Pipeline: identify upstream file → copy verbatim into `src/lib<name>/...` → flip + qualify the yaml subseg → write `symbol_addrs.txt` entries → `make extract && make clean && make` → verify ROM SHA-1. The yaml flip and `symbol_addrs.txt` additions are agent actions (single pass — no user round-trip).
 
 Use when: the target is in libultra (`__osViGetCurrentContext`, `__osViSwapBuffer`, …) or libkmc (`_matherr`, `__matherr`, `_atoi`, …). For project-specific functions, use `/decomp` instead.
 
 <command-prereqs>
 - Ghidra MCP must be running (verify with `ss -tln | grep 8089`); used to confirm the curated name.
 - `~/development/repos/libultra_modern/` and `~/development/repos/libkmc/` must be checked out — these are the upstream search trees.
-- The user must explicitly allow `mariogolf64.yaml` edits for this run (this command modifies the subseg path qualifier).
+- This command edits `mariogolf64.yaml` (subseg flip + path qualifier) and adds to `symbol_addrs.txt` directly — both are agent actions per `CLAUDE.md`. yaml authority is limited to subseg flip/split/qualifier lines; `symbol_addrs.txt` is add-only (never delete; keep disjoint from `ghidra_symbols.txt`).
 - Only one of `/decomp`, `/decomp-lead`, `/sync-names`, `/decomp-libupstream` may run at a time; `tools/mcp_lock.py` is the gate.
 </command-prereqs>
 
@@ -48,23 +48,22 @@ Get the canonical curated name via Ghidra MCP (`mcp__ghidra__get_function_by_add
 
 - `hasm` — abort: "func lives in `hasm`; INCLUDE_ASM is permanent."
 - `c` — proceed.
-- `asm` — **before** emitting flip instructions, run **Step 3** (find upstream), then **Step 3.5** (static-detection pre-flight), then **Step 2.5** (symbol scout) so you can hand the user the exact yaml path qualifier *and* a heads-up list of unsynced symbol refs in one shot. Order: Step 3 → Step 3.5 → Step 2.5 → emit. Emit:
+- `asm` — **the agent flips it in the same run.** First run **Step 3** (find upstream), then **Step 3.5** (static-detection pre-flight), then **Step 2.5** (symbol scout). Order: Step 3 → Step 3.5 → Step 2.5 → flip. Branch on the pre-flight results:
 
-  ```
-  /decomp-libupstream: subseg [0x<seg>, asm] needs to be `c` first. Suggested flip:
-  -      - [0x<seg>, asm]
-  +      - [0x<seg>, c, lib<name>/<exact-upstream-rel-path>/<basename>]
+  - If Step 3 returns no upstream, take the **No-upstream-source** abort (release the lock first) and skip Step 2.5.
+  - If Step 3.5 finds a file-scope static, take the **BSS-layout-conflict** abort (release the lock first) and skip Step 2.5 + the flip.
+  - Otherwise, perform the flip in `mariogolf64.yaml`:
 
-  <Step 2.5 heads-up block, if any — omit section entirely if empty>
+    ```
+    -      - [0x<seg>, asm]
+    +      - [0x<seg>, c, lib<name>/<exact-upstream-rel-path>/<basename>]
+    ```
 
-  Then run `make extract` and re-run /decomp-libupstream <curated>.
-  ```
-
-  Replace `<exact-upstream-rel-path>` with the upstream's path relative to its `src/` root (verbatim — preserve `shared/`, `monegi/`, `nintendo/` variant dirs). If the upstream search returns nothing, fall back to the **No-upstream-source** abort and skip Step 2.5. If Step 3.5 finds a file-scope static, fall back to its **BSS-layout-conflict** abort instead and skip Step 2.5 + the flip suggestion. On every exit path here, **release the lock** (`tools/mcp_lock.py release --identifier $ARGUMENTS`) before stopping — `/decomp-libupstream` does not modify yaml on the flip-needed path.
+    Replace `<exact-upstream-rel-path>` with the upstream's path relative to its `src/` root (verbatim — preserve `shared/`, `monegi/`, `nintendo/` variant dirs). Split a multi-file pack at the upstream-file boundary first if Step 3 found the subseg packs more than this one upstream file. Then run `make extract` to regenerate the scaffold and **continue to Step 4 in this same run** — no abort, no second invocation.
 
 ## Step 2.5 — Pre-flip symbol scout (asm path only)
 
-Runs only when Step 2 hits the `asm` case and Step 3 found an upstream. Scans the placeholder's asm body for `%hi/%lo`/`jal` operands and surfaces any symbol not yet in `ghidra_symbols.txt`/`symbol_addrs.txt`. Saves a round-trip: after the user flips the subseg, the *next* `/decomp-libupstream` run can land symbol proposals with everything pre-identified.
+Runs only when Step 2 hits the `asm` case and Step 3 found an upstream. Scans the placeholder's asm body for `%hi/%lo`/`jal` operands and surfaces any symbol not yet in `ghidra_symbols.txt`/`symbol_addrs.txt`, so Step 6 (same run, after the flip) can write them with everything pre-identified.
 
 ```bash
 seg="<seg-rom-hex>"           # e.g. 877B0
@@ -98,7 +97,7 @@ The body references N symbol(s) not yet in ghidra_symbols.txt/symbol_addrs.txt:
 
 If zero survivors, omit the heads-up section entirely (don't print an empty header).
 
-**No file edits in this step.** The flip remains the user's action; this is read-only intelligence so Step 6 of the next run has zero work to propose.
+**No file edits in this step** — it's read-only symbol intelligence feeding Step 6 of this same run (the flip happens at the end of Step 2, Step 6 writes the entries).
 
 ## Step 3 — Find the upstream file
 
@@ -160,14 +159,14 @@ grep -E '#include <[^>]+>' <upstream-path>
 
 For each include that doesn't yet resolve via the project's CFLAGS (`-I include -I include/libultra -I include/libultra/internal -I include/libkmc`), copy the upstream header into the right `include/` subtree verbatim. **Never modify upstream headers** — if an include doesn't resolve, prefer adjusting CFLAGS (add `-I include/libultra/<subdir>`) over editing the source.
 
-## Step 5 — Copy + yaml + delete placeholder
+## Step 5 — Copy + qualify yaml + delete placeholder
 
 1. `cp <upstream-path> src/lib<name>/<subdir>/<basename>.c` (mkdir -p first).
-2. Edit `mariogolf64.yaml`: replace `[0x<seg>, c]` with `[0x<seg>, c, lib<name>/<subdir>/<basename>]`. **DO NOT** add the `.c` extension — splat handles that.
-3. Delete the old placeholder `src/<seg>.c` if it exists.
+2. Ensure the yaml subseg is path-qualified: `[0x<seg>, c, lib<name>/<subdir>/<basename>]` (**DO NOT** add the `.c` extension — splat handles that). If you flipped the subseg in Step 2 (asm path), it is already qualified — verify and move on. If you arrived on a bare `[0x<seg>, c]`, edit it to add the qualifier now and re-run `make extract`.
+3. Delete the bare placeholder `src/<seg>.c` if one was scaffolded (only when the subseg arrived bare `[0x<seg>, c]`).
 4. Skip `clang-format` entirely — both library dirs carry `.clang-format` with `DisableFormat: true`. The body must remain byte-exact upstream.
 
-## Step 6 — Propose symbol_addrs.txt entries (only for symbols not already synced)
+## Step 6 — Write symbol_addrs.txt entries (only for symbols not already synced)
 
 Identify every symbol the new C body references via `%hi/%lo` / call / data-access. For each, **first check `ghidra_symbols.txt`**:
 
@@ -177,20 +176,20 @@ grep -E "^<symbol>\s+=" ghidra_symbols.txt symbol_addrs.txt
 
 Symbols already in `ghidra_symbols.txt` (splat-fed via `/sync-names`) or `symbol_addrs.txt` need no proposal — splat will rename the asm-side references automatically. Skip them. If every referenced symbol is already covered, this section is empty in the final report ("No proposals — all referenced symbols already synced.") and Step 7 can run immediately.
 
-For symbols **not** in either file, query Ghidra MCP for the curated name + vram + type and propose `symbol_addrs.txt` entries:
+For symbols **not** in either file, query Ghidra MCP for the curated name + vram + type and **write** them to `symbol_addrs.txt` (add-only; keep disjoint from `ghidra_symbols.txt`):
 
 ```
 <curated_func_name>  = 0x<vram>; // type:func
 <curated_global>     = 0x<vram>; // type:u32 size:0x4   (or appropriate splat type)
 ```
 
-Use the same Ghidra-type → splat-type mapping that `sync_decomp_names.py:map_ghidra_dtype` uses. If many entries would be needed, suggest running `/sync-names` first (separate session, separate lock) so the symbols land in `ghidra_symbols.txt` instead — that's preferred over manual `symbol_addrs.txt` curation.
+Use the same Ghidra-type → splat-type mapping that `sync_decomp_names.py:map_ghidra_dtype` uses. If many entries would be needed, prefer running `/sync-names` first (separate session, separate lock) so the symbols land in `ghidra_symbols.txt` instead — that's cleaner than a long list of ad-hoc `symbol_addrs.txt` entries.
 
-**The agent proposes; the user applies.** `symbol_addrs.txt` edits require explicit approval per project convention.
+**The agent writes these directly** (add-only, never deleting; disjoint from `ghidra_symbols.txt`) per the `CLAUDE.md` convention — no user round-trip.
 
-## Step 7 — Build verification (only after user applies symbol_addrs.txt)
+## Step 7 — Build verification
 
-After the user pastes the proposed entries and confirms, run:
+After writing any Step 6 entries, run:
 
 ```bash
 make extract                                       # regenerate asm/data with new names
@@ -210,12 +209,15 @@ tools/mcp_lock.py release --identifier $ARGUMENTS
 Must run on **every** exit path — success, abort, error. The abort paths that need to release explicitly before stopping:
 
 - Step 2 `hasm` abort
-- Step 2 `asm` flip-needed exit (already noted there)
-- Step 3 **No-upstream-source** abort
-- Step 3.5 **BSS-layout-conflict** abort
+- Step 3 **No-upstream-source** abort (taken from within the Step 2 `asm` branch when no upstream is found)
+- Step 3.5 **BSS-layout-conflict** abort (taken from within the Step 2 `asm` branch when a file-scope static is found)
 - Step 7 **Codegen-divergence** outcome
 
+(The Step 2 `asm` case no longer aborts for "flip needed" — the agent flips the subseg and continues in the same run.)
+
 Releasing a lock you don't own is a no-op, so it's safe to call once before each abort `return`.
+
+**Sprint bookkeeping (only if a sprint is active).** If `SPRINT.md` exists at the repo root, this run is part of a sprint (`CLAUDE.md ## Scrum operating model`): append one line to its `## Standup log` — `<func> — <outcome> — <next target or "review">`. Any workflow-improvement note worth keeping goes into `SPRINT.md`'s `## Suggestion buffer` for the `/sprint-review` gate — not applied mid-sprint.
 
 Final report sections in this order:
 
@@ -223,22 +225,22 @@ Final report sections in this order:
 ### Outcome
 
 One of:
-- **Repositioned** — upstream copy in place, yaml updated, headers OK, symbol_addrs.txt entries proposed, build matches baserom SHA-1.
-- **Pending user action** — files in place, build will FAIL until user applies the proposed `symbol_addrs.txt` entries and runs `make extract && make clean && make`.
+- **Repositioned** — upstream copy in place, yaml flipped + qualified, headers OK, `symbol_addrs.txt` entries written, build matches baserom SHA-1.
 - **No-upstream-source** — function isn't in libultra/libkmc; use `/decomp` instead.
 - **BSS-layout-conflict** — upstream has a file-scope `static` global; section-relative BSS reloc would shift splat-emitted symbols and break the ROM. Use `/decomp` and drop the `static`.
 - **Codegen-divergence** — upstream copy compiled but ROM SHA-1 mismatches for reasons other than file-scope statics (e.g., SDK version skew). Hand-decompile via `/decomp`.
 
 ### Applied changes
 
-1. `src/lib<name>/...` — verbatim from `<upstream-path>`.
-2. `mariogolf64.yaml` — `[0x<seg>, c]` → `[0x<seg>, c, lib<name>/...]`.
+1. `mariogolf64.yaml` — subseg `[0x<seg>, asm]` → `[0x<seg>, c, lib<name>/...]` (flip + path qualifier; split first if multi-file).
+2. `src/lib<name>/...` — verbatim from `<upstream-path>`.
 3. `include/lib<name>/...` (if headers added) — verbatim from upstream.
-4. Deleted: `src/<seg>.c` placeholder.
+4. `symbol_addrs.txt` — added `<N>` curated entries (add-only), or "none needed".
+5. Deleted: `src/<seg>.c` placeholder.
 
-### symbol_addrs.txt entries to apply
+### symbol_addrs.txt entries written
 
-If any referenced symbols are missing from `ghidra_symbols.txt`/`symbol_addrs.txt`:
+If any referenced symbols were missing from `ghidra_symbols.txt`/`symbol_addrs.txt`, the agent added them:
 
 ```
 <curated_func>  = 0x<vram>; // type:func
@@ -246,12 +248,12 @@ If any referenced symbols are missing from `ghidra_symbols.txt`/`symbol_addrs.tx
 ...
 ```
 
-Otherwise: `No proposals — all referenced symbols already synced.`
+Otherwise: `No additions — all referenced symbols already synced.`
 
-### Next user actions
+### Follow-ups
 
-1. Append any proposed entries above to `symbol_addrs.txt` (skip this if none).
-2. `make extract && make clean && make` — ROM SHA-1 should remain baserom's.
+Propagate the new names into the Ghidra workspace (cross-repo, not done by this run):
+`python3 ~/development/reversing/ghidra/mariogolf64/scripts/sync_decomp_names.py --import-from-decomp`
 
 ### Workflow notes
 

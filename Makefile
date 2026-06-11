@@ -1,5 +1,12 @@
 MAKEFLAGS += --no-builtin-rules
 
+# Use bash with pipefail so a failure anywhere in a recipe pipe aborts the build
+# LOUDLY. The asm rule is `$(CPP) ... | $(AS) ...`; without pipefail a missing
+# $(CPP) feeds empty input to $(AS), which "succeeds" and silently emits 0-byte
+# objects (cost a full session on 2026-06-11 when mips-linux-gnu-cpp was removed).
+SHELL := /bin/bash
+.SHELLFLAGS := -o pipefail -c
+
 # Fail if no baserom
 ifeq (,$(wildcard baserom.z64))
 $(error baserom.z64 not found. Place your ROM in the project root.)
@@ -24,6 +31,12 @@ LD      := $(MIPS_BINUTILS_PREFIX)ld
 OBJCOPY := $(MIPS_BINUTILS_PREFIX)objcopy
 STRIP   := $(MIPS_BINUTILS_PREFIX)strip
 CPP     := $(MIPS_BINUTILS_PREFIX)cpp
+
+# Abort early + clearly if the asm preprocessor is missing, rather than letting the
+# cpp|as pipe emit empty objects (belt-and-suspenders with .SHELLFLAGS pipefail above).
+ifeq (,$(shell command -v $(CPP) 2>/dev/null))
+$(error $(CPP) not found — install it, e.g. `sudo apt install cpp-mips-linux-gnu`)
+endif
 
 # Compiler - KMC GCC 2.7.2
 CC := COMPILER_PATH=tools/cc tools/cc/gcc
