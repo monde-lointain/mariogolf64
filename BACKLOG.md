@@ -206,6 +206,19 @@ v2 needs; clean mirror leaves remain the near-zero-risk default between classica
   **#2** CLAUDE.md note (mirror branch's proof IS the full-make SHA; byte spot-check is
   classical-only). No carry-overs.
 
+- **Sprint 17: 3 files BANKED — `src/libnusys/mainlib/nucontgbpakgetstatus.c`
+  (`nuContGBPakGetStatus`) + `nucontgbpakpower.c` (`nuContGBPakPower`) + `nucontgbpakreadid.c`
+  (`nuContGBPakReadID`), libnusys upstream-mirror sibling-trio.** md5-candidate 27→30; matched
+  29→32/2090 (~1.53%). 7th sibling-batch (first **trio**), opens the **nuCont sub-band warm**.
+  All 3 verbatim cp, first-pass clean (0/0/0/0). **First nuGfx/nuCont leaves with no data
+  globals at all** — shared sole callee `nuSiSendMesg`@0x800A2824 (already in ghidra_symbols),
+  struct types/constants/prototypes all in nusys.h → **zero new symbols, zero header copies,
+  zero splits, three yaml flips the only enabler.** S16#1's broadened `refs-unplaced` grep
+  correctly reported all 3 no-hazard (no false-clean recurrence); the gate asm-data-recovery
+  jal/lui scan confirmed truly clean. seed 6 (2+2+2 cold floor) / banked 6pt. Retro: **0 of 3
+  applied** (PO: log only — all 3 buffered items confirmatory, already covered by S14/S16
+  doctrine). No carry-overs.
+
 ## PO ordering note (S16 retro — the false-clean class is closed; deeper nusys leaves now priced)
 
 The S16 grep fix re-priced the nuGfx*FuncSet leaves (now pts-3 recover-extern, was false-clean

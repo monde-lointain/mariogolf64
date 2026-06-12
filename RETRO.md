@@ -25,6 +25,15 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 17 — mirror: nuContGBPak{GetStatus,Power,ReadID} (libnusys sibling-trio) — 2026-06-11
+- Increment: 3 files banked / 3 fns matched (delta: ~1.39% → ~1.53%; md5-candidate files 27→30)
+- Quality: 0/0/0/0 (stuck-far/permuter/carried/re-opened) — all verbatim mirrors, 0 iterations; goal met first pass
+- Seed: committed 6pt; banked 6pt; regime mirror   (v1; mirror track seed-only — realized is v2/classical)
+- What helped: cohesive sibling trio off the warm libnusys band — shared sole callee `nuSiSendMesg`@0x800A2824 (in ghidra_symbols) + shared header nusys.h pre-resolved all 3; struct types/constants/prototypes already in nusys.h; three yaml flips the only enabler (zero new symbols, zero header copies, zero splits). S16#1's extended refs-unplaced grep correctly reported all 3 no-hazard; the gate asm-data-recovery jal/lui scan confirmed truly clean (sole jal = nuSiSendMesg, zero data loads). Mirror branch banked on full-make SHA alone (no spot-check).
+- Friction: none — cleanest sprint to date; the S16#1 grep fix + gate-check made the false-clean risk a non-event.
+- Applied: 0 of 3 (PO: log only) — all 3 buffered items were confirmatory observations already covered by existing doctrine (#1 nuCont-warm ≡ S14 open-band fast-path; #2 sibling-batch ≡ S4/S5/S10; #3 gate jal/lui check ≡ S16#1). No tooling/CLAUDE.md edits.
+- Carry-over: none
+
 ## Sprint 16 — mirror: nuGfxTaskAllEndWait + nuGfxDisplayOff (1st libnusys sibling-batch) — 2026-06-11
 - Increment: 2 files banked / 2 fns matched (delta: ~1.29% → ~1.39%; md5-candidate files 25→27)
 - Quality: 0/0/0/0 (stuck-far/permuter/carried/re-opened) — both verbatim mirrors, 0 iterations; goal met first pass
