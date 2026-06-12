@@ -25,6 +25,17 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 31 — classical: func_800A2F50 (trivial getter) + nuGfxInit (libnusys, novel GBI/absolute-addr gotcha) — 2026-06-12
+- Increment: 2 files banked / 2 fns matched (delta: md5-candidate files 54→56; **56/56 = ALL FILES** — project reaches full md5-candidate coverage for the current src/ tree)
+- Quality: 0/0/0/0 (stuck-far/permuter/carried/re-opened) — both score 0; goal met (PO signed off partial — noted)
+- Seed: committed 8pt; banked 8pt; regime classical   (v2 active: func_800A2F50 seed=3/realized=2 residual=−1; nuGfxInit seed=5/realized=8 residual=+3; S31 net realized 10, net residual +2 — first positive-residual sprint)
+- What helped: **func_800A2F50 first-pass clean** (16 B getter, score 0 immediately — no surprises). For **nuGfxInit**: the decisive move was consulting the **v2.00 SDK source** (`~/n64sdk/4.0/pc/basic/nusys/src/nusys-2.00/nusys/nugfxinit.c`) rather than the v2.07 libultra_modern upstream (wrong SDK version for this game). v2.00 revealed: `Gfx gfxList[0x100] + Gfx *gfxList_ptr` locals + GBI macros `gSPDisplayList/gDPFullSync/gSPEndDisplayList` with `gfxList_ptr++`. GBI macros forced KMC GCC to allocate `gfxList_ptr` (0x820 frame vs 0x818 without it) and created the data-dependency chain for sequential store scheduling. `D_B6698 = 0xB6698` in `undefined_syms_auto.txt` is an **absolute-physical-address linker symbol** (OS_K0_TO_PHYSICAL of the rdpstateinit_dl array); `(u32)&D_B6698` generates the matching `R_MIPS_HI16/LO16 D_B6698` relocs. `#undef nuGfxInit` after `#include <nusys.h>` to override the in-tree nusys.h macro redefinition.
+- Friction: **v2.07 vs v2.00 SDK mismatch** — libultra_modern's `nugfxinit.c` wraps the init in a `nuGfxInitEX2()` macro absent from the ROM build; checking `~/n64sdk/4.0/pc/basic/nusys/` first would have saved multiple re-seed attempts. **`D_B6698` is distinct from the standard recover-extern vram pattern** — it's not a virtual address in RAM but a physical address in the linker's absolute segment; it lives in `undefined_syms_auto.txt` not `symbol_addrs.txt`, and must be referenced via `&D_B6698` (not as a literal). The decomp_loop.py cmp target issue (split-subseg 7E350 resolves to 7E330.o) surfaced again for func_800A2F50; worked around by using `build/asm/7E350.o` directly.
+- Applied: 1 of 2: #1 (CLAUDE.md split-subseg spot-check cmp note — use `build/asm/<subseg_offset>.o` for split subsegs); (#2 libnusys classical v2.00 pattern NOT applied — PO deferred)
+- Carry-over: none
+
+---
+
 ## Sprint 30 — mixed: strcmp (libkmc verbatim) + osSetTimer (classical, stripped) + __osDequeueThread (classical, defines-data drop) — 2026-06-12
 - Increment: 3 files banked / 3 fns matched (delta: md5-candidate files 51→54; matched 57→57/2090 2.58%→2.73%)
 - Quality: 0/0/0/0 (stuck-far/permuter/carried/re-opened) — all score 0 first pass; 0 iterations; goal met

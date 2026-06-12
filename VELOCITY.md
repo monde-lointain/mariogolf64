@@ -102,13 +102,14 @@ until v2. These rows double as the **reference stories** for the plan-time ±1 a
 | 28 | nucontgbpakreadwrite + nucontgbpakcheck + memset+setmem | 1+1+2 | mirror / cold / pack-split+NU_DEBUG+header | 3+3=6 | *6* | **Heterogeneous 3-file sprint: libnusys pack-split (0x7D710 → two single-fn leaves) + libkmc whole-file pack + companion header copy.** `nuContGBPakReadWrite`: verbatim cp — `#ifdef NU_DEBUG` block compiles out automatically (ROM build doesn't define NU_DEBUG; no manual drop needed, unlike S26's near-verbatim). `nuContGBPakCheckConnector`: verbatim cp, simple 1-jal leaf. `memset`+`setmem`: verbatim cp of upstream `libkmc/memset.c`; FAST_SPEED=1 path confirmed consistent; `memory.h` companion copied from `~/development/repos/libkmc/include/memory.h` → `include/libkmc/memory.h` (self-contained: `size_t` + memory fn decls); libkmc `-O` profile auto-applied by Makefile. All 4 fns 0 iterations, all names pre-curated. md5-candidate 46→49. **Retro fix:** `pick_target.py` `jal-count-mismatch:5vs1` was a tool bug — (1) `_DEAD_OPEN_RE` missing `#ifdef NU_DEBUG`; (2) `C_CALL_RE` matching `address(`/`size(` inside format-string literals. Fixed: `NU_DEBUG` added to dead-block pattern + `_strip_string_literals()` helper applied at both `call_divergence` and `calls_unplaced`. After fix `osSetTimer` correctly shows `5vs2`. Retro applied 1 of 1 (#1 fix jal-count-mismatch). Mirror track stays seed-only — `(real)` illustrative |
 | 29 | nupireadwritesram + _matherr | 1+1 | mirror / cold+warm / recover-extern+pack+needs-define | 3+3=6 | *6* | **libnusys (cold): `nuPiReadWriteSram` — entire body behind `#ifdef USE_EPI`; compiles to empty stub without it. One-time Makefile enabler (`LIBNUSYS_CFLAGS := $(CFLAGS) -DUSE_EPI` + libnusys pattern rule) at gate; `nuPiSramHandle`=0x8012F4D8 recover-extern. `pick_target.py` false-clean (USE_EPI not detected as a hazard). libkmc (warm): `__matherr` — pack-split 0x8EBE0 → C 112 B (`_matherr.c`) + hasm 56 B (`__muldi3`, permanent); `errno`=0x800FE3D0 recover-extern; libkmc `-O` auto-applied. Both verbatim cp, 0 iter. md5-candidate 49→51. Retro applied 1 of 1 (#1 `needs-define` hazard in `pick_target.py` — `function_gating_define()` detects top-level `#ifdef` body gate; `_parse_makefile_defines()` cross-checks against effective library CFLAGS; +1 in seed_points). Mirror track stays seed-only — `(real)` illustrative |
 | 30 | strcmp + osSetTimer + __osDequeueThread | 1+1+1 | mixed: mirror/warm/verbatim + classical/warm/jal-mismatch-stripped + classical/warm/defines-data-drop | 1+2+3=6 | **6** | **First mixed sprint; 3rd+4th classical-track fns.** `strcmp` (libkmc verbatim cp, 0 iter, warm mirror, seed 1; libkmc `-O` auto-applied). `osSetTimer` (**mis-routed as near-verbatim at DoR** — `jal-count-mismatch:5vs2` flagged; asm revealed fundamentally stripped impl — no interrupt disable/restore/counter update, different `__osSetTimerIntr` arg; routed to classical; `__osTimerList`@0x800C8240 recover-extern; score 0 first pass; realized=seed=2). `__osDequeueThread` (classical, defines-data drop — 5 file-scope defs from thread.c dropped; 64 B pointer-walk loop; register params + `(OSThread*)queue` head cast; score 0 first pass; realized=seed=3). All 3 green SHA first pass, 0 stuck-far/permuter/carried/re-opened. md5-candidate 51→54. Retro applied 1 of 1 (#1 CLAUDE.md gate note: large jal-count-mismatch >2 is `classical-likely` — disassemble before routing to mirror branch). Classical track adds 2 fns, both residual 0 — S30 classical seed+realized **5 logged** |
+| 31 | func_800A2F50 + nuGfxInit | 1+1 | classical / warm / first-pass-clean + classical / warm / novel-libnusys-gotcha | 3+5=8 | **10** | **5th+6th classical-track fns; first pure classical sprint.** `func_800A2F50` (16 B getter, score 0 first pass; realized 2 = seed 3 − 1 first-pass-clean; residual −1). `nuGfxInit` (176 B, 6 jals; jal-count-mismatch 13vs6 >2 → classical; Ghidra seed + v2.00 SDK `~/n64sdk/4.0/pc/basic/nusys/` as template — v2.07 libultra_modern was wrong for this build; **novel gotcha × 2**: (1) `Gfx gfxList[0x100]+Gfx *gfxList_ptr` locals + GBI macros `gSPDisplayList/gDPFullSync/gSPEndDisplayList` with `gfxList_ptr++` required to force 0x820 frame (raw array writes gave 0x818); (2) `D_B6698 = 0xB6698` in `undefined_syms_auto.txt` is an **absolute-physical-address linker symbol** for `rdpstateinit_dl`; referenced as `(u32)&D_B6698` to generate matching `R_MIPS_HI16/LO16 D_B6698` relocs — distinct from the standard recover-extern vram pattern; `#undef nuGfxInit` needed to override in-tree nusys.h macro. realized 8 = seed 5 + 1 novel-gotcha → Fibonacci snap 6→8; residual +3). All 0 stuck-far/permuter/carried/re-opened. md5-candidate 54→56 (56/56 = ALL FILES). Retro applied 1 of 2 (#1 CLAUDE.md split-subseg spot-check cmp note; #2 libnusys classical pattern NOT applied — PO deferred). Classical track seed+realized **S31: 8+10 logged** |
 
 **Seed-velocity = 2.0 pt/sprint** (bootstrap anchors S1–5, sum seed 10 / 5 sprints). With the
 live-logged mirror sprints S6 (seed 1) + S7 (seed 2) + S8 (seed 1) + S12 (seed 2) + S13 (seed 1)
 + S14 (seed 1) + S15 (seed 3) + S16 (seed 4) + S17 (seed 6) + S18 (seed 2) + S19 (seed 9)
 + S20 (seed 6) + S21 (seed 2) + S22 (seed 3) + S23 (seed 2) + S24 (seed 3) + S25 (seed 5)
 + S26 (seed 5) + S27 (seed 8) + S28 (seed 6) + S29 (seed 6) + S30-mirror (seed 1), the
-running mirror-regime seed-velocity is 89 pt / 27 sprints = **3.30 pt/sprint** — the warm-pool
+running mirror-regime seed-velocity is 89 pt / 27 sprints = **3.30 pt/sprint** (unchanged through S31 — S31 was pure classical, 0 mirror pts) — the warm-pool
 downward drift reverses as a *new* cold band opens (S6 last clean vi leaf; S7 opened the *cold*
 convert band at the 2 pt floor; S8 the warm-1 thread leaf; S12 the warm-2 recover-extern thread
 leaf; S13 6th vi mirror; S14 3rd thread mirror — note S14 was a **zero-enabler warm singleton**
@@ -123,14 +124,12 @@ S17/S19 banked 3 files each in one sprint, so points/sprint reflects how many ho
 siblings were committed (the "commitment-shaped, not pure throughput" caveat below), not faster
 matching; per-leaf effort is still the flat cold-mirror 2–3 pt. **S9 is the first classical-track row** (seed 5,
 banked 5, first-pass clean) — logged separately, NOT folded into the mirror 3.30 average
-(never compare regimes). Classical track: **n=3** (S9 seed 5 / realized
-illustrative; S11 seed 5 / **realized 5 logged**; S30 (mixed) seed 5 / **realized 5 logged**),
-seed-velocity 5 pt/sprint. S9 proved the loop
+(never compare regimes). Classical track: **n=4** (S9 seed 5 / realized
+illustrative; S11 seed 5 / **realized 5 logged**; S30 (mixed) seed 5 / **realized 5 logged**;
+S31 seed 8 / **realized 10 logged**), seed-velocity 5.75 pt/sprint (n=4: 5+5+5+8=23/4). S9 proved the loop
 mechanically but produced **zero residual variance** (clean wrapper); **S11 produced the first
 real variance** (non-trivial leaf, seed compiled 0.80, matched after 1 fix-iteration), so the
-PO **activated v2** at the S11 review. The realized tier is now live on this track; all three
-data points land at seed (residual 0), so the seed rubric is so-far well-calibrated for
-small classical leaves — watch for the first non-zero residual (a stuck-far / permuter / re-attempt).
+PO **activated v2** at the S11 review. The realized tier is live on this track. **S31 is the first positive residual (+2 net: func_800A2F50 residual −1, nuGfxInit residual +3)** — the seed rubric UNDER-priced nuGfxInit's novel-gotcha complexity (GBI macro frame requirement + absolute-physical-address linker symbol). The +1 Fibonacci snap for novel-bank-gotcha is validated; consider +2 for libnusys classical with two distinct novel patterns next occurrence.
 Three honest caveats:
 - **Fitted, not validated.** The bands were chosen so this history reads ~2 pt/sprint; the
   first out-of-sample sprint is the real test. The byte gates (768/1536) and the classical
@@ -149,9 +148,8 @@ Three honest caveats:
 ## Velocity (headline — v1 mirror track + v2 classical track active)
 - **Mirror track (v1): seed-velocity 2.0 pt/sprint** (n=5 anchors, all verbatim; seed-only —
   the mirror band is a point mass, no realized tier).
-- **Classical track (v2 ACTIVE since S11): n=3, seed 5 pt/sprint, realized 5 pt/sprint, residual 0.**
-  Realized-velocity / rolling-5 / re-anchor are now live here; all three data points land at seed
-  so far, so the rubric is well-calibrated for small classical leaves pending the first non-zero residual.
+- **Classical track (v2 ACTIVE since S11): n=4, seed 5.75 pt/sprint, realized 6.67 pt/sprint (excl. S9 illustrative: (5+5+10)/3), net residual +2 (S31 first positive).**
+  Realized-velocity / rolling-5 / re-anchor live here. S31 nuGfxInit is the first over-seed classical fn (+3 residual); rubric needs +1 for double-novel-gotcha libnusys classical targets.
 - **Regime:** `mirror` is a depleting minority (~22 % of ranked candidates: 56 mirror vs 194
   classical; 18 warm / 38 cold). The warm clean-singleton mirror pool is now **mined out** (S11
   plan gate: every top mirror candidate carries a blocking hazard), pushing the project onto the
