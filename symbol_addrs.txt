@@ -11,3 +11,5 @@ nuGfxSwapCfbFunc = 0x800B67B4; // size:0x4
 nuContRmbCtl = 0x80104F50; // size:0x28
 nuContPfs = 0x801B8A18; // size:0x1A0
 __osPiTable = 0x800C7E8C; // size:0x4
+__osPiDevMgr = 0x800C7E70; // size:0x1C
+osPiGetCmdQueue = 0x800B06F0; // type:func
