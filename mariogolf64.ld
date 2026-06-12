@@ -184,7 +184,7 @@ SECTIONS
         build/asm/82560.o(.text);
         build/asm/82590.o(.text);
         build/asm/82810.o(.text);
-        build/asm/82B20.o(.text);
+        build/src/libultra/monegi/convert/virtualtophysical.o(.text);
         build/asm/82B80.o(.text);
         build/asm/83780.o(.text);
         build/asm/841E0.o(.text);
@@ -407,7 +407,7 @@ SECTIONS
         build/asm/82560.o(.data);
         build/asm/82590.o(.data);
         build/asm/82810.o(.data);
-        build/asm/82B20.o(.data);
+        build/src/libultra/monegi/convert/virtualtophysical.o(.data);
         build/asm/82B80.o(.data);
         build/asm/83780.o(.data);
         build/asm/841E0.o(.data);
@@ -631,7 +631,7 @@ SECTIONS
         build/asm/82560.o(.rodata);
         build/asm/82590.o(.rodata);
         build/asm/82810.o(.rodata);
-        build/asm/82B20.o(.rodata);
+        build/src/libultra/monegi/convert/virtualtophysical.o(.rodata);
         build/asm/82B80.o(.rodata);
         build/asm/83780.o(.rodata);
         build/asm/841E0.o(.rodata);
@@ -882,7 +882,7 @@ SECTIONS
         build/asm/82560.o(.bss);
         build/asm/82590.o(.bss);
         build/asm/82810.o(.bss);
-        build/asm/82B20.o(.bss);
+        build/src/libultra/monegi/convert/virtualtophysical.o(.bss);
         build/asm/82B80.o(.bss);
         build/asm/83780.o(.bss);
         build/asm/841E0.o(.bss);

@@ -195,7 +195,7 @@ segments:
       - [0x82560, asm]
       - [0x82590, asm]
       - [0x82810, asm]
-      - [0x82B20, asm]
+      - [0x82B20, c, libultra/monegi/convert/virtualtophysical]
       - [0x82B80, asm]
       - [0x83780, asm]
       - [0x841E0, asm]
