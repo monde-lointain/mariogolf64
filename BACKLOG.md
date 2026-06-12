@@ -14,15 +14,13 @@ classical-loop target per few sprints to validate the *classical* match-loop (st
 every win below was an upstream mirror). Sprints capped small (1 upstream file, or ≤ ~3–4 functions) until a per-sprint
 count emerges.
 
-**PO ordering note (S7 retro #2 — break the mirror point-mass).** Seven straight first-pass-clean
-mirror sprints (S1–S7) have produced **zero residual variance**, so the v2 story-point activation
-trigger (first classical/mixed sprint with real variance) remains unmet and the classical
-match-loop is **still entirely unproven**. The PO should **deliberately schedule one classical
-target** within the next few sprints — none sit in the top-12 smallest-first ranker, so it needs a
-separate `venv/bin/python3 tools/pick_target.py --upstream none` search (a small no-upstream leaf).
-This is timeboxed as a spike (classical loop is unvalidated) and is the only path to turning on the
-v2 realized-tier machinery. Until then, the remaining clean mirror leaves (smallest-first:
-`osStopThread` warm/seed-1, then the cold convert/other bands) keep the ROM green at near-zero risk.
+**PO ordering note (S7 #2 — RESOLVED at S9).** The standing "schedule one classical target"
+recommendation was executed in **Sprint 9** (`func_80099490`, the first `--upstream none` match) —
+the classical match-loop is now **proven**. But the spike matched first-pass-clean with **zero
+residual variance**, so the v2 activation remains uncalibratable and was **deferred** at the S9
+review. See the **`## PO ordering note (S9 retro …)`** below for the live guidance: the next
+classical target must be **non-trivial** (real arithmetic/branches/locals) to generate the variance
+v2 needs; clean mirror leaves remain the near-zero-risk default between classical spikes.
 
 - **Sprint 0 (pre-Scrum): 7 files BANKED (8 C-body matches + 1 hasm).** Before this overlay
   existed: `src/libkmc/matherr.c` (`_matherr`), `src/libkmc/rand.c` (`rand`+`srand`,
@@ -106,6 +104,29 @@ v2 realized-tier machinery. Until then, the remaining clean mirror leaves (small
   forward: (a) schedule the classical spike — `--upstream none` search — to break the now-8-long
   mirror point-mass and trip the v2 trigger (S7 #2 / S8 #3); (b) thread band is now warm, so
   re-price its leaves (`__osDequeueThread`/`osYieldThread`) at the next gate.**
+
+- **Sprint 9: 1 file BANKED — `src/main/func_80099490.c` (`func_80099490`), FIRST classical
+  (no-upstream) match.** md5-candidate 17→18; matched 19→20/2090 (~0.96%). **Classical match-loop
+  PROVEN** (S1–S8 were all upstream mirrors). Acted on the standing S7#2/S8#3 classical-spike
+  recommendation: a thin no-arg wrapper `void func_80099490(void){ nuPiInitSram(); }`, the
+  lowest-variance classical leaf. Callee pre-symbolized, single-fn subseg, kept its `func_` name
+  → **one yaml flip, zero symbol adds, zero header copies**; m2c failed on the 1-stub parent,
+  Ghidra-decompile seed carried it; first-pass clean (0/0/0/0). Retro: **2 of 3 applied** —
+  **#1 graceful m2c fallback** (`seed_c.py parent_has_real_c()` skips m2ctx on a stub-only parent)
+  + **#3 `intrinsic-likely` hazard** (`pick_target.py` flags CP0/`sqrt` register shims like
+  `osGetCount`/`__osGetCause` so smallest-first stops surfacing un-decompilable leaves). No
+  carry-overs.
+
+## PO ordering note (S9 retro — defer v2, schedule a non-trivial classical next)
+
+The S9 classical spike **proved the loop mechanically but produced zero residual variance**
+(a clean verbatim-shaped wrapper), so the PO **deferred v2** at the S9 review — turning on the
+realized-tier machinery against a point mass would measure nothing. To unlock v2, the next
+classical target should be **non-trivial**: a small no-upstream fn with real arithmetic,
+branches, or locals (NOT a thin wrapper or a register/FPU intrinsic — the new `intrinsic-likely`
+hazard now filters the latter out of the smallest-first pick). Mining clean mirror leaves
+(`__osDequeueThread`/`osYieldThread` in the now-warm thread band, or the cold convert/other
+bands) remains the near-zero-risk default between classical spikes.
 
 ## Enabler items (gate-time, agent-performed since 2026-06-11)
 

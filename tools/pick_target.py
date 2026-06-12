@@ -105,6 +105,52 @@ def asm_functions(rom_off):
     return names
 
 
+# Ops C can't emit (or won't schedule into a leaf delay slot): CP0 register moves
+# and a bare FPU sqrt. A tiny leaf whose only work is one of these is really `hasm`,
+# not a classical target — flag it so smallest-first stops surfacing it as the pick.
+INTRINSIC_OPS = {
+    "mfc0", "mtc0", "dmfc0", "dmtc0", "cfc0", "ctc0",
+    "sqrt.s", "sqrt.d",
+}
+INSN_RE = re.compile(r"/\*\s*[0-9A-Fa-f]+\s+[0-9A-Fa-f]+\s+[0-9A-Fa-f]+\s*\*/\s+(\S+)")
+
+
+def intrinsic_likely(rom_off, primary):
+    """True if the primary fn is a register/FPU intrinsic shim (mfc0/mtc0/sqrt + jr),
+    not C-expressible. Reads the fn's body in asm/<ROM>.s: a leaf (no `jal`) whose
+    work instructions (excluding jr/nop) are all CP0-moves/sqrt, or one spimdisasm
+    tagged `handwritten`."""
+    path = os.path.join(ROOT, "asm", f"{rom_off:X}.s")
+    if not os.path.exists(path):
+        return False
+    in_fn = False
+    mnemonics = []
+    handwritten = False
+    with open(path) as f:
+        for line in f:
+            m = GLABEL_RE.match(line)
+            if m:
+                if in_fn:           # reached the next function — stop
+                    break
+                in_fn = m.group(1) == primary
+                continue
+            if not in_fn:
+                continue
+            if line.lstrip().startswith("endlabel"):
+                break
+            if "handwritten" in line:
+                handwritten = True
+            insn = INSN_RE.search(line)
+            if insn:
+                mnemonics.append(insn.group(1))
+    if "jal" in mnemonics:          # a wrapper/has calls → decompilable
+        return False
+    work = [m for m in mnemonics if m not in ("jr", "nop")]
+    if work and all(m in INTRINSIC_OPS for m in work):
+        return True
+    return handwritten             # spimdisasm-tagged handwritten leaf (no jal)
+
+
 def build_upstream_index():
     """Map upstream function name -> (lib, path), scanning libultra/libkmc once."""
     index = {}
@@ -369,6 +415,8 @@ def build_rows(args, upstream_index, carried):
                 hazards.append("non16align")
             if len(fns) > 1:
                 hazards.append(f"pack:{len(fns)}fn")
+            if intrinsic_likely(off, fns[0]):
+                hazards.append("intrinsic-likely")  # register/FPU shim → hasm, not a classical target
         elif typ == "c" and path:
             cpath = os.path.join(ROOT, "src", path + ".c")
             if not os.path.exists(cpath):

@@ -337,6 +337,36 @@ def sanitize_ghidra_body(text: str, placeholder: str) -> str:
     return text.strip() + "\n"
 
 
+def parent_has_real_c(parent: Path) -> bool:
+    """True if the parent .c holds C beyond #includes and INCLUDE_ASM stubs.
+
+    A freshly-flipped 1-stub file (the common classical-loop start) has no type
+    context for m2ctx to extract, so running cpp over it only yields a noisy
+    failure — detect it and skip m2ctx, falling to the Ghidra seed cleanly.
+    """
+    if parent is None or not parent.exists():
+        return False
+    in_block_comment = False
+    for raw in parent.read_text(encoding="utf-8", errors="replace").splitlines():
+        line = raw.strip()
+        if in_block_comment:
+            if "*/" in line:
+                in_block_comment = False
+            continue
+        if not line or line.startswith("//"):
+            continue
+        if line.startswith("/*"):
+            if "*/" not in line:
+                in_block_comment = True
+            continue
+        if line.startswith("#"):           # preprocessor (incl. #include)
+            continue
+        if INCLUDE_ASM_RE.search(line):    # an asm stub, not real C
+            continue
+        return True                        # anything else is real C
+    return False
+
+
 def collect_parent_externs(parent: Path) -> tuple[list[str], list[str]]:
     """Return (extern_decls, include_asm_names) from the parent .c."""
     if parent is None or not parent.exists():
@@ -513,10 +543,13 @@ def main() -> None:
     has_ctx = False
     if args.parent:
         parent_path = Path(args.parent)
-        if parent_path.exists():
-            has_ctx = run_m2ctx(parent_path, ctx_path)
-        else:
+        if not parent_path.exists():
             log(f"[seed] --parent {args.parent} not found; skipping m2ctx")
+        elif not parent_has_real_c(parent_path):
+            log("[seed] parent has only INCLUDE_ASM stubs; skipping m2ctx "
+                "(no type context) — relying on the Ghidra seed")
+        else:
+            has_ctx = run_m2ctx(parent_path, ctx_path)
 
     # m2c
     m2c_path = out_dir / "m2c.c"

@@ -75,12 +75,18 @@ until v2. These rows double as the **reference stories** for the plan-time ±1 a
 | 6 | viblack | 1 | mirror / warm / — | 1 | *1* | first live-logged v1 sprint; verbatim, zero-enabler, banked 1pt |
 | 7 | virtualtophysical | 1 | mirror / cold / — | 2 | *2* | opens convert band (vi exhausted); verbatim, zero-enabler, banked 2pt |
 | 8 | stopthread | 1 | mirror / warm / — | 1 | *1* | opens thread band; verbatim, zero-enabler, banked 1pt |
+| 9 | func_80099490 | 1 | **classical** / — / — | 5 | *—* | **first classical-track row** — no-upstream wrapper `nuPiInitSram()`; first-pass clean (score 0, 0 iter), banked 5pt; classical loop PROVEN. Kept OUT of the mirror seed-velocity (separate regime) |
 
 **Seed-velocity = 2.0 pt/sprint** (bootstrap anchors S1–5, sum seed 10 / 5 sprints). With the
 three live-logged sprints S6 (seed 1) + S7 (seed 2) + S8 (seed 1), the running mirror-regime
 seed-velocity is 14 pt / 8 sprints = **1.75 pt/sprint** — the predicted downward drift as the
 warm singleton pool depletes (S6 last clean vi leaf; S7 opened the *cold* convert band at the
-2 pt floor; S8 the warm-1 thread leaf).
+2 pt floor; S8 the warm-1 thread leaf). **S9 is the first classical-track row** (seed 5,
+banked 5, first-pass clean) — logged separately, NOT folded into the mirror 1.75 average
+(never compare regimes). Classical track: n=1, seed-velocity 5 pt/sprint (one point, no signal
+yet). It proved the classical loop mechanically but produced **zero residual variance** (clean
+verbatim-shaped wrapper), so the PO **deferred v2** at the S9 review — a non-trivial classical
+leaf (arithmetic/branches/locals) is scheduled next to generate the variance v2 needs.
 Three honest caveats:
 - **Fitted, not validated.** The bands were chosen so this history reads ~2 pt/sprint; the
   first out-of-sample sprint is the real test. The byte gates (768/1536) and the classical
