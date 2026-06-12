@@ -5,3 +5,6 @@ __osRunQueue = 0x800C8228; // size:0x4
 osViSetYScale = 0x800AD370; // type:func
 nuGfxDisplay = 0x80104E6C; // size:0x4
 nuGfxTaskSpool = 0x8012D478; // size:0x4
+nuScPreNMIFunc = 0x800B6780; // size:0x4
+nuGfxFunc = 0x800C7DC0; // size:0x4
+nuGfxSwapCfbFunc = 0x800B67B4; // size:0x4
