@@ -16,3 +16,6 @@ osPiGetCmdQueue = 0x800B06F0; // type:func
 nuContDataOpen = 0x800A2CAC; // type:func
 nuContData = 0x801051F8; // size:0x18
 nuContDataLockKey = 0x800FED38; // size:0x4
+__OSGlobalIntMask = 0x800C9470; // size:0x4
+__osBaseCounter = 0x800FBE04; // size:0x4
+__osCurrentTime = 0x801052F0; // size:0x8
