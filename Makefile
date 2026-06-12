@@ -98,14 +98,12 @@ extract:
 	./venv/bin/python3 -m splat split $(BASENAME).yaml
 
 sync-names:
-	@tools/mcp_lock.py acquire --command sync-names --identifier export
 	-GHIDRA_REPO="$${MARIOGOLF64_GHIDRA_REPO:-$$HOME/development/reversing/ghidra/mariogolf64}"; \
 	  SYNC_PY="$$GHIDRA_REPO/venv/bin/python3"; \
 	  [ -x "$$SYNC_PY" ] || SYNC_PY=./venv/bin/python3; \
 	  [ -x "$$SYNC_PY" ] || SYNC_PY=python3; \
 	  "$$SYNC_PY" "$$GHIDRA_REPO/scripts/sync_decomp_names.py" \
 	    --export-to-decomp --decomp-root . --write-in-place
-	@tools/mcp_lock.py release --identifier export
 
 .PHONY: all clean distclean setup extract sync-names nonmatching-func spotcheck-build clean-nonmatchings
 
@@ -157,9 +155,9 @@ $(BUILD_DIR)/$(SRC_DIR)/libkmc/%.o: $(SRC_DIR)/libkmc/%.c
 	$(STRIP) $@ -N dummy-symbol-name
 	rm $@.s $@.tmp
 
-# === /decomp loop targets =====================================================
-# Driven by tools/decomp_loop.py inside the iteration loop, and by /decomp's
-# in-tree spot-check step. Mirrors decomp.me's KMC GCC compile so the resulting
+# === execution-loop targets ===================================================
+# Driven by tools/decomp_loop.py inside the iteration loop, and by the execution
+# loop's in-tree spot-check step. Mirrors decomp.me's KMC GCC compile so the resulting
 # object reflects what decomp.me would produce (single-step `gcc -c`).
 
 # Per-function compile of nonmatchings/$(FUNC)/base.c -> nonmatchings/$(FUNC)/current.o.
@@ -175,12 +173,12 @@ nonmatching-func:
 # `#ifndef NONMATCHING / INCLUDE_ASM / #else <C body> #endif`) with
 # NONMATCHING=1 into build/src/$(SEG).spotcheck.o. Two-step compile because
 # the spotcheck source inherits the parent's other INCLUDE_ASM directives.
-# /decomp step 10 creates and removes the .spotcheck file; this target only
-# builds it.
+# The execution loop's finalize step creates and removes the .spotcheck file;
+# this target only builds it.
 spotcheck-build:
 	@test -n "$(SEG)" || { echo "Usage: make spotcheck-build SEG=<seg> FUNC=<func_XXXXXXXX>" >&2; exit 1; }
 	@test -n "$(FUNC)" || { echo "Usage: make spotcheck-build SEG=<seg> FUNC=<func_XXXXXXXX>" >&2; exit 1; }
-	@test -f src/$(SEG).c.spotcheck || { echo "src/$(SEG).c.spotcheck not found (created by /decomp step 10)" >&2; exit 1; }
+	@test -f src/$(SEG).c.spotcheck || { echo "src/$(SEG).c.spotcheck not found (created during the execution loop's finalize step)" >&2; exit 1; }
 	$(CC) -x c -S $(CFLAGS) -DNONMATCHING -o $(BUILD_DIR)/$(SRC_DIR)/$(SEG).spotcheck.s src/$(SEG).c.spotcheck
 	tools/cc/as -EB -mips2 -I include -o $(BUILD_DIR)/$(SRC_DIR)/$(SEG).spotcheck.tmp $(BUILD_DIR)/$(SRC_DIR)/$(SEG).spotcheck.s
 	cp $(BUILD_DIR)/$(SRC_DIR)/$(SEG).spotcheck.tmp $(BUILD_DIR)/$(SRC_DIR)/$(SEG).spotcheck.o

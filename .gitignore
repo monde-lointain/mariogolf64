@@ -47,13 +47,16 @@ debug_source.c
 # Extracted assembly (generated)
 asm_extracted/
 
-# Permuter + /decomp loop scratch dirs
+# Permuter + execution-loop scratch dirs
 nonmatchings/
 permuter_settings.toml
 
-# /decomp in-tree spot-check scratch (created and removed by /decomp step 10)
+# In-tree spot-check scratch (created and removed during the execution loop's finalize step)
 src/*.c.spotcheck
 build/src/*.spotcheck.o
+
+# Sprint board (ephemeral live board + resume surface, written by /sprint-plan)
+SPRINT.md
 
 # Makefile options
 .make_options
@@ -84,3 +87,6 @@ tags
 
 # Ghidra scripts (local only)
 ghidra/
+
+# Local Claude Code MCP config (machine-specific Ghidra port pin)
+.mcp.json

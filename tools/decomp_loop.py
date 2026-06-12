@@ -96,7 +96,7 @@ def resolve_placeholder(name: str) -> str:
     fail(
         f"could not resolve '{name}' to a known function; not present in "
         f"{[str(f) for f in SYMBOL_FILES]} and not in placeholder form. "
-        "Run /decomp from a slash command (which queries Ghidra MCP) or pass the placeholder directly."
+        "Run the execution loop (which queries Ghidra MCP) or pass the placeholder directly."
     )
     raise SystemExit(1)  # unreachable; for type checker
 

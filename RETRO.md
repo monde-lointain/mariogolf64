@@ -5,8 +5,8 @@ the *consolidated* record so lessons compound across sprints (McConnell, *More E
 Agile*, Ch.19: retros must change behavior). The PO promotes durable lessons into the memory
 dir manually — the review gate does not auto-write memory.
 
-Process/tooling edits are **retro-gated**: the per-run "Suggested workflow improvements"
-that `/decomp` records into `SPRINT.md` are applied here, at review, not mid-sprint (see
+Process/tooling edits are **retro-gated**: the "Suggested workflow improvements" the
+execution loop records into `SPRINT.md` are applied here, at review, not mid-sprint (see
 `CLAUDE.md ## Scrum operating model`). The `Applied:` line below is the audit trail of which
 numbered suggestions the PO accepted.
 

@@ -13,7 +13,7 @@
    BSS slot is supplied by splat at 0x800FBD30 — keeping `static` would
    place rand.o's local BSS ahead of the splat-emitted `next` and shift
    every downstream BSS symbol (see CLAUDE.md "File-scope `static` blocks
-   `/decomp-libupstream`"). Codegen is identical because `next` resolves
+   the upstream mirror"). Codegen is identical because `next` resolves
    to the same vram either way. */
 extern long next;
 
