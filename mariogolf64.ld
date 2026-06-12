@@ -220,10 +220,10 @@ SECTIONS
         build/src/libultra/monegi/thread/setthreadpri.o(.text);
         build/asm/878A0.o(.text);
         build/src/libultra/monegi/thread/stopthread.o(.text);
-        build/asm/87A80.o(.text);
+        build/src/libultra/monegi/thread/dequeuethread.o(.text);
         build/src/libultra/monegi/thread/yieldthread.o(.text);
         build/src/libultra/monegi/time/gettime.o(.text);
-        build/asm/87BA0.o(.text);
+        build/src/libultra/monegi/time/settimer.o(.text);
         build/asm/87C40.o(.text);
         build/asm/87F40.o(.text);
         build/asm/88000.o(.text);
@@ -282,7 +282,7 @@ SECTIONS
         build/src/libkmc/memset.o(.text);
         build/src/libkmc/rand.o(.text);
         build/asm/8E660.o(.text);
-        build/asm/8EAD0.o(.text);
+        build/src/libkmc/strcmp.o(.text);
         build/src/libkmc/_matherr.o(.text);
         build/asm/8EC50.o(.text);
         build/asm/8EC88.o(.text);
@@ -448,10 +448,10 @@ SECTIONS
         build/src/libultra/monegi/thread/setthreadpri.o(.data);
         build/asm/878A0.o(.data);
         build/src/libultra/monegi/thread/stopthread.o(.data);
-        build/asm/87A80.o(.data);
+        build/src/libultra/monegi/thread/dequeuethread.o(.data);
         build/src/libultra/monegi/thread/yieldthread.o(.data);
         build/src/libultra/monegi/time/gettime.o(.data);
-        build/asm/87BA0.o(.data);
+        build/src/libultra/monegi/time/settimer.o(.data);
         build/asm/87C40.o(.data);
         build/asm/87F40.o(.data);
         build/asm/88000.o(.data);
@@ -510,7 +510,7 @@ SECTIONS
         build/src/libkmc/memset.o(.data);
         build/src/libkmc/rand.o(.data);
         build/asm/8E660.o(.data);
-        build/asm/8EAD0.o(.data);
+        build/src/libkmc/strcmp.o(.data);
         build/src/libkmc/_matherr.o(.data);
         build/asm/8EC50.o(.data);
         build/asm/8EC88.o(.data);
@@ -677,10 +677,10 @@ SECTIONS
         build/src/libultra/monegi/thread/setthreadpri.o(.rodata);
         build/asm/878A0.o(.rodata);
         build/src/libultra/monegi/thread/stopthread.o(.rodata);
-        build/asm/87A80.o(.rodata);
+        build/src/libultra/monegi/thread/dequeuethread.o(.rodata);
         build/src/libultra/monegi/thread/yieldthread.o(.rodata);
         build/src/libultra/monegi/time/gettime.o(.rodata);
-        build/asm/87BA0.o(.rodata);
+        build/src/libultra/monegi/time/settimer.o(.rodata);
         build/asm/87C40.o(.rodata);
         build/asm/87F40.o(.rodata);
         build/asm/88000.o(.rodata);
@@ -739,7 +739,7 @@ SECTIONS
         build/src/libkmc/memset.o(.rodata);
         build/src/libkmc/rand.o(.rodata);
         build/asm/8E660.o(.rodata);
-        build/asm/8EAD0.o(.rodata);
+        build/src/libkmc/strcmp.o(.rodata);
         build/src/libkmc/_matherr.o(.rodata);
         build/asm/8EC50.o(.rodata);
         build/asm/8EC88.o(.rodata);
@@ -933,10 +933,10 @@ SECTIONS
         build/src/libultra/monegi/thread/setthreadpri.o(.bss);
         build/asm/878A0.o(.bss);
         build/src/libultra/monegi/thread/stopthread.o(.bss);
-        build/asm/87A80.o(.bss);
+        build/src/libultra/monegi/thread/dequeuethread.o(.bss);
         build/src/libultra/monegi/thread/yieldthread.o(.bss);
         build/src/libultra/monegi/time/gettime.o(.bss);
-        build/asm/87BA0.o(.bss);
+        build/src/libultra/monegi/time/settimer.o(.bss);
         build/asm/87C40.o(.bss);
         build/asm/87F40.o(.bss);
         build/asm/88000.o(.bss);
@@ -995,7 +995,7 @@ SECTIONS
         build/src/libkmc/memset.o(.bss);
         build/src/libkmc/rand.o(.bss);
         build/asm/8E660.o(.bss);
-        build/asm/8EAD0.o(.bss);
+        build/src/libkmc/strcmp.o(.bss);
         build/src/libkmc/_matherr.o(.bss);
         build/asm/8EC50.o(.bss);
         build/asm/8EC88.o(.bss);

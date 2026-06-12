@@ -25,6 +25,17 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 30 — mixed: strcmp (libkmc verbatim) + osSetTimer (classical, stripped) + __osDequeueThread (classical, defines-data drop) — 2026-06-12
+- Increment: 3 files banked / 3 fns matched (delta: md5-candidate files 51→54; matched 57→57/2090 2.58%→2.73%)
+- Quality: 0/0/0/0 (stuck-far/permuter/carried/re-opened) — all score 0 first pass; 0 iterations; goal met
+- Seed: committed 6pt; banked 6pt; regime mixed (1 mirror + 2 classical)   (v1 + v2 active: mirror seed-only; classical realized tier: osSetTimer seed=realized=2, residual 0; __osDequeueThread seed=realized=3, residual 0; S30 classical seed+realized=5 logged)
+- What helped: **all three fns score 0 first pass** — strcmp verbatim cp (libkmc warm, `-O` auto-applied); osSetTimer Ghidra-seeded classical body written directly from asm (stripped impl — no interrupt disable/restore, no counter update; correct `__osTimerList` recover-extern from `lui`/`lw` pair → 0x800C8240); __osDequeueThread direct-from-asm (64 B pointer-walk; register params; `(OSThread*)queue` head cast for the loop; 5 file-scope defs dropped cleanly). `make extract` re-run after `__osTimerList` add to regenerate asm labels; caught the missing re-extract early (linker undefined-ref vs stale asm).
+- Friction: **osSetTimer mis-routed as near-verbatim at DoR** — `jal-count-mismatch:5vs2` at the gate implied a near-verbatim drop (S18/S26 pattern), but disassembly showed the ROM impl is fundamentally different (no interrupt-disable shell, no timer counter update, different arg to `__osSetTimerIntr`). A large mismatch (5vs2 = 3 absent calls) does NOT mean a near-verbatim drop is possible — it can mean a wholly different stripped implementation. The hazard flag was correct; the *routing intuition* was wrong. **`int` vs `s32` return type**: first seed used `s32 osSetTimer(...)` → conflicting-types compile error (declaration in `os_time.h:104` is `int`); fixed immediately.
+- Applied: 1 of 1: #1 (CLAUDE.md gate note: `jal-count-mismatch` >2 is `classical-likely` — disassemble + compare asm logic structure vs upstream before routing to mirror branch; a large mismatch defaults to the classical loop unless asm confirms a clean line-drop)
+- Carry-over: none
+
+---
+
 ## Sprint 29 — mirror: nuPiReadWriteSram (libnusys, recover-extern+needs-define Makefile gate) + __matherr (libkmc, pack-split+recover-extern) — 2026-06-12
 - Increment: 2 files banked / 2 fns matched (delta: md5-candidate files 49→51; matched 53→55/2090 ~2.54%→~2.63%)
 - Quality: 0/0/0/0 (stuck-far/permuter/carried/re-opened) — both first-pass; 0 iterations; goal met

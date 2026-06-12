@@ -101,13 +101,14 @@ until v2. These rows double as the **reference stories** for the plan-time ±1 a
 | 27 | setglobalintmask + resetglobalintmask + gettime | 1+1+1 | mirror / cold / pack+recover-extern | 5+3=8 | *8* | **Opens `nintendo/exception/` (3rd `nintendo/` band after S22/S23 `pi/`) + `monegi/time/` (new band).** Pack split at 0x8B9D0; shared recover-extern `__OSGlobalIntMask`@0x800C9470 (inlined vram, size:0x4) for the `exception/` pair; `__osBaseCounter`@0x800FBE04 (size:0x4) + `__osCurrentTime`@0x801052F0 (size:0x8 OSTime) for `gettime.c` from asm disassembly. `__osViDevMgr` dead-`#ifdef _DEBUG` over-flag confirmed (no symbol add — pick's `#ifdef`-blind grep expected behavior). 3 symbol adds + 1 pack split + 3 yaml flips at gate. All verbatim cp, 0 iterations. seed 8pt (5+3); 8-gate clear (3-increment batch, not a single large item). Retro applied 0 of 0 (buffer "None new"). Mirror track stays seed-only — `(real)` illustrative |
 | 28 | nucontgbpakreadwrite + nucontgbpakcheck + memset+setmem | 1+1+2 | mirror / cold / pack-split+NU_DEBUG+header | 3+3=6 | *6* | **Heterogeneous 3-file sprint: libnusys pack-split (0x7D710 → two single-fn leaves) + libkmc whole-file pack + companion header copy.** `nuContGBPakReadWrite`: verbatim cp — `#ifdef NU_DEBUG` block compiles out automatically (ROM build doesn't define NU_DEBUG; no manual drop needed, unlike S26's near-verbatim). `nuContGBPakCheckConnector`: verbatim cp, simple 1-jal leaf. `memset`+`setmem`: verbatim cp of upstream `libkmc/memset.c`; FAST_SPEED=1 path confirmed consistent; `memory.h` companion copied from `~/development/repos/libkmc/include/memory.h` → `include/libkmc/memory.h` (self-contained: `size_t` + memory fn decls); libkmc `-O` profile auto-applied by Makefile. All 4 fns 0 iterations, all names pre-curated. md5-candidate 46→49. **Retro fix:** `pick_target.py` `jal-count-mismatch:5vs1` was a tool bug — (1) `_DEAD_OPEN_RE` missing `#ifdef NU_DEBUG`; (2) `C_CALL_RE` matching `address(`/`size(` inside format-string literals. Fixed: `NU_DEBUG` added to dead-block pattern + `_strip_string_literals()` helper applied at both `call_divergence` and `calls_unplaced`. After fix `osSetTimer` correctly shows `5vs2`. Retro applied 1 of 1 (#1 fix jal-count-mismatch). Mirror track stays seed-only — `(real)` illustrative |
 | 29 | nupireadwritesram + _matherr | 1+1 | mirror / cold+warm / recover-extern+pack+needs-define | 3+3=6 | *6* | **libnusys (cold): `nuPiReadWriteSram` — entire body behind `#ifdef USE_EPI`; compiles to empty stub without it. One-time Makefile enabler (`LIBNUSYS_CFLAGS := $(CFLAGS) -DUSE_EPI` + libnusys pattern rule) at gate; `nuPiSramHandle`=0x8012F4D8 recover-extern. `pick_target.py` false-clean (USE_EPI not detected as a hazard). libkmc (warm): `__matherr` — pack-split 0x8EBE0 → C 112 B (`_matherr.c`) + hasm 56 B (`__muldi3`, permanent); `errno`=0x800FE3D0 recover-extern; libkmc `-O` auto-applied. Both verbatim cp, 0 iter. md5-candidate 49→51. Retro applied 1 of 1 (#1 `needs-define` hazard in `pick_target.py` — `function_gating_define()` detects top-level `#ifdef` body gate; `_parse_makefile_defines()` cross-checks against effective library CFLAGS; +1 in seed_points). Mirror track stays seed-only — `(real)` illustrative |
+| 30 | strcmp + osSetTimer + __osDequeueThread | 1+1+1 | mixed: mirror/warm/verbatim + classical/warm/jal-mismatch-stripped + classical/warm/defines-data-drop | 1+2+3=6 | **6** | **First mixed sprint; 3rd+4th classical-track fns.** `strcmp` (libkmc verbatim cp, 0 iter, warm mirror, seed 1; libkmc `-O` auto-applied). `osSetTimer` (**mis-routed as near-verbatim at DoR** — `jal-count-mismatch:5vs2` flagged; asm revealed fundamentally stripped impl — no interrupt disable/restore/counter update, different `__osSetTimerIntr` arg; routed to classical; `__osTimerList`@0x800C8240 recover-extern; score 0 first pass; realized=seed=2). `__osDequeueThread` (classical, defines-data drop — 5 file-scope defs from thread.c dropped; 64 B pointer-walk loop; register params + `(OSThread*)queue` head cast; score 0 first pass; realized=seed=3). All 3 green SHA first pass, 0 stuck-far/permuter/carried/re-opened. md5-candidate 51→54. Retro applied 1 of 1 (#1 CLAUDE.md gate note: large jal-count-mismatch >2 is `classical-likely` — disassemble before routing to mirror branch). Classical track adds 2 fns, both residual 0 — S30 classical seed+realized **5 logged** |
 
 **Seed-velocity = 2.0 pt/sprint** (bootstrap anchors S1–5, sum seed 10 / 5 sprints). With the
 live-logged mirror sprints S6 (seed 1) + S7 (seed 2) + S8 (seed 1) + S12 (seed 2) + S13 (seed 1)
 + S14 (seed 1) + S15 (seed 3) + S16 (seed 4) + S17 (seed 6) + S18 (seed 2) + S19 (seed 9)
 + S20 (seed 6) + S21 (seed 2) + S22 (seed 3) + S23 (seed 2) + S24 (seed 3) + S25 (seed 5)
-+ S26 (seed 5) + S27 (seed 8) + S28 (seed 6) + S29 (seed 6), the
-running mirror-regime seed-velocity is 88 pt / 26 sprints = **3.38 pt/sprint** — the warm-pool
++ S26 (seed 5) + S27 (seed 8) + S28 (seed 6) + S29 (seed 6) + S30-mirror (seed 1), the
+running mirror-regime seed-velocity is 89 pt / 27 sprints = **3.30 pt/sprint** — the warm-pool
 downward drift reverses as a *new* cold band opens (S6 last clean vi leaf; S7 opened the *cold*
 convert band at the 2 pt floor; S8 the warm-1 thread leaf; S12 the warm-2 recover-extern thread
 leaf; S13 6th vi mirror; S14 3rd thread mirror — note S14 was a **zero-enabler warm singleton**
@@ -121,13 +122,14 @@ trio (seed 9). **The post-S16 rise to 2.63 is sibling-batch-driven, not per-leaf
 S17/S19 banked 3 files each in one sprint, so points/sprint reflects how many homogeneous
 siblings were committed (the "commitment-shaped, not pure throughput" caveat below), not faster
 matching; per-leaf effort is still the flat cold-mirror 2–3 pt. **S9 is the first classical-track row** (seed 5,
-banked 5, first-pass clean) — logged separately, NOT folded into the mirror 1.75 average
-(never compare regimes). Classical track: **n=2** (S9 seed 5 / realized
-illustrative; S11 seed 5 / **realized 5 logged**), seed-velocity 5 pt/sprint. S9 proved the loop
+banked 5, first-pass clean) — logged separately, NOT folded into the mirror 3.30 average
+(never compare regimes). Classical track: **n=3** (S9 seed 5 / realized
+illustrative; S11 seed 5 / **realized 5 logged**; S30 (mixed) seed 5 / **realized 5 logged**),
+seed-velocity 5 pt/sprint. S9 proved the loop
 mechanically but produced **zero residual variance** (clean wrapper); **S11 produced the first
 real variance** (non-trivial leaf, seed compiled 0.80, matched after 1 fix-iteration), so the
-PO **activated v2** at the S11 review. The realized tier is now live on this track; its first
-two data points both land at seed (residual 0), so the seed rubric is so-far well-calibrated for
+PO **activated v2** at the S11 review. The realized tier is now live on this track; all three
+data points land at seed (residual 0), so the seed rubric is so-far well-calibrated for
 small classical leaves — watch for the first non-zero residual (a stuck-far / permuter / re-attempt).
 Three honest caveats:
 - **Fitted, not validated.** The bands were chosen so this history reads ~2 pt/sprint; the
@@ -147,9 +149,9 @@ Three honest caveats:
 ## Velocity (headline — v1 mirror track + v2 classical track active)
 - **Mirror track (v1): seed-velocity 2.0 pt/sprint** (n=5 anchors, all verbatim; seed-only —
   the mirror band is a point mass, no realized tier).
-- **Classical track (v2 ACTIVE since S11): n=2, seed 5 pt/sprint, realized 5 pt/sprint, residual 0.**
-  Realized-velocity / rolling-5 / re-anchor are now live here; both data points land at seed so
-  far, so the rubric is well-calibrated for small classical leaves pending the first non-zero residual.
+- **Classical track (v2 ACTIVE since S11): n=3, seed 5 pt/sprint, realized 5 pt/sprint, residual 0.**
+  Realized-velocity / rolling-5 / re-anchor are now live here; all three data points land at seed
+  so far, so the rubric is well-calibrated for small classical leaves pending the first non-zero residual.
 - **Regime:** `mirror` is a depleting minority (~22 % of ranked candidates: 56 mirror vs 194
   classical; 18 warm / 38 cold). The warm clean-singleton mirror pool is now **mined out** (S11
   plan gate: every top mirror candidate carries a blocking hazard), pushing the project onto the
