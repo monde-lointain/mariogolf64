@@ -241,6 +241,21 @@ v2 needs; clean mirror leaves remain the near-zero-risk default between classica
   mirror sub-case bullet, #2 CLAUDE.md fill-the-cap batch-sizing rule, #3 kept gate MCP re-confirm
   mandatory (3/3 logged). No carry-overs.
 
+- **Sprint 20: 2 files BANKED — `src/libnusys/mainlib/nucontrmbstart.c` (`nuContRmbStart`) +
+  `nucontgbpakopen.c` (`nuContGBPakOpen`), libnusys recover-extern mirrors.** md5-candidate
+  34→36; matched 36→38/2090 (~1.82%). 9th sibling-batch, 3rd recover-extern batch, 2nd libnusys
+  pair. Both single-fn leaves behind the S17-banked callee `nuSiSendMesg`; one recover-extern
+  each (nuContRmbCtl=0x80104F50, nuContPfs=0x801B8A18). **First gate vram-miss:** pick's inlined
+  nuContRmbCtl@0x80104F57 was the `.mode` field addr (offset 7) of an indexed-struct array — true
+  base 0x80104F50, caught by the mandatory lui/addiu re-confirm (nuContPfs matched exactly).
+  Homogeneous pair; genuinely-clean set was exactly 2 (trimmed nuContDataGetEx — extra MISSING fn
+  symbol nuContDataOpen). Both verbatim cp, 0 iterations. seed 6 / banked 6pt. Retro: **2 of 3
+  applied** — #1 CLAUDE.md indexed-struct-array field-addr-vs-base note (keep re-confirm
+  mandatory), #2 CLAUDE.md array-extern size rule (scalar 0x4 / array stride×count). No carry-overs.
+  **Note (out-of-band, not backlogged per PO): Ghidra-workspace ↔ decomp `ghidra_symbols.txt`
+  drift (~250 Ghidra-ahead; 5 decomp-ahead build-critical) makes full `make sync-names`
+  destructive — gate-time name refresh stays surgical until reconciled.**
+
 ## PO ordering note (S16 retro — the false-clean class is closed; deeper nusys leaves now priced)
 
 The S16 grep fix re-priced the nuGfx*FuncSet leaves (now pts-3 recover-extern, was false-clean

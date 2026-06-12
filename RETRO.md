@@ -25,6 +25,15 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 20 — mirror: nuCont recover-extern pair (nuContRmbStart + nuContGBPakOpen) — 2026-06-12
+- Increment: 2 files banked / 2 fns matched (delta: ~1.72% → ~1.82%; md5-candidate files 34→36)
+- Quality: 0/0/0/0 (stuck-far/permuter/carried/re-opened) — both verbatim mirrors, 0 iterations; goal met first pass
+- Seed: committed 6pt; banked 6pt; regime mirror   (v1 — story points; realized tier is v2, untouched this pure-mirror sprint)
+- What helped: 9th sibling-batch, 3rd recover-extern batch — the lowest-risk fill-the-cap pattern (S16/S19). Shared callee `nuSiSendMesg` pre-curated (S17). The **mandatory gate lui/addiu re-confirm** earned its keep: it caught the first inlined-vram miss (nuContRmbCtl@0x80104F57 was the `.mode` field addr, true base 0x80104F50). Doctrine trim-to-cleanest-2 correctly excluded nuContDataGetEx (extra MISSING fn symbol nuContDataOpen).
+- Friction: none on the matching path. Out-of-band, the post-sprint Ghidra name-sync surfaced material **workspace↔decomp `ghidra_symbols.txt` drift** (~250 Ghidra-ahead funcs/globals; 5 decomp-ahead build-critical: `__muldi3`/`__moddi3`/`__osRunningThread`/`__osViCurr`/`__osViNext`) → full `make sync-names` is currently destructive (PO chose not to backlog it this gate).
+- Applied: 2 of 3 — #1 (CLAUDE.md recover-extern bullet: indexed-struct-array inlined vram is the field addr, recover base by subtracting the member offset; keep re-confirm mandatory) + #2 (CLAUDE.md size rule: scalar/fn-ptr 0x4, array stride×count); (#3 confirmatory log-only — NOT a file edit; sync-drift backlog item NOT selected)
+- Carry-over: none
+
 ## Sprint 19 — mirror: nuGfx*FuncSet trio (libnusys recover-extern batch) — 2026-06-12
 - Increment: 3 files banked / 3 fns matched (delta: ~1.58% → ~1.72%; md5-candidate files 31→34)
 - Quality: 0/0/0/0 (stuck-far/permuter/carried/re-opened) — all verbatim mirrors, 0 iterations; goal met first pass
