@@ -25,6 +25,17 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 38 — osAiSetFrequency (carry-over retry; 0pt spiked again) — 2026-06-12
+- Increment: 0 files banked / 0 fns matched (delta: none; 79/2090 ~3.78%; md5-candidate 72 unchanged)
+- Quality: stuck-far 0 / permuter 0 / carried 1 (osAiSetFrequency — .rodata layout conflict, new layer) / re-opened 0
+- Seed: committed 2pt; banked 0pt (spiked); regime mirror
+- What helped: **Binutils source (mips-binutils-2.6) confirmed the fix.** `tc-mips.c` line 5323 shows `g_switch_value < 4` → inline immediate for `li.s` (32-bit float); line 5353 shows `g_switch_value >= 8` → `.lit8` else `.rodata` for `li.d` (64-bit double). **`-G 0` on KMC `as`** makes 0.5f/2^31f inline (no `.lit4`) and 2^32d go to `.rodata` (no `.lit8`) — exactly what the ROM has. Also confirmed by `ultralib/makefiles/gcc.mk` line 9: original build used `-G 0` in ASFLAGS. Applied `-G 0` to all `tools/cc/as` invocations in the Makefile; full `make` ROM SHA-1 still green. **The fix unblocks all future FP-using libultra functions.**
+- Friction: **Two-layer blocker on osAiSetFrequency.** Layer 1 (`.lit4`/`.lit8` link error) = FIXED this sprint. Layer 2 (`.rodata` layout conflict) = new discovery: compiler-generated 2^32d double goes to `.rodata`, but linker places it at 0x800CA270 (per linker script ordering) instead of 0x800D22A0. The `[0xAD5E0, rodata]` subseg owns 0x800D22A0 already — the constant appears twice in the ROM (once from the asm object at the correct address, once from aisetfreq.o's `.rodata` at the wrong address). Root cause: the original linker concatenated all `.text` then all `.rodata` in object order; splat interleaves `.text` and `.rodata` by subseg position, so aisetfreq.o's `.rodata` lands 0x8030 bytes too early. Verbatim mirror is permanently blocked; the viable path is the **classical loop** with C code that avoids generating the `.rodata` constant (replace the u32→float idiom so the compiler uses `lui/mtc1` for the 2^32 double instead of a memory load).
+- Applied: #1 PARTIAL — Makefile `-G 0` on `tools/cc/as` applied (layer 1 resolved; ROM green); `.rodata` layout conflict documented for next sprint
+- Carry-over: osAiSetFrequency (updated blocker: `.rodata` layout conflict — classical loop required)
+
+---
+
 ## Sprint 37 — nuPiReadRom (classical) + osAiGetLength/osAiGetStatus/osViSetSpecialFeatures (mirrors) — 2026-06-12
 - Increment: 4 files banked / 4 fns matched (delta: md5-candidate files 68→72; matched 75→79/2090 (~3.78%))
 - Quality: stuck-far 0 / permuter 0 / carried 1 (osAiSetFrequency — osViClock + rodata D_800D22A0 unplaced) / re-opened 0

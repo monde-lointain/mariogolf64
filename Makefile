@@ -149,7 +149,7 @@ $(BUILD_DIR)/$(ASSETS_DIR)/%.o: $(ASSETS_DIR)/%.bin
 # understands modern-only directives like .set gp=64 that raw asm uses).
 $(BUILD_DIR)/$(SRC_DIR)/%.o: $(SRC_DIR)/%.c
 	$(CC) -S $(CFLAGS) -o $@.s $<
-	tools/cc/as -EB -mips2 -I include -o $@.tmp $@.s
+	tools/cc/as -EB -mips2 -G 0 -I include -o $@.tmp $@.s
 	cp $@.tmp $@
 	$(STRIP) $@ -N dummy-symbol-name
 	rm $@.s $@.tmp
@@ -158,7 +158,7 @@ $(BUILD_DIR)/$(SRC_DIR)/%.o: $(SRC_DIR)/%.c
 # Pattern-rule specificity beats the generic src/% rule.
 $(BUILD_DIR)/$(SRC_DIR)/libultra/%.o: $(SRC_DIR)/libultra/%.c
 	$(CC) -S $(LIBULTRA_CFLAGS) -o $@.s $<
-	tools/cc/as -EB -mips2 -I include -o $@.tmp $@.s
+	tools/cc/as -EB -mips2 -G 0 -I include -o $@.tmp $@.s
 	cp $@.tmp $@
 	$(STRIP) $@ -N dummy-symbol-name
 	rm $@.s $@.tmp
@@ -168,7 +168,7 @@ $(BUILD_DIR)/$(SRC_DIR)/libultra/%.o: $(SRC_DIR)/libultra/%.c
 # generic src/% rule when both match.
 $(BUILD_DIR)/$(SRC_DIR)/libkmc/%.o: $(SRC_DIR)/libkmc/%.c
 	$(CC) -S $(LIBKMC_CFLAGS) -o $@.s $<
-	tools/cc/as -EB -mips2 -I include -o $@.tmp $@.s
+	tools/cc/as -EB -mips2 -G 0 -I include -o $@.tmp $@.s
 	cp $@.tmp $@
 	$(STRIP) $@ -N dummy-symbol-name
 	rm $@.s $@.tmp
@@ -177,7 +177,7 @@ $(BUILD_DIR)/$(SRC_DIR)/libkmc/%.o: $(SRC_DIR)/libkmc/%.c
 # behind #ifdef USE_EPI (see LIBNUSYS_CFLAGS). Pattern-rule specificity beats generic src/%.
 $(BUILD_DIR)/$(SRC_DIR)/libnusys/%.o: $(SRC_DIR)/libnusys/%.c
 	$(CC) -S $(LIBNUSYS_CFLAGS) -o $@.s $<
-	tools/cc/as -EB -mips2 -I include -o $@.tmp $@.s
+	tools/cc/as -EB -mips2 -G 0 -I include -o $@.tmp $@.s
 	cp $@.tmp $@
 	$(STRIP) $@ -N dummy-symbol-name
 	rm $@.s $@.tmp

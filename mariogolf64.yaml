@@ -182,7 +182,7 @@ segments:
       - [0x7EDB0, c, libultra/nintendo/pi/piacs]
       - [0x7EEA0, c, libultra/monegi/ai/aigetlen]
       - [0x7EEB0, c, libultra/monegi/ai/aigetstat]
-      - [0x7EEC0, asm]
+      - [0x7EEC0, c, libultra/monegi/ai/aisetfreq]
       - [0x7EFE0, c, libultra/monegi/ai/aisetnextbuf]
       - [0x7F080, asm]
       - [0x7F8B0, asm]
