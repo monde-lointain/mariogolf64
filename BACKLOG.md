@@ -300,6 +300,17 @@ v2 needs; clean mirror leaves remain the near-zero-risk default between classica
   **0 of 3 applied** (PO: apply none — #1 size-hint tooling declined; #2/#3 confirmatory). No
   carry-overs.
 
+- **Sprint 26: 2 files BANKED — `src/libnusys/mainlib/nucontrmbcheck.c` (`nuContRmbCheck`) +
+  `nucontqueryread.c` (`nuContQueryRead`), libnusys heterogeneous pair (jal-divergence/drop +
+  pack-split).** md5-candidate 41→43. **`nuContRmbCheck`**: near-verbatim/drop — upstream's
+  `osSetIntMask` critical section is absent from this ROM build (3 upstream jals → 1 ROM jal);
+  dropped `mask`/`osSetIntMask`×2, verbatim cp of remainder; disassembly confirmed 1 jal
+  (`nuSiSendMesg`). **`nuContQueryRead`**: verbatim pack-split — trivial 1-jal fn split out of
+  the 0x7E330 pack at rom 0x7E350; unnamed 16B sibling `func_800A2F50` stays asm. Both names
+  pre-curated in ghidra_symbols, zero new symbol adds, zero header copies. 0 iterations each.
+  seed 5 / banked 5pt. Retro: **0 of 0** (buffer "None new"). No carry-overs. **PO directive:
+  target ≥5pt per sprint going forward** — batch 2+ files per sprint consistently.
+
 - **Sprint 25: 1 file BANKED — `src/libnusys/mainlib/nucontdatalock.c` (`nuContDataLock` +
   `nuContDataUnLock`), libnusys recover-extern mirror.** md5-candidate 40→41. **Whole-file
   pack** — subseg 0x7E2D0 held exactly the two fns of one upstream file, so a single cohesive
@@ -310,6 +321,20 @@ v2 needs; clean mirror leaves remain the near-zero-risk default between classica
   lock macros in `nusys.h` → one symbol add + one yaml flip, verbatim cp, 0 iterations. Two
   `jal` both = osSetIntMask, reconciled clean (no jal-count flag). seed 5 / banked 5pt. Retro:
   **0 of 0** (suggestion buffer "None new"). No carry-overs.
+
+## PO ordering note (S26 retro — target ≥5pt per sprint; batch 2+ files consistently)
+
+PO directive: **commit at least 5pt per sprint going forward**. The mirror band now consistently
+yields 2–3pt leaves, so hitting 5pt means batching ≥2 files per sprint. Practical implications:
+- At the next gate, default to a 2-file minimum (heterogeneous pairs count — S26 proved they
+  work first-pass). Fill the 3–4 fn cap when the batch is homogeneous.
+- For the remaining pickable libnusys/libultra leaves, the easiest 5pt combos are: two
+  jal-mismatch or two recover-extern leaves (pts 2+3 or 3+3), or one recover-extern plus one
+  pack-split (2+3 or 3+3). `osGetTime` (pts 3, 3 recover-extern) + `__matherr` (pts 3, pack +
+  non16align + recover-extern) would combine at pts 6, but the `__matherr` non16align hazard
+  needs investigation at the gate (the non16align means we need to split away the hasm `__muldi3`
+  at the correct non-16-aligned boundary before flipping). The simpler path is `osGetTime` (pts
+  3) + the `nuContGBPakReadWrite` split (pts 3) = 6pt, or any two ≥2-pt leaves.
 
 ## PO ordering note (S16 retro — the false-clean class is closed; deeper nusys leaves now priced)
 

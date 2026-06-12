@@ -25,6 +25,18 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 26 — mirror: nuContRmbCheck + nuContQueryRead (libnusys jal-divergence/drop + pack-split) — 2026-06-12
+- Increment: 2 files banked / 2 fns matched (delta: md5-candidate files 41→43)
+- Quality: 0/0/0/0 (stuck-far/permuter/carried/re-opened) — both first-pass; 0 iterations; goal met first pass
+- Seed: committed 5pt; banked 5pt; regime mirror   (v1 — story points; realized tier is v2, untouched this pure-mirror sprint)
+- What helped: **both leaves were fully pre-wired** — names pre-curated in ghidra_symbols, all refs placed, all constants/types in nusys.h → zero new symbol adds, zero header copies. `nuContRmbCheck` used the S18 near-verbatim/drop pattern exactly: disassemble confirmed 1 jal (nuSiSendMesg), drop `osSetIntMask`×2 + `mask`, verbatim cp of the remainder. `nuContQueryRead` used the S10 pack-split pattern: mechanical split at rom 0x7E350, trivial 1-jal upstream (`nuSiSendMesg(NU_CONT_QUERY_MSG, NULL)`), unnamed 16B sibling `func_800A2F50` stays asm. Heterogeneous hazard types (jal-divergence + pack) but both are proven sub-cases — no novel friction, no iteration needed on either.
+- Friction: none — the `jal-count-mismatch:3vs1` advisory for `nuContRmbCheck` was exactly what it said: 3 upstream jals (nuSiSendMesg + osSetIntMask×2), 1 in ROM (nuSiSendMesg only). Disassembly took one MCP call to confirm; the drop was three lines.
+- Applied: 0 of 0 (suggestion buffer recorded "None new"; PO: apply none)
+- PO directive (S26 retro): **target ≥5pt per sprint going forward** — batch 2+ files per sprint consistently. Recorded in BACKLOG.md ordering note and VELOCITY.md.
+- Carry-over: none
+
+---
+
 ## Sprint 25 — mirror: nuContDataLock/UnLock (libnusys recover-extern, whole-file pack) — 2026-06-12
 - Increment: 1 file banked / 2 fns matched (delta: md5-candidate files 40→41)
 - Quality: 0/0/0/0 (stuck-far/permuter/carried/re-opened) — verbatim mirror, 0 iterations; goal met first pass
