@@ -25,6 +25,15 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 21 — mirror: nuGfxRetraceWait (zero-enabler clean libnusys cp) — 2026-06-12
+- Increment: 1 file banked / 1 fn matched (delta: md5-candidate files 36→37)
+- Quality: 0/0/0/0 (stuck-far/permuter/carried/re-opened) — verbatim mirror, 0 iterations; goal met first pass
+- Seed: committed 2pt; banked 2pt; regime mirror   (v1 — story points; realized tier is v2, untouched this pure-mirror sprint)
+- What helped: pick_target reported `-` (no hazard) and was right — first genuinely zero-enabler clean cp since the libnusys band opened (S15). Warm nuGfx band (5 banked siblings), `nusys.h` + all refs pre-placed, name pre-curated → one yaml flip the only enabler. Open-band fast-path applied cleanly (no manual re-grep).
+- Friction: none. Only friction was conceptual — the S11 "warm pool mined out" BACKLOG note is stale (predates the S15 libnusys unlock) and could mislead a future gate into assuming a known-edit is always required.
+- Applied: 1 of 1 — #1 (refresh BACKLOG PO note: libnusys mirror band still yields zero-enabler clean cp's, not just recover-extern fillers)
+- Carry-over: none
+
 ## Sprint 20 — mirror: nuCont recover-extern pair (nuContRmbStart + nuContGBPakOpen) — 2026-06-12
 - Increment: 2 files banked / 2 fns matched (delta: ~1.72% → ~1.82%; md5-candidate files 34→36)
 - Quality: 0/0/0/0 (stuck-far/permuter/carried/re-opened) — both verbatim mirrors, 0 iterations; goal met first pass

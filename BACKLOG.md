@@ -256,6 +256,14 @@ v2 needs; clean mirror leaves remain the near-zero-risk default between classica
   drift (~250 Ghidra-ahead; 5 decomp-ahead build-critical) makes full `make sync-names`
   destructive — gate-time name refresh stays surgical until reconciled.**
 
+- **Sprint 21: 1 file BANKED — `src/libnusys/mainlib/nugfxretracewait.c` (`nuGfxRetraceWait`),
+  libnusys clean mirror.** md5-candidate 36→37. First genuinely **zero-enabler clean cp** since
+  the libnusys band opened (S15): pick reported `-` (no hazard) and was right — warm nuGfx band
+  (5 siblings), `nusys.h` + all refs pre-placed, name pre-curated → **one yaml flip the only
+  enabler** (zero symbol add, zero header copy, zero known-edit). Verbatim cp, 0 iterations.
+  seed 2 / banked 2pt. Retro: **1 of 1 applied** — #1 refreshed the stale S11 "warm pool mined
+  out" note below. No carry-overs.
+
 ## PO ordering note (S16 retro — the false-clean class is closed; deeper nusys leaves now priced)
 
 The S16 grep fix re-priced the nuGfx*FuncSet leaves (now pts-3 recover-extern, was false-clean
@@ -325,12 +333,17 @@ for the next gate (S12 retro #2/#3, considered-but-not-applied — guidance, not
 **classical track**; the mirror track stays seed-only (still a point mass). The classical loop
 is proven both mechanically (S9) and with real variance (S11). Two live ordering facts for the
 next gate:
-- **The warm clean-singleton mirror pool is mined out.** At the S11 gate every top mirror
-  candidate carried a *blocking* hazard: `needs-header` (audio band, `guRandom`, `sprintf`),
-  `file-static` (`sprintf`, `osSpTaskLoad`), `defines-data` (`__osDequeueThread`), or a
-  `refs-unplaced` data extern needing asm-data-recovery (`osYieldThread`/`__osRunQueue`@0x800C8228
-  — already recovered at the S11 gate, ready to use, `osGetTime`, `osEPiLinkHandle`). The
-  cheapest *remaining* mirror is now a recover-one-extern flip, not a zero-enabler `cp`.
+- **The *libultra* warm clean-singleton mirror pool is mined out — but the libnusys band is
+  not (UPDATED S21).** At the S11 gate every top *libultra* mirror carried a *blocking* hazard:
+  `needs-header` (audio band, `guRandom`, `sprintf`), `file-static` (`sprintf`, `osSpTaskLoad`),
+  `defines-data` (`__osDequeueThread`), or a `refs-unplaced` data extern needing asm-data-recovery
+  (`osYieldThread`/`__osRunQueue`@0x800C8228 — recovered at the S11 gate, `osGetTime`,
+  `osEPiLinkHandle`). **This note predates the S15 libnusys-band unlock.** The libnusys mirror band
+  (nuGfx*/nuCont*) still yields **zero-enabler clean cp's** — S21 banked `nuGfxRetraceWait` with
+  one yaml flip and no symbol add / header copy / known-edit (pick reported `-` no-hazard and was
+  right). So don't assume the cheapest remaining mirror is always a recover-extern or known-edit
+  flip: re-check `pick_target.py`'s hazard column each gate — a `-` libnusys leaf in a warm band
+  is a true zero-enabler `cp`. The *libultra* recover-extern fillers (above) remain valid options.
 - **Classical is now a first-class option, not just a spike.** With v2 calibrating, continue
   pulling **non-trivial** small classical leaves (real arithmetic/branches/locals; the
   `intrinsic-likely` hazard filters register/FPU shims) to grow the realized-tier signal and
