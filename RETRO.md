@@ -25,6 +25,15 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 18 — mirror: nuContInit (libnusys near-verbatim, drop-one-line) — 2026-06-12
+- Increment: 1 file banked / 1 fn matched (delta: ~1.53% → ~1.58%; md5-candidate files 30→31)
+- Quality: 0/0/0/0 (stuck-far/permuter/carried/re-opened) — near-verbatim mirror, 0 iterations; goal met first pass
+- Seed: committed 2pt; banked 2pt; regime mirror   (v1; mirror track seed-only — realized is v2/classical)
+- What helped: the S16 gate asm-data-recovery check (disassemble before declaring clean) generalized perfectly — it caught the upstream-vs-ROM call divergence (upstream calls 4 managers, ROM jals only 3; no `nuContPakMgrInit` in this build). Handled as a near-verbatim mirror: copy upstream verbatim, drop the one diverging line, bank on full-make SHA. Deterministic from asm, no iteration. The 3 retained callees + nusys.h all pre-placed → one yaml flip the only enabler.
+- Friction: pick_target reported nuContInit no-hazard — its ref-grep flags data refs, not jal callees, so the build divergence was invisible until the gate disassembled. Resolved by the applied #1 hazard.
+- Applied: 2 of 2 (PO: both) — #1 new `jal-count-mismatch:<C>vs<asm>` hazard in pick_target.py (counts upstream calls vs ROM jals, strips dead `#ifdef _DEBUG`/`_FINALROM` blocks; verified it flags nuContInit 4vs3); #2 CLAUDE.md near-verbatim-mirror (upstream-vs-ROM call divergence) bullet alongside the file-scope-static-drop rule.
+- Carry-over: none
+
 ## Sprint 17 — mirror: nuContGBPak{GetStatus,Power,ReadID} (libnusys sibling-trio) — 2026-06-11
 - Increment: 3 files banked / 3 fns matched (delta: ~1.39% → ~1.53%; md5-candidate files 27→30)
 - Quality: 0/0/0/0 (stuck-far/permuter/carried/re-opened) — all verbatim mirrors, 0 iterations; goal met first pass

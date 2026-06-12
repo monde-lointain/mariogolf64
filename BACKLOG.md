@@ -219,6 +219,16 @@ v2 needs; clean mirror leaves remain the near-zero-risk default between classica
   applied** (PO: log only — all 3 buffered items confirmatory, already covered by S14/S16
   doctrine). No carry-overs.
 
+- **Sprint 18: 1 file BANKED — `src/libnusys/mainlib/nucontinit.c` (`nuContInit`), libnusys
+  near-verbatim mirror (drop-one-line).** md5-candidate 30→31; matched 32→33/2090 (~1.58%).
+  First **near-verbatim mirror sub-case**: upstream calls 4 managers but this ROM's asm has
+  only **3 jals** — `nuContPakMgrInit` is absent from this build (an upstream-vs-ROM **build
+  divergence**, not a missing symbol/def). Copied upstream verbatim, dropped the diverging line,
+  banked on full-make SHA, 0 iteration. pick_target reported no-hazard (its ref-grep counts data
+  refs, not jal callees) — caught at the gate by disassembling. seed 2 / banked 2pt. Retro:
+  **2 of 2 applied** — #1 new `jal-count-mismatch` hazard in pick_target.py (counts upstream
+  calls vs ROM jals; verified flags 4vs3), #2 CLAUDE.md near-verbatim-mirror bullet. No carry-overs.
+
 ## PO ordering note (S16 retro — the false-clean class is closed; deeper nusys leaves now priced)
 
 The S16 grep fix re-priced the nuGfx*FuncSet leaves (now pts-3 recover-extern, was false-clean

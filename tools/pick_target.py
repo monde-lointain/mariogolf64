@@ -8,8 +8,9 @@ files from mariogolf64.yaml + asm/ + src/, flags upstream-mirror availability
 an enabler-free flip), and hazards (file-scope static, file-scope data-global
 definition, refs-unplaced = a data extern referenced but absent from both name
 files, non-16-aligned subseg, multi-function pack, needs-header = an upstream
-include unresolved under the project -I set), and prints a smallest-first table
-for `/sprint-plan`.
+include unresolved under the project -I set, jal-count-mismatch = the upstream
+.c's call count disagrees with the ROM fn's jal count = a build divergence =>
+near-verbatim mirror), and prints a smallest-first table for `/sprint-plan`.
 
 Usage:
   venv/bin/python3 tools/pick_target.py [--lib SUBSTR] [-n N] [--include-stuck] [--json]
@@ -343,6 +344,97 @@ def signature_hint(rom_off, primary, sig_index):
         if len(bases) >= 3:
             break
     return f"maybe-upstream:{lib}:" + ",".join(bases)
+
+
+# --- Upstream-vs-ROM call-divergence (the S18 nuContInit catch) ----------------------
+#
+# A mapped upstream .c can disagree with THIS ROM's build: nuContInit's upstream calls four
+# managers, but the ROM's asm has only three jals (no nuContPakMgrInit) — a verbatim mirror
+# would emit an extra call and never match. That is not a missing symbol (refs_unplaced) nor a
+# missing definition (defines_data_globals); it is a build divergence. Flag it advisory so the
+# gate reconciles the upstream call list against the ROM's jals before declaring a clean mirror
+# (and routes it to the near-verbatim "drop-one-line" mirror sub-case). Count-based, not
+# set-based: counting raw jals (symbolic AND func_) sidesteps the symbolization mismatch a
+# name-set diff would hit. Dead `#ifdef _DEBUG` / `#ifndef _FINALROM` / `#if 0` blocks are
+# stripped first (their debug calls compile out of the real build); macro/inlined calls can
+# still skew the count, so it stays advisory — the gate confirms by disassembling.
+
+_DEAD_OPEN_RE = re.compile(r"#\s*if(?:def\s+_DEBUG|ndef\s+_FINALROM|\s+0)\b")
+_PP_IF_RE = re.compile(r"#\s*if")
+_PP_ENDIF_RE = re.compile(r"#\s*endif")
+
+
+def _strip_dead_blocks(text):
+    """Drop `#ifdef _DEBUG` / `#ifndef _FINALROM` / `#if 0` regions (matched #endif, nested)."""
+    out, in_dead, nest = [], False, 0
+    for line in text.splitlines():
+        s = line.lstrip()
+        if in_dead:
+            if _PP_IF_RE.match(s):
+                nest += 1
+            elif _PP_ENDIF_RE.match(s):
+                if nest == 0:
+                    in_dead = False
+                else:
+                    nest -= 1
+            continue
+        if _DEAD_OPEN_RE.match(s):
+            in_dead, nest = True, 0
+            continue
+        out.append(line)
+    return "\n".join(out)
+
+
+def _upstream_body(up_cpath, primary):
+    """The brace-matched body of `primary` in its upstream .c, or None."""
+    try:
+        text = open(up_cpath, errors="ignore").read()
+    except OSError:
+        return None
+    for name, body in _iter_upstream_functions(text):
+        if name == primary:
+            return body
+    return None
+
+
+def _asm_jal_count(rom_off, primary):
+    """Count of `jal <name>` in `primary`'s body in asm/<ROM>.s (incl. func_ targets), or None
+    when the asm is absent (e.g. the subseg was already flipped to c)."""
+    path = os.path.join(ROOT, "asm", f"{rom_off:X}.s")
+    if not os.path.exists(path):
+        return None
+    in_fn, n = False, 0
+    with open(path) as f:
+        for line in f:
+            m = GLABEL_RE.match(line)
+            if m:
+                if in_fn:
+                    break
+                in_fn = m.group(1) == primary
+                continue
+            if not in_fn:
+                continue
+            if line.lstrip().startswith("endlabel"):
+                break
+            if CALL_INSN_RE.search(line):
+                n += 1
+    return n
+
+
+def call_divergence(rom_off, primary, up_cpath):
+    """Advisory `jal-count-mismatch:<C>vs<asm>` when the upstream call count for `primary` differs
+    from the ROM fn's jal count — an upstream-vs-ROM build divergence. None when they agree, the
+    body/asm is unreadable, or the count can't be taken. Advisory only; the gate confirms."""
+    body = _upstream_body(up_cpath, primary)
+    if body is None:
+        return None
+    n_asm = _asm_jal_count(rom_off, primary)
+    if n_asm is None:
+        return None
+    n_c = len([n for n in C_CALL_RE.findall(_strip_dead_blocks(body)) if n not in _C_NONCALL])
+    if n_c == n_asm:
+        return None
+    return f"jal-count-mismatch:{n_c}vs{n_asm}"
 
 
 def has_file_scope_static(cpath):
@@ -723,6 +815,9 @@ def build_rows(args, upstream_index, carried, sig_index):
             if missing:
                 hazards.append("needs-header:" + ",".join(missing))
                 blocked = any(include_is_blocked(inc) for inc in missing)
+            divergence = call_divergence(off, primary, up_path)
+            if divergence:
+                hazards.append(divergence)  # near-verbatim mirror: reconcile call list at the gate
             band = "warm" if band_is_warm(band_mirror_dir(up_lib, up_path)) else "cold"
         elif kind == "asm-flip" and primary.startswith("func_"):
             # No name-index hit + un-named: it may still be an un-named SDK mirror (the S13
