@@ -380,13 +380,19 @@ def signature_hint(rom_off, primary, sig_index):
 # stripped first (their debug calls compile out of the real build); macro/inlined calls can
 # still skew the count, so it stays advisory — the gate confirms by disassembling.
 
-_DEAD_OPEN_RE = re.compile(r"#\s*if(?:def\s+_DEBUG|ndef\s+_FINALROM|\s+0)\b")
+_DEAD_OPEN_RE = re.compile(r"#\s*if(?:def\s+(?:_DEBUG|NU_DEBUG)|ndef\s+_FINALROM|\s+0)\b")
 _PP_IF_RE = re.compile(r"#\s*if")
 _PP_ENDIF_RE = re.compile(r"#\s*endif")
+_STR_LIT_RE = re.compile(r'"[^"\\]*(?:\\.[^"\\]*)*"')
+
+
+def _strip_string_literals(text):
+    """Replace string literal contents with empty quotes to prevent C_CALL_RE false matches."""
+    return _STR_LIT_RE.sub('""', text)
 
 
 def _strip_dead_blocks(text):
-    """Drop `#ifdef _DEBUG` / `#ifndef _FINALROM` / `#if 0` regions (matched #endif, nested)."""
+    """Drop `#ifdef _DEBUG` / `#ifdef NU_DEBUG` / `#ifndef _FINALROM` / `#if 0` regions (matched #endif, nested)."""
     out, in_dead, nest = [], False, 0
     for line in text.splitlines():
         s = line.lstrip()
@@ -452,7 +458,7 @@ def call_divergence(rom_off, primary, up_cpath):
     n_asm = _asm_jal_count(rom_off, primary)
     if n_asm is None:
         return None
-    n_c = len([n for n in C_CALL_RE.findall(_strip_dead_blocks(body)) if n not in _C_NONCALL])
+    n_c = len([n for n in C_CALL_RE.findall(_strip_string_literals(_strip_dead_blocks(body))) if n not in _C_NONCALL])
     if n_c == n_asm:
         return None
     return f"jal-count-mismatch:{n_c}vs{n_asm}"
@@ -678,7 +684,7 @@ def calls_unplaced(cpath, primary, placed):
     except OSError:
         return []
     defined = {name for name, _ in _iter_upstream_functions(text)}
-    body = _strip_dead_blocks(_strip_comments(text))
+    body = _strip_string_literals(_strip_dead_blocks(_strip_comments(text)))
     called = {n for n in C_CALL_RE.findall(body) if n not in _C_NONCALL}
     return sorted(n for n in called if n not in placed and n not in defined)
 

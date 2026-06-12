@@ -25,6 +25,17 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 28 — mirror: nuContGBPakReadWrite+nuContGBPakCheckConnector (libnusys, pack-split+NU_DEBUG) + memset+setmem (libkmc, whole-file pack+memory.h) — 2026-06-12
+- Increment: 3 files banked / 4 fns matched (delta: md5-candidate files 46→49)
+- Quality: 0/0/0/0 (stuck-far/permuter/carried/re-opened) — all first-pass; 0 iterations; goal met
+- Seed: committed 6pt; banked 6pt; regime mirror   (v1 — story points; realized tier is v2, untouched this pure-mirror sprint)
+- What helped: **NU_DEBUG block is a preprocessor conditional, not a manual drop** — the ROM build doesn't define NU_DEBUG, so the `#ifdef NU_DEBUG` osSyncPrintf block compiles out of the verbatim cp cleanly; no explicit line removal (contrast S26 near-verbatim/drop which required dropping `osSetIntMask` lines). **memory.h companion copy** straightforward: libkmc `memset.c`'s `#include <memory.h>` resolved by copying `include/libkmc/memory.h` from the upstream; self-contained (`size_t` typedef + memory fn decls). **FAST_SPEED=1 path consistent** — libkmc's fast branch matched without iteration. libkmc `-O` profile auto-applied by Makefile. All 4 fns verbatim cp, 0 iterations; all names pre-curated in ghidra_symbols; no new symbol_addrs.txt additions needed.
+- Friction: **`pick_target.py` `jal-count-mismatch:5vs1` false alarm** on `nuContGBPakReadWrite` — two compounding bugs: (1) `_DEAD_OPEN_RE` only stripped `#ifdef _DEBUG`/`#ifndef _FINALROM`/`#if 0`, missing `#ifdef NU_DEBUG`; (2) `C_CALL_RE` matched `address(`/`size(` inside osSyncPrintf format-string literals. Combined: 5 = osSyncPrintf×2 + address×1 (str) + size×1 (str) + nuSiSendMesg×1. Fixed at retro: `NU_DEBUG` added to `_DEAD_OPEN_RE`; `_strip_string_literals()` helper added and applied at both `call_divergence` and `calls_unplaced`. After fix `osSetTimer` correctly shows `5vs2`.
+- Applied: 1 of 1: #1 (fix pick_target.py jal-count-mismatch — add NU_DEBUG stripping + strip string literals before C_CALL_RE)
+- Carry-over: none
+
+---
+
 ## Sprint 27 — mirror: __osSetGlobalIntMask + __osResetGlobalIntMask + osGetTime (libultra recover-extern, 2 new bands) — 2026-06-12
 - Increment: 3 files banked / 3 fns matched (delta: md5-candidate files 43→46)
 - Quality: 0/0/0/0 (stuck-far/permuter/carried/re-opened) — all first-pass; 0 iterations; goal met first pass
