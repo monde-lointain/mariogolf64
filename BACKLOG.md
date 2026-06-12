@@ -53,6 +53,16 @@ count emerges.
   Sprint-3's `needs-header` hazard auto-steered triage past `guRandom`/audio/`osSyncPrintf` to
   the clean pair. Retro: 0 of 3 suggestions applied (PO: Apply none). No carry-overs.
 
+- **Sprint 5: 2 files BANKED — `src/libultra/monegi/vi/viswapbuf.c` (`osViSwapBuffer`) +
+  `visetevent.c` (`osViSetEvent`), libultra upstream-mirror.** md5-candidate 12→14; matched
+  14→16/2090 (~0.77%). 2nd sibling-pair, 3rd zero-enabler sprint off a warm band: the `monegi/vi/`
+  band (opened Sprint-0 `vigetcurrcontext`, Sprint-3 `visetmode`) pre-resolved `__osViNext` + the
+  int-disable pair + all 4 headers — **zero new symbols, zero header copies**, two yaml flips.
+  Both byte-identical verbatim copies, first-pass clean (0 iteration). Retro: **2 of 3 applied** —
+  #1 **band-warm boost** (Sprint-4 #1, PO-deferred, now validated twice) + #2 **`defines-data`
+  hazard** both landed in `tools/pick_target.py`; the latter caught `__osDequeueThread`/`thread.c`
+  as a false-clean (re-defines the placed `__osThreadTail` extern + 4 siblings). No carry-overs.
+
 ## Enabler items (gate-time, agent-performed since 2026-06-11)
 
 These are the gate-time enabler actions a sprint may need before its execution middle can run
