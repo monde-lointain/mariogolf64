@@ -44,6 +44,15 @@ count emerges.
   the audio band, `osSyncPrintf`), automating the manual include-triage of the last two sprints.
   No carry-overs.
 
+- **Sprint 4: 2 files BANKED — `src/libultra/monegi/si/sirawread.c` (`__osSiRawReadIo`) +
+  `sirawwrite.c` (`__osSiRawWriteIo`), libultra upstream-mirror.** md5-candidate 10→12; matched
+  12→14/2090 (~0.67%). First **sibling-pair** sprint (2 files at one-file cost): the `monegi/si/`
+  band was already open (Sprint-0's `si.c`/`__osSiDeviceBusy`), so both leaves' callee +
+  companion headers (`siint.h`/`assert.h`/`PR/rcp.h`) were pre-resolved — **zero new symbols,
+  zero header copies**, two yaml flips the only enabler. Both first-pass clean (0 iteration).
+  Sprint-3's `needs-header` hazard auto-steered triage past `guRandom`/audio/`osSyncPrintf` to
+  the clean pair. Retro: 0 of 3 suggestions applied (PO: Apply none). No carry-overs.
+
 ## Enabler items (gate-time, agent-performed since 2026-06-11)
 
 These are the gate-time enabler actions a sprint may need before its execution middle can run
