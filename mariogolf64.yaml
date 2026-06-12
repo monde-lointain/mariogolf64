@@ -316,6 +316,7 @@ segments:
       - [0xAD590, rodata]
       - [0xAD5A0, rodata]
       - [0xAD5E0, rodata]
+      - [0xAD6A0, .rodata, libultra/monegi/ai/aisetfreq]
       - [0xAD6B0, rodata]
       - [0xAD6F0, rodata]
       - [0xAD8C0, rodata]
