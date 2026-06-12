@@ -20,6 +20,7 @@ gate calls, mirroring marioparty7's pick_target.py.
 import argparse
 import glob
 import json
+import math
 import os
 import re
 import sys
@@ -28,6 +29,24 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 YAML = os.path.join(ROOT, "mariogolf64.yaml")
 LIBULTRA = os.path.expanduser("~/development/repos/libultra_modern/src")
 LIBKMC = os.path.expanduser("~/development/repos/libkmc/src")
+# The game also links libnusys / libmus / libnaudio (KMC N64 SDK). Their functions are
+# mirrorable verbatim exactly like libultra/libkmc; scanning their source here lets the
+# name index map the *named* ones (nuGfxSwapCfb, nuContRamWrite, …) to an upstream instead
+# of mislabeling them `none`. The un-named `func_<vram>` mirrors are caught separately by
+# the signature matcher (signature_hint). Roots point at each lib's `.c` source tree.
+_N64SDK = os.path.expanduser("~/development/repos/n64sdkmod/packages")
+LIBNUSYS = os.path.join(_N64SDK, "libnusys/usr/src/PR/libsrc/nusys-2.07")
+LIBNAUDIO = os.path.join(_N64SDK, "libnaudio/usr/src/PR/libsrc")
+LIBMUS = os.path.join(_N64SDK, "libmus/usr/src/PR/libsrc/libmus/src")
+# lib-name -> source tree root. The single source of truth for build_upstream_index,
+# band_mirror_dir, and the signature index. Order = name-collision precedence (first wins).
+UPSTREAM_TREES = (
+    ("libultra", LIBULTRA),
+    ("libkmc", LIBKMC),
+    ("libnusys", LIBNUSYS),
+    ("libnaudio", LIBNAUDIO),
+    ("libmus", LIBMUS),
+)
 BACKLOG = os.path.join(ROOT, "BACKLOG.md")
 # The two disjoint symbol-name files. A symbol absent from BOTH gets no linker address; for a
 # *data* extern that means an undefined reference (see refs_unplaced). Functions are exempt —
@@ -154,7 +173,7 @@ def intrinsic_likely(rom_off, primary):
 def build_upstream_index():
     """Map upstream function name -> (lib, path), scanning libultra/libkmc once."""
     index = {}
-    for lib, tree in (("libultra", LIBULTRA), ("libkmc", LIBKMC)):
+    for lib, tree in UPSTREAM_TREES:
         if not os.path.isdir(tree):
             continue
         for cpath in glob.glob(os.path.join(tree, "**", "*.c"), recursive=True):
@@ -166,6 +185,161 @@ def build_upstream_index():
             for m in UPSTREAM_DEF_RE.finditer(text):
                 index.setdefault(m.group(1), (lib, cpath))
     return index
+
+
+# --- Signature matcher (un-named func_<vram> mirror detection) -----------------------
+#
+# build_upstream_index() is keyed on the curated *name*, so an SDK function that splat left
+# as `func_<vram>` (no Ghidra name yet) never maps — it falls out as `upstream: none` and gets
+# mislabeled a classical leaf. That mislabel is what burned Sprint 13 (osViSetYScale and
+# __osPfsSelectBank both surfaced as "classical"). The fix, modeled on coddog's register-
+# stripped opcode signature but done WITHOUT compiling the SDK trees: compare the target's
+# *callee set* (its `jal` targets, already symbolic in the asm) against every SDK source
+# function's call set, weighted by inverse document frequency. A rare callee (__osContRamWrite,
+# called by a handful of pfs fns) is near-decisive; a common one (the __osDisableInt/
+# __osRestoreInt int-disable pair, in dozens of fns) contributes little — so a unique-callee
+# target gets one confident hit and a common-callee target (the vi setters) gets a correctly
+# *ambiguous* short list. The result is advisory: a `maybe-upstream:<lib>:<files>` hazard that
+# tells the gate to asm-vs-upstream-check before committing a classical framing — it never
+# silently reclassifies. Constants are a weak secondary signal (SDK C uses macros, not raw
+# numbers), so callees carry the verdict.
+
+CALL_INSN_RE = re.compile(r"\bjal\s+([A-Za-z_]\w+)")
+# Immediate-bearing ALU/load-imm ops; the operand we want is the trailing immediate literal.
+IMM_INSN_RE = re.compile(
+    r"\b(?:addiu|ori|andi|xori|lui|li|slti|sltiu|daddiu)\b.*?(-?0x[0-9A-Fa-f]+)\s*$")
+# C identifiers used as call targets: `name(`. Excludes control keywords (see _C_NONCALL).
+C_CALL_RE = re.compile(r"\b([A-Za-z_]\w+)\s*\(")
+C_INT_RE = re.compile(r"\b(0x[0-9A-Fa-f]+|\d+)\b")
+_C_NONCALL = {
+    "if", "for", "while", "switch", "return", "sizeof", "do", "else", "case",
+    "defined", "OS_LOG_FLOAT", "assert",
+}
+# Stack-frame / register-save offsets dominate addiu/sw immediates and carry no identity;
+# ignore them so the constant signal isn't pure noise. (Kept tiny — callees do the real work.)
+_FRAME_IMMS = {"0x10", "0x14", "0x18", "0x1c", "0x20", "0x24", "0x28", "-0x10",
+               "-0x14", "-0x18", "-0x1c", "-0x20", "-0x24", "-0x28"}
+
+
+def _asm_signature(rom_off, primary):
+    """(callee set, constant set) for the target fn from asm/<ROM>.s. Callees exclude internal
+    `func_*`/`.L*` targets (only symbolic SDK-ish names carry cross-build identity)."""
+    path = os.path.join(ROOT, "asm", f"{rom_off:X}.s")
+    if not os.path.exists(path):
+        return set(), set()
+    callees, consts = set(), set()
+    in_fn = False
+    with open(path) as f:
+        for line in f:
+            m = GLABEL_RE.match(line)
+            if m:
+                if in_fn:
+                    break
+                in_fn = m.group(1) == primary
+                continue
+            if not in_fn:
+                continue
+            if line.lstrip().startswith("endlabel"):
+                break
+            cm = CALL_INSN_RE.search(line)
+            if cm and not cm.group(1).startswith("func_"):
+                callees.add(cm.group(1))
+            im = IMM_INSN_RE.search(line)
+            if im and im.group(1).lower() not in _FRAME_IMMS:
+                consts.add(im.group(1).lower())
+    return callees, consts
+
+
+def _c_signature(body):
+    """(callee set, constant set) for an SDK function body (C source)."""
+    callees = {n for n in C_CALL_RE.findall(body) if n not in _C_NONCALL}
+    consts = {c.lower() for c in C_INT_RE.findall(body) if c.lower() not in _FRAME_IMMS}
+    return callees, consts
+
+
+def _iter_upstream_functions(text):
+    """Yield (name, body) for each top-level function in an SDK .c, body = brace-matched."""
+    for m in UPSTREAM_DEF_RE.finditer(text):
+        brace = text.find("{", m.end() - 1)
+        if brace < 0:
+            continue
+        depth, i = 0, brace
+        while i < len(text):
+            if text[i] == "{":
+                depth += 1
+            elif text[i] == "}":
+                depth -= 1
+                if depth == 0:
+                    break
+            i += 1
+        yield m.group(1), text[brace:i + 1]
+
+
+def build_signature_index():
+    """All SDK functions as (lib, basename, name, callees, consts) + the callee document
+    frequency (how many SDK fns call each name) for IDF weighting. One pass over the trees."""
+    entries = []
+    df = {}
+    for lib, tree in UPSTREAM_TREES:
+        if not os.path.isdir(tree):
+            continue
+        for cpath in glob.glob(os.path.join(tree, "**", "*.c"), recursive=True):
+            try:
+                with open(cpath, errors="ignore") as f:
+                    text = f.read()
+            except OSError:
+                continue
+            base = os.path.splitext(os.path.basename(cpath))[0]
+            for name, body in _iter_upstream_functions(text):
+                callees, consts = _c_signature(body)
+                callees.discard(name)  # ignore self-recursion
+                if not callees:
+                    continue
+                entries.append((lib, base, name, callees, consts))
+                for c in callees:
+                    df[c] = df.get(c, 0) + 1
+    return entries, df
+
+
+def signature_hint(rom_off, primary, sig_index):
+    """Advisory `maybe-upstream:<lib>:<f1>[,<f2>…]` hazard for an un-named candidate, or None.
+    Scores each SDK fn by IDF-weighted shared-callee mass over the target's total callee mass;
+    a small constant-overlap bonus breaks ties. Returns the top matches above a confidence
+    floor — the gate confirms by reading the upstream (never a silent reclassification)."""
+    entries, df = sig_index
+    t_callees, t_consts = _asm_signature(rom_off, primary)
+    if not t_callees:
+        return None  # pure leaf / only internal calls — not signature-able this way
+    n_docs = max(len(entries), 1)
+    weight = {c: math.log(1 + n_docs / (1 + df.get(c, 0))) for c in t_callees}
+    total = sum(weight.values()) or 1.0
+    scored = []
+    for lib, base, name, callees, consts in entries:
+        shared = t_callees & callees
+        if not shared:
+            continue
+        score = sum(weight[c] for c in shared) / total
+        if t_consts and consts:
+            score += 0.15 * len(t_consts & consts) / len(t_consts)
+        scored.append((score, lib, base, name))
+    if not scored:
+        return None
+    scored.sort(reverse=True)
+    best = scored[0][0]
+    if best < 0.5:
+        return None  # too weak to be worth the gate's attention
+    # Keep candidates within 85% of the top score (the ambiguous-tie short list).
+    lib = scored[0][1]
+    bases, seen = [], set()
+    for score, l, base, name in scored:
+        if l != lib or score < best * 0.85:
+            continue
+        if base not in seen:
+            seen.add(base)
+            bases.append(base)
+        if len(bases) >= 3:
+            break
+    return f"maybe-upstream:{lib}:" + ",".join(bases)
 
 
 def has_file_scope_static(cpath):
@@ -301,7 +475,7 @@ def recover_unplaced_vram(rom_off):
 
 def band_mirror_dir(lib, up_path):
     """Project mirror directory for an upstream file: src/lib<...>/<upstream-rel-dir>."""
-    tree = LIBULTRA if lib == "libultra" else LIBKMC
+    tree = dict(UPSTREAM_TREES).get(lib, LIBULTRA)
     rel = os.path.relpath(up_path, tree)
     return os.path.join(ROOT, "src", lib, os.path.dirname(rel))
 
@@ -433,7 +607,7 @@ def carry_over_names():
     return names
 
 
-def build_rows(args, upstream_index, carried):
+def build_rows(args, upstream_index, carried, sig_index):
     subs = parse_subsegs()
     rows = []
     for i, (off, typ, path) in enumerate(subs):
@@ -497,6 +671,12 @@ def build_rows(args, upstream_index, carried):
                 hazards.append("needs-header:" + ",".join(missing))
                 blocked = any(include_is_blocked(inc) for inc in missing)
             band = "warm" if band_is_warm(band_mirror_dir(up_lib, up_path)) else "cold"
+        elif kind == "asm-flip" and primary.startswith("func_"):
+            # No name-index hit + un-named: it may still be an un-named SDK mirror (the S13
+            # trap). Run the signature matcher; an advisory hit flags the gate to verify.
+            hint = signature_hint(off, primary, sig_index)
+            if hint:
+                hazards.append(hint)
 
         if args.lib and args.lib not in (path or "") and not any(args.lib in n for n in fns):
             continue
@@ -527,7 +707,8 @@ def main():
     ap.add_argument("--json", action="store_true")
     args = ap.parse_args()
 
-    rows = build_rows(args, build_upstream_index(), carry_over_names())
+    rows = build_rows(args, build_upstream_index(), carry_over_names(),
+                      build_signature_index())
     if args.json:
         print(json.dumps(rows, indent=1))
         return

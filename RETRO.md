@@ -25,6 +25,17 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 13 — mirror: osViSetYScale (vi band; un-named-mirror trap → pick_target fix) — 2026-06-11
+- Increment: 1 file banked / 1 fn matched (delta: ~1.15% → ~1.20%; md5-candidate files 22→23)
+- Quality: 0/0/0/0 (stuck-far/permuter/carried/re-opened) — verbatim mirror, 0 iterations; goal met first pass
+- Seed: committed 1pt; banked 1pt; regime **mirror** (warm vi-band; **seed-miss: pick said 5/classical, corrected to 1/mirror at the gate**; mirror track seed-only, realized tier is v2/classical)
+- What helped: the gate's mandatory asm-vs-upstream check — `func_800AD370` ranked as a "non-trivial classical leaf" (the PO's target for v2 residual signal) but its asm (`swc1 fs0,0x24` + `ori 0x4` under int-disable) matched `libultra_modern/.../visetyscale.c` byte-for-shape → revealed as **osViSetYScale**, an un-named mirror. Caught BEFORE a wasted classical hand-decomp. All externs + all 4 headers pre-placed (6th vi-band mirror) → verbatim cp, zero header copies, one symbol add. PO interrupt pointed at libnusys/libmus/libnaudio + coddog as the systemic fix.
+- Friction: the **root cause** — `pick_target.py` maps upstream by *curated name*, so every un-named `func_<vram>` that is really SDK code shows as `upstream:none` and gets mislabeled classical. Both offered candidates were mirrors (`func_800AD370`=osViSetYScale, `func_800AE920`=__osPfsSelectBank). This silently corrupts the classical pool and the v2-residual target hunt. The v2 goal went unmet this sprint (no genuine classical leaf banked).
+- Applied: 2 of 3 — **#1 signature matcher** (un-named candidates now carry an advisory `maybe-upstream:<lib>:<files>` hazard from IDF-weighted shared-callee mass, coddog-style register-stripped idea done compile-free; validated: `func_800AE920`→`pfsselectbank` in the short list, vi setters→correctly-ambiguous `visetyscale,viswapbuf`) + **#2 three-lib scan** (libnusys/libmus/libnaudio added to the upstream index via the `UPSTREAM_TREES` registry; named nusys fns now classify `libnusys`, e.g. `nuGfxSwapCfb`). #3 (4-lib classical-negative vet) NOT selected — subsumed by #1's matcher for now.
+- Carry-over: none banked-incomplete, but two ORDERING facts surface (see BACKLOG): (a) the nusys/audio mirror band needs an include-path enabler (`nusys.h` etc. unresolved → `needs-header` blk) before it's pickable; (b) a genuine classical leaf for v2 must now be vetted against all 4 SDK trees (use the new `maybe-upstream` hint as the filter).
+
+---
+
 ## Sprint 12 — mirror: osYieldThread (thread band, recover-extern flip) — 2026-06-11
 - Increment: 1 file banked / 1 fn matched (delta: ~1.10% → ~1.15%; md5-candidate files 21→22)
 - Quality: 0/0/0/0 (stuck-far/permuter/carried/re-opened) — verbatim mirror, 0 iterations; goal met

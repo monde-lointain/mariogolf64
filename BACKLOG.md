@@ -157,6 +157,33 @@ v2 needs; clean mirror leaves remain the near-zero-risk default between classica
   labels → binds `name@0xADDR` for the unambiguous single-extern case; verified on `osEPiLinkHandle`
   + `__osSetGlobalIntMask`). No carry-overs.
 
+- **Sprint 13: 1 file BANKED — `src/libultra/monegi/vi/visetyscale.c` (`osViSetYScale`),
+  libultra upstream-mirror.** md5-candidate 22→23; matched 24→25/2090 (~1.20%). 6th vi-band
+  mirror. **The increment was picked as a non-trivial classical leaf** (`func_800AD370`, the
+  PO's v2-residual target) but the gate's asm-vs-upstream check unmasked it as `osViSetYScale`
+  — an **un-named** libultra mirror (no curated name → `pick_target` mislabeled it `none`).
+  Verbatim cp, zero header copies, one symbol add, first-pass clean. seed mis-priced 5
+  (classical) → corrected 1 (warm mirror) / banked 1pt. Retro: **2 of 3 applied** — **#1**
+  signature matcher (un-named candidates get an advisory `maybe-upstream:<lib>:<files>` hazard
+  from IDF-weighted shared-callee mass; PO-steer: coddog) + **#2** libnusys/libmus/libnaudio
+  added to the upstream index (named nusys fns now classify `libnusys`). No carry-overs.
+
+## PO ordering note (S13 retro — the mirror band is far bigger than `none` showed; 2 facts)
+
+The S13 tooling fixes reclassified a large slice of the "classical" backlog as **un-named SDK
+mirrors**. Two live ordering facts for the next gate:
+- **The nusys / audio / mus mirror band is now visible but include-blocked.** `pick_target`
+  surfaces nuGfx*/nuCont*/audio leaves as `libnusys`/`libnaudio`/`libmus` mirrors, but they
+  carry `needs-header:nusys.h` (blk) — the nusys/audio include paths aren't in the project `-I`
+  set. **Enabler to unlock the whole band:** add the nusys (+ naudio/mus) include dir(s) to
+  CFLAGS / copy the companion headers, then these become cheap cold mirrors. This is the new
+  highest-throughput lever — a PO call (a Makefile `-I` enabler, deferred like the audio
+  `<libaudio.h>` path).
+- **A genuine classical leaf for v2 must clear the `maybe-upstream` filter.** The v2-residual
+  hunt can no longer trust `upstream:none`. Pick a candidate whose `maybe-upstream` hazard is
+  **absent or refuted at the gate** (asm-vs-upstream-checked) — that is the only trustworthy
+  classical signal now. The smallest such genuinely-game leaf grows the realized tier.
+
 ## PO ordering note (S12 retro — recover-extern is the mirror floor; #2/#3 carried)
 
 S12 banked the cheapest *remaining* mirror (recover-one-extern). Two carried ordering facts
