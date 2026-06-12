@@ -170,7 +170,7 @@ segments:
       - [0x7D970, asm]
       - [0x7DE70, asm]
       - [0x7DF90, asm]
-      - [0x7E2D0, asm]
+      - [0x7E2D0, c, libnusys/mainlib/nucontdatalock]
       - [0x7E330, asm]
       - [0x7E360, asm]
       - [0x7E780, c, libultra/nintendo/pi/epidma]

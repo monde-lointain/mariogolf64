@@ -159,7 +159,7 @@ SECTIONS
         build/asm/7D970.o(.text);
         build/asm/7DE70.o(.text);
         build/asm/7DF90.o(.text);
-        build/asm/7E2D0.o(.text);
+        build/src/libnusys/mainlib/nucontdatalock.o(.text);
         build/asm/7E330.o(.text);
         build/asm/7E360.o(.text);
         build/src/libultra/nintendo/pi/epidma.o(.text);
@@ -383,7 +383,7 @@ SECTIONS
         build/asm/7D970.o(.data);
         build/asm/7DE70.o(.data);
         build/asm/7DF90.o(.data);
-        build/asm/7E2D0.o(.data);
+        build/src/libnusys/mainlib/nucontdatalock.o(.data);
         build/asm/7E330.o(.data);
         build/asm/7E360.o(.data);
         build/src/libultra/nintendo/pi/epidma.o(.data);
@@ -608,7 +608,7 @@ SECTIONS
         build/asm/7D970.o(.rodata);
         build/asm/7DE70.o(.rodata);
         build/asm/7DF90.o(.rodata);
-        build/asm/7E2D0.o(.rodata);
+        build/src/libnusys/mainlib/nucontdatalock.o(.rodata);
         build/asm/7E330.o(.rodata);
         build/asm/7E360.o(.rodata);
         build/src/libultra/nintendo/pi/epidma.o(.rodata);
@@ -860,7 +860,7 @@ SECTIONS
         build/asm/7D970.o(.bss);
         build/asm/7DE70.o(.bss);
         build/asm/7DF90.o(.bss);
-        build/asm/7E2D0.o(.bss);
+        build/src/libnusys/mainlib/nucontdatalock.o(.bss);
         build/asm/7E330.o(.bss);
         build/asm/7E360.o(.bss);
         build/src/libultra/nintendo/pi/epidma.o(.bss);
