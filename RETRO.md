@@ -25,6 +25,17 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 36 — alCopy + alHeapInit (libultra audio band unlock) — 2026-06-12
+- Increment: 2 files banked / 2 fns matched (delta: md5-candidate files 66→68; matched 73→75/2090)
+- Quality: stuck-far 0 / permuter 0 / carried 0 / re-opened 0 — clean sweep
+- Seed: committed 6pt; banked 6pt; regime mirror   (v1 — story points; realized tier is v2, untouched this pure-mirror sprint)
+- What helped: **PO library-first directive** pointed directly to the audio-band unlock (S2 retro first flagged `-I include/libultra/PR` as missing; paid here in S36). Parallel to S15's libnusys unlock: one Makefile `-I include/libultra/PR` + one companion header copy (`synthInternals.h` → `include/libultra/internal/`) opens the whole `libultra/monegi/audio/` band. **libnaudio vs libaudio concern** (PO mid-sprint note) resolved quickly — `grep -r "void alCopy\|void alHeapInit"` in the libnaudio package returned no results; these are shared utility functions identical in both libraries; `libultra_modern` source is authoritative for both. Both verbatim cp, 0 iterations.
+- Friction: **S35 ld/symbol_addrs leftovers** — `mariogolf64.ld` and `symbol_addrs.txt` changes from S35's `make extract` (vi symbols + ld entries) were not staged in S35's bank commits; bundled into S36's `alHeapInit` commit. No ROM correctness impact (SHA-1 stayed green throughout), but a minor audit gap.
+- Applied: 0 of 0 (suggestion buffer empty — no workflow improvements recorded this sprint)
+- Carry-over: none
+
+---
+
 ## Sprint 35 — osStartThread + vi-getter trio (4 verbatim mirrors) — 2026-06-12
 - Increment: 4 files banked / 4 fns matched (delta: md5-candidate files 62→66)
 - Quality: stuck-far 0 / permuter 0 / carried 0 / re-opened 0
