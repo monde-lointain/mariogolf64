@@ -384,6 +384,10 @@ _DEAD_OPEN_RE = re.compile(r"#\s*if(?:def\s+(?:_DEBUG|NU_DEBUG)|ndef\s+_FINALROM
 _PP_IF_RE = re.compile(r"#\s*if")
 _PP_ENDIF_RE = re.compile(r"#\s*endif")
 _STR_LIT_RE = re.compile(r'"[^"\\]*(?:\\.[^"\\]*)*"')
+_IFDEF_OPEN_RE = re.compile(r'^\s*#\s*ifdef\s+([A-Za-z_][A-Za-z0-9_]*)')
+_PP_OPENING_DIRECTIVE_RE = re.compile(r'^\s*#\s*if(?:def|ndef)?\b')
+_PP_ENDIF_LINE_RE = re.compile(r'^\s*#\s*endif\b')
+_MAKEFILE_DEFINE_RE = re.compile(r'-D([A-Za-z_][A-Za-z0-9_]*)(?:=[^\s]*)?')
 
 
 def _strip_string_literals(text):
@@ -410,6 +414,68 @@ def _strip_dead_blocks(text):
             continue
         out.append(line)
     return "\n".join(out)
+
+
+_PROJECT_DEFINES = None
+
+
+def _parse_makefile_defines():
+    """Return {lib: frozenset(defines)} by parsing the project Makefile.
+    'libkmc' and 'libnusys' inherit from the main CFLAGS set plus their own additions."""
+    makefile = os.path.join(ROOT, "Makefile")
+    raw = {"main": set(), "libkmc": set(), "libnusys": set()}
+    try:
+        with open(makefile) as f:
+            for line in f:
+                for var, key in [("CFLAGS", "main"), ("LIBKMC_CFLAGS", "libkmc"), ("LIBNUSYS_CFLAGS", "libnusys")]:
+                    if re.match(rf'^\s*{var}\s*[:+]?=', line):
+                        raw[key].update(m.group(1) for m in _MAKEFILE_DEFINE_RE.finditer(line))
+    except OSError:
+        pass
+    raw["libkmc"] |= raw["main"]
+    raw["libnusys"] |= raw["main"]
+    return {k: frozenset(v) for k, v in raw.items()}
+
+
+def _active_defines_for_lib(lib):
+    """Effective -D defines for an upstream library key (libultra, libkmc, libnusys)."""
+    global _PROJECT_DEFINES
+    if _PROJECT_DEFINES is None:
+        _PROJECT_DEFINES = _parse_makefile_defines()
+    key = {"libkmc": "libkmc", "libnusys": "libnusys"}.get(lib or "", "main")
+    return _PROJECT_DEFINES[key]
+
+
+def function_gating_define(up_cpath, primary):
+    """If `primary`'s entire body is wrapped by a single top-level `#ifdef DEFINE`, return
+    DEFINE; else return None.  Detects build-define gates like USE_EPI where the fn compiles
+    to an empty stub without the define — distinct from inner feature-flag conditionals."""
+    body = _upstream_body(up_cpath, primary)
+    if body is None:
+        return None
+    lines = [l for l in body[1:-1].splitlines()
+             if l.strip() and not l.lstrip().startswith('//')]
+    if not lines:
+        return None
+    m = _IFDEF_OPEN_RE.match(lines[0])
+    if not m:
+        return None
+    define = m.group(1)
+    depth, matching_i = 0, None
+    for i, line in enumerate(lines):
+        s = line.strip()
+        if _PP_OPENING_DIRECTIVE_RE.match(s):
+            depth += 1
+        elif _PP_ENDIF_LINE_RE.match(s):
+            depth -= 1
+            if depth == 0:
+                matching_i = i
+                break
+    if matching_i is None:
+        return None
+    if any(l.strip() for l in lines[matching_i + 1:]):
+        return None
+    return define
 
 
 def _upstream_body(up_cpath, primary):
@@ -815,6 +881,7 @@ def seed_points(size, upstream, band, nfns, hazards, blocked):
     pack = nfns > 1
     drop = ("file-static" in hazards) or ("defines-data" in hazards)  # → classical fallback
     needs_copy = "needs-header" in hazards  # a copyable companion header (blocked ones already 'blk')
+    needs_define = "needs-define" in hazards  # Makefile build-define enabler (e.g. USE_EPI in LIBNUSYS_CFLAGS)
     recover = ("refs-unplaced" in hazards) or ("calls-unplaced" in hazards)  # symbol-recovery enabler before the mirror links
     big = size >= 768
     huge = size >= 1536
@@ -831,6 +898,8 @@ def seed_points(size, upstream, band, nfns, hazards, blocked):
         base += 1  # file-static / defines-data drop → classical fallback
     if needs_copy:
         base += 1  # companion-header copy
+    if needs_define:
+        base += 1  # Makefile build-define enabler
     if recover:
         base += 1  # asm-data-recovery of an unplaced data extern (S2 __osThreadTail pattern)
     if pack or big:
@@ -923,6 +992,9 @@ def build_rows(args, upstream_index, carried, sig_index):
             if missing:
                 hazards.append("needs-header:" + ",".join(missing))
                 blocked = any(include_is_blocked(inc) for inc in missing)
+            gating = function_gating_define(up_path, primary)
+            if gating and gating not in _active_defines_for_lib(up_lib):
+                hazards.append(f"needs-define:{gating}")
             divergence = call_divergence(off, primary, up_path)
             if divergence:
                 hazards.append(divergence)  # near-verbatim mirror: reconcile call list at the gate

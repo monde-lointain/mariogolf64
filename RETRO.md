@@ -25,6 +25,17 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 29 — mirror: nuPiReadWriteSram (libnusys, recover-extern+needs-define Makefile gate) + __matherr (libkmc, pack-split+recover-extern) — 2026-06-12
+- Increment: 2 files banked / 2 fns matched (delta: md5-candidate files 49→51; matched 53→55/2090 ~2.54%→~2.63%)
+- Quality: 0/0/0/0 (stuck-far/permuter/carried/re-opened) — both first-pass; 0 iterations; goal met
+- Seed: committed 6pt; banked 6pt; regime mirror   (v1 — story points; realized tier is v2, untouched this pure-mirror sprint)
+- What helped: **USE_EPI gate handled cleanly at the plan gate once spotted** — the Makefile fix (`LIBNUSYS_CFLAGS := $(CFLAGS) -DUSE_EPI` + libnusys pattern rule, modeled on the existing LIBKMC_CFLAGS setup) was a one-time band enabler; applied + validated with `make extract && make` before the execution middle ran. `__matherr`'s non16align resolved by splitting the 0x8EBE0 pack: C portion 112 B 16-aligned (`_matherr.c`) + hasm portion 56 B (`__muldi3`, permanent hasm per CLAUDE.md — stays raw asm forever). Both verbatim cp, 0 iterations; `errno`@0x800FE3D0 recovered cleanly from `__matherr`'s own `lui`/`sw` pair.
+- Friction: **`pick_target.py` false-clean on `nuPiReadWriteSram`** — the tool correctly flagged `refs-unplaced:nuPiSramHandle@0x8012F4D8` but did NOT detect that the entire function body is gated by `#ifdef USE_EPI`, so without `-DUSE_EPI` the function compiled to an empty stub. The existing `needs-header` hazard class catches missing includes but had no analogue for missing build-defines. Discovered at the execution middle (function body was empty on first compile attempt). Fixed at retro: `function_gating_define()` detects a top-level `#ifdef DEFINE` wrapping the entire body; `_parse_makefile_defines()` + `_active_defines_for_lib()` cross-check the define against the library's effective CFLAGS (parsed from the Makefile); `needs-define:<DEFINE>` hazard added to the main loop and seed_points +1. After fix, `nuPiReadWriteSram` no longer triggers `needs-define:USE_EPI` because USE_EPI is now in LIBNUSYS_CFLAGS — correct behavior; the hazard fires only for defines absent from the library's CFLAGS.
+- Applied: 1 of 1: #1 (pick_target.py `needs-define` hazard — `function_gating_define()` + `_parse_makefile_defines()` + `_active_defines_for_lib()` + +1 in seed_points for needs-define; now detects body-gating `#ifdef` absent from the effective library CFLAGS)
+- Carry-over: none
+
+---
+
 ## Sprint 28 — mirror: nuContGBPakReadWrite+nuContGBPakCheckConnector (libnusys, pack-split+NU_DEBUG) + memset+setmem (libkmc, whole-file pack+memory.h) — 2026-06-12
 - Increment: 3 files banked / 4 fns matched (delta: md5-candidate files 46→49)
 - Quality: 0/0/0/0 (stuck-far/permuter/carried/re-opened) — all first-pass; 0 iterations; goal met

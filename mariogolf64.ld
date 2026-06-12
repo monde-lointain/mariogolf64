@@ -142,7 +142,7 @@ SECTIONS
         build/src/libnusys/mainlib/nugfxretracewait.o(.text);
         build/src/libnusys/mainlib/nugfxdisplayoff.o(.text);
         build/asm/7CAD0.o(.text);
-        build/asm/7CBD0.o(.text);
+        build/src/libnusys/mainlib/nupireadwritesram.o(.text);
         build/src/libnusys/mainlib/nucontinit.o(.text);
         build/src/libnusys/mainlib/nucontdatagetex.o(.text);
         build/asm/7CD60.o(.text);
@@ -283,7 +283,8 @@ SECTIONS
         build/src/libkmc/rand.o(.text);
         build/asm/8E660.o(.text);
         build/asm/8EAD0.o(.text);
-        build/asm/8EBE0.o(.text);
+        build/src/libkmc/_matherr.o(.text);
+        build/asm/8EC50.o(.text);
         build/asm/8EC88.o(.text);
         build/asm/8EE50.o(.text);
         build/asm/8EFC0.o(.text);
@@ -369,7 +370,7 @@ SECTIONS
         build/src/libnusys/mainlib/nugfxretracewait.o(.data);
         build/src/libnusys/mainlib/nugfxdisplayoff.o(.data);
         build/asm/7CAD0.o(.data);
-        build/asm/7CBD0.o(.data);
+        build/src/libnusys/mainlib/nupireadwritesram.o(.data);
         build/src/libnusys/mainlib/nucontinit.o(.data);
         build/src/libnusys/mainlib/nucontdatagetex.o(.data);
         build/asm/7CD60.o(.data);
@@ -510,7 +511,8 @@ SECTIONS
         build/src/libkmc/rand.o(.data);
         build/asm/8E660.o(.data);
         build/asm/8EAD0.o(.data);
-        build/asm/8EBE0.o(.data);
+        build/src/libkmc/_matherr.o(.data);
+        build/asm/8EC50.o(.data);
         build/asm/8EC88.o(.data);
         build/asm/8EE50.o(.data);
         build/asm/8EFC0.o(.data);
@@ -597,7 +599,7 @@ SECTIONS
         build/src/libnusys/mainlib/nugfxretracewait.o(.rodata);
         build/src/libnusys/mainlib/nugfxdisplayoff.o(.rodata);
         build/asm/7CAD0.o(.rodata);
-        build/asm/7CBD0.o(.rodata);
+        build/src/libnusys/mainlib/nupireadwritesram.o(.rodata);
         build/src/libnusys/mainlib/nucontinit.o(.rodata);
         build/src/libnusys/mainlib/nucontdatagetex.o(.rodata);
         build/asm/7CD60.o(.rodata);
@@ -738,7 +740,8 @@ SECTIONS
         build/src/libkmc/rand.o(.rodata);
         build/asm/8E660.o(.rodata);
         build/asm/8EAD0.o(.rodata);
-        build/asm/8EBE0.o(.rodata);
+        build/src/libkmc/_matherr.o(.rodata);
+        build/asm/8EC50.o(.rodata);
         build/asm/8EC88.o(.rodata);
         build/asm/8EE50.o(.rodata);
         build/asm/8EFC0.o(.rodata);
@@ -852,7 +855,7 @@ SECTIONS
         build/src/libnusys/mainlib/nugfxretracewait.o(.bss);
         build/src/libnusys/mainlib/nugfxdisplayoff.o(.bss);
         build/asm/7CAD0.o(.bss);
-        build/asm/7CBD0.o(.bss);
+        build/src/libnusys/mainlib/nupireadwritesram.o(.bss);
         build/src/libnusys/mainlib/nucontinit.o(.bss);
         build/src/libnusys/mainlib/nucontdatagetex.o(.bss);
         build/asm/7CD60.o(.bss);
@@ -993,7 +996,8 @@ SECTIONS
         build/src/libkmc/rand.o(.bss);
         build/asm/8E660.o(.bss);
         build/asm/8EAD0.o(.bss);
-        build/asm/8EBE0.o(.bss);
+        build/src/libkmc/_matherr.o(.bss);
+        build/asm/8EC50.o(.bss);
         build/asm/8EC88.o(.bss);
         build/asm/8EE50.o(.bss);
         build/asm/8EFC0.o(.bss);
