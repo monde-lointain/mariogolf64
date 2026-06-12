@@ -201,7 +201,7 @@ SECTIONS
         build/asm/860C0.o(.text);
         build/asm/861F0.o(.text);
         build/asm/86280.o(.text);
-        build/asm/862B0.o(.text);
+        build/src/libultra/monegi/message/createmesgqueue.o(.text);
         build/asm/862E0.o(.text);
         build/asm/86420.o(.text);
         build/asm/86550.o(.text);
@@ -424,7 +424,7 @@ SECTIONS
         build/asm/860C0.o(.data);
         build/asm/861F0.o(.data);
         build/asm/86280.o(.data);
-        build/asm/862B0.o(.data);
+        build/src/libultra/monegi/message/createmesgqueue.o(.data);
         build/asm/862E0.o(.data);
         build/asm/86420.o(.data);
         build/asm/86550.o(.data);
@@ -648,7 +648,7 @@ SECTIONS
         build/asm/860C0.o(.rodata);
         build/asm/861F0.o(.rodata);
         build/asm/86280.o(.rodata);
-        build/asm/862B0.o(.rodata);
+        build/src/libultra/monegi/message/createmesgqueue.o(.rodata);
         build/asm/862E0.o(.rodata);
         build/asm/86420.o(.rodata);
         build/asm/86550.o(.rodata);
@@ -899,7 +899,7 @@ SECTIONS
         build/asm/860C0.o(.bss);
         build/asm/861F0.o(.bss);
         build/asm/86280.o(.bss);
-        build/asm/862B0.o(.bss);
+        build/src/libultra/monegi/message/createmesgqueue.o(.bss);
         build/asm/862E0.o(.bss);
         build/asm/86420.o(.bss);
         build/asm/86550.o(.bss);

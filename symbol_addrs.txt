@@ -1,2 +1,3 @@
 main = 0x800994B0; // type:func
 __osDpDeviceBusy = 0x800B2B10; // type:func
+__osThreadTail = 0x800C8220; // size:0x8

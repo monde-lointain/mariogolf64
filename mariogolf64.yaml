@@ -212,7 +212,7 @@ segments:
       - [0x860C0, asm]
       - [0x861F0, asm]
       - [0x86280, asm]
-      - [0x862B0, asm]
+      - [0x862B0, c, libultra/monegi/message/createmesgqueue]
       - [0x862E0, asm]
       - [0x86420, asm]
       - [0x86550, asm]
