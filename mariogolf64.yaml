@@ -122,7 +122,7 @@ segments:
       - [0x5B620, asm]
       - [0x68500, asm]
       - [0x70E10, asm]
-      - [0x74890, asm]
+      - [0x74890, c, main/func_80099490]
       - [0x748B0, asm]
       - [0x78330, asm]
       - [0x78D10, asm]
