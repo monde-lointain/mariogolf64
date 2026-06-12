@@ -55,7 +55,7 @@ endif
 #   CPPFLAGS includes -DBUILD_VERSION=VERSION_J -D_FINALROM.
 # -mips3 is now the project default (see CFLAGS above). -O3 and -funsigned-char are
 # libultra-specific overrides; -DBUILD_VERSION=VERSION_J guards version-conditional code.
-LIBULTRA_CFLAGS := $(subst -O2,-O3,$(CFLAGS)) -funsigned-char -DBUILD_VERSION=VERSION_J
+LIBULTRA_CFLAGS := $(subst -O2,-O3,$(CFLAGS)) -funsigned-char -DBUILD_VERSION=VERSION_J -I include/libultra/PR
 
 # libkmc upstream was built with `gcc -O` (not -O2) per ~/development/repos/libkmc/src/genn64.bat
 # (env var gccsw=-mips3 -mgp32 -mfp32 -G0; explicit -O per file compile). -mips3 is now the
