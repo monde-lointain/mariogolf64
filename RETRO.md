@@ -25,6 +25,17 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 33 — classical: piacs.c (libultra nintendo/pi, 3-fn PI access queue) — 2026-06-12
+- Increment: 1 file banked / 3 fns matched (delta: md5-candidate files 58→59; 59/59 C files)
+- Quality: 0/0/0/0 (stuck-far/permuter/carried/re-opened) — all score 0 on first seed; goal met
+- Seed: committed 5pt; banked 5pt; regime classical/mirror-mixed (first classical sub-sprint; no residual variance — v2 deferred)
+- What helped: **ultralib build-flag discovery** — root cause of `__osPiGetAccess` refusing to match at `-O2 -mips2` was that libultra's actual build used `OPTFLAGS=-O3 MIPS_VERSION=-mips3 -funsigned-char` (ultralib gcc.mk, VERSION_J). `-O3` inlines `__osPiCreateAccessQueue` into `__osPiGetAccess` (eliminating the `jal`); `-mips3` schedules `sw $ra` into the `bnez` delay slot. Changing global CFLAGS to `-mips3` and adding `LIBULTRA_CFLAGS=-O3 -funsigned-char` produced score=0 on first seed. **Both-functions-in-base.c seed**: seeding only `__osPiGetAccess` in isolation (without `__osPiCreateAccessQueue` in the same TU) would never get `-O3` inlining — the two-function seed is the correct structural move for same-TU callee inlining. **`decomp_loop.py` libultra auto-detect**: added `detect_libultra_profile()` + wired into `auto` path so the correct flags apply without `--profile libultra`. **`__osPiRelAccess` trivial**: single `osSendMesg` call, score=0 immediately.
+- Friction: **`make sync-names` mid-sprint eviction** — running sync-names mid-sprint evicted `__osRunningThread`, `__osViCurr`, `__osViNext` from `ghidra_symbols.txt` and renamed `__osPiRelAcces`→`__osPiRelAccess`; build broke with 3 undefined references + wrong INCLUDE_ASM label. Recovery: add evicted symbols to `symbol_addrs.txt` (add-only); rename the INCLUDE_ASM stub + per-function asm files; `make extract && make`. **Stale `asm/7EDB0.s` label**: the top-level segment asm still had the 1-s `__osPiRelAcces` label after the rename; `decomp_loop.py` couldn't find `__osPiRelAccess`. Fix: manually update the 3 occurrences in `asm/7EDB0.s` + rebuild `build/asm/7EDB0.o`. **`-mips2`→`-mips3` global change** needed ROM-wide verification before accepting; ran full `make` + SHA-1 to confirm all existing banked files still matched.
+- Applied: 4 of 4: #1 (CLAUDE.md: sync-names eviction recovery bullet added); #2 (CLAUDE.md: libultra compile profile bullet updated — `-O3 -funsigned-char`, global `-mips3` origin documented); #3 (CLAUDE.md: decomp_loop.py libultra auto-detect documented in same bullet); #4 (CLAUDE.md: stale top-level asm label-sync note added)
+- Carry-over: none
+
+---
+
 ## Sprint 32 — mirror: osSpTaskYield (libultra rsp, zero-enabler) + osSyncPrintf+rmonPrintf (libultra libc, FINALROM vararg stubs) — 2026-06-12
 - Increment: 2 files banked / 3 fns matched (delta: md5-candidate files 56→58; all 58 C files now md5-candidate)
 - Quality: 0/0/0/0 (stuck-far/permuter/carried/re-opened) — all first-pass; 0 iterations; goal met
