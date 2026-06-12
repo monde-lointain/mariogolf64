@@ -71,7 +71,7 @@ DATA_GLOBAL_DEF_RE = re.compile(
     r"\s*(?:\[[^\]]*\]\s*)?(?:=[^;]*)?;\s*$"
 )
 INCLUDE_RE = re.compile(r'^\s*#\s*include\s*[<"]([^>"]+)[>"]')
-# The project's quoted/angle include search dirs (Makefile CFLAGS `-I` set, under -nostdinc).
+# The project's quoted/angle include search dirs (Makefile CFLAGS `-I` set; -nostdinc removed S32 — stdarg.h ships at include/stdarg.h for correct MIPS GCC 2.7.2 vararg ABI).
 INCLUDE_DIRS = [
     os.path.join(ROOT, d)
     for d in ("include", "include/libultra", "include/libultra/internal", "include/libkmc", "include/libnusys")

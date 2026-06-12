@@ -25,6 +25,17 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 32 — mirror: osSpTaskYield (libultra rsp, zero-enabler) + osSyncPrintf+rmonPrintf (libultra libc, FINALROM vararg stubs) — 2026-06-12
+- Increment: 2 files banked / 3 fns matched (delta: md5-candidate files 56→58; all 58 C files now md5-candidate)
+- Quality: 0/0/0/0 (stuck-far/permuter/carried/re-opened) — all first-pass; 0 iterations; goal met
+- Seed: committed 10pt; banked 10pt; regime mirror   (v1 — story points; realized tier is v2, untouched this pure-mirror sprint)
+- What helped: **`-D_FINALROM` global flag** (Makefile gate enabler) stripped both `osSyncPrintf`+`rmonPrintf` bodies to empty MIPS O32 vararg stubs (save `$a0–$a3` + `jr $ra`) — ROM match without iteration. **ultralib repo** for VERSION_J source structure (`~/development/repos/ultralib/src/libc/syncprintf.c`): `libultra_modern`'s `syncprintf.c` has `__osSyncVPrintf` (VERSION_K+ only) which this ROM omits; the `#if BUILD_VERSION <= VERSION_J` branch reveals the two-function VERSION_J layout. **`include/stdarg.h`** from ultralib GCC headers resolved KMC GCC 2.7.2's missing stdarg.h; **`-nostdinc` removed** (ROM SHA-1 still green — `include/stdarg.h` takes precedence via `-I include`). `osSpTaskYield`: verbatim zero-enabler — `__osSpSetStatus`@0x800B16B0 + `SP_SET_YIELD`=0x400 pre-placed; one yaml flip.
+- Friction: **VERSION_J vs VERSION_K+ libultra mismatch** — `libultra_modern`'s syncprintf.c has `__osSyncVPrintf` first; verbatim copy would emit 3 fns in wrong order. Resolved by cross-referencing ultralib for the VERSION_J layout. **stdarg.h absent from KMC GCC 2.7.2 install** (compiler-internal headers absent from `tools/cc/`); companion copy from ultralib then `-nostdinc` removed.
+- Applied: 2 of 2: #1 (pick_target.py INCLUDE_DIRS comment updated — `-nostdinc` removed; `include/stdarg.h` for correct MIPS GCC 2.7.2 vararg ABI); #2 (CLAUDE.md: ultralib VERSION_J cross-reference added to upstream-mirror bullet)
+- Carry-over: none
+
+---
+
 ## Sprint 31 — classical: func_800A2F50 (trivial getter) + nuGfxInit (libnusys, novel GBI/absolute-addr gotcha) — 2026-06-12
 - Increment: 2 files banked / 2 fns matched (delta: md5-candidate files 54→56; **56/56 = ALL FILES** — project reaches full md5-candidate coverage for the current src/ tree)
 - Quality: 0/0/0/0 (stuck-far/permuter/carried/re-opened) — both score 0; goal met (PO signed off partial — noted)

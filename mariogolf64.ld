@@ -202,7 +202,7 @@ SECTIONS
         build/asm/85DA0.o(.text);
         build/asm/860C0.o(.text);
         build/asm/861F0.o(.text);
-        build/asm/86280.o(.text);
+        build/src/libultra/monegi/libc/syncprintf.o(.text);
         build/src/libultra/monegi/message/createmesgqueue.o(.text);
         build/asm/862E0.o(.text);
         build/asm/86420.o(.text);
@@ -211,7 +211,7 @@ SECTIONS
         build/src/libultra/monegi/rdp/dpctr.o(.text);
         build/asm/86790.o(.text);
         build/asm/867A0.o(.text);
-        build/asm/869E0.o(.text);
+        build/src/libultra/monegi/rsp/sptaskyield.o(.text);
         build/src/main/func_800AB600.o(.text);
         build/asm/86A50.o(.text);
         build/asm/87510.o(.text);
@@ -430,7 +430,7 @@ SECTIONS
         build/asm/85DA0.o(.data);
         build/asm/860C0.o(.data);
         build/asm/861F0.o(.data);
-        build/asm/86280.o(.data);
+        build/src/libultra/monegi/libc/syncprintf.o(.data);
         build/src/libultra/monegi/message/createmesgqueue.o(.data);
         build/asm/862E0.o(.data);
         build/asm/86420.o(.data);
@@ -439,7 +439,7 @@ SECTIONS
         build/src/libultra/monegi/rdp/dpctr.o(.data);
         build/asm/86790.o(.data);
         build/asm/867A0.o(.data);
-        build/asm/869E0.o(.data);
+        build/src/libultra/monegi/rsp/sptaskyield.o(.data);
         build/src/main/func_800AB600.o(.data);
         build/asm/86A50.o(.data);
         build/asm/87510.o(.data);
@@ -659,7 +659,7 @@ SECTIONS
         build/asm/85DA0.o(.rodata);
         build/asm/860C0.o(.rodata);
         build/asm/861F0.o(.rodata);
-        build/asm/86280.o(.rodata);
+        build/src/libultra/monegi/libc/syncprintf.o(.rodata);
         build/src/libultra/monegi/message/createmesgqueue.o(.rodata);
         build/asm/862E0.o(.rodata);
         build/asm/86420.o(.rodata);
@@ -668,7 +668,7 @@ SECTIONS
         build/src/libultra/monegi/rdp/dpctr.o(.rodata);
         build/asm/86790.o(.rodata);
         build/asm/867A0.o(.rodata);
-        build/asm/869E0.o(.rodata);
+        build/src/libultra/monegi/rsp/sptaskyield.o(.rodata);
         build/src/main/func_800AB600.o(.rodata);
         build/asm/86A50.o(.rodata);
         build/asm/87510.o(.rodata);
@@ -915,7 +915,7 @@ SECTIONS
         build/asm/85DA0.o(.bss);
         build/asm/860C0.o(.bss);
         build/asm/861F0.o(.bss);
-        build/asm/86280.o(.bss);
+        build/src/libultra/monegi/libc/syncprintf.o(.bss);
         build/src/libultra/monegi/message/createmesgqueue.o(.bss);
         build/asm/862E0.o(.bss);
         build/asm/86420.o(.bss);
@@ -924,7 +924,7 @@ SECTIONS
         build/src/libultra/monegi/rdp/dpctr.o(.bss);
         build/asm/86790.o(.bss);
         build/asm/867A0.o(.bss);
-        build/asm/869E0.o(.bss);
+        build/src/libultra/monegi/rsp/sptaskyield.o(.bss);
         build/src/main/func_800AB600.o(.bss);
         build/asm/86A50.o(.bss);
         build/asm/87510.o(.bss);
