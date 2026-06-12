@@ -144,7 +144,7 @@ SECTIONS
         build/asm/7CAD0.o(.text);
         build/asm/7CBD0.o(.text);
         build/src/libnusys/mainlib/nucontinit.o(.text);
-        build/asm/7CCD0.o(.text);
+        build/src/libnusys/mainlib/nucontdatagetex.o(.text);
         build/asm/7CD60.o(.text);
         build/src/libnusys/mainlib/nucontrmbstart.o(.text);
         build/asm/7D330.o(.text);
@@ -368,7 +368,7 @@ SECTIONS
         build/asm/7CAD0.o(.data);
         build/asm/7CBD0.o(.data);
         build/src/libnusys/mainlib/nucontinit.o(.data);
-        build/asm/7CCD0.o(.data);
+        build/src/libnusys/mainlib/nucontdatagetex.o(.data);
         build/asm/7CD60.o(.data);
         build/src/libnusys/mainlib/nucontrmbstart.o(.data);
         build/asm/7D330.o(.data);
@@ -593,7 +593,7 @@ SECTIONS
         build/asm/7CAD0.o(.rodata);
         build/asm/7CBD0.o(.rodata);
         build/src/libnusys/mainlib/nucontinit.o(.rodata);
-        build/asm/7CCD0.o(.rodata);
+        build/src/libnusys/mainlib/nucontdatagetex.o(.rodata);
         build/asm/7CD60.o(.rodata);
         build/src/libnusys/mainlib/nucontrmbstart.o(.rodata);
         build/asm/7D330.o(.rodata);
@@ -845,7 +845,7 @@ SECTIONS
         build/asm/7CAD0.o(.bss);
         build/asm/7CBD0.o(.bss);
         build/src/libnusys/mainlib/nucontinit.o(.bss);
-        build/asm/7CCD0.o(.bss);
+        build/src/libnusys/mainlib/nucontdatagetex.o(.bss);
         build/asm/7CD60.o(.bss);
         build/src/libnusys/mainlib/nucontrmbstart.o(.bss);
         build/asm/7D330.o(.bss);
