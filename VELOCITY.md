@@ -73,11 +73,13 @@ until v2. These rows double as the **reference stories** for the plan-time ±1 a
 | 4 | sirawread + sirawwrite | 1+1 | mirror / warm / — | 1+1=2 | *2* | both verbatim, warm floor 1 each |
 | 5 | viswapbuf + visetevent | 1+1 | mirror / warm / — | 1+1=2 | *2* | both verbatim, warm floor 1 each |
 | 6 | viblack | 1 | mirror / warm / — | 1 | *1* | first live-logged v1 sprint; verbatim, zero-enabler, banked 1pt |
+| 7 | virtualtophysical | 1 | mirror / cold / — | 2 | *2* | opens convert band (vi exhausted); verbatim, zero-enabler, banked 2pt |
 
 **Seed-velocity = 2.0 pt/sprint** (bootstrap anchors S1–5, sum seed 10 / 5 sprints). With the
-first live-logged sprint S6 (seed 1, banked 1), the running mirror-regime seed-velocity is
-11 pt / 6 sprints ≈ **1.83 pt/sprint** — the predicted downward drift as the warm singleton pool
-depletes (S6 was the last clean vi-band leaf). Three honest caveats:
+two live-logged sprints S6 (seed 1) + S7 (seed 2), the running mirror-regime seed-velocity is
+13 pt / 7 sprints ≈ **1.86 pt/sprint** — the predicted downward drift as the warm singleton pool
+depletes (S6 was the last clean vi leaf; S7 opened the *cold* convert band at the 2 pt floor).
+Three honest caveats:
 - **Fitted, not validated.** The bands were chosen so this history reads ~2 pt/sprint; the
   first out-of-sample sprint is the real test. The byte gates (768/1536) and the classical
   5/8/13 tiers have **zero** supporting data — provisional, corrected by v2's residual loop.
@@ -98,3 +100,9 @@ depletes (S6 was the last clean vi-band leaf). Three honest caveats:
 - **Regime:** `mirror` (~22 % of ranked candidates: 56 mirror vs 194 classical; 18 warm /
   38 cold). The mirror band is a depleting minority — the first classical/mixed sprint trips
   the v2 activation trigger.
+- **S7 note:** vi band exhausted of clean leaves (S6), so S7 opened the **cold convert band**
+  (`virtualtophysical`, seed 2 = the cold-mirror floor). The S7 retro added a **`refs-unplaced`
+  hazard** to `pick_target.py` (a referenced data extern absent from both name files — the dual
+  of `defines-data`); it re-priced `osYieldThread` 1→2 and `osEPiLinkHandle` 2→3, and confirmed
+  `osStopThread` is the smallest *clean* remaining leaf (seed 1, warm, no unplaced ref). Still
+  7-straight first-pass-clean mirrors → zero residual variance → v2 trigger remains unmet.

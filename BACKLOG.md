@@ -14,6 +14,16 @@ classical-loop target per few sprints to validate the *classical* match-loop (st
 every win below was an upstream mirror). Sprints capped small (1 upstream file, or ≤ ~3–4 functions) until a per-sprint
 count emerges.
 
+**PO ordering note (S7 retro #2 — break the mirror point-mass).** Seven straight first-pass-clean
+mirror sprints (S1–S7) have produced **zero residual variance**, so the v2 story-point activation
+trigger (first classical/mixed sprint with real variance) remains unmet and the classical
+match-loop is **still entirely unproven**. The PO should **deliberately schedule one classical
+target** within the next few sprints — none sit in the top-12 smallest-first ranker, so it needs a
+separate `venv/bin/python3 tools/pick_target.py --upstream none` search (a small no-upstream leaf).
+This is timeboxed as a spike (classical loop is unvalidated) and is the only path to turning on the
+v2 realized-tier machinery. Until then, the remaining clean mirror leaves (smallest-first:
+`osStopThread` warm/seed-1, then the cold convert/other bands) keep the ROM green at near-zero risk.
+
 - **Sprint 0 (pre-Scrum): 7 files BANKED (8 C-body matches + 1 hasm).** Before this overlay
   existed: `src/libkmc/matherr.c` (`_matherr`), `src/libkmc/rand.c` (`rand`+`srand`,
   validated the libkmc `-O` profile carve), `src/libultra/shared/system/afterprenmi.c`
@@ -72,6 +82,19 @@ count emerges.
   No carry-overs. **Note: viblack was the last clean singleton in the vi band** — the 3 smallest
   remaining libultra leaves (`__osDequeueThread`, `__osViInit`, `osYieldThread`) now all carry
   the `defines-data` hazard or need asm-data-recovery for a placed-by-undecompiled-file extern.
+
+- **Sprint 7: 1 file BANKED — `src/libultra/monegi/convert/virtualtophysical.c`
+  (`osVirtualToPhysical`), libultra upstream-mirror.** md5-candidate 15→16; matched 17→18/2090
+  (~0.86%). **Opened a NEW band (`monegi/convert/`)** — acted on S6 retro #1 (vi band mined out of
+  clean leaves). True zero-enabler mirror: all refs pre-resolved (`__osProbeTLB`@0x800ACC00 in
+  ghidra_symbols, R4300 macros in in-tree `PR/R4300.h`), name pre-curated (0x800A7720), single-fn
+  subseg (no split) → **zero symbol adds, zero header copies, one yaml flip**. Verbatim `cp`,
+  byte-identical, first-pass clean (0/0/0/0). seed 2pt / banked 2pt (cold-mirror floor). Retro:
+  **2 of 3 applied** — **#1 `refs-unplaced` hazard** landed in `tools/pick_target.py` (dual of
+  `defines-data`: flags a `__`-prefixed data extern referenced but absent from both name files →
+  asm-data-recovery enabler; re-priced `osYieldThread` 1→2, `osEPiLinkHandle` 2→3, confirmed
+  `osStopThread` is the smallest *clean* remaining leaf) + **#2** the classical-target ordering
+  note above. No carry-overs.
 
 ## Enabler items (gate-time, agent-performed since 2026-06-11)
 

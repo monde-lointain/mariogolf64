@@ -6,9 +6,10 @@ execution loop). Enumerates flippable `asm` subsegs and partially-matched `c`
 files from mariogolf64.yaml + asm/ + src/, flags upstream-mirror availability
 (libultra/libkmc), band warmth (a mirror dir with an already-banked sibling →
 an enabler-free flip), and hazards (file-scope static, file-scope data-global
-definition, non-16-aligned subseg, multi-function pack, needs-header = an
-upstream include unresolved under the project -I set), and prints a
-smallest-first table for `/sprint-plan`.
+definition, refs-unplaced = a data extern referenced but absent from both name
+files, non-16-aligned subseg, multi-function pack, needs-header = an upstream
+include unresolved under the project -I set), and prints a smallest-first table
+for `/sprint-plan`.
 
 Usage:
   venv/bin/python3 tools/pick_target.py [--lib SUBSTR] [-n N] [--include-stuck] [--json]
@@ -28,6 +29,10 @@ YAML = os.path.join(ROOT, "mariogolf64.yaml")
 LIBULTRA = os.path.expanduser("~/development/repos/libultra_modern/src")
 LIBKMC = os.path.expanduser("~/development/repos/libkmc/src")
 BACKLOG = os.path.join(ROOT, "BACKLOG.md")
+# The two disjoint symbol-name files. A symbol absent from BOTH gets no linker address; for a
+# *data* extern that means an undefined reference (see refs_unplaced). Functions are exempt —
+# splat auto-resolves them via undefined_funcs_auto.txt.
+NAME_FILES = [os.path.join(ROOT, "symbol_addrs.txt"), os.path.join(ROOT, "ghidra_symbols.txt")]
 
 # Subseg line: `- [0x8DF10, c, libultra/monegi/rdp/dp]` or `- [0x8D230, asm]`.
 # (bss entries use the `{ type: bss, ... }` brace form and are intentionally skipped.)
@@ -161,6 +166,60 @@ def defines_data_globals(cpath):
     return names
 
 
+_PLACED_SYMBOLS = None
+
+
+def placed_symbols():
+    """Lazily-built set of every symbol name in the two name files (symbol_addrs + ghidra). A
+    name in this set has a linker address; one absent from it does not (a data extern then
+    link-fails). Format: `name = 0x...; // ...`."""
+    global _PLACED_SYMBOLS
+    if _PLACED_SYMBOLS is None:
+        names = set()
+        for nf in NAME_FILES:
+            if not os.path.exists(nf):
+                continue
+            with open(nf, errors="ignore") as f:
+                for line in f:
+                    m = re.match(r"\s*([A-Za-z_]\w+)\s*=", line)
+                    if m:
+                        names.add(m.group(1))
+        _PLACED_SYMBOLS = names
+    return _PLACED_SYMBOLS
+
+
+# An SDK-internal global is `__`-prefixed (e.g. __osRunQueue). Uppercase macros ([A-Z]-led) and
+# CamelCase types never match, so this rarely false-flags a non-symbol token.
+SDK_GLOBAL_RE = re.compile(r"__[A-Za-z]\w+")
+
+
+def refs_unplaced(cpath, placed):
+    """Data externs the upstream .c *references* but that are absent from BOTH name files — the
+    dual of `defines-data` (which catches definitions). The motivating case: osYieldThread reads
+    `&__osRunQueue`, a global whose address the asm bakes as a raw lui/addiu immediate (no symbol)
+    but which a verbatim C mirror turns into an undefined extern → link failure. A non-empty
+    result is the `refs-unplaced` DoR hazard → the execution middle must recover each name's vram
+    via asm-data-recovery (disassemble the target fn, read the lui/addiu HI/LO16 pair, add the
+    extern to symbol_addrs.txt) BEFORE the flip links. Heuristic, gate-confirmed: a `__`-prefixed
+    token, never called anywhere in the file (so functions — which splat auto-resolves via
+    undefined_funcs_auto — are excluded), and absent from the name set. A function *pointer*
+    passed by bare name could over-flag; the gate confirms against the upstream."""
+    try:
+        text = open(cpath, errors="ignore").read()
+    except OSError:
+        return []
+    tokens = set(SDK_GLOBAL_RE.findall(text))
+    unplaced = []
+    for tok in tokens:
+        if tok in placed:
+            continue
+        # Called anywhere (`tok(` allowing whitespace) → a function, not a data extern → skip.
+        if re.search(re.escape(tok) + r"\s*\(", text):
+            continue
+        unplaced.append(tok)
+    return sorted(unplaced)
+
+
 def band_mirror_dir(lib, up_path):
     """Project mirror directory for an upstream file: src/lib<...>/<upstream-rel-dir>."""
     tree = LIBULTRA if lib == "libultra" else LIBKMC
@@ -260,13 +319,14 @@ def seed_points(size, upstream, band, nfns, hazards, blocked):
     pack = nfns > 1
     drop = ("file-static" in hazards) or ("defines-data" in hazards)  # → classical fallback
     needs_copy = "needs-header" in hazards  # a copyable companion header (blocked ones already 'blk')
+    recover = "refs-unplaced" in hazards  # asm-data-recovery enabler before the mirror links
     big = size >= 768
     huge = size >= 1536
     if huge or (classical and pack):
         return 13  # must decompose; never a 1-increment sprint
     if nfns >= 4:
         return 8  # a large pack must decompose regardless of path (hits the 8-gate)
-    if classical and (big or pack or drop or needs_copy):
+    if classical and (big or pack or drop or needs_copy or recover):
         return 8  # enabler gate — decompose / scaffold first
     if classical:
         return 5  # small single classical fn — unproven regime, high variance
@@ -275,6 +335,8 @@ def seed_points(size, upstream, band, nfns, hazards, blocked):
         base += 1  # file-static / defines-data drop → classical fallback
     if needs_copy:
         base += 1  # companion-header copy
+    if recover:
+        base += 1  # asm-data-recovery of an unplaced data extern (S2 __osThreadTail pattern)
     if pack or big:
         base += 1
     return snap_fib(base)
@@ -330,6 +392,9 @@ def build_rows(args, upstream_index, carried):
             data_defs = defines_data_globals(up_path)
             if data_defs:
                 hazards.append("defines-data:" + ",".join(data_defs))  # .data analogue → classical loop
+            unplaced = refs_unplaced(up_path, placed_symbols())
+            if unplaced:
+                hazards.append("refs-unplaced:" + ",".join(unplaced))  # asm-data-recovery before flip
             missing = missing_includes(up_path)
             if missing:
                 hazards.append("needs-header:" + ",".join(missing))
