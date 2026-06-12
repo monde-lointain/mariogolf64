@@ -63,6 +63,16 @@ count emerges.
   hazard** both landed in `tools/pick_target.py`; the latter caught `__osDequeueThread`/`thread.c`
   as a false-clean (re-defines the placed `__osThreadTail` extern + 4 siblings). No carry-overs.
 
+- **Sprint 6: 1 file BANKED — `src/libultra/monegi/vi/viblack.c` (`osViBlack`), libultra
+  upstream-mirror.** md5-candidate 14→15; matched 16→17/2090 (~0.81%). 4th consecutive
+  zero-enabler vi-band mirror — `__osViNext` + the int-disable pair + both headers all
+  pre-placed, single-fn subseg (no split), name pre-curated (0x800AD720) → **one yaml flip the
+  only enabler**. Verbatim `cp`, byte-identical, first-pass clean (0/0/0/0). First **live-logged
+  v1 story-point sprint** (seed 1, banked 1pt). Retro: **0 of 3 applied** (PO: Apply none).
+  No carry-overs. **Note: viblack was the last clean singleton in the vi band** — the 3 smallest
+  remaining libultra leaves (`__osDequeueThread`, `__osViInit`, `osYieldThread`) now all carry
+  the `defines-data` hazard or need asm-data-recovery for a placed-by-undecompiled-file extern.
+
 ## Enabler items (gate-time, agent-performed since 2026-06-11)
 
 These are the gate-time enabler actions a sprint may need before its execution middle can run

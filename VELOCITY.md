@@ -72,8 +72,12 @@ until v2. These rows double as the **reference stories** for the plan-time ±1 a
 | 3 | visetmode.c | 1 | mirror / warm / needs-copy | 2 | *1* | trivial `assert.h` copy |
 | 4 | sirawread + sirawwrite | 1+1 | mirror / warm / — | 1+1=2 | *2* | both verbatim, warm floor 1 each |
 | 5 | viswapbuf + visetevent | 1+1 | mirror / warm / — | 1+1=2 | *2* | both verbatim, warm floor 1 each |
+| 6 | viblack | 1 | mirror / warm / — | 1 | *1* | first live-logged v1 sprint; verbatim, zero-enabler, banked 1pt |
 
-**Seed-velocity = 2.0 pt/sprint** (sum seed 10 / 5 sprints). Three honest caveats:
+**Seed-velocity = 2.0 pt/sprint** (bootstrap anchors S1–5, sum seed 10 / 5 sprints). With the
+first live-logged sprint S6 (seed 1, banked 1), the running mirror-regime seed-velocity is
+11 pt / 6 sprints ≈ **1.83 pt/sprint** — the predicted downward drift as the warm singleton pool
+depletes (S6 was the last clean vi-band leaf). Three honest caveats:
 - **Fitted, not validated.** The bands were chosen so this history reads ~2 pt/sprint; the
   first out-of-sample sprint is the real test. The byte gates (768/1536) and the classical
   5/8/13 tiers have **zero** supporting data — provisional, corrected by v2's residual loop.
