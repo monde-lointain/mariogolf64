@@ -193,6 +193,35 @@ v2 needs; clean mirror leaves remain the near-zero-risk default between classica
   ranks as pts-2 cold mirrors, no longer `blk`) + **#2** the libnusys path-mirror convention in
   CLAUDE.md. No carry-overs.
 
+- **Sprint 16: 2 files BANKED — `src/libnusys/mainlib/nugfxtaskallendwait.c`
+  (`nuGfxTaskAllEndWait`) + `nugfxdisplayoff.c` (`nuGfxDisplayOff`), libnusys upstream-mirror
+  sibling-batch.** md5-candidate 25→27; matched 27→29/2090 (~1.39%). 6th sibling-pair, 1st
+  libnusys batch (acted on the S15 sibling-batch note). Both verbatim cp, first-pass clean
+  (0/0/0/0). Two recover-extern enablers — `nuGfxTaskSpool`=0x8012D478, `nuGfxDisplay`=0x80104E6C
+  — both **non-`__`-prefixed library globals** that pick_target's `refs-unplaced` grep missed (a
+  **false-clean**: reported no-hazard, recovered at the gate from each fn's own lui/lw|sw). seed
+  4 (2+2 cold floor) / banked 4pt. Retro: **2 of 3 applied** — **#1** broadened `refs-unplaced`
+  to scan the .c's resolvable headers for `extern` *data* decls (now flags non-`__` globals;
+  `nuGfxFunc`/`nuScPreNMIFunc`/`nuGfxSwapCfbFunc` now surface recover-extern + inline vrams) +
+  **#2** CLAUDE.md note (mirror branch's proof IS the full-make SHA; byte spot-check is
+  classical-only). No carry-overs.
+
+## PO ordering note (S16 retro — the false-clean class is closed; deeper nusys leaves now priced)
+
+The S16 grep fix re-priced the nuGfx*FuncSet leaves (now pts-3 recover-extern, was false-clean
+pts-2). Three live ordering facts for the next gate:
+- **The cheapest remaining clean nusys leaves are the `nuContGBPak*` band** (`nuContInit`,
+  `nuContGBPakGetStatus`/`Power`/`ReadID`, all pts-2, no hazard after the S16 fix → genuinely
+  clean). Sibling-batch 2–3 of them next — same warm-band zero-enabler pattern as S16, but now
+  with the false-clean risk eliminated (pick_target's no-hazard is trustworthy again for non-`__`
+  globals).
+- **The `nuGfx*FuncSet` trio (`nuPreNMIFuncSet`, `nuGfxFuncSet`, `nuGfxSwapCfbFuncSet`) are
+  pts-3 recover-extern mirrors** with their vrams already inlined by pick_target — a cheap
+  follow-on batch (one symbol add each, then verbatim cp).
+- **The classical / v2-residual track is still owed a non-trivial leaf** (carried S11/S13/S15).
+  Mirror remains the low-risk default, but v2's realized tier needs a `maybe-upstream`-cleared
+  classical leaf to grow.
+
 ## PO ordering note (S15 retro — the libnusys band is open; sibling-batch it; #3 carried)
 
 The S15 enabler is paid once. Three live ordering facts for the next gate:

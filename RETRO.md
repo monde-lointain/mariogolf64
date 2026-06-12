@@ -25,6 +25,15 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 16 — mirror: nuGfxTaskAllEndWait + nuGfxDisplayOff (1st libnusys sibling-batch) — 2026-06-11
+- Increment: 2 files banked / 2 fns matched (delta: ~1.29% → ~1.39%; md5-candidate files 25→27)
+- Quality: 0/0/0/0 (stuck-far/permuter/carried/re-opened) — both verbatim mirrors, 0 iterations; goal met first pass
+- Seed: committed 4pt; banked 4pt; regime mirror   (v1; mirror track seed-only — realized is v2/classical)
+- What helped: S15-note sibling-batch off the warm libnusys band; callee `osViBlack` (S6) + both fn names pre-curated; the two data globals recovered deterministically at the gate from each fn's own asm (`lui 0x8013`/`lw -0x2b88`→nuGfxTaskSpool=0x8012D478; `lui 0x8010`/`sw 0x4e6c`→nuGfxDisplay=0x80104E6C); mirror branch banked on full-make SHA alone (no spot-check)
+- Friction: **false-clean** — pick_target reported both no-hazard, but the data globals are non-`__`-prefixed library globals its `refs-unplaced` grep skipped, so the recover-extern enabler surfaced only at the gate (not pre-flagged). Fixed in this retro (#1).
+- Applied: 2 of 3 — #1 broadened `refs-unplaced` (pick_target now scans the .c's resolvable headers for `extern` *data* decls → flags non-`__` globals like nuGfxFunc/nuScPreNMIFunc/nuGfxSwapCfbFunc, which now show recover-extern hazards + inline vrams); #2 CLAUDE.md execution-loop note (mirror branch's proof IS the full-make SHA; byte spot-check is classical-only). #3 (document open-band fast-path covers libnusys/mainlib) NOT selected — guidance-only, and #1 supersedes its caveat.
+- Carry-over: none
+
 ## Sprint 15 — mirror: nuGfxSwapCfb (libnusys band unlock) — 2026-06-11
 - Increment: 1 file banked / 1 fn matched (delta: ~1.24% → ~1.29%; md5-candidate files 24→25)
 - Quality: 0/0/0/0 (stuck-far/permuter/carried/re-opened) — verbatim mirror, 0 iterations; goal met first pass

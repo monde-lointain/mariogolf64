@@ -415,6 +415,49 @@ def placed_symbols():
 # CamelCase types never match, so this rarely false-flags a non-symbol token.
 SDK_GLOBAL_RE = re.compile(r"__[A-Za-z]\w+")
 
+# A data extern declaration in a header: `extern <type...> <name>[opt-array];` with NO '(' before
+# the `;` (the lookahead drops function prototypes and function-pointer externs). Captures the
+# final identifier — the declared global's name (e.g. `extern volatile u32 nuGfxTaskSpool;`).
+EXTERN_DATA_DECL_RE = re.compile(
+    r"^\s*extern\s+(?![^;\n]*\()[^;\n]*?\b([A-Za-z_]\w*)\s*(?:\[[^\]]*\])?\s*;", re.M
+)
+
+
+def _resolve_include(inc):
+    """First INCLUDE_DIRS hit for an `#include` target, or None (an unindexed / system header)."""
+    for d in INCLUDE_DIRS:
+        path = os.path.join(d, inc)
+        if os.path.exists(path):
+            return path
+    return None
+
+
+def declared_extern_data(cpath, _depth=0, _seen=None):
+    """Names declared as *data* externs in the headers `cpath` pulls in (recursively, only within
+    the project -I set). Function prototypes are excluded by EXTERN_DATA_DECL_RE. This is what lets
+    refs_unplaced catch non-`__`-prefixed library globals (libnusys's nuGfxTaskSpool/nuGfxDisplay,
+    libmus's, …) that SDK_GLOBAL_RE alone misses — the S16 false-clean motivated it. Bounded depth
+    keeps a header cycle finite."""
+    if _seen is None:
+        _seen = set()
+    names = set()
+    try:
+        text = open(cpath, errors="ignore").read()
+    except OSError:
+        return names
+    names.update(EXTERN_DATA_DECL_RE.findall(text))
+    if _depth >= 4:
+        return names
+    for line in text.splitlines():
+        im = INCLUDE_RE.match(line)
+        if not im:
+            continue
+        header = _resolve_include(im.group(1))
+        if header and header not in _seen:
+            _seen.add(header)
+            names |= declared_extern_data(header, _depth + 1, _seen)
+    return names
+
 
 def refs_unplaced(cpath, placed):
     """Data externs the upstream .c *references* but that are absent from BOTH name files — the
@@ -424,17 +467,24 @@ def refs_unplaced(cpath, placed):
     result is the `refs-unplaced` DoR hazard → the execution middle must recover each name's vram
     via asm-data-recovery (disassemble the target fn, read the lui/addiu HI/LO16 pair, add the
     extern to symbol_addrs.txt) BEFORE the flip links. Heuristic, gate-confirmed: a `__`-prefixed
-    token, never called anywhere in the file (so functions — which splat auto-resolves via
+    token OR a name the .c's headers declare as a data extern (via declared_extern_data — catches
+    non-`__` library globals like libnusys's nuGfxTaskSpool, the S16 false-clean), referenced in
+    the file, never called anywhere (so functions — which splat auto-resolves via
     undefined_funcs_auto — are excluded), and absent from the name set. A function *pointer*
     passed by bare name could over-flag; the gate confirms against the upstream."""
     try:
         text = open(cpath, errors="ignore").read()
     except OSError:
         return []
-    tokens = set(SDK_GLOBAL_RE.findall(text))
+    # `__`-prefixed SDK globals (libultra/libkmc) + any data extern the .c's headers *declare*
+    # (libnusys/libmus non-`__` globals SDK_GLOBAL_RE misses — the S16 nuGfxTaskSpool false-clean).
+    tokens = set(SDK_GLOBAL_RE.findall(text)) | declared_extern_data(cpath)
     unplaced = []
     for tok in tokens:
         if tok in placed:
+            continue
+        # Only flag names the .c actually references (declared_extern_data over-yields header decls).
+        if not re.search(r"\b" + re.escape(tok) + r"\b", text):
             continue
         # Called anywhere (`tok(` allowing whitespace) → a function, not a data extern → skip.
         if re.search(re.escape(tok) + r"\s*\(", text):
