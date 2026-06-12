@@ -414,7 +414,15 @@ def build_rows(args, upstream_index, carried):
             if size and size % 16 != 0:
                 hazards.append("non16align")
             if len(fns) > 1:
-                hazards.append(f"pack:{len(fns)}fn")
+                # List each fn + its upstream basename so the gate can tell a multi-file pack
+                # (different basenames → split at the upstream-file boundary, e.g. dpsetstat+dpctr)
+                # from a single-file pack, without hand-disassembling asm/<rom>.s.
+                members = []
+                for fn in fns:
+                    _, fn_up = upstream_index.get(fn, (None, None))
+                    stem = os.path.splitext(os.path.basename(fn_up))[0] if fn_up else "?"
+                    members.append(f"{fn}={stem}")
+                hazards.append(f"pack:{len(fns)}fn[" + ",".join(members) + "]")
             if intrinsic_likely(off, fns[0]):
                 hazards.append("intrinsic-likely")  # register/FPU shim → hasm, not a classical target
         elif typ == "c" and path:

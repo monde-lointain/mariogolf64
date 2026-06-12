@@ -117,6 +117,19 @@ v2 needs; clean mirror leaves remain the near-zero-risk default between classica
   `osGetCount`/`__osGetCause` so smallest-first stops surfacing un-decompilable leaves). No
   carry-overs.
 
+- **Sprint 10: 2 files BANKED — `src/libultra/monegi/rdp/dpsetstat.c` (`osDpSetStatus`) +
+  `dpctr.c` (`osDpGetCounters`), libultra upstream-mirror.** md5-candidate 18→20; matched
+  20→22/2090 (~1.05%, **crossed 1%**). 5th **sibling-pair**, 9th straight clean mirror. Split the
+  0x86730 `pack:2fn` block at 0x86740 (two *different* upstream files — dpsetstat.c 0x10 +
+  dpctr.c 0x4C, both 16-aligned) → two verbatim `cp`s. dp band warm (S1 dp.c); both names
+  pre-curated in ghidra_symbols.txt, all DPC_*_REG in PR/rcp.h, both headers present → **zero
+  symbol adds, zero header copies, one yaml split**. Both first-pass clean (0/0/0/0). seed 2pt /
+  banked 2pt. Retro: **1 of 3 applied** — **#1 pack-disambiguation column** landed in
+  `pick_target.py` (`pack:Nfn[fn=basename,…]` shows each member's upstream file → the gate spots
+  a multi-file pack needing a split without disassembling asm/<rom>.s). No carry-overs.
+  **Note (#2 carried): the rdp band still has `dpsetnextbuf.c` + `dpgetstat.c` as asm leaves —
+  re-price them next gate, likely another zero-enabler pair.**
+
 ## PO ordering note (S9 retro — defer v2, schedule a non-trivial classical next)
 
 The S9 classical spike **proved the loop mechanically but produced zero residual variance**

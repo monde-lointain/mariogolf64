@@ -76,6 +76,7 @@ until v2. These rows double as the **reference stories** for the plan-time ±1 a
 | 7 | virtualtophysical | 1 | mirror / cold / — | 2 | *2* | opens convert band (vi exhausted); verbatim, zero-enabler, banked 2pt |
 | 8 | stopthread | 1 | mirror / warm / — | 1 | *1* | opens thread band; verbatim, zero-enabler, banked 1pt |
 | 9 | func_80099490 | 1 | **classical** / — / — | 5 | *—* | **first classical-track row** — no-upstream wrapper `nuPiInitSram()`; first-pass clean (score 0, 0 iter), banked 5pt; classical loop PROVEN. Kept OUT of the mirror seed-velocity (separate regime) |
+| 10 | dpsetstat + dpctr | 1+1 | mirror / warm / — | 1+1=2 | *2* | 5th sibling-pair; split 0x86730 pack (osDpSetStatus+osDpGetCounters) at upstream-file boundary; both verbatim, zero-enabler, banked 2pt. 9th straight clean mirror |
 
 **Seed-velocity = 2.0 pt/sprint** (bootstrap anchors S1–5, sum seed 10 / 5 sprints). With the
 three live-logged sprints S6 (seed 1) + S7 (seed 2) + S8 (seed 1), the running mirror-regime

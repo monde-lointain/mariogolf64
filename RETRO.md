@@ -25,6 +25,17 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 10 — bank rdp DPC sibling-pair (dpsetstat.c + dpctr.c) — 2026-06-11
+- Increment: 2 files banked / 2 fns matched (delta: ~0.96% → ~1.05%; md5-candidate files 18→20)
+- Quality: 0/0/0/0 (stuck-far/permuter/carried/re-opened) — both first-pass clean (verbatim mirrors, 0 iterations); goal met
+- Seed: committed 2pt; banked 2pt; regime **mirror** (per-file 1+1; 8-gate clear; realized tier is v2)
+- What helped: 5th **sibling-pair** off a warm band (dp band opened S1 dp.c). The `pack:2fn` hazard flagged the 0x86730 block; one disassembly confirmed it bundled two *different* upstream files (osDpSetStatus=dpsetstat.c 0x10 + osDpGetCounters=dpctr.c 0x4C, NOT the name-guessed dpgetstat.c). Split at 0x86740 (both 16-aligned) → two verbatim `cp`s. Both names pre-curated in ghidra_symbols.txt, all DPC_*_REG in PR/rcp.h, both headers present from S1 → **zero symbol adds, zero header copies, one yaml split**. Crossed 1% matched
+- Friction: the `pack:2fn` hazard named only the *first* fn — the 2nd member + its upstream file were invisible until a hand-disassembly of asm/86730.s, and the obvious name-guess (dpgetstat.c) was wrong (it was dpctr.c). Minor, but it cost the one manual asm read the mirror branch otherwise avoids
+- Applied: 1 of 3 — PO selected #1. **#1 pack-disambiguation column** landed in `tools/pick_target.py`: `pack:Nfn` now renders `pack:Nfn[fn1=basename1,fn2=basename2,…]` (each member's upstream basename via the existing upstream_index), so the gate distinguishes a multi-file pack needing a split (different basenames — `__osSetGlobalIntMask`=setglobalintmask+resetglobalintmask) from a single-file pack (`sprintf`=sprintf+sprintf) without disassembling asm/<rom>.s; an un-indexed member shows `=?` (e.g. `__muldi3`). pts unchanged (purely additive to the hazards string). (#2 re-price rdp leaves → folded into BACKLOG note, not a code edit; #3 v2-uncalibratable → reaffirmed below, not selected)
+- Carry-over: none
+
+---
+
 ## Sprint 9 — first classical (no-upstream) match: func_80099490 — 2026-06-11
 - Increment: 1 file banked / 1 fn matched (delta: ~0.91% → ~0.96%; md5-candidate files 17→18)
 - Quality: 0/0/0/0 (stuck-far/permuter/carried/re-opened) — first-pass clean (score 0, 8/8 rows, 0 iterations); goal met
