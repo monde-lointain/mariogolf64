@@ -154,7 +154,7 @@ segments:
       - [0x7CAA0, c, libnusys/mainlib/nugfxdisplayoff]
       - [0x7CAD0, asm]
       - [0x7CBD0, asm]
-      - [0x7CC90, asm]
+      - [0x7CC90, c, libnusys/mainlib/nucontinit]
       - [0x7CCD0, asm]
       - [0x7CD60, asm]
       - [0x7D2D0, asm]
