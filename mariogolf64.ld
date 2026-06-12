@@ -70,7 +70,7 @@ SECTIONS
         build/asm/1050.o(.text);
         build/asm/1130.o(.text);
         build/asm/17B0.o(.text);
-        build/asm/3700.o(.text);
+        build/src/libnusys/mainlib/nugfxinit.o(.text);
         build/asm/37B0.o(.text);
         build/asm/4650.o(.text);
         build/asm/4840.o(.text);
@@ -162,7 +162,7 @@ SECTIONS
         build/asm/7DF90.o(.text);
         build/src/libnusys/mainlib/nucontdatalock.o(.text);
         build/src/libnusys/mainlib/nucontqueryread.o(.text);
-        build/asm/7E350.o(.text);
+        build/src/main/__osGetCurrFaultedThread.o(.text);
         build/asm/7E360.o(.text);
         build/src/libultra/nintendo/pi/epidma.o(.text);
         build/src/libultra/nintendo/pi/epilinkhandle.o(.text);
@@ -298,7 +298,7 @@ SECTIONS
         build/asm/1050.o(.data);
         build/asm/1130.o(.data);
         build/asm/17B0.o(.data);
-        build/asm/3700.o(.data);
+        build/src/libnusys/mainlib/nugfxinit.o(.data);
         build/asm/37B0.o(.data);
         build/asm/4650.o(.data);
         build/asm/4840.o(.data);
@@ -390,7 +390,7 @@ SECTIONS
         build/asm/7DF90.o(.data);
         build/src/libnusys/mainlib/nucontdatalock.o(.data);
         build/src/libnusys/mainlib/nucontqueryread.o(.data);
-        build/asm/7E350.o(.data);
+        build/src/main/__osGetCurrFaultedThread.o(.data);
         build/asm/7E360.o(.data);
         build/src/libultra/nintendo/pi/epidma.o(.data);
         build/src/libultra/nintendo/pi/epilinkhandle.o(.data);
@@ -527,7 +527,7 @@ SECTIONS
         build/asm/1050.o(.rodata);
         build/asm/1130.o(.rodata);
         build/asm/17B0.o(.rodata);
-        build/asm/3700.o(.rodata);
+        build/src/libnusys/mainlib/nugfxinit.o(.rodata);
         build/asm/37B0.o(.rodata);
         build/asm/4650.o(.rodata);
         build/asm/4840.o(.rodata);
@@ -619,7 +619,7 @@ SECTIONS
         build/asm/7DF90.o(.rodata);
         build/src/libnusys/mainlib/nucontdatalock.o(.rodata);
         build/src/libnusys/mainlib/nucontqueryread.o(.rodata);
-        build/asm/7E350.o(.rodata);
+        build/src/main/__osGetCurrFaultedThread.o(.rodata);
         build/asm/7E360.o(.rodata);
         build/src/libultra/nintendo/pi/epidma.o(.rodata);
         build/src/libultra/nintendo/pi/epilinkhandle.o(.rodata);
@@ -783,7 +783,7 @@ SECTIONS
         build/asm/1050.o(.bss);
         build/asm/1130.o(.bss);
         build/asm/17B0.o(.bss);
-        build/asm/3700.o(.bss);
+        build/src/libnusys/mainlib/nugfxinit.o(.bss);
         build/asm/37B0.o(.bss);
         build/asm/4650.o(.bss);
         build/asm/4840.o(.bss);
@@ -875,7 +875,7 @@ SECTIONS
         build/asm/7DF90.o(.bss);
         build/src/libnusys/mainlib/nucontdatalock.o(.bss);
         build/src/libnusys/mainlib/nucontqueryread.o(.bss);
-        build/asm/7E350.o(.bss);
+        build/src/main/__osGetCurrFaultedThread.o(.bss);
         build/asm/7E360.o(.bss);
         build/src/libultra/nintendo/pi/epidma.o(.bss);
         build/src/libultra/nintendo/pi/epilinkhandle.o(.bss);

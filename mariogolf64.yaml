@@ -173,7 +173,7 @@ segments:
       - [0x7DF90, asm]
       - [0x7E2D0, c, libnusys/mainlib/nucontdatalock]
       - [0x7E330, c, libnusys/mainlib/nucontqueryread]
-      - [0x7E350, c, main/func_800A2F50]
+      - [0x7E350, c, main/__osGetCurrFaultedThread]
       - [0x7E360, asm]
       - [0x7E780, c, libultra/nintendo/pi/epidma]
       - [0x7E820, c, libultra/nintendo/pi/epilinkhandle]

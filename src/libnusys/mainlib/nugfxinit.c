@@ -3,9 +3,9 @@
 
 extern void func_80029250(void *, s32);
 extern u32 D_800B6688;
-extern u32 D_800FED14;
+extern u16 *nuGfxZBuffer;
 extern u32 D_800B6680;
-extern u32 D_801061B0;
+extern NUUcode *nuGfxUcode;
 extern u32 D_B6698;
 
 void nuGfxInit(void) {
@@ -14,9 +14,9 @@ void nuGfxInit(void) {
 
     nuGfxThreadStart();
     func_80029250(&D_800B6688, 3);
-    D_800FED14 = 0x80000400;
+    nuGfxZBuffer = (u16 *)0x80000400;
     nuGfxSwapCfbFuncSet(nuGfxSwapCfb);
-    D_801061B0 = (u32)&D_800B6680;
+    nuGfxUcode = (NUUcode *)&D_800B6680;
     nuGfxTaskMgrInit();
     gfxList_ptr = gfxList;
     gSPDisplayList(gfxList_ptr++, (u32)&D_B6698);
