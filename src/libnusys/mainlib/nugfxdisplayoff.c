@@ -1,3 +1,21 @@
-#include "common.h"
+/*======================================================================*/
+/*		NuSYS										*/
+/*		nugfxdisplayoff.c								*/
+/*												*/
+/*		Copyright (C) 1997, NINTENDO Co,Ltd.				*/
+/*												*/
+/*----------------------------------------------------------------------*/    
+/* Ver 1.0	97/10/9		Created by Kensaku Ohki(SLANP)		*/
+/*======================================================================*/
+#include <nusys.h>
 
-INCLUDE_ASM("asm/nonmatchings/libnusys/mainlib/nugfxdisplayoff", nuGfxDisplayOff);
+/*----------------------------------------------------------------------*/
+/*	DISPLAY-OFF										*/
+/*	IN:	None 										*/
+/*	RET:	None 										*/
+/*----------------------------------------------------------------------*/
+void nuGfxDisplayOff(void)		
+{
+    nuGfxDisplay = NU_GFX_DISPLAY_OFF;
+    osViBlack(TRUE);
+}
