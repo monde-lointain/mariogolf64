@@ -163,7 +163,7 @@ SECTIONS
         build/asm/7E330.o(.text);
         build/asm/7E360.o(.text);
         build/asm/7E780.o(.text);
-        build/asm/7E820.o(.text);
+        build/src/libultra/nintendo/pi/epilinkhandle.o(.text);
         build/asm/7E870.o(.text);
         build/asm/7E9F0.o(.text);
         build/asm/7EDB0.o(.text);
@@ -387,7 +387,7 @@ SECTIONS
         build/asm/7E330.o(.data);
         build/asm/7E360.o(.data);
         build/asm/7E780.o(.data);
-        build/asm/7E820.o(.data);
+        build/src/libultra/nintendo/pi/epilinkhandle.o(.data);
         build/asm/7E870.o(.data);
         build/asm/7E9F0.o(.data);
         build/asm/7EDB0.o(.data);
@@ -612,7 +612,7 @@ SECTIONS
         build/asm/7E330.o(.rodata);
         build/asm/7E360.o(.rodata);
         build/asm/7E780.o(.rodata);
-        build/asm/7E820.o(.rodata);
+        build/src/libultra/nintendo/pi/epilinkhandle.o(.rodata);
         build/asm/7E870.o(.rodata);
         build/asm/7E9F0.o(.rodata);
         build/asm/7EDB0.o(.rodata);
@@ -864,7 +864,7 @@ SECTIONS
         build/asm/7E330.o(.bss);
         build/asm/7E360.o(.bss);
         build/asm/7E780.o(.bss);
-        build/asm/7E820.o(.bss);
+        build/src/libultra/nintendo/pi/epilinkhandle.o(.bss);
         build/asm/7E870.o(.bss);
         build/asm/7E9F0.o(.bss);
         build/asm/7EDB0.o(.bss);
