@@ -287,6 +287,19 @@ v2 needs; clean mirror leaves remain the near-zero-risk default between classica
   hazard, the function dual of `refs-unplaced`) + #2 (CLAUDE.md: reconcile the full data+function
   callee list at the gate). No carry-overs.
 
+- **Sprint 24: 1 file BANKED — `src/libnusys/mainlib/nucontdatagetex.c` (`nuContDataGetEx`),
+  libnusys recover-extern + recover-callee mirror.** md5-candidate 39→40. **First leaf carrying
+  BOTH `refs-unplaced` AND `calls-unplaced` simultaneously** — the S20 data-recover and S23
+  function-dual doctrines composed cleanly, no special handling, both vrams confirmed in one
+  disassemble pass. Data `nuContData`=0x801051F8 (`OSContPad[NU_CONT_MAXCONTROLLERS]`, stride 6
+  ×4 → size:0x18; offset-0 `lhu` confirmed BASE not field, S20 caution cleared) + callee
+  `nuContDataOpen`=0x800A2CAC (jal target, S23 dual). jal-count 3vs3 clean. **Closes the S20
+  trim** (this fn was dropped from the S20 pair for the then-missing `nuContDataOpen`; S23's
+  `calls-unplaced` hazard — verified on this exact leaf — made it a deterministic gate add).
+  Two symbol adds + one yaml flip, verbatim cp, 0 iterations. seed 3 / banked 3pt. Retro:
+  **0 of 3 applied** (PO: apply none — #1 size-hint tooling declined; #2/#3 confirmatory). No
+  carry-overs.
+
 ## PO ordering note (S16 retro — the false-clean class is closed; deeper nusys leaves now priced)
 
 The S16 grep fix re-priced the nuGfx*FuncSet leaves (now pts-3 recover-extern, was false-clean

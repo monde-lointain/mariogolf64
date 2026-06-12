@@ -25,6 +25,15 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 24 — mirror: nuContDataGetEx (libnusys recover-extern + recover-callee; closes S20 trim) — 2026-06-12
+- Increment: 1 file banked / 1 fn matched (delta: md5-candidate files 39→40)
+- Quality: 0/0/0/0 (stuck-far/permuter/carried/re-opened) — verbatim mirror, 0 iterations; goal met first pass
+- Seed: committed 3pt; banked 3pt; regime mirror   (v1 — story points; realized tier is v2, untouched this pure-mirror sprint)
+- What helped: **first leaf carrying BOTH `refs-unplaced` AND `calls-unplaced` at once** — the S20 data-recover and S23 function-dual doctrines composed cleanly with no special handling, both vrams confirmed in one `disassemble_function` pass. Data `nuContData`=0x801051F8 (`OSContPad[NU_CONT_MAXCONTROLLERS]`; stride 6 from the asm index-multiply + `li a2,0x6` bcopy size × 4 controllers → size:0x18; the offset-0 `lhu` confirmed it is the BASE not a field addr — the S20 indexed-struct caution cleared cleanly). Callee `nuContDataOpen`=0x800A2CAC recovered from its jal target (S23 dual). jal-count reconcile 3vs3 (`nuContDataClose`@0x800A2C84 + `bcopy`@0x800AA9A0 pre-placed) → clean verbatim, no drop; pick correctly did NOT flag jal-count-mismatch. **Closed the S20 trim** — `nuContDataGetEx` was dropped from the S20 pair precisely for the then-unhandled missing `nuContDataOpen` symbol; S23's `calls-unplaced` hazard (added last sprint, with this exact leaf as its verification case) made it a deterministic gate add this sprint.
+- Friction: none — the S23 `calls-unplaced` fix pre-flagged the missing callee at the plan gate, so the execution-middle link-fail that motivated that fix did **not** recur. Clean end-to-end.
+- Applied: 0 of 3 (PO: apply none — #1 size-hint tooling [parse asm index-multiply → `stride:N` for array externs] declined as nice-to-have, gate derives size by hand correctly; #2 dual-hazard-composes + #3 jal-count-specificity both confirmatory, already covered by S20/S23 doctrine)
+- Carry-over: none
+
 ## Sprint 23 — mirror: osEPiStartDma (libultra recover-extern, 2nd nintendo/pi leaf) — 2026-06-12
 - Increment: 1 file banked / 1 fn matched (delta: md5-candidate files 38→39)
 - Quality: 0/0/0/0 (stuck-far/permuter/carried/re-opened) — verbatim mirror, 0 iterations; goal met first pass
