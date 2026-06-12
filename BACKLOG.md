@@ -229,6 +229,18 @@ v2 needs; clean mirror leaves remain the near-zero-risk default between classica
   **2 of 2 applied** — #1 new `jal-count-mismatch` hazard in pick_target.py (counts upstream
   calls vs ROM jals; verified flags 4vs3), #2 CLAUDE.md near-verbatim-mirror bullet. No carry-overs.
 
+- **Sprint 19: 3 files BANKED — `src/libnusys/mainlib/nuprenmifuncset.c` (`nuPreNMIFuncSet`) +
+  `nugfxfuncset.c` (`nuGfxFuncSet`) + `nugfxswapcfbfuncset.c` (`nuGfxSwapCfbFuncSet`), libnusys
+  recover-extern mirrors.** md5-candidate 31→34; matched 33→36/2090 (~1.72%). The S15-note
+  `nuGfx*FuncSet` trio — each stores one callback global behind an `osSetIntMask` critical
+  section. **8th sibling-batch (2nd trio); first homogeneous batch banked at the full ≤3-4 cap.**
+  One recover-extern each (nuScPreNMIFunc=0x800B6780, nuGfxFunc=0x800C7DC0,
+  nuGfxSwapCfbFunc=0x800B67B4), all flagged correctly by S16#1's broadened grep (no false-clean),
+  vrams confirmed deterministically from each fn's own lui/addiu (3/3 matched pick). All verbatim
+  cp, 0 iterations. seed 9 / banked 9pt. Retro: **3 of 3 applied** — #1 CLAUDE.md recover-extern
+  mirror sub-case bullet, #2 CLAUDE.md fill-the-cap batch-sizing rule, #3 kept gate MCP re-confirm
+  mandatory (3/3 logged). No carry-overs.
+
 ## PO ordering note (S16 retro — the false-clean class is closed; deeper nusys leaves now priced)
 
 The S16 grep fix re-priced the nuGfx*FuncSet leaves (now pts-3 recover-extern, was false-clean

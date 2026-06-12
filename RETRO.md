@@ -25,6 +25,15 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 19 — mirror: nuGfx*FuncSet trio (libnusys recover-extern batch) — 2026-06-12
+- Increment: 3 files banked / 3 fns matched (delta: ~1.58% → ~1.72%; md5-candidate files 31→34)
+- Quality: 0/0/0/0 (stuck-far/permuter/carried/re-opened) — all verbatim mirrors, 0 iterations; goal met first pass
+- Seed: committed 9pt; banked 9pt; regime mirror   (v1; mirror track seed-only — realized is v2/classical)
+- What helped: the recover-extern mirror flow is now fully deterministic and batches cleanly — pick_target's broadened (S16#1) refs-unplaced grep flagged all 3 globals correctly (no false-clean), each vram confirmed from the fn's own lui/addiu (3/3 matched pick's inlined value). All 3 fns + the nuGfxTaskAllEndWait callee pre-curated in ghidra_symbols → enabler = 3 data-extern adds + 3 yaml flips, nothing else. First homogeneous batch banked at the full ≤3-4 cap (3 files) at one-file risk; per-file all-or-nothing banking made the marginal sibling near-free.
+- Friction: none — clean first-pass on all three. (jal-count reconciled at the gate, no S18-style divergence.)
+- Applied: 3 of 3 (PO: all) — #1 CLAUDE.md "recover-extern mirror" sub-case bullet (third known-edit mirror sub-case, alongside file-static-drop + jal-divergence); #2 CLAUDE.md fill-the-cap batch-sizing rule (homogeneous sibling sets default to filling the ≤3-4 cap; heterogeneous trim to cleanest 2); #3 kept gate MCP-disassemble re-confirm mandatory (vram empirically 3/3 reliable but re-confirm stays while sample small — recorded in #1's bullet). Also logged the S19 VELOCITY row + refreshed the running mirror seed-velocity (1.92→2.63, flagged batch-driven not throughput).
+- Carry-over: none
+
 ## Sprint 18 — mirror: nuContInit (libnusys near-verbatim, drop-one-line) — 2026-06-12
 - Increment: 1 file banked / 1 fn matched (delta: ~1.53% → ~1.58%; md5-candidate files 30→31)
 - Quality: 0/0/0/0 (stuck-far/permuter/carried/re-opened) — near-verbatim mirror, 0 iterations; goal met first pass

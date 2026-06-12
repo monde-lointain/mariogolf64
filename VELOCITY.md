@@ -90,11 +90,12 @@ until v2. These rows double as the **reference stories** for the plan-time ±1 a
 | 16 | nugfxtaskallendwait + nugfxdisplayoff | 1+1 | mirror / cold / recover-extern | 2+2=4 | *4* | **6th sibling-pair; 1st libnusys batch (S15-note).** Both verbatim cp, 0 iterations. Each needed a recover-extern (nuGfxTaskSpool=0x8012D478, nuGfxDisplay=0x80104E6C) — **non-`__` library globals pick_target's refs-unplaced grep missed → a false-clean** (seeded 2 each, no hazard, but actually recover-extern). Recovered deterministically at the gate (lui/lw + lui/sw). Callee `osViBlack` banked S6; names pre-curated in ghidra_symbols. Retro applied #1 (broaden refs-unplaced to header-declared non-`__` data externs — now flags nuGfxFunc/nuScPreNMIFunc etc.) + #2 (CLAUDE.md: mirror branch's proof IS the full-make SHA). Mirror track stays seed-only — `(real)` illustrative |
 | 17 | nucontgbpak{getstatus,power,readid} | 1+1+1 | mirror / cold→warm / — | 2+2+2=6 | *6* | **7th sibling-batch (first trio); opens the nuCont sub-band warm.** All 3 verbatim cp, 0 iterations. **First nuGfx/nuCont leaves with NO data globals** — shared sole callee `nuSiSendMesg`@0x800A2824 (already in ghidra_symbols), struct types/constants/prototypes all in nusys.h → zero new symbols, zero header copies, zero splits, three yaml flips the only enabler. S16#1's broadened refs-unplaced grep correctly reported all 3 no-hazard (no false-clean this time); gate jal/lui scan confirmed truly clean. Retro applied 0 of 3 (all confirmatory observations). Mirror track stays seed-only — `(real)` illustrative |
 | 18 | nucontinit | 1 | mirror / warm / jal-divergence | 2 | *2* | **near-verbatim mirror sub-case (1st):** upstream calls 4 managers, ROM's asm has only **3 jals** (no `nuContPakMgrInit` in this build). Not a missing symbol/def — an upstream-vs-ROM build **divergence**. Copied upstream verbatim, dropped the diverging line, banked on full-make SHA, 0 iteration. Caught at the gate by disassembling (pick reported no-hazard — its ref-grep counts data refs, not jal callees). Retro applied #1 (new `jal-count-mismatch` hazard in pick_target — verified it flags 4vs3) + #2 (CLAUDE.md near-verbatim-mirror bullet). Mirror track stays seed-only — `(real)` illustrative |
+| 19 | nu{prenmi,gfx,gfxswapcfb}funcset | 1+1+1 | mirror / cold / recover-extern | 3+3+3=9 | *9* | **8th sibling-batch (2nd trio); the S15-note nuGfx\*FuncSet trio.** All 3 verbatim cp, 0 iterations. Each stores one callback global behind an `osSetIntMask` critical section; one recover-extern each (nuScPreNMIFunc=0x800B6780, nuGfxFunc=0x800C7DC0, nuGfxSwapCfbFunc=0x800B67B4) — S16#1's broadened refs-unplaced grep flagged all 3 correctly (no false-clean), vrams confirmed deterministically at the gate via each fn's own lui/addiu (3/3 matched pick's inlined vram). 3 fns + callee `nuGfxTaskAllEndWait` pre-curated in ghidra_symbols → only enabler = 3 symbol_addrs adds + 3 yaml flips. **First 3-file homogeneous batch banked at the ≤3-4 cap** (vs S4/S5's pairs). Retro applied #1 (CLAUDE.md recover-extern-mirror sub-case bullet) + #2 (CLAUDE.md fill-the-cap batch-sizing rule) + #3 (keep gate MCP re-confirm mandatory; 3/3 logged). Mirror track stays seed-only — `(real)` illustrative |
 
 **Seed-velocity = 2.0 pt/sprint** (bootstrap anchors S1–5, sum seed 10 / 5 sprints). With the
 live-logged mirror sprints S6 (seed 1) + S7 (seed 2) + S8 (seed 1) + S12 (seed 2) + S13 (seed 1)
-+ S14 (seed 1) + S15 (seed 3) + S16 (seed 4), the
-running mirror-regime seed-velocity is 25 pt / 13 sprints = **1.92 pt/sprint** — the warm-pool
++ S14 (seed 1) + S15 (seed 3) + S16 (seed 4) + S17 (seed 6) + S18 (seed 2) + S19 (seed 9), the
+running mirror-regime seed-velocity is 42 pt / 16 sprints = **2.63 pt/sprint** — the warm-pool
 downward drift reverses as a *new* cold band opens (S6 last clean vi leaf; S7 opened the *cold*
 convert band at the 2 pt floor; S8 the warm-1 thread leaf; S12 the warm-2 recover-extern thread
 leaf; S13 6th vi mirror; S14 3rd thread mirror — note S14 was a **zero-enabler warm singleton**
@@ -103,7 +104,11 @@ project-wide: the thread band still yields zero-enabler clean leaves; S15 paid a
 +1 enabler to open the *cold* libnusys band — a fresh deep pool of pts-2 cold mirrors; S16
 sibling-batched 2 of them, seed 4, each a recover-extern over a non-`__` library global that
 pick_target had mis-reported clean — the S16 retro broadened the refs-unplaced grep to close
-that false-clean). **S9 is the first classical-track row** (seed 5,
+that false-clean); S17 trio-batched the nuContGBPak siblings (seed 6) and S19 the nuGfx\*FuncSet
+trio (seed 9). **The post-S16 rise to 2.63 is sibling-batch-driven, not per-leaf throughput** —
+S17/S19 banked 3 files each in one sprint, so points/sprint reflects how many homogeneous
+siblings were committed (the "commitment-shaped, not pure throughput" caveat below), not faster
+matching; per-leaf effort is still the flat cold-mirror 2–3 pt. **S9 is the first classical-track row** (seed 5,
 banked 5, first-pass clean) — logged separately, NOT folded into the mirror 1.75 average
 (never compare regimes). Classical track: **n=2** (S9 seed 5 / realized
 illustrative; S11 seed 5 / **realized 5 logged**), seed-velocity 5 pt/sprint. S9 proved the loop
