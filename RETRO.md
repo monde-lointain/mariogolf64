@@ -25,6 +25,17 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 37 — nuPiReadRom (classical) + osAiGetLength/osAiGetStatus/osViSetSpecialFeatures (mirrors) — 2026-06-12
+- Increment: 4 files banked / 4 fns matched (delta: md5-candidate files 68→72; matched 75→79/2090 (~3.78%))
+- Quality: stuck-far 0 / permuter 0 / carried 1 (osAiSetFrequency — osViClock + rodata D_800D22A0 unplaced) / re-opened 0
+- Seed: committed 7pt; banked 7pt; regime mixed (classical 3pt + mirror 4pt)   (v2 classical: nuPiReadRom realized=3, residual 0)
+- What helped: **IO_READ isolation artifact correctly identified** for osAiGetLength/osAiGetStatus (from S34 precedent) — score ≠ 0 in isolation due to MMIO literal-vs-reloc; went directly to in-tree spot-check, 0 wasted iterations. **osViSetSpecialFeatures** clean zero-enabler verbatim mirror; `refs-unplaced:__osViDevMgr` was dead `_DEBUG` FP as predicted; spot-check MATCH 368B, ROM SHA-1 green.
+- Friction: **nuPiReadRom ROM variant undocumented** — no upstream source (nusys-1.10/1.20/2.00/2.07) matched; ROM calls osInvalDCache twice per iteration and sets all struct fields inside the loop. Required 3 C iterations to discover correct GCC delay-slot ordering (`rom_addr += readSize; size -= readSize;` AFTER the jal, `rom_addr` first).
+- Applied: 0 of 0 (suggestion buffer empty)
+- Carry-over: osAiSetFrequency (0x7EEC0, 288B) — osViClock@D_800C9468 + rodata D_800D22A0 unplaced; stays `[0x7EEC0, asm]`
+
+---
+
 ## Sprint 36 — alCopy + alHeapInit (libultra audio band unlock) — 2026-06-12
 - Increment: 2 files banked / 2 fns matched (delta: md5-candidate files 66→68; matched 73→75/2090)
 - Quality: stuck-far 0 / permuter 0 / carried 0 / re-opened 0 — clean sweep
