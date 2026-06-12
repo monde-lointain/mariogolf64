@@ -22,3 +22,4 @@ __osCurrentTime = 0x801052F0; // size:0x8
 nuPiSramHandle = 0x8012F4D8; // size:0x4
 errno = 0x800FE3D0; // size:0x4
 __osTimerList = 0x800C8240; // size:0x4
+D_800C8234 = 0x800C8234; // size:0x4
