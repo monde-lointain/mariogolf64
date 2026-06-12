@@ -215,7 +215,7 @@ SECTIONS
         build/asm/87510.o(.text);
         build/asm/87600.o(.text);
         build/src/libultra/monegi/thread/getthreadpri.o(.text);
-        build/asm/877D0.o(.text);
+        build/src/libultra/monegi/thread/setthreadpri.o(.text);
         build/asm/878A0.o(.text);
         build/src/libultra/monegi/thread/stopthread.o(.text);
         build/asm/87A80.o(.text);
@@ -439,7 +439,7 @@ SECTIONS
         build/asm/87510.o(.data);
         build/asm/87600.o(.data);
         build/src/libultra/monegi/thread/getthreadpri.o(.data);
-        build/asm/877D0.o(.data);
+        build/src/libultra/monegi/thread/setthreadpri.o(.data);
         build/asm/878A0.o(.data);
         build/src/libultra/monegi/thread/stopthread.o(.data);
         build/asm/87A80.o(.data);
@@ -664,7 +664,7 @@ SECTIONS
         build/asm/87510.o(.rodata);
         build/asm/87600.o(.rodata);
         build/src/libultra/monegi/thread/getthreadpri.o(.rodata);
-        build/asm/877D0.o(.rodata);
+        build/src/libultra/monegi/thread/setthreadpri.o(.rodata);
         build/asm/878A0.o(.rodata);
         build/src/libultra/monegi/thread/stopthread.o(.rodata);
         build/asm/87A80.o(.rodata);
@@ -916,7 +916,7 @@ SECTIONS
         build/asm/87510.o(.bss);
         build/asm/87600.o(.bss);
         build/src/libultra/monegi/thread/getthreadpri.o(.bss);
-        build/asm/877D0.o(.bss);
+        build/src/libultra/monegi/thread/setthreadpri.o(.bss);
         build/asm/878A0.o(.bss);
         build/src/libultra/monegi/thread/stopthread.o(.bss);
         build/asm/87A80.o(.bss);

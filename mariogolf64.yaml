@@ -226,7 +226,7 @@ segments:
       - [0x87510, asm]
       - [0x87600, asm]
       - [0x877B0, c, libultra/monegi/thread/getthreadpri]
-      - [0x877D0, asm]
+      - [0x877D0, c, libultra/monegi/thread/setthreadpri]
       - [0x878A0, asm]
       - [0x879C0, c, libultra/monegi/thread/stopthread]
       - [0x87A80, asm]
