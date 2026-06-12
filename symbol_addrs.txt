@@ -19,3 +19,5 @@ nuContDataLockKey = 0x800FED38; // size:0x4
 __OSGlobalIntMask = 0x800C9470; // size:0x4
 __osBaseCounter = 0x800FBE04; // size:0x4
 __osCurrentTime = 0x801052F0; // size:0x8
+nuPiSramHandle = 0x8012F4D8; // size:0x4
+errno = 0x800FE3D0; // size:0x4

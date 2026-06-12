@@ -56,6 +56,10 @@ endif
 # libultra was built with -O2, so this override is libkmc-only.
 LIBKMC_CFLAGS := $(subst -O2,-O,$(CFLAGS))
 
+# libnusys nuPi* files require USE_EPI to enable the function body
+# (the upstream Makefile sets DEFINES := USE_EPI=1 for all nusys source).
+LIBNUSYS_CFLAGS := $(CFLAGS) -DUSE_EPI
+
 # Directories
 SRC_DIR := src
 
@@ -150,6 +154,15 @@ $(BUILD_DIR)/$(SRC_DIR)/%.o: $(SRC_DIR)/%.c
 # generic src/% rule when both match.
 $(BUILD_DIR)/$(SRC_DIR)/libkmc/%.o: $(SRC_DIR)/libkmc/%.c
 	$(CC) -S $(LIBKMC_CFLAGS) -o $@.s $<
+	tools/cc/as -EB -mips2 -I include -o $@.tmp $@.s
+	cp $@.tmp $@
+	$(STRIP) $@ -N dummy-symbol-name
+	rm $@.s $@.tmp
+
+# libnusys compile profile: adds -DUSE_EPI for nuPi* files that guard their body
+# behind #ifdef USE_EPI (see LIBNUSYS_CFLAGS). Pattern-rule specificity beats generic src/%.
+$(BUILD_DIR)/$(SRC_DIR)/libnusys/%.o: $(SRC_DIR)/libnusys/%.c
+	$(CC) -S $(LIBNUSYS_CFLAGS) -o $@.s $<
 	tools/cc/as -EB -mips2 -I include -o $@.tmp $@.s
 	cp $@.tmp $@
 	$(STRIP) $@ -N dummy-symbol-name
