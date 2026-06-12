@@ -25,6 +25,15 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 23 — mirror: osEPiStartDma (libultra recover-extern, 2nd nintendo/pi leaf) — 2026-06-12
+- Increment: 1 file banked / 1 fn matched (delta: md5-candidate files 38→39)
+- Quality: 0/0/0/0 (stuck-far/permuter/carried/re-opened) — verbatim mirror, 0 iterations; goal met first pass
+- Seed: committed 2pt; banked 2pt; regime mirror   (v1 — story points; realized tier is v2, untouched this pure-mirror sprint)
+- What helped: clean single-fn recover-extern, sibling of S22 epilinkhandle in the now-warm `nintendo/pi/` band (`piint.h` + `PR/ultraerror.h` pre-in-tree). `__osPiDevMgr`=0x800C7E70 recovered deterministically from the fn's own `lui 0x800c`/`lw 0x7e70` (`.active` off0 = struct base); size 0x1C confirmed by the gap to the already-placed `__osPiTable`=0x800C7E8C (OSDevMgr = 7 words). `osEPiStartDma` name pre-curated → no func symbol add at the gate. Asm jals matched upstream (no jal-count-mismatch), `_DEBUG` blocks compiled out.
+- Friction: **an unplaced *function* callee (`osPiGetCmdQueue`=0x800B06F0) link-failed the verbatim mirror in the execution middle** — the gate `make extract && make` passed green because the INCLUDE_ASM scaffold resolves the jal directly, so the missing C symbol only bit once the body called it by name. `pick_target.py`'s `refs-unplaced` grep had reported epidma clean: it *excludes anything called* (assumed splat's undefined_funcs_auto resolves all callees), but a callee labelled `func_<addr>` (unnamed in both files) has no `<name>` to bind. Recovered the vram from its jal target, added `// type:func` add-only, re-extract+make → green. A false-clean the gate could not catch — the motivating defect for both fixes below.
+- Applied: 2 of 2 — #1 (`pick_target.py` new `calls-unplaced:<fn>@0x<addr>` hazard, the function dual of `refs-unplaced` — greps upstream `name(` calls vs both name files, comment/string/dead-block-stripped to kill copyright-header + format-string noise; inlines the vram from the `func_<addr>` jal when unambiguous; verified it now flags `nuContDataGetEx`→`nuContDataOpen`@0x800A2CAC) + #2 (CLAUDE.md recover-extern bullet: reconcile the **full data+function callee list** against the name files in the same gate disassemble pass; note the gate build-check is blind to this class)
+- Carry-over: none
+
 ## Sprint 22 — mirror: osEPiLinkHandle (libultra recover-extern, first nintendo/ dir) — 2026-06-12
 - Increment: 1 file banked / 1 fn matched (delta: md5-candidate files 37→38)
 - Quality: 0/0/0/0 (stuck-far/permuter/carried/re-opened) — verbatim mirror, 0 iterations; goal met first pass

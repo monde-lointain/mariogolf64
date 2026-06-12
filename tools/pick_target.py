@@ -639,6 +639,77 @@ def recover_unplaced_vram(rom_off):
     return sorted(addrs)
 
 
+# splat labels a callee whose vram is in NEITHER name file `func_<8-hex>` in the asm jal; a
+# *placed* callee shows its real name. So every `jal func_<addr>` is, by construction, an
+# unplaced *function* reference — the function dual of the unnamed-data `D_<addr>` label.
+FUNC_JAL_RE = re.compile(r"\bjal\s+func_([0-9A-Fa-f]{8})\b")
+
+# Strip C comments and string literals so neither a copyright header
+# (`/* ... Copyright (C) ... Ohki ... */`) nor a format string
+# (`osSyncPrintf("... address(0x%X) ...")`) can masquerade as a `name(` call token.
+_BLOCK_COMMENT_RE = re.compile(r"/\*.*?\*/", re.DOTALL)
+_LINE_COMMENT_RE = re.compile(r"//[^\n]*")
+_STRING_LIT_RE = re.compile(r'"(?:\\.|[^"\\\n])*"')
+
+
+def _strip_comments(text):
+    """Blank C comments then string literals (comments first, so a `"` inside one is gone)."""
+    text = _LINE_COMMENT_RE.sub("", _BLOCK_COMMENT_RE.sub(" ", text))
+    return _STRING_LIT_RE.sub('""', text)
+
+
+def calls_unplaced(cpath, primary, placed):
+    """Functions the upstream .c *calls* by name that are absent from BOTH name files — the
+    function dual of refs_unplaced. A verbatim mirror link-FAILS on these once the C body calls
+    them by name: splat's undefined_funcs_auto only resolves a callee whose vram carries a name,
+    so a callee labelled `func_<addr>` in the asm (unnamed in both files) has no `<name>` symbol
+    for the C reference to bind. The gate build-check can't catch this — the INCLUDE_ASM scaffold
+    resolves the jal directly, so the symbol is only needed once the C body calls by name (S23:
+    osPiGetCmdQueue@0x800B06F0, missed by refs_unplaced precisely because it *excludes* anything
+    called). A non-empty result is the `calls-unplaced` DoR hazard → the gate recovers each
+    callee's vram from its asm jal target and adds `<name> = 0x<addr>; // type:func` to
+    symbol_addrs.txt (add-only) BEFORE the flip. Heuristic, gate-confirmed: a `name(` call token
+    in the dead-block-stripped body (so a dead `#ifdef _DEBUG` call like __osError does not
+    over-flag), not a control keyword, not defined in the same file (those resolve locally), and
+    absent from placed. A function-like macro could over-flag; the gate reconciles against the
+    asm jals (the same disassemble pass that confirms the recover-extern vram)."""
+    try:
+        text = open(cpath, errors="ignore").read()
+    except OSError:
+        return []
+    defined = {name for name, _ in _iter_upstream_functions(text)}
+    body = _strip_dead_blocks(_strip_comments(text))
+    called = {n for n in C_CALL_RE.findall(body) if n not in _C_NONCALL}
+    return sorted(n for n in called if n not in placed and n not in defined)
+
+
+def recover_unplaced_call_vram(rom_off, primary):
+    """Addresses of `primary`'s *unnamed* jal targets (`jal func_<hex>`) in asm/<ROM>.s — the
+    callees splat couldn't name because they're absent from both name files. The function dual of
+    recover_unplaced_vram (data). Returns a sorted list of distinct addresses; the caller binds
+    name→vram only when unambiguous (one unplaced upstream call ∩ one unnamed jal). The gate
+    confirms before any symbol_addrs add."""
+    path = os.path.join(ROOT, "asm", f"{rom_off:X}.s")
+    if not os.path.exists(path):
+        return []
+    in_fn, addrs = False, set()
+    with open(path) as f:
+        for line in f:
+            m = GLABEL_RE.match(line)
+            if m:
+                if in_fn:
+                    break
+                in_fn = m.group(1) == primary
+                continue
+            if not in_fn:
+                continue
+            if line.lstrip().startswith("endlabel"):
+                break
+            for h in FUNC_JAL_RE.findall(line):
+                addrs.add(int(h, 16))
+    return sorted(addrs)
+
+
 def band_mirror_dir(lib, up_path):
     """Project mirror directory for an upstream file: src/lib<...>/<upstream-rel-dir>."""
     tree = dict(UPSTREAM_TREES).get(lib, LIBULTRA)
@@ -738,7 +809,7 @@ def seed_points(size, upstream, band, nfns, hazards, blocked):
     pack = nfns > 1
     drop = ("file-static" in hazards) or ("defines-data" in hazards)  # → classical fallback
     needs_copy = "needs-header" in hazards  # a copyable companion header (blocked ones already 'blk')
-    recover = "refs-unplaced" in hazards  # asm-data-recovery enabler before the mirror links
+    recover = ("refs-unplaced" in hazards) or ("calls-unplaced" in hazards)  # symbol-recovery enabler before the mirror links
     big = size >= 768
     huge = size >= 1536
     if huge or (classical and pack):
@@ -832,6 +903,16 @@ def build_rows(args, upstream_index, carried, sig_index):
                 else:
                     refs = unplaced
                 hazards.append("refs-unplaced:" + ",".join(refs))  # asm-data-recovery before flip
+            unplaced_calls = calls_unplaced(up_path, primary, placed_symbols())
+            if unplaced_calls:
+                # Annotate the recovered vram inline when unambiguous (one unplaced call ∩ one
+                # unnamed jal), mirroring refs-unplaced, so the gate copy-pastes the func entry.
+                ccands = recover_unplaced_call_vram(off, primary)
+                if len(unplaced_calls) == 1 and len(ccands) == 1:
+                    crefs = [f"{unplaced_calls[0]}@0x{ccands[0]:08X}"]
+                else:
+                    crefs = unplaced_calls
+                hazards.append("calls-unplaced:" + ",".join(crefs))  # recover func symbol before flip
             missing = missing_includes(up_path)
             if missing:
                 hazards.append("needs-header:" + ",".join(missing))

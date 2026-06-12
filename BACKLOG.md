@@ -275,6 +275,18 @@ v2 needs; clean mirror leaves remain the near-zero-risk default between classica
   rom offset, for the recover-extern re-confirm) + #2 (`pick_target.py` `vram` column). The
   re-confirm caught a target-fn vram guess error this sprint — see RETRO/VELOCITY. No carry-overs.
 
+- **Sprint 23: 1 file BANKED — `src/libultra/nintendo/pi/epidma.c` (`osEPiStartDma`), libultra
+  recover-extern mirror.** md5-candidate 38→39. 2nd `nintendo/pi/` leaf (sibling of S22
+  epilinkhandle; band now warm). One recover-extern (`__osPiDevMgr`=0x800C7E70, OSDevMgr struct →
+  size:0x1C, confirmed from the fn's own `lui 0x800c`/`lw 0x7e70` `.active` off0 + the gap to
+  placed `__osPiTable`). Verbatim cp, 0 iterations. seed 2 / banked 2pt. **New false-clean class
+  surfaced:** an unplaced *function* callee (`osPiGetCmdQueue`=0x800B06F0) link-failed in the
+  execution middle — pick's `refs-unplaced` excludes anything called, and the INCLUDE_ASM
+  gate-build resolves the jal directly so `make extract && make` stayed green. Recovered from its
+  jal target add-only. Retro: **2 of 2 applied** — #1 (`pick_target.py` `calls-unplaced:<fn>@addr`
+  hazard, the function dual of `refs-unplaced`) + #2 (CLAUDE.md: reconcile the full data+function
+  callee list at the gate). No carry-overs.
+
 ## PO ordering note (S16 retro — the false-clean class is closed; deeper nusys leaves now priced)
 
 The S16 grep fix re-priced the nuGfx*FuncSet leaves (now pts-3 recover-extern, was false-clean
