@@ -3,3 +3,5 @@ __osDpDeviceBusy = 0x800B2B10; // type:func
 __osThreadTail = 0x800C8220; // size:0x8
 __osRunQueue = 0x800C8228; // size:0x4
 osViSetYScale = 0x800AD370; // type:func
+nuGfxDisplay = 0x80104E6C; // size:0x4
+nuGfxTaskSpool = 0x8012D478; // size:0x4
