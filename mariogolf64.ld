@@ -236,7 +236,7 @@ SECTIONS
         build/asm/88770.o(.text);
         build/src/libultra/monegi/vi/viswapbuf.o(.text);
         build/asm/88810.o(.text);
-        build/asm/88B20.o(.text);
+        build/src/libultra/monegi/vi/viblack.o(.text);
         build/asm/88B80.o(.text);
         build/asm/88D80.o(.text);
         build/asm/88EA0.o(.text);
@@ -459,7 +459,7 @@ SECTIONS
         build/asm/88770.o(.data);
         build/src/libultra/monegi/vi/viswapbuf.o(.data);
         build/asm/88810.o(.data);
-        build/asm/88B20.o(.data);
+        build/src/libultra/monegi/vi/viblack.o(.data);
         build/asm/88B80.o(.data);
         build/asm/88D80.o(.data);
         build/asm/88EA0.o(.data);
@@ -683,7 +683,7 @@ SECTIONS
         build/asm/88770.o(.rodata);
         build/src/libultra/monegi/vi/viswapbuf.o(.rodata);
         build/asm/88810.o(.rodata);
-        build/asm/88B20.o(.rodata);
+        build/src/libultra/monegi/vi/viblack.o(.rodata);
         build/asm/88B80.o(.rodata);
         build/asm/88D80.o(.rodata);
         build/asm/88EA0.o(.rodata);
@@ -934,7 +934,7 @@ SECTIONS
         build/asm/88770.o(.bss);
         build/src/libultra/monegi/vi/viswapbuf.o(.bss);
         build/asm/88810.o(.bss);
-        build/asm/88B20.o(.bss);
+        build/src/libultra/monegi/vi/viblack.o(.bss);
         build/asm/88B80.o(.bss);
         build/asm/88D80.o(.bss);
         build/asm/88EA0.o(.bss);

@@ -247,7 +247,7 @@ segments:
       - [0x88770, asm]
       - [0x887C0, c, libultra/monegi/vi/viswapbuf]
       - [0x88810, asm]
-      - [0x88B20, asm]
+      - [0x88B20, c, libultra/monegi/vi/viblack]
       - [0x88B80, asm]
       - [0x88D80, asm]
       - [0x88EA0, asm]
