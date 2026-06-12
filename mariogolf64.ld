@@ -137,7 +137,7 @@ SECTIONS
         build/asm/7C830.o(.text);
         build/asm/7C960.o(.text);
         build/asm/7C9A0.o(.text);
-        build/asm/7C9E0.o(.text);
+        build/src/libnusys/mainlib/nugfxswapcfb.o(.text);
         build/asm/7CA00.o(.text);
         build/asm/7CA20.o(.text);
         build/asm/7CAA0.o(.text);
@@ -361,7 +361,7 @@ SECTIONS
         build/asm/7C830.o(.data);
         build/asm/7C960.o(.data);
         build/asm/7C9A0.o(.data);
-        build/asm/7C9E0.o(.data);
+        build/src/libnusys/mainlib/nugfxswapcfb.o(.data);
         build/asm/7CA00.o(.data);
         build/asm/7CA20.o(.data);
         build/asm/7CAA0.o(.data);
@@ -586,7 +586,7 @@ SECTIONS
         build/asm/7C830.o(.rodata);
         build/asm/7C960.o(.rodata);
         build/asm/7C9A0.o(.rodata);
-        build/asm/7C9E0.o(.rodata);
+        build/src/libnusys/mainlib/nugfxswapcfb.o(.rodata);
         build/asm/7CA00.o(.rodata);
         build/asm/7CA20.o(.rodata);
         build/asm/7CAA0.o(.rodata);
@@ -838,7 +838,7 @@ SECTIONS
         build/asm/7C830.o(.bss);
         build/asm/7C960.o(.bss);
         build/asm/7C9A0.o(.bss);
-        build/asm/7C9E0.o(.bss);
+        build/src/libnusys/mainlib/nugfxswapcfb.o(.bss);
         build/asm/7CA00.o(.bss);
         build/asm/7CA20.o(.bss);
         build/asm/7CAA0.o(.bss);
