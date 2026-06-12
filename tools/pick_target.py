@@ -73,7 +73,7 @@ INCLUDE_RE = re.compile(r'^\s*#\s*include\s*[<"]([^>"]+)[>"]')
 # The project's quoted/angle include search dirs (Makefile CFLAGS `-I` set, under -nostdinc).
 INCLUDE_DIRS = [
     os.path.join(ROOT, d)
-    for d in ("include", "include/libultra", "include/libultra/internal", "include/libkmc")
+    for d in ("include", "include/libultra", "include/libultra/internal", "include/libkmc", "include/libnusys")
 ]
 PROJECT_INC = os.path.join(ROOT, "include")
 # Upstream include trees a missing companion header can be *copied from* (the execution-middle
@@ -84,6 +84,9 @@ PROJECT_INC = os.path.join(ROOT, "include")
 UPSTREAM_INC_ROOTS = [
     os.path.expanduser("~/development/repos/libultra_modern/include"),
     os.path.expanduser("~/development/repos/libkmc/include"),
+    os.path.expanduser(
+        "~/development/repos/n64sdkmod/packages/libnusys/usr/src/PR/libsrc/nusys-2.07/nusys/include"
+    ),
 ]
 UPSTREAM_BONUS = 200
 CARRYOVER_PENALTY = 1000

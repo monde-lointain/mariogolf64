@@ -180,6 +180,34 @@ v2 needs; clean mirror leaves remain the near-zero-risk default between classica
   No carry-overs. **Note:** corrects the "warm clean-singleton pool mined out" claim — that was
   vi-band-specific; the **thread band still yields zero-enabler clean leaves** (siblings remain).
 
+- **Sprint 15: 1 file BANKED — `src/libnusys/mainlib/nugfxswapcfb.c` (`nuGfxSwapCfb`), FIRST
+  libnusys upstream-mirror; the libnusys band is now UNLOCKED.** md5-candidate 24→25; matched
+  26→27/2090 (~1.29%). Acted on the S13 retro #1 highest-throughput lever: the include-blocked
+  libnusys band. Paid a one-time scaffolding enabler — copy the single self-contained `nusys.h`
+  (deps `<ultra64.h>`+`<PR/gs2dex.h>`, both already in-tree) to `include/libnusys/nusys.h` + add
+  `-I include/libnusys` to CFLAGS — then mirrored the smallest leaf to prove it. Callee
+  `osViSwapBuffer` banked S5, name pre-curated (`nuGfxSwapCfb`@0x800A15E0 in ghidra_symbols →
+  zero symbol add). Verbatim cp, first-pass clean (0/0/0/0). seed 3 (cold floor 2 + enabler 1) /
+  banked 3pt. Retro: **2 of 3 applied** — **#1** un-blk the nusys ranker (`+include/libnusys` in
+  `pick_target.py` INCLUDE_DIRS + nusys upstream-inc root; the whole nuGfx*/nuCont* band now
+  ranks as pts-2 cold mirrors, no longer `blk`) + **#2** the libnusys path-mirror convention in
+  CLAUDE.md. No carry-overs.
+
+## PO ordering note (S15 retro — the libnusys band is open; sibling-batch it; #3 carried)
+
+The S15 enabler is paid once. Three live ordering facts for the next gate:
+- **The nuGfx*/nuCont* band is now a deep pool of zero-enabler cold mirrors** (S15 retro #3,
+  guidance-only). `pick_target` surfaces them pickable at pts 2: `nuGfxTaskAllEndWait` (0x7CA00,
+  32B), `nuGfxDisplayOff` (0x7CAA0, 48B), `nuPreNMIFuncSet`, `nuGfxFuncSet`, `nuGfxSwapCfbFuncSet`,
+  `nuContInit`, … all single-fn, no hazard. **Next sprint: sibling-batch 2 of them** (the S4/S5
+  zero-enabler pair pattern) now that the `-I`/header enabler is amortized.
+- **Watch for nusys multi-fn packs.** `nuContQueryRead` (0x7E330) is a `pack:2fn` with an
+  un-named sibling (`func_800A2F50`) — needs a subseg split at the upstream-file boundary, like
+  the S10 dp pack. Prefer the clean single-fn leaves first.
+- **The classical / v2-residual track is still owed a non-trivial leaf** (carried from S11/S12/
+  S13 notes). The mirror band reopening (libnusys) is the lower-risk default, but v2's residual
+  signal still needs a genuine `maybe-upstream`-cleared classical leaf to grow the realized tier.
+
 ## PO ordering note (S13 retro — the mirror band is far bigger than `none` showed; 2 facts)
 
 The S13 tooling fixes reclassified a large slice of the "classical" backlog as **un-named SDK

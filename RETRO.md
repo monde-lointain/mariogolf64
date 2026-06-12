@@ -25,6 +25,15 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 15 — mirror: nuGfxSwapCfb (libnusys band unlock) — 2026-06-11
+- Increment: 1 file banked / 1 fn matched (delta: ~1.24% → ~1.29%; md5-candidate files 24→25)
+- Quality: 0/0/0/0 (stuck-far/permuter/carried/re-opened) — verbatim mirror, 0 iterations; goal met first pass
+- Seed: committed 3pt; banked 3pt; regime mirror (cold floor 2 + 1 scaffolding-enabler unlock) — v1, mirror track seed-only
+- What helped: the S13 retro's libnusys upstream-index made the band visible; the unlock was cheap because `nusys.h` is one self-contained header (deps `<ultra64.h>`+`<PR/gs2dex.h>` both already in-tree) and the only callee `osViSwapBuffer` was banked S5 — so the whole enabler was `cp nusys.h` + one `-I` CFLAGS line + one yaml flip, zero symbol adds (`nuGfxSwapCfb`@0x800A15E0 pre-curated). One paid-once enabler converts the entire nuGfx*/nuCont* band to pts-2 cold mirrors (verified: ranker now shows them pickable, no longer `blk`).
+- Friction: none mechanically. The only subtlety was the gate-vs-execution split — the `-I`/header enabler is inert until the real `.c` lands, so the gate's `make extract && make` proves the flip stays green but not that the unlock *compiles*; that proof came in the execution-middle build (also green). Worth keeping in mind for future band-unlock sprints.
+- Applied: 2 of 3 — #1 (un-blk the nusys ranker: `+include/libnusys` in `pick_target.py` INCLUDE_DIRS + nusys upstream-inc root) + #2 (CLAUDE.md libnusys path-mirror convention + `-I` list). (#3 sibling-batch the nuGfx* band — guidance only, carried to BACKLOG ordering note, no file edit.)
+- Carry-over: none
+
 ## Sprint 14 — mirror: osSetThreadPri (thread band, open-band fast-path) — 2026-06-11
 - Increment: 1 file banked / 1 fn matched (delta: ~1.20% → ~1.24%; md5-candidate files 23→24)
 - Quality: 0/0/0/0 (stuck-far/permuter/carried/re-opened) — verbatim mirror, 0 iterations; goal met first pass

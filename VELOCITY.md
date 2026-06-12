@@ -86,16 +86,18 @@ until v2. These rows double as the **reference stories** for the plan-time ±1 a
 | 12 | yieldthread | 1 | mirror / warm / recover-extern | 2 | *2* | 2nd thread-band leaf (sibling of S8 stopthread); 10th straight clean mirror. seed 2 = warm-1 floor +1 for the `refs-unplaced` recover-extern enabler (`__osRunQueue`@0x800C8228, recovered at the S11 gate). Verbatim cp, 0 iterations, zero header copies, one symbol add. Mirror track stays seed-only — `(real)` illustrative |
 | 13 | visetyscale | 1 | mirror / warm / — | 1 | *1* | 6th vi-band mirror (`osViSetYScale`). **Seed-miss event:** pick mis-seeded it **5** (mislabeled classical, un-named func_800AD370) — corrected to **1** at the gate after asm-vs-upstream confirmed the libultra mirror. Verbatim cp, 0 iterations, zero header copies, one symbol add. Motivated the S13 retro's pick_target signature-matcher + 3-lib scan. Mirror track stays seed-only — `(real)` illustrative |
 | 14 | setthreadpri | 1 | mirror / warm / — | 1 | *1* | 3rd thread-band mirror (`osSetThreadPri`, after S8 stopthread + S12 yieldthread). Seed **correct first time** (pick said 1/mirror, no gate correction). Largest mirror banked to date (208 B, queue dequeue/enqueue + yield branch) yet still pts 1 → confirms byte-gate-dormant calibration. Verbatim cp, 0 iterations, name pre-curated, all 7 refs + 3 headers pre-placed — **one yaml flip the only enabler** (zero symbol add, zero header copy). Retro applied #3 open-band fast-path. Mirror track stays seed-only — `(real)` illustrative |
+| 15 | nugfxswapcfb | 1 | mirror / cold / band-unlock | 3 | *3* | **1st libnusys row — opens the whole nuGfx*/nuCont* band.** seed 3 = cold-mirror floor 2 + 1 scaffolding-enabler (`-I include/libnusys` CFLAGS + verbatim `nusys.h`, deps `<ultra64.h>`+`<PR/gs2dex.h>` both in-tree; callee `osViSwapBuffer` banked S5). One paid-once enabler, then the band ranks as pts-2 cold mirrors. Verbatim cp, 0 iterations, name pre-curated (`nuGfxSwapCfb`@0x800A15E0 in ghidra_symbols → zero symbol add). Retro applied #1 (un-blk nusys ranker `-I`) + #2 (CLAUDE.md libnusys path table). Mirror track stays seed-only — `(real)` illustrative |
 
 **Seed-velocity = 2.0 pt/sprint** (bootstrap anchors S1–5, sum seed 10 / 5 sprints). With the
 live-logged mirror sprints S6 (seed 1) + S7 (seed 2) + S8 (seed 1) + S12 (seed 2) + S13 (seed 1)
-+ S14 (seed 1), the
-running mirror-regime seed-velocity is 18 pt / 11 sprints = **1.64 pt/sprint** — the predicted
-downward drift as the warm singleton pool depletes (S6 last clean vi leaf; S7 opened the *cold*
++ S14 (seed 1) + S15 (seed 3), the
+running mirror-regime seed-velocity is 21 pt / 12 sprints = **1.75 pt/sprint** — the warm-pool
+downward drift reverses as a *new* cold band opens (S6 last clean vi leaf; S7 opened the *cold*
 convert band at the 2 pt floor; S8 the warm-1 thread leaf; S12 the warm-2 recover-extern thread
 leaf; S13 6th vi mirror; S14 3rd thread mirror — note S14 was a **zero-enabler warm singleton**
 (one yaml flip), so the "warm clean-singleton pool mined out" claim is **vi-band-specific**, not
-project-wide: the thread band still yields zero-enabler clean leaves). **S9 is the first classical-track row** (seed 5,
+project-wide: the thread band still yields zero-enabler clean leaves; S15 paid a one-time
++1 enabler to open the *cold* libnusys band — a fresh deep pool of pts-2 cold mirrors). **S9 is the first classical-track row** (seed 5,
 banked 5, first-pass clean) — logged separately, NOT folded into the mirror 1.75 average
 (never compare regimes). Classical track: **n=2** (S9 seed 5 / realized
 illustrative; S11 seed 5 / **realized 5 logged**), seed-velocity 5 pt/sprint. S9 proved the loop
