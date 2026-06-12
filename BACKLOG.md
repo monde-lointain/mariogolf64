@@ -28,6 +28,13 @@ count emerges.
   `cpp-mips-linux-gnu`, now guarded in the Makefile (`pipefail` + missing-`$(CPP)` abort).
   No carry-overs.
 
+- **Sprint 2: 1 file BANKED — `src/libultra/monegi/message/createmesgqueue.c`
+  (`osCreateMesgQueue`), libultra upstream-mirror.** md5-candidate 8→9; matched 10→11/2090
+  (~0.53%). 7th `monegi/` mirror. New data extern `__osThreadTail`=0x800C8220 recovered from
+  the fn's own asm (`lui/addiu`) and added add-only to `symbol_addrs.txt`. Clean first-pass
+  match (0/0/0/0). Retro codified the asm-data-recovery pattern + an include-resolvability
+  hazard (audio band needs `-I include/libultra/PR`). No carry-overs.
+
 ## Enabler items (gate-time, agent-performed since 2026-06-11)
 
 These are the gate-time enabler actions a sprint may need before its execution middle can run
