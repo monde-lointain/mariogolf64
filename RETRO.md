@@ -25,6 +25,15 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 35 — osStartThread + vi-getter trio (4 verbatim mirrors) — 2026-06-12
+- Increment: 4 files banked / 4 fns matched (delta: md5-candidate files 62→66)
+- Quality: stuck-far 0 / permuter 0 / carried 0 / re-opened 0
+- Seed: committed 16pt; banked 16pt; regime mirror   (v1 — story points; mirror track seed-only)
+- What helped: disassemble-first before presuming "drops needed" — the jal-count-mismatch:9vs7 on osStartThread resolved verbatim (GCC -O3 tail-merging shares one jal across 3 switch-case paths); mmuldi3.s vendor sidestep unblocked hasm consolidation cleanly
+- Friction: preliminary "2 dropped jals" assessment in DoR notes required extra disassembly verification that turned out to be unnecessary; future small mismatches should default to try-verbatim-first
+- Applied: 1 of 1 (#1 CLAUDE.md `jal-count-mismatch` bullet: small ≤2 mismatch + identical-arg multi-branch → try verbatim first; document tail-merge case)
+- Carry-over: none
+
 ## Sprint 34 — mixed: osJamMesg + osRecvMesg (libultra message-queue pair, warm mirrors) + osAiSetNextBuffer (libultra AI, classical static-drop) — 2026-06-12
 - Increment: 3 files banked / 3 fns matched (delta: md5-candidate files 59→62; matched 66→69)
 - Quality: 0/0/0/0 (stuck-far/permuter/carried/re-opened) — goal met
