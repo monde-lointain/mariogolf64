@@ -14,10 +14,13 @@ tiny/uniform — see `CLAUDE.md ## Story points`):
   today. The seed is a pure function of `tools/pick_target.py`'s columns, so it is
   **re-derivable** — it needs no anti-retrofit freeze commit, and the plan gate creates no
   commit. The committed seed is logged here in the normal review/retro commit.
-- **v2 (deferred): the realized-tier + residual + rolling/re-anchor machinery.** Dormant until
-  the **first classical or mixed sprint** produces real residual variance to calibrate against
-  (turning it on against the current 5 identical verbatim sprints would only measure a point
-  mass). Designed in `CLAUDE.md`; activated by PO approval at the review that hits the trigger.
+- **v2 (ACTIVE since Sprint 11, 2026-06-11): the realized-tier + residual + rolling/re-anchor
+  machinery.** Was dormant until the **first classical or mixed sprint** produced real residual
+  variance to calibrate against (turning it on against the 5 identical verbatim mirror sprints
+  would only measure a point mass). S11 (`func_800AB600`) was that sprint — a non-trivial
+  classical leaf whose seed compiled at 0.80 and matched only after a fix-iteration — so the PO
+  activated v2 at the S11 review. The realized tier is now scored per-sprint on the **classical
+  track**; the mirror track stays seed-only (still a point mass there).
 
 ## Purpose — what the v1 number actually changes
 1. **8-point decompose gate (primary).** A seed of **8 or 13 means do NOT commit it as a normal
@@ -50,7 +53,7 @@ mirror (has upstream): base = 1 if warm else 2;  +1 each for {static/data-drop, 
 dir already holds a banked sibling (enabler-free). `big` = size≥768 B, `huge` = ≥1536 B — the
 byte gates are **dormant** in the current <256 B regime and only bite for large/classical fns.
 
-## Realized tier + residual loop — DEFERRED to v2
+## Realized tier + residual loop — ACTIVE (v2, since Sprint 11)
 Scored at review from the RETRO facts (start at the seed band; +1 per
 {stuck-far / permuter / re-attempt / novel bank-gotcha / mid-sprint split / carry-or-reopen};
 −1 verbatim first-try ≤1 fix-iteration; per-file then summed). With it come the two-pass
@@ -58,7 +61,9 @@ Scored at review from the RETRO facts (start at the seed band; +1 per
 (do not over-credit the freeze):** the freeze locks only the deterministic *seed*; the realized
 tier is **agent-scored and subjective**, so the real anti-gaming guards are the **per-file
 all-or-nothing bank + the quality counter-metric** (stuck-far / permuter / carried / re-opened),
-not the freeze. None of this is active in v1.
+not the freeze. **Scope:** applied on the **classical track only** — the mirror track has no
+residual variance to score (still a point mass), so it stays seed-only. **S11 worked example:**
+seed 5, no escalations, single fix-iteration on a non-verbatim leaf → realized 5, residual 0.
 
 ## Bootstrap anchors (retro-pointed S1–5; the calibration loop, pre-run)
 All `regime: mirror`, all tiny verbatim leaves (<256 B). `seed` = the rubric (a-priori, **live
@@ -77,6 +82,7 @@ until v2. These rows double as the **reference stories** for the plan-time ±1 a
 | 8 | stopthread | 1 | mirror / warm / — | 1 | *1* | opens thread band; verbatim, zero-enabler, banked 1pt |
 | 9 | func_80099490 | 1 | **classical** / — / — | 5 | *—* | **first classical-track row** — no-upstream wrapper `nuPiInitSram()`; first-pass clean (score 0, 0 iter), banked 5pt; classical loop PROVEN. Kept OUT of the mirror seed-velocity (separate regime) |
 | 10 | dpsetstat + dpctr | 1+1 | mirror / warm / — | 1+1=2 | *2* | 5th sibling-pair; split 0x86730 pack (osDpSetStatus+osDpGetCounters) at upstream-file boundary; both verbatim, zero-enabler, banked 2pt. 9th straight clean mirror |
+| 11 | func_800AB600 | 1 | **classical** / — / — | 5 | **5** | **2nd classical-track row; v2 ACTIVATED here.** Non-trivial leaf (bit ops + branch + struct RMW). First classical sprint with **real residual variance**: seed compiled 0.80/score 400, matched after **1 fix-iteration** (register-reuse nudge). Realized=5 (seed band; no stuck-far/permuter/re-attempt/split/carry; not a verbatim mirror so the −1 first-try credit doesn't apply). Residual 0 — seed priced it right, but the loop *iterated*, so the realized tier finally has signal. `(real)` is now **logged, not illustrative** |
 
 **Seed-velocity = 2.0 pt/sprint** (bootstrap anchors S1–5, sum seed 10 / 5 sprints). With the
 three live-logged sprints S6 (seed 1) + S7 (seed 2) + S8 (seed 1), the running mirror-regime
@@ -84,10 +90,13 @@ seed-velocity is 14 pt / 8 sprints = **1.75 pt/sprint** — the predicted downwa
 warm singleton pool depletes (S6 last clean vi leaf; S7 opened the *cold* convert band at the
 2 pt floor; S8 the warm-1 thread leaf). **S9 is the first classical-track row** (seed 5,
 banked 5, first-pass clean) — logged separately, NOT folded into the mirror 1.75 average
-(never compare regimes). Classical track: n=1, seed-velocity 5 pt/sprint (one point, no signal
-yet). It proved the classical loop mechanically but produced **zero residual variance** (clean
-verbatim-shaped wrapper), so the PO **deferred v2** at the S9 review — a non-trivial classical
-leaf (arithmetic/branches/locals) is scheduled next to generate the variance v2 needs.
+(never compare regimes). Classical track: **n=2** (S9 seed 5 / realized
+illustrative; S11 seed 5 / **realized 5 logged**), seed-velocity 5 pt/sprint. S9 proved the loop
+mechanically but produced **zero residual variance** (clean wrapper); **S11 produced the first
+real variance** (non-trivial leaf, seed compiled 0.80, matched after 1 fix-iteration), so the
+PO **activated v2** at the S11 review. The realized tier is now live on this track; its first
+two data points both land at seed (residual 0), so the seed rubric is so-far well-calibrated for
+small classical leaves — watch for the first non-zero residual (a stuck-far / permuter / re-attempt).
 Three honest caveats:
 - **Fitted, not validated.** The bands were chosen so this history reads ~2 pt/sprint; the
   first out-of-sample sprint is the real test. The byte gates (768/1536) and the classical
@@ -103,12 +112,16 @@ Three honest caveats:
   before the overlay; its 7-files/sprint outlier would corrupt the per-sprint baseline. It
   stays in `BACKLOG.md` as historical record, out of this calibration.
 
-## Velocity (v1 headline)
-- **Seed-velocity: 2.0 pt/sprint** (mirror regime, n=5, all verbatim). Realized-velocity,
-  rolling windows, residual, and the re-anchor trigger are **v2** (need variance to exist).
-- **Regime:** `mirror` (~22 % of ranked candidates: 56 mirror vs 194 classical; 18 warm /
-  38 cold). The mirror band is a depleting minority — the first classical/mixed sprint trips
-  the v2 activation trigger.
+## Velocity (headline — v1 mirror track + v2 classical track active)
+- **Mirror track (v1): seed-velocity 2.0 pt/sprint** (n=5 anchors, all verbatim; seed-only —
+  the mirror band is a point mass, no realized tier).
+- **Classical track (v2 ACTIVE since S11): n=2, seed 5 pt/sprint, realized 5 pt/sprint, residual 0.**
+  Realized-velocity / rolling-5 / re-anchor are now live here; both data points land at seed so
+  far, so the rubric is well-calibrated for small classical leaves pending the first non-zero residual.
+- **Regime:** `mirror` is a depleting minority (~22 % of ranked candidates: 56 mirror vs 194
+  classical; 18 warm / 38 cold). The warm clean-singleton mirror pool is now **mined out** (S11
+  plan gate: every top mirror candidate carries a blocking hazard), pushing the project onto the
+  classical track — which is exactly what tripped v2.
 - **S7 note:** vi band exhausted of clean leaves (S6), so S7 opened the **cold convert band**
   (`virtualtophysical`, seed 2 = the cold-mirror floor). The S7 retro added a **`refs-unplaced`
   hazard** to `pick_target.py` (a referenced data extern absent from both name files — the dual

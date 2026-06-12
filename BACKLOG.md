@@ -128,18 +128,43 @@ v2 needs; clean mirror leaves remain the near-zero-risk default between classica
   `pick_target.py` (`pack:Nfn[fn=basename,…]` shows each member's upstream file → the gate spots
   a multi-file pack needing a split without disassembling asm/<rom>.s). No carry-overs.
   **Note (#2 carried): the rdp band still has `dpsetnextbuf.c` + `dpgetstat.c` as asm leaves —
-  re-price them next gate, likely another zero-enabler pair.**
+  re-price them next gate, likely another zero-enabler pair.** *(CORRECTED at S11 gate: these
+  do NOT exist as discrete asm leaves in this ROM — 0x86790 is `osGetCount` (intrinsic-likely),
+  0x867A0 is the `osSpTaskLoad` pack. The upstream `.c` files exist but MG64's build doesn't
+  carry those functions here. Do not re-pursue them as a pair.)*
 
-## PO ordering note (S9 retro — defer v2, schedule a non-trivial classical next)
+- **Sprint 11: 1 file BANKED — `src/main/func_800AB600.c` (`func_800AB600`), 2nd classical
+  (no-upstream) match; FIRST sprint with residual variance → v2 ACTIVATED.** md5-candidate
+  20→21; matched 22→23/2090 (~1.10%). PO redirected the gate from the `osYieldThread` mirror to
+  a **non-trivial** classical leaf (S9 ordering note). The fn has real logic — bit ops + a
+  branch + a conditional struct RMW + a `(status>>8)&1` return that Ghidra decompiled **wrong**
+  (`return 0`) — so the classical loop iterated: seed compiled 0.80/score 400, matched after **1
+  fix-iteration** via a **register-reuse nudge** (`bit = status>>8; bit &= 1;`). One yaml flip,
+  zero symbol adds, zero header copies (kept `func_` name). seed 5 / banked 5 / realized 5 /
+  residual 0. Retro: **2 of 3 applied** — **#2 register-reuse nudge** (CLAUDE.md Conventions
+  bullet) + **#3 asm > Ghidra-decompile for classical seeds** (Seed step). The headline decision
+  was **v2 activation** (sign-off, not a file-suggestion): the S9 deferral condition is met, so
+  the realized-tier/residual/rolling-5/re-anchor machinery is now live on the classical track
+  (VELOCITY.md updated). No carry-overs.
 
-The S9 classical spike **proved the loop mechanically but produced zero residual variance**
-(a clean verbatim-shaped wrapper), so the PO **deferred v2** at the S9 review — turning on the
-realized-tier machinery against a point mass would measure nothing. To unlock v2, the next
-classical target should be **non-trivial**: a small no-upstream fn with real arithmetic,
-branches, or locals (NOT a thin wrapper or a register/FPU intrinsic — the new `intrinsic-likely`
-hazard now filters the latter out of the smallest-first pick). Mining clean mirror leaves
-(`__osDequeueThread`/`osYieldThread` in the now-warm thread band, or the cold convert/other
-bands) remains the near-zero-risk default between classical spikes.
+## PO ordering note (S11 retro — v2 active; mirror warm pool mined out)
+
+**v2 is ACTIVE** (since the S11 review). The realized-tier/residual machinery now runs on the
+**classical track**; the mirror track stays seed-only (still a point mass). The classical loop
+is proven both mechanically (S9) and with real variance (S11). Two live ordering facts for the
+next gate:
+- **The warm clean-singleton mirror pool is mined out.** At the S11 gate every top mirror
+  candidate carried a *blocking* hazard: `needs-header` (audio band, `guRandom`, `sprintf`),
+  `file-static` (`sprintf`, `osSpTaskLoad`), `defines-data` (`__osDequeueThread`), or a
+  `refs-unplaced` data extern needing asm-data-recovery (`osYieldThread`/`__osRunQueue`@0x800C8228
+  — already recovered at the S11 gate, ready to use, `osGetTime`, `osEPiLinkHandle`). The
+  cheapest *remaining* mirror is now a recover-one-extern flip, not a zero-enabler `cp`.
+- **Classical is now a first-class option, not just a spike.** With v2 calibrating, continue
+  pulling **non-trivial** small classical leaves (real arithmetic/branches/locals; the
+  `intrinsic-likely` hazard filters register/FPU shims) to grow the realized-tier signal and
+  watch for the first **non-zero residual** (a stuck-far / permuter / re-attempt) — that is the
+  data v2's residual loop actually needs. `osYieldThread` (recovered extern ready) remains the
+  cheapest mirror fallback when a low-risk increment is wanted.
 
 ## Enabler items (gate-time, agent-performed since 2026-06-11)
 

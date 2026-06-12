@@ -25,6 +25,15 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 11 — classical: func_800AB600, first sprint with residual variance (v2 activated) — 2026-06-11
+- Increment: 1 file banked / 1 fn matched (delta: ~1.05% → ~1.10%; md5-candidate files 20→21)
+- Quality: 0/0/0/0 (stuck-far/permuter/carried/re-opened) — matched after 1 fix-iteration, no spike; goal met
+- Seed: committed 5pt; banked 5pt; regime **classical** (realized 5, residual 0 — first v2-logged realized tier)
+- What helped: PO redirected the gate from the `osYieldThread` mirror to a non-trivial no-upstream leaf (S9 ordering note — generate v2 variance). `func_800AB600` had real logic (bit ops + branch + conditional struct RMW + a `(status>>8)&1` return), so the classical loop actually iterated: seed compiled 0.80/score 400, and a **register-reuse nudge** (`bit = status>>8; bit &= 1;` instead of one expression — forces GCC to reuse `a0` for the shift+mask) flipped it to score 0 in one iteration. Byte spot-check identical; full make SHA-1 green. One yaml flip, zero symbol adds, zero header copies (kept the `func_` name like S9)
+- Friction: m2c failed again on the stub-only parent (expected graceful fallback); the Ghidra **decompile was wrong** (rendered the return as `return 0`), so the body had to be hand-translated from the asm listing, not the decompile
+- Applied: 2 of 3 — PO selected #2 + #3. **#2 register-reuse nudge** → new `CLAUDE.md ## Conventions` bullet (split a single expression into two statements over one lvalue when the only diff is a scratch register). **#3 asm > Ghidra decompile** → appended to the classical Seed step (`disassemble_function` is ground truth; the decompile can be silently wrong). **#1 (v2 activation)** was the headline decision, taken in the sign-off (not a file-suggestion): the S9 deferral condition — first classical sprint with real residual variance — is now satisfied, so **v2 is ACTIVE** (realized-tier/residual/rolling-5/re-anchor on the classical track; mirror track stays seed-only). VELOCITY.md updated accordingly
+- Carry-over: none
+
 ## Sprint 10 — bank rdp DPC sibling-pair (dpsetstat.c + dpctr.c) — 2026-06-11
 - Increment: 2 files banked / 2 fns matched (delta: ~0.96% → ~1.05%; md5-candidate files 18→20)
 - Quality: 0/0/0/0 (stuck-far/permuter/carried/re-opened) — both first-pass clean (verbatim mirrors, 0 iterations); goal met
