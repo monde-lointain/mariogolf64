@@ -139,7 +139,7 @@ SECTIONS
         build/src/libnusys/mainlib/nugfxswapcfbfuncset.o(.text);
         build/src/libnusys/mainlib/nugfxswapcfb.o(.text);
         build/src/libnusys/mainlib/nugfxtaskallendwait.o(.text);
-        build/asm/7CA20.o(.text);
+        build/src/libnusys/mainlib/nugfxretracewait.o(.text);
         build/src/libnusys/mainlib/nugfxdisplayoff.o(.text);
         build/asm/7CAD0.o(.text);
         build/asm/7CBD0.o(.text);
@@ -363,7 +363,7 @@ SECTIONS
         build/src/libnusys/mainlib/nugfxswapcfbfuncset.o(.data);
         build/src/libnusys/mainlib/nugfxswapcfb.o(.data);
         build/src/libnusys/mainlib/nugfxtaskallendwait.o(.data);
-        build/asm/7CA20.o(.data);
+        build/src/libnusys/mainlib/nugfxretracewait.o(.data);
         build/src/libnusys/mainlib/nugfxdisplayoff.o(.data);
         build/asm/7CAD0.o(.data);
         build/asm/7CBD0.o(.data);
@@ -588,7 +588,7 @@ SECTIONS
         build/src/libnusys/mainlib/nugfxswapcfbfuncset.o(.rodata);
         build/src/libnusys/mainlib/nugfxswapcfb.o(.rodata);
         build/src/libnusys/mainlib/nugfxtaskallendwait.o(.rodata);
-        build/asm/7CA20.o(.rodata);
+        build/src/libnusys/mainlib/nugfxretracewait.o(.rodata);
         build/src/libnusys/mainlib/nugfxdisplayoff.o(.rodata);
         build/asm/7CAD0.o(.rodata);
         build/asm/7CBD0.o(.rodata);
@@ -840,7 +840,7 @@ SECTIONS
         build/src/libnusys/mainlib/nugfxswapcfbfuncset.o(.bss);
         build/src/libnusys/mainlib/nugfxswapcfb.o(.bss);
         build/src/libnusys/mainlib/nugfxtaskallendwait.o(.bss);
-        build/asm/7CA20.o(.bss);
+        build/src/libnusys/mainlib/nugfxretracewait.o(.bss);
         build/src/libnusys/mainlib/nugfxdisplayoff.o(.bss);
         build/asm/7CAD0.o(.bss);
         build/asm/7CBD0.o(.bss);
