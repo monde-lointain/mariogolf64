@@ -25,6 +25,17 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 14 — mirror: osSetThreadPri (thread band, open-band fast-path) — 2026-06-11
+- Increment: 1 file banked / 1 fn matched (delta: ~1.20% → ~1.24%; md5-candidate files 23→24)
+- Quality: 0/0/0/0 (stuck-far/permuter/carried/re-opened) — verbatim mirror, 0 iterations; goal met first pass
+- Seed: committed 1pt; banked 1pt; regime **mirror** (warm thread-band single-fn; seed correct first time — pick_target said 1/mirror, no gate correction needed; mirror track seed-only)
+- What helped: 3rd thread-band mirror (after getthreadpri, yieldthread) — band fully open, so all 7 refs (`__osRunningThread`/`__osRunQueue`/`__osDequeueThread`/`__osEnqueueThread`/`__osEnqueueAndYield`/`__osDisableInt`/`__osRestoreInt`) + all 3 headers (`PR/os_internal.h`/`PR/ultraerror.h`/`internal/osint.h`) pre-placed and the name pre-curated in `ghidra_symbols.txt`. **One yaml flip the only enabler** — zero symbol adds, zero header copies, no split. Largest mirror banked to date (208 B, real queue dequeue/enqueue + yield branch) yet still pts=1 → reinforces the byte-gate-dormant calibration (effort = path + enabler load, not bytes).
+- Friction: none. Notable: VELOCITY.md's "warm clean-singleton mirror pool mined out (S11)" was vi-band-specific — the **thread band is still warm with clean siblings**; S14 banked one with zero hazards.
+- Applied: 1 of 3 — **#3 open-band fast-path** (CLAUDE.md upstream-mirror bullet: a ≥2-banked-sibling band with a `pick_target` no-hazard candidate skips the agent's redundant manual per-ref re-grep; the fast-path NEVER overrides a flagged hazard — `__osDequeueThread` is the live counterexample, a `defines-data` false-clean inside the warm thread band; gate build-check stays load-bearing). #1 (VELOCITY anchor note re 208 B) + #2 (thread-band sibling-pair BACKLOG note) NOT selected.
+- Carry-over: none.
+
+---
+
 ## Sprint 13 — mirror: osViSetYScale (vi band; un-named-mirror trap → pick_target fix) — 2026-06-11
 - Increment: 1 file banked / 1 fn matched (delta: ~1.15% → ~1.20%; md5-candidate files 22→23)
 - Quality: 0/0/0/0 (stuck-far/permuter/carried/re-opened) — verbatim mirror, 0 iterations; goal met first pass

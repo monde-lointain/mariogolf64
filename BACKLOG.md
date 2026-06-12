@@ -168,6 +168,18 @@ v2 needs; clean mirror leaves remain the near-zero-risk default between classica
   from IDF-weighted shared-callee mass; PO-steer: coddog) + **#2** libnusys/libmus/libnaudio
   added to the upstream index (named nusys fns now classify `libnusys`). No carry-overs.
 
+- **Sprint 14: 1 file BANKED — `src/libultra/monegi/thread/setthreadpri.c` (`osSetThreadPri`),
+  libultra upstream-mirror.** md5-candidate 23→24; matched 25→26/2090 (~1.24%). 3rd thread-band
+  mirror (after S8 `stopthread`, S12 `yieldthread`). Band fully open → all 7 refs + 3 headers
+  pre-placed, name pre-curated → **one yaml flip the only enabler** (zero symbol add, zero header
+  copy, no split). Largest mirror banked to date (208 B, queue dequeue/enqueue + yield branch)
+  yet still seed/banked **1pt** — confirms byte-gate-dormant calibration. Verbatim cp, first-pass
+  clean (0/0/0/0). Retro: **1 of 3 applied** — **#3** open-band fast-path (≥2-banked-sibling band
+  + `pick_target` no-hazard → skip the agent's redundant manual per-ref re-grep; never overrides a
+  flagged hazard, e.g. `__osDequeueThread`'s `defines-data` false-clean still routes normally).
+  No carry-overs. **Note:** corrects the "warm clean-singleton pool mined out" claim — that was
+  vi-band-specific; the **thread band still yields zero-enabler clean leaves** (siblings remain).
+
 ## PO ordering note (S13 retro — the mirror band is far bigger than `none` showed; 2 facts)
 
 The S13 tooling fixes reclassified a large slice of the "classical" backlog as **un-named SDK
