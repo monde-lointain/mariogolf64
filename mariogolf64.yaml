@@ -78,7 +78,7 @@ segments:
     follows_vram: entry
     bss_size: 0x122100
     subsegments:
-      - [0x1050, asm]
+      - [0x1050, c, libnusys/mainlib/nupireadrom]
       - [0x1130, asm]
       - [0x17B0, asm]
       - [0x3700, c, libnusys/mainlib/nugfxinit]
@@ -180,7 +180,9 @@ segments:
       - [0x7E870, asm]
       - [0x7E9F0, asm]
       - [0x7EDB0, c, libultra/nintendo/pi/piacs]
-      - [0x7EEA0, asm]
+      - [0x7EEA0, c, libultra/monegi/ai/aigetlen]
+      - [0x7EEB0, c, libultra/monegi/ai/aigetstat]
+      - [0x7EEC0, asm]
       - [0x7EFE0, c, libultra/monegi/ai/aisetnextbuf]
       - [0x7F080, asm]
       - [0x7F8B0, asm]
@@ -246,7 +248,7 @@ segments:
       - [0x88210, asm]
       - [0x88550, c, libultra/monegi/vi/visetevent]
       - [0x885B0, c, libultra/monegi/vi/visetmode]
-      - [0x88600, asm]
+      - [0x88600, c, libultra/monegi/vi/visetspecial]
       - [0x88770, c, libultra/monegi/vi/visetyscale]
       - [0x887C0, c, libultra/monegi/vi/viswapbuf]
       - [0x88810, asm]

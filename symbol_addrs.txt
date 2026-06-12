@@ -44,3 +44,4 @@ __muldi3 = 0x800B3850; // type:func
 osViGetCurrentFramebuffer = 0x800ACD50; // type:func
 osViGetNextFramebuffer = 0x800ACD90; // type:func
 osViGetCurrentMode = 0x800ACDD0; // type:func
+nuPiCartHandle = 0x801B55C8; // size:0x4
