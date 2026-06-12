@@ -154,7 +154,8 @@ SECTIONS
         build/src/libnusys/mainlib/nucontgbpakgetstatus.o(.text);
         build/src/libnusys/mainlib/nucontgbpakpower.o(.text);
         build/src/libnusys/mainlib/nucontgbpakreadid.o(.text);
-        build/asm/7D710.o(.text);
+        build/src/libnusys/mainlib/nucontgbpakreadwrite.o(.text);
+        build/src/libnusys/mainlib/nucontgbpakcheck.o(.text);
         build/asm/7D7A0.o(.text);
         build/asm/7D970.o(.text);
         build/asm/7DE70.o(.text);
@@ -221,7 +222,7 @@ SECTIONS
         build/src/libultra/monegi/thread/stopthread.o(.text);
         build/asm/87A80.o(.text);
         build/src/libultra/monegi/thread/yieldthread.o(.text);
-        build/asm/87B10.o(.text);
+        build/src/libultra/monegi/time/gettime.o(.text);
         build/asm/87BA0.o(.text);
         build/asm/87C40.o(.text);
         build/asm/87F40.o(.text);
@@ -254,7 +255,8 @@ SECTIONS
         build/asm/8ACA0.o(.text);
         build/asm/8AF90.o(.text);
         build/asm/8B900.o(.text);
-        build/asm/8B990.o(.text);
+        build/src/libultra/nintendo/exception/setglobalintmask.o(.text);
+        build/src/libultra/nintendo/exception/resetglobalintmask.o(.text);
         build/asm/8BA20.o(.text);
         build/asm/8BC80.o(.text);
         build/src/libultra/monegi/ai/ai.o(.text);
@@ -277,7 +279,7 @@ SECTIONS
         build/src/libultra/monegi/si/si.o(.text);
         build/asm/8DF50.o(.text);
         build/asm/8E110.o(.text);
-        build/asm/8E550.o(.text);
+        build/src/libkmc/memset.o(.text);
         build/src/libkmc/rand.o(.text);
         build/asm/8E660.o(.text);
         build/asm/8EAD0.o(.text);
@@ -379,7 +381,8 @@ SECTIONS
         build/src/libnusys/mainlib/nucontgbpakgetstatus.o(.data);
         build/src/libnusys/mainlib/nucontgbpakpower.o(.data);
         build/src/libnusys/mainlib/nucontgbpakreadid.o(.data);
-        build/asm/7D710.o(.data);
+        build/src/libnusys/mainlib/nucontgbpakreadwrite.o(.data);
+        build/src/libnusys/mainlib/nucontgbpakcheck.o(.data);
         build/asm/7D7A0.o(.data);
         build/asm/7D970.o(.data);
         build/asm/7DE70.o(.data);
@@ -446,7 +449,7 @@ SECTIONS
         build/src/libultra/monegi/thread/stopthread.o(.data);
         build/asm/87A80.o(.data);
         build/src/libultra/monegi/thread/yieldthread.o(.data);
-        build/asm/87B10.o(.data);
+        build/src/libultra/monegi/time/gettime.o(.data);
         build/asm/87BA0.o(.data);
         build/asm/87C40.o(.data);
         build/asm/87F40.o(.data);
@@ -479,7 +482,8 @@ SECTIONS
         build/asm/8ACA0.o(.data);
         build/asm/8AF90.o(.data);
         build/asm/8B900.o(.data);
-        build/asm/8B990.o(.data);
+        build/src/libultra/nintendo/exception/setglobalintmask.o(.data);
+        build/src/libultra/nintendo/exception/resetglobalintmask.o(.data);
         build/asm/8BA20.o(.data);
         build/asm/8BC80.o(.data);
         build/src/libultra/monegi/ai/ai.o(.data);
@@ -502,7 +506,7 @@ SECTIONS
         build/src/libultra/monegi/si/si.o(.data);
         build/asm/8DF50.o(.data);
         build/asm/8E110.o(.data);
-        build/asm/8E550.o(.data);
+        build/src/libkmc/memset.o(.data);
         build/src/libkmc/rand.o(.data);
         build/asm/8E660.o(.data);
         build/asm/8EAD0.o(.data);
@@ -605,7 +609,8 @@ SECTIONS
         build/src/libnusys/mainlib/nucontgbpakgetstatus.o(.rodata);
         build/src/libnusys/mainlib/nucontgbpakpower.o(.rodata);
         build/src/libnusys/mainlib/nucontgbpakreadid.o(.rodata);
-        build/asm/7D710.o(.rodata);
+        build/src/libnusys/mainlib/nucontgbpakreadwrite.o(.rodata);
+        build/src/libnusys/mainlib/nucontgbpakcheck.o(.rodata);
         build/asm/7D7A0.o(.rodata);
         build/asm/7D970.o(.rodata);
         build/asm/7DE70.o(.rodata);
@@ -672,7 +677,7 @@ SECTIONS
         build/src/libultra/monegi/thread/stopthread.o(.rodata);
         build/asm/87A80.o(.rodata);
         build/src/libultra/monegi/thread/yieldthread.o(.rodata);
-        build/asm/87B10.o(.rodata);
+        build/src/libultra/monegi/time/gettime.o(.rodata);
         build/asm/87BA0.o(.rodata);
         build/asm/87C40.o(.rodata);
         build/asm/87F40.o(.rodata);
@@ -705,7 +710,8 @@ SECTIONS
         build/asm/8ACA0.o(.rodata);
         build/asm/8AF90.o(.rodata);
         build/asm/8B900.o(.rodata);
-        build/asm/8B990.o(.rodata);
+        build/src/libultra/nintendo/exception/setglobalintmask.o(.rodata);
+        build/src/libultra/nintendo/exception/resetglobalintmask.o(.rodata);
         build/asm/8BA20.o(.rodata);
         build/asm/8BC80.o(.rodata);
         build/src/libultra/monegi/ai/ai.o(.rodata);
@@ -728,7 +734,7 @@ SECTIONS
         build/src/libultra/monegi/si/si.o(.rodata);
         build/asm/8DF50.o(.rodata);
         build/asm/8E110.o(.rodata);
-        build/asm/8E550.o(.rodata);
+        build/src/libkmc/memset.o(.rodata);
         build/src/libkmc/rand.o(.rodata);
         build/asm/8E660.o(.rodata);
         build/asm/8EAD0.o(.rodata);
@@ -858,7 +864,8 @@ SECTIONS
         build/src/libnusys/mainlib/nucontgbpakgetstatus.o(.bss);
         build/src/libnusys/mainlib/nucontgbpakpower.o(.bss);
         build/src/libnusys/mainlib/nucontgbpakreadid.o(.bss);
-        build/asm/7D710.o(.bss);
+        build/src/libnusys/mainlib/nucontgbpakreadwrite.o(.bss);
+        build/src/libnusys/mainlib/nucontgbpakcheck.o(.bss);
         build/asm/7D7A0.o(.bss);
         build/asm/7D970.o(.bss);
         build/asm/7DE70.o(.bss);
@@ -925,7 +932,7 @@ SECTIONS
         build/src/libultra/monegi/thread/stopthread.o(.bss);
         build/asm/87A80.o(.bss);
         build/src/libultra/monegi/thread/yieldthread.o(.bss);
-        build/asm/87B10.o(.bss);
+        build/src/libultra/monegi/time/gettime.o(.bss);
         build/asm/87BA0.o(.bss);
         build/asm/87C40.o(.bss);
         build/asm/87F40.o(.bss);
@@ -958,7 +965,8 @@ SECTIONS
         build/asm/8ACA0.o(.bss);
         build/asm/8AF90.o(.bss);
         build/asm/8B900.o(.bss);
-        build/asm/8B990.o(.bss);
+        build/src/libultra/nintendo/exception/setglobalintmask.o(.bss);
+        build/src/libultra/nintendo/exception/resetglobalintmask.o(.bss);
         build/asm/8BA20.o(.bss);
         build/asm/8BC80.o(.bss);
         build/src/libultra/monegi/ai/ai.o(.bss);
@@ -981,7 +989,7 @@ SECTIONS
         build/src/libultra/monegi/si/si.o(.bss);
         build/asm/8DF50.o(.bss);
         build/asm/8E110.o(.bss);
-        build/asm/8E550.o(.bss);
+        build/src/libkmc/memset.o(.bss);
         build/src/libkmc/rand.o(.bss);
         build/asm/8E660.o(.bss);
         build/asm/8EAD0.o(.bss);
