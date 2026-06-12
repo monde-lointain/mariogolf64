@@ -83,12 +83,15 @@ until v2. These rows double as the **reference stories** for the plan-time ±1 a
 | 9 | func_80099490 | 1 | **classical** / — / — | 5 | *—* | **first classical-track row** — no-upstream wrapper `nuPiInitSram()`; first-pass clean (score 0, 0 iter), banked 5pt; classical loop PROVEN. Kept OUT of the mirror seed-velocity (separate regime) |
 | 10 | dpsetstat + dpctr | 1+1 | mirror / warm / — | 1+1=2 | *2* | 5th sibling-pair; split 0x86730 pack (osDpSetStatus+osDpGetCounters) at upstream-file boundary; both verbatim, zero-enabler, banked 2pt. 9th straight clean mirror |
 | 11 | func_800AB600 | 1 | **classical** / — / — | 5 | **5** | **2nd classical-track row; v2 ACTIVATED here.** Non-trivial leaf (bit ops + branch + struct RMW). First classical sprint with **real residual variance**: seed compiled 0.80/score 400, matched after **1 fix-iteration** (register-reuse nudge). Realized=5 (seed band; no stuck-far/permuter/re-attempt/split/carry; not a verbatim mirror so the −1 first-try credit doesn't apply). Residual 0 — seed priced it right, but the loop *iterated*, so the realized tier finally has signal. `(real)` is now **logged, not illustrative** |
+| 12 | yieldthread | 1 | mirror / warm / recover-extern | 2 | *2* | 2nd thread-band leaf (sibling of S8 stopthread); 10th straight clean mirror. seed 2 = warm-1 floor +1 for the `refs-unplaced` recover-extern enabler (`__osRunQueue`@0x800C8228, recovered at the S11 gate). Verbatim cp, 0 iterations, zero header copies, one symbol add. Mirror track stays seed-only — `(real)` illustrative |
 
 **Seed-velocity = 2.0 pt/sprint** (bootstrap anchors S1–5, sum seed 10 / 5 sprints). With the
-three live-logged sprints S6 (seed 1) + S7 (seed 2) + S8 (seed 1), the running mirror-regime
-seed-velocity is 14 pt / 8 sprints = **1.75 pt/sprint** — the predicted downward drift as the
-warm singleton pool depletes (S6 last clean vi leaf; S7 opened the *cold* convert band at the
-2 pt floor; S8 the warm-1 thread leaf). **S9 is the first classical-track row** (seed 5,
+four live-logged mirror sprints S6 (seed 1) + S7 (seed 2) + S8 (seed 1) + S12 (seed 2), the
+running mirror-regime seed-velocity is 16 pt / 9 sprints = **1.78 pt/sprint** — the predicted
+downward drift as the warm singleton pool depletes (S6 last clean vi leaf; S7 opened the *cold*
+convert band at the 2 pt floor; S8 the warm-1 thread leaf; S12 the warm-2 recover-extern thread
+leaf — the warm clean-singleton pool is now mined out, so the cheapest mirror is a recover-extern
+flip, not a zero-enabler cp). **S9 is the first classical-track row** (seed 5,
 banked 5, first-pass clean) — logged separately, NOT folded into the mirror 1.75 average
 (never compare regimes). Classical track: **n=2** (S9 seed 5 / realized
 illustrative; S11 seed 5 / **realized 5 logged**), seed-velocity 5 pt/sprint. S9 proved the loop

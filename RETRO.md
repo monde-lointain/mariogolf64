@@ -25,6 +25,17 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 12 — mirror: osYieldThread (thread band, recover-extern flip) — 2026-06-11
+- Increment: 1 file banked / 1 fn matched (delta: ~1.10% → ~1.15%; md5-candidate files 21→22)
+- Quality: 0/0/0/0 (stuck-far/permuter/carried/re-opened) — verbatim mirror, 0 iterations; goal met
+- Seed: committed 2pt; banked 2pt; regime **mirror** (warm-1 floor +1 recover-extern; mirror track seed-only, realized tier is v2/classical)
+- What helped: the S11 gate had already recovered `__osRunQueue`@0x800C8228 from the fn's own asm (`lui a0,0x800d / addiu a0,a0,-0x7dd8`), so the whole enabler was one `symbol_addrs.txt` add + one yaml flip. Upstream `yieldthread.c` is a clean 5-liner, no file-scope static → safe verbatim mirror; refs `__osRunningThread`/`__osEnqueueAndYield` + both headers pre-placed from S8 stopthread (same band). Full make SHA-1 green first try
+- Friction: none material. (Cosmetic: the bank commit body says "md5-candidate 20→21"; actual was 21→22 — unpushed, left as-is)
+- Applied: 1 of 3 — PO selected #1. **#1 inline recovered vram into the `refs-unplaced` hazard** → `tools/pick_target.py` now reads splat's `D_<vaddr>` auto-labels from `asm/<ROM>.s` and binds `name@0xADDR` when the mapping is unambiguous (exactly one unplaced upstream name ∩ one candidate address — the recover-one-extern floor case). Verified: `osEPiLinkHandle → __osPiTable@0x800C7E8C`, `__osSetGlobalIntMask → __OSGlobalIntMask@0x800C9470` (address-set dedup collapses repeat refs); ambiguous multi-extern rows (`osGetTime`, `__osDequeueThread`) stay bare. The gate still confirms before any add, so an over-listed local-rodata D_ is harmless. **#2 (re-price `__osDequeueThread`)** and **#3 (favor classical next 1–2 sprints)** NOT selected — recorded here as considered, carried into the BACKLOG ordering note for the next gate
+- Carry-over: none
+
+---
+
 ## Sprint 11 — classical: func_800AB600, first sprint with residual variance (v2 activated) — 2026-06-11
 - Increment: 1 file banked / 1 fn matched (delta: ~1.05% → ~1.10%; md5-candidate files 20→21)
 - Quality: 0/0/0/0 (stuck-far/permuter/carried/re-opened) — matched after 1 fix-iteration, no spike; goal met

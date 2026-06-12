@@ -147,6 +147,32 @@ v2 needs; clean mirror leaves remain the near-zero-risk default between classica
   the realized-tier/residual/rolling-5/re-anchor machinery is now live on the classical track
   (VELOCITY.md updated). No carry-overs.
 
+- **Sprint 12: 1 file BANKED — `src/libultra/monegi/thread/yieldthread.c` (`osYieldThread`),
+  libultra upstream-mirror.** md5-candidate 21→22; matched 23→24/2090 (~1.15%). 10th straight
+  clean mirror, 2nd in the `monegi/thread/` band (sibling of S8 stopthread). The S11-gate-recovered
+  extern `__osRunQueue`@0x800C8228 was consumed: one `symbol_addrs.txt` add + one yaml flip, zero
+  header copies (refs + headers pre-placed from S8), verbatim cp, first-pass clean (0 iteration).
+  seed 2 (warm-1 +1 recover-extern) / banked 2pt. Retro: **1 of 3 applied** — **#1** inline the
+  recovered vram into the `refs-unplaced` hazard (`pick_target.py` reads splat's `D_<vaddr>`
+  labels → binds `name@0xADDR` for the unambiguous single-extern case; verified on `osEPiLinkHandle`
+  + `__osSetGlobalIntMask`). No carry-overs.
+
+## PO ordering note (S12 retro — recover-extern is the mirror floor; #2/#3 carried)
+
+S12 banked the cheapest *remaining* mirror (recover-one-extern). Two carried ordering facts
+for the next gate (S12 retro #2/#3, considered-but-not-applied — guidance, not file edits):
+- **Re-price `__osDequeueThread` next gate (carried #2).** It is the last thread-band leaf but
+  carries `defines-data` (it *re-defines* `__osThreadTail` + 4 placed siblings) → routes to the
+  classical loop with the data-defs dropped, NOT a clean verbatim cp. Decide at the gate whether
+  the drop links cleanly or hits the BSS-layout-conflict wall before committing it.
+- **Favor classical non-trivial leaves the next 1–2 sprints (carried #3).** The mirror track is
+  a confirmed point mass (10 straight clean/near-clean: S1–S8, S10, S12); v2's residual signal
+  lives only on the classical track (S9, S11, both residual 0). Pull non-trivial small classical
+  leaves to grow the realized tier and watch for the first **non-zero residual**; keep a
+  recover-extern mirror (`osEPiLinkHandle`@`__osPiTable`, `osGetTime`, `osSetThreadPri` warm-1
+  clean) in reserve as a low-risk filler. `pick_target.py` now surfaces the recovered vram inline
+  (`refs-unplaced:name@0xADDR`) for the single-extern cases, so those flips are gate-cheap.
+
 ## PO ordering note (S11 retro — v2 active; mirror warm pool mined out)
 
 **v2 is ACTIVE** (since the S11 review). The realized-tier/residual machinery now runs on the

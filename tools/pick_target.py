@@ -266,6 +266,39 @@ def refs_unplaced(cpath, placed):
     return sorted(unplaced)
 
 
+# splat emits `D_<8-hex-vaddr>` auto-labels for any referenced data address WITHOUT a name in
+# the two name files; a *placed* symbol shows its real name instead. So every `D_<addr>` in a
+# subseg's asm is, by construction, an unplaced data reference — and the recovered vram is the
+# label itself (no MCP `disassemble_function` needed). The fallback `lui reg,0xHHHH` + `addiu`
+# pair (raw immediate, not %hi(...)) catches a non-D_ materialization.
+DATA_LABEL_RE = re.compile(r"\bD_([0-9A-Fa-f]{8})\b")
+RAW_HILO_RE = re.compile(
+    r"\blui\s+\$\w+,\s*0x([0-9A-Fa-f]{4})\b.*?\b(?:addiu|lw|sw|lh|sh|lhu|lbu|lb|sb)\s"
+    r"[^\n]*?(-?0x[0-9A-Fa-f]+)",
+    re.DOTALL,
+)
+
+
+def recover_unplaced_vram(rom_off):
+    """Candidate vrams of the unplaced data this subseg references, read from `asm/<ROM>.s`
+    deterministically (the asm-data-recovery the execution middle would otherwise do via MCP).
+    Returns a sorted list of distinct addresses. The caller binds a name→vram only when the
+    mapping is unambiguous (exactly one unplaced upstream name ∩ one candidate) — the
+    osYieldThread floor case; multi-extern stays a hint. The gate still confirms before any
+    symbol_addrs add, so a stray local-rodata D_ over-listing is harmless."""
+    path = os.path.join(ROOT, "asm", f"{rom_off:X}.s")
+    if not os.path.exists(path):
+        return []
+    try:
+        text = open(path, errors="ignore").read()
+    except OSError:
+        return []
+    addrs = {int(h, 16) for h in DATA_LABEL_RE.findall(text)}
+    for hi, lo in RAW_HILO_RE.findall(text):
+        addrs.add(((int(hi, 16) << 16) + int(lo, 16)) & 0xFFFFFFFF)
+    return sorted(addrs)
+
+
 def band_mirror_dir(lib, up_path):
     """Project mirror directory for an upstream file: src/lib<...>/<upstream-rel-dir>."""
     tree = LIBULTRA if lib == "libultra" else LIBKMC
@@ -450,7 +483,15 @@ def build_rows(args, upstream_index, carried):
                 hazards.append("defines-data:" + ",".join(data_defs))  # .data analogue → classical loop
             unplaced = refs_unplaced(up_path, placed_symbols())
             if unplaced:
-                hazards.append("refs-unplaced:" + ",".join(unplaced))  # asm-data-recovery before flip
+                # Annotate the recovered vram inline when the binding is unambiguous (one unplaced
+                # name ∩ one asm candidate) so the gate copy-pastes the symbol_addrs entry instead
+                # of re-running MCP disassemble_function (S12 retro #1). Ambiguous → bare names.
+                cands = recover_unplaced_vram(off)
+                if len(unplaced) == 1 and len(cands) == 1:
+                    refs = [f"{unplaced[0]}@0x{cands[0]:08X}"]
+                else:
+                    refs = unplaced
+                hazards.append("refs-unplaced:" + ",".join(refs))  # asm-data-recovery before flip
             missing = missing_includes(up_path)
             if missing:
                 hazards.append("needs-header:" + ",".join(missing))
