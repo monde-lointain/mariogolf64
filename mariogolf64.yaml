@@ -221,7 +221,7 @@ segments:
       - [0x86790, asm]
       - [0x867A0, asm]
       - [0x869E0, asm]
-      - [0x86A00, asm]
+      - [0x86A00, c, main/func_800AB600]
       - [0x86A50, asm]
       - [0x87510, asm]
       - [0x87600, asm]
