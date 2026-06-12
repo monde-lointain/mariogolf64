@@ -215,3 +215,12 @@ spotcheck-build:
 # Wipe per-function scratch dirs. Leaves the build dir alone.
 clean-nonmatchings:
 	rm -rf nonmatchings/*/
+
+# Vendor override: build/asm/8EC50.o from src/libkmc/mmuldi3.s using KMC as.
+# Explicit rule wins over the asm/%.s pattern rule for this specific target.
+# mmuldi3.s uses KMC register-name conventions (move → addu encoding); must
+# use tools/cc/as, not modern mips-linux-gnu-as.
+$(BUILD_DIR)/$(ASM_DIR)/8EC50.o: src/libkmc/mmuldi3.s
+	tools/cc/as -EB -mips2 -o $@.tmp $<
+	cp $@.tmp $@
+	rm $@.tmp

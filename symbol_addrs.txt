@@ -40,3 +40,4 @@ __osRunningThread = 0x800C8230; // size:0x4
 __osViCurr = 0x800C9560; // size:0x4
 __osViNext = 0x800C9564; // size:0x4
 hdwrBugFlag = 0x800C7EC0; // size:0x1
+__muldi3 = 0x800B3850; // type:func

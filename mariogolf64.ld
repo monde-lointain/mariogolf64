@@ -170,7 +170,7 @@ SECTIONS
         build/asm/7E9F0.o(.text);
         build/src/libultra/nintendo/pi/piacs.o(.text);
         build/asm/7EEA0.o(.text);
-        build/asm/7EFE0.o(.text);
+        build/src/libultra/monegi/ai/aisetnextbuf.o(.text);
         build/asm/7F080.o(.text);
         build/asm/7F8B0.o(.text);
         build/asm/803C0.o(.text);
@@ -204,8 +204,8 @@ SECTIONS
         build/asm/861F0.o(.text);
         build/src/libultra/monegi/libc/syncprintf.o(.text);
         build/src/libultra/monegi/message/createmesgqueue.o(.text);
-        build/asm/862E0.o(.text);
-        build/asm/86420.o(.text);
+        build/src/libultra/monegi/message/jammesg.o(.text);
+        build/src/libultra/monegi/message/recvmesg.o(.text);
         build/asm/86550.o(.text);
         build/src/libultra/monegi/rdp/dpsetstat.o(.text);
         build/src/libultra/monegi/rdp/dpctr.o(.text);
@@ -285,10 +285,7 @@ SECTIONS
         build/src/libkmc/strcmp.o(.text);
         build/src/libkmc/_matherr.o(.text);
         build/asm/8EC50.o(.text);
-        build/asm/8EC88.o(.text);
-        build/asm/8EE50.o(.text);
-        build/asm/8EFC0.o(.text);
-        build/asm/8EFE0.o(.text);
+        build/asm/8F020.o(.text);
         build/asm/8F140.o(.text);
         build/src/libkmc/matherr.o(.text);
         build/asm/8F250.o(.text);
@@ -398,7 +395,7 @@ SECTIONS
         build/asm/7E9F0.o(.data);
         build/src/libultra/nintendo/pi/piacs.o(.data);
         build/asm/7EEA0.o(.data);
-        build/asm/7EFE0.o(.data);
+        build/src/libultra/monegi/ai/aisetnextbuf.o(.data);
         build/asm/7F080.o(.data);
         build/asm/7F8B0.o(.data);
         build/asm/803C0.o(.data);
@@ -432,8 +429,8 @@ SECTIONS
         build/asm/861F0.o(.data);
         build/src/libultra/monegi/libc/syncprintf.o(.data);
         build/src/libultra/monegi/message/createmesgqueue.o(.data);
-        build/asm/862E0.o(.data);
-        build/asm/86420.o(.data);
+        build/src/libultra/monegi/message/jammesg.o(.data);
+        build/src/libultra/monegi/message/recvmesg.o(.data);
         build/asm/86550.o(.data);
         build/src/libultra/monegi/rdp/dpsetstat.o(.data);
         build/src/libultra/monegi/rdp/dpctr.o(.data);
@@ -513,10 +510,7 @@ SECTIONS
         build/src/libkmc/strcmp.o(.data);
         build/src/libkmc/_matherr.o(.data);
         build/asm/8EC50.o(.data);
-        build/asm/8EC88.o(.data);
-        build/asm/8EE50.o(.data);
-        build/asm/8EFC0.o(.data);
-        build/asm/8EFE0.o(.data);
+        build/asm/8F020.o(.data);
         build/asm/8F140.o(.data);
         build/src/libkmc/matherr.o(.data);
         build/asm/8F250.o(.data);
@@ -627,7 +621,7 @@ SECTIONS
         build/asm/7E9F0.o(.rodata);
         build/src/libultra/nintendo/pi/piacs.o(.rodata);
         build/asm/7EEA0.o(.rodata);
-        build/asm/7EFE0.o(.rodata);
+        build/src/libultra/monegi/ai/aisetnextbuf.o(.rodata);
         build/asm/7F080.o(.rodata);
         build/asm/7F8B0.o(.rodata);
         build/asm/803C0.o(.rodata);
@@ -661,8 +655,8 @@ SECTIONS
         build/asm/861F0.o(.rodata);
         build/src/libultra/monegi/libc/syncprintf.o(.rodata);
         build/src/libultra/monegi/message/createmesgqueue.o(.rodata);
-        build/asm/862E0.o(.rodata);
-        build/asm/86420.o(.rodata);
+        build/src/libultra/monegi/message/jammesg.o(.rodata);
+        build/src/libultra/monegi/message/recvmesg.o(.rodata);
         build/asm/86550.o(.rodata);
         build/src/libultra/monegi/rdp/dpsetstat.o(.rodata);
         build/src/libultra/monegi/rdp/dpctr.o(.rodata);
@@ -742,10 +736,7 @@ SECTIONS
         build/src/libkmc/strcmp.o(.rodata);
         build/src/libkmc/_matherr.o(.rodata);
         build/asm/8EC50.o(.rodata);
-        build/asm/8EC88.o(.rodata);
-        build/asm/8EE50.o(.rodata);
-        build/asm/8EFC0.o(.rodata);
-        build/asm/8EFE0.o(.rodata);
+        build/asm/8F020.o(.rodata);
         build/asm/8F140.o(.rodata);
         build/src/libkmc/matherr.o(.rodata);
         build/asm/8F250.o(.rodata);
@@ -883,7 +874,7 @@ SECTIONS
         build/asm/7E9F0.o(.bss);
         build/src/libultra/nintendo/pi/piacs.o(.bss);
         build/asm/7EEA0.o(.bss);
-        build/asm/7EFE0.o(.bss);
+        build/src/libultra/monegi/ai/aisetnextbuf.o(.bss);
         build/asm/7F080.o(.bss);
         build/asm/7F8B0.o(.bss);
         build/asm/803C0.o(.bss);
@@ -917,8 +908,8 @@ SECTIONS
         build/asm/861F0.o(.bss);
         build/src/libultra/monegi/libc/syncprintf.o(.bss);
         build/src/libultra/monegi/message/createmesgqueue.o(.bss);
-        build/asm/862E0.o(.bss);
-        build/asm/86420.o(.bss);
+        build/src/libultra/monegi/message/jammesg.o(.bss);
+        build/src/libultra/monegi/message/recvmesg.o(.bss);
         build/asm/86550.o(.bss);
         build/src/libultra/monegi/rdp/dpsetstat.o(.bss);
         build/src/libultra/monegi/rdp/dpctr.o(.bss);
@@ -998,10 +989,7 @@ SECTIONS
         build/src/libkmc/strcmp.o(.bss);
         build/src/libkmc/_matherr.o(.bss);
         build/asm/8EC50.o(.bss);
-        build/asm/8EC88.o(.bss);
-        build/asm/8EE50.o(.bss);
-        build/asm/8EFC0.o(.bss);
-        build/asm/8EFE0.o(.bss);
+        build/asm/8F020.o(.bss);
         build/asm/8F140.o(.bss);
         build/src/libkmc/matherr.o(.bss);
         build/asm/8F250.o(.bss);
