@@ -25,6 +25,17 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 34 — mixed: osJamMesg + osRecvMesg (libultra message-queue pair, warm mirrors) + osAiSetNextBuffer (libultra AI, classical static-drop) — 2026-06-12
+- Increment: 3 files banked / 3 fns matched (delta: md5-candidate files 59→62; matched 66→69)
+- Quality: 0/0/0/0 (stuck-far/permuter/carried/re-opened) — goal met
+- Seed: committed 5pt; banked 5pt; regime mirror+classical-mixed (osJamMesg 1pt mirror; osRecvMesg 2pt mirror; osAiSetNextBuffer 2pt classical; all-or-nothing 3/3 banked)
+- What helped: **warm message-band pair trivial** — `osJamMesg` + `osRecvMesg` were clean verbatim copies; all callees pre-placed; `MQ_IS_EMPTY` hazard was a macro false-positive (gate confirmed). Zero iterations, 2 yaml flips + `make extract` = done. **IO_WRITE isolation artifact correctly identified early** — `osAiSetNextBuffer`'s score=600 with `total_rows==match_count` and `top_mismatches:[]` was recognized as the MMIO literal-vs-reloc isolation pattern before wasting any iterations; went directly to in-tree spot-check after verifying C logic against asm. **`hdwrBugFlag` vram deterministically recovered** from the target fn's own `lui 0x800c`/`lbu 0x7ec0` HI/LO16 pair.
+- Friction: **Data-global label sync** — after adding `hdwrBugFlag` to `symbol_addrs.txt`, the stale `asm/7EFE0.s` still used `D_800C7EC0`; decomp_loop.py built the reference from the stale file causing reloc-name mismatches. Fixed by replacing all 3 `D_800C7EC0` occurrences with `hdwrBugFlag` and rebuilding `build/asm/7EFE0.o`. **IO_WRITE score never reaches 0** — the isolation artifact cannot be fixed via C iteration; the in-tree spot-check is the only authoritative path for MMIO functions.
+- Applied: 2 of 2: #1 (CLAUDE.md: IO_WRITE/IO_READ isolation artifact convention bullet added after Isolated-compile caveat); #2 (CLAUDE.md: data-global stale asm label sync convention bullet added after Stale top-level asm label sync after gate rename)
+- Carry-over: none
+
+---
+
 ## Sprint 33 — classical: piacs.c (libultra nintendo/pi, 3-fn PI access queue) — 2026-06-12
 - Increment: 1 file banked / 3 fns matched (delta: md5-candidate files 58→59; 59/59 C files)
 - Quality: 0/0/0/0 (stuck-far/permuter/carried/re-opened) — all score 0 on first seed; goal met
