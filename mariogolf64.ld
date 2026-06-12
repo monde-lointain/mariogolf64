@@ -168,7 +168,7 @@ SECTIONS
         build/src/libultra/nintendo/pi/epilinkhandle.o(.text);
         build/asm/7E870.o(.text);
         build/asm/7E9F0.o(.text);
-        build/asm/7EDB0.o(.text);
+        build/src/libultra/nintendo/pi/piacs.o(.text);
         build/asm/7EEA0.o(.text);
         build/asm/7EFE0.o(.text);
         build/asm/7F080.o(.text);
@@ -396,7 +396,7 @@ SECTIONS
         build/src/libultra/nintendo/pi/epilinkhandle.o(.data);
         build/asm/7E870.o(.data);
         build/asm/7E9F0.o(.data);
-        build/asm/7EDB0.o(.data);
+        build/src/libultra/nintendo/pi/piacs.o(.data);
         build/asm/7EEA0.o(.data);
         build/asm/7EFE0.o(.data);
         build/asm/7F080.o(.data);
@@ -625,7 +625,7 @@ SECTIONS
         build/src/libultra/nintendo/pi/epilinkhandle.o(.rodata);
         build/asm/7E870.o(.rodata);
         build/asm/7E9F0.o(.rodata);
-        build/asm/7EDB0.o(.rodata);
+        build/src/libultra/nintendo/pi/piacs.o(.rodata);
         build/asm/7EEA0.o(.rodata);
         build/asm/7EFE0.o(.rodata);
         build/asm/7F080.o(.rodata);
@@ -881,7 +881,7 @@ SECTIONS
         build/src/libultra/nintendo/pi/epilinkhandle.o(.bss);
         build/asm/7E870.o(.bss);
         build/asm/7E9F0.o(.bss);
-        build/asm/7EDB0.o(.bss);
+        build/src/libultra/nintendo/pi/piacs.o(.bss);
         build/asm/7EEA0.o(.bss);
         build/asm/7EFE0.o(.bss);
         build/asm/7F080.o(.bss);

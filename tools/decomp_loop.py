@@ -139,6 +139,7 @@ def ensure_reference_object(seg_stem: str) -> Path:
 
 
 LIBKMC_SRC = Path.home() / "development" / "repos" / "libkmc" / "src"
+LIBULTRA_SRC = Path.home() / "development" / "repos" / "ultralib" / "src"
 
 
 def detect_libkmc_profile(placeholder: str) -> bool:
@@ -165,12 +166,37 @@ def detect_libkmc_profile(placeholder: str) -> bool:
     return False
 
 
-def compile_candidate(placeholder: str, libkmc: bool) -> tuple[bool, str, Path]:
-    """Run `make nonmatching-func FUNC=<placeholder> [LIBKMC=1]`."""
+def detect_libultra_profile(placeholder: str) -> bool:
+    """True if <placeholder> appears as a function definition in ultralib upstream.
+
+    libultra was built with -O3 -funsigned-char -DBUILD_VERSION=VERSION_J
+    (ultralib gcc.mk, VERSION_J libgultra_rom). The loop must mirror LIBULTRA_CFLAGS
+    to produce ground-truth bytes — affects inlining and delay-slot scheduling.
+    """
+    if not LIBULTRA_SRC.exists():
+        return False
+    pat = re.compile(
+        rf"^[A-Za-z_][A-Za-z0-9_ *]*\b{re.escape(placeholder)}\s*\(",
+        re.MULTILINE,
+    )
+    for f in LIBULTRA_SRC.rglob("*.c"):
+        try:
+            text = f.read_text(encoding="utf-8", errors="replace")
+        except OSError:
+            continue
+        if pat.search(text):
+            return True
+    return False
+
+
+def compile_candidate(placeholder: str, libkmc: bool, libultra: bool = False) -> tuple[bool, str, Path]:
+    """Run `make nonmatching-func FUNC=<placeholder> [LIBKMC=1|LIBULTRA=1]`."""
     current_o = NONMATCHINGS_DIR / placeholder / "current.o"
     cmd = ["make", "nonmatching-func", f"FUNC={placeholder}"]
     if libkmc:
         cmd.append("LIBKMC=1")
+    elif libultra:
+        cmd.append("LIBULTRA=1")
     proc = subprocess.run(
         cmd,
         cwd=ROOT_DIR,
@@ -305,10 +331,10 @@ def main() -> None:
     )
     parser.add_argument(
         "--profile",
-        choices=["auto", "libkmc", "default"],
+        choices=["auto", "libkmc", "libultra", "default"],
         default="auto",
-        help="Compile profile. auto = detect libkmc by upstream-src presence; "
-             "libkmc = force -O; default = force -O2.",
+        help="Compile profile. auto = detect by upstream-src presence; "
+             "libkmc = force -O; libultra = force -O3 -funsigned-char; default = force -O2.",
     )
     args = parser.parse_args()
 
@@ -322,15 +348,20 @@ def main() -> None:
     log(f"[reference] {reference_o.relative_to(ROOT_DIR)}")
 
     if args.profile == "libkmc":
-        libkmc = True
+        libkmc, libultra = True, False
+    elif args.profile == "libultra":
+        libkmc, libultra = False, True
     elif args.profile == "default":
-        libkmc = False
+        libkmc, libultra = False, False
     else:
         libkmc = detect_libkmc_profile(placeholder)
+        libultra = (not libkmc) and detect_libultra_profile(placeholder)
     if libkmc:
         log(f"[profile] libkmc (-O) — placeholder found in {LIBKMC_SRC}")
+    elif libultra:
+        log(f"[profile] libultra (-O3 -funsigned-char) — placeholder found in {LIBULTRA_SRC}")
 
-    ok, compile_log, current_o = compile_candidate(placeholder, libkmc)
+    ok, compile_log, current_o = compile_candidate(placeholder, libkmc, libultra)
     if not ok:
         emit({
             "compile_ok": False,

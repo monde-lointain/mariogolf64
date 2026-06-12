@@ -45,19 +45,24 @@ CC := COMPILER_PATH=tools/cc tools/cc/gcc
 ASFLAGS := -march=vr4300 -32 -I include --no-pad-sections
 CPPFLAGS := -fno-dollars-in-identifiers -P
 AS_DEFINES := -DMIPSEB -D_LANGUAGE_ASSEMBLY -D_ULTRA64
-CFLAGS := -G 0 -mips2 -mgp32 -mfp32 -mno-abicalls -O2 -I include -I include/libultra -I include/libultra/internal -I include/libkmc -I include/libnusys -DINCLUDE_ASM_USE_MACRO_INC -D_LANGUAGE_C -D_FINALROM
+CFLAGS := -G 0 -mips3 -mgp32 -mfp32 -mno-abicalls -O2 -I include -I include/libultra -I include/libultra/internal -I include/libkmc -I include/libnusys -DINCLUDE_ASM_USE_MACRO_INC -D_LANGUAGE_C -D_FINALROM
 ifeq ($(NONMATCHING),1)
 CFLAGS += -DNONMATCHING
 endif
 
-# libkmc upstream was built with `gcc -O` (not -O2) per ~/development/repos/libkmc/src/genn64.bat.
-# The instruction scheduler at -O differs from -O2: e.g., rand.c stores `next` between
-# the two addiu's at -O, vs after both at -O2. Matching the original ROM requires -O.
-# libultra was built with -O2, so this override is libkmc-only.
+# libultra upstream (ultralib gcc.mk, VERSION_J libgultra_rom):
+#   OPTFLAGS=-O3, MIPS_VERSION=-mips3, CFLAGS includes -funsigned-char for VERSION <= J,
+#   CPPFLAGS includes -DBUILD_VERSION=VERSION_J -D_FINALROM.
+# -mips3 is now the project default (see CFLAGS above). -O3 and -funsigned-char are
+# libultra-specific overrides; -DBUILD_VERSION=VERSION_J guards version-conditional code.
+LIBULTRA_CFLAGS := $(subst -O2,-O3,$(CFLAGS)) -funsigned-char -DBUILD_VERSION=VERSION_J
+
+# libkmc upstream was built with `gcc -O` (not -O2) per ~/development/repos/libkmc/src/genn64.bat
+# (env var gccsw=-mips3 -mgp32 -mfp32 -G0; explicit -O per file compile). -mips3 is now the
+# project default. -O (vs -O2) is the only remaining libkmc-specific override.
 LIBKMC_CFLAGS := $(subst -O2,-O,$(CFLAGS))
 
-# libnusys nuPi* files require USE_EPI to enable the function body
-# (the upstream Makefile sets DEFINES := USE_EPI=1 for all nusys source).
+# libnusys: -DUSE_EPI enables nuPi* function bodies (upstream Makefile sets USE_EPI=1 for all nusys).
 LIBNUSYS_CFLAGS := $(CFLAGS) -DUSE_EPI
 
 # Directories
@@ -149,6 +154,15 @@ $(BUILD_DIR)/$(SRC_DIR)/%.o: $(SRC_DIR)/%.c
 	$(STRIP) $@ -N dummy-symbol-name
 	rm $@.s $@.tmp
 
+# libultra compile profile: -O3 -funsigned-char -DBUILD_VERSION=VERSION_J (see LIBULTRA_CFLAGS).
+# Pattern-rule specificity beats the generic src/% rule.
+$(BUILD_DIR)/$(SRC_DIR)/libultra/%.o: $(SRC_DIR)/libultra/%.c
+	$(CC) -S $(LIBULTRA_CFLAGS) -o $@.s $<
+	tools/cc/as -EB -mips2 -I include -o $@.tmp $@.s
+	cp $@.tmp $@
+	$(STRIP) $@ -N dummy-symbol-name
+	rm $@.s $@.tmp
+
 # libkmc compile profile: same pipeline as above, but with -O instead of -O2
 # (see LIBKMC_CFLAGS comment). Pattern-rule specificity puts this above the
 # generic src/% rule when both match.
@@ -177,9 +191,9 @@ $(BUILD_DIR)/$(SRC_DIR)/libnusys/%.o: $(SRC_DIR)/libnusys/%.c
 # base.c has no INCLUDE_ASM directives, so single-step is safe (no need to route
 # through system `as`). Always defines NONMATCHING.
 nonmatching-func:
-	@test -n "$(FUNC)" || { echo "Usage: make nonmatching-func FUNC=<func_XXXXXXXX> [LIBKMC=1]" >&2; exit 1; }
+	@test -n "$(FUNC)" || { echo "Usage: make nonmatching-func FUNC=<func_XXXXXXXX> [LIBKMC=1|LIBULTRA=1]" >&2; exit 1; }
 	@test -f nonmatchings/$(FUNC)/base.c || { echo "nonmatchings/$(FUNC)/base.c not found; run tools/seed_c.py first" >&2; exit 1; }
-	$(CC) -c $(if $(LIBKMC),$(LIBKMC_CFLAGS),$(CFLAGS)) -DNONMATCHING -o nonmatchings/$(FUNC)/current.o nonmatchings/$(FUNC)/base.c
+	$(CC) -c $(if $(LIBKMC),$(LIBKMC_CFLAGS),$(if $(LIBULTRA),$(LIBULTRA_CFLAGS),$(CFLAGS))) -DNONMATCHING -o nonmatchings/$(FUNC)/current.o nonmatchings/$(FUNC)/base.c
 
 # In-tree spot-check build. Compiles src/$(SEG).c.spotcheck (a temporary copy
 # of the parent with the target function's INCLUDE_ASM wrapped in

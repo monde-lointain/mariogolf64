@@ -179,7 +179,7 @@ segments:
       - [0x7E820, c, libultra/nintendo/pi/epilinkhandle]
       - [0x7E870, asm]
       - [0x7E9F0, asm]
-      - [0x7EDB0, asm]
+      - [0x7EDB0, c, libultra/nintendo/pi/piacs]
       - [0x7EEA0, asm]
       - [0x7EFE0, asm]
       - [0x7F080, asm]
