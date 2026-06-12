@@ -67,7 +67,7 @@ SECTIONS
     {
         FILL(0x00000000);
         main_TEXT_START = .;
-        build/asm/1050.o(.text);
+        build/src/libnusys/mainlib/nupireadrom.o(.text);
         build/asm/1130.o(.text);
         build/asm/17B0.o(.text);
         build/src/libnusys/mainlib/nugfxinit.o(.text);
@@ -169,7 +169,9 @@ SECTIONS
         build/asm/7E870.o(.text);
         build/asm/7E9F0.o(.text);
         build/src/libultra/nintendo/pi/piacs.o(.text);
-        build/asm/7EEA0.o(.text);
+        build/src/libultra/monegi/ai/aigetlen.o(.text);
+        build/src/libultra/monegi/ai/aigetstat.o(.text);
+        build/asm/7EEC0.o(.text);
         build/src/libultra/monegi/ai/aisetnextbuf.o(.text);
         build/asm/7F080.o(.text);
         build/asm/7F8B0.o(.text);
@@ -235,7 +237,7 @@ SECTIONS
         build/asm/88210.o(.text);
         build/src/libultra/monegi/vi/visetevent.o(.text);
         build/src/libultra/monegi/vi/visetmode.o(.text);
-        build/asm/88600.o(.text);
+        build/src/libultra/monegi/vi/visetspecial.o(.text);
         build/src/libultra/monegi/vi/visetyscale.o(.text);
         build/src/libultra/monegi/vi/viswapbuf.o(.text);
         build/asm/88810.o(.text);
@@ -292,7 +294,7 @@ SECTIONS
         main_TEXT_END = .;
         main_TEXT_SIZE = ABSOLUTE(main_TEXT_END - main_TEXT_START);
         main_DATA_START = .;
-        build/asm/1050.o(.data);
+        build/src/libnusys/mainlib/nupireadrom.o(.data);
         build/asm/1130.o(.data);
         build/asm/17B0.o(.data);
         build/src/libnusys/mainlib/nugfxinit.o(.data);
@@ -394,7 +396,9 @@ SECTIONS
         build/asm/7E870.o(.data);
         build/asm/7E9F0.o(.data);
         build/src/libultra/nintendo/pi/piacs.o(.data);
-        build/asm/7EEA0.o(.data);
+        build/src/libultra/monegi/ai/aigetlen.o(.data);
+        build/src/libultra/monegi/ai/aigetstat.o(.data);
+        build/asm/7EEC0.o(.data);
         build/src/libultra/monegi/ai/aisetnextbuf.o(.data);
         build/asm/7F080.o(.data);
         build/asm/7F8B0.o(.data);
@@ -460,7 +464,7 @@ SECTIONS
         build/asm/88210.o(.data);
         build/src/libultra/monegi/vi/visetevent.o(.data);
         build/src/libultra/monegi/vi/visetmode.o(.data);
-        build/asm/88600.o(.data);
+        build/src/libultra/monegi/vi/visetspecial.o(.data);
         build/src/libultra/monegi/vi/visetyscale.o(.data);
         build/src/libultra/monegi/vi/viswapbuf.o(.data);
         build/asm/88810.o(.data);
@@ -518,7 +522,7 @@ SECTIONS
         main_DATA_END = .;
         main_DATA_SIZE = ABSOLUTE(main_DATA_END - main_DATA_START);
         main_RODATA_START = .;
-        build/asm/1050.o(.rodata);
+        build/src/libnusys/mainlib/nupireadrom.o(.rodata);
         build/asm/1130.o(.rodata);
         build/asm/17B0.o(.rodata);
         build/src/libnusys/mainlib/nugfxinit.o(.rodata);
@@ -620,7 +624,9 @@ SECTIONS
         build/asm/7E870.o(.rodata);
         build/asm/7E9F0.o(.rodata);
         build/src/libultra/nintendo/pi/piacs.o(.rodata);
-        build/asm/7EEA0.o(.rodata);
+        build/src/libultra/monegi/ai/aigetlen.o(.rodata);
+        build/src/libultra/monegi/ai/aigetstat.o(.rodata);
+        build/asm/7EEC0.o(.rodata);
         build/src/libultra/monegi/ai/aisetnextbuf.o(.rodata);
         build/asm/7F080.o(.rodata);
         build/asm/7F8B0.o(.rodata);
@@ -686,7 +692,7 @@ SECTIONS
         build/asm/88210.o(.rodata);
         build/src/libultra/monegi/vi/visetevent.o(.rodata);
         build/src/libultra/monegi/vi/visetmode.o(.rodata);
-        build/asm/88600.o(.rodata);
+        build/src/libultra/monegi/vi/visetspecial.o(.rodata);
         build/src/libultra/monegi/vi/visetyscale.o(.rodata);
         build/src/libultra/monegi/vi/viswapbuf.o(.rodata);
         build/asm/88810.o(.rodata);
@@ -771,7 +777,7 @@ SECTIONS
     {
         FILL(0x00000000);
         main_BSS_START = .;
-        build/asm/1050.o(.bss);
+        build/src/libnusys/mainlib/nupireadrom.o(.bss);
         build/asm/1130.o(.bss);
         build/asm/17B0.o(.bss);
         build/src/libnusys/mainlib/nugfxinit.o(.bss);
@@ -873,7 +879,9 @@ SECTIONS
         build/asm/7E870.o(.bss);
         build/asm/7E9F0.o(.bss);
         build/src/libultra/nintendo/pi/piacs.o(.bss);
-        build/asm/7EEA0.o(.bss);
+        build/src/libultra/monegi/ai/aigetlen.o(.bss);
+        build/src/libultra/monegi/ai/aigetstat.o(.bss);
+        build/asm/7EEC0.o(.bss);
         build/src/libultra/monegi/ai/aisetnextbuf.o(.bss);
         build/asm/7F080.o(.bss);
         build/asm/7F8B0.o(.bss);
@@ -939,7 +947,7 @@ SECTIONS
         build/asm/88210.o(.bss);
         build/src/libultra/monegi/vi/visetevent.o(.bss);
         build/src/libultra/monegi/vi/visetmode.o(.bss);
-        build/asm/88600.o(.bss);
+        build/src/libultra/monegi/vi/visetspecial.o(.bss);
         build/src/libultra/monegi/vi/visetyscale.o(.bss);
         build/src/libultra/monegi/vi/viswapbuf.o(.bss);
         build/asm/88810.o(.bss);
