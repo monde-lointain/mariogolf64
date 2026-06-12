@@ -5,7 +5,8 @@ Pure-static ranker (no Ghidra MCP — the agent seeds from MCP inline during the
 execution loop). Enumerates flippable `asm` subsegs and partially-matched `c`
 files from mariogolf64.yaml + asm/ + src/, flags upstream-mirror availability
 (libultra/libkmc) and hazards (file-scope static, non-16-aligned subseg,
-multi-function pack), and prints a smallest-first table for `/sprint-plan`.
+multi-function pack, needs-header = an upstream include unresolved under the
+project -I set), and prints a smallest-first table for `/sprint-plan`.
 
 Usage:
   venv/bin/python3 tools/pick_target.py [--lib SUBSTR] [-n N] [--include-stuck] [--json]
@@ -35,6 +36,12 @@ GLABEL_RE = re.compile(r"^\s*glabel\s+(\S+)")
 # Approximate C function-definition: a return-type-led line ending in `name(`.
 UPSTREAM_DEF_RE = re.compile(r"^[A-Za-z_][\w \t\*]*?\b([A-Za-z_]\w+)\s*\(", re.M)
 FILE_STATIC_RE = re.compile(r"^\s*static\b[^=]*;\s*$")
+INCLUDE_RE = re.compile(r'^\s*#\s*include\s*[<"]([^>"]+)[>"]')
+# The project's quoted/angle include search dirs (Makefile CFLAGS `-I` set, under -nostdinc).
+INCLUDE_DIRS = [
+    os.path.join(ROOT, d)
+    for d in ("include", "include/libultra", "include/libultra/internal", "include/libkmc")
+]
 UPSTREAM_BONUS = 200
 CARRYOVER_PENALTY = 1000
 
@@ -97,6 +104,26 @@ def has_file_scope_static(cpath):
     return False
 
 
+def missing_includes(cpath):
+    """Upstream includes that don't resolve under the project -I set (-nostdinc, so every
+    header must come from INCLUDE_DIRS). A non-empty result is the `needs-header` DoR hazard:
+    the verbatim mirror won't compile until each is satisfied — copy the companion header
+    (execution-middle, e.g. assert.h) or add a -I path (deferred enabler, e.g. the audio band's
+    <libaudio.h> at include/libultra/PR/). Conservative: scans all `#include` lines regardless
+    of `#ifdef` state, so a dead `#ifdef _DEBUG` include may over-flag — the gate confirms."""
+    missing = []
+    with open(cpath, errors="ignore") as f:
+        for line in f:
+            m = INCLUDE_RE.match(line)
+            if not m:
+                continue
+            inc = m.group(1)
+            if not any(os.path.exists(os.path.join(d, inc)) for d in INCLUDE_DIRS):
+                if inc not in missing:
+                    missing.append(inc)
+    return missing
+
+
 def carry_over_names():
     """Function names parked in BACKLOG.md ## Carry-overs (de-ranked)."""
     names = set()
@@ -139,8 +166,12 @@ def build_rows(args, upstream_index, carried):
 
         primary = fns[0]
         up_lib, up_path = upstream_index.get(primary, (None, None))
-        if up_path and has_file_scope_static(up_path):
-            hazards.append("file-static")  # route to the classical loop, not the mirror
+        if up_path:
+            if has_file_scope_static(up_path):
+                hazards.append("file-static")  # route to the classical loop, not the mirror
+            missing = missing_includes(up_path)
+            if missing:
+                hazards.append("needs-header:" + ",".join(missing))
 
         if args.lib and args.lib not in (path or "") and not any(args.lib in n for n in fns):
             continue

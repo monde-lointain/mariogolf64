@@ -35,6 +35,15 @@ count emerges.
   match (0/0/0/0). Retro codified the asm-data-recovery pattern + an include-resolvability
   hazard (audio band needs `-I include/libultra/PR`). No carry-overs.
 
+- **Sprint 3: 1 file BANKED — `src/libultra/monegi/vi/visetmode.c` (`osViSetMode`), libultra
+  upstream-mirror.** md5-candidate 9→10; matched 11→12/2090 (~0.57%). 8th `monegi/` mirror, 2nd
+  in the `vi/` band (sibling of `vigetcurrcontext.c`). **Zero symbol recovery** — all linker refs
+  pre-resolved; only enabler was a trivial companion-header copy (`include/libultra/assert.h`).
+  Clean first-pass match (0/0/0/0). Retro landed the **`needs-header` hazard** in
+  `tools/pick_target.py` (greps upstream `#include`s vs the `-I` set — auto-flags `guRandom`,
+  the audio band, `osSyncPrintf`), automating the manual include-triage of the last two sprints.
+  No carry-overs.
+
 ## Enabler items (gate-time, agent-performed since 2026-06-11)
 
 These are the gate-time enabler actions a sprint may need before its execution middle can run
