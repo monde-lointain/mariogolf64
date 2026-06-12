@@ -25,6 +25,15 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 25 — mirror: nuContDataLock/UnLock (libnusys recover-extern, whole-file pack) — 2026-06-12
+- Increment: 1 file banked / 2 fns matched (delta: md5-candidate files 40→41)
+- Quality: 0/0/0/0 (stuck-far/permuter/carried/re-opened) — verbatim mirror, 0 iterations; goal met first pass
+- Seed: committed 5pt; banked 5pt; regime mirror   (v1 — story points; realized tier is v2, untouched this pure-mirror sprint)
+- What helped: subseg 0x7E2D0 packed **exactly** the two fns of one upstream file (`nuContDataLock`+`nuContDataUnLock` = all of `nucontdatalock.c`) → cohesive whole-file flip, **no split, no orphan asm**. Single recover-extern `nuContDataLockKey`=0x800FED38, a plain **scalar** word (size:0x4) — the simplest S20 sub-case (assigned directly, no index-multiply), so the inlined `refs-unplaced` vram needed no base-offset correction; re-confirmed via the fn's own `lui 0x8010`/`sw -0x12c8` pair. Both fn names pre-curated in `ghidra_symbols.txt`, `osSetIntMask` pre-placed, lock macros already in `nusys.h` → only one gate add. Two `jal 0x800a2f60` both = osSetIntMask, reconciled clean (no jal-count-mismatch flag, correctly).
+- Friction: none — fully covered by existing recover-extern doctrine; deterministic end-to-end.
+- Applied: 0 of 0 (suggestion buffer recorded "None new"; PO: apply none)
+- Carry-over: none
+
 ## Sprint 24 — mirror: nuContDataGetEx (libnusys recover-extern + recover-callee; closes S20 trim) — 2026-06-12
 - Increment: 1 file banked / 1 fn matched (delta: md5-candidate files 39→40)
 - Quality: 0/0/0/0 (stuck-far/permuter/carried/re-opened) — verbatim mirror, 0 iterations; goal met first pass

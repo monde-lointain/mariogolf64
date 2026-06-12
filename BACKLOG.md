@@ -300,6 +300,17 @@ v2 needs; clean mirror leaves remain the near-zero-risk default between classica
   **0 of 3 applied** (PO: apply none — #1 size-hint tooling declined; #2/#3 confirmatory). No
   carry-overs.
 
+- **Sprint 25: 1 file BANKED — `src/libnusys/mainlib/nucontdatalock.c` (`nuContDataLock` +
+  `nuContDataUnLock`), libnusys recover-extern mirror.** md5-candidate 40→41. **Whole-file
+  pack** — subseg 0x7E2D0 held exactly the two fns of one upstream file, so a single cohesive
+  flip banked both with **no split and no orphan asm**. One recover-extern
+  `nuContDataLockKey`=0x800FED38, the simplest S20 sub-case (plain scalar word, size:0x4, no
+  index-multiply → inlined `refs-unplaced` vram needed no base-offset fix; re-confirmed via the
+  fn's own `lui 0x8010`/`sw -0x12c8`). Both fn names pre-curated, `osSetIntMask` pre-placed,
+  lock macros in `nusys.h` → one symbol add + one yaml flip, verbatim cp, 0 iterations. Two
+  `jal` both = osSetIntMask, reconciled clean (no jal-count flag). seed 5 / banked 5pt. Retro:
+  **0 of 0** (suggestion buffer "None new"). No carry-overs.
+
 ## PO ordering note (S16 retro — the false-clean class is closed; deeper nusys leaves now priced)
 
 The S16 grep fix re-priced the nuGfx*FuncSet leaves (now pts-3 recover-extern, was false-clean
