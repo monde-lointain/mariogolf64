@@ -74,11 +74,13 @@ until v2. These rows double as the **reference stories** for the plan-time ±1 a
 | 5 | viswapbuf + visetevent | 1+1 | mirror / warm / — | 1+1=2 | *2* | both verbatim, warm floor 1 each |
 | 6 | viblack | 1 | mirror / warm / — | 1 | *1* | first live-logged v1 sprint; verbatim, zero-enabler, banked 1pt |
 | 7 | virtualtophysical | 1 | mirror / cold / — | 2 | *2* | opens convert band (vi exhausted); verbatim, zero-enabler, banked 2pt |
+| 8 | stopthread | 1 | mirror / warm / — | 1 | *1* | opens thread band; verbatim, zero-enabler, banked 1pt |
 
 **Seed-velocity = 2.0 pt/sprint** (bootstrap anchors S1–5, sum seed 10 / 5 sprints). With the
-two live-logged sprints S6 (seed 1) + S7 (seed 2), the running mirror-regime seed-velocity is
-13 pt / 7 sprints ≈ **1.86 pt/sprint** — the predicted downward drift as the warm singleton pool
-depletes (S6 was the last clean vi leaf; S7 opened the *cold* convert band at the 2 pt floor).
+three live-logged sprints S6 (seed 1) + S7 (seed 2) + S8 (seed 1), the running mirror-regime
+seed-velocity is 14 pt / 8 sprints = **1.75 pt/sprint** — the predicted downward drift as the
+warm singleton pool depletes (S6 last clean vi leaf; S7 opened the *cold* convert band at the
+2 pt floor; S8 the warm-1 thread leaf).
 Three honest caveats:
 - **Fitted, not validated.** The bands were chosen so this history reads ~2 pt/sprint; the
   first out-of-sample sprint is the real test. The byte gates (768/1536) and the classical

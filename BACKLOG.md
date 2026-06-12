@@ -96,6 +96,17 @@ v2 realized-tier machinery. Until then, the remaining clean mirror leaves (small
   `osStopThread` is the smallest *clean* remaining leaf) + **#2** the classical-target ordering
   note above. No carry-overs.
 
+- **Sprint 8: 1 file BANKED — `src/libultra/monegi/thread/stopthread.c` (`osStopThread`),
+  libultra upstream-mirror.** md5-candidate 16→17; matched 18→19/2090 (~0.91%). **Opened the
+  `monegi/thread/` band.** Smallest *clean* leaf (S7 retro #2 confirmed): seed 1, warm, name
+  pre-curated (0x800AC5C0), all refs pre-placed (`__osRunningThread`, `__osEnqueueAndYield`,
+  `__osDequeueThread`, int-disable pair), both headers present → **zero symbol adds, zero header
+  copies, one yaml flip**. Verbatim `cp`, first-pass clean (0/0/0/0). 8th straight clean mirror.
+  Retro: **0 of 3 applied** (PO: Apply none). No carry-overs. **Standing recommendations carried
+  forward: (a) schedule the classical spike — `--upstream none` search — to break the now-8-long
+  mirror point-mass and trip the v2 trigger (S7 #2 / S8 #3); (b) thread band is now warm, so
+  re-price its leaves (`__osDequeueThread`/`osYieldThread`) at the next gate.**
+
 ## Enabler items (gate-time, agent-performed since 2026-06-11)
 
 These are the gate-time enabler actions a sprint may need before its execution middle can run
