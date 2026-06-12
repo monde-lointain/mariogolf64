@@ -95,10 +95,30 @@ path to try first, and the explicit success predicate —
 `src/<seg>.c` flips to md5-candidate."* Snapshot match progress as the pre-sprint baseline
 (matched count + md5-candidate file count + date — from `git log` + a `pick_target.py` count).
 
+## Step 5b — Estimate the sprint (story points) + the 8-point gate
+
+Story-point velocity is **active (v1)** — Fibonacci 1,2,3,5,8,13, `regime: mirror` scope. See
+`VELOCITY.md` for the rules + anchors. For the chosen increment:
+
+1. **Seed** = the `pts` column from the Step 1 `pick_target.py` table (deterministic). For a
+   **cluster**, the committed seed is the **sum** of its files' `pts`. A `blk` seed = an
+   un-pickable needs-header (unindexed `-I` / system header) — a DoR reject; **swap the
+   increment**, do not commit it.
+2. **8-point gate.** A committed **8 or 13 must NOT be committed as a normal 1-increment
+   sprint** — **decompose** it (split the subseg at the upstream-file/function boundary) or pull
+   a scaffolding **enabler** as the sprint goal instead. This prevents an all-or-nothing bank
+   stall. (Most remaining classical units seed 8/13 — expect this gate to fire once the mirror
+   band is mined out.)
+3. **Adjust** (optional, ±1 ladder step) by comparing the increment's profile to the
+   `VELOCITY.md` anchor rows. This is the **committed estimate** — surfaced to the PO in Step 6.
+   **No freeze commit in v1** (the seed is deterministic / re-derivable); it is logged to
+   `VELOCITY.md` at `/sprint-review`, not here.
+
 ## Step 6 — PO approval gate
 
 Present the proposed **goal** + **committed backlog** (the increment, its enablers, the
-upstream path, the snapshot) to the PO with `AskUserQuestion`: approve as-is / edit the goal /
+upstream path, the snapshot) + the **committed story-point estimate** (seed → adjusted; whether
+the 8-gate fired) to the PO with `AskUserQuestion`: approve as-is / edit the goal /
 swap the increment. **Do not proceed until approved.** On approval, the **agent** performs the
 enablers in Step 7 — the PO approves the goal and scope; it no longer hand-edits the yaml or
 `symbol_addrs.txt`.
@@ -139,6 +159,9 @@ On a green validation, write `SPRINT.md` (gitignored — ephemeral scratch + res
 ## Committed backlog
 - [ ] <file or cluster>  (<N> fns, ~<instrs> instrs, upstream: <libultra|libkmc|none>)  DoR: ok (flip validated)
 - [x] enabler (agent, at gate): <flip / split / symbol_addrs — performed + validated>
+
+## Estimate (story points)
+committed <N>pt  (seed <S from pts; sum for clusters> → adjusted <N>; 8-gate: <fired/clear>; regime: mirror)
 
 ## DoR notes
 - subseg: <c | flipped>; upstream: <path | none>; hazards: <static / BSS-conflict / none>

@@ -42,9 +42,45 @@ The tactical match-loop runs inside a thin Scrum cadence (McConnell, *More Effec
 - **Spike + carry-over.** A function that blocks its file's all-or-nothing DoD (stuck-far < 0.97 percent, needs permuter, BSS-layout-conflict, subseg-alignment) is timeboxed as a **spike**: note it, **carry its file/cluster to the next sprint**, count credit at the **function** level so one bad fn doesn't zero the sprint. **Never weaken DoD to bank a spike.**
 - **Quality counter-metric.** Track stuck-far + permuter-escalated + carried + re-opened per sprint (from the `SPRINT.md` standup log + `git log`), reported next to the match count so the count can't be gamed by premature spiking.
 - **Process changes are retro-gated.** The "Suggested workflow improvements" the execution loop emits are *recorded* into `SPRINT.md` during the sprint and applied **only** at `/sprint-review` — never mid-sprint.
-- **Deferred to phase 2 (named trigger).** Story points / velocity / burndown / WSJF. At 0.43% there is no velocity to calibrate. Sprints are **scope-boxed**, not time-boxed; the future velocity basis must be files (or functions) per calendar week. **Trigger:** the agent *proposes* the switch at a review once ≈5 sprints of history exist; the **PO decides**. Until then: descriptive count + smallest-first + `pick_target.py`'s size column.
+- **Story points (active since 2026-06-11, the named-trigger switch).** Velocity basis = **realized points per sprint** (Fibonacci 1,2,3,5,8,13), **not** files/week — sprints are scope-boxed with no calendar cadence. Shipped in two phases: **v1 (live)** = a deterministic `pts` seed (`pick_target.py`) + the **8-point decompose gate**; **v2 (deferred)** = the realized-tier / residual / re-anchor machinery, activated by PO approval at the first classical/mixed sprint that produces real variance. See `## Story points` below and `VELOCITY.md` (the committed dashboard). Velocity is a **planning indicator, not a performance target** (McConnell Ch. 19) — reported next to the quality counter-metric, which (with per-file all-or-nothing banking) is the real anti-gaming guard.
 - **Two-gate close.** Review accepts the *product* (DoD + scope); retro improves the *process* (and is the single apply-point for tooling edits) — two distinct decisions in `/sprint-review`.
 - **Resume protocol (multi-session).** On a fresh mid-sprint session: read `SPRINT.md`, reconcile banked work via `git log` since the snapshot, and verify Ghidra MCP connectivity (`list_instances`, port 8089) before resuming the execution loop.
+
+## Story points (v1 — the velocity system)
+
+The lightweight estimation layer over the Scrum cadence (McConnell, *More Effective Agile*,
+Ch. 20/19/9), ported from `../marioparty7/VELOCITY.md` and re-calibrated for MG64's regime.
+`VELOCITY.md` is the committed dashboard (rules + bootstrap anchors); this section is the rule
+summary. **Scale: Fibonacci 1,2,3,5,8,13.** Scope: the current phase (`regime: mirror`); the
+classical/game regime gets a separate track.
+
+- **Deterministic seed.** `tools/pick_target.py`'s **`pts`** column (`seed_points()`) is the
+  a-priori seed — a pure function of `size`, `upstream` (mirror vs classical), `band`
+  (warm/cold), `nfns`, and `hazards`. MG64's effort axis is **path + enabler load**, not bytes
+  (every target is a tiny <256 B leaf), so the byte gates are dormant until large/classical fns
+  arrive. A **cluster** seed is the **sum** of its files' seeds. `pts` is **display-only — it
+  does not change the smallest-first sort.** A `blk` seed = an un-pickable needs-header
+  (unindexed `-I` / system header, e.g. `<libaudio.h>`) — a DoR reject, not a cheap target.
+- **The 8-point decompose gate (the primary value).** A seed of **8 or 13 must NOT run as a
+  normal 1-increment sprint** — decompose it (split the subseg at the upstream-file/function
+  boundary, as the existing multi-fn-pack doctrine already does) or pull a scaffolding enabler
+  as the goal instead. Prevents an all-or-nothing bank stall on a too-big unit. Applied at the
+  `/sprint-plan` gate (Step 5b).
+- **Per-file all-or-nothing banking.** Points bank **per file**, even inside a cluster: a
+  spiked/carried file scores **0 pt** (the anti-gaming guard), but a banked sibling still
+  counts — so sibling-pair batching (the S4/S5 win) is never punished. This is a *separate
+  ledger* from the function-level **quality counter-metric** (stuck-far / permuter / carried /
+  re-opened), which is unchanged and still reported next to velocity.
+- **v1 has no freeze commit.** The v1 seed is deterministic and re-derivable, so it carries
+  near-zero retrofit risk: the plan gate creates **no commit**, and the committed seed is
+  logged in `VELOCITY.md` in the normal `/sprint-review` retro commit (so an abandoned sprint
+  leaves no orphan row). The two-pass git-freeze belongs to v2 (where the realized tier *is*
+  retrofittable).
+- **v2 (deferred).** The realized-tier rule + residual loop + rolling-5 + re-anchor trigger +
+  the separate classical track + the two-pass freeze. **Activation trigger:** the first
+  classical or mixed sprint that produces real residual variance — proposed at that review, PO
+  approves (turning it on against the 5 identical verbatim sprints would only measure a point
+  mass). Designed in `VELOCITY.md`; dormant until then.
 
 ## Conventions
 

@@ -16,6 +16,7 @@ numbered suggestions the PO accepted.
 ## Sprint N — <goal> — <date>
 - Increment: <files banked> / <functions matched> (delta: <pct before → after>)
 - Quality: <stuck-far>/<permuter>/<carried>/<re-opened> this sprint
+- Seed: committed <N>pt; banked <B>pt; regime <mirror|classical|mixed>   (v1 — story points; realized tier is v2)
 - What helped: <levers / upstream-mirrors / tools that worked>
 - Friction: <what slowed it down>
 - Applied: <PO-selected, N of M: #1 … #k …; (#j … NOT selected)>

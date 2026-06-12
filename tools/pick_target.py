@@ -51,6 +51,16 @@ INCLUDE_DIRS = [
     os.path.join(ROOT, d)
     for d in ("include", "include/libultra", "include/libultra/internal", "include/libkmc")
 ]
+PROJECT_INC = os.path.join(ROOT, "include")
+# Upstream include trees a missing companion header can be *copied from* (the execution-middle
+# mirror, e.g. assert.h). A header absent here and absent from the project tree is a system
+# header we don't ship (blocked); a header present in the project tree but unreachable under
+# INCLUDE_DIRS is an unindexed-`-I` case (blocked, a deferred Makefile enabler — the audio
+# band's <libaudio.h> at include/libultra/PR/). See classify of needs-header in seed_points.
+UPSTREAM_INC_ROOTS = [
+    os.path.expanduser("~/development/repos/libultra_modern/include"),
+    os.path.expanduser("~/development/repos/libkmc/include"),
+]
 UPSTREAM_BONUS = 200
 CARRYOVER_PENALTY = 1000
 # A warm band (the candidate's mirror dir already holds a banked sibling) means its
@@ -193,6 +203,83 @@ def missing_includes(cpath):
     return missing
 
 
+_PROJECT_INC_INDEX = None
+
+
+def _project_inc_index():
+    """Lazily-built set of every header under the project `include/` tree (both its root-relative
+    path and its basename) — used to tell an unreachable-but-present header (unindexed `-I`,
+    defer) from a genuinely-absent one (copyable from upstream, or a system header)."""
+    global _PROJECT_INC_INDEX
+    if _PROJECT_INC_INDEX is None:
+        idx = set()
+        for f in glob.glob(os.path.join(PROJECT_INC, "**", "*"), recursive=True):
+            if os.path.isfile(f):
+                idx.add(os.path.relpath(f, PROJECT_INC))
+                idx.add(os.path.basename(f))
+        _PROJECT_INC_INDEX = idx
+    return _PROJECT_INC_INDEX
+
+
+def include_is_blocked(inc):
+    """Classify a *missing* include (one `missing_includes` already found unreachable). Blocked =
+    can't be fixed by a companion-header copy: either it's present in the project `include/` tree
+    but unreachable under the current `-I` set (unindexed `-I` — a deferred Makefile enabler), or
+    it's absent everywhere (a system header we don't ship). Copyable (NOT blocked) = absent from
+    the project tree but present at `<upstream-include-root>/<inc>` → mirror it in mid-execution
+    (assert.h). Heuristic, gate-confirmed (basename match can rarely over-flag)."""
+    idx = _project_inc_index()
+    if inc in idx or os.path.basename(inc) in idx:
+        return True  # present in-tree but unreachable → unindexed -I, defer
+    for root in UPSTREAM_INC_ROOTS:
+        if os.path.exists(os.path.join(root, inc)):
+            return False  # absent in-tree, copyable from upstream → companion-copy
+    return True  # nowhere → system header / unavailable
+
+
+def snap_fib(n):
+    """Round a raw additive score up to the nearest Fibonacci ladder rung (1,2,3,5,8,13)."""
+    for f in (1, 2, 3, 5, 8, 13):
+        if n <= f:
+            return f
+    return 13
+
+
+def seed_points(size, upstream, band, nfns, hazards, blocked):
+    """Deterministic a-priori story-point seed (Fibonacci 1,2,3,5,8,13) for one increment —
+    the v1 story-point system (see VELOCITY.md). MG64's effort axis is PATH (upstream-mirror vs
+    classical-loop) + ENABLER LOAD (band warmth, hazards), not raw bytes; the byte gates (768 /
+    1536) are dormant in the current <256 B regime and only bite for large/classical fns.
+    `hazards` is the joined hazard string; `blocked` is True when any needs-header is un-pickable
+    (see include_is_blocked). Returns an int, or 'blk' for a blocked (un-pickable) target.
+    Display-only — does NOT influence the smallest-first sort. A committed cluster seed is the
+    SUM of its files' seeds (banked per-file, not all-or-nothing across the cluster)."""
+    if blocked:
+        return "blk"  # un-pickable until the -I path is added / header shipped — a DoR reject
+    classical = upstream == "none"
+    pack = nfns > 1
+    drop = ("file-static" in hazards) or ("defines-data" in hazards)  # → classical fallback
+    needs_copy = "needs-header" in hazards  # a copyable companion header (blocked ones already 'blk')
+    big = size >= 768
+    huge = size >= 1536
+    if huge or (classical and pack):
+        return 13  # must decompose; never a 1-increment sprint
+    if nfns >= 4:
+        return 8  # a large pack must decompose regardless of path (hits the 8-gate)
+    if classical and (big or pack or drop or needs_copy):
+        return 8  # enabler gate — decompose / scaffold first
+    if classical:
+        return 5  # small single classical fn — unproven regime, high variance
+    base = 1 if band == "warm" else 2  # warm = enabler-free; cold = symbol recovery / cold deps
+    if drop:
+        base += 1  # file-static / defines-data drop → classical fallback
+    if needs_copy:
+        base += 1  # companion-header copy
+    if pack or big:
+        base += 1
+    return snap_fib(base)
+
+
 def carry_over_names():
     """Function names parked in BACKLOG.md ## Carry-overs (de-ranked)."""
     names = set()
@@ -236,6 +323,7 @@ def build_rows(args, upstream_index, carried):
         primary = fns[0]
         up_lib, up_path = upstream_index.get(primary, (None, None))
         band = "-"
+        blocked = False
         if up_path:
             if has_file_scope_static(up_path):
                 hazards.append("file-static")  # route to the classical loop, not the mirror
@@ -245,6 +333,7 @@ def build_rows(args, upstream_index, carried):
             missing = missing_includes(up_path)
             if missing:
                 hazards.append("needs-header:" + ",".join(missing))
+                blocked = any(include_is_blocked(inc) for inc in missing)
             band = "warm" if band_is_warm(band_mirror_dir(up_lib, up_path)) else "cold"
 
         if args.lib and args.lib not in (path or "") and not any(args.lib in n for n in fns):
@@ -257,10 +346,12 @@ def build_rows(args, upstream_index, carried):
             score += BAND_WARM_BONUS  # prefer enabler-free warm-band siblings over equally-small cold ones
         if primary in carried:
             score -= CARRYOVER_PENALTY
+        hz = ",".join(hazards) or "-"
         rows.append({
             "func": primary, "rom": f"0x{off:X}", "size": size, "nfns": len(fns),
+            "pts": seed_points(size, up_lib or "none", band, len(fns), hz, blocked),
             "kind": kind, "upstream": up_lib or "none", "band": band,
-            "hazards": ",".join(hazards) or "-", "score": score,
+            "hazards": hz, "score": score,
         })
     rows.sort(key=lambda r: (-r["score"], r["size"]))
     return rows[: args.n]
@@ -281,9 +372,10 @@ def main():
     if not rows:
         print("(no candidates — every asm subseg flipped and every c file at 0 stubs?)")
         return
-    print(f"{'func':28} {'rom':>9} {'size':>5} {'nfn':>3} {'kind':8} {'upstream':9} {'band':4} hazards")
+    print(f"{'func':28} {'rom':>9} {'size':>5} {'nfn':>3} {'pts':>3} {'kind':8} "
+          f"{'upstream':9} {'band':4} hazards")
     for r in rows:
-        print(f"{r['func']:28} {r['rom']:>9} {r['size']:>5} {r['nfns']:>3} "
+        print(f"{r['func']:28} {r['rom']:>9} {r['size']:>5} {r['nfns']:>3} {str(r['pts']):>3} "
               f"{r['kind']:8} {r['upstream']:9} {r['band']:4} {r['hazards']}")
 
 

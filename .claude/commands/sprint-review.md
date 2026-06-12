@@ -52,6 +52,12 @@ Paste the **real output**. Claim nothing the commands don't show. The SHA-1 is t
   (`git log --oneline <snapshot>..HEAD -- src/`).
 - **Quality counter-metric:** stuck-far + permuter-escalated + carried + re-opened, read from
   the `SPRINT.md` standup log — the balance metric so the count isn't gamed by premature spikes.
+- **Story-point seed (v1):** the committed seed from `SPRINT.md ## Estimate`, with **per-file
+  banking** (a spiked file scores 0 pt; a banked sibling still counts). Report `committed <N>pt;
+  banked <B>pt; regime mirror`. No realized-tier scoring in v1 (that is v2 — see `VELOCITY.md`).
+  If this is the **first classical or mixed sprint** (or the first with a clear seed miss),
+  flag it: it trips the **v2 activation trigger** → propose turning on the realized-tier loop in
+  the Step 4 sign-off.
 - **Scope vs goal:** did we bank the increment? List any **carry-overs** (spiked files + the
   blocking function + cost).
 
@@ -69,9 +75,14 @@ This is the **only** place the sprint's process/tooling edits land:
 
 1. Apply the PO-selected suggestions to their named files (`tools/*.py`, `CLAUDE.md`, the
    commands, `include/`).
-2. Prepend one entry to `RETRO.md` in its documented format (increment, quality
-   counter-metric, what helped, friction, the `Applied (N of M)` audit line, carry-overs).
-3. Move carry-overs to `BACKLOG.md ## Carry-overs`; add an `## Active phase` BANKED paragraph
+2. **Log the story-point row to `VELOCITY.md`** (in this same retro commit — the v1 seed is
+   deterministic, so no separate plan-gate freeze): append `Sp <N> | <increment> | seed <S>;
+   banked <B>pt; regime mirror` under the anchors/log. (When v2 is active, also fill the
+   realized tier + residual here in the documented format.)
+3. Prepend one entry to `RETRO.md` in its documented format (increment, quality
+   counter-metric, the `Seed:` line, what helped, friction, the `Applied (N of M)` audit line,
+   carry-overs).
+4. Move carry-overs to `BACKLOG.md ## Carry-overs`; add an `## Active phase` BANKED paragraph
    for the increment.
 
 Durable lessons stay in `RETRO.md`; the **PO promotes them into the memory dir manually** —
