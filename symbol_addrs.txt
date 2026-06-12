@@ -30,3 +30,5 @@ D_800B6688 = 0x800B6688; // size:0x4
 nuGfxZBuffer = 0x800FED14; // size:0x4
 D_800B6680 = 0x800B6680; // size:0x4
 nuGfxUcode = 0x801061B0; // size:0x4
+rmonPrintf = 0x800AAE94; // type:func
+osSpTaskYield = 0x800AB5E0; // type:func
