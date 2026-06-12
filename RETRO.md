@@ -25,6 +25,15 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 22 — mirror: osEPiLinkHandle (libultra recover-extern, first nintendo/ dir) — 2026-06-12
+- Increment: 1 file banked / 1 fn matched (delta: md5-candidate files 37→38)
+- Quality: 0/0/0/0 (stuck-far/permuter/carried/re-opened) — verbatim mirror, 0 iterations; goal met first pass
+- Seed: committed 3pt; banked 3pt; regime mirror   (v1 — story points; realized tier is v2, untouched this pure-mirror sprint)
+- What helped: clean single-fn recover-extern, the lowest-risk mirror. `__osPiTable`=0x800C7E8C (simple pointer → size:0x4) recovered deterministically from the fn's own `lui 0x800c`/`lw/sw 0x7e8c`; `piint.h` + `__osDisableInt`/`__osRestoreInt` pre-placed → one symbol add + one yaml flip. First `nintendo/` variant-dir mirror; like S21 for libnusys, refutes the stale S11 "libultra warm pool mined out" note for the recover-extern fillers it explicitly left open.
+- Friction: the mandatory re-confirm exposed a **target-fn vram error** (distinct from S20's extern-vram miss): a hand-guessed flat `rom + 0x80020000` resolved *mid-function* and silently returned a wrong ~1000 B containing fn. Caught only by the leaf-size mismatch. Real base is `rom + 0x80024C00`, and the curated name was already authoritative in `ghidra_symbols.txt` (0x800A3420) — the guess was avoidable.
+- Applied: 2 of 2 — #1 (CLAUDE.md recover-extern bullet: look up the *target fn's* vram from the name files / yaml base for the disassemble re-confirm, never guess a flat offset) + #2 (`pick_target.py` `vram` column — emits the authoritative splat vram so the gate re-confirm needs no derivation)
+- Carry-over: none
+
 ## Sprint 21 — mirror: nuGfxRetraceWait (zero-enabler clean libnusys cp) — 2026-06-12
 - Increment: 1 file banked / 1 fn matched (delta: md5-candidate files 36→37)
 - Quality: 0/0/0/0 (stuck-far/permuter/carried/re-opened) — verbatim mirror, 0 iterations; goal met first pass

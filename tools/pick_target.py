@@ -128,6 +128,27 @@ def asm_functions(rom_off):
     return names
 
 
+# `/* ROM VRAM BYTES */` instruction comment — the second field is the authoritative vram
+# splat emitted for that ROM offset. Surfacing it spares the gate a rom→vram derivation for
+# the mandatory recover-extern re-confirm (S22: a hand-guessed flat `rom + <const>` resolved
+# mid-function and returned a wrong containing fn — read the vram, never guess it).
+VRAM_COMMENT_RE = re.compile(r"/\*\s*[0-9A-Fa-f]+\s+([0-9A-Fa-f]{8})\s+[0-9A-Fa-f]{8}\s*\*/")
+
+
+def subseg_vram(rom_off):
+    """The target subseg's start vram, read from the first instruction comment in
+    asm/<ROM>.s. Returns an int, or None when the asm listing is absent/unreadable."""
+    path = os.path.join(ROOT, "asm", f"{rom_off:X}.s")
+    if not os.path.exists(path):
+        return None
+    with open(path) as f:
+        for line in f:
+            m = VRAM_COMMENT_RE.search(line)
+            if m:
+                return int(m.group(1), 16)
+    return None
+
+
 # Ops C can't emit (or won't schedule into a leaf delay slot): CP0 register moves
 # and a bare FPU sqrt. A tiny leaf whose only work is one of these is really `hasm`,
 # not a classical target — flag it so smallest-first stops surfacing it as the pick.
@@ -837,8 +858,11 @@ def build_rows(args, upstream_index, carried, sig_index):
         if primary in carried:
             score -= CARRYOVER_PENALTY
         hz = ",".join(hazards) or "-"
+        vram = subseg_vram(off)
         rows.append({
-            "func": primary, "rom": f"0x{off:X}", "size": size, "nfns": len(fns),
+            "func": primary, "rom": f"0x{off:X}",
+            "vram": f"0x{vram:08X}" if vram is not None else "?",
+            "size": size, "nfns": len(fns),
             "pts": seed_points(size, up_lib or "none", band, len(fns), hz, blocked),
             "kind": kind, "upstream": up_lib or "none", "band": band,
             "hazards": hz, "score": score,
@@ -863,11 +887,11 @@ def main():
     if not rows:
         print("(no candidates — every asm subseg flipped and every c file at 0 stubs?)")
         return
-    print(f"{'func':28} {'rom':>9} {'size':>5} {'nfn':>3} {'pts':>3} {'kind':8} "
+    print(f"{'func':28} {'rom':>9} {'vram':>10} {'size':>5} {'nfn':>3} {'pts':>3} {'kind':8} "
           f"{'upstream':9} {'band':4} hazards")
     for r in rows:
-        print(f"{r['func']:28} {r['rom']:>9} {r['size']:>5} {r['nfns']:>3} {str(r['pts']):>3} "
-              f"{r['kind']:8} {r['upstream']:9} {r['band']:4} {r['hazards']}")
+        print(f"{r['func']:28} {r['rom']:>9} {r['vram']:>10} {r['size']:>5} {r['nfns']:>3} "
+              f"{str(r['pts']):>3} {r['kind']:8} {r['upstream']:9} {r['band']:4} {r['hazards']}")
 
 
 if __name__ == "__main__":

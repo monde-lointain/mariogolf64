@@ -264,6 +264,17 @@ v2 needs; clean mirror leaves remain the near-zero-risk default between classica
   seed 2 / banked 2pt. Retro: **1 of 1 applied** — #1 refreshed the stale S11 "warm pool mined
   out" note below. No carry-overs.
 
+- **Sprint 22: 1 file BANKED — `src/libultra/nintendo/pi/epilinkhandle.c` (`osEPiLinkHandle`),
+  libultra recover-extern mirror.** md5-candidate 37→38. **First `nintendo/` variant-dir mirror**
+  (prior libultra were `monegi/`/`shared/`) and the first libultra recover-extern since the
+  S11 mined-out note — refuting it for the recover-extern fillers it explicitly left open, as
+  S21 did for libnusys. One recover-extern (`__osPiTable`=0x800C7E8C, simple pointer → size:0x4,
+  confirmed from the fn's own `lui 0x800c`/`lw/sw 0x7e8c`); `piint.h` + the int-disable pair
+  pre-placed → one symbol add + one yaml flip. Verbatim cp, 0 iterations. seed 3 / banked 3pt.
+  Retro: **2 of 2 applied** — #1 (CLAUDE.md: look up the target fn's vram, never guess a flat
+  rom offset, for the recover-extern re-confirm) + #2 (`pick_target.py` `vram` column). The
+  re-confirm caught a target-fn vram guess error this sprint — see RETRO/VELOCITY. No carry-overs.
+
 ## PO ordering note (S16 retro — the false-clean class is closed; deeper nusys leaves now priced)
 
 The S16 grep fix re-priced the nuGfx*FuncSet leaves (now pts-3 recover-extern, was false-clean
