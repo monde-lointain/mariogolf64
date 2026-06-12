@@ -263,8 +263,8 @@ SECTIONS
         build/asm/8CA40.o(.text);
         build/asm/8CA50.o(.text);
         build/asm/8CAA0.o(.text);
-        build/asm/8CB80.o(.text);
-        build/asm/8CBD0.o(.text);
+        build/src/libultra/monegi/si/sirawread.o(.text);
+        build/src/libultra/monegi/si/sirawwrite.o(.text);
         build/asm/8CC20.o(.text);
         build/asm/8CD10.o(.text);
         build/asm/8CD70.o(.text);
@@ -486,8 +486,8 @@ SECTIONS
         build/asm/8CA40.o(.data);
         build/asm/8CA50.o(.data);
         build/asm/8CAA0.o(.data);
-        build/asm/8CB80.o(.data);
-        build/asm/8CBD0.o(.data);
+        build/src/libultra/monegi/si/sirawread.o(.data);
+        build/src/libultra/monegi/si/sirawwrite.o(.data);
         build/asm/8CC20.o(.data);
         build/asm/8CD10.o(.data);
         build/asm/8CD70.o(.data);
@@ -710,8 +710,8 @@ SECTIONS
         build/asm/8CA40.o(.rodata);
         build/asm/8CA50.o(.rodata);
         build/asm/8CAA0.o(.rodata);
-        build/asm/8CB80.o(.rodata);
-        build/asm/8CBD0.o(.rodata);
+        build/src/libultra/monegi/si/sirawread.o(.rodata);
+        build/src/libultra/monegi/si/sirawwrite.o(.rodata);
         build/asm/8CC20.o(.rodata);
         build/asm/8CD10.o(.rodata);
         build/asm/8CD70.o(.rodata);
@@ -961,8 +961,8 @@ SECTIONS
         build/asm/8CA40.o(.bss);
         build/asm/8CA50.o(.bss);
         build/asm/8CAA0.o(.bss);
-        build/asm/8CB80.o(.bss);
-        build/asm/8CBD0.o(.bss);
+        build/src/libultra/monegi/si/sirawread.o(.bss);
+        build/src/libultra/monegi/si/sirawwrite.o(.bss);
         build/asm/8CC20.o(.bss);
         build/asm/8CD10.o(.bss);
         build/asm/8CD70.o(.bss);
