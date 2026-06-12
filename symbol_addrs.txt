@@ -2,3 +2,4 @@ main = 0x800994B0; // type:func
 __osDpDeviceBusy = 0x800B2B10; // type:func
 __osThreadTail = 0x800C8220; // size:0x8
 __osRunQueue = 0x800C8228; // size:0x4
+osViSetYScale = 0x800AD370; // type:func

@@ -234,7 +234,7 @@ SECTIONS
         build/src/libultra/monegi/vi/visetevent.o(.text);
         build/src/libultra/monegi/vi/visetmode.o(.text);
         build/asm/88600.o(.text);
-        build/asm/88770.o(.text);
+        build/src/libultra/monegi/vi/visetyscale.o(.text);
         build/src/libultra/monegi/vi/viswapbuf.o(.text);
         build/asm/88810.o(.text);
         build/src/libultra/monegi/vi/viblack.o(.text);
@@ -458,7 +458,7 @@ SECTIONS
         build/src/libultra/monegi/vi/visetevent.o(.data);
         build/src/libultra/monegi/vi/visetmode.o(.data);
         build/asm/88600.o(.data);
-        build/asm/88770.o(.data);
+        build/src/libultra/monegi/vi/visetyscale.o(.data);
         build/src/libultra/monegi/vi/viswapbuf.o(.data);
         build/asm/88810.o(.data);
         build/src/libultra/monegi/vi/viblack.o(.data);
@@ -683,7 +683,7 @@ SECTIONS
         build/src/libultra/monegi/vi/visetevent.o(.rodata);
         build/src/libultra/monegi/vi/visetmode.o(.rodata);
         build/asm/88600.o(.rodata);
-        build/asm/88770.o(.rodata);
+        build/src/libultra/monegi/vi/visetyscale.o(.rodata);
         build/src/libultra/monegi/vi/viswapbuf.o(.rodata);
         build/asm/88810.o(.rodata);
         build/src/libultra/monegi/vi/viblack.o(.rodata);
@@ -935,7 +935,7 @@ SECTIONS
         build/src/libultra/monegi/vi/visetevent.o(.bss);
         build/src/libultra/monegi/vi/visetmode.o(.bss);
         build/asm/88600.o(.bss);
-        build/asm/88770.o(.bss);
+        build/src/libultra/monegi/vi/visetyscale.o(.bss);
         build/src/libultra/monegi/vi/viswapbuf.o(.bss);
         build/asm/88810.o(.bss);
         build/src/libultra/monegi/vi/viblack.o(.bss);
