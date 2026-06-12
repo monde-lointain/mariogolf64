@@ -25,6 +25,17 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 27 — mirror: __osSetGlobalIntMask + __osResetGlobalIntMask + osGetTime (libultra recover-extern, 2 new bands) — 2026-06-12
+- Increment: 3 files banked / 3 fns matched (delta: md5-candidate files 43→46)
+- Quality: 0/0/0/0 (stuck-far/permuter/carried/re-opened) — all first-pass; 0 iterations; goal met first pass
+- Seed: committed 8pt; banked 8pt; regime mirror   (v1 — story points; realized tier is v2, untouched this pure-mirror sprint)
+- What helped: **all headers in-tree, all externs recovered deterministically at gate.** `__OSGlobalIntMask`@0x800C9470 inlined by `pick_target` (no disassembly needed for that confirm). `__osBaseCounter`/`__osCurrentTime` from `osGetTime`'s own asm (2 `lui`/`lw` pairs, `D_800FBE04` + `D_801052F0`/`D_801052F4`, straightforward read). Pack split boundary at 0x8B9D0 located directly from the asm file (`endlabel __osSetGlobalIntMask` / `glabel __osResetGlobalIntMask`). `__osViDevMgr` dead-`#ifdef _DEBUG` over-flag caught early (pick's `#ifdef`-blind grep flags it, but fn's asm has no load → confirmed zero symbol add). 3 symbol adds + 1 pack split + 3 yaml flips at gate; all first-pass clean.
+- Friction: none — two new bands opened without friction; existing recover-extern + pack-split doctrine fully covered both. The `nintendo/exception/` pair shared one extern between two files (no doubled symbol add). `osGetTime`'s dead-`_DEBUG` block added no complication (verbatim kept per convention; `__osViDevMgr` correctly excluded from symbol_addrs).
+- Applied: 0 of 0 (suggestion buffer recorded "None new"; PO: apply none)
+- Carry-over: none
+
+---
+
 ## Sprint 26 — mirror: nuContRmbCheck + nuContQueryRead (libnusys jal-divergence/drop + pack-split) — 2026-06-12
 - Increment: 2 files banked / 2 fns matched (delta: md5-candidate files 41→43)
 - Quality: 0/0/0/0 (stuck-far/permuter/carried/re-opened) — both first-pass; 0 iterations; goal met first pass
