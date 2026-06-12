@@ -205,7 +205,8 @@ SECTIONS
         build/asm/862E0.o(.text);
         build/asm/86420.o(.text);
         build/asm/86550.o(.text);
-        build/asm/86730.o(.text);
+        build/src/libultra/monegi/rdp/dpsetstat.o(.text);
+        build/src/libultra/monegi/rdp/dpctr.o(.text);
         build/asm/86790.o(.text);
         build/asm/867A0.o(.text);
         build/asm/869E0.o(.text);
@@ -428,7 +429,8 @@ SECTIONS
         build/asm/862E0.o(.data);
         build/asm/86420.o(.data);
         build/asm/86550.o(.data);
-        build/asm/86730.o(.data);
+        build/src/libultra/monegi/rdp/dpsetstat.o(.data);
+        build/src/libultra/monegi/rdp/dpctr.o(.data);
         build/asm/86790.o(.data);
         build/asm/867A0.o(.data);
         build/asm/869E0.o(.data);
@@ -652,7 +654,8 @@ SECTIONS
         build/asm/862E0.o(.rodata);
         build/asm/86420.o(.rodata);
         build/asm/86550.o(.rodata);
-        build/asm/86730.o(.rodata);
+        build/src/libultra/monegi/rdp/dpsetstat.o(.rodata);
+        build/src/libultra/monegi/rdp/dpctr.o(.rodata);
         build/asm/86790.o(.rodata);
         build/asm/867A0.o(.rodata);
         build/asm/869E0.o(.rodata);
@@ -903,7 +906,8 @@ SECTIONS
         build/asm/862E0.o(.bss);
         build/asm/86420.o(.bss);
         build/asm/86550.o(.bss);
-        build/asm/86730.o(.bss);
+        build/src/libultra/monegi/rdp/dpsetstat.o(.bss);
+        build/src/libultra/monegi/rdp/dpctr.o(.bss);
         build/asm/86790.o(.bss);
         build/asm/867A0.o(.bss);
         build/asm/869E0.o(.bss);
