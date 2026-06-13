@@ -61,3 +61,5 @@ __osGbpakTimer = 0x8012F490; // size:0x20
 __osGbpakTimerMsg = 0x800FF4AC; // size:0x4
 __osGbpakTimerQ = 0x801B70F8; // size:0x18
 __osCleanupThread = 0x800B04E8; // type:func
+__osGbpakSetBank = 0x800B1A90; // type:func
+bcmp = 0x800B0A20; // type:func

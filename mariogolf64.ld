@@ -247,7 +247,8 @@ SECTIONS
         build/src/libultra/shared/gbpak/gbpakinit.o(.text);
         build/src/libultra/shared/gbpak/gbpakgetstatus.o(.text);
         build/src/libultra/shared/gbpak/gbpakpower.o(.text);
-        build/asm/88FC0.o(.text);
+        build/src/libultra/shared/gbpak/gbpakreadwrite.o(.text);
+        build/src/libultra/shared/gbpak/gbpakreadid.o(.text);
         build/asm/89320.o(.text);
         build/asm/89780.o(.text);
         build/asm/89B10.o(.text);
@@ -476,7 +477,8 @@ SECTIONS
         build/src/libultra/shared/gbpak/gbpakinit.o(.data);
         build/src/libultra/shared/gbpak/gbpakgetstatus.o(.data);
         build/src/libultra/shared/gbpak/gbpakpower.o(.data);
-        build/asm/88FC0.o(.data);
+        build/src/libultra/shared/gbpak/gbpakreadwrite.o(.data);
+        build/src/libultra/shared/gbpak/gbpakreadid.o(.data);
         build/asm/89320.o(.data);
         build/asm/89780.o(.data);
         build/asm/89B10.o(.data);
@@ -719,7 +721,8 @@ SECTIONS
         build/src/libultra/shared/gbpak/gbpakinit.o(.rodata);
         build/src/libultra/shared/gbpak/gbpakgetstatus.o(.rodata);
         build/src/libultra/shared/gbpak/gbpakpower.o(.rodata);
-        build/asm/88FC0.o(.rodata);
+        build/src/libultra/shared/gbpak/gbpakreadwrite.o(.rodata);
+        build/src/libultra/shared/gbpak/gbpakreadid.o(.rodata);
         build/asm/89320.o(.rodata);
         build/asm/89780.o(.rodata);
         build/asm/89B10.o(.rodata);
@@ -963,7 +966,8 @@ SECTIONS
         build/src/libultra/shared/gbpak/gbpakinit.o(.bss);
         build/src/libultra/shared/gbpak/gbpakgetstatus.o(.bss);
         build/src/libultra/shared/gbpak/gbpakpower.o(.bss);
-        build/asm/88FC0.o(.bss);
+        build/src/libultra/shared/gbpak/gbpakreadwrite.o(.bss);
+        build/src/libultra/shared/gbpak/gbpakreadid.o(.bss);
         build/asm/89320.o(.bss);
         build/asm/89780.o(.bss);
         build/asm/89B10.o(.bss);
