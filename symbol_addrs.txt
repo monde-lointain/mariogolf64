@@ -51,3 +51,4 @@ osTvType = 0x80000300; // size:0x4
 osViModeNtscLan1 = 0x800C9570; // size:0x50
 osViModePalLan1 = 0x800C95C0; // size:0x50
 osViModeMpalLan1 = 0x800C9610; // size:0x50
+__osCurrentHandle = 0x800C7E90; // size:0x8

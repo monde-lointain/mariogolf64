@@ -271,7 +271,7 @@ segments:
       - [0x8B990, c, libultra/nintendo/exception/setglobalintmask]
       - [0x8B9D0, c, libultra/nintendo/exception/resetglobalintmask]
       - [0x8BA20, asm]
-      - [0x8BC80, asm]
+      - [0x8BC80, c, libultra/nintendo/pi/epirawwrite]
       - [0x8BDF0, c, libultra/monegi/ai/ai]
       - [0x8BE10, asm]
       - [0x8BE20, asm]
