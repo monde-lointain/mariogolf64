@@ -192,7 +192,7 @@ segments:
       - [0x815C0, asm]
       - [0x82160, asm]
       - [0x822E0, c, libultra/audio/heapinit]
-      - [0x82320, asm]
+      - [0x82320, c, libultra/audio/heapalloc]
       - [0x82370, c, libultra/audio/copy]
       - [0x823B0, asm]
       - [0x824E0, asm]
