@@ -38,11 +38,11 @@ def _sdk_path(env_var: str, default: str) -> Path:
 # libkmc upstream src — decomp_loop's compile-profile detection (gcc -O).
 LIBKMC_SRC = _sdk_path("MG_LIBKMC_SRC", "~/development/repos/libkmc/src")
 # libultra upstream src for decomp_loop's profile detection. Points to
-# ultralib/src (Nintendo VERSION_J tree), mirroring the folder structure used
-# in src/libultra/ (io/, os/, audio/, libc/). Set MG_LIBULTRA_SRC to override.
-# Note: ultralib's gu/mgu helpers are C files (libultra_modern exposed them as
-# .s), so profile detection for those subsystems may differ; pass
-# `--profile libultra` to force the -O profile if ever needed.
+# ultralib/src (Nintendo VERSION_J tree, the sole libultra source), mirroring the
+# folder structure used in src/libultra/ (io/, os/, audio/, libc/). Set
+# MG_LIBULTRA_SRC to override.
+# Note: ultralib's gu/mgu helpers are C files, so profile detection for those
+# subsystems may differ; pass `--profile libultra` to force the -O profile if needed.
 LIBULTRA_SRC = _sdk_path("MG_LIBULTRA_SRC", "~/development/repos/ultralib/src")
 
 

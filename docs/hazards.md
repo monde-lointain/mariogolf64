@@ -20,15 +20,17 @@ iteration, no byte-`cmp` (that guard is classical-loop-only).
 (not `none`).
 
 **Procedure:**
-1. Upstream roots: libultra `~/development/repos/libultra_modern/src/`, libkmc
+1. Upstream roots: libultra `~/development/repos/ultralib/src/`, libkmc
    `~/development/repos/libkmc/src/`, libnusys
    `~/development/repos/n64sdkmod/packages/libnusys/usr/src/PR/libsrc/nusys-2.07/nusys/src/`.
-   For a libultra function absent from `libultra_modern` (VERSION_K+ only), cross-reference
-   `~/development/repos/ultralib/` for the VERSION_J source (`#if BUILD_VERSION <= VERSION_J`).
+   ultralib is the *sole* libultra source. The project builds `-DBUILD_VERSION=VERSION_J`, so
+   version-conditional upstream code selects itself via ultralib's own `#if BUILD_VERSION` guards —
+   no manual version picking. Do **not** consult `libultra_modern` (deprecated): it is 2.0L-only and
+   its casts diverge from this VERSION_J build (see the cast-divergence section).
 2. Project path mirrors the upstream path exactly: take the upstream path relative to its `src/`
-   root and prepend `src/lib<name>/`. E.g. `libultra_modern/src/monegi/vi/vigetcurrcontext.c` →
-   `src/libultra/monegi/vi/vigetcurrcontext.c`. Do not collapse variant dirs
-   (`shared/`/`monegi/`/`nintendo/`) — the variant records which SDK branch the function came from.
+   root and prepend `src/lib<name>/`. E.g. `ultralib/src/io/vigetcurrcontext.c` →
+   `src/libultra/io/vigetcurrcontext.c`. Mirror ultralib's functional subdirs verbatim
+   (`io/`, `os/`, `libc/`, `audio/`, `gu/`, …) — do not rename or flatten them.
    Companion headers mirror their upstream `include/` layout under `include/lib<name>/`.
 3. Verbatim means verbatim: keep dead `#ifdef _DEBUG` blocks and their unconditional companion
    `#include`s (they compile out because `_DEBUG` is undefined). If such a block needs a header
@@ -186,7 +188,8 @@ VERSION_J commonly sign-extends the whole `OSContext` block, so align an outlier
 neighbors.
 
 **Provenance:** S44 (`osCreateThread`: `context.ra = (s64)(s32)__osCleanupThread` sign-extend, vs
-libultra_modern's `(u64)(u32)` zero-extend; sibling `sp`/`a0` already sign-extended).
+the old 2.0L upstream's `(u64)(u32)` zero-extend; sibling `sp`/`a0` already sign-extended). This
+divergence is one reason the project standardized on ultralib VERSION_J as the sole upstream.
 
 ---
 

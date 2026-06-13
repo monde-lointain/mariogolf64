@@ -9,9 +9,9 @@ import tempfile
 script_dir = os.path.dirname(os.path.realpath(__file__))
 root_dir = os.path.abspath(os.path.join(script_dir, ".."))
 
-# Project-specific. libultra + libnusys headers live under include/ (copied from
-# ~/development/repos/libultra_modern and ~/development/repos/n64sdkmod), so a
-# single -Iinclude covers them all (PR/, n64/nusys/, top-level).
+# Project-specific. libultra + libnusys headers live under include/ (libultra mirrors
+# ultralib's tree — PR/, PRinternal/, compiler/gcc; libnusys from ~/development/repos/n64sdkmod),
+# so a single -Iinclude covers them all (PR/, n64/nusys/, top-level).
 CPP_FLAGS = [
     "-Iinclude",
     "-D_LANGUAGE_C",

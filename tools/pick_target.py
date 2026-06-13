@@ -101,12 +101,10 @@ PROJECT_INC = os.path.join(ROOT, "include")
 # INCLUDE_DIRS is an unindexed-`-I` case (blocked, a deferred Makefile enabler — the audio
 # band's <libaudio.h> at include/libultra/PR/). See classify of needs-header in seed_points.
 UPSTREAM_INC_ROOTS = [
-    # ultralib is the live libultra mirror source (LIBULTRA = ultralib/src), so its include tree is
-    # the primary companion-header donor and must lead — it ships the `PRinternal/` prefix the
-    # mirrors `#include` (libultra_modern uses `internal/`, so it can't satisfy `PRinternal/<h>`).
+    # ultralib is the sole libultra mirror source (LIBULTRA = ultralib/src), so its include tree is
+    # the libultra companion-header donor — it ships the `PRinternal/` prefix the mirrors `#include`.
     # S46: the PI-band PRinternal/piint.h copy came from here.
     os.path.expanduser("~/development/repos/ultralib/include"),
-    os.path.expanduser("~/development/repos/libultra_modern/include"),
     os.path.expanduser("~/development/repos/libkmc/include"),
     os.path.expanduser(
         "~/development/repos/n64sdkmod/packages/libnusys/usr/src/PR/libsrc/nusys-2.07/nusys/include"
