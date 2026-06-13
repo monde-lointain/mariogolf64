@@ -141,8 +141,17 @@ the gate by disassembling and comparing the jal list against the upstream call l
 - **Confirmed clean drop:** stays a mirror — copy verbatim, drop the diverging line(s)
   (deterministic from the asm jal list), `make` → ROM SHA-1 is the proof. (S18: `nuContInit` drops
   the absent `nuContPakMgrInit` call.)
+- **Jal-less dropped block (jal count can MATCH).** A dropped block need not contain a call, so the
+  jal count can agree while the build still diverges — `pick_target.py` flags nothing. A verbatim
+  mirror that links fine but misses the ROM SHA-1, with no flagged hazard, often means this ROM omits
+  a jal-less upstream guard/early-return (or replaces a multi-call block with a one-liner). Don't
+  iterate C blind: `.o`-diff against the baserom asm first (same first-SHA-miss remedy as the cast
+  divergence below). The dropped lines are deterministic from the asm structure. (S45 `osGbpakReadWrite`
+  drops `if (size == 0) return 0;` — a jal-less early-return that folds into the later `blez` size<=0
+  path; `osGbpakReadId` replaces the upstream `if(bcmp){ write-temp; reread; recheck }` retry block
+  — 5 calls + a `temp[32]` local — with `if (bcmp(...)) return 4;`, where the jal count *did* diverge.)
 
-**Provenance:** S18, S30, S35.
+**Provenance:** S18, S30, S35, S45.
 
 ---
 
@@ -209,6 +218,20 @@ in one `make`. Only reach for the classical seed loop when dropping the def forc
 (e.g. an initializer the asm computes inline). Place each dropped global add-only in
 `symbol_addrs.txt` at its asm-recovered vram (scalar `// size:0x4`, array `// size:stride×count`);
 `pick_target.py` surfaces the array dimension as `defines-data:<name>[DIM]`.
+
+**Function-local statics in a shared data blob (S45).** The fast path also covers a *function-local*
+`static` array whose initialized bytes live in a shared data segment (`main_data`), not in this
+object's `.data` and not in a `.rodata` sibling. `pick_target.py` won't flag it (a `static` is
+invisible to the refs-unplaced extern grep, and the asm names it `D_<vram>` which resolves from
+`main_data`, so no link break); it surfaces only as a full-make SHA miss whose `.o`-diff shows a
+nonzero `.data` section in the compiled object (the compiler emitted a *second* copy that shifts the
+data segment). Fix exactly as for a file-scope global: drop the `static` def → a **sized** `extern`
+(`extern u8 nintendo[48];` — size it so `sizeof`/`ARRLEN` still compiles; an incomplete `[]` errors
+on `sizeof applied to an incomplete type`), then add the symbol add-only at its real vram so
+`make extract` renames the `main_data` dlabel. No `.data` is emitted, no segment shift, and the
+`.text` reloc target is identical (`%hi/%lo` either way). The splat `D_<vram>` name is its real vram;
+a `.NON_MATCHING`-suffixed map address is an alias, not the storage. (S45 `osGbpakReadId`:
+`nintendo`@0x800C93F0 size:0x30, `mmc_type`@0x800C9420 size:0x14.)
 
 ---
 

@@ -25,6 +25,17 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 45 — osGbpakReadWrite + osGbpakReadId libultra gbpak — 2026-06-13
+- Increment: 2 files banked / 2 functions matched (`src/libultra/shared/gbpak/{gbpakreadwrite,gbpakreadid}.c`); md5-candidate 83→85. Closes the `libultra/shared/gbpak/` band (S43 power/getstatus, S44 init). All 85 c files now md5-candidate, 0 INCLUDE_ASM stubs anywhere in `src/`. Goal fully met, 0 carry-overs.
+- Quality: stuck-far 0, permuter 0, carried 0, re-opened 0.
+- Seed: committed 3pt (0x88FC0 2-fn pack); banked 3pt; regime mirror (seed-only — both mirror track; 8-gate clear). Both divergences were near-verbatim mirror known-edits (dropped blocks), not classical iterations, so no realized-tier scoring.
+- What helped: warm gbpak band (S43/S44) pre-placed every callee except two deterministic recover-callees added at the gate (`__osGbpakSetBank`=0x800B1A90, `bcmp`=0x800B0A20 — both from the pack's own jals). The `.o`-diff-on-first-SHA-miss reflex (codified S44) immediately localized both divergences instead of blind C iteration. readid's data resolution reused S44's defines-data fast-path verbatim (drop static def → sized extern + dlabel rename), no main_data split needed.
+- Friction: both functions are near-verbatim mirrors where MG64 OMITS upstream blocks, surfacing only at the full-make SHA miss. (a) `osGbpakReadWrite` drops `if (size == 0) return 0;` — a **jal-less** early-return, so jal-counting can't flag it (folds into the later `blez` uninit-`ret` path). (b) `osGbpakReadId` drops the upstream `if(bcmp){ write-temp; reread; recheck }` retry block (jal 12→7), and after the `.text` matched the SHA still missed on `.data`: the function-local `static nintendo[]`/`mmc_type[]` arrays live in the shared `main_data` blob (the compiler emitting a second copy shifts the data segment). Both are the S18/S44 late-surfacing class — invisible to every gate check.
+- Applied (2 of 3): #1 `docs/hazards.md` Near-verbatim-mirror section gains a jal-less-dropped-block bullet (jal count can MATCH; `.o`-diff first) + provenance S45. #2 `docs/hazards.md` defines-data verbatim-body fast-path gains a function-local-statics-in-shared-blob paragraph (drop static → sized extern + dlabel rename; size it so `sizeof`/`ARRLEN` compiles; `D_<vram>` name is the real vram, `.NON_MATCHING` map addr is an alias). #3 log-only (pick_target can't cheaply detect shared-blob statics — they're invisible to the refs-unplaced grep and don't link-break).
+- Carry-overs: none. Cross-repo follow-up: `__osGbpakSetBank`=0x800B1A90 + `bcmp`=0x800B0A20 (were `func_<addr>` in Ghidra) and data names `nintendo`=0x800C93F0 / `mmc_type`=0x800C9420 are new decomp-side symbols — propagate via `sync_decomp_names.py --import-from-decomp`.
+
+---
+
 ## Sprint 44 — osCreateThread + osDestroyThread + osGbpakInit libultra — 2026-06-13
 - Increment: 3 files banked / 3 functions matched (`src/libultra/monegi/thread/{createthread,destroythread}.c` + `src/libultra/shared/gbpak/gbpakinit.c`); md5-candidate 80→83. First sprint under the PO libultra-epic directive. Goal fully met, 0 carry-overs.
 - Quality: stuck-far 0, permuter 0, carried 0, re-opened 0.
