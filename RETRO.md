@@ -25,6 +25,15 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 43 — gbpak pair (osGbpakPower + osGbpakGetStatus) libultra classical — 2026-06-13
+- Increment: 2 files banked / 2 functions matched (`src/libultra/shared/gbpak/{gbpakpower,gbpakgetstatus}.c`); md5-candidate 78→80 (80/80 src .c now 0-stub). Goal fully met, 0 carry-overs.
+- Quality: stuck-far 0, permuter 0, carried 0, re-opened 0.
+- Seed: committed 6pt (power 3 + getstatus 3); banked 6pt; classical track v2. Realized 4 (each fn −1 verbatim-first-try); residual −2 — the most-negative classical residual to date, because both were classical-FLAGGED (jal-count-mismatch) yet proved pure verbatim mirrors. Two-pass freeze: seed committed pre-`src/` (`fcd06a7`).
+- What helped: both `jal-count-mismatch` flags were macro FPs, recognised at the gate against the asm (power's 6vs5 = `OS_USEC_TO_CYCLES`; getstatus's 6vs4 = 2× `ERRCK`), so both seeded as verbatim upstream bodies and matched first try. The S41 deterministic recover-extern pattern handled all 5 unplaced symbols at the gate (3 timer globals via the osSetTimer arg setup, 2 callees via their jal targets) → no execution-middle link failures. getstatus's score-15 isolation artifact (empty `top_mismatches` + 76/76 rows) was recognised immediately (S34/S39 precedent) → straight to full-make SHA, no wasted C iteration.
+- Friction: pick_target's jal-count path still over-counted function-like macros as calls — the S42 fix only hardcoded `MQ_IS_FULL`/`MQ_IS_EMPTY`, so `OS_USEC_TO_CYCLES` and `ERRCK` slipped through and mis-routed two clean mirrors to the classical track. Both fns banked anyway (the gate caught it), but the seed over-priced the sprint by ~2pt.
+- Applied (2 of 2): #1 generalised `_c_jal_count` in `pick_target.py` to drop EVERY invoked function-like macro via the S41 `all_func_macros()` table (not just the 2 hardcoded names); side-corrected sprintf `2vs1`→clean (va_start FP) and osCartRomInit `21vs5`→`6vs5` (macro inflation); golden regenerated, 23/23 tooling tests pass. #2 documented the isolation-artifact recognition signal (`score≠0` + empty `top_mismatches` + `match_count==total_rows` → trust full-make SHA, skip iteration/permuter) in `CLAUDE.md` Spot-check bullet + `docs/hazards.md#isolated-compile-caveat`.
+- Carry-overs: none.
+
 ## Sprint 42 — osSendMesg + osSetEventMesg libultra message pair — 2026-06-13
 - Increment: 2 files banked / 2 functions matched (`src/libultra/monegi/message/{sendmesg,seteventmesg}.c`); md5-candidate 76→78 (78/78 src .c now 0-stub).
 - Quality: 0/0/0/0 this sprint (stuck-far/permuter/carried/re-opened).

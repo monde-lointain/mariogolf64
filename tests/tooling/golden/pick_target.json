@@ -28,7 +28,7 @@
   {
     "band": "warm",
     "func": "sprintf",
-    "hazards": "pack:2fn[sprintf=sprintf,proutSprintf=sprintf],file-static,needs-header:xstdio.h,string.h,jal-count-mismatch:2vs1",
+    "hazards": "pack:2fn[sprintf=sprintf,proutSprintf=sprintf],file-static,needs-header:xstdio.h,string.h",
     "kind": "asm-flip",
     "nfns": 2,
     "pts": "blk",
@@ -325,32 +325,6 @@
     "vram": "0x800A2A70"
   },
   {
-    "band": "cold",
-    "func": "osGbpakGetStatus",
-    "hazards": "calls-unplaced:__osContRamRead,__osPfsGetStatus,jal-count-mismatch:6vs4",
-    "kind": "asm-flip",
-    "nfns": 1,
-    "pts": 3,
-    "rom": "0x88D80",
-    "score": -88,
-    "size": 288,
-    "upstream": "libultra",
-    "vram": "0x800AD980"
-  },
-  {
-    "band": "cold",
-    "func": "osGbpakPower",
-    "hazards": "refs-unplaced:__osGbpakTimer,__osGbpakTimerMsg,__osGbpakTimerQ,jal-count-mismatch:6vs5",
-    "kind": "asm-flip",
-    "nfns": 1,
-    "pts": 3,
-    "rom": "0x88EA0",
-    "score": -88,
-    "size": 288,
-    "upstream": "libultra",
-    "vram": "0x800ADAA0"
-  },
-  {
     "band": "-",
     "func": "osMapTLBRdb",
     "hazards": "intrinsic-likely",
@@ -392,7 +366,7 @@
   {
     "band": "warm",
     "func": "osCartRomInit",
-    "hazards": "refs-unplaced:__CartRomHandle,__OSTranxInfo,calls-unplaced:aligned,jal-count-mismatch:21vs5",
+    "hazards": "refs-unplaced:__CartRomHandle,__OSTranxInfo,calls-unplaced:aligned,jal-count-mismatch:6vs5",
     "kind": "asm-flip",
     "nfns": 1,
     "pts": 2,
@@ -648,5 +622,31 @@
     "size": 240,
     "upstream": "none",
     "vram": "0x800B1820"
+  },
+  {
+    "band": "warm",
+    "func": "osGbpakInit",
+    "hazards": "defines-data:__osGbpakTimer,__osGbpakTimerMsg,calls-unplaced:aligned",
+    "kind": "asm-flip",
+    "nfns": 1,
+    "pts": 3,
+    "rom": "0x88B80",
+    "score": -248,
+    "size": 512,
+    "upstream": "libultra",
+    "vram": "0x800AD780"
+  },
+  {
+    "band": "-",
+    "func": "__floatdidf",
+    "hazards": "-",
+    "kind": "asm-flip",
+    "nfns": 1,
+    "pts": 5,
+    "rom": "0x8F140",
+    "score": -256,
+    "size": 256,
+    "upstream": "none",
+    "vram": "0x800B3D40"
   }
 ]

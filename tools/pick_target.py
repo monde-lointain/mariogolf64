@@ -435,6 +435,24 @@ def _upstream_body(up_cpath, primary):
     return None
 
 
+def _c_jal_count(body):
+    """C-side jal count for `body`: `name(` occurrences minus control keywords AND function-like
+    macros. A macro *invocation* emits no jal of its own — OS_USEC_TO_CYCLES expands to arithmetic,
+    ERRCK to assignment+branch (the S43 gbpak `6vs5`/`6vs4` FPs), va_start to a builtin (the S43
+    sprintf `2vs1` FP), MQ_IS_FULL to a field compare (the S42 osSendMesg `7vs6` FP). Generalises
+    the S42 hardcoded `_C_NONCALL` predicate-macro list to the project-wide `all_func_macros()`
+    table (S41), so every invoked macro is dropped, not just the two that were named. One level only
+    (a macro whose body wraps exactly one real call would under-count by 1 — rare, and the gate
+    reconciles the upstream call list against the asm regardless); the bias is conservative because
+    the recurring failure mode is *over*-counting predicate/arithmetic macros as phantom calls."""
+    macros = all_func_macros()
+    return sum(
+        1
+        for name in C_CALL_RE.findall(body)
+        if name not in _C_NONCALL and name not in macros
+    )
+
+
 def call_divergence(rom_off, primary, up_cpath):
     """Advisory `jal-count-mismatch:<C>vs<asm>` when the upstream call count for `primary` differs
     from the ROM fn's jal count — an upstream-vs-ROM build divergence. None when they agree, the
@@ -445,7 +463,7 @@ def call_divergence(rom_off, primary, up_cpath):
     n_asm = _asm_jal_count(rom_off, primary)
     if n_asm is None:
         return None
-    n_c = len([n for n in C_CALL_RE.findall(_strip_string_literals(_strip_dead_blocks(body))) if n not in _C_NONCALL])
+    n_c = _c_jal_count(_strip_string_literals(_strip_dead_blocks(body)))
     if n_c == n_asm:
         return None
     return Hazard(HAZARD_JAL_COUNT_MISMATCH, f"{n_c}vs{n_asm}")

@@ -371,6 +371,15 @@ the truth.
 
 **Trigger:** Score ≠ 0 in isolation but the mismatches are HI/LO16 reloc address loads.
 
+**Fast recognition signal (S43):** `decomp_loop.py` reports a **non-zero `score` with empty
+`top_mismatches` AND `match_count == total_rows`** (every row matched, yet a residual score). That
+combination is definitionally an isolation artifact — asm-differ found no mnemonic-row diff, so the
+score is pure reloc/addend noise (struct-field LO16 addends like `pfs->queue`/`pfs->channel`, extern
+HI/LO16 calls against now-placed symbols). It is NOT a near-miss: do not iterate C, do not run the
+permuter. Go straight to the in-tree spot-check / full-make ROM SHA-1, which is byte-authoritative.
+S43 `osGbpakGetStatus` scored 15 / 99.8% this way (76/76 rows, empty mismatches) and the full make
+matched the baserom unchanged.
+
 **Procedure:** Trust the in-tree spot-check, not the isolated score.
 
 ---

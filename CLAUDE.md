@@ -59,7 +59,10 @@ Ghidra MCP is used inline at seed time. For each target function:
      intermediate, see `docs/hazards.md#register-reuse-nudge-classical-regalloc`.
    - **Spot-check** (only at score 0): byte-level `cmp` of the in-tree compiled `.text` vs the
      isolated one. The `cmp` is the truth, not the mnemonic diff (see
-     `docs/hazards.md#assembler-differences--byte-cmp-spot-check`).
+     `docs/hazards.md#assembler-differences--byte-cmp-spot-check`). A non-zero score with **empty
+     `top_mismatches` AND `match_count == total_rows`** is an isolation artifact (struct-field reloc
+     addend / extern HI/LO16), not a near-miss — go straight to the in-tree spot-check / full-make
+     SHA-1, do not iterate C or reach for the permuter (see `docs/hazards.md#isolated-compile-caveat`).
    - **Finalize** (only if the spot-check passes): inline the body into `src/<seg>.c`, drop the
      `INCLUDE_ASM` line, `clang-format -i` (skip under `src/libultra/` & `src/libkmc/`), then `make`
      until `build/mariogolf64.z64: OK` and SHA-1 == baserom.
