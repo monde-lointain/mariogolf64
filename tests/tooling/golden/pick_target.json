@@ -13,19 +13,6 @@
     "vram": "0x800A6F20"
   },
   {
-    "band": "cold",
-    "func": "guRandom",
-    "hazards": "needs-header:guint.h",
-    "kind": "asm-flip",
-    "nfns": 1,
-    "pts": "blk",
-    "rom": "0x85420",
-    "score": 152,
-    "size": 48,
-    "upstream": "libultra",
-    "vram": "0x800AA020"
-  },
-  {
     "band": "warm",
     "func": "sprintf",
     "hazards": "pack:2fn[sprintf=sprintf,proutSprintf=sprintf],file-static,needs-header:xstdio.h,string.h,os.h",
@@ -206,19 +193,6 @@
     "size": 16,
     "upstream": "none",
     "vram": "0x801F4A30"
-  },
-  {
-    "band": "cold",
-    "func": "guScaleF",
-    "hazards": "pack:2fn[guScaleF=scale,guScale=scale],needs-header:guint.h",
-    "kind": "asm-flip",
-    "nfns": 2,
-    "pts": "blk",
-    "rom": "0x85A50",
-    "score": -24,
-    "size": 224,
-    "upstream": "libultra",
-    "vram": "0x800AA650"
   },
   {
     "band": "cold",
@@ -429,6 +403,19 @@
     "vram": "0x800A20A0"
   },
   {
+    "band": "warm",
+    "func": "guMtxCatF",
+    "hazards": "pack:2fn[guMtxCatF=mtxcatf,guMtxXFMF=mtxxfmf]",
+    "kind": "asm-flip",
+    "nfns": 2,
+    "pts": 2,
+    "rom": "0x847D0",
+    "score": -136,
+    "size": 400,
+    "upstream": "libultra",
+    "vram": "0x800A93D0"
+  },
+  {
     "band": "-",
     "func": "func_800A0A90",
     "hazards": "-",
@@ -546,19 +533,6 @@
     "vram": "0x800ACC00"
   },
   {
-    "band": "cold",
-    "func": "guMtxCatF",
-    "hazards": "pack:2fn[guMtxCatF=mtxcatf,guMtxXFMF=mtxxfmf],needs-header:guint.h",
-    "kind": "asm-flip",
-    "nfns": 2,
-    "pts": "blk",
-    "rom": "0x847D0",
-    "score": -200,
-    "size": 400,
-    "upstream": "libultra",
-    "vram": "0x800A93D0"
-  },
-  {
     "band": "-",
     "func": "func_800A1320",
     "hazards": "pack:2fn[func_800A1320=?,func_800A1370=?]",
@@ -648,5 +622,31 @@
     "size": 464,
     "upstream": "libnusys",
     "vram": "0x800A23A0"
+  },
+  {
+    "band": "warm",
+    "func": "__osPfsGetStatus",
+    "hazards": "pack:3fn[__osPfsGetStatus=pfsgetstatus,func_800AE800=?,func_800AE894=?],refs-unplaced:__OSContRequesFormatShort,__osContLastCmd,__osPfsInodeCacheBank,__osPfsPifRam,calls-unplaced:__osSiRawStartDma,needs-header:PRinternal/controller.h,PRinternal/siint.h,jal-count-mismatch:7vs6",
+    "kind": "asm-flip",
+    "nfns": 3,
+    "pts": 5,
+    "rom": "0x89B10",
+    "score": -264,
+    "size": 528,
+    "upstream": "libultra",
+    "vram": "0x800AE710"
+  },
+  {
+    "band": "-",
+    "func": "func_800A4FC0",
+    "hazards": "pack:2fn[func_800A4FC0=?,func_800A509C=?]",
+    "kind": "asm-flip",
+    "nfns": 2,
+    "pts": 13,
+    "rom": "0x803C0",
+    "score": -272,
+    "size": 272,
+    "upstream": "none",
+    "vram": "0x800A4FC0"
   }
 ]

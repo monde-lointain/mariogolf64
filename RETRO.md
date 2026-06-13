@@ -25,6 +25,15 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 50 — guScaleF + guScale libultra gu/ band-open fast-path mirror — 2026-06-13
+- Increment: 1 file banked (`src/libultra/gu/scale.c`) / 2 fns matched (`guScaleF`, `guScale`; 2nd gu/ file). md5-candidate 90→91 (91/91 .c files stub-free).
+- Quality: 0/0/0/0 this sprint. Clean first-build verbatim match (zero edits, no seed/decomp_loop/permuter).
+- Seed: committed 2pt; banked 2pt; regime mirror (8-gate clear; seed-only, no freeze commit).
+- What helped: S49's open gu/ band — `guint.h` already in `src/libultra/gu/`, so scale.c's quote-`#include "guint.h"` resolved source-relative with no enabler. Diagnosed the `blk needs-header:guint.h` as a band-warmth false-blk at the gate (manual override). Both callees (`guMtxIdentF`/`guMtxF2L`) and both names already placed/curated → single yaml-flip the only enabler.
+- Friction: S49's BACKLOG band-note mis-predicted this pack as calls-unplaced (`guMtxIdentF`/`guMtxF2L`); they were already placed, so it over-stated the cost. The false-blk required a manual gate override (now fixed in tooling, see Applied).
+- Applied: 1 of 1 (#1 `missing_includes` now takes the mirror dir and drops band-local quote-includes that resolve source-relative — `guMtxCatF` and future gu/ siblings stop showing false-`blk`; `docs/hazards.md#needs-header` band-local-quote-include note; golden regen, 23 pass).
+- Carry-over: none. (gu/ band now warm with guint.h in-tree; next gu candidates `guMtxCatF`/`guRotateRPYF` are pickable warm mirrors, plus rotate/perspective/mtxcat packs with their own hazards.)
+
 ## Sprint 49 — guRandom libultra gu/ band defines-data fast-path mirror — 2026-06-13
 - Increment: 1 file banked (`src/libultra/gu/random.c`) / 1 fn matched (`guRandom`, 1st gu/ fn, opens the cold band). md5-candidate 89→90 (90/90 .c files stub-free); asm subsegs 183→182.
 - Quality: 0/0/0/0 this sprint. Clean first-build match (no seed/decomp_loop/permuter).

@@ -259,6 +259,13 @@ so a dead-`_DEBUG` include can over-flag — confirm against the upstream).
 **Procedure:**
 - **Missing-but-copyable** → copy the companion header into the tree in the execution middle (e.g.
   `assert.h` for `visetmode.c`).
+- **Band-local quote-include (already resolved)** → a `#include "x.h"` resolves source-relative to
+  the dir the mirror compiles in, so once the first band sibling has shipped its companion at
+  `src/lib<...>/<band>/x.h` (e.g. `gu/guint.h`, copied alongside `gu/random.c` in S49), every
+  later sibling that quote-includes it is already clean — no enabler. Since S50 `missing_includes`
+  takes the mirror dir and drops these, so they no longer over-flag as `needs-header`/`blk`. This
+  is the include-side of `#open-band-fast-path`; the over-flag only persists for an angle-include
+  (`<x.h>`), which is never source-relative.
 - **Unindexed `-I` path** → a deferred Makefile enabler; defer the pick unless the PO adds the path.
   The audio band's bare `#include <libaudio.h>` (header sits at `include/libultra/PR/libaudio.h`,
   but there is no `-I include/libultra/PR`) is the standing example: flagging an audio leaf as a
