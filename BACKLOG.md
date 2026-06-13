@@ -8,19 +8,24 @@ This file holds only the *ordering rationale*, *enabler items* (gate actions), a
 
 ## Active phase / epic
 
-**libultra/libkmc upstream-mirror band, smallest-first.** Reposition known SDK functions
-verbatim (the upstream-mirror branch of the execution loop); reserve one no-upstream
-classical-loop target per few sprints to validate the *classical* match-loop (still unproven —
-every win below was an upstream mirror). Sprints capped small (1 upstream file, or ≤ ~3–4 functions) until a per-sprint
-count emerges.
+**Epic 1 — complete the libultra function set (mirrors + classical), smallest-first.** All
+remaining libultra functions are in scope: verbatim mirrors, known-edit sub-cases (near-verbatim
+drop, file-static drop), recover-extern mirrors, and classical-loop targets. libkmc and libnusys
+remain pickable fillers when needed to hit the ≥5pt sprint target (S26 directive), but are
+subordinate to the libultra goal. Target selection is `tools/pick_target.py` (smallest-first);
+the 8-point decompose gate fires on any seed ≥8. v2 classical track is active (since S11);
+mirror is the default, classical is first-class when the asm warrants it.
 
-**PO ordering note (S7 #2 — RESOLVED at S9).** The standing "schedule one classical target"
-recommendation was executed in **Sprint 9** (`func_80099490`, the first `--upstream none` match) —
-the classical match-loop is now **proven**. But the spike matched first-pass-clean with **zero
-residual variance**, so the v2 activation remains uncalibratable and was **deferred** at the S9
-review. See the **`## PO ordering note (S9 retro …)`** below for the live guidance: the next
-classical target must be **non-trivial** (real arithmetic/branches/locals) to generate the variance
-v2 needs; clean mirror leaves remain the near-zero-risk default between classical spikes.
+**Remaining libultra hazard map (S38).** Clean warm mirrors still available in open bands
+(`monegi/ai/`, `nintendo/pi/`, `monegi/thread/`). **blk** — `alHeapDBAlloc` (needs
+`os_internal.h`/`ultraerror.h` companion copies to advance the `audio/` sub-band beyond the S36
+pair). **defines-data (classical)** — `__osViInit` (3pt, defines placed BSS globals, static drops
+needed). **jal-count-mismatch / classical-likely** — `osCartRomInit` (`21vs5`, stripped impl);
+`__osEPiRawWriteIo` (`2vs0`, investigate at gate). **Packs (split at upstream boundary)** —
+`osCreateThread` (2fn), `ldiv` (2fn), `osSendMesg` (2fn), `__osPiRawStartDma` (3fn),
+`osSpTaskLoad` (2fn), all ≤8pt. **Large packs (8-gate: decompose)** — `__osTimerServicesInit`
+(4fn), `_Litob` (4fn), `alEnvmixerPull` (8fn), `osCreateScheduler` (13pt, must decompose into
+sub-sprints).
 
 - **Sprint 0 (pre-Scrum): 7 files BANKED (8 C-body matches + 1 hasm).** Before this overlay
   existed: `src/libkmc/matherr.c` (`_matherr`), `src/libkmc/rand.c` (`rand`+`srand`,
