@@ -226,6 +226,29 @@ def rodata_literals(rom_off, primary):
     return sorted(addrs)
 
 
+# Integer loads of an anonymous pooled constant: `lw/lwu/ld $r, %lo(D_<addr>)($reg)`. GCC moves a
+# pooled `double` into an FP register pair with two `lw`s + `mtc1`s (not `ldc1`), so the 2nd (+ any
+# further) word of a rodata literal block is invisible to RODATA_LITERAL_RE's FP-only scan.
+RODATA_WORD_RE = re.compile(
+    r"\b(?:lw|lwu|ld)\b[^\n]*%lo\(D_(?:ovl\d+_)?([0-9A-Fa-f]{8})\)"
+)
+
+
+def rodata_word_refs(rom_off, primary):
+    """VRAMs `primary` loads via integer `lw/lwu/ld %lo(D_<addr>)` in asm/<ROM>.s. The caller
+    band-filters these (keeping only code-segment `.rodata` addresses) and unions them with the
+    FP literals from rodata_literals to size the full `.rodata` sibling-split extent — GCC loads a
+    pooled `double` via an `lw` pair + `mtc1`, so its 2nd word is invisible to the FP-only scan
+    (S52: lookatref's 1.0 double at 0x800D2518 was such an `lw` pair). Data-segment hits are not
+    rodata literals (they are placed/recover-extern data refs) and the caller drops them. Returns a
+    sorted list of distinct addresses."""
+    addrs = set()
+    for line in iter_function_body(rom_off, primary):
+        for h in RODATA_WORD_RE.findall(line):
+            addrs.add(int(h, 16))
+    return sorted(addrs)
+
+
 def recover_unplaced_call_vram(rom_off, primary):
     """Addresses of `primary`'s *unnamed* jal targets (`jal func_<hex>`) in asm/<ROM>.s — the
     callees splat couldn't name because they're absent from both name files. The function dual of

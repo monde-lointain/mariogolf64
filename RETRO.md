@@ -25,6 +25,17 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 52 — guRotateRPYF/RPY + guLookAtReflectF/Reflect libultra gu/ mirror pair — 2026-06-13
+- Increment: 2 files banked (`src/libultra/gu/rotaterpy.c`, `lookatref.c`) / 4 fns matched (`guRotateRPYF`, `guRotateRPY`, `guLookAtReflectF`, `guLookAtReflect`; 4th+5th gu/ files). md5-candidate 92→94; asm subsegs 180→178.
+- Quality: 0/0/0/0 this sprint. Both verbatim ultralib VERSION_J mirrors, clean first build, 0 iterations.
+- Seed: committed 5pt; banked 5pt; regime mirror (8-gate clear; seed-only). rotaterpy seed 2 + lookatref seed 3.
+- What helped: all callees pre-placed (sinf/cosf/guMtxIdentF/guMtxF2L); `guint.h` shipped S49; both names pre-curated. rotaterpy was a clean S49 static-float clone (`dtor`@0x800C81E0 recover-extern, drop fn-local static → file-scope extern). lookatref's two known patterns composed without surprise: `sqrtf`@0x800B0A10 recover-callee (S23 dual) + the S38/S48 `.rodata` sibling split, both pre-noted at the gate so neither was a finalize-time SHA miss.
+- Friction: (a) **rodata-literal mislabel** — pick_target flagged rotaterpy's `dtor`@0x800C81E0 (data region) and lookatref's literals (rodata region) identically, but the enablers differ (recover-extern vs sibling split); diagnosed by address range at finalize. Fixed in tooling (#2). (b) **partial rodata extent** — the hazard listed only lookatref's `ldc1` double @0x800D2510; the `1.0` @0x800D2518 was an `lw`-pair the FP-only scan missed (the split is 16 B, not 8). Sized correctly from the disasm; fixed in tooling (#3). (c) **stale S51 band note** — predicted `guMtxIdentF`/`guMtxF2L` as next small gu/ leaves; they are inside the pts-13 main pack `func_800660A0`, not separable. Corrected (#1).
+- Applied (3 of 3): #1 BACKLOG gu/ band-note correction (separable gu/ leaf pool mined out; the rest are `blk`/pts-13/heterogeneous); #2 `pick_target.py` segment classifier — `%lo(D_)` in a `rodata` subseg ⇒ `rodata-literal` sibling split, in the data segment ⇒ new `data-static` (S49 recover-extern); #3 `rodata_word_refs` unions `lw`-pair double 2nd-words (band-filtered) so the sibling-split extent is full. golden regen (sqrtf rename + stale guMtxCatF row dropped), 23 pass. docs/hazards.md (#defines-data data-static para + #rodata-sibling extent note) + CLAUDE.md hazard index updated.
+- Carry-over: none.
+
+---
+
 ## Sprint 51 — guMtxCatF + guMtxXFMF libultra gu/ combined-subseg mirror — 2026-06-13
 - Increment: 1 file banked (`src/libultra/gu/mtxcatf.c`) / 2 fns matched (`guMtxCatF`, `guMtxXFMF`; 3rd gu/ file). md5-candidate 91→92 (92/92 .c files stub-free); asm subsegs → 180.
 - Quality: 0/0/0/0 this sprint. Verbatim ultralib `src/gu/mtxcatf.c`, zero edits, matched first `make`.

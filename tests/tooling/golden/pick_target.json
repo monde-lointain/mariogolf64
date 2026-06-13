@@ -40,7 +40,7 @@
   },
   {
     "band": "-",
-    "func": "func_800B0A10",
+    "func": "sqrtf",
     "hazards": "intrinsic-likely",
     "kind": "asm-flip",
     "nfns": 1,
@@ -403,19 +403,6 @@
     "vram": "0x800A20A0"
   },
   {
-    "band": "warm",
-    "func": "guMtxCatF",
-    "hazards": "pack:2fn[guMtxCatF=mtxcatf,guMtxXFMF=mtxxfmf]",
-    "kind": "asm-flip",
-    "nfns": 2,
-    "pts": 2,
-    "rom": "0x847D0",
-    "score": -136,
-    "size": 400,
-    "upstream": "libultra",
-    "vram": "0x800A93D0"
-  },
-  {
     "band": "-",
     "func": "func_800A0A90",
     "hazards": "-",
@@ -648,5 +635,18 @@
     "size": 272,
     "upstream": "none",
     "vram": "0x800A4FC0"
+  },
+  {
+    "band": "-",
+    "func": "__fixunsdfdi",
+    "hazards": "-",
+    "kind": "asm-flip",
+    "nfns": 1,
+    "pts": 5,
+    "rom": "0x8F020",
+    "score": -288,
+    "size": 288,
+    "upstream": "none",
+    "vram": "0x800B3C20"
   }
 ]

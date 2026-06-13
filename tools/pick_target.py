@@ -43,6 +43,7 @@ from decomp_asm import (
     recover_unplaced_call_vram,
     recover_unplaced_vram,
     rodata_literals,
+    rodata_word_refs,
     subseg_vram,
 )
 
@@ -161,6 +162,7 @@ HAZARD_NON16ALIGN = "non16align"
 HAZARD_INTRINSIC_LIKELY = "intrinsic-likely"
 HAZARD_MAYBE_UPSTREAM = "maybe-upstream"
 HAZARD_RODATA_LITERAL = "rodata-literal"
+HAZARD_DATA_STATIC = "data-static"
 HAZARD_REMAINING = "remaining"
 
 
@@ -193,6 +195,35 @@ def parse_subsegs():
             subs.append((off, m.group(2), path))
     subs.sort(key=lambda s: s[0])
     return subs
+
+
+@functools.lru_cache(maxsize=1)
+def _rodata_rom_ranges():
+    """[(start_rom, end_rom)] of every `rodata`/`.rodata` subseg, for classifying a `%lo(D_<vram>)`
+    literal. A constant whose ROM offset (vram − the fn's code-segment delta) lands in one of these
+    ranges is a compiler-pooled rodata literal the mirror re-emits → a `.rodata` sibling split
+    (S38/S48); one that lands elsewhere is a function-local `static` the mirror re-emits into the
+    data segment → a recover-extern + file-scope-extern drop (S49). The two enablers differ, so the
+    gate must be routed to the right one."""
+    subs = parse_subsegs()
+    ranges = []
+    for i, (off, typ, _path) in enumerate(subs):
+        if typ in ("rodata", ".rodata"):
+            end = subs[i + 1][0] if i + 1 < len(subs) else off
+            ranges.append((off, end))
+    return tuple(ranges)
+
+
+def _literal_in_rodata(vram, off):
+    """True when the `%lo(D_<vram>)` constant loaded by the fn at ROM `off` lives in the code
+    segment's pooled `.rodata` (vs. the data segment). Text and pooled rodata share one segment
+    delta, so vram − (fn_vram − off) is the constant's ROM offset; test it against the rodata
+    subseg ranges. Returns False when the fn's vram is unknown (asm listing absent)."""
+    fn_vram = subseg_vram(off)
+    if fn_vram is None:
+        return False
+    rom = vram - (fn_vram - off)
+    return any(start <= rom < end for start, end in _rodata_rom_ranges())
 
 
 def build_upstream_index():
@@ -1129,12 +1160,27 @@ def append_upstream_hazards(off, primary, up_lib, up_path, hazards):
     divergence = call_divergence(off, primary, up_path)
     if divergence:
         hazards.append(divergence)  # near-verbatim mirror: reconcile call list at the gate
-    literals = rodata_literals(off, primary)
-    if literals:
-        # Compiler-pooled FP constants the mirror re-emits → a `.rodata` sibling split is needed at
-        # finalize (docs/hazards.md#rodata-sibling-yaml-pattern). Pre-note the vram as a DoR enabler
-        # so it is not a finalize-time SHA-miss surprise (S48).
-        hazards.append(Hazard(HAZARD_RODATA_LITERAL, ",".join(f"0x{a:08X}" for a in literals)))
+    # Anonymous `%lo(D_<addr>)` constant loads split into two enablers by segment (S52):
+    #   - code-segment `.rodata` → compiler-pooled literal the mirror re-emits → a `.rodata` sibling
+    #     split at finalize (docs/hazards.md#rodata-sibling-yaml-pattern, S38/S48).
+    #   - data segment → a function-local `static` the mirror re-emits → recover-extern + drop the
+    #     static to a file-scope `extern` (docs/hazards.md#defines-data, S49 fast path).
+    # The FP-only scan (ldc1/lwc1) seeds both; integer `lw` refs that land in the rodata band add the
+    # companion words of a pooled `double` (GCC's `lw` pair + `mtc1`) so the sibling-split extent is
+    # sized in full, not just its first word. `lw` refs in the data segment are ordinary data refs
+    # (refs-unplaced/defines-data already cover them) and are dropped here.
+    rodata_lits, data_statics = [], []
+    for a in rodata_literals(off, primary):
+        (rodata_lits if _literal_in_rodata(a, off) else data_statics).append(a)
+    for a in rodata_word_refs(off, primary):
+        if _literal_in_rodata(a, off) and a not in rodata_lits:
+            rodata_lits.append(a)
+    if rodata_lits:
+        # Pre-note the full vram extent as a DoR enabler so it is not a finalize-time SHA-miss (S48).
+        hazards.append(Hazard(HAZARD_RODATA_LITERAL, ",".join(f"0x{a:08X}" for a in sorted(rodata_lits))))
+    if data_statics:
+        # A function-local static the mirror must drop to a file-scope extern + recover (S49).
+        hazards.append(Hazard(HAZARD_DATA_STATIC, ",".join(f"0x{a:08X}" for a in sorted(data_statics))))
     band = "warm" if band_is_warm(mirror_dir) else "cold"
     return band, blocked
 

@@ -220,7 +220,7 @@ When `pick_target.py` flags a hazard (or a match shows its symptom), read the ma
 | `calls-unplaced:<fn>@0x…`       | #calls-unplaced-function-callee-dual |
 | `jal-count-mismatch:<C>vs<asm>` | #near-verbatim-mirror-jal-count-mismatch |
 | `file-static`                   | #file-static-bss-layout-conflict |
-| `defines-data:<g>`              | #defines-data |
+| `defines-data:<g>` / `data-static:<addr>` | #defines-data |
 | `needs-header:<inc>`            | #needs-header |
 | `needs-define:<def>`            | #needs-define |
 | `pack:<n>fn[…]`                 | #multi-function-segment-splitting-pack |
