@@ -70,3 +70,5 @@ osRomBase = 0x80000308; // size:0x4
 __CartRomHandle = 0x80105BC0; // size:0x74
 osCartRomInitFirst = 0x800C7EA0; // size:0x4
 xseed = 0x800C81C0; // size:0x4
+sqrtf = 0x800B0A10; // type:func
+dtor = 0x800C81E0; // size:0x4
