@@ -242,7 +242,7 @@ SECTIONS
         build/src/libultra/io/visetspecial.o(.text);
         build/src/libultra/io/visetyscale.o(.text);
         build/src/libultra/io/viswapbuf.o(.text);
-        build/asm/88810.o(.text);
+        build/src/libultra/io/viswapcontext.o(.text);
         build/src/libultra/io/viblack.o(.text);
         build/src/libultra/io/gbpakinit.o(.text);
         build/src/libultra/io/gbpakgetstatus.o(.text);
@@ -474,7 +474,7 @@ SECTIONS
         build/src/libultra/io/visetspecial.o(.data);
         build/src/libultra/io/visetyscale.o(.data);
         build/src/libultra/io/viswapbuf.o(.data);
-        build/asm/88810.o(.data);
+        build/src/libultra/io/viswapcontext.o(.data);
         build/src/libultra/io/viblack.o(.data);
         build/src/libultra/io/gbpakinit.o(.data);
         build/src/libultra/io/gbpakgetstatus.o(.data);
@@ -720,7 +720,12 @@ SECTIONS
         build/src/libultra/io/visetspecial.o(.rodata);
         build/src/libultra/io/visetyscale.o(.rodata);
         build/src/libultra/io/viswapbuf.o(.rodata);
-        build/asm/88810.o(.rodata);
+        build/asm/data/AD6B0.rodata.o(.rodata);
+        build/asm/data/AD6F0.rodata.o(.rodata);
+        build/asm/data/AD8C0.rodata.o(.rodata);
+        build/asm/data/AD910.rodata.o(.rodata);
+        build/asm/data/AD9C0.rodata.o(.rodata);
+        build/src/libultra/io/viswapcontext.o(.rodata);
         build/src/libultra/io/viblack.o(.rodata);
         build/src/libultra/io/gbpakinit.o(.rodata);
         build/src/libultra/io/gbpakgetstatus.o(.rodata);
@@ -774,11 +779,6 @@ SECTIONS
         build/asm/8F140.o(.rodata);
         build/src/libkmc/matherr.o(.rodata);
         build/asm/8F250.o(.rodata);
-        build/asm/data/AD6B0.rodata.o(.rodata);
-        build/asm/data/AD6F0.rodata.o(.rodata);
-        build/asm/data/AD8C0.rodata.o(.rodata);
-        build/asm/data/AD910.rodata.o(.rodata);
-        build/asm/data/AD9C0.rodata.o(.rodata);
         build/asm/data/AD9F0.rodata.o(.rodata);
         build/asm/data/ADA40.rodata.o(.rodata);
         build/asm/data/ADBD0.rodata.o(.rodata);
@@ -967,7 +967,7 @@ SECTIONS
         build/src/libultra/io/visetspecial.o(.bss);
         build/src/libultra/io/visetyscale.o(.bss);
         build/src/libultra/io/viswapbuf.o(.bss);
-        build/asm/88810.o(.bss);
+        build/src/libultra/io/viswapcontext.o(.bss);
         build/src/libultra/io/viblack.o(.bss);
         build/src/libultra/io/gbpakinit.o(.bss);
         build/src/libultra/io/gbpakgetstatus.o(.bss);
