@@ -25,6 +25,17 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 41 — __osEPiRawWriteIo libultra pi IO_WRITE mirror — 2026-06-13
+- Increment: 1 file banked / 1 fn matched (md5-candidate 72→73)
+- Quality: stuck-far 0 / permuter 0 / carried 0 / re-opened 0
+- Seed: committed 2pt; banked 2pt; regime mirror
+- What helped: clean single-fn subseg (0x8BC80, no split); `__osEPiRawWriteIo` name pre-curated; `piint.h`+`PR/ultraerror.h` in-tree; the `_DEBUG` block compiles out. IO_WRITE MMIO isolation artifact (S34) → skip the isolation spot-check, ROM SHA-1 is the proof. The recover-extern flow (read the vram from the fn's own `%hi/%lo` pair, add the data extern, rebuild) was the same deterministic, zero-iteration path as every prior recover-extern
+- Friction: a NEW recover-extern blind spot — the unplaced global hid inside a *library macro* (`EPI_SYNC` in `piint.h` → `__osCurrentHandle[domain]`), not the `.c` body, so it was invisible to BOTH `pick_target.py`'s ref-grep and the gate build-check (the INCLUDE_ASM scaffold resolves the body), surfacing only as `undefined reference to __osCurrentHandle` when the C linked in the execution middle — exactly the S23 `calls-unplaced` / S40 wrong-library-header pattern. Recovered deterministically (`D_800C7E90` from the fn's `lui/lw %hi/%lo` pair; index `domain*4` separate `addu` → base direct; `OSPiHandle*[2]` → size:0x8), rebuilt green. Not a spike — no DoD weakening
+- Applied: 2 of 2 — #1 CLAUDE.md *macro-hidden recover-extern (S41)* convention bullet; #2 `pick_target.py` `refs_unplaced`/`calls_unplaced` now **follow one level of macro expansion** (project-wide function-like-macro table cached once; each invoked macro's params stripped; `__builtin_*` + nested-macro names excluded). Validated by full-table diff vs the committed tool: strict de-noise (dropped 15+ macro false-positives incl. `IO_READ`/`IO_WRITE`/`ARRLEN`/`MQ_IS_FULL`/`va_start`/`ERRCK`), surfaced the real macro-hidden callee `__osMotorAccess` (via `osMotorStart`), and re-confirmed it would have flagged `__osCurrentHandle` had it been unplaced
+- Carry-over: none
+
+---
+
 ## Sprint 40 — ldiv.c (ldiv+lldiv) libultra verbatim mirror — 2026-06-13
 - Increment: 1 file banked / 2 fns matched (md5-candidate 71→72)
 - Quality: stuck-far 0 / permuter 0 / carried 0 / re-opened 0

@@ -11,6 +11,9 @@ files, non-16-aligned subseg, multi-function pack, needs-header = an upstream
 include unresolved under the project -I set, jal-count-mismatch = the upstream
 .c's call count disagrees with the ROM fn's jal count = a build divergence =>
 near-verbatim mirror), and prints a smallest-first table for `/sprint-plan`.
+The refs-unplaced / calls-unplaced grep follows one level of macro expansion so a
+global or callee inlined only through an invoked library macro (EPI_SYNC →
+__osCurrentHandle, S41) is flagged, not deferred to a mid-execution link failure.
 
 Usage:
   venv/bin/python3 tools/pick_target.py [--lib SUBSTR] [-n N] [--include-stuck] [--json]
@@ -644,6 +647,71 @@ def declared_extern_data(cpath, _depth=0, _seen=None):
     return names
 
 
+# A function-like macro definition in a header: `#define NAME(args) replacement`, the replacement
+# spanning '\'-continued lines. Captures NAME and the full (possibly multi-line) body. A verbatim
+# mirror that *invokes* such a macro inlines its body, so any data extern / callee the macro
+# references is pulled into the object though it never appears in the .c source — the
+# macro-hidden recover-extern (S41: EPI_SYNC in piint.h → __osCurrentHandle, invisible to the
+# .c-body grep AND the gate build-check alike, surfacing only when the body links).
+FUNC_MACRO_DEF_RE = re.compile(
+    r"^[ \t]*#[ \t]*define[ \t]+([A-Za-z_]\w*)\(([^)]*)\)[ \t]*((?:.*\\\n)*.*)", re.M
+)
+
+
+_ALL_FUNC_MACROS = None
+
+
+def all_func_macros():
+    """{name: replacement-body} for every function-like macro defined anywhere under the project
+    -I set, scanned once and cached. A project-wide table (not a per-file header walk) so the
+    macro-name exclusion in calls_unplaced is COMPLETE — a macro pulled into an expansion through
+    a nested invocation (IO_READ → PHYS_TO_K1) is still recognised as a macro even when its own
+    defining header sits beyond the invoking file's include depth, so it is never mis-flagged as
+    an unplaced call."""
+    global _ALL_FUNC_MACROS
+    if _ALL_FUNC_MACROS is None:
+        macros = {}
+        for d in INCLUDE_DIRS:
+            for root, _dirs, files in os.walk(d):
+                for fn in files:
+                    if not fn.endswith((".h", ".inc")):
+                        continue
+                    try:
+                        text = open(os.path.join(root, fn), errors="ignore").read()
+                    except OSError:
+                        continue
+                    for name, params, body in FUNC_MACRO_DEF_RE.findall(text):
+                        plist = [p.strip() for p in params.split(",") if p.strip() not in ("", "...")]
+                        macros.setdefault(name, (plist, body))
+        _ALL_FUNC_MACROS = macros
+    return _ALL_FUNC_MACROS
+
+
+def macro_hidden_text(cpath):
+    """One-level macro expansion of `cpath`: the replacement bodies of the function-like macros the
+    .c *invokes*, plus the set of all function-like macro names in scope. Lets refs_unplaced /
+    calls_unplaced see a data extern or callee that a verbatim mirror inlines through a macro
+    (EPI_SYNC → __osCurrentHandle, S41) — invisible to the body grep and the gate build-check.
+    One level only: the directly-invoked macros' bodies; macros THEY invoke are not recursed (the
+    gate confirms against the asm). Each macro's own parameter names are stripped from its body so
+    a placeholder like va_start's `__AP`/`__LASTARG` is not mistaken for a referenced global.
+    Returns (expansion_text, macro_names)."""
+    try:
+        text = open(cpath, errors="ignore").read()
+    except OSError:
+        return "", set()
+    macros = all_func_macros()
+    body = _strip_comments(text)
+    parts = []
+    for name, (params, mbody) in macros.items():
+        if not re.search(r"\b" + re.escape(name) + r"\s*\(", body):
+            continue
+        for p in params:
+            mbody = re.sub(r"\b" + re.escape(p) + r"\b", " ", mbody)
+        parts.append(mbody)
+    return "\n".join(parts), set(macros)
+
+
 def refs_unplaced(cpath, placed):
     """Data externs the upstream .c *references* but that are absent from BOTH name files — the
     dual of `defines-data` (which catches definitions). The motivating case: osYieldThread reads
@@ -661,18 +729,22 @@ def refs_unplaced(cpath, placed):
         text = open(cpath, errors="ignore").read()
     except OSError:
         return []
+    # Append one-level macro expansion so a global referenced only inside an invoked library macro
+    # (EPI_SYNC → __osCurrentHandle, S41) is visible to the same `__`-prefix / declared-extern grep.
+    macro_text, _ = macro_hidden_text(cpath)
+    scan = text + "\n" + macro_text
     # `__`-prefixed SDK globals (libultra/libkmc) + any data extern the .c's headers *declare*
     # (libnusys/libmus non-`__` globals SDK_GLOBAL_RE misses — the S16 nuGfxTaskSpool false-clean).
-    tokens = set(SDK_GLOBAL_RE.findall(text)) | declared_extern_data(cpath)
+    tokens = set(SDK_GLOBAL_RE.findall(scan)) | declared_extern_data(cpath)
     unplaced = []
     for tok in tokens:
-        if tok in placed:
+        if tok in placed or tok.startswith("__builtin_"):  # GCC intrinsic, never a linked global
             continue
-        # Only flag names the .c actually references (declared_extern_data over-yields header decls).
-        if not re.search(r"\b" + re.escape(tok) + r"\b", text):
+        # Only flag names the .c (or its invoked macros) actually references.
+        if not re.search(r"\b" + re.escape(tok) + r"\b", scan):
             continue
         # Called anywhere (`tok(` allowing whitespace) → a function, not a data extern → skip.
-        if re.search(re.escape(tok) + r"\s*\(", text):
+        if re.search(re.escape(tok) + r"\s*\(", scan):
             continue
         unplaced.append(tok)
     return sorted(unplaced)
@@ -750,8 +822,16 @@ def calls_unplaced(cpath, primary, placed):
     except OSError:
         return []
     defined = {name for name, _ in _iter_upstream_functions(text)}
-    body = _strip_string_literals(_strip_dead_blocks(_strip_comments(text)))
-    called = {n for n in C_CALL_RE.findall(body) if n not in _C_NONCALL}
+    # Append one-level macro expansion so a callee invoked only inside a library macro is seen;
+    # exclude the macro names themselves (a macro body that invokes UPDATE_REG/WAIT_ON_IOBUSY etc.
+    # must not flag those as unplaced functions — they inline, they don't link).
+    macro_text, macro_names = macro_hidden_text(cpath)
+    body = _strip_string_literals(_strip_dead_blocks(_strip_comments(text + "\n" + macro_text)))
+    called = {
+        n
+        for n in C_CALL_RE.findall(body)
+        if n not in _C_NONCALL and n not in macro_names and not n.startswith("__builtin_")
+    }
     return sorted(n for n in called if n not in placed and n not in defined)
 
 
