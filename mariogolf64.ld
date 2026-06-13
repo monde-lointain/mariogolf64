@@ -218,7 +218,8 @@ SECTIONS
         build/src/main/func_800AB600.o(.text);
         build/asm/86A50.o(.text);
         build/asm/87510.o(.text);
-        build/asm/87600.o(.text);
+        build/src/libultra/monegi/thread/createthread.o(.text);
+        build/src/libultra/monegi/thread/destroythread.o(.text);
         build/src/libultra/monegi/thread/getthreadpri.o(.text);
         build/src/libultra/monegi/thread/setthreadpri.o(.text);
         build/src/libultra/monegi/thread/startthread.o(.text);
@@ -243,7 +244,7 @@ SECTIONS
         build/src/libultra/monegi/vi/viswapbuf.o(.text);
         build/asm/88810.o(.text);
         build/src/libultra/monegi/vi/viblack.o(.text);
-        build/asm/88B80.o(.text);
+        build/src/libultra/shared/gbpak/gbpakinit.o(.text);
         build/src/libultra/shared/gbpak/gbpakgetstatus.o(.text);
         build/src/libultra/shared/gbpak/gbpakpower.o(.text);
         build/asm/88FC0.o(.text);
@@ -446,7 +447,8 @@ SECTIONS
         build/src/main/func_800AB600.o(.data);
         build/asm/86A50.o(.data);
         build/asm/87510.o(.data);
-        build/asm/87600.o(.data);
+        build/src/libultra/monegi/thread/createthread.o(.data);
+        build/src/libultra/monegi/thread/destroythread.o(.data);
         build/src/libultra/monegi/thread/getthreadpri.o(.data);
         build/src/libultra/monegi/thread/setthreadpri.o(.data);
         build/src/libultra/monegi/thread/startthread.o(.data);
@@ -471,7 +473,7 @@ SECTIONS
         build/src/libultra/monegi/vi/viswapbuf.o(.data);
         build/asm/88810.o(.data);
         build/src/libultra/monegi/vi/viblack.o(.data);
-        build/asm/88B80.o(.data);
+        build/src/libultra/shared/gbpak/gbpakinit.o(.data);
         build/src/libultra/shared/gbpak/gbpakgetstatus.o(.data);
         build/src/libultra/shared/gbpak/gbpakpower.o(.data);
         build/asm/88FC0.o(.data);
@@ -688,7 +690,8 @@ SECTIONS
         build/src/main/func_800AB600.o(.rodata);
         build/asm/86A50.o(.rodata);
         build/asm/87510.o(.rodata);
-        build/asm/87600.o(.rodata);
+        build/src/libultra/monegi/thread/createthread.o(.rodata);
+        build/src/libultra/monegi/thread/destroythread.o(.rodata);
         build/src/libultra/monegi/thread/getthreadpri.o(.rodata);
         build/src/libultra/monegi/thread/setthreadpri.o(.rodata);
         build/src/libultra/monegi/thread/startthread.o(.rodata);
@@ -713,7 +716,7 @@ SECTIONS
         build/src/libultra/monegi/vi/viswapbuf.o(.rodata);
         build/asm/88810.o(.rodata);
         build/src/libultra/monegi/vi/viblack.o(.rodata);
-        build/asm/88B80.o(.rodata);
+        build/src/libultra/shared/gbpak/gbpakinit.o(.rodata);
         build/src/libultra/shared/gbpak/gbpakgetstatus.o(.rodata);
         build/src/libultra/shared/gbpak/gbpakpower.o(.rodata);
         build/asm/88FC0.o(.rodata);
@@ -931,7 +934,8 @@ SECTIONS
         build/src/main/func_800AB600.o(.bss);
         build/asm/86A50.o(.bss);
         build/asm/87510.o(.bss);
-        build/asm/87600.o(.bss);
+        build/src/libultra/monegi/thread/createthread.o(.bss);
+        build/src/libultra/monegi/thread/destroythread.o(.bss);
         build/src/libultra/monegi/thread/getthreadpri.o(.bss);
         build/src/libultra/monegi/thread/setthreadpri.o(.bss);
         build/src/libultra/monegi/thread/startthread.o(.bss);
@@ -956,7 +960,7 @@ SECTIONS
         build/src/libultra/monegi/vi/viswapbuf.o(.bss);
         build/asm/88810.o(.bss);
         build/src/libultra/monegi/vi/viblack.o(.bss);
-        build/asm/88B80.o(.bss);
+        build/src/libultra/shared/gbpak/gbpakinit.o(.bss);
         build/src/libultra/shared/gbpak/gbpakgetstatus.o(.bss);
         build/src/libultra/shared/gbpak/gbpakpower.o(.bss);
         build/asm/88FC0.o(.bss);

@@ -60,3 +60,4 @@ __osPfsGetStatus = 0x800AE710; // type:func
 __osGbpakTimer = 0x8012F490; // size:0x20
 __osGbpakTimerMsg = 0x800FF4AC; // size:0x4
 __osGbpakTimerQ = 0x801B70F8; // size:0x18
+__osCleanupThread = 0x800B04E8; // type:func
