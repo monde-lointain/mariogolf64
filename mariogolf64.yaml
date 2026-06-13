@@ -284,7 +284,7 @@ segments:
       - [0x8CBD0, c, libultra/monegi/si/sirawwrite]
       - [0x8CC20, asm]
       - [0x8CD10, asm]
-      - [0x8CD70, asm]
+      - [0x8CD70, c, libultra/monegi/vi/viinit]
       - [0x8CE80, c, libultra/monegi/vi/vigetcurrcontext]
       - [0x8CE90, asm]
       - [0x8D230, asm]
