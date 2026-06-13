@@ -129,6 +129,34 @@ def asm_path(rom_off):
     return os.path.join(ROOT, "asm", f"{rom_off:X}.s")
 
 
+def iter_function_body(rom_off, primary):
+    """Yield each body line of `primary` from its asm/<ROM>.s listing.
+
+    Starts after the `glabel <primary>` line; stops at the next `glabel` or a line
+    beginning `endlabel` (neither boundary line is yielded). Yields nothing when the
+    asm file is absent or the label isn't found. Each per-function asm scan (callee
+    set, jal count, intrinsic check, unplaced-call recovery) is a filter over this
+    one body walk. (A caller needing to distinguish absent-file from empty-body — see
+    _asm_jal_count's None — keeps its own asm_path()/os.path.exists guard.)"""
+    path = asm_path(rom_off)
+    if not os.path.exists(path):
+        return
+    in_fn = False
+    with open(path) as f:
+        for line in f:
+            m = GLABEL_RE.match(line)
+            if m:
+                if in_fn:
+                    break
+                in_fn = m.group(1) == primary
+                continue
+            if not in_fn:
+                continue
+            if line.lstrip().startswith("endlabel"):
+                break
+            yield line
+
+
 def asm_functions(rom_off):
     """glabel names defined in asm/<ROM>.s for this subseg (curated if already synced)."""
     path = asm_path(rom_off)
@@ -179,29 +207,14 @@ def intrinsic_likely(rom_off, primary):
     not C-expressible. Reads the fn's body in asm/<ROM>.s: a leaf (no `jal`) whose
     work instructions (excluding jr/nop) are all CP0-moves/sqrt, or one spimdisasm
     tagged `handwritten`."""
-    path = asm_path(rom_off)
-    if not os.path.exists(path):
-        return False
-    in_fn = False
     mnemonics = []
     handwritten = False
-    with open(path) as f:
-        for line in f:
-            m = GLABEL_RE.match(line)
-            if m:
-                if in_fn:           # reached the next function — stop
-                    break
-                in_fn = m.group(1) == primary
-                continue
-            if not in_fn:
-                continue
-            if line.lstrip().startswith("endlabel"):
-                break
-            if "handwritten" in line:
-                handwritten = True
-            insn = INSN_RE.search(line)
-            if insn:
-                mnemonics.append(insn.group(1))
+    for line in iter_function_body(rom_off, primary):
+        if "handwritten" in line:
+            handwritten = True
+        insn = INSN_RE.search(line)
+        if insn:
+            mnemonics.append(insn.group(1))
     if "jal" in mnemonics:          # a wrapper/has calls → decompilable
         return False
     work = [m for m in mnemonics if m not in ("jr", "nop")]
@@ -264,29 +277,14 @@ _FRAME_IMMS = {"0x10", "0x14", "0x18", "0x1c", "0x20", "0x24", "0x28", "-0x10",
 def _asm_signature(rom_off, primary):
     """(callee set, constant set) for the target fn from asm/<ROM>.s. Callees exclude internal
     `func_*`/`.L*` targets (only symbolic SDK-ish names carry cross-build identity)."""
-    path = asm_path(rom_off)
-    if not os.path.exists(path):
-        return set(), set()
     callees, consts = set(), set()
-    in_fn = False
-    with open(path) as f:
-        for line in f:
-            m = GLABEL_RE.match(line)
-            if m:
-                if in_fn:
-                    break
-                in_fn = m.group(1) == primary
-                continue
-            if not in_fn:
-                continue
-            if line.lstrip().startswith("endlabel"):
-                break
-            cm = CALL_INSN_RE.search(line)
-            if cm and not cm.group(1).startswith("func_"):
-                callees.add(cm.group(1))
-            im = IMM_INSN_RE.search(line)
-            if im and im.group(1).lower() not in _FRAME_IMMS:
-                consts.add(im.group(1).lower())
+    for line in iter_function_body(rom_off, primary):
+        cm = CALL_INSN_RE.search(line)
+        if cm and not cm.group(1).startswith("func_"):
+            callees.add(cm.group(1))
+        im = IMM_INSN_RE.search(line)
+        if im and im.group(1).lower() not in _FRAME_IMMS:
+            consts.add(im.group(1).lower())
     return callees, consts
 
 
@@ -504,24 +502,14 @@ def _upstream_body(up_cpath, primary):
 def _asm_jal_count(rom_off, primary):
     """Count of `jal <name>` in `primary`'s body in asm/<ROM>.s (incl. func_ targets), or None
     when the asm is absent (e.g. the subseg was already flipped to c)."""
-    path = asm_path(rom_off)
-    if not os.path.exists(path):
+    # Absent-file MUST return None (not 0): call_divergence branches on it, and an
+    # asm-present 0-jal fn (jal-count-mismatch:Nvs0) is observably distinct from absent.
+    if not os.path.exists(asm_path(rom_off)):
         return None
-    in_fn, n = False, 0
-    with open(path) as f:
-        for line in f:
-            m = GLABEL_RE.match(line)
-            if m:
-                if in_fn:
-                    break
-                in_fn = m.group(1) == primary
-                continue
-            if not in_fn:
-                continue
-            if line.lstrip().startswith("endlabel"):
-                break
-            if CALL_INSN_RE.search(line):
-                n += 1
+    n = 0
+    for line in iter_function_body(rom_off, primary):
+        if CALL_INSN_RE.search(line):
+            n += 1
     return n
 
 
@@ -839,24 +827,10 @@ def recover_unplaced_call_vram(rom_off, primary):
     recover_unplaced_vram (data). Returns a sorted list of distinct addresses; the caller binds
     name→vram only when unambiguous (one unplaced upstream call ∩ one unnamed jal). The gate
     confirms before any symbol_addrs add."""
-    path = asm_path(rom_off)
-    if not os.path.exists(path):
-        return []
-    in_fn, addrs = False, set()
-    with open(path) as f:
-        for line in f:
-            m = GLABEL_RE.match(line)
-            if m:
-                if in_fn:
-                    break
-                in_fn = m.group(1) == primary
-                continue
-            if not in_fn:
-                continue
-            if line.lstrip().startswith("endlabel"):
-                break
-            for h in FUNC_JAL_RE.findall(line):
-                addrs.add(int(h, 16))
+    addrs = set()
+    for line in iter_function_body(rom_off, primary):
+        for h in FUNC_JAL_RE.findall(line):
+            addrs.add(int(h, 16))
     return sorted(addrs)
 
 
