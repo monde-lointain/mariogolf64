@@ -182,7 +182,16 @@ def compile_candidate(placeholder: str, libkmc: bool, libultra: bool = False) ->
 
 
 def objdump_function(obj_path: Path, placeholder: str) -> str:
-    """objdump one function from `obj_path` (raw text)."""
+    """objdump one function from `obj_path` (raw text).
+
+    Flags mirror decomp.me / asm-differ's expected objdump input:
+      -drz                  disassemble, show raw, intermix zeroes
+      -m mips:4300          force the N64 CPU (objects carry no arch tag)
+      --no-show-raw-insn    drop opcode hex so asm-differ keys on mnemonics
+      --disassemble-zeroes  keep `.word 0` padding (don't collapse runs)
+      --reloc               emit relocations so symbol refs are comparable
+      --disassemble=<fn>    only the target function
+    """
     cmd = [
         OBJDUMP,
         "-drz",

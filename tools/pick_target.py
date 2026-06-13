@@ -22,6 +22,7 @@ Replaces the old `/decomp-lead` roadmap: target selection is now a tool the plan
 gate calls, mirroring marioparty7's pick_target.py.
 """
 import argparse
+import functools
 import glob
 import json
 import math
@@ -100,6 +101,12 @@ CARRYOVER_PENALTY = 1000
 # size (the tiebreak intent) without overriding large size gaps. Validated twice —
 # the si pair (Sprint 4) and vi pair (Sprint 5) both banked at one-file cost off warm bands.
 BAND_WARM_BONUS = 64
+# Story-point seed size thresholds (bytes): a "big" leaf trips the enabler gate
+# (decompose/scaffold first), a "huge" one must always decompose (never a
+# 1-increment sprint). A pack of this many functions decomposes regardless of path.
+BIG_FN_BYTES = 768
+HUGE_FN_BYTES = 1536
+PACK_DECOMPOSE_NFNS = 4
 
 
 def parse_subsegs():
@@ -419,12 +426,11 @@ def _strip_dead_blocks(text):
     return "\n".join(out)
 
 
-_PROJECT_DEFINES = None
-
-
+@functools.cache
 def _parse_makefile_defines():
-    """Return {lib: frozenset(defines)} by parsing the project Makefile.
-    'libkmc' and 'libnusys' inherit from the main CFLAGS set plus their own additions."""
+    """Return {lib: frozenset(defines)} by parsing the project Makefile (cached:
+    one parse per process). 'libkmc' and 'libnusys' inherit from the main CFLAGS
+    set plus their own additions."""
     makefile = os.path.join(ROOT, "Makefile")
     raw = {"main": set(), "libkmc": set(), "libnusys": set()}
     try:
@@ -442,11 +448,8 @@ def _parse_makefile_defines():
 
 def _active_defines_for_lib(lib):
     """Effective -D defines for an upstream library key (libultra, libkmc, libnusys)."""
-    global _PROJECT_DEFINES
-    if _PROJECT_DEFINES is None:
-        _PROJECT_DEFINES = _parse_makefile_defines()
     key = {"libkmc": "libkmc", "libnusys": "libnusys"}.get(lib or "", "main")
-    return _PROJECT_DEFINES[key]
+    return _parse_makefile_defines()[key]
 
 
 def function_gating_define(up_cpath, primary):
@@ -577,26 +580,21 @@ def defines_data_globals(cpath):
     return names
 
 
-_PLACED_SYMBOLS = None
-
-
+@functools.cache
 def placed_symbols():
-    """Lazily-built set of every symbol name in the two name files (symbol_addrs + ghidra). A
-    name in this set has a linker address; one absent from it does not (a data extern then
-    link-fails). Format: `name = 0x...; // ...`."""
-    global _PLACED_SYMBOLS
-    if _PLACED_SYMBOLS is None:
-        names = set()
-        for nf in NAME_FILES:
-            if not os.path.exists(nf):
-                continue
-            with open(nf, errors="ignore") as f:
-                for line in f:
-                    m = re.match(r"\s*([A-Za-z_]\w+)\s*=", line)
-                    if m:
-                        names.add(m.group(1))
-        _PLACED_SYMBOLS = names
-    return _PLACED_SYMBOLS
+    """Set of every symbol name in the two name files (symbol_addrs + ghidra),
+    built once per process. A name in this set has a linker address; one absent
+    from it does not (a data extern then link-fails). Format: `name = 0x...; // ...`."""
+    names = set()
+    for nf in NAME_FILES:
+        if not os.path.exists(nf):
+            continue
+        with open(nf, errors="ignore") as f:
+            for line in f:
+                m = re.match(r"\s*([A-Za-z_]\w+)\s*=", line)
+                if m:
+                    names.add(m.group(1))
+    return names
 
 
 # An SDK-internal global is `__`-prefixed (e.g. __osRunQueue). Uppercase macros ([A-Z]-led) and
@@ -658,33 +656,28 @@ FUNC_MACRO_DEF_RE = re.compile(
 )
 
 
-_ALL_FUNC_MACROS = None
-
-
+@functools.cache
 def all_func_macros():
     """{name: replacement-body} for every function-like macro defined anywhere under the project
-    -I set, scanned once and cached. A project-wide table (not a per-file header walk) so the
+    -I set, scanned once per process. A project-wide table (not a per-file header walk) so the
     macro-name exclusion in calls_unplaced is COMPLETE — a macro pulled into an expansion through
     a nested invocation (IO_READ → PHYS_TO_K1) is still recognised as a macro even when its own
     defining header sits beyond the invoking file's include depth, so it is never mis-flagged as
     an unplaced call."""
-    global _ALL_FUNC_MACROS
-    if _ALL_FUNC_MACROS is None:
-        macros = {}
-        for d in INCLUDE_DIRS:
-            for root, _dirs, files in os.walk(d):
-                for fn in files:
-                    if not fn.endswith((".h", ".inc")):
-                        continue
-                    try:
-                        text = open(os.path.join(root, fn), errors="ignore").read()
-                    except OSError:
-                        continue
-                    for name, params, body in FUNC_MACRO_DEF_RE.findall(text):
-                        plist = [p.strip() for p in params.split(",") if p.strip() not in ("", "...")]
-                        macros.setdefault(name, (plist, body))
-        _ALL_FUNC_MACROS = macros
-    return _ALL_FUNC_MACROS
+    macros = {}
+    for d in INCLUDE_DIRS:
+        for root, _dirs, files in os.walk(d):
+            for fn in files:
+                if not fn.endswith((".h", ".inc")):
+                    continue
+                try:
+                    text = open(os.path.join(root, fn), errors="ignore").read()
+                except OSError:
+                    continue
+                for name, params, body in FUNC_MACRO_DEF_RE.findall(text):
+                    plist = [p.strip() for p in params.split(",") if p.strip() not in ("", "...")]
+                    macros.setdefault(name, (plist, body))
+    return macros
 
 
 def macro_hidden_text(cpath):
@@ -904,22 +897,18 @@ def missing_includes(cpath):
     return missing
 
 
-_PROJECT_INC_INDEX = None
-
-
+@functools.cache
 def _project_inc_index():
-    """Lazily-built set of every header under the project `include/` tree (both its root-relative
-    path and its basename) — used to tell an unreachable-but-present header (unindexed `-I`,
-    defer) from a genuinely-absent one (copyable from upstream, or a system header)."""
-    global _PROJECT_INC_INDEX
-    if _PROJECT_INC_INDEX is None:
-        idx = set()
-        for f in glob.glob(os.path.join(PROJECT_INC, "**", "*"), recursive=True):
-            if os.path.isfile(f):
-                idx.add(os.path.relpath(f, PROJECT_INC))
-                idx.add(os.path.basename(f))
-        _PROJECT_INC_INDEX = idx
-    return _PROJECT_INC_INDEX
+    """Set of every header under the project `include/` tree (both its root-relative path and
+    its basename), built once per process — used to tell an unreachable-but-present header
+    (unindexed `-I`, defer) from a genuinely-absent one (copyable from upstream, or a system
+    header)."""
+    idx = set()
+    for f in glob.glob(os.path.join(PROJECT_INC, "**", "*"), recursive=True):
+        if os.path.isfile(f):
+            idx.add(os.path.relpath(f, PROJECT_INC))
+            idx.add(os.path.basename(f))
+    return idx
 
 
 def include_is_blocked(inc):
@@ -963,11 +952,11 @@ def seed_points(size, upstream, band, nfns, hazards, blocked):
     needs_copy = "needs-header" in hazards  # a copyable companion header (blocked ones already 'blk')
     needs_define = "needs-define" in hazards  # Makefile build-define enabler (e.g. USE_EPI in LIBNUSYS_CFLAGS)
     recover = ("refs-unplaced" in hazards) or ("calls-unplaced" in hazards)  # symbol-recovery enabler before the mirror links
-    big = size >= 768
-    huge = size >= 1536
+    big = size >= BIG_FN_BYTES
+    huge = size >= HUGE_FN_BYTES
     if huge or (classical and pack):
         return 13  # must decompose; never a 1-increment sprint
-    if nfns >= 4:
+    if nfns >= PACK_DECOMPOSE_NFNS:
         return 8  # a large pack must decompose regardless of path (hits the 8-gate)
     if classical and (big or pack or drop or needs_copy or recover):
         return 8  # enabler gate — decompose / scaffold first
