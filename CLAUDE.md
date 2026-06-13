@@ -234,6 +234,7 @@ When `pick_target.py` flags a hazard (or a match shows its symptom), read the ma
 | (warm band, no hazard)          | #open-band-fast-path |
 | (`undefined reference` after mid-sprint sync-names) | #make-sync-names-eviction-recovery |
 | (loop can't find label / reloc-name mismatch) | #stale-top-level-asm-label-sync |
+| (clean mirror SHA-miss, one field's high word) | #mirror-cast-divergence-sign--vs-zero-extend |
 | (Gfx* manipulation)             | #display-lists |
 
 ## Cross-repo sync (Ghidra workspace at `~/development/reversing/ghidra/mariogolf64/`)

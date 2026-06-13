@@ -25,6 +25,17 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 44 — osCreateThread + osDestroyThread + osGbpakInit libultra — 2026-06-13
+- Increment: 3 files banked / 3 functions matched (`src/libultra/monegi/thread/{createthread,destroythread}.c` + `src/libultra/shared/gbpak/gbpakinit.c`); md5-candidate 80→83. First sprint under the PO libultra-epic directive. Goal fully met, 0 carry-overs.
+- Quality: stuck-far 0, permuter 0, carried 0, re-opened 0.
+- Seed: committed 6pt (thread pack 3 + gbpakinit 3); banked 6pt; regime mirror (seed-only — all 3 mirror track; 8-gate clear). createthread's cast fix is a near-verbatim mirror known-edit, not a classical iteration, so no realized-tier scoring.
+- What helped: thread band fully proven (S8/12/14/35) → all callees + headers pre-placed, one recover-extern (`__osCleanupThread`=0x800B04E8) the only thread enabler. `_FINALROM` auto-drops the `thprof`/`_DEBUG` blocks (asm confirmed no thprof store). gbpakinit composed S42's defines-data verbatim-body fast-path with S43's already-placed gbpak data region + callees → zero new symbols, matched first `make`. The S43 gbpak groundwork made the initializer near-free.
+- Friction: createthread's verbatim copy mismatched on one cast — baserom sign-extends `context.ra = (s64)(s32)__osCleanupThread` (`sra v0,a0,0x1f`) where libultra_modern zero-extends `(u64)(u32)` (`move v0,zero`). A VERSION_J source divergence invisible to every gate check (jal count, ref/header grep) and the INCLUDE_ASM gate build; surfaced only at the full-make SHA miss (same late-surfacing class as S18 jal-count / S40 wrong-lib-header). Resolved by diffing the compiled `.o` against baserom asm and flipping the one cast to match the sibling sp/a0 fields.
+- Applied (1 of 2): #1 new `docs/hazards.md#mirror-cast-divergence-sign--vs-zero-extend` section (diff the `.o` on the first SHA miss of a context-building mirror; flip `(u64)(u32)`↔`(s64)(s32)` to match siblings) + CLAUDE.md hazard-index row. #2 confirmatory (defines-data + warm-band doctrine composed with zero friction) — log-only, no edit.
+- Carry-overs: none. Cross-repo follow-up: `__osCleanupThread`=0x800B04E8 is a new decomp-side symbol (Ghidra had no function there) — propagate via `sync_decomp_names.py --import-from-decomp`.
+
+---
+
 ## Sprint 43 — gbpak pair (osGbpakPower + osGbpakGetStatus) libultra classical — 2026-06-13
 - Increment: 2 files banked / 2 functions matched (`src/libultra/shared/gbpak/{gbpakpower,gbpakgetstatus}.c`); md5-candidate 78→80 (80/80 src .c now 0-stub). Goal fully met, 0 carry-overs.
 - Quality: stuck-far 0, permuter 0, carried 0, re-opened 0.

@@ -146,6 +146,31 @@ the gate by disassembling and comparing the jal list against the upstream call l
 
 ---
 
+## Mirror cast divergence (sign- vs zero-extend)
+
+**Rule:** A verbatim mirror can match every instruction except the width-extension of one 64-bit
+context/field assignment, when this ROM's source casts differently from the upstream `.c`. KMC GCC
+emits `sra rd,rs,0x1f` for a sign-extending `(s64)(s32)x` but `move rd,zero` (writing the high word)
+for a zero-extending `(u64)(u32)x` — same low word, different high word. Invisible to every gate
+check (jal count, ref/header grep) and the `INCLUDE_ASM` gate build; surfaces only as a full-make
+ROM SHA-1 miss in the execution middle (same late-surfacing class as jal-count-mismatch S18 /
+wrong-lib-header S40).
+
+**Trigger:** a clean-mirror flip (no hazard flagged) whose verbatim copy links fine but the ROM
+SHA-1 doesn't match, and the byte diff is isolated to one field's high word.
+
+**Procedure:** on the first SHA miss of a context-building / pointer-into-64-bit-field mirror, diff
+the compiled `.o` (`mips-linux-gnu-objdump -d build/.../<file>.o`) against the baserom asm before
+assuming a deeper problem. If the only delta is `sra rd,rs,0x1f` (baserom) vs `move rd,zero` (yours)
+or vice-versa, flip that one cast: `(u64)(u32)x` ↔ `(s64)(s32)x`. Match the sibling fields —
+VERSION_J commonly sign-extends the whole `OSContext` block, so align an outlier zero-extend to its
+neighbors.
+
+**Provenance:** S44 (`osCreateThread`: `context.ra = (s64)(s32)__osCleanupThread` sign-extend, vs
+libultra_modern's `(u64)(u32)` zero-extend; sibling `sp`/`a0` already sign-extended).
+
+---
+
 ## file-static (BSS-layout-conflict)
 
 **Rule:** A file-scope `static <type> <name>;` (BSS global) in the upstream blocks the verbatim
