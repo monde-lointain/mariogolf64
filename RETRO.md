@@ -25,6 +25,15 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 49 — guRandom libultra gu/ band defines-data fast-path mirror — 2026-06-13
+- Increment: 1 file banked (`src/libultra/gu/random.c`) / 1 fn matched (`guRandom`, 1st gu/ fn, opens the cold band). md5-candidate 89→90 (90/90 .c files stub-free); asm subsegs 183→182.
+- Quality: 0/0/0/0 this sprint. Clean first-build match (no seed/decomp_loop/permuter).
+- Seed: committed 2pt; banked 2pt; regime mirror (8-gate clear).
+- What helped: the S45 defines-data verbatim-body fast path applied verbatim — function-local `static xseed` → file-scope sized `extern` + `xseed`@0x800C81C0 add-only; `main_data` `dlabel xseed` confirmed by the `.NON_MATCHING` alias at the gate, exactly as documented. Diagnosed the `blk needs-header:guint.h` as a false-block at the plan gate (mbi.h/gu.h already resolve via the existing `-I include/libultra/PR`; guint.h missing-but-copyable), avoiding a needless DoR reject.
+- Friction: none. Suggestion buffer empty.
+- Applied: 0 of 0 (PO: Apply none — no buffered suggestions).
+- Carry-over: none. (Cold gu/ band now open via in-tree guint.h; `guScaleF`/`guScale` pack is the next gu candidate but carries `guMtxIdentF`/`guMtxF2L` callees → calls-unplaced.)
+
 ## Sprint 48 — __osViSwapContext libultra io/ vi-band verbatim mirror — 2026-06-13
 - Increment: 1 file banked (`src/libultra/io/viswapcontext.c`) / 1 fn matched (11th vi-band sibling). md5-candidate 88→89 (89/89 .c files now stub-free).
 - Quality: 0/0/0/0 this sprint.
