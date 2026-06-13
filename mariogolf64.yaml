@@ -207,7 +207,7 @@ segments:
       - [0x84960, asm]
       - [0x84CE0, asm]
       - [0x85060, asm]
-      - [0x85420, asm]
+      - [0x85420, c, libultra/gu/random]
       - [0x85450, asm]
       - [0x85730, asm]
       - [0x85A50, asm]
