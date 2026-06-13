@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
-"""Extract and format functions from MIPS assembly files."""
+"""Extract and format functions from MIPS assembly files.
 
-import argparse
+Library module: `extract_functions()` is imported by tools/seed_c.py to slice a
+single function's formatted asm. No CLI — invoke it from Python.
+"""
+
 import re
-from pathlib import Path
 
 
 def format_line(line: str) -> str | None:
@@ -70,28 +72,3 @@ def extract_functions(content: str) -> list[tuple[str, str]]:
         i += 1
 
     return functions
-
-
-def main():
-    parser = argparse.ArgumentParser(description='Extract and format MIPS assembly functions')
-    parser.add_argument('-o', '--output-dir', default='asm_extracted', help='Output directory (default: asm_extracted)')
-    parser.add_argument('--asm-dir', default='asm', help='Assembly directory (default: asm)')
-    args = parser.parse_args()
-
-    asm_path = Path(args.asm_dir)
-    output_path = Path(args.output_dir)
-    output_path.mkdir(parents=True, exist_ok=True)
-
-    count = 0
-    for asm_file in sorted(asm_path.rglob('*.s')):
-        content = asm_file.read_text()
-        functions = extract_functions(content)
-        for func_name, func_content in functions:
-            (output_path / f"{func_name}.s").write_text(func_content + '\n')
-            count += 1
-
-    print(f"Extracted {count} functions to {output_path}/")
-
-
-if __name__ == '__main__':
-    main()
