@@ -25,6 +25,17 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 40 — ldiv.c (ldiv+lldiv) libultra verbatim mirror — 2026-06-13
+- Increment: 1 file banked / 2 fns matched (md5-candidate 71→72)
+- Quality: stuck-far 0 / permuter 0 / carried 0 / re-opened 0
+- Seed: committed 2pt; banked 2pt; regime mirror
+- What helped: whole-file 2-fn pack (one subseg = exactly `ldiv`+`lldiv`, no split); both names pre-curated; `__divdi3` (lldiv's 64-bit-divide callee) pre-placed; gate triage confirmed `__divdi3` placed before declaring clean (the `calls-unplaced` dual check). Verbatim cp, ROM SHA-1 = the proof
+- Friction: verbatim `ldiv.c`'s `#include "stdlib.h"` resolved to the libkmc `stdlib.h`, which lacks libultra-only `lldiv_t` — a **resolvable-but-wrong-library** header. `pick_target.py`'s `needs-header` grep (resolvability-only) AND the gate build-check (INCLUDE_ASM scaffold never compiles the C body) both miss it; it surfaced only when the body compiled in the execution middle, like `calls-unplaced`. First instinct (add `lldiv_t` to the libkmc header) was a symptom fix the PO rejected — it pollutes a verbatim libkmc mirror, defeating cross-referencing. Root-caused via systematic-debugging: the real defect is a libultra source resolving its std header to a libkmc header
+- Applied: 1 of 2 — #2 CLAUDE.md per-library standard-C-header isolation bullet (vendor libultra std headers verbatim to `include/libultra/compiler/gcc/`, prepend `-I` in `LIBULTRA_CFLAGS` only; never pollute `include/libkmc/*`); (#1 `cross-lib-header` hazard in `pick_target.py` NOT selected — PO deferred)
+- Carry-over: none
+
+---
+
 ## Sprint 39 — __osViInit classical loop — 2026-06-12
 - Increment: 1 file banked / 1 fn matched (delta: 80→81/2090 ~3.88%; md5-candidate 73→74; all 74 C files now 0-stub)
 - Quality: stuck-far 0 / permuter 0 / carried 0 / re-opened 0
