@@ -37,13 +37,13 @@ def _sdk_path(env_var: str, default: str) -> Path:
 
 # libkmc upstream src — decomp_loop's compile-profile detection (gcc -O).
 LIBKMC_SRC = _sdk_path("MG_LIBKMC_SRC", "~/development/repos/libkmc/src")
-# libultra upstream src for decomp_loop's profile detection. Settled on
-# `libultra_modern/src` — the same tree pick_target.py mirrors from, and the
-# monegi/KMC variant this game actually ships (the prior `ultralib/src` was the
-# Nintendo VERSION_J tree, kept on disk only as a cross-reference). The gu/mgu
-# helpers it exposes as hand-written .s (vs ultralib's C) correctly read as
-# "no -O3 C profile" here; pass `--profile libultra` to force it if ever needed.
-LIBULTRA_SRC = _sdk_path("MG_LIBULTRA_SRC", "~/development/repos/libultra_modern/src")
+# libultra upstream src for decomp_loop's profile detection. Points to
+# ultralib/src (Nintendo VERSION_J tree), mirroring the folder structure used
+# in src/libultra/ (io/, os/, audio/, libc/). Set MG_LIBULTRA_SRC to override.
+# Note: ultralib's gu/mgu helpers are C files (libultra_modern exposed them as
+# .s), so profile detection for those subsystems may differ; pass
+# `--profile libultra` to force the -O profile if ever needed.
+LIBULTRA_SRC = _sdk_path("MG_LIBULTRA_SRC", "~/development/repos/ultralib/src")
 
 
 # --- regexes --------------------------------------------------------------

@@ -47,7 +47,7 @@ from decomp_asm import (
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 YAML = os.path.join(ROOT, "mariogolf64.yaml")
-LIBULTRA = os.path.expanduser("~/development/repos/libultra_modern/src")
+LIBULTRA = os.path.expanduser("~/development/repos/ultralib/src")
 LIBKMC = os.path.expanduser("~/development/repos/libkmc/src")
 # The game also links libnusys / libmus / libnaudio (KMC N64 SDK). Their functions are
 # mirrorable verbatim exactly like libultra/libkmc; scanning their source here lets the
