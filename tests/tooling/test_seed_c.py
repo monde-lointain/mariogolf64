@@ -6,11 +6,49 @@ proven behavior-preserving.
 """
 from __future__ import annotations
 
+import json
+
+import pytest
+
 from pathlib import Path
 
 from conftest import load_tool
 
 seed = load_tool("seed_c")
+
+
+# --- stitch_base_c (golden) ----------------------------------------------
+# Locks the assembled base.c text before stitch_base_c's 8-arg signature is
+# refactored into a parameter object. Exercises every section: rodata warning,
+# parent externs, sibling asm, auto-externs, m2c reference, sanitized ghidra body.
+
+def _stitch_inputs(tmp_path: Path):
+    (tmp_path / "m2c.c").write_text("int m2c_ref(void) { return 0; }\n")
+    (tmp_path / "ghidra.c").write_text(
+        "/* [MM12] copied from ELF */\nundefined4 returns_0(void)\n{\n    return 0;\n}\n"
+    )
+    return dict(
+        out_dir=tmp_path,
+        placeholder="func_80012345",
+        externs=["extern u32 gFoo;"],
+        sibling_asm_names=["func_80012345", "siblingFn"],
+        auto_externs=["extern void *D_80022222;"],
+        m2c_path=tmp_path / "m2c.c",
+        ghidra_path=tmp_path / "ghidra.c",
+        missing_rodata=["D_80099999"],
+    )
+
+
+def test_stitch_base_c_golden(tmp_path, golden_dir, regen):
+    kwargs = _stitch_inputs(tmp_path)
+    out_path = seed.stitch_base_c(seed.BaseCSpec(**kwargs))
+    produced = out_path.read_text()
+
+    gpath = golden_dir / "seed_c_base.c"
+    if regen or not gpath.exists():
+        gpath.write_text(produced)
+        pytest.skip(f"golden regenerated: {gpath.name}")
+    assert produced == gpath.read_text()
 
 
 # --- sanitize_ghidra_body -------------------------------------------------
@@ -81,6 +119,24 @@ def test_parent_has_real_c_with_real_code(tmp_path: Path):
     p = tmp_path / "real.c"
     p.write_text('#include <ultra64.h>\n\nvoid foo(void) { }\n')
     assert seed.parent_has_real_c(p) is True
+
+
+def test_slice_rodata_pointer_detection(tmp_path, monkeypatch):
+    data = tmp_path / "data"
+    data.mkdir()
+    (data / "x.rodata.s").write_text(
+        "dlabel D_80001000\n.word func_80002000\nenddlabel D_80001000\n"
+        "dlabel D_80001004\n.word 0x12345678\nenddlabel D_80001004\n"
+    )
+    monkeypatch.setattr(seed, "ASM_DATA_DIR", data)
+    out = tmp_path / "out.rodata.s"
+    path, missing, pointers = seed.slice_rodata(
+        {"D_80001000", "D_80001004", "D_80009999"}, out
+    )
+    assert "D_80001000" in pointers        # single `.word <symbol>` => pointer-typed
+    assert "D_80001004" not in pointers    # `.word <hex imm>` => not a pointer
+    assert missing == ["D_80009999"]       # absent from all data files
+    assert path == out and out.exists()
 
 
 def test_collect_parent_externs(tmp_path: Path):

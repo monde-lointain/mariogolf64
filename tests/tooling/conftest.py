@@ -31,6 +31,9 @@ def load_tool(name: str):
     spec = importlib.util.spec_from_file_location(f"tool_{name}", TOOLS / f"{name}.py")
     assert spec and spec.loader, f"cannot load tools/{name}.py"
     mod = importlib.util.module_from_spec(spec)
+    # Register before exec so decorators that introspect sys.modules (e.g.
+    # @dataclass resolving cls.__module__) resolve correctly.
+    sys.modules[spec.name] = mod
     spec.loader.exec_module(mod)
     return mod
 

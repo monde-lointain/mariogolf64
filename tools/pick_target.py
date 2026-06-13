@@ -999,86 +999,124 @@ def carry_over_names():
     return names
 
 
+def classify_subseg(off, typ, path, size, upstream_index):
+    """Classify one subseg into (kind, fns, hazards), or None to skip it.
+
+    Covers the two pickable subseg shapes: a flippable `asm` block (with its
+    align/pack/intrinsic hazards) and a partially-matched `c` file (remaining
+    INCLUDE_ASM stub count). bss + non-pickable rows return None.
+    """
+    if typ == "asm":
+        fns = asm_functions(off)
+        if not fns:
+            return None
+        hazards = []
+        if size and size % 16 != 0:
+            hazards.append("non16align")
+        if len(fns) > 1:
+            # List each fn + its upstream basename so the gate can tell a multi-file pack
+            # (different basenames → split at the upstream-file boundary, e.g. dpsetstat+dpctr)
+            # from a single-file pack, without hand-disassembling asm/<rom>.s.
+            members = []
+            for fn in fns:
+                _, fn_up = upstream_index.get(fn, (None, None))
+                stem = os.path.splitext(os.path.basename(fn_up))[0] if fn_up else "?"
+                members.append(f"{fn}={stem}")
+            hazards.append(f"pack:{len(fns)}fn[" + ",".join(members) + "]")
+        if intrinsic_likely(off, fns[0]):
+            hazards.append("intrinsic-likely")  # register/FPU shim → hasm, not a classical target
+        return "asm-flip", fns, hazards
+    if typ == "c" and path:
+        cpath = os.path.join(ROOT, "src", path + ".c")
+        if not os.path.exists(cpath):
+            return None
+        text = open(cpath).read()
+        fns = re.findall(r"INCLUDE_ASM\([^,]+,\s*([A-Za-z_]\w+)", text)
+        if not fns:  # 0 stubs => already an md5-candidate
+            return None
+        return "c-stub", fns, [f"remaining:{len(fns)}"]
+    return None
+
+
+def append_upstream_hazards(off, primary, up_lib, up_path, hazards):
+    """Append the upstream-mirror hazards for a named candidate (in-place, in the
+    order the gate reads them) and return (band, blocked)."""
+    blocked = False
+    if has_file_scope_static(up_path):
+        hazards.append("file-static")  # route to the classical loop, not the mirror
+    data_defs = defines_data_globals(up_path)
+    if data_defs:
+        hazards.append("defines-data:" + ",".join(data_defs))  # .data analogue → classical loop
+    unplaced = refs_unplaced(up_path, placed_symbols())
+    if unplaced:
+        # Annotate the recovered vram inline when the binding is unambiguous (one unplaced
+        # name ∩ one asm candidate) so the gate copy-pastes the symbol_addrs entry instead
+        # of re-running MCP disassemble_function (S12 retro #1). Ambiguous → bare names.
+        cands = recover_unplaced_vram(off)
+        if len(unplaced) == 1 and len(cands) == 1:
+            refs = [f"{unplaced[0]}@0x{cands[0]:08X}"]
+        else:
+            refs = unplaced
+        hazards.append("refs-unplaced:" + ",".join(refs))  # asm-data-recovery before flip
+    unplaced_calls = calls_unplaced(up_path, primary, placed_symbols())
+    if unplaced_calls:
+        # Annotate the recovered vram inline when unambiguous (one unplaced call ∩ one
+        # unnamed jal), mirroring refs-unplaced, so the gate copy-pastes the func entry.
+        ccands = recover_unplaced_call_vram(off, primary)
+        if len(unplaced_calls) == 1 and len(ccands) == 1:
+            crefs = [f"{unplaced_calls[0]}@0x{ccands[0]:08X}"]
+        else:
+            crefs = unplaced_calls
+        hazards.append("calls-unplaced:" + ",".join(crefs))  # recover func symbol before flip
+    missing = missing_includes(up_path)
+    if missing:
+        hazards.append("needs-header:" + ",".join(missing))
+        blocked = any(include_is_blocked(inc) for inc in missing)
+    gating = function_gating_define(up_path, primary)
+    if gating and gating not in _active_defines_for_lib(up_lib):
+        hazards.append(f"needs-define:{gating}")
+    divergence = call_divergence(off, primary, up_path)
+    if divergence:
+        hazards.append(divergence)  # near-verbatim mirror: reconcile call list at the gate
+    band = "warm" if band_is_warm(band_mirror_dir(up_lib, up_path)) else "cold"
+    return band, blocked
+
+
+def score_row(off, primary, kind, fns, size, up_lib, band, blocked, hazards, carried):
+    """Assemble the ranked row dict (score folds size + upstream/warm/carry bonuses)."""
+    score = -size + (UPSTREAM_BONUS if up_lib else 0)
+    if band == "warm":
+        score += BAND_WARM_BONUS  # prefer enabler-free warm-band siblings over equally-small cold ones
+    if primary in carried:
+        score -= CARRYOVER_PENALTY
+    hz = ",".join(hazards) or "-"
+    vram = subseg_vram(off)
+    return {
+        "func": primary, "rom": f"0x{off:X}",
+        "vram": f"0x{vram:08X}" if vram is not None else "?",
+        "size": size, "nfns": len(fns),
+        "pts": seed_points(size, up_lib or "none", band, len(fns), hz, blocked),
+        "kind": kind, "upstream": up_lib or "none", "band": band,
+        "hazards": hz, "score": score,
+    }
+
+
 def build_rows(args, upstream_index, carried, sig_index):
     subs = parse_subsegs()
     rows = []
     for i, (off, typ, path) in enumerate(subs):
         size = subs[i + 1][0] - off if i + 1 < len(subs) else 0
-        if typ == "asm":
-            fns = asm_functions(off)
-            if not fns:
-                continue
-            kind = "asm-flip"
-            hazards = []
-            if size and size % 16 != 0:
-                hazards.append("non16align")
-            if len(fns) > 1:
-                # List each fn + its upstream basename so the gate can tell a multi-file pack
-                # (different basenames → split at the upstream-file boundary, e.g. dpsetstat+dpctr)
-                # from a single-file pack, without hand-disassembling asm/<rom>.s.
-                members = []
-                for fn in fns:
-                    _, fn_up = upstream_index.get(fn, (None, None))
-                    stem = os.path.splitext(os.path.basename(fn_up))[0] if fn_up else "?"
-                    members.append(f"{fn}={stem}")
-                hazards.append(f"pack:{len(fns)}fn[" + ",".join(members) + "]")
-            if intrinsic_likely(off, fns[0]):
-                hazards.append("intrinsic-likely")  # register/FPU shim → hasm, not a classical target
-        elif typ == "c" and path:
-            cpath = os.path.join(ROOT, "src", path + ".c")
-            if not os.path.exists(cpath):
-                continue
-            text = open(cpath).read()
-            fns = re.findall(r"INCLUDE_ASM\([^,]+,\s*([A-Za-z_]\w+)", text)
-            if not fns:  # 0 stubs => already an md5-candidate
-                continue
-            kind = "c-stub"
-            hazards = [f"remaining:{len(fns)}"]
-        else:
+        classified = classify_subseg(off, typ, path, size, upstream_index)
+        if classified is None:
             continue
+        kind, fns, hazards = classified
 
         primary = fns[0]
         up_lib, up_path = upstream_index.get(primary, (None, None))
         band = "-"
         blocked = False
         if up_path:
-            if has_file_scope_static(up_path):
-                hazards.append("file-static")  # route to the classical loop, not the mirror
-            data_defs = defines_data_globals(up_path)
-            if data_defs:
-                hazards.append("defines-data:" + ",".join(data_defs))  # .data analogue → classical loop
-            unplaced = refs_unplaced(up_path, placed_symbols())
-            if unplaced:
-                # Annotate the recovered vram inline when the binding is unambiguous (one unplaced
-                # name ∩ one asm candidate) so the gate copy-pastes the symbol_addrs entry instead
-                # of re-running MCP disassemble_function (S12 retro #1). Ambiguous → bare names.
-                cands = recover_unplaced_vram(off)
-                if len(unplaced) == 1 and len(cands) == 1:
-                    refs = [f"{unplaced[0]}@0x{cands[0]:08X}"]
-                else:
-                    refs = unplaced
-                hazards.append("refs-unplaced:" + ",".join(refs))  # asm-data-recovery before flip
-            unplaced_calls = calls_unplaced(up_path, primary, placed_symbols())
-            if unplaced_calls:
-                # Annotate the recovered vram inline when unambiguous (one unplaced call ∩ one
-                # unnamed jal), mirroring refs-unplaced, so the gate copy-pastes the func entry.
-                ccands = recover_unplaced_call_vram(off, primary)
-                if len(unplaced_calls) == 1 and len(ccands) == 1:
-                    crefs = [f"{unplaced_calls[0]}@0x{ccands[0]:08X}"]
-                else:
-                    crefs = unplaced_calls
-                hazards.append("calls-unplaced:" + ",".join(crefs))  # recover func symbol before flip
-            missing = missing_includes(up_path)
-            if missing:
-                hazards.append("needs-header:" + ",".join(missing))
-                blocked = any(include_is_blocked(inc) for inc in missing)
-            gating = function_gating_define(up_path, primary)
-            if gating and gating not in _active_defines_for_lib(up_lib):
-                hazards.append(f"needs-define:{gating}")
-            divergence = call_divergence(off, primary, up_path)
-            if divergence:
-                hazards.append(divergence)  # near-verbatim mirror: reconcile call list at the gate
-            band = "warm" if band_is_warm(band_mirror_dir(up_lib, up_path)) else "cold"
+            band, blocked = append_upstream_hazards(off, primary, up_lib, up_path, hazards)
         elif kind == "asm-flip" and primary.startswith("func_"):
             # No name-index hit + un-named: it may still be an un-named SDK mirror (the S13
             # trap). Run the signature matcher; an advisory hit flags the gate to verify.
@@ -1091,21 +1129,7 @@ def build_rows(args, upstream_index, carried, sig_index):
         if primary in carried and not args.include_stuck:
             continue
 
-        score = -size + (UPSTREAM_BONUS if up_lib else 0)
-        if band == "warm":
-            score += BAND_WARM_BONUS  # prefer enabler-free warm-band siblings over equally-small cold ones
-        if primary in carried:
-            score -= CARRYOVER_PENALTY
-        hz = ",".join(hazards) or "-"
-        vram = subseg_vram(off)
-        rows.append({
-            "func": primary, "rom": f"0x{off:X}",
-            "vram": f"0x{vram:08X}" if vram is not None else "?",
-            "size": size, "nfns": len(fns),
-            "pts": seed_points(size, up_lib or "none", band, len(fns), hz, blocked),
-            "kind": kind, "upstream": up_lib or "none", "band": band,
-            "hazards": hz, "score": score,
-        })
+        rows.append(score_row(off, primary, kind, fns, size, up_lib, band, blocked, hazards, carried))
     rows.sort(key=lambda r: (-r["score"], r["size"]))
     return rows[: args.n]
 

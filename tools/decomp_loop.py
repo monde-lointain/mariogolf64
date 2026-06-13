@@ -294,6 +294,29 @@ def score_diff(raw: dict, max_mismatches: int = 5) -> dict:
     }
 
 
+def resolve_profile(profile: str, placeholder: str) -> tuple[bool, bool]:
+    """Resolve the compile profile to (libkmc, libultra) flags.
+
+    `auto` detects by upstream-src presence; the explicit choices force a
+    profile. Mirrors the Makefile's per-library CFLAGS so the candidate object
+    reflects ground-truth bytes (libkmc -O, libultra -O3 -funsigned-char).
+    """
+    if profile == "libkmc":
+        libkmc, libultra = True, False
+    elif profile == "libultra":
+        libkmc, libultra = False, True
+    elif profile == "default":
+        libkmc, libultra = False, False
+    else:
+        libkmc = detect_libkmc_profile(placeholder)
+        libultra = (not libkmc) and detect_libultra_profile(placeholder)
+    if libkmc:
+        log(f"[profile] libkmc (-O) — placeholder found in {LIBKMC_SRC}")
+    elif libultra:
+        log(f"[profile] libultra (-O3 -funsigned-char) — placeholder found in {LIBULTRA_SRC}")
+    return libkmc, libultra
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--func", required=True, help="func_XXXXXXXX or curated name")
@@ -322,19 +345,7 @@ def main() -> None:
     reference_o = ensure_reference_object(seg_stem)
     log(f"[reference] {reference_o.relative_to(ROOT_DIR)}")
 
-    if args.profile == "libkmc":
-        libkmc, libultra = True, False
-    elif args.profile == "libultra":
-        libkmc, libultra = False, True
-    elif args.profile == "default":
-        libkmc, libultra = False, False
-    else:
-        libkmc = detect_libkmc_profile(placeholder)
-        libultra = (not libkmc) and detect_libultra_profile(placeholder)
-    if libkmc:
-        log(f"[profile] libkmc (-O) — placeholder found in {LIBKMC_SRC}")
-    elif libultra:
-        log(f"[profile] libultra (-O3 -funsigned-char) — placeholder found in {LIBULTRA_SRC}")
+    libkmc, libultra = resolve_profile(args.profile, placeholder)
 
     ok, compile_log, current_o = compile_candidate(placeholder, libkmc, libultra)
     if not ok:
