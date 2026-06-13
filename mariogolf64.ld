@@ -166,7 +166,7 @@ SECTIONS
         build/asm/7E360.o(.text);
         build/src/libultra/io/epidma.o(.text);
         build/src/libultra/io/epilinkhandle.o(.text);
-        build/asm/7E870.o(.text);
+        build/src/libultra/io/cartrominit.o(.text);
         build/asm/7E9F0.o(.text);
         build/src/libultra/io/piacs.o(.text);
         build/src/libultra/io/aigetlen.o(.text);
@@ -398,7 +398,7 @@ SECTIONS
         build/asm/7E360.o(.data);
         build/src/libultra/io/epidma.o(.data);
         build/src/libultra/io/epilinkhandle.o(.data);
-        build/asm/7E870.o(.data);
+        build/src/libultra/io/cartrominit.o(.data);
         build/asm/7E9F0.o(.data);
         build/src/libultra/io/piacs.o(.data);
         build/src/libultra/io/aigetlen.o(.data);
@@ -631,7 +631,7 @@ SECTIONS
         build/asm/7E360.o(.rodata);
         build/src/libultra/io/epidma.o(.rodata);
         build/src/libultra/io/epilinkhandle.o(.rodata);
-        build/asm/7E870.o(.rodata);
+        build/src/libultra/io/cartrominit.o(.rodata);
         build/asm/7E9F0.o(.rodata);
         build/src/libultra/io/piacs.o(.rodata);
         build/src/libultra/io/aigetlen.o(.rodata);
@@ -891,7 +891,7 @@ SECTIONS
         build/asm/7E360.o(.bss);
         build/src/libultra/io/epidma.o(.bss);
         build/src/libultra/io/epilinkhandle.o(.bss);
-        build/asm/7E870.o(.bss);
+        build/src/libultra/io/cartrominit.o(.bss);
         build/asm/7E9F0.o(.bss);
         build/src/libultra/io/piacs.o(.bss);
         build/src/libultra/io/aigetlen.o(.bss);

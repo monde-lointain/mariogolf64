@@ -177,7 +177,7 @@ segments:
       - [0x7E360, asm]
       - [0x7E780, c, libultra/io/epidma]
       - [0x7E820, c, libultra/io/epilinkhandle]
-      - [0x7E870, asm]
+      - [0x7E870, c, libultra/io/cartrominit]
       - [0x7E9F0, asm]
       - [0x7EDB0, c, libultra/io/piacs]
       - [0x7EEA0, c, libultra/io/aigetlen]

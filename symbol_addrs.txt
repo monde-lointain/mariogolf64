@@ -66,3 +66,5 @@ bcmp = 0x800B0A20; // type:func
 nintendo = 0x800C93F0; // size:0x30
 mmc_type = 0x800C9420; // size:0x14
 osRomBase = 0x80000308; // size:0x4
+__CartRomHandle = 0x80105BC0; // size:0x74
+osCartRomInitFirst = 0x800C7EA0; // size:0x4
