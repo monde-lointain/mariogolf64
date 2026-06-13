@@ -159,6 +159,10 @@ below).
 - **Scratch dir** `nonmatchings/<func>/` (gitignored, shared with the permuter).
 - **Python tools run via the venv:** `venv/bin/python3 tools/X.py` (system python lacks asm-differ
   deps and is PEP-668-locked).
+- **Shared tool helpers** live in `tools/decomp_common.py` (venv re-exec, path constants, asm/symbol
+  regexes, `emit`/`log`, `find_segment`, SDK-path config) and `tools/lib.sh` (shell wrappers).
+  `make test-tools` runs the `tests/tooling/` characterization suite (pytest); refactor tooling
+  under it, and `REGEN_GOLDEN=1` to refresh golden snapshots after an intended behavior change.
 - **File-level matching.** A source file matches only when every function in it matches. Promoting a
   match replaces one `INCLUDE_ASM` stub with the C body. No md5 win until the last stub in a file is
   gone.

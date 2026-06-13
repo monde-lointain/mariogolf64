@@ -38,8 +38,12 @@ ifeq (,$(shell command -v $(CPP) 2>/dev/null))
 $(error $(CPP) not found — install it, e.g. `sudo apt install cpp-mips-linux-gnu`)
 endif
 
-# Compiler - KMC GCC 2.7.2
-CC := COMPILER_PATH=tools/cc tools/cc/gcc
+# Compiler + assembler - KMC GCC 2.7.2 / KMC binutils 2.6 (downloaded into
+# tools/cc by `make -C tools`). KMC_PREFIX is overridable for a relocated
+# toolchain. COMPILER_PATH points GCC at its runtime support libs in tools/cc.
+KMC_PREFIX ?= tools/cc
+CC    := COMPILER_PATH=$(KMC_PREFIX) $(KMC_PREFIX)/gcc
+KMC_AS := $(KMC_PREFIX)/as
 
 # Flags
 ASFLAGS := -march=vr4300 -32 -I include --no-pad-sections
@@ -153,41 +157,28 @@ $(BUILD_DIR)/$(ASSETS_DIR)/%.o: $(ASSETS_DIR)/%.bin
 	$(OBJCOPY) -I binary -O elf32-tradbigmips $< $@
 
 # Compile C (KMC GCC → .s, then KMC binutils 2.6 `as` → .o).
-# Using the original assembler (tools/cc/as) gives us the KMC `move dst,zero`
+# Using the original assembler ($(KMC_AS)) gives us the KMC `move dst,zero`
 # → `addu dst,zero,zero` encoding natively, AND auto-pads .text to its 16-byte
 # section alignment. Modern `mips-linux-gnu-as` is kept for asm/% (it
 # understands modern-only directives like .set gp=64 that raw asm uses).
+#
+# All four C profiles share ONE recipe (below); the only difference is the
+# compile flags, selected per source tree via the C_PROFILE_CFLAGS
+# pattern-specific variable. `%` spans slashes, so the single src/%.o rule also
+# builds nested lib paths, and the more-specific variable patterns win there:
+#   - libultra: -O3 -funsigned-char -DBUILD_VERSION=VERSION_J (LIBULTRA_CFLAGS)
+#   - libkmc:   -O instead of -O2 (LIBKMC_CFLAGS)
+#   - libnusys: adds -DUSE_EPI for nuPi* bodies (LIBNUSYS_CFLAGS)
+C_PROFILE_CFLAGS = $(CFLAGS)
+$(BUILD_DIR)/$(SRC_DIR)/libultra/%.o: C_PROFILE_CFLAGS = $(LIBULTRA_CFLAGS)
+$(BUILD_DIR)/$(SRC_DIR)/libkmc/%.o:   C_PROFILE_CFLAGS = $(LIBKMC_CFLAGS)
+$(BUILD_DIR)/$(SRC_DIR)/libnusys/%.o: C_PROFILE_CFLAGS = $(LIBNUSYS_CFLAGS)
+
+# `strip -N dummy-symbol-name`: drop the placeholder symbol KMC GCC emits so it
+# doesn't collide at link; the name is inert, the strip just keeps the symtab clean.
 $(BUILD_DIR)/$(SRC_DIR)/%.o: $(SRC_DIR)/%.c
-	$(CC) -S $(CFLAGS) -o $@.s $<
-	tools/cc/as -EB -mips2 -G 0 -I include -o $@.tmp $@.s
-	cp $@.tmp $@
-	$(STRIP) $@ -N dummy-symbol-name
-	rm $@.s $@.tmp
-
-# libultra compile profile: -O3 -funsigned-char -DBUILD_VERSION=VERSION_J (see LIBULTRA_CFLAGS).
-# Pattern-rule specificity beats the generic src/% rule.
-$(BUILD_DIR)/$(SRC_DIR)/libultra/%.o: $(SRC_DIR)/libultra/%.c
-	$(CC) -S $(LIBULTRA_CFLAGS) -o $@.s $<
-	tools/cc/as -EB -mips2 -G 0 -I include -o $@.tmp $@.s
-	cp $@.tmp $@
-	$(STRIP) $@ -N dummy-symbol-name
-	rm $@.s $@.tmp
-
-# libkmc compile profile: same pipeline as above, but with -O instead of -O2
-# (see LIBKMC_CFLAGS comment). Pattern-rule specificity puts this above the
-# generic src/% rule when both match.
-$(BUILD_DIR)/$(SRC_DIR)/libkmc/%.o: $(SRC_DIR)/libkmc/%.c
-	$(CC) -S $(LIBKMC_CFLAGS) -o $@.s $<
-	tools/cc/as -EB -mips2 -G 0 -I include -o $@.tmp $@.s
-	cp $@.tmp $@
-	$(STRIP) $@ -N dummy-symbol-name
-	rm $@.s $@.tmp
-
-# libnusys compile profile: adds -DUSE_EPI for nuPi* files that guard their body
-# behind #ifdef USE_EPI (see LIBNUSYS_CFLAGS). Pattern-rule specificity beats generic src/%.
-$(BUILD_DIR)/$(SRC_DIR)/libnusys/%.o: $(SRC_DIR)/libnusys/%.c
-	$(CC) -S $(LIBNUSYS_CFLAGS) -o $@.s $<
-	tools/cc/as -EB -mips2 -G 0 -I include -o $@.tmp $@.s
+	$(CC) -S $(C_PROFILE_CFLAGS) -o $@.s $<
+	$(KMC_AS) -EB -mips2 -G 0 -I include -o $@.tmp $@.s
 	cp $@.tmp $@
 	$(STRIP) $@ -N dummy-symbol-name
 	rm $@.s $@.tmp
@@ -217,7 +208,7 @@ spotcheck-build:
 	@test -n "$(FUNC)" || { echo "Usage: make spotcheck-build SEG=<seg> FUNC=<func_XXXXXXXX>" >&2; exit 1; }
 	@test -f src/$(SEG).c.spotcheck || { echo "src/$(SEG).c.spotcheck not found (created during the execution loop's finalize step)" >&2; exit 1; }
 	$(CC) -x c -S $(CFLAGS) -DNONMATCHING -o $(BUILD_DIR)/$(SRC_DIR)/$(SEG).spotcheck.s src/$(SEG).c.spotcheck
-	tools/cc/as -EB -mips2 -I include -o $(BUILD_DIR)/$(SRC_DIR)/$(SEG).spotcheck.tmp $(BUILD_DIR)/$(SRC_DIR)/$(SEG).spotcheck.s
+	$(KMC_AS) -EB -mips2 -I include -o $(BUILD_DIR)/$(SRC_DIR)/$(SEG).spotcheck.tmp $(BUILD_DIR)/$(SRC_DIR)/$(SEG).spotcheck.s
 	cp $(BUILD_DIR)/$(SRC_DIR)/$(SEG).spotcheck.tmp $(BUILD_DIR)/$(SRC_DIR)/$(SEG).spotcheck.o
 	$(STRIP) $(BUILD_DIR)/$(SRC_DIR)/$(SEG).spotcheck.o -N dummy-symbol-name
 	rm $(BUILD_DIR)/$(SRC_DIR)/$(SEG).spotcheck.s $(BUILD_DIR)/$(SRC_DIR)/$(SEG).spotcheck.tmp
@@ -229,8 +220,8 @@ clean-nonmatchings:
 # Vendor override: build/asm/8EC50.o from src/libkmc/mmuldi3.s using KMC as.
 # Explicit rule wins over the asm/%.s pattern rule for this specific target.
 # mmuldi3.s uses KMC register-name conventions (move → addu encoding); must
-# use tools/cc/as, not modern mips-linux-gnu-as.
+# use $(KMC_AS), not modern mips-linux-gnu-as.
 $(BUILD_DIR)/$(ASM_DIR)/8EC50.o: src/libkmc/mmuldi3.s
-	tools/cc/as -EB -mips2 -o $@.tmp $<
+	$(KMC_AS) -EB -mips2 -o $@.tmp $<
 	cp $@.tmp $@
 	rm $@.tmp
