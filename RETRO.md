@@ -25,6 +25,17 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 51 — guMtxCatF + guMtxXFMF libultra gu/ combined-subseg mirror — 2026-06-13
+- Increment: 1 file banked (`src/libultra/gu/mtxcatf.c`) / 2 fns matched (`guMtxCatF`, `guMtxXFMF`; 3rd gu/ file). md5-candidate 91→92 (92/92 .c files stub-free); asm subsegs → 180.
+- Quality: 0/0/0/0 this sprint. Verbatim ultralib `src/gu/mtxcatf.c`, zero edits, matched first `make`.
+- Seed: committed 3pt; banked 3pt; regime mirror (8-gate clear; seed-only). Deterministic pts seed was 2 (= S50's identical 2-fn gu shape); the gate +1 was a one-time non16align adjust — do NOT re-anchor future 2-fn gu mirrors at 3.
+- What helped: ultralib's combined `src/gu/mtxcatf.c` holds BOTH fns as clean C (the original SGI file); both names pre-curated, `guint.h` shipped S49 — pure verbatim cp. S50's `missing_includes` fix correctly de-flagged `guMtxCatF` from `blk` (warm/no-hazard at the gate, as predicted).
+- Friction: (a) **non16align** — `guMtxXFMF` is tight-packed after `guMtxCatF` at non-16 `0x848AC`; a per-fn yaml split SHA-missed on a bare stub (KMC `as` pads fn1's `.o` to 16, shifting fn2). Diagnosed via the gate build-check, fixed with one combined subseg. (b) **Gate red-herring** — `pick_target` mapped `guMtxCatF` to libultra_modern's hand-asm `mtxcatf.s` (the deprecated split distro CLAUDE.md already forbids); disasm-probe showed compiled-C nested-loop matmul. Cost one extra PO re-confirm. (c) **Orphan file** — the reverted split left a stale `gu/mtxxfmf.c` stub that `git add -A` swept into the bank commit; removed in a fixup commit after the user flagged it.
+- Applied (3 of 3): #1 pack `.s`/`.c`-boundary disasm-probe before classical-flag (hazards.md pack section); #2 hazards.md#non16align combined-subseg case + reverted-split cleanup caveat; #3 hazards.md#upstream-mirror-pattern S51 cautionary note (reach ultralib first; a libultra_modern `.s` is not evidence of hand-asm).
+- Carry-over: none. `guMtxCatF` was the only deferred candidate; it banked.
+
+---
+
 ## Sprint 50 — guScaleF + guScale libultra gu/ band-open fast-path mirror — 2026-06-13
 - Increment: 1 file banked (`src/libultra/gu/scale.c`) / 2 fns matched (`guScaleF`, `guScale`; 2nd gu/ file). md5-candidate 90→91 (91/91 .c files stub-free).
 - Quality: 0/0/0/0 this sprint. Clean first-build verbatim match (zero edits, no seed/decomp_loop/permuter).

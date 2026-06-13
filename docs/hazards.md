@@ -45,7 +45,11 @@ and near-verbatim sections. Known-edit sub-cases: file-static drop, defines-data
 line-drop, recover-extern placement.
 
 **Provenance:** S15 unlocked the libnusys band by vendoring one `include/libnusys/nusys.h` +
-`-I include/libnusys`; `-I include/libultra/PR` is the precedent for unblocking a band.
+`-I include/libnusys`; `-I include/libultra/PR` is the precedent for unblocking a band. S51 is the
+cautionary case for step 1's "do not consult `libultra_modern`": its split `gu/` layout
+(hand-asm `mtxcatf.s` + C `mtxxfmf.c`) mis-suggested `guMtxCatF` was hand-asm at the gate, while
+ultralib's `src/gu/mtxcatf.c` (the sole source) holds BOTH fns as clean C — which the ROM matched
+verbatim. Reach for ultralib first; a `libultra_modern` `.s` is not evidence the ROM fn is hand-asm.
 
 ---
 
@@ -415,6 +419,15 @@ block the mirror) → flip the first chunk to `[0x<seg>, c]` so the scaffold onl
 **Provenance:** 0x8E620 (`rand`+`srand` from `rand.c` packed with `_xsincos`+`sin`+`cos`+`tan` from
 `sin.c`).
 
+**Per-distribution upstream caveat (S51):** `pick_target.py`'s `upstream` column and the gate's
+"upstream availability" note come from the pack name-map, not the bytes. A fn the map calls a
+mirror may ship as hand-asm `.s` in one distribution (libultra_modern) yet have been compiled from
+the original combined `.c` in this ROM. Before flagging the `.s`-mapped fn classical/hand-asm,
+disasm-probe it for compiled-C structure (stack frame + nested-loop counters + `slti`/`bnez` loop
+tails). S51 `guMtxCatF` mapped to `mtxcatf.s` (hand-asm upstream) but the disasm was a textbook
+compiled nested-loop matmul — both pack fns were clean C from the original SGI `mtxcatf.c`. See also
+the non16align combined-subseg case when fn2 is tight-packed.
+
 ---
 
 ## register-reuse nudge (classical regalloc)
@@ -489,6 +502,23 @@ mis-place downstream bytes.
 **Trigger:** `pick_target.py` flag `non16align`.
 
 **Procedure:** Split the yaml at the alignment boundary or add a `.balign`.
+
+**Combined-subseg case (S51):** When a 2-fn pack has fn2 packed tight after fn1 at a non-16 offset
+(fn1's size is not a 16-multiple), you CANNOT split into per-fn subsegs — KMC `as` pads fn1's
+standalone `.o` `.text` to 16, inserting bytes that shift fn2 downstream and breaking the ROM SHA-1
+on a bare stub flip. The fix is the opposite of the normal pack split: flip the whole pack to one
+combined `[0x<rom>, c, lib<name>/<basename>]` subseg holding BOTH functions in one `.o` (both
+`INCLUDE_ASM` stubs, then decompile each). Padding then lands only at the object's end, matching the
+original single-`.o` layout. S51 `guMtxCatF`(0xDC)+`guMtxXFMF`(0xAC, at non-16 `0x848AC`) → one
+`gu/mtxcatf.c`. A bare-stub split flip is the gate-build canary: SHA-miss with a correctly-named
+stub ⇒ alignment, not a bad offset.
+
+**Cleanup after a reverted split:** when the gate first tried a per-fn split and then reverted to the
+combined subseg, splat leaves the abandoned attempt's `src/lib<name>/<fn2>.c` stub + its
+`asm/nonmatchings/.../<fn2>/` dir on disk (splat never deletes files for removed subsegs). A blind
+`git add -A` then commits the orphan stub. Before committing the bank, `git rm` the stale
+`src/.../<fn2>.c` and `rm -rf` its asm scaffold dir (S51: orphan `gu/mtxxfmf.c` swept in, removed in a
+fixup commit).
 
 ---
 
