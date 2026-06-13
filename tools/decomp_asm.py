@@ -200,6 +200,32 @@ def recover_unplaced_vram(rom_off):
 FUNC_JAL_RE = re.compile(r"\bjal\s+func_([0-9A-Fa-f]{8})\b")
 
 
+# A compiler-pooled FP constant load: `ldc1/lwc1 $fX, %lo(D_<addr>)($reg)` — an *anonymous*
+# (`D_`-labelled, so absent from both name files) double/float literal GCC emits into the C file's
+# `.rodata`. Overlay subsegs label it `D_ovl<N>_<addr>`; the trailing 8 hex is the vram either way.
+# A named float global would show its curated name (not `D_`), so it is a placed/recover-extern
+# case, not a literal — excluded by requiring the `D_` prefix.
+RODATA_LITERAL_RE = re.compile(
+    r"\b(?:ldc1|lwc1)\b[^\n]*%lo\(D_(?:ovl\d+_)?([0-9A-Fa-f]{8})\)"
+)
+
+
+def rodata_literals(rom_off, primary):
+    """VRAMs of the anonymous compiler-pooled FP constants `primary` loads via `ldc1/lwc1
+    %lo(D_<addr>)` in asm/<ROM>.s. A verbatim mirror's compiler re-emits these into the C object's
+    `.rodata`, which must then be placed by a dot-prefixed `.rodata` sibling subseg at the
+    constant's ROM offset (docs/hazards.md#rodata-sibling-yaml-pattern, S38/S48). Pre-noting them
+    at the gate turns a finalize-time SHA-miss into a planned DoR enabler. Anonymous (`D_`) only:
+    a named float global is a placed / recover-extern case, not a literal. Such a load is by
+    construction a rodata access (absolute %hi/%lo addressing), so the address always lies outside
+    the fn's own text band. Returns a sorted list of distinct addresses."""
+    addrs = set()
+    for line in iter_function_body(rom_off, primary):
+        for h in RODATA_LITERAL_RE.findall(line):
+            addrs.add(int(h, 16))
+    return sorted(addrs)
+
+
 def recover_unplaced_call_vram(rom_off, primary):
     """Addresses of `primary`'s *unnamed* jal targets (`jal func_<hex>`) in asm/<ROM>.s — the
     callees splat couldn't name because they're absent from both name files. The function dual of

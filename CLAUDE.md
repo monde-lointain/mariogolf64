@@ -228,7 +228,7 @@ When `pick_target.py` flags a hazard (or a match shows its symptom), read the ma
 | `intrinsic-likely` / `maybe-upstream:…` | #intrinsic-likely--maybe-upstream-signature-hints |
 | (libultra leaf, bare std header)| #per-library-standard-c-header-isolation |
 | (match locks ~0.9, lib target)  | #compile-profiles-libkmc--o-libultra--o3 |
-| (compiler rodata, wrong offset) | #rodata-sibling-yaml-pattern |
+| (compiler rodata, wrong offset) / `rodata-literal:<addr>` | #rodata-sibling-yaml-pattern |
 | (MMIO fn, flat score, empty top_mismatches) | #io_writeio_read-isolation-artifact |
 | (macro-hidden extern)           | #macro-hidden-recover-extern |
 | (warm band, no hazard)          | #open-band-fast-path |

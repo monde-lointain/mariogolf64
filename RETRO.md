@@ -25,6 +25,28 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 48 — __osViSwapContext libultra io/ vi-band verbatim mirror — 2026-06-13
+- Increment: 1 file banked (`src/libultra/io/viswapcontext.c`) / 1 fn matched (11th vi-band sibling). md5-candidate 88→89 (89/89 .c files now stub-free).
+- Quality: 0/0/0/0 this sprint.
+- Seed: committed 5pt; banked 5pt; regime mirror (8-gate clear; seed-only, no freeze commit).
+- What helped: gate triage pre-located BOTH wrinkles before the flip — the recover-extern
+  (`__additional_scanline`=0x800C826C, asm-data-recovery) and the rodata-sibling (the asm `ldc1`
+  from a 0x800d.. literal in a different ROM band telegraphed the `2^32` double). `.text` matched
+  on first compile; only the yaml rodata split (`[0xAD9E0, .rodata, libultra/io/viswapcontext]`,
+  same pattern as S38 aisetfreq) was needed for the green ROM. VERSION_J path + vi struct layout
+  already proven by 10 banked siblings → high confidence.
+- Friction: pick_target's refs-unplaced listed `__OSViContext` (a struct TYPE, not a data symbol),
+  costing a verification step to rule out; the rodata-sibling surfaced only on the first SHA miss
+  (not pre-flagged). Both fixed this retro.
+- Applied: 2 of 2 — #1 `declared_type_names` in pick_target.py + the type-name exclusion in
+  refs_unplaced (drops typedef'd types like __OSViContext from the recover-extern list); #2
+  `rodata_literals` in decomp_asm.py + the `rodata-literal:<addr>` hazard on mirror candidates
+  (pre-flags anonymous `ldc1/lwc1 %lo(D_)` FP constants so the sibling split is a DoR enabler).
+  hazards.md rodata-sibling section + CLAUDE.md hazard index updated; `make test-tools` 23 pass.
+- Carry-over: none.
+
+---
+
 ## Sprint 47 — osCartRomInit libultra io/ verbatim mirror (cross-jump tail-merge) — 2026-06-13
 - Increment: 1 file banked / 1 function matched (`src/libultra/io/cartrominit.c`); md5-candidate 87→88. Single fn 0x7E870, no split. Goal fully met, 0 carry-overs. First fn from the S46-reopened io/ band's near-verbatim tier (S46 banked the clean getters).
 - Quality: stuck-far 0, permuter 0, carried 0, re-opened 0. (One 0x10-short near-miss self-corrected mid-build via the verbatim cross-jump — not a spike.)

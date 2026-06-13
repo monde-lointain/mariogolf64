@@ -42,6 +42,7 @@ from decomp_asm import (
     intrinsic_likely,
     recover_unplaced_call_vram,
     recover_unplaced_vram,
+    rodata_literals,
     subseg_vram,
 )
 
@@ -159,6 +160,7 @@ HAZARD_PACK = "pack"
 HAZARD_NON16ALIGN = "non16align"
 HAZARD_INTRINSIC_LIKELY = "intrinsic-likely"
 HAZARD_MAYBE_UPSTREAM = "maybe-upstream"
+HAZARD_RODATA_LITERAL = "rodata-literal"
 HAZARD_REMAINING = "remaining"
 
 
@@ -655,6 +657,44 @@ EXTERN_DATA_DECL_RE = re.compile(
 )
 
 
+# A typedef'd type *name* in a header, in the two forms the SDK uses: a struct/union/enum body
+# close (`} __OSViContext;` — including array/`__attribute__` tails) and a simple alias
+# (`typedef u32 OSId;`). Captures the alias identifier. This lets refs_unplaced drop a `__`-prefixed
+# token that is actually a TYPE used in a declaration (`register __OSViContext* vc;`) rather than a
+# data extern — without it, SDK_GLOBAL_RE flags the type as a phantom recover-extern (S48:
+# __OSViContext, a 0x30-byte struct in viint.h, surfaced in the refs-unplaced list).
+TYPEDEF_CLOSE_RE = re.compile(r"}\s*([A-Za-z_]\w*)\s*(?:\[[^\]]*\]|__attribute__\s*\([^;]*\))?\s*;", re.M)
+TYPEDEF_SIMPLE_RE = re.compile(r"^\s*typedef\s+[^;{}\n]*?\b([A-Za-z_]\w*)\s*;", re.M)
+
+
+def declared_type_names(cpath, _depth=0, _seen=None):
+    """Type names typedef'd in the headers `cpath` pulls in (recursively, within the project -I
+    set), mirroring declared_extern_data's bounded header walk. Used to exclude type tokens from
+    refs_unplaced so a `__`-prefixed TYPE (e.g. __OSViContext) is not mistaken for an unplaced data
+    extern. A file-scope `} var;` instance is rare in SDK headers and gate-confirmed, so the small
+    over-exclusion risk is acceptable."""
+    if _seen is None:
+        _seen = set()
+    names = set()
+    try:
+        text = open(cpath, errors="ignore").read()
+    except OSError:
+        return names
+    names.update(TYPEDEF_CLOSE_RE.findall(text))
+    names.update(TYPEDEF_SIMPLE_RE.findall(text))
+    if _depth >= 4:
+        return names
+    for line in text.splitlines():
+        im = INCLUDE_RE.match(line)
+        if not im:
+            continue
+        header = _resolve_include(im.group(1))
+        if header and header not in _seen:
+            _seen.add(header)
+            names |= declared_type_names(header, _depth + 1, _seen)
+    return names
+
+
 def _resolve_include(inc):
     """First INCLUDE_DIRS hit for an `#include` target, or None (an unindexed / system header)."""
     for d in INCLUDE_DIRS:
@@ -784,9 +824,14 @@ def refs_unplaced(cpath, placed, lib=None):
         # `__`/declared-extern grep would otherwise miss — see BOOT_GLOBALS.
         | {g for g in BOOT_GLOBALS if re.search(r"\b" + re.escape(g) + r"\b", scan)}
     )
+    # Type names the headers typedef (e.g. __OSViContext) are referenced in declarations, not as
+    # data — drop them so a `__`-prefixed TYPE is not flagged as a phantom recover-extern (S48).
+    types = declared_type_names(cpath)
     unplaced = []
     for tok in tokens:
         if tok in placed or tok.startswith("__builtin_"):  # GCC intrinsic, never a linked global
+            continue
+        if tok in types:  # a typedef'd type, not a data extern
             continue
         # Only flag names the .c (or its invoked macros) actually references.
         if not re.search(r"\b" + re.escape(tok) + r"\b", scan):
@@ -1072,6 +1117,12 @@ def append_upstream_hazards(off, primary, up_lib, up_path, hazards):
     divergence = call_divergence(off, primary, up_path)
     if divergence:
         hazards.append(divergence)  # near-verbatim mirror: reconcile call list at the gate
+    literals = rodata_literals(off, primary)
+    if literals:
+        # Compiler-pooled FP constants the mirror re-emits → a `.rodata` sibling split is needed at
+        # finalize (docs/hazards.md#rodata-sibling-yaml-pattern). Pre-note the vram as a DoR enabler
+        # so it is not a finalize-time SHA-miss surprise (S48).
+        hazards.append(Hazard(HAZARD_RODATA_LITERAL, ",".join(f"0x{a:08X}" for a in literals)))
     band = "warm" if band_is_warm(band_mirror_dir(up_lib, up_path)) else "cold"
     return band, blocked
 
