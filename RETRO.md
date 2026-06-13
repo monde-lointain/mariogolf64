@@ -25,6 +25,18 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 42 — osSendMesg + osSetEventMesg libultra message pair — 2026-06-13
+- Increment: 2 files banked / 2 functions matched (`src/libultra/monegi/message/{sendmesg,seteventmesg}.c`); md5-candidate 76→78 (78/78 src .c now 0-stub).
+- Quality: 0/0/0/0 this sprint (stuck-far/permuter/carried/re-opened).
+- Seed: committed 5pt; banked 5pt; regime mixed (sendmesg mirror seed 2 + seteventmesg classical defines-data seed 3). Classical track: S42 seed 3 / realized 2 / residual −1 (verbatim-first-try). 8-gate clear.
+- What helped: (1) **defines-data verbatim-body fast path** — `osSetEventMesg`'s only edit from upstream was dropping the two file-scope defs (`__osEventStateTab`, `__osPreNMI`); body verbatim → known-edit *mirror*, matched in one `make` (no seed loop). Both functions banked in a single build. (2) Per-function jal analysis at the gate dissolved the `7vs6` flag (osSendMesg 6vs6, osSetEventMesg 3vs3 — each clean). (3) `ultralib/src/os/seteventmesg.c` as 2nd source confirmed the `BUILD_VERSION>=VERSION_J` path (matches the asm's PRENMI/`__osPreNMI` block) and `_FINALROM`→OS_NUM_EVENTS=15 fixed the array size at 0x78.
+- Friction: two pick_target blind spots, both caught at the gate not the table. (a) `jal-count-mismatch:7vs6` was a **`MQ_IS_FULL` macro-pseudo-call** counted on the C side (the jal-count path uses `_C_NONCALL`, which — unlike S41's calls-unplaced de-noise — lacked the message predicate macros). (b) **`defines_data_globals` never flagged `__osEventStateTab`**: the `ALIGNED(8)` suffix defeats both `DATA_GLOBAL_DEF_RE` (no `;` right after `]`) and the `"(" not in line` paren-guard (ALIGNED's paren), so the defines-data hazard was discovered manually by reading the asm + upstream. The PO swap to this sibling at the plan gate is what surfaced it.
+- Applied (3 of 3): #1 `pick_target.py` — `MQ_IS_FULL`/`MQ_IS_EMPTY` → `_C_NONCALL` (fixes the jal-count C-side + maybe-upstream signature; golden regenerated). #2 `docs/hazards.md#defines-data` — verbatim-body fast-path note (mirror proof, skip the classical seed). #3 `pick_target.py` — `defines_data_globals` surfaces the array dimension as `defines-data:<name>[DIM]` (mechanical scalar-vs-array size hint; `DATA_GLOBAL_DEF_RE` capture group added).
+- New suggestion buffered for next review: **extend `defines_data_globals` to attribute-suffixed defs** (`Type name[N] ALIGNED(x);` / `__attribute__((...))`) — both the regex and the paren-guard bail on the trailing macro-call, so `ALIGNED` arrays evade detection entirely (the S42 `__osEventStateTab` miss). Needs the paren-guard relaxed for known attribute macros (ALIGNED/`__attribute__`) without re-admitting function decls — not done this sprint (function-decl regression risk, out of approved scope).
+- Carry-overs: none. (The dropped libnusys filler `nuPiInit`/`nuPiInitSram` and the message-pack sibling `osSetEventMesg` are all banked or remain asm as before; nothing spiked.)
+
+---
+
 ## Sprint 41 — __osEPiRawWriteIo libultra pi IO_WRITE mirror — 2026-06-13
 - Increment: 1 file banked / 1 fn matched (md5-candidate 72→73)
 - Quality: stuck-far 0 / permuter 0 / carried 0 / re-opened 0

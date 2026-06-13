@@ -598,19 +598,6 @@
     "vram": "0x800A1320"
   },
   {
-    "band": "warm",
-    "func": "osSendMesg",
-    "hazards": "pack:2fn[osSendMesg=sendmesg,osSetEventMesg=seteventmesg],jal-count-mismatch:7vs6",
-    "kind": "asm-flip",
-    "nfns": 2,
-    "pts": 2,
-    "rom": "0x86550",
-    "score": -216,
-    "size": 480,
-    "upstream": "libultra",
-    "vram": "0x800AB150"
-  },
-  {
     "band": "-",
     "func": "guScaleF",
     "hazards": "pack:2fn[guScaleF=?,guScale=?]",
@@ -648,5 +635,18 @@
     "size": 240,
     "upstream": "none",
     "vram": "0x800AC110"
+  },
+  {
+    "band": "-",
+    "func": "func_800B1820",
+    "hazards": "pack:2fn[func_800B1820=?,func_800B188C=?]",
+    "kind": "asm-flip",
+    "nfns": 2,
+    "pts": 13,
+    "rom": "0x8CC20",
+    "score": -240,
+    "size": 240,
+    "upstream": "none",
+    "vram": "0x800B1820"
   }
 ]

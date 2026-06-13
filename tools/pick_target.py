@@ -86,7 +86,7 @@ FILE_STATIC_RE = re.compile(r"^\s*static\b[^=]*;\s*$")
 # and struct members never match. Captures the variable name.
 DATA_GLOBAL_DEF_RE = re.compile(
     r"^(?:(?:struct|union|enum)\s+)?[A-Za-z_][\w \t\*]*?\b([A-Za-z_]\w+)"
-    r"\s*(?:\[[^\]]*\]\s*)?(?:=[^;]*)?;\s*$"
+    r"\s*(?:\[([^\]]*)\]\s*)?(?:=[^;]*)?;\s*$"
 )
 INCLUDE_RE = re.compile(r'^\s*#\s*include\s*[<"]([^>"]+)[>"]')
 # The project's quoted/angle include search dirs (Makefile CFLAGS `-I` set; -nostdinc removed S32 — stdarg.h ships at include/stdarg.h for correct MIPS GCC 2.7.2 vararg ABI).
@@ -217,6 +217,10 @@ C_INT_RE = re.compile(r"\b(0x[0-9A-Fa-f]+|\d+)\b")
 _C_NONCALL = {
     "if", "for", "while", "switch", "return", "sizeof", "do", "else", "case",
     "defined", "OS_LOG_FLOAT", "assert",
+    # Inline predicate macros that expand to field comparisons, emitting NO jal — counting them
+    # as C calls over-inflates the jal-count C side (the S42 osSendMesg `MQ_IS_FULL` 7vs6 FP) and
+    # pollutes the maybe-upstream callee signature. They carry no cross-build identity.
+    "MQ_IS_FULL", "MQ_IS_EMPTY",
 }
 
 
@@ -477,7 +481,12 @@ def defines_data_globals(cpath):
                     ("#", "//", "*", "}", "static", "extern", "typedef"))):
                 m = DATA_GLOBAL_DEF_RE.match(line)
                 if m and "(" not in line.split("=", 1)[0]:
-                    names.append(m.group(1))
+                    # Surface the array dimension (`name[DIM]`) so the gate sizes the symbol_addrs
+                    # entry mechanically — a scalar is 0x4, an array is stride×count (S20 rule;
+                    # S42 __osEventStateTab[OS_NUM_EVENTS]). The element/stride + macro resolution
+                    # still happens at the gate; this just flags array-vs-scalar without opening
+                    # the source.
+                    names.append(f"{m.group(1)}[{m.group(2)}]" if m.group(2) is not None else m.group(1))
             # A depth-0 function header (K&R or ANSI) opens a param region where `type name;`
             # lines are parameters, not globals — skip until the body brace. K&R math in libkmc
             # (`_xatan(u,v,atanp)` then `XLONG u,v;`) would otherwise false-flag every param.

@@ -174,6 +174,17 @@ from `refs-unplaced`, where a merely *referenced* extern is safe to place.)
 
 **Procedure:** Classical loop, drop the definition; the linker resolves to the splat-side global.
 
+**Verbatim-body fast path (S42).** When the *only* edit from upstream is dropping the file-scope
+definitions (the function body is otherwise verbatim), this is a known-edit **mirror**, not a true
+classical target — prove it by full-make ROM SHA-1 like any mirror, skip the seed / `decomp_loop` /
+spot-check cycle. The dropped def changes only the `.data`/`.bss` allocation (moved splat-side); the
+`.text` is byte-identical once the externs land at their placed vrams, so the body matches on the
+first build. S42 `osSetEventMesg` (drop `__osEventStateTab` + `__osPreNMI`, add one `extern`) matched
+in one `make`. Only reach for the classical seed loop when dropping the def forces a *body* change
+(e.g. an initializer the asm computes inline). Place each dropped global add-only in
+`symbol_addrs.txt` at its asm-recovered vram (scalar `// size:0x4`, array `// size:stride×count`);
+`pick_target.py` surfaces the array dimension as `defines-data:<name>[DIM]`.
+
 ---
 
 ## needs-header
