@@ -192,7 +192,7 @@ SECTIONS
         build/asm/82B80.o(.text);
         build/asm/83780.o(.text);
         build/asm/841E0.o(.text);
-        build/asm/847D0.o(.text);
+        build/src/libultra/gu/mtxcatf.o(.text);
         build/asm/84960.o(.text);
         build/asm/84CE0.o(.text);
         build/asm/85060.o(.text);
@@ -424,7 +424,7 @@ SECTIONS
         build/asm/82B80.o(.data);
         build/asm/83780.o(.data);
         build/asm/841E0.o(.data);
-        build/asm/847D0.o(.data);
+        build/src/libultra/gu/mtxcatf.o(.data);
         build/asm/84960.o(.data);
         build/asm/84CE0.o(.data);
         build/asm/85060.o(.data);
@@ -670,7 +670,7 @@ SECTIONS
         build/asm/82B80.o(.rodata);
         build/asm/83780.o(.rodata);
         build/asm/841E0.o(.rodata);
-        build/asm/847D0.o(.rodata);
+        build/src/libultra/gu/mtxcatf.o(.rodata);
         build/asm/84960.o(.rodata);
         build/asm/84CE0.o(.rodata);
         build/asm/85060.o(.rodata);
@@ -917,7 +917,7 @@ SECTIONS
         build/asm/82B80.o(.bss);
         build/asm/83780.o(.bss);
         build/asm/841E0.o(.bss);
-        build/asm/847D0.o(.bss);
+        build/src/libultra/gu/mtxcatf.o(.bss);
         build/asm/84960.o(.bss);
         build/asm/84CE0.o(.bss);
         build/asm/85060.o(.bss);
