@@ -22,6 +22,7 @@ Replaces the old `/decomp-lead` roadmap: target selection is now a tool the plan
 gate calls, mirroring marioparty7's pick_target.py.
 """
 import argparse
+import dataclasses
 import functools
 import glob
 import json
@@ -107,6 +108,43 @@ BAND_WARM_BONUS = 64
 BIG_FN_BYTES = 768
 HUGE_FN_BYTES = 1536
 PACK_DECOMPOSE_NFNS = 4
+
+
+# --- Hazards ---------------------------------------------------------------
+# A hazard is a (kind, optional detail) pair, not a formatted string: the kind is
+# one of the constants below (the shared vocabulary producers emit and seed_points
+# classifies on), and the detail carries the kind-specific payload (the symbol
+# list, the count pair, the upstream short-list). render() is the ONLY place a
+# hazard becomes a string — `kind` for a bare flag, `kind:detail` otherwise — so
+# the printed/JSON form stays exactly what the gate + the hazard index read.
+HAZARD_FILE_STATIC = "file-static"
+HAZARD_DEFINES_DATA = "defines-data"
+HAZARD_REFS_UNPLACED = "refs-unplaced"
+HAZARD_CALLS_UNPLACED = "calls-unplaced"
+HAZARD_NEEDS_HEADER = "needs-header"
+HAZARD_NEEDS_DEFINE = "needs-define"
+HAZARD_JAL_COUNT_MISMATCH = "jal-count-mismatch"
+HAZARD_PACK = "pack"
+HAZARD_NON16ALIGN = "non16align"
+HAZARD_INTRINSIC_LIKELY = "intrinsic-likely"
+HAZARD_MAYBE_UPSTREAM = "maybe-upstream"
+HAZARD_REMAINING = "remaining"
+
+
+@dataclasses.dataclass
+class Hazard:
+    """One flagged hazard: a `kind` constant + an optional `detail` payload.
+
+    `detail` holds everything after the kind's colon verbatim — a comma list
+    (`defines-data:a,b`), a count pair (`jal-count-mismatch:2vs1`), a bracketed
+    pack (`pack:2fn[a=foo]`), or a colon-bearing short-list (`maybe-upstream:
+    libultra:f1,f2`). Keep it a single string; render() does not re-split it."""
+
+    kind: str
+    detail: str | None = None
+
+    def render(self) -> str:
+        return self.kind if self.detail is None else f"{self.kind}:{self.detail}"
 
 
 def parse_subsegs():
@@ -377,7 +415,7 @@ def signature_hint(rom_off, primary, sig_index):
             bases.append(base)
         if len(bases) >= 3:
             break
-    return f"maybe-upstream:{lib}:" + ",".join(bases)
+    return Hazard(HAZARD_MAYBE_UPSTREAM, f"{lib}:" + ",".join(bases))
 
 
 # --- Upstream-vs-ROM call-divergence (the S18 nuContInit catch) ----------------------
@@ -526,7 +564,7 @@ def call_divergence(rom_off, primary, up_cpath):
     n_c = len([n for n in C_CALL_RE.findall(_strip_string_literals(_strip_dead_blocks(body))) if n not in _C_NONCALL])
     if n_c == n_asm:
         return None
-    return f"jal-count-mismatch:{n_c}vs{n_asm}"
+    return Hazard(HAZARD_JAL_COUNT_MISMATCH, f"{n_c}vs{n_asm}")
 
 
 def has_file_scope_static(cpath):
@@ -980,7 +1018,7 @@ def classify_subseg(off, typ, path, size, upstream_index):
             return None
         hazards = []
         if size and size % 16 != 0:
-            hazards.append("non16align")
+            hazards.append(Hazard(HAZARD_NON16ALIGN))
         if len(fns) > 1:
             # List each fn + its upstream basename so the gate can tell a multi-file pack
             # (different basenames → split at the upstream-file boundary, e.g. dpsetstat+dpctr)
@@ -990,9 +1028,9 @@ def classify_subseg(off, typ, path, size, upstream_index):
                 _, fn_up = upstream_index.get(fn, (None, None))
                 stem = os.path.splitext(os.path.basename(fn_up))[0] if fn_up else "?"
                 members.append(f"{fn}={stem}")
-            hazards.append(f"pack:{len(fns)}fn[" + ",".join(members) + "]")
+            hazards.append(Hazard(HAZARD_PACK, f"{len(fns)}fn[" + ",".join(members) + "]"))
         if intrinsic_likely(off, fns[0]):
-            hazards.append("intrinsic-likely")  # register/FPU shim → hasm, not a classical target
+            hazards.append(Hazard(HAZARD_INTRINSIC_LIKELY))  # register/FPU shim → hasm, not a classical target
         return "asm-flip", fns, hazards
     if typ == "c" and path:
         cpath = os.path.join(ROOT, "src", path + ".c")
@@ -1002,7 +1040,7 @@ def classify_subseg(off, typ, path, size, upstream_index):
         fns = re.findall(r"INCLUDE_ASM\([^,]+,\s*([A-Za-z_]\w+)", text)
         if not fns:  # 0 stubs => already an md5-candidate
             return None
-        return "c-stub", fns, [f"remaining:{len(fns)}"]
+        return "c-stub", fns, [Hazard(HAZARD_REMAINING, str(len(fns)))]
     return None
 
 
@@ -1011,10 +1049,10 @@ def append_upstream_hazards(off, primary, up_lib, up_path, hazards):
     order the gate reads them) and return (band, blocked)."""
     blocked = False
     if has_file_scope_static(up_path):
-        hazards.append("file-static")  # route to the classical loop, not the mirror
+        hazards.append(Hazard(HAZARD_FILE_STATIC))  # route to the classical loop, not the mirror
     data_defs = defines_data_globals(up_path)
     if data_defs:
-        hazards.append("defines-data:" + ",".join(data_defs))  # .data analogue → classical loop
+        hazards.append(Hazard(HAZARD_DEFINES_DATA, ",".join(data_defs)))  # .data analogue → classical loop
     unplaced = refs_unplaced(up_path, placed_symbols())
     if unplaced:
         # Annotate the recovered vram inline when the binding is unambiguous (one unplaced
@@ -1025,7 +1063,7 @@ def append_upstream_hazards(off, primary, up_lib, up_path, hazards):
             refs = [f"{unplaced[0]}@0x{cands[0]:08X}"]
         else:
             refs = unplaced
-        hazards.append("refs-unplaced:" + ",".join(refs))  # asm-data-recovery before flip
+        hazards.append(Hazard(HAZARD_REFS_UNPLACED, ",".join(refs)))  # asm-data-recovery before flip
     unplaced_calls = calls_unplaced(up_path, primary, placed_symbols())
     if unplaced_calls:
         # Annotate the recovered vram inline when unambiguous (one unplaced call ∩ one
@@ -1035,14 +1073,14 @@ def append_upstream_hazards(off, primary, up_lib, up_path, hazards):
             crefs = [f"{unplaced_calls[0]}@0x{ccands[0]:08X}"]
         else:
             crefs = unplaced_calls
-        hazards.append("calls-unplaced:" + ",".join(crefs))  # recover func symbol before flip
+        hazards.append(Hazard(HAZARD_CALLS_UNPLACED, ",".join(crefs)))  # recover func symbol before flip
     missing = missing_includes(up_path)
     if missing:
-        hazards.append("needs-header:" + ",".join(missing))
+        hazards.append(Hazard(HAZARD_NEEDS_HEADER, ",".join(missing)))
         blocked = any(include_is_blocked(inc) for inc in missing)
     gating = function_gating_define(up_path, primary)
     if gating and gating not in _active_defines_for_lib(up_lib):
-        hazards.append(f"needs-define:{gating}")
+        hazards.append(Hazard(HAZARD_NEEDS_DEFINE, gating))
     divergence = call_divergence(off, primary, up_path)
     if divergence:
         hazards.append(divergence)  # near-verbatim mirror: reconcile call list at the gate
@@ -1057,7 +1095,7 @@ def score_row(off, primary, kind, fns, size, up_lib, band, blocked, hazards, car
         score += BAND_WARM_BONUS  # prefer enabler-free warm-band siblings over equally-small cold ones
     if primary in carried:
         score -= CARRYOVER_PENALTY
-    hz = ",".join(hazards) or "-"
+    hz = ",".join(h.render() for h in hazards) or "-"
     vram = subseg_vram(off)
     return {
         "func": primary, "rom": f"0x{off:X}",
