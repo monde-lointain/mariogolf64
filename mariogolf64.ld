@@ -199,7 +199,7 @@ SECTIONS
         build/src/libultra/gu/random.o(.text);
         build/asm/85450.o(.text);
         build/asm/85730.o(.text);
-        build/asm/85A50.o(.text);
+        build/src/libultra/gu/scale.o(.text);
         build/asm/85B30.o(.text);
         build/asm/85DA0.o(.text);
         build/asm/860C0.o(.text);
@@ -431,7 +431,7 @@ SECTIONS
         build/src/libultra/gu/random.o(.data);
         build/asm/85450.o(.data);
         build/asm/85730.o(.data);
-        build/asm/85A50.o(.data);
+        build/src/libultra/gu/scale.o(.data);
         build/asm/85B30.o(.data);
         build/asm/85DA0.o(.data);
         build/asm/860C0.o(.data);
@@ -677,7 +677,7 @@ SECTIONS
         build/src/libultra/gu/random.o(.rodata);
         build/asm/85450.o(.rodata);
         build/asm/85730.o(.rodata);
-        build/asm/85A50.o(.rodata);
+        build/src/libultra/gu/scale.o(.rodata);
         build/asm/85B30.o(.rodata);
         build/asm/85DA0.o(.rodata);
         build/asm/860C0.o(.rodata);
@@ -924,7 +924,7 @@ SECTIONS
         build/src/libultra/gu/random.o(.bss);
         build/asm/85450.o(.bss);
         build/asm/85730.o(.bss);
-        build/asm/85A50.o(.bss);
+        build/src/libultra/gu/scale.o(.bss);
         build/asm/85B30.o(.bss);
         build/asm/85DA0.o(.bss);
         build/asm/860C0.o(.bss);
