@@ -5,11 +5,9 @@
 #          ./run-permuter.sh ___udivmoddi4 --stop-on-zero
 
 set -euo pipefail
+source tools/lib.sh
 
-# Activate venv if exists
-if [ -f "venv/bin/activate" ]; then
-    source venv/bin/activate
-fi
+mg_activate_venv
 
 if [ $# -lt 1 ]; then
     echo "Usage: $0 <func_name> [permuter.py args...]"
@@ -20,14 +18,7 @@ fi
 FUNC_NAME="$1"
 shift
 
-# Find the permuter directory for this function
-PERMUTER_DIR=$(find nonmatchings -maxdepth 1 -type d -name "${FUNC_NAME}*" | head -1)
-
-if [ -z "$PERMUTER_DIR" ]; then
-    echo "Error: Permuter directory not found for ${FUNC_NAME}"
-    echo "Run ./setup-permuter.sh ${FUNC_NAME} first"
-    exit 1
-fi
+mg_find_permuter_dir "$FUNC_NAME"
 
 THREADS=$(($(nproc) - 1))
 if [ "$THREADS" -lt 1 ]; then
