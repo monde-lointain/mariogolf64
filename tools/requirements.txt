@@ -5,3 +5,6 @@ colorama
 watchdog
 levenshtein
 cxxfilt
+
+# Characterization test suite for the decomp tooling (`make test-tools`).
+pytest

@@ -1,0 +1,12 @@
+{
+  "compile_ok": true,
+  "current_path": "nonmatchings/rand/current.o",
+  "match_count": 13,
+  "max_score": 1300,
+  "percent": 1.0,
+  "placeholder": "rand",
+  "reference_path": "build/asm/8E620.o",
+  "score": 0,
+  "segment": "8E620",
+  "total_rows": 13
+}
