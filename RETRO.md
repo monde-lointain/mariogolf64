@@ -25,6 +25,17 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 39 — __osViInit classical loop — 2026-06-12
+- Increment: 1 file banked / 1 fn matched (delta: 80→81/2090 ~3.88%; md5-candidate 73→74; all 74 C files now 0-stub)
+- Quality: stuck-far 0 / permuter 0 / carried 0 / re-opened 0
+- Seed: committed 3pt; banked 3pt; realized 3pt; regime classical
+- What helped: ultralib VERSION_J `vi.c` as reference (function body verbatim-minus-3-defs); IO_WRITE isolation artifact doctrine (verify C vs asm instruction-by-instruction, inline direct — no C edit iterations); all 5 symbol_addrs adds + callees pre-placed at gate; `__osViCurr`/`__osViNext` externs already in symbol_addrs from prior sprints
+- Friction: byte-level `.o` `cmp` reported MISMATCH — required analysis to identify two distinct isolation artifacts: (1) IO_WRITE literal-address vs symbolic reloc (known, S34); (2) struct-field access via base symbol encodes inline LO16 addend (`sh v0, 0x32(at)`) while reference asm uses zero-placeholder (`sh v0, 0x0(at)`) with per-field `D_<addr>` reloc — both link identically. The second pattern was previously unrecognized and briefly appeared to be a real mismatch before the hex dump analysis confirmed all non-reloc instruction bytes were bit-for-bit identical
+- Applied: 1 of 1 — #1 CLAUDE.md spot-check bullet extended: base-symbol struct-field reloc+addend encoding documented as linking-equivalent isolation artifact (inline LO16 addend vs zero-placeholder D_addr reloc)
+- Carry-over: none
+
+---
+
 ## Sprint 38 (retroactive bank) — osAiSetFrequency verbatim mirror resolved — 2026-06-12
 - Increment: 1 file banked / 1 fn matched (delta: 79→80/2090 ~3.83%; md5-candidate 72→73)
 - Quality: stuck-far 0 / permuter 0 / carried 0 / re-opened 0
