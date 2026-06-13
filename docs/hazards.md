@@ -133,7 +133,17 @@ the gate by disassembling and comparing the jal list against the upstream call l
 - **Small (≤2): try verbatim first.** The mismatch may be a GCC -O3 tail-merge artifact (one shared
   `jal` for identical call+args across branches). Verbatim copy + `make`; only investigate
   line-drops if the SHA-1 doesn't match. (S35: `osStartThread` `9vs7` = three identical
-  `__osEnqueueThread(&__osRunQueue, t)` sites merged.)
+  `__osEnqueueThread(&__osRunQueue, t)` sites merged.) **Do NOT hand-fold an early-return to force
+  the count.** When the upstream has two *identical* tail blocks — an early-return
+  `if (cond) { f(); return X; }` plus the same `f(); return X;` at the end — -O3 **cross-jumps**
+  them into one shared tail itself, which IS the `jal N-1`. Copy verbatim and let the compiler do
+  it; rewriting to `if (!cond) { body }` changes register allocation and can emit a *different-sized*
+  function. **Wrong-size diagnostic:** if a verbatim/near-verbatim mirror's built function differs
+  from the baserom in *instruction count* (not just a local field), the cause is regalloc /
+  tail-merge, not a logic bug — every downstream function then shifts and the whole ROM mismatches
+  (a far worse symptom than a one-row diff). Restore the verbatim structure before chasing it. (S47:
+  `osCartRomInit` `6vs5` — hand-folding the `if(!first){rel;return;}` early-return compiled 0x10
+  short (1 vs 2 callee-saved regs); the verbatim source cross-jumped to the exact baserom regalloc.)
 - **Large (>2): default to classical.** The ROM may implement different logic (different branches,
   args, stripped control flow). Disassemble and compare structure vs the upstream body before
   routing; only a confirmed clean line-drop stays a mirror. (S30: `osSetTimer` `5vs2` was a
@@ -151,7 +161,7 @@ the gate by disassembling and comparing the jal list against the upstream call l
   path; `osGbpakReadId` replaces the upstream `if(bcmp){ write-temp; reread; recheck }` retry block
   — 5 calls + a `temp[32]` local — with `if (bcmp(...)) return 4;`, where the jal count *did* diverge.)
 
-**Provenance:** S18, S30, S35, S45.
+**Provenance:** S18, S30, S35, S45, S47.
 
 ---
 

@@ -385,6 +385,96 @@ def _strip_dead_blocks(text):
     return "\n".join(out)
 
 
+# Version-conditional stripping. The build compiles ONE side of `#if BUILD_VERSION <op> VERSION_X`
+# (libultra is `-DBUILD_VERSION=VERSION_J`), so the inactive side's refs/calls are phantom — they
+# never reach the real object. S47 `osCartRomInit`: `CartRomHandle` + `osPiRawReadIo` live only in
+# the non-J `#else` branch, yet refs/calls-unplaced flagged them. Only the *exact* form
+# `BUILD_VERSION <op> VERSION_X` is evaluated; a compound condition (`&&`/`||`) or any other `#if`
+# is opaque (both branches kept, nesting tracked so #else/#endif still pair correctly). A lib with
+# no `-DBUILD_VERSION` (libkmc/libnusys) yields ordinal 0 → no-op (those upstreams don't gate on it).
+_VERSION_ORD = {f"VERSION_{c}": i for i, c in enumerate("DEFGHIJKL", start=1)}
+_BUILD_VERSION_VAL_RE = re.compile(r"-DBUILD_VERSION=(VERSION_[A-Z])\b")
+_BUILD_VERSION_IF_RE = re.compile(
+    r"^\s*#\s*if\s+BUILD_VERSION\s*(>=|<=|==|!=|>|<)\s*(VERSION_[A-Z])\s*$"
+)
+_PP_ELSE_LINE_RE = re.compile(r"^\s*#\s*else\b")
+_LIB_CFLAGS_VAR = {
+    "libultra": "LIBULTRA_CFLAGS",
+    "libkmc": "LIBKMC_CFLAGS",
+    "libnusys": "LIBNUSYS_CFLAGS",
+}
+
+
+@functools.cache
+def _build_version_ord_by_var():
+    """{Makefile CFLAGS var: BUILD_VERSION ordinal} from `-DBUILD_VERSION=VERSION_X` (cached)."""
+    out = {}
+    try:
+        with open(os.path.join(ROOT, "Makefile")) as f:
+            for line in f:
+                m = re.match(r"^\s*(CFLAGS|LIBKMC_CFLAGS|LIBNUSYS_CFLAGS|LIBULTRA_CFLAGS)\s*[:+]?=", line)
+                if m:
+                    v = _BUILD_VERSION_VAL_RE.search(line)
+                    if v:
+                        out[m.group(1)] = _VERSION_ORD.get(v.group(1), 0)
+    except OSError:
+        pass
+    return out
+
+
+def _build_version_ord(lib):
+    """BUILD_VERSION ordinal effective for an upstream library (0 if the lib sets no -DBUILD_VERSION)."""
+    return _build_version_ord_by_var().get(_LIB_CFLAGS_VAR.get(lib or "", "CFLAGS"), 0)
+
+
+def _eval_build_version(op, ver, ord_):
+    rhs = _VERSION_ORD.get(ver, 0)
+    return {
+        ">=": ord_ >= rhs, "<=": ord_ <= rhs, ">": ord_ > rhs,
+        "<": ord_ < rhs, "==": ord_ == rhs, "!=": ord_ != rhs,
+    }[op]
+
+
+def _strip_inactive_version_branches(text, build_ord):
+    """Drop the dead side of `#if BUILD_VERSION <op> VERSION_X [#else] #endif` for `build_ord`.
+    Non-BUILD_VERSION conditionals pass through unchanged (both branches kept); nesting is tracked
+    so #else/#endif pair to the right directive. build_ord 0 → no-op."""
+    if not build_ord:
+        return text
+    out, stack = [], []  # frame: {"ver": bool, "emit": bool}; line live iff all frames emit
+    live = lambda: all(fr["emit"] for fr in stack)
+    for line in text.splitlines():
+        s = line.lstrip()
+        m = _BUILD_VERSION_IF_RE.match(s)
+        if m:
+            stack.append({"ver": True, "emit": _eval_build_version(m.group(1), m.group(2), build_ord)})
+            continue  # drop the #if directive itself
+        if _PP_OPENING_DIRECTIVE_RE.match(s):
+            keep = live()
+            stack.append({"ver": False, "emit": True})
+            if keep:
+                out.append(line)
+            continue
+        if _PP_ELSE_LINE_RE.match(s):
+            if stack and stack[-1]["ver"]:
+                stack[-1]["emit"] = not stack[-1]["emit"]
+                continue  # drop the #else of a resolved version branch
+            if live():
+                out.append(line)
+            continue
+        if _PP_ENDIF_LINE_RE.match(s):
+            if stack:
+                ver = stack.pop()["ver"]
+                if not ver and live():
+                    out.append(line)
+                continue
+            out.append(line)
+            continue
+        if live():
+            out.append(line)
+    return "\n".join(out)
+
+
 @functools.cache
 def _parse_makefile_defines():
     """Return {lib: frozenset(defines)} by parsing the project Makefile (cached:
@@ -663,7 +753,7 @@ def macro_hidden_text(cpath):
     return "\n".join(parts), set(macros)
 
 
-def refs_unplaced(cpath, placed):
+def refs_unplaced(cpath, placed, lib=None):
     """Data externs the upstream .c *references* but that are absent from BOTH name files — the
     dual of `defines-data` (which catches definitions). The motivating case: osYieldThread reads
     `&__osRunQueue`, a global whose address the asm bakes as a raw lui/addiu immediate (no symbol)
@@ -680,6 +770,9 @@ def refs_unplaced(cpath, placed):
         text = open(cpath, errors="ignore").read()
     except OSError:
         return []
+    # Drop the inactive `#if BUILD_VERSION` side so a ref in the dead branch (S47: `CartRomHandle`
+    # in the non-J `#else`) is not phantom-flagged.
+    text = _strip_inactive_version_branches(text, _build_version_ord(lib))
     # Append one-level macro expansion so a global referenced only inside an invoked library macro
     # (EPI_SYNC → __osCurrentHandle, S41) is visible to the same `__`-prefix / declared-extern grep.
     macro_text, _ = macro_hidden_text(cpath)
@@ -721,7 +814,7 @@ def _strip_comments(text):
     return _STRING_LIT_RE.sub('""', text)
 
 
-def calls_unplaced(cpath, primary, placed):
+def calls_unplaced(cpath, primary, placed, lib=None):
     """Functions the upstream .c *calls* by name that are absent from BOTH name files — the
     function dual of refs_unplaced. A verbatim mirror link-FAILS on these once the C body calls
     them by name: splat's undefined_funcs_auto only resolves a callee whose vram carries a name,
@@ -745,6 +838,9 @@ def calls_unplaced(cpath, primary, placed):
     # exclude the macro names themselves (a macro body that invokes UPDATE_REG/WAIT_ON_IOBUSY etc.
     # must not flag those as unplaced functions — they inline, they don't link).
     macro_text, macro_names = macro_hidden_text(cpath)
+    # Drop the inactive `#if BUILD_VERSION` side first (S47: `osPiRawReadIo` is called only in the
+    # non-J `#else` branch) so its calls are not phantom-flagged.
+    text = _strip_inactive_version_branches(text, _build_version_ord(lib))
     body = _strip_string_literals(_strip_dead_blocks(_strip_comments(text + "\n" + macro_text)))
     called = {
         n
@@ -942,7 +1038,7 @@ def append_upstream_hazards(off, primary, up_lib, up_path, hazards):
     data_defs = defines_data_globals(up_path)
     if data_defs:
         hazards.append(Hazard(HAZARD_DEFINES_DATA, ",".join(data_defs)))  # .data analogue → classical loop
-    unplaced = refs_unplaced(up_path, placed_symbols())
+    unplaced = refs_unplaced(up_path, placed_symbols(), up_lib)
     if unplaced:
         # Annotate the recovered vram inline when the binding is unambiguous (one unplaced
         # name ∩ one asm candidate) so the gate copy-pastes the symbol_addrs entry instead
@@ -958,7 +1054,7 @@ def append_upstream_hazards(off, primary, up_lib, up_path, hazards):
             f"{r}@0x{BOOT_GLOBALS[r]:08X}" if r in BOOT_GLOBALS else r for r in refs
         ]
         hazards.append(Hazard(HAZARD_REFS_UNPLACED, ",".join(refs)))  # asm-data-recovery before flip
-    unplaced_calls = calls_unplaced(up_path, primary, placed_symbols())
+    unplaced_calls = calls_unplaced(up_path, primary, placed_symbols(), up_lib)
     if unplaced_calls:
         # Annotate the recovered vram inline when unambiguous (one unplaced call ∩ one
         # unnamed jal), mirroring refs-unplaced, so the gate copy-pastes the func entry.

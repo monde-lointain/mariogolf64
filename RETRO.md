@@ -25,6 +25,15 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 47 — osCartRomInit libultra io/ verbatim mirror (cross-jump tail-merge) — 2026-06-13
+- Increment: 1 file banked / 1 function matched (`src/libultra/io/cartrominit.c`); md5-candidate 87→88. Single fn 0x7E870, no split. Goal fully met, 0 carry-overs. First fn from the S46-reopened io/ band's near-verbatim tier (S46 banked the clean getters).
+- Quality: stuck-far 0, permuter 0, carried 0, re-opened 0. (One 0x10-short near-miss self-corrected mid-build via the verbatim cross-jump — not a spike.)
+- Seed: committed 3pt; banked 3pt; regime mirror (8-gate clear; near-verbatim-mirror sub-case, seed-only).
+- What helped: **the user's "look at ultralib" steer was the unlock.** The verbatim ultralib VERSION_J source has two *identical* `{ __osPiRelAccess(); return &__CartRomHandle; }` tails (early-return + end); KMC GCC -O3 **cross-jumps** them into one shared block itself (the jal `6vs5`), reproducing the exact 0x20-frame / s1-anchor / s0=base-in-delay-slot regalloc. Two defines-data drops placed at gate (`__CartRomHandle`=0x80105BC0 size:0x74; function-local `static int first` → `osCartRomInitFirst`=0x800C7EA0) + companion `PRinternal/macros.h`. Residual isolated 4400 / 99-of-99-rows was pure reloc HI/LO16 addend (isolation artifact) → full-make SHA proved it, no permuter.
+- Friction: my first attempt **hand-folded** the early-return into `if(first){body}` — it compiled 0x10 SHORTER (1 vs 2 callee-saved regs), shifting every downstream fn → whole-ROM mismatch (a far worse symptom than a local diff). The *wrong size*, not a wrong instruction, was the tell. pick_target also mis-flagged 3 refs/calls FPs from the inactive non-J `#else` branch (`CartRomHandle`, `osPiRawReadIo`) + an `endif` directive token.
+- Applied: 3 of 3 — #1 `docs/hazards.md` Near-verbatim section: verbatim-first for cross-jumpable duplicate-tail jal-mismatches + "wrong-SIZE ⇒ regalloc/tail-merge, not logic" diagnostic (S47 provenance); #2 `tools/pick_target.py` `_strip_inactive_version_branches` honoring `#if BUILD_VERSION` in refs/calls-unplaced (drops dead-`#else` FPs + the `endif` token; golden regen, 23 pass); #3 log-only defines-data blind-spot note (function-local-static-with-init + global-def both surfaced as refs-unplaced, S42/S45 class).
+- Carry-over: none. **Cross-repo follow-up:** `__CartRomHandle`=0x80105BC0, `osCartRomInitFirst`=0x800C7EA0 are new decomp-side symbols — propagate via `sync_decomp_names.py --import-from-decomp`.
+
 ## Sprint 46 — __osPiRawStartDma + osPiGetCmdQueue libultra io PI-band unlock — 2026-06-13
 - Increment: 2 files banked / 2 functions matched (`src/libultra/io/{pirawdma,pigetcmdq}.c`); md5-candidate 85→87. 0x8BA20 3-fn pack split at the upstream boundary (pirawdma 0x8BA20, pigetcmdq 0x8BAF0, `func_800B0710` left asm). Goal fully met, 0 carry-overs.
 - Quality: stuck-far 0, permuter 0, carried 0, re-opened 0. Both verbatim first-try, 0 iteration.

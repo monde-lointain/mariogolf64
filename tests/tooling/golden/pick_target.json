@@ -377,19 +377,6 @@
     "vram": "0x800AE920"
   },
   {
-    "band": "warm",
-    "func": "osCartRomInit",
-    "hazards": "refs-unplaced:CartRomHandle,__CartRomHandle,__OSTranxInfo,calls-unplaced:aligned,osPiRawReadIo,needs-header:PRinternal/macros.h,jal-count-mismatch:6vs5",
-    "kind": "asm-flip",
-    "nfns": 1,
-    "pts": 3,
-    "rom": "0x7E870",
-    "score": -120,
-    "size": 384,
-    "upstream": "libultra",
-    "vram": "0x800A3470"
-  },
-  {
     "band": "-",
     "func": "func_800A0730",
     "hazards": "pack:2fn[func_800A0730=?,func_800A0774=?]",
@@ -600,7 +587,7 @@
   {
     "band": "warm",
     "func": "__osContRamRead",
-    "hazards": "file-static,refs-unplaced:__OSContRamReadFormat,__osContLastCmd,__osPfsLastChannel,__osPfsPifRam,calls-unplaced:READFORMAT,__osContAddressCrc,__osContDataCrc,__osSiGetAccess,__osSiRawStartDma,__osSiRelAccess,endif,needs-header:PRinternal/macros.h,PRinternal/controller.h,PRinternal/siint.h,jal-count-mismatch:23vs10",
+    "hazards": "file-static,refs-unplaced:__OSContRamReadFormat,__osContLastCmd,__osPfsLastChannel,__osPfsPifRam,calls-unplaced:READFORMAT,__osContAddressCrc,__osContDataCrc,__osSiGetAccess,__osSiRawStartDma,__osSiRelAccess,needs-header:PRinternal/controller.h,PRinternal/siint.h,jal-count-mismatch:23vs10",
     "kind": "asm-flip",
     "nfns": 1,
     "pts": 5,
@@ -648,5 +635,18 @@
     "size": 256,
     "upstream": "none",
     "vram": "0x800B3D40"
+  },
+  {
+    "band": "cold",
+    "func": "nuContGBPakFread",
+    "hazards": "jal-count-mismatch:5vs9",
+    "kind": "asm-flip",
+    "nfns": 1,
+    "pts": 2,
+    "rom": "0x7D7A0",
+    "score": -264,
+    "size": 464,
+    "upstream": "libnusys",
+    "vram": "0x800A23A0"
   }
 ]
