@@ -18,34 +18,33 @@ Stderr: human-readable progress.
 """
 from __future__ import annotations
 
-import os
 import sys
 from pathlib import Path
 
-SCRIPT_DIR = Path(__file__).resolve().parent
-ROOT_DIR = SCRIPT_DIR.parent
+import decomp_common as dc
 
-# --- venv re-exec ----------------------------------------------------------
-# Project policy: all Python tooling runs out of ./venv. If we were launched
-# from a different interpreter (e.g. system python3), self-promote.
-_VENV_PY = ROOT_DIR / "venv" / "bin" / "python3"
-if _VENV_PY.exists() and Path(sys.executable).resolve() != _VENV_PY.resolve():
-    os.execv(str(_VENV_PY), [str(_VENV_PY), __file__, *sys.argv[1:]])
-# ---------------------------------------------------------------------------
+dc.reexec_into_venv(__file__)
 
 import argparse
 import importlib.util
-import json
 import re
 import subprocess
-ASM_DIR = ROOT_DIR / "asm"
-ASM_DATA_DIR = ASM_DIR / "data"
-NONMATCHINGS_DIR = ROOT_DIR / "nonmatchings"
+
+# Shared constants/helpers live in decomp_common (single source of truth);
+# re-bound here so the rest of this module reads unchanged.
+SCRIPT_DIR = dc.SCRIPT_DIR
+ROOT_DIR = dc.ROOT_DIR
+ASM_DIR = dc.ASM_DIR
+ASM_DATA_DIR = dc.ASM_DATA_DIR
+NONMATCHINGS_DIR = dc.NONMATCHINGS_DIR
+PLACEHOLDER_RE = dc.PLACEHOLDER_RE
+emit = dc.emit
+log = dc.log
+
 M2CTX_PATH = SCRIPT_DIR / "m2ctx.py"
 M2C_PATH = SCRIPT_DIR / "m2c" / "m2c.py"
 
-PLACEHOLDER_RE = re.compile(r"^(?:func_[0-9A-Fa-f]{8}|[A-Za-z_][A-Za-z0-9_]*)$")
-GLABEL_RE = re.compile(r"^\s*glabel\s+(\S+)\s*$")
+# seed_c-specific regexes (parent-scan + rodata-slicing).
 HI_LO_REF_RE = re.compile(r"%(?:hi|lo)\(([A-Za-z_][\w.]*)\)")
 INCLUDE_ASM_RE = re.compile(r'INCLUDE_ASM\([^,]+,\s*([A-Za-z_][\w]*)\s*\)\s*;')
 EXTERN_LINE_RE = re.compile(r"^\s*extern\s+[^;]+;\s*$")
@@ -53,16 +52,6 @@ DATA_LABEL_RE = re.compile(r"^\s*([A-Za-z_][\w.]*)\s*:\s*$")
 DLABEL_RE = re.compile(r"^\s*dlabel\s+([A-Za-z_][\w.]*)\s*$")
 ENDDLABEL_RE = re.compile(r"^\s*enddlabel\b")
 WORD_SYM_RE = re.compile(r"\.word\s+([A-Za-z_][\w.]*)\s*$")
-
-
-def emit(payload: dict) -> None:
-    sys.stdout.write(json.dumps(payload) + "\n")
-    sys.stdout.flush()
-
-
-def log(msg: str) -> None:
-    sys.stderr.write(msg + "\n")
-    sys.stderr.flush()
 
 
 def fail(error: str) -> None:
@@ -80,20 +69,6 @@ def load_extract_functions():
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)  # type: ignore[union-attr]
     return module
-
-
-def find_segment(placeholder: str) -> str:
-    """Return the segment stem (e.g. '1050') containing <placeholder>."""
-    for s_file in sorted(ASM_DIR.glob("*.s")):
-        try:
-            for line in s_file.read_text(encoding="utf-8", errors="replace").splitlines():
-                m = GLABEL_RE.match(line)
-                if m and m.group(1) == placeholder:
-                    return s_file.stem
-        except OSError:
-            continue
-    fail(f"no `glabel {placeholder}` found in any asm/*.s file")
-    raise SystemExit(1)
 
 
 def slice_target_asm(placeholder: str, seg_stem: str, out_dir: Path) -> Path:
@@ -514,7 +489,9 @@ def main() -> None:
     out_dir.mkdir(parents=True, exist_ok=True)
     log(f"[seed] working dir: {out_dir.relative_to(ROOT_DIR)}")
 
-    seg_stem = find_segment(placeholder)
+    seg_stem = dc.find_segment(placeholder)
+    if seg_stem is None:
+        fail(f"no `glabel {placeholder}` found in any asm/*.s file")
     log(f"[seed] segment: {seg_stem}")
 
     target_asm = slice_target_asm(placeholder, seg_stem, out_dir)

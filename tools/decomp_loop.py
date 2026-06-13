@@ -16,42 +16,29 @@ import os
 import sys
 from pathlib import Path
 
-SCRIPT_DIR = Path(__file__).resolve().parent
-ROOT_DIR = SCRIPT_DIR.parent
+import decomp_common as dc
 
-# --- venv re-exec ----------------------------------------------------------
-# Project policy: all Python tooling runs out of ./venv (which carries the
-# asm-differ deps: watchdog, levenshtein, colorama). If we were launched from
-# a different interpreter (e.g. system python3), self-promote.
-_VENV_PY = ROOT_DIR / "venv" / "bin" / "python3"
-if _VENV_PY.exists() and Path(sys.executable).resolve() != _VENV_PY.resolve():
-    os.execv(str(_VENV_PY), [str(_VENV_PY), __file__, *sys.argv[1:]])
-# ---------------------------------------------------------------------------
+dc.reexec_into_venv(__file__)
 
 import argparse
-import json
 import re
 import subprocess
+
+# Shared constants/helpers live in decomp_common (single source of truth);
+# re-bound here so the rest of this module reads unchanged.
+SCRIPT_DIR = dc.SCRIPT_DIR
+ROOT_DIR = dc.ROOT_DIR
+ASM_DIR = dc.ASM_DIR
+BUILD_ASM_DIR = dc.BUILD_ASM_DIR
+NONMATCHINGS_DIR = dc.NONMATCHINGS_DIR
+SYMBOL_FILES = dc.SYMBOL_FILES
+PLACEHOLDER_RE = dc.PLACEHOLDER_RE
+SYM_LINE_RE = dc.SYM_LINE_RE
+emit = dc.emit
+log = dc.log
+
 ASMDIFF_DIR = SCRIPT_DIR / "asm-differ"
-ASM_DIR = ROOT_DIR / "asm"
-BUILD_ASM_DIR = ROOT_DIR / "build" / "asm"
-NONMATCHINGS_DIR = ROOT_DIR / "nonmatchings"
-SYMBOL_FILES = [ROOT_DIR / "symbol_addrs.txt", ROOT_DIR / "ghidra_symbols.txt"]
-
 OBJDUMP = os.environ.get("OBJDUMP", "mips-linux-gnu-objdump")
-PLACEHOLDER_RE = re.compile(r"^(?:func_[0-9A-Fa-f]{8}|[A-Za-z_][A-Za-z0-9_]*)$")
-GLABEL_RE = re.compile(r"^\s*glabel\s+(\S+)\s*$")
-SYM_LINE_RE = re.compile(r"^\s*(\w+)\s*=\s*0x([0-9A-Fa-f]+)\s*;")
-
-
-def emit(payload: dict) -> None:
-    sys.stdout.write(json.dumps(payload) + "\n")
-    sys.stdout.flush()
-
-
-def log(msg: str) -> None:
-    sys.stderr.write(msg + "\n")
-    sys.stderr.flush()
 
 
 def fail(error: str, code: int = 1, extra: dict | None = None) -> None:
@@ -101,20 +88,6 @@ def resolve_placeholder(name: str) -> str:
     raise SystemExit(1)  # unreachable; for type checker
 
 
-def find_segment(placeholder: str) -> str:
-    """Return the segment stem (e.g. '1050') whose asm file declares <placeholder>."""
-    for s_file in sorted(ASM_DIR.glob("*.s")):
-        try:
-            for line in s_file.read_text(encoding="utf-8", errors="replace").splitlines():
-                m = GLABEL_RE.match(line)
-                if m and m.group(1) == placeholder:
-                    return s_file.stem
-        except OSError:
-            continue
-    fail(f"no `glabel {placeholder}` found in any asm/*.s file")
-    raise SystemExit(1)
-
-
 def ensure_reference_object(seg_stem: str) -> Path:
     """Build build/asm/<seg>.o if missing or stale. Returns its path."""
     target = BUILD_ASM_DIR / f"{seg_stem}.o"
@@ -138,8 +111,8 @@ def ensure_reference_object(seg_stem: str) -> Path:
     return target
 
 
-LIBKMC_SRC = Path.home() / "development" / "repos" / "libkmc" / "src"
-LIBULTRA_SRC = Path.home() / "development" / "repos" / "ultralib" / "src"
+LIBKMC_SRC = dc.LIBKMC_SRC
+LIBULTRA_SRC = dc.LIBULTRA_SRC
 
 
 def detect_libkmc_profile(placeholder: str) -> bool:
@@ -341,7 +314,9 @@ def main() -> None:
     asmdiff_available()
 
     placeholder = resolve_placeholder(args.func)
-    seg_stem = find_segment(placeholder)
+    seg_stem = dc.find_segment(placeholder)
+    if seg_stem is None:
+        fail(f"no `glabel {placeholder}` found in any asm/*.s file")
     log(f"[resolve] {args.func} -> {placeholder} (segment {seg_stem})")
 
     reference_o = ensure_reference_object(seg_stem)

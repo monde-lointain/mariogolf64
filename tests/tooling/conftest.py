@@ -24,6 +24,10 @@ REGEN = os.environ.get("REGEN_GOLDEN") == "1"
 
 def load_tool(name: str):
     """Import a tools/<name>.py module by path (not via sys.path)."""
+    # Tool modules import their shared helper as `import decomp_common`; make
+    # tools/ importable so that resolves during tests.
+    if str(TOOLS) not in sys.path:
+        sys.path.insert(0, str(TOOLS))
     spec = importlib.util.spec_from_file_location(f"tool_{name}", TOOLS / f"{name}.py")
     assert spec and spec.loader, f"cannot load tools/{name}.py"
     mod = importlib.util.module_from_spec(spec)
