@@ -957,18 +957,19 @@ def seed_points(size, upstream, band, nfns, hazards, blocked):
     the v1 story-point system (see VELOCITY.md). MG64's effort axis is PATH (upstream-mirror vs
     classical-loop) + ENABLER LOAD (band warmth, hazards), not raw bytes; the byte gates (768 /
     1536) are dormant in the current <256 B regime and only bite for large/classical fns.
-    `hazards` is the joined hazard string; `blocked` is True when any needs-header is un-pickable
+    `hazards` is the list of Hazard objects; `blocked` is True when any needs-header is un-pickable
     (see include_is_blocked). Returns an int, or 'blk' for a blocked (un-pickable) target.
     Display-only — does NOT influence the smallest-first sort. A committed cluster seed is the
     SUM of its files' seeds (banked per-file, not all-or-nothing across the cluster)."""
     if blocked:
         return "blk"  # un-pickable until the -I path is added / header shipped — a DoR reject
+    kinds = {h.kind for h in hazards}
     classical = upstream == "none"
     pack = nfns > 1
-    drop = ("file-static" in hazards) or ("defines-data" in hazards)  # → classical fallback
-    needs_copy = "needs-header" in hazards  # a copyable companion header (blocked ones already 'blk')
-    needs_define = "needs-define" in hazards  # Makefile build-define enabler (e.g. USE_EPI in LIBNUSYS_CFLAGS)
-    recover = ("refs-unplaced" in hazards) or ("calls-unplaced" in hazards)  # symbol-recovery enabler before the mirror links
+    drop = (HAZARD_FILE_STATIC in kinds) or (HAZARD_DEFINES_DATA in kinds)  # → classical fallback
+    needs_copy = HAZARD_NEEDS_HEADER in kinds  # a copyable companion header (blocked ones already 'blk')
+    needs_define = HAZARD_NEEDS_DEFINE in kinds  # Makefile build-define enabler (e.g. USE_EPI in LIBNUSYS_CFLAGS)
+    recover = (HAZARD_REFS_UNPLACED in kinds) or (HAZARD_CALLS_UNPLACED in kinds)  # symbol-recovery enabler before the mirror links
     big = size >= BIG_FN_BYTES
     huge = size >= HUGE_FN_BYTES
     if huge or (classical and pack):
@@ -1101,7 +1102,7 @@ def score_row(off, primary, kind, fns, size, up_lib, band, blocked, hazards, car
         "func": primary, "rom": f"0x{off:X}",
         "vram": f"0x{vram:08X}" if vram is not None else "?",
         "size": size, "nfns": len(fns),
-        "pts": seed_points(size, up_lib or "none", band, len(fns), hz, blocked),
+        "pts": seed_points(size, up_lib or "none", band, len(fns), hazards, blocked),
         "kind": kind, "upstream": up_lib or "none", "band": band,
         "hazards": hz, "score": score,
     }
