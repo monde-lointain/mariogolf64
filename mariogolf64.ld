@@ -244,8 +244,8 @@ SECTIONS
         build/asm/88810.o(.text);
         build/src/libultra/monegi/vi/viblack.o(.text);
         build/asm/88B80.o(.text);
-        build/asm/88D80.o(.text);
-        build/asm/88EA0.o(.text);
+        build/src/libultra/shared/gbpak/gbpakgetstatus.o(.text);
+        build/src/libultra/shared/gbpak/gbpakpower.o(.text);
         build/asm/88FC0.o(.text);
         build/asm/89320.o(.text);
         build/asm/89780.o(.text);
@@ -472,8 +472,8 @@ SECTIONS
         build/asm/88810.o(.data);
         build/src/libultra/monegi/vi/viblack.o(.data);
         build/asm/88B80.o(.data);
-        build/asm/88D80.o(.data);
-        build/asm/88EA0.o(.data);
+        build/src/libultra/shared/gbpak/gbpakgetstatus.o(.data);
+        build/src/libultra/shared/gbpak/gbpakpower.o(.data);
         build/asm/88FC0.o(.data);
         build/asm/89320.o(.data);
         build/asm/89780.o(.data);
@@ -714,8 +714,8 @@ SECTIONS
         build/asm/88810.o(.rodata);
         build/src/libultra/monegi/vi/viblack.o(.rodata);
         build/asm/88B80.o(.rodata);
-        build/asm/88D80.o(.rodata);
-        build/asm/88EA0.o(.rodata);
+        build/src/libultra/shared/gbpak/gbpakgetstatus.o(.rodata);
+        build/src/libultra/shared/gbpak/gbpakpower.o(.rodata);
         build/asm/88FC0.o(.rodata);
         build/asm/89320.o(.rodata);
         build/asm/89780.o(.rodata);
@@ -957,8 +957,8 @@ SECTIONS
         build/asm/88810.o(.bss);
         build/src/libultra/monegi/vi/viblack.o(.bss);
         build/asm/88B80.o(.bss);
-        build/asm/88D80.o(.bss);
-        build/asm/88EA0.o(.bss);
+        build/src/libultra/shared/gbpak/gbpakgetstatus.o(.bss);
+        build/src/libultra/shared/gbpak/gbpakpower.o(.bss);
         build/asm/88FC0.o(.bss);
         build/asm/89320.o(.bss);
         build/asm/89780.o(.bss);
