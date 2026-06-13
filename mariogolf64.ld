@@ -208,7 +208,8 @@ SECTIONS
         build/src/libultra/monegi/message/createmesgqueue.o(.text);
         build/src/libultra/monegi/message/jammesg.o(.text);
         build/src/libultra/monegi/message/recvmesg.o(.text);
-        build/asm/86550.o(.text);
+        build/src/libultra/monegi/message/sendmesg.o(.text);
+        build/src/libultra/monegi/message/seteventmesg.o(.text);
         build/src/libultra/monegi/rdp/dpsetstat.o(.text);
         build/src/libultra/monegi/rdp/dpctr.o(.text);
         build/asm/86790.o(.text);
@@ -435,7 +436,8 @@ SECTIONS
         build/src/libultra/monegi/message/createmesgqueue.o(.data);
         build/src/libultra/monegi/message/jammesg.o(.data);
         build/src/libultra/monegi/message/recvmesg.o(.data);
-        build/asm/86550.o(.data);
+        build/src/libultra/monegi/message/sendmesg.o(.data);
+        build/src/libultra/monegi/message/seteventmesg.o(.data);
         build/src/libultra/monegi/rdp/dpsetstat.o(.data);
         build/src/libultra/monegi/rdp/dpctr.o(.data);
         build/asm/86790.o(.data);
@@ -676,7 +678,8 @@ SECTIONS
         build/src/libultra/monegi/message/createmesgqueue.o(.rodata);
         build/src/libultra/monegi/message/jammesg.o(.rodata);
         build/src/libultra/monegi/message/recvmesg.o(.rodata);
-        build/asm/86550.o(.rodata);
+        build/src/libultra/monegi/message/sendmesg.o(.rodata);
+        build/src/libultra/monegi/message/seteventmesg.o(.rodata);
         build/src/libultra/monegi/rdp/dpsetstat.o(.rodata);
         build/src/libultra/monegi/rdp/dpctr.o(.rodata);
         build/asm/86790.o(.rodata);
@@ -918,7 +921,8 @@ SECTIONS
         build/src/libultra/monegi/message/createmesgqueue.o(.bss);
         build/src/libultra/monegi/message/jammesg.o(.bss);
         build/src/libultra/monegi/message/recvmesg.o(.bss);
-        build/asm/86550.o(.bss);
+        build/src/libultra/monegi/message/sendmesg.o(.bss);
+        build/src/libultra/monegi/message/seteventmesg.o(.bss);
         build/src/libultra/monegi/rdp/dpsetstat.o(.bss);
         build/src/libultra/monegi/rdp/dpctr.o(.bss);
         build/asm/86790.o(.bss);
