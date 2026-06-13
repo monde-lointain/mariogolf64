@@ -124,9 +124,14 @@ def parse_subsegs():
     return subs
 
 
+def asm_path(rom_off):
+    """The asm listing for a subseg: `asm/<ROM>.s` (the file splat emits per ROM offset)."""
+    return os.path.join(ROOT, "asm", f"{rom_off:X}.s")
+
+
 def asm_functions(rom_off):
     """glabel names defined in asm/<ROM>.s for this subseg (curated if already synced)."""
-    path = os.path.join(ROOT, "asm", f"{rom_off:X}.s")
+    path = asm_path(rom_off)
     if not os.path.exists(path):
         return []
     names = []
@@ -148,7 +153,7 @@ VRAM_COMMENT_RE = re.compile(r"/\*\s*[0-9A-Fa-f]+\s+([0-9A-Fa-f]{8})\s+[0-9A-Fa-
 def subseg_vram(rom_off):
     """The target subseg's start vram, read from the first instruction comment in
     asm/<ROM>.s. Returns an int, or None when the asm listing is absent/unreadable."""
-    path = os.path.join(ROOT, "asm", f"{rom_off:X}.s")
+    path = asm_path(rom_off)
     if not os.path.exists(path):
         return None
     with open(path) as f:
@@ -174,7 +179,7 @@ def intrinsic_likely(rom_off, primary):
     not C-expressible. Reads the fn's body in asm/<ROM>.s: a leaf (no `jal`) whose
     work instructions (excluding jr/nop) are all CP0-moves/sqrt, or one spimdisasm
     tagged `handwritten`."""
-    path = os.path.join(ROOT, "asm", f"{rom_off:X}.s")
+    path = asm_path(rom_off)
     if not os.path.exists(path):
         return False
     in_fn = False
@@ -259,7 +264,7 @@ _FRAME_IMMS = {"0x10", "0x14", "0x18", "0x1c", "0x20", "0x24", "0x28", "-0x10",
 def _asm_signature(rom_off, primary):
     """(callee set, constant set) for the target fn from asm/<ROM>.s. Callees exclude internal
     `func_*`/`.L*` targets (only symbolic SDK-ish names carry cross-build identity)."""
-    path = os.path.join(ROOT, "asm", f"{rom_off:X}.s")
+    path = asm_path(rom_off)
     if not os.path.exists(path):
         return set(), set()
     callees, consts = set(), set()
@@ -499,7 +504,7 @@ def _upstream_body(up_cpath, primary):
 def _asm_jal_count(rom_off, primary):
     """Count of `jal <name>` in `primary`'s body in asm/<ROM>.s (incl. func_ targets), or None
     when the asm is absent (e.g. the subseg was already flipped to c)."""
-    path = os.path.join(ROOT, "asm", f"{rom_off:X}.s")
+    path = asm_path(rom_off)
     if not os.path.exists(path):
         return None
     in_fn, n = False, 0
@@ -763,7 +768,7 @@ def recover_unplaced_vram(rom_off):
     mapping is unambiguous (exactly one unplaced upstream name ∩ one candidate) — the
     osYieldThread floor case; multi-extern stays a hint. The gate still confirms before any
     symbol_addrs add, so a stray local-rodata D_ over-listing is harmless."""
-    path = os.path.join(ROOT, "asm", f"{rom_off:X}.s")
+    path = asm_path(rom_off)
     if not os.path.exists(path):
         return []
     try:
@@ -834,7 +839,7 @@ def recover_unplaced_call_vram(rom_off, primary):
     recover_unplaced_vram (data). Returns a sorted list of distinct addresses; the caller binds
     name→vram only when unambiguous (one unplaced upstream call ∩ one unnamed jal). The gate
     confirms before any symbol_addrs add."""
-    path = os.path.join(ROOT, "asm", f"{rom_off:X}.s")
+    path = asm_path(rom_off)
     if not os.path.exists(path):
         return []
     in_fn, addrs = False, set()
