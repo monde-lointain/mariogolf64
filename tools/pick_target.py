@@ -31,6 +31,20 @@ import os
 import re
 import sys
 
+# Asm-scanning layer (the per-`asm/<ROM>.s` body walk + the scans over it). Self-contained
+# and stdlib-only; imported here so this module keeps the yaml/upstream/hazard/scoring logic.
+# _FRAME_IMMS is shared with the C-side _c_signature below.
+from decomp_asm import (
+    _asm_jal_count,
+    _asm_signature,
+    _FRAME_IMMS,
+    asm_functions,
+    intrinsic_likely,
+    recover_unplaced_call_vram,
+    recover_unplaced_vram,
+    subseg_vram,
+)
+
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 YAML = os.path.join(ROOT, "mariogolf64.yaml")
 LIBULTRA = os.path.expanduser("~/development/repos/libultra_modern/src")
@@ -64,7 +78,6 @@ NAME_FILES = [os.path.join(ROOT, "symbol_addrs.txt"), os.path.join(ROOT, "ghidra
 SUBSEG_RE = re.compile(
     r"^\s*-\s*\[\s*0x([0-9A-Fa-f]+)\s*,\s*([a-z]+)\s*(?:,\s*([^\]]+?))?\s*\]"
 )
-GLABEL_RE = re.compile(r"^\s*glabel\s+(\S+)")
 # Approximate C function-definition: a return-type-led line ending in `name(`.
 UPSTREAM_DEF_RE = re.compile(r"^[A-Za-z_][\w \t\*]*?\b([A-Za-z_]\w+)\s*\(", re.M)
 FILE_STATIC_RE = re.compile(r"^\s*static\b[^=]*;\s*$")
@@ -162,105 +175,6 @@ def parse_subsegs():
     return subs
 
 
-def asm_path(rom_off):
-    """The asm listing for a subseg: `asm/<ROM>.s` (the file splat emits per ROM offset)."""
-    return os.path.join(ROOT, "asm", f"{rom_off:X}.s")
-
-
-def iter_function_body(rom_off, primary):
-    """Yield each body line of `primary` from its asm/<ROM>.s listing.
-
-    Starts after the `glabel <primary>` line; stops at the next `glabel` or a line
-    beginning `endlabel` (neither boundary line is yielded). Yields nothing when the
-    asm file is absent or the label isn't found. Each per-function asm scan (callee
-    set, jal count, intrinsic check, unplaced-call recovery) is a filter over this
-    one body walk. (A caller needing to distinguish absent-file from empty-body — see
-    _asm_jal_count's None — keeps its own asm_path()/os.path.exists guard.)"""
-    path = asm_path(rom_off)
-    if not os.path.exists(path):
-        return
-    in_fn = False
-    with open(path) as f:
-        for line in f:
-            m = GLABEL_RE.match(line)
-            if m:
-                if in_fn:
-                    break
-                in_fn = m.group(1) == primary
-                continue
-            if not in_fn:
-                continue
-            if line.lstrip().startswith("endlabel"):
-                break
-            yield line
-
-
-def asm_functions(rom_off):
-    """glabel names defined in asm/<ROM>.s for this subseg (curated if already synced)."""
-    path = asm_path(rom_off)
-    if not os.path.exists(path):
-        return []
-    names = []
-    with open(path) as f:
-        for line in f:
-            m = GLABEL_RE.match(line)
-            if m:
-                names.append(m.group(1))
-    return names
-
-
-# `/* ROM VRAM BYTES */` instruction comment — the second field is the authoritative vram
-# splat emitted for that ROM offset. Surfacing it spares the gate a rom→vram derivation for
-# the mandatory recover-extern re-confirm (S22: a hand-guessed flat `rom + <const>` resolved
-# mid-function and returned a wrong containing fn — read the vram, never guess it).
-VRAM_COMMENT_RE = re.compile(r"/\*\s*[0-9A-Fa-f]+\s+([0-9A-Fa-f]{8})\s+[0-9A-Fa-f]{8}\s*\*/")
-
-
-def subseg_vram(rom_off):
-    """The target subseg's start vram, read from the first instruction comment in
-    asm/<ROM>.s. Returns an int, or None when the asm listing is absent/unreadable."""
-    path = asm_path(rom_off)
-    if not os.path.exists(path):
-        return None
-    with open(path) as f:
-        for line in f:
-            m = VRAM_COMMENT_RE.search(line)
-            if m:
-                return int(m.group(1), 16)
-    return None
-
-
-# Ops C can't emit (or won't schedule into a leaf delay slot): CP0 register moves
-# and a bare FPU sqrt. A tiny leaf whose only work is one of these is really `hasm`,
-# not a classical target — flag it so smallest-first stops surfacing it as the pick.
-INTRINSIC_OPS = {
-    "mfc0", "mtc0", "dmfc0", "dmtc0", "cfc0", "ctc0",
-    "sqrt.s", "sqrt.d",
-}
-INSN_RE = re.compile(r"/\*\s*[0-9A-Fa-f]+\s+[0-9A-Fa-f]+\s+[0-9A-Fa-f]+\s*\*/\s+(\S+)")
-
-
-def intrinsic_likely(rom_off, primary):
-    """True if the primary fn is a register/FPU intrinsic shim (mfc0/mtc0/sqrt + jr),
-    not C-expressible. Reads the fn's body in asm/<ROM>.s: a leaf (no `jal`) whose
-    work instructions (excluding jr/nop) are all CP0-moves/sqrt, or one spimdisasm
-    tagged `handwritten`."""
-    mnemonics = []
-    handwritten = False
-    for line in iter_function_body(rom_off, primary):
-        if "handwritten" in line:
-            handwritten = True
-        insn = INSN_RE.search(line)
-        if insn:
-            mnemonics.append(insn.group(1))
-    if "jal" in mnemonics:          # a wrapper/has calls → decompilable
-        return False
-    work = [m for m in mnemonics if m not in ("jr", "nop")]
-    if work and all(m in INTRINSIC_OPS for m in work):
-        return True
-    return handwritten             # spimdisasm-tagged handwritten leaf (no jal)
-
-
 def build_upstream_index():
     """Map upstream function name -> (lib, path), scanning libultra/libkmc once."""
     index = {}
@@ -295,35 +209,15 @@ def build_upstream_index():
 # silently reclassifies. Constants are a weak secondary signal (SDK C uses macros, not raw
 # numbers), so callees carry the verdict.
 
-CALL_INSN_RE = re.compile(r"\bjal\s+([A-Za-z_]\w+)")
-# Immediate-bearing ALU/load-imm ops; the operand we want is the trailing immediate literal.
-IMM_INSN_RE = re.compile(
-    r"\b(?:addiu|ori|andi|xori|lui|li|slti|sltiu|daddiu)\b.*?(-?0x[0-9A-Fa-f]+)\s*$")
 # C identifiers used as call targets: `name(`. Excludes control keywords (see _C_NONCALL).
+# (The asm-side CALL_INSN_RE/IMM_INSN_RE + _asm_signature live in decomp_asm; _FRAME_IMMS is
+# imported from there so both sides drop the same stack-frame offsets.)
 C_CALL_RE = re.compile(r"\b([A-Za-z_]\w+)\s*\(")
 C_INT_RE = re.compile(r"\b(0x[0-9A-Fa-f]+|\d+)\b")
 _C_NONCALL = {
     "if", "for", "while", "switch", "return", "sizeof", "do", "else", "case",
     "defined", "OS_LOG_FLOAT", "assert",
 }
-# Stack-frame / register-save offsets dominate addiu/sw immediates and carry no identity;
-# ignore them so the constant signal isn't pure noise. (Kept tiny — callees do the real work.)
-_FRAME_IMMS = {"0x10", "0x14", "0x18", "0x1c", "0x20", "0x24", "0x28", "-0x10",
-               "-0x14", "-0x18", "-0x1c", "-0x20", "-0x24", "-0x28"}
-
-
-def _asm_signature(rom_off, primary):
-    """(callee set, constant set) for the target fn from asm/<ROM>.s. Callees exclude internal
-    `func_*`/`.L*` targets (only symbolic SDK-ish names carry cross-build identity)."""
-    callees, consts = set(), set()
-    for line in iter_function_body(rom_off, primary):
-        cm = CALL_INSN_RE.search(line)
-        if cm and not cm.group(1).startswith("func_"):
-            callees.add(cm.group(1))
-        im = IMM_INSN_RE.search(line)
-        if im and im.group(1).lower() not in _FRAME_IMMS:
-            consts.add(im.group(1).lower())
-    return callees, consts
 
 
 def _c_signature(body):
@@ -535,20 +429,6 @@ def _upstream_body(up_cpath, primary):
         if name == primary:
             return body
     return None
-
-
-def _asm_jal_count(rom_off, primary):
-    """Count of `jal <name>` in `primary`'s body in asm/<ROM>.s (incl. func_ targets), or None
-    when the asm is absent (e.g. the subseg was already flipped to c)."""
-    # Absent-file MUST return None (not 0): call_divergence branches on it, and an
-    # asm-present 0-jal fn (jal-count-mismatch:Nvs0) is observably distinct from absent.
-    if not os.path.exists(asm_path(rom_off)):
-        return None
-    n = 0
-    for line in iter_function_body(rom_off, primary):
-        if CALL_INSN_RE.search(line):
-            n += 1
-    return n
 
 
 def call_divergence(rom_off, primary, up_cpath):
@@ -774,44 +654,6 @@ def refs_unplaced(cpath, placed):
     return sorted(unplaced)
 
 
-# splat emits `D_<8-hex-vaddr>` auto-labels for any referenced data address WITHOUT a name in
-# the two name files; a *placed* symbol shows its real name instead. So every `D_<addr>` in a
-# subseg's asm is, by construction, an unplaced data reference — and the recovered vram is the
-# label itself (no MCP `disassemble_function` needed). The fallback `lui reg,0xHHHH` + `addiu`
-# pair (raw immediate, not %hi(...)) catches a non-D_ materialization.
-DATA_LABEL_RE = re.compile(r"\bD_([0-9A-Fa-f]{8})\b")
-RAW_HILO_RE = re.compile(
-    r"\blui\s+\$\w+,\s*0x([0-9A-Fa-f]{4})\b.*?\b(?:addiu|lw|sw|lh|sh|lhu|lbu|lb|sb)\s"
-    r"[^\n]*?(-?0x[0-9A-Fa-f]+)",
-    re.DOTALL,
-)
-
-
-def recover_unplaced_vram(rom_off):
-    """Candidate vrams of the unplaced data this subseg references, read from `asm/<ROM>.s`
-    deterministically (the asm-data-recovery the execution middle would otherwise do via MCP).
-    Returns a sorted list of distinct addresses. The caller binds a name→vram only when the
-    mapping is unambiguous (exactly one unplaced upstream name ∩ one candidate) — the
-    osYieldThread floor case; multi-extern stays a hint. The gate still confirms before any
-    symbol_addrs add, so a stray local-rodata D_ over-listing is harmless."""
-    path = asm_path(rom_off)
-    if not os.path.exists(path):
-        return []
-    try:
-        text = open(path, errors="ignore").read()
-    except OSError:
-        return []
-    addrs = {int(h, 16) for h in DATA_LABEL_RE.findall(text)}
-    for hi, lo in RAW_HILO_RE.findall(text):
-        addrs.add(((int(hi, 16) << 16) + int(lo, 16)) & 0xFFFFFFFF)
-    return sorted(addrs)
-
-
-# splat labels a callee whose vram is in NEITHER name file `func_<8-hex>` in the asm jal; a
-# *placed* callee shows its real name. So every `jal func_<addr>` is, by construction, an
-# unplaced *function* reference — the function dual of the unnamed-data `D_<addr>` label.
-FUNC_JAL_RE = re.compile(r"\bjal\s+func_([0-9A-Fa-f]{8})\b")
-
 # Strip C comments and string literals so neither a copyright header
 # (`/* ... Copyright (C) ... Ohki ... */`) nor a format string
 # (`osSyncPrintf("... address(0x%X) ...")`) can masquerade as a `name(` call token.
@@ -857,19 +699,6 @@ def calls_unplaced(cpath, primary, placed):
         if n not in _C_NONCALL and n not in macro_names and not n.startswith("__builtin_")
     }
     return sorted(n for n in called if n not in placed and n not in defined)
-
-
-def recover_unplaced_call_vram(rom_off, primary):
-    """Addresses of `primary`'s *unnamed* jal targets (`jal func_<hex>`) in asm/<ROM>.s — the
-    callees splat couldn't name because they're absent from both name files. The function dual of
-    recover_unplaced_vram (data). Returns a sorted list of distinct addresses; the caller binds
-    name→vram only when unambiguous (one unplaced upstream call ∩ one unnamed jal). The gate
-    confirms before any symbol_addrs add."""
-    addrs = set()
-    for line in iter_function_body(rom_off, primary):
-        for h in FUNC_JAL_RE.findall(line):
-            addrs.add(int(h, 16))
-    return sorted(addrs)
 
 
 def band_mirror_dir(lib, up_path):
