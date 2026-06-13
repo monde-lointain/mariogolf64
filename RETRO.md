@@ -25,6 +25,15 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 46 — __osPiRawStartDma + osPiGetCmdQueue libultra io PI-band unlock — 2026-06-13
+- Increment: 2 files banked / 2 functions matched (`src/libultra/io/{pirawdma,pigetcmdq}.c`); md5-candidate 85→87. 0x8BA20 3-fn pack split at the upstream boundary (pirawdma 0x8BA20, pigetcmdq 0x8BAF0, `func_800B0710` left asm). Goal fully met, 0 carry-overs.
+- Quality: stuck-far 0, permuter 0, carried 0, re-opened 0. Both verbatim first-try, 0 iteration.
+- Seed: committed 2pt; banked 2pt; regime mirror (8-gate clear).
+- What helped: both verbatim mirrors built clean off the one-time `PRinternal/piint.h` companion-copy (`PR/os_internal.h`+`PR/rcp.h` deps already in-tree); `_DEBUG` block compiles out of pirawdma; both fn names pre-placed. The gate `make extract && make` green-ROM check confirmed the split + header before execution.
+- Friction: the whole PI/SI/cont/pfs libultra band had been hidden behind a `pick_target` **false-`blk`** — `include_is_blocked` matched the include's *basename* (`piint.h`) against the differently-prefixed in-tree `internal/piint.h` and mislabeled a cheap companion-copy as a deferred -I, so 11 pickable mirrors read as un-pickable for many sprints. `osRomBase` (a libultra boot-region global at the fixed 0x80000308, asm-baked as `D_80000308`) was also missed by refs-unplaced's `__`-prefix grep — pre-added at the gate here, but a less-careful gate would link-fail on first mirror compile.
+- Applied (2 of 2): #1 `include_is_blocked` now matches the full relative include path (not basename) + ultralib/include added as the primary libultra companion-header root (ships the `PRinternal/` prefix libultra_modern lacks) → the 11-fn band un-`blk`'d; #2 `BOOT_GLOBALS` table (osTvType…osAppNMIBuffer, 0x80000300-0x1C) wired into `refs_unplaced` so a referenced-but-unplaced boot global surfaces with its known vram inline. Golden snapshot refreshed (was stale from prior sprints; isolated my edits to 11 intended `blk`→pickable rows before regen); 20 pass / 3 skip.
+- Carry-over: none.
+
 ## Sprint 45 — osGbpakReadWrite + osGbpakReadId libultra gbpak — 2026-06-13
 - Increment: 2 files banked / 2 functions matched (`src/libultra/shared/gbpak/{gbpakreadwrite,gbpakreadid}.c`); md5-candidate 83→85. Closes the `libultra/shared/gbpak/` band (S43 power/getstatus, S44 init). All 85 c files now md5-candidate, 0 INCLUDE_ASM stubs anywhere in `src/`. Goal fully met, 0 carry-overs.
 - Quality: stuck-far 0, permuter 0, carried 0, re-opened 0.

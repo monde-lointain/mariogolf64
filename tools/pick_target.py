@@ -101,6 +101,11 @@ PROJECT_INC = os.path.join(ROOT, "include")
 # INCLUDE_DIRS is an unindexed-`-I` case (blocked, a deferred Makefile enabler — the audio
 # band's <libaudio.h> at include/libultra/PR/). See classify of needs-header in seed_points.
 UPSTREAM_INC_ROOTS = [
+    # ultralib is the live libultra mirror source (LIBULTRA = ultralib/src), so its include tree is
+    # the primary companion-header donor and must lead — it ships the `PRinternal/` prefix the
+    # mirrors `#include` (libultra_modern uses `internal/`, so it can't satisfy `PRinternal/<h>`).
+    # S46: the PI-band PRinternal/piint.h copy came from here.
+    os.path.expanduser("~/development/repos/ultralib/include"),
     os.path.expanduser("~/development/repos/libultra_modern/include"),
     os.path.expanduser("~/development/repos/libkmc/include"),
     os.path.expanduser(
@@ -108,6 +113,21 @@ UPSTREAM_INC_ROOTS = [
     ),
 ]
 UPSTREAM_BONUS = 200
+# The libultra boot-region globals (fixed RAM 0x80000300-0x8000031C). A verbatim mirror references
+# these by name (osRomBase, osMemSize, …) but the asm bakes them as raw lui/addiu immediates that
+# splat auto-labels `D_800003xx` — so refs_unplaced's `__`-prefix / declared-extern grep misses
+# them and the mirror link-fails on first compile. Surfacing them with their known vram lets the
+# gate add the recover-extern from this table, no asm-data-recovery pass needed (S46: osRomBase).
+BOOT_GLOBALS = {
+    "osTvType": 0x80000300,
+    "osRomType": 0x80000304,
+    "osRomBase": 0x80000308,
+    "osResetType": 0x8000030C,
+    "osCicId": 0x80000310,
+    "osVersion": 0x80000314,
+    "osMemSize": 0x80000318,
+    "osAppNMIBuffer": 0x8000031C,
+}
 CARRYOVER_PENALTY = 1000
 # A warm band (the candidate's mirror dir already holds a banked sibling) means its
 # companion headers + callee symbols are in-tree → an enabler-free flip. Worth ~one
@@ -666,7 +686,13 @@ def refs_unplaced(cpath, placed):
     scan = text + "\n" + macro_text
     # `__`-prefixed SDK globals (libultra/libkmc) + any data extern the .c's headers *declare*
     # (libnusys/libmus non-`__` globals SDK_GLOBAL_RE misses — the S16 nuGfxTaskSpool false-clean).
-    tokens = set(SDK_GLOBAL_RE.findall(scan)) | declared_extern_data(cpath)
+    tokens = (
+        set(SDK_GLOBAL_RE.findall(scan))
+        | declared_extern_data(cpath)
+        # Known libultra boot-region globals (non-`__`-prefixed, asm-baked as D_800003xx) the
+        # `__`/declared-extern grep would otherwise miss — see BOOT_GLOBALS.
+        | {g for g in BOOT_GLOBALS if re.search(r"\b" + re.escape(g) + r"\b", scan)}
+    )
     unplaced = []
     for tok in tokens:
         if tok in placed or tok.startswith("__builtin_"):  # GCC intrinsic, never a linked global
@@ -792,11 +818,17 @@ def include_is_blocked(inc):
     the project tree but present at `<upstream-include-root>/<inc>` → mirror it in mid-execution
     (assert.h). Heuristic, gate-confirmed (basename match can rarely over-flag)."""
     idx = _project_inc_index()
-    if inc in idx or os.path.basename(inc) in idx:
-        return True  # present in-tree but unreachable → unindexed -I, defer
+    # Reachability is by the EXACT include path, not basename. A header shipped in-tree under a
+    # *different* prefix (e.g. `internal/piint.h`) does NOT make `PRinternal/piint.h` reachable —
+    # that's a cheap companion-copy, not a deferred -I. (_project_inc_index also stores basenames,
+    # so a bare-name include like `libaudio.h` still matches the `inc in idx` basename entry and
+    # stays correctly blocked.) S46: the basename collision was masking the whole PRinternal/ PI
+    # band as false-`blk`.
+    if inc in idx:
+        return True  # present in-tree at this exact path/name but unreachable → unindexed -I, defer
     for root in UPSTREAM_INC_ROOTS:
         if os.path.exists(os.path.join(root, inc)):
-            return False  # absent in-tree, copyable from upstream → companion-copy
+            return False  # absent in-tree at this path, copyable from upstream → companion-copy
     return True  # nowhere → system header / unavailable
 
 
@@ -920,6 +952,11 @@ def append_upstream_hazards(off, primary, up_lib, up_path, hazards):
             refs = [f"{unplaced[0]}@0x{cands[0]:08X}"]
         else:
             refs = unplaced
+        # A boot-region global carries its vram in BOOT_GLOBALS, so annotate it inline regardless
+        # of the single-candidate disambiguation above (the gate copy-pastes the recover-extern).
+        refs = [
+            f"{r}@0x{BOOT_GLOBALS[r]:08X}" if r in BOOT_GLOBALS else r for r in refs
+        ]
         hazards.append(Hazard(HAZARD_REFS_UNPLACED, ",".join(refs)))  # asm-data-recovery before flip
     unplaced_calls = calls_unplaced(up_path, primary, placed_symbols())
     if unplaced_calls:
