@@ -194,7 +194,7 @@ SECTIONS
         build/src/libultra/gu/lookatref.o(.text);
         build/src/libultra/gu/mtxcatf.o(.text);
         build/asm/84960.o(.text);
-        build/asm/84CE0.o(.text);
+        build/src/libultra/gu/perspective.o(.text);
         build/asm/85060.o(.text);
         build/src/libultra/gu/random.o(.text);
         build/asm/85450.o(.text);
@@ -426,7 +426,7 @@ SECTIONS
         build/src/libultra/gu/lookatref.o(.data);
         build/src/libultra/gu/mtxcatf.o(.data);
         build/asm/84960.o(.data);
-        build/asm/84CE0.o(.data);
+        build/src/libultra/gu/perspective.o(.data);
         build/asm/85060.o(.data);
         build/src/libultra/gu/random.o(.data);
         build/asm/85450.o(.data);
@@ -675,7 +675,7 @@ SECTIONS
         build/src/libultra/gu/lookatref.o(.rodata);
         build/src/libultra/gu/mtxcatf.o(.rodata);
         build/asm/84960.o(.rodata);
-        build/asm/84CE0.o(.rodata);
+        build/src/libultra/gu/perspective.o(.rodata);
         build/asm/85060.o(.rodata);
         build/src/libultra/gu/random.o(.rodata);
         build/asm/85450.o(.rodata);
@@ -723,7 +723,7 @@ SECTIONS
         build/src/libultra/io/visetspecial.o(.rodata);
         build/src/libultra/io/visetyscale.o(.rodata);
         build/src/libultra/io/viswapbuf.o(.rodata);
-        build/asm/data/AD920.rodata.o(.rodata);
+        build/asm/data/AD960.rodata.o(.rodata);
         build/asm/data/AD9C0.rodata.o(.rodata);
         build/src/libultra/io/viswapcontext.o(.rodata);
         build/src/libultra/io/viblack.o(.rodata);
@@ -919,7 +919,7 @@ SECTIONS
         build/src/libultra/gu/lookatref.o(.bss);
         build/src/libultra/gu/mtxcatf.o(.bss);
         build/asm/84960.o(.bss);
-        build/asm/84CE0.o(.bss);
+        build/src/libultra/gu/perspective.o(.bss);
         build/asm/85060.o(.bss);
         build/src/libultra/gu/random.o(.bss);
         build/asm/85450.o(.bss);
