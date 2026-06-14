@@ -25,6 +25,15 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 59 — osGbpakCheckConnector (libultra io gbpak verbatim C mirror) — 2026-06-14
+- Increment: `src/libultra/io/gbpakcheckconnector.c` banked (1 fn, `osGbpakCheckConnector`, 1120 B). Verbatim ultralib `src/io/gbpakcheckconnector.c` with the io-band include adaptation (`PRinternal/controller.h` → `"controller.h"` + `controller_gbpak.h`), zero edits, matched first `make`, full-make ROM SHA-1 == baserom. md5-candidate +1. Returns to the C-mirror track after the S56-58 asm-mirror vendoring run.
+- Quality: stuck-far 0 / permuter 0 / carried 0 / re-opened 0.
+- Seed: committed 3pt; banked 3pt; regime mirror (seed-only; 8-gate clear).
+- What helped: sibling-vendored infra made this nearly free — the exact callees (`osGbpakGetStatus`/`Power`/`ReadWrite`) were already-banked siblings (`gbpak{getstatus,power,readwrite}.c`), and the only hazard `needs-header:controller.h(vendorable)` was a 0-work no-op: `include/libultra/internal/controller.h` (which defines `ARRLEN`/`ERRCK` inline) plus `controller_gbpak.h` were already vendored and already on the io band's `-I` set, so the stripped-include adaptation resolved for free. No jal-mismatch / calls-unplaced / refs-unplaced; name pre-curated → zero symbol adds. pick_target's clean hazard profile (vs the ContRam pair's `jal-count-mismatch:23vs10`) correctly steered the pick.
+- Friction: none. The `needs-header` flag mildly over-stated the work (it was already vendored, not a fresh cp) — captured as suggestion #1, applied below.
+- Applied (1 of 1): #1 `pick_target.py` `include_is_already_vendored` — a missing include whose BASENAME resolves under the lib's `-I` set (so the established prefix-stripping adaptation costs nothing) is now tagged `(already-vendored)` instead of `(vendorable)`, distinguishing a 0-work no-op from a one-time source cp; re-tags the warm io/cont/pfs/vimgr/timer band (`__osContRam{Read,Write}`, `osContInit`, `__osGbpakSetBank`, `osCreateViManager`, `__osTimerServicesInit`, …) whose header hazards are all no-ops, while `guRotateF`'s genuine `../gu/guint.h` companion-copy correctly stays `(vendorable)`; golden regen, suite 29 pass.
+- Carry-overs: none. The clean low-cost libultra C-mirror band is exhausted again; remaining libultra C is classical-track (the ContRam/pfs/cont families carry `jal-count-mismatch` → stripped impls) or the asm-mirror vendoring carry-overs.
+
 ## Sprint 58 — asm-mirror vendoring: 3 libultra intrinsic-likely asm TUs (sqrtf, osMapTLBRdb, bcopy) — 2026-06-14
 - Increment: 0 new `.c` (asm-vendor/hasm housekeeping). 3 libultra hand-asm TUs vendored from ultralib + built into the ROM: `sqrtf` (0x8BE10, gu/sqrtf.s), `osMapTLBRdb` (0x8CD10, os/maptlbrdb.s), `bcopy` (0x85DA0, libc/bcopy.s). 3 subsegs flipped `asm`→`hasm` (hasm 10→13; asm subsegs 167→164); 3 intrinsic-likely candidates off the carry-over list. md5-candidate unchanged at 97/97 (.c files all 0-stub). Full-make ROM SHA-1 == baserom; all 3 `.o` `.text` == subseg slot (0x10/0x60/0x320, KMC-`as` padding).
 - Quality: stuck-far 0 / permuter 0 / carried 0 / re-opened 0.

@@ -1160,6 +1160,21 @@ def include_is_blocked(inc):
     return not include_is_vendorable(inc)
 
 
+def include_is_already_vendored(inc, lib):
+    """True if a *missing* include needs NO header work at all: its full path is unreachable (so
+    `missing_includes` flagged it), but its BASENAME already resolves under the current `-I` set,
+    so the established include-path adaptation (drop the upstream prefix — `PRinternal/controller.h`
+    → `"controller.h"`, the io/gu band pattern) resolves it for free. S59: `osGbpakCheckConnector`'s
+    `PRinternal/controller.h` was tagged `(vendorable)` but the sibling-vendored
+    `include/libultra/internal/controller.h` was already on the io band's `-I` set, so the flag was
+    a 0-work no-op. This is a strict refinement of vendorable: same non-blocking class, but priced as
+    zero enabler load rather than a one-time cp. lib selects the band's extra `-I` dirs (LIB_EXTRA).
+    """
+    search_dirs = INCLUDE_DIRS + LIB_EXTRA_INCLUDE_DIRS.get(lib or "", [])
+    base = os.path.basename(inc)
+    return any(os.path.exists(os.path.join(d, base)) for d in search_dirs)
+
+
 def snap_fib(n):
     """Round a raw additive score up to the nearest Fibonacci ladder rung (1,2,3,5,8,13)."""
     for f in (1, 2, 3, 5, 8, 13):
@@ -1310,10 +1325,18 @@ def append_upstream_hazards(off, primary, up_lib, up_path, hazards):
     mirror_dir = band_mirror_dir(up_lib, up_path)
     missing = missing_includes(up_path, mirror_dir, up_lib)
     if missing:
-        # Tag each header copyable-from-upstream as `(vendorable)` so the gate prices it as a
-        # one-time header-vendor enabler, not a DoR reject; a bare (untagged) header is a real
-        # block (deferred -I / system header). `blocked` (→ pts 'blk') counts only the bare ones.
-        tagged = [inc if include_is_blocked(inc) else f"{inc}(vendorable)" for inc in missing]
+        # Tag each header by enabler load: bare (untagged) = a real block (deferred -I / system
+        # header, → pts 'blk'); `(vendorable)` = a one-time source cp; `(already-vendored)` = no
+        # work at all — the basename already resolves under the -I set, so the include-path
+        # adaptation is free (S59). `blocked` (→ pts 'blk') still counts only the bare ones.
+        def _header_tag(inc):
+            if include_is_blocked(inc):
+                return inc
+            if include_is_already_vendored(inc, up_lib):
+                return f"{inc}(already-vendored)"
+            return f"{inc}(vendorable)"
+
+        tagged = [_header_tag(inc) for inc in missing]
         hazards.append(Hazard(HAZARD_NEEDS_HEADER, ",".join(tagged)))
         blocked = any(include_is_blocked(inc) for inc in missing)
     gating = function_gating_define(up_path, primary)

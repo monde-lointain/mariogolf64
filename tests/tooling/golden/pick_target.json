@@ -353,7 +353,7 @@
   {
     "band": "warm",
     "func": "__osContRamRead",
-    "hazards": "refs-unplaced:__OSContRamReadFormat,__osContLastCmd,__osPfsLastChannel,__osPfsPifRam,calls-unplaced:READFORMAT,__osContAddressCrc,__osContDataCrc,__osSiGetAccess,__osSiRawStartDma,__osSiRelAccess,needs-header:PRinternal/controller.h(vendorable),PRinternal/siint.h(vendorable),jal-count-mismatch:23vs10",
+    "hazards": "refs-unplaced:__OSContRamReadFormat,__osContLastCmd,__osPfsLastChannel,__osPfsPifRam,calls-unplaced:READFORMAT,__osContAddressCrc,__osContDataCrc,__osSiGetAccess,__osSiRawStartDma,__osSiRelAccess,needs-header:PRinternal/controller.h(already-vendored),PRinternal/siint.h(already-vendored),jal-count-mismatch:23vs10",
     "kind": "asm-flip",
     "nfns": 1,
     "pts": 3,
@@ -418,7 +418,7 @@
   {
     "band": "warm",
     "func": "__osPfsGetStatus",
-    "hazards": "pack:3fn[__osPfsGetStatus=pfsgetstatus,func_800AE800=?,func_800AE894=?],refs-unplaced:__OSContRequesFormatShort,__osContLastCmd,__osPfsInodeCacheBank,__osPfsPifRam,calls-unplaced:__osSiRawStartDma,needs-header:PRinternal/controller.h(vendorable),PRinternal/siint.h(vendorable),jal-count-mismatch:7vs6",
+    "hazards": "pack:3fn[__osPfsGetStatus=pfsgetstatus,func_800AE800=?,func_800AE894=?],refs-unplaced:__OSContRequesFormatShort,__osContLastCmd,__osPfsInodeCacheBank,__osPfsPifRam,calls-unplaced:__osSiRawStartDma,needs-header:PRinternal/controller.h(already-vendored),PRinternal/siint.h(already-vendored),jal-count-mismatch:7vs6",
     "kind": "asm-flip",
     "nfns": 3,
     "pts": 5,
@@ -470,7 +470,7 @@
   {
     "band": "warm",
     "func": "osSpTaskLoad",
-    "hazards": "pack:2fn[osSpTaskLoad=sptask,osSpTaskStartGo=sptask],file-static,calls-unplaced:_osVirtualToPhysical,needs-header:PRinternal/osint.h(vendorable),jal-count-mismatch:7vs14",
+    "hazards": "pack:2fn[osSpTaskLoad=sptask,osSpTaskStartGo=sptask],file-static,calls-unplaced:_osVirtualToPhysical,needs-header:PRinternal/osint.h(already-vendored),jal-count-mismatch:7vs14",
     "kind": "asm-flip",
     "nfns": 2,
     "pts": 5,
@@ -483,7 +483,7 @@
   {
     "band": "warm",
     "func": "__osContRamWrite",
-    "hazards": "refs-unplaced:__OSContRamReadFormat,__osContLastCmd,__osPfsLastChannel,__osPfsPifRam,calls-unplaced:READFORMAT,__osContAddressCrc,__osContDataCrc,__osSiGetAccess,__osSiRawStartDma,__osSiRelAccess,needs-header:PRinternal/controller.h(vendorable),PRinternal/siint.h(vendorable),jal-count-mismatch:22vs10",
+    "hazards": "refs-unplaced:__OSContRamReadFormat,__osContLastCmd,__osPfsLastChannel,__osPfsPifRam,calls-unplaced:READFORMAT,__osContAddressCrc,__osContDataCrc,__osSiGetAccess,__osSiRawStartDma,__osSiRelAccess,needs-header:PRinternal/controller.h(already-vendored),PRinternal/siint.h(already-vendored),jal-count-mismatch:22vs10",
     "kind": "asm-flip",
     "nfns": 1,
     "pts": 3,
@@ -574,7 +574,7 @@
   {
     "band": "warm",
     "func": "__osTimerServicesInit",
-    "hazards": "pack:4fn[__osTimerServicesInit=timerintr,__osTimerInterrupt=timerintr,__osSetTimerIntr=timerintr,__osInsertTimer=timerintr],defines-data:__osCurrentTime,__osBaseCounter,__osViIntrCount,__osTimerCounter,__osBaseTimer,__osTimerList,__osProfileList,__osProfileListEnd,__osProfileOverflowBin,refs-unplaced:__ProfDone,__osBaseTimer,__osProfTimerQ,__osProfileList,__osProfileListEnd,__osProfileOverflowBin,__osTimerCounter,__osViIntrCount,calls-unplaced:aligned,needs-header:PRinternal/osint.h(vendorable)",
+    "hazards": "pack:4fn[__osTimerServicesInit=timerintr,__osTimerInterrupt=timerintr,__osSetTimerIntr=timerintr,__osInsertTimer=timerintr],defines-data:__osCurrentTime,__osBaseCounter,__osViIntrCount,__osTimerCounter,__osBaseTimer,__osTimerList,__osProfileList,__osProfileListEnd,__osProfileOverflowBin,refs-unplaced:__ProfDone,__osBaseTimer,__osProfTimerQ,__osProfileList,__osProfileListEnd,__osProfileOverflowBin,__osTimerCounter,__osViIntrCount,calls-unplaced:aligned,needs-header:PRinternal/osint.h(already-vendored)",
     "kind": "asm-flip",
     "nfns": 4,
     "pts": 8,
@@ -587,7 +587,7 @@
   {
     "band": "warm",
     "func": "osContInit",
-    "hazards": "pack:3fn[osContInit=controller,func_800A75AC=?,func_800A7660=?],defines-data:__osContPifRam,__osContLastCmd,__osMaxControllers,__osEepromTimer,__osEepromTimerMsg,__osContinitialized,refs-unplaced:__OSContRequesFormat,__osContLastCmd,__osContPifRam,__osContinitialized,__osEepromTimer,__osEepromTimerMsg,__osEepromTimerQ,__osMaxControllers,calls-unplaced:__osSiCreateAccessQueue,__osSiRawStartDma,aligned,needs-header:PRinternal/controller.h(vendorable),PRinternal/siint.h(vendorable)",
+    "hazards": "pack:3fn[osContInit=controller,func_800A75AC=?,func_800A7660=?],defines-data:__osContPifRam,__osContLastCmd,__osMaxControllers,__osEepromTimer,__osEepromTimerMsg,__osContinitialized,refs-unplaced:__OSContRequesFormat,__osContLastCmd,__osContPifRam,__osContinitialized,__osEepromTimer,__osEepromTimerMsg,__osEepromTimerQ,__osMaxControllers,calls-unplaced:__osSiCreateAccessQueue,__osSiRawStartDma,aligned,needs-header:PRinternal/controller.h(already-vendored),PRinternal/siint.h(already-vendored)",
     "kind": "asm-flip",
     "nfns": 3,
     "pts": 5,
@@ -613,7 +613,7 @@
   {
     "band": "warm",
     "func": "osCreateViManager",
-    "hazards": "pack:2fn[osCreateViManager=vimgr,func_800ACFB0=?],file-static,defines-data:__osViDevMgr,__additional_scanline,refs-unplaced:__OSViContext,__osViDevMgr,__osViIntrCount,calls-unplaced:aligned,needs-header:PRinternal/viint.h(vendorable),PRinternal/osint.h(vendorable)",
+    "hazards": "pack:2fn[osCreateViManager=vimgr,func_800ACFB0=?],file-static,defines-data:__osViDevMgr,__additional_scanline,refs-unplaced:__OSViContext,__osViDevMgr,__osViIntrCount,calls-unplaced:aligned,needs-header:PRinternal/viint.h(already-vendored),PRinternal/osint.h(already-vendored)",
     "kind": "asm-flip",
     "nfns": 2,
     "pts": 5,
