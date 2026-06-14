@@ -285,7 +285,7 @@ SECTIONS
         build/asm/8CAA0.o(.text);
         build/src/libultra/io/sirawread.o(.text);
         build/src/libultra/io/sirawwrite.o(.text);
-        build/asm/8CC20.o(.text);
+        build/src/libultra/io/crc.o(.text);
         build/asm/8CD10.o(.text);
         build/src/libultra/io/viinit.o(.text);
         build/src/libultra/io/vigetcurrcontext.o(.text);
@@ -528,7 +528,7 @@ SECTIONS
         build/asm/8CAA0.o(.data);
         build/src/libultra/io/sirawread.o(.data);
         build/src/libultra/io/sirawwrite.o(.data);
-        build/asm/8CC20.o(.data);
+        build/src/libultra/io/crc.o(.data);
         build/asm/8CD10.o(.data);
         build/src/libultra/io/viinit.o(.data);
         build/src/libultra/io/vigetcurrcontext.o(.data);
@@ -786,7 +786,7 @@ SECTIONS
         build/asm/8CAA0.o(.rodata);
         build/src/libultra/io/sirawread.o(.rodata);
         build/src/libultra/io/sirawwrite.o(.rodata);
-        build/asm/8CC20.o(.rodata);
+        build/src/libultra/io/crc.o(.rodata);
         build/asm/8CD10.o(.rodata);
         build/src/libultra/io/viinit.o(.rodata);
         build/src/libultra/io/vigetcurrcontext.o(.rodata);
@@ -1037,7 +1037,7 @@ SECTIONS
         build/asm/8CAA0.o(.bss);
         build/src/libultra/io/sirawread.o(.bss);
         build/src/libultra/io/sirawwrite.o(.bss);
-        build/asm/8CC20.o(.bss);
+        build/src/libultra/io/crc.o(.bss);
         build/asm/8CD10.o(.bss);
         build/src/libultra/io/viinit.o(.bss);
         build/src/libultra/io/vigetcurrcontext.o(.bss);

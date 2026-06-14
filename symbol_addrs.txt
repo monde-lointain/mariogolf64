@@ -77,3 +77,5 @@ __libm_qnan_f = 0x800D2640; // size:0x4
 guLookAt = 0x800A7FF0; // type:func
 osMapTLB = 0x800ACB40; // type:func
 osUnmapTLB = 0x800ACCC0; // type:func
+__osContAddressCrc = 0x800B1820; // type:func
+__osContDataCrc = 0x800B188C; // type:func

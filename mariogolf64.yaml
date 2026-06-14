@@ -296,7 +296,7 @@ segments:
       - [0x8CAA0, asm]
       - [0x8CB80, c, libultra/io/sirawread]
       - [0x8CBD0, c, libultra/io/sirawwrite]
-      - [0x8CC20, asm]
+      - [0x8CC20, c, libultra/io/crc]
       - [0x8CD10, hasm]
       - [0x8CD70, c, libultra/io/viinit]
       - [0x8CE80, c, libultra/io/vigetcurrcontext]
