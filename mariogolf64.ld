@@ -688,10 +688,10 @@ SECTIONS
         build/asm/82810.o(.rodata);
         build/src/libultra/os/virtualtophysical.o(.rodata);
         build/asm/82B80.o(.rodata);
-        build/src/libultra/gu/cosf.o(.rodata);
-        build/asm/83070.o(.rodata);
         build/asm/data/AD6B0.rodata.o(.rodata);
         build/asm/data/AD6F0.rodata.o(.rodata);
+        build/src/libultra/gu/cosf.o(.rodata);
+        build/asm/83070.o(.rodata);
         build/asm/data/AD8C0.rodata.o(.rodata);
         build/src/libultra/gu/lookathil.o(.rodata);
         build/src/libultra/gu/lookatref.o(.rodata);

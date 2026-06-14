@@ -335,6 +335,7 @@ segments:
       - [0xAD6A0, .rodata, libultra/io/aisetfreq]
       - [0xAD6B0, rodata]
       - [0xAD6F0, rodata]
+      - [0xAD860, .rodata, libultra/gu/cosf]
       - [0xAD8C0, rodata]
       - [0xAD8E0, .rodata, libultra/gu/lookathil]
       - [0xAD910, .rodata, libultra/gu/lookatref]
