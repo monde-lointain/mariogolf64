@@ -205,6 +205,7 @@ SECTIONS
         build/asm/85B30.o(.text);
         build/asm/85DA0.o(.text);
         build/asm/860C0.o(.text);
+        build/src/libultra/libc/string.o(.text);
         build/src/libultra/libc/sprintf.o(.text);
         build/src/libultra/libc/syncprintf.o(.text);
         build/src/libultra/os/createmesgqueue.o(.text);
@@ -443,6 +444,7 @@ SECTIONS
         build/asm/85B30.o(.data);
         build/asm/85DA0.o(.data);
         build/asm/860C0.o(.data);
+        build/src/libultra/libc/string.o(.data);
         build/src/libultra/libc/sprintf.o(.data);
         build/src/libultra/libc/syncprintf.o(.data);
         build/src/libultra/os/createmesgqueue.o(.data);
@@ -697,6 +699,7 @@ SECTIONS
         build/asm/85B30.o(.rodata);
         build/asm/85DA0.o(.rodata);
         build/asm/860C0.o(.rodata);
+        build/src/libultra/libc/string.o(.rodata);
         build/src/libultra/libc/sprintf.o(.rodata);
         build/src/libultra/libc/syncprintf.o(.rodata);
         build/src/libultra/os/createmesgqueue.o(.rodata);
@@ -946,6 +949,7 @@ SECTIONS
         build/asm/85B30.o(.bss);
         build/asm/85DA0.o(.bss);
         build/asm/860C0.o(.bss);
+        build/src/libultra/libc/string.o(.bss);
         build/src/libultra/libc/sprintf.o(.bss);
         build/src/libultra/libc/syncprintf.o(.bss);
         build/src/libultra/os/createmesgqueue.o(.bss);

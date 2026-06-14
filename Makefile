@@ -173,6 +173,12 @@ C_PROFILE_CFLAGS = $(CFLAGS)
 $(BUILD_DIR)/$(SRC_DIR)/libultra/%.o: C_PROFILE_CFLAGS = $(LIBULTRA_CFLAGS)
 $(BUILD_DIR)/$(SRC_DIR)/libkmc/%.o:   C_PROFILE_CFLAGS = $(LIBKMC_CFLAGS)
 $(BUILD_DIR)/$(SRC_DIR)/libnusys/%.o: C_PROFILE_CFLAGS = $(LIBNUSYS_CFLAGS)
+# string.c is the one libultra TU this ROM compiled SIGNED-char: strchr/strlen char
+# comparisons load lb + sll/sra sign-extend (not lbu/andi 0xff). Override the band's
+# -funsigned-char for this single TU (explicit-target var wins over the libultra/%.o
+# pattern). The other 100+ libultra C files are char-signedness-ambiguous, so the band
+# default is unaffected. (S65)
+$(BUILD_DIR)/$(SRC_DIR)/libultra/libc/string.o: C_PROFILE_CFLAGS = $(subst -funsigned-char,-fsigned-char,$(LIBULTRA_CFLAGS))
 
 # `strip -N dummy-symbol-name`: drop the placeholder symbol KMC GCC emits so it
 # doesn't collide at link; the name is inert, the strip just keeps the symtab clean.
@@ -254,6 +260,7 @@ VENDOR_ASM := \
 	8BE10:src/libultra/gu/sqrtf.s \
 	8CD10:src/libultra/os/maptlbrdb.s \
 	85DA0:src/libultra/libc/bcopy.s \
+	860C0:src/libultra/libc/bzero.s \
 	8CA50:src/libultra/os/setfpccsr.s \
 	8CA60:src/libultra/os/setsr.s \
 	8CA70:src/libultra/os/setwatchlo.s
