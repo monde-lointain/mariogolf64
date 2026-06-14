@@ -1502,14 +1502,23 @@ def build_rows(args, upstream_index, carried, sig_index):
         blocked = False
         if up_path:
             band, blocked = append_upstream_hazards(off, primary, up_lib, up_path, hazards)
-        elif kind == "asm-flip" and primary.startswith("func_"):
-            # No name-index hit + un-named: it may still be an un-named SDK mirror (the S13
-            # trap). Run the signature matcher; an advisory hit flags the gate to verify.
-            hint = signature_hint(off, primary, sig_index)
-            if hint:
-                hazards.append(hint)
+        elif kind == "asm-flip":
+            if build_asm_tu_index().get(primary):
+                # A hand-asm libultra mirror (no `.c` def, so absent from upstream_index): bcopy,
+                # __osSetFpcCsr, the cache/TLB leaves. Label it libultra for the column/filter/pts
+                # so `--lib libultra` surfaces it. The `.s` TU path already rides the
+                # intrinsic-likely hazard from classify_subseg; do NOT set up_path (it feeds the
+                # C-only append_upstream_hazards) — the asm-mirror-vendoring route, not a C mirror.
+                up_lib = "libultra"
+            elif primary.startswith("func_"):
+                # No name-index hit + un-named: it may still be an un-named SDK mirror (the S13
+                # trap). Run the signature matcher; an advisory hit flags the gate to verify.
+                hint = signature_hint(off, primary, sig_index)
+                if hint:
+                    hazards.append(hint)
 
-        if args.lib and args.lib not in (path or "") and not any(args.lib in n for n in fns):
+        if args.lib and args.lib not in (path or "") and (up_lib or "") != args.lib \
+                and not any(args.lib in n for n in fns):
             continue
         if primary in carried and not args.include_stuck:
             continue

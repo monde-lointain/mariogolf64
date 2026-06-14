@@ -1,6 +1,19 @@
 [
   {
     "band": "-",
+    "func": "__osSetFpcCsr",
+    "hazards": "pack:4fn[__osSetFpcCsr=?,__osSetSR=?,__osSetWatchLo=?,__osSpDeviceBusy=sp]",
+    "kind": "asm-flip",
+    "nfns": 4,
+    "pts": 8,
+    "rom": "0x8CA50",
+    "score": 120,
+    "size": 80,
+    "upstream": "libultra",
+    "vram": "0x800B1650"
+  },
+  {
+    "band": "-",
     "func": "func_ovl0_801F4A30",
     "hazards": "-",
     "kind": "asm-flip",
@@ -156,19 +169,6 @@
     "vram": "0x800A12D0"
   },
   {
-    "band": "-",
-    "func": "__osSetFpcCsr",
-    "hazards": "pack:4fn[__osSetFpcCsr=?,__osSetSR=?,__osSetWatchLo=?,__osSpDeviceBusy=sp]",
-    "kind": "asm-flip",
-    "nfns": 4,
-    "pts": 13,
-    "rom": "0x8CA50",
-    "score": -80,
-    "size": 80,
-    "upstream": "none",
-    "vram": "0x800B1650"
-  },
-  {
     "band": "cold",
     "func": "nuSiCallBackAdd",
     "hazards": "pack:2fn[nuSiCallBackAdd=nusicallbackadd,nuSiCallBackRemove=nusicallbackremove],refs-unplaced:nuSiCallBackList@0x800C7E30",
@@ -193,6 +193,19 @@
     "size": 304,
     "upstream": "libnusys",
     "vram": "0x800A1430"
+  },
+  {
+    "band": "-",
+    "func": "bzero",
+    "hazards": "pack:4fn[bzero=?,strchr=string,strlen=string,memcpy=string]",
+    "kind": "asm-flip",
+    "nfns": 4,
+    "pts": 8,
+    "rom": "0x860C0",
+    "score": -104,
+    "size": 304,
+    "upstream": "libultra",
+    "vram": "0x800AACC0"
   },
   {
     "band": "-",
@@ -453,19 +466,6 @@
     "size": 288,
     "upstream": "none",
     "vram": "0x800B3C20"
-  },
-  {
-    "band": "-",
-    "func": "bzero",
-    "hazards": "pack:4fn[bzero=?,strchr=string,strlen=string,memcpy=string]",
-    "kind": "asm-flip",
-    "nfns": 4,
-    "pts": 13,
-    "rom": "0x860C0",
-    "score": -304,
-    "size": 304,
-    "upstream": "none",
-    "vram": "0x800AACC0"
   },
   {
     "band": "warm",
