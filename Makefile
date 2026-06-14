@@ -253,7 +253,10 @@ VENDOR_ASM := \
 	88100:src/libultra/os/unmaptlball.s \
 	8BE10:src/libultra/gu/sqrtf.s \
 	8CD10:src/libultra/os/maptlbrdb.s \
-	85DA0:src/libultra/libc/bcopy.s
+	85DA0:src/libultra/libc/bcopy.s \
+	8CA50:src/libultra/os/setfpccsr.s \
+	8CA60:src/libultra/os/setsr.s \
+	8CA70:src/libultra/os/setwatchlo.s
 
 define VENDOR_ASM_RULE
 $(BUILD_DIR)/$(ASM_DIR)/$(1).o: $(2)
