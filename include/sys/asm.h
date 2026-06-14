@@ -65,6 +65,16 @@ x:
 #define NOP .set noreorder; nop; .set reorder;
 #define CACHE(op, reg) .set noreorder; cache op, reg; .set reorder;
 
+#define MFC0(reg, op)  \
+    .set noreorder     ;\
+        mfc0 reg, op  ;\
+    .set reorder
+
+#define MTC0(reg, op)  \
+    .set noreorder     ;\
+        mtc0 reg, op  ;\
+    .set reorder
+
 #ifdef __cplusplus
 }
 #endif

@@ -225,3 +225,31 @@ $(BUILD_DIR)/$(ASM_DIR)/8EC50.o: src/libkmc/mmuldi3.s
 	$(KMC_AS) -EB -mips2 -o $@.tmp $<
 	cp $@.tmp $@
 	rm $@.tmp
+
+# Vendored libultra hand-asm TUs: assemble the real ultralib .s sources under
+# src/libultra/ with the SAME toolchain + flags ultralib uses (KMC/N64 gcc,
+# gcc.mk profile), mirroring how LIBULTRA_CFLAGS mirrors ultralib's C profile.
+# This is load-bearing: the KMC assembler pads each function's .text up to its
+# 16-byte ROM slot, so the verbatim 0xC ultralib TU lands as the 0x10 the ROM
+# expects. Modern mips-linux-gnu `as` emits the bare 0xC and the subseg shifts
+# (SHA-1 break). The subseg is `hasm`, so splat keeps asm/<rom>.s for reference
+# but does not regenerate it; this explicit rule wins over the asm/%.s pattern
+# rule. Add a <rom>:<src> pair to extend. See docs/hazards.md#upstream-mirror-pattern.
+LIBULTRA_ASFLAGS := -x assembler-with-cpp -w -nostdinc -c -G 0 -mips3 -mgp32 -mfp32 \
+	-DMIPSEB -D_LANGUAGE_ASSEMBLY -D_MIPS_SIM=1 -D_ULTRA64 \
+	-D_MIPS_SZLONG=32 -D__USE_ISOC99 -DBUILD_VERSION=VERSION_J -D_FINALROM \
+	-I include -I include/libultra -I include/libultra/PR -I include/libultra/compiler/gcc
+
+VENDOR_ASM := \
+	86790:src/libultra/os/getcount.s \
+	8CA20:src/libultra/os/getcause.s \
+	8CA30:src/libultra/os/getsr.s \
+	8CA40:src/libultra/os/setcompare.s
+
+define VENDOR_ASM_RULE
+$(BUILD_DIR)/$(ASM_DIR)/$(1).o: $(2)
+	$$(CC) $$(LIBULTRA_ASFLAGS) -o $$@.tmp $$<
+	$$(OBJCOPY) --set-section-alignment .text=4 --set-section-alignment .data=4 --set-section-alignment .rodata=4 --set-section-alignment .bss=4 $$@.tmp $$@
+	rm $$@.tmp
+endef
+$(foreach pair,$(VENDOR_ASM),$(eval $(call VENDOR_ASM_RULE,$(word 1,$(subst :, ,$(pair))),$(word 2,$(subst :, ,$(pair))))))
