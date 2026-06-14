@@ -1239,11 +1239,13 @@ def append_upstream_hazards(off, primary, up_lib, up_path, hazards):
     # The FP-only scan (ldc1/lwc1) seeds both; integer `lw` refs that land in the rodata band add the
     # companion words of a pooled `double` (GCC's `lw` pair + `mtc1`) so the sibling-split extent is
     # sized in full, not just its first word. `lw` refs in the data segment are ordinary data refs
-    # (refs-unplaced/defines-data already cover them) and are dropped here.
+    # (refs-unplaced/defines-data already cover them) and are dropped here. Both scans span the whole
+    # subseg (every pack function), since the `.rodata` sibling places the whole object's `.rodata`
+    # (S55: guPerspective's pooled doubles, missed by the old per-primary scan).
     rodata_lits, data_statics = [], []
-    for a in rodata_literals(off, primary):
+    for a in rodata_literals(off):
         (rodata_lits if _literal_in_rodata(a, off) else data_statics).append(a)
-    for a in rodata_word_refs(off, primary):
+    for a in rodata_word_refs(off):
         if _literal_in_rodata(a, off) and a not in rodata_lits:
             rodata_lits.append(a)
     if rodata_lits:

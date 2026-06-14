@@ -53,6 +53,27 @@ def iter_function_body(rom_off, primary):
             yield line
 
 
+def iter_subseg_body(rom_off):
+    """Yield every body line of asm/<ROM>.s across *all* its functions (the whole subseg).
+
+    Like iter_function_body but un-scoped: skips `glabel`/`endlabel` boundary lines and
+    yields the instruction lines of every function in the listing. The asm/<ROM>.s file is
+    exactly one subseg = one future C source file = one compiled object, so this is the right
+    domain for any scan that concerns the *object's* output rather than a single function's —
+    notably the compiler-pooled `.rodata` literals (rodata_literals / rodata_word_refs): a
+    `.rodata` sibling subseg places the whole object's `.rodata`, so a sibling function's
+    pooled doubles belong to the same split extent as the primary's (S55: guPerspective loads
+    0x800D2540..0x2558 that guPerspectiveF does not). Yields nothing when the file is absent."""
+    path = asm_path(rom_off)
+    if not os.path.exists(path):
+        return
+    with open(path) as f:
+        for line in f:
+            if GLABEL_RE.match(line) or line.lstrip().startswith("endlabel"):
+                continue
+            yield line
+
+
 def asm_functions(rom_off):
     """glabel names defined in asm/<ROM>.s for this subseg (curated if already synced)."""
     path = asm_path(rom_off)
@@ -210,17 +231,20 @@ RODATA_LITERAL_RE = re.compile(
 )
 
 
-def rodata_literals(rom_off, primary):
-    """VRAMs of the anonymous compiler-pooled FP constants `primary` loads via `ldc1/lwc1
+def rodata_literals(rom_off):
+    """VRAMs of the anonymous compiler-pooled FP constants the *whole subseg* loads via `ldc1/lwc1
     %lo(D_<addr>)` in asm/<ROM>.s. A verbatim mirror's compiler re-emits these into the C object's
     `.rodata`, which must then be placed by a dot-prefixed `.rodata` sibling subseg at the
-    constant's ROM offset (docs/hazards.md#rodata-sibling-yaml-pattern, S38/S48). Pre-noting them
+    constant's ROM offset (docs/hazards.md#rodata-sibling-yaml-pattern, S38/S48). The scan spans
+    every function in the subseg, not just the primary: the sibling places the whole object's
+    `.rodata`, so a pack sibling's pooled literals belong to the same split extent (S55:
+    guPerspective's 0x800D2540..0x2558 — the per-primary scan undercounted 4 of 8). Pre-noting them
     at the gate turns a finalize-time SHA-miss into a planned DoR enabler. Anonymous (`D_`) only:
     a named float global is a placed / recover-extern case, not a literal. Such a load is by
     construction a rodata access (absolute %hi/%lo addressing), so the address always lies outside
-    the fn's own text band. Returns a sorted list of distinct addresses."""
+    the subseg's own text band. Returns a sorted list of distinct addresses."""
     addrs = set()
-    for line in iter_function_body(rom_off, primary):
+    for line in iter_subseg_body(rom_off):
         for h in RODATA_LITERAL_RE.findall(line):
             addrs.add(int(h, 16))
     return sorted(addrs)
@@ -234,16 +258,17 @@ RODATA_WORD_RE = re.compile(
 )
 
 
-def rodata_word_refs(rom_off, primary):
-    """VRAMs `primary` loads via integer `lw/lwu/ld %lo(D_<addr>)` in asm/<ROM>.s. The caller
-    band-filters these (keeping only code-segment `.rodata` addresses) and unions them with the
-    FP literals from rodata_literals to size the full `.rodata` sibling-split extent — GCC loads a
-    pooled `double` via an `lw` pair + `mtc1`, so its 2nd word is invisible to the FP-only scan
-    (S52: lookatref's 1.0 double at 0x800D2518 was such an `lw` pair). Data-segment hits are not
+def rodata_word_refs(rom_off):
+    """VRAMs the *whole subseg* loads via integer `lw/lwu/ld %lo(D_<addr>)` in asm/<ROM>.s. The
+    caller band-filters these (keeping only code-segment `.rodata` addresses) and unions them with
+    the FP literals from rodata_literals to size the full `.rodata` sibling-split extent — GCC loads
+    a pooled `double` via an `lw` pair + `mtc1`, so its 2nd word is invisible to the FP-only scan
+    (S52: lookatref's 1.0 double at 0x800D2518 was such an `lw` pair). Scans every function in the
+    subseg for the same whole-object reason as rodata_literals (S55). Data-segment hits are not
     rodata literals (they are placed/recover-extern data refs) and the caller drops them. Returns a
     sorted list of distinct addresses."""
     addrs = set()
-    for line in iter_function_body(rom_off, primary):
+    for line in iter_subseg_body(rom_off):
         for h in RODATA_WORD_RE.findall(line):
             addrs.add(int(h, 16))
     return sorted(addrs)
