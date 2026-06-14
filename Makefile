@@ -244,7 +244,11 @@ VENDOR_ASM := \
 	86790:src/libultra/os/getcount.s \
 	8CA20:src/libultra/os/getcause.s \
 	8CA30:src/libultra/os/getsr.s \
-	8CA40:src/libultra/os/setcompare.s
+	8CA40:src/libultra/os/setcompare.s \
+	824E0:src/libultra/os/writebackdcache.s \
+	82560:src/libultra/os/writebackdcacheall.s \
+	88000:src/libultra/os/probetlb.s \
+	88100:src/libultra/os/unmaptlball.s
 
 define VENDOR_ASM_RULE
 $(BUILD_DIR)/$(ASM_DIR)/$(1).o: $(2)
