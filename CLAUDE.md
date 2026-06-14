@@ -142,7 +142,16 @@ summary.
   needs-header (a DoR reject).
 - **The 8-point decompose gate (v1).** A seed of 8 or 13 must NOT run as a normal 1-increment sprint
   — decompose it (split the subseg at the upstream-file/function boundary) or pull a scaffolding
-  enabler as the goal instead. Applied at the `/sprint-plan` gate.
+  enabler as the goal instead. Applied at the `/sprint-plan` gate. **Verbatim-mirror exemption
+  (S64).** A seed-8/13 increment may run as a normal 1-increment sprint when ALL hold: (a) `regime:
+  mirror` + a verbatim copy of a single upstream file, (b) the decompose path is mechanically blocked
+  (one upstream file with no 16-aligned internal function boundary to split at — `non16align` on the
+  inner boundary), and (c) every callee is placed + both/all names curated (the "no residual
+  variance" condition). The gate's all-or-nothing concern guards CLASSICAL iteration stalls; a
+  verbatim single-file mirror banks atomically (or is a quick spike), so a size-only 8/13 is a false
+  fire — the same false-flag class the hazard detectors keep retiring. Document the exemption in
+  `SPRINT.md ## Estimate`; the increment stays seed-only (S64 `gu/lookathil.c`, pts-13, banked
+  first-try). The exemption never covers classical or multi-file packs.
 - **Per-file all-or-nothing banking.** Points bank per file: a spiked/carried file scores 0 pt, a
   banked sibling still counts. This is a separate ledger from the function-level quality
   counter-metric.
@@ -236,6 +245,7 @@ When `pick_target.py` flags a hazard (or a match shows its symptom), read the ma
 | `stale-header:os_version.h(<V>)`| #stale-vendored-header |
 | `needs-define:<def>`            | #needs-define |
 | `pack:<n>fn[…]`                 | #multi-function-segment-splitting-pack |
+| `c-combined:<n>file[…]` (≥2 distinct C upstream files in one asm subseg) | #multi-function-segment-splitting-pack |
 | `non16align`                    | #non16align |
 | `intrinsic-likely:<tu>.s` (vendorable ultralib asm TU) | #asm-mirror-vendoring |
 | `combined-subseg:<n>tu[…]` (≥2 distinct asm TUs in one subseg) | #asm-mirror-vendoring |

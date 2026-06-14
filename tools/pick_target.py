@@ -200,6 +200,7 @@ HAZARD_NEEDS_DEFINE = "needs-define"
 HAZARD_JAL_COUNT_MISMATCH = "jal-count-mismatch"
 HAZARD_PACK = "pack"
 HAZARD_COMBINED_SUBSEG = "combined-subseg"
+HAZARD_C_COMBINED = "c-combined"
 HAZARD_NON16ALIGN = "non16align"
 HAZARD_INTRINSIC_LIKELY = "intrinsic-likely"
 HAZARD_MAYBE_UPSTREAM = "maybe-upstream"
@@ -266,6 +267,28 @@ def _literal_in_rodata(vram, off):
         return False
     rom = vram - (fn_vram - off)
     return any(start <= rom < end for start, end in _rodata_rom_ranges())
+
+
+def _rodata_carve_end_vram(off, lit_vram):
+    """VRAM of the rodata-subseg boundary that ends the carve containing `lit_vram` (S64 #2).
+
+    The rodata-literal scan reports the `%lo(D_…)`-referenced literals, but the sibling-split's
+    carve extends to the next `.rodata` subseg boundary, which can run past the last referenced
+    literal: a multi-`du` dlabel block's trailing word has no `%lo` of its own (S64 lookathil —
+    the 0x800D2508 `.double 0` inside the D_800D2500 block, so the scan's max 0x800D2500 understated
+    the 0x800D2510 carve end = the lookatref `.rodata` boundary). Pre-noting the boundary turns the
+    finalize-time `.o`-sized carve into a planned extent at the gate. Returns the end vram (upper
+    bound: the whole subseg end, exact when the mirror's literals are the subseg tail, the common
+    case), or None when the fn vram is unknown or the literal is not in a code-segment rodata range."""
+    fn_vram = subseg_vram(off)
+    if fn_vram is None:
+        return None
+    delta = fn_vram - off
+    rom = lit_vram - delta
+    for start, end in _rodata_rom_ranges():
+        if start <= rom < end:
+            return end + delta
+    return None
 
 
 def build_upstream_index():
@@ -1348,10 +1371,13 @@ def classify_subseg(off, typ, path, size, upstream_index):
             members = []
             asm_index = build_asm_tu_index()
             asm_tus = []  # distinct vendorable .s TUs among asm-ONLY members (no C mirror)
+            c_stems = []  # distinct C-upstream stems among members (multi-file C-mirror pack)
             for fn in fns:
                 _, fn_up = upstream_index.get(fn, (None, None))
                 stem = os.path.splitext(os.path.basename(fn_up))[0] if fn_up else "?"
                 members.append(f"{fn}={stem}")
+                if fn_up and stem not in c_stems:
+                    c_stems.append(stem)
                 # Count a member's asm TU only when it has NO C upstream: a member with a C
                 # mirror is a C-mirror pack-split target (the pack hazard's basenames), not an
                 # asm-vendor TU — ultralib may ship a .s variant (e.g. gu translate.s) the ROM
@@ -1361,6 +1387,17 @@ def classify_subseg(off, typ, path, size, upstream_index):
                     if t and t not in asm_tus:
                         asm_tus.append(t)
             hazards.append(Hazard(HAZARD_PACK, f"{len(fns)}fn[" + ",".join(members) + "]"))
+            # C analog of combined-subseg (S64 #3): ≥2 *distinct* C upstream files share one asm
+            # subseg → a multi-file C-mirror pack the gate splits at the upstream-file boundary, then
+            # mirrors each verbatim. The pack basenames already encode this, but a big combined subseg
+            # (e.g. 0x82B80 = align.c + cosf.c + lookat.c, 3072B) ranks by its WHOLE size and buries a
+            # cheap clean leaf (cosf, a zero-callee gu/cosf.c mirror) past smallest-first; surfacing
+            # `c-combined:Nfile[…]` prices the split + names the leaves so the gate evaluates them
+            # without hand-disassembling asm/<rom>.s. A single-file pack (guPerspectiveF+guPerspective,
+            # both = perspective) has one stem → does NOT fire.
+            if len(c_stems) > 1:
+                hazards.append(Hazard(HAZARD_C_COMBINED,
+                                      f"{len(c_stems)}file[" + "|".join(sorted(c_stems)) + "]"))
             # Combined-subseg sub-pattern: ≥2 asm-ONLY members from *distinct* vendorable ultralib
             # .s files (the asm analog of a multi-file C pack). The gate must split the subseg at
             # the TU boundary, then vendor each .s verbatim (S62 invaldcache|invalicache). Surfacing
@@ -1488,7 +1525,14 @@ def append_upstream_hazards(off, primary, up_lib, up_path, hazards):
             rodata_lits.append(a)
     if rodata_lits:
         # Pre-note the full vram extent as a DoR enabler so it is not a finalize-time SHA-miss (S48).
-        hazards.append(Hazard(HAZARD_RODATA_LITERAL, ",".join(f"0x{a:08X}" for a in sorted(rodata_lits))))
+        detail = ",".join(f"0x{a:08X}" for a in sorted(rodata_lits))
+        # Append the carve-end boundary (S64 #2): the sibling-split runs to the next `.rodata`
+        # subseg boundary, which can exceed the last `%lo`-referenced literal (a multi-`du` dlabel
+        # block's trailing word has no ref of its own).
+        end = _rodata_carve_end_vram(off, max(rodata_lits))
+        if end and end > max(rodata_lits):
+            detail += f";carve-end=0x{end:08X}"
+        hazards.append(Hazard(HAZARD_RODATA_LITERAL, detail))
     if data_statics:
         # A function-local static the mirror must drop to a file-scope extern + recover (S49).
         hazards.append(Hazard(HAZARD_DATA_STATIC, ",".join(f"0x{a:08X}" for a in sorted(data_statics))))
