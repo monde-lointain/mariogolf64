@@ -57,13 +57,18 @@ endif
 # libultra upstream (ultralib gcc.mk, VERSION_J libgultra_rom):
 #   OPTFLAGS=-O3, MIPS_VERSION=-mips3, CFLAGS includes -funsigned-char for VERSION <= J,
 #   CPPFLAGS includes -DBUILD_VERSION=VERSION_J -D_FINALROM.
-# -mips3 is now the project default (see CFLAGS above). -O3 and -funsigned-char are
+# -mips3 is now the project default (see CFLAGS above). -O3 and -fsigned-char are
 # libultra-specific overrides; -DBUILD_VERSION=VERSION_J guards version-conditional code.
+# NOTE on -fsigned-char (S65): ultralib's gcc.mk adds -funsigned-char for VERSION_J, but this
+# ROM's libultra was built SIGNED-char — string.c's strchr/strlen load lb + sll/sra sign-extend,
+# not lbu/andi 0xff. An S65 clean rebuild under -fsigned-char reproduced the baserom SHA-1 exactly
+# (every current libultra C file matches signed), so the band default is -fsigned-char here, a
+# deliberate, ROM-proven deviation from the documented J profile. See docs/hazards.md#char-signedness.
 # The leading -I include/libultra/compiler/gcc supplies libultra's own standard C headers
 # (vendored verbatim from ultralib/include/compiler/gcc; e.g. stdlib.h with lldiv_t, which
 # libkmc's stdlib.h lacks). It is PREPENDED so it wins over include/libkmc/stdlib.h, and is
 # libultra-only — libkmc/libnusys/other sources keep resolving stdlib.h to the libkmc copy.
-LIBULTRA_CFLAGS := -I include/libultra/compiler/gcc $(subst -O2,-O3,$(CFLAGS)) -funsigned-char -DBUILD_VERSION=VERSION_J -I include/libultra/PR
+LIBULTRA_CFLAGS := -I include/libultra/compiler/gcc $(subst -O2,-O3,$(CFLAGS)) -fsigned-char -DBUILD_VERSION=VERSION_J -I include/libultra/PR
 
 # libkmc upstream was built with `gcc -O` (not -O2) per ~/development/repos/libkmc/src/genn64.bat
 # (env var gccsw=-mips3 -mgp32 -mfp32 -G0; explicit -O per file compile). -mips3 is now the
@@ -166,19 +171,13 @@ $(BUILD_DIR)/$(ASSETS_DIR)/%.o: $(ASSETS_DIR)/%.bin
 # compile flags, selected per source tree via the C_PROFILE_CFLAGS
 # pattern-specific variable. `%` spans slashes, so the single src/%.o rule also
 # builds nested lib paths, and the more-specific variable patterns win there:
-#   - libultra: -O3 -funsigned-char -DBUILD_VERSION=VERSION_J (LIBULTRA_CFLAGS)
+#   - libultra: -O3 -fsigned-char -DBUILD_VERSION=VERSION_J (LIBULTRA_CFLAGS)
 #   - libkmc:   -O instead of -O2 (LIBKMC_CFLAGS)
 #   - libnusys: adds -DUSE_EPI for nuPi* bodies (LIBNUSYS_CFLAGS)
 C_PROFILE_CFLAGS = $(CFLAGS)
 $(BUILD_DIR)/$(SRC_DIR)/libultra/%.o: C_PROFILE_CFLAGS = $(LIBULTRA_CFLAGS)
 $(BUILD_DIR)/$(SRC_DIR)/libkmc/%.o:   C_PROFILE_CFLAGS = $(LIBKMC_CFLAGS)
 $(BUILD_DIR)/$(SRC_DIR)/libnusys/%.o: C_PROFILE_CFLAGS = $(LIBNUSYS_CFLAGS)
-# string.c is the one libultra TU this ROM compiled SIGNED-char: strchr/strlen char
-# comparisons load lb + sll/sra sign-extend (not lbu/andi 0xff). Override the band's
-# -funsigned-char for this single TU (explicit-target var wins over the libultra/%.o
-# pattern). The other 100+ libultra C files are char-signedness-ambiguous, so the band
-# default is unaffected. (S65)
-$(BUILD_DIR)/$(SRC_DIR)/libultra/libc/string.o: C_PROFILE_CFLAGS = $(subst -funsigned-char,-fsigned-char,$(LIBULTRA_CFLAGS))
 
 # `strip -N dummy-symbol-name`: drop the placeholder symbol KMC GCC emits so it
 # doesn't collide at link; the name is inert, the strip just keeps the symtab clean.

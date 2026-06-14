@@ -183,19 +183,6 @@
   },
   {
     "band": "-",
-    "func": "bzero",
-    "hazards": "pack:4fn[bzero=?,strchr=string,strlen=string,memcpy=string]",
-    "kind": "asm-flip",
-    "nfns": 4,
-    "pts": 8,
-    "rom": "0x860C0",
-    "score": -104,
-    "size": 304,
-    "upstream": "libultra",
-    "vram": "0x800AACC0"
-  },
-  {
-    "band": "-",
     "func": "func_800AE920",
     "hazards": "maybe-upstream:libultra:pfssetlabel,pfsselectbank,pfsreformat",
     "kind": "asm-flip",
@@ -648,5 +635,18 @@
     "size": 928,
     "upstream": "libultra",
     "vram": "0x800B1A90"
+  },
+  {
+    "band": "warm",
+    "func": "__osDevMgrMain",
+    "hazards": "calls-unplaced:__osEPiRawReadIo,dma,edma,jal-count-mismatch:25vs21",
+    "kind": "asm-flip",
+    "nfns": 1,
+    "pts": 3,
+    "rom": "0x7E9F0",
+    "score": -696,
+    "size": 960,
+    "upstream": "libultra",
+    "vram": "0x800A35F0"
   }
 ]

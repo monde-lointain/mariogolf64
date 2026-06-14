@@ -468,21 +468,61 @@ same compiler at the wrong level produces a byte mismatch.
 
 - **libkmc = `-O`** (per `libkmc/src/genn64.bat`), not `-O2`. At `-O` rand.c stores `next` between
   the two `addiu` ops; at `-O2` it moves to the end.
-- **libultra = `-O3 -funsigned-char`** with `MIPS_VERSION=-mips3` for VERSION_J (ultralib gcc.mk).
-  Global CFLAGS uses `-mips3` (changed from `-mips2` in S33). `-O3` enables inlining of small
-  same-TU functions and affects delay-slot scheduling.
+- **libultra = `-O3 -fsigned-char`** with `MIPS_VERSION=-mips3` for VERSION_J (ultralib gcc.mk —
+  but see the char-signedness note). Global CFLAGS uses `-mips3` (changed from `-mips2` in S33).
+  `-O3` enables inlining of small same-TU functions and affects delay-slot scheduling.
+  **Char signedness is `-fsigned-char`, NOT ultralib-J's `-funsigned-char` (S65).** ultralib's
+  `gcc.mk` adds `-funsigned-char` for VERSION_J, but this ROM's libultra was built signed: an S65
+  full `make clean` rebuild under `-fsigned-char` reproduced the baserom SHA-1 exactly (every
+  current libultra C file matches signed). See `#char-signedness` for the symptom + the per-file
+  override mechanism if a future TU ever needs the opposite.
 
 **Trigger:** A libkmc match locking at ~0.9 across every C rewrite (suspect scheduler-level); a
 libultra match locking at ~0.9 with unexpected register usage or wrong delay-slot instructions.
 
 **Procedure:** The Makefile carves `LIBKMC_CFLAGS := $(subst -O2,-O,$(CFLAGS))` and
-`LIBULTRA_CFLAGS := $(subst -O2,-O3,$(CFLAGS)) -funsigned-char -DBUILD_VERSION=VERSION_J`, each via a
+`LIBULTRA_CFLAGS := $(subst -O2,-O3,$(CFLAGS)) -fsigned-char -DBUILD_VERSION=VERSION_J`, each via a
 specificity-winning pattern rule. `decomp_loop.py` auto-applies the right profile when a matching
 `src/libkmc/<basename>.c` or `src/libultra/<relpath>.c` exists. If a match locks at ~0.9, verify the
 loop is using the correct profile (compile `base.c` with `-O` directly, or pass `LIBULTRA=1` /
 `--profile libultra`) before iterating further on the C.
 
 **Provenance:** S33 (`-mips3`).
+
+---
+
+## char-signedness (libultra is -fsigned-char)
+
+**Rule:** This ROM's libultra was compiled with **signed `char`** (`-fsigned-char`), a ROM-proven
+deviation from ultralib's documented VERSION_J profile (gcc.mk adds `-funsigned-char` for D–J). The
+band default `LIBULTRA_CFLAGS` therefore carries `-fsigned-char`. Most libultra C is
+char-signedness-*ambiguous* (matches under either flag), so this only ever surfaces on a file whose
+codegen actually depends on `char` signedness.
+
+**Symptom (the S65 discriminator):** a verbatim C mirror SHA-misses, and the only diff is byte-load
+signedness — the ROM loads `lb` + `sll/sra` sign-extend (and may emit a phantom empty stack frame),
+while the wrong flag gives `lbu` + `andi 0xff`. The exposing pattern is a `char` lvalue compared
+against a **non-zero** value (e.g. `strchr`'s `*s != ch`); a comparison against literal `0` is
+signedness-invariant (`strlen`/`memcpy` matched under both — `memcpy` fully, `strlen`'s `lb` is the
+compiler's free choice for a `!= 0` test).
+
+**Procedure:**
+1. The band default is already `-fsigned-char` (S65) — a new libultra mirror compiles signed with no
+   action. If a mirror SHA-misses with the `lbu/andi` vs `lb/sll-sra` signature, you have the inverse
+   case (a TU that wants the *opposite* signedness).
+2. Per-file override mechanism (the explicit-target var beats the `libultra/%.o` pattern):
+   `$(BUILD_DIR)/$(SRC_DIR)/libultra/<rel>.o: C_PROFILE_CFLAGS = $(subst -fsigned-char,-funsigned-char,$(LIBULTRA_CFLAGS))`
+   (or the reverse subst). Append-and-last-wins also works since gcc takes the final `-f*-char`.
+3. To re-settle the band default after several such files, run `make clean && make` with the global
+   flag flipped and compare the ROM SHA-1 — the S65 authoritative test (a clean rebuild under
+   `-fsigned-char` reproduced the baserom exactly, proving the global default, not a per-file patch).
+
+**Distinct from** the per-field **cast-divergence** hazard (a 2.0L-vs-J `(type)` widening on one
+struct field's high word) — that is a source/version difference; this is a whole-TU compiler flag.
+
+**Provenance:** S65 (string.c `strchr`/`strlen` exposed it; the per-file override was the initial
+fix, then the clean-rebuild test proved `-fsigned-char` is the correct band default and the override
+was removed).
 
 ---
 

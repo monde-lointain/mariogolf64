@@ -1374,18 +1374,25 @@ def classify_subseg(off, typ, path, size, upstream_index):
             c_stems = []  # distinct C-upstream stems among members (multi-file C-mirror pack)
             for fn in fns:
                 _, fn_up = upstream_index.get(fn, (None, None))
-                stem = os.path.splitext(os.path.basename(fn_up))[0] if fn_up else "?"
-                members.append(f"{fn}={stem}")
-                if fn_up and stem not in c_stems:
-                    c_stems.append(stem)
-                # Count a member's asm TU only when it has NO C upstream: a member with a C
-                # mirror is a C-mirror pack-split target (the pack hazard's basenames), not an
-                # asm-vendor TU — ultralib may ship a .s variant (e.g. gu translate.s) the ROM
-                # doesn't use. Without this gate a C-mirror gu pack would mis-flag as asm.
-                if not fn_up:
-                    t = asm_index.get(fn)
-                    if t and t not in asm_tus:
+                if fn_up:
+                    stem = os.path.splitext(os.path.basename(fn_up))[0]
+                    members.append(f"{fn}={stem}")
+                    if stem not in c_stems:
+                        c_stems.append(stem)
+                    continue
+                # No C upstream. Count a member's asm TU only here: a member with a C mirror
+                # is a C-mirror pack-split target (the pack hazard's basenames), not an asm-vendor
+                # TU — ultralib may ship a .s variant (e.g. gu translate.s) the ROM doesn't use.
+                # Without this gate a C-mirror gu pack would mis-flag as asm. Name the .s in the
+                # member label so a MIXED asm+C pack reads as `bzero=bzero.s` not an opaque
+                # `bzero=?` (S65 #1: the [0x860C0] libc pack = bzero.s + string.c was unreadable).
+                t = asm_index.get(fn)
+                if t:
+                    members.append(f"{fn}={os.path.basename(t)}")
+                    if t not in asm_tus:
                         asm_tus.append(t)
+                else:
+                    members.append(f"{fn}=?")
             hazards.append(Hazard(HAZARD_PACK, f"{len(fns)}fn[" + ",".join(members) + "]"))
             # C analog of combined-subseg (S64 #3): ≥2 *distinct* C upstream files share one asm
             # subseg → a multi-file C-mirror pack the gate splits at the upstream-file boundary, then

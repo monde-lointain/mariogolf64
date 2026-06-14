@@ -25,6 +25,17 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 65 — clear [0x860C0] libc pack: bzero asm-mirror + string.c C mirror — 2026-06-14
+- Increment: 1 `.c` banked (`src/libultra/libc/string.c`, 3 fns `strchr`/`strlen`/`memcpy`) + 1 asm-mirror (`src/libultra/libc/bzero.s`, `bzero`) / 4 functions matched (md5-candidate 103→**104**; asm subsegs 158→157, hasm 18→19, c 103→104). Decomposed the pts-8 4-fn pack at the bzero|string boundary (rom 0x86160, 16-aligned) into one `hasm` (bzero) + one `c` (string).
+- Quality: stuck-far 0 / permuter 0 / carried 0 / re-opened 0.
+- Seed: committed 4pt; banked 4pt; regime mirror (seed-only; pack seed-8 → 8-gate fired → decomposed into string ~2 + bzero ~2). **Calibration note: the mirror track's "zero-variance point-mass" was VIOLATED — string.c was a verbatim mirror that SHA-missed and needed a build-flag recovery (would carry a +1 novel-gotcha residual on the classical track). First mirror sprint with real variance; the per-file all-or-nothing bank + counter-metric still held.**
+- What helped: bzero asm-mirror reused the bcopy.s VENDOR_ASM pattern verbatim (WEAK/LEAF/XLEAF all in `sys/asm.h`, R4300.h/regdef.h deps vendored, `blkclr` unreferenced→harmless) → proven green at the gate, 0 iter. `memcpy` matched under both char flags. `.o`-disassembly diff localized the SHA-miss to char-load signedness in 1 step.
+- Friction: string.c char-signedness. Verbatim mirror SHA-missed — ROM compiled it SIGNED-char (`strchr`/`strlen` load `lb`+`sll/sra`, phantom empty frame) but the band forced `-funsigned-char`. Initial fix was a per-file `-fsigned-char` override; the PO-approved authoritative test (`make clean` + global `-fsigned-char` rebuild) then reproduced the baserom SHA-1 **exactly** → `-funsigned-char` was a WRONG band default. Flipped the band to `-fsigned-char`, removed the per-file override. ultralib's gcc.mk adds `-funsigned-char` for VERSION_J, so MG64's libultra char signedness is a **ROM-proven deviation from the documented J profile** (durable project constraint — PO promote to memory).
+- Applied (3 of 3): #1 `pick_target.py` pack-member labels resolve `.s` TUs via `build_asm_tu_index` (`bzero=?`→`bzero=bzero.s`; a MIXED asm+C pack is now legible at the gate, no longer an opaque pts-8; golden regen for the now-split [0x860C0] row, suite 26 pass / 3 skip). #2 `docs/hazards.md#char-signedness` section + `CLAUDE.md` hazard-index row (`clean mirror SHA-miss, char load lb/sll-sra vs lbu/andi`) + the per-file override mechanism documented; **the suggested pick_target char-sensitivity pre-flag was DESCOPED — the #3 global flip removed the systematic cause, so a fuzzy char-comparison detector would now only catch a hypothetical inverse case at false-positive risk**. #3 global signed-char investigation → flipped the band default to `-fsigned-char` (Makefile LIBULTRA_CFLAGS + comments; docs/hazards.md compile-profiles note).
+- Carry-over: none. `[0x860C0]` pack fully cleared.
+
+---
+
 ## Sprint 64 — bank gu/lookathil.c (guLookAtHiliteF + guLookAtHilite), libultra gu mirror — 2026-06-14
 - Increment: 1 `.c` banked (`src/libultra/gu/lookathil.c`, 2 fns) / 2 functions matched (delta: md5-candidate 102/103 → **103/103**, all `.c` stub-free; asm subsegs 159→158). Verbatim ultralib `gu/lookathil.c` (VERSION_J), byte-identical cp, full-make ROM SHA-1 == baserom first try.
 - Quality: stuck-far 0 / permuter 0 / carried 0 / re-opened 0 (1 expected rodata sibling-split, not a gotcha).
