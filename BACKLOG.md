@@ -530,4 +530,22 @@ Files with a timeboxed spike (a function that locked < 0.97 percent, needs permu
 a BSS-layout-conflict). `tools/pick_target.py` de-ranks BACKLOG carry-overs so they stop
 resurfacing; `/sprint-plan` re-pulls them first when retrying.
 
-_(none — osAiSetFrequency carry-over resolved and banked at S38 retroactive review)_
+- **asm-mirror vendoring — remaining intrinsic-likely libultra TUs (S56 pilot proved the pattern).**
+  S56 vendored the 4 single-instr reg shims (`getcount`/`getcause`/`getsr`/`setcompare`) via the
+  KMC-gcc `VENDOR_ASM` Makefile mechanism (assemble ultralib `.s` with `LIBULTRA_ASFLAGS`; KMC `as`
+  pads each fn's `.text` to its 16-byte ROM slot, which modern `as` does not). The pattern now
+  extends by adding `<rom>:src/libultra/<dir>/<file>.s` pairs to `VENDOR_ASM`, vendoring the ultralib
+  TU verbatim, and flipping the subseg `asm`→`hasm`. Each new TU still needs per-TU ROM-SHA-1
+  verification (ultralib version-match unproven beyond the reg shims). Remaining, smallest-first:
+  - **single-fn primitives:** `osWritebackDCacheAll` (0x82560), `osWritebackDCache` (0x824E0,
+    `src/os/writebackdcache.s`), `bcopy` (0x85DA0, `src/libc/bcopy.s`), `func_800ACCC0` (0x880C0),
+    `func_800ACB40` (0x87F40), `__osProbeTLB` (0x88000, `src/os/probetlb.s`),
+    `osUnmapTLBAll` (0x88100, `src/os/unmaptlball.s`), `osMapTLBRdb` (0x8CD10, `src/os/maptlbrdb.s`),
+    `sqrtf` (0x8BE10, `src/gu/sqrtf.s` — uses `sqrt.s` FPU op, verify the `.set` reorder/nop).
+  - **pure-asm packs (both fns asm, no C):** `osInvalDCache`+`osInvalICache` (0x823B0,
+    `src/os/invaldcache.s`+`invalicache.s`), `__osDisableInt`+`__osRestoreInt` (0x8B900).
+  - **DO NOT blanket-hasm (mixed packs with real C mirrors):** `osSetIntMask` pack:3fn (0x7E360 —
+    also holds `osCreatePiManager`/pimgr + `__osEPiRawStartDma`/epirawdma; split first, hasm only
+    `osSetIntMask`); `func_800AFB90` pack:8fn (0x8AF90 — exception/thread dispatch block; its own
+    decision). These stay asm flip-candidates for now.
+- _(osAiSetFrequency carry-over resolved and banked at S38 retroactive review)_
