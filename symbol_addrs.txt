@@ -75,3 +75,5 @@ guAlign = 0x800A794C; // type:func
 dtor = 0x800C81E0; // size:0x4
 __libm_qnan_f = 0x800D2640; // size:0x4
 guLookAt = 0x800A7FF0; // type:func
+osMapTLB = 0x800ACB40; // type:func
+osUnmapTLB = 0x800ACCC0; // type:func
