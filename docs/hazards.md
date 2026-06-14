@@ -166,7 +166,24 @@ resolves the jal directly, so the missing symbol only bites in the execution mid
 and functions — against the name files in the same disassemble pass that confirms a recover-extern
 vram (the asm jal list is already in hand).
 
-**Provenance:** S23 (`osEPiStartDma` → `osPiGetCmdQueue`@0x800B06F0).
+**Renamed-vs-substituted callee — body-compare before editing (S61).** When the upstream calls
+`fooBar` but the jal target is already named *something else* (`calls-unplaced:fooBar` flagged, yet
+the asm `jal`s a placed symbol with a different name), there are two cases and they need opposite
+fixes: **(1) renamed** — same function, decomp gave it a different name → the mirror is still
+verbatim, just confirm the name and leave the body (no edit; the placed name binds the jal); **(2)
+substituted** — this ROM calls a *genuinely different* function for that slot → edit the C body to
+call the placed name (a known-edit near-verbatim mirror). **Do not assume (1).** Disassemble the
+target and body-compare it against the upstream callee's prebuilt `.o`
+(`mips-linux-gnu-objdump -d ~/development/repos/ultralib/build/J/.../<callee>.o`): stack frame, error
+paths, sqrt/branch handling. A fast first discriminator is the address — a libultra callee lives in
+the 0x800A_0000+ block; a target in the game code region (low 0x8002_xxxx) is almost certainly a game
+substitution. (S61 `guRotateF`: upstream `guNormalize`, but the ROM `jal`s `vec3f_normalize`@0x80029900
+— body-compare proved a *different* fn (game region; −0x28 frame + `osSyncPrintf` degenerate-input
+error path + (0,1,0) fallback + bare `sqrt.s`, vs `guNormalize`'s −0x20 frame + `sqrtf` NaN-check, no
+error path), so the body edit `guNormalize`→`vec3f_normalize` was correct, not a name reconciliation.)
+
+**Provenance:** S23 (`osEPiStartDma` → `osPiGetCmdQueue`@0x800B06F0); S61 (`guRotateF` substituted
+`vec3f_normalize`).
 
 ---
 
@@ -334,6 +351,29 @@ the fn-local `static` → a file-scope `extern <type> <name>;` + add the symbol 
 vram so `make extract` renames the `D_<vram>` dlabel; no `.data` emitted, `.text` reloc identical),
 **not** a `.rodata` sibling split. (S49 `xseed`@0x800C81C0; S52 `dtor`@0x800C81E0 for `guRotateRPYF`;
 the same gu data band holds `guRotateF`@0x800C81D0, `guAlignF`@0x800C81A0.)
+
+**The drop-extern *hoist* vs. the verbatim-static *carve* (S61).** Be precise about scope: this is a
+**function-local** `static` (declared inside the fn, persists across calls, *internal linkage*) — not
+a file-scope `static`. Compiled verbatim, the compiler emits it as a **local** symbol (`dtor.2` in the
+`.o`'s symbol table), so two siblings' identically-named function-local statics **never collide** —
+they are distinct locals in distinct objects (`guRotateF`'s `dtor`@0x800C81D0 and `guRotateRPYF`'s
+`dtor`@0x800C81E0 coexist fine as verbatim locals). The S52 drop-extern fast path *hoists* the
+function-local static up into a file-scope `extern <type> <name>;` (giving it external linkage); that
+is what introduces a name — and a second sibling can't hoist to the **same** file-scope name
+(`guRotateRPYF` already hoisted `dtor` + claimed its `symbol_addrs` entry, so a second `extern float
+dtor;` is a duplicate symbol / binds the wrong vram). So two ways place a function-local FP static:
+**(a) hoist** under a *unique* file-scope name (curated `<fn>_dtor`, or the raw `D_<vram>` dlabel) +
+symbol add — no `.data` emitted; **(b) keep it verbatim** (preserving the function-local semantics)
+and carve a `.data` subseg for the file — `[<rom>, .data, lib<...>/<file>]` + a continuation
+`[<rom+ext>, data]`. The carve is the more verbatim option (no source edit, no hoist). **If you carve,
+size the extent from the COMPILED object, not the static's byte size** —
+`mips-linux-gnu-objdump -s -j .data build/.../<file>.o` (the section is alignment-padded: `dtor` is
+4B but `rotate.o(.data)` is **16B** = 4B + 12B pad), cross-checked against the baserom bytes to the
+next data symbol. A short carve double-counts (the compiled `.data` injects its full padded extent
+while the un-carved tail still emits the original bytes) → the ROM grows and the whole data segment
+reflows (S61: a 4B carve grew the ROM +16B; the misleading `cmp` first-diff was at 0x1008, an
+artifact of the size-grown file, not the real divergence). Clean-rebuild to verify. (S61 `guRotateF`:
+16B carve `0xA35D0`→`0xA35E0`.)
 
 ---
 

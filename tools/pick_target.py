@@ -528,6 +528,30 @@ def _strip_dead_blocks(text):
     return "\n".join(out)
 
 
+_DEFINE_LINE_RE = re.compile(r"^[ \t]*#[ \t]*define\b")
+
+
+def _strip_define_lines(text):
+    """Drop `#define` directive lines (including `\\`-continuations). A `#define NAME (expr)`
+    object/function-like macro DEFINITION is not a call site, yet its `NAME (` matches C_CALL_RE and
+    inflates both the C-side jal count and the calls-unplaced set. S61: gu/rotate's VERSION_J `#else`
+    branch `#define xxsine (x * sine)` / yxsine / zxsine were each counted as a phantom call →
+    false `jal-count-mismatch:7vs4` + `calls-unplaced:...,xxsine,yxsine,zxsine` that mis-routed a
+    clean near-verbatim mirror toward the classical loop. Strip the source's own #define lines before
+    the call scan (the one-level macro EXPANSION bodies appended by macro_hidden_text carry no
+    #define directives, so macro-hidden-extern detection is unaffected)."""
+    out, cont = [], False
+    for line in text.splitlines():
+        if cont:
+            cont = line.rstrip().endswith("\\")
+            continue
+        if _DEFINE_LINE_RE.match(line):
+            cont = line.rstrip().endswith("\\")
+            continue
+        out.append(line)
+    return "\n".join(out)
+
+
 # Version-conditional stripping. The build compiles ONE side of `#if BUILD_VERSION <op> VERSION_X`
 # (libultra is `-DBUILD_VERSION=VERSION_J`), so the inactive side's refs/calls are phantom — they
 # never reach the real object. S47 `osCartRomInit`: `CartRomHandle` + `osPiRawReadIo` live only in
@@ -767,7 +791,7 @@ def call_divergence(rom_off, primary, up_cpath):
     n_asm = _asm_jal_count(rom_off, primary)
     if n_asm is None:
         return None
-    n_c = _c_jal_count(_strip_string_literals(_strip_dead_blocks(body)))
+    n_c = _c_jal_count(_strip_define_lines(_strip_string_literals(_strip_dead_blocks(body))))
     if n_c == n_asm:
         return None
     return Hazard(HAZARD_JAL_COUNT_MISMATCH, f"{n_c}vs{n_asm}")
@@ -1098,6 +1122,7 @@ def calls_unplaced(cpath, primary, placed, lib=None):
     # Drop the inactive `#if BUILD_VERSION` side first (S47: `osPiRawReadIo` is called only in the
     # non-J `#else` branch) so its calls are not phantom-flagged.
     text = _strip_inactive_version_branches(text, _build_version_ord(lib))
+    text = _strip_define_lines(text)  # an in-body `#define NAME (expr)` is a macro def, not a call (S61)
     body = _strip_string_literals(_strip_dead_blocks(_strip_comments(text + "\n" + macro_text)))
     called = {
         n

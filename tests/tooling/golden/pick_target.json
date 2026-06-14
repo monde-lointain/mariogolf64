@@ -520,19 +520,6 @@
     "vram": "0x800A6D60"
   },
   {
-    "band": "warm",
-    "func": "guRotateF",
-    "hazards": "pack:2fn[guRotateF=rotate,guRotate=rotate],calls-unplaced:guNormalize,xxsine,yxsine,zxsine,jal-count-mismatch:7vs4,data-static:0x800C81D0",
-    "kind": "asm-flip",
-    "nfns": 2,
-    "pts": 3,
-    "rom": "0x85450",
-    "score": -472,
-    "size": 736,
-    "upstream": "libultra",
-    "vram": "0x800AA050"
-  },
-  {
     "band": "-",
     "func": "func_8009FB60",
     "hazards": "pack:2fn[func_8009FB60=?,func_8009FD1C=?],maybe-upstream:libultra:viswapcontext,sprawdma,sirawdma",
@@ -648,5 +635,18 @@
     "size": 624,
     "upstream": "none",
     "vram": "0x800AA730"
+  },
+  {
+    "band": "cold",
+    "func": "nuContMgrInit",
+    "hazards": "pack:9fn[nuContMgrInit=nucontmgr,func_800A2C64=?,nuContDataClose=nucontmgr,nuContDataOpen=nucontmgr,contReadData=nucontmgr,func_800A2D5C=?,func_800A2DAC=?,func_800A2E38=?,func_800A2E58=?],file-static,defines-data:nuContCallBack,refs-unplaced:nuContCallBack,nuContNum,nuContReadFunc,nuContStatus,nuContWaitMesgQ,calls-unplaced:aligned,osContGetQuery,osContStartQuery",
+    "kind": "asm-flip",
+    "nfns": 9,
+    "pts": 8,
+    "rom": "0x7DF90",
+    "score": -632,
+    "size": 832,
+    "upstream": "libnusys",
+    "vram": "0x800A2B90"
   }
 ]
