@@ -247,6 +247,8 @@ VENDOR_ASM := \
 	8CA40:src/libultra/os/setcompare.s \
 	824E0:src/libultra/os/writebackdcache.s \
 	82560:src/libultra/os/writebackdcacheall.s \
+	823B0:src/libultra/os/invaldcache.s \
+	82460:src/libultra/os/invalicache.s \
 	88000:src/libultra/os/probetlb.s \
 	88100:src/libultra/os/unmaptlball.s \
 	8BE10:src/libultra/gu/sqrtf.s \
