@@ -520,6 +520,19 @@
     "vram": "0x800A6D60"
   },
   {
+    "band": "warm",
+    "func": "guRotateF",
+    "hazards": "pack:2fn[guRotateF=rotate,guRotate=rotate],calls-unplaced:guNormalize,xxsine,yxsine,zxsine,jal-count-mismatch:7vs4,data-static:0x800C81D0",
+    "kind": "asm-flip",
+    "nfns": 2,
+    "pts": 3,
+    "rom": "0x85450",
+    "score": -472,
+    "size": 736,
+    "upstream": "libultra",
+    "vram": "0x800AA050"
+  },
+  {
     "band": "-",
     "func": "func_8009FB60",
     "hazards": "pack:2fn[func_8009FB60=?,func_8009FD1C=?],maybe-upstream:libultra:viswapcontext,sprawdma,sirawdma",
@@ -596,19 +609,6 @@
     "size": 784,
     "upstream": "libultra",
     "vram": "0x800A7410"
-  },
-  {
-    "band": "cold",
-    "func": "guRotateF",
-    "hazards": "pack:2fn[guRotateF=rotate,guRotate=rotate],calls-unplaced:guNormalize,xxsine,yxsine,zxsine,needs-header:../gu/guint.h(vendorable),jal-count-mismatch:7vs4,data-static:0x800C81D0",
-    "kind": "asm-flip",
-    "nfns": 2,
-    "pts": 5,
-    "rom": "0x85450",
-    "score": -536,
-    "size": 736,
-    "upstream": "libultra",
-    "vram": "0x800AA050"
   },
   {
     "band": "warm",

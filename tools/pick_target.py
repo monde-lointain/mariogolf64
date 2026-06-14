@@ -195,6 +195,7 @@ HAZARD_DEFINES_DATA = "defines-data"
 HAZARD_REFS_UNPLACED = "refs-unplaced"
 HAZARD_CALLS_UNPLACED = "calls-unplaced"
 HAZARD_NEEDS_HEADER = "needs-header"
+HAZARD_STALE_HEADER = "stale-header"
 HAZARD_NEEDS_DEFINE = "needs-define"
 HAZARD_JAL_COUNT_MISMATCH = "jal-count-mismatch"
 HAZARD_PACK = "pack"
@@ -267,17 +268,27 @@ def _literal_in_rodata(vram, off):
 
 
 def build_upstream_index():
-    """Map upstream function name -> (lib, path), scanning libultra/libkmc once."""
+    """Map upstream function name -> (lib, path), scanning libultra/libkmc once.
+
+    Two determinism fixes (S60). (1) Sort the glob so a name defined in multiple upstream files
+    resolves to the alphabetically-first directory, not whatever the filesystem yields first: gu/
+    beats mgu/ — MG64 mirrors libgultra, not the fast-gu `mgu` variant — so a pack member like
+    guMtxXFML (in both gu/mtxcatl.c under a version guard and mgu/mtxxfml.c) co-locates with its
+    sibling guMtxCatL in gu/mtxcatl.c instead of mislabeling to mgu (which cascaded a phantom
+    `../gu/guint.h` needs-header FP). (2) Strip version-inactive branches first, so a def behind a
+    dead `#if BUILD_VERSION` guard for this build's ordinal doesn't register a phantom attribution."""
     index = {}
     for lib, tree in UPSTREAM_TREES:
         if not os.path.isdir(tree):
             continue
-        for cpath in glob.glob(os.path.join(tree, "**", "*.c"), recursive=True):
+        build_ord = _build_version_ord(lib)
+        for cpath in sorted(glob.glob(os.path.join(tree, "**", "*.c"), recursive=True)):
             try:
                 with open(cpath, errors="ignore") as f:
                     text = f.read()
             except OSError:
                 continue
+            text = _strip_inactive_version_branches(text, build_ord)
             for m in UPSTREAM_DEF_RE.finditer(text):
                 index.setdefault(m.group(1), (lib, cpath))
     return index
@@ -605,6 +616,57 @@ def _strip_inactive_version_branches(text, build_ord):
         if live():
             out.append(line)
     return "\n".join(out)
+
+
+_DEFINE_VERSION_RE = re.compile(r"^\s*#\s*define\s+(VERSION_[A-Z])\b")
+
+
+@functools.cache
+def _os_version_defined_tokens(lib):
+    """The VERSION_<X> tokens the os_version.h resolvable on a `lib` candidate's effective -I set
+    actually `#define`s. The denominator for stale_version_header: the in-tree os_version.h can
+    resolve as a FILE (so needs-header stays silent) yet be a stripped revision that defines none of
+    the VERSION_* constants the gcc.mk profile expects (S60: the 2.0L header). Empty frozenset when
+    no os_version.h resolves at all."""
+    search_dirs = INCLUDE_DIRS + LIB_EXTRA_INCLUDE_DIRS.get(lib or "", [])
+    for d in search_dirs:
+        p = os.path.join(d, "os_version.h")
+        if os.path.exists(p):
+            toks = set()
+            with open(p, errors="ignore") as f:
+                for line in f:
+                    m = _DEFINE_VERSION_RE.match(line)
+                    if m:
+                        toks.add(m.group(1))
+            return frozenset(toks)
+    return frozenset()
+
+
+def stale_version_header(up_path, lib):
+    """Sorted VERSION_<X> tokens an upstream file's `#if BUILD_VERSION <op> VERSION_X` guards
+    reference but the in-tree os_version.h (on the candidate's -I set) does NOT `#define` — so cpp
+    reads each as 0 and silently mis-evaluates the guard. S60: gu/mtxcatl.c's `#if BUILD_VERSION <
+    VERSION_K` evaluated `0 < 0` against the stripped 2.0L os_version.h and dropped guMtxXFML to a
+    link error. A `stale-header:os_version.h(VERSION_K)` hazard = vendor the missing constant(s) into
+    os_version.h before the flip (additive; clean-rebuild-verify since every other guard compares the
+    -DBUILD_VERSION token and evaluates identically). Distinct from needs-header: the header file
+    exists and resolves — the gap is its CONTENT. Returns [] when the lib sets no -DBUILD_VERSION
+    (its guards don't gate on VERSION_*) or every referenced token is defined."""
+    if not _build_version_ord(lib):
+        return []
+    refs = set()
+    try:
+        with open(up_path, errors="ignore") as f:
+            for line in f:
+                m = _BUILD_VERSION_IF_RE.match(line.lstrip())
+                if m:
+                    refs.add(m.group(2))
+    except OSError:
+        return []
+    if not refs:
+        return []
+    defined = _os_version_defined_tokens(lib)
+    return sorted(t for t in refs if t not in defined)
 
 
 @functools.cache
@@ -1097,8 +1159,10 @@ def missing_includes(cpath, mirror_dir=None, lib=None):
             if any(os.path.exists(os.path.join(d, inc)) for d in search_dirs):
                 continue
             # A quote-include resolves source-relative once the band-local companion is in-tree.
+            # normpath collapses a `..` segment (S60: a relative `../gu/guint.h` from a sibling-dir
+            # upstream source resolves to the already-vendored gu/ copy, not a phantom needs-header).
             is_quote = '"' in m.group(0)
-            if is_quote and mirror_dir and os.path.exists(os.path.join(mirror_dir, inc)):
+            if is_quote and mirror_dir and os.path.exists(os.path.normpath(os.path.join(mirror_dir, inc))):
                 continue
             if inc not in missing:
                 missing.append(inc)
@@ -1339,6 +1403,12 @@ def append_upstream_hazards(off, primary, up_lib, up_path, hazards):
         tagged = [_header_tag(inc) for inc in missing]
         hazards.append(Hazard(HAZARD_NEEDS_HEADER, ",".join(tagged)))
         blocked = any(include_is_blocked(inc) for inc in missing)
+    stale = stale_version_header(up_path, up_lib)
+    if stale:
+        # A version-conditional fn silently dropped: os_version.h resolves but is a stripped revision
+        # missing the referenced VERSION_* constant. A one-time additive header-content vendor, not a
+        # block — keep it off `blocked` (it does not gate the DoR, only warns the gate). S60.
+        hazards.append(Hazard(HAZARD_STALE_HEADER, "os_version.h(" + ",".join(stale) + ")"))
     gating = function_gating_define(up_path, primary)
     if gating and gating not in _active_defines_for_lib(up_lib):
         hazards.append(Hazard(HAZARD_NEEDS_DEFINE, gating))

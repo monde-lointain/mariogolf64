@@ -196,6 +196,11 @@ below).
   passing ≠ ROM matching; the final `make` proves the match. Gate the `sha1sum` on `make`
   succeeding (confirm the `build/mariogolf64.z64: OK` line first) — a failed link leaves the previous
   `.z64` in `build/`, so `sha1sum` on a stale ROM false-positives.
+- **Clean-rebuild when an enabler edits a shared vendored header.** The build tracks no header deps,
+  so an incremental `make` recompiles only the file you touched, not the other consumers of a header
+  you changed. When a mirror/enabler edits a widely-included header (e.g.
+  `include/libultra/PR/os_version.h`), the **banking** SHA-1 must come from `make clean && make
+  extract && make`, not an incremental build (`docs/hazards.md#clean-rebuild-after-shared-header-edit`).
 - **Never clang-format library code under `src/libultra/` or `src/libkmc/`.** These are verbatim
   upstream copies; reformatting defeats cross-referencing. Both dirs carry a local `.clang-format`
   with `DisableFormat: true`.
@@ -228,6 +233,7 @@ When `pick_target.py` flags a hazard (or a match shows its symptom), read the ma
 | `file-static`                   | #file-static-bss-layout-conflict |
 | `defines-data:<g>` / `data-static:<addr>` | #defines-data |
 | `needs-header:<inc>`            | #needs-header |
+| `stale-header:os_version.h(<V>)`| #stale-vendored-header |
 | `needs-define:<def>`            | #needs-define |
 | `pack:<n>fn[…]`                 | #multi-function-segment-splitting-pack |
 | `non16align`                    | #non16align |

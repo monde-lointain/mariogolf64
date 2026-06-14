@@ -639,6 +639,64 @@ fixup commit).
 
 ---
 
+## stale-vendored-header
+
+**Rule:** A vendored header can resolve as a *file* (so `needs-header` stays silent) yet be a stripped
+revision whose *content* is missing constants the build expects — the gap is the content, not the
+path. The specific case: the in-tree `include/libultra/PR/os_version.h` was the 2.0L release header,
+which defines only `OS_MAJOR/MINOR_VERSION` and **none** of the `VERSION_D..L` ordinal constants the
+ultralib gcc.mk profile uses. An upstream mirror with a `#if BUILD_VERSION < VERSION_K` guard then
+sees `VERSION_K` (and the `-DBUILD_VERSION=VERSION_J` token) as undefined → cpp reads both as `0` →
+the guard mis-evaluates and the guarded function silently vanishes into a link error, not a compile
+error (S60: `gu/mtxcatl.c`'s `guMtxXFML` dropped, `undefined reference to guMtxXFML` at link).
+
+**Trigger:** `pick_target.py` flag `stale-header:os_version.h(<VERSION_X>,…)` — fires when an upstream
+file's `#if BUILD_VERSION <op> VERSION_X` references a token the os_version.h on the candidate's `-I`
+set does not `#define` (and the lib actually sets `-DBUILD_VERSION`). Distinct from `needs-header`
+(file absent) and `needs-define` (a non-version gating define).
+
+**Procedure:**
+- Add the missing `VERSION_*` constants to `include/libultra/PR/os_version.h`, verbatim from the
+  ultralib gcc.mk `os_version.h` (`VERSION_D 1` … `VERSION_L 9`). This is a one-time additive
+  header-content vendor enabler, not a `blk`.
+- **Additive + SHA-safe by construction:** every *existing* in-tree guard compares against
+  `VERSION_J` and the build sets `BUILD_VERSION=VERSION_J`, so `>= VERSION_J` stays true and
+  `< VERSION_J` stays false whether the tokens are `0`-vs-`0` (stripped) or `7`-vs-`7` (vendored) —
+  only a `< VERSION_K`-style guard (the one that was wrong) flips. Leave `OS_MAJOR/MINOR_VERSION`
+  untouched (the upstream form needs `BUILD_VERSION_STRING`, which is not defined here).
+- **Verify with a clean rebuild** (see #clean-rebuild-after-shared-header-edit) — the build has no
+  header-dependency tracking, so a `make` after the edit only recompiles the file you touched; the
+  other os_version.h consumers keep stale objects and a divergence would hide until the next clean.
+
+**Provenance:** S60 (gu/mtxcatl.c — `guMtxXFML` under `#if BUILD_VERSION < VERSION_K`; the in-tree
+os_version.h was the 2.0L revision; the `pick_target` `_strip_inactive_version_branches`/`build_ord`
+machinery already existed for ref/call scanning, reused here for the detector).
+
+---
+
+## clean-rebuild-after-shared-header-edit
+
+**Rule:** The build tracks no header dependencies — a `make` recompiles only the `.c` files whose
+objects are missing or older than the source, **not** the consumers of a header you edited. So when a
+mirror/enabler edits a *shared vendored header* (e.g. `include/libultra/PR/os_version.h`, included
+transitively by many libultra TUs), the post-edit verification MUST be a clean rebuild, or a stale
+object can mask a divergence the header change introduced elsewhere.
+
+**Trigger:** the finalize/enabler step modifies a header under `include/` that more than one already-
+banked TU includes (directly or via `guint.h`/`gu.h`/etc.).
+
+**Procedure:**
+- `make clean && make extract && make`, then `sha1sum build/mariogolf64.z64` == baserom. The clean
+  rebuild recompiles every consumer against the new header; only then is the SHA-1 a real guard.
+- A plain incremental `make` is fine while iterating the *mirror file itself* (rm its stale `.o` if
+  the header change doesn't retrigger it), but the **banking** SHA-1 must come from the clean build.
+
+**Provenance:** S60 (the os_version.h VERSION_* add — incremental `make` left `guMtxXFML` undefined
+until the touched object was removed; a `make clean` rebuild then confirmed the add was globally
+SHA-safe across all os_version.h consumers).
+
+---
+
 ## needs-define
 
 **Rule:** A function guarded by a preprocessor define not active for its lib won't compile into the
