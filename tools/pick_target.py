@@ -205,6 +205,7 @@ HAZARD_STALE_HEADER = "stale-header"
 HAZARD_NEEDS_DEFINE = "needs-define"
 HAZARD_JAL_COUNT_MISMATCH = "jal-count-mismatch"
 HAZARD_PACK = "pack"
+HAZARD_SINGLE_FILE_PACK = "single-file-pack"
 HAZARD_COMBINED_SUBSEG = "combined-subseg"
 HAZARD_C_COMBINED = "c-combined"
 HAZARD_NON16ALIGN = "non16align"
@@ -1381,11 +1382,13 @@ def classify_subseg(off, typ, path, size, upstream_index):
             asm_index = build_asm_tu_index()
             asm_tus = []  # distinct vendorable .s TUs among asm-ONLY members (no C mirror)
             c_stems = []  # distinct C-upstream stems among members (multi-file C-mirror pack)
+            c_members = 0  # members that resolved to a C upstream (for the single-file-pack test)
             for fn in fns:
                 _, fn_up = upstream_index.get(fn, (None, None))
                 if fn_up:
                     stem = os.path.splitext(os.path.basename(fn_up))[0]
                     members.append(f"{fn}={stem}")
+                    c_members += 1
                     if stem not in c_stems:
                         c_stems.append(stem)
                     continue
@@ -1402,7 +1405,16 @@ def classify_subseg(off, typ, path, size, upstream_index):
                         asm_tus.append(t)
                 else:
                     members.append(f"{fn}=?")
-            hazards.append(Hazard(HAZARD_PACK, f"{len(fns)}fn[" + ",".join(members) + "]"))
+            # A pack whose every member resolves to ONE upstream C file is NOT a split-required
+            # blocker — it is an atomic verbatim mirror (guPerspectiveF+guPerspective S55,
+            # guLookAtHiliteF+guLookAtHilite S64, guTranslateF+guTranslate S67), banked or spiked
+            # in one shot. Tag it `single-file-pack` (informational, → #upstream-mirror-pattern) so
+            # the gate stops reading it as the multi-file `pack` that needs an upstream-file split
+            # (S67 #2). The pts seed is unchanged (seed_points keys the pack penalty on nfns>1, not
+            # the kind), so this is display-only. A MIXED asm+C or multi-stem pack keeps `pack`.
+            single_file = c_members == len(fns) and len(c_stems) == 1
+            pack_kind = HAZARD_SINGLE_FILE_PACK if single_file else HAZARD_PACK
+            hazards.append(Hazard(pack_kind, f"{len(fns)}fn[" + ",".join(members) + "]"))
             # C analog of combined-subseg (S64 #3): ≥2 *distinct* C upstream files share one asm
             # subseg → a multi-file C-mirror pack the gate splits at the upstream-file boundary, then
             # mirrors each verbatim. The pack basenames already encode this, but a big combined subseg

@@ -25,6 +25,17 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 67 — bank gu/translate.c (guTranslateF + guTranslate), libultra gu mirror — 2026-06-14
+- Increment: 1 `.c` banked (`src/libultra/gu/translate.c`, 2 fns `guTranslateF`+`guTranslate`) / 2 functions matched (md5-candidate 106→**107**, all 107 .c stub-free). The **last un-flipped asm leaf in the gu band** (S66 surfaced it); the gu band 0x82F20..0x85CD0 is now fully decompiled.
+- Quality: stuck-far 0 / permuter 0 / carried 0 / re-opened 0.
+- Seed: committed 2pt; banked 2pt; regime mirror (8-gate clear)
+- What helped: the cleanest mirror of the whole band — zero enablers beyond the one yaml flip. Both fn names pre-curated in `ghidra_symbols.txt`, `guint.h` already vendored (gu-band sibling of perspective/lookathil), callees `guMtxIdentF`/`guMtxF2L` placed, and **no float literals → no rodata-sibling split** (simpler than perspective/lookathil). Byte-identical verbatim `cp`, full-make ROM SHA-1 == baserom first try, 0 iteration. The gate's call/data-ref reconciliation found nothing unplaced, so no execution-time surprises.
+- Friction: none.
+- Applied (1 of 2, PO selected #2 only): #2 `pick_target.py` now emits `single-file-pack:<n>fn[…]` for a pure single-upstream-file C pack (all members → one stem, no `=?`/asm members) instead of the split-implying `pack:<n>fn[…]` — display-only (the pts seed keys the pack penalty on `nfns>1`, not the hazard kind), so sort/scoring unchanged; CLAUDE.md hazard-index row + `docs/hazards.md` single-file-pack note synced to route it to `#upstream-mirror-pattern`; golden regen (legitimate — translate banking removed it from the candidate set), suite 29 pass. (#1 BACKLOG gu-trail-retired note: NOT selected.)
+- Carry-over: none.
+
+---
+
 ## Sprint 66 — bank cosf + sinf (libultra gu trig verbatim mirrors) — 2026-06-14
 - Increment: 2 `.c` banked (`src/libultra/gu/cosf.c` `cosf` + `src/libultra/gu/sinf.c` `sinf`) / 2 functions matched (md5-candidate 104→**106**, all 106 .c stub-free; asm subsegs 157→158; surfaced `gu/translate.c` as a new asm leaf). Both decompose-splits of pts-13 combined packs at the upstream-file boundary (cosf from `[0x82B80]` 5-fn at 0x82F20+0x83070; sinf from `[0x85B30]` 3-fn at 0x85CD0).
 - Quality: stuck-far 0 / permuter 0 / carried 0 / re-opened 0 (1 gate-missed enabler recovered in-execution, not a spike).

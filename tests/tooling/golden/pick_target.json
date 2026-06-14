@@ -1,18 +1,5 @@
 [
   {
-    "band": "warm",
-    "func": "guTranslateF",
-    "hazards": "pack:2fn[guTranslateF=translate,guTranslate=translate]",
-    "kind": "asm-flip",
-    "nfns": 2,
-    "pts": 2,
-    "rom": "0x85CD0",
-    "score": 56,
-    "size": 208,
-    "upstream": "libultra",
-    "vram": "0x800AA8D0"
-  },
-  {
     "band": "-",
     "func": "func_ovl0_801F4A30",
     "hazards": "-",
@@ -184,7 +171,7 @@
   {
     "band": "cold",
     "func": "gfxThread",
-    "hazards": "pack:2fn[gfxThread=nugfxthread,nuGfxThreadStart=nugfxthread],file-static,refs-unplaced:nuGfxMesgQ,nuGfxPreNMIFunc,nuGfxThread,calls-unplaced:aligned",
+    "hazards": "single-file-pack:2fn[gfxThread=nugfxthread,nuGfxThreadStart=nugfxthread],file-static,refs-unplaced:nuGfxMesgQ,nuGfxPreNMIFunc,nuGfxThread,calls-unplaced:aligned",
     "kind": "asm-flip",
     "nfns": 2,
     "pts": 5,
@@ -236,7 +223,7 @@
   {
     "band": "cold",
     "func": "nuContGBPakMgrInit",
-    "hazards": "pack:8fn[nuContGBPakMgrInit=nucontgbpakmgr,nuContGBPakMgrRemove=nucontgbpakmgr,contGBPakOpen=nucontgbpakmgr,contGBPakGetState=nucontgbpakmgr,contGBPakPower=nucontgbpakmgr,contGBPakReadID=nucontgbpakmgr,contGBPakReadWrite=nucontgbpakmgr,contGBPakCheckConnector=nucontgbpakmgr],defines-data:nuContGBPakCallBack,refs-unplaced:nuContGBPakCallBack@0x800C7E20",
+    "hazards": "single-file-pack:8fn[nuContGBPakMgrInit=nucontgbpakmgr,nuContGBPakMgrRemove=nucontgbpakmgr,contGBPakOpen=nucontgbpakmgr,contGBPakGetState=nucontgbpakmgr,contGBPakPower=nucontgbpakmgr,contGBPakReadID=nucontgbpakmgr,contGBPakReadWrite=nucontgbpakmgr,contGBPakCheckConnector=nucontgbpakmgr],defines-data:nuContGBPakCallBack,refs-unplaced:nuContGBPakCallBack@0x800C7E20",
     "kind": "asm-flip",
     "nfns": 8,
     "pts": 8,
@@ -457,7 +444,7 @@
   {
     "band": "warm",
     "func": "osSpTaskLoad",
-    "hazards": "pack:2fn[osSpTaskLoad=sptask,osSpTaskStartGo=sptask],file-static,calls-unplaced:_osVirtualToPhysical,needs-header:PRinternal/osint.h(already-vendored),jal-count-mismatch:7vs14",
+    "hazards": "single-file-pack:2fn[osSpTaskLoad=sptask,osSpTaskStartGo=sptask],file-static,calls-unplaced:_osVirtualToPhysical,needs-header:PRinternal/osint.h(already-vendored),jal-count-mismatch:7vs14",
     "kind": "asm-flip",
     "nfns": 2,
     "pts": 5,
@@ -561,7 +548,7 @@
   {
     "band": "warm",
     "func": "__osTimerServicesInit",
-    "hazards": "pack:4fn[__osTimerServicesInit=timerintr,__osTimerInterrupt=timerintr,__osSetTimerIntr=timerintr,__osInsertTimer=timerintr],defines-data:__osCurrentTime,__osBaseCounter,__osViIntrCount,__osTimerCounter,__osBaseTimer,__osTimerList,__osProfileList,__osProfileListEnd,__osProfileOverflowBin,refs-unplaced:__ProfDone,__osBaseTimer,__osProfTimerQ,__osProfileList,__osProfileListEnd,__osProfileOverflowBin,__osTimerCounter,__osViIntrCount,calls-unplaced:aligned,needs-header:PRinternal/osint.h(already-vendored)",
+    "hazards": "single-file-pack:4fn[__osTimerServicesInit=timerintr,__osTimerInterrupt=timerintr,__osSetTimerIntr=timerintr,__osInsertTimer=timerintr],defines-data:__osCurrentTime,__osBaseCounter,__osViIntrCount,__osTimerCounter,__osBaseTimer,__osTimerList,__osProfileList,__osProfileListEnd,__osProfileOverflowBin,refs-unplaced:__ProfDone,__osBaseTimer,__osProfTimerQ,__osProfileList,__osProfileListEnd,__osProfileOverflowBin,__osTimerCounter,__osViIntrCount,calls-unplaced:aligned,needs-header:PRinternal/osint.h(already-vendored)",
     "kind": "asm-flip",
     "nfns": 4,
     "pts": 8,
@@ -648,5 +635,18 @@
     "size": 928,
     "upstream": "libultra",
     "vram": "0x800A7780"
+  },
+  {
+    "band": "warm",
+    "func": "__osGbpakSetBank",
+    "hazards": "pack:4fn[__osGbpakSetBank=gbpakreadwrite,func_800B1B50=?,func_800B1CCC=?,func_800B1D70=?],needs-header:PRinternal/controller.h(already-vendored),jal-count-mismatch:5vs3",
+    "kind": "asm-flip",
+    "nfns": 4,
+    "pts": 8,
+    "rom": "0x8CE90",
+    "score": -664,
+    "size": 928,
+    "upstream": "libultra",
+    "vram": "0x800B1A90"
   }
 ]

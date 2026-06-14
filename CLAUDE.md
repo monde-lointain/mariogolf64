@@ -245,6 +245,7 @@ When `pick_target.py` flags a hazard (or a match shows its symptom), read the ma
 | `stale-header:os_version.h(<V>)`| #stale-vendored-header |
 | `needs-define:<def>`            | #needs-define |
 | `pack:<n>fn[…]`                 | #multi-function-segment-splitting-pack |
+| `single-file-pack:<n>fn[…]` (all members → one upstream C file; atomic verbatim mirror, NO split) | #upstream-mirror-pattern |
 | `c-combined:<n>file[…]` (≥2 distinct C upstream files in one asm subseg) | #multi-function-segment-splitting-pack |
 | `non16align`                    | #non16align |
 | `intrinsic-likely:<tu>.s` (vendorable ultralib asm TU) | #asm-mirror-vendoring |

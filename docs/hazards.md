@@ -657,6 +657,16 @@ is a `#pragma weak` alias (e.g. `cosf`, whose `gu/cosf.c` defines `__cosf`) show
 and is *not* counted in `c-combined` — `upstream_index` keys on the defined name, not the alias; such
 a leaf still needs manual identification (S64 `cosf` was found by disassembly, recorded in BACKLOG).
 
+**Not every pack splits — `single-file-pack` (S67 #2).** When *every* pack member resolves to one
+upstream C file (one stem, no `=?`/asm members), `pick_target.py` emits `single-file-pack:<n>fn[…]`
+instead of `pack:<n>fn[…]`. This is the atomic-verbatim-mirror class (guPerspectiveF+guPerspective
+S55, guLookAtHiliteF+guLookAtHilite S64, guTranslateF+guTranslate S67): the whole subseg IS one
+upstream file, so there is NO upstream-file boundary to split at — copy it verbatim and bank/spike in
+one shot (route to `#upstream-mirror-pattern`, not the split procedure below). The `pts` seed is
+unchanged (the pack penalty keys on `nfns>1`, not the kind), so the relabel is display-only — it just
+stops the gate reading an atomic mirror as a split-required blocker. A mixed asm+C pack or a
+multi-stem pack keeps `pack`.
+
 **Procedure:** Insert a new `[0x<offset>, asm]` line at the boundary between upstream files (read the
 first instruction's vram from the asm). Two cases: (a) upstream-mirror on the first file → flip the
 first chunk to `[0x<seg>, c, lib<name>/<basename>]`, leave the rest `asm`; (b) classical (statics
