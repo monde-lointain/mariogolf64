@@ -214,7 +214,7 @@ segments:
       - [0x85B30, asm]
       - [0x85DA0, asm]
       - [0x860C0, asm]
-      - [0x861F0, asm]
+      - [0x861F0, c, libultra/libc/sprintf]
       - [0x86280, c, libultra/libc/syncprintf]
       - [0x862B0, c, libultra/os/createmesgqueue]
       - [0x862E0, c, libultra/os/jammesg]
