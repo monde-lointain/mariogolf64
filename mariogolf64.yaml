@@ -260,7 +260,7 @@ segments:
       - [0x88EA0, c, libultra/io/gbpakpower]
       - [0x88FC0, c, libultra/io/gbpakreadwrite]
       - [0x89190, c, libultra/io/gbpakreadid]
-      - [0x89320, asm]
+      - [0x89320, c, libultra/io/gbpakcheckconnector]
       - [0x89780, asm]
       - [0x89B10, asm]
       - [0x89D20, asm]
