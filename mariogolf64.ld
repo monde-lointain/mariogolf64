@@ -198,7 +198,7 @@ SECTIONS
         build/src/libultra/gu/perspective.o(.text);
         build/asm/85060.o(.text);
         build/src/libultra/gu/random.o(.text);
-        build/asm/85450.o(.text);
+        build/src/libultra/gu/rotate.o(.text);
         build/src/libultra/gu/rotaterpy.o(.text);
         build/src/libultra/gu/scale.o(.text);
         build/asm/85B30.o(.text);
@@ -431,7 +431,8 @@ SECTIONS
         build/src/libultra/gu/perspective.o(.data);
         build/asm/85060.o(.data);
         build/src/libultra/gu/random.o(.data);
-        build/asm/85450.o(.data);
+        build/asm/data/main_data.data.o(.data);
+        build/src/libultra/gu/rotate.o(.data);
         build/src/libultra/gu/rotaterpy.o(.data);
         build/src/libultra/gu/scale.o(.data);
         build/asm/85B30.o(.data);
@@ -530,7 +531,7 @@ SECTIONS
         build/asm/8F140.o(.data);
         build/src/libkmc/matherr.o(.data);
         build/asm/8F250.o(.data);
-        build/asm/data/main_data.data.o(.data);
+        build/asm/data/A35E0.data.o(.data);
         main_DATA_END = .;
         main_DATA_SIZE = ABSOLUTE(main_DATA_END - main_DATA_START);
         main_RODATA_START = .;
@@ -681,7 +682,7 @@ SECTIONS
         build/src/libultra/gu/perspective.o(.rodata);
         build/asm/85060.o(.rodata);
         build/src/libultra/gu/random.o(.rodata);
-        build/asm/85450.o(.rodata);
+        build/src/libultra/gu/rotate.o(.rodata);
         build/src/libultra/gu/rotaterpy.o(.rodata);
         build/src/libultra/gu/scale.o(.rodata);
         build/asm/85B30.o(.rodata);
@@ -926,7 +927,7 @@ SECTIONS
         build/src/libultra/gu/perspective.o(.bss);
         build/asm/85060.o(.bss);
         build/src/libultra/gu/random.o(.bss);
-        build/asm/85450.o(.bss);
+        build/src/libultra/gu/rotate.o(.bss);
         build/src/libultra/gu/rotaterpy.o(.bss);
         build/src/libultra/gu/scale.o(.bss);
         build/asm/85B30.o(.bss);
