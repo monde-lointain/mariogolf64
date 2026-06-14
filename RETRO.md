@@ -25,6 +25,17 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 56 — asm-mirror vendoring pilot: 4 libultra reg-shim asm TUs — 2026-06-14
+- Increment: 0 new `.c` (asm-vendor/hasm housekeeping, not a C-decomp increment). 4 libultra reg-shim hand-asm TUs vendored from ultralib + built into the ROM: `getcount`/`getcause`/`getsr`/`setcompare`. 4 subsegs flipped `asm`→`hasm` (hasm 2→6; asm subsegs 175→171); the 4 intrinsic-likely shims off `pick_target`. md5-candidate unchanged at 97/97.
+- Quality: 0/0/0/0 stuck-far/permuter/re-opened this sprint; ~11 remaining intrinsic-likely TUs + 2 mixed packs carried *by plan* (not spiked) to BACKLOG. 1 novel bank-gotcha (modern-as padding) resolved within-sprint.
+- Seed: committed 2pt; banked 2pt; regime mirror (asm-mirror track, seed-only).
+- What helped: the C upstream-mirror discipline transferred cleanly to asm — vendor verbatim, prove by full-make ROM SHA-1. The asm headers (`PR/R4300.h`, `sys/asm.h`, `sys/regdef.h`) were already in-tree; only `MFC0`/`MTC0` macros needed vendoring. The `8EC50.o`/`mmuldi3.s` precedent gave the Makefile-override shape. Reading `splat/hasm.py` confirmed `hasm` keeps the existing `asm/<rom>.s` (its `split()` only writes if absent) so flipping was non-destructive.
+- Friction: **the entire first attempt SHA-broke.** Assembling the verbatim 0xC ultralib TUs with modern `mips-linux-gnu as` produced 0xC objects, but the `.ld` does not ALIGN between subsegs (the pad must live in the object), so every following subseg shifted. The PO's directive to **use ultralib's exact flags** was the fix: the KMC/N64 gcc (`gcc.mk` profile) `as` pads each fn's `.text` up to its 16-byte ROM slot → 0x10, matching the ROM. Secondary friction: started against `libultra_modern` (an `additional working dir`) before PO corrected to `ultralib` — addressed by #4. The BACKLOG carry-over de-rank swept the mixed-pack names too (regex grabs all backtick'd idents), de-listing `osSetIntMask`/`func_800AFB90` — harmless (they're deferred anyway), fix offered as #carry-over-wording but PO did not select it.
+- Applied (3 of 4): #1 new `docs/hazards.md#asm-mirror-vendoring` section (KMC-as padding load-bearing, hasm flip, `VENDOR_ASM` map, no-inter-subseg-ALIGN caveat) + CLAUDE.md hazard index row + reworded intrinsic-likely playbook; #2 `pick_target.py` intrinsic-likely now carries the vendorable ultralib TU path (`build_asm_tu_index` scans LEAF/XLEAF/WEAK; `intrinsic-likely:os/getcount.s` vs bare = no-source shim; golden regen 28 pass); #4 pinned `~/development/repos/ultralib` (gcc.mk / VERSION_J) as THE libultra source in CLAUDE.md's mirror-branch step, not `libultra_modern`. (#3 carry-over-wording fix NOT selected.)
+- Carry-over: ~11 remaining intrinsic-likely libultra asm TUs (cache/TLB/bcopy/sqrtf + the `osInvalDCache`/`__osDisableInt` pure-asm 2fn packs) for follow-up asm-mirror sprints, + the 2 mixed packs (`osSetIntMask`, `func_800AFB90`) noted do-not-blanket-hasm. See BACKLOG ## Carry-overs.
+
+---
+
 ## Sprint 55 — perspective libultra gu/ mirror (last clean low-cost libultra leaf) — 2026-06-14
 - Increment: 1 file banked (`src/libultra/gu/perspective.c`) / 2 fns matched (`guPerspectiveF` + `guPerspective`). md5-candidate 96→97 (all 97 src `.c` files 0-stub); asm subsegs 176→175.
 - Quality: 0/0/0/0 this sprint. Verbatim `libultra_modern` monegi `gu/perspective.c`, clean first build, 0 iterations.

@@ -53,6 +53,54 @@ verbatim. Reach for ultralib first; a `libultra_modern` `.s` is not evidence the
 
 ---
 
+## asm-mirror vendoring
+
+**Rule:** The asm analog of the upstream-mirror pattern, for a libultra function that is genuinely
+hand-written assembly (a register/FPU/cache/TLB primitive — the `intrinsic-likely` shims). Instead of
+leaving it as an anonymous `asm/<rom>.s` disassembly or a bare `hasm`, vendor the **real ultralib
+`.s` TU** into `src/libultra/<dir>/` and build it. The proof is the full-`make` ROM SHA-1, same as
+the C mirror. Pilot: S56 (`getcount`/`getcause`/`getsr`/`setcompare`).
+
+**Trigger:** `pick_target.py` flags `intrinsic-likely:<tu>.s` (a vendorable ultralib TU exists) on
+an `asm-flip` candidate. A bare `intrinsic-likely` (no `:<tu>`) is a no-source shim → plain `hasm`.
+
+**Procedure:**
+1. **Copy the ultralib `.s` verbatim** from `~/development/repos/ultralib/src/<dir>/<file>.s` to
+   `src/libultra/<dir>/<file>.s` (mirror the subdir, same as the C pattern).
+2. **Vendor any missing asm macros** into the project headers (verbatim from ultralib). The MONEGI
+   `include/sys/asm.h` lacked `MFC0`/`MTC0` (S56 added them). The TU's `#include "PR/R4300.h"`
+   resolves via `-I include/libultra`; `sys/asm.h`/`sys/regdef.h` via `-I include`.
+3. **Assemble with ultralib's EXACT toolchain + flags — KMC/N64 gcc, gcc.mk profile — NOT modern
+   `mips-linux-gnu as`.** This is the load-bearing step: KMC `as` pads each function's `.text` up to
+   its 16-byte ROM slot, so the verbatim 0xC TU lands as the 0x10 the ROM expects. Modern `as` emits
+   the bare 0xC and every following subseg shifts → SHA-1 break (the entire S56 failure mode before
+   the toolchain switch). The Makefile carries this as `LIBULTRA_ASFLAGS` + the `VENDOR_ASM`
+   `<rom>:<src>` map + a `define`/`foreach`/`eval` rule that builds `build/asm/<rom>.o` from the
+   vendored `.s` (explicit rule wins over the `asm/%.s` pattern rule). Add a `<rom>:<src>` pair to
+   extend. (This mirrors how `LIBULTRA_CFLAGS` mirrors ultralib's C profile, and the `8EC50.o`
+   `mmuldi3.s` override is the prior art for a single vendored-asm `.o`.)
+4. **Flip the subseg `asm` → `hasm`** in `mariogolf64.yaml`. splat's `hasm` `split()` writes the
+   `.s` only if absent, so the existing `asm/<rom>.s` is kept (vestigial reference, like `8EC50.s`)
+   and never regenerated; `pick_target.py` skips `hasm` (it classifies only `asm`/`c`). The build
+   gets the `.o` from the `VENDOR_ASM` rule, not from `asm/<rom>.s`.
+5. `make extract && make` → ROM SHA-1 must equal the baserom. Verify the vendored `.o`'s `.text`
+   size equals the subseg size (`mips-linux-gnu-size -A build/asm/<rom>.o`).
+
+**Caveats:**
+- The `.ld` does **not** `ALIGN` between subsegs (only segment-level `ALIGN(__romPos,16)`), so the
+  pad must live in the object — there is no linker fallback. This is why step 3's KMC padding is
+  mandatory, not cosmetic.
+- Per-TU version-match is unproven beyond the S56 reg shims. Each new TU needs its own ROM-SHA-1
+  verify; a macro-expansion divergence (e.g. an aliased `WEAK(bcopy, _bcopy)` whose project `WEAK`
+  macro is empty) can need extra handling.
+- Do **not** blanket-vendor a mixed `pack:` (e.g. `osSetIntMask` shares its subseg with the C
+  mirrors `osCreatePiManager`/`__osEPiRawStartDma`); split first and vendor only the asm member.
+
+**Provenance:** S56 (4 reg shims; KMC-as padding the load-bearing discovery, per PO directive to use
+ultralib's exact flags).
+
+---
+
 ## recover-extern (refs-unplaced)
 
 **Rule:** A clean verbatim leaf often references a global the upstream declares `extern` (defined in
@@ -561,7 +609,9 @@ fixup commit).
 ## intrinsic-likely / maybe-upstream (signature hints)
 
 **Rule:** Two advisory flags from the signature matcher.
-- `intrinsic-likely` — a register/FPU shim → `hasm`, not a classical target. Refuse it.
+- `intrinsic-likely` — a register/FPU/cache/TLB shim, not a classical target. If the detail names a
+  vendorable ultralib TU (`intrinsic-likely:os/getcount.s`), asm-mirror it (see
+  `#asm-mirror-vendoring`); a bare `intrinsic-likely` (no `:<tu>`) is a no-source shim → plain `hasm`.
 - `maybe-upstream:<lib>:<bases>` — an un-named subseg (`func_<addr>`) that the signature matcher
   thinks is an un-named SDK mirror (the S13 trap). Verify against the candidate upstream at the gate
   before treating it as classical.

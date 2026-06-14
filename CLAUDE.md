@@ -44,6 +44,12 @@ Ghidra MCP is used inline at seed time. For each target function:
    `docs/hazards.md#upstream-mirror-pattern`. Before declaring a clean mirror, reconcile the
    upstream's call + data-ref list (one level of macro expansion included) against the name files,
    and handle any flagged hazard via the index below.
+   - **libultra source is `~/development/repos/ultralib` (gcc.mk / KMC-N64 profile,
+     `-DBUILD_VERSION=VERSION_J`) — NOT `libultra_modern`** (deprecated 2.0L, casts diverge; it is
+     an `additional working dir` but is not the source). This pin holds for both the C mirror and the
+     hand-asm `intrinsic-likely:<tu>.s` asm-mirror (`docs/hazards.md#asm-mirror-vendoring`): the
+     project mirrors ultralib's `gcc.mk` profile (`LIBULTRA_CFLAGS` for C, `LIBULTRA_ASFLAGS` for
+     vendored asm TUs). libkmc → `~/development/repos/libkmc`, libnusys → the n64sdkmod nusys tree.
 
 3. **Classical branch** (no upstream, or a hazard routes here): seed → iterate → spot-check →
    finalize.
@@ -225,7 +231,8 @@ When `pick_target.py` flags a hazard (or a match shows its symptom), read the ma
 | `needs-define:<def>`            | #needs-define |
 | `pack:<n>fn[…]`                 | #multi-function-segment-splitting-pack |
 | `non16align`                    | #non16align |
-| `intrinsic-likely` / `maybe-upstream:…` | #intrinsic-likely--maybe-upstream-signature-hints |
+| `intrinsic-likely:<tu>.s` (vendorable ultralib asm TU) | #asm-mirror-vendoring |
+| `intrinsic-likely` (bare) / `maybe-upstream:…` | #intrinsic-likely--maybe-upstream-signature-hints |
 | (libultra leaf, bare std header)| #per-library-standard-c-header-isolation |
 | (match locks ~0.9, lib target)  | #compile-profiles-libkmc--o-libultra--o3 |
 | (compiler rodata, wrong offset) / `rodata-literal:<addr>` | #rodata-sibling-yaml-pattern |

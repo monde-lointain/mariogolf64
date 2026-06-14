@@ -82,6 +82,10 @@ SUBSEG_RE = re.compile(
 )
 # Approximate C function-definition: a return-type-led line ending in `name(`.
 UPSTREAM_DEF_RE = re.compile(r"^[A-Za-z_][\w \t\*]*?\b([A-Za-z_]\w+)\s*\(", re.M)
+# A hand-asm TU's exported entry: `LEAF(osGetCount)` / `XLEAF(name)` / `WEAK(bcopy, _bcopy)`
+# (sys/asm.h macros). The WEAK arm catches the public name of an aliased TU (bcopy → _bcopy).
+# Keys build_asm_tu_index so an intrinsic-likely shim can name its vendorable ultralib .s TU.
+ASM_TU_DEF_RE = re.compile(r"^\s*(?:X?LEAF|WEAK)\(\s*([A-Za-z_]\w+)", re.M)
 FILE_STATIC_RE = re.compile(r"^\s*static\b[^=]*;\s*$")
 # A file-scope data-global *definition* (external linkage): `<type> <name> [= init];`.
 # Applied only at brace-depth 0 (see defines_data_globals) so function-body statements
@@ -261,6 +265,27 @@ def build_upstream_index():
                 continue
             for m in UPSTREAM_DEF_RE.finditer(text):
                 index.setdefault(m.group(1), (lib, cpath))
+    return index
+
+
+@functools.lru_cache(maxsize=1)
+def build_asm_tu_index():
+    """Map hand-asm function name -> its .s path (relative to the libultra source tree).
+
+    Scans the ultralib `.s` TUs (LEAF/XLEAF entries) so an `intrinsic-likely` shim can name
+    the vendorable upstream asm TU it mirrors (see docs/hazards.md#asm-mirror-vendoring), the
+    asm analog of build_upstream_index's C map. A bare `intrinsic-likely` (no detail) then
+    means a genuine no-source shim; `intrinsic-likely:os/getcount.s` means a vendorable TU."""
+    index = {}
+    if os.path.isdir(LIBULTRA):
+        for spath in glob.glob(os.path.join(LIBULTRA, "**", "*.s"), recursive=True):
+            try:
+                with open(spath, errors="ignore") as f:
+                    text = f.read()
+            except OSError:
+                continue
+            for m in ASM_TU_DEF_RE.finditer(text):
+                index.setdefault(m.group(1), os.path.relpath(spath, LIBULTRA))
     return index
 
 
@@ -1167,7 +1192,10 @@ def classify_subseg(off, typ, path, size, upstream_index):
                 members.append(f"{fn}={stem}")
             hazards.append(Hazard(HAZARD_PACK, f"{len(fns)}fn[" + ",".join(members) + "]"))
         if intrinsic_likely(off, fns[0]):
-            hazards.append(Hazard(HAZARD_INTRINSIC_LIKELY))  # register/FPU shim → hasm, not a classical target
+            # register/FPU shim → hasm, not a classical target. Carry the vendorable ultralib
+            # TU path when one exists (intrinsic-likely:os/getcount.s), so the gate can asm-mirror
+            # it instead of refusing outright (docs/hazards.md#asm-mirror-vendoring).
+            hazards.append(Hazard(HAZARD_INTRINSIC_LIKELY, build_asm_tu_index().get(fns[0])))
         return "asm-flip", fns, hazards
     if typ == "c" and path:
         cpath = os.path.join(ROOT, "src", path + ".c")
