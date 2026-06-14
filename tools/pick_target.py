@@ -125,6 +125,14 @@ UPSTREAM_INC_ROOTS = [
         "~/development/repos/n64sdkmod/packages/libnusys/usr/src/PR/libsrc/nusys-2.07/nusys/include"
     ),
 ]
+# Upstream library *source* trees — the donors for SOURCE-PRIVATE companion headers (e.g.
+# ultralib `src/libc/xstdio.h`, `src/gu/guint.h`) that a mirror `#include`s with quotes and that
+# get copied source-relative next to the mirrored .c, NOT into an -I dir. Distinct from
+# UPSTREAM_INC_ROOTS (the public -I header donors). A `needs-header:<h>` whose `<h>` lives here is
+# vendorable (a cheap source-relative cp), not a blocked DoR reject (S49 guint.h, S54 xstdio.h).
+UPSTREAM_SRC_ROOTS = [
+    LIBULTRA,  # ~/development/repos/ultralib/src
+]
 UPSTREAM_BONUS = 200
 # The libultra boot-region globals (fixed RAM 0x80000300-0x8000031C). A verbatim mirror references
 # these by name (osRomBase, osMemSize, …) but the asm bakes them as raw lui/addiu immediates that
@@ -623,14 +631,34 @@ def call_divergence(rom_off, primary, up_cpath):
     return Hazard(HAZARD_JAL_COUNT_MISMATCH, f"{n_c}vs{n_asm}")
 
 
+def _is_static_func_proto(line):
+    """A `static ...;` line that declares a FUNCTION (prototype: `static T f(...);`), not a
+    variable. Such a static function shares the mirror's TU and is NOT a BSS-layout hazard, so it
+    must not flag file-static (S54: sprintf's `static void* proutSprintf(...);`). A variable is kept
+    flagged, including a function-*pointer* var (`static T (*fp)(...);`, the `(*`) and an attributed
+    array (`static T a[N] __attribute__((aligned(8)));` — its `aligned(8)` parens must NOT read as a
+    call declarator, so strip `__attribute__((...))` first; S54 caught gfxThread's nuGfxMesgBuf)."""
+    s = re.sub(r"__attribute__\s*\(\(.*?\)\)", "", line)  # drop attribute groups (their parens)
+    i = s.find("(")
+    if i == -1:
+        return False  # no declarator parens → a plain variable
+    if s[i + 1:i + 2] == "*":
+        return False  # `(*name)(...)` → function-pointer variable
+    if "[" in s[:i]:
+        return False  # `name[dim] ...(` → array variable (a stray paren past the subscript)
+    return True  # `name(...)` → function prototype/definition
+
+
 def has_file_scope_static(cpath):
-    """True if the upstream .c declares a file-scope static (BSS-layout hazard → classical loop)."""
+    """True if the upstream .c declares a file-scope static *variable* (BSS-layout hazard →
+    classical loop). A file-scope static *function* (prototype) is excluded — it is not a data
+    hazard (S54)."""
     with open(cpath, errors="ignore") as f:
         for line in f:
             stripped = line.lstrip()
             if stripped.startswith(("//", "*")):
                 continue
-            if FILE_STATIC_RE.match(line):
+            if FILE_STATIC_RE.match(line) and not _is_static_func_proto(line):
                 return True
     return False
 
@@ -1011,26 +1039,45 @@ def _project_inc_index():
     return idx
 
 
-def include_is_blocked(inc):
-    """Classify a *missing* include (one `missing_includes` already found unreachable). Blocked =
-    can't be fixed by a companion-header copy: either it's present in the project `include/` tree
-    but unreachable under the current `-I` set (unindexed `-I` — a deferred Makefile enabler), or
-    it's absent everywhere (a system header we don't ship). Copyable (NOT blocked) = absent from
-    the project tree but present at `<upstream-include-root>/<inc>` → mirror it in mid-execution
-    (assert.h). Heuristic, gate-confirmed (basename match can rarely over-flag)."""
-    idx = _project_inc_index()
-    # Reachability is by the EXACT include path, not basename. A header shipped in-tree under a
-    # *different* prefix (e.g. `internal/piint.h`) does NOT make `PRinternal/piint.h` reachable —
-    # that's a cheap companion-copy, not a deferred -I. (_project_inc_index also stores basenames,
-    # so a bare-name include like `libaudio.h` still matches the `inc in idx` basename entry and
-    # stays correctly blocked.) S46: the basename collision was masking the whole PRinternal/ PI
-    # band as false-`blk`.
-    if inc in idx:
-        return True  # present in-tree at this exact path/name but unreachable → unindexed -I, defer
+@functools.cache
+def _upstream_src_headers():
+    """Basenames of every `.h` under the upstream library SOURCE trees (UPSTREAM_SRC_ROOTS) — the
+    source-private companion headers (xstdio.h, guint.h) a mirror copies source-relative next to
+    its .c. Built once per process. Distinct from the public -I headers (UPSTREAM_INC_ROOTS)."""
+    names = set()
+    for root in UPSTREAM_SRC_ROOTS:
+        for f in glob.glob(os.path.join(root, "**", "*.h"), recursive=True):
+            names.add(os.path.basename(f))
+    return names
+
+
+def include_is_vendorable(inc):
+    """True if a *missing* include is copyable from upstream (a cheap header-vendor enabler), not a
+    hard block: present at `<upstream-include-root>/<inc>` (companion-copy into an -I dir, e.g.
+    assert.h) OR a source-private header found under an upstream source tree (source-relative copy
+    next to the mirror, e.g. guint.h/xstdio.h). NOT vendorable when it's in the project tree but
+    unreachable (deferred -I) or absent everywhere (system header). Heuristic, gate-confirmed.
+
+    The project-tree check is by the EXACT include path, not basename: a header shipped in-tree
+    under a *different* prefix (e.g. `internal/piint.h`) does NOT make `PRinternal/piint.h`
+    reachable — that's a cheap companion-copy, not a deferred -I. (_project_inc_index also stores
+    basenames, so a bare-name include like `libaudio.h` still matches the basename entry and stays
+    correctly NOT-vendorable.) S46: the basename collision was masking the whole PRinternal/ PI
+    band as false-`blk`."""
+    if inc in _project_inc_index():
+        return False  # present in-tree but unreachable → unindexed -I, a deferred enabler not a cp
     for root in UPSTREAM_INC_ROOTS:
         if os.path.exists(os.path.join(root, inc)):
-            return False  # absent in-tree at this path, copyable from upstream → companion-copy
-    return True  # nowhere → system header / unavailable
+            return True  # public companion header → copy into an -I dir
+    return os.path.basename(inc) in _upstream_src_headers()  # source-private → source-relative cp
+
+
+def include_is_blocked(inc):
+    """Classify a *missing* include (one `missing_includes` already found unreachable). Blocked =
+    can't be fixed by a header copy = NOT vendorable: either present in the project `include/` tree
+    but unreachable under the current `-I` set (unindexed `-I` — a deferred Makefile enabler), or
+    absent everywhere (a system header we don't ship). The complement of include_is_vendorable."""
+    return not include_is_vendorable(inc)
 
 
 def snap_fib(n):
@@ -1172,7 +1219,11 @@ def append_upstream_hazards(off, primary, up_lib, up_path, hazards):
     mirror_dir = band_mirror_dir(up_lib, up_path)
     missing = missing_includes(up_path, mirror_dir, up_lib)
     if missing:
-        hazards.append(Hazard(HAZARD_NEEDS_HEADER, ",".join(missing)))
+        # Tag each header copyable-from-upstream as `(vendorable)` so the gate prices it as a
+        # one-time header-vendor enabler, not a DoR reject; a bare (untagged) header is a real
+        # block (deferred -I / system header). `blocked` (→ pts 'blk') counts only the bare ones.
+        tagged = [inc if include_is_blocked(inc) else f"{inc}(vendorable)" for inc in missing]
+        hazards.append(Hazard(HAZARD_NEEDS_HEADER, ",".join(tagged)))
         blocked = any(include_is_blocked(inc) for inc in missing)
     gating = function_gating_define(up_path, primary)
     if gating and gating not in _active_defines_for_lib(up_lib):

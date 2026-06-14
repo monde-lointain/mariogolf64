@@ -205,12 +205,19 @@ splat-side `next` slot, the 0x10-aligned chunk inserts ahead and shifts every do
 breaking every code reloc into that range (10,853 ROM bytes diff for `rand`). Function-local
 `static` is fine — only file-scope is the problem.
 
-**Trigger:** `pick_target.py` flag `file-static`.
+**Trigger:** `pick_target.py` flag `file-static`. **Static *functions* do not count** — a
+file-scope `static <type> <name>(...);` (proto/def) shares the mirror's TU and is no BSS hazard, so
+`has_file_scope_static` skips it (S54: sprintf's `static void* proutSprintf(...);` was a false flag
+that mis-routed a clean 2-fn mirror toward the classical loop). The detector strips
+`__attribute__((...))` before the declarator check so an attributed static *array*
+(`static OSMesg buf[N] __attribute__((aligned(8)));`) still flags. Known gap: an *initialized*
+static (`static T x[] = {...};`) carries `=` and is invisible to the regex — not flagged (caught at
+the gate / link if a sub-fn of a decompose pack is later mirrored).
 
 **Procedure:** Fall to the classical loop with the `static` **dropped** in the C body. The linker
 then resolves to the splat-side global at the correct vram.
 
-**Provenance:** `rand` (file-scope-static pre-flight).
+**Provenance:** `rand` (file-scope-static pre-flight); `sprintf` (static-function false-flag, S54).
 
 ---
 
@@ -273,9 +280,19 @@ the same gu data band holds `guRotateF`@0x800C81D0, `guAlignF`@0x800C81A0.)
 project `-I` set: `include/{,libultra,libultra/internal,libkmc,libnusys}`; the grep is `#ifdef`-blind
 so a dead-`_DEBUG` include can over-flag — confirm against the upstream).
 
+**Vendorable annotation (S54).** `pick_target` tags each missing header `<inc>(vendorable)` when it
+is copyable from upstream — a public companion under an `UPSTREAM_INC_ROOTS` include dir (copy into
+an `-I` dir) OR a source-private header found by basename under an `UPSTREAM_SRC_ROOTS` source tree
+(`ultralib/src/**`, copy source-relative next to the mirror — `xstdio.h`, `guint.h`). A vendorable
+header is a one-time header-vendor *enabler* (pts `needs-copy` +1), **not** a `blk` DoR reject; only
+a *bare* (untagged) header — present in-tree but unreachable (deferred `-I`), or absent everywhere (a
+system header) — sets `blocked` → `blk`. This closed the recurring "blk that's actually a 1pt cp"
+gate-time re-diagnosis (S49 guint.h, S53 PR-band, S54 sprintf's `xstdio.h`/`string.h`).
+
 **Procedure:**
-- **Missing-but-copyable** → copy the companion header into the tree in the execution middle (e.g.
-  `assert.h` for `visetmode.c`).
+- **Missing-but-copyable / `(vendorable)`** → copy the companion header into the tree (a public one
+  into its `-I` dir like `assert.h` for `visetmode.c`; a source-private one source-relative next to
+  the mirror like `xstdio.h` → `src/libultra/libc/`).
 - **Band-local quote-include (already resolved)** → a `#include "x.h"` resolves source-relative to
   the dir the mirror compiles in, so once the first band sibling has shipped its companion at
   `src/lib<...>/<band>/x.h` (e.g. `gu/guint.h`, copied alongside `gu/random.c` in S49), every

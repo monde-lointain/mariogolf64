@@ -25,6 +25,15 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 54 — sprintf libultra libc/ mirror (last named-clean libultra leaf) — 2026-06-13
+- Increment: 1 file banked (`src/libultra/libc/sprintf.c`) / 2 fns matched (`sprintf` + static `proutSprintf`). md5-candidate 95→96 (all 96 src `.c` files 0-stub); asm subsegs 177→176.
+- Quality: 0/0/0/0 this sprint. Verbatim ultralib VERSION_J mirror, clean first build, 0 iterations.
+- Seed: committed 3pt; banked 3pt; regime mirror (seed-only; 8-gate clear).
+- What helped: whole-file 2-fn combined subseg (S40 ldiv pattern, no split); both callees pre-placed (`_Printf`/`memcpy`) and both names pre-curated → zero symbol adds; the `size_t`-redefinition risk never materialized (verbatim built clean first try). The DoR self-audit pre-refuted both blocking flags before the flip.
+- Friction: two `pick_target` false-flags forced a gate-time re-diagnosis — `file-static` fired on the `static proutSprintf(...)` *function* proto (a static function is no BSS hazard), and `blk needs-header:xstdio.h,string.h` was the recurring vendorable-header class (3rd instance after S49 guint.h / S53 PR-band). Both now closed in tooling. Applying #1 surfaced a latent bug — a naive proto detector was fooled by the `(` inside `__attribute__((aligned(8)))`, which would have wrongly un-flagged genuine static arrays (gfxThread's `nuGfxMesgBuf`); caught by reviewing the pre-regen diff, fixed with an attribute-strip.
+- Applied (2 of 3): #1 `pick_target.py` file-static detector ignores static *function* declarations (`_is_static_func_proto`, attribute-stripped so attributed static *arrays* still flag) + `docs/hazards.md#file-static` note; #2 `needs-header:<h>(vendorable)` annotation — `UPSTREAM_SRC_ROOTS` source-private header index + `include_is_vendorable` recognizes source-relative-copyable headers as a 1pt enabler, not `blk` + `docs/hazards.md#needs-header` note; (#3 S40 cross-lib-header confirmatory — log-only, NOT a file edit). Golden regen, 23 pass.
+- Carry-over: none.
+
 ## Sprint 53 — alHeapDBAlloc libultra audio/ mirror — 2026-06-13
 - Increment: 1 file banked (`src/libultra/audio/heapalloc.c`) / 1 fn matched (`alHeapDBAlloc`; closes the named-clean `libultra/audio/` leaf, sibling of the S36 heapinit/copy pair). md5-candidate 94→95; asm subsegs 178→177.
 - Quality: 0/0/0/0 this sprint. Verbatim ultralib mirror, clean first build, 0 iterations.

@@ -1,18 +1,5 @@
 [
   {
-    "band": "warm",
-    "func": "sprintf",
-    "hazards": "pack:2fn[sprintf=sprintf,proutSprintf=sprintf],file-static,needs-header:xstdio.h,string.h",
-    "kind": "asm-flip",
-    "nfns": 2,
-    "pts": "blk",
-    "rom": "0x861F0",
-    "score": 120,
-    "size": 144,
-    "upstream": "libultra",
-    "vram": "0x800AADF0"
-  },
-  {
     "band": "-",
     "func": "osGetCount",
     "hazards": "intrinsic-likely",
@@ -379,7 +366,7 @@
   {
     "band": "cold",
     "func": "nuContGBPakMgrInit",
-    "hazards": "pack:8fn[nuContGBPakMgrInit=nucontgbpakmgr,nuContGBPakMgrRemove=nucontgbpakmgr,contGBPakOpen=nucontgbpakmgr,contGBPakGetState=nucontgbpakmgr,contGBPakPower=nucontgbpakmgr,contGBPakReadID=nucontgbpakmgr,contGBPakReadWrite=nucontgbpakmgr,contGBPakCheckConnector=nucontgbpakmgr],file-static,defines-data:nuContGBPakCallBack,refs-unplaced:nuContGBPakCallBack@0x800C7E20",
+    "hazards": "pack:8fn[nuContGBPakMgrInit=nucontgbpakmgr,nuContGBPakMgrRemove=nucontgbpakmgr,contGBPakOpen=nucontgbpakmgr,contGBPakGetState=nucontgbpakmgr,contGBPakPower=nucontgbpakmgr,contGBPakReadID=nucontgbpakmgr,contGBPakReadWrite=nucontgbpakmgr,contGBPakCheckConnector=nucontgbpakmgr],defines-data:nuContGBPakCallBack,refs-unplaced:nuContGBPakCallBack@0x800C7E20",
     "kind": "asm-flip",
     "nfns": 8,
     "pts": 8,
@@ -535,10 +522,10 @@
   {
     "band": "warm",
     "func": "__osContRamRead",
-    "hazards": "file-static,refs-unplaced:__OSContRamReadFormat,__osContLastCmd,__osPfsLastChannel,__osPfsPifRam,calls-unplaced:READFORMAT,__osContAddressCrc,__osContDataCrc,__osSiGetAccess,__osSiRawStartDma,__osSiRelAccess,needs-header:PRinternal/controller.h,PRinternal/siint.h,jal-count-mismatch:23vs10",
+    "hazards": "refs-unplaced:__OSContRamReadFormat,__osContLastCmd,__osPfsLastChannel,__osPfsPifRam,calls-unplaced:READFORMAT,__osContAddressCrc,__osContDataCrc,__osSiGetAccess,__osSiRawStartDma,__osSiRelAccess,needs-header:PRinternal/controller.h(vendorable),PRinternal/siint.h(vendorable),jal-count-mismatch:23vs10",
     "kind": "asm-flip",
     "nfns": 1,
-    "pts": 5,
+    "pts": 3,
     "rom": "0x8A820",
     "score": -232,
     "size": 496,
@@ -600,7 +587,7 @@
   {
     "band": "warm",
     "func": "__osPfsGetStatus",
-    "hazards": "pack:3fn[__osPfsGetStatus=pfsgetstatus,func_800AE800=?,func_800AE894=?],refs-unplaced:__OSContRequesFormatShort,__osContLastCmd,__osPfsInodeCacheBank,__osPfsPifRam,calls-unplaced:__osSiRawStartDma,needs-header:PRinternal/controller.h,PRinternal/siint.h,jal-count-mismatch:7vs6",
+    "hazards": "pack:3fn[__osPfsGetStatus=pfsgetstatus,func_800AE800=?,func_800AE894=?],refs-unplaced:__OSContRequesFormatShort,__osContLastCmd,__osPfsInodeCacheBank,__osPfsPifRam,calls-unplaced:__osSiRawStartDma,needs-header:PRinternal/controller.h(vendorable),PRinternal/siint.h(vendorable),jal-count-mismatch:7vs6",
     "kind": "asm-flip",
     "nfns": 3,
     "pts": 5,
@@ -648,5 +635,18 @@
     "size": 304,
     "upstream": "none",
     "vram": "0x800A6FB0"
+  },
+  {
+    "band": "-",
+    "func": "bzero",
+    "hazards": "pack:4fn[bzero=?,strchr=string,strlen=string,memcpy=string]",
+    "kind": "asm-flip",
+    "nfns": 4,
+    "pts": 13,
+    "rom": "0x860C0",
+    "score": -304,
+    "size": 304,
+    "upstream": "none",
+    "vram": "0x800AACC0"
   }
 ]
