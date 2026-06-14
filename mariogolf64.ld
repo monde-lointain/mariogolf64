@@ -192,7 +192,7 @@ SECTIONS
         build/src/libultra/os/virtualtophysical.o(.text);
         build/src/libultra/gu/align.o(.text);
         build/src/libultra/gu/cosf.o(.text);
-        build/asm/83070.o(.text);
+        build/src/libultra/gu/lookat.o(.text);
         build/src/libultra/gu/lookathil.o(.text);
         build/src/libultra/gu/lookatref.o(.text);
         build/src/libultra/gu/mtxcatf.o(.text);
@@ -434,7 +434,7 @@ SECTIONS
         build/asm/data/main_data.data.o(.data);
         build/src/libultra/gu/align.o(.data);
         build/src/libultra/gu/cosf.o(.data);
-        build/asm/83070.o(.data);
+        build/src/libultra/gu/lookat.o(.data);
         build/src/libultra/gu/lookathil.o(.data);
         build/src/libultra/gu/lookatref.o(.data);
         build/src/libultra/gu/mtxcatf.o(.data);
@@ -692,8 +692,7 @@ SECTIONS
         build/asm/data/AD6B0.rodata.o(.rodata);
         build/asm/data/AD6F0.rodata.o(.rodata);
         build/src/libultra/gu/cosf.o(.rodata);
-        build/asm/83070.o(.rodata);
-        build/asm/data/AD8C0.rodata.o(.rodata);
+        build/src/libultra/gu/lookat.o(.rodata);
         build/src/libultra/gu/lookathil.o(.rodata);
         build/src/libultra/gu/lookatref.o(.rodata);
         build/src/libultra/gu/mtxcatf.o(.rodata);
@@ -945,7 +944,7 @@ SECTIONS
         build/src/libultra/os/virtualtophysical.o(.bss);
         build/src/libultra/gu/align.o(.bss);
         build/src/libultra/gu/cosf.o(.bss);
-        build/asm/83070.o(.bss);
+        build/src/libultra/gu/lookat.o(.bss);
         build/src/libultra/gu/lookathil.o(.bss);
         build/src/libultra/gu/lookatref.o(.bss);
         build/src/libultra/gu/mtxcatf.o(.bss);
