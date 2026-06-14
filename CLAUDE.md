@@ -241,6 +241,7 @@ When `pick_target.py` flags a hazard (or a match shows its symptom), read the ma
 | `jal-count-mismatch:<C>vs<asm>` | #near-verbatim-mirror-jal-count-mismatch |
 | `file-static`                   | #file-static-bss-layout-conflict |
 | `defines-data:<g>` / `data-static:<addr>` | #defines-data |
+| `twin-of:<file>` (mirror dir holds a banked sibling with the same ld-section carve) | #defines-data / #rodata-sibling-yaml-pattern |
 | `needs-header:<inc>`            | #needs-header |
 | `stale-header:os_version.h(<V>)`| #stale-vendored-header |
 | `needs-define:<def>`            | #needs-define |

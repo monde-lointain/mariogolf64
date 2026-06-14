@@ -25,6 +25,17 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 68 — bank gu/align.c (guAlignF + guAlign), libultra gu mirror — 2026-06-14
+- Increment: 1 `.c` banked (`src/libultra/gu/align.c`, 2 fns `guAlignF`+`guAlign`) / 2 functions matched (md5-candidate 107→**108**, all 108 .c stub-free; remaining libultra asm-flip candidates 16→15). The **verbatim twin of S61 `rotate.c`** — same `libultra/gu` dir, same substituted-callee + static-dtor signature.
+- Quality: stuck-far 0 / permuter 0 / carried 0 / re-opened 0. First-build match, 0 iteration.
+- Seed: committed 3pt; banked 3pt; regime mirror (8-gate clear)
+- What helped: the S61 rotate.c precedent made the sprint mechanical — the two hazards (`calls-unplaced:guNormalize`, `data-static:0x800C81A0`) were exactly rotate's, so the playbook was known before the gate (copy verbatim, apply the one `guNormalize`→`vec3f_normalize` substituted-callee edit, carve the `static float dtor` `.data` sibling). `vec3f_normalize`@0x80029900 is a *game-region* fn (libultra lives at 0x800A0000+ — the S61 address-region discriminator), so the substitution was certain without re-body-comparing. `guAlign` inlined the full guAlignF body (-0xA8 frame) as -O2 same-TU inlining predicts; first build matched. `guint.h` resolves source-relative (co-located at `src/libultra/gu/guint.h`) → zero header work.
+- Friction: one process wrinkle, not a stall — the `.data` sibling could not land at the plan gate (an INCLUDE_ASM stub emits no `.data`, so the carve shifts the data segment and fails the gate green-ROM check). Deferred the split to the execution step with the body; gate flipped text only. Now codified (suggestion #1) so the next static-carve mirror doesn't re-discover it.
+- Applied (3 of 3): #1 ld-section split-timing — `sprint-plan` Step-7 enabler list + `docs/hazards.md#defines-data` (Carve timing) + `#.rodata-sibling-yaml-pattern` (Timing) now state a `.data`/`.rodata`/`.bss` sibling lands at execution-with-body, never the gate. #2 `pick_target.py` `twin-of:<file>` hint — a candidate that re-emits a function-local static (data-static / rodata-literal) whose mirror dir already carved that ld-section now names the proven sibling (new `_static_carve_siblings` with a dot-aware yaml scan, since the shared SUBSEG_RE types as `[a-z]+` and silently drops dot-prefixed siblings); CLAUDE.md hazard-index row added. #3 `pick_target.py` single-file-pack recognition for an unnamed trailing member — the gu F-variant + s16-wrapper idiom: when the one named C stem's upstream file defines exactly nfns functions, the pack atomic-mirrors (verified live: guLookAtF flipped `pack`→`single-file-pack`). golden regen (align banking removed guAlignF + the new flags fire on out-of-window rows), suite 26 pass / 3 skip.
+- Carry-over: none.
+
+---
+
 ## Sprint 67 — bank gu/translate.c (guTranslateF + guTranslate), libultra gu mirror — 2026-06-14
 - Increment: 1 `.c` banked (`src/libultra/gu/translate.c`, 2 fns `guTranslateF`+`guTranslate`) / 2 functions matched (md5-candidate 106→**107**, all 107 .c stub-free). The **last un-flipped asm leaf in the gu band** (S66 surfaced it); the gu band 0x82F20..0x85CD0 is now fully decompiled.
 - Quality: stuck-far 0 / permuter 0 / carried 0 / re-opened 0.

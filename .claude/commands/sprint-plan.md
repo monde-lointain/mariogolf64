@@ -134,7 +134,13 @@ Once the PO approves, perform the enablers, then confirm the scaffold still buil
    `symbol_addrs.txt` (add-only). This must land before `make extract` so splat scaffolds the
    curated name, not `func_<VRAM>`.
 2. **Flip the subseg** in `mariogolf64.yaml`: `[0x<off>, asm]` → `[0x<off>, c, <path>]` (split a
-   multi-file pack at the upstream-file boundary first, if needed).
+   multi-file pack at the upstream-file boundary first, if needed). **TEXT only at the gate — an
+   ld-section sibling (`.data`/`.rodata`/`.bss` carved from the C compile) is NOT a gate enabler.**
+   An `INCLUDE_ASM` stub emits no such section, so a sibling added here carves an empty range and
+   shifts every following data/rodata byte → the green-ROM check below fails. The ld-section split
+   lands during execution **with the real body** (S68; see `docs/hazards.md#defines-data` for the
+   `.data` carve and `#.rodata-sibling-yaml-pattern` for `.rodata`). At the gate, leave the
+   data/rodata region as its existing generic subseg; the stub's `%lo(D_<vram>)` resolves from it.
 3. **Validate**:
 
    ```bash

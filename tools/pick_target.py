@@ -213,6 +213,7 @@ HAZARD_INTRINSIC_LIKELY = "intrinsic-likely"
 HAZARD_MAYBE_UPSTREAM = "maybe-upstream"
 HAZARD_RODATA_LITERAL = "rodata-literal"
 HAZARD_DATA_STATIC = "data-static"
+HAZARD_TWIN_OF = "twin-of"
 HAZARD_REMAINING = "remaining"
 
 
@@ -444,6 +445,48 @@ def _iter_upstream_functions(text):
                     break
             i += 1
         yield m.group(1), text[brace:i + 1]
+
+
+@functools.lru_cache(maxsize=None)
+def _upstream_file_func_count(lib, cpath):
+    """Count top-level function DEFINITIONS in an upstream .c (version-active branches only).
+
+    Used by the single-file-pack test to recognize a pack whose trailing member(s) are unnamed
+    (`func_<addr>`): if the pack's one named C stem defines exactly nfns functions, the unnamed
+    members are that file's other functions, so the pack atomic-mirrors the whole file (S68 #3 —
+    the gu F-variant + s16-wrapper idiom: `guAlignF` named + `func_<addr>` = `guAlign`, both in
+    align.c). Conservative — an exact count match only; a mismatch falls back to the `pack` flag."""
+    try:
+        with open(cpath, errors="ignore") as f:
+            text = f.read()
+    except OSError:
+        return 0
+    text = _strip_inactive_version_branches(text, _build_version_ord(lib))
+    return sum(1 for _ in _iter_upstream_functions(text))
+
+
+# A dot-prefixed ld-section sibling line, e.g. `- [0xA35D0, .data, libultra/gu/rotate]`. The shared
+# SUBSEG_RE types as `[a-z]+` (no leading dot), so parse_subsegs SKIPS these — scan them directly.
+_LD_SIBLING_RE = re.compile(
+    r"^\s*-\s*\[\s*0x[0-9A-Fa-f]+\s*,\s*(\.(?:data|rodata|bss))\s*,\s*([^\]]+?)\s*\]")
+
+
+@functools.lru_cache(maxsize=1)
+def _static_carve_siblings():
+    """{yaml_dir: {".data"/".rodata"/".bss": {basename,...}}} for every ld-section sibling subseg —
+    the dirs already holding a banked file with a proven static carve. Feeds the twin-of hint
+    (S68 #2): a candidate that re-emits a function-local static (data-static / rodata-literal)
+    whose mirror dir already carved the same section type has an established playbook (align.c was
+    the verbatim twin of S61 rotate.c — same `libultra/gu` dir, same `.data` dtor carve)."""
+    out = {}
+    with open(YAML) as f:
+        for line in f:
+            m = _LD_SIBLING_RE.match(line)
+            if not m:
+                continue
+            d, b = os.path.split(m.group(2).strip())
+            out.setdefault(d, {".data": set(), ".rodata": set(), ".bss": set()})[m.group(1)].add(b)
+    return out
 
 
 def build_signature_index():
@@ -1382,15 +1425,17 @@ def classify_subseg(off, typ, path, size, upstream_index):
             asm_index = build_asm_tu_index()
             asm_tus = []  # distinct vendorable .s TUs among asm-ONLY members (no C mirror)
             c_stems = []  # distinct C-upstream stems among members (multi-file C-mirror pack)
+            c_files = []  # parallel to c_stems: the (lib, cpath) of each distinct C stem
             c_members = 0  # members that resolved to a C upstream (for the single-file-pack test)
             for fn in fns:
-                _, fn_up = upstream_index.get(fn, (None, None))
+                fn_lib, fn_up = upstream_index.get(fn, (None, None))
                 if fn_up:
                     stem = os.path.splitext(os.path.basename(fn_up))[0]
                     members.append(f"{fn}={stem}")
                     c_members += 1
                     if stem not in c_stems:
                         c_stems.append(stem)
+                        c_files.append((fn_lib, fn_up))
                     continue
                 # No C upstream. Count a member's asm TU only here: a member with a C mirror
                 # is a C-mirror pack-split target (the pack hazard's basenames), not an asm-vendor
@@ -1413,6 +1458,15 @@ def classify_subseg(off, typ, path, size, upstream_index):
             # (S67 #2). The pts seed is unchanged (seed_points keys the pack penalty on nfns>1, not
             # the kind), so this is display-only. A MIXED asm+C or multi-stem pack keeps `pack`.
             single_file = c_members == len(fns) and len(c_stems) == 1
+            # S68 #3: a pack with unnamed (`func_<addr>`) member(s) still atomic-mirrors when its
+            # one named C stem's upstream file defines exactly len(fns) functions — the unnamed
+            # members are that file's other functions (the gu F-variant + s16-wrapper idiom:
+            # guAlignF named + func_800A794C = guAlign, both in align.c). Without this an unnamed
+            # wrapper mislabels the pack as the multi-file `pack` that needs an upstream-file split.
+            # Conservative: one named stem + an exact function-count match; else falls back to pack.
+            if not single_file and len(c_stems) == 1 and 1 <= c_members < len(fns):
+                if _upstream_file_func_count(*c_files[0]) == len(fns):
+                    single_file = True
             pack_kind = HAZARD_SINGLE_FILE_PACK if single_file else HAZARD_PACK
             hazards.append(Hazard(pack_kind, f"{len(fns)}fn[" + ",".join(members) + "]"))
             # C analog of combined-subseg (S64 #3): ≥2 *distinct* C upstream files share one asm
@@ -1564,6 +1618,23 @@ def append_upstream_hazards(off, primary, up_lib, up_path, hazards):
     if data_statics:
         # A function-local static the mirror must drop to a file-scope extern + recover (S49).
         hazards.append(Hazard(HAZARD_DATA_STATIC, ",".join(f"0x{a:08X}" for a in sorted(data_statics))))
+    # twin-of hint (S68 #2): when the candidate re-emits a function-local static (data-static /
+    # rodata-literal) AND its mirror dir already holds a banked sibling that carved the same
+    # ld-section, name that sibling so the gate reaches for the established carve playbook instead
+    # of re-deriving it (align.c was the verbatim twin of S61 rotate.c — same `libultra/gu` dir,
+    # same `.data` dtor carve + substituted-callee edit). Prefer a same-section twin; else any.
+    if data_statics or rodata_lits:
+        tree = dict(UPSTREAM_TREES).get(up_lib, LIBULTRA)
+        rel = os.path.relpath(up_path, tree)
+        cand_dir = os.path.join(up_lib, os.path.dirname(rel))
+        cand_stem = os.path.splitext(os.path.basename(rel))[0]
+        sibs = _static_carve_siblings().get(cand_dir)
+        if sibs:
+            want = ".data" if data_statics else ".rodata"
+            pool = sorted(sibs[want] - {cand_stem}) \
+                or sorted((sibs[".data"] | sibs[".rodata"] | sibs[".bss"]) - {cand_stem})
+            if pool:
+                hazards.append(Hazard(HAZARD_TWIN_OF, pool[0]))
     band = "warm" if band_is_warm(mirror_dir) else "cold"
     return band, blocked
 

@@ -625,19 +625,6 @@
   },
   {
     "band": "warm",
-    "func": "guAlignF",
-    "hazards": "pack:2fn[guAlignF=align,func_800A794C=?],calls-unplaced:guNormalize,data-static:0x800C81A0",
-    "kind": "asm-flip",
-    "nfns": 2,
-    "pts": 3,
-    "rom": "0x82B80",
-    "score": -664,
-    "size": 928,
-    "upstream": "libultra",
-    "vram": "0x800A7780"
-  },
-  {
-    "band": "warm",
     "func": "__osGbpakSetBank",
     "hazards": "pack:4fn[__osGbpakSetBank=gbpakreadwrite,func_800B1B50=?,func_800B1CCC=?,func_800B1D70=?],needs-header:PRinternal/controller.h(already-vendored),jal-count-mismatch:5vs3",
     "kind": "asm-flip",
@@ -648,5 +635,18 @@
     "size": 928,
     "upstream": "libultra",
     "vram": "0x800B1A90"
+  },
+  {
+    "band": "warm",
+    "func": "__osDevMgrMain",
+    "hazards": "calls-unplaced:__osEPiRawReadIo,dma,edma,jal-count-mismatch:25vs21",
+    "kind": "asm-flip",
+    "nfns": 1,
+    "pts": 3,
+    "rom": "0x7E9F0",
+    "score": -696,
+    "size": 960,
+    "upstream": "libultra",
+    "vram": "0x800A35F0"
   }
 ]

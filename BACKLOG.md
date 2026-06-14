@@ -604,11 +604,20 @@ resurfacing; `/sprint-plan` re-pulls them first when retrying.
     VERSION_J mirror, byte-identical cp, 0 iteration, full-make ROM SHA-1 == baserom first try. Zero
     enablers beyond the yaml flip (names pre-curated, `guint.h` vendored, callees placed, no float
     literals → no rodata split). The `pack:2fn` flag was the single-upstream-file false-flag class
-    (now tagged `single-file-pack` by `pick_target.py`, S67 #2). **The gu band is now fully
-    decompiled — no gu mirrors remain.**
-  - NB: the align/lookat tails of the old 0x82B80 subseg (now `[0x82B80,asm]` guAlignF + `[0x83070,asm]`
-    guLookAtF) are NOT clean mirrors — they carry the `calls-unplaced:guNormalize` →
-    `vec3f_normalize` substitution (S61) + a `data-static`; classical or substituted-mirror, harder.
+    (now tagged `single-file-pack` by `pick_target.py`, S67 #2). (S67 said "gu band fully
+    decompiled"; corrected at S68 — `gu/align.c` 0x82B80 banked S68, `gu/lookat.c` 0x83070 remains.)
+  - ~~**`gu/align.c` (guAlignF + guAlign, 0x82B80)**~~ **BANKED S68** — a known-edit near-verbatim
+    mirror, the **verbatim twin of S61 rotate.c**. The `calls-unplaced:guNormalize` →
+    `vec3f_normalize` substitution (game-region fn @0x80029900) + the `static float dtor` `.data`
+    sibling `[0xA35A0]` were exactly rotate's playbook → first-build match, 0 iteration. The
+    substituted-mirror class is mechanical, not "harder," when a banked dir-sibling pins the playbook
+    (now surfaced by `pick_target.py twin-of:<file>`, S68 #2). `guAlign` inlined guAlignF (-O2 same-TU).
+  - **`gu/lookat.c` (guLookAtF + guLookAt, 0x83070)** — the last un-flipped gu leaf. Same
+    `vec3f_normalize` substitution class as align, but **pts-13** (1808B, 6-double `rodata-literal`
+    pool @0x800D24C0..;carve-end=0x800D25C0). `pick_target` now tags it `single-file-pack:2fn` (S68
+    #3 — guLookAt is the unnamed wrapper) + `twin-of:cosf` (S68 #2). The seed-13 trips the 8-gate;
+    eligible for the verbatim-mirror exemption (single file, no 16-aligned internal split, callees
+    placed) like S64 lookathil — evaluate at the next gate.
 - **Tooling follow-up (S66 #2, deeper half) — cross-member `refs_unplaced` scan.** `pick_target.py`
   now keys weak aliases (`PRAGMA_WEAK_RE`, so `cosf=cosf`), but `refs_unplaced` still scans only a
   pack's PRIMARY upstream — a hidden member's `__`-prefixed data extern (S66 `__libm_qnan_f`, refd by
