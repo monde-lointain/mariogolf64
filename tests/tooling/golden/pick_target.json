@@ -1,19 +1,6 @@
 [
   {
     "band": "-",
-    "func": "__osSetFpcCsr",
-    "hazards": "pack:4fn[__osSetFpcCsr=?,__osSetSR=?,__osSetWatchLo=?,__osSpDeviceBusy=sp],combined-subseg:3tu[setfpccsr.s|setsr.s|setwatchlo.s]",
-    "kind": "asm-flip",
-    "nfns": 4,
-    "pts": 8,
-    "rom": "0x8CA50",
-    "score": 120,
-    "size": 80,
-    "upstream": "libultra",
-    "vram": "0x800B1650"
-  },
-  {
-    "band": "-",
     "func": "func_ovl0_801F4A30",
     "hazards": "-",
     "kind": "asm-flip",
@@ -648,5 +635,18 @@
     "size": 832,
     "upstream": "libnusys",
     "vram": "0x800A2B90"
+  },
+  {
+    "band": "-",
+    "func": "func_800A7190",
+    "hazards": "pack:5fn[func_800A7190=?,func_800A7210=?,osContStartReadData=contreaddata,osContGetReadData=contreaddata,func_800A7354=?],maybe-upstream:libultra:writehost,voicesetadconverter,voicegetstatus",
+    "kind": "asm-flip",
+    "nfns": 5,
+    "pts": 13,
+    "rom": "0x82590",
+    "score": -640,
+    "size": 640,
+    "upstream": "none",
+    "vram": "0x800A7190"
   }
 ]

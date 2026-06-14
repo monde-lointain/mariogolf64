@@ -1369,7 +1369,16 @@ def classify_subseg(off, typ, path, size, upstream_index):
             # setintmask.s) has a single distinct TU → does NOT fire (different, harder hazard).
             if len(asm_tus) > 1:
                 bn = "|".join(sorted(os.path.basename(t) for t in asm_tus))
-                hazards.append(Hazard(HAZARD_COMBINED_SUBSEG, f"{len(asm_tus)}tu[{bn}]"))
+                detail = f"{len(asm_tus)}tu[{bn}]"
+                # Price the needs-define enabler for the split the same way the intrinsic-likely
+                # path does (S63 #1): a vendorable .s in the pack may reference an UPPER_CASE asm
+                # macro the in-tree `-I` headers lack (setfpccsr.s → CFC1/CTC1), and the gate must
+                # vendor it before the split, not discover it at a failing vendor-compile. Union
+                # the misses across the pack's TUs so one (needs-define:…) prices the whole split.
+                miss = sorted({m for t in asm_tus for m in vendorable_tu_missing_defines(t)})
+                if miss:
+                    detail = f"{detail}(needs-define:{','.join(miss)})"
+                hazards.append(Hazard(HAZARD_COMBINED_SUBSEG, detail))
         if intrinsic_likely(off, fns[0]):
             # register/FPU shim → hasm, not a classical target. Carry the vendorable ultralib
             # TU path when one exists (intrinsic-likely:os/getcount.s), so the gate can asm-mirror

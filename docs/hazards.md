@@ -115,9 +115,16 @@ an `asm-flip` candidate. A bare `intrinsic-likely` (no `:<tu>`) is a no-source s
   `combined-subseg:<n>tu[a.s|b.s]`. Split the subseg at each TU boundary first (one `hasm` subseg per
   `.s`, the asm analog of the multi-file C-pack split), add one `VENDOR_ASM` pair per TU, then vendor
   each `.s` verbatim. `make extract` writes the new split subseg's `asm/<rom>.s` (absent → splat
-  writes it once); the build still takes each `.o` from its `VENDOR_ASM` rule. S62:
+  writes it once); the build still takes each `.o` from its `VENDOR_ASM` rule. Like the
+  `intrinsic-likely` path, the flag carries `(needs-define:<MACROS>)` (the union across the pack's
+  TUs) when any pack `.s` references an `UPPER_CASE` asm macro the in-tree `-I` headers lack, so the
+  define enabler is priced at the gate, not at a failing vendor-compile (S63: `setfpccsr.s` →
+  `CFC1`/`CTC1`, which were absent because S56 vendored only `MFC0`/`MTC0` — vendor the missing
+  macros into `include/sys/asm.h` verbatim from ultralib `sys/asm.h`). S62:
   `[0x823B0,asm]` held `osInvalDCache`+`osInvalICache` → split at 0x82460 → two `hasm` + two
-  `VENDOR_ASM` pairs (slots 0xB0 + 0x80). Distinct from the two cases above: (a) the mixed-pack caveat
+  `VENDOR_ASM` pairs (slots 0xB0 + 0x80). A mixed pack with a C-mirrorable member splits the same way
+  but vendors only the asm TUs and C-mirrors the rest (S63: `[0x8CA50,asm]` = 3 reg-shim TUs + the
+  C-mirror `__osSpDeviceBusy` → 3 `hasm` + 1 `c, libultra/io/sp`). Distinct from the two cases above: (a) the mixed-pack caveat
   fires when ≥1 member has a C mirror (a member with a C upstream is excluded from the TU count, so
   the flag does NOT fire); (b) a *partial-TU* pack whose asm members share ONE `.s` (e.g.
   `__osDisableInt`/`__osRestoreInt` both in `setintmask.s`) is a single distinct TU → also does NOT
@@ -128,7 +135,10 @@ ultralib's exact flags). S57 (4 cache/TLB primitives — `osWritebackDCacheAll`/
 `osUnmapTLBAll`/`__osProbeTLB`, all first-try clean; added the `needs-define` pre-check + this bisect
 protocol). S58 (3 cross-dir TUs: `sqrtf`/`osMapTLBRdb`/`bcopy`, clearing the `WEAK`-alias + FPU-op
 cases). S62 (`osInvalDCache`+`osInvalICache` — the combined-subseg split sub-pattern + the
-`combined-subseg` pre-flag).
+`combined-subseg` pre-flag). S63 (the `[0x8CA50]` reg-shim "set" family `setfpccsr`/`setsr`/
+`setwatchlo` + the C-mirror `__osSpDeviceBusy` — first mixed asm-mirror + C-mirror subseg-clear;
+extended the `needs-define` pre-check to the `combined-subseg` path after `CFC1`/`CTC1` surfaced at a
+failing vendor-compile).
 
 ---
 
