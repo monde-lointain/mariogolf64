@@ -110,11 +110,25 @@ an `asm-flip` candidate. A bare `intrinsic-likely` (no `:<tu>`) is a no-source s
   — each subseg's `.o` is independent.
 - Do **not** blanket-vendor a mixed `pack:` (e.g. `osSetIntMask` shares its subseg with the C
   mirrors `osCreatePiManager`/`__osEPiRawStartDma`); split first and vendor only the asm member.
+- **Combined-subseg sub-pattern (≥2 distinct asm TUs in one subseg).** When one `asm` subseg holds
+  ≥2 asm-ONLY functions (no C mirror) from *different* ultralib `.s` files, `pick_target.py` flags
+  `combined-subseg:<n>tu[a.s|b.s]`. Split the subseg at each TU boundary first (one `hasm` subseg per
+  `.s`, the asm analog of the multi-file C-pack split), add one `VENDOR_ASM` pair per TU, then vendor
+  each `.s` verbatim. `make extract` writes the new split subseg's `asm/<rom>.s` (absent → splat
+  writes it once); the build still takes each `.o` from its `VENDOR_ASM` rule. S62:
+  `[0x823B0,asm]` held `osInvalDCache`+`osInvalICache` → split at 0x82460 → two `hasm` + two
+  `VENDOR_ASM` pairs (slots 0xB0 + 0x80). Distinct from the two cases above: (a) the mixed-pack caveat
+  fires when ≥1 member has a C mirror (a member with a C upstream is excluded from the TU count, so
+  the flag does NOT fire); (b) a *partial-TU* pack whose asm members share ONE `.s` (e.g.
+  `__osDisableInt`/`__osRestoreInt` both in `setintmask.s`) is a single distinct TU → also does NOT
+  fire, and needs a harder partial-TU carve (still a spike).
 
 **Provenance:** S56 (4 reg shims; KMC-as padding the load-bearing discovery, per PO directive to use
 ultralib's exact flags). S57 (4 cache/TLB primitives — `osWritebackDCacheAll`/`osWritebackDCache`/
 `osUnmapTLBAll`/`__osProbeTLB`, all first-try clean; added the `needs-define` pre-check + this bisect
-protocol).
+protocol). S58 (3 cross-dir TUs: `sqrtf`/`osMapTLBRdb`/`bcopy`, clearing the `WEAK`-alias + FPU-op
+cases). S62 (`osInvalDCache`+`osInvalICache` — the combined-subseg split sub-pattern + the
+`combined-subseg` pre-flag).
 
 ---
 

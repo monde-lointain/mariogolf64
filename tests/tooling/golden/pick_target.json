@@ -2,7 +2,7 @@
   {
     "band": "-",
     "func": "__osSetFpcCsr",
-    "hazards": "pack:4fn[__osSetFpcCsr=?,__osSetSR=?,__osSetWatchLo=?,__osSpDeviceBusy=sp]",
+    "hazards": "pack:4fn[__osSetFpcCsr=?,__osSetSR=?,__osSetWatchLo=?,__osSpDeviceBusy=sp],combined-subseg:3tu[setfpccsr.s|setsr.s|setwatchlo.s]",
     "kind": "asm-flip",
     "nfns": 4,
     "pts": 8,

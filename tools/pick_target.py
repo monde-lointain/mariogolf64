@@ -199,6 +199,7 @@ HAZARD_STALE_HEADER = "stale-header"
 HAZARD_NEEDS_DEFINE = "needs-define"
 HAZARD_JAL_COUNT_MISMATCH = "jal-count-mismatch"
 HAZARD_PACK = "pack"
+HAZARD_COMBINED_SUBSEG = "combined-subseg"
 HAZARD_NON16ALIGN = "non16align"
 HAZARD_INTRINSIC_LIKELY = "intrinsic-likely"
 HAZARD_MAYBE_UPSTREAM = "maybe-upstream"
@@ -1345,11 +1346,30 @@ def classify_subseg(off, typ, path, size, upstream_index):
             # (different basenames → split at the upstream-file boundary, e.g. dpsetstat+dpctr)
             # from a single-file pack, without hand-disassembling asm/<rom>.s.
             members = []
+            asm_index = build_asm_tu_index()
+            asm_tus = []  # distinct vendorable .s TUs among asm-ONLY members (no C mirror)
             for fn in fns:
                 _, fn_up = upstream_index.get(fn, (None, None))
                 stem = os.path.splitext(os.path.basename(fn_up))[0] if fn_up else "?"
                 members.append(f"{fn}={stem}")
+                # Count a member's asm TU only when it has NO C upstream: a member with a C
+                # mirror is a C-mirror pack-split target (the pack hazard's basenames), not an
+                # asm-vendor TU — ultralib may ship a .s variant (e.g. gu translate.s) the ROM
+                # doesn't use. Without this gate a C-mirror gu pack would mis-flag as asm.
+                if not fn_up:
+                    t = asm_index.get(fn)
+                    if t and t not in asm_tus:
+                        asm_tus.append(t)
             hazards.append(Hazard(HAZARD_PACK, f"{len(fns)}fn[" + ",".join(members) + "]"))
+            # Combined-subseg sub-pattern: ≥2 asm-ONLY members from *distinct* vendorable ultralib
+            # .s files (the asm analog of a multi-file C pack). The gate must split the subseg at
+            # the TU boundary, then vendor each .s verbatim (S62 invaldcache|invalicache). Surfacing
+            # it here prices the split before hand-disassembling asm/<rom>.s. A pack whose asm
+            # members share one .s (a partial-TU split, e.g. __osDisableInt/__osRestoreInt in
+            # setintmask.s) has a single distinct TU → does NOT fire (different, harder hazard).
+            if len(asm_tus) > 1:
+                bn = "|".join(sorted(os.path.basename(t) for t in asm_tus))
+                hazards.append(Hazard(HAZARD_COMBINED_SUBSEG, f"{len(asm_tus)}tu[{bn}]"))
         if intrinsic_likely(off, fns[0]):
             # register/FPU shim → hasm, not a classical target. Carry the vendorable ultralib
             # TU path when one exists (intrinsic-likely:os/getcount.s), so the gate can asm-mirror
