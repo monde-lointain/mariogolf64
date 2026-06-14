@@ -25,6 +25,15 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 58 — asm-mirror vendoring: 3 libultra intrinsic-likely asm TUs (sqrtf, osMapTLBRdb, bcopy) — 2026-06-14
+- Increment: 0 new `.c` (asm-vendor/hasm housekeeping). 3 libultra hand-asm TUs vendored from ultralib + built into the ROM: `sqrtf` (0x8BE10, gu/sqrtf.s), `osMapTLBRdb` (0x8CD10, os/maptlbrdb.s), `bcopy` (0x85DA0, libc/bcopy.s). 3 subsegs flipped `asm`→`hasm` (hasm 10→13; asm subsegs 167→164); 3 intrinsic-likely candidates off the carry-over list. md5-candidate unchanged at 97/97 (.c files all 0-stub). Full-make ROM SHA-1 == baserom; all 3 `.o` `.text` == subseg slot (0x10/0x60/0x320, KMC-`as` padding).
+- Quality: stuck-far 0 / permuter 0 / carried 0 / re-opened 0.
+- Seed: committed 2pt; banked 2pt; regime mirror (asm-mirror cluster, seed-only; 8-gate clear).
+- What helped: the S57 `needs-define` pre-check had already confirmed the whole batch self-contained (0 missing macros), so the two flagged caveats were pre-priced at the plan gate and both held without special handling — `bcopy`'s `#ifdef __sgi` takes the `#else` `_bcopy=bcopy` path in the KMC build (the in-tree `WEAK` macro never reached), and `sqrtf`'s missing `.set noreorder` lets the assembler auto-fill the `j ra` delay slot. First cross-dir batch (gu/ + os/ + libc/) proves the pattern is dir-agnostic. Per-subseg `.o` independence meant no all-or-nothing risk; the bisect protocol was on standby but unused.
+- Friction: none. All 3 first-try clean in one atomic `make extract && make`.
+- Applied (0 of 0): empty suggestion buffer — no new gotchas surfaced.
+- Carry-overs: none new. Remaining intrinsic-likely TUs still de-ranked in BACKLOG: un-named `func_800ACB40`/`func_800ACCC0` (need ultralib `.s` identification, else bare-intrinsic→plain hasm); `osInvalDCache`+`osInvalICache` pack (0x823B0, combined 2-fn subseg → needs a combined-`.s` sub-pattern); `__osDisableInt`/`__osRestoreInt` (source not yet located in ultralib `src/os/`); plus the mixed packs (`osSetIntMask` 3fn, `func_800AFB90` 8fn) that must be split before any hasm.
+
 ## Sprint 57 — asm-mirror vendoring: 4 libultra cache/TLB asm primitives — 2026-06-14
 - Increment: 0 new `.c` (asm-vendor/hasm housekeeping). 4 libultra cache/TLB hand-asm TUs vendored from ultralib + built into the ROM: `osWritebackDCacheAll` (0x82560), `osUnmapTLBAll` (0x88100), `osWritebackDCache` (0x824E0), `__osProbeTLB` (0x88000). 4 subsegs flipped `asm`→`hasm` (hasm 6→10; asm subsegs 171→167); 4 intrinsic-likely candidates off `pick_target`. md5-candidate unchanged at 97/97 (.c files all 0-stub).
 - Quality: 0/0/0/0 stuck-far/permuter/carried/re-opened. All 4 ultralib version-matched FIRST attempt (one atomic gate `make`); no novel gotcha — S56 derisked the pattern (KMC-as padding, VENDOR_ASM mechanism).
