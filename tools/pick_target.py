@@ -82,6 +82,12 @@ SUBSEG_RE = re.compile(
 )
 # Approximate C function-definition: a return-type-led line ending in `name(`.
 UPSTREAM_DEF_RE = re.compile(r"^[A-Za-z_][\w \t\*]*?\b([A-Za-z_]\w+)\s*\(", re.M)
+# `#pragma weak <alias> = <impl>` exports <alias> at the implementation's address. The def loop
+# only keys the impl name (gu/cosf.c defines `fcos`/`__cosf`), so the ROM/curated weak alias `cosf`
+# was absent from the upstream index → a pack member read `cosf=?` and hid cosf.c from the
+# c-combined member labels (S66). Keying the alias too lets a weak-aliased SDK fn resolve to its
+# upstream file (cosf/sinf/fcos/fsin), the C analog of ASM_TU_DEF_RE's WEAK arm (bcopy → _bcopy).
+PRAGMA_WEAK_RE = re.compile(r"^\s*#pragma\s+weak\s+([A-Za-z_]\w+)\s*=\s*[A-Za-z_]\w+", re.M)
 # A hand-asm TU's exported entry: `LEAF(osGetCount)` / `XLEAF(name)` / `WEAK(bcopy, _bcopy)`
 # (sys/asm.h macros). The WEAK arm catches the public name of an aliased TU (bcopy → _bcopy).
 # Keys build_asm_tu_index so an intrinsic-likely shim can name its vendorable ultralib .s TU.
@@ -314,6 +320,9 @@ def build_upstream_index():
                 continue
             text = _strip_inactive_version_branches(text, build_ord)
             for m in UPSTREAM_DEF_RE.finditer(text):
+                index.setdefault(m.group(1), (lib, cpath))
+            # Weak aliases export the ROM-visible name at the impl's address (S66 cosf/sinf).
+            for m in PRAGMA_WEAK_RE.finditer(text):
                 index.setdefault(m.group(1), (lib, cpath))
     return index
 

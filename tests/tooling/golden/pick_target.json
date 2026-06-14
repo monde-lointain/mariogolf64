@@ -1,5 +1,18 @@
 [
   {
+    "band": "warm",
+    "func": "guTranslateF",
+    "hazards": "pack:2fn[guTranslateF=translate,guTranslate=translate]",
+    "kind": "asm-flip",
+    "nfns": 2,
+    "pts": 2,
+    "rom": "0x85CD0",
+    "score": 56,
+    "size": 208,
+    "upstream": "libultra",
+    "vram": "0x800AA8D0"
+  },
+  {
     "band": "-",
     "func": "func_ovl0_801F4A30",
     "hazards": "-",
@@ -625,28 +638,15 @@
   },
   {
     "band": "warm",
-    "func": "__osGbpakSetBank",
-    "hazards": "pack:4fn[__osGbpakSetBank=gbpakreadwrite,func_800B1B50=?,func_800B1CCC=?,func_800B1D70=?],needs-header:PRinternal/controller.h(already-vendored),jal-count-mismatch:5vs3",
+    "func": "guAlignF",
+    "hazards": "pack:2fn[guAlignF=align,func_800A794C=?],calls-unplaced:guNormalize,data-static:0x800C81A0",
     "kind": "asm-flip",
-    "nfns": 4,
-    "pts": 8,
-    "rom": "0x8CE90",
+    "nfns": 2,
+    "pts": 3,
+    "rom": "0x82B80",
     "score": -664,
     "size": 928,
     "upstream": "libultra",
-    "vram": "0x800B1A90"
-  },
-  {
-    "band": "warm",
-    "func": "__osDevMgrMain",
-    "hazards": "calls-unplaced:__osEPiRawReadIo,dma,edma,jal-count-mismatch:25vs21",
-    "kind": "asm-flip",
-    "nfns": 1,
-    "pts": 3,
-    "rom": "0x7E9F0",
-    "score": -696,
-    "size": 960,
-    "upstream": "libultra",
-    "vram": "0x800A35F0"
+    "vram": "0x800A7780"
   }
 ]

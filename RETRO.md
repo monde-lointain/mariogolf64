@@ -25,6 +25,17 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 66 — bank cosf + sinf (libultra gu trig verbatim mirrors) — 2026-06-14
+- Increment: 2 `.c` banked (`src/libultra/gu/cosf.c` `cosf` + `src/libultra/gu/sinf.c` `sinf`) / 2 functions matched (md5-candidate 104→**106**, all 106 .c stub-free; asm subsegs 157→158; surfaced `gu/translate.c` as a new asm leaf). Both decompose-splits of pts-13 combined packs at the upstream-file boundary (cosf from `[0x82B80]` 5-fn at 0x82F20+0x83070; sinf from `[0x85B30]` 3-fn at 0x85CD0).
+- Quality: stuck-far 0 / permuter 0 / carried 0 / re-opened 0 (1 gate-missed enabler recovered in-execution, not a spike).
+- Seed: committed 4pt (cosf 2 + sinf 2); banked 4pt; regime mirror (8-gate satisfied by the two decompose-splits, S60 pattern)
+- What helped: did **sinf first** (lower-variance: the shared weak-alias + `__libm_qnan_f` machinery proven on the clean anonymous-pool sibling before cosf's named pool). PO-directed byte-compare of cosf.o `.rodata` vs ROM **before** carving confirmed the pool matched libultra → the S64 named-rodata caveat fell as a phantom. First C `#pragma weak cosf=__cosf` mirror compiled+matched clean under KMC gcc 2.7.2 (C analog of S58 bcopy `_bcopy=bcopy`), no edit.
+- Friction: a **gate-missed shared recover-extern** — `__libm_qnan_f`@0x800D2640 (the NaN-path return refd by both fns) was anonymous `D_800D2640`, invisible to `refs-unplaced` (can't bind an anon label) AND hidden because the fns were non-primary pack members (refs_unplaced scans only the primary's upstream, align.c). Caught at execution-time data-ref reconciliation, recovered (1 add). Also: a clean-rebuild was needed after the symbol rename (stale stub `.o` referenced the old `D_800D2640` — the no-`.s`-dep rule). PO course-corrections honored: libkmc-vs-libultra verified (libultra — ROM rodata byte-id to ultralib, libkmc has no cosf/sinf), cosf's named-rodata byte-checked vs libultra before carving.
+- Applied (3 of 3): #1 `docs/hazards.md` .rodata-sibling named-pool note (retire the phantom collision caveat) + S66 provenance; #2 `pick_target.py PRAGMA_WEAK_RE` keys weak aliases in `build_upstream_index` (`cosf=cosf` not `cosf=?`) — provably golden-inert (the only weak-aliased fns, cosf/sinf, are now banked), suite 29 pass; #3 `docs/hazards.md` Upstream-mirror `#pragma weak` C-mirror note. (#4 mirror-track-variance observation: logged, no edit proposed.)
+- Carry-over: none (file-level). Tooling follow-up (the deeper half of #2): union `refs_unplaced` over c-combined member upstreams so a hidden member's `__`-prefixed extern (the `__libm_qnan_f` class) surfaces at the gate, not at execution — recorded in BACKLOG enabler notes.
+
+---
+
 ## Sprint 65 — clear [0x860C0] libc pack: bzero asm-mirror + string.c C mirror — 2026-06-14
 - Increment: 1 `.c` banked (`src/libultra/libc/string.c`, 3 fns `strchr`/`strlen`/`memcpy`) + 1 asm-mirror (`src/libultra/libc/bzero.s`, `bzero`) / 4 functions matched (md5-candidate 103→**104**; asm subsegs 158→157, hasm 18→19, c 103→104). Decomposed the pts-8 4-fn pack at the bzero|string boundary (rom 0x86160, 16-aligned) into one `hasm` (bzero) + one `c` (string).
 - Quality: stuck-far 0 / permuter 0 / carried 0 / re-opened 0.
