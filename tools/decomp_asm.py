@@ -140,6 +140,35 @@ def intrinsic_likely(rom_off, primary):
     return handwritten             # spimdisasm-tagged handwritten leaf (no jal)
 
 
+# Privileged ops gcc never emits from C: TLB writes/probes, CP0 register moves (32/64-bit),
+# FPU control-register moves, the `cache` op, and `eret`. A function whose compiled body
+# contains ANY of these is definitively a hand-asm TU (zero false-positive risk on a genuine
+# classical target — the C compiler never generates them), so it is an asm-mirror candidate,
+# NOT something to decompile. This is broader than intrinsic_likely, which only catches a
+# *pure* shim (whole body = CP0-moves/sqrt + jr, no jal): a TU that does real work around the
+# privileged op — branches/loads (osMapTLB/osUnmapTLB) or even calls (exception dispatch) —
+# slips past intrinsic_likely yet is just as much hand-asm. (S70 #1.)
+PRIVILEGED_OPS = {
+    "tlbwi", "tlbwr", "tlbp", "tlbr",
+    "mfc0", "mtc0", "dmfc0", "dmtc0", "cfc0", "ctc0",
+    "cfc1", "ctc1",
+    "cache", "eret",
+}
+
+
+def privileged_asm(rom_off, primary):
+    """True if `primary`'s body (in asm/<ROM>.s) contains a privileged op C cannot emit
+    (TLB/CP0/FPU-control/cache/eret) → a hand-asm TU even when it has surrounding control flow
+    or calls. Broader than intrinsic_likely; used to flag asm-mirror candidates the pure-shim
+    test misses (osMapTLB/osUnmapTLB: a tlbwi + branch/lw logic; an exception dispatcher: a
+    privileged op + jals)."""
+    for line in iter_function_body(rom_off, primary):
+        insn = INSN_RE.search(line)
+        if insn and insn.group(1) in PRIVILEGED_OPS:
+            return True
+    return False
+
+
 # Asm-side of the signature matcher (the C-side _c_signature + the IDF scoring live in
 # pick_target.py). CALL_INSN_RE/IMM_INSN_RE pull the target's callee + constant sets from
 # the asm; _FRAME_IMMS is shared with _c_signature (imported back there) so both sides drop

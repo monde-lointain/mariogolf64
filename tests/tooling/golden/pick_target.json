@@ -535,7 +535,7 @@
   {
     "band": "-",
     "func": "audio_sched_thread_entry",
-    "hazards": "-",
+    "hazards": "intrinsic-likely:cp0-asm(identify-TU)",
     "kind": "asm-flip",
     "nfns": 1,
     "pts": 5,

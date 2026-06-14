@@ -256,6 +256,7 @@ When `pick_target.py` flags a hazard (or a match shows its symptom), read the ma
 | `c-combined:<n>file[…]` (≥2 distinct C upstream files in one asm subseg) | #multi-function-segment-splitting-pack |
 | `non16align`                    | #non16align |
 | `intrinsic-likely:<tu>.s` (vendorable ultralib asm TU) | #asm-mirror-vendoring |
+| `intrinsic-likely:cp0-asm(identify-TU)` (un-named privileged hand-asm: TLB/CP0/eret, name unresolved) | #asm-mirror-vendoring |
 | `combined-subseg:<n>tu[…]` (≥2 distinct asm TUs in one subseg) | #asm-mirror-vendoring |
 | `intrinsic-likely` (bare) / `maybe-upstream:…` | #intrinsic-likely--maybe-upstream-signature-hints |
 | (libultra leaf, bare std header)| #per-library-standard-c-header-isolation |

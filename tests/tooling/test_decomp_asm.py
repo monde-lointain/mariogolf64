@@ -67,3 +67,66 @@ def test_scans_absent_file_return_empty(asm, monkeypatch):
     monkeypatch.setattr(asm, "asm_path", lambda rom_off: "/no/such/asm.s")
     assert asm.rodata_literals(0xDEADBE) == []
     assert list(asm.iter_subseg_body(0xDEADBE)) == []
+
+
+# privileged_asm vs intrinsic_likely (S70 #1). Three shapes, each a distinct case:
+#   privTlb  — a tlbwi + branch/lw logic, NO jal (osMapTLB/osUnmapTLB shape): intrinsic_likely
+#              false (work isn't all-INTRINSIC_OPS, no `handwritten` tag), privileged_asm TRUE.
+#   privCall — an mtc0 + jal (the audio_sched_thread_entry / exception-dispatch shape):
+#              intrinsic_likely false (a jal → "decompilable" early-out), privileged_asm TRUE.
+#   plainLeaf— ordinary lui/lw leaf, no privileged op: BOTH false (a genuine classical target).
+PRIV_ASM = """\
+glabel privTlb
+/* 1000 800A0000 3C018000 */  lui   $at, 0x8000
+/* 1004 800A0004 10200002 */  beqz  $at, .L800A0010
+/* 1008 800A0008 00000000 */   nop
+/* 100C 800A000C 42000002 */  tlbwi
+.L800A0010:
+/* 1010 800A0010 03E00008 */  jr    $ra
+endlabel privTlb
+glabel privCall
+/* 1014 800A0014 40043000 */  mfc0  $a0, $6
+/* 1018 800A0018 0C000010 */  jal   func_80000040
+/* 101C 800A001C 00000000 */   nop
+/* 1020 800A0020 40870000 */  mtc0  $a3, $0
+/* 1024 800A0024 03E00008 */  jr    $ra
+endlabel privCall
+glabel plainLeaf
+/* 1028 800A0028 3C01800D */  lui   $at, %hi(D_800D2520)
+/* 102C 800A002C 8C220000 */  lw    $v0, 0x0($at)
+/* 1030 800A0030 03E00008 */  jr    $ra
+endlabel plainLeaf
+"""
+
+
+@pytest.fixture
+def priv_asm(tmp_path, monkeypatch):
+    mod = load_tool("decomp_asm")
+    f = tmp_path / "C0FFEE.s"
+    f.write_text(PRIV_ASM)
+    monkeypatch.setattr(mod, "asm_path", lambda rom_off: str(f))
+    return mod
+
+
+def test_privileged_asm_flags_tlb_leaf(priv_asm):
+    """A tlbwi with surrounding control flow (no jal) — the osMapTLB/osUnmapTLB shape that
+    intrinsic_likely misses (work isn't all CP0-moves/sqrt)."""
+    assert priv_asm.privileged_asm(0xC0FFEE, "privTlb") is True
+    assert priv_asm.intrinsic_likely(0xC0FFEE, "privTlb") is False
+
+
+def test_privileged_asm_flags_cp0_with_call(priv_asm):
+    """An mtc0 alongside a jal — the exception-dispatch / audio_sched_thread_entry shape;
+    intrinsic_likely early-outs on the jal, but it is still hand-asm."""
+    assert priv_asm.privileged_asm(0xC0FFEE, "privCall") is True
+    assert priv_asm.intrinsic_likely(0xC0FFEE, "privCall") is False
+
+
+def test_privileged_asm_ignores_plain_leaf(priv_asm):
+    """No privileged op → a genuine classical target, not an asm-mirror candidate."""
+    assert priv_asm.privileged_asm(0xC0FFEE, "plainLeaf") is False
+
+
+def test_privileged_asm_absent_file(priv_asm, monkeypatch):
+    monkeypatch.setattr(priv_asm, "asm_path", lambda rom_off: "/no/such/asm.s")
+    assert priv_asm.privileged_asm(0xC0FFEE, "privTlb") is False

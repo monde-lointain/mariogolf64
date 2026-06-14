@@ -40,6 +40,7 @@ from decomp_asm import (
     _FRAME_IMMS,
     asm_functions,
     intrinsic_likely,
+    privileged_asm,
     recover_unplaced_call_vram,
     recover_unplaced_vram,
     rodata_literals,
@@ -1498,19 +1499,35 @@ def classify_subseg(off, typ, path, size, upstream_index):
                 if miss:
                     detail = f"{detail}(needs-define:{','.join(miss)})"
                 hazards.append(Hazard(HAZARD_COMBINED_SUBSEG, detail))
-        if intrinsic_likely(off, fns[0]):
-            # register/FPU shim → hasm, not a classical target. Carry the vendorable ultralib
-            # TU path when one exists (intrinsic-likely:os/getcount.s), so the gate can asm-mirror
-            # it instead of refusing outright (docs/hazards.md#asm-mirror-vendoring).
+        # Hand-asm detection → asm-mirror candidate, not a classical target. Two cases collapse
+        # here: a *pure* register/FPU shim (intrinsic_likely) and a privileged TU that does real
+        # work around an op C can't emit (privileged_asm: a tlbwi/mtc0/eret with branches+loads or
+        # calls — osMapTLB/osUnmapTLB, exception dispatch; S70 #1). Both vendor verbatim from the
+        # ultralib .s (docs/hazards.md#asm-mirror-vendoring).
+        prim_intrinsic = intrinsic_likely(off, fns[0])
+        prim_privileged = privileged_asm(off, fns[0])
+        if prim_intrinsic or prim_privileged:
+            # Carry the vendorable ultralib TU path when the primary's name matches a LEAF
+            # (intrinsic-likely:os/getcount.s, …:os/setintmask.s) so the gate asm-mirrors it
+            # directly. When the TU is vendorable, pre-flag any macro the in-tree asm `-I` headers
+            # don't define (…(needs-define:RDB_BASE_VIRTUAL_ADDR,…)) so the gate pays the enabler
+            # before the verbatim copy, not at a failing vendor-compile.
             tu = build_asm_tu_index().get(fns[0])
-            # When the TU is vendorable, pre-flag any macro the in-tree asm `-I` headers don't define
-            # (intrinsic-likely:os/maptlbrdb.s(needs-define:RDB_BASE_VIRTUAL_ADDR,…)) so the gate
-            # pays the define enabler before the verbatim copy, not at the failing vendor-compile.
             if tu:
                 miss = vendorable_tu_missing_defines(tu)
                 if miss:
                     tu = f"{tu}(needs-define:{','.join(miss)})"
-            hazards.append(Hazard(HAZARD_INTRINSIC_LIKELY, tu))
+                detail = tu
+            elif prim_privileged:
+                # An un-named func_<addr> with a privileged op: the name can't resolve the TU, but
+                # the privileged op proves a vendorable ultralib source exists. Tag it cp0-asm so the
+                # gate identifies + vendors it (a single MCP disasm names it by its CP0/TLB signature
+                # — osMapTLB/osUnmapTLB), instead of reading the BARE intrinsic-likely as a no-source
+                # shim and parking it (the 14-sprint carry-over this retires).
+                detail = "cp0-asm(identify-TU)"
+            else:
+                detail = None  # genuine no-source shim (handwritten leaf, no privileged op, no TU)
+            hazards.append(Hazard(HAZARD_INTRINSIC_LIKELY, detail))
         return "asm-flip", fns, hazards
     if typ == "c" and path:
         cpath = os.path.join(ROOT, "src", path + ".c")

@@ -77,6 +77,19 @@ the C mirror. Pilot: S56 (`getcount`/`getcause`/`getsr`/`setcompare`).
 **Trigger:** `pick_target.py` flags `intrinsic-likely:<tu>.s` (a vendorable ultralib TU exists) on
 an `asm-flip` candidate. A bare `intrinsic-likely` (no `:<tu>`) is a no-source shim → plain `hasm`.
 
+`intrinsic-likely:cp0-asm(identify-TU)` (S70 #1) is the same asm-mirror class for an **un-named**
+`func_<addr>` subseg whose body holds a privileged op gcc never emits (`tlbwi`/`tlbwr`/`tlbp`/`tlbr`,
+`mfc0`/`mtc0`/`dmfc0`/`dmtc0`/`cfc0`/`ctc0`, `cfc1`/`ctc1`, `cache`, `eret`). The op proves a
+vendorable ultralib source exists but the un-named primary can't resolve the `.s`, so the gate
+**identifies the TU first** — one MCP `disassemble_function` names it by its CP0/TLB signature
+(e.g. `mfc0/mtc0 Index/EntryHi + tlbwi` ⇒ `osMapTLB`/`osUnmapTLB`, S70) — then vendors it per the
+procedure below. This is *broader* than the pure-shim `intrinsic_likely`: it fires even when the body
+has real control flow or `jal`s around the privileged op (`osMapTLB`'s branch/lw logic; an
+exception/context dispatcher's `mtc0`+`jal`, e.g. the mislabeled `audio_sched_thread_entry`
+0x800B3E50). The point is negative as much as positive — such a subseg is hand-asm, **never** a
+classical decomp target, so smallest-first must not surface it as one. If no ultralib source turns up
+for the identified TU, it falls back to plain `hasm`.
+
 **Procedure:**
 1. **Copy the ultralib `.s` verbatim** from `~/development/repos/ultralib/src/<dir>/<file>.s` to
    `src/libultra/<dir>/<file>.s` (mirror the subdir, same as the C pattern).
@@ -797,7 +810,9 @@ fixup commit).
 **Rule:** Two advisory flags from the signature matcher.
 - `intrinsic-likely` — a register/FPU/cache/TLB shim, not a classical target. If the detail names a
   vendorable ultralib TU (`intrinsic-likely:os/getcount.s`), asm-mirror it (see
-  `#asm-mirror-vendoring`); a bare `intrinsic-likely` (no `:<tu>`) is a no-source shim → plain `hasm`.
+  `#asm-mirror-vendoring`); `intrinsic-likely:cp0-asm(identify-TU)` is an un-named privileged hand-asm
+  subseg (also `#asm-mirror-vendoring` — identify the TU first); a bare `intrinsic-likely` (no `:<tu>`,
+  no `cp0-asm`) is a no-source shim → plain `hasm`.
 - `maybe-upstream:<lib>:<bases>` — an un-named subseg (`func_<addr>`) that the signature matcher
   thinks is an un-named SDK mirror (the S13 trap). Verify against the candidate upstream at the gate
   before treating it as classical.
