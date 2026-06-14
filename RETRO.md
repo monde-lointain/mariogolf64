@@ -25,6 +25,17 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 69 — bank gu/lookat.c (guLookAtF + guLookAt), libultra gu mirror; GU BAND CLOSED — 2026-06-14
+- Increment: 1 `.c` banked (`src/libultra/gu/lookat.c`, 2 fns `guLookAtF`+`guLookAt`) / 2 functions matched (md5-candidate 108→**109**, all 109 .c stub-free; asm subsegs 156→155). The **TRUE last un-flipped gu asm leaf** — banking it closes the entire gu band (the perspective S55 → lookathil S64 → cosf/sinf S66 → translate S67 → align S68 → lookat S69 trail ends here).
+- Quality: stuck-far 0 / permuter 0 / carried 0 / re-opened 0. Byte-identical verbatim `cp`, 0 edits, 0 iteration, full-make ROM SHA-1 == baserom first `make`.
+- Seed: committed 13pt; banked 13pt; regime mirror (8-gate FIRED → verbatim-mirror exemption, generalized)
+- What helped: the gate asm-vs-source check **corrected a wrong carry-over note before it cost anything** — the backlog claimed lookat was the "vec3f_normalize substitution class as align," but the source/asm showed guLookAtF uses `sqrtf` **inline** (`-1.0/sqrtf(...)`), making it a PURE verbatim mirror (S64 lookathil shape, NOT align/rotate). All callees pre-placed (`guMtxIdentF`/`sqrtf`/`guMtxF2L`); `guLookAt` inlines guLookAtF (-O2 same-TU, exactly the S68 guAlign pattern). The rodata-sibling carve was mechanical (cosf/lookathil playbook): the anon 6-literal pool 0x800D24C0..0x800D24E0 maps exactly to the generic `[0xAD8C0, rodata]` block (bounded by lookathil), so the carve = `.o(.rodata)` 0x20 exact, SHA-confirmed.
+- Friction: one judgment call at the gate, not a stall — lookat's inner fn boundary guLookAt@0x800A7FF0 is **16-aligned**, so the S64 exemption's literal condition (b) (`non16align` on the inner boundary) did not hold as written. Resolved by recognizing the `non16align` test was a proxy for "no valid inter-file split point," which a `single-file-pack` satisfies regardless of inner alignment (you can't mirror half a `.c`). Codified as suggestion #1 so the next 16-aligned single-file-pack 8/13 doesn't re-litigate it.
+- Applied (2 of 2): #1 generalized the S64 verbatim-mirror exemption condition (b) — a `single-file-pack` (every member fn from one upstream `.c`) is decompose-blocked **regardless of inner-boundary 16-alignment** (S64 lookathil non16align + S69 lookat 16-aligned, both blocked); `pick_target.py`'s `single-file-pack` tag (S67) IS the signal, so this is doctrine-only (no tooling/golden change). Edited `CLAUDE.md ## Story points` exemption + the `VELOCITY.md` exemption summary. #2 corrected the `BACKLOG.md` carry-over's wrong `vec3f_normalize`-substitution claim (lookat is sqrtf-inline verbatim) and marked the gu-band carry-over section CLOSED.
+- Carry-over: none. **Cross-repo follow-up:** `guLookAt`=0x800A7FF0 is a new decomp-side symbol → propagate to the Ghidra workspace via `sync_decomp_names.py --import-from-decomp`.
+
+---
+
 ## Sprint 68 — bank gu/align.c (guAlignF + guAlign), libultra gu mirror — 2026-06-14
 - Increment: 1 `.c` banked (`src/libultra/gu/align.c`, 2 fns `guAlignF`+`guAlign`) / 2 functions matched (md5-candidate 107→**108**, all 108 .c stub-free; remaining libultra asm-flip candidates 16→15). The **verbatim twin of S61 `rotate.c`** — same `libultra/gu` dir, same substituted-callee + static-dtor signature.
 - Quality: stuck-far 0 / permuter 0 / carried 0 / re-opened 0. First-build match, 0 iteration.
