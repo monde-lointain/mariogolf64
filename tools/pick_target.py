@@ -97,11 +97,24 @@ INCLUDE_DIRS = [
     for d in ("include", "include/libultra", "include/libultra/internal", "include/libkmc", "include/libnusys")
 ]
 PROJECT_INC = os.path.join(ROOT, "include")
+# Per-lib extra `-I` dirs the Makefile's profile CFLAGS add on top of the base INCLUDE_DIRS, so a
+# mirror's include resolution must match the profile it actually compiles under. LIBULTRA_CFLAGS
+# (Makefile) prepends `-I include/libultra/compiler/gcc` and appends `-I include/libultra/PR`, so a
+# libultra mirror resolves <libaudio.h>/<os_internal.h>/<ultraerror.h> and the rest of the PR/ band
+# through these — missing_includes must include them for a libultra candidate or it false-flags
+# needs-header → blk (S53: alHeapDBAlloc + the whole audio/PR mirror band were hidden this way).
+# libkmc/libnusys CFLAGS add no extra `-I`, so they map to the base set.
+LIB_EXTRA_INCLUDE_DIRS = {
+    "libultra": [
+        os.path.join(ROOT, "include/libultra/compiler/gcc"),
+        os.path.join(ROOT, "include/libultra/PR"),
+    ],
+}
 # Upstream include trees a missing companion header can be *copied from* (the execution-middle
 # mirror, e.g. assert.h). A header absent here and absent from the project tree is a system
-# header we don't ship (blocked); a header present in the project tree but unreachable under
-# INCLUDE_DIRS is an unindexed-`-I` case (blocked, a deferred Makefile enabler — the audio
-# band's <libaudio.h> at include/libultra/PR/). See classify of needs-header in seed_points.
+# header we don't ship (blocked); a header present in the project tree but unreachable under the
+# candidate's effective `-I` set (INCLUDE_DIRS + LIB_EXTRA_INCLUDE_DIRS[lib]) is an unindexed-`-I`
+# case (blocked, a deferred Makefile enabler). See classify of needs-header in seed_points.
 UPSTREAM_INC_ROOTS = [
     # ultralib is the sole libultra mirror source (LIBULTRA = ultralib/src), so its include tree is
     # the libultra companion-header donor — it ships the `PRinternal/` prefix the mirrors `#include`.
@@ -946,19 +959,26 @@ def band_is_warm(mirror_dir):
     return False
 
 
-def missing_includes(cpath, mirror_dir=None):
-    """Upstream includes that don't resolve under the project -I set (-nostdinc, so every
-    header must come from INCLUDE_DIRS). A non-empty result is the `needs-header` DoR hazard:
+def missing_includes(cpath, mirror_dir=None, lib=None):
+    """Upstream includes that don't resolve under the candidate's effective -I set (-nostdinc, so
+    every header must come from a -I dir). A non-empty result is the `needs-header` DoR hazard:
     the verbatim mirror won't compile until each is satisfied — copy the companion header
-    (execution-middle, e.g. assert.h) or add a -I path (deferred enabler, e.g. the audio band's
-    <libaudio.h> at include/libultra/PR/). Conservative: scans all `#include` lines regardless
-    of `#ifdef` state, so a dead `#ifdef _DEBUG` include may over-flag — the gate confirms.
+    (execution-middle, e.g. assert.h) or add a -I path (deferred enabler). Conservative: scans all
+    `#include` lines regardless of `#ifdef` state, so a dead `#ifdef _DEBUG` include may over-flag
+    — the gate confirms.
+
+    The effective -I set is the base INCLUDE_DIRS plus LIB_EXTRA_INCLUDE_DIRS[lib] — the profile
+    CFLAGS the source actually compiles under. A libultra mirror resolves <libaudio.h> and the rest
+    of the PR/ band through `-I include/libultra/PR` (LIBULTRA_CFLAGS); passing `lib='libultra'` is
+    what keeps that band from false-flagging needs-header → blk (S53: alHeapDBAlloc). `lib=None`
+    uses the base set only.
 
     A quote-include (`#include "x.h"`) resolves source-relative to the dir the mirror compiles
     in, so a band-local companion already shipped at <mirror_dir>/x.h (e.g. gu/guint.h, copied
     alongside the first gu/ sibling in S49) is NOT missing even though it is absent from the -I
     set — the band-open fast path (S50). `mirror_dir` is the in-tree dir the source will land in
     (band_mirror_dir); None disables the source-relative check."""
+    search_dirs = INCLUDE_DIRS + LIB_EXTRA_INCLUDE_DIRS.get(lib or "", [])
     missing = []
     with open(cpath, errors="ignore") as f:
         for line in f:
@@ -966,7 +986,7 @@ def missing_includes(cpath, mirror_dir=None):
             if not m:
                 continue
             inc = m.group(1)
-            if any(os.path.exists(os.path.join(d, inc)) for d in INCLUDE_DIRS):
+            if any(os.path.exists(os.path.join(d, inc)) for d in search_dirs):
                 continue
             # A quote-include resolves source-relative once the band-local companion is in-tree.
             is_quote = '"' in m.group(0)
@@ -1150,7 +1170,7 @@ def append_upstream_hazards(off, primary, up_lib, up_path, hazards):
             crefs = unplaced_calls
         hazards.append(Hazard(HAZARD_CALLS_UNPLACED, ",".join(crefs)))  # recover func symbol before flip
     mirror_dir = band_mirror_dir(up_lib, up_path)
-    missing = missing_includes(up_path, mirror_dir)
+    missing = missing_includes(up_path, mirror_dir, up_lib)
     if missing:
         hazards.append(Hazard(HAZARD_NEEDS_HEADER, ",".join(missing)))
         blocked = any(include_is_blocked(inc) for inc in missing)

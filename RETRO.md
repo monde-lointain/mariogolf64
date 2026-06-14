@@ -25,6 +25,17 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 53 — alHeapDBAlloc libultra audio/ mirror — 2026-06-13
+- Increment: 1 file banked (`src/libultra/audio/heapalloc.c`) / 1 fn matched (`alHeapDBAlloc`; closes the named-clean `libultra/audio/` leaf, sibling of the S36 heapinit/copy pair). md5-candidate 94→95; asm subsegs 178→177.
+- Quality: 0/0/0/0 this sprint. Verbatim ultralib mirror, clean first build, 0 iterations.
+- Seed: committed 1pt; banked 1pt; regime mirror (8-gate clear; seed-only). pts column read `blk` (the false-block); true seed 1 (warm single-fn mirror), refuted at the gate.
+- What helped: the audio band was already open (copy.c/heapinit.c, S36) and the name was pre-curated in ghidra_symbols, so the only enabler was the yaml flip. Body is trivial under `_FINALROM` (the `_DEBUG` HeapInfo bookkeeping + `__osError` compile out), so no data externs and no callees to reconcile — a pure verbatim cp + SHA proof.
+- Friction: **a new false-block class.** pick_target reported `blk needs-header:libaudio.h,os_internal.h,ultraerror.h` and `--lib libultra` returned empty, making the band look mined out. All 3 headers ship at `include/libultra/PR/` and resolve via `LIBULTRA_CFLAGS -I include/libultra/PR`, but `missing_includes`'s `-I` model (base INCLUDE_DIRS) omits the PR/ path — so every libultra PR-band mirror false-flagged. Distinct from the S49/S50 gu/ quote-include false-blks (those resolved source-relative; this one is a genuine `-I` dir the model lacked). Refuted at the gate by the banked sibling heapinit.c, then fixed in tooling.
+- Applied (3 of 3): #1 `missing_includes` now takes the candidate's `lib` and unions `LIB_EXTRA_INCLUDE_DIRS[lib]` (libultra ⇒ `include/libultra/compiler/gcc` + `include/libultra/PR`, matching LIBULTRA_CFLAGS) into the resolvable `-I` set — kills the PR-band false-blk; golden regen (alHeapDBAlloc gone, sprintf's `os.h` now resolved → `needs-header:xstdio.h,string.h`), 23 pass. #2 dropped the stale "deferred Makefile enabler — the audio band's <libaudio.h> at include/libultra/PR/" comment at the INCLUDE_DIRS note (superseded by #1). #3 BACKLOG libultra hazard-map re-survey (below).
+- Carry-over: none.
+
+---
+
 ## Sprint 52 — guRotateRPYF/RPY + guLookAtReflectF/Reflect libultra gu/ mirror pair — 2026-06-13
 - Increment: 2 files banked (`src/libultra/gu/rotaterpy.c`, `lookatref.c`) / 4 fns matched (`guRotateRPYF`, `guRotateRPY`, `guLookAtReflectF`, `guLookAtReflect`; 4th+5th gu/ files). md5-candidate 92→94; asm subsegs 180→178.
 - Quality: 0/0/0/0 this sprint. Both verbatim ultralib VERSION_J mirrors, clean first build, 0 iterations.

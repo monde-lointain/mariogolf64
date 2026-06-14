@@ -1,21 +1,8 @@
 [
   {
     "band": "warm",
-    "func": "alHeapDBAlloc",
-    "hazards": "needs-header:libaudio.h,os_internal.h,ultraerror.h",
-    "kind": "asm-flip",
-    "nfns": 1,
-    "pts": "blk",
-    "rom": "0x82320",
-    "score": 184,
-    "size": 80,
-    "upstream": "libultra",
-    "vram": "0x800A6F20"
-  },
-  {
-    "band": "warm",
     "func": "sprintf",
-    "hazards": "pack:2fn[sprintf=sprintf,proutSprintf=sprintf],file-static,needs-header:xstdio.h,string.h,os.h",
+    "hazards": "pack:2fn[sprintf=sprintf,proutSprintf=sprintf],file-static,needs-header:xstdio.h,string.h",
     "kind": "asm-flip",
     "nfns": 2,
     "pts": "blk",
@@ -648,5 +635,18 @@
     "size": 288,
     "upstream": "none",
     "vram": "0x800B3C20"
+  },
+  {
+    "band": "-",
+    "func": "osInvalDCache",
+    "hazards": "pack:2fn[osInvalDCache=?,osInvalICache=?],intrinsic-likely",
+    "kind": "asm-flip",
+    "nfns": 2,
+    "pts": 13,
+    "rom": "0x823B0",
+    "score": -304,
+    "size": 304,
+    "upstream": "none",
+    "vram": "0x800A6FB0"
   }
 ]
