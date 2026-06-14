@@ -72,3 +72,4 @@ osCartRomInitFirst = 0x800C7EA0; // size:0x4
 xseed = 0x800C81C0; // size:0x4
 sqrtf = 0x800B0A10; // type:func
 dtor = 0x800C81E0; // size:0x4
+__libm_qnan_f = 0x800D2640; // size:0x4
