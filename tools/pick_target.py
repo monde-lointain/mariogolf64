@@ -86,6 +86,21 @@ UPSTREAM_DEF_RE = re.compile(r"^[A-Za-z_][\w \t\*]*?\b([A-Za-z_]\w+)\s*\(", re.M
 # (sys/asm.h macros). The WEAK arm catches the public name of an aliased TU (bcopy → _bcopy).
 # Keys build_asm_tu_index so an intrinsic-likely shim can name its vendorable ultralib .s TU.
 ASM_TU_DEF_RE = re.compile(r"^\s*(?:X?LEAF|WEAK)\(\s*([A-Za-z_]\w+)", re.M)
+# A vendorable asm TU references CPU/cache/TLB constants by macro (K0BASE, DCACHE_SIZE, C0_ENTRYHI,
+# RDB_BASE_VIRTUAL_ADDR, …). The gate must vendor-compile it under LIBULTRA_ASFLAGS, so a macro the
+# in-tree headers don't define is a needs-define enabler (e.g. osMapTLBRdb's RDB_* would block if
+# PR/rdb.h were absent). MACRO_REF_RE matches an UPPER_CASE token (≥3 chars so register names like
+# t0/a0/ra — lower-case — and 2-char directives never match); C_COMMENT_RE/ASM_INCLUDE_LINE_RE strip
+# the noise sources (a `/* TLB */` comment word, the `R4300` in an `#include "PR/R4300.h"` path).
+MACRO_REF_RE = re.compile(r"\b[A-Z][A-Z0-9_]{2,}\b")
+C_COMMENT_RE = re.compile(r"/\*.*?\*/", re.S)
+ASM_INCLUDE_LINE_RE = re.compile(r"^\s*#\s*include.*$", re.M)
+# The `-I` set LIBULTRA_ASFLAGS assembles a vendored .s under (Makefile). A macro defined in none of
+# these headers is genuinely missing — the asm analog of missing_includes' header reachability.
+ASM_VENDOR_INCLUDE_DIRS = [
+    os.path.join(ROOT, d)
+    for d in ("include", "include/libultra", "include/libultra/PR", "include/libultra/compiler/gcc")
+]
 FILE_STATIC_RE = re.compile(r"^\s*static\b[^=]*;\s*$")
 # A file-scope data-global *definition* (external linkage): `<type> <name> [= init];`.
 # Applied only at brace-depth 0 (see defines_data_globals) so function-body statements
@@ -287,6 +302,46 @@ def build_asm_tu_index():
             for m in ASM_TU_DEF_RE.finditer(text):
                 index.setdefault(m.group(1), os.path.relpath(spath, LIBULTRA))
     return index
+
+
+_INTREE_ASM_MACROS = None
+
+
+def _intree_asm_macros():
+    """Every `#define`d name reachable under the vendored-asm `-I` set (ASM_VENDOR_INCLUDE_DIRS).
+
+    Cached. The denominator for vendorable_tu_missing_defines: a macro a vendored .s references but
+    that appears in none of these headers can't assemble under LIBULTRA_ASFLAGS."""
+    global _INTREE_ASM_MACROS
+    if _INTREE_ASM_MACROS is None:
+        macros = set()
+        for d in ASM_VENDOR_INCLUDE_DIRS:
+            for h in glob.glob(os.path.join(d, "**", "*.h"), recursive=True):
+                try:
+                    macros.update(re.findall(r"#define\s+(\w+)", open(h, errors="ignore").read()))
+                except OSError:
+                    continue
+        _INTREE_ASM_MACROS = macros
+    return _INTREE_ASM_MACROS
+
+
+def vendorable_tu_missing_defines(rel):
+    """Sorted UPPER_CASE macros a vendorable ultralib .s (path relative to LIBULTRA) references but
+    that the in-tree asm `-I` headers don't define — a needs-define enabler the gate must satisfy
+    before vendoring (S57 retro #1). Strips C comments + `#include` lines first so a `/* TLB */`
+    comment word or the `R4300` in an `#include "PR/R4300.h"` path can't false-flag. Empty for a
+    self-contained TU (verified empty for the whole current vendoring backlog — all cache/TLB/gu
+    macros ship in include/libultra/PR/R4300.h, RDB_* in PR/rdb.h)."""
+    if not rel:
+        return []
+    spath = os.path.join(LIBULTRA, rel)
+    try:
+        text = open(spath, errors="ignore").read()
+    except OSError:
+        return []
+    text = ASM_INCLUDE_LINE_RE.sub("", C_COMMENT_RE.sub("", text))
+    defined = _intree_asm_macros()
+    return sorted({t for t in MACRO_REF_RE.findall(text)} - defined)
 
 
 # --- Signature matcher (un-named func_<vram> mirror detection) -----------------------
@@ -1195,7 +1250,15 @@ def classify_subseg(off, typ, path, size, upstream_index):
             # register/FPU shim → hasm, not a classical target. Carry the vendorable ultralib
             # TU path when one exists (intrinsic-likely:os/getcount.s), so the gate can asm-mirror
             # it instead of refusing outright (docs/hazards.md#asm-mirror-vendoring).
-            hazards.append(Hazard(HAZARD_INTRINSIC_LIKELY, build_asm_tu_index().get(fns[0])))
+            tu = build_asm_tu_index().get(fns[0])
+            # When the TU is vendorable, pre-flag any macro the in-tree asm `-I` headers don't define
+            # (intrinsic-likely:os/maptlbrdb.s(needs-define:RDB_BASE_VIRTUAL_ADDR,…)) so the gate
+            # pays the define enabler before the verbatim copy, not at the failing vendor-compile.
+            if tu:
+                miss = vendorable_tu_missing_defines(tu)
+                if miss:
+                    tu = f"{tu}(needs-define:{','.join(miss)})"
+            hazards.append(Hazard(HAZARD_INTRINSIC_LIKELY, tu))
         return "asm-flip", fns, hazards
     if typ == "c" and path:
         cpath = os.path.join(ROOT, "src", path + ".c")

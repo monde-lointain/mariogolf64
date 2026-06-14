@@ -70,6 +70,12 @@ an `asm-flip` candidate. A bare `intrinsic-likely` (no `:<tu>`) is a no-source s
 2. **Vendor any missing asm macros** into the project headers (verbatim from ultralib). The MONEGI
    `include/sys/asm.h` lacked `MFC0`/`MTC0` (S56 added them). The TU's `#include "PR/R4300.h"`
    resolves via `-I include/libultra`; `sys/asm.h`/`sys/regdef.h` via `-I include`.
+   `pick_target.py` pre-flags this as `intrinsic-likely:<tu>.s(needs-define:<MACROS>)` when the
+   vendorable `.s` references an `UPPER_CASE` macro none of the in-tree asm `-I` headers
+   (`include`, `include/libultra`, `include/libultra/PR`, `include/libultra/compiler/gcc`) define —
+   so the enabler is priced at the gate, not at a failing vendor-compile (S57 retro #1). The whole
+   current cache/TLB/gu backlog is self-contained (all `DCACHE_*`/`C_*`/`TLB*`/`C0_*` ship in
+   `include/libultra/PR/R4300.h`, `RDB_*` in `PR/rdb.h`) → the pre-check reports nothing for it.
 3. **Assemble with ultralib's EXACT toolchain + flags — KMC/N64 gcc, gcc.mk profile — NOT modern
    `mips-linux-gnu as`.** This is the load-bearing step: KMC `as` pads each function's `.text` up to
    its 16-byte ROM slot, so the verbatim 0xC TU lands as the 0x10 the ROM expects. Modern `as` emits
@@ -90,14 +96,25 @@ an `asm-flip` candidate. A bare `intrinsic-likely` (no `:<tu>`) is a no-source s
 - The `.ld` does **not** `ALIGN` between subsegs (only segment-level `ALIGN(__romPos,16)`), so the
   pad must live in the object — there is no linker fallback. This is why step 3's KMC padding is
   mandatory, not cosmetic.
-- Per-TU version-match is unproven beyond the S56 reg shims. Each new TU needs its own ROM-SHA-1
-  verify; a macro-expansion divergence (e.g. an aliased `WEAK(bcopy, _bcopy)` whose project `WEAK`
-  macro is empty) can need extra handling.
+- Per-TU version-match is unproven beyond the S56 reg shims (S57 added 4 cache/TLB primitives, all
+  first-try clean). Each new TU needs its own ROM-SHA-1 verify; a macro-expansion divergence (e.g.
+  an aliased `WEAK(bcopy, _bcopy)` whose project `WEAK` macro is empty) can need extra handling.
+- **SHA-breaker bisect (a batch of N flips, one bad TU).** The gate `make` validates all flipped
+  subsegs at once, so a single version-mismatched TU breaks the whole-ROM SHA-1 without naming the
+  culprit. To localize: flip the suspect subseg back to `asm` in `mariogolf64.yaml` (its `asm/<rom>.s`
+  disassembly is still present — splat never deleted it), rebuild, and check the SHA-1. SHA goes
+  green → that TU was the breaker (it is a spike: leave it `asm`, carry it to `BACKLOG.md`); SHA
+  still red → keep flipping suspects back until it greens. Bisect a large batch by reverting half
+  the flips at a time. The reverted TU's vendored `.s` stays in `src/libultra/` (unused while `asm`)
+  for a later retry against a different ultralib revision. Banked TUs in the same batch are unaffected
+  — each subseg's `.o` is independent.
 - Do **not** blanket-vendor a mixed `pack:` (e.g. `osSetIntMask` shares its subseg with the C
   mirrors `osCreatePiManager`/`__osEPiRawStartDma`); split first and vendor only the asm member.
 
 **Provenance:** S56 (4 reg shims; KMC-as padding the load-bearing discovery, per PO directive to use
-ultralib's exact flags).
+ultralib's exact flags). S57 (4 cache/TLB primitives — `osWritebackDCacheAll`/`osWritebackDCache`/
+`osUnmapTLBAll`/`__osProbeTLB`, all first-try clean; added the `needs-define` pre-check + this bisect
+protocol).
 
 ---
 

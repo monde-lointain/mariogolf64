@@ -532,17 +532,22 @@ Files with a timeboxed spike (a function that locked < 0.97 percent, needs permu
 a BSS-layout-conflict). `tools/pick_target.py` de-ranks BACKLOG carry-overs so they stop
 resurfacing; `/sprint-plan` re-pulls them first when retrying.
 
-- **asm-mirror vendoring — remaining intrinsic-likely libultra TUs (S56 pilot proved the pattern).**
-  S56 vendored the 4 single-instr reg shims (`getcount`/`getcause`/`getsr`/`setcompare`) via the
-  KMC-gcc `VENDOR_ASM` Makefile mechanism (assemble ultralib `.s` with `LIBULTRA_ASFLAGS`; KMC `as`
-  pads each fn's `.text` to its 16-byte ROM slot, which modern `as` does not). The pattern now
-  extends by adding `<rom>:src/libultra/<dir>/<file>.s` pairs to `VENDOR_ASM`, vendoring the ultralib
-  TU verbatim, and flipping the subseg `asm`→`hasm`. Each new TU still needs per-TU ROM-SHA-1
-  verification (ultralib version-match unproven beyond the reg shims). Remaining, smallest-first:
-  - **single-fn primitives:** `osWritebackDCacheAll` (0x82560), `osWritebackDCache` (0x824E0,
-    `src/os/writebackdcache.s`), `bcopy` (0x85DA0, `src/libc/bcopy.s`), `func_800ACCC0` (0x880C0),
-    `func_800ACB40` (0x87F40), `__osProbeTLB` (0x88000, `src/os/probetlb.s`),
-    `osUnmapTLBAll` (0x88100, `src/os/unmaptlball.s`), `osMapTLBRdb` (0x8CD10, `src/os/maptlbrdb.s`),
+- **asm-mirror vendoring — remaining intrinsic-likely libultra TUs (S56 pilot + S57 cache/TLB batch
+  proved the pattern repeatable).** S56 vendored the 4 single-instr reg shims
+  (`getcount`/`getcause`/`getsr`/`setcompare`); S57 vendored the 4 cache/TLB primitives
+  (`osWritebackDCacheAll`/`osWritebackDCache`/`osUnmapTLBAll`/`__osProbeTLB`, all first-try clean) via
+  the KMC-gcc `VENDOR_ASM` Makefile mechanism (assemble ultralib `.s` with `LIBULTRA_ASFLAGS`; KMC `as`
+  pads each fn's `.text` to its 16-byte ROM slot, which modern `as` does not). The pattern extends by
+  adding `<rom>:src/libultra/<dir>/<file>.s` pairs to `VENDOR_ASM`, vendoring the ultralib TU verbatim,
+  and flipping the subseg `asm`→`hasm`. Each new TU still needs per-TU ROM-SHA-1 verification (version
+  mismatch → SHA break; bisect per `docs/hazards.md#asm-mirror-vendoring`). `pick_target.py` now
+  pre-flags any `needs-define:<MACROS>` on the `intrinsic-likely:<tu>.s` hazard (S57 #1) so a
+  missing-macro enabler is priced at the gate — the whole list below verified self-contained (0
+  missing). Remaining, smallest-first:
+  - **single-fn primitives:** `bcopy` (0x85DA0, `src/libc/bcopy.s` — `WEAK(bcopy,_bcopy)` alias,
+    verify the project `WEAK` macro), `func_800ACCC0` (0x880C0), `func_800ACB40` (0x87F40),
+    `osMapTLBRdb` (0x8CD10, `src/os/maptlbrdb.s` — **clean**, `PR/rdb.h` is in-tree; an earlier
+    "needs rdb.h" assumption was refuted by the S57 #1 pre-check),
     `sqrtf` (0x8BE10, `src/gu/sqrtf.s` — uses `sqrt.s` FPU op, verify the `.set` reorder/nop).
   - **pure-asm packs (both fns asm, no C):** `osInvalDCache`+`osInvalICache` (0x823B0,
     `src/os/invaldcache.s`+`invalicache.s`), `__osDisableInt`+`__osRestoreInt` (0x8B900).

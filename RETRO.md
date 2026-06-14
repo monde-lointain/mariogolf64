@@ -25,6 +25,15 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 57 — asm-mirror vendoring: 4 libultra cache/TLB asm primitives — 2026-06-14
+- Increment: 0 new `.c` (asm-vendor/hasm housekeeping). 4 libultra cache/TLB hand-asm TUs vendored from ultralib + built into the ROM: `osWritebackDCacheAll` (0x82560), `osUnmapTLBAll` (0x88100), `osWritebackDCache` (0x824E0), `__osProbeTLB` (0x88000). 4 subsegs flipped `asm`→`hasm` (hasm 6→10; asm subsegs 171→167); 4 intrinsic-likely candidates off `pick_target`. md5-candidate unchanged at 97/97 (.c files all 0-stub).
+- Quality: 0/0/0/0 stuck-far/permuter/carried/re-opened. All 4 ultralib version-matched FIRST attempt (one atomic gate `make`); no novel gotcha — S56 derisked the pattern (KMC-as padding, VENDOR_ASM mechanism).
+- Seed: committed 4pt; banked 4pt; regime mirror (8-gate clear; seed-only, no realized/residual).
+- What helped: S56's `VENDOR_ASM` map + `LIBULTRA_ASFLAGS` profile made each new TU a 3-line addition (copy `.s`, add pair, flip subseg). All cache/TLB/gu macros + `PR/rdb.h` already ship in-tree → the whole cache/TLB family is zero-enabler. Pre-curated `ghidra_symbols.txt` names + `LEAF` symbol → zero symbol adds. Gate validated all 4 atomically with the green ROM SHA-1.
+- Friction: none. Pre-sprint I wrongly assumed `osMapTLBRdb` needed a `PR/rdb.h` copy and excluded it; the suggestion #1 pre-check then proved `rdb.h` is in-tree and the TU is clean (backlog correction, folded in).
+- Applied (2 of 2): #1 `pick_target.py` `vendorable_tu_missing_defines` needs-define pre-check (greps the vendorable `.s` UPPER_CASE macros vs the in-tree asm `-I` headers; strips C comments + `#include` paths to avoid `R4300`/`TLB` false-flags; annotates `intrinsic-likely:<tu>.s(needs-define:<MACROS>)`; +1 unit test, suite 28→29, golden unchanged — inert on the self-contained backlog); #2 `docs/hazards.md#asm-mirror-vendoring` SHA-breaker bisect protocol (flip a suspect subseg back to `asm`, rebuild, narrow) + needs-define step note + S57 provenance.
+- Carry-over: none from this set. Remaining vendorable intrinsic-likely TUs: `bcopy` (0x85DA0, `WEAK` alias — verify `WEAK` macro), `sqrtf` (0x8BE10, `sqrt.s` FPU + reorder/nop), `func_800ACCC0` (0x880C0), `func_800ACB40` (0x87F40), `osMapTLBRdb` (0x8CD10, **clean** — was mis-flagged); pure-asm packs `osInvalDCache`+`osInvalICache` (0x823B0), `__osDisableInt`+`__osRestoreInt` (0x8B900); mixed-pack split-firsts `osSetIntMask` (0x7E360), `func_800AFB90` (0x8AF90).
+
 ## Sprint 56 — asm-mirror vendoring pilot: 4 libultra reg-shim asm TUs — 2026-06-14
 - Increment: 0 new `.c` (asm-vendor/hasm housekeeping, not a C-decomp increment). 4 libultra reg-shim hand-asm TUs vendored from ultralib + built into the ROM: `getcount`/`getcause`/`getsr`/`setcompare`. 4 subsegs flipped `asm`→`hasm` (hasm 2→6; asm subsegs 175→171); the 4 intrinsic-likely shims off `pick_target`. md5-candidate unchanged at 97/97.
 - Quality: 0/0/0/0 stuck-far/permuter/re-opened this sprint; ~11 remaining intrinsic-likely TUs + 2 mixed packs carried *by plan* (not spiked) to BACKLOG. 1 novel bank-gotcha (modern-as padding) resolved within-sprint.
