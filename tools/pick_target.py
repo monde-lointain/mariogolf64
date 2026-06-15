@@ -2160,21 +2160,37 @@ def _coddog_pct(detail):
         return 0.0
 
 
-def score_row(off, primary, kind, fns, size, up_lib, band, blocked, hazards, carried):
+@dataclasses.dataclass
+class Candidate:
+    """A ranked subseg's resolved identity + path/band verdict, assembled in build_rows once its
+    upstream/coddog branches settle, then passed as ONE argument to score_row (Phase 2a: collapses
+    score_row's former 10-parameter list to 3 and retires the (off, primary, up_lib, ...) data
+    clump). `fns` is the full member list (len == nfns); `up_lib` is None for a classical target."""
+    off: int
+    primary: str
+    kind: str
+    fns: list
+    size: int
+    up_lib: "str | None"
+    band: str
+    blocked: bool
+
+
+def score_row(cand, hazards, carried):
     """Assemble the ranked row dict (score folds size + upstream/warm/carry bonuses)."""
-    score = -size + (UPSTREAM_BONUS if up_lib else 0)
-    if band == "warm":
+    score = -cand.size + (UPSTREAM_BONUS if cand.up_lib else 0)
+    if cand.band == "warm":
         score += BAND_WARM_BONUS  # prefer enabler-free warm-band siblings over equally-small cold ones
-    if primary in carried:
+    if cand.primary in carried:
         score -= CARRYOVER_PENALTY
     hz = ",".join(h.render() for h in hazards) or "-"
-    vram = subseg_vram(off)
+    vram = subseg_vram(cand.off)
     return {
-        "func": primary, "rom": f"0x{off:X}",
+        "func": cand.primary, "rom": f"0x{cand.off:X}",
         "vram": f"0x{vram:08X}" if vram is not None else "?",
-        "size": size, "nfns": len(fns),
-        "pts": seed_points(size, up_lib or "none", band, len(fns), hazards, blocked),
-        "kind": kind, "upstream": up_lib or "none", "band": band,
+        "size": cand.size, "nfns": len(cand.fns),
+        "pts": seed_points(cand.size, cand.up_lib or "none", cand.band, len(cand.fns), hazards, cand.blocked),
+        "kind": cand.kind, "upstream": cand.up_lib or "none", "band": cand.band,
         "hazards": hz, "score": score,
     }
 
@@ -2309,7 +2325,8 @@ def build_rows(args, upstream_index, carried, sig_index, coddog_index=None):
         if dsm:
             hazards.append(dsm)
 
-        rows.append(score_row(off, primary, kind, fns, size, up_lib, band, blocked, hazards, carried))
+        cand = Candidate(off, primary, kind, fns, size, up_lib, band, blocked)
+        rows.append(score_row(cand, hazards, carried))
     rows.sort(key=lambda r: (-r["score"], r["size"]))
     return rows[: args.n]
 

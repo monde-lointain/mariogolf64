@@ -279,9 +279,9 @@ def _coddog_rows(pt, monkeypatch, *, ui, carried, coddog):
     monkeypatch.setattr(pt, "src_func_callers", lambda: {})
     monkeypatch.setattr(pt, "append_upstream_hazards", lambda *a, **k: ("warm", False))
     monkeypatch.setattr(pt, "score_row",
-                        lambda off, primary, kind, fns, size, up_lib, band, blocked, hz, carr: {
-                            "func": primary, "rom": hex(off), "upstream": up_lib,
-                            "score": 0, "size": size,
+                        lambda cand, hz, carr: {
+                            "func": cand.primary, "rom": hex(cand.off), "upstream": cand.up_lib,
+                            "score": 0, "size": cand.size,
                             "hazards": ",".join(h.detail for h in hz
                                                 if h.kind == pt.HAZARD_CODDOG_MIRROR)})
     return pt.build_rows(A(), ui, carried, {}, coddog)
@@ -409,8 +409,8 @@ def test_coddog_tail_trap_rescan(monkeypatch):
     monkeypatch.setattr(pt, "recover_unplaced_call_vram", lambda off, primary: [])
     monkeypatch.setattr(pt, "rodata_jtbls", lambda off: [])
     monkeypatch.setattr(pt, "score_row",
-                        lambda off, primary, kind, fns, size, up_lib, band, blocked, hz, carr: {
-                            "func": primary, "upstream": up_lib, "score": 0, "size": size,
+                        lambda cand, hz, carr: {
+                            "func": cand.primary, "upstream": cand.up_lib, "score": 0, "size": cand.size,
                             "hazards": ",".join(h.kind + (":" + h.detail if h.detail else "") for h in hz)})
     rows = pt.build_rows(A(), {"namedLeader": ("libultra", "/x/wrong.c")}, set(), {},
                          {"func_1100": ("src/io/piacs.c", 99.99)})
@@ -512,14 +512,15 @@ def test_score_row_characterization():
     H = pt.Hazard
     KEYS = ["func", "rom", "vram", "size", "nfns", "pts", "kind",
             "upstream", "band", "hazards", "score"]
-    r = pt.score_row(0x99999, "func_x", "asm-flip", ["func_x"], 100, "libultra", "warm",
-                     False, [H(pt.HAZARD_FILE_STATIC), H(pt.HAZARD_NEEDS_HEADER, "x.h")], set())
+    C = pt.Candidate
+    r = pt.score_row(C(0x99999, "func_x", "asm-flip", ["func_x"], 100, "libultra", "warm", False),
+                     [H(pt.HAZARD_FILE_STATIC), H(pt.HAZARD_NEEDS_HEADER, "x.h")], set())
     assert list(r.keys()) == KEYS
     assert r["vram"] == "?"                       # synthetic off: no asm listing
     assert r["hazards"] == "file-static,needs-header:x.h"
     assert r["score"] == -100 + 200 + 64          # 164: upstream + warm bonuses
-    r2 = pt.score_row(0x99999, "func_y", "asm-flip", ["func_y", "func_z"], 64, None, "-",
-                      False, [], {"func_y"})
+    r2 = pt.score_row(C(0x99999, "func_y", "asm-flip", ["func_y", "func_z"], 64, None, "-", False),
+                      [], {"func_y"})
     assert r2["hazards"] == "-"                    # no hazards renders "-"
     assert r2["score"] == -64 - 1000              # carried penalty, no bonuses
     assert (pt.UPSTREAM_BONUS, pt.BAND_WARM_BONUS, pt.CARRYOVER_PENALTY) == (200, 64, 1000)
