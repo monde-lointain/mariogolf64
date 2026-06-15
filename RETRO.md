@@ -25,6 +25,17 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 79 — io contramread + contramwrite, the S71-named cont-pak RAM I/O verbatim mirror pair — 2026-06-15
+- Increment: src/libultra/io/contramread.c (`__osContRamRead`) + contramwrite.c (`__osContRamWrite`) banked / 2 functions matched. md5-candidate 122→124 files; asm subsegs 145→144 (+1 nop-pad subseg).
+- Quality: 0/0/0/0 this sprint (both banked first sprint; the contramwrite trailing-pad split was in-execution localization, not a spike — the body never diverged, 0 real iteration).
+- Seed: committed 6pt (seed 3+3); banked 6pt; regime mirror (seed-only). 8-gate clear (6<8). Smallest-first homogeneous sibling pair off the re-priced coddog list.
+- What helped: coddog @99.99 confirmed both verbatim before any compile; all 10 callees/fn pre-placed (warm cont band); the S44/S45 defines-data verbatim-body fast-path made `__osPfsLastChannel = -1` a drop-to-extern + add-only name (0x800C9450, recovered from the fn's own lui/lw), NO `.data` carve; the io-band `PRinternal/{controller,siint}.h`→bare include convention (S72/S74) reused verbatim; the gate-validated flip caught nothing wrong (both flips green).
+- Friction: contramwrite SHA-missed the first make (ROM 96B short) — a NEW gate-invisible class: splat extracts the whole subseg slot (516B fn + 27 trailing nops padding to the 128-aligned `osAfterPreNMI`@0x800AF880), but the verbatim C compile only 16-aligns its `.text` (.o=0x210), dropping the 0x60 residual. Invisible to every gate check (the INCLUDE_ASM stub carries the pad → gate build green); localized by `.o`-size diff + the extracted-asm trailing-nop run. Fixed with a nop-pad `[0x8AC20, asm]` split (hazards.md:122 — no inter-subseg linker ALIGN). The contramread sibling (slot == 16-aligned fn) mirrored clean, no split — the FP guard in one pair.
+- Applied: 2 of 2: #1 `pick_target.py` `trailing-pad:<n>B@<align>` pre-flag (new `code_end_rom` in `decomp_asm` finds the real code end; fires only when the next boundary is >16-aligned so a merely-16 gap / delay-nop artifact doesn't false-fire) + an **all-nop asm subseg skip** (the pad subseg carries a splat glabel but is pure nops; the skip also retired 8 pre-existing all-nop `func_ovl*_801F4A30` overlay stubs the ranker was surfacing as the "smallest" picks); #2 `docs/hazards.md#trailing-alignment-pad-after-a-c-mirror` (the split recipe + contramwrite worked example) + the CLAUDE.md hazard-index row. Golden regen (8 overlay-stub rows dropped + the new trailing-pad flag), suite 42 pass.
+- Carry-over: none. Note: the trailing-pad pre-flag now prices this class at the gate, so a future >16-aligned-boundary mirror (3 live candidates flagged @32/@64/@128) won't SHA-miss mid-execution.
+
+---
+
 ## Sprint 78 — clear the io c-combined subseg [0x8CE90]: gbpaksetbank + pfsisplug, 2 libultra io coddog mirrors — 2026-06-15
 - Increment: src/libultra/io/gbpaksetbank.c (1 fn) + src/libultra/io/pfsisplug.c (3 fns) banked / 4 functions matched. md5-candidate 120→122 files; asm subsegs 146→145.
 - Quality: 0/0/0/0 this sprint (both files banked first-try; the defines-data BSS was a known sub-case, not a surprise).

@@ -39,6 +39,7 @@ from decomp_asm import (
     _asm_signature,
     _FRAME_IMMS,
     asm_functions,
+    code_end_rom,
     intrinsic_likely,
     privileged_asm,
     recover_unplaced_call_vram,
@@ -235,6 +236,7 @@ HAZARD_TWIN_OF = "twin-of"
 HAZARD_REMAINING = "remaining"
 HAZARD_CODDOG_MIRROR = "coddog-mirror"  # S71: a coddog compare2 match to an ultralib fn
 HAZARD_CALLER_EVICT = "caller-evict"  # S77: an un-named func_ member a banked C file calls by name
+HAZARD_TRAILING_PAD = "trailing-pad"  # S79: trailing nop pad to a higher-aligned next subseg a C mirror can't emit
 
 
 @dataclasses.dataclass
@@ -1578,9 +1580,37 @@ def classify_subseg(off, typ, path, size, upstream_index):
         fns = asm_functions(off)
         if not fns:
             return None
+        # Skip a pure-nop pad subseg (S79): a trailing-alignment pad split off as its own `[..,asm]`
+        # subseg (the trailing-pad remedy below) carries a splat glabel but is 0x00000000 nops only —
+        # never a decomp target. `subseg_vram` non-None (listing present) + `code_end_rom` None (no
+        # non-nop instruction) is the all-nop signature; a real fn always has a non-nop body.
+        if subseg_vram(off) is not None and code_end_rom(off) is None:
+            return None
         hazards = []
         if size and size % 16 != 0:
             hazards.append(Hazard(HAZARD_NON16ALIGN))
+        # Trailing-alignment pad (S79): splat extracts the whole subseg slot (function + the nop
+        # padding up to the next, higher-aligned subseg). A flipped C mirror's compiler only
+        # 16-aligns its `.text`, so a pad beyond that 16B fill is dropped → ROM short → SHA-miss
+        # in the execution middle, invisible to the gate (the INCLUDE_ASM stub carries the pad).
+        # Pre-flag the residual pad-subseg byte count + the next boundary's alignment so the gate
+        # prices the `[0x<gcc_o_end>, asm]` split up front. FP-guarded: residual is `size` minus
+        # the function's own 16-aligned size, so a fn that already fills its slot (e.g. the
+        # contramread sibling) yields 0 and is not flagged. See
+        # docs/hazards.md#trailing-alignment-pad-after-a-c-mirror.
+        code_end = code_end_rom(off)
+        if size and code_end is not None:
+            gcc_aligned = (code_end - off + 15) & ~15
+            residual = size - gcc_aligned
+            next_vram = subseg_vram(off)
+            align = (next_vram + size) & -(next_vram + size) if next_vram else 0
+            # Require the next boundary to be aligned ABOVE 16: that is the exact condition GCC's
+            # own 16-align can't fill (contramwrite → 128-aligned osAfterPreNMI). A residual at a
+            # merely-16-aligned boundary is the delay-slot-nop measurement artifact (code_end stops
+            # at the last non-nop, undercounting a real `jr ra; nop` tail by one 16-step) — GCC
+            # 16-aligns past it anyway, so excluding align<=16 removes that false fire.
+            if residual >= 16 and align > 16:
+                hazards.append(Hazard(HAZARD_TRAILING_PAD, f"{residual}B@{align}"))
         if len(fns) > 1:
             # List each fn + its upstream basename so the gate can tell a multi-file pack
             # (different basenames → split at the upstream-file boundary, e.g. dpsetstat+dpctr)

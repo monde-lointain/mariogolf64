@@ -256,6 +256,7 @@ When `pick_target.py` flags a hazard (or a match shows its symptom), read the ma
 | `single-file-pack:<n>fn[…]` (all members → one upstream C file; atomic verbatim mirror, NO split) | #upstream-mirror-pattern |
 | `c-combined:<n>file[…]` (≥2 distinct C upstream files in one asm subseg) | #multi-function-segment-splitting-pack |
 | `non16align`                    | #non16align |
+| `trailing-pad:<n>B@<align>` (a verbatim C mirror compiles short of its subseg slot — the slot has nop pad to a >16-aligned next subseg the compiler's 16-align can't fill; split a nop-pad `[..,asm]` subseg) | #trailing-alignment-pad-after-a-c-mirror |
 | `intrinsic-likely:<tu>.s` (vendorable ultralib asm TU) | #asm-mirror-vendoring |
 | `intrinsic-likely:cp0-asm(identify-TU)` (un-named privileged hand-asm: TLB/CP0/eret, name unresolved) | #asm-mirror-vendoring |
 | `combined-subseg:<n>tu[…]` (≥2 distinct asm TUs in one subseg) | #asm-mirror-vendoring |

@@ -879,6 +879,39 @@ fixup commit).
 
 ---
 
+## trailing-alignment pad after a C mirror
+
+**Rule:** splat extracts the WHOLE subseg slot — the function PLUS the `0x00000000` nop padding that
+fills the gap up to the next subseg. When that next subseg sits at an alignment ABOVE 16 (32/64/128),
+the pad is larger than the ≤12B a compiler's 16-byte `.text` alignment emits. A verbatim C mirror
+therefore compiles SHORT of the slot, the ROM shrinks, and everything downstream shifts → a SHA-miss
+in the execution middle. It is invisible to every gate check: the `INCLUDE_ASM` stub carries the pad,
+so the gate build is green; only the real C body drops it (the S18/S44 late-surfacing class). The
+sibling guard: a function whose 16-aligned size already fills its slot (the same-subseg neighbor)
+mirrors clean — only the one preceding a higher-aligned boundary pays.
+
+**Trigger:** `pick_target.py` flag `trailing-pad:<n>B@<align>` (S79) — `<n>` = the residual pad bytes
+beyond the compiler's 16-align, `<align>` = the next boundary's alignment (e.g. `96B@128`). Pre-flags
+it at the gate so the split is priced, not localized mid-execution. (`docs/hazards.md:122` — the `.ld`
+does NOT `ALIGN` between subsegs, so the pad must live in an object; there is no linker fallback. This
+is the C-mirror dual of the KMC-`as` 16-pad note in `#asm-mirror-vendoring`.)
+
+**Procedure:** flip the function subseg to `c` as usual, then split a nop-pad `[0x<gcc_o_end>, asm]`
+subseg between it and the next subseg. `<gcc_o_end>` = the function subseg ROM offset + the compiled
+`.o` `.text` size (`mips-linux-gnu-objdump -h build/.../<file>.o` → the 16-aligned `.text` extent);
+splat re-extracts the residual nops there. The compiler's own 16-align nops (the `.o`'s tail) match the
+baserom nops at those addresses; the pad subseg supplies the rest up to the higher-aligned boundary.
+A pure-nop subseg is never a pick — `pick_target.py` skips any all-nop asm subseg (`code_end_rom` None
+with a present listing), which also retired 8 pre-existing all-nop overlay stubs (`func_ovl*_801F4A30`).
+
+**Worked example (S79 `__osContRamWrite`):** function 0x204 (516B) → GCC `.o` `.text` 0x210 (528B,
+16-aligned) → real slot 0x270 (624B) up to the 128-aligned `osAfterPreNMI` (0x800AF880). Split
+`[0x8AC20, asm]` (= 0x8AA10 + 0x210) carries the residual 0x60 (96B) of nops. Re-extract + `make` →
+ROM SHA-1 == baserom. The body itself never diverged (129 instrs byte-identical); the gap was purely
+the trailing pad. The contramread sibling (slot == 16-aligned fn size) mirrored clean, no split.
+
+---
+
 ## intrinsic-likely / maybe-upstream (signature hints)
 
 **Rule:** Two advisory flags from the signature matcher.

@@ -109,6 +109,39 @@ def subseg_vram(rom_off):
     return None
 
 
+# `/* ROM VRAM BYTES */` with the BYTES (3rd) field captured, for spotting trailing 0x00000000
+# nop padding (a higher-alignment gap the next subseg sits at) that a verbatim C mirror can't
+# reproduce — the compiler only 16-aligns its `.text`. See code_end_rom + pick_target trailing-pad.
+PAD_INSN_RE = re.compile(r"/\*\s*([0-9A-Fa-f]+)\s+[0-9A-Fa-f]{8}\s+([0-9A-Fa-f]{8})\s*\*/")
+
+
+def code_end_rom(rom_off):
+    """ROM offset just past the last non-nop instruction in asm/<ROM>.s (the real code end,
+    excluding trailing 0x00000000 nop padding). Returns None when the listing is absent/empty.
+
+    Used to price a trailing higher-alignment pad: splat extracts the whole subseg slot (function
+    + the pad nops up to the next, higher-aligned subseg), but a flipped C mirror's compiler only
+    16-aligns its `.text`, so a pad beyond 16B is lost → ROM short → SHA-miss in execution. Reading
+    where the real code ends lets the gate price the pad-subseg split (see
+    pick_target HAZARD_TRAILING_PAD + docs/hazards.md#trailing-alignment-pad-after-a-c-mirror).
+    Approximate by up to one 16B step when a function's real final instruction is a delay-slot nop
+    (counted as pad); the flag is advisory and the gate confirms the .o end by compiling."""
+    path = asm_path(rom_off)
+    if not os.path.exists(path):
+        return None
+    last = None
+    with open(path) as f:
+        for line in f:
+            m = PAD_INSN_RE.search(line)
+            if not m:
+                continue
+            if m.group(2).lower() != "00000000":
+                last = int(m.group(1), 16)
+    if last is None:
+        return None
+    return last + 4
+
+
 # Ops C can't emit (or won't schedule into a leaf delay slot): CP0 register moves
 # and a bare FPU sqrt. A tiny leaf whose only work is one of these is really `hasm`,
 # not a classical target — flag it so smallest-first stops surfacing it as the pick.

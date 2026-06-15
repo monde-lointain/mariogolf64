@@ -446,6 +446,40 @@ sub-sprints).
   → mis-attributes a fn to a sibling that only declares it (gbpaksetbank→gbpakreadwrite); (b)
   `carry_over_names()` is fundamentally over-broad (222 banked tokens treated as carried) — the coddog
   exemption patches only the coddog subset; a precise carry-over parser would un-de-rank the rest.
+
+- **Sprint 79: 2 .c files BANKED — `src/libultra/io/contramread.c` (`__osContRamRead`) +
+  `contramwrite.c` (`__osContRamWrite`), libultra io coddog cont-pak RAM I/O mirror pair; first
+  trailing-128-align pad split.** md5-candidate 122→**124** (all 124 .c stub-free); asm subsegs
+  145→144 (net: 2 asm flipped to c, +1 nop-pad subseg). 8th coddog cross-ref sprint; the **exact
+  pair the S71 note named** as verbatim-mirrorable, smallest-first off the re-priced coddog list.
+  Both verbatim ultralib VERSION_J (coddog @99.99), full-make ROM SHA-1 == baserom. Flips `[0x8A820,
+  asm]`→`[..,c,libultra/io/contramread]` + `[0x8AA10, asm]`→`[..,c,libultra/io/contramwrite]`.
+  **contramread defines-data fast-path** — defines `s32 __osPfsLastChannel = -1` → dropped to
+  `extern` per the S44/S45 fast-path + `symbol_addrs __osPfsLastChannel=0x800C9450 size:0x4`
+  (recovered from `lui 0x800d`/`lw -0x6bb0`, disjoint), **NO `.data` carve** (the byte already lives
+  in the data blob; def→extern leaves the .text unchanged); contramwrite externs it. **contramwrite
+  trailing-128-align pad (the one wrinkle, NOT a spike):** the 516B fn (129 instrs byte-identical) is
+  followed by 27 trailing nops padding to the 128-aligned `osAfterPreNMI`@0x800AF880; the verbatim C
+  compile only 16-aligns its `.text` (`.o`=0x210), dropping the 0x60 residual → ROM 96B short → SHA
+  miss on the first `make`, invisible to every gate check (the INCLUDE_ASM stub carries the pad).
+  Localized via `.o`-size diff + the extracted-asm trailing-nop run; fixed with a nop-pad split
+  `[0x8AC20, asm]` (=0x8AA10+`.o` 0x210) between contramwrite and afterprenmi (`docs/hazards.md:122`
+  — no inter-subseg linker ALIGN). The contramread sibling (slot == 16-aligned fn size) mirrored
+  clean, no split — the FP guard within one pair. All 10 callees/fn pre-placed (`__osSiGetAccess`/
+  `__osSiRawStartDma`/`__osSiRelAccess`/`osRecvMesg`/`bcopy`/`__osContAddressCrc`/`__osContDataCrc`/
+  `__osPfsGetStatus`); include adapt `PRinternal/{controller,siint}.h`→bare (kept `PRinternal/macros.h`).
+  seed 6 (3+3) / banked 6pt; regime mirror (seed-only; 8-gate clear at 6<8). 0 stuck-far/permuter/
+  carried/re-opened. Applied 2 of 2: #1 `pick_target.py` `trailing-pad:<n>B@<align>` pre-flag (new
+  `decomp_asm.code_end_rom`; fires only when the next boundary is >16-aligned — the merely-16 /
+  delay-nop case is the FP guard) + an **all-nop asm subseg skip** (the pad subseg carries a splat
+  glabel but is pure nops; the skip also retired 8 pre-existing all-nop `func_ovl*_801F4A30` overlay
+  stubs the ranker surfaced as the "smallest" picks); #2 `docs/hazards.md#trailing-alignment-pad-after-a-c-mirror`
+  + the CLAUDE.md hazard-index row; golden regen (8 overlay-stub rows dropped + the new trailing-pad
+  flag), suite 42 pass. **Cross-repo follow-up:** `__osPfsLastChannel`=0x800C9450 is a new decomp-side
+  data symbol → propagate via `sync_decomp_names.py --import-from-decomp`. **Band note: 3 live
+  candidates now carry the `trailing-pad` flag (@32/@64/@128) — those mirrors are priced at the gate.
+  The io clean-coddog leaves remain mined out (piacs/motor defines-data+file-static traps + os/settime
+  pts-13 pack remain).**
   **Band note: next-cleanest libultra coddog mirrors — os/settime (single fn buried in the 6fn pack at
   0x526B0, needs decompose) and the io `[0x8CE90]` pack is now CLEARED; the defines-data/file-static
   traps remain (piacs/motor, contpfs [0x89D90, 7fn @100], sched, timerintr [0x87C40, 4fn]).**
