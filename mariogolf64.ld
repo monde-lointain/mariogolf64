@@ -293,7 +293,8 @@ SECTIONS
         build/asm/8CD10.o(.text);
         build/src/libultra/io/viinit.o(.text);
         build/src/libultra/io/vigetcurrcontext.o(.text);
-        build/asm/8CE90.o(.text);
+        build/src/libultra/io/gbpaksetbank.o(.text);
+        build/src/libultra/io/pfsisplug.o(.text);
         build/asm/8D230.o(.text);
         build/src/libultra/io/dp.o(.text);
         build/src/libultra/io/si.o(.text);
@@ -540,7 +541,8 @@ SECTIONS
         build/asm/8CD10.o(.data);
         build/src/libultra/io/viinit.o(.data);
         build/src/libultra/io/vigetcurrcontext.o(.data);
-        build/asm/8CE90.o(.data);
+        build/src/libultra/io/gbpaksetbank.o(.data);
+        build/src/libultra/io/pfsisplug.o(.data);
         build/asm/8D230.o(.data);
         build/src/libultra/io/dp.o(.data);
         build/src/libultra/io/si.o(.data);
@@ -802,7 +804,8 @@ SECTIONS
         build/asm/8CD10.o(.rodata);
         build/src/libultra/io/viinit.o(.rodata);
         build/src/libultra/io/vigetcurrcontext.o(.rodata);
-        build/asm/8CE90.o(.rodata);
+        build/src/libultra/io/gbpaksetbank.o(.rodata);
+        build/src/libultra/io/pfsisplug.o(.rodata);
         build/asm/8D230.o(.rodata);
         build/src/libultra/io/dp.o(.rodata);
         build/src/libultra/io/si.o(.rodata);
@@ -1057,7 +1060,8 @@ SECTIONS
         build/asm/8CD10.o(.bss);
         build/src/libultra/io/viinit.o(.bss);
         build/src/libultra/io/vigetcurrcontext.o(.bss);
-        build/asm/8CE90.o(.bss);
+        build/src/libultra/io/gbpaksetbank.o(.bss);
+        build/src/libultra/io/pfsisplug.o(.bss);
         build/asm/8D230.o(.bss);
         build/src/libultra/io/dp.o(.bss);
         build/src/libultra/io/si.o(.bss);
