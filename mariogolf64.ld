@@ -164,6 +164,8 @@ SECTIONS
         build/src/libnusys/mainlib/nucontqueryread.o(.text);
         build/src/main/__osGetCurrFaultedThread.o(.text);
         build/asm/7E360.o(.text);
+        build/asm/7E400.o(.text);
+        build/src/libultra/io/epirawdma.o(.text);
         build/src/libultra/io/epidma.o(.text);
         build/src/libultra/io/epilinkhandle.o(.text);
         build/src/libultra/io/cartrominit.o(.text);
@@ -411,6 +413,8 @@ SECTIONS
         build/src/libnusys/mainlib/nucontqueryread.o(.data);
         build/src/main/__osGetCurrFaultedThread.o(.data);
         build/asm/7E360.o(.data);
+        build/asm/7E400.o(.data);
+        build/src/libultra/io/epirawdma.o(.data);
         build/src/libultra/io/epidma.o(.data);
         build/src/libultra/io/epilinkhandle.o(.data);
         build/src/libultra/io/cartrominit.o(.data);
@@ -661,6 +665,8 @@ SECTIONS
         build/src/libnusys/mainlib/nucontqueryread.o(.rodata);
         build/src/main/__osGetCurrFaultedThread.o(.rodata);
         build/asm/7E360.o(.rodata);
+        build/asm/7E400.o(.rodata);
+        build/src/libultra/io/epirawdma.o(.rodata);
         build/src/libultra/io/epidma.o(.rodata);
         build/src/libultra/io/epilinkhandle.o(.rodata);
         build/src/libultra/io/cartrominit.o(.rodata);
@@ -934,6 +940,8 @@ SECTIONS
         build/src/libnusys/mainlib/nucontqueryread.o(.bss);
         build/src/main/__osGetCurrFaultedThread.o(.bss);
         build/asm/7E360.o(.bss);
+        build/asm/7E400.o(.bss);
+        build/src/libultra/io/epirawdma.o(.bss);
         build/src/libultra/io/epidma.o(.bss);
         build/src/libultra/io/epilinkhandle.o(.bss);
         build/src/libultra/io/cartrominit.o(.bss);
