@@ -25,6 +25,17 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 73 — bank gu/position.c (guPositionF + guPosition), libultra gu coddog-mirror; closes the gu text band — 2026-06-14
+- Increment: 1 .c file banked (`src/libultra/gu/position.c`) / 2 fns matched (md5-candidate 112 → 113, all 113 .c stub-free; asm subsegs 150 → 149). The gu text band is now fully decompiled (only the permanent `0x85DA0 hasm` remains).
+- Quality: stuck-far 0 / permuter 0 / carried 0 / re-opened 0 (first-build, 0 iteration).
+- Seed: committed 3pt; banked 3pt; regime mirror (seed-only, 8-gate clear).
+- What helped: the S71 coddog map made the un-named `func_800A9C60`/`func_800A9E38` a definitive 99.99 verbatim mirror of `gu/position.c`; the fully-warm gu band pre-placed every callee (`sinf`/`cosf`/`guMtxF2L`) + `guint.h`; align.c/rotate.c gave the exact 16B dtor `.data`-carve precedent (S61/S68), so sizing the carve `[0xA35B0,.data,position]`→`[0xA35C0,data]` (random's xseed) was mechanical. Verbatim cp byte-identical, first-build SHA match.
+- Friction: the coddog row UNDER-flagged the target — clean pts-3, NO defines-data — even after the S72 coddog trap re-scan. Two blind spots stacked: the asm-side `data-static` pre-flag (S52) does not fire on un-named coddog candidates, and the S72 re-scan ran only `defines_data_globals`, which skips `static` lines AND scans only brace-depth 0 — so guPositionF's function-local `static float dtor` was invisible. Caught only by reading the upstream + asm data refs at the gate; an un-vetted pick would have SHA-missed mid-sprint on the un-carved dtor.
+- Applied: 2 of 2: #1 `pick_target.py` `defines_local_static_data()` — greps function-body `static <type> <name> = <init>;` (depth ≥ 1, excludes static fn protos) and merges into the `defines-data` hazard on BOTH the named-upstream and coddog re-scan call sites; the source-side backstop the coddog band needed. Verified: flags `dtor` on position/rotate/align/rotaterpy, clean on perspective/epirawread; suite 35 pass, no golden regen. #2 `docs/hazards.md#defines-data` S73 source-side-backstop note (reinforces the S61 16B sizing).
+- Carry-over: none.
+
+---
+
 ## Sprint 72 — bank io/epirawread.c (__osEPiRawReadIo) + io/pfsselectbank.c (__osPfsSelectBank), libultra io coddog-mirror pair — 2026-06-14
 - Increment: 2 .c files banked (`src/libultra/io/epirawread.c` + `pfsselectbank.c`) / 2 fns matched (md5-candidate 110 → 112, all 112 .c stub-free; asm subsegs 152 → 150).
 - Quality: stuck-far 0 / permuter 0 / carried 0 / re-opened 0 (both first-build, 0 iteration).

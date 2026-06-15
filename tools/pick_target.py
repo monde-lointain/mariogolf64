@@ -123,6 +123,14 @@ DATA_GLOBAL_DEF_RE = re.compile(
     r"^(?:(?:struct|union|enum)\s+)?[A-Za-z_][\w \t\*]*?\b([A-Za-z_]\w+)"
     r"\s*(?:\[([^\]]*)\]\s*)?(?:=[^;]*)?;\s*$"
 )
+# S73: a function-local *initialized* static: `static <type> <name> [= init];` inside a body.
+# defines_data_globals can't see it (it skips `static` lines AND scans only brace-depth 0), but
+# KMC GCC 2.7.2 emits it into the TU's .data exactly like a file-scope global, so a verbatim mirror
+# re-emits the bytes and needs the same .data sibling carve. The non-greedy prefix backtracks so the
+# captured name is the last identifier before `=` (gu/position.c's `static float dtor = π/180`).
+LOCAL_STATIC_DATA_RE = re.compile(
+    r"^static\b[^;{}]*?\b([A-Za-z_]\w+)\s*(?:\[[^\]]*\])?\s*=[^;]*;\s*$"
+)
 INCLUDE_RE = re.compile(r'^\s*#\s*include\s*[<"]([^>"]+)[>"]')
 # The project's quoted/angle include search dirs (Makefile CFLAGS `-I` set; -nostdinc removed S32 — stdarg.h ships at include/stdarg.h for correct MIPS GCC 2.7.2 vararg ABI).
 INCLUDE_DIRS = [
@@ -985,6 +993,30 @@ def defines_data_globals(cpath):
     return names
 
 
+def defines_local_static_data(cpath):
+    """Function-local *initialized* statics (brace-depth >= 1) the mirror re-emits into .data — the
+    inside-a-function companion to defines_data_globals (which skips `static` and scans only depth 0).
+    Returns the defined names; the caller merges them into the `defines-data` hazard so the gate plans
+    the .data sibling carve and seed_points re-prices the mirror off the clean-cp floor. Excludes
+    static function protos / function-pointer inits (reuses _is_static_func_proto). Motivating case
+    (S73): gu/position.c's `static float dtor = 3.1415926/180.0;` inside guPositionF needed a
+    0x10-byte .data carve that the file-scope detector — and the S72 coddog re-scan — both missed."""
+    names = []
+    depth = 0
+    with open(cpath, errors="ignore") as f:
+        for raw in f:
+            line = raw.strip()
+            if depth >= 1 and line.startswith("static") and "=" in line \
+                    and not _is_static_func_proto(line):
+                m = LOCAL_STATIC_DATA_RE.match(line)
+                if m:
+                    names.append(m.group(1))
+            depth += raw.count("{") - raw.count("}")
+            if depth < 0:
+                depth = 0
+    return names
+
+
 @functools.cache
 def placed_symbols():
     """Set of every symbol name in the two name files (symbol_addrs + ghidra),
@@ -1608,7 +1640,7 @@ def append_upstream_hazards(off, primary, up_lib, up_path, hazards):
     blocked = False
     if has_file_scope_static(up_path):
         hazards.append(Hazard(HAZARD_FILE_STATIC))  # route to the classical loop, not the mirror
-    data_defs = defines_data_globals(up_path)
+    data_defs = defines_data_globals(up_path) + defines_local_static_data(up_path)  # S73: + fn-local statics
     if data_defs:
         hazards.append(Hazard(HAZARD_DEFINES_DATA, ",".join(data_defs)))  # .data analogue → classical loop
     unplaced = refs_unplaced(up_path, placed_symbols(), up_lib)
@@ -1779,7 +1811,7 @@ def build_rows(args, upstream_index, carried, sig_index, coddog_index=None):
                 clib = up_lib or "libultra"
                 if has_file_scope_static(cl_path):
                     hazards.append(Hazard(HAZARD_FILE_STATIC))
-                cdefs = defines_data_globals(cl_path)
+                cdefs = defines_data_globals(cl_path) + defines_local_static_data(cl_path)  # S73: + fn-local statics
                 if cdefs:
                     hazards.append(Hazard(HAZARD_DEFINES_DATA, ",".join(cdefs)))
                 ctagged, cblk = _tagged_missing_includes(cl_path, clib)

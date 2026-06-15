@@ -434,6 +434,19 @@ makes the `.o` emit the real `.data`). The stub's `%lo(D_<vram>)` resolves from 
 `data` subseg in the meantime. (S68 `gu/align.c`: deferred the `[0xA35A0, .data, libultra/gu/align]`
 carve from gate to the body step; the verbatim twin of S61's carve, first-build match.)
 
+**Source-side detector — the coddog-band backstop (S73).** The S52 `data-static`/`rodata-literal`
+pre-flag is **asm-side** (it classifies the fn's `lwc1/ldc1 %lo(D_<addr>)`), and it does **not** fire
+on an un-named **coddog** candidate — `gu/position.c` (`func_800A9C60`, a 99.99 coddog mirror) ranked
+a clean pts-3 with *no* data-static/defines-data flag, hiding its `dtor` carve, even though guPositionF
+loads `%lo(D_800C81B0)`. So `pick_target.py` now also reads the resolved **upstream source**:
+`defines_local_static_data()` greps function-body `static <type> <name> = <init>;` and merges the
+names into the `defines-data:<name>` hazard on **both** the named-upstream and the coddog re-scan paths
+(the S72 coddog trap re-scan ran only `defines_data_globals`, which skips `static` and scans only
+brace-depth 0 — doubly blind to a fn-local static). This is the source-side backstop the coddog band
+needed. Sizing is unchanged from S61: a single `static float` → a **16B** `.data` carve (4B + 12B pad).
+(S73 `gu/position.c`: 16B carve `[0xA35B0, .data, libultra/gu/position]`→`[0xA35C0, data]` for
+random's `xseed` remainder; align/rotate are the identical 16B precedents; first-build SHA match.)
+
 ---
 
 ## needs-header
