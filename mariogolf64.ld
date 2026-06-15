@@ -261,8 +261,9 @@ SECTIONS
         build/asm/89B10.o(.text);
         build/src/libultra/io/pfsselectbank.o(.text);
         build/asm/89D90.o(.text);
-        build/asm/8A820.o(.text);
-        build/asm/8AA10.o(.text);
+        build/src/libultra/io/contramread.o(.text);
+        build/src/libultra/io/contramwrite.o(.text);
+        build/asm/8AC20.o(.text);
         build/src/libultra/os/afterprenmi.o(.text);
         build/asm/8ACA0.o(.text);
         build/asm/8AF90.o(.text);
@@ -509,8 +510,9 @@ SECTIONS
         build/asm/89B10.o(.data);
         build/src/libultra/io/pfsselectbank.o(.data);
         build/asm/89D90.o(.data);
-        build/asm/8A820.o(.data);
-        build/asm/8AA10.o(.data);
+        build/src/libultra/io/contramread.o(.data);
+        build/src/libultra/io/contramwrite.o(.data);
+        build/asm/8AC20.o(.data);
         build/src/libultra/os/afterprenmi.o(.data);
         build/asm/8ACA0.o(.data);
         build/asm/8AF90.o(.data);
@@ -772,8 +774,9 @@ SECTIONS
         build/asm/89B10.o(.rodata);
         build/src/libultra/io/pfsselectbank.o(.rodata);
         build/asm/89D90.o(.rodata);
-        build/asm/8A820.o(.rodata);
-        build/asm/8AA10.o(.rodata);
+        build/src/libultra/io/contramread.o(.rodata);
+        build/src/libultra/io/contramwrite.o(.rodata);
+        build/asm/8AC20.o(.rodata);
         build/src/libultra/os/afterprenmi.o(.rodata);
         build/asm/8ACA0.o(.rodata);
         build/asm/8AF90.o(.rodata);
@@ -1028,8 +1031,9 @@ SECTIONS
         build/asm/89B10.o(.bss);
         build/src/libultra/io/pfsselectbank.o(.bss);
         build/asm/89D90.o(.bss);
-        build/asm/8A820.o(.bss);
-        build/asm/8AA10.o(.bss);
+        build/src/libultra/io/contramread.o(.bss);
+        build/src/libultra/io/contramwrite.o(.bss);
+        build/asm/8AC20.o(.bss);
         build/src/libultra/os/afterprenmi.o(.bss);
         build/asm/8ACA0.o(.bss);
         build/asm/8AF90.o(.bss);
