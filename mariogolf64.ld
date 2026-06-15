@@ -237,7 +237,7 @@ SECTIONS
         build/src/libultra/os/yieldthread.o(.text);
         build/src/libultra/os/gettime.o(.text);
         build/src/libultra/os/settimer.o(.text);
-        build/asm/87C40.o(.text);
+        build/src/libultra/os/timerintr.o(.text);
         build/asm/87F40.o(.text);
         build/asm/88000.o(.text);
         build/asm/880C0.o(.text);
@@ -267,7 +267,7 @@ SECTIONS
         build/src/libultra/io/contramwrite.o(.text);
         build/asm/8AC20.o(.text);
         build/src/libultra/os/afterprenmi.o(.text);
-        build/asm/8ACA0.o(.text);
+        build/src/libultra/os/initialize.o(.text);
         build/asm/8AF90.o(.text);
         build/asm/8B900.o(.text);
         build/src/libultra/os/setglobalintmask.o(.text);
@@ -488,7 +488,7 @@ SECTIONS
         build/src/libultra/os/yieldthread.o(.data);
         build/src/libultra/os/gettime.o(.data);
         build/src/libultra/os/settimer.o(.data);
-        build/asm/87C40.o(.data);
+        build/src/libultra/os/timerintr.o(.data);
         build/asm/87F40.o(.data);
         build/asm/88000.o(.data);
         build/asm/880C0.o(.data);
@@ -518,7 +518,7 @@ SECTIONS
         build/src/libultra/io/contramwrite.o(.data);
         build/asm/8AC20.o(.data);
         build/src/libultra/os/afterprenmi.o(.data);
-        build/asm/8ACA0.o(.data);
+        build/src/libultra/os/initialize.o(.data);
         build/asm/8AF90.o(.data);
         build/asm/8B900.o(.data);
         build/src/libultra/os/setglobalintmask.o(.data);
@@ -753,7 +753,7 @@ SECTIONS
         build/src/libultra/os/yieldthread.o(.rodata);
         build/src/libultra/os/gettime.o(.rodata);
         build/src/libultra/os/settimer.o(.rodata);
-        build/asm/87C40.o(.rodata);
+        build/src/libultra/os/timerintr.o(.rodata);
         build/asm/87F40.o(.rodata);
         build/asm/88000.o(.rodata);
         build/asm/880C0.o(.rodata);
@@ -784,7 +784,7 @@ SECTIONS
         build/src/libultra/io/contramwrite.o(.rodata);
         build/asm/8AC20.o(.rodata);
         build/src/libultra/os/afterprenmi.o(.rodata);
-        build/asm/8ACA0.o(.rodata);
+        build/src/libultra/os/initialize.o(.rodata);
         build/asm/8AF90.o(.rodata);
         build/asm/8B900.o(.rodata);
         build/src/libultra/os/setglobalintmask.o(.rodata);
@@ -1013,7 +1013,7 @@ SECTIONS
         build/src/libultra/os/yieldthread.o(.bss);
         build/src/libultra/os/gettime.o(.bss);
         build/src/libultra/os/settimer.o(.bss);
-        build/asm/87C40.o(.bss);
+        build/src/libultra/os/timerintr.o(.bss);
         build/asm/87F40.o(.bss);
         build/asm/88000.o(.bss);
         build/asm/880C0.o(.bss);
@@ -1043,7 +1043,7 @@ SECTIONS
         build/src/libultra/io/contramwrite.o(.bss);
         build/asm/8AC20.o(.bss);
         build/src/libultra/os/afterprenmi.o(.bss);
-        build/asm/8ACA0.o(.bss);
+        build/src/libultra/os/initialize.o(.bss);
         build/asm/8AF90.o(.bss);
         build/asm/8B900.o(.bss);
         build/src/libultra/os/setglobalintmask.o(.bss);

@@ -248,7 +248,7 @@ segments:
       - [0x87AC0, c, libultra/os/yieldthread]
       - [0x87B10, c, libultra/os/gettime]
       - [0x87BA0, c, libultra/os/settimer]
-      - [0x87C40, asm]
+      - [0x87C40, c, libultra/os/timerintr]
       - [0x87F40, hasm]
       - [0x88000, hasm]
       - [0x880C0, hasm]
