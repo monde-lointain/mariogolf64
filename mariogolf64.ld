@@ -283,7 +283,10 @@ SECTIONS
         build/asm/8CA60.o(.text);
         build/asm/8CA70.o(.text);
         build/src/libultra/io/sp.o(.text);
-        build/asm/8CAA0.o(.text);
+        build/src/libultra/io/spgetstat.o(.text);
+        build/src/libultra/io/spsetstat.o(.text);
+        build/src/libultra/io/spsetpc.o(.text);
+        build/src/libultra/io/sprawdma.o(.text);
         build/src/libultra/io/sirawread.o(.text);
         build/src/libultra/io/sirawwrite.o(.text);
         build/src/libultra/io/crc.o(.text);
@@ -527,7 +530,10 @@ SECTIONS
         build/asm/8CA60.o(.data);
         build/asm/8CA70.o(.data);
         build/src/libultra/io/sp.o(.data);
-        build/asm/8CAA0.o(.data);
+        build/src/libultra/io/spgetstat.o(.data);
+        build/src/libultra/io/spsetstat.o(.data);
+        build/src/libultra/io/spsetpc.o(.data);
+        build/src/libultra/io/sprawdma.o(.data);
         build/src/libultra/io/sirawread.o(.data);
         build/src/libultra/io/sirawwrite.o(.data);
         build/src/libultra/io/crc.o(.data);
@@ -786,7 +792,10 @@ SECTIONS
         build/asm/8CA60.o(.rodata);
         build/asm/8CA70.o(.rodata);
         build/src/libultra/io/sp.o(.rodata);
-        build/asm/8CAA0.o(.rodata);
+        build/src/libultra/io/spgetstat.o(.rodata);
+        build/src/libultra/io/spsetstat.o(.rodata);
+        build/src/libultra/io/spsetpc.o(.rodata);
+        build/src/libultra/io/sprawdma.o(.rodata);
         build/src/libultra/io/sirawread.o(.rodata);
         build/src/libultra/io/sirawwrite.o(.rodata);
         build/src/libultra/io/crc.o(.rodata);
@@ -1038,7 +1047,10 @@ SECTIONS
         build/asm/8CA60.o(.bss);
         build/asm/8CA70.o(.bss);
         build/src/libultra/io/sp.o(.bss);
-        build/asm/8CAA0.o(.bss);
+        build/src/libultra/io/spgetstat.o(.bss);
+        build/src/libultra/io/spsetstat.o(.bss);
+        build/src/libultra/io/spsetpc.o(.bss);
+        build/src/libultra/io/sprawdma.o(.bss);
         build/src/libultra/io/sirawread.o(.bss);
         build/src/libultra/io/sirawwrite.o(.bss);
         build/src/libultra/io/crc.o(.bss);

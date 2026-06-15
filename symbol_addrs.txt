@@ -93,3 +93,4 @@ osContStartQuery = 0x800A7190; // type:func
 osContGetQuery = 0x800A7210; // type:func
 __osPackRequestData = 0x800A7660; // type:func
 __osContGetInitData = 0x800A75AC; // type:func
+__osSpGetStatus = 0x800B16A0; // type:func

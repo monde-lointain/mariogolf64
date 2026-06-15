@@ -1,9 +1,9 @@
 #include "common.h"
 
-extern u32 func_800B16A0(void);
+extern u32 __osSpGetStatus(void);
 
 u32 func_800AB600(void *arg0) {
-  u32 status = func_800B16A0();
+  u32 status = __osSpGetStatus();
   u32 bit = status >> 8;
   bit &= 1;
 
