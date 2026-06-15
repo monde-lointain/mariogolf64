@@ -167,7 +167,7 @@ SECTIONS
         build/src/libultra/io/epidma.o(.text);
         build/src/libultra/io/epilinkhandle.o(.text);
         build/src/libultra/io/cartrominit.o(.text);
-        build/asm/7E9F0.o(.text);
+        build/src/libultra/io/devmgr.o(.text);
         build/src/libultra/io/piacs.o(.text);
         build/src/libultra/io/aigetlen.o(.text);
         build/src/libultra/io/aigetstat.o(.text);
@@ -409,7 +409,7 @@ SECTIONS
         build/src/libultra/io/epidma.o(.data);
         build/src/libultra/io/epilinkhandle.o(.data);
         build/src/libultra/io/cartrominit.o(.data);
-        build/asm/7E9F0.o(.data);
+        build/src/libultra/io/devmgr.o(.data);
         build/src/libultra/io/piacs.o(.data);
         build/src/libultra/io/aigetlen.o(.data);
         build/src/libultra/io/aigetstat.o(.data);
@@ -654,10 +654,6 @@ SECTIONS
         build/src/libultra/io/epidma.o(.rodata);
         build/src/libultra/io/epilinkhandle.o(.rodata);
         build/src/libultra/io/cartrominit.o(.rodata);
-        build/asm/7E9F0.o(.rodata);
-        build/src/libultra/io/piacs.o(.rodata);
-        build/src/libultra/io/aigetlen.o(.rodata);
-        build/src/libultra/io/aigetstat.o(.rodata);
         build/asm/data/main_rodata.rodata.o(.rodata);
         build/asm/data/A5CE0.rodata.o(.rodata);
         build/asm/data/A5D30.rodata.o(.rodata);
@@ -671,6 +667,10 @@ SECTIONS
         build/asm/data/AD590.rodata.o(.rodata);
         build/asm/data/AD5A0.rodata.o(.rodata);
         build/asm/data/AD5E0.rodata.o(.rodata);
+        build/src/libultra/io/devmgr.o(.rodata);
+        build/src/libultra/io/piacs.o(.rodata);
+        build/src/libultra/io/aigetlen.o(.rodata);
+        build/src/libultra/io/aigetstat.o(.rodata);
         build/src/libultra/io/aisetfreq.o(.rodata);
         build/src/libultra/io/aisetnextbuf.o(.rodata);
         build/asm/7F080.o(.rodata);
@@ -922,7 +922,7 @@ SECTIONS
         build/src/libultra/io/epidma.o(.bss);
         build/src/libultra/io/epilinkhandle.o(.bss);
         build/src/libultra/io/cartrominit.o(.bss);
-        build/asm/7E9F0.o(.bss);
+        build/src/libultra/io/devmgr.o(.bss);
         build/src/libultra/io/piacs.o(.bss);
         build/src/libultra/io/aigetlen.o(.bss);
         build/src/libultra/io/aigetstat.o(.bss);
