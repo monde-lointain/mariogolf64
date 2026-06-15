@@ -1940,10 +1940,35 @@ def build_rows(args, upstream_index, carried, sig_index, coddog_index=None):
                 # path so the seed (recover → snap up a rung) and the gate prices are honest.
                 _append_recover_hazards(off, primary, cl_path, clib, hazards)
 
+        # S78: a multi-fn asm subseg's mirror IDENTITY often lives in its UN-NAMED tail, not its
+        # named (or mis-attributed) leader. The S71 block above keys coddog on `primary` AND fires
+        # only when `not up_path`, so a named-leader subseg whose tail `func_<addr>` members coddog-
+        # match an ultralib `.c` was invisible (S76 devmgr; S78 gbpaksetbank+pfsisplug @0x8CE90: leader
+        # __osGbpakSetBank is named AND mis-attributed to gbpakreadwrite.c via a forward prototype, so
+        # its tail func_800B1B50→pfsisplug.c carried the real identity). Scan ALL members; surface each
+        # distinct coddog `.c` identity the primary block did not already flag, and label the subseg
+        # libultra so seed_points + the column price it as the mirror it is.
+        cod_members = [(fn, coddog_index[fn][0], coddog_index[fn][1]) for fn in fns
+                       if fn in coddog_index and coddog_index[fn][1] >= CODDOG_MIRROR_PCT
+                       and not coddog_index[fn][0].startswith("src/audio")]
+        if cod_members:
+            already = {h.detail.split("@", 1)[0] for h in hazards if h.kind == HAZARD_CODDOG_MIRROR}
+            for cfile in sorted({c for _, c, _ in cod_members}):
+                if cfile in already:
+                    continue
+                cpct = max(p for _, c, p in cod_members if c == cfile)
+                hazards.append(Hazard(HAZARD_CODDOG_MIRROR, f"{cfile}@{cpct:.2f}"))
+            if up_lib is None:
+                up_lib = "libultra"
+
         if args.lib and args.lib not in (path or "") and (up_lib or "") != args.lib \
                 and not any(args.lib in n for n in fns):
             continue
-        if primary in carried and not args.include_stuck:
+        # The `carried` filter de-ranks BACKLOG carry-overs, but carry_over_names() scoops EVERY
+        # backticked token from the digest log (S45 name-dropped `__osGbpakSetBank` as a banked
+        # callee), so a definitively-coddog'd subseg must not be silently dropped because its leader
+        # was prose-mentioned. A real coddog identity overrides the name-drop (S78).
+        if primary in carried and not args.include_stuck and not cod_members:
             continue
 
         rows.append(score_row(off, primary, kind, fns, size, up_lib, band, blocked, hazards, carried))

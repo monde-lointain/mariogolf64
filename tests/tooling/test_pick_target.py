@@ -185,3 +185,58 @@ def test_caller_evict_flag(tmp_path, monkeypatch):
     callers = pt.src_func_callers()
     assert callers.get("func_800B16A0") == ["src/main/caller.c"], callers
     assert "func_deadbeef" not in callers and "func_DEADBEEF" not in callers
+
+
+def _coddog_rows(pt, monkeypatch, *, ui, carried, coddog):
+    """Drive build_rows over ONE synthetic 2-fn asm subseg with the file-reading helpers stubbed,
+    so the new coddog-tail logic is tested in isolation (no tree deps). Leader is `namedLeader`
+    (named, in ui+carried); tail is `func_1100`."""
+    class A:
+        lib = None
+        include_stuck = False
+        n = 999
+    monkeypatch.setattr(pt, "parse_subsegs", lambda: [(0x1000, "asm", None), (0x2000, "asm", None)])
+    monkeypatch.setattr(pt, "classify_subseg",
+                        lambda off, typ, path, size, _ui:
+                        ("asm-flip", ["namedLeader", "func_1100"], []) if off == 0x1000 else None)
+    monkeypatch.setattr(pt, "src_func_callers", lambda: {})
+    monkeypatch.setattr(pt, "append_upstream_hazards", lambda *a, **k: ("warm", False))
+    monkeypatch.setattr(pt, "score_row",
+                        lambda off, primary, kind, fns, size, up_lib, band, blocked, hz, carr: {
+                            "func": primary, "rom": hex(off), "upstream": up_lib,
+                            "score": 0, "size": size,
+                            "hazards": ",".join(h.detail for h in hz
+                                                if h.kind == pt.HAZARD_CODDOG_MIRROR)})
+    return pt.build_rows(A(), ui, carried, {}, coddog)
+
+
+def test_coddog_tail_overrides_carried_namedrop(monkeypatch):
+    """S78: a multi-fn asm subseg's mirror identity often lives in its UN-NAMED tail, not its named
+    (or upstream-mis-attributed) leader. carry_over_names() scoops every backticked token from the
+    BACKLOG digest log, so a banked callee name-dropped in a carry-over paragraph (S45 did this to
+    `__osGbpakSetBank`) falsely de-ranks the whole subseg. A definitive (>=PCT, non-audio) coddog
+    hit on ANY member must (a) surface that identity even when the leader carries a (wrong) upstream
+    path, and (b) override the carried name-drop drop. Real case: [0x8CE90] = __osGbpakSetBank
+    (named, mis-attributed to gbpakreadwrite.c via a forward prototype) + tail func_->pfsisplug.c."""
+    pt = load_tool("pick_target")
+    rows = _coddog_rows(
+        pt, monkeypatch,
+        ui={"namedLeader": ("libultra", "/x/wrong.c")},   # mis-attributed (prototype) upstream
+        carried={"namedLeader"},                          # name-dropped in the digest log
+        coddog={"func_1100": ("src/io/pfsisplug.c", 99.99)})
+    got = [r for r in rows if r["func"] == "namedLeader"]
+    assert got, "a coddog-identified subseg must survive the carried name-drop filter"
+    assert "src/io/pfsisplug.c@99.99" in got[0]["hazards"], got[0]["hazards"]
+    assert got[0]["upstream"] == "libultra"
+
+
+def test_carried_namedrop_still_drops_without_coddog(monkeypatch):
+    """The carried filter still de-ranks a genuinely-carried leader when NO member is coddog'd — the
+    S78 exemption is scoped strictly to definitive coddog identities, not a blanket disable."""
+    pt = load_tool("pick_target")
+    rows = _coddog_rows(
+        pt, monkeypatch,
+        ui={"namedLeader": ("libultra", "/x/wrong.c")},
+        carried={"namedLeader"},
+        coddog={})  # no coddog identity -> the name-drop drop still applies
+    assert not [r for r in rows if r["func"] == "namedLeader"]

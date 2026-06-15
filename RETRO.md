@@ -25,6 +25,17 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 78 — clear the io c-combined subseg [0x8CE90]: gbpaksetbank + pfsisplug, 2 libultra io coddog mirrors — 2026-06-15
+- Increment: src/libultra/io/gbpaksetbank.c (1 fn) + src/libultra/io/pfsisplug.c (3 fns) banked / 4 functions matched. md5-candidate 120→122 files; asm subsegs 146→145.
+- Quality: 0/0/0/0 this sprint (both files banked first-try; the defines-data BSS was a known sub-case, not a surprise).
+- Seed: committed 4pt; banked 4pt; regime mirror (seed-only). The 4-fn c-combined subseg ranks ~pts-8/13 → 8-gate FIRED → resolved by decompose at the upstream-file boundary (S74/S77 path).
+- What helped: the S77 band-note pointed straight at [0x8CE90]; the cached coddog map (`tools/coddog/coddog_map.tsv`) gave the per-member upstream split (gbpaksetbank.c + pfsisplug.c) without hand-disassembly; the S44/S45 defines-data fast-path made pfsisplug's `OSPifRam __osPfsPifRam` a drop-to-extern (vendored `controller.h:227` extern + symbol_addrs, NO `.bss` carve — the shared bss blob already reserves the range, bss has no ROM bytes); all callees pre-placed; the io-band `PRinternal/{controller,siint}.h`→bare include convention (S72/S74) was reused verbatim.
+- Friction: the subseg never surfaced in `pick_target.py` (had to find it via the band-note + a manual coddog grep). Root cause was two-fold: (1) `carry_over_names()` scoops EVERY backticked token from the BACKLOG digest log, so `__osGbpakSetBank` — name-dropped as a banked callee in S45's carry-over prose — falsely landed in the `carried` set and the whole subseg was de-ranked invisible; (2) the coddog flag keyed only on `fns[0]`, so the tail's real identity (func_800B1B50→pfsisplug.c) was never surfaced, compounded by `UPSTREAM_DEF_RE` mis-attributing `__osGbpakSetBank` to gbpakreadwrite.c (a forward prototype matched as a def).
+- Applied: 1 of 1: #1 `pick_target.py build_rows` — scan ALL subseg members for a definitive (≥PCT, non-audio) coddog hit (not just `fns[0]`), surface each distinct tail identity even under a named/mis-attributed leader, and exempt a coddog-identified subseg from the over-broad `carried` name-drop filter; +2 unit tests (`test_coddog_tail_overrides_carried_namedrop`, `test_carried_namedrop_still_drops_without_coddog`), golden stable (the only live case [0x8CE90] is now flipped), suite 42 pass.
+- Carry-over: none. Follow-ups logged (not applied this gate): (a) `UPSTREAM_DEF_RE` matches forward prototypes (`...);`) as definitions → mis-attributes a fn to a sibling file that only declares it (cosmetic noise on the surfaced row); (b) `carry_over_names()` is fundamentally over-broad (222 banked tokens treated as carried) — the coddog exemption only patches the coddog subset; a precise carry-over parser (or a structured carry-over marker in BACKLOG) would un-de-rank the rest.
+
+---
+
 ## Sprint 77 — clear the io-SP c-combined subseg [0x8CAA0]: spgetstat + spsetstat + spsetpc + sprawdma, 4 libultra io mirrors — 2026-06-15
 - Increment: 4 files banked (`src/libultra/io/{spgetstat,spsetstat,spsetpc,sprawdma}.c`, 4 fns) / 4 fns matched. md5-candidate 116→120; asm subsegs 147→146. Subseg [0x8CAA0] fully C.
 - Quality: 0/0/0/0 this sprint (the caller-eviction was a gate surprise resolved without a spike/carry).
