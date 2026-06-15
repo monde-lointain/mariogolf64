@@ -56,6 +56,7 @@ osViModeNtscLan1 = 0x800C9570; // size:0x50
 osViModePalLan1 = 0x800C95C0; // size:0x50
 osViModeMpalLan1 = 0x800C9610; // size:0x50
 __osCurrentHandle = 0x800C7E90; // size:0x8
+__osRcpImTable = 0x800D2200; // size:0x80
 __osEventStateTab = 0x801B7078; // size:0x78
 __osPreNMI = 0x800C81F0; // size:0x4
 __osShutdown = 0x800C946C; // size:0x4
