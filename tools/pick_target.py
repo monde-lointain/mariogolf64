@@ -852,26 +852,30 @@ def stale_version_header(up_path, lib):
 @functools.cache
 def _parse_makefile_defines():
     """Return {lib: frozenset(defines)} by parsing the project Makefile (cached:
-    one parse per process). 'libkmc' and 'libnusys' inherit from the main CFLAGS
-    set plus their own additions."""
+    one parse per process). 'libkmc'/'libnusys'/'libultra' each inherit from the main
+    CFLAGS set plus their own profile additions. The libultra profile carries
+    -DBUILD_VERSION + -DF3DEX_GBI_2 (S83) — without parsing LIBULTRA_CFLAGS the GBI
+    microcode define is invisible, so a GBI-value-guarded macro (OS_YIELD_DATA_SIZE)
+    false-flags as needs-define on a build that already defines it."""
     makefile = os.path.join(ROOT, "Makefile")
-    raw = {"main": set(), "libkmc": set(), "libnusys": set()}
+    raw = {"main": set(), "libkmc": set(), "libnusys": set(), "libultra": set()}
     try:
         with open(makefile) as f:
             for line in f:
-                for var, key in [("CFLAGS", "main"), ("LIBKMC_CFLAGS", "libkmc"), ("LIBNUSYS_CFLAGS", "libnusys")]:
+                for var, key in [("CFLAGS", "main"), ("LIBKMC_CFLAGS", "libkmc"),
+                                 ("LIBNUSYS_CFLAGS", "libnusys"), ("LIBULTRA_CFLAGS", "libultra")]:
                     if re.match(rf'^\s*{var}\s*[:+]?=', line):
                         raw[key].update(m.group(1) for m in _MAKEFILE_DEFINE_RE.finditer(line))
     except OSError:
         pass
-    raw["libkmc"] |= raw["main"]
-    raw["libnusys"] |= raw["main"]
+    for k in ("libkmc", "libnusys", "libultra"):
+        raw[k] |= raw["main"]
     return {k: frozenset(v) for k, v in raw.items()}
 
 
 def _active_defines_for_lib(lib):
     """Effective -D defines for an upstream library key (libultra, libkmc, libnusys)."""
-    key = {"libkmc": "libkmc", "libnusys": "libnusys"}.get(lib or "", "main")
+    key = {"libkmc": "libkmc", "libnusys": "libnusys", "libultra": "libultra"}.get(lib or "", "main")
     return _parse_makefile_defines()[key]
 
 
@@ -905,6 +909,99 @@ def function_gating_define(up_cpath, primary):
     if any(l.strip() for l in lines[matching_i + 1:]):
         return None
     return define
+
+
+# GBI microcode macros that gate object-like macro VALUES in PR/sptask.h (OS_YIELD_DATA_SIZE,
+# OS_YIELD_AUDIO_SIZE). ultralib builds libgultra_rom with a global -DF3DEX_GBI default; MG64 runs
+# F3DEX2, so the project pins -DF3DEX_GBI_2 in LIBULTRA_CFLAGS (S83). With NONE defined the macro
+# silently takes the #else value, mismatching the ROM by one word (sptask's
+# IO_READ(...+OS_YIELD_DATA_SIZE-4): 0x900 vs the baserom's 0xc00) — invisible to the gate stub.
+GBI_MICROCODE_DEFINES = ("F3D_GBI", "F3DEX_GBI", "F3DLP_GBI", "F3DEX_GBI_2")
+_OBJ_DEFINE_RE = re.compile(r'^\s*#\s*define\s+([A-Za-z_]\w*)\s+(\S.*?)\s*$')
+_GBI_COND_RE = re.compile(r'defined\s*\(\s*([A-Za-z_]\w*)\s*\)|\bifdef\s+([A-Za-z_]\w*)')
+
+
+def _scan_value_guards(text):
+    """Object-like macros in `text` whose value is gated by a GBI-microcode `#if`/`#ifdef` block
+    with a DIFFERENT `#else` value. Returns {macro: tuple(guard_defines)}. The PR/sptask.h shape:
+        #if (defined(F3DEX_GBI)||defined(F3DLP_GBI)||defined(F3DEX_GBI_2))
+        #define OS_YIELD_DATA_SIZE 0xc00
+        #else
+        #define OS_YIELD_DATA_SIZE 0x900
+        #endif
+    """
+    lines = text.splitlines()
+    n, i, out = len(lines), 0, {}
+    while i < n:
+        s = lines[i].strip()
+        if re.match(r'^#\s*if', s):
+            guard = tuple(d for grp in _GBI_COND_RE.findall(s) for d in grp
+                          if d and d in GBI_MICROCODE_DEFINES)
+            if guard:
+                if_vals, else_vals, cur, depth, j = {}, {}, None, 1, i + 1
+                cur = if_vals
+                while j < n and depth > 0:
+                    t = lines[j].strip()
+                    if re.match(r'^#\s*if', t):
+                        depth += 1
+                    elif re.match(r'^#\s*endif', t):
+                        depth -= 1
+                        if depth == 0:
+                            break
+                    elif depth == 1 and re.match(r'^#\s*else', t):
+                        cur = else_vals
+                    elif depth == 1:
+                        md = _OBJ_DEFINE_RE.match(lines[j])
+                        if md:
+                            cur[md.group(1)] = md.group(2)
+                    j += 1
+                for name, v1 in if_vals.items():
+                    if else_vals.get(name, v1) != v1:
+                        out[name] = guard
+                i = j
+        i += 1
+    return out
+
+
+@functools.cache
+def _gbi_guarded_macros(lib):
+    """{macro: tuple(guard_defines)} for GBI-value-guarded object-like macros under `lib`'s effective
+    -I set (INCLUDE_DIRS + LIB_EXTRA_INCLUDE_DIRS[lib]). Cached per lib (one header walk per run)."""
+    out = {}
+    for d in INCLUDE_DIRS + LIB_EXTRA_INCLUDE_DIRS.get(lib or "", []):
+        if not os.path.isdir(d):
+            continue
+        for root, _dirs, files in os.walk(d):
+            for fn in files:
+                if not fn.endswith((".h", ".inc")):
+                    continue
+                try:
+                    text = open(os.path.join(root, fn), errors="ignore").read()
+                except OSError:
+                    continue
+                out.update(_scan_value_guards(text))
+    return out
+
+
+def gbi_value_guard_needs_define(cpath, lib):
+    """The GBI-microcode define a mirror candidate needs because its body uses a GBI-value-guarded
+    macro (OS_YIELD_DATA_SIZE) and NO guard define is active for `lib` — else None. Returns the
+    canonical F3DEX_GBI_2 when it satisfies the guard, else the first guard define. Dormant for
+    libultra now (the standing -DF3DEX_GBI_2 resolves the value), but prices a candidate guarded by
+    an inactive define so the 1-word SHA-miss (S83 sptask) is paid at the gate, not in execution."""
+    guarded = _gbi_guarded_macros(lib)
+    if not guarded:
+        return None
+    try:
+        body = _strip_comments(open(cpath, errors="ignore").read())
+    except OSError:
+        return None
+    active = _active_defines_for_lib(lib)
+    used = set(re.findall(r'[A-Za-z_]\w*', body))
+    for name, guard in guarded.items():
+        if name in used and not (set(guard) & active):
+            return "F3DEX_GBI_2" if "F3DEX_GBI_2" in guard else guard[0]
+    return None
 
 
 def _upstream_body(up_cpath, primary):
@@ -1873,6 +1970,9 @@ def append_upstream_hazards(off, primary, up_lib, up_path, hazards):
     gating = function_gating_define(up_path, primary)
     if gating and gating not in _active_defines_for_lib(up_lib):
         hazards.append(Hazard(HAZARD_NEEDS_DEFINE, gating))
+    gbi_def = gbi_value_guard_needs_define(up_path, up_lib)
+    if gbi_def:
+        hazards.append(Hazard(HAZARD_NEEDS_DEFINE, gbi_def))  # GBI-value-guarded macro (S83 OS_YIELD_DATA_SIZE)
     divergence = call_divergence(off, primary, up_path, up_lib)
     if divergence:
         hazards.append(divergence)  # near-verbatim mirror: reconcile call list at the gate

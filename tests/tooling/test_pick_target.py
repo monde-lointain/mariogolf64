@@ -54,6 +54,56 @@ def test_vendorable_tu_missing_defines(tmp_path, monkeypatch):
     assert "R4300" not in miss and "RDBPORT" not in miss and "TLB" not in miss
 
 
+def test_gbi_value_guard_needs_define(tmp_path, monkeypatch):
+    """S83 retro #1: a mirror candidate using a GBI-value-guarded macro (OS_YIELD_DATA_SIZE) is
+    flagged needs-define when NO guard microcode define is active, and clean when one is. Also
+    confirms LIBULTRA_CFLAGS's -DF3DEX_GBI_2 / -DBUILD_VERSION reach the libultra active-define set."""
+    pt = load_tool("pick_target")
+
+    # Part A: the live Makefile's LIBULTRA_CFLAGS defines now reach the libultra active set
+    # (previously libultra fell through to the bare main CFLAGS, hiding the GBI define).
+    pt._parse_makefile_defines.cache_clear()
+    libu = pt._active_defines_for_lib("libultra")
+    assert "F3DEX_GBI_2" in libu and "BUILD_VERSION" in libu
+
+    # Part B: synthetic header with the PR/sptask.h guard shape + a candidate that uses the macro.
+    inc = tmp_path / "inc"
+    inc.mkdir()
+    (inc / "sptask.h").write_text(
+        "#if (defined(F3DEX_GBI)||defined(F3DLP_GBI)||defined(F3DEX_GBI_2))\n"
+        "#define\tOS_YIELD_DATA_SIZE\t\t0xc00\n"
+        "#else\n"
+        "#define OS_YIELD_DATA_SIZE 0x900\n"
+        "#endif\n"
+    )
+    cand = tmp_path / "sptask.c"
+    cand.write_text("void f(void){ g(p + OS_YIELD_DATA_SIZE - 4); }\n")
+
+    monkeypatch.setattr(pt, "INCLUDE_DIRS", [str(inc)])
+    monkeypatch.setattr(pt, "LIB_EXTRA_INCLUDE_DIRS", {})
+    pt._gbi_guarded_macros.cache_clear()
+
+    # the value-guard shape is detected (guard defines preserved in source order)
+    assert pt._scan_value_guards((inc / "sptask.h").read_text()) == {
+        "OS_YIELD_DATA_SIZE": ("F3DEX_GBI", "F3DLP_GBI", "F3DEX_GBI_2")
+    }
+
+    # no GBI define active → flagged, canonical F3DEX_GBI_2 reported
+    monkeypatch.setattr(pt, "_active_defines_for_lib", lambda lib: frozenset({"_FINALROM"}))
+    assert pt.gbi_value_guard_needs_define(str(cand), "libultra") == "F3DEX_GBI_2"
+
+    # F3DEX_GBI_2 active → the macro resolves, no flag (the standing LIBULTRA_CFLAGS case)
+    monkeypatch.setattr(pt, "_active_defines_for_lib", lambda lib: frozenset({"F3DEX_GBI_2"}))
+    assert pt.gbi_value_guard_needs_define(str(cand), "libultra") is None
+
+    # a candidate that never uses the macro → no flag even with nothing active
+    monkeypatch.setattr(pt, "_active_defines_for_lib", lambda lib: frozenset())
+    other = tmp_path / "other.c"
+    other.write_text("void h(void){ return; }\n")
+    assert pt.gbi_value_guard_needs_define(str(other), "libultra") is None
+    pt._gbi_guarded_macros.cache_clear()
+
+
 def test_pick_target_json_golden(golden_dir, regen, monkeypatch):
     # The S71 coddog map (tools/coddog/coddog_map.tsv) is gitignored + build-dependent, so the
     # committed golden is map-free; neutralize any local map for a reproducible snapshot.

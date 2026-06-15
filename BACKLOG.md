@@ -565,6 +565,37 @@ sub-sprints).
   [0x87C40, 4fn], sched); next-cleanest is sptask [0x867A0, 2fn] but it carries jal-count-mismatch:7vs14
   (asm > C calls) → gate-investigate/classical, plus file-static.**
 
+- **Sprint 83: 1 .c file BANKED — `src/libultra/io/sptask.c` (`osSpTaskLoad` + `osSpTaskStartGo`),
+  the RSP task-load file; a clean `single-file-pack:2fn` verbatim mirror.** md5-candidate 127→**128**
+  (all 128 .c stub-free); asm subsegs 141→140. 12th coddog cross-ref sprint, the S82-teed-up
+  "next-cleanest" io leaf. **Its three gate hazards ALL resolved to false-flags before the flip:**
+  `jal-count-mismatch:7vs14` = the `static _VirtualToPhysicalTask` inlined into `osSpTaskLoad` (the 7×
+  `jal osVirtualToPhysical` in the asm confirms it; coddog 99.99 holds, NOT a version divergence);
+  `calls-unplaced:_osVirtualToPhysical` = the line-11 macro (real callee `osVirtualToPhysical`=0x800A7720
+  placed); `needs-header:PRinternal/osint.h` = already-vendored no-op (→ bare `osint.h`). Only real
+  work = **drop-def fast path** (S33/S81/S82): `static OSTask tmp_task` → `extern`, placed add-only at
+  the asm-recovered `tmp_task`=0x800FA9C0 size:0x40 (.bss `ADD30.bss.s`, abuts S81 `siAccessBuf`).
+  Gate flip `[0x867A0, asm]`→`[0x867A0, c, libultra/io/sptask]` (standalone 576B 16-aligned, no split).
+  **One in-execution divergence (NEW class, invisible to the gate stub):** verbatim body LINKED clean
+  but full-make SHA-1 missed by EXACTLY ONE WORD @0x800AB504 — `IO_READ(...+OS_YIELD_DATA_SIZE-4)`
+  emitted `0x8FC` vs baserom `0xBFC`. Root cause: `PR/sptask.h` guards `OS_YIELD_DATA_SIZE` 0xc00
+  (GBI-microcode defined) vs 0x900 (#else) and `LIBULTRA_CFLAGS` had no GBI define. Fix (PO directive):
+  `+LIBULTRA_CFLAGS -DF3DEX_GBI_2` (MG64's actual microcode; same 0xc00 guard as ultralib's default
+  -DF3DEX_GBI). Clean rebuild → ROM SHA-1 == baserom, every other banked libultra file SHA-1-neutral;
+  0 C-body iterations. seed 5 / banked 5pt; regime mirror (seed-only; 8-gate clear at 5<8). 0
+  stuck-far/permuter/carried/re-opened. Applied 3 of 3: #1 `pick_target.py` GBI-value-guard pre-flag
+  (parse `LIBULTRA_CFLAGS` → libultra active-define set; `gbi_value_guard_needs_define` flags a
+  candidate using a GBI-guarded macro when no guard define is active — dormant while -DF3DEX_GBI_2
+  stands) +1 unit test, golden-neutral, suite 46 pass; #2 `docs/hazards.md#needs-define` GBI-microcode
+  sub-case + the 1-word SHA-miss tell; #3 byte `.o`-diff localization (confirmatory, S44 doctrine).
+  **Cross-repo follow-up:** `tmp_task`=0x800FA9C0 is a new decomp-side data symbol → propagate via
+  `sync_decomp_names.py --import-from-decomp` (the 2 fn names were already in `ghidra_symbols.txt`).
+  **Band note: the standing -DF3DEX_GBI_2 now pre-satisfies any libultra mirror using a GBI-guarded
+  macro. The io defines-data/file-static traps remain (motor [pack:2fn, pts-8], contpfs [0x89D90, 7fn
+  @100], vimgr [0x88210, 2fn, un-named member], timerintr [0x87C40, 4fn, pts-8, 9 defines-data], sched
+  [0x86A50, 15fn, pts-13]); osSetIntMask [0x7E360] needs a 3-way TU split (setintmask.s hasm + pimgr +
+  epirawdma).**
+
 - **Sprint 48: 1 file BANKED — `src/libultra/io/viswapcontext.c` (`__osViSwapContext`), libultra; 11th vi-band sibling.** md5-candidate 88→89 (all 89 .c files now stub-free). Single fn 0x88810. Verbatim ultralib VERSION_J `src/io/viswapcontext.c` (include `PRinternal/viint.h` → bare `viint.h`, sibling convention). One recover-extern at gate: `__additional_scanline`=0x800C826C (size:0x4, `extern u32` per viint.h, recovered from `lui 0x800d / lw -0x7d94`). `__osViNext`/`__osViCurr` already placed; `__OSViContext` from pick_target refs-unplaced was a **struct TYPE** (0x30B viint.h), not a data symbol — ruled out. `.text` matched first compile (0x310B); only the **rodata-sibling** for the `2^32` u32→float double needed a yaml split (`[0xAD9C0, rodata]` → insert `[0xAD9E0, .rodata, libultra/io/viswapcontext]`, 16B = double + 8 pad; same as S38 aisetfreq). seed 5 / banked 5pt; regime mirror (seed-only). All 0 stuck-far/permuter/carried/re-opened. Applied: 2 of 2 (#1 `pick_target.py`/`decomp_asm.py` `declared_type_names` — excludes typedef'd types from refs-unplaced; #2 `rodata-literal:<addr>` pre-flag for mirror candidates loading anonymous `ldc1/lwc1 %lo(D_)` FP constants; hazards.md + CLAUDE.md index updated, `make test-tools` 23 pass). No carry-overs. **Cross-repo follow-up:** `__additional_scanline`=0x800C826C is a new decomp-side symbol — propagate via `sync_decomp_names.py --import-from-decomp`. **Band note: cont/pfs/timer io siblings remain (companion-copies + recover-externs); the vi band has no smaller clean leaves left.**
 
 - **Sprint 46: 2 files BANKED — `src/libultra/io/pirawdma.c` (`__osPiRawStartDma`) + `pigetcmdq.c` (`osPiGetCmdQueue`), libultra; reopens the PI/SI/cont/pfs mirror band.** md5-candidate 85→87. 0x8BA20 3-fn pack split at vram 0x800B06F0 (pigetcmdq) + 0x800B0710 (`func_800B0710` left asm). **Root unblock — a multi-sprint `pick_target` false-`blk`:** ultralib mirrors `#include "PRinternal/<h>"` but the project shipped those internal headers under `internal/`, so `include_is_blocked` matched the include *basename* (`piint.h`) against in-tree `internal/piint.h` and mislabeled a cheap companion-copy as a deferred-`-I` block → the whole PI/SI/cont/pfs/vi/timer band read `blk needs-header` and was un-pickable. Fixed at retro: full-relative-path match (not basename) + ultralib/include as the primary libultra companion-header root → 11 band fns un-`blk`'d (`osCartRomInit`, `__osContRam{Read,Write}`, `__osPfsGetStatus`, `osSpTaskLoad`, `osContInit`, `osCreateViManager`, `osMotorStop`, `__osViSwapContext`, `__osTimerServicesInit`, `__osGbpakSetBank`). Enabler: verbatim `cp ultralib/include/PRinternal/piint.h → include/libultra/PRinternal/` (deps `PR/os_internal.h`+`PR/rcp.h` in-tree). `__osPiRawStartDma` (224 B): `_DEBUG` block compiles out; recover-extern `osRomBase`=0x80000308 — a libultra **boot-region global** asm-baked as `D_80000308`, missed by refs-unplaced's `__`-prefix grep → 2nd retro fix: `BOOT_GLOBALS` table (0x80000300-0x1C) surfaces them with known vram. `osPiGetCmdQueue` (32 B): 2-line getter, only ref `__osPiDevMgr` placed. Both verbatim cp, names pre-placed, 0 iter. seed 2 / banked 2pt; regime mirror (seed-only). All 0 stuck-far/permuter/carried/re-opened. Applied: 2 of 2 (#1 `include_is_blocked` full-path + ultralib companion root; #2 `BOOT_GLOBALS` recover table; golden refreshed, 20 pass/3 skip). No carry-overs. **Cross-repo follow-up:** `osRomBase`=0x80000308 is a new decomp-side symbol — propagate via `sync_decomp_names.py --import-from-decomp`. **Band note: the cont/pfs/vi siblings now need only `controller.h`/`siint.h`/`macros.h`/`viint.h` companion-copies (cheap) — the next mirror pool.**

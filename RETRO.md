@@ -25,6 +25,15 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 83 — io sptask.c, the RSP task-load file (verbatim mirror) — 2026-06-15
+- Increment: src/libultra/io/sptask.c (`osSpTaskLoad` + `osSpTaskStartGo`) banked / 2 functions matched. md5-candidate 127→128 files; asm subsegs 141→140.
+- Quality: 0/0/0/0 this sprint (verbatim single-file-pack mirror, 0 C-body iterations; clean-rebuild ROM SHA-1 == baserom).
+- Seed: committed 5pt; banked 5pt; regime mirror (8-gate clear at 5<8; seed-only).
+- What helped: gate-investigation of `sptask`'s three hazard flags resolved ALL as false-flags before the flip — `jal-count-mismatch:7vs14` was the static `_VirtualToPhysicalTask` inlined (7× `jal osVirtualToPhysical` in asm confirms; coddog 99.99 holds), `calls-unplaced:_osVirtualToPhysical` was the line-11 macro (real callee placed), `needs-header` a no-op. So the only real work was the routine drop-def (`tmp_task`→extern @0x800FA9C0), exactly the S81/S82 pattern. When the verbatim body linked clean but SHA-missed, the S44 byte `.o`-diff localized it to one word instantly.
+- Friction: the one-word divergence (`OS_YIELD_DATA_SIZE` 0x900 vs baserom 0xc00) is a NEW late-surface class — a GBI-microcode-guarded MACRO VALUE, invisible to the gate (the INCLUDE_ASM stub never compiles the body) and to a jal/ref reconcile. Surfaced only as a full-make SHA miss. Root cause: `LIBULTRA_CFLAGS` lacked any GBI define (`PR/sptask.h` then takes the `#else` value). PO directed the fix: pin `-DF3DEX_GBI_2` (MG64's microcode). A second clean rebuild confirmed every other banked libultra file stays SHA-1-neutral.
+- Applied: 3 of 3 — #1 `pick_target.py` GBI-value-guard pre-flag (parse `LIBULTRA_CFLAGS` into the libultra active-define set; `gbi_value_guard_needs_define` + `_scan_value_guards`/`_gbi_guarded_macros` flag a candidate body that uses a GBI-guarded macro when no guard define is active — dormant while `-DF3DEX_GBI_2` stands, prices a differently-guarded candidate) +1 unit test `test_gbi_value_guard_needs_define`, golden-neutral, suite 46 pass; #2 `docs/hazards.md#needs-define` GBI-microcode sub-case (the 1-word `addiu` SHA-miss tell + the byte `.o`-diff localization); #3 the byte `.o`-diff localization note (confirmatory, already covered by the S44 doctrine — log-only).
+- Carry-over: none.
+
 ## Sprint 82 — io controller.c, the controller-init file (verbatim mirror) — 2026-06-15
 - Increment: src/libultra/io/controller.c (`osContInit` + `__osContGetInitData` + `__osPackRequestData`) banked / 3 functions matched. md5-candidate 126→127 files; asm subsegs 142→141.
 - Quality: 0/0/0/0 this sprint (verbatim drop-def cp, 0 iteration; clean-make ROM SHA-1 == baserom).

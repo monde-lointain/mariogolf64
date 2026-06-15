@@ -1089,6 +1089,40 @@ build as written.
 **Procedure:** Confirm the gating define against the upstream; if it is not in the lib's active
 define set, the leaf is not a clean flip — defer or handle the define at the gate.
 
+### GBI-microcode define (S83 — value-guarded macro, not a whole-body gate)
+
+A subtler sub-case: not a `#ifdef DEFINE` wrapping the whole function, but an **object-like macro
+whose VALUE is GBI-microcode-guarded**, used inside an otherwise-verbatim body. `PR/sptask.h`:
+
+```c
+#if (defined(F3DEX_GBI)||defined(F3DLP_GBI)||defined(F3DEX_GBI_2))
+#define OS_YIELD_DATA_SIZE 0xc00
+#else
+#define OS_YIELD_DATA_SIZE 0x900
+#endif
+```
+
+ultralib builds `libgultra_rom` with a global default `GBIDEFINE := -DF3DEX_GBI`; MG64 runs the
+F3DEX2 microcode, so the project pins **`-DF3DEX_GBI_2` in `LIBULTRA_CFLAGS`** (Makefile). With NO
+GBI define the macro silently takes the `#else` value. The standing pin resolves this for every
+libultra mirror; it is documented here because the failure mode is invisible to every gate check.
+
+**The tell (S83 `sptask.c`):** the mirror compiles and LINKS clean (all symbols resolve), but the
+full-make ROM SHA-1 misses by **exactly one word** — an `addiu rX, rX, imm` whose immediate is off by
+the macro delta (built `0x8FC` vs baserom `0xBFC`, i.e. `OS_YIELD_DATA_SIZE - 4` at `0x900` vs
+`0xc00`). It is invisible to the gate because the `INCLUDE_ASM` stub never compiles the body (same
+late-surface class as #needs-define USE_EPI, the cross-lib-header S40, the macro-hidden-extern S41).
+
+**Localize a linked-but-SHA-missed mirror (S44 `.o`-diff, byte form):** diff the subseg bytes
+between `baserom.z64` and `build/mariogolf64.z64` and group differing bytes into 4-byte instruction
+words (`dd` is blocked — use a venv python read of both files at the ROM offset). A single differing
+word with an off-by-constant immediate points straight at a header-macro / enum value divergence; a
+whole-body divergence is a different (version / cast / char-signedness) class.
+
+**Pre-flag:** `pick_target.py` flags `needs-define:<GBI def>` when a candidate's body uses a
+GBI-value-guarded macro and no guard define is active for the lib (`gbi_value_guard_needs_define`,
+keyed off the parsed `LIBULTRA_CFLAGS` define set). Dormant while `-DF3DEX_GBI_2` stands, by design.
+
 ---
 
 ## make sync-names eviction recovery
