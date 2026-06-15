@@ -1400,19 +1400,40 @@ def include_is_blocked(inc):
     return not include_is_vendorable(inc)
 
 
-def include_is_already_vendored(inc, lib):
-    """True if a *missing* include needs NO header work at all: its full path is unreachable (so
-    `missing_includes` flagged it), but its BASENAME already resolves under the current `-I` set,
-    so the established include-path adaptation (drop the upstream prefix — `PRinternal/controller.h`
-    → `"controller.h"`, the io/gu band pattern) resolves it for free. S59: `osGbpakCheckConnector`'s
-    `PRinternal/controller.h` was tagged `(vendorable)` but the sibling-vendored
-    `include/libultra/internal/controller.h` was already on the io band's `-I` set, so the flag was
-    a 0-work no-op. This is a strict refinement of vendorable: same non-blocking class, but priced as
-    zero enabler load rather than a one-time cp. lib selects the band's extra `-I` dirs (LIB_EXTRA).
-    """
+def already_vendored_intree_path(inc, lib):
+    """For a *missing* include (full path unreachable, so `missing_includes` flagged it) whose
+    BASENAME resolves under the current `-I` set: the in-tree path the verbatim include must be
+    ADAPTED to (the established drop-the-prefix fix-up — `PRinternal/controller.h` → `"controller.h"`,
+    resolved from `include/libultra/internal/`). None when the basename does not resolve.
+
+    Returned relative to the project `include/` root for a compact gate hint. Every
+    `(already-vendored)` header IS a needs-include-adapt case by construction: it reached the tagger
+    only because its full path already failed `missing_includes`, so the upstream prefix differs from
+    the in-tree layout and the include line must change (SHA-neutral — declarations only). S74
+    surfaces the adapt target so the gate prices the include edit (`PRinternal/controller.h` →
+    `internal/controller.h`) instead of hitting `No such file` at first build."""
     search_dirs = INCLUDE_DIRS + LIB_EXTRA_INCLUDE_DIRS.get(lib or "", [])
     base = os.path.basename(inc)
-    return any(os.path.exists(os.path.join(d, base)) for d in search_dirs)
+    for d in search_dirs:
+        cand = os.path.join(d, base)
+        if os.path.exists(cand):
+            try:
+                return os.path.relpath(cand, PROJECT_INC)
+            except ValueError:
+                return cand
+    return None
+
+
+def include_is_already_vendored(inc, lib):
+    """True if a *missing* include needs NO header CP work: its full path is unreachable (so
+    `missing_includes` flagged it), but its BASENAME already resolves under the current `-I` set, so
+    the established include-path adaptation (drop the upstream prefix) resolves it. S59:
+    `osGbpakCheckConnector`'s `PRinternal/controller.h` was tagged `(vendorable)` but the
+    sibling-vendored `include/libultra/internal/controller.h` was already on the io band's `-I` set.
+    A strict refinement of vendorable: same non-blocking class, no cp, BUT it does cost a one-line
+    include adaptation (see `already_vendored_intree_path`, surfaced in the tag since S74). lib
+    selects the band's extra `-I` dirs (LIB_EXTRA)."""
+    return already_vendored_intree_path(inc, lib) is not None
 
 
 def _tagged_missing_includes(cpath, lib):
@@ -1428,8 +1449,12 @@ def _tagged_missing_includes(cpath, lib):
     def _tag(inc):
         if include_is_blocked(inc):
             return inc
-        if include_is_already_vendored(inc, lib):
-            return f"{inc}(already-vendored)"
+        adapt = already_vendored_intree_path(inc, lib)
+        if adapt is not None:
+            # Non-blocking, no cp — but the verbatim include line must be adapted to the in-tree
+            # location (S74: `PRinternal/controller.h` → `internal/controller.h`). Surface the
+            # target so the gate prices the edit instead of hitting it at first build.
+            return f"{inc}(already-vendored,adapt->{adapt})"
         return f"{inc}(vendorable)"
 
     return [_tag(inc) for inc in missing], any(include_is_blocked(inc) for inc in missing)
@@ -1634,16 +1659,16 @@ def classify_subseg(off, typ, path, size, upstream_index):
     return None
 
 
-def append_upstream_hazards(off, primary, up_lib, up_path, hazards):
-    """Append the upstream-mirror hazards for a named candidate (in-place, in the
-    order the gate reads them) and return (band, blocked)."""
-    blocked = False
-    if has_file_scope_static(up_path):
-        hazards.append(Hazard(HAZARD_FILE_STATIC))  # route to the classical loop, not the mirror
-    data_defs = defines_data_globals(up_path) + defines_local_static_data(up_path)  # S73: + fn-local statics
-    if data_defs:
-        hazards.append(Hazard(HAZARD_DEFINES_DATA, ",".join(data_defs)))  # .data analogue → classical loop
-    unplaced = refs_unplaced(up_path, placed_symbols(), up_lib)
+def _append_recover_hazards(off, primary, up_path, up_lib, hazards):
+    """Append refs-unplaced + calls-unplaced (the symbol-recovery battery, with inline-vram
+    annotation when the binding is unambiguous) for an upstream .c, in-place. Shared by the
+    named-upstream battery (append_upstream_hazards) and the S74 coddog trap re-scan, so a
+    coddog-resolved mirror prices its recover-extern load identically to a named one — mirroring how
+    `_tagged_missing_includes` is shared so both price headers identically. An un-named (`func_`)
+    subseg blocks the named-keyed scan, so without this the recover-extern load is invisible at the
+    gate and only surfaces at first build (S74 contreaddata: 3 SI callees + 3 data globals)."""
+    placed = placed_symbols()
+    unplaced = refs_unplaced(up_path, placed, up_lib)
     if unplaced:
         # Annotate the recovered vram inline when the binding is unambiguous (one unplaced
         # name ∩ one asm candidate) so the gate copy-pastes the symbol_addrs entry instead
@@ -1659,7 +1684,7 @@ def append_upstream_hazards(off, primary, up_lib, up_path, hazards):
             f"{r}@0x{BOOT_GLOBALS[r]:08X}" if r in BOOT_GLOBALS else r for r in refs
         ]
         hazards.append(Hazard(HAZARD_REFS_UNPLACED, ",".join(refs)))  # asm-data-recovery before flip
-    unplaced_calls = calls_unplaced(up_path, primary, placed_symbols(), up_lib)
+    unplaced_calls = calls_unplaced(up_path, primary, placed, up_lib)
     if unplaced_calls:
         # Annotate the recovered vram inline when unambiguous (one unplaced call ∩ one
         # unnamed jal), mirroring refs-unplaced, so the gate copy-pastes the func entry.
@@ -1669,6 +1694,18 @@ def append_upstream_hazards(off, primary, up_lib, up_path, hazards):
         else:
             crefs = unplaced_calls
         hazards.append(Hazard(HAZARD_CALLS_UNPLACED, ",".join(crefs)))  # recover func symbol before flip
+
+
+def append_upstream_hazards(off, primary, up_lib, up_path, hazards):
+    """Append the upstream-mirror hazards for a named candidate (in-place, in the
+    order the gate reads them) and return (band, blocked)."""
+    blocked = False
+    if has_file_scope_static(up_path):
+        hazards.append(Hazard(HAZARD_FILE_STATIC))  # route to the classical loop, not the mirror
+    data_defs = defines_data_globals(up_path) + defines_local_static_data(up_path)  # S73: + fn-local statics
+    if data_defs:
+        hazards.append(Hazard(HAZARD_DEFINES_DATA, ",".join(data_defs)))  # .data analogue → classical loop
+    _append_recover_hazards(off, primary, up_path, up_lib, hazards)
     mirror_dir = band_mirror_dir(up_lib, up_path)  # also reused below for band warmth
     tagged, hdr_blocked = _tagged_missing_includes(up_path, up_lib)
     if tagged:
@@ -1818,6 +1855,12 @@ def build_rows(args, upstream_index, carried, sig_index, coddog_index=None):
                 if ctagged:
                     hazards.append(Hazard(HAZARD_NEEDS_HEADER, ",".join(ctagged)))
                     blocked = blocked or cblk
+                # S74: also union refs/calls-unplaced over the coddog-resolved upstream. The un-named
+                # `func_` blocked the named-keyed scan in append_upstream_hazards, so a coddog mirror's
+                # recover-extern load was invisible at the gate (S74 contreaddata: 3 SI callees + 3
+                # data globals, all found by manual recon, not the ranker). Same battery as the named
+                # path so the seed (recover → snap up a rung) and the gate prices are honest.
+                _append_recover_hazards(off, primary, cl_path, clib, hazards)
 
         if args.lib and args.lib not in (path or "") and (up_lib or "") != args.lib \
                 and not any(args.lib in n for n in fns):
