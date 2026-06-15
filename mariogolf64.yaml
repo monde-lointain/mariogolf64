@@ -199,6 +199,7 @@ segments:
       - [0x824E0, hasm]
       - [0x82560, hasm]
       - [0x82590, asm]
+      - [0x82630, c, libultra/io/contreaddata]
       - [0x82810, asm]
       - [0x82B20, c, libultra/os/virtualtophysical]
       - [0x82B80, c, libultra/gu/align]
