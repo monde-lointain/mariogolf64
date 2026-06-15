@@ -67,7 +67,7 @@
   {
     "band": "cold",
     "func": "gfxThread",
-    "hazards": "single-file-pack:2fn[gfxThread=nugfxthread,nuGfxThreadStart=nugfxthread],file-static,refs-unplaced:nuGfxMesgQ,nuGfxPreNMIFunc,nuGfxThread,calls-unplaced:aligned",
+    "hazards": "single-file-pack:2fn[gfxThread=nugfxthread,nuGfxThreadStart=nugfxthread],file-static,refs-unplaced:nuGfxMesgQ,nuGfxPreNMIFunc,nuGfxThread",
     "kind": "asm-flip",
     "nfns": 2,
     "pts": 5,
@@ -340,7 +340,7 @@
   {
     "band": "cold",
     "func": "nuContMgrInit",
-    "hazards": "pack:9fn[nuContMgrInit=nucontmgr,func_800A2C64=?,nuContDataClose=nucontmgr,nuContDataOpen=nucontmgr,contReadData=nucontmgr,func_800A2D5C=?,func_800A2DAC=?,func_800A2E38=?,func_800A2E58=?],file-static,defines-data:nuContCallBack,refs-unplaced:nuContCallBack,nuContNum,nuContReadFunc,nuContStatus,nuContWaitMesgQ,calls-unplaced:aligned",
+    "hazards": "pack:9fn[nuContMgrInit=nucontmgr,func_800A2C64=?,nuContDataClose=nucontmgr,nuContDataOpen=nucontmgr,contReadData=nucontmgr,func_800A2D5C=?,func_800A2DAC=?,func_800A2E38=?,func_800A2E58=?],file-static,defines-data:nuContCallBack,refs-unplaced:nuContCallBack,nuContNum,nuContReadFunc,nuContStatus,nuContWaitMesgQ",
     "kind": "asm-flip",
     "nfns": 9,
     "pts": 8,
@@ -431,7 +431,7 @@
   {
     "band": "cold",
     "func": "nuGfxTaskMgr",
-    "hazards": "single-file-pack:3fn[nuGfxTaskMgr=nugfxtaskmgr,nuGfxTaskMgrInit=nugfxtaskmgr,nuGfxTaskStart=?],file-static,defines-data:beforeFlag,refs-unplaced:nuDramStack,nuGfxCfb,nuGfxCfbCounter,nuGfxCfbNum,nuGfxCfb_ptr,nuGfxTaskEndFunc,nuGfxUcodeFifoPtr,nuGfxUcodeFifoSize,nuRDPOutputBuf,nuYieldBuf,nusched,rspbootTextEnd,calls-unplaced:aligned,jal-count-mismatch:7vs11",
+    "hazards": "single-file-pack:3fn[nuGfxTaskMgr=nugfxtaskmgr,nuGfxTaskMgrInit=nugfxtaskmgr,nuGfxTaskStart=?],file-static,defines-data:beforeFlag,refs-unplaced:nuDramStack,nuGfxCfb,nuGfxCfbCounter,nuGfxCfbNum,nuGfxCfb_ptr,nuGfxTaskEndFunc,nuGfxUcodeFifoPtr,nuGfxUcodeFifoSize,nuRDPOutputBuf,nuYieldBuf,nusched,rspbootTextEnd,jal-count-mismatch:7vs11",
     "kind": "asm-flip",
     "nfns": 3,
     "pts": 5,
@@ -496,7 +496,7 @@
   {
     "band": "cold",
     "func": "nuContRmbMgrInit",
-    "hazards": "pack:9fn[nuContRmbMgrInit=nucontrmbmgr,nuContRmbMgrRemove=nucontrmbmgr,contRmbControl=nucontrmbmgr,contRmbRetrace=nucontrmbmgr,contRmbCheckMesg=nucontrmbmgr,func_800A1DA0=?,func_800A1DE8=?,func_800A1E18=?,func_800A1EA4=?],defines-data:nuContRmbCallBack,refs-unplaced:nuContRmbCallBack,nuContRmbSearchTime,nuScRetraceCounter,calls-unplaced:__osMotorAccess,aligned",
+    "hazards": "pack:9fn[nuContRmbMgrInit=nucontrmbmgr,nuContRmbMgrRemove=nucontrmbmgr,contRmbControl=nucontrmbmgr,contRmbRetrace=nucontrmbmgr,contRmbCheckMesg=nucontrmbmgr,func_800A1DA0=?,func_800A1DE8=?,func_800A1E18=?,func_800A1EA4=?],defines-data:nuContRmbCallBack,refs-unplaced:nuContRmbCallBack,nuContRmbSearchTime,nuScRetraceCounter,calls-unplaced:__osMotorAccess",
     "kind": "asm-flip",
     "nfns": 9,
     "pts": 8,

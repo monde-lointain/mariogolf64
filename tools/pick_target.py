@@ -239,6 +239,10 @@ HAZARD_CODDOG_TWIN = "coddog-twin"  # S81: coddog matched a near-identical TWIN 
 # the named members name the real source (siacs); mirror from the member-named source, not the file
 HAZARD_CALLER_EVICT = "caller-evict"  # S77: an un-named func_ member a banked C file calls by name
 HAZARD_TRAILING_PAD = "trailing-pad"  # S79: trailing nop pad to a higher-aligned next subseg a C mirror can't emit
+HAZARD_DROP_STATIC_MIRROR = "drop-static-mirror"  # S87: a coddog-confirmed verbatim mirror whose
+# file-static + defines-data + refs-unplaced cluster is ONE S81 drop-to-extern enabler (pure .bss,
+# no carve) — re-frames the scary cluster so the gate prices it as a seed-only N-symbol mirror, not
+# a carve/classical spike; see docs/hazards.md#file-static-bss-layout-conflict
 HAZARD_HEADER_RENAMES_SYMBOL = "header-renames-symbol"  # S85: a (transitively-)vendored header
 # rewrites the candidate's curated symbol via a macro `#define <curated_fn>(...) <other>` (os_host.h
 # K->J shim `#define __osInitialize_common() osInitialize()`; S31 nuGfxInit was the 1st instance) →
@@ -477,6 +481,13 @@ _C_NONCALL = {
     # as C calls over-inflates the jal-count C side (the S42 osSendMesg `MQ_IS_FULL` 7vs6 FP) and
     # pollutes the maybe-upstream callee signature. They carry no cross-build identity.
     "MQ_IS_FULL", "MQ_IS_EMPTY",
+    # GCC attribute artifacts surfaced by macro_hidden_text: the macros.h `ALIGNED(x)` /
+    # `STACK(...)` family expand to `__attribute__((aligned(x)))`, so the lowercase `aligned`
+    # attribute keyword (and `__attribute__` itself) read as `name(` call tokens and mis-flag as
+    # an unplaced callee (S87 vimgr: `static STACK(...) ALIGNED(0x10)` → phantom `calls-unplaced:aligned`).
+    # The macro NAMES (ALIGNED/STACK/ARRLEN/ALIGN8) are already dropped via macro_names; these are
+    # their expansion residue, which macro_names does not cover.
+    "aligned", "__attribute__",
 }
 
 
@@ -2142,6 +2153,66 @@ def append_upstream_hazards(off, primary, up_lib, up_path, hazards):
     return band, blocked
 
 
+def _file_scope_static_count(cpath):
+    """Number of file-scope static *variable* declarations (the uninitialized .bss family
+    FILE_STATIC_RE matches; static function protos excluded). One matching line == one .bss symbol,
+    counted without fragile declarator extraction (a `STACK(name, size)` macro hides the name). Used
+    for the drop-static-mirror count; the func-local uninitialized static (S87 vimgr's `retrace`) is a
+    known under-count — it has no file-scope line and is recovered at the gate alongside the rest."""
+    n = 0
+    try:
+        with open(cpath, errors="ignore") as f:
+            for line in f:
+                s = line.lstrip()
+                if s.startswith(("//", "*")):
+                    continue
+                if FILE_STATIC_RE.match(line) and not _is_static_func_proto(line):
+                    n += 1
+    except OSError:
+        return 0
+    return n
+
+
+def drop_static_mirror_hazard(mirror_path, hazards):
+    """S87: re-frame a coddog-confirmed verbatim mirror's .bss-family hazard cluster as ONE
+    drop-to-extern enabler, or None. When a >=CODDOG_MIRROR_PCT non-audio `coddog-mirror` identity is
+    on the row AND a `file-static` is present AND NO carve signal is (no rodata-literal / data-static /
+    rodata-jtbl), the file-static + defines-data + refs-unplaced flags are NOT a carve/classical spike:
+    every uninitialized file-scope static/global is dropped to a sized `extern` placed at its main_bss
+    vram (pure .bss = no ROM bytes = no carve, the S81 siacs pattern). Returns a `drop-static-mirror:
+    <n>bss` Hazard so the gate prices a seed-only N-symbol mirror instead of the scary 4-flag cluster.
+    The co-listed file-static/defines-data/refs-unplaced stay (seed_points + the gate's per-symbol
+    recovery read them); this tag is the leading verdict that they are one enabler. (S87 vimgr.c: the
+    carry-over's '.bss carve' framing was the false-flag this retires — banked seed-only, first build.)
+
+    Advisory + graceful: a candidate with a NONZERO-initialized global (real .data, not modelled as a
+    distinct flag) that slips the condition degrades to the documented carve playbook when the gate
+    SHA misses — never a silent wrong bank."""
+    kinds = {h.kind for h in hazards}
+    if HAZARD_FILE_STATIC not in kinds:
+        return None
+    if kinds & {HAZARD_RODATA_LITERAL, HAZARD_DATA_STATIC, HAZARD_RODATA_JTBL}:
+        return None  # a carve signal disqualifies the pure-.bss drop
+    definitive = any(
+        h.kind == HAZARD_CODDOG_MIRROR and not h.detail.split("@", 1)[0].startswith("src/audio")
+        and _coddog_pct(h.detail) >= CODDOG_MIRROR_PCT
+        for h in hazards
+    )
+    if not definitive:
+        return None
+    n = (_file_scope_static_count(mirror_path) + len(defines_data_globals(mirror_path))
+         if mirror_path and os.path.isfile(mirror_path) else 0)
+    return Hazard(HAZARD_DROP_STATIC_MIRROR, f"{n}bss" if n else "bss")
+
+
+def _coddog_pct(detail):
+    """Parse the `<file>@<pct>` coddog hazard detail's percentage, or 0.0 if malformed."""
+    try:
+        return float(detail.split("@", 1)[1])
+    except (IndexError, ValueError):
+        return 0.0
+
+
 def score_row(off, primary, kind, fns, size, up_lib, band, blocked, hazards, carried):
     """Assemble the ranked row dict (score folds size + upstream/warm/carry bonuses)."""
     score = -size + (UPSTREAM_BONUS if up_lib else 0)
@@ -2186,6 +2257,7 @@ def build_rows(args, upstream_index, carried, sig_index, coddog_index=None):
         up_lib, up_path = upstream_index.get(primary, (None, None))
         band = "-"
         blocked = False
+        mirror_path = up_path  # the .c the drop-static-mirror count reads; coddog identity overrides below
         if up_path:
             band, blocked = append_upstream_hazards(off, primary, up_lib, up_path, hazards)
         elif kind == "asm-flip":
@@ -2239,6 +2311,7 @@ def build_rows(args, upstream_index, carried, sig_index, coddog_index=None):
             # globals). Shared with the S78 tail-identity block via _append_coddog_trap_hazards.
             cl_path = _coddog_upstream_path(cfile)
             if cl_path:
+                mirror_path = cl_path  # the confirmed coddog identity is the file we mirror + count
                 blocked = _append_coddog_trap_hazards(off, primary, cl_path, up_lib, hazards) or blocked
 
         # S78: a multi-fn asm subseg's mirror IDENTITY often lives in its UN-NAMED tail, not its
@@ -2267,6 +2340,7 @@ def build_rows(args, upstream_index, carried, sig_index, coddog_index=None):
                 # went un-priced. `already` excludes the primary's cfile, so no double-scan.
                 cl_path = _coddog_upstream_path(cfile)
                 if cl_path:
+                    mirror_path = cl_path or mirror_path  # the coddog identity is the real mirror source
                     blocked = _append_coddog_trap_hazards(off, primary, cl_path, up_lib, hazards) or blocked
             if up_lib is None:
                 up_lib = "libultra"
@@ -2280,6 +2354,13 @@ def build_rows(args, upstream_index, carried, sig_index, coddog_index=None):
         # was prose-mentioned. A real coddog identity overrides the name-drop (S78).
         if primary in carried and not args.include_stuck and not cod_members:
             continue
+
+        # S87: re-frame a coddog-confirmed pure-.bss file-static cluster as one drop-to-extern enabler
+        # (not a carve/classical spike) — appended last so it reads as the leading verdict over the
+        # file-static/defines-data/refs-unplaced flags it summarizes.
+        dsm = drop_static_mirror_hazard(mirror_path, hazards)
+        if dsm:
+            hazards.append(dsm)
 
         rows.append(score_row(off, primary, kind, fns, size, up_lib, band, blocked, hazards, carried))
     rows.sort(key=lambda r: (-r["score"], r["size"]))

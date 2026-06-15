@@ -620,6 +620,34 @@ sub-sprints).
   via `sync_decomp_names.py --import-from-decomp` (the 2 fn names were already in `ghidra_symbols.txt`).
   **The `[0x7E360]` pack now has only `pimgr` (osCreatePiManager) left → carry-over below.**
 
+- **Sprint 87: 1 .c file BANKED — `src/libultra/io/vimgr.c` (`osCreateViManager` + `viMgrMain`),
+  libultra io drop-STATIC mirror; the vimgr.c carry-over, banked once S86 cleared its timer-wall.**
+  md5-candidate 131→**132** (all 132 .c stub-free); flippable asm subsegs 138→137. Verbatim ultralib
+  VERSION_J `src/io/vimgr.c`, single 0x340 subseg = exactly the 2 fns (single-file-pack, no split;
+  flip `[0x88210, asm]`→`[0x88210, c, libultra/io/vimgr]`). **The carry-over's "heavy file-static
+  `.bss` carve" framing was the false-flag this sprint retires:** the 6 file-statics + 2 globals + 1
+  func-local static are all UNINITIALIZED → pure `.bss` (no ROM bytes) → DROP to sized `extern`s
+  placed at recovered `main_bss` vrams (`retrace`=0x800FAA10, `viThread`=0x800FAA18,
+  `viThreadStack`=0x800FABD0 [STACK_START +0x1000 = `viEventQueue`], `viEventQueue`=0x800FBBD0,
+  `viEventBuf`=0x800FBBE8, `viRetraceMsg`=0x800FBC00, `viCounterMsg`=0x800FBC18,
+  `__osViDevMgr`=0x800C8250), **NO carve, NO classical loop** (the S81 `siacs.c` drop-to-extern
+  pattern; `__additional_scanline`=0x800C826C pre-placed S48). `osCreateViManager` pre-curated;
+  `viMgrMain` (static fn) name added at gate. All callees placed (timer-side by S86). Include adapt
+  `PRinternal/{viint,osint}.h`→bare (sibling visetevent/visetmode). Full-make ROM SHA-1 == baserom,
+  0 iteration. 0 stuck-far/permuter/carried/re-opened. seed 5 / banked 5pt; regime mirror (8-gate
+  clear at 5<8; seed-only). Applied 3 of 3: #1 `docs/hazards.md#file-static-bss-layout-conflict`
+  uninitialized-static = pure-`.bss` drop-to-extern-mirror split + new `drop-static-mirror:<n>bss`
+  re-frame tag in `pick_target.py` (`drop_static_mirror_hazard`; +1 unit test, golden-neutral) +
+  CLAUDE.md index row; #2 `pick_target.py _C_NONCALL += aligned,__attribute__` (the `ALIGNED`/`STACK`
+  macro-expansion attribute residue mis-flagged `calls-unplaced:aligned`; golden regen = 4
+  `aligned`-only removals); #3 folded into #1. `make test-tools` 48→49 pass. **Cross-repo
+  follow-up:** 9 new decomp-side symbols (`viMgrMain` + the 8 `.bss` data symbols) → propagate via
+  `sync_decomp_names.py --import-from-decomp` (`osCreateViManager` already in `ghidra_symbols.txt`).
+  **Band note: the `drop-static-mirror` tag now re-prices `osMotorStop`/`motor.c` (drop-static-mirror:2bss)
+  — the io file-static traps that looked like carve spikes are mostly drop-to-extern mirrors;
+  remaining heavy ones are pimgr [0x7E400] (mixed `.data`/`.bss`, needs verify) + the sched/contpfs
+  packs (carve signals / 8-gate).**
+
 - **Sprint 86: 1 .c file BANKED — `src/libultra/os/timerintr.c` (`__osTimerServicesInit` +
   `__osTimerInterrupt` + `__osSetTimerIntr` + `__osInsertTimer`), libultra os/ drop-def mirror; the
   OS timer-service core (`vimgr.c`/`settimer.c` dependency root).** md5-candidate 130→**131** (all 131
@@ -934,23 +962,14 @@ by `/sprint-plan`:
   (osCreateMesgQueue, osSetEventMesg, osGetThreadPri/osSetThreadPri, __osDisableInt/__osRestoreInt,
   __osDevMgrMain, osCreateThread/osStartThread, __osPiCreateAccessQueue). Pursue when the data-sibling
   enabler is the sprint goal. Header `PRinternal/piint.h` already vendored (S84 epirawdma).
-- **io file-static .bss-carve trap — `vimgr.c` (`osCreateViManager` + `func_800ACFB0`/viMgrMain,
-  [0x88210, asm], pts-5).** Spike. coddog 99.99 vs ultralib VERSION_J `src/io/vimgr.c` (a 2-fn
-  single-file-pack: `osCreateViManager` + the `static viMgrMain` thread). **Blocker = a heavy
-  file-static `.bss` carve** — the file defines 6 file-statics that a verbatim mirror re-emits into
-  `.bss`: `viThread` (OSThread), `viThreadStack` (STACK, `OS_VIM_STACKSIZE`), `viEventQueue`
-  (OSMesgQueue), `viEventBuf[5]` (OSMesg[5]), `viRetraceMsg` + `viCounterMsg` (OSIoMesg), plus a
-  `static u16 retrace` inside viMgrMain. Unlike a drop-def, statics have NO external linkage → they
-  must be DEFINED (the compiler emits their `.bss`), so this needs the `.bss` layout to match the ROM
-  (a carve, or confirm they sit in a placed `main_bss` range). defines-data globals `__osViDevMgr`
-  (OSDevMgr, .bss) + `__additional_scanline`=0x800C826C (**placed S48**) drop-def normally. **Timer
-  dependency wall now GONE (S86):** viMgrMain calls `__osTimerInterrupt` + references
-  `__osCurrentTime`/`__osBaseCounter`/`__osViIntrCount` — all placed by S86's timerintr bank. Other
-  callees placed (osCreateMesgQueue/osSetEventMesg/osGetThreadPri/osSetThreadPri/__osDisableInt/
-  __osRestoreInt/osCreateThread/__osViInit/osStartThread/osRecvMesg/osSendMesg/osGetCount/
-  __osViGetCurrentContext/__osViSwapContext). `calls-unplaced:aligned` = the STACK macro (FP). Header
-  `PRinternal/{viint,osint}.h` already vendored. Pursue when the file-static `.bss`-carve enabler is
-  the sprint goal (the S33 piacs `static piAccessBuf[]` BSS-layout-conflict playbook is the model).
+- _(io `vimgr.c` (`osCreateViManager` + `viMgrMain`) carry-over **RESOLVED + banked S87** — the
+  "heavy file-static `.bss` carve" framing was over-cautious. The 6 file-statics + 2 globals + 1
+  func-local static are all UNINITIALIZED → pure `.bss` (no ROM bytes), so they DROP to sized
+  `extern`s placed at recovered `main_bss` vrams (the S81 `siacs.c` drop-to-extern pattern), **NO
+  carve, NO classical loop**. Banked first-build seed-only once S86 placed the timer-side deps.
+  Codified: `docs/hazards.md#file-static-bss-layout-conflict` now splits uninitialized (pure-`.bss`
+  drop-to-extern mirror) from initialized-nonzero (real `.data` carve), and `pick_target.py` emits a
+  `drop-static-mirror:<n>bss` re-frame tag (coddog@≥99 + file-static + no carve signal).)_
 - _(os/ `initialize.c` (`__osInitialize_common` + `create_speed_param`) carry-over **RESOLVED + banked
   S85** — turned out a drop-def mirror (NOT the framed cross-region `.data` carve; main_data provides
   the bytes) + one VERSION_K-gate un-gate (`__osSetWatchLo`, `docs/hazards.md#needs-define`) + a

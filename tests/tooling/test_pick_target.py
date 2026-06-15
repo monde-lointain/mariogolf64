@@ -418,3 +418,43 @@ def test_coddog_tail_trap_rescan(monkeypatch):
     assert "coddog-mirror:src/io/piacs.c@99.99" in hit["hazards"]
     assert "file-static" in hit["hazards"], hit["hazards"]
     assert "defines-data:__osPiAccessQueueEnabled" in hit["hazards"], hit["hazards"]
+
+
+def test_drop_static_mirror_hazard(tmp_path):
+    """S87 retro #3: a coddog-confirmed verbatim mirror whose data-shaping hazards are the pure-.bss
+    family (file-static + defines-data + refs-unplaced, NO carve signal) is re-framed as ONE
+    drop-to-extern enabler — not a carve/classical spike (the false-flag the vimgr carry-over carried).
+    Gated by: a >=PCT non-audio coddog identity AND a file-static AND no rodata-literal/data-static/
+    rodata-jtbl. Count = file-scope static lines + defines-data globals (a func-local static is a known
+    under-count, recovered at the gate)."""
+    pt = load_tool("pick_target")
+    H = pt.Hazard
+    cod = H(pt.HAZARD_CODDOG_MIRROR, "src/io/vimgr.c@99.99")
+    fs = H(pt.HAZARD_FILE_STATIC)
+    dd = H(pt.HAZARD_DEFINES_DATA, "__osViDevMgr")
+
+    # the pure-.bss cluster → tagged (no path → bare `bss`, no count)
+    got = pt.drop_static_mirror_hazard(None, [cod, fs, dd])
+    assert got is not None and got.kind == pt.HAZARD_DROP_STATIC_MIRROR and got.detail == "bss"
+
+    # a real upstream path → a count (2 file-scope statics + 1 global = 3bss)
+    up = tmp_path / "vimgr.c"
+    up.write_text(
+        "OSDevMgr __osViDevMgr = { 0 };\n"
+        "static OSThread viThread;\n"
+        "static OSMesgQueue viEventQueue;\n"
+        "void osCreateViManager(int p){ (void)viThread; }\n")
+    got = pt.drop_static_mirror_hazard(str(up), [cod, fs, dd])
+    assert got is not None and got.detail == "3bss", got
+
+    # a carve signal (rodata-jtbl / data-static / rodata-literal) disqualifies the pure-.bss drop
+    for carve in (pt.HAZARD_RODATA_JTBL, pt.HAZARD_DATA_STATIC, pt.HAZARD_RODATA_LITERAL):
+        assert pt.drop_static_mirror_hazard(None, [cod, fs, dd, H(carve, "0x800D0000")]) is None
+
+    # no file-static (a plain drop-def mirror) → not this tag
+    assert pt.drop_static_mirror_hazard(None, [cod, dd]) is None
+    # an audio or sub-threshold coddog hit is advisory, not a confirmed mirror → no tag
+    assert pt.drop_static_mirror_hazard(None, [H(pt.HAZARD_CODDOG_MIRROR, "src/audio/x.c@99.99"), fs]) is None
+    assert pt.drop_static_mirror_hazard(None, [H(pt.HAZARD_CODDOG_MIRROR, "src/io/x.c@88.00"), fs]) is None
+    # no coddog identity at all → no tag (the file-static still routes via the classical/carve playbook)
+    assert pt.drop_static_mirror_hazard(None, [fs, dd]) is None

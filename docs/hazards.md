@@ -371,7 +371,40 @@ the gate / link if a sub-fn of a decompose pack is later mirrored).
 **Procedure:** Fall to the classical loop with the `static` **dropped** in the C body. The linker
 then resolves to the splat-side global at the correct vram.
 
-**Provenance:** `rand` (file-scope-static pre-flight); `sprintf` (static-function false-flag, S54).
+**Uninitialized file-static is a drop-to-extern MIRROR, not a carve/classical spike (S87).** Be
+precise about what "BSS-layout-conflict" costs. An *uninitialized* file-scope static (`static T x;`,
+no `=`) is **pure `.bss`** — it occupies no ROM bytes (`.bss` is zero-filled at runtime, absent from
+the image), so it cannot shift the ROM. The only requirement is that the `.text` `%hi/%lo` relocs
+into it resolve to the right addresses, which a **drop-to-`extern`** delivers: drop each `static T x;`
+to a sized `extern T x;` (size `viThreadStack`-style arrays via the same macro so `sizeof`/`STACK_START`
+still compute), then place each at its `main_bss` vram (`x = 0x<vram>; // size:0x<n>`, recovered from
+the fn's `lui/%lo` like any recover-extern). The compiled object then emits **no `.bss`** and the body
+is byte-identical → it banks atomically on the full-make SHA, exactly like an S81 drop-def. This is the
+**S81 `siacs.c` pattern generalized** (drop-to-extern, no carve, no classical seed loop) — *not* the
+`rand` carve. The tell is **initialized-vs-uninitialized**: `FILE_STATIC_RE` only matches the
+uninitialized form (an `=`-bearing static is invisible to it), so a flagged `file-static` is already
+the pure-`.bss` kind. A **func-local** uninitialized `static` (S87 `vimgr` `retrace`) is the same:
+hoist it to a file-scope `extern` + place it (it would otherwise emit a local `.bss` symbol the linker
+places at the wrong address). Escalate to a `.data` **carve** (the `rand`/S61 playbook) ONLY when a
+static carries a **nonzero** initializer (real `.data` bytes that DO shift the image) — `={0}` is still
+`.bss`. (S87 `io/vimgr.c`: 6 file-statics + 2 globals + 1 func-local static, all dropped to externs,
+0 carve, first-build SHA match; the carry-over's "heavy `.bss` carve" framing was the false-flag this
+retires.)
+
+**The `drop-static-mirror:<n>bss` re-frame tag (S87).** When a `coddog-mirror:<file>@≥99` (non-audio)
+is on the row, a `file-static` is present, and there is **no** carve signal (`rodata-literal` /
+`data-static` / `rodata-jtbl`), `pick_target.py` appends `drop-static-mirror:<n>bss` — the leading
+verdict that the co-listed `file-static` + `defines-data` + `refs-unplaced` flags are **one
+drop-to-extern enabler** (the pure-`.bss` case above), not the scary 4-flag carve cluster they read as.
+`<n>` counts the detector-visible defined `.bss` symbols (file-scope static lines + `defines-data`
+globals); a func-local static is a known under-count, recovered at the gate with the rest. The cluster
+flags stay (the gate's per-symbol recovery + `seed_points` read them); the tag tells the gate to price
+a **seed-only N-symbol mirror**. A nonzero-initialized global that slips the gate degrades gracefully
+to the carve playbook on the SHA miss — never a silent wrong bank.
+
+**Provenance:** `rand` (file-scope-static pre-flight); `sprintf` (static-function false-flag, S54);
+`io/vimgr.c` (S87: uninitialized file-static = pure-`.bss` drop-to-extern mirror, the
+`drop-static-mirror` tag).
 
 ---
 
