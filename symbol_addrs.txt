@@ -109,3 +109,4 @@ __osPfsGetInitData = 0x800B1D70; // type:func
 __osPfsPifRam = 0x801B7EF0; // size:0x40
 __osPfsLastChannel = 0x800C9450; // size:0x4
 __osPfsInodeCacheBank = 0x800C9444; // size:0x1
+tmp_task = 0x800FA9C0; // size:0x40

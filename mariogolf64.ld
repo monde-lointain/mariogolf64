@@ -220,7 +220,7 @@ SECTIONS
         build/src/libultra/io/dpsetstat.o(.text);
         build/src/libultra/io/dpctr.o(.text);
         build/asm/86790.o(.text);
-        build/asm/867A0.o(.text);
+        build/src/libultra/io/sptask.o(.text);
         build/src/libultra/io/sptaskyield.o(.text);
         build/src/main/func_800AB600.o(.text);
         build/asm/86A50.o(.text);
@@ -469,7 +469,7 @@ SECTIONS
         build/src/libultra/io/dpsetstat.o(.data);
         build/src/libultra/io/dpctr.o(.data);
         build/asm/86790.o(.data);
-        build/asm/867A0.o(.data);
+        build/src/libultra/io/sptask.o(.data);
         build/src/libultra/io/sptaskyield.o(.data);
         build/src/main/func_800AB600.o(.data);
         build/asm/86A50.o(.data);
@@ -732,7 +732,7 @@ SECTIONS
         build/src/libultra/io/dpsetstat.o(.rodata);
         build/src/libultra/io/dpctr.o(.rodata);
         build/asm/86790.o(.rodata);
-        build/asm/867A0.o(.rodata);
+        build/src/libultra/io/sptask.o(.rodata);
         build/src/libultra/io/sptaskyield.o(.rodata);
         build/src/main/func_800AB600.o(.rodata);
         build/asm/86A50.o(.rodata);
@@ -990,7 +990,7 @@ SECTIONS
         build/src/libultra/io/dpsetstat.o(.bss);
         build/src/libultra/io/dpctr.o(.bss);
         build/asm/86790.o(.bss);
-        build/asm/867A0.o(.bss);
+        build/src/libultra/io/sptask.o(.bss);
         build/src/libultra/io/sptaskyield.o(.bss);
         build/src/main/func_800AB600.o(.bss);
         build/asm/86A50.o(.bss);

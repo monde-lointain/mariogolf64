@@ -231,7 +231,7 @@ segments:
       - [0x86730, c, libultra/io/dpsetstat]
       - [0x86740, c, libultra/io/dpctr]
       - [0x86790, hasm]
-      - [0x867A0, asm]
+      - [0x867A0, c, libultra/io/sptask]
       - [0x869E0, c, libultra/io/sptaskyield]
       - [0x86A00, c, main/func_800AB600]
       - [0x86A50, asm]

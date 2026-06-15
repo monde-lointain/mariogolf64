@@ -68,7 +68,12 @@ endif
 # (vendored verbatim from ultralib/include/compiler/gcc; e.g. stdlib.h with lldiv_t, which
 # libkmc's stdlib.h lacks). It is PREPENDED so it wins over include/libkmc/stdlib.h, and is
 # libultra-only — libkmc/libnusys/other sources keep resolving stdlib.h to the libkmc copy.
-LIBULTRA_CFLAGS := -I include/libultra/compiler/gcc $(subst -O2,-O3,$(CFLAGS)) -fsigned-char -DBUILD_VERSION=VERSION_J -I include/libultra/PR
+# -DF3DEX_GBI_2 (S83): a GBI microcode macro must be defined so PR/sptask.h selects
+# OS_YIELD_DATA_SIZE=0xc00 (vs the #else 0x900) — sptask.c's IO_READ(...+OS_YIELD_DATA_SIZE-4)
+# mismatched the baserom without it. ultralib's Makefile defaults GBIDEFINE := -DF3DEX_GBI, but
+# MG64 runs the F3DEX2 microcode, so -DF3DEX_GBI_2 is the accurate define (same 0xc00 guard).
+# Clean-rebuild-verified ROM-SHA-1-neutral for every other banked libultra file.
+LIBULTRA_CFLAGS := -I include/libultra/compiler/gcc $(subst -O2,-O3,$(CFLAGS)) -fsigned-char -DBUILD_VERSION=VERSION_J -DF3DEX_GBI_2 -I include/libultra/PR
 
 # libkmc upstream was built with `gcc -O` (not -O2) per ~/development/repos/libkmc/src/genn64.bat
 # (env var gccsw=-mips3 -mgp32 -mfp32 -G0; explicit -O per file compile). -mips3 is now the
