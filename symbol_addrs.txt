@@ -97,3 +97,4 @@ __osSpGetStatus = 0x800B16A0; // type:func
 osPfsIsPlug = 0x800B1B50; // type:func
 __osPfsRequestData = 0x800B1CCC; // type:func
 __osPfsGetInitData = 0x800B1D70; // type:func
+__osPfsPifRam = 0x801B7EF0; // size:0x40
