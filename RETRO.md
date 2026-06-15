@@ -25,6 +25,17 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 76 — bank io/devmgr.c (__osDevMgrMain), libultra io coddog verbatim mirror; first switch-jump-table rodata sibling — 2026-06-14
+- Increment: 1 file banked (`src/libultra/io/devmgr.c`, `__osDevMgrMain`) / 1 fn matched. md5-candidate 115→116; asm subsegs 148→147.
+- Quality: 0/0/0/0 this sprint (the jtbl carve was an in-execution surprise resolved without a spike/carry).
+- Seed: committed 3pt; banked 3pt; regime mirror (seed-only; 8-gate clear at 3<8).
+- What helped: the coddog map (`__osDevMgrMain`→`src/io/devmgr.c`@99.99) confirmed a clean verbatim mirror despite the scary-looking hazards — both `jal-count-mismatch:25vs21` + `calls-unplaced:dma,edma` were correctly read at the gate as the **indirect-call false-positive class** (4 `jalr` through `dm->dma`/`dm->edma` OSDevMgr struct fn-ptrs; 25−4=21), so the candidate was NOT mis-routed to classical. Name pre-curated + all 7 callees + all LEO/OSDevMgr macros pre-placed → zero symbol adds, one include adapt.
+- Friction: the verbatim `cp` link-FAILED at first make — `switch (mb->hdr.type)` compiles to a jump table `jtbl_800D2280` (ROM 0xAD680) in the autogen asm rodata whose `.word .L800A39xx` entries are the fn's own internal labels; flipping text→C deleted them → undefined-ref link break. NOT pre-flagged (the `rodata-literal` flag catches only FP pools), and **the gate's text-only green-ROM check cannot catch it by construction** (the jtbl stays valid asm until the body lands). Fixed in-execution with a `.rodata` sibling carve `[0xAD680, .rodata, libultra/io/devmgr]`; the C jtbl reproduced the 8-word block (7 case + 1 zero pad) byte-for-byte → SHA match.
+- Applied (3 of 3): #1 `pick_target.py` `rodata-jtbl:0x<vram>` pre-flag — `decomp_asm.rodata_jtbls` scans `%lo(jtbl_…)` whole-subseg (plain + overlay), wired in the SHARED recover-battery (`_append_recover_hazards`) so it prices BOTH named-upstream and coddog candidates (display-only, no point bump, like `rodata-literal`); +3 unit tests, golden regen, suite 39 pass. #2 `docs/hazards.md#rodata-sibling-yaml-pattern` switch-jump-table sub-case (automatic byte-match for a verbatim mirror, trailing zero-pad from linker subseg-boundary fill, gate-can't-catch rationale) + S76 provenance. #3 `CLAUDE.md` hazard-index row for `rodata-jtbl:<addr>`.
+- Carry-over: none new. (Standing: io defines-data/file-static traps piacs/motor; os/settime pts-13 multi-file pack; asm-mirror partial-TU spike `__osDisableInt`/`__osRestoreInt`. Next-cleanest named coddog mirrors: `osSetTimer`→settimer.c, `__osSetTimerIntr`→timerintr.c.)
+
+---
+
 ## Sprint 75 — bank io/contquery.c (osContStartQuery + osContGetQuery), libultra io coddog-mirror; the near-free-retry of the S74 split head — 2026-06-14
 - Increment: src/libultra/io/contquery.c banked (2 fns) / md5-candidate files 114→115; asm subsegs 170→169.
 - Quality: 0/0/0/0 (stuck-far / permuter / carried / re-opened) — clean first-try, 0 iteration.

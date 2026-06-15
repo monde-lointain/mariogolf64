@@ -43,6 +43,7 @@ from decomp_asm import (
     privileged_asm,
     recover_unplaced_call_vram,
     recover_unplaced_vram,
+    rodata_jtbls,
     rodata_literals,
     rodata_word_refs,
     subseg_vram,
@@ -228,6 +229,7 @@ HAZARD_NON16ALIGN = "non16align"
 HAZARD_INTRINSIC_LIKELY = "intrinsic-likely"
 HAZARD_MAYBE_UPSTREAM = "maybe-upstream"
 HAZARD_RODATA_LITERAL = "rodata-literal"
+HAZARD_RODATA_JTBL = "rodata-jtbl"  # S76: a switch jump table the mirror re-emits → .rodata sibling carve
 HAZARD_DATA_STATIC = "data-static"
 HAZARD_TWIN_OF = "twin-of"
 HAZARD_REMAINING = "remaining"
@@ -1694,6 +1696,19 @@ def _append_recover_hazards(off, primary, up_path, up_lib, hazards):
         else:
             crefs = unplaced_calls
         hazards.append(Hazard(HAZARD_CALLS_UNPLACED, ",".join(crefs)))  # recover func symbol before flip
+    # Switch jump table (S76): a `switch` compiles to a `jtbl_<addr>` in the code-segment `.rodata`
+    # whose `.word` entries are the fn's own internal `.L<addr>` labels. Flipping the subseg text->C
+    # deletes those labels, so the still-asm rodata jtbl link-breaks (undefined-`.L<addr>` ref) unless
+    # a `.rodata` sibling carve places the C-re-emitted table. The gate's text-only green-ROM check
+    # cannot catch this by construction (the jtbl stays valid asm until the C body lands), so it must
+    # be priced at the gate — the jump-table analog of rodata-literal (a verbatim mirror re-emits a
+    # byte-identical table: same case-body absolute addresses; #rodata-sibling-yaml-pattern). Scanned
+    # here in the SHARED battery so it prices both the named-upstream and coddog paths (S76
+    # __osDevMgrMain is NAMED, so the S72/S73 coddog re-scan never reached it). Display-only like
+    # rodata-literal: the carve is a mechanical near-free enabler, so no seed_points bump.
+    jtbls = [a for a in rodata_jtbls(off) if _literal_in_rodata(a, off)]
+    if jtbls:
+        hazards.append(Hazard(HAZARD_RODATA_JTBL, ",".join(f"0x{a:08X}" for a in sorted(jtbls))))
 
 
 def append_upstream_hazards(off, primary, up_lib, up_path, hazards):

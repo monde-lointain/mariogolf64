@@ -468,19 +468,6 @@
     "vram": "0x800A2B90"
   },
   {
-    "band": "warm",
-    "func": "__osDevMgrMain",
-    "hazards": "calls-unplaced:dma,edma,jal-count-mismatch:25vs21",
-    "kind": "asm-flip",
-    "nfns": 1,
-    "pts": 3,
-    "rom": "0x7E9F0",
-    "score": -696,
-    "size": 960,
-    "upstream": "libultra",
-    "vram": "0x800A35F0"
-  },
-  {
     "band": "-",
     "func": "vector_magnitude_safe",
     "hazards": "pack:8fn[vector_magnitude_safe=?,calculate_hypotenuse_safe=?,func_8006A174=?,update_rng_seed=?,hypotf_2d=?,calc_vec3_magnitude=?,func_8006A1EC=?,func_8006A274=?]",
@@ -648,5 +635,18 @@
     "size": 1392,
     "upstream": "libnusys",
     "vram": "0x800A1960"
+  },
+  {
+    "band": "-",
+    "func": "func_ovl6_8024D800",
+    "hazards": "-",
+    "kind": "asm-flip",
+    "nfns": 1,
+    "pts": 8,
+    "rom": "0x136BA0",
+    "score": -1264,
+    "size": 1264,
+    "upstream": "none",
+    "vram": "0x8024D800"
   }
 ]

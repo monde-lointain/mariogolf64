@@ -69,6 +69,54 @@ def test_scans_absent_file_return_empty(asm, monkeypatch):
     assert list(asm.iter_subseg_body(0xDEADBE)) == []
 
 
+# A subseg whose PRIMARY pools an FP literal (D_) and whose SIBLINGS each do an
+# indexed `switch` via a jump table (jtbl_), one plain + one overlay-form. The jtbl
+# scan must pick the jtbl_ vrams whole-subseg and must NOT confuse them with the D_
+# literal (a distinct `%lo(jtbl_…)` vs `%lo(D_…)` form). S76 __osDevMgrMain.
+JTBL_ASM = """\
+glabel fnA
+/* 2000 800A3700 3C01800D */  lui   $at, %hi(D_800D2520)
+/* 2004 800A3704 D4222520 */  ldc1  $f2, %lo(D_800D2520)($at)
+/* 2008 800A3708 03E00008 */  jr    $ra
+endlabel fnA
+glabel fnB
+/* 200C 800A3854 3C01800D */  lui   $at, %hi(jtbl_800D2280)
+/* 2010 800A3858 8C222280 */  lw    $v0, %lo(jtbl_800D2280)($at)
+/* 2014 800A385C 00400008 */  jr    $v0
+endlabel fnB
+glabel fnC
+/* 2018 801F4F44 3C018023 */  lui   $at, %hi(jtbl_ovl3_80231428)
+/* 201C 801F4F48 8C221428 */  lw    $v0, %lo(jtbl_ovl3_80231428)($at)
+/* 2020 801F4F4C 00400008 */  jr    $v0
+endlabel fnC
+"""
+
+
+@pytest.fixture
+def jtbl_asm(tmp_path, monkeypatch):
+    """Load decomp_asm with asm_path pinned to a synthetic switch-jtbl listing."""
+    mod = load_tool("decomp_asm")
+    f = tmp_path / "BADA55.s"
+    f.write_text(JTBL_ASM)
+    monkeypatch.setattr(mod, "asm_path", lambda rom_off: str(f))
+    return mod
+
+
+def test_rodata_jtbls_whole_subseg_plain_and_overlay(jtbl_asm):
+    """A switch jump table (jtbl_) is picked whole-subseg, plain + overlay forms (S76)."""
+    assert jtbl_asm.rodata_jtbls(0xBADA55) == [0x800D2280, 0x80231428]
+
+
+def test_rodata_jtbls_excludes_fp_literal(jtbl_asm):
+    """The jtbl scan is distinct from the FP-literal (D_) scan — no D_ vram leaks in."""
+    assert 0x800D2520 not in jtbl_asm.rodata_jtbls(0xBADA55)
+
+
+def test_rodata_jtbls_absent_file(jtbl_asm, monkeypatch):
+    monkeypatch.setattr(jtbl_asm, "asm_path", lambda rom_off: "/no/such/asm.s")
+    assert jtbl_asm.rodata_jtbls(0xBADA55) == []
+
+
 # privileged_asm vs intrinsic_likely (S70 #1). Three shapes, each a distinct case:
 #   privTlb  — a tlbwi + branch/lw logic, NO jal (osMapTLB/osUnmapTLB shape): intrinsic_likely
 #              false (work isn't all-INTRINSIC_OPS, no `handwritten` tag), privileged_asm TRUE.

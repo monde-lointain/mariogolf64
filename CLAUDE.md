@@ -264,6 +264,7 @@ When `pick_target.py` flags a hazard (or a match shows its symptom), read the ma
 | (libultra leaf, bare std header)| #per-library-standard-c-header-isolation |
 | (match locks ~0.9, lib target)  | #compile-profiles-libkmc--o-libultra--o3 |
 | (compiler rodata, wrong offset) / `rodata-literal:<addr>` | #rodata-sibling-yaml-pattern |
+| `rodata-jtbl:<addr>` (a `switch` jump table the mirror re-emits; the gate's text-only flip can't catch the carve — the jtbl stays valid asm until the body lands — so it's priced at the gate) | #rodata-sibling-yaml-pattern |
 | (MMIO fn, flat score, empty top_mismatches) | #io_writeio_read-isolation-artifact |
 | (macro-hidden extern)           | #macro-hidden-recover-extern |
 | (warm band, no hazard)          | #open-band-fast-path |
