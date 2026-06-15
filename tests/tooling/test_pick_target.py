@@ -240,3 +240,82 @@ def test_carried_namedrop_still_drops_without_coddog(monkeypatch):
         carried={"namedLeader"},
         coddog={})  # no coddog identity -> the name-drop drop still applies
     assert not [r for r in rows if r["func"] == "namedLeader"]
+
+
+def test_resolve_include_vendored_basename_fallback(tmp_path, monkeypatch):
+    """S80 #1: a vendored-prefix include (`PRinternal/controller.h`) whose in-tree copy drops the
+    prefix (`.../internal/controller.h`) resolves via a BASENAME fallback, so the header walk scans
+    it and refs_unplaced no longer phantom-flags a struct TYPE it typedefs as an unplaced data extern
+    (the __OSContRequesFormatShort false-positive on pfsgetstatus.c)."""
+    pt = load_tool("pick_target")
+    inc = tmp_path / "inc"
+    (inc / "internal").mkdir(parents=True)
+    (inc / "internal" / "controller.h").write_text(
+        "typedef struct {\n    int rxsize;\n} __OSContRequesFormatShort;\n")
+    monkeypatch.setattr(pt, "INCLUDE_DIRS", [str(inc), str(inc / "internal")])
+    # exact prefixed path misses; basename `controller.h` resolves under internal/
+    assert pt._resolve_include("PRinternal/controller.h") == str(inc / "internal" / "controller.h")
+    # a bare basename absent everywhere still returns None (no false resolution)
+    assert pt._resolve_include("nope.h") is None
+    cfile = tmp_path / "src.c"
+    cfile.write_text('#include "PRinternal/controller.h"\n'
+                     "void f(void){ __OSContRequesFormatShort t; }\n")
+    assert "__OSContRequesFormatShort" in pt.declared_type_names(str(cfile))
+    # ...so refs_unplaced excludes it (a TYPE, not an unplaced data extern)
+    assert "__OSContRequesFormatShort" not in pt.refs_unplaced(str(cfile), set(), "libultra")
+
+
+def test_call_divergence_strips_inactive_version_branch(monkeypatch):
+    """S80 #2: call_divergence drops the inactive `#if BUILD_VERSION` side before counting C calls,
+    so an `#else` branch's call does not double-count against the active branch's (pfsgetstatus's
+    non-J `__osPfsRequestOneChannel(channel)` inflated 6→7, a phantom `7vs6` on a byte-clean mirror).
+    Without the lib's build_ord (None → 0) the strip is a no-op and the phantom returns."""
+    pt = load_tool("pick_target")
+    # _upstream_body returns the brace body (no signature line), so name only real call sites.
+    body = ("#if BUILD_VERSION >= VERSION_J\n"
+            "    foo(a, b);\n"
+            "#else\n"
+            "    foo(a);\n"        # dead under J — must NOT count
+            "#endif\n"
+            "    bar();\n")
+    monkeypatch.setattr(pt, "_upstream_body", lambda cp, pr: body)
+    monkeypatch.setattr(pt, "_asm_jal_count", lambda off, pr: 2)  # J build: foo + bar
+    monkeypatch.setattr(pt, "_build_version_ord",
+                        lambda lib: pt._VERSION_ORD["VERSION_J"] if lib else 0)
+    assert pt.call_divergence(0x1000, "ff", "x.c", "libultra") is None  # strip → 2vs2 → no hazard
+    d = pt.call_divergence(0x1000, "ff", "x.c", None)                   # no strip → foo doubles → 3vs2
+    assert d is not None and d.detail == "3vs2"
+
+
+def test_coddog_tail_trap_rescan(monkeypatch):
+    """S80 #3: a coddog identity carried by an UN-NAMED TAIL member (not the named leader) re-runs
+    the file-level trap battery on the resolved upstream, so its defines-data/file-static is priced.
+    initialize.c's coddog hit keys on the sibling `create_speed_param`, not leader
+    `__osInitialize_common`, so before this only the S78 bare coddog flag surfaced — its defines-data
+    `.data` carve went un-priced. Map the tail to the real trap file src/io/piacs.c and assert
+    defines-data + file-static appear via the tail path."""
+    pt = load_tool("pick_target")
+
+    class A:
+        lib = None
+        include_stuck = False
+        n = 999
+    monkeypatch.setattr(pt, "parse_subsegs", lambda: [(0x1000, "asm", None)])
+    monkeypatch.setattr(pt, "classify_subseg",
+                        lambda off, typ, path, size, _ui: ("asm-flip", ["namedLeader", "func_1100"], []))
+    monkeypatch.setattr(pt, "src_func_callers", lambda: {})
+    monkeypatch.setattr(pt, "append_upstream_hazards", lambda *a, **k: ("warm", False))
+    # asm-reading helpers: off=0x1000 is synthetic, return empty so only the upstream .c is read.
+    monkeypatch.setattr(pt, "recover_unplaced_vram", lambda off: [])
+    monkeypatch.setattr(pt, "recover_unplaced_call_vram", lambda off, primary: [])
+    monkeypatch.setattr(pt, "rodata_jtbls", lambda off: [])
+    monkeypatch.setattr(pt, "score_row",
+                        lambda off, primary, kind, fns, size, up_lib, band, blocked, hz, carr: {
+                            "func": primary, "upstream": up_lib, "score": 0, "size": size,
+                            "hazards": ",".join(h.kind + (":" + h.detail if h.detail else "") for h in hz)})
+    rows = pt.build_rows(A(), {"namedLeader": ("libultra", "/x/wrong.c")}, set(), {},
+                         {"func_1100": ("src/io/piacs.c", 99.99)})
+    hit = next(r for r in rows if r["func"] == "namedLeader")
+    assert "coddog-mirror:src/io/piacs.c@99.99" in hit["hazards"]
+    assert "file-static" in hit["hazards"], hit["hazards"]
+    assert "defines-data:__osPiAccessQueueEnabled" in hit["hazards"], hit["hazards"]

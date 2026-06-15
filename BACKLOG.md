@@ -480,6 +480,34 @@ sub-sprints).
   candidates now carry the `trailing-pad` flag (@32/@64/@128) — those mirrors are priced at the gate.
   The io clean-coddog leaves remain mined out (piacs/motor defines-data+file-static traps + os/settime
   pts-13 pack remain).**
+
+- **Sprint 80: 1 .c file BANKED — `src/libultra/io/pfsgetstatus.c` (`__osPfsGetStatus` +
+  `__osPfsRequestOneChannel` + `__osPfsGetOneChannelData`), libultra io coddog mirror; a clean
+  single-file 3-fn cp.** md5-candidate 124→**125** (all 125 .c stub-free); asm subsegs 144→143.
+  9th coddog cross-ref sprint. Verbatim ultralib VERSION_J `io/pfsgetstatus.c` (coddog @99.99),
+  byte-identical body (only `PRinternal/{controller,siint}.h`→bare include adapt), 0 edits, 0
+  iteration, first-make ROM SHA-1 == baserom. Flip `[0x89B10, asm]`→`[0x89B10, c,
+  libultra/io/pfsgetstatus]`, standalone subseg (no split). Gate enablers: recover
+  `__osPfsInodeCacheBank`=0x800C9444 size:0x1 (byte store `li 0xfa; lui 0x800d; sb -0x6bbc(at)`;
+  defined by still-asm contpfs.c, extern for us) + 2 sibling names `__osPfsRequestOneChannel`=
+  0x800AE800 / `__osPfsGetOneChannelData`=0x800AE894 (`__osPfsGetStatus` pre-placed). **Two flagged
+  hazards were pick_target false-positives**, debunked at the gate + FIXED this retro:
+  `refs-unplaced:__OSContRequesFormatShort` = a struct TYPE in the (unresolved) `PRinternal/controller.h`;
+  `jal-count-mismatch:7vs6` = the non-J `#else` branch's `__osPfsRequestOneChannel(channel)`
+  double-counted (NOT the CHNL_ERR macro — the execution-time hypothesis was refuted by reading the
+  code at the retro). seed 5 / banked 5pt; regime mirror (seed-only; 8-gate clear at 5<8). 0
+  stuck-far/permuter/carried/re-opened. Applied 3 of 3, all `pick_target.py` accuracy fixes (each
+  with a regression test): #1 `_resolve_include` basename fallback (vendored-prefix `PRinternal/X.h`→
+  `internal/X.h` now scanned → `declared_type_names` sees the typedef → `refs_unplaced` drops it);
+  #2 `call_divergence` strips inactive `#if BUILD_VERSION` branches (lib-threaded) so a dead-branch
+  call no longer double-counts; #3 factor `_append_coddog_trap_hazards`, called from the S78
+  tail-identity block too (so `initialize.c`'s defines-data is priced — its coddog hit keys on the
+  sibling `create_speed_param`, not the leader `__osInitialize_common`). Golden stable, suite 45
+  pass. **Cross-repo follow-up:** 3 new decomp-side symbols (`__osPfsRequestOneChannel` /
+  `__osPfsGetOneChannelData` / `__osPfsInodeCacheBank`) → propagate via
+  `sync_decomp_names.py --import-from-decomp`. **Band note: `initialize.c` (os/, pts now 5) is the
+  next-cleanest coddog leaf but is a cross-region `.data`-carve + name-reconcile job (see
+  Carry-overs); the io clean-coddog leaves remain mined out (piacs/motor traps, os/settime pts-13).**
   **Band note: next-cleanest libultra coddog mirrors — os/settime (single fn buried in the 6fn pack at
   0x526B0, needs decompose) and the io `[0x8CE90]` pack is now CLEARED; the defines-data/file-static
   traps remain (piacs/motor, contpfs [0x89D90, 7fn @100], sched, timerintr [0x87C40, 4fn]).**
@@ -712,6 +740,20 @@ by `/sprint-plan`:
   needs a `.data`/`.bss` sibling carve (`docs/hazards.md#defines-data`) or classical routing with the
   data dropped to `extern` — the dormant draft `src/libultra/io/piacs.c` (externs the data) is the
   pre-staged shape. NOT a clean-pair pick; pursue when the data-sibling enabler is the sprint goal.
+- **os/ coddog-mirror trap — `initialize.c` (`__osInitialize_common` + `create_speed_param`, pts-5,
+  2fn @0x8ACA0).** Spike (data-sibling enabler). Now correctly priced `defines-data` (the S80 #3 fix
+  surfaced it — its coddog hit keys on the sibling `create_speed_param`, not the leader). Under
+  `-D_FINALROM -DBUILD_VERSION=VERSION_J` it compiles exactly 2 fns and emits a 0x14-byte `.data`
+  block `osClockRate`(unplaced, @0x800C9460,8B) / `osViClock`(@0x800C9468) / `__osShutdown`(@0x800C946C)
+  / `__OSGlobalIntMask`(@0x800C9470) — 3 of 4 already placed in `symbol_addrs` — in a region SEPARATE
+  from the .text, so a clean verbatim mirror needs a cross-region `.data` sibling carve
+  (`docs/hazards.md#defines-data`) + recover `osClockRate`=0x800C9460. **Name reconciliation needed:**
+  the J source names the fns `osInitialize` / `static createSpeedParam`, but Ghidra curated the K-era
+  `__osInitialize_common` / `create_speed_param`; decide the canonical name at the gate (and who
+  calls 0x800AF8A0 by symbol). Its `!defined(_FINALROM)` KMC block is dead under the project flags but
+  is not stripped by `_strip_inactive_version_branches` (BUILD_VERSION only), so its refs/calls-unplaced
+  over-flag (advisory — the priced defines-data is the load-bearing signal; a future `_FINALROM`-strip
+  is the clean follow-up). Pursue when the `.data`-carve + name-reconcile is the sprint goal.
 - **Tooling follow-up (S72 #2) — optional `bare-assert` advisory flag.** `pick_target` could scan a
   mirror candidate's upstream `.c` for a non-`_DEBUG`-guarded `assert(` and flag it, so the
   `#assert-strip` `_DEBUG`-wrap is priced at the gate rather than rediscovered by the read==write

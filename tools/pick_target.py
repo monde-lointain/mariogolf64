@@ -913,7 +913,7 @@ def _c_jal_count(body):
     )
 
 
-def call_divergence(rom_off, primary, up_cpath):
+def call_divergence(rom_off, primary, up_cpath, lib=None):
     """Advisory `jal-count-mismatch:<C>vs<asm>` when the upstream call count for `primary` differs
     from the ROM fn's jal count — an upstream-vs-ROM build divergence. None when they agree, the
     body/asm is unreadable, or the count can't be taken. Advisory only; the gate confirms."""
@@ -923,6 +923,11 @@ def call_divergence(rom_off, primary, up_cpath):
     n_asm = _asm_jal_count(rom_off, primary)
     if n_asm is None:
         return None
+    # Drop the inactive `#if BUILD_VERSION` side FIRST (needs the directives intact): an `#else`
+    # branch's call double-counts against the active branch's → a phantom mismatch on a byte-clean
+    # mirror (S80 pfsgetstatus: the non-J `__osPfsRequestOneChannel(channel)` inflated 6→7, a false
+    # `7vs6`). refs_unplaced strips the same way (S47); without the lib's build_ord this is a no-op.
+    body = _strip_inactive_version_branches(body, _build_version_ord(lib))
     n_c = _c_jal_count(_strip_define_lines(_strip_string_literals(_strip_dead_blocks(body))))
     if n_c == n_asm:
         return None
@@ -1132,11 +1137,24 @@ def declared_type_names(cpath, _depth=0, _seen=None):
 
 
 def _resolve_include(inc):
-    """First INCLUDE_DIRS hit for an `#include` target, or None (an unindexed / system header)."""
+    """First INCLUDE_DIRS hit for an `#include` target, or None (an unindexed / system header).
+    Falls back to a BASENAME match when the full relative path misses: an upstream `.c` includes a
+    vendored header by its SDK prefix (`PRinternal/controller.h`) but the in-tree copy drops the
+    prefix (`include/libultra/internal/controller.h`) — the same already-vendored adaptation
+    `already_vendored_intree_path` resolves for needs-header. Without it the header is never scanned,
+    so declared_type_names / declared_extern_data miss every typedef/extern it declares and
+    refs_unplaced phantom-flags a struct TYPE as an unplaced data extern (S80: __OSContRequesFormatShort,
+    a typedef in PRinternal/controller.h, was mis-flagged refs-unplaced on pfsgetstatus.c)."""
     for d in INCLUDE_DIRS:
         path = os.path.join(d, inc)
         if os.path.exists(path):
             return path
+    base = os.path.basename(inc)
+    if base != inc:  # had a directory prefix that missed → try the vendored basename
+        for d in INCLUDE_DIRS:
+            path = os.path.join(d, base)
+            if os.path.exists(path):
+                return path
     return None
 
 
@@ -1784,6 +1802,29 @@ def _append_recover_hazards(off, primary, up_path, up_lib, hazards):
         hazards.append(Hazard(HAZARD_RODATA_JTBL, ",".join(f"0x{a:08X}" for a in sorted(jtbls))))
 
 
+def _append_coddog_trap_hazards(off, primary, cl_path, up_lib, hazards):
+    """The file-level trap re-scan for a coddog-resolved upstream `.c` (file-static, defines-data,
+    needs-header, recover-extern battery), in-place; returns whether a needs-header tag blocks the
+    DoR. Shared by BOTH coddog paths so a coddog identity carried by an UN-NAMED tail member (the
+    S78 cod_members scan) prices its traps identically to one keyed on the primary (the S72 block):
+    S80 found initialize.c's defines-data `.data` carve invisible because its coddog hit keys on the
+    sibling `create_speed_param`, not the named leader `__osInitialize_common`, so only the S78 block
+    fired and it surfaced the bare coddog flag WITHOUT the trap battery the S72 block runs."""
+    clib = up_lib or "libultra"
+    if has_file_scope_static(cl_path):
+        hazards.append(Hazard(HAZARD_FILE_STATIC))
+    cdefs = defines_data_globals(cl_path) + defines_local_static_data(cl_path)  # S73: + fn-local statics
+    if cdefs:
+        hazards.append(Hazard(HAZARD_DEFINES_DATA, ",".join(cdefs)))
+    blocked = False
+    ctagged, cblk = _tagged_missing_includes(cl_path, clib)
+    if ctagged:
+        hazards.append(Hazard(HAZARD_NEEDS_HEADER, ",".join(ctagged)))
+        blocked = cblk
+    _append_recover_hazards(off, primary, cl_path, clib, hazards)
+    return blocked
+
+
 def append_upstream_hazards(off, primary, up_lib, up_path, hazards):
     """Append the upstream-mirror hazards for a named candidate (in-place, in the
     order the gate reads them) and return (band, blocked)."""
@@ -1808,7 +1849,7 @@ def append_upstream_hazards(off, primary, up_lib, up_path, hazards):
     gating = function_gating_define(up_path, primary)
     if gating and gating not in _active_defines_for_lib(up_lib):
         hazards.append(Hazard(HAZARD_NEEDS_DEFINE, gating))
-    divergence = call_divergence(off, primary, up_path)
+    divergence = call_divergence(off, primary, up_path, up_lib)
     if divergence:
         hazards.append(divergence)  # near-verbatim mirror: reconcile call list at the gate
     # Anonymous `%lo(D_<addr>)` constant loads split into two enablers by segment (S52):
@@ -1951,24 +1992,14 @@ def build_rows(args, upstream_index, carried, sig_index, coddog_index=None):
             # seed_points re-prices it (drop/needs_copy) — instead of a mid-sprint BSS-layout stall.
             # Motivating case: `func_800AC110 → piacs.c` (pts-3 "clean") DEFINES __osPiAccessQueueEnabled
             # + `static OSMesg piAccessBuf[]` → defines-data + file-static, a route-to-classical trap.
+            # S72/S74: re-run the file-level trap battery (file-static, defines-data, needs-header)
+            # AND union refs/calls-unplaced over the coddog-resolved upstream — the un-named `func_`
+            # blocked the named-keyed scan in append_upstream_hazards, so a coddog mirror's traps +
+            # recover-extern load were invisible at the gate (S74 contreaddata: 3 SI callees + 3 data
+            # globals). Shared with the S78 tail-identity block via _append_coddog_trap_hazards.
             cl_path = _coddog_upstream_path(cfile)
             if cl_path:
-                clib = up_lib or "libultra"
-                if has_file_scope_static(cl_path):
-                    hazards.append(Hazard(HAZARD_FILE_STATIC))
-                cdefs = defines_data_globals(cl_path) + defines_local_static_data(cl_path)  # S73: + fn-local statics
-                if cdefs:
-                    hazards.append(Hazard(HAZARD_DEFINES_DATA, ",".join(cdefs)))
-                ctagged, cblk = _tagged_missing_includes(cl_path, clib)
-                if ctagged:
-                    hazards.append(Hazard(HAZARD_NEEDS_HEADER, ",".join(ctagged)))
-                    blocked = blocked or cblk
-                # S74: also union refs/calls-unplaced over the coddog-resolved upstream. The un-named
-                # `func_` blocked the named-keyed scan in append_upstream_hazards, so a coddog mirror's
-                # recover-extern load was invisible at the gate (S74 contreaddata: 3 SI callees + 3
-                # data globals, all found by manual recon, not the ranker). Same battery as the named
-                # path so the seed (recover → snap up a rung) and the gate prices are honest.
-                _append_recover_hazards(off, primary, cl_path, clib, hazards)
+                blocked = _append_coddog_trap_hazards(off, primary, cl_path, up_lib, hazards) or blocked
 
         # S78: a multi-fn asm subseg's mirror IDENTITY often lives in its UN-NAMED tail, not its
         # named (or mis-attributed) leader. The S71 block above keys coddog on `primary` AND fires
@@ -1988,6 +2019,14 @@ def build_rows(args, upstream_index, carried, sig_index, coddog_index=None):
                     continue
                 cpct = max(p for _, c, p in cod_members if c == cfile)
                 hazards.append(Hazard(HAZARD_CODDOG_MIRROR, f"{cfile}@{cpct:.2f}"))
+                # S80: surface the tail-identity file's traps too. The S72 block above keys on the
+                # primary, so a coddog hit carried by an un-named TAIL member (initialize.c's hit is
+                # on the sibling `create_speed_param`, not leader `__osInitialize_common`) reached
+                # here with only the bare coddog flag — its defines-data `.data` carve / file-static
+                # went un-priced. `already` excludes the primary's cfile, so no double-scan.
+                cl_path = _coddog_upstream_path(cfile)
+                if cl_path:
+                    blocked = _append_coddog_trap_hazards(off, primary, cl_path, up_lib, hazards) or blocked
             if up_lib is None:
                 up_lib = "libultra"
 
