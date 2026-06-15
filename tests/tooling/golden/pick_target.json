@@ -261,19 +261,6 @@
   },
   {
     "band": "-",
-    "func": "func_800A7190",
-    "hazards": "pack:2fn[func_800A7190=?,func_800A7210=?],maybe-upstream:libultra:voicesetadconverter,voicegetstatus,voicecontwrite4",
-    "kind": "asm-flip",
-    "nfns": 2,
-    "pts": 13,
-    "rom": "0x82590",
-    "score": -160,
-    "size": 160,
-    "upstream": "none",
-    "vram": "0x800A7190"
-  },
-  {
-    "band": "-",
     "func": "func_800A09E0",
     "hazards": "pack:2fn[func_800A09E0=?,func_800A09F0=?]",
     "kind": "asm-flip",
@@ -338,19 +325,6 @@
     "vram": "0x800B16A0"
   },
   {
-    "band": "warm",
-    "func": "__osContRamRead",
-    "hazards": "refs-unplaced:__OSContRamReadFormat,__osPfsLastChannel,__osPfsPifRam,calls-unplaced:READFORMAT,needs-header:PRinternal/controller.h(already-vendored,adapt->libultra/internal/controller.h),PRinternal/siint.h(already-vendored,adapt->libultra/internal/siint.h),jal-count-mismatch:23vs10",
-    "kind": "asm-flip",
-    "nfns": 1,
-    "pts": 3,
-    "rom": "0x8A820",
-    "score": -232,
-    "size": 496,
-    "upstream": "libultra",
-    "vram": "0x800AF420"
-  },
-  {
     "band": "-",
     "func": "__floatdidf",
     "hazards": "-",
@@ -377,19 +351,6 @@
     "vram": "0x800A23A0"
   },
   {
-    "band": "warm",
-    "func": "__osPfsGetStatus",
-    "hazards": "pack:3fn[__osPfsGetStatus=pfsgetstatus,func_800AE800=?,func_800AE894=?],refs-unplaced:__OSContRequesFormatShort,__osPfsInodeCacheBank,__osPfsPifRam,needs-header:PRinternal/controller.h(already-vendored,adapt->libultra/internal/controller.h),PRinternal/siint.h(already-vendored,adapt->libultra/internal/siint.h),jal-count-mismatch:7vs6",
-    "kind": "asm-flip",
-    "nfns": 3,
-    "pts": 5,
-    "rom": "0x89B10",
-    "score": -264,
-    "size": 528,
-    "upstream": "libultra",
-    "vram": "0x800AE710"
-  },
-  {
     "band": "-",
     "func": "func_800A4FC0",
     "hazards": "pack:2fn[func_800A4FC0=?,func_800A509C=?]",
@@ -414,32 +375,6 @@
     "size": 288,
     "upstream": "none",
     "vram": "0x800B3C20"
-  },
-  {
-    "band": "warm",
-    "func": "osSpTaskLoad",
-    "hazards": "single-file-pack:2fn[osSpTaskLoad=sptask,osSpTaskStartGo=sptask],file-static,calls-unplaced:_osVirtualToPhysical,needs-header:PRinternal/osint.h(already-vendored,adapt->libultra/internal/osint.h),jal-count-mismatch:7vs14",
-    "kind": "asm-flip",
-    "nfns": 2,
-    "pts": 5,
-    "rom": "0x867A0",
-    "score": -312,
-    "size": 576,
-    "upstream": "libultra",
-    "vram": "0x800AB3A0"
-  },
-  {
-    "band": "warm",
-    "func": "__osContRamWrite",
-    "hazards": "refs-unplaced:__OSContRamReadFormat,__osPfsLastChannel,__osPfsPifRam,calls-unplaced:READFORMAT,needs-header:PRinternal/controller.h(already-vendored,adapt->libultra/internal/controller.h),PRinternal/siint.h(already-vendored,adapt->libultra/internal/siint.h),jal-count-mismatch:22vs10",
-    "kind": "asm-flip",
-    "nfns": 1,
-    "pts": 3,
-    "rom": "0x8AA10",
-    "score": -360,
-    "size": 624,
-    "upstream": "libultra",
-    "vram": "0x800AF610"
   },
   {
     "band": "-",
@@ -507,45 +442,6 @@
     "vram": "0x800B3E50"
   },
   {
-    "band": "warm",
-    "func": "__osTimerServicesInit",
-    "hazards": "single-file-pack:4fn[__osTimerServicesInit=timerintr,__osTimerInterrupt=timerintr,__osSetTimerIntr=timerintr,__osInsertTimer=timerintr],defines-data:__osCurrentTime,__osBaseCounter,__osViIntrCount,__osTimerCounter,__osBaseTimer,__osTimerList,__osProfileList,__osProfileListEnd,__osProfileOverflowBin,refs-unplaced:__ProfDone,__osBaseTimer,__osProfTimerQ,__osProfileList,__osProfileListEnd,__osProfileOverflowBin,__osTimerCounter,__osViIntrCount,calls-unplaced:aligned,needs-header:PRinternal/osint.h(already-vendored,adapt->libultra/internal/osint.h)",
-    "kind": "asm-flip",
-    "nfns": 4,
-    "pts": 8,
-    "rom": "0x87C40",
-    "score": -504,
-    "size": 768,
-    "upstream": "libultra",
-    "vram": "0x800AC840"
-  },
-  {
-    "band": "warm",
-    "func": "osContInit",
-    "hazards": "pack:3fn[osContInit=controller,func_800A75AC=?,func_800A7660=?],defines-data:__osContPifRam,__osContLastCmd,__osMaxControllers,__osEepromTimer,__osEepromTimerMsg,__osContinitialized,refs-unplaced:__OSContRequesFormat,__osContinitialized,__osEepromTimer,__osEepromTimerMsg,__osEepromTimerQ,calls-unplaced:__osSiCreateAccessQueue,aligned,needs-header:PRinternal/controller.h(already-vendored,adapt->libultra/internal/controller.h),PRinternal/siint.h(already-vendored,adapt->libultra/internal/siint.h)",
-    "kind": "asm-flip",
-    "nfns": 3,
-    "pts": 5,
-    "rom": "0x82810",
-    "score": -520,
-    "size": 784,
-    "upstream": "libultra",
-    "vram": "0x800A7410"
-  },
-  {
-    "band": "warm",
-    "func": "osCreateViManager",
-    "hazards": "pack:2fn[osCreateViManager=vimgr,func_800ACFB0=?],file-static,defines-data:__osViDevMgr,__additional_scanline,refs-unplaced:__OSViContext,__osViDevMgr,__osViIntrCount,calls-unplaced:aligned,needs-header:PRinternal/viint.h(already-vendored,adapt->libultra/internal/viint.h),PRinternal/osint.h(already-vendored,adapt->libultra/internal/osint.h)",
-    "kind": "asm-flip",
-    "nfns": 2,
-    "pts": 5,
-    "rom": "0x88210",
-    "score": -568,
-    "size": 832,
-    "upstream": "libultra",
-    "vram": "0x800ACE10"
-  },
-  {
     "band": "-",
     "func": "mus_heap_init",
     "hazards": "pack:8fn[mus_heap_init=?,func_8009E28C=?,func_8009E2BC=?,func_8009E2D4=?,func_8009E2E0=?,func_8009E30C=?,mus_samples_init=?,mus_samples_current=?]",
@@ -561,7 +457,7 @@
   {
     "band": "cold",
     "func": "nuContMgrInit",
-    "hazards": "pack:9fn[nuContMgrInit=nucontmgr,func_800A2C64=?,nuContDataClose=nucontmgr,nuContDataOpen=nucontmgr,contReadData=nucontmgr,func_800A2D5C=?,func_800A2DAC=?,func_800A2E38=?,func_800A2E58=?],file-static,defines-data:nuContCallBack,refs-unplaced:nuContCallBack,nuContNum,nuContReadFunc,nuContStatus,nuContWaitMesgQ,calls-unplaced:aligned,osContGetQuery,osContStartQuery",
+    "hazards": "pack:9fn[nuContMgrInit=nucontmgr,func_800A2C64=?,nuContDataClose=nucontmgr,nuContDataOpen=nucontmgr,contReadData=nucontmgr,func_800A2D5C=?,func_800A2DAC=?,func_800A2E38=?,func_800A2E58=?],file-static,defines-data:nuContCallBack,refs-unplaced:nuContCallBack,nuContNum,nuContReadFunc,nuContStatus,nuContWaitMesgQ,calls-unplaced:aligned",
     "kind": "asm-flip",
     "nfns": 9,
     "pts": 8,
@@ -570,19 +466,6 @@
     "size": 832,
     "upstream": "libnusys",
     "vram": "0x800A2B90"
-  },
-  {
-    "band": "warm",
-    "func": "__osGbpakSetBank",
-    "hazards": "pack:4fn[__osGbpakSetBank=gbpakreadwrite,func_800B1B50=?,func_800B1CCC=?,func_800B1D70=?],needs-header:PRinternal/controller.h(already-vendored,adapt->libultra/internal/controller.h),jal-count-mismatch:5vs3",
-    "kind": "asm-flip",
-    "nfns": 4,
-    "pts": 8,
-    "rom": "0x8CE90",
-    "score": -664,
-    "size": 928,
-    "upstream": "libultra",
-    "vram": "0x800B1A90"
   },
   {
     "band": "warm",
@@ -648,5 +531,122 @@
     "size": 800,
     "upstream": "none",
     "vram": "0x800500E0"
+  },
+  {
+    "band": "-",
+    "func": "func_80051E90",
+    "hazards": "pack:6fn[func_80051E90=?,func_80051FCC=?,func_80052070=?,func_800520DC=?,func_80052100=?,func_80052168=?]",
+    "kind": "asm-flip",
+    "nfns": 6,
+    "pts": 13,
+    "rom": "0x2D290",
+    "score": -816,
+    "size": 816,
+    "upstream": "none",
+    "vram": "0x80051E90"
+  },
+  {
+    "band": "-",
+    "func": "func_ovl8_801F55A0",
+    "hazards": "pack:5fn[func_ovl8_801F55A0=?,func_ovl8_801F5604=?,func_ovl8_801F56E4=?,func_ovl8_801F5780=?,func_ovl8_801F57F8=?]",
+    "kind": "asm-flip",
+    "nfns": 5,
+    "pts": 13,
+    "rom": "0x14F5E0",
+    "score": -896,
+    "size": 896,
+    "upstream": "none",
+    "vram": "0x801F55A0"
+  },
+  {
+    "band": "-",
+    "func": "func_80070FD0",
+    "hazards": "pack:4fn[func_80070FD0=?,func_800710C4=?,func_8007117C=?,func_80071220=?],maybe-upstream:libmus:player_api.inc,player,player_fifo.inc",
+    "kind": "asm-flip",
+    "nfns": 4,
+    "pts": 13,
+    "rom": "0x4C3D0",
+    "score": -928,
+    "size": 928,
+    "upstream": "none",
+    "vram": "0x80070FD0"
+  },
+  {
+    "band": "cold",
+    "func": "nuGfxTaskMgr",
+    "hazards": "single-file-pack:3fn[nuGfxTaskMgr=nugfxtaskmgr,nuGfxTaskMgrInit=nugfxtaskmgr,nuGfxTaskStart=?],file-static,defines-data:beforeFlag,refs-unplaced:nuDramStack,nuGfxCfb,nuGfxCfbCounter,nuGfxCfbNum,nuGfxCfb_ptr,nuGfxTaskEndFunc,nuGfxUcodeFifoPtr,nuGfxUcodeFifoSize,nuRDPOutputBuf,nuYieldBuf,nusched,rspbootTextEnd,calls-unplaced:aligned,jal-count-mismatch:7vs11",
+    "kind": "asm-flip",
+    "nfns": 3,
+    "pts": 5,
+    "rom": "0x4840",
+    "score": -984,
+    "size": 1184,
+    "upstream": "libnusys",
+    "vram": "0x80029440"
+  },
+  {
+    "band": "-",
+    "func": "func_800A5DA0",
+    "hazards": "pack:4fn[func_800A5DA0=?,func_800A5EE0=?,func_800A5F10=?,func_800A60FC=?]",
+    "kind": "asm-flip",
+    "nfns": 4,
+    "pts": 13,
+    "rom": "0x811A0",
+    "score": -1056,
+    "size": 1056,
+    "upstream": "none",
+    "vram": "0x800A5DA0"
+  },
+  {
+    "band": "cold",
+    "func": "nuContGBPakFwrite",
+    "hazards": "pack:7fn[nuContGBPakFwrite=nucontgbpakfwrite,func_800A2780=?,nuSiMgrInit=nusimgr,nuSiSendMesg=nusimgr,func_800A2888=?,func_800A28A8=?,func_800A28C8=?],c-combined:2file[nucontgbpakfwrite|nusimgr],refs-unplaced:nuContGBPakCallBack,jal-count-mismatch:5vs10",
+    "kind": "asm-flip",
+    "nfns": 7,
+    "pts": 8,
+    "rom": "0x7D970",
+    "score": -1080,
+    "size": 1280,
+    "upstream": "libnusys",
+    "vram": "0x800A2570"
+  },
+  {
+    "band": "-",
+    "func": "_xatan",
+    "hazards": "pack:3fn[_xatan=?,atan=atan,atan2=atan]",
+    "kind": "asm-flip",
+    "nfns": 3,
+    "pts": 13,
+    "rom": "0x8E110",
+    "score": -1088,
+    "size": 1088,
+    "upstream": "none",
+    "vram": "0x800B2D10"
+  },
+  {
+    "band": "-",
+    "func": "_xsincos",
+    "hazards": "pack:4fn[_xsincos=?,sin=sin,cos=sin,tan=sin]",
+    "kind": "asm-flip",
+    "nfns": 4,
+    "pts": 13,
+    "rom": "0x8E660",
+    "score": -1136,
+    "size": 1136,
+    "upstream": "none",
+    "vram": "0x800B3260"
+  },
+  {
+    "band": "cold",
+    "func": "nuContRmbMgrInit",
+    "hazards": "pack:9fn[nuContRmbMgrInit=nucontrmbmgr,nuContRmbMgrRemove=nucontrmbmgr,contRmbControl=nucontrmbmgr,contRmbRetrace=nucontrmbmgr,contRmbCheckMesg=nucontrmbmgr,func_800A1DA0=?,func_800A1DE8=?,func_800A1E18=?,func_800A1EA4=?],defines-data:nuContRmbCallBack,refs-unplaced:nuContRmbCallBack,nuContRmbSearchTime,nuScRetraceCounter,calls-unplaced:__osMotorAccess,aligned",
+    "kind": "asm-flip",
+    "nfns": 9,
+    "pts": 8,
+    "rom": "0x7CD60",
+    "score": -1192,
+    "size": 1392,
+    "upstream": "libnusys",
+    "vram": "0x800A1960"
   }
 ]

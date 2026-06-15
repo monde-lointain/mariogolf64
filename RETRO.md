@@ -25,6 +25,30 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 75 — bank io/contquery.c (osContStartQuery + osContGetQuery), libultra io coddog-mirror; the near-free-retry of the S74 split head — 2026-06-14
+- Increment: src/libultra/io/contquery.c banked (2 fns) / md5-candidate files 114→115; asm subsegs 170→169.
+- Quality: 0/0/0/0 (stuck-far / permuter / carried / re-opened) — clean first-try, 0 iteration.
+- Seed: committed 5pt; banked 5pt; regime mirror (seed-only; 8-gate clear at 5<8).
+- What helped: the S74 carry-over was a model near-free-retry pre-scope — all 4 enabler addresses
+  (`osContStartQuery`=0x800A7190, `osContGetQuery`=0x800A7210, callees `__osPackRequestData`=0x800A7660,
+  `__osContGetInitData`=0x800A75AC) verbatim-correct, so execution was a mechanical replay: flip
+  [0x82590,asm]→c, verbatim `cp` of ultralib `io/contquery.c` with `PRinternal/`→bare include adapt
+  (the S74 sibling convention), full-make ROM SHA-1 == baserom first build. Pure text mirror (defines
+  no data/static → no ld-section sibling). Ghidra disasm re-confirmed the two jal targets at the gate.
+- Friction: none. The pick_target row carried a redundant + mis-pointed `maybe-upstream:voice*` IDF
+  guess alongside the definitive `coddog-mirror:contquery.c@99.99` — noise, not a blocker (suggestion #1).
+- Applied (2 of 2): #1 `pick_target.py build_rows` — suppress `maybe-upstream` when a ≥99% non-audio
+  `coddog-mirror` hit is on the same row (the IDF guess is redundant once coddog has named the file;
+  +1 unit test `test_coddog_suppresses_maybe_upstream`, golden regen for the contquery flip, suite
+  36 pass); #2 `BACKLOG.md ## Carry-overs` two-kind format (spike vs near-free-retry) + a 5-point
+  near-free-retry **completeness checklist** (flip line / placed-ref inventory / new-recovery vrams /
+  include-adapt / upstream pin), + a `sprint-review.md` Step-5.4 pointer — codifies the S74 carry-over
+  shape that made this sprint a replay.
+- Carry-over: none. (Remaining coddog io band = the piacs/motor traps, defines-data/file-static, not
+  clean verbatim cps — already parked in BACKLOG.)
+
+---
+
 ## Sprint 74 — bank io/contreaddata.c (osContStartReadData + osContGetReadData + __osPackReadData), libultra io coddog-mirror; decompose the pts-8 cont subseg — 2026-06-14
 - Increment: 1 .c file banked (`src/libultra/io/contreaddata.c`) / 3 fns matched (md5-candidate 113 → **114**, all 114 .c stub-free). Decomposed the pts-8 c-combined `0x82590` subseg (contquery.c head + contreaddata.c tail) at the upstream-file boundary; banked the clean tail (16-aligned split at 0x82630). Carry: contquery.c head.
 - Quality: stuck-far 0 / permuter 0 / carried 0 / re-opened 0 (verbatim cp, first-build SHA match, 0 iteration).

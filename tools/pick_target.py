@@ -1821,9 +1821,19 @@ def build_rows(args, upstream_index, carried, sig_index, coddog_index=None):
             elif primary.startswith("func_"):
                 # No name-index hit + un-named: it may still be an un-named SDK mirror (the S13
                 # trap). Run the signature matcher; an advisory hit flags the gate to verify.
-                hint = signature_hint(off, primary, sig_index)
-                if hint:
-                    hazards.append(hint)
+                # S75: but skip it when coddog already holds a definitive (>=CODDOG_MIRROR_PCT,
+                # non-audio) identity for this fn — the maybe-upstream IDF guess is then redundant
+                # noise that can point at the WRONG file (S75 func_800A7190 carried both
+                # coddog-mirror:src/io/contquery.c@99.99 AND a mis-pointed
+                # maybe-upstream:libultra:voicesetadconverter,...). Let the coddog hit (appended
+                # below) stand as the sole upstream signal.
+                cod = coddog_index.get(primary)
+                cod_definitive = bool(cod) and cod[1] >= CODDOG_MIRROR_PCT \
+                    and not cod[0].startswith("src/audio")
+                if not cod_definitive:
+                    hint = signature_hint(off, primary, sig_index)
+                    if hint:
+                        hazards.append(hint)
 
         # S71 coddog cross-ref: a candidate coddog matched to an ultralib fn but that the C-name
         # index missed (un-named / `none`) is a verbatim-mirror target mis-seen as classical. Flag

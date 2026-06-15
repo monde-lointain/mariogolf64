@@ -89,8 +89,10 @@ This is the only place the sprint's process/tooling edits land:
    residual in the documented format (the plan-gate seed was already frozen pre-`src/`).
 3. Prepend one entry to `RETRO.md` in its documented format (increment, quality counter-metric, the
    `Seed:` line, what helped, friction, the `Applied (N of M)` audit line, carry-overs).
-4. Move carry-overs to `BACKLOG.md ## Carry-overs`; add an `## Active phase` BANKED paragraph for the
-   increment.
+4. Move carry-overs to `BACKLOG.md ## Carry-overs` (follow the two-kind format in that section's
+   header — a **spike** records its DoD blocker; a **near-free retry** uses the 5-point completeness
+   checklist so the next gate is a mechanical replay); add an `## Active phase` BANKED paragraph for
+   the increment.
 
 Durable lessons stay in `RETRO.md`; the PO promotes them into the memory dir manually — do not
 auto-write memory.
