@@ -199,7 +199,7 @@ SECTIONS
         build/src/libultra/gu/mtxcatl.o(.text);
         build/src/libultra/gu/ortho.o(.text);
         build/src/libultra/gu/perspective.o(.text);
-        build/asm/85060.o(.text);
+        build/src/libultra/gu/position.o(.text);
         build/src/libultra/gu/random.o(.text);
         build/src/libultra/gu/rotate.o(.text);
         build/src/libultra/gu/rotaterpy.o(.text);
@@ -441,9 +441,9 @@ SECTIONS
         build/src/libultra/gu/mtxcatl.o(.data);
         build/src/libultra/gu/ortho.o(.data);
         build/src/libultra/gu/perspective.o(.data);
-        build/asm/85060.o(.data);
+        build/src/libultra/gu/position.o(.data);
         build/src/libultra/gu/random.o(.data);
-        build/asm/data/A35B0.data.o(.data);
+        build/asm/data/A35C0.data.o(.data);
         build/src/libultra/gu/rotate.o(.data);
         build/src/libultra/gu/rotaterpy.o(.data);
         build/src/libultra/gu/scale.o(.data);
@@ -699,7 +699,7 @@ SECTIONS
         build/src/libultra/gu/mtxcatl.o(.rodata);
         build/src/libultra/gu/ortho.o(.rodata);
         build/src/libultra/gu/perspective.o(.rodata);
-        build/asm/85060.o(.rodata);
+        build/src/libultra/gu/position.o(.rodata);
         build/src/libultra/gu/random.o(.rodata);
         build/src/libultra/gu/rotate.o(.rodata);
         build/src/libultra/gu/rotaterpy.o(.rodata);
@@ -951,7 +951,7 @@ SECTIONS
         build/src/libultra/gu/mtxcatl.o(.bss);
         build/src/libultra/gu/ortho.o(.bss);
         build/src/libultra/gu/perspective.o(.bss);
-        build/asm/85060.o(.bss);
+        build/src/libultra/gu/position.o(.bss);
         build/src/libultra/gu/random.o(.bss);
         build/src/libultra/gu/rotate.o(.bss);
         build/src/libultra/gu/rotaterpy.o(.bss);
