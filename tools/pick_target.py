@@ -1670,6 +1670,19 @@ def snap_fib(n):
     return 13
 
 
+# Mirror-path story-point enablers, GROUPED (Phase 1b seed-weight table). Each present group
+# adds 1 to the seed base; a group with >1 member kind contributes a SINGLE bump (preserving the
+# old `drop`/`recover` OR-pairs: FILE_STATIC + DEFINES_DATA both present is still one `drop`). The
+# names are reused by the classical enabler gate. Adding a hazard's mirror-path seed cost is now an
+# edit to this table, not to seed_points' body (the Phase-1b de-shotgun of the if-ladder).
+_SEED_ENABLER_GROUPS = (
+    ("drop", frozenset({HAZARD_FILE_STATIC, HAZARD_DEFINES_DATA})),  # → classical fallback
+    ("needs_copy", frozenset({HAZARD_NEEDS_HEADER})),                # companion-header copy
+    ("needs_define", frozenset({HAZARD_NEEDS_DEFINE})),              # Makefile build-define enabler
+    ("recover", frozenset({HAZARD_REFS_UNPLACED, HAZARD_CALLS_UNPLACED})),  # asm-data-recovery
+)
+
+
 def seed_points(size, upstream, band, nfns, hazards, blocked):
     """Deterministic a-priori story-point seed (Fibonacci 1,2,3,5,8,13) for one increment —
     the v1 story-point system (see VELOCITY.md). MG64's effort axis is PATH (upstream-mirror vs
@@ -1684,10 +1697,10 @@ def seed_points(size, upstream, band, nfns, hazards, blocked):
     kinds = {h.kind for h in hazards}
     classical = upstream == "none"
     pack = nfns > 1
-    drop = (HAZARD_FILE_STATIC in kinds) or (HAZARD_DEFINES_DATA in kinds)  # → classical fallback
-    needs_copy = HAZARD_NEEDS_HEADER in kinds  # a copyable companion header (blocked ones already 'blk')
-    needs_define = HAZARD_NEEDS_DEFINE in kinds  # Makefile build-define enabler (e.g. USE_EPI in LIBNUSYS_CFLAGS)
-    recover = (HAZARD_REFS_UNPLACED in kinds) or (HAZARD_CALLS_UNPLACED in kinds)  # symbol-recovery enabler before the mirror links
+    # Which enabler groups are present (table-driven). Each contributes one base bump below; the
+    # classical gate keys on the curated subset drop/needs_copy/recover.
+    present = {name: bool(kinds & ks) for name, ks in _SEED_ENABLER_GROUPS}
+    drop, needs_copy, recover = present["drop"], present["needs_copy"], present["recover"]
     big = size >= BIG_FN_BYTES
     huge = size >= HUGE_FN_BYTES
     if huge or (classical and pack):
@@ -1699,14 +1712,7 @@ def seed_points(size, upstream, band, nfns, hazards, blocked):
     if classical:
         return 5  # small single classical fn — unproven regime, high variance
     base = 1 if band == "warm" else 2  # warm = enabler-free; cold = symbol recovery / cold deps
-    if drop:
-        base += 1  # file-static / defines-data drop → classical fallback
-    if needs_copy:
-        base += 1  # companion-header copy
-    if needs_define:
-        base += 1  # Makefile build-define enabler
-    if recover:
-        base += 1  # asm-data-recovery of an unplaced data extern (S2 __osThreadTail pattern)
+    base += sum(present.values())  # one bump per present enabler group (drop/copy/define/recover)
     if pack or big:
         base += 1
     return snap_fib(base)
