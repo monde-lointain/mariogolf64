@@ -25,6 +25,15 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 82 — io controller.c, the controller-init file (verbatim mirror) — 2026-06-15
+- Increment: src/libultra/io/controller.c (`osContInit` + `__osContGetInitData` + `__osPackRequestData`) banked / 3 functions matched. md5-candidate 126→127 files; asm subsegs 142→141.
+- Quality: 0/0/0/0 this sprint (verbatim drop-def cp, 0 iteration; clean-make ROM SHA-1 == baserom).
+- Seed: committed 5pt; banked 5pt; regime mirror (8-gate clear 5<8; seed-only).
+- What helped: the teed-up S81 setup — siacs.c was banked precisely to place `__osSiCreateAccessQueue`, controller's last real callee, so `calls-unplaced` was already just the `aligned` macro false-flag. Clean `single-file-pack:3fn` (atomic, no split) + S42 drop-def fast path made it a 0-edit verbatim mirror. Includes adapted off the `contreaddata.c` sibling (already-vendored). 3 of the 7 dropped globals placed at the gate from `osContInit.s` `D_` refs (S81 #2). One global (`__osEepromTimer`) was pure drop-def — defined here but referenced only by still-asm eeprom.c, so no extern/placement needed at all.
+- Friction: the gate `D_<vram>`→name symbol-add failed an *incremental* link (`undefined reference to D_8012F4DC`) because make doesn't track the INCLUDE_ASM `.s` dep, so the stale stub `.o` kept the now-removed `D_` symbol — masked by a stale-`.z64` false-positive SHA. `make clean && make extract && make` produced the green ROM. (Now documented — see Applied #1.)
+- Applied (1 of 3): #1 `docs/hazards.md#defines-data` — a `D_<vram>` rename symbol-add (gate OR execution) must be validated with a CLEAN rebuild, not incremental, since the INCLUDE_ASM `.s` dep is untracked. (#2 pick_target defines-data referenced-by-self-vs-elsewhere split NOT selected — low value, fast path handles both identically; #3 confirmatory single-file-pack+S42+coddog-true-source cadence, log-only.)
+- Carry-over: none.
+
 ## Sprint 81 — io siacs.c, the SI access-queue file (verbatim piacs.c twin) — 2026-06-15
 - Increment: src/libultra/io/siacs.c (`__osSiCreateAccessQueue` + `__osSiGetAccess` + `__osSiRelAccess`) banked / 3 functions matched. md5-candidate 125→126 files; asm subsegs 143→142.
 - Quality: 0/0/0/0 this sprint (verbatim drop-def cp, 0 iteration; first-make ROM SHA-1 == baserom).

@@ -450,6 +450,17 @@ pre-existing `D_` label is inert, a section carve is not. (S81 `io/siacs.c`: the
 all visible as `D_<vram>` in the scaffold asm; placing them at the gate would have avoided the 2nd
 extract. Contrast the gu carves S61/S68/S73, which inject real `.data` and MUST stay at execution.)
 
+**Validate a `D_<vram>` rename with a CLEAN rebuild, not an incremental `make` (S82).** The symbol-add
+is SHA-neutral, but `make` does **not** track the INCLUDE_ASM `.s` dependency of the stub object. After
+the gate `make extract` renames `D_<vram>`→`<name>` in the scaffold `.s`, an *incremental* `make` does
+NOT recompile the stub `.o` (its `.c` is unchanged) → the stale object still references the now-removed
+`D_<vram>` auto-symbol → `undefined reference to D_<vram>` link failure, masked by a stale-`.z64`
+false-positive SHA. Run `make clean && make extract && make` (or `rm` the affected stub `.o`) to
+validate the rename. This holds whether the rename happens at the gate OR mid-execution, so the gate
+pre-place's only real saving over deferring is one fewer `make extract` — both still need the clean
+rebuild. (S82 `io/controller.c`: gate-placing `__osEepromTimerMsg`@0x8012F4DC et al. failed the
+incremental link with `undefined reference to D_8012F4DC`; `make clean` produced the green ROM.)
+
 **Source-side detector — the coddog-band backstop (S73).** The S52 `data-static`/`rodata-literal`
 pre-flag is **asm-side** (it classifies the fn's `lwc1/ldc1 %lo(D_<addr>)`), and it does **not** fire
 on an un-named **coddog** candidate — `gu/position.c` (`func_800A9C60`, a 99.99 coddog mirror) ranked

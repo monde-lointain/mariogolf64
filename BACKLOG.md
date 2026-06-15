@@ -539,6 +539,32 @@ sub-sprints).
   0x526B0, needs decompose) and the io `[0x8CE90]` pack is now CLEARED; the defines-data/file-static
   traps remain (piacs/motor, contpfs [0x89D90, 7fn @100], sched, timerintr [0x87C40, 4fn]).**
 
+- **Sprint 82: 1 .c file BANKED — `src/libultra/io/controller.c` (`osContInit` +
+  `__osContGetInitData` + `__osPackRequestData`), the controller-init file; a clean
+  `single-file-pack:3fn` verbatim mirror.** md5-candidate 126→**127** (all 127 .c stub-free); asm
+  subsegs 142→141. 11th coddog cross-ref sprint, the **teed-up next-up after S81** (siacs.c was banked
+  precisely to place `__osSiCreateAccessQueue`, controller's last real callee). Verbatim ultralib
+  VERSION_J `src/io/controller.c`, single-file-pack (atomic, no split), **0 edits, 0 iteration**,
+  clean-make ROM SHA-1 == baserom; flip `[0x82810, asm]`→`[0x82810, c, libultra/io/controller]`
+  (single 784B 16-aligned block). Drop-def fast path (S42): 7 file-scope data globals dropped →
+  `extern` — 3 pre-placed (`__osContPifRam`/`__osContLastCmd`/`__osMaxControllers`), **3 placed at the
+  gate** from `osContInit.s` `D_` refs (`__osContinitialized`=0x800C8190 size:0x4,
+  `__osEepromTimerQ`=0x801B8A00 size:0x18, `__osEepromTimerMsg`=0x8012F4DC size:0x4), and
+  `__osEepromTimer` a **pure drop-def** (defined here but referenced only by still-asm `eeprom.c` → its
+  own `D_` resolves it; no extern/placement). Include adaptation `PRinternal/{controller,siint}.h` →
+  bare (the `contreaddata.c` sibling convention; all already-vendored). `calls-unplaced:aligned` =
+  ALIGNED() macro false-flag. seed 5 / banked 5pt; regime mirror (seed-only; 8-gate clear at 5<8). 0
+  stuck-far/permuter/carried/re-opened. Applied 1 of 3: #1 `docs/hazards.md#defines-data` — a
+  `D_<vram>` rename symbol-add (gate OR execution) needs a CLEAN rebuild, not incremental, since the
+  INCLUDE_ASM `.s` dep is untracked by make (this sprint: the incremental link failed with
+  `undefined reference to D_8012F4DC`, masked by a stale-`.z64` SHA; `make clean` fixed it). (#2
+  pick_target defines-data referenced-by-self-vs-elsewhere split NOT selected; #3 confirmatory.)
+  **Cross-repo follow-up:** 3 new decomp-side data symbols (`__osContinitialized` / `__osEepromTimerQ`
+  / `__osEepromTimerMsg`) → propagate via `sync_decomp_names.py --import-from-decomp`. **Band note: the
+  io defines-data/file-static traps remain (piacs/motor, contpfs [0x89D90, 7fn @100], vimgr, timerintr
+  [0x87C40, 4fn], sched); next-cleanest is sptask [0x867A0, 2fn] but it carries jal-count-mismatch:7vs14
+  (asm > C calls) → gate-investigate/classical, plus file-static.**
+
 - **Sprint 48: 1 file BANKED — `src/libultra/io/viswapcontext.c` (`__osViSwapContext`), libultra; 11th vi-band sibling.** md5-candidate 88→89 (all 89 .c files now stub-free). Single fn 0x88810. Verbatim ultralib VERSION_J `src/io/viswapcontext.c` (include `PRinternal/viint.h` → bare `viint.h`, sibling convention). One recover-extern at gate: `__additional_scanline`=0x800C826C (size:0x4, `extern u32` per viint.h, recovered from `lui 0x800d / lw -0x7d94`). `__osViNext`/`__osViCurr` already placed; `__OSViContext` from pick_target refs-unplaced was a **struct TYPE** (0x30B viint.h), not a data symbol — ruled out. `.text` matched first compile (0x310B); only the **rodata-sibling** for the `2^32` u32→float double needed a yaml split (`[0xAD9C0, rodata]` → insert `[0xAD9E0, .rodata, libultra/io/viswapcontext]`, 16B = double + 8 pad; same as S38 aisetfreq). seed 5 / banked 5pt; regime mirror (seed-only). All 0 stuck-far/permuter/carried/re-opened. Applied: 2 of 2 (#1 `pick_target.py`/`decomp_asm.py` `declared_type_names` — excludes typedef'd types from refs-unplaced; #2 `rodata-literal:<addr>` pre-flag for mirror candidates loading anonymous `ldc1/lwc1 %lo(D_)` FP constants; hazards.md + CLAUDE.md index updated, `make test-tools` 23 pass). No carry-overs. **Cross-repo follow-up:** `__additional_scanline`=0x800C826C is a new decomp-side symbol — propagate via `sync_decomp_names.py --import-from-decomp`. **Band note: cont/pfs/timer io siblings remain (companion-copies + recover-externs); the vi band has no smaller clean leaves left.**
 
 - **Sprint 46: 2 files BANKED — `src/libultra/io/pirawdma.c` (`__osPiRawStartDma`) + `pigetcmdq.c` (`osPiGetCmdQueue`), libultra; reopens the PI/SI/cont/pfs mirror band.** md5-candidate 85→87. 0x8BA20 3-fn pack split at vram 0x800B06F0 (pigetcmdq) + 0x800B0710 (`func_800B0710` left asm). **Root unblock — a multi-sprint `pick_target` false-`blk`:** ultralib mirrors `#include "PRinternal/<h>"` but the project shipped those internal headers under `internal/`, so `include_is_blocked` matched the include *basename* (`piint.h`) against in-tree `internal/piint.h` and mislabeled a cheap companion-copy as a deferred-`-I` block → the whole PI/SI/cont/pfs/vi/timer band read `blk needs-header` and was un-pickable. Fixed at retro: full-relative-path match (not basename) + ultralib/include as the primary libultra companion-header root → 11 band fns un-`blk`'d (`osCartRomInit`, `__osContRam{Read,Write}`, `__osPfsGetStatus`, `osSpTaskLoad`, `osContInit`, `osCreateViManager`, `osMotorStop`, `__osViSwapContext`, `__osTimerServicesInit`, `__osGbpakSetBank`). Enabler: verbatim `cp ultralib/include/PRinternal/piint.h → include/libultra/PRinternal/` (deps `PR/os_internal.h`+`PR/rcp.h` in-tree). `__osPiRawStartDma` (224 B): `_DEBUG` block compiles out; recover-extern `osRomBase`=0x80000308 — a libultra **boot-region global** asm-baked as `D_80000308`, missed by refs-unplaced's `__`-prefix grep → 2nd retro fix: `BOOT_GLOBALS` table (0x80000300-0x1C) surfaces them with known vram. `osPiGetCmdQueue` (32 B): 2-line getter, only ref `__osPiDevMgr` placed. Both verbatim cp, names pre-placed, 0 iter. seed 2 / banked 2pt; regime mirror (seed-only). All 0 stuck-far/permuter/carried/re-opened. Applied: 2 of 2 (#1 `include_is_blocked` full-path + ultralib companion root; #2 `BOOT_GLOBALS` recover table; golden refreshed, 20 pass/3 skip). No carry-overs. **Cross-repo follow-up:** `osRomBase`=0x80000308 is a new decomp-side symbol — propagate via `sync_decomp_names.py --import-from-decomp`. **Band note: the cont/pfs/vi siblings now need only `controller.h`/`siint.h`/`macros.h`/`viint.h` companion-copies (cheap) — the next mirror pool.**
