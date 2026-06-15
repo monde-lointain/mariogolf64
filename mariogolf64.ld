@@ -224,7 +224,7 @@ SECTIONS
         build/src/libultra/io/sptaskyield.o(.text);
         build/src/main/func_800AB600.o(.text);
         build/asm/86A50.o(.text);
-        build/asm/87510.o(.text);
+        build/src/libultra/io/siacs.o(.text);
         build/src/libultra/os/createthread.o(.text);
         build/src/libultra/os/destroythread.o(.text);
         build/src/libultra/os/getthreadpri.o(.text);
@@ -473,7 +473,7 @@ SECTIONS
         build/src/libultra/io/sptaskyield.o(.data);
         build/src/main/func_800AB600.o(.data);
         build/asm/86A50.o(.data);
-        build/asm/87510.o(.data);
+        build/src/libultra/io/siacs.o(.data);
         build/src/libultra/os/createthread.o(.data);
         build/src/libultra/os/destroythread.o(.data);
         build/src/libultra/os/getthreadpri.o(.data);
@@ -736,7 +736,7 @@ SECTIONS
         build/src/libultra/io/sptaskyield.o(.rodata);
         build/src/main/func_800AB600.o(.rodata);
         build/asm/86A50.o(.rodata);
-        build/asm/87510.o(.rodata);
+        build/src/libultra/io/siacs.o(.rodata);
         build/src/libultra/os/createthread.o(.rodata);
         build/src/libultra/os/destroythread.o(.rodata);
         build/src/libultra/os/getthreadpri.o(.rodata);
@@ -994,7 +994,7 @@ SECTIONS
         build/src/libultra/io/sptaskyield.o(.bss);
         build/src/main/func_800AB600.o(.bss);
         build/asm/86A50.o(.bss);
-        build/asm/87510.o(.bss);
+        build/src/libultra/io/siacs.o(.bss);
         build/src/libultra/os/createthread.o(.bss);
         build/src/libultra/os/destroythread.o(.bss);
         build/src/libultra/os/getthreadpri.o(.bss);
