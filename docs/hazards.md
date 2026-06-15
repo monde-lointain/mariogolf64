@@ -136,6 +136,26 @@ for the identified TU, it falls back to plain `hasm`.
   — each subseg's `.o` is independent.
 - Do **not** blanket-vendor a mixed `pack:` (e.g. `osSetIntMask` shares its subseg with the C
   mirrors `osCreatePiManager`/`__osEPiRawStartDma`); split first and vendor only the asm member.
+- **Vendored `.s` carrying a non-`.text` section (`.rodata`/`.data`/`.bss`) → vendor `.text` only
+  (S84).** splat auto-links a `hasm` `.o`'s `.data`/`.rodata`/`.bss` at the **END** of each output
+  section — NOT in address order. See the generated `mariogolf64.ld`: the `build/asm/823B0.o(.rodata)`
+  / `824E0.o(.rodata)` lines sit at the `.rodata` section tail, after the address-ordered C/data-file
+  siblings. For a TU whose data section is empty this is a harmless 0-byte line; for a TU with a real
+  data section (S84 `setintmask.s`'s `.rdata __osRcpImTable`, a 0x80-byte / 64-`.half` LUT) the bytes
+  would be emitted a **second** time at the wrong offset → every following rodata byte shifts → SHA-1
+  break. **Fix:** copy the `.s` but **strip the data block** (the `.rdata`/`.data` directive through
+  EOF), vendoring only `.text`; keep that data as the existing splat-extracted generic blob
+  (`asm/data/<rom>.rodata.s`), renamed to the upstream symbol via a `symbol_addrs.txt` add
+  (`__osRcpImTable = 0x800D2200; // size:0x80`). splat then renames `D_<vram>` → the symbol in BOTH
+  the generic blob (which now *defines* it) and every referencer — **including cross-TU ones** (S84:
+  the exception dispatcher `asm/8AF90.s` also loads `__osRcpImTable`) — and the vendored `.text`'s
+  `%hi/%lo(<sym>)` resolves to it. It is a `D_<vram>` rename across asm → needs a clean rebuild
+  (`make clean && make extract && make`; see `#defines-data`). The vendored `.s` keeps its
+  `.globl <sym>` line (now a harmless external declaration). Afterward confirm `build/asm/<rom>.o` is
+  `.text`-only (`mips-linux-gnu-objdump -h build/asm/<rom>.o`), so the auto-link line carries 0 bytes.
+  `pick_target.py` pre-flags this as `intrinsic-likely:<tu>.s(has-rodata:<sym>)` (S84 #3) so the
+  strip+rename enabler is priced at the gate. (Keeping the table in the shared blob is arguably *more*
+  correct than carving it into one TU when it is referenced cross-TU, as `__osRcpImTable` is.)
 - **Combined-subseg sub-pattern (≥2 distinct asm TUs in one subseg).** When one `asm` subseg holds
   ≥2 asm-ONLY functions (no C mirror) from *different* ultralib `.s` files, `pick_target.py` flags
   `combined-subseg:<n>tu[a.s|b.s]`. Split the subseg at each TU boundary first (one `hasm` subseg per
@@ -164,7 +184,9 @@ cases). S62 (`osInvalDCache`+`osInvalICache` — the combined-subseg split sub-p
 `combined-subseg` pre-flag). S63 (the `[0x8CA50]` reg-shim "set" family `setfpccsr`/`setsr`/
 `setwatchlo` + the C-mirror `__osSpDeviceBusy` — first mixed asm-mirror + C-mirror subseg-clear;
 extended the `needs-define` pre-check to the `combined-subseg` path after `CFC1`/`CTC1` surfaced at a
-failing vendor-compile).
+failing vendor-compile). S84 (`osSetIntMask` from `[0x7E360]` mixed pack — first vendored `.s` with a
+`.rodata` LUT; added the `has-rodata` pre-flag + the vendor-`.text`-only / strip+rename-the-blob
+sub-case above; `pimgr` C member carried, `epirawdma` C member banked same sprint).
 
 ---
 

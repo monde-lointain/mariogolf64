@@ -411,7 +411,37 @@ def vendorable_tu_missing_defines(rel):
         return []
     text = ASM_INCLUDE_LINE_RE.sub("", C_COMMENT_RE.sub("", text))
     defined = _intree_asm_macros()
-    return sorted({t for t in MACRO_REF_RE.findall(text)} - defined)
+    # S84 #2: a macro the .s `#define`s itself (e.g. setintmask.s's `#define MI_INTR_MASK ...`,
+    # often unused) is not a missing enabler — subtract the TU's own defines before flagging.
+    local = set(re.findall(r"#define\s+(\w+)", text))
+    return sorted({t for t in MACRO_REF_RE.findall(text)} - defined - local)
+
+
+def vendorable_tu_data_symbols(rel):
+    """Exported symbols a vendorable ultralib .s (path relative to LIBULTRA) defines in a NON-.text
+    section (.rdata/.rodata/.data/.sdata/.bss) — a has-rodata enabler (S84 #3). A vendored .s with
+    such a section is NOT a clean .text-only VENDOR_ASM cp: splat auto-links a hasm .o's data
+    sections at the END of each output section (out of address order), so the bytes duplicate +
+    misplace -> SHA break. The fix (docs/hazards.md#asm-mirror-vendoring) vendors .text only +
+    strips the data block, keeping that data as the existing extracted generic blob renamed to this
+    symbol via a `symbol_addrs` add. Flagging it prices the strip+rename enabler at the gate rather
+    than discovering it at a failing vendor-build (S84 setintmask / __osRcpImTable). Empty for a
+    .text-only TU (the whole current vendoring backlog)."""
+    if not rel:
+        return []
+    spath = os.path.join(LIBULTRA, rel)
+    try:
+        text = open(spath, errors="ignore").read()
+    except OSError:
+        return []
+    text = C_COMMENT_RE.sub("", text)
+    m = re.search(r"^\s*\.(rdata|rodata|data|sdata|bss|sbss)\b", text, re.M)
+    if not m:
+        return []
+    tail = text[m.end():]
+    syms = re.findall(r"(?:EXPORT|XLEAF|glabel|dlabel)\s*\(?\s*(\w+)", tail)
+    syms += re.findall(r"\.globl\s+(\w+)", tail)
+    return sorted(set(syms))
 
 
 # --- Signature matcher (un-named func_<vram> mirror detection) -----------------------
@@ -1844,12 +1874,17 @@ def classify_subseg(off, typ, path, size, upstream_index):
             # directly. When the TU is vendorable, pre-flag any macro the in-tree asm `-I` headers
             # don't define (…(needs-define:RDB_BASE_VIRTUAL_ADDR,…)) so the gate pays the enabler
             # before the verbatim copy, not at a failing vendor-compile.
-            tu = build_asm_tu_index().get(fns[0])
-            if tu:
-                miss = vendorable_tu_missing_defines(tu)
+            rel = build_asm_tu_index().get(fns[0])
+            if rel:
+                detail = rel
+                miss = vendorable_tu_missing_defines(rel)
                 if miss:
-                    tu = f"{tu}(needs-define:{','.join(miss)})"
-                detail = tu
+                    detail = f"{detail}(needs-define:{','.join(miss)})"
+                # S84 #3: a vendorable .s with a non-.text section can't be a clean .text-only cp —
+                # pre-flag the strip+rename enabler (docs/hazards.md#asm-mirror-vendoring).
+                data_syms = vendorable_tu_data_symbols(rel)
+                if data_syms:
+                    detail = f"{detail}(has-rodata:{','.join(data_syms)})"
             elif prim_privileged:
                 # An un-named func_<addr> with a privileged op: the name can't resolve the TU, but
                 # the privileged op proves a vendorable ultralib source exists. Tag it cp0-asm so the

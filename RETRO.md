@@ -25,6 +25,15 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 84 — [0x7E360] io pack, 2 of 3 (epirawdma C mirror + setintmask asm-vendor) — 2026-06-15
+- Increment: src/libultra/io/epirawdma.c (`__osEPiRawStartDma`, C mirror) + src/libultra/os/setintmask.s (`osSetIntMask`, hasm asm-vendor) banked / 2 functions matched. md5-candidate 128→129 .c; hasm 21→22; asm 140→140.
+- Quality: 0/0/1/0 this sprint (0 stuck-far, 0 permuter, 1 carried = pimgr planned spike, 0 re-opened; both banked first-build SHA == baserom, 0 iterations).
+- Seed: committed 4pt; banked 4pt; regime mirror (8-gate clear; seed-only — both verbatim/deterministic).
+- What helped: the gate split the c-combined `[0x7E360]` pack 3-way at the upstream-file boundaries (all 16-aligned) and validated green before any body landed, so epirawdma + setintmask were independent atomic banks. epirawdma was a true zero-enabler io mirror (sibling epidma.c pre-resolved the `#include "piint.h"` adaptation + all refs; name pre-curated). For setintmask the `.ld` + `objdump -h` told the whole story at the gate: reading how splat auto-links a hasm `.o`'s sections (823B0/824E0 `.rodata` at the section tail) predicted the duplicate-LUT SHA-break BEFORE building, so approach-1 (vendor `.text` only + rename the generic blob) was chosen up front and worked first-build.
+- Friction: the setintmask `.rodata` LUT (`__osRcpImTable`) is a NEW vendoring class — the first vendorable `.s` carrying a non-`.text` section, and it's referenced cross-TU (the exception dispatcher `asm/8AF90.s`), so it could not just be carved into setintmask's TU. Required understanding splat's auto-link ordering + a `D_<vram>`-rename clean rebuild. Now fully documented + pre-flagged so the next such TU is a mechanical replay.
+- Applied: 3 of 3 — #1 `docs/hazards.md#asm-mirror-vendoring` vendored-`.s`-with-`.rodata`/`.data` sub-case (vendor `.text` only, strip the data block, keep it as the renamed generic blob; + Provenance S84 + the CLAUDE.md hazard-index row); #2 `pick_target.py vendorable_tu_missing_defines` subtracts the `.s`'s own `#define`s (the `MI_INTR_MASK` self-define false-positive); #3 `pick_target.py vendorable_tu_data_symbols` → `intrinsic-likely:<tu>.s(has-rodata:<sym>)` pre-flag so the strip+rename enabler is priced at the gate. `make test-tools` 46 pass, golden-neutral.
+- Carry-over: src/libultra/io/pimgr.c (`osCreatePiManager`, [0x7E400,asm]) — file-static (piThread/piThreadStack/piEventQueue/piEventBuf) + defines-data (__osPiDevMgr/__osPiTable/__Dom1SpeedParam/__Dom2SpeedParam/__osCurrentHandle) → needs a .data/.bss carve.
+
 ## Sprint 83 — io sptask.c, the RSP task-load file (verbatim mirror) — 2026-06-15
 - Increment: src/libultra/io/sptask.c (`osSpTaskLoad` + `osSpTaskStartGo`) banked / 2 functions matched. md5-candidate 127→128 files; asm subsegs 141→140.
 - Quality: 0/0/0/0 this sprint (verbatim single-file-pack mirror, 0 C-body iterations; clean-rebuild ROM SHA-1 == baserom).

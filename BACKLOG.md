@@ -596,6 +596,30 @@ sub-sprints).
   [0x86A50, 15fn, pts-13]); osSetIntMask [0x7E360] needs a 3-way TU split (setintmask.s hasm + pimgr +
   epirawdma).**
 
+- **Sprint 84: 2 units BANKED — `src/libultra/io/epirawdma.c` (`__osEPiRawStartDma`, C mirror) +
+  `src/libultra/os/setintmask.s` (`osSetIntMask`, hasm asm-vendor); cleared 2 of 3 members of the
+  `[0x7E360]` c-combined io pack.** md5-candidate 128→**129** .c (all stub-free); hasm 21→**22**; asm
+  140→140. The gate split `[0x7E360, asm]` 3-way at the upstream-file boundaries (all 16-aligned):
+  `[0x7E360, asm]`(setintmask) + `[0x7E400, asm]`(pimgr) + `[0x7E590, c, libultra/io/epirawdma]`,
+  validated green. **epirawdma** = clean verbatim ultralib VERSION_J io mirror: jal=1
+  (`osVirtualToPhysical` S7), `__osCurrentHandle`=0x800C7E90 placed, include adapt = sibling epidma.c's
+  `#include "piint.h"`, no rodata, name pre-curated → zero symbol adds, first-build SHA == baserom, 0
+  iteration. **setintmask** = first VENDOR_ASM `.s` carrying a `.rodata` LUT (`__osRcpImTable`, 64-`.half`
+  @0x800D2200/rom 0xAD600, ref'd cross-TU by exception dispatch `asm/8AF90.s`). **Novel:** splat
+  auto-links a hasm `.o`'s `.rodata` at the section END (out of address order, see `.ld` 823B0/824E0)
+  → vendoring the full `.s` would duplicate+misplace the 0x80B → SHA break. Resolved by vendoring
+  `.text` only (strip the `.rdata` block) + keeping the LUT as the extracted generic blob renamed via
+  `symbol_addrs += __osRcpImTable=0x800D2200 size:0x80` (D_<vram> rename → clean rebuild; `7E360.o`
+  confirmed `.text`-only 0xA0); VENDOR_ASM += `7E360:src/libultra/os/setintmask.s`; flip
+  `[0x7E360, asm]`→`[0x7E360, hasm]`. First-build SHA == baserom, 0 iteration. seed 4 / banked 4pt;
+  regime mirror (seed-only; 8-gate clear). 0 stuck-far/permuter/re-opened; 1 carried (pimgr, planned).
+  Applied 3 of 3: #1 `docs/hazards.md#asm-mirror-vendoring` vendored-`.s`-with-`.rodata` sub-case (+
+  CLAUDE.md index row); #2 `pick_target.py` needs-define skips a `.s`'s own `#define`s (MI_INTR_MASK
+  FP); #3 `pick_target.py` `has-rodata:<sym>` pre-flag; `make test-tools` 46 pass, golden-neutral.
+  **Cross-repo follow-up:** `__osRcpImTable`=0x800D2200 is a new decomp-side data symbol → propagate
+  via `sync_decomp_names.py --import-from-decomp` (the 2 fn names were already in `ghidra_symbols.txt`).
+  **The `[0x7E360]` pack now has only `pimgr` (osCreatePiManager) left → carry-over below.**
+
 - **Sprint 48: 1 file BANKED — `src/libultra/io/viswapcontext.c` (`__osViSwapContext`), libultra; 11th vi-band sibling.** md5-candidate 88→89 (all 89 .c files now stub-free). Single fn 0x88810. Verbatim ultralib VERSION_J `src/io/viswapcontext.c` (include `PRinternal/viint.h` → bare `viint.h`, sibling convention). One recover-extern at gate: `__additional_scanline`=0x800C826C (size:0x4, `extern u32` per viint.h, recovered from `lui 0x800d / lw -0x7d94`). `__osViNext`/`__osViCurr` already placed; `__OSViContext` from pick_target refs-unplaced was a **struct TYPE** (0x30B viint.h), not a data symbol — ruled out. `.text` matched first compile (0x310B); only the **rodata-sibling** for the `2^32` u32→float double needed a yaml split (`[0xAD9C0, rodata]` → insert `[0xAD9E0, .rodata, libultra/io/viswapcontext]`, 16B = double + 8 pad; same as S38 aisetfreq). seed 5 / banked 5pt; regime mirror (seed-only). All 0 stuck-far/permuter/carried/re-opened. Applied: 2 of 2 (#1 `pick_target.py`/`decomp_asm.py` `declared_type_names` — excludes typedef'd types from refs-unplaced; #2 `rodata-literal:<addr>` pre-flag for mirror candidates loading anonymous `ldc1/lwc1 %lo(D_)` FP constants; hazards.md + CLAUDE.md index updated, `make test-tools` 23 pass). No carry-overs. **Cross-repo follow-up:** `__additional_scanline`=0x800C826C is a new decomp-side symbol — propagate via `sync_decomp_names.py --import-from-decomp`. **Band note: cont/pfs/timer io siblings remain (companion-copies + recover-externs); the vi band has no smaller clean leaves left.**
 
 - **Sprint 46: 2 files BANKED — `src/libultra/io/pirawdma.c` (`__osPiRawStartDma`) + `pigetcmdq.c` (`osPiGetCmdQueue`), libultra; reopens the PI/SI/cont/pfs mirror band.** md5-candidate 85→87. 0x8BA20 3-fn pack split at vram 0x800B06F0 (pigetcmdq) + 0x800B0710 (`func_800B0710` left asm). **Root unblock — a multi-sprint `pick_target` false-`blk`:** ultralib mirrors `#include "PRinternal/<h>"` but the project shipped those internal headers under `internal/`, so `include_is_blocked` matched the include *basename* (`piint.h`) against in-tree `internal/piint.h` and mislabeled a cheap companion-copy as a deferred-`-I` block → the whole PI/SI/cont/pfs/vi/timer band read `blk needs-header` and was un-pickable. Fixed at retro: full-relative-path match (not basename) + ultralib/include as the primary libultra companion-header root → 11 band fns un-`blk`'d (`osCartRomInit`, `__osContRam{Read,Write}`, `__osPfsGetStatus`, `osSpTaskLoad`, `osContInit`, `osCreateViManager`, `osMotorStop`, `__osViSwapContext`, `__osTimerServicesInit`, `__osGbpakSetBank`). Enabler: verbatim `cp ultralib/include/PRinternal/piint.h → include/libultra/PRinternal/` (deps `PR/os_internal.h`+`PR/rcp.h` in-tree). `__osPiRawStartDma` (224 B): `_DEBUG` block compiles out; recover-extern `osRomBase`=0x80000308 — a libultra **boot-region global** asm-baked as `D_80000308`, missed by refs-unplaced's `__`-prefix grep → 2nd retro fix: `BOOT_GLOBALS` table (0x80000300-0x1C) surfaces them with known vram. `osPiGetCmdQueue` (32 B): 2-line getter, only ref `__osPiDevMgr` placed. Both verbatim cp, names pre-placed, 0 iter. seed 2 / banked 2pt; regime mirror (seed-only). All 0 stuck-far/permuter/carried/re-opened. Applied: 2 of 2 (#1 `include_is_blocked` full-path + ultralib companion root; #2 `BOOT_GLOBALS` recover table; golden refreshed, 20 pass/3 skip). No carry-overs. **Cross-repo follow-up:** `osRomBase`=0x80000308 is a new decomp-side symbol — propagate via `sync_decomp_names.py --import-from-decomp`. **Band note: the cont/pfs/vi siblings now need only `controller.h`/`siint.h`/`macros.h`/`viint.h` companion-copies (cheap) — the next mirror pool.**
@@ -824,6 +848,20 @@ by `/sprint-plan`:
   needs a `.data`/`.bss` sibling carve (`docs/hazards.md#defines-data`) or classical routing with the
   data dropped to `extern` — the dormant draft `src/libultra/io/piacs.c` (externs the data) is the
   pre-staged shape. NOT a clean-pair pick; pursue when the data-sibling enabler is the sprint goal.
+- **io defines-data+file-static trap — `pimgr.c` (`osCreatePiManager`, [0x7E400, asm], 0x7E400-0x7E590).**
+  Spike (the 3rd member of the S84-split `[0x7E360]` pack; setintmask + epirawdma banked S84). Under
+  `-D_FINALROM -DBUILD_VERSION=VERSION_J` it compiles ONE fn (the `#ifndef _FINALROM` `ramromThread`/
+  `ramromMain` block strips). **Blocker = a mixed `.data`/`.bss` carve:** file-statics `piThread`
+  (OSThread, .bss), `piThreadStack` (STACK, .bss `D_800F97E0`), `piEventQueue` (OSMesgQueue, .bss),
+  `piEventBuf` (OSMesg[1], .bss); plus defines-data `__osPiDevMgr`=0x800C7E70 (OSDevMgr, .bss),
+  `__osPiTable` (OSPiHandle*, .bss/.sdata), `__Dom1SpeedParam`=0x800FA990 + `__Dom2SpeedParam`=0x800FA9A8
+  (OSPiHandle, .bss), `__osCurrentHandle`=0x800C7E90 (OSPiHandle*[2] = {&__Dom1SpeedParam,&__Dom2SpeedParam},
+  .data — **already placed**, the S84 epirawdma ref). Same trap class as `piacs.c`/`motor.c`/`initialize.c`
+  above: needs `.data`/`.bss` sibling carves (`docs/hazards.md#defines-data`) + recover-externs for the
+  un-placed statics, or classical routing with the data dropped to `extern`. Callees all placed
+  (osCreateMesgQueue, osSetEventMesg, osGetThreadPri/osSetThreadPri, __osDisableInt/__osRestoreInt,
+  __osDevMgrMain, osCreateThread/osStartThread, __osPiCreateAccessQueue). Pursue when the data-sibling
+  enabler is the sprint goal. Header `PRinternal/piint.h` already vendored (S84 epirawdma).
 - **os/ coddog-mirror trap — `initialize.c` (`__osInitialize_common` + `create_speed_param`, pts-5,
   2fn @0x8ACA0).** Spike (data-sibling enabler). Now correctly priced `defines-data` (the S80 #3 fix
   surfaced it — its coddog hit keys on the sibling `create_speed_param`, not the leader). Under
@@ -878,10 +916,14 @@ by `/sprint-plan`:
     asm-ONLY fns in distinct ultralib `.s` files (`os/invaldcache.s`+`invalicache.s`), split at 0x82460
     into two `hasm` subsegs + two `VENDOR_ASM` pairs, first-try clean. `combined-subseg:2tu[…]` is the
     pre-flag for this shape.)_
-  - **DO NOT blanket-hasm (mixed packs with real C mirrors):** `osSetIntMask` pack:3fn (0x7E360 —
+  - **DO NOT blanket-hasm (mixed packs with real C mirrors):** ~~`osSetIntMask` pack:3fn (0x7E360 —
     also holds `osCreatePiManager`/pimgr + `__osEPiRawStartDma`/epirawdma; split first, hasm only
-    `osSetIntMask`); `func_800AFB90` pack:8fn (0x8AF90 — exception/thread dispatch block; its own
-    decision). These stay asm flip-candidates for now.
+    `osSetIntMask`)~~ **2 of 3 BANKED S84** — split 3-way at the gate; `osSetIntMask` vendored
+    `.text`-only as `hasm` (the FIRST vendored `.s` carrying a `.rodata` LUT, `__osRcpImTable`; see the
+    has-rodata sub-case in `docs/hazards.md#asm-mirror-vendoring`), `__osEPiRawStartDma` C-mirrored;
+    only `pimgr` (osCreatePiManager) remains → carry-over below. `func_800AFB90` pack:8fn (0x8AF90 —
+    exception/thread dispatch block; its own decision; note it loads the now-named `__osRcpImTable`).
+    Stays an asm flip-candidate for now.
 - **~~C-mirror next-cleanest leaves buried in gu combined subsegs (S64)~~ — GU BAND FULLY CLOSED at
   S69** (cosf+sinf S66, translate S67, align S68, lookat S69; no gu mirrors remain). History retained:
   - ~~**`cosf` (gu/cosf.c)** + **`sinf` (gu/sinf.c)**~~ **BANKED S66** — both verbatim ultralib
