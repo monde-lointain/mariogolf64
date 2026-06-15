@@ -234,6 +234,7 @@ HAZARD_DATA_STATIC = "data-static"
 HAZARD_TWIN_OF = "twin-of"
 HAZARD_REMAINING = "remaining"
 HAZARD_CODDOG_MIRROR = "coddog-mirror"  # S71: a coddog compare2 match to an ultralib fn
+HAZARD_CALLER_EVICT = "caller-evict"  # S77: an un-named func_ member a banked C file calls by name
 
 
 @dataclasses.dataclass
@@ -1036,6 +1037,48 @@ def placed_symbols():
     return names
 
 
+# An un-named decomp symbol: `func_<vram>` or `func_ovl<n>_<vram>` (the splat scaffold placeholder).
+_FUNC_TOKEN_RE = re.compile(r"\bfunc_(?:ovl\d+_)?[0-9A-Fa-f]{6,8}\b")
+
+_SRC_CALLER_CACHE = None
+
+
+def src_func_callers():
+    """S77: map every un-named `func_<vram>` token to the banked C files that reference it by name
+    (outside an INCLUDE_ASM stub line). Built once per process by walking `src/`.
+
+    Motivates the `caller-evict` gate flag: when the gate ADDS a curated symbol for an un-named
+    `func_<vram>` member (so splat renames it), any already-banked C file that hard-codes the old
+    `func_<vram>` name fails to link (undefined reference) until its call site is renamed too. This
+    is the stale-label-sync hazard reaching the gate via a symbol ADD rather than `make sync-names`.
+    S77 hit it live: adding `__osSpGetStatus`=0x800B16A0 evicted the banked caller
+    `src/main/func_800AB600.c`. Surfacing the caller here prices the one-line rename fixup at the
+    gate instead of as a build-check link error."""
+    global _SRC_CALLER_CACHE
+    if _SRC_CALLER_CACHE is not None:
+        return _SRC_CALLER_CACHE
+    callers: dict[str, set] = {}
+    src_root = os.path.join(ROOT, "src")
+    for dirpath, _dirs, files in os.walk(src_root):
+        for fname in files:
+            if not fname.endswith(".c"):
+                continue
+            fpath = os.path.join(dirpath, fname)
+            try:
+                with open(fpath, errors="ignore") as f:
+                    lines = f.read().splitlines()
+            except OSError:
+                continue
+            rel = os.path.relpath(fpath, ROOT)
+            for ln in lines:
+                if "INCLUDE_ASM" in ln:
+                    continue  # the func_'s own scaffold stub is regenerated, not an eviction
+                for tok in _FUNC_TOKEN_RE.findall(ln):
+                    callers.setdefault(tok, set()).add(rel)
+    _SRC_CALLER_CACHE = {k: sorted(v) for k, v in callers.items()}
+    return _SRC_CALLER_CACHE
+
+
 # An SDK-internal global is `__`-prefixed (e.g. __osRunQueue). Uppercase macros ([A-Z]-led) and
 # CamelCase types never match, so this rarely false-flags a non-symbol token.
 SDK_GLOBAL_RE = re.compile(r"__[A-Za-z]\w+")
@@ -1818,6 +1861,16 @@ def build_rows(args, upstream_index, carried, sig_index, coddog_index=None):
         if classified is None:
             continue
         kind, fns, hazards = classified
+
+        # S77: an un-named `func_<vram>` member a banked C file calls by name will be EVICTED when
+        # the gate adds its curated symbol (splat renames it → the caller's hard-coded name fails to
+        # link). Flag the caller so the one-line rename fixup is priced at the gate, not discovered
+        # as a build-check link error. Display-only (seed_points ignores this kind).
+        _callers = src_func_callers()
+        _evicts = [f"{fn}@{','.join(_callers[fn])}" for fn in fns
+                   if fn.startswith("func_") and fn in _callers]
+        if _evicts:
+            hazards.append(Hazard(HAZARD_CALLER_EVICT, ";".join(_evicts)))
 
         primary = fns[0]
         up_lib, up_path = upstream_index.get(primary, (None, None))

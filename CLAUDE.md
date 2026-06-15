@@ -269,6 +269,7 @@ When `pick_target.py` flags a hazard (or a match shows its symptom), read the ma
 | (macro-hidden extern)           | #macro-hidden-recover-extern |
 | (warm band, no hazard)          | #open-band-fast-path |
 | (`undefined reference` after mid-sprint sync-names) | #make-sync-names-eviction-recovery |
+| `caller-evict:<func_vram>@<file>` (a banked C file calls an un-named member by name; naming it at the gate evicts the caller) | #caller-evict |
 | (loop can't find label / reloc-name mismatch) | #stale-top-level-asm-label-sync |
 | (clean mirror SHA-miss, one field's high word) | #mirror-cast-divergence-sign--vs-zero-extend |
 | (clean mirror SHA-miss, char load lb/sll-sra vs lbu/andi) | #char-signedness |

@@ -1051,6 +1051,29 @@ a renamed global.
 
 ---
 
+## caller-evict
+
+**Rule:** Adding a curated name for an un-named `func_<vram>` to `symbol_addrs.txt` (a common gate
+enabler when naming a coddog / upstream-mirror leader) makes `make extract` rename that symbol in the
+scaffold. Any ALREADY-BANKED C file that hard-codes the old `func_<vram>` name (an `extern` decl +
+call) then fails to link with `undefined reference to func_<vram>`. Same class as
+`#stale-top-level-asm-label-sync`, but reaching the gate via a symbol ADD rather than `make sync-names`.
+
+**Pre-flag:** `pick_target.py` flags `caller-evict:<func_vram>@<file>[;…]` (S77) — it walks `src/`
+for every un-named member a banked C file references by name (INCLUDE_ASM stub lines excluded). When
+the flip will name that `func_`, the listed caller's call site must be renamed in the same flip.
+Display-only (does not change `pts`); the fixup is one line and SHA-neutral (same address).
+
+**Trigger:** the gate's green-ROM `make extract && make` fails with `undefined reference to
+func_<vram>` from a banked C object after a `symbol_addrs.txt` add.
+
+**Procedure:** rename the call site(s) in the flagged banked C file from `func_<vram>` to the curated
+name (both the `extern` declaration and the call). The codegen is identical (same `jal` target), so
+the ROM SHA-1 is unchanged. S77: adding `__osSpGetStatus`=0x800B16A0 evicted `src/main/func_800AB600.c`
+(`extern u32 func_800B16A0(void)` + `func_800B16A0()` → `__osSpGetStatus`).
+
+---
+
 ## Display lists
 
 **Rule:** F3DEX2 microcode. Include `<PR/gbi.h>` when the target manipulates `Gfx*`.

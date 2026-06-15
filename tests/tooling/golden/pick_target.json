@@ -313,19 +313,6 @@
   },
   {
     "band": "-",
-    "func": "func_800B16A0",
-    "hazards": "pack:4fn[func_800B16A0=?,__osSpSetStatus=spsetstat,__osSpSetPc=spsetpc,__osSpRawStartDma=sprawdma],c-combined:3file[sprawdma|spsetpc|spsetstat]",
-    "kind": "asm-flip",
-    "nfns": 4,
-    "pts": 13,
-    "rom": "0x8CAA0",
-    "score": -224,
-    "size": 224,
-    "upstream": "none",
-    "vram": "0x800B16A0"
-  },
-  {
-    "band": "-",
     "func": "__floatdidf",
     "hazards": "-",
     "kind": "asm-flip",
@@ -418,7 +405,7 @@
   {
     "band": "-",
     "func": "func_80029250",
-    "hazards": "pack:2fn[func_80029250=?,func_800292FC=?]",
+    "hazards": "pack:2fn[func_80029250=?,func_800292FC=?],caller-evict:func_80029250@src/libnusys/mainlib/nugfxinit.c",
     "kind": "asm-flip",
     "nfns": 2,
     "pts": 13,
@@ -648,5 +635,18 @@
     "size": 1264,
     "upstream": "none",
     "vram": "0x8024D800"
+  },
+  {
+    "band": "-",
+    "func": "func_800A0D70",
+    "hazards": "pack:8fn[func_800A0D70=?,func_800A0FE0=?,func_800A1148=?,func_800A1174=?,func_800A118C=?,func_800A11EC=?,func_800A1224=?,func_800A1274=?]",
+    "kind": "asm-flip",
+    "nfns": 8,
+    "pts": 13,
+    "rom": "0x7C170",
+    "score": -1376,
+    "size": 1376,
+    "upstream": "none",
+    "vram": "0x800A0D70"
   }
 ]

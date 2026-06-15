@@ -25,6 +25,17 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 77 — clear the io-SP c-combined subseg [0x8CAA0]: spgetstat + spsetstat + spsetpc + sprawdma, 4 libultra io mirrors — 2026-06-15
+- Increment: 4 files banked (`src/libultra/io/{spgetstat,spsetstat,spsetpc,sprawdma}.c`, 4 fns) / 4 fns matched. md5-candidate 116→120; asm subsegs 147→146. Subseg [0x8CAA0] fully C.
+- Quality: 0/0/0/0 this sprint (the caller-eviction was a gate surprise resolved without a spike/carry).
+- Seed: committed 4pt (plan-gate est ~6); banked 4pt; regime mirror (seed-only). 8-gate FIRED on the subseg's pts-13 → resolved by decompose at the c-combined file boundary (S74 path), not the verbatim-exemption.
+- What helped: coddog 99.99 on 3 of 4 members + Ghidra disasm of the un-named leader `func_800B16A0` (= `__osSpGetStatus`, a 4-instr `IO_READ` coddog couldn't fingerprint) turned a 3-file c-combined into a clean 4-file clear; the S72 assert-strip playbook made sprawdma a known-edit (asm-confirmed no `jal __assert`); all callees pre-placed (`__osSpDeviceBusy`/`osVirtualToPhysical`); register immediates only → zero ld-section siblings.
+- Friction: gate symbol-add (`__osSpGetStatus`=0x800B16A0) evicted the banked classical caller `src/main/func_800AB600.c` (hard-coded `func_800B16A0()`) → `undefined reference` at the green-ROM gate check; fixed by renaming the call site (same addr, SHA-neutral). Now pre-flagged (Applied #1).
+- Applied (1 of 1): #1 `pick_target.py` `caller-evict:<func_vram>@<file>` pre-flag (`src_func_callers()` walks `src/`, INCLUDE_ASM-excluded, display-only) + `docs/hazards.md#caller-evict` + CLAUDE.md hazard-index row; +1 unit test `test_caller_evict_flag`, golden regen (suite 40 pass).
+- Carry-over: none.
+
+---
+
 ## Sprint 76 — bank io/devmgr.c (__osDevMgrMain), libultra io coddog verbatim mirror; first switch-jump-table rodata sibling — 2026-06-14
 - Increment: 1 file banked (`src/libultra/io/devmgr.c`, `__osDevMgrMain`) / 1 fn matched. md5-candidate 115→116; asm subsegs 148→147.
 - Quality: 0/0/0/0 this sprint (the jtbl carve was an in-execution surprise resolved without a spike/carry).

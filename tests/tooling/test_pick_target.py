@@ -155,3 +155,33 @@ def test_coddog_suppresses_maybe_upstream(tmp_path, monkeypatch):
     aud = {r["func"]: r for r in json.loads(run_tool("pick_target", "--json", "-n", "400").stdout)}["func_800A07B0"]
     assert "coddog-mirror:src/audio/fake.c@99.99" in aud["hazards"]
     assert "maybe-upstream" in aud["hazards"], aud["hazards"]
+
+
+def test_caller_evict_flag(tmp_path, monkeypatch):
+    """S77 retro #1: src_func_callers() prices the gate caller-eviction.
+
+    Naming an un-named func_<vram> (a gate symbol add) makes splat rename it; a banked C file that
+    hard-codes the old func_ name then fails to link (S77 hit it: __osSpGetStatus add evicted the
+    banked caller func_800AB600.c). The helper maps each func_ token to the banked callers that
+    reference it, EXCLUDING INCLUDE_ASM stub lines (the func_'s own scaffold is regenerated, not an
+    eviction). Verifies: a real call site is mapped; the own-stub line is not counted; an
+    un-referenced func_ is absent."""
+    pt = load_tool("pick_target")
+    src = tmp_path / "src"
+    (src / "main").mkdir(parents=True)
+    (src / "libultra" / "io").mkdir(parents=True)
+    # banked caller: references func_800B16A0 by name (extern decl + call)
+    (src / "main" / "caller.c").write_text(
+        "extern u32 func_800B16A0(void);\n"
+        "u32 wrapper(void) { return func_800B16A0(); }\n"
+    )
+    # the func_'s own scaffold stub — its INCLUDE_ASM line must be EXCLUDED, not an eviction
+    (src / "libultra" / "io" / "spgetstat.c").write_text(
+        '#include "common.h"\n'
+        'INCLUDE_ASM("asm/nonmatchings/libultra/io/spgetstat", func_800B16A0);\n'
+    )
+    monkeypatch.setattr(pt, "ROOT", str(tmp_path))
+    monkeypatch.setattr(pt, "_SRC_CALLER_CACHE", None)
+    callers = pt.src_func_callers()
+    assert callers.get("func_800B16A0") == ["src/main/caller.c"], callers
+    assert "func_deadbeef" not in callers and "func_DEADBEEF" not in callers
