@@ -1400,6 +1400,29 @@ def macro_hidden_text(cpath):
     return "\n".join(parts), set(macros)
 
 
+def _names_in_function_bodies(text):
+    """Identifiers appearing at brace-depth >= 1 (function bodies + any aggregate `= {...}`
+    initializer) in the comment/string-stripped text. refs_unplaced uses this to drop a `__`-token
+    that THIS .c itself defines as a file-scope data global yet no function body references by name:
+    drop-def externs/removes that def plus any holder initializer, so the token needs no
+    symbol_addrs recovery. Motivating case (S86 timerintr.c): `__osBaseTimer` is named ONLY in the
+    depth-0 initializer `OSTimer* __osTimerList = &__osBaseTimer;` — drop-def deletes that line, so
+    no extern/placement is owed. Conservative: a token inside a file-scope aggregate `= {...}`
+    initializer counts as in-body and stays flagged (a harmless EXTRA recover, never a missed one)."""
+    clean = _strip_comments(text)
+    body = []
+    depth = 0
+    for ch in clean:
+        if ch == "{":
+            depth += 1
+        elif ch == "}":
+            if depth > 0:
+                depth -= 1
+        elif depth >= 1:
+            body.append(ch)
+    return set(re.findall(r"[A-Za-z_]\w*", "".join(body)))
+
+
 def refs_unplaced(cpath, placed, lib=None):
     """Data externs the upstream .c *references* but that are absent from BOTH name files — the
     dual of `defines-data` (which catches definitions). The motivating case: osYieldThread reads
@@ -1449,6 +1472,13 @@ def refs_unplaced(cpath, placed, lib=None):
         if re.search(re.escape(tok) + r"\s*\(", scan):
             continue
         unplaced.append(tok)
+    # S86: drop a token THIS .c defines as a file-scope data global but no function body references
+    # by name — it lives only in another global's depth-0 initializer (`__osTimerList =
+    # &__osBaseTimer`), which drop-def removes, so it is not an unplaced extern owed a recovery.
+    defined_here = {n.split("[", 1)[0] for n in defines_data_globals(cpath)}
+    if defined_here:
+        body_names = _names_in_function_bodies(text)
+        unplaced = [t for t in unplaced if not (t in defined_here and t not in body_names)]
     return sorted(unplaced)
 
 

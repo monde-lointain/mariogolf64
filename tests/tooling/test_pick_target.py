@@ -342,6 +342,28 @@ def test_resolve_include_vendored_basename_fallback(tmp_path, monkeypatch):
     assert "__OSContRequesFormatShort" not in pt.refs_unplaced(str(cfile), set(), "libultra")
 
 
+def test_refs_unplaced_drops_initializer_only_self_defined_global(tmp_path):
+    """S86 #1: a `__`-global the .c itself DEFINES but references ONLY inside another global's
+    depth-0 initializer is drop-def-resolved — drop-def deletes that initializer, so it owes no
+    symbol_addrs recovery. timerintr.c's `__osBaseTimer` (named only in
+    `OSTimer* __osTimerList = &__osBaseTimer;`) must NOT be refs_unplaced, while `__osViIntrCount`
+    (defined here AND assigned in a function body) MUST stay flagged."""
+    pt = load_tool("pick_target")
+    cfile = tmp_path / "timerintr.c"
+    cfile.write_text(
+        "u32 __osViIntrCount;\n"
+        "OSTimer __osBaseTimer;\n"
+        "OSTimer* __osTimerList = &__osBaseTimer;\n"
+        "void __osTimerServicesInit(void) {\n"
+        "    __osViIntrCount = 0;\n"
+        "    __osTimerList->next = __osTimerList;\n"
+        "}\n")
+    refs = pt.refs_unplaced(str(cfile), set(), "libultra")
+    assert "__osBaseTimer" not in refs        # initializer-only self-def → drop-def removes it
+    assert "__osViIntrCount" in refs           # body-referenced → still owed a recovery
+    assert "__osTimerList" in refs             # body-referenced (->next) → still owed (if unplaced)
+
+
 def test_call_divergence_strips_inactive_version_branch(monkeypatch):
     """S80 #2: call_divergence drops the inactive `#if BUILD_VERSION` side before counting C calls,
     so an `#else` branch's call does not double-count against the active branch's (pfsgetstatus's

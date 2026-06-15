@@ -620,6 +620,36 @@ sub-sprints).
   via `sync_decomp_names.py --import-from-decomp` (the 2 fn names were already in `ghidra_symbols.txt`).
   **The `[0x7E360]` pack now has only `pimgr` (osCreatePiManager) left → carry-over below.**
 
+- **Sprint 86: 1 .c file BANKED — `src/libultra/os/timerintr.c` (`__osTimerServicesInit` +
+  `__osTimerInterrupt` + `__osSetTimerIntr` + `__osInsertTimer`), libultra os/ drop-def mirror; the
+  OS timer-service core (`vimgr.c`/`settimer.c` dependency root).** md5-candidate 130→**131** (all 131
+  .c stub-free); flippable asm subsegs 139→138. Verbatim ultralib VERSION_J `src/os/timerintr.c`,
+  single 0x300 subseg = exactly the 4 fns (flip `[0x87C40, asm]`→`[0x87C40, c, libultra/os/timerintr]`,
+  no split). pts-8 single-file-pack tripped the 8-gate → ran under the **verbatim-mirror exemption,
+  now extended to the drop-def sub-case** (S64/S69 class; regime mirror + single-file-pack
+  decompose-blocked + all 4 names curated + all callees placed). **Pure drop-def, NO carve** (the only
+  remaining libultra trap with no file-static): the 6 file-scope data globals → `extern`; `-D_FINALROM`
+  strips the `#ifndef _FINALROM` profile block; the `VERSION_K` `tim<468` clamp correctly excluded for
+  J. 3 pre-placed (`__osCurrentTime`/`__osBaseCounter`/`__osTimerList`, S27/S30), 2 recovered from asm
+  (`__osViIntrCount`=0x800FF1E0, `__osTimerCounter`=0x80132364), and **`__osBaseTimer` needed NO
+  extern/placement** — named only in `__osTimerList`'s dropped `.data` initializer
+  (`OSTimer* __osTimerList = &__osBaseTimer;`), so the placed pointer's bytes encode its address (the
+  S86 #1 refs_unplaced fix now drops this class). All callees placed (osSendMesg/osGetCount/
+  __osDisableInt/__osRestoreInt/__osSetCompare); include adapt `PRinternal/osint.h`→bare (sibling
+  settimer/gettime). Full-make ROM SHA-1 == baserom, 0 iteration. 0 stuck-far/permuter/carried/
+  re-opened. seed 8 / banked 8pt; regime mirror (seed-only). Applied 4 of 4: #1 `pick_target.py
+  refs_unplaced` drops a self-defined global named only in another global's depth-0 initializer
+  (`_names_in_function_bodies`; +1 unit test, suite 48 pass, golden-neutral); #2 CLAUDE.md bank-step
+  generated-artifact commit-hygiene note (`undefined_syms_auto.txt`+`mariogolf64.ld`); #3 CLAUDE.md
+  8-gate exemption wording extended to drop-def; #4 the `vimgr.c` carry-over update below.
+  **Cross-repo follow-up:** 2 new decomp-side symbols (`__osViIntrCount`, `__osTimerCounter`) →
+  propagate via `sync_decomp_names.py --import-from-decomp` (the 4 fn names were already in
+  `ghidra_symbols.txt`). **Band note: timerintr banking places vimgr.c's timer-side deps; the
+  remaining libultra is the io/os file-static traps (pimgr [0x7E400], piacs/motor, vimgr, sched/
+  contpfs packs) + the `__osDisableInt`/`__osRestoreInt` partial-TU asm-vendor split. Smaller
+  libnusys leaves (nuContRmbModeSet pts-3, nuGfxDisplayOn pts-3) rank cheaper than the libultra
+  traps.**
+
 - **Sprint 85: 1 .c file BANKED — `src/libultra/os/initialize.c` (`__osInitialize_common` +
   `create_speed_param`), libultra os/ coddog mirror; the S80-teed-up next-cleanest coddog leaf.**
   md5-candidate 129→**130** (all 130 .c stub-free); asm subsegs 140→139. 13th coddog cross-ref sprint.
@@ -904,6 +934,23 @@ by `/sprint-plan`:
   (osCreateMesgQueue, osSetEventMesg, osGetThreadPri/osSetThreadPri, __osDisableInt/__osRestoreInt,
   __osDevMgrMain, osCreateThread/osStartThread, __osPiCreateAccessQueue). Pursue when the data-sibling
   enabler is the sprint goal. Header `PRinternal/piint.h` already vendored (S84 epirawdma).
+- **io file-static .bss-carve trap — `vimgr.c` (`osCreateViManager` + `func_800ACFB0`/viMgrMain,
+  [0x88210, asm], pts-5).** Spike. coddog 99.99 vs ultralib VERSION_J `src/io/vimgr.c` (a 2-fn
+  single-file-pack: `osCreateViManager` + the `static viMgrMain` thread). **Blocker = a heavy
+  file-static `.bss` carve** — the file defines 6 file-statics that a verbatim mirror re-emits into
+  `.bss`: `viThread` (OSThread), `viThreadStack` (STACK, `OS_VIM_STACKSIZE`), `viEventQueue`
+  (OSMesgQueue), `viEventBuf[5]` (OSMesg[5]), `viRetraceMsg` + `viCounterMsg` (OSIoMesg), plus a
+  `static u16 retrace` inside viMgrMain. Unlike a drop-def, statics have NO external linkage → they
+  must be DEFINED (the compiler emits their `.bss`), so this needs the `.bss` layout to match the ROM
+  (a carve, or confirm they sit in a placed `main_bss` range). defines-data globals `__osViDevMgr`
+  (OSDevMgr, .bss) + `__additional_scanline`=0x800C826C (**placed S48**) drop-def normally. **Timer
+  dependency wall now GONE (S86):** viMgrMain calls `__osTimerInterrupt` + references
+  `__osCurrentTime`/`__osBaseCounter`/`__osViIntrCount` — all placed by S86's timerintr bank. Other
+  callees placed (osCreateMesgQueue/osSetEventMesg/osGetThreadPri/osSetThreadPri/__osDisableInt/
+  __osRestoreInt/osCreateThread/__osViInit/osStartThread/osRecvMesg/osSendMesg/osGetCount/
+  __osViGetCurrentContext/__osViSwapContext). `calls-unplaced:aligned` = the STACK macro (FP). Header
+  `PRinternal/{viint,osint}.h` already vendored. Pursue when the file-static `.bss`-carve enabler is
+  the sprint goal (the S33 piacs `static piAccessBuf[]` BSS-layout-conflict playbook is the model).
 - _(os/ `initialize.c` (`__osInitialize_common` + `create_speed_param`) carry-over **RESOLVED + banked
   S85** — turned out a drop-def mirror (NOT the framed cross-region `.data` carve; main_data provides
   the bytes) + one VERSION_K-gate un-gate (`__osSetWatchLo`, `docs/hazards.md#needs-define`) + a

@@ -75,9 +75,13 @@ Ghidra MCP is used inline at seed time. For each target function:
      until `build/mariogolf64.z64: OK` and SHA-1 == baserom.
 
 4. **Bank** the function (only at score 0 + spot-check + full-`make` SHA match). Give it its curated
-   Ghidra name (add to `symbol_addrs.txt`, rename in the body, re-`make`). `git commit`. Append a
-   standup line to `SPRINT.md`, and record the run's numbered "Suggested workflow improvements" into
-   `SPRINT.md`'s buffer — applied only at `/sprint-review`, never mid-sprint.
+   Ghidra name (add to `symbol_addrs.txt`, rename in the body, re-`make`). `git commit` — **stage the
+   `make extract`-regenerated artifacts too** (`undefined_syms_auto.txt` + `mariogolf64.ld`); they
+   change on a subseg flip / `symbol_addrs.txt` add and must travel with the commit, or the regen
+   bleeds into the next sprint's dirty tree (S85→S86: a `D_→named` BOOT_GLOBALS regen left
+   uncommitted surfaced as a stray diff at the next gate). `git status` should be clean after commit.
+   Append a standup line to `SPRINT.md`, and record the run's numbered "Suggested workflow
+   improvements" into `SPRINT.md`'s buffer — applied only at `/sprint-review`, never mid-sprint.
 
 A function that locks `< 0.97 percent`, needs the permuter, or hits a BSS-layout/alignment wall is a
 spike: note it, carry its file to `BACKLOG.md ## Carry-overs`, and move on. Don't weaken the DoD to
@@ -145,7 +149,10 @@ summary.
   — decompose it (split the subseg at the upstream-file/function boundary) or pull a scaffolding
   enabler as the goal instead. Applied at the `/sprint-plan` gate. **Verbatim-mirror exemption
   (S64; generalized S69).** A seed-8/13 increment may run as a normal 1-increment sprint when ALL
-  hold: (a) `regime: mirror` + a verbatim copy of a single upstream file, (b) the decompose path is
+  hold: (a) `regime: mirror` + a verbatim copy of a single upstream file — **a drop-def mirror
+  qualifies** (the function bodies are byte-verbatim; only the file-scope data DEFS become `extern`
+  decls, which emit nothing, so it banks atomically exactly like a pure `cp`; S86 `os/timerintr.c`,
+  pts-8 single-file-pack, banked first-try seed-only), (b) the decompose path is
   mechanically blocked — the increment is a `single-file-pack` (every member fn comes from ONE
   upstream `.c`), so there is no inter-file boundary to split at and an intra-file split can't be
   independently mirrored. **This holds regardless of inner-boundary 16-alignment** — S64

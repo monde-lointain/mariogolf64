@@ -25,6 +25,15 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 86 — os/timerintr.c (__osTimerServicesInit + __osTimerInterrupt + __osSetTimerIntr + __osInsertTimer), libultra drop-def mirror — 2026-06-15
+- Increment: src/libultra/os/timerintr.c banked / 4 functions matched. md5-candidate 130→131 .c (all stub-free); flippable asm subsegs 139→138.
+- Quality: 0/0/0/0 this sprint (0 stuck-far, 0 permuter, 0 carried, 0 re-opened; 0 C-body iterations — first-build full-make SHA-1 == baserom).
+- Seed: committed 8pt; banked 8pt; regime mirror (pts-8 tripped the 8-gate → verbatim-mirror exemption applied: single-file-pack:4fn decompose-blocked + all 4 names curated + all callees placed; seed-only).
+- What helped: the only remaining libultra trap with NO file-static, so a pure drop-def (S82/S85 default) with no .bss/.data carve. The 6 data globals reduced to 2 real recover-externs (3 pre-placed from S27/S30) once I noticed `__osBaseTimer` is named ONLY in `__osTimerList`'s dropped `.data` initializer — the placed pointer's bytes already encode its address, so it needs no extern/placement at all. Two MCP `disassemble_function` calls recovered both externs deterministically (lui/sw HI/LO16) and reconciled the 3 placed ones. The `-D_FINALROM` profile-block strip + correctly-J-excluded `VERSION_K` clamp meant the verbatim body matched first build.
+- Friction: none in execution. One process snag surfaced at the gate (not a code issue): `undefined_syms_auto.txt` was dirty at session start — an S85 `make extract` regen (BOOT_GLOBALS D_→named) the S85 commit never staged; S86 absorbed it (→ applied #2).
+- Applied: 4 of 4 — #1 `pick_target.py refs_unplaced` drops a `__`-global the .c itself defines but no function body references (named only in another global's depth-0 initializer; new `_names_in_function_bodies` brace-depth scan), +1 unit test (`test_refs_unplaced_drops_initializer_only_self_defined_global`), `make test-tools` 47→48 pass, golden-neutral; #2 CLAUDE.md bank-step note — always stage the `make extract`-regenerated `undefined_syms_auto.txt` + `mariogolf64.ld` so the regen doesn't bleed into the next sprint's tree; #3 CLAUDE.md 8-gate verbatim-mirror exemption wording extended to explicitly cover the drop-def sub-case (verbatim body + externed data defs banks atomically like a pure cp); #4 BACKLOG `vimgr.c` carry-over note (timerintr banking placed its timer-side deps).
+- Carry-over: none (the increment fully banked). vimgr.c (osCreateViManager) remains a file-static .bss-carve spike but its timer dependency wall is now gone — see BACKLOG ## Carry-overs.
+
 ## Sprint 85 — os/initialize.c (__osInitialize_common + create_speed_param), libultra coddog mirror — 2026-06-15
 - Increment: src/libultra/os/initialize.c banked / 2 functions matched. md5-candidate 129→130 .c (all stub-free); asm subsegs 140→139.
 - Quality: 0/0/0/0 this sprint (0 stuck-far, 0 permuter, 0 carried, 0 re-opened; 0 C-body iterations — the 2 build-fix passes were symbol/version reconciliation, not classical iteration).
