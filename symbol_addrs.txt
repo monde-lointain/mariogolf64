@@ -79,3 +79,5 @@ osMapTLB = 0x800ACB40; // type:func
 osUnmapTLB = 0x800ACCC0; // type:func
 __osContAddressCrc = 0x800B1820; // type:func
 __osContDataCrc = 0x800B188C; // type:func
+__osEPiRawReadIo = 0x800B0710; // type:func
+__osPfsSelectBank = 0x800AE920; // type:func

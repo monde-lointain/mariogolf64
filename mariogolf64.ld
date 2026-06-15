@@ -258,7 +258,7 @@ SECTIONS
         build/src/libultra/io/gbpakcheckconnector.o(.text);
         build/asm/89780.o(.text);
         build/asm/89B10.o(.text);
-        build/asm/89D20.o(.text);
+        build/src/libultra/io/pfsselectbank.o(.text);
         build/asm/89D90.o(.text);
         build/asm/8A820.o(.text);
         build/asm/8AA10.o(.text);
@@ -270,7 +270,7 @@ SECTIONS
         build/src/libultra/os/resetglobalintmask.o(.text);
         build/src/libultra/io/pirawdma.o(.text);
         build/src/libultra/io/pigetcmdq.o(.text);
-        build/asm/8BB10.o(.text);
+        build/src/libultra/io/epirawread.o(.text);
         build/src/libultra/io/epirawwrite.o(.text);
         build/src/libultra/io/ai.o(.text);
         build/asm/8BE10.o(.text);
@@ -501,7 +501,7 @@ SECTIONS
         build/src/libultra/io/gbpakcheckconnector.o(.data);
         build/asm/89780.o(.data);
         build/asm/89B10.o(.data);
-        build/asm/89D20.o(.data);
+        build/src/libultra/io/pfsselectbank.o(.data);
         build/asm/89D90.o(.data);
         build/asm/8A820.o(.data);
         build/asm/8AA10.o(.data);
@@ -513,7 +513,7 @@ SECTIONS
         build/src/libultra/os/resetglobalintmask.o(.data);
         build/src/libultra/io/pirawdma.o(.data);
         build/src/libultra/io/pigetcmdq.o(.data);
-        build/asm/8BB10.o(.data);
+        build/src/libultra/io/epirawread.o(.data);
         build/src/libultra/io/epirawwrite.o(.data);
         build/src/libultra/io/ai.o(.data);
         build/asm/8BE10.o(.data);
@@ -759,7 +759,7 @@ SECTIONS
         build/src/libultra/io/gbpakcheckconnector.o(.rodata);
         build/asm/89780.o(.rodata);
         build/asm/89B10.o(.rodata);
-        build/asm/89D20.o(.rodata);
+        build/src/libultra/io/pfsselectbank.o(.rodata);
         build/asm/89D90.o(.rodata);
         build/asm/8A820.o(.rodata);
         build/asm/8AA10.o(.rodata);
@@ -771,7 +771,7 @@ SECTIONS
         build/src/libultra/os/resetglobalintmask.o(.rodata);
         build/src/libultra/io/pirawdma.o(.rodata);
         build/src/libultra/io/pigetcmdq.o(.rodata);
-        build/asm/8BB10.o(.rodata);
+        build/src/libultra/io/epirawread.o(.rodata);
         build/src/libultra/io/epirawwrite.o(.rodata);
         build/src/libultra/io/ai.o(.rodata);
         build/asm/8BE10.o(.rodata);
@@ -1010,7 +1010,7 @@ SECTIONS
         build/src/libultra/io/gbpakcheckconnector.o(.bss);
         build/asm/89780.o(.bss);
         build/asm/89B10.o(.bss);
-        build/asm/89D20.o(.bss);
+        build/src/libultra/io/pfsselectbank.o(.bss);
         build/asm/89D90.o(.bss);
         build/asm/8A820.o(.bss);
         build/asm/8AA10.o(.bss);
@@ -1022,7 +1022,7 @@ SECTIONS
         build/src/libultra/os/resetglobalintmask.o(.bss);
         build/src/libultra/io/pirawdma.o(.bss);
         build/src/libultra/io/pigetcmdq.o(.bss);
-        build/asm/8BB10.o(.bss);
+        build/src/libultra/io/epirawread.o(.bss);
         build/src/libultra/io/epirawwrite.o(.bss);
         build/src/libultra/io/ai.o(.bss);
         build/asm/8BE10.o(.bss);
