@@ -458,3 +458,68 @@ def test_drop_static_mirror_hazard(tmp_path):
     assert pt.drop_static_mirror_hazard(None, [H(pt.HAZARD_CODDOG_MIRROR, "src/io/x.c@88.00"), fs]) is None
     # no coddog identity at all → no tag (the file-static still routes via the classical/carve playbook)
     assert pt.drop_static_mirror_hazard(None, [fs, dd]) is None
+
+
+# --- refactor pre-flight characterization (tooling/refactor-pick-target) -------------------
+# These lock CURRENT behavior (captured live, not a spec) ahead of the pick_target.py refactor
+# so the seed-weight-table (Phase 1b), the Candidate parameter object (Phase 2), and the
+# module split are unit-guarded, not only golden-guarded. See the plan's Phase 0.
+
+
+def test_pick_target_table_golden(golden_dir, regen, monkeypatch):
+    """Lock the HUMAN TABLE output — the format /sprint-plan actually consumes
+    (`venv/bin/python3 tools/pick_target.py -n 12`, .claude/commands/sprint-plan.md:47),
+    which the --json golden does NOT cover. A diff after refactoring = a regression in the
+    gate's input. Map-free for reproducibility, like the json golden."""
+    monkeypatch.setenv("CODDOG_MAP", "/nonexistent/coddog_map.tsv")
+    proc = run_tool("pick_target", "-n", ROWS)
+    assert proc.returncode == 0, proc.stderr
+    table = proc.stdout
+    assert table.strip(), "expected a non-empty table"
+    gpath = golden_dir / "pick_target_table.txt"
+    if regen or not gpath.exists():
+        gpath.write_text(table)
+        pytest.skip(f"golden regenerated: {gpath.name}")
+    assert table == gpath.read_text()
+
+
+def test_seed_points_characterization():
+    """Lock seed_points' a-priori story-point seed across the path/enabler matrix BEFORE the
+    if-ladder (`:1743-1771`) becomes a HAZARD_SEED_WEIGHT table (Phase 1b)."""
+    pt = load_tool("pick_target")
+    H = pt.Hazard
+    sp = pt.seed_points  # (size, upstream, band, nfns, hazards, blocked) -> seed
+    assert sp(100, "none", "-", 1, [], False) == 5            # small single classical
+    assert sp(100, "libultra", "warm", 1, [], False) == 1     # warm enabler-free mirror
+    assert sp(100, "libultra", "cold", 1, [], False) == 2     # cold mirror
+    assert sp(100, "libultra", "warm", 2, [], False) == 2     # + pack
+    assert sp(2000, "libultra", "warm", 1, [], False) == 13   # huge -> must decompose
+    assert sp(100, "none", "-", 2, [], False) == 13           # classical pack -> 13
+    assert sp(100, "none", "-", 1, [], True) == "blk"         # blocked -> un-pickable
+    assert sp(100, "libultra", "warm", 1, [H(pt.HAZARD_FILE_STATIC)], False) == 2
+    assert sp(100, "libultra", "warm", 1, [H(pt.HAZARD_NEEDS_HEADER, "x.h")], False) == 2
+    assert sp(100, "libultra", "warm", 1, [H(pt.HAZARD_REFS_UNPLACED, "a@0x1")], False) == 2
+    assert sp(100, "libultra", "cold", 4, [], False) == 8     # large pack must decompose
+    assert sp(100, "none", "-", 1, [H(pt.HAZARD_FILE_STATIC)], False) == 8  # classical+drop gate
+    assert [pt.snap_fib(n) for n in (0, 1, 2, 3, 4, 5, 6, 9)] == [1, 1, 2, 3, 5, 5, 8, 13]
+
+
+def test_score_row_characterization():
+    """Lock score_row's dict shape + score arithmetic
+    (-size + UPSTREAM_BONUS(200) + BAND_WARM_BONUS(64) - CARRYOVER_PENALTY(1000)) and the
+    rendered hazard string, BEFORE Phase 2 collapses its 10 args into a Candidate."""
+    pt = load_tool("pick_target")
+    H = pt.Hazard
+    KEYS = ["func", "rom", "vram", "size", "nfns", "pts", "kind",
+            "upstream", "band", "hazards", "score"]
+    r = pt.score_row(0x99999, "func_x", "asm-flip", ["func_x"], 100, "libultra", "warm",
+                     False, [H(pt.HAZARD_FILE_STATIC), H(pt.HAZARD_NEEDS_HEADER, "x.h")], set())
+    assert list(r.keys()) == KEYS
+    assert r["vram"] == "?"                       # synthetic off: no asm listing
+    assert r["hazards"] == "file-static,needs-header:x.h"
+    assert r["score"] == -100 + 200 + 64          # 164: upstream + warm bonuses
+    r2 = pt.score_row(0x99999, "func_y", "asm-flip", ["func_y", "func_z"], 64, None, "-",
+                      False, [], {"func_y"})
+    assert r2["hazards"] == "-"                    # no hazards renders "-"
+    assert r2["score"] == -64 - 1000              # carried penalty, no bonuses
+    assert (pt.UPSTREAM_BONUS, pt.BAND_WARM_BONUS, pt.CARRYOVER_PENALTY) == (200, 64, 1000)
