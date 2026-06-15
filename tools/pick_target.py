@@ -870,13 +870,13 @@ def stale_version_header(up_path, lib):
         return []
     refs = set()
     try:
-        with open(up_path, errors="ignore") as f:
-            for line in f:
-                m = _BUILD_VERSION_IF_RE.match(line.lstrip())
-                if m:
-                    refs.add(m.group(2))
+        text = UpstreamSource.get(up_path).text
     except OSError:
         return []
+    for line in text.splitlines():
+        m = _BUILD_VERSION_IF_RE.match(line.lstrip())
+        if m:
+            refs.add(m.group(2))
     if not refs:
         return []
     defined = _os_version_defined_tokens(lib)
@@ -1111,13 +1111,12 @@ def has_file_scope_static(cpath):
     """True if the upstream .c declares a file-scope static *variable* (BSS-layout hazard →
     classical loop). A file-scope static *function* (prototype) is excluded — it is not a data
     hazard (S54)."""
-    with open(cpath, errors="ignore") as f:
-        for line in f:
-            stripped = line.lstrip()
-            if stripped.startswith(("//", "*")):
-                continue
-            if FILE_STATIC_RE.match(line) and not _is_static_func_proto(line):
-                return True
+    for line in UpstreamSource.get(cpath).text.splitlines():
+        stripped = line.lstrip()
+        if stripped.startswith(("//", "*")):
+            continue
+        if FILE_STATIC_RE.match(line) and not _is_static_func_proto(line):
+            return True
     return False
 
 
@@ -1132,29 +1131,28 @@ def defines_data_globals(cpath):
     names = []
     depth = 0
     in_kr_params = False  # between a K&R `name(args)` header and its `{` body
-    with open(cpath, errors="ignore") as f:
-        for raw in f:
-            line = raw.strip()
-            if (depth == 0 and not in_kr_params and line and not line.startswith(
-                    ("#", "//", "*", "}", "static", "extern", "typedef"))):
-                m = DATA_GLOBAL_DEF_RE.match(line)
-                if m and "(" not in line.split("=", 1)[0]:
-                    # Surface the array dimension (`name[DIM]`) so the gate sizes the symbol_addrs
-                    # entry mechanically — a scalar is 0x4, an array is stride×count (S20 rule;
-                    # S42 __osEventStateTab[OS_NUM_EVENTS]). The element/stride + macro resolution
-                    # still happens at the gate; this just flags array-vs-scalar without opening
-                    # the source.
-                    names.append(f"{m.group(1)}[{m.group(2)}]" if m.group(2) is not None else m.group(1))
-            # A depth-0 function header (K&R or ANSI) opens a param region where `type name;`
-            # lines are parameters, not globals — skip until the body brace. K&R math in libkmc
-            # (`_xatan(u,v,atanp)` then `XLONG u,v;`) would otherwise false-flag every param.
-            if depth == 0 and "(" in line and not line.endswith(";") and "{" not in line:
-                in_kr_params = True
-            if "{" in raw:
-                in_kr_params = False
-            depth += raw.count("{") - raw.count("}")
-            if depth < 0:
-                depth = 0
+    for raw in UpstreamSource.get(cpath).text.splitlines():
+        line = raw.strip()
+        if (depth == 0 and not in_kr_params and line and not line.startswith(
+                ("#", "//", "*", "}", "static", "extern", "typedef"))):
+            m = DATA_GLOBAL_DEF_RE.match(line)
+            if m and "(" not in line.split("=", 1)[0]:
+                # Surface the array dimension (`name[DIM]`) so the gate sizes the symbol_addrs
+                # entry mechanically — a scalar is 0x4, an array is stride×count (S20 rule;
+                # S42 __osEventStateTab[OS_NUM_EVENTS]). The element/stride + macro resolution
+                # still happens at the gate; this just flags array-vs-scalar without opening
+                # the source.
+                names.append(f"{m.group(1)}[{m.group(2)}]" if m.group(2) is not None else m.group(1))
+        # A depth-0 function header (K&R or ANSI) opens a param region where `type name;`
+        # lines are parameters, not globals — skip until the body brace. K&R math in libkmc
+        # (`_xatan(u,v,atanp)` then `XLONG u,v;`) would otherwise false-flag every param.
+        if depth == 0 and "(" in line and not line.endswith(";") and "{" not in line:
+            in_kr_params = True
+        if "{" in raw:
+            in_kr_params = False
+        depth += raw.count("{") - raw.count("}")
+        if depth < 0:
+            depth = 0
     return names
 
 
@@ -1168,17 +1166,16 @@ def defines_local_static_data(cpath):
     0x10-byte .data carve that the file-scope detector — and the S72 coddog re-scan — both missed."""
     names = []
     depth = 0
-    with open(cpath, errors="ignore") as f:
-        for raw in f:
-            line = raw.strip()
-            if depth >= 1 and line.startswith("static") and "=" in line \
-                    and not _is_static_func_proto(line):
-                m = LOCAL_STATIC_DATA_RE.match(line)
-                if m:
-                    names.append(m.group(1))
-            depth += raw.count("{") - raw.count("}")
-            if depth < 0:
-                depth = 0
+    for raw in UpstreamSource.get(cpath).text.splitlines():
+        line = raw.strip()
+        if depth >= 1 and line.startswith("static") and "=" in line \
+                and not _is_static_func_proto(line):
+            m = LOCAL_STATIC_DATA_RE.match(line)
+            if m:
+                names.append(m.group(1))
+        depth += raw.count("{") - raw.count("}")
+        if depth < 0:
+            depth = 0
     return names
 
 
@@ -1562,22 +1559,21 @@ def missing_includes(cpath, mirror_dir=None, lib=None):
     (band_mirror_dir); None disables the source-relative check."""
     search_dirs = INCLUDE_DIRS + LIB_EXTRA_INCLUDE_DIRS.get(lib or "", [])
     missing = []
-    with open(cpath, errors="ignore") as f:
-        for line in f:
-            m = INCLUDE_RE.match(line)
-            if not m:
-                continue
-            inc = m.group(1)
-            if any(os.path.exists(os.path.join(d, inc)) for d in search_dirs):
-                continue
-            # A quote-include resolves source-relative once the band-local companion is in-tree.
-            # normpath collapses a `..` segment (S60: a relative `../gu/guint.h` from a sibling-dir
-            # upstream source resolves to the already-vendored gu/ copy, not a phantom needs-header).
-            is_quote = '"' in m.group(0)
-            if is_quote and mirror_dir and os.path.exists(os.path.normpath(os.path.join(mirror_dir, inc))):
-                continue
-            if inc not in missing:
-                missing.append(inc)
+    for line in UpstreamSource.get(cpath).text.splitlines():
+        m = INCLUDE_RE.match(line)
+        if not m:
+            continue
+        inc = m.group(1)
+        if any(os.path.exists(os.path.join(d, inc)) for d in search_dirs):
+            continue
+        # A quote-include resolves source-relative once the band-local companion is in-tree.
+        # normpath collapses a `..` segment (S60: a relative `../gu/guint.h` from a sibling-dir
+        # upstream source resolves to the already-vendored gu/ copy, not a phantom needs-header).
+        is_quote = '"' in m.group(0)
+        if is_quote and mirror_dir and os.path.exists(os.path.normpath(os.path.join(mirror_dir, inc))):
+            continue
+        if inc not in missing:
+            missing.append(inc)
     return missing
 
 
@@ -2006,15 +2002,15 @@ def header_renames_symbol(cpath, primary, _depth=0, _seen=None):
     define_re = re.compile(r'^\s*#\s*define\s+' + re.escape(primary) + r'\b')
     includes = []
     try:
-        with open(cpath, errors="replace") as f:
-            for line in f:
-                if _depth > 0 and define_re.match(line):
-                    return os.path.basename(cpath)
-                m = INCLUDE_RE.match(line)
-                if m:
-                    includes.append(m.group(1))
+        text = UpstreamSource.get(cpath).text  # errors='ignore' (was 'replace'; immaterial for ASCII)
     except OSError:
         return None
+    for line in text.splitlines():
+        if _depth > 0 and define_re.match(line):
+            return os.path.basename(cpath)
+        m = INCLUDE_RE.match(line)
+        if m:
+            includes.append(m.group(1))
     for inc in includes:
         hdr = _resolve_include(inc)
         if hdr:
@@ -2142,15 +2138,15 @@ def _file_scope_static_count(cpath):
     known under-count — it has no file-scope line and is recovered at the gate alongside the rest."""
     n = 0
     try:
-        with open(cpath, errors="ignore") as f:
-            for line in f:
-                s = line.lstrip()
-                if s.startswith(("//", "*")):
-                    continue
-                if FILE_STATIC_RE.match(line) and not _is_static_func_proto(line):
-                    n += 1
+        text = UpstreamSource.get(cpath).text
     except OSError:
         return 0
+    for line in text.splitlines():
+        s = line.lstrip()
+        if s.startswith(("//", "*")):
+            continue
+        if FILE_STATIC_RE.match(line) and not _is_static_func_proto(line):
+            n += 1
     return n
 
 
