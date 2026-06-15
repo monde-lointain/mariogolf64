@@ -523,6 +523,14 @@ def build_coddog_index():
     return idx
 
 
+def _coddog_upstream_path(cfile):
+    """Resolve a coddog map `ulfile` (e.g. `src/io/piacs.c`, repo-root-relative) to an on-disk
+    path, or None. The map's paths are relative to the ultralib repo root; LIBULTRA is `<root>/src`.
+    Used by build_rows to re-run the file-level trap detectors on a coddog-matched upstream."""
+    p = os.path.join(os.path.dirname(LIBULTRA), cfile)
+    return p if os.path.isfile(p) else None
+
+
 def build_signature_index():
     """All SDK functions as (lib, basename, name, callees, consts) + the callee document
     frequency (how many SDK fns call each name) for IDF weighting. One pass over the trees."""
@@ -1375,6 +1383,26 @@ def include_is_already_vendored(inc, lib):
     return any(os.path.exists(os.path.join(d, base)) for d in search_dirs)
 
 
+def _tagged_missing_includes(cpath, lib):
+    """(tagged_headers, blocked) for cpath's unreachable includes, tagged by enabler load: bare =
+    a real block (deferred -I / system header → pts 'blk'), `(vendorable)` = a one-time source cp,
+    `(already-vendored)` = free (the basename already resolves under the -I set). `blocked` counts
+    only the bare ones. Shared by the named-upstream battery (append_upstream_hazards) and the S72
+    coddog trap re-scan (build_rows), so both price headers identically."""
+    missing = missing_includes(cpath, band_mirror_dir(lib, cpath), lib)
+    if not missing:
+        return [], False
+
+    def _tag(inc):
+        if include_is_blocked(inc):
+            return inc
+        if include_is_already_vendored(inc, lib):
+            return f"{inc}(already-vendored)"
+        return f"{inc}(vendorable)"
+
+    return [_tag(inc) for inc in missing], any(include_is_blocked(inc) for inc in missing)
+
+
 def snap_fib(n):
     """Round a raw additive score up to the nearest Fibonacci ladder rung (1,2,3,5,8,13)."""
     for f in (1, 2, 3, 5, 8, 13):
@@ -1609,23 +1637,11 @@ def append_upstream_hazards(off, primary, up_lib, up_path, hazards):
         else:
             crefs = unplaced_calls
         hazards.append(Hazard(HAZARD_CALLS_UNPLACED, ",".join(crefs)))  # recover func symbol before flip
-    mirror_dir = band_mirror_dir(up_lib, up_path)
-    missing = missing_includes(up_path, mirror_dir, up_lib)
-    if missing:
-        # Tag each header by enabler load: bare (untagged) = a real block (deferred -I / system
-        # header, → pts 'blk'); `(vendorable)` = a one-time source cp; `(already-vendored)` = no
-        # work at all — the basename already resolves under the -I set, so the include-path
-        # adaptation is free (S59). `blocked` (→ pts 'blk') still counts only the bare ones.
-        def _header_tag(inc):
-            if include_is_blocked(inc):
-                return inc
-            if include_is_already_vendored(inc, up_lib):
-                return f"{inc}(already-vendored)"
-            return f"{inc}(vendorable)"
-
-        tagged = [_header_tag(inc) for inc in missing]
+    mirror_dir = band_mirror_dir(up_lib, up_path)  # also reused below for band warmth
+    tagged, hdr_blocked = _tagged_missing_includes(up_path, up_lib)
+    if tagged:
         hazards.append(Hazard(HAZARD_NEEDS_HEADER, ",".join(tagged)))
-        blocked = any(include_is_blocked(inc) for inc in missing)
+        blocked = blocked or hdr_blocked
     stale = stale_version_header(up_path, up_lib)
     if stale:
         # A version-conditional fn silently dropped: os_version.h resolves but is a stripped revision
@@ -1750,6 +1766,26 @@ def build_rows(args, upstream_index, carried, sig_index, coddog_index=None):
             hazards.append(Hazard(HAZARD_CODDOG_MIRROR, f"{cfile}@{cpct:.2f}"))
             if up_lib is None and cpct >= CODDOG_MIRROR_PCT and not cfile.startswith("src/audio"):
                 up_lib = "libultra"
+            # S72: the coddog-resolved upstream is a real `.c`, but its trap detectors never ran.
+            # An un-named (`func_<addr>`) subseg's defines-data / file-static / needs-header key off
+            # the *named* upstream (absent here), so a verbatim-mirror candidate that DEFINES data or
+            # a file-scope static looked clean under the bare coddog flag. Re-run the three file-level
+            # (name-independent) detectors on the resolved `.c` so the gate prices the trap — and
+            # seed_points re-prices it (drop/needs_copy) — instead of a mid-sprint BSS-layout stall.
+            # Motivating case: `func_800AC110 → piacs.c` (pts-3 "clean") DEFINES __osPiAccessQueueEnabled
+            # + `static OSMesg piAccessBuf[]` → defines-data + file-static, a route-to-classical trap.
+            cl_path = _coddog_upstream_path(cfile)
+            if cl_path:
+                clib = up_lib or "libultra"
+                if has_file_scope_static(cl_path):
+                    hazards.append(Hazard(HAZARD_FILE_STATIC))
+                cdefs = defines_data_globals(cl_path)
+                if cdefs:
+                    hazards.append(Hazard(HAZARD_DEFINES_DATA, ",".join(cdefs)))
+                ctagged, cblk = _tagged_missing_includes(cl_path, clib)
+                if ctagged:
+                    hazards.append(Hazard(HAZARD_NEEDS_HEADER, ",".join(ctagged)))
+                    blocked = blocked or cblk
 
         if args.lib and args.lib not in (path or "") and (up_lib or "") != args.lib \
                 and not any(args.lib in n for n in fns):

@@ -561,6 +561,42 @@ was removed).
 
 ---
 
+## assert-strip (bare upstream assert vs NDEBUG)
+
+**Rule:** This build defines **neither `NDEBUG` nor `_DEBUG`** (only `_FINALROM`). The in-tree
+`assert.h` keys solely off `NDEBUG`: undefined → `assert(EX)` expands to
+`((EX)?(void)0:__assert(...))`, which **emits a branch + `jal __assert`** (plus the `__FILE__` /
+line / stringized-expr args). The ROM's libultra was a release build with asserts stripped, so a
+verbatim mirror of a file whose upstream calls `assert()` **outside** any `#ifdef _DEBUG` compiles in
+assert code the ROM does not have → SHA-miss.
+
+**Symptom:** a clean verbatim io/cont/pfs/vi/si mirror SHA-misses (or the isolated `.text` is
+*larger* than its ROM slot) and the extra bytes are a `beq/bne` + `jal __assert`. The tell: the
+function is the *same size* as a sibling that has no assert (S72: epirawread's 0x170 subseg == its
+twin epirawwrite's 0x170 → the ROM carries no assert code for the bare `assert(data != NULL)`).
+
+**Procedure:**
+1. Wrap the bare upstream assert(s) in `#ifdef _DEBUG` — the in-tree, banked convention. `sirawread.c`
+   does exactly this: upstream has bare `assert((devAddr & 0x3) == 0); assert(data != NULL);`, the
+   banked mirror guards them in `#ifdef _DEBUG`. With `_DEBUG` undefined the assert tokens are never
+   compiled → zero code → matches the release ROM. Fold a bare assert adjacent to an existing
+   `#ifdef _DEBUG` block (the `devAddr & 0x3` __osError class) into that same block.
+2. The proof stays the full-make ROM SHA-1. Do NOT instead define `NDEBUG` globally — it would also
+   silence asserts the ROM might genuinely retain elsewhere, and the band has not been rebuilt under
+   it; the `#ifdef _DEBUG` wrap is the surgical, per-call strip.
+3. `assert.h` need not be included once every assert is `_DEBUG`-wrapped (the token never reaches the
+   macro phase), but mirroring the upstream include is harmless.
+
+**Banked instances:** sirawread.c, sirawwrite.c, visetmode.c, viswapbuf.c, visetevent.c (vi/si bare
+asserts), epirawread.c (S72, pi EPI band — `assert(data != NULL)` sat *outside* the `_DEBUG` block).
+
+**Provenance:** S72 (epirawread.c; the read-twin's bare assert would have emitted code, caught by the
+read==write subseg-size tell + the banked sirawread convention). A `bare-assert` advisory
+`pick_target` flag (scan a mirror's upstream for a non-`_DEBUG`-guarded `assert(`) is a noted
+deferred enhancement — see `BACKLOG.md ## Carry-overs`.
+
+---
+
 ## .rodata sibling-yaml pattern
 
 **Rule:** When GCC emits a `.rodata` constant for a C file whose text is at one ROM offset but whose
@@ -851,11 +887,25 @@ carrying `pack` / `jal-count-mismatch` / `maybe-upstream`, before committing it 
    13 → 3). Audio hits stay advisory (the one-time audio-header enabler is not modeled). Absent map
    → ranking unchanged (the committed golden is map-free; `CODDOG_MAP` env overrides the path).
 3. Treat a `coddog-mirror` candidate as `#upstream-mirror-pattern` (verbatim cp from the matched
-   `.c`); the `@<pct>` is the confidence (99.99 = byte-verbatim once placed).
+   `.c`); the `@<pct>` is the confidence (99.99 = byte-verbatim once placed). **NOT every coddog
+   match is an atomic verbatim cp** — see step 4.
+4. **S72 trap re-scan:** because the candidate is un-named (`func_<addr>`), its own
+   `defines-data` / `file-static` / `needs-header` detectors (which key off the *named* upstream)
+   never ran — so a coddog match to a file that **defines data or a file-scope static** looked clean
+   under the bare flag. `build_rows` now re-runs those three *file-level* (name-independent)
+   detectors on the coddog-resolved `.c` and appends their hazards (and `seed_points` re-prices via
+   `drop`/`needs_copy`). So a `coddog-mirror` candidate carrying `file-static` / `defines-data`
+   routes to `#file-static-bss-layout-conflict` / `#defines-data` (a `.data`/`.bss` sibling carve or
+   classical), **NOT** an atomic verbatim cp. Motivating case: `func_800AC110 → piacs.c` ranks pts-5
+   (not the bare-coddog pts-3) because piacs.c DEFINES `__osPiAccessQueueEnabled` + a
+   `static OSMesg piAccessBuf[]`; `osMotorStop → motor.c` likewise surfaces
+   `defines-data:__osMotorinitialized[...]`.
 
-**Trigger:** `pick_target.py` flags `coddog-mirror:<file>@<pct>` (only when the map exists).
+**Trigger:** `pick_target.py` flags `coddog-mirror:<file>@<pct>` (only when the map exists); any
+`file-static` / `defines-data` / `needs-header` on the *same row* is the S72 trap re-scan.
 
-**Provenance:** S71 (crc.c mis-seed; the recipe + reusable tool memory in `coddog-ultralib-crossref`).
+**Provenance:** S71 (crc.c mis-seed; the recipe + reusable tool memory in `coddog-ultralib-crossref`);
+S72 (the trap re-scan — coddog-mirror candidates can hide a defines-data/file-static BSS trap).
 
 ---
 

@@ -183,19 +183,6 @@
   },
   {
     "band": "-",
-    "func": "func_800AE920",
-    "hazards": "maybe-upstream:libultra:pfssetlabel,pfsselectbank,pfsreformat",
-    "kind": "asm-flip",
-    "nfns": 1,
-    "pts": 5,
-    "rom": "0x89D20",
-    "score": -112,
-    "size": 112,
-    "upstream": "none",
-    "vram": "0x800AE920"
-  },
-  {
-    "band": "-",
     "func": "func_800A0730",
     "hazards": "pack:2fn[func_800A0730=?,func_800A0774=?]",
     "kind": "asm-flip",
@@ -352,19 +339,6 @@
   },
   {
     "band": "-",
-    "func": "func_800AC110",
-    "hazards": "pack:3fn[func_800AC110=?,func_800AC164=?,func_800AC1D0=?],maybe-upstream:libultra:siacs,piacs",
-    "kind": "asm-flip",
-    "nfns": 3,
-    "pts": 13,
-    "rom": "0x87510",
-    "score": -240,
-    "size": 240,
-    "upstream": "none",
-    "vram": "0x800AC110"
-  },
-  {
-    "band": "-",
     "func": "__floatdidf",
     "hazards": "-",
     "kind": "asm-flip",
@@ -453,19 +427,6 @@
     "size": 624,
     "upstream": "libultra",
     "vram": "0x800AF610"
-  },
-  {
-    "band": "-",
-    "func": "func_800B0710",
-    "hazards": "-",
-    "kind": "asm-flip",
-    "nfns": 1,
-    "pts": 5,
-    "rom": "0x8BB10",
-    "score": -368,
-    "size": 368,
-    "upstream": "none",
-    "vram": "0x800B0710"
   },
   {
     "band": "-",
@@ -626,7 +587,7 @@
   {
     "band": "warm",
     "func": "__osDevMgrMain",
-    "hazards": "calls-unplaced:__osEPiRawReadIo,dma,edma,jal-count-mismatch:25vs21",
+    "hazards": "calls-unplaced:dma,edma,jal-count-mismatch:25vs21",
     "kind": "asm-flip",
     "nfns": 1,
     "pts": 3,
@@ -648,5 +609,44 @@
     "size": 704,
     "upstream": "none",
     "vram": "0x8006A000"
+  },
+  {
+    "band": "-",
+    "func": "mus_thread_create",
+    "hazards": "pack:2fn[mus_thread_create=?,mus_audio_thread=?]",
+    "kind": "asm-flip",
+    "nfns": 2,
+    "pts": 13,
+    "rom": "0x79370",
+    "score": -720,
+    "size": 720,
+    "upstream": "none",
+    "vram": "0x8009DF70"
+  },
+  {
+    "band": "-",
+    "func": "__osInitialize_common",
+    "hazards": "pack:2fn[__osInitialize_common=?,create_speed_param=?]",
+    "kind": "asm-flip",
+    "nfns": 2,
+    "pts": 13,
+    "rom": "0x8ACA0",
+    "score": -752,
+    "size": 752,
+    "upstream": "none",
+    "vram": "0x800AF8A0"
+  },
+  {
+    "band": "-",
+    "func": "func_800500E0",
+    "hazards": "pack:3fn[func_800500E0=?,func_80050274=?,func_8005029C=?]",
+    "kind": "asm-flip",
+    "nfns": 3,
+    "pts": 13,
+    "rom": "0x2B4E0",
+    "score": -800,
+    "size": 800,
+    "upstream": "none",
+    "vram": "0x800500E0"
   }
 ]

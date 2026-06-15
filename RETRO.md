@@ -25,6 +25,17 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 72 — bank io/epirawread.c (__osEPiRawReadIo) + io/pfsselectbank.c (__osPfsSelectBank), libultra io coddog-mirror pair — 2026-06-14
+- Increment: 2 .c files banked (`src/libultra/io/epirawread.c` + `pfsselectbank.c`) / 2 fns matched (md5-candidate 110 → 112, all 112 .c stub-free; asm subsegs 152 → 150).
+- Quality: stuck-far 0 / permuter 0 / carried 0 / re-opened 0 (both first-build, 0 iteration).
+- Seed: committed 4pt (2+2); banked 4pt; regime mirror (seed-only, 8-gate clear).
+- What helped: the S71 coddog map turned the un-named `func_800B0710`/`func_800AE920` into definitive verbatim-mirror targets (99.99%). epirawread had a banked twin (epirawwrite) pinning the include/EPI_SYNC pattern; the bare-assert wrinkle was resolved by the banked sirawread convention (`_DEBUG`-wrap), with the read==write subseg size as the proof the ROM strips it. pfsselectbank's callee + headers were all pre-placed.
+- Friction: two near-misses avoided by reading upstream at the gate — (a) the bare `assert(data != NULL)` would have emitted `jal __assert` and SHA-missed (NDEBUG undefined here); (b) the sibling coddog leaf piacs.c looked like a clean pts-3 mirror but DEFINES data + a `static` (a BSS trap). Both are now tooling-surfaced.
+- Applied: 2 of 2: #1 `pick_target.py` coddog trap re-scan — `build_rows` re-runs defines_data/file_static/needs_header on the coddog-resolved `.c` (shared `_tagged_missing_includes` + `_coddog_upstream_path`); piacs re-priced 3→5, motor.c now shows defines-data/file-static; +1 unit test, golden regen, suite 35 pass. #2 `docs/hazards.md#assert-strip` playbook + CLAUDE.md index row + coddog-cross-ref trap-re-scan note. (#3 was observation-only, no edit.)
+- Carry-over: none (a file). Tooling follow-up (not file-blocking): optional `bare-assert` advisory `pick_target` flag — scan a mirror's upstream for a non-`_DEBUG`-guarded `assert(` so the strip is priced at the gate.
+
+---
+
 ## Sprint 71 — bank io/crc.c (__osContAddressCrc + __osContDataCrc), libultra io mirror; FIRST coddog-driven target — 2026-06-14
 - Increment: 1 .c file banked (`src/libultra/io/crc.c`) / 2 fns matched (md5-candidate 109 → 110, all 110 .c stub-free; asm subsegs 153 → 152).
 - Quality: stuck-far 0 / permuter 0 / carried 0 / re-opened 0.

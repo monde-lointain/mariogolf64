@@ -106,3 +106,25 @@ def test_coddog_mirror_repricing(tmp_path, monkeypatch):
     audio = rows.get("func_800A09E0")  # audio hit: flagged but NOT re-priced (header-gated)
     assert audio is not None and "coddog-mirror:src/audio/fake.c@99.99" in audio["hazards"]
     assert audio["upstream"] == "none"
+
+
+def test_coddog_trap_rescan(tmp_path, monkeypatch):
+    """S72: a coddog-matched upstream's trap detectors (defines-data / file-static / needs-header)
+    re-run on the resolved `.c`, so a verbatim-mirror candidate's hidden BSS/data trap is priced at
+    the gate, not discovered mid-sprint. Map a none-classified candidate to a REAL ultralib file
+    with the trap — src/io/piacs.c DEFINES `__osPiAccessQueueEnabled` + a `static OSMesg piAccessBuf`
+    — and assert both hazards surface (and the seed re-prices off the bare-coddog clean look)."""
+    mapf = tmp_path / "coddog_map.tsv"
+    mapf.write_text("func_800A0730\t__osPiCreateAccessQueue\tsrc/io/piacs.c\t99.99\n")
+    monkeypatch.setenv("CODDOG_MAP", str(mapf))
+    rows = {r["func"]: r for r in json.loads(run_tool("pick_target", "--json", "-n", "200").stdout)}
+
+    hit = rows.get("func_800A0730")
+    assert hit is not None, "mapped candidate missing from output"
+    assert "coddog-mirror:src/io/piacs.c@99.99" in hit["hazards"]
+    # The trap the bare coddog flag hid: piacs.c is NOT an atomic verbatim cp.
+    assert "file-static" in hit["hazards"], hit["hazards"]
+    assert "defines-data:" in hit["hazards"], hit["hazards"]
+    # Re-priced as a libultra mirror (≥99% non-audio) but the defines-data/file-static `drop`
+    # lifts the seed above a bare clean io mirror (so the gate sees the real cost).
+    assert hit["upstream"] == "libultra"
