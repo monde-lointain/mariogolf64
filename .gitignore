@@ -90,3 +90,6 @@ ghidra/
 
 # Local Claude Code MCP config (machine-specific Ghidra port pin)
 .mcp.json
+
+# S71 coddog cross-ref generated map (local, depends on ultralib/coddog builds)
+tools/coddog/coddog_map.tsv

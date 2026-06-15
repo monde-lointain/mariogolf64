@@ -821,6 +821,42 @@ fixup commit).
 
 **Provenance:** S13 (un-named SDK mirror trap).
 
+For a definitive (not IDF-guess) version of `maybe-upstream`, see `#coddog-cross-ref` — it pairs the
+un-named fn with its ultralib identity by instruction-hash match.
+
+---
+
+## coddog cross-ref
+
+**Rule:** `pick_target.py` classifies an un-named (`func_<addr>`) subseg as `upstream none` →
+classical, even when it is a verbatim ultralib mirror. The names being absent is the ONLY reason.
+**S71 crc.c** was mis-seeded **pts-13 classical** (`none` + `pack:2fn`) but is a trivial verbatim
+2-fn mirror. coddog (`compare2`, reloc-masked instruction hashes) pairs each MG64 fn with the
+ultralib fn it matches, revealing the source file — turning the `none`/classical guess into a known
+mirror target. Per the S71 sweep, ~all of the remaining libultra band is verbatim-mirrorable.
+
+**When:** an `upstream none` candidate in the libultra vram range (`0x800A_xxxx`–`0x800B_xxxx`)
+carrying `pack` / `jal-count-mismatch` / `maybe-upstream`, before committing it to the classical loop.
+
+**Procedure:**
+1. Run the sweep: `make coddog-sweep` (or `tools/coddog_sweep.sh`). Needs a fresh `make` (MG64 ELF),
+   a built ultralib (`~/development/repos/ultralib/build/J`, the VERSION_J pin), and the coddog
+   binary. It builds a combined ultralib-J ELF (KMC objects need
+   `objcopy -R .mdebug -R .reginfo …` to normalize the symtab + strip ECOFF, then
+   `ld -r --allow-multiple-definition`; objdiff cannot read a `.a` archive), runs `compare2`, and
+   writes `tools/coddog/coddog_map.tsv` (gitignored — local, build-dependent).
+2. `pick_target.py` (`build_coddog_index`) reads the map if present: a candidate whose lead fn is in
+   the map gets a `coddog-mirror:<file>@<pct>` hazard; a **≥99% non-audio** hit is re-priced
+   `upstream libultra` so `seed_points` drops it off the `classical and pack` → 13 path (crc.c:
+   13 → 3). Audio hits stay advisory (the one-time audio-header enabler is not modeled). Absent map
+   → ranking unchanged (the committed golden is map-free; `CODDOG_MAP` env overrides the path).
+3. Treat a `coddog-mirror` candidate as `#upstream-mirror-pattern` (verbatim cp from the matched
+   `.c`); the `@<pct>` is the confidence (99.99 = byte-verbatim once placed).
+
+**Trigger:** `pick_target.py` flags `coddog-mirror:<file>@<pct>` (only when the map exists).
+
+**Provenance:** S71 (crc.c mis-seed; the recipe + reusable tool memory in `coddog-ultralib-crossref`).
+
 ---
 
 ## stale-vendored-header

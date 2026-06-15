@@ -3,7 +3,8 @@
 This project decompiles Mario Golf 64 (N64) one function at a time. Tooling: splat (file
 splitting), KMC GCC 2.7.2 (`tools/cc/gcc`), m2c (asm→C seed), asm-differ (library mode),
 decomp-permuter (escalation), Ghidra MCP bridge (live decompile + struct/symbol lookup, port 8089,
-all calls pass `program="baserom.z64"`).
+all calls pass `program="baserom.z64"`), coddog (`make coddog-sweep` — fingerprints MG64 fns vs
+ultralib VERSION_J to reveal an un-named `func_`'s upstream source; see `docs/hazards.md#coddog-cross-ref`).
 
 This file is the always-loaded core: the workflow model, the Scrum cadence, and the every-sprint
 rules. Detail lives in two on-demand references:
@@ -259,6 +260,7 @@ When `pick_target.py` flags a hazard (or a match shows its symptom), read the ma
 | `intrinsic-likely:cp0-asm(identify-TU)` (un-named privileged hand-asm: TLB/CP0/eret, name unresolved) | #asm-mirror-vendoring |
 | `combined-subseg:<n>tu[…]` (≥2 distinct asm TUs in one subseg) | #asm-mirror-vendoring |
 | `intrinsic-likely` (bare) / `maybe-upstream:…` | #intrinsic-likely--maybe-upstream-signature-hints |
+| `coddog-mirror:<file>@<pct>` (coddog matched an un-named/`none` candidate to an ultralib fn → verbatim mirror, not classical) | #coddog-cross-ref |
 | (libultra leaf, bare std header)| #per-library-standard-c-header-isolation |
 | (match locks ~0.9, lib target)  | #compile-profiles-libkmc--o-libultra--o3 |
 | (compiler rodata, wrong offset) / `rodata-literal:<addr>` | #rodata-sibling-yaml-pattern |

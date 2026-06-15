@@ -125,6 +125,13 @@ extract:
 test-tools:
 	./venv/bin/python3 -m pytest tests/tooling
 
+# S71: fingerprint MG64's functions against ultralib VERSION_J (coddog compare2) and write
+# tools/coddog/coddog_map.tsv, which pick_target.py reads to re-price/flag none-classified
+# verbatim mirrors. Needs a fresh `make` (the MG64 ELF) + a built ultralib + coddog. Opt-in:
+# the map is gitignored; absent → pick_target ranking is unchanged. See docs/hazards.md#coddog-cross-ref.
+coddog-sweep:
+	./tools/coddog_sweep.sh
+
 sync-names:
 	-GHIDRA_REPO="$${MARIOGOLF64_GHIDRA_REPO:-$$HOME/development/reversing/ghidra/mariogolf64}"; \
 	  SYNC_PY="$$GHIDRA_REPO/venv/bin/python3"; \
@@ -133,7 +140,7 @@ sync-names:
 	  "$$SYNC_PY" "$$GHIDRA_REPO/scripts/sync_decomp_names.py" \
 	    --export-to-decomp --decomp-root . --write-in-place
 
-.PHONY: all clean distclean setup extract test-tools sync-names nonmatching-func spotcheck-build clean-nonmatchings
+.PHONY: all clean distclean setup extract test-tools coddog-sweep sync-names nonmatching-func spotcheck-build clean-nonmatchings
 
 # Create build directories. The trailing `$(sort $(dir $(C_O_FILES)))` is
 # REQUIRED: when C_FILES recursively picks up src/libultra/vi/<file>.c, the

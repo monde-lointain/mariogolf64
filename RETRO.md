@@ -25,6 +25,17 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 71 — bank io/crc.c (__osContAddressCrc + __osContDataCrc), libultra io mirror; FIRST coddog-driven target — 2026-06-14
+- Increment: 1 .c file banked (`src/libultra/io/crc.c`) / 2 fns matched (md5-candidate 109 → 110, all 110 .c stub-free; asm subsegs 153 → 152).
+- Quality: stuck-far 0 / permuter 0 / carried 0 / re-opened 0.
+- Seed: committed 2pt; banked 2pt; regime mirror (8-gate fired pts-13 → cleared by the verbatim-mirror exemption; pts-13 was a coddog-refuted false price, the S43 tooling-artifact class, logged at the corrected mirror seed).
+- What helped: **coddog `compare2`** (PO directive) — fingerprinting MG64 vs a combined ultralib-J ELF reclassified the pts-13 `none`/`pack:2fn` subseg as a trivial verbatim 2-fn mirror (99.99%). nm confirmed zero callees (pure CRC integer math); subseg = crc.o `.text` 0xF0 exact; `u8*` arg dodged char-signedness. Byte-identical cp, first-build match.
+- Friction: the harness needed building (KMC objects need `objcopy -R .mdebug/.reginfo` + `ld -r --allow-multiple-definition`; objdiff can't read a `.a`). The first sweep script had a `python3 - <<HEREDOC | pipe` stdin collision (heredoc shadowed the piped data) → extracted `parse_map.py`. Golden needed a map-free regen (crc banking + the new optional map both shifted output).
+- Applied (4 of 4): #1 coddog gate-step (`docs/hazards.md#coddog-cross-ref` + CLAUDE.md index/preamble); #2 `pick_target.py build_coddog_index` reads `tools/coddog/coddog_map.tsv` → `coddog-mirror:<file>@<pct>` flag + ≥99% non-audio re-price as libultra mirror (env-overridable `CODDOG_MAP`, golden regen, new `test_coddog_mirror_repricing`); #3 BACKLOG S71 regime note (libultra ~all verbatim-mirrorable; genuine classical only the libc xprintf band; audio header-gated); #4 `tools/coddog_sweep.sh` + `tools/coddog/parse_map.py` harness + `make coddog-sweep`. `make test-tools` 34 pass.
+- Carry-overs: none new. Bonus: `__osContRamRead`/`__osContRamWrite` unlocked (CRC helper callees now placed). Cross-repo follow-up: `__osContAddressCrc`/`__osContDataCrc` → `sync_decomp_names.py --import-from-decomp`.
+
+---
+
 ## Sprint 70 — asm-mirror osMapTLB + osUnmapTLB, libultra os TLB CP0 primitives — 2026-06-14
 - Increment: 2 asm TUs vendored+banked (`src/libultra/os/maptlb.s` osMapTLB 0x87F40 / `unmaptlb.s` osUnmapTLB 0x880C0) / 2 functions matched. No `.c` md5-candidate delta (asm-mirror is asm→hasm, not asm→c): asm subsegs 155→153, hasm 19→21; `.c` md5-candidate unchanged 109/109. 6th asm-mirror vendoring sprint (S56/57/58/62/63 lineage).
 - Quality: stuck-far 0 / permuter 0 / carried 0 / re-opened 0. Both byte-id to ROM disasm, full-make ROM SHA-1 == baserom **first make, 0 iteration**; `.o(.text)` 0xC0/0x40 = 0xB4/0x3C bodies 16-padded (KMC-`as`) → exact slot fill (0x87F40+0xC0=0x88000, 0x880C0+0x40=0x88100).

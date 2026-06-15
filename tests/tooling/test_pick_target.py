@@ -54,7 +54,10 @@ def test_vendorable_tu_missing_defines(tmp_path, monkeypatch):
     assert "R4300" not in miss and "RDBPORT" not in miss and "TLB" not in miss
 
 
-def test_pick_target_json_golden(golden_dir, regen):
+def test_pick_target_json_golden(golden_dir, regen, monkeypatch):
+    # The S71 coddog map (tools/coddog/coddog_map.tsv) is gitignored + build-dependent, so the
+    # committed golden is map-free; neutralize any local map for a reproducible snapshot.
+    monkeypatch.setenv("CODDOG_MAP", "/nonexistent/coddog_map.tsv")
     proc = run_tool("pick_target", "--json", "-n", ROWS)
     assert proc.returncode == 0, proc.stderr
     rows = json.loads(proc.stdout)
@@ -68,13 +71,38 @@ def test_pick_target_json_golden(golden_dir, regen):
     assert rows == expected
 
 
-def test_pick_target_ranked_by_descending_score(golden_dir, regen):
+def test_pick_target_ranked_by_descending_score(golden_dir, regen, monkeypatch):
     """Lock the ranking contract: rows are ordered by `score`, highest first.
 
     (`score` folds size + bonuses/penalties; the smallest-first intent lives
     inside the score, not in a raw size sort.)
     """
+    monkeypatch.setenv("CODDOG_MAP", "/nonexistent/coddog_map.tsv")
     proc = run_tool("pick_target", "--json", "-n", ROWS)
     rows = json.loads(proc.stdout)
     scores = [r["score"] for r in rows]
     assert scores == sorted(scores, reverse=True), "rows must be ranked by descending score"
+
+
+def test_coddog_mirror_repricing(tmp_path, monkeypatch):
+    """S71: an optional coddog map re-prices/flags a none-classified verbatim mirror.
+
+    A candidate pick_target sees as `upstream none` (un-named fns) but coddog matched ≥99% to a
+    non-audio ultralib file is re-priced as a libultra mirror + flagged coddog-mirror:<file>@<pct>;
+    a <99% or audio hit stays advisory (flag only). Absent map → unchanged (covered by the golden)."""
+    # A none-classified pack candidate to target: func_800A0730 (pts-13 none pack:2fn) from the golden.
+    mapf = tmp_path / "coddog_map.tsv"
+    mapf.write_text(
+        "func_800A0730\t__osFakeMirror\tsrc/io/fake.c\t99.99\n"
+        "func_800A09E0\t__alFakeAudio\tsrc/audio/fake.c\t99.99\n"
+    )
+    monkeypatch.setenv("CODDOG_MAP", str(mapf))
+    rows = {r["func"]: r for r in json.loads(run_tool("pick_target", "--json", "-n", "200").stdout)}
+
+    hit = rows.get("func_800A0730")
+    assert hit is not None and "coddog-mirror:src/io/fake.c@99.99" in hit["hazards"]
+    assert hit["upstream"] == "libultra" and hit["pts"] < 13  # re-priced off the classical-pack 13
+
+    audio = rows.get("func_800A09E0")  # audio hit: flagged but NOT re-priced (header-gated)
+    assert audio is not None and "coddog-mirror:src/audio/fake.c@99.99" in audio["hazards"]
+    assert audio["upstream"] == "none"

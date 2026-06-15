@@ -340,7 +340,7 @@
   {
     "band": "warm",
     "func": "__osContRamRead",
-    "hazards": "refs-unplaced:__OSContRamReadFormat,__osContLastCmd,__osPfsLastChannel,__osPfsPifRam,calls-unplaced:READFORMAT,__osContAddressCrc,__osContDataCrc,__osSiGetAccess,__osSiRawStartDma,__osSiRelAccess,needs-header:PRinternal/controller.h(already-vendored),PRinternal/siint.h(already-vendored),jal-count-mismatch:23vs10",
+    "hazards": "refs-unplaced:__OSContRamReadFormat,__osContLastCmd,__osPfsLastChannel,__osPfsPifRam,calls-unplaced:READFORMAT,__osSiGetAccess,__osSiRawStartDma,__osSiRelAccess,needs-header:PRinternal/controller.h(already-vendored),PRinternal/siint.h(already-vendored),jal-count-mismatch:23vs10",
     "kind": "asm-flip",
     "nfns": 1,
     "pts": 3,
@@ -362,19 +362,6 @@
     "size": 240,
     "upstream": "none",
     "vram": "0x800AC110"
-  },
-  {
-    "band": "-",
-    "func": "func_800B1820",
-    "hazards": "pack:2fn[func_800B1820=?,func_800B188C=?]",
-    "kind": "asm-flip",
-    "nfns": 2,
-    "pts": 13,
-    "rom": "0x8CC20",
-    "score": -240,
-    "size": 240,
-    "upstream": "none",
-    "vram": "0x800B1820"
   },
   {
     "band": "-",
@@ -457,7 +444,7 @@
   {
     "band": "warm",
     "func": "__osContRamWrite",
-    "hazards": "refs-unplaced:__OSContRamReadFormat,__osContLastCmd,__osPfsLastChannel,__osPfsPifRam,calls-unplaced:READFORMAT,__osContAddressCrc,__osContDataCrc,__osSiGetAccess,__osSiRawStartDma,__osSiRelAccess,needs-header:PRinternal/controller.h(already-vendored),PRinternal/siint.h(already-vendored),jal-count-mismatch:22vs10",
+    "hazards": "refs-unplaced:__OSContRamReadFormat,__osContLastCmd,__osPfsLastChannel,__osPfsPifRam,calls-unplaced:READFORMAT,__osSiGetAccess,__osSiRawStartDma,__osSiRelAccess,needs-header:PRinternal/controller.h(already-vendored),PRinternal/siint.h(already-vendored),jal-count-mismatch:22vs10",
     "kind": "asm-flip",
     "nfns": 1,
     "pts": 3,
@@ -648,5 +635,18 @@
     "size": 960,
     "upstream": "libultra",
     "vram": "0x800A35F0"
+  },
+  {
+    "band": "-",
+    "func": "vector_magnitude_safe",
+    "hazards": "pack:8fn[vector_magnitude_safe=?,calculate_hypotenuse_safe=?,func_8006A174=?,update_rng_seed=?,hypotf_2d=?,calc_vec3_magnitude=?,func_8006A1EC=?,func_8006A274=?]",
+    "kind": "asm-flip",
+    "nfns": 8,
+    "pts": 13,
+    "rom": "0x45400",
+    "score": -704,
+    "size": 704,
+    "upstream": "none",
+    "vram": "0x8006A000"
   }
 ]

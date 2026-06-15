@@ -75,6 +75,13 @@ BACKLOG = os.path.join(ROOT, "BACKLOG.md")
 # *data* extern that means an undefined reference (see refs_unplaced). Functions are exempt —
 # splat auto-resolves them via undefined_funcs_auto.txt.
 NAME_FILES = [os.path.join(ROOT, "symbol_addrs.txt"), os.path.join(ROOT, "ghidra_symbols.txt")]
+# S71: optional coddog cross-ref map (mgname<TAB>ulname<TAB>ulfile<TAB>pct), written by
+# tools/coddog_sweep.sh. Absent by default → build_coddog_index() returns {} and ranking is
+# unchanged. A ≥CODDOG_MIRROR_PCT non-audio hit re-prices an un-named/none candidate as a libultra
+# mirror (crc.c was mis-seeded pts-13 classical; coddog proved it a verbatim 2-fn mirror). See
+# docs/hazards.md#coddog-cross-ref.
+CODDOG_MAP = os.environ.get("CODDOG_MAP", os.path.join(ROOT, "tools/coddog/coddog_map.tsv"))
+CODDOG_MIRROR_PCT = 99.0
 
 # Subseg line: `- [0x8DF10, c, libultra/monegi/rdp/dp]` or `- [0x8D230, asm]`.
 # (bss entries use the `{ type: bss, ... }` brace form and are intentionally skipped.)
@@ -216,6 +223,7 @@ HAZARD_RODATA_LITERAL = "rodata-literal"
 HAZARD_DATA_STATIC = "data-static"
 HAZARD_TWIN_OF = "twin-of"
 HAZARD_REMAINING = "remaining"
+HAZARD_CODDOG_MIRROR = "coddog-mirror"  # S71: a coddog compare2 match to an ultralib fn
 
 
 @dataclasses.dataclass
@@ -488,6 +496,31 @@ def _static_carve_siblings():
             d, b = os.path.split(m.group(2).strip())
             out.setdefault(d, {".data": set(), ".rodata": set(), ".bss": set()})[m.group(1)].add(b)
     return out
+
+
+def build_coddog_index():
+    """S71: load the optional coddog cross-ref map -> {mgname: (ulfile, pct)}.
+
+    The map (tools/coddog/coddog_map.tsv, written by tools/coddog_sweep.sh) pairs each MG64
+    function with the ultralib fn coddog matched it to. Absent/garbled lines are skipped; an
+    absent file returns {} (ranking unchanged). Unlike signature_hint's IDF guess, a coddog hit is
+    an actual instruction-hash match — definitive enough to re-price a none-classified verbatim
+    mirror (see build_rows). Format per line: mgname<TAB>ulname<TAB>ulfile<TAB>pct."""
+    idx = {}
+    try:
+        with open(CODDOG_MAP, errors="ignore") as f:
+            for line in f:
+                parts = line.rstrip("\n").split("\t")
+                if len(parts) != 4:
+                    continue
+                mg, _ul, ulfile, pct = parts
+                try:
+                    idx[mg] = (ulfile, float(pct))
+                except ValueError:
+                    continue
+    except OSError:
+        return {}
+    return idx
 
 
 def build_signature_index():
@@ -1675,7 +1708,8 @@ def score_row(off, primary, kind, fns, size, up_lib, band, blocked, hazards, car
     }
 
 
-def build_rows(args, upstream_index, carried, sig_index):
+def build_rows(args, upstream_index, carried, sig_index, coddog_index=None):
+    coddog_index = coddog_index or {}
     subs = parse_subsegs()
     rows = []
     for i, (off, typ, path) in enumerate(subs):
@@ -1706,6 +1740,17 @@ def build_rows(args, upstream_index, carried, sig_index):
                 if hint:
                     hazards.append(hint)
 
+        # S71 coddog cross-ref: a candidate coddog matched to an ultralib fn but that the C-name
+        # index missed (un-named / `none`) is a verbatim-mirror target mis-seen as classical. Flag
+        # the match always; re-price a ≥CODDOG_MIRROR_PCT *non-audio* hit as a libultra mirror so
+        # `seed_points` drops it off the `classical and pack` -> 13 path (crc.c: pts-13 -> 3). Audio
+        # hits stay advisory (they still need the one-time audio-header enabler, not modeled here).
+        if not up_path and primary in coddog_index:
+            cfile, cpct = coddog_index[primary]
+            hazards.append(Hazard(HAZARD_CODDOG_MIRROR, f"{cfile}@{cpct:.2f}"))
+            if up_lib is None and cpct >= CODDOG_MIRROR_PCT and not cfile.startswith("src/audio"):
+                up_lib = "libultra"
+
         if args.lib and args.lib not in (path or "") and (up_lib or "") != args.lib \
                 and not any(args.lib in n for n in fns):
             continue
@@ -1726,7 +1771,7 @@ def main():
     args = ap.parse_args()
 
     rows = build_rows(args, build_upstream_index(), carry_over_names(),
-                      build_signature_index())
+                      build_signature_index(), build_coddog_index())
     if args.json:
         print(json.dumps(rows, indent=1))
         return
