@@ -187,7 +187,7 @@ SECTIONS
         build/asm/82460.o(.text);
         build/asm/824E0.o(.text);
         build/asm/82560.o(.text);
-        build/asm/82590.o(.text);
+        build/src/libultra/io/contquery.o(.text);
         build/src/libultra/io/contreaddata.o(.text);
         build/asm/82810.o(.text);
         build/src/libultra/os/virtualtophysical.o(.text);
@@ -429,7 +429,7 @@ SECTIONS
         build/asm/82460.o(.data);
         build/asm/824E0.o(.data);
         build/asm/82560.o(.data);
-        build/asm/82590.o(.data);
+        build/src/libultra/io/contquery.o(.data);
         build/src/libultra/io/contreaddata.o(.data);
         build/asm/82810.o(.data);
         build/src/libultra/os/virtualtophysical.o(.data);
@@ -687,7 +687,7 @@ SECTIONS
         build/asm/82460.o(.rodata);
         build/asm/824E0.o(.rodata);
         build/asm/82560.o(.rodata);
-        build/asm/82590.o(.rodata);
+        build/src/libultra/io/contquery.o(.rodata);
         build/src/libultra/io/contreaddata.o(.rodata);
         build/asm/82810.o(.rodata);
         build/src/libultra/os/virtualtophysical.o(.rodata);
@@ -942,7 +942,7 @@ SECTIONS
         build/asm/82460.o(.bss);
         build/asm/824E0.o(.bss);
         build/asm/82560.o(.bss);
-        build/asm/82590.o(.bss);
+        build/src/libultra/io/contquery.o(.bss);
         build/src/libultra/io/contreaddata.o(.bss);
         build/asm/82810.o(.bss);
         build/src/libultra/os/virtualtophysical.o(.bss);
