@@ -256,7 +256,7 @@ segments:
       - [0x88150, c, libultra/io/vigetcurrframebuf]
       - [0x88190, c, libultra/io/vigetnextframebuf]
       - [0x881D0, c, libultra/io/vigetmode]
-      - [0x88210, asm]
+      - [0x88210, c, libultra/io/vimgr]
       - [0x88550, c, libultra/io/visetevent]
       - [0x885B0, c, libultra/io/visetmode]
       - [0x88600, c, libultra/io/visetspecial]

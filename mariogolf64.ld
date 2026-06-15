@@ -245,7 +245,7 @@ SECTIONS
         build/src/libultra/io/vigetcurrframebuf.o(.text);
         build/src/libultra/io/vigetnextframebuf.o(.text);
         build/src/libultra/io/vigetmode.o(.text);
-        build/asm/88210.o(.text);
+        build/src/libultra/io/vimgr.o(.text);
         build/src/libultra/io/visetevent.o(.text);
         build/src/libultra/io/visetmode.o(.text);
         build/src/libultra/io/visetspecial.o(.text);
@@ -496,7 +496,7 @@ SECTIONS
         build/src/libultra/io/vigetcurrframebuf.o(.data);
         build/src/libultra/io/vigetnextframebuf.o(.data);
         build/src/libultra/io/vigetmode.o(.data);
-        build/asm/88210.o(.data);
+        build/src/libultra/io/vimgr.o(.data);
         build/src/libultra/io/visetevent.o(.data);
         build/src/libultra/io/visetmode.o(.data);
         build/src/libultra/io/visetspecial.o(.data);
@@ -761,7 +761,7 @@ SECTIONS
         build/src/libultra/io/vigetcurrframebuf.o(.rodata);
         build/src/libultra/io/vigetnextframebuf.o(.rodata);
         build/src/libultra/io/vigetmode.o(.rodata);
-        build/asm/88210.o(.rodata);
+        build/src/libultra/io/vimgr.o(.rodata);
         build/src/libultra/io/visetevent.o(.rodata);
         build/src/libultra/io/visetmode.o(.rodata);
         build/src/libultra/io/visetspecial.o(.rodata);
@@ -1021,7 +1021,7 @@ SECTIONS
         build/src/libultra/io/vigetcurrframebuf.o(.bss);
         build/src/libultra/io/vigetnextframebuf.o(.bss);
         build/src/libultra/io/vigetmode.o(.bss);
-        build/asm/88210.o(.bss);
+        build/src/libultra/io/vimgr.o(.bss);
         build/src/libultra/io/visetevent.o(.bss);
         build/src/libultra/io/visetmode.o(.bss);
         build/src/libultra/io/visetspecial.o(.bss);
