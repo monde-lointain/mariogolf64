@@ -25,6 +25,15 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 81 — io siacs.c, the SI access-queue file (verbatim piacs.c twin) — 2026-06-15
+- Increment: src/libultra/io/siacs.c (`__osSiCreateAccessQueue` + `__osSiGetAccess` + `__osSiRelAccess`) banked / 3 functions matched. md5-candidate 125→126 files; asm subsegs 143→142.
+- Quality: 0/0/0/0 this sprint (verbatim drop-def cp, 0 iteration; first-make ROM SHA-1 == baserom).
+- Seed: committed 5pt; banked 5pt; regime mirror (seed-only). 8-gate clear (5<8). Smallest remaining libultra candidate (240B); the file-static+defines-data load priced it pts-5 but it banked atomically like any mirror via the S42 drop-def fast path.
+- What helped: it's the verbatim structural TWIN of the already-banked `io/piacs.c` — exact playbook in hand (drop the 3 data defs → extern, place add-only). coddog @99.99 confirmed verbatim; all callees pre-placed (`osCreateMesgQueue`/`osSendMesg`/`osRecvMesg`); 2 of 3 fns already named; warm io band so no header work. The 3 SI data vrams were all visible as `D_<vram>` in the scaffold asm → trivial recover-extern. Bonus: placing `__osSiCreateAccessQueue`=0x800AC110 resolves the `calls-unplaced` callee the next-up controller.c needs.
+- Friction: coddog named the TWIN (piacs.c) not the real source (siacs.c) — caught by the named SI members, a manual reconcile. And the data-symbol adds landed mid-execution → forced a 2nd `make extract` (the gate placed only the fn symbol); these globals were gate-placeable (no section carve) so the 2nd extract was avoidable. Both became retro suggestions.
+- Applied: 2 of 2 — #1 `pick_target.py` `coddog-twin:<matched>!=<member-src>` pre-flag (helper `_append_coddog_twin_hazard`, wired into both coddog emission sites; unit-verified piacs!=siacs fires, agree/unnamed no-op; CLAUDE.md index row + docs/hazards.md #coddog-cross-ref step 5); #2 docs/hazards.md #defines-data gate-safe symbol-add note (a drop-def symbol-add naming an existing `D_<vram>` is SHA-neutral at the stub stage, distinct from the S68 execution-only ld-section carve). Golden stable (committed map is coddog-free → twin check inert), suite 45 pass.
+- Carry-over: none.
+
 ## Sprint 80 — io pfsgetstatus.c, a clean single-file 3-fn coddog verbatim mirror — 2026-06-15
 - Increment: src/libultra/io/pfsgetstatus.c (`__osPfsGetStatus` + `__osPfsRequestOneChannel` + `__osPfsGetOneChannelData`) banked / 3 functions matched. md5-candidate 124→125 files; asm subsegs 144→143.
 - Quality: 0/0/0/0 this sprint (verbatim cp, 0 edits, 0 iteration; first-make ROM SHA-1 == baserom).

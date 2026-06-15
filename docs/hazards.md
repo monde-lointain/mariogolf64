@@ -434,6 +434,22 @@ makes the `.o` emit the real `.data`). The stub's `%lo(D_<vram>)` resolves from 
 `data` subseg in the meantime. (S68 `gu/align.c`: deferred the `[0xA35A0, .data, libultra/gu/align]`
 carve from gate to the body step; the verbatim twin of S61's carve, first-build match.)
 
+**Symbol-add vs. section-carve — the gate-safe drop-def sub-case (S81).** The S68 "execution, never
+the gate" rule is specifically about an **ld-section sibling carve** (a `[<rom>, .data, …]` /
+`.bss` / `.rodata` yaml subseg), which carves an empty range against the `.text`-only stub and shifts
+every following data byte → gate SHA break. It does **NOT** cover a plain `symbol_addrs.txt` data
+entry that merely **names an existing auto `D_<vram>` label** (the global already lives in a generic
+`data`/`bss` subseg; the add only renames the dlabel, emits no new section). That symbol-add is
+**SHA-neutral at the stub stage** and so MAY be performed at the plan gate alongside the function
+symbol — saving the mid-execution second `make extract` the recover-extern otherwise forces. The tell
+that a drop-def is the gate-safe symbol-add kind (not a carve): the dropped globals' vrams are already
+visible as `%lo(D_<vram>)` in the **scaffold `.s`** (so they resolve from an existing region, no new
+section needed). When in doubt, the gate `make extract && make` green-ROM SHA is the proof — naming a
+pre-existing `D_` label is inert, a section carve is not. (S81 `io/siacs.c`: the 3 SI globals
+`__osSiAccessQueueEnabled`@0x800C8210 / `__osSiAccessQueue`@0x801EFFB0 / `siAccessBuf`@0x800FAA00 were
+all visible as `D_<vram>` in the scaffold asm; placing them at the gate would have avoided the 2nd
+extract. Contrast the gu carves S61/S68/S73, which inject real `.data` and MUST stay at execution.)
+
 **Source-side detector — the coddog-band backstop (S73).** The S52 `data-static`/`rodata-literal`
 pre-flag is **asm-side** (it classifies the fn's `lwc1/ldc1 %lo(D_<addr>)`), and it does **not** fire
 on an un-named **coddog** candidate — `gu/position.c` (`func_800A9C60`, a 99.99 coddog mirror) ranked
@@ -972,11 +988,25 @@ carrying `pack` / `jal-count-mismatch` / `maybe-upstream`, before committing it 
    `static OSMesg piAccessBuf[]`; `osMotorStop → motor.c` likewise surfaces
    `defines-data:__osMotorinitialized[...]`.
 
+5. **S81 twin disambiguation:** coddog's reloc-masked hashes can pair a candidate with a
+   near-identical **twin** file rather than its real source — `func_800AC110`+`__osSiGetAccess`+
+   `__osSiRelAccess` (the SI access-queue subseg) coddog-matched `src/io/piacs.c@99.99`, but its
+   named members name `siacs`. `pick_target.py` cross-checks the coddog basename against the pack's
+   *named* members' upstream basenames and, on disagreement, appends `coddog-twin:<matched>!=<member-src>`.
+   **Mirror from `<member-src>` (siacs.c), not the coddog `<matched>` file (piacs.c).** A @99.99 twin
+   is byte-identical once placed (the body is the same either way), so this only removes a manual
+   reconcile step — but it pins which upstream the agent copies + which symbol names it places. No-ops
+   when the candidate has no named member (nothing to disagree with) or the basenames agree.
+
 **Trigger:** `pick_target.py` flags `coddog-mirror:<file>@<pct>` (only when the map exists); any
-`file-static` / `defines-data` / `needs-header` on the *same row* is the S72 trap re-scan.
+`file-static` / `defines-data` / `needs-header` on the *same row* is the S72 trap re-scan; a
+`coddog-twin:<matched>!=<member-src>` on the same row means coddog named the twin — mirror from
+`<member-src>`.
 
 **Provenance:** S71 (crc.c mis-seed; the recipe + reusable tool memory in `coddog-ultralib-crossref`);
-S72 (the trap re-scan — coddog-mirror candidates can hide a defines-data/file-static BSS trap).
+S72 (the trap re-scan — coddog-mirror candidates can hide a defines-data/file-static BSS trap);
+S81 (`io/siacs.c`: coddog named the twin `piacs.c`, named members → real source `siacs.c`; the
+gate-safe drop-def symbol-add note also landed in #defines-data).
 
 ---
 

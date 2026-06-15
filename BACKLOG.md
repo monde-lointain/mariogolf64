@@ -508,6 +508,33 @@ sub-sprints).
   `sync_decomp_names.py --import-from-decomp`. **Band note: `initialize.c` (os/, pts now 5) is the
   next-cleanest coddog leaf but is a cross-region `.data`-carve + name-reconcile job (see
   Carry-overs); the io clean-coddog leaves remain mined out (piacs/motor traps, os/settime pts-13).**
+
+- **Sprint 81: 1 .c file BANKED — `src/libultra/io/siacs.c` (`__osSiCreateAccessQueue` +
+  `__osSiGetAccess` + `__osSiRelAccess`), the SI access-queue file; a verbatim twin of banked
+  `io/piacs.c`.** md5-candidate 125→**126** (all 126 .c stub-free); asm subsegs 143→142. 10th coddog
+  cross-ref sprint, smallest remaining libultra candidate (240B). coddog matched the TWIN
+  `piacs.c@99.99` but the named members (`__osSiGetAccess`/`__osSiRelAccess`) name the real source
+  `siacs.c` — mirrored from siacs.c. Drop-def fast path (S42): the 3 file-defined data globals
+  dropped → `extern`, placed add-only at asm-recovered vrams (`__osSiAccessQueueEnabled`=0x800C8210
+  size:0x4, `__osSiAccessQueue`=0x801EFFB0 size:0x18, `siAccessBuf`=0x800FAA00 size:0x4 — all visible
+  as `D_<vram>` in the scaffold asm). Gate enablers: `__osSiCreateAccessQueue`=0x800AC110 (func) +
+  flip `[0x87510, asm]`→`[0x87510, c, libultra/io/siacs]` (standalone 240B subseg, no split). 0
+  edits, 0 iteration, first-make ROM SHA-1 == baserom. **Bonus unlock:** placing
+  `__osSiCreateAccessQueue` resolves the `calls-unplaced` callee the next-up `controller.c`
+  (`osContInit` pack) needs. seed 5 / banked 5pt; regime mirror (seed-only; 8-gate clear at 5<8). 0
+  stuck-far/permuter/carried/re-opened. Applied 2 of 2: #1 `pick_target.py`
+  `coddog-twin:<matched>!=<member-src>` pre-flag (cross-checks coddog basename vs named-member
+  upstream basenames; fires `piacs!=siacs`; helper `_append_coddog_twin_hazard` wired into both
+  coddog emission sites + CLAUDE.md index row + `docs/hazards.md#coddog-cross-ref` step 5); #2
+  `docs/hazards.md#defines-data` gate-safe symbol-add note (a drop-def symbol-add naming an existing
+  `D_<vram>` is SHA-neutral at the stub stage — distinct from the S68 execution-only ld-section
+  carve; would have avoided this sprint's 2nd `make extract`). Golden stable (committed map is
+  coddog-free → twin check inert), suite 45 pass. **Cross-repo follow-up:** 4 new decomp-side symbols
+  (`__osSiCreateAccessQueue` / `__osSiAccessQueueEnabled` / `__osSiAccessQueue` / `siAccessBuf`) →
+  propagate via `sync_decomp_names.py --import-from-decomp`. **Band note: `siacs` unlocked
+  `__osSiCreateAccessQueue` → `controller.c` (`osContInit`, pts-5, defines 6 globals + 4 refs-unplaced)
+  is now the next coddog io candidate; still a heavier recover-extern/defines-data mirror, not a clean
+  cp.**
   **Band note: next-cleanest libultra coddog mirrors — os/settime (single fn buried in the 6fn pack at
   0x526B0, needs decompose) and the io `[0x8CE90]` pack is now CLEARED; the defines-data/file-static
   traps remain (piacs/motor, contpfs [0x89D90, 7fn @100], sched, timerintr [0x87C40, 4fn]).**

@@ -235,6 +235,8 @@ HAZARD_DATA_STATIC = "data-static"
 HAZARD_TWIN_OF = "twin-of"
 HAZARD_REMAINING = "remaining"
 HAZARD_CODDOG_MIRROR = "coddog-mirror"  # S71: a coddog compare2 match to an ultralib fn
+HAZARD_CODDOG_TWIN = "coddog-twin"  # S81: coddog matched a near-identical TWIN file (piacs.c) but
+# the named members name the real source (siacs); mirror from the member-named source, not the file
 HAZARD_CALLER_EVICT = "caller-evict"  # S77: an un-named func_ member a banked C file calls by name
 HAZARD_TRAILING_PAD = "trailing-pad"  # S79: trailing nop pad to a higher-aligned next subseg a C mirror can't emit
 
@@ -542,6 +544,28 @@ def _coddog_upstream_path(cfile):
     Used by build_rows to re-run the file-level trap detectors on a coddog-matched upstream."""
     p = os.path.join(os.path.dirname(LIBULTRA), cfile)
     return p if os.path.isfile(p) else None
+
+
+def _append_coddog_twin_hazard(cfile, fns, upstream_index, hazards):
+    """S81: coddog (compare2, reloc-masked) can match a near-identical TWIN file rather than the
+    candidate's real source -- the SI access-queue subseg (`func_800AC110`+`__osSiGetAccess`+
+    `__osSiRelAccess`) coddog-matched `src/io/piacs.c@99.99`, but its named members name `siacs`.
+    Cross-check the coddog-matched basename against the pack's *named* members' upstream basenames;
+    on disagreement flag `coddog-twin:<matched>!=<member-src>` so the gate mirrors from the
+    member-named source (siacs.c), not the coddog file (piacs.c). A @99.99 twin is byte-identical
+    once placed, so the body is the same either way -- this only removes a manual SI/PI reconcile
+    step. No-ops when no member is named (nothing to disagree with) or the basenames agree."""
+    cstem = os.path.splitext(os.path.basename(cfile))[0]
+    member_stems = []
+    for fn in fns:
+        _, fn_up = upstream_index.get(fn, (None, None))
+        if fn_up:
+            s = os.path.splitext(os.path.basename(fn_up))[0]
+            if s not in member_stems:
+                member_stems.append(s)
+    if member_stems and cstem not in member_stems:
+        hazards.append(Hazard(HAZARD_CODDOG_TWIN,
+                              f"{cstem}!={','.join(sorted(member_stems))}"))
 
 
 def build_signature_index():
@@ -1982,6 +2006,7 @@ def build_rows(args, upstream_index, carried, sig_index, coddog_index=None):
         if not up_path and primary in coddog_index:
             cfile, cpct = coddog_index[primary]
             hazards.append(Hazard(HAZARD_CODDOG_MIRROR, f"{cfile}@{cpct:.2f}"))
+            _append_coddog_twin_hazard(cfile, fns, upstream_index, hazards)
             if up_lib is None and cpct >= CODDOG_MIRROR_PCT and not cfile.startswith("src/audio"):
                 up_lib = "libultra"
             # S72: the coddog-resolved upstream is a real `.c`, but its trap detectors never ran.
@@ -2019,6 +2044,7 @@ def build_rows(args, upstream_index, carried, sig_index, coddog_index=None):
                     continue
                 cpct = max(p for _, c, p in cod_members if c == cfile)
                 hazards.append(Hazard(HAZARD_CODDOG_MIRROR, f"{cfile}@{cpct:.2f}"))
+                _append_coddog_twin_hazard(cfile, fns, upstream_index, hazards)
                 # S80: surface the tail-identity file's traps too. The S72 block above keys on the
                 # primary, so a coddog hit carried by an un-named TAIL member (initialize.c's hit is
                 # on the sibling `create_speed_param`, not leader `__osInitialize_common`) reached

@@ -262,6 +262,7 @@ When `pick_target.py` flags a hazard (or a match shows its symptom), read the ma
 | `combined-subseg:<n>tu[…]` (≥2 distinct asm TUs in one subseg) | #asm-mirror-vendoring |
 | `intrinsic-likely` (bare) / `maybe-upstream:…` | #intrinsic-likely--maybe-upstream-signature-hints |
 | `coddog-mirror:<file>@<pct>` (coddog matched an un-named/`none` candidate to an ultralib fn → verbatim mirror, not classical; S72: a same-row `file-static`/`defines-data`/`needs-header` is the coddog trap re-scan → not an atomic cp) | #coddog-cross-ref |
+| `coddog-twin:<matched>!=<member-src>` (S81: coddog matched a near-identical TWIN file; the named members name the real source — mirror from `<member-src>`, not `<matched>`) | #coddog-cross-ref |
 | (libultra leaf, bare std header)| #per-library-standard-c-header-isolation |
 | (match locks ~0.9, lib target)  | #compile-profiles-libkmc--o-libultra--o3 |
 | (compiler rodata, wrong offset) / `rodata-literal:<addr>` | #rodata-sibling-yaml-pattern |
