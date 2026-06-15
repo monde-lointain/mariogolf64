@@ -200,7 +200,7 @@ segments:
       - [0x82560, hasm]
       - [0x82590, c, libultra/io/contquery]
       - [0x82630, c, libultra/io/contreaddata]
-      - [0x82810, asm]
+      - [0x82810, c, libultra/io/controller]
       - [0x82B20, c, libultra/os/virtualtophysical]
       - [0x82B80, c, libultra/gu/align]
       - [0x82F20, c, libultra/gu/cosf]
