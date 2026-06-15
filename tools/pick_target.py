@@ -216,6 +216,40 @@ HUGE_FN_BYTES = 1536
 PACK_DECOMPOSE_NFNS = 4
 
 
+# --- Upstream source cache -------------------------------------------------
+class UpstreamSource:
+    """Cached view of one upstream source/header file (Phase 2b). `UpstreamSource.get(path).text`
+    reads the file once (errors='ignore') and memoizes it for the process, so the ~10+ producers
+    that each inspect the SAME upstream .c per candidate (file-static / defines-data / refs- &
+    calls-unplaced / missing-includes / call-divergence / version-header / ...) read it ONCE instead
+    of re-open()ing it every time. Retires the per-producer redundant IO + the Feature Envy of a
+    pile of functions that each open a path they were handed. The producers keep their (cpath, ...)
+    signatures and route their read through here, so the test seams are unchanged. `.text` raises
+    OSError exactly like open(), so callers keep their own try/except."""
+
+    _cache: "dict[str, UpstreamSource]" = {}
+
+    def __init__(self, path):
+        self.path = path
+        self._text = None
+        self._read = False
+
+    @classmethod
+    def get(cls, path):
+        inst = cls._cache.get(path)
+        if inst is None:
+            inst = cls._cache[path] = cls(path)
+        return inst
+
+    @property
+    def text(self):
+        if not self._read:
+            with open(self.path, errors="ignore") as f:  # OSError propagates; callers keep try/except
+                self._text = f.read()
+            self._read = True
+        return self._text
+
+
 # --- Hazards ---------------------------------------------------------------
 # A hazard is a (kind, optional detail) pair, not a formatted string: the kind is
 # one of the constants below (the shared vocabulary producers emit and seed_points
@@ -993,7 +1027,7 @@ def gbi_value_guard_needs_define(cpath, lib):
     if not guarded:
         return None
     try:
-        body = _strip_comments(open(cpath, errors="ignore").read())
+        body = _strip_comments(UpstreamSource.get(cpath).text)
     except OSError:
         return None
     active = _active_defines_for_lib(lib)
@@ -1007,7 +1041,7 @@ def gbi_value_guard_needs_define(cpath, lib):
 def _upstream_body(up_cpath, primary):
     """The brace-matched body of `primary` in its upstream .c, or None."""
     try:
-        text = open(up_cpath, errors="ignore").read()
+        text = UpstreamSource.get(up_cpath).text
     except OSError:
         return None
     for name, body in _iter_upstream_functions(text):
@@ -1239,7 +1273,7 @@ def declared_type_names(cpath, _depth=0, _seen=None):
         _seen = set()
     names = set()
     try:
-        text = open(cpath, errors="ignore").read()
+        text = UpstreamSource.get(cpath).text
     except OSError:
         return names
     names.update(TYPEDEF_CLOSE_RE.findall(text))
@@ -1289,7 +1323,7 @@ def declared_extern_data(cpath, _depth=0, _seen=None):
         _seen = set()
     names = set()
     try:
-        text = open(cpath, errors="ignore").read()
+        text = UpstreamSource.get(cpath).text
     except OSError:
         return names
     names.update(EXTERN_DATA_DECL_RE.findall(text))
@@ -1351,7 +1385,7 @@ def macro_hidden_text(cpath):
     a placeholder like va_start's `__AP`/`__LASTARG` is not mistaken for a referenced global.
     Returns (expansion_text, macro_names)."""
     try:
-        text = open(cpath, errors="ignore").read()
+        text = UpstreamSource.get(cpath).text
     except OSError:
         return "", set()
     macros = all_func_macros()
@@ -1403,7 +1437,7 @@ def refs_unplaced(cpath, placed, lib=None):
     undefined_funcs_auto — are excluded), and absent from the name set. A function *pointer*
     passed by bare name could over-flag; the gate confirms against the upstream."""
     try:
-        text = open(cpath, errors="ignore").read()
+        text = UpstreamSource.get(cpath).text
     except OSError:
         return []
     # Drop the inactive `#if BUILD_VERSION` side so a ref in the dead branch (S47: `CartRomHandle`
@@ -1464,7 +1498,7 @@ def calls_unplaced(cpath, primary, placed, lib=None):
     absent from placed. A function-like macro could over-flag; the gate reconciles against the
     asm jals (the same disassemble pass that confirms the recover-extern vram)."""
     try:
-        text = open(cpath, errors="ignore").read()
+        text = UpstreamSource.get(cpath).text
     except OSError:
         return []
     defined = {name for name, _ in _iter_upstream_functions(text)}
