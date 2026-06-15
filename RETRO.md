@@ -25,6 +25,15 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 85 — os/initialize.c (__osInitialize_common + create_speed_param), libultra coddog mirror — 2026-06-15
+- Increment: src/libultra/os/initialize.c banked / 2 functions matched. md5-candidate 129→130 .c (all stub-free); asm subsegs 140→139.
+- Quality: 0/0/0/0 this sprint (0 stuck-far, 0 permuter, 0 carried, 0 re-opened; 0 C-body iterations — the 2 build-fix passes were symbol/version reconciliation, not classical iteration).
+- Seed: committed 5pt; banked 5pt; regime mirror (8-gate clear at 5<8; seed-only — verbatim/deterministic).
+- What helped: the S80-teed-up coddog identity made this the obvious smallest-first pick; `.o`-disasm (`objdump -d`) vs Ghidra MCP `disassemble_function` localized the 8-byte SHA-miss to ONE instruction pair (`__osSetWatchLo`) in minutes; the drop-def fast path (S82/S83 default) meant no `.data` carve despite the carry-over framing one. The 8-byte `.o` size tell (fn 0x228 vs asm `nonmatching ... 0x230`) pointed straight at a whole-instruction gap (version class) vs an off-by-immediate (GBI/enum class).
+- Friction: TWO reconcile classes neither pick_target nor the gate stub build can see, both surfacing only when the real body compiles/links — (1) os_host.h's `#define __osInitialize_common() osInitialize()` K→J source-compat macro silently renamed the exported symbol (link wanted the curated name); (2) `__osSetWatchLo(0x4900000)` gated `>= VERSION_K` in the reconstruction but present in MG64's J build. The carry-over also over-stated the work (cross-region carve + name-reconcile) where the reality was drop-def + 2 one-line edits — a recurring "carry-over over-states difficulty" theme (cf. S70 maptlb).
+- Applied: 3 of 3 — #1 `pick_target.py header_renames_symbol` (transitive-header scan for a macro rewriting the curated leader → `header-renames-symbol:<fn>@<hdr>` flag, wired into both hazard appenders) + unit test + `docs/hazards.md#header-renames-symbol` + CLAUDE.md index row; #2 `docs/hazards.md#needs-define` VERSION_K-gate-present-in-J sub-case (the exact N×8B SHA-miss tell + the `.o`-size cross-check + `.o`-disasm-vs-MCP localize) + CLAUDE.md symptom row; #3 `BACKLOG.md ## Carry-overs` drop-def-default guidance + asm-recovered-address rule (corrected pimgr's wrong `__Dom*SpeedParam` addresses). `make test-tools` 47 pass (46→47), golden-neutral.
+- Carry-over: none (the increment fully banked). pimgr (osCreatePiManager) remains the next io defines-data+file-static spike — now with __Dom1SpeedParam=0x80106248 / __Dom2SpeedParam=0x800FEC98 pre-placed (S85) + their carry-over addresses corrected.
+
 ## Sprint 84 — [0x7E360] io pack, 2 of 3 (epirawdma C mirror + setintmask asm-vendor) — 2026-06-15
 - Increment: src/libultra/io/epirawdma.c (`__osEPiRawStartDma`, C mirror) + src/libultra/os/setintmask.s (`osSetIntMask`, hasm asm-vendor) banked / 2 functions matched. md5-candidate 128→129 .c; hasm 21→22; asm 140→140.
 - Quality: 0/0/1/0 this sprint (0 stuck-far, 0 permuter, 1 carried = pimgr planned spike, 0 re-opened; both banked first-build SHA == baserom, 0 iterations).

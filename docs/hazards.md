@@ -1145,6 +1145,58 @@ whole-body divergence is a different (version / cast / char-signedness) class.
 GBI-value-guarded macro and no guard define is active for the lib (`gbi_value_guard_needs_define`,
 keyed off the parsed `LIBULTRA_CFLAGS` define set). Dormant while `-DF3DEX_GBI_2` stands, by design.
 
+### VERSION_K-gated statement present in MG64's J build (S85 — exact N×8B SHA-miss)
+
+The ultralib reconstruction's `#if BUILD_VERSION >= VERSION_K` gates are sometimes **too aggressive**
+for MG64's actual VERSION_J build: a call/statement the source gates K-only is in fact present in the
+J ROM. `pick_target.py`'s `_strip_inactive_version_branches` strips `>= VERSION_K` under J, so the
+mirror compiles **short of the asm by whole instructions**.
+
+**S85 `initialize.c` — two instances in one file (verify each independently):**
+- `__osSetWatchLo(0x4900000)` was gated `#if BUILD_VERSION >= VERSION_K`; un-gating it to
+  `>= VERSION_J` restored the missing `jal __osSetWatchLo; lui a0,0x490` — the EXACT 8-byte/2-instr
+  miss.
+- `createSpeedParam`'s body, by contrast, has a `#elif BUILD_VERSION == VERSION_J` branch
+  (reconstruction lines 210-224) so it DID compile under J as-is — **check the J branch exists before
+  assuming a K-gate needs un-gating** (not every K-gated thing is missing under J).
+
+**The tell:** the mirror compiles + LINKS clean, but the full-make ROM SHA-1 misses by an exact
+multiple of 8 bytes (whole instructions) localized to ONE contiguous region — distinct from the
+GBI/enum off-by-constant *immediate* class above. Cross-check the `.o` function size against the asm:
+the next symbol's `nm` offset vs the asm `nonmatching <fn>, 0x<size>` comment (S85
+`__osInitialize_common` compiled `0x228` vs baserom `0x230`).
+
+**Localize:** disassemble the `.o` (`mips-linux-gnu-objdump -d build/<path>.o`) and the baserom fn
+(Ghidra MCP `disassemble_function`), align; the divergence is a contiguous run of asm-only
+instructions matching a `>= VERSION_K`-gated statement in the upstream (the 8-byte shift then
+propagates cleanly through the rest).
+
+**Fix:** change ONLY that one gate `>= VERSION_K` → `>= VERSION_J` in the mirrored copy (a
+near-verbatim version-gate edit, same class as #char-signedness / #assert-strip; confirm the gated
+callee is a placed symbol). NOT a blanket un-gate of every K-block.
+
+---
+
+## header-renames-symbol (vendored header rewrites the curated symbol)
+
+**Rule:** A (transitively-)vendored libultra header can rewrite the candidate's curated function name
+via a source-compat macro. `os_host.h`: `#define __osInitialize_common() osInitialize()` (the K-era
+worker name → the J public name). When the mirror body defines `void __osInitialize_common() {...}`,
+the function-like macro fires and the object exports `osInitialize` instead — so the curated symbol
+the entry stub / callers reference (`__osInitialize_common`) is **undefined at link**. S31 `nuGfxInit`
+(nusys.h) was the 1st instance, S85 `initialize.c` the 2nd → a real class.
+
+**Trigger:** `pick_target.py` flag `header-renames-symbol:<fn>@<header>` (S85; scans the candidate's
+transitively-included resolvable headers for `#define <curated_leader>...`), OR a link
+`undefined reference to <curated_fn>` where the `.o` `nm` shows the function exported under a
+DIFFERENT name. Invisible to the gate stub build — the macro bites only a real function definition,
+which an `INCLUDE_ASM` stub never has (same late-surface class as #needs-define).
+
+**Procedure:** Add `#undef <curated_fn>` to the mirrored `.c` AFTER the `#include`s (so the
+transitive header's macro is undone) and before the function definition; then the
+name-macro/`INITIALIZE_FUNC` reconcile exports the curated symbol. SHA-neutral (a symbol-name change,
+not a byte change). Same one-line fix as the S31 `#undef nuGfxInit`.
+
 ---
 
 ## make sync-names eviction recovery

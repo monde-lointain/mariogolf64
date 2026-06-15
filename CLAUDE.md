@@ -252,6 +252,8 @@ When `pick_target.py` flags a hazard (or a match shows its symptom), read the ma
 | `needs-header:<inc>`            | #needs-header |
 | `stale-header:os_version.h(<V>)`| #stale-vendored-header |
 | `needs-define:<def>`            | #needs-define |
+| (clean mirror SHA-miss, exact N×8B / fn shorter than its asm size; a `>= VERSION_K`-gated stmt MG64-J actually has) | #needs-define |
+| `header-renames-symbol:<fn>@<hdr>` (S85: a transitively-vendored header rewrites the curated symbol via a macro, e.g. os_host.h `#define __osInitialize_common() osInitialize()` → needs `#undef <fn>`; S31 nuGfxInit class) | #header-renames-symbol |
 | `pack:<n>fn[…]`                 | #multi-function-segment-splitting-pack |
 | `single-file-pack:<n>fn[…]` (all members → one upstream C file; atomic verbatim mirror, NO split) | #upstream-mirror-pattern |
 | `c-combined:<n>file[…]` (≥2 distinct C upstream files in one asm subseg) | #multi-function-segment-splitting-pack |

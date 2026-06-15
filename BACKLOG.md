@@ -620,6 +620,40 @@ sub-sprints).
   via `sync_decomp_names.py --import-from-decomp` (the 2 fn names were already in `ghidra_symbols.txt`).
   **The `[0x7E360]` pack now has only `pimgr` (osCreatePiManager) left → carry-over below.**
 
+- **Sprint 85: 1 .c file BANKED — `src/libultra/os/initialize.c` (`__osInitialize_common` +
+  `create_speed_param`), libultra os/ coddog mirror; the S80-teed-up next-cleanest coddog leaf.**
+  md5-candidate 129→**130** (all 130 .c stub-free); asm subsegs 140→139. 13th coddog cross-ref sprint.
+  Verbatim ultralib VERSION_J `src/os/initialize.c` (single 0x2F0 subseg = exactly the 2 fns; flip
+  `[0x8ACA0, asm]`→`[0x8ACA0, c, libultra/os/initialize]`, no split). **The carry-over over-stated it**
+  (recurring theme): framed as a cross-region `.data` carve + name-reconcile, but the actual path was
+  the **drop-def fast path** (S82 default — extern the 4 `.data` globals + `__osFinalrom`; main_data
+  provides the bytes, NO carve). **Two NEW reconcile classes surfaced in execution, both → tooling:**
+  (1) **header-renames-symbol** — `os_host.h` `#define __osInitialize_common() osInitialize()` (K→J
+  source-compat shim, transitively included) rewrote the C function def → the curated symbol was
+  undefined at link (caller wants `__osInitialize_common`, C exported `osInitialize`); fixed with
+  `#undef __osInitialize_common` (S31 `#undef nuGfxInit` class, the 2nd instance). (2) **VERSION_K-gate
+  too aggressive for MG64-J** — `__osSetWatchLo(0x4900000)` gated `#if BUILD_VERSION >= VERSION_K` but
+  present in MG64's J build → the EXACT 8-byte/2-instr SHA-miss (`.o` fn 0x228 vs asm 0x230), localized
+  by `.o`-disasm vs Ghidra MCP, fixed by un-gating that one line to `>= VERSION_J` (createSpeedParam's
+  body, by contrast, has a `#elif == VERSION_J` branch so it compiled as-is). 7 symbol_addrs adds: gate
+  `osClockRate`=0x800C9460 / `__osFinalrom`=0x801B74D8 / `__osExceptionPreamble`=0x800AFB90 (was
+  func_800AFB90) / `__Dom1SpeedParam`=0x80106248 / `__Dom2SpeedParam`=0x800FEC98; execution
+  `osResetType`=0x8000030C / `osAppNMIBuffer`=0x8000031C (BOOT_GLOBALS class, S46). 0 C-body iterations.
+  Clean rebuild ROM SHA-1 == baserom. seed 5 / banked 5pt; regime mirror (seed-only; 8-gate clear at
+  5<8). 0 stuck-far/permuter/carried/re-opened. Applied 3 of 3: #1 `pick_target.py`
+  `header_renames_symbol` detector (transitive header scan for a macro rewriting the curated leader) +
+  `header-renames-symbol:<fn>@<hdr>` flag wired into both hazard appenders + unit test +
+  `docs/hazards.md#header-renames-symbol` + CLAUDE.md index row; #2 `docs/hazards.md#needs-define`
+  VERSION_K-gate-present-in-J sub-case (the N×8B SHA-miss tell + .o-disasm localize) + CLAUDE.md index
+  symptom row; #3 `BACKLOG.md ## Carry-overs` drop-def-default guidance + asm-recovered-address rule
+  (corrected pimgr's wrong `__Dom*SpeedParam` addrs). `make test-tools` 47 pass, golden-neutral.
+  **Cross-repo follow-up:** 7 new decomp-side symbols → propagate via `sync_decomp_names.py
+  --import-from-decomp` (the 2 fn names were already in `ghidra_symbols.txt`). **Band note: the os/
+  band's clean coddog leaf is now banked; remaining libultra is the io/os defines-data+file-static
+  traps (pimgr [0x7E400], piacs/motor, contpfs/vimgr/timerintr/sched packs) + the asm-vendoring TUs
+  (__osDisableInt/__osRestoreInt partial-TU split). Smaller libnusys leaves (nuContRmbModeSet pts-3,
+  nuGfxDisplayOn pts-3) now rank ahead — a cheaper next sprint than the libultra traps.**
+
 - **Sprint 48: 1 file BANKED — `src/libultra/io/viswapcontext.c` (`__osViSwapContext`), libultra; 11th vi-band sibling.** md5-candidate 88→89 (all 89 .c files now stub-free). Single fn 0x88810. Verbatim ultralib VERSION_J `src/io/viswapcontext.c` (include `PRinternal/viint.h` → bare `viint.h`, sibling convention). One recover-extern at gate: `__additional_scanline`=0x800C826C (size:0x4, `extern u32` per viint.h, recovered from `lui 0x800d / lw -0x7d94`). `__osViNext`/`__osViCurr` already placed; `__OSViContext` from pick_target refs-unplaced was a **struct TYPE** (0x30B viint.h), not a data symbol — ruled out. `.text` matched first compile (0x310B); only the **rodata-sibling** for the `2^32` u32→float double needed a yaml split (`[0xAD9C0, rodata]` → insert `[0xAD9E0, .rodata, libultra/io/viswapcontext]`, 16B = double + 8 pad; same as S38 aisetfreq). seed 5 / banked 5pt; regime mirror (seed-only). All 0 stuck-far/permuter/carried/re-opened. Applied: 2 of 2 (#1 `pick_target.py`/`decomp_asm.py` `declared_type_names` — excludes typedef'd types from refs-unplaced; #2 `rodata-literal:<addr>` pre-flag for mirror candidates loading anonymous `ldc1/lwc1 %lo(D_)` FP constants; hazards.md + CLAUDE.md index updated, `make test-tools` 23 pass). No carry-overs. **Cross-repo follow-up:** `__additional_scanline`=0x800C826C is a new decomp-side symbol — propagate via `sync_decomp_names.py --import-from-decomp`. **Band note: cont/pfs/timer io siblings remain (companion-copies + recover-externs); the vi band has no smaller clean leaves left.**
 
 - **Sprint 46: 2 files BANKED — `src/libultra/io/pirawdma.c` (`__osPiRawStartDma`) + `pigetcmdq.c` (`osPiGetCmdQueue`), libultra; reopens the PI/SI/cont/pfs mirror band.** md5-candidate 85→87. 0x8BA20 3-fn pack split at vram 0x800B06F0 (pigetcmdq) + 0x800B0710 (`func_800B0710` left asm). **Root unblock — a multi-sprint `pick_target` false-`blk`:** ultralib mirrors `#include "PRinternal/<h>"` but the project shipped those internal headers under `internal/`, so `include_is_blocked` matched the include *basename* (`piint.h`) against in-tree `internal/piint.h` and mislabeled a cheap companion-copy as a deferred-`-I` block → the whole PI/SI/cont/pfs/vi/timer band read `blk needs-header` and was un-pickable. Fixed at retro: full-relative-path match (not basename) + ultralib/include as the primary libultra companion-header root → 11 band fns un-`blk`'d (`osCartRomInit`, `__osContRam{Read,Write}`, `__osPfsGetStatus`, `osSpTaskLoad`, `osContInit`, `osCreateViManager`, `osMotorStop`, `__osViSwapContext`, `__osTimerServicesInit`, `__osGbpakSetBank`). Enabler: verbatim `cp ultralib/include/PRinternal/piint.h → include/libultra/PRinternal/` (deps `PR/os_internal.h`+`PR/rcp.h` in-tree). `__osPiRawStartDma` (224 B): `_DEBUG` block compiles out; recover-extern `osRomBase`=0x80000308 — a libultra **boot-region global** asm-baked as `D_80000308`, missed by refs-unplaced's `__`-prefix grep → 2nd retro fix: `BOOT_GLOBALS` table (0x80000300-0x1C) surfaces them with known vram. `osPiGetCmdQueue` (32 B): 2-line getter, only ref `__osPiDevMgr` placed. Both verbatim cp, names pre-placed, 0 iter. seed 2 / banked 2pt; regime mirror (seed-only). All 0 stuck-far/permuter/carried/re-opened. Applied: 2 of 2 (#1 `include_is_blocked` full-path + ultralib companion root; #2 `BOOT_GLOBALS` recover table; golden refreshed, 20 pass/3 skip). No carry-overs. **Cross-repo follow-up:** `osRomBase`=0x80000308 is a new decomp-side symbol — propagate via `sync_decomp_names.py --import-from-decomp`. **Band note: the cont/pfs/vi siblings now need only `controller.h`/`siint.h`/`macros.h`/`viint.h` companion-copies (cheap) — the next mirror pool.**
@@ -832,6 +866,13 @@ Two kinds, both de-ranked by `tools/pick_target.py` (so they stop resurfacing) a
 by `/sprint-plan`:
 - **Spike** — a function that BLOCKED its file's DoD (locked < 0.97 percent, needs permuter,
   BSS-layout / subseg-alignment conflict). The note records the blocker so the retry resolves it first.
+  **For a defines-data spike, default the framing to drop-def** (extern the file's data globals; the
+  bytes come from the existing extracted blob, usually `main_data`) — NOT a `.data`/`.bss` sibling
+  carve. A carve is needed only when the data lives in the file's OWN extracted region; placed-sibling
+  data (already resolved from `main_data`) is not, so drop-def is the S82/S83/S85 default and a carve
+  the exception (S38/S48/S68). Bind every cited data address to an **asm-recovered** value, never a
+  guess (S85: `initialize.c`'s carry-over framed a carve that was really drop-def, AND `pimgr`'s
+  `__Dom*SpeedParam` addresses were wrong — both corrected by reading the asm at the gate).
 - **Near-free retry** — NOT blocked; a fully-scoped increment deferred only by the sprint cap (e.g. a
   coddog-mirror sibling, or the un-flipped head of a split subseg). Author it as a **completeness
   checklist** so the retry is a mechanical replay (S74→S75 `contquery` proof: all 4 addresses
@@ -854,28 +895,19 @@ by `/sprint-plan`:
   `ramromMain` block strips). **Blocker = a mixed `.data`/`.bss` carve:** file-statics `piThread`
   (OSThread, .bss), `piThreadStack` (STACK, .bss `D_800F97E0`), `piEventQueue` (OSMesgQueue, .bss),
   `piEventBuf` (OSMesg[1], .bss); plus defines-data `__osPiDevMgr`=0x800C7E70 (OSDevMgr, .bss),
-  `__osPiTable` (OSPiHandle*, .bss/.sdata), `__Dom1SpeedParam`=0x800FA990 + `__Dom2SpeedParam`=0x800FA9A8
-  (OSPiHandle, .bss), `__osCurrentHandle`=0x800C7E90 (OSPiHandle*[2] = {&__Dom1SpeedParam,&__Dom2SpeedParam},
-  .data — **already placed**, the S84 epirawdma ref). Same trap class as `piacs.c`/`motor.c`/`initialize.c`
-  above: needs `.data`/`.bss` sibling carves (`docs/hazards.md#defines-data`) + recover-externs for the
-  un-placed statics, or classical routing with the data dropped to `extern`. Callees all placed
+  `__osPiTable` (OSPiHandle*, .bss/.sdata), `__Dom1SpeedParam`=0x80106248 + `__Dom2SpeedParam`=0x800FEC98
+  (OSPiHandle size:0x74, .bss — **both placed S85** from create_speed_param's byte-field stores; the
+  earlier 0x800FA990/0x800FA9A8 here were WRONG), `__osCurrentHandle`=0x800C7E90 (OSPiHandle*[2] =
+  {&__Dom1SpeedParam,&__Dom2SpeedParam}, .data — **already placed**, the S84 epirawdma ref). Same trap
+  class as `piacs.c`/`motor.c`: drop-def the data globals to `extern` (the S82/S85 default; carve only
+  if the data is in pimgr's OWN extracted region) + recover-externs for the un-placed statics. Callees all placed
   (osCreateMesgQueue, osSetEventMesg, osGetThreadPri/osSetThreadPri, __osDisableInt/__osRestoreInt,
   __osDevMgrMain, osCreateThread/osStartThread, __osPiCreateAccessQueue). Pursue when the data-sibling
   enabler is the sprint goal. Header `PRinternal/piint.h` already vendored (S84 epirawdma).
-- **os/ coddog-mirror trap — `initialize.c` (`__osInitialize_common` + `create_speed_param`, pts-5,
-  2fn @0x8ACA0).** Spike (data-sibling enabler). Now correctly priced `defines-data` (the S80 #3 fix
-  surfaced it — its coddog hit keys on the sibling `create_speed_param`, not the leader). Under
-  `-D_FINALROM -DBUILD_VERSION=VERSION_J` it compiles exactly 2 fns and emits a 0x14-byte `.data`
-  block `osClockRate`(unplaced, @0x800C9460,8B) / `osViClock`(@0x800C9468) / `__osShutdown`(@0x800C946C)
-  / `__OSGlobalIntMask`(@0x800C9470) — 3 of 4 already placed in `symbol_addrs` — in a region SEPARATE
-  from the .text, so a clean verbatim mirror needs a cross-region `.data` sibling carve
-  (`docs/hazards.md#defines-data`) + recover `osClockRate`=0x800C9460. **Name reconciliation needed:**
-  the J source names the fns `osInitialize` / `static createSpeedParam`, but Ghidra curated the K-era
-  `__osInitialize_common` / `create_speed_param`; decide the canonical name at the gate (and who
-  calls 0x800AF8A0 by symbol). Its `!defined(_FINALROM)` KMC block is dead under the project flags but
-  is not stripped by `_strip_inactive_version_branches` (BUILD_VERSION only), so its refs/calls-unplaced
-  over-flag (advisory — the priced defines-data is the load-bearing signal; a future `_FINALROM`-strip
-  is the clean follow-up). Pursue when the `.data`-carve + name-reconcile is the sprint goal.
+- _(os/ `initialize.c` (`__osInitialize_common` + `create_speed_param`) carry-over **RESOLVED + banked
+  S85** — turned out a drop-def mirror (NOT the framed cross-region `.data` carve; main_data provides
+  the bytes) + one VERSION_K-gate un-gate (`__osSetWatchLo`, `docs/hazards.md#needs-define`) + a
+  `#undef __osInitialize_common` for the os_host.h K→J shim (`docs/hazards.md#header-renames-symbol`).)_
 - **Tooling follow-up (S72 #2) — optional `bare-assert` advisory flag.** `pick_target` could scan a
   mirror candidate's upstream `.c` for a non-`_DEBUG`-guarded `assert(` and flag it, so the
   `#assert-strip` `_DEBUG`-wrap is priced at the gate rather than rediscovered by the read==write

@@ -104,6 +104,33 @@ def test_gbi_value_guard_needs_define(tmp_path, monkeypatch):
     pt._gbi_guarded_macros.cache_clear()
 
 
+def test_header_renames_symbol(tmp_path, monkeypatch):
+    """S85 retro #1: a (transitively-)vendored header function-like macro that rewrites the curated
+    symbol (`os_host.h`: `#define __osInitialize_common() osInitialize()`, the K->J shim) is
+    pre-flagged so the `#undef <fn>` enabler is priced at the gate. Verifies transitive reach,
+    exact-name (`\\b`) matching, and no false-flag for a sibling the shim does not rename."""
+    pt = load_tool("pick_target")
+    inc = tmp_path / "inc"
+    inc.mkdir()
+    # transitive chain: candidate.c -> os_internal.h -> os_host.h (the renaming shim)
+    (inc / "os_host.h").write_text("#define __osInitialize_common() osInitialize()\n")
+    (inc / "os_internal.h").write_text('#include "os_host.h"\n')
+    cand = tmp_path / "initialize.c"
+    cand.write_text('#include "os_internal.h"\nvoid __osInitialize_common(){ }\n')
+    monkeypatch.setattr(pt, "INCLUDE_DIRS", [str(inc)])
+
+    # the curated leader is renamed by a transitively-included header → flagged with that header
+    assert pt.header_renames_symbol(str(cand), "__osInitialize_common") == "os_host.h"
+    # a sibling the shim does NOT rename → no flag
+    assert pt.header_renames_symbol(str(cand), "create_speed_param") is None
+    # exact-name boundary: a shorter name sharing the prefix must not match (\b after the name)
+    assert pt.header_renames_symbol(str(cand), "__osInitialize") is None
+    # a candidate whose headers do not resolve / do not rename → no flag
+    other = tmp_path / "other.c"
+    other.write_text('#include "os_internal.h"\nvoid g(){ }\n')
+    assert pt.header_renames_symbol(str(other), "g") is None
+
+
 def test_pick_target_json_golden(golden_dir, regen, monkeypatch):
     # The S71 coddog map (tools/coddog/coddog_map.tsv) is gitignored + build-dependent, so the
     # committed golden is map-free; neutralize any local map for a reproducible snapshot.

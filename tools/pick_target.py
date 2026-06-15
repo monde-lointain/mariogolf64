@@ -239,6 +239,10 @@ HAZARD_CODDOG_TWIN = "coddog-twin"  # S81: coddog matched a near-identical TWIN 
 # the named members name the real source (siacs); mirror from the member-named source, not the file
 HAZARD_CALLER_EVICT = "caller-evict"  # S77: an un-named func_ member a banked C file calls by name
 HAZARD_TRAILING_PAD = "trailing-pad"  # S79: trailing nop pad to a higher-aligned next subseg a C mirror can't emit
+HAZARD_HEADER_RENAMES_SYMBOL = "header-renames-symbol"  # S85: a (transitively-)vendored header
+# rewrites the candidate's curated symbol via a macro `#define <curated_fn>(...) <other>` (os_host.h
+# K->J shim `#define __osInitialize_common() osInitialize()`; S31 nuGfxInit was the 1st instance) →
+# needs a `#undef <curated_fn>` enabler in the mirror; see docs/hazards.md#header-renames-symbol
 
 
 @dataclasses.dataclass
@@ -1958,6 +1962,46 @@ def _append_recover_hazards(off, primary, up_path, up_lib, hazards):
         hazards.append(Hazard(HAZARD_RODATA_JTBL, ",".join(f"0x{a:08X}" for a in sorted(jtbls))))
 
 
+def header_renames_symbol(cpath, primary, _depth=0, _seen=None):
+    """A (transitively-)included vendored header that rewrites the candidate's curated symbol via a
+    macro `#define <primary>...` — a K->J source-compat shim (`os_host.h`:
+    `#define __osInitialize_common() osInitialize()`; S31 nuGfxInit was the 1st instance, S85 the
+    2nd → a real class). The macro bites ONLY the real body's function definition, so it is invisible
+    to pick_target's other scans AND the gate stub build (an INCLUDE_ASM stub never compiles the
+    body); it surfaces as a link symbol-mismatch (the caller wants the curated name, but the C
+    exports the rewritten name). Returns the renaming header's basename so the gate prices a
+    `#undef <primary>` enabler, or None. Recurses the `#include` tree (bounded depth + seen-set);
+    matches `#define <primary>` only in HEADERS (`_depth > 0`), not the candidate `.c` itself.
+    Scans only the PRIMARY (leader) name — both known instances rename the leader."""
+    if not cpath or _depth > 4 or not os.path.exists(cpath):
+        return None
+    if _seen is None:
+        _seen = set()
+    rp = os.path.realpath(cpath)
+    if rp in _seen:
+        return None
+    _seen.add(rp)
+    define_re = re.compile(r'^\s*#\s*define\s+' + re.escape(primary) + r'\b')
+    includes = []
+    try:
+        with open(cpath, errors="replace") as f:
+            for line in f:
+                if _depth > 0 and define_re.match(line):
+                    return os.path.basename(cpath)
+                m = INCLUDE_RE.match(line)
+                if m:
+                    includes.append(m.group(1))
+    except OSError:
+        return None
+    for inc in includes:
+        hdr = _resolve_include(inc)
+        if hdr:
+            hit = header_renames_symbol(hdr, primary, _depth + 1, _seen)
+            if hit:
+                return hit
+    return None
+
+
 def _append_coddog_trap_hazards(off, primary, cl_path, up_lib, hazards):
     """The file-level trap re-scan for a coddog-resolved upstream `.c` (file-static, defines-data,
     needs-header, recover-extern battery), in-place; returns whether a needs-header tag blocks the
@@ -1978,6 +2022,9 @@ def _append_coddog_trap_hazards(off, primary, cl_path, up_lib, hazards):
         hazards.append(Hazard(HAZARD_NEEDS_HEADER, ",".join(ctagged)))
         blocked = cblk
     _append_recover_hazards(off, primary, cl_path, clib, hazards)
+    ren = header_renames_symbol(cl_path, primary)
+    if ren:
+        hazards.append(Hazard(HAZARD_HEADER_RENAMES_SYMBOL, f"{primary}@{ren}"))
     return blocked
 
 
@@ -2011,6 +2058,9 @@ def append_upstream_hazards(off, primary, up_lib, up_path, hazards):
     divergence = call_divergence(off, primary, up_path, up_lib)
     if divergence:
         hazards.append(divergence)  # near-verbatim mirror: reconcile call list at the gate
+    ren = header_renames_symbol(up_path, primary)
+    if ren:
+        hazards.append(Hazard(HAZARD_HEADER_RENAMES_SYMBOL, f"{primary}@{ren}"))  # needs #undef (S85)
     # Anonymous `%lo(D_<addr>)` constant loads split into two enablers by segment (S52):
     #   - code-segment `.rodata` → compiler-pooled literal the mirror re-emits → a `.rodata` sibling
     #     split at finalize (docs/hazards.md#rodata-sibling-yaml-pattern, S38/S48).
