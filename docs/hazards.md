@@ -812,9 +812,24 @@ twin epirawwrite's 0x170 → the ROM carries no assert code for the bare `assert
    it; the `#ifdef _DEBUG` wrap is the surgical, per-call strip.
 3. `assert.h` need not be included once every assert is `_DEBUG`-wrapped (the token never reaches the
    macro phase), but mirroring the upstream include is harmless.
+4. **An assert that is the SOLE body of an `if` cannot be wrapped alone** — `#ifdef _DEBUG`-wrapping
+   just the assert leaves the `if (...)` bodyless under non-`_DEBUG` → a syntax error. Wrap the WHOLE
+   `if`+assert in the `#ifdef _DEBUG` block (S106 sched.c:575 `if (avail & OS_SC_DP == 0) assert(...)`,
+   an always-false dead branch — the `&`-vs-`==` precedence makes the guard `avail & 0`, so the whole
+   thing is zero code in the release ROM either way; wrapping it is SHA-neutral). Same for an assert
+   that is the body of any other bodyless control statement.
+5. **Count every assert with `assert\s*\(` (allow whitespace before the paren).** `pick_target`'s
+   `bare_asserts` already does (`re.findall(r"\bassert\s*\(", ...)`), so its `bare-assert:N` count is
+   authoritative — the agent's manual strip grep MUST match it. S106 sched.c had 9 bare asserts but a
+   manual `^\s*assert\(` grep found only 7: it missed `assert (t->msgQ)` and `assert ( (type == …))`
+   (a SPACE before the paren), so 2 asserts compiled in on the first build (`.text` +0x80 `jal
+   __assert`, `.rodata` +0x50 stringized-expr/`__FILE__`) → SHA-miss, fixed by wrapping the 2. Always
+   reconcile the manual count against pick's `bare-assert:N` before declaring the strip complete.
 
 **Banked instances:** sirawread.c, sirawwrite.c, visetmode.c, viswapbuf.c, visetevent.c (vi/si bare
-asserts), epirawread.c (S72, pi EPI band — `assert(data != NULL)` sat *outside* the `_DEBUG` block).
+asserts), epirawread.c (S72, pi EPI band — `assert(data != NULL)` sat *outside* the `_DEBUG` block),
+sched.c (S106, 9 bare asserts — the heaviest assert-strip mirror; 2 were `assert (` space-variants +
+1 was an `if`-body, steps 4-5).
 
 **Provenance:** S72 (epirawread.c; the read-twin's bare assert would have emitted code, caught by the
 read==write subseg-size tell + the banked sirawread convention). A `bare-assert` advisory
@@ -1670,6 +1685,31 @@ func_<vram>` from a banked C object after a `symbol_addrs.txt` add.
 name (both the `extern` declaration and the call). The codegen is identical (same `jal` target), so
 the ROM SHA-1 is unchanged. S77: adding `__osSpGetStatus`=0x800B16A0 evicted `src/main/func_800AB600.c`
 (`extern u32 func_800B16A0(void)` + `func_800B16A0()` → `__osSpGetStatus`).
+
+**Companion case A — multi-global mirror flip evicts STILL-ASM callers (S106).** The dual direction:
+flipping a mirror whose source defines ≥2 GLOBAL functions makes the C object export those globals
+under their real names (osCreateScheduler, osScAddClient, …). Any STILL-ASM file that called them by
+the old `func_<vram>` name then link-fails (`undefined reference to func_<vram>`) — the asm reloc
+points at a name nothing defines. `pick_target`'s `caller-evict` only walks banked C callers, so an
+asm caller is invisible at the gate; it surfaces as the execution-time link error. Fix: add each
+externally-referenced global's curated name to `symbol_addrs.txt`; `make extract` re-extracts the asm
+caller with the new name and it resolves against the mirror's def. S106 sched.c: still-asm mus_dma
+(`asm/78D10.s`) called `func_800AB798`/`func_800AB880` → named `osScAddClient`=0x800AB798 +
+`osScGetCmdQ`=0x800AB880 (the file's other globals, osScRemoveClient/__scTaskReady, had no external
+caller → no add needed). Name only the globals the link error names.
+
+**Companion case B — a mirror's recover-callee IS an already-banked `func_` (S106).** A new mirror
+calls a libultra fn by name (`osSpTaskYielded`); the recover resolves not to still-asm but to a
+function ALREADY banked classically under its `func_<vram>` placeholder (`func_800AB600`, banked S11
+as a "main" leaf — it was the un-named `osSpTaskYielded` all along, revealed by the mirror's call).
+Fix: RENAME the banked func_ to the libultra name (symbol_addrs add + the C body's function name) AND
+match the header signature (`OSYieldResult osSpTaskYielded(OSTask *tp)` from sptask.h). Critically,
+**keep the VERIFIED classical body**, not the upstream-verbatim form — the S11 match used
+`bit = (status>>8)&1` and the upstream uses `(status & SP_STATUS_YIELDED) ? OS_TASK_YIELDED : 0`,
+which can codegen differently (`srl;andi` vs `andi;sltu`) at the game `-O2` profile. Do NOT relocate
+the file into `src/libultra/` (would force the `-O3` band → possible divergence; see
+`#game-region-mirror-o2-profile`); leave it where it banked (the file name stays `func_<vram>.c`, a
+cosmetic mismatch — optional follow-up rename).
 
 ---
 

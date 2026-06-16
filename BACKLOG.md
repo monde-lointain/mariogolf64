@@ -674,6 +674,44 @@ sub-sprints).
   to the Ghidra workspace via `sync_decomp_names.py --import-from-decomp`. **Bonus:** pre-places the
   `osCreateScheduler` (pts-13) `calls-unplaced` callee. No carry-overs.
 
+- **Sprint 106: 1 .c file BANKED — `src/libultra/sched/sched.c` (`osCreateScheduler` + 13 helpers),
+  the libultra RCP task scheduler — THE last real libultra source mirror.** md5-candidate 154→**155**
+  (all .c stub-free); asm subsegs ~124→~123; 14 fns matched. **The libultra cheap/source-mirror band
+  is now fully mined out** — remaining libultra is non-source work: the `exceptasm.s` jtbl spike, the
+  game-region structural phantoms (llcvt/settime/contquery, `coddog-structural`), and libnusys/libkmc
+  fillers. pts-13 tripped the 8-gate but decompose was MECHANICALLY BLOCKED (single-file-pack — the
+  `[0x86A50,asm]` subseg is exactly the .text 0xA10, 0x86A50..0x87460) → PO-approved enabler-forward
+  full mirror (S100 reverb precedent), banked atomically after 1 enabler fix-iteration. **Characterized
+  up front from `ultralib/build/J/libgultra_rom/.../sched.o`** (the `_rom`/`_FINALROM` profile =
+  MG64's): .text 0xa10 / .data 0x10 / .rodata 0x20 / **.bss 0** — SC_LOGGING is OFF, so the scLog/
+  logArray statics are gone and `calls-unplaced:osCreateLog,osFlushLog,osLogEvent` + `jal-count-
+  mismatch:12vs11` were ALL false flags. **Dual carve:** `.data` `[0xA3600,.data,libultra/sched/sched]`
+  0x10 (count/dp_busy/dpCount/firsttime @vram 0x800C8200, firsttime=1 nonzero; vram via __scExec
+  `dp_busy=0x800C8204`, segment-wide vram−rom=0x80024C00) + `.rodata` `[0xAD9C0,.rodata,libultra/sched/
+  sched]` 0x20 (the __scExec switch jtbl @0x800D25C0 — the whole generic `[0xAD9C0,rodata]` block, exact
+  fit). **2 recover (S22/S24):** `osViModeTable`=0x800C8270 size:0x1180 (56×0x50 OSViMode, src/io/vitbl,
+  shared with nuScCreateScheduler) + `osSpTaskYielded`=0x800AB600 — which IS the S11-banked
+  `func_800AB600` ("classical main" leaf = the un-named scheduler yield-check all along); renamed +
+  signature matched to sptask.h (`OSYieldResult`/`OSTask*`) keeping the verified `(status>>8)&1` body
+  (NOT the upstream ternary — -O2 codegen risk; the file stays src/main/, no -O3 relocation). **2
+  caller-evict:** still-asm mus_dma (`asm/78D10.s`) called the sched globals by old func_ names → named
+  `osScAddClient`=0x800AB798 + `osScGetCmdQ`=0x800AB880 (osScRemoveClient/__scTaskReady had no external
+  caller → no add). **assert-strip: 9 bare asserts** `#ifdef _DEBUG`-wrapped — pick's `bare-assert:9`
+  was authoritative, but a manual `^\s*assert\(` grep found only 7 (missed 2 `assert (` SPACE-variants
+  `assert (t->msgQ)`/`assert ( (type==…))` → first-build .text 0xa90/.rodata 0x70 bloat → 1 fix-iteration
+  → exact 0xa10/0x20); 1 of the 9 was an `if`-body needing the whole-`if` wrapped. Include adapt
+  PRinternal/osint.h→osint.h, drop #ident. **First-build (after the 1 assert fix) full-make ROM SHA-1
+  == baserom.** 0 stuck-far/permuter/carried/re-opened; 1 fix-iteration. regime mirror → **seed-only,
+  banked 13pt**. Applied **4 of 4** (PO): #1+#2 `docs/hazards.md#assert-strip` steps 4-5 (assert-as-`if`-
+  body whole-`if` wrap + `assert\s*\(` space-variant count cross-check vs pick's `bare-assert:N` — no
+  tool change, the detector already uses `\bassert\s*\(`); #3 `#caller-evict` Companion B (recover-callee
+  IS an already-banked func_ → rename+match-sig+keep-verified-body); #4 `#caller-evict` Companion A
+  (multi-global flip evicts still-asm callers); #5 logged as the BACKLOG tooling follow-up below. No
+  carry-overs. **Cross-repo follow-up:** 4 new decomp symbols (`osSpTaskYielded`@0x800AB600,
+  `osScAddClient`@0x800AB798, `osScGetCmdQ`@0x800AB880, `osViModeTable`@0x800C8270) → propagate via
+  `sync_decomp_names.py --import-from-decomp`. Optional cosmetic: rename `src/main/func_800AB600.c` to
+  an osSpTaskYielded-named file (keep -O2/src/main).
+
 - **Sprint 103: 1 .c file BANKED — `src/mgu/mtxutil.c` (`guMtxF2L` + `guMtxL2F` + `guMtxIdentF` +
   `guMtxIdent`), gu matrix utils; a planned verbatim libultra mirror that PIVOTED to classical at the
   game `-O2` profile.** md5-candidate 151→**152** (all .c stub-free); asm subsegs 125→125 (the split
@@ -1616,6 +1654,19 @@ by `/sprint-plan`:
   xprintf's spaces/zeroes. **Still DEFERRED: the c-combined/multi-file case** — a c-combined pack's
   per-member `up_path` can mis-attribute which member owns the `.data` array, the same blocker as the
   jtbl owner-per-member work (S98 #1). Gate that on the per-member upstream resolution landing first.
+  **S106 4th data point + the SCALAR extension (deferred) —** sched.c's `.data` (0x10) is FOUR SCALAR
+  initialized statics, NOT an array: file-scope `static int dp_busy=0; static int dpCount=0;` (depth 0)
+  + function-local `static int count=0;` (`__scMain`) / `static int firsttime=1;` (`__scTaskReady`,
+  depth>=1). `defines_file_static_init_array` matches only `[…]` arrays at depth 0, so all 4 were
+  invisible; the carve was recovered manually at execution (asm `__scExec` `dp_busy=lui 0x800d/sw
+  -0x7dfc` → 0x800C8204, so the .data base count=0x800C8200). NB: under KMC GCC, an EXPLICITLY-init
+  scalar (even `=0`) lands in `.data` not `.bss` — so the detector key is "has `= <init>`", not
+  "nonzero init"; at least one nonzero in the group (firsttime=1) anchors the whole .data block. To
+  ship: a `FILE_STATIC_INIT_SCALAR_RE` (`static <type> <name> = <init>;`, no `[`, exclude `const`)
+  scanned at ALL depths (function-local statics carve too), fired on the single-file-pack subset like
+  the array detector; +unit test + golden regen. pick's advisory `defines-data:count,firsttime` WAS the
+  gate signal (not a miss, just un-upgraded to `data-carve`), and the carve is a mechanical execution
+  step, so NOT file-blocking. Off-cadence golden-gated (touches the ranker) — `tooling-refactor-style`.
 
 - **Tooling follow-up (S101 #1) — suppress intra-pack `calls-unplaced` (calls-side dual of S66 #2).**
   `pick_target` flagged all 4 `calls-unplaced:__freeParam,_freePVoice,_frexpf,_ldexpf` on env, but
