@@ -442,7 +442,6 @@ SECTIONS
         build/src/libultra/audio/filter.o(.data);
         build/src/libultra/audio/mainbus.o(.data);
         build/src/libultra/audio/resample.o(.data);
-        build/asm/data/A3460.data.o(.data);
         build/src/libultra/audio/reverb.o(.data);
         build/src/libultra/audio/save.o(.data);
         build/src/libultra/audio/sl.o(.data);
@@ -716,7 +715,6 @@ SECTIONS
         build/src/libultra/audio/env.o(.rodata);
         build/src/libultra/audio/filter.o(.rodata);
         build/src/libultra/audio/mainbus.o(.rodata);
-        build/asm/data/AD6F0.rodata.o(.rodata);
         build/src/libultra/audio/resample.o(.rodata);
         build/src/libultra/audio/reverb.o(.rodata);
         build/src/libultra/audio/save.o(.rodata);
