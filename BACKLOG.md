@@ -620,6 +620,33 @@ sub-sprints).
   via `sync_decomp_names.py --import-from-decomp` (the 2 fn names were already in `ghidra_symbols.txt`).
   **The `[0x7E360]` pack now has only `pimgr` (osCreatePiManager) left → carry-over below.**
 
+- **Sprint 91: 1 asm-mirror BANKED — `src/libultra/libc/bcmp.s` (`bcmp`), libultra libc asm-mirror;
+  split off the pts-13 `[0x8BE20]` bcmp/xprintf pack.** Vendored asm-mirror TUs 20→**21**; the cheap
+  libultra mirror band is exhausted (every remaining candidate is a pts-8/13 pack) so the gate verified
+  the top coddog "mirrors" are false/partial before picking: `func_80050400` "llcvt.c@99.99" is KMC
+  compiler-runtime (fn-sizes 0x28/0xC0/0x84 ≠ llcvt's 0x1c×6/0x80×2, a coddog false fingerprint),
+  `func_800660A0` mtxutil tail matches only 2/4 fns (L2F/IdentF; F2L/Ident diverge), `_Litob`/`_Ldtob`
+  are the S71 <99% divergent classical leaves. **Mid-gate pivot:** PO first approved **exceptasm.s**
+  (8 fns, `.text`=0x970 EXACTLY matches the subseg) but gate disassembly found `__osIntTable` /
+  `jtbl_800D2610` — a switch jtbl the active `.text` `jr`s through, emitted SYMBOLICALLY
+  (`.word .L800Bxxxx`) in a separate extracted rodata blob → breaks S84 strip-and-rename (vestigial
+  `.text` labels) AND can't be carve-placed (VENDOR_ASM `.o` rodata auto-links at section end) → a
+  genuine SPIKE → PO pivoted to bcmp + carried exceptasm. Banked `libc/bcmp.s`: nm-u empty, only
+  R4300/asm/regdef includes, WEAK skipped non-__sgi, NO data/rodata → cleanest asm-mirror class. Split
+  `[0x8BE20]` at 0x8BF30 (`_Printf`@0x800B0B30, 16-aligned; gate-validated green as two asm subsegs
+  first), vendor ultralib `libc/bcmp.s` via `VENDOR_ASM` (`8BE20:…`), flip `[0x8BE20]` asm→hasm.
+  `build/asm/8BE20.o` .text-only 0x110 exact, full-make ROM SHA-1 == baserom, 0 iteration. `bcmp`
+  =0x800B0A20 pre-curated → zero symbol adds. **Bonus:** isolates the `[0x8BF30]` xprintf pack
+  (`_Printf`/`_Putfld`/`func_800B1580`) for future classical work. seed 2 / banked 2pt; regime mirror
+  (seed-only; 8-gate FIRED on the pts-13 parent → decomposed). 0 stuck-far/permuter/re-opened, **1
+  carried** (exceptasm). Applied 3 of 3: #1 `pick_target.py` has-rodata gated to the ACTIVE build
+  (`#ifndef _FINALROM`/inactive-`BUILD_VERSION` EXPORTs dropped — exceptasm's `__osCauseTable_pt` no
+  longer over-counted); #2 new `vendorable_tu_jtbl` + `asm-mirror-jtbl:<head>` tag (a symbolic-pointer
+  table → asm-mirror SPIKE, not S84 replay); #3 `docs/hazards.md#asm-mirror-vendoring` jtbl sub-case +
+  has-rodata active-build note + 2 CLAUDE.md index rows. `make test-tools` 52 pass, golden-inert.
+  **Cross-repo follow-up: none** (bcmp pre-curated, no new decomp-side symbols). **exceptasm carried →
+  Carry-overs below.**
+
 - **Sprint 90: 1 .c file BANKED — `src/libultra/io/pimgr.c` (`osCreatePiManager`), libultra io
   PI-manager drop-def mirror; closes the S84-split `[0x7E360]` PI pack.** md5-candidate 134→**135**;
   asm/hasm subsegs 158→157. The last member of the S84 3-way split (setintmask + epirawdma banked
@@ -1072,6 +1099,30 @@ by `/sprint-plan`:
   Header `PRinternal/siint.h` already vendored. Pursue when the data-sibling + log-callee enablers
   are the sprint goal; the sirawdma tail is already off it (S89). seed ~13 → the 8-gate applies
   (single-file once split, but the carve+jtbl+5-recover load is real work).
+- **os/exceptasm.s asm-mirror — `__osExceptionPreamble` pack:8fn, `[0x8AF90, asm]`
+  (0x800AFB90..0x800B0A20, 0x970).** SPIKE (S91 gate-investigated, then carried). The OS exception/
+  thread-dispatch core: under VERSION_J+_FINALROM the 8 active fns are `__osExceptionPreamble`/
+  `__osException`/`send_mesg`/`__osEnqueueAndYield`/`__osEnqueueThread`/`__osPopThread`/
+  `__osDispatchThread`/`__osCleanupThread` (the `__pt*`/`handle_CpU`/`__osNop` gate out). The `.text`
+  =0x970 EXACTLY matches the subseg (high source confidence; J/_FINALROM flags correct), and MOST of it
+  strips clean — the `.data` tables `__osHwIntTable`=0x800C9480 (0x28) / `__osPiIntTable`=0x800C94A8
+  (0x8) and the `.rodata` byte-table `__osIntOffTable`=0x800D25F0 (0x20) are plain S84 strip-and-rename;
+  8 of 9 externs are already placed (only **`__osThreadSave`=0x800FC6A8** needs adding — it's the
+  `la k0` at `__osException` start, splat-labelled `D_800FC6A8`). **Sole blocker = `__osIntTable` /
+  `jtbl_800D2610`** — a switch jump table the active `__osException` does an indexed `jr` through.
+  splat extracts it to the separate rodata blob `asm/data/AD9F0.rodata.s` SYMBOLICALLY
+  (`.word .L800B00A0 … .L800AFDFC`, pointers to `.text`-internal labels). Vendoring the `.text` as
+  hasm makes `asm/8AF90.s` vestigial → those `.L800Bxxxx` labels vanish → the blob's refs go UNDEFINED
+  at link. A rodata-sibling carve ALSO fails — the `VENDOR_ASM` `.o` is `build/asm/8AF90.o` (no
+  src-path subseg to address-place its rodata; a hasm `.o`'s rodata auto-links at the section END →
+  wrong addr → SHA break). **Both dead-ends proven (S91).** NEEDS a novel placement mechanism (export
+  the `.text` labels under names the jtbl blob references, OR make the jtbl literal via reloc config,
+  OR a non-VENDOR_ASM way to carve a hasm `.o`'s rodata to a fixed addr) — a dedicated spike-sprint
+  goal, NOT a routine asm-mirror. `pick_target.py` now flags it
+  `intrinsic-likely:os/exceptasm.s(...)(asm-mirror-jtbl:__osIntTable)` (S91 #2) so it stops reading as
+  an S84 has-rodata replay; the `has-rodata:__osCauseTable_pt` over-count is also fixed (S91 #1 — that
+  symbol is `#ifndef _FINALROM`-gated, excluded here). Same heavy-spike class as the sched.c head
+  (jtbl + multi-recover), distinct mechanism (the jtbl-vs-vendored-.text bind, not a `.data` carve).
 - _(io `vimgr.c` (`osCreateViManager` + `viMgrMain`) carry-over **RESOLVED + banked S87** — the
   "heavy file-static `.bss` carve" framing was over-cautious. The 6 file-statics + 2 globals + 1
   func-local static are all UNINITIALIZED → pure `.bss` (no ROM bytes), so they DROP to sized

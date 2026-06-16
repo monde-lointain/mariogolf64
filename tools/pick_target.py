@@ -495,6 +495,12 @@ def vendorable_tu_data_symbols(rel):
     except OSError:
         return []
     text = C_COMMENT_RE.sub("", text)
+    # S91 #1: scan only the ACTIVE data sections. A `#ifndef _FINALROM` / version-gated EXPORT
+    # (S91: exceptasm.s's `__osCauseTable_pt` lives in `#ifndef _FINALROM`) is NOT emitted under
+    # MG64's `-D_FINALROM -DBUILD_VERSION=VERSION_J` asm profile, so listing it over-counts the
+    # rodata-strip enabler. Drop the dead + inactive-version blocks before the section scan so the
+    # priced has-rodata set is what the vendored `.o` actually carries, not the all-branches union.
+    text = _strip_inactive_version_branches(_strip_dead_blocks(text), _build_version_ord("libultra"))
     m = re.search(r"^\s*\.(rdata|rodata|data|sdata|bss|sbss)\b", text, re.M)
     if not m:
         return []
@@ -502,6 +508,52 @@ def vendorable_tu_data_symbols(rel):
     syms = re.findall(r"(?:EXPORT|XLEAF|glabel|dlabel)\s*\(?\s*(\w+)", tail)
     syms += re.findall(r"\.globl\s+(\w+)", tail)
     return sorted(set(syms))
+
+
+# `.word` operand that is a label reference (not a numeric literal / arithmetic). A symbolic-pointer
+# table — its operands are identifiers, optionally with +/- displacement.
+_WORD_LABEL_OPERAND_RE = re.compile(r"^[A-Za-z_]\w*(?:\s*[+-]\s*\w+)?$")
+
+
+def vendorable_tu_jtbl(rel):
+    """Sorted heads of any SYMBOLIC-pointer table (`.word <label>, …`) a vendorable ultralib `.s`
+    defines in its ACTIVE `.rdata`/`.rodata`/`.data` section (S91 #2). Such a table — a switch jump
+    table (`__osIntTable: .word redispatch, sw1, …`, the active `__osException` `jr`s through it) or
+    any function-pointer table — is what makes a `.text`-only asm-mirror a SPIKE, not an S84
+    strip-and-rename: splat extracts the table to a SEPARATE rodata blob with SYMBOLIC `.word .L…`
+    entries pointing at `.text`-internal labels; vendoring the `.text` as hasm makes `asm/<rom>.s`
+    vestigial so those labels vanish → the blob's refs go UNDEFINED at link, and the table can't be
+    carve-placed either (the VENDOR_ASM `.o` is `build/asm/<rom>.o`, no src-path subseg; a hasm `.o`'s
+    rodata auto-links at the section END → wrong addr → SHA break). So this is the negative signal: a
+    heavy asm-mirror like exceptasm is NOT the S84 has-rodata replay its `data_symbols` flag suggests.
+    Numeric tables (`__osHwIntTable: .word 0, 0`) are NOT flagged (they strip-and-rename cleanly).
+    See docs/hazards.md#asm-mirror-vendoring. Empty for a `.text`-only or numeric-data TU."""
+    if not rel:
+        return []
+    spath = os.path.join(LIBULTRA, rel)
+    try:
+        text = open(spath, errors="ignore").read()
+    except OSError:
+        return []
+    text = C_COMMENT_RE.sub("", text)
+    text = _strip_inactive_version_branches(_strip_dead_blocks(text), _build_version_ord("libultra"))
+    m = re.search(r"^\s*\.(rdata|rodata|data|sdata)\b", text, re.M)
+    if not m:
+        return []
+    heads, cur = [], None
+    for line in text[m.end():].splitlines():
+        s = line.strip()
+        if not s:
+            continue
+        lbl = re.match(r"(?:EXPORT|XLEAF|glabel|dlabel)\s*\(?\s*(\w+)|(\w+)\s*:", s)
+        if lbl:
+            cur = lbl.group(1) or lbl.group(2)
+            continue
+        mw = re.match(r"\.word\s+(.+)$", s)
+        if mw and any(_WORD_LABEL_OPERAND_RE.match(op.strip()) for op in mw.group(1).split(",")):
+            if cur:
+                heads.append(cur)
+    return sorted(set(heads))
 
 
 # --- Signature matcher (un-named func_<vram> mirror detection) -----------------------
@@ -1951,6 +2003,14 @@ def classify_subseg(off, typ, path, size, upstream_index):
                 data_syms = vendorable_tu_data_symbols(rel)
                 if data_syms:
                     detail = f"{detail}(has-rodata:{','.join(data_syms)})"
+                # S91 #2: a SYMBOLIC-pointer table in the active data section (a switch jtbl / fn-ptr
+                # table) makes the .text-only asm-mirror a SPIKE, NOT the S84 strip-and-rename the
+                # has-rodata flag implies — the table extracts to a separate blob with vestigial
+                # .text-label refs and can't be carve-placed. Flag it so the gate doesn't mis-frame a
+                # heavy asm-mirror (S91 exceptasm: __osIntTable jtbl) as a clean replay.
+                jtbls = vendorable_tu_jtbl(rel)
+                if jtbls:
+                    detail = f"{detail}(asm-mirror-jtbl:{','.join(jtbls)})"
             elif prim_privileged:
                 # An un-named func_<addr> with a privileged op: the name can't resolve the TU, but
                 # the privileged op proves a vendorable ultralib source exists. Tag it cp0-asm so the

@@ -25,6 +25,17 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 91 — libc/bcmp.s (bcmp), libultra libc asm-mirror (mid-gate pivot from exceptasm) — 2026-06-15
+- Increment: src/libultra/libc/bcmp.s banked / 1 fn matched (asm-mirror). Vendored asm-mirror TUs 20→21; `build/asm/8BE20.o` .text-only 0x110 exact; full-make ROM SHA-1 == baserom, 0 iteration. Split the pts-13 `[0x8BE20]` bcmp/xprintf pack at 0x8BF30 (16-aligned), isolating the `[0x8BF30]` xprintf leaves for future classical work.
+- Quality: 0 stuck-far, 0 permuter, **1 carried** (exceptasm spike), 0 re-opened. Plus 1 mid-gate pivot (exceptasm→bcmp) on a material gate finding.
+- Seed: committed 2pt; banked 2pt; regime mirror (seed-only; 8-gate FIRED on the pts-13 parent pack → decomposed to the bcmp sub-increment).
+- What helped: the gate's verbatim-vs-source checks killed three false coddog "mirrors" before any wasted iteration — `func_80050400` "llcvt.c@99.99" (KMC compiler-runtime; MG64 fn-sizes 0x28/0xC0/0x84 vs llcvt's 0x1c×6/0x80×2), `func_800660A0` mtxutil tail (only 2/4 fns match — L2F/IdentF do, F2L/Ident diverge), `_Litob`/`_Ldtob` (S71 <99% divergent classical). For exceptasm, the `.text`=0x970 EXACT subseg-size match + J/_FINALROM-correct flags gave high source confidence, but disassembling the rodata at the gate (NOT trusting the has-rodata flag) surfaced the `__osIntTable`/`jtbl_800D2610` blocker BEFORE committing — the gate-time data-ref reconciliation earned its keep.
+- Friction: I mis-framed exceptasm to the PO as an "S84 has-rodata replay scaled ×3" before the deep gate dig; the symbolic-jtbl-in-separate-blob blocker only surfaced mid-gate, forcing a re-ask. The has-rodata flag itself over-counted (`__osCauseTable_pt`, a `#ifndef _FINALROM` export) — a real pricing bug now fixed (#1). Lesson: a heavy asm-mirror's has-rodata flag is not a green light; disassemble the table form (numeric LUT vs symbolic pointer table) at the gate.
+- Applied: 3 of 3: #1 `pick_target.py` `vendorable_tu_data_symbols` strips dead (`#ifndef _FINALROM`) + inactive-`BUILD_VERSION` blocks before the data-section scan → the priced has-rodata set is the active build's (exceptasm now lists only `__osHwIntTable`/`__osPiIntTable`, not `__osCauseTable_pt`); #2 new `vendorable_tu_jtbl` detector + `intrinsic-likely:<tu>.s(asm-mirror-jtbl:<head>)` tag — a SYMBOLIC-pointer `.word <label>` table (switch jtbl / fn-ptr) makes the `.text`-only asm-mirror a SPIKE, not an S84 strip-and-rename (numeric LUTs unaffected; exceptasm flags `__osIntTable`); #3 `docs/hazards.md#asm-mirror-vendoring` jtbl sub-case (both proven dead-ends: vestigial labels + VENDOR_ASM-`.o`-rodata-end-placement) + the has-rodata active-build gate note + 2 CLAUDE.md index rows. suite 52 pass, golden-inert.
+- Carry-over: **exceptasm.s** (`__osExceptionPreamble` pack:8fn, [0x8AF90]) — scoped SPIKE, jtbl-placement blocker (see BACKLOG). The cheap libultra mirror band is exhausted; remaining = heavy packs (exceptasm jtbl-spike, sched.c carve-spike, motor.c version-trap, the divergent xprintf classical leaves).
+
+---
+
 ## Sprint 90 — io/pimgr.c (osCreatePiManager), libultra io PI-manager drop-def mirror — 2026-06-15
 - Increment: src/libultra/io/pimgr.c banked / 1 function matched. md5-candidate 134→135 .c (all stub-free); asm/hasm subsegs 158→157. Closes the S84-split [0x7E360] PI pack.
 - Quality: 0/0/0/0 this sprint (0 stuck-far, 0 permuter, 0 carried, 0 re-opened; verbatim drop-def, full-make ROM SHA-1 == baserom first build, 0 iteration).

@@ -156,6 +156,28 @@ for the identified TU, it falls back to plain `hasm`.
   `pick_target.py` pre-flags this as `intrinsic-likely:<tu>.s(has-rodata:<sym>)` (S84 #3) so the
   strip+rename enabler is priced at the gate. (Keeping the table in the shared blob is arguably *more*
   correct than carving it into one TU when it is referenced cross-TU, as `__osRcpImTable` is.)
+  - **The has-rodata pre-flag is gated to the ACTIVE build (S91 #1).** `vendorable_tu_data_symbols`
+    strips `#ifndef _FINALROM` + inactive `BUILD_VERSION` branches before scanning the data section, so
+    an EXPORT only the debug/other-version build emits is NOT listed (S91: exceptasm.s's
+    `__osCauseTable_pt` lives in `#ifndef _FINALROM` → excluded under the `-D_FINALROM` asm profile; the
+    real active rodata is `__osIntOffTable`/`__osIntTable`/`__osHwIntTable`/`__osPiIntTable`). Price the
+    strip set the vendored `.o` actually carries, not the all-branches union.
+- **A SYMBOLIC-pointer table in the data section → the asm-mirror is a SPIKE, not an S84 replay
+  (S91 #2).** The S84 strip-and-rename works for a *numeric* LUT (`.word 0,0` / `.half …`): the bytes
+  are self-contained, so keeping the extracted blob + renaming `D_<vram>` resolves cleanly. It does
+  **NOT** work for a table of `.word <label>` entries — a switch jump table (`__osIntTable: .word
+  redispatch, sw1, …`, whose active `__osException` `jr`s through it) or any function-pointer table.
+  splat extracts such a table to a SEPARATE rodata blob (`asm/data/<rom>.rodata.s`) with the entries
+  emitted SYMBOLICALLY (`.word .L800B00A0, …`) as references to `.text`-internal labels. Vendoring the
+  `.text` as hasm makes `asm/<rom>.s` vestigial → those `.L…` labels vanish → **the blob's `.word .L…`
+  refs go UNDEFINED at link**. And it can't be carve-placed instead: the `VENDOR_ASM` `.o` is
+  `build/asm/<rom>.o` (no src-path subseg to address-place its `.rodata`; a hasm `.o`'s rodata
+  auto-links at the section END → wrong addr → SHA break). **Both proven dead-ends (S91 exceptasm) —
+  strip-and-rename AND carve.** No clean mechanism exists yet; such a TU is a spike (needs a novel
+  placement, e.g. exporting the `.text` labels under names the blob references, or making the jtbl
+  literal via reloc config). `pick_target.py` flags it `intrinsic-likely:<tu>.s(asm-mirror-jtbl:<head>)`
+  (the `.word <label>` table's head symbol) so a heavy asm-mirror (exceptasm) is NOT mis-framed as a
+  clean has-rodata replay at the gate — even though its `.text` size may exactly match the subseg.
 - **Combined-subseg sub-pattern (≥2 distinct asm TUs in one subseg).** When one `asm` subseg holds
   ≥2 asm-ONLY functions (no C mirror) from *different* ultralib `.s` files, `pick_target.py` flags
   `combined-subseg:<n>tu[a.s|b.s]`. Split the subseg at each TU boundary first (one `hasm` subseg per
