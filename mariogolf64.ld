@@ -175,7 +175,7 @@ SECTIONS
         build/src/libultra/io/aigetstat.o(.text);
         build/src/libultra/io/aisetfreq.o(.text);
         build/src/libultra/io/aisetnextbuf.o(.text);
-        build/asm/7F080.o(.text);
+        build/src/libultra/audio/drvrnew.o(.text);
         build/src/libultra/audio/load.o(.text);
         build/src/libultra/audio/auxbus.o(.text);
         build/asm/804D0.o(.text);
@@ -427,7 +427,8 @@ SECTIONS
         build/src/libultra/io/aigetstat.o(.data);
         build/src/libultra/io/aisetfreq.o(.data);
         build/src/libultra/io/aisetnextbuf.o(.data);
-        build/asm/7F080.o(.data);
+        build/asm/data/main_data.data.o(.data);
+        build/src/libultra/audio/drvrnew.o(.data);
         build/src/libultra/audio/load.o(.data);
         build/src/libultra/audio/auxbus.o(.data);
         build/asm/804D0.o(.data);
@@ -445,7 +446,7 @@ SECTIONS
         build/src/libultra/io/contreaddata.o(.data);
         build/src/libultra/io/controller.o(.data);
         build/src/libultra/os/virtualtophysical.o(.data);
-        build/asm/data/main_data.data.o(.data);
+        build/asm/data/A3460.data.o(.data);
         build/src/libultra/gu/align.o(.data);
         build/src/libultra/gu/cosf.o(.data);
         build/src/libultra/gu/lookat.o(.data);
@@ -696,7 +697,7 @@ SECTIONS
         build/src/libultra/io/aigetstat.o(.rodata);
         build/src/libultra/io/aisetfreq.o(.rodata);
         build/src/libultra/io/aisetnextbuf.o(.rodata);
-        build/asm/7F080.o(.rodata);
+        build/src/libultra/audio/drvrnew.o(.rodata);
         build/src/libultra/audio/load.o(.rodata);
         build/src/libultra/audio/auxbus.o(.rodata);
         build/asm/804D0.o(.rodata);
@@ -715,7 +716,6 @@ SECTIONS
         build/src/libultra/io/controller.o(.rodata);
         build/src/libultra/os/virtualtophysical.o(.rodata);
         build/src/libultra/gu/align.o(.rodata);
-        build/asm/data/AD6B0.rodata.o(.rodata);
         build/asm/data/AD6F0.rodata.o(.rodata);
         build/src/libultra/gu/cosf.o(.rodata);
         build/src/libultra/gu/lookat.o(.rodata);
@@ -960,7 +960,7 @@ SECTIONS
         build/src/libultra/io/aigetstat.o(.bss);
         build/src/libultra/io/aisetfreq.o(.bss);
         build/src/libultra/io/aisetnextbuf.o(.bss);
-        build/asm/7F080.o(.bss);
+        build/src/libultra/audio/drvrnew.o(.bss);
         build/src/libultra/audio/load.o(.bss);
         build/src/libultra/audio/auxbus.o(.bss);
         build/asm/804D0.o(.bss);
