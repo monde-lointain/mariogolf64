@@ -620,6 +620,31 @@ sub-sprints).
   via `sync_decomp_names.py --import-from-decomp` (the 2 fn names were already in `ghidra_symbols.txt`).
   **The `[0x7E360]` pack now has only `pimgr` (osCreatePiManager) left → carry-over below.**
 
+- **Sprint 94: 1 .c file BANKED — `src/libultra/audio/auxbus.c` (`alAuxBusPull` + `alAuxBusParam`),
+  libultra audio verbatim mirror; the audio sub-band's first mirror.** md5-candidate 137→**138**
+  (all 138 .c stub-free); asm subsegs 157→156 (0x803C0 flipped). The smallest-clean remaining
+  libultra leaf (272 B / 2 fn), found by surveying the **coddog column** after `--lib libultra`
+  showed only pts-8/13 spikes (the S55 caveat): `func_800A4FC0` @ 0x803C0 = coddog
+  `src/audio/auxbus.c`@100.00, `one-tu`, ZERO other hazards. The audio header `-I` enabler was
+  **already paid** (heapinit/heapalloc/copy flipped) → near-zero-enabler cp. Single text flip
+  `[0x803C0,asm]`→`[0x803C0,c,libultra/audio/auxbus]` (no split, no carve). Verbatim ultralib
+  VERSION_J `src/audio/auxbus.c`, byte-identical cp, **first-build full-make ROM SHA-1 == baserom,
+  0 iteration**. Verified clean before the cp: no file-scope data/statics, callees are ABI macros
+  (`aClearBuffer`) + an indirect `sources[i]->handler` (no jal to place), `switch` one real case
+  (no jtbl), types/macros (`ALAuxBus`/`AL_AUX_*`/`AL_FILTER_ADD_SOURCE`) all resolve in-tree.
+  pts-13 tripped the 8-gate but ran under the **verbatim-mirror exemption (S64/S69)** (regime mirror
+  + verbatim single upstream file + decompose-blocked `one-tu` + no jal callees + both names curated
+  at gate). 2 symbol adds (`alAuxBusPull`=0x800A4FC0, `alAuxBusParam`=0x800A509C). seed 13 / banked
+  13pt; regime mirror (seed-only). 0 stuck-far/permuter/carried/re-opened. Retro applied **3 of 3**:
+  #1 `pick_target.py` `--lib <scope>` now surfaces coddog-mirror rows whose matched source is
+  in-scope (so un-named audio mirrors appear under `--lib libultra`/`--lib audio`) + a crash-guard +
+  1 unit test (suite 54 pass) + golden regen (absorbs the auxbus-bank tail-shift, not the filter
+  edit); #2 the audio-sub-band ordering note below; #3 a pts-mirror-over-estimate decision
+  (`VELOCITY.md` seed-rubric — keep pts as-is, exemption absorbs the false 8-fire; audio re-pricing
+  deferred). **Cross-repo follow-up:** 2 new decomp-side symbols → `sync_decomp_names.py
+  --import-from-decomp`. **Band note: the audio sub-band is now partially open (see the S94 ordering
+  note); auxbus was the only zero-hazard audio leaf — the rest carry real hazards.**
+
 - **Sprint 93: 1 .c file BANKED — `src/libultra/libc/xldtob.c` (`_Ldtob` + `_Ldunscale` + `_Genld`),
   libultra libc float-to-string verbatim mirror; the S92 xldtob-tail carry-over, banked first-try.**
   md5-candidate 136→**137** (all 137 .c stub-free); asm subsegs −1 (0x8D480 flipped) + 1 generic rodata
@@ -948,6 +973,33 @@ sub-sprints).
   lock macros in `nusys.h` → one symbol add + one yaml flip, verbatim cp, 0 iterations. Two
   `jal` both = osSetIntMask, reconciled clean (no jal-count flag). seed 5 / banked 5pt. Retro:
   **0 of 0** (suggestion buffer "None new"). No carry-overs.
+
+## PO ordering note (S94 retro — the audio sub-band is partially open; survey by the coddog column)
+
+S94 banked the first audio mirror (`auxbus.c`). Live ordering facts for the next gate:
+- **The audio header `-I` enabler is already paid** (heapinit/heapalloc/copy were flipped pre-S94;
+  `libaudio.h`/`synthInternals.h`/`abi.h` are vendored in-tree). So the S71-deferred audio unlock
+  lever does NOT need re-paying — audio coddog mirrors are pickable now, gated only by their own
+  per-file hazards.
+- **`--lib libultra` now surfaces the audio coddog rows** (S94 #1 fix — `--lib <scope>` matches a
+  coddog-mirror row whose matched source is in-scope; `--lib audio` works as a sub-path scope too).
+  Before S94 these classified `upstream none` (un-named, header-gated → not re-priced) and the
+  scoped filter hid them; the S55 "survey by the upstream/coddog column" workaround is no longer
+  required for audio.
+- **Next-cleanest audio leaves + their hazards** (auxbus was the ONLY zero-hazard leaf; the rest are
+  real work, NOT atomic cps): `mainbus.c` (`func_800A5DA0`, 4fn, rodata-jtbl:0x800D23E8 +
+  coddog-fncount-mismatch:2vs4 → multi-file/jtbl); `save.c` (`func_800A6D60`, 6fn, coddog-twin
+  save!=sl + fncount 2vs6 → multi-file); `load.c` (`func_800A44B0`/`func_8009F440`,
+  refs-unplaced:lastCnt + calls-unplaced:alLoadParam); `drvrnew.c` (`func_800A3C80`, 8fn,
+  needs-header:stdio.h,initfx.h(vendorable) + refs-unplaced:__FILE__,__LINE__ + calls-unplaced +
+  rodata-jtbl); `reverb.c` (`func_800A61C0`, 8fn, defines-data:val,blob + needs-header(vendorable) +
+  refs/calls-unplaced + rodata-jtbl); `envmixer.c`/`alEnvmixerPull` (8fn, refs/calls-unplaced +
+  rodata-jtbl + 13 rodata-literal + jal-mismatch). The vendorable-header ones (drvrnew/reverb/env)
+  are mirrorable with a companion-copy enabler; mainbus/save need the multi-file split first.
+- **Open tooling question (deferred S94 #3):** audio coddog hits are still priced as classical packs
+  (seed 13) because they aren't re-priced to `libultra` (the S71 header-gate carve-out, now stale).
+  Re-pricing would drop their seeds to mirror values but needs per-row vendorable-header FP analysis
+  + a golden regen — a candidate enabler-sprint item, not yet done.
 
 ## PO ordering note (S71 retro — coddog: the remaining libultra band is ~all verbatim-mirrorable)
 

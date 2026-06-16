@@ -185,6 +185,35 @@ def test_coddog_mirror_repricing(tmp_path, monkeypatch):
     assert audio["upstream"] == "none"
 
 
+def test_lib_filter_surfaces_audio_coddog_mirror(tmp_path, monkeypatch):
+    """S94: `--lib <scope>` surfaces a coddog-mirror row whose matched source is in-scope, even when
+    the row stayed `upstream none` (audio coddog hits are flagged but NOT re-priced -> none, since
+    they were header-`-I`-gated, S71). Before this fix a clean audio mirror like auxbus.c was
+    invisible under `--lib libultra` (no `libultra/` path qualifier, no curated name) so the gate had
+    to survey by the coddog column (the S55 "--lib is misleading" caveat). The coddog map IS the
+    ultralib sweep, so any coddog-mirror match -> libultra; a sub-path scope (`--lib audio`) matches
+    via the matched-source path substring."""
+    mapf = tmp_path / "coddog_map.tsv"
+    mapf.write_text("func_800A09E0\t__alFakeAudio\tsrc/audio/fake.c\t99.99\n")
+    monkeypatch.setenv("CODDOG_MAP", str(mapf))
+
+    # --lib libultra: the audio coddog row (upstream none) is now in scope.
+    ultra = {r["func"] for r in json.loads(
+        run_tool("pick_target", "--lib", "libultra", "--json", "-n", "400").stdout)}
+    assert "func_800A09E0" in ultra, "audio coddog row missing under --lib libultra"
+
+    # --lib audio: the same row surfaces via the matched-source path substring.
+    aud = {r["func"] for r in json.loads(
+        run_tool("pick_target", "--lib", "audio", "--json", "-n", "400").stdout)}
+    assert "func_800A09E0" in aud, "audio coddog row missing under --lib audio"
+
+    # Guard: a scope matching no path/name/up_lib/coddog-source still excludes the row (the filter
+    # is widened for in-scope coddog hits only, not disabled).
+    none = {r["func"] for r in json.loads(
+        run_tool("pick_target", "--lib", "zzznomatch", "--json", "-n", "400").stdout)}
+    assert "func_800A09E0" not in none
+
+
 def test_coddog_trap_rescan(tmp_path, monkeypatch):
     """S72: a coddog-matched upstream's trap detectors (defines-data / file-static / needs-header)
     re-run on the resolved `.c`, so a verbatim-mirror candidate's hidden BSS/data trap is priced at

@@ -17,7 +17,6 @@ func_ovl10_801F4A40           0x1508E0 0x801F4A40   176   2  13 asm-flip none   
 func_800A1320                  0x7C720 0x800A1320   208   2  13 asm-flip none      -    pack:2fn[func_800A1320=?,func_800A1370=?]
 __floatdidf                    0x8F140 0x800B3D40   256   1   5 asm-flip none      -    -
 nuContGBPakFread               0x7D7A0 0x800A23A0   464   1   2 asm-flip libnusys  cold jal-count-mismatch:5vs9
-func_800A4FC0                  0x803C0 0x800A4FC0   272   2  13 asm-flip none      -    pack:2fn[func_800A4FC0=?,func_800A509C=?],one-tu
 __fixunsdfdi                   0x8F020 0x800B3C20   288   1   5 asm-flip none      -    -
 func_800A6D60                  0x82160 0x800A6D60   384   6  13 asm-flip none      -    pack:6fn[func_800A6D60=?,func_800A6E08=?,alInit=sl,alClose=sl,alLink=sl,alUnlink=sl]
 func_8009FB60                  0x7AF60 0x8009FB60   480   2  13 asm-flip none      -    pack:2fn[func_8009FB60=?,func_8009FD1C=?],one-tu,maybe-upstream:libultra:viswapcontext,sprawdma,sirawdma
@@ -49,3 +48,4 @@ func_8006EA90                  0x49E90 0x8006EA90  1808   3  13 asm-flip none   
 func_8009F440                  0x7A840 0x8009F440  1824   3  13 asm-flip none      -    pack:3fn[func_8009F440=?,func_8009F888=?,func_8009FA14=?],one-tu
 func_ovl15_801FB400           0x16C590 0x801FB400  1824   2  13 asm-flip none      -    pack:2fn[func_ovl15_801FB400=?,func_ovl15_801FB510=?]
 func_80050400                  0x2B800 0x80050400  2032  11  13 asm-flip none      -    pack:11fn[func_80050400=?,func_80050428=?,func_800504E8=?,func_80050504=?,func_80050588=?,func_80050598=?,func_800505A0=?,func_8005062C=?,func_800506D4=?,func_80050710=?,func_80050914=?]
+func_800A3C80                  0x7F080 0x800A3C80  2096   8  13 asm-flip none      -    pack:8fn[func_800A3C80=?,func_800A3D24=?,func_800A41BC=?,func_800A4274=?,func_800A4324=?,func_800A43B0=?,func_800A440C=?,func_800A4468=?]

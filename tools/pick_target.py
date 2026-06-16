@@ -2573,8 +2573,19 @@ def build_rows(args, upstream_index, carried, sig_index, coddog_index=None):
             if up_lib is None:
                 up_lib = "libultra"
 
-        if args.lib and args.lib not in (path or "") and (up_lib or "") != args.lib \
-                and not any(args.lib in n for n in fns):
+        # S94: a `coddog-mirror` hazard pins the row to an ultralib(libultra) source even when
+        # up_lib stayed None — audio coddog hits are deliberately NOT re-priced to libultra (they
+        # were header-`-I`-gated, S71), so a clean audio mirror like auxbus.c surfaced as
+        # `upstream none` and `--lib libultra` skipped it (the S55 "--lib is misleading" caveat,
+        # which cost a by-coddog-column manual survey at the S94 gate). The coddog map IS the
+        # ultralib sweep, so any coddog-mirror match means libultra; also honor a sub-path scope
+        # (e.g. `--lib audio` -> src/audio/...) via the matched-source path substring.
+        cod_srcs = [h.detail.rsplit("@", 1)[0] for h in hazards
+                    if h.kind == HAZARD_CODDOG_MIRROR]
+        cod_in_scope = bool(args.lib) and bool(cod_srcs) and (
+            args.lib == "libultra" or any(args.lib in s for s in cod_srcs))
+        if args.lib and not cod_in_scope and args.lib not in (path or "") \
+                and (up_lib or "") != args.lib and not any(args.lib in n for n in fns):
             continue
         # The `carried` filter de-ranks BACKLOG carry-overs (intentional — a parked carry-over is
         # retrieved via --include-stuck / the BACKLOG, NOT smallest-first; S90 pimgr confirmed this is
