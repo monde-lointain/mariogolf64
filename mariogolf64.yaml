@@ -298,7 +298,7 @@ segments:
       - [0x8BE10, hasm]
       - [0x8BE20, hasm]
       - [0x8BF30, c, libultra/libc/xprintf]
-      - [0x8C980, asm]
+      - [0x8C980, c, libultra/io/dpsetnextbuf]
       - [0x8CA20, hasm]
       - [0x8CA30, hasm]
       - [0x8CA40, hasm]

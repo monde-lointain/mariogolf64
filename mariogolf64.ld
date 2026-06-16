@@ -287,7 +287,7 @@ SECTIONS
         build/asm/8BE10.o(.text);
         build/asm/8BE20.o(.text);
         build/src/libultra/libc/xprintf.o(.text);
-        build/asm/8C980.o(.text);
+        build/src/libultra/io/dpsetnextbuf.o(.text);
         build/asm/8CA20.o(.text);
         build/asm/8CA30.o(.text);
         build/asm/8CA40.o(.text);
@@ -550,7 +550,7 @@ SECTIONS
         build/asm/8BE20.o(.data);
         build/asm/data/A35E0.data.o(.data);
         build/src/libultra/libc/xprintf.o(.data);
-        build/asm/8C980.o(.data);
+        build/src/libultra/io/dpsetnextbuf.o(.data);
         build/asm/8CA20.o(.data);
         build/asm/8CA30.o(.data);
         build/asm/8CA40.o(.data);
@@ -827,7 +827,7 @@ SECTIONS
         build/asm/data/AD9F0.rodata.o(.rodata);
         build/asm/data/ADA40.rodata.o(.rodata);
         build/src/libultra/libc/xprintf.o(.rodata);
-        build/asm/8C980.o(.rodata);
+        build/src/libultra/io/dpsetnextbuf.o(.rodata);
         build/asm/8CA20.o(.rodata);
         build/asm/8CA30.o(.rodata);
         build/asm/8CA40.o(.rodata);
@@ -1093,7 +1093,7 @@ SECTIONS
         build/asm/8BE10.o(.bss);
         build/asm/8BE20.o(.bss);
         build/src/libultra/libc/xprintf.o(.bss);
-        build/asm/8C980.o(.bss);
+        build/src/libultra/io/dpsetnextbuf.o(.bss);
         build/asm/8CA20.o(.bss);
         build/asm/8CA30.o(.bss);
         build/asm/8CA40.o(.bss);
