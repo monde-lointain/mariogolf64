@@ -277,7 +277,8 @@ When `pick_target.py` flags a hazard (or a match shows its symptom), read the ma
 | `intrinsic-likely` (bare) / `maybe-upstream:…` | #intrinsic-likely--maybe-upstream-signature-hints |
 | `coddog-mirror:<file>@<pct>` (coddog matched an un-named/`none` candidate to an ultralib fn → verbatim mirror, not classical; S72: a same-row `file-static`/`defines-data`/`needs-header` is the coddog trap re-scan → not an atomic cp) | #coddog-cross-ref |
 | `coddog-twin:<matched>!=<member-src>` (S81: coddog matched a near-identical TWIN file; the named members name the real source — mirror from `<member-src>`, not `<matched>`) | #coddog-cross-ref |
-| `coddog-fncount-mismatch:<m>vs<n>` (S88: the coddog file defines FEWER fns than the pack holds → a structural fingerprint match, NOT a single-file source attribution; the pack is multi-file. under-count only — `m<n`) | #coddog-cross-ref |
+| `coddog-fncount-mismatch:<m>vs<n>` (S88: the coddog file defines FEWER fns than the pack holds → a structural fingerprint match, NOT a single-file source attribution; the pack is multi-file. under-count only — `m<n`. S92: now also fires when the coddog identity is TAIL-carried, not just on the primary member — caught all 3 llcvt phantoms) | #coddog-cross-ref |
+| `coddog-structural:<file>@<pct>` (S92: a single-coddog-identity multi-fn pack whose matched source's meaningful-LOC implies a compiled size far below the subseg's — `size > 64 B/LOC` — so the @99% match is a structural fingerprint, not a source attribution; the size-dimension companion to `coddog-fncount-mismatch`. advisory, display-only. llcvt.c's 8 `return d;` stubs matched THREE distinct subsegs) | #coddog-cross-ref |
 | (libultra leaf, bare std header)| #per-library-standard-c-header-isolation |
 | (match locks ~0.9, lib target)  | #compile-profiles-libkmc--o-libultra--o3 |
 | (compiler rodata, wrong offset) / `rodata-literal:<addr>` | #rodata-sibling-yaml-pattern |

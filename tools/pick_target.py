@@ -276,6 +276,16 @@ HAZARD_CODDOG_FNCOUNT_MISMATCH = "coddog-fncount-mismatch"  # S88: a coddog-mirr
 # fns than the pack holds (settime.c 1fn coddog-matched a 6fn os pack) → a structural fingerprint
 # match, NOT a source attribution; the pack's real source is multi-file. Under-count direction only
 # (a true single source can define MORE, via version/_DEBUG-gated extras, e.g. contpfs 9 vs ROM 7).
+# S92: the under-count check now ALSO fires when the coddog identity is TAIL-carried (func_80050400's
+# leader is not in coddog_index; a tail member carries llcvt.c, 8 stubs vs the 11fn pack) — the old
+# check ran only in the primary block, so a tail-carried phantom surfaced as a clean single source.
+HAZARD_CODDOG_STRUCTURAL = "coddog-structural"  # S92: a coddog-mirror hit whose matched source's
+# expected compiled size is far below the matched subseg's (llcvt.c's ~8 trivial `return d;` stubs,
+# ~250B, vs a 2032B/11fn subseg — coddog matched the same llcvt.c to THREE distinct subsegs) → a
+# structural fingerprint match, not a source attribution. The size-dimension companion to
+# coddog-fncount-mismatch (the fn-count dimension); advisory (display-only, does not re-price).
+CODDOG_STRUCTURAL_BYTES_PER_LOC = 64  # subseg bytes / source meaningful-LOC above this, on a
+# single-identity multi-fn pack, marks the coddog match structural (conservative: ~4x a dense -O2 fn)
 HAZARD_COMBINED_SUBSEG = "combined-subseg"
 HAZARD_C_COMBINED = "c-combined"
 HAZARD_NON16ALIGN = "non16align"
@@ -636,6 +646,27 @@ def _upstream_file_func_count(lib, cpath):
         return 0
     text = _strip_inactive_version_branches(text, _build_version_ord(lib))
     return sum(1 for _ in _iter_upstream_functions(text))
+
+
+@functools.lru_cache(maxsize=None)
+def _meaningful_loc(cpath):
+    """Count non-blank, non-comment, non-preprocessor source lines of an upstream .c — a crude proxy
+    for its compiled .text size, used by the S92 coddog-structural size-ratio guard. Line-based
+    (blanks, `//`/`*`/`/*` comment lines, and `#`-directives dropped); a multi-line block comment's
+    body lines start `*` and are skipped, so the proxy errs low (safe: a low LOC only RAISES the
+    bytes/LOC ratio toward the threshold, never masks a real mismatch). Returns 0 on read failure."""
+    try:
+        with open(cpath, errors="ignore") as f:
+            text = f.read()
+    except OSError:
+        return 0
+    n = 0
+    for line in text.splitlines():
+        s = line.strip()
+        if not s or s.startswith(("//", "#", "*", "/*")):
+            continue
+        n += 1
+    return n
 
 
 # A dot-prefixed ld-section sibling line, e.g. `- [0xA35D0, .data, libultra/gu/rotate]`. The shared
@@ -2452,6 +2483,26 @@ def build_rows(args, upstream_index, carried, sig_index, coddog_index=None):
                 if cl_path:
                     mirror_path = cl_path or mirror_path  # the coddog identity is the real mirror source
                     blocked = _append_coddog_trap_hazards(off, primary, cl_path, up_lib, hazards) or blocked
+            # S92: the under-count fncount-mismatch + the structural size-ratio guards run in the
+            # PRIMARY coddog block (above) only when the identity is on `primary`. When the WHOLE
+            # pack resolves to ONE coddog .c via a TAIL member (func_80050400's leader is not in
+            # coddog_index; a tail member carries llcvt.c — 8 trivial `return d;` stubs, ~250B — yet
+            # the subseg is 2032B/11fn, and coddog matched that same llcvt.c to THREE subsegs),
+            # neither guard ran, so the phantom surfaced as a clean single-source mirror. Re-run both
+            # here when the pack has exactly one coddog identity (dedup the fncount flag w/ primary).
+            distinct = sorted({c for _, c, _ in cod_members})
+            if len(fns) > 1 and len(distinct) == 1:
+                cl1 = _coddog_upstream_path(distinct[0])
+                if cl1:
+                    matched_n = _upstream_file_func_count(up_lib or "libultra", cl1)
+                    if 0 < matched_n < len(fns) \
+                            and not any(h.kind == HAZARD_CODDOG_FNCOUNT_MISMATCH for h in hazards):
+                        hazards.append(Hazard(HAZARD_CODDOG_FNCOUNT_MISMATCH,
+                                              f"{matched_n}vs{len(fns)}"))
+                    loc = _meaningful_loc(cl1)
+                    if loc and size > CODDOG_STRUCTURAL_BYTES_PER_LOC * loc:
+                        cpct = max(p for _, c, p in cod_members if c == distinct[0])
+                        hazards.append(Hazard(HAZARD_CODDOG_STRUCTURAL, f"{distinct[0]}@{cpct:.2f}"))
             if up_lib is None:
                 up_lib = "libultra"
 

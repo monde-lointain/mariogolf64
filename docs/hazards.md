@@ -1096,15 +1096,38 @@ carrying `pack` / `jal-count-mismatch` / `maybe-upstream`, before committing it 
    reconcile step — but it pins which upstream the agent copies + which symbol names it places. No-ops
    when the candidate has no named member (nothing to disagree with) or the basenames agree.
 
+6. **S88/S92 structural-fingerprint guards (a @99% match that is NOT a source attribution).** coddog
+   hashes a fn's branch/call SHAPE, so a small source can fingerprint-match a much larger, unrelated
+   pack. Two name-independent guards fire when ONE coddog `.c` claims a whole multi-fn pack:
+   - **`coddog-fncount-mismatch:<m>vs<n>`** (S88) — the matched source defines FEWER fns (`m`) than the
+     pack holds (`n`), so it cannot be the sole source → the pack is multi-file. Under-count only (a
+     true single source may define MORE via version/`_DEBUG`-gated extras). **S92:** the check now also
+     runs when the coddog identity is carried by an un-named TAIL member (not the pack leader), the
+     case the S88 primary-only check missed — `func_80050400`'s leader is absent from the map but a tail
+     member carries `llcvt.c` (8 fns vs the 11fn pack).
+   - **`coddog-structural:<file>@<pct>`** (S92) — the matched source's meaningful-LOC implies a compiled
+     size far below the subseg's (`subseg_bytes > 64 × source_LOC`). `llcvt.c` is 8 trivial `return d;`
+     conversion stubs (~250 B) yet coddog matched it @99.99 to THREE distinct subsegs (2032 B / 2912 B /
+     7728 B). Advisory/display-only — the size-dimension companion to the fn-count guard. When either
+     guard is on a coddog row, do NOT treat the `coddog-mirror` flag as a single-file mirror identity.
+   - **NOT done (S92 carry-over):** a `.data`-carve detector for a file's OWN initialized file-statics
+     (the `_Litob` ldigs/udigs class). An `addiu %lo(D_<addr>)` into the `.data` range cannot be
+     distinguished from a SHARED extern reference by asm alone (the same instruction serves both), and
+     `refs-unplaced` has gaps, so a naive scan mis-routes cross-file externs to a phantom carve. Deferred
+     to a dedicated tooling sprint — see `BACKLOG.md ## Carry-overs`.
+
 **Trigger:** `pick_target.py` flags `coddog-mirror:<file>@<pct>` (only when the map exists); any
 `file-static` / `defines-data` / `needs-header` on the *same row* is the S72 trap re-scan; a
 `coddog-twin:<matched>!=<member-src>` on the same row means coddog named the twin — mirror from
-`<member-src>`.
+`<member-src>`; a `coddog-fncount-mismatch` / `coddog-structural` on the same row means the @99%
+match is a structural fingerprint, not a source attribution (the pack is multi-file / mis-attributed).
 
 **Provenance:** S71 (crc.c mis-seed; the recipe + reusable tool memory in `coddog-ultralib-crossref`);
 S72 (the trap re-scan — coddog-mirror candidates can hide a defines-data/file-static BSS trap);
 S81 (`io/siacs.c`: coddog named the twin `piacs.c`, named members → real source `siacs.c`; the
-gate-safe drop-def symbol-add note also landed in #defines-data).
+gate-safe drop-def symbol-add note also landed in #defines-data); S88 (`coddog-fncount-mismatch`);
+S92 (the fncount check extended to tail-carried identities + the `coddog-structural` size guard —
+both retiring the llcvt false-positive class, where one tiny source fingerprint-matched 3 subsegs).
 
 ---
 

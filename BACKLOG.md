@@ -620,6 +620,31 @@ sub-sprints).
   via `sync_decomp_names.py --import-from-decomp` (the 2 fn names were already in `ghidra_symbols.txt`).
   **The `[0x7E360]` pack now has only `pimgr` (osCreatePiManager) left → carry-over below.**
 
+- **Sprint 92: 1 .c file BANKED — `src/libultra/libc/xlitob.c` (`_Litob`), libultra libc c-combined
+  decompose + `.data` carve.** md5-candidate 135→**136** (all .c stub-free); asm subsegs 135→135
+  (xldtob tail stays asm). `_Litob` is the printf integer-to-string radix formatter (oct/dec/hex,
+  signed/unsigned 64-bit). The pts-13 `[0x8D230]` `c-combined:2file[xldtob|xlitob]` pack tripped the
+  8-gate → decomposed at the upstream-file boundary (xlitob HEAD / xldtob TAIL), since a 2-file
+  c-combined blocks the verbatim-mirror exemption. Split `[0x8D230,asm]`→`[0x8D230,c,libultra/libc/
+  xlitob]` (_Litob, 592B/0x250) + `[0x8D480,asm]` (xldtob tail `_Ldtob`/`_Ldunscale`/`_Genld`,
+  16-aligned). Verbatim ultralib VERSION_J `src/libc/xlitob.c`, **byte-identical cp, first-build
+  full-make ROM SHA-1 == baserom, 0 iteration.** `jal-count-mismatch:2vs4` was a FALSE flag (4 jals =
+  lldiv+memcpy source calls + 2 compiler u64 div/mod intrinsics `__udivdi3`/`__umoddi3`). **`.data`
+  carve** for the file-static digit tables `ldigs`="0123456789abcdef"@0x800C9660 + `udigs`@0x800C9674
+  (asm-recovered lui/addiu): `[0xA4A60,.data,libultra/libc/xlitob]` size 0x30 exact first try (segment
+  vram→rom delta 0x80024C00, anchored off `gu/align.o(.data)`@0x800C81A0=rom 0xA35A0). Headers all
+  resolve (xstdio.h source-private same-dir S54, stdlib.h/string.h); all 4 callees + `_Litob`
+  pre-named → **zero symbol adds**. seed 3 / banked 3pt; regime mirror (seed-only). 0 stuck-far/
+  permuter/carried/re-opened. Retro applied **2 of 3**: #1 `coddog-fncount-mismatch` extended to
+  TAIL-carried coddog identities (the S88 check ran only on the pack leader → func_80050400's
+  llcvt.c identity, carried by a tail member, never fired 8vs11; now flags all 3 llcvt phantoms);
+  #2 new `coddog-structural:<file>@<pct>` size-ratio guard (`>64 B/LOC`); #3 a `.data`-carve detector
+  was **built then reverted** (over-fired — see carry-over). suite 52 pass, golden-inert.
+  **Cross-repo follow-up:** none (no new symbols; `_Litob` already in `ghidra_symbols.txt`).
+  **Band note: the next libc leaf is the xldtob tail `[0x8D480]` (near-free decompose sibling,
+  carry-over below); the broader libultra band is the heavy sched/exceptasm spikes + the `_Printf`/
+  xprintf pack (S91-isolated).**
+
 - **Sprint 91: 1 asm-mirror BANKED — `src/libultra/libc/bcmp.s` (`bcmp`), libultra libc asm-mirror;
   split off the pts-13 `[0x8BE20]` bcmp/xprintf pack.** Vendored asm-mirror TUs 20→**21**; the cheap
   libultra mirror band is exhausted (every remaining candidate is a pts-8/13 pack) so the gate verified
@@ -1057,6 +1082,28 @@ by `/sprint-plan`:
   adaptation vs upstream; **(5)** the upstream pin (file + VERSION_J). A near-free retry missing any
   of these is a half-scoped spike — finish the scope before deferring.
 
+- **Near-free retry — xldtob tail `[0x8D480, asm]` (`_Ldtob` + `_Ldunscale` + `_Genld`, the 3-fn
+  tail left by S92's xldtob|xlitob decompose).** The S92 split banked the xlitob HEAD (`_Litob`);
+  this is the clean xldtob sibling, the float/long-double-to-string scaling routines. Completeness
+  checklist:
+  - **(1) flip/split:** `[0x8D480, asm]` → `[0x8D480, c, libultra/libc/xldtob]` (covers
+    0x800B2080..0x800B2B10, rom 0x8D480..0x8DF10; the next subseg `[0x8DF10, c, libultra/io/dp]`
+    bounds it). The 0x8D480 head is already split off (S92), so this is a single text flip, no
+    further split. Re-confirm the 16-alignment of the xldtob fn boundaries at the gate.
+  - **(2) placed-ref inventory:** coddog `src/libc/xldtob.c@99.99`. Callees include `lldiv`
+    =0x800B2BD4 (named, in this same asm range), `memcpy`=0x800AADC4, and the u64 div/mod intrinsics
+    `__udivdi3`=0x800B3BC0 / `__umoddi3`=0x800B3BE0 (all named). _Ldtob/_Ldunscale/_Genld names —
+    verify in ghidra_symbols at the gate (the S92 row tagged them as named members).
+  - **(3) NEW recovery:** the `.rodata` literal carve `rodata-literal:0x800D2820,0x800D2828;
+    carve-end=0x800D2840` (the float scaling constants; these are xldtob's, NOT xlitob's — confirmed
+    S92). Recover the exact carve extent from the `.o(.rodata)` size at execution
+    (`docs/hazards.md#rodata-sibling-yaml-pattern`). Check for any xldtob file-static `.data` (read
+    the asm lui/addiu at the gate — S92's `.data`-carve detector was NOT shipped, so this is manual).
+  - **(4) include adaptation:** xldtob.c includes the same source-private `xstdio.h` (same-dir) +
+    stdlib.h/string.h as xlitob (S92 verified all resolve); plus any math headers — verify at gate.
+  - **(5) upstream pin:** ultralib `src/libc/xldtob.c`, VERSION_J (gcc.mk / KMC-N64,
+    `-DBUILD_VERSION=VERSION_J`).
+
 - _(S89 reconciliation — `piacs.c` (`__osPiCreateAccessQueue`/`__osPiGetAccess`/`__osPiRelAccess`,
   0x800A39B0) is **ALREADY BANKED**, NOT a remaining trap. It is flipped + matching at
   `[0x7EDB0, c, libultra/io/piacs]` (drop-to-extern mirror — all 3 data symbols placed:
@@ -1135,6 +1182,25 @@ by `/sprint-plan`:
   S85** — turned out a drop-def mirror (NOT the framed cross-region `.data` carve; main_data provides
   the bytes) + one VERSION_K-gate un-gate (`__osSetWatchLo`, `docs/hazards.md#needs-define`) + a
   `#undef __osInitialize_common` for the os_host.h K→J shim (`docs/hazards.md#header-renames-symbol`).)_
+- **Tooling follow-up (S92 #3, REVERTED at apply) — `.data`-carve detector for file-static
+  INITIALIZED arrays.** S92's `_Litob` needed a `.data` carve for its `ldigs`/`udigs` digit tables
+  (`static char[]="0123…"`), which NO detector flagged at the gate (only xldtob's `rodata-literal`
+  surfaced; the asm ref is `addiu %lo(D_<addr>)` address-of, caught by neither the FP-load nor
+  `lw`-load scan). A built `data_addr_refs` scan (`addiu %lo(D_)` band-filtered to the `.data`
+  range) was **reverted** because it could not separate a file's OWN static (→ `.data` carve) from a
+  SHARED cross-file extern referenced via the identical instruction (→ recover-extern): it over-fired
+  on `0x800C8270` (a global shared between two scheduler-create files, osCreateScheduler +
+  nuScCreateScheduler) and `0x800C7E30` (nuSiCallBackList, referenced cross-file by nuContGBPakFwrite —
+  names un-backticked here so carry_over_names does not de-rank these real candidates). Excluding
+  `refs-unplaced` addresses is necessary but
+  INSUFFICIENT (refs-unplaced has cross-file gaps). A correct detector needs a file's-own-static vs
+  cross-file-extern discriminator — likely SOURCE-based (scan the mirror's resolved upstream `.c` for
+  `static <type> <name>[…] = <init>` initialized file-scope statics → flag a `.data` carve, address
+  recovered from asm at the gate), but the c-combined/coddog `up_path` resolution can point at the
+  WRONG member file (xlitob vs xldtob), so it needs the right per-member upstream first. Not
+  file-blocking (the carve is a mechanical S38/S68 gate step once the asm is read; S92 banked it
+  manually first-try). Dedicated tooling sprint — see `docs/hazards.md#coddog-cross-ref` step 6.
+
 - **Tooling follow-up (S72 #2) — optional `bare-assert` advisory flag.** `pick_target` could scan a
   mirror candidate's upstream `.c` for a non-`_DEBUG`-guarded `assert(` and flag it, so the
   `#assert-strip` `_DEBUG`-wrap is priced at the gate rather than rediscovered by the read==write
