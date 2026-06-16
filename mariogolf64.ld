@@ -503,7 +503,7 @@ SECTIONS
         build/src/libultra/os/yieldthread.o(.data);
         build/src/libultra/os/gettime.o(.data);
         build/src/libultra/os/settimer.o(.data);
-        build/asm/data/A3620.data.o(.data);
+        build/src/libultra/os/thread.o(.data);
         build/src/libultra/os/timerintr.o(.data);
         build/src/libultra/os/maptlb.o(.data);
         build/src/libultra/os/probetlb.o(.data);

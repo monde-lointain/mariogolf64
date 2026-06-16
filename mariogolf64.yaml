@@ -354,7 +354,7 @@ segments:
       - [0xA35F0, .data, libultra/os/seteventmesg]
       - [0xA3600, .data, libultra/sched/sched]
       - [0xA3610, .data, libultra/io/siacs]
-      - [0xA3620, data]
+      - [0xA3620, .data, libultra/os/thread]
       - [0xA3640, .data, libultra/os/timerintr]
       - [0xA3650, .data, libultra/io/vimgr]
       - [0xA3670, data]
