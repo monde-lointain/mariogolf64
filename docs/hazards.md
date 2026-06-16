@@ -816,6 +816,16 @@ of its own, so the scan's max referenced literal can understate the carve end (S
 the 0x800D2510 carve end = the `lookatref` `.rodata` boundary). `carve-end` is the next `.rodata`
 subseg boundary (an upper bound, exact when the mirror's literals are the subseg tail — the common
 case); the finalize carve is still `.o`-sized, but the gate now sees the planned extent.
+**Generic-subseg-bound carve = exact extent, no split (S101).** When a carve START *or* END coincides
+with an existing generic `[off, (ro)data]` subseg boundary, that generic subseg's opposite boundary
+IS the exact carve extent — the linker already split the section there, so the carve is a **1-line
+attribute flip** of the existing generic subseg (`[off, data]` → `[off, .data, path]`), not a split,
+and `carve-end`'s upper bound is exact (the S93 xldtob single-line case, generalized). S101 `env.c`:
+BOTH sections were whole-subseg flips — `.data` `eqpower[128]` = the entire generic `[0xA3460, data]`
+(0x100 B, vram 0x800C8060), `.rodata` jtbl+13 literals = the entire generic `[0xAD6F0, rodata]`
+(0xF0 B, vram 0x800D22F0). pick's `carve-end=0x800D25C0` over-stated (real end 0x800D23E0 = the next
+named `.rodata` boundary 0xAD7E0). After the env|filter split, env is a single-file-pack and the sole
+owner, so the `;owner-per-member` marker is moot.
 **Carve-START widening (S93): the reported min can understate the carve start.** The FP/`lw` scans
 see only scalar `%lo` *loads*; a `.rodata` block that *opens* with a file-scope `static const <type>
 name[]` array begins at the array base (an `addiu %lo` address-of) and may carry string literals

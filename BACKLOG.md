@@ -620,6 +620,40 @@ sub-sprints).
   via `sync_decomp_names.py --import-from-decomp` (the 2 fn names were already in `ghidra_symbols.txt`).
   **The `[0x7E360]` pack now has only `pimgr` (osCreatePiManager) left → carry-over below.**
 
+- **Sprint 101: 2 .c files BANKED — `src/libultra/audio/env.c` (`alEnvmixerPull` + `alEnvmixerParam`
+  + `_pullSubFrame` + `_frexpf` + `_ldexpf` + `_getRate` + `_getVol`) + `src/libultra/audio/filter.c`
+  (`alFilterNew`); cleared the `[0x804D0]` `c-combined:2file[env|filter]` pack — the LAST un-flipped
+  audio-synth-cluster subseg.** md5-candidate 148→**150**; asm subsegs 127→126; 8 fns matched. The
+  audio-synth mirror vein is now fully banked. pts-13 tripped the 8-gate → MANDATORY decompose
+  (`c-combined` blocks the verbatim exemption) → split `[0x804D0,asm]`→`[0x804D0,c,libultra/audio/env]`
+  + `[0x81180,c,libultra/audio/filter]` at the env/filter file boundary (`alFilterNew`@0x800A5D80,
+  the 0x20 B tail). **filter.c (1fn):** trivial verbatim cp (6 struct-field writes, no data/rodata/
+  calls), `alFilterNew` pre-curated. **env.c (7fn, the envmixer):** the drvrnew (S96) / reverb (S100)
+  carve-mirror class — verbatim ultralib VERSION_J, failed the exemption on residual variance (dual
+  carve + assert-strip), ran enabler-forward. **Dual whole-subseg carve, NO split (both sections,
+  S93-class):** `.data` `eqpower[128]`@`[0xA3460,.data,libultra/audio/env]` (0x100 B, vram 0x800C8060,
+  the file's ONLY `.data`; the S92 UN-flagged initialized-static-array class, asm-recovered from the
+  `s4 = lui 0x800d/addiu -0x7fa0` load) + `.rodata` jtbl_800D22F0 + 13 FP literals@`[0xAD6F0,.rodata,
+  libultra/audio/env]` (0xF0 B) — BOTH landed exactly on an existing generic subseg boundary whose end
+  bounded the env.o section → 1-line attribute flips (pick's `carve-end=0x800D25C0` over-stated; real
+  end 0x800D23E0 = the next named `.rodata` boundary 0xAD7E0). **assert-strip:** 3 asserts (105/106/370,
+  the `#if BUILD_VERSION<J` block around 102-104 is only a `#line` directive, asserts are ACTIVE)
+  wrapped `#ifdef _DEBUG` (NDEBUG+_DEBUG both unset → bare `assert()`→`__assert` SHA-break; save.c
+  style). **2 calls-unplaced recovered:** `__freeParam`=0x80051E74, `_freePVoice`=0x80051E7C
+  (alEnvmixerPull lines 292/267 jal targets, still-asm synth region); `_frexpf`/`_ldexpf` calls-unplaced
+  were intra-file FALSE-positives (env.c members). 4 member symbol adds at gate (`_frexpf`/`_ldexpf`/
+  `_getRate`/`_getVol`). Both **first-build full-make ROM SHA-1 == baserom, 0 iteration**. 0 stuck-far/
+  permuter/carried/re-opened. Applied 3 of 3: #1 `docs/hazards.md#rodata-sibling-yaml-pattern`
+  generic-subseg-bound carve = exact-extent-no-split heuristic (advances the deferred S98 carve-end
+  work); #2 BACKLOG S92 `.data`-carve detector 2nd data point (env single-file-pack = the safe first
+  slice, no per-member `up_path` ambiguity); #3 BACKLOG new S101 #1 tooling follow-up — suppress
+  intra-pack `calls-unplaced` (calls-side dual of S66 #2). **Cross-repo follow-up:** 6 new decomp-side
+  symbols (`_frexpf`/`_ldexpf`/`_getRate`/`_getVol`/`__freeParam`/`_freePVoice`) → propagate via
+  `sync_decomp_names.py --import-from-decomp`. **Band note: the audio-synth cluster (auxbus/load/
+  drvrnew/save/sl/mainbus/resample/reverb/env/filter) is now COMPLETELY mirrored. Remaining libultra
+  is the heavy non-audio packs — sched.c head + exceptasm.s spikes (carry-overs), the xprintf classical
+  band, and the structural-phantom packs (llcvt/settime/contquery-region).**
+
 - **Sprint 100: 1 .c file BANKED — `src/libultra/audio/reverb.c` (`alFxPull` + `alFxParam` +
   `alFxParamHdl` + `_loadOutputBuffer` + `_loadBuffer` + `_saveBuffer` + `_filterBuffer` +
   `_doModFunc`), the libultra audio REVERB effect; cleared the `[0x815C0]` pack.** md5-candidate
@@ -1451,6 +1485,24 @@ by `/sprint-plan`:
   WRONG member file (xlitob vs xldtob), so it needs the right per-member upstream first. Not
   file-blocking (the carve is a mechanical S38/S68 gate step once the asm is read; S92 banked it
   manually first-try). Dedicated tooling sprint — see `docs/hazards.md#coddog-cross-ref` step 6.
+  **S101 2nd data point (confirms worth doing):** env.c's `eqpower[128]` (`static s16 eqpower[…] =
+  {…}`, the file's ONLY `.data`) was likewise UN-flagged, recovered manually at execution from the
+  asm (`s4 = lui 0x800d/addiu -0x7fa0` → 0x800C8060) and bounded exactly by the existing generic
+  `[0xA3460,data]` subseg. This is exactly the `static <type> <name>[…] = <init>` source-scan case;
+  AND env is a clean **single-file-pack** (post env|filter split), so the per-member `up_path`
+  ambiguity that blocked S92 does NOT arise here — the source-based detector would have fired cleanly.
+  The single-file-pack subset is the safe first slice to ship the detector on.
+
+- **Tooling follow-up (S101 #1) — suppress intra-pack `calls-unplaced` (calls-side dual of S66 #2).**
+  `pick_target` flagged all 4 `calls-unplaced:__freeParam,_freePVoice,_frexpf,_ldexpf` on env, but
+  `_frexpf`/`_ldexpf` are DEFINED as pack members (env.c fns 0x800A5978/0x800A5A58) → they self-resolve
+  on a verbatim mirror and are pure noise (only `__freeParam`/`_freePVoice` are real cross-file
+  recover-callees). Suppress a `calls-unplaced` callee whose name matches a resolved pack-member
+  function — the calls-side analog of the deferred S66 #2 cross-member `refs_unplaced` union. Cheap:
+  the member basename set is already computed for the `pack:Nfn[fn=basename,…]` column, so the filter
+  is a set-membership check in `_append_recover_hazards` (the same place the jtbl owner-attribution
+  lives). Not file-blocking (the intra-file callees self-resolve on mirror; the noise just over-states
+  the gate cost). Off-cadence golden-gated (touches the ranker) — `tooling-refactor-style`.
 
 - **Tooling follow-up (S72 #2) — optional `bare-assert` advisory flag.** `pick_target` could scan a
   mirror candidate's upstream `.c` for a non-`_DEBUG`-guarded `assert(` and flag it, so the
