@@ -141,7 +141,9 @@ SECTIONS
         build/src/libnusys/mainlib/nugfxtaskallendwait.o(.text);
         build/src/libnusys/mainlib/nugfxretracewait.o(.text);
         build/src/libnusys/mainlib/nugfxdisplayoff.o(.text);
-        build/asm/7CAD0.o(.text);
+        build/src/libnusys/mainlib/nugfxdisplayon.o(.text);
+        build/src/libnusys/mainlib/nupiinit.o(.text);
+        build/src/libnusys/mainlib/nupiinitsram.o(.text);
         build/src/libnusys/mainlib/nupireadwritesram.o(.text);
         build/src/libnusys/mainlib/nucontinit.o(.text);
         build/src/libnusys/mainlib/nucontdatagetex.o(.text);
@@ -395,7 +397,9 @@ SECTIONS
         build/src/libnusys/mainlib/nugfxtaskallendwait.o(.data);
         build/src/libnusys/mainlib/nugfxretracewait.o(.data);
         build/src/libnusys/mainlib/nugfxdisplayoff.o(.data);
-        build/asm/7CAD0.o(.data);
+        build/src/libnusys/mainlib/nugfxdisplayon.o(.data);
+        build/src/libnusys/mainlib/nupiinit.o(.data);
+        build/src/libnusys/mainlib/nupiinitsram.o(.data);
         build/src/libnusys/mainlib/nupireadwritesram.o(.data);
         build/src/libnusys/mainlib/nucontinit.o(.data);
         build/src/libnusys/mainlib/nucontdatagetex.o(.data);
@@ -654,7 +658,9 @@ SECTIONS
         build/src/libnusys/mainlib/nugfxtaskallendwait.o(.rodata);
         build/src/libnusys/mainlib/nugfxretracewait.o(.rodata);
         build/src/libnusys/mainlib/nugfxdisplayoff.o(.rodata);
-        build/asm/7CAD0.o(.rodata);
+        build/src/libnusys/mainlib/nugfxdisplayon.o(.rodata);
+        build/src/libnusys/mainlib/nupiinit.o(.rodata);
+        build/src/libnusys/mainlib/nupiinitsram.o(.rodata);
         build/src/libnusys/mainlib/nupireadwritesram.o(.rodata);
         build/src/libnusys/mainlib/nucontinit.o(.rodata);
         build/src/libnusys/mainlib/nucontdatagetex.o(.rodata);
@@ -933,7 +939,9 @@ SECTIONS
         build/src/libnusys/mainlib/nugfxtaskallendwait.o(.bss);
         build/src/libnusys/mainlib/nugfxretracewait.o(.bss);
         build/src/libnusys/mainlib/nugfxdisplayoff.o(.bss);
-        build/asm/7CAD0.o(.bss);
+        build/src/libnusys/mainlib/nugfxdisplayon.o(.bss);
+        build/src/libnusys/mainlib/nupiinit.o(.bss);
+        build/src/libnusys/mainlib/nupiinitsram.o(.bss);
         build/src/libnusys/mainlib/nupireadwritesram.o(.bss);
         build/src/libnusys/mainlib/nucontinit.o(.bss);
         build/src/libnusys/mainlib/nucontdatagetex.o(.bss);
