@@ -5,9 +5,9 @@
 #include "viint.h"
 #include "osint.h"
 
-extern OSDevMgr __osViDevMgr;
+OSDevMgr __osViDevMgr = { 0 };
 #if BUILD_VERSION >= VERSION_J
-extern u32 __additional_scanline;
+u32 __additional_scanline = 0;
 #endif
 extern OSThread viThread;
 extern u64 viThreadStack[ALIGN8(OS_VIM_STACKSIZE) / sizeof(u64)];

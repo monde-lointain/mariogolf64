@@ -483,7 +483,6 @@ SECTIONS
         build/src/libultra/os/jammesg.o(.data);
         build/src/libultra/os/recvmesg.o(.data);
         build/src/libultra/os/sendmesg.o(.data);
-        build/asm/data/A35E0.data.o(.data);
         build/src/libultra/os/seteventmesg.o(.data);
         build/src/libultra/io/dpsetstat.o(.data);
         build/src/libultra/io/dpctr.o(.data);
@@ -525,12 +524,12 @@ SECTIONS
         build/src/libultra/io/gbpakgetstatus.o(.data);
         build/src/libultra/io/gbpakpower.o(.data);
         build/src/libultra/io/gbpakreadwrite.o(.data);
+        build/asm/data/A3670.data.o(.data);
         build/src/libultra/io/gbpakreadid.o(.data);
         build/src/libultra/io/gbpakcheckconnector.o(.data);
         build/src/libultra/io/motor.o(.data);
         build/src/libultra/io/pfsgetstatus.o(.data);
         build/src/libultra/io/pfsselectbank.o(.data);
-        build/asm/data/A3650.data.o(.data);
         build/src/libultra/io/contpfs.o(.data);
         build/src/libultra/io/contramread.o(.data);
         build/src/libultra/io/contramwrite.o(.data);

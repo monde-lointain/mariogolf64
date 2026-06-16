@@ -12,7 +12,7 @@
 
 #include "guint.h"
 
-extern float dtor;
+static float dtor = 3.1415926 / 180.0;
 
 /*
  *  Return rotation matrix given roll, pitch, and yaw in degrees
