@@ -16,10 +16,10 @@ extern __osExceptionVector __osExceptionPreamble[];
 extern OSPiHandle __Dom1SpeedParam;
 extern OSPiHandle __Dom2SpeedParam;
 
-extern OSTime osClockRate;
-extern s32 osViClock;
-extern u32 __osShutdown;
-extern u32 __OSGlobalIntMask;
+OSTime osClockRate = OS_CLOCK_RATE;
+s32 osViClock = VI_NTSC_CLOCK;
+u32 __osShutdown = 0;
+u32 __OSGlobalIntMask = OS_IM_ALL;
 #ifdef _FINALROM
 extern u32 __osFinalrom;
 #else

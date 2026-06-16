@@ -536,6 +536,7 @@ SECTIONS
         build/src/libultra/io/contramwrite.o(.data);
         build/src/libultra/os/parameters.o(.data);
         build/src/libultra/os/afterprenmi.o(.data);
+        build/asm/data/A3610.data.o(.data);
         build/src/libultra/os/initialize.o(.data);
         build/src/libultra/os/exceptasm.o(.data);
         build/src/libultra/os/interrupt.o(.data);
@@ -548,7 +549,7 @@ SECTIONS
         build/src/libultra/io/ai.o(.data);
         build/src/libultra/gu/sqrtf.o(.data);
         build/src/libultra/libc/bcmp.o(.data);
-        build/asm/data/A3610.data.o(.data);
+        build/asm/data/A4880.data.o(.data);
         build/src/libultra/libc/xprintf.o(.data);
         build/src/libultra/io/dpsetnextbuf.o(.data);
         build/src/libultra/os/getcause.o(.data);

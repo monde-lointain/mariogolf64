@@ -352,6 +352,8 @@ segments:
       - [0xA35E0, data]
       - [0xA3600, .data, libultra/sched/sched]
       - [0xA3610, data]
+      - [0xA4860, .data, libultra/os/initialize]
+      - [0xA4880, data]
       - [0xA48B0, .data, libultra/libc/xprintf]
       - [0xA4900, data]
       - [0xA4A60, .data, libultra/libc/xlitob]
