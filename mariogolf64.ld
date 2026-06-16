@@ -180,7 +180,8 @@ SECTIONS
         build/src/libultra/audio/drvrnew.o(.text);
         build/src/libultra/audio/load.o(.text);
         build/src/libultra/audio/auxbus.o(.text);
-        build/asm/804D0.o(.text);
+        build/src/libultra/audio/env.o(.text);
+        build/src/libultra/audio/filter.o(.text);
         build/src/libultra/audio/mainbus.o(.text);
         build/src/libultra/audio/resample.o(.text);
         build/src/libultra/audio/reverb.o(.text);
@@ -437,7 +438,8 @@ SECTIONS
         build/src/libultra/audio/drvrnew.o(.data);
         build/src/libultra/audio/load.o(.data);
         build/src/libultra/audio/auxbus.o(.data);
-        build/asm/804D0.o(.data);
+        build/src/libultra/audio/env.o(.data);
+        build/src/libultra/audio/filter.o(.data);
         build/src/libultra/audio/mainbus.o(.data);
         build/src/libultra/audio/resample.o(.data);
         build/asm/data/A3460.data.o(.data);
@@ -711,7 +713,8 @@ SECTIONS
         build/src/libultra/audio/drvrnew.o(.rodata);
         build/src/libultra/audio/load.o(.rodata);
         build/src/libultra/audio/auxbus.o(.rodata);
-        build/asm/804D0.o(.rodata);
+        build/src/libultra/audio/env.o(.rodata);
+        build/src/libultra/audio/filter.o(.rodata);
         build/src/libultra/audio/mainbus.o(.rodata);
         build/asm/data/AD6F0.rodata.o(.rodata);
         build/src/libultra/audio/resample.o(.rodata);
@@ -978,7 +981,8 @@ SECTIONS
         build/src/libultra/audio/drvrnew.o(.bss);
         build/src/libultra/audio/load.o(.bss);
         build/src/libultra/audio/auxbus.o(.bss);
-        build/asm/804D0.o(.bss);
+        build/src/libultra/audio/env.o(.bss);
+        build/src/libultra/audio/filter.o(.bss);
         build/src/libultra/audio/mainbus.o(.bss);
         build/src/libultra/audio/resample.o(.bss);
         build/src/libultra/audio/reverb.o(.bss);
