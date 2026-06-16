@@ -460,6 +460,47 @@ def test_drop_static_mirror_hazard(tmp_path):
     assert pt.drop_static_mirror_hazard(None, [fs, dd]) is None
 
 
+def test_file_static_const_array_widens_rodata_carve_start(tmp_path):
+    """S93: the rodata-literal carve-start under-states a `.rodata` block that OPENS with a file-scope
+    `static const <type> name[]` array — the FP scan sees only scalar `ldc1/lwc1 %lo` loads, missing
+    the array base (`addiu %lo` address-of) + string-literal pointers, so min(rodata_lits) is 0x50 B
+    too high (xldtob.c: pows[] dlabel 0x800D27D0 vs the FP scan's 0x800D2820). defines_file_static_const_array
+    detects the file-PRIVATE const array that makes widening the carve-start to the subseg boundary
+    FP-safe (the `static` keyword bars cross-file linkage — the whole code-seg rodata subseg is this
+    object's own; the direct `addiu %lo` scan was reverted S92 for cross-file FP in .data)."""
+    pt = load_tool("pick_target")
+
+    # a file-scope `static const` ARRAY → detected (the widening signal)
+    up = tmp_path / "xldtob.c"
+    up.write_text(
+        '#include "stdlib.h"\n'
+        "static const ldouble pows[] = {10e0L, 10e1L, 10e3L};\n"
+        "void _Ldtob(int code) { (void)pows[code]; }\n")
+    assert pt.defines_file_static_const_array(str(up)) == ["pows"]
+
+    # a NON-const mutable array (xlitob's ldigs/udigs) → NOT detected: it lands in .data (its own
+    # carve), so the rodata widening must not fire (the S92 reversion's over-fire class).
+    mutable = tmp_path / "xlitob.c"
+    mutable.write_text(
+        'static char ldigs[] = "0123456789abcdef";\n'
+        "void _Litob(int code) { (void)ldigs[code]; }\n")
+    assert pt.defines_file_static_const_array(str(mutable)) == []
+
+    # a brace-depth>=1 function-local const array is not file-scope → excluded (depth tracking)
+    local = tmp_path / "loc.c"
+    local.write_text(
+        "void f(int i) {\n"
+        "    static const int t[2] = {1, 2};\n"
+        "    (void)t[i];\n"
+        "}\n")
+    assert pt.defines_file_static_const_array(str(local)) == []
+
+    # a scalar const (not an array) is not this signal
+    scalar = tmp_path / "sc.c"
+    scalar.write_text("static const float dtor = 3.14;\nvoid g(void){}\n")
+    assert pt.defines_file_static_const_array(str(scalar)) == []
+
+
 # --- refactor pre-flight characterization (tooling/refactor-pick-target) -------------------
 # These lock CURRENT behavior (captured live, not a spec) ahead of the pick_target.py refactor
 # so the seed-weight-table (Phase 1b), the Candidate parameter object (Phase 2), and the

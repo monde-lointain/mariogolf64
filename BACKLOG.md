@@ -620,6 +620,36 @@ sub-sprints).
   via `sync_decomp_names.py --import-from-decomp` (the 2 fn names were already in `ghidra_symbols.txt`).
   **The `[0x7E360]` pack now has only `pimgr` (osCreatePiManager) left → carry-over below.**
 
+- **Sprint 93: 1 .c file BANKED — `src/libultra/libc/xldtob.c` (`_Ldtob` + `_Ldunscale` + `_Genld`),
+  libultra libc float-to-string verbatim mirror; the S92 xldtob-tail carry-over, banked first-try.**
+  md5-candidate 136→**137** (all 137 .c stub-free); asm subsegs −1 (0x8D480 flipped) + 1 generic rodata
+  [0xADBD0] carved. The clean twin of S92's xlitob (`_Litob`) — the float/long-double→string scaling
+  routines. Single text flip `[0x8D480,asm]`→`[0x8D480,c,libultra/libc/xldtob]` (S92 already split the
+  xlitob head off `[0x8D230]`, so no further split). pts-13 tripped the 8-gate but ran under the
+  **verbatim-mirror exemption (S64/S69)**: regime mirror + verbatim single upstream file +
+  decompose-blocked `single-file-pack:3fn`/`one-tu` + all callees placed + all 3 names pre-curated in
+  ghidra_symbols. Verbatim ultralib VERSION_J `src/libc/xldtob.c`, byte-identical cp, **first-build
+  full-make ROM SHA-1 == baserom, 0 iteration**. `jal-count-mismatch:4vs3` was a FALSE flag (SHA proves
+  the verbatim body). **`.rodata`-ONLY data story** (`pows[]` is `const` → `.rodata`, NOT the mutable
+  `.data` of xlitob's ldigs/udigs): the generic `[0xADBD0,rodata]` subseg ALREADY bounded the exact 0x70
+  extent (vram 0x800D27D0→0x800D2840 = `static const ldouble pows[]` 0x48 + "NaN"/"Inf" strings +
+  1.0/1e8/"0" literals) → **1-line attribute change** `rodata`→`.rodata,libultra/libc/xldtob`, NO split.
+  Callees memcpy/ldiv/lldiv/__udivdi3/__umoddi3 all pre-placed; xstdio.h/stdlib.h/string.h resolve (S92)
+  → **zero symbol adds**. The S92 near-free-retry carry-over checklist (flip line / placed-ref inventory
+  / rodata recovery / includes / upstream pin) replayed verbatim-correct → 0 rework (3rd S74→S75-style
+  proof). 0 stuck-far/permuter/carried/re-opened. seed 13 / banked 13pt; regime mirror (seed-only).
+  Retro applied 3 of 3: #1 `pick_target.py` rodata-literal **carve-start widening**
+  (`defines_file_static_const_array` source-gates a rodata-subseg-start carve-start — the FP scan missed
+  the pows[] base 0x800D27D0 by 0x50 B; FP-safe via the `static const` file-private gate, unlike the
+  S92-reverted .data addiu scan; +1 unit test, suite 53 pass, golden-inert); #2
+  `docs/hazards.md#rodata-sibling-yaml-pattern` carve-start-widening + carve-as-attribute-change notes +
+  S93 provenance; #3 near-free-retry checklist confirmation (no edit). **Cross-repo follow-up: NONE** (all
+  3 names pre-curated; zero new decomp-side symbols). **Band note: the libc xstdio family is now
+  xprintf-only — `_Printf`/`_Putfld` (the `[0x8BF30]` xprintf leaves S91 split off bcmp) remain as a
+  pts-13 single-file-pack with `rodata-jtbl` + soft-float; the remaining clean libultra mirrors are mined
+  out (what's left = the motor.c version trap, the sched/exceptasm heavy spikes, and the coddog-structural
+  multi-file packs).**
+
 - **Sprint 92: 1 .c file BANKED — `src/libultra/libc/xlitob.c` (`_Litob`), libultra libc c-combined
   decompose + `.data` carve.** md5-candidate 135→**136** (all .c stub-free); asm subsegs 135→135
   (xldtob tail stays asm). `_Litob` is the printf integer-to-string radix formatter (oct/dec/hex,
@@ -1082,27 +1112,16 @@ by `/sprint-plan`:
   adaptation vs upstream; **(5)** the upstream pin (file + VERSION_J). A near-free retry missing any
   of these is a half-scoped spike — finish the scope before deferring.
 
-- **Near-free retry — xldtob tail `[0x8D480, asm]` (`_Ldtob` + `_Ldunscale` + `_Genld`, the 3-fn
-  tail left by S92's xldtob|xlitob decompose).** The S92 split banked the xlitob HEAD (`_Litob`);
-  this is the clean xldtob sibling, the float/long-double-to-string scaling routines. Completeness
-  checklist:
-  - **(1) flip/split:** `[0x8D480, asm]` → `[0x8D480, c, libultra/libc/xldtob]` (covers
-    0x800B2080..0x800B2B10, rom 0x8D480..0x8DF10; the next subseg `[0x8DF10, c, libultra/io/dp]`
-    bounds it). The 0x8D480 head is already split off (S92), so this is a single text flip, no
-    further split. Re-confirm the 16-alignment of the xldtob fn boundaries at the gate.
-  - **(2) placed-ref inventory:** coddog `src/libc/xldtob.c@99.99`. Callees include `lldiv`
-    =0x800B2BD4 (named, in this same asm range), `memcpy`=0x800AADC4, and the u64 div/mod intrinsics
-    `__udivdi3`=0x800B3BC0 / `__umoddi3`=0x800B3BE0 (all named). _Ldtob/_Ldunscale/_Genld names —
-    verify in ghidra_symbols at the gate (the S92 row tagged them as named members).
-  - **(3) NEW recovery:** the `.rodata` literal carve `rodata-literal:0x800D2820,0x800D2828;
-    carve-end=0x800D2840` (the float scaling constants; these are xldtob's, NOT xlitob's — confirmed
-    S92). Recover the exact carve extent from the `.o(.rodata)` size at execution
-    (`docs/hazards.md#rodata-sibling-yaml-pattern`). Check for any xldtob file-static `.data` (read
-    the asm lui/addiu at the gate — S92's `.data`-carve detector was NOT shipped, so this is manual).
-  - **(4) include adaptation:** xldtob.c includes the same source-private `xstdio.h` (same-dir) +
-    stdlib.h/string.h as xlitob (S92 verified all resolve); plus any math headers — verify at gate.
-  - **(5) upstream pin:** ultralib `src/libc/xldtob.c`, VERSION_J (gcc.mk / KMC-N64,
-    `-DBUILD_VERSION=VERSION_J`).
+- _(Near-free retry — xldtob tail `[0x8D480]` (`_Ldtob` + `_Ldunscale` + `_Genld`) **RESOLVED + banked
+  S93** — the carry-over's 5-point checklist replayed verbatim-correct (0 rework): single text flip
+  `[0x8D480,asm]`→`[0x8D480,c,libultra/libc/xldtob]`, verbatim ultralib VERSION_J cp, 0 edits, 0
+  iteration, full-make ROM SHA-1 == baserom first build. The `.rodata` story was simpler than the
+  checklist hedged: `pows[]` is `const` → `.rodata`-ONLY (no `.data` carve — the "check for file-static
+  .data" was a no-op), and the generic `[0xADBD0,rodata]` subseg ALREADY bounded the exact 0x70 extent
+  (vram 0x800D27D0→0x800D2840), so the carve was a 1-line attribute change, NO split. The carry-over's
+  `rodata-literal:0x800D2820` carve-start under-stated the real start (0x800D27D0, the pows[] dlabel) by
+  0x50 B → S93 #1 added the `defines_file_static_const_array`-gated carve-start widening so a const-array
+  mirror prices the full extent at the gate.)_
 
 - _(S89 reconciliation — `piacs.c` (`__osPiCreateAccessQueue`/`__osPiGetAccess`/`__osPiRelAccess`,
   0x800A39B0) is **ALREADY BANKED**, NOT a remaining trap. It is flipped + matching at

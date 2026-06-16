@@ -143,6 +143,15 @@ DATA_GLOBAL_DEF_RE = re.compile(
 LOCAL_STATIC_DATA_RE = re.compile(
     r"^static\b[^;{}]*?\b([A-Za-z_]\w+)\s*(?:\[[^\]]*\])?\s*=[^;]*;\s*$"
 )
+# S93: a file-scope `static const <type> <name>[...] = ...` array. `const` static is file-PRIVATE
+# rodata (the `static` keyword bars cross-file linkage), so its presence makes widening the
+# rodata-literal carve-start to the subseg boundary FP-safe (the scan misses the array base
+# `addiu %lo` + string-literal pointers). Non-greedy prefix backtracks to the last id before `[`
+# (xldtob.c's `static const ldouble pows[] = {...}`). The initializer may run past the line end (a
+# multi-line `{...}`), so this matches the opening decl `... [...] =`, not the trailing `;`.
+FILE_STATIC_CONST_ARRAY_RE = re.compile(
+    r"^static\s+const\b[^;{}]*?\b([A-Za-z_]\w+)\s*\[[^\]]*\]\s*="
+)
 INCLUDE_RE = re.compile(r'^\s*#\s*include\s*[<"]([^>"]+)[>"]')
 # The project's quoted/angle include search dirs (Makefile CFLAGS `-I` set; -nostdinc removed S32 — stdarg.h ships at include/stdarg.h for correct MIPS GCC 2.7.2 vararg ABI).
 INCLUDE_DIRS = [
@@ -369,6 +378,27 @@ def _literal_in_rodata(vram, off):
         return False
     rom = vram - (fn_vram - off)
     return any(start <= rom < end for start, end in _rodata_rom_ranges())
+
+
+def _rodata_carve_start_vram(off, lit_vram):
+    """VRAM where the rodata subseg containing `lit_vram` BEGINS (S93) — the carve-start companion to
+    _rodata_carve_end_vram. The FP-literal scan reports only the scalar `ldc1/lwc1 %lo` loads, so its
+    min understates a `.rodata` block that opens with a `static const` array base (an `addiu %lo`
+    address-of the scan misses) or string literals. The `.rodata` sibling places the WHOLE object's
+    rodata, which the splat subseg already bounds, so the carve runs from the subseg start. Returns
+    the start vram (lower bound: the subseg start, exact when the mirror's rodata fills the subseg —
+    the common case, symmetric to the carve-end upper bound), or None when the fn vram is unknown or
+    the literal is not in a code-segment rodata range. Gated by defines_file_static_const_array at the
+    call site to stay FP-safe (a `const` static is file-private, so the whole subseg is this object's)."""
+    fn_vram = subseg_vram(off)
+    if fn_vram is None:
+        return None
+    delta = fn_vram - off
+    rom = lit_vram - delta
+    for start, end in _rodata_rom_ranges():
+        if start <= rom < end:
+            return start + delta
+    return None
 
 
 def _rodata_carve_end_vram(off, lit_vram):
@@ -1263,6 +1293,32 @@ def defines_local_static_data(cpath):
         if depth >= 1 and line.startswith("static") and "=" in line \
                 and not _is_static_func_proto(line):
             m = LOCAL_STATIC_DATA_RE.match(line)
+            if m:
+                names.append(m.group(1))
+        depth += raw.count("{") - raw.count("}")
+        if depth < 0:
+            depth = 0
+    return names
+
+
+def defines_file_static_const_array(cpath):
+    """File-scope `static const <type> <name>[...] = {...};` arrays in the upstream .c (S93). A
+    `const` static is file-PRIVATE rodata (the `static` keyword bars cross-file linkage), so when one
+    is present the whole code-segment `.rodata` carve is this object's own — it is then safe to widen
+    the rodata-literal carve-start to the subseg boundary. The FP-literal scan sees only the scalar
+    `ldc1/lwc1 %lo` loads, missing the array base (an `addiu %lo` address-of) + string-literal
+    pointers, so the reported carve-start under-states the real extent. The `addiu %lo` scan that
+    would find it directly was reverted (S92) for cross-file FP in the `.data` band; this `static
+    const` source gate keeps the rodata-only widening FP-safe. Returns the array names; a non-empty
+    result authorises the carve-start widening in `_append_recover_hazards`. Motivating case:
+    xldtob.c's `static const ldouble pows[]` — the FP scan reported the carve from 0x800D2820, but
+    the pows[] dlabel + NaN/Inf strings start 0x50 B earlier at 0x800D27D0 (the whole [0xADBD0]
+    rodata subseg)."""
+    names = []
+    depth = 0
+    for raw in UpstreamSource.get(cpath).text.splitlines():
+        if depth == 0:
+            m = FILE_STATIC_CONST_ARRAY_RE.match(raw.strip())
             if m:
                 names.append(m.group(1))
         depth += raw.count("{") - raw.count("}")
@@ -2231,6 +2287,17 @@ def append_upstream_hazards(off, primary, up_lib, up_path, hazards):
     for a in rodata_word_refs(off):
         if _literal_in_rodata(a, off) and a not in rodata_lits:
             rodata_lits.append(a)
+    # Carve-start widening (S93): the FP-literal/lw scans see only scalar `%lo` loads, so
+    # min(rodata_lits) under-states a rodata block that opens with a file-scope `static const` array
+    # base (an `addiu %lo` address-of, missed by both scans) or string literals. When the upstream
+    # defines such a file-PRIVATE const array, the whole code-segment rodata subseg is this object's
+    # own → widen the carve-start to the subseg boundary. (The direct `addiu %lo` scan was reverted
+    # S92 for cross-file FP in .data; the `static const` source gate keeps this rodata-only widening
+    # FP-safe.) xldtob.c: pows[] dlabel 0x800D27D0 is 0x50 B below the FP scan's 0x800D2820 min.
+    if rodata_lits and defines_file_static_const_array(up_path):
+        start = _rodata_carve_start_vram(off, min(rodata_lits))
+        if start is not None and start < min(rodata_lits):
+            rodata_lits.append(start)
     if rodata_lits:
         # Pre-note the full vram extent as a DoR enabler so it is not a finalize-time SHA-miss (S48).
         detail = ",".join(f"0x{a:08X}" for a in sorted(rodata_lits))
