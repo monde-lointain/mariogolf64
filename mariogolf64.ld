@@ -181,7 +181,8 @@ SECTIONS
         build/asm/804D0.o(.text);
         build/asm/811A0.o(.text);
         build/asm/815C0.o(.text);
-        build/asm/82160.o(.text);
+        build/src/libultra/audio/save.o(.text);
+        build/src/libultra/audio/sl.o(.text);
         build/src/libultra/audio/heapinit.o(.text);
         build/src/libultra/audio/heapalloc.o(.text);
         build/src/libultra/audio/copy.o(.text);
@@ -434,7 +435,8 @@ SECTIONS
         build/asm/804D0.o(.data);
         build/asm/811A0.o(.data);
         build/asm/815C0.o(.data);
-        build/asm/82160.o(.data);
+        build/src/libultra/audio/save.o(.data);
+        build/src/libultra/audio/sl.o(.data);
         build/src/libultra/audio/heapinit.o(.data);
         build/src/libultra/audio/heapalloc.o(.data);
         build/src/libultra/audio/copy.o(.data);
@@ -703,7 +705,8 @@ SECTIONS
         build/asm/804D0.o(.rodata);
         build/asm/811A0.o(.rodata);
         build/asm/815C0.o(.rodata);
-        build/asm/82160.o(.rodata);
+        build/src/libultra/audio/save.o(.rodata);
+        build/src/libultra/audio/sl.o(.rodata);
         build/src/libultra/audio/heapinit.o(.rodata);
         build/src/libultra/audio/heapalloc.o(.rodata);
         build/src/libultra/audio/copy.o(.rodata);
@@ -966,7 +969,8 @@ SECTIONS
         build/asm/804D0.o(.bss);
         build/asm/811A0.o(.bss);
         build/asm/815C0.o(.bss);
-        build/asm/82160.o(.bss);
+        build/src/libultra/audio/save.o(.bss);
+        build/src/libultra/audio/sl.o(.bss);
         build/src/libultra/audio/heapinit.o(.bss);
         build/src/libultra/audio/heapalloc.o(.bss);
         build/src/libultra/audio/copy.o(.bss);
