@@ -25,6 +25,17 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 90 — io/pimgr.c (osCreatePiManager), libultra io PI-manager drop-def mirror — 2026-06-15
+- Increment: src/libultra/io/pimgr.c banked / 1 function matched. md5-candidate 134→135 .c (all stub-free); asm/hasm subsegs 158→157. Closes the S84-split [0x7E360] PI pack.
+- Quality: 0/0/0/0 this sprint (0 stuck-far, 0 permuter, 0 carried, 0 re-opened; verbatim drop-def, full-make ROM SHA-1 == baserom first build, 0 iteration).
+- Seed: committed 5pt; banked 5pt; regime mirror (seed-only; 8-gate clear at 5<8).
+- What helped: the carry-over's "mixed .data/.bss carve" spike framing was over-cautious (the vimgr S87 false-flag class) — applying the drop-static test at the gate showed the only .data global (__osCurrentHandle) was already placed → a clean drop-def, NO carve. The 4 uninitialized .bss statics dropped-to-extern at asm-recovered main_bss vrams, all 4 sizes+addresses from a SINGLE disassembly via inter-symbol gaps (piThread 0x1B0 / piThreadStack 0x1000 / piEventQueue 0x18 / piEventBuf 0x4, the contiguous block below piacs's piAccessBuf). Name pre-curated, all callees + data refs placed (S84/S85), header piint.h vendored → zero header copies. internal/piint.h already declared __osPiDevMgr/__osCurrentHandle so those defs just deleted; __osPiTable/__Dom*SpeedParam unreferenced → dropped.
+- Friction: none on the bank. Applying #2 surfaced a real tooling bug — carry_over_names() over-scooped 332 backtick tokens (split landed on a mid-line prose mention of "## Carry-overs", then took everything to EOF including the historical banked-sprint archive), silently de-ranking name-dropped still-asm functions (bcmp/_Litob) from the ranker. pimgr's own absence was NOT that bug — it was a correct by-design carry-over de-rank (retrieved via the BACKLOG, the intended path).
+- Applied: 3 of 3: #1 BACKLOG Spike-guidance at-write-time drop-static-test discipline (frame the drop-def verdict, not the worst-case carve) + sched.c head framing revised to a genuine carve/jtbl/log-callee spike; #2 pick_target.py carry_over_names() region+symbol scoping (heading-anchored ^## Carry-overs split + live-region bound + placed_symbols∪func_ intersect → 332→50 carried; un-suppresses prose-name-dropped still-asm fns while keeping motor/sched/func_800AFB90 parked) + the by-design clarification comment at the exclusion site; #3 docs/hazards.md#recover-extern-refs-unplaced contiguous-.bss-block-sized-by-gaps fast-path note.
+- Carry-over: none new (pimgr resolved). Remaining io: motor.c (version-branch trap) + sched.c head (genuine carve/jtbl/5-log-callee spike).
+
+---
+
 ## Sprint 89 — io/sirawdma.c (__osSiRawStartDma), libultra io SI-DMA mirror via sched|sirawdma decompose — 2026-06-15
 - Increment: src/libultra/io/sirawdma.c banked / 1 function matched. md5-candidate 133→134 .c (all stub-free); flippable asm subsegs 136→136 (sched head stays asm, +1 C subseg).
 - Quality: 0/0/0/0 this sprint (0 stuck-far, 0 permuter, 0 carried, 0 re-opened; first-build full-make ROM SHA-1 == baserom, 0 iteration).

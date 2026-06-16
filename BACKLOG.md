@@ -620,6 +620,34 @@ sub-sprints).
   via `sync_decomp_names.py --import-from-decomp` (the 2 fn names were already in `ghidra_symbols.txt`).
   **The `[0x7E360]` pack now has only `pimgr` (osCreatePiManager) left → carry-over below.**
 
+- **Sprint 90: 1 .c file BANKED — `src/libultra/io/pimgr.c` (`osCreatePiManager`), libultra io
+  PI-manager drop-def mirror; closes the S84-split `[0x7E360]` PI pack.** md5-candidate 134→**135**;
+  asm/hasm subsegs 158→157. The last member of the S84 3-way split (setintmask + epirawdma banked
+  S84). Verbatim ultralib `src/io/pimgr.c` (VERSION_J/FINALROM): `#ifndef _FINALROM` ramrom block +
+  `_DEBUG` `__osError` strip → ONE fn; every file-scope DEF drops to `extern` so the `.o` emits only
+  `.text` (atomic drop-def). **The "mixed `.data`/`.bss` carve" spike framing was over-cautious** (the
+  vimgr S87 class): the only `.data` global `__osCurrentHandle` was already placed (S84) → NO carve.
+  4 asm-recovered `.bss` drop-to-externs added at the gate (contiguous main_bss block below piacs's
+  `piAccessBuf`@0x800FA9B0): `piThread`=0x800F97E0 (0x1B0 OSThread), `piThreadStack`=0x800F9990 (0x1000
+  OS_PIM_STACKSIZE), `piEventQueue`=0x800FA990 (0x18), `piEventBuf`=0x800FA9A8 (0x4); sizes inferred
+  from inter-symbol gaps + types. Header `piint.h` provides `__osPiDevMgr`/`__osCurrentHandle`;
+  `__osPiTable`/`__Dom*SpeedParam` unreferenced (dropped); bare-include `piint.h` per the epirawdma
+  sibling. Name `osCreatePiManager`=0x800A3000 pre-curated; all callees + data refs placed (S84/S85).
+  Byte-clean first build, 0 iteration, full-make ROM SHA-1 == baserom. seed 5 / banked 5pt; regime
+  mirror (seed-only; 8-gate clear at 5<8). 0 stuck-far/permuter/carried/re-opened. Applied 3 of 3:
+  #1 `BACKLOG.md` Spike-guidance at-write-time drop-static-test discipline (frame the drop-def verdict,
+  not the worst-case carve) + sched.c head framing revised; #2 `pick_target.py` `carry_over_names()`
+  region+symbol scoping (the heading-anchored split + live-region bound fixes a 332→50 over-scoop that
+  silently dropped name-dropped still-asm functions like `bcmp`/`_Litob` from the ranker) + the
+  by-design clarification at the exclusion site (a parked carry-over is retrieved via `--include-stuck`
+  / the BACKLOG, NOT smallest-first — S90 pimgr was found that way, not a filter bug); #3
+  `docs/hazards.md#recover-extern-refs-unplaced` contiguous-`.bss`-block-sized-by-gaps recover note.
+  **Cross-repo follow-up:** 4 new decomp-side `.bss` symbols (`piThread`/`piThreadStack`/`piEventQueue`/
+  `piEventBuf`) → propagate via `sync_decomp_names.py --import-from-decomp`. **Band note: the io
+  defines-data/file-static mirror traps are now exhausted except `motor.c` (version-branch trap) +
+  `sched.c` head (genuine carve/jtbl/log-callee spike); the pimgr drop-def confirms the io
+  file-static class is drop-to-extern, never a carve.**
+
 - **Sprint 88: 1 .c file BANKED — `src/libultra/io/contpfs.c` (`__osSumcalc` + `__osIdCheckSum` +
   `__osRepairPackId` + `__osCheckPackId` + `__osGetId` + `__osCheckId` + `__osPfsRWInode`), libultra
   io single-file-pack drop-def mirror; the pfs id/inode core (7 fns banked atomically).**
@@ -986,6 +1014,13 @@ by `/sprint-plan`:
   the exception (S38/S48/S68). Bind every cited data address to an **asm-recovered** value, never a
   guess (S85: `initialize.c`'s carry-over framed a carve that was really drop-def, AND `pimgr`'s
   `__Dom*SpeedParam` addresses were wrong — both corrected by reading the asm at the gate).
+  **For an io/os file-static MIRROR spike, run the drop-static test AT CARRY-OVER-WRITE TIME and
+  frame the EXPECTED resolution** — uninitialized statics → drop-to-extern at recovered `main_bss`
+  vrams (S81 siacs / S87 vimgr); `.data` globals that are already-placed → drop-def; reserve "carve"
+  only for a NON-placed nonzero-init global living in the file's OWN extracted region. Every io
+  file-static mirror that has come due was a clean drop-def/drop-to-extern, ZERO carves (vimgr S87,
+  pimgr S90), yet both were first framed as a "mixed `.data`/`.bss` carve" spike and banked
+  first-build seed-only once the test was applied — so frame the verdict, not the worst case.
 - **Near-free retry** — NOT blocked; a fully-scoped increment deferred only by the sprint cap (e.g. a
   coddog-mirror sibling, or the un-flipped head of a split subseg). Author it as a **completeness
   checklist** so the retry is a mechanical replay (S74→S75 `contquery` proof: all 4 addresses
@@ -1013,26 +1048,23 @@ by `/sprint-plan`:
   `__osMotorinitialized` is else-only — cpreprocess does not version-gate motor.c here). Do NOT
   pursue `osMotorStop` as a routine drop-static/drop-def mirror; it needs the `#else`-branch source
   (a per-file build-version override or a vendored old-branch copy), a distinct un-priced enabler.
-- **io defines-data+file-static trap — `pimgr.c` (`osCreatePiManager`, [0x7E400, asm], 0x7E400-0x7E590).**
-  Spike (the 3rd member of the S84-split `[0x7E360]` pack; setintmask + epirawdma banked S84). Under
-  `-D_FINALROM -DBUILD_VERSION=VERSION_J` it compiles ONE fn (the `#ifndef _FINALROM` `ramromThread`/
-  `ramromMain` block strips). **Blocker = a mixed `.data`/`.bss` carve:** file-statics `piThread`
-  (OSThread, .bss), `piThreadStack` (STACK, .bss `D_800F97E0`), `piEventQueue` (OSMesgQueue, .bss),
-  `piEventBuf` (OSMesg[1], .bss); plus defines-data `__osPiDevMgr`=0x800C7E70 (OSDevMgr, .bss),
-  `__osPiTable` (OSPiHandle*, .bss/.sdata), `__Dom1SpeedParam`=0x80106248 + `__Dom2SpeedParam`=0x800FEC98
-  (OSPiHandle size:0x74, .bss — **both placed S85** from create_speed_param's byte-field stores; the
-  earlier 0x800FA990/0x800FA9A8 here were WRONG), `__osCurrentHandle`=0x800C7E90 (OSPiHandle*[2] =
-  {&__Dom1SpeedParam,&__Dom2SpeedParam}, .data — **already placed**, the S84 epirawdma ref). Same trap
-  class as `piacs.c`/`motor.c`: drop-def the data globals to `extern` (the S82/S85 default; carve only
-  if the data is in pimgr's OWN extracted region) + recover-externs for the un-placed statics. Callees all placed
-  (osCreateMesgQueue, osSetEventMesg, osGetThreadPri/osSetThreadPri, __osDisableInt/__osRestoreInt,
-  __osDevMgrMain, osCreateThread/osStartThread, __osPiCreateAccessQueue). Pursue when the data-sibling
-  enabler is the sprint goal. Header `PRinternal/piint.h` already vendored (S84 epirawdma).
+- _(io `pimgr.c` (`osCreatePiManager`) carry-over **RESOLVED + banked S90** — the "mixed `.data`/`.bss`
+  carve" spike framing was over-cautious, the same false-frame the vimgr S87 carry-over got. Under
+  `-D_FINALROM -DBUILD_VERSION=VERSION_J` it compiles ONE fn; the only `.data` global
+  (`__osCurrentHandle`) was already placed (S84) → it's a clean **drop-def mirror**, NO carve: all
+  file-scope DEFs drop to `extern` (header provides `__osPiDevMgr`/`__osCurrentHandle`;
+  `__osPiTable`/`__Dom*SpeedParam` unreferenced), and the 4 uninitialized file-statics drop-to-extern
+  at asm-recovered `main_bss` vrams — `piThread`=0x800F97E0 (0x1B0), `piThreadStack`=0x800F9990
+  (0x1000), `piEventQueue`=0x800FA990 (0x18), `piEventBuf`=0x800FA9A8 (0x4), the contiguous block just
+  below piacs's `piAccessBuf`@0x800FA9B0. Byte-clean first build, 0 iteration. The earlier
+  0x800FA990/0x800FA9A8 framed here as `__Dom*SpeedParam` were WRONG (those are piEventQueue/piEventBuf);
+  `__Dom1/2SpeedParam` are at 0x80106248/0x800FEC98 per S85.)_
 - **sched.c head — `osCreateScheduler` + ~13 sched fns, `[0x86A50, asm]` (0x800AB650..0x800AC060,
-  the head left by S89's sched|sirawdma decompose).** Spike (heavy). Coddog `src/sched/sched.c`@99.99
-  but a stacked-hazard mirror, not an atomic cp: **file-static** + **defines-data:count,firsttime**
-  (a `.data`/`.bss` drop-to-extern or carve — apply the S87 drop-static-mirror test:
-  uninitialized→drop-to-extern, nonzero-init→carve) + a **`rodata-jtbl:0x800D25C0`** switch table
+  the head left by S89's sched|sirawdma decompose).** Spike (heavy) — a GENUINE carve/recover spike,
+  not the pimgr/vimgr over-frame: it is NOT a single drop-def. Coddog `src/sched/sched.c`@99.99 but a
+  stacked-hazard mirror: **file-static** + **defines-data:count,firsttime** (apply the S87
+  drop-static-mirror test at the gate — uninitialized→drop-to-extern, nonzero-init→carve; verify
+  `count`/`firsttime` placement before assuming a carve) + a **`rodata-jtbl:0x800D25C0`** switch table
   (needs the `.rodata` sibling carve, `docs/hazards.md#rodata-sibling-yaml-pattern`, S76 devmgr
   pattern) + **5 calls-unplaced log callees** (`osCreateLog`/`osDpSetNextBuffer`/`osFlushLog`/
   `osLogEvent`/`osSpTaskYielded` — recover or place from the still-asm log/sp subsegs) +

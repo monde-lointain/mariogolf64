@@ -1758,14 +1758,40 @@ def seed_points(size, upstream, band, nfns, hazards, blocked):
 
 
 def carry_over_names():
-    """Function names parked in BACKLOG.md ## Carry-overs (de-ranked)."""
+    """Function names genuinely PARKED in BACKLOG.md ## Carry-overs (de-ranked from the
+    default ranker; build_rows skips a row whose primary is in here unless --include-stuck).
+
+    A parked carry-over is correctly absent from `pick_target` output BY DESIGN — retrieve it
+    with `--include-stuck` or by reading the BACKLOG (S90: `osCreatePiManager`/pimgr was found
+    via the carry-over, not the ranker, and that is the intended path; it was not a filter bug).
+
+    Two scope guards narrow the S45/S75 over-scoop, where every backticked prose token (a macro
+    `STACK`, a name-dropped banked callee, a tool name) was carried — so a *still-asm* primary
+    could be silently dropped just by being prose-mentioned:
+      (1) stop at the first historical `- **Sprint NN: … BANKED` paragraph — that append-only
+          banked-sprint archive lives under the same heading but is NOT parked work; and
+      (2) keep only tokens that are real symbols (placed in a name file, or a `func_<vram>`
+          placeholder) — drops macro/tool/keyword noise.
+    A genuine parked leader (osMotorStop, osCreateScheduler) still de-ranks; the archive's
+    name-drops of still-asm functions no longer do."""
     names = set()
     if not os.path.exists(BACKLOG):
         return names
     with open(BACKLOG) as f:
-        parts = f.read().split("## Carry-overs", 1)
-    if len(parts) > 1:
-        names.update(re.findall(r"`([A-Za-z_]\w+)`", parts[1]))
+        # Anchor on the HEADING (start-of-line), not a mid-line prose mention of
+        # "## Carry-overs" (several digest paragraphs reference it in backticks) — a string split
+        # would start the region mid-archive and truncate the genuine carry-overs (S90 bug).
+        parts = re.split(r"(?m)^## Carry-overs", f.read(), maxsplit=1)
+    if len(parts) <= 1:
+        return names
+    region = parts[1]
+    archive = re.search(r"^- \*\*Sprint \d+\b", region, re.M)  # guard (1): bound the live region
+    if archive:
+        region = region[: archive.start()]
+    placed = placed_symbols()  # guard (2): real symbols only (names file ∪ func_<vram>)
+    for tok in re.findall(r"`([A-Za-z_]\w+)`", region):
+        if tok in placed or _FUNC_TOKEN_RE.fullmatch(tok):
+            names.add(tok)
     return names
 
 
@@ -2372,10 +2398,12 @@ def build_rows(args, upstream_index, carried, sig_index, coddog_index=None):
         if args.lib and args.lib not in (path or "") and (up_lib or "") != args.lib \
                 and not any(args.lib in n for n in fns):
             continue
-        # The `carried` filter de-ranks BACKLOG carry-overs, but carry_over_names() scoops EVERY
-        # backticked token from the digest log (S45 name-dropped `__osGbpakSetBank` as a banked
-        # callee), so a definitively-coddog'd subseg must not be silently dropped because its leader
-        # was prose-mentioned. A real coddog identity overrides the name-drop (S78).
+        # The `carried` filter de-ranks BACKLOG carry-overs (intentional — a parked carry-over is
+        # retrieved via --include-stuck / the BACKLOG, NOT smallest-first; S90 pimgr confirmed this is
+        # by design, not a bug). carry_over_names() is now region+symbol scoped (S90) so a prose
+        # name-drop of a still-asm function no longer silently drops it; the cod_members override is
+        # the older backstop for a definitively-coddog'd subseg whose leader was prose-mentioned
+        # (S45 `__osGbpakSetBank`-as-callee, S78 coddog-identity-wins).
         if primary in carried and not args.include_stuck and not cod_members:
             continue
 

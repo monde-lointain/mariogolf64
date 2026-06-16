@@ -218,8 +218,18 @@ unambiguous — one unplaced name ∩ one asm candidate; otherwise bare names).
    0x68×4).
 4. Flip the subseg, verbatim `cp` the upstream, `make` → ROM SHA-1 is the proof.
 
+**Contiguous `.bss`-block fast-path (S90):** a file-static drop-to-extern mirror often references a
+whole RUN of adjacent `.bss` statics declared together in the upstream `.c` (e.g. pimgr.c's
+`piThread` / `piThreadStack` / `piEventQueue` / `piEventBuf`). Recover the entire block from a SINGLE
+`disassemble_function` of the one fn that touches them: each base is a `lui/addiu` HI/LO16 pair (or a
+`STACK_START` top-of-stack value = base + sizeof), and each **size is the gap to the next symbol in
+the run** cross-checked against the C type (`OSThread`=0x1B0, `OSMesgQueue`=0x18, `OSMesg[1]`=0x4,
+`STACK(_,N)`=`ALIGN8(N)`). The run is laid out in source-declaration order at consecutive `main_bss`
+vrams (pimgr's block sat immediately below the prior io file's `piAccessBuf`), so one disassembly +
+the gap arithmetic yields every `symbol_addrs` size:-extern at once — no per-symbol re-disassembly.
+
 **Provenance:** S12 (inline-vram idea), S19 (3/3 trio), S20 (indexed-array base correction), S22
-(flat-guess trap).
+(flat-guess trap), S90 (contiguous `.bss`-block sized by inter-symbol gaps).
 
 ---
 
