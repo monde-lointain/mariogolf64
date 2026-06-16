@@ -286,7 +286,8 @@ SECTIONS
         build/src/libultra/io/ai.o(.text);
         build/asm/8BE10.o(.text);
         build/asm/8BE20.o(.text);
-        build/asm/8BF30.o(.text);
+        build/src/libultra/libc/xprintf.o(.text);
+        build/asm/8C980.o(.text);
         build/asm/8CA20.o(.text);
         build/asm/8CA30.o(.text);
         build/asm/8CA40.o(.text);
@@ -547,7 +548,9 @@ SECTIONS
         build/src/libultra/io/ai.o(.data);
         build/asm/8BE10.o(.data);
         build/asm/8BE20.o(.data);
-        build/asm/8BF30.o(.data);
+        build/asm/data/A35E0.data.o(.data);
+        build/src/libultra/libc/xprintf.o(.data);
+        build/asm/8C980.o(.data);
         build/asm/8CA20.o(.data);
         build/asm/8CA30.o(.data);
         build/asm/8CA40.o(.data);
@@ -567,7 +570,7 @@ SECTIONS
         build/src/libultra/io/vigetcurrcontext.o(.data);
         build/src/libultra/io/gbpaksetbank.o(.data);
         build/src/libultra/io/pfsisplug.o(.data);
-        build/asm/data/A35E0.data.o(.data);
+        build/asm/data/A4900.data.o(.data);
         build/src/libultra/libc/xlitob.o(.data);
         build/src/libultra/libc/xldtob.o(.data);
         build/src/libultra/io/dp.o(.data);
@@ -821,7 +824,10 @@ SECTIONS
         build/src/libultra/io/ai.o(.rodata);
         build/asm/8BE10.o(.rodata);
         build/asm/8BE20.o(.rodata);
-        build/asm/8BF30.o(.rodata);
+        build/asm/data/AD9F0.rodata.o(.rodata);
+        build/asm/data/ADA40.rodata.o(.rodata);
+        build/src/libultra/libc/xprintf.o(.rodata);
+        build/asm/8C980.o(.rodata);
         build/asm/8CA20.o(.rodata);
         build/asm/8CA30.o(.rodata);
         build/asm/8CA40.o(.rodata);
@@ -842,8 +848,6 @@ SECTIONS
         build/src/libultra/io/gbpaksetbank.o(.rodata);
         build/src/libultra/io/pfsisplug.o(.rodata);
         build/src/libultra/libc/xlitob.o(.rodata);
-        build/asm/data/AD9F0.rodata.o(.rodata);
-        build/asm/data/ADA40.rodata.o(.rodata);
         build/src/libultra/libc/xldtob.o(.rodata);
         build/src/libultra/io/dp.o(.rodata);
         build/src/libultra/io/si.o(.rodata);
@@ -1088,7 +1092,8 @@ SECTIONS
         build/src/libultra/io/ai.o(.bss);
         build/asm/8BE10.o(.bss);
         build/asm/8BE20.o(.bss);
-        build/asm/8BF30.o(.bss);
+        build/src/libultra/libc/xprintf.o(.bss);
+        build/asm/8C980.o(.bss);
         build/asm/8CA20.o(.bss);
         build/asm/8CA30.o(.bss);
         build/asm/8CA40.o(.bss);
