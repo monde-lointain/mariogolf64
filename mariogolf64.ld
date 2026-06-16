@@ -165,7 +165,7 @@ SECTIONS
         build/asm/7DF90.o(.text);
         build/src/libnusys/mainlib/nucontdatalock.o(.text);
         build/src/libnusys/mainlib/nucontqueryread.o(.text);
-        build/src/main/__osGetCurrFaultedThread.o(.text);
+        build/src/libultra/os/getcurrfaultthread.o(.text);
         build/src/libultra/os/setintmask.o(.text);
         build/src/libultra/io/pimgr.o(.text);
         build/src/libultra/io/epirawdma.o(.text);
@@ -230,7 +230,7 @@ SECTIONS
         build/src/libultra/os/getcount.o(.text);
         build/src/libultra/io/sptask.o(.text);
         build/src/libultra/io/sptaskyield.o(.text);
-        build/src/main/func_800AB600.o(.text);
+        build/src/libultra/io/sptaskyielded.o(.text);
         build/src/libultra/sched/sched.o(.text);
         build/src/libultra/io/sirawdma.o(.text);
         build/src/libultra/io/siacs.o(.text);
@@ -423,7 +423,7 @@ SECTIONS
         build/asm/7DF90.o(.data);
         build/src/libnusys/mainlib/nucontdatalock.o(.data);
         build/src/libnusys/mainlib/nucontqueryread.o(.data);
-        build/src/main/__osGetCurrFaultedThread.o(.data);
+        build/src/libultra/os/getcurrfaultthread.o(.data);
         build/src/libultra/os/setintmask.o(.data);
         build/src/libultra/io/pimgr.o(.data);
         build/src/libultra/io/epirawdma.o(.data);
@@ -491,7 +491,7 @@ SECTIONS
         build/src/libultra/os/getcount.o(.data);
         build/src/libultra/io/sptask.o(.data);
         build/src/libultra/io/sptaskyield.o(.data);
-        build/src/main/func_800AB600.o(.data);
+        build/src/libultra/io/sptaskyielded.o(.data);
         build/asm/data/A35E0.data.o(.data);
         build/src/libultra/sched/sched.o(.data);
         build/src/libultra/io/sirawdma.o(.data);
@@ -688,7 +688,7 @@ SECTIONS
         build/asm/7DF90.o(.rodata);
         build/src/libnusys/mainlib/nucontdatalock.o(.rodata);
         build/src/libnusys/mainlib/nucontqueryread.o(.rodata);
-        build/src/main/__osGetCurrFaultedThread.o(.rodata);
+        build/src/libultra/os/getcurrfaultthread.o(.rodata);
         build/src/libultra/os/setintmask.o(.rodata);
         build/src/libultra/io/pimgr.o(.rodata);
         build/src/libultra/io/epirawdma.o(.rodata);
@@ -766,7 +766,7 @@ SECTIONS
         build/src/libultra/os/getcount.o(.rodata);
         build/src/libultra/io/sptask.o(.rodata);
         build/src/libultra/io/sptaskyield.o(.rodata);
-        build/src/main/func_800AB600.o(.rodata);
+        build/src/libultra/io/sptaskyielded.o(.rodata);
         build/src/libultra/sched/sched.o(.rodata);
         build/src/libultra/io/sirawdma.o(.rodata);
         build/src/libultra/io/siacs.o(.rodata);
@@ -968,7 +968,7 @@ SECTIONS
         build/asm/7DF90.o(.bss);
         build/src/libnusys/mainlib/nucontdatalock.o(.bss);
         build/src/libnusys/mainlib/nucontqueryread.o(.bss);
-        build/src/main/__osGetCurrFaultedThread.o(.bss);
+        build/src/libultra/os/getcurrfaultthread.o(.bss);
         build/src/libultra/os/setintmask.o(.bss);
         build/src/libultra/io/pimgr.o(.bss);
         build/src/libultra/io/epirawdma.o(.bss);
@@ -1033,7 +1033,7 @@ SECTIONS
         build/src/libultra/os/getcount.o(.bss);
         build/src/libultra/io/sptask.o(.bss);
         build/src/libultra/io/sptaskyield.o(.bss);
-        build/src/main/func_800AB600.o(.bss);
+        build/src/libultra/io/sptaskyielded.o(.bss);
         build/src/libultra/sched/sched.o(.bss);
         build/src/libultra/io/sirawdma.o(.bss);
         build/src/libultra/io/siacs.o(.bss);
