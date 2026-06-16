@@ -398,7 +398,7 @@ segments:
       - [0xAD9C0, .rodata, libultra/sched/sched]
       - [0xAD9E0, .rodata, libultra/io/viswapcontext]
       - [0xAD9F0, .rodata, libultra/os/exceptasm]
-      - [0xADA40, rodata]
+      - [0xADA40, .rodata, libultra/gu/libm_vals]
       - [0xADA50, .rodata, libultra/libc/xprintf]
       - [0xADBD0, .rodata, libultra/libc/xldtob]
       - [0xADC40, rodata]

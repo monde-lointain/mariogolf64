@@ -823,7 +823,7 @@ SECTIONS
         build/src/libultra/io/ai.o(.rodata);
         build/src/libultra/gu/sqrtf.o(.rodata);
         build/src/libultra/libc/bcmp.o(.rodata);
-        build/asm/data/ADA40.rodata.o(.rodata);
+        build/src/libultra/gu/libm_vals.o(.rodata);
         build/src/libultra/libc/xprintf.o(.rodata);
         build/src/libultra/io/dpsetnextbuf.o(.rodata);
         build/src/libultra/os/getcause.o(.rodata);
