@@ -649,6 +649,32 @@ sub-sprints).
   now the next pool — the remaining packs are mostly multi-file `c-combined` (sched/__assert/_Litob,
   decompose at the file boundary) or hazardous (llcvt soft-float, contquery, the motor/pimgr traps).**
 
+- **Sprint 89: 1 .c file BANKED — `src/libultra/io/sirawdma.c` (`__osSiRawStartDma`), libultra io
+  SI-DMA verbatim mirror; decomposed the `osCreateScheduler` `c-combined:2file[sched|sirawdma]` pack.**
+  md5-candidate 133→**134** (all 134 .c stub-free); flippable asm subsegs 136→136 (sched head stays
+  asm, +1 C subseg). The `0x86A50` subseg is a c-combined of the heavy `sched.c` head + the clean
+  `sirawdma.c` tail; pts-13 tripped the 8-gate → **decomposed at the upstream-file boundary** (the
+  S74/S75 contquery/contreaddata pattern): keep `[0x86A50, asm]` for the sched head (0x800AB650..
+  0x800AC060), add `[0x87460, c, libultra/io/sirawdma]` for the 176B tail (`__osSiRawStartDma`=
+  0x800AC060, 16-aligned, pre-placed S74). Verbatim ultralib VERSION_J `src/io/sirawdma.c`, sibling
+  of S4 sirawread/sirawwrite; **first-build full-make ROM SHA-1 == baserom, 0 iteration**. Uses the
+  `>= VERSION_J` `IO_READ(SI_STATUS_REG)` busy-check branch (the function EXISTS in J — NOT the
+  motor.c version trap). Two known edits: include adapt `PRinternal/siint.h`→bare `siint.h` (S74
+  convention) + `#ifdef _DEBUG`-wrap the bare upstream `assert` (assert-strip; held — ROM strips it,
+  the sirawread/sirawwrite/epirawread convention). All callees pre-placed (osWritebackDCache=
+  0x800A70E0, osVirtualToPhysical=0x800A7720, osInvalDCache=0x800A6FB0); SI/PIF macros in vendored
+  siint.h/rcp.h; no data/rodata (the row's file-static / defines-data:count,firsttime /
+  rodata-jtbl:0x800D25C0 / log-fn hazards ALL belong to the still-asm sched head). Pure text mirror,
+  zero new symbols (name pre-placed). seed 2 / banked 2pt; regime mirror (8-gate resolved by
+  decompose; seed-only). 0 stuck-far/permuter/carried/re-opened. Applied 1 of 1: #1 BACKLOG staleness
+  reconciliation — `piacs.c` marked BANKED (was a stale "remaining io trap" through S88; green ROM
+  since the `cbaf80a` 2026-06-13 layout refactor), carry-over de-paired from `motor.c`. **Cross-repo
+  follow-up: none** (no new decomp-side symbols; `__osSiRawStartDma` pre-placed). **Band note: the
+  sched.c head (osCreateScheduler + ~13 fns) is now a standalone heavy spike (file-static +
+  count/firsttime defines-data + rodata-jtbl switch + 5 log callees) → carry-over below; remaining
+  multi-file packs `__assert`/`_Litob`/llcvt decompose or are soft-float-hazardous; io traps now
+  motor + pimgr only.**
+
 - **Sprint 87: 1 .c file BANKED — `src/libultra/io/vimgr.c` (`osCreateViManager` + `viMgrMain`),
   libultra io drop-STATIC mirror; the vimgr.c carry-over, banked once S86 cleared its timer-wall.**
   md5-candidate 131→**132** (all 132 .c stub-free); flippable asm subsegs 138→137. Verbatim ultralib
@@ -969,14 +995,16 @@ by `/sprint-plan`:
   adaptation vs upstream; **(5)** the upstream pin (file + VERSION_J). A near-free retry missing any
   of these is a half-scoped spike — finish the scope before deferring.
 
-- **io coddog-mirror traps — `piacs.c` (`func_800AC110`, pts-5, 3fn) + `motor.c` (`osMotorStop`
-  pack:2fn).** Both are 99.99% coddog matches but NOT atomic verbatim cps (the S72 #1 trap re-scan now
-  surfaces this): piacs.c DEFINES `__osPiAccessQueueEnabled` + `static OSMesg piAccessBuf[]`
-  (defines-data + file-static); motor.c likewise `__osMotorinitialized[]`. A clean verbatim mirror
-  needs a `.data`/`.bss` sibling carve (`docs/hazards.md#defines-data`) or classical routing with the
-  data dropped to `extern` — the dormant draft `src/libultra/io/piacs.c` (externs the data) is the
-  pre-staged shape. NOT a clean-pair pick; pursue when the data-sibling enabler is the sprint goal.
-  **S88 correction — `motor.c` is a DEEPER trap than the data-sibling framing.** Upstream `motor.c`'s
+- _(S89 reconciliation — `piacs.c` (`__osPiCreateAccessQueue`/`__osPiGetAccess`/`__osPiRelAccess`,
+  0x800A39B0) is **ALREADY BANKED**, NOT a remaining trap. It is flipped + matching at
+  `[0x7EDB0, c, libultra/io/piacs]` (drop-to-extern mirror — all 3 data symbols placed:
+  `__osPiAccessQueueEnabled`=0x800C7EB0, `__osPiAccessQueue`=0x80106198, `piAccessBuf`=0x800FA9B0),
+  green ROM since the `cbaf80a` 2026-06-13 layout refactor. The historical "piacs/motor traps remain"
+  band refrain is stale on piacs; NOTE `func_800AC110` in the old pairing was a mislabel — that vram
+  is `__osSiCreateAccessQueue`/siacs.c (banked S81), a different file. The genuine remaining io traps
+  are `motor.c` + `pimgr.c` below.)_
+- **io coddog-mirror trap — `motor.c` (`osMotorStop` pack:2fn, [0x89780, asm]).** A 99.99% coddog
+  match but NOT an atomic verbatim cp — a **version-branch trap**. Upstream `motor.c`'s
   `#if BUILD_VERSION >= VERSION_J` branch defines `__osMotorAccess`+`__osMakeMotorData`+`osMotorInit`
   and does **NOT** define `osMotorStop` (or `osMotorStart`) at all — those live only in the `#else`
   (`< VERSION_J`) branch. So a verbatim VERSION_J mirror of `motor.c` yields the WRONG function set;
@@ -1000,6 +1028,18 @@ by `/sprint-plan`:
   (osCreateMesgQueue, osSetEventMesg, osGetThreadPri/osSetThreadPri, __osDisableInt/__osRestoreInt,
   __osDevMgrMain, osCreateThread/osStartThread, __osPiCreateAccessQueue). Pursue when the data-sibling
   enabler is the sprint goal. Header `PRinternal/piint.h` already vendored (S84 epirawdma).
+- **sched.c head — `osCreateScheduler` + ~13 sched fns, `[0x86A50, asm]` (0x800AB650..0x800AC060,
+  the head left by S89's sched|sirawdma decompose).** Spike (heavy). Coddog `src/sched/sched.c`@99.99
+  but a stacked-hazard mirror, not an atomic cp: **file-static** + **defines-data:count,firsttime**
+  (a `.data`/`.bss` drop-to-extern or carve — apply the S87 drop-static-mirror test:
+  uninitialized→drop-to-extern, nonzero-init→carve) + a **`rodata-jtbl:0x800D25C0`** switch table
+  (needs the `.rodata` sibling carve, `docs/hazards.md#rodata-sibling-yaml-pattern`, S76 devmgr
+  pattern) + **5 calls-unplaced log callees** (`osCreateLog`/`osDpSetNextBuffer`/`osFlushLog`/
+  `osLogEvent`/`osSpTaskYielded` — recover or place from the still-asm log/sp subsegs) +
+  `jal-count-mismatch:12vs11` (verify at the gate — likely an indirect-call false-positive class).
+  Header `PRinternal/siint.h` already vendored. Pursue when the data-sibling + log-callee enablers
+  are the sprint goal; the sirawdma tail is already off it (S89). seed ~13 → the 8-gate applies
+  (single-file once split, but the carve+jtbl+5-recover load is real work).
 - _(io `vimgr.c` (`osCreateViManager` + `viMgrMain`) carry-over **RESOLVED + banked S87** — the
   "heavy file-static `.bss` carve" framing was over-cautious. The 6 file-statics + 2 globals + 1
   func-local static are all UNINITIALIZED → pure `.bss` (no ROM bytes), so they DROP to sized
