@@ -144,6 +144,19 @@
   },
   {
     "band": "-",
+    "func": "func_800B1580",
+    "hazards": "maybe-upstream:libultra:dpsetnextbuf",
+    "kind": "asm-flip",
+    "nfns": 1,
+    "pts": 5,
+    "rom": "0x8C980",
+    "score": -160,
+    "size": 160,
+    "upstream": "none",
+    "vram": "0x800B1580"
+  },
+  {
+    "band": "-",
     "func": "func_800A09E0",
     "hazards": "pack:2fn[func_800A09E0=?,func_800A09F0=?]",
     "kind": "asm-flip",
@@ -418,7 +431,7 @@
   {
     "band": "-",
     "func": "_xatan",
-    "hazards": "pack:3fn[_xatan=?,atan=atan,atan2=atan]",
+    "hazards": "single-file-pack:3fn[_xatan=?,atan=atan,atan2=atan]",
     "kind": "asm-flip",
     "nfns": 3,
     "pts": 13,
@@ -431,7 +444,7 @@
   {
     "band": "-",
     "func": "_xsincos",
-    "hazards": "pack:4fn[_xsincos=?,sin=sin,cos=sin,tan=sin]",
+    "hazards": "single-file-pack:4fn[_xsincos=?,sin=sin,cos=sin,tan=sin]",
     "kind": "asm-flip",
     "nfns": 4,
     "pts": 13,
@@ -622,19 +635,6 @@
     "size": 2528,
     "upstream": "none",
     "vram": "0x8009CF30"
-  },
-  {
-    "band": "warm",
-    "func": "_Printf",
-    "hazards": "single-file-pack:3fn[_Printf=xprintf,_Putfld=xprintf,func_800B1580=?],defines-data:fchar,fbit,refs-unplaced:__PTRDIFF_TYPE__,calls-unplaced:pfn,rodata-jtbl:0x800D2678,jal-count-mismatch:14vs3",
-    "kind": "asm-flip",
-    "nfns": 3,
-    "pts": 13,
-    "rom": "0x8BF30",
-    "score": -2536,
-    "size": 2800,
-    "upstream": "libultra",
-    "vram": "0x800B0B30"
   },
   {
     "band": "-",

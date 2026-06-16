@@ -254,10 +254,11 @@ When `pick_target.py` flags a hazard (or a match shows its symptom), read the ma
 | (upstream column is a lib)      | #upstream-mirror-pattern |
 | `refs-unplaced:<g>@0x…`         | #recover-extern-refs-unplaced |
 | `calls-unplaced:<fn>@0x…`       | #calls-unplaced-function-callee-dual |
-| `jal-count-mismatch:<C>vs<asm>` | #near-verbatim-mirror-jal-count-mismatch |
+| `jal-count-mismatch:<C>vs<asm>` (S104: a `(*pfn)` callback output is a `jalr` not a `jal`, and a macro the .c #defines itself — xprintf's `PUT`/`PAD` — is no jal; both now dropped from the C count, so a callback-heavy mirror like `_Printf` no longer reads as a stripped re-impl) | #near-verbatim-mirror-jal-count-mismatch |
 | `file-static`                   | #file-static-bss-layout-conflict |
 | `drop-static-mirror:<n>bss` (coddog-mirror + uninitialized file-static, no carve signal → the file-static/defines-data/refs-unplaced cluster is ONE S81 drop-to-extern enabler, NOT a carve; S87 vimgr) | #file-static-bss-layout-conflict |
 | `defines-data:<g>` / `data-static:<addr>` | #defines-data |
+| `data-carve:<names>` (S104: a file-scope NON-const initialized `static T name[]=init;` array the verbatim mirror re-emits → `.data` sibling carve at the asm-recovered vram; the S92/S101 un-flagged class — xprintf spaces/zeroes, env eqpower. Single-file-pack subset only. advisory) | #defines-data |
 | `twin-of:<file>` (mirror dir holds a banked sibling with the same ld-section carve) | #defines-data / #rodata-sibling-yaml-pattern |
 | `needs-header:<inc>`            | #needs-header |
 | `stale-header:os_version.h(<V>)`| #stale-vendored-header |
@@ -268,6 +269,7 @@ When `pick_target.py` flags a hazard (or a match shows its symptom), read the ma
 | (mirror `parse error`/`undefined ref` on a helper macro the `(already-vendored)` reconstructed header lacks or mis-forms; S88 controller.h missing `SELECT_BANK` + object-like `SET_ACTIVEBANK_TO_ZERO`) | #vendored-header-incomplete |
 | `pack:<n>fn[…]`                 | #multi-function-segment-splitting-pack |
 | `single-file-pack:<n>fn[…]` (all members → one upstream C file; atomic verbatim mirror, NO split) | #upstream-mirror-pattern |
+| `upstream-fncount-mismatch:<m>vs<n>` (S104: a single-named-stem pack with MORE fns than the upstream .c defines → a FOREIGN TU bundled in the subseg, split it off + mirror only the upstream's fns; the named-symbol analog of coddog-fncount-mismatch. xprintf's func_800B1580 __osDpDeviceBusy TU. advisory) | #upstream-mirror-pattern |
 | `one-tu` (S88: every inner fn boundary non-16-aligned → ONE .o; confirms a single-file-pack even for un-named coddog packs, AND marks per-fn decompose as blocked) | #upstream-mirror-pattern / #non16align |
 | `c-combined:<n>file[…]` (≥2 distinct C upstream files in one asm subseg) | #multi-function-segment-splitting-pack |
 | `non16align`                    | #non16align |

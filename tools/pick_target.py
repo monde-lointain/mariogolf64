@@ -102,6 +102,14 @@ SUBSEG_RE = re.compile(
 )
 # Approximate C function-definition: a return-type-led line ending in `name(`.
 UPSTREAM_DEF_RE = re.compile(r"^[A-Za-z_][\w \t\*]*?\b([A-Za-z_]\w+)\s*\(", re.M)
+# Keywords that can lead a `<word>(` at a statement boundary but are NOT a function name — control
+# flow (an indented `if (`/`switch (`) and type/storage qualifiers (the `int (*tbl[])(void)` decl,
+# whose token before the first `(` is `int`). _iter_upstream_functions filters these (S104).
+_DEF_NONNAME_KW = frozenset((
+    "if", "while", "for", "switch", "else", "do", "return", "case", "goto", "sizeof", "default",
+    "int", "char", "short", "long", "unsigned", "signed", "float", "double", "void", "struct",
+    "union", "enum", "const", "static", "extern", "volatile", "register", "typedef", "auto",
+))
 # `#pragma weak <alias> = <impl>` exports <alias> at the implementation's address. The def loop
 # only keys the impl name (gu/cosf.c defines `fcos`/`__cosf`), so the ROM/curated weak alias `cosf`
 # was absent from the upstream index → a pack member read `cosf=?` and hid cosf.c from the
@@ -151,6 +159,14 @@ LOCAL_STATIC_DATA_RE = re.compile(
 # multi-line `{...}`), so this matches the opening decl `... [...] =`, not the trailing `;`.
 FILE_STATIC_CONST_ARRAY_RE = re.compile(
     r"^static\s+const\b[^;{}]*?\b([A-Za-z_]\w+)\s*\[[^\]]*\]\s*="
+)
+# S104: a file-scope NON-const INITIALIZED static array (`static <type> <name>[…] = …;`) → .data (not
+# rodata). The verbatim mirror re-emits it, so it needs a .data sibling carve at the recovered vram —
+# the S92/S101 un-flagged class (xprintf spaces/zeroes, env eqpower, _Litob ldigs/udigs). The `(?!const)`
+# lookahead defers const arrays to FILE_STATIC_CONST_ARRAY_RE (rodata); `[^;{}=]*?` keeps the type span
+# off the initializer. Uninitialized statics (no `=`) are .bss (file-static / drop-static), not this.
+FILE_STATIC_INIT_ARRAY_RE = re.compile(
+    r"^static\s+(?!const\b)[^;{}=]*?\b([A-Za-z_]\w+)\s*\[[^\]]*\]\s*="
 )
 INCLUDE_RE = re.compile(r'^\s*#\s*include\s*[<"]([^>"]+)[>"]')
 # The project's quoted/angle include search dirs (Makefile CFLAGS `-I` set; -nostdinc removed S32 — stdarg.h ships at include/stdarg.h for correct MIPS GCC 2.7.2 vararg ABI).
@@ -346,6 +362,19 @@ HAZARD_GAME_REGION_MIRROR = "game-region-mirror"  # S103: a coddog/libultra-sour
 # (-O2): the src/libultra/ path forces -O3 → wrong auto-inlining (guMtxIdent inlined its callees, 240B
 # vs ROM 60B). Route the mirror to a -O2 path (src/mgu/…), NOT src/libultra/. Advisory. Detail `0x<vram>`.
 # See docs/hazards.md#game-region-mirror-o2-profile
+HAZARD_UPSTREAM_FNCOUNT_MISMATCH = "upstream-fncount-mismatch"  # S104: a pack with ONE named C stem whose
+# upstream .c defines FEWER functions than the pack holds → the extra members are a FOREIGN TU bundled in
+# the subseg (split it off, mirror only the upstream's fns). The named-symbol analog of
+# coddog-fncount-mismatch (which keys on the coddog identity). xprintf's `[_Printf=xprintf,_Putfld=xprintf,
+# func_800B1580=?]`: xprintf.c defines 2 fns, the pack has 3 → func_800B1580 is a separate __osDpDeviceBusy
+# TU. Detail `<members>vs<defs>`. Advisory (display-only). See docs/hazards.md#upstream-mirror-pattern
+HAZARD_DATA_CARVE = "data-carve"  # S104: the upstream .c defines a file-scope INITIALIZED static array
+# (`static <type> <name>[…] = <init>;`, NON-const → .data) the verbatim mirror re-emits → needs a `.data`
+# sibling carve at the asm-recovered vram. The .data analogue of defines_file_static_const_array's rodata
+# widening; the S92/S101 un-flagged class (_Litob ldigs/udigs, env eqpower, xprintf spaces/zeroes). `static`
+# bars cross-file linkage so the array is file-PRIVATE → the source-scan sidesteps the S92 own-vs-extern
+# blocker. Fired ONLY on the single-file (non c-combined) subset (S101 safe slice). Detail `<names>`.
+# Advisory (display-only). See docs/hazards.md#defines-data
 
 
 @dataclasses.dataclass
@@ -670,22 +699,101 @@ def _c_signature(body):
     return callees, consts
 
 
+_NONCODE_RE = re.compile(
+    r"//[^\n]*"                                  # line comment
+    r"|/\*.*?\*/"                                # block comment
+    r'|"(?:\\.|[^"\\])*"'                        # string literal
+    r"|'(?:\\.|[^'\\])*'"                        # char literal
+    r"|(?m:^[ \t]*\#(?:[^\n]*\\\n)*[^\n]*)",     # preprocessor directive (+ `\` continuations)
+    re.S)
+
+
+def _blank_noncode(text):
+    """Return `text` with comments, string/char literals, and preprocessor-directive lines replaced by
+    spaces, PRESERVING length + newlines so offsets map back to the original. Lets the def scanner
+    ignore `(`/`{`/`;` inside a comment, a `"name("` literal, or a `#define PUT(s,n)` macro header,
+    while the caller still slices each function body from the UNMODIFIED text (directives intact, which
+    call_divergence's dead-block scan needs — S104: blanking them in the body re-counted a dead
+    `#ifdef NU_DEBUG` osSyncPrintf as a phantom `jal-count-mismatch`)."""
+    return _NONCODE_RE.sub(lambda m: re.sub(r"[^\n]", " ", m.group(0)), text)
+
+
 def _iter_upstream_functions(text):
-    """Yield (name, body) for each top-level function in an SDK .c, body = brace-matched."""
-    for m in UPSTREAM_DEF_RE.finditer(text):
-        brace = text.find("{", m.end() - 1)
-        if brace < 0:
-            continue
-        depth, i = 0, brace
-        while i < len(text):
-            if text[i] == "{":
-                depth += 1
-            elif text[i] == "}":
-                depth -= 1
-                if depth == 0:
-                    break
+    """Yield (name, body) for each top-level (depth-0) function DEFINITION in an SDK .c, body =
+    brace-matched from the ORIGINAL text. A self-contained depth-aware scan over a length-preserving
+    blanked copy (NOT the column-anchored UPSTREAM_DEF_RE, which stays conservative for the symbol
+    index at build_upstream_index): driven by depth-0 `(`, so it handles every def shape uniformly and
+    never miscounts (S104, the xprintf retro):
+      - ANSI `T name(params) {`, K&R `T name(params) decls; {`, AND single-token implicit-int K&R
+        `name(params) {` (libkmc `_xatan(u,v,atanp)`, which the two-token regex could not split);
+      - leading-indented headers (nusys ` void nuGfxTaskStart(...)`, a stray-space top-level def the
+        column-0 anchor missed → an under-count that mis-fired upstream-fncount-mismatch);
+      - depth-awareness excludes an in-body call (`foo(x)` at depth>=1) that the broadened match would
+        otherwise mistake for a def — the reason UPSTREAM_DEF_RE stays column-anchored elsewhere;
+      - the blanked copy hides a doc-comment signature (`double atan(double)` in atan.c's banner), a
+        `"name("` literal, and a `#define MACRO(x)` header from the scan.
+    The name = the identifier immediately before the `(`; a control/type/qualifier keyword there
+    (`if (`, `int (*tbl[])(...)`) is not a function name (_DEF_NONNAME_KW). A forward declaration
+    (`)` then `;`) is skipped. The body's braces are consumed in one pass so depth stays correct."""
+    scan = _blank_noncode(text)
+    n = len(scan)
+    i = depth = 0
+    while i < n:
+        c = scan[i]
+        if c == "{":
+            depth += 1
             i += 1
-        yield m.group(1), text[brace:i + 1]
+            continue
+        if c == "}":
+            depth = max(0, depth - 1)
+            i += 1
+            continue
+        if depth != 0 or c != "(":
+            i += 1
+            continue
+        # A depth-0 '(': the identifier ending just before it is the candidate function name.
+        j = i - 1
+        while j >= 0 and scan[j] in " \t\r\n":
+            j -= 1
+        k = j
+        while k >= 0 and (scan[k].isalnum() or scan[k] == "_"):
+            k -= 1
+        name = scan[k + 1:j + 1]
+        if not name or not (name[0].isalpha() or name[0] == "_") or name in _DEF_NONNAME_KW:
+            i += 1
+            continue
+        # Match this param-list ')'.
+        d2, p = 0, i
+        while p < n:
+            if scan[p] == "(":
+                d2 += 1
+            elif scan[p] == ")":
+                d2 -= 1
+                if d2 == 0:
+                    break
+            p += 1
+        if p >= n:
+            break
+        q = p + 1
+        while q < n and scan[q] in " \t\r\n":
+            q += 1
+        if q < n and scan[q] == ";":  # `T name(...);` forward declaration / prototype — no body
+            i = p + 1
+            continue
+        brace = scan.find("{", p)
+        if brace < 0:
+            break
+        d3, b = 0, brace
+        while b < n:
+            if scan[b] == "{":
+                d3 += 1
+            elif scan[b] == "}":
+                d3 -= 1
+                if d3 == 0:
+                    break
+            b += 1
+        yield name, text[brace:b + 1]
+        i = b + 1  # skip the consumed body so depth stays 0
 
 
 @functools.lru_cache(maxsize=None)
@@ -1216,21 +1324,26 @@ def _upstream_body(up_cpath, primary):
     return None
 
 
-def _c_jal_count(body):
+def _c_jal_count(body, local_macros=()):
     """C-side jal count for `body`: `name(` occurrences minus control keywords AND function-like
     macros. A macro *invocation* emits no jal of its own — OS_USEC_TO_CYCLES expands to arithmetic,
     ERRCK to assignment+branch (the S43 gbpak `6vs5`/`6vs4` FPs), va_start to a builtin (the S43
     sprintf `2vs1` FP), MQ_IS_FULL to a field compare (the S42 osSendMesg `7vs6` FP). Generalises
     the S42 hardcoded `_C_NONCALL` predicate-macro list to the project-wide `all_func_macros()`
-    table (S41), so every invoked macro is dropped, not just the two that were named. One level only
-    (a macro whose body wraps exactly one real call would under-count by 1 — rare, and the gate
-    reconciles the upstream call list against the asm regardless); the bias is conservative because
-    the recurring failure mode is *over*-counting predicate/arithmetic macros as phantom calls."""
+    table (S41), so every invoked macro is dropped, not just the two that were named. `local_macros`
+    adds the function-like macros DEFINED IN the upstream .c itself (S104: xprintf.c's `PUT`/`PAD`/
+    `ATOI`, invisible to `all_func_macros()` which scans only headers) — PUT/PAD each wrap a `(*pfn)(…)`
+    indirect output that compiles to `jalr`, not a named `jal`, so counting them inflated _Printf's
+    C side to 14 vs the ROM's 3 jals = a phantom `14vs3` near-verbatim-mirror flag on a clean mirror.
+    One level only (a macro whose body wraps exactly one real call would under-count by 1 — rare, and
+    the gate reconciles the upstream call list against the asm regardless); the bias is conservative
+    because the recurring failure mode is *over*-counting predicate/arithmetic/callback macros."""
     macros = all_func_macros()
+    local = set(local_macros)
     return sum(
         1
         for name in C_CALL_RE.findall(body)
-        if name not in _C_NONCALL and name not in macros
+        if name not in _C_NONCALL and name not in macros and name not in local
     )
 
 
@@ -1249,7 +1362,15 @@ def call_divergence(rom_off, primary, up_cpath, lib=None):
     # mirror (S80 pfsgetstatus: the non-J `__osPfsRequestOneChannel(channel)` inflated 6→7, a false
     # `7vs6`). refs_unplaced strips the same way (S47); without the lib's build_ord this is a no-op.
     body = _strip_inactive_version_branches(body, _build_version_ord(lib))
-    n_c = _c_jal_count(_strip_define_lines(_strip_string_literals(_strip_dead_blocks(body))))
+    # Local function-like macros the .c #defines itself (S104: xprintf's PUT/PAD/ATOI) are not in
+    # all_func_macros() (headers only) → drop them too, else a callback-wrapping macro reads as a call.
+    try:
+        local_macros = set(re.findall(
+            r'^\s*#\s*define\s+([A-Za-z_]\w*)\s*\(', UpstreamSource.get(up_cpath).text, re.M))
+    except OSError:
+        local_macros = set()
+    n_c = _c_jal_count(
+        _strip_define_lines(_strip_string_literals(_strip_dead_blocks(body))), local_macros)
     if n_c == n_asm:
         return None
     return Hazard(HAZARD_JAL_COUNT_MISMATCH, f"{n_c}vs{n_asm}")
@@ -1409,6 +1530,32 @@ def defines_file_static_const_array(cpath):
     for raw in UpstreamSource.get(cpath).text.splitlines():
         if depth == 0:
             m = FILE_STATIC_CONST_ARRAY_RE.match(raw.strip())
+            if m:
+                names.append(m.group(1))
+        depth += raw.count("{") - raw.count("}")
+        if depth < 0:
+            depth = 0
+    return names
+
+
+def defines_file_static_init_array(cpath):
+    """File-scope NON-const INITIALIZED `static <type> <name>[…] = <init>;` arrays in the upstream .c
+    (S104) — the .data analogue of defines_file_static_const_array (the rodata/const case). A verbatim
+    mirror re-emits these into its OWN .data, so each needs a `.data` sibling carve at the asm-recovered
+    vram. This is the S92/S101 un-flagged class (`xprintf` spaces/zeroes, env `eqpower[128]`, _Litob
+    `ldigs`/`udigs`), which no other detector catches: FILE_STATIC_RE excludes `=`-initialized lines
+    (.bss only), defines_data_globals skips `static`, defines_local_static_data is depth>=1. `static`
+    bars cross-file linkage → the array is file-PRIVATE, so the source-scan sidesteps the S92
+    own-vs-cross-file-extern blocker (the reason the asm `addiu %lo` detector was reverted). The caller
+    fires `data-carve` ONLY on the single-file (non c-combined) subset (S101: the safe first slice — a
+    c-combined pack's per-member up_path can mis-attribute the carve). Returns the array names; the
+    vram + exact extent are recovered from the asm at the gate (the .data carve is a mechanical step)."""
+    names = []
+    depth = 0
+    text = _strip_inactive_version_branches(UpstreamSource.get(cpath).text, _build_version_ord("libultra"))
+    for raw in _strip_comments(text).splitlines():
+        if depth == 0:
+            m = FILE_STATIC_INIT_ARRAY_RE.match(raw.strip())
             if m:
                 names.append(m.group(1))
         depth += raw.count("{") - raw.count("}")
@@ -1734,6 +1881,30 @@ def refs_unplaced(cpath, placed, lib=None):
     return sorted(unplaced)
 
 
+def _fn_ptr_param_names(text):
+    """Names declared as function-pointer PARAMETERS in any function header — `T name(args)` (the
+    implicit-fn-ptr param form, e.g. xprintf's `void* pfn(void*,const char*,size_t)`) or
+    `T (*name)(args)`. These read as a call to C_CALL_RE but a verbatim mirror invokes them via
+    `jalr` through the pointer, not a `jal` to a named symbol, so they must not flag calls-unplaced
+    (S104: _Printf's `pfn` was a phantom `calls-unplaced:pfn`). Scans each def header's matched
+    param list only, so an in-body real call of the same spelling elsewhere is unaffected."""
+    names = set()
+    for m in UPSTREAM_DEF_RE.finditer(text):
+        depth, p = 0, m.end() - 1  # at the header '('
+        while p < len(text):
+            if text[p] == "(":
+                depth += 1
+            elif text[p] == ")":
+                depth -= 1
+                if depth == 0:
+                    break
+            p += 1
+        params = text[m.end():p]
+        names.update(re.findall(r"\(\s*\*\s*([A-Za-z_]\w+)\s*\)\s*\(", params))  # T (*name)(...)
+        names.update(re.findall(r"\b([A-Za-z_]\w+)\s*\(", params))              # T name(...)
+    return names
+
+
 def calls_unplaced(cpath, primary, placed, lib=None):
     """Functions the upstream .c *calls* by name that are absent from BOTH name files — the
     function dual of refs_unplaced. A verbatim mirror link-FAILS on these once the C body calls
@@ -1754,6 +1925,7 @@ def calls_unplaced(cpath, primary, placed, lib=None):
     except OSError:
         return []
     defined = {name for name, _ in _iter_upstream_functions(text)}
+    fn_ptr_params = _fn_ptr_param_names(text)  # S104: a fn-ptr param (`pfn`) is a jalr, not a jal
     # Append one-level macro expansion so a callee invoked only inside a library macro is seen;
     # exclude the macro names themselves (a macro body that invokes UPDATE_REG/WAIT_ON_IOBUSY etc.
     # must not flag those as unplaced functions — they inline, they don't link).
@@ -1772,6 +1944,7 @@ def calls_unplaced(cpath, primary, placed, lib=None):
         n
         for n in C_CALL_RE.findall(body)
         if n not in _C_NONCALL and n not in macro_names and n not in local_macro_names
+        and n not in fn_ptr_params
         and not n.startswith("__builtin_")
     }
     return sorted(n for n in called if n not in placed and n not in defined)
@@ -2141,6 +2314,17 @@ def classify_subseg(off, typ, path, size, upstream_index):
                     single_file = True
             pack_kind = HAZARD_SINGLE_FILE_PACK if single_file else HAZARD_PACK
             hazards.append(Hazard(pack_kind, f"{len(fns)}fn[" + ",".join(members) + "]"))
+            # S104: one named C stem but the pack has MORE fns than that .c defines → the surplus
+            # members are a FOREIGN TU bundled in the subseg (xprintf's func_800B1580, a separate
+            # __osDpDeviceBusy TU; xprintf.c defines 2, the pack has 3). Flag it so the gate splits the
+            # foreign TU off and mirrors only the upstream's fns, instead of attempting a whole-pack
+            # atomic mirror. The named-symbol analog of coddog-fncount-mismatch. Guard `c_members <=
+            # fc` (the named members must fit the file's defs, else the attribution itself is suspect);
+            # `not single_file` (an exact-count single-file pack is fine). Advisory (display-only).
+            if not single_file and len(c_stems) == 1 and c_members:
+                fc = _upstream_file_func_count(*c_files[0])
+                if fc and len(fns) > fc and c_members <= fc:
+                    hazards.append(Hazard(HAZARD_UPSTREAM_FNCOUNT_MISMATCH, f"{len(fns)}vs{fc}"))
             # S88 one-tu: if EVERY inner fn boundary is non-16-aligned, the pack is ONE .o (the
             # linker 16-aligns each .o's .text start, so a 2nd .o would begin on a 16 boundary).
             # Confirms a single-file-pack structurally even when members are un-named (the
@@ -2431,6 +2615,13 @@ def append_upstream_hazards(off, primary, up_lib, up_path, hazards, member_paths
         for d in defines_data_globals(p) + defines_local_static_data(p)))
     if data_defs:
         hazards.append(Hazard(HAZARD_DEFINES_DATA, ",".join(data_defs)))  # .data analogue → classical loop
+    # File-scope NON-const initialized static arrays (S104: xprintf spaces/zeroes) the verbatim mirror
+    # re-emits → a `.data` sibling carve. Single-file ONLY (`not member_paths`): the S101 safe slice — a
+    # c-combined pack's per-member up_path can mis-attribute, so defer the multi-file case (BACKLOG S92).
+    if not member_paths:
+        init_arrays = list(dict.fromkeys(defines_file_static_init_array(up_path)))
+        if init_arrays:
+            hazards.append(Hazard(HAZARD_DATA_CARVE, ",".join(init_arrays)))  # .data carve at recovered vram
     # Bare (non-_DEBUG-guarded) asserts a verbatim mirror would compile in (S97 assert-strip pre-flag).
     n_assert = sum(bare_asserts(p) for p in (up_path, *member_paths))
     if n_assert:

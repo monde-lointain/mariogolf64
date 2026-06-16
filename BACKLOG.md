@@ -620,6 +620,39 @@ sub-sprints).
   via `sync_decomp_names.py --import-from-decomp` (the 2 fn names were already in `ghidra_symbols.txt`).
   **The `[0x7E360]` pack now has only `pimgr` (osCreatePiManager) left → carry-over below.**
 
+- **Sprint 104: 1 .c file BANKED — `src/libultra/libc/xprintf.c` (`_Printf` + `_Putfld`), the
+  libultra printf formatting engine; PO picked it as a "classical spike", the gate UNMASKED a verbatim
+  MIRROR (S13 precedent).** md5-candidate 152→**153** (all .c stub-free); asm subsegs ~125 (+1
+  func_800B1580 split subseg). The gate asm-vs-upstream check defused four misleading plan-gate tags:
+  `jal-count-mismatch:14vs3` was pure jalr-vs-jal (every `(*pfn)` output is `jalr s4`; the 3 jals =
+  strchr×2 + _Putfld match upstream `_Printf` exactly), `single-file-pack:3fn` was wrong (upstream
+  xprintf.c defines ONLY 2 fns — `func_800B1580` is a separate `__osDpDeviceBusy` TU, split off at the
+  gate `[0x8BF30,asm]`→`[0x8BF30,c,libultra/libc/xprintf]`+`[0x8C980,asm]`, 16-aligned), and
+  `calls-unplaced:pfn` / `refs-unplaced:__PTRDIFF_TYPE__` were a fn-ptr param + a compiler typedef
+  macro. Warm libc band (xlitob S92 / xldtob S93 / string.c all banked) C-resolved all 4 callees
+  (`_Litob`/`_Ldtob`/`strchr`/`strlen`) → ZERO recovery, ZERO symbol adds (`_Printf`/`_Putfld`
+  pre-curated in ghidra_symbols). Byte-identical cp of ultralib VERSION_J `src/libc/xprintf.c`; **dual
+  carve** sized by `objdump -h xprintf.o`: `.data` `[0xA48B0,.data]` 0x50 (spaces[33]+zeroes[33], the
+  S92/S101 un-flagged init-static-array class) + `.rodata` `[0xADA50,.rodata]` 0x178 (fchar/fbit/"hlL"/
+  _Putfld switch jtbl; carve-start 0x10 past the FOREIGN leading `__libm_qnan_f`@0xADA40, bounded by
+  xldtob's `[0xADBD0]`). 8-gate FIRED at pts-13 → resolved by DECOMPOSE (split off func_800B1580) +
+  enabler-forward (S101 env / S93 xldtob carve-residual single-file mirror precedent; banks
+  atomically). **First-build full-make ROM SHA-1 == baserom, 0 iteration.** regime mirror → seed-only,
+  banked 13pt. 0 stuck-far/permuter/carried/re-opened. Applied **4 of 4**: #1 `_c_jal_count` drops the
+  .c's own function-like macros (PUT/PAD) + `calls_unplaced` skips fn-ptr params (the jalr-vs-jal +
+  pfn false flags) + unit tests; #2 `upstream-fncount-mismatch:<m>vs<n>` (foreign-TU-in-single-stem-
+  pack) on a depth-aware `_iter_upstream_functions` rewrite (counts single-token K&R `_xatan` +
+  leading-space defs, skips protos/#define/doc-comments → `_xatan`/`_xsincos` correctly relabel
+  single-file-pack) + unit test; #3 `data-carve:<names>` .data init-static-array detector
+  (`defines_file_static_init_array`, single-file-pack subset) + unit test; #4 `docs/hazards.md`
+  carve-start-past-foreign-leading-symbol + `.o`-section-size extent oracle. suite +4 tests pass,
+  golden regen (func_800B1580 added; _xatan/_xsincos pack→single-file-pack; _Printf banked). No
+  carry-over (func_800B1580 is a foreign asm TU, never in scope). **Cross-repo follow-up: none — both
+  fn names already in `ghidra_symbols.txt`.** **Band note: the libultra libc band's printf/number-
+  format vein is now banked (xprintf/xlitob/xldtob/ldiv/sprintf/string); remaining libultra is the
+  heavy non-audio structural packs (llcvt/settime game-region phantoms) + the sched.c-head & exceptasm.s
+  spikes (carry-overs).**
+
 - **Sprint 103: 1 .c file BANKED — `src/mgu/mtxutil.c` (`guMtxF2L` + `guMtxL2F` + `guMtxIdentF` +
   `guMtxIdent`), gu matrix utils; a planned verbatim libultra mirror that PIVOTED to classical at the
   game `-O2` profile.** md5-candidate 151→**152** (all .c stub-free); asm subsegs 125→125 (the split
@@ -1556,6 +1589,12 @@ by `/sprint-plan`:
   AND env is a clean **single-file-pack** (post env|filter split), so the per-member `up_path`
   ambiguity that blocked S92 does NOT arise here — the source-based detector would have fired cleanly.
   The single-file-pack subset is the safe first slice to ship the detector on.
+  **SHIPPED (single-file-pack subset) S104** — the source-based `data-carve:<names>` detector
+  (`defines_file_static_init_array`: file-scope NON-const `static T name[]=init;`) now fires on the
+  single-file (non `c-combined`) subset, the exact safe slice this note identified. 3rd data point was
+  xprintf's spaces/zeroes. **Still DEFERRED: the c-combined/multi-file case** — a c-combined pack's
+  per-member `up_path` can mis-attribute which member owns the `.data` array, the same blocker as the
+  jtbl owner-per-member work (S98 #1). Gate that on the per-member upstream resolution landing first.
 
 - **Tooling follow-up (S101 #1) — suppress intra-pack `calls-unplaced` (calls-side dual of S66 #2).**
   `pick_target` flagged all 4 `calls-unplaced:__freeParam,_freePVoice,_frexpf,_ldexpf` on env, but

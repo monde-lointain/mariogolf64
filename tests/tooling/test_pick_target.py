@@ -631,6 +631,69 @@ def test_file_static_const_array_widens_rodata_carve_start(tmp_path):
     assert pt.defines_file_static_const_array(str(scalar)) == []
 
 
+def test_iter_upstream_functions_def_shapes(tmp_path):
+    """S104: the depth-aware scanner counts every def shape exactly — skips a proto / `#define` /
+    doc-comment, counts a single-token implicit-int K&R def (`_xatan(u,v)`) and a stray-leading-space
+    header. The xprintf retro root cause: the old regex over-counted a proto and under-counted these."""
+    pt = load_tool("pick_target")
+    c = tmp_path / "u.c"
+    c.write_text(
+        "/* banner: double atan(double) */\n"           # doc-comment signature → NOT a def
+        "#define PUT(x) sink(x)\n"                        # function-like macro header → NOT a def
+        "static void _Putfld(int x);\n"                  # forward declaration → NOT a def
+        "int _Printf(void* pfn(int), int a) {\n"
+        "    if (a) { PUT(a); }\n"                        # in-body call/control → NOT a def
+        "    return 0;\n"
+        "}\n"
+        "_xatan(u, v)\n"                                  # single-token implicit-int K&R def
+        "int u, v;\n"
+        "{ return u; }\n"
+        " void leading(void) { return; }\n"              # stray-leading-space top-level def
+        "static void _Putfld(int x) { (void)x; }\n")
+    names = [n for n, _ in pt._iter_upstream_functions(c.read_text())]
+    assert names == ["_Printf", "_xatan", "leading", "_Putfld"]
+    assert pt._upstream_file_func_count("libultra", str(c)) == 4
+
+
+def test_jal_count_drops_local_macros():
+    """S104 #1: a function-like macro DEFINED IN the upstream .c (xprintf's PUT/PAD) is not a jal —
+    PUT wraps a `(*pfn)(…)` jalr. _c_jal_count must drop local macros, else a callback-heavy mirror
+    reads as a stripped re-impl (the phantom `14vs3`)."""
+    pt = load_tool("pick_target")
+    body = "{ PUT(a); PUT(b); PAD(c); realcall(d); }"
+    assert pt._c_jal_count(body) == 4                       # no local-macro set: PUT/PAD counted
+    assert pt._c_jal_count(body, {"PUT", "PAD"}) == 1       # local macros dropped → only realcall
+
+
+def test_calls_unplaced_skips_fn_ptr_param(tmp_path):
+    """S104 #1: a function-pointer parameter (`pfn`) invoked via the pointer is a jalr, not a jal to a
+    named symbol, so it must not surface as calls-unplaced (the phantom `calls-unplaced:pfn`)."""
+    pt = load_tool("pick_target")
+    c = tmp_path / "p.c"
+    c.write_text(
+        "int run(void* pfn(int, char*), int x) {\n"
+        "    pfn(x, 0);\n"
+        "    realcall(x);\n"
+        "}\n")
+    got = pt.calls_unplaced(str(c), "run", set(), "libultra")
+    assert "pfn" not in got and "realcall" in got
+
+
+def test_upstream_fncount_mismatch_and_data_carve(tmp_path):
+    """S104 #2/#3: a single-stem pack with MORE fns than the upstream defines (a foreign TU bundled in)
+    and the .data init-static-array detector (xprintf spaces/zeroes class)."""
+    pt = load_tool("pick_target")
+    # #3: NON-const initialized file-scope static array → .data carve; const/scalar/local excluded.
+    c = tmp_path / "x.c"
+    c.write_text(
+        'static char spaces[] = "   ";\n'
+        "static const char fchar[] = {1, 2};\n"
+        "static int scalar = 5;\n"
+        "void f(void) { static int loc[2] = {1, 2}; (void)loc; }\n")
+    assert pt.defines_file_static_init_array(str(c)) == ["spaces"]
+    assert pt.defines_file_static_const_array(str(c)) == ["fchar"]   # unchanged: const stays rodata
+
+
 # --- refactor pre-flight characterization (tooling/refactor-pick-target) -------------------
 # These lock CURRENT behavior (captured live, not a spec) ahead of the pick_target.py refactor
 # so the seed-weight-table (Phase 1b), the Candidate parameter object (Phase 2), and the

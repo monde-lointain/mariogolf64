@@ -505,6 +505,18 @@ enablers, landed with the real body; confirm the C-object section sizes match th
 `file-static` (that's the BSS/uninitialized hazard) — initialized statics are a `.data` carve, not a
 classical reroute.
 
+**`.data` init-static-array pre-flag (S104).** A file-scope NON-const initialized `static <type>
+<name>[…] = <init>;` array — `.data` the verbatim mirror re-emits — is now pre-flagged
+`data-carve:<names>` by `pick_target.py`, the `.data` analogue of the `static const` rodata-widening
+signal. It is the recurring S92/S101 un-flagged class no other detector caught (`FILE_STATIC_RE`
+excludes `=`-initialized lines, `defines_data_globals` skips `static`, `defines_local_static_data` is
+depth≥1): xprintf's `spaces`/`zeroes`, env's `eqpower[128]`, _Litob's `ldigs`/`udigs`. `static` bars
+cross-file linkage → the array is file-PRIVATE, so the source-scan sidesteps the S92 own-vs-extern
+blocker (the reason the asm `addiu %lo` scan was reverted). Fired ONLY on the single-file (non
+`c-combined`) subset (S101 safe slice; the multi-file per-member attribution stays a BACKLOG
+follow-up). Advisory/display-only — recover the vram + exact extent from the asm at execution, then
+carve as above (confirm against the `.o` `.data` section size — see the rodata extent-oracle note).
+
 **Shared global ⇒ DROP, never carve (S97).** The carve-vs-drop choice is not free when the defined
 global is *shared* — referenced by OTHER still-asm subsegs via the splat `D_<vram>` name. Then the
 **DROP-to-extern is mandatory**, a carve cannot work: a carve makes the mirror `.o` define the C
@@ -862,6 +874,18 @@ code-segment rodata subseg is this object's own, which makes the widening FP-saf
 `.data` band it could not tell a file's own static from a shared cross-file extern; the `static
 const` source gate confines this to rodata where that ambiguity does not arise.)
 
+**Carve-START past a FOREIGN leading symbol; the `.o` section size is the extent oracle (S104).** A
+generic `[off, rodata]` subseg can *begin* with a symbol owned by a DIFFERENT, already-banked file —
+then the carve must start at the target's FIRST symbol, not the subseg boundary (so the carve-start
+widening above does NOT apply: the leading bytes are not this object's). S104 `xprintf`: the generic
+`[0xADA40, rodata]` led with `__libm_qnan_f`@0xADA40 (cosf/sinf's NaN const, referenced via its
+symbol), so xprintf's carve started 0x10 later at fchar `[0xADA50, .rodata, libultra/libc/xprintf]`
+(0x178 B → bounded by xldtob's `[0xADBD0]`), leaving `__libm_qnan_f` in a 0x10 B generic remnant. The
+authoritative extent for BOTH the `.data` and `.rodata` carve is the **compiled object's section
+size**: `mips-linux-gnu-objdump -h build/src/<path>.o` (xprintf.o: `.data` 0x50 = spaces[33]+pad +
+zeroes[33]+pad, `.rodata` 0x178 = fchar+fbit+"hlL"+jtbl). Read it once the body compiles (even at a
+link-failing build) to size each carve exactly, rather than inferring from the asm `%lo` span.
+
 **Named vs anonymous pool (S66): no difference — the named-rodata CAVEAT is retired.** A pooled
 constant block whose words are *named* in `ghidra_symbols.txt` (e.g. cosf's
 `kCoeff4`/`kCoeff3`/…/`kInvPi`/`kPiHi`/`kPiLo`/`kZero`/`zOneHalf1`/`kOneHalf2` at 0x800D2460..0x24B8)
@@ -1032,6 +1056,19 @@ one shot (route to `#upstream-mirror-pattern`, not the split procedure below). T
 unchanged (the pack penalty keys on `nfns>1`, not the kind), so the relabel is display-only — it just
 stops the gate reading an atomic mirror as a split-required blocker. A mixed asm+C pack or a
 multi-stem pack keeps `pack`.
+
+**Foreign TU bundled in a single-stem pack — `upstream-fncount-mismatch:<m>vs<n>` (S104).** The
+mirror-image hazard: a pack has ONE named C stem but MORE functions (`m`) than that upstream `.c`
+defines (`n`), so the surplus members are a SEPARATE TU sharing the subseg — split it off and mirror
+ONLY the upstream's `n` fns. The named-symbol analog of `coddog-fncount-mismatch` (which keys on the
+coddog identity). Motivating case: `_Printf`/xprintf's `pack:3fn[_Printf=xprintf,_Putfld=xprintf,
+func_800B1580=?]` — xprintf.c defines 2 fns, the pack holds 3, so `func_800B1580` (a separate
+`__osDpDeviceBusy` TU) was split off at its 16-aligned boundary before the verbatim mirror. This
+relies on an ACCURATE upstream function count: `_iter_upstream_functions` is a depth-aware scan (not
+the column-anchored `UPSTREAM_DEF_RE`) so it counts every def shape — ANSI, K&R, single-token
+implicit-int K&R (`_xatan(u,v)`), and stray-leading-space headers — and skips protos / `#define`
+macro headers / doc-comment signatures; an under-count there would false-fire this on a genuine
+single-file pack (the nugfxtaskmgr ` void nuGfxTaskStart(...)` near-miss). Advisory/display-only.
 
 **Procedure:** Insert a new `[0x<offset>, asm]` line at the boundary between upstream files (read the
 first instruction's vram from the asm). Two cases: (a) upstream-mirror on the first file → flip the
