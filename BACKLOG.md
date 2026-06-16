@@ -620,6 +620,35 @@ sub-sprints).
   via `sync_decomp_names.py --import-from-decomp` (the 2 fn names were already in `ghidra_symbols.txt`).
   **The `[0x7E360]` pack now has only `pimgr` (osCreatePiManager) left → carry-over below.**
 
+- **Sprint 88: 1 .c file BANKED — `src/libultra/io/contpfs.c` (`__osSumcalc` + `__osIdCheckSum` +
+  `__osRepairPackId` + `__osCheckPackId` + `__osGetId` + `__osCheckId` + `__osPfsRWInode`), libultra
+  io single-file-pack drop-def mirror; the pfs id/inode core (7 fns banked atomically).**
+  md5-candidate 132→**133** (all 133 .c stub-free); flippable asm subsegs 137→136. Verbatim ultralib
+  VERSION_J `src/io/contpfs.c`, single 0x2C0 subseg = exactly the 7 fns (one .o — all inner
+  boundaries non-16-aligned; flip `[0x89D90, asm]`→`[0x89D90, c, libultra/io/contpfs]`). The upstream
+  version guards selected the function set for free: `#if BUILD_VERSION < VERSION_J` strips
+  `__osPfsSelectBank` (the separately-banked `pfsselectbank.c`), `#ifdef _DEBUG` strips `__osDumpId`.
+  **Drop-def** the 3 cache globals → `extern` (S85/S87 pattern; bytes in extracted data/bss):
+  `__osPfsInodeCacheBank`=0x800C9444 pre-placed; recovered `__osPfsInodeCacheChannel`=0x800C9440
+  (.data, =-1 = D_800C9440) + `__osPfsInodeCache`=0x801B68E8 (.bss, 0x100 = D_801B68E8). All callees
+  pre-placed (__osContRamRead/Write, __osSi*, osRecvMesg, __osContAddressCrc/DataCrc, bzero,
+  osGetCount, the 2-arg __osPfsSelectBank). Include adapt `PRinternal/controller.h`→bare. pts-13
+  single-file-pack ran under the **verbatim-mirror exemption** (decompose blocked — one .o). **Novel
+  bank-gotcha (vendored-header-incomplete):** the reconstructed `controller.h` was `(already-vendored)`
+  yet missing `SELECT_BANK` + had an object-like `SET_ACTIVEBANK_TO_ZERO` (vs the source's `()` call)
+  → 5 parse errors; aligned both to VERSION_J (add `SELECT_BANK`, function-like macro; grep confirmed
+  no other src consumer) + clean-rebuild. Full-make ROM SHA-1 == baserom, 0 C-body iteration. 0
+  stuck-far/permuter/carried/re-opened; 1 novel bank-gotcha. seed 13 / banked 13pt; regime mirror
+  (8-gate fired → exemption; seed-only). Applied 4 of 4: #1 `docs/hazards.md#vendored-header-incomplete`
+  + CLAUDE.md row (the `needs-macro` auto-detector DEFERRED — FP risk needs preprocessing; tracked
+  below); #2 `pick_target.py coddog-fncount-mismatch` (under-count only); #3 `pick_target.py one-tu`
+  + `decomp_asm.asm_function_addrs`; #4 this `motor.c` version-branch trap note. `make test-tools`
+  50→52 pass, golden regen (28 `one-tu` additions, diff is flag-only). **Cross-repo follow-up:** 9
+  new decomp-side symbols (7 fns + `__osPfsInodeCache`/`__osPfsInodeCacheChannel`) → propagate via
+  `sync_decomp_names.py --import-from-decomp`. **Band note: the clean libultra single-file-packs are
+  now the next pool — the remaining packs are mostly multi-file `c-combined` (sched/__assert/_Litob,
+  decompose at the file boundary) or hazardous (llcvt soft-float, contquery, the motor/pimgr traps).**
+
 - **Sprint 87: 1 .c file BANKED — `src/libultra/io/vimgr.c` (`osCreateViManager` + `viMgrMain`),
   libultra io drop-STATIC mirror; the vimgr.c carry-over, banked once S86 cleared its timer-wall.**
   md5-candidate 131→**132** (all 132 .c stub-free); flippable asm subsegs 138→137. Verbatim ultralib
@@ -947,6 +976,15 @@ by `/sprint-plan`:
   needs a `.data`/`.bss` sibling carve (`docs/hazards.md#defines-data`) or classical routing with the
   data dropped to `extern` — the dormant draft `src/libultra/io/piacs.c` (externs the data) is the
   pre-staged shape. NOT a clean-pair pick; pursue when the data-sibling enabler is the sprint goal.
+  **S88 correction — `motor.c` is a DEEPER trap than the data-sibling framing.** Upstream `motor.c`'s
+  `#if BUILD_VERSION >= VERSION_J` branch defines `__osMotorAccess`+`__osMakeMotorData`+`osMotorInit`
+  and does **NOT** define `osMotorStop` (or `osMotorStart`) at all — those live only in the `#else`
+  (`< VERSION_J`) branch. So a verbatim VERSION_J mirror of `motor.c` yields the WRONG function set;
+  the ROM's `osMotorStop` corresponds to the older `#else` source, conflicting with the project's
+  VERSION_J pin. `pick_target`'s hazards mix both branches (`READFORMAT`/`SELECT_BANK` are J-only,
+  `__osMotorinitialized` is else-only — cpreprocess does not version-gate motor.c here). Do NOT
+  pursue `osMotorStop` as a routine drop-static/drop-def mirror; it needs the `#else`-branch source
+  (a per-file build-version override or a vendored old-branch copy), a distinct un-priced enabler.
 - **io defines-data+file-static trap — `pimgr.c` (`osCreatePiManager`, [0x7E400, asm], 0x7E400-0x7E590).**
   Spike (the 3rd member of the S84-split `[0x7E360]` pack; setintmask + epirawdma banked S84). Under
   `-D_FINALROM -DBUILD_VERSION=VERSION_J` it compiles ONE fn (the `#ifndef _FINALROM` `ramromThread`/
@@ -978,6 +1016,18 @@ by `/sprint-plan`:
   mirror candidate's upstream `.c` for a non-`_DEBUG`-guarded `assert(` and flag it, so the
   `#assert-strip` `_DEBUG`-wrap is priced at the gate rather than rediscovered by the read==write
   size tell. Not file-blocking (the playbook covers it; the strip is a cheap in-execution edit).
+
+- **Tooling follow-up (S88 #1) — `needs-macro:<MACRO>@<hdr>` AUTO-detector (deferred half).** S88
+  shipped the `docs/hazards.md#vendored-header-incomplete` playbook + the manual gate check, but
+  DEFERRED the automated `pick_target` detector: for a mirror candidate, confirm every function-like
+  helper macro the upstream `.c` invokes is `#define`d (with compatible arity) in a resolvable header.
+  The blocker is FP-avoidance — a naive `\b[A-Z_]{3,}\s*\(` grep can't tell a function-like macro
+  invocation from a real call or an enum-constant-in-a-macro, so it needs cpreprocess-grade macro
+  extraction from the headers (object- vs function-like) + arity compare. Worthwhile because several
+  remaining io/os mirrors use the same reconstructed `controller.h`/`siint.h`; a new macro one of them
+  is the FIRST to use would re-trip the S88 mid-execution parse-error. Not file-blocking (the playbook
+  + manual grep covers it; the macro is a cheap header-align edit). Reuse `cpreprocess` define-line
+  parsing + the existing `C_CALL_RE` call-scan, both already imported by `pick_target`.
 
 - **asm-mirror vendoring — remaining intrinsic-likely libultra TUs (S56 pilot + S57 cache/TLB + S58
   cross-dir + S62 combined-subseg split + S63 mixed combined-subseg+C-mirror clear (reg-shim "set"

@@ -80,7 +80,7 @@
   {
     "band": "-",
     "func": "func_800A0730",
-    "hazards": "pack:2fn[func_800A0730=?,func_800A0774=?]",
+    "hazards": "pack:2fn[func_800A0730=?,func_800A0774=?],one-tu",
     "kind": "asm-flip",
     "nfns": 2,
     "pts": 13,
@@ -184,7 +184,7 @@
   {
     "band": "-",
     "func": "func_ovl10_801F4A40",
-    "hazards": "pack:2fn[func_ovl10_801F4A40=?,func_ovl10_801F4AD8=?]",
+    "hazards": "pack:2fn[func_ovl10_801F4A40=?,func_ovl10_801F4AD8=?],one-tu",
     "kind": "asm-flip",
     "nfns": 2,
     "pts": 13,
@@ -236,7 +236,7 @@
   {
     "band": "-",
     "func": "func_800A4FC0",
-    "hazards": "pack:2fn[func_800A4FC0=?,func_800A509C=?]",
+    "hazards": "pack:2fn[func_800A4FC0=?,func_800A509C=?],one-tu",
     "kind": "asm-flip",
     "nfns": 2,
     "pts": 13,
@@ -275,7 +275,7 @@
   {
     "band": "-",
     "func": "func_8009FB60",
-    "hazards": "pack:2fn[func_8009FB60=?,func_8009FD1C=?],maybe-upstream:libultra:viswapcontext,sprawdma,sirawdma",
+    "hazards": "pack:2fn[func_8009FB60=?,func_8009FD1C=?],one-tu,maybe-upstream:libultra:viswapcontext,sprawdma,sirawdma",
     "kind": "asm-flip",
     "nfns": 2,
     "pts": 13,
@@ -288,7 +288,7 @@
   {
     "band": "-",
     "func": "func_800A0800",
-    "hazards": "pack:2fn[func_800A0800=?,func_800A0918=?]",
+    "hazards": "pack:2fn[func_800A0800=?,func_800A0918=?],one-tu",
     "kind": "asm-flip",
     "nfns": 2,
     "pts": 13,
@@ -301,7 +301,7 @@
   {
     "band": "-",
     "func": "func_80029250",
-    "hazards": "pack:2fn[func_80029250=?,func_800292FC=?],caller-evict:func_80029250@src/libnusys/mainlib/nugfxinit.c",
+    "hazards": "pack:2fn[func_80029250=?,func_800292FC=?],one-tu,caller-evict:func_80029250@src/libnusys/mainlib/nugfxinit.c",
     "kind": "asm-flip",
     "nfns": 2,
     "pts": 13,
@@ -340,7 +340,7 @@
   {
     "band": "cold",
     "func": "nuContMgrInit",
-    "hazards": "pack:9fn[nuContMgrInit=nucontmgr,func_800A2C64=?,nuContDataClose=nucontmgr,nuContDataOpen=nucontmgr,contReadData=nucontmgr,func_800A2D5C=?,func_800A2DAC=?,func_800A2E38=?,func_800A2E58=?],file-static,defines-data:nuContCallBack,refs-unplaced:nuContCallBack,nuContNum,nuContReadFunc,nuContStatus,nuContWaitMesgQ",
+    "hazards": "pack:9fn[nuContMgrInit=nucontmgr,func_800A2C64=?,nuContDataClose=nucontmgr,nuContDataOpen=nucontmgr,contReadData=nucontmgr,func_800A2D5C=?,func_800A2DAC=?,func_800A2E38=?,func_800A2E58=?],one-tu,file-static,defines-data:nuContCallBack,refs-unplaced:nuContCallBack,nuContNum,nuContReadFunc,nuContStatus,nuContWaitMesgQ",
     "kind": "asm-flip",
     "nfns": 9,
     "pts": 8,
@@ -366,7 +366,7 @@
   {
     "band": "-",
     "func": "mus_thread_create",
-    "hazards": "pack:2fn[mus_thread_create=?,mus_audio_thread=?]",
+    "hazards": "pack:2fn[mus_thread_create=?,mus_audio_thread=?],one-tu",
     "kind": "asm-flip",
     "nfns": 2,
     "pts": 13,
@@ -379,7 +379,7 @@
   {
     "band": "-",
     "func": "func_800500E0",
-    "hazards": "pack:3fn[func_800500E0=?,func_80050274=?,func_8005029C=?]",
+    "hazards": "pack:3fn[func_800500E0=?,func_80050274=?,func_8005029C=?],one-tu",
     "kind": "asm-flip",
     "nfns": 3,
     "pts": 13,
@@ -431,7 +431,7 @@
   {
     "band": "cold",
     "func": "nuGfxTaskMgr",
-    "hazards": "single-file-pack:3fn[nuGfxTaskMgr=nugfxtaskmgr,nuGfxTaskMgrInit=nugfxtaskmgr,nuGfxTaskStart=?],file-static,defines-data:beforeFlag,refs-unplaced:nuDramStack,nuGfxCfb,nuGfxCfbCounter,nuGfxCfbNum,nuGfxCfb_ptr,nuGfxTaskEndFunc,nuGfxUcodeFifoPtr,nuGfxUcodeFifoSize,nuRDPOutputBuf,nuYieldBuf,nusched,rspbootTextEnd,jal-count-mismatch:7vs11",
+    "hazards": "single-file-pack:3fn[nuGfxTaskMgr=nugfxtaskmgr,nuGfxTaskMgrInit=nugfxtaskmgr,nuGfxTaskStart=?],one-tu,file-static,defines-data:beforeFlag,refs-unplaced:nuDramStack,nuGfxCfb,nuGfxCfbCounter,nuGfxCfbNum,nuGfxCfb_ptr,nuGfxTaskEndFunc,nuGfxUcodeFifoPtr,nuGfxUcodeFifoSize,nuRDPOutputBuf,nuYieldBuf,nusched,rspbootTextEnd,jal-count-mismatch:7vs11",
     "kind": "asm-flip",
     "nfns": 3,
     "pts": 5,
@@ -535,7 +535,7 @@
   {
     "band": "-",
     "func": "func_800328E0",
-    "hazards": "pack:6fn[func_800328E0=?,func_800329B8=?,func_800329D8=?,func_800329F4=?,func_80032B78=?,func_80032E34=?]",
+    "hazards": "pack:6fn[func_800328E0=?,func_800329B8=?,func_800329D8=?,func_800329F4=?,func_80032B78=?,func_80032E34=?],one-tu",
     "kind": "asm-flip",
     "nfns": 6,
     "pts": 13,
@@ -587,7 +587,7 @@
   {
     "band": "-",
     "func": "func_80067D40",
-    "hazards": "pack:5fn[func_80067D40=?,func_80067D4C=?,func_80067D74=?,func_800680FC=?,func_80068308=?]",
+    "hazards": "pack:5fn[func_80067D40=?,func_80067D4C=?,func_80067D74=?,func_800680FC=?,func_80068308=?],one-tu",
     "kind": "asm-flip",
     "nfns": 5,
     "pts": 13,
@@ -600,7 +600,7 @@
   {
     "band": "-",
     "func": "func_8006EA90",
-    "hazards": "pack:3fn[func_8006EA90=?,func_8006ED2C=?,func_8006ED34=?]",
+    "hazards": "pack:3fn[func_8006EA90=?,func_8006ED2C=?,func_8006ED34=?],one-tu",
     "kind": "asm-flip",
     "nfns": 3,
     "pts": 13,
@@ -613,7 +613,7 @@
   {
     "band": "-",
     "func": "func_8009F440",
-    "hazards": "pack:3fn[func_8009F440=?,func_8009F888=?,func_8009FA14=?]",
+    "hazards": "pack:3fn[func_8009F440=?,func_8009F888=?,func_8009FA14=?],one-tu",
     "kind": "asm-flip",
     "nfns": 3,
     "pts": 13,

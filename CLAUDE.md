@@ -262,8 +262,10 @@ When `pick_target.py` flags a hazard (or a match shows its symptom), read the ma
 | `needs-define:<def>`            | #needs-define |
 | (clean mirror SHA-miss, exact N×8B / fn shorter than its asm size; a `>= VERSION_K`-gated stmt MG64-J actually has) | #needs-define |
 | `header-renames-symbol:<fn>@<hdr>` (S85: a transitively-vendored header rewrites the curated symbol via a macro, e.g. os_host.h `#define __osInitialize_common() osInitialize()` → needs `#undef <fn>`; S31 nuGfxInit class) | #header-renames-symbol |
+| (mirror `parse error`/`undefined ref` on a helper macro the `(already-vendored)` reconstructed header lacks or mis-forms; S88 controller.h missing `SELECT_BANK` + object-like `SET_ACTIVEBANK_TO_ZERO`) | #vendored-header-incomplete |
 | `pack:<n>fn[…]`                 | #multi-function-segment-splitting-pack |
 | `single-file-pack:<n>fn[…]` (all members → one upstream C file; atomic verbatim mirror, NO split) | #upstream-mirror-pattern |
+| `one-tu` (S88: every inner fn boundary non-16-aligned → ONE .o; confirms a single-file-pack even for un-named coddog packs, AND marks per-fn decompose as blocked) | #upstream-mirror-pattern / #non16align |
 | `c-combined:<n>file[…]` (≥2 distinct C upstream files in one asm subseg) | #multi-function-segment-splitting-pack |
 | `non16align`                    | #non16align |
 | `trailing-pad:<n>B@<align>` (a verbatim C mirror compiles short of its subseg slot — the slot has nop pad to a >16-aligned next subseg the compiler's 16-align can't fill; split a nop-pad `[..,asm]` subseg) | #trailing-alignment-pad-after-a-c-mirror |
@@ -274,6 +276,7 @@ When `pick_target.py` flags a hazard (or a match shows its symptom), read the ma
 | `intrinsic-likely` (bare) / `maybe-upstream:…` | #intrinsic-likely--maybe-upstream-signature-hints |
 | `coddog-mirror:<file>@<pct>` (coddog matched an un-named/`none` candidate to an ultralib fn → verbatim mirror, not classical; S72: a same-row `file-static`/`defines-data`/`needs-header` is the coddog trap re-scan → not an atomic cp) | #coddog-cross-ref |
 | `coddog-twin:<matched>!=<member-src>` (S81: coddog matched a near-identical TWIN file; the named members name the real source — mirror from `<member-src>`, not `<matched>`) | #coddog-cross-ref |
+| `coddog-fncount-mismatch:<m>vs<n>` (S88: the coddog file defines FEWER fns than the pack holds → a structural fingerprint match, NOT a single-file source attribution; the pack is multi-file. under-count only — `m<n`) | #coddog-cross-ref |
 | (libultra leaf, bare std header)| #per-library-standard-c-header-isolation |
 | (match locks ~0.9, lib target)  | #compile-profiles-libkmc--o-libultra--o3 |
 | (compiler rodata, wrong offset) / `rodata-literal:<addr>` | #rodata-sibling-yaml-pattern |

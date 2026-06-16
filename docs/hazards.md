@@ -1076,6 +1076,43 @@ gate-safe drop-def symbol-add note also landed in #defines-data).
 
 ---
 
+## vendored-header-incomplete (a reconstructed header is `(already-vendored)` yet missing a macro)
+
+**Rule:** The project's vendored internal headers (`include/libultra/internal/controller.h`,
+`siint.h`, …) are **reconstructed**, not verbatim ultralib copies (see the
+`//some version of this almost certainly existed` comment in `controller.h`). So a header can be
+`(already-vendored)` — the file exists and its basename resolves on the `-I` set, so `needs-header`
+stays silent — yet **not define a function-like helper macro** the upstream `.c` invokes, or define
+it in an incompatible form (object-like when the source calls it `MACRO()`). The result is a
+**mid-execution compile error** after the verbatim copy lands (`parse error before ')'` for a
+function-like call on an object-like macro; an `undefined reference` / implicit-decl for a missing
+one), invisible to the plan gate (the `INCLUDE_ASM` stub carries the original asm — no header
+exercise). This is the reconstructed-header dual of `#stale-vendored-header` (there the file is a
+stripped *revision*; here it is missing/mis-formed *macros*).
+
+**Trigger:** not yet auto-flagged (a robust `needs-macro:<MACRO>@<hdr>` detector is a deferred
+follow-up — distinguishing a function-like macro invocation from a real call needs preprocessing, so
+a naive `UPPER(` grep false-fires). **Manual gate check for a mirror candidate:** grep the upstream
+`.c` for the ALL-CAPS helper macros it invokes (`SELECT_BANK(`, `SET_ACTIVEBANK_TO_ZERO(`, `ERRCK(`,
+…) and confirm each is `#define`d in a resolvable header **with a compatible arity** (function-like
+`#define NAME(` for a `NAME(...)` call site). Compare against ultralib's gated definition.
+
+**Procedure:** align the vendored header to the pinned version (`-DBUILD_VERSION=VERSION_J`): add the
+missing macro / fix the arity **verbatim from ultralib's version-active definition**, keeping the
+mirror `.c` verbatim. Guard the blast radius first — `grep -rn '<MACRO>' src/` to confirm no other
+banked consumer depends on the old form (S88: `SET_ACTIVEBANK_TO_ZERO`/`SELECT_BANK` had zero other
+consumers, so the form-change + addition were safe). Editing a shared vendored header → the banking
+SHA-1 must come from a **clean rebuild** (`make clean && make extract && make`), not an incremental
+build (`#clean-rebuild-after-shared-header-edit`).
+
+**Provenance:** S88 (`io/contpfs.c`: vendored `controller.h` was missing `SELECT_BANK` entirely and
+had an object-like `SET_ACTIVEBANK_TO_ZERO` vs the source's `SET_ACTIVEBANK_TO_ZERO()` →
+5 parse errors; aligned both to VERSION_J — added `SELECT_BANK`, made the macro function-like — no
+other consumers, clean-rebuild, banked seed-only first try). The `(already-vendored)` no-op tag
+(S59) prices the *file's existence*, not its *macro completeness* — that gap is this hazard.
+
+---
+
 ## stale-vendored-header
 
 **Rule:** A vendored header can resolve as a *file* (so `needs-header` stays silent) yet be a stripped

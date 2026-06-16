@@ -88,6 +88,34 @@ def asm_functions(rom_off):
     return names
 
 
+# `/* ROM VRAM BYTES */` with the ROM (1st) field captured, for reading each glabel's ROM start.
+_ROM_FIELD_RE = re.compile(r"/\*\s*([0-9A-Fa-f]+)\s+[0-9A-Fa-f]{8}\s+[0-9A-Fa-f]{8}\s*\*/")
+
+
+def asm_function_addrs(rom_off):
+    """[(glabel_name, rom_offset_int)] for each function in asm/<ROM>.s — the ROM offset read from
+    the first instruction comment after each glabel. Lets the gate test whether a pack's inner
+    function boundaries are all non-16-aligned (= one compilation unit, since the linker 16-aligns
+    every .o's .text start, so any second .o begins on a 16 boundary). See pick_target `one-tu`."""
+    path = asm_path(rom_off)
+    if not os.path.exists(path):
+        return []
+    out = []
+    pending = None
+    with open(path) as f:
+        for line in f:
+            m = GLABEL_RE.match(line)
+            if m:
+                pending = m.group(1)
+                continue
+            if pending is not None:
+                r = _ROM_FIELD_RE.search(line)
+                if r:
+                    out.append((pending, int(r.group(1), 16)))
+                    pending = None
+    return out
+
+
 # `/* ROM VRAM BYTES */` instruction comment — the second field is the authoritative vram
 # splat emitted for that ROM offset. Surfacing it spares the gate a rom→vram derivation for
 # the mandatory recover-extern re-confirm (S22: a hand-guessed flat `rom + <const>` resolved

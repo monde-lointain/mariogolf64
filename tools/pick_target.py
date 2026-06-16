@@ -39,6 +39,7 @@ from decomp_asm import (
     _asm_signature,
     _FRAME_IMMS,
     asm_functions,
+    asm_function_addrs,
     code_end_rom,
     intrinsic_likely,
     privileged_asm,
@@ -267,6 +268,14 @@ HAZARD_NEEDS_DEFINE = "needs-define"
 HAZARD_JAL_COUNT_MISMATCH = "jal-count-mismatch"
 HAZARD_PACK = "pack"
 HAZARD_SINGLE_FILE_PACK = "single-file-pack"
+HAZARD_ONE_TU = "one-tu"  # S88: every inner fn boundary of a pack is non-16-aligned → ONE .o (the
+# linker 16-aligns each .o's .text start, so any second .o begins on a 16 boundary). Confirms a
+# single-file-pack structurally even when members are un-named (the coddog-mirror case), AND it is
+# the S51 non16align signal that a per-fn decompose split is mechanically blocked.
+HAZARD_CODDOG_FNCOUNT_MISMATCH = "coddog-fncount-mismatch"  # S88: a coddog-mirror file defines FEWER
+# fns than the pack holds (settime.c 1fn coddog-matched a 6fn os pack) → a structural fingerprint
+# match, NOT a source attribution; the pack's real source is multi-file. Under-count direction only
+# (a true single source can define MORE, via version/_DEBUG-gated extras, e.g. contpfs 9 vs ROM 7).
 HAZARD_COMBINED_SUBSEG = "combined-subseg"
 HAZARD_C_COMBINED = "c-combined"
 HAZARD_NON16ALIGN = "non16align"
@@ -1854,6 +1863,15 @@ def classify_subseg(off, typ, path, size, upstream_index):
                     single_file = True
             pack_kind = HAZARD_SINGLE_FILE_PACK if single_file else HAZARD_PACK
             hazards.append(Hazard(pack_kind, f"{len(fns)}fn[" + ",".join(members) + "]"))
+            # S88 one-tu: if EVERY inner fn boundary is non-16-aligned, the pack is ONE .o (the
+            # linker 16-aligns each .o's .text start, so a 2nd .o would begin on a 16 boundary).
+            # Confirms a single-file-pack structurally even when members are un-named (the
+            # coddog-mirror case, where the named-stem single_file test can't fire), and marks a
+            # per-fn decompose split as mechanically blocked (S51 non16align). Sufficient, not
+            # necessary: a one-.o pack with a 16-multiple-sized member won't fire (conservative).
+            addrs = [a for _, a in asm_function_addrs(off)]
+            if len(addrs) == len(fns) and all(a % 16 != 0 for a in addrs[1:]):
+                hazards.append(Hazard(HAZARD_ONE_TU))
             # C analog of combined-subseg (S64 #3): ≥2 *distinct* C upstream files share one asm
             # subseg → a multi-file C-mirror pack the gate splits at the upstream-file boundary, then
             # mirrors each verbatim. The pack basenames already encode this, but a big combined subseg
@@ -2306,6 +2324,19 @@ def build_rows(args, upstream_index, carried, sig_index, coddog_index=None):
             if cl_path:
                 mirror_path = cl_path  # the confirmed coddog identity is the file we mirror + count
                 blocked = _append_coddog_trap_hazards(off, primary, cl_path, up_lib, hazards) or blocked
+                # S88: a coddog hit on a multi-fn pack can be a STRUCTURAL fingerprint match, not a
+                # source attribution — settime.c (1 fn) coddog-matched the 6fn os pack [0x526B0]
+                # (settime's `__osCurrentTime = time` is structurally a sub-shape of a timer fn).
+                # If the matched file defines FEWER fns than the pack holds, it cannot be the sole
+                # source → the pack is multi-file; flag so the gate doesn't read it as a
+                # single-file-pack mirror. Under-count direction ONLY: a true single source may
+                # define MORE (version/_DEBUG-gated extras — contpfs.c 9 raw vs 7 ROM fns), which is
+                # fine, so `matched > nfns` is never flagged (would false-fire on contpfs).
+                if len(fns) > 1:
+                    matched_n = _upstream_file_func_count(up_lib or "libultra", cl_path)
+                    if 0 < matched_n < len(fns):
+                        hazards.append(Hazard(HAZARD_CODDOG_FNCOUNT_MISMATCH,
+                                              f"{matched_n}vs{len(fns)}"))
 
         # S78: a multi-fn asm subseg's mirror IDENTITY often lives in its UN-NAMED tail, not its
         # named (or mis-attributed) leader. The S71 block above keys coddog on `primary` AND fires
