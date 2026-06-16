@@ -543,7 +543,8 @@ def build_kmc_asm_tu_index():
 
     The libkmc analog of build_asm_tu_index. libkmc soft-float / 64-bit math TUs (mmuldi3.s,
     mcvtld.s) vendor verbatim via the KMC `as` path (KMC register conventions + `.include
-    "mips_as.h"`), a distinct mechanism from ultralib's LIBULTRA_ASFLAGS VENDOR_ASM. A primary
+    "mips_as.h"`), a distinct mechanism from ultralib's LIBULTRA_ASFLAGS rule — they build under the
+    path-based `build/src/libkmc/%.o: src/libkmc/%.s` KMC-`as` pattern rule. A primary
     whose name matches here gets `intrinsic-likely:<tu>.s(kmc-as)` so the gate vendors it with the
     KMC-as recipe (docs/hazards.md#asm-mirror-vendoring). Basename only: a libkmc TU's enabler
     surface differs from ultralib's, so it must NOT feed the LIBULTRA-relative vendorable_tu_*
@@ -608,7 +609,7 @@ def vendorable_tu_missing_defines(rel):
 def vendorable_tu_data_symbols(rel):
     """Exported symbols a vendorable ultralib .s (path relative to LIBULTRA) defines in a NON-.text
     section (.rdata/.rodata/.data/.sdata/.bss) — a has-rodata enabler (S84 #3). A vendored .s with
-    such a section is NOT a clean .text-only VENDOR_ASM cp: splat auto-links a hasm .o's data
+    such a section is NOT a clean .text-only mirror cp: splat auto-links a hasm .o's data
     sections at the END of each output section (out of address order), so the bytes duplicate +
     misplace -> SHA break. The fix (docs/hazards.md#asm-mirror-vendoring) vendors .text only +
     strips the data block, keeping that data as the existing extracted generic blob renamed to this
@@ -649,10 +650,10 @@ def vendorable_tu_jtbl(rel):
     table (`__osIntTable: .word redispatch, sw1, …`, the active `__osException` `jr`s through it) or
     any function-pointer table — is what makes a `.text`-only asm-mirror a SPIKE, not an S84
     strip-and-rename: splat extracts the table to a SEPARATE rodata blob with SYMBOLIC `.word .L…`
-    entries pointing at `.text`-internal labels; vendoring the `.text` as hasm makes `asm/<rom>.s`
-    vestigial so those labels vanish → the blob's refs go UNDEFINED at link, and the table can't be
-    carve-placed either (the VENDOR_ASM `.o` is `build/asm/<rom>.o`, no src-path subseg; a hasm `.o`'s
-    rodata auto-links at the section END → wrong addr → SHA break). So this is the negative signal: a
+    entries pointing at `.text`-internal labels; vendoring the `.text`-only ultralib `.s` (which does
+    not define splat's `.L<addr>` labels) leaves the blob's refs UNDEFINED at link, and the table can't
+    be carve-placed either (a hasm `.o`'s rodata auto-links at the section END → wrong addr → SHA
+    break). The fix re-exports the labels from the vendored `.text` (S107). So this is the negative signal: a
     heavy asm-mirror like exceptasm is NOT the S84 has-rodata replay its `data_symbols` flag suggests.
     Numeric tables (`__osHwIntTable: .word 0, 0`) are NOT flagged (they strip-and-rename cleanly).
     See docs/hazards.md#asm-mirror-vendoring. Empty for a `.text`-only or numeric-data TU."""

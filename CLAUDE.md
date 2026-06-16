@@ -209,7 +209,11 @@ below).
   Subseg flips, multi-file splits, and the `make extract` that regenerates the scaffold are gate
   actions (or inline when a split is needed mid-flight).
 - **`hasm` subsegments stay raw asm forever** (entry stub, `__muldi3` libkmc math module, RSP
-  microcode entries). The execution loop refuses these.
+  microcode entries). The execution loop refuses these. The project sets `hasm_in_src_path: True`, so
+  a `hasm` `.s` lives under `src/<dir>/<stem>.s` (each `hasm` yaml line carries a `<dir>/<stem>` name
+  qualifier) and its object builds to `build/src/<dir>/<stem>.o` via a path-based Makefile pattern
+  rule that picks the assembler by tree (KMC for `src/libultra/` + `src/libkmc/`, modern GAS for the
+  rest). This replaced the old `VENDOR_ASM` `<rom>:<src>` map.
 - **Permuter** (`./run-permuter.sh`) runs only when asm-differ's `percent` ≥ 0.97. Below that,
   iterate on C or reconsider whether the subseg should be `hasm`.
 - **Decomp is authoritative for names** (per the Ghidra-workspace
@@ -275,7 +279,7 @@ When `pick_target.py` flags a hazard (or a match shows its symptom), read the ma
 | `non16align`                    | #non16align |
 | `trailing-pad:<n>B@<align>` (a verbatim C mirror compiles short of its subseg slot — the slot has nop pad to a >16-aligned next subseg the compiler's 16-align can't fill; split a nop-pad `[..,asm]` subseg) | #trailing-alignment-pad-after-a-c-mirror |
 | `intrinsic-likely:<tu>.s` (vendorable ultralib asm TU) | #asm-mirror-vendoring |
-| `intrinsic-likely:<tu>.s(kmc-as)` (S109: a libkmc soft-float/64-bit-math asm-only TU the pure-shim+privileged tests both MISS — a branchy cvt routine matching a libkmc `.s` `.globl`, no C upstream → the KMC-as sub-lane: `$(KMC_AS)` explicit-rule path NOT `VENDOR_ASM`, `.include "mips_as.h"` via `-I src/libkmc`, the `li 0xffffffff`→`addiu $X,$0,-1` encoding edit, and a multi-fn TU spanning >1 splat subseg merges to ONE hasm; mcvtld.s `__fixunsdfdi`+`__floatdidf`) | #asm-mirror-vendoring |
+| `intrinsic-likely:<tu>.s(kmc-as)` (S109: a libkmc soft-float/64-bit-math asm-only TU the pure-shim+privileged tests both MISS — a branchy cvt routine matching a libkmc `.s` `.globl`, no C upstream → the KMC-as sub-lane: the path-based `build/src/libkmc/%.o: src/libkmc/%.s` KMC-`as` pattern rule (NOT the ultralib `LIBULTRA_ASFLAGS` rule), `.include "mips_as.h"` via `-I src/libkmc`, the `li 0xffffffff`→`addiu $X,$0,-1` encoding edit, and a multi-fn TU spanning >1 splat subseg merges to ONE hasm; mcvtld.s `__fixunsdfdi`+`__floatdidf`) | #asm-mirror-vendoring |
 | `intrinsic-likely:<tu>.s(has-rodata:<sym>)` (S84: the vendorable .s carries a `.rodata`/`.data` section → vendor `.text` only + strip the data block, keep it as the renamed generic blob; S91: gated to the ACTIVE build — `#ifndef _FINALROM`/inactive-`BUILD_VERSION` EXPORTs dropped) | #asm-mirror-vendoring |
 | `intrinsic-likely:<tu>.s(asm-mirror-jtbl:<head>)` (S91→S107: the vendorable .s defines a SYMBOLIC-pointer table — a switch jtbl / fn-ptr `.word <label>` block — the active `.text` references → the LABEL-EXPORT asm-mirror procedure, NOT a spike: vendor `.text`-only + strip-and-rename the tables, then re-export the jtbl-target `.L<addr>` labels in the vendored `.text` so the already-placed blob resolves; S107 exceptasm worked example) | #asm-mirror-vendoring |
 | `intrinsic-likely:cp0-asm(identify-TU)` (un-named privileged hand-asm: TLB/CP0/eret, name unresolved) | #asm-mirror-vendoring |

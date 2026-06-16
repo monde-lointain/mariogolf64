@@ -96,13 +96,20 @@ BIN_FILES := $(wildcard $(ASSETS_DIR)/*.bin)
 # linker-time "undefined reference" errors that are hard to trace back to a
 # Makefile glob. Do NOT "simplify" this line back to wildcard.
 C_FILES := $(shell find $(SRC_DIR) -name '*.c')
+# Hand-written / vendored assembly now lives under src/ (hasm_in_src_path: True in
+# the yaml), co-located with the C mirrors. Same recursive-`find` rationale as
+# C_FILES above: vendored TUs sit at nested paths (src/libultra/<dir>/<f>.s,
+# src/libkmc/<f>.s, src/entry/entry.s). The per-tree assembler is selected by the
+# build/src/... pattern rules below, replacing the old VENDOR_ASM <rom>:<src> map.
+SRC_ASM_FILES := $(shell find $(SRC_DIR) -name '*.s')
 
 # Object files
 ASM_O_FILES := $(patsubst $(ASM_DIR)/%.s,$(BUILD_DIR)/$(ASM_DIR)/%.o,$(ASM_FILES))
 BIN_O_FILES := $(patsubst $(ASSETS_DIR)/%.bin,$(BUILD_DIR)/$(ASSETS_DIR)/%.o,$(BIN_FILES))
 C_O_FILES := $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/$(SRC_DIR)/%.o,$(C_FILES))
+SRC_ASM_O_FILES := $(patsubst $(SRC_DIR)/%.s,$(BUILD_DIR)/$(SRC_DIR)/%.o,$(SRC_ASM_FILES))
 
-O_FILES := $(ASM_O_FILES) $(BIN_O_FILES) $(C_O_FILES)
+O_FILES := $(ASM_O_FILES) $(BIN_O_FILES) $(C_O_FILES) $(SRC_ASM_O_FILES)
 
 # Default target
 all: $(BUILD_DIR)/$(TARGET)
@@ -154,7 +161,7 @@ sync-names:
 # with "No such file or directory" on the .o.tmp output and the linker reports
 # the missing .o as an undefined-reference error. Do NOT remove the $(sort)
 # block.
-$(shell mkdir -p $(BUILD_DIR)/$(ASM_DIR)/data $(BUILD_DIR)/$(ASSETS_DIR) $(BUILD_DIR)/$(SRC_DIR) $(sort $(dir $(C_O_FILES))))
+$(shell mkdir -p $(BUILD_DIR)/$(ASM_DIR)/data $(BUILD_DIR)/$(ASSETS_DIR) $(BUILD_DIR)/$(SRC_DIR) $(sort $(dir $(C_O_FILES)) $(dir $(SRC_ASM_O_FILES))))
 
 # Link
 $(BUILD_DIR)/$(TARGET): $(BUILD_DIR)/$(BASENAME).elf
@@ -176,8 +183,9 @@ $(BUILD_DIR)/$(ASSETS_DIR)/%.o: $(ASSETS_DIR)/%.bin
 # Compile C (KMC GCC → .s, then KMC binutils 2.6 `as` → .o).
 # Using the original assembler ($(KMC_AS)) gives us the KMC `move dst,zero`
 # → `addu dst,zero,zero` encoding natively, AND auto-pads .text to its 16-byte
-# section alignment. Modern `mips-linux-gnu-as` is kept for asm/% (it
-# understands modern-only directives like .set gp=64 that raw asm uses).
+# section alignment. Modern `mips-linux-gnu-as` is kept for asm/% and the
+# generic src/%.s rule (the entry stub) — it understands modern-only directives
+# like .set gp=64 that raw splat-extracted asm uses.
 #
 # All four C profiles share ONE recipe (below); the only difference is the
 # compile flags, selected per source tree via the C_PROFILE_CFLAGS
@@ -234,68 +242,53 @@ spotcheck-build:
 clean-nonmatchings:
 	rm -rf nonmatchings/*/
 
-# Vendor override: build/asm/8EC50.o from src/libkmc/mmuldi3.s using KMC as.
-# Explicit rule wins over the asm/%.s pattern rule for this specific target.
-# mmuldi3.s uses KMC register-name conventions (move → addu encoding); must
-# use $(KMC_AS), not modern mips-linux-gnu-as.
-$(BUILD_DIR)/$(ASM_DIR)/8EC50.o: src/libkmc/mmuldi3.s
-	$(KMC_AS) -EB -mips2 -o $@.tmp $<
-	cp $@.tmp $@
-	rm $@.tmp
+# === Vendored / hand-written assembly under src/ ============================
+# hasm subseg .s files live under src/ (hasm_in_src_path: True in the yaml),
+# co-located with the C mirrors, and are assembled BY PATH. GNU make selects the
+# most-specific pattern (shortest stem) whose prerequisite exists, so the
+# src/libultra/%.s and src/libkmc/%.s rules win over the generic src/%.s rule,
+# and a wrong-extension candidate (src/%.c) self-eliminates on its missing
+# prereq. This replaces the old VENDOR_ASM <rom>:<src> map + foreach/eval: to
+# vendor a new TU, drop the .s under src/<tree>/ and add the hasm name qualifier
+# in the yaml — no Makefile edit. See docs/hazards.md#asm-mirror-vendoring.
 
-# Vendor override: build/asm/8F020.o from src/libkmc/mcvtld.s (KMC soft-float
-# double<->long long cvt TU: __fixdfdi/__fixunsdfdi @0x8F020 + __floatdidf
-# @0x8F140). Same KMC register conventions as mmuldi3.s; its `.include
-# "mips_as.h"` (sets FPU=1) resolves via -I src/libkmc. One TU -> one .o spanning
-# both functions; the yaml merges 0x8F020 + 0x8F140 into a single hasm subseg.
-$(BUILD_DIR)/$(ASM_DIR)/8F020.o: src/libkmc/mcvtld.s src/libkmc/mips_as.h
-	$(KMC_AS) -EB -mips2 -I src/libkmc -o $@.tmp $<
-	cp $@.tmp $@
-	rm $@.tmp
-
-# Vendored libultra hand-asm TUs: assemble the real ultralib .s sources under
-# src/libultra/ with the SAME toolchain + flags ultralib uses (KMC/N64 gcc,
-# gcc.mk profile), mirroring how LIBULTRA_CFLAGS mirrors ultralib's C profile.
-# This is load-bearing: the KMC assembler pads each function's .text up to its
-# 16-byte ROM slot, so the verbatim 0xC ultralib TU lands as the 0x10 the ROM
-# expects. Modern mips-linux-gnu `as` emits the bare 0xC and the subseg shifts
-# (SHA-1 break). The subseg is `hasm`, so splat keeps asm/<rom>.s for reference
-# but does not regenerate it; this explicit rule wins over the asm/%.s pattern
-# rule. Add a <rom>:<src> pair to extend. See docs/hazards.md#upstream-mirror-pattern.
+# Vendored libultra hand-asm TUs (src/libultra/<dir>/<f>.s): assemble with the
+# SAME toolchain + flags ultralib uses (KMC/N64 gcc, gcc.mk profile), mirroring
+# how LIBULTRA_CFLAGS mirrors ultralib's C profile. LOAD-BEARING: the KMC
+# assembler pads each function's .text up to its 16-byte ROM slot, so the
+# verbatim 0xC ultralib TU lands as the 0x10 the ROM expects. Modern
+# mips-linux-gnu `as` emits the bare 0xC and the subseg shifts (SHA-1 break) —
+# which is why these must NOT fall through to the generic src/%.s modern-GAS rule.
 LIBULTRA_ASFLAGS := -x assembler-with-cpp -w -nostdinc -c -G 0 -mips3 -mgp32 -mfp32 \
 	-DMIPSEB -D_LANGUAGE_ASSEMBLY -D_MIPS_SIM=1 -D_ULTRA64 \
 	-D_MIPS_SZLONG=32 -D__USE_ISOC99 -DBUILD_VERSION=VERSION_J -D_FINALROM \
 	-I include -I include/libultra -I include/libultra/PR -I include/libultra/compiler/gcc
 
-VENDOR_ASM := \
-	86790:src/libultra/os/getcount.s \
-	8CA20:src/libultra/os/getcause.s \
-	8CA30:src/libultra/os/getsr.s \
-	8CA40:src/libultra/os/setcompare.s \
-	824E0:src/libultra/os/writebackdcache.s \
-	82560:src/libultra/os/writebackdcacheall.s \
-	823B0:src/libultra/os/invaldcache.s \
-	82460:src/libultra/os/invalicache.s \
-	88000:src/libultra/os/probetlb.s \
-	88100:src/libultra/os/unmaptlball.s \
-	8BE10:src/libultra/gu/sqrtf.s \
-	8CD10:src/libultra/os/maptlbrdb.s \
-	85DA0:src/libultra/libc/bcopy.s \
-	860C0:src/libultra/libc/bzero.s \
-	8BE20:src/libultra/libc/bcmp.s \
-	8CA50:src/libultra/os/setfpccsr.s \
-	8CA60:src/libultra/os/setsr.s \
-	8CA70:src/libultra/os/setwatchlo.s \
-	87F40:src/libultra/os/maptlb.s \
-	880C0:src/libultra/os/unmaptlb.s \
-	7E360:src/libultra/os/setintmask.s \
-	8AF90:src/libultra/os/exceptasm.s \
-	8B900:src/libultra/os/interrupt.s
+$(BUILD_DIR)/$(SRC_DIR)/libultra/%.o: $(SRC_DIR)/libultra/%.s
+	$(CC) $(LIBULTRA_ASFLAGS) -o $@.tmp $<
+	$(OBJCOPY) --set-section-alignment .text=4 --set-section-alignment .data=4 --set-section-alignment .rodata=4 --set-section-alignment .bss=4 $@.tmp $@
+	rm $@.tmp
 
-define VENDOR_ASM_RULE
-$(BUILD_DIR)/$(ASM_DIR)/$(1).o: $(2)
-	$$(CC) $$(LIBULTRA_ASFLAGS) -o $$@.tmp $$<
-	$$(OBJCOPY) --set-section-alignment .text=4 --set-section-alignment .data=4 --set-section-alignment .rodata=4 --set-section-alignment .bss=4 $$@.tmp $$@
-	rm $$@.tmp
-endef
-$(foreach pair,$(VENDOR_ASM),$(eval $(call VENDOR_ASM_RULE,$(word 1,$(subst :, ,$(pair))),$(word 2,$(subst :, ,$(pair))))))
+# Vendored libkmc soft-float / 64-bit-math TUs (src/libkmc/<f>.s): KMC register
+# conventions (move -> addu encoding), assembled with KMC `as` directly. No
+# objcopy alignment step (the 16-byte-slot padding happens inside KMC `as`). The
+# -I src/libkmc resolves mcvtld.s's `.include "mips_as.h"` (sets FPU=1); it is
+# harmless for the self-contained mmuldi3.s.
+$(BUILD_DIR)/$(SRC_DIR)/libkmc/%.o: $(SRC_DIR)/libkmc/%.s
+	$(KMC_AS) -EB -mips2 -I src/libkmc -o $@.tmp $<
+	cp $@.tmp $@
+	rm $@.tmp
+
+# Preserve the mips_as.h header dependency the old explicit mcvtld rule carried
+# (prereq-only line; does not override the recipe above).
+$(BUILD_DIR)/$(SRC_DIR)/libkmc/mcvtld.o: $(SRC_DIR)/libkmc/mips_as.h
+
+# Other hand-written asm under src/ (the entry stub): modern mips-linux-gnu `as`,
+# same recipe as the asm/%.s rule — it uses .set gp=64 + .include "macro.inc",
+# which KMC `as` rejects. CPP-preprocess, then assemble. Most-specific pattern
+# matching makes the libultra/libkmc rules above win for those trees, so this
+# catches only the remaining src/*.s (currently just src/entry/entry.s).
+$(BUILD_DIR)/$(SRC_DIR)/%.o: $(SRC_DIR)/%.s
+	$(CPP) $(CPPFLAGS) -I include $(AS_DEFINES) $< | $(AS) $(ASFLAGS) -o $@.tmp
+	$(OBJCOPY) --set-section-alignment .text=4 --set-section-alignment .data=4 --set-section-alignment .rodata=4 --set-section-alignment .bss=4 $@.tmp $@
+	rm $@.tmp

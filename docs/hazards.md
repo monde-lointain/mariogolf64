@@ -127,17 +127,22 @@ for the identified TU, it falls back to plain `hasm`.
    `mips-linux-gnu as`.** This is the load-bearing step: KMC `as` pads each function's `.text` up to
    its 16-byte ROM slot, so the verbatim 0xC TU lands as the 0x10 the ROM expects. Modern `as` emits
    the bare 0xC and every following subseg shifts → SHA-1 break (the entire S56 failure mode before
-   the toolchain switch). The Makefile carries this as `LIBULTRA_ASFLAGS` + the `VENDOR_ASM`
-   `<rom>:<src>` map + a `define`/`foreach`/`eval` rule that builds `build/asm/<rom>.o` from the
-   vendored `.s` (explicit rule wins over the `asm/%.s` pattern rule). Add a `<rom>:<src>` pair to
-   extend. (This mirrors how `LIBULTRA_CFLAGS` mirrors ultralib's C profile, and the `8EC50.o`
-   `mmuldi3.s` override is the prior art for a single vendored-asm `.o`.)
-4. **Flip the subseg `asm` → `hasm`** in `mariogolf64.yaml`. splat's `hasm` `split()` writes the
-   `.s` only if absent, so the existing `asm/<rom>.s` is kept (vestigial reference, like `8EC50.s`)
-   and never regenerated; `pick_target.py` skips `hasm` (it classifies only `asm`/`c`). The build
-   gets the `.o` from the `VENDOR_ASM` rule, not from `asm/<rom>.s`.
+   the toolchain switch). The Makefile carries this as `LIBULTRA_ASFLAGS` + a **path-based pattern
+   rule** `build/src/libultra/%.o: src/libultra/%.s` that assembles every `.s` under `src/libultra/`
+   with `$(CC) $(LIBULTRA_ASFLAGS)` + the section-alignment `objcopy` (the more-specific pattern wins
+   over the generic `src/%.s` modern-GAS rule; the project sets `hasm_in_src_path: True`, see step 4).
+   Nothing to add per TU — dropping the `.s` under `src/libultra/<dir>/` + qualifying the yaml line
+   (step 4) is the whole extension; there is no Makefile edit. (This mirrors how `LIBULTRA_CFLAGS`
+   mirrors ultralib's C profile.)
+4. **Flip the subseg `asm` → `hasm` AND add the `<dir>/<stem>` name qualifier** in `mariogolf64.yaml`
+   (e.g. `[0x86790, hasm, libultra/os/getcount]`), so the project's `hasm_in_src_path: True` resolves
+   the `.s` to `src/libultra/<dir>/<stem>.s` and its object to `build/src/libultra/<dir>/<stem>.o`.
+   splat's `hasm` `split()` writes the `.s` only if absent, so the verbatim copy from step 1 is kept
+   (it IS the canonical source now — not a vestigial `asm/<rom>.s`) and never regenerated;
+   `pick_target.py` skips `hasm` (it classifies only `asm`/`c`). The build gets the `.o` from the
+   path-based pattern rule.
 5. `make extract && make` → ROM SHA-1 must equal the baserom. Verify the vendored `.o`'s `.text`
-   size equals the subseg size (`mips-linux-gnu-size -A build/asm/<rom>.o`).
+   size equals the subseg size (`mips-linux-gnu-size -A build/src/libultra/<dir>/<stem>.o`).
 
 **Caveats:**
 - The `.ld` does **not** `ALIGN` between subsegs (only segment-level `ALIGN(__romPos,16)`), so the
@@ -148,8 +153,9 @@ for the identified TU, it falls back to plain `hasm`.
   an aliased `WEAK(bcopy, _bcopy)` whose project `WEAK` macro is empty) can need extra handling.
 - **SHA-breaker bisect (a batch of N flips, one bad TU).** The gate `make` validates all flipped
   subsegs at once, so a single version-mismatched TU breaks the whole-ROM SHA-1 without naming the
-  culprit. To localize: flip the suspect subseg back to `asm` in `mariogolf64.yaml` (its `asm/<rom>.s`
-  disassembly is still present — splat never deleted it), rebuild, and check the SHA-1. SHA goes
+  culprit. To localize: flip the suspect subseg back to `asm` in `mariogolf64.yaml` and drop its name
+  qualifier — splat then re-extracts `asm/<rom>.s` on the next `make extract` (the vendored copy stays
+  at `src/libultra/<dir>/<stem>.s` for retry), rebuild, and check the SHA-1. SHA goes
   green → that TU was the breaker (it is a spike: leave it `asm`, carry it to `BACKLOG.md`); SHA
   still red → keep flipping suspects back until it greens. Bisect a large batch by reverting half
   the flips at a time. The reverted TU's vendored `.s` stays in `src/libultra/` (unused while `asm`)
@@ -159,8 +165,9 @@ for the identified TU, it falls back to plain `hasm`.
   mirrors `osCreatePiManager`/`__osEPiRawStartDma`); split first and vendor only the asm member.
 - **Vendored `.s` carrying a non-`.text` section (`.rodata`/`.data`/`.bss`) → vendor `.text` only
   (S84).** splat auto-links a `hasm` `.o`'s `.data`/`.rodata`/`.bss` at the **END** of each output
-  section — NOT in address order. See the generated `mariogolf64.ld`: the `build/asm/823B0.o(.rodata)`
-  / `824E0.o(.rodata)` lines sit at the `.rodata` section tail, after the address-ordered C/data-file
+  section — NOT in address order. See the generated `mariogolf64.ld`: the
+  `build/src/libultra/os/invaldcache.o(.rodata)` / `writebackdcache.o(.rodata)` lines sit at the
+  `.rodata` section tail, after the address-ordered C/data-file
   siblings. For a TU whose data section is empty this is a harmless 0-byte line; for a TU with a real
   data section (S84 `setintmask.s`'s `.rdata __osRcpImTable`, a 0x80-byte / 64-`.half` LUT) the bytes
   would be emitted a **second** time at the wrong offset → every following rodata byte shifts → SHA-1
@@ -172,8 +179,9 @@ for the identified TU, it falls back to plain `hasm`.
   the exception dispatcher `asm/8AF90.s` also loads `__osRcpImTable`) — and the vendored `.text`'s
   `%hi/%lo(<sym>)` resolves to it. It is a `D_<vram>` rename across asm → needs a clean rebuild
   (`make clean && make extract && make`; see `#defines-data`). The vendored `.s` keeps its
-  `.globl <sym>` line (now a harmless external declaration). Afterward confirm `build/asm/<rom>.o` is
-  `.text`-only (`mips-linux-gnu-objdump -h build/asm/<rom>.o`), so the auto-link line carries 0 bytes.
+  `.globl <sym>` line (now a harmless external declaration). Afterward confirm
+  `build/src/libultra/<dir>/<stem>.o` is `.text`-only
+  (`mips-linux-gnu-objdump -h build/src/libultra/<dir>/<stem>.o`), so the auto-link line carries 0 bytes.
   `pick_target.py` pre-flags this as `intrinsic-likely:<tu>.s(has-rodata:<sym>)` (S84 #3) so the
   strip+rename enabler is priced at the gate. (Keeping the table in the shared blob is arguably *more*
   correct than carving it into one TU when it is referenced cross-TU, as `__osRcpImTable` is.)
@@ -208,26 +216,28 @@ for the identified TU, it falls back to plain `hasm`.
      `.data` (S84), `.globl`-declare the stripped tables (harmless external decls). Then **insert
      `.globl .L<addr>` + `.L<addr>:` at each jtbl-target instruction**, mapping the blob's `.L<addr>`
      name to the upstream label by its instruction (e.g. `.L800AFDFC`=`mfc0 t1,C0_COMPARE`=`counter`;
-     `.L800B00A0`=`lw t1,THREAD_PRI(k0)`=`redispatch`). Add the `VENDOR_ASM` pair, flip `asm`→`hasm`,
+     `.L800B00A0`=`lw t1,THREAD_PRI(k0)`=`redispatch`). Flip `asm`→`hasm` + add the yaml name
+     qualifier (`libultra/<dir>/<stem>` resolves both the `.s` and its `.o`),
      `make clean && make extract && make`. The blob's `.word .L<addr>` now resolve to the vendored-
-     `.text` globals; `objdump -h build/asm/<rom>.o` confirms `.text`-only (empty `.data`/`.rodata`/
-     `.bss` → 0-byte auto-link lines). SHA-1 == baserom.
+     `.text` globals; `objdump -h build/src/libultra/<dir>/<stem>.o` confirms `.text`-only (empty
+     `.data`/`.rodata`/`.bss` → 0-byte auto-link lines). SHA-1 == baserom.
   `pick_target.py` flags it `intrinsic-likely:<tu>.s(asm-mirror-jtbl:<head>)` (the `.word <label>`
   table's head symbol) — now a ROUTINE label-export asm-mirror, NOT a spike. (S107 exceptasm is the
   worked example: 8-fn OS exception/dispatch TU, 9 jtbl targets, banked first-try after the mechanism.)
 - **Combined-subseg sub-pattern (≥2 distinct asm TUs in one subseg).** When one `asm` subseg holds
   ≥2 asm-ONLY functions (no C mirror) from *different* ultralib `.s` files, `pick_target.py` flags
   `combined-subseg:<n>tu[a.s|b.s]`. Split the subseg at each TU boundary first (one `hasm` subseg per
-  `.s`, the asm analog of the multi-file C-pack split), add one `VENDOR_ASM` pair per TU, then vendor
-  each `.s` verbatim. `make extract` writes the new split subseg's `asm/<rom>.s` (absent → splat
-  writes it once); the build still takes each `.o` from its `VENDOR_ASM` rule. Like the
+  `.s`, the asm analog of the multi-file C-pack split), qualify each new `hasm` line with its
+  `src/libultra/<dir>/<stem>` path, then vendor each `.s` verbatim there. splat writes each split
+  subseg's `.s` to `src/` only if absent; the build takes each `.o` from the path-based pattern rule. Like the
   `intrinsic-likely` path, the flag carries `(needs-define:<MACROS>)` (the union across the pack's
   TUs) when any pack `.s` references an `UPPER_CASE` asm macro the in-tree `-I` headers lack, so the
   define enabler is priced at the gate, not at a failing vendor-compile (S63: `setfpccsr.s` →
   `CFC1`/`CTC1`, which were absent because S56 vendored only `MFC0`/`MTC0` — vendor the missing
   macros into `include/sys/asm.h` verbatim from ultralib `sys/asm.h`). S62:
-  `[0x823B0,asm]` held `osInvalDCache`+`osInvalICache` → split at 0x82460 → two `hasm` + two
-  `VENDOR_ASM` pairs (slots 0xB0 + 0x80). A mixed pack with a C-mirrorable member splits the same way
+  `[0x823B0,asm]` held `osInvalDCache`+`osInvalICache` → split at 0x82460 → two `hasm` subsegs
+  (qualified `libultra/os/invaldcache` + `libultra/os/invalicache`, slots 0xB0 + 0x80). A mixed pack
+  with a C-mirrorable member splits the same way
   but vendors only the asm TUs and C-mirrors the rest (S63: `[0x8CA50,asm]` = 3 reg-shim TUs + the
   C-mirror `__osSpDeviceBusy` → 3 `hasm` + 1 `c, libultra/io/sp`). Distinct from the two cases above: (a) the mixed-pack caveat
   fires when ≥1 member has a C mirror (a member with a C upstream is excluded from the TU count, so
@@ -239,10 +249,11 @@ for the identified TU, it falls back to plain `hasm`.
 `__muldi3`; `mcvtld.s` `__fixdfdi`/`__fixunsdfdi`+`__floatdidf`) are NOT ultralib `LEAF`/`XLEAF` TUs
 and do NOT assemble under `LIBULTRA_ASFLAGS`. They use **KMC register conventions** (`move dst,zero`
 → `addu` encoding) and must be assembled with the **KMC assembler** `$(KMC_AS)`, the same toolchain
-the in-tree disassembly-reassembly path uses. The Makefile carries each as an **explicit
-`build/asm/<rom>.o:` rule** (NOT the `VENDOR_ASM` `<rom>:<src>` map, which hard-codes the ultralib
-profile): `$(KMC_AS) -EB -mips2 [-I src/libkmc] -o $@.tmp $<; cp $@.tmp $@; rm $@.tmp` (the `8EC50.o`
-`mmuldi3.s` rule is the prior art). `pick_target.py` flags it `intrinsic-likely:<tu>.s(kmc-as)` so the
+the in-tree disassembly-reassembly path uses. The Makefile carries these under a **path-based pattern
+rule** `build/src/libkmc/%.o: src/libkmc/%.s` (separate from the ultralib `src/libultra/%.o` rule,
+which hard-codes the `LIBULTRA_ASFLAGS` profile): `$(KMC_AS) -EB -mips2 -I src/libkmc -o $@.tmp $<;
+cp $@.tmp $@; rm $@.tmp` (no objcopy — the 16-byte-slot pad happens inside KMC `as`).
+`pick_target.py` flags it `intrinsic-likely:<tu>.s(kmc-as)` so the
 gate reaches for the KMC-as recipe, not the ultralib one — the libkmc analog of the ultralib
 `intrinsic-likely:<tu>.s` (S109). It fires when an asm-only primary the pure-shim + privileged tests
 both MISS (a branchy cvt routine — no CP0/FPU-ctrl op, no `handwritten` tag) matches a libkmc `.s`
@@ -264,7 +275,7 @@ KMC-as specifics:
 - **Multi-fn TU spanning >1 splat subseg → merge to ONE `hasm`.** A KMC-as TU defining several
   functions (`mcvtld.s` = `__fixunsdfdi`@0x8F020 + `__floatdidf`@0x8F140) extracts as several
   ADJACENT `asm` subsegs (one per fn). One source `.s` → one `.o`, so merge them into a single
-  `[<first-rom>, hasm]` (delete the later subseg line(s)) before adding the explicit rule; the merged
+  `[<first-rom>, hasm, libkmc/<stem>]` (delete the later subseg line(s)); the merged
   subseg's extent (to the next subseg) must equal the TU's assembled size. The asm analog of the C
   `single-file-pack` (one upstream file → one atomic mirror, no inter-fn split). 0 `symbol_addrs`
   adds when both fns are already named (S109).

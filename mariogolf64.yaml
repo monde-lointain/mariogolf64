@@ -23,6 +23,13 @@ options:
   use_legacy_include_asm: False
   mips_abi_float_regs: o32
 
+  # hasm subseg .s files live under src/ (next to the C mirrors), not asm/.
+  # Each hasm line carries a <dir>/<stem> name qualifier so its .s resolves to
+  # src/<dir>/<stem>.s and its object to build/src/<dir>/<stem>.o; the Makefile
+  # picks the assembler by path (KMC for src/libultra + src/libkmc vendored TUs,
+  # modern GAS for the entry stub). Replaces the old VENDOR_ASM <rom>:<src> map.
+  hasm_in_src_path: True
+
   # Disable splat's regeneration of include/macro.inc, include_asm.h, and
   # labels.inc. Default behavior overwrites those files on every `make
   # extract` from a hardcoded template that emits `.internal
@@ -69,7 +76,7 @@ segments:
     start: 0x1000
     vram: 0x80025C00
     subsegments:
-      - [0x1000, hasm]
+      - [0x1000, hasm, entry/entry]
 
   - name: main
     type: code
@@ -177,7 +184,7 @@ segments:
       - [0x7E2D0, c, libnusys/mainlib/nucontdatalock]
       - [0x7E330, c, libnusys/mainlib/nucontqueryread]
       - [0x7E350, c, main/__osGetCurrFaultedThread]
-      - [0x7E360, hasm]
+      - [0x7E360, hasm, libultra/os/setintmask]
       - [0x7E400, c, libultra/io/pimgr]
       - [0x7E590, c, libultra/io/epirawdma]
       - [0x7E780, c, libultra/io/epidma]
@@ -202,10 +209,10 @@ segments:
       - [0x822E0, c, libultra/audio/heapinit]
       - [0x82320, c, libultra/audio/heapalloc]
       - [0x82370, c, libultra/audio/copy]
-      - [0x823B0, hasm]
-      - [0x82460, hasm]
-      - [0x824E0, hasm]
-      - [0x82560, hasm]
+      - [0x823B0, hasm, libultra/os/invaldcache]
+      - [0x82460, hasm, libultra/os/invalicache]
+      - [0x824E0, hasm, libultra/os/writebackdcache]
+      - [0x82560, hasm, libultra/os/writebackdcacheall]
       - [0x82590, c, libultra/io/contquery]
       - [0x82630, c, libultra/io/contreaddata]
       - [0x82810, c, libultra/io/controller]
@@ -226,8 +233,8 @@ segments:
       - [0x85A50, c, libultra/gu/scale]
       - [0x85B30, c, libultra/gu/sinf]
       - [0x85CD0, c, libultra/gu/translate]
-      - [0x85DA0, hasm]
-      - [0x860C0, hasm]
+      - [0x85DA0, hasm, libultra/libc/bcopy]
+      - [0x860C0, hasm, libultra/libc/bzero]
       - [0x86160, c, libultra/libc/string]
       - [0x861F0, c, libultra/libc/sprintf]
       - [0x86280, c, libultra/libc/syncprintf]
@@ -238,7 +245,7 @@ segments:
       - [0x86680, c, libultra/os/seteventmesg]
       - [0x86730, c, libultra/io/dpsetstat]
       - [0x86740, c, libultra/io/dpctr]
-      - [0x86790, hasm]
+      - [0x86790, hasm, libultra/os/getcount]
       - [0x867A0, c, libultra/io/sptask]
       - [0x869E0, c, libultra/io/sptaskyield]
       - [0x86A00, c, main/func_800AB600]
@@ -256,10 +263,10 @@ segments:
       - [0x87B10, c, libultra/os/gettime]
       - [0x87BA0, c, libultra/os/settimer]
       - [0x87C40, c, libultra/os/timerintr]
-      - [0x87F40, hasm]
-      - [0x88000, hasm]
-      - [0x880C0, hasm]
-      - [0x88100, hasm]
+      - [0x87F40, hasm, libultra/os/maptlb]
+      - [0x88000, hasm, libultra/os/probetlb]
+      - [0x880C0, hasm, libultra/os/unmaptlb]
+      - [0x88100, hasm, libultra/os/unmaptlball]
       - [0x88150, c, libultra/io/vigetcurrframebuf]
       - [0x88190, c, libultra/io/vigetnextframebuf]
       - [0x881D0, c, libultra/io/vigetmode]
@@ -286,8 +293,8 @@ segments:
       - [0x8AC20, asm]
       - [0x8AC80, c, libultra/os/afterprenmi]
       - [0x8ACA0, c, libultra/os/initialize]
-      - [0x8AF90, hasm]
-      - [0x8B900, hasm]
+      - [0x8AF90, hasm, libultra/os/exceptasm]
+      - [0x8B900, hasm, libultra/os/interrupt]
       - [0x8B990, c, libultra/os/setglobalintmask]
       - [0x8B9D0, c, libultra/os/resetglobalintmask]
       - [0x8BA20, c, libultra/io/pirawdma]
@@ -295,16 +302,16 @@ segments:
       - [0x8BB10, c, libultra/io/epirawread]
       - [0x8BC80, c, libultra/io/epirawwrite]
       - [0x8BDF0, c, libultra/io/ai]
-      - [0x8BE10, hasm]
-      - [0x8BE20, hasm]
+      - [0x8BE10, hasm, libultra/gu/sqrtf]
+      - [0x8BE20, hasm, libultra/libc/bcmp]
       - [0x8BF30, c, libultra/libc/xprintf]
       - [0x8C980, c, libultra/io/dpsetnextbuf]
-      - [0x8CA20, hasm]
-      - [0x8CA30, hasm]
-      - [0x8CA40, hasm]
-      - [0x8CA50, hasm]
-      - [0x8CA60, hasm]
-      - [0x8CA70, hasm]
+      - [0x8CA20, hasm, libultra/os/getcause]
+      - [0x8CA30, hasm, libultra/os/getsr]
+      - [0x8CA40, hasm, libultra/os/setcompare]
+      - [0x8CA50, hasm, libultra/os/setfpccsr]
+      - [0x8CA60, hasm, libultra/os/setsr]
+      - [0x8CA70, hasm, libultra/os/setwatchlo]
       - [0x8CA80, c, libultra/io/sp]
       - [0x8CAA0, c, libultra/io/spgetstat]
       - [0x8CAB0, c, libultra/io/spsetstat]
@@ -313,7 +320,7 @@ segments:
       - [0x8CB80, c, libultra/io/sirawread]
       - [0x8CBD0, c, libultra/io/sirawwrite]
       - [0x8CC20, c, libultra/io/crc]
-      - [0x8CD10, hasm]
+      - [0x8CD10, hasm, libultra/os/maptlbrdb]
       - [0x8CD70, c, libultra/io/viinit]
       - [0x8CE80, c, libultra/io/vigetcurrcontext]
       - [0x8CE90, c, libultra/io/gbpaksetbank]
@@ -329,8 +336,8 @@ segments:
       - [0x8E660, asm]
       - [0x8EAD0, c, libkmc/strcmp]
       - [0x8EBE0, c, libkmc/_matherr]
-      - [0x8EC50, hasm]
-      - [0x8F020, hasm]
+      - [0x8EC50, hasm, libkmc/mmuldi3]
+      - [0x8F020, hasm, libkmc/mcvtld]
       - [0x8F240, c, libkmc/matherr]
       - [0x8F250, asm]
       - [0x8F440, data, main_data]
