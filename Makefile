@@ -279,7 +279,8 @@ VENDOR_ASM := \
 	87F40:src/libultra/os/maptlb.s \
 	880C0:src/libultra/os/unmaptlb.s \
 	7E360:src/libultra/os/setintmask.s \
-	8AF90:src/libultra/os/exceptasm.s
+	8AF90:src/libultra/os/exceptasm.s \
+	8B900:src/libultra/os/interrupt.s
 
 define VENDOR_ASM_RULE
 $(BUILD_DIR)/$(ASM_DIR)/$(1).o: $(2)

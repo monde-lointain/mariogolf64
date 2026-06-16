@@ -287,7 +287,7 @@ segments:
       - [0x8AC80, c, libultra/os/afterprenmi]
       - [0x8ACA0, c, libultra/os/initialize]
       - [0x8AF90, hasm]
-      - [0x8B900, asm]
+      - [0x8B900, hasm]
       - [0x8B990, c, libultra/os/setglobalintmask]
       - [0x8B9D0, c, libultra/os/resetglobalintmask]
       - [0x8BA20, c, libultra/io/pirawdma]
