@@ -312,7 +312,7 @@ segments:
       - [0x8CE90, c, libultra/io/gbpaksetbank]
       - [0x8CF50, c, libultra/io/pfsisplug]
       - [0x8D230, c, libultra/libc/xlitob]
-      - [0x8D480, asm]
+      - [0x8D480, c, libultra/libc/xldtob]
       - [0x8DF10, c, libultra/io/dp]
       - [0x8DF30, c, libultra/io/si]
       - [0x8DF50, c, libultra/libc/ldiv]
@@ -362,7 +362,7 @@ segments:
       - [0xAD9E0, .rodata, libultra/io/viswapcontext]
       - [0xAD9F0, rodata]
       - [0xADA40, rodata]
-      - [0xADBD0, rodata]
+      - [0xADBD0, .rodata, libultra/libc/xldtob]
       - [0xADC40, rodata]
       - [0xADCA0, rodata]
       - { type: bss, vram: 0x800D2930 }
