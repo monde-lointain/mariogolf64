@@ -273,7 +273,7 @@ segments:
       - [0x89780, asm]
       - [0x89B10, c, libultra/io/pfsgetstatus]
       - [0x89D20, c, libultra/io/pfsselectbank]
-      - [0x89D90, asm]
+      - [0x89D90, c, libultra/io/contpfs]
       - [0x8A820, c, libultra/io/contramread]
       - [0x8AA10, c, libultra/io/contramwrite]
       - [0x8AC20, asm]
