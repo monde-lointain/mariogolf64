@@ -265,7 +265,7 @@ SECTIONS
         build/src/libultra/io/gbpakreadwrite.o(.text);
         build/src/libultra/io/gbpakreadid.o(.text);
         build/src/libultra/io/gbpakcheckconnector.o(.text);
-        build/asm/89780.o(.text);
+        build/src/libultra/io/motor.o(.text);
         build/src/libultra/io/pfsgetstatus.o(.text);
         build/src/libultra/io/pfsselectbank.o(.text);
         build/src/libultra/io/contpfs.o(.text);
@@ -525,7 +525,7 @@ SECTIONS
         build/src/libultra/io/gbpakreadwrite.o(.data);
         build/src/libultra/io/gbpakreadid.o(.data);
         build/src/libultra/io/gbpakcheckconnector.o(.data);
-        build/asm/89780.o(.data);
+        build/src/libultra/io/motor.o(.data);
         build/src/libultra/io/pfsgetstatus.o(.data);
         build/src/libultra/io/pfsselectbank.o(.data);
         build/src/libultra/io/contpfs.o(.data);
@@ -798,7 +798,7 @@ SECTIONS
         build/src/libultra/io/gbpakreadwrite.o(.rodata);
         build/src/libultra/io/gbpakreadid.o(.rodata);
         build/src/libultra/io/gbpakcheckconnector.o(.rodata);
-        build/asm/89780.o(.rodata);
+        build/src/libultra/io/motor.o(.rodata);
         build/src/libultra/io/pfsgetstatus.o(.rodata);
         build/src/libultra/io/pfsselectbank.o(.rodata);
         build/src/libultra/io/contpfs.o(.rodata);
@@ -1064,7 +1064,7 @@ SECTIONS
         build/src/libultra/io/gbpakreadwrite.o(.bss);
         build/src/libultra/io/gbpakreadid.o(.bss);
         build/src/libultra/io/gbpakcheckconnector.o(.bss);
-        build/asm/89780.o(.bss);
+        build/src/libultra/io/motor.o(.bss);
         build/src/libultra/io/pfsgetstatus.o(.bss);
         build/src/libultra/io/pfsselectbank.o(.bss);
         build/src/libultra/io/contpfs.o(.bss);
