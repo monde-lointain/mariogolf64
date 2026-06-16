@@ -104,6 +104,16 @@ for the identified TU, it falls back to plain `hasm`.
 **Procedure:**
 1. **Copy the ultralib `.s` verbatim** from `~/development/repos/ultralib/src/<dir>/<file>.s` to
    `src/libultra/<dir>/<file>.s` (mirror the subdir, same as the C pattern).
+   - **Internal-header include rewrite (the one verbatim deviation).** ultralib `.s` TUs include
+     their *internal* headers bare (`#include "threadasm.h"`, `"exceptasm.h"`) because in ultralib
+     they sit next to the `.s` in `src/<dir>/`. The project keeps those headers under
+     `include/libultra/internal/`, which the `LIBULTRA_ASFLAGS` `-I` set reaches only via
+     `-I include/libultra` — so rewrite each bare internal-header include to `internal/<h>`
+     (`"threadasm.h"` → `"internal/threadasm.h"`). The public-prefixed includes (`PR/…`, `sys/…`)
+     already resolve and stay as-is. This is the *only* allowed edit to the vendored `.s`; it touches
+     no `.text` byte, so the full-`make` SHA-1 stays the verbatim proof. Skipping it is a first-build
+     `No such file or directory` parse error, not a SHA miss (S107 exceptasm rewrote
+     `exceptasm.h`+`threadasm.h`; S108 interrupt.s rewrote `threadasm.h`).
 2. **Vendor any missing asm macros** into the project headers (verbatim from ultralib). The MONEGI
    `include/sys/asm.h` lacked `MFC0`/`MTC0` (S56 added them). The TU's `#include "PR/R4300.h"`
    resolves via `-I include/libultra`; `sys/asm.h`/`sys/regdef.h` via `-I include`.
@@ -1339,6 +1349,16 @@ carrying `pack` / `jal-count-mismatch` / `maybe-upstream`, before committing it 
      conversion stubs (~250 B) yet coddog matched it @99.99 to THREE distinct subsegs (2032 B / 2912 B /
      7728 B). Advisory/display-only — the size-dimension companion to the fn-count guard. When either
      guard is on a coddog row, do NOT treat the `coddog-mirror` flag as a single-file mirror identity.
+     - **S108 — `llcvt.c` is not linked at all (workhorse-linked / wrapper-absent).** Beyond the
+       structural over-match: MG64 never links `llcvt.c`. Its 8 stubs are thin wrappers that `jal` the
+       libgcc soft-float workhorses (`__fixdfdi`, `__floatdidf`, …); KMC GCC emits calls to those
+       workhorses **directly**, so the workhorses ARE present (`__floatdidf` @0x800B3D40,
+       `__fixunsdfdi` @0x800B3C20, in the libkmc/libgcc band, already named) while the `__d_to_ll`…
+       `__ull_to_f` wrapper TU is absent everywhere (name files + asm). So every `__d_to_ll @99.99`
+       row is a reloc-masked FP on the stack→`jal`→return stub shape (`func_800504E8` calls a game fn;
+       `spawn_object_simple` IS a game fn). Lesson for a future planner: a tiny-stub coddog identity
+       can mean the source TU was never linked, not just over-matched — confirm the *workhorse*
+       symbols, not the wrapper, before chasing the `.c`.
    - **NOT done (S92 carry-over):** a `.data`-carve detector for a file's OWN initialized file-statics
      (the `_Litob` ldigs/udigs class). An `addiu %lo(D_<addr>)` into the `.data` range cannot be
      distinguished from a SHARED extern reference by asm alone (the same instruction serves both), and

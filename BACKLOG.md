@@ -16,6 +16,17 @@ subordinate to the libultra goal. Target selection is `tools/pick_target.py` (sm
 the 8-point decompose gate fires on any seed ≥8. v2 classical track is active (since S11);
 mirror is the default, classical is first-class when the asm warrants it.
 
+**S108 — `os/interrupt.s` BANKED (asm-mirror hasm) + remaining libultra-region asm inventory.**
+`__osDisableInt`+`__osRestoreInt` (0x8B900) vendored verbatim from ultralib (VERSION_J branch), the
+clean no-jtbl/no-rodata sibling of S107 exceptasm; asm subsegs 122→121. The scope's other half —
+`llcvt.c` — is **closed as not-linked** (workhorse `__floatdidf`/`__fixunsdfdi` present in the
+libkmc/libgcc band, wrapper TU absent; the `__d_to_ll @99.99` rows are reloc-masked FPs — see
+`docs/hazards.md#coddog-cross-ref` S108 note). **Remaining un-mirrored libultra-region asm subsegs
+(PO context for the next gate):** `0x8E110` `_xatan` (libc math, ~0x440 B); `0x8E660` + `0x8F020`
+`__fixunsdfdi` + `0x8F140` `__floatdidf` (libkmc/libgcc soft-float, ~0x690 B total). These are the
+next asm-mirror / classical candidates; the non-libultra-region coddog targets (`os/settime.c`,
+`sp/spriteex2.c`, `audio/synthesizer.c`) remain the other open work.
+
 **Remaining libultra hazard map (S38; corrected S53; sprintf closed S54).** ~~**blk** —
 `alHeapDBAlloc`~~ **BANKED S53** (PR-band false-blk fixed via `LIB_EXTRA_INCLUDE_DIRS`, S53 #1).
 ~~`sprintf` (file-static + pack:2fn + needs-header:xstdio.h,string.h)~~ **BANKED S54** — all three
@@ -1695,6 +1706,21 @@ by `/sprint-plan`:
   the array detector; +unit test + golden regen. pick's advisory `defines-data:count,firsttime` WAS the
   gate signal (not a miss, just un-upgraded to `data-carve`), and the carve is a mechanical execution
   step, so NOT file-blocking. Off-cadence golden-gated (touches the ranker) — `tooling-refactor-style`.
+
+- **Tooling follow-up (S108 #2) — multi-root asm-TU index so libkmc math/soft-float TUs surface as
+  asm-mirror candidates.** Investigated at the S108 review: the existing intrinsic-likely path
+  already tags ultralib hand-asm correctly (`interrupt.s` WAS tagged `intrinsic-likely:os/interrupt.s`
+  pre-flip; its top-15 miss was the INTENDED `(-score,size)` de-prioritization of hand-asm, not a
+  bug). The real gap is the remaining libultra-region inventory is **libkmc**, which `build_asm_tu_index`
+  (ultralib-only scan) misses → it shows as bare `upstream none`: `__floatdidf`/`__fixunsdfdi`
+  (0x8F140/0x8F020 → `libkmc/src/mcvtld.s`, asm-mirror) and `_xatan`/`_xsincos` (0x8E110/0x8E660 →
+  `libkmc/src/atan.c`/`sin.c`, **C** mirror, not asm). Scope: (1) extend `build_asm_tu_index` to a
+  multi-root scan (ultralib + libkmc), tracking each TU's source root; (2) make the downstream
+  consumers root-aware — `vendorable_tu_missing_defines`/`_data_symbols`/`_jtbl` all
+  `os.path.join(LIBULTRA, rel)` today and would mis-join a libkmc path; (3) optionally extend the C
+  upstream index for libkmc math so `_xatan`/`_xsincos` get a libkmc C attribution. NOT file-blocking
+  (the inventory is in `## Active phase` for the PO). Off-cadence golden-gated (touches the ranker +
+  several coupled functions) — `tooling-refactor-style`. Do NOT rush this into a review gate.
 
 - **Tooling follow-up (S101 #1) — suppress intra-pack `calls-unplaced` (calls-side dual of S66 #2).**
   `pick_target` flagged all 4 `calls-unplaced:__freeParam,_freePVoice,_frexpf,_ldexpf` on env, but
