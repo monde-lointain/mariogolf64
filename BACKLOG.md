@@ -620,6 +620,28 @@ sub-sprints).
   via `sync_decomp_names.py --import-from-decomp` (the 2 fn names were already in `ghidra_symbols.txt`).
   **The `[0x7E360]` pack now has only `pimgr` (osCreatePiManager) left → carry-over below.**
 
+- **Sprint 96: 1 .c file BANKED — `src/libultra/audio/drvrnew.c` (`_init_lpfilter` + `alFxNew` +
+  6×`al*New`), the libultra audio synthesis DRIVER; the 3rd audio sub-band mirror and the FIRST that
+  did NOT run under the verbatim-mirror exemption.** md5-candidate 139→**140**. pts-13 tripped the
+  8-gate and the S64/S69 exemption FAILED condition (c) "no residual variance" (unlike S94/S95):
+  drvrnew references **10 cross-file pull/param entry points by name** + needs a **dual carve**, so
+  it ran enabler-forward (PO chose the full mirror over an enabler-only sprint; banked atomically
+  first-try). Enablers: vendored `initfx.h`(→`include/libultra/internal/`) + `stdio.h`(→
+  `include/libultra/compiler/gcc/`, same source as memory/stdlib/string.h); 18 symbol adds (8 drvrnew
+  fns + 10 callees `alFilterNew`=0x800A5D80/alMainBusPull/Param/alResamplePull/Param/alFxPull/Param/
+  ParamHdl/alSavePull/Param, all asm-confirmed from al*New a1/a2+jal, no conflict/caller-evict);
+  **`.data` carve** `[0xA32D0,.data,libultra/audio/drvrnew]` (6 `static s32 *_PARAMS[]`=0x190, 3-way
+  split of main_data) + **`.rodata` carve** `[0xAD6B0,.rodata,…]` (jtbl_800D22B8 switch + SCALE/
+  CONVERT/2³² consts=0x40, attribute-change). `refs-unplaced:__FILE__,__LINE__` was FALSE (`_DEBUG`
+  off → `alHeapAlloc→alHeapDBAlloc(0,0,…)`, no string). Verbatim ultralib VERSION_J, byte-identical
+  cp, **first-build full-make ROM SHA-1 == baserom, 0 iteration**. 0 stuck-far/permuter/carried/
+  re-opened. **Strategic: pre-named the reverb/mainbus/save/resample/fx entry points + vendored the
+  shared headers → the audio synth cluster (reverb/env/mainbus/save/resample) is the warm cheaper
+  next band.** Retro applied 3 of 4 (+1 log-only): #1 `pick_target.py` `coddog-source-banked:<file>`
+  tag (a coddog match to an already-banked mirror is structural — func_8009F440→load.c@98.17 FP);
+  #2 `refs_unplaced` skips compiler predefined macros (`__FILE__`/`__LINE__`/…); #3 `docs/hazards.md`
+  dual-section-carve cross-ref (#defines-data ↔ #rodata-sibling); #4 cluster-unlock log-only. No
+  carry-overs.
 - **Sprint 95: 1 .c file BANKED — `src/libultra/audio/load.c` (`alAdpcmPull` + `alRaw16Pull` +
   `alLoadParam` + `_decodeChunk`), libultra audio verbatim mirror; the 2nd audio sub-band leaf.**
   md5-candidate 138→**139** (all 139 .c stub-free); asm subsegs 156→155 (0x7F8B0 flipped). The
@@ -1018,20 +1040,21 @@ facts for the next gate:
   Before S94 these classified `upstream none` (un-named, header-gated → not re-priced) and the
   scoped filter hid them; the S55 "survey by the upstream/coddog column" workaround is no longer
   required for audio.
-- **Next-cleanest audio leaves + their hazards (S95 refresh).** auxbus (S94) + load (S95) were the
-  only two near-clean audio leaves — both banked. ~~`load.c` (`func_800A44B0`, refs-unplaced:lastCnt
-  + calls-unplaced:alLoadParam)~~ **BANKED S95** — both hazards were FALSE: lastCnt was an AUD_PROFILE-
-  guarded phantom (S95 #1 de-noise added AUD_PROFILE to the dead-#ifdef strip), alLoadParam a
-  self-member. The rest are real work, NOT atomic cps: `mainbus.c` (`func_800A5DA0`, 4fn,
-  rodata-jtbl:0x800D23E8 + coddog-fncount-mismatch:2vs4 → multi-file/jtbl); `save.c`
-  (`func_800A6D60`, 6fn, coddog-twin save!=sl + fncount 2vs6 → multi-file); `drvrnew.c`
-  (`func_800A3C80`, 8fn, needs-header:stdio.h,initfx.h(vendorable) + refs-unplaced:__FILE__,__LINE__ +
-  calls-unplaced:alFilterNew,dmaNew + rodata-jtbl); `reverb.c` (`func_800A61C0`, 8fn,
-  defines-data:val,blob + needs-header(vendorable) + refs:alGlobals,save_min + calls-unplaced +
-  rodata-jtbl); `envmixer.c`/`alEnvmixerPull` (8fn, refs/calls-unplaced + rodata-jtbl + 13
-  rodata-literal + jal-mismatch). The vendorable-header single-file packs (drvrnew/reverb/env) are
-  mirrorable with a stdio.h/initfx.h companion-copy + rodata-jtbl carve enabler; mainbus/save need
-  the multi-file coddog-boundary split first. **NOTE (S95):** the phantom `lastCnt`/`save_min`/
+- **Next-cleanest audio leaves + their hazards (S96 refresh).** auxbus (S94) + load (S95) + drvrnew
+  (S96) banked. ~~`drvrnew.c` (`func_800A3C80`, 8fn, needs-header + refs/calls-unplaced +
+  rodata-jtbl)~~ **BANKED S96** — the audio synth DRIVER, first non-exemption audio mirror: vendored
+  initfx.h+stdio.h, dual `.data`+`.rodata` carve, 18 syms (8 + 10 cross-file callees). `__FILE__/
+  __LINE__` was FALSE (`_DEBUG` off → `alHeapDBAlloc(0,0,…)`; S96 #2 dropped builtins from
+  refs_unplaced). The rest, NOW CHEAPER (drvrnew pre-named their entry points + vendored the shared
+  initfx.h/stdio.h): `reverb.c` (`alFxPull`=0x800A61C0, 8fn — `_init_lpfilter` now placed (drvrnew),
+  defines-data:val,blob + refs:alGlobals + calls-unplaced:SWAP,_init_lpfilter + rodata-jtbl);
+  `env.c`/`alEnvmixerPull` (8fn, calls-unplaced:_frexpf,_ldexpf float intrinsics + rodata-jtbl + 13
+  rodata-literal + jal-mismatch — verify the intrinsic callees are placed first); `mainbus.c`
+  (`alMainBusPull`=0x800A5DA0, 4fn, rodata-jtbl:0x800D23E8 + twin-of:drvrnew + coddog-fncount 2vs4 →
+  multi-file/jtbl); `save.c` (`alSavePull`=0x800A6D60, 6fn, coddog-twin save!=sl + fncount 2vs6 →
+  multi-file). The synth-cluster single-file packs (reverb/env) are mirrorable with their own
+  rodata-jtbl carve (headers + cluster entry points already paid by S96); mainbus/save need the
+  multi-file coddog-boundary split first. **NOTE (S95):** the phantom `lastCnt`/`save_min`/
   `rate_min`/`vol_min` AUD_PROFILE externs are now de-noised off these rows — their remaining
   refs-unplaced flags (alGlobals etc.) are the real ones.
 - **Open tooling question (deferred S94 #3):** audio coddog hits are still priced as classical packs

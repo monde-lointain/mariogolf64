@@ -308,6 +308,11 @@ HAZARD_REMAINING = "remaining"
 HAZARD_CODDOG_MIRROR = "coddog-mirror"  # S71: a coddog compare2 match to an ultralib fn
 HAZARD_CODDOG_TWIN = "coddog-twin"  # S81: coddog matched a near-identical TWIN file (piacs.c) but
 # the named members name the real source (siacs); mirror from the member-named source, not the file
+HAZARD_CODDOG_SOURCE_BANKED = "coddog-source-banked"  # S96: a coddog-mirror hit whose project mirror
+# is ALREADY banked (0-stub) in-tree — the source is fully decompiled, so the match can't be a fresh
+# attribution; necessarily structural (a DSP/stub fingerprint coincidence), like coddog-fncount-
+# mismatch / coddog-structural. func_8009F440's `coddog-mirror:src/audio/load.c@98.17` after load.c
+# banked S95 is the motivating false-attribution; advisory (display-only, does not re-price).
 HAZARD_CALLER_EVICT = "caller-evict"  # S77: an un-named func_ member a banked C file calls by name
 HAZARD_TRAILING_PAD = "trailing-pad"  # S79: trailing nop pad to a higher-aligned next subseg a C mirror can't emit
 HAZARD_DROP_STATIC_MIRROR = "drop-static-mirror"  # S87: a coddog-confirmed verbatim mirror whose
@@ -754,6 +759,22 @@ def _coddog_upstream_path(cfile):
     Used by build_rows to re-run the file-level trap detectors on a coddog-matched upstream."""
     p = os.path.join(os.path.dirname(LIBULTRA), cfile)
     return p if os.path.isfile(p) else None
+
+
+def _coddog_source_banked(cod_src):
+    """S96: True if a coddog-matched source's project mirror is ALREADY banked (0-stub) in-tree. A
+    coddog-mirror hit to such a file can't be a fresh source attribution (the source is fully
+    decompiled), so the match is necessarily structural — a DSP/stub fingerprint coincidence, the
+    sibling of coddog-fncount-mismatch / coddog-structural. `cod_src` is the ultralib-repo-relative
+    path the coddog map carries (`src/audio/load.c`); coddog is always the ultralib sweep, so the
+    mirror lands at `src/libultra/<reldir>/<base>`."""
+    rel = cod_src[len("src/"):] if cod_src.startswith("src/") else cod_src
+    mp = os.path.join(ROOT, "src", "libultra", rel)
+    try:
+        with open(mp, errors="ignore") as f:
+            return "INCLUDE_ASM" not in f.read()
+    except OSError:
+        return False
 
 
 def _append_coddog_twin_hazard(cfile, fns, upstream_index, hazards):
@@ -1390,6 +1411,16 @@ def src_func_callers():
 # CamelCase types never match, so this rarely false-flags a non-symbol token.
 SDK_GLOBAL_RE = re.compile(r"__[A-Za-z]\w+")
 
+# Compiler predefined macros: `__`-prefixed so SDK_GLOBAL_RE matches them, but they expand to a
+# string/int literal at compile time — never a linked global. drvrnew's debug-heap call
+# `alHeapDBAlloc((u8*)__FILE__, __LINE__, ...)` surfaced `__FILE__,__LINE__` as a phantom
+# refs-unplaced (S96; here under an inactive `#ifdef _DEBUG`, but they'd be false even when active).
+# The reverb/env synthesis siblings carry the same macro, so skip these like `__builtin_`.
+_C_PREDEF_MACROS = frozenset({
+    "__FILE__", "__LINE__", "__DATE__", "__TIME__", "__TIMESTAMP__", "__BASE_FILE__",
+    "__func__", "__FUNCTION__", "__PRETTY_FUNCTION__",
+})
+
 # A data extern declaration in a header: `extern <type...> <name>[opt-array];` with NO '(' before
 # the `;` (the lookahead drops function prototypes and function-pointer externs). Captures the
 # final identifier — the declared global's name (e.g. `extern volatile u32 nuGfxTaskSpool;`).
@@ -1613,8 +1644,8 @@ def refs_unplaced(cpath, placed, lib=None):
     types = declared_type_names(cpath)
     unplaced = []
     for tok in tokens:
-        if tok in placed or tok.startswith("__builtin_"):  # GCC intrinsic, never a linked global
-            continue
+        if tok in placed or tok.startswith("__builtin_") or tok in _C_PREDEF_MACROS:
+            continue  # placed, GCC intrinsic, or compiler predefined macro — never a linked global
         if tok in types:  # a typedef'd type, not a data extern
             continue
         # Only flag names the .c (or its invoked macros) actually references.
@@ -2589,6 +2620,10 @@ def build_rows(args, upstream_index, carried, sig_index, coddog_index=None):
         # (e.g. `--lib audio` -> src/audio/...) via the matched-source path substring.
         cod_srcs = [h.detail.rsplit("@", 1)[0] for h in hazards
                     if h.kind == HAZARD_CODDOG_MIRROR]
+        # S96: flag a coddog match to an already-banked source as structural (advisory) — its mirror
+        # is fully decompiled, so the hit is a fingerprint coincidence, not a fresh attribution.
+        for s in sorted({c for c in cod_srcs if _coddog_source_banked(c)}):
+            hazards.append(Hazard(HAZARD_CODDOG_SOURCE_BANKED, os.path.basename(s)))
         cod_in_scope = bool(args.lib) and bool(cod_srcs) and (
             args.lib == "libultra" or any(args.lib in s for s in cod_srcs))
         if args.lib and not cod_in_scope and args.lib not in (path or "") \

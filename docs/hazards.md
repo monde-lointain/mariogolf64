@@ -449,6 +449,19 @@ from `refs-unplaced`, where a merely *referenced* extern is safe to place.)
 **Trigger:** `pick_target.py` flag `defines-data:<g>,...`. Note `__osDequeueThread` is a
 `defines-data` false-clean even inside the warm thread band — it does not fast-path.
 
+**Dual-section carve (S96).** A verbatim coddog mirror can need BOTH a `.data` carve (here) AND a
+`.rodata` carve ([`.rodata sibling-yaml pattern`](#rodata-sibling-yaml-pattern)) in the SAME
+increment when the upstream file has file-scope `static` *initialized* arrays **and** a `switch` /
+pooled FP constants — drvrnew.c (the al synth driver) had both: six `static s32 *_PARAMS[]` arrays
++ a `switch(fxType)` jtbl + SCALE/CONVERT/2³² f64 consts. Size each carve from the `%hi(D_<vram>)`
+**address band**: a `0x800Cxxxx`-range ref is `.data` (carved out of `main_data` with a 3-way
+split — `[start,data]` / `[carve,.data,<file>]` / `[end,data]`), a `0x800D2xxx`/`jtbl_` ref is
+`.rodata` (its own subseg → attribute-change carve, or split). Both are execution-time (NOT gate)
+enablers, landed with the real body; confirm the C-object section sizes match the carve extents
+(drvrnew.o: `.data` 0x190 = 100 `s32`, `.rodata` 0x40). The `static` arrays do NOT trip
+`file-static` (that's the BSS/uninitialized hazard) — initialized statics are a `.data` carve, not a
+classical reroute.
+
 **Procedure:** Classical loop, drop the definition; the linker resolves to the splat-side global.
 
 **Verbatim-body fast path (S42).** When the *only* edit from upstream is dropping the file-scope
@@ -731,7 +744,10 @@ deferred enhancement — see `BACKLOG.md ## Carry-overs`.
 ROM offset with the **same name** as the `c` subseg. Splat matches siblings by name; the dot-prefix
 subseg's `out_path()` returns the compiled C object, placing `build/src/xxx.o(.rodata)` at the
 correct VRAM. `should_self_split()` = False for dot-prefix types (no asm file extracted), and
-`auto_link_sections` won't insert a duplicate.
+`auto_link_sections` won't insert a duplicate. When the same mirror ALSO defines file-scope `static`
+*initialized* arrays, this `.rodata` carve pairs with a `.data` carve — see the
+[dual-section carve note](#defines-data) (S96 drvrnew.c: jtbl+consts `.rodata` here + `*_PARAMS[]`
+`.data` there).
 
 **Trigger:** A libultra/libkmc file with a compiler-generated rodata constant at a different ROM
 offset than its text (e.g. a `2^32` double). `pick_target.py` pre-flags this as
