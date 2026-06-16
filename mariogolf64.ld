@@ -547,7 +547,6 @@ SECTIONS
         build/src/libultra/io/ai.o(.data);
         build/src/libultra/gu/sqrtf.o(.data);
         build/src/libultra/libc/bcmp.o(.data);
-        build/asm/data/A4880.data.o(.data);
         build/src/libultra/libc/xprintf.o(.data);
         build/src/libultra/io/dpsetnextbuf.o(.data);
         build/src/libultra/os/getcause.o(.data);
@@ -824,7 +823,6 @@ SECTIONS
         build/src/libultra/io/ai.o(.rodata);
         build/src/libultra/gu/sqrtf.o(.rodata);
         build/src/libultra/libc/bcmp.o(.rodata);
-        build/asm/data/AD9F0.rodata.o(.rodata);
         build/asm/data/ADA40.rodata.o(.rodata);
         build/src/libultra/libc/xprintf.o(.rodata);
         build/src/libultra/io/dpsetnextbuf.o(.rodata);

@@ -1272,3 +1272,23 @@ LEAF(__osCleanupThread)
     /* Despite being a jal, this function does not return as the thread will have been destroyed */
     jal     osDestroyThread
 END(__osCleanupThread)
+
+.section .rodata
+
+__osIntOffTable:
+    .byte 0x00, 0x14, 0x18, 0x18, 0x1C, 0x1C, 0x1C, 0x1C
+    .byte 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20
+    .byte 0x00, 0x04, 0x08, 0x08, 0x0C, 0x0C, 0x0C, 0x0C
+    .byte 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10
+
+__osIntTable:
+    .word .L800B00A0, .L800B0064, .L800B0040, .L800AFE68, .L800AFE20, .L800AFFDC, .L800AFDE4, .L800AFDF0, .L800AFDFC
+    .word 0, 0, 0
+
+.section .data
+
+__osHwIntTable:
+    .word 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+
+__osPiIntTable:
+    .word 0, 0
