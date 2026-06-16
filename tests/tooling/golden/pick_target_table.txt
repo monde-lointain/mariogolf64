@@ -10,7 +10,6 @@ nuContGBPakMgrInit             0x7D4A0 0x800A20A0   336   8   8 asm-flip libnusy
 func_800A0A90                  0x7BE90 0x800A0A90   144   1   5 asm-flip none      -    -
 func_800A0B20                  0x7BF20 0x800A0B20   144   1   5 asm-flip none      -    -
 func_800A0C60                  0x7C060 0x800A0C60   144   1   5 asm-flip none      -    -
-func_800B1580                  0x8C980 0x800B1580   160   1   5 asm-flip none      -    maybe-upstream:libultra:dpsetnextbuf
 func_800A09E0                  0x7BDE0 0x800A09E0   176   2  13 asm-flip none      -    pack:2fn[func_800A09E0=?,func_800A09F0=?]
 func_800A0BB0                  0x7BFB0 0x800A0BB0   176   1   5 asm-flip none      -    -
 func_ovl10_801F4A40           0x1508E0 0x801F4A40   176   2  13 asm-flip none      -    pack:2fn[func_ovl10_801F4A40=?,func_ovl10_801F4AD8=?],one-tu
@@ -49,3 +48,4 @@ func_80050400                  0x2B800 0x80050400  2032  11  13 asm-flip none   
 func_800772B0                  0x526B0 0x800772B0  2368   6  13 asm-flip none      -    pack:6fn[func_800772B0=?,func_800772C4=?,func_8007775C=?,func_800779A8=?,func_80077AD4=?,func_80077BD8=?],one-tu
 al_init                        0x78330 0x8009CF30  2528  13  13 asm-flip none      -    pack:13fn[al_init=?,func_8009CF98=?,func_8009D004=?,func_8009D274=?,func_8009D2C4=?,func_8009D40C=?,func_8009D6EC=?,func_8009D774=?,func_8009D7E8=?,func_8009D800=?,func_8009D820=?,func_8009D864=?,func_8009D8A8=?]
 func_8009FD40                  0x7B140 0x8009FD40  2544   6  13 asm-flip none      -    pack:6fn[func_8009FD40=?,func_800A0050=?,func_800A0240=?,func_800A0450=?,func_800A0578=?,func_800A0690=?]
+func_ovl8_801F4A40            0x14EA80 0x801F4A40  2912   9  13 asm-flip none      -    pack:9fn[func_ovl8_801F4A40=?,func_ovl8_801F4A5C=?,func_ovl8_801F4A6C=?,func_ovl8_801F4A90=?,func_ovl8_801F4ABC=?,func_ovl8_801F4C84=?,func_ovl8_801F4D48=?,func_ovl8_801F4D74=?,func_801F4F80=?]

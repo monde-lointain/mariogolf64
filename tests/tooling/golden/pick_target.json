@@ -144,19 +144,6 @@
   },
   {
     "band": "-",
-    "func": "func_800B1580",
-    "hazards": "maybe-upstream:libultra:dpsetnextbuf",
-    "kind": "asm-flip",
-    "nfns": 1,
-    "pts": 5,
-    "rom": "0x8C980",
-    "score": -160,
-    "size": 160,
-    "upstream": "none",
-    "vram": "0x800B1580"
-  },
-  {
-    "band": "-",
     "func": "func_800A09E0",
     "hazards": "pack:2fn[func_800A09E0=?,func_800A09F0=?]",
     "kind": "asm-flip",
@@ -648,5 +635,18 @@
     "size": 2544,
     "upstream": "none",
     "vram": "0x8009FD40"
+  },
+  {
+    "band": "-",
+    "func": "func_ovl8_801F4A40",
+    "hazards": "pack:9fn[func_ovl8_801F4A40=?,func_ovl8_801F4A5C=?,func_ovl8_801F4A6C=?,func_ovl8_801F4A90=?,func_ovl8_801F4ABC=?,func_ovl8_801F4C84=?,func_ovl8_801F4D48=?,func_ovl8_801F4D74=?,func_801F4F80=?]",
+    "kind": "asm-flip",
+    "nfns": 9,
+    "pts": 13,
+    "rom": "0x14EA80",
+    "score": -2912,
+    "size": 2912,
+    "upstream": "none",
+    "vram": "0x801F4A40"
   }
 ]

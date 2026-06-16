@@ -25,6 +25,16 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 107 — os/exceptasm.s (8-fn OS exception/dispatch TU), the S91 jtbl spike SOLVED via label-export — 2026-06-16
+- Increment: src/libultra/os/exceptasm.s banked as a `.text`-only asm-mirror (`hasm`), 8 fns. asm subsegs ~123→122; md5-candidate unchanged at 155 (asm-mirror banks as `hasm`, not a `.c`); +8 fns matched.
+- Quality: stuck-far 0, permuter 0, carried 0, re-opened 0. A seed-13 parked since S91, banked clean — 0 iteration after the mechanism.
+- Seed: committed 13pt; banked 13pt; regime mirror (asm-mirror, seed-only — no v2 residual).
+- What helped: the live disassembly re-opened the case at the plan gate — `jlabel` makes the 9 jtbl targets GLOBAL (`include/macro.inc`) and the jtbl lives in its OWN already-address-placed rodata subseg that survives the `.text` flip and stays SYMBOLIC. So S91's listed-but-untried "export the `.text` labels" option was viable all along. A Phase-1 rename-isolation checkpoint (strip-renames with the subseg still `asm`, proven green) cleanly separated rename risk from the destructive vendor/flip+clean-rebuild. All 8 fns were pre-curated in ghidra_symbols → no fn-add, no caller-evict.
+- Friction: none mechanically (banked first-try after the mechanism). The only "friction" was a documentation one — S91's "both dead-ends proven" framing over-generalized from 2 tried paths to the whole class, which is what had parked exceptasm for 16 sprints.
+- Applied (3 of 3): #1 `docs/hazards.md#asm-mirror-vendoring` asm-mirror-jtbl sub-case rewritten spike→proven LABEL-EXPORT procedure (Phase-1 rename-isolation + Phase-2 vendor-`.text`-only + re-export the `.L<addr>` labels) + `pick_target.py` comment + CLAUDE.md hazard-index row; #2 the untried-mechanism-before-dead-end lesson (BACKLOG carry-over header — a spike that lists an untried option must TRY it before the class is called a dead-end); #3 Phase-1 rename-isolation codified as step 1 of the procedure.
+- Carry-over: none — the exceptasm carry-over is RESOLVED. The only genuine remaining libultra *source* work is the `setintmask` partial-TU spike (`__osDisableInt`+`__osRestoreInt` @0x8B900).
+- Cross-repo follow-up: 5 new decomp-side data symbols (`__osHwIntTable`/`__osPiIntTable`/`__osIntOffTable`/`__osIntTable`/`__osThreadSave`) → propagate via `sync_decomp_names.py --import-from-decomp`.
+
 ## Sprint 106 — sched/sched.c (osCreateScheduler + 13 helpers), the libultra RCP task scheduler — THE last real libultra source mirror — 2026-06-16
 - Increment: src/libultra/sched/sched.c banked / 14 fns matched (osCreateScheduler + osScAddClient/osScRemoveClient/osScGetCmdQ/__scTaskReady + 9 statics). md5-candidate 154→**155** (all .c stub-free); asm subsegs ~124→~123. Goal MET (0 stubs + ROM SHA-1 green). The libultra cheap/source-mirror band is now fully mined out — what remains is non-source work (exceptasm.s jtbl spike, game-region structural phantoms llcvt/settime/contquery, libnusys/libkmc fillers).
 - Quality: 0 stuck-far / 0 permuter / 0 carried / 0 re-opened. **1 fix-iteration** (2 missed `assert (` space-variants → SHA-miss → wrapped → match). Verbatim ultralib VERSION_J cp + dual carve + 2 recover + 2 caller-evict; banked atomically.

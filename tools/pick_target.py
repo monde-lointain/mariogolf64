@@ -2387,11 +2387,13 @@ def classify_subseg(off, typ, path, size, upstream_index):
                 data_syms = vendorable_tu_data_symbols(rel)
                 if data_syms:
                     detail = f"{detail}(has-rodata:{','.join(data_syms)})"
-                # S91 #2: a SYMBOLIC-pointer table in the active data section (a switch jtbl / fn-ptr
-                # table) makes the .text-only asm-mirror a SPIKE, NOT the S84 strip-and-rename the
-                # has-rodata flag implies — the table extracts to a separate blob with vestigial
-                # .text-label refs and can't be carve-placed. Flag it so the gate doesn't mis-frame a
-                # heavy asm-mirror (S91 exceptasm: __osIntTable jtbl) as a clean replay.
+                # S91 #2 / S107: a SYMBOLIC-pointer table in the active data section (a switch jtbl /
+                # fn-ptr table) needs the LABEL-EXPORT procedure on top of the S84 strip-and-rename
+                # (NOT a spike — proven S107 exceptasm). The table extracts to a separate, already-
+                # address-placed blob that keeps symbolic .word .L<addr> refs after the flip; vendor
+                # .text-only and RE-EXPORT those .L<addr> labels in the vendored .text so the blob
+                # resolves. Flag it so the gate runs the label-export procedure, not a bare has-rodata
+                # replay (see docs/hazards.md#asm-mirror-vendoring, the asm-mirror-jtbl sub-case).
                 jtbls = vendorable_tu_jtbl(rel)
                 if jtbls:
                     detail = f"{detail}(asm-mirror-jtbl:{','.join(jtbls)})"

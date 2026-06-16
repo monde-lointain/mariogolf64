@@ -674,6 +674,39 @@ sub-sprints).
   to the Ghidra workspace via `sync_decomp_names.py --import-from-decomp`. **Bonus:** pre-places the
   `osCreateScheduler` (pts-13) `calls-unplaced` callee. No carry-overs.
 
+- **Sprint 107: 1 asm-mirror BANKED — `src/libultra/os/exceptasm.s` (`__osExceptionPreamble` + 7
+  dispatch fns, the OS exception/thread-dispatch core), vendored `.text`-only `hasm`. THE S91 jtbl
+  spike SOLVED via the label-export mechanism.** asm subsegs ~123→**122**; md5-candidate unchanged at
+  155 (an asm-mirror banks as `hasm`, not a `.c`); 8 fns matched. **The "both dead-ends proven, needs
+  a novel mechanism" framing (parked 16 sprints) was an over-generalization** — S91 proved 2 paths fail
+  (strip-and-rename a symbolic table; carve a `hasm` `.o`'s rodata) but LISTED a 3rd untried option that
+  works first-try. The `__osIntTable` switch jtbl lives in its OWN already-address-placed rodata blob
+  (`asm/data/AD9F0.rodata.s`) that survives the `.text` flip and keeps SYMBOLIC `.word .L800Bxxxx` refs
+  into the `.text`. **Phase 1** (subseg still `asm`): `symbol_addrs` strip-rename the 5 D_/jtbl_ tables
+  (`__osHwIntTable`=0x800C9480/0x28, `__osPiIntTable`=0x800C94A8/0x8, `__osIntOffTable`=0x800D25F0/0x20,
+  `__osIntTable`=0x800D2610/0x30, `__osThreadSave`=0x800FC6A8/0x1B0=sizeof(OSThread) bss) → green with
+  the subseg still `asm` (isolates rename risk; the `__osIntTable` rename PRESERVED the symbolic jtbl).
+  **Phase 2:** vendor ultralib `os/exceptasm.s` `.text`-only (strip `.rdata`/`.data`; adapt the 2
+  source-private includes → `internal/exceptasm.h`+`internal/threadasm.h`, vendoring `exceptasm.h`→
+  `include/libultra/internal/`; `.globl` the stripped tables) + **export the 9 jtbl-target labels under
+  the `.L800Bxxxx` names the blob references** (mapped by instruction: `counter`→`.L800AFDFC`,
+  `redispatch`→`.L800B00A0`, …). VENDOR_ASM pair 8AF90 + flip `[0x8AF90,asm]`→`hasm`, `make clean &&
+  make extract && make`. Vendored `.o` = `.text`-only `0x970` exact (objdump: empty data sections →
+  0-byte auto-link lines); blob stayed symbolic → the 9 exports are LOAD-BEARING (this IS the
+  mechanism). All 8 fns pre-curated in ghidra_symbols → no fn-add, no caller-evict. 0 extract-artifact
+  changes (`.ld` already named `build/asm/8AF90.o`; renamed syms are blob-defined not undefined).
+  **First-build full-make ROM SHA-1 == baserom, 0 iteration.** 0 stuck-far/permuter/carried/re-opened.
+  regime mirror → seed-only, banked 13pt. Applied **3 of 3**: #1 `docs/hazards.md#asm-mirror-vendoring`
+  asm-mirror-jtbl sub-case rewritten spike→proven LABEL-EXPORT procedure (Phase-1 rename-isolation +
+  Phase-2 vendor-`.text`-only + re-export) + `pick_target.py` comment + CLAUDE.md hazard-index row; #2
+  untried-mechanism-before-dead-end lesson (carry-over header above); #3 Phase-1 rename-isolation
+  codified as step 1. **Cross-repo follow-up:** 5 new decomp data symbols (`__osHwIntTable`/
+  `__osPiIntTable`/`__osIntOffTable`/`__osIntTable`/`__osThreadSave`) → propagate via
+  `sync_decomp_names.py --import-from-decomp`. **Band: exceptasm done → the ONLY genuine remaining
+  libultra SOURCE work is the `setintmask` partial-TU spike (`__osDisableInt`+`__osRestoreInt`
+  @0x8B900, 2 of 3 fns share setintmask.s); everything else `--lib libultra` is game-region structural
+  phantoms or libnusys/libkmc fillers.**
+
 - **Sprint 106: 1 .c file BANKED — `src/libultra/sched/sched.c` (`osCreateScheduler` + 13 helpers),
   the libultra RCP task scheduler — THE last real libultra source mirror.** md5-candidate 154→**155**
   (all .c stub-free); asm subsegs ~124→~123; 14 fns matched. **The libultra cheap/source-mirror band
@@ -1508,6 +1541,12 @@ by `/sprint-plan`:
   file-static mirror that has come due was a clean drop-def/drop-to-extern, ZERO carves (vimgr S87,
   pimgr S90), yet both were first framed as a "mixed `.data`/`.bss` carve" spike and banked
   first-build seed-only once the test was applied — so frame the verdict, not the worst case.
+  **Try every UNTRIED mechanism before declaring a dead-end CLASS (S107).** A spike note that proves N
+  paths fail but LISTS an untried option must not generalize "both/all dead-ends proven" to the whole
+  class — the listed-but-untried option may be the answer. S107 exceptasm: S91 proved strip-and-rename
+  + carve fail and listed "export the `.text` labels" as untried; that 3rd option banked first-try and
+  retired the 16-sprint spike. Enumerate the untried mechanisms explicitly in the carry-over and gate
+  the "spike" verdict on all of them being tried, not on the hard-looking ones.
 - **Near-free retry** — NOT blocked; a fully-scoped increment deferred only by the sprint cap (e.g. a
   coddog-mirror sibling, or the un-flipped head of a split subseg). Author it as a **completeness
   checklist** so the retry is a mechanical replay (S74→S75 `contquery` proof: all 4 addresses
@@ -1570,30 +1609,19 @@ by `/sprint-plan`:
   Header `PRinternal/siint.h` already vendored. Pursue when the data-sibling + log-callee enablers
   are the sprint goal; the sirawdma tail is already off it (S89). seed ~13 → the 8-gate applies
   (single-file once split, but the carve+jtbl+5-recover load is real work).
-- **os/exceptasm.s asm-mirror — `__osExceptionPreamble` pack:8fn, `[0x8AF90, asm]`
-  (0x800AFB90..0x800B0A20, 0x970).** SPIKE (S91 gate-investigated, then carried). The OS exception/
-  thread-dispatch core: under VERSION_J+_FINALROM the 8 active fns are `__osExceptionPreamble`/
-  `__osException`/`send_mesg`/`__osEnqueueAndYield`/`__osEnqueueThread`/`__osPopThread`/
-  `__osDispatchThread`/`__osCleanupThread` (the `__pt*`/`handle_CpU`/`__osNop` gate out). The `.text`
-  =0x970 EXACTLY matches the subseg (high source confidence; J/_FINALROM flags correct), and MOST of it
-  strips clean — the `.data` tables `__osHwIntTable`=0x800C9480 (0x28) / `__osPiIntTable`=0x800C94A8
-  (0x8) and the `.rodata` byte-table `__osIntOffTable`=0x800D25F0 (0x20) are plain S84 strip-and-rename;
-  8 of 9 externs are already placed (only **`__osThreadSave`=0x800FC6A8** needs adding — it's the
-  `la k0` at `__osException` start, splat-labelled `D_800FC6A8`). **Sole blocker = `__osIntTable` /
-  `jtbl_800D2610`** — a switch jump table the active `__osException` does an indexed `jr` through.
-  splat extracts it to the separate rodata blob `asm/data/AD9F0.rodata.s` SYMBOLICALLY
-  (`.word .L800B00A0 … .L800AFDFC`, pointers to `.text`-internal labels). Vendoring the `.text` as
-  hasm makes `asm/8AF90.s` vestigial → those `.L800Bxxxx` labels vanish → the blob's refs go UNDEFINED
-  at link. A rodata-sibling carve ALSO fails — the `VENDOR_ASM` `.o` is `build/asm/8AF90.o` (no
-  src-path subseg to address-place its rodata; a hasm `.o`'s rodata auto-links at the section END →
-  wrong addr → SHA break). **Both dead-ends proven (S91).** NEEDS a novel placement mechanism (export
-  the `.text` labels under names the jtbl blob references, OR make the jtbl literal via reloc config,
-  OR a non-VENDOR_ASM way to carve a hasm `.o`'s rodata to a fixed addr) — a dedicated spike-sprint
-  goal, NOT a routine asm-mirror. `pick_target.py` now flags it
-  `intrinsic-likely:os/exceptasm.s(...)(asm-mirror-jtbl:__osIntTable)` (S91 #2) so it stops reading as
-  an S84 has-rodata replay; the `has-rodata:__osCauseTable_pt` over-count is also fixed (S91 #1 — that
-  symbol is `#ifndef _FINALROM`-gated, excluded here). Same heavy-spike class as the sched.c head
-  (jtbl + multi-recover), distinct mechanism (the jtbl-vs-vendored-.text bind, not a `.data` carve).
+- _(os/exceptasm.s asm-mirror (`__osExceptionPreamble` + 7 dispatch fns, `[0x8AF90]`) carry-over
+  **RESOLVED + banked S107** — the "both dead-ends proven, needs a novel mechanism" spike framing was
+  an over-generalization. S91 proved 2 paths fail (strip-and-rename a SYMBOLIC table; carve a `hasm`
+  `.o`'s rodata) but LISTED a 3rd untried option ("export the `.text` labels under names the blob
+  references") — which works FIRST-TRY. The `__osIntTable` jtbl lives in its OWN already-address-placed
+  rodata blob (`asm/data/AD9F0.rodata.s`) that survives the `.text` flip and keeps SYMBOLIC
+  `.word .L800Bxxxx` refs; vendor `.text`-only + strip-rename the 5 tables (`__osHwIntTable`/
+  `__osPiIntTable`/`__osIntOffTable`/`__osIntTable`/`__osThreadSave`@0x800FC6A8 0x1B0 bss) + re-export
+  the 9 jtbl-target `.L800Bxxxx` labels in the vendored `.text` (mapped by instruction). All 8 fns
+  pre-curated in ghidra_symbols. Full-make ROM SHA-1 == baserom first build, 0 iteration. Codified as
+  the LABEL-EXPORT procedure in `docs/hazards.md#asm-mirror-vendoring` (the asm-mirror-jtbl class is no
+  longer a spike). NB: the sched.c-head "same heavy-spike class" pairing was stale — sched banked S106,
+  exceptasm S107.)_
 - _(io `vimgr.c` (`osCreateViManager` + `viMgrMain`) carry-over **RESOLVED + banked S87** — the
   "heavy file-static `.bss` carve" framing was over-cautious. The 6 file-statics + 2 globals + 1
   func-local static are all UNINITIALIZED → pure `.bss` (no ROM bytes), so they DROP to sized

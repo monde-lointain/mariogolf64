@@ -173,22 +173,38 @@ for the identified TU, it falls back to plain `hasm`.
     `__osCauseTable_pt` lives in `#ifndef _FINALROM` → excluded under the `-D_FINALROM` asm profile; the
     real active rodata is `__osIntOffTable`/`__osIntTable`/`__osHwIntTable`/`__osPiIntTable`). Price the
     strip set the vendored `.o` actually carries, not the all-branches union.
-- **A SYMBOLIC-pointer table in the data section → the asm-mirror is a SPIKE, not an S84 replay
-  (S91 #2).** The S84 strip-and-rename works for a *numeric* LUT (`.word 0,0` / `.half …`): the bytes
-  are self-contained, so keeping the extracted blob + renaming `D_<vram>` resolves cleanly. It does
-  **NOT** work for a table of `.word <label>` entries — a switch jump table (`__osIntTable: .word
-  redispatch, sw1, …`, whose active `__osException` `jr`s through it) or any function-pointer table.
+- **A SYMBOLIC-pointer table in the data section → the LABEL-EXPORT procedure (S107; was mis-framed
+  a spike at S91).** The S84 strip-and-rename works for a *numeric* LUT (`.word 0,0` / `.half …`): the
+  bytes are self-contained, so keeping the extracted blob + renaming `D_<vram>` resolves cleanly. A
+  table of `.word <label>` entries — a switch jump table (`__osIntTable: .word redispatch, sw1, …`,
+  whose active `__osException` `jr`s through it) or any function-pointer table — needs ONE more step.
   splat extracts such a table to a SEPARATE rodata blob (`asm/data/<rom>.rodata.s`) with the entries
-  emitted SYMBOLICALLY (`.word .L800B00A0, …`) as references to `.text`-internal labels. Vendoring the
-  `.text` as hasm makes `asm/<rom>.s` vestigial → those `.L…` labels vanish → **the blob's `.word .L…`
-  refs go UNDEFINED at link**. And it can't be carve-placed instead: the `VENDOR_ASM` `.o` is
-  `build/asm/<rom>.o` (no src-path subseg to address-place its `.rodata`; a hasm `.o`'s rodata
-  auto-links at the section END → wrong addr → SHA break). **Both proven dead-ends (S91 exceptasm) —
-  strip-and-rename AND carve.** No clean mechanism exists yet; such a TU is a spike (needs a novel
-  placement, e.g. exporting the `.text` labels under names the blob references, or making the jtbl
-  literal via reloc config). `pick_target.py` flags it `intrinsic-likely:<tu>.s(asm-mirror-jtbl:<head>)`
-  (the `.word <label>` table's head symbol) so a heavy asm-mirror (exceptasm) is NOT mis-framed as a
-  clean has-rodata replay at the gate — even though its `.text` size may exactly match the subseg.
+  emitted SYMBOLICALLY (`.word .L800B00A0, …`) as references to `.text`-internal labels (these are
+  global — `jlabel` = `.global`+label, `include/macro.inc`). Two paths FAIL: (a) vendoring `.text`-only
+  and doing nothing — `asm/<rom>.s` goes vestigial so the `.L…` labels the blob references are no
+  longer DEFINED → undefined at link; (b) carve-placing the table in the vendored `.o` — a `hasm`
+  `.o`'s `.rodata` auto-links at the section END → wrong addr → SHA break. **The fix is neither — it is
+  to RE-EXPORT the labels (S91's listed-but-untried option, proven S107 exceptasm).** The blob lives
+  in its OWN data subseg (`asm/data/<rom>.rodata.s`), which is **already address-placed and survives
+  the `.text` flip** — and after the flip it KEEPS emitting `.word .L<addr>` (symbolic, not literal).
+  So make the vendored `.text` DEFINE those labels:
+  1. **Phase 1 — rename-isolation (do FIRST, subseg still `asm`).** `symbol_addrs` add-only: rename the
+     jtbl head (`jtbl_<addr>` → its upstream name, e.g. `__osIntTable`) AND every byte/word/data table
+     the `.text` references by upstream name (`D_<vram>` → `__osIntOffTable`/`__osHwIntTable`/…), plus
+     any externalized scratch (`__osThreadSave`). `make extract && make` → must stay GREEN. This proves
+     the renames don't break the still-`asm` build and that the jtbl rename PRESERVES the symbolic
+     entries, isolating rename risk from the flip. (S107: a clean green checkpoint.)
+  2. **Phase 2 — vendor `.text`-only + export the labels.** Copy the ultralib `.s`, strip `.rdata`/
+     `.data` (S84), `.globl`-declare the stripped tables (harmless external decls). Then **insert
+     `.globl .L<addr>` + `.L<addr>:` at each jtbl-target instruction**, mapping the blob's `.L<addr>`
+     name to the upstream label by its instruction (e.g. `.L800AFDFC`=`mfc0 t1,C0_COMPARE`=`counter`;
+     `.L800B00A0`=`lw t1,THREAD_PRI(k0)`=`redispatch`). Add the `VENDOR_ASM` pair, flip `asm`→`hasm`,
+     `make clean && make extract && make`. The blob's `.word .L<addr>` now resolve to the vendored-
+     `.text` globals; `objdump -h build/asm/<rom>.o` confirms `.text`-only (empty `.data`/`.rodata`/
+     `.bss` → 0-byte auto-link lines). SHA-1 == baserom.
+  `pick_target.py` flags it `intrinsic-likely:<tu>.s(asm-mirror-jtbl:<head>)` (the `.word <label>`
+  table's head symbol) — now a ROUTINE label-export asm-mirror, NOT a spike. (S107 exceptasm is the
+  worked example: 8-fn OS exception/dispatch TU, 9 jtbl targets, banked first-try after the mechanism.)
 - **Combined-subseg sub-pattern (≥2 distinct asm TUs in one subseg).** When one `asm` subseg holds
   ≥2 asm-ONLY functions (no C mirror) from *different* ultralib `.s` files, `pick_target.py` flags
   `combined-subseg:<n>tu[a.s|b.s]`. Split the subseg at each TU boundary first (one `hasm` subseg per
