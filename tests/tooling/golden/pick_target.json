@@ -78,19 +78,6 @@
     "vram": "0x800A1430"
   },
   {
-    "band": "warm",
-    "func": "alSavePull",
-    "hazards": "pack:6fn[alSavePull=save,alSaveParam=save,alInit=sl,alClose=sl,alLink=sl,alUnlink=sl],c-combined:2file[save|sl]",
-    "kind": "asm-flip",
-    "nfns": 6,
-    "pts": 8,
-    "rom": "0x82160",
-    "score": -120,
-    "size": 384,
-    "upstream": "libultra",
-    "vram": "0x800A6D60"
-  },
-  {
     "band": "-",
     "func": "func_800A0730",
     "hazards": "pack:2fn[func_800A0730=?,func_800A0774=?],one-tu",
@@ -648,5 +635,18 @@
     "size": 2368,
     "upstream": "none",
     "vram": "0x800772B0"
+  },
+  {
+    "band": "-",
+    "func": "al_init",
+    "hazards": "pack:13fn[al_init=?,func_8009CF98=?,func_8009D004=?,func_8009D274=?,func_8009D2C4=?,func_8009D40C=?,func_8009D6EC=?,func_8009D774=?,func_8009D7E8=?,func_8009D800=?,func_8009D820=?,func_8009D864=?,func_8009D8A8=?]",
+    "kind": "asm-flip",
+    "nfns": 13,
+    "pts": 13,
+    "rom": "0x78330",
+    "score": -2528,
+    "size": 2528,
+    "upstream": "none",
+    "vram": "0x8009CF30"
   }
 ]

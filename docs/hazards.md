@@ -462,6 +462,21 @@ enablers, landed with the real body; confirm the C-object section sizes match th
 `file-static` (that's the BSS/uninitialized hazard) — initialized statics are a `.data` carve, not a
 classical reroute.
 
+**Shared global ⇒ DROP, never carve (S97).** The carve-vs-drop choice is not free when the defined
+global is *shared* — referenced by OTHER still-asm subsegs via the splat `D_<vram>` name. Then the
+**DROP-to-extern is mandatory**, a carve cannot work: a carve makes the mirror `.o` define the C
+*name* (e.g. `alGlobals`) while the un-flipped siblings still reference `D_<vram>`, so they go
+unresolved; bridging them with a `symbol_addrs` entry then creates an absolute-symbol-vs-`.data`
+double-definition. DROP is clean — one splat-side def (the `make extract` rename names the existing
+`.data` dlabel), and every referrer (the mirror's `extern` + all sibling asm) resolves to it. Carve
+ONLY when THIS file is the **sole referrer** (a file-private initialized array/const with content the
+compiler must emit — drvrnew.c's `static s32 *_PARAMS[]`). Tell them apart by grepping the `D_<vram>`
+referrers across `asm/` + `src/`: >1 distinct subseg ⇒ shared ⇒ DROP. S97 `sl.c` `alGlobals`
+(`D_800C8180`, refd by env @804D0 + fx @815C0 + sl @82160) dropped to the `libaudio.h` extern +
+`alGlobals=0x800C8180 // size:0x4`; the 16 B `.data` (4 B ptr + 12 B section-align pad) stayed
+splat-side. `pick_target.py` now unions `defines-data` over a `c-combined` pack's member upstreams
+(S97), so a secondary member's defined global is priced at the gate, not at execution.
+
 **Procedure:** Classical loop, drop the definition; the linker resolves to the splat-side global.
 
 **Verbatim-body fast path (S42).** When the *only* edit from upstream is dropping the file-scope

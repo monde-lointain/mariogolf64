@@ -5,7 +5,6 @@ func_800A07B0                  0x7BBB0 0x800A07B0    80   1   5 asm-flip none   
 func_800A12D0                  0x7C6D0 0x800A12D0    80   1   5 asm-flip none      -    -
 nuSiCallBackAdd                0x7DE70 0x800A2A70   288   2   5 asm-flip libnusys  cold pack:2fn[nuSiCallBackAdd=nusicallbackadd,nuSiCallBackRemove=nusicallbackremove],c-combined:2file[nusicallbackadd|nusicallbackremove],refs-unplaced:nuSiCallBackList@0x800C7E30
 gfxThread                      0x7C830 0x800A1430   304   2   5 asm-flip libnusys  cold single-file-pack:2fn[gfxThread=nugfxthread,nuGfxThreadStart=nugfxthread],file-static,refs-unplaced:nuGfxMesgQ,nuGfxPreNMIFunc,nuGfxThread
-alSavePull                     0x82160 0x800A6D60   384   6   8 asm-flip libultra  warm pack:6fn[alSavePull=save,alSaveParam=save,alInit=sl,alClose=sl,alLink=sl,alUnlink=sl],c-combined:2file[save|sl]
 func_800A0730                  0x7BB30 0x800A0730   128   2  13 asm-flip none      -    pack:2fn[func_800A0730=?,func_800A0774=?],one-tu
 func_800A0CF0                  0x7C0F0 0x800A0CF0   128   1   5 asm-flip none      -    -
 nuContGBPakMgrInit             0x7D4A0 0x800A20A0   336   8   8 asm-flip libnusys  cold single-file-pack:8fn[nuContGBPakMgrInit=nucontgbpakmgr,nuContGBPakMgrRemove=nucontgbpakmgr,contGBPakOpen=nucontgbpakmgr,contGBPakGetState=nucontgbpakmgr,contGBPakPower=nucontgbpakmgr,contGBPakReadID=nucontgbpakmgr,contGBPakReadWrite=nucontgbpakmgr,contGBPakCheckConnector=nucontgbpakmgr],defines-data:nuContGBPakCallBack,refs-unplaced:nuContGBPakCallBack@0x800C7E20
@@ -49,3 +48,4 @@ func_8009F440                  0x7A840 0x8009F440  1824   3  13 asm-flip none   
 func_ovl15_801FB400           0x16C590 0x801FB400  1824   2  13 asm-flip none      -    pack:2fn[func_ovl15_801FB400=?,func_ovl15_801FB510=?]
 func_80050400                  0x2B800 0x80050400  2032  11  13 asm-flip none      -    pack:11fn[func_80050400=?,func_80050428=?,func_800504E8=?,func_80050504=?,func_80050588=?,func_80050598=?,func_800505A0=?,func_8005062C=?,func_800506D4=?,func_80050710=?,func_80050914=?]
 func_800772B0                  0x526B0 0x800772B0  2368   6  13 asm-flip none      -    pack:6fn[func_800772B0=?,func_800772C4=?,func_8007775C=?,func_800779A8=?,func_80077AD4=?,func_80077BD8=?],one-tu
+al_init                        0x78330 0x8009CF30  2528  13  13 asm-flip none      -    pack:13fn[al_init=?,func_8009CF98=?,func_8009D004=?,func_8009D274=?,func_8009D2C4=?,func_8009D40C=?,func_8009D6EC=?,func_8009D774=?,func_8009D7E8=?,func_8009D800=?,func_8009D820=?,func_8009D864=?,func_8009D8A8=?]

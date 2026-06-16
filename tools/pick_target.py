@@ -269,6 +269,11 @@ class UpstreamSource:
 # the printed/JSON form stays exactly what the gate + the hazard index read.
 HAZARD_FILE_STATIC = "file-static"
 HAZARD_DEFINES_DATA = "defines-data"
+HAZARD_BARE_ASSERT = "bare-assert"  # S97: a non-`#ifdef _DEBUG`-guarded upstream assert() a verbatim
+# mirror compiles in (this build defines neither NDEBUG nor _DEBUG → `<assert.h>` expands to a live
+# __assert call), but the ROM's release libultra stripped asserts → SHA-miss + an `#ifdef _DEBUG` wrap
+# (docs/hazards.md#assert-strip). Advisory; the wrap is a cheap finalize edit, not a DoR block. save.c
+# (alSavePull) was the first audio-cluster mirror to hit this.
 HAZARD_REFS_UNPLACED = "refs-unplaced"
 HAZARD_CALLS_UNPLACED = "calls-unplaced"
 HAZARD_NEEDS_HEADER = "needs-header"
@@ -1322,6 +1327,38 @@ def defines_local_static_data(cpath):
     return names
 
 
+def bare_asserts(cpath):
+    """Count `assert(` calls NOT guarded by a dead `#ifdef _DEBUG`/`#if 0` block in the upstream .c
+    (S97). This build defines neither NDEBUG nor _DEBUG, and `<assert.h>` expands `assert(EX)` to a
+    live `__assert(...)` call, so a verbatim mirror of a file with a BARE (non-_DEBUG-guarded) assert
+    compiles in a branch + `jal __assert` the release ROM lacks → SHA-miss + an `#ifdef _DEBUG` wrap
+    (docs/hazards.md#assert-strip). Counts post-`_strip_dead_blocks`, so an upstream assert already in
+    the in-tree `#ifdef _DEBUG` convention does NOT fire (the token never reaches the macro phase).
+    `\\bassert` won't match `__assert` (no word boundary after `_`). save.c (alSavePull) was the first
+    audio-cluster mirror to hit this; pre-flagging prices the wrap at the gate."""
+    try:
+        text = UpstreamSource.get(cpath).text
+    except OSError:
+        return 0
+    return len(re.findall(r"\bassert\s*\(", _strip_dead_blocks(_strip_comments(text))))
+
+
+def _c_combined_member_paths(fns, up_path, upstream_index):
+    """The distinct C upstreams of a c-combined pack's NON-primary members (S97). The primary-keyed
+    mirror battery (append_upstream_hazards) scans only fns[0]'s upstream, so a SECONDARY member
+    file's defined global / bare assert is invisible at the gate (sl.c's `alGlobals` defines-data,
+    missed at the S96 primary-only scan when alSavePull/save.c was the pack primary). Returns member
+    cpaths != up_path, de-duped + order-preserving; empty for a single-fn or single-file pack (no
+    behavior change off the c-combined path)."""
+    seen, paths = set(), []
+    for fn in fns[1:]:
+        _, p = upstream_index.get(fn, (None, None))
+        if p and p != up_path and p not in seen:
+            seen.add(p)
+            paths.append(p)
+    return paths
+
+
 def defines_file_static_const_array(cpath):
     """File-scope `static const <type> <name>[...] = {...};` arrays in the upstream .c (S93). A
     `const` static is file-PRIVATE rodata (the `static` keyword bars cross-file linkage), so when one
@@ -2275,15 +2312,27 @@ def _append_coddog_trap_hazards(off, primary, cl_path, up_lib, hazards):
     return blocked
 
 
-def append_upstream_hazards(off, primary, up_lib, up_path, hazards):
+def append_upstream_hazards(off, primary, up_lib, up_path, hazards, member_paths=()):
     """Append the upstream-mirror hazards for a named candidate (in-place, in the
-    order the gate reads them) and return (band, blocked)."""
+    order the gate reads them) and return (band, blocked). `member_paths` are a c-combined pack's
+    non-primary member upstreams (S97): the defines-data + bare-assert scans union over them so a
+    SECONDARY member file's defined global / bare assert is priced at the gate, not discovered at
+    execution (sl.c's `alGlobals`, missed by the S96 primary-only scan). The recover-extern /
+    needs-header / call-divergence battery stays primary-keyed (member refs-unplaced is the separate
+    S66-deferred follow-up)."""
     blocked = False
     if has_file_scope_static(up_path):
         hazards.append(Hazard(HAZARD_FILE_STATIC))  # route to the classical loop, not the mirror
-    data_defs = defines_data_globals(up_path) + defines_local_static_data(up_path)  # S73: + fn-local statics
+    # defines-data over the primary + c-combined members (S73: + fn-local statics; S97: + members).
+    data_defs = list(dict.fromkeys(  # de-dup, order-preserving
+        d for p in (up_path, *member_paths)
+        for d in defines_data_globals(p) + defines_local_static_data(p)))
     if data_defs:
         hazards.append(Hazard(HAZARD_DEFINES_DATA, ",".join(data_defs)))  # .data analogue → classical loop
+    # Bare (non-_DEBUG-guarded) asserts a verbatim mirror would compile in (S97 assert-strip pre-flag).
+    n_assert = sum(bare_asserts(p) for p in (up_path, *member_paths))
+    if n_assert:
+        hazards.append(Hazard(HAZARD_BARE_ASSERT, str(n_assert)))
     _append_recover_hazards(off, primary, up_path, up_lib, hazards)
     mirror_dir = band_mirror_dir(up_lib, up_path)  # also reused below for band warmth
     tagged, hdr_blocked = _tagged_missing_includes(up_path, up_lib)
@@ -2492,7 +2541,9 @@ def build_rows(args, upstream_index, carried, sig_index, coddog_index=None):
         blocked = False
         mirror_path = up_path  # the .c the drop-static-mirror count reads; coddog identity overrides below
         if up_path:
-            band, blocked = append_upstream_hazards(off, primary, up_lib, up_path, hazards)
+            member_paths = _c_combined_member_paths(fns, up_path, upstream_index)
+            band, blocked = append_upstream_hazards(
+                off, primary, up_lib, up_path, hazards, member_paths)
         elif kind == "asm-flip":
             if build_asm_tu_index().get(primary):
                 # A hand-asm libultra mirror (no `.c` def, so absent from upstream_index): bcopy,

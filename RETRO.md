@@ -25,6 +25,17 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 97 — audio/save.c (alSavePull/alSaveParam) + audio/sl.c (alInit/alClose/alLink/alUnlink), libultra audio-synth mirrors; cleared the 0x82160 c-combined pack — 2026-06-16
+- Increment: src/libultra/audio/save.c + src/libultra/audio/sl.c banked / 6 fns matched (alSavePull, alSaveParam; alInit, alClose, alLink, alUnlink). md5-candidate 140→**142** (all .c stub-free). The smallest audio-synth-cluster unit, the `[0x82160]` `alSavePull` pack — `c-combined:2file[save|sl]` decomposed at the save.c/sl.c file boundary (0x82230, alInit).
+- Quality: 0 stuck-far / 0 permuter / 0 carried / 0 re-opened. Both verbatim ultralib VERSION_J cp + one known-edit each (assert-strip wrap / shared-global drop), first-build full-make ROM SHA-1 == baserom, 0 iteration.
+- Seed: committed 5pt; banked 5pt; regime mirror (seed 2 save + 3 sl; 8-gate fired on the pts-8 pack → satisfied by decomposing at the file boundary, NOT the verbatim exemption — c-combined MUST decompose).
+- What helped: (a) reading both upstream `.c` at the gate caught sl.c's `defines-data:alGlobals` that pick_target (primary-keyed) missed; (b) the asm was ground truth — alSavePull's zero `jal` confirmed the assert strips, and alClose's `jal func_80051E54` named alSynDelete; (c) the `#assert-strip` + `#defines-data` playbooks gave the exact mechanical fixes (sirawread `#ifdef _DEBUG` wrap; S42 drop-to-extern).
+- Friction: save.c SHA-missed mid-execution on the first audio-cluster `assert()` (siblings load/drvrnew/auxbus have none) — `<assert.h>` resolves to `include/assert.h` (NDEBUG-keyed, active) → live `__assert`. Resolved in one known-edit wrap. sl.c's alGlobals is a SHARED global (env/fx still-asm reference it) → forced the DROP (a carve would orphan the sibling refs / double-define); recognized before building.
+- Applied: 3 of 3: #1 `pick_target.py` `bare-assert:<n>` advisory (scans upstream for non-`_DEBUG`-guarded `assert(` post-`_strip_dead_blocks`; flags reverb/env/sched at the gate) + CLAUDE.md hazard-index row; #2 `docs/hazards.md#defines-data` shared-global DROP-mandatory rule (carve only when the file is the sole referrer); #3 `pick_target.py` unions `defines-data` over `c-combined` member upstreams (`_c_combined_member_paths`, so a secondary member's defined global prices at the gate). Golden regen (absorbs the bank + new flags), tooling suite green.
+- Carry-over: none. The audio-synth cluster's remaining asm (env @804D0, mainbus+resample @811A0, fx/reverb @815C0) is the warm next band — pick_target now pre-flags its `bare-assert` (env 3, reverb 1) + member-union `defines-data`.
+
+---
+
 ## Sprint 96 — audio/drvrnew.c (_init_lpfilter/alFxNew/6×al*New), libultra audio synth driver verbatim mirror; first non-exemption audio mirror — 2026-06-16
 - Increment: src/libultra/audio/drvrnew.c banked / 8 fns matched (_init_lpfilter, alFxNew, + 6 trivial al*New filter-constructor wrappers: alEnvmixerNew/alLoadNew/alResampleNew/alAuxBusNew/alMainBusNew/alSaveNew). md5-candidate 139→**140** (all .c stub-free). The al synthesis **driver** — 3rd audio sub-band mirror (after S94 auxbus, S95 load), and the FIRST that did not run under the verbatim-mirror exemption.
 - Quality: 0 stuck-far / 0 permuter / 0 carried / 0 re-opened. Verbatim ultralib VERSION_J, byte-identical cp, first-build full-make ROM SHA-1 == baserom, 0 iteration. drvrnew.o sections match the carve extents exactly (.text 0x830 / .data 0x190 = 100 s32 / .rodata 0x40).

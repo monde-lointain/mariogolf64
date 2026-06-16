@@ -620,6 +620,29 @@ sub-sprints).
   via `sync_decomp_names.py --import-from-decomp` (the 2 fn names were already in `ghidra_symbols.txt`).
   **The `[0x7E360]` pack now has only `pimgr` (osCreatePiManager) left → carry-over below.**
 
+- **Sprint 97: 2 .c files BANKED — `src/libultra/audio/save.c` (`alSavePull` + `alSaveParam`) +
+  `src/libultra/audio/sl.c` (`alInit` + `alClose` + `alLink` + `alUnlink`), libultra audio-synth
+  mirrors; cleared the `[0x82160]` `alSavePull` pack.** md5-candidate 140→142; 6 fns matched. The
+  smallest audio-synth-cluster unit, a `c-combined:2file[save|sl]` pack that tripped the 8-gate (NOT
+  the verbatim exemption — c-combined MUST decompose) → split `[0x82160,asm]` at the save.c/sl.c file
+  boundary (0x82230, alInit) into two single-file mirrors. **save.c** verbatim VERSION_J cp + the
+  **assert-strip wrap** — `assert(f->filter.source)` is the first audio mirror to use assert();
+  `<assert.h>`→`include/assert.h` (NDEBUG-keyed, undefined → live `__assert`) SHA-missed a verbatim cp
+  → wrapped in `#ifdef _DEBUG` (sirawread convention); names pre-curated S96, no carve. **sl.c**
+  verbatim cp + **shared-global defines-data DROP (S42 fast path, mandatory)** — `alGlobals`
+  (D_800C8180, 16B = 4B ptr + 12B `.data` pad) is SHARED (env @804D0 + fx @815C0 still-asm reference
+  it) so a carve would orphan those refs / double-define → dropped to the `libaudio.h:388` extern +
+  `alGlobals=0x800C8180 // size:0x4` (storage stays splat-side). 1 gate callee-name
+  `alSynDelete=0x80051E54` (alClose's, only asm callers → no caller-evict). Both first-build full-make
+  SHA-1 == baserom, 0 iteration. seed 5 (2 save + 3 sl), regime mirror (seed-only). 0
+  stuck-far/permuter/carried/re-opened. Applied 3 of 3: #1 `pick_target.py` `bare-assert:<n>` advisory
+  + CLAUDE.md index row; #2 `docs/hazards.md#defines-data` shared-global DROP-mandatory rule; #3
+  `pick_target.py` `defines-data` c-combined member-union (`_c_combined_member_paths`); golden regen,
+  tooling suite green. **Cross-repo follow-up:** `alSynDelete`=0x80051E54 + `alGlobals`=0x800C8180 are
+  new decomp-side symbols → propagate via `sync_decomp_names.py --import-from-decomp`. **The audio-synth
+  cluster's remaining asm (env @804D0, mainbus+resample @811A0, fx/reverb @815C0) is the warm next band
+  — pick_target now pre-flags its bare-assert (env 3, reverb 1) + member-union defines-data.**
+
 - **Sprint 96: 1 .c file BANKED — `src/libultra/audio/drvrnew.c` (`_init_lpfilter` + `alFxNew` +
   6×`al*New`), the libultra audio synthesis DRIVER; the 3rd audio sub-band mirror and the FIRST that
   did NOT run under the verbatim-mirror exemption.** md5-candidate 139→**140**. pts-13 tripped the
