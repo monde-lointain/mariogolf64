@@ -272,7 +272,7 @@ SECTIONS
         build/src/libultra/io/contpfs.o(.text);
         build/src/libultra/io/contramread.o(.text);
         build/src/libultra/io/contramwrite.o(.text);
-        build/asm/8AC20.o(.text);
+        build/src/libultra/os/parameters.o(.text);
         build/src/libultra/os/afterprenmi.o(.text);
         build/src/libultra/os/initialize.o(.text);
         build/src/libultra/os/exceptasm.o(.text);
@@ -534,7 +534,7 @@ SECTIONS
         build/src/libultra/io/contpfs.o(.data);
         build/src/libultra/io/contramread.o(.data);
         build/src/libultra/io/contramwrite.o(.data);
-        build/asm/8AC20.o(.data);
+        build/src/libultra/os/parameters.o(.data);
         build/src/libultra/os/afterprenmi.o(.data);
         build/src/libultra/os/initialize.o(.data);
         build/src/libultra/os/exceptasm.o(.data);
@@ -808,7 +808,7 @@ SECTIONS
         build/src/libultra/io/contpfs.o(.rodata);
         build/src/libultra/io/contramread.o(.rodata);
         build/src/libultra/io/contramwrite.o(.rodata);
-        build/asm/8AC20.o(.rodata);
+        build/src/libultra/os/parameters.o(.rodata);
         build/src/libultra/os/afterprenmi.o(.rodata);
         build/src/libultra/os/initialize.o(.rodata);
         build/src/libultra/os/exceptasm.o(.rodata);
@@ -1075,7 +1075,7 @@ SECTIONS
         build/src/libultra/io/contpfs.o(.bss);
         build/src/libultra/io/contramread.o(.bss);
         build/src/libultra/io/contramwrite.o(.bss);
-        build/asm/8AC20.o(.bss);
+        build/src/libultra/os/parameters.o(.bss);
         build/src/libultra/os/afterprenmi.o(.bss);
         build/src/libultra/os/initialize.o(.bss);
         build/src/libultra/os/exceptasm.o(.bss);
