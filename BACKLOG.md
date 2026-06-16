@@ -620,6 +620,37 @@ sub-sprints).
   via `sync_decomp_names.py --import-from-decomp` (the 2 fn names were already in `ghidra_symbols.txt`).
   **The `[0x7E360]` pack now has only `pimgr` (osCreatePiManager) left → carry-over below.**
 
+- **Sprint 95: 1 .c file BANKED — `src/libultra/audio/load.c` (`alAdpcmPull` + `alRaw16Pull` +
+  `alLoadParam` + `_decodeChunk`), libultra audio verbatim mirror; the 2nd audio sub-band leaf.**
+  md5-candidate 138→**139** (all 139 .c stub-free); asm subsegs 156→155 (0x7F8B0 flipped). The
+  cleanest tractable audio pack once auxbus (S94) opened the band: the `[0x7F8B0]` subseg
+  (0xB10=2832B, ending exactly at auxbus 0x803C0) coddog-maps ALL 4 fns to ultralib
+  `src/audio/load.c`@99.99 in source order (alAdpcmPull/alRaw16Pull/alLoadParam/_decodeChunk) → a
+  true single-file pack, vs mainbus (2vs4) / save (2vs6 coddog-twin) which are genuinely multi-file
+  (structural FPs needing a boundary split). **All 3 flagged hazards were FALSE:**
+  `refs-unplaced:lastCnt` (the `extern u32 ...lastCnt[]` decl + the `lastCnt[++cnt_index]=osGetCount()`
+  use + the 2 `PROFILE_AUD()` timing calls are ALL `#ifdef AUD_PROFILE`-guarded; MG64 doesn't define
+  it → compile out → zero refs); `calls-unplaced:alLoadParam@0x800A4E3C` (a self-member, the coddog
+  tail-carry artifact). Only active external callee `alCopy` placed S36; abi.h microcode macros
+  (a*/aLoad*/aSetBuffer) + libaudio.h/synthInternals.h/os.h/R4300.h all vendored/in-tree; no rodata
+  literals/jtbl (the alLoadParam `switch(paramID)` compiled to a branch chain → no carve). Single
+  text flip `[0x7F8B0,asm]`→`[0x7F8B0,c,libultra/audio/load]` (no split, no carve). Verbatim ultralib
+  VERSION_J `src/audio/load.c`, byte-identical cp, **first-build full-make ROM SHA-1 == baserom, 0
+  iteration, 0 recover-extern**. pts-13 tripped the 8-gate but ran under the **verbatim-mirror
+  exemption (S64/S69)** (regime mirror + verbatim single upstream file + decompose-blocked
+  single-file-pack + all callees placed + 4 names curated at gate). 4 symbol adds
+  (alAdpcmPull=0x800A44B0, alRaw16Pull=0x800A48F4, alLoadParam=0x800A4C90, _decodeChunk=0x800A4E3C).
+  seed 13 / banked 13pt; regime mirror (seed-only). 0 stuck-far/permuter/carried/re-opened. Retro
+  applied **3 of 3**: #1 AUD_PROFILE de-noise (`cpreprocess.py` `_strip_dead_blocks` set += AUD_PROFILE;
+  `pick_target.py` `refs_unplaced` now strips dead blocks symmetric w/ calls_unplaced + `macro_hidden_text`
+  strips dead blocks before finding invocations so a macro invoked ONLY under a dead block —
+  PROFILE_AUD — isn't phantom-expanded; drops the phantom lastCnt/save_min/rate_min/vol_min from
+  reverb/env/load rows; suite 54 pass, golden-inert); #2 the audio-sub-band ordering refresh below; #3
+  coddog-attribution log-only note (the member map cleanly separated single-file from multi-file).
+  **Cross-repo follow-up:** 4 new decomp-side symbols → `sync_decomp_names.py --import-from-decomp`.
+  **Band note: the audio sub-band now has 2 leaves banked (auxbus, load); the remaining audio packs
+  are real work — see the refreshed S94 ordering note.**
+
 - **Sprint 94: 1 .c file BANKED — `src/libultra/audio/auxbus.c` (`alAuxBusPull` + `alAuxBusParam`),
   libultra audio verbatim mirror; the audio sub-band's first mirror.** md5-candidate 137→**138**
   (all 138 .c stub-free); asm subsegs 157→156 (0x803C0 flipped). The smallest-clean remaining
@@ -976,7 +1007,8 @@ sub-sprints).
 
 ## PO ordering note (S94 retro — the audio sub-band is partially open; survey by the coddog column)
 
-S94 banked the first audio mirror (`auxbus.c`). Live ordering facts for the next gate:
+S94 banked the first audio mirror (`auxbus.c`); S95 banked the 2nd (`load.c`, 4fn). Live ordering
+facts for the next gate:
 - **The audio header `-I` enabler is already paid** (heapinit/heapalloc/copy were flipped pre-S94;
   `libaudio.h`/`synthInternals.h`/`abi.h` are vendored in-tree). So the S71-deferred audio unlock
   lever does NOT need re-paying — audio coddog mirrors are pickable now, gated only by their own
@@ -986,16 +1018,22 @@ S94 banked the first audio mirror (`auxbus.c`). Live ordering facts for the next
   Before S94 these classified `upstream none` (un-named, header-gated → not re-priced) and the
   scoped filter hid them; the S55 "survey by the upstream/coddog column" workaround is no longer
   required for audio.
-- **Next-cleanest audio leaves + their hazards** (auxbus was the ONLY zero-hazard leaf; the rest are
-  real work, NOT atomic cps): `mainbus.c` (`func_800A5DA0`, 4fn, rodata-jtbl:0x800D23E8 +
-  coddog-fncount-mismatch:2vs4 → multi-file/jtbl); `save.c` (`func_800A6D60`, 6fn, coddog-twin
-  save!=sl + fncount 2vs6 → multi-file); `load.c` (`func_800A44B0`/`func_8009F440`,
-  refs-unplaced:lastCnt + calls-unplaced:alLoadParam); `drvrnew.c` (`func_800A3C80`, 8fn,
-  needs-header:stdio.h,initfx.h(vendorable) + refs-unplaced:__FILE__,__LINE__ + calls-unplaced +
-  rodata-jtbl); `reverb.c` (`func_800A61C0`, 8fn, defines-data:val,blob + needs-header(vendorable) +
-  refs/calls-unplaced + rodata-jtbl); `envmixer.c`/`alEnvmixerPull` (8fn, refs/calls-unplaced +
-  rodata-jtbl + 13 rodata-literal + jal-mismatch). The vendorable-header ones (drvrnew/reverb/env)
-  are mirrorable with a companion-copy enabler; mainbus/save need the multi-file split first.
+- **Next-cleanest audio leaves + their hazards (S95 refresh).** auxbus (S94) + load (S95) were the
+  only two near-clean audio leaves — both banked. ~~`load.c` (`func_800A44B0`, refs-unplaced:lastCnt
+  + calls-unplaced:alLoadParam)~~ **BANKED S95** — both hazards were FALSE: lastCnt was an AUD_PROFILE-
+  guarded phantom (S95 #1 de-noise added AUD_PROFILE to the dead-#ifdef strip), alLoadParam a
+  self-member. The rest are real work, NOT atomic cps: `mainbus.c` (`func_800A5DA0`, 4fn,
+  rodata-jtbl:0x800D23E8 + coddog-fncount-mismatch:2vs4 → multi-file/jtbl); `save.c`
+  (`func_800A6D60`, 6fn, coddog-twin save!=sl + fncount 2vs6 → multi-file); `drvrnew.c`
+  (`func_800A3C80`, 8fn, needs-header:stdio.h,initfx.h(vendorable) + refs-unplaced:__FILE__,__LINE__ +
+  calls-unplaced:alFilterNew,dmaNew + rodata-jtbl); `reverb.c` (`func_800A61C0`, 8fn,
+  defines-data:val,blob + needs-header(vendorable) + refs:alGlobals,save_min + calls-unplaced +
+  rodata-jtbl); `envmixer.c`/`alEnvmixerPull` (8fn, refs/calls-unplaced + rodata-jtbl + 13
+  rodata-literal + jal-mismatch). The vendorable-header single-file packs (drvrnew/reverb/env) are
+  mirrorable with a stdio.h/initfx.h companion-copy + rodata-jtbl carve enabler; mainbus/save need
+  the multi-file coddog-boundary split first. **NOTE (S95):** the phantom `lastCnt`/`save_min`/
+  `rate_min`/`vol_min` AUD_PROFILE externs are now de-noised off these rows — their remaining
+  refs-unplaced flags (alGlobals etc.) are the real ones.
 - **Open tooling question (deferred S94 #3):** audio coddog hits are still priced as classical packs
   (seed 13) because they aren't re-priced to `libultra` (the S71 header-gate carve-out, now stale).
   Re-pricing would drop their seeds to mirror values but needs per-row vendorable-header FP analysis

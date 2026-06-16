@@ -1534,7 +1534,10 @@ def macro_hidden_text(cpath):
     except OSError:
         return "", set()
     macros = all_func_macros()
-    body = _strip_comments(text)
+    # S95: drop dead `#ifdef _DEBUG/NU_DEBUG/AUD_PROFILE` / `#ifndef _FINALROM` / `#if 0` blocks before
+    # finding invocations, so a macro invoked ONLY inside a dead block (PROFILE_AUD in the audio band,
+    # guarded by `#ifdef AUD_PROFILE`) is not expanded into a phantom refs/calls ref (load.c's lastCnt).
+    body = _strip_dead_blocks(_strip_comments(text))
     parts = []
     for name, (params, mbody) in macros.items():
         if not re.search(r"\b" + re.escape(name) + r"\s*\(", body):
@@ -1588,6 +1591,10 @@ def refs_unplaced(cpath, placed, lib=None):
     # Drop the inactive `#if BUILD_VERSION` side so a ref in the dead branch (S47: `CartRomHandle`
     # in the non-J `#else`) is not phantom-flagged.
     text = _strip_inactive_version_branches(text, _build_version_ord(lib))
+    # S95: also drop dead `#ifdef _DEBUG/NU_DEBUG/AUD_PROFILE` / `#ifndef _FINALROM` / `#if 0` blocks
+    # (symmetric with calls_unplaced) so a data extern referenced ONLY in a dead branch (load.c's
+    # AUD_PROFILE-guarded `extern u32 ...lastCnt[]` decl + its use) is not phantom-flagged.
+    text = _strip_dead_blocks(text)
     # Append one-level macro expansion so a global referenced only inside an invoked library macro
     # (EPI_SYNC → __osCurrentHandle, S41) is visible to the same `__`-prefix / declared-extern grep.
     macro_text, _ = macro_hidden_text(cpath)

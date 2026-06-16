@@ -36,13 +36,17 @@ def _strip_string_literals(text):
     return _STR_LIT_RE.sub('""', text)
 
 
-_DEAD_OPEN_RE = re.compile(r"#\s*if(?:def\s+(?:_DEBUG|NU_DEBUG)|ndef\s+_FINALROM|\s+0)\b")
+_DEAD_OPEN_RE = re.compile(r"#\s*if(?:def\s+(?:_DEBUG|NU_DEBUG|AUD_PROFILE)|ndef\s+_FINALROM|\s+0)\b")
 _PP_IF_RE = re.compile(r"#\s*if")
 _PP_ENDIF_RE = re.compile(r"#\s*endif")
 
 
 def _strip_dead_blocks(text):
-    """Drop `#ifdef _DEBUG` / `#ifdef NU_DEBUG` / `#ifndef _FINALROM` / `#if 0` regions (matched #endif, nested)."""
+    """Drop `#ifdef _DEBUG` / `#ifdef NU_DEBUG` / `#ifdef AUD_PROFILE` / `#ifndef _FINALROM` / `#if 0`
+    regions (matched #endif, nested). AUD_PROFILE (S95): the audio band's debug-counter macro
+    (`lastCnt[++cnt_index] = osGetCount();`, the PROFILE_AUD() timing calls, and the gating
+    `extern u32 ...lastCnt[]` decl) is `#ifdef AUD_PROFILE`-guarded and MG64 does not define it, so
+    those refs/calls are phantom -- without this, load.c carried a false `refs-unplaced:lastCnt`."""
     out, in_dead, nest = [], False, 0
     for line in text.splitlines():
         s = line.lstrip()
