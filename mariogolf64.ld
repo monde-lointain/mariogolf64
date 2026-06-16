@@ -231,7 +231,7 @@ SECTIONS
         build/src/libultra/io/sptask.o(.text);
         build/src/libultra/io/sptaskyield.o(.text);
         build/src/main/func_800AB600.o(.text);
-        build/asm/86A50.o(.text);
+        build/src/libultra/sched/sched.o(.text);
         build/src/libultra/io/sirawdma.o(.text);
         build/src/libultra/io/siacs.o(.text);
         build/src/libultra/os/createthread.o(.text);
@@ -493,7 +493,8 @@ SECTIONS
         build/src/libultra/io/sptask.o(.data);
         build/src/libultra/io/sptaskyield.o(.data);
         build/src/main/func_800AB600.o(.data);
-        build/asm/86A50.o(.data);
+        build/asm/data/A35E0.data.o(.data);
+        build/src/libultra/sched/sched.o(.data);
         build/src/libultra/io/sirawdma.o(.data);
         build/src/libultra/io/siacs.o(.data);
         build/src/libultra/os/createthread.o(.data);
@@ -548,7 +549,7 @@ SECTIONS
         build/src/libultra/io/ai.o(.data);
         build/asm/8BE10.o(.data);
         build/asm/8BE20.o(.data);
-        build/asm/data/A35E0.data.o(.data);
+        build/asm/data/A3610.data.o(.data);
         build/src/libultra/libc/xprintf.o(.data);
         build/src/libultra/io/dpsetnextbuf.o(.data);
         build/asm/8CA20.o(.data);
@@ -768,7 +769,7 @@ SECTIONS
         build/src/libultra/io/sptask.o(.rodata);
         build/src/libultra/io/sptaskyield.o(.rodata);
         build/src/main/func_800AB600.o(.rodata);
-        build/asm/86A50.o(.rodata);
+        build/src/libultra/sched/sched.o(.rodata);
         build/src/libultra/io/sirawdma.o(.rodata);
         build/src/libultra/io/siacs.o(.rodata);
         build/src/libultra/os/createthread.o(.rodata);
@@ -795,7 +796,6 @@ SECTIONS
         build/src/libultra/io/visetspecial.o(.rodata);
         build/src/libultra/io/visetyscale.o(.rodata);
         build/src/libultra/io/viswapbuf.o(.rodata);
-        build/asm/data/AD9C0.rodata.o(.rodata);
         build/src/libultra/io/viswapcontext.o(.rodata);
         build/src/libultra/io/viblack.o(.rodata);
         build/src/libultra/io/gbpakinit.o(.rodata);
@@ -1037,7 +1037,7 @@ SECTIONS
         build/src/libultra/io/sptask.o(.bss);
         build/src/libultra/io/sptaskyield.o(.bss);
         build/src/main/func_800AB600.o(.bss);
-        build/asm/86A50.o(.bss);
+        build/src/libultra/sched/sched.o(.bss);
         build/src/libultra/io/sirawdma.o(.bss);
         build/src/libultra/io/siacs.o(.bss);
         build/src/libultra/os/createthread.o(.bss);
