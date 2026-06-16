@@ -23,8 +23,7 @@
 
 #include <libaudio.h>
 
-/* alGlobals def dropped: placed splat-side in main_data (shared by env/fx); extern from libaudio.h */
-extern ALGlobals *alGlobals;
+ALGlobals *alGlobals = 0;
 
 void alInit(ALGlobals *g, ALSynConfig *c)
 {

@@ -458,7 +458,6 @@ SECTIONS
         build/src/libultra/io/contreaddata.o(.data);
         build/src/libultra/io/controller.o(.data);
         build/src/libultra/os/virtualtophysical.o(.data);
-        build/asm/data/A3580.data.o(.data);
         build/src/libultra/gu/align.o(.data);
         build/src/libultra/gu/cosf.o(.data);
         build/src/libultra/gu/lookat.o(.data);
@@ -470,7 +469,6 @@ SECTIONS
         build/src/libultra/gu/perspective.o(.data);
         build/src/libultra/gu/position.o(.data);
         build/src/libultra/gu/random.o(.data);
-        build/asm/data/A35C0.data.o(.data);
         build/src/libultra/gu/rotate.o(.data);
         build/src/libultra/gu/rotaterpy.o(.data);
         build/src/libultra/gu/scale.o(.data);
@@ -485,6 +483,7 @@ SECTIONS
         build/src/libultra/os/jammesg.o(.data);
         build/src/libultra/os/recvmesg.o(.data);
         build/src/libultra/os/sendmesg.o(.data);
+        build/asm/data/A35E0.data.o(.data);
         build/src/libultra/os/seteventmesg.o(.data);
         build/src/libultra/io/dpsetstat.o(.data);
         build/src/libultra/io/dpctr.o(.data);
@@ -492,7 +491,6 @@ SECTIONS
         build/src/libultra/io/sptask.o(.data);
         build/src/libultra/io/sptaskyield.o(.data);
         build/src/libultra/io/sptaskyielded.o(.data);
-        build/asm/data/A35E0.data.o(.data);
         build/src/libultra/sched/sched.o(.data);
         build/src/libultra/io/sirawdma.o(.data);
         build/src/libultra/io/siacs.o(.data);
@@ -506,6 +504,7 @@ SECTIONS
         build/src/libultra/os/yieldthread.o(.data);
         build/src/libultra/os/gettime.o(.data);
         build/src/libultra/os/settimer.o(.data);
+        build/asm/data/A3620.data.o(.data);
         build/src/libultra/os/timerintr.o(.data);
         build/src/libultra/os/maptlb.o(.data);
         build/src/libultra/os/probetlb.o(.data);
@@ -531,12 +530,12 @@ SECTIONS
         build/src/libultra/io/motor.o(.data);
         build/src/libultra/io/pfsgetstatus.o(.data);
         build/src/libultra/io/pfsselectbank.o(.data);
+        build/asm/data/A3650.data.o(.data);
         build/src/libultra/io/contpfs.o(.data);
         build/src/libultra/io/contramread.o(.data);
         build/src/libultra/io/contramwrite.o(.data);
         build/src/libultra/os/parameters.o(.data);
         build/src/libultra/os/afterprenmi.o(.data);
-        build/asm/data/A3610.data.o(.data);
         build/src/libultra/os/initialize.o(.data);
         build/src/libultra/os/exceptasm.o(.data);
         build/src/libultra/os/interrupt.o(.data);

@@ -7,7 +7,7 @@
 #define READFORMAT(ptr) ((__OSContRamReadFormat*)(ptr))
 
 #if BUILD_VERSION >= VERSION_J
-extern s32 __osPfsLastChannel;
+s32 __osPfsLastChannel = -1;
 
 s32 __osContRamRead(OSMesgQueue* mq, int channel, u16 address, u8* buffer) {
     s32 ret = 0;

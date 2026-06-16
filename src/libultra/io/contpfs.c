@@ -6,8 +6,8 @@
 
 #if BUILD_VERSION >= VERSION_J
 extern __OSInode __osPfsInodeCache;
-extern s32 __osPfsInodeCacheChannel;
-extern u8 __osPfsInodeCacheBank;
+s32 __osPfsInodeCacheChannel = -1;
+u8 __osPfsInodeCacheBank = 250;
 #endif
 
 u16 __osSumcalc(u8* ptr, int length) {

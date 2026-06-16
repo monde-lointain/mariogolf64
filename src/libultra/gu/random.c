@@ -18,7 +18,7 @@
  *
  */
 
-extern unsigned int xseed;
+static unsigned int xseed = 174823885;
 
 int guRandom(void)
 {

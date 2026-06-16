@@ -2,7 +2,7 @@
 #include "PR/ultraerror.h"
 #include "osint.h"
 
-extern u32 __osPreNMI;
+u32 __osPreNMI = FALSE;
 
 void osSetEventMesg(OSEvent event, OSMesgQueue* mq, OSMesg msg) {
     register u32 saveMask;

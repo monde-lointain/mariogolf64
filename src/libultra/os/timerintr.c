@@ -7,7 +7,7 @@ extern u32 __osBaseCounter;
 extern u32 __osViIntrCount;
 extern u32 __osTimerCounter;
 extern OSTimer __osBaseTimer;
-extern OSTimer* __osTimerList;
+OSTimer* __osTimerList = &__osBaseTimer;
 
 #ifndef _FINALROM
 OSMesgQueue __osProfTimerQ ALIGNED(0x8);
