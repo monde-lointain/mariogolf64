@@ -144,3 +144,7 @@ viRetraceMsg = 0x800FBC00; // size:0x18
 viCounterMsg = 0x800FBC18; // size:0x18
 alAuxBusPull = 0x800A4FC0; // type:func
 alAuxBusParam = 0x800A509C; // type:func
+alAdpcmPull = 0x800A44B0; // type:func
+alRaw16Pull = 0x800A48F4; // type:func
+alLoadParam = 0x800A4C90; // type:func
+_decodeChunk = 0x800A4E3C; // type:func

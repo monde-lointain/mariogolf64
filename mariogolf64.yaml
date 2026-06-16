@@ -187,7 +187,7 @@ segments:
       - [0x7EEC0, c, libultra/io/aisetfreq]
       - [0x7EFE0, c, libultra/io/aisetnextbuf]
       - [0x7F080, asm]
-      - [0x7F8B0, asm]
+      - [0x7F8B0, c, libultra/audio/load]
       - [0x803C0, c, libultra/audio/auxbus]
       - [0x804D0, asm]
       - [0x811A0, asm]
