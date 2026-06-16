@@ -620,6 +620,35 @@ sub-sprints).
   via `sync_decomp_names.py --import-from-decomp` (the 2 fn names were already in `ghidra_symbols.txt`).
   **The `[0x7E360]` pack now has only `pimgr` (osCreatePiManager) left → carry-over below.**
 
+- **Sprint 100: 1 .c file BANKED — `src/libultra/audio/reverb.c` (`alFxPull` + `alFxParam` +
+  `alFxParamHdl` + `_loadOutputBuffer` + `_loadBuffer` + `_saveBuffer` + `_filterBuffer` +
+  `_doModFunc`), the libultra audio REVERB effect; cleared the `[0x815C0]` pack.** md5-candidate
+  147→**148**; asm subsegs 128→127; 8 fns matched. The 4th audio-synth-cluster mirror and a
+  **drvrnew-class replay (S96)**: a pts-13 single-file pack that tripped the 8-gate and FAILED the
+  S64/S69 verbatim exemption (residual variance: dual carve + assert-strip) → ran enabler-forward
+  (PO chose the full mirror; banked atomically first-try). Verbatim ultralib VERSION_J
+  `src/audio/reverb.c`, **all 8 includes kept verbatim** (`ultraerror.h`+`os_internal.h` ARE vendored
+  at `include/libultra/PR/` — drvrnew's drop was unnecessary) + **1 assert-strip** (`assert(source)`
+  → `#ifdef _DEBUG`, S97 convention; reconciles `jal-count-mismatch:8vs7`). **Dual carve:** `.rodata`
+  ATTRIBUTE-CHANGE `[0xAD810,.rodata,libultra/audio/reverb]` (jtbl_800D2410 8-entry + 6 FP doubles =
+  0x50; the generic `[0xAD810,rodata]` already bounded the exact extent → NO split, S93-class; pick's
+  `carve-end=0x800D25C0` was a 0x160 over-estimate) + `.data` 3-WAY SPLIT `[0xA3560,.data,
+  libultra/audio/reverb]` (0x20: `L_INC[]`={0x10,0x10,0x20}, `val`=0.0, `lastval`=-10.0=`0xC1200000`,
+  `blob`=0, pad). **Novel: the `.data` was UNREFERENCED dead statics** (no `.text` reloc → not
+  asm-recoverable) so the carve offset was found by ROM byte-search (objdump `.data` → `xxd baserom |
+  grep`), at 0xA3560 (0x100 B past drvrnew's 0xA3460 tail — link order interleaves other files'
+  `.data`). `calls-unplaced:SWAP` FALSE (inline macro). 5 helper symbol adds at gate
+  (`_loadOutputBuffer`=0x800A6738/`_loadBuffer`=0x800A6950/`_saveBuffer`=0x800A6AC0/`_filterBuffer`=
+  0x800A6C30/`_doModFunc`=0x800A6CCC; alFxPull/Param/ParamHdl placed S96). First-build full-make ROM
+  SHA-1 == baserom, 0 iteration. seed 13 / banked 13pt; regime mirror (seed-only). 0
+  stuck-far/permuter/carried/re-opened. Applied 1 of 3: #1 `docs/hazards.md#defines-data`
+  unreferenced-static-carve byte-search sub-case (+ deferred `pick_target` `;unref` tag, off-cadence
+  ranker follow-up). **Cross-repo follow-up:** 5 new decomp-side fn symbols (`_loadOutputBuffer`/
+  `_loadBuffer`/`_saveBuffer`/`_filterBuffer`/`_doModFunc`) → propagate via
+  `sync_decomp_names.py --import-from-decomp`. **The audio-synth cluster's last asm leaf is env @0x804D0
+  (`c-combined:2file[env|filter]`, MUST decompose; verify `_frexpf`/`_ldexpf` placed first); then the
+  heavy carry-over spikes (sched head @0x86A50, exceptasm @0x8AF90) remain.**
+
 - **Sprint 99: 3 .c files BANKED — `src/libnusys/mainlib/nugfxdisplayon.c` (`nuGfxDisplayOn`) +
   `nupiinit.c` (`nuPiInit`) + `nupiinitsram.c` (`nuPiInitSram`), libnusys mirrors; cleared the
   `[0x7CAD0]` c-combined:3file pack.** md5-candidate 144→**147**; 3 fns matched. A

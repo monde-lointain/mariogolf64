@@ -560,6 +560,22 @@ reflows (S61: a 4B carve grew the ROM +16B; the misleading `cmp` first-diff was 
 artifact of the size-grown file, not the real divergence). Clean-rebuild to verify. (S61 `guRotateF`:
 16B carve `0xA35D0`→`0xA35E0`.)
 
+**Unreferenced carve — locate the offset by ROM byte-search (S100).** The carved `.data` bytes may be
+entirely UNREFERENCED: file-scope / function-local `static`s that no function reads, but which KMC GCC
+2.7.2 still emits (an explicitly-`=0`-initialized static lands in `.data` not `.bss`, and an unused
+initialized static is NOT elided at `-O3`). Then there is no `%hi/%lo(D_<vram>)` in any body — the
+S61/S96 "size from the address band" step has nothing to read, and `pick_target`'s `defines-data`
+flag names the symbols but can't bind a vram. **Locate it by byte-search:**
+`mips-linux-gnu-objdump -s -j .data build/.../<file>.o` for the compiled bytes, then search the
+baserom for that exact pattern (`xxd baserom.z64 | grep '<hex words>'`) → the ROM offset is the carve
+start. The link order does NOT place it immediately after the previous mirror's carve — other files'
+`.data` interleave (S100 `reverb.c`'s 0x20 sat at `0xA3560`, 0x100 B past drvrnew's `0xA3460` tail).
+Confirm the extent against the next baserom data symbol, then 3-way split as usual. (S100 `reverb.c`:
+`L_INC[]`={0x10,0x10,0x20} + `val`=0.0 + `lastval`=-10.0 (`0xC1200000`) + `blob`=0, 0x20 at `0xA3560`.)
+Tooling follow-up (S100 #1, deferred — off-cadence ranker change): `pick_target.py` could tag
+`defines-data:<g>;unref` when the flagged global has no `%lo` ref in the owning fn bodies, signalling
+the gate to byte-search rather than asm-recover.
+
 **Carve timing — execution, never the plan gate (S68).** A `.data` (or any ld-section) sibling
 carved from the C compile cannot land at the `/sprint-plan` gate: the gate validates the *stub*
 state, where an `INCLUDE_ASM` `.text`-only object emits no `.data`, so the sibling carves an empty
