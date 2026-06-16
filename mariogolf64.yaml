@@ -237,6 +237,7 @@ segments:
       - [0x869E0, c, libultra/io/sptaskyield]
       - [0x86A00, c, main/func_800AB600]
       - [0x86A50, asm]
+      - [0x87460, c, libultra/io/sirawdma]
       - [0x87510, c, libultra/io/siacs]
       - [0x87600, c, libultra/os/createthread]
       - [0x876D0, c, libultra/os/destroythread]
