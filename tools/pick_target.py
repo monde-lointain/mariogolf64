@@ -120,6 +120,12 @@ PRAGMA_WEAK_RE = re.compile(r"^\s*#pragma\s+weak\s+([A-Za-z_]\w+)\s*=\s*[A-Za-z_
 # (sys/asm.h macros). The WEAK arm catches the public name of an aliased TU (bcopy → _bcopy).
 # Keys build_asm_tu_index so an intrinsic-likely shim can name its vendorable ultralib .s TU.
 ASM_TU_DEF_RE = re.compile(r"^\s*(?:X?LEAF|WEAK)\(\s*([A-Za-z_]\w+)", re.M)
+# libkmc hand-asm TUs (soft-float / 64-bit math: mmuldi3.s, mcvtld.s) export entries with a bare
+# `.globl name` — KMC register conventions, assembled via the KMC `as` path (NOT ultralib's
+# LEAF/XLEAF macros + LIBULTRA_ASFLAGS). Keys build_kmc_asm_tu_index so a libkmc asm-only TU the
+# pure-shim/privileged tests miss (a branchy cvt routine) still names its vendorable .s + the
+# kmc-as mechanism. See docs/hazards.md#asm-mirror-vendoring (the kmc-as sub-lane, S109).
+KMC_ASM_TU_DEF_RE = re.compile(r"^\s*\.globl\s+([A-Za-z_]\w+)", re.M)
 # A vendorable asm TU references CPU/cache/TLB constants by macro (K0BASE, DCACHE_SIZE, C0_ENTRYHI,
 # RDB_BASE_VIRTUAL_ADDR, …). The gate must vendor-compile it under LIBULTRA_ASFLAGS, so a macro the
 # in-tree headers don't define is a needs-define enabler (e.g. osMapTLBRdb's RDB_* would block if
@@ -528,6 +534,31 @@ def build_asm_tu_index():
                 continue
             for m in ASM_TU_DEF_RE.finditer(text):
                 index.setdefault(m.group(1), os.path.relpath(spath, LIBULTRA))
+    return index
+
+
+@functools.lru_cache(maxsize=1)
+def build_kmc_asm_tu_index():
+    """Map libkmc hand-asm function name -> its .s basename (the KMC-as asm-mirror lane).
+
+    The libkmc analog of build_asm_tu_index. libkmc soft-float / 64-bit math TUs (mmuldi3.s,
+    mcvtld.s) vendor verbatim via the KMC `as` path (KMC register conventions + `.include
+    "mips_as.h"`), a distinct mechanism from ultralib's LIBULTRA_ASFLAGS VENDOR_ASM. A primary
+    whose name matches here gets `intrinsic-likely:<tu>.s(kmc-as)` so the gate vendors it with the
+    KMC-as recipe (docs/hazards.md#asm-mirror-vendoring). Basename only: a libkmc TU's enabler
+    surface differs from ultralib's, so it must NOT feed the LIBULTRA-relative vendorable_tu_*
+    helpers. Only the asm-ONLY libkmc TUs are the target set — a libkmc fn with a C source
+    (memset/strcmp/rand) resolves via the C upstream index and is excluded at the emission site."""
+    index = {}
+    if os.path.isdir(LIBKMC):
+        for spath in glob.glob(os.path.join(LIBKMC, "*.s")):
+            try:
+                with open(spath, errors="ignore") as f:
+                    text = f.read()
+            except OSError:
+                continue
+            for m in KMC_ASM_TU_DEF_RE.finditer(text):
+                index.setdefault(m.group(1), os.path.basename(spath))
     return index
 
 
@@ -2407,6 +2438,19 @@ def classify_subseg(off, typ, path, size, upstream_index):
             else:
                 detail = None  # genuine no-source shim (handwritten leaf, no privileged op, no TU)
             hazards.append(Hazard(HAZARD_INTRINSIC_LIKELY, detail))
+        else:
+            # S109: a libkmc soft-float / 64-bit math TU the pure-shim + privileged tests both miss
+            # (a branchy cvt routine like mcvtld.s __fixunsdfdi/__floatdidf — no CP0/FPU-ctrl op, no
+            # `handwritten` tag) is STILL a verbatim KMC-as asm-mirror, not a classical decomp target.
+            # If the primary matches a libkmc .s `.globl` AND the subseg has no C upstream, name the
+            # .s + the kmc-as mechanism so the gate vendors it via the KMC `as` path (KMC register
+            # conventions, `.include "mips_as.h"` via -I src/libkmc, `li 0xffffffff`->`addiu` edit),
+            # not LIBULTRA_ASFLAGS. The `not in upstream_index` guard excludes the C-mirrorable libkmc
+            # files (memset/strcmp/rand resolve via the C upstream index), leaving only the asm-ONLY
+            # TUs (mmuldi3/mcvtld/mcvt*). See docs/hazards.md#asm-mirror-vendoring (kmc-as sub-lane).
+            kmc_tu = build_kmc_asm_tu_index().get(fns[0])
+            if kmc_tu and fns[0] not in upstream_index:
+                hazards.append(Hazard(HAZARD_INTRINSIC_LIKELY, f"{kmc_tu}(kmc-as)"))
         return "asm-flip", fns, hazards
     if typ == "c" and path:
         cpath = os.path.join(ROOT, "src", path + ".c")

@@ -195,19 +195,6 @@
     "vram": "0x800A1320"
   },
   {
-    "band": "-",
-    "func": "__floatdidf",
-    "hazards": "-",
-    "kind": "asm-flip",
-    "nfns": 1,
-    "pts": 5,
-    "rom": "0x8F140",
-    "score": -256,
-    "size": 256,
-    "upstream": "none",
-    "vram": "0x800B3D40"
-  },
-  {
     "band": "cold",
     "func": "nuContGBPakFread",
     "hazards": "jal-count-mismatch:5vs9",
@@ -219,19 +206,6 @@
     "size": 464,
     "upstream": "libnusys",
     "vram": "0x800A23A0"
-  },
-  {
-    "band": "-",
-    "func": "__fixunsdfdi",
-    "hazards": "-",
-    "kind": "asm-flip",
-    "nfns": 1,
-    "pts": 5,
-    "rom": "0x8F020",
-    "score": -288,
-    "size": 288,
-    "upstream": "none",
-    "vram": "0x800B3C20"
   },
   {
     "band": "-",
@@ -414,32 +388,6 @@
     "size": 1280,
     "upstream": "libnusys",
     "vram": "0x800A2570"
-  },
-  {
-    "band": "-",
-    "func": "_xatan",
-    "hazards": "single-file-pack:3fn[_xatan=?,atan=atan,atan2=atan]",
-    "kind": "asm-flip",
-    "nfns": 3,
-    "pts": 13,
-    "rom": "0x8E110",
-    "score": -1088,
-    "size": 1088,
-    "upstream": "none",
-    "vram": "0x800B2D10"
-  },
-  {
-    "band": "-",
-    "func": "_xsincos",
-    "hazards": "single-file-pack:4fn[_xsincos=?,sin=sin,cos=sin,tan=sin]",
-    "kind": "asm-flip",
-    "nfns": 4,
-    "pts": 13,
-    "rom": "0x8E660",
-    "score": -1136,
-    "size": 1136,
-    "upstream": "none",
-    "vram": "0x800B3260"
   },
   {
     "band": "cold",
@@ -648,5 +596,57 @@
     "size": 2912,
     "upstream": "none",
     "vram": "0x801F4A40"
+  },
+  {
+    "band": "cold",
+    "func": "__assert",
+    "hazards": "pack:19fn[__assert=assert,vec3f_normalize=?,func_800299D0=?,flag_is_set=?,func_80029A30=?,func_80029A6C=?,func_80029AA8=?,func_80029AE4=?,func_80029B08=?,func_80029B58=?,func_80029BD8=?,func_80029C00=?,mainproc=nuboot,func_80029EEC=?,func_80029F28=?,func_80029F6C=?,func_8002A144=?,func_8002A310=?,game_draw_callback=?],c-combined:2file[assert|nuboot],file-static,calls-unplaced:__assertBreak,needs-header:PRinternal/osint.h(already-vendored,adapt->libultra/internal/osint.h),jal-count-mismatch:0vs1,game-region-mirror:0x800298E0",
+    "kind": "asm-flip",
+    "nfns": 19,
+    "pts": 13,
+    "rom": "0x4CE0",
+    "score": -3224,
+    "size": 3424,
+    "upstream": "libultra",
+    "vram": "0x800298E0"
+  },
+  {
+    "band": "-",
+    "func": "func_80077BF0",
+    "hazards": "pack:7fn[func_80077BF0=?,func_80077C0C=?,func_80077C18=?,func_80077DEC=?,func_80077E6C=?,func_80077E94=?,render_spark_effects=?],one-tu",
+    "kind": "asm-flip",
+    "nfns": 7,
+    "pts": 13,
+    "rom": "0x52FF0",
+    "score": -3360,
+    "size": 3360,
+    "upstream": "none",
+    "vram": "0x80077BF0"
+  },
+  {
+    "band": "-",
+    "func": "func_ovl9_801F4A40",
+    "hazards": "pack:4fn[func_ovl9_801F4A40=?,func_ovl9_801F4B68=?,func_ovl9_801F4DA0=?,func_ovl9_801F4FF4=?]",
+    "kind": "asm-flip",
+    "nfns": 4,
+    "pts": 13,
+    "rom": "0x14FB60",
+    "score": -3376,
+    "size": 3376,
+    "upstream": "none",
+    "vram": "0x801F4A40"
+  },
+  {
+    "band": "-",
+    "func": "func_80076500",
+    "hazards": "pack:6fn[func_80076500=?,func_8007654C=?,func_80076558=?,func_80076640=?,func_80076778=?,func_8007680C=?]",
+    "kind": "asm-flip",
+    "nfns": 6,
+    "pts": 13,
+    "rom": "0x51900",
+    "score": -3504,
+    "size": 3504,
+    "upstream": "none",
+    "vram": "0x80076500"
   }
 ]

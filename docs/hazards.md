@@ -235,6 +235,40 @@ for the identified TU, it falls back to plain `hasm`.
   `__osDisableInt`/`__osRestoreInt` both in `setintmask.s`) is a single distinct TU → also does NOT
   fire, and needs a harder partial-TU carve (still a spike).
 
+**KMC-as sub-lane (libkmc soft-float / 64-bit math TUs).** libkmc's hand-asm TUs (`mmuldi3.s`
+`__muldi3`; `mcvtld.s` `__fixdfdi`/`__fixunsdfdi`+`__floatdidf`) are NOT ultralib `LEAF`/`XLEAF` TUs
+and do NOT assemble under `LIBULTRA_ASFLAGS`. They use **KMC register conventions** (`move dst,zero`
+→ `addu` encoding) and must be assembled with the **KMC assembler** `$(KMC_AS)`, the same toolchain
+the in-tree disassembly-reassembly path uses. The Makefile carries each as an **explicit
+`build/asm/<rom>.o:` rule** (NOT the `VENDOR_ASM` `<rom>:<src>` map, which hard-codes the ultralib
+profile): `$(KMC_AS) -EB -mips2 [-I src/libkmc] -o $@.tmp $<; cp $@.tmp $@; rm $@.tmp` (the `8EC50.o`
+`mmuldi3.s` rule is the prior art). `pick_target.py` flags it `intrinsic-likely:<tu>.s(kmc-as)` so the
+gate reaches for the KMC-as recipe, not the ultralib one — the libkmc analog of the ultralib
+`intrinsic-likely:<tu>.s` (S109). It fires when an asm-only primary the pure-shim + privileged tests
+both MISS (a branchy cvt routine — no CP0/FPU-ctrl op, no `handwritten` tag) matches a libkmc `.s`
+`.globl` AND has no C upstream; the `not in upstream_index` guard excludes the C-mirrorable libkmc
+files (`memset`/`strcmp`/`rand` resolve via the C index), leaving only the asm-ONLY math TUs. Three
+KMC-as specifics:
+- **`.include "mips_as.h"`.** A libkmc `.s` may `.include` its tiny KMC header (`mcvtld.s` →
+  `mips_as.h`, one line `.equ FPU,1`). Vendor that header alongside the `.s` (`src/libkmc/mips_as.h`)
+  and add `-I src/libkmc` to the KMC-as rule. (`mmuldi3.s` is self-contained and needs neither.)
+- **`li $X,0xffffffff` → `addiu $X,$0,-1` (the documented encoding edit).** KMC `as` expands
+  `li reg,0xffffffff` to a 2-insn `lui+ori`; the ROM uses the 1-insn `addiu reg,$0,-1`
+  (`2403ffff`/`2407ffff`). Each extra word shifts the rest of the TU down → SHA-1 break (the
+  `.align`/trailing-nop pad absorbs the size so the FUNCTION boundaries hold, but the bytes diverge).
+  Rewrite each such `li` to the explicit `addiu` — the **only** allowed edit to the vendored libkmc
+  `.s`, touching no real `.text` semantics. Same divergence already applied to the vendored
+  `mmuldi3.s` (six `li $9,0xffffffff`); S109 applied two in `mcvtld.s`. Diagnose by `cmp`-ing the
+  assembled `.o`'s `.text` against the baserom bytes (Python byte-slice — `dd` is hook-blocked): a
+  one-word downstream shift starting at a `lui …ffff` / `ori …ffff` pair is this exact case.
+- **Multi-fn TU spanning >1 splat subseg → merge to ONE `hasm`.** A KMC-as TU defining several
+  functions (`mcvtld.s` = `__fixunsdfdi`@0x8F020 + `__floatdidf`@0x8F140) extracts as several
+  ADJACENT `asm` subsegs (one per fn). One source `.s` → one `.o`, so merge them into a single
+  `[<first-rom>, hasm]` (delete the later subseg line(s)) before adding the explicit rule; the merged
+  subseg's extent (to the next subseg) must equal the TU's assembled size. The asm analog of the C
+  `single-file-pack` (one upstream file → one atomic mirror, no inter-fn split). 0 `symbol_addrs`
+  adds when both fns are already named (S109).
+
 **Provenance:** S56 (4 reg shims; KMC-as padding the load-bearing discovery, per PO directive to use
 ultralib's exact flags). S57 (4 cache/TLB primitives — `osWritebackDCacheAll`/`osWritebackDCache`/
 `osUnmapTLBAll`/`__osProbeTLB`, all first-try clean; added the `needs-define` pre-check + this bisect
@@ -245,7 +279,10 @@ cases). S62 (`osInvalDCache`+`osInvalICache` — the combined-subseg split sub-p
 extended the `needs-define` pre-check to the `combined-subseg` path after `CFC1`/`CTC1` surfaced at a
 failing vendor-compile). S84 (`osSetIntMask` from `[0x7E360]` mixed pack — first vendored `.s` with a
 `.rodata` LUT; added the `has-rodata` pre-flag + the vendor-`.text`-only / strip+rename-the-blob
-sub-case above; `pimgr` C member carried, `epirawdma` C member banked same sprint).
+sub-case above; `pimgr` C member carried, `epirawdma` C member banked same sprint). S109 (`mcvtld.s` `__fixunsdfdi`+`__floatdidf` — first
+documented **KMC-as sub-lane** TU: the libkmc `$(KMC_AS)` explicit-rule path + `.include
+"mips_as.h"` via `-I src/libkmc` + the `li 0xffffffff`→`addiu` encoding edit + the multi-subseg
+merge-to-one-`hasm`; the `intrinsic-likely:<tu>.s(kmc-as)` flag).
 
 ---
 

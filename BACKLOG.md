@@ -16,6 +16,22 @@ subordinate to the libultra goal. Target selection is `tools/pick_target.py` (sm
 the 8-point decompose gate fires on any seed ≥8. v2 classical track is active (since S11);
 mirror is the default, classical is first-class when the asm warrants it.
 
+**S109 — `mcvtld.s` BANKED (asm-mirror hasm, first KMC-as sub-lane).** libkmc soft-float
+double↔long-long cvt TU (`__fixdfdi`/`__fixunsdfdi` @0x8F020 + `__floatdidf` @0x8F140) vendored
+verbatim via the KMC-assembler explicit-rule path (the `mmuldi3.s` precedent), the two adjacent asm
+subsegs merged to one `[0x8F020,hasm]`. Two `li 0xffffffff`→`addiu $X,$0,-1` encoding edits (the
+mmuldi3 divergence); `.include "mips_as.h"` vendored to `src/libkmc/mips_as.h` + `-I src/libkmc`;
+0 symbol adds. Full-make ROM SHA-1 == baserom; asm subsegs 121→119, hasm 25→26. The S108 #2
+deferred "multi-root libkmc asm-TU index" follow-up is now DONE (S109 #1: `intrinsic-likely:<tu>.s
+(kmc-as)` tag + `build_kmc_asm_tu_index`). **Remaining un-mirrored libultra-region asm subsegs (PO
+context for the next gate):** `0x8E110` `_xatan`+`atan`+`atan2` (libkmc `atan.c`, **C-mirror**,
+3-fn single-file-pack, refs external rodata `_atbl[]`/`D_800C9690`); `0x8E660` `_xsincos`+`sin`+
+`cos`+`tan` (libkmc `sin.c`, **C-mirror**, 4-fn single-file-pack); `0x8F250`
+`audio_sched_thread_entry` (cp0-asm intrinsic, identify-TU). The libkmc soft-float asm band is now
+exhausted (mmuldi3 + mcvtld done); the next libkmc work is the atan/sin **C-mirrors** (doubles +
+external rodata carves + KMC `-O` profile, real classical/mirror risk), or the non-libultra-region
+coddog targets (`os/settime.c`, `sp/spriteex2.c`, `audio/synthesizer.c`).
+
 **S108 — `os/interrupt.s` BANKED (asm-mirror hasm) + remaining libultra-region asm inventory.**
 `__osDisableInt`+`__osRestoreInt` (0x8B900) vendored verbatim from ultralib (VERSION_J branch), the
 clean no-jtbl/no-rodata sibling of S107 exceptasm; asm subsegs 122→121. The scope's other half —
