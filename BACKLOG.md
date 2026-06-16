@@ -620,6 +620,38 @@ sub-sprints).
   via `sync_decomp_names.py --import-from-decomp` (the 2 fn names were already in `ghidra_symbols.txt`).
   **The `[0x7E360]` pack now has only `pimgr` (osCreatePiManager) left → carry-over below.**
 
+- **Sprint 102: 1 .c file BANKED — `src/libultra/io/motor.c` (`__osMotorAccess` + `osMotorInit`),
+  libultra io VERSION_J verbatim mirror; corrected a wrong ghidra name WITHOUT `make sync-names`.**
+  md5-candidate 150→**151** (all .c stub-free); asm subsegs 126→125; 2 fns matched. The io/motor.c
+  trap S75 flagged — the smallest remaining libultra target (pts-8; everything else under
+  `--lib libultra` is pts-13 and structurally trapped: llcvt/settime `coddog-structural`, `_Printf`
+  rodata-jtbl). The active `#if BUILD_VERSION >= VERSION_J` branch compiles `__osMotorAccess`@0x800AE380
+  + `osMotorInit`@0x800AE4C4 (`__osMakeMotorData` inlined → `pack:2fn`/`one-tu`) + the file-static
+  `__MotorDataBuf[4]` — all verified against `build/J/libgultra_rom/motor.o` (`T __osMotorAccess`, no
+  `osMotorStop`; `b __MotorDataBuf`). pts-8 tripped the 8-gate but decompose was MECHANICALLY BLOCKED
+  (one-tu single-file-pack, no inter-file boundary) → ran 1-increment enabler-forward (S100/S101
+  precedent). **Headline — `wrong-ghidra-name` override (NO sync-names):** ghidra_symbols mislabels
+  0x800AE380 `osMotorStop`, but os_motor.h `#define osMotorStop(x) __osMotorAccess(...)` makes that a
+  macro; the VERSION_J fn IS `__osMotorAccess`. Corrected via a `symbol_addrs.txt` override
+  `__osMotorAccess = 0x800AE380; // rom:0x89780 type:func` — the `rom:` qualifier dodges splat's
+  same-rom+segment dup error (`util/symbols.py:298-309`), symbol_addrs is read first so it wins the
+  reference (still-asm contRmbControl's 4 relocs → `jal __osMotorAccess`, gate-verified). NO `#undef`
+  needed (body names the macro RHS). **drop-static:** `__MotorDataBuf`=0x800FBC30 size:0x100 (lui
+  0x8010/addiu -0x43d0; vi/io bss after viCounterMsg) `static`→`extern`. Include adapt
+  `PRinternal/{controller,siint}.h`→bare. pick false-flags resolved by VERSION_J analysis
+  (`defines-data:__osMotorinitialized` + half `drop-static:2bss` = inactive `#else`;
+  `calls-unplaced:READFORMAT` = function-like macro) — all fixed in the tool this retro. **First-build
+  full-make ROM SHA-1 == baserom, 0 iteration.** 0 stuck-far/permuter/carried/re-opened. Applied 4 of 4:
+  #1 new `docs/hazards.md#wrong-ghidra-name-override` + CLAUDE.md index + `pick_target.py`
+  `wrong-ghidra-name` tag + unit test; #2 version-strip wired into the file-static/defines-data
+  detectors + same-file function-like macro exclusion in `calls_unplaced`; #3 `header_renames_symbol`
+  macro-alias false-fire suppression; #4 `nm build/J/libgultra_rom/*.o` authoritative-symbol-set note.
+  suite 55 pass, golden regen. **Cross-repo follow-up:** rename 0x800AE380 `osMotorStop`→`__osMotorAccess`
+  in the Ghidra workspace (deferred reconciliation; the override coexists meanwhile). **Band note: io is
+  now down to the `piacs` defines-data+file-static trap as the last io leaf; remaining libultra is the
+  heavy non-audio structural packs (llcvt/settime/contquery-region phantoms), the xprintf classical
+  band, and the sched.c-head + exceptasm.s spikes (carry-overs).**
+
 - **Sprint 101: 2 .c files BANKED — `src/libultra/audio/env.c` (`alEnvmixerPull` + `alEnvmixerParam`
   + `_pullSubFrame` + `_frexpf` + `_ldexpf` + `_getRate` + `_getVol`) + `src/libultra/audio/filter.c`
   (`alFilterNew`); cleared the `[0x804D0]` `c-combined:2file[env|filter]` pack — the LAST un-flipped

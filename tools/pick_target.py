@@ -328,6 +328,12 @@ HAZARD_HEADER_RENAMES_SYMBOL = "header-renames-symbol"  # S85: a (transitively-)
 # rewrites the candidate's curated symbol via a macro `#define <curated_fn>(...) <other>` (os_host.h
 # K->J shim `#define __osInitialize_common() osInitialize()`; S31 nuGfxInit was the 1st instance) →
 # needs a `#undef <curated_fn>` enabler in the mirror; see docs/hazards.md#header-renames-symbol
+HAZARD_WRONG_GHIDRA_NAME = "wrong-ghidra-name"  # S102: ghidra_symbols mislabels the primary vram with
+# a macro NAME (os_motor.h `#define osMotorStop(x) __osMotorAccess(...)`) while the upstream defines the
+# macro's RHS (`__osMotorAccess`) at that vram. Bank under the correct (RHS) name via a symbol_addrs
+# maintainer-override (a `rom:<off>` qualifier dodges splat's same-rom+segment dup error; symbol_addrs
+# is read first so it wins the reference) — NOT the destructive `make sync-names`. Detail
+# `<ghidra_name>-><correct_name>@<header>`. See docs/hazards.md#wrong-ghidra-name-override
 
 
 @dataclasses.dataclass
@@ -1260,8 +1266,12 @@ def has_file_scope_static(cpath):
     classical loop). A file-scope static *function* (prototype) is excluded — it is not a data
     hazard (S54). S99: scan comment-STRIPPED text — FILE_STATIC_RE anchors on `;\\s*$`, so a
     trailing `/* ... */` after the `;` (nupiinit.c's `static OSMesgQueue PiMesgQ
-    __attribute__((aligned(8)));  /* PI message queue */`) silently defeated the match."""
-    for line in _strip_comments(UpstreamSource.get(cpath).text).splitlines():
+    __attribute__((aligned(8)));  /* PI message queue */`) silently defeated the match.
+    S102: strip the dead `#if BUILD_VERSION` side first so an inactive-`#else`-branch file-static
+    (motor.c's <VERSION_J `_MotorStopData[]`/`__osMotorinitialized`) is not phantom-flagged — the
+    active VERSION_J branch's `__MotorDataBuf` is the only real file-static."""
+    text = _strip_inactive_version_branches(UpstreamSource.get(cpath).text, _build_version_ord("libultra"))
+    for line in _strip_comments(text).splitlines():
         stripped = line.lstrip()
         if stripped.startswith(("//", "*")):
             continue
@@ -1280,11 +1290,14 @@ def defines_data_globals(cpath):
     like needs-header: `__osThreadTail` et al. in thread.c (osDequeueThread) is the motivating case.
     S99: scan comment-STRIPPED text — a `/* ... ( ... */` banner (nupiinit/nupiinitsram.c's
     `Copyright (C) 1997` line) contains a `(` that falsely trips the K&R-param guard below, silently
-    suppressing EVERY subsequent depth-0 global (nuPiCartHandle/nuPiSramHandle were both missed)."""
+    suppressing EVERY subsequent depth-0 global (nuPiCartHandle/nuPiSramHandle were both missed).
+    S102: strip the dead `#if BUILD_VERSION` side first so an inactive-`#else`-branch defined global
+    (motor.c's <VERSION_J `__osMotorinitialized[MAXCONTROLLERS]`) is not phantom-flagged."""
     names = []
     depth = 0
     in_kr_params = False  # between a K&R `name(args)` header and its `{` body
-    for raw in _strip_comments(UpstreamSource.get(cpath).text).splitlines():
+    text = _strip_inactive_version_branches(UpstreamSource.get(cpath).text, _build_version_ord("libultra"))
+    for raw in _strip_comments(text).splitlines():
         line = raw.strip()
         if (depth == 0 and not in_kr_params and line and not line.startswith(
                 ("#", "//", "*", "}", "static", "extern", "typedef"))):
@@ -1316,10 +1329,12 @@ def defines_local_static_data(cpath):
     the .data sibling carve and seed_points re-prices the mirror off the clean-cp floor. Excludes
     static function protos / function-pointer inits (reuses _is_static_func_proto). Motivating case
     (S73): gu/position.c's `static float dtor = 3.1415926/180.0;` inside guPositionF needed a
-    0x10-byte .data carve that the file-scope detector — and the S72 coddog re-scan — both missed."""
+    0x10-byte .data carve that the file-scope detector — and the S72 coddog re-scan — both missed.
+    S102: strip the dead `#if BUILD_VERSION` side first (symmetric with the file-scope scans)."""
     names = []
     depth = 0
-    for raw in UpstreamSource.get(cpath).text.splitlines():
+    text = _strip_inactive_version_branches(UpstreamSource.get(cpath).text, _build_version_ord("libultra"))
+    for raw in text.splitlines():
         line = raw.strip()
         if depth >= 1 and line.startswith("static") and "=" in line \
                 and not _is_static_func_proto(line):
@@ -1734,12 +1749,18 @@ def calls_unplaced(cpath, primary, placed, lib=None):
     # Drop the inactive `#if BUILD_VERSION` side first (S47: `osPiRawReadIo` is called only in the
     # non-J `#else` branch) so its calls are not phantom-flagged.
     text = _strip_inactive_version_branches(text, _build_version_ord(lib))
+    # S102: same-file function-like macros (`#define READFORMAT(ptr) ((__OSContRamReadFormat*)(ptr))`
+    # in motor.c) expand to casts/exprs, not jals — collect their names so a `READFORMAT(ptr)` use is
+    # not flagged as an unplaced function. macro_hidden_text only captures HEADER macros (the .c's own
+    # function-like #defines were invisible to that scan → the S102 false fire).
+    local_macro_names = set(re.findall(r'^\s*#\s*define\s+([A-Za-z_]\w*)\s*\(', text, re.M))
     text = _strip_define_lines(text)  # an in-body `#define NAME (expr)` is a macro def, not a call (S61)
     body = _strip_string_literals(_strip_dead_blocks(_strip_comments(text + "\n" + macro_text)))
     called = {
         n
         for n in C_CALL_RE.findall(body)
-        if n not in _C_NONCALL and n not in macro_names and not n.startswith("__builtin_")
+        if n not in _C_NONCALL and n not in macro_names and n not in local_macro_names
+        and not n.startswith("__builtin_")
     }
     return sorted(n for n in called if n not in placed and n not in defined)
 
@@ -2251,6 +2272,62 @@ def _append_recover_hazards(off, primary, up_path, up_lib, hazards):
         hazards.append(Hazard(HAZARD_RODATA_JTBL, ",".join(f"0x{a:08X}" for a in sorted(jtbls))))
 
 
+def _upstream_defines_function(cpath, name):
+    """True if the version-stripped upstream .c defines a function named `name` at brace-depth 0.
+    S102: gates header_renames_symbol against a macro-ALIAS false fire. os_motor.h's
+    `#define osMotorStop(x) __osMotorAccess((x), MOTOR_STOP)` macro-renames a symbol, but a `#undef`
+    is only needed when the BODY actually defines a function named `primary` (the S85
+    __osInitialize_common source-compat case — there the upstream defines __osInitialize_common and
+    the macro rewrites it). Under VERSION_J motor.c defines `__osMotorAccess` (the macro's RHS), NOT
+    `osMotorStop`, so the curated name is the RHS — the `osMotorStop` token never appears in the body
+    and no #undef is needed. Returns False ⇒ suppress the hazard."""
+    try:
+        text = UpstreamSource.get(cpath).text
+    except OSError:
+        return False
+    text = _strip_inactive_version_branches(text, _build_version_ord("libultra"))
+    return any(n == name for n, _ in _iter_upstream_functions(text))
+
+
+def _macro_alias_target(cpath, primary, _depth=0, _seen=None):
+    """The first identifier in the body of a `#define <primary>(...) <body>` macro found in the
+    include tree, or None. S102: paired with header_renames_symbol to name the wrong-ghidra-name
+    correction — os_motor.h's `#define osMotorStop(x) __osMotorAccess((x), MOTOR_STOP)` → the symbol
+    `__osMotorAccess` that the vram is really named (vs the ghidra mislabel `osMotorStop`). Matches
+    only in HEADERS (`_depth > 0`), like header_renames_symbol."""
+    if not cpath or _depth > 4 or not os.path.exists(cpath):
+        return None
+    if _seen is None:
+        _seen = set()
+    rp = os.path.realpath(cpath)
+    if rp in _seen:
+        return None
+    _seen.add(rp)
+    define_re = re.compile(r'^\s*#\s*define\s+' + re.escape(primary) + r'\s*\([^)]*\)\s*(\S.*)$')
+    id_re = re.compile(r'[A-Za-z_]\w*')
+    includes = []
+    try:
+        text = UpstreamSource.get(cpath).text
+    except OSError:
+        return None
+    for line in text.splitlines():
+        if _depth > 0:
+            m = define_re.match(line)
+            if m:
+                ids = id_re.findall(m.group(1))
+                return ids[0] if ids else None
+        m = INCLUDE_RE.match(line)
+        if m:
+            includes.append(m.group(1))
+    for inc in includes:
+        hdr = _resolve_include(inc)
+        if hdr:
+            hit = _macro_alias_target(hdr, primary, _depth + 1, _seen)
+            if hit:
+                return hit
+    return None
+
+
 def header_renames_symbol(cpath, primary, _depth=0, _seen=None):
     """A (transitively-)included vendored header that rewrites the candidate's curated symbol via a
     macro `#define <primary>...` — a K->J source-compat shim (`os_host.h`:
@@ -2312,8 +2389,12 @@ def _append_coddog_trap_hazards(off, primary, cl_path, up_lib, hazards):
         blocked = cblk
     _append_recover_hazards(off, primary, cl_path, clib, hazards)
     ren = header_renames_symbol(cl_path, primary)
-    if ren:
+    if ren and _upstream_defines_function(cl_path, primary):  # S102: skip macro-alias false fire
         hazards.append(Hazard(HAZARD_HEADER_RENAMES_SYMBOL, f"{primary}@{ren}"))
+    elif ren:  # S102: primary is a macro alias for a DIFFERENT upstream symbol → wrong ghidra name
+        tgt = _macro_alias_target(cl_path, primary)
+        if tgt and _upstream_defines_function(cl_path, tgt):
+            hazards.append(Hazard(HAZARD_WRONG_GHIDRA_NAME, f"{primary}->{tgt}@{ren}"))
     return blocked
 
 
@@ -2364,8 +2445,12 @@ def append_upstream_hazards(off, primary, up_lib, up_path, hazards, member_paths
     if divergence:
         hazards.append(divergence)  # near-verbatim mirror: reconcile call list at the gate
     ren = header_renames_symbol(up_path, primary)
-    if ren:
+    if ren and _upstream_defines_function(up_path, primary):  # S102: skip macro-alias false fire
         hazards.append(Hazard(HAZARD_HEADER_RENAMES_SYMBOL, f"{primary}@{ren}"))  # needs #undef (S85)
+    elif ren:  # S102: primary is a macro alias for a DIFFERENT upstream symbol → wrong ghidra name
+        tgt = _macro_alias_target(up_path, primary)
+        if tgt and _upstream_defines_function(up_path, tgt):
+            hazards.append(Hazard(HAZARD_WRONG_GHIDRA_NAME, f"{primary}->{tgt}@{ren}"))
     # Anonymous `%lo(D_<addr>)` constant loads split into two enablers by segment (S52):
     #   - code-segment `.rodata` → compiler-pooled literal the mirror re-emits → a `.rodata` sibling
     #     split at finalize (docs/hazards.md#rodata-sibling-yaml-pattern, S38/S48).

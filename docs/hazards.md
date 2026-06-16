@@ -44,6 +44,17 @@ Before declaring a clean verbatim mirror, reconcile the upstream's full call + d
 and near-verbatim sections. Known-edit sub-cases: file-static drop, defines-data drop, near-verbatim
 line-drop, recover-extern placement.
 
+**Authoritative symbol set via `nm` (S102).** For a mirror that is `#if BUILD_VERSION`-branched or
+inline-ambiguous (a `pack` where a static helper may or may not be inlined), do NOT reason from the
+source alone — read the matching prebuilt object:
+`mips-linux-gnu-nm ~/development/repos/ultralib/build/J/libgultra_rom/src/<dir>/<file>.o`. It gives
+the definitive VERSION_J symbol set: which functions are global (`T`) vs absent (inlined), which data
+is local/static (`b`/`d`) vs global, and the exact `.text` offsets. S102 motor.c: nm settled that the
+0x800AE380 fn is `T __osMotorAccess` (not the ghidra `osMotorStop` — see #wrong-ghidra-name-override),
+that `__osMakeMotorData` is inlined (→ `pack:2fn`, not 3), and that `__MotorDataBuf` is a local `b`
+(→ drop-static-to-extern, not a defined global). `libgultra_rom` is the release/ROM profile that
+matches MG64's build; `libgultra`/`libgultra_d` are the debug profiles.
+
 **`#pragma weak` alias mirror (S66, no special handling).** A libultra C file whose ROM/curated
 symbol is a *weak alias* mirrors verbatim with zero edits. `gu/cosf.c` / `gu/sinf.c` carry
 `#pragma weak cosf = __cosf` + `#define fcos __cosf`, so the defined function is `__cosf` and `cosf`
@@ -1450,6 +1461,57 @@ which an `INCLUDE_ASM` stub never has (same late-surface class as #needs-define)
 transitive header's macro is undone) and before the function definition; then the
 name-macro/`INITIALIZE_FUNC` reconcile exports the curated symbol. SHA-neutral (a symbol-name change,
 not a byte change). Same one-line fix as the S31 `#undef nuGfxInit`.
+
+**NOT this hazard (the S102 contrast):** if the upstream does NOT define a function named
+`<curated_fn>` — the curated name is a macro ALIAS for a DIFFERENT symbol the upstream defines (the
+macro's RHS) — then the body never contains the `<curated_fn>` token, no `#undef` is needed, and the
+real issue is a mislabeled ghidra name → see `#wrong-ghidra-name-override`. `pick_target.py` now
+suppresses `header-renames-symbol` in that case (`_upstream_defines_function` gate) and emits
+`wrong-ghidra-name` instead.
+
+---
+
+## wrong-ghidra-name-override (correct a mislabeled symbol without sync-names)
+
+**Rule:** `ghidra_symbols.txt` can name a function vram with the WRONG symbol — a macro ALIAS rather
+than the real function. S102 motor.c: ghidra labels 0x800AE380 `osMotorStop`, but os_motor.h
+`#define osMotorStop(x) __osMotorAccess((x), MOTOR_STOP)` makes that a *macro*; the function the
+VERSION_J build defines at 0x800AE380 is `__osMotorAccess` (verified in `build/J/libgultra_rom/motor.o`:
+`T __osMotorAccess`@0, no `osMotorStop` symbol). A verbatim mirror names the body `__osMotorAccess`
+(correct), so the still-asm callers' relocs (`jal osMotorStop`) and the C object (`__osMotorAccess`)
+disagree → `undefined reference`.
+
+**Why not `make sync-names`:** the canonical fix (rename in Ghidra → sync) is a FULL
+`--export-to-decomp --write-in-place` regen — still destructive (~250-symbol Ghidra↔decomp drift,
+S20/S87). And you can't hand-edit `ghidra_symbols.txt` (sync-owned) nor naively add the correct name
+to `symbol_addrs.txt` (same vram already in ghidra_symbols → splat dup error).
+
+**Trigger:** `pick_target.py` flag `wrong-ghidra-name:<ghidra_name>-><correct_name>@<header>` (S102) —
+fires when a header macro `#define <ghidra_name>(...)` exists, the version-stripped upstream does NOT
+define a function named `<ghidra_name>`, and the macro's RHS leading symbol IS defined in the upstream.
+It is the distinguishing companion of `#header-renames-symbol` (which fires when the body DOES define
+the macro name → a real `#undef`).
+
+**Procedure (the non-destructive override):**
+1. Add a `symbol_addrs.txt` maintainer-override for the CORRECT name with a `rom:` qualifier:
+   `<correct_name> = 0x<vram>; // rom:0x<off> type:func`. The `rom:` (or `segment:`) qualifier is
+   load-bearing: splat's dup-symbol error (`util/symbols.py`, the `have_same_rom_addresses and
+   same_segment` test) fires ONLY when a same-vram symbol shares BOTH rom AND segment; a bare entry has
+   rom=None (== the ghidra entry's None) + same segment → clash. The qualifier makes
+   `have_same_rom_addresses` False → no clash.
+2. `symbol_addrs.txt` is loaded FIRST (splat `initialize`, before `ghidra_symbols.txt`), so the
+   override WINS the reference: both the scaffolded `INCLUDE_ASM` stub and the still-asm callers' relocs
+   resolve to `<correct_name>`. (The link also runs `--allow-multiple-definition` as a safety net.)
+3. Name the mirror body `<correct_name>` (verbatim — it is the real upstream name). NO `#undef` needed:
+   the body never contains the macro-name token, so the alias macro is inert (this is why
+   `#header-renames-symbol` does NOT apply — the curated name IS the macro's RHS).
+4. The stale `ghidra_symbols.txt` entry + the override coexist deliberately; the override wins.
+   **Cross-repo follow-up:** rename the vram in the Ghidra workspace to `<correct_name>` so the
+   source-of-truth matches; a future reconciled sync can drop the override.
+
+**Verify at the gate:** after the flip + override, `make extract`, then confirm (a) the scaffolded
+`src/.../<file>.c` stub is `INCLUDE_ASM(..., <correct_name>)` and (b) the still-asm caller's
+`asm/<seg>.s` relocs `jal <correct_name>` — both prove the override won before you write the body.
 
 ---
 

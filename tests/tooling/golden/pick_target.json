@@ -444,7 +444,7 @@
   {
     "band": "cold",
     "func": "nuContRmbMgrInit",
-    "hazards": "pack:9fn[nuContRmbMgrInit=nucontrmbmgr,nuContRmbMgrRemove=nucontrmbmgr,contRmbControl=nucontrmbmgr,contRmbRetrace=nucontrmbmgr,contRmbCheckMesg=nucontrmbmgr,func_800A1DA0=?,func_800A1DE8=?,func_800A1E18=?,func_800A1EA4=?],defines-data:nuContRmbSearchTime,nuContRmbCallBack,refs-unplaced:nuContRmbCallBack,nuContRmbSearchTime,nuScRetraceCounter,calls-unplaced:__osMotorAccess",
+    "hazards": "pack:9fn[nuContRmbMgrInit=nucontrmbmgr,nuContRmbMgrRemove=nucontrmbmgr,contRmbControl=nucontrmbmgr,contRmbRetrace=nucontrmbmgr,contRmbCheckMesg=nucontrmbmgr,func_800A1DA0=?,func_800A1DE8=?,func_800A1E18=?,func_800A1EA4=?],defines-data:nuContRmbSearchTime,nuContRmbCallBack,refs-unplaced:nuContRmbCallBack,nuContRmbSearchTime,nuScRetraceCounter",
     "kind": "asm-flip",
     "nfns": 9,
     "pts": 8,
@@ -626,7 +626,7 @@
   {
     "band": "warm",
     "func": "_Printf",
-    "hazards": "single-file-pack:3fn[_Printf=xprintf,_Putfld=xprintf,func_800B1580=?],defines-data:fchar,fbit,refs-unplaced:__PTRDIFF_TYPE__,calls-unplaced:ATOI,LDSIGN,PAD,PUT,isdigit,pfn,rodata-jtbl:0x800D2678,jal-count-mismatch:14vs3",
+    "hazards": "single-file-pack:3fn[_Printf=xprintf,_Putfld=xprintf,func_800B1580=?],defines-data:fchar,fbit,refs-unplaced:__PTRDIFF_TYPE__,calls-unplaced:pfn,rodata-jtbl:0x800D2678,jal-count-mismatch:14vs3",
     "kind": "asm-flip",
     "nfns": 3,
     "pts": 13,

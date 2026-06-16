@@ -262,6 +262,7 @@ When `pick_target.py` flags a hazard (or a match shows its symptom), read the ma
 | `needs-define:<def>`            | #needs-define |
 | (clean mirror SHA-miss, exact N×8B / fn shorter than its asm size; a `>= VERSION_K`-gated stmt MG64-J actually has) | #needs-define |
 | `header-renames-symbol:<fn>@<hdr>` (S85: a transitively-vendored header rewrites the curated symbol via a macro, e.g. os_host.h `#define __osInitialize_common() osInitialize()` → needs `#undef <fn>`; S31 nuGfxInit class) | #header-renames-symbol |
+| `wrong-ghidra-name:<ghidra>-><correct>@<hdr>` (S102: ghidra_symbols mislabels the vram with a macro NAME — os_motor.h `#define osMotorStop(x) __osMotorAccess(...)` — while the upstream defines the macro's RHS `__osMotorAccess` there; bank under the correct name via a `symbol_addrs.txt` `rom:`-qualified maintainer-override that wins the reference, NOT the destructive `make sync-names`. The header-renames companion when the body does NOT define the macro name → no `#undef`) | #wrong-ghidra-name-override |
 | (mirror `parse error`/`undefined ref` on a helper macro the `(already-vendored)` reconstructed header lacks or mis-forms; S88 controller.h missing `SELECT_BANK` + object-like `SET_ACTIVEBANK_TO_ZERO`) | #vendored-header-incomplete |
 | `pack:<n>fn[…]`                 | #multi-function-segment-splitting-pack |
 | `single-file-pack:<n>fn[…]` (all members → one upstream C file; atomic verbatim mirror, NO split) | #upstream-mirror-pattern |

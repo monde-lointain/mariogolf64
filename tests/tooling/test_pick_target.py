@@ -131,6 +131,39 @@ def test_header_renames_symbol(tmp_path, monkeypatch):
     assert pt.header_renames_symbol(str(other), "g") is None
 
 
+def test_wrong_ghidra_name_override(tmp_path, monkeypatch):
+    """S102: a vendored header function-like macro that renames the curated symbol to a DIFFERENT
+    symbol the upstream actually defines (os_motor.h `#define osMotorStop(x) __osMotorAccess(...)`,
+    while motor.c defines `__osMotorAccess`, NOT `osMotorStop`) is a header-renames-symbol FALSE
+    fire — the body never contains the `osMotorStop` token, so no `#undef` is needed.
+    _upstream_defines_function distinguishes it from the S85 source-compat rename (body DOES define
+    the macro name); _macro_alias_target names the correction target for the wrong-ghidra-name tag."""
+    pt = load_tool("pick_target")
+    inc = tmp_path / "inc"
+    inc.mkdir()
+    (inc / "os_motor.h").write_text(
+        "#define osMotorStop(x) __osMotorAccess((x), 0)\n"
+        "extern s32 __osMotorAccess(OSPfs *, s32);\n")
+    cand = tmp_path / "motor.c"
+    cand.write_text(
+        '#include "os_motor.h"\n'
+        "s32 __osMotorAccess(OSPfs* pfs, s32 flag) { return flag; }\n"
+        "s32 osMotorInit(OSMesgQueue* mq, OSPfs* pfs, int ch) { return 0; }\n")
+    monkeypatch.setattr(pt, "INCLUDE_DIRS", [str(inc)])
+
+    # the header macro-renames osMotorStop ...
+    assert pt.header_renames_symbol(str(cand), "osMotorStop") == "os_motor.h"
+    # ... but the body defines __osMotorAccess (the macro RHS), NOT osMotorStop → S102 false fire
+    assert pt._upstream_defines_function(str(cand), "osMotorStop") is False
+    assert pt._upstream_defines_function(str(cand), "__osMotorAccess") is True
+    # a symbol the body genuinely defines (the S85 real-rename contrast) → True
+    assert pt._upstream_defines_function(str(cand), "osMotorInit") is True
+    # the correction target is the macro's RHS leading identifier
+    assert pt._macro_alias_target(str(cand), "osMotorStop") == "__osMotorAccess"
+    # a name with no aliasing macro → no target
+    assert pt._macro_alias_target(str(cand), "osMotorInit") is None
+
+
 def test_pick_target_json_golden(golden_dir, regen, monkeypatch):
     # The S71 coddog map (tools/coddog/coddog_map.tsv) is gitignored + build-dependent, so the
     # committed golden is map-free; neutralize any local map for a reproducible snapshot.
