@@ -300,7 +300,8 @@ SECTIONS
         build/src/libultra/io/vigetcurrcontext.o(.text);
         build/src/libultra/io/gbpaksetbank.o(.text);
         build/src/libultra/io/pfsisplug.o(.text);
-        build/asm/8D230.o(.text);
+        build/src/libultra/libc/xlitob.o(.text);
+        build/asm/8D480.o(.text);
         build/src/libultra/io/dp.o(.text);
         build/src/libultra/io/si.o(.text);
         build/src/libultra/libc/ldiv.o(.text);
@@ -553,7 +554,9 @@ SECTIONS
         build/src/libultra/io/vigetcurrcontext.o(.data);
         build/src/libultra/io/gbpaksetbank.o(.data);
         build/src/libultra/io/pfsisplug.o(.data);
-        build/asm/8D230.o(.data);
+        build/asm/data/A35E0.data.o(.data);
+        build/src/libultra/libc/xlitob.o(.data);
+        build/asm/8D480.o(.data);
         build/src/libultra/io/dp.o(.data);
         build/src/libultra/io/si.o(.data);
         build/src/libultra/libc/ldiv.o(.data);
@@ -568,7 +571,7 @@ SECTIONS
         build/asm/8F140.o(.data);
         build/src/libkmc/matherr.o(.data);
         build/asm/8F250.o(.data);
-        build/asm/data/A35E0.data.o(.data);
+        build/asm/data/A4A90.data.o(.data);
         main_DATA_END = .;
         main_DATA_SIZE = ABSOLUTE(main_DATA_END - main_DATA_START);
         main_RODATA_START = .;
@@ -821,7 +824,8 @@ SECTIONS
         build/src/libultra/io/vigetcurrcontext.o(.rodata);
         build/src/libultra/io/gbpaksetbank.o(.rodata);
         build/src/libultra/io/pfsisplug.o(.rodata);
-        build/asm/8D230.o(.rodata);
+        build/src/libultra/libc/xlitob.o(.rodata);
+        build/asm/8D480.o(.rodata);
         build/src/libultra/io/dp.o(.rodata);
         build/src/libultra/io/si.o(.rodata);
         build/src/libultra/libc/ldiv.o(.rodata);
@@ -1082,7 +1086,8 @@ SECTIONS
         build/src/libultra/io/vigetcurrcontext.o(.bss);
         build/src/libultra/io/gbpaksetbank.o(.bss);
         build/src/libultra/io/pfsisplug.o(.bss);
-        build/asm/8D230.o(.bss);
+        build/src/libultra/libc/xlitob.o(.bss);
+        build/asm/8D480.o(.bss);
         build/src/libultra/io/dp.o(.bss);
         build/src/libultra/io/si.o(.bss);
         build/src/libultra/libc/ldiv.o(.bss);
