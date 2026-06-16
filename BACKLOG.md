@@ -620,6 +620,38 @@ sub-sprints).
   via `sync_decomp_names.py --import-from-decomp` (the 2 fn names were already in `ghidra_symbols.txt`).
   **The `[0x7E360]` pack now has only `pimgr` (osCreatePiManager) left → carry-over below.**
 
+- **Sprint 103: 1 .c file BANKED — `src/mgu/mtxutil.c` (`guMtxF2L` + `guMtxL2F` + `guMtxIdentF` +
+  `guMtxIdent`), gu matrix utils; a planned verbatim libultra mirror that PIVOTED to classical at the
+  game `-O2` profile.** md5-candidate 151→**152** (all .c stub-free); asm subsegs 125→125 (the split
+  carved a c subseg out of the `[0x414A0,asm]` game pack; the 8-fn game-code prefix stays asm, never
+  in scope). The 8-gate fired on the pts-13 `func_800660A0` pack → decompose at the mtxutil TU
+  boundary `guMtxF2L`@0x80067B00 (rom 0x42F00, 16-aligned), splitting `[0x414A0,asm]` →
+  `[0x414A0,asm]` + `[0x42F00,c,mgu/mtxutil]` + `[0x43140,asm]`. **The verbatim-mirror premise FAILED
+  first build (two compounding errors):** (1) the 4 gu fns are GAME-region (0x80067B00, inside the
+  game pack), compiled `-O2`, NOT the libultra `-O3` band — `src/libultra/gu` placement forced `-O3`
+  → `-finline-functions` inlined `guMtxIdent` (240B vs ROM 60B); (2) `guMtxF2L` CLAMPS in place
+  (`if(x<-32768.0f)…; if(x>32766.0f)…`, consts `0xc7000000`/`0x46fffc00`) — a Monegi overflow-guard
+  variant absent from ultralib `gu/mtxutil.c`, ultralib `mgu/mtxf2l.s`, AND `libultra_modern
+  monegi/mgu/mtxf2l.s` (all 3 non-clamping, byte-identical). PO chose push-through-classically →
+  re-placed at `src/mgu/mtxutil.c` (`-O2`, include via public `<ultra64.h>`), 3 fns byte-verbatim +
+  `guMtxF2L` = upstream body + an explicit clamp; **new verbatim-upstream dir `src/mgu/`** with a
+  `.clang-format` (`DisableFormat: true`). 1 fix-iteration: float-literal `f`-suffix (bare doubles
+  compiled `c.lt.d`+`cvt.d.s`+a rodata pair; ROM uses single `c.lt.s` inline). 3-leaf byte-cmp
+  IDENTICAL + full-make ROM SHA-1 == baserom. 0 symbol adds (4 names pre-curated in `ghidra_symbols`).
+  seed 3 (regime mirror — the coddog-mirror tag over-promised "verbatim cp") → **realized 5, residual
+  +2, regime mixed** (v2: +1 mid-sprint re-plan, +1 novel profile+clamp gotcha). 0
+  stuck-far/permuter/carried/re-opened; **1 mid-sprint re-plan + 1 fix-iteration**. Applied **4 of 4**:
+  #1 `pick_target.py coddog-partial:<m>of<n>fn` (≥2-distinct-twin subset guard — the multi-twin
+  companion to `coddog-fncount-mismatch`, the under-weighted `coddog-twin:mtxidentf!=mtxutil` signal)
+  + `test_coddog_partial_twin_subset`; #2 `pick_target.py game-region-mirror:0x<vram>` (a libultra
+  source below the libultra-band rom is `-O2`, route to `src/mgu/`) + `test_game_region_mirror_below_libultra_band`
+  + `docs/hazards.md#game-region-mirror-o2-profile` + CLAUDE.md index row; #3 float-literal
+  single-vs-double note (`docs/hazards.md#mirror-cast-divergence`); #4 codify `src/mgu/` no-clang-format
+  (CLAUDE.md ×3 + `.clang-format`). suite 55→**57** pass (no golden regen — post-bank the live
+  `func_800660A0` row lost its gu identity, so no golden delta). **Lesson: a `coddog-mirror` on a
+  game-region multi-fn pack is NOT a clean verbatim cp signal — coddog matched only 2 of 4 fns; the
+  two new guards target exactly this.** No carry-over.
+
 - **Sprint 102: 1 .c file BANKED — `src/libultra/io/motor.c` (`__osMotorAccess` + `osMotorInit`),
   libultra io VERSION_J verbatim mirror; corrected a wrong ghidra name WITHOUT `make sync-names`.**
   md5-candidate 150→**151** (all .c stub-free); asm subsegs 126→125; 2 fns matched. The io/motor.c

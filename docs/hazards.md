@@ -392,6 +392,18 @@ neighbors.
 the old 2.0L upstream's `(u64)(u32)` zero-extend; sibling `sp`/`a0` already sign-extended). This
 divergence is one reason the project standardized on ultralib VERSION_J as the sole upstream.
 
+**S103 float-literal single-vs-double (classical FP reconstruction).** When a classical/mirror
+reconstruction adds a float comparison or clamp against a literal (`if (x < -32768.0)`), a **bare
+floating literal is `double`** — KMC GCC promotes the `f32` operand (`cvt.d.s`), compares as double
+(`c.lt.d`), and **loads the double constant from `.rodata`** (`lui at,0; ldc1`). The ROM, built from
+a `float`-literal source, compares **single** (`c.lt.s`) with the constant **inline** (`lui/mtc1`, no
+rodata). Symptom: insn count matches but the compares are `.d`, plus a spurious `.rodata` double the
+mirror would need to carve. **Fix:** suffix every FP literal in a compare/clamp/assignment with `f`
+(`-32768.0f`, `32766.0f`) so it stays single-precision and inline. Provenance: S103 (`guMtxF2L`'s
+Monegi clamp — `if (mf[i][j*2] < -32768.0f) … > 32766.0f` — consts `0xc7000000`/`0x46fffc00`; bare
+doubles first compiled `c.lt.d`+`cvt.d.s`+a rodata pair before the `f` suffix fixed it in one
+iteration). See #game-region-mirror-o2-profile for the same sprint's profile gotcha.
+
 ---
 
 ## file-static (BSS-layout-conflict)
@@ -1340,6 +1352,49 @@ set does not `#define` (and the lib actually sets `-DBUILD_VERSION`). Distinct f
 **Provenance:** S60 (gu/mtxcatl.c — `guMtxXFML` under `#if BUILD_VERSION < VERSION_K`; the in-tree
 os_version.h was the 2.0L revision; the `pick_target` `_strip_inactive_version_branches`/`build_ord`
 machinery already existed for ref/call scanning, reused here for the detector).
+
+**S103 partial-twin subset (`coddog-partial:<m>of<n>fn`).** coddog matches per-FUNCTION; when its
+corpus splits a combined source into per-fn files (`mtxidentf.c`, `mtxl2f.c`) and a multi-fn subseg's
+fns match ONLY SOME of them, the bare `coddog-mirror`/`coddog-twin` flags over-promise a clean
+single-file mirror. `pick_target` flags `coddog-partial` when **≥2 DISTINCT per-fn twin files** matched
+a pack covering **fewer fns than it holds** (`len(cod_members) < nfns`) — the multi-twin companion to
+`coddog-fncount-mismatch` (which fires only at `len(distinct)==1`). The un-matched fns are NOT
+verified upstream → per-fn verify before mirroring. **Provenance:** S103 (`func_800660A0`:
+`mtxidentf.c`+`mtxl2f.c` @100 matched only `guMtxIdentF`/`guMtxL2F`; the combined `mtxutil.c`'s
+`guMtxF2L` (Monegi clamp variant) + `guMtxIdent` (-O2 non-inline) diverged from every available
+upstream — the planned verbatim cp failed first build, banked classical via #game-region-mirror-o2-profile).
+
+---
+
+## game-region mirror (-O2 profile)
+
+**Rule:** A libultra/SDK source can be **statically linked into the GAME** (not the libultra code
+band) — its subseg sits at a low rom/vram, and the build compiles it with the **game `CFLAGS` (-O2)**,
+NOT `LIBULTRA_CFLAGS` (-O3 via `$(subst -O2,-O3,…)`). The Makefile selects the profile by **src path
+prefix**: only `src/libultra/%` and `src/libkmc/%` get the lib profiles; everything else is -O2. So a
+game-embedded SDK mirror placed under `src/libultra/` compiles at the WRONG -O3 → `-finline-functions`
+inlines its small callees (the ROM, at -O2, keeps the `jal`s). Symptom: a verbatim mirror where a
+caller fn balloons (e.g. `guMtxIdent` 240 B vs ROM 60 B) because -O3 inlined `guMtxIdentF`/`guMtxF2L`.
+
+**Trigger:** `pick_target.py` flag `game-region-mirror:0x<vram>` — fires when a row's `up_lib ==
+"libultra"` and its rom is **below the lowest-rom `libultra/` subseg** (the libultra code band start).
+Advisory (display-only).
+
+**Procedure:**
+- Mirror the file under a **-O2 path**, NOT `src/libultra/…`. The project convention is **`src/mgu/`**
+  for the game-embedded ultralib gu/mgu matrix source (the Monegi variant); a `.clang-format`
+  (`DisableFormat: true`) guards it as a verbatim-upstream dir (see CLAUDE.md). Any non-`libultra/`,
+  non-`libkmc/` path gives -O2; pick one that reflects the source (`src/mgu/`, `src/main/…`).
+- Includes: the game `-I` set lacks `src/libultra/gu` and `include/libultra/PR`, so a source-private
+  companion (`guint.h`) won't resolve — include via the **public** path instead (`#include <ultra64.h>`
+  pulls `<PR/gu.h>` → `FTOFIX32`/`FIX32TOF` + `<PR/gbi.h>` → `Mtx`).
+- A divergent fn (a Monegi-modified variant absent from upstream) is then a normal **classical**
+  reconstruction on the -O2 file (the verbatim siblings stay byte-exact); see the float-literal note in
+  #mirror-cast-divergence-sign--vs-zero-extend for the single-precision FP gotcha.
+
+**Provenance:** S103 (`func_800660A0`'s gu mtxutil tail @0x80067B00, inside a game pack — the 4 fns
+`guMtxF2L`/`guMtxL2F`/`guMtxIdentF`/`guMtxIdent` banked at `src/mgu/mtxutil.c` -O2; the initial
+`src/libultra/gu/mtxutil.c` -O3 placement inlined `guMtxIdent` and never matched).
 
 ---
 

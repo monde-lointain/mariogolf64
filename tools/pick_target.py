@@ -334,6 +334,18 @@ HAZARD_WRONG_GHIDRA_NAME = "wrong-ghidra-name"  # S102: ghidra_symbols mislabels
 # maintainer-override (a `rom:<off>` qualifier dodges splat's same-rom+segment dup error; symbol_addrs
 # is read first so it wins the reference) — NOT the destructive `make sync-names`. Detail
 # `<ghidra_name>-><correct_name>@<header>`. See docs/hazards.md#wrong-ghidra-name-override
+HAZARD_CODDOG_PARTIAL = "coddog-partial"  # S103: coddog matched >=2 DISTINCT per-fn TWIN files to ONE
+# multi-fn subseg, covering only a SUBSET of its fns (mtxidentf.c@100 + mtxl2f.c@100 → 2 of
+# func_800660A0's 12 fns; the real source is the COMBINED mtxutil.c, where guMtxF2L (a clamp variant)
+# + guMtxIdent (inlining) DIVERGE — only guMtxIdentF/guMtxL2F matched). A per-fn fingerprint SET, NOT a
+# single-file mirror → the un-matched fns need per-fn verification. The multi-twin companion to
+# coddog-fncount-mismatch (which fires only at len(distinct)==1). Advisory. See docs/hazards.md#coddog-cross-ref
+HAZARD_GAME_REGION_MIRROR = "game-region-mirror"  # S103: a coddog/libultra-source mirror whose vram is
+# BELOW the libultra code band is statically linked INTO THE GAME and compiled -O2 (game CFLAGS), NOT
+# -O3 (LIBULTRA_CFLAGS). func_800660A0's gu mtxutil tail (0x80067B00, a game pack) banked at src/mgu/
+# (-O2): the src/libultra/ path forces -O3 → wrong auto-inlining (guMtxIdent inlined its callees, 240B
+# vs ROM 60B). Route the mirror to a -O2 path (src/mgu/…), NOT src/libultra/. Advisory. Detail `0x<vram>`.
+# See docs/hazards.md#game-region-mirror-o2-profile
 
 
 @dataclasses.dataclass
@@ -2627,6 +2639,10 @@ def score_row(cand, hazards, carried):
 def build_rows(args, upstream_index, carried, sig_index, coddog_index=None):
     coddog_index = coddog_index or {}
     subs = parse_subsegs()
+    # S103: lowest-rom `libultra/` subseg = the start of the libultra code band. A libultra-source
+    # mirror BELOW it is game-region (-O2), not libultra-band (-O3) — feeds HAZARD_GAME_REGION_MIRROR.
+    _libultra_band_start = min((o for o, _, p in subs if (p or "").startswith("libultra/")),
+                               default=None)
     rows = []
     for i, (off, typ, path) in enumerate(subs):
         size = subs[i + 1][0] - off if i + 1 < len(subs) else 0
@@ -2769,6 +2785,15 @@ def build_rows(args, upstream_index, carried, sig_index, coddog_index=None):
                     if loc and size > CODDOG_STRUCTURAL_BYTES_PER_LOC * loc:
                         cpct = max(p for _, c, p in cod_members if c == distinct[0])
                         hazards.append(Hazard(HAZARD_CODDOG_STRUCTURAL, f"{distinct[0]}@{cpct:.2f}"))
+            # S103: ≥2 DISTINCT per-fn TWIN files matched to ONE multi-fn subseg, covering only a
+            # SUBSET of its fns → a per-fn fingerprint set, NOT a single-file mirror (func_800660A0:
+            # mtxidentf.c + mtxl2f.c @100 = 2 of 12 fns; the combined mtxutil.c source has guMtxF2L
+            # (clamp) + guMtxIdent (inline) diverging). The multi-twin companion to the len==1-only
+            # coddog-fncount-mismatch. Advisory: per-fn verify, do NOT read it as a clean mirror.
+            twin_files = {h.detail.split("!=", 1)[0]
+                          for h in hazards if h.kind == HAZARD_CODDOG_TWIN}
+            if len(distinct) >= 2 and len(twin_files) >= 2 and len(cod_members) < len(fns):
+                hazards.append(Hazard(HAZARD_CODDOG_PARTIAL, f"{len(cod_members)}of{len(fns)}fn"))
             if up_lib is None:
                 up_lib = "libultra"
 
@@ -2785,6 +2810,14 @@ def build_rows(args, upstream_index, carried, sig_index, coddog_index=None):
         # is fully decompiled, so the hit is a fingerprint coincidence, not a fresh attribution.
         for s in sorted({c for c in cod_srcs if _coddog_source_banked(c)}):
             hazards.append(Hazard(HAZARD_CODDOG_SOURCE_BANKED, os.path.basename(s)))
+        # S103: a libultra-source mirror whose vram is BELOW the libultra code band is game-linked
+        # at -O2, not -O3 — route it to a -O2 path (src/mgu/…), NOT src/libultra/ (which forces -O3 →
+        # wrong auto-inlining; func_800660A0's mtxutil tail banked at src/mgu/). Gated on up_lib ==
+        # "libultra" (excludes audio coddog hits, which stay un-re-priced + above the band anyway).
+        if up_lib == "libultra" and _libultra_band_start is not None and off < _libultra_band_start:
+            v = subseg_vram(off)
+            hazards.append(Hazard(HAZARD_GAME_REGION_MIRROR,
+                                  f"0x{v:08X}" if v is not None else hex(off)))
         cod_in_scope = bool(args.lib) and bool(cod_srcs) and (
             args.lib == "libultra" or any(args.lib in s for s in cod_srcs))
         if args.lib and not cod_in_scope and args.lib not in (path or "") \

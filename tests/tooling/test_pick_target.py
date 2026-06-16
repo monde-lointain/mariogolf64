@@ -482,6 +482,74 @@ def test_coddog_tail_trap_rescan(monkeypatch):
     assert "defines-data:__osPiAccessQueueEnabled" in hit["hazards"], hit["hazards"]
 
 
+def _hazard_rows(pt, monkeypatch, *, subs, classify, ui, coddog):
+    """Drive build_rows over synthetic subsegs with file-reading helpers stubbed; score_row emits
+    every hazard kind:detail so the assertion can match the advisory flags. Shared by the S103
+    coddog-partial + game-region-mirror tests."""
+    class A:
+        lib = None
+        include_stuck = False
+        n = 999
+    monkeypatch.setattr(pt, "parse_subsegs", lambda: subs)
+    monkeypatch.setattr(pt, "classify_subseg", classify)
+    monkeypatch.setattr(pt, "src_func_callers", lambda: {})
+    monkeypatch.setattr(pt, "append_upstream_hazards", lambda *a, **k: ("warm", False))
+    monkeypatch.setattr(pt, "_coddog_upstream_path", lambda cfile: None)  # skip trap-rescan/fncount file reads
+    monkeypatch.setattr(pt, "subseg_vram", lambda off: 0x80067B00)
+    monkeypatch.setattr(pt, "score_row",
+                        lambda cand, hz, carr: {
+                            "func": cand.primary, "upstream": cand.up_lib, "score": 0, "size": cand.size,
+                            "hazards": ",".join(h.kind + (":" + h.detail if h.detail else "") for h in hz)})
+    return pt.build_rows(A(), ui, set(), {}, coddog)
+
+
+def test_coddog_partial_twin_subset(monkeypatch):
+    """S103: coddog matched 2 DISTINCT per-fn TWIN files (mtxidentf.c + mtxl2f.c) to a multi-fn pack,
+    covering only a SUBSET of its fns → a per-fn fingerprint set, NOT a single-file mirror (the real
+    src is the combined mtxutil.c; guMtxF2L (clamp) + guMtxIdent (inline) diverged). Flag coddog-partial
+    so the gate per-fn-verifies. The multi-twin companion to the len(distinct)==1-only fncount-mismatch."""
+    pt = load_tool("pick_target")
+    rows = _hazard_rows(
+        pt, monkeypatch,
+        subs=[(0x1000, "asm", None)],
+        classify=lambda off, typ, path, size, _ui:
+            ("asm-flip", ["leader", "guMtxL2F", "guMtxIdentF"], []),
+        ui={"leader": ("libultra", "/x/wrong.c"),            # named leader, distinct upstream
+            "guMtxL2F": ("libultra", "/x/mtxutil.c"),        # members named -> combined mtxutil
+            "guMtxIdentF": ("libultra", "/x/mtxutil.c")},
+        coddog={"guMtxL2F": ("src/mgu/mtxl2f.c", 100.0),     # 2 distinct per-fn twins
+                "guMtxIdentF": ("src/mgu/mtxidentf.c", 100.0)})
+    hz = next(r for r in rows if r["func"] == "leader")["hazards"]
+    assert "coddog-partial:2of3fn" in hz, hz                 # 2 coddog'd of 3 pack fns
+    assert "coddog-twin:" in hz                              # the twins that drove the partial flag
+
+
+def test_game_region_mirror_below_libultra_band(monkeypatch):
+    """S103: a libultra-source mirror whose rom is BELOW the libultra code band is game-linked at -O2,
+    not -O3 — flag game-region-mirror so the gate routes it to a -O2 path (src/mgu/), not src/libultra/
+    (which forces -O3 → wrong inlining). Band start = lowest-rom `libultra/` subseg (0x9000 here)."""
+    pt = load_tool("pick_target")
+    rows = _hazard_rows(
+        pt, monkeypatch,
+        subs=[(0x1000, "asm", None), (0x9000, "c", "libultra/io/pimgr")],  # band starts at 0x9000
+        classify=lambda off, typ, path, size, _ui:
+            ("asm-flip", ["leader"], []) if off == 0x1000 else None,
+        ui={"leader": ("libultra", "/x/gu/mtxutil.c")},      # libultra source, but rom 0x1000 < 0x9000
+        coddog={})
+    hz = next(r for r in rows if r["func"] == "leader")["hazards"]
+    assert "game-region-mirror:0x80067B00" in hz, hz
+    # a libultra subseg ABOVE the band must NOT be flagged: re-run with the source row at 0xA000
+    rows2 = _hazard_rows(
+        pt, monkeypatch,
+        subs=[(0x9000, "c", "libultra/io/pimgr"), (0xA000, "asm", None)],  # band starts at 0x9000
+        classify=lambda off, typ, path, size, _ui:
+            ("asm-flip", ["leader"], []) if off == 0xA000 else None,
+        ui={"leader": ("libultra", "/x/gu/mtxutil.c")},
+        coddog={})
+    hz2 = next(r for r in rows2 if r["func"] == "leader")["hazards"]
+    assert "game-region-mirror" not in hz2, hz2              # 0xA000 > band start -> no flag
+
+
 def test_drop_static_mirror_hazard(tmp_path):
     """S87 retro #3: a coddog-confirmed verbatim mirror whose data-shaping hazards are the pure-.bss
     family (file-static + defines-data + refs-unplaced, NO carve signal) is re-framed as ONE

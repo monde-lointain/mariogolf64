@@ -71,7 +71,7 @@ Ghidra MCP is used inline at seed time. For each target function:
      addend / extern HI/LO16), not a near-miss — go straight to the in-tree spot-check / full-make
      SHA-1, do not iterate C or reach for the permuter (see `docs/hazards.md#isolated-compile-caveat`).
    - **Finalize** (only if the spot-check passes): inline the body into `src/<seg>.c`, drop the
-     `INCLUDE_ASM` line, `clang-format -i` (skip under `src/libultra/` & `src/libkmc/`), then `make`
+     `INCLUDE_ASM` line, `clang-format -i` (skip under `src/libultra/`, `src/libkmc/` & `src/mgu/`), then `make`
      until `build/mariogolf64.z64: OK` and SHA-1 == baserom.
 
 4. **Bank** the function (only at score 0 + spot-check + full-`make` SHA match). Give it its curated
@@ -215,7 +215,7 @@ below).
 - **Decomp is authoritative for names** (per the Ghidra-workspace
   `docs/re/coordination/decomp_coordination.md`).
 - **Match finalization is three steps:** inline body into `src/<seg>.c` → `clang-format -i`
-  (skip under `src/libultra/` & `src/libkmc/`) → full `make` until ROM SHA-1 matches. Spot-check
+  (skip under `src/libultra/`, `src/libkmc/` & `src/mgu/`) → full `make` until ROM SHA-1 matches. Spot-check
   passing ≠ ROM matching; the final `make` proves the match. Gate the `sha1sum` on `make`
   succeeding (confirm the `build/mariogolf64.z64: OK` line first) — a failed link leaves the previous
   `.z64` in `build/`, so `sha1sum` on a stale ROM false-positives.
@@ -224,9 +224,11 @@ below).
   you changed. When a mirror/enabler edits a widely-included header (e.g.
   `include/libultra/PR/os_version.h`), the **banking** SHA-1 must come from `make clean && make
   extract && make`, not an incremental build (`docs/hazards.md#clean-rebuild-after-shared-header-edit`).
-- **Never clang-format library code under `src/libultra/` or `src/libkmc/`.** These are verbatim
-  upstream copies; reformatting defeats cross-referencing. Both dirs carry a local `.clang-format`
-  with `DisableFormat: true`.
+- **Never clang-format library code under `src/libultra/`, `src/libkmc/`, or `src/mgu/`.** These are
+  verbatim upstream copies; reformatting defeats cross-referencing. Each dir carries a local
+  `.clang-format` with `DisableFormat: true`. `src/mgu/` (S103) holds the game-embedded ultralib
+  gu/mgu matrix source (the Monegi variant, compiled at the game `-O2` profile, NOT the libultra
+  `-O3` band — see `docs/hazards.md#game-region-mirror-o2-profile`).
 - **Use ultra64.h types** (`s32`/`u64`/`vu32`/`f32`/…) in decomp C, never raw
   `int`/`long long`/`volatile unsigned long`.
 - **Prompt authoring.** Any slash command in this project follows `PROMPT_GUIDELINES.md` at the
@@ -280,6 +282,8 @@ When `pick_target.py` flags a hazard (or a match shows its symptom), read the ma
 | `coddog-twin:<matched>!=<member-src>` (S81: coddog matched a near-identical TWIN file; the named members name the real source — mirror from `<member-src>`, not `<matched>`) | #coddog-cross-ref |
 | `coddog-fncount-mismatch:<m>vs<n>` (S88: the coddog file defines FEWER fns than the pack holds → a structural fingerprint match, NOT a single-file source attribution; the pack is multi-file. under-count only — `m<n`. S92: now also fires when the coddog identity is TAIL-carried, not just on the primary member — caught all 3 llcvt phantoms) | #coddog-cross-ref |
 | `coddog-structural:<file>@<pct>` (S92: a single-coddog-identity multi-fn pack whose matched source's meaningful-LOC implies a compiled size far below the subseg's — `size > 64 B/LOC` — so the @99% match is a structural fingerprint, not a source attribution; the size-dimension companion to `coddog-fncount-mismatch`. advisory, display-only. llcvt.c's 8 `return d;` stubs matched THREE distinct subsegs) | #coddog-cross-ref |
+| `coddog-partial:<m>of<n>fn` (S103: coddog matched ≥2 DISTINCT per-fn TWIN files to a multi-fn pack covering only `<m>` of `<n>` fns → a per-fn fingerprint SET, NOT a single-file mirror; the un-matched fns diverge — per-fn verify. The multi-twin companion to `coddog-fncount-mismatch` (which fires only at one coddog identity). advisory. func_800660A0: mtxidentf+mtxl2f matched 2 of 12; combined mtxutil.c's guMtxF2L/guMtxIdent diverged) | #coddog-cross-ref |
+| `game-region-mirror:0x<vram>` (S103: a libultra-source mirror whose rom is BELOW the libultra code band is game-linked at `-O2`, NOT the libultra `-O3` band — `src/libultra/` placement forces `-O3` → wrong auto-inlining; route to a `-O2` path `src/mgu/…` + include via public `<ultra64.h>`. advisory. func_800660A0's gu mtxutil tail @0x80067B00) | #game-region-mirror-o2-profile |
 | (libultra leaf, bare std header)| #per-library-standard-c-header-isolation |
 | (match locks ~0.9, lib target)  | #compile-profiles-libkmc--o-libultra--o3 |
 | (compiler rodata, wrong offset) / `rodata-literal:<addr>` | #rodata-sibling-yaml-pattern |

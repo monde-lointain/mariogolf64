@@ -25,6 +25,17 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 103 — mgu/mtxutil.c (guMtxF2L + guMtxL2F + guMtxIdentF + guMtxIdent), gu matrix utils; planned verbatim mirror PIVOTED to classical at -O2 — 2026-06-16
+- Increment: src/mgu/mtxutil.c banked / 4 fns matched (guMtxF2L, guMtxL2F, guMtxIdentF, guMtxIdent). md5-candidate 151→**152** (all .c stub-free); asm subsegs 125→125 (the split carved a c subseg out of the `[0x414A0,asm]` game pack; the 8-fn game-code prefix stays asm, out of scope). Goal MET (all 4 fns + ROM SHA-1 green); path diverged from plan.
+- Quality: 0 stuck-far / 0 permuter / 0 carried / 0 re-opened. BUT **1 mid-sprint re-plan (mirror→classical) + 1 fix-iteration** — the counter-metric the headline lesson is about.
+- Seed: committed 3pt (regime mirror, seed-only — the coddog-mirror tag over-promised "verbatim cp"); realized **5** (+1 mid-sprint re-plan, +1 novel profile+clamp gotcha); residual **+2**; regime **mixed** (v2 realized tier, classical track).
+- What helped: diagnosing the FAILED first build by objdump-vs-ROM diff, not guesswork — it surfaced BOTH errors cleanly: (1) guMtxIdent 240B-vs-60B = -O3 inlining → the fns are GAME-region (-O2), not the libultra -O3 band (src/libultra/ forces the wrong profile); (2) guMtxF2L's clamp = a Monegi variant absent from every upstream (ultralib gu C + ultralib mgu asm + libultra_modern monegi/mgu asm, all 3 non-clamping byte-identical). Once profiled -O2 at src/mgu/, 3 fns were verbatim and guMtxF2L was a 1-iteration classical clamp (float-literal `f`-suffix for single-precision).
+- Friction: the **coddog-mirror premise was wrong** — coddog matched only 2 of 4 fns (mtxidentf+mtxl2f per-fn twins), but `coddog-twin:mtxidentf!=mtxutil` was under-weighted as a clean single-file signal at the plan gate. Cost a full mirror attempt + revert before re-planning. Both new guards (#1 coddog-partial, #2 game-region-mirror) target exactly this miss for the next time.
+- Applied: 4 of 4 — #1 `pick_target.py` `coddog-partial:<m>of<n>fn` (≥2-distinct-twin subset guard, the multi-twin companion to coddog-fncount-mismatch) + `test_coddog_partial_twin_subset`; #2 `pick_target.py` `game-region-mirror:0x<vram>` (libultra source below the libultra-band rom → -O2, route to src/mgu/) + `test_game_region_mirror_below_libultra_band` + `docs/hazards.md#game-region-mirror-o2-profile` + CLAUDE.md index row; #3 float-literal single-vs-double note (`docs/hazards.md#mirror-cast-divergence`); #4 codify `src/mgu/` as a no-clang-format verbatim-upstream dir (CLAUDE.md ×3 + `src/mgu/.clang-format`). suite 55→**57** pass (REGEN not needed — post-bank the live func_800660A0 row lost its gu identity, so no golden delta).
+- Carry-over: none (the game-code prefix `[0x414A0,asm]` was never in scope, not a spike).
+
+---
+
 ## Sprint 102 — io/motor.c (__osMotorAccess + osMotorInit), libultra io VERSION_J mirror; corrected a wrong ghidra name without sync-names — 2026-06-16
 - Increment: src/libultra/io/motor.c banked / 2 fns matched (__osMotorAccess, osMotorInit). md5-candidate 150→**151** (all .c stub-free); asm subsegs 126→125. The io/motor.c trap S75 flagged (the smallest remaining libultra target — pts-8; everything else `--lib libultra` is pts-13 + structurally trapped).
 - Quality: 0 stuck-far / 0 permuter / 0 carried / 0 re-opened. Verbatim ultralib VERSION_J cp (+ include adapt + drop-static); first-build full-make ROM SHA-1 == baserom, 0 iteration.
