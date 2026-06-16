@@ -243,6 +243,16 @@ $(BUILD_DIR)/$(ASM_DIR)/8EC50.o: src/libkmc/mmuldi3.s
 	cp $@.tmp $@
 	rm $@.tmp
 
+# Vendor override: build/asm/8F020.o from src/libkmc/mcvtld.s (KMC soft-float
+# double<->long long cvt TU: __fixdfdi/__fixunsdfdi @0x8F020 + __floatdidf
+# @0x8F140). Same KMC register conventions as mmuldi3.s; its `.include
+# "mips_as.h"` (sets FPU=1) resolves via -I src/libkmc. One TU -> one .o spanning
+# both functions; the yaml merges 0x8F020 + 0x8F140 into a single hasm subseg.
+$(BUILD_DIR)/$(ASM_DIR)/8F020.o: src/libkmc/mcvtld.s src/libkmc/mips_as.h
+	$(KMC_AS) -EB -mips2 -I src/libkmc -o $@.tmp $<
+	cp $@.tmp $@
+	rm $@.tmp
+
 # Vendored libultra hand-asm TUs: assemble the real ultralib .s sources under
 # src/libultra/ with the SAME toolchain + flags ultralib uses (KMC/N64 gcc,
 # gcc.mk profile), mirroring how LIBULTRA_CFLAGS mirrors ultralib's C profile.

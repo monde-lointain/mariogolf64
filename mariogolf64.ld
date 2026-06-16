@@ -320,7 +320,6 @@ SECTIONS
         build/src/libkmc/_matherr.o(.text);
         build/asm/8EC50.o(.text);
         build/asm/8F020.o(.text);
-        build/asm/8F140.o(.text);
         build/src/libkmc/matherr.o(.text);
         build/asm/8F250.o(.text);
         main_TEXT_END = .;
@@ -585,7 +584,6 @@ SECTIONS
         build/src/libkmc/_matherr.o(.data);
         build/asm/8EC50.o(.data);
         build/asm/8F020.o(.data);
-        build/asm/8F140.o(.data);
         build/src/libkmc/matherr.o(.data);
         build/asm/8F250.o(.data);
         build/asm/data/A4A90.data.o(.data);
@@ -860,7 +858,6 @@ SECTIONS
         build/src/libkmc/_matherr.o(.rodata);
         build/asm/8EC50.o(.rodata);
         build/asm/8F020.o(.rodata);
-        build/asm/8F140.o(.rodata);
         build/src/libkmc/matherr.o(.rodata);
         build/asm/8F250.o(.rodata);
         build/asm/data/ADC40.rodata.o(.rodata);
@@ -1126,7 +1123,6 @@ SECTIONS
         build/src/libkmc/_matherr.o(.bss);
         build/asm/8EC50.o(.bss);
         build/asm/8F020.o(.bss);
-        build/asm/8F140.o(.bss);
         build/src/libkmc/matherr.o(.bss);
         build/asm/8F250.o(.bss);
         build/asm/data/ADD30.bss.o(.bss);
