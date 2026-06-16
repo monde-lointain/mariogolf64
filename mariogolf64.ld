@@ -179,7 +179,8 @@ SECTIONS
         build/src/libultra/audio/load.o(.text);
         build/src/libultra/audio/auxbus.o(.text);
         build/asm/804D0.o(.text);
-        build/asm/811A0.o(.text);
+        build/src/libultra/audio/mainbus.o(.text);
+        build/src/libultra/audio/resample.o(.text);
         build/asm/815C0.o(.text);
         build/src/libultra/audio/save.o(.text);
         build/src/libultra/audio/sl.o(.text);
@@ -433,7 +434,8 @@ SECTIONS
         build/src/libultra/audio/load.o(.data);
         build/src/libultra/audio/auxbus.o(.data);
         build/asm/804D0.o(.data);
-        build/asm/811A0.o(.data);
+        build/src/libultra/audio/mainbus.o(.data);
+        build/src/libultra/audio/resample.o(.data);
         build/asm/815C0.o(.data);
         build/src/libultra/audio/save.o(.data);
         build/src/libultra/audio/sl.o(.data);
@@ -703,7 +705,9 @@ SECTIONS
         build/src/libultra/audio/load.o(.rodata);
         build/src/libultra/audio/auxbus.o(.rodata);
         build/asm/804D0.o(.rodata);
-        build/asm/811A0.o(.rodata);
+        build/src/libultra/audio/mainbus.o(.rodata);
+        build/asm/data/AD6F0.rodata.o(.rodata);
+        build/src/libultra/audio/resample.o(.rodata);
         build/asm/815C0.o(.rodata);
         build/src/libultra/audio/save.o(.rodata);
         build/src/libultra/audio/sl.o(.rodata);
@@ -719,7 +723,7 @@ SECTIONS
         build/src/libultra/io/controller.o(.rodata);
         build/src/libultra/os/virtualtophysical.o(.rodata);
         build/src/libultra/gu/align.o(.rodata);
-        build/asm/data/AD6F0.rodata.o(.rodata);
+        build/asm/data/AD810.rodata.o(.rodata);
         build/src/libultra/gu/cosf.o(.rodata);
         build/src/libultra/gu/lookat.o(.rodata);
         build/src/libultra/gu/lookathil.o(.rodata);
@@ -967,7 +971,8 @@ SECTIONS
         build/src/libultra/audio/load.o(.bss);
         build/src/libultra/audio/auxbus.o(.bss);
         build/asm/804D0.o(.bss);
-        build/asm/811A0.o(.bss);
+        build/src/libultra/audio/mainbus.o(.bss);
+        build/src/libultra/audio/resample.o(.bss);
         build/asm/815C0.o(.bss);
         build/src/libultra/audio/save.o(.bss);
         build/src/libultra/audio/sl.o(.bss);
