@@ -177,7 +177,7 @@ SECTIONS
         build/src/libultra/io/aisetnextbuf.o(.text);
         build/asm/7F080.o(.text);
         build/asm/7F8B0.o(.text);
-        build/asm/803C0.o(.text);
+        build/src/libultra/audio/auxbus.o(.text);
         build/asm/804D0.o(.text);
         build/asm/811A0.o(.text);
         build/asm/815C0.o(.text);
@@ -429,7 +429,7 @@ SECTIONS
         build/src/libultra/io/aisetnextbuf.o(.data);
         build/asm/7F080.o(.data);
         build/asm/7F8B0.o(.data);
-        build/asm/803C0.o(.data);
+        build/src/libultra/audio/auxbus.o(.data);
         build/asm/804D0.o(.data);
         build/asm/811A0.o(.data);
         build/asm/815C0.o(.data);
@@ -698,7 +698,7 @@ SECTIONS
         build/src/libultra/io/aisetnextbuf.o(.rodata);
         build/asm/7F080.o(.rodata);
         build/asm/7F8B0.o(.rodata);
-        build/asm/803C0.o(.rodata);
+        build/src/libultra/audio/auxbus.o(.rodata);
         build/asm/804D0.o(.rodata);
         build/asm/811A0.o(.rodata);
         build/asm/815C0.o(.rodata);
@@ -962,7 +962,7 @@ SECTIONS
         build/src/libultra/io/aisetnextbuf.o(.bss);
         build/asm/7F080.o(.bss);
         build/asm/7F8B0.o(.bss);
-        build/asm/803C0.o(.bss);
+        build/src/libultra/audio/auxbus.o(.bss);
         build/asm/804D0.o(.bss);
         build/asm/811A0.o(.bss);
         build/asm/815C0.o(.bss);
