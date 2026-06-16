@@ -183,7 +183,7 @@ SECTIONS
         build/asm/804D0.o(.text);
         build/src/libultra/audio/mainbus.o(.text);
         build/src/libultra/audio/resample.o(.text);
-        build/asm/815C0.o(.text);
+        build/src/libultra/audio/reverb.o(.text);
         build/src/libultra/audio/save.o(.text);
         build/src/libultra/audio/sl.o(.text);
         build/src/libultra/audio/heapinit.o(.text);
@@ -440,7 +440,8 @@ SECTIONS
         build/asm/804D0.o(.data);
         build/src/libultra/audio/mainbus.o(.data);
         build/src/libultra/audio/resample.o(.data);
-        build/asm/815C0.o(.data);
+        build/asm/data/A3460.data.o(.data);
+        build/src/libultra/audio/reverb.o(.data);
         build/src/libultra/audio/save.o(.data);
         build/src/libultra/audio/sl.o(.data);
         build/src/libultra/audio/heapinit.o(.data);
@@ -454,7 +455,7 @@ SECTIONS
         build/src/libultra/io/contreaddata.o(.data);
         build/src/libultra/io/controller.o(.data);
         build/src/libultra/os/virtualtophysical.o(.data);
-        build/asm/data/A3460.data.o(.data);
+        build/asm/data/A3580.data.o(.data);
         build/src/libultra/gu/align.o(.data);
         build/src/libultra/gu/cosf.o(.data);
         build/src/libultra/gu/lookat.o(.data);
@@ -714,7 +715,7 @@ SECTIONS
         build/src/libultra/audio/mainbus.o(.rodata);
         build/asm/data/AD6F0.rodata.o(.rodata);
         build/src/libultra/audio/resample.o(.rodata);
-        build/asm/815C0.o(.rodata);
+        build/src/libultra/audio/reverb.o(.rodata);
         build/src/libultra/audio/save.o(.rodata);
         build/src/libultra/audio/sl.o(.rodata);
         build/src/libultra/audio/heapinit.o(.rodata);
@@ -729,7 +730,6 @@ SECTIONS
         build/src/libultra/io/controller.o(.rodata);
         build/src/libultra/os/virtualtophysical.o(.rodata);
         build/src/libultra/gu/align.o(.rodata);
-        build/asm/data/AD810.rodata.o(.rodata);
         build/src/libultra/gu/cosf.o(.rodata);
         build/src/libultra/gu/lookat.o(.rodata);
         build/src/libultra/gu/lookathil.o(.rodata);
@@ -981,7 +981,7 @@ SECTIONS
         build/asm/804D0.o(.bss);
         build/src/libultra/audio/mainbus.o(.bss);
         build/src/libultra/audio/resample.o(.bss);
-        build/asm/815C0.o(.bss);
+        build/src/libultra/audio/reverb.o(.bss);
         build/src/libultra/audio/save.o(.bss);
         build/src/libultra/audio/sl.o(.bss);
         build/src/libultra/audio/heapinit.o(.bss);
