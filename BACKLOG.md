@@ -653,6 +653,27 @@ sub-sprints).
   heavy non-audio structural packs (llcvt/settime game-region phantoms) + the sched.c-head & exceptasm.s
   spikes (carry-overs).**
 
+- **Sprint 105: 1 .c file BANKED — `src/libultra/io/dpsetnextbuf.c` (`osDpSetNextBuffer`), libultra
+  DP next-buffer setter; the S104-split foreign TU picked up the very next sprint.** md5-candidate
+  153→**154** (all .c stub-free); asm subsegs ~125→~124. **Split-then-mirror pipeline validated
+  end-to-end:** S104's `upstream-fncount-mismatch` split `func_800B1580` off the xprintf subseg as a
+  foreign asm TU; it was the smallest libultra candidate this sprint, coddog@99.99 → `src/io/
+  dpsetnextbuf.c`, and the gate asm confirmed `osDpSetNextBuffer` (3 jals = `__osDpDeviceBusy`@0x800B2B10
+  S1 + `osVirtualToPhysical`@0x800A7720 S7 ×2; DPC_STATUS/START/END_REG IO_WRITE/IO_READ; no `_DEBUG`
+  block). NOTE: the imprecise S104 carried label "`__osDpDeviceBusy` TU" was a hint, not an attribution —
+  the fn *calls* __osDpDeviceBusy, it isn't it (corrected at the gate; retro #2 codified this). Warm io
+  band (dp.c S1, dpsetstat/dpctr S10, epi* S22/S23) pre-placed both callees + all 4 headers → ZERO
+  recovery, ZERO carve, ZERO mid-flight surprises. Verbatim body cp of ultralib VERSION_J `src/io/
+  dpsetnextbuf.c`; only the include block adapted to in-tree io-band convention (dropped `#ident`,
+  `PRinternal/osint.h`→`osint.h`); `_DEBUG` asserts kept verbatim (compile out under `_FINALROM`). 1
+  symbol add at gate (`osDpSetNextBuffer`=0x800B1580). **First-build full-make ROM SHA-1 == baserom, 0
+  iteration.** regime mirror → seed-only, committed/banked **3pt**. 0 stuck-far/permuter/carried/re-opened.
+  Applied **1 of 3** (PO): #2 `docs/hazards.md#upstream-mirror-pattern` split-off-TU-label-is-a-hint note
+  (#1 confirmatory split-then-mirror-validated, log-only; #3 seed-pricing nuance on 0-work coddog-mirror +
+  already-vendored header, NOT selected). **Cross-repo follow-up:** propagate `osDpSetNextBuffer`@0x800B1580
+  to the Ghidra workspace via `sync_decomp_names.py --import-from-decomp`. **Bonus:** pre-places the
+  `osCreateScheduler` (pts-13) `calls-unplaced` callee. No carry-overs.
+
 - **Sprint 103: 1 .c file BANKED — `src/mgu/mtxutil.c` (`guMtxF2L` + `guMtxL2F` + `guMtxIdentF` +
   `guMtxIdent`), gu matrix utils; a planned verbatim libultra mirror that PIVOTED to classical at the
   game `-O2` profile.** md5-candidate 151→**152** (all .c stub-free); asm subsegs 125→125 (the split

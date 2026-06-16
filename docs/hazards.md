@@ -1070,6 +1070,15 @@ implicit-int K&R (`_xatan(u,v)`), and stray-leading-space headers — and skips 
 macro headers / doc-comment signatures; an under-count there would false-fire this on a genuine
 single-file pack (the nugfxtaskmgr ` void nuGfxTaskStart(...)` near-miss). Advisory/display-only.
 
+**The split-off TU's carried label is a HINT, not a source attribution (S105).** When you split a
+foreign TU off and leave it `asm` for a later sprint, whatever you call it in the split-sprint's
+notes is a quick guess — re-derive its real source with coddog + the asm at the *next* gate, never
+trust the carried label. S104 split `func_800B1580` off xprintf and called it the "`__osDpDeviceBusy`
+TU"; S105 picked it up and the gate found it was actually `osDpSetNextBuffer` (`src/io/dpsetnextbuf.c`,
+coddog@99.99) — the fn *calls* `__osDpDeviceBusy`, it isn't it. The verbatim mirror banked first-try
+once the source was correctly attributed. (Standard practice already; codified because the imprecise
+carried label could mislead a less careful pass.)
+
 **Procedure:** Insert a new `[0x<offset>, asm]` line at the boundary between upstream files (read the
 first instruction's vram from the asm). Two cases: (a) upstream-mirror on the first file → flip the
 first chunk to `[0x<seg>, c, lib<name>/<basename>]`, leave the rest `asm`; (b) classical (statics

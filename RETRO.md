@@ -25,6 +25,17 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 105 — io/dpsetnextbuf.c (osDpSetNextBuffer), libultra DP next-buffer setter; the S104-split foreign TU picked up + re-identified — 2026-06-16
+- Increment: src/libultra/io/dpsetnextbuf.c banked / 1 fn matched (osDpSetNextBuffer). md5-candidate 153→**154** (all .c stub-free); asm subsegs ~125→~124. Goal MET (0 stubs + ROM SHA-1 green), first-try, exactly as planned.
+- Quality: 0 stuck-far / 0 permuter / 0 carried / 0 re-opened. Verbatim-body ultralib VERSION_J cp; first-build full-make ROM SHA-1 == baserom, 0 iteration.
+- Seed: committed 3pt; banked 3pt; regime **mirror** (seed-only — no v2 residual on the mirror track). 8-gate clear (3 < 8).
+- What helped: the **split-then-mirror pipeline** S104 set up paid off cleanly — func_800B1580, split off the xprintf subseg as a foreign TU, was the smallest libultra candidate this sprint and coddog@99.99 attributed it to `src/io/dpsetnextbuf.c`. The gate asm confirmed `osDpSetNextBuffer` (3 jals = __osDpDeviceBusy@0x800B2B10 S1 + osVirtualToPhysical@0x800A7720 S7 ×2). Warm io band (dp.c S1, dpsetstat/dpctr S10, epi* S22/S23) pre-placed both callees + all 4 headers → zero recovery, zero carve, zero mid-flight surprises. The `needs-header:(already-vendored,adapt->osint.h)` annotation made the include adapt a zero-lookup mechanical step.
+- Friction: none. The only thing to watch: S104 carried the TU with an imprecise label ("__osDpDeviceBusy TU") — the fn CALLS that, it isn't it. coddog + the asm were authoritative at the gate. Codified (retro #2).
+- Applied: 1 of 3 — #2 `docs/hazards.md#upstream-mirror-pattern` (upstream-fncount-mismatch subsection): a split-off TU's carried label is a HINT, not a source attribution — coddog/asm verify at the next gate (motivated by exactly this S104→S105 hand-off). (#1 split-then-mirror-validated — confirmatory, log-only; #3 seed-pricing nuance on 0-work coddog-mirror + already-vendored header — NOT selected, seed is planning-only / mirror track seed-only.)
+- Carry-over: none. Bonus: banking osDpSetNextBuffer pre-places a `calls-unplaced` callee for the future osCreateScheduler (pts-13) sprint.
+
+---
+
 ## Sprint 104 — libc/xprintf.c (_Printf + _Putfld), libultra printf engine; PO's "classical spike" UNMASKED as a verbatim mirror at the gate — 2026-06-16
 - Increment: src/libultra/libc/xprintf.c banked / 2 fns matched (_Printf, _Putfld). md5-candidate 152→**153** (all .c stub-free); asm subsegs ~125 (+1 func_800B1580 split subseg). Goal MET (0 stubs + ROM SHA-1 green); the target was the same, but the BRANCH (mirror, not classical) was corrected at the gate.
 - Quality: 0 stuck-far / 0 permuter / 0 carried / 0 re-opened. Byte-identical ultralib VERSION_J cp + dual carve; first-build full-make ROM SHA-1 == baserom, 0 iteration.
