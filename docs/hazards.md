@@ -396,7 +396,15 @@ file-scope `static <type> <name>(...);` (proto/def) shares the mirror's TU and i
 `has_file_scope_static` skips it (S54: sprintf's `static void* proutSprintf(...);` was a false flag
 that mis-routed a clean 2-fn mirror toward the classical loop). The detector strips
 `__attribute__((...))` before the declarator check so an attributed static *array*
-(`static OSMesg buf[N] __attribute__((aligned(8)));`) still flags. Known gap: an *initialized*
+(`static OSMesg buf[N] __attribute__((aligned(8)));`) still flags. **S99: the scan runs on
+comment-STRIPPED text** — `FILE_STATIC_RE` anchors on `;\s*$`, so a trailing `/* ... */` after the
+`;` (nupiinit.c's `static OSMesgQueue PiMesgQ __attribute__((aligned(8)));  /* PI message queue */`)
+silently defeated the match pre-fix; the same comment-strip un-suppressed `defines-data` (a
+`/* ... ( ... */` banner like `Copyright (C) 1997` falsely tripped the K&R-param guard, hiding every
+subsequent depth-0 global across the whole nusys band). **Also S99: `file-static` now unions over a
+c-combined pack's members** (like `defines-data` since S97) — a SECONDARY member's file-scope static
+(`nuContGBPakFwrite`'s `nusimgr` member) is a pack-level drop-static enabler the primary-only scan
+missed. Known gap: an *initialized*
 static (`static T x[] = {...};`) carries `=` and is invisible to the regex — not flagged (caught at
 the gate / link if a sub-fn of a decompose pack is later mirrored).
 
@@ -434,9 +442,21 @@ flags stay (the gate's per-symbol recovery + `seed_points` read them); the tag t
 a **seed-only N-symbol mirror**. A nonzero-initialized global that slips the gate degrades gracefully
 to the carve playbook on the SHA miss — never a silent wrong bank.
 
+**Batch-adding a pack's recovered statics transiently reds the build (S99; data-symbol caller-evict).**
+When drop-static-mirroring a multi-member pack one member at a time, add each member's recovered `.bss`
+statics to `symbol_addrs.txt` **with (or just before) writing that member's body** — not all up front.
+A static added while its consuming member is still an `INCLUDE_ASM` stub **evicts the asm stub's
+sub-field auto-labels** (`SramHandle = 0x800F7580` killed the still-asm `nupiinitsram` stub's
+`D_800F758C`/`D_800F7584`/… → undefined-reference link errors), exactly like the `#caller-evict` /
+`make-sync-names` eviction but for a DATA symbol. Benign — it resolves the moment the consuming body
+lands (the C references `SramHandle` directly, no `D_` labels) — but a red build between the symbol add
+and the last body is expected, not a regression. (S99 `nuPiInitSram`: added all 3 pack statics at once,
+red until both pi bodies landed, then SHA-clean.)
+
 **Provenance:** `rand` (file-scope-static pre-flight); `sprintf` (static-function false-flag, S54);
 `io/vimgr.c` (S87: uninitialized file-static = pure-`.bss` drop-to-extern mirror, the
-`drop-static-mirror` tag).
+`drop-static-mirror` tag); `nupiinit`/`nupiinitsram` (S99: 3-file c-combined drop-static pack;
+comment-strip + member-union detector fix; batch-add transient-red note).
 
 ---
 

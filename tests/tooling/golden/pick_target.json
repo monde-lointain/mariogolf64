@@ -13,19 +13,6 @@
     "vram": "0x800A1FB0"
   },
   {
-    "band": "cold",
-    "func": "nuGfxDisplayOn",
-    "hazards": "pack:3fn[nuGfxDisplayOn=nugfxdisplayon,nuPiInit=nupiinit,nuPiInitSram=nupiinitsram],c-combined:3file[nugfxdisplayon|nupiinit|nupiinitsram]",
-    "kind": "asm-flip",
-    "nfns": 3,
-    "pts": 3,
-    "rom": "0x7CAD0",
-    "score": -56,
-    "size": 256,
-    "upstream": "libnusys",
-    "vram": "0x800A16D0"
-  },
-  {
     "band": "-",
     "func": "func_800A07B0",
     "hazards": "maybe-upstream:libultra:synremoveplayer,synaddplayer,sndplayer",
@@ -67,7 +54,7 @@
   {
     "band": "cold",
     "func": "gfxThread",
-    "hazards": "single-file-pack:2fn[gfxThread=nugfxthread,nuGfxThreadStart=nugfxthread],file-static,refs-unplaced:nuGfxMesgQ,nuGfxPreNMIFunc,nuGfxThread",
+    "hazards": "single-file-pack:2fn[gfxThread=nugfxthread,nuGfxThreadStart=nugfxthread],file-static,defines-data:nuGfxFunc,nuGfxPreNMIFunc,nuGfxThread,refs-unplaced:nuGfxMesgQ,nuGfxPreNMIFunc,nuGfxThread",
     "kind": "asm-flip",
     "nfns": 2,
     "pts": 5,
@@ -314,7 +301,7 @@
   {
     "band": "cold",
     "func": "nuContMgrInit",
-    "hazards": "pack:9fn[nuContMgrInit=nucontmgr,func_800A2C64=?,nuContDataClose=nucontmgr,nuContDataOpen=nucontmgr,contReadData=nucontmgr,func_800A2D5C=?,func_800A2DAC=?,func_800A2E38=?,func_800A2E58=?],one-tu,file-static,defines-data:nuContCallBack,refs-unplaced:nuContCallBack,nuContNum,nuContReadFunc,nuContStatus,nuContWaitMesgQ",
+    "hazards": "pack:9fn[nuContMgrInit=nucontmgr,func_800A2C64=?,nuContDataClose=nucontmgr,nuContDataOpen=nucontmgr,contReadData=nucontmgr,func_800A2D5C=?,func_800A2DAC=?,func_800A2E38=?,func_800A2E58=?],one-tu,file-static,defines-data:nuContNum,nuContDataLockKey,nuContReadFunc,nuContCallBack,refs-unplaced:nuContCallBack,nuContNum,nuContReadFunc,nuContStatus,nuContWaitMesgQ",
     "kind": "asm-flip",
     "nfns": 9,
     "pts": 8,
@@ -405,7 +392,7 @@
   {
     "band": "cold",
     "func": "nuGfxTaskMgr",
-    "hazards": "single-file-pack:3fn[nuGfxTaskMgr=nugfxtaskmgr,nuGfxTaskMgrInit=nugfxtaskmgr,nuGfxTaskStart=?],one-tu,file-static,defines-data:beforeFlag,refs-unplaced:nuDramStack,nuGfxCfb,nuGfxCfbCounter,nuGfxCfbNum,nuGfxCfb_ptr,nuGfxTaskEndFunc,nuGfxUcodeFifoPtr,nuGfxUcodeFifoSize,nuRDPOutputBuf,nuYieldBuf,nusched,rspbootTextEnd,jal-count-mismatch:7vs11",
+    "hazards": "single-file-pack:3fn[nuGfxTaskMgr=nugfxtaskmgr,nuGfxTaskMgrInit=nugfxtaskmgr,nuGfxTaskStart=?],one-tu,file-static,defines-data:nuGfxUcode,nuGfxTask[NU_GFX_TASK_NUM],nuGfxTaskSpool,nuGfxCfb,nuGfxCfbNum,nuGfxCfb_ptr,nuGfxZBuffer,nuGfxDisplay,nuGfxCfbCounter,nuGfxUcodeFifoSize,nuGfxUcodeFifoPtr,nuGfxSwapCfbFunc,nuGfxTaskEndFunc,beforeFlag,refs-unplaced:nuDramStack,nuGfxCfb,nuGfxCfbCounter,nuGfxCfbNum,nuGfxCfb_ptr,nuGfxTaskEndFunc,nuGfxUcodeFifoPtr,nuGfxUcodeFifoSize,nuRDPOutputBuf,nuYieldBuf,nusched,rspbootTextEnd,jal-count-mismatch:7vs11",
     "kind": "asm-flip",
     "nfns": 3,
     "pts": 5,
@@ -418,7 +405,7 @@
   {
     "band": "cold",
     "func": "nuContGBPakFwrite",
-    "hazards": "pack:7fn[nuContGBPakFwrite=nucontgbpakfwrite,func_800A2780=?,nuSiMgrInit=nusimgr,nuSiSendMesg=nusimgr,func_800A2888=?,func_800A28A8=?,func_800A28C8=?],c-combined:2file[nucontgbpakfwrite|nusimgr],refs-unplaced:nuContGBPakCallBack,jal-count-mismatch:5vs10",
+    "hazards": "pack:7fn[nuContGBPakFwrite=nucontgbpakfwrite,func_800A2780=?,nuSiMgrInit=nusimgr,nuSiSendMesg=nusimgr,func_800A2888=?,func_800A28A8=?,func_800A28C8=?],c-combined:2file[nucontgbpakfwrite|nusimgr],file-static,defines-data:nuSiCallBackList,refs-unplaced:nuContGBPakCallBack,jal-count-mismatch:5vs10",
     "kind": "asm-flip",
     "nfns": 7,
     "pts": 8,
@@ -457,7 +444,7 @@
   {
     "band": "cold",
     "func": "nuContRmbMgrInit",
-    "hazards": "pack:9fn[nuContRmbMgrInit=nucontrmbmgr,nuContRmbMgrRemove=nucontrmbmgr,contRmbControl=nucontrmbmgr,contRmbRetrace=nucontrmbmgr,contRmbCheckMesg=nucontrmbmgr,func_800A1DA0=?,func_800A1DE8=?,func_800A1E18=?,func_800A1EA4=?],defines-data:nuContRmbCallBack,refs-unplaced:nuContRmbCallBack,nuContRmbSearchTime,nuScRetraceCounter,calls-unplaced:__osMotorAccess",
+    "hazards": "pack:9fn[nuContRmbMgrInit=nucontrmbmgr,nuContRmbMgrRemove=nucontrmbmgr,contRmbControl=nucontrmbmgr,contRmbRetrace=nucontrmbmgr,contRmbCheckMesg=nucontrmbmgr,func_800A1DA0=?,func_800A1DE8=?,func_800A1E18=?,func_800A1EA4=?],defines-data:nuContRmbSearchTime,nuContRmbCallBack,refs-unplaced:nuContRmbCallBack,nuContRmbSearchTime,nuScRetraceCounter,calls-unplaced:__osMotorAccess",
     "kind": "asm-flip",
     "nfns": 9,
     "pts": 8,
@@ -648,5 +635,18 @@
     "size": 2800,
     "upstream": "libultra",
     "vram": "0x800B0B30"
+  },
+  {
+    "band": "-",
+    "func": "func_8009FD40",
+    "hazards": "pack:6fn[func_8009FD40=?,func_800A0050=?,func_800A0240=?,func_800A0450=?,func_800A0578=?,func_800A0690=?]",
+    "kind": "asm-flip",
+    "nfns": 6,
+    "pts": 13,
+    "rom": "0x7B140",
+    "score": -2544,
+    "size": 2544,
+    "upstream": "none",
+    "vram": "0x8009FD40"
   }
 ]

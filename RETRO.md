@@ -25,6 +25,15 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 99 — libnusys nugfxdisplayon.c + nupiinit.c + nupiinitsram.c; cleared the 0x7CAD0 c-combined:3file pack — 2026-06-16
+- Increment: src/libnusys/mainlib/{nugfxdisplayon,nupiinit,nupiinitsram}.c banked / 3 fns matched (nuGfxDisplayOn, nuPiInit, nuPiInitSram). md5-candidate 144→**147** (all .c stub-free). The `[0x7CAD0]` `c-combined:3file` pack decomposed at the 3 file boundaries (nuPiInit@0x7CAE0, nuPiInitSram@0x7CB20, 16-aligned).
+- Quality: 0 stuck-far / 0 permuter / 0 carried / 0 re-opened. nugfxdisplayon = trivial verbatim cp; nupiinit/nupiinitsram = S87 drop-static mirrors (5 file-scope defs → extern, 3 statics asm-recovered into symbol_addrs, no carve — `.bss` is NOBITS). All 3 first-build full-make ROM SHA-1 == baserom, 0 iteration.
+- Seed: committed 3pt; banked 3pt; regime mirror (8-gate clear). NOTE: seed 3 was a primary-only lower bound — pick_target's whole-pack scan missed members 2&3's drop-static load (anchor-true ~6); retro #1 fixes the under-pricing class.
+- What helped: the MCP asm-disassemble at the gate recovered all 3 static addrs (PiMesgQ/PiMesgBuf/SramHandle) + confirmed the 2 globals already placed → priced the drop-static load before execution. `.bss`-NOBITS insight: no carve, the ROM match rode entirely on the `.text` relocs resolving via symbol_addrs (S81/S87 pattern, 3rd confirmation).
+- Friction: batch-adding all 3 statics up front transiently red the build — `SramHandle` evicted the still-asm `nupiinitsram` stub's sub-field `D_` labels (a DATA-symbol caller-evict) until the body landed. Benign, now documented (#2).
+- Applied (3 of 3): #1 `pick_target.py` comment-strip fix (`has_file_scope_static` + `defines_data_globals` scan comment-STRIPPED text — trailing-`/*..*/`-after-`;` defeated FILE_STATIC_RE; a `Copyright (C)` banner's `(` falsely tripped the K&R guard, suppressing depth-0 globals across the whole nusys band) + `file-static` member-union over c-combined members; golden regen (now flags gfxThread/nuContMgrInit/nuGfxTaskMgr defines-data + nuContGBPakFwrite file-static+defines-data), suite 54 pass; #2 `docs/hazards.md#file-static` batch-add transient-red note + detector-sync note; #3 `.bss`-NOBITS-no-carve confirmation (log-only).
+- Carry-over: none.
+
 ## Sprint 98 — audio/mainbus.c (alMainBusPull/alMainBusParam) + audio/resample.c (alResamplePull/alResampleParam), libultra audio-synth mirrors; cleared the 0x811A0 c-combined pack — 2026-06-16
 - Increment: src/libultra/audio/mainbus.c + src/libultra/audio/resample.c banked / 4 fns matched (alMainBusPull, alMainBusParam; alResamplePull, alResampleParam). md5-candidate 142→**144** (all .c stub-free); asm subsegs 130→129. The `[0x811A0]` `c-combined:2file[mainbus|resample]` pack — the cheapest remaining audio-synth-cluster unit (S97 warm next band) — decomposed at the mainbus/resample file boundary (0x81310, alResamplePull@0x800A5F10, 16-aligned).
 - Quality: 0 stuck-far / 0 permuter / 0 carried / 0 re-opened. Both verbatim ultralib VERSION_J cp; mainbus carve-free, resample one `.rodata` carve. Both first-build full-make ROM SHA-1 == baserom, 0 iteration.

@@ -1258,8 +1258,10 @@ def _is_static_func_proto(line):
 def has_file_scope_static(cpath):
     """True if the upstream .c declares a file-scope static *variable* (BSS-layout hazard →
     classical loop). A file-scope static *function* (prototype) is excluded — it is not a data
-    hazard (S54)."""
-    for line in UpstreamSource.get(cpath).text.splitlines():
+    hazard (S54). S99: scan comment-STRIPPED text — FILE_STATIC_RE anchors on `;\\s*$`, so a
+    trailing `/* ... */` after the `;` (nupiinit.c's `static OSMesgQueue PiMesgQ
+    __attribute__((aligned(8)));  /* PI message queue */`) silently defeated the match."""
+    for line in _strip_comments(UpstreamSource.get(cpath).text).splitlines():
         stripped = line.lstrip()
         if stripped.startswith(("//", "*")):
             continue
@@ -1275,11 +1277,14 @@ def defines_data_globals(cpath):
     file-static BSS hazard. Returns the defined names; a non-empty result is the `defines-data`
     DoR hazard → route to the classical loop with the data defs dropped (the fn references the
     splat-placed globals via extern). Heuristic (brace-depth + line shape), confirmed at the gate
-    like needs-header: `__osThreadTail` et al. in thread.c (osDequeueThread) is the motivating case."""
+    like needs-header: `__osThreadTail` et al. in thread.c (osDequeueThread) is the motivating case.
+    S99: scan comment-STRIPPED text — a `/* ... ( ... */` banner (nupiinit/nupiinitsram.c's
+    `Copyright (C) 1997` line) contains a `(` that falsely trips the K&R-param guard below, silently
+    suppressing EVERY subsequent depth-0 global (nuPiCartHandle/nuPiSramHandle were both missed)."""
     names = []
     depth = 0
     in_kr_params = False  # between a K&R `name(args)` header and its `{` body
-    for raw in UpstreamSource.get(cpath).text.splitlines():
+    for raw in _strip_comments(UpstreamSource.get(cpath).text).splitlines():
         line = raw.strip()
         if (depth == 0 and not in_kr_params and line and not line.startswith(
                 ("#", "//", "*", "}", "static", "extern", "typedef"))):
@@ -2315,13 +2320,17 @@ def _append_coddog_trap_hazards(off, primary, cl_path, up_lib, hazards):
 def append_upstream_hazards(off, primary, up_lib, up_path, hazards, member_paths=()):
     """Append the upstream-mirror hazards for a named candidate (in-place, in the
     order the gate reads them) and return (band, blocked). `member_paths` are a c-combined pack's
-    non-primary member upstreams (S97): the defines-data + bare-assert scans union over them so a
-    SECONDARY member file's defined global / bare assert is priced at the gate, not discovered at
-    execution (sl.c's `alGlobals`, missed by the S96 primary-only scan). The recover-extern /
+    non-primary member upstreams (S97): the file-static (S99) + defines-data + bare-assert scans union
+    over them so a SECONDARY member file's file-scope static / defined global / bare assert is priced
+    at the gate, not discovered at execution (sl.c's `alGlobals`, missed by the S96 primary-only scan;
+    nupiinit/nupiinitsram's drop-static load, missed by the S99 pre-fix primary-only scan). The recover-extern /
     needs-header / call-divergence battery stays primary-keyed (member refs-unplaced is the separate
     S66-deferred follow-up)."""
     blocked = False
-    if has_file_scope_static(up_path):
+    # file-static over the primary + c-combined members (S99): a SECONDARY member's file-scope static
+    # (nupiinitsram.c's `SramHandle`) is a pack-level drop-static enabler, so the gate must see it —
+    # the same member-union the defines-data scan below already does (S97). Primary-only missed it.
+    if any(has_file_scope_static(p) for p in (up_path, *member_paths)):
         hazards.append(Hazard(HAZARD_FILE_STATIC))  # route to the classical loop, not the mirror
     # defines-data over the primary + c-combined members (S73: + fn-local statics; S97: + members).
     data_defs = list(dict.fromkeys(  # de-dup, order-preserving

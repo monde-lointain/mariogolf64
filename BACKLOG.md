@@ -620,6 +620,31 @@ sub-sprints).
   via `sync_decomp_names.py --import-from-decomp` (the 2 fn names were already in `ghidra_symbols.txt`).
   **The `[0x7E360]` pack now has only `pimgr` (osCreatePiManager) left → carry-over below.**
 
+- **Sprint 99: 3 .c files BANKED — `src/libnusys/mainlib/nugfxdisplayon.c` (`nuGfxDisplayOn`) +
+  `nupiinit.c` (`nuPiInit`) + `nupiinitsram.c` (`nuPiInitSram`), libnusys mirrors; cleared the
+  `[0x7CAD0]` c-combined:3file pack.** md5-candidate 144→**147**; 3 fns matched. A
+  `c-combined:3file[nugfxdisplayon|nupiinit|nupiinitsram]` pack split at the 3 file boundaries
+  (`nuPiInit`@0x7CAE0, `nuPiInitSram`@0x7CB20, all 16-aligned) into 3 single-file mirrors.
+  **nugfxdisplayon** (16B) = trivial verbatim cp (1 store to `nuGfxDisplay`, placed S16), zero
+  enabler. **nupiinit** (64B) + **nupiinitsram** (176B) = S87 drop-static mirrors — file-statics
+  `PiMesgQ`/`PiMesgBuf`/`SramHandle` + globals `nuPiCartHandle`/`nuPiSramHandle` dropped to extern;
+  the 3 statics asm-recovered (PiMesgQ=0x800F74A0/0x18, PiMesgBuf=0x800F74B8/0xC8,
+  SramHandle=0x800F7580/0x74) + added to symbol_addrs (**no carve — `.bss` is NOBITS**; the ROM match
+  rides only the `.text` relocs). All 4 callees placed (osCreatePiManager/osCartRomInit/bzero/
+  osEPiLinkHandle). All 3 first-build full-make ROM SHA-1 == baserom, 0 iteration. seed 3 (a
+  primary-only lower bound — pick_target's whole-pack scan missed members 2&3's drop-static load,
+  anchor-true ~6; retro #1 fixed the class); regime mirror (seed-only). 0
+  stuck-far/permuter/carried/re-opened. Applied 3 of 3: #1 `pick_target.py` comment-strip fix
+  (`has_file_scope_static`+`defines_data_globals` scan comment-STRIPPED text — a trailing `/*..*/`
+  after `;` and a `Copyright (C)` banner's `(` had suppressed file-static/defines-data across the
+  whole nusys band) + `file-static` member-union over c-combined members; golden regen, suite 54
+  pass; #2 `docs/hazards.md#file-static` batch-add transient-red note (DATA-symbol caller-evict) +
+  detector-sync note; #3 `.bss`-NOBITS-no-carve confirmation (log-only). **Cross-repo follow-up:** 3
+  new decomp-side data symbols (PiMesgQ/PiMesgBuf/SramHandle) → propagate via
+  `sync_decomp_names.py --import-from-decomp` when convenient. **Remaining libnusys mainlib asm:** the
+  nuCont/nuSi manager packs (nuContRmbModeSet, nuContMgrInit, gfxThread, etc.) — now correctly
+  flagged with their members' file-static/defines-data load post-fix.
+
 - **Sprint 98: 2 .c files BANKED — `src/libultra/audio/mainbus.c` (`alMainBusPull` +
   `alMainBusParam`) + `src/libultra/audio/resample.c` (`alResamplePull` + `alResampleParam`),
   libultra audio-synth mirrors; cleared the `[0x811A0]` c-combined pack.** md5-candidate 142→**144**;
