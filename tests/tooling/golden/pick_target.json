@@ -351,19 +351,6 @@
     "vram": "0x8009DF70"
   },
   {
-    "band": "warm",
-    "func": "alMainBusPull",
-    "hazards": "pack:4fn[alMainBusPull=mainbus,alMainBusParam=mainbus,alResamplePull=resample,alResampleParam=resample],c-combined:2file[mainbus|resample],rodata-jtbl:0x800D23E8,rodata-literal:0x800D23E0;carve-end=0x800D25C0,twin-of:drvrnew",
-    "kind": "asm-flip",
-    "nfns": 4,
-    "pts": 8,
-    "rom": "0x811A0",
-    "score": -792,
-    "size": 1056,
-    "upstream": "libultra",
-    "vram": "0x800A5DA0"
-  },
-  {
     "band": "-",
     "func": "func_800500E0",
     "hazards": "pack:3fn[func_800500E0=?,func_80050274=?,func_8005029C=?],one-tu",
@@ -648,5 +635,18 @@
     "size": 2528,
     "upstream": "none",
     "vram": "0x8009CF30"
+  },
+  {
+    "band": "warm",
+    "func": "_Printf",
+    "hazards": "single-file-pack:3fn[_Printf=xprintf,_Putfld=xprintf,func_800B1580=?],defines-data:fchar,fbit,refs-unplaced:__PTRDIFF_TYPE__,calls-unplaced:ATOI,LDSIGN,PAD,PUT,isdigit,pfn,rodata-jtbl:0x800D2678,jal-count-mismatch:14vs3",
+    "kind": "asm-flip",
+    "nfns": 3,
+    "pts": 13,
+    "rom": "0x8BF30",
+    "score": -2536,
+    "size": 2800,
+    "upstream": "libultra",
+    "vram": "0x800B0B30"
   }
 ]

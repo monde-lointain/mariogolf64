@@ -620,6 +620,31 @@ sub-sprints).
   via `sync_decomp_names.py --import-from-decomp` (the 2 fn names were already in `ghidra_symbols.txt`).
   **The `[0x7E360]` pack now has only `pimgr` (osCreatePiManager) left → carry-over below.**
 
+- **Sprint 98: 2 .c files BANKED — `src/libultra/audio/mainbus.c` (`alMainBusPull` +
+  `alMainBusParam`) + `src/libultra/audio/resample.c` (`alResamplePull` + `alResampleParam`),
+  libultra audio-synth mirrors; cleared the `[0x811A0]` c-combined pack.** md5-candidate 142→**144**;
+  asm subsegs 130→129; 4 fns matched. The cheapest remaining audio-synth-cluster unit (S97 warm next
+  band), a `c-combined:2file[mainbus|resample]` pack that tripped the 8-gate (NOT the verbatim
+  exemption — c-combined MUST decompose) → split `[0x811A0,asm]` text at the mainbus/resample file
+  boundary (0x81310, `alResamplePull`@0x800A5F10, 16-aligned) into two single-file mirrors. **mainbus.c**
+  verbatim VERSION_J cp, **carve-FREE** (alMainBusPull all-immediate, alMainBusParam 1-case
+  switch→branch — asm-confirmed no 0x800D2 refs). **resample.c** verbatim cp + a **`.rodata` carve**
+  `[0xAD7E0,.rodata,libultra/audio/resample]` (MAX_RATIO double `D_800D23E0` 8B + `jtbl_800D23E8` 10w
+  40B = 0x30, alResamplePull `ldc1 0x23e0` + alResampleParam 5-case switch); pre-carve build link-failed
+  (`AD6F0.rodata.o` jtbl `.word .L800A6160/.L800A6188` vanish under C) → carved generic `[0xAD6F0]`
+  3-way (twin-of:drvrnew S96 pinned the playbook). All 4 names pre-curated S96 (drvrnew callees) →
+  **zero symbol adds**; osVirtualToPhysical placed S7; AUD_PROFILE dead S95. Both first-build full-make
+  ROM SHA-1 == baserom, 0 iteration. seed 4 (2 mainbus + 2 resample); regime mirror (seed-only). 0
+  stuck-far/permuter/carried/re-opened. Applied 2 of 2 (conservative form): #1 `pick_target.py`
+  `;owner-per-member` marker on a c-combined pack's rodata-jtbl/literal (the whole-pack scan
+  over-attributed resample's carve to the mainbus primary row; fires only when `member_paths` non-empty
+  → no single-file regression; now flags the env/filter pack 0x804D0) + CLAUDE.md index row +
+  `docs/hazards.md#rodata-sibling-yaml-pattern` owner-per-member note; #2 carve-end upper-bound +
+  stale-`asm/<ROM>.s` caveats in the same hazards section; golden regen, suite 54 pass. **No cross-repo
+  follow-up** (zero new decomp-side symbols). **The audio-synth cluster's remaining asm — env @804D0
+  (`c-combined:2file[env|filter]`, now `;owner-per-member`-flagged) + fx/reverb @815C0 — is the warm
+  next band.**
+
 - **Sprint 97: 2 .c files BANKED — `src/libultra/audio/save.c` (`alSavePull` + `alSaveParam`) +
   `src/libultra/audio/sl.c` (`alInit` + `alClose` + `alLink` + `alUnlink`), libultra audio-synth
   mirrors; cleared the `[0x82160]` `alSavePull` pack.** md5-candidate 140→142; 6 fns matched. The
@@ -1337,6 +1362,23 @@ by `/sprint-plan`:
   S85** — turned out a drop-def mirror (NOT the framed cross-region `.data` carve; main_data provides
   the bytes) + one VERSION_K-gate un-gate (`__osSetWatchLo`, `docs/hazards.md#needs-define`) + a
   `#undef __osInitialize_common` for the os_host.h K→J shim (`docs/hazards.md#header-renames-symbol`).)_
+- **Tooling follow-up (S98 #1, deferred half) — full per-member rodata carve attribution +
+  label-bounded carve-end.** S98 shipped the conservative `;owner-per-member` marker (suffixed on a
+  c-combined pack's `rodata-jtbl`/`rodata-literal` so the gate does not carve the PRIMARY `.c` by
+  default) + the `docs/hazards.md#rodata-sibling-yaml-pattern` owner-confirm playbook, but DEFERRED the
+  precise attribution: (a) scan each c-combined member function's body for the `%lo(D_<addr>)` /
+  `%lo(jtbl_<addr>)` ref and tag the OWNING member stem (e.g. `rodata-jtbl:0x800D23E8@resample`) instead
+  of the all-or-nothing marker — needs the fn→member-stem map plumbed into `append_upstream_hazards`
+  AND `_append_recover_hazards` (the jtbl is emitted in the latter, which today gets no member context;
+  also covers the coddog jtbl path); (b) tighten `_rodata_carve_end_vram` to stop at the first
+  following rodata block whose `.word .L<addr>` entries leave the owning member's `[fn_start, fn_end)`
+  range (S98 env's `carve-end=0x800D2410` over-ran into resample's already-carved 0x800D23E0..0x2410).
+  Also worth a guard: `pick_target` reads a STALE `asm/<ROM>.s` after a flip/split (splat leaves the old
+  per-ROM listing when a subseg flips to `c`), so a post-split re-run mis-scopes the scan — bound the
+  subseg scan to the candidate's own `[off, off+size)` extent. Not file-blocking (the marker +
+  link-error confirm cover the gate; the carve is `.o`-sized at execution). Touches the smallest-first
+  ranker → off-cadence golden-gated work (tooling-refactor-style). Reuse the existing `member_paths`
+  resolution + `iter_function_body` + the rodata REs already in `decomp_asm.py`.
 - **Tooling follow-up (S92 #3, REVERTED at apply) — `.data`-carve detector for file-static
   INITIALIZED arrays.** S92's `_Litob` needed a `.data` carve for its `ldigs`/`udigs` digit tables
   (`static char[]="0123…"`), which NO detector flagged at the gate (only xldtob's `rodata-literal`

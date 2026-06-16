@@ -283,6 +283,7 @@ When `pick_target.py` flags a hazard (or a match shows its symptom), read the ma
 | (match locks ~0.9, lib target)  | #compile-profiles-libkmc--o-libultra--o3 |
 | (compiler rodata, wrong offset) / `rodata-literal:<addr>` | #rodata-sibling-yaml-pattern |
 | `rodata-jtbl:<addr>` (a `switch` jump table the mirror re-emits; the gate's text-only flip can't catch the carve — the jtbl stays valid asm until the body lands — so it's priced at the gate) | #rodata-sibling-yaml-pattern |
+| `…;owner-per-member` on a `rodata-jtbl`/`rodata-literal` (S98: a c-combined multi-file pack — the whole-pack scan over-attributes the carve to the PRIMARY row; the owner is the member fn that references it, confirmed at execution by the pre-carve build's undefined-`.L<addr>` link-error — do NOT carve the primary `.c` by default) | #rodata-sibling-yaml-pattern |
 | (MMIO fn, flat score, empty top_mismatches) | #io_writeio_read-isolation-artifact |
 | (macro-hidden extern)           | #macro-hidden-recover-extern |
 | (warm band, no hazard)          | #open-band-fast-path |

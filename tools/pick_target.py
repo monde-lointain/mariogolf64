@@ -2415,6 +2415,22 @@ def append_upstream_hazards(off, primary, up_lib, up_path, hazards, member_paths
                 or sorted((sibs[".data"] | sibs[".rodata"] | sibs[".bss"]) - {cand_stem})
             if pool:
                 hazards.append(Hazard(HAZARD_TWIN_OF, pool[0]))
+    # owner-per-member marker (S98): the rodata-literal/jtbl scans span the WHOLE subseg (S55), which
+    # is correct for a single-file pack (one .c -> one .o -> one .rodata) but OVER-attributes for a
+    # c-combined (multi-file) pack — both members' pooled rodata lands on the PRIMARY row, yet the
+    # carve owner is the member file whose function actually references it. S98: alMainBusPull's row
+    # carried resample's `rodata-literal:0x800D23E0` (MAX_RATIO) + `rodata-jtbl:0x800D23E8`
+    # (alResampleParam switch); mainbus.c is carve-FREE. Mark the multi-file case so the gate does not
+    # carve the primary `.c` by default — the true owner is confirmed at execution by the pre-carve
+    # build's undefined-`.L<addr>` link-error (the jtbl `.word` entries name the owning function).
+    # Fires ONLY when member_paths is non-empty (a c-combined pack), so a single-file pack is
+    # untouched (no S55 regression). Full per-member attribution (incl. the coddog jtbl path in
+    # _append_recover_hazards) + label-range-bounded carve-end: BACKLOG tooling follow-up (S98).
+    if member_paths:
+        for h in hazards:
+            if h.kind in (HAZARD_RODATA_JTBL, HAZARD_RODATA_LITERAL) and \
+                    "owner-per-member" not in (h.detail or ""):
+                h.detail = f"{h.detail or ''};owner-per-member"
     band = "warm" if band_is_warm(mirror_dir) else "cold"
     return band, blocked
 
