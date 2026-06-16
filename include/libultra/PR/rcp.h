@@ -560,6 +560,7 @@
 #define VI_CTRL_DIVOT_ON            0x00010 /* 4: default = on */
 #define VI_CTRL_SERRATE_ON          0x00040 /* 6: on if interlaced */
 #define VI_CTRL_ANTIALIAS_MASK      0x00300 /* [9:8] anti-alias mode */
+#define VI_CTRL_ANTIALIAS_MODE_0    0x00000 /* Bit [9:8] anti-alias mode */
 #define VI_CTRL_ANTIALIAS_MODE_1    0x00100 /* Bit [9:8] anti-alias mode */
 #define VI_CTRL_ANTIALIAS_MODE_2    0x00200 /* Bit [9:8] anti-alias mode */
 #define VI_CTRL_ANTIALIAS_MODE_3    0x00300 /* Bit [9:8] anti-alias mode */
