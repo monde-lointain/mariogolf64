@@ -524,7 +524,7 @@ SECTIONS
         build/src/libultra/io/gbpakgetstatus.o(.data);
         build/src/libultra/io/gbpakpower.o(.data);
         build/src/libultra/io/gbpakreadwrite.o(.data);
-        build/asm/data/A3670.data.o(.data);
+        build/src/libultra/io/vitbl.o(.data);
         build/src/libultra/io/gbpakreadid.o(.data);
         build/src/libultra/io/gbpakcheckconnector.o(.data);
         build/src/libultra/io/motor.o(.data);
@@ -569,7 +569,10 @@ SECTIONS
         build/src/libultra/io/vigetcurrcontext.o(.data);
         build/src/libultra/io/gbpaksetbank.o(.data);
         build/src/libultra/io/pfsisplug.o(.data);
-        build/asm/data/A4900.data.o(.data);
+        build/src/libultra/io/vi.o(.data);
+        build/src/libultra/vimodes/vimodentsclan1.o(.data);
+        build/src/libultra/vimodes/vimodepallan1.o(.data);
+        build/src/libultra/vimodes/vimodempallan1.o(.data);
         build/src/libultra/libc/xlitob.o(.data);
         build/src/libultra/libc/xldtob.o(.data);
         build/src/libultra/io/dp.o(.data);
