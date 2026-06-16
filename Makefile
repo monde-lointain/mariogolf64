@@ -272,6 +272,7 @@ VENDOR_ASM := \
 	8CD10:src/libultra/os/maptlbrdb.s \
 	85DA0:src/libultra/libc/bcopy.s \
 	860C0:src/libultra/libc/bzero.s \
+	8BE20:src/libultra/libc/bcmp.s \
 	8CA50:src/libultra/os/setfpccsr.s \
 	8CA60:src/libultra/os/setsr.s \
 	8CA70:src/libultra/os/setwatchlo.s \

@@ -280,6 +280,7 @@ SECTIONS
         build/src/libultra/io/ai.o(.text);
         build/asm/8BE10.o(.text);
         build/asm/8BE20.o(.text);
+        build/asm/8BF30.o(.text);
         build/asm/8CA20.o(.text);
         build/asm/8CA30.o(.text);
         build/asm/8CA40.o(.text);
@@ -532,6 +533,7 @@ SECTIONS
         build/src/libultra/io/ai.o(.data);
         build/asm/8BE10.o(.data);
         build/asm/8BE20.o(.data);
+        build/asm/8BF30.o(.data);
         build/asm/8CA20.o(.data);
         build/asm/8CA30.o(.data);
         build/asm/8CA40.o(.data);
@@ -799,6 +801,7 @@ SECTIONS
         build/src/libultra/io/ai.o(.rodata);
         build/asm/8BE10.o(.rodata);
         build/asm/8BE20.o(.rodata);
+        build/asm/8BF30.o(.rodata);
         build/asm/8CA20.o(.rodata);
         build/asm/8CA30.o(.rodata);
         build/asm/8CA40.o(.rodata);
@@ -1059,6 +1062,7 @@ SECTIONS
         build/src/libultra/io/ai.o(.bss);
         build/asm/8BE10.o(.bss);
         build/asm/8BE20.o(.bss);
+        build/asm/8BF30.o(.bss);
         build/asm/8CA20.o(.bss);
         build/asm/8CA30.o(.bss);
         build/asm/8CA40.o(.bss);
