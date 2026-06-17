@@ -16,6 +16,17 @@ subordinate to the libultra goal. Target selection is `tools/pick_target.py` (sm
 the 8-point decompose gate fires on any seed ≥8. v2 classical track is active (since S11);
 mirror is the default, classical is first-class when the asm warrants it.
 
+**S112 — `src/libkmc/atan.c` BANKED (first libkmc C-mirror).** Verbatim mirror of `libkmc/src/atan.c`
+(`_xatan`+`atan`+`atan2`, CORDIC fixed-point on `long long` XLONG + doubles) at the libkmc `-O` profile
+(`LIBKMC_CFLAGS` = `-O2`→`-O`), first-build clean (0 iteration, all 4 flagged risks held). Enablers:
+placed `_atbl`=0x800C9690 (shared atbl.c CORDIC table — the whole `[0xA4A90,data]` 0xBD8 blob = the
+table, a symbol-place NOT a carve), vendored `cordic.h`, carved `[0xADC40,rodata]`→`[0xADC40,.rodata,
+libkmc/atan]` (generic-subseg-bound 1-line flip, 0x60 B). All callees pre-placed (`__floatdidf`/
+`__fixunsdfdi`/`__matherr`); KMC GCC inlines the long-long shifts (0 shift-helper jal). md5-candidate
+161→162. Full-make ROM SHA-1 == baserom. **The libkmc band is now down to ONE non-`hasm` unit —
+`sin.c` (`_xsincos`+sin+cos+tan, [0x8E660]), the near-free sibling retry (cordic.h + `_atbl` already
+placed; see Carry-overs). After sin.c banks, libkmc is fully mined (only mmuldi3/mcvtld `hasm` remain).**
+
 **S111 — libultra `.data`/`.rodata` resolution sweep BANKED (≈18 TUs).** Carved every attributable
 anonymous block in the libultra `.data`/`.rodata` region (0xA32D0–0xADCA0) into named `libultra/<tu>`
 subsegs: 12 placed drop-def restores (initialize/sl/controller/random/seteventmesg/siacs/timerintr/
@@ -1599,17 +1610,21 @@ by `/sprint-plan`:
   adaptation vs upstream; **(5)** the upstream pin (file + VERSION_J). A near-free retry missing any
   of these is a half-scoped spike — finish the scope before deferring.
 
-- _(Spike — **libkmc `atan.c` (0x8E110) + `sin.c` (0x8E660) C-mirrors own the last 3 un-resolved
-  libultra-region data/rodata blocks** (S111). Per the S109 BACKLOG context: `0x8E110` =
-  `_xatan`+`atan`+`atan2` (libkmc `atan.c`, 3-fn single-file-pack) and `0x8E660` =
-  `_xsincos`+`sin`+`cos`+`tan` (libkmc `sin.c`, 4-fn). Their data/rodata, left anonymous because both
-  fns are still bare `asm`: **`A4A90` (0xBD8 @0x800C9690) = atan.c's `_atbl[]`** (NOT unattributable —
-  S111 first mislabelled it after a fresh xref/​drmario64 check that missed the existing S109 note;
-  always grep BACKLOG/the S109 `## Active phase` asm-inventory before declaring a block orphan),
-  `ADC40` = atan.c `cordic_atan_divisor_2_60`, `ADCA0` = sin.c sin/cos consts. RESOLUTION: these are
-  **C-mirrors** (not asm-mirrors) — flip the two asm subsegs to `c`, mirror the libkmc sources, and the
-  `_atbl[]`/cordic/sincos data carves to those `.c` files (`.data`/`.rodata` siblings). Decompiling the
-  fns and resolving their data is ONE unit.)_
+- _(Near-free retry — **libkmc `sin.c` (0x8E660) C-mirror** (`_xsincos`+`sin`+`cos`+`tan`, 4-fn
+  single-file-pack). The `atan.c` sibling banked **S112** (first libkmc C-mirror, first-build clean);
+  this is its near-free replay (NOT a spike — the atan.c bank pre-placed the shared deps). **Completeness
+  checklist:** **(1)** flip `[0x8E660, asm]` → `[0x8E660, c, libkmc/sin]` (text only at gate). **(2)**
+  placed-ref inventory: `_atbl`=0x800C9690 (placed S112), soft-float callees already placed
+  (`__floatdidf`@0x800B3D40, `__fixunsdfdi`@0x800B3C20), `cordic.h` vendored S112, names curated
+  (`_xsincos`/`sin`/`cos`/`tan` in ghidra_symbols). **NO `__matherr` dep** (unlike atan.c). **(3)** NEW
+  symbols to add: none expected (sin.c's only data dep is `_atbl`, already placed; confirm at the gate by
+  disassembling `0x8E660` — verify no un-named `D_<addr>` ref beyond `_atbl`). **(4)** include adaptation:
+  verbatim, `#include "_kmclib.h"`/`<math.h>`/`<cordic.h>` all in-tree under `include/libkmc/`; SKIP
+  clang-format (local DisableFormat). **(5)** upstream pin: `~/development/repos/libkmc/src/sin.c` (GCC
+  branch: XLONG=long long, MBIT=2^60, CBIT=52). Execution: verbatim cp + carve the rodata sibling
+  `[0xADCA0, rodata]` → `[0xADCA0, .rodata, libkmc/sin]` (the sin/cos FP consts), full-make SHA-1.
+  **After this, libkmc is fully mined — only mmuldi3/mcvtld `hasm` remain.** Same risk class as atan.c
+  (double + long-long-shift codegen + rodata literal-pool), de-risked by the atan.c first-build match.)_
 
 - _(Near-free retry — xldtob tail `[0x8D480]` (`_Ldtob` + `_Ldunscale` + `_Genld`) **RESOLVED + banked
   S93** — the carry-over's 5-point checklist replayed verbatim-correct (0 rework): single text flip

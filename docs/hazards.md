@@ -335,8 +335,20 @@ the run** cross-checked against the C type (`OSThread`=0x1B0, `OSMesgQueue`=0x18
 vrams (pimgr's block sat immediately below the prior io file's `piAccessBuf`), so one disassembly +
 the gap arithmetic yields every `symbol_addrs` size:-extern at once — no per-symbol re-disassembly.
 
+**Unindexed-upstream mirror → no auto refs-unplaced (S112).** A mirror candidate whose `upstream`
+column is `none` (a coddog-match, a de-ranked carry-over, or any source not in the upstream index)
+gets **no** refs-unplaced scan at all — the hazard is computed only for a candidate with an indexed
+upstream `.c`. So an inline `extern <type> <name>[];` data dep declared in the upstream BODY (not a
+header) won't be auto-flagged; recover it manually at the gate from the asm `%hi/%lo` and place it
+add-only before the flip. NB the *detection* is not the gap: `EXTERN_DATA_DECL_RE` +
+`declared_extern_data` already match the inline array / macro-type form (`extern XLONG _atbl[];` →
+`_atbl`) once the upstream is indexed. S112 `atan.c`/`sin.c` (libkmc math, upstream `none`, de-ranked
+carry-overs) needed `_atbl`@0x800C9690 placed by hand; indexing libkmc math was rejected as low-value
+(carry-overs) + reclassification-risk.
+
 **Provenance:** S12 (inline-vram idea), S19 (3/3 trio), S20 (indexed-array base correction), S22
-(flat-guess trap), S90 (contiguous `.bss`-block sized by inter-symbol gaps).
+(flat-guess trap), S90 (contiguous `.bss`-block sized by inter-symbol gaps), S112 (unindexed-mirror
+no-scan note).
 
 ---
 
@@ -1067,6 +1079,17 @@ carve split `[0xAD6F0, rodata]` 3-way → inserted `[0xAD7E0, .rodata, libultra/
 MAX_RATIO double `D_800D23E0` (8B) + `jtbl_800D23E8` (10 words, 40B) = 0x30; mainbus.c carve-free.
 First **owner-per-member** case — added the `;owner-per-member` c-combined marker after the
 whole-pack scan over-attributed resample's rodata to the mainbus primary row).
+S112 (`atan.c`: first **libkmc** C-mirror — generic `[0xADC40, rodata]` (`cordic_atan_divisor_2_60`
++ 10 pooled FP literals + the `"atan2"` string, 0x60 B) **already bounded** the extent → 1-line
+attribute flip `rodata` → `.rodata, libkmc/atan`, NO split; byte-matched first build).
+
+**Stale orphan after a retype-carve (S112): expected, harmless.** Flipping a generic `[ADDR, rodata]`
+→ `[ADDR, .rodata, <file>]` leaves the pre-carve `asm/data/<ADDR>.rodata.s` (and, on an incremental
+build, a stale `build/asm/data/<ADDR>.rodata.o`) on disk — `make extract` does not prune a removed
+subseg's per-file output, and `make clean` wipes `build/` but not `asm/`. Both are **gitignored and
+absent from `mariogolf64.ld`** (unlinked), so a clean-rebuild ROM SHA-1 == baserom is proof they're
+inert — do NOT mistake the leftover `.s` at verify time for a double-carve (a double-LINK would
+overlap and break the SHA, so a green clean-rebuild already rules it out).
 
 ---
 

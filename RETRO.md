@@ -25,6 +25,17 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 112 — bank src/libkmc/atan.c (first libkmc C-mirror) — 2026-06-17
+- Increment: src/libkmc/atan.c banked (3 fn: _xatan/atan/atan2). md5-candidate 161→162.
+- Quality: 0/0/0/0 (stuck-far/permuter/carried/re-opened).
+- Seed: committed 13pt; banked 13pt; regime mirror (8-gate fired → verbatim-mirror exemption; seed-only).
+- What helped: the carry-over's full data map (S109/S111) pre-resolved every dep at the gate — `_atbl`@0x800C9690 (the whole `[0xA4A90,data]` 0xBD8 blob = the CORDIC table, so a symbol-place not a carve), the rodata sibling bounded exactly by the generic `[0xADC40,rodata]` (1-line flip, no split), and all callees pre-placed (`__floatdidf`/`__fixunsdfdi`/`__matherr`). Verbatim cp at the libkmc `-O` profile matched FIRST BUILD, 0 iteration — all 4 flagged risks (rodata pool order / long-long shift codegen / -O fp scheduling / K&R protos) held. KMC GCC inlines the long-long shifts (no `__ashrdi3` enabler). Confirms the verbatim-mirror exemption generalizes to a pts-13 single-file-pack carrying recover-extern + rodata-carve, not just a clean cp.
+- Friction: none on the bank. Minor: a stale `asm/data/ADC40.rodata.s` orphan lingered after the retype-carve (gitignored + unlinked, harmless) — confirmed inert via clean-rebuild SHA match (now documented).
+- Applied (3 of 3): #1 `docs/hazards.md#.rodata sibling` stale-orphan-after-retype-carve note + S112 provenance; #2 `docs/hazards.md#recover-extern` unindexed-upstream-mirror no-scan note (root-caused: atan/sin are upstream `none` so refs_unplaced never runs; the regex ALREADY matches the inline `extern XLONG _atbl[];` — indexing libkmc math rejected as low-value carry-overs + reclassification-risk); #3 BACKLOG band-exhaustion paragraph.
+- Carry-over: src/libkmc/sin.c (near-free retry, NOT a spike) — cordic.h + `_atbl` now placed; the last libkmc non-hasm unit.
+
+---
+
 ## Sprint 111 — resolve ALL libultra TU .data/.rodata (whole-region carve sweep) — 2026-06-17
 - Increment: ≈18 libultra TU `.data`/`.rodata` sections carved into named `libultra/<tu>` subsegs across the 0xA32D0–0xADCA0 region (12 placed drop-def restores, 6 vendored data TUs: thread/vitbl/vi/3×vimodes, exceptasm `.data`+`.rodata` un-stripped, gu/libm_vals). 8 new src/libultra files; 46 named data/rodata subsegs now. md5-candidate unchanged at 155 (these are data carves, not new `.c` fn matches).
 - Quality: stuck-far 0, permuter 0, carried 3 (ADC40 atan-consts, ADCA0 _xsincos-consts, A4A90 unattributable), re-opened **1 — major** (3 build breaks masked behind an ungated stale-green `sha1sum`).
