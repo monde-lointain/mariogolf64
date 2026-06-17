@@ -127,12 +127,12 @@ for the identified TU, it falls back to plain `hasm`.
    `mips-linux-gnu as`.** This is the load-bearing step: KMC `as` pads each function's `.text` up to
    its 16-byte ROM slot, so the verbatim 0xC TU lands as the 0x10 the ROM expects. Modern `as` emits
    the bare 0xC and every following subseg shifts → SHA-1 break (the entire S56 failure mode before
-   the toolchain switch). The Makefile carries this as `LIBULTRA_ASFLAGS` + a **path-based pattern
+   the toolchain switch). `mk/libultra.mk` carries this as `LIBULTRA_ASFLAGS` + a **path-based pattern
    rule** `build/src/libultra/%.o: src/libultra/%.s` that assembles every `.s` under `src/libultra/`
    with `$(CC) $(LIBULTRA_ASFLAGS)` + the section-alignment `objcopy` (the more-specific pattern wins
    over the generic `src/%.s` modern-GAS rule; the project sets `hasm_in_src_path: True`, see step 4).
    Nothing to add per TU — dropping the `.s` under `src/libultra/<dir>/` + qualifying the yaml line
-   (step 4) is the whole extension; there is no Makefile edit. (This mirrors how `LIBULTRA_CFLAGS`
+   (step 4) is the whole extension; there is no build-file edit. (This mirrors how `LIBULTRA_CFLAGS`
    mirrors ultralib's C profile.)
 4. **Flip the subseg `asm` → `hasm` AND add the `<dir>/<stem>` name qualifier** in `mariogolf64.yaml`
    (e.g. `[0x86790, hasm, libultra/os/getcount]`), so the project's `hasm_in_src_path: True` resolves
@@ -249,7 +249,7 @@ for the identified TU, it falls back to plain `hasm`.
 `__muldi3`; `mcvtld.s` `__fixdfdi`/`__fixunsdfdi`+`__floatdidf`) are NOT ultralib `LEAF`/`XLEAF` TUs
 and do NOT assemble under `LIBULTRA_ASFLAGS`. They use **KMC register conventions** (`move dst,zero`
 → `addu` encoding) and must be assembled with the **KMC assembler** `$(KMC_AS)`, the same toolchain
-the in-tree disassembly-reassembly path uses. The Makefile carries these under a **path-based pattern
+the in-tree disassembly-reassembly path uses. `mk/libkmc.mk` carries these under a **path-based pattern
 rule** `build/src/libkmc/%.o: src/libkmc/%.s` (separate from the ultralib `src/libultra/%.o` rule,
 which hard-codes the `LIBULTRA_ASFLAGS` profile): `$(KMC_AS) -EB -mips2 -I src/libkmc -o $@.tmp $<;
 cp $@.tmp $@; rm $@.tmp` (no objcopy — the 16-byte-slot pad happens inside KMC `as`).
@@ -815,7 +815,7 @@ same compiler at the wrong level produces a byte mismatch.
 **Trigger:** A libkmc match locking at ~0.9 across every C rewrite (suspect scheduler-level); a
 libultra match locking at ~0.9 with unexpected register usage or wrong delay-slot instructions.
 
-**Procedure:** The Makefile carves `LIBKMC_CFLAGS := $(subst -O2,-O,$(CFLAGS))` and
+**Procedure:** `mk/libkmc.mk` and `mk/libultra.mk` carve `LIBKMC_CFLAGS := $(subst -O2,-O,$(CFLAGS))` and
 `LIBULTRA_CFLAGS := $(subst -O2,-O3,$(CFLAGS)) -fsigned-char -DBUILD_VERSION=VERSION_J`, each via a
 specificity-winning pattern rule. `decomp_loop.py` auto-applies the right profile when a matching
 `src/libkmc/<basename>.c` or `src/libultra/<relpath>.c` exists. If a match locks at ~0.9, verify the
@@ -845,7 +845,7 @@ compiler's free choice for a `!= 0` test).
 1. The band default is already `-fsigned-char` (S65) — a new libultra mirror compiles signed with no
    action. If a mirror SHA-misses with the `lbu/andi` vs `lb/sll-sra` signature, you have the inverse
    case (a TU that wants the *opposite* signedness).
-2. Per-file override mechanism (the explicit-target var beats the `libultra/%.o` pattern):
+2. Per-file override mechanism (add in `mk/libultra.mk`; the explicit-target var beats the `libultra/%.o` pattern):
    `$(BUILD_DIR)/$(SRC_DIR)/libultra/<rel>.o: C_PROFILE_CFLAGS = $(subst -fsigned-char,-funsigned-char,$(LIBULTRA_CFLAGS))`
    (or the reverse subst). Append-and-last-wins also works since gcc takes the final `-f*-char`.
 3. To re-settle the band default after several such files, run `make clean && make` with the global
@@ -1114,7 +1114,7 @@ need ground truth.
   IO_WRITE literal addresses, proceed directly to `make` + ROM SHA-1 without C iteration.
 
 `include/macro.inc` had its `.internal _MACRO_INC_GUARD` line removed so KMC `as` parses it cleanly.
-`permuter_settings.toml` mirrors the Makefile's `src/%` pipeline.
+`permuter_settings.toml` mirrors the build's `src/%` pipeline (`mk/src.mk`).
 
 **Provenance:** S39 (struct-field reloc addend encoding).
 
@@ -1515,8 +1515,9 @@ upstream — the planned verbatim cp failed first build, banked classical via #g
 
 **Rule:** A libultra/SDK source can be **statically linked into the GAME** (not the libultra code
 band) — its subseg sits at a low rom/vram, and the build compiles it with the **game `CFLAGS` (-O2)**,
-NOT `LIBULTRA_CFLAGS` (-O3 via `$(subst -O2,-O3,…)`). The Makefile selects the profile by **src path
-prefix**: only `src/libultra/%` and `src/libkmc/%` get the lib profiles; everything else is -O2. So a
+NOT `LIBULTRA_CFLAGS` (-O3 via `$(subst -O2,-O3,…)`). The build selects the profile by **src path
+prefix** (the `mk/lib*.mk` `C_PROFILE_CFLAGS` overrides): only `src/libultra/%` and `src/libkmc/%`
+get the lib profiles; everything else is -O2. So a
 game-embedded SDK mirror placed under `src/libultra/` compiles at the WRONG -O3 → `-finline-functions`
 inlines its small callees (the ROM, at -O2, keeps the `jal`s). Symptom: a verbatim mirror where a
 caller fn balloons (e.g. `guMtxIdent` 240 B vs ROM 60 B) because -O3 inlined `guMtxIdentF`/`guMtxF2L`.
@@ -1590,7 +1591,7 @@ whose VALUE is GBI-microcode-guarded**, used inside an otherwise-verbatim body. 
 ```
 
 ultralib builds `libgultra_rom` with a global default `GBIDEFINE := -DF3DEX_GBI`; MG64 runs the
-F3DEX2 microcode, so the project pins **`-DF3DEX_GBI_2` in `LIBULTRA_CFLAGS`** (Makefile). With NO
+F3DEX2 microcode, so the project pins **`-DF3DEX_GBI_2` in `LIBULTRA_CFLAGS`** (`mk/libultra.mk`). With NO
 GBI define the macro silently takes the `#else` value. The standing pin resolves this for every
 libultra mirror; it is documented here because the failure mode is invisible to every gate check.
 
