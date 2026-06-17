@@ -181,6 +181,48 @@ def test_pick_target_json_golden(golden_dir, regen, monkeypatch):
     assert rows == expected
 
 
+def test_pick_target_deep_json_golden(golden_dir, regen, monkeypatch):
+    """Deeper-row companion to the -n 50 golden: pin ALL rows (the backlog is ~108), so the long
+    tail of hazard detectors that only fire on rows 51+ is byte-pinned, not just spot-asserted.
+    Coddog stays off here (base behavior); the coddog path is pinned by the coddog golden below."""
+    monkeypatch.setenv("CODDOG_MAP", "/nonexistent/coddog_map.tsv")
+    proc = run_tool("pick_target", "--json", "-n", "200")
+    assert proc.returncode == 0, proc.stderr
+    rows = json.loads(proc.stdout)
+    assert isinstance(rows, list) and len(rows) > 50, "expected the full backlog, deeper than -n 50"
+
+    gpath = golden_dir / "pick_target_deep.json"
+    if regen or not gpath.exists():
+        gpath.write_text(json.dumps(rows, indent=2, sort_keys=True) + "\n")
+        pytest.skip(f"golden regenerated: {gpath.name}")
+    assert rows == json.loads(gpath.read_text())
+
+
+def test_pick_target_coddog_json_golden(golden_dir, regen, monkeypatch):
+    """Coddog-ENABLED golden: the -n 50 / deep goldens run coddog OFF (the live map is gitignored +
+    build-dependent), so the coddog re-ranking path — coddog-mirror flagging, the non-audio
+    re-pricing, the audio advisory-only branch, and the `@`/`.split` detail parsing — was never
+    byte-pinned. Drive pick_target with a COMMITTED synthetic map (golden/coddog_map_fixture.tsv,
+    the proven func_800A0730 non-audio + func_800A09E0 audio entries) and snapshot, so the coddog
+    detail strings are a stable contract. This is the gate for Phase-A Hazard.coddog_* methods +
+    the cluster-7 (coddog) extraction."""
+    fixture = golden_dir / "coddog_map_fixture.tsv"
+    monkeypatch.setenv("CODDOG_MAP", str(fixture))
+    proc = run_tool("pick_target", "--json", "-n", "200")
+    assert proc.returncode == 0, proc.stderr
+    rows = json.loads(proc.stdout)
+    # sanity: the fixture's non-audio hit re-prices to libultra, the audio hit stays none-but-flagged
+    by_func = {r["func"]: r for r in rows}
+    assert "coddog-mirror:src/io/fake.c@99.99" in by_func["func_800A0730"]["hazards"]
+    assert "coddog-mirror:src/audio/fake.c@99.99" in by_func["func_800A09E0"]["hazards"]
+
+    gpath = golden_dir / "pick_target_coddog.json"
+    if regen or not gpath.exists():
+        gpath.write_text(json.dumps(rows, indent=2, sort_keys=True) + "\n")
+        pytest.skip(f"golden regenerated: {gpath.name}")
+    assert rows == json.loads(gpath.read_text())
+
+
 def test_pick_target_ranked_by_descending_score(golden_dir, regen, monkeypatch):
     """Lock the ranking contract: rows are ordered by `score`, highest first.
 
@@ -758,3 +800,33 @@ def test_score_row_characterization():
     assert r2["hazards"] == "-"                    # no hazards renders "-"
     assert r2["score"] == -64 - 1000              # carried penalty, no bonuses
     assert (pt.UPSTREAM_BONUS, pt.BAND_WARM_BONUS, pt.CARRYOVER_PENALTY) == (200, 64, 1000)
+
+
+def test_hazard_detail_accessors():
+    """Lock the Hazard detail encode/decode now that parse knowledge is centralized on the class
+    (Phase A: the `@`/`!=`/`;owner-per-member` ad-hoc splits scattered across build_rows are gone).
+    Covers mark_owner_per_member explicitly — it was the one re-parsed surface with no prior test."""
+    pt = load_tool("pick_target")
+    H = pt.Hazard
+
+    # coddog_mirror classmethod encodes `<file>@<pct>` (2-decimal) and round-trips through accessors.
+    h = H.coddog_mirror("src/io/contquery.c", 99.99)
+    assert h.render() == "coddog-mirror:src/io/contquery.c@99.99"
+    assert h.coddog_file() == "src/io/contquery.c"
+    assert h.coddog_pct() == 99.99
+    assert h.coddog_source() == "src/io/contquery.c"   # rsplit form, same when no `@` in path
+    # malformed pct degrades to 0.0 (the old _coddog_pct contract)
+    assert H(pt.HAZARD_CODDOG_MIRROR, "src/io/x.c").coddog_pct() == 0.0
+
+    # twin_file pulls the primary `<stem>` out of `<stem>!=<alt,...>`
+    assert H(pt.HAZARD_CODDOG_TWIN, "siacs!=piacs,siacs").twin_file() == "siacs"
+
+    # mark_owner_per_member: idempotent in-place append, None-detail safe
+    j = H(pt.HAZARD_RODATA_JTBL, "0x800D23E8")
+    j.mark_owner_per_member()
+    assert j.detail == "0x800D23E8;owner-per-member"
+    j.mark_owner_per_member()                          # second call is a no-op
+    assert j.detail == "0x800D23E8;owner-per-member"
+    n = H(pt.HAZARD_RODATA_LITERAL)
+    n.mark_owner_per_member()
+    assert n.detail == ";owner-per-member"

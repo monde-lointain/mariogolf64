@@ -62,8 +62,8 @@ def iter_subseg_body(rom_off):
     domain for any scan that concerns the *object's* output rather than a single function's —
     notably the compiler-pooled `.rodata` literals (rodata_literals / rodata_word_refs): a
     `.rodata` sibling subseg places the whole object's `.rodata`, so a sibling function's
-    pooled doubles belong to the same split extent as the primary's (S55: guPerspective loads
-    0x800D2540..0x2558 that guPerspectiveF does not). Yields nothing when the file is absent."""
+    pooled doubles belong to the same split extent as the primary's (e.g. guPerspective loads
+    doubles that guPerspectiveF does not). Yields nothing when the file is absent."""
     path = asm_path(rom_off)
     if not os.path.exists(path):
         return
@@ -118,8 +118,8 @@ def asm_function_addrs(rom_off):
 
 # `/* ROM VRAM BYTES */` instruction comment — the second field is the authoritative vram
 # splat emitted for that ROM offset. Surfacing it spares the gate a rom→vram derivation for
-# the mandatory recover-extern re-confirm (S22: a hand-guessed flat `rom + <const>` resolved
-# mid-function and returned a wrong containing fn — read the vram, never guess it).
+# the mandatory recover-extern re-confirm (a hand-guessed flat `rom + <const>` can resolve
+# mid-function and return a wrong containing fn — read the vram, never guess it).
 VRAM_COMMENT_RE = re.compile(r"/\*\s*[0-9A-Fa-f]+\s+([0-9A-Fa-f]{8})\s+[0-9A-Fa-f]{8}\s*\*/")
 
 
@@ -208,7 +208,7 @@ def intrinsic_likely(rom_off, primary):
 # NOT something to decompile. This is broader than intrinsic_likely, which only catches a
 # *pure* shim (whole body = CP0-moves/sqrt + jr, no jal): a TU that does real work around the
 # privileged op — branches/loads (osMapTLB/osUnmapTLB) or even calls (exception dispatch) —
-# slips past intrinsic_likely yet is just as much hand-asm. (S70 #1.)
+# slips past intrinsic_likely yet is just as much hand-asm.
 PRIVILEGED_OPS = {
     "tlbwi", "tlbwr", "tlbp", "tlbr",
     "mfc0", "mtc0", "dmfc0", "dmtc0", "cfc0", "ctc0",
@@ -325,10 +325,10 @@ def rodata_literals(rom_off):
     """VRAMs of the anonymous compiler-pooled FP constants the *whole subseg* loads via `ldc1/lwc1
     %lo(D_<addr>)` in asm/<ROM>.s. A verbatim mirror's compiler re-emits these into the C object's
     `.rodata`, which must then be placed by a dot-prefixed `.rodata` sibling subseg at the
-    constant's ROM offset (docs/hazards.md#rodata-sibling-yaml-pattern, S38/S48). The scan spans
-    every function in the subseg, not just the primary: the sibling places the whole object's
-    `.rodata`, so a pack sibling's pooled literals belong to the same split extent (S55:
-    guPerspective's 0x800D2540..0x2558 — the per-primary scan undercounted 4 of 8). Pre-noting them
+    constant's ROM offset (docs/hazards.md#rodata-sibling-yaml-pattern). The scan spans every
+    function in the subseg, not just the primary: the sibling places the whole object's `.rodata`,
+    so a pack sibling's pooled literals belong to the same split extent (a per-primary scan would
+    undercount the siblings' doubles). Pre-noting them
     at the gate turns a finalize-time SHA-miss into a planned DoR enabler. Anonymous (`D_`) only:
     a named float global is a placed / recover-extern case, not a literal. Such a load is by
     construction a rodata access (absolute %hi/%lo addressing), so the address always lies outside
@@ -353,8 +353,8 @@ def rodata_word_refs(rom_off):
     caller band-filters these (keeping only code-segment `.rodata` addresses) and unions them with
     the FP literals from rodata_literals to size the full `.rodata` sibling-split extent — GCC loads
     a pooled `double` via an `lw` pair + `mtc1`, so its 2nd word is invisible to the FP-only scan
-    (S52: lookatref's 1.0 double at 0x800D2518 was such an `lw` pair). Scans every function in the
-    subseg for the same whole-object reason as rodata_literals (S55). Data-segment hits are not
+    (e.g. a 1.0 double loaded as such an `lw` pair). Scans every function in the subseg for the same
+    whole-object reason as rodata_literals. Data-segment hits are not
     rodata literals (they are placed/recover-extern data refs) and the caller drops them. Returns a
     sorted list of distinct addresses."""
     addrs = set()
@@ -377,7 +377,7 @@ def rodata_jtbls(rom_off):
     """VRAMs of the switch jump tables the *whole subseg* references via `%lo(jtbl_<addr>)` in
     asm/<ROM>.s. A verbatim mirror's compiler re-emits the table into the C object's `.rodata`,
     which a dot-prefixed `.rodata` sibling subseg must place at the table's ROM offset
-    (docs/hazards.md#rodata-sibling-yaml-pattern, S76 __osDevMgrMain). The table's `.word` entries
+    (docs/hazards.md#rodata-sibling-yaml-pattern). The table's `.word` entries
     are the function's own internal `.L<addr>` labels, so flipping the subseg text->C deletes those
     labels and the still-asm rodata jtbl link-breaks with undefined-`.L<addr>` refs — a break the
     gate's text-only green-ROM check cannot catch by construction (the jtbl stays valid asm until
