@@ -56,6 +56,7 @@ __osViNext = 0x800C9564; // size:0x4
 __additional_scanline = 0x800C826C; // size:0x4
 hdwrBugFlag = 0x800C7EC0; // size:0x1
 __muldi3 = 0x800B3850; // type:func
+__moddi3 = 0x800B3B00; // type:func
 osViGetCurrentFramebuffer = 0x800ACD50; // type:func
 osViGetNextFramebuffer = 0x800ACD90; // type:func
 osViGetCurrentMode = 0x800ACDD0; // type:func
