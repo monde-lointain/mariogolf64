@@ -181,6 +181,48 @@ def test_pick_target_json_golden(golden_dir, regen, monkeypatch):
     assert rows == expected
 
 
+def test_pick_target_deep_json_golden(golden_dir, regen, monkeypatch):
+    """Deeper-row companion to the -n 50 golden: pin ALL rows (the backlog is ~108), so the long
+    tail of hazard detectors that only fire on rows 51+ is byte-pinned, not just spot-asserted.
+    Coddog stays off here (base behavior); the coddog path is pinned by the coddog golden below."""
+    monkeypatch.setenv("CODDOG_MAP", "/nonexistent/coddog_map.tsv")
+    proc = run_tool("pick_target", "--json", "-n", "200")
+    assert proc.returncode == 0, proc.stderr
+    rows = json.loads(proc.stdout)
+    assert isinstance(rows, list) and len(rows) > 50, "expected the full backlog, deeper than -n 50"
+
+    gpath = golden_dir / "pick_target_deep.json"
+    if regen or not gpath.exists():
+        gpath.write_text(json.dumps(rows, indent=2, sort_keys=True) + "\n")
+        pytest.skip(f"golden regenerated: {gpath.name}")
+    assert rows == json.loads(gpath.read_text())
+
+
+def test_pick_target_coddog_json_golden(golden_dir, regen, monkeypatch):
+    """Coddog-ENABLED golden: the -n 50 / deep goldens run coddog OFF (the live map is gitignored +
+    build-dependent), so the coddog re-ranking path — coddog-mirror flagging, the non-audio
+    re-pricing, the audio advisory-only branch, and the `@`/`.split` detail parsing — was never
+    byte-pinned. Drive pick_target with a COMMITTED synthetic map (golden/coddog_map_fixture.tsv,
+    the proven func_800A0730 non-audio + func_800A09E0 audio entries) and snapshot, so the coddog
+    detail strings are a stable contract. This is the gate for Phase-A Hazard.coddog_* methods +
+    the cluster-7 (coddog) extraction."""
+    fixture = golden_dir / "coddog_map_fixture.tsv"
+    monkeypatch.setenv("CODDOG_MAP", str(fixture))
+    proc = run_tool("pick_target", "--json", "-n", "200")
+    assert proc.returncode == 0, proc.stderr
+    rows = json.loads(proc.stdout)
+    # sanity: the fixture's non-audio hit re-prices to libultra, the audio hit stays none-but-flagged
+    by_func = {r["func"]: r for r in rows}
+    assert "coddog-mirror:src/io/fake.c@99.99" in by_func["func_800A0730"]["hazards"]
+    assert "coddog-mirror:src/audio/fake.c@99.99" in by_func["func_800A09E0"]["hazards"]
+
+    gpath = golden_dir / "pick_target_coddog.json"
+    if regen or not gpath.exists():
+        gpath.write_text(json.dumps(rows, indent=2, sort_keys=True) + "\n")
+        pytest.skip(f"golden regenerated: {gpath.name}")
+    assert rows == json.loads(gpath.read_text())
+
+
 def test_pick_target_ranked_by_descending_score(golden_dir, regen, monkeypatch):
     """Lock the ranking contract: rows are ordered by `score`, highest first.
 
