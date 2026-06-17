@@ -333,7 +333,7 @@ segments:
       - [0x8E110, c, libkmc/atan]
       - [0x8E550, c, libkmc/memset]
       - [0x8E620, c, libkmc/rand]
-      - [0x8E660, asm]
+      - [0x8E660, c, libkmc/sin]
       - [0x8EAD0, c, libkmc/strcmp]
       - [0x8EBE0, c, libkmc/_matherr]
       - [0x8EC50, hasm, libkmc/mmuldi3]
@@ -402,7 +402,7 @@ segments:
       - [0xADA50, .rodata, libultra/libc/xprintf]
       - [0xADBD0, .rodata, libultra/libc/xldtob]
       - [0xADC40, .rodata, libkmc/atan]
-      - [0xADCA0, rodata]
+      - [0xADCA0, .rodata, libkmc/sin]
       - { type: bss, vram: 0x800D2930 }
 
   # Overlay 0 (shared ROM with 1,2)
