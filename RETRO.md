@@ -3,7 +3,7 @@
 One short digest per sprint, newest first, written at the `/sprint-review` gate. This is
 the *consolidated* record so lessons compound across sprints (McConnell, *More Effective
 Agile*, Ch.19: retros must change behavior). The PO promotes durable lessons into the memory
-dir manually — the review gate does not auto-write memory.
+dir manually; the review gate does not auto-write memory.
 
 Process/tooling edits are **retro-gated**: the "Suggested workflow improvements" the
 execution loop records into `SPRINT.md` are applied here, at review, not mid-sprint (see

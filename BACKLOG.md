@@ -1,6 +1,6 @@
 # Mario Golf 64 decomp product backlog
 
-The Product Owner (you) orders this. The live candidate list is **not** duplicated here —
+The Product Owner (you) orders this. The live candidate list is **not** duplicated here;
 target selection is `tools/pick_target.py` (smallest-first ranker, run at `/sprint-plan`).
 This file holds only the *ordering rationale*, *enabler items* (gate actions), and
 *carry-overs*. `/sprint-plan` re-refines the slice each sprint;
