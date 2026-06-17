@@ -222,7 +222,11 @@ below).
   (skip under `src/libultra/`, `src/libkmc/` & `src/mgu/`) → full `make` until ROM SHA-1 matches. Spot-check
   passing ≠ ROM matching; the final `make` proves the match. Gate the `sha1sum` on `make`
   succeeding (confirm the `build/mariogolf64.z64: OK` line first) — a failed link leaves the previous
-  `.z64` in `build/`, so `sha1sum` on a stale ROM false-positives.
+  `.z64` in `build/`, so `sha1sum` on a stale ROM false-positives. **Always verify with
+  `tools/verify-rom.sh [--extract]`, never a hand-rolled `make … ; sha1sum`** — the helper asserts the
+  `OK` line before trusting the hash. S111 burned a whole review to a hand-rolled ungated `sha1sum`
+  that read a coincidentally-green stale ROM and reported MATCH across 3 commits that never built (a
+  missing `VI_CTRL_ANTIALIAS_MODE_0` define + 2 unresolved carve symbols).
 - **Clean-rebuild when an enabler edits a shared vendored header.** The build tracks no header deps,
   so an incremental `make` recompiles only the file you touched, not the other consumers of a header
   you changed. When a mirror/enabler edits a widely-included header (e.g.
@@ -264,6 +268,7 @@ When `pick_target.py` flags a hazard (or a match shows its symptom), read the ma
 | `defines-data:<g>` / `data-static:<addr>` | #defines-data |
 | `data-carve:<names>` (S104: a file-scope NON-const initialized `static T name[]=init;` array the verbatim mirror re-emits → `.data` sibling carve at the asm-recovered vram; the S92/S101 un-flagged class — xprintf spaces/zeroes, env eqpower. Single-file-pack subset only. advisory) | #defines-data |
 | `twin-of:<file>` (mirror dir holds a banked sibling with the same ld-section carve) | #defines-data / #rodata-sibling-yaml-pattern |
+| (resolving a whole-region `.data`/`.rodata` sweep — drop-def restore, data-only TU vendor, or un-strip; S111 libultra block) | #data-rodata-carve |
 | `needs-header:<inc>`            | #needs-header |
 | `stale-header:os_version.h(<V>)`| #stale-vendored-header |
 | `needs-define:<def>`            | #needs-define |

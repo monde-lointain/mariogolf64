@@ -1804,3 +1804,62 @@ cosmetic mismatch — optional follow-up rename).
 **Procedure:** For static dlists in rodata, run `~/development/repos/n64-tools/src/gfxdis-rom/gfxdis`
 (build once with `make -C ~/development/repos/n64-tools`). `gfxdis` only handles static dlists;
 dynamic builders are hand-decompiled.
+
+---
+
+## data-rodata-carve
+
+**When:** resolving the anonymous `.data`/`.rodata` blocks in a whole library region into named
+`.data`/`.rodata, libultra/<tu>` subsegs (S111 swept the libultra `.data` block 0xA32D0–0xA5668). A
+libultra `.data` region is a contiguous link-order run; each TU is carved independently by splitting
+the anonymous `[0xXXXX, data]` around its `[start, end)`.
+
+**Attribution oracle.** `make extract` (splat) prints `Rodata segment 'X' may belong to the text
+segment 'Y'` (splat `rodata.py`) for each anonymous rodata referenced by a single function — capture
+stderr. `.data` blocks get NO such hint: attribute by grepping the **defining** upstream file in
+`~/development/repos/ultralib/src` for the symbol (`OSThread *__osRunQueue;`, not just an `extern`),
+then confirm placed-status in the yaml. `../drmario64/lib/ultralib/src` is the cross-ref for TUs MG64
+hasn't placed; a block drmario64 also leaves generic (`RO_<vram>`) is genuinely unattributable —
+leave it a blob.
+
+**Three carve kinds:**
+
+1. **Placed drop-def restore.** The TU is placed but mirrored "drop-def" (its data DEF was turned
+   into an `extern`). Restore the upstream initializer in declaration = ROM-address order
+   (`extern T x;` → `T x = <upstream init>;`), confirm bytes vs `asm/data/<blk>.data.s`. Function
+   statics (`dtor`, `nintendo[]`, `xseed`) go back as `static` (file-scope static byte-matches the
+   function-local form). `symbol_addrs.txt` is add-only — leave the extern; the restored def coexists
+   via `--allow-multiple-definition` (same address).
+
+2. **Not-placed data TU vendor.** Pure-data upstream TUs (`io/vitbl.c` osViModeTable, `vimodes/*.c`)
+   are copied verbatim (`PRinternal/viint.h`→`viint.h` rewrite). Code+data TUs whose `.text` is still
+   asm (`os/thread.c`, `io/vi.c`) get a **data-only** file emitting just the globals (empty `.text`,
+   no text subseg) — see the two GOTCHAS below.
+
+3. **asm-mirror un-strip.** An S107 stripped-jtbl `hasm` keeps its tables as blobs only while their
+   target labels aren't exported. Once the vendored `.text` re-exports the jtbl-target `.L<addr>`
+   labels, append the tables back to the `.s` as `.section .rodata`/`.section .data` and carve — the
+   `.word .L<addr>` resolves locally (S111 exceptasm: `__osIntOffTable`+`__osIntTable` rodata,
+   `__osHwIntTable`+`__osPiIntTable` data). A stripped-jtbl hasm's tables are CARVE-ABLE, not
+   permanent blobs (corrects the S107 "must stay anon" framing).
+
+**The four SHA/link gotchas (S111 — all were masked by an ungated `sha1sum`; use
+`tools/verify-rom.sh`):**
+
+- **0x10 `.data`-size-pad boundary.** GCC pads each `.o`'s `.data` *size* up to 0x10. The carve's
+  next-subseg boundary is the **0x10-aligned end** of the TU's data, NOT the last symbol's end — the
+  "Automatically generated and unreferenced pad" `D_<vram>` syms ARE that trailing pad (initialize:
+  0x14 data → next subseg at +0x20). Wrong boundary = exact-N×byte SHA miss.
+- **reloc-to-bss needs placement.** A restored pointer init to an uninitialized `.bss` symbol
+  (`OSTimer* __osTimerList = &__osBaseTimer;`) is a `.data` reloc; if the bss target isn't a placed
+  symbol the link fails `undefined reference`. Name it in `symbol_addrs.txt` at its baserom bss vram
+  (read from the ROM pointer value) — do NOT `define` it in the `.c` (that perturbs bss layout and the
+  pointer value won't match).
+- **cross-TU-split data needs non-`static`.** Upstream keeps file data `static` because the function
+  using it is in the same `.c`. When MG64 has split that function into its own TU (`io/viinit.c`'s
+  `__osViInit` does `extern __OSViContext vi[2]`), the data must be **global** (drop `static`) so the
+  split TU links. Bytes are identical; only visibility changes.
+- **verbatim mirror `needs-define`.** A verbatim data TU can use a header macro the project's vendored
+  header lacks (`vitbl.c` → `VI_CTRL_ANTIALIAS_MODE_0`, absent from the MG64 `rcp.h` which had only
+  `_1/_2/_3`). Add the missing define from the `~/development/repos/ultralib` authority; a shared-header
+  edit then needs a clean rebuild (`#clean-rebuild-after-shared-header-edit`).

@@ -25,6 +25,26 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 111 — resolve ALL libultra TU .data/.rodata (whole-region carve sweep) — 2026-06-17
+- Increment: ≈18 libultra TU `.data`/`.rodata` sections carved into named `libultra/<tu>` subsegs across the 0xA32D0–0xADCA0 region (12 placed drop-def restores, 6 vendored data TUs: thread/vitbl/vi/3×vimodes, exceptasm `.data`+`.rodata` un-stripped, gu/libm_vals). 8 new src/libultra files; 46 named data/rodata subsegs now. md5-candidate unchanged at 155 (these are data carves, not new `.c` fn matches).
+- Quality: stuck-far 0, permuter 0, carried 3 (ADC40 atan-consts, ADCA0 _xsincos-consts, A4A90 unattributable), re-opened **1 — major** (3 build breaks masked behind an ungated stale-green `sha1sum`).
+- Seed: committed 8pt; banked 8pt; regime mixed — v2 realized **13**, residual **+5** (the masked-failure re-open + 3 mid-sprint link/header debugs + large multi-TU scope).
+- What helped: splat's `Rodata segment X may belong to text Y` hint as the attribution oracle; ultralib as the byte authority + drmario64 as the not-placed-TU cross-ref (incl. confirming A4A90 is genuinely unattributable); the 0x10 `.data`-size-pad boundary rule once found; un-stripping the S107 exceptasm tables (the strip was reversible once labels were re-exported).
+- Friction: a hand-rolled `make … ; sha1sum` (NOT gated on the `OK` line) read a coincidentally-green stale ROM and false-positived MATCH across 3 commits that never built — vitbl missing `VI_CTRL_ANTIALIAS_MODE_0` (project rcp.h had only _1/_2/_3), timerintr `&__osBaseTimer` reloc to an unplaced bss symbol, and `vi` left `static` while MG64 splits `__osViInit` into a separate viinit.c. systematic-debugging root-caused all three; genuinely re-verified green.
+- Applied (3 of 3): #1 `tools/verify-rom.sh` gated-verify helper + CLAUDE.md mandate (directly closes the false-positive that masked the breaks); #2 `docs/hazards.md#data-rodata-carve` playbook (3 carve kinds + 4 SHA/link gotchas) + CLAUDE.md hazard-index row; #3 splat-attribution-oracle + asm-mirror-jtbl-reversible notes folded into the same section.
+- Carry-over: ADC40 (`atan` consts) + ADCA0 (`_xsincos` consts) — need `atan`/`_xsincos` vendored as `hasm` asm-mirrors first, then their rodata carves; A4A90 (~3 KB) unattributable, left a blob.
+
+---
+
+## Sprint 110 — re-home osSpTaskYielded + __osGetCurrFaultedThread + vendor os/parameters.s — 2026-06-16
+- Increment: two trivial libultra leaf fns re-homed from src/main/ (-O2) to src/libultra/{io/sptaskyielded.c, os/getcurrfaultthread.c} as verbatim upstream mirrors at -O3; the 0x8AC20 "remaining file" resolved as `os/parameters.s` (`.space 0x60` + ABS() OS globals) vendored `hasm`. asm subsegs 119→118 (parameters now hasm). +0 net new fn matches (re-home), but the libultra region around 0x8AC20 is now fully c/hasm.
+- Quality: stuck-far 0, permuter 0, carried 0, re-opened 0.
+- Seed: committed 4pt; banked 4pt; regime mirror.
+- What helped: the verbatim upstream IS the -O3 ground truth, so the re-home matched first build; recognizing the all-nop 0x8AC20 block as a real `.space`+ABS TU (os/parameters.s), not padding.
+- Friction: initial mis-read of 0x8AC20 as alignment padding (corrected by the PO pointing at the ultralib source); C_FILES is a find-glob so the old src/main files had to be `git rm`'d to avoid a double-definition.
+- Applied: none (banked between gates; lessons folded into the S111 review).
+- Carry-over: none.
+
 ## Sprint 109 — mcvtld.s (__fixunsdfdi + __floatdidf), the first KMC-as sub-lane asm-mirror — 2026-06-16
 - Increment: src/libkmc/mcvtld.s banked as a verbatim asm-mirror (`hasm`), 2 fns (`__fixdfdi`/`__fixunsdfdi` shared entry @0x8F020 + `__floatdidf` @0x8F140). asm subsegs 121→**119**, hasm 25→**26**; md5-candidate unchanged at 155 (asm-mirror banks as `hasm`, not a `.c`); +2 fns matched. The cleanest remaining asm TU in the libultra-region band (S108 note), PO-picked over the heavier `atan.c` C-mirror.
 - Quality: stuck-far 0, permuter 0, carried 0, re-opened 0. Banked clean; the two `li`→`addiu` edits were a known mmuldi3 divergence handled at the gate, not a re-attempt.

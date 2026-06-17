@@ -16,6 +16,22 @@ subordinate to the libultra goal. Target selection is `tools/pick_target.py` (sm
 the 8-point decompose gate fires on any seed ≥8. v2 classical track is active (since S11);
 mirror is the default, classical is first-class when the asm warrants it.
 
+**S111 — libultra `.data`/`.rodata` resolution sweep BANKED (≈18 TUs).** Carved every attributable
+anonymous block in the libultra `.data`/`.rodata` region (0xA32D0–0xADCA0) into named `libultra/<tu>`
+subsegs: 12 placed drop-def restores (initialize/sl/controller/random/seteventmesg/siacs/timerintr/
+contpfs/contramread/rotaterpy/vimgr/gbpakreadid), 6 vendored data TUs (thread.c & vi.c data-only;
+vitbl.c 56-entry osViModeTable + 3 vimodes verbatim), the exceptasm tables UN-stripped + carved (the
+S107 strip was reversible once `.text` re-exports the `.L<addr>` labels), and `gu/libm_vals.s`
+(`__libm_qnan_f`). New `docs/hazards.md#data-rodata-carve` playbook + `tools/verify-rom.sh` gated-verify
+helper (after an ungated `sha1sum` masked 3 build breaks behind a stale-green ROM). **Remaining libultra
+data/rodata = the libkmc `atan.c`/`sin.c` C-mirror unit** (A4A90 `_atbl`/ADC40/ADCA0 carve when those
+fns are decompiled — see Carry-overs). Full-make ROM SHA-1 == baserom.
+
+**S110 — re-home + `os/parameters.s` BANKED (mirror).** Re-homed `osSpTaskYielded`
+(`func_800AB600.c`→`io/sptaskyielded.c`) + `__osGetCurrFaultedThread.c`→`os/getcurrfaultthread.c` from
+src/main/ (-O2) to src/libultra/ (-O3) as verbatim mirrors; resolved 0x8AC20 as `os/parameters.s`
+(`.space 0x60` + ABS() N64 OS globals) vendored `hasm`. asm subsegs 119→118.
+
 **S109 — `mcvtld.s` BANKED (asm-mirror hasm, first KMC-as sub-lane).** libkmc soft-float
 double↔long-long cvt TU (`__fixdfdi`/`__fixunsdfdi` @0x8F020 + `__floatdidf` @0x8F140) vendored
 verbatim via the KMC-assembler explicit-rule path (the `mmuldi3.s` precedent), the two adjacent asm
@@ -1582,6 +1598,18 @@ by `/sprint-plan`:
   NEW recover-extern / callee vrams to add, each WITH its confirmed address; **(4)** the include
   adaptation vs upstream; **(5)** the upstream pin (file + VERSION_J). A near-free retry missing any
   of these is a half-scoped spike — finish the scope before deferring.
+
+- _(Spike — **libkmc `atan.c` (0x8E110) + `sin.c` (0x8E660) C-mirrors own the last 3 un-resolved
+  libultra-region data/rodata blocks** (S111). Per the S109 BACKLOG context: `0x8E110` =
+  `_xatan`+`atan`+`atan2` (libkmc `atan.c`, 3-fn single-file-pack) and `0x8E660` =
+  `_xsincos`+`sin`+`cos`+`tan` (libkmc `sin.c`, 4-fn). Their data/rodata, left anonymous because both
+  fns are still bare `asm`: **`A4A90` (0xBD8 @0x800C9690) = atan.c's `_atbl[]`** (NOT unattributable —
+  S111 first mislabelled it after a fresh xref/​drmario64 check that missed the existing S109 note;
+  always grep BACKLOG/the S109 `## Active phase` asm-inventory before declaring a block orphan),
+  `ADC40` = atan.c `cordic_atan_divisor_2_60`, `ADCA0` = sin.c sin/cos consts. RESOLUTION: these are
+  **C-mirrors** (not asm-mirrors) — flip the two asm subsegs to `c`, mirror the libkmc sources, and the
+  `_atbl[]`/cordic/sincos data carves to those `.c` files (`.data`/`.rodata` siblings). Decompiling the
+  fns and resolving their data is ONE unit.)_
 
 - _(Near-free retry — xldtob tail `[0x8D480]` (`_Ldtob` + `_Ldunscale` + `_Genld`) **RESOLVED + banked
   S93** — the carry-over's 5-point checklist replayed verbatim-correct (0 rework): single text flip
