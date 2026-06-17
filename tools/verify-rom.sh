@@ -11,7 +11,9 @@
 set -uo pipefail
 cd "$(dirname "$0")/.."
 
-BASEROM_SHA1=e2c4e7a905b29529b49a1619a401fe699224829b
+# Single-source the expected hash from splat's authoritative `sha1:` (top of mariogolf64.yaml),
+# rather than a duplicated literal. `exit` stops at the first match (guards a future per-segment key).
+BASEROM_SHA1=$(awk '/^sha1:/{print $2; exit}' mariogolf64.yaml)
 LOG=$(mktemp)
 trap 'rm -f "$LOG"' EXIT
 
