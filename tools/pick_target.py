@@ -2507,40 +2507,11 @@ def _append_coddog_trap_hazards(off, primary, cl_path, up_lib, hazards):
     return blocked
 
 
-def append_upstream_hazards(off, primary, up_lib, up_path, hazards, member_paths=()):
-    """Append the upstream-mirror hazards for a named candidate (in-place, in the
-    order the gate reads them) and return (band, blocked). `member_paths` are a c-combined pack's
-    non-primary member upstreams (S97): the file-static (S99) + defines-data + bare-assert scans union
-    over them so a SECONDARY member file's file-scope static / defined global / bare assert is priced
-    at the gate, not discovered at execution (sl.c's `alGlobals`, missed by the S96 primary-only scan;
-    nupiinit/nupiinitsram's drop-static load, missed by the S99 pre-fix primary-only scan). The recover-extern /
-    needs-header / call-divergence battery stays primary-keyed (member refs-unplaced is the separate
-    S66-deferred follow-up)."""
+def _append_header_version_hazards(off, primary, up_path, up_lib, hazards):
+    """Append the include / stale-header / needs-define / call-divergence / header-rename
+    hazards for a named upstream candidate (in place, in order). Returns whether a missing
+    header BLOCKS the candidate (an unresolved -I path)."""
     blocked = False
-    # file-static over the primary + c-combined members (S99): a SECONDARY member's file-scope static
-    # (nupiinitsram.c's `SramHandle`) is a pack-level drop-static enabler, so the gate must see it —
-    # the same member-union the defines-data scan below already does (S97). Primary-only missed it.
-    if any(has_file_scope_static(p) for p in (up_path, *member_paths)):
-        hazards.append(Hazard(HAZARD_FILE_STATIC))  # route to the classical loop, not the mirror
-    # defines-data over the primary + c-combined members (S73: + fn-local statics; S97: + members).
-    data_defs = list(dict.fromkeys(  # de-dup, order-preserving
-        d for p in (up_path, *member_paths)
-        for d in defines_data_globals(p) + defines_local_static_data(p)))
-    if data_defs:
-        hazards.append(Hazard(HAZARD_DEFINES_DATA, ",".join(data_defs)))  # .data analogue → classical loop
-    # File-scope NON-const initialized static arrays (S104: xprintf spaces/zeroes) the verbatim mirror
-    # re-emits → a `.data` sibling carve. Single-file ONLY (`not member_paths`): the S101 safe slice — a
-    # c-combined pack's per-member up_path can mis-attribute, so defer the multi-file case (BACKLOG S92).
-    if not member_paths:
-        init_arrays = list(dict.fromkeys(defines_file_static_init_array(up_path)))
-        if init_arrays:
-            hazards.append(Hazard(HAZARD_DATA_CARVE, ",".join(init_arrays)))  # .data carve at recovered vram
-    # Bare (non-_DEBUG-guarded) asserts a verbatim mirror would compile in (S97 assert-strip pre-flag).
-    n_assert = sum(bare_asserts(p) for p in (up_path, *member_paths))
-    if n_assert:
-        hazards.append(Hazard(HAZARD_BARE_ASSERT, str(n_assert)))
-    _append_recover_hazards(off, primary, up_path, up_lib, hazards)
-    mirror_dir = band_mirror_dir(up_lib, up_path)  # also reused below for band warmth
     tagged, hdr_blocked = _tagged_missing_includes(up_path, up_lib)
     if tagged:
         hazards.append(Hazard(HAZARD_NEEDS_HEADER, ",".join(tagged)))
@@ -2567,6 +2538,13 @@ def append_upstream_hazards(off, primary, up_lib, up_path, hazards, member_paths
         tgt = _macro_alias_target(up_path, primary)
         if tgt and _upstream_defines_function(up_path, tgt):
             hazards.append(Hazard(HAZARD_WRONG_GHIDRA_NAME, f"{primary}->{tgt}@{ren}"))
+    return blocked
+
+
+def _append_rodata_carve_hazards(off, up_path, hazards):
+    """Append the rodata-literal sibling-carve + data-static recover hazards for an upstream
+    candidate (in place). Returns (rodata_lits, data_statics) for the twin-of section that
+    follows."""
     # Anonymous `%lo(D_<addr>)` constant loads split into two enablers by segment (S52):
     #   - code-segment `.rodata` → compiler-pooled literal the mirror re-emits → a `.rodata` sibling
     #     split at finalize (docs/hazards.md#rodata-sibling-yaml-pattern, S38/S48).
@@ -2608,6 +2586,45 @@ def append_upstream_hazards(off, primary, up_lib, up_path, hazards, member_paths
     if data_statics:
         # A function-local static the mirror must drop to a file-scope extern + recover (S49).
         hazards.append(Hazard(HAZARD_DATA_STATIC, ",".join(f"0x{a:08X}" for a in sorted(data_statics))))
+    return rodata_lits, data_statics
+
+
+def append_upstream_hazards(off, primary, up_lib, up_path, hazards, member_paths=()):
+    """Append the upstream-mirror hazards for a named candidate (in-place, in the
+    order the gate reads them) and return (band, blocked). `member_paths` are a c-combined pack's
+    non-primary member upstreams (S97): the file-static (S99) + defines-data + bare-assert scans union
+    over them so a SECONDARY member file's file-scope static / defined global / bare assert is priced
+    at the gate, not discovered at execution (sl.c's `alGlobals`, missed by the S96 primary-only scan;
+    nupiinit/nupiinitsram's drop-static load, missed by the S99 pre-fix primary-only scan). The recover-extern /
+    needs-header / call-divergence battery stays primary-keyed (member refs-unplaced is the separate
+    S66-deferred follow-up)."""
+    blocked = False
+    # file-static over the primary + c-combined members (S99): a SECONDARY member's file-scope static
+    # (nupiinitsram.c's `SramHandle`) is a pack-level drop-static enabler, so the gate must see it —
+    # the same member-union the defines-data scan below already does (S97). Primary-only missed it.
+    if any(has_file_scope_static(p) for p in (up_path, *member_paths)):
+        hazards.append(Hazard(HAZARD_FILE_STATIC))  # route to the classical loop, not the mirror
+    # defines-data over the primary + c-combined members (S73: + fn-local statics; S97: + members).
+    data_defs = list(dict.fromkeys(  # de-dup, order-preserving
+        d for p in (up_path, *member_paths)
+        for d in defines_data_globals(p) + defines_local_static_data(p)))
+    if data_defs:
+        hazards.append(Hazard(HAZARD_DEFINES_DATA, ",".join(data_defs)))  # .data analogue → classical loop
+    # File-scope NON-const initialized static arrays (S104: xprintf spaces/zeroes) the verbatim mirror
+    # re-emits → a `.data` sibling carve. Single-file ONLY (`not member_paths`): the S101 safe slice — a
+    # c-combined pack's per-member up_path can mis-attribute, so defer the multi-file case (BACKLOG S92).
+    if not member_paths:
+        init_arrays = list(dict.fromkeys(defines_file_static_init_array(up_path)))
+        if init_arrays:
+            hazards.append(Hazard(HAZARD_DATA_CARVE, ",".join(init_arrays)))  # .data carve at recovered vram
+    # Bare (non-_DEBUG-guarded) asserts a verbatim mirror would compile in (S97 assert-strip pre-flag).
+    n_assert = sum(bare_asserts(p) for p in (up_path, *member_paths))
+    if n_assert:
+        hazards.append(Hazard(HAZARD_BARE_ASSERT, str(n_assert)))
+    _append_recover_hazards(off, primary, up_path, up_lib, hazards)
+    mirror_dir = band_mirror_dir(up_lib, up_path)  # also reused below for band warmth
+    blocked = _append_header_version_hazards(off, primary, up_path, up_lib, hazards) or blocked
+    rodata_lits, data_statics = _append_rodata_carve_hazards(off, up_path, hazards)
     # twin-of hint (S68 #2): when the candidate re-emits a function-local static (data-static /
     # rodata-literal) AND its mirror dir already holds a banked sibling that carved the same
     # ld-section, name that sibling so the gate reaches for the established carve playbook instead
@@ -2965,6 +2982,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
