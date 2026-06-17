@@ -1,0 +1,63 @@
+# Python bytecode
+__pycache__/
+*.py[cod]
+*.py.class
+
+# Environments
+.env
+.venv
+env/
+venv
+ENV/
+env.bak/
+venv.bak/
+
+# IDE-specific files
+.vs/
+.vscode/
+.swp
+
+# Private files
+private/
+
+# Build generated folders
+.splat/
+asm/
+bin/
+assets/
+build/
+
+# Object files
+*.o
+
+# Make dependency files
+*.d
+
+# N64 ROM files
+*.z64
+*.n64
+*.v64
+
+# Makefile options
+.make_options
+
+# Swap
+[._]*.s[a-v][a-z]
+# comment out the next line if you don't need vector files
+!*.svg
+[._]*.sw[a-p]
+[._]s[a-rt-v][a-z]
+[._]ss[a-gi-z]
+[._]sw[a-p]
+
+# Session
+Session.vim
+Sessionx.vim
+
+# Temporary
+.netrwhist
+*~
+# Auto-generated tag files
+tags
+# Persistent undo
+[._]*.un~

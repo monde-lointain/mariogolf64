@@ -1,0 +1,6 @@
+# The docker/Dockerfile build context is the repo root, which holds large
+# gitignored-but-present dirs (build/, asm/, assets/, venv/, .git, tools/cc).
+# Ignore everything and un-ignore only the ROM the Dockerfile COPYs. The
+# Dockerfile itself is read via `-f` and is unaffected by this filter.
+*
+!baserom.z64

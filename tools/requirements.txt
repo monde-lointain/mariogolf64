@@ -1,0 +1,12 @@
+# Pinned (not a range): `make extract` regenerates mariogolf64.ld + the
+# undefined_*_auto.txt scaffold the build links, so a new splat release can shift
+# the SHA-1 with no code change. 0.37.1 is the version the matching ROM was built
+# with. Bump deliberately + re-verify the ROM SHA-1.
+splat64[mips]==0.37.1
+# splat64 declares its asm generators as ranges (spimdisasm>=1.39.0,
+# rabbitizer>=1.12.0). A newer spimdisasm/rabbitizer emits jump-table labels
+# differently, so a fresh `make extract` produces asm that no longer links
+# (undefined `.L<vram>_<rom>` refs) against the committed scaffold. Pin both to
+# the versions the matching asm was extracted with. Bump deliberately + re-verify.
+spimdisasm==1.39.3
+rabbitizer==1.14.3

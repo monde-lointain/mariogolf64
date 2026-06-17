@@ -1,0 +1,4 @@
+// Maintainer symbol overrides for splat (add-only; name = 0x<vram>; // type:func | size:0x<n>).
+// Bare build carries no curated names except those the hand-asm entry stub references;
+// library names are added with each library commit.
+main = 0x800994B0; // type:func

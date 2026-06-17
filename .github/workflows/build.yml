@@ -1,0 +1,48 @@
+name: Build
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    name: Build ROM
+    runs-on: ubuntu-latest
+
+    # PUBLIC repo: never run the ROM-baked container for fork PRs. The build runs
+    # PR-controlled make/scripts, which could exfiltrate /orig/baserom.z64. Limit
+    # to same-repo pushes and same-repo PRs. (Forks also never receive GHCR_PAT,
+    # so the container pull would fail anyway; this makes it a clean skip.)
+    if: >-
+      github.event_name == 'push' ||
+      github.event.pull_request.head.repo.full_name == github.repository
+
+    permissions:
+      contents: read
+
+    # Private build image with the baserom baked in at /orig/. See docker/.
+    container:
+      image: ghcr.io/monde-lointain/mariogolf64-build:main
+      credentials:
+        username: monde-lointain
+        password: ${{ secrets.GHCR_PAT }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Must precede any `make`: the Makefile errors at parse time if baserom.z64
+      # is absent (and if mips-linux-gnu-cpp is missing, satisfied by the image).
+      - name: Provide baserom
+        run: cp /orig/baserom.z64 baserom.z64
+
+      - name: Setup (venv + KMC toolchain)
+        run: make setup
+
+      - name: Extract (splat)
+        run: make extract
+
+      # verify-rom.sh runs `make`, gates on the `build/mariogolf64.z64: OK` line,
+      # then checks SHA-1 == baserom (the mandated stale-green guard).
+      - name: Build + verify ROM SHA-1
+        run: tools/verify-rom.sh
