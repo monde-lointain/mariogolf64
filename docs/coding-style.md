@@ -1,9 +1,14 @@
 # Coding guidelines (on-demand reference)
 
-The C quality bar + naming conventions for code promoted into the tree. `CLAUDE.md` keeps a compact
-naming table; read this when writing or naming non-trivial C (classical matches, struct authoring,
-new helpers). Verbatim upstream copies under `src/libultra/` and `src/libkmc/` are exempt — they are
-never reformatted.
+The C quality bar and naming conventions for code promoted into the tree, grounded in Steve
+McConnell's *Code Complete* (ch 11 for variable names, ch 31 for layout and style, ch 32 for
+self-documenting code). `CLAUDE.md` keeps a compact naming table; read this when writing or naming
+non-trivial C (classical matches, struct authoring, new helpers).
+
+Scope: these rules govern classical / hand-authored C only. Verbatim upstream mirrors under
+`src/libultra/`, `src/libkmc/`, and `src/mgu/` are exempt and stay byte-identical to upstream: never
+rename, reformat, re-comment, or split-to-one-statement-per-line a mirror, since that breaks the
+match.
 
 ## Prime directive: manage complexity
 
@@ -17,11 +22,13 @@ keep in mind.
 - Program *into* your language, not *in* it. Decide what you want, then express it with available
   tools; compensate for missing features with conventions, not by limiting your thinking.
 - If it's hard, it's probably wrong. Tricky code, code that resists a clean name, comment, or test,
-  is a warning sign — simplify instead of pressing on.
+  is a warning sign: simplify instead of pressing on.
 - Be eclectic, not dogmatic. Heuristics, not commandments.
 - Make code so simple there are obviously no defects, not so complex there are no obvious defects.
 
 ## Naming
+
+Naming guidance follows Code Complete ch 11.
 
 - The name should fully and accurately describe what the thing represents. If you can say in words
   what it is, that is usually the best name.
@@ -34,7 +41,7 @@ keep in mind.
 - Use `count` (a total) and `index` (one element), not the ambiguous `num`.
 - Use precise opposites consistently: begin/end, first/last, min/max, next/prev, old/new,
   source/target, add/remove, get/set, open/close.
-- Booleans read as true/false and are stated positively: `done`, `found`, `success` — never
+- Booleans read as true/false and are stated positively: `done`, `found`, `success`, never
   `notDone`. Avoid `flag`; name the condition.
 - Loop indices `i`/`j`/`k` only in short, non-nested loops; meaningful names when nested, long, or
   used outside the loop.
@@ -61,7 +68,7 @@ x = x - xx;                               balance = balance - lastPayment;
 - Replace magic numbers/strings with named constants. Only `0` and `1` belong as bare literals.
 - Guard every division against a zero denominator. Watch integer overflow and truncation, including
   in intermediate results.
-- Never compare floats for exact equality — compare within a tolerance.
+- Never compare floats for exact equality; compare within a tolerance.
 - Keep array/string indices in bounds; check first, middle, and last endpoints for off-by-one.
 - Prefer enums over loose constants for a fixed value set; reserve the first slot for "invalid".
 
@@ -81,12 +88,12 @@ discriminant = sqrt(b*b - 4*a*c);   /* not: temp = sqrt(...); ... temp = swap */
 - Aim for functional cohesion: a function does one and only one thing.
 - The name describes everything it does, including side effects. If the name needs "and," remove the
   side effect rather than lengthening the name. Avoid vague verbs (`handle`, `process`, `dealWith`).
-- Let length follow the logic, not an arbitrary cap — but be suspicious past a screenful.
+- Let length follow the logic, not an arbitrary cap, but be suspicious past a screenful.
 - Parameters: order input → modify → output; keep that order consistent across similar functions;
   put status/error params last.
-- Limit parameters to ~7. Needing more consistently means coupling is too tight — group the data.
-- Use every parameter. Don't reuse an input parameter as a working variable — copy to a local; mark
-  inputs `const`.
+- Limit parameters to ~7. Needing more consistently means coupling is too tight; group the data.
+- Use every parameter. Don't reuse an input parameter as a working variable; copy to a local, and
+  mark inputs `const`.
 - Ensure every path returns a valid value (initialize the return value up top).
 - Never return a pointer/reference to a local.
 
@@ -104,7 +111,7 @@ A "class" here means any module: data plus the functions that own it (an Abstrac
 
 - Model each module as an ADT: expose operations, hide representation. Callers should never touch the
   internal data.
-- Information hiding — for every module ask "what should I hide?" Hide two things: complexity, and
+- Information hiding: for every module ask "what should I hide?" Hide two things: complexity, and
   decisions likely to change.
 - Hide a decision behind a function and a type, not scattered literals:
 
@@ -124,7 +131,7 @@ IdType id = new_id();               /* hide the creation policy */
 ## Control flow
 
 - Make the nominal path obvious. Put the normal case right after the `if`, stack error/exception
-  cases below. Don't write an empty `if` with work in the `else` — negate the test.
+  cases below. Don't write an empty `if` with work in the `else`; negate the test.
 - Cover every case: give `if/else` chains a final `else`, and `switch` a `default`, that catches the
   unexpected value and reports it.
 - Use guard clauses (early returns) to check error cases up front and keep the nominal code
@@ -139,10 +146,10 @@ if (!key_valid(key))   return ERR_KEY;
 
 - Treat each loop as a black box: one entry, control conditions stated from outside, assured
   termination (mentally run the first, a middle, and the last iteration). Extract long bodies.
-- Always brace conditional and loop bodies, even one-liners — layout must not be able to lie.
+- Always brace conditional and loop bodies, even one-liners, so layout cannot lie.
 - Use `break`/`continue`/early `return` to simplify, sparingly. Avoid `goto`.
 - For recursion, ensure a base case stops it; prefer iteration for simple cases.
-- Replace complicated `if`/`switch` logic with a lookup table — logic scales badly, data stays flat:
+- Replace complicated `if`/`switch` logic with a lookup table; logic scales badly, data stays flat:
 
 ```c
 static const int days_per_month[12] = {31,28,31,30,31,30,31,31,30,31,30,31};
@@ -157,7 +164,7 @@ days = days_per_month[month - 1];
 
 ## Defensive programming
 
-- Validate all data from any external source (user, file, network, another module) — range, length,
+- Validate all data from any external source (user, file, network, another module): range, length,
   format. Reject or sanitize at the boundary.
 - Build a barricade: validate data as it crosses into trusted code. Outside is dirty (error
   handling); inside is clean (assertions).
@@ -170,21 +177,26 @@ days = days_per_month[month - 1];
 
 ## Comments and layout
 
-- Self-documenting code first. Good names, structure, named constants, and simple control flow carry
-  most of the documentation. Fix bad code; don't paper over it with comments.
+- Self-documenting code first (Code Complete ch 32): good code is its own documentation. Good names,
+  structure, named constants, and simple control flow carry most of it. Fix bad code rather than
+  paper over it with comments; rewrite tricky code rather than comment it.
 - Comment intent and summary ("why"), never restate the code ("what"). A wrong or redundant comment
   is worse than none.
-- A good comment is at the level you'd name a function doing the same thing — if you can name it
+- A good comment is at the level you'd name a function doing the same thing: if you can name it
   cleanly, consider extracting that function.
 - Keep comments next to their code and updated; document surprises, workarounds, and the reason
   behind any deliberate oddity (quantify perf tricks so no one "fixes" them).
+- Roughly one comment per ten statements tends to read best, but treat that as an emergent effect of
+  a good process, not a quota to hit.
+- Standardize one marker (e.g. `TODO`) for incomplete code so it stays mechanically searchable.
 
 ```c
-if (account_type == ACCOUNT_NEW)   /* if establishing a new account  — intent */
-/* not:  if (account_flag == 0)       // if account flag is zero      — mechanics */
+if (account_type == ACCOUNT_NEW)   /* if establishing a new account  (intent) */
+/* not:  if (account_flag == 0)       // if account flag is zero      (mechanics) */
 ```
 
-- Layout reveals logical structure — that is its job. Consistency matters more than which style.
+- Layout reveals logical structure (Code Complete ch 31); that is its job. Consistency matters more
+  than which style.
 - Indent subordinate code (2–4 spaces). Separate "paragraphs" of related statements with blank lines.
 - One statement per line; one declaration per line; no multiple side effects per line.
 - Brace single-statement bodies so layout and logic can't diverge.
@@ -192,7 +204,7 @@ if (account_type == ACCOUNT_NEW)   /* if establishing a new account  — intent 
 ## Writing, evolving, and verifying code
 
 **Grow code from intent.** Design a non-trivial function in intent-level pseudocode first (what, not
-how). Review the pseudocode — iterating is cheap before you're invested in code. Then turn each line
+how). Review the pseudocode; iterating is cheap before you're invested in code. Then turn each line
 into a comment and fill real code beneath it. If one line explodes into too much code, extract a
 function (its name falls out of the pseudocode).
 
@@ -211,11 +223,11 @@ never special-case the output. Add a regression test, then look for the same bug
 cluster).
 
 **Test as you go.** Aim for branch coverage. Test boundaries (just below / at / just above each
-limit) and bad data, not just clean inputs. Focus on error-prone areas — defects cluster (~80% in
+limit) and bad data, not just clean inputs. Focus on error-prone areas; defects cluster (~80% in
 ~20% of routines).
 
 **Performance comes last.** Build clean, correct, modular code first. Don't optimize as you go.
-Measure before tuning, and again after — intuition about hot spots is usually wrong.
+Measure before tuning, and again after; intuition about hot spots is usually wrong.
 
 ---
 
@@ -247,20 +259,20 @@ before promoting. Use ultra64.h types (`s32`/`u64`/`vu32`/`f32`/…), never raw 
 ## Library near-implementations: keep the `gu*` name vs. rename as custom
 
 `tools/libultra_match.py` opcode-matches asm blocks against the libultra archive. An *exact* match
-is the library function — keep its name. A *near* match (the matcher's calibration "different-length"
+is the library function: keep its name. A *near* match (the matcher's calibration "different-length"
 bucket, or a CONFLICT row) is a function the game edited from a library routine; name it by **region**:
 
 - **Inside the libultra code region** (clustered among confirmed libultra functions in the static
   segment, e.g. `guAlignF`@0x800A7780, `guLookAtHilite`@0x800A8380, `guMtxF2L`@0x80067CB4): a `gu*`
   math routine the game devs hand-tuned in place. **Keep the original libultra name** and finalize it
-  under `src/libultra/` like any mirror — it is still semantically the library function.
+  under `src/libultra/` like any mirror: it is still semantically the library function.
 - **Outside it, in game code space** (sitting among game TUs, e.g. `vec3f_normalize`@0x80029900,
-  which is *not* `guNormalize` — proven by byte-compare in S61): a custom game function that merely
+  which is *not* `guNormalize`, proven by byte-compare in S61): a custom game function that merely
   resembles a library routine. Name it per the **non-library conventions above** (`lower_case`,
   descriptive), never the libultra name, and finalize it under its game `src/<seg>.c`.
 
 The discriminator is address locality (does it sit within the libultra cluster?), not the opcode
-similarity alone — a high opcode resemblance to `guNormalize` does not make a low-segment game
+similarity alone; a high opcode resemblance to `guNormalize` does not make a low-segment game
 function `guNormalize`.
 
 ```c
