@@ -330,7 +330,7 @@ segments:
       - [0x8DF10, c, libultra/io/dp]
       - [0x8DF30, c, libultra/io/si]
       - [0x8DF50, c, libultra/libc/ldiv]
-      - [0x8E110, asm]
+      - [0x8E110, c, libkmc/atan]
       - [0x8E550, c, libkmc/memset]
       - [0x8E620, c, libkmc/rand]
       - [0x8E660, asm]
@@ -401,7 +401,7 @@ segments:
       - [0xADA40, .rodata, libultra/gu/libm_vals]
       - [0xADA50, .rodata, libultra/libc/xprintf]
       - [0xADBD0, .rodata, libultra/libc/xldtob]
-      - [0xADC40, rodata]
+      - [0xADC40, .rodata, libkmc/atan]
       - [0xADCA0, rodata]
       - { type: bss, vram: 0x800D2930 }
 

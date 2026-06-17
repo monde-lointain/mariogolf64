@@ -312,7 +312,7 @@ SECTIONS
         build/src/libultra/io/dp.o(.text);
         build/src/libultra/io/si.o(.text);
         build/src/libultra/libc/ldiv.o(.text);
-        build/asm/8E110.o(.text);
+        build/src/libkmc/atan.o(.text);
         build/src/libkmc/memset.o(.text);
         build/src/libkmc/rand.o(.text);
         build/asm/8E660.o(.text);
@@ -577,7 +577,7 @@ SECTIONS
         build/src/libultra/io/dp.o(.data);
         build/src/libultra/io/si.o(.data);
         build/src/libultra/libc/ldiv.o(.data);
-        build/asm/8E110.o(.data);
+        build/src/libkmc/atan.o(.data);
         build/src/libkmc/memset.o(.data);
         build/src/libkmc/rand.o(.data);
         build/asm/8E660.o(.data);
@@ -850,7 +850,7 @@ SECTIONS
         build/src/libultra/io/dp.o(.rodata);
         build/src/libultra/io/si.o(.rodata);
         build/src/libultra/libc/ldiv.o(.rodata);
-        build/asm/8E110.o(.rodata);
+        build/src/libkmc/atan.o(.rodata);
         build/src/libkmc/memset.o(.rodata);
         build/src/libkmc/rand.o(.rodata);
         build/asm/8E660.o(.rodata);
@@ -860,7 +860,6 @@ SECTIONS
         build/src/libkmc/mcvtld.o(.rodata);
         build/src/libkmc/matherr.o(.rodata);
         build/asm/8F250.o(.rodata);
-        build/asm/data/ADC40.rodata.o(.rodata);
         build/asm/data/ADCA0.rodata.o(.rodata);
         main_RODATA_END = .;
         main_RODATA_SIZE = ABSOLUTE(main_RODATA_END - main_RODATA_START);
@@ -1115,7 +1114,7 @@ SECTIONS
         build/src/libultra/io/dp.o(.bss);
         build/src/libultra/io/si.o(.bss);
         build/src/libultra/libc/ldiv.o(.bss);
-        build/asm/8E110.o(.bss);
+        build/src/libkmc/atan.o(.bss);
         build/src/libkmc/memset.o(.bss);
         build/src/libkmc/rand.o(.bss);
         build/asm/8E660.o(.bss);
