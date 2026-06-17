@@ -485,7 +485,7 @@ def test_call_divergence_strips_inactive_version_branch(monkeypatch):
     monkeypatch.setattr(pt, "_upstream_body", lambda cp, pr: body)
     monkeypatch.setattr(pt, "_asm_jal_count", lambda off, pr: 2)  # J build: foo + bar
     monkeypatch.setattr(pt, "_build_version_ord",
-                        lambda lib: pt._VERSION_ORD["VERSION_J"] if lib else 0)
+                        lambda lib: load_tool("build_config")._VERSION_ORD["VERSION_J"] if lib else 0)
     assert pt.call_divergence(0x1000, "ff", "x.c", "libultra") is None  # strip → 2vs2 → no hazard
     d = pt.call_divergence(0x1000, "ff", "x.c", None)                   # no strip → foo doubles → 3vs2
     assert d is not None and d.detail == "3vs2"

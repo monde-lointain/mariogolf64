@@ -7,10 +7,10 @@ call/ref scans. Pure string->string (stdlib + `re` only); imported back into pic
 so its call sites read unchanged, the same facade pattern decomp_asm.py uses. Imports
 nothing from pick_target (the dependency stays one-directional and acyclic).
 
-Scope note: the version-conditional stripper (_strip_inactive_version_branches) is NOT
-here yet -- it is coupled to the build-version config (_VERSION_ORD / _build_version_ord
-/ the Makefile-define machinery) and shares preprocessor regexes with functions that stay
-in pick_target, so it relocates later alongside that config cluster.
+Scope note: the version-conditional stripper (_strip_inactive_version_branches) lives in
+build_config.py, not here -- it is coupled to the build-version config (_VERSION_ORD /
+_build_version_ord / the Makefile-define machinery), so it sits alongside that config
+cluster in its own leaf rather than with these pure C-text strippers.
 """
 import re
 

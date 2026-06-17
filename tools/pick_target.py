@@ -33,6 +33,17 @@ import sys
 
 import decomp_common as dc
 
+# BUILD_VERSION config + version-conditional stripping (shared by the C-side and asm-TU scanners),
+# extracted to a leaf. _build_version_ord / _strip_inactive_version_branches plus the 3 PP/version
+# regexes the staying preprocessor scanners reference are re-imported here.
+from build_config import (
+    _build_version_ord,
+    _strip_inactive_version_branches,
+    _BUILD_VERSION_IF_RE,
+    _PP_OPENING_DIRECTIVE_RE,
+    _PP_ENDIF_LINE_RE,
+)
+
 # Asm-scanning layer (the per-`asm/<ROM>.s` body walk + the scans over it). Self-contained
 # and stdlib-only; imported here so this module keeps the yaml/upstream/hazard/scoring logic.
 # _FRAME_IMMS is shared with the C-side _c_signature below.
@@ -870,100 +881,11 @@ def signature_hint(rom_off, primary, sig_index):
 # still skew the count, so it stays advisory — the gate confirms by disassembling.
 
 _IFDEF_OPEN_RE = re.compile(r'^\s*#\s*ifdef\s+([A-Za-z_][A-Za-z0-9_]*)')
-_PP_OPENING_DIRECTIVE_RE = re.compile(r'^\s*#\s*if(?:def|ndef)?\b')
-_PP_ENDIF_LINE_RE = re.compile(r'^\s*#\s*endif\b')
 _MAKEFILE_DEFINE_RE = re.compile(r'-D([A-Za-z_][A-Za-z0-9_]*)(?:=[^\s]*)?')
 
-
-# Version-conditional stripping. The build compiles ONE side of `#if BUILD_VERSION <op> VERSION_X`
-# (libultra is `-DBUILD_VERSION=VERSION_J`), so the inactive side's refs/calls are phantom — they
-# never reach the real object. E.g. osCartRomInit's `CartRomHandle` + `osPiRawReadIo` live only in
-# the non-J `#else` branch, yet refs/calls-unplaced flagged them. Only the *exact* form
-# `BUILD_VERSION <op> VERSION_X` is evaluated; a compound condition (`&&`/`||`) or any other `#if`
-# is opaque (both branches kept, nesting tracked so #else/#endif still pair correctly). A lib with
-# no `-DBUILD_VERSION` (libkmc/libnusys) yields ordinal 0 → no-op (those upstreams don't gate on it).
-_VERSION_ORD = {f"VERSION_{c}": i for i, c in enumerate("DEFGHIJKL", start=1)}
-_BUILD_VERSION_VAL_RE = re.compile(r"-DBUILD_VERSION=(VERSION_[A-Z])\b")
-_BUILD_VERSION_IF_RE = re.compile(
-    r"^\s*#\s*if\s+BUILD_VERSION\s*(>=|<=|==|!=|>|<)\s*(VERSION_[A-Z])\s*$"
-)
-_PP_ELSE_LINE_RE = re.compile(r"^\s*#\s*else\b")
-_LIB_CFLAGS_VAR = {
-    "libultra": "LIBULTRA_CFLAGS",
-    "libkmc": "LIBKMC_CFLAGS",
-    "libnusys": "LIBNUSYS_CFLAGS",
-}
-
-
-@functools.cache
-def _build_version_ord_by_var():
-    """{Makefile CFLAGS var: BUILD_VERSION ordinal} from `-DBUILD_VERSION=VERSION_X` (cached)."""
-    out = {}
-    try:
-        with open(os.path.join(ROOT, "Makefile")) as f:
-            for line in f:
-                m = re.match(r"^\s*(CFLAGS|LIBKMC_CFLAGS|LIBNUSYS_CFLAGS|LIBULTRA_CFLAGS)\s*[:+]?=", line)
-                if m:
-                    v = _BUILD_VERSION_VAL_RE.search(line)
-                    if v:
-                        out[m.group(1)] = _VERSION_ORD.get(v.group(1), 0)
-    except OSError:
-        pass
-    return out
-
-
-def _build_version_ord(lib):
-    """BUILD_VERSION ordinal effective for an upstream library (0 if the lib sets no -DBUILD_VERSION)."""
-    return _build_version_ord_by_var().get(_LIB_CFLAGS_VAR.get(lib or "", "CFLAGS"), 0)
-
-
-def _eval_build_version(op, ver, ord_):
-    rhs = _VERSION_ORD.get(ver, 0)
-    return {
-        ">=": ord_ >= rhs, "<=": ord_ <= rhs, ">": ord_ > rhs,
-        "<": ord_ < rhs, "==": ord_ == rhs, "!=": ord_ != rhs,
-    }[op]
-
-
-def _strip_inactive_version_branches(text, build_ord):
-    """Drop the dead side of `#if BUILD_VERSION <op> VERSION_X [#else] #endif` for `build_ord`.
-    Non-BUILD_VERSION conditionals pass through unchanged (both branches kept); nesting is tracked
-    so #else/#endif pair to the right directive. build_ord 0 → no-op."""
-    if not build_ord:
-        return text
-    out, stack = [], []  # frame: {"ver": bool, "emit": bool}; line live iff all frames emit
-    live = lambda: all(fr["emit"] for fr in stack)
-    for line in text.splitlines():
-        s = line.lstrip()
-        m = _BUILD_VERSION_IF_RE.match(s)
-        if m:
-            stack.append({"ver": True, "emit": _eval_build_version(m.group(1), m.group(2), build_ord)})
-            continue  # drop the #if directive itself
-        if _PP_OPENING_DIRECTIVE_RE.match(s):
-            keep = live()
-            stack.append({"ver": False, "emit": True})
-            if keep:
-                out.append(line)
-            continue
-        if _PP_ELSE_LINE_RE.match(s):
-            if stack and stack[-1]["ver"]:
-                stack[-1]["emit"] = not stack[-1]["emit"]
-                continue  # drop the #else of a resolved version branch
-            if live():
-                out.append(line)
-            continue
-        if _PP_ENDIF_LINE_RE.match(s):
-            if stack:
-                ver = stack.pop()["ver"]
-                if not ver and live():
-                    out.append(line)
-                continue
-            out.append(line)
-            continue
-        if live():
-            out.append(line)
-    return "\n".join(out)
-
+# BUILD_VERSION config + version-conditional stripping moved to build_config.py (the shared leaf
+# both the C-side and asm-TU scanners use); _build_version_ord / _strip_inactive_version_branches
+# and the shared PP/BUILD_VERSION regexes are re-imported at the top of this module.
 
 _DEFINE_VERSION_RE = re.compile(r"^\s*#\s*define\s+(VERSION_[A-Z])\b")
 
