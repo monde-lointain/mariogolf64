@@ -31,6 +31,8 @@ import os
 import re
 import sys
 
+import decomp_common as dc
+
 # Asm-scanning layer (the per-`asm/<ROM>.s` body walk + the scans over it). Self-contained
 # and stdlib-only; imported here so this module keeps the yaml/upstream/hazard/scoring logic.
 # _FRAME_IMMS is shared with the C-side _c_signature below.
@@ -116,7 +118,7 @@ from pick_target_yaml import (
     _rodata_carve_end_vram,
 )
 
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+ROOT = dc.PROJECT_ROOT  # literal, symlink-stable root (see decomp_common.PROJECT_ROOT)
 LIBULTRA = os.path.expanduser("~/development/repos/ultralib/src")
 LIBKMC = os.path.expanduser("~/development/repos/libkmc/src")
 # The game also links libnusys / libmus / libnaudio (KMC N64 SDK). Their functions are

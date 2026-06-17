@@ -21,6 +21,11 @@ from pathlib import Path
 # tools/decomp_common.py -> tools/ -> project root
 SCRIPT_DIR = Path(__file__).resolve().parent
 ROOT_DIR = SCRIPT_DIR.parent
+# Literal, symlink-stable project root (os.path, NOT pathlib .resolve()), as a str. The rankers
+# (pick_target, decomp_asm) require this: .resolve() follows symlinks, which could shift the asm/
+# lookup and change ranked rows. Distinct from ROOT_DIR above, which is internal to decomp_common
+# (ASM_DIR/SYMBOL_FILES); shared by the os.path-based tools that key paths off the literal root.
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ASM_DIR = ROOT_DIR / "asm"
 ASM_DATA_DIR = ASM_DIR / "data"
 NONMATCHINGS_DIR = ROOT_DIR / "nonmatchings"
