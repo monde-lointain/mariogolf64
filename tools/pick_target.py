@@ -2100,6 +2100,179 @@ def carry_over_names():
     return names
 
 
+def _classify_pack_hazards(off, fns, upstream_index):
+    """Hazards for a multi-fn asm subseg (a pack): the member breakdown plus the
+    pack-shape flags (single-file vs multi-file pack, foreign-TU fn-count mismatch,
+    one-.o, c-combined, combined asm-TU). Assumes len(fns) > 1; returns them in order."""
+    hz = []
+    # List each fn + its upstream basename so the gate can tell a multi-file pack
+    # (different basenames → split at the upstream-file boundary, e.g. dpsetstat+dpctr)
+    # from a single-file pack, without hand-disassembling asm/<rom>.s.
+    members = []
+    asm_index = build_asm_tu_index()
+    asm_tus = []  # distinct vendorable .s TUs among asm-ONLY members (no C mirror)
+    c_stems = []  # distinct C-upstream stems among members (multi-file C-mirror pack)
+    c_files = []  # parallel to c_stems: the (lib, cpath) of each distinct C stem
+    c_members = 0  # members that resolved to a C upstream (for the single-file-pack test)
+    for fn in fns:
+        fn_lib, fn_up = upstream_index.get(fn, (None, None))
+        if fn_up:
+            stem = os.path.splitext(os.path.basename(fn_up))[0]
+            members.append(f"{fn}={stem}")
+            c_members += 1
+            if stem not in c_stems:
+                c_stems.append(stem)
+                c_files.append((fn_lib, fn_up))
+            continue
+        # No C upstream. Count a member's asm TU only here: a member with a C mirror
+        # is a C-mirror pack-split target (the pack hazard's basenames), not an asm-vendor
+        # TU — ultralib may ship a .s variant (e.g. gu translate.s) the ROM doesn't use.
+        # Without this gate a C-mirror gu pack would mis-flag as asm. Name the .s in the
+        # member label so a MIXED asm+C pack reads as `bzero=bzero.s` not an opaque
+        # `bzero=?` (S65 #1: the [0x860C0] libc pack = bzero.s + string.c was unreadable).
+        t = asm_index.get(fn)
+        if t:
+            members.append(f"{fn}={os.path.basename(t)}")
+            if t not in asm_tus:
+                asm_tus.append(t)
+        else:
+            members.append(f"{fn}=?")
+    # A pack whose every member resolves to ONE upstream C file is NOT a split-required
+    # blocker — it is an atomic verbatim mirror (guPerspectiveF+guPerspective S55,
+    # guLookAtHiliteF+guLookAtHilite S64, guTranslateF+guTranslate S67), banked or spiked
+    # in one shot. Tag it `single-file-pack` (informational, → #upstream-mirror-pattern) so
+    # the gate stops reading it as the multi-file `pack` that needs an upstream-file split
+    # (S67 #2). The pts seed is unchanged (seed_points keys the pack penalty on nfns>1, not
+    # the kind), so this is display-only. A MIXED asm+C or multi-stem pack keeps `pack`.
+    single_file = c_members == len(fns) and len(c_stems) == 1
+    # S68 #3: a pack with unnamed (`func_<addr>`) member(s) still atomic-mirrors when its
+    # one named C stem's upstream file defines exactly len(fns) functions — the unnamed
+    # members are that file's other functions (the gu F-variant + s16-wrapper idiom:
+    # guAlignF named + func_800A794C = guAlign, both in align.c). Without this an unnamed
+    # wrapper mislabels the pack as the multi-file `pack` that needs an upstream-file split.
+    # Conservative: one named stem + an exact function-count match; else falls back to pack.
+    if not single_file and len(c_stems) == 1 and 1 <= c_members < len(fns):
+        if _upstream_file_func_count(*c_files[0]) == len(fns):
+            single_file = True
+    pack_kind = HAZARD_SINGLE_FILE_PACK if single_file else HAZARD_PACK
+    hz.append(Hazard(pack_kind, f"{len(fns)}fn[" + ",".join(members) + "]"))
+    # S104: one named C stem but the pack has MORE fns than that .c defines → the surplus
+    # members are a FOREIGN TU bundled in the subseg (xprintf's func_800B1580, a separate
+    # __osDpDeviceBusy TU; xprintf.c defines 2, the pack has 3). Flag it so the gate splits the
+    # foreign TU off and mirrors only the upstream's fns, instead of attempting a whole-pack
+    # atomic mirror. The named-symbol analog of coddog-fncount-mismatch. Guard `c_members <=
+    # fc` (the named members must fit the file's defs, else the attribution itself is suspect);
+    # `not single_file` (an exact-count single-file pack is fine). Advisory (display-only).
+    if not single_file and len(c_stems) == 1 and c_members:
+        fc = _upstream_file_func_count(*c_files[0])
+        if fc and len(fns) > fc and c_members <= fc:
+            hz.append(Hazard(HAZARD_UPSTREAM_FNCOUNT_MISMATCH, f"{len(fns)}vs{fc}"))
+    # S88 one-tu: if EVERY inner fn boundary is non-16-aligned, the pack is ONE .o (the
+    # linker 16-aligns each .o's .text start, so a 2nd .o would begin on a 16 boundary).
+    # Confirms a single-file-pack structurally even when members are un-named (the
+    # coddog-mirror case, where the named-stem single_file test can't fire), and marks a
+    # per-fn decompose split as mechanically blocked (S51 non16align). Sufficient, not
+    # necessary: a one-.o pack with a 16-multiple-sized member won't fire (conservative).
+    addrs = [a for _, a in asm_function_addrs(off)]
+    if len(addrs) == len(fns) and all(a % 16 != 0 for a in addrs[1:]):
+        hz.append(Hazard(HAZARD_ONE_TU))
+    # C analog of combined-subseg (S64 #3): ≥2 *distinct* C upstream files share one asm
+    # subseg → a multi-file C-mirror pack the gate splits at the upstream-file boundary, then
+    # mirrors each verbatim. The pack basenames already encode this, but a big combined subseg
+    # (e.g. 0x82B80 = align.c + cosf.c + lookat.c, 3072B) ranks by its WHOLE size and buries a
+    # cheap clean leaf (cosf, a zero-callee gu/cosf.c mirror) past smallest-first; surfacing
+    # `c-combined:Nfile[…]` prices the split + names the leaves so the gate evaluates them
+    # without hand-disassembling asm/<rom>.s. A single-file pack (guPerspectiveF+guPerspective,
+    # both = perspective) has one stem → does NOT fire.
+    if len(c_stems) > 1:
+        hz.append(Hazard(HAZARD_C_COMBINED,
+                              f"{len(c_stems)}file[" + "|".join(sorted(c_stems)) + "]"))
+    # Combined-subseg sub-pattern: ≥2 asm-ONLY members from *distinct* vendorable ultralib
+    # .s files (the asm analog of a multi-file C pack). The gate must split the subseg at
+    # the TU boundary, then vendor each .s verbatim (S62 invaldcache|invalicache). Surfacing
+    # it here prices the split before hand-disassembling asm/<rom>.s. A pack whose asm
+    # members share one .s (a partial-TU split, e.g. __osDisableInt/__osRestoreInt in
+    # setintmask.s) has a single distinct TU → does NOT fire (different, harder hazard).
+    if len(asm_tus) > 1:
+        bn = "|".join(sorted(os.path.basename(t) for t in asm_tus))
+        detail = f"{len(asm_tus)}tu[{bn}]"
+        # Price the needs-define enabler for the split the same way the intrinsic-likely
+        # path does (S63 #1): a vendorable .s in the pack may reference an UPPER_CASE asm
+        # macro the in-tree `-I` headers lack (setfpccsr.s → CFC1/CTC1), and the gate must
+        # vendor it before the split, not discover it at a failing vendor-compile. Union
+        # the misses across the pack's TUs so one (needs-define:…) prices the whole split.
+        miss = sorted({m for t in asm_tus for m in vendorable_tu_missing_defines(t)})
+        if miss:
+            detail = f"{detail}(needs-define:{','.join(miss)})"
+        hz.append(Hazard(HAZARD_COMBINED_SUBSEG, detail))
+    return hz
+
+
+def _classify_asm_mirror_hazards(off, fns, upstream_index):
+    """The hand-asm / asm-mirror hazard for an asm subseg: a pure register/FPU shim or a
+    privileged CP0/TLB TU (both vendor verbatim from the ultralib .s), or a libkmc
+    soft-float TU (the kmc-as path). Returns 0 or 1 intrinsic-likely hazard."""
+    hz = []
+    # Hand-asm detection → asm-mirror candidate, not a classical target. Two cases collapse
+    # here: a *pure* register/FPU shim (intrinsic_likely) and a privileged TU that does real
+    # work around an op C can't emit (privileged_asm: a tlbwi/mtc0/eret with branches+loads or
+    # calls — osMapTLB/osUnmapTLB, exception dispatch; S70 #1). Both vendor verbatim from the
+    # ultralib .s (docs/hazards.md#asm-mirror-vendoring).
+    prim_intrinsic = intrinsic_likely(off, fns[0])
+    prim_privileged = privileged_asm(off, fns[0])
+    if prim_intrinsic or prim_privileged:
+        # Carry the vendorable ultralib TU path when the primary's name matches a LEAF
+        # (intrinsic-likely:os/getcount.s, …:os/setintmask.s) so the gate asm-mirrors it
+        # directly. When the TU is vendorable, pre-flag any macro the in-tree asm `-I` headers
+        # don't define (…(needs-define:RDB_BASE_VIRTUAL_ADDR,…)) so the gate pays the enabler
+        # before the verbatim copy, not at a failing vendor-compile.
+        rel = build_asm_tu_index().get(fns[0])
+        if rel:
+            detail = rel
+            miss = vendorable_tu_missing_defines(rel)
+            if miss:
+                detail = f"{detail}(needs-define:{','.join(miss)})"
+            # S84 #3: a vendorable .s with a non-.text section can't be a clean .text-only cp —
+            # pre-flag the strip+rename enabler (docs/hazards.md#asm-mirror-vendoring).
+            data_syms = vendorable_tu_data_symbols(rel)
+            if data_syms:
+                detail = f"{detail}(has-rodata:{','.join(data_syms)})"
+            # S91 #2 / S107: a SYMBOLIC-pointer table in the active data section (a switch jtbl /
+            # fn-ptr table) needs the LABEL-EXPORT procedure on top of the S84 strip-and-rename
+            # (NOT a spike — proven S107 exceptasm). The table extracts to a separate, already-
+            # address-placed blob that keeps symbolic .word .L<addr> refs after the flip; vendor
+            # .text-only and RE-EXPORT those .L<addr> labels in the vendored .text so the blob
+            # resolves. Flag it so the gate runs the label-export procedure, not a bare has-rodata
+            # replay (see docs/hazards.md#asm-mirror-vendoring, the asm-mirror-jtbl sub-case).
+            jtbls = vendorable_tu_jtbl(rel)
+            if jtbls:
+                detail = f"{detail}(asm-mirror-jtbl:{','.join(jtbls)})"
+        elif prim_privileged:
+            # An un-named func_<addr> with a privileged op: the name can't resolve the TU, but
+            # the privileged op proves a vendorable ultralib source exists. Tag it cp0-asm so the
+            # gate identifies + vendors it (a single MCP disasm names it by its CP0/TLB signature
+            # — osMapTLB/osUnmapTLB), instead of reading the BARE intrinsic-likely as a no-source
+            # shim and parking it (the 14-sprint carry-over this retires).
+            detail = "cp0-asm(identify-TU)"
+        else:
+            detail = None  # genuine no-source shim (handwritten leaf, no privileged op, no TU)
+        hz.append(Hazard(HAZARD_INTRINSIC_LIKELY, detail))
+    else:
+        # S109: a libkmc soft-float / 64-bit math TU the pure-shim + privileged tests both miss
+        # (a branchy cvt routine like mcvtld.s __fixunsdfdi/__floatdidf — no CP0/FPU-ctrl op, no
+        # `handwritten` tag) is STILL a verbatim KMC-as asm-mirror, not a classical decomp target.
+        # If the primary matches a libkmc .s `.globl` AND the subseg has no C upstream, name the
+        # .s + the kmc-as mechanism so the gate vendors it via the KMC `as` path (KMC register
+        # conventions, `.include "mips_as.h"` via -I src/libkmc, `li 0xffffffff`->`addiu` edit),
+        # not LIBULTRA_ASFLAGS. The `not in upstream_index` guard excludes the C-mirrorable libkmc
+        # files (memset/strcmp/rand resolve via the C upstream index), leaving only the asm-ONLY
+        # TUs (mmuldi3/mcvtld/mcvt*). See docs/hazards.md#asm-mirror-vendoring (kmc-as sub-lane).
+        kmc_tu = build_kmc_asm_tu_index().get(fns[0])
+        if kmc_tu and fns[0] not in upstream_index:
+            hz.append(Hazard(HAZARD_INTRINSIC_LIKELY, f"{kmc_tu}(kmc-as)"))
+    return hz
+
+
 def classify_subseg(off, typ, path, size, upstream_index):
     """Classify one subseg into (kind, fns, hazards), or None to skip it.
 
@@ -2143,163 +2316,8 @@ def classify_subseg(off, typ, path, size, upstream_index):
             if residual >= 16 and align > 16:
                 hazards.append(Hazard(HAZARD_TRAILING_PAD, f"{residual}B@{align}"))
         if len(fns) > 1:
-            # List each fn + its upstream basename so the gate can tell a multi-file pack
-            # (different basenames → split at the upstream-file boundary, e.g. dpsetstat+dpctr)
-            # from a single-file pack, without hand-disassembling asm/<rom>.s.
-            members = []
-            asm_index = build_asm_tu_index()
-            asm_tus = []  # distinct vendorable .s TUs among asm-ONLY members (no C mirror)
-            c_stems = []  # distinct C-upstream stems among members (multi-file C-mirror pack)
-            c_files = []  # parallel to c_stems: the (lib, cpath) of each distinct C stem
-            c_members = 0  # members that resolved to a C upstream (for the single-file-pack test)
-            for fn in fns:
-                fn_lib, fn_up = upstream_index.get(fn, (None, None))
-                if fn_up:
-                    stem = os.path.splitext(os.path.basename(fn_up))[0]
-                    members.append(f"{fn}={stem}")
-                    c_members += 1
-                    if stem not in c_stems:
-                        c_stems.append(stem)
-                        c_files.append((fn_lib, fn_up))
-                    continue
-                # No C upstream. Count a member's asm TU only here: a member with a C mirror
-                # is a C-mirror pack-split target (the pack hazard's basenames), not an asm-vendor
-                # TU — ultralib may ship a .s variant (e.g. gu translate.s) the ROM doesn't use.
-                # Without this gate a C-mirror gu pack would mis-flag as asm. Name the .s in the
-                # member label so a MIXED asm+C pack reads as `bzero=bzero.s` not an opaque
-                # `bzero=?` (S65 #1: the [0x860C0] libc pack = bzero.s + string.c was unreadable).
-                t = asm_index.get(fn)
-                if t:
-                    members.append(f"{fn}={os.path.basename(t)}")
-                    if t not in asm_tus:
-                        asm_tus.append(t)
-                else:
-                    members.append(f"{fn}=?")
-            # A pack whose every member resolves to ONE upstream C file is NOT a split-required
-            # blocker — it is an atomic verbatim mirror (guPerspectiveF+guPerspective S55,
-            # guLookAtHiliteF+guLookAtHilite S64, guTranslateF+guTranslate S67), banked or spiked
-            # in one shot. Tag it `single-file-pack` (informational, → #upstream-mirror-pattern) so
-            # the gate stops reading it as the multi-file `pack` that needs an upstream-file split
-            # (S67 #2). The pts seed is unchanged (seed_points keys the pack penalty on nfns>1, not
-            # the kind), so this is display-only. A MIXED asm+C or multi-stem pack keeps `pack`.
-            single_file = c_members == len(fns) and len(c_stems) == 1
-            # S68 #3: a pack with unnamed (`func_<addr>`) member(s) still atomic-mirrors when its
-            # one named C stem's upstream file defines exactly len(fns) functions — the unnamed
-            # members are that file's other functions (the gu F-variant + s16-wrapper idiom:
-            # guAlignF named + func_800A794C = guAlign, both in align.c). Without this an unnamed
-            # wrapper mislabels the pack as the multi-file `pack` that needs an upstream-file split.
-            # Conservative: one named stem + an exact function-count match; else falls back to pack.
-            if not single_file and len(c_stems) == 1 and 1 <= c_members < len(fns):
-                if _upstream_file_func_count(*c_files[0]) == len(fns):
-                    single_file = True
-            pack_kind = HAZARD_SINGLE_FILE_PACK if single_file else HAZARD_PACK
-            hazards.append(Hazard(pack_kind, f"{len(fns)}fn[" + ",".join(members) + "]"))
-            # S104: one named C stem but the pack has MORE fns than that .c defines → the surplus
-            # members are a FOREIGN TU bundled in the subseg (xprintf's func_800B1580, a separate
-            # __osDpDeviceBusy TU; xprintf.c defines 2, the pack has 3). Flag it so the gate splits the
-            # foreign TU off and mirrors only the upstream's fns, instead of attempting a whole-pack
-            # atomic mirror. The named-symbol analog of coddog-fncount-mismatch. Guard `c_members <=
-            # fc` (the named members must fit the file's defs, else the attribution itself is suspect);
-            # `not single_file` (an exact-count single-file pack is fine). Advisory (display-only).
-            if not single_file and len(c_stems) == 1 and c_members:
-                fc = _upstream_file_func_count(*c_files[0])
-                if fc and len(fns) > fc and c_members <= fc:
-                    hazards.append(Hazard(HAZARD_UPSTREAM_FNCOUNT_MISMATCH, f"{len(fns)}vs{fc}"))
-            # S88 one-tu: if EVERY inner fn boundary is non-16-aligned, the pack is ONE .o (the
-            # linker 16-aligns each .o's .text start, so a 2nd .o would begin on a 16 boundary).
-            # Confirms a single-file-pack structurally even when members are un-named (the
-            # coddog-mirror case, where the named-stem single_file test can't fire), and marks a
-            # per-fn decompose split as mechanically blocked (S51 non16align). Sufficient, not
-            # necessary: a one-.o pack with a 16-multiple-sized member won't fire (conservative).
-            addrs = [a for _, a in asm_function_addrs(off)]
-            if len(addrs) == len(fns) and all(a % 16 != 0 for a in addrs[1:]):
-                hazards.append(Hazard(HAZARD_ONE_TU))
-            # C analog of combined-subseg (S64 #3): ≥2 *distinct* C upstream files share one asm
-            # subseg → a multi-file C-mirror pack the gate splits at the upstream-file boundary, then
-            # mirrors each verbatim. The pack basenames already encode this, but a big combined subseg
-            # (e.g. 0x82B80 = align.c + cosf.c + lookat.c, 3072B) ranks by its WHOLE size and buries a
-            # cheap clean leaf (cosf, a zero-callee gu/cosf.c mirror) past smallest-first; surfacing
-            # `c-combined:Nfile[…]` prices the split + names the leaves so the gate evaluates them
-            # without hand-disassembling asm/<rom>.s. A single-file pack (guPerspectiveF+guPerspective,
-            # both = perspective) has one stem → does NOT fire.
-            if len(c_stems) > 1:
-                hazards.append(Hazard(HAZARD_C_COMBINED,
-                                      f"{len(c_stems)}file[" + "|".join(sorted(c_stems)) + "]"))
-            # Combined-subseg sub-pattern: ≥2 asm-ONLY members from *distinct* vendorable ultralib
-            # .s files (the asm analog of a multi-file C pack). The gate must split the subseg at
-            # the TU boundary, then vendor each .s verbatim (S62 invaldcache|invalicache). Surfacing
-            # it here prices the split before hand-disassembling asm/<rom>.s. A pack whose asm
-            # members share one .s (a partial-TU split, e.g. __osDisableInt/__osRestoreInt in
-            # setintmask.s) has a single distinct TU → does NOT fire (different, harder hazard).
-            if len(asm_tus) > 1:
-                bn = "|".join(sorted(os.path.basename(t) for t in asm_tus))
-                detail = f"{len(asm_tus)}tu[{bn}]"
-                # Price the needs-define enabler for the split the same way the intrinsic-likely
-                # path does (S63 #1): a vendorable .s in the pack may reference an UPPER_CASE asm
-                # macro the in-tree `-I` headers lack (setfpccsr.s → CFC1/CTC1), and the gate must
-                # vendor it before the split, not discover it at a failing vendor-compile. Union
-                # the misses across the pack's TUs so one (needs-define:…) prices the whole split.
-                miss = sorted({m for t in asm_tus for m in vendorable_tu_missing_defines(t)})
-                if miss:
-                    detail = f"{detail}(needs-define:{','.join(miss)})"
-                hazards.append(Hazard(HAZARD_COMBINED_SUBSEG, detail))
-        # Hand-asm detection → asm-mirror candidate, not a classical target. Two cases collapse
-        # here: a *pure* register/FPU shim (intrinsic_likely) and a privileged TU that does real
-        # work around an op C can't emit (privileged_asm: a tlbwi/mtc0/eret with branches+loads or
-        # calls — osMapTLB/osUnmapTLB, exception dispatch; S70 #1). Both vendor verbatim from the
-        # ultralib .s (docs/hazards.md#asm-mirror-vendoring).
-        prim_intrinsic = intrinsic_likely(off, fns[0])
-        prim_privileged = privileged_asm(off, fns[0])
-        if prim_intrinsic or prim_privileged:
-            # Carry the vendorable ultralib TU path when the primary's name matches a LEAF
-            # (intrinsic-likely:os/getcount.s, …:os/setintmask.s) so the gate asm-mirrors it
-            # directly. When the TU is vendorable, pre-flag any macro the in-tree asm `-I` headers
-            # don't define (…(needs-define:RDB_BASE_VIRTUAL_ADDR,…)) so the gate pays the enabler
-            # before the verbatim copy, not at a failing vendor-compile.
-            rel = build_asm_tu_index().get(fns[0])
-            if rel:
-                detail = rel
-                miss = vendorable_tu_missing_defines(rel)
-                if miss:
-                    detail = f"{detail}(needs-define:{','.join(miss)})"
-                # S84 #3: a vendorable .s with a non-.text section can't be a clean .text-only cp —
-                # pre-flag the strip+rename enabler (docs/hazards.md#asm-mirror-vendoring).
-                data_syms = vendorable_tu_data_symbols(rel)
-                if data_syms:
-                    detail = f"{detail}(has-rodata:{','.join(data_syms)})"
-                # S91 #2 / S107: a SYMBOLIC-pointer table in the active data section (a switch jtbl /
-                # fn-ptr table) needs the LABEL-EXPORT procedure on top of the S84 strip-and-rename
-                # (NOT a spike — proven S107 exceptasm). The table extracts to a separate, already-
-                # address-placed blob that keeps symbolic .word .L<addr> refs after the flip; vendor
-                # .text-only and RE-EXPORT those .L<addr> labels in the vendored .text so the blob
-                # resolves. Flag it so the gate runs the label-export procedure, not a bare has-rodata
-                # replay (see docs/hazards.md#asm-mirror-vendoring, the asm-mirror-jtbl sub-case).
-                jtbls = vendorable_tu_jtbl(rel)
-                if jtbls:
-                    detail = f"{detail}(asm-mirror-jtbl:{','.join(jtbls)})"
-            elif prim_privileged:
-                # An un-named func_<addr> with a privileged op: the name can't resolve the TU, but
-                # the privileged op proves a vendorable ultralib source exists. Tag it cp0-asm so the
-                # gate identifies + vendors it (a single MCP disasm names it by its CP0/TLB signature
-                # — osMapTLB/osUnmapTLB), instead of reading the BARE intrinsic-likely as a no-source
-                # shim and parking it (the 14-sprint carry-over this retires).
-                detail = "cp0-asm(identify-TU)"
-            else:
-                detail = None  # genuine no-source shim (handwritten leaf, no privileged op, no TU)
-            hazards.append(Hazard(HAZARD_INTRINSIC_LIKELY, detail))
-        else:
-            # S109: a libkmc soft-float / 64-bit math TU the pure-shim + privileged tests both miss
-            # (a branchy cvt routine like mcvtld.s __fixunsdfdi/__floatdidf — no CP0/FPU-ctrl op, no
-            # `handwritten` tag) is STILL a verbatim KMC-as asm-mirror, not a classical decomp target.
-            # If the primary matches a libkmc .s `.globl` AND the subseg has no C upstream, name the
-            # .s + the kmc-as mechanism so the gate vendors it via the KMC `as` path (KMC register
-            # conventions, `.include "mips_as.h"` via -I src/libkmc, `li 0xffffffff`->`addiu` edit),
-            # not LIBULTRA_ASFLAGS. The `not in upstream_index` guard excludes the C-mirrorable libkmc
-            # files (memset/strcmp/rand resolve via the C upstream index), leaving only the asm-ONLY
-            # TUs (mmuldi3/mcvtld/mcvt*). See docs/hazards.md#asm-mirror-vendoring (kmc-as sub-lane).
-            kmc_tu = build_kmc_asm_tu_index().get(fns[0])
-            if kmc_tu and fns[0] not in upstream_index:
-                hazards.append(Hazard(HAZARD_INTRINSIC_LIKELY, f"{kmc_tu}(kmc-as)"))
+            hazards.extend(_classify_pack_hazards(off, fns, upstream_index))
+        hazards.extend(_classify_asm_mirror_hazards(off, fns, upstream_index))
         return "asm-flip", fns, hazards
     if typ == "c" and path:
         cpath = os.path.join(ROOT, "src", path + ".c")
@@ -2947,5 +2965,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
