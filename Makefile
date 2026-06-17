@@ -1,13 +1,16 @@
 MAKEFLAGS += --no-builtin-rules
 
-# Use bash with pipefail so a failure anywhere in a recipe pipe aborts the build
-# LOUDLY. The asm rule is `$(CPP) ... | $(AS) ...`; without pipefail a missing
-# $(CPP) feeds empty input to $(AS), which "succeeds" and silently emits 0-byte
-# objects (cost a full session on 2026-06-11 when mips-linux-gnu-cpp was removed).
+# Run recipes under bash with pipefail. The asm rules pipe $(CPP) into $(AS); a
+# missing $(CPP) would feed empty input to $(AS), which "succeeds" and emits a
+# silent 0-byte object. pipefail fails the whole pipe instead.
 SHELL := /bin/bash
 .SHELLFLAGS := -o pipefail -c
 
-# Fail if no baserom
+# A failed recipe must not leave a half-written target behind: a truncated object
+# with a fresh timestamp would be treated as up to date and silently break the ROM.
+.DELETE_ON_ERROR:
+
+# The build cannot run without the ROM it reproduces.
 ifeq (,$(wildcard baserom.z64))
 $(error baserom.z64 not found. Place your ROM in the project root.)
 endif
@@ -16,15 +19,27 @@ BASENAME := mariogolf64
 TARGET := $(BASENAME).z64
 LD_SCRIPT := $(BASENAME).ld
 
-# NONMATCHING mode - compiles WIP C code and skips md5 check
+# NONMATCHING compiles WIP C and skips the md5 check.
 NONMATCHING ?= 0
 
-# Directories
-BUILD_DIR := build
+# Directories. NONMATCHING objects build into a separate tree so a WIP build never
+# poisons the matching build/ that the md5 check and verify-rom.sh read.
+BUILD_DIR := build$(if $(filter 1,$(NONMATCHING)),/nonmatching)
 ASM_DIR := asm
 ASSETS_DIR := assets
+SRC_DIR := src
 
-# Tools - system binutils for assembly, KMC for C compilation
+# Verbosity: `make V=1` echoes full command lines; the default prints one terse
+# status line per artifact and runs the command quietly.
+V ?= 0
+ifeq ($(V),0)
+  Q := @
+else
+  Q :=
+endif
+
+# Toolchain: system binutils assembles the splat-extracted asm; KMC GCC 2.7.2 +
+# KMC binutils 2.6 compile C (downloaded into tools/cc by `make -C tools`).
 MIPS_BINUTILS_PREFIX ?= mips-linux-gnu-
 AS      := $(MIPS_BINUTILS_PREFIX)as
 LD      := $(MIPS_BINUTILS_PREFIX)ld
@@ -32,20 +47,20 @@ OBJCOPY := $(MIPS_BINUTILS_PREFIX)objcopy
 STRIP   := $(MIPS_BINUTILS_PREFIX)strip
 CPP     := $(MIPS_BINUTILS_PREFIX)cpp
 
-# Abort early + clearly if the asm preprocessor is missing, rather than letting the
-# cpp|as pipe emit empty objects (belt-and-suspenders with .SHELLFLAGS pipefail above).
+# Fail early and clearly if the asm preprocessor is missing, rather than leaving
+# pipefail to catch the empty-pipe case later.
 ifeq (,$(shell command -v $(CPP) 2>/dev/null))
-$(error $(CPP) not found — install it, e.g. `sudo apt install cpp-mips-linux-gnu`)
+$(error $(CPP) not found; install it, e.g. `sudo apt install cpp-mips-linux-gnu`)
 endif
 
-# Compiler + assembler - KMC GCC 2.7.2 / KMC binutils 2.6 (downloaded into
-# tools/cc by `make -C tools`). KMC_PREFIX is overridable for a relocated
-# toolchain. COMPILER_PATH points GCC at its runtime support libs in tools/cc.
+# KMC_PREFIX is overridable for a relocated toolchain. COMPILER_PATH points GCC at
+# its runtime support libs in tools/cc.
 KMC_PREFIX ?= tools/cc
 CC    := COMPILER_PATH=$(KMC_PREFIX) $(KMC_PREFIX)/gcc
 KMC_AS := $(KMC_PREFIX)/as
 
-# Flags
+# Base flags. The per-tree C profiles (libultra/libkmc/libnusys) live in mk/*.mk
+# and override C_PROFILE_CFLAGS for their output paths.
 ASFLAGS := -march=vr4300 -32 -I include --no-pad-sections
 CPPFLAGS := -fno-dollars-in-identifiers -P
 AS_DEFINES := -DMIPSEB -D_LANGUAGE_ASSEMBLY -D_ULTRA64
@@ -54,56 +69,44 @@ ifeq ($(NONMATCHING),1)
 CFLAGS += -DNONMATCHING
 endif
 
-# libultra upstream (ultralib gcc.mk, VERSION_J libgultra_rom):
-#   OPTFLAGS=-O3, MIPS_VERSION=-mips3, CFLAGS includes -funsigned-char for VERSION <= J,
-#   CPPFLAGS includes -DBUILD_VERSION=VERSION_J -D_FINALROM.
-# -mips3 is now the project default (see CFLAGS above). -O3 and -fsigned-char are
-# libultra-specific overrides; -DBUILD_VERSION=VERSION_J guards version-conditional code.
-# NOTE on -fsigned-char (S65): ultralib's gcc.mk adds -funsigned-char for VERSION_J, but this
-# ROM's libultra was built SIGNED-char — string.c's strchr/strlen load lb + sll/sra sign-extend,
-# not lbu/andi 0xff. An S65 clean rebuild under -fsigned-char reproduced the baserom SHA-1 exactly
-# (every current libultra C file matches signed), so the band default is -fsigned-char here, a
-# deliberate, ROM-proven deviation from the documented J profile. See docs/hazards.md#char-signedness.
-# The leading -I include/libultra/compiler/gcc supplies libultra's own standard C headers
-# (vendored verbatim from ultralib/include/compiler/gcc; e.g. stdlib.h with lldiv_t, which
-# libkmc's stdlib.h lacks). It is PREPENDED so it wins over include/libkmc/stdlib.h, and is
-# libultra-only — libkmc/libnusys/other sources keep resolving stdlib.h to the libkmc copy.
-# -DF3DEX_GBI_2 (S83): a GBI microcode macro must be defined so PR/sptask.h selects
-# OS_YIELD_DATA_SIZE=0xc00 (vs the #else 0x900) — sptask.c's IO_READ(...+OS_YIELD_DATA_SIZE-4)
-# mismatched the baserom without it. ultralib's Makefile defaults GBIDEFINE := -DF3DEX_GBI, but
-# MG64 runs the F3DEX2 microcode, so -DF3DEX_GBI_2 is the accurate define (same 0xc00 guard).
-# Clean-rebuild-verified ROM-SHA-1-neutral for every other banked libultra file.
-LIBULTRA_CFLAGS := -I include/libultra/compiler/gcc $(subst -O2,-O3,$(CFLAGS)) -fsigned-char -DBUILD_VERSION=VERSION_J -DF3DEX_GBI_2 -I include/libultra/PR
+# The default C profile; mk/lib*.mk override it per output tree.
+C_PROFILE_CFLAGS = $(CFLAGS)
 
-# libkmc upstream was built with `gcc -O` (not -O2) per ~/development/repos/libkmc/src/genn64.bat
-# (env var gccsw=-mips3 -mgp32 -mfp32 -G0; explicit -O per file compile). -mips3 is now the
-# project default. -O (vs -O2) is the only remaining libkmc-specific override.
-LIBKMC_CFLAGS := $(subst -O2,-O,$(CFLAGS))
+# Shared section-alignment flags for objcopy, and the modern-GAS assemble recipe
+# used by both the splat-extracted asm/ and the generic src/ entry stub.
+OBJCOPY_ALIGN := --set-section-alignment .text=4 --set-section-alignment .data=4 --set-section-alignment .rodata=4 --set-section-alignment .bss=4
 
-# libnusys: -DUSE_EPI enables nuPi* function bodies (upstream Makefile sets USE_EPI=1 for all nusys).
-LIBNUSYS_CFLAGS := $(CFLAGS) -DUSE_EPI
+define assemble-modern
+@echo '  AS      $<'
+$(Q)$(CPP) $(CPPFLAGS) -I include $(AS_DEFINES) $< | $(AS) $(ASFLAGS) -o $@.tmp
+$(Q)$(OBJCOPY) $(OBJCOPY_ALIGN) $@.tmp $@
+$(Q)rm $@.tmp
+endef
 
-# Directories
-SRC_DIR := src
+# Default goal first.
+.DEFAULT_GOAL := all
+all: $(BUILD_DIR)/$(TARGET)
+ifneq ($(NONMATCHING),1)
+	@md5sum -c $(BASENAME).md5
+endif
 
-# Find all source files
+# Per-tree compile rules + flags.
+include mk/asm.mk
+include mk/assets.mk
+include mk/libultra.mk
+include mk/libkmc.mk
+include mk/libnusys.mk
+include mk/src.mk
+
+# Source discovery. Recursive find, NOT $(wildcard): library/vendored code lives
+# at nested paths (src/libultra/vi/*.c, src/libkmc/*.s, src/entry/entry.s).
+# $(wildcard) is non-recursive and would silently drop them, surfacing only as
+# link-time "undefined reference".
 ASM_FILES := $(wildcard $(ASM_DIR)/*.s) $(wildcard $(ASM_DIR)/data/*.s)
 BIN_FILES := $(wildcard $(ASSETS_DIR)/*.bin)
-# IMPORTANT: this MUST be a recursive `find`, NOT `$(wildcard $(SRC_DIR)/*.c)`.
-# Library code lives at nested paths: src/libultra/vi/<file>.c, src/libkmc/<file>.c,
-# and future SDK upstream mirrors will follow the same pattern. `$(wildcard)` is
-# non-recursive and silently drops those files from the build, producing
-# linker-time "undefined reference" errors that are hard to trace back to a
-# Makefile glob. Do NOT "simplify" this line back to wildcard.
 C_FILES := $(shell find $(SRC_DIR) -name '*.c')
-# Hand-written / vendored assembly now lives under src/ (hasm_in_src_path: True in
-# the yaml), co-located with the C mirrors. Same recursive-`find` rationale as
-# C_FILES above: vendored TUs sit at nested paths (src/libultra/<dir>/<f>.s,
-# src/libkmc/<f>.s, src/entry/entry.s). The per-tree assembler is selected by the
-# build/src/... pattern rules below, replacing the old VENDOR_ASM <rom>:<src> map.
 SRC_ASM_FILES := $(shell find $(SRC_DIR) -name '*.s')
 
-# Object files
 ASM_O_FILES := $(patsubst $(ASM_DIR)/%.s,$(BUILD_DIR)/$(ASM_DIR)/%.o,$(ASM_FILES))
 BIN_O_FILES := $(patsubst $(ASSETS_DIR)/%.bin,$(BUILD_DIR)/$(ASSETS_DIR)/%.o,$(BIN_FILES))
 C_O_FILES := $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/$(SRC_DIR)/%.o,$(C_FILES))
@@ -111,11 +114,20 @@ SRC_ASM_O_FILES := $(patsubst $(SRC_DIR)/%.s,$(BUILD_DIR)/$(SRC_DIR)/%.o,$(SRC_A
 
 O_FILES := $(ASM_O_FILES) $(BIN_O_FILES) $(C_O_FILES) $(SRC_ASM_O_FILES)
 
-# Default target
-all: $(BUILD_DIR)/$(TARGET)
-ifneq ($(NONMATCHING),1)
-	@md5sum -c $(BASENAME).md5
-endif
+# Pre-create every build output dir at parse time (race-free under -j). The
+# $(sort $(dir ...)) over the object lists is REQUIRED: nested sources write to
+# build/src/<tree>/<dir>/, and that parent must exist or the assemble step fails
+# on a missing .o.tmp path.
+$(shell mkdir -p $(BUILD_DIR)/$(ASM_DIR)/data $(BUILD_DIR)/$(ASSETS_DIR) $(BUILD_DIR)/$(SRC_DIR) $(sort $(dir $(C_O_FILES)) $(dir $(SRC_ASM_O_FILES))))
+
+# Link the objects into the ELF, then strip it to the raw ROM image.
+$(BUILD_DIR)/$(TARGET): $(BUILD_DIR)/$(BASENAME).elf
+	@echo '  ROM     $@'
+	$(Q)$(OBJCOPY) -O binary $< $@
+
+$(BUILD_DIR)/$(BASENAME).elf: $(O_FILES) $(LD_SCRIPT) undefined_funcs_auto.txt undefined_syms_auto.txt hardware_regs.txt extern_syms.txt
+	@echo '  LD      $@'
+	$(Q)$(LD) --no-check-sections --omagic --allow-multiple-definition -T hardware_regs.txt -T undefined_funcs_auto.txt -T undefined_syms_auto.txt -T extern_syms.txt -T $(LD_SCRIPT) -Map $(BUILD_DIR)/$(BASENAME).map -o $@
 
 clean:
 	rm -rf $(BUILD_DIR)
@@ -131,16 +143,17 @@ setup:
 extract:
 	./venv/bin/python3 -m splat split $(BASENAME).yaml
 
-# Characterization suite for the decomp tooling (tests/tooling/). Locks the
-# actual current behavior of tools/*.py so tooling refactors stay behavior-
-# preserving. Set REGEN_GOLDEN=1 to rewrite the golden snapshots.
+# Characterization suite locking tools/*.py behavior. REGEN_GOLDEN=1 rewrites the
+# golden snapshots after an intended behavior change.
 test-tools:
 	./venv/bin/python3 -m pytest tests/tooling
 
-# S71: fingerprint MG64's functions against ultralib VERSION_J (coddog compare2) and write
-# tools/coddog/coddog_map.tsv, which pick_target.py reads to re-price/flag none-classified
-# verbatim mirrors. Needs a fresh `make` (the MG64 ELF) + a built ultralib + coddog. Opt-in:
-# the map is gitignored; absent → pick_target ranking is unchanged. See docs/hazards.md#coddog-cross-ref.
+check: test-tools
+
+# Fingerprint MG64's functions against ultralib VERSION_J and write
+# tools/coddog/coddog_map.tsv, which pick_target.py reads to re-price
+# none-classified verbatim mirrors. Needs a fresh `make`, a built ultralib, and
+# coddog; the map is gitignored, so absent it leaves pick_target ranking unchanged.
 coddog-sweep:
 	./tools/coddog_sweep.sh
 
@@ -152,82 +165,31 @@ sync-names:
 	  "$$SYNC_PY" "$$GHIDRA_REPO/scripts/sync_decomp_names.py" \
 	    --export-to-decomp --decomp-root . --write-in-place
 
-.PHONY: all clean distclean setup extract test-tools coddog-sweep sync-names nonmatching-func spotcheck-build clean-nonmatchings
+help:
+	@echo 'Targets:'
+	@echo '  all (default)    build + verify the matching ROM'
+	@echo '  extract          re-split the baserom with splat'
+	@echo '  clean            remove the build tree'
+	@echo '  distclean        also remove extracted asm/assets + generated scaffold'
+	@echo '  setup            create venv + download the KMC toolchain'
+	@echo '  test-tools/check run the tooling characterization suite'
+	@echo '  coddog-sweep     fingerprint vs ultralib VERSION_J'
+	@echo '  sync-names       import curated names from the Ghidra workspace'
+	@echo 'Variables: V=1 (full commands), NONMATCHING=1 (WIP C, skip md5).'
 
-# Create build directories. The trailing `$(sort $(dir $(C_O_FILES)))` is
-# REQUIRED: when C_FILES recursively picks up src/libultra/vi/<file>.c, the
-# pattern rule writes to build/src/libultra/vi/<file>.o, and that nested
-# parent dir must exist. Without this expansion, the as-step fails opaquely
-# with "No such file or directory" on the .o.tmp output and the linker reports
-# the missing .o as an undefined-reference error. Do NOT remove the $(sort)
-# block.
-$(shell mkdir -p $(BUILD_DIR)/$(ASM_DIR)/data $(BUILD_DIR)/$(ASSETS_DIR) $(BUILD_DIR)/$(SRC_DIR) $(sort $(dir $(C_O_FILES)) $(dir $(SRC_ASM_O_FILES))))
-
-# Link
-$(BUILD_DIR)/$(TARGET): $(BUILD_DIR)/$(BASENAME).elf
-	$(OBJCOPY) -O binary $< $@
-
-$(BUILD_DIR)/$(BASENAME).elf: $(O_FILES) $(LD_SCRIPT) undefined_funcs_auto.txt undefined_syms_auto.txt hardware_regs.txt extern_syms.txt
-	$(LD) --no-check-sections --omagic --allow-multiple-definition -T hardware_regs.txt -T undefined_funcs_auto.txt -T undefined_syms_auto.txt -T extern_syms.txt -T $(LD_SCRIPT) -Map $(BUILD_DIR)/$(BASENAME).map -o $@
-
-# Assemble (CPP preprocess, then assemble with system as)
-$(BUILD_DIR)/$(ASM_DIR)/%.o: $(ASM_DIR)/%.s
-	$(CPP) $(CPPFLAGS) -I include $(AS_DEFINES) $< | $(AS) $(ASFLAGS) -o $@.tmp
-	$(OBJCOPY) --set-section-alignment .text=4 --set-section-alignment .data=4 --set-section-alignment .rodata=4 --set-section-alignment .bss=4 $@.tmp $@
-	rm $@.tmp
-
-# Binary to object
-$(BUILD_DIR)/$(ASSETS_DIR)/%.o: $(ASSETS_DIR)/%.bin
-	$(OBJCOPY) -I binary -O elf32-tradbigmips $< $@
-
-# Compile C (KMC GCC → .s, then KMC binutils 2.6 `as` → .o).
-# Using the original assembler ($(KMC_AS)) gives us the KMC `move dst,zero`
-# → `addu dst,zero,zero` encoding natively, AND auto-pads .text to its 16-byte
-# section alignment. Modern `mips-linux-gnu-as` is kept for asm/% and the
-# generic src/%.s rule (the entry stub) — it understands modern-only directives
-# like .set gp=64 that raw splat-extracted asm uses.
-#
-# All four C profiles share ONE recipe (below); the only difference is the
-# compile flags, selected per source tree via the C_PROFILE_CFLAGS
-# pattern-specific variable. `%` spans slashes, so the single src/%.o rule also
-# builds nested lib paths, and the more-specific variable patterns win there:
-#   - libultra: -O3 -fsigned-char -DBUILD_VERSION=VERSION_J (LIBULTRA_CFLAGS)
-#   - libkmc:   -O instead of -O2 (LIBKMC_CFLAGS)
-#   - libnusys: adds -DUSE_EPI for nuPi* bodies (LIBNUSYS_CFLAGS)
-C_PROFILE_CFLAGS = $(CFLAGS)
-$(BUILD_DIR)/$(SRC_DIR)/libultra/%.o: C_PROFILE_CFLAGS = $(LIBULTRA_CFLAGS)
-$(BUILD_DIR)/$(SRC_DIR)/libkmc/%.o:   C_PROFILE_CFLAGS = $(LIBKMC_CFLAGS)
-$(BUILD_DIR)/$(SRC_DIR)/libnusys/%.o: C_PROFILE_CFLAGS = $(LIBNUSYS_CFLAGS)
-
-# `strip -N dummy-symbol-name`: drop the placeholder symbol KMC GCC emits so it
-# doesn't collide at link; the name is inert, the strip just keeps the symtab clean.
-$(BUILD_DIR)/$(SRC_DIR)/%.o: $(SRC_DIR)/%.c
-	$(CC) -S $(C_PROFILE_CFLAGS) -o $@.s $<
-	$(KMC_AS) -EB -mips2 -G 0 -I include -o $@.tmp $@.s
-	cp $@.tmp $@
-	$(STRIP) $@ -N dummy-symbol-name
-	rm $@.s $@.tmp
-
-# === execution-loop targets ===================================================
-# Driven by tools/decomp_loop.py inside the iteration loop, and by the execution
-# loop's in-tree spot-check step. Mirrors decomp.me's KMC GCC compile so the resulting
-# object reflects what decomp.me would produce (single-step `gcc -c`).
-
-# Per-function compile of nonmatchings/$(FUNC)/base.c -> nonmatchings/$(FUNC)/current.o.
-# base.c has no INCLUDE_ASM directives, so single-step is safe (no need to route
-# through system `as`). Always defines NONMATCHING.
+# Per-function compile of nonmatchings/$(FUNC)/base.c into current.o, driven by
+# tools/decomp_loop.py. base.c has no INCLUDE_ASM, so a single-step `gcc -c`
+# mirrors what decomp.me produces. Always defines NONMATCHING.
 nonmatching-func:
 	@test -n "$(FUNC)" || { echo "Usage: make nonmatching-func FUNC=<func_XXXXXXXX> [LIBKMC=1|LIBULTRA=1]" >&2; exit 1; }
 	@test -f nonmatchings/$(FUNC)/base.c || { echo "nonmatchings/$(FUNC)/base.c not found; run tools/seed_c.py first" >&2; exit 1; }
 	$(CC) -c $(if $(LIBKMC),$(LIBKMC_CFLAGS),$(if $(LIBULTRA),$(LIBULTRA_CFLAGS),$(CFLAGS))) -DNONMATCHING -o nonmatchings/$(FUNC)/current.o nonmatchings/$(FUNC)/base.c
 
-# In-tree spot-check build. Compiles src/$(SEG).c.spotcheck (a temporary copy
-# of the parent with the target function's INCLUDE_ASM wrapped in
-# `#ifndef NONMATCHING / INCLUDE_ASM / #else <C body> #endif`) with
-# NONMATCHING=1 into build/src/$(SEG).spotcheck.o. Two-step compile because
-# the spotcheck source inherits the parent's other INCLUDE_ASM directives.
-# The execution loop's finalize step creates and removes the .spotcheck file;
-# this target only builds it.
+# In-tree spot-check build. Compiles src/$(SEG).c.spotcheck (the parent with the
+# target function's INCLUDE_ASM swapped for its candidate C body under NONMATCHING)
+# into build/src/$(SEG).spotcheck.o. Two-step because the source still carries the
+# parent's other INCLUDE_ASM directives. The loop's finalize step creates and
+# removes the .spotcheck file; this target only builds it.
 spotcheck-build:
 	@test -n "$(SEG)" || { echo "Usage: make spotcheck-build SEG=<seg> FUNC=<func_XXXXXXXX>" >&2; exit 1; }
 	@test -n "$(FUNC)" || { echo "Usage: make spotcheck-build SEG=<seg> FUNC=<func_XXXXXXXX>" >&2; exit 1; }
@@ -238,57 +200,8 @@ spotcheck-build:
 	$(STRIP) $(BUILD_DIR)/$(SRC_DIR)/$(SEG).spotcheck.o -N dummy-symbol-name
 	rm $(BUILD_DIR)/$(SRC_DIR)/$(SEG).spotcheck.s $(BUILD_DIR)/$(SRC_DIR)/$(SEG).spotcheck.tmp
 
-# Wipe per-function scratch dirs. Leaves the build dir alone.
+# Wipe per-function scratch dirs; leaves the build tree alone.
 clean-nonmatchings:
 	rm -rf nonmatchings/*/
 
-# === Vendored / hand-written assembly under src/ ============================
-# hasm subseg .s files live under src/ (hasm_in_src_path: True in the yaml),
-# co-located with the C mirrors, and are assembled BY PATH. GNU make selects the
-# most-specific pattern (shortest stem) whose prerequisite exists, so the
-# src/libultra/%.s and src/libkmc/%.s rules win over the generic src/%.s rule,
-# and a wrong-extension candidate (src/%.c) self-eliminates on its missing
-# prereq. This replaces the old VENDOR_ASM <rom>:<src> map + foreach/eval: to
-# vendor a new TU, drop the .s under src/<tree>/ and add the hasm name qualifier
-# in the yaml — no Makefile edit. See docs/hazards.md#asm-mirror-vendoring.
-
-# Vendored libultra hand-asm TUs (src/libultra/<dir>/<f>.s): assemble with the
-# SAME toolchain + flags ultralib uses (KMC/N64 gcc, gcc.mk profile), mirroring
-# how LIBULTRA_CFLAGS mirrors ultralib's C profile. LOAD-BEARING: the KMC
-# assembler pads each function's .text up to its 16-byte ROM slot, so the
-# verbatim 0xC ultralib TU lands as the 0x10 the ROM expects. Modern
-# mips-linux-gnu `as` emits the bare 0xC and the subseg shifts (SHA-1 break) —
-# which is why these must NOT fall through to the generic src/%.s modern-GAS rule.
-LIBULTRA_ASFLAGS := -x assembler-with-cpp -w -nostdinc -c -G 0 -mips3 -mgp32 -mfp32 \
-	-DMIPSEB -D_LANGUAGE_ASSEMBLY -D_MIPS_SIM=1 -D_ULTRA64 \
-	-D_MIPS_SZLONG=32 -D__USE_ISOC99 -DBUILD_VERSION=VERSION_J -D_FINALROM \
-	-I include -I include/libultra -I include/libultra/PR -I include/libultra/compiler/gcc
-
-$(BUILD_DIR)/$(SRC_DIR)/libultra/%.o: $(SRC_DIR)/libultra/%.s
-	$(CC) $(LIBULTRA_ASFLAGS) -o $@.tmp $<
-	$(OBJCOPY) --set-section-alignment .text=4 --set-section-alignment .data=4 --set-section-alignment .rodata=4 --set-section-alignment .bss=4 $@.tmp $@
-	rm $@.tmp
-
-# Vendored libkmc soft-float / 64-bit-math TUs (src/libkmc/<f>.s): KMC register
-# conventions (move -> addu encoding), assembled with KMC `as` directly. No
-# objcopy alignment step (the 16-byte-slot padding happens inside KMC `as`). The
-# -I src/libkmc resolves mcvtld.s's `.include "mips_as.h"` (sets FPU=1); it is
-# harmless for the self-contained mmuldi3.s.
-$(BUILD_DIR)/$(SRC_DIR)/libkmc/%.o: $(SRC_DIR)/libkmc/%.s
-	$(KMC_AS) -EB -mips2 -I src/libkmc -o $@.tmp $<
-	cp $@.tmp $@
-	rm $@.tmp
-
-# Preserve the mips_as.h header dependency the old explicit mcvtld rule carried
-# (prereq-only line; does not override the recipe above).
-$(BUILD_DIR)/$(SRC_DIR)/libkmc/mcvtld.o: $(SRC_DIR)/libkmc/mips_as.h
-
-# Other hand-written asm under src/ (the entry stub): modern mips-linux-gnu `as`,
-# same recipe as the asm/%.s rule — it uses .set gp=64 + .include "macro.inc",
-# which KMC `as` rejects. CPP-preprocess, then assemble. Most-specific pattern
-# matching makes the libultra/libkmc rules above win for those trees, so this
-# catches only the remaining src/*.s (currently just src/entry/entry.s).
-$(BUILD_DIR)/$(SRC_DIR)/%.o: $(SRC_DIR)/%.s
-	$(CPP) $(CPPFLAGS) -I include $(AS_DEFINES) $< | $(AS) $(ASFLAGS) -o $@.tmp
-	$(OBJCOPY) --set-section-alignment .text=4 --set-section-alignment .data=4 --set-section-alignment .rodata=4 --set-section-alignment .bss=4 $@.tmp $@
-	rm $@.tmp
+.PHONY: all clean distclean setup extract test-tools check coddog-sweep sync-names help nonmatching-func spotcheck-build clean-nonmatchings

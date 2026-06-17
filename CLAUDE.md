@@ -50,7 +50,7 @@ Ghidra MCP is used inline at seed time. For each target function:
      an `additional working dir` but is not the source). This pin holds for both the C mirror and the
      hand-asm `intrinsic-likely:<tu>.s` asm-mirror (`docs/hazards.md#asm-mirror-vendoring`): the
      project mirrors ultralib's `gcc.mk` profile (`LIBULTRA_CFLAGS` for C, `LIBULTRA_ASFLAGS` for
-     vendored asm TUs). libkmc → `~/development/repos/libkmc`, libnusys → the n64sdkmod nusys tree.
+     vendored asm TUs, both in `mk/libultra.mk`). libkmc → `~/development/repos/libkmc`, libnusys → the n64sdkmod nusys tree.
 
 3. **Classical branch** (no upstream, or a hazard routes here): seed → iterate → spot-check →
    finalize.
@@ -211,9 +211,9 @@ below).
 - **`hasm` subsegments stay raw asm forever** (entry stub, `__muldi3` libkmc math module, RSP
   microcode entries). The execution loop refuses these. The project sets `hasm_in_src_path: True`, so
   a `hasm` `.s` lives under `src/<dir>/<stem>.s` (each `hasm` yaml line carries a `<dir>/<stem>` name
-  qualifier) and its object builds to `build/src/<dir>/<stem>.o` via a path-based Makefile pattern
-  rule that picks the assembler by tree (KMC for `src/libultra/` + `src/libkmc/`, modern GAS for the
-  rest). This replaced the old `VENDOR_ASM` `<rom>:<src>` map.
+  qualifier) and its object builds to `build/src/<dir>/<stem>.o` via a path-based pattern rule in the
+  `mk/*.mk` fragments (the top `Makefile` is a thin skeleton that `include`s them) that picks the
+  assembler by tree (KMC for `src/libultra/` + `src/libkmc/`, modern GAS for the rest).
 - **Permuter** (`./run-permuter.sh`) runs only when asm-differ's `percent` ≥ 0.97. Below that,
   iterate on C or reconsider whether the subseg should be `hasm`.
 - **Decomp is authoritative for names** (per the Ghidra-workspace
