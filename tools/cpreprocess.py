@@ -43,10 +43,10 @@ _PP_ENDIF_RE = re.compile(r"#\s*endif")
 
 def _strip_dead_blocks(text):
     """Drop `#ifdef _DEBUG` / `#ifdef NU_DEBUG` / `#ifdef AUD_PROFILE` / `#ifndef _FINALROM` / `#if 0`
-    regions (matched #endif, nested). AUD_PROFILE (S95): the audio band's debug-counter macro
-    (`lastCnt[++cnt_index] = osGetCount();`, the PROFILE_AUD() timing calls, and the gating
-    `extern u32 ...lastCnt[]` decl) is `#ifdef AUD_PROFILE`-guarded and MG64 does not define it, so
-    those refs/calls are phantom -- without this, load.c carried a false `refs-unplaced:lastCnt`."""
+    regions (matched #endif, nested). The audio band's debug-counter macros (the PROFILE_AUD()
+    timing calls + their gating `extern u32 ...[]` decl) are `#ifdef AUD_PROFILE`-guarded and MG64
+    does not define it, so those refs/calls are phantom -- without this, an audio mirror would carry
+    a false `refs-unplaced` on the counter."""
     out, in_dead, nest = [], False, 0
     for line in text.splitlines():
         s = line.lstrip()
@@ -72,10 +72,10 @@ _DEFINE_LINE_RE = re.compile(r"^[ \t]*#[ \t]*define\b")
 def _strip_define_lines(text):
     """Drop `#define` directive lines (including `\\`-continuations). A `#define NAME (expr)`
     object/function-like macro DEFINITION is not a call site, yet its `NAME (` matches C_CALL_RE and
-    inflates both the C-side jal count and the calls-unplaced set. S61: gu/rotate's VERSION_J `#else`
-    branch `#define xxsine (x * sine)` / yxsine / zxsine were each counted as a phantom call →
-    false `jal-count-mismatch:7vs4` + `calls-unplaced:...,xxsine,yxsine,zxsine` that mis-routed a
-    clean near-verbatim mirror toward the classical loop. Strip the source's own #define lines before
+    inflates both the C-side jal count and the calls-unplaced set (e.g. a `#define xxsine (x * sine)`
+    would be counted as a phantom call → a false `jal-count-mismatch` + `calls-unplaced:xxsine` that
+    mis-routes a clean near-verbatim mirror toward the classical loop). Strip the source's own
+    #define lines before
     the call scan (the one-level macro EXPANSION bodies appended by macro_hidden_text carry no
     #define directives, so macro-hidden-extern detection is unaffected)."""
     out, cont = [], False

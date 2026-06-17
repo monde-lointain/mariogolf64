@@ -13,7 +13,7 @@ include unresolved under the project -I set, jal-count-mismatch = the upstream
 near-verbatim mirror), and prints a smallest-first table for `/sprint-plan`.
 The refs-unplaced / calls-unplaced grep follows one level of macro expansion so a
 global or callee inlined only through an invoked library macro (EPI_SYNC →
-__osCurrentHandle, S41) is flagged, not deferred to a mid-execution link failure.
+__osCurrentHandle) is flagged, not deferred to a mid-execution link failure.
 
 Usage:
   venv/bin/python3 tools/pick_target.py [--lib SUBSTR] [-n N] [--include-stuck] [--json]
@@ -142,18 +142,17 @@ BACKLOG = os.path.join(ROOT, "BACKLOG.md")
 # *data* extern that means an undefined reference (see refs_unplaced). Functions are exempt —
 # splat auto-resolves them via undefined_funcs_auto.txt.
 NAME_FILES = [os.path.join(ROOT, "symbol_addrs.txt"), os.path.join(ROOT, "ghidra_symbols.txt")]
-# S71: optional coddog cross-ref map (mgname<TAB>ulname<TAB>ulfile<TAB>pct), written by
+# Optional coddog cross-ref map (mgname<TAB>ulname<TAB>ulfile<TAB>pct), written by
 # tools/coddog_sweep.sh. Absent by default → build_coddog_index() returns {} and ranking is
 # unchanged. A ≥CODDOG_MIRROR_PCT non-audio hit re-prices an un-named/none candidate as a libultra
-# mirror (crc.c was mis-seeded pts-13 classical; coddog proved it a verbatim 2-fn mirror). See
-# docs/hazards.md#coddog-cross-ref.
+# mirror. See docs/hazards.md#coddog-cross-ref.
 CODDOG_MAP = os.environ.get("CODDOG_MAP", os.path.join(ROOT, "tools/coddog/coddog_map.tsv"))
 
 # Approximate C function-definition: a return-type-led line ending in `name(`.
 UPSTREAM_DEF_RE = re.compile(r"^[A-Za-z_][\w \t\*]*?\b([A-Za-z_]\w+)\s*\(", re.M)
 # Keywords that can lead a `<word>(` at a statement boundary but are NOT a function name — control
 # flow (an indented `if (`/`switch (`) and type/storage qualifiers (the `int (*tbl[])(void)` decl,
-# whose token before the first `(` is `int`). _iter_upstream_functions filters these (S104).
+# whose token before the first `(` is `int`). _iter_upstream_functions filters these.
 _DEF_NONNAME_KW = frozenset((
     "if", "while", "for", "switch", "else", "do", "return", "case", "goto", "sizeof", "default",
     "int", "char", "short", "long", "unsigned", "signed", "float", "double", "void", "struct",
@@ -162,7 +161,7 @@ _DEF_NONNAME_KW = frozenset((
 # `#pragma weak <alias> = <impl>` exports <alias> at the implementation's address. The def loop
 # only keys the impl name (gu/cosf.c defines `fcos`/`__cosf`), so the ROM/curated weak alias `cosf`
 # was absent from the upstream index → a pack member read `cosf=?` and hid cosf.c from the
-# c-combined member labels (S66). Keying the alias too lets a weak-aliased SDK fn resolve to its
+# c-combined member labels. Keying the alias too lets a weak-aliased SDK fn resolve to its
 # upstream file (cosf/sinf/fcos/fsin), the C analog of ASM_TU_DEF_RE's WEAK arm (bcopy → _bcopy).
 PRAGMA_WEAK_RE = re.compile(r"^\s*#pragma\s+weak\s+([A-Za-z_]\w+)\s*=\s*[A-Za-z_]\w+", re.M)
 # A hand-asm TU's exported entry: `LEAF(osGetCount)` / `XLEAF(name)` / `WEAK(bcopy, _bcopy)`
@@ -173,7 +172,7 @@ ASM_TU_DEF_RE = re.compile(r"^\s*(?:X?LEAF|WEAK)\(\s*([A-Za-z_]\w+)", re.M)
 # `.globl name` — KMC register conventions, assembled via the KMC `as` path (NOT ultralib's
 # LEAF/XLEAF macros + LIBULTRA_ASFLAGS). Keys build_kmc_asm_tu_index so a libkmc asm-only TU the
 # pure-shim/privileged tests miss (a branchy cvt routine) still names its vendorable .s + the
-# kmc-as mechanism. See docs/hazards.md#asm-mirror-vendoring (the kmc-as sub-lane, S109).
+# kmc-as mechanism. See docs/hazards.md#asm-mirror-vendoring (the kmc-as sub-lane).
 KMC_ASM_TU_DEF_RE = re.compile(r"^\s*\.globl\s+([A-Za-z_]\w+)", re.M)
 # A vendorable asm TU references CPU/cache/TLB constants by macro (K0BASE, DCACHE_SIZE, C0_ENTRYHI,
 # RDB_BASE_VIRTUAL_ADDR, …). The gate must vendor-compile it under LIBULTRA_ASFLAGS, so a macro the
@@ -198,7 +197,7 @@ DATA_GLOBAL_DEF_RE = re.compile(
     r"^(?:(?:struct|union|enum)\s+)?[A-Za-z_][\w \t\*]*?\b([A-Za-z_]\w+)"
     r"\s*(?:\[([^\]]*)\]\s*)?(?:=[^;]*)?;\s*$"
 )
-# S73: a function-local *initialized* static: `static <type> <name> [= init];` inside a body.
+# A function-local *initialized* static: `static <type> <name> [= init];` inside a body.
 # defines_data_globals can't see it (it skips `static` lines AND scans only brace-depth 0), but
 # KMC GCC 2.7.2 emits it into the TU's .data exactly like a file-scope global, so a verbatim mirror
 # re-emits the bytes and needs the same .data sibling carve. The non-greedy prefix backtracks so the
@@ -206,7 +205,7 @@ DATA_GLOBAL_DEF_RE = re.compile(
 LOCAL_STATIC_DATA_RE = re.compile(
     r"^static\b[^;{}]*?\b([A-Za-z_]\w+)\s*(?:\[[^\]]*\])?\s*=[^;]*;\s*$"
 )
-# S93: a file-scope `static const <type> <name>[...] = ...` array. `const` static is file-PRIVATE
+# A file-scope `static const <type> <name>[...] = ...` array. `const` static is file-PRIVATE
 # rodata (the `static` keyword bars cross-file linkage), so its presence makes widening the
 # rodata-literal carve-start to the subseg boundary FP-safe (the scan misses the array base
 # `addiu %lo` + string-literal pointers). Non-greedy prefix backtracks to the last id before `[`
@@ -215,16 +214,16 @@ LOCAL_STATIC_DATA_RE = re.compile(
 FILE_STATIC_CONST_ARRAY_RE = re.compile(
     r"^static\s+const\b[^;{}]*?\b([A-Za-z_]\w+)\s*\[[^\]]*\]\s*="
 )
-# S104: a file-scope NON-const INITIALIZED static array (`static <type> <name>[…] = …;`) → .data (not
-# rodata). The verbatim mirror re-emits it, so it needs a .data sibling carve at the recovered vram —
-# the S92/S101 un-flagged class (xprintf spaces/zeroes, env eqpower, _Litob ldigs/udigs). The `(?!const)`
+# A file-scope NON-const INITIALIZED static array (`static <type> <name>[…] = …;`) → .data (not
+# rodata). The verbatim mirror re-emits it, so it needs a .data sibling carve at the recovered vram
+# (e.g. xprintf spaces/zeroes, env eqpower, _Litob ldigs/udigs). The `(?!const)`
 # lookahead defers const arrays to FILE_STATIC_CONST_ARRAY_RE (rodata); `[^;{}=]*?` keeps the type span
 # off the initializer. Uninitialized statics (no `=`) are .bss (file-static / drop-static), not this.
 FILE_STATIC_INIT_ARRAY_RE = re.compile(
     r"^static\s+(?!const\b)[^;{}=]*?\b([A-Za-z_]\w+)\s*\[[^\]]*\]\s*="
 )
 INCLUDE_RE = re.compile(r'^\s*#\s*include\s*[<"]([^>"]+)[>"]')
-# The project's quoted/angle include search dirs (Makefile CFLAGS `-I` set; -nostdinc removed S32 — stdarg.h ships at include/stdarg.h for correct MIPS GCC 2.7.2 vararg ABI).
+# The project's quoted/angle include search dirs (Makefile CFLAGS `-I` set; -nostdinc removed — stdarg.h ships at include/stdarg.h for correct MIPS GCC 2.7.2 vararg ABI).
 INCLUDE_DIRS = [
     os.path.join(ROOT, d)
     for d in ("include", "include/libultra", "include/libultra/internal", "include/libkmc", "include/libnusys")
@@ -235,7 +234,7 @@ PROJECT_INC = os.path.join(ROOT, "include")
 # (Makefile) prepends `-I include/libultra/compiler/gcc` and appends `-I include/libultra/PR`, so a
 # libultra mirror resolves <libaudio.h>/<os_internal.h>/<ultraerror.h> and the rest of the PR/ band
 # through these — missing_includes must include them for a libultra candidate or it false-flags
-# needs-header → blk (S53: alHeapDBAlloc + the whole audio/PR mirror band were hidden this way).
+# needs-header → blk (it once hid the whole audio/PR mirror band this way).
 # libkmc/libnusys CFLAGS add no extra `-I`, so they map to the base set.
 LIB_EXTRA_INCLUDE_DIRS = {
     "libultra": [
@@ -251,7 +250,7 @@ LIB_EXTRA_INCLUDE_DIRS = {
 UPSTREAM_INC_ROOTS = [
     # ultralib is the sole libultra mirror source (LIBULTRA = ultralib/src), so its include tree is
     # the libultra companion-header donor — it ships the `PRinternal/` prefix the mirrors `#include`.
-    # S46: the PI-band PRinternal/piint.h copy came from here.
+    # The PI-band PRinternal/piint.h copy came from here.
     os.path.expanduser("~/development/repos/ultralib/include"),
     os.path.expanduser("~/development/repos/libkmc/include"),
     os.path.expanduser(
@@ -262,7 +261,7 @@ UPSTREAM_INC_ROOTS = [
 # ultralib `src/libc/xstdio.h`, `src/gu/guint.h`) that a mirror `#include`s with quotes and that
 # get copied source-relative next to the mirrored .c, NOT into an -I dir. Distinct from
 # UPSTREAM_INC_ROOTS (the public -I header donors). A `needs-header:<h>` whose `<h>` lives here is
-# vendorable (a cheap source-relative cp), not a blocked DoR reject (S49 guint.h, S54 xstdio.h).
+# vendorable (a cheap source-relative cp), not a blocked DoR reject (e.g. guint.h, xstdio.h).
 UPSTREAM_SRC_ROOTS = [
     LIBULTRA,  # ~/development/repos/ultralib/src
 ]
@@ -271,7 +270,7 @@ UPSTREAM_BONUS = 200
 # these by name (osRomBase, osMemSize, …) but the asm bakes them as raw lui/addiu immediates that
 # splat auto-labels `D_800003xx` — so refs_unplaced's `__`-prefix / declared-extern grep misses
 # them and the mirror link-fails on first compile. Surfacing them with their known vram lets the
-# gate add the recover-extern from this table, no asm-data-recovery pass needed (S46: osRomBase).
+# gate add the recover-extern from this table, no asm-data-recovery pass needed.
 BOOT_GLOBALS = {
     "osTvType": 0x80000300,
     "osRomType": 0x80000304,
@@ -334,7 +333,7 @@ class UpstreamSource:
 def build_upstream_index():
     """Map upstream function name -> (lib, path), scanning libultra/libkmc once.
 
-    Two determinism fixes (S60). (1) Sort the glob so a name defined in multiple upstream files
+    Two determinism fixes. (1) Sort the glob so a name defined in multiple upstream files
     resolves to the alphabetically-first directory, not whatever the filesystem yields first: gu/
     beats mgu/ — MG64 mirrors libgultra, not the fast-gu `mgu` variant — so a pack member like
     guMtxXFML (in both gu/mtxcatl.c under a version guard and mgu/mtxxfml.c) co-locates with its
@@ -355,7 +354,7 @@ def build_upstream_index():
             text = _strip_inactive_version_branches(text, build_ord)
             for m in UPSTREAM_DEF_RE.finditer(text):
                 index.setdefault(m.group(1), (lib, cpath))
-            # Weak aliases export the ROM-visible name at the impl's address (S66 cosf/sinf).
+            # Weak aliases export the ROM-visible name at the impl's address (e.g. cosf/sinf).
             for m in PRAGMA_WEAK_RE.finditer(text):
                 index.setdefault(m.group(1), (lib, cpath))
     return index
@@ -432,7 +431,7 @@ def _intree_asm_macros():
 def vendorable_tu_missing_defines(rel):
     """Sorted UPPER_CASE macros a vendorable ultralib .s (path relative to LIBULTRA) references but
     that the in-tree asm `-I` headers don't define — a needs-define enabler the gate must satisfy
-    before vendoring (S57 retro #1). Strips C comments + `#include` lines first so a `/* TLB */`
+    before vendoring. Strips C comments + `#include` lines first so a `/* TLB */`
     comment word or the `R4300` in an `#include "PR/R4300.h"` path can't false-flag. Empty for a
     self-contained TU (verified empty for the whole current vendoring backlog — all cache/TLB/gu
     macros ship in include/libultra/PR/R4300.h, RDB_* in PR/rdb.h)."""
@@ -445,21 +444,21 @@ def vendorable_tu_missing_defines(rel):
         return []
     text = ASM_INCLUDE_LINE_RE.sub("", C_COMMENT_RE.sub("", text))
     defined = _intree_asm_macros()
-    # S84 #2: a macro the .s `#define`s itself (e.g. setintmask.s's `#define MI_INTR_MASK ...`,
-    # often unused) is not a missing enabler — subtract the TU's own defines before flagging.
+    # A macro the .s `#define`s itself (e.g. setintmask.s's `#define MI_INTR_MASK ...`, often unused)
+    # is not a missing enabler — subtract the TU's own defines before flagging.
     local = set(re.findall(r"#define\s+(\w+)", text))
     return sorted({t for t in MACRO_REF_RE.findall(text)} - defined - local)
 
 
 def vendorable_tu_data_symbols(rel):
     """Exported symbols a vendorable ultralib .s (path relative to LIBULTRA) defines in a NON-.text
-    section (.rdata/.rodata/.data/.sdata/.bss) — a has-rodata enabler (S84 #3). A vendored .s with
+    section (.rdata/.rodata/.data/.sdata/.bss) — a has-rodata enabler. A vendored .s with
     such a section is NOT a clean .text-only mirror cp: splat auto-links a hasm .o's data
     sections at the END of each output section (out of address order), so the bytes duplicate +
     misplace -> SHA break. The fix (docs/hazards.md#asm-mirror-vendoring) vendors .text only +
     strips the data block, keeping that data as the existing extracted generic blob renamed to this
     symbol via a `symbol_addrs` add. Flagging it prices the strip+rename enabler at the gate rather
-    than discovering it at a failing vendor-build (S84 setintmask / __osRcpImTable). Empty for a
+    than discovering it at a failing vendor-build. Empty for a
     .text-only TU (the whole current vendoring backlog)."""
     if not rel:
         return []
@@ -469,8 +468,8 @@ def vendorable_tu_data_symbols(rel):
     except OSError:
         return []
     text = C_COMMENT_RE.sub("", text)
-    # S91 #1: scan only the ACTIVE data sections. A `#ifndef _FINALROM` / version-gated EXPORT
-    # (S91: exceptasm.s's `__osCauseTable_pt` lives in `#ifndef _FINALROM`) is NOT emitted under
+    # Scan only the ACTIVE data sections. A `#ifndef _FINALROM` / version-gated EXPORT
+    # (e.g. exceptasm.s's `__osCauseTable_pt` lives in `#ifndef _FINALROM`) is NOT emitted under
     # MG64's `-D_FINALROM -DBUILD_VERSION=VERSION_J` asm profile, so listing it over-counts the
     # rodata-strip enabler. Drop the dead + inactive-version blocks before the section scan so the
     # priced has-rodata set is what the vendored `.o` actually carries, not the all-branches union.
@@ -491,15 +490,15 @@ _WORD_LABEL_OPERAND_RE = re.compile(r"^[A-Za-z_]\w*(?:\s*[+-]\s*\w+)?$")
 
 def vendorable_tu_jtbl(rel):
     """Sorted heads of any SYMBOLIC-pointer table (`.word <label>, …`) a vendorable ultralib `.s`
-    defines in its ACTIVE `.rdata`/`.rodata`/`.data` section (S91 #2). Such a table — a switch jump
-    table (`__osIntTable: .word redispatch, sw1, …`, the active `__osException` `jr`s through it) or
-    any function-pointer table — is what makes a `.text`-only asm-mirror a SPIKE, not an S84
+    defines in its ACTIVE `.rdata`/`.rodata`/`.data` section. Such a table — a switch jump table
+    (`__osIntTable: .word redispatch, sw1, …`, the active `__osException` `jr`s through it) or
+    any function-pointer table — is what makes a `.text`-only asm-mirror a SPIKE, not a clean
     strip-and-rename: splat extracts the table to a SEPARATE rodata blob with SYMBOLIC `.word .L…`
     entries pointing at `.text`-internal labels; vendoring the `.text`-only ultralib `.s` (which does
     not define splat's `.L<addr>` labels) leaves the blob's refs UNDEFINED at link, and the table can't
     be carve-placed either (a hasm `.o`'s rodata auto-links at the section END → wrong addr → SHA
-    break). The fix re-exports the labels from the vendored `.text` (S107). So this is the negative signal: a
-    heavy asm-mirror like exceptasm is NOT the S84 has-rodata replay its `data_symbols` flag suggests.
+    break). The fix re-exports the labels from the vendored `.text`. So this is the negative signal: a
+    heavy asm-mirror like exceptasm is NOT the has-rodata replay its `data_symbols` flag suggests.
     Numeric tables (`__osHwIntTable: .word 0, 0`) are NOT flagged (they strip-and-rename cleanly).
     See docs/hazards.md#asm-mirror-vendoring. Empty for a `.text`-only or numeric-data TU."""
     if not rel:
@@ -556,13 +555,13 @@ _C_NONCALL = {
     "if", "for", "while", "switch", "return", "sizeof", "do", "else", "case",
     "defined", "OS_LOG_FLOAT", "assert",
     # Inline predicate macros that expand to field comparisons, emitting NO jal — counting them
-    # as C calls over-inflates the jal-count C side (the S42 osSendMesg `MQ_IS_FULL` 7vs6 FP) and
+    # as C calls over-inflates the jal-count C side (a `MQ_IS_FULL` reads as a call but is none) and
     # pollutes the maybe-upstream callee signature. They carry no cross-build identity.
     "MQ_IS_FULL", "MQ_IS_EMPTY",
     # GCC attribute artifacts surfaced by macro_hidden_text: the macros.h `ALIGNED(x)` /
     # `STACK(...)` family expand to `__attribute__((aligned(x)))`, so the lowercase `aligned`
     # attribute keyword (and `__attribute__` itself) read as `name(` call tokens and mis-flag as
-    # an unplaced callee (S87 vimgr: `static STACK(...) ALIGNED(0x10)` → phantom `calls-unplaced:aligned`).
+    # an unplaced callee (`static STACK(...) ALIGNED(0x10)` → phantom `calls-unplaced:aligned`).
     # The macro NAMES (ALIGNED/STACK/ARRLEN/ALIGN8) are already dropped via macro_names; these are
     # their expansion residue, which macro_names does not cover.
     "aligned", "__attribute__",
@@ -590,7 +589,7 @@ def _blank_noncode(text):
     spaces, PRESERVING length + newlines so offsets map back to the original. Lets the def scanner
     ignore `(`/`{`/`;` inside a comment, a `"name("` literal, or a `#define PUT(s,n)` macro header,
     while the caller still slices each function body from the UNMODIFIED text (directives intact, which
-    call_divergence's dead-block scan needs — S104: blanking them in the body re-counted a dead
+    call_divergence's dead-block scan needs — blanking them in the body would re-count a dead
     `#ifdef NU_DEBUG` osSyncPrintf as a phantom `jal-count-mismatch`)."""
     return _NONCODE_RE.sub(lambda m: re.sub(r"[^\n]", " ", m.group(0)), text)
 
@@ -600,7 +599,7 @@ def _iter_upstream_functions(text):
     brace-matched from the ORIGINAL text. A self-contained depth-aware scan over a length-preserving
     blanked copy (NOT the column-anchored UPSTREAM_DEF_RE, which stays conservative for the symbol
     index at build_upstream_index): driven by depth-0 `(`, so it handles every def shape uniformly and
-    never miscounts (S104, the xprintf retro):
+    never miscounts:
       - ANSI `T name(params) {`, K&R `T name(params) decls; {`, AND single-token implicit-int K&R
         `name(params) {` (libkmc `_xatan(u,v,atanp)`, which the two-token regex could not split);
       - leading-indented headers (nusys ` void nuGfxTaskStart(...)`, a stray-space top-level def the
@@ -679,9 +678,9 @@ def _upstream_file_func_count(lib, cpath):
 
     Used by the single-file-pack test to recognize a pack whose trailing member(s) are unnamed
     (`func_<addr>`): if the pack's one named C stem defines exactly nfns functions, the unnamed
-    members are that file's other functions, so the pack atomic-mirrors the whole file (S68 #3 —
-    the gu F-variant + s16-wrapper idiom: `guAlignF` named + `func_<addr>` = `guAlign`, both in
-    align.c). Conservative — an exact count match only; a mismatch falls back to the `pack` flag."""
+    members are that file's other functions, so the pack atomic-mirrors the whole file (the gu
+    F-variant + s16-wrapper idiom: `guAlignF` named + `func_<addr>` = `guAlign`, both in align.c).
+    Conservative — an exact count match only; a mismatch falls back to the `pack` flag."""
     try:
         with open(cpath, errors="ignore") as f:
             text = f.read()
@@ -694,7 +693,7 @@ def _upstream_file_func_count(lib, cpath):
 @functools.lru_cache(maxsize=None)
 def _meaningful_loc(cpath):
     """Count non-blank, non-comment, non-preprocessor source lines of an upstream .c — a crude proxy
-    for its compiled .text size, used by the S92 coddog-structural size-ratio guard. Line-based
+    for its compiled .text size, used by the coddog-structural size-ratio guard. Line-based
     (blanks, `//`/`*`/`/*` comment lines, and `#`-directives dropped); a multi-line block comment's
     body lines start `*` and are skipped, so the proxy errs low (safe: a low LOC only RAISES the
     bytes/LOC ratio toward the threshold, never masks a real mismatch). Returns 0 on read failure."""
@@ -721,10 +720,10 @@ _LD_SIBLING_RE = re.compile(
 @functools.lru_cache(maxsize=1)
 def _static_carve_siblings():
     """{yaml_dir: {".data"/".rodata"/".bss": {basename,...}}} for every ld-section sibling subseg —
-    the dirs already holding a banked file with a proven static carve. Feeds the twin-of hint
-    (S68 #2): a candidate that re-emits a function-local static (data-static / rodata-literal)
-    whose mirror dir already carved the same section type has an established playbook (align.c was
-    the verbatim twin of S61 rotate.c — same `libultra/gu` dir, same `.data` dtor carve)."""
+    the dirs already holding a banked file with a proven static carve. Feeds the twin-of hint:
+    a candidate that re-emits a function-local static (data-static / rodata-literal) whose mirror
+    dir already carved the same section type has an established playbook (align.c was the verbatim
+    twin of rotate.c — same `libultra/gu` dir, same `.data` dtor carve)."""
     out = {}
     with open(YAML) as f:
         for line in f:
@@ -737,7 +736,7 @@ def _static_carve_siblings():
 
 
 def build_coddog_index():
-    """S71: load the optional coddog cross-ref map -> {mgname: (ulfile, pct)}.
+    """Load the optional coddog cross-ref map -> {mgname: (ulfile, pct)}.
 
     The map (tools/coddog/coddog_map.tsv, written by tools/coddog_sweep.sh) pairs each MG64
     function with the ultralib fn coddog matched it to. Absent/garbled lines are skipped; an
@@ -770,7 +769,7 @@ def _coddog_upstream_path(cfile):
 
 
 def _coddog_source_banked(cod_src):
-    """S96: True if a coddog-matched source's project mirror is ALREADY banked (0-stub) in-tree. A
+    """True if a coddog-matched source's project mirror is ALREADY banked (0-stub) in-tree. A
     coddog-mirror hit to such a file can't be a fresh source attribution (the source is fully
     decompiled), so the match is necessarily structural — a DSP/stub fingerprint coincidence, the
     sibling of coddog-fncount-mismatch / coddog-structural. `cod_src` is the ultralib-repo-relative
@@ -786,14 +785,14 @@ def _coddog_source_banked(cod_src):
 
 
 def _append_coddog_twin_hazard(cfile, fns, upstream_index, hazards):
-    """S81: coddog (compare2, reloc-masked) can match a near-identical TWIN file rather than the
-    candidate's real source -- the SI access-queue subseg (`func_800AC110`+`__osSiGetAccess`+
-    `__osSiRelAccess`) coddog-matched `src/io/piacs.c@99.99`, but its named members name `siacs`.
-    Cross-check the coddog-matched basename against the pack's *named* members' upstream basenames;
-    on disagreement flag `coddog-twin:<matched>!=<member-src>` so the gate mirrors from the
-    member-named source (siacs.c), not the coddog file (piacs.c). A @99.99 twin is byte-identical
-    once placed, so the body is the same either way -- this only removes a manual SI/PI reconcile
-    step. No-ops when no member is named (nothing to disagree with) or the basenames agree."""
+    """coddog (compare2, reloc-masked) can match a near-identical TWIN file rather than the
+    candidate's real source -- the SI access-queue subseg coddog-matched `src/io/piacs.c@99.99`,
+    but its named members name `siacs`. Cross-check the coddog-matched basename against the pack's
+    *named* members' upstream basenames; on disagreement flag `coddog-twin:<matched>!=<member-src>`
+    so the gate mirrors from the member-named source (siacs.c), not the coddog file (piacs.c). A
+    @99.99 twin is byte-identical once placed, so the body is the same either way -- this only
+    removes a manual SI/PI reconcile step. No-ops when no member is named (nothing to disagree with)
+    or the basenames agree."""
     cstem = os.path.splitext(os.path.basename(cfile))[0]
     member_stems = []
     for fn in fns:
@@ -874,7 +873,7 @@ def signature_hint(rom_off, primary, sig_index):
     return Hazard(HAZARD_MAYBE_UPSTREAM, f"{lib}:" + ",".join(bases))
 
 
-# --- Upstream-vs-ROM call-divergence (the S18 nuContInit catch) ----------------------
+# --- Upstream-vs-ROM call-divergence (the nuContInit catch) ----------------------
 #
 # A mapped upstream .c can disagree with THIS ROM's build: nuContInit's upstream calls four
 # managers, but the ROM's asm has only three jals (no nuContPakMgrInit) — a verbatim mirror
@@ -895,7 +894,7 @@ _MAKEFILE_DEFINE_RE = re.compile(r'-D([A-Za-z_][A-Za-z0-9_]*)(?:=[^\s]*)?')
 
 # Version-conditional stripping. The build compiles ONE side of `#if BUILD_VERSION <op> VERSION_X`
 # (libultra is `-DBUILD_VERSION=VERSION_J`), so the inactive side's refs/calls are phantom — they
-# never reach the real object. S47 `osCartRomInit`: `CartRomHandle` + `osPiRawReadIo` live only in
+# never reach the real object. E.g. osCartRomInit's `CartRomHandle` + `osPiRawReadIo` live only in
 # the non-J `#else` branch, yet refs/calls-unplaced flagged them. Only the *exact* form
 # `BUILD_VERSION <op> VERSION_X` is evaluated; a compound condition (`&&`/`||`) or any other `#if`
 # is opaque (both branches kept, nesting tracked so #else/#endif still pair correctly). A lib with
@@ -991,8 +990,8 @@ def _os_version_defined_tokens(lib):
     """The VERSION_<X> tokens the os_version.h resolvable on a `lib` candidate's effective -I set
     actually `#define`s. The denominator for stale_version_header: the in-tree os_version.h can
     resolve as a FILE (so needs-header stays silent) yet be a stripped revision that defines none of
-    the VERSION_* constants the gcc.mk profile expects (S60: the 2.0L header). Empty frozenset when
-    no os_version.h resolves at all."""
+    the VERSION_* constants the gcc.mk profile expects (e.g. a stripped 2.0L header). Empty frozenset
+    when no os_version.h resolves at all."""
     search_dirs = INCLUDE_DIRS + LIB_EXTRA_INCLUDE_DIRS.get(lib or "", [])
     for d in search_dirs:
         p = os.path.join(d, "os_version.h")
@@ -1010,9 +1009,9 @@ def _os_version_defined_tokens(lib):
 def stale_version_header(up_path, lib):
     """Sorted VERSION_<X> tokens an upstream file's `#if BUILD_VERSION <op> VERSION_X` guards
     reference but the in-tree os_version.h (on the candidate's -I set) does NOT `#define` — so cpp
-    reads each as 0 and silently mis-evaluates the guard. S60: gu/mtxcatl.c's `#if BUILD_VERSION <
-    VERSION_K` evaluated `0 < 0` against the stripped 2.0L os_version.h and dropped guMtxXFML to a
-    link error. A `stale-header:os_version.h(VERSION_K)` hazard = vendor the missing constant(s) into
+    reads each as 0 and silently mis-evaluates the guard (e.g. gu/mtxcatl.c's `#if BUILD_VERSION <
+    VERSION_K` evaluates `0 < 0` against a stripped 2.0L os_version.h and drops guMtxXFML to a link
+    error). A `stale-header:os_version.h(VERSION_K)` hazard = vendor the missing constant(s) into
     os_version.h before the flip (additive; clean-rebuild-verify since every other guard compares the
     -DBUILD_VERSION token and evaluates identically). Distinct from needs-header: the header file
     exists and resolves — the gap is its CONTENT. Returns [] when the lib sets no -DBUILD_VERSION
@@ -1040,7 +1039,7 @@ def _parse_makefile_defines():
     one parse per process). The base CFLAGS live in the top Makefile; the per-library
     profiles live in the included mk/*.mk fragments, so scan both.
     'libkmc'/'libnusys'/'libultra' each inherit from the main CFLAGS set plus their own
-    profile additions. The libultra profile carries -DBUILD_VERSION + -DF3DEX_GBI_2 (S83)
+    profile additions. The libultra profile carries -DBUILD_VERSION + -DF3DEX_GBI_2
     — without parsing LIBULTRA_CFLAGS the GBI microcode define is invisible, so a
     GBI-value-guarded macro (OS_YIELD_DATA_SIZE) false-flags as needs-define on a build
     that already defines it."""
@@ -1101,7 +1100,7 @@ def function_gating_define(up_cpath, primary):
 
 # GBI microcode macros that gate object-like macro VALUES in PR/sptask.h (OS_YIELD_DATA_SIZE,
 # OS_YIELD_AUDIO_SIZE). ultralib builds libgultra_rom with a global -DF3DEX_GBI default; MG64 runs
-# F3DEX2, so the project pins -DF3DEX_GBI_2 in LIBULTRA_CFLAGS (S83). With NONE defined the macro
+# F3DEX2, so the project pins -DF3DEX_GBI_2 in LIBULTRA_CFLAGS. With NONE defined the macro
 # silently takes the #else value, mismatching the ROM by one word (sptask's
 # IO_READ(...+OS_YIELD_DATA_SIZE-4): 0x900 vs the baserom's 0xc00) — invisible to the gate stub.
 GBI_MICROCODE_DEFINES = ("F3D_GBI", "F3DEX_GBI", "F3DLP_GBI", "F3DEX_GBI_2")
@@ -1176,7 +1175,7 @@ def gbi_value_guard_needs_define(cpath, lib):
     macro (OS_YIELD_DATA_SIZE) and NO guard define is active for `lib` — else None. Returns the
     canonical F3DEX_GBI_2 when it satisfies the guard, else the first guard define. Dormant for
     libultra now (the standing -DF3DEX_GBI_2 resolves the value), but prices a candidate guarded by
-    an inactive define so the 1-word SHA-miss (S83 sptask) is paid at the gate, not in execution."""
+    an inactive define so the 1-word SHA-miss is paid at the gate, not in execution."""
     guarded = _gbi_guarded_macros(lib)
     if not guarded:
         return None
@@ -1207,12 +1206,11 @@ def _upstream_body(up_cpath, primary):
 def _c_jal_count(body, local_macros=()):
     """C-side jal count for `body`: `name(` occurrences minus control keywords AND function-like
     macros. A macro *invocation* emits no jal of its own — OS_USEC_TO_CYCLES expands to arithmetic,
-    ERRCK to assignment+branch (the S43 gbpak `6vs5`/`6vs4` FPs), va_start to a builtin (the S43
-    sprintf `2vs1` FP), MQ_IS_FULL to a field compare (the S42 osSendMesg `7vs6` FP). Generalises
-    the S42 hardcoded `_C_NONCALL` predicate-macro list to the project-wide `all_func_macros()`
-    table (S41), so every invoked macro is dropped, not just the two that were named. `local_macros`
-    adds the function-like macros DEFINED IN the upstream .c itself (S104: xprintf.c's `PUT`/`PAD`/
-    `ATOI`, invisible to `all_func_macros()` which scans only headers) — PUT/PAD each wrap a `(*pfn)(…)`
+    ERRCK to assignment+branch, va_start to a builtin, MQ_IS_FULL to a field compare. Drops every
+    invoked macro via the project-wide `all_func_macros()` table, not just a hardcoded predicate
+    list. `local_macros` adds the function-like macros DEFINED IN the upstream .c itself (e.g.
+    xprintf.c's `PUT`/`PAD`/`ATOI`, invisible to `all_func_macros()` which scans only headers) —
+    PUT/PAD each wrap a `(*pfn)(…)`
     indirect output that compiles to `jalr`, not a named `jal`, so counting them inflated _Printf's
     C side to 14 vs the ROM's 3 jals = a phantom `14vs3` near-verbatim-mirror flag on a clean mirror.
     One level only (a macro whose body wraps exactly one real call would under-count by 1 — rare, and
@@ -1239,10 +1237,10 @@ def call_divergence(rom_off, primary, up_cpath, lib=None):
         return None
     # Drop the inactive `#if BUILD_VERSION` side FIRST (needs the directives intact): an `#else`
     # branch's call double-counts against the active branch's → a phantom mismatch on a byte-clean
-    # mirror (S80 pfsgetstatus: the non-J `__osPfsRequestOneChannel(channel)` inflated 6→7, a false
-    # `7vs6`). refs_unplaced strips the same way (S47); without the lib's build_ord this is a no-op.
+    # mirror (e.g. pfsgetstatus's non-J `__osPfsRequestOneChannel(channel)` inflates 6→7, a false
+    # `7vs6`). refs_unplaced strips the same way; without the lib's build_ord this is a no-op.
     body = _strip_inactive_version_branches(body, _build_version_ord(lib))
-    # Local function-like macros the .c #defines itself (S104: xprintf's PUT/PAD/ATOI) are not in
+    # Local function-like macros the .c #defines itself (e.g. xprintf's PUT/PAD/ATOI) are not in
     # all_func_macros() (headers only) → drop them too, else a callback-wrapping macro reads as a call.
     try:
         local_macros = set(re.findall(
@@ -1259,10 +1257,10 @@ def call_divergence(rom_off, primary, up_cpath, lib=None):
 def _is_static_func_proto(line):
     """A `static ...;` line that declares a FUNCTION (prototype: `static T f(...);`), not a
     variable. Such a static function shares the mirror's TU and is NOT a BSS-layout hazard, so it
-    must not flag file-static (S54: sprintf's `static void* proutSprintf(...);`). A variable is kept
+    must not flag file-static (e.g. sprintf's `static void* proutSprintf(...);`). A variable is kept
     flagged, including a function-*pointer* var (`static T (*fp)(...);`, the `(*`) and an attributed
     array (`static T a[N] __attribute__((aligned(8)));` — its `aligned(8)` parens must NOT read as a
-    call declarator, so strip `__attribute__((...))` first; S54 caught gfxThread's nuGfxMesgBuf)."""
+    call declarator, so strip `__attribute__((...))` first)."""
     s = re.sub(r"__attribute__\s*\(\(.*?\)\)", "", line)  # drop attribute groups (their parens)
     i = s.find("(")
     if i == -1:
@@ -1277,12 +1275,11 @@ def _is_static_func_proto(line):
 def has_file_scope_static(cpath):
     """True if the upstream .c declares a file-scope static *variable* (BSS-layout hazard →
     classical loop). A file-scope static *function* (prototype) is excluded — it is not a data
-    hazard (S54). S99: scan comment-STRIPPED text — FILE_STATIC_RE anchors on `;\\s*$`, so a
-    trailing `/* ... */` after the `;` (nupiinit.c's `static OSMesgQueue PiMesgQ
-    __attribute__((aligned(8)));  /* PI message queue */`) silently defeated the match.
-    S102: strip the dead `#if BUILD_VERSION` side first so an inactive-`#else`-branch file-static
-    (motor.c's <VERSION_J `_MotorStopData[]`/`__osMotorinitialized`) is not phantom-flagged — the
-    active VERSION_J branch's `__MotorDataBuf` is the only real file-static."""
+    hazard. Scan comment-STRIPPED text — FILE_STATIC_RE anchors on `;\\s*$`, so a trailing
+    `/* ... */` after the `;` (e.g. `static OSMesgQueue PiMesgQ __attribute__((aligned(8)));
+    /* PI message queue */`) would silently defeat the match. Strip the dead `#if BUILD_VERSION` side
+    first so an inactive-`#else`-branch file-static (e.g. motor.c's <VERSION_J statics) is not
+    phantom-flagged — only the active VERSION_J branch's file-static is real."""
     text = _strip_inactive_version_branches(UpstreamSource.get(cpath).text, _build_version_ord("libultra"))
     for line in _strip_comments(text).splitlines():
         stripped = line.lstrip()
@@ -1300,12 +1297,11 @@ def defines_data_globals(cpath):
     file-static BSS hazard. Returns the defined names; a non-empty result is the `defines-data`
     DoR hazard → route to the classical loop with the data defs dropped (the fn references the
     splat-placed globals via extern). Heuristic (brace-depth + line shape), confirmed at the gate
-    like needs-header: `__osThreadTail` et al. in thread.c (osDequeueThread) is the motivating case.
-    S99: scan comment-STRIPPED text — a `/* ... ( ... */` banner (nupiinit/nupiinitsram.c's
-    `Copyright (C) 1997` line) contains a `(` that falsely trips the K&R-param guard below, silently
-    suppressing EVERY subsequent depth-0 global (nuPiCartHandle/nuPiSramHandle were both missed).
-    S102: strip the dead `#if BUILD_VERSION` side first so an inactive-`#else`-branch defined global
-    (motor.c's <VERSION_J `__osMotorinitialized[MAXCONTROLLERS]`) is not phantom-flagged."""
+    like needs-header: `__osThreadTail` et al. in thread.c (osDequeueThread) is a typical case.
+    Scan comment-STRIPPED text — a `/* ... ( ... */` banner (e.g. a `Copyright (C) 1997` line)
+    contains a `(` that would falsely trip the K&R-param guard below, silently suppressing EVERY
+    subsequent depth-0 global. Strip the dead `#if BUILD_VERSION` side first so an
+    inactive-`#else`-branch defined global is not phantom-flagged."""
     names = []
     depth = 0
     in_kr_params = False  # between a K&R `name(args)` header and its `{` body
@@ -1317,8 +1313,8 @@ def defines_data_globals(cpath):
             m = DATA_GLOBAL_DEF_RE.match(line)
             if m and "(" not in line.split("=", 1)[0]:
                 # Surface the array dimension (`name[DIM]`) so the gate sizes the symbol_addrs
-                # entry mechanically — a scalar is 0x4, an array is stride×count (S20 rule;
-                # S42 __osEventStateTab[OS_NUM_EVENTS]). The element/stride + macro resolution
+                # entry mechanically — a scalar is 0x4, an array is stride×count (e.g.
+                # __osEventStateTab[OS_NUM_EVENTS]). The element/stride + macro resolution
                 # still happens at the gate; this just flags array-vs-scalar without opening
                 # the source.
                 names.append(f"{m.group(1)}[{m.group(2)}]" if m.group(2) is not None else m.group(1))
@@ -1340,10 +1336,10 @@ def defines_local_static_data(cpath):
     inside-a-function companion to defines_data_globals (which skips `static` and scans only depth 0).
     Returns the defined names; the caller merges them into the `defines-data` hazard so the gate plans
     the .data sibling carve and seed_points re-prices the mirror off the clean-cp floor. Excludes
-    static function protos / function-pointer inits (reuses _is_static_func_proto). Motivating case
-    (S73): gu/position.c's `static float dtor = 3.1415926/180.0;` inside guPositionF needed a
-    0x10-byte .data carve that the file-scope detector — and the S72 coddog re-scan — both missed.
-    S102: strip the dead `#if BUILD_VERSION` side first (symmetric with the file-scope scans)."""
+    static function protos / function-pointer inits (reuses _is_static_func_proto). Typical case:
+    gu/position.c's `static float dtor = 3.1415926/180.0;` inside guPositionF needs a 0x10-byte
+    .data carve that the file-scope detector — and the coddog re-scan — both miss. Strip the dead
+    `#if BUILD_VERSION` side first (symmetric with the file-scope scans)."""
     names = []
     depth = 0
     text = _strip_inactive_version_branches(UpstreamSource.get(cpath).text, _build_version_ord("libultra"))
@@ -1361,14 +1357,14 @@ def defines_local_static_data(cpath):
 
 
 def bare_asserts(cpath):
-    """Count `assert(` calls NOT guarded by a dead `#ifdef _DEBUG`/`#if 0` block in the upstream .c
-    (S97). This build defines neither NDEBUG nor _DEBUG, and `<assert.h>` expands `assert(EX)` to a
-    live `__assert(...)` call, so a verbatim mirror of a file with a BARE (non-_DEBUG-guarded) assert
+    """Count `assert(` calls NOT guarded by a dead `#ifdef _DEBUG`/`#if 0` block in the upstream .c.
+    This build defines neither NDEBUG nor _DEBUG, and `<assert.h>` expands `assert(EX)` to a live
+    `__assert(...)` call, so a verbatim mirror of a file with a BARE (non-_DEBUG-guarded) assert
     compiles in a branch + `jal __assert` the release ROM lacks → SHA-miss + an `#ifdef _DEBUG` wrap
     (docs/hazards.md#assert-strip). Counts post-`_strip_dead_blocks`, so an upstream assert already in
     the in-tree `#ifdef _DEBUG` convention does NOT fire (the token never reaches the macro phase).
-    `\\bassert` won't match `__assert` (no word boundary after `_`). save.c (alSavePull) was the first
-    audio-cluster mirror to hit this; pre-flagging prices the wrap at the gate."""
+    `\\bassert` won't match `__assert` (no word boundary after `_`). Pre-flagging prices the wrap at
+    the gate."""
     try:
         text = UpstreamSource.get(cpath).text
     except OSError:
@@ -1377,12 +1373,12 @@ def bare_asserts(cpath):
 
 
 def _c_combined_member_paths(fns, up_path, upstream_index):
-    """The distinct C upstreams of a c-combined pack's NON-primary members (S97). The primary-keyed
-    mirror battery (append_upstream_hazards) scans only fns[0]'s upstream, so a SECONDARY member
-    file's defined global / bare assert is invisible at the gate (sl.c's `alGlobals` defines-data,
-    missed at the S96 primary-only scan when alSavePull/save.c was the pack primary). Returns member
-    cpaths != up_path, de-duped + order-preserving; empty for a single-fn or single-file pack (no
-    behavior change off the c-combined path)."""
+    """The distinct C upstreams of a c-combined pack's NON-primary members. The primary-keyed mirror
+    battery (append_upstream_hazards) scans only fns[0]'s upstream, so a SECONDARY member file's
+    defined global / bare assert is invisible at the gate (e.g. sl.c's `alGlobals` defines-data,
+    missed by a primary-only scan when save.c is the pack primary). Returns member cpaths != up_path,
+    de-duped + order-preserving; empty for a single-fn or single-file pack (no behavior change off the
+    c-combined path)."""
     seen, paths = set(), []
     for fn in fns[1:]:
         _, p = upstream_index.get(fn, (None, None))
@@ -1393,18 +1389,16 @@ def _c_combined_member_paths(fns, up_path, upstream_index):
 
 
 def defines_file_static_const_array(cpath):
-    """File-scope `static const <type> <name>[...] = {...};` arrays in the upstream .c (S93). A
-    `const` static is file-PRIVATE rodata (the `static` keyword bars cross-file linkage), so when one
-    is present the whole code-segment `.rodata` carve is this object's own — it is then safe to widen
+    """File-scope `static const <type> <name>[...] = {...};` arrays in the upstream .c. A `const`
+    static is file-PRIVATE rodata (the `static` keyword bars cross-file linkage), so when one is
+    present the whole code-segment `.rodata` carve is this object's own — it is then safe to widen
     the rodata-literal carve-start to the subseg boundary. The FP-literal scan sees only the scalar
     `ldc1/lwc1 %lo` loads, missing the array base (an `addiu %lo` address-of) + string-literal
-    pointers, so the reported carve-start under-states the real extent. The `addiu %lo` scan that
-    would find it directly was reverted (S92) for cross-file FP in the `.data` band; this `static
-    const` source gate keeps the rodata-only widening FP-safe. Returns the array names; a non-empty
-    result authorises the carve-start widening in `_append_recover_hazards`. Motivating case:
-    xldtob.c's `static const ldouble pows[]` — the FP scan reported the carve from 0x800D2820, but
-    the pows[] dlabel + NaN/Inf strings start 0x50 B earlier at 0x800D27D0 (the whole [0xADBD0]
-    rodata subseg)."""
+    pointers, so the reported carve-start under-states the real extent. A direct `addiu %lo` scan was
+    reverted (cross-file FP in the `.data` band); this `static const` source gate keeps the
+    rodata-only widening FP-safe. Returns the array names; a non-empty result authorises the
+    carve-start widening in `_append_recover_hazards`. Typical case: xldtob.c's
+    `static const ldouble pows[]`, whose dlabel + NaN/Inf strings start below the FP scan's min."""
     names = []
     depth = 0
     for raw in UpstreamSource.get(cpath).text.splitlines():
@@ -1420,15 +1414,15 @@ def defines_file_static_const_array(cpath):
 
 def defines_file_static_init_array(cpath):
     """File-scope NON-const INITIALIZED `static <type> <name>[…] = <init>;` arrays in the upstream .c
-    (S104) — the .data analogue of defines_file_static_const_array (the rodata/const case). A verbatim
-    mirror re-emits these into its OWN .data, so each needs a `.data` sibling carve at the asm-recovered
-    vram. This is the S92/S101 un-flagged class (`xprintf` spaces/zeroes, env `eqpower[128]`, _Litob
-    `ldigs`/`udigs`), which no other detector catches: FILE_STATIC_RE excludes `=`-initialized lines
-    (.bss only), defines_data_globals skips `static`, defines_local_static_data is depth>=1. `static`
-    bars cross-file linkage → the array is file-PRIVATE, so the source-scan sidesteps the S92
-    own-vs-cross-file-extern blocker (the reason the asm `addiu %lo` detector was reverted). The caller
-    fires `data-carve` ONLY on the single-file (non c-combined) subset (S101: the safe first slice — a
-    c-combined pack's per-member up_path can mis-attribute the carve). Returns the array names; the
+    — the .data analogue of defines_file_static_const_array (the rodata/const case). A verbatim mirror
+    re-emits these into its OWN .data, so each needs a `.data` sibling carve at the asm-recovered vram.
+    This class (`xprintf` spaces/zeroes, env `eqpower[128]`, _Litob `ldigs`/`udigs`) is one no other
+    detector catches: FILE_STATIC_RE excludes `=`-initialized lines (.bss only), defines_data_globals
+    skips `static`, defines_local_static_data is depth>=1. `static` bars cross-file linkage → the array
+    is file-PRIVATE, so the source-scan sidesteps the own-vs-cross-file-extern blocker (the reason the
+    asm `addiu %lo` detector was reverted). The caller fires `data-carve` ONLY on the single-file (non
+    c-combined) subset (a c-combined pack's per-member up_path can mis-attribute the carve). Returns
+    the array names; the
     vram + exact extent are recovered from the asm at the gate (the .data carve is a mechanical step)."""
     names = []
     depth = 0
@@ -1468,16 +1462,15 @@ _SRC_CALLER_CACHE = None
 
 
 def src_func_callers():
-    """S77: map every un-named `func_<vram>` token to the banked C files that reference it by name
+    """Map every un-named `func_<vram>` token to the banked C files that reference it by name
     (outside an INCLUDE_ASM stub line). Built once per process by walking `src/`.
 
     Motivates the `caller-evict` gate flag: when the gate ADDS a curated symbol for an un-named
     `func_<vram>` member (so splat renames it), any already-banked C file that hard-codes the old
     `func_<vram>` name fails to link (undefined reference) until its call site is renamed too. This
     is the stale-label-sync hazard reaching the gate via a symbol ADD rather than `make sync-names`.
-    S77 hit it live: adding `__osSpGetStatus`=0x800B16A0 evicted the banked caller
-    `src/main/func_800AB600.c`. Surfacing the caller here prices the one-line rename fixup at the
-    gate instead of as a build-check link error."""
+    Surfacing the caller here prices the one-line rename fixup at the gate instead of as a build-check
+    link error."""
     global _SRC_CALLER_CACHE
     if _SRC_CALLER_CACHE is not None:
         return _SRC_CALLER_CACHE
@@ -1510,7 +1503,7 @@ SDK_GLOBAL_RE = re.compile(r"__[A-Za-z]\w+")
 # Compiler predefined macros: `__`-prefixed so SDK_GLOBAL_RE matches them, but they expand to a
 # string/int literal at compile time — never a linked global. drvrnew's debug-heap call
 # `alHeapDBAlloc((u8*)__FILE__, __LINE__, ...)` surfaced `__FILE__,__LINE__` as a phantom
-# refs-unplaced (S96; here under an inactive `#ifdef _DEBUG`, but they'd be false even when active).
+# refs-unplaced (here under an inactive `#ifdef _DEBUG`, but they'd be false even when active).
 # The reverb/env synthesis siblings carry the same macro, so skip these like `__builtin_`.
 _C_PREDEF_MACROS = frozenset({
     "__FILE__", "__LINE__", "__DATE__", "__TIME__", "__TIMESTAMP__", "__BASE_FILE__",
@@ -1529,8 +1522,8 @@ EXTERN_DATA_DECL_RE = re.compile(
 # close (`} __OSViContext;` — including array/`__attribute__` tails) and a simple alias
 # (`typedef u32 OSId;`). Captures the alias identifier. This lets refs_unplaced drop a `__`-prefixed
 # token that is actually a TYPE used in a declaration (`register __OSViContext* vc;`) rather than a
-# data extern — without it, SDK_GLOBAL_RE flags the type as a phantom recover-extern (S48:
-# __OSViContext, a 0x30-byte struct in viint.h, surfaced in the refs-unplaced list).
+# data extern — without it, SDK_GLOBAL_RE flags the type as a phantom recover-extern (e.g.
+# __OSViContext, a 0x30-byte struct in viint.h, would surface in the refs-unplaced list).
 TYPEDEF_CLOSE_RE = re.compile(r"}\s*([A-Za-z_]\w*)\s*(?:\[[^\]]*\]|__attribute__\s*\([^;]*\))?\s*;", re.M)
 TYPEDEF_SIMPLE_RE = re.compile(r"^\s*typedef\s+[^;{}\n]*?\b([A-Za-z_]\w*)\s*;", re.M)
 
@@ -1570,8 +1563,8 @@ def _resolve_include(inc):
     prefix (`include/libultra/internal/controller.h`) — the same already-vendored adaptation
     `already_vendored_intree_path` resolves for needs-header. Without it the header is never scanned,
     so declared_type_names / declared_extern_data miss every typedef/extern it declares and
-    refs_unplaced phantom-flags a struct TYPE as an unplaced data extern (S80: __OSContRequesFormatShort,
-    a typedef in PRinternal/controller.h, was mis-flagged refs-unplaced on pfsgetstatus.c)."""
+    refs_unplaced phantom-flags a struct TYPE as an unplaced data extern (e.g. a typedef in
+    PRinternal/controller.h would mis-flag refs-unplaced on pfsgetstatus.c)."""
     for d in INCLUDE_DIRS:
         path = os.path.join(d, inc)
         if os.path.exists(path):
@@ -1589,8 +1582,7 @@ def declared_extern_data(cpath, _depth=0, _seen=None):
     """Names declared as *data* externs in the headers `cpath` pulls in (recursively, only within
     the project -I set). Function prototypes are excluded by EXTERN_DATA_DECL_RE. This is what lets
     refs_unplaced catch non-`__`-prefixed library globals (libnusys's nuGfxTaskSpool/nuGfxDisplay,
-    libmus's, …) that SDK_GLOBAL_RE alone misses — the S16 false-clean motivated it. Bounded depth
-    keeps a header cycle finite."""
+    libmus's, …) that SDK_GLOBAL_RE alone misses. Bounded depth keeps a header cycle finite."""
     if _seen is None:
         _seen = set()
     names = set()
@@ -1616,7 +1608,7 @@ def declared_extern_data(cpath, _depth=0, _seen=None):
 # spanning '\'-continued lines. Captures NAME and the full (possibly multi-line) body. A verbatim
 # mirror that *invokes* such a macro inlines its body, so any data extern / callee the macro
 # references is pulled into the object though it never appears in the .c source — the
-# macro-hidden recover-extern (S41: EPI_SYNC in piint.h → __osCurrentHandle, invisible to the
+# macro-hidden recover-extern (e.g. EPI_SYNC in piint.h → __osCurrentHandle, invisible to the
 # .c-body grep AND the gate build-check alike, surfacing only when the body links).
 FUNC_MACRO_DEF_RE = re.compile(
     r"^[ \t]*#[ \t]*define[ \t]+([A-Za-z_]\w*)\(([^)]*)\)[ \t]*((?:.*\\\n)*.*)", re.M
@@ -1651,7 +1643,7 @@ def macro_hidden_text(cpath):
     """One-level macro expansion of `cpath`: the replacement bodies of the function-like macros the
     .c *invokes*, plus the set of all function-like macro names in scope. Lets refs_unplaced /
     calls_unplaced see a data extern or callee that a verbatim mirror inlines through a macro
-    (EPI_SYNC → __osCurrentHandle, S41) — invisible to the body grep and the gate build-check.
+    (EPI_SYNC → __osCurrentHandle) — invisible to the body grep and the gate build-check.
     One level only: the directly-invoked macros' bodies; macros THEY invoke are not recursed (the
     gate confirms against the asm). Each macro's own parameter names are stripped from its body so
     a placeholder like va_start's `__AP`/`__LASTARG` is not mistaken for a referenced global.
@@ -1661,9 +1653,9 @@ def macro_hidden_text(cpath):
     except OSError:
         return "", set()
     macros = all_func_macros()
-    # S95: drop dead `#ifdef _DEBUG/NU_DEBUG/AUD_PROFILE` / `#ifndef _FINALROM` / `#if 0` blocks before
-    # finding invocations, so a macro invoked ONLY inside a dead block (PROFILE_AUD in the audio band,
-    # guarded by `#ifdef AUD_PROFILE`) is not expanded into a phantom refs/calls ref (load.c's lastCnt).
+    # Drop dead `#ifdef _DEBUG/NU_DEBUG/AUD_PROFILE` / `#ifndef _FINALROM` / `#if 0` blocks before
+    # finding invocations, so a macro invoked ONLY inside a dead block (e.g. a `#ifdef AUD_PROFILE`
+    # profile call in the audio band) is not expanded into a phantom refs/calls ref.
     body = _strip_dead_blocks(_strip_comments(text))
     parts = []
     for name, (params, mbody) in macros.items():
@@ -1680,7 +1672,7 @@ def _names_in_function_bodies(text):
     initializer) in the comment/string-stripped text. refs_unplaced uses this to drop a `__`-token
     that THIS .c itself defines as a file-scope data global yet no function body references by name:
     drop-def externs/removes that def plus any holder initializer, so the token needs no
-    symbol_addrs recovery. Motivating case (S86 timerintr.c): `__osBaseTimer` is named ONLY in the
+    symbol_addrs recovery. Typical case (timerintr.c): `__osBaseTimer` is named ONLY in the
     depth-0 initializer `OSTimer* __osTimerList = &__osBaseTimer;` — drop-def deletes that line, so
     no extern/placement is owed. Conservative: a token inside a file-scope aggregate `= {...}`
     initializer counts as in-body and stays flagged (a harmless EXTRA recover, never a missed one)."""
@@ -1707,7 +1699,7 @@ def refs_unplaced(cpath, placed, lib=None):
     via asm-data-recovery (disassemble the target fn, read the lui/addiu HI/LO16 pair, add the
     extern to symbol_addrs.txt) BEFORE the flip links. Heuristic, gate-confirmed: a `__`-prefixed
     token OR a name the .c's headers declare as a data extern (via declared_extern_data — catches
-    non-`__` library globals like libnusys's nuGfxTaskSpool, the S16 false-clean), referenced in
+    non-`__` library globals like libnusys's nuGfxTaskSpool), referenced in
     the file, never called anywhere (so functions — which splat auto-resolves via
     undefined_funcs_auto — are excluded), and absent from the name set. A function *pointer*
     passed by bare name could over-flag; the gate confirms against the upstream."""
@@ -1715,19 +1707,19 @@ def refs_unplaced(cpath, placed, lib=None):
         text = UpstreamSource.get(cpath).text
     except OSError:
         return []
-    # Drop the inactive `#if BUILD_VERSION` side so a ref in the dead branch (S47: `CartRomHandle`
-    # in the non-J `#else`) is not phantom-flagged.
+    # Drop the inactive `#if BUILD_VERSION` side so a ref in the dead branch (e.g. `CartRomHandle`
+    # in a non-J `#else`) is not phantom-flagged.
     text = _strip_inactive_version_branches(text, _build_version_ord(lib))
-    # S95: also drop dead `#ifdef _DEBUG/NU_DEBUG/AUD_PROFILE` / `#ifndef _FINALROM` / `#if 0` blocks
-    # (symmetric with calls_unplaced) so a data extern referenced ONLY in a dead branch (load.c's
-    # AUD_PROFILE-guarded `extern u32 ...lastCnt[]` decl + its use) is not phantom-flagged.
+    # Also drop dead `#ifdef _DEBUG/NU_DEBUG/AUD_PROFILE` / `#ifndef _FINALROM` / `#if 0` blocks
+    # (symmetric with calls_unplaced) so a data extern referenced ONLY in a dead branch (e.g. an
+    # AUD_PROFILE-guarded `extern u32 ...[]` decl + its use) is not phantom-flagged.
     text = _strip_dead_blocks(text)
     # Append one-level macro expansion so a global referenced only inside an invoked library macro
-    # (EPI_SYNC → __osCurrentHandle, S41) is visible to the same `__`-prefix / declared-extern grep.
+    # (EPI_SYNC → __osCurrentHandle) is visible to the same `__`-prefix / declared-extern grep.
     macro_text, _ = macro_hidden_text(cpath)
     scan = text + "\n" + macro_text
     # `__`-prefixed SDK globals (libultra/libkmc) + any data extern the .c's headers *declare*
-    # (libnusys/libmus non-`__` globals SDK_GLOBAL_RE misses — the S16 nuGfxTaskSpool false-clean).
+    # (libnusys/libmus non-`__` globals SDK_GLOBAL_RE misses, e.g. nuGfxTaskSpool).
     tokens = (
         set(SDK_GLOBAL_RE.findall(scan))
         | declared_extern_data(cpath)
@@ -1736,7 +1728,7 @@ def refs_unplaced(cpath, placed, lib=None):
         | {g for g in BOOT_GLOBALS if re.search(r"\b" + re.escape(g) + r"\b", scan)}
     )
     # Type names the headers typedef (e.g. __OSViContext) are referenced in declarations, not as
-    # data — drop them so a `__`-prefixed TYPE is not flagged as a phantom recover-extern (S48).
+    # data — drop them so a `__`-prefixed TYPE is not flagged as a phantom recover-extern.
     types = declared_type_names(cpath)
     unplaced = []
     for tok in tokens:
@@ -1751,8 +1743,8 @@ def refs_unplaced(cpath, placed, lib=None):
         if re.search(re.escape(tok) + r"\s*\(", scan):
             continue
         unplaced.append(tok)
-    # S86: drop a token THIS .c defines as a file-scope data global but no function body references
-    # by name — it lives only in another global's depth-0 initializer (`__osTimerList =
+    # Drop a token THIS .c defines as a file-scope data global but no function body references by
+    # name — it lives only in another global's depth-0 initializer (`__osTimerList =
     # &__osBaseTimer`), which drop-def removes, so it is not an unplaced extern owed a recovery.
     defined_here = {n.split("[", 1)[0] for n in defines_data_globals(cpath)}
     if defined_here:
@@ -1766,7 +1758,7 @@ def _fn_ptr_param_names(text):
     implicit-fn-ptr param form, e.g. xprintf's `void* pfn(void*,const char*,size_t)`) or
     `T (*name)(args)`. These read as a call to C_CALL_RE but a verbatim mirror invokes them via
     `jalr` through the pointer, not a `jal` to a named symbol, so they must not flag calls-unplaced
-    (S104: _Printf's `pfn` was a phantom `calls-unplaced:pfn`). Scans each def header's matched
+    (e.g. _Printf's `pfn` would be a phantom `calls-unplaced:pfn`). Scans each def header's matched
     param list only, so an in-body real call of the same spelling elsewhere is unaffected."""
     names = set()
     for m in UPSTREAM_DEF_RE.finditer(text):
@@ -1791,9 +1783,9 @@ def calls_unplaced(cpath, primary, placed, lib=None):
     them by name: splat's undefined_funcs_auto only resolves a callee whose vram carries a name,
     so a callee labelled `func_<addr>` in the asm (unnamed in both files) has no `<name>` symbol
     for the C reference to bind. The gate build-check can't catch this — the INCLUDE_ASM scaffold
-    resolves the jal directly, so the symbol is only needed once the C body calls by name (S23:
-    osPiGetCmdQueue@0x800B06F0, missed by refs_unplaced precisely because it *excludes* anything
-    called). A non-empty result is the `calls-unplaced` DoR hazard → the gate recovers each
+    resolves the jal directly, so the symbol is only needed once the C body calls by name (e.g.
+    osPiGetCmdQueue, missed by refs_unplaced precisely because it *excludes* anything called).
+    A non-empty result is the `calls-unplaced` DoR hazard → the gate recovers each
     callee's vram from its asm jal target and adds `<name> = 0x<addr>; // type:func` to
     symbol_addrs.txt (add-only) BEFORE the flip. Heuristic, gate-confirmed: a `name(` call token
     in the dead-block-stripped body (so a dead `#ifdef _DEBUG` call like __osError does not
@@ -1805,20 +1797,20 @@ def calls_unplaced(cpath, primary, placed, lib=None):
     except OSError:
         return []
     defined = {name for name, _ in _iter_upstream_functions(text)}
-    fn_ptr_params = _fn_ptr_param_names(text)  # S104: a fn-ptr param (`pfn`) is a jalr, not a jal
+    fn_ptr_params = _fn_ptr_param_names(text)  # a fn-ptr param (`pfn`) is a jalr, not a jal
     # Append one-level macro expansion so a callee invoked only inside a library macro is seen;
     # exclude the macro names themselves (a macro body that invokes UPDATE_REG/WAIT_ON_IOBUSY etc.
     # must not flag those as unplaced functions — they inline, they don't link).
     macro_text, macro_names = macro_hidden_text(cpath)
-    # Drop the inactive `#if BUILD_VERSION` side first (S47: `osPiRawReadIo` is called only in the
-    # non-J `#else` branch) so its calls are not phantom-flagged.
+    # Drop the inactive `#if BUILD_VERSION` side first (e.g. `osPiRawReadIo` called only in a non-J
+    # `#else` branch) so its calls are not phantom-flagged.
     text = _strip_inactive_version_branches(text, _build_version_ord(lib))
-    # S102: same-file function-like macros (`#define READFORMAT(ptr) ((__OSContRamReadFormat*)(ptr))`
-    # in motor.c) expand to casts/exprs, not jals — collect their names so a `READFORMAT(ptr)` use is
-    # not flagged as an unplaced function. macro_hidden_text only captures HEADER macros (the .c's own
-    # function-like #defines were invisible to that scan → the S102 false fire).
+    # Same-file function-like macros (`#define READFORMAT(ptr) ((__OSContRamReadFormat*)(ptr))` in
+    # motor.c) expand to casts/exprs, not jals — collect their names so a `READFORMAT(ptr)` use is
+    # not flagged as an unplaced function. macro_hidden_text only captures HEADER macros, so the .c's
+    # own function-like #defines need this separate scan.
     local_macro_names = set(re.findall(r'^\s*#\s*define\s+([A-Za-z_]\w*)\s*\(', text, re.M))
-    text = _strip_define_lines(text)  # an in-body `#define NAME (expr)` is a macro def, not a call (S61)
+    text = _strip_define_lines(text)  # an in-body `#define NAME (expr)` is a macro def, not a call
     body = _strip_string_literals(_strip_dead_blocks(_strip_comments(text + "\n" + macro_text)))
     called = {
         n
@@ -1863,14 +1855,13 @@ def missing_includes(cpath, mirror_dir=None, lib=None):
     The effective -I set is the base INCLUDE_DIRS plus LIB_EXTRA_INCLUDE_DIRS[lib] — the profile
     CFLAGS the source actually compiles under. A libultra mirror resolves <libaudio.h> and the rest
     of the PR/ band through `-I include/libultra/PR` (LIBULTRA_CFLAGS); passing `lib='libultra'` is
-    what keeps that band from false-flagging needs-header → blk (S53: alHeapDBAlloc). `lib=None`
-    uses the base set only.
+    what keeps that band from false-flagging needs-header → blk. `lib=None` uses the base set only.
 
     A quote-include (`#include "x.h"`) resolves source-relative to the dir the mirror compiles
-    in, so a band-local companion already shipped at <mirror_dir>/x.h (e.g. gu/guint.h, copied
-    alongside the first gu/ sibling in S49) is NOT missing even though it is absent from the -I
-    set — the band-open fast path (S50). `mirror_dir` is the in-tree dir the source will land in
-    (band_mirror_dir); None disables the source-relative check."""
+    in, so a band-local companion already shipped at <mirror_dir>/x.h (e.g. a gu/guint.h copied
+    alongside the first gu/ sibling) is NOT missing even though it is absent from the -I set — the
+    band-open fast path. `mirror_dir` is the in-tree dir the source will land in (band_mirror_dir);
+    None disables the source-relative check."""
     search_dirs = INCLUDE_DIRS + LIB_EXTRA_INCLUDE_DIRS.get(lib or "", [])
     missing = []
     for line in UpstreamSource.get(cpath).text.splitlines():
@@ -1881,7 +1872,7 @@ def missing_includes(cpath, mirror_dir=None, lib=None):
         if any(os.path.exists(os.path.join(d, inc)) for d in search_dirs):
             continue
         # A quote-include resolves source-relative once the band-local companion is in-tree.
-        # normpath collapses a `..` segment (S60: a relative `../gu/guint.h` from a sibling-dir
+        # normpath collapses a `..` segment (a relative `../gu/guint.h` from a sibling-dir
         # upstream source resolves to the already-vendored gu/ copy, not a phantom needs-header).
         is_quote = '"' in m.group(0)
         if is_quote and mirror_dir and os.path.exists(os.path.normpath(os.path.join(mirror_dir, inc))):
@@ -1928,8 +1919,8 @@ def include_is_vendorable(inc):
     under a *different* prefix (e.g. `internal/piint.h`) does NOT make `PRinternal/piint.h`
     reachable — that's a cheap companion-copy, not a deferred -I. (_project_inc_index also stores
     basenames, so a bare-name include like `libaudio.h` still matches the basename entry and stays
-    correctly NOT-vendorable.) S46: the basename collision was masking the whole PRinternal/ PI
-    band as false-`blk`."""
+    correctly NOT-vendorable.) Without the exact-path check, the basename collision would mask the
+    whole PRinternal/ PI band as false-`blk`."""
     if inc in _project_inc_index():
         return False  # present in-tree but unreachable → unindexed -I, a deferred enabler not a cp
     for root in UPSTREAM_INC_ROOTS:
@@ -1955,8 +1946,8 @@ def already_vendored_intree_path(inc, lib):
     Returned relative to the project `include/` root for a compact gate hint. Every
     `(already-vendored)` header IS a needs-include-adapt case by construction: it reached the tagger
     only because its full path already failed `missing_includes`, so the upstream prefix differs from
-    the in-tree layout and the include line must change (SHA-neutral — declarations only). S74
-    surfaces the adapt target so the gate prices the include edit (`PRinternal/controller.h` →
+    the in-tree layout and the include line must change (SHA-neutral — declarations only). Surfacing
+    the adapt target lets the gate price the include edit (`PRinternal/controller.h` →
     `internal/controller.h`) instead of hitting `No such file` at first build."""
     search_dirs = INCLUDE_DIRS + LIB_EXTRA_INCLUDE_DIRS.get(lib or "", [])
     base = os.path.basename(inc)
@@ -1973,12 +1964,11 @@ def already_vendored_intree_path(inc, lib):
 def include_is_already_vendored(inc, lib):
     """True if a *missing* include needs NO header CP work: its full path is unreachable (so
     `missing_includes` flagged it), but its BASENAME already resolves under the current `-I` set, so
-    the established include-path adaptation (drop the upstream prefix) resolves it. S59:
-    `osGbpakCheckConnector`'s `PRinternal/controller.h` was tagged `(vendorable)` but the
-    sibling-vendored `include/libultra/internal/controller.h` was already on the io band's `-I` set.
-    A strict refinement of vendorable: same non-blocking class, no cp, BUT it does cost a one-line
-    include adaptation (see `already_vendored_intree_path`, surfaced in the tag since S74). lib
-    selects the band's extra `-I` dirs (LIB_EXTRA)."""
+    the established include-path adaptation (drop the upstream prefix) resolves it (e.g. a
+    `PRinternal/controller.h` whose basename already resolves via a sibling-vendored
+    `include/libultra/internal/controller.h` on the band's `-I` set). A strict refinement of
+    vendorable: same non-blocking class, no cp, BUT it does cost a one-line include adaptation
+    (see `already_vendored_intree_path`). lib selects the band's extra `-I` dirs (LIB_EXTRA)."""
     return already_vendored_intree_path(inc, lib) is not None
 
 
@@ -1986,7 +1976,7 @@ def _tagged_missing_includes(cpath, lib):
     """(tagged_headers, blocked) for cpath's unreachable includes, tagged by enabler load: bare =
     a real block (deferred -I / system header → pts 'blk'), `(vendorable)` = a one-time source cp,
     `(already-vendored)` = free (the basename already resolves under the -I set). `blocked` counts
-    only the bare ones. Shared by the named-upstream battery (append_upstream_hazards) and the S72
+    only the bare ones. Shared by the named-upstream battery (append_upstream_hazards) and the
     coddog trap re-scan (build_rows), so both price headers identically."""
     missing = missing_includes(cpath, band_mirror_dir(lib, cpath), lib)
     if not missing:
@@ -1998,7 +1988,7 @@ def _tagged_missing_includes(cpath, lib):
         adapt = already_vendored_intree_path(inc, lib)
         if adapt is not None:
             # Non-blocking, no cp — but the verbatim include line must be adapted to the in-tree
-            # location (S74: `PRinternal/controller.h` → `internal/controller.h`). Surface the
+            # location (`PRinternal/controller.h` → `internal/controller.h`). Surface the
             # target so the gate prices the edit instead of hitting it at first build.
             return f"{inc}(already-vendored,adapt->{adapt})"
         return f"{inc}(vendorable)"
@@ -2067,12 +2057,12 @@ def carry_over_names():
     default ranker; build_rows skips a row whose primary is in here unless --include-stuck).
 
     A parked carry-over is correctly absent from `pick_target` output BY DESIGN — retrieve it
-    with `--include-stuck` or by reading the BACKLOG (S90: `osCreatePiManager`/pimgr was found
-    via the carry-over, not the ranker, and that is the intended path; it was not a filter bug).
+    with `--include-stuck` or by reading the BACKLOG (e.g. pimgr is found via the carry-over, not
+    the ranker, and that is the intended path, not a filter bug).
 
-    Two scope guards narrow the S45/S75 over-scoop, where every backticked prose token (a macro
-    `STACK`, a name-dropped banked callee, a tool name) was carried — so a *still-asm* primary
-    could be silently dropped just by being prose-mentioned:
+    Two scope guards narrow an over-scoop, where every backticked prose token (a macro `STACK`, a
+    name-dropped banked callee, a tool name) was carried — so a *still-asm* primary could be
+    silently dropped just by being prose-mentioned:
       (1) stop at the first historical `- **Sprint NN: … BANKED` paragraph — that append-only
           banked-sprint archive lives under the same heading but is NOT parked work; and
       (2) keep only tokens that are real symbols (placed in a name file, or a `func_<vram>`
@@ -2085,7 +2075,7 @@ def carry_over_names():
     with open(BACKLOG) as f:
         # Anchor on the HEADING (start-of-line), not a mid-line prose mention of
         # "## Carry-overs" (several digest paragraphs reference it in backticks) — a string split
-        # would start the region mid-archive and truncate the genuine carry-overs (S90 bug).
+        # would start the region mid-archive and truncate the genuine carry-overs.
         parts = re.split(r"(?m)^## Carry-overs", f.read(), maxsplit=1)
     if len(parts) <= 1:
         return names
@@ -2316,17 +2306,17 @@ def classify_subseg(off, typ, path, size, upstream_index):
 def _append_recover_hazards(off, primary, up_path, up_lib, hazards):
     """Append refs-unplaced + calls-unplaced (the symbol-recovery battery, with inline-vram
     annotation when the binding is unambiguous) for an upstream .c, in-place. Shared by the
-    named-upstream battery (append_upstream_hazards) and the S74 coddog trap re-scan, so a
+    named-upstream battery (append_upstream_hazards) and the coddog trap re-scan, so a
     coddog-resolved mirror prices its recover-extern load identically to a named one — mirroring how
     `_tagged_missing_includes` is shared so both price headers identically. An un-named (`func_`)
     subseg blocks the named-keyed scan, so without this the recover-extern load is invisible at the
-    gate and only surfaces at first build (S74 contreaddata: 3 SI callees + 3 data globals)."""
+    gate and only surfaces at first build."""
     placed = placed_symbols()
     unplaced = refs_unplaced(up_path, placed, up_lib)
     if unplaced:
         # Annotate the recovered vram inline when the binding is unambiguous (one unplaced
         # name ∩ one asm candidate) so the gate copy-pastes the symbol_addrs entry instead
-        # of re-running MCP disassemble_function (S12 retro #1). Ambiguous → bare names.
+        # of re-running MCP disassemble_function. Ambiguous → bare names.
         cands = recover_unplaced_vram(off)
         if len(unplaced) == 1 and len(cands) == 1:
             refs = [f"{unplaced[0]}@0x{cands[0]:08X}"]
@@ -2348,16 +2338,16 @@ def _append_recover_hazards(off, primary, up_path, up_lib, hazards):
         else:
             crefs = unplaced_calls
         hazards.append(Hazard(HAZARD_CALLS_UNPLACED, ",".join(crefs)))  # recover func symbol before flip
-    # Switch jump table (S76): a `switch` compiles to a `jtbl_<addr>` in the code-segment `.rodata`
-    # whose `.word` entries are the fn's own internal `.L<addr>` labels. Flipping the subseg text->C
+    # Switch jump table: a `switch` compiles to a `jtbl_<addr>` in the code-segment `.rodata` whose
+    # `.word` entries are the fn's own internal `.L<addr>` labels. Flipping the subseg text->C
     # deletes those labels, so the still-asm rodata jtbl link-breaks (undefined-`.L<addr>` ref) unless
     # a `.rodata` sibling carve places the C-re-emitted table. The gate's text-only green-ROM check
     # cannot catch this by construction (the jtbl stays valid asm until the C body lands), so it must
     # be priced at the gate — the jump-table analog of rodata-literal (a verbatim mirror re-emits a
     # byte-identical table: same case-body absolute addresses; #rodata-sibling-yaml-pattern). Scanned
-    # here in the SHARED battery so it prices both the named-upstream and coddog paths (S76
-    # __osDevMgrMain is NAMED, so the S72/S73 coddog re-scan never reached it). Display-only like
-    # rodata-literal: the carve is a mechanical near-free enabler, so no seed_points bump.
+    # here in the SHARED battery so it prices both the named-upstream and coddog paths (a NAMED
+    # jtbl-owner is never reached by the coddog re-scan otherwise). Display-only like rodata-literal:
+    # the carve is a mechanical near-free enabler, so no seed_points bump.
     jtbls = [a for a in rodata_jtbls(off) if _literal_in_rodata(a, off)]
     if jtbls:
         hazards.append(Hazard(HAZARD_RODATA_JTBL, ",".join(f"0x{a:08X}" for a in sorted(jtbls))))
@@ -2365,11 +2355,11 @@ def _append_recover_hazards(off, primary, up_path, up_lib, hazards):
 
 def _upstream_defines_function(cpath, name):
     """True if the version-stripped upstream .c defines a function named `name` at brace-depth 0.
-    S102: gates header_renames_symbol against a macro-ALIAS false fire. os_motor.h's
+    Gates header_renames_symbol against a macro-ALIAS false fire. os_motor.h's
     `#define osMotorStop(x) __osMotorAccess((x), MOTOR_STOP)` macro-renames a symbol, but a `#undef`
-    is only needed when the BODY actually defines a function named `primary` (the S85
-    __osInitialize_common source-compat case — there the upstream defines __osInitialize_common and
-    the macro rewrites it). Under VERSION_J motor.c defines `__osMotorAccess` (the macro's RHS), NOT
+    is only needed when the BODY actually defines a function named `primary` (the source-compat case,
+    where the upstream defines the curated name and the macro rewrites it). Under VERSION_J motor.c
+    defines `__osMotorAccess` (the macro's RHS), NOT
     `osMotorStop`, so the curated name is the RHS — the `osMotorStop` token never appears in the body
     and no #undef is needed. Returns False ⇒ suppress the hazard."""
     try:
@@ -2382,7 +2372,7 @@ def _upstream_defines_function(cpath, name):
 
 def _macro_alias_target(cpath, primary, _depth=0, _seen=None):
     """The first identifier in the body of a `#define <primary>(...) <body>` macro found in the
-    include tree, or None. S102: paired with header_renames_symbol to name the wrong-ghidra-name
+    include tree, or None. Paired with header_renames_symbol to name the wrong-ghidra-name
     correction — os_motor.h's `#define osMotorStop(x) __osMotorAccess((x), MOTOR_STOP)` → the symbol
     `__osMotorAccess` that the vram is really named (vs the ghidra mislabel `osMotorStop`). Matches
     only in HEADERS (`_depth > 0`), like header_renames_symbol."""
@@ -2421,9 +2411,9 @@ def _macro_alias_target(cpath, primary, _depth=0, _seen=None):
 
 def header_renames_symbol(cpath, primary, _depth=0, _seen=None):
     """A (transitively-)included vendored header that rewrites the candidate's curated symbol via a
-    macro `#define <primary>...` — a K->J source-compat shim (`os_host.h`:
-    `#define __osInitialize_common() osInitialize()`; S31 nuGfxInit was the 1st instance, S85 the
-    2nd → a real class). The macro bites ONLY the real body's function definition, so it is invisible
+    macro `#define <primary>...` — a K->J source-compat shim (e.g. `os_host.h`:
+    `#define __osInitialize_common() osInitialize()`). The macro bites ONLY the real body's function
+    definition, so it is invisible
     to pick_target's other scans AND the gate stub build (an INCLUDE_ASM stub never compiles the
     body); it surfaces as a link symbol-mismatch (the caller wants the curated name, but the C
     exports the rewritten name). Returns the renaming header's basename so the gate prices a
@@ -2463,14 +2453,13 @@ def _append_coddog_trap_hazards(off, primary, cl_path, up_lib, hazards):
     """The file-level trap re-scan for a coddog-resolved upstream `.c` (file-static, defines-data,
     needs-header, recover-extern battery), in-place; returns whether a needs-header tag blocks the
     DoR. Shared by BOTH coddog paths so a coddog identity carried by an UN-NAMED tail member (the
-    S78 cod_members scan) prices its traps identically to one keyed on the primary (the S72 block):
-    S80 found initialize.c's defines-data `.data` carve invisible because its coddog hit keys on the
-    sibling `create_speed_param`, not the named leader `__osInitialize_common`, so only the S78 block
-    fired and it surfaced the bare coddog flag WITHOUT the trap battery the S72 block runs."""
+    tail cod_members scan) prices its traps identically to one keyed on the primary — otherwise a
+    tail-member coddog hit surfaces the bare coddog flag WITHOUT the trap battery (e.g. a
+    defines-data `.data` carve on a sibling whose hit keys on a non-leader name)."""
     clib = up_lib or "libultra"
     if has_file_scope_static(cl_path):
         hazards.append(Hazard(HAZARD_FILE_STATIC))
-    cdefs = defines_data_globals(cl_path) + defines_local_static_data(cl_path)  # S73: + fn-local statics
+    cdefs = defines_data_globals(cl_path) + defines_local_static_data(cl_path)  # + fn-local statics
     if cdefs:
         hazards.append(Hazard(HAZARD_DEFINES_DATA, ",".join(cdefs)))
     blocked = False
@@ -2480,9 +2469,9 @@ def _append_coddog_trap_hazards(off, primary, cl_path, up_lib, hazards):
         blocked = cblk
     _append_recover_hazards(off, primary, cl_path, clib, hazards)
     ren = header_renames_symbol(cl_path, primary)
-    if ren and _upstream_defines_function(cl_path, primary):  # S102: skip macro-alias false fire
+    if ren and _upstream_defines_function(cl_path, primary):  # skip macro-alias false fire
         hazards.append(Hazard(HAZARD_HEADER_RENAMES_SYMBOL, f"{primary}@{ren}"))
-    elif ren:  # S102: primary is a macro alias for a DIFFERENT upstream symbol → wrong ghidra name
+    elif ren:  # primary is a macro alias for a DIFFERENT upstream symbol → wrong ghidra name
         tgt = _macro_alias_target(cl_path, primary)
         if tgt and _upstream_defines_function(cl_path, tgt):
             hazards.append(Hazard(HAZARD_WRONG_GHIDRA_NAME, f"{primary}->{tgt}@{ren}"))
@@ -2572,32 +2561,31 @@ def _append_rodata_carve_hazards(off, up_path, hazards):
 def append_upstream_hazards(off, primary, up_lib, up_path, hazards, member_paths=()):
     """Append the upstream-mirror hazards for a named candidate (in-place, in the
     order the gate reads them) and return (band, blocked). `member_paths` are a c-combined pack's
-    non-primary member upstreams (S97): the file-static (S99) + defines-data + bare-assert scans union
-    over them so a SECONDARY member file's file-scope static / defined global / bare assert is priced
-    at the gate, not discovered at execution (sl.c's `alGlobals`, missed by the S96 primary-only scan;
-    nupiinit/nupiinitsram's drop-static load, missed by the S99 pre-fix primary-only scan). The recover-extern /
-    needs-header / call-divergence battery stays primary-keyed (member refs-unplaced is the separate
-    S66-deferred follow-up)."""
+    non-primary member upstreams: the file-static + defines-data + bare-assert scans union over them
+    so a SECONDARY member file's file-scope static / defined global / bare assert is priced at the
+    gate, not discovered at execution (e.g. sl.c's `alGlobals`, or a member's drop-static load, missed
+    by a primary-only scan). The recover-extern / needs-header / call-divergence battery stays
+    primary-keyed (member refs-unplaced is a separate deferred follow-up)."""
     blocked = False
-    # file-static over the primary + c-combined members (S99): a SECONDARY member's file-scope static
-    # (nupiinitsram.c's `SramHandle`) is a pack-level drop-static enabler, so the gate must see it —
-    # the same member-union the defines-data scan below already does (S97). Primary-only missed it.
+    # file-static over the primary + c-combined members: a SECONDARY member's file-scope static is a
+    # pack-level drop-static enabler, so the gate must see it — the same member-union the defines-data
+    # scan below already does. A primary-only scan would miss it.
     if any(has_file_scope_static(p) for p in (up_path, *member_paths)):
         hazards.append(Hazard(HAZARD_FILE_STATIC))  # route to the classical loop, not the mirror
-    # defines-data over the primary + c-combined members (S73: + fn-local statics; S97: + members).
+    # defines-data over the primary + c-combined members (+ fn-local statics).
     data_defs = list(dict.fromkeys(  # de-dup, order-preserving
         d for p in (up_path, *member_paths)
         for d in defines_data_globals(p) + defines_local_static_data(p)))
     if data_defs:
         hazards.append(Hazard(HAZARD_DEFINES_DATA, ",".join(data_defs)))  # .data analogue → classical loop
-    # File-scope NON-const initialized static arrays (S104: xprintf spaces/zeroes) the verbatim mirror
-    # re-emits → a `.data` sibling carve. Single-file ONLY (`not member_paths`): the S101 safe slice — a
-    # c-combined pack's per-member up_path can mis-attribute, so defer the multi-file case (BACKLOG S92).
+    # File-scope NON-const initialized static arrays (e.g. xprintf spaces/zeroes) the verbatim mirror
+    # re-emits → a `.data` sibling carve. Single-file ONLY (`not member_paths`): a c-combined pack's
+    # per-member up_path can mis-attribute, so defer the multi-file case.
     if not member_paths:
         init_arrays = list(dict.fromkeys(defines_file_static_init_array(up_path)))
         if init_arrays:
             hazards.append(Hazard(HAZARD_DATA_CARVE, ",".join(init_arrays)))  # .data carve at recovered vram
-    # Bare (non-_DEBUG-guarded) asserts a verbatim mirror would compile in (S97 assert-strip pre-flag).
+    # Bare (non-_DEBUG-guarded) asserts a verbatim mirror would compile in (assert-strip pre-flag).
     n_assert = sum(bare_asserts(p) for p in (up_path, *member_paths))
     if n_assert:
         hazards.append(Hazard(HAZARD_BARE_ASSERT, str(n_assert)))
@@ -2605,11 +2593,11 @@ def append_upstream_hazards(off, primary, up_lib, up_path, hazards, member_paths
     mirror_dir = band_mirror_dir(up_lib, up_path)  # also reused below for band warmth
     blocked = _append_header_version_hazards(off, primary, up_path, up_lib, hazards) or blocked
     rodata_lits, data_statics = _append_rodata_carve_hazards(off, up_path, hazards)
-    # twin-of hint (S68 #2): when the candidate re-emits a function-local static (data-static /
-    # rodata-literal) AND its mirror dir already holds a banked sibling that carved the same
-    # ld-section, name that sibling so the gate reaches for the established carve playbook instead
-    # of re-deriving it (align.c was the verbatim twin of S61 rotate.c — same `libultra/gu` dir,
-    # same `.data` dtor carve + substituted-callee edit). Prefer a same-section twin; else any.
+    # twin-of hint: when the candidate re-emits a function-local static (data-static / rodata-literal)
+    # AND its mirror dir already holds a banked sibling that carved the same ld-section, name that
+    # sibling so the gate reaches for the established carve playbook instead of re-deriving it (e.g.
+    # align.c was the verbatim twin of rotate.c — same `libultra/gu` dir, same `.data` dtor carve).
+    # Prefer a same-section twin; else any.
     if data_statics or rodata_lits:
         tree = dict(UPSTREAM_TREES).get(up_lib, LIBULTRA)
         rel = os.path.relpath(up_path, tree)
@@ -2622,17 +2610,15 @@ def append_upstream_hazards(off, primary, up_lib, up_path, hazards, member_paths
                 or sorted((sibs[".data"] | sibs[".rodata"] | sibs[".bss"]) - {cand_stem})
             if pool:
                 hazards.append(Hazard(HAZARD_TWIN_OF, pool[0]))
-    # owner-per-member marker (S98): the rodata-literal/jtbl scans span the WHOLE subseg (S55), which
-    # is correct for a single-file pack (one .c -> one .o -> one .rodata) but OVER-attributes for a
-    # c-combined (multi-file) pack — both members' pooled rodata lands on the PRIMARY row, yet the
-    # carve owner is the member file whose function actually references it. S98: alMainBusPull's row
-    # carried resample's `rodata-literal:0x800D23E0` (MAX_RATIO) + `rodata-jtbl:0x800D23E8`
-    # (alResampleParam switch); mainbus.c is carve-FREE. Mark the multi-file case so the gate does not
-    # carve the primary `.c` by default — the true owner is confirmed at execution by the pre-carve
-    # build's undefined-`.L<addr>` link-error (the jtbl `.word` entries name the owning function).
-    # Fires ONLY when member_paths is non-empty (a c-combined pack), so a single-file pack is
-    # untouched (no S55 regression). Full per-member attribution (incl. the coddog jtbl path in
-    # _append_recover_hazards) + label-range-bounded carve-end: BACKLOG tooling follow-up (S98).
+    # owner-per-member marker: the rodata-literal/jtbl scans span the WHOLE subseg, which is correct
+    # for a single-file pack (one .c -> one .o -> one .rodata) but OVER-attributes for a c-combined
+    # (multi-file) pack — both members' pooled rodata lands on the PRIMARY row, yet the carve owner is
+    # the member file whose function actually references it (a carve-free primary can carry a sibling's
+    # rodata-literal + rodata-jtbl). Mark the multi-file case so the gate does not carve the primary
+    # `.c` by default — the true owner is confirmed at execution by the pre-carve build's
+    # undefined-`.L<addr>` link-error (the jtbl `.word` entries name the owning function). Fires ONLY
+    # when member_paths is non-empty (a c-combined pack), so a single-file pack is untouched. Full
+    # per-member attribution + label-range-bounded carve-end: a BACKLOG tooling follow-up.
     if member_paths:
         for h in hazards:
             if h.kind in (HAZARD_RODATA_JTBL, HAZARD_RODATA_LITERAL):
@@ -2645,8 +2631,8 @@ def _file_scope_static_count(cpath):
     """Number of file-scope static *variable* declarations (the uninitialized .bss family
     FILE_STATIC_RE matches; static function protos excluded). One matching line == one .bss symbol,
     counted without fragile declarator extraction (a `STACK(name, size)` macro hides the name). Used
-    for the drop-static-mirror count; the func-local uninitialized static (S87 vimgr's `retrace`) is a
-    known under-count — it has no file-scope line and is recovered at the gate alongside the rest."""
+    for the drop-static-mirror count; a func-local uninitialized static is a known under-count — it
+    has no file-scope line and is recovered at the gate alongside the rest."""
     n = 0
     try:
         text = UpstreamSource.get(cpath).text
@@ -2662,16 +2648,15 @@ def _file_scope_static_count(cpath):
 
 
 def drop_static_mirror_hazard(mirror_path, hazards):
-    """S87: re-frame a coddog-confirmed verbatim mirror's .bss-family hazard cluster as ONE
+    """Re-frame a coddog-confirmed verbatim mirror's .bss-family hazard cluster as ONE
     drop-to-extern enabler, or None. When a >=CODDOG_MIRROR_PCT non-audio `coddog-mirror` identity is
     on the row AND a `file-static` is present AND NO carve signal is (no rodata-literal / data-static /
     rodata-jtbl), the file-static + defines-data + refs-unplaced flags are NOT a carve/classical spike:
     every uninitialized file-scope static/global is dropped to a sized `extern` placed at its main_bss
-    vram (pure .bss = no ROM bytes = no carve, the S81 siacs pattern). Returns a `drop-static-mirror:
-    <n>bss` Hazard so the gate prices a seed-only N-symbol mirror instead of the scary 4-flag cluster.
-    The co-listed file-static/defines-data/refs-unplaced stay (seed_points + the gate's per-symbol
-    recovery read them); this tag is the leading verdict that they are one enabler. (S87 vimgr.c: the
-    carry-over's '.bss carve' framing was the false-flag this retires — banked seed-only, first build.)
+    vram (pure .bss = no ROM bytes = no carve). Returns a `drop-static-mirror:<n>bss` Hazard so the
+    gate prices a seed-only N-symbol mirror instead of the scary 4-flag cluster. The co-listed
+    file-static/defines-data/refs-unplaced stay (seed_points + the gate's per-symbol recovery read
+    them); this tag is the leading verdict that they are one enabler.
 
     Advisory + graceful: a candidate with a NONZERO-initialized global (real .data, not modelled as a
     distinct flag) that slips the condition degrades to the documented carve playbook when the gate
