@@ -9,9 +9,10 @@ import functools
 import os
 import re
 
+import decomp_common as dc
 from decomp_asm import subseg_vram
 
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+ROOT = dc.PROJECT_ROOT  # literal, symlink-stable root (see decomp_common.PROJECT_ROOT)
 YAML = os.path.join(ROOT, "mariogolf64.yaml")
 
 # Subseg line: `- [0x8DF10, c, libultra/monegi/rdp/dp]` or `- [0x8D230, asm]`.

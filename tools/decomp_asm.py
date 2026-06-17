@@ -4,20 +4,21 @@
 The per-subseg `asm/<ROM>.s` listing layer: the path helper, the single
 function-body walk every per-function scan filters over, and the scans
 themselves (callee/constant signature, jal count, intrinsic shim, unplaced
-data/function recovery). Stdlib-only and self-contained — it imports nothing
-from pick_target (so the dependency stays one-directional and acyclic).
+data/function recovery). It imports nothing from pick_target (so the dependency
+stays one-directional and acyclic); decomp_common is a lower leaf, safe to import.
 
-ROOT is computed the same os.path way pick_target uses (NOT pathlib resolve()):
-decomp_common.py's pathlib ROOT_DIR follows symlinks, which could resolve to a
-different `asm/` path and shift the ranked rows; keep these two independent.
+ROOT is the literal, symlink-stable root from decomp_common.PROJECT_ROOT (os.path,
+NOT pathlib .resolve()): .resolve() follows symlinks, which could shift the asm/
+lookup and change ranked rows -- so the rankers share the os.path-based root.
 """
 import os
 import re
 
-# tools/decomp_asm.py -> tools/ -> project root (matches pick_target.py exactly).
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+import decomp_common as dc
 
-GLABEL_RE = re.compile(r"^\s*glabel\s+(\S+)")
+ROOT = dc.PROJECT_ROOT  # literal, symlink-stable root (see decomp_common.PROJECT_ROOT)
+
+GLABEL_RE = dc.GLABEL_RE  # shared definition (decomp_common owns the glabel-line regex)
 
 
 def asm_path(rom_off):

@@ -36,7 +36,7 @@ def test_vendorable_tu_missing_defines(tmp_path, monkeypatch):
 
     # Synthetic TU: point LIBULTRA at a temp tree, seed the macro denominator directly.
     monkeypatch.setattr(pt, "LIBULTRA", str(tmp_path))
-    monkeypatch.setattr(pt, "_INTREE_ASM_MACROS", {"K0BASE", "C0_ENTRYHI", "LEAF", "END"})
+    monkeypatch.setattr(pt, "_intree_asm_macros", lambda: frozenset({"K0BASE", "C0_ENTRYHI", "LEAF", "END"}))
     (tmp_path / "os").mkdir()
     (tmp_path / "os" / "fake.s").write_text(
         '#include "PR/R4300.h"      /* TLB stuff for the RDBPORT comment */\n'
@@ -362,10 +362,11 @@ def test_caller_evict_flag(tmp_path, monkeypatch):
         'INCLUDE_ASM("asm/nonmatchings/libultra/io/spgetstat", func_800B16A0);\n'
     )
     monkeypatch.setattr(pt, "ROOT", str(tmp_path))
-    monkeypatch.setattr(pt, "_SRC_CALLER_CACHE", None)
+    pt.src_func_callers.cache_clear()
     callers = pt.src_func_callers()
     assert callers.get("func_800B16A0") == ["src/main/caller.c"], callers
     assert "func_deadbeef" not in callers and "func_DEADBEEF" not in callers
+    pt.src_func_callers.cache_clear()  # don't leak the tmp-ROOT walk into later tests
 
 
 def _coddog_rows(pt, monkeypatch, *, ui, carried, coddog):
@@ -484,7 +485,7 @@ def test_call_divergence_strips_inactive_version_branch(monkeypatch):
     monkeypatch.setattr(pt, "_upstream_body", lambda cp, pr: body)
     monkeypatch.setattr(pt, "_asm_jal_count", lambda off, pr: 2)  # J build: foo + bar
     monkeypatch.setattr(pt, "_build_version_ord",
-                        lambda lib: pt._VERSION_ORD["VERSION_J"] if lib else 0)
+                        lambda lib: load_tool("build_config")._VERSION_ORD["VERSION_J"] if lib else 0)
     assert pt.call_divergence(0x1000, "ff", "x.c", "libultra") is None  # strip → 2vs2 → no hazard
     d = pt.call_divergence(0x1000, "ff", "x.c", None)                   # no strip → foo doubles → 3vs2
     assert d is not None and d.detail == "3vs2"
@@ -607,7 +608,7 @@ def test_drop_static_mirror_hazard(tmp_path):
 
     # the pure-.bss cluster → tagged (no path → bare `bss`, no count)
     got = pt.drop_static_mirror_hazard(None, [cod, fs, dd])
-    assert got is not None and got.kind == pt.HAZARD_DROP_STATIC_MIRROR and got.detail == "bss"
+    assert got is not None and got.render() == "drop-static-mirror:bss"
 
     # a real upstream path → a count (2 file-scope statics + 1 global = 3bss)
     up = tmp_path / "vimgr.c"

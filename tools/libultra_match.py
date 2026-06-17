@@ -30,6 +30,7 @@ project gcc + LIBULTRA_CFLAGS before trusting the worklist.
 Read-only. Usage: venv/bin/python3 tools/libultra_match.py [--min-insns N] [--all]
 """
 import argparse
+import functools
 import os
 import re
 import subprocess
@@ -119,19 +120,21 @@ def build_reference(archives=None):
     return by_name, by_sig
 
 
-_SRC_CACHE = None
+@functools.cache
+def _src_index():
+    """Archive-member basename (rotate.o) -> its src relpath (gu/rotate.o), built once by walking
+    SRC_OBJ_TREE."""
+    index = {}
+    for dirpath, _, files in os.walk(SRC_OBJ_TREE):
+        for f in files:
+            if f.endswith(".o"):
+                index.setdefault(f, os.path.relpath(os.path.join(dirpath, f), SRC_OBJ_TREE))
+    return index
 
 
 def member_src(member):
     """Map an archive member basename (rotate.o) to its src relpath (gu/rotate), best-effort."""
-    global _SRC_CACHE
-    if _SRC_CACHE is None:
-        _SRC_CACHE = {}
-        for dirpath, _, files in os.walk(SRC_OBJ_TREE):
-            for f in files:
-                if f.endswith(".o"):
-                    _SRC_CACHE.setdefault(f, os.path.relpath(os.path.join(dirpath, f), SRC_OBJ_TREE))
-    rel = _SRC_CACHE.get(member)
+    rel = _src_index().get(member)
     return os.path.splitext(rel)[0] if rel else os.path.splitext(member)[0]
 
 

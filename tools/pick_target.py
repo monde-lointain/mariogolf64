@@ -31,6 +31,19 @@ import os
 import re
 import sys
 
+import decomp_common as dc
+
+# BUILD_VERSION config + version-conditional stripping (shared by the C-side and asm-TU scanners),
+# extracted to a leaf. _build_version_ord / _strip_inactive_version_branches plus the 3 PP/version
+# regexes the staying preprocessor scanners reference are re-imported here.
+from build_config import (
+    _build_version_ord,
+    _strip_inactive_version_branches,
+    _BUILD_VERSION_IF_RE,
+    _PP_OPENING_DIRECTIVE_RE,
+    _PP_ENDIF_LINE_RE,
+)
+
 # Asm-scanning layer (the per-`asm/<ROM>.s` body walk + the scans over it). Self-contained
 # and stdlib-only; imported here so this module keeps the yaml/upstream/hazard/scoring logic.
 # _FRAME_IMMS is shared with the C-side _c_signature below.
@@ -63,46 +76,33 @@ from cpreprocess import (
 # Hazard taxonomy (the Hazard record + its HAZARD_* kind vocabulary + coddog tuning),
 # extracted to a stdlib-only leaf so every module imports it without a cycle; call sites
 # (Hazard(...), HAZARD_*) read unchanged. See tools/pick_target_hazards.py.
+# Hazard kinds the ranker still references directly: bare/pass-through constructions (file-static,
+# one-tu, non16align, combined-subseg, intrinsic-likely, needs-define, rodata-literal), the pack
+# kind args, and `.kind ==` comparisons. The detail-FORMAT kinds are now emitted via Hazard.<kind>()
+# factories, so their constants live only in pick_target_hazards (not re-imported here).
 from pick_target_hazards import (
     Hazard,
     CODDOG_MIRROR_PCT,
     HAZARD_FILE_STATIC,
     HAZARD_DEFINES_DATA,
-    HAZARD_BARE_ASSERT,
     HAZARD_REFS_UNPLACED,
     HAZARD_CALLS_UNPLACED,
     HAZARD_NEEDS_HEADER,
-    HAZARD_STALE_HEADER,
     HAZARD_NEEDS_DEFINE,
-    HAZARD_JAL_COUNT_MISMATCH,
     HAZARD_PACK,
     HAZARD_SINGLE_FILE_PACK,
     HAZARD_ONE_TU,
     HAZARD_CODDOG_FNCOUNT_MISMATCH,
-    HAZARD_CODDOG_STRUCTURAL,
     CODDOG_STRUCTURAL_BYTES_PER_LOC,
     HAZARD_COMBINED_SUBSEG,
-    HAZARD_C_COMBINED,
     HAZARD_NON16ALIGN,
     HAZARD_INTRINSIC_LIKELY,
-    HAZARD_MAYBE_UPSTREAM,
     HAZARD_RODATA_LITERAL,
     HAZARD_RODATA_JTBL,
     HAZARD_DATA_STATIC,
-    HAZARD_TWIN_OF,
-    HAZARD_REMAINING,
     HAZARD_CODDOG_MIRROR,
     HAZARD_CODDOG_TWIN,
-    HAZARD_CODDOG_SOURCE_BANKED,
-    HAZARD_CALLER_EVICT,
-    HAZARD_TRAILING_PAD,
-    HAZARD_DROP_STATIC_MIRROR,
-    HAZARD_HEADER_RENAMES_SYMBOL,
-    HAZARD_WRONG_GHIDRA_NAME,
-    HAZARD_CODDOG_PARTIAL,
     HAZARD_GAME_REGION_MIRROR,
-    HAZARD_UPSTREAM_FNCOUNT_MISMATCH,
-    HAZARD_DATA_CARVE,
 )
 
 # splat-yaml subseg parsing + .rodata carve-range helpers, extracted to a self-contained leaf;
@@ -116,7 +116,7 @@ from pick_target_yaml import (
     _rodata_carve_end_vram,
 )
 
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+ROOT = dc.PROJECT_ROOT  # literal, symlink-stable root (see decomp_common.PROJECT_ROOT)
 LIBULTRA = os.path.expanduser("~/development/repos/ultralib/src")
 LIBKMC = os.path.expanduser("~/development/repos/libkmc/src")
 # The game also links libnusys / libmus / libnaudio (KMC N64 SDK). Their functions are
@@ -407,25 +407,20 @@ def build_kmc_asm_tu_index():
     return index
 
 
-_INTREE_ASM_MACROS = None
-
-
+@functools.cache
 def _intree_asm_macros():
     """Every `#define`d name reachable under the vendored-asm `-I` set (ASM_VENDOR_INCLUDE_DIRS).
 
     Cached. The denominator for vendorable_tu_missing_defines: a macro a vendored .s references but
     that appears in none of these headers can't assemble under LIBULTRA_ASFLAGS."""
-    global _INTREE_ASM_MACROS
-    if _INTREE_ASM_MACROS is None:
-        macros = set()
-        for d in ASM_VENDOR_INCLUDE_DIRS:
-            for h in glob.glob(os.path.join(d, "**", "*.h"), recursive=True):
-                try:
-                    macros.update(re.findall(r"#define\s+(\w+)", open(h, errors="ignore").read()))
-                except OSError:
-                    continue
-        _INTREE_ASM_MACROS = macros
-    return _INTREE_ASM_MACROS
+    macros = set()
+    for d in ASM_VENDOR_INCLUDE_DIRS:
+        for h in glob.glob(os.path.join(d, "**", "*.h"), recursive=True):
+            try:
+                macros.update(re.findall(r"#define\s+(\w+)", open(h, errors="ignore").read()))
+            except OSError:
+                continue
+    return frozenset(macros)
 
 
 def vendorable_tu_missing_defines(rel):
@@ -802,8 +797,7 @@ def _append_coddog_twin_hazard(cfile, fns, upstream_index, hazards):
             if s not in member_stems:
                 member_stems.append(s)
     if member_stems and cstem not in member_stems:
-        hazards.append(Hazard(HAZARD_CODDOG_TWIN,
-                              f"{cstem}!={','.join(sorted(member_stems))}"))
+        hazards.append(Hazard.coddog_twin(cstem, member_stems))
 
 
 def build_signature_index():
@@ -870,7 +864,7 @@ def signature_hint(rom_off, primary, sig_index):
             bases.append(base)
         if len(bases) >= 3:
             break
-    return Hazard(HAZARD_MAYBE_UPSTREAM, f"{lib}:" + ",".join(bases))
+    return Hazard.maybe_upstream(lib, bases)
 
 
 # --- Upstream-vs-ROM call-divergence (the nuContInit catch) ----------------------
@@ -887,100 +881,11 @@ def signature_hint(rom_off, primary, sig_index):
 # still skew the count, so it stays advisory — the gate confirms by disassembling.
 
 _IFDEF_OPEN_RE = re.compile(r'^\s*#\s*ifdef\s+([A-Za-z_][A-Za-z0-9_]*)')
-_PP_OPENING_DIRECTIVE_RE = re.compile(r'^\s*#\s*if(?:def|ndef)?\b')
-_PP_ENDIF_LINE_RE = re.compile(r'^\s*#\s*endif\b')
 _MAKEFILE_DEFINE_RE = re.compile(r'-D([A-Za-z_][A-Za-z0-9_]*)(?:=[^\s]*)?')
 
-
-# Version-conditional stripping. The build compiles ONE side of `#if BUILD_VERSION <op> VERSION_X`
-# (libultra is `-DBUILD_VERSION=VERSION_J`), so the inactive side's refs/calls are phantom — they
-# never reach the real object. E.g. osCartRomInit's `CartRomHandle` + `osPiRawReadIo` live only in
-# the non-J `#else` branch, yet refs/calls-unplaced flagged them. Only the *exact* form
-# `BUILD_VERSION <op> VERSION_X` is evaluated; a compound condition (`&&`/`||`) or any other `#if`
-# is opaque (both branches kept, nesting tracked so #else/#endif still pair correctly). A lib with
-# no `-DBUILD_VERSION` (libkmc/libnusys) yields ordinal 0 → no-op (those upstreams don't gate on it).
-_VERSION_ORD = {f"VERSION_{c}": i for i, c in enumerate("DEFGHIJKL", start=1)}
-_BUILD_VERSION_VAL_RE = re.compile(r"-DBUILD_VERSION=(VERSION_[A-Z])\b")
-_BUILD_VERSION_IF_RE = re.compile(
-    r"^\s*#\s*if\s+BUILD_VERSION\s*(>=|<=|==|!=|>|<)\s*(VERSION_[A-Z])\s*$"
-)
-_PP_ELSE_LINE_RE = re.compile(r"^\s*#\s*else\b")
-_LIB_CFLAGS_VAR = {
-    "libultra": "LIBULTRA_CFLAGS",
-    "libkmc": "LIBKMC_CFLAGS",
-    "libnusys": "LIBNUSYS_CFLAGS",
-}
-
-
-@functools.cache
-def _build_version_ord_by_var():
-    """{Makefile CFLAGS var: BUILD_VERSION ordinal} from `-DBUILD_VERSION=VERSION_X` (cached)."""
-    out = {}
-    try:
-        with open(os.path.join(ROOT, "Makefile")) as f:
-            for line in f:
-                m = re.match(r"^\s*(CFLAGS|LIBKMC_CFLAGS|LIBNUSYS_CFLAGS|LIBULTRA_CFLAGS)\s*[:+]?=", line)
-                if m:
-                    v = _BUILD_VERSION_VAL_RE.search(line)
-                    if v:
-                        out[m.group(1)] = _VERSION_ORD.get(v.group(1), 0)
-    except OSError:
-        pass
-    return out
-
-
-def _build_version_ord(lib):
-    """BUILD_VERSION ordinal effective for an upstream library (0 if the lib sets no -DBUILD_VERSION)."""
-    return _build_version_ord_by_var().get(_LIB_CFLAGS_VAR.get(lib or "", "CFLAGS"), 0)
-
-
-def _eval_build_version(op, ver, ord_):
-    rhs = _VERSION_ORD.get(ver, 0)
-    return {
-        ">=": ord_ >= rhs, "<=": ord_ <= rhs, ">": ord_ > rhs,
-        "<": ord_ < rhs, "==": ord_ == rhs, "!=": ord_ != rhs,
-    }[op]
-
-
-def _strip_inactive_version_branches(text, build_ord):
-    """Drop the dead side of `#if BUILD_VERSION <op> VERSION_X [#else] #endif` for `build_ord`.
-    Non-BUILD_VERSION conditionals pass through unchanged (both branches kept); nesting is tracked
-    so #else/#endif pair to the right directive. build_ord 0 → no-op."""
-    if not build_ord:
-        return text
-    out, stack = [], []  # frame: {"ver": bool, "emit": bool}; line live iff all frames emit
-    live = lambda: all(fr["emit"] for fr in stack)
-    for line in text.splitlines():
-        s = line.lstrip()
-        m = _BUILD_VERSION_IF_RE.match(s)
-        if m:
-            stack.append({"ver": True, "emit": _eval_build_version(m.group(1), m.group(2), build_ord)})
-            continue  # drop the #if directive itself
-        if _PP_OPENING_DIRECTIVE_RE.match(s):
-            keep = live()
-            stack.append({"ver": False, "emit": True})
-            if keep:
-                out.append(line)
-            continue
-        if _PP_ELSE_LINE_RE.match(s):
-            if stack and stack[-1]["ver"]:
-                stack[-1]["emit"] = not stack[-1]["emit"]
-                continue  # drop the #else of a resolved version branch
-            if live():
-                out.append(line)
-            continue
-        if _PP_ENDIF_LINE_RE.match(s):
-            if stack:
-                ver = stack.pop()["ver"]
-                if not ver and live():
-                    out.append(line)
-                continue
-            out.append(line)
-            continue
-        if live():
-            out.append(line)
-    return "\n".join(out)
-
+# BUILD_VERSION config + version-conditional stripping moved to build_config.py (the shared leaf
+# both the C-side and asm-TU scanners use); _build_version_ord / _strip_inactive_version_branches
+# and the shared PP/BUILD_VERSION regexes are re-imported at the top of this module.
 
 _DEFINE_VERSION_RE = re.compile(r"^\s*#\s*define\s+(VERSION_[A-Z])\b")
 
@@ -1251,7 +1156,7 @@ def call_divergence(rom_off, primary, up_cpath, lib=None):
         _strip_define_lines(_strip_string_literals(_strip_dead_blocks(body))), local_macros)
     if n_c == n_asm:
         return None
-    return Hazard(HAZARD_JAL_COUNT_MISMATCH, f"{n_c}vs{n_asm}")
+    return Hazard.jal_count_mismatch(n_c, n_asm)
 
 
 def _is_static_func_proto(line):
@@ -1458,9 +1363,7 @@ def placed_symbols():
 # An un-named decomp symbol: `func_<vram>` or `func_ovl<n>_<vram>` (the splat scaffold placeholder).
 _FUNC_TOKEN_RE = re.compile(r"\bfunc_(?:ovl\d+_)?[0-9A-Fa-f]{6,8}\b")
 
-_SRC_CALLER_CACHE = None
-
-
+@functools.cache
 def src_func_callers():
     """Map every un-named `func_<vram>` token to the banked C files that reference it by name
     (outside an INCLUDE_ASM stub line). Built once per process by walking `src/`.
@@ -1471,9 +1374,6 @@ def src_func_callers():
     is the stale-label-sync hazard reaching the gate via a symbol ADD rather than `make sync-names`.
     Surfacing the caller here prices the one-line rename fixup at the gate instead of as a build-check
     link error."""
-    global _SRC_CALLER_CACHE
-    if _SRC_CALLER_CACHE is not None:
-        return _SRC_CALLER_CACHE
     callers: dict[str, set] = {}
     src_root = os.path.join(ROOT, "src")
     for dirpath, _dirs, files in os.walk(src_root):
@@ -1492,8 +1392,7 @@ def src_func_callers():
                     continue  # the func_'s own scaffold stub is regenerated, not an eviction
                 for tok in _FUNC_TOKEN_RE.findall(ln):
                     callers.setdefault(tok, set()).add(rel)
-    _SRC_CALLER_CACHE = {k: sorted(v) for k, v in callers.items()}
-    return _SRC_CALLER_CACHE
+    return {k: sorted(v) for k, v in callers.items()}
 
 
 # An SDK-internal global is `__`-prefixed (e.g. __osRunQueue). Uppercase macros ([A-Z]-led) and
@@ -2139,7 +2038,7 @@ def _classify_pack_hazards(off, fns, upstream_index):
         if _upstream_file_func_count(*c_files[0]) == len(fns):
             single_file = True
     pack_kind = HAZARD_SINGLE_FILE_PACK if single_file else HAZARD_PACK
-    hz.append(Hazard(pack_kind, f"{len(fns)}fn[" + ",".join(members) + "]"))
+    hz.append(Hazard.pack(pack_kind, len(fns), members))
     # One named C stem but the pack has MORE fns than that .c defines → the surplus members
     # are a FOREIGN TU bundled in the subseg (split it off, mirror only the upstream's fns).
     # The named-symbol analog of coddog-fncount-mismatch. Guard `c_members <= fc` (the named
@@ -2148,7 +2047,7 @@ def _classify_pack_hazards(off, fns, upstream_index):
     if not single_file and len(c_stems) == 1 and c_members:
         fc = _upstream_file_func_count(*c_files[0])
         if fc and len(fns) > fc and c_members <= fc:
-            hz.append(Hazard(HAZARD_UPSTREAM_FNCOUNT_MISMATCH, f"{len(fns)}vs{fc}"))
+            hz.append(Hazard.upstream_fncount_mismatch(len(fns), fc))
     # one-tu: if EVERY inner fn boundary is non-16-aligned, the pack is ONE .o (the linker
     # 16-aligns each .o's .text start, so a 2nd .o would begin on a 16 boundary). Confirms a
     # single-file-pack structurally even when members are un-named (the coddog-mirror case),
@@ -2163,8 +2062,7 @@ def _classify_pack_hazards(off, fns, upstream_index):
     # smallest-first; surfacing `c-combined:Nfile[…]` prices the split + names the leaves. A
     # single-file pack has one stem → does NOT fire.
     if len(c_stems) > 1:
-        hz.append(Hazard(HAZARD_C_COMBINED,
-                              f"{len(c_stems)}file[" + "|".join(sorted(c_stems)) + "]"))
+        hz.append(Hazard.c_combined(c_stems))
     # Combined-subseg sub-pattern: ≥2 asm-ONLY members from *distinct* vendorable ultralib .s
     # files (the asm analog of a multi-file C pack). The gate splits the subseg at the TU
     # boundary, then vendors each .s verbatim. A pack whose asm members share one .s (a
@@ -2286,7 +2184,7 @@ def classify_subseg(off, typ, path, size, upstream_index):
             # a real `jr ra; nop` tail by one 16-step) — GCC 16-aligns past it anyway, so excluding
             # align<=16 removes that false fire.
             if residual >= 16 and align > 16:
-                hazards.append(Hazard(HAZARD_TRAILING_PAD, f"{residual}B@{align}"))
+                hazards.append(Hazard.trailing_pad(residual, align))
         if len(fns) > 1:
             hazards.extend(_classify_pack_hazards(off, fns, upstream_index))
         hazards.extend(_classify_asm_mirror_hazards(off, fns, upstream_index))
@@ -2299,7 +2197,7 @@ def classify_subseg(off, typ, path, size, upstream_index):
         fns = re.findall(r"INCLUDE_ASM\([^,]+,\s*([A-Za-z_]\w+)", text)
         if not fns:  # 0 stubs => already an md5-candidate
             return None
-        return "c-stub", fns, [Hazard(HAZARD_REMAINING, str(len(fns)))]
+        return "c-stub", fns, [Hazard.remaining(len(fns))]
     return None
 
 
@@ -2327,7 +2225,7 @@ def _append_recover_hazards(off, primary, up_path, up_lib, hazards):
         refs = [
             f"{r}@0x{BOOT_GLOBALS[r]:08X}" if r in BOOT_GLOBALS else r for r in refs
         ]
-        hazards.append(Hazard(HAZARD_REFS_UNPLACED, ",".join(refs)))  # asm-data-recovery before flip
+        hazards.append(Hazard.refs_unplaced(refs))  # asm-data-recovery before flip
     unplaced_calls = calls_unplaced(up_path, primary, placed, up_lib)
     if unplaced_calls:
         # Annotate the recovered vram inline when unambiguous (one unplaced call ∩ one
@@ -2337,7 +2235,7 @@ def _append_recover_hazards(off, primary, up_path, up_lib, hazards):
             crefs = [f"{unplaced_calls[0]}@0x{ccands[0]:08X}"]
         else:
             crefs = unplaced_calls
-        hazards.append(Hazard(HAZARD_CALLS_UNPLACED, ",".join(crefs)))  # recover func symbol before flip
+        hazards.append(Hazard.calls_unplaced(crefs))  # recover func symbol before flip
     # Switch jump table: a `switch` compiles to a `jtbl_<addr>` in the code-segment `.rodata` whose
     # `.word` entries are the fn's own internal `.L<addr>` labels. Flipping the subseg text->C
     # deletes those labels, so the still-asm rodata jtbl link-breaks (undefined-`.L<addr>` ref) unless
@@ -2350,7 +2248,7 @@ def _append_recover_hazards(off, primary, up_path, up_lib, hazards):
     # the carve is a mechanical near-free enabler, so no seed_points bump.
     jtbls = [a for a in rodata_jtbls(off) if _literal_in_rodata(a, off)]
     if jtbls:
-        hazards.append(Hazard(HAZARD_RODATA_JTBL, ",".join(f"0x{a:08X}" for a in sorted(jtbls))))
+        hazards.append(Hazard.rodata_jtbl(jtbls))
 
 
 def _upstream_defines_function(cpath, name):
@@ -2461,20 +2359,20 @@ def _append_coddog_trap_hazards(off, primary, cl_path, up_lib, hazards):
         hazards.append(Hazard(HAZARD_FILE_STATIC))
     cdefs = defines_data_globals(cl_path) + defines_local_static_data(cl_path)  # + fn-local statics
     if cdefs:
-        hazards.append(Hazard(HAZARD_DEFINES_DATA, ",".join(cdefs)))
+        hazards.append(Hazard.defines_data(cdefs))
     blocked = False
     ctagged, cblk = _tagged_missing_includes(cl_path, clib)
     if ctagged:
-        hazards.append(Hazard(HAZARD_NEEDS_HEADER, ",".join(ctagged)))
+        hazards.append(Hazard.needs_header(ctagged))
         blocked = cblk
     _append_recover_hazards(off, primary, cl_path, clib, hazards)
     ren = header_renames_symbol(cl_path, primary)
     if ren and _upstream_defines_function(cl_path, primary):  # skip macro-alias false fire
-        hazards.append(Hazard(HAZARD_HEADER_RENAMES_SYMBOL, f"{primary}@{ren}"))
+        hazards.append(Hazard.header_renames_symbol(primary, ren))
     elif ren:  # primary is a macro alias for a DIFFERENT upstream symbol → wrong ghidra name
         tgt = _macro_alias_target(cl_path, primary)
         if tgt and _upstream_defines_function(cl_path, tgt):
-            hazards.append(Hazard(HAZARD_WRONG_GHIDRA_NAME, f"{primary}->{tgt}@{ren}"))
+            hazards.append(Hazard.wrong_ghidra_name(primary, tgt, ren))
     return blocked
 
 
@@ -2485,14 +2383,14 @@ def _append_header_version_hazards(off, primary, up_path, up_lib, hazards):
     blocked = False
     tagged, hdr_blocked = _tagged_missing_includes(up_path, up_lib)
     if tagged:
-        hazards.append(Hazard(HAZARD_NEEDS_HEADER, ",".join(tagged)))
+        hazards.append(Hazard.needs_header(tagged))
         blocked = blocked or hdr_blocked
     stale = stale_version_header(up_path, up_lib)
     if stale:
         # A version-conditional fn silently dropped: os_version.h resolves but is a stripped revision
         # missing the referenced VERSION_* constant. A one-time additive header-content vendor, not a
         # block — keep it off `blocked` (it does not gate the DoR, only warns the gate).
-        hazards.append(Hazard(HAZARD_STALE_HEADER, "os_version.h(" + ",".join(stale) + ")"))
+        hazards.append(Hazard.stale_header(stale))
     gating = function_gating_define(up_path, primary)
     if gating and gating not in _active_defines_for_lib(up_lib):
         hazards.append(Hazard(HAZARD_NEEDS_DEFINE, gating))
@@ -2504,11 +2402,11 @@ def _append_header_version_hazards(off, primary, up_path, up_lib, hazards):
         hazards.append(divergence)  # near-verbatim mirror: reconcile call list at the gate
     ren = header_renames_symbol(up_path, primary)
     if ren and _upstream_defines_function(up_path, primary):  # skip macro-alias false fire
-        hazards.append(Hazard(HAZARD_HEADER_RENAMES_SYMBOL, f"{primary}@{ren}"))  # needs #undef
+        hazards.append(Hazard.header_renames_symbol(primary, ren))  # needs #undef
     elif ren:  # primary is a macro alias for a DIFFERENT upstream symbol → wrong ghidra name
         tgt = _macro_alias_target(up_path, primary)
         if tgt and _upstream_defines_function(up_path, tgt):
-            hazards.append(Hazard(HAZARD_WRONG_GHIDRA_NAME, f"{primary}->{tgt}@{ren}"))
+            hazards.append(Hazard.wrong_ghidra_name(primary, tgt, ren))
     return blocked
 
 
@@ -2554,7 +2452,7 @@ def _append_rodata_carve_hazards(off, up_path, hazards):
         hazards.append(Hazard(HAZARD_RODATA_LITERAL, detail))
     if data_statics:
         # A function-local static the mirror must drop to a file-scope extern + recover.
-        hazards.append(Hazard(HAZARD_DATA_STATIC, ",".join(f"0x{a:08X}" for a in sorted(data_statics))))
+        hazards.append(Hazard.data_static(data_statics))
     return rodata_lits, data_statics
 
 
@@ -2577,18 +2475,18 @@ def append_upstream_hazards(off, primary, up_lib, up_path, hazards, member_paths
         d for p in (up_path, *member_paths)
         for d in defines_data_globals(p) + defines_local_static_data(p)))
     if data_defs:
-        hazards.append(Hazard(HAZARD_DEFINES_DATA, ",".join(data_defs)))  # .data analogue → classical loop
+        hazards.append(Hazard.defines_data(data_defs))  # .data analogue → classical loop
     # File-scope NON-const initialized static arrays (e.g. xprintf spaces/zeroes) the verbatim mirror
     # re-emits → a `.data` sibling carve. Single-file ONLY (`not member_paths`): a c-combined pack's
     # per-member up_path can mis-attribute, so defer the multi-file case.
     if not member_paths:
         init_arrays = list(dict.fromkeys(defines_file_static_init_array(up_path)))
         if init_arrays:
-            hazards.append(Hazard(HAZARD_DATA_CARVE, ",".join(init_arrays)))  # .data carve at recovered vram
+            hazards.append(Hazard.data_carve(init_arrays))  # .data carve at recovered vram
     # Bare (non-_DEBUG-guarded) asserts a verbatim mirror would compile in (assert-strip pre-flag).
     n_assert = sum(bare_asserts(p) for p in (up_path, *member_paths))
     if n_assert:
-        hazards.append(Hazard(HAZARD_BARE_ASSERT, str(n_assert)))
+        hazards.append(Hazard.bare_assert(n_assert))
     _append_recover_hazards(off, primary, up_path, up_lib, hazards)
     mirror_dir = band_mirror_dir(up_lib, up_path)  # also reused below for band warmth
     blocked = _append_header_version_hazards(off, primary, up_path, up_lib, hazards) or blocked
@@ -2609,7 +2507,7 @@ def append_upstream_hazards(off, primary, up_lib, up_path, hazards, member_paths
             pool = sorted(sibs[want] - {cand_stem}) \
                 or sorted((sibs[".data"] | sibs[".rodata"] | sibs[".bss"]) - {cand_stem})
             if pool:
-                hazards.append(Hazard(HAZARD_TWIN_OF, pool[0]))
+                hazards.append(Hazard.twin_of(pool[0]))
     # owner-per-member marker: the rodata-literal/jtbl scans span the WHOLE subseg, which is correct
     # for a single-file pack (one .c -> one .o -> one .rodata) but OVER-attributes for a c-combined
     # (multi-file) pack — both members' pooled rodata lands on the PRIMARY row, yet the carve owner is
@@ -2675,7 +2573,7 @@ def drop_static_mirror_hazard(mirror_path, hazards):
         return None
     n = (_file_scope_static_count(mirror_path) + len(defines_data_globals(mirror_path))
          if mirror_path and os.path.isfile(mirror_path) else 0)
-    return Hazard(HAZARD_DROP_STATIC_MIRROR, f"{n}bss" if n else "bss")
+    return Hazard.drop_static_mirror(n)
 
 
 @dataclasses.dataclass
@@ -2732,7 +2630,7 @@ def _build_row(off, typ, path, size, args, upstream_index, carried, sig_index,
     _evicts = [f"{fn}@{','.join(_callers[fn])}" for fn in fns
                if fn.startswith("func_") and fn in _callers]
     if _evicts:
-        hazards.append(Hazard(HAZARD_CALLER_EVICT, ";".join(_evicts)))
+        hazards.append(Hazard.caller_evict(_evicts))
 
     primary = fns[0]
     up_lib, up_path = upstream_index.get(primary, (None, None))
@@ -2796,8 +2694,7 @@ def _build_row(off, typ, path, size, args, upstream_index, carried, sig_index,
             if len(fns) > 1:
                 matched_n = _upstream_file_func_count(up_lib or "libultra", cl_path)
                 if 0 < matched_n < len(fns):
-                    hazards.append(Hazard(HAZARD_CODDOG_FNCOUNT_MISMATCH,
-                                          f"{matched_n}vs{len(fns)}"))
+                    hazards.append(Hazard.coddog_fncount_mismatch(matched_n, len(fns)))
 
     # A multi-fn asm subseg's mirror IDENTITY often lives in its UN-NAMED tail, not its named (or
     # mis-attributed) leader. The primary block above keys coddog on `primary` AND fires only when
@@ -2836,12 +2733,11 @@ def _build_row(off, typ, path, size, args, upstream_index, carried, sig_index,
                 matched_n = _upstream_file_func_count(up_lib or "libultra", cl1)
                 if 0 < matched_n < len(fns) \
                         and not any(h.kind == HAZARD_CODDOG_FNCOUNT_MISMATCH for h in hazards):
-                    hazards.append(Hazard(HAZARD_CODDOG_FNCOUNT_MISMATCH,
-                                          f"{matched_n}vs{len(fns)}"))
+                    hazards.append(Hazard.coddog_fncount_mismatch(matched_n, len(fns)))
                 loc = _meaningful_loc(cl1)
                 if loc and size > CODDOG_STRUCTURAL_BYTES_PER_LOC * loc:
                     cpct = max(p for _, c, p in cod_members if c == distinct[0])
-                    hazards.append(Hazard(HAZARD_CODDOG_STRUCTURAL, f"{distinct[0]}@{cpct:.2f}"))
+                    hazards.append(Hazard.coddog_structural(distinct[0], cpct))
         # ≥2 DISTINCT per-fn TWIN files matched to ONE multi-fn subseg, covering only a SUBSET of its
         # fns → a per-fn fingerprint set, NOT a single-file mirror (the un-matched fns diverge from
         # the combined source). The multi-twin companion to the len==1-only coddog-fncount-mismatch.
@@ -2849,7 +2745,7 @@ def _build_row(off, typ, path, size, args, upstream_index, carried, sig_index,
         twin_files = {h.twin_file()
                       for h in hazards if h.kind == HAZARD_CODDOG_TWIN}
         if len(distinct) >= 2 and len(twin_files) >= 2 and len(cod_members) < len(fns):
-            hazards.append(Hazard(HAZARD_CODDOG_PARTIAL, f"{len(cod_members)}of{len(fns)}fn"))
+            hazards.append(Hazard.coddog_partial(len(cod_members), len(fns)))
         if up_lib is None:
             up_lib = "libultra"
 
@@ -2863,15 +2759,14 @@ def _build_row(off, typ, path, size, args, upstream_index, carried, sig_index,
     # Flag a coddog match to an already-banked source as structural (advisory) — its mirror is fully
     # decompiled, so the hit is a fingerprint coincidence, not a fresh attribution.
     for s in sorted({c for c in cod_srcs if _coddog_source_banked(c)}):
-        hazards.append(Hazard(HAZARD_CODDOG_SOURCE_BANKED, os.path.basename(s)))
+        hazards.append(Hazard.coddog_source_banked(os.path.basename(s)))
     # A libultra-source mirror whose vram is BELOW the libultra code band is game-linked at -O2, not
     # -O3 — route it to a -O2 path (src/mgu/…), NOT src/libultra/ (which forces -O3 → wrong
     # auto-inlining). Gated on up_lib == "libultra" (excludes audio coddog hits, which stay
     # un-re-priced + above the band anyway).
     if up_lib == "libultra" and _libultra_band_start is not None and off < _libultra_band_start:
         v = subseg_vram(off)
-        hazards.append(Hazard(HAZARD_GAME_REGION_MIRROR,
-                              f"0x{v:08X}" if v is not None else hex(off)))
+        hazards.append(Hazard.game_region_mirror(v, off))
     cod_in_scope = bool(args.lib) and bool(cod_srcs) and (
         args.lib == "libultra" or any(args.lib in s for s in cod_srcs))
     if args.lib and not cod_in_scope and args.lib not in (path or "") \

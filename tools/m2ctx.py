@@ -6,8 +6,9 @@ import sys
 import subprocess
 import tempfile
 
-script_dir = os.path.dirname(os.path.realpath(__file__))
-root_dir = os.path.abspath(os.path.join(script_dir, ".."))
+import decomp_common as dc
+
+root_dir = dc.PROJECT_ROOT  # literal, symlink-stable root (see decomp_common.PROJECT_ROOT)
 
 # Project-specific. libultra + libnusys headers live under include/ (libultra mirrors
 # ultralib's tree — PR/, PRinternal/, compiler/gcc; libnusys from ~/development/repos/n64sdkmod),
