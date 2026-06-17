@@ -800,3 +800,33 @@ def test_score_row_characterization():
     assert r2["hazards"] == "-"                    # no hazards renders "-"
     assert r2["score"] == -64 - 1000              # carried penalty, no bonuses
     assert (pt.UPSTREAM_BONUS, pt.BAND_WARM_BONUS, pt.CARRYOVER_PENALTY) == (200, 64, 1000)
+
+
+def test_hazard_detail_accessors():
+    """Lock the Hazard detail encode/decode now that parse knowledge is centralized on the class
+    (Phase A: the `@`/`!=`/`;owner-per-member` ad-hoc splits scattered across build_rows are gone).
+    Covers mark_owner_per_member explicitly — it was the one re-parsed surface with no prior test."""
+    pt = load_tool("pick_target")
+    H = pt.Hazard
+
+    # coddog_mirror classmethod encodes `<file>@<pct>` (2-decimal) and round-trips through accessors.
+    h = H.coddog_mirror("src/io/contquery.c", 99.99)
+    assert h.render() == "coddog-mirror:src/io/contquery.c@99.99"
+    assert h.coddog_file() == "src/io/contquery.c"
+    assert h.coddog_pct() == 99.99
+    assert h.coddog_source() == "src/io/contquery.c"   # rsplit form, same when no `@` in path
+    # malformed pct degrades to 0.0 (the old _coddog_pct contract)
+    assert H(pt.HAZARD_CODDOG_MIRROR, "src/io/x.c").coddog_pct() == 0.0
+
+    # twin_file pulls the primary `<stem>` out of `<stem>!=<alt,...>`
+    assert H(pt.HAZARD_CODDOG_TWIN, "siacs!=piacs,siacs").twin_file() == "siacs"
+
+    # mark_owner_per_member: idempotent in-place append, None-detail safe
+    j = H(pt.HAZARD_RODATA_JTBL, "0x800D23E8")
+    j.mark_owner_per_member()
+    assert j.detail == "0x800D23E8;owner-per-member"
+    j.mark_owner_per_member()                          # second call is a no-op
+    assert j.detail == "0x800D23E8;owner-per-member"
+    n = H(pt.HAZARD_RODATA_LITERAL)
+    n.mark_owner_per_member()
+    assert n.detail == ";owner-per-member"

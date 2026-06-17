@@ -390,13 +390,45 @@ class Hazard:
     `detail` holds everything after the kind's colon verbatim — a comma list
     (`defines-data:a,b`), a count pair (`jal-count-mismatch:2vs1`), a bracketed
     pack (`pack:2fn[a=foo]`), or a colon-bearing short-list (`maybe-upstream:
-    libultra:f1,f2`). Keep it a single string; render() does not re-split it."""
+    libultra:f1,f2`). render() emits it verbatim. The handful of callers that
+    need a FIELD back out of the string go through the named accessors below
+    (the coddog `<file>@<pct>` and twin `<stem>!=<...>` encodings), so that
+    parse/encode knowledge lives here, not scattered across the ranker."""
 
     kind: str
     detail: str | None = None
 
     def render(self) -> str:
         return self.kind if self.detail is None else f"{self.kind}:{self.detail}"
+
+    @classmethod
+    def coddog_mirror(cls, cfile: str, pct: float) -> "Hazard":
+        """A coddog-mirror flag, detail encoded as `<file>@<pct>` (2-decimal)."""
+        return cls(HAZARD_CODDOG_MIRROR, f"{cfile}@{pct:.2f}")
+
+    def coddog_file(self) -> str:
+        """The `<file>` half of a coddog `<file>@<pct>` detail."""
+        return self.detail.split("@", 1)[0]
+
+    def coddog_pct(self) -> float:
+        """The `<pct>` half of a coddog `<file>@<pct>` detail, or 0.0 if malformed."""
+        try:
+            return float(self.detail.split("@", 1)[1])
+        except (IndexError, ValueError):
+            return 0.0
+
+    def coddog_source(self) -> str:
+        """The source path of a coddog detail, tolerating an `@` in the path (rsplit)."""
+        return self.detail.rsplit("@", 1)[0]
+
+    def twin_file(self) -> str:
+        """The primary `<stem>` of a coddog-twin `<stem>!=<alt,...>` detail."""
+        return self.detail.split("!=", 1)[0]
+
+    def mark_owner_per_member(self) -> None:
+        """Append the `;owner-per-member` marker once, in place (idempotent)."""
+        if "owner-per-member" not in (self.detail or ""):
+            self.detail = f"{self.detail or ''};owner-per-member"
 
 
 def parse_subsegs():
@@ -2775,9 +2807,8 @@ def append_upstream_hazards(off, primary, up_lib, up_path, hazards, member_paths
     # _append_recover_hazards) + label-range-bounded carve-end: BACKLOG tooling follow-up (S98).
     if member_paths:
         for h in hazards:
-            if h.kind in (HAZARD_RODATA_JTBL, HAZARD_RODATA_LITERAL) and \
-                    "owner-per-member" not in (h.detail or ""):
-                h.detail = f"{h.detail or ''};owner-per-member"
+            if h.kind in (HAZARD_RODATA_JTBL, HAZARD_RODATA_LITERAL):
+                h.mark_owner_per_member()
     band = "warm" if band_is_warm(mirror_dir) else "cold"
     return band, blocked
 
@@ -2823,8 +2854,8 @@ def drop_static_mirror_hazard(mirror_path, hazards):
     if kinds & {HAZARD_RODATA_LITERAL, HAZARD_DATA_STATIC, HAZARD_RODATA_JTBL}:
         return None  # a carve signal disqualifies the pure-.bss drop
     definitive = any(
-        h.kind == HAZARD_CODDOG_MIRROR and not h.detail.split("@", 1)[0].startswith("src/audio")
-        and _coddog_pct(h.detail) >= CODDOG_MIRROR_PCT
+        h.kind == HAZARD_CODDOG_MIRROR and not h.coddog_file().startswith("src/audio")
+        and h.coddog_pct() >= CODDOG_MIRROR_PCT
         for h in hazards
     )
     if not definitive:
@@ -2832,14 +2863,6 @@ def drop_static_mirror_hazard(mirror_path, hazards):
     n = (_file_scope_static_count(mirror_path) + len(defines_data_globals(mirror_path))
          if mirror_path and os.path.isfile(mirror_path) else 0)
     return Hazard(HAZARD_DROP_STATIC_MIRROR, f"{n}bss" if n else "bss")
-
-
-def _coddog_pct(detail):
-    """Parse the `<file>@<pct>` coddog hazard detail's percentage, or 0.0 if malformed."""
-    try:
-        return float(detail.split("@", 1)[1])
-    except (IndexError, ValueError):
-        return 0.0
 
 
 @dataclasses.dataclass
@@ -2943,7 +2966,7 @@ def build_rows(args, upstream_index, carried, sig_index, coddog_index=None):
         # hits stay advisory (they still need the one-time audio-header enabler, not modeled here).
         if not up_path and primary in coddog_index:
             cfile, cpct = coddog_index[primary]
-            hazards.append(Hazard(HAZARD_CODDOG_MIRROR, f"{cfile}@{cpct:.2f}"))
+            hazards.append(Hazard.coddog_mirror(cfile, cpct))
             _append_coddog_twin_hazard(cfile, fns, upstream_index, hazards)
             if up_lib is None and cpct >= CODDOG_MIRROR_PCT and not cfile.startswith("src/audio"):
                 up_lib = "libultra"
@@ -2990,12 +3013,12 @@ def build_rows(args, upstream_index, carried, sig_index, coddog_index=None):
                        if fn in coddog_index and coddog_index[fn][1] >= CODDOG_MIRROR_PCT
                        and not coddog_index[fn][0].startswith("src/audio")]
         if cod_members:
-            already = {h.detail.split("@", 1)[0] for h in hazards if h.kind == HAZARD_CODDOG_MIRROR}
+            already = {h.coddog_file() for h in hazards if h.kind == HAZARD_CODDOG_MIRROR}
             for cfile in sorted({c for _, c, _ in cod_members}):
                 if cfile in already:
                     continue
                 cpct = max(p for _, c, p in cod_members if c == cfile)
-                hazards.append(Hazard(HAZARD_CODDOG_MIRROR, f"{cfile}@{cpct:.2f}"))
+                hazards.append(Hazard.coddog_mirror(cfile, cpct))
                 _append_coddog_twin_hazard(cfile, fns, upstream_index, hazards)
                 # S80: surface the tail-identity file's traps too. The S72 block above keys on the
                 # primary, so a coddog hit carried by an un-named TAIL member (initialize.c's hit is
@@ -3031,7 +3054,7 @@ def build_rows(args, upstream_index, carried, sig_index, coddog_index=None):
             # mtxidentf.c + mtxl2f.c @100 = 2 of 12 fns; the combined mtxutil.c source has guMtxF2L
             # (clamp) + guMtxIdent (inline) diverging). The multi-twin companion to the len==1-only
             # coddog-fncount-mismatch. Advisory: per-fn verify, do NOT read it as a clean mirror.
-            twin_files = {h.detail.split("!=", 1)[0]
+            twin_files = {h.twin_file()
                           for h in hazards if h.kind == HAZARD_CODDOG_TWIN}
             if len(distinct) >= 2 and len(twin_files) >= 2 and len(cod_members) < len(fns):
                 hazards.append(Hazard(HAZARD_CODDOG_PARTIAL, f"{len(cod_members)}of{len(fns)}fn"))
@@ -3045,7 +3068,7 @@ def build_rows(args, upstream_index, carried, sig_index, coddog_index=None):
         # which cost a by-coddog-column manual survey at the S94 gate). The coddog map IS the
         # ultralib sweep, so any coddog-mirror match means libultra; also honor a sub-path scope
         # (e.g. `--lib audio` -> src/audio/...) via the matched-source path substring.
-        cod_srcs = [h.detail.rsplit("@", 1)[0] for h in hazards
+        cod_srcs = [h.coddog_source() for h in hazards
                     if h.kind == HAZARD_CODDOG_MIRROR]
         # S96: flag a coddog match to an already-banked source as structural (advisory) — its mirror
         # is fully decompiled, so the hit is a fingerprint coincidence, not a fresh attribution.
