@@ -1191,23 +1191,26 @@ def stale_version_header(up_path, lib):
 
 @functools.cache
 def _parse_makefile_defines():
-    """Return {lib: frozenset(defines)} by parsing the project Makefile (cached:
-    one parse per process). 'libkmc'/'libnusys'/'libultra' each inherit from the main
-    CFLAGS set plus their own profile additions. The libultra profile carries
-    -DBUILD_VERSION + -DF3DEX_GBI_2 (S83) — without parsing LIBULTRA_CFLAGS the GBI
-    microcode define is invisible, so a GBI-value-guarded macro (OS_YIELD_DATA_SIZE)
-    false-flags as needs-define on a build that already defines it."""
-    makefile = os.path.join(ROOT, "Makefile")
+    """Return {lib: frozenset(defines)} by parsing the project build files (cached:
+    one parse per process). The base CFLAGS live in the top Makefile; the per-library
+    profiles live in the included mk/*.mk fragments, so scan both.
+    'libkmc'/'libnusys'/'libultra' each inherit from the main CFLAGS set plus their own
+    profile additions. The libultra profile carries -DBUILD_VERSION + -DF3DEX_GBI_2 (S83)
+    — without parsing LIBULTRA_CFLAGS the GBI microcode define is invisible, so a
+    GBI-value-guarded macro (OS_YIELD_DATA_SIZE) false-flags as needs-define on a build
+    that already defines it."""
+    build_files = [os.path.join(ROOT, "Makefile")] + sorted(glob.glob(os.path.join(ROOT, "mk", "*.mk")))
     raw = {"main": set(), "libkmc": set(), "libnusys": set(), "libultra": set()}
-    try:
-        with open(makefile) as f:
-            for line in f:
-                for var, key in [("CFLAGS", "main"), ("LIBKMC_CFLAGS", "libkmc"),
-                                 ("LIBNUSYS_CFLAGS", "libnusys"), ("LIBULTRA_CFLAGS", "libultra")]:
-                    if re.match(rf'^\s*{var}\s*[:+]?=', line):
-                        raw[key].update(m.group(1) for m in _MAKEFILE_DEFINE_RE.finditer(line))
-    except OSError:
-        pass
+    for path in build_files:
+        try:
+            with open(path) as f:
+                for line in f:
+                    for var, key in [("CFLAGS", "main"), ("LIBKMC_CFLAGS", "libkmc"),
+                                     ("LIBNUSYS_CFLAGS", "libnusys"), ("LIBULTRA_CFLAGS", "libultra")]:
+                        if re.match(rf'^\s*{var}\s*[:+]?=', line):
+                            raw[key].update(m.group(1) for m in _MAKEFILE_DEFINE_RE.finditer(line))
+        except OSError:
+            continue
     for k in ("libkmc", "libnusys", "libultra"):
         raw[k] |= raw["main"]
     return {k: frozenset(v) for k, v in raw.items()}
