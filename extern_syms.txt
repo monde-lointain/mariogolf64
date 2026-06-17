@@ -81,3 +81,14 @@ func_8040B97C = 0x8040B97C;
 func_8040BA44 = 0x8040BA44;
 func_8040BC70 = 0x8040BC70;
 func_8040BD90 = 0x8040BD90;
+
+/* Non-libultra symbols the libultra sources call into (libkmc soft-math, mgu,
+   game vector helper). Defined here so libultra links before those libraries
+   land as their own commits; each is removed when its library is added. */
+__divdi3 = 0x800B3A50;
+__udivdi3 = 0x800B3BC0;
+__umoddi3 = 0x800B3BE0;
+guMtxF2L = 0x80067B00;
+guMtxL2F = 0x80067C0C;
+guMtxIdentF = 0x80067CB4;
+vec3f_normalize = 0x80029900;

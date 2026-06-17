@@ -90,10 +90,11 @@ ifneq ($(NONMATCHING),1)
 	@md5sum -c $(BASENAME).md5
 endif
 
-# Per-tree compile rules + flags. Library trees (mk/libultra.mk, ...) are added
-# back by the commit that introduces each library's sources.
+# Per-tree compile rules + flags. Library trees are added back by the commit
+# that introduces each library's sources.
 include mk/asm.mk
 include mk/assets.mk
+include mk/libultra.mk
 include mk/src.mk
 
 # Source discovery. Recursive find, NOT $(wildcard): library/vendored code lives
