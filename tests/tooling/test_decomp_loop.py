@@ -71,13 +71,20 @@ STABLE_KEYS = (
 
 
 def test_decomp_loop_rand_scores_zero(golden_dir, regen):
-    # The loop compiles nonmatchings/<fn>/base.c, which is gitignored scratch.
-    # Present during a refactor session (the vise); absent on a clean checkout,
-    # where this end-to-end check skips and the score_diff unit tests above carry
-    # the characterization load.
+    # The loop needs TWO transient gitignored scratch inputs to coexist:
+    #   1. nonmatchings/<fn>/base.c (from seed_c), and
+    #   2. a top-level asm/<seg>.s declaring `glabel <fn>`, the reference the
+    #      loop diffs against (resolved by decomp_loop's own find_segment).
+    # `rand` is banked (subseg `c`), so splat never emits asm/<seg>.s for it on a
+    # clean tree -- input 2 only lingers as stale leftover from before banking.
+    # Both are gitignored: present during a refactor session (the vise), absent on
+    # a clean/re-extracted checkout, where this end-to-end check skips and the
+    # score_diff unit tests above carry the characterization load.
     base_c = ROOT / "nonmatchings" / GOLDEN_FN / "base.c"
     if not base_c.exists():
         pytest.skip(f"{base_c.relative_to(ROOT)} absent (gitignored scratch); run seed_c first")
+    if dl.dc.find_segment(GOLDEN_FN) is None:
+        pytest.skip(f"no `glabel {GOLDEN_FN}` in any asm/*.s (banked fn; reference asm absent on a clean tree)")
 
     proc = run_tool("decomp_loop", "--func", GOLDEN_FN, "--score-only")
     assert proc.returncode == 0, proc.stderr
