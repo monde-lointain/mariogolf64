@@ -1,6 +1,6 @@
 // Maintainer symbol overrides for splat (add-only).
-// libultra symbols, merged from the decomp symbol tables (ghidra names folded in;
-// symbol_addrs entries win on conflict). Non-libultra symbols are dropped.
+// libultra + libkmc symbols, merged from the decomp symbol tables (ghidra names
+// folded in; symbol_addrs entries win on conflict). Non-library symbols are dropped.
 main = 0x800994B0; // type:func
 osTvType = 0x80000300; // size:0x4
 osRomBase = 0x80000308; // size:0x4
@@ -309,3 +309,33 @@ __osFinalrom = 0x801B74D8; // size:0x4
 __osPfsPifRam = 0x801B7EF0; // size:0x40
 __osEepromTimerQ = 0x801B8A00; // size:0x18
 __osSiAccessQueue = 0x801EFFB0; // size:0x18
+
+// libkmc symbols (math / string / soft-float + 64-bit-math TUs; ghidra names
+// folded in). 0x800B3C20 is named __fixdfdi (the signed (double)->(long long)
+// entry both atan/sin call); __fixunsdfdi aliases it (.globl in mcvtld.s, unref).
+_xatan = 0x800B2D10; // type:func
+atan = 0x800B2EC8; // type:func
+atan2 = 0x800B2FE0; // type:func
+memset = 0x800B3150; // type:func
+setmem = 0x800B31F0; // type:func
+rand = 0x800B3220; // type:func
+srand = 0x800B3254; // type:func
+_xsincos = 0x800B3260; // type:func
+sin = 0x800B3480; // type:func
+cos = 0x800B3560; // type:func
+tan = 0x800B35F8; // type:func
+strcmp = 0x800B36D0; // type:func
+__matherr = 0x800B37E0; // type:func
+__muldi3 = 0x800B3850; // type:func
+__divdi3 = 0x800B3A50; // type:func
+__moddi3 = 0x800B3B00; // type:func
+__udivdi3 = 0x800B3BC0; // type:func
+__umoddi3 = 0x800B3BE0; // type:func
+__fixdfdi = 0x800B3C20; // type:func
+__floatdidf = 0x800B3D40; // type:func
+_matherr = 0x800B3E40; // type:func
+_atbl = 0x800C9690; // size:0x200  CORDIC atan(2^-i) table (libkmc atbl.c), extern from atan.c/sin.c
+cordic_atan_divisor_2_60 = 0x800D2840; // type:u64 size:0x8
+RO_800D28A0 = 0x800D28A0; //
+next = 0x800FBD30; // size:0x4
+errno = 0x800FE3D0; // size:0x4  C errno (libkmc errno.c slot, written by _matherr.c)
