@@ -2106,8 +2106,8 @@ def _classify_pack_hazards(off, fns, upstream_index):
     one-.o, c-combined, combined asm-TU). Assumes len(fns) > 1; returns them in order."""
     hz = []
     # List each fn + its upstream basename so the gate can tell a multi-file pack
-    # (different basenames → split at the upstream-file boundary, e.g. dpsetstat+dpctr)
-    # from a single-file pack, without hand-disassembling asm/<rom>.s.
+    # (different basenames → split at the upstream-file boundary) from a single-file
+    # pack, without hand-disassembling asm/<rom>.s.
     members = []
     asm_index = build_asm_tu_index()
     asm_tus = []  # distinct vendorable .s TUs among asm-ONLY members (no C mirror)
@@ -2125,11 +2125,9 @@ def _classify_pack_hazards(off, fns, upstream_index):
                 c_files.append((fn_lib, fn_up))
             continue
         # No C upstream. Count a member's asm TU only here: a member with a C mirror
-        # is a C-mirror pack-split target (the pack hazard's basenames), not an asm-vendor
-        # TU — ultralib may ship a .s variant (e.g. gu translate.s) the ROM doesn't use.
-        # Without this gate a C-mirror gu pack would mis-flag as asm. Name the .s in the
-        # member label so a MIXED asm+C pack reads as `bzero=bzero.s` not an opaque
-        # `bzero=?` (S65 #1: the [0x860C0] libc pack = bzero.s + string.c was unreadable).
+        # is a C-mirror pack-split target, not an asm-vendor TU (ultralib may ship a .s
+        # variant the ROM doesn't use). Name the .s in the member label so a MIXED asm+C
+        # pack reads as `bzero=bzero.s`, not an opaque `bzero=?`.
         t = asm_index.get(fn)
         if t:
             members.append(f"{fn}={os.path.basename(t)}")
@@ -2138,69 +2136,56 @@ def _classify_pack_hazards(off, fns, upstream_index):
         else:
             members.append(f"{fn}=?")
     # A pack whose every member resolves to ONE upstream C file is NOT a split-required
-    # blocker — it is an atomic verbatim mirror (guPerspectiveF+guPerspective S55,
-    # guLookAtHiliteF+guLookAtHilite S64, guTranslateF+guTranslate S67), banked or spiked
-    # in one shot. Tag it `single-file-pack` (informational, → #upstream-mirror-pattern) so
-    # the gate stops reading it as the multi-file `pack` that needs an upstream-file split
-    # (S67 #2). The pts seed is unchanged (seed_points keys the pack penalty on nfns>1, not
-    # the kind), so this is display-only. A MIXED asm+C or multi-stem pack keeps `pack`.
+    # blocker — it is an atomic verbatim mirror (the gu F-variant + wrapper idiom), banked
+    # or spiked in one shot. Tag it `single-file-pack` so the gate stops reading it as the
+    # multi-file `pack` that needs an upstream-file split. Display-only (the pts seed keys the
+    # pack penalty on nfns>1, not the kind). A MIXED asm+C or multi-stem pack keeps `pack`.
     single_file = c_members == len(fns) and len(c_stems) == 1
-    # S68 #3: a pack with unnamed (`func_<addr>`) member(s) still atomic-mirrors when its
-    # one named C stem's upstream file defines exactly len(fns) functions — the unnamed
-    # members are that file's other functions (the gu F-variant + s16-wrapper idiom:
-    # guAlignF named + func_800A794C = guAlign, both in align.c). Without this an unnamed
-    # wrapper mislabels the pack as the multi-file `pack` that needs an upstream-file split.
+    # A pack with unnamed (`func_<addr>`) member(s) still atomic-mirrors when its one named C
+    # stem's upstream file defines exactly len(fns) functions — the unnamed members are that
+    # file's other functions (e.g. guAlignF named + an unnamed guAlign, both in align.c).
     # Conservative: one named stem + an exact function-count match; else falls back to pack.
     if not single_file and len(c_stems) == 1 and 1 <= c_members < len(fns):
         if _upstream_file_func_count(*c_files[0]) == len(fns):
             single_file = True
     pack_kind = HAZARD_SINGLE_FILE_PACK if single_file else HAZARD_PACK
     hz.append(Hazard(pack_kind, f"{len(fns)}fn[" + ",".join(members) + "]"))
-    # S104: one named C stem but the pack has MORE fns than that .c defines → the surplus
-    # members are a FOREIGN TU bundled in the subseg (xprintf's func_800B1580, a separate
-    # __osDpDeviceBusy TU; xprintf.c defines 2, the pack has 3). Flag it so the gate splits the
-    # foreign TU off and mirrors only the upstream's fns, instead of attempting a whole-pack
-    # atomic mirror. The named-symbol analog of coddog-fncount-mismatch. Guard `c_members <=
-    # fc` (the named members must fit the file's defs, else the attribution itself is suspect);
-    # `not single_file` (an exact-count single-file pack is fine). Advisory (display-only).
+    # One named C stem but the pack has MORE fns than that .c defines → the surplus members
+    # are a FOREIGN TU bundled in the subseg (split it off, mirror only the upstream's fns).
+    # The named-symbol analog of coddog-fncount-mismatch. Guard `c_members <= fc` (the named
+    # members must fit the file's defs, else the attribution is suspect) and `not single_file`.
+    # Advisory (display-only).
     if not single_file and len(c_stems) == 1 and c_members:
         fc = _upstream_file_func_count(*c_files[0])
         if fc and len(fns) > fc and c_members <= fc:
             hz.append(Hazard(HAZARD_UPSTREAM_FNCOUNT_MISMATCH, f"{len(fns)}vs{fc}"))
-    # S88 one-tu: if EVERY inner fn boundary is non-16-aligned, the pack is ONE .o (the
-    # linker 16-aligns each .o's .text start, so a 2nd .o would begin on a 16 boundary).
-    # Confirms a single-file-pack structurally even when members are un-named (the
-    # coddog-mirror case, where the named-stem single_file test can't fire), and marks a
-    # per-fn decompose split as mechanically blocked (S51 non16align). Sufficient, not
-    # necessary: a one-.o pack with a 16-multiple-sized member won't fire (conservative).
+    # one-tu: if EVERY inner fn boundary is non-16-aligned, the pack is ONE .o (the linker
+    # 16-aligns each .o's .text start, so a 2nd .o would begin on a 16 boundary). Confirms a
+    # single-file-pack structurally even when members are un-named (the coddog-mirror case),
+    # and marks a per-fn decompose split as mechanically blocked. Sufficient, not necessary:
+    # a one-.o pack with a 16-multiple-sized member won't fire (conservative).
     addrs = [a for _, a in asm_function_addrs(off)]
     if len(addrs) == len(fns) and all(a % 16 != 0 for a in addrs[1:]):
         hz.append(Hazard(HAZARD_ONE_TU))
-    # C analog of combined-subseg (S64 #3): ≥2 *distinct* C upstream files share one asm
-    # subseg → a multi-file C-mirror pack the gate splits at the upstream-file boundary, then
-    # mirrors each verbatim. The pack basenames already encode this, but a big combined subseg
-    # (e.g. 0x82B80 = align.c + cosf.c + lookat.c, 3072B) ranks by its WHOLE size and buries a
-    # cheap clean leaf (cosf, a zero-callee gu/cosf.c mirror) past smallest-first; surfacing
-    # `c-combined:Nfile[…]` prices the split + names the leaves so the gate evaluates them
-    # without hand-disassembling asm/<rom>.s. A single-file pack (guPerspectiveF+guPerspective,
-    # both = perspective) has one stem → does NOT fire.
+    # C analog of combined-subseg: ≥2 *distinct* C upstream files share one asm subseg → a
+    # multi-file C-mirror pack the gate splits at the upstream-file boundary, then mirrors each
+    # verbatim. A big combined subseg ranks by its WHOLE size and buries a cheap clean leaf past
+    # smallest-first; surfacing `c-combined:Nfile[…]` prices the split + names the leaves. A
+    # single-file pack has one stem → does NOT fire.
     if len(c_stems) > 1:
         hz.append(Hazard(HAZARD_C_COMBINED,
                               f"{len(c_stems)}file[" + "|".join(sorted(c_stems)) + "]"))
-    # Combined-subseg sub-pattern: ≥2 asm-ONLY members from *distinct* vendorable ultralib
-    # .s files (the asm analog of a multi-file C pack). The gate must split the subseg at
-    # the TU boundary, then vendor each .s verbatim (S62 invaldcache|invalicache). Surfacing
-    # it here prices the split before hand-disassembling asm/<rom>.s. A pack whose asm
-    # members share one .s (a partial-TU split, e.g. __osDisableInt/__osRestoreInt in
-    # setintmask.s) has a single distinct TU → does NOT fire (different, harder hazard).
+    # Combined-subseg sub-pattern: ≥2 asm-ONLY members from *distinct* vendorable ultralib .s
+    # files (the asm analog of a multi-file C pack). The gate splits the subseg at the TU
+    # boundary, then vendors each .s verbatim. A pack whose asm members share one .s (a
+    # partial-TU split) has a single distinct TU → does NOT fire (different, harder hazard).
     if len(asm_tus) > 1:
         bn = "|".join(sorted(os.path.basename(t) for t in asm_tus))
         detail = f"{len(asm_tus)}tu[{bn}]"
-        # Price the needs-define enabler for the split the same way the intrinsic-likely
-        # path does (S63 #1): a vendorable .s in the pack may reference an UPPER_CASE asm
-        # macro the in-tree `-I` headers lack (setfpccsr.s → CFC1/CTC1), and the gate must
-        # vendor it before the split, not discover it at a failing vendor-compile. Union
-        # the misses across the pack's TUs so one (needs-define:…) prices the whole split.
+        # Price the needs-define enabler for the split the same way the intrinsic-likely path
+        # does: a vendorable .s may reference an UPPER_CASE asm macro the in-tree `-I` headers
+        # lack (e.g. setfpccsr.s → CFC1/CTC1), and the gate must vendor it before the split.
+        # Union the misses across the pack's TUs so one (needs-define:…) prices the whole split.
         miss = sorted({m for t in asm_tus for m in vendorable_tu_missing_defines(t)})
         if miss:
             detail = f"{detail}(needs-define:{','.join(miss)})"
@@ -2216,7 +2201,7 @@ def _classify_asm_mirror_hazards(off, fns, upstream_index):
     # Hand-asm detection → asm-mirror candidate, not a classical target. Two cases collapse
     # here: a *pure* register/FPU shim (intrinsic_likely) and a privileged TU that does real
     # work around an op C can't emit (privileged_asm: a tlbwi/mtc0/eret with branches+loads or
-    # calls — osMapTLB/osUnmapTLB, exception dispatch; S70 #1). Both vendor verbatim from the
+    # calls — osMapTLB/osUnmapTLB, exception dispatch). Both vendor verbatim from the
     # ultralib .s (docs/hazards.md#asm-mirror-vendoring).
     prim_intrinsic = intrinsic_likely(off, fns[0])
     prim_privileged = privileged_asm(off, fns[0])
@@ -2232,41 +2217,38 @@ def _classify_asm_mirror_hazards(off, fns, upstream_index):
             miss = vendorable_tu_missing_defines(rel)
             if miss:
                 detail = f"{detail}(needs-define:{','.join(miss)})"
-            # S84 #3: a vendorable .s with a non-.text section can't be a clean .text-only cp —
+            # A vendorable .s with a non-.text section can't be a clean .text-only cp —
             # pre-flag the strip+rename enabler (docs/hazards.md#asm-mirror-vendoring).
             data_syms = vendorable_tu_data_symbols(rel)
             if data_syms:
                 detail = f"{detail}(has-rodata:{','.join(data_syms)})"
-            # S91 #2 / S107: a SYMBOLIC-pointer table in the active data section (a switch jtbl /
-            # fn-ptr table) needs the LABEL-EXPORT procedure on top of the S84 strip-and-rename
-            # (NOT a spike — proven S107 exceptasm). The table extracts to a separate, already-
-            # address-placed blob that keeps symbolic .word .L<addr> refs after the flip; vendor
-            # .text-only and RE-EXPORT those .L<addr> labels in the vendored .text so the blob
-            # resolves. Flag it so the gate runs the label-export procedure, not a bare has-rodata
-            # replay (see docs/hazards.md#asm-mirror-vendoring, the asm-mirror-jtbl sub-case).
+            # A SYMBOLIC-pointer table in the active data section (a switch jtbl / fn-ptr table)
+            # needs the LABEL-EXPORT procedure on top of the strip-and-rename. The table extracts
+            # to a separate, already-address-placed blob that keeps symbolic .word .L<addr> refs
+            # after the flip; vendor .text-only and RE-EXPORT those .L<addr> labels in the vendored
+            # .text so the blob resolves. Flag it so the gate runs the label-export procedure, not
+            # a bare has-rodata replay (docs/hazards.md#asm-mirror-vendoring, the asm-mirror-jtbl case).
             jtbls = vendorable_tu_jtbl(rel)
             if jtbls:
                 detail = f"{detail}(asm-mirror-jtbl:{','.join(jtbls)})"
         elif prim_privileged:
             # An un-named func_<addr> with a privileged op: the name can't resolve the TU, but
             # the privileged op proves a vendorable ultralib source exists. Tag it cp0-asm so the
-            # gate identifies + vendors it (a single MCP disasm names it by its CP0/TLB signature
-            # — osMapTLB/osUnmapTLB), instead of reading the BARE intrinsic-likely as a no-source
-            # shim and parking it (the 14-sprint carry-over this retires).
+            # gate identifies + vendors it (a single MCP disasm names it by its CP0/TLB signature),
+            # instead of reading the BARE intrinsic-likely as a no-source shim and parking it.
             detail = "cp0-asm(identify-TU)"
         else:
             detail = None  # genuine no-source shim (handwritten leaf, no privileged op, no TU)
         hz.append(Hazard(HAZARD_INTRINSIC_LIKELY, detail))
     else:
-        # S109: a libkmc soft-float / 64-bit math TU the pure-shim + privileged tests both miss
-        # (a branchy cvt routine like mcvtld.s __fixunsdfdi/__floatdidf — no CP0/FPU-ctrl op, no
-        # `handwritten` tag) is STILL a verbatim KMC-as asm-mirror, not a classical decomp target.
-        # If the primary matches a libkmc .s `.globl` AND the subseg has no C upstream, name the
-        # .s + the kmc-as mechanism so the gate vendors it via the KMC `as` path (KMC register
-        # conventions, `.include "mips_as.h"` via -I src/libkmc, `li 0xffffffff`->`addiu` edit),
-        # not LIBULTRA_ASFLAGS. The `not in upstream_index` guard excludes the C-mirrorable libkmc
-        # files (memset/strcmp/rand resolve via the C upstream index), leaving only the asm-ONLY
-        # TUs (mmuldi3/mcvtld/mcvt*). See docs/hazards.md#asm-mirror-vendoring (kmc-as sub-lane).
+        # A libkmc soft-float / 64-bit math TU the pure-shim + privileged tests both miss (a
+        # branchy cvt routine like mcvtld.s, no CP0/FPU-ctrl op, no `handwritten` tag) is STILL a
+        # verbatim KMC-as asm-mirror, not a classical decomp target. If the primary matches a
+        # libkmc .s `.globl` AND the subseg has no C upstream, name the .s + the kmc-as mechanism
+        # so the gate vendors it via the KMC `as` path (`.include "mips_as.h"` via -I src/libkmc,
+        # the `li 0xffffffff`->`addiu` edit), not LIBULTRA_ASFLAGS. The `not in upstream_index`
+        # guard excludes the C-mirrorable libkmc files, leaving only the asm-ONLY TUs.
+        # See docs/hazards.md#asm-mirror-vendoring (kmc-as sub-lane).
         kmc_tu = build_kmc_asm_tu_index().get(fns[0])
         if kmc_tu and fns[0] not in upstream_index:
             hz.append(Hazard(HAZARD_INTRINSIC_LIKELY, f"{kmc_tu}(kmc-as)"))
@@ -2284,7 +2266,7 @@ def classify_subseg(off, typ, path, size, upstream_index):
         fns = asm_functions(off)
         if not fns:
             return None
-        # Skip a pure-nop pad subseg (S79): a trailing-alignment pad split off as its own `[..,asm]`
+        # Skip a pure-nop pad subseg: a trailing-alignment pad split off as its own `[..,asm]`
         # subseg (the trailing-pad remedy below) carries a splat glabel but is 0x00000000 nops only —
         # never a decomp target. `subseg_vram` non-None (listing present) + `code_end_rom` None (no
         # non-nop instruction) is the all-nop signature; a real fn always has a non-nop body.
@@ -2293,7 +2275,7 @@ def classify_subseg(off, typ, path, size, upstream_index):
         hazards = []
         if size and size % 16 != 0:
             hazards.append(Hazard(HAZARD_NON16ALIGN))
-        # Trailing-alignment pad (S79): splat extracts the whole subseg slot (function + the nop
+        # Trailing-alignment pad: splat extracts the whole subseg slot (function + the nop
         # padding up to the next, higher-aligned subseg). A flipped C mirror's compiler only
         # 16-aligns its `.text`, so a pad beyond that 16B fill is dropped → ROM short → SHA-miss
         # in the execution middle, invisible to the gate (the INCLUDE_ASM stub carries the pad).
@@ -2309,10 +2291,10 @@ def classify_subseg(off, typ, path, size, upstream_index):
             next_vram = subseg_vram(off)
             align = (next_vram + size) & -(next_vram + size) if next_vram else 0
             # Require the next boundary to be aligned ABOVE 16: that is the exact condition GCC's
-            # own 16-align can't fill (contramwrite → 128-aligned osAfterPreNMI). A residual at a
-            # merely-16-aligned boundary is the delay-slot-nop measurement artifact (code_end stops
-            # at the last non-nop, undercounting a real `jr ra; nop` tail by one 16-step) — GCC
-            # 16-aligns past it anyway, so excluding align<=16 removes that false fire.
+            # own 16-align can't fill. A residual at a merely-16-aligned boundary is the
+            # delay-slot-nop measurement artifact (code_end stops at the last non-nop, undercounting
+            # a real `jr ra; nop` tail by one 16-step) — GCC 16-aligns past it anyway, so excluding
+            # align<=16 removes that false fire.
             if residual >= 16 and align > 16:
                 hazards.append(Hazard(HAZARD_TRAILING_PAD, f"{residual}B@{align}"))
         if len(fns) > 1:
@@ -2520,21 +2502,21 @@ def _append_header_version_hazards(off, primary, up_path, up_lib, hazards):
     if stale:
         # A version-conditional fn silently dropped: os_version.h resolves but is a stripped revision
         # missing the referenced VERSION_* constant. A one-time additive header-content vendor, not a
-        # block — keep it off `blocked` (it does not gate the DoR, only warns the gate). S60.
+        # block — keep it off `blocked` (it does not gate the DoR, only warns the gate).
         hazards.append(Hazard(HAZARD_STALE_HEADER, "os_version.h(" + ",".join(stale) + ")"))
     gating = function_gating_define(up_path, primary)
     if gating and gating not in _active_defines_for_lib(up_lib):
         hazards.append(Hazard(HAZARD_NEEDS_DEFINE, gating))
     gbi_def = gbi_value_guard_needs_define(up_path, up_lib)
     if gbi_def:
-        hazards.append(Hazard(HAZARD_NEEDS_DEFINE, gbi_def))  # GBI-value-guarded macro (S83 OS_YIELD_DATA_SIZE)
+        hazards.append(Hazard(HAZARD_NEEDS_DEFINE, gbi_def))  # GBI-value-guarded macro (e.g. OS_YIELD_DATA_SIZE)
     divergence = call_divergence(off, primary, up_path, up_lib)
     if divergence:
         hazards.append(divergence)  # near-verbatim mirror: reconcile call list at the gate
     ren = header_renames_symbol(up_path, primary)
-    if ren and _upstream_defines_function(up_path, primary):  # S102: skip macro-alias false fire
-        hazards.append(Hazard(HAZARD_HEADER_RENAMES_SYMBOL, f"{primary}@{ren}"))  # needs #undef (S85)
-    elif ren:  # S102: primary is a macro alias for a DIFFERENT upstream symbol → wrong ghidra name
+    if ren and _upstream_defines_function(up_path, primary):  # skip macro-alias false fire
+        hazards.append(Hazard(HAZARD_HEADER_RENAMES_SYMBOL, f"{primary}@{ren}"))  # needs #undef
+    elif ren:  # primary is a macro alias for a DIFFERENT upstream symbol → wrong ghidra name
         tgt = _macro_alias_target(up_path, primary)
         if tgt and _upstream_defines_function(up_path, tgt):
             hazards.append(Hazard(HAZARD_WRONG_GHIDRA_NAME, f"{primary}->{tgt}@{ren}"))
@@ -2545,46 +2527,44 @@ def _append_rodata_carve_hazards(off, up_path, hazards):
     """Append the rodata-literal sibling-carve + data-static recover hazards for an upstream
     candidate (in place). Returns (rodata_lits, data_statics) for the twin-of section that
     follows."""
-    # Anonymous `%lo(D_<addr>)` constant loads split into two enablers by segment (S52):
+    # Anonymous `%lo(D_<addr>)` constant loads split into two enablers by segment:
     #   - code-segment `.rodata` → compiler-pooled literal the mirror re-emits → a `.rodata` sibling
-    #     split at finalize (docs/hazards.md#rodata-sibling-yaml-pattern, S38/S48).
+    #     split at finalize (docs/hazards.md#rodata-sibling-yaml-pattern).
     #   - data segment → a function-local `static` the mirror re-emits → recover-extern + drop the
-    #     static to a file-scope `extern` (docs/hazards.md#defines-data, S49 fast path).
+    #     static to a file-scope `extern` (docs/hazards.md#defines-data).
     # The FP-only scan (ldc1/lwc1) seeds both; integer `lw` refs that land in the rodata band add the
     # companion words of a pooled `double` (GCC's `lw` pair + `mtc1`) so the sibling-split extent is
     # sized in full, not just its first word. `lw` refs in the data segment are ordinary data refs
     # (refs-unplaced/defines-data already cover them) and are dropped here. Both scans span the whole
-    # subseg (every pack function), since the `.rodata` sibling places the whole object's `.rodata`
-    # (S55: guPerspective's pooled doubles, missed by the old per-primary scan).
+    # subseg (every pack function), since the `.rodata` sibling places the whole object's `.rodata`.
     rodata_lits, data_statics = [], []
     for a in rodata_literals(off):
         (rodata_lits if _literal_in_rodata(a, off) else data_statics).append(a)
     for a in rodata_word_refs(off):
         if _literal_in_rodata(a, off) and a not in rodata_lits:
             rodata_lits.append(a)
-    # Carve-start widening (S93): the FP-literal/lw scans see only scalar `%lo` loads, so
-    # min(rodata_lits) under-states a rodata block that opens with a file-scope `static const` array
-    # base (an `addiu %lo` address-of, missed by both scans) or string literals. When the upstream
-    # defines such a file-PRIVATE const array, the whole code-segment rodata subseg is this object's
-    # own → widen the carve-start to the subseg boundary. (The direct `addiu %lo` scan was reverted
-    # S92 for cross-file FP in .data; the `static const` source gate keeps this rodata-only widening
-    # FP-safe.) xldtob.c: pows[] dlabel 0x800D27D0 is 0x50 B below the FP scan's 0x800D2820 min.
+    # Carve-start widening: the FP-literal/lw scans see only scalar `%lo` loads, so min(rodata_lits)
+    # under-states a rodata block that opens with a file-scope `static const` array base (an
+    # `addiu %lo` address-of, missed by both scans) or string literals. When the upstream defines such
+    # a file-PRIVATE const array, the whole code-segment rodata subseg is this object's own → widen
+    # the carve-start to the subseg boundary. The `static const` source gate keeps it FP-safe (a bare
+    # `addiu %lo` scan false-fires on cross-file .data).
     if rodata_lits and defines_file_static_const_array(up_path):
         start = _rodata_carve_start_vram(off, min(rodata_lits))
         if start is not None and start < min(rodata_lits):
             rodata_lits.append(start)
     if rodata_lits:
-        # Pre-note the full vram extent as a DoR enabler so it is not a finalize-time SHA-miss (S48).
+        # Pre-note the full vram extent as a DoR enabler so it is not a finalize-time SHA-miss.
         detail = ",".join(f"0x{a:08X}" for a in sorted(rodata_lits))
-        # Append the carve-end boundary (S64 #2): the sibling-split runs to the next `.rodata`
-        # subseg boundary, which can exceed the last `%lo`-referenced literal (a multi-`du` dlabel
-        # block's trailing word has no ref of its own).
+        # Append the carve-end boundary: the sibling-split runs to the next `.rodata` subseg
+        # boundary, which can exceed the last `%lo`-referenced literal (a multi-`du` dlabel block's
+        # trailing word has no ref of its own).
         end = _rodata_carve_end_vram(off, max(rodata_lits))
         if end and end > max(rodata_lits):
             detail += f";carve-end=0x{end:08X}"
         hazards.append(Hazard(HAZARD_RODATA_LITERAL, detail))
     if data_statics:
-        # A function-local static the mirror must drop to a file-scope extern + recover (S49).
+        # A function-local static the mirror must drop to a file-scope extern + recover.
         hazards.append(Hazard(HAZARD_DATA_STATIC, ",".join(f"0x{a:08X}" for a in sorted(data_statics))))
     return rodata_lits, data_statics
 
@@ -2759,10 +2739,10 @@ def _build_row(off, typ, path, size, args, upstream_index, carried, sig_index,
         return None
     kind, fns, hazards = classified
 
-    # S77: an un-named `func_<vram>` member a banked C file calls by name will be EVICTED when
-    # the gate adds its curated symbol (splat renames it → the caller's hard-coded name fails to
-    # link). Flag the caller so the one-line rename fixup is priced at the gate, not discovered
-    # as a build-check link error. Display-only (seed_points ignores this kind).
+    # An un-named `func_<vram>` member a banked C file calls by name will be EVICTED when the gate
+    # adds its curated symbol (splat renames it → the caller's hard-coded name fails to link). Flag
+    # the caller so the one-line rename fixup is priced at the gate, not discovered as a build-check
+    # link error. Display-only (seed_points ignores this kind).
     _callers = src_func_callers()
     _evicts = [f"{fn}@{','.join(_callers[fn])}" for fn in fns
                if fn.startswith("func_") and fn in _callers]
@@ -2787,14 +2767,11 @@ def _build_row(off, typ, path, size, args, upstream_index, carried, sig_index,
             # C-only append_upstream_hazards) — the asm-mirror-vendoring route, not a C mirror.
             up_lib = "libultra"
         elif primary.startswith("func_"):
-            # No name-index hit + un-named: it may still be an un-named SDK mirror (the S13
-            # trap). Run the signature matcher; an advisory hit flags the gate to verify.
-            # S75: but skip it when coddog already holds a definitive (>=CODDOG_MIRROR_PCT,
-            # non-audio) identity for this fn — the maybe-upstream IDF guess is then redundant
-            # noise that can point at the WRONG file (S75 func_800A7190 carried both
-            # coddog-mirror:src/io/contquery.c@99.99 AND a mis-pointed
-            # maybe-upstream:libultra:voicesetadconverter,...). Let the coddog hit (appended
-            # below) stand as the sole upstream signal.
+            # No name-index hit + un-named: it may still be an un-named SDK mirror. Run the
+            # signature matcher; an advisory hit flags the gate to verify. But skip it when coddog
+            # already holds a definitive (>=CODDOG_MIRROR_PCT, non-audio) identity for this fn — the
+            # maybe-upstream IDF guess is then redundant noise that can point at the WRONG file. Let
+            # the coddog hit (appended below) stand as the sole upstream signal.
             cod = coddog_index.get(primary)
             cod_definitive = bool(cod) and cod[1] >= CODDOG_MIRROR_PCT \
                 and not cod[0].startswith("src/audio")
@@ -2803,56 +2780,46 @@ def _build_row(off, typ, path, size, args, upstream_index, carried, sig_index,
                 if hint:
                     hazards.append(hint)
 
-    # S71 coddog cross-ref: a candidate coddog matched to an ultralib fn but that the C-name
-    # index missed (un-named / `none`) is a verbatim-mirror target mis-seen as classical. Flag
-    # the match always; re-price a ≥CODDOG_MIRROR_PCT *non-audio* hit as a libultra mirror so
-    # `seed_points` drops it off the `classical and pack` -> 13 path (crc.c: pts-13 -> 3). Audio
-    # hits stay advisory (they still need the one-time audio-header enabler, not modeled here).
+    # coddog cross-ref: a candidate coddog matched to an ultralib fn but that the C-name index
+    # missed (un-named / `none`) is a verbatim-mirror target mis-seen as classical. Flag the match
+    # always; re-price a ≥CODDOG_MIRROR_PCT *non-audio* hit as a libultra mirror so `seed_points`
+    # drops it off the `classical and pack` -> 13 path. Audio hits stay advisory (they still need the
+    # one-time audio-header enabler, not modeled here).
     if not up_path and primary in coddog_index:
         cfile, cpct = coddog_index[primary]
         hazards.append(Hazard.coddog_mirror(cfile, cpct))
         _append_coddog_twin_hazard(cfile, fns, upstream_index, hazards)
         if up_lib is None and cpct >= CODDOG_MIRROR_PCT and not cfile.startswith("src/audio"):
             up_lib = "libultra"
-        # S72: the coddog-resolved upstream is a real `.c`, but its trap detectors never ran.
-        # An un-named (`func_<addr>`) subseg's defines-data / file-static / needs-header key off
-        # the *named* upstream (absent here), so a verbatim-mirror candidate that DEFINES data or
-        # a file-scope static looked clean under the bare coddog flag. Re-run the three file-level
-        # (name-independent) detectors on the resolved `.c` so the gate prices the trap — and
-        # seed_points re-prices it (drop/needs_copy) — instead of a mid-sprint BSS-layout stall.
-        # Motivating case: `func_800AC110 → piacs.c` (pts-3 "clean") DEFINES __osPiAccessQueueEnabled
-        # + `static OSMesg piAccessBuf[]` → defines-data + file-static, a route-to-classical trap.
-        # S72/S74: re-run the file-level trap battery (file-static, defines-data, needs-header)
-        # AND union refs/calls-unplaced over the coddog-resolved upstream — the un-named `func_`
-        # blocked the named-keyed scan in append_upstream_hazards, so a coddog mirror's traps +
-        # recover-extern load were invisible at the gate (S74 contreaddata: 3 SI callees + 3 data
-        # globals). Shared with the S78 tail-identity block via _append_coddog_trap_hazards.
+        # The coddog-resolved upstream is a real `.c`, but its trap detectors never ran: an un-named
+        # (`func_<addr>`) subseg's defines-data / file-static / needs-header key off the *named*
+        # upstream (absent here), so a verbatim-mirror candidate that DEFINES data or a file-scope
+        # static looked clean under the bare coddog flag. Re-run the file-level trap battery
+        # (file-static, defines-data, needs-header) AND union refs/calls-unplaced over the
+        # coddog-resolved upstream so the gate prices the trap — and seed_points re-prices it
+        # (drop/needs_copy) — instead of a mid-sprint BSS-layout stall. Shared with the tail-identity
+        # block below via _append_coddog_trap_hazards.
         cl_path = _coddog_upstream_path(cfile)
         if cl_path:
             mirror_path = cl_path  # the confirmed coddog identity is the file we mirror + count
             blocked = _append_coddog_trap_hazards(off, primary, cl_path, up_lib, hazards) or blocked
-            # S88: a coddog hit on a multi-fn pack can be a STRUCTURAL fingerprint match, not a
-            # source attribution — settime.c (1 fn) coddog-matched the 6fn os pack [0x526B0]
-            # (settime's `__osCurrentTime = time` is structurally a sub-shape of a timer fn).
-            # If the matched file defines FEWER fns than the pack holds, it cannot be the sole
-            # source → the pack is multi-file; flag so the gate doesn't read it as a
-            # single-file-pack mirror. Under-count direction ONLY: a true single source may
-            # define MORE (version/_DEBUG-gated extras — contpfs.c 9 raw vs 7 ROM fns), which is
-            # fine, so `matched > nfns` is never flagged (would false-fire on contpfs).
+            # A coddog hit on a multi-fn pack can be a STRUCTURAL fingerprint match, not a source
+            # attribution. If the matched file defines FEWER fns than the pack holds, it cannot be
+            # the sole source → the pack is multi-file; flag so the gate doesn't read it as a
+            # single-file-pack mirror. Under-count direction ONLY: a true single source may define
+            # MORE (version/_DEBUG-gated extras), so `matched > nfns` is never flagged.
             if len(fns) > 1:
                 matched_n = _upstream_file_func_count(up_lib or "libultra", cl_path)
                 if 0 < matched_n < len(fns):
                     hazards.append(Hazard(HAZARD_CODDOG_FNCOUNT_MISMATCH,
                                           f"{matched_n}vs{len(fns)}"))
 
-    # S78: a multi-fn asm subseg's mirror IDENTITY often lives in its UN-NAMED tail, not its
-    # named (or mis-attributed) leader. The S71 block above keys coddog on `primary` AND fires
-    # only when `not up_path`, so a named-leader subseg whose tail `func_<addr>` members coddog-
-    # match an ultralib `.c` was invisible (S76 devmgr; S78 gbpaksetbank+pfsisplug @0x8CE90: leader
-    # __osGbpakSetBank is named AND mis-attributed to gbpakreadwrite.c via a forward prototype, so
-    # its tail func_800B1B50→pfsisplug.c carried the real identity). Scan ALL members; surface each
-    # distinct coddog `.c` identity the primary block did not already flag, and label the subseg
-    # libultra so seed_points + the column price it as the mirror it is.
+    # A multi-fn asm subseg's mirror IDENTITY often lives in its UN-NAMED tail, not its named (or
+    # mis-attributed) leader. The primary block above keys coddog on `primary` AND fires only when
+    # `not up_path`, so a named-leader subseg whose tail `func_<addr>` members coddog-match an
+    # ultralib `.c` was invisible. Scan ALL members; surface each distinct coddog `.c` identity the
+    # primary block did not already flag, and label the subseg libultra so seed_points + the column
+    # price it as the mirror it is.
     cod_members = [(fn, coddog_index[fn][0], coddog_index[fn][1]) for fn in fns
                    if fn in coddog_index and coddog_index[fn][1] >= CODDOG_MIRROR_PCT
                    and not coddog_index[fn][0].startswith("src/audio")]
@@ -2864,22 +2831,19 @@ def _build_row(off, typ, path, size, args, upstream_index, carried, sig_index,
             cpct = max(p for _, c, p in cod_members if c == cfile)
             hazards.append(Hazard.coddog_mirror(cfile, cpct))
             _append_coddog_twin_hazard(cfile, fns, upstream_index, hazards)
-            # S80: surface the tail-identity file's traps too. The S72 block above keys on the
-            # primary, so a coddog hit carried by an un-named TAIL member (initialize.c's hit is
-            # on the sibling `create_speed_param`, not leader `__osInitialize_common`) reached
-            # here with only the bare coddog flag — its defines-data `.data` carve / file-static
-            # went un-priced. `already` excludes the primary's cfile, so no double-scan.
+            # Surface the tail-identity file's traps too. The primary block above keys on the
+            # primary, so a coddog hit carried by an un-named TAIL member reached here with only the
+            # bare coddog flag — its defines-data `.data` carve / file-static went un-priced.
+            # `already` excludes the primary's cfile, so no double-scan.
             cl_path = _coddog_upstream_path(cfile)
             if cl_path:
                 mirror_path = cl_path or mirror_path  # the coddog identity is the real mirror source
                 blocked = _append_coddog_trap_hazards(off, primary, cl_path, up_lib, hazards) or blocked
-        # S92: the under-count fncount-mismatch + the structural size-ratio guards run in the
-        # PRIMARY coddog block (above) only when the identity is on `primary`. When the WHOLE
-        # pack resolves to ONE coddog .c via a TAIL member (func_80050400's leader is not in
-        # coddog_index; a tail member carries llcvt.c — 8 trivial `return d;` stubs, ~250B — yet
-        # the subseg is 2032B/11fn, and coddog matched that same llcvt.c to THREE subsegs),
-        # neither guard ran, so the phantom surfaced as a clean single-source mirror. Re-run both
-        # here when the pack has exactly one coddog identity (dedup the fncount flag w/ primary).
+        # The under-count fncount-mismatch + structural size-ratio guards run in the PRIMARY coddog
+        # block (above) only when the identity is on `primary`. When the WHOLE pack resolves to ONE
+        # coddog .c via a TAIL member, neither guard ran, so the phantom surfaced as a clean
+        # single-source mirror. Re-run both here when the pack has exactly one coddog identity (dedup
+        # the fncount flag w/ primary).
         distinct = sorted({c for _, c, _ in cod_members})
         if len(fns) > 1 and len(distinct) == 1:
             cl1 = _coddog_upstream_path(distinct[0])
@@ -2893,11 +2857,10 @@ def _build_row(off, typ, path, size, args, upstream_index, carried, sig_index,
                 if loc and size > CODDOG_STRUCTURAL_BYTES_PER_LOC * loc:
                     cpct = max(p for _, c, p in cod_members if c == distinct[0])
                     hazards.append(Hazard(HAZARD_CODDOG_STRUCTURAL, f"{distinct[0]}@{cpct:.2f}"))
-        # S103: ≥2 DISTINCT per-fn TWIN files matched to ONE multi-fn subseg, covering only a
-        # SUBSET of its fns → a per-fn fingerprint set, NOT a single-file mirror (func_800660A0:
-        # mtxidentf.c + mtxl2f.c @100 = 2 of 12 fns; the combined mtxutil.c source has guMtxF2L
-        # (clamp) + guMtxIdent (inline) diverging). The multi-twin companion to the len==1-only
-        # coddog-fncount-mismatch. Advisory: per-fn verify, do NOT read it as a clean mirror.
+        # ≥2 DISTINCT per-fn TWIN files matched to ONE multi-fn subseg, covering only a SUBSET of its
+        # fns → a per-fn fingerprint set, NOT a single-file mirror (the un-matched fns diverge from
+        # the combined source). The multi-twin companion to the len==1-only coddog-fncount-mismatch.
+        # Advisory: per-fn verify, do NOT read it as a clean mirror.
         twin_files = {h.twin_file()
                       for h in hazards if h.kind == HAZARD_CODDOG_TWIN}
         if len(distinct) >= 2 and len(twin_files) >= 2 and len(cod_members) < len(fns):
@@ -2905,23 +2868,21 @@ def _build_row(off, typ, path, size, args, upstream_index, carried, sig_index,
         if up_lib is None:
             up_lib = "libultra"
 
-    # S94: a `coddog-mirror` hazard pins the row to an ultralib(libultra) source even when
-    # up_lib stayed None — audio coddog hits are deliberately NOT re-priced to libultra (they
-    # were header-`-I`-gated, S71), so a clean audio mirror like auxbus.c surfaced as
-    # `upstream none` and `--lib libultra` skipped it (the S55 "--lib is misleading" caveat,
-    # which cost a by-coddog-column manual survey at the S94 gate). The coddog map IS the
-    # ultralib sweep, so any coddog-mirror match means libultra; also honor a sub-path scope
-    # (e.g. `--lib audio` -> src/audio/...) via the matched-source path substring.
+    # A `coddog-mirror` hazard pins the row to an ultralib(libultra) source even when up_lib stayed
+    # None — audio coddog hits are deliberately NOT re-priced to libultra (they were header-`-I`-
+    # gated), so a clean audio mirror surfaced as `upstream none` and `--lib libultra` skipped it.
+    # The coddog map IS the ultralib sweep, so any coddog-mirror match means libultra; also honor a
+    # sub-path scope (e.g. `--lib audio` -> src/audio/...) via the matched-source path substring.
     cod_srcs = [h.coddog_source() for h in hazards
                 if h.kind == HAZARD_CODDOG_MIRROR]
-    # S96: flag a coddog match to an already-banked source as structural (advisory) — its mirror
-    # is fully decompiled, so the hit is a fingerprint coincidence, not a fresh attribution.
+    # Flag a coddog match to an already-banked source as structural (advisory) — its mirror is fully
+    # decompiled, so the hit is a fingerprint coincidence, not a fresh attribution.
     for s in sorted({c for c in cod_srcs if _coddog_source_banked(c)}):
         hazards.append(Hazard(HAZARD_CODDOG_SOURCE_BANKED, os.path.basename(s)))
-    # S103: a libultra-source mirror whose vram is BELOW the libultra code band is game-linked
-    # at -O2, not -O3 — route it to a -O2 path (src/mgu/…), NOT src/libultra/ (which forces -O3 →
-    # wrong auto-inlining; func_800660A0's mtxutil tail banked at src/mgu/). Gated on up_lib ==
-    # "libultra" (excludes audio coddog hits, which stay un-re-priced + above the band anyway).
+    # A libultra-source mirror whose vram is BELOW the libultra code band is game-linked at -O2, not
+    # -O3 — route it to a -O2 path (src/mgu/…), NOT src/libultra/ (which forces -O3 → wrong
+    # auto-inlining). Gated on up_lib == "libultra" (excludes audio coddog hits, which stay
+    # un-re-priced + above the band anyway).
     if up_lib == "libultra" and _libultra_band_start is not None and off < _libultra_band_start:
         v = subseg_vram(off)
         hazards.append(Hazard(HAZARD_GAME_REGION_MIRROR,
@@ -2932,16 +2893,15 @@ def _build_row(off, typ, path, size, args, upstream_index, carried, sig_index,
             and (up_lib or "") != args.lib and not any(args.lib in n for n in fns):
         return None
     # The `carried` filter de-ranks BACKLOG carry-overs (intentional — a parked carry-over is
-    # retrieved via --include-stuck / the BACKLOG, NOT smallest-first; S90 pimgr confirmed this is
-    # by design, not a bug). carry_over_names() is now region+symbol scoped (S90) so a prose
-    # name-drop of a still-asm function no longer silently drops it; the cod_members override is
-    # the older backstop for a definitively-coddog'd subseg whose leader was prose-mentioned
-    # (S45 `__osGbpakSetBank`-as-callee, S78 coddog-identity-wins).
+    # retrieved via --include-stuck / the BACKLOG, NOT smallest-first). carry_over_names() is
+    # region+symbol scoped so a prose name-drop of a still-asm function no longer silently drops it;
+    # the cod_members override is the backstop for a definitively-coddog'd subseg whose leader was
+    # prose-mentioned (coddog identity wins).
     if primary in carried and not args.include_stuck and not cod_members:
         return None
 
-    # S87: re-frame a coddog-confirmed pure-.bss file-static cluster as one drop-to-extern enabler
-    # (not a carve/classical spike) — appended last so it reads as the leading verdict over the
+    # Re-frame a coddog-confirmed pure-.bss file-static cluster as one drop-to-extern enabler (not a
+    # carve/classical spike) — appended last so it reads as the leading verdict over the
     # file-static/defines-data/refs-unplaced flags it summarizes.
     dsm = drop_static_mirror_hazard(mirror_path, hazards)
     if dsm:
@@ -2954,7 +2914,7 @@ def _build_row(off, typ, path, size, args, upstream_index, carried, sig_index,
 def build_rows(args, upstream_index, carried, sig_index, coddog_index=None):
     coddog_index = coddog_index or {}
     subs = parse_subsegs()
-    # S103: lowest-rom `libultra/` subseg = the start of the libultra code band. A libultra-source
+    # The lowest-rom `libultra/` subseg = the start of the libultra code band. A libultra-source
     # mirror BELOW it is game-region (-O2), not libultra-band (-O3) — feeds HAZARD_GAME_REGION_MIRROR.
     _libultra_band_start = min((o for o, _, p in subs if (p or "").startswith("libultra/")),
                                default=None)
