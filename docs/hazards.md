@@ -815,6 +815,13 @@ same compiler at the wrong level produces a byte mismatch.
 
 - **libkmc = `-O`** (per `libkmc/src/genn64.bat`), not `-O2`. At `-O` rand.c stores `next` between
   the two `addiu` ops; at `-O2` it moves to the end.
+  - **CORDIC `double↔long long` cvt helper (S112/S113).** The libkmc math mirrors (`atan.c`, `sin.c`)
+    convert `XLONG = (double)expr * MBIT` where the source double can be negative — yet KMC GCC at `-O`
+    emits **`__fixunsdfdi`** (the UNSIGNED `double→u64` helper, @0x800B3C20), never `__fixdfdi`. So a
+    libkmc CORDIC C-mirror needs only `__fixunsdfdi` + `__floatdidf` (@0x800B3D40) placed — there is no
+    signed-cvt-helper enabler to recover. Confirmed identical in both atan.c and sin.c (verify at the
+    gate by reading the subseg's jal list, never by assuming `__fixdfdi` from the C signedness). The
+    long-long shifts (`x>>i`) are inlined (no `__ashrdi3`/shift-helper jal).
 - **libultra = `-O3 -fsigned-char`** with `MIPS_VERSION=-mips3` for VERSION_J (ultralib gcc.mk —
   but see the char-signedness note). Global CFLAGS uses `-mips3` (changed from `-mips2` in S33).
   `-O3` enables inlining of small same-TU functions and affects delay-slot scheduling.

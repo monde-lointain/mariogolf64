@@ -25,6 +25,17 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 113 — bank src/libkmc/sin.c (libkmc C-mirror, near-free atan.c replay) — 2026-06-17
+- Increment: src/libkmc/sin.c banked (4 fn: _xsincos/sin/cos/tan). md5-candidate 162→163. **libkmc C-band complete** (only mmuldi3/mcvtld `hasm` remain).
+- Quality: 0/0/0/0 (stuck-far/permuter/carried/re-opened).
+- Seed: committed 13pt; banked 13pt; regime mirror (8-gate fired → verbatim-mirror exemption; seed-only). 3rd pts-13 single-file-pack exemption (S64/S69/S112/S113).
+- What helped: the S112 near-free-retry carry-over (a 5-point completeness checklist) replayed **verbatim-correct, 0 rework, 0 iteration** — the flip line, placed-ref inventory, the no-new-symbols verdict, the include adaptation, and the upstream pin were all exactly right. Shared deps pre-placed by atan.c/mcvtld (`_atbl`@0x800C9690, `__fixunsdfdi`@0x800B3C20, `__floatdidf`@0x800B3D40, cordic.h vendored). Gate-time asm disassembly (asm/8E660.s) confirmed the jal/data-ref set before the flip, so no execution-time link surprise. The rodata carve was the same exact-bound generic-subseg flip as atan's [0xADC40] (no split). The atan.c first-build match de-risked every codegen concern (long-long shift / -O fp scheduling / K&R protos).
+- Friction: none. The `__fixdfdi`-vs-`__fixunsdfdi` question (signed `XLONG=double*MBIT` with possibly-negative th) was resolved at the gate by reading the asm — KMC GCC emits `__fixunsdfdi` for both atan.c and sin.c, so no signed-cvt helper was needed.
+- Applied (3 of 3): #1 BACKLOG libkmc-fully-mined epic-status (S112 paragraph updated + sin.c carry-over cleared); #2 near-free-retry checklist 3rd-clean-hit doctrine data-point (S75 contquery / S93 xldtob / S113 sin.c — the carry-over-as-mechanical-replay pattern is robust, no tooling change); #3 `docs/hazards.md#compile-profiles` note that KMC GCC emits `__fixunsdfdi` not `__fixdfdi` for the libkmc CORDIC `double→long long` idiom.
+- Carry-over: none. libkmc fully mined.
+
+---
+
 ## Sprint 112 — bank src/libkmc/atan.c (first libkmc C-mirror) — 2026-06-17
 - Increment: src/libkmc/atan.c banked (3 fn: _xatan/atan/atan2). md5-candidate 161→162.
 - Quality: 0/0/0/0 (stuck-far/permuter/carried/re-opened).

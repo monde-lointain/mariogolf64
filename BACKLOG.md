@@ -16,6 +16,20 @@ subordinate to the libultra goal. Target selection is `tools/pick_target.py` (sm
 the 8-point decompose gate fires on any seed ≥8. v2 classical track is active (since S11);
 mirror is the default, classical is first-class when the asm warrants it.
 
+**S113 — `src/libkmc/sin.c` BANKED (libkmc C-band COMPLETE).** Verbatim mirror of `libkmc/src/sin.c`
+(`_xsincos`+`sin`+`cos`+`tan`, CORDIC fixed-point, same XLONG/MBIT/CBIT idioms as atan.c) at the libkmc
+`-O` profile. The near-free retry of S112 atan.c: the carry-over's 5-point completeness checklist
+replayed **verbatim-correct, 0 rework, 0 iteration**. Gate enabler = ONE text flip `[0x8E660,asm]`→
+`[0x8E660,c,libkmc/sin]`; execution = verbatim cp + carve `[0xADCA0,rodata]`→`[0xADCA0,.rodata,
+libkmc/sin]` (whole generic subseg = 0x90 B = 18 doubles, exact-bound, the atan.c [0xADC40] precedent).
+**ZERO new symbols** — all 4 names curated, `_atbl`=0x800C9690 / `__fixunsdfdi`=0x800B3C20 /
+`__floatdidf`=0x800B3D40 placed (S112/S109); asm-confirmed (asm/8E660.s) the only jals are those 3 +
+`_atbl` + the FP pool; no `__matherr` (unlike atan), no `__fixdfdi` (KMC GCC emits `__fixunsdfdi` for
+the signed `XLONG=double*MBIT` idiom). md5-candidate 162→163. Full-make ROM SHA-1 == baserom (first
+build). **libkmc is now FULLY MINED — only the `mmuldi3`/`mcvtld` `hasm` math modules remain (permanent
+asm). The next work is the non-libultra-region coddog targets (`os/settime.c`, `sp/spriteex2.c`,
+`audio/synthesizer.c`) or a classical-track sprint.**
+
 **S112 — `src/libkmc/atan.c` BANKED (first libkmc C-mirror).** Verbatim mirror of `libkmc/src/atan.c`
 (`_xatan`+`atan`+`atan2`, CORDIC fixed-point on `long long` XLONG + doubles) at the libkmc `-O` profile
 (`LIBKMC_CFLAGS` = `-O2`→`-O`), first-build clean (0 iteration, all 4 flagged risks held). Enablers:
@@ -23,9 +37,8 @@ placed `_atbl`=0x800C9690 (shared atbl.c CORDIC table — the whole `[0xA4A90,da
 table, a symbol-place NOT a carve), vendored `cordic.h`, carved `[0xADC40,rodata]`→`[0xADC40,.rodata,
 libkmc/atan]` (generic-subseg-bound 1-line flip, 0x60 B). All callees pre-placed (`__floatdidf`/
 `__fixunsdfdi`/`__matherr`); KMC GCC inlines the long-long shifts (0 shift-helper jal). md5-candidate
-161→162. Full-make ROM SHA-1 == baserom. **The libkmc band is now down to ONE non-`hasm` unit —
-`sin.c` (`_xsincos`+sin+cos+tan, [0x8E660]), the near-free sibling retry (cordic.h + `_atbl` already
-placed; see Carry-overs). After sin.c banks, libkmc is fully mined (only mmuldi3/mcvtld `hasm` remain).**
+161→162. Full-make ROM SHA-1 == baserom. **`sin.c` followed as the near-free sibling (S113) →
+libkmc is now fully mined (only mmuldi3/mcvtld `hasm` remain).**
 
 **S111 — libultra `.data`/`.rodata` resolution sweep BANKED (≈18 TUs).** Carved every attributable
 anonymous block in the libultra `.data`/`.rodata` region (0xA32D0–0xADCA0) into named `libultra/<tu>`
@@ -1610,21 +1623,15 @@ by `/sprint-plan`:
   adaptation vs upstream; **(5)** the upstream pin (file + VERSION_J). A near-free retry missing any
   of these is a half-scoped spike — finish the scope before deferring.
 
-- _(Near-free retry — **libkmc `sin.c` (0x8E660) C-mirror** (`_xsincos`+`sin`+`cos`+`tan`, 4-fn
-  single-file-pack). The `atan.c` sibling banked **S112** (first libkmc C-mirror, first-build clean);
-  this is its near-free replay (NOT a spike — the atan.c bank pre-placed the shared deps). **Completeness
-  checklist:** **(1)** flip `[0x8E660, asm]` → `[0x8E660, c, libkmc/sin]` (text only at gate). **(2)**
-  placed-ref inventory: `_atbl`=0x800C9690 (placed S112), soft-float callees already placed
-  (`__floatdidf`@0x800B3D40, `__fixunsdfdi`@0x800B3C20), `cordic.h` vendored S112, names curated
-  (`_xsincos`/`sin`/`cos`/`tan` in ghidra_symbols). **NO `__matherr` dep** (unlike atan.c). **(3)** NEW
-  symbols to add: none expected (sin.c's only data dep is `_atbl`, already placed; confirm at the gate by
-  disassembling `0x8E660` — verify no un-named `D_<addr>` ref beyond `_atbl`). **(4)** include adaptation:
-  verbatim, `#include "_kmclib.h"`/`<math.h>`/`<cordic.h>` all in-tree under `include/libkmc/`; SKIP
-  clang-format (local DisableFormat). **(5)** upstream pin: `~/development/repos/libkmc/src/sin.c` (GCC
-  branch: XLONG=long long, MBIT=2^60, CBIT=52). Execution: verbatim cp + carve the rodata sibling
-  `[0xADCA0, rodata]` → `[0xADCA0, .rodata, libkmc/sin]` (the sin/cos FP consts), full-make SHA-1.
-  **After this, libkmc is fully mined — only mmuldi3/mcvtld `hasm` remain.** Same risk class as atan.c
-  (double + long-long-shift codegen + rodata literal-pool), de-risked by the atan.c first-build match.)_
+- _(Near-free retry — **libkmc `sin.c` (0x8E660) C-mirror** (`_xsincos`+`sin`+`cos`+`tan`) **RESOLVED +
+  banked S113** — the carry-over's 5-point completeness checklist replayed verbatim-correct, 0 rework,
+  0 iteration: text flip `[0x8E660,asm]`→`[0x8E660,c,libkmc/sin]`, verbatim cp of
+  `~/development/repos/libkmc/src/sin.c`, carve `[0xADCA0,rodata]`→`[0xADCA0,.rodata,libkmc/sin]` (whole
+  generic subseg, 0x90 B = 18 doubles), ZERO new symbols (all deps placed S112/S109), full-make ROM SHA-1
+  == baserom first build. The "confirm no un-named `D_<addr>` beyond `_atbl`" check held; KMC GCC emits
+  `__fixunsdfdi` (not `__fixdfdi`) for the signed `XLONG=double*MBIT` idiom (now `#compile-profiles`).
+  **libkmc is now fully mined — only mmuldi3/mcvtld `hasm` remain.** The 3rd clean near-free-retry-checklist
+  replay (S75 contquery / S93 xldtob / S113 sin.c).)_
 
 - _(Near-free retry — xldtob tail `[0x8D480]` (`_Ldtob` + `_Ldunscale` + `_Genld`) **RESOLVED + banked
   S93** — the carry-over's 5-point checklist replayed verbatim-correct (0 rework): single text flip
