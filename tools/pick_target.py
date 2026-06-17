@@ -407,25 +407,20 @@ def build_kmc_asm_tu_index():
     return index
 
 
-_INTREE_ASM_MACROS = None
-
-
+@functools.cache
 def _intree_asm_macros():
     """Every `#define`d name reachable under the vendored-asm `-I` set (ASM_VENDOR_INCLUDE_DIRS).
 
     Cached. The denominator for vendorable_tu_missing_defines: a macro a vendored .s references but
     that appears in none of these headers can't assemble under LIBULTRA_ASFLAGS."""
-    global _INTREE_ASM_MACROS
-    if _INTREE_ASM_MACROS is None:
-        macros = set()
-        for d in ASM_VENDOR_INCLUDE_DIRS:
-            for h in glob.glob(os.path.join(d, "**", "*.h"), recursive=True):
-                try:
-                    macros.update(re.findall(r"#define\s+(\w+)", open(h, errors="ignore").read()))
-                except OSError:
-                    continue
-        _INTREE_ASM_MACROS = macros
-    return _INTREE_ASM_MACROS
+    macros = set()
+    for d in ASM_VENDOR_INCLUDE_DIRS:
+        for h in glob.glob(os.path.join(d, "**", "*.h"), recursive=True):
+            try:
+                macros.update(re.findall(r"#define\s+(\w+)", open(h, errors="ignore").read()))
+            except OSError:
+                continue
+    return frozenset(macros)
 
 
 def vendorable_tu_missing_defines(rel):
@@ -1458,9 +1453,7 @@ def placed_symbols():
 # An un-named decomp symbol: `func_<vram>` or `func_ovl<n>_<vram>` (the splat scaffold placeholder).
 _FUNC_TOKEN_RE = re.compile(r"\bfunc_(?:ovl\d+_)?[0-9A-Fa-f]{6,8}\b")
 
-_SRC_CALLER_CACHE = None
-
-
+@functools.cache
 def src_func_callers():
     """Map every un-named `func_<vram>` token to the banked C files that reference it by name
     (outside an INCLUDE_ASM stub line). Built once per process by walking `src/`.
@@ -1471,9 +1464,6 @@ def src_func_callers():
     is the stale-label-sync hazard reaching the gate via a symbol ADD rather than `make sync-names`.
     Surfacing the caller here prices the one-line rename fixup at the gate instead of as a build-check
     link error."""
-    global _SRC_CALLER_CACHE
-    if _SRC_CALLER_CACHE is not None:
-        return _SRC_CALLER_CACHE
     callers: dict[str, set] = {}
     src_root = os.path.join(ROOT, "src")
     for dirpath, _dirs, files in os.walk(src_root):
@@ -1492,8 +1482,7 @@ def src_func_callers():
                     continue  # the func_'s own scaffold stub is regenerated, not an eviction
                 for tok in _FUNC_TOKEN_RE.findall(ln):
                     callers.setdefault(tok, set()).add(rel)
-    _SRC_CALLER_CACHE = {k: sorted(v) for k, v in callers.items()}
-    return _SRC_CALLER_CACHE
+    return {k: sorted(v) for k, v in callers.items()}
 
 
 # An SDK-internal global is `__`-prefixed (e.g. __osRunQueue). Uppercase macros ([A-Z]-led) and

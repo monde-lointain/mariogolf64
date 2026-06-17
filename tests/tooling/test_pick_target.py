@@ -36,7 +36,7 @@ def test_vendorable_tu_missing_defines(tmp_path, monkeypatch):
 
     # Synthetic TU: point LIBULTRA at a temp tree, seed the macro denominator directly.
     monkeypatch.setattr(pt, "LIBULTRA", str(tmp_path))
-    monkeypatch.setattr(pt, "_INTREE_ASM_MACROS", {"K0BASE", "C0_ENTRYHI", "LEAF", "END"})
+    monkeypatch.setattr(pt, "_intree_asm_macros", lambda: frozenset({"K0BASE", "C0_ENTRYHI", "LEAF", "END"}))
     (tmp_path / "os").mkdir()
     (tmp_path / "os" / "fake.s").write_text(
         '#include "PR/R4300.h"      /* TLB stuff for the RDBPORT comment */\n'
@@ -362,10 +362,11 @@ def test_caller_evict_flag(tmp_path, monkeypatch):
         'INCLUDE_ASM("asm/nonmatchings/libultra/io/spgetstat", func_800B16A0);\n'
     )
     monkeypatch.setattr(pt, "ROOT", str(tmp_path))
-    monkeypatch.setattr(pt, "_SRC_CALLER_CACHE", None)
+    pt.src_func_callers.cache_clear()
     callers = pt.src_func_callers()
     assert callers.get("func_800B16A0") == ["src/main/caller.c"], callers
     assert "func_deadbeef" not in callers and "func_DEADBEEF" not in callers
+    pt.src_func_callers.cache_clear()  # don't leak the tmp-ROOT walk into later tests
 
 
 def _coddog_rows(pt, monkeypatch, *, ui, carried, coddog):
