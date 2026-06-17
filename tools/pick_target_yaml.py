@@ -40,10 +40,10 @@ def parse_subsegs():
 def _rodata_rom_ranges():
     """[(start_rom, end_rom)] of every `rodata`/`.rodata` subseg, for classifying a `%lo(D_<vram>)`
     literal. A constant whose ROM offset (vram − the fn's code-segment delta) lands in one of these
-    ranges is a compiler-pooled rodata literal the mirror re-emits → a `.rodata` sibling split
-    (S38/S48); one that lands elsewhere is a function-local `static` the mirror re-emits into the
-    data segment → a recover-extern + file-scope-extern drop (S49). The two enablers differ, so the
-    gate must be routed to the right one."""
+    ranges is a compiler-pooled rodata literal the mirror re-emits → a `.rodata` sibling split;
+    one that lands elsewhere is a function-local `static` the mirror re-emits into the data segment
+    → a recover-extern + file-scope-extern drop. The two enablers differ, so the gate must be routed
+    to the right one."""
     subs = parse_subsegs()
     ranges = []
     for i, (off, typ, _path) in enumerate(subs):
@@ -66,7 +66,7 @@ def _literal_in_rodata(vram, off):
 
 
 def _rodata_carve_start_vram(off, lit_vram):
-    """VRAM where the rodata subseg containing `lit_vram` BEGINS (S93) — the carve-start companion to
+    """VRAM where the rodata subseg containing `lit_vram` BEGINS — the carve-start companion to
     _rodata_carve_end_vram. The FP-literal scan reports only the scalar `ldc1/lwc1 %lo` loads, so its
     min understates a `.rodata` block that opens with a `static const` array base (an `addiu %lo`
     address-of the scan misses) or string literals. The `.rodata` sibling places the WHOLE object's
@@ -87,14 +87,13 @@ def _rodata_carve_start_vram(off, lit_vram):
 
 
 def _rodata_carve_end_vram(off, lit_vram):
-    """VRAM of the rodata-subseg boundary that ends the carve containing `lit_vram` (S64 #2).
+    """VRAM of the rodata-subseg boundary that ends the carve containing `lit_vram`.
 
     The rodata-literal scan reports the `%lo(D_…)`-referenced literals, but the sibling-split's
     carve extends to the next `.rodata` subseg boundary, which can run past the last referenced
-    literal: a multi-`du` dlabel block's trailing word has no `%lo` of its own (S64 lookathil —
-    the 0x800D2508 `.double 0` inside the D_800D2500 block, so the scan's max 0x800D2500 understated
-    the 0x800D2510 carve end = the lookatref `.rodata` boundary). Pre-noting the boundary turns the
-    finalize-time `.o`-sized carve into a planned extent at the gate. Returns the end vram (upper
+    literal: a multi-`du` dlabel block's trailing word has no `%lo` of its own, so the scan's max
+    understates the carve end. Pre-noting the boundary turns the finalize-time `.o`-sized carve into
+    a planned extent at the gate. Returns the end vram (upper
     bound: the whole subseg end, exact when the mirror's literals are the subseg tail, the common
     case), or None when the fn vram is unknown or the literal is not in a code-segment rodata range."""
     fn_vram = subseg_vram(off)
