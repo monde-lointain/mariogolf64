@@ -122,6 +122,148 @@ class Hazard:
         """A coddog-mirror flag, detail encoded as `<file>@<pct>` (2-decimal)."""
         return cls(HAZARD_CODDOG_MIRROR, f"{cfile}@{pct:.2f}")
 
+    # --- detail-format factories ------------------------------------------------------------
+    # One source of truth for each kind's `detail` encoding; render() output is byte-identical to
+    # the old inline f-strings (the goldens + test_hazard_factories.py pin every format). The four
+    # kinds whose detail is a pre-assembled variable (combined-subseg, intrinsic-likely,
+    # rodata-literal, needs-define) and the bare no-detail kinds (one-tu, non16align, file-static)
+    # carry no format literal and are constructed directly at their call sites.
+
+    @classmethod
+    def pack(cls, kind: str, n_fns: int, members) -> "Hazard":
+        """pack / single-file-pack: `<n>fn[member=alias,...]` (caller picks the kind constant)."""
+        return cls(kind, f"{n_fns}fn[" + ",".join(members) + "]")
+
+    @classmethod
+    def upstream_fncount_mismatch(cls, n_members: int, n_defs: int) -> "Hazard":
+        """`<members>vs<defs>` — pack has more fns than its single named .c defines."""
+        return cls(HAZARD_UPSTREAM_FNCOUNT_MISMATCH, f"{n_members}vs{n_defs}")
+
+    @classmethod
+    def c_combined(cls, c_stems) -> "Hazard":
+        """`<n>file[stem|stem|...]` — ≥2 distinct C upstream files in one asm subseg."""
+        return cls(HAZARD_C_COMBINED, f"{len(c_stems)}file[" + "|".join(sorted(c_stems)) + "]")
+
+    @classmethod
+    def jal_count_mismatch(cls, n_c: int, n_asm: int) -> "Hazard":
+        """`<c>vs<asm>` jal-count divergence."""
+        return cls(HAZARD_JAL_COUNT_MISMATCH, f"{n_c}vs{n_asm}")
+
+    @classmethod
+    def maybe_upstream(cls, lib: str, bases) -> "Hazard":
+        """`<lib>:<name,...>` signature-hint match."""
+        return cls(HAZARD_MAYBE_UPSTREAM, f"{lib}:" + ",".join(bases))
+
+    @classmethod
+    def trailing_pad(cls, residual: int, align: int) -> "Hazard":
+        """`<n>B@<align>` nop-pad after a short C mirror."""
+        return cls(HAZARD_TRAILING_PAD, f"{residual}B@{align}")
+
+    @classmethod
+    def remaining(cls, n: int) -> "Hazard":
+        """`<n>` residual count."""
+        return cls(HAZARD_REMAINING, str(n))
+
+    @classmethod
+    def rodata_jtbl(cls, addrs) -> "Hazard":
+        """Comma list of `0x%08X` switch-jtbl vrams (sorted)."""
+        return cls(HAZARD_RODATA_JTBL, ",".join(f"0x{a:08X}" for a in sorted(addrs)))
+
+    @classmethod
+    def data_static(cls, addrs) -> "Hazard":
+        """Comma list of `0x%08X` file-static data vrams (sorted)."""
+        return cls(HAZARD_DATA_STATIC, ",".join(f"0x{a:08X}" for a in sorted(addrs)))
+
+    @classmethod
+    def defines_data(cls, names) -> "Hazard":
+        """Comma list of file-scope data symbol names."""
+        return cls(HAZARD_DEFINES_DATA, ",".join(names))
+
+    @classmethod
+    def refs_unplaced(cls, refs) -> "Hazard":
+        """Comma list of un-placed extern data refs (each may carry `@<vram>`)."""
+        return cls(HAZARD_REFS_UNPLACED, ",".join(refs))
+
+    @classmethod
+    def calls_unplaced(cls, names) -> "Hazard":
+        """Comma list of un-placed callee names."""
+        return cls(HAZARD_CALLS_UNPLACED, ",".join(names))
+
+    @classmethod
+    def data_carve(cls, arrays) -> "Hazard":
+        """Comma list of file-scope initialized-array names (.data sibling carve)."""
+        return cls(HAZARD_DATA_CARVE, ",".join(arrays))
+
+    @classmethod
+    def needs_header(cls, tagged) -> "Hazard":
+        """Comma list of needs-header entries (each may carry a `(...)` adapt tag)."""
+        return cls(HAZARD_NEEDS_HEADER, ",".join(tagged))
+
+    @classmethod
+    def header_renames_symbol(cls, primary: str, header: str) -> "Hazard":
+        """`<primary>@<header>` — a vendored header macro rewrites the curated symbol."""
+        return cls(HAZARD_HEADER_RENAMES_SYMBOL, f"{primary}@{header}")
+
+    @classmethod
+    def wrong_ghidra_name(cls, primary: str, correct: str, header: str) -> "Hazard":
+        """`<ghidra>-><correct>@<header>` — ghidra_symbols mislabels the vram with a macro name."""
+        return cls(HAZARD_WRONG_GHIDRA_NAME, f"{primary}->{correct}@{header}")
+
+    @classmethod
+    def stale_header(cls, missing) -> "Hazard":
+        """`os_version.h(<token,...>)` — header resolves but is missing referenced VERSION_* tokens."""
+        return cls(HAZARD_STALE_HEADER, "os_version.h(" + ",".join(missing) + ")")
+
+    @classmethod
+    def bare_assert(cls, n: int) -> "Hazard":
+        """`<n>` un-guarded upstream assert() count."""
+        return cls(HAZARD_BARE_ASSERT, str(n))
+
+    @classmethod
+    def twin_of(cls, stem: str) -> "Hazard":
+        """`<stem>` of a banked sibling sharing the same ld-section carve."""
+        return cls(HAZARD_TWIN_OF, stem)
+
+    @classmethod
+    def drop_static_mirror(cls, n: int) -> "Hazard":
+        """`<n>bss` (or bare `bss`) drop-to-extern enabler."""
+        return cls(HAZARD_DROP_STATIC_MIRROR, f"{n}bss" if n else "bss")
+
+    @classmethod
+    def caller_evict(cls, evicts) -> "Hazard":
+        """`;`-joined `<fn>@<header,...>` caller-eviction entries."""
+        return cls(HAZARD_CALLER_EVICT, ";".join(evicts))
+
+    @classmethod
+    def coddog_twin(cls, cstem: str, member_stems) -> "Hazard":
+        """coddog-twin: `<stem>!=<alt,...>` (sorted alts; paired with twin_file())."""
+        return cls(HAZARD_CODDOG_TWIN, f"{cstem}!={','.join(sorted(member_stems))}")
+
+    @classmethod
+    def coddog_fncount_mismatch(cls, matched_n: int, n_fns: int) -> "Hazard":
+        """`<matched>vs<pack>` — coddog source defines fewer fns than the pack holds."""
+        return cls(HAZARD_CODDOG_FNCOUNT_MISMATCH, f"{matched_n}vs{n_fns}")
+
+    @classmethod
+    def coddog_structural(cls, cfile: str, pct: float) -> "Hazard":
+        """coddog-structural: `<file>@<pct>` (paired with coddog_source()/coddog_pct())."""
+        return cls(HAZARD_CODDOG_STRUCTURAL, f"{cfile}@{pct:.2f}")
+
+    @classmethod
+    def coddog_partial(cls, matched: int, total: int) -> "Hazard":
+        """`<m>of<n>fn` — per-fn twin set covering only a subset of a multi-fn pack."""
+        return cls(HAZARD_CODDOG_PARTIAL, f"{matched}of{total}fn")
+
+    @classmethod
+    def coddog_source_banked(cls, basename: str) -> "Hazard":
+        """The coddog source's basename (already banked)."""
+        return cls(HAZARD_CODDOG_SOURCE_BANKED, basename)
+
+    @classmethod
+    def game_region_mirror(cls, vram, off: int) -> "Hazard":
+        """`0x%08X` of the vram (or hex(off) fallback) for a game-region (-O2) mirror."""
+        return cls(HAZARD_GAME_REGION_MIRROR, f"0x{vram:08X}" if vram is not None else hex(off))
+
     def coddog_file(self) -> str:
         """The `<file>` half of a coddog `<file>@<pct>` detail."""
         return self.detail.split("@", 1)[0]

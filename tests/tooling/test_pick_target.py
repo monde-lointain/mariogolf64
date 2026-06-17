@@ -608,7 +608,7 @@ def test_drop_static_mirror_hazard(tmp_path):
 
     # the pure-.bss cluster → tagged (no path → bare `bss`, no count)
     got = pt.drop_static_mirror_hazard(None, [cod, fs, dd])
-    assert got is not None and got.kind == pt.HAZARD_DROP_STATIC_MIRROR and got.detail == "bss"
+    assert got is not None and got.render() == "drop-static-mirror:bss"
 
     # a real upstream path → a count (2 file-scope statics + 1 global = 3bss)
     up = tmp_path / "vimgr.c"
