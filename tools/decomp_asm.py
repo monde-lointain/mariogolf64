@@ -18,7 +18,7 @@ import decomp_common as dc
 
 ROOT = dc.PROJECT_ROOT  # literal, symlink-stable root (see decomp_common.PROJECT_ROOT)
 
-GLABEL_RE = re.compile(r"^\s*glabel\s+(\S+)")
+GLABEL_RE = dc.GLABEL_RE  # shared definition (decomp_common owns the glabel-line regex)
 
 
 def asm_path(rom_off):
