@@ -162,7 +162,8 @@ SECTIONS
         build/src/libnusys/mainlib/nucontgbpakreadwrite.o(.text);
         build/src/libnusys/mainlib/nucontgbpakcheck.o(.text);
         build/src/libnusys/mainlib/nucontgbpakfread.o(.text);
-        build/asm/7D970.o(.text);
+        build/src/libnusys/mainlib/nucontgbpakfwrite.o(.text);
+        build/asm/7DB80.o(.text);
         build/src/libnusys/mainlib/nusicallbackadd.o(.text);
         build/src/libnusys/mainlib/nusicallbackremove.o(.text);
         build/src/libnusys/mainlib/nucontmgr.o(.text);
@@ -424,7 +425,8 @@ SECTIONS
         build/src/libnusys/mainlib/nucontgbpakreadwrite.o(.data);
         build/src/libnusys/mainlib/nucontgbpakcheck.o(.data);
         build/src/libnusys/mainlib/nucontgbpakfread.o(.data);
-        build/asm/7D970.o(.data);
+        build/src/libnusys/mainlib/nucontgbpakfwrite.o(.data);
+        build/asm/7DB80.o(.data);
         build/src/libnusys/mainlib/nusicallbackadd.o(.data);
         build/src/libnusys/mainlib/nusicallbackremove.o(.data);
         build/asm/data/main_data_2.data.o(.data);
@@ -694,7 +696,8 @@ SECTIONS
         build/src/libnusys/mainlib/nucontgbpakreadwrite.o(.rodata);
         build/src/libnusys/mainlib/nucontgbpakcheck.o(.rodata);
         build/src/libnusys/mainlib/nucontgbpakfread.o(.rodata);
-        build/asm/7D970.o(.rodata);
+        build/src/libnusys/mainlib/nucontgbpakfwrite.o(.rodata);
+        build/asm/7DB80.o(.rodata);
         build/src/libnusys/mainlib/nusicallbackadd.o(.rodata);
         build/src/libnusys/mainlib/nusicallbackremove.o(.rodata);
         build/src/libnusys/mainlib/nucontmgr.o(.rodata);
@@ -974,7 +977,8 @@ SECTIONS
         build/src/libnusys/mainlib/nucontgbpakreadwrite.o(.bss);
         build/src/libnusys/mainlib/nucontgbpakcheck.o(.bss);
         build/src/libnusys/mainlib/nucontgbpakfread.o(.bss);
-        build/asm/7D970.o(.bss);
+        build/src/libnusys/mainlib/nucontgbpakfwrite.o(.bss);
+        build/asm/7DB80.o(.bss);
         build/src/libnusys/mainlib/nusicallbackadd.o(.bss);
         build/src/libnusys/mainlib/nusicallbackremove.o(.bss);
         build/src/libnusys/mainlib/nucontmgr.o(.bss);
