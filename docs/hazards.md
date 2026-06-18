@@ -345,6 +345,14 @@ the run**, cross-checked against the C type (`OSThread`=0x1B0, `OSMesgQueue`=0x1
 `STACK(_,N)`=`ALIGN8(N)`). The run is laid out in source-declaration order at consecutive `main_bss`
 vrams (pimgr's block sat immediately below the prior io file's `piAccessBuf`), so one disassembly plus
 the gap arithmetic yields every `symbol_addrs` size:-extern at once, with no per-symbol re-disassembly.
+**Stack-top-equals-named-adjacent-symbol tell (S115).** A thread-stack `static T Stack[N]` passes its
+*top* (`Stack + N`, stacks grow down) as the `osCreateThread` sp arg, so its asm `%hi/%lo` resolves to
+`Stack`'s **end**, not its base. When that end lands exactly on an ALREADY-PLACED symbol from a
+DIFFERENT TU, the asm shows `%lo(<NamedSymbol>)` (a real name, not a `D_<addr>` auto-label): that named
+symbol's addr IS the stack's exact end, so `base = <NamedSymbol> addr - STACK_SIZE` with zero gap
+arithmetic. (S115 `nugfxthread.c` `GfxStack`: sp arg `%lo(PiMesgQ)`=0x800F74A0, `PiMesgQ` placed
+S99/nupiinit.c → `GfxStack` base 0x800F54A0, size 0x2000 = `NU_GFX_STACK_SIZE`.) A `D_<addr>` label
+there means the next symbol is itself still un-named — fall back to `base = top - sizeof`.
 
 **Unindexed-upstream mirror → no auto refs-unplaced (S112).** A mirror candidate whose `upstream`
 column is `none` (a coddog-match, a de-ranked carry-over, or any source not in the upstream index)
@@ -557,7 +565,14 @@ is on the row, a `file-static` is present, and there is **no** carve signal (`ro
 verdict that the co-listed `file-static` + `defines-data` + `refs-unplaced` flags are **one
 drop-to-extern enabler** (the pure-`.bss` case above), not the scary 4-flag carve cluster they read as.
 `<n>` counts the detector-visible defined `.bss` symbols (file-scope static lines + `defines-data`
-globals); a func-local static is a known under-count, recovered at the gate with the rest. The cluster
+globals); a func-local static is a known under-count, recovered at the gate with the rest. **A second
+under-count class (S115): a file-scope UNINITIALIZED non-static global that the upstream header already
+declares `extern`** (S115 `nugfxthread.c`'s `nuGfxMesgQ`) is a `.bss` drop-def but is NOT in the
+`<n>bss` tally — it carries no `=` (so `defines-data`'s K&R-guarded init scan skips it) yet is not a
+file-scope `static` either, so it falls between both detectors and surfaces only under `refs-unplaced`.
+The gate's per-symbol `refs-unplaced` recovery still places it, so the tally undercount is graceful
+(use the union of `drop-static-mirror` + `defines-data` + `refs-unplaced` as the recover set, not the
+`<n>` alone). The cluster
 flags stay (the gate's per-symbol recovery + `seed_points` read them); the tag tells the gate to price
 a **seed-only N-symbol mirror**. A nonzero-initialized global that slips the gate degrades gracefully
 to the carve playbook on the SHA miss, never a silent wrong bank.

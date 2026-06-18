@@ -25,6 +25,26 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 115 — bank src/libnusys/mainlib/nugfxthread.c (libnusys drop-static mirror) — 2026-06-17
+- Increment: src/libnusys/mainlib/nugfxthread.c banked (2 fn: gfxThread + nuGfxThreadStart). md5-candidate 165→166 (all 166 src .c stub-free).
+- Quality: 0/0/0/0 (stuck-far/permuter/carried/re-opened).
+- Seed: committed 5pt; banked 5pt; regime mirror (seed-only; 8-gate clear at 5<8).
+- What helped: the `drop-static-mirror:4bss` re-frame tag + `coddog-mirror:mainlib/nugfxthread.c@99.99` priced this as one drop-to-extern enabler, not a scary 4-flag carve cluster — the proven S87/S90 pattern replayed first-build, 0 iteration. All 5 callees + nuGfxFunc pre-placed; both fn names pre-curated → gate was a single yaml flip. The S90 contiguous-`.bss`-block fast-path recovered nuGfxMesgBuf/nuGfxThread as one run; the GfxStack stack-top resolving to the NAMED cross-TU symbol PiMesgQ@0x800F74A0 (placed S99) gave a zero-arithmetic base (0x800F74A0 − 0x2000).
+- Friction: none. (One latent: the `drop-static-mirror:<n>bss` tally counted 4 but the recover set was 5 — the uninitialized header-declared global nuGfxMesgQ falls between the file-static and defines-data detectors; refs-unplaced caught it, so graceful. Now documented as a 2nd under-count class.)
+- Applied: 2 of 2: #1 `docs/hazards.md` drop-static fast-path — stack-top-equals-named-adjacent-symbol tell (base = NamedSymbol addr − STACK_SIZE); #2 `docs/hazards.md` `drop-static-mirror:<n>bss` 2nd under-count class (header-declared uninit global → use the drop-static + defines-data + refs-unplaced union as the recover set).
+- Carry-over: none.
+- **Ledger note:** discovered at this gate that **S114 (nuSiCallBackAdd + nuSiCallBackRemove, commit 9690ad8) was banked but never reviewed** — no VELOCITY/RETRO/BACKLOG entry, and its SPRINT.md suggestion buffer was lost when S115 planning overwrote it. See the S114 backfill below / PO follow-up.
+
+## Sprint 114 — bank nuSiCallBackAdd + nuSiCallBackRemove (libnusys nuSi mirror pair) — 2026-06-17  [BACKFILLED at S115 review]
+- Increment: src/libnusys/mainlib/nusicallbackadd.c + nusicallbackremove.c banked (2 fn: nuSiCallBackAdd + nuSiCallBackRemove). md5-candidate 163→165.
+- Quality: 0/0/0/0 (reconstructed from the clean commit 9690ad8; no standup log survives).
+- Seed: committed ~4pt (reconstructed — SPRINT.md lost; S16 2-file-libnusys-recover-extern precedent); banked ~4pt; regime mirror.
+- What helped: verbatim nusys-2.07 mirror pair (coddog 99.99 each); c-combined `[0x7DE70,asm]` split at the 0x7DF10 file boundary; 1 recover-extern nuSiCallBackList=0x800C7E30 (defined by the un-decompiled nusimgr.c).
+- Friction: the load-bearing one is a PROCESS gap — the sprint banked + committed but its `/sprint-review` never ran, so the ledger had no row and the suggestion buffer was lost when S115 planning overwrote SPRINT.md. (Matching friction unknown; no standup survives.)
+- Applied: none recoverable (suggestion buffer lost with the overwritten SPRINT.md).
+- Carry-over: none.
+- Process lesson (promoted to the S115 review): a banked sprint MUST run `/sprint-review` before the next `/sprint-plan` overwrites SPRINT.md — `/sprint-plan` could guard this by detecting an un-retro'd SPRINT.md (banked items + no matching RETRO entry) and warning before overwrite.
+
 ## Sprint 113 — bank src/libkmc/sin.c (libkmc C-mirror, near-free atan.c replay) — 2026-06-17
 - Increment: src/libkmc/sin.c banked (4 fn: _xsincos/sin/cos/tan). md5-candidate 162→163. **libkmc C-band complete** (only mmuldi3/mcvtld `hasm` remain).
 - Quality: 0/0/0/0 (stuck-far/permuter/carried/re-opened).

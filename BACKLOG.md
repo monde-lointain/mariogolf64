@@ -16,6 +16,29 @@ subordinate to the libultra goal. Target selection is `tools/pick_target.py` (sm
 the 8-point decompose gate fires on any seed ≥8. v2 classical track is active (since S11);
 mirror is the default, classical is first-class when the asm warrants it.
 
+**S115 — `src/libnusys/mainlib/nugfxthread.c` BANKED (libnusys drop-static mirror).** `gfxThread` +
+`nuGfxThreadStart` (the NuSYS graphics thread + its starter) banked as a verbatim drop-static mirror of
+nusys-2.07 `nugfxthread.c` (coddog 99.99, `single-file-pack:2fn`), first-build ROM SHA-1 == baserom, 0
+iteration — the proven S87/S90 drop-static pattern. Bodies byte-verbatim; the 4 header-declared globals
+drop-def (nusys.h `extern`) + the 2 file-statics drop-static-to-extern, all placed at asm-recovered
+`main_bss` vrams: `nuGfxPreNMIFunc`=0x800C7DC4, `nuGfxMesgBuf`=0x800E72D0/0x20, `nuGfxThread`=
+0x800E72F0/0x1B0, `GfxStack`=0x800F54A0/0x2000, `nuGfxMesgQ`=0x801052D0/0x18 (`nuGfxFunc`@0x800C7DC0
+pre-placed S19). All 5 callees pre-placed, both fn names pre-curated → gate = 1 yaml flip. No rodata
+carve (2-case switch, no jtbl). md5-candidate 165→**166** (all 166 src .c stub-free). Retro applied 2
+of 2 (2 `docs/hazards.md` drop-static notes: the stack-top-named-symbol tell + the 2nd `<n>bss`
+under-count class). **Cross-repo follow-up:** 5 new decomp data symbols → propagate via
+`sync_decomp_names.py --import-from-decomp`. **Remaining libnusys (next-cleanest):** `nuContGBPakMgrInit`
+(pts-8 single-file-pack:8fn, 1 drop-def `nuContGBPakCallBack`) and the `nuContRmb*` pack (240B but
+multi-file + unidentified `func_800A2090`).
+
+**S114 — `nusicallbackadd.c` + `nusicallbackremove.c` BANKED (libnusys nuSi mirror pair).** _[BACKFILLED
+at the S115 review — banked commit 9690ad8 but its `/sprint-review` never ran.]_ `nuSiCallBackAdd` +
+`nuSiCallBackRemove` banked as a verbatim nusys-2.07 mirror pair (coddog 99.99 each): `[0x7DE70,asm]`
+split at the 0x7DF10 file boundary into `nusicallbackadd` + `nusicallbackremove`; recovered
+`nuSiCallBackList`=0x800C7E30 (defined by the un-decompiled `nusimgr.c`). Full-make ROM SHA-1 ==
+baserom. md5-candidate 163→**165**. No carry-overs. (Ledger reconstructed from the commit at the S115
+gate; the committed seed ~4pt is reconstructed and the suggestion buffer was lost.)
+
 **S113 — `src/libkmc/sin.c` BANKED (libkmc C-band COMPLETE).** Verbatim mirror of `libkmc/src/sin.c`
 (`_xsincos`+`sin`+`cos`+`tan`, CORDIC fixed-point, same XLONG/MBIT/CBIT idioms as atan.c) at the libkmc
 `-O` profile. The near-free retry of S112 atan.c: the carry-over's 5-point completeness checklist
