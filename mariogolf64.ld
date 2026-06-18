@@ -151,7 +151,9 @@ SECTIONS
         build/asm/7CD60.o(.text);
         build/src/libnusys/mainlib/nucontrmbstart.o(.text);
         build/src/libnusys/mainlib/nucontrmbcheck.o(.text);
-        build/asm/7D3B0.o(.text);
+        build/src/libnusys/mainlib/nucontrmbmodeset.o(.text);
+        build/src/libnusys/mainlib/nucontrmbforcestop.o(.text);
+        build/asm/7D490.o(.text);
         build/src/libnusys/mainlib/nucontgbpakmgr.o(.text);
         build/src/libnusys/mainlib/nucontgbpakopen.o(.text);
         build/src/libnusys/mainlib/nucontgbpakgetstatus.o(.text);
@@ -410,7 +412,9 @@ SECTIONS
         build/asm/7CD60.o(.data);
         build/src/libnusys/mainlib/nucontrmbstart.o(.data);
         build/src/libnusys/mainlib/nucontrmbcheck.o(.data);
-        build/asm/7D3B0.o(.data);
+        build/src/libnusys/mainlib/nucontrmbmodeset.o(.data);
+        build/src/libnusys/mainlib/nucontrmbforcestop.o(.data);
+        build/asm/7D490.o(.data);
         build/asm/data/main_data.data.o(.data);
         build/src/libnusys/mainlib/nucontgbpakmgr.o(.data);
         build/src/libnusys/mainlib/nucontgbpakopen.o(.data);
@@ -679,7 +683,9 @@ SECTIONS
         build/asm/7CD60.o(.rodata);
         build/src/libnusys/mainlib/nucontrmbstart.o(.rodata);
         build/src/libnusys/mainlib/nucontrmbcheck.o(.rodata);
-        build/asm/7D3B0.o(.rodata);
+        build/src/libnusys/mainlib/nucontrmbmodeset.o(.rodata);
+        build/src/libnusys/mainlib/nucontrmbforcestop.o(.rodata);
+        build/asm/7D490.o(.rodata);
         build/src/libnusys/mainlib/nucontgbpakmgr.o(.rodata);
         build/src/libnusys/mainlib/nucontgbpakopen.o(.rodata);
         build/src/libnusys/mainlib/nucontgbpakgetstatus.o(.rodata);
@@ -957,7 +963,9 @@ SECTIONS
         build/asm/7CD60.o(.bss);
         build/src/libnusys/mainlib/nucontrmbstart.o(.bss);
         build/src/libnusys/mainlib/nucontrmbcheck.o(.bss);
-        build/asm/7D3B0.o(.bss);
+        build/src/libnusys/mainlib/nucontrmbmodeset.o(.bss);
+        build/src/libnusys/mainlib/nucontrmbforcestop.o(.bss);
+        build/asm/7D490.o(.bss);
         build/src/libnusys/mainlib/nucontgbpakmgr.o(.bss);
         build/src/libnusys/mainlib/nucontgbpakopen.o(.bss);
         build/src/libnusys/mainlib/nucontgbpakgetstatus.o(.bss);
