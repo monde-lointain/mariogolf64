@@ -25,6 +25,18 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 117 — bank src/libnusys/mainlib/nucontmgr.c (libnusys 2.05 .data-carve + drop-def mirror) — 2026-06-17
+- Increment: src/libnusys/mainlib/nucontmgr.c banked (9 fns: nuContMgrInit/Remove + DataClose/Open + 5 static dispatch leaves). md5-candidate 167 → 168 (all 168 src .c stub-free).
+- Quality: 0/0/0/0 (stuck-far/permuter/carried/re-opened). Banked atomically, no spike. BUT 3 mirror-enabler gotchas (atypical for the mirror track) — see Friction.
+- Seed: committed 8pt; banked 8pt; regime mirror (8-gate fired → verbatim-mirror exemption held; seed-only).
+- What helped: the S116 sibling pattern (.data-carve hybrid) was the right mental model; the cross-ref check (sweep base..base+size) correctly cleared the S116 share-check gotcha (no still-asm sibling reads the carve at base+offset); the asm-vs-source reconcile mapped all 14 data refs (2 .data + 6 BSS + 3 already-placed + nuSiMesgQ) before any build.
+- Friction (3 gotchas, all resolved in-sprint, no carry): (1) **wrong nusys version** — source is 2.05, not the pinned 2.07; the 2.06/2.07 loop rewrite (comma-operator for-update) compiles 2 instrs short → ROM-wide -0x10 cascade (100740 diff bytes). A clean rebuild ruled out staleness; per-function objdump localized it to nuContMgrInit+contReadNW; compiling all nusys revisions found 2.00≡2.05 = 0x340. The 8-gate exemption assumes a clean point-mass, so this is the first mirror sprint that needed real diagnosis. (2) **carve size** — I carved the 0x24 symbol-content sum, but the `.o` `.data` SECTION is 0x30 (0xC 16-align END pad) → overlap; fixed to 0xA3270. (3) **entry.s hasm sync** — naming nuContNum=0x8010C2D0 broke the `_start` boot stub (uses it as initial $sp; boot stack top IS &nuContNum); byte-neutral D_→name edit.
+- Applied (3 of 3): #1 nusys-version-divergence + version-hunt playbook (`docs/hazards.md` coddog-cross-ref nusys-sweep); #2 carve-extent = `objdump -h .o .data` SECTION size, 16-aligned, not symbol-content sum (`#defines-data`); #3 hasm-referrer byte-neutral symbol sync, grep src/**/*.s at the gate (`#file-static`).
+- Carry-over: none.
+- Cross-repo follow-up: 13 new decomp symbols (5 fn + 8 data) → `sync_decomp_names.py --import-from-decomp`.
+
+---
+
 ## Sprint 116 — bank src/libnusys/mainlib/nucontgbpakmgr.c (libnusys .data-carve mirror) — 2026-06-17
 - Increment: src/libnusys/mainlib/nucontgbpakmgr.c banked (8 fn: nuContGBPakMgrInit/Remove + 6 static contGBPak* dispatch leaves). md5-candidate 166→167 (all 167 src .c stub-free).
 - Quality: 0/0/0/0 (stuck-far/permuter/carried/re-opened). One in-sprint link-error gotcha (shared-at-a-field), resolved without spike/carry.

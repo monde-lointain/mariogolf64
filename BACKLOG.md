@@ -16,6 +16,28 @@ subordinate to the libultra goal. Target selection is `tools/pick_target.py` (sm
 the 8-point decompose gate fires on any seed ≥8. v2 classical track is active (since S11);
 mirror is the default, classical is first-class when the asm warrants it.
 
+**S117 — `src/libnusys/mainlib/nucontmgr.c` BANKED (libnusys **2.05** .data-carve + drop-def hybrid
+mirror).** The NuSYS Controller Manager (`nuContMgrInit`/`Remove` + `nuContDataClose`/`Open` + 5 static
+dispatch leaves `contReadData`/`contQuery`/`contRetrace`/`contRead`/`contReadNW`) banked, the S116
+sibling, full-make ROM SHA-1 == baserom. pts-8 8-gate fired → verbatim-mirror exemption. **HEADLINE
+finding: MG64's libnusys is NOT uniformly nusys-2.07.** coddog-sweep-nusys (2.07 ref) matched @99.99
+STRUCTURALLY, but the 2.06/2.07 rewrite changed `nuContMgrInit`'s loop from `for(...;cnt++){...;bitmask
+<<=1;}` to the comma-operator `for(...; bitmask<<=1, cnt++)`, which KMC compiles 2 instrs shorter
+(`.text` 0x330 vs 0x340), cascading a ROM-wide -0x10 shift. Diagnosed by compiling every nusys revision:
+2.00≡2.05 (code-identical, JP vs EN comments) give 0x340; used English 2.05. **Hybrid mirror:** `.data`
+carve (`nuContReadFunc`@0x800C7E40 + `funcList`@0x800C7E44 + `nuContCallBack`@0x800C7E58, `.o` `.data`
+SECTION 0x30 w/ 0xC 16-align END pad → carve 0xA3240..0xA3270 [first try 0x24 content → overlap]) out of
+`main_data` 3-way split; BSS drop-def the 6 scattered-COMMON globals → extern. **entry.s hasm sync:**
+naming `nuContNum`=0x8010C2D0 evicted `D_8010C2D0` that `_start` uses as the boot stack top
+(== &nuContNum, highest BSS) → byte-neutral D_→name edit. 3 gotchas resolved in-sprint, no carry; first
+mirror-track sprint with real diagnostic friction. md5-candidate 167→**168** (all 168 src .c stub-free).
+Retro applied 3 of 3 (nusys-version-divergence + version-hunt playbook `#coddog-cross-ref`; carve-extent =
+`.o .data` section size `#defines-data`; hasm-referrer sync `#file-static`). **Cross-repo follow-up:** 13
+new decomp symbols (5 fn + 8 data) → propagate via `sync_decomp_names.py --import-from-decomp`. **Remaining
+libnusys (next-cleanest):** `nuGfxTaskMgr` (pts-5 `single-file-pack:3fn`, file-static + ~14 defines-data,
+`jal-count-mismatch:7vs11` — version-check it too); the messy ones are `nuContGBPakFread` (pts-2 1fn,
+`jal-count-mismatch:5vs9`, no coddog) and the `nuContRmb*` multi-file packs (240B+, unidentified `func_`s).
+
 **S116 — `src/libnusys/mainlib/nucontgbpakmgr.c` BANKED (libnusys .data-carve mirror, FIRST libnusys
 `.data` carve).** The 64GB Pak Manager (`nuContGBPakMgrInit`/`Remove` + 6 static `contGBPak*` dispatch
 leaves) banked as a verbatim nusys-2.07 mirror (coddog 99.99, `single-file-pack:8fn`), first-build ROM

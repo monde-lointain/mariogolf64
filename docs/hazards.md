@@ -559,6 +559,18 @@ static carries a **nonzero** initializer (real `.data` bytes that DO shift the i
 0 carve, first-build SHA match; the carry-over's "heavy `.bss` carve" framing was the false-flag this
 retires.)
 
+**hasm referrers need a byte-neutral symbol sync (S117).** A BSS drop-to-extern (or recover-extern)
+names a `D_<vram>` that `make extract` re-labels everywhere EXCEPT `hasm` files (the entry stub,
+vendored asm), which are never re-extracted. If a `hasm` referenced the old `D_<vram>`, naming the
+symbol orphans that reference (`undefined reference to D_<vram>` at link). S117: naming
+`nuContNum`=0x8010C2D0 broke `src/entry/entry.s`, which loads that address as the `_start` initial
+`$sp` (the boot stack top IS `&nuContNum`, the highest BSS global, so the boot stack grows down through
+the lower BSS and abandons it before `nucontmgr` runs). Fix: a byte-neutral `D_<vram>`->`<name>` edit in
+the `hasm` (same address => identical `%hi/%lo`, ROM SHA-1 unchanged). Anticipate it at the gate: grep
+`src/**/*.s` for the `D_<vram>` of each to-be-named drop-def/recover-extern symbol BEFORE the build, so
+the sync is planned, not a mid-build link error. (A [`caller-evict`](#caller-evict) sub-case for data
+symbols.)
+
 **The `drop-static-mirror:<n>bss` re-frame tag (S87).** When a `coddog-mirror:<file>@≥99` (non-audio)
 is on the row, a `file-static` is present, and there is **no** carve signal (`rodata-literal` /
 `data-static` / `rodata-jtbl`), `pick_target.py` appends `drop-static-mirror:<n>bss`: the leading
@@ -663,6 +675,15 @@ split `main_data | nucontgbpakmgr .data | main_data_2`): the still-asm sibling `
 only the link error (`undefined reference to D_800C7E24`) surfaced the field ref. Tooling follow-up:
 `pick_target.py` could report a defines-data global's field-level `base+N` external refs (not just the
 base) so the share-status is priced at the gate.
+
+**Carve extent = the `.o` `.data` SECTION size (16-aligned), not the symbol-content sum (S117).** The
+compiler pads `.data` up to the section's 16-byte alignment, so the carve runs to the next 16 boundary,
+PAST the last placed symbol. `nucontmgr.c`'s `.data` content is 0x24 (`nuContReadFunc` 0x4 + `funcList`
+0x14 + `nuContCallBack` 0xC) but the `.o` `.data` SECTION is **0x30** (0xC of END padding); carving 0x24
+left the next subseg 0xC inside the section, so the link placed the 0x30 section over it and shifted the
+data segment. Always size the carve from `mips-linux-gnu-objdump -h build/.../<file>.o` `.data`, never the
+sum of `symbol_addrs` sizes; the ROM zero-padding at `carve_end..section_end` is the mirror's, owned by the
+carve (it matches the compiler's `.data` tail-padding bytes).
 
 **Procedure:** Classical loop, drop the definition; the linker resolves to the splat-side global.
 
@@ -1523,6 +1544,20 @@ instruction) wrappers (`nuGfxSetUcodeFifo`, `nuContGBPakMgrInit`) that coddog re
 against unrelated small fns, the same structural-fingerprint class as steps 5 and 6; smallest-first
 + the gate read filter them (a big pack mis-re-priced to libnusys ranks last by size). **Provenance:**
 this sweep.
+
+**Nusys version divergence (S117): MG64's libnusys is NOT uniformly nusys-2.07.** `build_nusys_ref.sh`
+compiles the pinned 2.07, so `coddog-mirror:mainlib/<file>.c@99.99` is a STRUCTURAL match, not a
+byte-exact source pin. Some files are an EARLIER revision: `nucontmgr.c` is **2.05** (the 2.06/2.07
+rewrite changed `nuContMgrInit`'s loop from `for(...;cnt++){ ...; bitmask<<=1; }` to the comma-operator
+`for(...; bitmask<<=1, cnt++)`, which the KMC compiler emits 2 instrs shorter, `-0x10` `.text`, so the
+`.ld`'s concatenated subsegs cascade a ROM-wide `-0x10` shift). **The tell:** a clean verbatim mirror
+whose compiled `.o` `.text`/`.data` section size differs from the subseg size despite the coddog hit
+(here `.text` 0x330 vs 0x340). **Recovery: version-hunt.** Compile every available nusys revision
+(`~/development/repos/nusys/src/{1.10,1.20,2.00,2.05,2.06}` + the 2.07 pin) and pick the one whose
+`objdump -h` `.text`/`.data` sizes match the subseg; 2.00 and 2.05 are code-identical (only JP-Shift_JIS
+vs EN comments), so prefer the English 2.05. Tooling follow-up: `build_nusys_ref` could sweep multiple
+versions, or `pick_target` could cross-check the coddog hit against the subseg byte-size and flag a
+`coddog-size-mismatch` when they disagree.
 
 ---
 
