@@ -161,7 +161,8 @@ SECTIONS
         build/src/libnusys/mainlib/nucontgbpakcheck.o(.text);
         build/asm/7D7A0.o(.text);
         build/asm/7D970.o(.text);
-        build/asm/7DE70.o(.text);
+        build/src/libnusys/mainlib/nusicallbackadd.o(.text);
+        build/src/libnusys/mainlib/nusicallbackremove.o(.text);
         build/asm/7DF90.o(.text);
         build/src/libnusys/mainlib/nucontdatalock.o(.text);
         build/src/libnusys/mainlib/nucontqueryread.o(.text);
@@ -419,7 +420,8 @@ SECTIONS
         build/src/libnusys/mainlib/nucontgbpakcheck.o(.data);
         build/asm/7D7A0.o(.data);
         build/asm/7D970.o(.data);
-        build/asm/7DE70.o(.data);
+        build/src/libnusys/mainlib/nusicallbackadd.o(.data);
+        build/src/libnusys/mainlib/nusicallbackremove.o(.data);
         build/asm/7DF90.o(.data);
         build/src/libnusys/mainlib/nucontdatalock.o(.data);
         build/src/libnusys/mainlib/nucontqueryread.o(.data);
@@ -685,7 +687,8 @@ SECTIONS
         build/src/libnusys/mainlib/nucontgbpakcheck.o(.rodata);
         build/asm/7D7A0.o(.rodata);
         build/asm/7D970.o(.rodata);
-        build/asm/7DE70.o(.rodata);
+        build/src/libnusys/mainlib/nusicallbackadd.o(.rodata);
+        build/src/libnusys/mainlib/nusicallbackremove.o(.rodata);
         build/asm/7DF90.o(.rodata);
         build/src/libnusys/mainlib/nucontdatalock.o(.rodata);
         build/src/libnusys/mainlib/nucontqueryread.o(.rodata);
@@ -962,7 +965,8 @@ SECTIONS
         build/src/libnusys/mainlib/nucontgbpakcheck.o(.bss);
         build/asm/7D7A0.o(.bss);
         build/asm/7D970.o(.bss);
-        build/asm/7DE70.o(.bss);
+        build/src/libnusys/mainlib/nusicallbackadd.o(.bss);
+        build/src/libnusys/mainlib/nusicallbackremove.o(.bss);
         build/asm/7DF90.o(.bss);
         build/src/libnusys/mainlib/nucontdatalock.o(.bss);
         build/src/libnusys/mainlib/nucontqueryread.o(.bss);

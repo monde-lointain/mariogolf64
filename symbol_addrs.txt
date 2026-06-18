@@ -14,6 +14,7 @@ nuScPreNMIFunc = 0x800B6780; // size:0x4
 nuGfxFunc = 0x800C7DC0; // size:0x4
 nuGfxSwapCfbFunc = 0x800B67B4; // size:0x4
 nuContRmbCtl = 0x80104F50; // size:0x28
+nuSiCallBackList = 0x800C7E30; // size:0x4
 nuContPfs = 0x801B8A18; // size:0x1A0
 __osPiTable = 0x800C7E8C; // size:0x4
 __osPiDevMgr = 0x800C7E70; // size:0x1C
