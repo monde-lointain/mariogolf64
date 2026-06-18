@@ -153,7 +153,7 @@ segments:
       - [0x7C6D0, asm]
       - [0x7C720, asm]
       - [0x7C7F0, c, libnusys/mainlib/nuprenmifuncset]
-      - [0x7C830, asm]
+      - [0x7C830, c, libnusys/mainlib/nugfxthread]
       - [0x7C960, c, libnusys/mainlib/nugfxfuncset]
       - [0x7C9A0, c, libnusys/mainlib/nugfxswapcfbfuncset]
       - [0x7C9E0, c, libnusys/mainlib/nugfxswapcfb]
