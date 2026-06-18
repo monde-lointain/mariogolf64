@@ -104,6 +104,8 @@ from pick_target_hazards import (
     HAZARD_CODDOG_MIRROR,
     HAZARD_CODDOG_TWIN,
     HAZARD_GAME_REGION_MIRROR,
+    HAZARD_BLOCK_REORDER_SIBLING,
+    HAZARD_UNATTRIB_LEAF,
 )
 
 # splat-yaml subseg parsing + .rodata carve-range helpers, extracted to a self-contained leaf;
@@ -300,6 +302,15 @@ BAND_WARM_BONUS = 64
 BIG_FN_BYTES = 768
 HUGE_FN_BYTES = 1536
 PACK_DECOMPOSE_NFNS = 4
+
+# Banked block-reorder mirror families, keyed by upstream-file basename PREFIX. MG64's per-file nusys
+# revision reorders two source blocks vs every archived SDK (the GBPak F-variants run the RAM-enable
+# block before nuContGBPakCheckConnector, `ram=0` in the range-check delay slot). A new same-family fn
+# carrying the block-reorder tell (unexplained jal-mismatch + no coddog-mirror) needs the SAME
+# block-swap; the value is the banked sibling .c that confirms it. Seeded S119 nucontgbpakfread ->
+# S120 nucontgbpakfwrite (banked first-build once the swap was applied up-front). See
+# docs/hazards.md#near-verbatim-mirror-jal-count-mismatch.
+BLOCK_REORDER_FAMILIES = {"nucontgbpak": "nucontgbpakfread.c"}
 
 
 # --- Upstream source cache -------------------------------------------------
@@ -1195,6 +1206,30 @@ def call_divergence(rom_off, primary, up_cpath, lib=None):
     return Hazard.jal_count_mismatch(n_c, n_asm, version_artifact=version_artifact)
 
 
+def _block_reorder_sibling(up_path, hazards, lib):
+    """The banked same-family block-reorder mirror (.c basename) whose CheckConnector/RAM-enable swap
+    replays on THIS candidate, or None. Fires on a libnusys fn carrying the block-reorder tell — an
+    UNexplained jal-mismatch (NOT a `(version-artifact?)` clean-drop) AND NO coddog-mirror (a reorder
+    breaks coddog's fingerprint, so "no coddog" IS the tell) — whose upstream-file basename is in a
+    BLOCK_REORDER_FAMILIES prefix. Advisory: documents that the verbatim cp needs the SAME swap the
+    sibling needed, so the gate applies it up-front rather than rediscovering it via a re-attempt
+    (S119 -> S120). Never flags the registered sibling against itself."""
+    if lib != "libnusys" or not up_path:
+        return None
+    jal_unexplained = any(
+        h.kind == HAZARD_JAL_COUNT_MISMATCH and "(version-artifact?)" not in (h.detail or "")
+        for h in hazards)
+    has_coddog = any(h.kind == HAZARD_CODDOG_MIRROR for h in hazards)
+    if not (jal_unexplained and not has_coddog):
+        return None
+    base = os.path.basename(up_path)
+    stem = os.path.splitext(base)[0]
+    for prefix, sibling in BLOCK_REORDER_FAMILIES.items():
+        if stem.startswith(prefix) and base != sibling:
+            return sibling
+    return None
+
+
 def _is_static_func_proto(line):
     """A `static ...;` line that declares a FUNCTION (prototype: `static T f(...);`), not a
     variable. Such a static function shares the mirror's TU and is NOT a BSS-layout hazard, so it
@@ -2040,6 +2075,24 @@ def carry_over_names():
     return names
 
 
+def _straddling_unattrib(fns, fn_stems, unattrib, name_addr):
+    """Vrams of `?` (unattributed) pack members that STRADDLE a c-combined file boundary — the
+    nearest named-C member BEFORE and AFTER resolve to DIFFERENT upstream stems. `fn_stems[i]` is
+    fn[i]'s C-upstream stem or None; `unattrib` is the set of fns rendered `=?` (no C, no asm TU);
+    `name_addr` maps a fn name -> its vram. A front/trailing `?` (no named member on one side) or a
+    `?` flanked by the SAME stem (a within-file unnamed fn) does NOT straddle. Pure (unit-tested
+    without a ROM)."""
+    out = []
+    for i, fn in enumerate(fns):
+        if fn not in unattrib or fn not in name_addr:
+            continue
+        prev_stem = next((fn_stems[j] for j in range(i - 1, -1, -1) if fn_stems[j]), None)
+        next_stem = next((fn_stems[j] for j in range(i + 1, len(fns)) if fn_stems[j]), None)
+        if prev_stem and next_stem and prev_stem != next_stem:
+            out.append(name_addr[fn])
+    return out
+
+
 def _classify_pack_hazards(off, fns, upstream_index):
     """Hazards for a multi-fn asm subseg (a pack): the member breakdown plus the
     pack-shape flags (single-file vs multi-file pack, foreign-TU fn-count mismatch,
@@ -2054,16 +2107,20 @@ def _classify_pack_hazards(off, fns, upstream_index):
     c_stems = []  # distinct C-upstream stems among members (multi-file C-mirror pack)
     c_files = []  # parallel to c_stems: the (lib, cpath) of each distinct C stem
     c_members = 0  # members that resolved to a C upstream (for the single-file-pack test)
+    fn_stems = []  # parallel to fns: each member's C-upstream stem, or None (asm-TU or `?`)
+    unattrib = set()  # fns rendered `=?` (no C upstream, no asm TU) — the unattributed-leaf candidates
     for fn in fns:
         fn_lib, fn_up = upstream_index.get(fn, (None, None))
         if fn_up:
             stem = os.path.splitext(os.path.basename(fn_up))[0]
             members.append(f"{fn}={stem}")
+            fn_stems.append(stem)
             c_members += 1
             if stem not in c_stems:
                 c_stems.append(stem)
                 c_files.append((fn_lib, fn_up))
             continue
+        fn_stems.append(None)
         # No C upstream. Count a member's asm TU only here: a member with a C mirror
         # is a C-mirror pack-split target, not an asm-vendor TU (ultralib may ship a .s
         # variant the ROM doesn't use). Name the .s in the member label so a MIXED asm+C
@@ -2075,6 +2132,7 @@ def _classify_pack_hazards(off, fns, upstream_index):
                 asm_tus.append(t)
         else:
             members.append(f"{fn}=?")
+            unattrib.add(fn)
     # A pack whose every member resolves to ONE upstream C file is NOT a split-required
     # blocker — it is an atomic verbatim mirror (the gu F-variant + wrapper idiom), banked
     # or spiked in one shot. Tag it `single-file-pack` so the gate stops reading it as the
@@ -2114,6 +2172,18 @@ def _classify_pack_hazards(off, fns, upstream_index):
     # single-file pack has one stem → does NOT fire.
     if len(c_stems) > 1:
         hz.append(Hazard.c_combined(c_stems))
+        # A SINGLE `?` leaf STRADDLING the file boundary (different named-C stems before and after it)
+        # must be assigned to one singleton by the split — flag its vram so the gate accounts for it
+        # rather than letting a silent `?` ride into the wrong side (S120 func_800A2780). Gated to a
+        # LONE straddler: a clean 2-file split with one stray leaf, NOT a whole foreign TU interleaved
+        # in (the __assert/nuboot game-boot region has 11 interspersed game `?`s — that messy bundle
+        # is the pack/upstream-fncount-mismatch case, not a stray boundary leaf). Front/trailing `?`
+        # (within one file) never straddle. asm_function_addrs gives ROM offsets → +subseg vram delta.
+        base_v = subseg_vram(off)
+        name_vram = {nm: base_v + (a - off) for nm, a in asm_function_addrs(off)}
+        straddlers = _straddling_unattrib(fns, fn_stems, unattrib, name_vram)
+        if len(straddlers) == 1:
+            hz.append(Hazard.unattrib_leaf(straddlers))
     # Combined-subseg sub-pattern: ≥2 asm-ONLY members from *distinct* vendorable ultralib .s
     # files (the asm analog of a multi-file C pack). The gate splits the subseg at the TU
     # boundary, then vendors each .s verbatim. A pack whose asm members share one .s (a
@@ -2869,6 +2939,13 @@ def _build_row(off, typ, path, size, args, upstream_index, carried, sig_index,
     dsm = drop_static_mirror_hazard(mirror_path, hazards)
     if dsm:
         hazards.append(dsm)
+
+    # Block-reorder tell (libnusys unexplained jal-mismatch + no coddog) in a family with a BANKED
+    # block-reorder mirror → name the sibling so the gate applies the SAME CheckConnector/RAM-enable
+    # swap up-front (appended after coddog so the no-coddog test sees the final hazard set).
+    brs = _block_reorder_sibling(up_path, hazards, up_lib)
+    if brs:
+        hazards.append(Hazard.block_reorder_sibling(brs))
 
     cand = Candidate(off, primary, kind, fns, size, up_lib, band, blocked)
     return score_row(cand, hazards, carried)

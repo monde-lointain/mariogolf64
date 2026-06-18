@@ -300,19 +300,6 @@
   },
   {
     "band": "cold",
-    "func": "nuContGBPakFwrite",
-    "hazards": "pack:7fn[nuContGBPakFwrite=nucontgbpakfwrite,func_800A2780=?,nuSiMgrInit=nusimgr,nuSiSendMesg=nusimgr,func_800A2888=?,func_800A28A8=?,func_800A28C8=?],c-combined:2file[nucontgbpakfwrite|nusimgr],file-static,defines-data:nuSiCallBackList,jal-count-mismatch:5vs10",
-    "kind": "asm-flip",
-    "nfns": 7,
-    "pts": 8,
-    "rom": "0x7D970",
-    "score": -1080,
-    "size": 1280,
-    "upstream": "libnusys",
-    "vram": "0x800A2570"
-  },
-  {
-    "band": "cold",
     "func": "nuContRmbMgrInit",
     "hazards": "pack:9fn[nuContRmbMgrInit=nucontrmbmgr,nuContRmbMgrRemove=nucontrmbmgr,contRmbControl=nucontrmbmgr,contRmbRetrace=nucontrmbmgr,contRmbCheckMesg=nucontrmbmgr,func_800A1DA0=?,func_800A1DE8=?,func_800A1E18=?,func_800A1EA4=?],defines-data:nuContRmbSearchTime,nuContRmbCallBack,refs-unplaced:nuContRmbCallBack,nuContRmbSearchTime,nuScRetraceCounter",
     "kind": "asm-flip",

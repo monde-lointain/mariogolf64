@@ -16,6 +16,29 @@ subordinate to the libultra goal. Target selection is `tools/pick_target.py` (sm
 the 8-point decompose gate fires on any seed ≥8. v2 classical track is active (since S11);
 mirror is the default, classical is first-class when the asm warrants it.
 
+**S120 — `nucontgbpakfwrite.c` BANKED (libnusys GBPak near-verbatim block-reorder mirror; S119
+sibling; GBPak family COMPLETE).** Banked `nuContGBPakFwrite` (0x800A2570), the last GBPak-family asm
+leaf, decomposed out of the pts-8 c-combined:2file `[0x7D970]` pack at the rom-0x7DB80 file boundary.
+**HEADLINE: sibling-replay banks the near-verbatim FIRST-BUILD.** nuContGBPakFwrite is the structural
+twin of S119's `nuContGBPakFread` — same MG64-specific block reorder (the RAM-enable block
+`bzero`/`data[31]=0xa`/`nuContGBPakWrite` runs BEFORE `nuContGBPakCheckConnector`, `ram=0` in the
+range-check `beqz` delay slot, `jal CheckConnector` at skip-label 0x800a2610), and the same benign
+`nuContGBPakRead`/`Write`→`ReadWrite` macro `jal-count-mismatch:5vs10`. Applying the CheckConnector ↔
+RAM-enable swap UP-FRONT (from the asm + the S119 precedent) on the verbatim nusys-2.07 cp landed
+insn-identical, full-make ROM SHA-1 == baserom, **0 iteration** (vs S119's discover-via-re-attempt).
+Zero symbol adds (name curated; all 5 callees placed). md5-candidate 172→**173** (all 173 src .c
+stub-free); asm subsegs 110→110 (split net-zero). Quality 0/0/0/0, **0 re-attempt**. seed 3 → realized
+2 (residual −1, the first sibling-known verbatim-first-try). **Cross-repo follow-up:** none. Retro
+applied 3 of 3 (#1 `pick_target.py block-reorder-sibling:<file>` tag + `BLOCK_REORDER_FAMILIES` + unit
+test + golden regen; #2 `unattrib-leaf:0x<vram>` lone-straddler flag for a c-combined split + unit
+test; #3 `VELOCITY.md` sibling-known per-fn-provenance refinement). All three forward-looking (zero
+current behavior; the only golden churn was the legitimate S120 split row). **Remaining libnusys
+(next-cleanest):** the S120 carry `[0x7DB80,asm]` = `func_800A2780` leaf (unidentified, returns
+&0x800F77D0) + `nusimgr.c` (5 fns, drop-static + `nuSiCallBackList` drop-def, see Carry-overs); then
+`nuGfxTaskMgr` (pts-8 `single-file-pack:3fn`, file-static + ~14 defines-data, `jal-count-mismatch:7vs11`
+no-coddog — a genuine structural near-verbatim, version-check AND structural) and the `nuContRmb*`/
+`nuScCreateScheduler` multi-file packs.
+
 **S119 — `func_800A2090.c` + `nucontgbpakfread.c` BANKED (libnusys GBPak/RMB region cleared).** Banked
 the S118 near-free carry-over `func_800A2090` (0x7D490, trivial classical 8B empty leaf
 `void func_800A2090(void){}` → KMC `jr $ra;nop`; the 8B subseg tail is the `trailing-pad:8B@16` to
@@ -1739,6 +1762,26 @@ by `/sprint-plan`:
   8B tail IS the `trailing-pad:8B@16` to `nucontgbpakmgr`@0x7D4A0, landed clean on the first full-make
   ROM SHA-1. Confirmed NOT `nuContRmbForceStopEnd` (no `nuSiSendMesg` call); unidentified empty fn. Banked
   with its GBPak sibling `nuContGBPakFread`; the old `[0x7D3B0]` RMB block is fully cleared.)_
+
+- **S120 split remainder — `[0x7DB80, asm]` = `func_800A2780` leaf + `nusimgr.c` (5 fns).** Left
+  asm when S120 decomposed the `[0x7D970]` c-combined:2file pack at the rom-0x7DB80 file boundary and
+  banked the `nucontgbpakfwrite` singleton. Two distinct next-increments share this subseg:
+  - **`func_800A2780`** (0x800A2780, 0xC B, 16-aligned): a leaf `return (void*)0x800F77D0;`
+    (`lui v0,0x800f; jr ra; addiu v0,v0,0x77d0`), present in NEITHER nucontgbpakfwrite.c nor the
+    nusimgr.c I read. **Needs identification at the gate** — disassemble + find what global lives at
+    0x800F77D0 and which nusys TU defines this accessor (it sits between the GBPak file and nusimgr;
+    it may be a nusimgr-adjacent accessor or a separate tiny TU). Until identified, the nusimgr split
+    cannot pick a clean 16-aligned boundary (nuSiMgrInit is at 0x800A278C, NOT 16-aligned), so either
+    func_800A2780 belongs WITH nusimgr (bank together) or it is its own micro-TU split off first.
+  - **`nusimgr.c`** (nuSiMgrInit=0x800A278C, nuSiSendMesg=0x800A2824, nuSiMgrStop=func_800A2888,
+    nuSiMgrRestart=func_800A28A8, nuSiMgrThread=func_800A28C8 static). Verbatim nusys mirror
+    (version-check the family per S117/S118). **Expected resolution (frame, not worst-case):** the 3
+    file-statics (`nuSiMesgBuf[8]`, `siMgrThread`, `siMgrStack[]`) drop-to-extern at asm-recovered
+    `main_bss` vrams (the S87/S90/S115 drop-static pattern); `nuSiCallBackList` is a `defines-data`
+    DROP-DEF, not a carve — it is ALREADY a placed extern (0x800C7E30, from the S114 nusicallbackadd/
+    remove sprint that referenced it), so nusimgr.c re-defining it just drops to extern (bytes from
+    the existing blob); `nuSiMesgQ`=0x801B93C0 + `nuSiMgrMesgQ` are refs to place/confirm. No clean
+    coddog self-match expected (libnusys), so jal/version reconciliation at the gate as usual.)
 
 - _(Near-free retry — **libkmc `sin.c` (0x8E660) C-mirror** (`_xsincos`+`sin`+`cos`+`tan`) **RESOLVED +
   banked S113** — the carry-over's 5-point completeness checklist replayed verbatim-correct, 0 rework,

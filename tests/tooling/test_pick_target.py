@@ -519,6 +519,48 @@ def test_call_divergence_libnusys_intmask_version_artifact(monkeypatch):
     assert d2 is not None and d2.detail == "3vs1"
 
 
+def test_block_reorder_sibling_libnusys_family():
+    """S120 #1: a libnusys candidate carrying the block-reorder tell — an UNexplained jal-mismatch +
+    NO coddog-mirror (the reorder breaks coddog's fingerprint) — whose upstream basename is in a
+    BLOCK_REORDER_FAMILIES prefix names the banked sibling whose CheckConnector/RAM-enable swap
+    replays, so the gate applies it up-front. A coddog match, a `(version-artifact?)` clean-drop, a
+    non-libnusys lib, or an out-of-family file all suppress; the registered sibling never self-flags."""
+    pt = load_tool("pick_target")
+    H = load_tool("pick_target_hazards").Hazard
+    jal = [H.jal_count_mismatch(5, 10)]  # the unexplained-mismatch tell
+    assert pt._block_reorder_sibling("a/nucontgbpakfwrite.c", jal, "libnusys") == "nucontgbpakfread.c"
+    assert pt._block_reorder_sibling("a/nucontgbpakfread.c", jal, "libnusys") is None  # no self-flag
+    assert pt._block_reorder_sibling(  # coddog match explains the structure → suppress
+        "a/nucontgbpakfwrite.c", jal + [H.coddog_mirror("x.c", 99.0)], "libnusys") is None
+    va = [H.jal_count_mismatch(2, 0, version_artifact=True)]  # clean-drop, not the reorder tell
+    assert pt._block_reorder_sibling("a/nucontgbpakfwrite.c", va, "libnusys") is None
+    assert pt._block_reorder_sibling("a/nucontgbpakfwrite.c", jal, "libultra") is None  # wrong lib
+    assert pt._block_reorder_sibling("a/nusched.c", jal, "libnusys") is None  # out of family
+    assert pt._block_reorder_sibling("a/nucontgbpakfwrite.c", [], "libnusys") is None  # no mismatch
+
+
+def test_straddling_unattrib_inter_file_leaf():
+    """S120 #2: _straddling_unattrib returns the vrams of `?` members whose nearest named-C members
+    before AND after resolve to DIFFERENT stems (an inter-file leaf the split must place) — and only
+    those. Models the pre-split S120 [0x7D970] pack: Fwrite(A), func_800A2780(?), nuSiMgrInit(B),
+    nuSiSendMesg(B), then 3 trailing `?` within B. Leading and same-stem-flanked `?` do NOT straddle."""
+    pt = load_tool("pick_target")
+    fns = ["nuContGBPakFwrite", "func_800A2780", "nuSiMgrInit", "nuSiSendMesg",
+           "func_800A2888", "func_800A28A8", "func_800A28C8"]
+    stems = ["nucontgbpakfwrite", None, "nusimgr", "nusimgr", None, None, None]
+    unattrib = {"func_800A2780", "func_800A2888", "func_800A28A8", "func_800A28C8"}
+    name_vram = {nm: 0x800A2570 + i * 0x10 for i, nm in enumerate(fns)}
+    assert pt._straddling_unattrib(fns, stems, unattrib, name_vram) == [name_vram["func_800A2780"]]
+    # a LEADING `?` (no named member before it) does NOT straddle
+    assert pt._straddling_unattrib(
+        ["func_x", "alSynNew", "alSynDelete"], [None, "synthesizer", "syndelete"],
+        {"func_x"}, {"func_x": 1, "alSynNew": 2, "alSynDelete": 3}) == []
+    # a `?` flanked by the SAME stem both sides (within one file) does NOT straddle
+    assert pt._straddling_unattrib(
+        ["a", "func_y", "b"], ["nusimgr", None, "nusimgr"],
+        {"func_y"}, {"a": 1, "func_y": 2, "b": 3}) == []
+
+
 def test_coddog_tail_trap_rescan(monkeypatch):
     """S80 #3: a coddog identity carried by an UN-NAMED TAIL member (not the named leader) re-runs
     the file-level trap battery on the resolved upstream, so its defines-data/file-static is priced.

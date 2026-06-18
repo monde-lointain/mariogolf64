@@ -97,6 +97,21 @@ HAZARD_DATA_CARVE = "data-carve"  # the upstream .c defines a file-scope INITIAL
 # `.data` sibling carve at the asm-recovered vram. `static` bars cross-file linkage so the array is
 # file-PRIVATE. Fired ONLY on the single-file (non c-combined) subset. Detail `<names>`. Advisory.
 # See docs/hazards.md#defines-data
+HAZARD_BLOCK_REORDER_SIBLING = "block-reorder-sibling"  # a libnusys candidate carrying the
+# block-reorder tell (an unexplained jal-mismatch + NO coddog-mirror; the reorder breaks coddog's
+# fingerprint) whose upstream-file family has an ALREADY-BANKED block-reorder mirror — MG64's per-file
+# nusys revision swaps two source blocks vs every archived SDK (the GBPak F-variants run the RAM-enable
+# block before nuContGBPakCheckConnector). The verbatim cp needs the SAME swap the sibling needed, so
+# the gate applies it UP-FRONT instead of rediscovering it via a re-attempt (S119 nucontgbpakfread ->
+# S120 nucontgbpakfwrite, first-build clean). Detail `<sibling.c>`. Advisory. See
+# docs/hazards.md#near-verbatim-mirror-jal-count-mismatch
+HAZARD_UNATTRIB_LEAF = "unattrib-leaf"  # within a c-combined pack (≥2 distinct C upstream files), a
+# `func_<addr>=?` member attributed to NEITHER file that STRADDLES a file boundary — the nearest named-C
+# members before AND after it resolve to DIFFERENT upstream stems. The file-boundary split must assign it
+# to one side; a silent `?` could ride into the wrong singleton (S120 func_800A2780, between
+# nucontgbpakfwrite and nusimgr). Front/trailing `?` (within one file) do NOT fire. Fired only for a
+# LONE straddler (a clean 2-file split with one stray leaf, not a whole interleaved foreign TU).
+# Detail `0x<vram>` (comma list). Advisory. See docs/hazards.md#multi-function-segment-splitting-pack
 
 
 @dataclasses.dataclass
@@ -197,6 +212,16 @@ class Hazard:
     def data_carve(cls, arrays) -> "Hazard":
         """Comma list of file-scope initialized-array names (.data sibling carve)."""
         return cls(HAZARD_DATA_CARVE, ",".join(arrays))
+
+    @classmethod
+    def block_reorder_sibling(cls, sibling: str) -> "Hazard":
+        """`<sibling.c>` — the banked same-family block-reorder mirror whose swap fix replays here."""
+        return cls(HAZARD_BLOCK_REORDER_SIBLING, sibling)
+
+    @classmethod
+    def unattrib_leaf(cls, addrs) -> "Hazard":
+        """Comma list of `0x%08X` vrams of inter-file `?` leaves straddling a c-combined file boundary."""
+        return cls(HAZARD_UNATTRIB_LEAF, ",".join(f"0x{a:08X}" for a in sorted(addrs)))
 
     @classmethod
     def needs_header(cls, tagged) -> "Hazard":

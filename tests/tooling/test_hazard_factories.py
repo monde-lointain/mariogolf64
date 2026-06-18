@@ -42,6 +42,10 @@ def test_address_list_factories():
     assert H.refs_unplaced(["g@0x80001000", "h"]).render() == f"{h.HAZARD_REFS_UNPLACED}:g@0x80001000,h"
     assert H.calls_unplaced(["__assertBreak"]).render() == f"{h.HAZARD_CALLS_UNPLACED}:__assertBreak"
     assert H.data_carve(["arr1", "arr2"]).render() == f"{h.HAZARD_DATA_CARVE}:arr1,arr2"
+    assert H.unattrib_leaf([0x800A2790, 0x800A2780]).render() \
+        == f"{h.HAZARD_UNATTRIB_LEAF}:0x800A2780,0x800A2790"
+    assert H.block_reorder_sibling("nucontgbpakfread.c").render() \
+        == f"{h.HAZARD_BLOCK_REORDER_SIBLING}:nucontgbpakfread.c"
 
 
 def test_header_factories():

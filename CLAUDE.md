@@ -295,6 +295,7 @@ When `pick_target.py` flags a hazard (or a match shows its symptom), read the ma
 | `calls-unplaced:<fn>@0x…` | #calls-unplaced-function-callee-dual |
 | macro-hidden extern | #macro-hidden-recover-extern |
 | `jal-count-mismatch:<C>vs<asm>` | #near-verbatim-mirror-jal-count-mismatch |
+| `block-reorder-sibling:<file>` | #near-verbatim-mirror-jal-count-mismatch |
 | `file-static` | #file-static-bss-layout-conflict |
 | `drop-static-mirror:<n>bss` | #file-static-bss-layout-conflict |
 | `defines-data:<g>` / `data-static:<addr>` | #defines-data |
@@ -310,6 +311,7 @@ When `pick_target.py` flags a hazard (or a match shows its symptom), read the ma
 | mirror parse error / undefined ref on a helper macro | #vendored-header-incomplete |
 | `pack:<n>fn[…]` | #multi-function-segment-splitting-pack |
 | `c-combined:<n>file[…]` | #multi-function-segment-splitting-pack |
+| `unattrib-leaf:<addr>` | #multi-function-segment-splitting-pack |
 | `non16align` | #non16align |
 | `trailing-pad:<n>B@<align>` | #trailing-alignment-pad-after-a-c-mirror |
 | `intrinsic-likely:<tu>.s` (and `(kmc-as)`, `(has-rodata:<sym>)`, `(asm-mirror-jtbl:<head>)`) | #asm-mirror-vendoring |

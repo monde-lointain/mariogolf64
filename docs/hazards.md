@@ -507,7 +507,20 @@ the gate by disassembling and comparing the jal list against the upstream call l
   calls.) Generalizes the S117/S118 "nusys version is per-file" finding from wrapper-PRESENCE to
   block-ORDER divergence.
 
-**Provenance:** S18, S30, S35, S45, S47, S118, S119.
+**Sibling-replay (S120).** Once one fn in a family is confirmed a block-reorder mirror, its siblings
+replay the SAME swap: `nuContGBPakFwrite` (S120) is the direct sibling of S119's `nuContGBPakFread`
+(its asm runs the RAM-enable block before `nuContGBPakCheckConnector` identically, with the same
+benign `nuContGBPakRead`/`Write`→`ReadWrite` macro `jal-count-mismatch:5vs10`). Applying the swap
+UP-FRONT from the asm + the sibling precedent banked it FIRST-BUILD, 0 iteration (vs S119, which
+discovered the reorder via a re-attempt). `pick_target.py` now surfaces
+`block-reorder-sibling:<sibling.c>` on a libnusys candidate carrying the tell (unexplained
+jal-mismatch + no `coddog-mirror`) whose upstream-file basename is in a known block-reorder family
+(`BLOCK_REORDER_FAMILIES`, seeded `nucontgbpak*`), so the gate plans the swap instead of re-deriving
+it. The flag is advisory: the seed keeps its +1 near-verbatim risk (the hand-edit is still real at
+plan time), but a sibling-known swap that banks first-try scores the realized −1 verbatim-first-try
+tier (VELOCITY S120 #3).
+
+**Provenance:** S18, S30, S35, S45, S47, S118, S119, S120.
 
 ---
 
@@ -1274,6 +1287,18 @@ none` because its unattributed `func_` primary set the column). Caveat: a member
 is a `#pragma weak` alias (e.g. `cosf`, whose `gu/cosf.c` defines `__cosf`) shows as `=?` in the pack
 and is not counted in `c-combined`, since `upstream_index` keys on the defined name, not the alias; such
 a leaf still needs manual identification (S64 `cosf` was found by disassembly, recorded in BACKLOG).
+
+**Inter-file stray leaf: `unattrib-leaf:0x<vram>` (S120).** Within a `c-combined` pack, a lone `=?`
+member whose nearest named-C members BEFORE and AFTER resolve to DIFFERENT stems straddles the
+file boundary — the split must consciously assign it to one singleton, or a silent `?` rides into the
+wrong side. `pick_target.py` flags its vram, but only for a LONE straddler (a clean 2-file split with
+one stray leaf); a whole foreign TU interleaved in (e.g. the `__assert`/`nuboot` game-boot region's 11
+interspersed game `?`s) is the messier `pack`/`upstream-fncount-mismatch`/`game-region-mirror` case,
+not a stray boundary leaf, so it does NOT fire. Motivating case: the pre-split S120 `[0x7D970]`
+`c-combined:2file[nucontgbpakfwrite|nusimgr]` pack, where `func_800A2780` (a 0xC-byte leaf returning
+`&0x800F77D0`, in NEITHER upstream source) sat exactly between `nuContGBPakFwrite` and `nuSiMgrInit`.
+The S120 split at the 16-aligned `0x7DB80` boundary left it in the trailing `[0x7DB80,asm]` subseg
+with `nusimgr` (a carry-over), but the flag would have surfaced it at the gate.
 
 **Not every pack splits: `single-file-pack` (S67 #2).** When every pack member resolves to one
 upstream C file (one stem, no `=?`/asm members), `pick_target.py` emits `single-file-pack:<n>fn[…]`
