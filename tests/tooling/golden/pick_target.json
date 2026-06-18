@@ -143,19 +143,6 @@
     "vram": "0x800A1320"
   },
   {
-    "band": "cold",
-    "func": "nuContGBPakFread",
-    "hazards": "jal-count-mismatch:5vs9",
-    "kind": "asm-flip",
-    "nfns": 1,
-    "pts": 2,
-    "rom": "0x7D7A0",
-    "score": -264,
-    "size": 464,
-    "upstream": "libnusys",
-    "vram": "0x800A23A0"
-  },
-  {
     "band": "-",
     "func": "func_8009FB60",
     "hazards": "pack:2fn[func_8009FB60=?,func_8009FD1C=?],one-tu,maybe-upstream:libultra:viswapcontext,sprawdma,sirawdma",
@@ -304,7 +291,7 @@
     "hazards": "single-file-pack:3fn[nuGfxTaskMgr=nugfxtaskmgr,nuGfxTaskMgrInit=nugfxtaskmgr,nuGfxTaskStart=?],one-tu,file-static,defines-data:nuGfxUcode,nuGfxTask[NU_GFX_TASK_NUM],nuGfxTaskSpool,nuGfxCfb,nuGfxCfbNum,nuGfxCfb_ptr,nuGfxZBuffer,nuGfxDisplay,nuGfxCfbCounter,nuGfxUcodeFifoSize,nuGfxUcodeFifoPtr,nuGfxSwapCfbFunc,nuGfxTaskEndFunc,beforeFlag,refs-unplaced:nuDramStack,nuGfxCfb,nuGfxCfbCounter,nuGfxCfbNum,nuGfxCfb_ptr,nuGfxTaskEndFunc,nuGfxUcodeFifoPtr,nuGfxUcodeFifoSize,nuRDPOutputBuf,nuYieldBuf,nusched,rspbootTextEnd,jal-count-mismatch:7vs11",
     "kind": "asm-flip",
     "nfns": 3,
-    "pts": 5,
+    "pts": 8,
     "rom": "0x4840",
     "score": -984,
     "size": 1184,
@@ -648,5 +635,18 @@
     "size": 4896,
     "upstream": "none",
     "vram": "0x80064D80"
+  },
+  {
+    "band": "-",
+    "func": "func_8004D190",
+    "hazards": "pack:25fn[func_8004D190=?,func_8004D4B8=?,func_8004D580=?,func_8004D5F0=?,func_8004D794=?,func_8004D7B8=?,set_flag_based_on_param=?,print_string_at_grid=?,check_and_print_grid=?,func_8004DA4C=?,convert_and_print_hex=?,func_8004DAF4=?,func_8004DC44=?,func_8004DD70=?,func_8004DDE4=?,func_8004DE44=?,func_8004DE60=?,func_8004DE7C=?,func_8004E058=?,func_8004E184=?,func_8004E1E0=?,func_8004E27C=?,func_8004E288=?,func_8004E2DC=?,func_8004E47C=?]",
+    "kind": "asm-flip",
+    "nfns": 25,
+    "pts": 13,
+    "rom": "0x28590",
+    "score": -5136,
+    "size": 5136,
+    "upstream": "none",
+    "vram": "0x8004D190"
   }
 ]

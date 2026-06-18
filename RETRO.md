@@ -25,6 +25,17 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 119 — clear func_800A2090 carry-over + nuContGBPakFread (libnusys GBPak/RMB region) — 2026-06-17
+- Increment: src/libnusys/mainlib/func_800A2090.c + nucontgbpakfread.c banked (1 fn each). md5-candidate 170 → 172 (all 172 src .c stub-free); asm subsegs 112 → 110. Region 0x7D490–0x7D7A0 fully cleared.
+- Quality: 0/0/0/0 (stuck-far/permuter/carried/re-opened). 1 mid-sprint re-attempt (nuContGBPakFread: verbatim cp SHA-missed → block-reorder hand-edit).
+- Seed: committed 3pt; banked 4pt realized (residual +1); regime mixed (func_800A2090 trivial classical seed-only + nuContGBPakFread near-verbatim, reclassified to the classical track per S119 #3).
+- What helped: the S118 near-free carry-over checklist made func_800A2090 a mechanical replay (the `trailing-pad:8B@16` to nucontgbpakmgr landed clean on the first full-make). For nuContGBPakFread, an in-tree-`.o` vs `build/asm/<rom>.o` objdump diff localized the divergence to pure block ORDER (117==117 insns reordered), and the per-revision nusys source set (`~/development/repos/nusys/src/<ver>/`) confirmed NO archived rev (1.20/2.00/2.05/2.06/2.07) reproduces it → hand-swap.
+- Friction: the gate mis-classified nuContGBPakFread as a "clean verbatim mirror" — it refuted the jal-mismatch (a real macro artifact: nuContGBPakRead/Write → nuContGBPakReadWrite) and confirmed callees placed, but jal/insn-count parity does NOT prove block-order parity. The un-refuted tell was the "no coddog" flag (a reorder breaks the structural fingerprint), under-weighted at planning → a planned-2pt mirror realized 3pt near-verbatim.
+- Applied: 3 of 3 — #1 `pick_target.py seed_points` prices a jal-mismatch + no-`coddog-mirror` target at mirror-floor +1 (near-verbatim risk; `(version-artifact?)` and coddog matches exempt), + unit test + golden regen (nuGfxTaskMgr 5→8, the genuinely-structural one); #2 `docs/hazards.md#near-verbatim-mirror-jal-count-mismatch` block-reorder version-divergence sub-case (read asm order, reconstruct source order, hand-swap, verify insn-identical) + CLAUDE.md hazard-index symptom row; #3 `VELOCITY.md` near-verbatim-reclassification rule (a SHA-missing nominal mirror scores on the classical track, not the point mass).
+- Carry-over: none. Region 0x7D490–0x7D7A0 cleared; only the pts-8 `nuContGBPakFwrite` c-combined:2file pack (0x7D970) remains asm in the GBPak band.
+
+---
+
 ## Sprint 118 — bank the RMB pair (nuContRmbModeSet + nuContRmbForceStop, libnusys mirrors) — 2026-06-17
 - Increment: src/libnusys/mainlib/nucontrmbmodeset.c + nucontrmbforcestop.c banked (1 fn each), split from the c-combined `[0x7D3B0,asm]` RMB pack. md5-candidate 168 → 170 (all 170 src .c stub-free).
 - Quality: 0/0/0/0 (stuck-far/permuter/carried/re-opened). Both first-build SHA, 0 iteration.

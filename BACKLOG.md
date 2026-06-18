@@ -16,6 +16,29 @@ subordinate to the libultra goal. Target selection is `tools/pick_target.py` (sm
 the 8-point decompose gate fires on any seed ≥8. v2 classical track is active (since S11);
 mirror is the default, classical is first-class when the asm warrants it.
 
+**S119 — `func_800A2090.c` + `nucontgbpakfread.c` BANKED (libnusys GBPak/RMB region cleared).** Banked
+the S118 near-free carry-over `func_800A2090` (0x7D490, trivial classical 8B empty leaf
+`void func_800A2090(void){}` → KMC `jr $ra;nop`; the 8B subseg tail is the `trailing-pad:8B@16` to
+nucontgbpakmgr@0x7D4A0, landed clean) plus `nuContGBPakFread` (0x7D7A0). **HEADLINE: a "mirror" that was
+really a near-verbatim BLOCK REORDER.** The verbatim nusys-2.07 cp built+linked clean but ROM SHA-MISSED;
+the in-tree vs asm objdump showed the SAME 117 insns REORDERED — MG64's per-file nusys rev runs the
+RAM-enable block (`bzero`/`data[31]=…`/`nuContGBPakWrite`) BEFORE `nuContGBPakCheckConnector` (`ram=0` in
+the range-check `beqz` delay slot, `jal CheckConnector` at the skip-label), but EVERY archived
+1.20/2.00/2.05/2.06/2.07 is CheckConnector-first. Hand-swapping the two source blocks → insn-identical,
+full-make ROM SHA-1 == baserom. The `jal-count-mismatch:5vs9` was an UNRELATED macro artifact (nusys.h
+`nuContGBPakRead`/`Write` → `nuContGBPakReadWrite`; 9 asm jals == 9 expanded call sites); the un-refuted
+tell was the "no coddog" flag (a reorder breaks the structural fingerprint). Zero symbol adds (func_ name
+kept; `nuContGBPakFread`@0x800A23A0 + all callees pre-curated). md5-candidate 170→**172** (all 172 src .c
+stub-free); asm subsegs 112→110. Quality 0/0/0/0 (1 re-attempt). **Cross-repo follow-up:** none. Retro
+applied 3 of 3 (#1 `pick_target.py` prices jal-mismatch + no-coddog at mirror-floor +1 [near-verbatim
+risk] + unit test + golden regen, nuGfxTaskMgr 5→8; #2 `docs/hazards.md#near-verbatim-mirror-jal-count-mismatch`
+block-reorder sub-case + CLAUDE.md index row; #3 `VELOCITY.md` near-verbatim-reclassification rule).
+**Remaining libnusys (next-cleanest):** the GBPak band's last asm leaf is the pts-8 `nuContGBPakFwrite`
+c-combined:2file pack (0x7D970, nucontgbpakfwrite|nusimgr); next is `nuGfxTaskMgr` (now pts-8 after the
+S119 #1 bump, `single-file-pack:3fn`, file-static + ~14 defines-data, `jal-count-mismatch:7vs11` no-coddog
+— a genuine structural near-verbatim, version-check AND structural) and the `nuContRmb*`/`nuScCreateScheduler`
+multi-file packs.
+
 **S118 — `nucontrmbmodeset.c` + `nucontrmbforcestop.c` BANKED (libnusys RMB mirror pair, per-file
 version split).** Split the smallest remaining libnusys block, the c-combined `[0x7D3B0,asm]` RMB pack
 (240B), 3-way at file boundaries and banked its 2 verbatim mirrors, both first-build ROM SHA-1 ==
@@ -1709,20 +1732,13 @@ by `/sprint-plan`:
   adaptation vs upstream; **(5)** the upstream pin (file + VERSION_J). A near-free retry missing any
   of these is a half-scoped spike — finish the scope before deferring.
 
-- **Near-free retry (S118 deferral) — `func_800A2090` (0x7D490, 8B empty stub), trivial CLASSICAL,
-  not a mirror.** Deliberately left as `[0x7D490, asm]` at the S118 PO scope gate; the RMB pair banked
-  without it. It is an 8-byte empty function (`jr $ra; nop`), NOT `nuContRmbForceStopEnd` (that calls
-  `nuSiSendMesg`); no archived nusys revision produces an empty RMB function, so it is unidentified and
-  keeps its `func_` name. Completeness checklist: **(1)** flip `[0x7D490, asm]`→`[0x7D490, c,
-  libnusys/mainlib/func_800A2090]` (already a standalone 16-aligned subseg from the S118 3-way split);
-  **(2)** placed-ref inventory: none — no calls, no data refs (pure leaf); **(3)** new recover/callee
-  vrams: none; **(4)** include adaptation: none (`void func_800A2090(void) {}` needs no header; keep the
-  `func_` name → zero symbol adds); **(5)** upstream pin: N/A — classical, body is `void
-  func_800A2090(void) {}` (KMC `-O` emits `jr $ra; nop` = 8B). **One risk to verify at finalize:** the
-  subseg is 16B (0x7D490..0x7D4A0) but the C `.text` is 8B; the 8B tail is the 16-align pad to the next
-  subseg (`nucontgbpakmgr`@0x7D4A0) — a standard `trailing-pad:8B@16` (ld fills the gap from the next
-  section's alignment). If the pad does not land zero/clean, leave it asm. Pair it with an adjacent
-  tiny libnusys target next sprint; banking it fully clears the old `[0x7D3B0]` RMB block.
+- _(Near-free retry (S118 deferral) — `func_800A2090` (0x7D490, 8B empty stub) **RESOLVED + banked
+  S119** — the carry-over's completeness checklist replayed verbatim-correct, 0 rework: flip
+  `[0x7D490,asm]`→`[0x7D490,c,libnusys/mainlib/func_800A2090]`, body `void func_800A2090(void){}` (KMC
+  `-O` → `jr $ra; nop` = 8B), kept `func_` name (zero symbol adds), and the one flagged risk held — the
+  8B tail IS the `trailing-pad:8B@16` to `nucontgbpakmgr`@0x7D4A0, landed clean on the first full-make
+  ROM SHA-1. Confirmed NOT `nuContRmbForceStopEnd` (no `nuSiSendMesg` call); unidentified empty fn. Banked
+  with its GBPak sibling `nuContGBPakFread`; the old `[0x7D3B0]` RMB block is fully cleared.)_
 
 - _(Near-free retry — **libkmc `sin.c` (0x8E660) C-mirror** (`_xsincos`+`sin`+`cos`+`tan`) **RESOLVED +
   banked S113** — the carry-over's 5-point completeness checklist replayed verbatim-correct, 0 rework,

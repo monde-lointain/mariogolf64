@@ -335,6 +335,7 @@ When `pick_target.py` flags a hazard (or a match shows its symptom), read the ma
 | clean mirror SHA-miss, one field's high word | #mirror-cast-divergence-sign--vs-zero-extend |
 | clean mirror SHA-miss, char load lb/sll-sra vs lbu/andi | #char-signedness |
 | clean mirror SHA-miss, extra `jal __assert` / bare `assert()` / `bare-assert:<n>` | #assert-strip |
+| clean mirror SHA-miss, same insn count reordered / jal-mismatch + no `coddog-mirror` | #near-verbatim-mirror-jal-count-mismatch |
 | Gfx* manipulation | #display-lists |
 
 ## Cross-repo sync (Ghidra workspace at `~/development/reversing/ghidra/mariogolf64/`)

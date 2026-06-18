@@ -842,6 +842,15 @@ def test_seed_points_characterization():
     assert sp(100, "libultra", "cold", 4, [], False) == 8     # large pack must decompose
     assert sp(100, "none", "-", 1, [H(pt.HAZARD_FILE_STATIC)], False) == 8  # classical+drop gate
     assert [pt.snap_fib(n) for n in (0, 1, 2, 3, 4, 5, 6, 9)] == [1, 1, 2, 3, 5, 5, 8, 13]
+    # S119: unexplained jal-count-mismatch + NO coddog-mirror = probable near-verbatim → +1 over the
+    # mirror floor (the verbatim cp SHA-misses, needs an asm-driven diagnosis + hand-edit).
+    JAL = pt.HAZARD_JAL_COUNT_MISMATCH
+    assert sp(100, "libnusys", "cold", 1, [H(JAL, "5vs9")], False) == 3       # cold 2 +1 near-verbatim
+    # A coddog-mirror structural match explains the row as a clean verbatim mirror → NO bump.
+    assert sp(100, "libnusys", "cold", 1,
+              [H(JAL, "5vs9"), H(pt.HAZARD_CODDOG_MIRROR, "x.c@99.99")], False) == 2
+    # The (version-artifact?) annotation is a known clean-drop → NO bump (S118 nuContRmbModeSet).
+    assert sp(100, "libnusys", "cold", 1, [H(JAL, "2vs0(version-artifact?)")], False) == 2
 
 
 def test_score_row_characterization():

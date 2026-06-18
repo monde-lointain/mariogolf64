@@ -91,6 +91,7 @@ from pick_target_hazards import (
     HAZARD_NEEDS_DEFINE,
     HAZARD_PACK,
     HAZARD_SINGLE_FILE_PACK,
+    HAZARD_JAL_COUNT_MISMATCH,
     HAZARD_ONE_TU,
     HAZARD_CODDOG_FNCOUNT_MISMATCH,
     CODDOG_STRUCTURAL_BYTES_PER_LOC,
@@ -1981,6 +1982,21 @@ def seed_points(size, upstream, band, nfns, hazards, blocked):
         return 5  # small single classical fn — unproven regime, high variance
     base = 1 if band == "warm" else 2  # warm = enabler-free; cold = symbol recovery / cold deps
     base += sum(present.values())  # one bump per present enabler group (drop/copy/define/recover)
+    # Unexplained jal-count-mismatch (NOT a `(version-artifact?)` clean-drop) with NO coddog-mirror
+    # structural match is a probable near-verbatim version/reorder divergence, not a clean verbatim
+    # cp: the verbatim copy SHA-misses and needs an asm-driven diagnosis + hand-edit. Price it one
+    # above the mirror floor so the gate plans the near-verbatim risk instead of exempting it as a
+    # clean verbatim. A coddog-mirror match (structural fingerprint) or the (version-artifact?)
+    # annotation explains the mismatch → no bump; "no coddog" is itself the divergence tell, since a
+    # reorder breaks coddog's fingerprint. (S119 nuContGBPakFread: jal `5vs9` macro-artifact + no
+    # coddog, planned 2pt clean mirror, realized 3pt block-reorder near-verbatim.) See
+    # docs/hazards.md#near-verbatim-mirror-jal-count-mismatch.
+    jal_unexplained = any(
+        h.kind == HAZARD_JAL_COUNT_MISMATCH and "(version-artifact?)" not in (h.detail or "")
+        for h in hazards)
+    has_coddog = any(h.kind == HAZARD_CODDOG_MIRROR for h in hazards)
+    if jal_unexplained and not has_coddog:
+        base += 1  # near-verbatim risk (version/reorder divergence the verbatim cp won't match)
     if pack or big:
         base += 1
     return snap_fib(base)

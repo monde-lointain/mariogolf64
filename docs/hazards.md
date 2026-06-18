@@ -484,8 +484,30 @@ the gate by disassembling and comparing the jal list against the upstream call l
   `jal-count-mismatch:<c>vs<asm>(version-artifact?)` for libnusys so smallest-first is not deterred
   (S118 #2). (S118 `nuContRmbModeSet` — leaf 0-jal = 2.00 variant, int-mask dropped; sibling
   `nuContRmbForceStop` was version-identical and copied straight from 2.07-sdk.)
+- **nusys per-file version BLOCK REORDER (no count signal; "no coddog" is the tell).** A per-file
+  version divergence need not change the call/instruction COUNT — it can be pure block ORDER. MG64's
+  per-file nusys revision can order two top-level blocks differently from every archived rev, and no
+  available source reproduces it. **Nothing count-based fires:** the jal count agrees with the asm and
+  the instruction count is identical; the only standing tell is the ABSENCE of a `coddog-mirror:`
+  match (a reorder breaks coddog's structural fingerprint, so "no coddog" on a jal-flagged libnusys
+  target is a divergence signal, not noise — `pick_target.py` now prices a jal-mismatch-without-coddog
+  target one above the mirror floor, S119 #1). **Symptom:** the verbatim cp builds + links clean but
+  the ROM SHA-1 misses; an in-tree-`.o` vs baserom-asm objdump diff shows the SAME instruction count,
+  same ops, REORDERED (with cascading regalloc differences). **Procedure:** read the asm's jal/block
+  order (which call/block executes first), reconstruct the true source order — a C compiler does NOT
+  reorder across an early-return-gated side-effecting call, so the asm order IS the source order —
+  hand-swap the blocks in the closest English rev (2.07), and verify insn-identical (`objdump -d`
+  diff of the in-tree `.o` vs `build/asm/<rom>.o`) plus full-make ROM SHA-1. (S119 `nuContGBPakFread`:
+  the RAM-enable block — `bzero` / `data[31]=…` / `nuContGBPakWrite` — runs BEFORE
+  `nuContGBPakCheckConnector` (`ram=0` in the range-check `beqz` delay slot, `jal CheckConnector` at
+  the skip-label), but every archived 1.20/2.00/2.05/2.06/2.07 is CheckConnector-first; swapping the
+  two source blocks gave the byte match. Its `jal-count-mismatch:5vs9` was an unrelated MACRO
+  artifact: nusys.h `nuContGBPakRead`/`Write` expand to `nuContGBPakReadWrite`, so 9 asm jals == 9
+  expanded call sites — confirm by expanding the macros before counting, do not read it as 4 dropped
+  calls.) Generalizes the S117/S118 "nusys version is per-file" finding from wrapper-PRESENCE to
+  block-ORDER divergence.
 
-**Provenance:** S18, S30, S35, S45, S47, S118.
+**Provenance:** S18, S30, S35, S45, S47, S118, S119.
 
 ---
 
