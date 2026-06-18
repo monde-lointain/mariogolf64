@@ -93,3 +93,5 @@ ghidra/
 
 # S71 coddog cross-ref generated map (local, depends on ultralib/coddog builds)
 tools/coddog/coddog_map.tsv
+# nusys coddog cross-ref map (local, depends on the build/nusys-ref/ reference + coddog)
+tools/coddog/nusys_map.tsv

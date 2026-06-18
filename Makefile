@@ -157,6 +157,13 @@ check: test-tools
 coddog-sweep:
 	./tools/coddog_sweep.sh
 
+# The libnusys analog of coddog-sweep: build the nusys-2.07 reference (build/nusys-ref/), then
+# fingerprint MG64 against it and write tools/coddog/nusys_map.tsv. build_nusys_ref.sh is the slow,
+# stable step; nusys_sweep.sh re-runs after each `make`. Both maps are gitignored.
+coddog-sweep-nusys:
+	./tools/build_nusys_ref.sh
+	./tools/nusys_sweep.sh
+
 sync-names:
 	-GHIDRA_REPO="$${MARIOGOLF64_GHIDRA_REPO:-$$HOME/development/reversing/ghidra/mariogolf64}"; \
 	  SYNC_PY="$$GHIDRA_REPO/venv/bin/python3"; \
@@ -174,6 +181,7 @@ help:
 	@echo '  setup            create venv + download the KMC toolchain'
 	@echo '  test-tools/check run the tooling characterization suite'
 	@echo '  coddog-sweep     fingerprint vs ultralib VERSION_J'
+	@echo '  coddog-sweep-nusys  build the nusys-2.07 reference + fingerprint vs it'
 	@echo '  sync-names       import curated names from the Ghidra workspace'
 	@echo 'Variables: V=1 (full commands), NONMATCHING=1 (WIP C, skip md5).'
 
@@ -204,4 +212,4 @@ spotcheck-build:
 clean-nonmatchings:
 	rm -rf nonmatchings/*/
 
-.PHONY: all clean distclean setup extract test-tools check coddog-sweep sync-names help nonmatching-func spotcheck-build clean-nonmatchings
+.PHONY: all clean distclean setup extract test-tools check coddog-sweep coddog-sweep-nusys sync-names help nonmatching-func spotcheck-build clean-nonmatchings

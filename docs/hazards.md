@@ -1472,6 +1472,23 @@ gate-safe drop-def symbol-add note also landed in #defines-data); S88 (`coddog-f
 S92 (the fncount check extended to tail-carried identities + the `coddog-structural` size guard,
 both retiring the llcvt false-positive class, where one tiny source fingerprint-matched 3 subsegs).
 
+**Nusys sweep (libnusys analog):** the same machinery pointed at the nusys-2.07 library instead of
+ultralib. `make coddog-sweep-nusys` runs `tools/build_nusys_ref.sh` (compile every
+`nusys/src/mainlib/*.c` with the project's KMC GCC + `LIBNUSYS_CFLAGS`, the in-tree mirror recipe,
+into `build/nusys-ref/`, then merge to one relocatable ELF) then `tools/nusys_sweep.sh` (`compare2`
+MG64 vs that ELF, writing `tools/coddog/nusys_map.tsv`, format
+`mgname<TAB>nusysname<TAB>mainlib/<file>.c<TAB>pct`). `pick_target.py` (`build_coddog_nusys_index`)
+reads it as a SEPARATE additive pass: a `>=99%` hit on an un-named subseg flags
+`coddog-mirror:mainlib/<file>.c@<pct>` and re-prices `upstream libnusys` (libnusys is already a
+first-class upstream lib, so the column / `--lib` / `seed_points` need no other change). The pass is
+keyed on the nusys map alone, so an absent `nusys_map.tsv` leaves libultra ranking byte-identical;
+the source-path prefix (`mainlib/` vs `src/`) tells the two maps apart downstream, and re-pricing
+routes `coddog-mirror:mainlib/...` to `src/libnusys/`. Caveat: nusys has many tiny (5 to 9
+instruction) wrappers (`nuGfxSetUcodeFifo`, `nuContGBPakMgrInit`) that coddog reports at 99.99%
+against unrelated small fns, the same structural-fingerprint class as steps 5 and 6; smallest-first
++ the gate read filter them (a big pack mis-re-priced to libnusys ranks last by size). **Provenance:**
+this sweep.
+
 ---
 
 ## vendored-header-incomplete (a reconstructed header is `(already-vendored)` yet missing a macro)

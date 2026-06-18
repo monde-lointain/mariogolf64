@@ -147,6 +147,11 @@ NAME_FILES = [os.path.join(ROOT, "symbol_addrs.txt"), os.path.join(ROOT, "ghidra
 # unchanged. A ≥CODDOG_MIRROR_PCT non-audio hit re-prices an un-named/none candidate as a libultra
 # mirror. See docs/hazards.md#coddog-cross-ref.
 CODDOG_MAP = os.environ.get("CODDOG_MAP", os.path.join(ROOT, "tools/coddog/coddog_map.tsv"))
+# Optional nusys coddog cross-ref map — the libnusys analog of CODDOG_MAP, written by
+# tools/nusys_sweep.sh. Absent by default → build_coddog_nusys_index() returns {} and ranking is
+# unchanged. A ≥CODDOG_MIRROR_PCT hit re-prices an un-named/none candidate as a libnusys mirror. Its
+# `cfile` paths are `mainlib/<base>.c` (nusys-2.07-src-relative), resolved by _coddog_nusys_path.
+NUSYS_CODDOG_MAP = os.environ.get("NUSYS_CODDOG_MAP", os.path.join(ROOT, "tools/coddog/nusys_map.tsv"))
 
 # Approximate C function-definition: a return-type-led line ending in `name(`.
 UPSTREAM_DEF_RE = re.compile(r"^[A-Za-z_][\w \t\*]*?\b([A-Za-z_]\w+)\s*\(", re.M)
@@ -730,29 +735,40 @@ def _static_carve_siblings():
     return out
 
 
-def build_coddog_index():
-    """Load the optional coddog cross-ref map -> {mgname: (ulfile, pct)}.
-
-    The map (tools/coddog/coddog_map.tsv, written by tools/coddog_sweep.sh) pairs each MG64
-    function with the ultralib fn coddog matched it to. Absent/garbled lines are skipped; an
-    absent file returns {} (ranking unchanged). Unlike signature_hint's IDF guess, a coddog hit is
+def _load_coddog_map(path):
+    """Parse a coddog cross-ref map (mgname<TAB>name<TAB>file<TAB>pct) -> {mgname: (file, pct)}.
+    Absent/garbled lines are skipped; an absent file returns {} (ranking unchanged). A coddog hit is
     an actual instruction-hash match — definitive enough to re-price a none-classified verbatim
-    mirror (see build_rows). Format per line: mgname<TAB>ulname<TAB>ulfile<TAB>pct."""
+    mirror (see build_rows). Shared by the libultra (build_coddog_index) and libnusys
+    (build_coddog_nusys_index) loaders."""
     idx = {}
     try:
-        with open(CODDOG_MAP, errors="ignore") as f:
+        with open(path, errors="ignore") as f:
             for line in f:
                 parts = line.rstrip("\n").split("\t")
                 if len(parts) != 4:
                     continue
-                mg, _ul, ulfile, pct = parts
+                mg, _name, cfile, pct = parts
                 try:
-                    idx[mg] = (ulfile, float(pct))
+                    idx[mg] = (cfile, float(pct))
                 except ValueError:
                     continue
     except OSError:
         return {}
     return idx
+
+
+def build_coddog_index():
+    """Load the optional libultra coddog cross-ref map -> {mgname: (ulfile, pct)} (written by
+    tools/coddog_sweep.sh; format mgname<TAB>ulname<TAB>ulfile<TAB>pct)."""
+    return _load_coddog_map(CODDOG_MAP)
+
+
+def build_coddog_nusys_index():
+    """Load the optional nusys coddog cross-ref map -> {mgname: (cfile, pct)} — the libnusys analog
+    of build_coddog_index, written by tools/nusys_sweep.sh. cfile is `mainlib/<base>.c`, resolved by
+    _coddog_nusys_path; absent file -> {} (ranking unchanged)."""
+    return _load_coddog_map(NUSYS_CODDOG_MAP)
 
 
 def _coddog_upstream_path(cfile):
@@ -763,15 +779,26 @@ def _coddog_upstream_path(cfile):
     return p if os.path.isfile(p) else None
 
 
+def _coddog_nusys_path(cfile):
+    """Resolve a nusys coddog map `cfile` (`mainlib/<base>.c`, nusys-2.07-src-relative) to an on-disk
+    path, or None. The libnusys analog of _coddog_upstream_path; the 2.07 source lives under
+    `<LIBNUSYS>/nusys/src/`."""
+    p = os.path.join(LIBNUSYS, "nusys/src", cfile)
+    return p if os.path.isfile(p) else None
+
+
 def _coddog_source_banked(cod_src):
     """True if a coddog-matched source's project mirror is ALREADY banked (0-stub) in-tree. A
     coddog-mirror hit to such a file can't be a fresh source attribution (the source is fully
     decompiled), so the match is necessarily structural — a DSP/stub fingerprint coincidence, the
-    sibling of coddog-fncount-mismatch / coddog-structural. `cod_src` is the ultralib-repo-relative
-    path the coddog map carries (`src/audio/load.c`); coddog is always the ultralib sweep, so the
-    mirror lands at `src/libultra/<reldir>/<base>`."""
-    rel = cod_src[len("src/"):] if cod_src.startswith("src/") else cod_src
-    mp = os.path.join(ROOT, "src", "libultra", rel)
+    sibling of coddog-fncount-mismatch / coddog-structural. `cod_src` is the source path the coddog
+    map carries: a nusys hit (`mainlib/<base>.c`) mirrors at `src/libnusys/<cod_src>`; a libultra hit
+    (`src/audio/load.c`, ultralib-repo-relative) mirrors at `src/libultra/<reldir>/<base>`."""
+    if cod_src.startswith("mainlib/"):
+        mp = os.path.join(ROOT, "src", "libnusys", cod_src)
+    else:
+        rel = cod_src[len("src/"):] if cod_src.startswith("src/") else cod_src
+        mp = os.path.join(ROOT, "src", "libultra", rel)
     try:
         with open(mp, errors="ignore") as f:
             return "INCLUDE_ASM" not in f.read()
@@ -2612,7 +2639,7 @@ def score_row(cand, hazards, carried):
 
 
 def _build_row(off, typ, path, size, args, upstream_index, carried, sig_index,
-               coddog_index, _libultra_band_start):
+               coddog_index, nusys_index, _libultra_band_start):
     """Classify one subseg and produce its scored row dict, or None to skip it (bss,
     scope-filtered, or a de-ranked carry-over). The per-subseg body of build_rows;
     up_lib/blocked/mirror_path are rebound in place across the coddog re-scan as the
@@ -2749,6 +2776,38 @@ def _build_row(off, typ, path, size, args, upstream_index, carried, sig_index,
         if up_lib is None:
             up_lib = "libultra"
 
+    # Nusys coddog cross-ref: the libnusys analog of the libultra blocks above, kept as a SEPARATE
+    # additive pass so an absent nusys_map.tsv leaves libultra ranking byte-identical. Fires only when
+    # no libultra coddog/name identity won (up_lib still None, or already libnusys). Scans primary +
+    # all members; for each distinct nusys source matched at >= CODDOG_MIRROR_PCT, flags coddog-mirror,
+    # re-runs the file-level trap battery against the real nusys `.c` (libnusys clib), and re-prices
+    # the subseg as a libnusys mirror so seed_points drops it off the classical path. A single-identity
+    # multi-fn pack gets the structural size-ratio guard (a tiny source fingerprint-matched to a big
+    # subseg — the `*FuncSet` one-liner twins coddog reports at 99.99%).
+    if up_lib in (None, "libnusys") and nusys_index:
+        nz = [(fn, nusys_index[fn][0], nusys_index[fn][1]) for fn in fns
+              if fn in nusys_index and nusys_index[fn][1] >= CODDOG_MIRROR_PCT]
+        if nz:
+            already = {h.coddog_file() for h in hazards if h.kind == HAZARD_CODDOG_MIRROR}
+            for cfile in sorted({c for _, c, _ in nz}):
+                if cfile in already:
+                    continue
+                cpct = max(p for _, c, p in nz if c == cfile)
+                hazards.append(Hazard.coddog_mirror(cfile, cpct))
+                cl_path = _coddog_nusys_path(cfile)
+                if cl_path:
+                    mirror_path = cl_path  # the confirmed nusys identity is the file we mirror + count
+                    blocked = _append_coddog_trap_hazards(off, primary, cl_path, "libnusys", hazards) or blocked
+            distinct = sorted({c for _, c, _ in nz})
+            if len(fns) > 1 and len(distinct) == 1:
+                cl1 = _coddog_nusys_path(distinct[0])
+                loc = _meaningful_loc(cl1) if cl1 else 0
+                if loc and size > CODDOG_STRUCTURAL_BYTES_PER_LOC * loc:
+                    cpct = max(p for _, c, p in nz if c == distinct[0])
+                    hazards.append(Hazard.coddog_structural(distinct[0], cpct))
+            if up_lib is None:
+                up_lib = "libnusys"
+
     # A `coddog-mirror` hazard pins the row to an ultralib(libultra) source even when up_lib stayed
     # None — audio coddog hits are deliberately NOT re-priced to libultra (they were header-`-I`-
     # gated), so a clean audio mirror surfaced as `upstream none` and `--lib libultra` skipped it.
@@ -2791,8 +2850,9 @@ def _build_row(off, typ, path, size, args, upstream_index, carried, sig_index,
     return score_row(cand, hazards, carried)
 
 
-def build_rows(args, upstream_index, carried, sig_index, coddog_index=None):
+def build_rows(args, upstream_index, carried, sig_index, coddog_index=None, nusys_index=None):
     coddog_index = coddog_index or {}
+    nusys_index = nusys_index or {}
     subs = parse_subsegs()
     # The lowest-rom `libultra/` subseg = the start of the libultra code band. A libultra-source
     # mirror BELOW it is game-region (-O2), not libultra-band (-O3) — feeds HAZARD_GAME_REGION_MIRROR.
@@ -2802,7 +2862,7 @@ def build_rows(args, upstream_index, carried, sig_index, coddog_index=None):
     for i, (off, typ, path) in enumerate(subs):
         size = subs[i + 1][0] - off if i + 1 < len(subs) else 0
         row = _build_row(off, typ, path, size, args, upstream_index, carried,
-                         sig_index, coddog_index, _libultra_band_start)
+                         sig_index, coddog_index, nusys_index, _libultra_band_start)
         if row is not None:
             rows.append(row)
     rows.sort(key=lambda r: (-r["score"], r["size"]))
@@ -2818,7 +2878,7 @@ def main():
     args = ap.parse_args()
 
     rows = build_rows(args, build_upstream_index(), carry_over_names(),
-                      build_signature_index(), build_coddog_index())
+                      build_signature_index(), build_coddog_index(), build_coddog_nusys_index())
     if args.json:
         print(json.dumps(rows, indent=1))
         return

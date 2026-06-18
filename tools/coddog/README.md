@@ -20,3 +20,15 @@ header). Writes `coddog_map.tsv` here (gitignored — depends on local builds).
 matches an ultralib fn gets a `coddog-mirror:<file>@<pct>` hazard; a ≥99% non-audio hit is re-priced
 as a `libultra` mirror (drops off the `classical and pack` → 13 seed path). Absent map → ranking
 unchanged. Full recipe + the `ld -r` combined-ELF build is in `docs/hazards.md#coddog-cross-ref`.
+
+## NuSystem variant
+
+    make coddog-sweep-nusys   # or: tools/build_nusys_ref.sh && tools/nusys_sweep.sh
+
+The libnusys analog. `build_nusys_ref.sh` compiles the nusys-2.07 `mainlib` with the project's KMC
+GCC + `LIBNUSYS_CFLAGS` (the in-tree mirror recipe) into `build/nusys-ref/` and merges it to one
+relocatable ELF (nusys has no prebuilt object tree at the project profile, unlike ultralib);
+`nusys_sweep.sh` runs `compare2` against it and writes `nusys_map.tsv` here (gitignored). `pick_target.py`
+(`build_coddog_nusys_index`) reads it as a separate additive pass that flags
+`coddog-mirror:mainlib/<file>.c@<pct>` and re-prices `upstream libnusys`; an absent `nusys_map.tsv`
+leaves libultra ranking byte-identical. See `docs/hazards.md#coddog-cross-ref` (the *Nusys sweep* note).

@@ -19,6 +19,14 @@ from conftest import golden_dir, load_tool, regen, run_tool  # noqa: F401
 ROWS = "50"
 
 
+@pytest.fixture(autouse=True)
+def _no_live_nusys_map(monkeypatch):
+    """Keep the live, gitignored, build-dependent nusys coddog map (tools/coddog/nusys_map.tsv,
+    written by tools/nusys_sweep.sh) out of every test so the goldens stay reproducible — the same
+    reason each golden neutralizes CODDOG_MAP. A nusys-specific test can override NUSYS_CODDOG_MAP."""
+    monkeypatch.setenv("NUSYS_CODDOG_MAP", "/nonexistent/nusys_map.tsv")
+
+
 def test_vendorable_tu_missing_defines(tmp_path, monkeypatch):
     """S57 retro #1: the asm-mirror needs-define pre-check (vendorable_tu_missing_defines).
 
@@ -591,6 +599,41 @@ def test_game_region_mirror_below_libultra_band(monkeypatch):
         coddog={})
     hz2 = next(r for r in rows2 if r["func"] == "leader")["hazards"]
     assert "game-region-mirror" not in hz2, hz2              # 0xA000 > band start -> no flag
+
+
+def test_coddog_nusys_repricing(monkeypatch):
+    """The libnusys analog of the libultra coddog re-price (build_coddog_nusys_index / nusys_sweep.sh):
+    an un-named subseg whose fn coddog matched (>=PCT) to a nusys mainlib source is flagged
+    coddog-mirror:mainlib/<file>.c and re-priced upstream=libnusys, so seed_points drops it off the
+    classical path. A SEPARATE additive pass keyed on the nusys_index, so an absent nusys map
+    (nusys_index={}) is a no-op — the guarantee the goldens' autouse neutralization relies on."""
+    pt = load_tool("pick_target")
+
+    class A:
+        lib = None
+        include_stuck = False
+        n = 999
+    monkeypatch.setattr(pt, "parse_subsegs", lambda: [(0x1000, "asm", None)])
+    monkeypatch.setattr(pt, "classify_subseg",
+                        lambda off, typ, path, size, _ui: ("asm-flip", ["func_1000"], []))
+    monkeypatch.setattr(pt, "src_func_callers", lambda: {})
+    monkeypatch.setattr(pt, "append_upstream_hazards", lambda *a, **k: ("warm", False))
+    monkeypatch.setattr(pt, "_coddog_nusys_path", lambda cfile: None)  # skip trap-rescan file read
+    monkeypatch.setattr(pt, "_coddog_source_banked", lambda s: False)  # tree-independent
+    monkeypatch.setattr(pt, "signature_hint", lambda off, primary, si: None)  # no libultra IDF guess
+    monkeypatch.setattr(pt, "subseg_vram", lambda off: 0x800A0000)
+    monkeypatch.setattr(pt, "score_row",
+                        lambda cand, hz, carr: {
+                            "func": cand.primary, "upstream": cand.up_lib, "score": 0, "size": cand.size,
+                            "hazards": ",".join(h.kind + (":" + h.detail if h.detail else "") for h in hz)})
+    # un-named func_1000 coddog-matched a nusys source -> re-price libnusys + flag.
+    rows = pt.build_rows(A(), {}, set(), {}, {}, {"func_1000": ("mainlib/nusimgr.c", 99.99)})
+    row = next(r for r in rows if r["func"] == "func_1000")
+    assert row["upstream"] == "libnusys", row
+    assert "coddog-mirror:mainlib/nusimgr.c@99.99" in row["hazards"], row["hazards"]
+    # absent nusys map -> no-op: stays unclassified (the libultra path is untouched).
+    rows0 = pt.build_rows(A(), {}, set(), {}, {}, {})
+    assert next(r for r in rows0 if r["func"] == "func_1000")["upstream"] is None
 
 
 def test_drop_static_mirror_hazard(tmp_path):
