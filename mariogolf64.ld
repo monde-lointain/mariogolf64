@@ -163,7 +163,7 @@ SECTIONS
         build/asm/7D970.o(.text);
         build/src/libnusys/mainlib/nusicallbackadd.o(.text);
         build/src/libnusys/mainlib/nusicallbackremove.o(.text);
-        build/asm/7DF90.o(.text);
+        build/src/libnusys/mainlib/nucontmgr.o(.text);
         build/src/libnusys/mainlib/nucontdatalock.o(.text);
         build/src/libnusys/mainlib/nucontqueryread.o(.text);
         build/src/libultra/os/getcurrfaultthread.o(.text);
@@ -423,7 +423,8 @@ SECTIONS
         build/asm/7D970.o(.data);
         build/src/libnusys/mainlib/nusicallbackadd.o(.data);
         build/src/libnusys/mainlib/nusicallbackremove.o(.data);
-        build/asm/7DF90.o(.data);
+        build/asm/data/main_data_2.data.o(.data);
+        build/src/libnusys/mainlib/nucontmgr.o(.data);
         build/src/libnusys/mainlib/nucontdatalock.o(.data);
         build/src/libnusys/mainlib/nucontqueryread.o(.data);
         build/src/libultra/os/getcurrfaultthread.o(.data);
@@ -439,7 +440,7 @@ SECTIONS
         build/src/libultra/io/aigetstat.o(.data);
         build/src/libultra/io/aisetfreq.o(.data);
         build/src/libultra/io/aisetnextbuf.o(.data);
-        build/asm/data/main_data_2.data.o(.data);
+        build/asm/data/main_data_3.data.o(.data);
         build/src/libultra/audio/drvrnew.o(.data);
         build/src/libultra/audio/load.o(.data);
         build/src/libultra/audio/auxbus.o(.data);
@@ -690,7 +691,7 @@ SECTIONS
         build/asm/7D970.o(.rodata);
         build/src/libnusys/mainlib/nusicallbackadd.o(.rodata);
         build/src/libnusys/mainlib/nusicallbackremove.o(.rodata);
-        build/asm/7DF90.o(.rodata);
+        build/src/libnusys/mainlib/nucontmgr.o(.rodata);
         build/src/libnusys/mainlib/nucontdatalock.o(.rodata);
         build/src/libnusys/mainlib/nucontqueryread.o(.rodata);
         build/src/libultra/os/getcurrfaultthread.o(.rodata);
@@ -968,7 +969,7 @@ SECTIONS
         build/asm/7D970.o(.bss);
         build/src/libnusys/mainlib/nusicallbackadd.o(.bss);
         build/src/libnusys/mainlib/nusicallbackremove.o(.bss);
-        build/asm/7DF90.o(.bss);
+        build/src/libnusys/mainlib/nucontmgr.o(.bss);
         build/src/libnusys/mainlib/nucontdatalock.o(.bss);
         build/src/libnusys/mainlib/nucontqueryread.o(.bss);
         build/src/libultra/os/getcurrfaultthread.o(.bss);
