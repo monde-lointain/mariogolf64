@@ -644,6 +644,26 @@ referrers across `asm/` + `src/`: >1 distinct subseg ⇒ shared ⇒ DROP. S97 `s
 splat-side. `pick_target.py` now unions `defines-data` over a `c-combined` pack's member upstreams
 (S97), so a secondary member's defined global is priced at the gate, not at execution.
 
+**Shared at a FIELD, and undroppable ⇒ carve + canonical-addend (S116).** Two refinements to the
+S97 share-check. (1) Sweep the WHOLE object range `base..base+size`, not just the base `D_<vram>`: a
+sibling that reads a *field* references `D_<base+N>` (a different label), so a base-only grep misses
+it and wrongly reads "sole-referrer." (2) "Shared ⇒ DROP" needs an **"AND droppable"** qualifier — a
+shared global whose initializer chains to file-private `static`s cannot be dropped (dropping the def
+orphans the statics → the compiler can dead-strip them → `.text` mismatch), so the **carve is forced
+even though it is shared**. Resolve the sibling's field reference by naming the carved global
+**canonical + sized** (`nuContGBPakCallBack = 0x800C7E20; // size:0xC`): splat then renders the
+sibling's `D_<base+4>` as `nuContGBPakCallBack + 0x4` (identical `%hi/%lo` bytes) and it binds to the
+C-exported symbol. This is the prefer-canonical-over-`D_<addr>`-placeholder rule, and it beats the two
+alternatives: a `D_<addr>` placeholder hides the name, and a `defined:False` absolute risks the S97
+double-def. No clash arises because the base stays C-defined (it is inside the carve, so splat marks
+it defined and never emits it to `undefined_syms_auto`). S116 `nucontgbpakmgr.c` (first libnusys
+`.data` carve: `funcList[8]`@0x800C7E00 + `nuContGBPakCallBack`@0x800C7E20, 0x30 B `.o` `.data`, 3-way
+split `main_data | nucontgbpakmgr .data | main_data_2`): the still-asm sibling `nuContGBPakFwrite`
+(0x7D970) reads `nuContGBPakCallBack.func` at base+4; the gate base-only share-check missed it and
+only the link error (`undefined reference to D_800C7E24`) surfaced the field ref. Tooling follow-up:
+`pick_target.py` could report a defines-data global's field-level `base+N` external refs (not just the
+base) so the share-status is priced at the gate.
+
 **Procedure:** Classical loop, drop the definition; the linker resolves to the splat-side global.
 
 **Verbatim-body fast path (S42).** When the *only* edit from upstream is dropping the file-scope

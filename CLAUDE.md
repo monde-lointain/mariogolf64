@@ -170,7 +170,10 @@ the summary.
     - (a) `regime: mirror` plus a verbatim copy of a single upstream file. A drop-def mirror
       qualifies: the function bodies are byte-verbatim, and only the file-scope data DEFS become
       `extern` decls, which emit nothing, so it banks atomically exactly like a pure `cp` (S86
-      `os/timerintr.c`, pts-8 single-file-pack, banked first-try seed-only).
+      `os/timerintr.c`, pts-8 single-file-pack, banked first-try seed-only). A `.data`-carve mirror
+      qualifies even more directly: the data DEFS STAY defined and the `.data` is carved to its placed
+      vram, so it is a pure verbatim `cp` of the whole file (S116 `nucontgbpakmgr.c`, pts-8
+      single-file-pack, banked first-try seed-only, the first libnusys `.data` carve).
     - (b) The decompose path is mechanically blocked: the increment is a `single-file-pack` (every
       member fn comes from ONE upstream `.c`), so there is no inter-file boundary to split at and an
       intra-file split cannot be independently mirrored. This holds regardless of inner-boundary

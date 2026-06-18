@@ -16,6 +16,26 @@ subordinate to the libultra goal. Target selection is `tools/pick_target.py` (sm
 the 8-point decompose gate fires on any seed ≥8. v2 classical track is active (since S11);
 mirror is the default, classical is first-class when the asm warrants it.
 
+**S116 — `src/libnusys/mainlib/nucontgbpakmgr.c` BANKED (libnusys .data-carve mirror, FIRST libnusys
+`.data` carve).** The 64GB Pak Manager (`nuContGBPakMgrInit`/`Remove` + 6 static `contGBPak*` dispatch
+leaves) banked as a verbatim nusys-2.07 mirror (coddog 99.99, `single-file-pack:8fn`), first-build ROM
+SHA-1 == baserom, 0 iteration. pts-8 8-gate fired → verbatim-mirror exemption (now extended to cover
+`.data`-carve mirrors, not just drop-def). The file DEFINES initialized `.data` (`funcList[8]`
+@0x800C7E00 0x20 + `nuContGBPakCallBack`@0x800C7E20 0xC, `.o` `.data` 0x30) carved **mid-`main_data`**
+via a 3-way split (`main_data | [0xA3200,.data,nucontgbpakmgr] | main_data_2`). **Gotcha (resolved
+in-sprint, no carry):** the gate base-only share-check wrongly read "sole-referrer"; the still-asm
+sibling `nuContGBPakFwrite` (0x7D970) reads `nuContGBPakCallBack.func` at base+4 (`D_800C7E24`) —
+caught by the link error. DROP impossible (callback→funcList→6-statics ref-chain), so carve forced;
+resolved by naming the base canonical+sized so splat renders the sibling as `nuContGBPakCallBack + 0x4`
+(see new `docs/hazards.md#defines-data` S116 paragraph). All 8 names pre-curated, all 9 callees placed.
+md5-candidate 166→**167** (all 167 src .c stub-free). Retro applied 4 of 4 (3 `#defines-data` refinements
++ 1 CLAUDE.md exemption note). **Cross-repo follow-up:** 1 new decomp data symbol (`nuContGBPakCallBack`)
+→ propagate via `sync_decomp_names.py --import-from-decomp`. **Remaining libnusys (next-cleanest):**
+`nuContMgrInit` (pts-8 `pack:9fn` `coddog-mirror:nucontmgr.c@99.99`, `drop-static-mirror:5bss` — the
+S115/S87/S90 drop-static pattern) and `nuGfxTaskMgr` (pts-5 `single-file-pack:3fn`, file-static +
+many defines-data); the messy ones are `nuContGBPakFread` (pts-2 1fn but `jal-count-mismatch:5vs9`,
+no coddog match) and the `nuContRmb*` pack (240B but multi-file + unidentified `func_800A2090`).
+
 **S115 — `src/libnusys/mainlib/nugfxthread.c` BANKED (libnusys drop-static mirror).** `gfxThread` +
 `nuGfxThreadStart` (the NuSYS graphics thread + its starter) banked as a verbatim drop-static mirror of
 nusys-2.07 `nugfxthread.c` (coddog 99.99, `single-file-pack:2fn`), first-build ROM SHA-1 == baserom, 0

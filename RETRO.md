@@ -25,6 +25,15 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 116 — bank src/libnusys/mainlib/nucontgbpakmgr.c (libnusys .data-carve mirror) — 2026-06-17
+- Increment: src/libnusys/mainlib/nucontgbpakmgr.c banked (8 fn: nuContGBPakMgrInit/Remove + 6 static contGBPak* dispatch leaves). md5-candidate 166→167 (all 167 src .c stub-free).
+- Quality: 0/0/0/0 (stuck-far/permuter/carried/re-opened). One in-sprint link-error gotcha (shared-at-a-field), resolved without spike/carry.
+- Seed: committed 8pt; banked 8pt; regime mirror (seed-only; 8-gate FIRED at 8, verbatim-mirror exemption applied — single-file-pack:8fn, decompose mechanically blocked, all callees placed + names curated).
+- What helped: `single-file-pack:8fn` + `coddog-mirror:nucontgbpakmgr.c@99.99` priced this as one verbatim cp; all 8 names pre-curated and all 9 callees placed (nuSiCallBackAdd/Remove S114, 6× osGbpak*, nuSiMesgQ) → gate was a single text flip. The `.o` `.data` section size (0x30) was the carve-extent oracle (funcList 0x20 + nuContGBPakCallBack 0xC + 4B align pad). Reading the splat source (symbols.py `write_undefined_syms_auto` = `referenced && !defined`) explained why the mid-carve address was silently omitted, and the canonical-base-with-addend fix (sized `nuContGBPakCallBack` → splat renders sibling as `nuContGBPakCallBack + 0x4`, binds the C export) is cleaner than a `D_` placeholder or `defined:False` absolute.
+- Friction: the gate share-check was INCOMPLETE — grepping only the base `D_800C7E20`/`D_800C7E00` wrongly read "sole-referrer → carve"; the real share was at base+4 (`D_800C7E24`, the still-asm sibling nuContGBPakFwrite reading `.func`), surfaced only by the link error. Compounded: S97 "shared ⇒ DROP" did not apply because the global is UNDROPPABLE (its initializer chains to file-private statics that dropping would orphan/dead-strip), so carve was forced anyway. Both now codified.
+- Applied: 4 of 4: #1 + #2 + #3 → `docs/hazards.md#defines-data` S116 paragraph (whole-object share-check base..base+size; mid-struct canonical-addend resolution; S97 "AND droppable" qualifier; pick_target field-level-ref auto-detection noted as tooling follow-up); #4 → `CLAUDE.md ## Story points` verbatim-mirror exemption (a) now lists the `.data`-carve mirror alongside drop-def/pure-cp.
+- Carry-over: none.
+
 ## Sprint 115 — bank src/libnusys/mainlib/nugfxthread.c (libnusys drop-static mirror) — 2026-06-17
 - Increment: src/libnusys/mainlib/nugfxthread.c banked (2 fn: gfxThread + nuGfxThreadStart). md5-candidate 165→166 (all 166 src .c stub-free).
 - Quality: 0/0/0/0 (stuck-far/permuter/carried/re-opened).
