@@ -40,6 +40,7 @@ __osActiveQueue = 0x800C822C; // size:0x4
 __osGetCurrFaultedThread = 0x800A2F50; // type:func
 func_80029250 = 0x80029250; // type:func
 D_800B6688 = 0x800B6688; // size:0x4
+nuContGBPakCallBack = 0x800C7E20; // size:0xC
 nuGfxZBuffer = 0x800FED14; // size:0x4
 D_800B6680 = 0x800B6680; // size:0x4
 nuGfxUcode = 0x801061B0; // size:0x4

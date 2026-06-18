@@ -152,7 +152,7 @@ SECTIONS
         build/src/libnusys/mainlib/nucontrmbstart.o(.text);
         build/src/libnusys/mainlib/nucontrmbcheck.o(.text);
         build/asm/7D3B0.o(.text);
-        build/asm/7D4A0.o(.text);
+        build/src/libnusys/mainlib/nucontgbpakmgr.o(.text);
         build/src/libnusys/mainlib/nucontgbpakopen.o(.text);
         build/src/libnusys/mainlib/nucontgbpakgetstatus.o(.text);
         build/src/libnusys/mainlib/nucontgbpakpower.o(.text);
@@ -411,7 +411,8 @@ SECTIONS
         build/src/libnusys/mainlib/nucontrmbstart.o(.data);
         build/src/libnusys/mainlib/nucontrmbcheck.o(.data);
         build/asm/7D3B0.o(.data);
-        build/asm/7D4A0.o(.data);
+        build/asm/data/main_data.data.o(.data);
+        build/src/libnusys/mainlib/nucontgbpakmgr.o(.data);
         build/src/libnusys/mainlib/nucontgbpakopen.o(.data);
         build/src/libnusys/mainlib/nucontgbpakgetstatus.o(.data);
         build/src/libnusys/mainlib/nucontgbpakpower.o(.data);
@@ -438,7 +439,7 @@ SECTIONS
         build/src/libultra/io/aigetstat.o(.data);
         build/src/libultra/io/aisetfreq.o(.data);
         build/src/libultra/io/aisetnextbuf.o(.data);
-        build/asm/data/main_data.data.o(.data);
+        build/asm/data/main_data_2.data.o(.data);
         build/src/libultra/audio/drvrnew.o(.data);
         build/src/libultra/audio/load.o(.data);
         build/src/libultra/audio/auxbus.o(.data);
@@ -678,7 +679,7 @@ SECTIONS
         build/src/libnusys/mainlib/nucontrmbstart.o(.rodata);
         build/src/libnusys/mainlib/nucontrmbcheck.o(.rodata);
         build/asm/7D3B0.o(.rodata);
-        build/asm/7D4A0.o(.rodata);
+        build/src/libnusys/mainlib/nucontgbpakmgr.o(.rodata);
         build/src/libnusys/mainlib/nucontgbpakopen.o(.rodata);
         build/src/libnusys/mainlib/nucontgbpakgetstatus.o(.rodata);
         build/src/libnusys/mainlib/nucontgbpakpower.o(.rodata);
@@ -956,7 +957,7 @@ SECTIONS
         build/src/libnusys/mainlib/nucontrmbstart.o(.bss);
         build/src/libnusys/mainlib/nucontrmbcheck.o(.bss);
         build/asm/7D3B0.o(.bss);
-        build/asm/7D4A0.o(.bss);
+        build/src/libnusys/mainlib/nucontgbpakmgr.o(.bss);
         build/src/libnusys/mainlib/nucontgbpakopen.o(.bss);
         build/src/libnusys/mainlib/nucontgbpakgetstatus.o(.bss);
         build/src/libnusys/mainlib/nucontgbpakpower.o(.bss);
