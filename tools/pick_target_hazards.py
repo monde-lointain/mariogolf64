@@ -145,9 +145,13 @@ class Hazard:
         return cls(HAZARD_C_COMBINED, f"{len(c_stems)}file[" + "|".join(sorted(c_stems)) + "]")
 
     @classmethod
-    def jal_count_mismatch(cls, n_c: int, n_asm: int) -> "Hazard":
-        """`<c>vs<asm>` jal-count divergence."""
-        return cls(HAZARD_JAL_COUNT_MISMATCH, f"{n_c}vs{n_asm}")
+    def jal_count_mismatch(cls, n_c: int, n_asm: int, version_artifact: bool = False) -> "Hazard":
+        """`<c>vs<asm>` jal-count divergence. `version_artifact` appends `(version-artifact?)` when
+        the surplus C calls are a known per-version wrapper rather than a logic divergence (libnusys
+        cont/RMB family's nusys-2.05+ `osSetIntMask` pair vs the pre-2.05 leaf asm, S118) — an
+        advisory hint that smallest-first should not be deterred from a clean near-verbatim drop."""
+        suffix = "(version-artifact?)" if version_artifact else ""
+        return cls(HAZARD_JAL_COUNT_MISMATCH, f"{n_c}vs{n_asm}{suffix}")
 
     @classmethod
     def maybe_upstream(cls, lib: str, bases) -> "Hazard":

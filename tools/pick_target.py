@@ -1179,11 +1179,19 @@ def call_divergence(rom_off, primary, up_cpath, lib=None):
             r'^\s*#\s*define\s+([A-Za-z_]\w*)\s*\(', UpstreamSource.get(up_cpath).text, re.M))
     except OSError:
         local_macros = set()
-    n_c = _c_jal_count(
-        _strip_define_lines(_strip_string_literals(_strip_dead_blocks(body))), local_macros)
+    stripped = _strip_define_lines(_strip_string_literals(_strip_dead_blocks(body)))
+    n_c = _c_jal_count(stripped, local_macros)
     if n_c == n_asm:
         return None
-    return Hazard.jal_count_mismatch(n_c, n_asm)
+    # libnusys per-file version divergence: the cont/RMB family added an `osSetIntMask(OS_IM_NONE)`
+    # body wrapper (decl + set + restore) in nusys-2.05, kept through 2.07. When this ROM's fn is the
+    # pre-2.05 leaf variant, the upstream's surplus jals are exactly those wrapper calls → the
+    # mismatch is a version artifact, not a logic divergence. Annotate so smallest-first is not
+    # deterred from a clean near-verbatim drop (S118 nuContRmbModeSet `2vs0`). The asm-side direction
+    # only (upstream has MORE: n_c > n_asm); see docs/hazards.md#near-verbatim-mirror-jal-count-mismatch.
+    n_wrap = len(re.findall(r"\bosSetIntMask\b", stripped))
+    version_artifact = (lib == "libnusys" and n_wrap > 0 and (n_c - n_asm) == n_wrap)
+    return Hazard.jal_count_mismatch(n_c, n_asm, version_artifact=version_artifact)
 
 
 def _is_static_func_proto(line):

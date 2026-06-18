@@ -499,6 +499,26 @@ def test_call_divergence_strips_inactive_version_branch(monkeypatch):
     assert d is not None and d.detail == "3vs2"
 
 
+def test_call_divergence_libnusys_intmask_version_artifact(monkeypatch):
+    """S118 #2: a libnusys jal-count-mismatch whose surplus C calls are exactly the nusys-2.05+
+    `osSetIntMask` body wrapper (absent from the pre-2.05 leaf asm) is annotated `(version-artifact?)`
+    so smallest-first is not deterred from a clean near-verbatim drop (nuContRmbModeSet `2vs0`). The
+    flag is libnusys-only and requires the surplus (n_c - n_asm) to equal the osSetIntMask count."""
+    pt = load_tool("pick_target")
+    body = ("    OSIntMask mask;\n"
+            "    mask = osSetIntMask(OS_IM_NONE);\n"
+            "    foo(a);\n"
+            "    osSetIntMask(mask);\n")  # 3 calls C-side; leaf asm omits the 2 wrapper calls
+    monkeypatch.setattr(pt, "_upstream_body", lambda cp, pr: body)
+    monkeypatch.setattr(pt, "_asm_jal_count", lambda off, pr: 1)  # leaf-ish: only foo survives
+    monkeypatch.setattr(pt, "_build_version_ord", lambda lib: 0)
+    d = pt.call_divergence(0x1000, "ff", "x.c", "libnusys")
+    assert d is not None and d.detail == "3vs1(version-artifact?)"
+    # non-libnusys: same body, no version annotation (the wrapper tell is nusys-family specific)
+    d2 = pt.call_divergence(0x1000, "ff", "x.c", "libultra")
+    assert d2 is not None and d2.detail == "3vs1"
+
+
 def test_coddog_tail_trap_rescan(monkeypatch):
     """S80 #3: a coddog identity carried by an UN-NAMED TAIL member (not the named leader) re-runs
     the file-level trap battery on the resolved upstream, so its defines-data/file-static is priced.

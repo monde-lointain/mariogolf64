@@ -16,6 +16,27 @@ subordinate to the libultra goal. Target selection is `tools/pick_target.py` (sm
 the 8-point decompose gate fires on any seed ≥8. v2 classical track is active (since S11);
 mirror is the default, classical is first-class when the asm warrants it.
 
+**S118 — `nucontrmbmodeset.c` + `nucontrmbforcestop.c` BANKED (libnusys RMB mirror pair, per-file
+version split).** Split the smallest remaining libnusys block, the c-combined `[0x7D3B0,asm]` RMB pack
+(240B), 3-way at file boundaries and banked its 2 verbatim mirrors, both first-build ROM SHA-1 ==
+baserom, 0 iteration. **HEADLINE (extends S117): nusys version is per-file even WITHIN the RMB
+family.** `nuContRmbForceStop` is code-identical 2.00..2.07 → verbatim 2.07-sdk cp. `nuContRmbModeSet`
+is NOT: nusys-2.05 wrapped the body in an `osSetIntMask(OS_IM_NONE)`/restore pair (2 jals, non-leaf)
+kept through 2.07, but MG64's asm is a **0-jal leaf** = the pre-2.05 (2.00) variant. Mirror = 2.07-sdk
+verbatim minus the 3-line int-mask wrapper (the near-verbatim drop, English comments + 2.00 leaf code);
+resolved pick_target's `jal-count-mismatch:2vs0` (a version artifact: it read the 2.05+ source's 2
+osSetIntMask jals vs the 0-jal asm). Zero symbol adds (both names pre-curated; `nuContRmbCtl`@0x80104F50
++ `nuSiSendMesg`@0x800A2824 placed). md5-candidate 168→**170** (all 170 src .c stub-free). Quality
+0/0/0/0. Retro applied 3 of 3 (#1 `docs/hazards.md#near-verbatim-mirror-jal-count-mismatch` nusys
+int-mask-wrapper anchor + provenance; #2 `pick_target.py` libnusys `(version-artifact?)` annotation +
+unit test + the 4 stale pick_target goldens caught up [red since pre-S114]; #3 this carry note).
+**Cross-repo follow-up:** none (0 new symbols). `func_800A2090` (8B empty stub) left as `[0x7D490,asm]`
+per PO scope → see Carry-overs (near-free retry). **Remaining libnusys (next-cleanest):** `nuGfxTaskMgr`
+(pts-5 `single-file-pack:3fn`, file-static + ~14 defines-data, `jal-count-mismatch:7vs11` — asm has
+MORE than the C, the opposite of S118's version-artifact, so version-check AND structural; the wrapper
+direction does NOT explain it); the messy ones are `nuContGBPakFread` (pts-2 1fn, `jal-count-mismatch:5vs9`,
+no coddog) and the `nuContRmb*`/`nuContGBPakFwrite` multi-file packs (1280B+, unidentified `func_`s).
+
 **S117 — `src/libnusys/mainlib/nucontmgr.c` BANKED (libnusys **2.05** .data-carve + drop-def hybrid
 mirror).** The NuSYS Controller Manager (`nuContMgrInit`/`Remove` + `nuContDataClose`/`Open` + 5 static
 dispatch leaves `contReadData`/`contQuery`/`contRetrace`/`contRead`/`contReadNW`) banked, the S116
@@ -1687,6 +1708,21 @@ by `/sprint-plan`:
   NEW recover-extern / callee vrams to add, each WITH its confirmed address; **(4)** the include
   adaptation vs upstream; **(5)** the upstream pin (file + VERSION_J). A near-free retry missing any
   of these is a half-scoped spike — finish the scope before deferring.
+
+- **Near-free retry (S118 deferral) — `func_800A2090` (0x7D490, 8B empty stub), trivial CLASSICAL,
+  not a mirror.** Deliberately left as `[0x7D490, asm]` at the S118 PO scope gate; the RMB pair banked
+  without it. It is an 8-byte empty function (`jr $ra; nop`), NOT `nuContRmbForceStopEnd` (that calls
+  `nuSiSendMesg`); no archived nusys revision produces an empty RMB function, so it is unidentified and
+  keeps its `func_` name. Completeness checklist: **(1)** flip `[0x7D490, asm]`→`[0x7D490, c,
+  libnusys/mainlib/func_800A2090]` (already a standalone 16-aligned subseg from the S118 3-way split);
+  **(2)** placed-ref inventory: none — no calls, no data refs (pure leaf); **(3)** new recover/callee
+  vrams: none; **(4)** include adaptation: none (`void func_800A2090(void) {}` needs no header; keep the
+  `func_` name → zero symbol adds); **(5)** upstream pin: N/A — classical, body is `void
+  func_800A2090(void) {}` (KMC `-O` emits `jr $ra; nop` = 8B). **One risk to verify at finalize:** the
+  subseg is 16B (0x7D490..0x7D4A0) but the C `.text` is 8B; the 8B tail is the 16-align pad to the next
+  subseg (`nucontgbpakmgr`@0x7D4A0) — a standard `trailing-pad:8B@16` (ld fills the gap from the next
+  section's alignment). If the pad does not land zero/clean, leave it asm. Pair it with an adjacent
+  tiny libnusys target next sprint; banking it fully clears the old `[0x7D3B0]` RMB block.
 
 - _(Near-free retry — **libkmc `sin.c` (0x8E660) C-mirror** (`_xsincos`+`sin`+`cos`+`tan`) **RESOLVED +
   banked S113** — the carry-over's 5-point completeness checklist replayed verbatim-correct, 0 rework,

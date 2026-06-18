@@ -25,6 +25,19 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 118 — bank the RMB pair (nuContRmbModeSet + nuContRmbForceStop, libnusys mirrors) — 2026-06-17
+- Increment: src/libnusys/mainlib/nucontrmbmodeset.c + nucontrmbforcestop.c banked (1 fn each), split from the c-combined `[0x7D3B0,asm]` RMB pack. md5-candidate 168 → 170 (all 170 src .c stub-free).
+- Quality: 0/0/0/0 (stuck-far/permuter/carried/re-opened). Both first-build SHA, 0 iteration.
+- Seed: committed 2pt; banked 2pt; regime mirror (8-gate clear; near-verbatim drop is a mirror sub-case → seed-only).
+- What helped: the smallest-first ranker put the 240B RMB pack on top; gate-time asm read (`nuContRmbModeSet` = 0-jal leaf, `nuContRmbForceStop` = 1 jal to placed nuSiSendMesg, `func_800A2090` = 8B empty stub) plus the per-version source set under `~/development/repos/nusys/src/<ver>/` let me pin the version BEFORE the flip. Banking `nucontrmbstart.c` (already in-tree) as the convention probe confirmed the RMB family is English/no-int-mask = 2.05+, isolating modeset as the outlier.
+- Friction: minimal. One real subtlety: the in-tree English RMB convention (2.05+) and modeset's matching code (2.00, no int-mask) are mutually exclusive — no English version omits the int-mask wrapper. Resolved by the near-verbatim drop (2.07-sdk verbatim minus the 3 wrapper lines = 2.00 leaf code + English comments). pick_target's `jal-count-mismatch:2vs0` was a version artifact (it read the 2.05+ source's 2 osSetIntMask jals).
+- Applied (3 of 3): #1 `docs/hazards.md#near-verbatim-mirror-jal-count-mismatch` nusys int-mask-wrapper anchor (leaf-asm tell + the drop procedure + version-source-set pointer) + S118 provenance; #2 `pick_target.py` libnusys `(version-artifact?)` annotation on an osSetIntMask-wrapper jal-count-mismatch (+`test_call_divergence_libnusys_intmask_version_artifact`; also caught up the 4 live-captured pick_target goldens, stale since pre-S114 — they had carried S114-S117 banked fns as candidates); #3 BACKLOG `func_800A2090` near-free-retry note.
+- Carry-over: none banked-blocking. `func_800A2090` (8B empty stub) deliberately deferred per PO scope as a near-free follow-up (a backlog near-free-retry, not a spike).
+- Cross-repo follow-up: none (0 new symbols — both fn names were already curated in ghidra_symbols.txt).
+- Process note: the 4 pick_target goldens were red (stale) at sprint start, since the S114-S117 reviews did not regen them; caught up here. Surfaced as a Scrum-process suggestion (golden-regen should be a per-review step, or pin them to a fixture).
+
+---
+
 ## Sprint 117 — bank src/libnusys/mainlib/nucontmgr.c (libnusys 2.05 .data-carve + drop-def mirror) — 2026-06-17
 - Increment: src/libnusys/mainlib/nucontmgr.c banked (9 fns: nuContMgrInit/Remove + DataClose/Open + 5 static dispatch leaves). md5-candidate 167 → 168 (all 168 src .c stub-free).
 - Quality: 0/0/0/0 (stuck-far/permuter/carried/re-opened). Banked atomically, no spike. BUT 3 mirror-enabler gotchas (atypical for the mirror track) — see Friction.

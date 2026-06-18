@@ -468,8 +468,24 @@ the gate by disassembling and comparing the jal list against the upstream call l
   drops `if (size == 0) return 0;`, a jal-less early-return that folds into the later `blez` size<=0
   path; `osGbpakReadId` replaces the upstream `if(bcmp){ write-temp; reread; recheck }` retry block
   (5 calls + a `temp[32]` local) with `if (bcmp(...)) return 4;`, where the jal count *did* diverge.)
+- **nusys per-file version wrapper (libnusys int-mask drop).** A libnusys mirror can mismatch
+  because MG64's build pins an OLDER nusys revision *per file* than the in-tree default (the
+  n64sdkmod nusys-2.07 tree); the version is NOT uniform (S117 established the divergence). The
+  concrete recurring delta in the `cont`/RMB family: nusys-2.05 wrapped the function body in an
+  `osSetIntMask(OS_IM_NONE)` ... `osSetIntMask(mask)` pair (a `OSIntMask mask;` decl + the two
+  calls), kept through 2.07; the pre-2.05 (2.00/1.x) source omits it. **Tell:** MG64's asm is a
+  **leaf** (no `addiu $sp,-N` / `sw $ra`, 0 jals) but the 2.05+ upstream wraps the body in two
+  `osSetIntMask` jals → a `jal-count-mismatch:2vs0`-style flag whose surplus is exactly the wrapper.
+  **Confirmed clean drop:** stays a mirror — copy the 2.07-sdk file verbatim, drop the 3-line
+  int-mask wrapper (keep the English comments), which IS the 2.00 leaf code; ROM SHA-1 is the proof.
+  A sibling whose code is version-identical (comments-only diff) copies straight from 2.07-sdk.
+  Diagnose the version with the per-revision source set under `~/development/repos/nusys/src/<ver>/`
+  (`grep -c osSetIntMask <ver>/nusys/<file>.c`). `pick_target.py` now annotates this case
+  `jal-count-mismatch:<c>vs<asm>(version-artifact?)` for libnusys so smallest-first is not deterred
+  (S118 #2). (S118 `nuContRmbModeSet` — leaf 0-jal = 2.00 variant, int-mask dropped; sibling
+  `nuContRmbForceStop` was version-identical and copied straight from 2.07-sdk.)
 
-**Provenance:** S18, S30, S35, S45, S47.
+**Provenance:** S18, S30, S35, S45, S47, S118.
 
 ---
 
