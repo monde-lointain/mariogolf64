@@ -148,7 +148,7 @@ SECTIONS
         build/src/libnusys/mainlib/nupireadwritesram.o(.text);
         build/src/libnusys/mainlib/nucontinit.o(.text);
         build/src/libnusys/mainlib/nucontdatagetex.o(.text);
-        build/asm/7CD60.o(.text);
+        build/src/libnusys/mainlib/nucontrmbmgr.o(.text);
         build/src/libnusys/mainlib/nucontrmbstart.o(.text);
         build/src/libnusys/mainlib/nucontrmbcheck.o(.text);
         build/src/libnusys/mainlib/nucontrmbmodeset.o(.text);
@@ -410,13 +410,13 @@ SECTIONS
         build/src/libnusys/mainlib/nupireadwritesram.o(.data);
         build/src/libnusys/mainlib/nucontinit.o(.data);
         build/src/libnusys/mainlib/nucontdatagetex.o(.data);
-        build/asm/7CD60.o(.data);
+        build/asm/data/main_data.data.o(.data);
+        build/src/libnusys/mainlib/nucontrmbmgr.o(.data);
         build/src/libnusys/mainlib/nucontrmbstart.o(.data);
         build/src/libnusys/mainlib/nucontrmbcheck.o(.data);
         build/src/libnusys/mainlib/nucontrmbmodeset.o(.data);
         build/src/libnusys/mainlib/nucontrmbforcestop.o(.data);
         build/src/libnusys/mainlib/func_800A2090.o(.data);
-        build/asm/data/main_data.data.o(.data);
         build/src/libnusys/mainlib/nucontgbpakmgr.o(.data);
         build/src/libnusys/mainlib/nucontgbpakopen.o(.data);
         build/src/libnusys/mainlib/nucontgbpakgetstatus.o(.data);
@@ -682,7 +682,7 @@ SECTIONS
         build/src/libnusys/mainlib/nupireadwritesram.o(.rodata);
         build/src/libnusys/mainlib/nucontinit.o(.rodata);
         build/src/libnusys/mainlib/nucontdatagetex.o(.rodata);
-        build/asm/7CD60.o(.rodata);
+        build/src/libnusys/mainlib/nucontrmbmgr.o(.rodata);
         build/src/libnusys/mainlib/nucontrmbstart.o(.rodata);
         build/src/libnusys/mainlib/nucontrmbcheck.o(.rodata);
         build/src/libnusys/mainlib/nucontrmbmodeset.o(.rodata);
@@ -963,7 +963,7 @@ SECTIONS
         build/src/libnusys/mainlib/nupireadwritesram.o(.bss);
         build/src/libnusys/mainlib/nucontinit.o(.bss);
         build/src/libnusys/mainlib/nucontdatagetex.o(.bss);
-        build/asm/7CD60.o(.bss);
+        build/src/libnusys/mainlib/nucontrmbmgr.o(.bss);
         build/src/libnusys/mainlib/nucontrmbstart.o(.bss);
         build/src/libnusys/mainlib/nucontrmbcheck.o(.bss);
         build/src/libnusys/mainlib/nucontrmbmodeset.o(.bss);
