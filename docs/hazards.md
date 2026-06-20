@@ -2060,3 +2060,67 @@ leave it a blob.
   header lacks (`vitbl.c` → `VI_CTRL_ANTIALIAS_MODE_0`, absent from the MG64 `rcp.h` which had only
   `_1/_2/_3`). Add the missing define from the `~/development/repos/ultralib` authority; a shared-header
   edit then needs a clean rebuild (`#clean-rebuild-after-shared-header-edit`).
+
+## cross-jump-tail-merge
+
+A verbatim mirror builds + links clean but ROM SHA-misses, and the in-tree-vs-target objdump shows
+the build is **SHORTER than the target** (instruction COUNT < target), with collateral `-0x10`-style
+address shifts on every symbol AFTER the short function (their CODE matches; only referenced
+addresses shifted). This is the project gcc 2.7.2 cross-jump pass merging two byte-identical
+store-and-jump tails that MG64's build kept separate.
+
+- **Tell from block-reorder (`#near-verbatim-mirror-jal-count-mismatch`).** cross-jump = build instr
+  COUNT **< target** (the merge deleted instrs). block-reorder = **equal** count, same insns
+  reordered. Different fix paths, so measure the count first.
+- **Mechanism.** `jump.c:find_cross_jump` merges two identical `j .L_ret; sh <reg>,<off>(<base>)` tails
+  (e.g. STOPPING `counter--` + FORCESTOP `counter=2`, both `sh v0,4(s0)`). The final cross-jump runs at
+  `toplev.c:3142` `jump_optimize(insns, 1, 1, 0)`, gated **only** by `optimize > 0` — there is **no
+  flag** to disable it (`-fno-thread-jumps` gates the SEPARATE `thread_jumps` pass; `-O1`/`-g -O2` still
+  merge). So the project compiler physically cannot emit identical-but-unmerged tails.
+
+**TRIAGE — the byte-identical-vs-differing-tails test (run this before reaching for the permuter):**
+disassemble the target's two tails.
+- **Tails byte-IDENTICAL, yet unmerged** → **compiler-build wall. NOT permuter-fixable.** Our always-on
+  cross-jump cannot reproduce identical-unmerged tails; the permuter can only break the merge by making
+  the tails DIFFER (a `volatile` temp → extra stack store), which then can't byte-match (S121
+  contRmbControl: 145k iters plateaued at 220, never 0). Go to the resolution ladder below.
+- **Tails DIFFER** (MG64's allocator split the registers / used different constants) → permuter IS
+  viable; the divergence is a register-allocation near-miss, not a merge wall.
+
+**S121 contRmbControl — the divergence is NON-MONOTONIC across compilers (no available binary works).**
+The target wants the osMotor RUN-case call MERGED but the STOPPING counter-store + FORCESTOP
+state-store UNMERGED — a selective pattern no single cross-jump knob produces. Evidence: real-KMC gcc
+2.7.2 (drmario64 `tools/gcc_kmc`) and the decompals FSF-2.7.2 rebuild (== the project `tools/cc/gcc`,
+byte-identical output) BOTH merge all three; SN gcc 2.7.2 (all decompme variants) and gcc 2.8.1
+(papermario default) mis-allocate (5 saved regs / 40B frame / const hoisted into `$19`) AND merge.
+Instrumenting `find_cross_jump` (env-gated `*f1`/`*f2` suppressor): the osMotor and FORCESTOP merges
+are `call_min`-indistinguishable, so suppressing enough to keep one always breaks the other
+(`MINLE1` best = 17 residual diffs, never 0). MG64's build used a different cross-jump ALGORITHM
+(merge-selection order / epilogue-vs-continuation heuristic), not a tunable parameter.
+
+**Resolution ladder (when the tails are byte-identical = compiler wall):**
+1. **Commit the matching siblings as C + the stuck fn as `INCLUDE_ASM`** (partial bank, ROM stays
+   green). S121 option B: 8/9 `nucontrmbmgr.c` banked as verbatim C, `contRmbControl` carried as
+   `INCLUDE_ASM` (forward-decl it `extern` since the asm `glabel` is `.globl`; the C callers' `jal`
+   bytes are identical static-or-extern). File is not yet md5-candidate, but +8 matched fns + green ROM.
+2. **`hasm`-split** the stuck fn (permanent asm; the file is 8 C + 1 hasm, never a pure-C md5-candidate).
+3. **Leave fully carried.**
+4. **Compiler-patch (DOWNGRADED, near-dead).** A clean `jump.c` minimum/flag patch CANNOT reproduce a
+   non-monotonic selective-merge pattern; only MG64's actual compiler binary would, and none available
+   reproduces it. Pursue only as open toolchain research, not a banking path.
+
+## permuter setup for KMC-toolchain mirrors
+
+Running decomp-permuter on a `libnusys`/`libultra`/`libkmc` (KMC-toolchain) function needs three
+fixes the generic setup misses (hit S121 contRmbControl):
+- **(a) custom `--settings`.** The root `permuter_settings.toml` `compiler_command` is GENERIC (`-I
+  include` only, no `-DUSE_EPI` / per-library include paths), so `import.py` preprocessing fails on
+  `#include <nusys.h>`. Pass `--settings <custom>.toml` whose `compiler_command` carries the file's real
+  CFLAGS (the per-library `-I include/libnusys …` + `-D` defines), piped through `tools/cc/gcc -S` to
+  `tools/cc/as`.
+- **(b) KMC-safe `asm_prelude_file`.** decomp-permuter's default `prelude.inc` has `.set gp=64`, which
+  KMC binutils-2.6 `tools/cc/as` REJECTS (`Expected comma after name gp`). Supply an `asm_prelude_file`
+  that drops that line (harmless at `-G 0`).
+- **(c) body + extracted target.** `import.py` accepts a `c_file` with the function BODY plus a target
+  `.s` extracted from `asm/<seg>.s` (`glabel`..`endlabel`) — no `INCLUDE_ASM` / `mg_resolve_c_asm`
+  round-trip is needed.

@@ -25,6 +25,17 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 121 — nucontrmbmgr.c (libnusys RMB-manager mirror; 8/9 banked, contRmbControl carried) — 2026-06-20
+- Increment: src/libnusys/mainlib/nucontrmbmgr.c PARTIAL — 8/9 fns banked as verbatim C, contRmbControl carried as INCLUDE_ASM. matched-fn +8; md5-candidate 173 → 173 (file not candidate, 1 stub); asm subsegs 110 → 109.
+- Quality: stuck-far 0 / permuter 1 / carried 1 / re-opened 1 (a size-8 verbatim mirror that became a multi-session compiler-RE spike, resolved to a partial bank).
+- Seed: committed 8pt; banked 0pt (per-file all-or-nothing — file partial); regime mirror (8-gate: verbatim-mirror exemption, single-file-pack). The +8 matched fns are the value, not the file point.
+- What helped: the S116 .data-carve template (carve 0xA31D0 / drop nuContRmbCtl to extern) made the 8 verbatim fns drop in clean; the byte-identical-vs-differing-tails triage proved the wall fast (no wasted permuter cycles once the tails were confirmed identical); option B (INCLUDE_ASM the one stuck fn) captured the 8 and kept the ROM green.
+- Friction: contRmbControl is a `#cross-jump-tail-merge` WALL — the project gcc 2.7.2 merges two byte-identical counter-store tails MG64 keeps separate; exhaustive RE (permuter 145k iters; real-KMC + decompals + SN + gcc 2.8.1) found NO available binary reproduces the non-monotonic selective pattern. A clean compiler-patch can't do it either (downgraded option C).
+- Applied (3 of 4): #2 `docs/hazards.md#cross-jump-tail-merge` (byte-identical-tail triage + resolution ladder; folds in the #3 downgraded compiler-fix conclusion); #4 `docs/hazards.md#permuter-setup-for-kmc-toolchain-mirrors` (custom --settings / KMC-safe prelude / body+target.s); #5 `CLAUDE.md ## Story points` sub-100-coddog exemption hedge (budget a codegen-divergence diagnosis pass, expect 0 pt if partial); + CLAUDE.md hazard-index rows. (#1 coddog-near-verbatim pick_target flag NOT selected.)
+- Carry-over: contRmbControl (0x800A19E0, INCLUDE_ASM in the otherwise-C nucontrmbmgr.c) — cross-jump-implementation wall, not a "try harder" spike; banks only with MG64's actual compiler binary (none available) or stays carried.
+
+---
+
 ## Sprint 120 — nuContGBPakFwrite (libnusys GBPak near-verbatim block-reorder mirror; S119 sibling) — 2026-06-18
 - Increment: src/libnusys/mainlib/nucontgbpakfwrite.c banked (1 fn). md5-candidate 172 → 173 (all 173 src .c stub-free); asm subsegs 110 → 110 (the c-combined split is net-zero: `[0x7D970,asm]` flipped to c, a new trailing `[0x7DB80,asm]` created for the nusimgr remainder). GBPak family complete.
 - Quality: 0/0/0/0 (stuck-far/permuter/carried/re-opened). **0 re-attempt** — first-build clean.

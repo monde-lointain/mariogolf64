@@ -189,6 +189,14 @@ the summary.
     increment stays seed-only (S64 `gu/lookathil.c` + S69 `gu/lookat.c`, both pts-13, banked
     first-try). The exemption never covers classical or multi-file packs (a `pack` or `c-combined` of
     2 or more distinct upstream files decomposes at the file boundary as usual).
+    - **Sub-100 coddog hedge (S121).** A `single-file-pack` with a sub-100 coddog score (e.g.
+      `@99.99`, the same near-verbatim tell that flags block-reorders) still qualifies for the
+      exemption, but budget a **codegen-divergence diagnosis pass**: the "banks atomically OR is a
+      quick spike" assumption can be violated by a per-fn divergence (block-reorder, or a
+      `#cross-jump-tail-merge` byte-identical-tail wall) that turns the "quick spike" into a multi-
+      session compiler-RE and a PARTIAL bank (S121 `nucontrmbmgr.c`: 8/9 banked C, 1 carried as
+      `INCLUDE_ASM`). Hedge the estimate "<=1 re-attempt" and expect a per-file score of 0 pt if the
+      file ends partial (the matched-fn count is the value signal, not the file point).
 - **Per-file all-or-nothing banking.** Points bank per file: a spiked/carried file scores 0 pt, a
   banked sibling still counts. This is a separate ledger from the function-level quality
   counter-metric.
@@ -338,6 +346,8 @@ When `pick_target.py` flags a hazard (or a match shows its symptom), read the ma
 | clean mirror SHA-miss, char load lb/sll-sra vs lbu/andi | #char-signedness |
 | clean mirror SHA-miss, extra `jal __assert` / bare `assert()` / `bare-assert:<n>` | #assert-strip |
 | clean mirror SHA-miss, same insn count reordered / jal-mismatch + no `coddog-mirror` | #near-verbatim-mirror-jal-count-mismatch |
+| clean mirror SHA-miss, build instr-count < target (shorter) / collateral post-fn addr shifts | #cross-jump-tail-merge |
+| permuter on a KMC-toolchain (libnusys/libultra/libkmc) mirror fn | #permuter-setup-for-kmc-toolchain-mirrors |
 | Gfx* manipulation | #display-lists |
 
 ## Cross-repo sync (Ghidra workspace at `~/development/reversing/ghidra/mariogolf64/`)

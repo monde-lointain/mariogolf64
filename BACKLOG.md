@@ -16,6 +16,33 @@ subordinate to the libultra goal. Target selection is `tools/pick_target.py` (sm
 the 8-point decompose gate fires on any seed ≥8. v2 classical track is active (since S11);
 mirror is the default, classical is first-class when the asm warrants it.
 
+**S121 — `nucontrmbmgr.c` 8/9 BANKED (libnusys RMB-manager verbatim mirror; `contRmbControl` carried
+as `INCLUDE_ASM`).** Banked the RMB manager's 8 verbatim libnusys fns as C (`nuContRmbMgrInit`/`Remove`,
+`contRmbRetrace`, `contRmbCheckMesg`, `contRmbForceStop`/`ForceStopEnd`/`Start`/`StopMesg`); the 9th,
+`contRmbControl` (0x800A19E0), is carried as `INCLUDE_ASM`. **HEADLINE: the verbatim-mirror exemption's
+first PARTIAL bank — a `#cross-jump-tail-merge` COMPILER WALL.** Planned a clean 9-fn pure-C
+md5-candidate (S116 .data-carve template), but `contRmbControl` SHA-missed: the project gcc 2.7.2
+merges two byte-identical `j .L_ret; sh v0,4(s0)` counter-store tails (STOPPING `counter--` + FORCESTOP
+`counter=2`) that MG64 keeps UNMERGED (build 0x1EC < target 0x1F8). A multi-session user-directed RE
+proved it unbankable with available tooling: byte-identical tails ⇒ permuter-immune (145k iters,
+plateau 220); and NO available binary reproduces the divergence — real-KMC (drmario64) + decompals
+FSF-2.7.2 (== `tools/cc/gcc`, byte-identical) BOTH merge, SN 2.7.2 + gcc 2.8.1 (papermario) mis-allocate
+(5 regs/40B frame) AND merge, and the target's selective pattern (osMotor merged, counter+FORCESTOP not)
+is NON-MONOTONIC in any cross-jump knob. **PO chose option B** — bank the 8, carry the 1, keep the ROM
+green. Enablers: subseg `[0x7CD60,asm]`→`[0x7CD60,c,nucontrmbmgr]`; `.data` carve `[0xA31D0,.data,
+nucontrmbmgr]` (0x30B: SearchTime/funcList/CallBack); `nuContRmbCtl` drop-to-extern (0x80104F50); 4
+msg-handler names added to `symbol_addrs` (ForceStopMesg=0x800A1DA0, ForceStopEndMesg=0x800A1DE8,
+StartMesg=0x800A1E18, StopMesg=0x800A1EA4); `contRmbControl` fwd-decl `extern` (asm `glabel` is
+`.globl`). matched-fn **+8**; md5-candidate 173→**173** (file not candidate, 1 stub); asm subsegs
+110→**109**. Quality: spike 1 / permuter 1 / carried 1 / re-opened 1. seed 8 / banked 0pt (per-file
+all-or-nothing — file partial); regime mirror. **Cross-repo follow-up:** 4 new decomp-side symbols →
+`sync_decomp_names.py --import-from-decomp`. Retro applied 3 of 4 (#2 `#cross-jump-tail-merge` hazard +
+#4 `#permuter-setup-for-kmc-toolchain-mirrors` + CLAUDE.md index rows; #5 sub-100-coddog exemption hedge;
+#1 NOT selected). **`contRmbControl` → Carry-overs (spike: cross-jump wall, banks only with a
+cross-jump-correct 2.7.2 build). Remaining libnusys (next-cleanest):** the S120 carry `[0x7DB80,asm]`
+(`func_800A2780` leaf + `nusimgr.c`), then `nuGfxTaskMgr` (pts-8 `single-file-pack:3fn`) and the
+`nuScCreateScheduler` multi-file packs.
+
 **S120 — `nucontgbpakfwrite.c` BANKED (libnusys GBPak near-verbatim block-reorder mirror; S119
 sibling; GBPak family COMPLETE).** Banked `nuContGBPakFwrite` (0x800A2570), the last GBPak-family asm
 leaf, decomposed out of the pts-8 c-combined:2file `[0x7D970]` pack at the rom-0x7DB80 file boundary.
@@ -1754,6 +1781,23 @@ by `/sprint-plan`:
   NEW recover-extern / callee vrams to add, each WITH its confirmed address; **(4)** the include
   adaptation vs upstream; **(5)** the upstream pin (file + VERSION_J). A near-free retry missing any
   of these is a half-scoped spike — finish the scope before deferring.
+
+- **Spike (S121) — `contRmbControl` (0x800A19E0), the ONE INCLUDE_ASM stub in the otherwise-C
+  `src/libnusys/mainlib/nucontrmbmgr.c`.** Blocker = a `#cross-jump-tail-merge` COMPILER WALL, NOT a
+  "try harder" retry. The project gcc 2.7.2 merges two byte-identical `j .L_ret; sh v0,4(s0)`
+  counter-store tails (STOPPING `counter--` + FORCESTOP `counter=2`) that MG64 keeps UNMERGED (build
+  0x1EC < target 0x1F8). **Exhaustively proven unbankable with available tooling** (do NOT re-spend
+  cycles here without a NEW compiler): (a) byte-identical tails ⇒ permuter can't help (145k iters,
+  plateau 220, never 0 — it only breaks the merge by adding instrs); (b) NO available binary
+  reproduces it — real-KMC (drmario64 `tools/gcc_kmc`) + decompals FSF-2.7.2 (== project `tools/cc/gcc`,
+  byte-identical) BOTH merge; SN 2.7.2 (all decompme variants) + gcc 2.8.1 (papermario) mis-allocate (5
+  regs/40B frame/`$19`-hoist) AND merge; (c) the target's selective pattern (osMotor merged, counter +
+  FORCESTOP not) is NON-MONOTONIC in any cross-jump knob (instrumented `find_cross_jump`:
+  `call_min`-indistinguishable, best suppression = 17 residual diffs). **The ONLY untried path is a
+  cross-jump-correct 2.7.2 build** (MG64's actual compiler, or a reverse-engineered `jump.c`
+  merge-selection heuristic — open toolchain research, low ROI). Until then the 8/9 C bank stands and
+  the file is not a pure-C md5-candidate. Evidence + env-gated patch preserved at
+  `nonmatchings/contRmbControl/sn_crossjump_investigation/`.
 
 - _(Near-free retry (S118 deferral) — `func_800A2090` (0x7D490, 8B empty stub) **RESOLVED + banked
   S119** — the carry-over's completeness checklist replayed verbatim-correct, 0 rework: flip
