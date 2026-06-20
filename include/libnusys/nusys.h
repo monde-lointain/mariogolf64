@@ -211,7 +211,7 @@ extern "C" {
 #define NU_CONT_MAXCONTROLLERS		MAXCONTROLLERS
 #define	NU_CONT_STACK_SIZE		0x2000
 #define	NU_CONT_MESG_MAX		8
-#define NU_CONT_THREAD_ID		6
+#define NU_CONT_THREAD_ID		5	/* MG64: controller/SI thread is slot 5, not the 2.07 value 6 (nusimgr.c osCreateThread id) */
 #define NU_CONT_THREAD_PRI		115
 #define	NU_CONT_DATA_UNLOCK		0
 #define	NU_CONT_DATA_LOCK		1

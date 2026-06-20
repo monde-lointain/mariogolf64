@@ -181,7 +181,7 @@ segments:
       - [0x7D760, c, libnusys/mainlib/nucontgbpakcheck]
       - [0x7D7A0, c, libnusys/mainlib/nucontgbpakfread]
       - [0x7D970, c, libnusys/mainlib/nucontgbpakfwrite]
-      - [0x7DB80, asm]
+      - [0x7DB80, c, libnusys/mainlib/nusimgr]
       - [0x7DE70, c, libnusys/mainlib/nusicallbackadd]
       - [0x7DF10, c, libnusys/mainlib/nusicallbackremove]
       - [0x7DF90, c, libnusys/mainlib/nucontmgr]
