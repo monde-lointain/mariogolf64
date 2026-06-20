@@ -16,6 +16,30 @@ subordinate to the libultra goal. Target selection is `tools/pick_target.py` (sm
 the 8-point decompose gate fires on any seed ≥8. v2 classical track is active (since S11);
 mirror is the default, classical is first-class when the asm warrants it.
 
+**S122 — `nusimgr.c` BANKED (libnusys SI-manager drop-static mirror + same-TU leaf; the S120-split
+carry-over).** Banked the whole `[0x7DB80]` subseg (0x800A2780-0x800A2A70, 6 fns) into ONE
+md5-candidate: `nuSiMgrInit`/`nuSiSendMesg`/`nuSiMgrStop`/`nuSiMgrRestart`/`nuSiMgrThread` (verbatim
+nusys-2.07) + `func_800A2780`. **The S120 carry-over's two open questions both resolved at execution.**
+(1) **The leaf is SAME-TU, not foreign:** `func_800A2780` is `return siMgrStack;` — its 0x800F77D0
+target is the base of nusimgr.c's own file-static `siMgrStack` (siMgrThread 0x800F7620 + 0x1B0); a
+static is file-local, so the leaf MUST be nusimgr.c (an MG64-added leading accessor the 2.07 upstream
+lacks), banked with it. (2) **Version-rev `needs-define`:** the byte-verbatim mirror SHA-missed by
+exactly one byte (vram 0x800A27E0 `li a1,6`→`5`, the `osCreateThread` thread-id) because vendored
+nusys-2.07 `NU_CONT_THREAD_ID=6` but MG64's rev compacts the controller/SI thread to slot 5 — fixed in
+`include/libnusys/nusys.h` (grep-confirmed nusimgr.c is the SOLE tree consumer → collateral-free;
+clean-rebuild). Drop-static `nuSiMesgBuf`=0x800F7600 / `siMgrThread`=0x800F7620 / `siMgrStack`=0x800F77D0
++ drop-def `nuSiMgrMesgQ`=0x8012D408 (all bss → SHA-neutral, no carve; `nuSiMesgQ`/`nuSiCallBackList`
+already placed). md5-candidate 173→**174** (all 174 src .c stub-free); asm subsegs 109→**108**. Quality
+0/0/0/0. seed 5 / banked 5pt; regime mirror. **Cross-repo follow-up:** 7 new decomp-side symbols (3 fn
+nuSiMgrStop/Restart/Thread + 4 data nuSiMesgBuf/siMgrThread/siMgrStack/nuSiMgrMesgQ) →
+`sync_decomp_names.py --import-from-decomp`. Retro applied 3 of 3 (#1 `#needs-define` version-rev
+single-immediate-byte sub-case + CLAUDE.md index row; #2 leaf-returns-static SAME-TU rule on the
+`unattrib-leaf` paragraph; #3 near-free-retry checklist 6th item = nusys header-value reconciliation).
+**Remaining libnusys (next-cleanest):** `nuGfxTaskMgr` (pts-8 `single-file-pack:3fn`, file-static +
+defines-data + refs-unplaced on the still-asm `nusched`/`rspbootTextEnd` + `jal-count-mismatch:7vs11`),
+then the `nuScCreateScheduler` / `func_800328E0` multi-fn packs (the latter's coddog is stale). The
+`contRmbControl` cross-jump WALL stays carried (compiler-blocked).
+
 **S121 — `nucontrmbmgr.c` 8/9 BANKED (libnusys RMB-manager verbatim mirror; `contRmbControl` carried
 as `INCLUDE_ASM`).** Banked the RMB manager's 8 verbatim libnusys fns as C (`nuContRmbMgrInit`/`Remove`,
 `contRmbRetrace`, `contRmbCheckMesg`, `contRmbForceStop`/`ForceStopEnd`/`Start`/`StopMesg`); the 9th,
@@ -1779,8 +1803,12 @@ by `/sprint-plan`:
   verbatim-correct, 0 rework): **(1)** the exact subseg flip/split line; **(2)** the placed-ref
   inventory (callees + data externs already resolved, with the sprint that placed them); **(3)** any
   NEW recover-extern / callee vrams to add, each WITH its confirmed address; **(4)** the include
-  adaptation vs upstream; **(5)** the upstream pin (file + VERSION_J). A near-free retry missing any
-  of these is a half-scoped spike — finish the scope before deferring.
+  adaptation vs upstream; **(5)** the upstream pin (file + VERSION_J); **(6)** for a libnusys/version-
+  pinned mirror, a **header-value reconciliation** vs the game's library rev (thread IDs, mesg-max,
+  stack sizes, and other plain `#define` VALUEs the body emits as `li`/`addiu` immediates) — the
+  vendored upstream version can diverge from the game's rev on a single immediate (S122 nusys-2.07
+  `NU_CONT_THREAD_ID=6` vs MG64's 5), and that surfaces only at first build unless reconciled here.
+  A near-free retry missing any of these is a half-scoped spike — finish the scope before deferring.
 
 - **Spike (S121) — `contRmbControl` (0x800A19E0), the ONE INCLUDE_ASM stub in the otherwise-C
   `src/libnusys/mainlib/nucontrmbmgr.c`.** Blocker = a `#cross-jump-tail-merge` COMPILER WALL, NOT a
@@ -1807,25 +1835,18 @@ by `/sprint-plan`:
   ROM SHA-1. Confirmed NOT `nuContRmbForceStopEnd` (no `nuSiSendMesg` call); unidentified empty fn. Banked
   with its GBPak sibling `nuContGBPakFread`; the old `[0x7D3B0]` RMB block is fully cleared.)_
 
-- **S120 split remainder — `[0x7DB80, asm]` = `func_800A2780` leaf + `nusimgr.c` (5 fns).** Left
-  asm when S120 decomposed the `[0x7D970]` c-combined:2file pack at the rom-0x7DB80 file boundary and
-  banked the `nucontgbpakfwrite` singleton. Two distinct next-increments share this subseg:
-  - **`func_800A2780`** (0x800A2780, 0xC B, 16-aligned): a leaf `return (void*)0x800F77D0;`
-    (`lui v0,0x800f; jr ra; addiu v0,v0,0x77d0`), present in NEITHER nucontgbpakfwrite.c nor the
-    nusimgr.c I read. **Needs identification at the gate** — disassemble + find what global lives at
-    0x800F77D0 and which nusys TU defines this accessor (it sits between the GBPak file and nusimgr;
-    it may be a nusimgr-adjacent accessor or a separate tiny TU). Until identified, the nusimgr split
-    cannot pick a clean 16-aligned boundary (nuSiMgrInit is at 0x800A278C, NOT 16-aligned), so either
-    func_800A2780 belongs WITH nusimgr (bank together) or it is its own micro-TU split off first.
-  - **`nusimgr.c`** (nuSiMgrInit=0x800A278C, nuSiSendMesg=0x800A2824, nuSiMgrStop=func_800A2888,
-    nuSiMgrRestart=func_800A28A8, nuSiMgrThread=func_800A28C8 static). Verbatim nusys mirror
-    (version-check the family per S117/S118). **Expected resolution (frame, not worst-case):** the 3
-    file-statics (`nuSiMesgBuf[8]`, `siMgrThread`, `siMgrStack[]`) drop-to-extern at asm-recovered
-    `main_bss` vrams (the S87/S90/S115 drop-static pattern); `nuSiCallBackList` is a `defines-data`
-    DROP-DEF, not a carve — it is ALREADY a placed extern (0x800C7E30, from the S114 nusicallbackadd/
-    remove sprint that referenced it), so nusimgr.c re-defining it just drops to extern (bytes from
-    the existing blob); `nuSiMesgQ`=0x801B93C0 + `nuSiMgrMesgQ` are refs to place/confirm. No clean
-    coddog self-match expected (libnusys), so jal/version reconciliation at the gate as usual.)
+- _(S120 split remainder — `[0x7DB80, asm]` = `func_800A2780` leaf + `nusimgr.c` (5 fns) **RESOLVED +
+  banked S122** — the whole subseg banked atomically as one md5-candidate `src/libnusys/mainlib/nusimgr.c`.
+  Both open questions resolved at execution. The leaf `func_800A2780` returns `&siMgrStack` (0x800F77D0
+  = siMgrThread 0x800F7620 + 0x1B0), a nusimgr.c file-static → provably SAME-TU (an MG64-added leading
+  accessor the 2.07 upstream lacks), banked WITH nusimgr (`return siMgrStack;`, kept func_ name); the
+  "foreign micro-TU" framing was wrong (now the `#multi-function-segment-splitting-pack` leaf-returns-
+  static rule). The expected drop-static/drop-def resolution held (nuSiMesgBuf=0x800F7600 / siMgrThread=
+  0x800F7620 / siMgrStack=0x800F77D0 drop-static; nuSiMgrMesgQ=0x8012D408 drop-def + symbol_addrs;
+  nuSiMesgQ/nuSiCallBackList already placed; all bss → no carve). ONE wrinkle the frame missed: a
+  version-rev `needs-define` — vendored nusys-2.07 `NU_CONT_THREAD_ID=6` vs MG64's 5 (the osCreateThread
+  thread-id), a single `li` immediate byte, fixed in nusys.h (sole consumer → collateral-free). Full-make
+  ROM SHA-1 == baserom, 1 fix-iteration.)_
 
 - _(Near-free retry — **libkmc `sin.c` (0x8E660) C-mirror** (`_xsincos`+`sin`+`cos`+`tan`) **RESOLVED +
   banked S113** — the carry-over's 5-point completeness checklist replayed verbatim-correct, 0 rework,

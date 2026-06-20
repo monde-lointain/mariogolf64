@@ -1300,6 +1300,19 @@ not a stray boundary leaf, so it does NOT fire. Motivating case: the pre-split S
 The S120 split at the 16-aligned `0x7DB80` boundary left it in the trailing `[0x7DB80,asm]` subseg
 with `nusimgr` (a carry-over), but the flag would have surfaced it at the gate.
 
+**Resolution rule — a leaf returning `&<static>` is SAME-TU, not foreign (S122).** S120's "in NEITHER
+upstream source" framing for `func_800A2780` was incomplete: the 0xC leaf is `return siMgrStack;` —
+its `&0x800F77D0` target is the BASE of `nusimgr.c`'s own file-static `siMgrStack` (siMgrThread
+0x800F7620 + 0x1B0 = 0x800F77D0). A static is file-local, so a function that takes its address MUST be
+compiled in the same TU. The leaf therefore IS `nusimgr.c` — an MG64-added leading accessor the
+2.07 upstream lacks — and banks WITH it (written `return siMgrStack;`, `func_` name kept), NOT as a
+foreign micro-TU. **So when an `unattrib-leaf` / stray boundary leaf returns `&<addr>`, resolve `<addr>`
+against the placed static map of the two neighbors BEFORE deciding foreign-vs-same-TU: an address
+inside a neighbor's static (file-local) range proves same-TU; only an address in a global/other-TU
+range (or an unrelated MMIO/const) leaves it genuinely foreign.** (A `pick_target` `leaf-returns-static:
+<file>` annotation that resolves the leaf's `lui/addiu` target against the static map would surface this
+at the gate; deferred tooling.)
+
 **Not every pack splits: `single-file-pack` (S67 #2).** When every pack member resolves to one
 upstream C file (one stem, no `=?`/asm members), `pick_target.py` emits `single-file-pack:<n>fn[…]`
 instead of `pack:<n>fn[…]`. This is the atomic-verbatim-mirror class (guPerspectiveF+guPerspective
@@ -1806,6 +1819,29 @@ whole-body divergence is a different (version / cast / char-signedness) class.
 **Pre-flag:** `pick_target.py` flags `needs-define:<GBI def>` when a candidate's body uses a
 GBI-value-guarded macro and no guard define is active for the lib (`gbi_value_guard_needs_define`,
 keyed off the parsed `LIBULTRA_CFLAGS` define set). Dormant while `-DF3DEX_GBI_2` stands, by design.
+
+### Version-rev `#define` VALUE divergence (S122: single `li`/`addiu` immediate byte)
+
+The same link-clean / one-word-SHA-miss class as the S83 GBI sub-case, but the gating is NOT a build
+flag: it is the vendored upstream version diverging from the GAME's library rev on a plain object-like
+`#define` value. S122 `nusimgr.c` (libnusys): a byte-verbatim drop-static mirror SHA-missed by exactly
+ONE byte, vram 0x800A27E0 `li a1,6` (build) vs `5` (ROM) — the `osCreateThread` thread-id arg. Root
+cause: vendored nusys-2.07 `include/libnusys/nusys.h` has `NU_CONT_THREAD_ID 6`, but MG64's nusys rev
+compacts the controller/SI thread to slot 5 (the IDs run idle=1/rmon=2/main=3/gfx=4/[audio-gap=5]/
+cont=6 in 2.07; MG64 drops the audio slot so cont=5).
+
+**The tell vs a reloc:** the lone differing word is a `li`/`addiu` whose immediate is a small literal
+(an enum/macro VALUE), NOT a `lui`+`addiu`/`lw` hi/lo PAIR carrying a relocated address. An immediate
+mismatch is a `#define`/enum value; a hi/lo address mismatch is a symbol-placement problem. Localize
+with the S44 `.o`-diff byte form (venv-python region cmp of `baserom.z64` vs `build/mariogolf64.z64`
+at the ROM offset) → the single off-by-constant immediate → grep the macro back through the header.
+
+**Fix + blast radius:** correct the vendored header to the game's value, then **grep `src/` +
+`include/` for every consumer of the macro before editing** — if the candidate is the sole consumer
+(S122: `nusimgr.c` was the only `NU_CONT_THREAD_ID`/`NU_SI_THREAD_ID` user in the tree), the change is
+collateral-free; otherwise a co-consumer that was matched at the OLD value will break. The build tracks
+no header deps, so bank from a `make clean && make extract && make` (the shared-header-edit rule), not
+an incremental build.
 
 ### VERSION_K-gated statement present in MG64's J build (S85: exact N×8B SHA-miss)
 

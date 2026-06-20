@@ -314,6 +314,7 @@ When `pick_target.py` flags a hazard (or a match shows its symptom), read the ma
 | `stale-header:os_version.h(<V>)` | #stale-vendored-header |
 | `needs-define:<def>` | #needs-define |
 | clean mirror SHA-miss, exact N×8B / fn shorter than its asm | #needs-define |
+| clean mirror SHA-miss, single `li`/`addiu` immediate byte (not a reloc'd hi/lo) | #needs-define |
 | `header-renames-symbol:<fn>@<hdr>` | #header-renames-symbol |
 | `wrong-ghidra-name:<ghidra>-><correct>@<hdr>` | #wrong-ghidra-name-override |
 | mirror parse error / undefined ref on a helper macro | #vendored-header-incomplete |

@@ -25,6 +25,17 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 122 — nusimgr.c (libnusys SI-manager drop-static mirror + same-TU leaf) — 2026-06-20
+- Increment: src/libnusys/mainlib/nusimgr.c banked (6 fns: nuSiMgrInit/nuSiSendMesg/nuSiMgrStop/nuSiMgrRestart/nuSiMgrThread + func_800A2780). matched-fn +6; md5-candidate 173 → 174 (all 174 src .c stub-free); asm subsegs 109 → 108. The S120-split carry-over, banked atomically.
+- Quality: stuck-far 0 / permuter 0 / carried 0 / re-opened 0 (one normal one-byte mirror fix-iteration, not a counter event).
+- Seed: committed 5pt; banked 5pt; regime mirror (8-gate clear at 5<8; the leaf made it effectively single-file).
+- What helped: the S87/S90/S115 drop-static pattern dropped the 3 statics + 3 globals to extern with zero friction (all bss → no carve); recovering the bss vrams from the asm up-front (nuSiMesgBuf/siMgrThread/siMgrStack contiguous + nuSiMgrMesgQ) meant the link resolved first try; the venv-python region cmp localized the lone SHA-miss byte instantly (the S44 .o-diff form).
+- Friction: two carry-over open questions surfaced only at execution. (a) The leaf func_800A2780 — the S120 note framed it "foreign micro-TU, in NEITHER upstream source," but it returns &siMgrStack (a nusimgr.c file-static) → provably SAME-TU; once seen, trivially `return siMgrStack;`. (b) A one-byte SHA-miss: vendored nusys-2.07 NU_CONT_THREAD_ID=6 vs MG64's 5 (the osCreateThread thread-id li immediate) — a version-rev #define divergence, caught only at first build. Both were quick once diagnosed.
+- Applied (3 of 3): #1 `docs/hazards.md#needs-define` version-rev single-`li`/`addiu`-immediate-byte sub-case (the S83/S44 link-clean-but-one-word-miss class, version-rev not GBI) + CLAUDE.md hazard-index "single immediate byte" row; #2 `docs/hazards.md` leaf-returns-static SAME-TU resolution rule appended to the `unattrib-leaf` paragraph (resolve the leaf's returned addr against the neighbors' static map before deciding foreign); #3 `BACKLOG.md ## Carry-overs` near-free-retry checklist 6th item (header-value reconciliation vs the game's nusys rev).
+- Carry-over: none (full atomic bank).
+
+---
+
 ## Sprint 121 — nucontrmbmgr.c (libnusys RMB-manager mirror; 8/9 banked, contRmbControl carried) — 2026-06-20
 - Increment: src/libnusys/mainlib/nucontrmbmgr.c PARTIAL — 8/9 fns banked as verbatim C, contRmbControl carried as INCLUDE_ASM. matched-fn +8; md5-candidate 173 → 173 (file not candidate, 1 stub); asm subsegs 110 → 109.
 - Quality: stuck-far 0 / permuter 1 / carried 1 / re-opened 1 (a size-8 verbatim mirror that became a multi-session compiler-RE spike, resolved to a partial bank).
