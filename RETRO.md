@@ -25,7 +25,16 @@ numbered suggestions the PO accepted.
 
 ---
 
-## Sprint 122 — nusimgr.c (libnusys SI-manager drop-static mirror + same-TU leaf) — 2026-06-20
+## Sprint 123 — nusched.c (libnusys game-customized scheduler; 10/14 banked, 4 carried) — 2026-06-21
+- Increment: src/libnusys/mainlib/nusched.c PARTIAL (10/14 fns banked C, NOT md5-candidate). matched +10; md5-candidate files 174→174; asm subsegs 108→107 (subseg flipped).
+- Quality: stuck-far 0 / permuter 0 / carried 4 / re-opened 0 (4 spikes: the heavily-customized fns).
+- Seed: committed 13pt; banked 0pt (per-file all-or-nothing, file partial); regime planned-mirror → actual mixed.
+- What helped: ASM-first re-assessment caught the false premise EARLY (coddog 99.99 was structural, the file is a game-customized scheduler). The user's ~/n64sdk version-triage hint was decisive — confirmed no stock 1.10/2.00/2.07 matches the custom fns, pinned MG64 ≈ 2.07-minus-nuVersion via the baserom "NuSystem"-string absence + the 2.07 PRENMI-dispatch in nuScAddClient. The vendored NUSched struct matched exactly (base 0x801B8380, size 0x680 derived from the asm). bank-stock-carry-custom (S121 generalized) banked 10 clean fns first-build, ROM green, committed as a safe checkpoint.
+- Friction: the plan gate mis-priced a coddog-mirror@99.99 row as a verbatim-exemption atomic mirror (the S121 hedge anticipated a PARTIAL but still framed it as a near-verbatim, not a pervasively-custom file). Data-layout ambiguity (D_800D8970 = nuScGraphicsStack-end ALIASES debTaskPerfPtr) cost diagnosis time; resolved (stack-top-aliases-next-symbol).
+- Applied (4 of 4): #1 CLAUDE.md ## Story points exemption-GUARD (coddog 99.99 = structure; don't fire the exemption on a non-lib func_ game-callee / unexplained large jal-mismatch; verify bodies) + #3 mixed bank-stock-carry-custom first-class note [the pick_target.py non-lib-func_-callee pricing is a TRACKED FOLLOW-UP, not yet coded — golden-suite risk in-gate; the gate applies the guard by reading asm callees]; #2 docs/hazards.md#upstream-mirror-pattern libnusys multi-version-triage step (baserom NuSystem-string grep + per-fn feature diff); #4 BACKLOG dependency-order note (nusched placed → unblocks nuGfxTaskMgr).
+- Carry-over: 4 fns in nusched.c → INCLUDE_ASM spike (nuScCreateScheduler, nuScEventHandler, nuScExecuteAudio, nuScExecuteGraphics): MG64-game-customized, need NU_DEBUG perf machinery + full stack/perf data layout (findings recorded in BACKLOG).
+
+
 - Increment: src/libnusys/mainlib/nusimgr.c banked (6 fns: nuSiMgrInit/nuSiSendMesg/nuSiMgrStop/nuSiMgrRestart/nuSiMgrThread + func_800A2780). matched-fn +6; md5-candidate 173 → 174 (all 174 src .c stub-free); asm subsegs 109 → 108. The S120-split carry-over, banked atomically.
 - Quality: stuck-far 0 / permuter 0 / carried 0 / re-opened 0 (one normal one-byte mirror fix-iteration, not a counter event).
 - Seed: committed 5pt; banked 5pt; regime mirror (8-gate clear at 5<8; the leaf made it effectively single-file).

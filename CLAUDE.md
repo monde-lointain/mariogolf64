@@ -197,6 +197,26 @@ the summary.
       session compiler-RE and a PARTIAL bank (S121 `nucontrmbmgr.c`: 8/9 banked C, 1 carried as
       `INCLUDE_ASM`). Hedge the estimate "<=1 re-attempt" and expect a per-file score of 0 pt if the
       file ends partial (the matched-fn count is the value signal, not the file point).
+    - **coddog 99.99 == STRUCTURE, not bytes; the exemption-GUARD (S123).** A `coddog-mirror:<f>@99.99`
+      can mask a HEAVILY game-customized file where MOST bodies diverge, not just a block-reorder
+      (S123 `nusched.c`: a game scheduler that shares only the nusys skeleton). The verbatim-mirror
+      exemption must NOT fire when the pack carries a **customization tell**: a `jal` to a non-lib
+      `func_<vram>` game callee (a callee that is not `os*`/`nuSc*`/`al*`/lib), OR a large
+      `jal-count-mismatch` not explained by a known macro/version artifact. Those signal pervasive
+      per-fn divergence -> route to the CLASSICAL track with the **mixed bank-stock-carry-custom**
+      plan (next bullet), NOT a seed-only atomic mirror. Verify BODIES before trusting a 99.99 row:
+      diff the asm against the upstream for the heavy functions, and run the nusys/libultra version
+      triage (`docs/hazards.md#upstream-mirror-pattern`) before concluding the divergence is custom.
+      (pick_target.py automation to price the non-lib-`func_`-callee tell is a tracked follow-up;
+      until then the gate applies this guard by reading the pack's asm callees.)
+    - **Mixed mirror+INCLUDE_ASM partial bank is first-class (S121 generalized, S123).** A
+      `coddog-mirror` file can be PARTIALLY stock: some fns byte-match the upstream, others are
+      game-customized. The right play is **bank-stock-carry-custom** — write the stock fns as C and
+      keep the customized fns as `INCLUDE_ASM` in the same `src/<seg>.c` (the ROM stays green; the
+      file is partial / not md5-candidate until the customized fns are classically decompiled). Plan
+      such a file as a `regime: mixed` increment, not a seed-only mirror: per-file all-or-nothing
+      means the partial file banks 0 pt, and the matched-fn count is the value signal (S123 nusched.c:
+      10/14 banked C, 4 carried, 0 pt, +10 matched).
 - **Per-file all-or-nothing banking.** Points bank per file: a spiked/carried file scores 0 pt, a
   banked sibling still counts. This is a separate ledger from the function-level quality
   counter-metric.

@@ -64,6 +64,23 @@ that `__osMakeMotorData` is inlined (so `pack:2fn`, not 3), and that `__MotorDat
 (so drop-static-to-extern, not a defined global). `libgultra_rom` is the release/ROM profile that
 matches MG64's build; `libgultra`/`libgultra_d` are the debug profiles.
 
+**libnusys multi-version triage before concluding "custom" (S123).** The pinned libnusys source is
+nusys-2.07 (`coddog-sweep-nusys` builds its ref), but MG64 forked an EARLIER rev with game edits, so a
+2.07 mirror can SHA-miss or only structurally match. Before declaring a function MG64-custom, triage
+across ALL on-disk nusys versions and pin the rev from the ROM:
+- Sources: `~/n64sdk/.../nusys/src/nusys-{1.10,1.20,2.00}/nusys/*.c` (note CRLF + Shift-JIS comments;
+  UTF-clean or strip comments when copying) plus the pinned `~/development/repos/n64sdkmod/.../nusys-2.07/`.
+- Pin the rev with two ROM-side tells: (1) `strings baserom.z64 | grep -i NuSystem` — ABSENT means the
+  `nuVersion[]="NuSystem"NU_VERSION` marker was removed (so NOT a stock 2.07 with its `.data` string;
+  `nuScRetraceCounter` is then uninitialized bss, no `.data` carve). (2) per-function feature diffs —
+  e.g. the `nuScAddClient` PRENMI-dispatch block is a 1998/12 (2.06/2.07) addition; its presence in
+  the asm dates the fork ≥2.06 even when the version string is gone (S123 nusched = ~2.07-minus-nuVersion).
+- A function that matches NO version (game-fn callees, added display/swap blocks, a tvtype hang-guard)
+  is genuinely MG64-custom -> classical track. A function that matches a SPECIFIC older version is a
+  near-verbatim mirror of THAT version (the per-file/per-fn version rule, #near-verbatim-mirror-jal-count-mismatch).
+This generalizes the libultra coddog cross-ref (`#coddog-cross-ref`) and the S117 nusys-version-hunt to
+the per-FUNCTION grain: in one subseg, stock fns and custom fns coexist (bank-stock-carry-custom).
+
 **`#pragma weak` alias mirror (S66, no special handling).** A libultra C file whose ROM/curated
 symbol is a weak alias mirrors verbatim with zero edits. `gu/cosf.c` / `gu/sinf.c` carry
 `#pragma weak cosf = __cosf` + `#define fcos __cosf`, so the defined function is `__cosf` and `cosf`
