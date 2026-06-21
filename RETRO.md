@@ -25,6 +25,17 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 124 — nugfxtaskmgr.c (libnusys game-customized gfx task manager; full file, 3/3 banked) — 2026-06-21
+- Increment: src/libnusys/mainlib/nugfxtaskmgr.c banked (3 fns: nuGfxTaskMgr/nuGfxTaskMgrInit/nuGfxTaskStart). matched-fn +3; md5-candidate files 174→175 (all 175 src .c stub-free); asm subsegs 107→106 (subseg flipped + fully banked). The planned mixed-partial resolved to a FULL bank.
+- Quality: stuck-far 0 / permuter 0 / carried 0 / re-opened 0 (Init: 1 re-attempt to find the dup-msgQ codegen — a normal classical iteration, the +1 novel bank-gotcha on the realized tier).
+- Seed: committed 8pt; banked full; regime mixed (planned mixed bank-stock-carry-custom; resolved to full). v2 realized tier: seed 8 → realized 9; residual +1 (game-customized asm RE + the dup-msgQ codegen discovery).
+- What helped: ASM-first decomp (the workflow's "asm is ground truth") matched all 3 game-customized fns where the upstream `.c` was shape-only. nuGfxTaskMgr (the hardest-looking, with the MG64 retrace-pacing wait) and nuGfxTaskStart (custom swap-sequence-table) both matched first-try. The KEY for nuGfxTaskMgrInit: reading the asm STORE ORDER (`next, msgQ, …fields…, msgQ`) — the field appearing at BOTH ends of the store sequence was the cue that the MG64 source has a DUPLICATE `msgQ =` at the loop tail; re-adding it reproduced GCC 2.7.2's dual-induction-var + double-store and landed the exact instr count → byte-match. The extern-ref drop-def data model (nugfxinit.c pattern) avoided any .data/.bss carve.
+- Friction: the first read mis-scored Init at ~19% byte-match (the 2-instr shortfall shifted .data/.bss → every reloc off), which masked that the structure was nearly right and over-suggested a permuter (the byte-match was far below the 0.97 permuter floor anyway). Localizing the deficit to the loop addressing (running-pointer vs indexed) and the dup-store tell took an objdump alignment pass. nuGfxUcode misread as 0x800B61B0 vs the real 0x801061B0 (hi/lo sign-extend) cost one reconciliation step.
+- Applied (3 of 3): #1 CLAUDE.md never-clang-format list += `src/libnusys/` (3 spots) + new `src/libnusys/.clang-format` (DisableFormat) — the de-facto convention made explicit (nusched/nugfxinit/nugfxtaskmgr all upstream tab style); #2 `pick_target.py` seed_points masking-coddog pricing — a `coddog-structural`/`coddog-source-banked` hit no longer SUPPRESSES the near-verbatim +1 and earns it on a pack (the S123 exemption-GUARD priced into the seed; forward-looking, golden-inert on the current candidate set — the non-lib-`func_`-callee detection remains the tracked follow-up); #3 new `docs/hazards.md#struct-init-loop-dup-store--dual-induction-var` section + CLAUDE.md hazard-index row (the dup-store / dual-IV match recipe; a pick_target `struct-init-loop` tag is a tracked follow-up).
+- Carry-over: none (full bank).
+
+---
+
 ## Sprint 123 — nusched.c (libnusys game-customized scheduler; 10/14 banked, 4 carried) — 2026-06-21
 - Increment: src/libnusys/mainlib/nusched.c PARTIAL (10/14 fns banked C, NOT md5-candidate). matched +10; md5-candidate files 174→174; asm subsegs 108→107 (subseg flipped).
 - Quality: stuck-far 0 / permuter 0 / carried 4 / re-opened 0 (4 spikes: the heavily-customized fns).

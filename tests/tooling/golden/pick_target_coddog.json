@@ -286,32 +286,6 @@
     "vram": "0x80070FD0"
   },
   {
-    "band": "cold",
-    "func": "nuGfxTaskMgr",
-    "hazards": "single-file-pack:3fn[nuGfxTaskMgr=nugfxtaskmgr,nuGfxTaskMgrInit=nugfxtaskmgr,nuGfxTaskStart=?],one-tu,file-static,defines-data:nuGfxUcode,nuGfxTask[NU_GFX_TASK_NUM],nuGfxTaskSpool,nuGfxCfb,nuGfxCfbNum,nuGfxCfb_ptr,nuGfxZBuffer,nuGfxDisplay,nuGfxCfbCounter,nuGfxUcodeFifoSize,nuGfxUcodeFifoPtr,nuGfxSwapCfbFunc,nuGfxTaskEndFunc,beforeFlag,refs-unplaced:nuDramStack,nuGfxCfb,nuGfxCfbCounter,nuGfxCfbNum,nuGfxCfb_ptr,nuGfxTaskEndFunc,nuGfxUcodeFifoPtr,nuGfxUcodeFifoSize,nuRDPOutputBuf,nuYieldBuf,nusched,rspbootTextEnd,jal-count-mismatch:7vs11",
-    "kind": "asm-flip",
-    "nfns": 3,
-    "pts": 8,
-    "rom": "0x4840",
-    "score": -984,
-    "size": 1184,
-    "upstream": "libnusys",
-    "vram": "0x80029440"
-  },
-  {
-    "band": "cold",
-    "func": "nuContRmbMgrInit",
-    "hazards": "pack:9fn[nuContRmbMgrInit=nucontrmbmgr,nuContRmbMgrRemove=nucontrmbmgr,contRmbControl=nucontrmbmgr,contRmbRetrace=nucontrmbmgr,contRmbCheckMesg=nucontrmbmgr,func_800A1DA0=?,func_800A1DE8=?,func_800A1E18=?,func_800A1EA4=?],defines-data:nuContRmbSearchTime,nuContRmbCallBack,refs-unplaced:nuContRmbCallBack,nuContRmbSearchTime,nuScRetraceCounter",
-    "kind": "asm-flip",
-    "nfns": 9,
-    "pts": 8,
-    "rom": "0x7CD60",
-    "score": -1192,
-    "size": 1392,
-    "upstream": "libnusys",
-    "vram": "0x800A1960"
-  },
-  {
     "band": "-",
     "func": "func_ovl6_8024D800",
     "hazards": "-",
@@ -557,19 +531,6 @@
     "size": 3504,
     "upstream": "none",
     "vram": "0x80076500"
-  },
-  {
-    "band": "cold",
-    "func": "nuScCreateScheduler",
-    "hazards": "pack:14fn[nuScCreateScheduler=nusched,func_800286B4=?,func_800286C0=?,nuScEventHandler=nusched,nuScAddClient=nusched,nuScResetClientMesgType=nusched,nuScRemoveClient=nusched,nuScEventBroadcast=nusched,nuScExecuteAudio=nusched,func_80028D28=?,nuScExecuteGraphics=nusched,nuScWaitTaskReady=nusched,func_80029234=?,func_80029240=?],upstream-fncount-mismatch:14vs13,file-static,defines-data:nuScPreNMIFunc,nuVersion[],nuScRetraceCounter,nuScPreNMIFlag,nuDebTaskPerfPtr,nuDebTaskPerfInterval,nuDebTaskPerfCnt,nuDebTaskPerfEnd,refs-unplaced:nuScPreNMIFlag,nuScRetraceCounter,nusched,calls-unplaced:void,jal-count-mismatch:22vs20",
-    "kind": "asm-flip",
-    "nfns": 14,
-    "pts": 13,
-    "rom": "0x37B0",
-    "score": -3544,
-    "size": 3744,
-    "upstream": "libnusys",
-    "vram": "0x800283B0"
   },
   {
     "band": "-",

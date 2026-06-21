@@ -80,8 +80,8 @@ Ghidra MCP is used inline at seed time. For each target function:
      addend, or extern HI/LO16), not a near-miss: go straight to the in-tree spot-check and full-make
      SHA-1; do not iterate C or reach for the permuter (see `docs/hazards.md#isolated-compile-caveat`).
    - **Finalize** (only if the spot-check passes): inline the body into `src/<seg>.c`, drop the
-     `INCLUDE_ASM` line, `clang-format -i` (skip under `src/libultra/`, `src/libkmc/`, and
-     `src/mgu/`), then `make` until `build/mariogolf64.z64: OK` and SHA-1 == baserom.
+     `INCLUDE_ASM` line, `clang-format -i` (skip under `src/libultra/`, `src/libkmc/`, `src/libnusys/`,
+     and `src/mgu/`), then `make` until `build/mariogolf64.z64: OK` and SHA-1 == baserom.
 
 4. **Bank** the function (only at score 0 plus spot-check plus full-`make` SHA match). Give it its
    curated Ghidra name (add to `symbol_addrs.txt`, rename in the body, re-`make`). On `git commit`,
@@ -270,7 +270,7 @@ below).
 - **Decomp is authoritative for names** (per the Ghidra-workspace
   `docs/re/coordination/decomp_coordination.md`).
 - **Match finalization is three steps:** inline the body into `src/<seg>.c`, `clang-format -i` (skip
-  under `src/libultra/`, `src/libkmc/`, and `src/mgu/`), then full `make` until ROM SHA-1 matches.
+  under `src/libultra/`, `src/libkmc/`, `src/libnusys/`, and `src/mgu/`), then full `make` until ROM SHA-1 matches.
   Spot-check passing is not ROM matching; the final `make` proves the match. Gate the `sha1sum` on
   `make` succeeding (confirm the `build/mariogolf64.z64: OK` line first): a failed link leaves the
   previous `.z64` in `build/`, so `sha1sum` on a stale ROM false-positives. **Always verify with
@@ -283,9 +283,11 @@ below).
   you changed. When a mirror or enabler edits a widely-included header (e.g.
   `include/libultra/PR/os_version.h`), the banking SHA-1 must come from `make clean && make extract &&
   make`, not an incremental build (`docs/hazards.md#clean-rebuild-after-shared-header-edit`).
-- **Never clang-format library code under `src/libultra/`, `src/libkmc/`, or `src/mgu/`.** These are
-  verbatim upstream copies; reformatting defeats cross-referencing. Each dir carries a local
-  `.clang-format` with `DisableFormat: true`. `src/mgu/` (S103) holds the game-embedded ultralib
+- **Never clang-format library code under `src/libultra/`, `src/libkmc/`, `src/libnusys/`, or
+  `src/mgu/`.** These are verbatim / near-verbatim upstream copies; reformatting defeats
+  cross-referencing (libnusys files keep the nusys upstream tab style: nusched / nugfxinit /
+  nugfxtaskmgr, S124). Each dir carries a local `.clang-format` with `DisableFormat: true`.
+  `src/mgu/` (S103) holds the game-embedded ultralib
   gu/mgu matrix source (the Monegi variant, compiled at the game `-O2` profile, NOT the libultra
   `-O3` band; see `docs/hazards.md#game-region-mirror-o2-profile`).
 - **Use ultra64.h types** (`s32`/`u64`/`vu32`/`f32`/...) in decomp C, never raw
@@ -368,6 +370,7 @@ When `pick_target.py` flags a hazard (or a match shows its symptom), read the ma
 | clean mirror SHA-miss, extra `jal __assert` / bare `assert()` / `bare-assert:<n>` | #assert-strip |
 | clean mirror SHA-miss, same insn count reordered / jal-mismatch + no `coddog-mirror` | #near-verbatim-mirror-jal-count-mismatch |
 | clean mirror SHA-miss, build instr-count < target (shorter) / collateral post-fn addr shifts | #cross-jump-tail-merge |
+| array-of-struct init loop shorter than target + a field stored twice (doubled store-offset) | #struct-init-loop-dup-store--dual-induction-var |
 | permuter on a KMC-toolchain (libnusys/libultra/libkmc) mirror fn | #permuter-setup-for-kmc-toolchain-mirrors |
 | Gfx* manipulation | #display-lists |
 

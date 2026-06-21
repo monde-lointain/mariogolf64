@@ -102,6 +102,8 @@ from pick_target_hazards import (
     HAZARD_RODATA_JTBL,
     HAZARD_DATA_STATIC,
     HAZARD_CODDOG_MIRROR,
+    HAZARD_CODDOG_STRUCTURAL,
+    HAZARD_CODDOG_SOURCE_BANKED,
     HAZARD_CODDOG_TWIN,
     HAZARD_GAME_REGION_MIRROR,
     HAZARD_BLOCK_REORDER_SIBLING,
@@ -2029,9 +2031,20 @@ def seed_points(size, upstream, band, nfns, hazards, blocked):
     jal_unexplained = any(
         h.kind == HAZARD_JAL_COUNT_MISMATCH and "(version-artifact?)" not in (h.detail or "")
         for h in hazards)
-    has_coddog = any(h.kind == HAZARD_CODDOG_MIRROR for h in hazards)
-    if jal_unexplained and not has_coddog:
-        base += 1  # near-verbatim risk (version/reorder divergence the verbatim cp won't match)
+    # A coddog-mirror SUPPRESSES the near-verbatim bump only when it is a CLEAN structural identity.
+    # A coddog-structural / coddog-source-banked hit is the S123/S124 customization-MASK tell: the
+    # 99.99 fingerprint matches a game-DIVERGENT body (or an already-banked false source), not a
+    # verbatim cp. It must NOT suppress the bump, and on a (single-file-)pack it earns the same
+    # game-modified-risk +1 — most-of-the-bodies-diverge, route to classical/mixed, not a seed-only
+    # mirror (S123 nusched.c coddog-source-banked@99.99 pack ran as a 10/14 mixed bank). The non-lib
+    # `jal func_<vram>` game-callee tell is a stronger signal still, but needs the call list here — a
+    # tracked follow-up; until then a masking coddog on a pack carries the risk price. See
+    # docs/hazards.md#coddog-cross-ref and CLAUDE.md ## Story points (exemption-GUARD).
+    coddog_masks = any(
+        h.kind in (HAZARD_CODDOG_STRUCTURAL, HAZARD_CODDOG_SOURCE_BANKED) for h in hazards)
+    has_clean_coddog = any(h.kind == HAZARD_CODDOG_MIRROR for h in hazards) and not coddog_masks
+    if (jal_unexplained and not has_clean_coddog) or (coddog_masks and pack):
+        base += 1  # near-verbatim / game-modified risk (the verbatim cp won't match; plan classical)
     if pack or big:
         base += 1
     return snap_fib(base)

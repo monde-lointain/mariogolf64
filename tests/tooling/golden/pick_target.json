@@ -286,32 +286,6 @@
     "vram": "0x80070FD0"
   },
   {
-    "band": "cold",
-    "func": "nuGfxTaskMgr",
-    "hazards": "single-file-pack:3fn[nuGfxTaskMgr=nugfxtaskmgr,nuGfxTaskMgrInit=nugfxtaskmgr,nuGfxTaskStart=?],one-tu,file-static,defines-data:nuGfxUcode,nuGfxTask[NU_GFX_TASK_NUM],nuGfxTaskSpool,nuGfxCfb,nuGfxCfbNum,nuGfxCfb_ptr,nuGfxZBuffer,nuGfxDisplay,nuGfxCfbCounter,nuGfxUcodeFifoSize,nuGfxUcodeFifoPtr,nuGfxSwapCfbFunc,nuGfxTaskEndFunc,beforeFlag,refs-unplaced:nuDramStack,nuGfxCfb,nuGfxCfbCounter,nuGfxCfbNum,nuGfxCfb_ptr,nuGfxTaskEndFunc,nuGfxUcodeFifoPtr,nuGfxUcodeFifoSize,nuRDPOutputBuf,nuYieldBuf,nusched,rspbootTextEnd,jal-count-mismatch:7vs11",
-    "kind": "asm-flip",
-    "nfns": 3,
-    "pts": 8,
-    "rom": "0x4840",
-    "score": -984,
-    "size": 1184,
-    "upstream": "libnusys",
-    "vram": "0x80029440"
-  },
-  {
-    "band": "cold",
-    "func": "nuContRmbMgrInit",
-    "hazards": "pack:9fn[nuContRmbMgrInit=nucontrmbmgr,nuContRmbMgrRemove=nucontrmbmgr,contRmbControl=nucontrmbmgr,contRmbRetrace=nucontrmbmgr,contRmbCheckMesg=nucontrmbmgr,func_800A1DA0=?,func_800A1DE8=?,func_800A1E18=?,func_800A1EA4=?],defines-data:nuContRmbSearchTime,nuContRmbCallBack,refs-unplaced:nuContRmbCallBack,nuContRmbSearchTime,nuScRetraceCounter",
-    "kind": "asm-flip",
-    "nfns": 9,
-    "pts": 8,
-    "rom": "0x7CD60",
-    "score": -1192,
-    "size": 1392,
-    "upstream": "libnusys",
-    "vram": "0x800A1960"
-  },
-  {
     "band": "-",
     "func": "func_ovl6_8024D800",
     "hazards": "-",
@@ -559,19 +533,6 @@
     "vram": "0x80076500"
   },
   {
-    "band": "cold",
-    "func": "nuScCreateScheduler",
-    "hazards": "pack:14fn[nuScCreateScheduler=nusched,func_800286B4=?,func_800286C0=?,nuScEventHandler=nusched,nuScAddClient=nusched,nuScResetClientMesgType=nusched,nuScRemoveClient=nusched,nuScEventBroadcast=nusched,nuScExecuteAudio=nusched,func_80028D28=?,nuScExecuteGraphics=nusched,nuScWaitTaskReady=nusched,func_80029234=?,func_80029240=?],upstream-fncount-mismatch:14vs13,file-static,defines-data:nuScPreNMIFunc,nuVersion[],nuScRetraceCounter,nuScPreNMIFlag,nuDebTaskPerfPtr,nuDebTaskPerfInterval,nuDebTaskPerfCnt,nuDebTaskPerfEnd,refs-unplaced:nuScPreNMIFlag,nuScRetraceCounter,nusched,calls-unplaced:void,jal-count-mismatch:22vs20",
-    "kind": "asm-flip",
-    "nfns": 14,
-    "pts": 13,
-    "rom": "0x37B0",
-    "score": -3544,
-    "size": 3744,
-    "upstream": "libnusys",
-    "vram": "0x800283B0"
-  },
-  {
     "band": "-",
     "func": "func_800521C0",
     "hazards": "pack:12fn[func_800521C0=?,func_800521DC=?,func_80052220=?,func_80052250=?,func_80052264=?,func_80052324=?,func_80052384=?,func_8005244C=?,func_800525C4=?,func_80052834=?,func_80052A68=?,func_80052CF0=?]",
@@ -648,5 +609,44 @@
     "size": 5920,
     "upstream": "none",
     "vram": "0x8021E550"
+  },
+  {
+    "band": "-",
+    "func": "func_80043AF0",
+    "hazards": "pack:25fn[func_80043AF0=?,func_80043B0C=?,get_club_meter_extent=?,get_club_meter_units=?,func_80043C20=?,func_80043C64=?,lerp_int_v2=?,predict_shot_distance=?,func_80044254=?,func_80044470=?,func_800444B8=?,lerp_int=?,predict_shot_distance_variant=?,get_club_distance_slot=?,get_club_param=?,get_shot_data=?,get_shot_param=?,get_shot_progress=?,resolve_club_terrain_mask=?,func_80044A8C=?,resolve_shot_quality_table=?,func_80044C7C=?,func_80044CCC=?,func_80044FDC=?,func_800451E4=?]",
+    "kind": "asm-flip",
+    "nfns": 25,
+    "pts": 13,
+    "rom": "0x1EEF0",
+    "score": -6384,
+    "size": 6384,
+    "upstream": "none",
+    "vram": "0x80043AF0"
+  },
+  {
+    "band": "-",
+    "func": "func_80052FE0",
+    "hazards": "pack:15fn[func_80052FE0=?,func_800530FC=?,func_8005342C=?,calculate_bone_matrices=?,clear_animation_slot=?,func_800542A0=?,func_80054310=?,get_character_state=?,func_800543A4=?,func_800543DC=?,func_800544B4=?,func_80054550=?,func_8005470C=?,func_8005483C=?,func_800548DC=?]",
+    "kind": "asm-flip",
+    "nfns": 15,
+    "pts": 13,
+    "rom": "0x2E3E0",
+    "score": -6432,
+    "size": 6432,
+    "upstream": "none",
+    "vram": "0x80052FE0"
+  },
+  {
+    "band": "-",
+    "func": "func_800660A0",
+    "hazards": "pack:8fn[func_800660A0=?,draw_course_decal_triangles=?,emit_aim_target_ring=?,func_800674B8=?,func_800676B0=?,func_80067730=?,update_rumble_intensity_table=?,func_80067A60=?]",
+    "kind": "asm-flip",
+    "nfns": 8,
+    "pts": 13,
+    "rom": "0x414A0",
+    "score": -6752,
+    "size": 6752,
+    "upstream": "none",
+    "vram": "0x800660A0"
   }
 ]

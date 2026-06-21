@@ -2162,6 +2162,40 @@ are `call_min`-indistinguishable, so suppressing enough to keep one always break
    non-monotonic selective-merge pattern; only MG64's actual compiler binary would, and none available
    reproduces it. Pursue only as open toolchain research, not a banking path.
 
+## struct-init-loop (dup-store / dual-induction-var)
+
+A near-verbatim mirror's **array-of-struct init loop** (`for(i){ arr[i].next = &arr[i+1]; arr[i].f =
+…; }` over a large struct) builds + links clean but ROM SHA-misses, the build is **SHORTER than the
+target** (instr COUNT < target, ~2 instrs short, with the usual `-0x10`-style collateral address
+shifts on everything after it), and the in-tree-vs-target objdump shows the target storing **one
+field TWICE** (the same value to the same offset at the loop body's HEAD and TAIL) via a **running
+address pointer**, while your build stores it once via indexed `lui %hi(base); addu …,v1`. This is NOT
+a cross-jump wall (`#cross-jump-tail-merge`, which DELETES instrs) and NOT permuter territory (the
+byte-match is far below 0.97) — it is a **source artifact**: the original loop body has a **duplicate
+field assignment** the literal upstream lacks.
+
+- **Mechanism.** Taking an address INTO the array (`next = &arr[i+1]`) makes gcc 2.7.2 strength-reduce
+  that to a running induction var (e.g. `a1 = &arr[i+1]`, stride = sizeof). A SECOND assignment of a
+  field whose address is a fixed offset below the next element (`arr[i].msgQ` at `next_elem - 8`) lets
+  gcc derive a SECOND running pointer (`a0 = a1 - 8`) and store that field via `0(a0)` at both the
+  head and tail of the body — the **double-store tell**. Your single-assignment source gives gcc one
+  IV (it picks one field for the running pointer, indexes the rest), so it is 1–2 instrs short and the
+  registers/addressing cascade-diverge.
+- **Fix.** Re-add the duplicate field assignment at the loop **tail** (the MG64 edit artifact: S124
+  `nuGfxTaskMgrInit` has a trailing `nuGfxTask[cnt].msgQ = &nuGfxTaskMgrMesgQ;` after the field block).
+  That single line reproduces gcc's dual-IV + double-store and lands the exact instr count → byte-match
+  first build after. Match driver: the asm STORE ORDER (`next, msgQ, …, msgQ`) — a field that appears
+  at both ends of the store sequence is your duplicate-assignment cue.
+- **Watch the value defines too.** S124 also needed `yield_data_size = OS_YIELD_DATA_SIZE` (0xC00), NOT
+  the 2.07 `NU_GFX_YIELD_BUF_SIZE` (= `OS_YIELD_DATA_SIZE + 0x10` = 0xC10) — the MG64 rev dropped the
+  `+0x10` (a `#needs-define` version value). Size the extern array (`extern T arr[N]`, not `arr[]`) so
+  gcc has the bound. The asm is authoritative for the store ORDER and the immediate values; the
+  upstream `.c` is the SHAPE only.
+
+(A `pick_target.py` `struct-init-loop` detection tag — a multi-store loop whose asm has a doubled
+field-store offset — is a tracked follow-up; until then this is recognized by the build-shorter +
+doubled-store-offset tell at match time.)
+
 ## permuter setup for KMC-toolchain mirrors
 
 Running decomp-permuter on a `libnusys`/`libultra`/`libkmc` (KMC-toolchain) function needs three

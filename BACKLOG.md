@@ -16,6 +16,30 @@ subordinate to the libultra goal. Target selection is `tools/pick_target.py` (sm
 the 8-point decompose gate fires on any seed ≥8. v2 classical track is active (since S11);
 mirror is the default, classical is first-class when the asm warrants it.
 
+**S124 — `nugfxtaskmgr.c` BANKED (libnusys game-customized gfx task manager; FULL file, 3/3).**
+Banked all 3 fns (`nuGfxTaskMgr` / `nuGfxTaskMgrInit` / `nuGfxTaskStart`) as C, ROM SHA-1 == baserom,
+md5-candidate. **HEADLINE: the S123 exemption-GUARD scenario at EXECUTION, but it banked FULLY — the
+apparent "regalloc wall" was a SOURCE ARTIFACT, not a compiler wall.** All 3 fns are game-customized
+(the plan's "near-verbatim mirror" premise was wrong, caught by ASM-first decomp): nuGfxTaskMgr has an
+MG64 retrace-pacing wait (`nuGfxRetraceWait`, sched frame-counter D_80104E68 vs last-seen D_800D8980)
++ reordered spool/callback; nuGfxTaskStart has a custom frame-buffer swap via seq-table
+`D_800B67A4[nuGfxCfbCounter] → nuGfxCfb[idx]`. **nuGfxTaskMgrInit was the match key (new
+`#struct-init-loop` hazard):** a DUPLICATE `nuGfxTask[cnt].msgQ = &mesgQ;` at the loop TAIL (MG64 edit
+artifact) reproduces GCC 2.7.2's dual-induction-var/double-store; plus `yield_data_size =
+OS_YIELD_DATA_SIZE` (0xC00, drops the 2.07 +0x10). Extern-ref drop-def data model (nugfxinit.c
+pattern, NO carve): +8 data externs to `symbol_addrs` (nuGfxCfb/_ptr/Num/Counter, nuGfxTaskEndFunc,
+nuRDPOutputBuf, nuDramStack, nuYieldBuf). Subseg flip [0x4840,c]. md5-candidate 174→**175**; asm
+subsegs 107→**106**. Quality 0/0/0/0 (Init 1 re-attempt). seed 8 / realized 9 (residual +1, regime
+mixed→full). **Cross-repo follow-up:** 11 new decomp symbols (3 fns + 8 data) →
+`sync_decomp_names.py --import-from-decomp`. Retro applied 3 of 3 (#1 CLAUDE.md never-clang-format +=
+src/libnusys/ + .clang-format; #2 pick_target masking-coddog seed pricing [forward-looking,
+golden-inert]; #3 `docs/hazards.md#struct-init-loop-dup-store--dual-induction-var` + index row). No
+carry-overs. **Remaining libnusys (next-cleanest):** the 4 nusched carry-over fns (classical,
+heavily-customized scheduler: nuScCreateScheduler/EventHandler/ExecuteAudio/ExecuteGraphics ~193/255/
+152/321 instrs — a multi-session classical grind, completes nusched.c → md5-candidate), then the big
+`func_800328E0`/`func_ovl*` packs (unidentified, coddog-source-banked noise needing version/identify-TU
+triage). **libnusys's clean-mirror band is mined out — remaining units need a classical-track plan.**
+
 **S123 — `nusched.c` 10/14 BANKED (libnusys game-customized scheduler; 4 fns carried as
 `INCLUDE_ASM`).** Banked 10 stock/small-variant scheduler fns as C (the 4 accessors nuScGetAudioMQ/
 GfxMQ/SetFrameBufferNum/GetFrameRate, nuScAddClient, nuScResetClientMesgType, nuScRemoveClient,
