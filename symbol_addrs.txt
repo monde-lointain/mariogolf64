@@ -287,3 +287,4 @@ nuGfxTaskEndFunc = 0x800B67B8; // size:0x4
 nuRDPOutputBuf = 0x8010CFC0; // size:0x20000
 nuDramStack = 0x801B7F80; // size:0x400
 nuYieldBuf = 0x8010C2E0; // size:0xC00
+nuDebTaskPerf = 0x801B5700; // size:0x5D0

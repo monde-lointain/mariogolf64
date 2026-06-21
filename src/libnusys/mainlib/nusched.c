@@ -24,6 +24,19 @@
 
 extern NUDebTaskPerf *debTaskPerfPtr;
 
+/* MG64-specific scheduler state (BSS); volatiles per the dead-reload/recompute tells. */
+extern vu32	D_801B68E0;	/* second retrace counter (++ w/ dead reload) */
+extern vs32	D_800B678C;	/* perf-sample-armed flag */
+extern vu32	D_8012F4D4;	/* swap-gate retrace base */
+extern void	*D_800B6784;	/* current gfx task ptr (fb @ +0xc) */
+extern s32	D_800B6788;	/* perf buffer index */
+extern s8	D_800B67C0;	/* display-off guard */
+
+/* The scheduler TU treats the retrace counter as volatile (dead-reload-after-store on
+   the ++, recompute-not-CSE of (counter - base)); nugfxtaskmgr/nucontrmbmgr keep the
+   non-volatile nusys.h extern, so the volatility is local to this TU. */
+extern volatile u32 nuScRetraceCounter;
+
 INCLUDE_ASM("asm/nonmatchings/libnusys/mainlib/nusched", nuScCreateScheduler);
 
 OSMesgQueue *nuScGetAudioMQ(void)
@@ -36,7 +49,60 @@ OSMesgQueue *nuScGetGfxMQ(void)
     return( &nusched.graphicsRequestMQ );
 }
 
-INCLUDE_ASM("asm/nonmatchings/libnusys/mainlib/nusched", nuScEventHandler);
+void nuScEventHandler(void)
+{
+    OSMesg	msg;
+    s32		beforeResetFrame;
+
+    nuScRetraceCounter = 0;
+    D_801B68E0 = 0;
+    while(1){
+	osRecvMesg(&nusched.retraceMQ, &msg, OS_MESG_BLOCK);
+	switch((int)msg){
+	case VIDEO_MSG:
+	    nuScRetraceCounter++;
+	    D_801B68E0++;
+	    if(D_800B678C != 0){
+		debTaskPerfPtr->retraceTime = OS_CYCLES_TO_USEC(osGetTime());
+		nuDebTaskPerf[D_800B6788].auTaskCnt = 0;
+		D_800B678C = 0;
+	    }
+	    if((nuScRetraceCounter - D_8012F4D4) >= 0x1F){
+		s32 frame = nuScRetraceCounter - D_8012F4D4;
+		if(D_800B6784 != NULL){
+		    if(frame == 0x20){
+			osViSwapBuffer(*(void **)((u8 *)D_800B6784 + 0xc));
+		    } else if(frame == 0x36 && D_800B67C0 == 0){
+			nuGfxDisplayOff();
+			D_800B6784 = NULL;
+		    }
+		}
+	    }
+	    nuScEventBroadcast(&nusched.retraceMsg);
+	    if(nuScPreNMIFlag){
+		if(beforeResetFrame){
+		    beforeResetFrame--;
+		} else {
+		    nuScPreNMIFlag |= NU_SC_BEFORE_RESET;
+		    osAfterPreNMI();
+		    osViSetYScale(1.0);
+		    osViBlack(TRUE);
+		}
+	    }
+	    break;
+	case PRE_NMI_MSG:
+	    nuScPreNMIFlag = NU_SC_PRENMI_GET;
+	    nuScEventBroadcast(&nusched.prenmiMsg);
+	    if(nuScPreNMIFunc != NULL){
+		(*nuScPreNMIFunc)();
+	    }
+	    beforeResetFrame = (nusched.frameRate / 2) / nusched.retraceCount - 3;
+	    break;
+	default:
+	    break;
+	}
+    }
+}
 
 void nuScAddClient(NUScClient* client, OSMesgQueue* msgQ, NUScMsg msgType)
 {
