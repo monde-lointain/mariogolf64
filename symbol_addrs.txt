@@ -13,6 +13,7 @@ nuGfxTaskSpool = 0x8012D478; // size:0x4
 nuScPreNMIFunc = 0x800B6780; // size:0x4
 nuScPreNMIFlag = 0x800FBD94; // size:0x1
 nusched = 0x801B8380; // size:0x680
+debTaskPerfPtr = 0x800D8970; // size:0x4
 nuScGetAudioMQ = 0x800286B4; // type:func
 nuScGetGfxMQ = 0x800286C0; // type:func
 nuScSetFrameBufferNum = 0x80029234; // type:func

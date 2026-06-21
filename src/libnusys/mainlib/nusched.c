@@ -9,13 +9,19 @@
 /* nuScExecuteAudio / nuScExecuteGraphics carry MG64-specific edits and	*/
 /* stay as INCLUDE_ASM until decompiled; the rest are stock-2.07 bodies.	*/
 /*======================================================================*/
+#define NU_DEBUG
 #include <nusys.h>
 #include "include_asm.h"
+
+#define TASK_YIELD		1	/* GFX TASK YILED FLAG */
+#define TASK_YIELDED		2	/* GFX TASK YILEDED FLAG */
 
 #define VIDEO_MSG		666	/* Retrace message */
 #define RSP_DONE_MSG		667	/* RSP task finished */
 #define RDP_DONE_MSG		668	/* RDP rendering finished*/
 #define PRE_NMI_MSG    	 	669	/* NMI message */
+
+extern NUDebTaskPerf *debTaskPerfPtr;
 
 INCLUDE_ASM("asm/nonmatchings/libnusys/mainlib/nusched", nuScCreateScheduler);
 
@@ -97,7 +103,98 @@ void nuScEventBroadcast(NUScMsg *msg)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/libnusys/mainlib/nusched", nuScExecuteAudio);
+void nuScExecuteAudio(void)
+{
+
+    NUScTask*	gfxTask;
+    NUScTask*	audioTask;
+    OSMesg 	msg;
+    u32		yieldFlag;
+#ifdef NU_DEBUG
+    OSIntMask	mask;
+#endif /* NU_DEBUG */
+
+    while(1) {
+	/* Wait for request for audio task execution. */
+	osRecvMesg(&nusched.audioRequestMQ, (OSMesg *)&audioTask, OS_MESG_BLOCK);
+	/* Do not create task after 0.5 sec - 2 frames. */
+	/* Do notify of end of task, however. */
+	if(nuScPreNMIFlag & NU_SC_BEFORE_RESET){
+	    /* Notify the thread that started the audio task that the task has finished. */
+	    osSendMesg(audioTask->msgQ, audioTask->msg, OS_MESG_BLOCK);
+	    continue;
+	}
+
+	osWritebackDCacheAll();	/* Flash the cache. */
+
+	/* Check current RSP status. */
+	yieldFlag = 0;
+	gfxTask = nusched.curGraphicsTask;
+
+	/* If a graphics task is being executed, have it yield. */
+	if( gfxTask ) {
+
+	    /* Wait for completion (yield) of the graphics task. */
+	    osSpTaskYield();		/* Task yield */
+	    osRecvMesg(&nusched.rspMQ, &msg, OS_MESG_BLOCK);
+
+	    /* Check whether the task actually has yielded.*/
+	    if (osSpTaskYielded(&gfxTask->list)){
+
+		/* Yielded */
+		yieldFlag = TASK_YIELD;
+	    } else {
+
+		/* Task finishes with yield. */
+		yieldFlag = TASK_YIELDED;
+	    }
+	}
+#ifdef NU_DEBUG
+	mask = osSetIntMask(OS_IM_NONE);
+	if(debTaskPerfPtr->auTaskCnt < NU_DEB_PERF_AUTASK_CNT){
+	    debTaskPerfPtr->auTaskTime[debTaskPerfPtr->auTaskCnt].rspStart =
+		OS_CYCLES_TO_USEC(osGetTime());
+	}
+	osSetIntMask(mask);
+#endif /* NU_DEBUG */
+
+	/* Execute audio task. */
+	nusched.curAudioTask = audioTask;
+	osSpTaskStart(&audioTask->list);
+
+	/* Wait for end of the RSP task. */
+	osRecvMesg(&nusched.rspMQ, &msg, OS_MESG_BLOCK);
+	nusched.curAudioTask = (NUScTask *)NULL;
+
+#ifdef NU_DEBUG
+	mask = osSetIntMask(OS_IM_NONE);
+	if(debTaskPerfPtr->auTaskCnt < NU_DEB_PERF_AUTASK_CNT){
+	   debTaskPerfPtr->auTaskTime[debTaskPerfPtr->auTaskCnt].rspEnd =
+	       OS_CYCLES_TO_USEC(osGetTime());
+	   debTaskPerfPtr->auTaskCnt++;
+	}
+	osSetIntMask(mask);
+#endif /* NU_DEBUG */
+
+	/* Check whether a graphics task is waiting to be executed.	*/
+	/* If so, send message.			*/
+	if( nusched.graphicsTaskSuspended )
+	    osSendMesg( &nusched.waitMQ, &msg, OS_MESG_BLOCK );
+
+	/* Resume the yielding graphics task. */
+	if( yieldFlag == TASK_YIELD ) {
+	    osSpTaskStart(&gfxTask->list);
+	} else if ( yieldFlag == TASK_YIELDED ) {
+	    /* The graphics task finishes at the same time as the yield,	*/
+	    /*	so the RSPTask completion message is the same as that for the yield.  */
+	    /* Send the message to the graphics task thread. */
+	    osSendMesg(&nusched.rspMQ, &msg, OS_MESG_BLOCK);
+	}
+
+	/* Notify the thread that started the audio task that the task has finished. */
+	osSendMesg(audioTask->msgQ, audioTask->msg, OS_MESG_BLOCK);
+    }
+}
 
 s32 func_80028D28(void)
 {
