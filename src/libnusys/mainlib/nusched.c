@@ -5,9 +5,10 @@
 /*		Copyright (C) 1997, NINTENDO Co,Ltd.			*/
 /*======================================================================*/
 /* MG64 nusched: a game-customized scheduler based on nusys-2.07 (minus  */
-/* the nuVersion[] marker). nuScCreateScheduler / nuScEventHandler /	*/
-/* nuScExecuteAudio / nuScExecuteGraphics carry MG64-specific edits and	*/
-/* stay as INCLUDE_ASM until decompiled; the rest are stock-2.07 bodies.	*/
+/* the nuVersion[] marker), compiled with NU_DEBUG. nuScExecuteAudio is	*/
+/* the stock NU_DEBUG body; nuScCreateScheduler / nuScEventHandler /	*/
+/* nuScExecuteGraphics carry MG64-specific edits and stay as INCLUDE_ASM	*/
+/* until decompiled; the rest are stock-2.07 bodies.			*/
 /*======================================================================*/
 #define NU_DEBUG
 #include <nusys.h>
