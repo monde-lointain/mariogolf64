@@ -73,7 +73,7 @@ SECTIONS
         build/src/libnusys/mainlib/nugfxinit.o(.text);
         build/src/libnusys/mainlib/nusched.o(.text);
         build/asm/4650.o(.text);
-        build/asm/4840.o(.text);
+        build/src/libnusys/mainlib/nugfxtaskmgr.o(.text);
         build/asm/4CE0.o(.text);
         build/asm/5A40.o(.text);
         build/asm/DCE0.o(.text);
@@ -335,7 +335,7 @@ SECTIONS
         build/src/libnusys/mainlib/nugfxinit.o(.data);
         build/src/libnusys/mainlib/nusched.o(.data);
         build/asm/4650.o(.data);
-        build/asm/4840.o(.data);
+        build/src/libnusys/mainlib/nugfxtaskmgr.o(.data);
         build/asm/4CE0.o(.data);
         build/asm/5A40.o(.data);
         build/asm/DCE0.o(.data);
@@ -607,7 +607,7 @@ SECTIONS
         build/src/libnusys/mainlib/nugfxinit.o(.rodata);
         build/src/libnusys/mainlib/nusched.o(.rodata);
         build/asm/4650.o(.rodata);
-        build/asm/4840.o(.rodata);
+        build/src/libnusys/mainlib/nugfxtaskmgr.o(.rodata);
         build/asm/4CE0.o(.rodata);
         build/asm/5A40.o(.rodata);
         build/asm/DCE0.o(.rodata);
@@ -888,7 +888,7 @@ SECTIONS
         build/src/libnusys/mainlib/nugfxinit.o(.bss);
         build/src/libnusys/mainlib/nusched.o(.bss);
         build/asm/4650.o(.bss);
-        build/asm/4840.o(.bss);
+        build/src/libnusys/mainlib/nugfxtaskmgr.o(.bss);
         build/asm/4CE0.o(.bss);
         build/asm/5A40.o(.bss);
         build/asm/DCE0.o(.bss);
