@@ -6,7 +6,7 @@
 /*======================================================================*/
 /* MG64 nugfxtaskmgr: a game-customized graphics task manager based on	*/
 /* nusys-2.07. nuGfxTaskMgr adds a retrace-pacing wait (nuGfxRetraceWait,*/
-/* scheduler frame counter D_80104E68 vs last-seen D_800D8980) and	*/
+/* scheduler frame counter nuScRetraceCounter vs last-seen D_800D8980) and	*/
 /* reorders the spool/callback. nuGfxTaskMgrInit uncomments the		*/
 /* output_buff FIFO setup (nuRDPOutputBuf) and re-stores msgQ at the	*/
 /* loop tail; nuGfxTaskStart swaps the frame buffer via the MG64	*/
@@ -25,7 +25,6 @@ extern OSThread		D_800D8990;	/* GfxTaskMgrThread		*/
 extern OSMesg		D_800DAB40[];	/* nuGfxTaskMgrMesgBuf (== stack top) */
 extern OSMesgQueue	D_801B93F8;	/* nuGfxTaskMgrMesgQ		*/
 extern u32		D_800D8980;	/* retrace pacing: last-seen counter */
-extern u32		D_80104E68;	/* retrace pacing: scheduler frame counter */
 extern u8		D_800B3F20[];	/* rspbootTextEnd		*/
 extern u8		audio_sched_thread_entry[];	/* rspbootTextStart */
 extern u8		D_800B67A4[];	/* MG64 frame-buffer swap sequence table */
@@ -50,13 +49,13 @@ void nuGfxTaskMgr(void *arg)
 	case NU_SC_SWAPBUFFER_MSG:
 	    while(1){
 		mask = osSetIntMask(OS_IM_NONE);
-		if((u32)(D_80104E68 - D_800D8980) >= 2){
+		if((u32)(nuScRetraceCounter - D_800D8980) >= 2){
 		    break;
 		}
 		osSetIntMask(mask);
 		nuGfxRetraceWait(1);
 	    }
-	    D_800D8980 = D_80104E68;
+	    D_800D8980 = nuScRetraceCounter;
 	    osSetIntMask(mask);
 
 	    if(nuGfxSwapCfbFunc != NULL){
