@@ -94,6 +94,16 @@ shared `__`-prefixed data extern reached only through the weak fn (S66: `__libm_
 return refd by both cosf and sinf as an anonymous `D_<addr>`): a recover-extern the `refs-unplaced`
 flag misses when the fn is a hidden pack member (see #recover-extern).
 
+**Perf/debug struct version drift (S125).** A vendored header struct that is referenced ONLY by
+carried / `INCLUDE_ASM` fns is **UNVALIDATED** — it was copied from the upstream version verbatim and
+never checked against the asm. When the first consumer is finally decompiled, the layout can be a
+different library rev: MG64's `nusys.h` `NUDebTaskPerf` carried the 2.07 `markerTime[10]` field
+(a 1999/05/30 feature) that MG64's pre-1999 rev lacks, so `auTaskCnt` was at 0x59 / `auTaskTime` at
+0x1A0 in the header but the asm needs 0x9 / 0x150 (struct size 0x1F0, asm-confirmed via the
+`idx * 0x1F0` array stride and the `lbu …,0x9` count load). Validate perf/debug struct offsets against
+the asm BEFORE banking the first perf-using fn; fix the vendored header to the game's rev (drop
+markerTime). A header struct is not ground truth until a matching fn proves its offsets.
+
 **Provenance:** S15 unlocked the libnusys band by vendoring one `include/libnusys/nusys.h` +
 `-I include/libnusys`; `-I include/libultra/PR` is the precedent for unblocking a band. S51 is the
 cautionary case for step 1's "do not consult `libultra_modern`": its split `gu/` layout (hand-asm
@@ -2211,3 +2221,75 @@ fixes the generic setup misses (hit S121 contRmbControl):
 - **(c) body + extracted target.** `import.py` accepts a `c_file` with the function BODY plus a target
   `.s` extracted from `asm/<seg>.s` (`glabel`..`endlabel`) — no `INCLUDE_ASM` / `mg_resolve_c_asm`
   round-trip is needed.
+
+## NU_DEBUG-stock-not-custom (carried perf fn triage)
+
+A `libnusys` carry framed as "heavily game-customized, classical RE" is often NOT custom at all — it is
+the **stock upstream body that failed to match because the file was compiled WITHOUT `NU_DEBUG`**, so
+the `#ifdef NU_DEBUG` performance machinery is absent from the C while the asm has it (osGetTime /
+osDpSetStatus / __udivdi3 calls). The tell: **the carried fns are EXACTLY the upstream fns that carry
+`#ifdef NU_DEBUG` blocks** (S123 carried nusched's 4 NU_DEBUG fns — nuScCreateScheduler /
+nuScEventHandler / nuScExecuteAudio / nuScExecuteGraphics — as "custom"; S125 found nuScExecuteAudio is
+a pure stock-NU_DEBUG mirror).
+
+- **Triage before classical-RE.** Diff the carried fn's asm against the upstream's **NU_DEBUG** body
+  (not the non-debug body). If the calls line up, it is stock: bank it as a mirror.
+- **Fix recipe (S125 nuScExecuteAudio, banked first build).** (a) `#define NU_DEBUG` at the top of the
+  `.c` BEFORE `#include <nusys.h>` (matches the MG64 TU compile); (b) validate the perf/debug struct
+  offsets vs the asm and fix the vendored header (see the perf-struct note in `#upstream-mirror-pattern`
+  — MG64's `NUDebTaskPerf` lacked the 2.07 `markerTime[10]`); (c) drop-def the `static` perf pointers
+  (`debTaskPerfPtr` etc.) to extern at their asm-recovered vrams. The stock body is then verbatim
+  (drop-static).
+- **Caveat.** NU_DEBUG-on covers ONLY the carried perf fns; the already-banked stock siblings have no
+  NU_DEBUG blocks so the file-wide `#define` does not perturb them. A fn with NU_DEBUG-stock perf code
+  PLUS genuine MG64 edits (swap-gate, game hooks) is still classical on top of the NU_DEBUG stock
+  skeleton (S125 nuScEventHandler / ExecuteGraphics).
+
+## libnusys inline-div mflo-hazard nop
+
+A `libnusys` fn with an **inline integer division** (`a / b` compiled to `divu` + `mflo`, not a
+`__udivdi3` call) can build + link clean and be **byte-perfect EXCEPT for 2 missing `nop`s after
+`mflo`** (the VR4300 mflo→consumer hazard padding) — a `mflo; nop; nop; <use>` in the target vs
+`mflo; <use>` in your build. Net: the build is 2 instrs short with the usual collateral address shifts.
+
+- **Root cause (S125 nuScEventHandler).** KMC gcc emits the GNU `div` **macro**; the assembler
+  (`tools/cc/as`) expands it and inserts the hazard nops — but ONLY when it can see the consumer is too
+  close. When gcc -O2 schedules the mflo consumer **into a loop-back `j`'s delay slot** (`mflo; j;
+  addiu` — consumer 2 slots after mflo across the branch), `as` does NOT pad, while the original build
+  emitted `mflo; nop; nop; j; addiu` (consumer 3 slots after). A standalone `int d(int a,int b){return
+  a/b - 3;}` DOES get the 2 nops by default, so it is **not a blanket missing flag** — it is the
+  loop-back-delay-slot scheduling that suppresses the pad.
+- **Flags do not help.** KMC gcc/as REJECT `-mfix4300`, `-mcpu=vr4300`, `-mtune=vr4300`,
+  `-mfix-vr4300`, `-Wa,-mfix-vr4300` (modern-gcc/binutils flags absent in the KMC 2.7.2 / binutils-2.6
+  toolchain).
+- **Resolution ladder.** (a) **Permuter candidate** — a source form that keeps the mflo consumer OUT of
+  the `j` delay slot (so the consumer lands ≥3 slots after mflo) lets `as` insert the nops; this is the
+  near-miss escalation (`#permuter-setup-for-kmc-toolchain-mirrors`). (b) Open question whether a KMC-as
+  hazard mode exists. Do NOT treat the 2-nop gap as a "try harder C" iteration — it is a scheduler /
+  assembler interaction, not a logic mismatch (everything else in S125 nuScEventHandler matched
+  byte-for-byte: the volatile counter block, perf block, swap-gate, PRENMI, epilogue, break code).
+
+## volatile-global tell (dead-reload + recompute-not-CSE)
+
+A `libnusys`/game mirror global that the asm accesses with **a dead reload immediately after a store**
+(`lw t,X; addiu t,t,1; sw t,X; lw t,X` where the 4th load's value is discarded) and/or is **re-read
+fresh on every reference instead of CSE'd** (e.g. `a - b` recomputed at each `==` compare rather than
+computed once) is **`volatile`** in the original. Declare it `vu32`/`vs32` (the ultra64 volatile types),
+not `u32`/`s32`.
+
+- **Tells.** (1) The dead reload-after-store is the **`volatile x++`** signature (gcc 2.7.2 re-reads
+  the volatile lvalue). (2) The per-read recompute (no common-subexpression elimination of `a - b`)
+  means BOTH operands are volatile, so each read is a fresh load. S125 nuScEventHandler:
+  `nuScRetraceCounter`, `D_801B68E0`, `D_800B678C`, `D_8012F4D4` are all volatile.
+- **Consequence for source form.** Because volatile blocks CSE, a sub-expression reused across several
+  comparisons (`(nuScRetraceCounter - D_8012F4D4)` against `0x20` and `0x36`) must be captured in a
+  **single non-volatile local** (`s32 frame = a - b;`) so gcc computes it once and reuses it — matching
+  the target's single `subu` + two compares. Inlining the volatile expression at each compare instead
+  emits a reload+recompute per site AND lets gcc canonicalize `(a-b)==c` to `(a-c)==b` (wrong codegen).
+  Also place that local's computation in program order relative to the other volatile reads so the
+  scheduler reproduces the target load order (S125: compute `frame` inside the `>=0x1F` block, before
+  the non-volatile pointer test, so the volatile reloads precede the pointer load).
+- **Shared-header caution.** Flipping a header-declared global to `vu32` (e.g. `nuScRetraceCounter` in
+  `nusys.h`) changes codegen for EVERY consumer — re-verify the already-banked consumers (S125:
+  `nugfxtaskmgr.c` reads `nuScRetraceCounter`; it matched non-volatile, so the flip is deferred to the
+  EventHandler retry and gated on a clean-rebuild SHA check).

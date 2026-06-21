@@ -372,6 +372,9 @@ When `pick_target.py` flags a hazard (or a match shows its symptom), read the ma
 | clean mirror SHA-miss, build instr-count < target (shorter) / collateral post-fn addr shifts | #cross-jump-tail-merge |
 | array-of-struct init loop shorter than target + a field stored twice (doubled store-offset) | #struct-init-loop-dup-store--dual-induction-var |
 | permuter on a KMC-toolchain (libnusys/libultra/libkmc) mirror fn | #permuter-setup-for-kmc-toolchain-mirrors |
+| libnusys carry whose carried fns == the upstream's `#ifdef NU_DEBUG` fns | #nu_debug-stock-not-custom-carried-perf-fn-triage |
+| libnusys inline `divu`, build byte-perfect except 2 missing `nop`s after `mflo` | #libnusys-inline-div-mflo-hazard-nop |
+| mirror global w/ dead-reload-after-store on `x++` or recompute-not-CSE of `a-b` | #volatile-global-tell-dead-reload--recompute-not-cse |
 | Gfx* manipulation | #display-lists |
 
 ## Cross-repo sync (Ghidra workspace at `~/development/reversing/ghidra/mariogolf64/`)

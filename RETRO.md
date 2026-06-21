@@ -25,6 +25,17 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 125 — nusched.c spike (1/4 banked: nuScExecuteAudio) + nuScRetraceCounter ID — 2026-06-21
+- Increment: src/libnusys/mainlib/nusched.c PARTIAL (1/4: nuScExecuteAudio banked C; EventHandler/Create/ExecuteGraphics carried). matched-fn +1; md5-candidate files 175→175 (nusched.c still partial, 3 stubs). Bonus: nuScRetraceCounter identified (0x80104E68) + nugfxtaskmgr.c renamed (byte-neutral).
+- Quality: stuck-far 0 / permuter-escalated 0 / carried 3 (nuScEventHandler near-miss + Create + ExecuteGraphics) / re-opened 0.
+- Seed: committed 8pt; banked 0 file pt (partial, per-file all-or-nothing); regime mixed. v2 realized tier: seed 8 → realized 10; residual +2 (carry-or-reopen + the novel mflo-hazard bank-gotcha).
+- What helped: the ASM-first re-assessment overturned the S123 "4 game-customized fns / heavy classical RE" framing — the 4 carried fns are EXACTLY the 4 with `#ifdef NU_DEBUG` blocks, and S123 compiled the file WITHOUT NU_DEBUG. nuScExecuteAudio is pure stock-NU_DEBUG, banked first-build via `#define NU_DEBUG` + a `NUDebTaskPerf` struct fix (dropped the 2.07 markerTime[10] → auTaskCnt@0x9 / auTaskTime@0x150, asm-confirmed) + drop-def debTaskPerfPtr. For nuScEventHandler, identifying the volatile globals (dead-reload-after-store + recompute-not-CSE) and the single-`frame`-local swap-gate brought it to byte-perfect except 2 nops.
+- Friction: nuScEventHandler is a `#libnusys-inline-div-mflo-hazard-nop` WALL — KMC gcc schedules the inline-`divu` mflo consumer into the loop-back `j` delay slot, suppressing the 2 VR4300 hazard nops the original build has; KMC gcc/as reject every -mfix4300/-mcpu=vr4300/-Wa flag (a standalone div DOES get the nops). A permuter candidate, not a try-harder-C iteration; carried with the full worked body + the precise blocker. Budget then precluded the heavier Create/ExecuteGraphics.
+- Applied (5 of 5): #1 `docs/hazards.md#nu_debug-stock-not-custom-carried-perf-fn-triage` (the carried-fns == NU_DEBUG-fns tell); #2 `docs/hazards.md#libnusys-inline-div-mflo-hazard-nop` (the EventHandler wall + permuter ladder); #3 perf-struct version-drift note in `#upstream-mirror-pattern`; #4 `docs/hazards.md#volatile-global-tell-dead-reload--recompute-not-cse`; #5 masking-coddog carry-forward (non-lib-`func_`-callee detection still the tracked follow-up); + 3 CLAUDE.md hazard-index rows.
+- Carry-over: 3 fns in nusched.c (INCLUDE_ASM): nuScEventHandler (NEAR-MATCH, 2-nop mflo-hazard permuter candidate, full body in BACKLOG), nuScCreateScheduler + nuScExecuteGraphics (untouched). Scaffolding (perf globals, 3 stacks, 6 MG64 globals) is asm-confirmed and listed in BACKLOG.
+
+---
+
 ## Sprint 124 — nugfxtaskmgr.c (libnusys game-customized gfx task manager; full file, 3/3 banked) — 2026-06-21
 - Increment: src/libnusys/mainlib/nugfxtaskmgr.c banked (3 fns: nuGfxTaskMgr/nuGfxTaskMgrInit/nuGfxTaskStart). matched-fn +3; md5-candidate files 174→175 (all 175 src .c stub-free); asm subsegs 107→106 (subseg flipped + fully banked). The planned mixed-partial resolved to a FULL bank.
 - Quality: stuck-far 0 / permuter 0 / carried 0 / re-opened 0 (Init: 1 re-attempt to find the dup-msgQ codegen — a normal classical iteration, the +1 novel bank-gotcha on the realized tier).
