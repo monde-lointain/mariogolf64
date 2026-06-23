@@ -54,7 +54,9 @@ u8 nuContMgrInit(void) {
   bitmask = 1;
   pattern = 0;
   for (cnt = 0; cnt < NU_CONT_MAXCONTROLLERS; cnt++) {
-    if (nuContStatus[cnt].errno) continue;
+    if (nuContStatus[cnt].errno) {
+      continue;
+    }
     // Count only standard controllers toward nuContNum / the pattern.
     if ((nuContStatus[cnt].type & CONT_TYPE_MASK) == CONT_TYPE_NORMAL) {
       nuContNum++;
@@ -91,9 +93,13 @@ static s32 contReadData(OSContPad* pad, u32 lockflag) {
   s32 rtn;
 
   rtn = osContStartReadData(&nuSiMesgQ);
-  if (rtn) return rtn;
+  if (rtn) {
+    return rtn;
+  }
   osRecvMesg(&nuSiMesgQ, NULL, OS_MESG_BLOCK);
-  if (lockflag & nuContDataLockKey) return rtn;
+  if (lockflag & nuContDataLockKey) {
+    return rtn;
+  }
   nuContDataClose();
   osContGetReadData(pad);
   nuContDataOpen();
@@ -105,7 +111,9 @@ static s32 contQuery(NUSiCommonMesg* mesg) {
   s32 rtn;
 
   rtn = osContStartQuery(&nuSiMesgQ);
-  if (rtn) return rtn;
+  if (rtn) {
+    return rtn;
+  }
   osRecvMesg(&nuSiMesgQ, NULL, OS_MESG_BLOCK);
   osContGetQuery(nuContStatus);
   return rtn;
@@ -149,7 +157,9 @@ static s32 contReadNW(NUSiCommonMesg* mesg) {
 
   osRecvMesg(&nuContWaitMesgQ, NULL, OS_MESG_NOBLOCK);
   rtn = contReadData(nuContData, 0);
-  if (rtn) return rtn;
+  if (rtn) {
+    return rtn;
+  }
   if (nuContReadFunc != NULL) {
     (*nuContReadFunc)(mesg->mesg);
   }

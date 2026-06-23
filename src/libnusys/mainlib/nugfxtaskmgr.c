@@ -44,7 +44,7 @@ void nuGfxTaskMgr(void* arg) {
         // iteration.
         while (1) {
           mask = osSetIntMask(OS_IM_NONE);
-          if ((u32)(nuScRetraceCounter - D_800D8980) >= 2) {
+          if ((nuScRetraceCounter - D_800D8980) >= 2) {
             break;
           }
           osSetIntMask(mask);
@@ -146,7 +146,7 @@ void nuGfxTaskStart(Gfx* gfxList_ptr, u32 gfxListSize, u32 ucode, u32 flag) {
   D_800D8984->list.t.ucode = nuGfxUcode[ucode].ucode;
   D_800D8984->list.t.ucode_data = nuGfxUcode[ucode].ucode_data;
   D_800D8984->flags = flag & 0x0000ffff;
-  D_800D8984->framebuffer = (u16*)nuGfxCfb_ptr;
+  D_800D8984->framebuffer = nuGfxCfb_ptr;
 
   // If the previous task ran XBUS microcode, make this task wait for the RDP to
   // drain before starting, then clear the carried XBUS bit.

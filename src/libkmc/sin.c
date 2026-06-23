@@ -50,15 +50,19 @@ double *sinp, *cosp;
 double sin(th)
 double th;
 {
-  double s, c;
-  int ti, sign;
+  double s;
+  double c;
+  int ti;
+  int sign;
 
   // Range-reduce to (-PI/2, PI/2]: ti is the count of half-periods nearest th
   // (rounding via the +/- 0.5 bias), and removing ti*PI leaves the residual the
   // kernel can handle. The odd/even parity of ti then flips the sign below.
   ti = (th / PI) + (th >= 0 ? 0.5 : -0.5);
-  th = th - ti * PI;
-  if (th < NR && th > -NR) return th;
+  th = th - (ti * PI);
+  if (th < NR && th > -NR) {
+    return th;
+  }
   _xsincos(th, &s, &c);
   return (ti & 1 ? -s : s);
 }
@@ -66,13 +70,14 @@ double th;
 double cos(th)
 double th;
 {
-  double s, c;
+  double s;
+  double c;
   int ti;
 
   // Same half-period reduction as sin(); cos picks up its sign from ti's parity
   // (cos negates across each successive half-period).
   ti = (th / PI) + (th >= 0 ? 0.5 : -0.5);
-  th = th - ti * PI;
+  th = th - (ti * PI);
   _xsincos(th, &s, &c);
   return (ti & 1 ? -c : c);
 }
@@ -80,14 +85,17 @@ double th;
 double tan(th)
 double th;
 {
-  double s, c;
+  double s;
+  double c;
   int ti;
 
   // tan = sin/cos: the half-period sign flips cancel in the ratio, so reduce,
   // compute both, and divide.
   ti = (th / PI) + (th >= 0 ? 0.5 : -0.5);
-  th = th - ti * PI;
-  if (th < NR && th > -NR) return th;
+  th = th - (ti * PI);
+  if (th < NR && th > -NR) {
+    return th;
+  }
   _xsincos(th, &s, &c);
   return s / c;
 }

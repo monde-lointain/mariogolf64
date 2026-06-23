@@ -47,5 +47,5 @@ void* memcpy(void* s1, const void* s2, size_t n) {
     su2++;
     n--;
   }
-  return (void*)s1;
+  return s1;
 }

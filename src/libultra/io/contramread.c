@@ -73,9 +73,9 @@ s32 __osContRamRead(OSMesgQueue* mq, int channel, u16 address, u8* buffer) {
         ret = __osPfsGetStatus(mq, channel);
         if (ret) {
           break;
-        } else {
-          ret = PFS_ERR_CONTRFAIL;
         }
+        ret = PFS_ERR_CONTRFAIL;
+
       } else {
         bcopy(READFORMAT(ptr)->data, buffer, BLOCKSIZE);
       }

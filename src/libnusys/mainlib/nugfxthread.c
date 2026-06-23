@@ -45,6 +45,6 @@ static void gfxThread(void* arg) {
 /* Create and start the graphics thread. */
 void nuGfxThreadStart(void) {
   osCreateThread(&nuGfxThread, NU_GFX_THREAD_ID, gfxThread, (void*)NULL,
-                 (GfxStack + NU_GFX_STACK_SIZE / 8), NU_GFX_THREAD_PRI);
+                 (GfxStack + (NU_GFX_STACK_SIZE / 8)), NU_GFX_THREAD_PRI);
   osStartThread(&nuGfxThread);
 }

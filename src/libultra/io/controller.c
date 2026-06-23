@@ -14,13 +14,6 @@
 #include "controller.h"
 #include "siint.h"
 
-extern OSPifRam __osContPifRam;
-extern u8 __osContLastCmd;
-extern u8 __osMaxControllers;
-extern OSTimer __osEepromTimer;
-extern OSMesgQueue __osEepromTimerQ;
-extern OSMesg __osEepromTimerMsg;
-
 // Latched after the first successful init so repeat calls are no-ops.
 s32 __osContinitialized = FALSE;
 

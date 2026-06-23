@@ -29,11 +29,14 @@ static const du pilo = {0x3e6110b4, 0x611a6263};  // pi, low correction term
 static const fu zero = {0x00000000};              // exact +0.0
 
 float fsin(float x) {
-  double dx, xsq, poly;
+  double dx;
+  double xsq;
+  double poly;
   double dn;
   int n;
   double result;
-  int ix, xpt;
+  int ix;
+  int xpt;
 
   // Pull the biased exponent from the bit pattern to band the magnitude without
   // an FPU compare.
@@ -49,8 +52,8 @@ float fsin(float x) {
     // sin(x) == x to float precision, so return x untouched.
     if (xpt >= 0xe6) {
       xsq = dx * dx;
-      poly = ((P[4].d * xsq + P[3].d) * xsq + P[2].d) * xsq + P[1].d;
-      result = dx + (dx * xsq) * poly;
+      poly = (((((P[4].d * xsq) + P[3].d) * xsq) + P[2].d) * xsq) + P[1].d;
+      result = dx + ((dx * xsq) * poly);
       return ((float)result);
     }
     return (x);
@@ -63,14 +66,16 @@ float fsin(float x) {
     dn = dx * rpi.d;
     n = ROUND(dn);
     dn = n;
-    dx = dx - dn * pihi.d;
-    dx = dx - dn * pilo.d;
+    dx = dx - (dn * pihi.d);
+    dx = dx - (dn * pilo.d);
     xsq = dx * dx;
-    poly = ((P[4].d * xsq + P[3].d) * xsq + P[2].d) * xsq + P[1].d;
-    result = dx + (dx * xsq) * poly;
+    poly = (((((P[4].d * xsq) + P[3].d) * xsq) + P[2].d) * xsq) + P[1].d;
+    result = dx + ((dx * xsq) * poly);
 
     // Odd n means an odd number of half periods were removed: flip the sign.
-    if ((n & 1) == 0) return ((float)result);
+    if ((n & 1) == 0) {
+      return ((float)result);
+    }
     return (-(float)result);
   }
 

@@ -13,6 +13,6 @@ void nuPreNMIFuncSet(NUScPreNMIFunc func) {
   OSIntMask mask;
 
   mask = osSetIntMask(OS_IM_NONE);
-  nuScPreNMIFunc = (NUScPreNMIFunc)func;
+  nuScPreNMIFunc = func;
   osSetIntMask(mask);
 }

@@ -120,7 +120,8 @@ s32 osMotorInit(OSMesgQueue* mq, OSPfs* pfs, int channel) {
   }
   if (ret != 0) {
     return ret;
-  } else if (temp[31] == 254) {
+  }
+  if (temp[31] == 254) {
     return PFS_ERR_DEVICE;
   }
 
@@ -138,7 +139,8 @@ s32 osMotorInit(OSMesgQueue* mq, OSPfs* pfs, int channel) {
   }
   if (ret != 0) {
     return ret;
-  } else if (temp[31] != 0x80) {
+  }
+  if (temp[31] != 0x80) {
     return PFS_ERR_DEVICE;
   }
 

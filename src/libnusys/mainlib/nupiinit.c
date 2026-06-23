@@ -7,7 +7,6 @@
 
 extern OSMesgQueue PiMesgQ;
 extern OSMesg PiMesgBuf[NU_PI_MESG_NUM];
-extern OSPiHandle* nuPiCartHandle;
 
 /*
  * Start the OS PI manager (the thread that serializes PI/DMA access) and cache

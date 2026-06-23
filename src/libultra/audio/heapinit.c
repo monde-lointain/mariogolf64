@@ -18,10 +18,11 @@ void alHeapInit(ALHeap* hp, u8* base, s32 len) {
   s32 extraAlign = (AL_CACHE_ALIGN + 1) - ((s32)base & AL_CACHE_ALIGN);
 
   /* A full cache line of padding means base was already aligned; skip it. */
-  if (extraAlign != AL_CACHE_ALIGN + 1)
+  if (extraAlign != AL_CACHE_ALIGN + 1) {
     hp->base = base + extraAlign;
-  else
+  } else {
     hp->base = base;
+  }
 
   hp->len = len;
   hp->cur = hp->base;

@@ -17,11 +17,9 @@ extern void func_80029250(void*, s32);
 // Used as the configuration block passed to func_80029250 (appears to hold the
 // frame buffers and related setup).
 extern u32 D_800B6688;
-extern u16* nuGfxZBuffer;
 
 // Used as the default microcode descriptor wired into the task manager below.
 extern u32 D_800B6680;
-extern NUUcode* nuGfxUcode;
 
 // Used as the display list run once at the end to settle the RDP.
 extern u32 D_B6698;

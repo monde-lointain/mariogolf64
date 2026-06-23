@@ -20,8 +20,16 @@ void guLookAtHiliteF(float mf[4][4], LookAt* l, Hilite* h, float xEye,
                      float xUp, float yUp, float zUp, float xl1, float yl1,
                      float zl1, float xl2, float yl2, float zl2, int twidth,
                      int theight) {
-  float len, xLook, yLook, zLook, xRight, yRight, zRight;
-  float xHilite, yHilite, zHilite;
+  float len;
+  float xLook;
+  float yLook;
+  float zLook;
+  float xRight;
+  float yRight;
+  float zRight;
+  float xHilite;
+  float yHilite;
+  float zHilite;
 
   guMtxIdentF(mf);
 
@@ -29,32 +37,32 @@ void guLookAtHiliteF(float mf[4][4], LookAt* l, Hilite* h, float xEye,
   xLook = xAt - xEye;
   yLook = yAt - yEye;
   zLook = zAt - zEye;
-  len = -1.0 / sqrtf(xLook * xLook + yLook * yLook + zLook * zLook);
+  len = -1.0 / sqrtf((xLook * xLook) + (yLook * yLook) + (zLook * zLook));
   xLook *= len;
   yLook *= len;
   zLook *= len;
 
   // Right = normalize(up x Look).
-  xRight = yUp * zLook - zUp * yLook;
-  yRight = zUp * xLook - xUp * zLook;
-  zRight = xUp * yLook - yUp * xLook;
-  len = 1.0 / sqrtf(xRight * xRight + yRight * yRight + zRight * zRight);
+  xRight = (yUp * zLook) - (zUp * yLook);
+  yRight = (zUp * xLook) - (xUp * zLook);
+  zRight = (xUp * yLook) - (yUp * xLook);
+  len = 1.0 / sqrtf((xRight * xRight) + (yRight * yRight) + (zRight * zRight));
   xRight *= len;
   yRight *= len;
   zRight *= len;
 
   // Re-orthogonalize the up vector as Up = normalize(Look x Right).
-  xUp = yLook * zRight - zLook * yRight;
-  yUp = zLook * xRight - xLook * zRight;
-  zUp = xLook * yRight - yLook * xRight;
-  len = 1.0 / sqrtf(xUp * xUp + yUp * yUp + zUp * zUp);
+  xUp = (yLook * zRight) - (zLook * yRight);
+  yUp = (zLook * xRight) - (xLook * zRight);
+  zUp = (xLook * yRight) - (yLook * xRight);
+  len = 1.0 / sqrtf((xUp * xUp) + (yUp * yUp) + (zUp * zUp));
   xUp *= len;
   yUp *= len;
   zUp *= len;
 
   // Highlight 1: normalize light 1, form its bisector with the view direction,
   // and project that onto the Right/Up axes to get the texture offset.
-  len = 1.0 / sqrtf(xl1 * xl1 + yl1 * yl1 + zl1 * zl1);
+  len = 1.0 / sqrtf((xl1 * xl1) + (yl1 * yl1) + (zl1 * zl1));
   xl1 *= len;
   yl1 *= len;
   zl1 *= len;
@@ -62,7 +70,7 @@ void guLookAtHiliteF(float mf[4][4], LookAt* l, Hilite* h, float xEye,
   xHilite = xl1 + xLook;
   yHilite = yl1 + yLook;
   zHilite = zl1 + zLook;
-  len = sqrtf(xHilite * xHilite + yHilite * yHilite + zHilite * zHilite);
+  len = sqrtf((xHilite * xHilite) + (yHilite * yHilite) + (zHilite * zHilite));
 
   // When the bisector is well defined, project it; below THRESH2 the light and
   // view nearly oppose, so fall back to the texture center.
@@ -71,35 +79,37 @@ void guLookAtHiliteF(float mf[4][4], LookAt* l, Hilite* h, float xEye,
     xHilite *= len;
     yHilite *= len;
     zHilite *= len;
-    h->h.x1 =
-        twidth * 4 +
-        (xHilite * xRight + yHilite * yRight + zHilite * zRight) * twidth * 2;
-    h->h.y1 = theight * 4 +
-              (xHilite * xUp + yHilite * yUp + zHilite * zUp) * theight * 2;
+    h->h.x1 = (twidth * 4) +
+              (((xHilite * xRight) + (yHilite * yRight) + (zHilite * zRight)) *
+               twidth * 2);
+    h->h.y1 =
+        (theight * 4) +
+        (((xHilite * xUp) + (yHilite * yUp) + (zHilite * zUp)) * theight * 2);
   } else {
     h->h.x1 = twidth * 2;
     h->h.y1 = theight * 2;
   }
 
   // Highlight 2: same projection for the second light direction.
-  len = 1.0 / sqrtf(xl2 * xl2 + yl2 * yl2 + zl2 * zl2);
+  len = 1.0 / sqrtf((xl2 * xl2) + (yl2 * yl2) + (zl2 * zl2));
   xl2 *= len;
   yl2 *= len;
   zl2 *= len;
   xHilite = xl2 + xLook;
   yHilite = yl2 + yLook;
   zHilite = zl2 + zLook;
-  len = sqrtf(xHilite * xHilite + yHilite * yHilite + zHilite * zHilite);
+  len = sqrtf((xHilite * xHilite) + (yHilite * yHilite) + (zHilite * zHilite));
   if (len > THRESH2) {
     len = 1.0 / len;
     xHilite *= len;
     yHilite *= len;
     zHilite *= len;
-    h->h.x2 =
-        twidth * 4 +
-        (xHilite * xRight + yHilite * yRight + zHilite * zRight) * twidth * 2;
-    h->h.y2 = theight * 4 +
-              (xHilite * xUp + yHilite * yUp + zHilite * zUp) * theight * 2;
+    h->h.x2 = (twidth * 4) +
+              (((xHilite * xRight) + (yHilite * yRight) + (zHilite * zRight)) *
+               twidth * 2);
+    h->h.y2 =
+        (theight * 4) +
+        (((xHilite * xUp) + (yHilite * yUp) + (zHilite * zUp)) * theight * 2);
   } else {
     h->h.x2 = twidth * 2;
     h->h.y2 = theight * 2;
@@ -134,15 +144,15 @@ void guLookAtHiliteF(float mf[4][4], LookAt* l, Hilite* h, float xEye,
   mf[0][0] = xRight;
   mf[1][0] = yRight;
   mf[2][0] = zRight;
-  mf[3][0] = -(xEye * xRight + yEye * yRight + zEye * zRight);
+  mf[3][0] = -((xEye * xRight) + (yEye * yRight) + (zEye * zRight));
   mf[0][1] = xUp;
   mf[1][1] = yUp;
   mf[2][1] = zUp;
-  mf[3][1] = -(xEye * xUp + yEye * yUp + zEye * zUp);
+  mf[3][1] = -((xEye * xUp) + (yEye * yUp) + (zEye * zUp));
   mf[0][2] = xLook;
   mf[1][2] = yLook;
   mf[2][2] = zLook;
-  mf[3][2] = -(xEye * xLook + yEye * yLook + zEye * zLook);
+  mf[3][2] = -((xEye * xLook) + (yEye * yLook) + (zEye * zLook));
   mf[0][3] = 0;
   mf[1][3] = 0;
   mf[2][3] = 0;

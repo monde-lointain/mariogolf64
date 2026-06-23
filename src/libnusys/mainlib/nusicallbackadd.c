@@ -32,7 +32,9 @@ void nuSiCallBackAdd(NUCallBackList* list) {
   // Count the minor-number handler slots so the dispatcher can range-check the
   // minor number later (func[0] is the retrace handler, so counting starts at
   // 1 and stops at the first NULL).
-  for (cnt = 1; list->func[cnt] != NULL; cnt++);
+  for (cnt = 1; list->func[cnt] != NULL; cnt++) {
+    ;
+  }
 
   // Link the entry in under an interrupt mask so the SI manager thread can't
   // traverse a partially linked node.

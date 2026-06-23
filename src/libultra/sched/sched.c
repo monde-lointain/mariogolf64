@@ -125,10 +125,11 @@ void osScRemoveClient(OSSched* sc, OSScClient* c) {
   mask = osSetIntMask(OS_IM_NONE);
   while (client != 0) {
     if (client == c) {
-      if (prev)
+      if (prev) {
         prev->next = c->next;
-      else
+      } else {
         sc->clientList = c->next;
+      }
       break;
     }
     prev = client;
@@ -151,7 +152,7 @@ static void __scMain(void* arg) {
   OSScClient* client;
   static int count = 0;
   while (1) {
-    osRecvMesg(&sc->interruptQ, (OSMesg*)&msg, OS_MESG_BLOCK);
+    osRecvMesg(&sc->interruptQ, (&msg), OS_MESG_BLOCK);
 #ifdef SC_LOGGING
     if (++count % 1024 == 0) osFlushLog(l);
 #endif
@@ -205,7 +206,9 @@ void __scHandleRetrace(OSSched* sc) {
     __scYield(sc);
   } else {
     state = ((sc->curRSPTask == 0) << 1) | (sc->curRDPTask == 0);
-    if (__scSchedule(sc, &sp, &dp, state) != state) __scExec(sc, sp, dp);
+    if (__scSchedule(sc, &sp, &dp, state) != state) {
+      __scExec(sc, sp, dp);
+    }
   }
   for (client = sc->clientList; client != 0; client = client->next) {
     osSendMesg(client->msgQ, (OSMesg)&sc->retraceMsg, OS_MESG_NOBLOCK);
@@ -218,7 +221,9 @@ void __scHandleRetrace(OSSched* sc) {
  * and complete it. Then schedule the next task(s) onto the freed units.
  */
 void __scHandleRSP(OSSched* sc) {
-  OSScTask *t, *sp = 0, *dp = 0;
+  OSScTask* t;
+  OSScTask* sp = 0;
+  OSScTask* dp = 0;
   s32 state;
 #ifdef _DEBUG
   assert(sc->curRSPTask);
@@ -239,7 +244,9 @@ void __scHandleRSP(OSSched* sc) {
     if ((t->flags & OS_SC_TYPE_MASK) == OS_SC_XBUS) {
       t->next = sc->gfxListHead;
       sc->gfxListHead = t;
-      if (sc->gfxListTail == 0) sc->gfxListTail = t;
+      if (sc->gfxListTail == 0) {
+        sc->gfxListTail = t;
+      }
     }
 #ifdef SC_LOGGING
     osLogEvent(l, 521, 1, t);
@@ -249,7 +256,9 @@ void __scHandleRSP(OSSched* sc) {
     __scTaskComplete(sc, t);
   }
   state = ((sc->curRSPTask == 0) << 1) | (sc->curRDPTask == 0);
-  if ((__scSchedule(sc, &sp, &dp, state)) != state) __scExec(sc, sp, dp);
+  if ((__scSchedule(sc, &sp, &dp, state)) != state) {
+    __scExec(sc, sp, dp);
+  }
 }
 
 /*
@@ -257,7 +266,9 @@ void __scHandleRSP(OSSched* sc) {
  * schedule the next task(s) onto the freed units.
  */
 void __scHandleRDP(OSSched* sc) {
-  OSScTask *t, *sp = 0, *dp = 0;
+  OSScTask* t;
+  OSScTask* sp = 0;
+  OSScTask* dp = 0;
   s32 state;
 #ifdef _DEBUG
   assert(sc->curRDPTask);
@@ -271,7 +282,9 @@ void __scHandleRDP(OSSched* sc) {
   t->state &= ~OS_SC_NEEDS_RDP;
   __scTaskComplete(sc, t);
   state = ((sc->curRSPTask == 0) << 1) | (sc->curRDPTask == 0);
-  if ((__scSchedule(sc, &sp, &dp, state)) != state) __scExec(sc, sp, dp);
+  if ((__scSchedule(sc, &sp, &dp, state)) != state) {
+    __scExec(sc, sp, dp);
+  }
 }
 
 /*
@@ -345,20 +358,22 @@ void __scAppendList(OSSched* sc, OSScTask* t) {
   assert((type == M_AUDTASK) || (type == M_GFXTASK));
 #endif
   if (type == M_AUDTASK) {
-    if (sc->audioListTail)
+    if (sc->audioListTail) {
       sc->audioListTail->next = t;
-    else
+    } else {
       sc->audioListHead = t;
+    }
     sc->audioListTail = t;
     sc->doAudio = 1;
 #ifdef SC_LOGGING
     osLogEvent(l, 506, 1, t);
 #endif
   } else {
-    if (sc->gfxListTail)
+    if (sc->gfxListTail) {
       sc->gfxListTail->next = t;
-    else
+    } else {
       sc->gfxListHead = t;
+    }
     sc->gfxListTail = t;
 #ifdef SC_LOGGING
     osLogEvent(l, 507, 1, t);
@@ -393,7 +408,9 @@ void __scExec(OSSched* sc, OSScTask* sp, OSScTask* dp) {
     osSpTaskLoad(&sp->list);
     osSpTaskStartGo(&sp->list);
     sc->curRSPTask = sp;
-    if (sp == dp) sc->curRDPTask = dp;
+    if (sp == dp) {
+      sc->curRDPTask = dp;
+    }
   }
   if (dp && (dp != sp)) {
 #ifdef _DEBUG
@@ -460,7 +477,9 @@ s32 __scSchedule(OSSched* sc, OSScTask** sp, OSScTask** dp, s32 availRCP) {
       avail &= ~OS_SC_SP;
       sc->doAudio = 0;
       sc->audioListHead = sc->audioListHead->next;
-      if (sc->audioListHead == NULL) sc->audioListTail = NULL;
+      if (sc->audioListHead == NULL) {
+        sc->audioListTail = NULL;
+      }
     }
   } else {
 #ifdef SC_LOGGING
@@ -494,14 +513,18 @@ s32 __scSchedule(OSSched* sc, OSScTask** sp, OSScTask** dp, s32 availRCP) {
 #endif
               }
               sc->gfxListHead = sc->gfxListHead->next;
-              if (sc->gfxListHead == NULL) sc->gfxListTail = NULL;
+              if (sc->gfxListHead == NULL) {
+                sc->gfxListTail = NULL;
+              }
             }
           } else {
             if (avail == (OS_SC_SP | OS_SC_DP)) {
               *sp = *dp = gfx;
               avail &= ~(OS_SC_SP | OS_SC_DP);
               sc->gfxListHead = sc->gfxListHead->next;
-              if (sc->gfxListHead == NULL) sc->gfxListTail = NULL;
+              if (sc->gfxListHead == NULL) {
+                sc->gfxListTail = NULL;
+              }
             }
           }
           break;
@@ -520,7 +543,9 @@ s32 __scSchedule(OSSched* sc, OSScTask** sp, OSScTask** dp, s32 availRCP) {
               *dp = gfx;
               avail &= ~OS_SC_DP;
               sc->gfxListHead = sc->gfxListHead->next;
-              if (sc->gfxListHead == NULL) sc->gfxListTail = NULL;
+              if (sc->gfxListHead == NULL) {
+                sc->gfxListTail = NULL;
+              }
             }
           }
           break;
@@ -533,6 +558,8 @@ s32 __scSchedule(OSSched* sc, OSScTask** sp, OSScTask** dp, s32 availRCP) {
   }
 
   // If this pass allocated any unit, recurse to try to fill the rest too.
-  if (avail != availRCP) avail = __scSchedule(sc, sp, dp, avail);
+  if (avail != availRCP) {
+    avail = __scSchedule(sc, sp, dp, avail);
+  }
   return avail;
 }

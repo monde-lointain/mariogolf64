@@ -18,21 +18,24 @@
 void guAlignF(float mf[4][4], float a, float x, float y, float z) {
   // degrees -> radians; static so it is computed once and shared across calls
   static float dtor = 3.1415926 / 180.0;
-  float s, c, h, hinv;
+  float s;
+  float c;
+  float h;
+  float hinv;
 
   vec3f_normalize(&x, &y, &z);
   a *= dtor;
   s = sinf(a);
   c = cosf(a);
-  h = sqrtf(x * x + z * z);
+  h = sqrtf((x * x) + (z * z));
 
   guMtxIdentF(mf);
   if (h != 0) {
     hinv = 1 / h;
 
     // clang-format off: hand-aligned matrix columns mirror the basis vectors
-    mf[0][0] = (-z * c - s * y * x) * hinv;
-    mf[1][0] = ( z * s - c * y * x) * hinv;
+    mf[0][0] = ((-z * c) - (s * y * x)) * hinv;
+    mf[1][0] = ( (z * s) - (c * y * x)) * hinv;
     mf[2][0] = -x;
     mf[3][0] = 0;
 
@@ -41,8 +44,8 @@ void guAlignF(float mf[4][4], float a, float x, float y, float z) {
     mf[2][1] = -y;
     mf[3][1] = 0;
 
-    mf[0][2] = ( c * x - s * y * z) * hinv;
-    mf[1][2] = (-s * x - c * y * z) * hinv;
+    mf[0][2] = ( (c * x) - (s * y * z)) * hinv;
+    mf[1][2] = ((-s * x) - (c * y * z)) * hinv;
     mf[2][2] = -z;
     mf[3][2] = 0;
 

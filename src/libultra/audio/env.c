@@ -75,7 +75,9 @@ Acmd* alEnvmixerPull(void* filter, s16* outp, s32 outCount, s32 sampleOffset,
     lastOffset = thisOffset;
     thisOffset = e->ctrlList->delta;
     samples = thisOffset - lastOffset;
-    if (samples > outCount) break;
+    if (samples > outCount) {
+      break;
+    }
 #if BUILD_VERSION < VERSION_J
 #line 103
 #endif
@@ -136,10 +138,15 @@ Acmd* alEnvmixerPull(void* filter, s16* outp, s32 outCount, s32 sampleOffset,
           e->cvolL = _getVol(e->cvolL, e->delta, e->lratm, e->lratl);
           e->cvolR = _getVol(e->cvolR, e->delta, e->rratm, e->rratl);
         }
-        if (e->cvolL == 0) e->cvolL = 1;
-        if (e->cvolR == 0) e->cvolR = 1;
-        if (e->ctrlList->type == AL_FILTER_SET_PAN)
+        if (e->cvolL == 0) {
+          e->cvolL = 1;
+        }
+        if (e->cvolR == 0) {
+          e->cvolR = 1;
+        }
+        if (e->ctrlList->type == AL_FILTER_SET_PAN) {
           e->pan = (s16)e->ctrlList->data.i;
+        }
         if (e->ctrlList->type == AL_FILTER_SET_VOLUME) {
           e->delta = 0;
           fVol = (e->ctrlList->data.i);
@@ -187,13 +194,17 @@ Acmd* alEnvmixerPull(void* filter, s16* outp, s32 outCount, s32 sampleOffset,
     outCount -= samples;
     thisParam = e->ctrlList;
     e->ctrlList = e->ctrlList->next;
-    if (e->ctrlList == 0) e->ctrlTail = 0;
+    if (e->ctrlList == 0) {
+      e->ctrlTail = 0;
+    }
     __freeParam(thisParam);
   }
 
   /* Render whatever is left after the last event in this frame. */
   ptr = _pullSubFrame(e, &inp, &loutp, outCount, sampleOffset, ptr);
-  if (e->delta > e->segEnd) e->delta = e->segEnd;
+  if (e->delta > e->segEnd) {
+    e->delta = e->segEnd;
+  }
 #ifdef AUD_PROFILE
   PROFILE_AUD(env_num, env_cnt, env_max, env_min);
 #endif
@@ -221,17 +232,23 @@ s32 alEnvmixerParam(void* filter, s32 paramID, void* param) {
       e->first = 1;
       e->motion = AL_STOPPED;
       e->volume = 1;
-      if (f->source) (*f->source->setParam)(f->source, AL_FILTER_RESET, param);
+      if (f->source) {
+        (*f->source->setParam)(f->source, AL_FILTER_RESET, param);
+      }
       break;
     case (AL_FILTER_START):
       e->motion = AL_PLAYING;
-      if (f->source) (*f->source->setParam)(f->source, AL_FILTER_START, param);
+      if (f->source) {
+        (*f->source->setParam)(f->source, AL_FILTER_START, param);
+      }
       break;
     case (AL_FILTER_SET_SOURCE):
       f->source = (ALFilter*)param;
       break;
     default:
-      if (f->source) (*f->source->setParam)(f->source, paramID, param);
+      if (f->source) {
+        (*f->source->setParam)(f->source, paramID, param);
+      }
   }
   return 0;
 }
@@ -252,7 +269,9 @@ static Acmd* _pullSubFrame(void* filter, s16* inp, s16* outp, s32 outCount,
   Acmd* ptr = p;
   ALEnvMixer* e = (ALEnvMixer*)filter;
   ALFilter* source = e->filter.source;
-  if (e->motion != AL_PLAYING || !outCount) return ptr;
+  if (e->motion != AL_PLAYING || !outCount) {
+    return ptr;
+  }
 #ifdef _DEBUG
   assert(source);
 #endif
@@ -290,10 +309,16 @@ static Acmd* _pullSubFrame(void* filter, s16* inp, s16* outp, s32 outCount,
 f64 _frexpf(f64 value, s32* eptr) {
   f64 absvalue;
   *eptr = 0;
-  if (value == 0.0) return (value);
+  if (value == 0.0) {
+    return (value);
+  }
   absvalue = (value > 0.0) ? value : -value;
-  for (; absvalue >= 1.0; absvalue *= 0.5) ++*eptr;
-  for (; absvalue < 0.5; absvalue += absvalue) --*eptr;
+  for (; absvalue >= 1.0; absvalue *= 0.5) {
+    ++*eptr;
+  }
+  for (; absvalue < 0.5; absvalue += absvalue) {
+    --*eptr;
+  }
   return (value > 0.0 ? absvalue : -absvalue);
 }
 
@@ -316,7 +341,11 @@ f64 _ldexpf(f64 in, s32 ex) {
  */
 static s16 _getRate(f64 vol, f64 tgt, s32 count, u16* ratel) {
   s16 s;
-  f64 invn = 1.0 / count, eps, a, fs, mant;
+  f64 invn = 1.0 / count;
+  f64 eps;
+  f64 a;
+  f64 fs;
+  f64 mant;
   s32 i_invn, ex, indx;
 #ifdef AUD_PROFILE
   lastCnt[++cnt_index] = osGetCount();
@@ -325,13 +354,16 @@ static s16 _getRate(f64 vol, f64 tgt, s32 count, u16* ratel) {
     if (tgt >= vol) {
       *ratel = 0xffff;
       return 0x7fff;
-    } else {
-      *ratel = 0;
-      return 0;
     }
+    *ratel = 0;
+    return 0;
   }
-  if (tgt < 1.0) tgt = 1.0;
-  if (vol <= 0) vol = 1;
+  if (tgt < 1.0) {
+    tgt = 1.0;
+  }
+  if (vol <= 0) {
+    vol = 1;
+  }
 #define NBITS (3)
 #define NPOS (1 << NBITS)
 #define NFRACBITS (30)
@@ -349,7 +381,9 @@ static s16 _getRate(f64 vol, f64 tgt, s32 count, u16* ratel) {
     fs = (1.0 + eps);
     a = 1.0;
     while (i_invn) {
-      if (i_invn & 1) a = a * fs;
+      if (i_invn & 1) {
+        a = a * fs;
+      }
       fs *= fs;
       i_invn >>= 1;
     }
@@ -369,7 +403,8 @@ static s16 _getRate(f64 vol, f64 tgt, s32 count, u16* ratel) {
  * rate. Uses exponentiation by squaring so a long ramp costs a few multiplies.
  */
 static f32 _getVol(f32 ivol, s32 samples, s16 ratem, u16 ratel) {
-  f32 r, a;
+  f32 r;
+  f32 a;
   s32 i;
 #ifdef AUD_PROFILE
   lastCnt[++cnt_index] = osGetCount();
@@ -381,9 +416,13 @@ static f32 _getVol(f32 ivol, s32 samples, s16 ratem, u16 ratel) {
   r = ((f32)(ratem << 16) + (f32)ratel) / 65536;
   a = 1.0;
   for (i = 0; i < 32; i++) {
-    if (samples & 1) a *= r;
+    if (samples & 1) {
+      a *= r;
+    }
     samples >>= 1;
-    if (samples == 0) break;
+    if (samples == 0) {
+      break;
+    }
     r *= r;
   }
   ivol *= a;

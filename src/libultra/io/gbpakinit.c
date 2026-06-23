@@ -36,10 +36,9 @@ s32 osGbpakInit(OSMesgQueue* mq, OSPfs* pfs, int channel) {
   }
   if (ret != 0) {
     return ret;
-  } else {
-    if (temp[BLOCKSIZE - 1] == GB_POWER_OFF) {
-      return PFS_ERR_DEVICE;
-    }
+  }
+  if (temp[BLOCKSIZE - 1] == GB_POWER_OFF) {
+    return PFS_ERR_DEVICE;
   }
 
   /* Now power the pak ON and confirm the read-back, same handshake. */
@@ -59,10 +58,9 @@ s32 osGbpakInit(OSMesgQueue* mq, OSPfs* pfs, int channel) {
   }
   if (ret != 0) {
     return ret;
-  } else {
-    if (temp[BLOCKSIZE - 1] != GB_POWER_ON) {
-      return PFS_ERR_DEVICE;
-    }
+  }
+  if (temp[BLOCKSIZE - 1] != GB_POWER_ON) {
+    return PFS_ERR_DEVICE;
   }
 
   /* Let the just-powered Game Boy cartridge finish booting before any access:

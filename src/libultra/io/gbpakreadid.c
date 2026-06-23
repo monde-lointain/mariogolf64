@@ -42,7 +42,8 @@ s32 osGbpakReadId(OSPfs* pfs, OSGbpakId* id, u8* status) {
   }
   if (ret == PFS_ERR_NEW_GBCART) {
     return PFS_ERR_CONTRFAIL;
-  } else if (ret == 0) {
+  }
+  if (ret == 0) {
     if (!(*status & OS_GBPAK_POWER)) {
       ERRCK(osGbpakPower(pfs, OS_GBPAK_POWER_ON));
     }

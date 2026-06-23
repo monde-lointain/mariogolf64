@@ -259,7 +259,7 @@ s32 __osGetId(OSPfs* pfs) {
   pfs->dir_size = 16;
   pfs->inode_table = PFS_ONE_PAGE;
   pfs->minode_table = (1 + pfs->banks) * PFS_ONE_PAGE;
-  pfs->dir_table = pfs->minode_table + pfs->banks * PFS_ONE_PAGE;
+  pfs->dir_table = pfs->minode_table + (pfs->banks * PFS_ONE_PAGE);
   ERRCK(__osContRamRead(pfs->queue, pfs->channel, PFS_LABEL_AREA, pfs->label));
   return 0;
 }
@@ -347,17 +347,17 @@ s32 __osPfsRWInode(OSPfs* pfs, __OSInode* inode, u8 flag, u8 bank) {
   // Transfer the whole inode page block-by-block. A write updates both the
   // primary table and its mirror; a read pulls only from the primary for now.
   for (j = 0; j < PFS_ONE_PAGE; j++) {
-    addr = ((u8*)inode->inode_page + j * BLOCKSIZE);
+    addr = ((u8*)inode->inode_page + (j * BLOCKSIZE));
     if (flag == PFS_WRITE) {
       ret = __osContRamWrite(pfs->queue, pfs->channel,
-                             pfs->inode_table + bank * PFS_ONE_PAGE + j, addr,
+                             pfs->inode_table + (bank * PFS_ONE_PAGE) + j, addr,
                              FALSE);
       ret = __osContRamWrite(pfs->queue, pfs->channel,
-                             pfs->minode_table + bank * PFS_ONE_PAGE + j, addr,
-                             FALSE);
+                             pfs->minode_table + (bank * PFS_ONE_PAGE) + j,
+                             addr, FALSE);
     } else {
       ret = __osContRamRead(pfs->queue, pfs->channel,
-                            pfs->inode_table + bank * PFS_ONE_PAGE + j, addr);
+                            pfs->inode_table + (bank * PFS_ONE_PAGE) + j, addr);
     }
     if (ret != 0) {
       return ret;
@@ -371,10 +371,10 @@ s32 __osPfsRWInode(OSPfs* pfs, __OSInode* inode, u8 flag, u8 bank) {
                       (PFS_INODE_SIZE_PER_PAGE - offset) * 2);
     if (sum != inode->inode_page[0].inode_t.page) {
       for (j = 0; j < PFS_ONE_PAGE; j++) {
-        addr = ((u8*)inode->inode_page + j * BLOCKSIZE);
-        ret =
-            __osContRamRead(pfs->queue, pfs->channel,
-                            pfs->minode_table + bank * PFS_ONE_PAGE + j, addr);
+        addr = ((u8*)inode->inode_page + (j * BLOCKSIZE));
+        ret = __osContRamRead(pfs->queue, pfs->channel,
+                              pfs->minode_table + (bank * PFS_ONE_PAGE) + j,
+                              addr);
       }
 #if BUILD_VERSION >= VERSION_J
       sum = __osSumcalc((u8*)&inode->inode_page[offset],
@@ -388,10 +388,10 @@ s32 __osPfsRWInode(OSPfs* pfs, __OSInode* inode, u8 flag, u8 bank) {
 
       // Mirror was good: repair the primary table from it.
       for (j = 0; j < PFS_ONE_PAGE; j++) {
-        addr = ((u8*)inode->inode_page + j * BLOCKSIZE);
+        addr = ((u8*)inode->inode_page + (j * BLOCKSIZE));
         ret = __osContRamWrite(pfs->queue, pfs->channel,
-                               pfs->inode_table + bank * PFS_ONE_PAGE + j, addr,
-                               FALSE);
+                               pfs->inode_table + (bank * PFS_ONE_PAGE) + j,
+                               addr, FALSE);
       }
     }
 #if BUILD_VERSION < VERSION_J

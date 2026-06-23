@@ -43,7 +43,7 @@ s32 osAiSetFrequency(u32 frequency) {
   // DAC rate = video clock / requested frequency, rounded to nearest integer
   // (the +0.5 before truncation does the rounding). It must clear the hardware
   // minimum or the rate is unachievable.
-  f = osViClock / (float)frequency + .5f;
+  f = (osViClock / (float)frequency) + .5f;
   dacRate = f;
   if (dacRate < AI_MIN_DAC_RATE) {
     return -1;

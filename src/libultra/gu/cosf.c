@@ -29,11 +29,14 @@ static const fu zero = {0x00000000};              // exact +0.0
 
 float fcos(float x) {
   float absx;
-  double dx, xsq, poly;
+  double dx;
+  double xsq;
+  double poly;
   double dn;
   int n;
   double result;
-  int ix, xpt;
+  int ix;
+  int xpt;
 
   // Pull the biased exponent straight from the float's bit pattern to test
   // magnitude without an FPU compare.
@@ -52,20 +55,22 @@ float fcos(float x) {
     // n = number of half periods; subtracting (n - 0.5)*pi folds x into the
     // range centered on a cosine extremum. pi is split hi/lo so the large
     // multiply keeps its low bits.
-    dn = dx * rpi.d + 0.5;
+    dn = (dx * rpi.d) + 0.5;
     n = ROUND(dn);
     dn = n;
     dn -= 0.5;
-    dx = dx - dn * pihi.d;
-    dx = dx - dn * pilo.d;
+    dx = dx - (dn * pihi.d);
+    dx = dx - (dn * pilo.d);
 
     // Horner evaluation of the odd-symmetric polynomial on the reduced angle.
     xsq = dx * dx;
-    poly = ((P[4].d * xsq + P[3].d) * xsq + P[2].d) * xsq + P[1].d;
-    result = dx + (dx * xsq) * poly;
+    poly = (((((P[4].d * xsq) + P[3].d) * xsq) + P[2].d) * xsq) + P[1].d;
+    result = dx + ((dx * xsq) * poly);
 
     // Each successive half period flips the sign of the result.
-    if ((n & 1) == 0) return ((float)result);
+    if ((n & 1) == 0) {
+      return ((float)result);
+    }
     return (-(float)result);
   }
 

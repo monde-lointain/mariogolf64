@@ -32,12 +32,16 @@ s32 nuContGBPakFread(NUContPakFile* handle, u16 address, u8* buffer, u16 size) {
     bzero(data, 32);
     data[31] = NU_CONT_GBPAK_MBC_RAM_ENABLE_CODE;
     rtn = nuContGBPakWrite(handle, NU_CONT_GBPAK_MBC_RAM_REG0_ADDR, data, 32);
-    if (rtn) return rtn;
+    if (rtn) {
+      return rtn;
+    }
     ram++;
   }
 
   rtn = nuContGBPakCheckConnector(handle, &status);
-  if (rtn) return rtn;
+  if (rtn) {
+    return rtn;
+  }
 
   // Walk the request in 32-byte blocks. A block is handled the slow way (read a
   // full aligned block into a scratch buffer, then copy out the wanted slice)
@@ -48,7 +52,9 @@ s32 nuContGBPakFread(NUContPakFile* handle, u16 address, u8* buffer, u16 size) {
     if (offset || size < 32) {
       readAdd = address & 0xffe0;
       rtn = nuContGBPakRead(handle, readAdd, data, 32);
-      if (rtn) return rtn;
+      if (rtn) {
+        return rtn;
+      }
       if (size < 32) {
         readsize = size;
       } else {
@@ -58,7 +64,9 @@ s32 nuContGBPakFread(NUContPakFile* handle, u16 address, u8* buffer, u16 size) {
     } else {
       readsize = size & 0xffe0;
       rtn = nuContGBPakRead(handle, address, buffer, readsize);
-      if (rtn) return rtn;
+      if (rtn) {
+        return rtn;
+      }
     }
     address += readsize;
     buffer += readsize;
@@ -69,12 +77,16 @@ s32 nuContGBPakFread(NUContPakFile* handle, u16 address, u8* buffer, u16 size) {
   if (ram) {
     bzero(data, 32);
     rtn = nuContGBPakWrite(handle, NU_CONT_GBPAK_MBC_RAM_REG0_ADDR, data, 32);
-    if (rtn) return rtn;
+    if (rtn) {
+      return rtn;
+    }
   }
 
   // A power drop mid-transfer means the data can't be trusted.
   rtn = nuContGBPakGetStatus(handle, &status);
-  if (rtn) return rtn;
+  if (rtn) {
+    return rtn;
+  }
   if (!(status & OS_GBPAK_POWER)) {
     return PFS_ERR_CONTRFAIL;
   }

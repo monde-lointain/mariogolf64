@@ -48,15 +48,15 @@ void guRotateF(float mf[4][4], float a, float x, float y, float z) {
   // Each axis: diagonal gets cos-interpolated component^2; the symmetric cross
   // term (ab/bc/ca) +/- the axis*sine term fills the paired off-diagonals.
   t = x * x;
-  mf[0][0] = t + cosine * (1 - t);
+  mf[0][0] = t + (cosine * (1 - t));
   mf[2][1] = bc - xxsine;
   mf[1][2] = bc + xxsine;
   t = y * y;
-  mf[1][1] = t + cosine * (1 - t);
+  mf[1][1] = t + (cosine * (1 - t));
   mf[2][0] = ca + yxsine;
   mf[0][2] = ca - yxsine;
   t = z * z;
-  mf[2][2] = t + cosine * (1 - t);
+  mf[2][2] = t + (cosine * (1 - t));
   mf[1][0] = ab - zxsine;
   mf[0][1] = ab + zxsine;
 }

@@ -40,12 +40,16 @@ s32 nuContGBPakFwrite(NUContPakFile* handle, u16 address, u8* buffer,
     bzero(data, 32);
     data[31] = NU_CONT_GBPAK_MBC_RAM_ENABLE_CODE;
     rtn = nuContGBPakWrite(handle, NU_CONT_GBPAK_MBC_RAM_REG0_ADDR, data, 32);
-    if (rtn) return rtn;
+    if (rtn) {
+      return rtn;
+    }
     ram++;
   }
 
   rtn = nuContGBPakCheckConnector(handle, &status);
-  if (rtn) return rtn;
+  if (rtn) {
+    return rtn;
+  }
 
   // Walk the request in 32-byte blocks. A misaligned or short tail block is a
   // read-modify-write: pull the aligned block in, splice the new bytes over the
@@ -56,7 +60,9 @@ s32 nuContGBPakFwrite(NUContPakFile* handle, u16 address, u8* buffer,
     if (offset || size < 32) {
       writeAdd = address & 0xffe0;
       rtn = nuContGBPakRead(handle, writeAdd, data, 32);
-      if (rtn) return rtn;
+      if (rtn) {
+        return rtn;
+      }
       if (size < 32) {
         writesize = size;
       } else {
@@ -64,11 +70,15 @@ s32 nuContGBPakFwrite(NUContPakFile* handle, u16 address, u8* buffer,
       }
       bcopy(buffer, (data + offset), writesize);
       rtn = nuContGBPakWrite(handle, writeAdd, data, 32);
-      if (rtn) return rtn;
+      if (rtn) {
+        return rtn;
+      }
     } else {
       writesize = size & 0xffe0;
       rtn = nuContGBPakWrite(handle, address, buffer, writesize);
-      if (rtn) return rtn;
+      if (rtn) {
+        return rtn;
+      }
     }
     address += writesize;
     buffer += writesize;
@@ -79,12 +89,16 @@ s32 nuContGBPakFwrite(NUContPakFile* handle, u16 address, u8* buffer,
   if (ram) {
     bzero(data, 32);
     rtn = nuContGBPakWrite(handle, NU_CONT_GBPAK_MBC_RAM_REG0_ADDR, data, 32);
-    if (rtn) return rtn;
+    if (rtn) {
+      return rtn;
+    }
   }
 
   // A power drop mid-transfer means the write may not have landed.
   rtn = nuContGBPakGetStatus(handle, &status);
-  if (rtn) return rtn;
+  if (rtn) {
+    return rtn;
+  }
   if (!(status & OS_GBPAK_POWER)) {
     return PFS_ERR_CONTRFAIL;
   }

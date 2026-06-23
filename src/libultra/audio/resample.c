@@ -36,7 +36,9 @@ Acmd* alResamplePull(void* filter, s16* outp, s32 outCnt, s32 sampleOffset,
   lastCnt[++cnt_index] = osGetCount();
 #endif
   inp = AL_DECODER_OUT;
-  if (!outCnt) return ptr;
+  if (!outCnt) {
+    return ptr;
+  }
 
   if (f->upitch) {
     /* Unity pitch: no conversion, just relocate the source samples in DMEM. */
@@ -44,7 +46,9 @@ Acmd* alResamplePull(void* filter, s16* outp, s32 outCnt, s32 sampleOffset,
     aDMEMMove(ptr++, inp, *outp, outCnt << 1);
   } else {
     /* Clamp the ratio, then quantize it to the RSP's fixed-point pitch grid. */
-    if (f->ratio > MAX_RATIO) f->ratio = MAX_RATIO;
+    if (f->ratio > MAX_RATIO) {
+      f->ratio = MAX_RATIO;
+    }
     f->ratio = (s32)(f->ratio * UNITY_PITCH);
     f->ratio = f->ratio / UNITY_PITCH;
 
@@ -88,11 +92,15 @@ s32 alResampleParam(void* filter, s32 paramID, void* param) {
       r->first = 1;
       r->motion = AL_STOPPED;
       r->upitch = 0;
-      if (f->source) (*f->source->setParam)(f->source, AL_FILTER_RESET, 0);
+      if (f->source) {
+        (*f->source->setParam)(f->source, AL_FILTER_RESET, 0);
+      }
       break;
     case (AL_FILTER_START):
       r->motion = AL_PLAYING;
-      if (f->source) (*f->source->setParam)(f->source, AL_FILTER_START, 0);
+      if (f->source) {
+        (*f->source->setParam)(f->source, AL_FILTER_START, 0);
+      }
       break;
     case (AL_FILTER_SET_PITCH):
       data.i = (s32)param;
@@ -102,7 +110,9 @@ s32 alResampleParam(void* filter, s32 paramID, void* param) {
       r->upitch = 1;
       break;
     default:
-      if (f->source) (*f->source->setParam)(f->source, paramID, param);
+      if (f->source) {
+        (*f->source->setParam)(f->source, paramID, param);
+      }
       break;
   }
   return 0;

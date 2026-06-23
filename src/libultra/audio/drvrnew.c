@@ -51,16 +51,20 @@ static s32 NULL_PARAMS[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
  * successive powers, giving the single-pole filter its roll-off.
  */
 void _init_lpfilter(ALLowPass* lp) {
-  s32 i, temp;
+  s32 i;
+  s32 temp;
   s16 fc;
-  f64 ffc, fcoef;
+  f64 ffc;
+  f64 fcoef;
 
   temp = lp->fc * SCALE;
   fc = temp >> 15;
   lp->fgain = SCALE - fc;
   lp->first = 1;
 
-  for (i = 0; i < 8; i++) lp->fcvec.fccoef[i] = 0;
+  for (i = 0; i < 8; i++) {
+    lp->fcvec.fccoef[i] = 0;
+  }
   lp->fcvec.fccoef[i++] = fc;
 
   fcoef = ffc = (f64)fc / SCALE;
@@ -77,7 +81,9 @@ void _init_lpfilter(ALLowPass* lp) {
  * optional resampler (chorus/flange modulation) and low-pass stage.
  */
 void alFxNew(ALFx* r, ALSynConfig* c, ALHeap* hp) {
-  u16 i, j, k;
+  u16 i;
+  u16 j;
+  u16 k;
   s32* param = 0;
   ALFilter* f = (ALFilter*)r;
   ALDelay* d;
@@ -118,7 +124,9 @@ void alFxNew(ALFx* r, ALSynConfig* c, ALHeap* hp) {
   r->delay = alHeapAlloc(hp, r->section_count, sizeof(ALDelay));
   r->base = alHeapAlloc(hp, r->length, sizeof(s16));
   r->input = r->base;
-  for (k = 0; k < r->length; k++) r->base[k] = 0;
+  for (k = 0; k < r->length; k++) {
+    r->base[k] = 0;
+  }
 
   /* Walk the preset, configuring one delay section per iteration. */
   for (i = 0; i < r->section_count; i++) {

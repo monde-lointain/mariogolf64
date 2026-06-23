@@ -30,7 +30,7 @@ u8 nuSiMgrInit(void) {
   osContInit(&nuSiMesgQ, &pattern, status);
 
   osCreateThread(&siMgrThread, NU_SI_THREAD_ID, nuSiMgrThread, (void*)NULL,
-                 (siMgrStack + NU_SI_STACK_SIZE / sizeof(u64)),
+                 (siMgrStack + (NU_SI_STACK_SIZE / sizeof(u64))),
                  NU_SI_THREAD_PRI);
   osStartThread(&siMgrThread);
   return pattern;
@@ -88,7 +88,9 @@ static void nuSiMgrThread(void* arg) {
           if ((*siCallBackListPtr)->func[0]) {
             ret = (*((*siCallBackListPtr)->func[0]))(siMesg);
           }
-          if (ret) break;
+          if (ret) {
+            break;
+          }
           siCallBackListPtr = &(*siCallBackListPtr)->next;
         }
         break;

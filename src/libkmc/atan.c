@@ -57,8 +57,9 @@ double d;
   if (d < 0) {
     d = -d;
     si = -1;
-  } else
+  } else {
     si = 1;
+  }
 
   if (d > NR) {
     // Keep the kernel argument in [0, 1] for accuracy: for d >= 1 feed atan of
@@ -72,9 +73,10 @@ double d;
       v = d * MBIT;
     }
     _xatan(u, v, &a);
-  } else
+  } else {
     // Tiny argument: atan(d) ~= d.
     a = d;
+  }
   return (si < 0 ? -a : a);
 }
 
@@ -90,10 +92,10 @@ double y, x;
 
   // On the y-axis the slope is infinite, so answer +/- PI/2 by the sign of y.
   if (x == 0) {
-    if (y > 0)
+    if (y > 0) {
       return PI / 2;
-    else
-      return -PI / 2;
+    }
+    return -PI / 2;
   }
 
   // Off the axes: take atan of the slope, then shift by the quadrant. x > 0 is
@@ -101,14 +103,14 @@ double y, x;
   // move the principal-value angle into the correct quadrant.
   d = y / x;
   d = atan(d);
-  if (x > 0)
+  if (x > 0) {
     return d;
-  else {
-    if (y == 0)
-      return PI;
-    else if (y > 0)
-      return d + PI;
-    else
-      return d - PI;
   }
+  if (y == 0) {
+    return PI;
+  }
+  if (y > 0) {
+    return d + PI;
+  }
+  return d - PI;
 }

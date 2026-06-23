@@ -18,7 +18,6 @@
 #define SRAM_PAGE_SIZE 0xd
 #define SRAM_REL_DURATION 0x2
 
-extern OSPiHandle* nuPiSramHandle;
 extern OSPiHandle SramHandle;
 
 /*
@@ -26,7 +25,9 @@ extern OSPiHandle SramHandle;
  * the base address shows it is already initialized.
  */
 void nuPiInitSram(void) {
-  if (SramHandle.baseAddress == PHYS_TO_K1(SRAM_START_ADDR)) return;
+  if (SramHandle.baseAddress == PHYS_TO_K1(SRAM_START_ADDR)) {
+    return;
+  }
 
   // Device identity and the K1 (uncached) view of its bus address.
   SramHandle.type = DEVICE_TYPE_SRAM;

@@ -19,12 +19,6 @@
 #include "PR/os_internal.h"
 #include "osint.h"
 
-extern OSTime __osCurrentTime;
-extern u32 __osBaseCounter;
-extern u32 __osViIntrCount;
-extern u32 __osTimerCounter;
-extern OSTimer __osBaseTimer;
-
 // List head is the base timer itself, used as a circular sentinel node.
 OSTimer* __osTimerList = &__osBaseTimer;
 

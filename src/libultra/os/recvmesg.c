@@ -29,10 +29,9 @@ s32 osRecvMesg(OSMesgQueue* mq, OSMesg* msg, s32 flags) {
     if (flags == OS_MESG_NOBLOCK) {
       __osRestoreInt(saveMask);
       return -1;
-    } else {
-      __osRunningThread->state = OS_STATE_WAITING;
-      __osEnqueueAndYield(&mq->mtqueue);
     }
+    __osRunningThread->state = OS_STATE_WAITING;
+    __osEnqueueAndYield(&mq->mtqueue);
   }
 
   // Hand back the oldest message and advance the head index modulo capacity.

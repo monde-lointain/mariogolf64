@@ -11,7 +11,9 @@
 /* Multiply m * n into res, all in fixed-point Mtx form. res may alias an input
  * because guMtxCatF accumulates into a scratch matrix. */
 void guMtxCatL(Mtx* m, Mtx* n, Mtx* res) {
-  float mf[4][4], nf[4][4], resf[4][4];
+  float mf[4][4];
+  float nf[4][4];
+  float resf[4][4];
 
   guMtxL2F(mf, m);
   guMtxL2F(nf, n);

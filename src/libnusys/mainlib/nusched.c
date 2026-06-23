@@ -69,7 +69,9 @@ void nuScCreateScheduler(u8 videoMode, u8 numFields) {
   // This game ships only for NTSC and MPAL; any other TV type hangs here
   // rather than running with an unsupported video timing.
   if (osTvType != OS_TV_NTSC && osTvType != OS_TV_MPAL) {
-    while (1);
+    while (1) {
+      ;
+    }
   }
   if (osTvType == OS_TV_MPAL) {
     videoMode = OS_VI_MPAL_LAN1;
@@ -135,16 +137,17 @@ void nuScCreateScheduler(u8 videoMode, u8 numFields) {
   // Three threads, by descending priority: event handler, audio, graphics.
   osCreateThread(&nusched.schedulerThread, 19,
                  (void (*)(void*))nuScEventHandler, (void*)&nusched,
-                 nuScStack + NU_SC_STACK_SIZE / sizeof(u64), NU_SC_HANDLER_PRI);
+                 nuScStack + (NU_SC_STACK_SIZE / sizeof(u64)),
+                 NU_SC_HANDLER_PRI);
   osStartThread(&nusched.schedulerThread);
   osCreateThread(&nusched.audioThread, 18, (void (*)(void*))nuScExecuteAudio,
                  (void*)&nusched,
-                 nuScAudioStack + NU_SC_STACK_SIZE / sizeof(u64),
+                 nuScAudioStack + (NU_SC_STACK_SIZE / sizeof(u64)),
                  NU_SC_AUDIO_PRI);
   osStartThread(&nusched.audioThread);
   osCreateThread(&nusched.graphicsThread, 17,
                  (void (*)(void*))nuScExecuteGraphics, (void*)&nusched,
-                 nuScGraphicsStack + NU_SC_STACK_SIZE / sizeof(u64),
+                 nuScGraphicsStack + (NU_SC_STACK_SIZE / sizeof(u64)),
                  NU_SC_GRAPHICS_PRI);
   osStartThread(&nusched.graphicsThread);
 }
@@ -223,7 +226,7 @@ void nuScEventHandler(void) {
         if (nuScPreNMIFunc != NULL) {
           (*nuScPreNMIFunc)();
         }
-        beforeResetFrame = (nusched.frameRate / 2) / nusched.retraceCount - 3;
+        beforeResetFrame = ((nusched.frameRate / 2) / nusched.retraceCount) - 3;
         break;
 
       default:
@@ -360,8 +363,9 @@ void nuScExecuteAudio(void) {
 #endif
 
     // If the graphics thread parked itself waiting on us, release it.
-    if (nusched.graphicsTaskSuspended)
+    if (nusched.graphicsTaskSuspended) {
       osSendMesg(&nusched.waitMQ, &msg, OS_MESG_BLOCK);
+    }
 
     // Resume the preempted graphics task: restart it if it genuinely yielded,
     // or just re-post its completion if it had already finished.
@@ -496,7 +500,9 @@ void nuScWaitTaskReady(NUScTask* task) {
   NUScClient client;
   void* fb = task->framebuffer;
 
-  if (nusched.frameBufferNum == 1) return;
+  if (nusched.frameBufferNum == 1) {
+    return;
+  }
   nuScAddClient(&client, &nusched.waitMQ, NU_SC_RETRACE_MSG);
   while (osViGetCurrentFramebuffer() == fb || osViGetNextFramebuffer() == fb) {
     osRecvMesg(&nusched.waitMQ, NULL, OS_MESG_BLOCK);

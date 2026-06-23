@@ -14,4 +14,8 @@
  * busy-wait is acceptable here because callers use it at coarse sync points
  * (e.g. just after init or before swapping the retrace callback).
  */
-void nuGfxTaskAllEndWait(void) { while (nuGfxTaskSpool); }
+void nuGfxTaskAllEndWait(void) {
+  while (nuGfxTaskSpool) {
+    ;
+  }
+}

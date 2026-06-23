@@ -20,8 +20,6 @@
 
 #define RANGE 2.0
 
-extern ALGlobals* alGlobals;
-
 #ifdef AUD_PROFILE
 extern u32 cnt_index, reverb_num, reverb_cnt, reverb_max, reverb_min, lastCnt[];
 extern u32 load_num, load_cnt, load_max, load_min, save_num, save_cnt, save_max,
@@ -57,8 +55,15 @@ Acmd* alFxPull(void* filter, s16* outp, s32 outCount, s32 sampleOffset,
   Acmd* ptr = p;
   ALFx* r = (ALFx*)filter;
   ALFilter* source = r->filter.source;
-  s16 i, buff1, buff2, input, output;
-  s16 *in_ptr, *out_ptr, gain, *prev_out_ptr = 0;
+  s16 i;
+  s16 buff1;
+  s16 buff2;
+  s16 input;
+  s16 output;
+  s16* in_ptr;
+  s16* out_ptr;
+  s16 gain;
+  s16* prev_out_ptr = 0;
   ALDelay *d, *pd;
 #ifdef AUD_PROFILE
   lastCnt[++cnt_index] = osGetCount();
@@ -109,15 +114,21 @@ Acmd* alFxPull(void* filter, s16* outp, s32 outCount, s32 sampleOffset,
       aMix(ptr++, 0, (u16)d->fbcoef, buff2, buff1);
       ptr = _saveBuffer(r, in_ptr, buff1, outCount, ptr);
     }
-    if (d->lp) ptr = _filterBuffer(d->lp, buff2, outCount, ptr);
-    if (!d->rs) ptr = _saveBuffer(r, out_ptr, buff2, outCount, ptr);
+    if (d->lp) {
+      ptr = _filterBuffer(d->lp, buff2, outCount, ptr);
+    }
+    if (!d->rs) {
+      ptr = _saveBuffer(r, out_ptr, buff2, outCount, ptr);
+    }
     if (d->gain) aMix(ptr++, 0, (u16)d->gain, buff2, output);
     prev_out_ptr = &r->input[d->output];
   }
 
   /* Advance the write head, wrapping it within the delay ring. */
   r->input += outCount;
-  if (r->input > &r->base[r->length]) r->input -= r->length;
+  if (r->input > &r->base[r->length]) {
+    r->input -= r->length;
+  }
   aDMEMMove(ptr++, output, AL_AUX_L_OUT, outCount << 1);
 #ifdef AUD_PROFILE
   PROFILE_AUD(reverb_num, reverb_cnt, reverb_max, reverb_min);
@@ -196,11 +207,17 @@ s32 alFxParamHdl(void* filter, s32 paramID, void* param) {
  */
 Acmd* _loadOutputBuffer(ALFx* r, ALDelay* d, s32 buff, s32 incount, Acmd* p) {
   Acmd* ptr = p;
-  s32 ratio, count, rbuff = AL_TEMP_2;
+  s32 ratio;
+  s32 count;
+  s32 rbuff = AL_TEMP_2;
   s16* out_ptr;
-  f32 fincount, fratio, delta;
-  s32 ramalign = 0, length;
-  static f32 val = 0.0, lastval = -10.0;
+  f32 fincount;
+  f32 fratio;
+  f32 delta;
+  s32 ramalign = 0;
+  s32 length;
+  static f32 val = 0.0;
+  static f32 lastval = -10.0;
   static f32 blob = 0;
   if (d->rs) {
     /* Modulated tap: derive the resample ratio from the LFO, pull the swept
@@ -250,7 +267,8 @@ Acmd* _loadOutputBuffer(ALFx* r, ALDelay* d, s32 buff, s32 incount, Acmd* p) {
  */
 Acmd* _loadBuffer(ALFx* r, s16* curr_ptr, s32 buff, s32 count, Acmd* p) {
   Acmd* ptr = p;
-  s32 after_end, before_end;
+  s32 after_end;
+  s32 before_end;
   s16 *updated_ptr, *delay_end;
 #ifdef AUD_PROFILE
   lastCnt[++cnt_index] = osGetCount();
@@ -260,7 +278,9 @@ Acmd* _loadBuffer(ALFx* r, s16* curr_ptr, s32 buff, s32 count, Acmd* p) {
   if (curr_ptr > delay_end)
     __osError(ERR_ALMODDELAYOVERFLOW, 1, delay_end - curr_ptr);
 #endif
-  if (curr_ptr < r->base) curr_ptr += r->length;
+  if (curr_ptr < r->base) {
+    curr_ptr += r->length;
+  }
   updated_ptr = curr_ptr + count;
   if (updated_ptr > delay_end) {
     /* Split the load across the ring wrap. */
@@ -287,13 +307,16 @@ Acmd* _loadBuffer(ALFx* r, s16* curr_ptr, s32 buff, s32 count, Acmd* p) {
  */
 Acmd* _saveBuffer(ALFx* r, s16* curr_ptr, s32 buff, s32 count, Acmd* p) {
   Acmd* ptr = p;
-  s32 after_end, before_end;
+  s32 after_end;
+  s32 before_end;
   s16 *updated_ptr, *delay_end;
 #ifdef AUD_PROFILE
   lastCnt[++cnt_index] = osGetCount();
 #endif
   delay_end = &r->base[r->length];
-  if (curr_ptr < r->base) curr_ptr += r->length;
+  if (curr_ptr < r->base) {
+    curr_ptr += r->length;
+  }
   updated_ptr = curr_ptr + count;
   if (updated_ptr > delay_end) {
     /* Split the save across the ring wrap. */

@@ -9,8 +9,6 @@
  */
 #include <nusys.h>
 
-extern NUContRmbCtl nuContRmbCtl[NU_CONT_MAXCONTROLLERS];
-
 /* Retrace interval, in frames, between AUTORUN pak-presence probes. */
 u32 nuContRmbSearchTime = NU_CONT_RMB_AUTO_SEARCHTIME;
 

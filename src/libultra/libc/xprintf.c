@@ -127,10 +127,13 @@ int _Printf(void* pfn(void*, const char*, size_t), void* arg, const char* fmt,
     } else if (*++s == '*') {
       x.prec = va_arg(ap, int);
       ++s;
-    } else
+    } else {
       for (x.prec = 0; isdigit(*s); s++) {
-        if (x.prec < 999) x.prec = x.prec * 10 + *s - '0';
+        if (x.prec < 999) {
+          x.prec = (x.prec * 10) + *s - '0';
+        }
       }
+    }
 
     // Length modifier: collapse "ll" to the single 'L' qual the converters use.
     x.qual = strchr("hlL", *s) ? *s++ : '\0';
@@ -149,7 +152,8 @@ int _Printf(void* pfn(void*, const char*, size_t), void* arg, const char* fmt,
     {
       // Right-justify (the default): pad with leading spaces before the field.
       if (!(x.flags & FLAGS_MINUS)) {
-        int i, j;
+        int i;
+        int j;
         if (0 < (x.width)) {
           i, j = x.width;
           for (; 0 < j; j -= i) {
@@ -217,7 +221,7 @@ static void _Putfld(_Pft* px, va_list* pap, char code, char* ac) {
       } else if (px->flags & FLAGS_SPACE) {
         ac[px->n0++] = ' ';
       }
-      px->s = (char*)&ac[px->n0];
+      px->s = (&ac[px->n0]);
       _Litob(px, code);
       break;
 
@@ -248,7 +252,7 @@ static void _Putfld(_Pft* px, va_list* pap, char code, char* ac) {
           ac[px->n0++] = code;
         }
       }
-      px->s = (char*)&ac[px->n0];
+      px->s = (&ac[px->n0]);
       _Litob(px, code);
       break;
 
@@ -260,13 +264,14 @@ static void _Putfld(_Pft* px, va_list* pap, char code, char* ac) {
       // Floating point. A bare double argument is read as double; only 'L'
       // pulls a long double. LDSIGN catches negative zero that `< 0` misses.
       px->v.ld = px->qual == 'L' ? va_arg(*pap, ldouble) : va_arg(*pap, double);
-      if (LDSIGN(px->v.ld))
+      if (LDSIGN(px->v.ld)) {
         ac[px->n0++] = '-';
-      else if (px->flags & FLAGS_PLUS)
+      } else if (px->flags & FLAGS_PLUS) {
         ac[px->n0++] = '+';
-      else if (px->flags & FLAGS_SPACE)
+      } else if (px->flags & FLAGS_SPACE) {
         ac[px->n0++] = ' ';
-      px->s = (char*)&ac[px->n0];
+      }
+      px->s = (&ac[px->n0]);
       _Ldtob(px, code);
       break;
 
@@ -287,7 +292,7 @@ static void _Putfld(_Pft* px, va_list* pap, char code, char* ac) {
     case 'p':
       // Pointer: print its bits as hex, reusing the integer converter.
       px->v.ll = (long)va_arg(*pap, void*);
-      px->s = (char*)&ac[px->n0];
+      px->s = (&ac[px->n0]);
       _Litob(px, 'x');
       break;
 

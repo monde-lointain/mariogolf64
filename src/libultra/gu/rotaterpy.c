@@ -14,8 +14,12 @@ static float dtor = 3.1415926 / 180.0;
  * The nine entries below are the expanded product of the three axis rotations;
  * the bottom row stays identity (guMtxIdentF), so there is no translation. */
 void guRotateRPYF(float mf[4][4], float r, float p, float h) {
-  float sinr, sinp, sinh;
-  float cosr, cosp, cosh;
+  float sinr;
+  float sinp;
+  float sinh;
+  float cosr;
+  float cosp;
+  float cosh;
 
   r *= dtor;
   p *= dtor;
@@ -31,11 +35,11 @@ void guRotateRPYF(float mf[4][4], float r, float p, float h) {
   mf[0][0] = cosp * cosh;
   mf[0][1] = cosp * sinh;
   mf[0][2] = -sinp;
-  mf[1][0] = sinr * sinp * cosh - cosr * sinh;
-  mf[1][1] = sinr * sinp * sinh + cosr * cosh;
+  mf[1][0] = (sinr * sinp * cosh) - (cosr * sinh);
+  mf[1][1] = (sinr * sinp * sinh) + (cosr * cosh);
   mf[1][2] = sinr * cosp;
-  mf[2][0] = cosr * sinp * cosh + sinr * sinh;
-  mf[2][1] = cosr * sinp * sinh - sinr * cosh;
+  mf[2][0] = (cosr * sinp * cosh) + (sinr * sinh);
+  mf[2][1] = (cosr * sinp * sinh) - (sinr * cosh);
   mf[2][2] = cosr * cosp;
 }
 

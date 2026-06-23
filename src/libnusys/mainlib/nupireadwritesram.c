@@ -33,16 +33,16 @@ void nuPiReadWriteSram(u32 addr, void* buf_ptr, u32 size, s32 flag) {
   dmaIoMesgBuf.hdr.pri = OS_MESG_PRI_NORMAL;
   dmaIoMesgBuf.hdr.retQueue = &dmaMesgQ;
   dmaIoMesgBuf.dramAddr = buf_ptr;
-  dmaIoMesgBuf.devAddr = (u32)addr;
+  dmaIoMesgBuf.devAddr = addr;
   dmaIoMesgBuf.size = size;
 
   // Prepare the cache for the chosen direction: invalidate before a read so the
   // incoming data is seen, write back before a write so the buffer's latest
   // contents reach SRAM.
   if (flag == OS_READ) {
-    osInvalDCache((void*)buf_ptr, (s32)size);
+    osInvalDCache(buf_ptr, (s32)size);
   } else {
-    osWritebackDCache((void*)buf_ptr, (s32)size);
+    osWritebackDCache(buf_ptr, (s32)size);
   }
 
   // Kick off the transfer and block until it completes.

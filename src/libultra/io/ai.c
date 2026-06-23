@@ -12,7 +12,6 @@ s32 __osAiDeviceBusy(void) {
   register s32 status = IO_READ(AI_STATUS_REG);
   if (status & AI_STATUS_FIFO_FULL) {
     return TRUE;
-  } else {
-    return FALSE;
   }
+  return FALSE;
 }

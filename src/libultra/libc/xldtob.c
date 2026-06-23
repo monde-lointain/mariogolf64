@@ -92,7 +92,8 @@ void _Ldtob(_Pft* px, char code) {
   if (err > 0) {
     memcpy(px->s, err == 2 ? "NaN" : "Inf", px->n1 = 3);
     return;
-  } else if (err == 0) {
+  }
+  if (err == 0) {
     // Exact zero: no digits, exponent zero.
     nsig = 0;
     xexp = 0;
@@ -110,7 +111,7 @@ void _Ldtob(_Pft* px, char code) {
       // 30103/100000), biased down by 4 so the digit loop has headroom. Then
       // multiply or divide by the matching powers of ten, decomposing the
       // (4-aligned) exponent one bit at a time against the pows[] table.
-      if ((xexp = xexp * 30103 / 100000 - 4) < 0) {
+      if ((xexp = (xexp * 30103 / 100000) - 4) < 0) {
         n = ALIGN(-xexp, 4), xexp = -n;
         for (i = 0; n > 0; n >>= 1, i++) {
           if (n & 1) {
@@ -209,20 +210,20 @@ short _Ldunscale(short* pex, ldouble* px) {
     // All-ones exponent: Inf if the mantissa is zero, otherwise NaN.
     *pex = 0;
     return (ps[_D0] & _DFRAC) || ps[_D1] || ps[_D2] || ps[_D3] ? 2 : 1;
-  } else if (xchar > 0) {
+  }
+  if (xchar > 0) {
     // Normal number: force the exponent field to bias-0 so the value becomes a
     // fraction in [1,2), and hand back the unbiased binary exponent.
     ps[_D0] = (ps[_D0] & ~_DMASK) | 0x3FF0;
     *pex = xchar - 0x3FE;
     return -1;
-  } else if (xchar < 0) {
+  }
+  if (xchar < 0) {
     // Cannot occur for a real field, but guards the signed shift result.
     return 2;
-  } else {
-    // Zero (and subnormals, treated as zero here).
-    *pex = 0;
-    return 0;
-  }
+  }  // Zero (and subnormals, treated as zero here).
+  *pex = 0;
+  return 0;
 }
 
 /*

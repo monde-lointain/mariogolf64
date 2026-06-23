@@ -15,7 +15,8 @@
  * RSP keeps when this is later packed to fixed point. */
 void guOrthoF(float mf[4][4], float l, float r, float b, float t, float n,
               float f, float scale) {
-  int i, j;
+  int i;
+  int j;
 
   guMtxIdentF(mf);
   mf[0][0] = 2 / (r - l);
@@ -26,8 +27,11 @@ void guOrthoF(float mf[4][4], float l, float r, float b, float t, float n,
   mf[3][2] = -(f + n) / (f - n);
   mf[3][3] = 1;
 
-  for (i = 0; i < 4; i++)
-    for (j = 0; j < 4; j++) mf[i][j] *= scale;
+  for (i = 0; i < 4; i++) {
+    for (j = 0; j < 4; j++) {
+      mf[i][j] *= scale;
+    }
+  }
 }
 
 /* Fixed-point entry point: build the matrix as floats, then pack to Mtx. */

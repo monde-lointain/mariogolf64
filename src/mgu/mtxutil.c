@@ -19,21 +19,32 @@
  * is not in the stock SGI source.
  */
 void guMtxF2L(float mf[4][4], Mtx* m) {
-  int i, j;
-  int e1, e2;
-  int *ai, *af;
+  int i;
+  int j;
+  int e1;
+  int e2;
+  int* ai;
+  int* af;
 
   ai = (int*)&m->m[0][0];
   af = (int*)&m->m[2][0];
 
-  for (i = 0; i < 4; i++)
+  for (i = 0; i < 4; i++) {
     for (j = 0; j < 2; j++) {
       // Saturate to the representable s15.16 range before fixed-point
       // conversion.
-      if (mf[i][j * 2] < -32768.0f) mf[i][j * 2] = -32768.0f;
-      if (mf[i][j * 2] > 32766.0f) mf[i][j * 2] = 32766.0f;
-      if (mf[i][j * 2 + 1] < -32768.0f) mf[i][j * 2 + 1] = -32768.0f;
-      if (mf[i][j * 2 + 1] > 32766.0f) mf[i][j * 2 + 1] = 32766.0f;
+      if (mf[i][j * 2] < -32768.0F) {
+        mf[i][j * 2] = -32768.0F;
+      }
+      if (mf[i][j * 2] > 32766.0F) {
+        mf[i][j * 2] = 32766.0F;
+      }
+      if (mf[i][(j * 2) + 1] < -32768.0F) {
+        mf[i][(j * 2) + 1] = -32768.0F;
+      }
+      if (mf[i][(j * 2) + 1] > 32766.0F) {
+        mf[i][(j * 2) + 1] = 32766.0F;
+      }
 
       e1 = FTOFIX32(mf[i][j * 2]);
       e2 = FTOFIX32(mf[i][j * 2 + 1]);
@@ -42,6 +53,7 @@ void guMtxF2L(float mf[4][4], Mtx* m) {
       *(ai++) = (e1 & 0xffff0000) | ((e2 >> 16) & 0xffff);
       *(af++) = ((e1 << 16) & 0xffff0000) | (e2 & 0xffff);
     }
+  }
 }
 
 /*
@@ -52,15 +64,19 @@ void guMtxF2L(float mf[4][4], Mtx* m) {
  * integer, then scales back to float.
  */
 void guMtxL2F(float mf[4][4], Mtx* m) {
-  int i, j;
-  unsigned int e1, e2;
-  unsigned int *ai, *af;
-  int q1, q2;
+  int i;
+  int j;
+  unsigned int e1;
+  unsigned int e2;
+  unsigned int* ai;
+  unsigned int* af;
+  int q1;
+  int q2;
 
   ai = (unsigned int*)&m->m[0][0];
   af = (unsigned int*)&m->m[2][0];
 
-  for (i = 0; i < 4; i++)
+  for (i = 0; i < 4; i++) {
     for (j = 0; j < 2; j++) {
       e1 = (*ai & 0xffff0000) | ((*af >> 16) & 0xffff);
       e2 = ((*(ai++) << 16) & 0xffff0000) | (*(af++) & 0xffff);
@@ -70,20 +86,25 @@ void guMtxL2F(float mf[4][4], Mtx* m) {
       q2 = *((int*)&e2);
 
       mf[i][j * 2] = FIX32TOF(q1);
-      mf[i][j * 2 + 1] = FIX32TOF(q2);
+      mf[i][(j * 2) + 1] = FIX32TOF(q2);
     }
+  }
 }
 
 // Set a float matrix to the 4x4 identity.
 void guMtxIdentF(float mf[4][4]) {
-  int i, j;
+  int i;
+  int j;
 
-  for (i = 0; i < 4; i++)
-    for (j = 0; j < 4; j++)
-      if (i == j)
+  for (i = 0; i < 4; i++) {
+    for (j = 0; j < 4; j++) {
+      if (i == j) {
         mf[i][j] = 1.0;
-      else
+      } else {
         mf[i][j] = 0.0;
+      }
+    }
+  }
 }
 
 // Build the fixed-point identity Mtx via the float form.

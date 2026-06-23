@@ -21,7 +21,7 @@ void* alHeapDBAlloc(u8* file, s32 line, ALHeap* hp, s32 num, s32 size) {
   u8* ptr = 0;
 
   /* Round the request up so the next allocation also starts cache-aligned. */
-  bytes = (num * size + AL_CACHE_ALIGN) & ~AL_CACHE_ALIGN;
+  bytes = ((num * size) + AL_CACHE_ALIGN) & ~AL_CACHE_ALIGN;
 #ifdef _DEBUG
   hp->count++;
   bytes += sizeof(HeapInfo);
