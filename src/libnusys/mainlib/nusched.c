@@ -5,10 +5,12 @@
 /*		Copyright (C) 1997, NINTENDO Co,Ltd.			*/
 /*======================================================================*/
 /* MG64 nusched: a game-customized scheduler based on nusys-2.07 (minus  */
-/* the nuVersion[] marker), compiled with NU_DEBUG. nuScExecuteAudio is	*/
-/* the stock NU_DEBUG body; nuScCreateScheduler / nuScEventHandler /	*/
-/* nuScExecuteGraphics carry MG64-specific edits and stay as INCLUDE_ASM	*/
-/* until decompiled; the rest are stock-2.07 bodies.			*/
+/* the nuVersion[] marker), compiled with NU_DEBUG. Fully decompiled.	*/
+/* nuScExecuteAudio is the stock NU_DEBUG body; nuScCreateScheduler	*/
+/* (osTvType hang/video-mode switch), nuScEventHandler (per-TU volatile	*/
+/* retrace counter, frame-swap gate) and nuScExecuteGraphics (swap gate	*/
+/* arm, custom perf rotation, game-swap hooks) carry MG64-specific edits;*/
+/* the rest are stock-2.07 bodies.					*/
 /*======================================================================*/
 #define NU_DEBUG
 #include <nusys.h>
@@ -29,7 +31,7 @@ extern vu32	D_801B68E0;	/* second retrace counter (++ w/ dead reload) */
 extern vs32	D_800B678C;	/* perf-sample-armed flag */
 extern vu32	D_8012F4D4;	/* swap-gate retrace base */
 extern void	*D_800B6784;	/* current gfx task ptr (fb @ +0xc) */
-extern s32	D_800B6788;	/* perf buffer index */
+extern vu32	D_800B6788;	/* perf buffer index (++ w/ dead reload, %3 unsigned) */
 extern s8	D_800B67C0;	/* display-off guard */
 extern u32	D_800B6790;	/* video TV-format code (MPAL=1 PAL=2 NTSC=3 other=4) */
 
@@ -47,6 +49,10 @@ extern volatile u32 nuScRetraceCounter;
 void nuScEventHandler(void);
 void nuScExecuteAudio(void);
 void nuScExecuteGraphics(void);
+
+/* MG64 game hooks called from nuScExecuteGraphics on a frame swap. */
+extern void func_8008D1DC(void);
+extern void func_80092324(void *framebuffer);
 
 void nuScCreateScheduler(u8 videoMode, u8 numFields)
 {
@@ -364,7 +370,107 @@ s32 func_80028D28(void)
     return 1;
 }
 
-INCLUDE_ASM("asm/nonmatchings/libnusys/mainlib/nusched", nuScExecuteGraphics);
+void nuScExecuteGraphics(void)
+{
+    OSMesg	msg;
+    NUScTask	*gfxTask;
+    OSIntMask	mask;
+
+    while(1){
+	/* Wait for request for graphics task execution. */
+	osRecvMesg(&nusched.graphicsRequestMQ, (OSMesg *)&gfxTask, OS_MESG_BLOCK);
+	if(nuScPreNMIFlag & NU_SC_BEFORE_RESET){
+	    osSendMesg(gfxTask->msgQ, (OSMesg)gfxTask, OS_MESG_BLOCK);
+	    continue;
+	}
+
+	/* Wait till frame buffer is available. */
+	nuScWaitTaskReady(gfxTask);
+
+	/* Wait while an audio task is being executed. */
+	mask = osSetIntMask(OS_IM_NONE);
+	while(nusched.curAudioTask){
+	    nusched.graphicsTaskSuspended = gfxTask;
+	    osSetIntMask(mask);
+	    osRecvMesg(&nusched.waitMQ, &msg, OS_MESG_BLOCK);
+	    mask = osSetIntMask(OS_IM_NONE);
+	    nusched.graphicsTaskSuspended = (NUScTask *)NULL;
+	}
+
+#ifdef NU_DEBUG
+	if(debTaskPerfPtr->gfxTaskCnt < NU_DEB_PERF_GFXTASK_CNT){
+	    debTaskPerfPtr->gfxTaskTime[debTaskPerfPtr->gfxTaskCnt].rspStart =
+		OS_CYCLES_TO_USEC(osGetTime());
+	}
+#endif /* NU_DEBUG */
+
+	/* Execute the graphics task and arm the swap gate. */
+	nusched.curGraphicsTask = gfxTask;
+	D_8012F4D4 = nuScRetraceCounter;
+	D_800B6784 = gfxTask;
+	osSpTaskLoad(&gfxTask->list);
+	osSpTaskStartGo(&gfxTask->list);
+	osSetIntMask(mask);
+
+	/* Wait for end of RSP task. */
+	mask = osSetIntMask(OS_IM_NONE);
+	osRecvMesg(&nusched.rspMQ, &msg, OS_MESG_BLOCK);
+	nusched.curGraphicsTask = (NUScTask *)NULL;
+	osSetIntMask(mask);
+
+	mask = osSetIntMask(OS_IM_NONE);
+#ifdef NU_DEBUG
+	if(debTaskPerfPtr->gfxTaskCnt < NU_DEB_PERF_GFXTASK_CNT){
+	    debTaskPerfPtr->gfxTaskTime[debTaskPerfPtr->gfxTaskCnt].rspEnd =
+		OS_CYCLES_TO_USEC(osGetTime());
+	}
+#endif /* NU_DEBUG */
+	osSetIntMask(mask);
+
+	/* Check NU_SC_NORDP flag to determine whether to wait for RDP finish. */
+	if(!(gfxTask->flags & NU_SC_NORDP)){
+	    osRecvMesg(&nusched.rdpMQ, &msg, OS_MESG_BLOCK);
+	}
+	D_800B6784 = NULL;
+
+	mask = osSetIntMask(OS_IM_NONE);
+#ifdef NU_DEBUG
+	if(debTaskPerfPtr->gfxTaskCnt < NU_DEB_PERF_GFXTASK_CNT){
+	    if(gfxTask->flags & NU_SC_NORDP){
+		debTaskPerfPtr->gfxTaskTime[debTaskPerfPtr->gfxTaskCnt].rdpEnd =
+		    debTaskPerfPtr->gfxTaskTime[debTaskPerfPtr->gfxTaskCnt].rspStart;
+		debTaskPerfPtr->gfxTaskTime[debTaskPerfPtr->gfxTaskCnt].dpCnt[0] = 0;
+	    } else {
+		debTaskPerfPtr->gfxTaskTime[debTaskPerfPtr->gfxTaskCnt].rdpEnd =
+		    OS_CYCLES_TO_USEC(osGetTime());
+		osDpGetCounters(debTaskPerfPtr->gfxTaskTime[debTaskPerfPtr->gfxTaskCnt].dpCnt);
+		osDpSetStatus(DPC_CLR_TMEM_CTR | DPC_CLR_PIPE_CTR | DPC_CLR_CMD_CTR | DPC_CLR_CLOCK_CTR);
+	    }
+	    debTaskPerfPtr->gfxTaskCnt++;
+	}
+
+	if(gfxTask->flags & NU_SC_SWAPBUFFER){
+	    D_800B6788++;
+	    D_800B6788 %= NU_DEB_PERF_BUF_NUM;
+	    nuDebTaskPerfPtr = debTaskPerfPtr;
+	    nuDebTaskPerf[D_800B6788].gfxTaskCnt = 0;
+	    nuDebTaskPerf[D_800B6788].retraceTime = 0;
+	    debTaskPerfPtr = &nuDebTaskPerf[D_800B6788];
+	    D_800B678C++;
+	}
+#endif /* NU_DEBUG */
+	osSetIntMask(mask);
+
+	/* MG64 frame-swap hooks. */
+	if(gfxTask->flags & NU_SC_SWAPBUFFER){
+	    func_8008D1DC();
+	    func_80092324(gfxTask->framebuffer);
+	}
+
+	/* Notify the thread that started the graphics task that the task has finished. */
+	osSendMesg(gfxTask->msgQ, (OSMesg)gfxTask, OS_MESG_BLOCK);
+    }
+}
 
 void nuScWaitTaskReady(NUScTask *task)
 {
