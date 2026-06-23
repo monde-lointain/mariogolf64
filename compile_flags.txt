@@ -1,0 +1,16 @@
+--target=mips-linux-gnu
+-march=mips3
+-mabi=32
+-mfp32
+-std=gnu89
+-nostdlibinc
+-ferror-limit=0
+-xc
+-D_LANGUAGE_C
+-D_FINALROM
+-DINCLUDE_ASM_USE_MACRO_INC
+-Iinclude
+-Iinclude/libultra
+-Iinclude/libultra/internal
+-Iinclude/libkmc
+-Iinclude/libnusys

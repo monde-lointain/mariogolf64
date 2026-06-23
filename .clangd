@@ -1,0 +1,17 @@
+# Base flags live in compile_flags.txt (repo root) so relative -I resolve against the root.
+# This file adds only the per-tree profile deltas (see CLAUDE.md build profiles).
+If:
+  PathMatch: src/libultra/.*
+CompileFlags:
+  Add:
+    - -fsigned-char
+    - -Iinclude/libultra/compiler/gcc
+    - -Iinclude/libultra/PR
+    - -DBUILD_VERSION=VERSION_J
+    - -DF3DEX_GBI_2
+---
+If:
+  PathMatch: src/libnusys/.*
+CompileFlags:
+  Add:
+    - -DUSE_EPI
