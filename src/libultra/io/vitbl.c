@@ -1,1744 +1,1578 @@
+/*
+ * The VI display-mode table: register presets for every supported video mode.
+ *
+ * One OSViMode per entry, indexed by the OS_VI_* mode constant. osViSetMode
+ * copies an entry into the active VI context, and __osViSwapContext writes its
+ * fields to the VI hardware registers. Modes are grouped by TV format (NTSC,
+ * PAL, MPAL, and FPAL on VERSION_J+).
+ *
+ * The mode-name suffix encodes the format. First letter: H high-res / L
+ * low-res. Second: A anti-aliased / P point-sampled. Third: N non-interlaced /
+ * F interlaced. Trailing digit: 1 = 16-bit color, 2 = 32-bit color.
+ *
+ * Each entry is { mode-id, common regs, { field-0 regs, field-1 regs } }. The
+ * helper macros (WIDTH/BURST/VSYNC/HSYNC/LEAP/HSTART/SCALE/ORIGIN/VINTR/...)
+ * pack the raw register values; the two field-register sets differ only for
+ * interlaced modes, where the two video fields need different timing.
+ */
+
 #include "PR/os.h"
 #include "PR/rcp.h"
 #include "viint.h"
 
 OSViMode osViModeTable[] = {
-    { OS_VI_NTSC_LPN1, // type
-      {
-          // comRegs
-          VI_CTRL_TYPE_16 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON | VI_CTRL_ANTIALIAS_MODE_2 |
-              VI_CTRL_PIXEL_ADV_3, // ctrl
-          WIDTH(320),              // width
-          BURST(57, 34, 5, 62),    // burst
-          VSYNC(525),              // vSync
-          HSYNC(3093, 0),          // hSync
-          LEAP(3093, 3093),        // leap
-          HSTART(108, 748),        // hStart
-          SCALE(2, 0),             // xScale
-          VCURRENT(0),             // vCurrent
+    {OS_VI_NTSC_LPN1,
+     {
+         VI_CTRL_TYPE_16 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON |
+             VI_CTRL_ANTIALIAS_MODE_2 | VI_CTRL_PIXEL_ADV_3,
+         WIDTH(320),
+         BURST(57, 34, 5, 62),
+         VSYNC(525),
+         HSYNC(3093, 0),
+         LEAP(3093, 3093),
+         HSTART(108, 748),
+         SCALE(2, 0),
+         VCURRENT(0),
+     },
+     {{
+          ORIGIN(640),
+          SCALE(1, 0),
+          HSTART(37, 511),
+          BURST(4, 2, 14, 0),
+          VINTR(2),
       },
-      { // fldRegs
-        {
-            // [0]
-            ORIGIN(640),        // origin
-            SCALE(1, 0),        // yScale
-            HSTART(37, 511),    // vStart
-            BURST(4, 2, 14, 0), // vBurst
-            VINTR(2),           // vIntr
-        },
-        {
-            // [1]
-            ORIGIN(640),        // origin
-            SCALE(1, 0),        // yScale
-            HSTART(37, 511),    // vStart
-            BURST(4, 2, 14, 0), // vBurst
-            VINTR(2),           // vIntr
-        } } },
-    { OS_VI_NTSC_LPF1, // type
       {
-          // comRegs
-          VI_CTRL_TYPE_16 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON | VI_CTRL_SERRATE_ON | VI_CTRL_ANTIALIAS_MODE_2 |
-              VI_CTRL_PIXEL_ADV_3, // ctrl
-          WIDTH(320),              // width
-          BURST(57, 34, 5, 62),    // burst
-          VSYNC(524),              // vSync
-          HSYNC(3093, 0),          // hSync
-          LEAP(3093, 3093),        // leap
-          HSTART(108, 748),        // hStart
-          SCALE(2, 0),             // xScale
-          VCURRENT(0),             // vCurrent
+          ORIGIN(640),
+          SCALE(1, 0),
+          HSTART(37, 511),
+          BURST(4, 2, 14, 0),
+          VINTR(2),
+      }}},
+    {OS_VI_NTSC_LPF1,
+     {
+         VI_CTRL_TYPE_16 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON |
+             VI_CTRL_SERRATE_ON | VI_CTRL_ANTIALIAS_MODE_2 |
+             VI_CTRL_PIXEL_ADV_3,
+         WIDTH(320),
+         BURST(57, 34, 5, 62),
+         VSYNC(524),
+         HSYNC(3093, 0),
+         LEAP(3093, 3093),
+         HSTART(108, 748),
+         SCALE(2, 0),
+         VCURRENT(0),
+     },
+     {{
+          ORIGIN(640),
+          SCALE(1, 0.25),
+          HSTART(35, 509),
+          BURST(4, 2, 14, 0),
+          VINTR(2),
       },
-      { // fldRegs
-        {
-            // [0]
-            ORIGIN(640),        // origin
-            SCALE(1, 0.25),     // yScale
-            HSTART(35, 509),    // vStart
-            BURST(4, 2, 14, 0), // vBurst
-            VINTR(2),           // vIntr
-        },
-        {
-            // [1]
-            ORIGIN(640),        // origin
-            SCALE(1, 0.75),     // yScale
-            HSTART(37, 511),    // vStart
-            BURST(4, 2, 14, 0), // vBurst
-            VINTR(2),           // vIntr
-        } } },
-    { OS_VI_NTSC_LAN1, // type
       {
-          // comRegs
-          VI_CTRL_TYPE_16 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON | VI_CTRL_DIVOT_ON | VI_CTRL_ANTIALIAS_MODE_1 |
-              VI_CTRL_PIXEL_ADV_3, // ctrl
-          WIDTH(320),              // width
-          BURST(57, 34, 5, 62),    // burst
-          VSYNC(525),              // vSync
-          HSYNC(3093, 0),          // hSync
-          LEAP(3093, 3093),        // leap
-          HSTART(108, 748),        // hStart
-          SCALE(2, 0),             // xScale
-          VCURRENT(0),             // vCurrent
+          ORIGIN(640),
+          SCALE(1, 0.75),
+          HSTART(37, 511),
+          BURST(4, 2, 14, 0),
+          VINTR(2),
+      }}},
+    {OS_VI_NTSC_LAN1,
+     {
+         VI_CTRL_TYPE_16 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON |
+             VI_CTRL_DIVOT_ON | VI_CTRL_ANTIALIAS_MODE_1 | VI_CTRL_PIXEL_ADV_3,
+         WIDTH(320),
+         BURST(57, 34, 5, 62),
+         VSYNC(525),
+         HSYNC(3093, 0),
+         LEAP(3093, 3093),
+         HSTART(108, 748),
+         SCALE(2, 0),
+         VCURRENT(0),
+     },
+     {{
+          ORIGIN(640),
+          SCALE(1, 0),
+          HSTART(37, 511),
+          BURST(4, 2, 14, 0),
+          VINTR(2),
       },
-      { // fldRegs
-        {
-            // [0]
-            ORIGIN(640),        // origin
-            SCALE(1, 0),        // yScale
-            HSTART(37, 511),    // vStart
-            BURST(4, 2, 14, 0), // vBurst
-            VINTR(2),           // vIntr
-        },
-        {
-            // [1]
-            ORIGIN(640),        // origin
-            SCALE(1, 0),        // yScale
-            HSTART(37, 511),    // vStart
-            BURST(4, 2, 14, 0), // vBurst
-            VINTR(2),           // vIntr
-        } } },
-    { OS_VI_NTSC_LAF1, // type
       {
-          // comRegs
-          VI_CTRL_TYPE_16 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON | VI_CTRL_DIVOT_ON | VI_CTRL_SERRATE_ON |
-              VI_CTRL_ANTIALIAS_MODE_0 | VI_CTRL_PIXEL_ADV_3, // ctrl
-          WIDTH(320),                                         // width
-          BURST(57, 34, 5, 62),                               // burst
-          VSYNC(524),                                         // vSync
-          HSYNC(3093, 0),                                     // hSync
-          LEAP(3093, 3093),                                   // leap
-          HSTART(108, 748),                                   // hStart
-          SCALE(2, 0),                                        // xScale
-          VCURRENT(0),                                        // vCurrent
+          ORIGIN(640),
+          SCALE(1, 0),
+          HSTART(37, 511),
+          BURST(4, 2, 14, 0),
+          VINTR(2),
+      }}},
+    {OS_VI_NTSC_LAF1,
+     {
+         VI_CTRL_TYPE_16 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON |
+             VI_CTRL_DIVOT_ON | VI_CTRL_SERRATE_ON | VI_CTRL_ANTIALIAS_MODE_0 |
+             VI_CTRL_PIXEL_ADV_3,
+         WIDTH(320),
+         BURST(57, 34, 5, 62),
+         VSYNC(524),
+         HSYNC(3093, 0),
+         LEAP(3093, 3093),
+         HSTART(108, 748),
+         SCALE(2, 0),
+         VCURRENT(0),
+     },
+     {{
+          ORIGIN(640),
+          SCALE(1, 0.25),
+          HSTART(35, 509),
+          BURST(4, 2, 14, 0),
+          VINTR(2),
       },
-      { // fldRegs
-        {
-            // [0]
-            ORIGIN(640),        // origin
-            SCALE(1, 0.25),     // yScale
-            HSTART(35, 509),    // vStart
-            BURST(4, 2, 14, 0), // vBurst
-            VINTR(2),           // vIntr
-        },
-        {
-            // [1]
-            ORIGIN(640),        // origin
-            SCALE(1, 0.75),     // yScale
-            HSTART(37, 511),    // vStart
-            BURST(4, 2, 14, 0), // vBurst
-            VINTR(2),           // vIntr
-        } } },
-    { OS_VI_NTSC_LPN2, // type
       {
-          // comRegs
-          VI_CTRL_TYPE_32 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON | VI_CTRL_ANTIALIAS_MODE_3 |
-              VI_CTRL_PIXEL_ADV_3, // ctrl
-          WIDTH(320),              // width
-          BURST(57, 34, 5, 62),    // burst
-          VSYNC(525),              // vSync
-          HSYNC(3093, 0),          // hSync
-          LEAP(3093, 3093),        // leap
-          HSTART(108, 748),        // hStart
-          SCALE(2, 0),             // xScale
-          VCURRENT(0),             // vCurrent
+          ORIGIN(640),
+          SCALE(1, 0.75),
+          HSTART(37, 511),
+          BURST(4, 2, 14, 0),
+          VINTR(2),
+      }}},
+    {OS_VI_NTSC_LPN2,
+     {
+         VI_CTRL_TYPE_32 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON |
+             VI_CTRL_ANTIALIAS_MODE_3 | VI_CTRL_PIXEL_ADV_3,
+         WIDTH(320),
+         BURST(57, 34, 5, 62),
+         VSYNC(525),
+         HSYNC(3093, 0),
+         LEAP(3093, 3093),
+         HSTART(108, 748),
+         SCALE(2, 0),
+         VCURRENT(0),
+     },
+     {{
+          ORIGIN(1280),
+          SCALE(1, 0),
+          HSTART(37, 511),
+          BURST(4, 2, 14, 0),
+          VINTR(2),
       },
-      { // fldRegs
-        {
-            // [0]
-            ORIGIN(1280),       // origin
-            SCALE(1, 0),        // yScale
-            HSTART(37, 511),    // vStart
-            BURST(4, 2, 14, 0), // vBurst
-            VINTR(2),           // vIntr
-        },
-        {
-            // [1]
-            ORIGIN(1280),       // origin
-            SCALE(1, 0),        // yScale
-            HSTART(37, 511),    // vStart
-            BURST(4, 2, 14, 0), // vBurst
-            VINTR(2),           // vIntr
-        } } },
-    { OS_VI_NTSC_LPF2, // type
       {
-          // comRegs
-          VI_CTRL_TYPE_32 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON | VI_CTRL_SERRATE_ON | VI_CTRL_ANTIALIAS_MODE_2 |
-              VI_CTRL_PIXEL_ADV_3, // ctrl
-          WIDTH(320),              // width
-          BURST(57, 34, 5, 62),    // burst
-          VSYNC(524),              // vSync
-          HSYNC(3093, 0),          // hSync
-          LEAP(3093, 3093),        // leap
-          HSTART(108, 748),        // hStart
-          SCALE(2, 0),             // xScale
-          VCURRENT(0),             // vCurrent
+          ORIGIN(1280),
+          SCALE(1, 0),
+          HSTART(37, 511),
+          BURST(4, 2, 14, 0),
+          VINTR(2),
+      }}},
+    {OS_VI_NTSC_LPF2,
+     {
+         VI_CTRL_TYPE_32 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON |
+             VI_CTRL_SERRATE_ON | VI_CTRL_ANTIALIAS_MODE_2 |
+             VI_CTRL_PIXEL_ADV_3,
+         WIDTH(320),
+         BURST(57, 34, 5, 62),
+         VSYNC(524),
+         HSYNC(3093, 0),
+         LEAP(3093, 3093),
+         HSTART(108, 748),
+         SCALE(2, 0),
+         VCURRENT(0),
+     },
+     {{
+          ORIGIN(1280),
+          SCALE(1, 0.25),
+          HSTART(35, 509),
+          BURST(4, 2, 14, 0),
+          VINTR(2),
       },
-      { // fldRegs
-        {
-            // [0]
-            ORIGIN(1280),       // origin
-            SCALE(1, 0.25),     // yScale
-            HSTART(35, 509),    // vStart
-            BURST(4, 2, 14, 0), // vBurst
-            VINTR(2),           // vIntr
-        },
-        {
-            // [1]
-            ORIGIN(1280),       // origin
-            SCALE(1, 0.75),     // yScale
-            HSTART(37, 511),    // vStart
-            BURST(4, 2, 14, 0), // vBurst
-            VINTR(2),           // vIntr
-        } } },
-    { OS_VI_NTSC_LAN2, // type
       {
-          // comRegs
-          VI_CTRL_TYPE_32 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON | VI_CTRL_DIVOT_ON | VI_CTRL_ANTIALIAS_MODE_0 |
-              VI_CTRL_PIXEL_ADV_3, // ctrl
-          WIDTH(320),              // width
-          BURST(57, 34, 5, 62),    // burst
-          VSYNC(525),              // vSync
-          HSYNC(3093, 0),          // hSync
-          LEAP(3093, 3093),        // leap
-          HSTART(108, 748),        // hStart
-          SCALE(2, 0),             // xScale
-          VCURRENT(0),             // vCurrent
+          ORIGIN(1280),
+          SCALE(1, 0.75),
+          HSTART(37, 511),
+          BURST(4, 2, 14, 0),
+          VINTR(2),
+      }}},
+    {OS_VI_NTSC_LAN2,
+     {
+         VI_CTRL_TYPE_32 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON |
+             VI_CTRL_DIVOT_ON | VI_CTRL_ANTIALIAS_MODE_0 | VI_CTRL_PIXEL_ADV_3,
+         WIDTH(320),
+         BURST(57, 34, 5, 62),
+         VSYNC(525),
+         HSYNC(3093, 0),
+         LEAP(3093, 3093),
+         HSTART(108, 748),
+         SCALE(2, 0),
+         VCURRENT(0),
+     },
+     {{
+          ORIGIN(1280),
+          SCALE(1, 0),
+          HSTART(37, 511),
+          BURST(4, 2, 14, 0),
+          VINTR(2),
       },
-      { // fldRegs
-        {
-            // [0]
-            ORIGIN(1280),       // origin
-            SCALE(1, 0),        // yScale
-            HSTART(37, 511),    // vStart
-            BURST(4, 2, 14, 0), // vBurst
-            VINTR(2),           // vIntr
-        },
-        {
-            // [1]
-            ORIGIN(1280),       // origin
-            SCALE(1, 0),        // yScale
-            HSTART(37, 511),    // vStart
-            BURST(4, 2, 14, 0), // vBurst
-            VINTR(2),           // vIntr
-        } } },
-    { OS_VI_NTSC_LAF2, // type
       {
-          // comRegs
-          VI_CTRL_TYPE_32 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON | VI_CTRL_DIVOT_ON | VI_CTRL_SERRATE_ON |
-              VI_CTRL_ANTIALIAS_MODE_0 | VI_CTRL_PIXEL_ADV_3, // ctrl
-          WIDTH(320),                                         // width
-          BURST(57, 34, 5, 62),                               // burst
-          VSYNC(524),                                         // vSync
-          HSYNC(3093, 0),                                     // hSync
-          LEAP(3093, 3093),                                   // leap
-          HSTART(108, 748),                                   // hStart
-          SCALE(2, 0),                                        // xScale
-          VCURRENT(0),                                        // vCurrent
+          ORIGIN(1280),
+          SCALE(1, 0),
+          HSTART(37, 511),
+          BURST(4, 2, 14, 0),
+          VINTR(2),
+      }}},
+    {OS_VI_NTSC_LAF2,
+     {
+         VI_CTRL_TYPE_32 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON |
+             VI_CTRL_DIVOT_ON | VI_CTRL_SERRATE_ON | VI_CTRL_ANTIALIAS_MODE_0 |
+             VI_CTRL_PIXEL_ADV_3,
+         WIDTH(320),
+         BURST(57, 34, 5, 62),
+         VSYNC(524),
+         HSYNC(3093, 0),
+         LEAP(3093, 3093),
+         HSTART(108, 748),
+         SCALE(2, 0),
+         VCURRENT(0),
+     },
+     {{
+          ORIGIN(1280),
+          SCALE(1, 0.25),
+          HSTART(35, 509),
+          BURST(4, 2, 14, 0),
+          VINTR(2),
       },
-      { // fldRegs
-        {
-            // [0]
-            ORIGIN(1280),       // origin
-            SCALE(1, 0.25),     // yScale
-            HSTART(35, 509),    // vStart
-            BURST(4, 2, 14, 0), // vBurst
-            VINTR(2),           // vIntr
-        },
-        {
-            // [1]
-            ORIGIN(1280),       // origin
-            SCALE(1, 0.75),     // yScale
-            HSTART(37, 511),    // vStart
-            BURST(4, 2, 14, 0), // vBurst
-            VINTR(2),           // vIntr
-        } } },
-    { OS_VI_NTSC_HPN1, // type
       {
-          // comRegs
-          VI_CTRL_TYPE_16 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON | VI_CTRL_SERRATE_ON | VI_CTRL_ANTIALIAS_MODE_2 |
-              VI_CTRL_PIXEL_ADV_3, // ctrl
-          WIDTH(1280),             // width
-          BURST(57, 34, 5, 62),    // burst
-          VSYNC(524),              // vSync
-          HSYNC(3093, 0),          // hSync
-          LEAP(3093, 3093),        // leap
-          HSTART(108, 748),        // hStart
-          SCALE(1, 0),             // xScale
-          VCURRENT(0),             // vCurrent
+          ORIGIN(1280),
+          SCALE(1, 0.75),
+          HSTART(37, 511),
+          BURST(4, 2, 14, 0),
+          VINTR(2),
+      }}},
+    {OS_VI_NTSC_HPN1,
+     {
+         VI_CTRL_TYPE_16 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON |
+             VI_CTRL_SERRATE_ON | VI_CTRL_ANTIALIAS_MODE_2 |
+             VI_CTRL_PIXEL_ADV_3,
+         WIDTH(1280),
+         BURST(57, 34, 5, 62),
+         VSYNC(524),
+         HSYNC(3093, 0),
+         LEAP(3093, 3093),
+         HSTART(108, 748),
+         SCALE(1, 0),
+         VCURRENT(0),
+     },
+     {{
+          ORIGIN(1280),
+          SCALE(1, 0),
+          HSTART(35, 509),
+          BURST(4, 2, 14, 0),
+          VINTR(2),
       },
-      { // fldRegs
-        {
-            // [0]
-            ORIGIN(1280),       // origin
-            SCALE(1, 0),        // yScale
-            HSTART(35, 509),    // vStart
-            BURST(4, 2, 14, 0), // vBurst
-            VINTR(2),           // vIntr
-        },
-        {
-            // [1]
-            ORIGIN(2560),       // origin
-            SCALE(1, 0),        // yScale
-            HSTART(37, 511),    // vStart
-            BURST(4, 2, 14, 0), // vBurst
-            VINTR(2),           // vIntr
-        } } },
-    { OS_VI_NTSC_HPF1, // type
       {
-          // comRegs
-          VI_CTRL_TYPE_16 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON | VI_CTRL_SERRATE_ON | VI_CTRL_ANTIALIAS_MODE_2 |
-              VI_CTRL_PIXEL_ADV_3, // ctrl
-          WIDTH(640),              // width
-          BURST(57, 34, 5, 62),    // burst
-          VSYNC(524),              // vSync
-          HSYNC(3093, 0),          // hSync
-          LEAP(3093, 3093),        // leap
-          HSTART(108, 748),        // hStart
-          SCALE(1, 0),             // xScale
-          VCURRENT(0),             // vCurrent
+          ORIGIN(2560),
+          SCALE(1, 0),
+          HSTART(37, 511),
+          BURST(4, 2, 14, 0),
+          VINTR(2),
+      }}},
+    {OS_VI_NTSC_HPF1,
+     {
+         VI_CTRL_TYPE_16 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON |
+             VI_CTRL_SERRATE_ON | VI_CTRL_ANTIALIAS_MODE_2 |
+             VI_CTRL_PIXEL_ADV_3,
+         WIDTH(640),
+         BURST(57, 34, 5, 62),
+         VSYNC(524),
+         HSYNC(3093, 0),
+         LEAP(3093, 3093),
+         HSTART(108, 748),
+         SCALE(1, 0),
+         VCURRENT(0),
+     },
+     {{
+          ORIGIN(1280),
+          SCALE(0.5, 0.5),
+          HSTART(35, 509),
+          BURST(4, 2, 14, 0),
+          VINTR(2),
       },
-      { // fldRegs
-        {
-            // [0]
-            ORIGIN(1280),       // origin
-            SCALE(0.5, 0.5),    // yScale
-            HSTART(35, 509),    // vStart
-            BURST(4, 2, 14, 0), // vBurst
-            VINTR(2),           // vIntr
-        },
-        {
-            // [1]
-            ORIGIN(2560),       // origin
-            SCALE(0.5, 0.5),    // yScale
-            HSTART(37, 511),    // vStart
-            BURST(4, 2, 14, 0), // vBurst
-            VINTR(2),           // vIntr
-        } } },
-    { OS_VI_NTSC_HAN1, // type
       {
-          // comRegs
-          VI_CTRL_TYPE_16 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON | VI_CTRL_DIVOT_ON | VI_CTRL_SERRATE_ON |
-              VI_CTRL_ANTIALIAS_MODE_0 | VI_CTRL_PIXEL_ADV_3, // ctrl
-          WIDTH(1280),                                        // width
-          BURST(57, 34, 5, 62),                               // burst
-          VSYNC(524),                                         // vSync
-          HSYNC(3093, 0),                                     // hSync
-          LEAP(3093, 3093),                                   // leap
-          HSTART(108, 748),                                   // hStart
-          SCALE(1, 0),                                        // xScale
-          VCURRENT(0),                                        // vCurrent
+          ORIGIN(2560),
+          SCALE(0.5, 0.5),
+          HSTART(37, 511),
+          BURST(4, 2, 14, 0),
+          VINTR(2),
+      }}},
+    {OS_VI_NTSC_HAN1,
+     {
+         VI_CTRL_TYPE_16 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON |
+             VI_CTRL_DIVOT_ON | VI_CTRL_SERRATE_ON | VI_CTRL_ANTIALIAS_MODE_0 |
+             VI_CTRL_PIXEL_ADV_3,
+         WIDTH(1280),
+         BURST(57, 34, 5, 62),
+         VSYNC(524),
+         HSYNC(3093, 0),
+         LEAP(3093, 3093),
+         HSTART(108, 748),
+         SCALE(1, 0),
+         VCURRENT(0),
+     },
+     {{
+          ORIGIN(1280),
+          SCALE(1, 0),
+          HSTART(35, 509),
+          BURST(4, 2, 14, 0),
+          VINTR(2),
       },
-      { // fldRegs
-        {
-            // [0]
-            ORIGIN(1280),       // origin
-            SCALE(1, 0),        // yScale
-            HSTART(35, 509),    // vStart
-            BURST(4, 2, 14, 0), // vBurst
-            VINTR(2),           // vIntr
-        },
-        {
-            // [1]
-            ORIGIN(2560),       // origin
-            SCALE(1, 0),        // yScale
-            HSTART(37, 511),    // vStart
-            BURST(4, 2, 14, 0), // vBurst
-            VINTR(2),           // vIntr
-        } } },
-    { OS_VI_NTSC_HAF1, // type
       {
-          // comRegs
-          VI_CTRL_TYPE_16 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON | VI_CTRL_DIVOT_ON | VI_CTRL_SERRATE_ON |
-              VI_CTRL_ANTIALIAS_MODE_0 | VI_CTRL_PIXEL_ADV_3, // ctrl
-          WIDTH(640),                                         // width
-          BURST(57, 34, 5, 62),                               // burst
-          VSYNC(524),                                         // vSync
-          HSYNC(3093, 0),                                     // hSync
-          LEAP(3093, 3093),                                   // leap
-          HSTART(108, 748),                                   // hStart
-          SCALE(1, 0),                                        // xScale
-          VCURRENT(0),                                        // vCurrent
+          ORIGIN(2560),
+          SCALE(1, 0),
+          HSTART(37, 511),
+          BURST(4, 2, 14, 0),
+          VINTR(2),
+      }}},
+    {OS_VI_NTSC_HAF1,
+     {
+         VI_CTRL_TYPE_16 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON |
+             VI_CTRL_DIVOT_ON | VI_CTRL_SERRATE_ON | VI_CTRL_ANTIALIAS_MODE_0 |
+             VI_CTRL_PIXEL_ADV_3,
+         WIDTH(640),
+         BURST(57, 34, 5, 62),
+         VSYNC(524),
+         HSYNC(3093, 0),
+         LEAP(3093, 3093),
+         HSTART(108, 748),
+         SCALE(1, 0),
+         VCURRENT(0),
+     },
+     {{
+          ORIGIN(1280),
+          SCALE(0.5, 0.5),
+          HSTART(35, 509),
+          BURST(4, 2, 14, 0),
+          VINTR(2),
       },
-      { // fldRegs
-        {
-            // [0]
-            ORIGIN(1280),       // origin
-            SCALE(0.5, 0.5),    // yScale
-            HSTART(35, 509),    // vStart
-            BURST(4, 2, 14, 0), // vBurst
-            VINTR(2),           // vIntr
-        },
-        {
-            // [1]
-            ORIGIN(2560),       // origin
-            SCALE(0.5, 0.5),    // yScale
-            HSTART(37, 511),    // vStart
-            BURST(4, 2, 14, 0), // vBurst
-            VINTR(2),           // vIntr
-        } } },
-    { OS_VI_NTSC_HPN2, // type
       {
-          // comRegs
-          VI_CTRL_TYPE_32 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON | VI_CTRL_SERRATE_ON | VI_CTRL_ANTIALIAS_MODE_3 |
-              VI_CTRL_PIXEL_ADV_3, // ctrl
-          WIDTH(1280),             // width
-          BURST(57, 34, 5, 62),    // burst
-          VSYNC(524),              // vSync
-          HSYNC(3093, 0),          // hSync
-          LEAP(3093, 3093),        // leap
-          HSTART(108, 748),        // hStart
-          SCALE(1, 0),             // xScale
-          VCURRENT(0),             // vCurrent
+          ORIGIN(2560),
+          SCALE(0.5, 0.5),
+          HSTART(37, 511),
+          BURST(4, 2, 14, 0),
+          VINTR(2),
+      }}},
+    {OS_VI_NTSC_HPN2,
+     {
+         VI_CTRL_TYPE_32 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON |
+             VI_CTRL_SERRATE_ON | VI_CTRL_ANTIALIAS_MODE_3 |
+             VI_CTRL_PIXEL_ADV_3,
+         WIDTH(1280),
+         BURST(57, 34, 5, 62),
+         VSYNC(524),
+         HSYNC(3093, 0),
+         LEAP(3093, 3093),
+         HSTART(108, 748),
+         SCALE(1, 0),
+         VCURRENT(0),
+     },
+     {{
+          ORIGIN(2560),
+          SCALE(1, 0),
+          HSTART(35, 509),
+          BURST(4, 2, 14, 0),
+          VINTR(2),
       },
-      { // fldRegs
-        {
-            // [0]
-            ORIGIN(2560),       // origin
-            SCALE(1, 0),        // yScale
-            HSTART(35, 509),    // vStart
-            BURST(4, 2, 14, 0), // vBurst
-            VINTR(2),           // vIntr
-        },
-        {
-            // [1]
-            ORIGIN(5120),       // origin
-            SCALE(1, 0),        // yScale
-            HSTART(37, 511),    // vStart
-            BURST(4, 2, 14, 0), // vBurst
-            VINTR(2),           // vIntr
-        } } },
-    { OS_VI_NTSC_HPF2, // type
       {
-          // comRegs
-          VI_CTRL_TYPE_32 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON | VI_CTRL_SERRATE_ON | VI_CTRL_ANTIALIAS_MODE_2 |
-              VI_CTRL_PIXEL_ADV_3, // ctrl
-          WIDTH(640),              // width
-          BURST(57, 34, 5, 62),    // burst
-          VSYNC(524),              // vSync
-          HSYNC(3093, 0),          // hSync
-          LEAP(3093, 3093),        // leap
-          HSTART(108, 748),        // hStart
-          SCALE(1, 0),             // xScale
-          VCURRENT(0),             // vCurrent
+          ORIGIN(5120),
+          SCALE(1, 0),
+          HSTART(37, 511),
+          BURST(4, 2, 14, 0),
+          VINTR(2),
+      }}},
+    {OS_VI_NTSC_HPF2,
+     {
+         VI_CTRL_TYPE_32 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON |
+             VI_CTRL_SERRATE_ON | VI_CTRL_ANTIALIAS_MODE_2 |
+             VI_CTRL_PIXEL_ADV_3,
+         WIDTH(640),
+         BURST(57, 34, 5, 62),
+         VSYNC(524),
+         HSYNC(3093, 0),
+         LEAP(3093, 3093),
+         HSTART(108, 748),
+         SCALE(1, 0),
+         VCURRENT(0),
+     },
+     {{
+          ORIGIN(2560),
+          SCALE(0.5, 0.5),
+          HSTART(35, 509),
+          BURST(4, 2, 14, 0),
+          VINTR(2),
       },
-      { // fldRegs
-        {
-            // [0]
-            ORIGIN(2560),       // origin
-            SCALE(0.5, 0.5),    // yScale
-            HSTART(35, 509),    // vStart
-            BURST(4, 2, 14, 0), // vBurst
-            VINTR(2),           // vIntr
-        },
-        {
-            // [1]
-            ORIGIN(5120),       // origin
-            SCALE(0.5, 0.5),    // yScale
-            HSTART(37, 511),    // vStart
-            BURST(4, 2, 14, 0), // vBurst
-            VINTR(2),           // vIntr
-        } } },
-    { OS_VI_PAL_LPN1, // type
       {
-          // comRegs
-          VI_CTRL_TYPE_16 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON | VI_CTRL_ANTIALIAS_MODE_2 |
-              VI_CTRL_PIXEL_ADV_3, // ctrl
-          WIDTH(320),              // width
-          BURST(58, 30, 4, 69),    // burst
-          VSYNC(625),              // vSync
-          HSYNC(3177, 23),         // hSync
-          LEAP(3183, 3181),        // leap
-          HSTART(128, 768),        // hStart
-          SCALE(2, 0),             // xScale
-          VCURRENT(0),             // vCurrent
+          ORIGIN(5120),
+          SCALE(0.5, 0.5),
+          HSTART(37, 511),
+          BURST(4, 2, 14, 0),
+          VINTR(2),
+      }}},
+    {OS_VI_PAL_LPN1,
+     {
+         VI_CTRL_TYPE_16 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON |
+             VI_CTRL_ANTIALIAS_MODE_2 | VI_CTRL_PIXEL_ADV_3,
+         WIDTH(320),
+         BURST(58, 30, 4, 69),
+         VSYNC(625),
+         HSYNC(3177, 23),
+         LEAP(3183, 3181),
+         HSTART(128, 768),
+         SCALE(2, 0),
+         VCURRENT(0),
+     },
+     {{
+          ORIGIN(640),
+          SCALE(1, 0),
+          HSTART(95, 569),
+          BURST(107, 2, 9, 0),
+          VINTR(2),
       },
-      { // fldRegs
-        {
-            // [0]
-            ORIGIN(640),         // origin
-            SCALE(1, 0),         // yScale
-            HSTART(95, 569),     // vStart
-            BURST(107, 2, 9, 0), // vBurst
-            VINTR(2),            // vIntr
-        },
-        {
-            // [1]
-            ORIGIN(640),         // origin
-            SCALE(1, 0),         // yScale
-            HSTART(95, 569),     // vStart
-            BURST(107, 2, 9, 0), // vBurst
-            VINTR(2),            // vIntr
-        } } },
-    { OS_VI_PAL_LPF1, // type
       {
-          // comRegs
-          VI_CTRL_TYPE_16 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON | VI_CTRL_SERRATE_ON | VI_CTRL_ANTIALIAS_MODE_2 |
-              VI_CTRL_PIXEL_ADV_3, // ctrl
-          WIDTH(320),              // width
-          BURST(58, 30, 4, 69),    // burst
-          VSYNC(624),              // vSync
-          HSYNC(3177, 23),         // hSync
-          LEAP(3183, 3181),        // leap
-          HSTART(128, 768),        // hStart
-          SCALE(2, 0),             // xScale
-          VCURRENT(0),             // vCurrent
+          ORIGIN(640),
+          SCALE(1, 0),
+          HSTART(95, 569),
+          BURST(107, 2, 9, 0),
+          VINTR(2),
+      }}},
+    {OS_VI_PAL_LPF1,
+     {
+         VI_CTRL_TYPE_16 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON |
+             VI_CTRL_SERRATE_ON | VI_CTRL_ANTIALIAS_MODE_2 |
+             VI_CTRL_PIXEL_ADV_3,
+         WIDTH(320),
+         BURST(58, 30, 4, 69),
+         VSYNC(624),
+         HSYNC(3177, 23),
+         LEAP(3183, 3181),
+         HSTART(128, 768),
+         SCALE(2, 0),
+         VCURRENT(0),
+     },
+     {{
+          ORIGIN(640),
+          SCALE(1, 0.25),
+          HSTART(93, 567),
+          BURST(107, 2, 9, 0),
+          VINTR(2),
       },
-      { // fldRegs
-        {
-            // [0]
-            ORIGIN(640),         // origin
-            SCALE(1, 0.25),      // yScale
-            HSTART(93, 567),     // vStart
-            BURST(107, 2, 9, 0), // vBurst
-            VINTR(2),            // vIntr
-        },
-        {
-            // [1]
-            ORIGIN(640),          // origin
-            SCALE(1, 0.75),       // yScale
-            HSTART(95, 569),      // vStart
-            BURST(105, 2, 13, 0), // vBurst
-            VINTR(2),             // vIntr
-        } } },
-    { OS_VI_PAL_LAN1, // type
       {
-          // comRegs
-          VI_CTRL_TYPE_16 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON | VI_CTRL_DIVOT_ON | VI_CTRL_ANTIALIAS_MODE_1 |
-              VI_CTRL_PIXEL_ADV_3, // ctrl
-          WIDTH(320),              // width
-          BURST(58, 30, 4, 69),    // burst
-          VSYNC(625),              // vSync
-          HSYNC(3177, 23),         // hSync
-          LEAP(3183, 3181),        // leap
-          HSTART(128, 768),        // hStart
-          SCALE(2, 0),             // xScale
-          VCURRENT(0),             // vCurrent
+          ORIGIN(640),
+          SCALE(1, 0.75),
+          HSTART(95, 569),
+          BURST(105, 2, 13, 0),
+          VINTR(2),
+      }}},
+    {OS_VI_PAL_LAN1,
+     {
+         VI_CTRL_TYPE_16 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON |
+             VI_CTRL_DIVOT_ON | VI_CTRL_ANTIALIAS_MODE_1 | VI_CTRL_PIXEL_ADV_3,
+         WIDTH(320),
+         BURST(58, 30, 4, 69),
+         VSYNC(625),
+         HSYNC(3177, 23),
+         LEAP(3183, 3181),
+         HSTART(128, 768),
+         SCALE(2, 0),
+         VCURRENT(0),
+     },
+     {{
+          ORIGIN(640),
+          SCALE(1, 0),
+          HSTART(95, 569),
+          BURST(107, 2, 9, 0),
+          VINTR(2),
       },
-      { // fldRegs
-        {
-            // [0]
-            ORIGIN(640),         // origin
-            SCALE(1, 0),         // yScale
-            HSTART(95, 569),     // vStart
-            BURST(107, 2, 9, 0), // vBurst
-            VINTR(2),            // vIntr
-        },
-        {
-            // [1]
-            ORIGIN(640),         // origin
-            SCALE(1, 0),         // yScale
-            HSTART(95, 569),     // vStart
-            BURST(107, 2, 9, 0), // vBurst
-            VINTR(2),            // vIntr
-        } } },
-    { OS_VI_PAL_LAF1, // type
       {
-          // comRegs
-          VI_CTRL_TYPE_16 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON | VI_CTRL_DIVOT_ON | VI_CTRL_SERRATE_ON |
-              VI_CTRL_ANTIALIAS_MODE_0 | VI_CTRL_PIXEL_ADV_3, // ctrl
-          WIDTH(320),                                         // width
-          BURST(58, 30, 4, 69),                               // burst
-          VSYNC(624),                                         // vSync
-          HSYNC(3177, 23),                                    // hSync
-          LEAP(3183, 3181),                                   // leap
-          HSTART(128, 768),                                   // hStart
-          SCALE(2, 0),                                        // xScale
-          VCURRENT(0),                                        // vCurrent
+          ORIGIN(640),
+          SCALE(1, 0),
+          HSTART(95, 569),
+          BURST(107, 2, 9, 0),
+          VINTR(2),
+      }}},
+    {OS_VI_PAL_LAF1,
+     {
+         VI_CTRL_TYPE_16 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON |
+             VI_CTRL_DIVOT_ON | VI_CTRL_SERRATE_ON | VI_CTRL_ANTIALIAS_MODE_0 |
+             VI_CTRL_PIXEL_ADV_3,
+         WIDTH(320),
+         BURST(58, 30, 4, 69),
+         VSYNC(624),
+         HSYNC(3177, 23),
+         LEAP(3183, 3181),
+         HSTART(128, 768),
+         SCALE(2, 0),
+         VCURRENT(0),
+     },
+     {{
+          ORIGIN(640),
+          SCALE(1, 0.25),
+          HSTART(93, 567),
+          BURST(107, 2, 9, 0),
+          VINTR(2),
       },
-      { // fldRegs
-        {
-            // [0]
-            ORIGIN(640),         // origin
-            SCALE(1, 0.25),      // yScale
-            HSTART(93, 567),     // vStart
-            BURST(107, 2, 9, 0), // vBurst
-            VINTR(2),            // vIntr
-        },
-        {
-            // [1]
-            ORIGIN(640),          // origin
-            SCALE(1, 0.75),       // yScale
-            HSTART(95, 569),      // vStart
-            BURST(105, 2, 13, 0), // vBurst
-            VINTR(2),             // vIntr
-        } } },
-    { OS_VI_PAL_LPN2, // type
       {
-          // comRegs
-          VI_CTRL_TYPE_32 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON | VI_CTRL_ANTIALIAS_MODE_3 |
-              VI_CTRL_PIXEL_ADV_3, // ctrl
-          WIDTH(320),              // width
-          BURST(58, 30, 4, 69),    // burst
-          VSYNC(625),              // vSync
-          HSYNC(3177, 23),         // hSync
-          LEAP(3183, 3181),        // leap
-          HSTART(128, 768),        // hStart
-          SCALE(2, 0),             // xScale
-          VCURRENT(0),             // vCurrent
+          ORIGIN(640),
+          SCALE(1, 0.75),
+          HSTART(95, 569),
+          BURST(105, 2, 13, 0),
+          VINTR(2),
+      }}},
+    {OS_VI_PAL_LPN2,
+     {
+         VI_CTRL_TYPE_32 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON |
+             VI_CTRL_ANTIALIAS_MODE_3 | VI_CTRL_PIXEL_ADV_3,
+         WIDTH(320),
+         BURST(58, 30, 4, 69),
+         VSYNC(625),
+         HSYNC(3177, 23),
+         LEAP(3183, 3181),
+         HSTART(128, 768),
+         SCALE(2, 0),
+         VCURRENT(0),
+     },
+     {{
+          ORIGIN(1280),
+          SCALE(1, 0),
+          HSTART(95, 569),
+          BURST(107, 2, 9, 0),
+          VINTR(2),
       },
-      { // fldRegs
-        {
-            // [0]
-            ORIGIN(1280),        // origin
-            SCALE(1, 0),         // yScale
-            HSTART(95, 569),     // vStart
-            BURST(107, 2, 9, 0), // vBurst
-            VINTR(2),            // vIntr
-        },
-        {
-            // [1]
-            ORIGIN(1280),        // origin
-            SCALE(1, 0),         // yScale
-            HSTART(95, 569),     // vStart
-            BURST(107, 2, 9, 0), // vBurst
-            VINTR(2),            // vIntr
-        } } },
-    { OS_VI_PAL_LPF2, // type
       {
-          // comRegs
-          VI_CTRL_TYPE_32 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON | VI_CTRL_SERRATE_ON | VI_CTRL_ANTIALIAS_MODE_2 |
-              VI_CTRL_PIXEL_ADV_3, // ctrl
-          WIDTH(320),              // width
-          BURST(58, 30, 4, 69),    // burst
-          VSYNC(624),              // vSync
-          HSYNC(3177, 23),         // hSync
-          LEAP(3183, 3181),        // leap
-          HSTART(128, 768),        // hStart
-          SCALE(2, 0),             // xScale
-          VCURRENT(0),             // vCurrent
+          ORIGIN(1280),
+          SCALE(1, 0),
+          HSTART(95, 569),
+          BURST(107, 2, 9, 0),
+          VINTR(2),
+      }}},
+    {OS_VI_PAL_LPF2,
+     {
+         VI_CTRL_TYPE_32 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON |
+             VI_CTRL_SERRATE_ON | VI_CTRL_ANTIALIAS_MODE_2 |
+             VI_CTRL_PIXEL_ADV_3,
+         WIDTH(320),
+         BURST(58, 30, 4, 69),
+         VSYNC(624),
+         HSYNC(3177, 23),
+         LEAP(3183, 3181),
+         HSTART(128, 768),
+         SCALE(2, 0),
+         VCURRENT(0),
+     },
+     {{
+          ORIGIN(1280),
+          SCALE(1, 0.25),
+          HSTART(93, 567),
+          BURST(107, 2, 9, 0),
+          VINTR(2),
       },
-      { // fldRegs
-        {
-            // [0]
-            ORIGIN(1280),        // origin
-            SCALE(1, 0.25),      // yScale
-            HSTART(93, 567),     // vStart
-            BURST(107, 2, 9, 0), // vBurst
-            VINTR(2),            // vIntr
-        },
-        {
-            // [1]
-            ORIGIN(1280),         // origin
-            SCALE(1, 0.75),       // yScale
-            HSTART(95, 569),      // vStart
-            BURST(105, 2, 13, 0), // vBurst
-            VINTR(2),             // vIntr
-        } } },
-    { OS_VI_PAL_LAN2, // type
       {
-          // comRegs
-          VI_CTRL_TYPE_32 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON | VI_CTRL_DIVOT_ON | VI_CTRL_ANTIALIAS_MODE_0 |
-              VI_CTRL_PIXEL_ADV_3, // ctrl
-          WIDTH(320),              // width
-          BURST(58, 30, 4, 69),    // burst
-          VSYNC(625),              // vSync
-          HSYNC(3177, 23),         // hSync
-          LEAP(3183, 3181),        // leap
-          HSTART(128, 768),        // hStart
-          SCALE(2, 0),             // xScale
-          VCURRENT(0),             // vCurrent
+          ORIGIN(1280),
+          SCALE(1, 0.75),
+          HSTART(95, 569),
+          BURST(105, 2, 13, 0),
+          VINTR(2),
+      }}},
+    {OS_VI_PAL_LAN2,
+     {
+         VI_CTRL_TYPE_32 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON |
+             VI_CTRL_DIVOT_ON | VI_CTRL_ANTIALIAS_MODE_0 | VI_CTRL_PIXEL_ADV_3,
+         WIDTH(320),
+         BURST(58, 30, 4, 69),
+         VSYNC(625),
+         HSYNC(3177, 23),
+         LEAP(3183, 3181),
+         HSTART(128, 768),
+         SCALE(2, 0),
+         VCURRENT(0),
+     },
+     {{
+          ORIGIN(1280),
+          SCALE(1, 0),
+          HSTART(95, 569),
+          BURST(107, 2, 9, 0),
+          VINTR(2),
       },
-      { // fldRegs
-        {
-            // [0]
-            ORIGIN(1280),        // origin
-            SCALE(1, 0),         // yScale
-            HSTART(95, 569),     // vStart
-            BURST(107, 2, 9, 0), // vBurst
-            VINTR(2),            // vIntr
-        },
-        {
-            // [1]
-            ORIGIN(1280),        // origin
-            SCALE(1, 0),         // yScale
-            HSTART(95, 569),     // vStart
-            BURST(107, 2, 9, 0), // vBurst
-            VINTR(2),            // vIntr
-        } } },
-    { OS_VI_PAL_LAF2, // type
       {
-          // comRegs
-          VI_CTRL_TYPE_32 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON | VI_CTRL_DIVOT_ON | VI_CTRL_SERRATE_ON |
-              VI_CTRL_ANTIALIAS_MODE_0 | VI_CTRL_PIXEL_ADV_3, // ctrl
-          WIDTH(320),                                         // width
-          BURST(58, 30, 4, 69),                               // burst
-          VSYNC(624),                                         // vSync
-          HSYNC(3177, 23),                                    // hSync
-          LEAP(3183, 3181),                                   // leap
-          HSTART(128, 768),                                   // hStart
-          SCALE(2, 0),                                        // xScale
-          VCURRENT(0),                                        // vCurrent
+          ORIGIN(1280),
+          SCALE(1, 0),
+          HSTART(95, 569),
+          BURST(107, 2, 9, 0),
+          VINTR(2),
+      }}},
+    {OS_VI_PAL_LAF2,
+     {
+         VI_CTRL_TYPE_32 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON |
+             VI_CTRL_DIVOT_ON | VI_CTRL_SERRATE_ON | VI_CTRL_ANTIALIAS_MODE_0 |
+             VI_CTRL_PIXEL_ADV_3,
+         WIDTH(320),
+         BURST(58, 30, 4, 69),
+         VSYNC(624),
+         HSYNC(3177, 23),
+         LEAP(3183, 3181),
+         HSTART(128, 768),
+         SCALE(2, 0),
+         VCURRENT(0),
+     },
+     {{
+          ORIGIN(1280),
+          SCALE(1, 0.25),
+          HSTART(93, 567),
+          BURST(107, 2, 9, 0),
+          VINTR(2),
       },
-      { // fldRegs
-        {
-            // [0]
-            ORIGIN(1280),        // origin
-            SCALE(1, 0.25),      // yScale
-            HSTART(93, 567),     // vStart
-            BURST(107, 2, 9, 0), // vBurst
-            VINTR(2),            // vIntr
-        },
-        {
-            // [1]
-            ORIGIN(1280),         // origin
-            SCALE(1, 0.75),       // yScale
-            HSTART(95, 569),      // vStart
-            BURST(105, 2, 13, 0), // vBurst
-            VINTR(2),             // vIntr
-        } } },
-    { OS_VI_PAL_HPN1, // type
       {
-          // comRegs
-          VI_CTRL_TYPE_16 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON | VI_CTRL_SERRATE_ON | VI_CTRL_ANTIALIAS_MODE_2 |
-              VI_CTRL_PIXEL_ADV_3, // ctrl
-          WIDTH(1280),             // width
-          BURST(58, 30, 4, 69),    // burst
-          VSYNC(624),              // vSync
-          HSYNC(3177, 23),         // hSync
-          LEAP(3183, 3181),        // leap
-          HSTART(128, 768),        // hStart
-          SCALE(1, 0),             // xScale
-          VCURRENT(0),             // vCurrent
+          ORIGIN(1280),
+          SCALE(1, 0.75),
+          HSTART(95, 569),
+          BURST(105, 2, 13, 0),
+          VINTR(2),
+      }}},
+    {OS_VI_PAL_HPN1,
+     {
+         VI_CTRL_TYPE_16 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON |
+             VI_CTRL_SERRATE_ON | VI_CTRL_ANTIALIAS_MODE_2 |
+             VI_CTRL_PIXEL_ADV_3,
+         WIDTH(1280),
+         BURST(58, 30, 4, 69),
+         VSYNC(624),
+         HSYNC(3177, 23),
+         LEAP(3183, 3181),
+         HSTART(128, 768),
+         SCALE(1, 0),
+         VCURRENT(0),
+     },
+     {{
+          ORIGIN(1280),
+          SCALE(1, 0),
+          HSTART(93, 567),
+          BURST(107, 2, 9, 0),
+          VINTR(2),
       },
-      { // fldRegs
-        {
-            // [0]
-            ORIGIN(1280),        // origin
-            SCALE(1, 0),         // yScale
-            HSTART(93, 567),     // vStart
-            BURST(107, 2, 9, 0), // vBurst
-            VINTR(2),            // vIntr
-        },
-        {
-            // [1]
-            ORIGIN(2560),         // origin
-            SCALE(1, 0),          // yScale
-            HSTART(95, 569),      // vStart
-            BURST(105, 2, 13, 0), // vBurst
-            VINTR(2),             // vIntr
-        } } },
-    { OS_VI_PAL_HPF1, // type
       {
-          // comRegs
-          VI_CTRL_TYPE_16 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON | VI_CTRL_SERRATE_ON | VI_CTRL_ANTIALIAS_MODE_2 |
-              VI_CTRL_PIXEL_ADV_3, // ctrl
-          WIDTH(640),              // width
-          BURST(58, 30, 4, 69),    // burst
-          VSYNC(624),              // vSync
-          HSYNC(3177, 23),         // hSync
-          LEAP(3183, 3181),        // leap
-          HSTART(128, 768),        // hStart
-          SCALE(1, 0),             // xScale
-          VCURRENT(0),             // vCurrent
+          ORIGIN(2560),
+          SCALE(1, 0),
+          HSTART(95, 569),
+          BURST(105, 2, 13, 0),
+          VINTR(2),
+      }}},
+    {OS_VI_PAL_HPF1,
+     {
+         VI_CTRL_TYPE_16 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON |
+             VI_CTRL_SERRATE_ON | VI_CTRL_ANTIALIAS_MODE_2 |
+             VI_CTRL_PIXEL_ADV_3,
+         WIDTH(640),
+         BURST(58, 30, 4, 69),
+         VSYNC(624),
+         HSYNC(3177, 23),
+         LEAP(3183, 3181),
+         HSTART(128, 768),
+         SCALE(1, 0),
+         VCURRENT(0),
+     },
+     {{
+          ORIGIN(1280),
+          SCALE(0.5, 0.5),
+          HSTART(93, 567),
+          BURST(107, 2, 9, 0),
+          VINTR(2),
       },
-      { // fldRegs
-        {
-            // [0]
-            ORIGIN(1280),        // origin
-            SCALE(0.5, 0.5),     // yScale
-            HSTART(93, 567),     // vStart
-            BURST(107, 2, 9, 0), // vBurst
-            VINTR(2),            // vIntr
-        },
-        {
-            // [1]
-            ORIGIN(2560),         // origin
-            SCALE(0.5, 0.5),      // yScale
-            HSTART(95, 569),      // vStart
-            BURST(105, 2, 13, 0), // vBurst
-            VINTR(2),             // vIntr
-        } } },
-    { OS_VI_PAL_HAN1, // type
       {
-          // comRegs
-          VI_CTRL_TYPE_16 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON | VI_CTRL_DIVOT_ON | VI_CTRL_SERRATE_ON |
-              VI_CTRL_ANTIALIAS_MODE_0 | VI_CTRL_PIXEL_ADV_3, // ctrl
-          WIDTH(1280),                                        // width
-          BURST(58, 30, 4, 69),                               // burst
-          VSYNC(624),                                         // vSync
-          HSYNC(3177, 23),                                    // hSync
-          LEAP(3183, 3181),                                   // leap
-          HSTART(128, 768),                                   // hStart
-          SCALE(1, 0),                                        // xScale
-          VCURRENT(0),                                        // vCurrent
+          ORIGIN(2560),
+          SCALE(0.5, 0.5),
+          HSTART(95, 569),
+          BURST(105, 2, 13, 0),
+          VINTR(2),
+      }}},
+    {OS_VI_PAL_HAN1,
+     {
+         VI_CTRL_TYPE_16 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON |
+             VI_CTRL_DIVOT_ON | VI_CTRL_SERRATE_ON | VI_CTRL_ANTIALIAS_MODE_0 |
+             VI_CTRL_PIXEL_ADV_3,
+         WIDTH(1280),
+         BURST(58, 30, 4, 69),
+         VSYNC(624),
+         HSYNC(3177, 23),
+         LEAP(3183, 3181),
+         HSTART(128, 768),
+         SCALE(1, 0),
+         VCURRENT(0),
+     },
+     {{
+          ORIGIN(1280),
+          SCALE(1, 0),
+          HSTART(93, 567),
+          BURST(107, 2, 9, 0),
+          VINTR(2),
       },
-      { // fldRegs
-        {
-            // [0]
-            ORIGIN(1280),        // origin
-            SCALE(1, 0),         // yScale
-            HSTART(93, 567),     // vStart
-            BURST(107, 2, 9, 0), // vBurst
-            VINTR(2),            // vIntr
-        },
-        {
-            // [1]
-            ORIGIN(2560),         // origin
-            SCALE(1, 0),          // yScale
-            HSTART(95, 569),      // vStart
-            BURST(105, 2, 13, 0), // vBurst
-            VINTR(2),             // vIntr
-        } } },
-    { OS_VI_PAL_HAF1, // type
       {
-          // comRegs
-          VI_CTRL_TYPE_16 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON | VI_CTRL_DIVOT_ON | VI_CTRL_SERRATE_ON |
-              VI_CTRL_ANTIALIAS_MODE_0 | VI_CTRL_PIXEL_ADV_3, // ctrl
-          WIDTH(640),                                         // width
-          BURST(58, 30, 4, 69),                               // burst
-          VSYNC(624),                                         // vSync
-          HSYNC(3177, 23),                                    // hSync
-          LEAP(3183, 3181),                                   // leap
-          HSTART(128, 768),                                   // hStart
-          SCALE(1, 0),                                        // xScale
-          VCURRENT(0),                                        // vCurrent
+          ORIGIN(2560),
+          SCALE(1, 0),
+          HSTART(95, 569),
+          BURST(105, 2, 13, 0),
+          VINTR(2),
+      }}},
+    {OS_VI_PAL_HAF1,
+     {
+         VI_CTRL_TYPE_16 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON |
+             VI_CTRL_DIVOT_ON | VI_CTRL_SERRATE_ON | VI_CTRL_ANTIALIAS_MODE_0 |
+             VI_CTRL_PIXEL_ADV_3,
+         WIDTH(640),
+         BURST(58, 30, 4, 69),
+         VSYNC(624),
+         HSYNC(3177, 23),
+         LEAP(3183, 3181),
+         HSTART(128, 768),
+         SCALE(1, 0),
+         VCURRENT(0),
+     },
+     {{
+          ORIGIN(1280),
+          SCALE(0.5, 0.5),
+          HSTART(93, 567),
+          BURST(107, 2, 9, 0),
+          VINTR(2),
       },
-      { // fldRegs
-        {
-            // [0]
-            ORIGIN(1280),        // origin
-            SCALE(0.5, 0.5),     // yScale
-            HSTART(93, 567),     // vStart
-            BURST(107, 2, 9, 0), // vBurst
-            VINTR(2),            // vIntr
-        },
-        {
-            // [1]
-            ORIGIN(2560),         // origin
-            SCALE(0.5, 0.5),      // yScale
-            HSTART(95, 569),      // vStart
-            BURST(105, 2, 13, 0), // vBurst
-            VINTR(2),             // vIntr
-        } } },
-    { OS_VI_PAL_HPN2, // type
       {
-          // comRegs
-          VI_CTRL_TYPE_32 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON | VI_CTRL_SERRATE_ON | VI_CTRL_ANTIALIAS_MODE_3 |
-              VI_CTRL_PIXEL_ADV_3, // ctrl
-          WIDTH(1280),             // width
-          BURST(58, 30, 4, 69),    // burst
-          VSYNC(624),              // vSync
-          HSYNC(3177, 23),         // hSync
-          LEAP(3183, 3181),        // leap
-          HSTART(128, 768),        // hStart
-          SCALE(1, 0),             // xScale
-          VCURRENT(0),             // vCurrent
+          ORIGIN(2560),
+          SCALE(0.5, 0.5),
+          HSTART(95, 569),
+          BURST(105, 2, 13, 0),
+          VINTR(2),
+      }}},
+    {OS_VI_PAL_HPN2,
+     {
+         VI_CTRL_TYPE_32 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON |
+             VI_CTRL_SERRATE_ON | VI_CTRL_ANTIALIAS_MODE_3 |
+             VI_CTRL_PIXEL_ADV_3,
+         WIDTH(1280),
+         BURST(58, 30, 4, 69),
+         VSYNC(624),
+         HSYNC(3177, 23),
+         LEAP(3183, 3181),
+         HSTART(128, 768),
+         SCALE(1, 0),
+         VCURRENT(0),
+     },
+     {{
+          ORIGIN(2560),
+          SCALE(1, 0),
+          HSTART(93, 567),
+          BURST(107, 2, 9, 0),
+          VINTR(2),
       },
-      { // fldRegs
-        {
-            // [0]
-            ORIGIN(2560),        // origin
-            SCALE(1, 0),         // yScale
-            HSTART(93, 567),     // vStart
-            BURST(107, 2, 9, 0), // vBurst
-            VINTR(2),            // vIntr
-        },
-        {
-            // [1]
-            ORIGIN(5120),         // origin
-            SCALE(1, 0),          // yScale
-            HSTART(95, 569),      // vStart
-            BURST(105, 2, 13, 0), // vBurst
-            VINTR(2),             // vIntr
-        } } },
-    { OS_VI_PAL_HPF2, // type
       {
-          // comRegs
-          VI_CTRL_TYPE_32 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON | VI_CTRL_SERRATE_ON | VI_CTRL_ANTIALIAS_MODE_2 |
-              VI_CTRL_PIXEL_ADV_3, // ctrl
-          WIDTH(640),              // width
-          BURST(58, 30, 4, 69),    // burst
-          VSYNC(624),              // vSync
-          HSYNC(3177, 23),         // hSync
-          LEAP(3183, 3181),        // leap
-          HSTART(128, 768),        // hStart
-          SCALE(1, 0),             // xScale
-          VCURRENT(0),             // vCurrent
+          ORIGIN(5120),
+          SCALE(1, 0),
+          HSTART(95, 569),
+          BURST(105, 2, 13, 0),
+          VINTR(2),
+      }}},
+    {OS_VI_PAL_HPF2,
+     {
+         VI_CTRL_TYPE_32 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON |
+             VI_CTRL_SERRATE_ON | VI_CTRL_ANTIALIAS_MODE_2 |
+             VI_CTRL_PIXEL_ADV_3,
+         WIDTH(640),
+         BURST(58, 30, 4, 69),
+         VSYNC(624),
+         HSYNC(3177, 23),
+         LEAP(3183, 3181),
+         HSTART(128, 768),
+         SCALE(1, 0),
+         VCURRENT(0),
+     },
+     {{
+          ORIGIN(2560),
+          SCALE(0.5, 0.5),
+          HSTART(93, 567),
+          BURST(107, 2, 9, 0),
+          VINTR(2),
       },
-      { // fldRegs
-        {
-            // [0]
-            ORIGIN(2560),        // origin
-            SCALE(0.5, 0.5),     // yScale
-            HSTART(93, 567),     // vStart
-            BURST(107, 2, 9, 0), // vBurst
-            VINTR(2),            // vIntr
-        },
-        {
-            // [1]
-            ORIGIN(5120),         // origin
-            SCALE(0.5, 0.5),      // yScale
-            HSTART(95, 569),      // vStart
-            BURST(105, 2, 13, 0), // vBurst
-            VINTR(2),             // vIntr
-        } } },
-    { OS_VI_MPAL_LPN1, // type
       {
-          // comRegs
-          VI_CTRL_TYPE_16 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON | VI_CTRL_ANTIALIAS_MODE_2 |
-              VI_CTRL_PIXEL_ADV_3, // ctrl
-          WIDTH(320),              // width
-          BURST(57, 30, 5, 70),    // burst
-          VSYNC(525),              // vSync
-          HSYNC(3089, 4),          // hSync
-          LEAP(3097, 3098),        // leap
-          HSTART(108, 748),        // hStart
-          SCALE(2, 0),             // xScale
-          VCURRENT(0),             // vCurrent
+          ORIGIN(5120),
+          SCALE(0.5, 0.5),
+          HSTART(95, 569),
+          BURST(105, 2, 13, 0),
+          VINTR(2),
+      }}},
+    {OS_VI_MPAL_LPN1,
+     {
+         VI_CTRL_TYPE_16 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON |
+             VI_CTRL_ANTIALIAS_MODE_2 | VI_CTRL_PIXEL_ADV_3,
+         WIDTH(320),
+         BURST(57, 30, 5, 70),
+         VSYNC(525),
+         HSYNC(3089, 4),
+         LEAP(3097, 3098),
+         HSTART(108, 748),
+         SCALE(2, 0),
+         VCURRENT(0),
+     },
+     {{
+          ORIGIN(640),
+          SCALE(1, 0),
+          HSTART(37, 511),
+          BURST(4, 2, 14, 0),
+          VINTR(2),
       },
-      { // fldRegs
-        {
-            // [0]
-            ORIGIN(640),        // origin
-            SCALE(1, 0),        // yScale
-            HSTART(37, 511),    // vStart
-            BURST(4, 2, 14, 0), // vBurst
-            VINTR(2),           // vIntr
-        },
-        {
-            // [1]
-            ORIGIN(640),        // origin
-            SCALE(1, 0),        // yScale
-            HSTART(37, 511),    // vStart
-            BURST(4, 2, 14, 0), // vBurst
-            VINTR(2),           // vIntr
-        } } },
-    { OS_VI_MPAL_LPF1, // type
       {
-          // comRegs
-          VI_CTRL_TYPE_16 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON | VI_CTRL_SERRATE_ON | VI_CTRL_ANTIALIAS_MODE_2 |
-              VI_CTRL_PIXEL_ADV_3, // ctrl
-          WIDTH(320),              // width
-          BURST(57, 30, 5, 70),    // burst
-          VSYNC(524),              // vSync
-          HSYNC(3088, 0),          // hSync
-          LEAP(3100, 3100),        // leap
-          HSTART(108, 748),        // hStart
-          SCALE(2, 0),             // xScale
-          VCURRENT(0),             // vCurrent
+          ORIGIN(640),
+          SCALE(1, 0),
+          HSTART(37, 511),
+          BURST(4, 2, 14, 0),
+          VINTR(2),
+      }}},
+    {OS_VI_MPAL_LPF1,
+     {
+         VI_CTRL_TYPE_16 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON |
+             VI_CTRL_SERRATE_ON | VI_CTRL_ANTIALIAS_MODE_2 |
+             VI_CTRL_PIXEL_ADV_3,
+         WIDTH(320),
+         BURST(57, 30, 5, 70),
+         VSYNC(524),
+         HSYNC(3088, 0),
+         LEAP(3100, 3100),
+         HSTART(108, 748),
+         SCALE(2, 0),
+         VCURRENT(0),
+     },
+     {{
+          ORIGIN(640),
+          SCALE(1, 0.25),
+          HSTART(35, 509),
+          BURST(2, 2, 11, 0),
+          VINTR(2),
       },
-      { // fldRegs
-        {
-            // [0]
-            ORIGIN(640),        // origin
-            SCALE(1, 0.25),     // yScale
-            HSTART(35, 509),    // vStart
-            BURST(2, 2, 11, 0), // vBurst
-            VINTR(2),           // vIntr
-        },
-        {
-            // [1]
-            ORIGIN(640),        // origin
-            SCALE(1, 0.75),     // yScale
-            HSTART(37, 511),    // vStart
-            BURST(4, 2, 14, 0), // vBurst
-            VINTR(2),           // vIntr
-        } } },
-    { OS_VI_MPAL_LAN1, // type
       {
-          // comRegs
-          VI_CTRL_TYPE_16 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON | VI_CTRL_DIVOT_ON | VI_CTRL_ANTIALIAS_MODE_1 |
-              VI_CTRL_PIXEL_ADV_3, // ctrl
-          WIDTH(320),              // width
-          BURST(57, 30, 5, 70),    // burst
-          VSYNC(525),              // vSync
-          HSYNC(3089, 4),          // hSync
-          LEAP(3097, 3098),        // leap
-          HSTART(108, 748),        // hStart
-          SCALE(2, 0),             // xScale
-          VCURRENT(0),             // vCurrent
+          ORIGIN(640),
+          SCALE(1, 0.75),
+          HSTART(37, 511),
+          BURST(4, 2, 14, 0),
+          VINTR(2),
+      }}},
+    {OS_VI_MPAL_LAN1,
+     {
+         VI_CTRL_TYPE_16 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON |
+             VI_CTRL_DIVOT_ON | VI_CTRL_ANTIALIAS_MODE_1 | VI_CTRL_PIXEL_ADV_3,
+         WIDTH(320),
+         BURST(57, 30, 5, 70),
+         VSYNC(525),
+         HSYNC(3089, 4),
+         LEAP(3097, 3098),
+         HSTART(108, 748),
+         SCALE(2, 0),
+         VCURRENT(0),
+     },
+     {{
+          ORIGIN(640),
+          SCALE(1, 0),
+          HSTART(37, 511),
+          BURST(4, 2, 14, 0),
+          VINTR(2),
       },
-      { // fldRegs
-        {
-            // [0]
-            ORIGIN(640),        // origin
-            SCALE(1, 0),        // yScale
-            HSTART(37, 511),    // vStart
-            BURST(4, 2, 14, 0), // vBurst
-            VINTR(2),           // vIntr
-        },
-        {
-            // [1]
-            ORIGIN(640),        // origin
-            SCALE(1, 0),        // yScale
-            HSTART(37, 511),    // vStart
-            BURST(4, 2, 14, 0), // vBurst
-            VINTR(2),           // vIntr
-        } } },
-    { OS_VI_MPAL_LAF1, // type
       {
-          // comRegs
-          VI_CTRL_TYPE_16 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON | VI_CTRL_DIVOT_ON | VI_CTRL_SERRATE_ON |
-              VI_CTRL_ANTIALIAS_MODE_0 | VI_CTRL_PIXEL_ADV_3, // ctrl
-          WIDTH(320),                                         // width
-          BURST(57, 30, 5, 70),                               // burst
-          VSYNC(524),                                         // vSync
-          HSYNC(3088, 0),                                     // hSync
-          LEAP(3100, 3100),                                   // leap
-          HSTART(108, 748),                                   // hStart
-          SCALE(2, 0),                                        // xScale
-          VCURRENT(0),                                        // vCurrent
+          ORIGIN(640),
+          SCALE(1, 0),
+          HSTART(37, 511),
+          BURST(4, 2, 14, 0),
+          VINTR(2),
+      }}},
+    {OS_VI_MPAL_LAF1,
+     {
+         VI_CTRL_TYPE_16 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON |
+             VI_CTRL_DIVOT_ON | VI_CTRL_SERRATE_ON | VI_CTRL_ANTIALIAS_MODE_0 |
+             VI_CTRL_PIXEL_ADV_3,
+         WIDTH(320),
+         BURST(57, 30, 5, 70),
+         VSYNC(524),
+         HSYNC(3088, 0),
+         LEAP(3100, 3100),
+         HSTART(108, 748),
+         SCALE(2, 0),
+         VCURRENT(0),
+     },
+     {{
+          ORIGIN(640),
+          SCALE(1, 0.25),
+          HSTART(35, 509),
+          BURST(2, 2, 11, 0),
+          VINTR(2),
       },
-      { // fldRegs
-        {
-            // [0]
-            ORIGIN(640),        // origin
-            SCALE(1, 0.25),     // yScale
-            HSTART(35, 509),    // vStart
-            BURST(2, 2, 11, 0), // vBurst
-            VINTR(2),           // vIntr
-        },
-        {
-            // [1]
-            ORIGIN(640),        // origin
-            SCALE(1, 0.75),     // yScale
-            HSTART(37, 511),    // vStart
-            BURST(4, 2, 14, 0), // vBurst
-            VINTR(2),           // vIntr
-        } } },
-    { OS_VI_MPAL_LPN2, // type
       {
-          // comRegs
-          VI_CTRL_TYPE_32 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON | VI_CTRL_ANTIALIAS_MODE_3 |
-              VI_CTRL_PIXEL_ADV_3, // ctrl
-          WIDTH(320),              // width
-          BURST(57, 30, 5, 70),    // burst
-          VSYNC(525),              // vSync
-          HSYNC(3089, 4),          // hSync
-          LEAP(3097, 3098),        // leap
-          HSTART(108, 748),        // hStart
-          SCALE(2, 0),             // xScale
-          VCURRENT(0),             // vCurrent
+          ORIGIN(640),
+          SCALE(1, 0.75),
+          HSTART(37, 511),
+          BURST(4, 2, 14, 0),
+          VINTR(2),
+      }}},
+    {OS_VI_MPAL_LPN2,
+     {
+         VI_CTRL_TYPE_32 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON |
+             VI_CTRL_ANTIALIAS_MODE_3 | VI_CTRL_PIXEL_ADV_3,
+         WIDTH(320),
+         BURST(57, 30, 5, 70),
+         VSYNC(525),
+         HSYNC(3089, 4),
+         LEAP(3097, 3098),
+         HSTART(108, 748),
+         SCALE(2, 0),
+         VCURRENT(0),
+     },
+     {{
+          ORIGIN(1280),
+          SCALE(1, 0),
+          HSTART(37, 511),
+          BURST(4, 2, 14, 0),
+          VINTR(2),
       },
-      { // fldRegs
-        {
-            // [0]
-            ORIGIN(1280),       // origin
-            SCALE(1, 0),        // yScale
-            HSTART(37, 511),    // vStart
-            BURST(4, 2, 14, 0), // vBurst
-            VINTR(2),           // vIntr
-        },
-        {
-            // [1]
-            ORIGIN(1280),       // origin
-            SCALE(1, 0),        // yScale
-            HSTART(37, 511),    // vStart
-            BURST(4, 2, 14, 0), // vBurst
-            VINTR(2),           // vIntr
-        } } },
-    { OS_VI_MPAL_LPF2, // type
       {
-          // comRegs
-          VI_CTRL_TYPE_32 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON | VI_CTRL_SERRATE_ON | VI_CTRL_ANTIALIAS_MODE_2 |
-              VI_CTRL_PIXEL_ADV_3, // ctrl
-          WIDTH(320),              // width
-          BURST(57, 30, 5, 70),    // burst
-          VSYNC(524),              // vSync
-          HSYNC(3088, 0),          // hSync
-          LEAP(3100, 3100),        // leap
-          HSTART(108, 748),        // hStart
-          SCALE(2, 0),             // xScale
-          VCURRENT(0),             // vCurrent
+          ORIGIN(1280),
+          SCALE(1, 0),
+          HSTART(37, 511),
+          BURST(4, 2, 14, 0),
+          VINTR(2),
+      }}},
+    {OS_VI_MPAL_LPF2,
+     {
+         VI_CTRL_TYPE_32 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON |
+             VI_CTRL_SERRATE_ON | VI_CTRL_ANTIALIAS_MODE_2 |
+             VI_CTRL_PIXEL_ADV_3,
+         WIDTH(320),
+         BURST(57, 30, 5, 70),
+         VSYNC(524),
+         HSYNC(3088, 0),
+         LEAP(3100, 3100),
+         HSTART(108, 748),
+         SCALE(2, 0),
+         VCURRENT(0),
+     },
+     {{
+          ORIGIN(1280),
+          SCALE(1, 0.25),
+          HSTART(35, 509),
+          BURST(2, 2, 11, 0),
+          VINTR(2),
       },
-      { // fldRegs
-        {
-            // [0]
-            ORIGIN(1280),       // origin
-            SCALE(1, 0.25),     // yScale
-            HSTART(35, 509),    // vStart
-            BURST(2, 2, 11, 0), // vBurst
-            VINTR(2),           // vIntr
-        },
-        {
-            // [1]
-            ORIGIN(1280),       // origin
-            SCALE(1, 0.75),     // yScale
-            HSTART(37, 511),    // vStart
-            BURST(4, 2, 14, 0), // vBurst
-            VINTR(2),           // vIntr
-        } } },
-    { OS_VI_MPAL_LAN2, // type
       {
-          // comRegs
-          VI_CTRL_TYPE_32 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON | VI_CTRL_DIVOT_ON | VI_CTRL_ANTIALIAS_MODE_0 |
-              VI_CTRL_PIXEL_ADV_3, // ctrl
-          WIDTH(320),              // width
-          BURST(57, 30, 5, 70),    // burst
-          VSYNC(525),              // vSync
-          HSYNC(3089, 4),          // hSync
-          LEAP(3097, 3098),        // leap
-          HSTART(108, 748),        // hStart
-          SCALE(2, 0),             // xScale
-          VCURRENT(0),             // vCurrent
+          ORIGIN(1280),
+          SCALE(1, 0.75),
+          HSTART(37, 511),
+          BURST(4, 2, 14, 0),
+          VINTR(2),
+      }}},
+    {OS_VI_MPAL_LAN2,
+     {
+         VI_CTRL_TYPE_32 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON |
+             VI_CTRL_DIVOT_ON | VI_CTRL_ANTIALIAS_MODE_0 | VI_CTRL_PIXEL_ADV_3,
+         WIDTH(320),
+         BURST(57, 30, 5, 70),
+         VSYNC(525),
+         HSYNC(3089, 4),
+         LEAP(3097, 3098),
+         HSTART(108, 748),
+         SCALE(2, 0),
+         VCURRENT(0),
+     },
+     {{
+          ORIGIN(1280),
+          SCALE(1, 0),
+          HSTART(37, 511),
+          BURST(4, 2, 14, 0),
+          VINTR(2),
       },
-      { // fldRegs
-        {
-            // [0]
-            ORIGIN(1280),       // origin
-            SCALE(1, 0),        // yScale
-            HSTART(37, 511),    // vStart
-            BURST(4, 2, 14, 0), // vBurst
-            VINTR(2),           // vIntr
-        },
-        {
-            // [1]
-            ORIGIN(1280),       // origin
-            SCALE(1, 0),        // yScale
-            HSTART(37, 511),    // vStart
-            BURST(4, 2, 14, 0), // vBurst
-            VINTR(2),           // vIntr
-        } } },
-    { OS_VI_MPAL_LAF2, // type
       {
-          // comRegs
-          VI_CTRL_TYPE_32 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON | VI_CTRL_DIVOT_ON | VI_CTRL_SERRATE_ON |
-              VI_CTRL_ANTIALIAS_MODE_0 | VI_CTRL_PIXEL_ADV_3, // ctrl
-          WIDTH(320),                                         // width
-          BURST(57, 30, 5, 70),                               // burst
-          VSYNC(524),                                         // vSync
-          HSYNC(3088, 0),                                     // hSync
-          LEAP(3100, 3100),                                   // leap
-          HSTART(108, 748),                                   // hStart
-          SCALE(2, 0),                                        // xScale
-          VCURRENT(0),                                        // vCurrent
+          ORIGIN(1280),
+          SCALE(1, 0),
+          HSTART(37, 511),
+          BURST(4, 2, 14, 0),
+          VINTR(2),
+      }}},
+    {OS_VI_MPAL_LAF2,
+     {
+         VI_CTRL_TYPE_32 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON |
+             VI_CTRL_DIVOT_ON | VI_CTRL_SERRATE_ON | VI_CTRL_ANTIALIAS_MODE_0 |
+             VI_CTRL_PIXEL_ADV_3,
+         WIDTH(320),
+         BURST(57, 30, 5, 70),
+         VSYNC(524),
+         HSYNC(3088, 0),
+         LEAP(3100, 3100),
+         HSTART(108, 748),
+         SCALE(2, 0),
+         VCURRENT(0),
+     },
+     {{
+          ORIGIN(1280),
+          SCALE(1, 0.25),
+          HSTART(35, 509),
+          BURST(2, 2, 11, 0),
+          VINTR(2),
       },
-      { // fldRegs
-        {
-            // [0]
-            ORIGIN(1280),       // origin
-            SCALE(1, 0.25),     // yScale
-            HSTART(35, 509),    // vStart
-            BURST(2, 2, 11, 0), // vBurst
-            VINTR(2),           // vIntr
-        },
-        {
-            // [1]
-            ORIGIN(1280),       // origin
-            SCALE(1, 0.75),     // yScale
-            HSTART(37, 511),    // vStart
-            BURST(4, 2, 14, 0), // vBurst
-            VINTR(2),           // vIntr
-        } } },
-    { OS_VI_MPAL_HPN1, // type
       {
-          // comRegs
-          VI_CTRL_TYPE_16 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON | VI_CTRL_SERRATE_ON | VI_CTRL_ANTIALIAS_MODE_2 |
-              VI_CTRL_PIXEL_ADV_3, // ctrl
-          WIDTH(1280),             // width
-          BURST(57, 30, 5, 70),    // burst
-          VSYNC(524),              // vSync
-          HSYNC(3088, 0),          // hSync
-          LEAP(3100, 3100),        // leap
-          HSTART(108, 748),        // hStart
-          SCALE(1, 0),             // xScale
-          VCURRENT(0),             // vCurrent
+          ORIGIN(1280),
+          SCALE(1, 0.75),
+          HSTART(37, 511),
+          BURST(4, 2, 14, 0),
+          VINTR(2),
+      }}},
+    {OS_VI_MPAL_HPN1,
+     {
+         VI_CTRL_TYPE_16 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON |
+             VI_CTRL_SERRATE_ON | VI_CTRL_ANTIALIAS_MODE_2 |
+             VI_CTRL_PIXEL_ADV_3,
+         WIDTH(1280),
+         BURST(57, 30, 5, 70),
+         VSYNC(524),
+         HSYNC(3088, 0),
+         LEAP(3100, 3100),
+         HSTART(108, 748),
+         SCALE(1, 0),
+         VCURRENT(0),
+     },
+     {{
+          ORIGIN(1280),
+          SCALE(1, 0),
+          HSTART(35, 509),
+          BURST(2, 2, 11, 0),
+          VINTR(2),
       },
-      { // fldRegs
-        {
-            // [0]
-            ORIGIN(1280),       // origin
-            SCALE(1, 0),        // yScale
-            HSTART(35, 509),    // vStart
-            BURST(2, 2, 11, 0), // vBurst
-            VINTR(2),           // vIntr
-        },
-        {
-            // [1]
-            ORIGIN(2560),       // origin
-            SCALE(1, 0),        // yScale
-            HSTART(37, 511),    // vStart
-            BURST(4, 2, 14, 0), // vBurst
-            VINTR(2),           // vIntr
-        } } },
-    { OS_VI_MPAL_HPF1, // type
       {
-          // comRegs
-          VI_CTRL_TYPE_16 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON | VI_CTRL_SERRATE_ON | VI_CTRL_ANTIALIAS_MODE_2 |
-              VI_CTRL_PIXEL_ADV_3, // ctrl
-          WIDTH(640),              // width
-          BURST(57, 30, 5, 70),    // burst
-          VSYNC(524),              // vSync
-          HSYNC(3088, 0),          // hSync
-          LEAP(3100, 3100),        // leap
-          HSTART(108, 748),        // hStart
-          SCALE(1, 0),             // xScale
-          VCURRENT(0),             // vCurrent
+          ORIGIN(2560),
+          SCALE(1, 0),
+          HSTART(37, 511),
+          BURST(4, 2, 14, 0),
+          VINTR(2),
+      }}},
+    {OS_VI_MPAL_HPF1,
+     {
+         VI_CTRL_TYPE_16 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON |
+             VI_CTRL_SERRATE_ON | VI_CTRL_ANTIALIAS_MODE_2 |
+             VI_CTRL_PIXEL_ADV_3,
+         WIDTH(640),
+         BURST(57, 30, 5, 70),
+         VSYNC(524),
+         HSYNC(3088, 0),
+         LEAP(3100, 3100),
+         HSTART(108, 748),
+         SCALE(1, 0),
+         VCURRENT(0),
+     },
+     {{
+          ORIGIN(1280),
+          SCALE(0.5, 0.5),
+          HSTART(35, 509),
+          BURST(2, 2, 11, 0),
+          VINTR(2),
       },
-      { // fldRegs
-        {
-            // [0]
-            ORIGIN(1280),       // origin
-            SCALE(0.5, 0.5),    // yScale
-            HSTART(35, 509),    // vStart
-            BURST(2, 2, 11, 0), // vBurst
-            VINTR(2),           // vIntr
-        },
-        {
-            // [1]
-            ORIGIN(2560),       // origin
-            SCALE(0.5, 0.5),    // yScale
-            HSTART(37, 511),    // vStart
-            BURST(4, 2, 14, 0), // vBurst
-            VINTR(2),           // vIntr
-        } } },
-    { OS_VI_MPAL_HAN1, // type
       {
-          // comRegs
-          VI_CTRL_TYPE_16 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON | VI_CTRL_DIVOT_ON | VI_CTRL_SERRATE_ON |
-              VI_CTRL_ANTIALIAS_MODE_0 | VI_CTRL_PIXEL_ADV_3, // ctrl
-          WIDTH(1280),                                        // width
-          BURST(57, 30, 5, 70),                               // burst
-          VSYNC(524),                                         // vSync
-          HSYNC(3088, 0),                                     // hSync
-          LEAP(3100, 3100),                                   // leap
-          HSTART(108, 748),                                   // hStart
-          SCALE(1, 0),                                        // xScale
-          VCURRENT(0),                                        // vCurrent
+          ORIGIN(2560),
+          SCALE(0.5, 0.5),
+          HSTART(37, 511),
+          BURST(4, 2, 14, 0),
+          VINTR(2),
+      }}},
+    {OS_VI_MPAL_HAN1,
+     {
+         VI_CTRL_TYPE_16 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON |
+             VI_CTRL_DIVOT_ON | VI_CTRL_SERRATE_ON | VI_CTRL_ANTIALIAS_MODE_0 |
+             VI_CTRL_PIXEL_ADV_3,
+         WIDTH(1280),
+         BURST(57, 30, 5, 70),
+         VSYNC(524),
+         HSYNC(3088, 0),
+         LEAP(3100, 3100),
+         HSTART(108, 748),
+         SCALE(1, 0),
+         VCURRENT(0),
+     },
+     {{
+          ORIGIN(1280),
+          SCALE(1, 0),
+          HSTART(35, 509),
+          BURST(2, 2, 11, 0),
+          VINTR(2),
       },
-      { // fldRegs
-        {
-            // [0]
-            ORIGIN(1280),       // origin
-            SCALE(1, 0),        // yScale
-            HSTART(35, 509),    // vStart
-            BURST(2, 2, 11, 0), // vBurst
-            VINTR(2),           // vIntr
-        },
-        {
-            // [1]
-            ORIGIN(2560),       // origin
-            SCALE(1, 0),        // yScale
-            HSTART(37, 511),    // vStart
-            BURST(4, 2, 14, 0), // vBurst
-            VINTR(2),           // vIntr
-        } } },
-    { OS_VI_MPAL_HAF1, // type
       {
-          // comRegs
-          VI_CTRL_TYPE_16 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON | VI_CTRL_DIVOT_ON | VI_CTRL_SERRATE_ON |
-              VI_CTRL_ANTIALIAS_MODE_0 | VI_CTRL_PIXEL_ADV_3, // ctrl
-          WIDTH(640),                                         // width
-          BURST(57, 30, 5, 70),                               // burst
-          VSYNC(524),                                         // vSync
-          HSYNC(3088, 0),                                     // hSync
-          LEAP(3100, 3100),                                   // leap
-          HSTART(108, 748),                                   // hStart
-          SCALE(1, 0),                                        // xScale
-          VCURRENT(0),                                        // vCurrent
+          ORIGIN(2560),
+          SCALE(1, 0),
+          HSTART(37, 511),
+          BURST(4, 2, 14, 0),
+          VINTR(2),
+      }}},
+    {OS_VI_MPAL_HAF1,
+     {
+         VI_CTRL_TYPE_16 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON |
+             VI_CTRL_DIVOT_ON | VI_CTRL_SERRATE_ON | VI_CTRL_ANTIALIAS_MODE_0 |
+             VI_CTRL_PIXEL_ADV_3,
+         WIDTH(640),
+         BURST(57, 30, 5, 70),
+         VSYNC(524),
+         HSYNC(3088, 0),
+         LEAP(3100, 3100),
+         HSTART(108, 748),
+         SCALE(1, 0),
+         VCURRENT(0),
+     },
+     {{
+          ORIGIN(1280),
+          SCALE(0.5, 0.5),
+          HSTART(35, 509),
+          BURST(2, 2, 11, 0),
+          VINTR(2),
       },
-      { // fldRegs
-        {
-            //[0]
-            ORIGIN(1280),       // origin
-            SCALE(0.5, 0.5),    // yScale
-            HSTART(35, 509),    // vStart
-            BURST(2, 2, 11, 0), // vBurst
-            VINTR(2),           // vIntr
-        },
-        {
-            //[1]
-            ORIGIN(2560),       // origin
-            SCALE(0.5, 0.5),    // yScale
-            HSTART(37, 511),    // vStart
-            BURST(4, 2, 14, 0), // vBurst
-            VINTR(2),           // vIntr
-        } } },
-    { OS_VI_MPAL_HPN2, // type
       {
-          // comRegs
-          VI_CTRL_TYPE_32 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON | VI_CTRL_SERRATE_ON | VI_CTRL_ANTIALIAS_MODE_3 |
-              VI_CTRL_PIXEL_ADV_3, // ctrl
-          WIDTH(1280),             // width
-          BURST(57, 30, 5, 70),    // burst
-          VSYNC(524),              // vSync
-          HSYNC(3088, 0),          // hSync
-          LEAP(3100, 3100),        // leap
-          HSTART(108, 748),        // hStart
-          SCALE(1, 0),             // xScale
-          VCURRENT(0),             // vCurrent
+          ORIGIN(2560),
+          SCALE(0.5, 0.5),
+          HSTART(37, 511),
+          BURST(4, 2, 14, 0),
+          VINTR(2),
+      }}},
+    {OS_VI_MPAL_HPN2,
+     {
+         VI_CTRL_TYPE_32 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON |
+             VI_CTRL_SERRATE_ON | VI_CTRL_ANTIALIAS_MODE_3 |
+             VI_CTRL_PIXEL_ADV_3,
+         WIDTH(1280),
+         BURST(57, 30, 5, 70),
+         VSYNC(524),
+         HSYNC(3088, 0),
+         LEAP(3100, 3100),
+         HSTART(108, 748),
+         SCALE(1, 0),
+         VCURRENT(0),
+     },
+     {{
+          ORIGIN(2560),
+          SCALE(1, 0),
+          HSTART(35, 509),
+          BURST(2, 2, 11, 0),
+          VINTR(2),
       },
-      { // fldRegs
-        {
-            // [0]
-            ORIGIN(2560),       // origin
-            SCALE(1, 0),        // yScale
-            HSTART(35, 509),    // vStart
-            BURST(2, 2, 11, 0), // vBurst
-            VINTR(2),           // vIntr
-        },
-        {
-            // [1]
-            ORIGIN(5120),       // origin
-            SCALE(1, 0),        // yScale
-            HSTART(37, 511),    // vStart
-            BURST(4, 2, 14, 0), // vBurst
-            VINTR(2),           // vIntr
-        } } },
-    { OS_VI_MPAL_HPF2, // type
       {
-          // comRegs
-          VI_CTRL_TYPE_32 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON | VI_CTRL_SERRATE_ON | VI_CTRL_ANTIALIAS_MODE_2 |
-              VI_CTRL_PIXEL_ADV_3, // ctrl
-          WIDTH(640),              // width
-          BURST(57, 30, 5, 70),    // burst
-          VSYNC(524),              // vSync
-          HSYNC(3088, 0),          // hSync
-          LEAP(3100, 3100),        // leap
-          HSTART(108, 748),        // hStart
-          SCALE(1, 0),             // xScale
-          VCURRENT(0),             // vCurrent
+          ORIGIN(5120),
+          SCALE(1, 0),
+          HSTART(37, 511),
+          BURST(4, 2, 14, 0),
+          VINTR(2),
+      }}},
+    {OS_VI_MPAL_HPF2,
+     {
+         VI_CTRL_TYPE_32 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON |
+             VI_CTRL_SERRATE_ON | VI_CTRL_ANTIALIAS_MODE_2 |
+             VI_CTRL_PIXEL_ADV_3,
+         WIDTH(640),
+         BURST(57, 30, 5, 70),
+         VSYNC(524),
+         HSYNC(3088, 0),
+         LEAP(3100, 3100),
+         HSTART(108, 748),
+         SCALE(1, 0),
+         VCURRENT(0),
+     },
+     {{
+          ORIGIN(2560),
+          SCALE(0.5, 0.5),
+          HSTART(35, 509),
+          BURST(2, 2, 11, 0),
+          VINTR(2),
       },
-      { // fldRegs
-        {
-            // [0]
-            ORIGIN(2560),       // origin
-            SCALE(0.5, 0.5),    // yScale
-            HSTART(35, 509),    // vStart
-            BURST(2, 2, 11, 0), // vBurst
-            VINTR(2),           // vIntr
-        },
-        {
-            // [1]
-            ORIGIN(5120),       // origin
-            SCALE(0.5, 0.5),    // yScale
-            HSTART(37, 511),    // vStart
-            BURST(4, 2, 14, 0), // vBurst
-            VINTR(2),           // vIntr
-        } } },
+      {
+          ORIGIN(5120),
+          SCALE(0.5, 0.5),
+          HSTART(37, 511),
+          BURST(4, 2, 14, 0),
+          VINTR(2),
+      }}},
 #if BUILD_VERSION >= VERSION_J
-    { OS_VI_FPAL_LPN1, // type
-      {
-          // comRegs
-          VI_CTRL_TYPE_16 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON | VI_CTRL_ANTIALIAS_MODE_2 |
-              VI_CTRL_PIXEL_ADV_3, // ctrl
-          WIDTH(320),              // width
-          BURST(58, 30, 4, 69),    // burst
-          VSYNC(625),              // vSync
-          HSYNC(3177, 23),         // hSync
-          LEAP(3183, 3181),        // leap
-          HSTART(128, 768),        // hStart
-          SCALE(2, 0),             // xScale
-          VCURRENT(0),             // vCurrent
+    {OS_VI_FPAL_LPN1,
+     {
+         VI_CTRL_TYPE_16 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON |
+             VI_CTRL_ANTIALIAS_MODE_2 | VI_CTRL_PIXEL_ADV_3,
+         WIDTH(320),
+         BURST(58, 30, 4, 69),
+         VSYNC(625),
+         HSYNC(3177, 23),
+         LEAP(3183, 3181),
+         HSTART(128, 768),
+         SCALE(2, 0),
+         VCURRENT(0),
+     },
+     {{
+          ORIGIN(640),
+          SCALE(1, 0),
+          HSTART(47, 617),
+          BURST(107, 2, 9, 0),
+          VINTR(2),
       },
-      { // fldRegs
-        {
-            // [0]
-            ORIGIN(640),         // origin
-            SCALE(1, 0),         // yScale
-            HSTART(47, 617),     // vStart
-            BURST(107, 2, 9, 0), // vBurst
-            VINTR(2),            // vIntr
-        },
-        {
-            // [1]
-            ORIGIN(640),         // origin
-            SCALE(1, 0),         // yScale
-            HSTART(47, 617),     // vStart
-            BURST(107, 2, 9, 0), // vBurst
-            VINTR(2),            // vIntr
-        } } },
-    { OS_VI_FPAL_LPF1, // type
       {
-          // comRegs
-          VI_CTRL_TYPE_16 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON | VI_CTRL_SERRATE_ON | VI_CTRL_ANTIALIAS_MODE_2 |
-              VI_CTRL_PIXEL_ADV_3, // ctrl
-          WIDTH(320),              // width
-          BURST(58, 30, 4, 69),    // burst
-          VSYNC(624),              // vSync
-          HSYNC(3177, 23),         // hSync
-          LEAP(3183, 3181),        // leap
-          HSTART(128, 768),        // hStart
-          SCALE(2, 0),             // xScale
-          VCURRENT(0),             // vCurrent
+          ORIGIN(640),
+          SCALE(1, 0),
+          HSTART(47, 617),
+          BURST(107, 2, 9, 0),
+          VINTR(2),
+      }}},
+    {OS_VI_FPAL_LPF1,
+     {
+         VI_CTRL_TYPE_16 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON |
+             VI_CTRL_SERRATE_ON | VI_CTRL_ANTIALIAS_MODE_2 |
+             VI_CTRL_PIXEL_ADV_3,
+         WIDTH(320),
+         BURST(58, 30, 4, 69),
+         VSYNC(624),
+         HSYNC(3177, 23),
+         LEAP(3183, 3181),
+         HSTART(128, 768),
+         SCALE(2, 0),
+         VCURRENT(0),
+     },
+     {{
+          ORIGIN(640),
+          SCALE(1, 0.25),
+          HSTART(45, 615),
+          BURST(107, 2, 9, 0),
+          VINTR(2),
       },
-      { // fldRegs
-        {
-            // [0]
-            ORIGIN(640),         // origin
-            SCALE(1, 0.25),      // yScale
-            HSTART(45, 615),     // vStart
-            BURST(107, 2, 9, 0), // vBurst
-            VINTR(2),            // vIntr
-        },
-        {
-            // [1]
-            ORIGIN(640),          // origin
-            SCALE(1, 0.75),       // yScale
-            HSTART(47, 617),      // vStart
-            BURST(105, 2, 13, 0), // vBurst
-            VINTR(2),             // vIntr
-        } } },
-    { OS_VI_FPAL_LAN1, // type
       {
-          // comRegs
-          VI_CTRL_TYPE_16 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON | VI_CTRL_DIVOT_ON | VI_CTRL_ANTIALIAS_MODE_1 |
-              VI_CTRL_PIXEL_ADV_3, // ctrl
-          WIDTH(320),              // width
-          BURST(58, 30, 4, 69),    // burst
-          VSYNC(625),              // vSync
-          HSYNC(3177, 23),         // hSync
-          LEAP(3183, 3181),        // leap
-          HSTART(128, 768),        // hStart
-          SCALE(2, 0),             // xScale
-          VCURRENT(0),             // vCurrent
+          ORIGIN(640),
+          SCALE(1, 0.75),
+          HSTART(47, 617),
+          BURST(105, 2, 13, 0),
+          VINTR(2),
+      }}},
+    {OS_VI_FPAL_LAN1,
+     {
+         VI_CTRL_TYPE_16 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON |
+             VI_CTRL_DIVOT_ON | VI_CTRL_ANTIALIAS_MODE_1 | VI_CTRL_PIXEL_ADV_3,
+         WIDTH(320),
+         BURST(58, 30, 4, 69),
+         VSYNC(625),
+         HSYNC(3177, 23),
+         LEAP(3183, 3181),
+         HSTART(128, 768),
+         SCALE(2, 0),
+         VCURRENT(0),
+     },
+     {{
+          ORIGIN(640),
+          SCALE(1, 0),
+          HSTART(47, 617),
+          BURST(107, 2, 9, 0),
+          VINTR(2),
       },
-      { // fldRegs
-        {
-            // [0]
-            ORIGIN(640),         // origin
-            SCALE(1, 0),         // yScale
-            HSTART(47, 617),     // vStart
-            BURST(107, 2, 9, 0), // vBurst
-            VINTR(2),            // vIntr
-        },
-        {
-            // [1]
-            ORIGIN(640),         // origin
-            SCALE(1, 0),         // yScale
-            HSTART(47, 617),     // vStart
-            BURST(107, 2, 9, 0), // vBurst
-            VINTR(2),            // vIntr
-        } } },
-    { OS_VI_FPAL_LAF1, // type
       {
-          // comRegs
-          VI_CTRL_TYPE_16 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON | VI_CTRL_DIVOT_ON | VI_CTRL_SERRATE_ON |
-              VI_CTRL_ANTIALIAS_MODE_0 | VI_CTRL_PIXEL_ADV_3, // ctrl
-          WIDTH(320),                                         // width
-          BURST(58, 30, 4, 69),                               // burst
-          VSYNC(624),                                         // vSync
-          HSYNC(3177, 23),                                    // hSync
-          LEAP(3183, 3181),                                   // leap
-          HSTART(128, 768),                                   // hStart
-          SCALE(2, 0),                                        // xScale
-          VCURRENT(0),                                        // vCurrent
+          ORIGIN(640),
+          SCALE(1, 0),
+          HSTART(47, 617),
+          BURST(107, 2, 9, 0),
+          VINTR(2),
+      }}},
+    {OS_VI_FPAL_LAF1,
+     {
+         VI_CTRL_TYPE_16 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON |
+             VI_CTRL_DIVOT_ON | VI_CTRL_SERRATE_ON | VI_CTRL_ANTIALIAS_MODE_0 |
+             VI_CTRL_PIXEL_ADV_3,
+         WIDTH(320),
+         BURST(58, 30, 4, 69),
+         VSYNC(624),
+         HSYNC(3177, 23),
+         LEAP(3183, 3181),
+         HSTART(128, 768),
+         SCALE(2, 0),
+         VCURRENT(0),
+     },
+     {{
+          ORIGIN(640),
+          SCALE(1, 0.25),
+          HSTART(45, 615),
+          BURST(107, 2, 9, 0),
+          VINTR(2),
       },
-      { // fldRegs
-        {
-            // [0]
-            ORIGIN(640),         // origin
-            SCALE(1, 0.25),      // yScale
-            HSTART(45, 615),     // vStart
-            BURST(107, 2, 9, 0), // vBurst
-            VINTR(2),            // vIntr
-        },
-        {
-            // [1]
-            ORIGIN(640),          // origin
-            SCALE(1, 0.75),       // yScale
-            HSTART(47, 617),      // vStart
-            BURST(105, 2, 13, 0), // vBurst
-            VINTR(2),             // vIntr
-        } } },
-    { OS_VI_FPAL_LPN2, // type
       {
-          // comRegs
-          VI_CTRL_TYPE_32 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON | VI_CTRL_ANTIALIAS_MODE_3 |
-              VI_CTRL_PIXEL_ADV_3, // ctrl
-          WIDTH(320),              // width
-          BURST(58, 30, 4, 69),    // burst
-          VSYNC(625),              // vSync
-          HSYNC(3177, 23),         // hSync
-          LEAP(3183, 3181),        // leap
-          HSTART(128, 768),        // hStart
-          SCALE(2, 0),             // xScale
-          VCURRENT(0),             // vCurrent
+          ORIGIN(640),
+          SCALE(1, 0.75),
+          HSTART(47, 617),
+          BURST(105, 2, 13, 0),
+          VINTR(2),
+      }}},
+    {OS_VI_FPAL_LPN2,
+     {
+         VI_CTRL_TYPE_32 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON |
+             VI_CTRL_ANTIALIAS_MODE_3 | VI_CTRL_PIXEL_ADV_3,
+         WIDTH(320),
+         BURST(58, 30, 4, 69),
+         VSYNC(625),
+         HSYNC(3177, 23),
+         LEAP(3183, 3181),
+         HSTART(128, 768),
+         SCALE(2, 0),
+         VCURRENT(0),
+     },
+     {{
+          ORIGIN(1280),
+          SCALE(1, 0),
+          HSTART(47, 617),
+          BURST(107, 2, 9, 0),
+          VINTR(2),
       },
-      { // fldRegs
-        {
-            // [0]
-            ORIGIN(1280),        // origin
-            SCALE(1, 0),         // yScale
-            HSTART(47, 617),     // vStart
-            BURST(107, 2, 9, 0), // vBurst
-            VINTR(2),            // vIntr
-        },
-        {
-            // [1]
-            ORIGIN(1280),        // origin
-            SCALE(1, 0),         // yScale
-            HSTART(47, 617),     // vStart
-            BURST(107, 2, 9, 0), // vBurst
-            VINTR(2),            // vIntr
-        } } },
-    { OS_VI_FPAL_LPF2, // type
       {
-          // comRegs
-          VI_CTRL_TYPE_32 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON | VI_CTRL_SERRATE_ON | VI_CTRL_ANTIALIAS_MODE_2 |
-              VI_CTRL_PIXEL_ADV_3, // ctrl
-          WIDTH(320),              // width
-          BURST(58, 30, 4, 69),    // burst
-          VSYNC(624),              // vSync
-          HSYNC(3177, 23),         // hSync
-          LEAP(3183, 3181),        // leap
-          HSTART(128, 768),        // hStart
-          SCALE(2, 0),             // xScale
-          VCURRENT(0),             // vCurrent
+          ORIGIN(1280),
+          SCALE(1, 0),
+          HSTART(47, 617),
+          BURST(107, 2, 9, 0),
+          VINTR(2),
+      }}},
+    {OS_VI_FPAL_LPF2,
+     {
+         VI_CTRL_TYPE_32 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON |
+             VI_CTRL_SERRATE_ON | VI_CTRL_ANTIALIAS_MODE_2 |
+             VI_CTRL_PIXEL_ADV_3,
+         WIDTH(320),
+         BURST(58, 30, 4, 69),
+         VSYNC(624),
+         HSYNC(3177, 23),
+         LEAP(3183, 3181),
+         HSTART(128, 768),
+         SCALE(2, 0),
+         VCURRENT(0),
+     },
+     {{
+          ORIGIN(1280),
+          SCALE(1, 0.25),
+          HSTART(45, 615),
+          BURST(107, 2, 9, 0),
+          VINTR(2),
       },
-      { // fldRegs
-        {
-            // [0]
-            ORIGIN(1280),        // origin
-            SCALE(1, 0.25),      // yScale
-            HSTART(45, 615),     // vStart
-            BURST(107, 2, 9, 0), // vBurst
-            VINTR(2),            // vIntr
-        },
-        {
-            // [1]
-            ORIGIN(1280),         // origin
-            SCALE(1, 0.75),       // yScale
-            HSTART(47, 617),      // vStart
-            BURST(105, 2, 13, 0), // vBurst
-            VINTR(2),             // vIntr
-        } } },
-    { OS_VI_FPAL_LAN2, // type
       {
-          // comRegs
-          VI_CTRL_TYPE_32 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON | VI_CTRL_DIVOT_ON | VI_CTRL_ANTIALIAS_MODE_0 |
-              VI_CTRL_PIXEL_ADV_3, // ctrl
-          WIDTH(320),              // width
-          BURST(58, 30, 4, 69),    // burst
-          VSYNC(625),              // vSync
-          HSYNC(3177, 23),         // hSync
-          LEAP(3183, 3181),        // leap
-          HSTART(128, 768),        // hStart
-          SCALE(2, 0),             // xScale
-          VCURRENT(0),             // vCurrent
+          ORIGIN(1280),
+          SCALE(1, 0.75),
+          HSTART(47, 617),
+          BURST(105, 2, 13, 0),
+          VINTR(2),
+      }}},
+    {OS_VI_FPAL_LAN2,
+     {
+         VI_CTRL_TYPE_32 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON |
+             VI_CTRL_DIVOT_ON | VI_CTRL_ANTIALIAS_MODE_0 | VI_CTRL_PIXEL_ADV_3,
+         WIDTH(320),
+         BURST(58, 30, 4, 69),
+         VSYNC(625),
+         HSYNC(3177, 23),
+         LEAP(3183, 3181),
+         HSTART(128, 768),
+         SCALE(2, 0),
+         VCURRENT(0),
+     },
+     {{
+          ORIGIN(1280),
+          SCALE(1, 0),
+          HSTART(47, 617),
+          BURST(107, 2, 9, 0),
+          VINTR(2),
       },
-      { // fldRegs
-        {
-            // [0]
-            ORIGIN(1280),        // origin
-            SCALE(1, 0),         // yScale
-            HSTART(47, 617),     // vStart
-            BURST(107, 2, 9, 0), // vBurst
-            VINTR(2),            // vIntr
-        },
-        {
-            // [1]
-            ORIGIN(1280),        // origin
-            SCALE(1, 0),         // yScale
-            HSTART(47, 617),     // vStart
-            BURST(107, 2, 9, 0), // vBurst
-            VINTR(2),            // vIntr
-        } } },
-    { OS_VI_FPAL_LAF2, // type
       {
-          // comRegs
-          VI_CTRL_TYPE_32 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON | VI_CTRL_DIVOT_ON | VI_CTRL_SERRATE_ON |
-              VI_CTRL_ANTIALIAS_MODE_0 | VI_CTRL_PIXEL_ADV_3, // ctrl
-          WIDTH(320),                                         // width
-          BURST(58, 30, 4, 69),                               // burst
-          VSYNC(624),                                         // vSync
-          HSYNC(3177, 23),                                    // hSync
-          LEAP(3183, 3181),                                   // leap
-          HSTART(128, 768),                                   // hStart
-          SCALE(2, 0),                                        // xScale
-          VCURRENT(0),                                        // vCurrent
+          ORIGIN(1280),
+          SCALE(1, 0),
+          HSTART(47, 617),
+          BURST(107, 2, 9, 0),
+          VINTR(2),
+      }}},
+    {OS_VI_FPAL_LAF2,
+     {
+         VI_CTRL_TYPE_32 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON |
+             VI_CTRL_DIVOT_ON | VI_CTRL_SERRATE_ON | VI_CTRL_ANTIALIAS_MODE_0 |
+             VI_CTRL_PIXEL_ADV_3,
+         WIDTH(320),
+         BURST(58, 30, 4, 69),
+         VSYNC(624),
+         HSYNC(3177, 23),
+         LEAP(3183, 3181),
+         HSTART(128, 768),
+         SCALE(2, 0),
+         VCURRENT(0),
+     },
+     {{
+          ORIGIN(1280),
+          SCALE(1, 0.25),
+          HSTART(45, 615),
+          BURST(107, 2, 9, 0),
+          VINTR(2),
       },
-      { // fldRegs
-        {
-            // [0]
-            ORIGIN(1280),        // origin
-            SCALE(1, 0.25),      // yScale
-            HSTART(45, 615),     // vStart
-            BURST(107, 2, 9, 0), // vBurst
-            VINTR(2),            // vIntr
-        },
-        {
-            // [1]
-            ORIGIN(1280),         // origin
-            SCALE(1, 0.75),       // yScale
-            HSTART(47, 617),      // vStart
-            BURST(105, 2, 13, 0), // vBurst
-            VINTR(2),             // vIntr
-        } } },
-    { OS_VI_FPAL_HPN1, // type
       {
-          // comRegs
-          VI_CTRL_TYPE_16 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON | VI_CTRL_SERRATE_ON | VI_CTRL_ANTIALIAS_MODE_2 |
-              VI_CTRL_PIXEL_ADV_3, // ctrl
-          WIDTH(1280),             // width
-          BURST(58, 30, 4, 69),    // burst
-          VSYNC(624),              // vSync
-          HSYNC(3177, 23),         // hSync
-          LEAP(3183, 3181),        // leap
-          HSTART(128, 768),        // hStart
-          SCALE(1, 0),             // xScale
-          VCURRENT(0),             // vCurrent
+          ORIGIN(1280),
+          SCALE(1, 0.75),
+          HSTART(47, 617),
+          BURST(105, 2, 13, 0),
+          VINTR(2),
+      }}},
+    {OS_VI_FPAL_HPN1,
+     {
+         VI_CTRL_TYPE_16 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON |
+             VI_CTRL_SERRATE_ON | VI_CTRL_ANTIALIAS_MODE_2 |
+             VI_CTRL_PIXEL_ADV_3,
+         WIDTH(1280),
+         BURST(58, 30, 4, 69),
+         VSYNC(624),
+         HSYNC(3177, 23),
+         LEAP(3183, 3181),
+         HSTART(128, 768),
+         SCALE(1, 0),
+         VCURRENT(0),
+     },
+     {{
+          ORIGIN(1280),
+          SCALE(1, 0),
+          HSTART(45, 615),
+          BURST(107, 2, 9, 0),
+          VINTR(2),
       },
-      { // fldRegs
-        {
-            // [0]
-            ORIGIN(1280),        // origin
-            SCALE(1, 0),         // yScale
-            HSTART(45, 615),     // vStart
-            BURST(107, 2, 9, 0), // vBurst
-            VINTR(2),            // vIntr
-        },
-        {
-            // [1]
-            ORIGIN(2560),         // origin
-            SCALE(1, 0),          // yScale
-            HSTART(47, 617),      // vStart
-            BURST(105, 2, 13, 0), // vBurst
-            VINTR(2),             // vIntr
-        } } },
-    { OS_VI_FPAL_HPF1, // type
       {
-          // comRegs
-          VI_CTRL_TYPE_16 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON | VI_CTRL_SERRATE_ON | VI_CTRL_ANTIALIAS_MODE_2 |
-              VI_CTRL_PIXEL_ADV_3, // ctrl
-          WIDTH(640),              // width
-          BURST(58, 30, 4, 69),    // burst
-          VSYNC(624),              // vSync
-          HSYNC(3177, 23),         // hSync
-          LEAP(3183, 3181),        // leap
-          HSTART(128, 768),        // hStart
-          SCALE(1, 0),             // xScale
-          VCURRENT(0),             // vCurrent
+          ORIGIN(2560),
+          SCALE(1, 0),
+          HSTART(47, 617),
+          BURST(105, 2, 13, 0),
+          VINTR(2),
+      }}},
+    {OS_VI_FPAL_HPF1,
+     {
+         VI_CTRL_TYPE_16 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON |
+             VI_CTRL_SERRATE_ON | VI_CTRL_ANTIALIAS_MODE_2 |
+             VI_CTRL_PIXEL_ADV_3,
+         WIDTH(640),
+         BURST(58, 30, 4, 69),
+         VSYNC(624),
+         HSYNC(3177, 23),
+         LEAP(3183, 3181),
+         HSTART(128, 768),
+         SCALE(1, 0),
+         VCURRENT(0),
+     },
+     {{
+          ORIGIN(1280),
+          SCALE(0.5, 0.5),
+          HSTART(45, 615),
+          BURST(107, 2, 9, 0),
+          VINTR(2),
       },
-      { // fldRegs
-        {
-            // [0]
-            ORIGIN(1280),        // origin
-            SCALE(0.5, 0.5),     // yScale
-            HSTART(45, 615),     // vStart
-            BURST(107, 2, 9, 0), // vBurst
-            VINTR(2),            // vIntr
-        },
-        {
-            // [1]
-            ORIGIN(2560),         // origin
-            SCALE(0.5, 0.5),      // yScale
-            HSTART(47, 617),      // vStart
-            BURST(105, 2, 13, 0), // vBurst
-            VINTR(2),             // vIntr
-        } } },
-    { OS_VI_FPAL_HAN1, // type
       {
-          // comRegs
-          VI_CTRL_TYPE_16 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON | VI_CTRL_DIVOT_ON | VI_CTRL_SERRATE_ON |
-              VI_CTRL_ANTIALIAS_MODE_0 | VI_CTRL_PIXEL_ADV_3, // ctrl
-          WIDTH(1280),                                        // width
-          BURST(58, 30, 4, 69),                               // burst
-          VSYNC(624),                                         // vSync
-          HSYNC(3177, 23),                                    // hSync
-          LEAP(3183, 3181),                                   // leap
-          HSTART(128, 768),                                   // hStart
-          SCALE(1, 0),                                        // xScale
-          VCURRENT(0),                                        // vCurrent
+          ORIGIN(2560),
+          SCALE(0.5, 0.5),
+          HSTART(47, 617),
+          BURST(105, 2, 13, 0),
+          VINTR(2),
+      }}},
+    {OS_VI_FPAL_HAN1,
+     {
+         VI_CTRL_TYPE_16 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON |
+             VI_CTRL_DIVOT_ON | VI_CTRL_SERRATE_ON | VI_CTRL_ANTIALIAS_MODE_0 |
+             VI_CTRL_PIXEL_ADV_3,
+         WIDTH(1280),
+         BURST(58, 30, 4, 69),
+         VSYNC(624),
+         HSYNC(3177, 23),
+         LEAP(3183, 3181),
+         HSTART(128, 768),
+         SCALE(1, 0),
+         VCURRENT(0),
+     },
+     {{
+          ORIGIN(1280),
+          SCALE(1, 0),
+          HSTART(45, 615),
+          BURST(107, 2, 9, 0),
+          VINTR(2),
       },
-      { // fldRegs
-        {
-            // [0]
-            ORIGIN(1280),        // origin
-            SCALE(1, 0),         // yScale
-            HSTART(45, 615),     // vStart
-            BURST(107, 2, 9, 0), // vBurst
-            VINTR(2),            // vIntr
-        },
-        {
-            // [1]
-            ORIGIN(2560),         // origin
-            SCALE(1, 0),          // yScale
-            HSTART(47, 617),      // vStart
-            BURST(105, 2, 13, 0), // vBurst
-            VINTR(2),             // vIntr
-        } } },
-    { OS_VI_FPAL_HAF1, // type
       {
-          // comRegs
-          VI_CTRL_TYPE_16 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON | VI_CTRL_DIVOT_ON | VI_CTRL_SERRATE_ON |
-              VI_CTRL_ANTIALIAS_MODE_0 | VI_CTRL_PIXEL_ADV_3, // ctrl
-          WIDTH(640),                                         // width
-          BURST(58, 30, 4, 69),                               // burst
-          VSYNC(624),                                         // vSync
-          HSYNC(3177, 23),                                    // hSync
-          LEAP(3183, 3181),                                   // leap
-          HSTART(128, 768),                                   // hStart
-          SCALE(1, 0),                                        // xScale
-          VCURRENT(0),                                        // vCurrent
+          ORIGIN(2560),
+          SCALE(1, 0),
+          HSTART(47, 617),
+          BURST(105, 2, 13, 0),
+          VINTR(2),
+      }}},
+    {OS_VI_FPAL_HAF1,
+     {
+         VI_CTRL_TYPE_16 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON |
+             VI_CTRL_DIVOT_ON | VI_CTRL_SERRATE_ON | VI_CTRL_ANTIALIAS_MODE_0 |
+             VI_CTRL_PIXEL_ADV_3,
+         WIDTH(640),
+         BURST(58, 30, 4, 69),
+         VSYNC(624),
+         HSYNC(3177, 23),
+         LEAP(3183, 3181),
+         HSTART(128, 768),
+         SCALE(1, 0),
+         VCURRENT(0),
+     },
+     {{
+          ORIGIN(1280),
+          SCALE(0.5, 0.5),
+          HSTART(45, 615),
+          BURST(107, 2, 9, 0),
+          VINTR(2),
       },
-      { // fldRegs
-        {
-            // [0]
-            ORIGIN(1280),        // origin
-            SCALE(0.5, 0.5),     // yScale
-            HSTART(45, 615),     // vStart
-            BURST(107, 2, 9, 0), // vBurst
-            VINTR(2),            // vIntr
-        },
-        {
-            // [1]
-            ORIGIN(2560),         // origin
-            SCALE(0.5, 0.5),      // yScale
-            HSTART(47, 617),      // vStart
-            BURST(105, 2, 13, 0), // vBurst
-            VINTR(2),             // vIntr
-        } } },
-    { OS_VI_FPAL_HPN2, // type
       {
-          // comRegs
-          VI_CTRL_TYPE_32 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON | VI_CTRL_SERRATE_ON | VI_CTRL_ANTIALIAS_MODE_3 |
-              VI_CTRL_PIXEL_ADV_3, // ctrl
-          WIDTH(1280),             // width
-          BURST(58, 30, 4, 69),    // burst
-          VSYNC(624),              // vSync
-          HSYNC(3177, 23),         // hSync
-          LEAP(3183, 3181),        // leap
-          HSTART(128, 768),        // hStart
-          SCALE(1, 0),             // xScale
-          VCURRENT(0),             // vCurrent
+          ORIGIN(2560),
+          SCALE(0.5, 0.5),
+          HSTART(47, 617),
+          BURST(105, 2, 13, 0),
+          VINTR(2),
+      }}},
+    {OS_VI_FPAL_HPN2,
+     {
+         VI_CTRL_TYPE_32 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON |
+             VI_CTRL_SERRATE_ON | VI_CTRL_ANTIALIAS_MODE_3 |
+             VI_CTRL_PIXEL_ADV_3,
+         WIDTH(1280),
+         BURST(58, 30, 4, 69),
+         VSYNC(624),
+         HSYNC(3177, 23),
+         LEAP(3183, 3181),
+         HSTART(128, 768),
+         SCALE(1, 0),
+         VCURRENT(0),
+     },
+     {{
+          ORIGIN(2560),
+          SCALE(1, 0),
+          HSTART(45, 615),
+          BURST(107, 2, 9, 0),
+          VINTR(2),
       },
-      { // fldRegs
-        {
-            // [0]
-            ORIGIN(2560),        // origin
-            SCALE(1, 0),         // yScale
-            HSTART(45, 615),     // vStart
-            BURST(107, 2, 9, 0), // vBurst
-            VINTR(2),            // vIntr
-        },
-        {
-            // [1]
-            ORIGIN(5120),         // origin
-            SCALE(1, 0),          // yScale
-            HSTART(47, 617),      // vStart
-            BURST(105, 2, 13, 0), // vBurst
-            VINTR(2),             // vIntr
-        } } },
-    { OS_VI_FPAL_HPF2, // type
       {
-          // comRegs
-          VI_CTRL_TYPE_32 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON | VI_CTRL_SERRATE_ON | VI_CTRL_ANTIALIAS_MODE_2 |
-              VI_CTRL_PIXEL_ADV_3, // ctrl
-          WIDTH(640),              // width
-          BURST(58, 30, 4, 69),    // burst
-          VSYNC(624),              // vSync
-          HSYNC(3177, 23),         // hSync
-          LEAP(3183, 3181),        // leap
-          HSTART(128, 768),        // hStart
-          SCALE(1, 0),             // xScale
-          VCURRENT(0),             // vCurrent
+          ORIGIN(5120),
+          SCALE(1, 0),
+          HSTART(47, 617),
+          BURST(105, 2, 13, 0),
+          VINTR(2),
+      }}},
+    {OS_VI_FPAL_HPF2,
+     {
+         VI_CTRL_TYPE_32 | VI_CTRL_GAMMA_DITHER_ON | VI_CTRL_GAMMA_ON |
+             VI_CTRL_SERRATE_ON | VI_CTRL_ANTIALIAS_MODE_2 |
+             VI_CTRL_PIXEL_ADV_3,
+         WIDTH(640),
+         BURST(58, 30, 4, 69),
+         VSYNC(624),
+         HSYNC(3177, 23),
+         LEAP(3183, 3181),
+         HSTART(128, 768),
+         SCALE(1, 0),
+         VCURRENT(0),
+     },
+     {{
+          ORIGIN(2560),
+          SCALE(0.5, 0.5),
+          HSTART(45, 615),
+          BURST(107, 2, 9, 0),
+          VINTR(2),
       },
-      { // fldRegs
-        {
-            // [0]
-            ORIGIN(2560),        // origin
-            SCALE(0.5, 0.5),     // yScale
-            HSTART(45, 615),     // vStart
-            BURST(107, 2, 9, 0), // vBurst
-            VINTR(2),            // vIntr
-        },
-        {
-            // [1]
-            ORIGIN(5120),         // origin
-            SCALE(0.5, 0.5),      // yScale
-            HSTART(47, 617),      // vStart
-            BURST(105, 2, 13, 0), // vBurst
-            VINTR(2),             // vIntr
-        } } },
+      {
+          ORIGIN(5120),
+          SCALE(0.5, 0.5),
+          HSTART(47, 617),
+          BURST(105, 2, 13, 0),
+          VINTR(2),
+      }}},
 #endif
 };

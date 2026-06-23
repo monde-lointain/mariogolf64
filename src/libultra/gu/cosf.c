@@ -1,137 +1,85 @@
-/**************************************************************************
- *									  *
- *		 Copyright (C) 1994, Silicon Graphics, Inc.		  *
- *									  *
- *  These coded instructions, statements, and computer programs  contain  *
- *  unpublished  proprietary  information of Silicon Graphics, Inc., and  *
- *  are protected by Federal copyright law.  They  may  not be disclosed  *
- *  to  third  parties  or copied or duplicated in any form, in whole or  *
- *  in part, without the prior written consent of Silicon Graphics, Inc.  *
- *									  *
- **************************************************************************/
+/*
+ * Single-precision cosine (software, no FPU intrinsic).
+ *
+ * Reduces the argument to a half-period offset, then evaluates a degree-8 even
+ * polynomial in double precision for accuracy before narrowing back to float.
+ * The public names fcos/cosf both alias this one implementation.
+ */
 
 #include "guint.h"
 
-/* ====================================================================
- * ====================================================================
- *
- * Module: fcos.c
- * $Revision: 1.3 $
- * $Date: 1998/10/09 06:10:53 $
- * $Author: has $
- * $Source: /exdisk2/cvs/N64OS/Master/cvsmdev2/PR/libultra/monegi/gu/cosf.c,v $
- *
- * Revision history:
- *  09-Jun-93 - Original Version
- *
- * Description:	source code for fcos function
- *
- * ====================================================================
- * ====================================================================
- */
-
 #pragma weak fcos = __cosf
 #pragma weak cosf = __cosf
-#define	fcos __cosf
+#define fcos __cosf
 
-/* coefficients for polynomial approximation of cos on +/- pi/2 */
-
-static const du	P[] =
-{
-{0x3ff00000,	0x00000000},
-{0xbfc55554,	0xbc83656d},
-{0x3f8110ed,	0x3804c2a0},
-{0xbf29f6ff,	0xeea56814},
-{0x3ec5dbdf,	0x0e314bfe},
+// Minimax polynomial coefficients c0..c4, as exact IEEE-754 bit patterns so the
+// compiler cannot perturb them; result ~ dx + dx*xsq*(c1 + xsq*(c2 + ...)).
+// clang-format off: hand-aligned coefficient table reads as one block
+static const du P[] = {
+    {0x3ff00000, 0x00000000}, {0xbfc55554, 0xbc83656d},
+    {0x3f8110ed, 0x3804c2a0}, {0xbf29f6ff, 0xeea56814},
+    {0x3ec5dbdf, 0x0e314bfe},
 };
+// clang-format on
 
-static const du	rpi =
-{0x3fd45f30,	0x6dc9c883};
+static const du rpi = {0x3fd45f30, 0x6dc9c883};   // 1/pi, for the period count
+static const du pihi = {0x400921fb, 0x50000000};  // pi, high half (exact bits)
+static const du pilo = {0x3e6110b4, 0x611a6263};  // pi, low correction term
+static const fu zero = {0x00000000};              // exact +0.0
 
-static const du	pihi =
-{0x400921fb,	0x50000000};
+float fcos(float x) {
+  float absx;
+  double dx;
+  double xsq;
+  double poly;
+  double dn;
+  int n;
+  double result;
+  int ix;
+  int xpt;
 
-static const du	pilo =
-{0x3e6110b4,	0x611a6263};
+  // Pull the biased exponent straight from the float's bit pattern to test
+  // magnitude without an FPU compare.
+  ix = *(int*)&x;
+  xpt = (ix >> 22);
+  xpt &= 0x1ff;
 
-static const fu	zero = {0x00000000};
+  // Below the threshold the argument is small enough that range reduction stays
+  // accurate; above it, only the NaN/large fallback below applies.
+  if (xpt < 0x136) {
+    // cos is even, so work with |x| and recover the sign from the half-period
+    // count n.
+    absx = ABS(x);
+    dx = absx;
 
-
-/* ====================================================================
- *
- * FunctionName		fcos
- *
- * Description		computes cosine of arg
- *
- * ====================================================================
- */
+    // n = number of half periods; subtracting (n - 0.5)*pi folds x into the
+    // range centered on a cosine extremum. pi is split hi/lo so the large
+    // multiply keeps its low bits.
+    dn = (dx * rpi.d) + 0.5;
+    n = ROUND(dn);
+    dn = n;
+    dn -= 0.5;
+    dx = dx - (dn * pihi.d);
+    dx = dx - (dn * pilo.d);
 
-float
-fcos( float x )
-{
-float	absx;
-double	dx, xsq, poly;
-double	dn;
-int	n;
-double	result;
-int	ix, xpt;
+    // Horner evaluation of the odd-symmetric polynomial on the reduced angle.
+    xsq = dx * dx;
+    poly = (((((P[4].d * xsq) + P[3].d) * xsq) + P[2].d) * xsq) + P[1].d;
+    result = dx + ((dx * xsq) * poly);
 
+    // Each successive half period flips the sign of the result.
+    if ((n & 1) == 0) {
+      return ((float)result);
+    }
+    return (-(float)result);
+  }
 
-	ix = *(int *)&x;
-	xpt = (ix >> 22);
-	xpt &= 0x1ff;
-
-	/* xpt is exponent(x) + 1 bit of mantissa */
-
-
-	if ( xpt < 0x136 )
-	{
-		/* |x| < 2^28 */
-
-		/* use the standard algorithm from Cody and Waite, doing
-		   the computations in double precision
-		*/
-
-		absx = ABS(x);
-
-		dx = absx;
-
-		dn = dx*rpi.d + 0.5;
-		n = ROUND(dn);
-		dn = n;
-
-		dn -= 0.5;
-
-		dx = dx - dn*pihi.d;
-		dx = dx - dn*pilo.d;	/* dx = x - (n - 0.5)*pi */
-
-		xsq = dx*dx;
-
-		poly = ((P[4].d*xsq + P[3].d)*xsq + P[2].d)*xsq + P[1].d;
-
-		result = dx + (dx*xsq)*poly;
-
-		/* negate result if n is odd */
-
-		if ( (n & 1) == 0 )
-			return ( (float)result );
-
-		return ( -(float)result );
-	}
-
-	if ( x != x )
-	{
-		/* x is a NaN; return a quiet NaN */
-
+  // x is NaN (only value not equal to itself) or too large to reduce.
+  if (x != x) {
 #ifdef _IP_NAN_SETS_ERRNO
-
-		*__errnoaddr = EDOM;
+    *__errnoaddr = EDOM;
 #endif
-		
-		return ( __libm_qnan_f );
-	}
-
-	/* just give up and return 0.0 */
-
-	return ( zero.f );
+    return (__libm_qnan_f);
+  }
+  return (zero.f);
 }
