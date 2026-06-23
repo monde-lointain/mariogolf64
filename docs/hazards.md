@@ -2262,12 +2262,20 @@ A `libnusys` fn with an **inline integer division** (`a / b` compiled to `divu` 
 - **Flags do not help.** KMC gcc/as REJECT `-mfix4300`, `-mcpu=vr4300`, `-mtune=vr4300`,
   `-mfix-vr4300`, `-Wa,-mfix-vr4300` (modern-gcc/binutils flags absent in the KMC 2.7.2 / binutils-2.6
   toolchain).
-- **Resolution ladder.** (a) **Permuter candidate** — a source form that keeps the mflo consumer OUT of
-  the `j` delay slot (so the consumer lands ≥3 slots after mflo) lets `as` insert the nops; this is the
-  near-miss escalation (`#permuter-setup-for-kmc-toolchain-mirrors`). (b) Open question whether a KMC-as
-  hazard mode exists. Do NOT treat the 2-nop gap as a "try harder C" iteration — it is a scheduler /
-  assembler interaction, not a logic mismatch (everything else in S125 nuScEventHandler matched
-  byte-for-byte: the volatile counter block, perf block, swap-gate, PRENMI, epilogue, break code).
+- **NOT a permuter wall (S126 overturns S125).** S125 framed this as a permuter candidate. S126 banked
+  nuScEventHandler with NO permuter: the 2 nops appear **naturally** once the function's data + volatility
+  scaffold is COMPLETE — specifically `nuScRetraceCounter` as a proper **per-TU volatile** (see
+  `#volatile-global tell`) AND `nuDebTaskPerf` placed in `symbol_addrs`. The S125 "missing nops" was a
+  **scaffold artifact** (an incomplete/header-flipped attempt scheduled the consumer differently), not a
+  KMC-as scheduling wall. **Lesson: complete the per-TU-volatile + data scaffold and RE-DIFF before
+  concluding a mflo-hazard near-miss needs the permuter.** Most "byte-perfect except 2 nops" libnusys
+  near-misses are an unfinished scaffold, not an assembler interaction.
+- **Resolution ladder.** (a) **Finish the scaffold first** — per-TU volatile globals + every referenced
+  data symbol placed, then re-diff; the nops usually resolve (S126). (b) Only if a complete-scaffold build
+  still SHA-misses by exactly the 2 nops is it a genuine scheduler/assembler wall → **permuter** (a source
+  form that keeps the mflo consumer OUT of the `j` delay slot, so it lands ≥3 slots after mflo, lets `as`
+  insert the nops; `#permuter-setup-for-kmc-toolchain-mirrors`). Do NOT treat the 2-nop gap as a "try
+  harder C" iteration — it is a scheduler/assembler interaction, not a logic mismatch.
 
 ## volatile-global tell (dead-reload + recompute-not-CSE)
 
@@ -2290,6 +2298,25 @@ not `u32`/`s32`.
   scheduler reproduces the target load order (S125: compute `frame` inside the `>=0x1F` block, before
   the non-volatile pointer test, so the volatile reloads precede the pointer load).
 - **Shared-header caution.** Flipping a header-declared global to `vu32` (e.g. `nuScRetraceCounter` in
-  `nusys.h`) changes codegen for EVERY consumer — re-verify the already-banked consumers (S125:
-  `nugfxtaskmgr.c` reads `nuScRetraceCounter`; it matched non-volatile, so the flip is deferred to the
-  EventHandler retry and gated on a clean-rebuild SHA check).
+  `nusys.h`) changes codegen for EVERY consumer — re-verify the already-banked consumers on a clean-rebuild
+  SHA check (no header-dep tracking, so an incremental build hides the breakage; `#clean-rebuild-after-shared-header-edit`).
+- **Per-TU volatile (S126) — the global is volatile in ONE TU, plain in others.** A global can read
+  `volatile` in the scheduler TU (dead-reload tell) yet `u32` in a sibling TU that is already BANKED
+  non-volatile. The original compiled each TU against its own declaration. Replicating it: **keep the
+  shared header non-volatile** (so the banked consumers stay matching) and add a **localized
+  `extern volatile u32 <g>;` redeclaration in the volatile TU only** (after the header include). GCC 2.7.2
+  accepts the qualifier-mismatch redeclaration with a benign `warning: type mismatch with previous
+  external decl` and emits per-access `lui`/`lo` absolute volatile addressing — matching the reference.
+  (S126 nuScEventHandler: `nuScRetraceCounter` is volatile in `nusched.c`, plain `u32` in `nugfxtaskmgr.c`
+  + `nucontrmbmgr.c`.)
+- **Do NOT use a cast macro for per-TU volatile.** `#define g (*(vu32 *)&g)` does NOT reproduce the
+  codegen: GCC computes `&g` once into a held register and accesses `0(reg)` (and burns an extra saved
+  reg in the prologue), instead of the reference's per-access `lui %hi(g); lw lo(g)` absolute addressing.
+  Use the redeclaration, not the cast.
+- **Diagnosis when a shared-header volatile flip SHA-misses.** A single-read **modulo/division**
+  (`x % n`, `x / n`) IS volatile-sensitive (it changes scheduling/CSE) — S126 `nucontrmbmgr.c`'s lone
+  `nuScRetraceCounter % nuContRmbSearchTime` grew `.text` +0x10 under the flip, cascading
+  `main_RODATA_END`/BSS by +0x10 into a ~21M-byte ROM diff; a plain reload-pair read is volatile-NEUTRAL
+  (S126 `nugfxtaskmgr.c`). To find the grower fast, **map-diff the per-object section sizes**:
+  `diff <(grep '\.text.*0x' base.map) <(grep '\.text.*0x' edits.map)` after a clean build of each — the
+  one object whose `.text`/`.rodata` size changed is the volatile-sensitive consumer.

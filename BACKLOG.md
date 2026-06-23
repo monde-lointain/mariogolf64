@@ -16,6 +16,28 @@ subordinate to the libultra goal. Target selection is `tools/pick_target.py` (sm
 the 8-point decompose gate fires on any seed ≥8. v2 classical track is active (since S11);
 mirror is the default, classical is first-class when the asm warrants it.
 
+**S126 — `nusched.c` COMPLETE (libnusys NU_DEBUG scheduler; last 3 fns banked; closes the S123/S125 spike).**
+Banked `nuScEventHandler` + `nuScCreateScheduler` + `nuScExecuteGraphics` as C; nusched.c now 0 stubs →
+**md5-candidate 175→176**. **HEADLINE: the S125 "nuScEventHandler is a permuter candidate" framing was
+OVERTURNED — NO permuter.** The 2 mflo-hazard nops appear NATURALLY once the data + volatility scaffold is
+complete. The decisive fix: `nuScRetraceCounter` is **per-TU volatile** (volatile in nusched.c, plain `u32`
+in the BANKED nugfxtaskmgr.c/nucontrmbmgr.c). A shared-header `vu32` flip BREAKS nucontrmbmgr.c — its lone
+`% nuContRmbSearchTime` modulo grows .text +0x10 (21M-byte ROM diff, found via per-object `.text` map-diff);
+a cast-macro `(*(vu32*)&x)` fails (held-pointer). FIX = keep nusys.h non-volatile + a localized
+`extern volatile u32 nuScRetraceCounter;` redeclaration in nusched.c only. `nuScCreateScheduler` = stock +
+MG64 osTvType hang-guard / videoMode override / TV-format switch (`D_800B6790`); match keys = MG64 init
+order + switch case order MPAL,PAL,NTSC,default; drop-static 3 thread stacks (tops alias next, S117); placed
+`nuDebTaskPerfPtr`=0x800FBE10. `nuScExecuteGraphics` (287/287) = stock + `while(curAudio)`, one big int-mask
+span, swap-gate arm (`D_8012F4D4`/`D_800B6784`), osSpTaskLoad+StartGo, custom SWAPBUFFER perf rotation
+(`D_800B6788`%3 + `D_800B678C`++), game hooks func_8008D1DC/func_80092324; cross-fn discovery `D_800B6788`→vu32;
+1 nudge (assign debTaskPerfPtr before the volatile `D_800B678C++`). Quality 0/0/0/0. seed 8; banked 8 file pt;
+realized 9 (residual +1); regime mixed. Retro applied **2 of 2**: docs/hazards.md #volatile-global tell
+(per-TU recipe + cast-macro anti-pattern + map-diff) / #libnusys inline-div mflo-hazard nop (reframe: not a
+permuter wall). **Cross-repo follow-up:** 6 new decomp symbols (nuDebTaskPerf/nuDebTaskPerfPtr/nuScStack/
+nuScAudioStack/nuScGraphicsStack/D_800B6790) → `sync_decomp_names.py --import-from-decomp`. **Phase note: the
+libnusys clean-mirror band is MINED OUT** (every `--lib libnusys` row is masked game code); next sprint moves
+scope. Carry-over: none.
+
 **S125 — `nusched.c` 1/4 BANKED (libnusys NU_DEBUG scheduler; nuScExecuteAudio) + nuScRetraceCounter ID.**
 Banked `nuScExecuteAudio` as C; `nuScEventHandler`/`nuScCreateScheduler`/`nuScExecuteGraphics` carry
 (nusched.c PARTIAL, 3 stubs, NOT md5-candidate). md5-candidate 175→175. **HEADLINE: the S123 "4
@@ -1881,39 +1903,6 @@ by `/sprint-plan`:
   `NU_CONT_THREAD_ID=6` vs MG64's 5), and that surfaces only at first build unless reconciled here.
   A near-free retry missing any of these is a half-scoped spike — finish the scope before deferring.
 
-- **Spike (S123→S125 updated) — 3 fns in `src/libnusys/mainlib/nusched.c` (still INCLUDE_ASM):
-  `nuScEventHandler` (0x800286CC, NEAR-MATCH), `nuScCreateScheduler` (0x800283B0), `nuScExecuteGraphics`
-  (0x80028D30).** S123 carried 4 fns framing them as heavy game-custom RE; **S125 overturned that**:
-  the 4 carried fns are EXACTLY the 4 with `#ifdef NU_DEBUG` blocks, and S123 compiled the file WITHOUT
-  NU_DEBUG. **`nuScExecuteAudio` BANKED S125** as a pure stock-NU_DEBUG mirror. The remaining 3 carry.
-  **Already committed S125 (reuse verbatim, no rework):** `#define NU_DEBUG` at top of nusched.c (before
-  include); `nusys.h` `NUDebTaskPerf` struct FIXED (dropped the 2.07 `markerTime[10]` → `auTaskCnt`@0x9,
-  `auTaskTime`@0x150, size 0x1F0, asm-confirmed); `debTaskPerfPtr`=0x800D8970 + `nuScRetraceCounter`
-  =0x80104E68 placed in symbol_addrs. So a retry starts from a green NU_DEBUG file.
-  - **`nuScEventHandler` — NEAR-FREE RETRY / PERMUTER CANDIDATE (S125).** The full worked body is
-    BYTE-PERFECT vs target EXCEPT the 2 VR4300 mflo-hazard nops after the inline `divu` (see
-    `docs/hazards.md#libnusys-inline-div-mflo-hazard-nop`): KMC gcc schedules the mflo consumer into the
-    loop-back `j` delay slot, suppressing `as`'s pad; KMC rejects `-mfix4300`/`-mcpu=vr4300`. **Escalate
-    via the permuter** (`#permuter-setup-for-kmc-toolchain-mirrors`) — a source form that keeps the mflo
-    consumer out of the `j` delay slot lets `as` insert the nops. The complete body + the volatile-globals
-    list + the single-`frame`-local swap-gate recipe are in `SPRINT.md` (S125 standup; promote to here on
-    next plan). **New symbols to add at retry (asm-confirmed):** flip `nuScRetraceCounter`→`vu32` (CHECK
-    nugfxtaskmgr.c still matches), `extern vu32 D_801B68E0`, `extern vs32 D_800B678C`, `extern vu32
-    D_8012F4D4`, `extern void *D_800B6784` (fb@+0xc), `extern s32 D_800B6788`, `extern s8 D_800B67C0`;
-    symbol_addrs `nuDebTaskPerf`=0x801B5700 size:0x5D0 + the 6 `D_` globals (`D_801B68E0`/`D_800B6784`/
-    `D_800B6788`/`D_800B678C`@size:0x4, `D_800B67C0`@size:0x1, `D_8012F4D4`@size:0x4).
-  - **`nuScCreateScheduler` + `nuScExecuteGraphics` — CLASSICAL (untouched S125, budget).** Reuse the
-    NU_DEBUG/struct/debTaskPerfPtr scaffolding above. Still-to-place: 3 thread stacks (sized
-    `u64[NU_SC_STACK_SIZE/8]`, SIZE=0x2000): `nuScStack`=0x800D2970, `nuScAudioStack`=0x800D4970,
-    `nuScGraphicsStack`=0x800D6970 — osCreateThread stack arg `stack+0x2000` = array END ALIASES the next
-    global (graphics-end 0x800D8970 == `debTaskPerfPtr`); define as sized arrays (stack-top-aliases-next-
-    symbol, S117). Plus `nuDebTaskPerfPtr`=0x800FBE10, `debFrameSwapCnt`(static), `nuDebTaskPerfInterval`
-    (=1, drop-def under NU_DEBUG so no .data), `nuDebTaskPerfEnd`, `nuDebTaskPerfCnt`. Per-fn MG64 edits:
-    nuScCreateScheduler (osTvType hang-guard self-loop; video-mode switch → `D_800B6790` 0x1E/1/2/3/4 by
-    osTvType; extra inits D_801B89EC/F0/F4/E8/FD + D_801B5700[0/4] + D_801B5708/09 + D_800FBE10);
-    nuScExecuteGraphics (game hooks func_8008D1DC + func_80092324 @0x80029158/64). Decompile from asm;
-    keep matched stock siblings intact. WATCH the mflo-hazard wall if either has an inline division. Lower
-    priority than cleaner libultra/libkmc units (PO scope sign-off S123/S125).
 - **Spike (S121) — `contRmbControl` (0x800A19E0), the ONE INCLUDE_ASM stub in the otherwise-C
   `src/libnusys/mainlib/nucontrmbmgr.c`.** Blocker = a `#cross-jump-tail-merge` COMPILER WALL, NOT a
   "try harder" retry. The project gcc 2.7.2 merges two byte-identical `j .L_ret; sh v0,4(s0)`
