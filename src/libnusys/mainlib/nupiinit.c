@@ -1,37 +1,20 @@
-/*======================================================================*/
-/*		NuSYS							*/
-/*		nupiint.c						*/
-/*									*/
-/*		Copyright (C) 1997, NINTENDO Co,Ltd.			*/
-/*									*/
-/*----------------------------------------------------------------------*/
-/* Ver 1.0	97/10/9		Created by Kensaku Ohki(SLANP)		*/
-/* Ver 1.2	98/07/4		Created by Kensaku Ohki(SLANP)		*/
-/*----------------------------------------------------------------------*/
-/* $Id: nupiinit.c,v 1.3 1998/07/07 12:47:03 ohki Exp $		*/
-/*======================================================================*/
+/*
+ * Peripheral-interface startup: bring up the PI manager and open a handle to
+ * the cartridge ROM so the rest of nusys can DMA from the cart.
+ */
+
 #include <nusys.h>
 
-extern OSMesgQueue	PiMesgQ;		/* PI message queue  */
-extern OSMesg		PiMesgBuf[NU_PI_MESG_NUM];	/* PI message buffer */
-extern OSPiHandle*	nuPiCartHandle;
-//OSMesgQueue		nuPiSemaphoreQ;
-//OSMesg		nuPiSemaphoreBuf;
+extern OSMesgQueue PiMesgQ;
+extern OSMesg PiMesgBuf[NU_PI_MESG_NUM];
+extern OSPiHandle* nuPiCartHandle;
 
-/*----------------------------------------------------------------------*/
-/*	nuPiInit  - Initialize PI and around				*/
-/*	DMA-transfer the data from ROM					*/
-/*	The message queue is the local variable to be able to be used	*/
-/*	between thread							*/
-/*	IN:	The head pointer of the heap buffer			*/
-/*	RET:	None							*/
-/*----------------------------------------------------------------------*/
-void nuPiInit(void)
-{
-            /* Create the PI manager */
-    osCreatePiManager((OSPri)OS_PRIORITY_PIMGR, &PiMesgQ, PiMesgBuf,
-		      NU_PI_MESG_NUM);
-
-    nuPiCartHandle = osCartRomInit();
-//    osCreateMesgQueue(&nuPiSemaphoreQ, nuPiSemaphoreBuf, 1);
+/*
+ * Start the OS PI manager (the thread that serializes PI/DMA access) and cache
+ * the cart ROM handle for later nuPiReadRom transfers.
+ */
+void nuPiInit(void) {
+  osCreatePiManager((OSPri)OS_PRIORITY_PIMGR, &PiMesgQ, PiMesgBuf,
+                    NU_PI_MESG_NUM);
+  nuPiCartHandle = osCartRomInit();
 }

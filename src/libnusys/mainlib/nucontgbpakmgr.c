@@ -1,15 +1,12 @@
-/*======================================================================*/
-/*		NuSYS							*/
-/*		nucontgbpakmgr.c					*/
-/*									*/
-/*		Copyright (C) 1997, NINTENDO Co,Ltd.			*/
-/*									*/
-/*----------------------------------------------------------------------*/    
-/* Ver 1.0	97/10/9		Created by Kensaku Ohki(SLANP)		*/
-/*======================================================================*/
-/* $Id: nucontgbpakmgr.c,v 1.7 1999/01/23 05:42:10 ohki Exp $	*/
-/*======================================================================*/
-
+/*
+ * GB Pak Manager.
+ *
+ * Registers a handler with the SI Manager that services GB Pak requests, and
+ * holds the worker callbacks behind it. Each public nuContGBPak* wrapper posts
+ * an SI message tagged with a minor command number; the SI Manager dispatches
+ * through funcList by that number, and the matching callback below unpacks the
+ * message and invokes the corresponding os-level GB Pak primitive.
+ */
 #include <nusys.h>
 
 static s32 contGBPakOpen(NUSiCommonMesg* mesg);
@@ -19,133 +16,92 @@ static s32 contGBPakReadID(NUSiCommonMesg* mesg);
 static s32 contGBPakReadWrite(NUSiCommonMesg* mesg);
 static s32 contGBPakCheckConnector(NUSiCommonMesg* mesg);
 
-static s32 (*funcList[])(NUSiCommonMesg*) = {
-    NULL,			/* NU_CONT_GBPAK_RETRACE_MSG	*/
-    contGBPakOpen,		/* NU_CONT_GBPAK_OPEN_MSG	*/
-    contGBPakGetState,		/* NU_CONT_GBPAK_STATUS_MSG	*/
-    contGBPakPower,		/* NU_CONT_GBPAK_POWER_MSG	*/
-    contGBPakReadID,		/* NU_CONT_GBPAK_READID_MSG	*/
-    contGBPakReadWrite,		/* NU_CONT_GBPAK_READWRITE_MSG	*/
-    contGBPakCheckConnector,	/* NU_CONT_GBPAK_CHECKCONNECTOR_MSG	*/
-    NULL			/* End of list */        
-};
-NUCallBackList	nuContGBPakCallBack = {NULL, funcList, NU_SI_MAJOR_NO_GBPAK};
+/*
+ * Dispatch table indexed by the message's minor command number. Slot 0 is
+ * unused (no command zero) and the trailing NULL terminates the list for the SI
+ * Manager.
+ */
+static s32 (*funcList[])(NUSiCommonMesg*) = {NULL,
+                                             contGBPakOpen,
+                                             contGBPakGetState,
+                                             contGBPakPower,
+                                             contGBPakReadID,
+                                             contGBPakReadWrite,
+                                             contGBPakCheckConnector,
+                                             NULL};
 
-/*----------------------------------------------------------------------*/
-/*	nuContGBPakMgrInit - Initializes the 64GB Pak Manager		*/
-/*	IN:	nothing				*/
-/*	RET:	nothing				*/
-/*----------------------------------------------------------------------*/
-void nuContGBPakMgrInit(void)
-{
+NUCallBackList nuContGBPakCallBack = {NULL, funcList, NU_SI_MAJOR_NO_GBPAK};
 
-    /* Registers the Controller Pak Manager with the SI manager */
-    nuSiCallBackAdd(&nuContGBPakCallBack);
-}
-/*----------------------------------------------------------------------*/
-/*	nuContGBPakMgrRemove - Removes the 64GB Pak Manager	*/
-/* 	Separates the 64GB Pak Manager from the SI manager.		*/
-/*	IN:	nothing							*/
-/*	RET:	nothing							*/
-/*----------------------------------------------------------------------*/
-void nuContGBPakMgrRemove(void)
-{
-    nuSiCallBackRemove(&nuContGBPakCallBack);
+/* Register the GB Pak handler with the SI Manager; not done by nuContInit. */
+void nuContGBPakMgrInit(void) { nuSiCallBackAdd(&nuContGBPakCallBack); }
 
+/* Unregister the GB Pak handler from the SI Manager. */
+void nuContGBPakMgrRemove(void) { nuSiCallBackRemove(&nuContGBPakCallBack); }
+
+/* Initialize GB Pak hardware on the handle's port (NU_CONT_GBPAK_OPEN_MSG). */
+static s32 contGBPakOpen(NUSiCommonMesg* mesg) {
+  NUContPakFile* handle;
+  NUContGBPakMesg* gbpakMesg;
+
+  gbpakMesg = (NUContGBPakMesg*)mesg->dataPtr;
+  handle = gbpakMesg->handle;
+  return osGbpakInit(&nuSiMesgQ, handle->pfs, handle->pfs->channel);
 }
 
-/*----------------------------------------------------------------------*/
-/*	contGBPakOpen - Checks the 64GB Pak	*/
-/*	IN:	mesg	message pointer					*/
-/*	RET:	error							*/
-/*----------------------------------------------------------------------*/
-static s32 contGBPakOpen(NUSiCommonMesg* mesg)    
-{
-    NUContPakFile*		handle;
-    NUContGBPakMesg*	gbpakMesg;
+/* Read GB Pak status flags into data[0] (NU_CONT_GBPAK_STATUS_MSG). */
+static s32 contGBPakGetState(NUSiCommonMesg* mesg) {
+  NUContPakFile* handle;
+  NUContGBPakMesg* gbpakMesg;
 
-    gbpakMesg = (NUContGBPakMesg*)mesg->dataPtr;
-    handle = gbpakMesg->handle;
-    return osGbpakInit(&nuSiMesgQ, handle->pfs, handle->pfs->channel);
+  gbpakMesg = (NUContGBPakMesg*)mesg->dataPtr;
+  handle = gbpakMesg->handle;
+  return osGbpakGetStatus(handle->pfs, (u8*)gbpakMesg->data[0]);
 }
 
-/*----------------------------------------------------------------------*/
-/*	contGBPakGetState - Obtains the status of the 64GB Pak			*/
-/*	IN:	mesg	message pointer 					*/
-/*	RET:	error							*/
-/*----------------------------------------------------------------------*/
-static s32 contGBPakGetState(NUSiCommonMesg* mesg)
-{
-    NUContPakFile*		handle;
-    NUContGBPakMesg*	gbpakMesg;
-    
-    gbpakMesg = (NUContGBPakMesg*)mesg->dataPtr;
-    handle = gbpakMesg->handle;
-    return osGbpakGetStatus(handle->pfs, (u8*)gbpakMesg->data[0]);
+/* Set cartridge power from data[0] (NU_CONT_GBPAK_POWER_MSG). */
+static s32 contGBPakPower(NUSiCommonMesg* mesg) {
+  NUContPakFile* handle;
+  NUContGBPakMesg* gbpakMesg;
+
+  gbpakMesg = (NUContGBPakMesg*)mesg->dataPtr;
+  handle = gbpakMesg->handle;
+  return osGbpakPower(handle->pfs, gbpakMesg->data[0]);
 }
 
+/* Read cartridge ID into data[0] and status into data[1]
+ * (NU_CONT_GBPAK_READID_MSG). */
+static s32 contGBPakReadID(NUSiCommonMesg* mesg) {
+  NUContPakFile* handle;
+  NUContGBPakMesg* gbpakMesg;
 
-/*----------------------------------------------------------------------*/
-/*	contGBPakPower - Controls 64GB Pak power				*/
-/*	IN:	mesg	message pointer				*/
-/*	RET:	error							*/
-/*----------------------------------------------------------------------*/
-static s32 contGBPakPower(NUSiCommonMesg* mesg)
-{
-    NUContPakFile*	handle;
-    NUContGBPakMesg*	gbpakMesg;
-    
-    gbpakMesg = (NUContGBPakMesg*)mesg->dataPtr;
-    handle = gbpakMesg->handle;
-    return osGbpakPower(handle->pfs, gbpakMesg->data[0]);
+  gbpakMesg = (NUContGBPakMesg*)mesg->dataPtr;
+  handle = gbpakMesg->handle;
+  return osGbpakReadId(handle->pfs, (OSGbpakId*)gbpakMesg->data[0],
+                       (u8*)gbpakMesg->data[1]);
 }
 
-/*----------------------------------------------------------------------*/
-/*	contGBPakReadID - Reads the ID of the GB cartridge		*/
-/*	IN:	mesg	message pointer				*/
-/*	RET:	error							*/
-/*----------------------------------------------------------------------*/
-static s32 contGBPakReadID(NUSiCommonMesg* mesg)
-{
-    NUContPakFile*		handle;
-    NUContGBPakMesg*	gbpakMesg;
-    
-    gbpakMesg = (NUContGBPakMesg*)mesg->dataPtr;
-    handle = gbpakMesg->handle;
-    return osGbpakReadId(handle->pfs, (OSGbpakId*)gbpakMesg->data[0],
-			 (u8*)gbpakMesg->data[1]);
-}
-/*----------------------------------------------------------------------*/
-/*	contGBPakReadWrite - Reads from and writes to the GB cartridge	*/
-/*	IN:	mesg	message pointer				*/
-/*	RET:	error							*/
-/*----------------------------------------------------------------------*/
-static s32 contGBPakReadWrite(NUSiCommonMesg* mesg)
-{
-    NUContPakFile*	handle;
-    NUContGBPakMesg*	gbpakMesg;
-    
-    gbpakMesg = (NUContGBPakMesg*)mesg->dataPtr;
-    handle = gbpakMesg->handle;
-    return osGbpakReadWrite(handle->pfs
-			    ,(u16)gbpakMesg->data[0]
-			    ,(u16)gbpakMesg->data[1]
-			    ,(u8*)gbpakMesg->data[2]
-			    ,(u16)gbpakMesg->data[3]);
+/*
+ * Aligned block transfer (NU_CONT_GBPAK_READWRITE_MSG): data[0]=flag,
+ * data[1]=address, data[2]=buffer, data[3]=size.
+ */
+static s32 contGBPakReadWrite(NUSiCommonMesg* mesg) {
+  NUContPakFile* handle;
+  NUContGBPakMesg* gbpakMesg;
+
+  gbpakMesg = (NUContGBPakMesg*)mesg->dataPtr;
+  handle = gbpakMesg->handle;
+  return osGbpakReadWrite(handle->pfs, (u16)gbpakMesg->data[0],
+                          (u16)gbpakMesg->data[1], (u8*)gbpakMesg->data[2],
+                          (u16)gbpakMesg->data[3]);
 }
 
-/*----------------------------------------------------------------------*/
-/*	contGBPakCheckConnector - Detects a poor GB cartridge connection	*/
-/*	IN:	mesg	message pointer				*/
-/*	RET:	error							*/
-/*----------------------------------------------------------------------*/
-static s32 contGBPakCheckConnector(NUSiCommonMesg* mesg)
-{
-    NUContPakFile*	handle;
-    NUContGBPakMesg*	gbpakMesg;
-    
-    gbpakMesg = (NUContGBPakMesg*)mesg->dataPtr;
-    handle = gbpakMesg->handle;
-    return osGbpakCheckConnector(handle->pfs, (u8*)gbpakMesg->data[0]);
-}
+/* Probe the connector, status into data[0] (NU_CONT_GBPAK_CHECKCONNECTOR_MSG).
+ */
+static s32 contGBPakCheckConnector(NUSiCommonMesg* mesg) {
+  NUContPakFile* handle;
+  NUContGBPakMesg* gbpakMesg;
 
+  gbpakMesg = (NUContGBPakMesg*)mesg->dataPtr;
+  handle = gbpakMesg->handle;
+  return osGbpakCheckConnector(handle->pfs, (u8*)gbpakMesg->data[0]);
+}

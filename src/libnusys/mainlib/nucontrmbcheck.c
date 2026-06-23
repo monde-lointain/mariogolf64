@@ -1,38 +1,29 @@
-/*======================================================================*/
-/*		NuSYS							*/
-/*		nucontrmbcheck.c					*/
-/*									*/
-/*		Copyright (C) 1997, NINTENDO Co,Ltd.			*/
-/*									*/
-/*----------------------------------------------------------------------*/
-/* Ver 1.0	97/10/9		Created by Kensaku Ohki(SLANP)		*/
-/*======================================================================*/
-/* $Id: nucontrmbcheck.c,v 1.6 1999/05/07 08:18:59 ohki Exp $		*/
-/*======================================================================*/
+/*
+ * Rumble Pak presence check.
+ *
+ * Probes one controller port for a Rumble Pak and records the outcome in the
+ * Rumble Pak control table so later start/stop calls know whether a motor is
+ * actually there. Unlike nuContPakOpen, it does not look for a Controller Pak.
+ */
 #include <nusys.h>
 
-/*----------------------------------------------------------------------*/
-/*	nuContRmbcheck - Check the oscillating pack 			*/
-/* 	Check if the oscillating pack is inserted. 			*/
-/*	The controller pack is not detected; thus, if you examine which */
-/*	pack is inserted, use nuContPakOpen. 				*/
-/*	IN:	contNo	The number of the controller 			*/
-/*	RET:	The return value of osMotorInit 			*/
-/*----------------------------------------------------------------------*/
-s32 nuContRmbCheck(u32 contNo)
-{
-    NUContRmbMesg	checkMesg;
-    s32			rtn;
+/*
+ * Check port contNo for a Rumble Pak and cache the result.
+ *
+ * The probe runs through the Rumble Pak Manager (ultimately osMotorInit); a
+ * zero return means a Rumble Pak responded, so the control entry's type is
+ * marked RUMBLE, otherwise NONE. The osMotorInit result is returned unchanged.
+ */
+s32 nuContRmbCheck(u32 contNo) {
+  NUContRmbMesg checkMesg;
+  s32 rtn;
 
-
-    checkMesg.contNo   = contNo;
-    rtn = nuSiSendMesg(NU_CONT_RMB_CHECK_MSG, (void*)&checkMesg);
-
-    /* Check errors; if there are no errors, it is the oscillating pack. */
-    if(!rtn){
-	nuContRmbCtl[contNo].type = NU_CONT_PAK_TYPE_RUMBLE;
-    } else {
-	nuContRmbCtl[contNo].type = NU_CONT_PAK_TYPE_NONE;
-    }
-    return rtn;
+  checkMesg.contNo = contNo;
+  rtn = nuSiSendMesg(NU_CONT_RMB_CHECK_MSG, (void*)&checkMesg);
+  if (!rtn) {
+    nuContRmbCtl[contNo].type = NU_CONT_PAK_TYPE_RUMBLE;
+  } else {
+    nuContRmbCtl[contNo].type = NU_CONT_PAK_TYPE_NONE;
+  }
+  return rtn;
 }

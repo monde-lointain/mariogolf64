@@ -1,22 +1,16 @@
-/*======================================================================*/
-/*		NuSYS							*/
-/*		nucontrmbforcestop.c					*/
-/*									*/
-/*		Copyright (C) 1997, NINTENDO Co,Ltd.			*/
-/*									*/
-/*----------------------------------------------------------------------*/    
-/* Ver 1.0	97/10/9		Created by Kensaku Ohki(SLANP)		*/
-/*======================================================================*/
-/* $Id: nucontrmbforcestop.c,v 1.6 1999/01/21 07:21:11 ohki Exp $	*/
-/*======================================================================*/
+/*
+ * Rumble Pak forced stop.
+ *
+ * Tells the Rumble Pak Manager to halt every controller's motor and latch them
+ * off: once forced to stop, nuContRmbStart has no effect while the PAUSE latch
+ * is set. Used to guarantee motors are quiet across events like a pause or a
+ * save-to-pak operation. (The stock release counterpart, nuContRmbForceStopEnd,
+ * is an empty stub in this build.)
+ */
 #include <nusys.h>
 
-/*----------------------------------------------------------------------*/
-/*	nuContRmbForceStop - Force to stop the oscillating pack 	*/
-/*	IN:	None 							*/
-/*	RET:	None 							*/
-/*----------------------------------------------------------------------*/
-void nuContRmbForceStop(void)
-{
-    nuSiSendMesg(NU_CONT_RMB_FORCESTOP_MSG, (void*)NULL);
+/* Post the force-stop request; it carries no payload, so the data pointer is
+ * NULL. */
+void nuContRmbForceStop(void) {
+  nuSiSendMesg(NU_CONT_RMB_FORCESTOP_MSG, (void*)NULL);
 }

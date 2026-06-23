@@ -1,157 +1,85 @@
-/**************************************************************************
- *									  *
- *		 Copyright (C) 1994, Silicon Graphics, Inc.		  *
- *									  *
- *  These coded instructions, statements, and computer programs  contain  *
- *  unpublished  proprietary  information of Silicon Graphics, Inc., and  *
- *  are protected by Federal copyright law.  They  may  not be disclosed  *
- *  to  third  parties  or copied or duplicated in any form, in whole or  *
- *  in part, without the prior written consent of Silicon Graphics, Inc.  *
- *									  *
- **************************************************************************/
+/*
+ * Single-precision sine (software, no FPU intrinsic).
+ *
+ * Splits the input by magnitude (read from the exponent bits) into bands: tiny
+ * angles return unchanged, small angles skip range reduction, and mid-range
+ * angles are reduced modulo pi before the polynomial. Evaluation is done in
+ * double precision for accuracy. The names fsin/sinf alias this one body.
+ */
 
 #include "guint.h"
 
-/* ====================================================================
- * ====================================================================
- *
- * Module: fsin.c
- * $Revision: 1.3 $
- * $Date: 1998/10/09 06:14:51 $
- * $Author: has $
- * $Source: /exdisk2/cvs/N64OS/Master/cvsmdev2/PR/libultra/monegi/gu/sinf.c,v $
- *
- * Revision history:
- *  09-Jun-93 - Original Version
- *
- * Description:	source code for fsin function
- *
- * ====================================================================
- * ====================================================================
- */
-
 #pragma weak fsin = __sinf
 #pragma weak sinf = __sinf
-#define	fsin __sinf
+#define fsin __sinf
 
-/* coefficients for polynomial approximation of sin on +/- pi/2 */
-
-static const du	P[] =
-{
-{0x3ff00000,	0x00000000},
-{0xbfc55554,	0xbc83656d},
-{0x3f8110ed,	0x3804c2a0},
-{0xbf29f6ff,	0xeea56814},
-{0x3ec5dbdf,	0x0e314bfe},
+// Minimax polynomial coefficients c0..c4, as exact IEEE-754 bit patterns so the
+// compiler cannot perturb them; result ~ dx + dx*xsq*(c1 + xsq*(c2 + ...)).
+// clang-format off: hand-aligned coefficient table reads as one block
+static const du P[] = {
+    {0x3ff00000, 0x00000000}, {0xbfc55554, 0xbc83656d},
+    {0x3f8110ed, 0x3804c2a0}, {0xbf29f6ff, 0xeea56814},
+    {0x3ec5dbdf, 0x0e314bfe},
 };
+// clang-format on
 
-static const du	rpi =
-{0x3fd45f30,	0x6dc9c883};
+static const du rpi = {0x3fd45f30, 0x6dc9c883};   // 1/pi, for the period count
+static const du pihi = {0x400921fb, 0x50000000};  // pi, high half (exact bits)
+static const du pilo = {0x3e6110b4, 0x611a6263};  // pi, low correction term
+static const fu zero = {0x00000000};              // exact +0.0
 
-static const du	pihi =
-{0x400921fb,	0x50000000};
+float fsin(float x) {
+  double dx, xsq, poly;
+  double dn;
+  int n;
+  double result;
+  int ix, xpt;
 
-static const du	pilo =
-{0x3e6110b4,	0x611a6263};
+  // Pull the biased exponent from the bit pattern to band the magnitude without
+  // an FPU compare.
+  ix = *(int*)&x;
+  xpt = (ix >> 22);
+  xpt &= 0x1ff;
 
-static const fu	zero = {0x00000000};
+  // Small-magnitude band: |x| already within one period, no reduction needed.
+  if (xpt < 0xff) {
+    dx = x;
 
-
-/* ====================================================================
- *
- * FunctionName		fsin
- *
- * Description		computes sine of arg
- *
- * ====================================================================
- */
+    // Above 0xe6 the polynomial is required; below it x is so tiny that
+    // sin(x) == x to float precision, so return x untouched.
+    if (xpt >= 0xe6) {
+      xsq = dx * dx;
+      poly = ((P[4].d * xsq + P[3].d) * xsq + P[2].d) * xsq + P[1].d;
+      result = dx + (dx * xsq) * poly;
+      return ((float)result);
+    }
+    return (x);
+  }
 
-float
-fsin( float x )
-{
-double	dx, xsq, poly;
-double	dn;
-int	n;
-double	result;
-int	ix, xpt;
+  // Mid band: reduce modulo pi (n = nearest multiple), then evaluate. pi is
+  // split hi/lo so the large multiply keeps its low bits.
+  if (xpt < 0x136) {
+    dx = x;
+    dn = dx * rpi.d;
+    n = ROUND(dn);
+    dn = n;
+    dx = dx - dn * pihi.d;
+    dx = dx - dn * pilo.d;
+    xsq = dx * dx;
+    poly = ((P[4].d * xsq + P[3].d) * xsq + P[2].d) * xsq + P[1].d;
+    result = dx + (dx * xsq) * poly;
 
+    // Odd n means an odd number of half periods were removed: flip the sign.
+    if ((n & 1) == 0) return ((float)result);
+    return (-(float)result);
+  }
 
-	ix = *(int *)&x;
-	xpt = (ix >> 22);
-	xpt &= 0x1ff;
-
-	/* xpt is exponent(x) + 1 bit of mantissa */
-
-	if ( xpt < 0xff )	
-	{
-		/* |x| < 1.5 */
-
-		dx = x;
-
-		if ( xpt >= 0xe6 )
-		{
-			/* |x| >= 2^(-12) */
-
-			/* compute sin(x) with a standard polynomial approximation */
-
-			xsq = dx*dx;
-
-			poly = ((P[4].d*xsq + P[3].d)*xsq + P[2].d)*xsq + P[1].d;
-
-			result = dx + (dx*xsq)*poly;
-
-			return ( (float)result );
-		}
-
-		return ( x );
-	}
-
-	if ( xpt < 0x136 )
-	{
-		/* |x| < 2^28 */
-
-		dx = x;
-
-		/*  reduce argument to +/- pi/2  */
-
-		dn = dx*rpi.d;
-
-		n = ROUND(dn);
-		dn = n;
-
-		dx = dx - dn*pihi.d;
-		dx = dx - dn*pilo.d;	/* dx = x - n*pi */
-
-		/* compute sin(dx) as before, negating result if n is odd
-		*/
-
-		xsq = dx*dx;
-
-		poly = ((P[4].d*xsq + P[3].d)*xsq + P[2].d)*xsq + P[1].d;
-
-		result = dx + (dx*xsq)*poly;
-
-
-		if ( (n & 1) == 0 )
-			return ( (float)result );
-
-		return ( -(float)result );
-	}
-
-	if ( x != x )
-	{
-		/* x is a NaN; return a quiet NaN */
-
+  // x is NaN (only value not equal to itself) or too large to reduce.
+  if (x != x) {
 #ifdef _IP_NAN_SETS_ERRNO
-
-		*__errnoaddr = EDOM;
+    *__errnoaddr = EDOM;
 #endif
-		
-		return ( __libm_qnan_f );
-	}
-
-	/* just give up and return 0.0 */
-
-	return ( zero.f );
+    return (__libm_qnan_f);
+  }
+  return (zero.f);
 }
-

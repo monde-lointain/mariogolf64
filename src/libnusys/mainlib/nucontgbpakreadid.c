@@ -1,34 +1,24 @@
-/*======================================================================*/
-/*		NuSYS					      		*/
-/*		nucontgbpakreadid.c		              		*/
-/*								        */
-/*		Copyright (C) 1997, NINTENDO Co,Ltd.		       	*/
-/*								        */
-/*----------------------------------------------------------------------*/    
-/* Ver 1.2	98/06/08		Created by Kensaku Ohki(SLANP)  */
-/*======================================================================*/
-/* $Id: nucontgbpakreadid.c,v 1.4 1999/01/21 07:16:29 ohki Exp $	*/
-/*======================================================================*/
+/*
+ * GB Pak cartridge ID read.
+ *
+ * Reads the registration (header) area of the Game Boy Game Pak ROM and reports
+ * the GB Pak status. The manager also powers the cartridge on as part of this
+ * request, so it is the usual first step after opening a GB Pak.
+ */
 #include <nusys.h>
 
-/*----------------------------------------------------------------------*/
-/*	nuContGBPakReadID - Reads the GB Game Pak ROM registration area.*/
-/* 	Reads the ROM registration area of the GB Game Pak inserted     */
-/*	in the 64GB Pak and stores the data in the buffer. 		*/
-/*	IN:	handle	64GB Pak handler. 			      	*/
-/*		id	Buffer for storing the ID area information.     */
-/*			(OS_GBPAK_ROM_ID_SIZE byte) 	             	*/
-/*		status				                    	*/
-/*	RET:	Value returned by osGbpakReadID(). 			*/
-/*----------------------------------------------------------------------*/
-s32 nuContGBPakReadID(NUContPakFile* handle, OSGbpakId* id, u8* status)
-{
-    NUContGBPakMesg 	gbpakMesg;
+/*
+ * Read handle's cartridge ID into id and its status into status.
+ *
+ * Both out-pointers are passed to the GB Pak Manager packed in the message data
+ * words. The osGbpakReadId result is stored in handle->error and returned.
+ */
+s32 nuContGBPakReadID(NUContPakFile* handle, OSGbpakId* id, u8* status) {
+  NUContGBPakMesg gbpakMesg;
 
-    gbpakMesg.handle   = handle;
-    gbpakMesg.data[0]  = (u32)id;
-    gbpakMesg.data[1]  = (u32)status;
-    handle->error = nuSiSendMesg(NU_CONT_GBPAK_READID_MSG, (void*)&gbpakMesg);
-    
-    return handle->error;
+  gbpakMesg.handle = handle;
+  gbpakMesg.data[0] = (u32)id;
+  gbpakMesg.data[1] = (u32)status;
+  handle->error = nuSiSendMesg(NU_CONT_GBPAK_READID_MSG, (void*)&gbpakMesg);
+  return handle->error;
 }

@@ -1,25 +1,24 @@
-/*======================================================================*/
-/*		NuSYS										*/
-/*		nugfxfuncset.c								*/
-/*												*/
-/*		Copyright (C) 1997, NINTENDO Co,Ltd.				*/
-/*												*/
-/*----------------------------------------------------------------------*/    
-/* Ver 1.0	97/10/9		Created by Kensaku Ohki(SLANP)		*/
-/*======================================================================*/
+/*
+ * Retrace callback registration.
+ *
+ * Installs the application's per-retrace graphics callback in the graphics
+ * thread. The callback receives the count of still-pending graphics tasks so it
+ * can skip work while the previous frame's task is unfinished.
+ */
 #include <nusys.h>
 
-/*----------------------------------------------------------------------------*/
-/*	Register the retrace call-back function in the loop of the Gfx thread.	*/
-/*	IN:	The pointer of the call-back function 					*/
-/*	RET:	None 											*/
-/*----------------------------------------------------------------------------*/
-void nuGfxFuncSet(NUGfxFunc func)
-{
-    OSIntMask mask;
-    nuGfxTaskAllEndWait();			/* Wait for the task ends  */	    
+/*
+ * Register func as the retrace callback.
+ *
+ * Existing tasks are drained first so the swap cannot race a callback already
+ * in flight, and the pointer is then written with interrupts masked so the
+ * graphics thread never observes a half-updated pointer.
+ */
+void nuGfxFuncSet(NUGfxFunc func) {
+  OSIntMask mask;
 
-    mask = osSetIntMask(OS_IM_NONE);
-    nuGfxFunc = func;
-    osSetIntMask(mask);
+  nuGfxTaskAllEndWait();
+  mask = osSetIntMask(OS_IM_NONE);
+  nuGfxFunc = func;
+  osSetIntMask(mask);
 }

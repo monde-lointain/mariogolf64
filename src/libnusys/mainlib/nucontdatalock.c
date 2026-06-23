@@ -1,38 +1,32 @@
-/*======================================================================*/
-/*		NuSYS										*/
-/*		nucondatalock.c								*/
-/*												*/
-/*		Copyright (C) 1997, NINTENDO Co,Ltd.				*/
-/*												*/
-/*----------------------------------------------------------------------*/    
-/* Ver 1.0	97/10/9		Created by Kensaku Ohki(SLANP)		*/
-/*======================================================================*/
+/*
+ * Controller-data latch.
+ *
+ * The Controller Manager refreshes its internal pad buffer every retrace. These
+ * two calls toggle a flag the retrace callback honors, letting an application
+ * freeze the buffer (e.g. to read a consistent snapshot across a frame) and
+ * release it again. The lock does not affect the explicit read-start path.
+ */
 #include <nusys.h>
 
-/*----------------------------------------------------------------------*/
-/*	nuContDataLock - Lock controller data 					*/
-/*	IN:	None 										*/
-/*	RET:	None 										*/
-/*----------------------------------------------------------------------*/
-void nuContDataLock(void)
-{
-    OSIntMask	mask;
+/*
+ * Stop the Controller Manager from overwriting the shared pad buffer.
+ *
+ * The flag is set under a full interrupt mask so the retrace callback cannot
+ * observe a half-written value; the previous mask is restored on the way out.
+ */
+void nuContDataLock(void) {
+  OSIntMask mask;
 
-    mask = osSetIntMask(OS_IM_NONE);
-    nuContDataLockKey = NU_CONT_DATA_LOCK;
-    osSetIntMask(mask);
-
+  mask = osSetIntMask(OS_IM_NONE);
+  nuContDataLockKey = NU_CONT_DATA_LOCK;
+  osSetIntMask(mask);
 }
-/*----------------------------------------------------------------------*/
-/*	nuContDataUnLock - Unlock controller data 				*/
-/*	IN:	None 										*/
-/*	RET:	None 										*/
-/*----------------------------------------------------------------------*/
-void nuContDataUnLock(void)
-{
-    OSIntMask	mask;
-    
-    mask = osSetIntMask(OS_IM_NONE);
-    nuContDataLockKey = NU_CONT_DATA_UNLOCK;
-    osSetIntMask(mask);
-}    
+
+/* Re-enable the per-retrace buffer refresh latched by nuContDataLock. */
+void nuContDataUnLock(void) {
+  OSIntMask mask;
+
+  mask = osSetIntMask(OS_IM_NONE);
+  nuContDataLockKey = NU_CONT_DATA_UNLOCK;
+  osSetIntMask(mask);
+}

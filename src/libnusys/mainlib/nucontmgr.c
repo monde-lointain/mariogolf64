@@ -1,244 +1,157 @@
-/*======================================================================*/
-/*		NuSYS							*/
-/*		nucontmgr.c						*/
-/*									*/
-/*		Copyright (C) 1997, NINTENDO Co,Ltd.			*/
-/*									*/
-/*----------------------------------------------------------------------*/
-/* Ver 1.0	97/10/9		Created by Kensaku Ohki(SLANP)		*/
-/*======================================================================*/
-/* $Id: nucontmgr.c,v 1.13 1999/01/23 05:43:23 ohki Exp $		*/
-/*======================================================================*/
+/*
+ * Controller Manager.
+ *
+ * Drives controller input under the SI Manager. At every retrace it reads all
+ * pads into the shared nuContData buffer, optionally invoking a user callback
+ * with the fresh data; it also serves on-demand read and query requests posted
+ * through the SI message path. A mutex queue guards the shared buffer, and a
+ * lock key lets an application freeze the per-retrace updates (see
+ * nucontdatalock.c). nuContMgrInit installs the dispatch table below.
+ */
 #include <nusys.h>
 
-/* BSS globals dropped to extern (scattered COMMON vrams, placed via symbol_addrs);   */
-/* nuContWaitMesgQ/nuContStatus/nuContData/nuContNum/nuContDataLockKey/nuContPfs are   */
-/* declared extern in <nusys.h>. nuContReadFunc keeps its .data definition (carved).   */
-extern OSMesg		nuContWaitMesgBuf;
-extern OSMesgQueue	nuContDataMutexQ;
-extern OSMesg		nuContDataMutexBuf;	/* Semaphore used in accessing data */
+extern OSMesg nuContWaitMesgBuf;
+extern OSMesgQueue nuContDataMutexQ;
+extern OSMesg nuContDataMutexBuf;
 
-NUContReadFunc	nuContReadFunc = NULL;	/* Callback function for */
-						/* end of Controller read */
+/* Optional per-retrace hook, set via nuContReadFuncSet; NULL when unused. */
+NUContReadFunc nuContReadFunc = NULL;
 
 static s32 contRetrace(NUSiCommonMesg* mesg);
 static s32 contRead(NUSiCommonMesg* mesg);
 static s32 contReadNW(NUSiCommonMesg* mesg);
 static s32 contQuery(NUSiCommonMesg* mesg);
 
-static s32 (*funcList[])(NUSiCommonMesg*) = {
-    contRetrace,			/* NU_CONT_RETRACE_MSG		*/
-    contRead,			/* NU_CONT_READ_MSG		*/
-    contReadNW,		/* NU_CONT_READ_NW_MSG		*/
-    contQuery,			/* NU_CONT_QUERY_MSG		*/
-    NULL			/* End of list	*/
-};
+/*
+ * Dispatch table indexed by the message's minor command number (retrace, read,
+ * non-waiting read, query). The trailing NULL terminates the list.
+ */
+static s32 (*funcList[])(NUSiCommonMesg*) = {contRetrace, contRead, contReadNW,
+                                             contQuery, NULL};
 
-NUCallBackList	nuContCallBack = {NULL,funcList, NU_SI_MAJOR_NO_CONT};
-				  
-/*----------------------------------------------------------------------*/
-/*	nuContMgrInit - Initializes the Controller Manager	*/
-/*	Initializes the Controller Manager and registers it with the SI manager. */
-/*	For compatibility with previous versions, this function generates and returns a bit */
-/*	pattern.								*/
-/*									*/
-/*	IN:	nothing							*/
-/*	RET:	the bit pattern of the connected Controller			*/
-/*----------------------------------------------------------------------*/
-u8 nuContMgrInit(void)
-{
-    int	cnt;
-    u8	pattern;
-    u8	bitmask;
-    
-    /* Removes the stop flag for a Controller data read.  */
-    nuContDataUnLock();
-    
-    /* The Controller data read wait queue */
-    osCreateMesgQueue(&nuContWaitMesgQ, &nuContWaitMesgBuf, 1);
-    
-    /* Creates a sephamore for Controller data access. */
-    osCreateMesgQueue(&nuContDataMutexQ, &nuContDataMutexBuf, 1);
-    
-    /* Registers the Controller Manager with the SI manager. */
-    nuSiCallBackAdd(&nuContCallBack);
-    
-    /* Gets the status. */
-    nuContQueryRead();
-    
-    /* Checks the number of Controllers connected. */
-    /* Only checks, however.	*/
-    nuContNum = 0;
-    bitmask = 1;
-    pattern = 0;
-    for(cnt = 0; cnt < NU_CONT_MAXCONTROLLERS; cnt++){
-	
-	/* Error check.  Not used if error occurred.  */
-	if(nuContStatus[cnt].errno) continue;
-	
-	/* Checks whether the flags for both CONT_ABUSOLUTE and CONT_JOYPORT are set. */
-	if((nuContStatus[cnt].type & CONT_TYPE_MASK) == CONT_TYPE_NORMAL){
-	    nuContNum++;
-	    pattern |= bitmask;
-	}
-	bitmask <<= 1;
+NUCallBackList nuContCallBack = {NULL, funcList, NU_SI_MAJOR_NO_CONT};
+
+/*
+ * Initialize the Controller Manager and register it with the SI Manager.
+ *
+ * Sets up the wait and mutex queues, registers the callback table, kicks off an
+ * initial status query, then counts the connected standard controllers and
+ * returns a bit pattern of their ports (bit 0 = port 1, ...).
+ */
+u8 nuContMgrInit(void) {
+  int cnt;
+  u8 pattern;
+  u8 bitmask;
+
+  nuContDataUnLock();
+  osCreateMesgQueue(&nuContWaitMesgQ, &nuContWaitMesgBuf, 1);
+  osCreateMesgQueue(&nuContDataMutexQ, &nuContDataMutexBuf, 1);
+  nuSiCallBackAdd(&nuContCallBack);
+  nuContQueryRead();
+
+  // Build the connected-controller bit pattern from the query results.
+  nuContNum = 0;
+  bitmask = 1;
+  pattern = 0;
+  for (cnt = 0; cnt < NU_CONT_MAXCONTROLLERS; cnt++) {
+    if (nuContStatus[cnt].errno) continue;
+    // Count only standard controllers toward nuContNum / the pattern.
+    if ((nuContStatus[cnt].type & CONT_TYPE_MASK) == CONT_TYPE_NORMAL) {
+      nuContNum++;
+      pattern |= bitmask;
     }
-    return pattern;
-}
-/*----------------------------------------------------------------------*/
-/*	nuContMgrRemove - Removes the Controller Manager		*/
-/* Separates the Controller Manager from the SI manager.			 */
-/*	IN:	nothing							*/
-/*	RET:	nothing							*/
-/*----------------------------------------------------------------------*/
-void nuContMgrRemove(void)
-{
-    nuSiCallBackRemove(&nuContCallBack);
+    bitmask <<= 1;
+  }
+  return pattern;
 }
 
-/*----------------------------------------------------------------------*/
-/*	nuContDataClose - Closes the Controller data			*/
-/*	Prevents other threads from accessing nuContData.			 */
-/*	IN:	nothing							*/
-/*	RET:	nothing							*/
-/*----------------------------------------------------------------------*/
-void nuContDataClose(void)
-{
-    osSendMesg(&nuContDataMutexQ, NULL, OS_MESG_BLOCK);
+/* Unregister the Controller Manager from the SI Manager. */
+void nuContMgrRemove(void) { nuSiCallBackRemove(&nuContCallBack); }
 
+/*
+ * Acquire / release the mutex guarding the shared nuContData buffer. Close
+ * takes the mutex (so the buffer can be touched safely); Open returns it.
+ */
+void nuContDataClose(void) {
+  osSendMesg(&nuContDataMutexQ, NULL, OS_MESG_BLOCK);
 }
 
-/*----------------------------------------------------------------------				*/
-/*	nuContDataOpen - Opens Controller data					*/
-/*	Enables nuContData to be accessed by other threads.				*/
-/*	IN:	nothing								*/
-/*	RET:	nothing								*/
-/*----------------------------------------------------------------------				*/
-void nuContDataOpen(void)
-{
-    osRecvMesg(&nuContDataMutexQ, NULL, OS_MESG_BLOCK);
-}
-	
-/*----------------------------------------------------------------------*/
-/*	contReadData - Reads Controller data (internal function)			*/
-/*	IN:	lockflag		A flag that checks whether the data are locked.	*/
-/*				0, no check performed (forced-read mode)		*/
-/*				1, perform check					*/
-/*	RET:	error								*/
-/*----------------------------------------------------------------------*/
-static s32 contReadData(OSContPad *pad,u32 lockflag)
-{
-
-    s32 rtn;
-    
-    /* Start Controller read.  */
-    rtn = osContStartReadData(&nuSiMesgQ);
-    if(rtn) return rtn;
-    
-    /* Wait for end of Controller read (approx. 2ms) */
-    osRecvMesg(&nuSiMesgQ, NULL, OS_MESG_BLOCK);
-
-    /* Check whether data are locked. */
-    /* Used in cases where the thread is switched by above-mentioned osRecvMesg, */
-    /* and the data are locked by that thread.*/
-    if(lockflag & nuContDataLockKey) return rtn;
-    
-    /* Get Controller data. */
-    nuContDataClose();
-    osContGetReadData(pad);
-    nuContDataOpen();
-    
-    return rtn;
+void nuContDataOpen(void) {
+  osRecvMesg(&nuContDataMutexQ, NULL, OS_MESG_BLOCK);
 }
 
-/*----------------------------------------------------------------------*/
-/*	contQuery - Obtains the Controller status			*/
-/*	IN:	*mesg	Pointer to a structure of the same type as NUContQueryMesg */
-/*	RET:	nothing							*/
-/*----------------------------------------------------------------------*/
-static s32 contQuery(NUSiCommonMesg* mesg)
-{
-    s32 rtn;
-    
-    /* Start obtaining Controller status */
-    rtn = osContStartQuery(&nuSiMesgQ);
-    if(rtn) return rtn;
-    
-    /* Wait for status to be obtained. */
-    osRecvMesg(&nuSiMesgQ, NULL, OS_MESG_BLOCK);
-    
-    /* Read the obtained data. */
-    osContGetQuery(nuContStatus);
-    
-    return rtn;
+/*
+ * Start a controller read and block until it completes.
+ *
+ * If lockflag matches the active data-lock key the result is left in the SI
+ * buffer and not copied out, honoring a caller that has frozen the shared
+ * buffer; otherwise the read data is copied into pad under the buffer mutex.
+ */
+static s32 contReadData(OSContPad* pad, u32 lockflag) {
+  s32 rtn;
+
+  rtn = osContStartReadData(&nuSiMesgQ);
+  if (rtn) return rtn;
+  osRecvMesg(&nuSiMesgQ, NULL, OS_MESG_BLOCK);
+  if (lockflag & nuContDataLockKey) return rtn;
+  nuContDataClose();
+  osContGetReadData(pad);
+  nuContDataOpen();
+  return rtn;
 }
 
-/*----------------------------------------------------------------------*/
-/*	contRetrace - Retrace processing					*/
-/*									*/
-/*	IN:	mesg	Message					*/
-/*	RET:	nothing							*/
-/*----------------------------------------------------------------------*/
-static s32 contRetrace(NUSiCommonMesg* mesg)
-{
-    /* Do not read the data if locked. */
-    if(nuContDataLockKey) {
-	return NU_SI_CALLBACK_CONTINUE;
-    }
-    /* Clear the wait message queue.  */
-    osRecvMesg(&nuContWaitMesgQ, NULL, OS_MESG_NOBLOCK);
-    
-    /* Controller read */
-    contReadData(nuContData, 1);
-    
-    /* Call the callback function after read ends.			*/
-    /* Because the priority of this thread is second to that of the event handler,	*/
-    /* processing by the callback function should be held to the minimum required.*/
-    /* The parameter is *msg_type.						*/
-    if(nuContReadFunc != NULL){
-	(*nuContReadFunc)(mesg->mesg);
-    }
-    
-    /* Send message indicating end of read. */
-    osSendMesg(&nuContWaitMesgQ, NULL, OS_MESG_NOBLOCK);
-    
+/* Query handler: refresh the nuContStatus table (NU_CONT_QUERY_MSG). */
+static s32 contQuery(NUSiCommonMesg* mesg) {
+  s32 rtn;
+
+  rtn = osContStartQuery(&nuSiMesgQ);
+  if (rtn) return rtn;
+  osRecvMesg(&nuSiMesgQ, NULL, OS_MESG_BLOCK);
+  osContGetQuery(nuContStatus);
+  return rtn;
+}
+
+/*
+ * Per-retrace handler: refresh the shared pad buffer and fire the user hook.
+ *
+ * When the data lock is held the refresh is skipped entirely so the frozen
+ * buffer is preserved. Otherwise a wait token is drained, all pads are read
+ * into nuContData (lockflag 1, honoring the lock), the optional read callback
+ * runs, and the wait token is replaced so blocked readers can proceed.
+ */
+static s32 contRetrace(NUSiCommonMesg* mesg) {
+  if (nuContDataLockKey) {
     return NU_SI_CALLBACK_CONTINUE;
+  }
+  osRecvMesg(&nuContWaitMesgQ, NULL, OS_MESG_NOBLOCK);
+  contReadData(nuContData, 1);
+  if (nuContReadFunc != NULL) {
+    (*nuContReadFunc)(mesg->mesg);
+  }
+  osSendMesg(&nuContWaitMesgQ, NULL, OS_MESG_NOBLOCK);
+  return NU_SI_CALLBACK_CONTINUE;
 }
 
-/*----------------------------------------------------------------------*/
-/*	contRead - Controller read processing 				*/
-/*									*/
-/*	IN:	mesg	message						*/
-/*	RET:	nothing							*/
-/*----------------------------------------------------------------------*/
-static s32 contRead(NUSiCommonMesg* mesg)
-{
-	return contReadData((OSContPad*)mesg->dataPtr, 0);
+/* On-demand read into the caller's buffer, ignoring the lock
+ * (NU_CONT_READ_MSG). */
+static s32 contRead(NUSiCommonMesg* mesg) {
+  return contReadData((OSContPad*)mesg->dataPtr, 0);
 }
 
-/*----------------------------------------------------------------------*/
-/*	contReadNW - Asynchronous Controller read				*/
-/*									*/
-/*	IN:	mesg	message					*/
-/*	RET:	nothing							*/
-/*----------------------------------------------------------------------*/
-static s32 contReadNW(NUSiCommonMesg* mesg)
-{
-    s32 rtn;
-    /* Clear the waitmessage queue.		*/
-    osRecvMesg(&nuContWaitMesgQ, NULL, OS_MESG_NOBLOCK);
-    
-    /* Controller read	*/
-    rtn = contReadData(nuContData, 0);
-    if(rtn) return rtn;
-    
-    /* Call the callback function after read ends. */
-    /* Because the priority of this thread is second to that of the event handler,	*/
-    /* processing by the callback function should be held to the minimum required.*/
-    if(nuContReadFunc != NULL){
-	(*nuContReadFunc)(mesg->mesg);
-    }
-    
-    return rtn;
-}
+/*
+ * Non-waiting on-demand read into the shared buffer (NU_CONT_READ_NW_MSG).
+ *
+ * Drains a wait token first so it does not block behind the retrace path, reads
+ * into nuContData, then runs the user hook on success.
+ */
+static s32 contReadNW(NUSiCommonMesg* mesg) {
+  s32 rtn;
 
+  osRecvMesg(&nuContWaitMesgQ, NULL, OS_MESG_NOBLOCK);
+  rtn = contReadData(nuContData, 0);
+  if (rtn) return rtn;
+  if (nuContReadFunc != NULL) {
+    (*nuContReadFunc)(mesg->mesg);
+  }
+  return rtn;
+}

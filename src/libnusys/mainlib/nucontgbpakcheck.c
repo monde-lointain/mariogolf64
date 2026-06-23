@@ -1,32 +1,24 @@
-/*======================================================================*/
-/*		NuSYS							*/
-/*		nucontgbpakcheck.c					*/
-/*									*/
-/*		Copyright (C) 1997, NINTENDO Co,Ltd.			*/
-/*									*/
-/*----------------------------------------------------------------------*/    
-/* Ver 1.2	98/06/08		Created by Kensaku Ohki(SLANP)	*/
-/*======================================================================*/
-/* $Id: nucontgbpakcheck.c,v 1.4 1999/01/21 07:15:13 ohki Exp $ */
-/*======================================================================*/
+/*
+ * GB Pak connector check.
+ *
+ * Detects a poorly seated Game Boy Game Pak by exercising special ROM and RAM
+ * addresses and watching every address line. Use it to distinguish a genuine
+ * read/write failure from a loose cartridge before trusting transferred data.
+ */
 #include <nusys.h>
 
-/*----------------------------------------------------------------------*/
-/*	nuContGBPakCheckConnector - Detects poor connection.            */
-/*	  Detects  poor contact of the GB Game Pak connector.           */
-/*	  Accesses GB Game Pak's special ROM and RAM areas to verify    */
-/*	operation of all address lines.               		 	*/
-/*	IN:	handle	64GB Pak handler.          			*/
-/*		status	Status	              				*/
-/*	RET:	Value returned from osGbpakCheckConnector()		*/
-/*----------------------------------------------------------------------*/
-s32 nuContGBPakCheckConnector(NUContPakFile* handle, u8* status)
-{
-    NUContGBPakMesg 	gbpakMesg;
+/*
+ * Run the connector check on handle, returning the GB Pak status in status.
+ *
+ * The out-pointer is forwarded to the GB Pak Manager in the message; the
+ * osGbpakCheckConnector result is stored in handle->error and returned.
+ */
+s32 nuContGBPakCheckConnector(NUContPakFile* handle, u8* status) {
+  NUContGBPakMesg gbpakMesg;
 
-    gbpakMesg.handle   = handle;
-    gbpakMesg.data[0]  = (u32)status;
-    handle->error = nuSiSendMesg(NU_CONT_GBPAK_CHECKCONNECTOR_MSG, (void*)&gbpakMesg);
-
-    return handle->error;
+  gbpakMesg.handle = handle;
+  gbpakMesg.data[0] = (u32)status;
+  handle->error =
+      nuSiSendMesg(NU_CONT_GBPAK_CHECKCONNECTOR_MSG, (void*)&gbpakMesg);
+  return handle->error;
 }

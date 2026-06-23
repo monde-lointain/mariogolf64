@@ -1,33 +1,30 @@
-/*======================================================================*/
-/*		NuSYS										*/
-/*		nugfxretracewait.c							*/
-/*												*/
-/*		Copyright (C) 1997, NINTENDO Co,Ltd.				*/
-/*												*/
-/*----------------------------------------------------------------------*/    
-/* Ver 1.0	97/10/9		Created by Kensaku Ohki(SLANP)		*/
-/*======================================================================*/  
+/*
+ * Retrace delay.
+ *
+ * Blocks the caller for a fixed number of vertical retraces, a simple way to
+ * pace startup or pause logic to the video frame rate without running a render
+ * loop.
+ */
 #include <nusys.h>
 
+/*
+ * Wait for retrace_num vertical retraces, then return.
+ *
+ * A temporary scheduler client is registered on a one-slot queue that receives
+ * a message every retrace; the loop consumes one message per retrace until the
+ * count is exhausted. The client is removed before returning so it does not
+ * keep receiving messages.
+ */
+void nuGfxRetraceWait(u32 retrace_num) {
+  NUScClient client;
+  OSMesg mesgBuf;
+  OSMesgQueue mesgQ;
 
-/*----------------------------------------------------------------------*/
-/*	nuGfxRetraceWait - Wait for the retrace 					*/
-/*	IN:	retrace_num	The retrace number 					*/
-/*	RET:	None 										*/
-/*----------------------------------------------------------------------*/
-void nuGfxRetraceWait(u32 retrace_num)
-{
-    NUScClient	client;
-    OSMesg	mesgBuf;
-    OSMesgQueue mesgQ;
-
-    osCreateMesgQueue(&mesgQ, &mesgBuf, 1);
-
-    /* Register the retrace client to the scheduler  */
-    nuScAddClient(&client, &mesgQ , NU_SC_RETRACE_MSG);  
-    while(retrace_num){
-	osRecvMesg( &mesgQ, NULL, OS_MESG_BLOCK );
-	retrace_num--;
-    }
-    nuScRemoveClient(&client );
+  osCreateMesgQueue(&mesgQ, &mesgBuf, 1);
+  nuScAddClient(&client, &mesgQ, NU_SC_RETRACE_MSG);
+  while (retrace_num) {
+    osRecvMesg(&mesgQ, NULL, OS_MESG_BLOCK);
+    retrace_num--;
+  }
+  nuScRemoveClient(&client);
 }

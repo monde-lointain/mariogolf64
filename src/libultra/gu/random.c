@@ -1,35 +1,23 @@
-/**************************************************************************
- *									  *
- *		 Copyright (C) 1995, Silicon Graphics, Inc.		  *
- *									  *
- *  These coded instructions, statements, and computer programs  contain  *
- *  unpublished  proprietary  information of Silicon Graphics, Inc., and  *
- *  are protected by Federal copyright law.  They  may  not be disclosed  *
- *  to  third  parties  or copied or duplicated in any form, in whole or  *
- *  in part, without the prior written consent of Silicon Graphics, Inc.  *
- *									  *
- **************************************************************************/
+/*
+ * Pseudo-random 32-bit integer generator.
+ *
+ * A small self-seeding generator that folds the running seed through a multiply
+ * and a shift each call. State is kept in a single file-static word.
+ */
 
 #include "guint.h"
 
-/*
- *  Return a pseudorandom 32 bit number
- *  try the RAND macro too
- *
- */
-
+// Running generator state; the initial value is an arbitrary nonzero seed.
 static unsigned int xseed = 174823885;
 
-int guRandom(void)
-{
-    unsigned int x;
+/* Advance the seed and return the next value. The (x+1) multiply mixes the bits
+ * nonlinearly; the >> 2 discards the low bits, which cycle most predictably. */
+int guRandom(void) {
+  unsigned int x;
 
-    x = (xseed<<2) + 2;
-
-    x *= (x+1);
-    x = x >> 2;
-
-    xseed = x;
-
-    return( x );
+  x = (xseed << 2) + 2;
+  x *= (x + 1);
+  x = x >> 2;
+  xseed = x;
+  return (x);
 }

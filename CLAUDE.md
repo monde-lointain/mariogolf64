@@ -49,8 +49,9 @@ Ghidra MCP is used inline at seed time. For each target function:
 
 2. **Mirror branch** (the `upstream` column is a lib, not `none`): copy the upstream `.c` verbatim to
    its mirrored `src/lib<name>/...` path; add any missing headers verbatim under
-   `include/lib<name>/...`; skip clang-format; `make`, and the ROM SHA-1 must equal the baserom. The
-   proof is the full-`make` SHA-1 (verbatim copy plus green ROM equals match); no byte-`cmp`. See
+   `include/lib<name>/...`; then `clang-format-22 -i` the copied files (these trees are now formatted;
+   formatting does not change codegen); `make`, and the ROM SHA-1 must equal the baserom. The proof is
+   the full-`make` SHA-1 (verbatim-then-formatted copy plus green ROM equals match); no byte-`cmp`. See
    `docs/hazards.md#upstream-mirror-pattern`. Before declaring a clean mirror, reconcile the
    upstream's call and data-ref list (including one level of macro expansion) against the name files,
    and handle any flagged hazard via the index below.
@@ -80,8 +81,9 @@ Ghidra MCP is used inline at seed time. For each target function:
      addend, or extern HI/LO16), not a near-miss: go straight to the in-tree spot-check and full-make
      SHA-1; do not iterate C or reach for the permuter (see `docs/hazards.md#isolated-compile-caveat`).
    - **Finalize** (only if the spot-check passes): inline the body into `src/<seg>.c`, drop the
-     `INCLUDE_ASM` line, `clang-format -i` (skip under `src/libultra/`, `src/libkmc/`, `src/libnusys/`,
-     and `src/mgu/`), then `make` until `build/mariogolf64.z64: OK` and SHA-1 == baserom.
+     `INCLUDE_ASM` line, `clang-format-22 -i` (now applies to every tree, including `src/libultra/`,
+     `src/libkmc/`, `src/libnusys/`, and `src/mgu/`), then `make` until `build/mariogolf64.z64: OK`
+     and SHA-1 == baserom.
 
 4. **Bank** the function (only at score 0 plus spot-check plus full-`make` SHA match). Give it its
    curated Ghidra name (add to `symbol_addrs.txt`, rename in the body, re-`make`). On `git commit`,
@@ -272,8 +274,9 @@ below).
   that, iterate on C or reconsider whether the subseg should be `hasm`.
 - **Decomp is authoritative for names** (per the Ghidra-workspace
   `docs/re/coordination/decomp_coordination.md`).
-- **Match finalization is three steps:** inline the body into `src/<seg>.c`, `clang-format -i` (skip
-  under `src/libultra/`, `src/libkmc/`, `src/libnusys/`, and `src/mgu/`), then full `make` until ROM SHA-1 matches.
+- **Match finalization is three steps:** inline the body into `src/<seg>.c`, `clang-format-22 -i`
+  (now applies to every tree, including `src/libultra/`, `src/libkmc/`, `src/libnusys/`, and
+  `src/mgu/`), then full `make` until ROM SHA-1 matches.
   Spot-check passing is not ROM matching; the final `make` proves the match. Gate the `sha1sum` on
   `make` succeeding (confirm the `build/mariogolf64.z64: OK` line first): a failed link leaves the
   previous `.z64` in `build/`, so `sha1sum` on a stale ROM false-positives. **Always verify with
@@ -286,13 +289,17 @@ below).
   you changed. When a mirror or enabler edits a widely-included header (e.g.
   `include/libultra/PR/os_version.h`), the banking SHA-1 must come from `make clean && make extract &&
   make`, not an incremental build (`docs/hazards.md#clean-rebuild-after-shared-header-edit`).
-- **Never clang-format library code under `src/libultra/`, `src/libkmc/`, `src/libnusys/`, or
-  `src/mgu/`.** These are verbatim / near-verbatim upstream copies; reformatting defeats
-  cross-referencing (libnusys files keep the nusys upstream tab style: nusched / nugfxinit /
-  nugfxtaskmgr, S124). Each dir carries a local `.clang-format` with `DisableFormat: true`.
-  `src/mgu/` (S103) holds the game-embedded ultralib
-  gu/mgu matrix source (the Monegi variant, compiled at the game `-O2` profile, NOT the libultra
-  `-O3` band; see `docs/hazards.md#game-region-mirror-o2-profile`).
+- **Library code under `src/libultra/`, `src/libkmc/`, `src/libnusys/`, and `src/mgu/` is
+  clang-format-22 formatted** (stock Google with `SortIncludes: Never`; each dir carries a local
+  `.clang-format` = `BasedOnStyle: Google` + `SortIncludes: Never`, which SUPERSEDES the old
+  `DisableFormat: true`). These trees were reworked (2026-06-23) to the Code Complete ch31/ch32
+  layout + comment style and deliberately diverge from the upstream SOURCE formatting, so they no
+  longer line up line-for-line against the vendor `.c` for visual cross-referencing; the ROM stays
+  byte-identical (comments/whitespace do not affect codegen, and coddog's fingerprint is asm-based,
+  not source-text). Format any new or edited file in these trees with `clang-format-22 -i`, like the
+  rest of the tree. `src/mgu/` (S103) holds the game-embedded ultralib gu/mgu matrix source (the
+  Monegi variant, compiled at the game `-O2` profile, NOT the libultra `-O3` band; see
+  `docs/hazards.md#game-region-mirror-o2-profile`).
 - **Use ultra64.h types** (`s32`/`u64`/`vu32`/`f32`/...) in decomp C, never raw
   `int`/`long long`/`volatile unsigned long`.
 - **Prompt authoring.** Every prompt surface in this project (`CLAUDE.md`, `docs/*`,

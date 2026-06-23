@@ -1,59 +1,48 @@
-/**************************************************************************
- *									  *
- *		 Copyright (C) 1994, Silicon Graphics, Inc.		  *
- *									  *
- *  These coded instructions, statements, and computer programs  contain  *
- *  unpublished  proprietary  information of Silicon Graphics, Inc., and  *
- *  are protected by Federal copyright law.  They  may  not be disclosed  *
- *  to  third  parties  or copied or duplicated in any form, in whole or  *
- *  in part, without the prior written consent of Silicon Graphics, Inc.  *
- *									  *
- **************************************************************************/
+/*
+ * Modeling matrix from roll/pitch/heading Euler angles.
+ *
+ * guRotateRPYF builds the float matrix; guRotateRPY packs it to fixed point.
+ * Angles are in degrees and positive values rotate counter-clockwise.
+ */
 
 #include "guint.h"
 
+// degrees -> radians, file-static so the constant is shared across calls
 static float dtor = 3.1415926 / 180.0;
 
-/*
- *  Return rotation matrix given roll, pitch, and yaw in degrees
- *
- */
+/* Compose roll (r), pitch (p), and heading/yaw (h) into one rotation matrix.
+ * The nine entries below are the expanded product of the three axis rotations;
+ * the bottom row stays identity (guMtxIdentF), so there is no translation. */
+void guRotateRPYF(float mf[4][4], float r, float p, float h) {
+  float sinr, sinp, sinh;
+  float cosr, cosp, cosh;
 
-void guRotateRPYF(float mf[4][4], float r, float p, float h)
-{
-	float	sinr, sinp, sinh;
-	float	cosr, cosp, cosh;
+  r *= dtor;
+  p *= dtor;
+  h *= dtor;
+  sinr = sinf(r);
+  cosr = cosf(r);
+  sinp = sinf(p);
+  cosp = cosf(p);
+  sinh = sinf(h);
+  cosh = cosf(h);
 
-	r *= dtor;
-	p *= dtor;
-	h *= dtor;
-	sinr = sinf(r);
-	cosr = cosf(r);
-	sinp = sinf(p);
-	cosp = cosf(p);
-	sinh = sinf(h);
-	cosh = cosf(h);
-
-	guMtxIdentF(mf);
-
-	mf[0][0] = cosp*cosh;
-	mf[0][1] = cosp*sinh;
-	mf[0][2] = -sinp;
-
-	mf[1][0] = sinr*sinp*cosh - cosr*sinh;
-	mf[1][1] = sinr*sinp*sinh + cosr*cosh;
-	mf[1][2] = sinr*cosp;
-
-	mf[2][0] = cosr*sinp*cosh + sinr*sinh;
-	mf[2][1] = cosr*sinp*sinh - sinr*cosh;
-	mf[2][2] = cosr*cosp;
+  guMtxIdentF(mf);
+  mf[0][0] = cosp * cosh;
+  mf[0][1] = cosp * sinh;
+  mf[0][2] = -sinp;
+  mf[1][0] = sinr * sinp * cosh - cosr * sinh;
+  mf[1][1] = sinr * sinp * sinh + cosr * cosh;
+  mf[1][2] = sinr * cosp;
+  mf[2][0] = cosr * sinp * cosh + sinr * sinh;
+  mf[2][1] = cosr * sinp * sinh - sinr * cosh;
+  mf[2][2] = cosr * cosp;
 }
 
-void guRotateRPY(Mtx *m, float r, float p, float h)
-{
-	Matrix	mf;
+/* Fixed-point entry point: build the matrix as floats, then pack to Mtx. */
+void guRotateRPY(Mtx* m, float r, float p, float h) {
+  Matrix mf;
 
-	guRotateRPYF(mf, r, p, h);
-
-	guMtxF2L(mf, m);
+  guRotateRPYF(mf, r, p, h);
+  guMtxF2L(mf, m);
 }

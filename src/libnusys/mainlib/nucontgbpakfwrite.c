@@ -1,113 +1,92 @@
-/*======================================================================*/
-/*		NuSYS					            	*/
-/*		nucontgbpakreadwrite.c		             		*/
-/*							                */
-/*		Copyright (C) 1997, NINTENDO Co,Ltd.          		*/
-/*								        */
-/*----------------------------------------------------------------------*/
-/* Ver 1.2	98/07/02		Created by Kensaku Ohki(SLANP) 	*/
-/*======================================================================*/
-/* $Id: nucontgbpakfwrite.c,v 1.4 1999/01/21 07:16:03 ohki Exp $	*/
-/*======================================================================*/
+/*
+ * GB Pak unaligned cartridge write.
+ *
+ * The write counterpart of nuContGBPakFread: writes an arbitrary address/length
+ * range to a Game Boy Game Pak, hiding the 32-byte block constraint. A partial
+ * block is handled read-modify-write so surrounding bytes are preserved. It
+ * also toggles MBC RAM access for cartridge SRAM and verifies power afterward.
+ */
 #include <nusys.h>
 
+/*
+ * Write size bytes from buffer to the cartridge at address.
+ *
+ * Power is assumed to be on already. Returns a PFS_ERR_* code on failure,
+ * otherwise the final status read.
+ */
+s32 nuContGBPakFwrite(NUContPakFile* handle, u16 address, u8* buffer,
+                      u16 size) {
+  s32 rtn;
+  s32 writesize;
+  s32 offset;
+  s32 ram;
+  u16 writeAdd;
+  u8 data[32];
+  u8 status;
 
-/*----------------------------------------------------------------------*/
-/*	nuContGBPakFwrite - Write to the GB Game Pak. 	          	*/
-/* 	Writes data to a GB Game Pak inserted in the 64GB Pak.         	*/
-/*	Neither the size nor the GB Game Pak addresses need to be      	*/
-/*	multiples of 32. 		    		               	*/
-/*	IN:	handle	64GB Pak handler. 		       		*/
-/*		address	CPU address of GB Game Pak. 	      		*/
-/*		buffer	Pointer to the buffer in RDRAM. 		*/
-/*		size	      Data size. 				*/
-/*	RET:	PFS_ERR_NOPACK				               	*/
-/*		PFS_ERR_DEVICE				              	*/
-/*		PFS_ERR_CONTRFAIL				        */
-/*		PFS_ERR_NO_GBCART				        */
-/*		PFS_ERR_NEW_GBCART			              	*/
-/*----------------------------------------------------------------------*/
-s32 nuContGBPakFwrite(NUContPakFile* handle, u16 address, u8* buffer, u16 size)
-{
-    s32		rtn;
-    s32		writesize;
-    s32		offset;
-    s32		ram;
-    u16		writeAdd;
-    u8		data[32];
-    u8    	status;
-
-    if(nuContGBPakCallBack.func == NULL){
+  // Without a registered GB Pak Manager there is nothing to dispatch to.
+  if (nuContGBPakCallBack.func == NULL) {
 #ifdef NU_DEBUG
-	osSyncPrintf("nuContGBPakReadWrite: no 64GBPack manager!!\n");
-#endif /* NU_DEBUG */
-	return 0;
+    osSyncPrintf("nuContGBPakReadWrite: no 64GBPack manager!!\n");
+#endif
+    return 0;
+  }
+
+  // The SRAM window (0xA000-0xBFFF) is normally write-protected. If the range
+  // touches it, send the MBC RAM-enable code so the cartridge accepts writes,
+  // and remember to re-protect it afterward.
+  ram = 0;
+  if ((0xa000 <= address) && (address < 0xc000)) {
+    bzero(data, 32);
+    data[31] = NU_CONT_GBPAK_MBC_RAM_ENABLE_CODE;
+    rtn = nuContGBPakWrite(handle, NU_CONT_GBPAK_MBC_RAM_REG0_ADDR, data, 32);
+    if (rtn) return rtn;
+    ram++;
+  }
+
+  rtn = nuContGBPakCheckConnector(handle, &status);
+  if (rtn) return rtn;
+
+  // Walk the request in 32-byte blocks. A misaligned or short tail block is a
+  // read-modify-write: pull the aligned block in, splice the new bytes over the
+  // wanted slice, and write the whole block back so neighboring bytes survive.
+  // A fully aligned run is written straight from the caller's buffer.
+  while (size) {
+    offset = address & 0x001f;
+    if (offset || size < 32) {
+      writeAdd = address & 0xffe0;
+      rtn = nuContGBPakRead(handle, writeAdd, data, 32);
+      if (rtn) return rtn;
+      if (size < 32) {
+        writesize = size;
+      } else {
+        writesize = 32 - offset;
+      }
+      bcopy(buffer, (data + offset), writesize);
+      rtn = nuContGBPakWrite(handle, writeAdd, data, 32);
+      if (rtn) return rtn;
+    } else {
+      writesize = size & 0xffe0;
+      rtn = nuContGBPakWrite(handle, address, buffer, writesize);
+      if (rtn) return rtn;
     }
+    address += writesize;
+    buffer += writesize;
+    size -= writesize;
+  }
 
-    /* Disable MBC1,2,3 SRAM write protection	*/
-    ram = 0;
-    if((0xa000 <= address) && (address < 0xc000)){
-	bzero(data, 32);
-	data[31] = NU_CONT_GBPAK_MBC_RAM_ENABLE_CODE;
-	rtn = nuContGBPakWrite(handle, NU_CONT_GBPAK_MBC_RAM_REG0_ADDR, data, 32);
-	if(rtn) return rtn;
-	ram++;
-    }
+  // Re-protect the SRAM window if this write enabled it.
+  if (ram) {
+    bzero(data, 32);
+    rtn = nuContGBPakWrite(handle, NU_CONT_GBPAK_MBC_RAM_REG0_ADDR, data, 32);
+    if (rtn) return rtn;
+  }
 
-    /* Check for poor contact. 				         	*/
-    /* Supports MBC1,2,3 and the case of no memory controller. 	*/
-    rtn =  nuContGBPakCheckConnector(handle, &status);
-    if(rtn) return rtn;
-
-
-    while(size){
-	/* Check whether address is a multiple of 32         */
-	/* and whether size is a multiple of 32-bytes.       */
-	/* If not, read data into buffer, and then write.    */
-	offset = address & 0x001f;
-	if(offset || size < 32){
-	    writeAdd = address & 0xffe0;
-	    rtn = nuContGBPakRead(handle, writeAdd, data, 32);
-	    if(rtn) return rtn;
-	    if(size < 32){
-		writesize = size;
-	    } else {
-		writesize = 32 - offset;
-	    }
-	    bcopy(buffer, (data + offset), writesize);
-	    rtn = nuContGBPakWrite(handle, writeAdd, data, 32);
-	    if(rtn) return rtn;
-	} else {
-
-	    /* If the write size is not a multiple of 32, make it     */
-	    /* a multiple of 32 and then write it.  		        */
-	    writesize = size & 0xffe0;
-	    rtn = nuContGBPakWrite(handle, address, buffer, writesize);
-	    if(rtn) return rtn;
-	}
-	address += writesize;
-	buffer += writesize;
-	size -= writesize;
-
-    }
-
-    /* MBC1,2,3 RAM write protection  */
-    if(ram){
-	bzero(data, 32);
-	rtn = nuContGBPakWrite(handle, NU_CONT_GBPAK_MBC_RAM_REG0_ADDR, data, 32);
-	if(rtn) return rtn;
-    }
-
-    /* When getting the status, if the power is OFF there is a chance that  */
-    /* the 64GB Pak or the controller has been removed or inserted.         */
-    /* Since this has the same meaning as PFS_ERR_CONTRFAIL, the same thing */
-    /* has been done here.  In the manual, where it talks about "If the     */
-    /* power is OFF..." the messages are different in the flow.  If this    */
-    /* matters to you, please make a change so the status is returned.      */
-    rtn = nuContGBPakGetStatus(handle, &status);
-    if(rtn) return rtn;
-    if(!(status & OS_GBPAK_POWER)){
-	return PFS_ERR_CONTRFAIL;
-    }
-    return rtn;
+  // A power drop mid-transfer means the write may not have landed.
+  rtn = nuContGBPakGetStatus(handle, &status);
+  if (rtn) return rtn;
+  if (!(status & OS_GBPAK_POWER)) {
+    return PFS_ERR_CONTRFAIL;
+  }
+  return rtn;
 }

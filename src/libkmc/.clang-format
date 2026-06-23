@@ -1,2 +1,2 @@
-DisableFormat: true
+BasedOnStyle: Google
 SortIncludes: Never
