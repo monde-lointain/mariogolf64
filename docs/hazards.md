@@ -2126,51 +2126,45 @@ leave it a blob.
 
 ## cross-jump-tail-merge
 
-A verbatim mirror builds + links clean but ROM SHA-misses, and the in-tree-vs-target objdump shows
-the build is **SHORTER than the target** (instruction COUNT < target), with collateral `-0x10`-style
-address shifts on every symbol AFTER the short function (their CODE matches; only referenced
-addresses shifted). This is the project gcc 2.7.2 cross-jump pass merging two byte-identical
-store-and-jump tails that MG64's build kept separate.
+A verbatim/near-verbatim mirror builds + links clean but ROM SHA-misses, and the in-tree-vs-target
+objdump shows the build is **SHORTER than the target** (instruction COUNT < target), with collateral
+`-0x10`-style address shifts on every symbol AFTER the short function (their CODE matches; only
+referenced addresses shifted).
+
+**RULE OUT A GAME-MODIFIED BODY FIRST (S127, the contRmbControl reversal).** This symptom is NOT proof
+of a compiler cross-jump merge; it is far more often a **body-semantics divergence** the literal
+upstream lacks. S121 declared `contRmbControl` an "exhaustively-proven-unbankable cross-jump wall" and
+carried it 5 sprints (+ a 145k-iter permuter run); S127 banked it byte-exact (full ROM SHA-1) with a
+**one-branch body fix and NO compiler change**. The real cause: MG64's FORCESTOP case is game-modified
+— on `osMotorInit` FAILURE it sets `state = STOPPED`, on SUCCESS `state = STOPPING; counter = 2` (an
+`if/else`), where the nusys/papermario upstream sets `state = STOPPING` UNCONDITIONALLY.
+- **The tell:** the target's FORCESTOP epilogue has TWO `sb v0,6(s0)` state stores with DIFFERENT
+  values (`li v0,1` in one branch; `li v0,2` from the `bnez` delay slot in the other). A single
+  unconditional `state =` cannot emit two differing state stores → the body has a branch the upstream
+  lacks. **Read the target's store SEQUENCE and VALUES, not just the control-flow shape.**
+- **Rule:** a "shorter + collateral-shift" mirror miss is a **body bug until proven a compiler
+  artifact**. A store your upstream body cannot produce (extra branch, different constant, doubled
+  field) IS the fix. Same class as `#struct-init-loop` (a dup-store body artifact, also "count-short").
 
 - **Tell from block-reorder (`#near-verbatim-mirror-jal-count-mismatch`).** cross-jump = build instr
-  COUNT **< target** (the merge deleted instrs). block-reorder = **equal** count, same insns
-  reordered. Different fix paths, so measure the count first.
-- **Mechanism.** `jump.c:find_cross_jump` merges two identical `j .L_ret; sh <reg>,<off>(<base>)` tails
-  (e.g. STOPPING `counter--` + FORCESTOP `counter=2`, both `sh v0,4(s0)`). The final cross-jump runs at
-  `toplev.c:3142` `jump_optimize(insns, 1, 1, 0)`, gated **only** by `optimize > 0` — there is **no
-  flag** to disable it (`-fno-thread-jumps` gates the SEPARATE `thread_jumps` pass; `-O1`/`-g -O2` still
-  merge). So the project compiler physically cannot emit identical-but-unmerged tails.
+  COUNT **< target** (a merge deleted instrs). block-reorder = **equal** count, same insns reordered.
+  Measure the count first.
+- **The actual cross-jump pass (why a BODY fix moves it).** `jump.c:find_cross_jump` can merge two
+  identical `j .L_ret; sh <reg>,<off>(<base>)` tails via the `minimum=1` "cross-jump to code before the
+  label" path (jump.c ~1978): **one** matching insn before the shared epilogue label suffices
+  (`--minimum` → `minimum <= 0` after a single match). So the merge is driven by basic-block **LAYOUT**
+  — which store lands immediately before the epilogue label — and the layout is driven by the BODY.
+  Change the body → change the layout → the "merge" moves or vanishes. The pass is always-on
+  (`toplev.c:3142` `jump_optimize(insns, 1, 1, 0)`, gated only by `optimize > 0`; no disabling flag —
+  `-fno-thread-jumps` gates the SEPARATE `thread_jumps` pass), which is exactly why its layout effects
+  get misread as an irreducible compiler wall.
 
-**TRIAGE — the byte-identical-vs-differing-tails test (run this before reaching for the permuter):**
-disassemble the target's two tails.
-- **Tails byte-IDENTICAL, yet unmerged** → **compiler-build wall. NOT permuter-fixable.** Our always-on
-  cross-jump cannot reproduce identical-unmerged tails; the permuter can only break the merge by making
-  the tails DIFFER (a `volatile` temp → extra stack store), which then can't byte-match (S121
-  contRmbControl: 145k iters plateaued at 220, never 0). Go to the resolution ladder below.
-- **Tails DIFFER** (MG64's allocator split the registers / used different constants) → permuter IS
-  viable; the divergence is a register-allocation near-miss, not a merge wall.
-
-**S121 contRmbControl — the divergence is NON-MONOTONIC across compilers (no available binary works).**
-The target wants the osMotor RUN-case call MERGED but the STOPPING counter-store + FORCESTOP
-state-store UNMERGED — a selective pattern no single cross-jump knob produces. Evidence: real-KMC gcc
-2.7.2 (drmario64 `tools/gcc_kmc`) and the decompals FSF-2.7.2 rebuild (== the project `tools/cc/gcc`,
-byte-identical output) BOTH merge all three; SN gcc 2.7.2 (all decompme variants) and gcc 2.8.1
-(papermario default) mis-allocate (5 saved regs / 40B frame / const hoisted into `$19`) AND merge.
-Instrumenting `find_cross_jump` (env-gated `*f1`/`*f2` suppressor): the osMotor and FORCESTOP merges
-are `call_min`-indistinguishable, so suppressing enough to keep one always breaks the other
-(`MINLE1` best = 17 residual diffs, never 0). MG64's build used a different cross-jump ALGORITHM
-(merge-selection order / epilogue-vs-continuation heuristic), not a tunable parameter.
-
-**Resolution ladder (when the tails are byte-identical = compiler wall):**
-1. **Commit the matching siblings as C + the stuck fn as `INCLUDE_ASM`** (partial bank, ROM stays
-   green). S121 option B: 8/9 `nucontrmbmgr.c` banked as verbatim C, `contRmbControl` carried as
-   `INCLUDE_ASM` (forward-decl it `extern` since the asm `glabel` is `.globl`; the C callers' `jal`
-   bytes are identical static-or-extern). File is not yet md5-candidate, but +8 matched fns + green ROM.
-2. **`hasm`-split** the stuck fn (permanent asm; the file is 8 C + 1 hasm, never a pure-C md5-candidate).
-3. **Leave fully carried.**
-4. **Compiler-patch (DOWNGRADED, near-dead).** A clean `jump.c` minimum/flag patch CANNOT reproduce a
-   non-monotonic selective-merge pattern; only MG64's actual compiler binary would, and none available
-   reproduces it. Pursue only as open toolchain research, not a banking path.
+**No compiler cross-jump WALL is confirmed in this project.** The sole candidate (S121 contRmbControl)
+was a body bug. If you ever reach byte-identical-unmerged tails with a body PROVEN to emit the target's
+exact stores + values, only then suspect a compiler-build divergence — and re-audit the body once more
+first. A genuinely stuck mirror fn then falls back to: partial-bank the matching siblings as C + carry
+the stuck fn as `INCLUDE_ASM` (ROM stays green; forward-decl `extern` since the asm `glabel` is
+`.globl`), or `hasm`-split it. A `jump.c` patch is NOT a banking path (open toolchain research only).
 
 ## struct-init-loop (dup-store / dual-induction-var)
 

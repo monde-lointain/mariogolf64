@@ -189,14 +189,17 @@ the summary.
     increment stays seed-only (S64 `gu/lookathil.c` + S69 `gu/lookat.c`, both pts-13, banked
     first-try). The exemption never covers classical or multi-file packs (a `pack` or `c-combined` of
     2 or more distinct upstream files decomposes at the file boundary as usual).
-    - **Sub-100 coddog hedge (S121).** A `single-file-pack` with a sub-100 coddog score (e.g.
-      `@99.99`, the same near-verbatim tell that flags block-reorders) still qualifies for the
-      exemption, but budget a **codegen-divergence diagnosis pass**: the "banks atomically OR is a
-      quick spike" assumption can be violated by a per-fn divergence (block-reorder, or a
-      `#cross-jump-tail-merge` byte-identical-tail wall) that turns the "quick spike" into a multi-
-      session compiler-RE and a PARTIAL bank (S121 `nucontrmbmgr.c`: 8/9 banked C, 1 carried as
-      `INCLUDE_ASM`). Hedge the estimate "<=1 re-attempt" and expect a per-file score of 0 pt if the
-      file ends partial (the matched-fn count is the value signal, not the file point).
+    - **Sub-100 coddog hedge (S121; corrected S127).** A `single-file-pack` with a sub-100 coddog score
+      (e.g. `@99.99`, the same near-verbatim tell that flags block-reorders) still qualifies for the
+      exemption, but budget a **body-divergence diagnosis pass**: the "banks atomically OR is a quick
+      spike" assumption can be violated by a per-fn divergence (block-reorder, or a **game-modified
+      body** — an extra branch/store the literal upstream lacks) that turns the "quick spike" into a
+      PARTIAL bank (S121 `nucontrmbmgr.c`: 8/9 banked C, 1 carried as `INCLUDE_ASM`). Hedge the estimate
+      "<=1 re-attempt" and expect a per-file score of 0 pt if the file ends partial (the matched-fn
+      count is the value signal, not the file point). **Do NOT conclude "compiler wall" before proving
+      the body emits the target's exact stores + values:** the S121 carry was misframed as an
+      unbankable `#cross-jump-tail-merge` for 5 sprints, then banked S127 with a one-branch FORCESTOP
+      fix (`state = STOPPED` on `osMotorInit` error). See `#cross-jump-tail-merge`.
     - **coddog 99.99 == STRUCTURE, not bytes; the exemption-GUARD (S123).** A `coddog-mirror:<f>@99.99`
       can mask a HEAVILY game-customized file where MOST bodies diverge, not just a block-reorder
       (S123 `nusched.c`: a game scheduler that shares only the nusys skeleton). The verbatim-mirror

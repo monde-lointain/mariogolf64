@@ -1903,22 +1903,22 @@ by `/sprint-plan`:
   `NU_CONT_THREAD_ID=6` vs MG64's 5), and that surfaces only at first build unless reconciled here.
   A near-free retry missing any of these is a half-scoped spike — finish the scope before deferring.
 
-- **Spike (S121) — `contRmbControl` (0x800A19E0), the ONE INCLUDE_ASM stub in the otherwise-C
-  `src/libnusys/mainlib/nucontrmbmgr.c`.** Blocker = a `#cross-jump-tail-merge` COMPILER WALL, NOT a
-  "try harder" retry. The project gcc 2.7.2 merges two byte-identical `j .L_ret; sh v0,4(s0)`
-  counter-store tails (STOPPING `counter--` + FORCESTOP `counter=2`) that MG64 keeps UNMERGED (build
-  0x1EC < target 0x1F8). **Exhaustively proven unbankable with available tooling** (do NOT re-spend
-  cycles here without a NEW compiler): (a) byte-identical tails ⇒ permuter can't help (145k iters,
-  plateau 220, never 0 — it only breaks the merge by adding instrs); (b) NO available binary
-  reproduces it — real-KMC (drmario64 `tools/gcc_kmc`) + decompals FSF-2.7.2 (== project `tools/cc/gcc`,
-  byte-identical) BOTH merge; SN 2.7.2 (all decompme variants) + gcc 2.8.1 (papermario) mis-allocate (5
-  regs/40B frame/`$19`-hoist) AND merge; (c) the target's selective pattern (osMotor merged, counter +
-  FORCESTOP not) is NON-MONOTONIC in any cross-jump knob (instrumented `find_cross_jump`:
-  `call_min`-indistinguishable, best suppression = 17 residual diffs). **The ONLY untried path is a
-  cross-jump-correct 2.7.2 build** (MG64's actual compiler, or a reverse-engineered `jump.c`
-  merge-selection heuristic — open toolchain research, low ROI). Until then the 8/9 C bank stands and
-  the file is not a pure-C md5-candidate. Evidence + env-gated patch preserved at
-  `nonmatchings/contRmbControl/sn_crossjump_investigation/`.
+- _(Spike (S121) — `contRmbControl` (0x800A19E0), the last INCLUDE_ASM stub in
+  `src/libnusys/mainlib/nucontrmbmgr.c` **RESOLVED + banked S127** — the "compiler wall" was a
+  MISDIAGNOSIS. S121 framed it as an unbankable `#cross-jump-tail-merge` (project gcc 2.7.2 merges two
+  byte-identical counter-store tails MG64 keeps unmerged; "exhaustively proven unbankable without a new
+  compiler" — 145k-iter permuter plateau, no available binary reproduces the selective merge). The real
+  cause was a **game-modified body**: MG64's FORCESTOP case sets `state = STOPPED` on `osMotorInit`
+  FAILURE and `state = STOPPING; counter = 2` only on SUCCESS (an `if/else`), where the
+  nusys/papermario upstream sets `state = STOPPING` UNCONDITIONALLY. The tell — the target's FORCESTOP
+  epilogue has TWO `sb v0,6(s0)` state stores with DIFFERENT values (`li v0,1` and `li v0,2`) — was in
+  the asm all along; the "cross-jump shorter-by-N" symptom was the wrong body's block layout, not a
+  merge wall (jump.c's `minimum=1` cross-jump needs only ONE matching insn before the epilogue label,
+  so LAYOUT, driven by the body, controls it). Fixed the one branch → byte-identical `.text` + full ROM
+  SHA-1 == baserom, NO compiler change. `nucontrmbmgr.c` is now a pure-C md5-candidate; **libnusys is
+  100% C.** Lesson folded into `#cross-jump-tail-merge` (rule out a game-modified body before declaring
+  a compiler wall: read the target's store SEQUENCE + VALUES) and the CLAUDE.md sub-100-coddog hedge.
+  S121 investigation evidence remains at `nonmatchings/contRmbControl/sn_crossjump_investigation/`.)_
 
 - _(Near-free retry (S118 deferral) — `func_800A2090` (0x7D490, 8B empty stub) **RESOLVED + banked
   S119** — the carry-over's completeness checklist replayed verbatim-correct, 0 rework: flip
