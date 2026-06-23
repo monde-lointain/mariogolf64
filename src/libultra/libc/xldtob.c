@@ -50,7 +50,7 @@ static const ldouble pows[] = {10e0L,  10e1L,  10e3L,   10e7L,  10e15L,
 // Classification results returned by _Ldunscale.
 #define NAN 2
 #define INF 1
-#define FINITE -1
+#define FINITE (-1)
 
 // Derived exponent-field masks for the double format.
 #define _DFRAC ((1 << _DOFF) - 1)        // fraction bits within word _D0

@@ -17,7 +17,9 @@ REG4 size_t n;
 #if FAST_SPEED
   REG1 UDWORD c;
   REG3 size_t n1;
-  if (n == 0) return dest;
+  if (n == 0) {
+    return dest;
+  }
 
   // Replicate the fill byte across all four bytes of a word so a single word
   // store paints four bytes at once.
@@ -30,7 +32,7 @@ REG4 size_t n;
   // MIPS faults on an unaligned word/halfword store, so the bulk loop below
   // must start aligned.
   if ((int)d & 1) {
-    *((BYTE*)d)++ = (BYTE)c;
+    *(d)++ = (BYTE)c;
     --n;
   }
   if (n >= 2) {
@@ -47,8 +49,12 @@ REG4 size_t n;
   }
 
   // Drain the 0..3 leftover bytes (a halfword then a byte).
-  if (n & 2) *((WORD*)d)++ = (WORD)c;
-  if (n & 1) *(BYTE*)d = (BYTE)c;
+  if (n & 2) {
+    *((WORD*)d)++ = (WORD)c;
+  }
+  if (n & 1) {
+    *d = (BYTE)c;
+  }
 #else
   // Portable fallback: store one byte per iteration.
   d = dest;

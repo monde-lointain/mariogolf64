@@ -15,7 +15,7 @@
 #ident "$Revision: 1.23 $"
 
 // Local classifier so the parser does not depend on locale or <ctype.h>.
-#define isdigit(x) ((x >= '0' && x <= '9'))
+#define isdigit(x) (((x) >= '0' && (x) <= '9'))
 
 /*
  * Sign bit of a long double, read from its most significant 16-bit word. Used
@@ -28,9 +28,9 @@
  * running value is clamped at 999 so a pathological width/precision can't
  * overflow.
  */
-#define ATOI(dst, src)                          \
-  for (dst = 0; isdigit(*src); ++src) {         \
-    if (dst < 999) dst = dst * 10 + *src - '0'; \
+#define ATOI(dst, src)                                  \
+  for ((dst) = 0; isdigit(*(src)); ++(src)) {           \
+    if ((dst) < 999) (dst) = (dst) * 10 + *(src) - '0'; \
   }
 
 // Longest padding run available from one pad string.

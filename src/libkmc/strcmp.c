@@ -19,11 +19,13 @@ REG3 char* s2;
 #if FAST_SPEED
   // If the two pointers do not share word alignment, a word compare would fault
   // on MIPS, so compare byte by byte for the whole string.
-  if (((char*)s1 - (char*)s2) & BUS_ERR_ALLIGN) {
+  if ((s1 - s2) & BUS_ERR_ALLIGN) {
     for (;;) {
       c = *((unsigned char*)s1)++;
       d = c - *((unsigned char*)s2)++;
-      if (d || c == 0) return d;
+      if (d || c == 0) {
+        return d;
+      }
     }
     return 0;
   }
@@ -33,7 +35,9 @@ REG3 char* s2;
   while ((int)s1 & 3) {
     c = *((unsigned char*)s1)++;
     d = c - *((UBYTE*)s2)++;
-    if (d || c == 0) return d;
+    if (d || c == 0) {
+      return d;
+    }
   }
 
   // Bulk compare one aligned word at a time.

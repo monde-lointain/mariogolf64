@@ -19,10 +19,10 @@
 
 // Convert one task pointer field from virtual to physical in place, leaving a
 // NULL pointer alone.
-#define _osVirtualToPhysical(ptr)          \
-  if (ptr != NULL) {                       \
-    ptr = (void*)osVirtualToPhysical(ptr); \
-  }                                        \
+#define _osVirtualToPhysical(ptr)            \
+  if ((ptr) != NULL) {                       \
+    (ptr) = (void*)osVirtualToPhysical(ptr); \
+  }                                          \
   (void)0
 
 extern OSTask tmp_task;

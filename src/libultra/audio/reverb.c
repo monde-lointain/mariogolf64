@@ -31,8 +31,8 @@ extern u32 load_num, load_cnt, load_max, load_min, save_num, save_cnt, save_max,
 #define SWAP(in, out) \
   {                   \
     s16 t = out;      \
-    out = in;         \
-    in = t;           \
+    (out) = in;       \
+    (in) = t;         \
   }
 
 Acmd* _loadOutputBuffer(ALFx* r, ALDelay* d, s32 buff, s32 incount, Acmd* p);
