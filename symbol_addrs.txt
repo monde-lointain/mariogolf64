@@ -293,3 +293,5 @@ nuScStack = 0x800D2970; // size:0x2000
 nuScAudioStack = 0x800D4970; // size:0x2000
 nuScGraphicsStack = 0x800D6970; // size:0x2000
 nuContRmbForceStopEnd = 0x800A2090; // type:func
+nuContRmbSearchTime = 0x800C7DD0; // size:0x4
+nuContRmbCallBack = 0x800C7DF0; // size:0xC
