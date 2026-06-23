@@ -1,0 +1,38 @@
+Checks: >
+  -*,
+  bugprone-*,
+  clang-analyzer-*,
+  clang-diagnostic-*,
+  misc-*,
+  performance-*,
+  portability-*,
+  readability-*,
+  -bugprone-easily-swappable-parameters,
+  -misc-include-cleaner,
+  -misc-non-private-member-variables-in-classes,
+  -misc-use-anonymous-namespace,
+  -misc-use-internal-linkage,
+  -performance-enum-size,
+  -portability-avoid-pragma-once,
+  -readability-function-cognitive-complexity,
+  -readability-identifier-length,
+  -readability-implicit-bool-conversion,
+  -readability-magic-numbers,
+  -readability-use-std-min-max,
+CheckOptions:
+  - key: readability-identifier-naming.StructCase
+    value: CamelCase
+  - key: readability-identifier-naming.FunctionCase
+    value: lower_case
+  - key: readability-identifier-naming.VariableCase
+    value: lower_case
+  - key: readability-identifier-naming.ParameterCase
+    value: lower_case
+  - key: readability-identifier-naming.EnumCase
+    value: CamelCase
+  - key: readability-identifier-naming.EnumConstantCase
+    value: UPPER_CASE
+  - key: readability-identifier-naming.GlobalConstantCase
+    value: UPPER_CASE
+  - key: readability-identifier-naming.MacroDefinitionCase
+    value: UPPER_CASE
