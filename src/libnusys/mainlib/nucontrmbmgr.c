@@ -10,7 +10,6 @@
 /* $Id: nucontrmbmgr.c,v 1.14 1999/01/23 05:44:22 ohki Exp $	*/
 /*======================================================================*/
 #include <nusys.h>
-#include "include_asm.h"
 
 extern NUContRmbCtl	nuContRmbCtl[NU_CONT_MAXCONTROLLERS];
 u32		nuContRmbSearchTime = NU_CONT_RMB_AUTO_SEARCHTIME;
@@ -68,11 +67,60 @@ void nuContRmbMgrRemove(void)
 /*		contNo	Controller number 				*/
 /*	RET:	error							*/
 /*----------------------------------------------------------------------*/
-/* contRmbControl is a cross-jump-implementation divergence vs the project's
-   gcc 2.7.2 (see SPRINT.md / nonmatchings/contRmbControl): no available
-   compiler binary reproduces its selective tail-merge. Carried as asm. */
-s32 contRmbControl(NUContRmbCtl* rmbCtl, u32 contNo);
-INCLUDE_ASM("asm/nonmatchings/libnusys/mainlib/nucontrmbmgr", contRmbControl);
+static s32 contRmbControl(NUContRmbCtl* rmbCtl, u32 contNo)
+{
+    s32	rtn = 0;
+    u32	integer;
+
+    /* Control the Rumble Pak status.		*/
+    switch(rmbCtl->state){
+    case NU_CONT_RMB_STATE_STOPPED:	/* Motor stopped. */
+	break;
+    case NU_CONT_RMB_STATE_STOPPING:
+	/* To stop the motor, osMotorStop must be executed for 3 frames; */
+	/* this processing is implemented.				   */
+	if(rmbCtl->counter > 0){
+	    rtn = osMotorStop(&nuContPfs[contNo]);
+	} else {
+	    rmbCtl->state = NU_CONT_RMB_STATE_STOPPED;
+	}
+	rmbCtl->counter--;
+	break;
+    case NU_CONT_RMB_STATE_RUN:	/* Run the motor to match the frequency. */
+	if(rmbCtl->frame >0){
+	    rmbCtl->counter += rmbCtl->freq;
+	    integer = rmbCtl->counter >> 8;
+	    rmbCtl->counter &= 0x00ff;
+	    if( integer > 0){
+		rtn = osMotorStart(&nuContPfs[contNo]);
+	    } else {
+		rtn = osMotorStop(&nuContPfs[contNo]);
+	    }
+	} else {
+	    rtn = osMotorStop(&nuContPfs[contNo]);
+	    rmbCtl->state = NU_CONT_RMB_STATE_STOPPING;
+	    rmbCtl->counter = 2;
+	}
+	rmbCtl->frame--;
+	break;
+    case NU_CONT_RMB_STATE_FORCESTOP:	/* Force a stop. */
+	/* MG64-modified: on osMotorInit failure, give up to STOPPED;	*/
+	/* on success, begin the normal stop sequence (vs nusys upstream	*/
+	/* which sets STOPPING unconditionally).			*/
+	rtn = osMotorInit(&nuSiMesgQ, &nuContPfs[contNo], contNo);
+	if(!rtn){
+	    osMotorStop(&nuContPfs[contNo]);
+	    rmbCtl->state = NU_CONT_RMB_STATE_STOPPING;
+	    rmbCtl->counter = 2;
+	} else {
+	    rmbCtl->state = NU_CONT_RMB_STATE_STOPPED;
+	}
+	break;
+    default:
+	break;
+    }
+    return rtn;
+}
 
 /*----------------------------------------------------------------------*/
 /*	contRmbRetrace - Controls the Rumble Pak by retrace		*/
