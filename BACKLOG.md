@@ -16,6 +16,25 @@ subordinate to the libultra goal. Target selection is `tools/pick_target.py` (sm
 the 8-point decompose gate fires on any seed ≥8. v2 classical track is active (since S11);
 mirror is the default, classical is first-class when the asm warrants it.
 
+**S127 — `nucontrmbmgr.c` COMPLETE (libnusys RMB-manager; the S121 spike RESOLVED).** Banked the last
+stub `contRmbControl` (0x800A19E0) as C → nucontrmbmgr.c now 0 stubs → **md5-candidate 176→177**;
+**libnusys mainlib is now 100% C.** **The S121 "cross-jump compiler wall" was a MISDIAGNOSIS:** MG64's
+FORCESTOP is game-modified (`state=STOPPED` on `osMotorInit` FAILURE, `state=STOPPING; counter=2` only
+on SUCCESS, an `if/else`), where the nusys/papermario upstream sets `state=STOPPING` UNCONDITIONALLY.
+The tell (two `sb v0,6(s0)` state stores with DIFFERENT values, `li 1`/`li 2`) was in the target asm
+all along; the "cross-jump shorter-by-N" symptom was the wrong body's block LAYOUT (jump.c's `minimum=1`
+cross-jump needs only ONE matching insn before the epilogue label → layout, driven by the body).
+User-directed systematic-debugging on the actual `mips-gcc-2.7.2/jump.c` source supplied the reframe.
+One-branch fix → byte-identical `.text` + full-make ROM SHA-1 == baserom, NO compiler change.
+Subseg/symbols unchanged (already `c` + curated from S121); asm subsegs 109→109. Quality 0/0/0/0 +
+resolved 1 prior carry. seed 3 / realized 5 / residual +2 (classical/mixed track). **Cross-repo
+follow-up:** none (`contRmbControl` already in `ghidra_symbols.txt`). Retro applied 3 of 3 (the core
+`#cross-jump-tail-merge` / CLAUDE.md / carry-over corrections landed in the bank commit per PO
+"fix docs now"): #1 BACKLOG/VELOCITY S121-claim SUPERSEDED markers; #2 memory
+`rule-out-body-before-compiler-wall`; #3 `pick_target.py` `body-divergence-suspect` tag on sub-100
+coddog-mirror rows (+ unit test + golden regen) + CLAUDE.md index row. **Next:** libnusys mined out
+(last stub gone) → re-scope to the libultra audio maybe-upstream band or classical singletons.
+
 **S126 — `nusched.c` COMPLETE (libnusys NU_DEBUG scheduler; last 3 fns banked; closes the S123/S125 spike).**
 Banked `nuScEventHandler` + `nuScCreateScheduler` + `nuScExecuteGraphics` as C; nusched.c now 0 stubs →
 **md5-candidate 175→176**. **HEADLINE: the S125 "nuScEventHandler is a permuter candidate" framing was
@@ -131,10 +150,14 @@ single-immediate-byte sub-case + CLAUDE.md index row; #2 leaf-returns-static SAM
 **Remaining libnusys (next-cleanest):** `nuGfxTaskMgr` (pts-8 `single-file-pack:3fn`, file-static +
 defines-data + refs-unplaced on the still-asm `nusched`/`rspbootTextEnd` + `jal-count-mismatch:7vs11`),
 then the `nuScCreateScheduler` / `func_800328E0` multi-fn packs (the latter's coddog is stale). The
-`contRmbControl` cross-jump WALL stays carried (compiler-blocked).
+`contRmbControl` cross-jump WALL stays carried (compiler-blocked). _(SUPERSEDED S127: NOT a wall — a
+game-modified FORCESTOP body; banked, file md5-candidate.)_
 
 **S121 — `nucontrmbmgr.c` 8/9 BANKED (libnusys RMB-manager verbatim mirror; `contRmbControl` carried
-as `INCLUDE_ASM`).** Banked the RMB manager's 8 verbatim libnusys fns as C (`nuContRmbMgrInit`/`Remove`,
+as `INCLUDE_ASM`).** _(SUPERSEDED S127: the `#cross-jump-tail-merge` "COMPILER WALL" framing below was a
+MISDIAGNOSIS — `contRmbControl` was a game-modified FORCESTOP body (`state=STOPPED` on `osMotorInit`
+error), banked S127 with a one-branch fix; the file is now a pure-C md5-candidate. The compiler-wall RE
+below is preserved as the historical record. See the S127 entry.)_ Banked the RMB manager's 8 verbatim libnusys fns as C (`nuContRmbMgrInit`/`Remove`,
 `contRmbRetrace`, `contRmbCheckMesg`, `contRmbForceStop`/`ForceStopEnd`/`Start`/`StopMesg`); the 9th,
 `contRmbControl` (0x800A19E0), is carried as `INCLUDE_ASM`. **HEADLINE: the verbatim-mirror exemption's
 first PARTIAL bank — a `#cross-jump-tail-merge` COMPILER WALL.** Planned a clean 9-fn pure-C

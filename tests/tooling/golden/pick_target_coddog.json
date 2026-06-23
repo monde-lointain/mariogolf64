@@ -2,7 +2,7 @@
   {
     "band": "-",
     "func": "func_800A0730",
-    "hazards": "pack:2fn[func_800A0730=?,func_800A0774=?],one-tu,coddog-mirror:src/io/fake.c@99.99,game-region-mirror:0x800A0730",
+    "hazards": "pack:2fn[func_800A0730=?,func_800A0774=?],one-tu,coddog-mirror:src/io/fake.c@99.99,body-divergence-suspect:src/io/fake.c@99.99,game-region-mirror:0x800A0730",
     "kind": "asm-flip",
     "nfns": 2,
     "pts": 3,
@@ -93,7 +93,7 @@
   {
     "band": "-",
     "func": "func_800A09E0",
-    "hazards": "pack:2fn[func_800A09E0=?,func_800A09F0=?],coddog-mirror:src/audio/fake.c@99.99",
+    "hazards": "pack:2fn[func_800A09E0=?,func_800A09F0=?],coddog-mirror:src/audio/fake.c@99.99,body-divergence-suspect:src/audio/fake.c@99.99",
     "kind": "asm-flip",
     "nfns": 2,
     "pts": 13,
@@ -1185,7 +1185,7 @@
   {
     "band": "-",
     "func": "func_8008D100",
-    "hazards": "pack:26fn[func_8008D100=?,func_8008D1DC=?,func_8008D3F4=?,func_8008DDDC=?,func_8008E164=?,per_hole_skybox_palette_load=?,func_8008E82C=?,update_sky_panel_verts=?,func_8008FF14=?,emit_sky_bg_panel_dl=?,emit_sky_panorama_strips_dl=?,func_8009226C=?,func_80092324=?,func_8009232C=?,func_80092E10=?,func_80092F18=?,func_800934CC=?,func_8009351C=?,func_800939E8=?,func_80094228=?,func_800947A8=?,func_80095150=?,func_8009548C=?,func_800957F0=?,func_800958D8=?,func_800959F8=?]",
+    "hazards": "pack:26fn[func_8008D100=?,func_8008D1DC=?,func_8008D3F4=?,func_8008DDDC=?,func_8008E164=?,per_hole_skybox_palette_load=?,func_8008E82C=?,update_sky_panel_verts=?,func_8008FF14=?,emit_sky_bg_panel_dl=?,emit_sky_panorama_strips_dl=?,func_8009226C=?,func_80092324=?,func_8009232C=?,func_80092E10=?,func_80092F18=?,func_800934CC=?,func_8009351C=?,func_800939E8=?,func_80094228=?,func_800947A8=?,func_80095150=?,func_8009548C=?,func_800957F0=?,func_800958D8=?,func_800959F8=?],caller-evict:func_8008D1DC@src/libnusys/mainlib/nusched.c;func_80092324@src/libnusys/mainlib/nusched.c",
     "kind": "asm-flip",
     "nfns": 26,
     "pts": 13,

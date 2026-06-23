@@ -112,6 +112,13 @@ HAZARD_UNATTRIB_LEAF = "unattrib-leaf"  # within a c-combined pack (≥2 distinc
 # nucontgbpakfwrite and nusimgr). Front/trailing `?` (within one file) do NOT fire. Fired only for a
 # LONE straddler (a clean 2-file split with one stray leaf, not a whole interleaved foreign TU).
 # Detail `0x<vram>` (comma list). Advisory. See docs/hazards.md#multi-function-segment-splitting-pack
+HAZARD_BODY_DIVERGENCE_SUSPECT = "body-divergence-suspect"  # a SUB-100 coddog-mirror (near-verbatim
+# but NOT byte-exact, e.g. @99.99) can mask a GAME-MODIFIED body, not just a block-reorder/compiler
+# artifact: an extra branch/store the literal upstream lacks. Flags the row for a body-store-value
+# diagnosis (read the target's store SEQUENCE + VALUES) BEFORE declaring a clean mirror OR a compiler
+# wall. S121 contRmbControl @99.99 was a game-modified FORCESTOP (state=STOPPED on osMotorInit error),
+# misread as a #cross-jump-tail-merge wall for 5 sprints; resolved S127 with a one-branch fix. Detail
+# `<file>@<pct>`. Advisory. See docs/hazards.md#cross-jump-tail-merge
 
 
 @dataclasses.dataclass
@@ -136,6 +143,11 @@ class Hazard:
     def coddog_mirror(cls, cfile: str, pct: float) -> "Hazard":
         """A coddog-mirror flag, detail encoded as `<file>@<pct>` (2-decimal)."""
         return cls(HAZARD_CODDOG_MIRROR, f"{cfile}@{pct:.2f}")
+
+    @classmethod
+    def body_divergence_suspect(cls, cfile: str, pct: float) -> "Hazard":
+        """A sub-100 coddog-mirror that may mask a game-modified body; detail `<file>@<pct>`."""
+        return cls(HAZARD_BODY_DIVERGENCE_SUSPECT, f"{cfile}@{pct:.2f}")
 
     # --- detail-format factories ------------------------------------------------------------
     # One source of truth for each kind's `detail` encoding; render() output is byte-identical to

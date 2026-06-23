@@ -373,6 +373,7 @@ When `pick_target.py` flags a hazard (or a match shows its symptom), read the ma
 | clean mirror SHA-miss, extra `jal __assert` / bare `assert()` / `bare-assert:<n>` | #assert-strip |
 | clean mirror SHA-miss, same insn count reordered / jal-mismatch + no `coddog-mirror` | #near-verbatim-mirror-jal-count-mismatch |
 | clean mirror SHA-miss, build instr-count < target (shorter) / collateral post-fn addr shifts | #cross-jump-tail-merge |
+| `body-divergence-suspect:<file>@<pct>` | #cross-jump-tail-merge |
 | array-of-struct init loop shorter than target + a field stored twice (doubled store-offset) | #struct-init-loop-dup-store--dual-induction-var |
 | permuter on a KMC-toolchain (libnusys/libultra/libkmc) mirror fn | #permuter-setup-for-kmc-toolchain-mirrors |
 | libnusys carry whose carried fns == the upstream's `#ifdef NU_DEBUG` fns | #nu_debug-stock-not-custom-carried-perf-fn-triage |

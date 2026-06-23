@@ -2926,6 +2926,16 @@ def _build_row(off, typ, path, size, args, upstream_index, carried, sig_index,
     # decompiled, so the hit is a fingerprint coincidence, not a fresh attribution.
     for s in sorted({c for c in cod_srcs if _coddog_source_banked(c)}):
         hazards.append(Hazard.coddog_source_banked(os.path.basename(s)))
+    # body-divergence-suspect (S127): a SUB-100 coddog-mirror (near-verbatim but NOT byte-exact) can
+    # mask a GAME-MODIFIED body, not just a block-reorder/compiler artifact. Flag it so the gate runs a
+    # body-store-value diagnosis (read the target's store SEQUENCE + VALUES) before declaring a clean
+    # mirror OR a compiler wall. S121 contRmbControl @99.99 was a game-modified FORCESTOP, misread as a
+    # #cross-jump-tail-merge wall for 5 sprints; resolved S127 with a one-branch fix.
+    for cf in sorted({h.coddog_file() for h in hazards
+                      if h.kind == HAZARD_CODDOG_MIRROR and h.coddog_pct() < 100.0}):
+        pct = max(h.coddog_pct() for h in hazards
+                  if h.kind == HAZARD_CODDOG_MIRROR and h.coddog_file() == cf)
+        hazards.append(Hazard.body_divergence_suspect(cf, pct))
     # A libultra-source mirror whose vram is BELOW the libultra code band is game-linked at -O2, not
     # -O3 — route it to a -O2 path (src/mgu/…), NOT src/libultra/ (which forces -O3 → wrong
     # auto-inlining). Gated on up_lib == "libultra" (excludes audio coddog hits, which stay

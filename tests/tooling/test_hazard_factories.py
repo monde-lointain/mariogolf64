@@ -63,6 +63,9 @@ def test_coddog_factories():
     # coddog_twin pairs with twin_file(); coddog_structural with coddog_pct()
     assert H.coddog_twin("foo", ["a", "b"]).twin_file() == "foo"
     assert H.coddog_structural("f.c", 99.0).coddog_pct() == 99.0
+    # body_divergence_suspect (S127): sub-100 coddog-mirror that may mask a game-modified body
+    assert (H.body_divergence_suspect("f.c", 99.99).render()
+            == f"{h.HAZARD_BODY_DIVERGENCE_SUSPECT}:f.c@99.99")
 
 
 def test_game_region_mirror():

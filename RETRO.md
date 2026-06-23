@@ -25,6 +25,17 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 127 — contRmbControl banked (libnusys RMB-manager; resolves the S121 cross-jump-wall spike) — 2026-06-23
+- Increment: src/libnusys/mainlib/nucontrmbmgr.c COMPLETE (1 fn, contRmbControl, banked C; closes the S121 partial). matched-fn +1; md5-candidate 176→**177** (file now 0 stubs). **libnusys mainlib is now 100% C.** ROM SHA-1 == baserom.
+- Quality: stuck-far 0 / permuter 0 / carried 0 / re-opened 0 — and **resolved 1 prior carry** (the S121 "unbankable" spike). Net positive.
+- Seed: committed 3pt; regime mixed (classical body-fix). v2 realized tier: seed 3 → realized 5; residual +2 (carry-or-reopen +1 + novel bank-gotcha +1 = the misdiagnosis reversal).
+- What helped: **the user's systematic-debugging redirect to the actual compiler source** (`mips-gcc-2.7.2/jump.c`). `find_cross_jump`'s `minimum=1` "cross-jump to code before the label" path merges on ONE matching insn before the epilogue label → the "merge" is basic-block-LAYOUT-driven, and layout is driven by the BODY. That reframe ("the body controls it, not an exotic heuristic") sent me back to re-read the target's stores, where the divergence was plain: the FORCESTOP epilogue has TWO `sb v0,6(s0)` state stores with DIFFERENT values (`li 1`/`li 2`), impossible from a single unconditional `state =`. MG64's FORCESTOP is game-modified (`state=STOPPED` on osMotorInit FAILURE, `state=STOPPING; counter=2` on SUCCESS, an if/else) vs upstream/papermario's unconditional STOPPING. One-branch fix → byte-identical .text + full ROM SHA-1, NO compiler change.
+- Friction: 5 sprints + a 145k-iter permuter run + a multi-binary compiler hunt (S121) were spent on a 1-line body bug. The "byte-identical-tails ⇒ compiler wall" triage assumed the body was correct; it wasn't. The lying-signature experiment (a real codegen perturbation) was a productive side-track that didn't resolve it; the body did. S123/S124 had ALREADY hit the same "apparent wall == source artifact" pattern — the lesson didn't generalize to the carried spike until now.
+- Applied (3 of 3 + mandatory ledger; the core `#cross-jump-tail-merge` / CLAUDE.md / carry-over corrections landed in the bank commit `7717792` per PO "fix docs now"): #1 SUPERSEDED markers on the S121 BACKLOG sprint-log + line-134 forward-pointer + VELOCITY row 121; #2 memory `rule-out-body-before-compiler-wall`; #3 `pick_target.py` `body-divergence-suspect` tag on sub-100 coddog-mirror rows (factory + `_build_row` post-pass + unit test + golden regen) + CLAUDE.md hazard-index row.
+- Carry-overs: none. **libnusys mined out** (last stub gone); next sprint re-scopes (libultra audio maybe-upstream band or classical singletons).
+
+---
+
 ## Sprint 126 — nusched.c COMPLETE (last 3 fns: nuScEventHandler + nuScCreateScheduler + nuScExecuteGraphics) — 2026-06-23
 - Increment: src/libnusys/mainlib/nusched.c FULL (3/3 remaining fns banked C; closes the S123/S125 spike, open 3 sprints). matched-fn +3; md5-candidate files 175→**176** (file now 0 stubs); asm subsegs unchanged (subseg already `c` from S123). ROM SHA-1 == baserom at every commit.
 - Quality: stuck-far 0 / permuter-escalated 0 / carried 0 / re-opened 0.
