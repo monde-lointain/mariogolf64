@@ -153,7 +153,7 @@ SECTIONS
         build/src/libnusys/mainlib/nucontrmbcheck.o(.text);
         build/src/libnusys/mainlib/nucontrmbmodeset.o(.text);
         build/src/libnusys/mainlib/nucontrmbforcestop.o(.text);
-        build/src/libnusys/mainlib/func_800A2090.o(.text);
+        build/src/libnusys/mainlib/nucontrmbforcestopend.o(.text);
         build/src/libnusys/mainlib/nucontgbpakmgr.o(.text);
         build/src/libnusys/mainlib/nucontgbpakopen.o(.text);
         build/src/libnusys/mainlib/nucontgbpakgetstatus.o(.text);
@@ -416,7 +416,7 @@ SECTIONS
         build/src/libnusys/mainlib/nucontrmbcheck.o(.data);
         build/src/libnusys/mainlib/nucontrmbmodeset.o(.data);
         build/src/libnusys/mainlib/nucontrmbforcestop.o(.data);
-        build/src/libnusys/mainlib/func_800A2090.o(.data);
+        build/src/libnusys/mainlib/nucontrmbforcestopend.o(.data);
         build/src/libnusys/mainlib/nucontgbpakmgr.o(.data);
         build/src/libnusys/mainlib/nucontgbpakopen.o(.data);
         build/src/libnusys/mainlib/nucontgbpakgetstatus.o(.data);
@@ -687,7 +687,7 @@ SECTIONS
         build/src/libnusys/mainlib/nucontrmbcheck.o(.rodata);
         build/src/libnusys/mainlib/nucontrmbmodeset.o(.rodata);
         build/src/libnusys/mainlib/nucontrmbforcestop.o(.rodata);
-        build/src/libnusys/mainlib/func_800A2090.o(.rodata);
+        build/src/libnusys/mainlib/nucontrmbforcestopend.o(.rodata);
         build/src/libnusys/mainlib/nucontgbpakmgr.o(.rodata);
         build/src/libnusys/mainlib/nucontgbpakopen.o(.rodata);
         build/src/libnusys/mainlib/nucontgbpakgetstatus.o(.rodata);
@@ -968,7 +968,7 @@ SECTIONS
         build/src/libnusys/mainlib/nucontrmbcheck.o(.bss);
         build/src/libnusys/mainlib/nucontrmbmodeset.o(.bss);
         build/src/libnusys/mainlib/nucontrmbforcestop.o(.bss);
-        build/src/libnusys/mainlib/func_800A2090.o(.bss);
+        build/src/libnusys/mainlib/nucontrmbforcestopend.o(.bss);
         build/src/libnusys/mainlib/nucontgbpakmgr.o(.bss);
         build/src/libnusys/mainlib/nucontgbpakopen.o(.bss);
         build/src/libnusys/mainlib/nucontgbpakgetstatus.o(.bss);
