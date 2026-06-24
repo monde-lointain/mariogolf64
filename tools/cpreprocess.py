@@ -12,6 +12,7 @@ build_config.py, not here -- it is coupled to the build-version config (_VERSION
 _build_version_ord / the Makefile-define machinery), so it sits alongside that config
 cluster in its own leaf rather than with these pure C-text strippers.
 """
+
 import re
 
 # Strip C comments and string literals so neither a copyright header
@@ -36,7 +37,9 @@ def _strip_string_literals(text):
     return _STR_LIT_RE.sub('""', text)
 
 
-_DEAD_OPEN_RE = re.compile(r"#\s*if(?:def\s+(?:_DEBUG|NU_DEBUG|AUD_PROFILE)|ndef\s+_FINALROM|\s+0)\b")
+_DEAD_OPEN_RE = re.compile(
+    r"#\s*if(?:def\s+(?:_DEBUG|NU_DEBUG|AUD_PROFILE)|ndef\s+_FINALROM|\s+0)\b"
+)
 _PP_IF_RE = re.compile(r"#\s*if")
 _PP_ENDIF_RE = re.compile(r"#\s*endif")
 

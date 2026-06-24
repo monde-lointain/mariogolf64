@@ -6,6 +6,7 @@ The wider tooling suite does not cover libultra_match at all, so this pins the o
 tree) so it characterizes real mapping behavior even on a checkout where ultralib isn't built --
 otherwise an empty/absent SRC_OBJ_TREE would silently pin only the fallback.
 """
+
 from __future__ import annotations
 
 from conftest import load_tool

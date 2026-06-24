@@ -21,6 +21,7 @@ Usage:
 Replaces the old `/decomp-lead` roadmap: target selection is now a tool the plan
 gate calls, mirroring marioparty7's pick_target.py.
 """
+
 import argparse
 import dataclasses
 import functools
@@ -146,34 +147,72 @@ BACKLOG = os.path.join(ROOT, "BACKLOG.md")
 # The two disjoint symbol-name files. A symbol absent from BOTH gets no linker address; for a
 # *data* extern that means an undefined reference (see refs_unplaced). Functions are exempt —
 # splat auto-resolves them via undefined_funcs_auto.txt.
-NAME_FILES = [os.path.join(ROOT, "symbol_addrs.txt"), os.path.join(ROOT, "ghidra_symbols.txt")]
+NAME_FILES = [
+    os.path.join(ROOT, "symbol_addrs.txt"),
+    os.path.join(ROOT, "ghidra_symbols.txt"),
+]
 # Optional coddog cross-ref map (mgname<TAB>ulname<TAB>ulfile<TAB>pct), written by
 # tools/coddog_sweep.sh. Absent by default → build_coddog_index() returns {} and ranking is
 # unchanged. A ≥CODDOG_MIRROR_PCT non-audio hit re-prices an un-named/none candidate as a libultra
 # mirror. See docs/hazards.md#coddog-cross-ref.
-CODDOG_MAP = os.environ.get("CODDOG_MAP", os.path.join(ROOT, "tools/coddog/coddog_map.tsv"))
+CODDOG_MAP = os.environ.get(
+    "CODDOG_MAP", os.path.join(ROOT, "tools/coddog/coddog_map.tsv")
+)
 # Optional nusys coddog cross-ref map — the libnusys analog of CODDOG_MAP, written by
 # tools/nusys_sweep.sh. Absent by default → build_coddog_nusys_index() returns {} and ranking is
 # unchanged. A ≥CODDOG_MIRROR_PCT hit re-prices an un-named/none candidate as a libnusys mirror. Its
 # `cfile` paths are `mainlib/<base>.c` (nusys-2.07-src-relative), resolved by _coddog_nusys_path.
-NUSYS_CODDOG_MAP = os.environ.get("NUSYS_CODDOG_MAP", os.path.join(ROOT, "tools/coddog/nusys_map.tsv"))
+NUSYS_CODDOG_MAP = os.environ.get(
+    "NUSYS_CODDOG_MAP", os.path.join(ROOT, "tools/coddog/nusys_map.tsv")
+)
 
 # Approximate C function-definition: a return-type-led line ending in `name(`.
 UPSTREAM_DEF_RE = re.compile(r"^[A-Za-z_][\w \t\*]*?\b([A-Za-z_]\w+)\s*\(", re.M)
 # Keywords that can lead a `<word>(` at a statement boundary but are NOT a function name — control
 # flow (an indented `if (`/`switch (`) and type/storage qualifiers (the `int (*tbl[])(void)` decl,
 # whose token before the first `(` is `int`). _iter_upstream_functions filters these.
-_DEF_NONNAME_KW = frozenset((
-    "if", "while", "for", "switch", "else", "do", "return", "case", "goto", "sizeof", "default",
-    "int", "char", "short", "long", "unsigned", "signed", "float", "double", "void", "struct",
-    "union", "enum", "const", "static", "extern", "volatile", "register", "typedef", "auto",
-))
+_DEF_NONNAME_KW = frozenset(
+    (
+        "if",
+        "while",
+        "for",
+        "switch",
+        "else",
+        "do",
+        "return",
+        "case",
+        "goto",
+        "sizeof",
+        "default",
+        "int",
+        "char",
+        "short",
+        "long",
+        "unsigned",
+        "signed",
+        "float",
+        "double",
+        "void",
+        "struct",
+        "union",
+        "enum",
+        "const",
+        "static",
+        "extern",
+        "volatile",
+        "register",
+        "typedef",
+        "auto",
+    )
+)
 # `#pragma weak <alias> = <impl>` exports <alias> at the implementation's address. The def loop
 # only keys the impl name (gu/cosf.c defines `fcos`/`__cosf`), so the ROM/curated weak alias `cosf`
 # was absent from the upstream index → a pack member read `cosf=?` and hid cosf.c from the
 # c-combined member labels. Keying the alias too lets a weak-aliased SDK fn resolve to its
 # upstream file (cosf/sinf/fcos/fsin), the C analog of ASM_TU_DEF_RE's WEAK arm (bcopy → _bcopy).
-PRAGMA_WEAK_RE = re.compile(r"^\s*#pragma\s+weak\s+([A-Za-z_]\w+)\s*=\s*[A-Za-z_]\w+", re.M)
+PRAGMA_WEAK_RE = re.compile(
+    r"^\s*#pragma\s+weak\s+([A-Za-z_]\w+)\s*=\s*[A-Za-z_]\w+", re.M
+)
 # A hand-asm TU's exported entry: `LEAF(osGetCount)` / `XLEAF(name)` / `WEAK(bcopy, _bcopy)`
 # (sys/asm.h macros). The WEAK arm catches the public name of an aliased TU (bcopy → _bcopy).
 # Keys build_asm_tu_index so an intrinsic-likely shim can name its vendorable ultralib .s TU.
@@ -197,7 +236,12 @@ ASM_INCLUDE_LINE_RE = re.compile(r"^\s*#\s*include.*$", re.M)
 # these headers is genuinely missing — the asm analog of missing_includes' header reachability.
 ASM_VENDOR_INCLUDE_DIRS = [
     os.path.join(ROOT, d)
-    for d in ("include", "include/libultra", "include/libultra/PR", "include/libultra/compiler/gcc")
+    for d in (
+        "include",
+        "include/libultra",
+        "include/libultra/PR",
+        "include/libultra/compiler/gcc",
+    )
 ]
 FILE_STATIC_RE = re.compile(r"^\s*static\b[^=]*;\s*$")
 # A file-scope data-global *definition* (external linkage): `<type> <name> [= init];`.
@@ -236,7 +280,13 @@ INCLUDE_RE = re.compile(r'^\s*#\s*include\s*[<"]([^>"]+)[>"]')
 # The project's quoted/angle include search dirs (Makefile CFLAGS `-I` set; -nostdinc removed — stdarg.h ships at include/stdarg.h for correct MIPS GCC 2.7.2 vararg ABI).
 INCLUDE_DIRS = [
     os.path.join(ROOT, d)
-    for d in ("include", "include/libultra", "include/libultra/internal", "include/libkmc", "include/libnusys")
+    for d in (
+        "include",
+        "include/libultra",
+        "include/libultra/internal",
+        "include/libkmc",
+        "include/libnusys",
+    )
 ]
 PROJECT_INC = os.path.join(ROOT, "include")
 # Per-lib extra `-I` dirs the Makefile's profile CFLAGS add on top of the base INCLUDE_DIRS, so a
@@ -343,7 +393,9 @@ class UpstreamSource:
     @property
     def text(self):
         if not self._read:
-            with open(self.path, errors="ignore") as f:  # OSError propagates; callers keep try/except
+            with open(
+                self.path, errors="ignore"
+            ) as f:  # OSError propagates; callers keep try/except
                 self._text = f.read()
             self._read = True
         return self._text
@@ -436,7 +488,9 @@ def _intree_asm_macros():
     for d in ASM_VENDOR_INCLUDE_DIRS:
         for h in glob.glob(os.path.join(d, "**", "*.h"), recursive=True):
             try:
-                macros.update(re.findall(r"#define\s+(\w+)", open(h, errors="ignore").read()))
+                macros.update(
+                    re.findall(r"#define\s+(\w+)", open(h, errors="ignore").read())
+                )
             except OSError:
                 continue
     return frozenset(macros)
@@ -487,11 +541,13 @@ def vendorable_tu_data_symbols(rel):
     # MG64's `-D_FINALROM -DBUILD_VERSION=VERSION_J` asm profile, so listing it over-counts the
     # rodata-strip enabler. Drop the dead + inactive-version blocks before the section scan so the
     # priced has-rodata set is what the vendored `.o` actually carries, not the all-branches union.
-    text = _strip_inactive_version_branches(_strip_dead_blocks(text), _build_version_ord("libultra"))
+    text = _strip_inactive_version_branches(
+        _strip_dead_blocks(text), _build_version_ord("libultra")
+    )
     m = re.search(r"^\s*\.(rdata|rodata|data|sdata|bss|sbss)\b", text, re.M)
     if not m:
         return []
-    tail = text[m.end():]
+    tail = text[m.end() :]
     syms = re.findall(r"(?:EXPORT|XLEAF|glabel|dlabel)\s*\(?\s*(\w+)", tail)
     syms += re.findall(r"\.globl\s+(\w+)", tail)
     return sorted(set(syms))
@@ -523,12 +579,14 @@ def vendorable_tu_jtbl(rel):
     except OSError:
         return []
     text = C_COMMENT_RE.sub("", text)
-    text = _strip_inactive_version_branches(_strip_dead_blocks(text), _build_version_ord("libultra"))
+    text = _strip_inactive_version_branches(
+        _strip_dead_blocks(text), _build_version_ord("libultra")
+    )
     m = re.search(r"^\s*\.(rdata|rodata|data|sdata)\b", text, re.M)
     if not m:
         return []
     heads, cur = [], None
-    for line in text[m.end():].splitlines():
+    for line in text[m.end() :].splitlines():
         s = line.strip()
         if not s:
             continue
@@ -537,7 +595,9 @@ def vendorable_tu_jtbl(rel):
             cur = lbl.group(1) or lbl.group(2)
             continue
         mw = re.match(r"\.word\s+(.+)$", s)
-        if mw and any(_WORD_LABEL_OPERAND_RE.match(op.strip()) for op in mw.group(1).split(",")):
+        if mw and any(
+            _WORD_LABEL_OPERAND_RE.match(op.strip()) for op in mw.group(1).split(",")
+        ):
             if cur:
                 heads.append(cur)
     return sorted(set(heads))
@@ -566,19 +626,31 @@ def vendorable_tu_jtbl(rel):
 C_CALL_RE = re.compile(r"\b([A-Za-z_]\w+)\s*\(")
 C_INT_RE = re.compile(r"\b(0x[0-9A-Fa-f]+|\d+)\b")
 _C_NONCALL = {
-    "if", "for", "while", "switch", "return", "sizeof", "do", "else", "case",
-    "defined", "OS_LOG_FLOAT", "assert",
+    "if",
+    "for",
+    "while",
+    "switch",
+    "return",
+    "sizeof",
+    "do",
+    "else",
+    "case",
+    "defined",
+    "OS_LOG_FLOAT",
+    "assert",
     # Inline predicate macros that expand to field comparisons, emitting NO jal — counting them
     # as C calls over-inflates the jal-count C side (a `MQ_IS_FULL` reads as a call but is none) and
     # pollutes the maybe-upstream callee signature. They carry no cross-build identity.
-    "MQ_IS_FULL", "MQ_IS_EMPTY",
+    "MQ_IS_FULL",
+    "MQ_IS_EMPTY",
     # GCC attribute artifacts surfaced by macro_hidden_text: the macros.h `ALIGNED(x)` /
     # `STACK(...)` family expand to `__attribute__((aligned(x)))`, so the lowercase `aligned`
     # attribute keyword (and `__attribute__` itself) read as `name(` call tokens and mis-flag as
     # an unplaced callee (`static STACK(...) ALIGNED(0x10)` → phantom `calls-unplaced:aligned`).
     # The macro NAMES (ALIGNED/STACK/ARRLEN/ALIGN8) are already dropped via macro_names; these are
     # their expansion residue, which macro_names does not cover.
-    "aligned", "__attribute__",
+    "aligned",
+    "__attribute__",
 }
 
 
@@ -590,12 +662,13 @@ def _c_signature(body):
 
 
 _NONCODE_RE = re.compile(
-    r"//[^\n]*"                                  # line comment
-    r"|/\*.*?\*/"                                # block comment
-    r'|"(?:\\.|[^"\\])*"'                        # string literal
-    r"|'(?:\\.|[^'\\])*'"                        # char literal
-    r"|(?m:^[ \t]*\#(?:[^\n]*\\\n)*[^\n]*)",     # preprocessor directive (+ `\` continuations)
-    re.S)
+    r"//[^\n]*"  # line comment
+    r"|/\*.*?\*/"  # block comment
+    r'|"(?:\\.|[^"\\])*"'  # string literal
+    r"|'(?:\\.|[^'\\])*'"  # char literal
+    r"|(?m:^[ \t]*\#(?:[^\n]*\\\n)*[^\n]*)",  # preprocessor directive (+ `\` continuations)
+    re.S,
+)
 
 
 def _blank_noncode(text):
@@ -648,8 +721,12 @@ def _iter_upstream_functions(text):
         k = j
         while k >= 0 and (scan[k].isalnum() or scan[k] == "_"):
             k -= 1
-        name = scan[k + 1:j + 1]
-        if not name or not (name[0].isalpha() or name[0] == "_") or name in _DEF_NONNAME_KW:
+        name = scan[k + 1 : j + 1]
+        if (
+            not name
+            or not (name[0].isalpha() or name[0] == "_")
+            or name in _DEF_NONNAME_KW
+        ):
             i += 1
             continue
         # Match this param-list ')'.
@@ -667,7 +744,9 @@ def _iter_upstream_functions(text):
         q = p + 1
         while q < n and scan[q] in " \t\r\n":
             q += 1
-        if q < n and scan[q] == ";":  # `T name(...);` forward declaration / prototype — no body
+        if (
+            q < n and scan[q] == ";"
+        ):  # `T name(...);` forward declaration / prototype — no body
             i = p + 1
             continue
         brace = scan.find("{", p)
@@ -682,7 +761,7 @@ def _iter_upstream_functions(text):
                 if d3 == 0:
                     break
             b += 1
-        yield name, text[brace:b + 1]
+        yield name, text[brace : b + 1]
         i = b + 1  # skip the consumed body so depth stays 0
 
 
@@ -728,7 +807,8 @@ def _meaningful_loc(cpath):
 # A dot-prefixed ld-section sibling line, e.g. `- [0xA35D0, .data, libultra/gu/rotate]`. The shared
 # SUBSEG_RE types as `[a-z]+` (no leading dot), so parse_subsegs SKIPS these — scan them directly.
 _LD_SIBLING_RE = re.compile(
-    r"^\s*-\s*\[\s*0x[0-9A-Fa-f]+\s*,\s*(\.(?:data|rodata|bss))\s*,\s*([^\]]+?)\s*\]")
+    r"^\s*-\s*\[\s*0x[0-9A-Fa-f]+\s*,\s*(\.(?:data|rodata|bss))\s*,\s*([^\]]+?)\s*\]"
+)
 
 
 @functools.lru_cache(maxsize=1)
@@ -745,7 +825,9 @@ def _static_carve_siblings():
             if not m:
                 continue
             d, b = os.path.split(m.group(2).strip())
-            out.setdefault(d, {".data": set(), ".rodata": set(), ".bss": set()})[m.group(1)].add(b)
+            out.setdefault(d, {".data": set(), ".rodata": set(), ".bss": set()})[
+                m.group(1)
+            ].add(b)
     return out
 
 
@@ -810,9 +892,9 @@ def _coddog_source_banked(cod_src):
     `src/libnusys/<base>.c` (the in-tree tree drops the upstream `mainlib/` dir); a libultra hit
     (`src/audio/load.c`, ultralib-repo-relative) mirrors at `src/libultra/<reldir>/<base>`."""
     if cod_src.startswith("mainlib/"):
-        mp = os.path.join(ROOT, "src", "libnusys", cod_src[len("mainlib/"):])
+        mp = os.path.join(ROOT, "src", "libnusys", cod_src[len("mainlib/") :])
     else:
-        rel = cod_src[len("src/"):] if cod_src.startswith("src/") else cod_src
+        rel = cod_src[len("src/") :] if cod_src.startswith("src/") else cod_src
         mp = os.path.join(ROOT, "src", "libultra", rel)
     try:
         with open(mp, errors="ignore") as f:
@@ -922,8 +1004,8 @@ def signature_hint(rom_off, primary, sig_index):
 # stripped first (their debug calls compile out of the real build); macro/inlined calls can
 # still skew the count, so it stays advisory — the gate confirms by disassembling.
 
-_IFDEF_OPEN_RE = re.compile(r'^\s*#\s*ifdef\s+([A-Za-z_][A-Za-z0-9_]*)')
-_MAKEFILE_DEFINE_RE = re.compile(r'-D([A-Za-z_][A-Za-z0-9_]*)(?:=[^\s]*)?')
+_IFDEF_OPEN_RE = re.compile(r"^\s*#\s*ifdef\s+([A-Za-z_][A-Za-z0-9_]*)")
+_MAKEFILE_DEFINE_RE = re.compile(r"-D([A-Za-z_][A-Za-z0-9_]*)(?:=[^\s]*)?")
 
 # BUILD_VERSION config + version-conditional stripping moved to build_config.py (the shared leaf
 # both the C-side and asm-TU scanners use); _build_version_ord / _strip_inactive_version_branches
@@ -990,16 +1072,24 @@ def _parse_makefile_defines():
     — without parsing LIBULTRA_CFLAGS the GBI microcode define is invisible, so a
     GBI-value-guarded macro (OS_YIELD_DATA_SIZE) false-flags as needs-define on a build
     that already defines it."""
-    build_files = [os.path.join(ROOT, "Makefile")] + sorted(glob.glob(os.path.join(ROOT, "mk", "*.mk")))
+    build_files = [os.path.join(ROOT, "Makefile")] + sorted(
+        glob.glob(os.path.join(ROOT, "mk", "*.mk"))
+    )
     raw = {"main": set(), "libkmc": set(), "libnusys": set(), "libultra": set()}
     for path in build_files:
         try:
             with open(path) as f:
                 for line in f:
-                    for var, key in [("CFLAGS", "main"), ("LIBKMC_CFLAGS", "libkmc"),
-                                     ("LIBNUSYS_CFLAGS", "libnusys"), ("LIBULTRA_CFLAGS", "libultra")]:
-                        if re.match(rf'^\s*{var}\s*[:+]?=', line):
-                            raw[key].update(m.group(1) for m in _MAKEFILE_DEFINE_RE.finditer(line))
+                    for var, key in [
+                        ("CFLAGS", "main"),
+                        ("LIBKMC_CFLAGS", "libkmc"),
+                        ("LIBNUSYS_CFLAGS", "libnusys"),
+                        ("LIBULTRA_CFLAGS", "libultra"),
+                    ]:
+                        if re.match(rf"^\s*{var}\s*[:+]?=", line):
+                            raw[key].update(
+                                m.group(1) for m in _MAKEFILE_DEFINE_RE.finditer(line)
+                            )
         except OSError:
             continue
     for k in ("libkmc", "libnusys", "libultra"):
@@ -1009,7 +1099,9 @@ def _parse_makefile_defines():
 
 def _active_defines_for_lib(lib):
     """Effective -D defines for an upstream library key (libultra, libkmc, libnusys)."""
-    key = {"libkmc": "libkmc", "libnusys": "libnusys", "libultra": "libultra"}.get(lib or "", "main")
+    key = {"libkmc": "libkmc", "libnusys": "libnusys", "libultra": "libultra"}.get(
+        lib or "", "main"
+    )
     return _parse_makefile_defines()[key]
 
 
@@ -1020,8 +1112,11 @@ def function_gating_define(up_cpath, primary):
     body = _upstream_body(up_cpath, primary)
     if body is None:
         return None
-    lines = [l for l in body[1:-1].splitlines()
-             if l.strip() and not l.lstrip().startswith('//')]
+    lines = [
+        l
+        for l in body[1:-1].splitlines()
+        if l.strip() and not l.lstrip().startswith("//")
+    ]
     if not lines:
         return None
     m = _IFDEF_OPEN_RE.match(lines[0])
@@ -1040,7 +1135,7 @@ def function_gating_define(up_cpath, primary):
                 break
     if matching_i is None:
         return None
-    if any(l.strip() for l in lines[matching_i + 1:]):
+    if any(l.strip() for l in lines[matching_i + 1 :]):
         return None
     return define
 
@@ -1051,8 +1146,10 @@ def function_gating_define(up_cpath, primary):
 # silently takes the #else value, mismatching the ROM by one word (sptask's
 # IO_READ(...+OS_YIELD_DATA_SIZE-4): 0x900 vs the baserom's 0xc00) — invisible to the gate stub.
 GBI_MICROCODE_DEFINES = ("F3D_GBI", "F3DEX_GBI", "F3DLP_GBI", "F3DEX_GBI_2")
-_OBJ_DEFINE_RE = re.compile(r'^\s*#\s*define\s+([A-Za-z_]\w*)\s+(\S.*?)\s*$')
-_GBI_COND_RE = re.compile(r'defined\s*\(\s*([A-Za-z_]\w*)\s*\)|\bifdef\s+([A-Za-z_]\w*)')
+_OBJ_DEFINE_RE = re.compile(r"^\s*#\s*define\s+([A-Za-z_]\w*)\s+(\S.*?)\s*$")
+_GBI_COND_RE = re.compile(
+    r"defined\s*\(\s*([A-Za-z_]\w*)\s*\)|\bifdef\s+([A-Za-z_]\w*)"
+)
 
 
 def _scan_value_guards(text):
@@ -1068,21 +1165,25 @@ def _scan_value_guards(text):
     n, i, out = len(lines), 0, {}
     while i < n:
         s = lines[i].strip()
-        if re.match(r'^#\s*if', s):
-            guard = tuple(d for grp in _GBI_COND_RE.findall(s) for d in grp
-                          if d and d in GBI_MICROCODE_DEFINES)
+        if re.match(r"^#\s*if", s):
+            guard = tuple(
+                d
+                for grp in _GBI_COND_RE.findall(s)
+                for d in grp
+                if d and d in GBI_MICROCODE_DEFINES
+            )
             if guard:
                 if_vals, else_vals, cur, depth, j = {}, {}, None, 1, i + 1
                 cur = if_vals
                 while j < n and depth > 0:
                     t = lines[j].strip()
-                    if re.match(r'^#\s*if', t):
+                    if re.match(r"^#\s*if", t):
                         depth += 1
-                    elif re.match(r'^#\s*endif', t):
+                    elif re.match(r"^#\s*endif", t):
                         depth -= 1
                         if depth == 0:
                             break
-                    elif depth == 1 and re.match(r'^#\s*else', t):
+                    elif depth == 1 and re.match(r"^#\s*else", t):
                         cur = else_vals
                     elif depth == 1:
                         md = _OBJ_DEFINE_RE.match(lines[j])
@@ -1131,7 +1232,7 @@ def gbi_value_guard_needs_define(cpath, lib):
     except OSError:
         return None
     active = _active_defines_for_lib(lib)
-    used = set(re.findall(r'[A-Za-z_]\w*', body))
+    used = set(re.findall(r"[A-Za-z_]\w*", body))
     for name, guard in guarded.items():
         if name in used and not (set(guard) & active):
             return "F3DEX_GBI_2" if "F3DEX_GBI_2" in guard else guard[0]
@@ -1190,8 +1291,13 @@ def call_divergence(rom_off, primary, up_cpath, lib=None):
     # Local function-like macros the .c #defines itself (e.g. xprintf's PUT/PAD/ATOI) are not in
     # all_func_macros() (headers only) → drop them too, else a callback-wrapping macro reads as a call.
     try:
-        local_macros = set(re.findall(
-            r'^\s*#\s*define\s+([A-Za-z_]\w*)\s*\(', UpstreamSource.get(up_cpath).text, re.M))
+        local_macros = set(
+            re.findall(
+                r"^\s*#\s*define\s+([A-Za-z_]\w*)\s*\(",
+                UpstreamSource.get(up_cpath).text,
+                re.M,
+            )
+        )
     except OSError:
         local_macros = set()
     stripped = _strip_define_lines(_strip_string_literals(_strip_dead_blocks(body)))
@@ -1205,7 +1311,7 @@ def call_divergence(rom_off, primary, up_cpath, lib=None):
     # deterred from a clean near-verbatim drop (S118 nuContRmbModeSet `2vs0`). The asm-side direction
     # only (upstream has MORE: n_c > n_asm); see docs/hazards.md#near-verbatim-mirror-jal-count-mismatch.
     n_wrap = len(re.findall(r"\bosSetIntMask\b", stripped))
-    version_artifact = (lib == "libnusys" and n_wrap > 0 and (n_c - n_asm) == n_wrap)
+    version_artifact = lib == "libnusys" and n_wrap > 0 and (n_c - n_asm) == n_wrap
     return Hazard.jal_count_mismatch(n_c, n_asm, version_artifact=version_artifact)
 
 
@@ -1220,8 +1326,10 @@ def _block_reorder_sibling(up_path, hazards, lib):
     if lib != "libnusys" or not up_path:
         return None
     jal_unexplained = any(
-        h.kind == HAZARD_JAL_COUNT_MISMATCH and "(version-artifact?)" not in (h.detail or "")
-        for h in hazards)
+        h.kind == HAZARD_JAL_COUNT_MISMATCH
+        and "(version-artifact?)" not in (h.detail or "")
+        for h in hazards
+    )
     has_coddog = any(h.kind == HAZARD_CODDOG_MIRROR for h in hazards)
     if not (jal_unexplained and not has_coddog):
         return None
@@ -1240,11 +1348,13 @@ def _is_static_func_proto(line):
     flagged, including a function-*pointer* var (`static T (*fp)(...);`, the `(*`) and an attributed
     array (`static T a[N] __attribute__((aligned(8)));` — its `aligned(8)` parens must NOT read as a
     call declarator, so strip `__attribute__((...))` first)."""
-    s = re.sub(r"__attribute__\s*\(\(.*?\)\)", "", line)  # drop attribute groups (their parens)
+    s = re.sub(
+        r"__attribute__\s*\(\(.*?\)\)", "", line
+    )  # drop attribute groups (their parens)
     i = s.find("(")
     if i == -1:
         return False  # no declarator parens → a plain variable
-    if s[i + 1:i + 2] == "*":
+    if s[i + 1 : i + 2] == "*":
         return False  # `(*name)(...)` → function-pointer variable
     if "[" in s[:i]:
         return False  # `name[dim] ...(` → array variable (a stray paren past the subscript)
@@ -1259,7 +1369,9 @@ def has_file_scope_static(cpath):
     /* PI message queue */`) would silently defeat the match. Strip the dead `#if BUILD_VERSION` side
     first so an inactive-`#else`-branch file-static (e.g. motor.c's <VERSION_J statics) is not
     phantom-flagged — only the active VERSION_J branch's file-static is real."""
-    text = _strip_inactive_version_branches(UpstreamSource.get(cpath).text, _build_version_ord("libultra"))
+    text = _strip_inactive_version_branches(
+        UpstreamSource.get(cpath).text, _build_version_ord("libultra")
+    )
     for line in _strip_comments(text).splitlines():
         stripped = line.lstrip()
         if stripped.startswith(("//", "*")):
@@ -1284,11 +1396,19 @@ def defines_data_globals(cpath):
     names = []
     depth = 0
     in_kr_params = False  # between a K&R `name(args)` header and its `{` body
-    text = _strip_inactive_version_branches(UpstreamSource.get(cpath).text, _build_version_ord("libultra"))
+    text = _strip_inactive_version_branches(
+        UpstreamSource.get(cpath).text, _build_version_ord("libultra")
+    )
     for raw in _strip_comments(text).splitlines():
         line = raw.strip()
-        if (depth == 0 and not in_kr_params and line and not line.startswith(
-                ("#", "//", "*", "}", "static", "extern", "typedef"))):
+        if (
+            depth == 0
+            and not in_kr_params
+            and line
+            and not line.startswith(
+                ("#", "//", "*", "}", "static", "extern", "typedef")
+            )
+        ):
             m = DATA_GLOBAL_DEF_RE.match(line)
             if m and "(" not in line.split("=", 1)[0]:
                 # Surface the array dimension (`name[DIM]`) so the gate sizes the symbol_addrs
@@ -1296,7 +1416,11 @@ def defines_data_globals(cpath):
                 # __osEventStateTab[OS_NUM_EVENTS]). The element/stride + macro resolution
                 # still happens at the gate; this just flags array-vs-scalar without opening
                 # the source.
-                names.append(f"{m.group(1)}[{m.group(2)}]" if m.group(2) is not None else m.group(1))
+                names.append(
+                    f"{m.group(1)}[{m.group(2)}]"
+                    if m.group(2) is not None
+                    else m.group(1)
+                )
         # A depth-0 function header (K&R or ANSI) opens a param region where `type name;`
         # lines are parameters, not globals — skip until the body brace. K&R math in libkmc
         # (`_xatan(u,v,atanp)` then `XLONG u,v;`) would otherwise false-flag every param.
@@ -1321,11 +1445,17 @@ def defines_local_static_data(cpath):
     `#if BUILD_VERSION` side first (symmetric with the file-scope scans)."""
     names = []
     depth = 0
-    text = _strip_inactive_version_branches(UpstreamSource.get(cpath).text, _build_version_ord("libultra"))
+    text = _strip_inactive_version_branches(
+        UpstreamSource.get(cpath).text, _build_version_ord("libultra")
+    )
     for raw in text.splitlines():
         line = raw.strip()
-        if depth >= 1 and line.startswith("static") and "=" in line \
-                and not _is_static_func_proto(line):
+        if (
+            depth >= 1
+            and line.startswith("static")
+            and "=" in line
+            and not _is_static_func_proto(line)
+        ):
             m = LOCAL_STATIC_DATA_RE.match(line)
             if m:
                 names.append(m.group(1))
@@ -1405,7 +1535,9 @@ def defines_file_static_init_array(cpath):
     vram + exact extent are recovered from the asm at the gate (the .data carve is a mechanical step)."""
     names = []
     depth = 0
-    text = _strip_inactive_version_branches(UpstreamSource.get(cpath).text, _build_version_ord("libultra"))
+    text = _strip_inactive_version_branches(
+        UpstreamSource.get(cpath).text, _build_version_ord("libultra")
+    )
     for raw in _strip_comments(text).splitlines():
         if depth == 0:
             m = FILE_STATIC_INIT_ARRAY_RE.match(raw.strip())
@@ -1436,6 +1568,7 @@ def placed_symbols():
 
 # An un-named decomp symbol: `func_<vram>` or `func_ovl<n>_<vram>` (the splat scaffold placeholder).
 _FUNC_TOKEN_RE = re.compile(r"\bfunc_(?:ovl\d+_)?[0-9A-Fa-f]{6,8}\b")
+
 
 @functools.cache
 def src_func_callers():
@@ -1478,10 +1611,19 @@ SDK_GLOBAL_RE = re.compile(r"__[A-Za-z]\w+")
 # `alHeapDBAlloc((u8*)__FILE__, __LINE__, ...)` surfaced `__FILE__,__LINE__` as a phantom
 # refs-unplaced (here under an inactive `#ifdef _DEBUG`, but they'd be false even when active).
 # The reverb/env synthesis siblings carry the same macro, so skip these like `__builtin_`.
-_C_PREDEF_MACROS = frozenset({
-    "__FILE__", "__LINE__", "__DATE__", "__TIME__", "__TIMESTAMP__", "__BASE_FILE__",
-    "__func__", "__FUNCTION__", "__PRETTY_FUNCTION__",
-})
+_C_PREDEF_MACROS = frozenset(
+    {
+        "__FILE__",
+        "__LINE__",
+        "__DATE__",
+        "__TIME__",
+        "__TIMESTAMP__",
+        "__BASE_FILE__",
+        "__func__",
+        "__FUNCTION__",
+        "__PRETTY_FUNCTION__",
+    }
+)
 
 # A data extern declaration in a header: `extern <type...> <name>[opt-array];` with NO '(' before
 # the `;` (the lookahead drops function prototypes and function-pointer externs). Captures the
@@ -1497,7 +1639,9 @@ EXTERN_DATA_DECL_RE = re.compile(
 # token that is actually a TYPE used in a declaration (`register __OSViContext* vc;`) rather than a
 # data extern — without it, SDK_GLOBAL_RE flags the type as a phantom recover-extern (e.g.
 # __OSViContext, a 0x30-byte struct in viint.h, would surface in the refs-unplaced list).
-TYPEDEF_CLOSE_RE = re.compile(r"}\s*([A-Za-z_]\w*)\s*(?:\[[^\]]*\]|__attribute__\s*\([^;]*\))?\s*;", re.M)
+TYPEDEF_CLOSE_RE = re.compile(
+    r"}\s*([A-Za-z_]\w*)\s*(?:\[[^\]]*\]|__attribute__\s*\([^;]*\))?\s*;", re.M
+)
 TYPEDEF_SIMPLE_RE = re.compile(r"^\s*typedef\s+[^;{}\n]*?\b([A-Za-z_]\w*)\s*;", re.M)
 
 
@@ -1607,7 +1751,11 @@ def all_func_macros():
                 except OSError:
                     continue
                 for name, params, body in FUNC_MACRO_DEF_RE.findall(text):
-                    plist = [p.strip() for p in params.split(",") if p.strip() not in ("", "...")]
+                    plist = [
+                        p.strip()
+                        for p in params.split(",")
+                        if p.strip() not in ("", "...")
+                    ]
                     macros.setdefault(name, (plist, body))
     return macros
 
@@ -1722,7 +1870,9 @@ def refs_unplaced(cpath, placed, lib=None):
     defined_here = {n.split("[", 1)[0] for n in defines_data_globals(cpath)}
     if defined_here:
         body_names = _names_in_function_bodies(text)
-        unplaced = [t for t in unplaced if not (t in defined_here and t not in body_names)]
+        unplaced = [
+            t for t in unplaced if not (t in defined_here and t not in body_names)
+        ]
     return sorted(unplaced)
 
 
@@ -1744,9 +1894,11 @@ def _fn_ptr_param_names(text):
                 if depth == 0:
                     break
             p += 1
-        params = text[m.end():p]
-        names.update(re.findall(r"\(\s*\*\s*([A-Za-z_]\w+)\s*\)\s*\(", params))  # T (*name)(...)
-        names.update(re.findall(r"\b([A-Za-z_]\w+)\s*\(", params))              # T name(...)
+        params = text[m.end() : p]
+        names.update(
+            re.findall(r"\(\s*\*\s*([A-Za-z_]\w+)\s*\)\s*\(", params)
+        )  # T (*name)(...)
+        names.update(re.findall(r"\b([A-Za-z_]\w+)\s*\(", params))  # T name(...)
     return names
 
 
@@ -1770,7 +1922,9 @@ def calls_unplaced(cpath, primary, placed, lib=None):
     except OSError:
         return []
     defined = {name for name, _ in _iter_upstream_functions(text)}
-    fn_ptr_params = _fn_ptr_param_names(text)  # a fn-ptr param (`pfn`) is a jalr, not a jal
+    fn_ptr_params = _fn_ptr_param_names(
+        text
+    )  # a fn-ptr param (`pfn`) is a jalr, not a jal
     # Append one-level macro expansion so a callee invoked only inside a library macro is seen;
     # exclude the macro names themselves (a macro body that invokes UPDATE_REG/WAIT_ON_IOBUSY etc.
     # must not flag those as unplaced functions — they inline, they don't link).
@@ -1782,13 +1936,21 @@ def calls_unplaced(cpath, primary, placed, lib=None):
     # motor.c) expand to casts/exprs, not jals — collect their names so a `READFORMAT(ptr)` use is
     # not flagged as an unplaced function. macro_hidden_text only captures HEADER macros, so the .c's
     # own function-like #defines need this separate scan.
-    local_macro_names = set(re.findall(r'^\s*#\s*define\s+([A-Za-z_]\w*)\s*\(', text, re.M))
-    text = _strip_define_lines(text)  # an in-body `#define NAME (expr)` is a macro def, not a call
-    body = _strip_string_literals(_strip_dead_blocks(_strip_comments(text + "\n" + macro_text)))
+    local_macro_names = set(
+        re.findall(r"^\s*#\s*define\s+([A-Za-z_]\w*)\s*\(", text, re.M)
+    )
+    text = _strip_define_lines(
+        text
+    )  # an in-body `#define NAME (expr)` is a macro def, not a call
+    body = _strip_string_literals(
+        _strip_dead_blocks(_strip_comments(text + "\n" + macro_text))
+    )
     called = {
         n
         for n in C_CALL_RE.findall(body)
-        if n not in _C_NONCALL and n not in macro_names and n not in local_macro_names
+        if n not in _C_NONCALL
+        and n not in macro_names
+        and n not in local_macro_names
         and n not in fn_ptr_params
         and not n.startswith("__builtin_")
     }
@@ -1848,7 +2010,11 @@ def missing_includes(cpath, mirror_dir=None, lib=None):
         # normpath collapses a `..` segment (a relative `../gu/guint.h` from a sibling-dir
         # upstream source resolves to the already-vendored gu/ copy, not a phantom needs-header).
         is_quote = '"' in m.group(0)
-        if is_quote and mirror_dir and os.path.exists(os.path.normpath(os.path.join(mirror_dir, inc))):
+        if (
+            is_quote
+            and mirror_dir
+            and os.path.exists(os.path.normpath(os.path.join(mirror_dir, inc)))
+        ):
             continue
         if inc not in missing:
             missing.append(inc)
@@ -1899,7 +2065,9 @@ def include_is_vendorable(inc):
     for root in UPSTREAM_INC_ROOTS:
         if os.path.exists(os.path.join(root, inc)):
             return True  # public companion header → copy into an -I dir
-    return os.path.basename(inc) in _upstream_src_headers()  # source-private → source-relative cp
+    return (
+        os.path.basename(inc) in _upstream_src_headers()
+    )  # source-private → source-relative cp
 
 
 def include_is_blocked(inc):
@@ -1966,7 +2134,9 @@ def _tagged_missing_includes(cpath, lib):
             return f"{inc}(already-vendored,adapt->{adapt})"
         return f"{inc}(vendorable)"
 
-    return [_tag(inc) for inc in missing], any(include_is_blocked(inc) for inc in missing)
+    return [_tag(inc) for inc in missing], any(
+        include_is_blocked(inc) for inc in missing
+    )
 
 
 def snap_fib(n):
@@ -1983,10 +2153,16 @@ def snap_fib(n):
 # names are reused by the classical enabler gate. Adding a hazard's mirror-path seed cost is now an
 # edit to this table, not to seed_points' body (the Phase-1b de-shotgun of the if-ladder).
 _SEED_ENABLER_GROUPS = (
-    ("drop", frozenset({HAZARD_FILE_STATIC, HAZARD_DEFINES_DATA})),  # → classical fallback
-    ("needs_copy", frozenset({HAZARD_NEEDS_HEADER})),                # companion-header copy
-    ("needs_define", frozenset({HAZARD_NEEDS_DEFINE})),              # Makefile build-define enabler
-    ("recover", frozenset({HAZARD_REFS_UNPLACED, HAZARD_CALLS_UNPLACED})),  # asm-data-recovery
+    (
+        "drop",
+        frozenset({HAZARD_FILE_STATIC, HAZARD_DEFINES_DATA}),
+    ),  # → classical fallback
+    ("needs_copy", frozenset({HAZARD_NEEDS_HEADER})),  # companion-header copy
+    ("needs_define", frozenset({HAZARD_NEEDS_DEFINE})),  # Makefile build-define enabler
+    (
+        "recover",
+        frozenset({HAZARD_REFS_UNPLACED, HAZARD_CALLS_UNPLACED}),
+    ),  # asm-data-recovery
 )
 
 
@@ -2007,7 +2183,11 @@ def seed_points(size, upstream, band, nfns, hazards, blocked):
     # Which enabler groups are present (table-driven). Each contributes one base bump below; the
     # classical gate keys on the curated subset drop/needs_copy/recover.
     present = {name: bool(kinds & ks) for name, ks in _SEED_ENABLER_GROUPS}
-    drop, needs_copy, recover = present["drop"], present["needs_copy"], present["recover"]
+    drop, needs_copy, recover = (
+        present["drop"],
+        present["needs_copy"],
+        present["recover"],
+    )
     big = size >= BIG_FN_BYTES
     huge = size >= HUGE_FN_BYTES
     if huge or (classical and pack):
@@ -2018,8 +2198,12 @@ def seed_points(size, upstream, band, nfns, hazards, blocked):
         return 8  # enabler gate — decompose / scaffold first
     if classical:
         return 5  # small single classical fn — unproven regime, high variance
-    base = 1 if band == "warm" else 2  # warm = enabler-free; cold = symbol recovery / cold deps
-    base += sum(present.values())  # one bump per present enabler group (drop/copy/define/recover)
+    base = (
+        1 if band == "warm" else 2
+    )  # warm = enabler-free; cold = symbol recovery / cold deps
+    base += sum(
+        present.values()
+    )  # one bump per present enabler group (drop/copy/define/recover)
     # Unexplained jal-count-mismatch (NOT a `(version-artifact?)` clean-drop) with NO coddog-mirror
     # structural match is a probable near-verbatim version/reorder divergence, not a clean verbatim
     # cp: the verbatim copy SHA-misses and needs an asm-driven diagnosis + hand-edit. Price it one
@@ -2030,8 +2214,10 @@ def seed_points(size, upstream, band, nfns, hazards, blocked):
     # coddog, planned 2pt clean mirror, realized 3pt block-reorder near-verbatim.) See
     # docs/hazards.md#near-verbatim-mirror-jal-count-mismatch.
     jal_unexplained = any(
-        h.kind == HAZARD_JAL_COUNT_MISMATCH and "(version-artifact?)" not in (h.detail or "")
-        for h in hazards)
+        h.kind == HAZARD_JAL_COUNT_MISMATCH
+        and "(version-artifact?)" not in (h.detail or "")
+        for h in hazards
+    )
     # A coddog-mirror SUPPRESSES the near-verbatim bump only when it is a CLEAN structural identity.
     # A coddog-structural / coddog-source-banked hit is the S123/S124 customization-MASK tell: the
     # 99.99 fingerprint matches a game-DIVERGENT body (or an already-banked false source), not a
@@ -2042,8 +2228,12 @@ def seed_points(size, upstream, band, nfns, hazards, blocked):
     # tracked follow-up; until then a masking coddog on a pack carries the risk price. See
     # docs/hazards.md#coddog-cross-ref and CLAUDE.md ## Story points (exemption-GUARD).
     coddog_masks = any(
-        h.kind in (HAZARD_CODDOG_STRUCTURAL, HAZARD_CODDOG_SOURCE_BANKED) for h in hazards)
-    has_clean_coddog = any(h.kind == HAZARD_CODDOG_MIRROR for h in hazards) and not coddog_masks
+        h.kind in (HAZARD_CODDOG_STRUCTURAL, HAZARD_CODDOG_SOURCE_BANKED)
+        for h in hazards
+    )
+    has_clean_coddog = (
+        any(h.kind == HAZARD_CODDOG_MIRROR for h in hazards) and not coddog_masks
+    )
     if (jal_unexplained and not has_clean_coddog) or (coddog_masks and pack):
         base += 1  # near-verbatim / game-modified risk (the verbatim cp won't match; plan classical)
     if pack or big:
@@ -2079,7 +2269,9 @@ def carry_over_names():
     if len(parts) <= 1:
         return names
     region = parts[1]
-    archive = re.search(r"^- \*\*Sprint \d+\b", region, re.M)  # guard (1): bound the live region
+    archive = re.search(
+        r"^- \*\*Sprint \d+\b", region, re.M
+    )  # guard (1): bound the live region
     if archive:
         region = region[: archive.start()]
     placed = placed_symbols()  # guard (2): real symbols only (names file ∪ func_<vram>)
@@ -2100,8 +2292,12 @@ def _straddling_unattrib(fns, fn_stems, unattrib, name_addr):
     for i, fn in enumerate(fns):
         if fn not in unattrib or fn not in name_addr:
             continue
-        prev_stem = next((fn_stems[j] for j in range(i - 1, -1, -1) if fn_stems[j]), None)
-        next_stem = next((fn_stems[j] for j in range(i + 1, len(fns)) if fn_stems[j]), None)
+        prev_stem = next(
+            (fn_stems[j] for j in range(i - 1, -1, -1) if fn_stems[j]), None
+        )
+        next_stem = next(
+            (fn_stems[j] for j in range(i + 1, len(fns)) if fn_stems[j]), None
+        )
         if prev_stem and next_stem and prev_stem != next_stem:
             out.append(name_addr[fn])
     return out
@@ -2120,9 +2316,13 @@ def _classify_pack_hazards(off, fns, upstream_index):
     asm_tus = []  # distinct vendorable .s TUs among asm-ONLY members (no C mirror)
     c_stems = []  # distinct C-upstream stems among members (multi-file C-mirror pack)
     c_files = []  # parallel to c_stems: the (lib, cpath) of each distinct C stem
-    c_members = 0  # members that resolved to a C upstream (for the single-file-pack test)
+    c_members = (
+        0  # members that resolved to a C upstream (for the single-file-pack test)
+    )
     fn_stems = []  # parallel to fns: each member's C-upstream stem, or None (asm-TU or `?`)
-    unattrib = set()  # fns rendered `=?` (no C upstream, no asm TU) — the unattributed-leaf candidates
+    unattrib = (
+        set()
+    )  # fns rendered `=?` (no C upstream, no asm TU) — the unattributed-leaf candidates
     for fn in fns:
         fn_lib, fn_up = upstream_index.get(fn, (None, None))
         if fn_up:
@@ -2417,8 +2617,10 @@ def _macro_alias_target(cpath, primary, _depth=0, _seen=None):
     if rp in _seen:
         return None
     _seen.add(rp)
-    define_re = re.compile(r'^\s*#\s*define\s+' + re.escape(primary) + r'\s*\([^)]*\)\s*(\S.*)$')
-    id_re = re.compile(r'[A-Za-z_]\w*')
+    define_re = re.compile(
+        r"^\s*#\s*define\s+" + re.escape(primary) + r"\s*\([^)]*\)\s*(\S.*)$"
+    )
+    id_re = re.compile(r"[A-Za-z_]\w*")
     includes = []
     try:
         text = UpstreamSource.get(cpath).text
@@ -2461,10 +2663,12 @@ def header_renames_symbol(cpath, primary, _depth=0, _seen=None):
     if rp in _seen:
         return None
     _seen.add(rp)
-    define_re = re.compile(r'^\s*#\s*define\s+' + re.escape(primary) + r'\b')
+    define_re = re.compile(r"^\s*#\s*define\s+" + re.escape(primary) + r"\b")
     includes = []
     try:
-        text = UpstreamSource.get(cpath).text  # errors='ignore' (was 'replace'; immaterial for ASCII)
+        text = UpstreamSource.get(
+            cpath
+        ).text  # errors='ignore' (was 'replace'; immaterial for ASCII)
     except OSError:
         return None
     for line in text.splitlines():
@@ -2492,7 +2696,9 @@ def _append_coddog_trap_hazards(off, primary, cl_path, up_lib, hazards):
     clib = up_lib or "libultra"
     if has_file_scope_static(cl_path):
         hazards.append(Hazard(HAZARD_FILE_STATIC))
-    cdefs = defines_data_globals(cl_path) + defines_local_static_data(cl_path)  # + fn-local statics
+    cdefs = defines_data_globals(cl_path) + defines_local_static_data(
+        cl_path
+    )  # + fn-local statics
     if cdefs:
         hazards.append(Hazard.defines_data(cdefs))
     blocked = False
@@ -2502,9 +2708,13 @@ def _append_coddog_trap_hazards(off, primary, cl_path, up_lib, hazards):
         blocked = cblk
     _append_recover_hazards(off, primary, cl_path, clib, hazards)
     ren = header_renames_symbol(cl_path, primary)
-    if ren and _upstream_defines_function(cl_path, primary):  # skip macro-alias false fire
+    if ren and _upstream_defines_function(
+        cl_path, primary
+    ):  # skip macro-alias false fire
         hazards.append(Hazard.header_renames_symbol(primary, ren))
-    elif ren:  # primary is a macro alias for a DIFFERENT upstream symbol → wrong ghidra name
+    elif (
+        ren
+    ):  # primary is a macro alias for a DIFFERENT upstream symbol → wrong ghidra name
         tgt = _macro_alias_target(cl_path, primary)
         if tgt and _upstream_defines_function(cl_path, tgt):
             hazards.append(Hazard.wrong_ghidra_name(primary, tgt, ren))
@@ -2531,14 +2741,22 @@ def _append_header_version_hazards(off, primary, up_path, up_lib, hazards):
         hazards.append(Hazard(HAZARD_NEEDS_DEFINE, gating))
     gbi_def = gbi_value_guard_needs_define(up_path, up_lib)
     if gbi_def:
-        hazards.append(Hazard(HAZARD_NEEDS_DEFINE, gbi_def))  # GBI-value-guarded macro (e.g. OS_YIELD_DATA_SIZE)
+        hazards.append(
+            Hazard(HAZARD_NEEDS_DEFINE, gbi_def)
+        )  # GBI-value-guarded macro (e.g. OS_YIELD_DATA_SIZE)
     divergence = call_divergence(off, primary, up_path, up_lib)
     if divergence:
-        hazards.append(divergence)  # near-verbatim mirror: reconcile call list at the gate
+        hazards.append(
+            divergence
+        )  # near-verbatim mirror: reconcile call list at the gate
     ren = header_renames_symbol(up_path, primary)
-    if ren and _upstream_defines_function(up_path, primary):  # skip macro-alias false fire
+    if ren and _upstream_defines_function(
+        up_path, primary
+    ):  # skip macro-alias false fire
         hazards.append(Hazard.header_renames_symbol(primary, ren))  # needs #undef
-    elif ren:  # primary is a macro alias for a DIFFERENT upstream symbol → wrong ghidra name
+    elif (
+        ren
+    ):  # primary is a macro alias for a DIFFERENT upstream symbol → wrong ghidra name
         tgt = _macro_alias_target(up_path, primary)
         if tgt and _upstream_defines_function(up_path, tgt):
             hazards.append(Hazard.wrong_ghidra_name(primary, tgt, ren))
@@ -2604,27 +2822,40 @@ def append_upstream_hazards(off, primary, up_lib, up_path, hazards, member_paths
     # pack-level drop-static enabler, so the gate must see it — the same member-union the defines-data
     # scan below already does. A primary-only scan would miss it.
     if any(has_file_scope_static(p) for p in (up_path, *member_paths)):
-        hazards.append(Hazard(HAZARD_FILE_STATIC))  # route to the classical loop, not the mirror
+        hazards.append(
+            Hazard(HAZARD_FILE_STATIC)
+        )  # route to the classical loop, not the mirror
     # defines-data over the primary + c-combined members (+ fn-local statics).
-    data_defs = list(dict.fromkeys(  # de-dup, order-preserving
-        d for p in (up_path, *member_paths)
-        for d in defines_data_globals(p) + defines_local_static_data(p)))
+    data_defs = list(
+        dict.fromkeys(  # de-dup, order-preserving
+            d
+            for p in (up_path, *member_paths)
+            for d in defines_data_globals(p) + defines_local_static_data(p)
+        )
+    )
     if data_defs:
-        hazards.append(Hazard.defines_data(data_defs))  # .data analogue → classical loop
+        hazards.append(
+            Hazard.defines_data(data_defs)
+        )  # .data analogue → classical loop
     # File-scope NON-const initialized static arrays (e.g. xprintf spaces/zeroes) the verbatim mirror
     # re-emits → a `.data` sibling carve. Single-file ONLY (`not member_paths`): a c-combined pack's
     # per-member up_path can mis-attribute, so defer the multi-file case.
     if not member_paths:
         init_arrays = list(dict.fromkeys(defines_file_static_init_array(up_path)))
         if init_arrays:
-            hazards.append(Hazard.data_carve(init_arrays))  # .data carve at recovered vram
+            hazards.append(
+                Hazard.data_carve(init_arrays)
+            )  # .data carve at recovered vram
     # Bare (non-_DEBUG-guarded) asserts a verbatim mirror would compile in (assert-strip pre-flag).
     n_assert = sum(bare_asserts(p) for p in (up_path, *member_paths))
     if n_assert:
         hazards.append(Hazard.bare_assert(n_assert))
     _append_recover_hazards(off, primary, up_path, up_lib, hazards)
     mirror_dir = band_mirror_dir(up_lib, up_path)  # also reused below for band warmth
-    blocked = _append_header_version_hazards(off, primary, up_path, up_lib, hazards) or blocked
+    blocked = (
+        _append_header_version_hazards(off, primary, up_path, up_lib, hazards)
+        or blocked
+    )
     rodata_lits, data_statics = _append_rodata_carve_hazards(off, up_path, hazards)
     # twin-of hint: when the candidate re-emits a function-local static (data-static / rodata-literal)
     # AND its mirror dir already holds a banked sibling that carved the same ld-section, name that
@@ -2639,8 +2870,9 @@ def append_upstream_hazards(off, primary, up_lib, up_path, hazards, member_paths
         sibs = _static_carve_siblings().get(cand_dir)
         if sibs:
             want = ".data" if data_statics else ".rodata"
-            pool = sorted(sibs[want] - {cand_stem}) \
-                or sorted((sibs[".data"] | sibs[".rodata"] | sibs[".bss"]) - {cand_stem})
+            pool = sorted(sibs[want] - {cand_stem}) or sorted(
+                (sibs[".data"] | sibs[".rodata"] | sibs[".bss"]) - {cand_stem}
+            )
             if pool:
                 hazards.append(Hazard.twin_of(pool[0]))
     # owner-per-member marker: the rodata-literal/jtbl scans span the WHOLE subseg, which is correct
@@ -2700,14 +2932,18 @@ def drop_static_mirror_hazard(mirror_path, hazards):
     if kinds & {HAZARD_RODATA_LITERAL, HAZARD_DATA_STATIC, HAZARD_RODATA_JTBL}:
         return None  # a carve signal disqualifies the pure-.bss drop
     definitive = any(
-        h.kind == HAZARD_CODDOG_MIRROR and not h.coddog_file().startswith("src/audio")
+        h.kind == HAZARD_CODDOG_MIRROR
+        and not h.coddog_file().startswith("src/audio")
         and h.coddog_pct() >= CODDOG_MIRROR_PCT
         for h in hazards
     )
     if not definitive:
         return None
-    n = (_file_scope_static_count(mirror_path) + len(defines_data_globals(mirror_path))
-         if mirror_path and os.path.isfile(mirror_path) else 0)
+    n = (
+        _file_scope_static_count(mirror_path) + len(defines_data_globals(mirror_path))
+        if mirror_path and os.path.isfile(mirror_path)
+        else 0
+    )
     return Hazard.drop_static_mirror(n)
 
 
@@ -2717,6 +2953,7 @@ class Candidate:
     upstream/coddog branches settle, then passed as ONE argument to score_row (Phase 2a: collapses
     score_row's former 10-parameter list to 3 and retires the (off, primary, up_lib, ...) data
     clump). `fns` is the full member list (len == nfns); `up_lib` is None for a classical target."""
+
     off: int
     primary: str
     kind: str
@@ -2737,17 +2974,40 @@ def score_row(cand, hazards, carried):
     hz = ",".join(h.render() for h in hazards) or "-"
     vram = subseg_vram(cand.off)
     return {
-        "func": cand.primary, "rom": f"0x{cand.off:X}",
+        "func": cand.primary,
+        "rom": f"0x{cand.off:X}",
         "vram": f"0x{vram:08X}" if vram is not None else "?",
-        "size": cand.size, "nfns": len(cand.fns),
-        "pts": seed_points(cand.size, cand.up_lib or "none", cand.band, len(cand.fns), hazards, cand.blocked),
-        "kind": cand.kind, "upstream": cand.up_lib or "none", "band": cand.band,
-        "hazards": hz, "score": score,
+        "size": cand.size,
+        "nfns": len(cand.fns),
+        "pts": seed_points(
+            cand.size,
+            cand.up_lib or "none",
+            cand.band,
+            len(cand.fns),
+            hazards,
+            cand.blocked,
+        ),
+        "kind": cand.kind,
+        "upstream": cand.up_lib or "none",
+        "band": cand.band,
+        "hazards": hz,
+        "score": score,
     }
 
 
-def _build_row(off, typ, path, size, args, upstream_index, carried, sig_index,
-               coddog_index, nusys_index, _libultra_band_start):
+def _build_row(
+    off,
+    typ,
+    path,
+    size,
+    args,
+    upstream_index,
+    carried,
+    sig_index,
+    coddog_index,
+    nusys_index,
+    _libultra_band_start,
+):
     """Classify one subseg and produce its scored row dict, or None to skip it (bss,
     scope-filtered, or a de-ranked carry-over). The per-subseg body of build_rows;
     up_lib/blocked/mirror_path are rebound in place across the coddog re-scan as the
@@ -2762,8 +3022,11 @@ def _build_row(off, typ, path, size, args, upstream_index, carried, sig_index,
     # the caller so the one-line rename fixup is priced at the gate, not discovered as a build-check
     # link error. Display-only (seed_points ignores this kind).
     _callers = src_func_callers()
-    _evicts = [f"{fn}@{','.join(_callers[fn])}" for fn in fns
-               if fn.startswith("func_") and fn in _callers]
+    _evicts = [
+        f"{fn}@{','.join(_callers[fn])}"
+        for fn in fns
+        if fn.startswith("func_") and fn in _callers
+    ]
     if _evicts:
         hazards.append(Hazard.caller_evict(_evicts))
 
@@ -2775,7 +3038,8 @@ def _build_row(off, typ, path, size, args, upstream_index, carried, sig_index,
     if up_path:
         member_paths = _c_combined_member_paths(fns, up_path, upstream_index)
         band, blocked = append_upstream_hazards(
-            off, primary, up_lib, up_path, hazards, member_paths)
+            off, primary, up_lib, up_path, hazards, member_paths
+        )
     elif kind == "asm-flip":
         if build_asm_tu_index().get(primary):
             # A hand-asm libultra mirror (no `.c` def, so absent from upstream_index): bcopy,
@@ -2791,8 +3055,11 @@ def _build_row(off, typ, path, size, args, upstream_index, carried, sig_index,
             # maybe-upstream IDF guess is then redundant noise that can point at the WRONG file. Let
             # the coddog hit (appended below) stand as the sole upstream signal.
             cod = coddog_index.get(primary)
-            cod_definitive = bool(cod) and cod[1] >= CODDOG_MIRROR_PCT \
+            cod_definitive = (
+                bool(cod)
+                and cod[1] >= CODDOG_MIRROR_PCT
                 and not cod[0].startswith("src/audio")
+            )
             if not cod_definitive:
                 hint = signature_hint(off, primary, sig_index)
                 if hint:
@@ -2807,7 +3074,11 @@ def _build_row(off, typ, path, size, args, upstream_index, carried, sig_index,
         cfile, cpct = coddog_index[primary]
         hazards.append(Hazard.coddog_mirror(cfile, cpct))
         _append_coddog_twin_hazard(cfile, fns, upstream_index, hazards)
-        if up_lib is None and cpct >= CODDOG_MIRROR_PCT and not cfile.startswith("src/audio"):
+        if (
+            up_lib is None
+            and cpct >= CODDOG_MIRROR_PCT
+            and not cfile.startswith("src/audio")
+        ):
             up_lib = "libultra"
         # The coddog-resolved upstream is a real `.c`, but its trap detectors never ran: an un-named
         # (`func_<addr>`) subseg's defines-data / file-static / needs-header key off the *named*
@@ -2819,8 +3090,13 @@ def _build_row(off, typ, path, size, args, upstream_index, carried, sig_index,
         # block below via _append_coddog_trap_hazards.
         cl_path = _coddog_upstream_path(cfile)
         if cl_path:
-            mirror_path = cl_path  # the confirmed coddog identity is the file we mirror + count
-            blocked = _append_coddog_trap_hazards(off, primary, cl_path, up_lib, hazards) or blocked
+            mirror_path = (
+                cl_path  # the confirmed coddog identity is the file we mirror + count
+            )
+            blocked = (
+                _append_coddog_trap_hazards(off, primary, cl_path, up_lib, hazards)
+                or blocked
+            )
             # A coddog hit on a multi-fn pack can be a STRUCTURAL fingerprint match, not a source
             # attribution. If the matched file defines FEWER fns than the pack holds, it cannot be
             # the sole source → the pack is multi-file; flag so the gate doesn't read it as a
@@ -2837,9 +3113,13 @@ def _build_row(off, typ, path, size, args, upstream_index, carried, sig_index,
     # ultralib `.c` was invisible. Scan ALL members; surface each distinct coddog `.c` identity the
     # primary block did not already flag, and label the subseg libultra so seed_points + the column
     # price it as the mirror it is.
-    cod_members = [(fn, coddog_index[fn][0], coddog_index[fn][1]) for fn in fns
-                   if fn in coddog_index and coddog_index[fn][1] >= CODDOG_MIRROR_PCT
-                   and not coddog_index[fn][0].startswith("src/audio")]
+    cod_members = [
+        (fn, coddog_index[fn][0], coddog_index[fn][1])
+        for fn in fns
+        if fn in coddog_index
+        and coddog_index[fn][1] >= CODDOG_MIRROR_PCT
+        and not coddog_index[fn][0].startswith("src/audio")
+    ]
     if cod_members:
         already = {h.coddog_file() for h in hazards if h.kind == HAZARD_CODDOG_MIRROR}
         for cfile in sorted({c for _, c, _ in cod_members}):
@@ -2854,8 +3134,13 @@ def _build_row(off, typ, path, size, args, upstream_index, carried, sig_index,
             # `already` excludes the primary's cfile, so no double-scan.
             cl_path = _coddog_upstream_path(cfile)
             if cl_path:
-                mirror_path = cl_path or mirror_path  # the coddog identity is the real mirror source
-                blocked = _append_coddog_trap_hazards(off, primary, cl_path, up_lib, hazards) or blocked
+                mirror_path = (
+                    cl_path or mirror_path
+                )  # the coddog identity is the real mirror source
+                blocked = (
+                    _append_coddog_trap_hazards(off, primary, cl_path, up_lib, hazards)
+                    or blocked
+                )
         # The under-count fncount-mismatch + structural size-ratio guards run in the PRIMARY coddog
         # block (above) only when the identity is on `primary`. When the WHOLE pack resolves to ONE
         # coddog .c via a TAIL member, neither guard ran, so the phantom surfaced as a clean
@@ -2866,8 +3151,9 @@ def _build_row(off, typ, path, size, args, upstream_index, carried, sig_index,
             cl1 = _coddog_upstream_path(distinct[0])
             if cl1:
                 matched_n = _upstream_file_func_count(up_lib or "libultra", cl1)
-                if 0 < matched_n < len(fns) \
-                        and not any(h.kind == HAZARD_CODDOG_FNCOUNT_MISMATCH for h in hazards):
+                if 0 < matched_n < len(fns) and not any(
+                    h.kind == HAZARD_CODDOG_FNCOUNT_MISMATCH for h in hazards
+                ):
                     hazards.append(Hazard.coddog_fncount_mismatch(matched_n, len(fns)))
                 loc = _meaningful_loc(cl1)
                 if loc and size > CODDOG_STRUCTURAL_BYTES_PER_LOC * loc:
@@ -2877,8 +3163,7 @@ def _build_row(off, typ, path, size, args, upstream_index, carried, sig_index,
         # fns → a per-fn fingerprint set, NOT a single-file mirror (the un-matched fns diverge from
         # the combined source). The multi-twin companion to the len==1-only coddog-fncount-mismatch.
         # Advisory: per-fn verify, do NOT read it as a clean mirror.
-        twin_files = {h.twin_file()
-                      for h in hazards if h.kind == HAZARD_CODDOG_TWIN}
+        twin_files = {h.twin_file() for h in hazards if h.kind == HAZARD_CODDOG_TWIN}
         if len(distinct) >= 2 and len(twin_files) >= 2 and len(cod_members) < len(fns):
             hazards.append(Hazard.coddog_partial(len(cod_members), len(fns)))
         if up_lib is None:
@@ -2893,10 +3178,15 @@ def _build_row(off, typ, path, size, args, upstream_index, carried, sig_index,
     # multi-fn pack gets the structural size-ratio guard (a tiny source fingerprint-matched to a big
     # subseg — the `*FuncSet` one-liner twins coddog reports at 99.99%).
     if up_lib in (None, "libnusys") and nusys_index:
-        nz = [(fn, nusys_index[fn][0], nusys_index[fn][1]) for fn in fns
-              if fn in nusys_index and nusys_index[fn][1] >= CODDOG_MIRROR_PCT]
+        nz = [
+            (fn, nusys_index[fn][0], nusys_index[fn][1])
+            for fn in fns
+            if fn in nusys_index and nusys_index[fn][1] >= CODDOG_MIRROR_PCT
+        ]
         if nz:
-            already = {h.coddog_file() for h in hazards if h.kind == HAZARD_CODDOG_MIRROR}
+            already = {
+                h.coddog_file() for h in hazards if h.kind == HAZARD_CODDOG_MIRROR
+            }
             for cfile in sorted({c for _, c, _ in nz}):
                 if cfile in already:
                     continue
@@ -2905,7 +3195,12 @@ def _build_row(off, typ, path, size, args, upstream_index, carried, sig_index,
                 cl_path = _coddog_nusys_path(cfile)
                 if cl_path:
                     mirror_path = cl_path  # the confirmed nusys identity is the file we mirror + count
-                    blocked = _append_coddog_trap_hazards(off, primary, cl_path, "libnusys", hazards) or blocked
+                    blocked = (
+                        _append_coddog_trap_hazards(
+                            off, primary, cl_path, "libnusys", hazards
+                        )
+                        or blocked
+                    )
             distinct = sorted({c for _, c, _ in nz})
             if len(fns) > 1 and len(distinct) == 1:
                 cl1 = _coddog_nusys_path(distinct[0])
@@ -2921,8 +3216,7 @@ def _build_row(off, typ, path, size, args, upstream_index, carried, sig_index,
     # gated), so a clean audio mirror surfaced as `upstream none` and `--lib libultra` skipped it.
     # The coddog map IS the ultralib sweep, so any coddog-mirror match means libultra; also honor a
     # sub-path scope (e.g. `--lib audio` -> src/audio/...) via the matched-source path substring.
-    cod_srcs = [h.coddog_source() for h in hazards
-                if h.kind == HAZARD_CODDOG_MIRROR]
+    cod_srcs = [h.coddog_source() for h in hazards if h.kind == HAZARD_CODDOG_MIRROR]
     # Flag a coddog match to an already-banked source as structural (advisory) — its mirror is fully
     # decompiled, so the hit is a fingerprint coincidence, not a fresh attribution.
     for s in sorted({c for c in cod_srcs if _coddog_source_banked(c)}):
@@ -2932,22 +3226,42 @@ def _build_row(off, typ, path, size, args, upstream_index, carried, sig_index,
     # body-store-value diagnosis (read the target's store SEQUENCE + VALUES) before declaring a clean
     # mirror OR a compiler wall. S121 contRmbControl @99.99 was a game-modified FORCESTOP, misread as a
     # #cross-jump-tail-merge wall for 5 sprints; resolved S127 with a one-branch fix.
-    for cf in sorted({h.coddog_file() for h in hazards
-                      if h.kind == HAZARD_CODDOG_MIRROR and h.coddog_pct() < 100.0}):
-        pct = max(h.coddog_pct() for h in hazards
-                  if h.kind == HAZARD_CODDOG_MIRROR and h.coddog_file() == cf)
+    for cf in sorted(
+        {
+            h.coddog_file()
+            for h in hazards
+            if h.kind == HAZARD_CODDOG_MIRROR and h.coddog_pct() < 100.0
+        }
+    ):
+        pct = max(
+            h.coddog_pct()
+            for h in hazards
+            if h.kind == HAZARD_CODDOG_MIRROR and h.coddog_file() == cf
+        )
         hazards.append(Hazard.body_divergence_suspect(cf, pct))
     # A libultra-source mirror whose vram is BELOW the libultra code band is game-linked at -O2, not
     # -O3 — route it to a -O2 path (src/mgu/…), NOT src/libultra/ (which forces -O3 → wrong
     # auto-inlining). Gated on up_lib == "libultra" (excludes audio coddog hits, which stay
     # un-re-priced + above the band anyway).
-    if up_lib == "libultra" and _libultra_band_start is not None and off < _libultra_band_start:
+    if (
+        up_lib == "libultra"
+        and _libultra_band_start is not None
+        and off < _libultra_band_start
+    ):
         v = subseg_vram(off)
         hazards.append(Hazard.game_region_mirror(v, off))
-    cod_in_scope = bool(args.lib) and bool(cod_srcs) and (
-        args.lib == "libultra" or any(args.lib in s for s in cod_srcs))
-    if args.lib and not cod_in_scope and args.lib not in (path or "") \
-            and (up_lib or "") != args.lib and not any(args.lib in n for n in fns):
+    cod_in_scope = (
+        bool(args.lib)
+        and bool(cod_srcs)
+        and (args.lib == "libultra" or any(args.lib in s for s in cod_srcs))
+    )
+    if (
+        args.lib
+        and not cod_in_scope
+        and args.lib not in (path or "")
+        and (up_lib or "") != args.lib
+        and not any(args.lib in n for n in fns)
+    ):
         return None
     # The `carried` filter de-ranks BACKLOG carry-overs (intentional — a parked carry-over is
     # retrieved via --include-stuck / the BACKLOG, NOT smallest-first). carry_over_names() is
@@ -2975,19 +3289,33 @@ def _build_row(off, typ, path, size, args, upstream_index, carried, sig_index,
     return score_row(cand, hazards, carried)
 
 
-def build_rows(args, upstream_index, carried, sig_index, coddog_index=None, nusys_index=None):
+def build_rows(
+    args, upstream_index, carried, sig_index, coddog_index=None, nusys_index=None
+):
     coddog_index = coddog_index or {}
     nusys_index = nusys_index or {}
     subs = parse_subsegs()
     # The lowest-rom `libultra/` subseg = the start of the libultra code band. A libultra-source
     # mirror BELOW it is game-region (-O2), not libultra-band (-O3) — feeds HAZARD_GAME_REGION_MIRROR.
-    _libultra_band_start = min((o for o, _, p in subs if (p or "").startswith("libultra/")),
-                               default=None)
+    _libultra_band_start = min(
+        (o for o, _, p in subs if (p or "").startswith("libultra/")), default=None
+    )
     rows = []
     for i, (off, typ, path) in enumerate(subs):
         size = subs[i + 1][0] - off if i + 1 < len(subs) else 0
-        row = _build_row(off, typ, path, size, args, upstream_index, carried,
-                         sig_index, coddog_index, nusys_index, _libultra_band_start)
+        row = _build_row(
+            off,
+            typ,
+            path,
+            size,
+            args,
+            upstream_index,
+            carried,
+            sig_index,
+            coddog_index,
+            nusys_index,
+            _libultra_band_start,
+        )
         if row is not None:
             rows.append(row)
     rows.sort(key=lambda r: (-r["score"], r["size"]))
@@ -2995,32 +3323,41 @@ def build_rows(args, upstream_index, carried, sig_index, coddog_index=None, nusy
 
 
 def main():
-    ap = argparse.ArgumentParser(description="Rank the next decomp target, smallest-first.")
+    ap = argparse.ArgumentParser(
+        description="Rank the next decomp target, smallest-first."
+    )
     ap.add_argument("--lib", help="substring filter on subseg path or function name")
     ap.add_argument("-n", type=int, default=20, help="max rows (default 20)")
-    ap.add_argument("--include-stuck", action="store_true", help="include BACKLOG carry-overs")
+    ap.add_argument(
+        "--include-stuck", action="store_true", help="include BACKLOG carry-overs"
+    )
     ap.add_argument("--json", action="store_true")
     args = ap.parse_args()
 
-    rows = build_rows(args, build_upstream_index(), carry_over_names(),
-                      build_signature_index(), build_coddog_index(), build_coddog_nusys_index())
+    rows = build_rows(
+        args,
+        build_upstream_index(),
+        carry_over_names(),
+        build_signature_index(),
+        build_coddog_index(),
+        build_coddog_nusys_index(),
+    )
     if args.json:
         print(json.dumps(rows, indent=1))
         return
     if not rows:
         print("(no candidates — every asm subseg flipped and every c file at 0 stubs?)")
         return
-    print(f"{'func':28} {'rom':>9} {'vram':>10} {'size':>5} {'nfn':>3} {'pts':>3} {'kind':8} "
-          f"{'upstream':9} {'band':4} hazards")
+    print(
+        f"{'func':28} {'rom':>9} {'vram':>10} {'size':>5} {'nfn':>3} {'pts':>3} {'kind':8} "
+        f"{'upstream':9} {'band':4} hazards"
+    )
     for r in rows:
-        print(f"{r['func']:28} {r['rom']:>9} {r['vram']:>10} {r['size']:>5} {r['nfns']:>3} "
-              f"{str(r['pts']):>3} {r['kind']:8} {r['upstream']:9} {r['band']:4} {r['hazards']}")
+        print(
+            f"{r['func']:28} {r['rom']:>9} {r['vram']:>10} {r['size']:>5} {r['nfns']:>3} "
+            f"{str(r['pts']):>3} {r['kind']:8} {r['upstream']:9} {r['band']:4} {r['hazards']}"
+        )
 
 
 if __name__ == "__main__":
     main()
-
-
-
-
-

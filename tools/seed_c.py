@@ -16,6 +16,7 @@ agent must replace.
 Stdout: one JSON object describing what was produced.
 Stderr: human-readable progress.
 """
+
 from __future__ import annotations
 
 import sys
@@ -47,7 +48,7 @@ M2C_PATH = SCRIPT_DIR / "m2c" / "m2c.py"
 
 # seed_c-specific regexes (parent-scan + rodata-slicing).
 HI_LO_REF_RE = re.compile(r"%(?:hi|lo)\(([A-Za-z_][\w.]*)\)")
-INCLUDE_ASM_RE = re.compile(r'INCLUDE_ASM\([^,]+,\s*([A-Za-z_][\w]*)\s*\)\s*;')
+INCLUDE_ASM_RE = re.compile(r"INCLUDE_ASM\([^,]+,\s*([A-Za-z_][\w]*)\s*\)\s*;")
 EXTERN_LINE_RE = re.compile(r"^\s*extern\s+[^;]+;\s*$")
 DATA_LABEL_RE = re.compile(r"^\s*([A-Za-z_][\w.]*)\s*:\s*$")
 DLABEL_RE = re.compile(r"^\s*dlabel\s+([A-Za-z_][\w.]*)\s*$")
@@ -84,7 +85,9 @@ def slice_target_asm(placeholder: str, seg_stem: str, out_dir: Path) -> Path:
             target_path = out_dir / "target.s"
             target_path.write_text(func_text + "\n", encoding="utf-8")
             return target_path
-    fail(f"`{placeholder}` listed in {seg_path} but extract_functions did not return it")
+    fail(
+        f"`{placeholder}` listed in {seg_path} but extract_functions did not return it"
+    )
     raise SystemExit(1)
 
 
@@ -196,7 +199,9 @@ def slice_rodata_phase(
                 labels, out_dir / "target.rodata.s"
             )
             if rodata_path is not None:
-                log(f"[seed] target.rodata.s written ({len(labels) - len(missing_rodata)} labels)")
+                log(
+                    f"[seed] target.rodata.s written ({len(labels) - len(missing_rodata)} labels)"
+                )
             if pointer_labels:
                 log(f"[seed] pointer-typed globals: {len(pointer_labels)}")
             if missing_rodata:
@@ -220,7 +225,9 @@ def run_m2ctx(parent: Path, out_path: Path) -> bool:
     # m2ctx.py writes ctx.c at root_dir/ctx.c; relocate to out_path.
     produced = ROOT_DIR / "ctx.c"
     if proc.returncode != 0 or not produced.exists():
-        log(f"[seed] m2ctx.py failed (rc={proc.returncode}); continuing without --context")
+        log(
+            f"[seed] m2ctx.py failed (rc={proc.returncode}); continuing without --context"
+        )
         log(f"[seed] stderr: {proc.stderr.strip()[:500]}")
         return False
     produced.replace(out_path)
@@ -274,27 +281,69 @@ GHIDRA_TYPE_MAP = {
 # do not auto-extern these. Conservative list — anything ending in _REG plus a
 # few unsuffixed standards.
 HW_REG_NAMES = {
-    "AI_STATUS_REG", "AI_DRAM_ADDR_REG", "AI_LEN_REG", "AI_CONTROL_REG",
-    "AI_DACRATE_REG", "AI_BITRATE_REG",
-    "DPC_STATUS_REG", "DPC_START_REG", "DPC_END_REG", "DPC_CURRENT_REG",
-    "DPC_CLOCK_REG", "DPC_BUFBUSY_REG", "DPC_PIPEBUSY_REG", "DPC_TMEM_REG",
-    "SI_STATUS_REG", "SI_DRAM_ADDR_REG", "SI_PIF_ADDR_RD64B_REG",
+    "AI_STATUS_REG",
+    "AI_DRAM_ADDR_REG",
+    "AI_LEN_REG",
+    "AI_CONTROL_REG",
+    "AI_DACRATE_REG",
+    "AI_BITRATE_REG",
+    "DPC_STATUS_REG",
+    "DPC_START_REG",
+    "DPC_END_REG",
+    "DPC_CURRENT_REG",
+    "DPC_CLOCK_REG",
+    "DPC_BUFBUSY_REG",
+    "DPC_PIPEBUSY_REG",
+    "DPC_TMEM_REG",
+    "SI_STATUS_REG",
+    "SI_DRAM_ADDR_REG",
+    "SI_PIF_ADDR_RD64B_REG",
     "SI_PIF_ADDR_WR64B_REG",
-    "MI_MODE_REG", "MI_VERSION_REG", "MI_INTR_REG", "MI_INTR_MASK_REG",
-    "VI_STATUS_REG", "VI_DRAM_ADDR_REG", "VI_WIDTH_REG", "VI_INTR_REG",
-    "VI_CURRENT_REG", "VI_BURST_REG", "VI_V_SYNC_REG", "VI_H_SYNC_REG",
-    "VI_LEAP_REG", "VI_H_START_REG", "VI_V_START_REG", "VI_V_BURST_REG",
-    "VI_X_SCALE_REG", "VI_Y_SCALE_REG",
-    "PI_STATUS_REG", "PI_DRAM_ADDR_REG", "PI_CART_ADDR_REG",
-    "PI_RD_LEN_REG", "PI_WR_LEN_REG",
-    "PI_BSD_DOM1_LAT_REG", "PI_BSD_DOM1_PWD_REG",
-    "PI_BSD_DOM1_PGS_REG", "PI_BSD_DOM1_RLS_REG",
-    "PI_BSD_DOM2_LAT_REG", "PI_BSD_DOM2_PWD_REG",
-    "PI_BSD_DOM2_PGS_REG", "PI_BSD_DOM2_RLS_REG",
-    "SP_STATUS_REG", "SP_MEM_ADDR_REG", "SP_DRAM_ADDR_REG",
-    "SP_RD_LEN_REG", "SP_WR_LEN_REG", "SP_DMA_FULL_REG",
-    "SP_DMA_BUSY_REG", "SP_SEMAPHORE_REG", "SP_PC_REG", "SP_IBIST_REG",
-    "AI_STATUS", "DPC_STATUS", "SI_STATUS", "MI_STATUS",  # Ghidra often drops _REG
+    "MI_MODE_REG",
+    "MI_VERSION_REG",
+    "MI_INTR_REG",
+    "MI_INTR_MASK_REG",
+    "VI_STATUS_REG",
+    "VI_DRAM_ADDR_REG",
+    "VI_WIDTH_REG",
+    "VI_INTR_REG",
+    "VI_CURRENT_REG",
+    "VI_BURST_REG",
+    "VI_V_SYNC_REG",
+    "VI_H_SYNC_REG",
+    "VI_LEAP_REG",
+    "VI_H_START_REG",
+    "VI_V_START_REG",
+    "VI_V_BURST_REG",
+    "VI_X_SCALE_REG",
+    "VI_Y_SCALE_REG",
+    "PI_STATUS_REG",
+    "PI_DRAM_ADDR_REG",
+    "PI_CART_ADDR_REG",
+    "PI_RD_LEN_REG",
+    "PI_WR_LEN_REG",
+    "PI_BSD_DOM1_LAT_REG",
+    "PI_BSD_DOM1_PWD_REG",
+    "PI_BSD_DOM1_PGS_REG",
+    "PI_BSD_DOM1_RLS_REG",
+    "PI_BSD_DOM2_LAT_REG",
+    "PI_BSD_DOM2_PWD_REG",
+    "PI_BSD_DOM2_PGS_REG",
+    "PI_BSD_DOM2_RLS_REG",
+    "SP_STATUS_REG",
+    "SP_MEM_ADDR_REG",
+    "SP_DRAM_ADDR_REG",
+    "SP_RD_LEN_REG",
+    "SP_WR_LEN_REG",
+    "SP_DMA_FULL_REG",
+    "SP_DMA_BUSY_REG",
+    "SP_SEMAPHORE_REG",
+    "SP_PC_REG",
+    "SP_IBIST_REG",
+    "AI_STATUS",
+    "DPC_STATUS",
+    "SI_STATUS",
+    "MI_STATUS",  # Ghidra often drops _REG
 }
 
 GHIDRA_HEADER_RE = re.compile(r"^/\*\s*\[MM\d+\][^*]*\*+/\s*$", re.MULTILINE)
@@ -331,9 +380,9 @@ def sanitize_ghidra_body(text: str, placeholder: str) -> str:
     # candidate name is followed by `(` and the line looks like a function
     # definition (not a call).
     func_def_re = re.compile(
-        r"((?:^|\n)\s*(?:[A-Za-z_][\w\s\*]*?\s|\*\s*))"   # return-type group
-        r"([A-Za-z_]\w*)"                                  # candidate name
-        r"(\s*\([^;]*?\)\s*\{)",                           # (...) {
+        r"((?:^|\n)\s*(?:[A-Za-z_][\w\s\*]*?\s|\*\s*))"  # return-type group
+        r"([A-Za-z_]\w*)"  # candidate name
+        r"(\s*\([^;]*?\)\s*\{)",  # (...) {
         re.MULTILINE,
     )
     text = func_def_re.sub(_rename, text, count=1)
@@ -362,11 +411,11 @@ def parent_has_real_c(parent: Path) -> bool:
             if "*/" not in line:
                 in_block_comment = True
             continue
-        if line.startswith("#"):           # preprocessor (incl. #include)
+        if line.startswith("#"):  # preprocessor (incl. #include)
             continue
-        if INCLUDE_ASM_RE.search(line):    # an asm stub, not real C
+        if INCLUDE_ASM_RE.search(line):  # an asm stub, not real C
             continue
-        return True                        # anything else is real C
+        return True  # anything else is real C
     return False
 
 
@@ -435,6 +484,7 @@ def auto_externs_for_hi_lo(
 class BaseCSpec:
     """The assembled inputs for stitch_base_c (groups what main accumulates over
     its rodata/context/extern phases), replacing an 8-argument call."""
+
     out_dir: Path
     placeholder: str
     externs: list[str]
@@ -460,8 +510,12 @@ def stitch_base_c(spec: BaseCSpec) -> Path:
     lines.append("// Edit freely; this is a seed, not the final answer.")
     lines.append("")
     lines.append("#include <ultra64.h>")
-    lines.append('// DLIST_HINT: if this function builds/walks Gfx*, add `#include <PR/gbi.h>`')
-    lines.append('//             and run gfxdis on any static dlists in target.rodata.s.')
+    lines.append(
+        "// DLIST_HINT: if this function builds/walks Gfx*, add `#include <PR/gbi.h>`"
+    )
+    lines.append(
+        "//             and run gfxdis on any static dlists in target.rodata.s."
+    )
     lines.append("")
 
     if missing_rodata:
@@ -479,7 +533,9 @@ def stitch_base_c(spec: BaseCSpec) -> Path:
         for name in sibling_asm_names:
             if name == placeholder:
                 continue
-            lines.append(f"extern void {name}(void); // TODO: refine signature from MCP")
+            lines.append(
+                f"extern void {name}(void); // TODO: refine signature from MCP"
+            )
         if auto_externs:
             lines.append("// --- auto-extern (refine types during iteration) ---")
             for e in auto_externs:
@@ -487,12 +543,16 @@ def stitch_base_c(spec: BaseCSpec) -> Path:
         lines.append("")
 
     if m2c_path.exists():
-        lines.append("/* === m2c reference (do not compile) =========================== */")
+        lines.append(
+            "/* === m2c reference (do not compile) =========================== */"
+        )
         lines.append("#if 0")
         for ml in m2c_path.read_text(encoding="utf-8", errors="replace").splitlines():
             lines.append(ml)
         lines.append("#endif")
-        lines.append("/* === end m2c reference ========================================= */")
+        lines.append(
+            "/* === end m2c reference ========================================= */"
+        )
         lines.append("")
 
     lines.append("// === Function body ============================================")
@@ -501,10 +561,14 @@ def stitch_base_c(spec: BaseCSpec) -> Path:
         body = sanitize_ghidra_body(body, placeholder).rstrip()
         lines.append(body)
     else:
-        lines.append(f"// TODO: agent — paste Ghidra MCP `decompile_function` output for {placeholder}")
-        lines.append(f"// here, then rename m2c synthetics per CLAUDE.md naming conventions.")
+        lines.append(
+            f"// TODO: agent — paste Ghidra MCP `decompile_function` output for {placeholder}"
+        )
+        lines.append(
+            f"// here, then rename m2c synthetics per CLAUDE.md naming conventions."
+        )
         lines.append(f"void {placeholder}(void) {{")
-        lines.append(f'    /* unimplemented */')
+        lines.append(f"    /* unimplemented */")
         lines.append(f"}}")
     lines.append("")
 
@@ -523,7 +587,9 @@ def main() -> None:
     args = parser.parse_args()
 
     if not PLACEHOLDER_RE.match(args.func):
-        fail(f"--func must be a func_XXXXXXXX placeholder or a valid C identifier; got {args.func!r}.")
+        fail(
+            f"--func must be a func_XXXXXXXX placeholder or a valid C identifier; got {args.func!r}."
+        )
     placeholder = args.func
 
     out_dir = NONMATCHINGS_DIR / placeholder
@@ -550,8 +616,10 @@ def main() -> None:
         if not parent_path.exists():
             log(f"[seed] --parent {args.parent} not found; skipping m2ctx")
         elif not parent_has_real_c(parent_path):
-            log("[seed] parent has only INCLUDE_ASM stubs; skipping m2ctx "
-                "(no type context) — relying on the Ghidra seed")
+            log(
+                "[seed] parent has only INCLUDE_ASM stubs; skipping m2ctx "
+                "(no type context) — relying on the Ghidra seed"
+            )
         else:
             has_ctx = run_m2ctx(parent_path, ctx_path)
 
@@ -566,7 +634,9 @@ def main() -> None:
         parent_path = Path(args.parent)
         if parent_path.exists():
             externs, sibling_asm_names = collect_parent_externs(parent_path)
-            log(f"[seed] parent externs: {len(externs)}  sibling INCLUDE_ASM: {len(sibling_asm_names)}")
+            log(
+                f"[seed] parent externs: {len(externs)}  sibling INCLUDE_ASM: {len(sibling_asm_names)}"
+            )
 
     # Ghidra body (written by slash command, not this script)
     ghidra_path = out_dir / "ghidra.c"
@@ -580,34 +650,40 @@ def main() -> None:
     if auto_externs:
         log(f"[seed] auto-extern: {len(auto_externs)} %hi/%lo label(s)")
 
-    base_path = stitch_base_c(BaseCSpec(
-        out_dir=out_dir,
-        placeholder=placeholder,
-        externs=externs,
-        sibling_asm_names=sibling_asm_names,
-        auto_externs=auto_externs,
-        m2c_path=m2c_path,
-        ghidra_path=ghidra_path,
-        missing_rodata=missing_rodata,
-    ))
+    base_path = stitch_base_c(
+        BaseCSpec(
+            out_dir=out_dir,
+            placeholder=placeholder,
+            externs=externs,
+            sibling_asm_names=sibling_asm_names,
+            auto_externs=auto_externs,
+            m2c_path=m2c_path,
+            ghidra_path=ghidra_path,
+            missing_rodata=missing_rodata,
+        )
+    )
     log(f"[seed] {base_path.relative_to(ROOT_DIR)} written")
 
-    emit({
-        "ok": True,
-        "placeholder": placeholder,
-        "segment": seg_stem,
-        "out_dir": str(out_dir.relative_to(ROOT_DIR)),
-        "base_c": str(base_path.relative_to(ROOT_DIR)),
-        "target_s": str(target_asm.relative_to(ROOT_DIR)),
-        "target_rodata_s": str(rodata_path.relative_to(ROOT_DIR)) if rodata_path else None,
-        "missing_rodata_labels": missing_rodata,
-        "ctx_c": str(ctx_path.relative_to(ROOT_DIR)) if has_ctx else None,
-        "m2c_c": str(m2c_path.relative_to(ROOT_DIR)),
-        "ghidra_c_expected": str(ghidra_path.relative_to(ROOT_DIR)),
-        "ghidra_c_present": ghidra_path.exists(),
-        "extern_count": len(externs),
-        "sibling_asm_count": len(sibling_asm_names),
-    })
+    emit(
+        {
+            "ok": True,
+            "placeholder": placeholder,
+            "segment": seg_stem,
+            "out_dir": str(out_dir.relative_to(ROOT_DIR)),
+            "base_c": str(base_path.relative_to(ROOT_DIR)),
+            "target_s": str(target_asm.relative_to(ROOT_DIR)),
+            "target_rodata_s": str(rodata_path.relative_to(ROOT_DIR))
+            if rodata_path
+            else None,
+            "missing_rodata_labels": missing_rodata,
+            "ctx_c": str(ctx_path.relative_to(ROOT_DIR)) if has_ctx else None,
+            "m2c_c": str(m2c_path.relative_to(ROOT_DIR)),
+            "ghidra_c_expected": str(ghidra_path.relative_to(ROOT_DIR)),
+            "ghidra_c_present": ghidra_path.exists(),
+            "extern_count": len(externs),
+            "sibling_asm_count": len(sibling_asm_names),
+        }
+    )
 
 
 if __name__ == "__main__":

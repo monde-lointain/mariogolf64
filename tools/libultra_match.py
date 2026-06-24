@@ -29,6 +29,7 @@ project gcc + LIBULTRA_CFLAGS before trusting the worklist.
 
 Read-only. Usage: venv/bin/python3 tools/libultra_match.py [--min-insns N] [--all]
 """
+
 import argparse
 import functools
 import os
@@ -54,15 +55,19 @@ import pick_target as pt  # noqa: E402  (parse_subsegs / upstream + asm-tu indic
 # raising worklist ambiguity. Override with MG_LIBULTRA_ARCHIVES (os.pathsep-separated).
 _ULTRALIB_ROOT = decomp_common.LIBULTRA_SRC.parent
 _DEFAULT_ARCHIVES = [
-    str(_ULTRALIB_ROOT / "build" / v / "libgultra_rom" / "libgultra_rom.a") for v in ("J", "K")
+    str(_ULTRALIB_ROOT / "build" / v / "libgultra_rom" / "libgultra_rom.a")
+    for v in ("J", "K")
 ]
-ARCHIVES = [a for a in os.environ.get("MG_LIBULTRA_ARCHIVES", "").split(os.pathsep) if a] \
-    or _DEFAULT_ARCHIVES
+ARCHIVES = [
+    a for a in os.environ.get("MG_LIBULTRA_ARCHIVES", "").split(os.pathsep) if a
+] or _DEFAULT_ARCHIVES
 # src-tree for member->src mapping: any present build/<v>/libgultra_rom/src (member names match).
 SRC_OBJ_TREE = next(
-    (str(_ULTRALIB_ROOT / "build" / v / "libgultra_rom" / "src")
-     for v in ("J", "K", "L", "I")
-     if (_ULTRALIB_ROOT / "build" / v / "libgultra_rom" / "src").is_dir()),
+    (
+        str(_ULTRALIB_ROOT / "build" / v / "libgultra_rom" / "src")
+        for v in ("J", "K", "L", "I")
+        if (_ULTRALIB_ROOT / "build" / v / "libgultra_rom" / "src").is_dir()
+    ),
     str(_ULTRALIB_ROOT / "build" / "J" / "libgultra_rom" / "src"),
 )
 OBJDUMP = os.environ.get("MG_MIPS_OBJDUMP", "mips-linux-gnu-objdump")
@@ -86,7 +91,9 @@ def build_reference(archives=None):
     """Union over archives: name -> [(sig, member)], sig -> [(name, member)] (distinct names)."""
     archives = archives or ARCHIVES
     by_name, by_sig = {}, {}
-    seen_sig_name = set()  # dedup (sig,name) so the same fn across versions isn't double-listed
+    seen_sig_name = (
+        set()
+    )  # dedup (sig,name) so the same fn across versions isn't double-listed
     for archive in archives:
         proc = subprocess.run([OBJDUMP, "-d", archive], capture_output=True, text=True)
         if proc.returncode != 0:
@@ -128,7 +135,9 @@ def _src_index():
     for dirpath, _, files in os.walk(SRC_OBJ_TREE):
         for f in files:
             if f.endswith(".o"):
-                index.setdefault(f, os.path.relpath(os.path.join(dirpath, f), SRC_OBJ_TREE))
+                index.setdefault(
+                    f, os.path.relpath(os.path.join(dirpath, f), SRC_OBJ_TREE)
+                )
     return index
 
 
@@ -183,22 +192,34 @@ def existing_names_and_addrs():
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("--min-insns", type=int, default=5,
-                    help="min instruction count for a worklist match (FP guard; default 5)")
-    ap.add_argument("--all", action="store_true",
-                    help="also list matches that land in already-`c` subsegs (sanity)")
+    ap.add_argument(
+        "--min-insns",
+        type=int,
+        default=5,
+        help="min instruction count for a worklist match (FP guard; default 5)",
+    )
+    ap.add_argument(
+        "--all",
+        action="store_true",
+        help="also list matches that land in already-`c` subsegs (sanity)",
+    )
     args = ap.parse_args()
 
     present = [a for a in ARCHIVES if os.path.exists(a)]
     if not present:
-        sys.exit("no reference archive found in:\n  " + "\n  ".join(ARCHIVES)
-                 + "\n(set MG_LIBULTRA_ARCHIVES, os.pathsep-separated)")
+        sys.exit(
+            "no reference archive found in:\n  "
+            + "\n  ".join(ARCHIVES)
+            + "\n(set MG_LIBULTRA_ARCHIVES, os.pathsep-separated)"
+        )
 
     print("reference (union):")
     for a in present:
         print(f"  {a}")
     by_name, by_sig = build_reference(present)
-    print(f"  {len(by_name)} archive functions, {len(by_sig)} distinct opcode signatures")
+    print(
+        f"  {len(by_name)} archive functions, {len(by_sig)} distinct opcode signatures"
+    )
 
     upstream = pt.build_upstream_index()
     subs = pt.parse_subsegs()
@@ -209,7 +230,7 @@ def main():
     # short libultra opcode-skeleton are false positives (osSetTime "matching" four ovl stubs).
     # Drop them up front (vram in the overlay range, or a func_ovl* name).
     OVERLAY_VRAM = 0x80100000
-    asm_funcs, c_funcs = [], []   # (rom_off, name, vram, sig, nins)
+    asm_funcs, c_funcs = [], []  # (rom_off, name, vram, sig, nins)
     overlay_skipped = 0
     for off, typ, _path in subs:
         for nm, vram, words in parse_asm_functions(off):
@@ -239,24 +260,40 @@ def main():
             if sig in arch_sigs:
                 cal_ok += 1
             elif any(len(rsig) == len(sig) for rsig in arch_sigs):
-                cal_flag.append((nm, off))     # same length, opcodes differ → flag/codegen
+                cal_flag.append((nm, off))  # same length, opcodes differ → flag/codegen
             else:
-                cal_impl.append((nm, off))     # different length → different impl/version
+                cal_impl.append((nm, off))  # different length → different impl/version
     print("\n=== calibration (#7: prebuilt-archive gcc vs the ROM) ===")
     if cal_total:
-        print(f"  {cal_ok}/{cal_total} compiled-C libultra funcs (still asm) opcode-match the archive")
-        print(f"  {len(cal_flag)} same-length opcode-swaps (compiler/flag divergence — e.g. -funsigned-char lb/lbu)")
-        print(f"  {len(cal_impl)} different-length (different source version/impl in the prebuilt tree)")
+        print(
+            f"  {cal_ok}/{cal_total} compiled-C libultra funcs (still asm) opcode-match the archive"
+        )
+        print(
+            f"  {len(cal_flag)} same-length opcode-swaps (compiler/flag divergence — e.g. -funsigned-char lb/lbu)"
+        )
+        print(
+            f"  {len(cal_impl)} different-length (different source version/impl in the prebuilt tree)"
+        )
         for label, lst in (("flag", cal_flag), ("impl", cal_impl)):
             for nm, off in lst[:8]:
                 print(f"    [{label}] {nm} @ 0x{off:X}")
         if cal_ok / cal_total < 0.8:
-            print("  WARNING: <80% calibration — the prebuilt build/J archive is only a partial reference.")
-            print("  Trust matches below (full opcode-seq equality is strong); treat NON-matches as")
-            print("  'not in this reference', not 'not libultra'. For a complete worklist, rebuild the")
-            print("  reference from ultralib source with tools/cc/gcc + LIBULTRA_CFLAGS (plan #7 fallback).")
+            print(
+                "  WARNING: <80% calibration — the prebuilt build/J archive is only a partial reference."
+            )
+            print(
+                "  Trust matches below (full opcode-seq equality is strong); treat NON-matches as"
+            )
+            print(
+                "  'not in this reference', not 'not libultra'. For a complete worklist, rebuild the"
+            )
+            print(
+                "  reference from ultralib source with tools/cc/gcc + LIBULTRA_CFLAGS (plan #7 fallback)."
+            )
     else:
-        print("  no compiled-C libultra funcs available to calibrate (matcher pipeline unverified for gcc fidelity)")
+        print(
+            "  no compiled-C libultra funcs available to calibrate (matcher pipeline unverified for gcc fidelity)"
+        )
 
     # --- match every asm-subseg function against the reference ------------------------------
     validation, worklist, conflicts, notes = [], [], [], []
@@ -271,38 +308,61 @@ def main():
         row = (off, nm, vram, ref_names, src, nins, ambig)
         if not nm.startswith("func_"):
             if nm in ref_names:
-                validation.append(row)        # already named correctly
+                validation.append(row)  # already named correctly
             else:
-                conflicts.append(row)          # named X, opcode-matches libultra Y
+                conflicts.append(row)  # named X, opcode-matches libultra Y
         else:
-            worklist.append(row)               # unnamed func_ -> a libultra match
+            worklist.append(row)  # unnamed func_ -> a libultra match
 
     # matches that fell in already-decompiled `c` subsegs (sanity only)
     if args.all:
         for off, nm, vram, sig, nins in c_funcs:
             if sig in by_sig:
-                notes.append((off, nm, vram, sorted({h[0] for h in by_sig[sig]}), None, nins, False))
+                notes.append(
+                    (
+                        off,
+                        nm,
+                        vram,
+                        sorted({h[0] for h in by_sig[sig]}),
+                        None,
+                        nins,
+                        False,
+                    )
+                )
 
     def fmt(row):
         off, nm, vram, ref_names, src, nins, ambig = row
         vs = f"0x{vram:08X}" if vram is not None else "?"
         tag = " [AMBIG]" if ambig else ""
-        return f"  0x{off:X} {vs} {nm:<26} -> {','.join(ref_names)} ({src}, {nins}i){tag}"
+        return (
+            f"  0x{off:X} {vs} {nm:<26} -> {','.join(ref_names)} ({src}, {nins}i){tag}"
+        )
 
-    print(f"\n=== validation: named asm blocks confirmed libultra by opcode ({len(validation)}) ===")
+    print(
+        f"\n=== validation: named asm blocks confirmed libultra by opcode ({len(validation)}) ==="
+    )
     for row in sorted(validation):
         print(fmt(row))
 
-    print(f"\n=== CONFLICTS: named asm block opcode-matches a DIFFERENT libultra fn ({len(conflicts)}) ===")
+    print(
+        f"\n=== CONFLICTS: named asm block opcode-matches a DIFFERENT libultra fn ({len(conflicts)}) ==="
+    )
     if conflicts:
-        print("  (likely a name-collision false-positive in pick_target's labeling — verify)")
+        print(
+            "  (likely a name-collision false-positive in pick_target's labeling — verify)"
+        )
     for row in sorted(conflicts):
         print(fmt(row))
 
     # worklist: unnamed func_ matches, filtered for disjointness + min length
     emitted = 0
-    print(f"\n=== symbol_addrs.txt worklist: unnamed libultra blocks (add-only, gate-applied) ===")
-    print("# review before applying; opcode-only match — confirm at the gate. min-insns=%d" % args.min_insns)
+    print(
+        f"\n=== symbol_addrs.txt worklist: unnamed libultra blocks (add-only, gate-applied) ==="
+    )
+    print(
+        "# review before applying; opcode-only match — confirm at the gate. min-insns=%d"
+        % args.min_insns
+    )
     for off, nm, vram, ref_names, src, nins, ambig in sorted(worklist):
         if nins < args.min_insns:
             continue
@@ -322,14 +382,24 @@ def main():
         if skip:
             print(f"# SKIP {name} = 0x{vram:08X}; // type:func ({src}){suffix}")
         else:
-            print(f"{name} = 0x{vram:08X}; // type:func  ({src}, was {nm}, {nins}i){suffix}")
+            print(
+                f"{name} = 0x{vram:08X}; // type:func  ({src}, was {nm}, {nins}i){suffix}"
+            )
             emitted += 1
     short = sum(1 for r in worklist if r[5] < args.min_insns)
-    print(f"\n# {emitted} ready to add; {short} unnamed matches below min-insns ({args.min_insns}) withheld;"
-          f" {overlay_skipped} overlay candidates excluded (libultra is never in an overlay).")
-    print("# AMBIG / common-skeleton flags mark short opcode-only matches that are not unique — verify those.")
-    print("# Leaf intrinsics under 20i are NOT a coddog blind spot here — this matcher includes them;")
-    print("# any still un-named are simply not opcode-unique enough to auto-name (raise --min-insns to trim).")
+    print(
+        f"\n# {emitted} ready to add; {short} unnamed matches below min-insns ({args.min_insns}) withheld;"
+        f" {overlay_skipped} overlay candidates excluded (libultra is never in an overlay)."
+    )
+    print(
+        "# AMBIG / common-skeleton flags mark short opcode-only matches that are not unique — verify those."
+    )
+    print(
+        "# Leaf intrinsics under 20i are NOT a coddog blind spot here — this matcher includes them;"
+    )
+    print(
+        "# any still un-named are simply not opcode-unique enough to auto-name (raise --min-insns to trim)."
+    )
 
 
 if __name__ == "__main__":

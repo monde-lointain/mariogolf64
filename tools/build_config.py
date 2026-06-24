@@ -15,6 +15,7 @@ is evaluated; a compound condition (`&&`/`||`) or any other `#if` is opaque (bot
 nesting tracked so #else/#endif still pair correctly). A lib with no `-DBUILD_VERSION`
 (libkmc/libnusys) yields ordinal 0 -> no-op (those upstreams don't gate on it).
 """
+
 import functools
 import os
 import re
@@ -23,8 +24,8 @@ from decomp_common import PROJECT_ROOT as ROOT
 
 # Shared with pick_target's staying preprocessor scanners (re-imported there); also used by
 # _strip_inactive_version_branches below.
-_PP_OPENING_DIRECTIVE_RE = re.compile(r'^\s*#\s*if(?:def|ndef)?\b')
-_PP_ENDIF_LINE_RE = re.compile(r'^\s*#\s*endif\b')
+_PP_OPENING_DIRECTIVE_RE = re.compile(r"^\s*#\s*if(?:def|ndef)?\b")
+_PP_ENDIF_LINE_RE = re.compile(r"^\s*#\s*endif\b")
 
 _VERSION_ORD = {f"VERSION_{c}": i for i, c in enumerate("DEFGHIJKL", start=1)}
 _BUILD_VERSION_VAL_RE = re.compile(r"-DBUILD_VERSION=(VERSION_[A-Z])\b")
@@ -46,7 +47,10 @@ def _build_version_ord_by_var():
     try:
         with open(os.path.join(ROOT, "Makefile")) as f:
             for line in f:
-                m = re.match(r"^\s*(CFLAGS|LIBKMC_CFLAGS|LIBNUSYS_CFLAGS|LIBULTRA_CFLAGS)\s*[:+]?=", line)
+                m = re.match(
+                    r"^\s*(CFLAGS|LIBKMC_CFLAGS|LIBNUSYS_CFLAGS|LIBULTRA_CFLAGS)\s*[:+]?=",
+                    line,
+                )
                 if m:
                     v = _BUILD_VERSION_VAL_RE.search(line)
                     if v:
@@ -64,8 +68,12 @@ def _build_version_ord(lib):
 def _eval_build_version(op, ver, ord_):
     rhs = _VERSION_ORD.get(ver, 0)
     return {
-        ">=": ord_ >= rhs, "<=": ord_ <= rhs, ">": ord_ > rhs,
-        "<": ord_ < rhs, "==": ord_ == rhs, "!=": ord_ != rhs,
+        ">=": ord_ >= rhs,
+        "<=": ord_ <= rhs,
+        ">": ord_ > rhs,
+        "<": ord_ < rhs,
+        "==": ord_ == rhs,
+        "!=": ord_ != rhs,
     }[op]
 
 
@@ -75,13 +83,21 @@ def _strip_inactive_version_branches(text, build_ord):
     so #else/#endif pair to the right directive. build_ord 0 → no-op."""
     if not build_ord:
         return text
-    out, stack = [], []  # frame: {"ver": bool, "emit": bool}; line live iff all frames emit
+    out, stack = (
+        [],
+        [],
+    )  # frame: {"ver": bool, "emit": bool}; line live iff all frames emit
     live = lambda: all(fr["emit"] for fr in stack)
     for line in text.splitlines():
         s = line.lstrip()
         m = _BUILD_VERSION_IF_RE.match(s)
         if m:
-            stack.append({"ver": True, "emit": _eval_build_version(m.group(1), m.group(2), build_ord)})
+            stack.append(
+                {
+                    "ver": True,
+                    "emit": _eval_build_version(m.group(1), m.group(2), build_ord),
+                }
+            )
             continue  # drop the #if directive itself
         if _PP_OPENING_DIRECTIVE_RE.match(s):
             keep = live()

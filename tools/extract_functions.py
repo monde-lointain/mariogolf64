@@ -13,19 +13,19 @@ def format_line(line: str) -> str | None:
     stripped = line.strip()
 
     # Label line (e.g., "  .L80099F64:")
-    label_match = re.match(r'^\s*(\.L\w+):\s*$', line)
+    label_match = re.match(r"^\s*(\.L\w+):\s*$", line)
     if label_match:
         return f"{label_match.group(1)}:"
 
     # Instruction line with comment (e.g., "    /* 75354 80099F54 14800003 */  bnez       $a0, .L80099F64")
-    instr_match = re.match(r'^\s*/\*[^*]*\*/\s+(\S+)\s*(.*)?$', line)
+    instr_match = re.match(r"^\s*/\*[^*]*\*/\s+(\S+)\s*(.*)?$", line)
     if instr_match:
         instr = instr_match.group(1)
         operands = instr_match.group(2) or ""
         # Remove $ from registers
-        operands = re.sub(r'\$', '', operands)
+        operands = re.sub(r"\$", "", operands)
         # Remove trailing comments
-        operands = re.sub(r'\s*/\*.*\*/', '', operands)
+        operands = re.sub(r"\s*/\*.*\*/", "", operands)
         # Strip whitespace from operands
         operands = operands.strip()
         # Align operands to column 16 (8 indent + 8 for instruction)
@@ -49,7 +49,7 @@ def extract_functions(content: str) -> list[tuple[str, str]]:
         line = lines[i]
 
         # Look for function start
-        glabel_match = re.match(r'^glabel\s+(\w+)\s*$', line)
+        glabel_match = re.match(r"^glabel\s+(\w+)\s*$", line)
         if glabel_match:
             func_name = glabel_match.group(1)
             func_lines = [func_name]
@@ -58,7 +58,7 @@ def extract_functions(content: str) -> list[tuple[str, str]]:
             # Collect lines until endlabel
             while i < len(lines):
                 line = lines[i]
-                endlabel_match = re.match(r'^endlabel\s+(\w+)\s*$', line)
+                endlabel_match = re.match(r"^endlabel\s+(\w+)\s*$", line)
                 if endlabel_match:
                     break
 
@@ -67,7 +67,7 @@ def extract_functions(content: str) -> list[tuple[str, str]]:
                     func_lines.append(formatted)
                 i += 1
 
-            functions.append((func_name, '\n'.join(func_lines)))
+            functions.append((func_name, "\n".join(func_lines)))
 
         i += 1
 

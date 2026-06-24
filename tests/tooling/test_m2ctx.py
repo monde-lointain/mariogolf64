@@ -4,6 +4,7 @@ Integration-flavored (shells out to host `gcc -E`), but cheap and deterministic.
 Locks the two behaviors the refactor must preserve: project macros survive
 preprocessing, and stock GCC predefined macros are stripped from the output.
 """
+
 from __future__ import annotations
 
 from pathlib import Path

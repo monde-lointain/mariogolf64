@@ -10,6 +10,7 @@ Mirrors decomp.me's KMC GCC compile + asm-differ flow exactly:
 Stdout: one JSON object (the agent parses this).
 Stderr: human-readable progress messages.
 """
+
 from __future__ import annotations
 
 import os
@@ -94,7 +95,9 @@ def ensure_reference_object(seg_stem: str) -> Path:
     src = ASM_DIR / f"{seg_stem}.s"
     if not src.exists():
         fail(f"asm source file missing: {src}")
-    needs_build = (not target.exists()) or (target.stat().st_mtime < src.stat().st_mtime)
+    needs_build = (not target.exists()) or (
+        target.stat().st_mtime < src.stat().st_mtime
+    )
     if needs_build:
         log(f"[bootstrap] building {target.relative_to(ROOT_DIR)} ...")
         proc = subprocess.run(
@@ -162,7 +165,9 @@ def detect_libultra_profile(placeholder: str) -> bool:
     return False
 
 
-def compile_candidate(placeholder: str, libkmc: bool, libultra: bool = False) -> tuple[bool, str, Path]:
+def compile_candidate(
+    placeholder: str, libkmc: bool, libultra: bool = False
+) -> tuple[bool, str, Path]:
     """Run `make nonmatching-func FUNC=<placeholder> [LIBKMC=1|LIBULTRA=1]`."""
     current_o = NONMATCHINGS_DIR / placeholder / "current.o"
     cmd = ["make", "nonmatching-func", f"FUNC={placeholder}"]
@@ -270,26 +275,39 @@ def score_diff(raw: dict, max_mismatches: int = 5) -> dict:
         if not base and not current:
             continue
         # asm-differ marks identity via matching `key` on both sides.
-        is_match = bool(base) and bool(current) and (base.get("key") == current.get("key"))
+        is_match = (
+            bool(base) and bool(current) and (base.get("key") == current.get("key"))
+        )
         if is_match:
             match_count += 1
         elif len(mismatches) < max_mismatches:
+
             def _flat(d):
                 t = d.get("text", []) if isinstance(d, dict) else []
                 if isinstance(t, list):
-                    return "".join(seg.get("text", "") if isinstance(seg, dict) else str(seg) for seg in t)
+                    return "".join(
+                        seg.get("text", "") if isinstance(seg, dict) else str(seg)
+                        for seg in t
+                    )
                 return str(t)
-            mismatches.append({
-                "row_idx": idx,
-                "base_text": _flat(base),
-                "current_text": _flat(current),
-            })
+
+            mismatches.append(
+                {
+                    "row_idx": idx,
+                    "base_text": _flat(base),
+                    "current_text": _flat(current),
+                }
+            )
     current_score = int(raw.get("current_score", -1))
     max_score = int(raw.get("max_score", 0))
     # Prefer asm-differ's own score; fall back to row-counting if unavailable.
     if current_score >= 0:
         score = current_score
-        percent = 1.0 - (current_score / max_score) if max_score > 0 else (1.0 if total else 0.0)
+        percent = (
+            1.0 - (current_score / max_score)
+            if max_score > 0
+            else (1.0 if total else 0.0)
+        )
     else:
         score = 0 if (total > 0 and match_count == total) else (total - match_count)
         percent = (match_count / total) if total else 0.0
@@ -322,7 +340,9 @@ def resolve_profile(profile: str, placeholder: str) -> tuple[bool, bool]:
     if libkmc:
         log(f"[profile] libkmc (-O) — placeholder found in {LIBKMC_SRC}")
     elif libultra:
-        log(f"[profile] libultra (-O3 -funsigned-char) — placeholder found in {LIBULTRA_SRC}")
+        log(
+            f"[profile] libultra (-O3 -funsigned-char) — placeholder found in {LIBULTRA_SRC}"
+        )
     return libkmc, libultra
 
 
@@ -339,7 +359,7 @@ def main() -> None:
         choices=["auto", "libkmc", "libultra", "default"],
         default="auto",
         help="Compile profile. auto = detect by upstream-src presence; "
-             "libkmc = force -O; libultra = force -O3 -funsigned-char; default = force -O2.",
+        "libkmc = force -O; libultra = force -O3 -funsigned-char; default = force -O2.",
     )
     args = parser.parse_args()
 
@@ -358,12 +378,14 @@ def main() -> None:
 
     ok, compile_log, current_o = compile_candidate(placeholder, libkmc, libultra)
     if not ok:
-        emit({
-            "compile_ok": False,
-            "placeholder": placeholder,
-            "segment": seg_stem,
-            "compile_log": compile_log[-4000:],
-        })
+        emit(
+            {
+                "compile_ok": False,
+                "placeholder": placeholder,
+                "segment": seg_stem,
+                "compile_log": compile_log[-4000:],
+            }
+        )
         sys.exit(0)
     log(f"[compile] {current_o.relative_to(ROOT_DIR)}")
 
@@ -375,14 +397,16 @@ def main() -> None:
     scored = score_diff(raw, max_mismatches=0 if args.score_only else 5)
     log(f"[diff] score={scored['score']} percent={scored['percent']:.4f}")
 
-    emit({
-        "compile_ok": True,
-        "placeholder": placeholder,
-        "segment": seg_stem,
-        "reference_path": str(reference_o.relative_to(ROOT_DIR)),
-        "current_path": str(current_o.relative_to(ROOT_DIR)),
-        **scored,
-    })
+    emit(
+        {
+            "compile_ok": True,
+            "placeholder": placeholder,
+            "segment": seg_stem,
+            "reference_path": str(reference_o.relative_to(ROOT_DIR)),
+            "current_path": str(current_o.relative_to(ROOT_DIR)),
+            **scored,
+        }
+    )
 
 
 if __name__ == "__main__":
