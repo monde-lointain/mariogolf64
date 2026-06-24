@@ -343,6 +343,9 @@ n_alSynStopVoice = 0x800A0CF0; // type:func
 // S130: n_synaddplayer.c + n_synsetvol.c mirrors.
 n_alSynAddPlayer = 0x800A07B0; // type:func
 n_alSynSetVol = 0x800A0BB0; // type:func
+// S131: n_syndelete.c + n_synsetfxmix.c mirrors (split from the 0x7BDE0 2-file pack).
+n_alSynDelete = 0x800A09E0; // type:func
+n_alSynSetFXMix = 0x800A09F0; // type:func
 // shared n_syn* callees/global, recovered from the n_alSynSetPan asm (still-asm siblings + n_sl.c global).
 __n_allocParam = 0x800A1148; // type:func
 n_alEnvmixerParam = 0x8009EFE8; // type:func

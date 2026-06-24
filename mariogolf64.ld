@@ -127,7 +127,8 @@ SECTIONS
         build/asm/7BB30.o(.text);
         build/src/libnaudio/n_synaddplayer.o(.text);
         build/asm/7BC00.o(.text);
-        build/asm/7BDE0.o(.text);
+        build/src/libnaudio/n_syndelete.o(.text);
+        build/src/libnaudio/n_synsetfxmix.o(.text);
         build/src/libnaudio/n_synsetpan.o(.text);
         build/src/libnaudio/n_synsetpitch.o(.text);
         build/src/libnaudio/n_synsetvol.o(.text);
@@ -393,7 +394,8 @@ SECTIONS
         build/asm/7BB30.o(.data);
         build/src/libnaudio/n_synaddplayer.o(.data);
         build/asm/7BC00.o(.data);
-        build/asm/7BDE0.o(.data);
+        build/src/libnaudio/n_syndelete.o(.data);
+        build/src/libnaudio/n_synsetfxmix.o(.data);
         build/src/libnaudio/n_synsetpan.o(.data);
         build/src/libnaudio/n_synsetpitch.o(.data);
         build/src/libnaudio/n_synsetvol.o(.data);
@@ -672,7 +674,8 @@ SECTIONS
         build/asm/7BB30.o(.rodata);
         build/src/libnaudio/n_synaddplayer.o(.rodata);
         build/asm/7BC00.o(.rodata);
-        build/asm/7BDE0.o(.rodata);
+        build/src/libnaudio/n_syndelete.o(.rodata);
+        build/src/libnaudio/n_synsetfxmix.o(.rodata);
         build/src/libnaudio/n_synsetpan.o(.rodata);
         build/src/libnaudio/n_synsetpitch.o(.rodata);
         build/src/libnaudio/n_synsetvol.o(.rodata);
@@ -957,7 +960,8 @@ SECTIONS
         build/asm/7BB30.o(.bss);
         build/src/libnaudio/n_synaddplayer.o(.bss);
         build/asm/7BC00.o(.bss);
-        build/asm/7BDE0.o(.bss);
+        build/src/libnaudio/n_syndelete.o(.bss);
+        build/src/libnaudio/n_synsetfxmix.o(.bss);
         build/src/libnaudio/n_synsetpan.o(.bss);
         build/src/libnaudio/n_synsetpitch.o(.bss);
         build/src/libnaudio/n_synsetvol.o(.bss);
