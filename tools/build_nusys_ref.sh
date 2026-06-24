@@ -16,6 +16,8 @@ set -euo pipefail
 
 REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$REPO"
+# shellcheck source=tools/sweep_lib.sh
+source "$REPO/tools/sweep_lib.sh"
 
 NUSYS_SRC="${NUSYS_SRC:-$HOME/development/repos/n64sdkmod/packages/libnusys/usr/src/PR/libsrc/nusys-2.07/nusys/src/mainlib}"
 OBJCOPY="${OBJCOPY:-mips-linux-gnu-objcopy}"
@@ -49,7 +51,7 @@ for src in "$NUSYS_SRC"/*.c; do
      && tools/cc/as -EB -mips2 -G 0 -I include -o "$obj" "$s" 2>>"$obj.err"; then
     "$STRIP" "$obj" -N dummy-symbol-name 2>/dev/null || true
     # Strip the KMC-specific ECOFF/debug sections GNU ld rejects (same set as the ultralib sweep).
-    "$OBJCOPY" -R .mdebug -R .mdebug.abi32 -R .reginfo -R .pdr -R .comment "$obj" "$obj" 2>/dev/null || true
+    "$OBJCOPY" "${MG_KMC_STRIP_SECTIONS[@]}" "$obj" "$obj" 2>/dev/null || true
     # symbol -> source-file map (relative path the pick_target nusys resolvers expect).
     "$NM" "$obj" 2>/dev/null | awk -v f="mainlib/$base.c" '/ T | t /{print $3"\t"f}' >> "$SYM2FILE"
     rm -f "$s" "$obj.err"
