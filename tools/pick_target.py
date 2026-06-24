@@ -3087,33 +3087,11 @@ def _resolve_named_upstream(st, upstream_index, coddog_index, sig_index):
                     st.hazards.append(hint)
 
 
-def _build_row(
-    off,
-    typ,
-    path,
-    size,
-    args,
-    upstream_index,
-    carried,
-    sig_index,
-    coddog_index,
-    nusys_index,
-    _libultra_band_start,
-):
-    """Classify one subseg and produce its scored row dict, or None to skip it (bss,
-    scope-filtered, or a de-ranked carry-over). The per-subseg body of build_rows;
-    the resolved identity lives on a _RowState (st) the coddog/nusys passes rebind in
-    place as they run."""
-    classified = classify_subseg(off, typ, path, size, upstream_index)
-    if classified is None:
-        return None
-    kind, fns, hazards = classified
-
-    _append_caller_evict(fns, hazards)
-
-    st = _RowState.create(off, size, kind, fns, hazards, upstream_index)
-    _resolve_named_upstream(st, upstream_index, coddog_index, sig_index)
-
+def _resolve_primary_coddog(st, coddog_index, upstream_index):
+    """coddog cross-ref keyed on the PRIMARY fn, fired only when the C-name index missed it. A coddog
+    match is then a verbatim-mirror target mis-seen as classical: flag it, re-price a non-audio
+    >=CODDOG_MIRROR_PCT hit to libultra, and re-run the file-level trap battery + the multi-fn
+    fncount-mismatch guard over the coddog-resolved `.c`."""
     # coddog cross-ref: a candidate coddog matched to an ultralib fn but that the C-name index
     # missed (un-named / `none`) is a verbatim-mirror target mis-seen as classical. Flag the match
     # always; re-price a ≥CODDOG_MIRROR_PCT *non-audio* hit as a libultra mirror so `seed_points`
@@ -3159,6 +3137,35 @@ def _build_row(
                     st.hazards.append(
                         Hazard.coddog_fncount_mismatch(matched_n, len(st.fns))
                     )
+
+
+def _build_row(
+    off,
+    typ,
+    path,
+    size,
+    args,
+    upstream_index,
+    carried,
+    sig_index,
+    coddog_index,
+    nusys_index,
+    _libultra_band_start,
+):
+    """Classify one subseg and produce its scored row dict, or None to skip it (bss,
+    scope-filtered, or a de-ranked carry-over). The per-subseg body of build_rows;
+    the resolved identity lives on a _RowState (st) the coddog/nusys passes rebind in
+    place as they run."""
+    classified = classify_subseg(off, typ, path, size, upstream_index)
+    if classified is None:
+        return None
+    kind, fns, hazards = classified
+
+    _append_caller_evict(fns, hazards)
+
+    st = _RowState.create(off, size, kind, fns, hazards, upstream_index)
+    _resolve_named_upstream(st, upstream_index, coddog_index, sig_index)
+    _resolve_primary_coddog(st, coddog_index, upstream_index)
 
     # A multi-fn asm subseg's mirror IDENTITY often lives in its UN-NAMED tail, not its named (or
     # mis-attributed) leader. The primary block above keys coddog on `primary` AND fires only when
