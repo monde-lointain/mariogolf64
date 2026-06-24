@@ -16,6 +16,27 @@ subordinate to the libultra goal. Target selection is `tools/pick_target.py` (sm
 the 8-point decompose gate fires on any seed ≥8. v2 classical track is active (since S11);
 mirror is the default, classical is first-class when the asm warrants it.
 
+**S133 — `n_save.c` / `n_alSavePull` BANKED (n_audio_sc N_MICRO command-stream mirror; first inc-vendor
++ N_MICRO pin).** A verbatim N_MICRO-branch mirror (80B): `jal n_alMainBusPull`, then the
+`inc/n_save_add01.inc.c` fragment → **md5-candidate 189→190**; asm subsegs 97→96. pick_target priced it
+`blk`, a FALSE-FLAG (the `.inc.c` body-include is vendorable from the n_audio_sc `src/inc/` tree; the
+needs-header detector scanned only `.h` basenames). Two latent enablers surfaced at the body compile
+(gate stub hid both): (1) `#needs-define N_MICRO` — the upstream builds the WHOLE lib with `-DN_MICRO=1`;
+without it n_save.c took the longer non-micro path → SHA-miss. Pinned `-DN_MICRO=1` in `LIBNAUDIO_CFLAGS`
+(same class as the `-DF3DEX_GBI_2` libultra pin), clean-rebuild. (2) `find src -name '*.c'` swept the
+`inc/*.inc.c` fragment as a TU (parse error) → Makefile `! -name '*.inc.c'` exclusion. Gate enablers:
+`n_alSavePull`=0x800A12D0 + `n_alMainBusPull`=0x800A1370 (calls-unplaced callee, stays asm); flip
+`[0x7C6D0]`. Quality 0/0/0/0. seed 3 / banked 3pt (mirror, seed-only). Retro applied 3 of 3: #1
+`include_is_vendorable` full-source-relative-path match under `UPSTREAM_SRC_ROOTS` (n_audio_sc `src/`
+registered) → `.inc.c` prices +1 not `blk`; #2 `_parse_makefile_defines` parses `LIBNAUDIO_CFLAGS` →
+libnaudio define set carries N_MICRO; #3 `docs/hazards.md#needs-header` `.inc.c` body-include sub-section
++ `#needs-define` N_MICRO library-pin sub-section. Goldens regen'd for the bank drift; suite 89 pass.
+**Cross-repo follow-up:** `n_alSavePull` + `n_alMainBusPull` → `sync_decomp_names.py --import-from-decomp`.
+**Next:** the inc-vendor + N_MICRO pin **de-blk the rest of the n_audio_sc band** — `n_resample.c`
+(`func_8009FB60`) blk→**pts5** (smallest, 2 fns, needs `inc/n_resample_add01.inc.c` + 2 callees placed);
+`n_load.c`/`n_reverb.c`/`n_env.c` blk→pts13 (decompose or batch). `func_800A0D70`/`n_synthesizer.c`
+(pts-8, 3 calls-unplaced) and `n_mainbus.c` (`[0x7C720]` split, Carry-overs) still pending.
+
 **S132 — `n_synallocvoice.c` + `n_sl.c` BANKED (n_audio_sc mirror cluster: clean cp + drop-def).** The
 S131-"Next" #1+#2, both Match FIRST build → **md5-candidate 187→189**; asm subsegs 99→97.
 `n_synallocvoice.c` (`n_alSynAllocVoice` + static `_allocatePVoice`) was a pure verbatim cp (all callees

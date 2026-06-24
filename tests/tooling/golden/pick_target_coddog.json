@@ -1,19 +1,6 @@
 [
   {
     "band": "-",
-    "func": "func_800A12D0",
-    "hazards": "-",
-    "kind": "asm-flip",
-    "nfns": 1,
-    "pts": 5,
-    "rom": "0x7C6D0",
-    "score": -80,
-    "size": 80,
-    "upstream": "none",
-    "vram": "0x800A12D0"
-  },
-  {
-    "band": "-",
     "func": "func_ovl10_801F4A40",
     "hazards": "pack:2fn[func_ovl10_801F4A40=?,func_ovl10_801F4AD8=?],one-tu,coddog-mirror:src/audio/fake.c@99.99,body-divergence-suspect:src/audio/fake.c@99.99",
     "kind": "asm-flip",
@@ -158,7 +145,7 @@
   {
     "band": "cold",
     "func": "n_alSynNew",
-    "hazards": "pack:8fn[n_alSynNew=n_synthesizer,func_800A0FE0=?,__n_allocParam=n_synthesizer,func_800A1174=?,func_800A118C=?,func_800A11EC=?,func_800A1224=?,_n_timeToSamples=n_synthesizer],calls-unplaced:alN_PVoiceNew,n_alSavePull,n_alSynAllocFX,jal-count-mismatch:3vs8,rodata-literal:0x800D21E0,0x800D21E8,0x800D21F0,0x800D21F8;carve-end=0x800D2930",
+    "hazards": "pack:8fn[n_alSynNew=n_synthesizer,func_800A0FE0=?,__n_allocParam=n_synthesizer,func_800A1174=?,func_800A118C=?,func_800A11EC=?,func_800A1224=?,_n_timeToSamples=n_synthesizer],calls-unplaced:alN_PVoiceNew,n_alSynAllocFX,jal-count-mismatch:3vs8,rodata-literal:0x800D21E0,0x800D21E8,0x800D21F0,0x800D21F8;carve-end=0x800D2930",
     "kind": "asm-flip",
     "nfns": 8,
     "pts": 8,

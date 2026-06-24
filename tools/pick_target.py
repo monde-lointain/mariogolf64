@@ -349,8 +349,14 @@ UPSTREAM_INC_ROOTS = [
 # get copied source-relative next to the mirrored .c, NOT into an -I dir. Distinct from
 # UPSTREAM_INC_ROOTS (the public -I header donors). A `needs-header:<h>` whose `<h>` lives here is
 # vendorable (a cheap source-relative cp), not a blocked DoR reject (e.g. guint.h, xstdio.h).
+# Also the donor for `.inc.c` body-includes (`#include "inc/<x>.inc.c"` inside a function body, e.g.
+# the n_audio_sc N_MICRO command-stream fragments) — include_is_vendorable checks the full
+# source-relative path here, so an `inc/*.inc.c` is a +1 vendorable enabler, not a `blk` DoR reject.
 UPSTREAM_SRC_ROOTS = [
     LIBULTRA,  # ~/development/repos/ultralib/src
+    os.path.expanduser(
+        "~/development/repos/n64sdkmod/packages/libnaudio/usr/src/PR/libsrc/n_audio_sc/src"
+    ),  # n_audio_sc (libnaudio) source-private headers + inc/*.inc.c body-includes
 ]
 UPSTREAM_BONUS = 200
 # The libultra boot-region globals (fixed RAM 0x80000300-0x8000031C). A verbatim mirror references
@@ -1132,15 +1138,23 @@ def _parse_makefile_defines():
     """Return {lib: frozenset(defines)} by parsing the project build files (cached:
     one parse per process). The base CFLAGS live in the top Makefile; the per-library
     profiles live in the included mk/*.mk fragments, so scan both.
-    'libkmc'/'libnusys'/'libultra' each inherit from the main CFLAGS set plus their own
+    'libkmc'/'libnusys'/'libultra'/'libnaudio' each inherit from the main CFLAGS set plus their own
     profile additions. The libultra profile carries -DBUILD_VERSION + -DF3DEX_GBI_2
     — without parsing LIBULTRA_CFLAGS the GBI microcode define is invisible, so a
     GBI-value-guarded macro (OS_YIELD_DATA_SIZE) false-flags as needs-define on a build
-    that already defines it."""
+    that already defines it. The libnaudio profile carries -DN_MICRO=1 (the n_audio_sc
+    micro command-stream variant): without parsing LIBNAUDIO_CFLAGS an N_MICRO-guarded
+    function (n_save.c et al.) false-flags as needs-define on a build that already defines it."""
     build_files = [os.path.join(ROOT, "Makefile")] + sorted(
         glob.glob(os.path.join(ROOT, "mk", "*.mk"))
     )
-    raw = {"main": set(), "libkmc": set(), "libnusys": set(), "libultra": set()}
+    raw = {
+        "main": set(),
+        "libkmc": set(),
+        "libnusys": set(),
+        "libultra": set(),
+        "libnaudio": set(),
+    }
     for path in build_files:
         try:
             with open(path) as f:
@@ -1150,6 +1164,7 @@ def _parse_makefile_defines():
                         ("LIBKMC_CFLAGS", "libkmc"),
                         ("LIBNUSYS_CFLAGS", "libnusys"),
                         ("LIBULTRA_CFLAGS", "libultra"),
+                        ("LIBNAUDIO_CFLAGS", "libnaudio"),
                     ]:
                         if re.match(rf"^\s*{var}\s*[:+]?=", line):
                             raw[key].update(
@@ -1157,16 +1172,19 @@ def _parse_makefile_defines():
                             )
         except OSError:
             continue
-    for k in ("libkmc", "libnusys", "libultra"):
+    for k in ("libkmc", "libnusys", "libultra", "libnaudio"):
         raw[k] |= raw["main"]
     return {k: frozenset(v) for k, v in raw.items()}
 
 
 def _active_defines_for_lib(lib):
-    """Effective -D defines for an upstream library key (libultra, libkmc, libnusys)."""
-    key = {"libkmc": "libkmc", "libnusys": "libnusys", "libultra": "libultra"}.get(
-        lib or "", "main"
-    )
+    """Effective -D defines for an upstream library key (libultra, libkmc, libnusys, libnaudio)."""
+    key = {
+        "libkmc": "libkmc",
+        "libnusys": "libnusys",
+        "libultra": "libultra",
+        "libnaudio": "libnaudio",
+    }.get(lib or "", "main")
     return _parse_makefile_defines()[key]
 
 
@@ -2190,9 +2208,14 @@ def include_is_vendorable(inc):
     for root in UPSTREAM_INC_ROOTS:
         if os.path.exists(os.path.join(root, inc)):
             return True  # public companion header → copy into an -I dir
+    # Source-relative full-path match under a SOURCE tree: a body-include (`inc/<x>.inc.c`) or a
+    # subdir-qualified source-private header, copied source-relative next to the mirror's .c.
+    for root in UPSTREAM_SRC_ROOTS:
+        if os.path.exists(os.path.join(root, inc)):
+            return True  # body-include / source-relative cp (e.g. inc/n_save_add01.inc.c)
     return (
         os.path.basename(inc) in _upstream_src_headers()
-    )  # source-private → source-relative cp
+    )  # source-private → source-relative cp (bare basename)
 
 
 def include_is_blocked(inc):

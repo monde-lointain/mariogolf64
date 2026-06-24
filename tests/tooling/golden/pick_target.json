@@ -1,19 +1,6 @@
 [
   {
     "band": "-",
-    "func": "func_800A12D0",
-    "hazards": "-",
-    "kind": "asm-flip",
-    "nfns": 1,
-    "pts": 5,
-    "rom": "0x7C6D0",
-    "score": -80,
-    "size": 80,
-    "upstream": "none",
-    "vram": "0x800A12D0"
-  },
-  {
-    "band": "-",
     "func": "func_ovl10_801F4A40",
     "hazards": "pack:2fn[func_ovl10_801F4A40=?,func_ovl10_801F4AD8=?],one-tu",
     "kind": "asm-flip",
@@ -145,7 +132,7 @@
   {
     "band": "cold",
     "func": "n_alSynNew",
-    "hazards": "pack:8fn[n_alSynNew=n_synthesizer,func_800A0FE0=?,__n_allocParam=n_synthesizer,func_800A1174=?,func_800A118C=?,func_800A11EC=?,func_800A1224=?,_n_timeToSamples=n_synthesizer],calls-unplaced:alN_PVoiceNew,n_alSavePull,n_alSynAllocFX,jal-count-mismatch:3vs8,rodata-literal:0x800D21E0,0x800D21E8,0x800D21F0,0x800D21F8;carve-end=0x800D2930",
+    "hazards": "pack:8fn[n_alSynNew=n_synthesizer,func_800A0FE0=?,__n_allocParam=n_synthesizer,func_800A1174=?,func_800A118C=?,func_800A11EC=?,func_800A1224=?,_n_timeToSamples=n_synthesizer],calls-unplaced:alN_PVoiceNew,n_alSynAllocFX,jal-count-mismatch:3vs8,rodata-literal:0x800D21E0,0x800D21E8,0x800D21F0,0x800D21F8;carve-end=0x800D2930",
     "kind": "asm-flip",
     "nfns": 8,
     "pts": 8,
@@ -648,5 +635,18 @@
     "size": 9776,
     "upstream": "none",
     "vram": "0x80213390"
+  },
+  {
+    "band": "-",
+    "func": "func_ovl11_80241800",
+    "hazards": "pack:16fn[func_ovl11_80241800=?,func_ovl11_80242074=?,func_ovl11_80242334=?,func_ovl11_80242B74=?,func_ovl11_80242FC0=?,func_ovl11_80243050=?,func_ovl11_802433B4=?,func_ovl11_802434A0=?,func_ovl11_80243634=?,func_ovl11_802436C8=?,func_ovl11_8024373C=?,func_ovl11_802438D0=?,func_ovl11_80243C48=?,func_ovl11_8024407C=?,func_ovl11_802440AC=?,func_ovl11_80244244=?],maybe-upstream:libnusys:nuaudma,nusimgr,nusicallbackadd",
+    "kind": "asm-flip",
+    "nfns": 16,
+    "pts": 13,
+    "rom": "0x150990",
+    "score": -11216,
+    "size": 11216,
+    "upstream": "none",
+    "vram": "0x80241800"
   }
 ]

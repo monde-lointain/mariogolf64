@@ -955,6 +955,28 @@ gate-time re-diagnosis (S49 guint.h, S53 PR-band, S54 sprintf's `xstdio.h`/`stri
   but there is no `-I include/libultra/PR`) is the standing example: flagging an audio leaf as a
   clean flip without that path is a false-clean. Prefer `<PR/x.h>`-style `monegi/` upstreams.
 
+**`.inc.c` body-include vendoring (S133, n_audio_sc).** Some upstreams `#include` a `.inc.c`
+**fragment inside a function body** (not a header): the n_audio_sc N_MICRO command-stream files do
+`#include "inc/<x>.inc.c"` in the `#else` of an `#ifdef N_MICRO`, where the fragment is a few bare
+statements (`n_aInterleave(ptr++); n_aSaveBuffer(...);`), not a TU. Three rules:
+- **Vendorable, not `blk`.** The fragment lives in the upstream `src/inc/` tree, so it is a +1
+  `needs-copy` enabler like any source-private header, copied source-relative next to the mirror
+  (`inc/n_save_add01.inc.c` → `src/libnaudio/inc/`). `include_is_vendorable` matches it by its full
+  source-relative path under `UPSTREAM_SRC_ROOTS` (the n_audio_sc `src/` is registered there), so it
+  no longer false-flags `blk`. Before S133 the detector scanned only `.h` basenames and missed the
+  whole inc set; that masked it as a DoR reject when it was a 1pt cp.
+- **NOT a standalone TU.** The build's source discovery is `find $(SRC_DIR) -name '*.c'`, which would
+  sweep the fragment in and try to compile it (`parse error before '++'`). The Makefile excludes it
+  with `! -name '*.inc.c'`. Any new body-include MUST use the `.inc.c` suffix so this exclusion
+  catches it.
+- **Do NOT clang-format the fragment.** It is a body-include with function-body indentation; running
+  `clang-format-22` on it standalone reindents to column 0 (it parses as a TU). Keep it verbatim;
+  codegen is unaffected (preprocessor text-inclusion, whitespace-irrelevant). Format only the host
+  `.c`.
+
+These files also branch on `N_MICRO`, an n_audio_sc-wide define: see `#needs-define` (the
+`-DN_MICRO=1` `LIBNAUDIO_CFLAGS` pin), the same class as the `-DF3DEX_GBI_2` libultra pin.
+
 ---
 
 ## per-library standard-C-header isolation
@@ -1971,6 +1993,20 @@ build as written.
 
 **Procedure:** Confirm the gating define against the upstream. If it is not in the lib's active
 define set, the leaf is not a clean flip: defer, or handle the define at the gate.
+
+### N_MICRO library-wide pin (S133: n_audio_sc command-stream variant)
+
+The n_audio_sc upstream Makefile builds the WHOLE library with `-DN_MICRO=1` (the "micro" command
+stream). Files that branch on it (`n_save.c`, `n_resample.c`, `n_reverb.c`, `n_env.c`, `n_load.c`,
+`n_synthesizer.c`) emit the micro path; with NO define they take the longer non-micro path and
+SHA-miss. The fix is a library-wide pin: `-DN_MICRO=1` in `LIBNAUDIO_CFLAGS` (`mk/libnaudio.mk`), the
+same standing-pin pattern as `-DF3DEX_GBI_2`. The setter mirrors (`n_syn*.c`) have no N_MICRO branch,
+so the pin is byte-neutral for them. `pick_target` parses `LIBNAUDIO_CFLAGS` into the libnaudio
+active-define set (S133), so N_MICRO reads as satisfied and a libnaudio mirror does not false-flag
+`needs-define:N_MICRO`. The first miss surfaced at the full-make ROM SHA-1 (`n_save.c` built the
+4-command non-micro path vs the target's 2 commands), invisible to the gate stub — the same
+late-surface class as the GBI sub-case below. See `#needs-header` for the paired `.inc.c`
+body-include the N_MICRO branch pulls in.
 
 ### GBI-microcode define (S83: value-guarded macro, not a whole-body gate)
 
