@@ -42,6 +42,8 @@ NONMATCHINGS_DIR = dc.NONMATCHINGS_DIR
 PLACEHOLDER_RE = dc.PLACEHOLDER_RE
 emit = dc.emit
 log = dc.log
+safe_read_text = dc.safe_read_text
+capture_stderr = dc.capture_stderr
 
 M2CTX_PATH = SCRIPT_DIR / "m2ctx.py"
 M2C_PATH = SCRIPT_DIR / "m2c" / "m2c.py"
@@ -79,7 +81,7 @@ def slice_target_asm(placeholder: str, seg_stem: str, out_dir: Path) -> Path:
     seg_path = ASM_DIR / f"{seg_stem}.s"
     if not seg_path.exists():
         fail(f"missing asm source: {seg_path}")
-    content = seg_path.read_text(encoding="utf-8", errors="replace")
+    content = safe_read_text(seg_path)
     for func_name, func_text in extract_mod.extract_functions(content):
         if func_name == placeholder:
             target_path = out_dir / "target.s"
@@ -93,7 +95,7 @@ def slice_target_asm(placeholder: str, seg_stem: str, out_dir: Path) -> Path:
 
 def collect_hi_lo_labels(target_asm_path: Path) -> set[str]:
     """Return all labels referenced via %hi/%lo in the target asm."""
-    text = target_asm_path.read_text(encoding="utf-8", errors="replace")
+    text = safe_read_text(target_asm_path)
     return set(HI_LO_REF_RE.findall(text))
 
 
@@ -129,7 +131,7 @@ def slice_rodata(
     for data_file in sorted(ASM_DATA_DIR.glob("*.s")):
         is_rodata = ".rodata." in data_file.name
         try:
-            lines = data_file.read_text(encoding="utf-8", errors="replace").splitlines()
+            lines = safe_read_text(data_file).splitlines()
         except OSError:
             continue
         i = 0
@@ -228,7 +230,7 @@ def run_m2ctx(parent: Path, out_path: Path) -> bool:
         log(
             f"[seed] m2ctx.py failed (rc={proc.returncode}); continuing without --context"
         )
-        log(f"[seed] stderr: {proc.stderr.strip()[:500]}")
+        log(f"[seed] stderr: {capture_stderr(proc)}")
         return False
     produced.replace(out_path)
     return True
@@ -247,9 +249,9 @@ def run_m2c(
     proc = subprocess.run(cmd, cwd=ROOT_DIR, capture_output=True, text=True)
     if proc.returncode != 0:
         log(f"[seed] m2c failed (rc={proc.returncode}); m2c.c will be a stub")
-        log(f"[seed] stderr: {proc.stderr.strip()[:500]}")
+        log(f"[seed] stderr: {capture_stderr(proc)}")
         out_path.write_text(
-            f"/* m2c failed; stderr:\n{proc.stderr.strip()[:2000]}\n*/\n",
+            f"/* m2c failed; stderr:\n{capture_stderr(proc, 2000)}\n*/\n",
             encoding="utf-8",
         )
         return False
@@ -399,7 +401,7 @@ def parent_has_real_c(parent: Path) -> bool:
     if parent is None or not parent.exists():
         return False
     in_block_comment = False
-    for raw in parent.read_text(encoding="utf-8", errors="replace").splitlines():
+    for raw in safe_read_text(parent).splitlines():
         line = raw.strip()
         if in_block_comment:
             if "*/" in line:
@@ -425,7 +427,7 @@ def collect_parent_externs(parent: Path) -> tuple[list[str], list[str]]:
         return [], []
     externs: list[str] = []
     asm_names: list[str] = []
-    for line in parent.read_text(encoding="utf-8", errors="replace").splitlines():
+    for line in safe_read_text(parent).splitlines():
         if EXTERN_LINE_RE.match(line):
             externs.append(line.rstrip())
             continue
@@ -547,7 +549,7 @@ def stitch_base_c(spec: BaseCSpec) -> Path:
             "/* === m2c reference (do not compile) =========================== */"
         )
         lines.append("#if 0")
-        for ml in m2c_path.read_text(encoding="utf-8", errors="replace").splitlines():
+        for ml in safe_read_text(m2c_path).splitlines():
             lines.append(ml)
         lines.append("#endif")
         lines.append(
@@ -557,7 +559,7 @@ def stitch_base_c(spec: BaseCSpec) -> Path:
 
     lines.append("// === Function body ============================================")
     if ghidra_path.exists():
-        body = ghidra_path.read_text(encoding="utf-8", errors="replace")
+        body = safe_read_text(ghidra_path)
         body = sanitize_ghidra_body(body, placeholder).rstrip()
         lines.append(body)
     else:

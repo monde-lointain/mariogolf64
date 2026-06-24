@@ -71,6 +71,27 @@ def reexec_into_venv(script: str) -> None:
         os.execv(str(venv_py), [str(venv_py), script, *sys.argv[1:]])
 
 
+# --- io helpers -----------------------------------------------------------
+def safe_read_text(path, *, errors: str = "replace") -> str:
+    """Read a text file as UTF-8 with a forgiving decode policy.
+
+    One source of truth for the `read_text(encoding="utf-8", errors=...)` idiom
+    that was copy-pasted across the tools. `errors` defaults to "replace"; pass
+    "ignore" to match the few sites that drop undecodable bytes instead.
+    """
+    return Path(path).read_text(encoding="utf-8", errors=errors)
+
+
+def capture_stderr(proc, limit: int = 500) -> str:
+    """The first `limit` chars of a finished subprocess's stderr, stripped.
+
+    Consolidates the head-truncated stderr idiom in the seed/loop error paths.
+    (Sites that deliberately keep the LAST N chars, or the full stream, are
+    left as-is - they are a different, intentional choice.)
+    """
+    return (proc.stderr or "").strip()[:limit]
+
+
 # --- output helpers -------------------------------------------------------
 def emit(payload: dict) -> None:
     """Write one JSON object to stdout (the agent parses this)."""

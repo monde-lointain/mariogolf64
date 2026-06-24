@@ -37,6 +37,8 @@ PLACEHOLDER_RE = dc.PLACEHOLDER_RE
 SYM_LINE_RE = dc.SYM_LINE_RE
 emit = dc.emit
 log = dc.log
+safe_read_text = dc.safe_read_text
+capture_stderr = dc.capture_stderr
 
 ASMDIFF_DIR = SCRIPT_DIR / "asm-differ"
 OBJDUMP = os.environ.get("OBJDUMP", "mips-linux-gnu-objdump")
@@ -74,7 +76,7 @@ def resolve_placeholder(name: str) -> str:
     for f in SYMBOL_FILES:
         if not f.exists():
             continue
-        for line in f.read_text(encoding="utf-8", errors="replace").splitlines():
+        for line in safe_read_text(f).splitlines():
             stripped = line.strip()
             if not stripped or stripped.startswith("//"):
                 continue
@@ -134,7 +136,7 @@ def detect_libkmc_profile(placeholder: str) -> bool:
     )
     for f in LIBKMC_SRC.glob("*.c"):
         try:
-            text = f.read_text(encoding="utf-8", errors="replace")
+            text = safe_read_text(f)
         except OSError:
             continue
         if pat.search(text):
@@ -157,7 +159,7 @@ def detect_libultra_profile(placeholder: str) -> bool:
     )
     for f in LIBULTRA_SRC.rglob("*.c"):
         try:
-            text = f.read_text(encoding="utf-8", errors="replace")
+            text = safe_read_text(f)
         except OSError:
             continue
         if pat.search(text):
@@ -210,7 +212,7 @@ def objdump_function(obj_path: Path, placeholder: str) -> str:
     ]
     proc = subprocess.run(cmd, capture_output=True, text=True)
     if proc.returncode != 0:
-        fail(f"objdump failed on {obj_path}: {proc.stderr.strip()[:500]}")
+        fail(f"objdump failed on {obj_path}: {capture_stderr(proc)}")
     return proc.stdout
 
 
