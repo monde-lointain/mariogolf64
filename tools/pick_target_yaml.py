@@ -55,15 +55,26 @@ def _rodata_rom_ranges():
     return tuple(ranges)
 
 
+def _rodata_rom_offset(off, lit_vram):
+    """(rom_offset, delta) of a `%lo(D_<lit_vram>)` constant loaded by the fn at ROM `off`, or None
+    when the fn vram is unknown (asm listing absent). Text and pooled rodata share one code-segment
+    delta (fn_vram − off), so rom = lit_vram − delta. Shared by the rodata classify/carve helpers."""
+    fn_vram = subseg_vram(off)
+    if fn_vram is None:
+        return None
+    delta = fn_vram - off
+    return lit_vram - delta, delta
+
+
 def _literal_in_rodata(vram, off):
     """True when the `%lo(D_<vram>)` constant loaded by the fn at ROM `off` lives in the code
     segment's pooled `.rodata` (vs. the data segment). Text and pooled rodata share one segment
     delta, so vram − (fn_vram − off) is the constant's ROM offset; test it against the rodata
     subseg ranges. Returns False when the fn's vram is unknown (asm listing absent)."""
-    fn_vram = subseg_vram(off)
-    if fn_vram is None:
+    rd = _rodata_rom_offset(off, vram)
+    if rd is None:
         return False
-    rom = vram - (fn_vram - off)
+    rom, _ = rd
     return any(start <= rom < end for start, end in _rodata_rom_ranges())
 
 
@@ -77,11 +88,10 @@ def _rodata_carve_start_vram(off, lit_vram):
     the common case, symmetric to the carve-end upper bound), or None when the fn vram is unknown or
     the literal is not in a code-segment rodata range. Gated by defines_file_static_const_array at the
     call site to stay FP-safe (a `const` static is file-private, so the whole subseg is this object's)."""
-    fn_vram = subseg_vram(off)
-    if fn_vram is None:
+    rd = _rodata_rom_offset(off, lit_vram)
+    if rd is None:
         return None
-    delta = fn_vram - off
-    rom = lit_vram - delta
+    rom, delta = rd
     for start, end in _rodata_rom_ranges():
         if start <= rom < end:
             return start + delta
@@ -98,11 +108,10 @@ def _rodata_carve_end_vram(off, lit_vram):
     a planned extent at the gate. Returns the end vram (upper
     bound: the whole subseg end, exact when the mirror's literals are the subseg tail, the common
     case), or None when the fn vram is unknown or the literal is not in a code-segment rodata range."""
-    fn_vram = subseg_vram(off)
-    if fn_vram is None:
+    rd = _rodata_rom_offset(off, lit_vram)
+    if rd is None:
         return None
-    delta = fn_vram - off
-    rom = lit_vram - delta
+    rom, delta = rd
     for start, end in _rodata_rom_ranges():
         if start <= rom < end:
             return end + delta
