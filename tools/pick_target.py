@@ -2839,6 +2839,19 @@ def _append_coddog_trap_hazards(off, primary, cl_path, up_lib, hazards):
         hazards.append(Hazard.needs_header(ctagged))
         blocked = cblk
     _append_recover_hazards(off, primary, cl_path, clib, hazards)
+    # rodata-literal sibling-carve scan: the FP-pool (ldc1/lwc1 %lo(D_)) double/const that the C
+    # compile emits into the code-segment .rodata at a placed vram. append_upstream_hazards runs this
+    # on the NAMED-upstream path, but this coddog path otherwise skipped it, so a coddog-resolved /
+    # n_audio_sc mirror's MAX_RATIO-style literal was an unflagged first-build SHA-miss (S134
+    # n_resample @0x800D2190; the libultra sibling resample @0x800D23E0 was flagged ONLY because it
+    # rides a NAMED c-combined row). The rodata-jtbl analog already rides _append_recover_hazards
+    # above; this pairs the literal scan into the coddog path. Dedup-guarded so a c-combined coddog
+    # pack's per-cfile re-entry (the _append_coddog_mirror_sources loop) does not double-append — the
+    # scan is keyed on `off`, so it returns the same set on every call. S134.
+    if not any(
+        h.kind in (HAZARD_RODATA_LITERAL, HAZARD_DATA_STATIC) for h in hazards
+    ):
+        _append_rodata_carve_hazards(off, cl_path, hazards)
     ren = header_renames_symbol(cl_path, primary)
     if ren and _upstream_defines_function(
         cl_path, primary
@@ -3480,7 +3493,17 @@ def _row_filtered(st, args, path, carried, cod_srcs):
     de-ranked BACKLOG carry-over (retrieved via --include-stuck or the BACKLOG, NOT smallest-first;
     carry_over_names() is region+symbol scoped, and a definitively-coddog'd subseg whose leader was
     merely prose-mentioned overrides the drop via st.cod_members)."""
-    cod_in_scope = (
+    # `--lib audio` is a SCOPE ALIAS for the game's audio libraries (libmus / libnaudio / nuaulstl),
+    # not a literal substring: an n_audio_sc mirror whose coddog source is a bare basename (e.g.
+    # "n_resample.c") and whose up_lib is "libnaudio" would otherwise DROP, since "audio" is not a
+    # substring of "n_resample.c", the up_lib test below is exact-match ("libnaudio" != "audio"), and
+    # its un-named `func_` members carry no "audio" either. Pre-fix, an audio row surfaced under
+    # `--lib audio` only by accident (n_load via its `src/audio/load.c` coddog variant; the libnusys
+    # audio_system_boot via its fn name), so the de-blk'd n_resample/n_reverb rows were invisible on
+    # the audio frontier (S134). Keying the alias on up_lib makes `--lib audio` show the whole audio
+    # band uniformly; the incidental path/fn substring matches below still hold (no regression).
+    audio_scope = args.lib == "audio" and st.up_lib in AUDIO_CODDOG_LIBS
+    cod_in_scope = audio_scope or (
         bool(args.lib)
         and bool(cod_srcs)
         and (args.lib == "libultra" or any(args.lib in s for s in cod_srcs))

@@ -16,6 +16,33 @@ subordinate to the libultra goal. Target selection is `tools/pick_target.py` (sm
 the 8-point decompose gate fires on any seed ≥8. v2 classical track is active (since S11);
 mirror is the default, classical is first-class when the asm warrants it.
 
+**S134 — `n_resample.c` BANKED (n_audio_sc N_MICRO mirror + MAX_RATIO rodata-literal carve).** The
+S133-"Next" #1, both fns Match → **md5-candidate 190→191**; asm subsegs 96→95. `n_alResamplePull` +
+`n_alResampleParam` (the N_MICRO `switch` degenerates to `default:`→`n_alLoadParam`, no jtbl), a 480B
+verbatim mirror with the 2nd `.inc.c` body-include vendored (`inc/n_resample_add01.inc.c`). **First
+build SHA-missed on an UNFLAGGED rodata-literal:** the `MAX_RATIO` double 1.99996 @ `D_800D2190` (rom
+0xAD590) that `n_alResamplePull`'s `ldc1 %lo(D_800D2190)` loads — GCC's own .rodata literal linked to
+the wrong vram (%hi matched, %lo off). The `@99.99 body-divergence-suspect` hedge budget paid for the
+diagnosis: byte-cmp localized it to 0x7AFEA (the `ldc1` %lo), NOT body divergence (both fns matched).
+Fixed with the S101 generic-subseg-bound `.rodata` carve — the generic `[0xAD590, rodata]` was EXACTLY
+the 0x10-byte block (double + `.double 0` pad) = a 1-line flip `[0xAD590, .rodata, libnaudio/n_resample]`;
+`.o(.rodata)` byte-matches baserom. Gate enablers: 4 symbol_addrs (`n_alResamplePull`=0x8009FB60 +
+`n_alResampleParam`=0x8009FD1C + jal-verified callees `n_alAdpcmPull`=0x8009F440 / `n_alLoadParam`=0x8009F888,
+both stay asm in n_load.c); flip `[0x7AF60]`. Quality 0/0/0/0 (1 diagnosis pass, no spike). seed 5 /
+banked 5pt (mirror, seed-only). Retro applied 2 of 2: #1 `pick_target.py` `--lib audio` SCOPE-ALIAS
+(`_row_filtered`, up_lib ∈ AUDIO_CODDOG_LIBS) → the audio band surfaces uniformly (n_reverb/n_load were
+invisible pre-fix); #2 `pick_target.py` `_append_coddog_trap_hazards` pairs the rodata-literal scan into
+the coddog path (dedup-guarded) → coddog/audio mirrors price the FP-pool carve at the gate (live:
+n_reverb `func_8009FD40` now shows `rodata-literal:0x800D21C0,…`). Goldens regen'd for the bank drift (4
+goldens, suite 89 pass). **Cross-repo follow-up:** 4 symbols (`n_alResamplePull`/`n_alResampleParam` +
+callees `n_alAdpcmPull`/`n_alLoadParam`) → `sync_decomp_names.py --import-from-decomp`. **Next:** the
+remaining n_audio_sc band — `n_reverb.c` (`func_8009FD40`, pts13, 6 fns, 4 inc fragments, now-flagged
+`rodata-literal:0x800D21C0` + `rodata-jtbl:0x800D21A0` + 2 unplaced callees) and `n_load.c`
+(`func_8009F440`/`n_alAdpcmPull`, pts13, 3 fns, 2 inc fragments — prefer the coddog `n_load.c@99.99`
+n_audio_sc `inc/` source over the named index's wrong `add/` resolution that the gate-naming surfaced).
+Both trip the 8-gate (single-file-pack exemption applies). The libmus `aud_*` DAG (`mus_thread_create`,
+`file-static` + 5 BSS statics + deep needs-header) remains the heavy classical/mixed unit. No carry-overs.
+
 **S133 — `n_save.c` / `n_alSavePull` BANKED (n_audio_sc N_MICRO command-stream mirror; first inc-vendor
 + N_MICRO pin).** A verbatim N_MICRO-branch mirror (80B): `jal n_alMainBusPull`, then the
 `inc/n_save_add01.inc.c` fragment → **md5-candidate 189→190**; asm subsegs 97→96. pick_target priced it

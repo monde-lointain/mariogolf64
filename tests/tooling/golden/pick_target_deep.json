@@ -14,19 +14,6 @@
   },
   {
     "band": "-",
-    "func": "func_8009FB60",
-    "hazards": "pack:2fn[func_8009FB60=?,func_8009FD1C=?],one-tu,maybe-upstream:libultra:viswapcontext,sprawdma,sirawdma",
-    "kind": "asm-flip",
-    "nfns": 2,
-    "pts": 13,
-    "rom": "0x7AF60",
-    "score": -480,
-    "size": 480,
-    "upstream": "none",
-    "vram": "0x8009FB60"
-  },
-  {
-    "band": "-",
     "func": "func_80029250",
     "hazards": "pack:2fn[func_80029250=?,func_800292FC=?],one-tu,caller-evict:func_80029250@src/libnusys/nugfxinit.c",
     "kind": "asm-flip",
@@ -169,6 +156,19 @@
     "vram": "0x800328E0"
   },
   {
+    "band": "cold",
+    "func": "n_alAdpcmPull",
+    "hazards": "single-file-pack:3fn[n_alAdpcmPull=n_load,n_alLoadParam=?,func_8009FA14=?],one-tu,needs-header:add/n_load_add01.c,add/n_load_add02.c,jal-count-mismatch:4vs3",
+    "kind": "asm-flip",
+    "nfns": 3,
+    "pts": "blk",
+    "rom": "0x7A840",
+    "score": -1624,
+    "size": 1824,
+    "upstream": "libnaudio",
+    "vram": "0x8009F440"
+  },
+  {
     "band": "-",
     "func": "mus_dma_init",
     "hazards": "pack:10fn[mus_dma_init=?,mus_dma_process=?,mus_dma_cb_new=?,mus_dma_callback=?,func_8009DBA0=?,mus_dma_sample=?,mus_set_sched=?,func_8009DDCC=?,func_8009DE30=?,mus_sched_install=?]",
@@ -232,19 +232,6 @@
     "size": 1808,
     "upstream": "none",
     "vram": "0x8006EA90"
-  },
-  {
-    "band": "-",
-    "func": "func_8009F440",
-    "hazards": "pack:3fn[func_8009F440=?,func_8009F888=?,func_8009FA14=?],one-tu",
-    "kind": "asm-flip",
-    "nfns": 3,
-    "pts": 13,
-    "rom": "0x7A840",
-    "score": -1824,
-    "size": 1824,
-    "upstream": "none",
-    "vram": "0x8009F440"
   },
   {
     "band": "-",

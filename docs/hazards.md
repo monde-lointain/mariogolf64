@@ -1139,12 +1139,16 @@ initialized arrays, this `.rodata` carve pairs with a `.data` carve; see the
 [dual-section carve note](#defines-data) (S96 drvrnew.c: jtbl+consts `.rodata` here + `*_PARAMS[]`
 `.data` there).
 
-**Trigger:** A libultra/libkmc file with a compiler-generated rodata constant at a different ROM
-offset than its text (e.g. a `2^32` double). `pick_target.py` pre-flags this as
-`rodata-literal:0x<vram>[,0x<vram>…]` on a mirror candidate whose asm loads an anonymous pooled FP
-constant (`ldc1/lwc1 %lo(D_<addr>)`), so the sibling split is a known DoR enabler, not a finalize
-surprise. The address is classified by segment first (data-segment statics are `data-static`, not
-`rodata-literal`; see #defines-data, S52). The pre-flag lists the full extent: GCC moves a
+**Trigger:** A libultra/libkmc/libnaudio file with a compiler-generated rodata constant at a different
+ROM offset than its text (e.g. a `2^32` double, or the `MAX_RATIO` 1.99996 double a resampler clamps
+against). `pick_target.py` pre-flags this as `rodata-literal:0x<vram>[,0x<vram>…]` on a mirror
+candidate whose asm loads an anonymous pooled FP constant (`ldc1/lwc1 %lo(D_<addr>)`), so the sibling
+split is a known DoR enabler, not a finalize surprise. The scan runs on BOTH the named-upstream path
+(`append_upstream_hazards`) AND the coddog/audio path (`_append_coddog_trap_hazards`, S134): pre-S134
+the literal scan was named-path-only, so an n_audio_sc coddog mirror's FP-pool double (S134
+`n_resample` `MAX_RATIO` @0x800D2190) was an unflagged first-build SHA-miss while the rodata-jtbl
+analog already rode the shared recover battery. The address is classified by segment first
+(data-segment statics are `data-static`, not `rodata-literal`; see #defines-data, S52). The pre-flag lists the full extent: GCC moves a
 pooled `double` into an FP register pair via an `lw` pair + `mtc1` (not `ldc1`), so a literal's 2nd
 (and further) word is an integer `lw %lo(D_<addr>)` invisible to the FP-only scan. pick_target adds
 the rodata-band `lw` refs so the split width is sized correctly (S52 `guLookAtReflectF`: `-1.0`
