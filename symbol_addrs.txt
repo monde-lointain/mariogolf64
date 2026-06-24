@@ -352,3 +352,11 @@ n_alEnvmixerParam = 0x8009EFE8; // type:func
 n_syn = 0x800C7DB4; // size:0x4
 // S130: n_alSynSetVol callee, recovered from func_800A0BB0 jal (in still-asm n_synthesizer.c subseg).
 _n_timeToSamples = 0x800A1274; // type:func
+// S132: n_synallocvoice.c (single-file-pack, _allocatePVoice static internal) + n_sl.c (drop-def).
+n_alSynAllocVoice = 0x800A0800; // type:func
+_allocatePVoice = 0x800A0918; // type:func
+n_alInit = 0x800A0730; // type:func
+n_alClose = 0x800A0774; // type:func
+// n_sl.c callee (head of still-asm n_synthesizer.c) + its drop-def global (adjacent to n_syn).
+n_alSynNew = 0x800A0D70; // type:func
+n_alGlobals = 0x800C7DB0; // size:0x4
