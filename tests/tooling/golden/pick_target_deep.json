@@ -171,7 +171,7 @@
   {
     "band": "-",
     "func": "func_80029250",
-    "hazards": "pack:2fn[func_80029250=?,func_800292FC=?],one-tu,caller-evict:func_80029250@src/libnusys/mainlib/nugfxinit.c",
+    "hazards": "pack:2fn[func_80029250=?,func_800292FC=?],one-tu,caller-evict:func_80029250@src/libnusys/nugfxinit.c",
     "kind": "asm-flip",
     "nfns": 2,
     "pts": 13,
@@ -1185,7 +1185,7 @@
   {
     "band": "-",
     "func": "func_8008D100",
-    "hazards": "pack:26fn[func_8008D100=?,func_8008D1DC=?,func_8008D3F4=?,func_8008DDDC=?,func_8008E164=?,per_hole_skybox_palette_load=?,func_8008E82C=?,update_sky_panel_verts=?,func_8008FF14=?,emit_sky_bg_panel_dl=?,emit_sky_panorama_strips_dl=?,func_8009226C=?,func_80092324=?,func_8009232C=?,func_80092E10=?,func_80092F18=?,func_800934CC=?,func_8009351C=?,func_800939E8=?,func_80094228=?,func_800947A8=?,func_80095150=?,func_8009548C=?,func_800957F0=?,func_800958D8=?,func_800959F8=?],caller-evict:func_8008D1DC@src/libnusys/mainlib/nusched.c;func_80092324@src/libnusys/mainlib/nusched.c",
+    "hazards": "pack:26fn[func_8008D100=?,func_8008D1DC=?,func_8008D3F4=?,func_8008DDDC=?,func_8008E164=?,per_hole_skybox_palette_load=?,func_8008E82C=?,update_sky_panel_verts=?,func_8008FF14=?,emit_sky_bg_panel_dl=?,emit_sky_panorama_strips_dl=?,func_8009226C=?,func_80092324=?,func_8009232C=?,func_80092E10=?,func_80092F18=?,func_800934CC=?,func_8009351C=?,func_800939E8=?,func_80094228=?,func_800947A8=?,func_80095150=?,func_8009548C=?,func_800957F0=?,func_800958D8=?,func_800959F8=?],caller-evict:func_8008D1DC@src/libnusys/nusched.c;func_80092324@src/libnusys/nusched.c",
     "kind": "asm-flip",
     "nfns": 26,
     "pts": 13,

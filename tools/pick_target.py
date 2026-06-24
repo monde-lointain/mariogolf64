@@ -806,10 +806,11 @@ def _coddog_source_banked(cod_src):
     coddog-mirror hit to such a file can't be a fresh source attribution (the source is fully
     decompiled), so the match is necessarily structural — a DSP/stub fingerprint coincidence, the
     sibling of coddog-fncount-mismatch / coddog-structural. `cod_src` is the source path the coddog
-    map carries: a nusys hit (`mainlib/<base>.c`) mirrors at `src/libnusys/<cod_src>`; a libultra hit
+    map carries: a nusys hit (`mainlib/<base>.c`, upstream-relative) mirrors at the FLAT
+    `src/libnusys/<base>.c` (the in-tree tree drops the upstream `mainlib/` dir); a libultra hit
     (`src/audio/load.c`, ultralib-repo-relative) mirrors at `src/libultra/<reldir>/<base>`."""
     if cod_src.startswith("mainlib/"):
-        mp = os.path.join(ROOT, "src", "libnusys", cod_src)
+        mp = os.path.join(ROOT, "src", "libnusys", cod_src[len("mainlib/"):])
     else:
         rel = cod_src[len("src/"):] if cod_src.startswith("src/") else cod_src
         mp = os.path.join(ROOT, "src", "libultra", rel)

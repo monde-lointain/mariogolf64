@@ -12,7 +12,7 @@ func_ovl10_801F4A40           0x1508E0 0x801F4A40   176   2  13 asm-flip none   
 func_800A1320                  0x7C720 0x800A1320   208   2  13 asm-flip none      -    pack:2fn[func_800A1320=?,func_800A1370=?]
 func_8009FB60                  0x7AF60 0x8009FB60   480   2  13 asm-flip none      -    pack:2fn[func_8009FB60=?,func_8009FD1C=?],one-tu,maybe-upstream:libultra:viswapcontext,sprawdma,sirawdma
 func_800A0800                  0x7BC00 0x800A0800   480   2  13 asm-flip none      -    pack:2fn[func_800A0800=?,func_800A0918=?],one-tu
-func_80029250                   0x4650 0x80029250   496   2  13 asm-flip none      -    pack:2fn[func_80029250=?,func_800292FC=?],one-tu,caller-evict:func_80029250@src/libnusys/mainlib/nugfxinit.c
+func_80029250                   0x4650 0x80029250   496   2  13 asm-flip none      -    pack:2fn[func_80029250=?,func_800292FC=?],one-tu,caller-evict:func_80029250@src/libnusys/nugfxinit.c
 audio_sched_thread_entry       0x8F250 0x800B3E50   496   1   5 asm-flip none      -    intrinsic-likely:cp0-asm(identify-TU)
 mus_heap_init                  0x79640 0x8009E240   624   8  13 asm-flip none      -    pack:8fn[mus_heap_init=?,func_8009E28C=?,func_8009E2BC=?,func_8009E2D4=?,func_8009E2E0=?,func_8009E30C=?,mus_samples_init=?,mus_samples_current=?]
 vector_magnitude_safe          0x45400 0x8006A000   704   8  13 asm-flip none      -    pack:8fn[vector_magnitude_safe=?,calculate_hypotenuse_safe=?,func_8006A174=?,update_rng_seed=?,hypotf_2d=?,calc_vec3_magnitude=?,func_8006A1EC=?,func_8006A274=?]

@@ -171,7 +171,7 @@
   {
     "band": "-",
     "func": "func_80029250",
-    "hazards": "pack:2fn[func_80029250=?,func_800292FC=?],one-tu,caller-evict:func_80029250@src/libnusys/mainlib/nugfxinit.c",
+    "hazards": "pack:2fn[func_80029250=?,func_800292FC=?],one-tu,caller-evict:func_80029250@src/libnusys/nugfxinit.c",
     "kind": "asm-flip",
     "nfns": 2,
     "pts": 13,
