@@ -120,21 +120,21 @@ LIBKMC_SRC = dc.LIBKMC_SRC
 LIBULTRA_SRC = dc.LIBULTRA_SRC
 
 
-def detect_libkmc_profile(placeholder: str) -> bool:
-    """True if <placeholder> appears as a function definition in libkmc upstream.
+def _detect_in_upstream(src_root: Path, placeholder: str, *, recursive: bool) -> bool:
+    """True if <placeholder> is defined as a function in `src_root`'s .c files.
 
-    libkmc was built with `gcc -O` (not -O2); the project Makefile carves a
-    libkmc-only compile profile via LIBKMC_CFLAGS. The loop must mirror that
-    to produce ground-truth bytes — see CLAUDE.md "libkmc compile profile is `-O`".
+    Shared by the libkmc/libultra profile detectors; `recursive` selects rglob
+    (libultra's nested io/os/audio tree) vs glob (libkmc's flat src). Matches a
+    K&R `int rand()` or a prototype `int rand(void)` at line start.
     """
-    if not LIBKMC_SRC.exists():
+    if not src_root.exists():
         return False
-    # Match either K&R `int rand()` or prototype `int rand(void)` at line start.
     pat = re.compile(
         rf"^[A-Za-z_][A-Za-z0-9_ *]*\b{re.escape(placeholder)}\s*\(",
         re.MULTILINE,
     )
-    for f in LIBKMC_SRC.glob("*.c"):
+    files = src_root.rglob("*.c") if recursive else src_root.glob("*.c")
+    for f in files:
         try:
             text = safe_read_text(f)
         except OSError:
@@ -142,6 +142,16 @@ def detect_libkmc_profile(placeholder: str) -> bool:
         if pat.search(text):
             return True
     return False
+
+
+def detect_libkmc_profile(placeholder: str) -> bool:
+    """True if <placeholder> appears as a function definition in libkmc upstream.
+
+    libkmc was built with `gcc -O` (not -O2); the project Makefile carves a
+    libkmc-only compile profile via LIBKMC_CFLAGS. The loop must mirror that
+    to produce ground-truth bytes — see CLAUDE.md "libkmc compile profile is `-O`".
+    """
+    return _detect_in_upstream(LIBKMC_SRC, placeholder, recursive=False)
 
 
 def detect_libultra_profile(placeholder: str) -> bool:
@@ -151,20 +161,7 @@ def detect_libultra_profile(placeholder: str) -> bool:
     (ultralib gcc.mk, VERSION_J libgultra_rom). The loop must mirror LIBULTRA_CFLAGS
     to produce ground-truth bytes — affects inlining and delay-slot scheduling.
     """
-    if not LIBULTRA_SRC.exists():
-        return False
-    pat = re.compile(
-        rf"^[A-Za-z_][A-Za-z0-9_ *]*\b{re.escape(placeholder)}\s*\(",
-        re.MULTILINE,
-    )
-    for f in LIBULTRA_SRC.rglob("*.c"):
-        try:
-            text = safe_read_text(f)
-        except OSError:
-            continue
-        if pat.search(text):
-            return True
-    return False
+    return _detect_in_upstream(LIBULTRA_SRC, placeholder, recursive=True)
 
 
 def compile_candidate(
