@@ -134,7 +134,7 @@ SECTIONS
         build/src/libnaudio/n_synsetvol.o(.text);
         build/src/libnaudio/n_synstartvoice.o(.text);
         build/src/libnaudio/n_synstopvoice.o(.text);
-        build/asm/7C170.o(.text);
+        build/src/libnaudio/n_synthesizer.o(.text);
         build/src/libnaudio/n_save.o(.text);
         build/asm/7C720.o(.text);
         build/src/libnusys/nuprenmifuncset.o(.text);
@@ -401,7 +401,7 @@ SECTIONS
         build/src/libnaudio/n_synsetvol.o(.data);
         build/src/libnaudio/n_synstartvoice.o(.data);
         build/src/libnaudio/n_synstopvoice.o(.data);
-        build/asm/7C170.o(.data);
+        build/src/libnaudio/n_synthesizer.o(.data);
         build/src/libnaudio/n_save.o(.data);
         build/asm/7C720.o(.data);
         build/src/libnusys/nuprenmifuncset.o(.data);
@@ -691,7 +691,8 @@ SECTIONS
         build/src/libnaudio/n_synsetvol.o(.rodata);
         build/src/libnaudio/n_synstartvoice.o(.rodata);
         build/src/libnaudio/n_synstopvoice.o(.rodata);
-        build/asm/7C170.o(.rodata);
+        build/asm/data/AD5A0.rodata.o(.rodata);
+        build/src/libnaudio/n_synthesizer.o(.rodata);
         build/src/libnaudio/n_save.o(.rodata);
         build/asm/7C720.o(.rodata);
         build/src/libnusys/nuprenmifuncset.o(.rodata);
@@ -736,8 +737,7 @@ SECTIONS
         build/src/libultra/io/epidma.o(.rodata);
         build/src/libultra/io/epilinkhandle.o(.rodata);
         build/src/libultra/io/cartrominit.o(.rodata);
-        build/asm/data/AD5A0.rodata.o(.rodata);
-        build/asm/data/AD5E0.rodata.o(.rodata);
+        build/asm/data/AD600.rodata.o(.rodata);
         build/src/libultra/io/devmgr.o(.rodata);
         build/src/libultra/io/piacs.o(.rodata);
         build/src/libultra/io/aigetlen.o(.rodata);
@@ -966,7 +966,7 @@ SECTIONS
         build/src/libnaudio/n_synsetvol.o(.bss);
         build/src/libnaudio/n_synstartvoice.o(.bss);
         build/src/libnaudio/n_synstopvoice.o(.bss);
-        build/asm/7C170.o(.bss);
+        build/src/libnaudio/n_synthesizer.o(.bss);
         build/src/libnaudio/n_save.o(.bss);
         build/asm/7C720.o(.bss);
         build/src/libnusys/nuprenmifuncset.o(.bss);

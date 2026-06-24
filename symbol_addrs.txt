@@ -369,3 +369,14 @@ n_alResamplePull = 0x8009FB60; // type:func
 n_alResampleParam = 0x8009FD1C; // type:func
 n_alAdpcmPull = 0x8009F440; // type:func
 n_alLoadParam = 0x8009F888; // type:func
+// S136: n_synthesizer.c single-file-pack mirror. 4 member fns (static _n_timeToSamplesNoRound
+// @0x800A1224 stays file-local, no add). Plus its cross-file refs derived from the n_alSynNew asm:
+// 2 calls-unplaced jal callees + 2 handler address-of refs (the n_reverb/n_auxbus pack leaders).
+n_alAudioFrame = 0x800A0FE0; // type:func
+_n_freeParam = 0x800A1174; // type:func
+_n_collectPVoices = 0x800A118C; // type:func
+_n_freePVoice = 0x800A11EC; // type:func
+alN_PVoiceNew = 0x8009E93C; // type:func
+n_alSynAllocFX = 0x800A1320; // type:func
+n_alFxPull = 0x8009FD40; // type:func
+n_alAuxBusPull = 0x8009E4B0; // type:func
