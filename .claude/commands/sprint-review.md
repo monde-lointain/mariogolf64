@@ -83,7 +83,11 @@ This is the only place the sprint's process/tooling edits land:
    commands, `include/`). A hazard playbook edit goes in `docs/hazards.md`; an every-sprint rule
    change goes in `CLAUDE.md`; keep the `CLAUDE.md` hazard index in sync if a `docs/hazards.md`
    section is added or renamed. New or edited prompt text follows `PROMPT_GUIDELINES.md` at the
-   project root.
+   project root. Treat prompt-surface headings as an API: `pick_target.py` / `pick_target_hazards.py`,
+   the `CLAUDE.md` hazard index, and `BACKLOG`/`RETRO`/`VELOCITY` cite `docs/hazards.md#<anchor>`
+   strings and `CLAUDE.md` section headings by exact text, so re-list or re-wrap content but keep
+   cited headings and `#anchor` strings unchanged; when a heading genuinely must change, update every
+   reference in lockstep.
 2. **Log the story-point row to `VELOCITY.md`** under the anchors/log. For a mirror sprint, the v1
    seed is deterministic (no separate plan-gate freeze): append `Sp <N> | <increment> | seed <S>;
    banked <B>pt; regime mirror`. For a classical/mixed sprint, also fill the v2 realized tier +
