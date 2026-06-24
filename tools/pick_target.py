@@ -3139,6 +3139,37 @@ def _resolve_primary_coddog(st, coddog_index, upstream_index):
                     )
 
 
+def _append_coddog_mirror_sources(st, members, path_resolver, lib, *, twin_index=None):
+    """Shared loop of the tail-coddog and nusys passes (the libultra/libnusys duplication factored
+    out): for each DISTINCT source in `members` (each a (fn, cfile, pct) tuple) not already flagged,
+    append a coddog-mirror hazard, optionally a twin hazard (when twin_index is given), resolve the
+    source `.c` via path_resolver, set st.mirror_path, and run the trap battery under `lib`. Returns
+    the sorted distinct cfile list the callers' single-identity fncount/structural guards key off.
+
+    The two passes still differ above and below this loop (audio filter, twin/fncount/partial guards,
+    final re-price), so only the loop is shared — a full merge would need a flag per difference."""
+    already = {h.coddog_file() for h in st.hazards if h.is_coddog_mirror()}
+    for cfile in sorted({c for _, c, _ in members}):
+        if cfile in already:
+            continue
+        cpct = max(p for _, c, p in members if c == cfile)
+        st.hazards.append(Hazard.coddog_mirror(cfile, cpct))
+        if twin_index is not None:
+            _append_coddog_twin_hazard(cfile, st.fns, twin_index, st.hazards)
+        cl_path = path_resolver(cfile)
+        if cl_path:
+            st.mirror_path = (
+                cl_path  # the confirmed coddog identity is the file we mirror + count
+            )
+            st.blocked = (
+                _append_coddog_trap_hazards(
+                    st.off, st.primary, cl_path, lib, st.hazards
+                )
+                or st.blocked
+            )
+    return sorted({c for _, c, _ in members})
+
+
 def _resolve_tail_coddog(st, coddog_index, upstream_index):
     """coddog cross-ref over ALL members (the tail-identity pass). A multi-fn subseg's mirror
     identity often lives in an UN-NAMED tail member, not the leader the primary pass keys on; scan
@@ -3159,34 +3190,20 @@ def _resolve_tail_coddog(st, coddog_index, upstream_index):
         and not coddog_index[fn][0].startswith("src/audio")
     ]
     if cod_members:
-        already = {h.coddog_file() for h in st.hazards if h.is_coddog_mirror()}
-        for cfile in sorted({c for _, c, _ in cod_members}):
-            if cfile in already:
-                continue
-            cpct = max(p for _, c, p in cod_members if c == cfile)
-            st.hazards.append(Hazard.coddog_mirror(cfile, cpct))
-            _append_coddog_twin_hazard(cfile, st.fns, upstream_index, st.hazards)
-            # Surface the tail-identity file's traps too. The primary block above keys on the
-            # primary, so a coddog hit carried by an un-named TAIL member reached here with only the
-            # bare coddog flag — its defines-data `.data` carve / file-static went un-priced.
-            # `already` excludes the primary's cfile, so no double-scan.
-            cl_path = _coddog_upstream_path(cfile)
-            if cl_path:
-                st.mirror_path = (
-                    cl_path or st.mirror_path
-                )  # the coddog identity is the real mirror source
-                st.blocked = (
-                    _append_coddog_trap_hazards(
-                        st.off, st.primary, cl_path, st.up_lib, st.hazards
-                    )
-                    or st.blocked
-                )
+        # Surface each tail-identity file's traps too (the primary pass keys on the primary, so a
+        # coddog hit carried by an un-named TAIL member reached here with only the bare coddog flag).
+        distinct = _append_coddog_mirror_sources(
+            st,
+            cod_members,
+            _coddog_upstream_path,
+            st.up_lib,
+            twin_index=upstream_index,
+        )
         # The under-count fncount-mismatch + structural size-ratio guards run in the PRIMARY coddog
         # block (above) only when the identity is on `primary`. When the WHOLE pack resolves to ONE
         # coddog .c via a TAIL member, neither guard ran, so the phantom surfaced as a clean
         # single-source mirror. Re-run both here when the pack has exactly one coddog identity (dedup
         # the fncount flag w/ primary).
-        distinct = sorted({c for _, c, _ in cod_members})
         if len(st.fns) > 1 and len(distinct) == 1:
             cl1 = _coddog_upstream_path(distinct[0])
             if cl1:
@@ -3236,22 +3253,9 @@ def _resolve_nusys(st, nusys_index):
             if fn in nusys_index and nusys_index[fn][1] >= CODDOG_MIRROR_PCT
         ]
         if nz:
-            already = {h.coddog_file() for h in st.hazards if h.is_coddog_mirror()}
-            for cfile in sorted({c for _, c, _ in nz}):
-                if cfile in already:
-                    continue
-                cpct = max(p for _, c, p in nz if c == cfile)
-                st.hazards.append(Hazard.coddog_mirror(cfile, cpct))
-                cl_path = _coddog_nusys_path(cfile)
-                if cl_path:
-                    st.mirror_path = cl_path  # the confirmed nusys identity is the file we mirror + count
-                    st.blocked = (
-                        _append_coddog_trap_hazards(
-                            st.off, st.primary, cl_path, "libnusys", st.hazards
-                        )
-                        or st.blocked
-                    )
-            distinct = sorted({c for _, c, _ in nz})
+            distinct = _append_coddog_mirror_sources(
+                st, nz, _coddog_nusys_path, "libnusys"
+            )
             if len(st.fns) > 1 and len(distinct) == 1:
                 cl1 = _coddog_nusys_path(distinct[0])
                 loc = _meaningful_loc(cl1) if cl1 else 0
