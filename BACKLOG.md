@@ -16,6 +16,26 @@ subordinate to the libultra goal. Target selection is `tools/pick_target.py` (sm
 the 8-point decompose gate fires on any seed ≥8. v2 classical track is active (since S11);
 mirror is the default, classical is first-class when the asm warrants it.
 
+**S131 — `n_syndelete.c` + `n_synsetfxmix.c` BANKED (split a 2-file pack at `0x7BDE0`).** The
+S130-"Next" `func_800A09E0` (`n_synsetfxmix`) turned out to be a **c-combined:2file** pack, not a
+single file: coddog flagged only `coddog-mirror:n_synsetfxmix.c@99.99` (matching `func_800A09F0` =
+`n_alSynSetFXMix`), while the 16B leader `func_800A09E0` (`n_alSynDelete` = `n_syn->head=0`, 4 instrs)
+is below coddog's fingerprint floor and went unmatched. Hand-disassembly at the gate identified the
+leaf as `n_syndelete.c`; decompose-split at the file boundary 0x7BDF0 → two verbatim n_audio_sc
+mirrors, **both Match FIRST build** (all callees placed S129/S130). **md5-candidate 185→187**; asm
+subsegs 100→99. Quality 0/0/0/0. seed 4 / banked 4pt (mirror, seed-only). Retro applied 1 of 1: #1
+`pick_target.py` ported the `coddog-fncount-mismatch` under-count guard into `_resolve_audio` (was
+libultra-tail-only) → audio single-identity multi-fn packs now surface as multi-file (live: `al_init`
+13fn vs `player_fx.c`@99.99 6fn → `6vs13`); + `#coddog-cross-ref` provenance; 3 golden tests
+de-hardcoded off the banked `func_800A09E0` (2 dynamic-select, 1 overlay fixture subject); suite 89
+pass. **Cross-repo follow-up:** 2 fn names (n_alSynDelete/n_alSynSetFXMix) →
+`sync_decomp_names.py --import-from-decomp`. **Next:** `func_800A0800` (`n_synallocvoice`, pts-3,
+2 source fns) is the cleanest remaining n_audio_sc mirror; `func_800A0730` (`n_sl.c`, pts-5);
+`func_800A1320`/`n_mainbus.c` still needs a split (Carry-overs); the `blk` audio libs
+(`n_save`/`n_load`/`n_reverb` `.inc.c` headers; the libmus `aud_*` DAG) remain. Heads-up: `al_init`
+(libmus `player_fx.c`) now correctly shows `coddog-fncount-mismatch:6vs13` — a multi-file pack, not a
+clean mirror.
+
 **S130 — `n_synaddplayer.c` + `n_synsetvol.c` BANKED (libnaudio n_audio_sc setter vein, cont.).** Two
 verbatim `@99.99` single-fn mirrors → **md5-candidate 183→185**; asm subsegs 102→100. `n_alSynAddPlayer`
 (0x800A07B0, interrupt-masked player list-prepend) was a pure cp; `n_alSynSetVol` (0x800A0BB0, the

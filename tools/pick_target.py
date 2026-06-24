@@ -3426,6 +3426,22 @@ def _resolve_audio(st, audio_indexes, audio_roots):
         distinct = _append_coddog_mirror_sources(st, az, resolver, lib)
         if len(st.fns) > 1 and len(distinct) == 1:
             cl1 = resolver(distinct[0])
+            # The pack resolves to ONE coddog `.c`, but that file may define FEWER fns than the pack
+            # holds: the surplus members are a FOREIGN TU (a separate upstream `.c`) bundled in the
+            # subseg, often a sub-coddog-floor leaf the per-member match missed (S131: n_synsetfxmix.c
+            # @99.99 matched func_800A09F0, but the 4-instr n_alSynDelete leaf at func_800A09E0 is below
+            # coddog's fingerprint floor, so it went unmatched and len(distinct) stayed 1). Flag
+            # `coddog-fncount-mismatch:<matched>vs<pack>` so the gate splits at the file boundary
+            # instead of hand-disassembling the subseg. Ports the libultra tail-coddog guard
+            # (_resolve_tail_coddog) into the audio path, where it was missing. Advisory.
+            if cl1:
+                matched_n = _upstream_file_func_count(lib, cl1)
+                if 0 < matched_n < len(st.fns) and not any(
+                    h.kind == HAZARD_CODDOG_FNCOUNT_MISMATCH for h in st.hazards
+                ):
+                    st.hazards.append(
+                        Hazard.coddog_fncount_mismatch(matched_n, len(st.fns))
+                    )
             loc = _meaningful_loc(cl1) if cl1 else 0
             if loc and st.size > CODDOG_STRUCTURAL_BYTES_PER_LOC * loc:
                 cpct = max(p for _, c, p in az if c == distinct[0])

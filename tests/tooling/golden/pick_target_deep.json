@@ -27,19 +27,6 @@
   },
   {
     "band": "-",
-    "func": "func_800A09E0",
-    "hazards": "pack:2fn[func_800A09E0=?,func_800A09F0=?]",
-    "kind": "asm-flip",
-    "nfns": 2,
-    "pts": 13,
-    "rom": "0x7BDE0",
-    "score": -176,
-    "size": 176,
-    "upstream": "none",
-    "vram": "0x800A09E0"
-  },
-  {
-    "band": "-",
     "func": "func_ovl10_801F4A40",
     "hazards": "pack:2fn[func_ovl10_801F4A40=?,func_ovl10_801F4AD8=?],one-tu",
     "kind": "asm-flip",

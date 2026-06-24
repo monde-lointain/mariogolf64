@@ -1632,7 +1632,12 @@ carrying `pack` / `jal-count-mismatch` / `maybe-upstream`, before committing it 
      true single source may define MORE via version/`_DEBUG`-gated extras). S92: the check now also
      runs when the coddog identity is carried by an un-named TAIL member (not the pack leader), the
      case the S88 primary-only check missed. `func_80050400`'s leader is absent from the map but a tail
-     member carries `llcvt.c` (8 fns vs the 11fn pack).
+     member carries `llcvt.c` (8 fns vs the 11fn pack). S131: the same under-count check now also runs
+     in the `_resolve_audio` pass (libmus/libnaudio/nuaulstl), where it had been omitted — `al_init`'s
+     13fn pack coddog-matches `player_fx.c`@99.99 but that file defines 6 fns → `coddog-fncount-mismatch:6vs13`
+     (was a bare, clean-looking mirror). Motivated by the S131 `0x7BDE0` 2-file pack: its sub-coddog-floor
+     4-instr `n_alSynDelete` leaf went unmatched, leaving `n_synsetfxmix.c`@99.99 looking single-file
+     until hand-disassembly at the gate revealed the second file.
    - **`coddog-structural:<file>@<pct>`** (S92): the matched source's meaningful-LOC implies a compiled
      size far below the subseg's (`subseg_bytes > 64 × source_LOC`). `llcvt.c` is 8 trivial `return d;`
      conversion stubs (~250 B) yet coddog matched it @99.99 to THREE distinct subsegs (2032 B / 2912 B /
@@ -1665,7 +1670,9 @@ S72 (the trap re-scan: coddog-mirror candidates can hide a defines-data/file-sta
 S81 (`io/siacs.c`: coddog named the twin `piacs.c`, named members → real source `siacs.c`; the
 gate-safe drop-def symbol-add note also landed in #defines-data); S88 (`coddog-fncount-mismatch`);
 S92 (the fncount check extended to tail-carried identities + the `coddog-structural` size guard,
-both retiring the llcvt false-positive class, where one tiny source fingerprint-matched 3 subsegs).
+both retiring the llcvt false-positive class, where one tiny source fingerprint-matched 3 subsegs);
+S131 (the fncount under-count check ported into the `_resolve_audio` pass, where it had been omitted;
+surfaced by the `0x7BDE0` 2-file pack whose sub-floor `n_alSynDelete` leaf hid the second file).
 
 **Sub-cases / variants:**
 
@@ -1712,8 +1719,11 @@ ido-static-recomp, the authentic vendor compiler). Each cell → `build/audio-re
 canonical `tools/coddog/<lib>_map.tsv` + `tools/coddog/audio_pins.tsv` (lib → pinned src root), and a
 `PIN_REPORT.md`. `pick_target.py`'s `_resolve_audio` pass (the libmus/libnaudio/nuaulstl analog of
 `_resolve_nusys`) reads those maps + pins: a `>=99%` member hit flags `coddog-mirror:<file>@<pct>`,
-re-runs the trap battery against the pinned `.c`, and re-prices `upstream <lib>`. Absent maps leave
-ranking byte-identical (additive-pass invariant). Run via `make coddog-sweep-audio`.
+re-runs the trap battery against the pinned `.c`, and re-prices `upstream <lib>`. A single-identity
+multi-fn pack gets the `coddog-fncount-mismatch` under-count guard (S131) + the `coddog-structural`
+size guard, so a coddog `.c` that defines fewer fns than the pack is surfaced as multi-file rather
+than a clean single-file mirror. Absent maps leave ranking byte-identical (additive-pass invariant).
+Run via `make coddog-sweep-audio`.
 
 **Audio toolchain gotchas (resolved):** (1) the PC-distribution SDK headers/source (`~/n64sdk`,
 `~/development/sdks/n64-sdk`) have **CRLF** line terminators that IDO's IRIX `cfe` mishandles at

@@ -25,6 +25,15 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 131 — n_syndelete.c + n_synsetfxmix.c (libnaudio n_audio_sc verbatim mirrors; split a 2-file pack) — 2026-06-24
+- Increment: 2 verbatim `@99.99` mirrors banked (n_alSynDelete + n_alSynSetFXMix), both Match FIRST build. md5-candidate **185→187** (+2); asm subsegs 100→99 (1 asm subseg split into 2 c). ROM SHA-1 == baserom.
+- Quality: 0/0/0/0 this sprint (stuck-far/permuter/carried/re-opened).
+- Seed: committed 4pt; banked 4pt; regime mirror (8-gate clear at 4<8; the c-combined:2file pack decomposed at the file boundary → two single-file-pack verbatim mirrors, each exempt).
+- What helped: the gate's hand-disassembly of the `0x7BDE0` subseg caught that the "single-file" `coddog-mirror:n_synsetfxmix.c@99.99` was actually a 2-FILE pack — coddog matched only `func_800A09F0` (n_alSynSetFXMix); the 16B leader `func_800A09E0` (n_alSynDelete = `n_syn->head=0`, 4 instrs) is below coddog's fingerprint floor so it went unmatched. Identifying the leaf as `n_syndelete.c` and splitting at 0x7BDF0 gave two clean verbatim mirrors; all callees (`__n_allocParam`/`n_alEnvmixerParam`/`n_syn`) were placed S129/S130, so both were a pure `cp`.
+- Friction: none on the bank. The retro engineering cost was suggestion #1 (the audio fncount guard) plus banking fallout — 3 golden tests hardcoded the now-banked `func_800A09E0` and had to be de-hardcoded (KeyError/missing-row); fixed 2 by dynamic candidate selection from a neutralized baseline and 1 (the committed coddog fixture) by switching the audio subject to a stable overlay func, so banking can't break them again.
+- Applied: 1 of 1 — #1 `pick_target.py` ported the `coddog-fncount-mismatch` under-count guard from the libultra tail path (`_resolve_tail_coddog`) into the audio path (`_resolve_audio`), where it had been omitted: a single-identity multi-fn audio pack whose coddog `.c` defines fewer fns than the pack now flags `coddog-fncount-mismatch:<m>vs<n>` (the 0x7BDE0 case it was built for is now banked, but it fires live on `al_init`'s 13fn pack vs `player_fx.c`@99.99's 6 fns → `6vs13`). Verified end-to-end (libmus 0→1 tag; the al_init multi-file tell); the guard is conservative (only fires on a genuine under-count). + `docs/hazards.md#coddog-cross-ref` provenance (S88/S92→S131). Goldens regen'd for the banking cascade; suite **89 pass**.
+- Carry-over: none from committed work.
+
 ## Sprint 130 — n_synaddplayer.c + n_synsetvol.c (libnaudio n_audio_sc setter mirrors) — 2026-06-24
 - Increment: 2 verbatim `@99.99` mirrors banked (n_alSynAddPlayer + n_alSynSetVol), both Match FIRST build. md5-candidate **183→185** (+2); asm subsegs 102→100 (2 flips). ROM SHA-1 == baserom.
 - Quality: 0/0/0/0 this sprint (stuck-far/permuter/carried/re-opened).

@@ -27,19 +27,6 @@
   },
   {
     "band": "-",
-    "func": "func_800A09E0",
-    "hazards": "pack:2fn[func_800A09E0=?,func_800A09F0=?]",
-    "kind": "asm-flip",
-    "nfns": 2,
-    "pts": 13,
-    "rom": "0x7BDE0",
-    "score": -176,
-    "size": 176,
-    "upstream": "none",
-    "vram": "0x800A09E0"
-  },
-  {
-    "band": "-",
     "func": "func_ovl10_801F4A40",
     "hazards": "pack:2fn[func_ovl10_801F4A40=?,func_ovl10_801F4AD8=?],one-tu",
     "kind": "asm-flip",
@@ -648,5 +635,18 @@
     "size": 8624,
     "upstream": "none",
     "vram": "0x80216B10"
+  },
+  {
+    "band": "-",
+    "func": "func_ovl0_80218CC0",
+    "hazards": "pack:13fn[func_ovl0_80218CC0=?,func_ovl0_80218D1C=?,func_ovl0_80218DB0=?,func_ovl0_80218DD0=?,func_ovl0_80218FDC=?,func_ovl0_80219034=?,func_ovl0_802199EC=?,func_ovl0_80219C74=?,func_ovl0_8021A62C=?,func_ovl0_8021A690=?,func_ovl0_8021A6BC=?,func_ovl0_8021A724=?,func_ovl0_8021A940=?]",
+    "kind": "asm-flip",
+    "nfns": 13,
+    "pts": 13,
+    "rom": "0xD1FC0",
+    "score": -9072,
+    "size": 9072,
+    "upstream": "none",
+    "vram": "0x80218CC0"
   }
 ]

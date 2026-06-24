@@ -1,2 +1,2 @@
 func_800A0730	__osFakeMirror	src/io/fake.c	99.99
-func_800A09E0	__alFakeAudio	src/audio/fake.c	99.99
+func_ovl10_801F4A40	__alFakeAudio	src/audio/fake.c	99.99

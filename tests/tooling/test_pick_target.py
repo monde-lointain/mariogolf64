@@ -231,9 +231,10 @@ def test_pick_target_coddog_json_golden(golden_dir, regen, monkeypatch):
     build-dependent), so the coddog re-ranking path — coddog-mirror flagging, the non-audio
     re-pricing, the audio advisory-only branch, and the `@`/`.split` detail parsing — was never
     byte-pinned. Drive pick_target with a COMMITTED synthetic map (golden/coddog_map_fixture.tsv,
-    the proven func_800A0730 non-audio + func_800A09E0 audio entries) and snapshot, so the coddog
-    detail strings are a stable contract. This is the gate for Phase-A Hazard.coddog_* methods +
-    the cluster-7 (coddog) extraction."""
+    the proven func_800A0730 non-audio + a stable overlay audio entry) and snapshot, so the coddog
+    detail strings are a stable contract. The audio subject is an OVERLAY func (func_ovl10_801F4A40),
+    insulated from the audio-mirror mining that banked the original func_800A09E0 (S131). This is the
+    gate for Phase-A Hazard.coddog_* methods + the cluster-7 (coddog) extraction."""
     fixture = golden_dir / "coddog_map_fixture.tsv"
     monkeypatch.setenv("CODDOG_MAP", str(fixture))
     proc = run_tool("pick_target", "--json", "-n", "200")
@@ -242,7 +243,10 @@ def test_pick_target_coddog_json_golden(golden_dir, regen, monkeypatch):
     # sanity: the fixture's non-audio hit re-prices to libultra, the audio hit stays none-but-flagged
     by_func = {r["func"]: r for r in rows}
     assert "coddog-mirror:src/io/fake.c@99.99" in by_func["func_800A0730"]["hazards"]
-    assert "coddog-mirror:src/audio/fake.c@99.99" in by_func["func_800A09E0"]["hazards"]
+    assert (
+        "coddog-mirror:src/audio/fake.c@99.99"
+        in by_func["func_ovl10_801F4A40"]["hazards"]
+    )
 
     gpath = golden_dir / "pick_target_coddog.json"
     if regen or not gpath.exists():
@@ -272,11 +276,29 @@ def test_coddog_mirror_repricing(tmp_path, monkeypatch):
     A candidate pick_target sees as `upstream none` (un-named fns) but coddog matched ≥99% to a
     non-audio ultralib file is re-priced as a libultra mirror + flagged coddog-mirror:<file>@<pct>;
     a <99% or audio hit stays advisory (flag only). Absent map → unchanged (covered by the golden)."""
-    # A none-classified pack candidate to target: func_800A0730 (pts-13 none pack:2fn) from the golden.
+    # Pick subjects dynamically from a neutralized baseline rather than hardcoding addresses a future
+    # sprint banks out from under the test (S131 banked the original func_800A09E0). `pack` = a pts-13
+    # none multi-fn pack (the re-pricing subject); `leaf` = any other none asm-flip row (the advisory
+    # audio subject).
+    monkeypatch.setenv("CODDOG_MAP", "/nonexistent/baseline_map.tsv")
+    base = json.loads(run_tool("pick_target", "--json", "-n", "200").stdout)
+    pack = next(
+        r["func"]
+        for r in base
+        if r["kind"] == "asm-flip"
+        and r["upstream"] == "none"
+        and r["nfns"] > 1
+        and r["pts"] == 13
+    )
+    leaf = next(
+        r["func"]
+        for r in base
+        if r["kind"] == "asm-flip" and r["upstream"] == "none" and r["func"] != pack
+    )
     mapf = tmp_path / "coddog_map.tsv"
     mapf.write_text(
-        "func_800A0730\t__osFakeMirror\tsrc/io/fake.c\t99.99\n"
-        "func_800A09E0\t__alFakeAudio\tsrc/audio/fake.c\t99.99\n"
+        f"{pack}\t__osFakeMirror\tsrc/io/fake.c\t99.99\n"
+        f"{leaf}\t__alFakeAudio\tsrc/audio/fake.c\t99.99\n"
     )
     monkeypatch.setenv("CODDOG_MAP", str(mapf))
     rows = {
@@ -284,15 +306,13 @@ def test_coddog_mirror_repricing(tmp_path, monkeypatch):
         for r in json.loads(run_tool("pick_target", "--json", "-n", "200").stdout)
     }
 
-    hit = rows.get("func_800A0730")
+    hit = rows.get(pack)
     assert hit is not None and "coddog-mirror:src/io/fake.c@99.99" in hit["hazards"]
     assert (
         hit["upstream"] == "libultra" and hit["pts"] < 13
     )  # re-priced off the classical-pack 13
 
-    audio = rows.get(
-        "func_800A09E0"
-    )  # audio hit: flagged but NOT re-priced (header-gated)
+    audio = rows.get(leaf)  # audio hit: flagged but NOT re-priced (header-gated)
     assert (
         audio is not None and "coddog-mirror:src/audio/fake.c@99.99" in audio["hazards"]
     )
@@ -307,8 +327,22 @@ def test_lib_filter_surfaces_audio_coddog_mirror(tmp_path, monkeypatch):
     to survey by the coddog column (the S55 "--lib is misleading" caveat). The coddog map IS the
     ultralib sweep, so any coddog-mirror match -> libultra; a sub-path scope (`--lib audio`) matches
     via the matched-source path substring."""
+    # Pick a LIVE asm-flip candidate dynamically rather than hardcoding an address a future sprint
+    # banks out from under the test (S131 banked the original func_800A09E0). Baseline run with the
+    # coddog map neutralized -> the first upstream-`none` asm-flip row; the test then injects a
+    # synthetic audio coddog hit for it.
+    monkeypatch.setenv("CODDOG_MAP", "/nonexistent/baseline_map.tsv")
+    base = json.loads(run_tool("pick_target", "--json", "-n", "400").stdout)
+    target = next(
+        r["func"]
+        for r in base
+        if r["func"].startswith("func_")
+        and r["upstream"] == "none"
+        and r["kind"] == "asm-flip"
+    )
+
     mapf = tmp_path / "coddog_map.tsv"
-    mapf.write_text("func_800A09E0\t__alFakeAudio\tsrc/audio/fake.c\t99.99\n")
+    mapf.write_text(f"{target}\t__alFakeAudio\tsrc/audio/fake.c\t99.99\n")
     monkeypatch.setenv("CODDOG_MAP", str(mapf))
 
     # --lib libultra: the audio coddog row (upstream none) is now in scope.
@@ -318,7 +352,7 @@ def test_lib_filter_surfaces_audio_coddog_mirror(tmp_path, monkeypatch):
             run_tool("pick_target", "--lib", "libultra", "--json", "-n", "400").stdout
         )
     }
-    assert "func_800A09E0" in ultra, "audio coddog row missing under --lib libultra"
+    assert target in ultra, "audio coddog row missing under --lib libultra"
 
     # --lib audio: the same row surfaces via the matched-source path substring.
     aud = {
@@ -327,7 +361,7 @@ def test_lib_filter_surfaces_audio_coddog_mirror(tmp_path, monkeypatch):
             run_tool("pick_target", "--lib", "audio", "--json", "-n", "400").stdout
         )
     }
-    assert "func_800A09E0" in aud, "audio coddog row missing under --lib audio"
+    assert target in aud, "audio coddog row missing under --lib audio"
 
     # Guard: a scope matching no path/name/up_lib/coddog-source still excludes the row (the filter
     # is widened for in-scope coddog hits only, not disabled).
@@ -337,7 +371,7 @@ def test_lib_filter_surfaces_audio_coddog_mirror(tmp_path, monkeypatch):
             run_tool("pick_target", "--lib", "zzznomatch", "--json", "-n", "400").stdout
         )
     }
-    assert "func_800A09E0" not in none
+    assert target not in none
 
 
 def test_coddog_trap_rescan(tmp_path, monkeypatch):
