@@ -96,6 +96,7 @@ include mk/assets.mk
 include mk/libultra.mk
 include mk/libkmc.mk
 include mk/libnusys.mk
+include mk/libnaudio.mk
 include mk/src.mk
 
 # Source discovery. Recursive find, NOT $(wildcard): library/vendored code lives

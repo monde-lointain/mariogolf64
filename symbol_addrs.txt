@@ -335,3 +335,12 @@ MusInitialize = 0x8009973C; // rom:0x74B3C type:func
 MusStartSong = 0x800999F0; // rom:0x74DF0 type:func
 MusSetScheduler = 0x8009A53C; // type:func
 __MusIntMemMalloc = 0x8009E28C; // type:func
+// libnaudio n_audio_sc n_syn* setter family, UPSTREAM names (S129 header-enabler sprint).
+n_alSynSetPan = 0x800A0A90; // type:func
+n_alSynSetPitch = 0x800A0B20; // type:func
+n_alSynStartVoice = 0x800A0C60; // type:func
+n_alSynStopVoice = 0x800A0CF0; // type:func
+// shared n_syn* callees/global, recovered from the n_alSynSetPan asm (still-asm siblings + n_sl.c global).
+__n_allocParam = 0x800A1148; // type:func
+n_alEnvmixerParam = 0x8009EFE8; // type:func
+n_syn = 0x800C7DB4; // size:0x4
