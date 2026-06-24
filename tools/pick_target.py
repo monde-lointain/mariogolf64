@@ -3050,31 +3050,12 @@ class _RowState:
         )
 
 
-def _build_row(
-    off,
-    typ,
-    path,
-    size,
-    args,
-    upstream_index,
-    carried,
-    sig_index,
-    coddog_index,
-    nusys_index,
-    _libultra_band_start,
-):
-    """Classify one subseg and produce its scored row dict, or None to skip it (bss,
-    scope-filtered, or a de-ranked carry-over). The per-subseg body of build_rows;
-    the resolved identity lives on a _RowState (st) the coddog/nusys passes rebind in
-    place as they run."""
-    classified = classify_subseg(off, typ, path, size, upstream_index)
-    if classified is None:
-        return None
-    kind, fns, hazards = classified
-
-    _append_caller_evict(fns, hazards)
-
-    st = _RowState.create(off, size, kind, fns, hazards, upstream_index)
+def _resolve_named_upstream(st, upstream_index, coddog_index, sig_index):
+    """Seed st's upstream identity from the C-name index. A named `.c` upstream runs the C-mirror
+    trap battery (sets band/blocked); an asm-flip with no `.c` def is labelled libultra when it is a
+    hand-asm TU mirror, else an un-named `func_` gets an advisory signature hint — unless coddog
+    already holds a definitive (non-audio, >=CODDOG_MIRROR_PCT) identity, in which case the hint is
+    redundant noise and is skipped."""
     if st.up_path:
         member_paths = _c_combined_member_paths(st.fns, st.up_path, upstream_index)
         st.band, st.blocked = append_upstream_hazards(
@@ -3104,6 +3085,34 @@ def _build_row(
                 hint = signature_hint(st.off, st.primary, sig_index)
                 if hint:
                     st.hazards.append(hint)
+
+
+def _build_row(
+    off,
+    typ,
+    path,
+    size,
+    args,
+    upstream_index,
+    carried,
+    sig_index,
+    coddog_index,
+    nusys_index,
+    _libultra_band_start,
+):
+    """Classify one subseg and produce its scored row dict, or None to skip it (bss,
+    scope-filtered, or a de-ranked carry-over). The per-subseg body of build_rows;
+    the resolved identity lives on a _RowState (st) the coddog/nusys passes rebind in
+    place as they run."""
+    classified = classify_subseg(off, typ, path, size, upstream_index)
+    if classified is None:
+        return None
+    kind, fns, hazards = classified
+
+    _append_caller_evict(fns, hazards)
+
+    st = _RowState.create(off, size, kind, fns, hazards, upstream_index)
+    _resolve_named_upstream(st, upstream_index, coddog_index, sig_index)
 
     # coddog cross-ref: a candidate coddog matched to an ultralib fn but that the C-name index
     # missed (un-named / `none`) is a verbatim-mirror target mis-seen as classical. Flag the match
