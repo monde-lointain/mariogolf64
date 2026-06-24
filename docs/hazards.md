@@ -34,12 +34,12 @@ iteration, no byte-`cmp` (that guard is classical-loop-only).
    `~/development/repos/n64sdkmod/packages/libnusys/usr/src/PR/libsrc/nusys-2.07/nusys/src/`.
    ultralib is the sole libultra source. The project builds `-DBUILD_VERSION=VERSION_J`, so
    version-conditional upstream code selects itself via ultralib's own `#if BUILD_VERSION` guards;
-   no manual version picking. Do NOT consult `libultra_modern` (deprecated): it is 2.0L-only and its
+   no manual version picking. Do not consult `libultra_modern` (deprecated): it is 2.0L-only and its
    casts diverge from this VERSION_J build (see the cast-divergence section).
 2. Project path mirrors the upstream path exactly: take the upstream path relative to its `src/` root
    and prepend `src/lib<name>/`. E.g. `ultralib/src/io/vigetcurrcontext.c` becomes
    `src/libultra/io/vigetcurrcontext.c`. Mirror ultralib's functional subdirs verbatim (`io/`, `os/`,
-   `libc/`, `audio/`, `gu/`, ...); do not rename or flatten them. Companion headers mirror their
+   `libc/`, `audio/`, `gu/`, ...); keep each name and depth exactly as upstream. Companion headers mirror their
    upstream `include/` layout under `include/lib<name>/`.
 3. Verbatim means verbatim: keep dead `#ifdef _DEBUG` blocks and their unconditional companion
    `#include`s (they compile out because `_DEBUG` is undefined). If such a block needs a header
@@ -53,9 +53,11 @@ Before declaring a clean verbatim mirror, reconcile the upstream's full call + d
 near-verbatim sections. Known-edit sub-cases: file-static drop, defines-data drop, near-verbatim
 line-drop, recover-extern placement.
 
+**Sub-cases / variants:**
+
 **Authoritative symbol set via `nm` (S102).** For a mirror that is `#if BUILD_VERSION`-branched or
-inline-ambiguous (a `pack` where a static helper may or may not be inlined), do NOT reason from the
-source alone; read the matching prebuilt object:
+inline-ambiguous (a `pack` where a static helper may or may not be inlined), read the matching
+prebuilt object rather than reasoning from the source alone:
 `mips-linux-gnu-nm ~/development/repos/ultralib/build/J/libgultra_rom/src/<dir>/<file>.o`. It gives
 the definitive VERSION_J symbol set: which functions are global (`T`) vs absent (inlined), which data
 is local/static (`b`/`d`) vs global, and the exact `.text` offsets. S102 motor.c: nm settled that the
@@ -365,6 +367,8 @@ is unambiguous (one unplaced name ∩ one asm candidate); otherwise bare names.
    0x1A0 = 0x68×4).
 4. Flip the subseg, verbatim `cp` the upstream, `make` → ROM SHA-1 is the proof.
 
+**Sub-cases / variants:**
+
 **Contiguous `.bss`-block fast-path (S90):** a file-static drop-to-extern mirror often references a
 whole RUN of adjacent `.bss` statics declared together in the upstream `.c` (e.g. pimgr.c's
 `piThread` / `piThreadStack` / `piEventQueue` / `piEventBuf`). Recover the entire block from a SINGLE
@@ -414,6 +418,8 @@ resolves the jal directly, so the missing symbol only bites in the execution mid
 `symbol_addrs.txt` (add-only) at the gate, before the flip. Reconcile the full callee list (data
 and functions) against the name files in the same disassemble pass that confirms a recover-extern
 vram (the asm jal list is already in hand).
+
+**Sub-cases / variants:**
 
 **Renamed-vs-substituted callee, body-compare before editing (S61).** When the upstream calls
 `fooBar` but the jal target is already named *something else* (`calls-unplaced:fooBar` flagged, yet
@@ -470,7 +476,7 @@ the gate by disassembling and comparing the jal list against the upstream call l
 - **Small (≤2): try verbatim first.** The mismatch may be a GCC -O3 tail-merge artifact (one shared
   `jal` for identical call+args across branches). Verbatim copy + `make`; only investigate
   line-drops if the SHA-1 doesn't match. (S35: `osStartThread` `9vs7` = three identical
-  `__osEnqueueThread(&__osRunQueue, t)` sites merged.) **Do NOT hand-fold an early-return to force
+  `__osEnqueueThread(&__osRunQueue, t)` sites merged.) **Do not hand-fold an early-return to force
   the count.** When the upstream has two *identical* tail blocks (an early-return
   `if (cond) { f(); return X; }` plus the same `f(); return X;` at the end), -O3 **cross-jumps**
   them into one shared tail itself, which IS the `jal N-1`. Copy verbatim and let the compiler do
@@ -536,6 +542,8 @@ the gate by disassembling and comparing the jal list against the upstream call l
   calls.) Generalizes the S117/S118 "nusys version is per-file" finding from wrapper-PRESENCE to
   block-ORDER divergence.
 
+**Sub-cases / variants:**
+
 **Sibling-replay (S120).** Once one fn in a family is confirmed a block-reorder mirror, its siblings
 replay the SAME swap: `nuContGBPakFwrite` (S120) is the direct sibling of S119's `nuContGBPakFread`
 (its asm runs the RAM-enable block before `nuContGBPakCheckConnector` identically, with the same
@@ -576,6 +584,8 @@ neighbors.
 **Provenance:** S44 (`osCreateThread`: `context.ra = (s64)(s32)__osCleanupThread` sign-extend, vs
 the old 2.0L upstream's `(u64)(u32)` zero-extend; sibling `sp`/`a0` already sign-extended). This
 divergence is one reason the project standardized on ultralib VERSION_J as the sole upstream.
+
+**Sub-cases / variants:**
 
 **S103 float-literal single-vs-double (classical FP reconstruction).** When a classical/mirror
 reconstruction adds a float comparison or clamp against a literal (`if (x < -32768.0)`), a **bare
@@ -618,6 +628,8 @@ static (`static T x[] = {...};`) carries `=` and is invisible to the regex, so i
 
 **Procedure:** Fall to the classical loop with the `static` **dropped** in the C body. The linker
 then resolves to the splat-side global at the correct vram.
+
+**Sub-cases / variants:**
 
 **Uninitialized file-static is a drop-to-extern MIRROR, not a carve/classical spike (S87).** Be
 precise about what "BSS-layout-conflict" costs. An *uninitialized* file-scope static (`static T x;`,
