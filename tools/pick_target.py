@@ -3007,6 +3007,49 @@ def _append_coddog_aux(hazards, cod_srcs):
         hazards.append(Hazard.body_divergence_suspect(cf, pct))
 
 
+@dataclasses.dataclass
+class _RowState:
+    """The per-subseg identity _build_row resolves across its named-upstream + coddog/nusys passes.
+    up_lib/up_path/band/blocked/mirror_path/cod_members are default-then-rebound IN SEQUENCE: the
+    named-upstream pass seeds the identity, then each coddog pass can override it (mirror_path -> the
+    confirmed coddog `.c`; up_lib -> the matched library). Because a later pass reads state an earlier
+    one set, the resolve helpers take and mutate ONE _RowState rather than threading a tuple, and
+    their call-order is load-bearing."""
+
+    off: int
+    size: int
+    kind: str
+    fns: list
+    hazards: list
+    primary: str
+    up_lib: "str | None"
+    up_path: "str | None"
+    band: str
+    blocked: bool
+    mirror_path: "str | None"
+    cod_members: list
+
+    @classmethod
+    def create(cls, off, size, kind, fns, hazards, upstream_index):
+        primary = fns[0]
+        up_lib, up_path = upstream_index.get(primary, (None, None))
+        return cls(
+            off=off,
+            size=size,
+            kind=kind,
+            fns=fns,
+            hazards=hazards,
+            primary=primary,
+            up_lib=up_lib,
+            up_path=up_path,
+            band="-",
+            blocked=False,
+            # the .c the drop-static-mirror count reads; coddog identity overrides below
+            mirror_path=up_path,
+            cod_members=[],
+        )
+
+
 def _build_row(
     off,
     typ,
@@ -3022,8 +3065,8 @@ def _build_row(
 ):
     """Classify one subseg and produce its scored row dict, or None to skip it (bss,
     scope-filtered, or a de-ranked carry-over). The per-subseg body of build_rows;
-    up_lib/blocked/mirror_path are rebound in place across the coddog re-scan as the
-    identity is resolved."""
+    the resolved identity lives on a _RowState (st) the coddog/nusys passes rebind in
+    place as they run."""
     classified = classify_subseg(off, typ, path, size, upstream_index)
     if classified is None:
         return None
@@ -3031,56 +3074,52 @@ def _build_row(
 
     _append_caller_evict(fns, hazards)
 
-    primary = fns[0]
-    up_lib, up_path = upstream_index.get(primary, (None, None))
-    band = "-"
-    blocked = False
-    mirror_path = up_path  # the .c the drop-static-mirror count reads; coddog identity overrides below
-    if up_path:
-        member_paths = _c_combined_member_paths(fns, up_path, upstream_index)
-        band, blocked = append_upstream_hazards(
-            off, primary, up_lib, up_path, hazards, member_paths
+    st = _RowState.create(off, size, kind, fns, hazards, upstream_index)
+    if st.up_path:
+        member_paths = _c_combined_member_paths(st.fns, st.up_path, upstream_index)
+        st.band, st.blocked = append_upstream_hazards(
+            st.off, st.primary, st.up_lib, st.up_path, st.hazards, member_paths
         )
-    elif kind == "asm-flip":
-        if build_asm_tu_index().get(primary):
+    elif st.kind == "asm-flip":
+        if build_asm_tu_index().get(st.primary):
             # A hand-asm libultra mirror (no `.c` def, so absent from upstream_index): bcopy,
             # __osSetFpcCsr, the cache/TLB leaves. Label it libultra for the column/filter/pts
             # so `--lib libultra` surfaces it. The `.s` TU path already rides the
             # intrinsic-likely hazard from classify_subseg; do NOT set up_path (it feeds the
             # C-only append_upstream_hazards) — the asm-mirror-vendoring route, not a C mirror.
-            up_lib = "libultra"
-        elif primary.startswith("func_"):
+            st.up_lib = "libultra"
+        elif st.primary.startswith("func_"):
             # No name-index hit + un-named: it may still be an un-named SDK mirror. Run the
             # signature matcher; an advisory hit flags the gate to verify. But skip it when coddog
             # already holds a definitive (>=CODDOG_MIRROR_PCT, non-audio) identity for this fn — the
             # maybe-upstream IDF guess is then redundant noise that can point at the WRONG file. Let
             # the coddog hit (appended below) stand as the sole upstream signal.
-            cod = coddog_index.get(primary)
+            cod = coddog_index.get(st.primary)
             cod_definitive = (
                 bool(cod)
                 and cod[1] >= CODDOG_MIRROR_PCT
                 and not cod[0].startswith("src/audio")
             )
             if not cod_definitive:
-                hint = signature_hint(off, primary, sig_index)
+                hint = signature_hint(st.off, st.primary, sig_index)
                 if hint:
-                    hazards.append(hint)
+                    st.hazards.append(hint)
 
     # coddog cross-ref: a candidate coddog matched to an ultralib fn but that the C-name index
     # missed (un-named / `none`) is a verbatim-mirror target mis-seen as classical. Flag the match
     # always; re-price a ≥CODDOG_MIRROR_PCT *non-audio* hit as a libultra mirror so `seed_points`
     # drops it off the `classical and pack` -> 13 path. Audio hits stay advisory (they still need the
     # one-time audio-header enabler, not modeled here).
-    if not up_path and primary in coddog_index:
-        cfile, cpct = coddog_index[primary]
-        hazards.append(Hazard.coddog_mirror(cfile, cpct))
-        _append_coddog_twin_hazard(cfile, fns, upstream_index, hazards)
+    if not st.up_path and st.primary in coddog_index:
+        cfile, cpct = coddog_index[st.primary]
+        st.hazards.append(Hazard.coddog_mirror(cfile, cpct))
+        _append_coddog_twin_hazard(cfile, st.fns, upstream_index, st.hazards)
         if (
-            up_lib is None
+            st.up_lib is None
             and cpct >= CODDOG_MIRROR_PCT
             and not cfile.startswith("src/audio")
         ):
-            up_lib = "libultra"
+            st.up_lib = "libultra"
         # The coddog-resolved upstream is a real `.c`, but its trap detectors never ran: an un-named
         # (`func_<addr>`) subseg's defines-data / file-static / needs-header key off the *named*
         # upstream (absent here), so a verbatim-mirror candidate that DEFINES data or a file-scope
@@ -3091,22 +3130,26 @@ def _build_row(
         # block below via _append_coddog_trap_hazards.
         cl_path = _coddog_upstream_path(cfile)
         if cl_path:
-            mirror_path = (
+            st.mirror_path = (
                 cl_path  # the confirmed coddog identity is the file we mirror + count
             )
-            blocked = (
-                _append_coddog_trap_hazards(off, primary, cl_path, up_lib, hazards)
-                or blocked
+            st.blocked = (
+                _append_coddog_trap_hazards(
+                    st.off, st.primary, cl_path, st.up_lib, st.hazards
+                )
+                or st.blocked
             )
             # A coddog hit on a multi-fn pack can be a STRUCTURAL fingerprint match, not a source
             # attribution. If the matched file defines FEWER fns than the pack holds, it cannot be
             # the sole source → the pack is multi-file; flag so the gate doesn't read it as a
             # single-file-pack mirror. Under-count direction ONLY: a true single source may define
             # MORE (version/_DEBUG-gated extras), so `matched > nfns` is never flagged.
-            if len(fns) > 1:
-                matched_n = _upstream_file_func_count(up_lib or "libultra", cl_path)
-                if 0 < matched_n < len(fns):
-                    hazards.append(Hazard.coddog_fncount_mismatch(matched_n, len(fns)))
+            if len(st.fns) > 1:
+                matched_n = _upstream_file_func_count(st.up_lib or "libultra", cl_path)
+                if 0 < matched_n < len(st.fns):
+                    st.hazards.append(
+                        Hazard.coddog_fncount_mismatch(matched_n, len(st.fns))
+                    )
 
     # A multi-fn asm subseg's mirror IDENTITY often lives in its UN-NAMED tail, not its named (or
     # mis-attributed) leader. The primary block above keys coddog on `primary` AND fires only when
@@ -3114,33 +3157,35 @@ def _build_row(
     # ultralib `.c` was invisible. Scan ALL members; surface each distinct coddog `.c` identity the
     # primary block did not already flag, and label the subseg libultra so seed_points + the column
     # price it as the mirror it is.
-    cod_members = [
+    cod_members = st.cod_members = [
         (fn, coddog_index[fn][0], coddog_index[fn][1])
-        for fn in fns
+        for fn in st.fns
         if fn in coddog_index
         and coddog_index[fn][1] >= CODDOG_MIRROR_PCT
         and not coddog_index[fn][0].startswith("src/audio")
     ]
     if cod_members:
-        already = {h.coddog_file() for h in hazards if h.is_coddog_mirror()}
+        already = {h.coddog_file() for h in st.hazards if h.is_coddog_mirror()}
         for cfile in sorted({c for _, c, _ in cod_members}):
             if cfile in already:
                 continue
             cpct = max(p for _, c, p in cod_members if c == cfile)
-            hazards.append(Hazard.coddog_mirror(cfile, cpct))
-            _append_coddog_twin_hazard(cfile, fns, upstream_index, hazards)
+            st.hazards.append(Hazard.coddog_mirror(cfile, cpct))
+            _append_coddog_twin_hazard(cfile, st.fns, upstream_index, st.hazards)
             # Surface the tail-identity file's traps too. The primary block above keys on the
             # primary, so a coddog hit carried by an un-named TAIL member reached here with only the
             # bare coddog flag — its defines-data `.data` carve / file-static went un-priced.
             # `already` excludes the primary's cfile, so no double-scan.
             cl_path = _coddog_upstream_path(cfile)
             if cl_path:
-                mirror_path = (
-                    cl_path or mirror_path
+                st.mirror_path = (
+                    cl_path or st.mirror_path
                 )  # the coddog identity is the real mirror source
-                blocked = (
-                    _append_coddog_trap_hazards(off, primary, cl_path, up_lib, hazards)
-                    or blocked
+                st.blocked = (
+                    _append_coddog_trap_hazards(
+                        st.off, st.primary, cl_path, st.up_lib, st.hazards
+                    )
+                    or st.blocked
                 )
         # The under-count fncount-mismatch + structural size-ratio guards run in the PRIMARY coddog
         # block (above) only when the identity is on `primary`. When the WHOLE pack resolves to ONE
@@ -3148,27 +3193,33 @@ def _build_row(
         # single-source mirror. Re-run both here when the pack has exactly one coddog identity (dedup
         # the fncount flag w/ primary).
         distinct = sorted({c for _, c, _ in cod_members})
-        if len(fns) > 1 and len(distinct) == 1:
+        if len(st.fns) > 1 and len(distinct) == 1:
             cl1 = _coddog_upstream_path(distinct[0])
             if cl1:
-                matched_n = _upstream_file_func_count(up_lib or "libultra", cl1)
-                if 0 < matched_n < len(fns) and not any(
-                    h.kind == HAZARD_CODDOG_FNCOUNT_MISMATCH for h in hazards
+                matched_n = _upstream_file_func_count(st.up_lib or "libultra", cl1)
+                if 0 < matched_n < len(st.fns) and not any(
+                    h.kind == HAZARD_CODDOG_FNCOUNT_MISMATCH for h in st.hazards
                 ):
-                    hazards.append(Hazard.coddog_fncount_mismatch(matched_n, len(fns)))
+                    st.hazards.append(
+                        Hazard.coddog_fncount_mismatch(matched_n, len(st.fns))
+                    )
                 loc = _meaningful_loc(cl1)
-                if loc and size > CODDOG_STRUCTURAL_BYTES_PER_LOC * loc:
+                if loc and st.size > CODDOG_STRUCTURAL_BYTES_PER_LOC * loc:
                     cpct = max(p for _, c, p in cod_members if c == distinct[0])
-                    hazards.append(Hazard.coddog_structural(distinct[0], cpct))
+                    st.hazards.append(Hazard.coddog_structural(distinct[0], cpct))
         # ≥2 DISTINCT per-fn TWIN files matched to ONE multi-fn subseg, covering only a SUBSET of its
         # fns → a per-fn fingerprint set, NOT a single-file mirror (the un-matched fns diverge from
         # the combined source). The multi-twin companion to the len==1-only coddog-fncount-mismatch.
         # Advisory: per-fn verify, do NOT read it as a clean mirror.
-        twin_files = {h.twin_file() for h in hazards if h.kind == HAZARD_CODDOG_TWIN}
-        if len(distinct) >= 2 and len(twin_files) >= 2 and len(cod_members) < len(fns):
-            hazards.append(Hazard.coddog_partial(len(cod_members), len(fns)))
-        if up_lib is None:
-            up_lib = "libultra"
+        twin_files = {h.twin_file() for h in st.hazards if h.kind == HAZARD_CODDOG_TWIN}
+        if (
+            len(distinct) >= 2
+            and len(twin_files) >= 2
+            and len(cod_members) < len(st.fns)
+        ):
+            st.hazards.append(Hazard.coddog_partial(len(cod_members), len(st.fns)))
+        if st.up_lib is None:
+            st.up_lib = "libultra"
 
     # Nusys coddog cross-ref: the libnusys analog of the libultra blocks above, kept as a SEPARATE
     # additive pass so an absent nusys_map.tsv leaves libultra ranking byte-identical. Fires only when
@@ -3178,56 +3229,56 @@ def _build_row(
     # the subseg as a libnusys mirror so seed_points drops it off the classical path. A single-identity
     # multi-fn pack gets the structural size-ratio guard (a tiny source fingerprint-matched to a big
     # subseg — the `*FuncSet` one-liner twins coddog reports at 99.99%).
-    if up_lib in (None, "libnusys") and nusys_index:
+    if st.up_lib in (None, "libnusys") and nusys_index:
         nz = [
             (fn, nusys_index[fn][0], nusys_index[fn][1])
-            for fn in fns
+            for fn in st.fns
             if fn in nusys_index and nusys_index[fn][1] >= CODDOG_MIRROR_PCT
         ]
         if nz:
-            already = {h.coddog_file() for h in hazards if h.is_coddog_mirror()}
+            already = {h.coddog_file() for h in st.hazards if h.is_coddog_mirror()}
             for cfile in sorted({c for _, c, _ in nz}):
                 if cfile in already:
                     continue
                 cpct = max(p for _, c, p in nz if c == cfile)
-                hazards.append(Hazard.coddog_mirror(cfile, cpct))
+                st.hazards.append(Hazard.coddog_mirror(cfile, cpct))
                 cl_path = _coddog_nusys_path(cfile)
                 if cl_path:
-                    mirror_path = cl_path  # the confirmed nusys identity is the file we mirror + count
-                    blocked = (
+                    st.mirror_path = cl_path  # the confirmed nusys identity is the file we mirror + count
+                    st.blocked = (
                         _append_coddog_trap_hazards(
-                            off, primary, cl_path, "libnusys", hazards
+                            st.off, st.primary, cl_path, "libnusys", st.hazards
                         )
-                        or blocked
+                        or st.blocked
                     )
             distinct = sorted({c for _, c, _ in nz})
-            if len(fns) > 1 and len(distinct) == 1:
+            if len(st.fns) > 1 and len(distinct) == 1:
                 cl1 = _coddog_nusys_path(distinct[0])
                 loc = _meaningful_loc(cl1) if cl1 else 0
-                if loc and size > CODDOG_STRUCTURAL_BYTES_PER_LOC * loc:
+                if loc and st.size > CODDOG_STRUCTURAL_BYTES_PER_LOC * loc:
                     cpct = max(p for _, c, p in nz if c == distinct[0])
-                    hazards.append(Hazard.coddog_structural(distinct[0], cpct))
-            if up_lib is None:
-                up_lib = "libnusys"
+                    st.hazards.append(Hazard.coddog_structural(distinct[0], cpct))
+            if st.up_lib is None:
+                st.up_lib = "libnusys"
 
     # A `coddog-mirror` hazard pins the row to an ultralib(libultra) source even when up_lib stayed
     # None — audio coddog hits are deliberately NOT re-priced to libultra (they were header-`-I`-
     # gated), so a clean audio mirror surfaced as `upstream none` and `--lib libultra` skipped it.
     # The coddog map IS the ultralib sweep, so any coddog-mirror match means libultra; also honor a
     # sub-path scope (e.g. `--lib audio` -> src/audio/...) via the matched-source path substring.
-    cod_srcs = [h.coddog_source() for h in hazards if h.is_coddog_mirror()]
-    _append_coddog_aux(hazards, cod_srcs)
+    cod_srcs = [h.coddog_source() for h in st.hazards if h.is_coddog_mirror()]
+    _append_coddog_aux(st.hazards, cod_srcs)
     # A libultra-source mirror whose vram is BELOW the libultra code band is game-linked at -O2, not
     # -O3 — route it to a -O2 path (src/mgu/…), NOT src/libultra/ (which forces -O3 → wrong
     # auto-inlining). Gated on up_lib == "libultra" (excludes audio coddog hits, which stay
     # un-re-priced + above the band anyway).
     if (
-        up_lib == "libultra"
+        st.up_lib == "libultra"
         and _libultra_band_start is not None
-        and off < _libultra_band_start
+        and st.off < _libultra_band_start
     ):
-        v = subseg_vram(off)
-        hazards.append(Hazard.game_region_mirror(v, off))
+        v = subseg_vram(st.off)
+        st.hazards.append(Hazard.game_region_mirror(v, st.off))
     cod_in_scope = (
         bool(args.lib)
         and bool(cod_srcs)
@@ -3237,8 +3288,8 @@ def _build_row(
         args.lib
         and not cod_in_scope
         and args.lib not in (path or "")
-        and (up_lib or "") != args.lib
-        and not any(args.lib in n for n in fns)
+        and (st.up_lib or "") != args.lib
+        and not any(args.lib in n for n in st.fns)
     ):
         return None
     # The `carried` filter de-ranks BACKLOG carry-overs (intentional — a parked carry-over is
@@ -3246,25 +3297,27 @@ def _build_row(
     # region+symbol scoped so a prose name-drop of a still-asm function no longer silently drops it;
     # the cod_members override is the backstop for a definitively-coddog'd subseg whose leader was
     # prose-mentioned (coddog identity wins).
-    if primary in carried and not args.include_stuck and not cod_members:
+    if st.primary in carried and not args.include_stuck and not st.cod_members:
         return None
 
     # Re-frame a coddog-confirmed pure-.bss file-static cluster as one drop-to-extern enabler (not a
     # carve/classical spike) — appended last so it reads as the leading verdict over the
     # file-static/defines-data/refs-unplaced flags it summarizes.
-    dsm = drop_static_mirror_hazard(mirror_path, hazards)
+    dsm = drop_static_mirror_hazard(st.mirror_path, st.hazards)
     if dsm:
-        hazards.append(dsm)
+        st.hazards.append(dsm)
 
     # Block-reorder tell (libnusys unexplained jal-mismatch + no coddog) in a family with a BANKED
     # block-reorder mirror → name the sibling so the gate applies the SAME CheckConnector/RAM-enable
     # swap up-front (appended after coddog so the no-coddog test sees the final hazard set).
-    brs = _block_reorder_sibling(up_path, hazards, up_lib)
+    brs = _block_reorder_sibling(st.up_path, st.hazards, st.up_lib)
     if brs:
-        hazards.append(Hazard.block_reorder_sibling(brs))
+        st.hazards.append(Hazard.block_reorder_sibling(brs))
 
-    cand = Candidate(off, primary, kind, fns, size, up_lib, band, blocked)
-    return score_row(cand, hazards, carried)
+    cand = Candidate(
+        st.off, st.primary, st.kind, st.fns, st.size, st.up_lib, st.band, st.blocked
+    )
+    return score_row(cand, st.hazards, carried)
 
 
 def build_rows(
