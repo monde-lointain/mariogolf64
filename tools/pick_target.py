@@ -2097,17 +2097,6 @@ def already_vendored_intree_path(inc, lib):
     return None
 
 
-def include_is_already_vendored(inc, lib):
-    """True if a *missing* include needs NO header CP work: its full path is unreachable (so
-    `missing_includes` flagged it), but its BASENAME already resolves under the current `-I` set, so
-    the established include-path adaptation (drop the upstream prefix) resolves it (e.g. a
-    `PRinternal/controller.h` whose basename already resolves via a sibling-vendored
-    `include/libultra/internal/controller.h` on the band's `-I` set). A strict refinement of
-    vendorable: same non-blocking class, no cp, BUT it does cost a one-line include adaptation
-    (see `already_vendored_intree_path`). lib selects the band's extra `-I` dirs (LIB_EXTRA)."""
-    return already_vendored_intree_path(inc, lib) is not None
-
-
 def _tagged_missing_includes(cpath, lib):
     """(tagged_headers, blocked) for cpath's unreachable includes, tagged by enabler load: bare =
     a real block (deferred -I / system header → pts 'blk'), `(vendorable)` = a one-time source cp,
