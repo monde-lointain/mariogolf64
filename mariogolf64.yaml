@@ -139,7 +139,7 @@ segments:
       - [0x79370, asm]
       - [0x79640, asm]
       - [0x798B0, asm]
-      - [0x7A840, asm]
+      - [0x7A840, c, libnaudio/n_load]
       - [0x7AF60, c, libnaudio/n_resample]
       - [0x7B140, asm]
       - [0x7BB30, c, libnaudio/n_sl]

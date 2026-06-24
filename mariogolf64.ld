@@ -121,7 +121,7 @@ SECTIONS
         build/asm/79370.o(.text);
         build/asm/79640.o(.text);
         build/asm/798B0.o(.text);
-        build/asm/7A840.o(.text);
+        build/src/libnaudio/n_load.o(.text);
         build/src/libnaudio/n_resample.o(.text);
         build/asm/7B140.o(.text);
         build/src/libnaudio/n_sl.o(.text);
@@ -388,7 +388,7 @@ SECTIONS
         build/asm/79370.o(.data);
         build/asm/79640.o(.data);
         build/asm/798B0.o(.data);
-        build/asm/7A840.o(.data);
+        build/src/libnaudio/n_load.o(.data);
         build/src/libnaudio/n_resample.o(.data);
         build/asm/7B140.o(.data);
         build/src/libnaudio/n_sl.o(.data);
@@ -668,7 +668,7 @@ SECTIONS
         build/asm/79370.o(.rodata);
         build/asm/79640.o(.rodata);
         build/asm/798B0.o(.rodata);
-        build/asm/7A840.o(.rodata);
+        build/src/libnaudio/n_load.o(.rodata);
         build/asm/data/main_rodata.rodata.o(.rodata);
         build/asm/data/A5CE0.rodata.o(.rodata);
         build/asm/data/A5D30.rodata.o(.rodata);
@@ -953,7 +953,7 @@ SECTIONS
         build/asm/79370.o(.bss);
         build/asm/79640.o(.bss);
         build/asm/798B0.o(.bss);
-        build/asm/7A840.o(.bss);
+        build/src/libnaudio/n_load.o(.bss);
         build/src/libnaudio/n_resample.o(.bss);
         build/asm/7B140.o(.bss);
         build/src/libnaudio/n_sl.o(.bss);
