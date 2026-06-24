@@ -1,55 +1,47 @@
-/*====================================================================
+/*
+ * Synth voice volume control.
  *
- * Copyright 1993, Silicon Graphics, Inc.
- * All Rights Reserved.
- *
- * This is UNPUBLISHED PROPRIETARY SOURCE CODE of Silicon Graphics,
- * Inc.; the contents of this file may not be disclosed to third
- * parties, copied or duplicated in any form, in whole or in part,
- * without the prior written permission of Silicon Graphics, Inc.
- *
- * RESTRICTED RIGHTS LEGEND:
- * Use, duplication or disclosure by the Government is subject to
- * restrictions as set forth in subdivision (c)(1)(ii) of the Rights
- * in Technical Data and Computer Software clause at DFARS
- * 252.227-7013, and/or in similar or successor clauses in the FAR,
- * DOD or NASA FAR Supplement. Unpublished - rights reserved under the
- * Copyright Laws of the United States.
- *====================================================================*/
-
+ * Sets the volume of an active naudio synthesizer voice over a transition time
+ * by queuing a parameter update onto the voice's envelope/mixer filter, to take
+ * effect at the voice's current sample position.
+ */
 #include <os_internal.h>
 #include <ultraerror.h>
 #include "n_synthInternals.h"
 
+/* Set the volume of voice v, ramping over transition time t. A no-op unless the
+ * voice is physically allocated. */
 void n_alSynSetVol(N_ALVoice* v, s16 volume, ALMicroTime t) {
   ALParam* update;
   ALFilter* f;
 
   if (v->pvoice) {
-    /*
-     * get new update struct from the free list
-     */
+    /* Take an update command off the free list; bail if it is exhausted. */
     update = __n_allocParam();
     ALFailIf(update == 0, ERR_ALSYN_NO_UPDATE);
 
-    /*
-     * set offset and volume data
-     */
+    /* Schedule the update for the voice's current sample position. */
 #ifdef SAMPLE_ROUND
     update->delta = SAMPLE184(n_syn->paramSamples + v->pvoice->offset);
 #else
     update->delta = n_syn->paramSamples + v->pvoice->offset;
 #endif
+
+    /* Carry the new volume as a single, unchained update. */
     update->type = AL_FILTER_SET_VOLUME;
     update->data.i = volume;
 
+    /* Carry the ramp transition time alongside it, converted from microseconds
+     * to samples. */
 #ifdef SAMPLE_ROUND
     update->moredata.i = SAMPLE184(_n_timeToSamples(t));
 #else
     update->moredata.i = _n_timeToSamples(t);
 #endif
-    update->next = 0;
 
+    /* Hand the update to the voice's filter, which applies it at the scheduled
+     * time. */
+    update->next = 0;
     n_alEnvmixerParam(v->pvoice, AL_FILTER_ADD_UPDATE, update);
   }
 }
