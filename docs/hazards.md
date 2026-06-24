@@ -1911,6 +1911,29 @@ banked TU includes (directly or via `guint.h`/`gu.h`/etc.).
 until the touched object was removed; a `make clean` rebuild then confirmed the add was globally
 SHA-safe across all os_version.h consumers).
 
+### shared-callee RENAME (S129: stale stub `.o` after a `symbol_addrs` rename)
+
+The same no-header-dep-tracking gap bites a different way when a bank RENAMES a shared callee/global
+in `symbol_addrs.txt` (a recover-extern), not just edits a header. Renaming e.g. `func_800A1148` to
+`__n_allocParam` and re-running `make extract` regenerates every `.s` that references it to the new
+name, but `make` does NOT recompile the still-`INCLUDE_ASM` sibling `.c` files (their `.c` did not
+change, and the build tracks no dep on the `.s` the macro includes). So their stale `.o` still
+references the OLD `func_<vram>` name, and the link fails `undefined reference to func_<vram>` even
+though the regenerated `.s` is correct.
+
+**Trigger:** banking one member of a homogeneous sibling set that share a recovered callee/global,
+while the other members are still `INCLUDE_ASM` stubs; link error names the pre-rename `func_<vram>`/
+`D_<vram>`.
+
+**Procedure:** for a homogeneous sibling set sharing recovered externs, write ALL the sibling bodies
+before building — each becomes a fresh-compiled `.c` referencing the new name, so no stale stub `.o`
+survives. Otherwise `rm` (or `touch` the source of) the still-stub `.o` after the rename to force its
+recompile. The shared extern only needs recovering once (it serves the whole set).
+
+**Provenance:** S129 (n_synsetpan recovered `__n_allocParam`/`n_alEnvmixerParam`/`n_syn`; the
+n_synsetpitch/startvoice/stopvoice stubs link-failed on stale `func_800A1148` until all 4 bodies were
+written and the set rebuilt together).
+
 ---
 
 ## needs-define

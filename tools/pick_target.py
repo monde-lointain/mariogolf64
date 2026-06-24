@@ -302,6 +302,7 @@ INCLUDE_DIRS = [
         "include/libultra/internal",
         "include/libkmc",
         "include/libnusys",
+        "include/libnaudio",
     )
 ]
 PROJECT_INC = os.path.join(ROOT, "include")
@@ -315,6 +316,15 @@ PROJECT_INC = os.path.join(ROOT, "include")
 LIB_EXTRA_INCLUDE_DIRS = {
     "libultra": [
         os.path.join(ROOT, "include/libultra/compiler/gcc"),
+        os.path.join(ROOT, "include/libultra/PR"),
+    ],
+    # LIBNAUDIO_CFLAGS (Makefile) prepends `-I src/libnaudio` (the n_audio_sc source-private internal
+    # headers n_synthInternals.h/synthInternals.h/n_abi.h) and appends `-I include/libultra/PR` (the
+    # bare <os_internal.h>/<ultraerror.h>/<libaudio.h> the n_syn*.c mirrors include), so a libnaudio
+    # mirror resolves its 3-header DAG through these. Without them the whole n_syn* band false-flags
+    # needs-header → blk (S129: the n_syn* family was hidden this way until the headers were vendored).
+    "libnaudio": [
+        os.path.join(ROOT, "src/libnaudio"),
         os.path.join(ROOT, "include/libultra/PR"),
     ],
 }

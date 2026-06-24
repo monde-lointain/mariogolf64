@@ -16,6 +16,27 @@ subordinate to the libultra goal. Target selection is `tools/pick_target.py` (sm
 the 8-point decompose gate fires on any seed ≥8. v2 classical track is active (since S11);
 mirror is the default, classical is first-class when the asm warrants it.
 
+**S129 — `src/libnaudio` STOOD UP + 4 n_syn* setter mirrors BANKED (n_audio_sc header band unlock).**
+The `audio` scope's only pickable work was the game-fault grab-bag (classical) or the `blk` audio libs
+(header-rejects); PO pulled the **header enabler** as the goal (the 8-gate's scaffolding branch). Stood
+up a NEW `src/libnaudio` tree (`mk/libnaudio.mk`, KMC -O3 per the n_audio_sc coddog pin) + vendored the
+`n_synthInternals.h` DAG (PUBLIC `n_libaudio_sc.h`→`include/libnaudio`; INTERNAL
+`n_synthInternals/synthInternals/n_abi.h`→`src/libnaudio`, `-I src/libnaudio` prepended so the SC
+`synthInternals.h` wins over the libultra-internal copy; the leaf headers were already under
+`include/libultra/PR`). Banked 4 homogeneous `@99.99` verbatim setter mirrors —
+n_alSynSetPan/SetPitch/StartVoice/StopVoice — all Match FIRST build. Shared externs recovered from the
+n_alSynSetPan asm (serve all 4): `__n_allocParam`=0x800A1148, `n_alEnvmixerParam`=0x8009EFE8,
+`n_syn`=0x800C7DB4. **md5-candidate 179→183**; asm subsegs 106→102. Quality 0/0/0/0. seed 5 / banked
+5pt (mirror, seed-only). **Gotcha:** shared-callee RENAME → stale stub `.o` (`#clean-rebuild-after-shared-header-edit`
+new sub-case). Post-bank PO-directed (codegen-neutral): ch31/32 rework of the 4 .c + 3 .h; clangd +
+clang-tidy enabled for `src/libnaudio`. **Cross-repo follow-up:** 4 fn names + 3 externs →
+`sync_decomp_names.py --import-from-decomp`. Retro applied 3 of 3: #1 hazards shared-callee-RENAME
+sub-case; #2 `pick_target.py` libnaudio profile include dirs (the `n_syn*` band now drops `blk`); #3
+CLAUDE.md vendored-header-placement convention. **Next:** the n_syn* vein is now NEAR-FREE — smallest
+pickable is `func_800A07B0` (pts-2, 80B) then func_800A0BB0/func_800A1320 (pts-3), a homogeneous 3-4
+cap fill; the libmus `aud_thread.c` enabler (deeper DAG: defines-data + 5 BSS statics) and the
+`0x8005E2C0` game-fault grab-bag remain. No carry-overs.
+
 **S128 — `src/main/audio_mgr.c` BANKED (first nualstl3; MG64 audio libs are GAME-EMBEDDED).** Banked a
 6-fn mixed game-region carve `[0x3A1D0..0x3A490)` → **md5-candidate 177→178**: 4 nualstl3 verbatim
 mirrors (nuAuStlMgrInit/SchedInstall/SchedWaitFrame/SchedDoTask, nusys-2.05 nuaustlmgr.c) + 2 game bgm

@@ -25,6 +25,17 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 129 — src/libnaudio stood up + 4 n_syn* setter mirrors (n_audio_sc header band unlock) — 2026-06-24
+- Increment: 4 verbatim mirrors banked (n_alSynSetPan/SetPitch/StartVoice/StopVoice), all Match FIRST build. md5-candidate **179→183** (+4); asm subsegs 106→102 (4 flips). ROM SHA-1 == baserom.
+- Quality: 0/0/0/0 this sprint (stuck-far/permuter/carried/re-opened).
+- Seed: committed 5pt; banked 5pt; regime mirror (8-gate: candidates were blk header-rejects → PO pulled the header enabler as the goal, the gate's scaffolding-enabler branch).
+- What helped: the header enabler had a SHALLOW DAG (each n_syn*.c includes only 3 headers; the leaf headers libaudio/mbi/ultratypes/os_internal/ultraerror were already vendored under include/libultra/PR) so standing up `src/libnaudio` + `mk/libnaudio.mk` (KMC -O3) unblocked a homogeneous ~19-leaf vein for the cost of 4 internal headers + one profile. Reading the n_alSynSetPan asm up front recovered the 3 shared externs (__n_allocParam/n_alEnvmixerParam/n_syn) once for all 4. The PO header-placement directive (public→include/<lib>, internal→src/<lib> with -I src/<lib> prepended) cleanly resolved the SC-vs-libultra `synthInternals.h` name clash.
+- Friction: shared-callee RENAME stale-`.o` — recovering `__n_allocParam` (rename of func_800A1148) link-failed the 3 still-stub siblings on the OLD name (no `.s`-dep tracking); fixed by writing all 4 bodies before building. pick_target kept the whole n_syn* band at `blk` because its include-resolver lacked the libnaudio profile dirs (fixed in #2).
+- Applied: 3 of 3 — #1 `docs/hazards.md#clean-rebuild-after-shared-header-edit` shared-callee-RENAME sub-case; #2 `pick_target.py` libnaudio profile include dirs (band drops blk, smallest now func_800A07B0 pts-2; golden regen); #3 CLAUDE.md vendored-header-placement convention + src/libnaudio added to the formatted-trees list.
+- Carry-over: none. (Post-bank PO-directed, codegen-neutral: ch31/32 rework of the 4 .c + 3 .h, and clangd+clang-tidy enabled for src/libnaudio — 0 findings under the configured set. Cross-repo: 4 fn names + 3 externs → `sync_decomp_names.py --import-from-decomp`.)
+
+---
+
 ## Sprint 128 — audio_mgr.c banked (game-embedded nualstl3 mgr + bgm; nualstl3/libmus band unlock) — 2026-06-24
 - Increment: src/main/audio_mgr.c md5-candidate (6 fns: 4 nualstl3 verbatim mirror + 2 game bgm classical). matched-fn +6; md5-candidate 177→**178**. ROM SHA-1 == baserom.
 - Quality: stuck-far 0 / permuter 0 / carried 0 / re-opened 0 (matching was 6/6 first-build; all friction was in scoping + band-unlock).

@@ -333,8 +333,8 @@ below).
   you changed. When a mirror or enabler edits a widely-included header (e.g.
   `include/libultra/PR/os_version.h`), the banking SHA-1 must come from `make clean && make extract &&
   make`, not an incremental build (`docs/hazards.md#clean-rebuild-after-shared-header-edit`).
-- **Library code under `src/libultra/`, `src/libkmc/`, `src/libnusys/`, and `src/mgu/` is
-  clang-format-22 formatted** (stock Google with `SortIncludes: Never`; each dir carries a local
+- **Library code under `src/libultra/`, `src/libkmc/`, `src/libnusys/`, `src/libnaudio/`, and
+  `src/mgu/` is clang-format-22 formatted** (stock Google with `SortIncludes: Never`; each dir carries a local
   `.clang-format` = `BasedOnStyle: Google` + `SortIncludes: Never`, which SUPERSEDES the old
   `DisableFormat: true`). These trees were reworked (2026-06-23) to the Code Complete ch31/ch32
   layout + comment style and deliberately diverge from the upstream SOURCE formatting, so they no
@@ -344,6 +344,16 @@ below).
   rest of the tree. `src/mgu/` (S103) holds the game-embedded ultralib gu/mgu matrix source (the
   Monegi variant, compiled at the game `-O2` profile, NOT the libultra `-O3` band; see
   `docs/hazards.md#game-region-mirror-o2-profile`).
+- **Vendored-header placement (PO directive, S129).** When a mirror needs headers vendored, split them
+  by the SDK's own public/internal layout: a **public** header (the SDK's `include/` side, what a
+  consumer `#include`s) goes to `include/<lib>/` verbatim with NO local `.clang-format` (the include
+  trees stay unformatted, like `include/libmus`); a **source-private/internal** header (the SDK's
+  `src/` side) goes to `src/<lib>/` mirroring the include sub-structure, under the tree's local
+  `.clang-format`. When an internal header shares a name with an existing one on the `-I` path (e.g.
+  the n_audio_sc `synthInternals.h` vs `include/libultra/internal/synthInternals.h`), the build
+  profile PREPENDS `-I src/<lib>` so the vendored SC copy wins (`mk/libnaudio.mk`, S129). Add the new
+  tree's profile include dirs to `pick_target.py`'s `LIB_EXTRA_INCLUDE_DIRS`/`INCLUDE_DIRS` so its
+  band stops false-flagging `needs-header → blk`.
 - **Use ultra64.h types** in decomp C (`s32`/`u64`/`vu32`/`f32`/...) for every integer and float;
   these replace raw `int`/`long long`/`volatile unsigned long`.
 - **Prompt authoring.** Every prompt surface in this project (`CLAUDE.md`, `docs/*`,
