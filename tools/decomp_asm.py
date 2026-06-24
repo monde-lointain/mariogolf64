@@ -360,6 +360,16 @@ RODATA_LITERAL_RE = re.compile(
 )
 
 
+def _scan_rodata(rom_off, regex):
+    """Sorted distinct VRAMs captured by `regex` across every line of the subseg body.
+    Shared scanner for the rodata_* extractors below - they differ only by regex."""
+    addrs = set()
+    for line in iter_subseg_body(rom_off):
+        for h in regex.findall(line):
+            addrs.add(int(h, 16))
+    return sorted(addrs)
+
+
 def rodata_literals(rom_off):
     """VRAMs of the anonymous compiler-pooled FP constants the *whole subseg* loads via `ldc1/lwc1
     %lo(D_<addr>)` in asm/<ROM>.s. A verbatim mirror's compiler re-emits these into the C object's
@@ -372,11 +382,7 @@ def rodata_literals(rom_off):
     a named float global is a placed / recover-extern case, not a literal. Such a load is by
     construction a rodata access (absolute %hi/%lo addressing), so the address always lies outside
     the subseg's own text band. Returns a sorted list of distinct addresses."""
-    addrs = set()
-    for line in iter_subseg_body(rom_off):
-        for h in RODATA_LITERAL_RE.findall(line):
-            addrs.add(int(h, 16))
-    return sorted(addrs)
+    return _scan_rodata(rom_off, RODATA_LITERAL_RE)
 
 
 # Integer loads of an anonymous pooled constant: `lw/lwu/ld $r, %lo(D_<addr>)($reg)`. GCC moves a
@@ -396,11 +402,7 @@ def rodata_word_refs(rom_off):
     whole-object reason as rodata_literals. Data-segment hits are not
     rodata literals (they are placed/recover-extern data refs) and the caller drops them. Returns a
     sorted list of distinct addresses."""
-    addrs = set()
-    for line in iter_subseg_body(rom_off):
-        for h in RODATA_WORD_RE.findall(line):
-            addrs.add(int(h, 16))
-    return sorted(addrs)
+    return _scan_rodata(rom_off, RODATA_WORD_RE)
 
 
 # A compiler switch jump table: the function loads it via `lui $at, %hi(jtbl_<addr>)` /
@@ -423,11 +425,7 @@ def rodata_jtbls(rom_off):
     the C body lands). Scans every function in the subseg for the same whole-object reason as
     rodata_literals (the sibling places the whole object's `.rodata`). Returns a sorted list of
     distinct table VRAMs."""
-    addrs = set()
-    for line in iter_subseg_body(rom_off):
-        for h in RODATA_JTBL_RE.findall(line):
-            addrs.add(int(h, 16))
-    return sorted(addrs)
+    return _scan_rodata(rom_off, RODATA_JTBL_RE)
 
 
 def recover_unplaced_call_vram(rom_off, primary):
