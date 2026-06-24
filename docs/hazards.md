@@ -2100,10 +2100,13 @@ dynamic builders are hand-decompiled.
 
 ## data-rodata-carve
 
-**When:** resolving the anonymous `.data`/`.rodata` blocks in a whole library region into named
-`.data`/`.rodata, libultra/<tu>` subsegs (S111 swept the libultra `.data` block 0xA32D0–0xA5668). A
-libultra `.data` region is a contiguous link-order run; each TU is carved independently by splitting
-the anonymous `[0xXXXX, data]` around its `[start, end)`.
+**Trigger:** resolving the anonymous `.data`/`.rodata` blocks in a whole library region into named
+`.data`/`.rodata, libultra/<tu>` subsegs (S111 swept the libultra `.data` block 0xA32D0–0xA5668).
+
+**Rule:** A libultra `.data` region is a contiguous link-order run; each TU is carved independently by
+splitting the anonymous `[0xXXXX, data]` around its `[start, end)`.
+
+**Procedure:**
 
 **Attribution oracle.** `make extract` (splat) prints `Rodata segment 'X' may belong to the text
 segment 'Y'` (splat `rodata.py`) for each anonymous rodata referenced by a single function; capture
@@ -2157,10 +2160,12 @@ leave it a blob.
 
 ## cross-jump-tail-merge
 
-A verbatim/near-verbatim mirror builds + links clean but ROM SHA-misses, and the in-tree-vs-target
-objdump shows the build is **SHORTER than the target** (instruction COUNT < target), with collateral
-`-0x10`-style address shifts on every symbol AFTER the short function (their CODE matches; only
-referenced addresses shifted).
+**Trigger:** A verbatim/near-verbatim mirror builds + links clean but ROM SHA-misses, and the
+in-tree-vs-target objdump shows the build is **SHORTER than the target** (instruction COUNT < target),
+with collateral `-0x10`-style address shifts on every symbol AFTER the short function (their CODE
+matches; only referenced addresses shifted).
+
+**Rule:**
 
 **RULE OUT A GAME-MODIFIED BODY FIRST (S127, the contRmbControl reversal).** This symptom is NOT proof
 of a compiler cross-jump merge; it is far more often a **body-semantics divergence** the literal
@@ -2199,15 +2204,18 @@ the stuck fn as `INCLUDE_ASM` (ROM stays green; forward-decl `extern` since the 
 
 ## struct-init-loop (dup-store / dual-induction-var)
 
-A near-verbatim mirror's **array-of-struct init loop** (`for(i){ arr[i].next = &arr[i+1]; arr[i].f =
-…; }` over a large struct) builds + links clean but ROM SHA-misses, the build is **SHORTER than the
-target** (instr COUNT < target, ~2 instrs short, with the usual `-0x10`-style collateral address
-shifts on everything after it), and the in-tree-vs-target objdump shows the target storing **one
-field TWICE** (the same value to the same offset at the loop body's HEAD and TAIL) via a **running
-address pointer**, while your build stores it once via indexed `lui %hi(base); addu …,v1`. This is NOT
-a cross-jump wall (`#cross-jump-tail-merge`, which DELETES instrs) and NOT permuter territory (the
-byte-match is far below 0.97) — it is a **source artifact**: the original loop body has a **duplicate
-field assignment** the literal upstream lacks.
+**Trigger:** A near-verbatim mirror's **array-of-struct init loop** (`for(i){ arr[i].next = &arr[i+1];
+arr[i].f = …; }` over a large struct) builds + links clean but ROM SHA-misses, the build is **SHORTER
+than the target** (instr COUNT < target, ~2 instrs short, with the usual `-0x10`-style collateral
+address shifts on everything after it), and the in-tree-vs-target objdump shows the target storing
+**one field TWICE** (the same value to the same offset at the loop body's HEAD and TAIL) via a
+**running address pointer**, while your build stores it once via indexed `lui %hi(base); addu …,v1`.
+
+**Rule:** This is NOT a cross-jump wall (`#cross-jump-tail-merge`, which DELETES instrs) and NOT
+permuter territory (the byte-match is far below 0.97) — it is a **source artifact**: the original loop
+body has a **duplicate field assignment** the literal upstream lacks.
+
+**Procedure:**
 
 - **Mechanism.** Taking an address INTO the array (`next = &arr[i+1]`) makes gcc 2.7.2 strength-reduce
   that to a running induction var (e.g. `a1 = &arr[i+1]`, stride = sizeof). A SECOND assignment of a
@@ -2233,8 +2241,11 @@ doubled-store-offset tell at match time.)
 
 ## permuter setup for KMC-toolchain mirrors
 
-Running decomp-permuter on a `libnusys`/`libultra`/`libkmc` (KMC-toolchain) function needs three
-fixes the generic setup misses (hit S121 contRmbControl):
+**Rule:** Running decomp-permuter on a `libnusys`/`libultra`/`libkmc` (KMC-toolchain) function needs
+three fixes the generic setup misses (hit S121 contRmbControl).
+
+**Procedure:**
+
 - **(a) custom `--settings`.** The root `permuter_settings.toml` `compiler_command` is GENERIC (`-I
   include` only, no `-DUSE_EPI` / per-library include paths), so `import.py` preprocessing fails on
   `#include <nusys.h>`. Pass `--settings <custom>.toml` whose `compiler_command` carries the file's real
@@ -2249,13 +2260,17 @@ fixes the generic setup misses (hit S121 contRmbControl):
 
 ## NU_DEBUG-stock-not-custom (carried perf fn triage)
 
-A `libnusys` carry framed as "heavily game-customized, classical RE" is often NOT custom at all — it is
-the **stock upstream body that failed to match because the file was compiled WITHOUT `NU_DEBUG`**, so
-the `#ifdef NU_DEBUG` performance machinery is absent from the C while the asm has it (osGetTime /
-osDpSetStatus / __udivdi3 calls). The tell: **the carried fns are EXACTLY the upstream fns that carry
-`#ifdef NU_DEBUG` blocks** (S123 carried nusched's 4 NU_DEBUG fns — nuScCreateScheduler /
-nuScEventHandler / nuScExecuteAudio / nuScExecuteGraphics — as "custom"; S125 found nuScExecuteAudio is
-a pure stock-NU_DEBUG mirror).
+**Rule:** A `libnusys` carry framed as "heavily game-customized, classical RE" is often NOT custom at
+all — it is the **stock upstream body that failed to match because the file was compiled WITHOUT
+`NU_DEBUG`**, so the `#ifdef NU_DEBUG` performance machinery is absent from the C while the asm has it
+(osGetTime / osDpSetStatus / __udivdi3 calls).
+
+**Trigger:** The tell: **the carried fns are EXACTLY the upstream fns that carry `#ifdef NU_DEBUG`
+blocks** (S123 carried nusched's 4 NU_DEBUG fns — nuScCreateScheduler / nuScEventHandler /
+nuScExecuteAudio / nuScExecuteGraphics — as "custom"; S125 found nuScExecuteAudio is a pure
+stock-NU_DEBUG mirror).
+
+**Procedure:**
 
 - **Triage before classical-RE.** Diff the carried fn's asm against the upstream's **NU_DEBUG** body
   (not the non-debug body). If the calls line up, it is stock: bank it as a mirror.
@@ -2272,10 +2287,12 @@ a pure stock-NU_DEBUG mirror).
 
 ## libnusys inline-div mflo-hazard nop
 
-A `libnusys` fn with an **inline integer division** (`a / b` compiled to `divu` + `mflo`, not a
-`__udivdi3` call) can build + link clean and be **byte-perfect EXCEPT for 2 missing `nop`s after
+**Trigger:** A `libnusys` fn with an **inline integer division** (`a / b` compiled to `divu` + `mflo`,
+not a `__udivdi3` call) can build + link clean and be **byte-perfect EXCEPT for 2 missing `nop`s after
 `mflo`** (the VR4300 mflo→consumer hazard padding) — a `mflo; nop; nop; <use>` in the target vs
 `mflo; <use>` in your build. Net: the build is 2 instrs short with the usual collateral address shifts.
+
+**Procedure:**
 
 - **Root cause (S125 nuScEventHandler).** KMC gcc emits the GNU `div` **macro**; the assembler
   (`tools/cc/as`) expands it and inserts the hazard nops — but ONLY when it can see the consumer is too
@@ -2304,11 +2321,14 @@ A `libnusys` fn with an **inline integer division** (`a / b` compiled to `divu` 
 
 ## volatile-global tell (dead-reload + recompute-not-CSE)
 
-A `libnusys`/game mirror global that the asm accesses with **a dead reload immediately after a store**
-(`lw t,X; addiu t,t,1; sw t,X; lw t,X` where the 4th load's value is discarded) and/or is **re-read
-fresh on every reference instead of CSE'd** (e.g. `a - b` recomputed at each `==` compare rather than
-computed once) is **`volatile`** in the original. Declare it `vu32`/`vs32` (the ultra64 volatile types),
-not `u32`/`s32`.
+**Trigger:** A `libnusys`/game mirror global that the asm accesses with **a dead reload immediately
+after a store** (`lw t,X; addiu t,t,1; sw t,X; lw t,X` where the 4th load's value is discarded) and/or
+is **re-read fresh on every reference instead of CSE'd** (e.g. `a - b` recomputed at each `==` compare
+rather than computed once) is **`volatile`** in the original.
+
+**Rule:** Declare it `vu32`/`vs32` (the ultra64 volatile types), not `u32`/`s32`.
+
+**Procedure:**
 
 - **Tells.** (1) The dead reload-after-store is the **`volatile x++`** signature (gcc 2.7.2 re-reads
   the volatile lvalue). (2) The per-read recompute (no common-subexpression elimination of `a - b`)
