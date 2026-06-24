@@ -3139,34 +3139,12 @@ def _resolve_primary_coddog(st, coddog_index, upstream_index):
                     )
 
 
-def _build_row(
-    off,
-    typ,
-    path,
-    size,
-    args,
-    upstream_index,
-    carried,
-    sig_index,
-    coddog_index,
-    nusys_index,
-    _libultra_band_start,
-):
-    """Classify one subseg and produce its scored row dict, or None to skip it (bss,
-    scope-filtered, or a de-ranked carry-over). The per-subseg body of build_rows;
-    the resolved identity lives on a _RowState (st) the coddog/nusys passes rebind in
-    place as they run."""
-    classified = classify_subseg(off, typ, path, size, upstream_index)
-    if classified is None:
-        return None
-    kind, fns, hazards = classified
-
-    _append_caller_evict(fns, hazards)
-
-    st = _RowState.create(off, size, kind, fns, hazards, upstream_index)
-    _resolve_named_upstream(st, upstream_index, coddog_index, sig_index)
-    _resolve_primary_coddog(st, coddog_index, upstream_index)
-
+def _resolve_tail_coddog(st, coddog_index, upstream_index):
+    """coddog cross-ref over ALL members (the tail-identity pass). A multi-fn subseg's mirror
+    identity often lives in an UN-NAMED tail member, not the leader the primary pass keys on; scan
+    every member, surface each distinct coddog `.c` the primary pass missed, re-run its trap battery,
+    and re-apply the single-identity fncount/structural + multi-twin partial guards. Sets
+    st.cod_members (read by the carry-over filter) and re-prices the subseg to libultra."""
     # A multi-fn asm subseg's mirror IDENTITY often lives in its UN-NAMED tail, not its named (or
     # mis-attributed) leader. The primary block above keys coddog on `primary` AND fires only when
     # `not up_path`, so a named-leader subseg whose tail `func_<addr>` members coddog-match an
@@ -3236,6 +3214,36 @@ def _build_row(
             st.hazards.append(Hazard.coddog_partial(len(cod_members), len(st.fns)))
         if st.up_lib is None:
             st.up_lib = "libultra"
+
+
+def _build_row(
+    off,
+    typ,
+    path,
+    size,
+    args,
+    upstream_index,
+    carried,
+    sig_index,
+    coddog_index,
+    nusys_index,
+    _libultra_band_start,
+):
+    """Classify one subseg and produce its scored row dict, or None to skip it (bss,
+    scope-filtered, or a de-ranked carry-over). The per-subseg body of build_rows;
+    the resolved identity lives on a _RowState (st) the coddog/nusys passes rebind in
+    place as they run."""
+    classified = classify_subseg(off, typ, path, size, upstream_index)
+    if classified is None:
+        return None
+    kind, fns, hazards = classified
+
+    _append_caller_evict(fns, hazards)
+
+    st = _RowState.create(off, size, kind, fns, hazards, upstream_index)
+    _resolve_named_upstream(st, upstream_index, coddog_index, sig_index)
+    _resolve_primary_coddog(st, coddog_index, upstream_index)
+    _resolve_tail_coddog(st, coddog_index, upstream_index)
 
     # Nusys coddog cross-ref: the libnusys analog of the libultra blocks above, kept as a SEPARATE
     # additive pass so an absent nusys_map.tsv leaves libultra ranking byte-identical. Fires only when
