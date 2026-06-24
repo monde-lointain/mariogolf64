@@ -363,3 +363,9 @@ n_alGlobals = 0x800C7DB0; // size:0x4
 // S133: n_save.c (n_alSavePull) + its calls-unplaced callee n_alMainBusPull (stays asm @0x7C720).
 n_alSavePull = 0x800A12D0; // type:func
 n_alMainBusPull = 0x800A1370; // type:func
+// S134: n_resample.c (n_alResamplePull + n_alResampleParam) + its 2 calls-unplaced callees
+// n_alAdpcmPull/n_alLoadParam (n_load.c fns, stay asm @0x7A840 until that file is mirrored).
+n_alResamplePull = 0x8009FB60; // type:func
+n_alResampleParam = 0x8009FD1C; // type:func
+n_alAdpcmPull = 0x8009F440; // type:func
+n_alLoadParam = 0x8009F888; // type:func
