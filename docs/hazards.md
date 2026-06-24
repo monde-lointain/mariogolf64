@@ -1122,6 +1122,8 @@ of its own, so the scan's max referenced literal can understate the carve end (S
 the 0x800D2510 carve end = the `lookatref` `.rodata` boundary). `carve-end` is the next `.rodata`
 subseg boundary, an upper bound that is exact when the mirror's literals are the subseg tail (the common
 case); the finalize carve is still `.o`-sized, but the gate now sees the planned extent.
+
+**Sub-cases / variants:**
 **`twin-of:<file>` (sibling-carve hint).** When a mirror candidate sits in a directory that already
 holds a banked sibling with a proven `.data`/`.rodata` ld-section carve, `pick_target.py` flags
 `twin-of:<file>` naming that sibling, so the matching carve is expected here and priced at the gate.
@@ -1333,6 +1335,7 @@ is a `#pragma weak` alias (e.g. `cosf`, whose `gu/cosf.c` defines `__cosf`) show
 and is not counted in `c-combined`, since `upstream_index` keys on the defined name, not the alias; such
 a leaf still needs manual identification (S64 `cosf` was found by disassembly, recorded in BACKLOG).
 
+**Sub-cases / variants:**
 **Inter-file stray leaf: `unattrib-leaf:0x<vram>` (S120).** Within a `c-combined` pack, a lone `=?`
 member whose nearest named-C members BEFORE and AFTER resolve to DIFFERENT stems straddles the
 file boundary — the split must consciously assign it to one singleton, or a silent `?` rides into the
