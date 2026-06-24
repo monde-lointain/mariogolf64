@@ -1,5 +1,15 @@
 # Mario Golf 64 Decomp workflow
 
+<role>
+You operate the Mario Golf 64 (N64) decompilation workflow, banking one matched function at a time
+toward a byte-exact ROM. The ROM SHA-1 against the baserom is the sole arbiter of a match. Two
+slash-command Scrum gates (`/sprint-plan`, `/sprint-review`) wrap an inline execution loop you run
+autonomously, smallest-first, in a single serial session. Follow the procedure that applies
+literally and precisely, since every instruction here drives that byte-exact oracle.
+</role>
+
+<context>
+
 This project decompiles Mario Golf 64 (N64) one function at a time. Tooling: splat (file splitting),
 KMC GCC 2.7.2 (`tools/cc/gcc`), m2c (asm to C seed), asm-differ (library mode), decomp-permuter
 (escalation), the Ghidra MCP bridge (live decompile + struct/symbol lookup, port 8089; every call
@@ -17,16 +27,25 @@ rules. Detail lives in two on-demand references:
 Prompt authoring for this workflow follows `PROMPT_GUIDELINES.md` at the project root (see
 Conventions).
 
+</context>
+
+<workflow_overview>
+
 ## Workflow at a glance
 
 Two slash commands are the Scrum gates. Between them the agent runs the execution loop inline: one
 function at a time, no per-function stop, a single serial session (no MCP lock). `SPRINT.md` is the
 resume surface when the middle spans context windows.
 
-Effort: run the gates as cheap triage; run classical decomp and the permuter at higher effort, where
-the extra reasoning pays off. Parallelism: read-only context gathering may run in parallel (read
-`BACKLOG.md`, run `pick_target.py`, and read the flagged hazard sections at once); MCP, build, and
-edit steps stay serial, since the session holds no MCP lock and the build is one shared tree.
+- **Effort.** Run the gates as cheap triage; run classical decomp and the permuter at higher effort,
+  where the extra reasoning pays off.
+- **Parallelism.** Read-only context gathering may run in parallel (read `BACKLOG.md`, run
+  `pick_target.py`, and read the flagged hazard sections at once). Keep MCP, build, and edit steps
+  serial, since the session holds no MCP lock and the build is one shared tree.
+
+</workflow_overview>
+
+<slash_commands>
 
 ## Slash commands
 
@@ -39,6 +58,10 @@ edit steps stay serial, since the session holds no MCP lock and the build is one
   sign-off, and is the single apply-point for the sprint's buffered workflow-improvement edits. It
   appends the `RETRO.md` digest and `BACKLOG.md` carry-overs.
 
+</slash_commands>
+
+<execution_loop>
+
 ## Execution loop (inline)
 
 After `/sprint-plan` writes `SPRINT.md`, work the committed backlog autonomously, smallest-first.
@@ -47,21 +70,24 @@ Ghidra MCP is used inline at seed time. For each target function:
 1. **Resolve** the function's subseg in `mariogolf64.yaml`. `hasm` means permanent asm: skip it. The
    subseg was already flipped to `c` at the gate.
 
-2. **Mirror branch** (the `upstream` column is a lib, not `none`): copy the upstream `.c` verbatim to
-   its mirrored `src/lib<name>/...` path; add any missing headers verbatim under
-   `include/lib<name>/...`; then `clang-format-22 -i` the copied files (these trees are now formatted;
-   formatting does not change codegen); `make`, and the ROM SHA-1 must equal the baserom. The proof is
-   the full-`make` SHA-1 (verbatim-then-formatted copy plus green ROM equals match); no byte-`cmp`. See
-   `docs/hazards.md#upstream-mirror-pattern`. Before declaring a clean mirror, reconcile the
-   upstream's call and data-ref list (including one level of macro expansion) against the name files,
-   and handle any flagged hazard via the index below.
-   - libultra source is `~/development/repos/ultralib` (gcc.mk / KMC-N64 profile,
-     `-DBUILD_VERSION=VERSION_J`), NOT `libultra_modern` (deprecated 2.0L, casts diverge; it is an
-     `additional working dir` but is not the source). This pin holds for both the C mirror and the
-     hand-asm `intrinsic-likely:<tu>.s` asm-mirror (`docs/hazards.md#asm-mirror-vendoring`): the
-     project mirrors ultralib's `gcc.mk` profile (`LIBULTRA_CFLAGS` for C, `LIBULTRA_ASFLAGS` for
-     vendored asm TUs, both in `mk/libultra.mk`). libkmc is `~/development/repos/libkmc`; libnusys is
-     the n64sdkmod nusys tree.
+2. **Mirror branch** (the `upstream` column is a lib, not `none`):
+   a. Copy the upstream `.c` verbatim to its mirrored `src/lib<name>/...` path.
+   b. Add any missing headers verbatim under `include/lib<name>/...`.
+   c. `clang-format-22 -i` the copied files (these trees are now formatted; formatting does not
+      change codegen).
+   d. `make`; the ROM SHA-1 must equal the baserom. The proof is the full-`make` SHA-1
+      (verbatim-then-formatted copy plus green ROM equals match); no byte-`cmp`. See
+      `docs/hazards.md#upstream-mirror-pattern`.
+   e. Before declaring a clean mirror, reconcile the upstream's call and data-ref list (including one
+      level of macro expansion) against the name files, and handle any flagged hazard via the index
+      below.
+   - **NOTE, libultra source pin.** libultra source is `~/development/repos/ultralib` (gcc.mk /
+     KMC-N64 profile, `-DBUILD_VERSION=VERSION_J`); use it, not `libultra_modern` (deprecated 2.0L,
+     casts diverge; it is an `additional working dir` but is not the source). This pin holds for both
+     the C mirror and the hand-asm `intrinsic-likely:<tu>.s` asm-mirror
+     (`docs/hazards.md#asm-mirror-vendoring`): the project mirrors ultralib's `gcc.mk` profile
+     (`LIBULTRA_CFLAGS` for C, `LIBULTRA_ASFLAGS` for vendored asm TUs, both in `mk/libultra.mk`).
+     libkmc is `~/development/repos/libkmc`; libnusys is the n64sdkmod nusys tree.
 
 3. **Classical branch** (no upstream, or a hazard routes here): seed, iterate, spot-check, finalize.
    - **Seed** `nonmatchings/<func>/base.c`: fetch the Ghidra decompile via MCP, then
@@ -85,24 +111,29 @@ Ghidra MCP is used inline at seed time. For each target function:
      `src/libkmc/`, `src/libnusys/`, and `src/mgu/`), then `make` until `build/mariogolf64.z64: OK`
      and SHA-1 == baserom.
 
-4. **Bank** the function (only at score 0 plus spot-check plus full-`make` SHA match). Give it its
-   curated Ghidra name (add to `symbol_addrs.txt`, rename in the body, re-`make`). On `git commit`,
-   stage the `make extract`-regenerated artifacts too (`undefined_syms_auto.txt` and
-   `mariogolf64.ld`): they change on a subseg flip or `symbol_addrs.txt` add and must travel with the
-   commit, or the regen bleeds into the next sprint's dirty tree (S85 to S86: a `D_`-to-named
-   BOOT_GLOBALS regen left uncommitted surfaced as a stray diff at the next gate). `git status` should
-   be clean after commit. Append a standup line to `SPRINT.md`, and record the run's numbered
-   "Suggested workflow improvements" into the `SPRINT.md` buffer, applied only at `/sprint-review`,
-   never mid-sprint.
+4. **Bank** the function (only at score 0 plus spot-check plus full-`make` SHA match):
+   a. Give it its curated Ghidra name: add to `symbol_addrs.txt`, rename in the body, re-`make`.
+   b. On `git commit`, stage the `make extract`-regenerated artifacts too (`undefined_syms_auto.txt`
+      and `mariogolf64.ld`): they change on a subseg flip or `symbol_addrs.txt` add and must travel
+      with the commit, or the regen bleeds into the next sprint's dirty tree (S85 to S86: a
+      `D_`-to-named BOOT_GLOBALS regen left uncommitted surfaced as a stray diff at the next gate).
+      `git status` should be clean after commit.
+   c. Append a standup line to `SPRINT.md`, and record the run's numbered "Suggested workflow
+      improvements" into the `SPRINT.md` buffer; apply these at `/sprint-review` only, not
+      mid-sprint.
 
 A function that locks below `0.97 percent`, needs the permuter, or hits a BSS-layout or alignment
-wall is a spike: note it, carry its file to `BACKLOG.md ## Carry-overs`, and move on. Do not weaken
-the DoD to bank a spike. The increment (the `src/<seg>.c` file) banks only when its last
+wall is a spike: note it, carry its file to `BACKLOG.md ## Carry-overs`, and move on. Hold the DoD
+firm; a spike is carried, not banked. The increment (the `src/<seg>.c` file) banks only when its last
 `INCLUDE_ASM` stub is gone.
 
 The context window auto-compacts as it fills, so do not stop early on budget concerns; save progress
 to `SPRINT.md` (standup line + suggestion buffer) as each function banks, so a fresh window resumes
 from it.
+
+</execution_loop>
+
+<scrum_model>
 
 ## Scrum operating model
 
@@ -123,35 +154,44 @@ dashboard). Target selection is `tools/pick_target.py`, not a stored roadmap.
   sibling set (same upstream pattern, same uniform enabler), fill the 3-to-4 cap, since per-file
   all-or-nothing banking makes the marginal sibling near-free. A heterogeneous batch (mixed hazards)
   trims to the cleanest 2. Review fires when every committed item is banked or spiked/carried.
-- **Definition of Ready.** Subseg flippable (not `hasm`); coarse size known; upstream-mirror
-  availability noted; hazards flagged. Enablers (subseg flip plus `make extract`, multi-file split,
-  `symbol_addrs.txt` additions) are performed by the agent at the plan gate after the PO approves the
-  goal/scope, and validated there: `make extract && make` must still produce the green baserom ROM
-  with the new stubs. This gate build-check is load-bearing: it once surfaced a missing-`cpp`
-  toolchain regression that was silently emptying every asm object. A name sync (`make sync-names`) is
-  gate-only, never mid-sprint (a rename breaks in-flight links until `make extract && make`).
-- **Definition of Done (binary; the oracle already exists).** Per-function: score 0, byte-`cmp`
-  spot-check, inlined, clang-format, full `make` to `build/mariogolf64.z64: OK`, SHA-1 == baserom, and
-  committed. Per-sprint: every fn in the file inlined (0 stubs), ROM SHA-1 matches, committed. The ROM
-  SHA-1 is green at every commit (un-decompiled parts fill from extracted asm), so at review the
-  `make` + SHA-1 paste is a regression guard; the value delta is the matched-count /
-  md5-candidate-files number. **Never commit a non-matching fn.**
+- **Definition of Ready.**
+  - Subseg flippable (not `hasm`); coarse size known; upstream-mirror availability noted; hazards
+    flagged.
+  - Enablers (subseg flip plus `make extract`, multi-file split, `symbol_addrs.txt` additions) are
+    performed by the agent at the plan gate after the PO approves the goal/scope, and validated
+    there: `make extract && make` must still produce the green baserom ROM with the new stubs. This
+    gate build-check is load-bearing: it once surfaced a missing-`cpp` toolchain regression that was
+    silently emptying every asm object.
+  - Run `make sync-names` only at the gate; a mid-sprint rename breaks in-flight links until the next
+    `make extract && make`.
+- **Definition of Done (binary; the oracle already exists).**
+  - Per-function: score 0, byte-`cmp` spot-check, inlined, clang-format, full `make` to
+    `build/mariogolf64.z64: OK`, SHA-1 == baserom, and committed.
+  - Per-sprint: every fn in the file inlined (0 stubs), ROM SHA-1 matches, committed.
+  - The ROM SHA-1 is green at every commit (un-decompiled parts fill from extracted asm), so at
+    review the `make` + SHA-1 paste is a regression guard; the value delta is the matched-count /
+    md5-candidate-files number. **Never commit a non-matching fn.**
 - **Spike + carry-over.** A function that blocks its file's DoD (stuck-far below 0.97, needs permuter,
   BSS-layout-conflict, subseg-alignment) is a spike: note it, carry its file or cluster to the next
-  sprint, and count credit at the function level. Do not weaken the DoD to bank a spike.
+  sprint, and count credit at the function level. Hold the DoD firm; a spike is carried, not banked.
 - **Quality counter-metric.** Track stuck-far + permuter-escalated + carried + re-opened per sprint,
   reported next to the match count so the count cannot be gamed by premature spiking.
 - **Process changes are retro-gated.** The "Suggested workflow improvements" the execution loop emits
-  are recorded into `SPRINT.md` during the sprint and applied only at `/sprint-review`, never
-  mid-sprint, so the sprint's matching behavior stays fixed and its measurement stays clean. The retro
-  is the single apply-point for edits to `CLAUDE.md`, `docs/*`, `tools/*.py`, and the two command
-  files. A PO-directed out-of-band rework of these surfaces is the one exception, by direct request.
+  are recorded into `SPRINT.md` during the sprint and applied at `/sprint-review` only, not
+  mid-sprint, so the sprint's matching behavior stays fixed and its measurement stays clean. The
+  retro is the single apply-point for edits to `CLAUDE.md`, `docs/*`, `tools/*.py`, and the two
+  command files. A PO-directed out-of-band rework of these surfaces is the one exception, by direct
+  request.
 - **Two-gate close.** Review accepts the product (DoD plus scope); retro improves the process (the
   single apply-point for tooling edits).
 - **Resume protocol.** On a fresh mid-sprint session: read `SPRINT.md`, reconcile banked work via
   `git log` since the snapshot, and verify Ghidra MCP connectivity (`list_instances`, port 8089)
   before resuming. The context window auto-compacts, so continue from `SPRINT.md` rather than wrapping
   up early.
+
+</scrum_model>
+
+<story_points>
 
 ## Story points
 
@@ -163,9 +203,9 @@ the summary.
   of `size`, `upstream`, `band`, `nfns`, `hazards`). A cluster seed is the sum of its files' seeds.
   `pts` is display-only: it does not change the smallest-first sort. A `blk` seed is an un-pickable
   needs-header (a DoR reject); swap the increment rather than commit it.
-- **The 8-point decompose gate (v1).** A seed of 8 or 13 must NOT run as a normal 1-increment sprint:
-  decompose it (split the subseg at the upstream-file or function boundary) or pull a scaffolding
-  enabler as the goal instead. Applied at the `/sprint-plan` gate. This prevents an all-or-nothing
+- **The 8-point decompose gate (v1).** Route a seed of 8 or 13 through the decompose gate before it
+  runs as a 1-increment sprint: decompose it (split the subseg at the upstream-file or function
+  boundary) or pull a scaffolding enabler as the goal instead. Applied at the `/sprint-plan` gate. This prevents an all-or-nothing
   bank stall. Expect it to fire once the mirror band is mined out and classical units dominate.
   - **Verbatim-mirror exemption (S64; generalized S69).** A seed-8/13 increment may run as a normal
     1-increment sprint when ALL of these hold:
@@ -198,18 +238,18 @@ the summary.
       body** — an extra branch/store the literal upstream lacks) that turns the "quick spike" into a
       PARTIAL bank (S121 `nucontrmbmgr.c`: 8/9 banked C, 1 carried as `INCLUDE_ASM`). Hedge the estimate
       "<=1 re-attempt" and expect a per-file score of 0 pt if the file ends partial (the matched-fn
-      count is the value signal, not the file point). **Do NOT conclude "compiler wall" before proving
-      the body emits the target's exact stores + values:** the S121 carry was misframed as an
+      count is the value signal, not the file point). **Prove the body emits the target's exact
+      stores + values before concluding "compiler wall":** the S121 carry was misframed as an
       unbankable `#cross-jump-tail-merge` for 5 sprints, then banked S127 with a one-branch FORCESTOP
       fix (`state = STOPPED` on `osMotorInit` error). See `#cross-jump-tail-merge`.
     - **coddog 99.99 == STRUCTURE, not bytes; the exemption-GUARD (S123).** A `coddog-mirror:<f>@99.99`
       can mask a HEAVILY game-customized file where MOST bodies diverge, not just a block-reorder
       (S123 `nusched.c`: a game scheduler that shares only the nusys skeleton). The verbatim-mirror
-      exemption must NOT fire when the pack carries a **customization tell**: a `jal` to a non-lib
+      exemption does not apply when the pack carries a **customization tell**: a `jal` to a non-lib
       `func_<vram>` game callee (a callee that is not `os*`/`nuSc*`/`al*`/lib), OR a large
       `jal-count-mismatch` not explained by a known macro/version artifact. Those signal pervasive
       per-fn divergence -> route to the CLASSICAL track with the **mixed bank-stock-carry-custom**
-      plan (next bullet), NOT a seed-only atomic mirror. Verify BODIES before trusting a 99.99 row:
+      plan (next bullet), not a seed-only atomic mirror. Verify BODIES before trusting a 99.99 row:
       diff the asm against the upstream for the heavy functions, and run the nusys/libultra version
       triage (`docs/hazards.md#upstream-mirror-pattern`) before concluding the divergence is custom.
       (pick_target.py automation to price the non-lib-`func_`-callee tell is a tracked follow-up;
@@ -238,6 +278,10 @@ the summary.
 Velocity is a planning indicator, not a performance target (McConnell Ch. 19), reported next to the
 quality counter-metric, which (with per-file all-or-nothing banking) is the real anti-gaming guard.
 
+</story_points>
+
+<conventions>
+
 ## Conventions (every-sprint)
 
 These apply regardless of hazard. Hazard-specific procedures are in `docs/hazards.md` (see the index
@@ -260,8 +304,8 @@ below).
   by `sync_decomp_names.py` (modify only via `make sync-names`, never hand-edit). The two name files
   must stay disjoint: never add a `symbol_addrs.txt` entry for an address already in
   `ghidra_symbols.txt` (splat errors on duplicates).
-- **yaml authority.** The agent edits `mariogolf64.yaml` subseg flip/split/path-qualifier lines only
-  (never the segment or memory-map structure); `mariogolf64.ld` and segment boundaries are off-limits.
+- **yaml authority.** Agent-editable in `mariogolf64.yaml`: subseg flip/split/path-qualifier lines.
+  Leave the segment and memory-map structure, `mariogolf64.ld`, and segment boundaries unchanged.
   Subseg flips, multi-file splits, and the `make extract` that regenerates the scaffold are gate
   actions (or inline when a split is needed mid-flight).
 - **`hasm` subsegments stay raw asm forever** (entry stub, `__muldi3` libkmc math module, RSP
@@ -279,8 +323,8 @@ below).
   `src/mgu/`), then full `make` until ROM SHA-1 matches.
   Spot-check passing is not ROM matching; the final `make` proves the match. Gate the `sha1sum` on
   `make` succeeding (confirm the `build/mariogolf64.z64: OK` line first): a failed link leaves the
-  previous `.z64` in `build/`, so `sha1sum` on a stale ROM false-positives. **Always verify with
-  `tools/verify-rom.sh [--extract]`, never a hand-rolled `make ... ; sha1sum`**: the helper asserts
+  previous `.z64` in `build/`, so `sha1sum` on a stale ROM false-positives. **Verify every ROM with
+  `tools/verify-rom.sh [--extract]`, not a hand-rolled `make ... ; sha1sum`**: the helper asserts
   the `OK` line before trusting the hash. S111 burned a whole review on a hand-rolled ungated
   `sha1sum` that read a coincidentally-green stale ROM and reported MATCH across 3 commits that never
   built (a missing `VI_CTRL_ANTIALIAS_MODE_0` define plus 2 unresolved carve symbols).
@@ -300,8 +344,8 @@ below).
   rest of the tree. `src/mgu/` (S103) holds the game-embedded ultralib gu/mgu matrix source (the
   Monegi variant, compiled at the game `-O2` profile, NOT the libultra `-O3` band; see
   `docs/hazards.md#game-region-mirror-o2-profile`).
-- **Use ultra64.h types** (`s32`/`u64`/`vu32`/`f32`/...) in decomp C, never raw
-  `int`/`long long`/`volatile unsigned long`.
+- **Use ultra64.h types** in decomp C (`s32`/`u64`/`vu32`/`f32`/...) for every integer and float;
+  these replace raw `int`/`long long`/`volatile unsigned long`.
 - **Prompt authoring.** Every prompt surface in this project (`CLAUDE.md`, `docs/*`,
   `.claude/commands/*`, and the artifact templates) follows `PROMPT_GUIDELINES.md` at the project root
   when created or modified. That file is a managed copy of the canonical guide; re-sync its
@@ -319,6 +363,8 @@ That table is the case convention. Naming quality (descriptive, problem-oriented
 follows `docs/coding-style.md`. When stitching m2c output, rename its `temp_*` / `local_*` / `arg_*`
 synthetics before promoting. This applies to classical / hand-authored C only; verbatim mirrors keep
 their upstream names unchanged.
+
+<hazard_index>
 
 ### Hazard index
 
@@ -388,6 +434,12 @@ When `pick_target.py` flags a hazard (or a match shows its symptom), read the ma
 | mirror global w/ dead-reload-after-store on `x++` or recompute-not-CSE of `a-b` | #volatile-global-tell-dead-reload--recompute-not-cse |
 | Gfx* manipulation | #display-lists |
 
+</hazard_index>
+
+</conventions>
+
+<cross_repo_sync>
+
 ## Cross-repo sync (Ghidra workspace at `~/development/reversing/ghidra/mariogolf64/`)
 
 - **Names (Ghidra to decomp):** `make sync-names` pulls curated function and data names into
@@ -406,3 +458,5 @@ When `pick_target.py` flags a hazard (or a match shows its symptom), read the ma
 - **Forbidden agent edits:** `ghidra_symbols.txt` (except via `make sync-names`), `mariogolf64.ld`,
   `re_tracking/*.yml`, `reloc_addrs.txt`. Agent-editable: `mariogolf64.yaml` subseg
   flip/split/path-qualifier lines only, and `symbol_addrs.txt` add-only.
+
+</cross_repo_sync>
