@@ -7,6 +7,8 @@ single function's formatted asm. No CLI — invoke it from Python.
 
 import re
 
+from decomp_common import GLABEL_RE
+
 
 def format_line(line: str) -> str | None:
     """Format a single line, returning None if it should be skipped."""
@@ -48,8 +50,9 @@ def extract_functions(content: str) -> list[tuple[str, str]]:
     while i < len(lines):
         line = lines[i]
 
-        # Look for function start
-        glabel_match = re.match(r"^glabel\s+(\w+)\s*$", line)
+        # Look for function start (shared GLABEL_RE: tolerates leading
+        # whitespace + captures \S+; a safe superset for col-0 \w glabels).
+        glabel_match = GLABEL_RE.match(line)
         if glabel_match:
             func_name = glabel_match.group(1)
             func_lines = [func_name]
