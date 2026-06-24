@@ -3266,6 +3266,28 @@ def _resolve_nusys(st, nusys_index):
                 st.up_lib = "libnusys"
 
 
+def _row_filtered(st, args, path, carried, cod_srcs):
+    """Return True to DROP the row. Two skip conditions: (1) the --lib scope filter — a row whose
+    path / coddog-source / up_lib / member names don't match the requested library; and (2) a
+    de-ranked BACKLOG carry-over (retrieved via --include-stuck or the BACKLOG, NOT smallest-first;
+    carry_over_names() is region+symbol scoped, and a definitively-coddog'd subseg whose leader was
+    merely prose-mentioned overrides the drop via st.cod_members)."""
+    cod_in_scope = (
+        bool(args.lib)
+        and bool(cod_srcs)
+        and (args.lib == "libultra" or any(args.lib in s for s in cod_srcs))
+    )
+    if (
+        args.lib
+        and not cod_in_scope
+        and args.lib not in (path or "")
+        and (st.up_lib or "") != args.lib
+        and not any(args.lib in n for n in st.fns)
+    ):
+        return True
+    return st.primary in carried and not args.include_stuck and not st.cod_members
+
+
 def _build_row(
     off,
     typ,
@@ -3314,25 +3336,7 @@ def _build_row(
     ):
         v = subseg_vram(st.off)
         st.hazards.append(Hazard.game_region_mirror(v, st.off))
-    cod_in_scope = (
-        bool(args.lib)
-        and bool(cod_srcs)
-        and (args.lib == "libultra" or any(args.lib in s for s in cod_srcs))
-    )
-    if (
-        args.lib
-        and not cod_in_scope
-        and args.lib not in (path or "")
-        and (st.up_lib or "") != args.lib
-        and not any(args.lib in n for n in st.fns)
-    ):
-        return None
-    # The `carried` filter de-ranks BACKLOG carry-overs (intentional — a parked carry-over is
-    # retrieved via --include-stuck / the BACKLOG, NOT smallest-first). carry_over_names() is
-    # region+symbol scoped so a prose name-drop of a still-asm function no longer silently drops it;
-    # the cod_members override is the backstop for a definitively-coddog'd subseg whose leader was
-    # prose-mentioned (coddog identity wins).
-    if st.primary in carried and not args.include_stuck and not st.cod_members:
+    if _row_filtered(st, args, path, carried, cod_srcs):
         return None
 
     # Re-frame a coddog-confirmed pure-.bss file-static cluster as one drop-to-extern enabler (not a
