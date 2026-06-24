@@ -17,8 +17,6 @@ extern OSThread D_800D8990;                   // manager thread
 extern OSMesg D_800DAB40[];                   // manager queue message buffer
 extern OSMesgQueue D_801B93F8;                // manager completion queue
 extern u32 D_800D8980;                        // retrace count of the last swap
-extern u8 D_800B3F20[];                       // end of the boot microcode blob
-extern u8 audio_sched_thread_entry[];         // start of the boot microcode
 extern u8 D_800B67A4[];                       // CFB index advance table
 extern u16 D_800B67BC;                        // pending task flags carry
 
@@ -110,10 +108,11 @@ void nuGfxTaskMgrInit(void) {
     D_801B5D08[cnt].list.t.type = M_GFXTASK;
     D_801B5D08[cnt].list.t.flags = 0x00;
 
-    // The RSP boot microcode is the blob spanning [entry, D_800B3F20).
-    D_801B5D08[cnt].list.t.ucode_boot = (u64*)audio_sched_thread_entry;
+    // The RSP boot microcode is the blob spanning [rspbootTextStart,
+    // rspbootTextEnd).
+    D_801B5D08[cnt].list.t.ucode_boot = (u64*)rspbootTextStart;
     D_801B5D08[cnt].list.t.ucode_boot_size =
-        ((s32)D_800B3F20 - (s32)audio_sched_thread_entry);
+        ((s32)rspbootTextEnd - (s32)rspbootTextStart);
     D_801B5D08[cnt].list.t.ucode_size = SP_UCODE_SIZE;
     D_801B5D08[cnt].list.t.ucode_data_size = SP_UCODE_DATA_SIZE;
 
