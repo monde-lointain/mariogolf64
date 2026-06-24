@@ -1,0 +1,75 @@
+# Python static analysis for the decomp tooling (tools/*.py + tests/tooling/).
+#
+# Scope: only THIS repo's first-party Python. Vendored submodules under tools/
+# (m2c, asm-differ, decomp-permuter, coddog, cc) carry their own configs/style and
+# are excluded everywhere. The C trees use clang-format-22, not this file.
+#
+# Adopted off-cadence (PO-directed). ruff format is enforced (line-length 88);
+# basedpyright runs in `basic` mode (advisory + tracked suppressions while the
+# untyped backlog is burned down); vulture flags dead code (advisory; whitelist
+# the dynamic-use false positives, never auto-delete).
+
+# Shared exclude list (kept in sync across the three tools by hand).
+# ruff:        [tool.ruff] extend-exclude
+# basedpyright:[tool.basedpyright] exclude
+# vulture:     [tool.vulture] exclude
+
+[tool.ruff]
+target-version = "py312"
+line-length = 88
+extend-exclude = [
+  "tools/m2c",
+  "tools/asm-differ",
+  "tools/decomp-permuter",
+  "tools/coddog",
+  "tools/cc",
+  "venv",
+  "build",
+  "asm",
+  "assets",
+  "nonmatchings",
+]
+
+[tool.ruff.lint]
+# Curated, codegen-neutral rule set: pyflakes (F), a subset of pycodestyle (E),
+# import sorting (I), pyupgrade (UP), bugbear (B), flake8-simplify (SIM), and the
+# error/warning Pylint rules (PLE/PLW). PLR (refactor) is intentionally omitted -
+# this is a lint pass, not the structural refactor (that is PR-2).
+select = ["E", "F", "I", "UP", "B", "SIM", "PLE", "PLW"]
+ignore = []
+
+[tool.ruff.lint.per-file-ignores]
+# Tests carry long golden/expectation strings; do not reflow-police them.
+"tests/tooling/*" = ["E501"]
+
+[tool.basedpyright]
+pythonVersion = "3.12"
+typeCheckingMode = "basic"
+venvPath = "."
+venv = "venv"
+include = ["tools", "tests/tooling"]
+exclude = [
+  "tools/m2c",
+  "tools/asm-differ",
+  "tools/decomp-permuter",
+  "tools/coddog",
+  "tools/cc",
+  "**/__pycache__",
+  "venv",
+  "build",
+  "asm",
+  "assets",
+  "nonmatchings",
+]
+
+[tool.vulture]
+paths = ["tools", "tests/tooling"]
+exclude = [
+  "tools/m2c",
+  "tools/asm-differ",
+  "tools/decomp-permuter",
+  "tools/coddog",
+  "tools/cc",
+]
+min_confidence = 80
+ignore_decorators = ["@pytest.fixture"]
