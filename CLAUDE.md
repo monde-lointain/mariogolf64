@@ -396,6 +396,7 @@ When `pick_target.py` flags a hazard (or a match shows its symptom), read the ma
 | `header-renames-symbol:<fn>@<hdr>` | #header-renames-symbol |
 | `wrong-ghidra-name:<ghidra>-><correct>@<hdr>` | #wrong-ghidra-name-override |
 | mirror parse error / undefined ref on a helper macro | #vendored-header-incomplete |
+| parse-error cascade at macro-def lines / `stray '\'` after vendoring an SDK header | #crlf-vendored-header |
 | `pack:<n>fn[…]` | #multi-function-segment-splitting-pack |
 | `c-combined:<n>file[…]` | #multi-function-segment-splitting-pack |
 | `unattrib-leaf:<addr>` | #multi-function-segment-splitting-pack |
@@ -411,6 +412,7 @@ When `pick_target.py` flags a hazard (or a match shows its symptom), read the ma
 | `coddog-structural:<file>@<pct>` | #coddog-cross-ref |
 | `coddog-partial:<m>of<n>fn` | #coddog-cross-ref |
 | `game-region-mirror:0x<vram>` | #game-region-mirror-o2-profile |
+| `game-embedded:0x<vram>` | #game-region-mirror-o2-profile |
 | libultra leaf, bare std header | #per-library-standard-c-header-isolation |
 | match locks ~0.9 on a lib target | #compile-profiles-libkmc--o-libultra--o3 |
 | compiler rodata wrong offset / `rodata-literal:<addr>` | #rodata-sibling-yaml-pattern |

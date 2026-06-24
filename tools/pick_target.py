@@ -3429,6 +3429,14 @@ def _build_row(
     ):
         v = subseg_vram(st.off)
         st.hazards.append(Hazard.game_region_mirror(v, st.off))
+    # A game-region coddog-mirror that covers only a SUBSET of its subseg (fncount-mismatch /
+    # structural / partial) is game-EMBEDDED: the upstream fns are compiled into a larger game TU,
+    # tight-packed with game fns, so a standalone carve SHA-misses on the non-16 tail. Plan a mixed
+    # 16-aligned carve, not a seed-only mirror (S128 audio_mgr.c). Synthesized last, from the
+    # assembled hazard set, so it reads as the leading verdict over the flags it summarizes.
+    ge = Hazard.game_embedded_for(st.hazards, subseg_vram(st.off))
+    if ge:
+        st.hazards.append(ge)
     if _row_filtered(st, args, path, carried, cod_srcs):
         return None
 

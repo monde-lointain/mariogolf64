@@ -16,6 +16,28 @@ subordinate to the libultra goal. Target selection is `tools/pick_target.py` (sm
 the 8-point decompose gate fires on any seed ≥8. v2 classical track is active (since S11);
 mirror is the default, classical is first-class when the asm warrants it.
 
+**S128 — `src/main/audio_mgr.c` BANKED (first nualstl3; MG64 audio libs are GAME-EMBEDDED).** Banked a
+6-fn mixed game-region carve `[0x3A1D0..0x3A490)` → **md5-candidate 177→178**: 4 nualstl3 verbatim
+mirrors (nuAuStlMgrInit/SchedInstall/SchedWaitFrame/SchedDoTask, nusys-2.05 nuaustlmgr.c) + 2 game bgm
+fns classical (bgm_alloc_song_buffer/bgm_start_current). **HEADLINE: nualstl3/libmus are NOT linked as
+standalone libraries — they are compiled INTO game audio TUs**, tight-packed (no 16-byte object
+boundary) against game fns. The planned standalone `nuaustlmgr.c` carve SHA-missed at the non-16 tail
+(0x3A448 = real bgm code, not nops; the #non16align gate-build canary), re-scoped (PO) to a 16-aligned
+mixed carve under `src/main/`. **Band-unlock:** vendored `include/libmus/PR/libmus.h` +
+`include/libnualstl/nualstl.h` (CRLF-stripped, `NU_AU_MESG_MAX=2` asm-confirmed, libmus_data.h→libaudio
+cascade dropped); `-I libmus/libnualstl/libnaudio`. **Upstream libmus names (PO):**
+MusInitialize/MusStartSong rom: override the wrong ghidra mus_*; MusSetScheduler + __MusIntMemMalloc
+added; audio_config_init→nuAuStlMgrInit rom: override. asm subsegs 105→106. Quality 0/0/0/0 (6/6
+first-build). seed 8 / realized 10 / residual +2 (re-scope/split + CRLF-header gotcha; mixed track).
+**Cross-repo follow-up:** 16 new decomp symbols + 3 wrong-ghidra-name corrections (audio_config_init→
+nuAuStlMgrInit, mus_initialize→MusInitialize, mus_play_song_ptr→MusStartSong) →
+`sync_decomp_names.py --import-from-decomp`. Retro applied 5 of 5: #1 pick_target `game-embedded`
+synthesis flag + CLAUDE.md index + docs sub-case; #2 `docs/hazards.md#crlf-vendored-header`; #3
+coding-style include-sort note + `src/main/.clang-format`; #4 #wrong-ghidra-name-override generalized;
+#5 #upstream-mirror-pattern header-constant-vs-asm validation. **Next:** the rest of the nualstl3/audio
+region (`pick_target --lib audio`) is more game-embedded fns inside the 27KB `0x396C0`/`0x8005E2C0`
+grab-bag — `game-embedded`-flagged, plan as mixed 16-aligned carves, not seed-only mirrors. No carry-overs.
+
 **S127 — `nucontrmbmgr.c` COMPLETE (libnusys RMB-manager; the S121 spike RESOLVED).** Banked the last
 stub `contRmbControl` (0x800A19E0) as C → nucontrmbmgr.c now 0 stubs → **md5-candidate 176→177**;
 **libnusys mainlib is now 100% C.** **The S121 "cross-jump compiler wall" was a MISDIAGNOSIS:** MG64's

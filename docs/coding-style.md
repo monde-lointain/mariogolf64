@@ -204,6 +204,13 @@ if (account_type == ACCOUNT_NEW)   /* if establishing a new account  (intent) */
 - Indent subordinate code (2–4 spaces). Separate "paragraphs" of related statements with blank lines.
 - One statement per line; one declaration per line; no multiple side effects per line.
 - Brace single-statement bodies so layout and logic can't diverge.
+- `clang-format-22` formats every tree. The root `.clang-format` is `BasedOnStyle: Google`, which
+  SORTS `#include`s; the library trees (`src/libultra/`, `src/libkmc/`, `src/libnusys/`, `src/mgu/`,
+  and now `src/main/`) carry a local `.clang-format` adding `SortIncludes: Never`. When a file has an
+  order-DEPENDENT include chain (e.g. `nusys.h` must precede `nualstl.h`; `common.h`/`ultra64.h` must
+  come first), formatting under a sorting config reorders them and breaks the build. Fix it at the tree
+  level: give the directory its own `.clang-format` with `SortIncludes: Never` (mirror the lib trees) —
+  not a per-file `// clang-format off` guard. S128 added `src/main/.clang-format` for exactly this.
 
 ## Writing, evolving, and verifying code
 

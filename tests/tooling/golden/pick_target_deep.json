@@ -184,7 +184,7 @@
   {
     "band": "-",
     "func": "mus_heap_init",
-    "hazards": "pack:8fn[mus_heap_init=?,func_8009E28C=?,func_8009E2BC=?,func_8009E2D4=?,func_8009E2E0=?,func_8009E30C=?,mus_samples_init=?,mus_samples_current=?]",
+    "hazards": "pack:8fn[mus_heap_init=?,__MusIntMemMalloc=lib_memory,func_8009E2BC=?,func_8009E2D4=?,func_8009E2E0=?,func_8009E30C=?,mus_samples_init=?,mus_samples_current=?],upstream-fncount-mismatch:8vs6",
     "kind": "asm-flip",
     "nfns": 8,
     "pts": 13,
@@ -453,6 +453,19 @@
     "size": 2544,
     "upstream": "none",
     "vram": "0x8009FD40"
+  },
+  {
+    "band": "-",
+    "func": "func_8005E2C0",
+    "hazards": "pack:9fn[func_8005E2C0=?,func_8005E2CC=?,func_8005E360=?,func_8005E380=?,func_8005EAD4=?,func_8005EC10=?,func_8005EC48=?,func_8005ECC4=?,audio_system_boot=?]",
+    "kind": "asm-flip",
+    "nfns": 9,
+    "pts": 13,
+    "rom": "0x396C0",
+    "score": -2832,
+    "size": 2832,
+    "upstream": "none",
+    "vram": "0x8005E2C0"
   },
   {
     "band": "-",
@@ -847,7 +860,7 @@
   {
     "band": "-",
     "func": "main",
-    "hazards": "pack:111fn[main=?,idle=nuboot,mus_cmd_envelope=?,mus_initialize=?,mus_set_master_volume=?,mus_play_song_ptr=?,mus_start_song_from_marker=?,try_spawn_global_object=?,func_80099CF0=?,mus_stop=?,mus_ask=?,mus_handle_stop=?,mus_handle_ask=?,mus_handle_set_volume=?,mus_handle_set_pan=?,mus_handle_set_freq_offset=?,mus_handle_set_tempo=?,mus_handle_set_reverb=?,mus_ptr_bank_initialize=?,func_8009A2F0=?,func_8009A318=?,func_8009A33C=?,mus_handle_get_ptr_bank=?,mus_handle_pause=?,mus_cmd_start_song=?,mus_set_fx_type=?,mus_set_song_fx_change=?,mus_fx_bank_initialize=?,func_8009A500=?,func_8009A508=?,func_8009A514=?,func_8009A520=?,func_8009A52C=?,func_8009A534=?,func_8009A53C=?,mus_handle_wave_count=?,mus_handle_wave_address=?,func_8009A624=?,func_8009A630=?,func_8009A64C=?,mus_fifo_dispatch=?,mus_fifo_enqueue=?,func_8009A7C8=?,mus_player_frame_handler=?,func_8009AB18=?,func_8009B060=?,func_8009B0DC=?,mus_set_volume_and_pan=?,func_8009B254=?,func_8009B360=?,func_8009B3D0=?,func_8009B5C4=?,func_8009B5E0=?,func_8009B698=?,func_8009B6F0=?,func_8009B754=?,func_8009B818=?,func_8009B92C=?,mus_remap_ptr_bank=?,func_8009BC58=?,init_struct_defaults=?,mus_alloc_channel=?,func_8009BFF0=?,func_8009C028=?,allocate_object_slot=?,mus_start_song=?,mus_handle_set_flag=?,mus_cmd_stop=?,mus_cmd_wave=?,mus_cmd_port_on=?,mus_cmd_port_off=?,mus_cmd_default_adsr=?,mus_cmd_tempo=?,mus_cmd_endit=?,mus_cmd_cutoff=?,mus_cmd_vibrato_up=?,mus_cmd_vibrato_down=?,mus_cmd_vibrato_off=?,mus_cmd_length=?,mus_cmd_ignore=?,mus_cmd_transpose=?,mus_cmd_ignore_transpose=?,mus_cmd_distort=?,mus_cmd_env_off=?,mus_cmd_env_on=?,mus_cmd_trigger_off=?,mus_cmd_trigger_on=?,mus_cmd_for=?,mus_cmd_next=?,mus_cmd_wobble=?,mus_cmd_wobble_off=?,mus_cmd_velocity_on=?,mus_cmd_velocity_off=?,mus_cmd_velocity=?,mus_cmd_pan=?,mus_cmd_stereo=?,mus_cmd_drums_on=?,mus_cmd_drums_off=?,mus_cmd_print=?,mus_cmd_goto=?,mus_cmd_reverb=?,mus_cmd_rand_note=?,mus_cmd_rand_volume=?,mus_cmd_rand_pan=?,mus_cmd_volume=?,mus_cmd_start_fx=?,mus_cmd_bend_range=?,mus_cmd_sweep=?,mus_cmd_change_fx=?,mus_cmd_marker=?,mus_cmd_length0=?],upstream-fncount-mismatch:111vs2",
+    "hazards": "pack:111fn[main=?,idle=nuboot,mus_cmd_envelope=?,MusInitialize=player_api.inc,mus_set_master_volume=?,MusStartSong=player_api.inc,mus_start_song_from_marker=?,try_spawn_global_object=?,func_80099CF0=?,mus_stop=?,mus_ask=?,mus_handle_stop=?,mus_handle_ask=?,mus_handle_set_volume=?,mus_handle_set_pan=?,mus_handle_set_freq_offset=?,mus_handle_set_tempo=?,mus_handle_set_reverb=?,mus_ptr_bank_initialize=?,func_8009A2F0=?,func_8009A318=?,func_8009A33C=?,mus_handle_get_ptr_bank=?,mus_handle_pause=?,mus_cmd_start_song=?,mus_set_fx_type=?,mus_set_song_fx_change=?,mus_fx_bank_initialize=?,func_8009A500=?,func_8009A508=?,func_8009A514=?,func_8009A520=?,func_8009A52C=?,func_8009A534=?,MusSetScheduler=player_api.inc,mus_handle_wave_count=?,mus_handle_wave_address=?,func_8009A624=?,func_8009A630=?,func_8009A64C=?,mus_fifo_dispatch=?,mus_fifo_enqueue=?,func_8009A7C8=?,mus_player_frame_handler=?,func_8009AB18=?,func_8009B060=?,func_8009B0DC=?,mus_set_volume_and_pan=?,func_8009B254=?,func_8009B360=?,func_8009B3D0=?,func_8009B5C4=?,func_8009B5E0=?,func_8009B698=?,func_8009B6F0=?,func_8009B754=?,func_8009B818=?,func_8009B92C=?,mus_remap_ptr_bank=?,func_8009BC58=?,init_struct_defaults=?,mus_alloc_channel=?,func_8009BFF0=?,func_8009C028=?,allocate_object_slot=?,mus_start_song=?,mus_handle_set_flag=?,mus_cmd_stop=?,mus_cmd_wave=?,mus_cmd_port_on=?,mus_cmd_port_off=?,mus_cmd_default_adsr=?,mus_cmd_tempo=?,mus_cmd_endit=?,mus_cmd_cutoff=?,mus_cmd_vibrato_up=?,mus_cmd_vibrato_down=?,mus_cmd_vibrato_off=?,mus_cmd_length=?,mus_cmd_ignore=?,mus_cmd_transpose=?,mus_cmd_ignore_transpose=?,mus_cmd_distort=?,mus_cmd_env_off=?,mus_cmd_env_on=?,mus_cmd_trigger_off=?,mus_cmd_trigger_on=?,mus_cmd_for=?,mus_cmd_next=?,mus_cmd_wobble=?,mus_cmd_wobble_off=?,mus_cmd_velocity_on=?,mus_cmd_velocity_off=?,mus_cmd_velocity=?,mus_cmd_pan=?,mus_cmd_stereo=?,mus_cmd_drums_on=?,mus_cmd_drums_off=?,mus_cmd_print=?,mus_cmd_goto=?,mus_cmd_reverb=?,mus_cmd_rand_note=?,mus_cmd_rand_volume=?,mus_cmd_rand_pan=?,mus_cmd_volume=?,mus_cmd_start_fx=?,mus_cmd_bend_range=?,mus_cmd_sweep=?,mus_cmd_change_fx=?,mus_cmd_marker=?,mus_cmd_length0=?],c-combined:2file[nuboot|player_api.inc],unattrib-leaf:0x800995F0",
     "kind": "asm-flip",
     "nfns": 111,
     "pts": 13,
@@ -1015,6 +1028,19 @@
   },
   {
     "band": "-",
+    "func": "bgm_load_song_from_rom",
+    "hazards": "pack:40fn[bgm_load_song_from_rom=?,func_8005F0BC=?,spawn_object_simple=?,func_8005F0FC=?,func_8005F11C=?,func_8005F180=?,func_8005F1C8=?,func_8005F224=?,func_8005F248=?,func_8005F290=?,func_8005F30C=?,func_8005F360=?,func_8005F4AC=?,func_8005F518=?,init_per_player_state=?,func_8005F838=?,func_8005F964=?,func_8005FB58=?,func_8005FCB8=?,func_8005FE8C=?,func_800600C0=?,func_80060128=?,func_80060190=?,func_80060210=?,func_800602B4=?,func_8006034C=?,func_80060358=?,func_800603A8=?,func_80060434=?,func_800604F4=?,func_800605EC=?,gen_terrain_detail_texture=?,setup_terrain_detail_default=?,emit_per_phase_fog_state=?,func_800627F8=?,func_8006280C=?,clear_terrain_emit_scratch=?,init_terrain_vertex_texcoords=?,emit_terrain_state_prefix_block=?,emit_course_terrain_dl=?]",
+    "kind": "asm-flip",
+    "nfns": 40,
+    "pts": 13,
+    "rom": "0x3A490",
+    "score": -23792,
+    "size": 23792,
+    "upstream": "none",
+    "vram": "0x8005F090"
+  },
+  {
+    "band": "-",
     "func": "get_table_entry",
     "hazards": "pack:11fn[get_table_entry=?,func_80032E88=?,play_sound_at_meter_ratio_gameplay=?,update_rotation_matrix=?,play_sound_at_meter_ratio=?,play_sound_for_meter_phase=?,read_meter_stick_normalized=?,update_ball_physics=?,func_80037E50=?,calc_stick_offset_with_noise=?,init_ball_for_shot=?]",
     "kind": "asm-flip",
@@ -1064,19 +1090,6 @@
     "size": 27296,
     "upstream": "none",
     "vram": "0x8024D800"
-  },
-  {
-    "band": "-",
-    "func": "func_8005E2C0",
-    "hazards": "pack:55fn[func_8005E2C0=?,func_8005E2CC=?,func_8005E360=?,func_8005E380=?,func_8005EAD4=?,func_8005EC10=?,func_8005EC48=?,func_8005ECC4=?,audio_system_boot=?,audio_config_init=?,func_8005EE94=?,func_8005EEF8=?,func_8005EF88=?,bgm_alloc_song_buffer=?,bgm_start_current=?,bgm_load_song_from_rom=?,func_8005F0BC=?,spawn_object_simple=?,func_8005F0FC=?,func_8005F11C=?,func_8005F180=?,func_8005F1C8=?,func_8005F224=?,func_8005F248=?,func_8005F290=?,func_8005F30C=?,func_8005F360=?,func_8005F4AC=?,func_8005F518=?,init_per_player_state=?,func_8005F838=?,func_8005F964=?,func_8005FB58=?,func_8005FCB8=?,func_8005FE8C=?,func_800600C0=?,func_80060128=?,func_80060190=?,func_80060210=?,func_800602B4=?,func_8006034C=?,func_80060358=?,func_800603A8=?,func_80060434=?,func_800604F4=?,func_800605EC=?,gen_terrain_detail_texture=?,setup_terrain_detail_default=?,emit_per_phase_fog_state=?,func_800627F8=?,func_8006280C=?,clear_terrain_emit_scratch=?,init_terrain_vertex_texcoords=?,emit_terrain_state_prefix_block=?,emit_course_terrain_dl=?]",
-    "kind": "asm-flip",
-    "nfns": 55,
-    "pts": 13,
-    "rom": "0x396C0",
-    "score": -27328,
-    "size": 27328,
-    "upstream": "none",
-    "vram": "0x8005E2C0"
   },
   {
     "band": "-",

@@ -118,6 +118,17 @@ HAZARD_GAME_REGION_MIRROR = (
 # the libultra code band is statically linked INTO THE GAME and compiled -O2 (game CFLAGS), NOT -O3
 # (LIBULTRA_CFLAGS) — the src/libultra/ path would force -O3 → wrong auto-inlining. Route the mirror
 # to a -O2 path (src/mgu/…). Advisory. Detail `0x<vram>`. See docs/hazards.md#game-region-mirror-o2-profile
+HAZARD_GAME_EMBEDDED = (
+    "game-embedded"  # a coddog-mirror that is NOT a standalone-carvable object: it is
+)
+# game-region-mirror (below the libultra band, -O2) AND covers only a SUBSET of its subseg's fns
+# (coddog-fncount-mismatch / coddog-structural / coddog-partial) → the upstream file's fns are compiled
+# INTO a larger game audio TU, tight-packed with game fns at non-16 boundaries, so a standalone carve
+# SHA-misses (KMC `as` 16-pads the .o .text, shifting the tail; #non16align). Plan a MIXED game-region
+# carve at 16-aligned bounds (bank the lib fns as a mirror + the adjacent game fns classical), NOT a
+# seed-only verbatim mirror. The synthesis of game-region-mirror + a coddog-subset signal (S128
+# audio_mgr.c: nualstl3 embedded in a 27KB game audio grab-bag). Detail `0x<vram>`. Advisory. See
+# docs/hazards.md#game-region-mirror-o2-profile
 HAZARD_UPSTREAM_FNCOUNT_MISMATCH = (
     "upstream-fncount-mismatch"  # a pack with ONE named C stem whose
 )
@@ -187,6 +198,11 @@ class Hazard:
     RODATA_OWNERS: ClassVar[frozenset[str]] = frozenset(
         {HAZARD_RODATA_JTBL, HAZARD_RODATA_LITERAL}
     )
+    # A coddog hit covering only a SUBSET of a multi-fn subseg (the matched upstream file's fns are
+    # interspersed with un-matched/game fns) — the game-embedded synthesis keys off this.
+    CODDOG_SUBSET_SIGNALS: ClassVar[frozenset[str]] = frozenset(
+        {HAZARD_CODDOG_FNCOUNT_MISMATCH, HAZARD_CODDOG_STRUCTURAL, HAZARD_CODDOG_PARTIAL}
+    )
 
     def render(self) -> str:
         return self.kind if self.detail is None else f"{self.kind}:{self.detail}"
@@ -210,6 +226,14 @@ class Hazard:
         """A pooled-rodata owner (literal or switch jtbl) the sibling carve places."""
         return self.kind in self.RODATA_OWNERS
 
+    def is_game_region_mirror(self) -> bool:
+        """A libultra/SDK-source mirror linked into the game (below the libultra band, -O2)."""
+        return self.kind == HAZARD_GAME_REGION_MIRROR
+
+    def is_coddog_subset_signal(self) -> bool:
+        """A coddog hit covering only a SUBSET of the subseg (fncount-mismatch/structural/partial)."""
+        return self.kind in self.CODDOG_SUBSET_SIGNALS
+
     def is_unexplained_jal(self) -> bool:
         """A jal-count mismatch NOT annotated as a known per-version wrapper artifact."""
         return self.kind == HAZARD_JAL_COUNT_MISMATCH and "(version-artifact?)" not in (
@@ -225,6 +249,29 @@ class Hazard:
     def body_divergence_suspect(cls, cfile: str, pct: float) -> "Hazard":
         """A sub-100 coddog-mirror that may mask a game-modified body; detail `<file>@<pct>`."""
         return cls(HAZARD_BODY_DIVERGENCE_SUSPECT, f"{cfile}@{pct:.2f}")
+
+    @classmethod
+    def game_embedded(cls, vram: int) -> "Hazard":
+        """A game-embedded coddog-mirror (not standalone-carvable); detail `0x<vram>`."""
+        return cls(HAZARD_GAME_EMBEDDED, f"0x{vram:08X}")
+
+    @classmethod
+    def game_embedded_for(cls, hazards, vram):
+        """Synthesize game-embedded from an assembled hazard set, or None.
+
+        A coddog-mirror that is ALSO a game-region-mirror AND covers only a SUBSET of its subseg's
+        fns (a coddog-subset signal) is compiled INTO a game TU, tight-packed with game fns, so a
+        standalone carve SHA-misses on the non-16 tail. The row should be planned as a mixed
+        16-aligned game-region carve, not a seed-only verbatim mirror (S128 audio_mgr.c)."""
+        if vram is None:
+            return None
+        if (
+            any(h.is_coddog_mirror() for h in hazards)
+            and any(h.is_game_region_mirror() for h in hazards)
+            and any(h.is_coddog_subset_signal() for h in hazards)
+        ):
+            return cls.game_embedded(vram)
+        return None
 
     # --- detail-format factories ------------------------------------------------------------
     # One source of truth for each kind's `detail` encoding; render() output is byte-identical to

@@ -184,7 +184,7 @@
   {
     "band": "-",
     "func": "mus_heap_init",
-    "hazards": "pack:8fn[mus_heap_init=?,func_8009E28C=?,func_8009E2BC=?,func_8009E2D4=?,func_8009E2E0=?,func_8009E30C=?,mus_samples_init=?,mus_samples_current=?]",
+    "hazards": "pack:8fn[mus_heap_init=?,__MusIntMemMalloc=lib_memory,func_8009E2BC=?,func_8009E2D4=?,func_8009E2E0=?,func_8009E30C=?,mus_samples_init=?,mus_samples_current=?],upstream-fncount-mismatch:8vs6",
     "kind": "asm-flip",
     "nfns": 8,
     "pts": 13,
@@ -456,6 +456,19 @@
   },
   {
     "band": "-",
+    "func": "func_8005E2C0",
+    "hazards": "pack:9fn[func_8005E2C0=?,func_8005E2CC=?,func_8005E360=?,func_8005E380=?,func_8005EAD4=?,func_8005EC10=?,func_8005EC48=?,func_8005ECC4=?,audio_system_boot=?]",
+    "kind": "asm-flip",
+    "nfns": 9,
+    "pts": 13,
+    "rom": "0x396C0",
+    "score": -2832,
+    "size": 2832,
+    "upstream": "none",
+    "vram": "0x8005E2C0"
+  },
+  {
+    "band": "-",
     "func": "func_ovl8_801F4A40",
     "hazards": "pack:9fn[func_ovl8_801F4A40=?,func_ovl8_801F4A5C=?,func_ovl8_801F4A6C=?,func_ovl8_801F4A90=?,func_ovl8_801F4ABC=?,func_ovl8_801F4C84=?,func_ovl8_801F4D48=?,func_ovl8_801F4D74=?,func_801F4F80=?]",
     "kind": "asm-flip",
@@ -635,18 +648,5 @@
     "size": 6752,
     "upstream": "none",
     "vram": "0x800660A0"
-  },
-  {
-    "band": "-",
-    "func": "func_8004E5A0",
-    "hazards": "pack:3fn[func_8004E5A0=?,func_8004E924=?,func_8004FDB4=?],one-tu",
-    "kind": "asm-flip",
-    "nfns": 3,
-    "pts": 13,
-    "rom": "0x299A0",
-    "score": -6976,
-    "size": 6976,
-    "upstream": "none",
-    "vram": "0x8004E5A0"
   }
 ]

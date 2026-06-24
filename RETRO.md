@@ -25,6 +25,17 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 128 — audio_mgr.c banked (game-embedded nualstl3 mgr + bgm; nualstl3/libmus band unlock) — 2026-06-24
+- Increment: src/main/audio_mgr.c md5-candidate (6 fns: 4 nualstl3 verbatim mirror + 2 game bgm classical). matched-fn +6; md5-candidate 177→**178**. ROM SHA-1 == baserom.
+- Quality: stuck-far 0 / permuter 0 / carried 0 / re-opened 0 (matching was 6/6 first-build; all friction was in scoping + band-unlock).
+- Seed: committed 8pt; regime mixed (4 mirror + 2 classical). v2 realized tier: seed 8 → realized 10; residual +2 (mid-sprint re-scope/split standalone→mixed carve +1; novel bank-gotcha CRLF-header +1).
+- What helped: the gate-build canary (#non16align) caught the standalone-carve premise failure BEFORE banking; ASM-first reading of the boundary bytes (REAL bgm code at 0x3A448, not nops) proved game-embedding; coddog libmus_map gave the upstream callee names (MusInitialize/MusStartSong/MusSetScheduler/__MusIntMemMalloc).
+- Friction: the whole plan premise was wrong — nualstl3 is game-EMBEDDED (compiled into a game audio TU, no object boundary), not a standalone lib → PO re-scope to a 16-aligned mixed carve under src/main/; vendored nualstl.h CRLF broke KMC cpp `\` macro continuations (silent parse cascade); root .clang-format sorted the order-dependent nusys.h/nualstl.h includes.
+- Applied (5 of 5, all 3 PO groups): #1 pick_target `game-embedded` synthesis flag (HAZARD_GAME_EMBEDDED + predicates + `Hazard.game_embedded_for` + unit test; golden-inert — fixtures lack the 3-condition shape) + CLAUDE.md index row + docs/hazards.md#game-region-mirror-o2-profile sub-case; #2 docs/hazards.md#crlf-vendored-header + index row; #3 docs/coding-style.md include-sort-trap note (+ `src/main/.clang-format` landed in-sprint per PO directive); #4 #wrong-ghidra-name-override generalized beyond macro aliases; #5 #upstream-mirror-pattern header-CONSTANT-vs-asm validation (NU_AU_MESG_MAX=2). Also regen'd the 4 pick_target goldens (sprint carve + symbol-add drift the bank commit had left stale).
+- Carry-over: none. (Cross-repo: 16 new decomp symbols + 3 wrong-ghidra-name corrections → `sync_decomp_names.py --import-from-decomp`.)
+
+---
+
 ## Sprint 127 — contRmbControl banked (libnusys RMB-manager; resolves the S121 cross-jump-wall spike) — 2026-06-23
 - Increment: src/libnusys/mainlib/nucontrmbmgr.c COMPLETE (1 fn, contRmbControl, banked C; closes the S121 partial). matched-fn +1; md5-candidate 176→**177** (file now 0 stubs). **libnusys mainlib is now 100% C.** ROM SHA-1 == baserom.
 - Quality: stuck-far 0 / permuter 0 / carried 0 / re-opened 0 — and **resolved 1 prior carry** (the S121 "unbankable" spike). Net positive.

@@ -109,6 +109,14 @@ different library rev: MG64's `nusys.h` `NUDebTaskPerf` carried the 2.07 `marker
 the asm BEFORE banking the first perf-using fn; fix the vendored header to the game's rev (drop
 markerTime). A header struct is not ground truth until a matching fn proves its offsets.
 
+**Header CONSTANTS reach codegen too — validate each against the asm (S128, generalizes the perf-struct
+rule).** Not just struct offsets: any vendored-header `#define` that flows into an instruction
+(array sizes, message counts, loop bounds, masks) must be reconciled with the asm before banking. MG64's
+nualstl `NU_AU_MESG_MAX` is 2 (the `osCreateMesgQueue(&nuAuMesgQ, …, 2)` count in the asm), not the
+stock 2.05 source's 4; the vendored `include/libnualstl/nualstl.h` was edited to 2. Read the literal in
+the target instruction (the `li`/`addiu` immediate), do not trust the stock constant — a wrong constant
+is a single-immediate SHA-miss the same class as a wrong struct offset.
+
 **Provenance:** S15 unlocked the libnusys band by vendoring one `include/libnusys/nusys.h` +
 `-I include/libnusys`; `-I include/libultra/PR` is the precedent for unblocking a band. S51 is the
 cautionary case for step 1's "do not consult `libultra_modern`": its split `gu/` layout (hand-asm
@@ -1758,6 +1766,30 @@ other consumers, clean-rebuild, banked seed-only first try). The `(already-vendo
 
 ---
 
+## crlf-vendored-header (a copied SDK header breaks KMC cpp's `\` continuations)
+
+**Rule:** N64 SDK source ships with CRLF (DOS) line endings. A vendored HEADER copied verbatim keeps
+its CRLF, and KMC GCC 2.7.2's preprocessor treats a `\` at end-of-line as a line-continuation ONLY when
+the `\` is immediately followed by the newline. With CRLF the `\` is followed by `\r`, so EVERY
+multi-line macro continuation breaks: the `#define` ends early, its body's following lines fall through
+to the C parser as code, and you get a SILENT cascade of `parse error` (reported at the macro-DEFINITION
+lines, not the call site) plus `stray '\' in program`. The `.c` mirror itself can be fine; the bad file
+is the included header. Plain single-line `#define`s are unaffected, so the first error lands at the
+first `\`-continuation macro in the header.
+
+**Trigger:** after vendoring an SDK-sourced header, the build throws a run of `parse error before <tok>`
+at the header's macro-definition lines (often the FIRST function-like macro) + `stray '\' in program`.
+`file include/<lib>/<hdr>.h` reports `CRLF line terminators`.
+
+**Procedure:** strip CR on copy — `sed -i 's/\r$//' include/<lib>/<hdr>.h` (or `dos2unix`). CRLF-clean
+the header before relying on it. (Comments/whitespace are codegen-neutral, so this never affects the
+ROM; it only un-breaks cpp.) This generalizes the `#upstream-mirror-pattern` CRLF note (which covered
+nusys `.c` SOURCES) to vendored headers. S128: `include/libnualstl/nualstl.h` from nusys-2.05 had CRLF;
+its `\`-continued seq-player macros cascaded into ~12 parse errors until stripped. The git-managed
+n64sdkmod headers (e.g. `libmus.h`) were already LF and fine, so suspect the SDK-extracted ones.
+
+---
+
 ## stale-vendored-header
 
 **Rule:** A vendored header can resolve as a *file* (so `needs-header` stays silent) yet be a stripped
@@ -1832,6 +1864,25 @@ Advisory (display-only).
 - A divergent fn (a Monegi-modified variant absent from upstream) is then a normal classical
   reconstruction on the -O2 file (the verbatim siblings stay byte-exact); see the float-literal note in
   #mirror-cast-divergence-sign--vs-zero-extend for the single-precision FP gotcha.
+
+**`game-embedded` sub-case — not standalone-carvable (S128).** A game-region mirror can be worse than
+"compile at -O2": the upstream file's functions are compiled INTO a larger game TU, tight-packed (no
+16-byte object padding) against game functions, so there is NO object boundary to carve a standalone
+mirror at. The natural end of the matched block lands on a non-16 address with REAL game code (not
+nops) immediately after; a standalone `[..,c,..]` subseg there SHA-misses because KMC `as` 16-pads the
+`.o` `.text` and shifts the tail (#non16align — the gate-build canary: a correctly-named stub that
+SHA-misses is alignment, not a bad offset). `pick_target.py` flags this as `game-embedded:0x<vram>`
+(the synthesis of `game-region-mirror` + a coddog-subset signal — `coddog-fncount-mismatch` /
+`coddog-structural` / `coddog-partial` — i.e. only SOME of the subseg's fns match the upstream).
+- **Plan a MIXED carve, not a seed-only mirror.** Carve `[A, B)` where BOTH A and B are 16-aligned
+  function boundaries (a 16-aligned carve always matches byte-wise, no padding inserted, regardless of
+  the true object boundary). The carve pulls in the adjacent game fns between the lib block and the next
+  16-aligned boundary; write the lib fns as verbatim mirrors and the game fns classical (or carry them
+  `INCLUDE_ASM`). Put the file under a game path (`src/main/…`), since it holds game functions.
+- **Find the boundaries from the asm:** the matched block's natural end is usually non-16; scan forward
+  to the next function start that is `vram % 16 == 0`. S128 audio_mgr.c: nualstl3's 4 nuAuStl* fns end
+  at 0x8005F048 (non-16, real bgm code follows) → extend to the next 16-aligned fn `bgm_load_song_from_rom`
+  @0x8005F090, carving `[0x3A1D0..0x3A490)` = 4 mirror + 2 game bgm fns, all 16-aligned, ROM SHA match.
 
 **Provenance:** S103 (`func_800660A0`'s gu mtxutil tail @0x80067B00, inside a game pack: the 4 fns
 `guMtxF2L`/`guMtxL2F`/`guMtxIdentF`/`guMtxIdent` banked at `src/mgu/mtxutil.c` -O2; the initial
@@ -2012,6 +2063,16 @@ fires when a header macro `#define <ghidra_name>(...)` exists, the version-strip
 define a function named `<ghidra_name>`, and the macro's RHS leading symbol IS defined in the upstream.
 It is the distinguishing companion of `#header-renames-symbol` (which fires when the body DOES define
 the macro name → a real `#undef`).
+
+**The override MECHANISM is not limited to macro aliases (S128).** `pick_target.py` only auto-flags the
+macro-alias case, but the `rom:`-qualifier override below corrects ANY wrong `ghidra_symbols.txt` name a
+coddog/upstream cross-ref proves wrong — a plain bad GUESS, not just a macro. S128 audio_mgr.c:
+`audio_config_init`@0x8005EDD0 was really `nuAuStlMgrInit`, and the libmus callees `mus_initialize`@
+0x8009973C / `mus_play_song_ptr`@0x800999F0 were really `MusInitialize` / `MusStartSong` (coddog
+libmus_map confirmed); the RSP-boot sprint likewise corrected `audio_sched_thread_entry`. In each the
+ghidra name is a non-canonical guess, the upstream name is canonical, and the override resolves both the
+mirror body and every still-asm caller to the correct name. Treat a coddog/upstream-confirmed wrong name
+the same as a macro alias even though no `pick_target.py` flag fires.
 
 **Procedure (the non-destructive override):**
 1. Add a `symbol_addrs.txt` maintainer-override for the CORRECT name with a `rom:` qualifier:

@@ -153,3 +153,44 @@ def test_game_region_mirror():
         H.game_region_mirror(None, 0x298E0).render()
         == f"{h.HAZARD_GAME_REGION_MIRROR}:0x298e0"
     )
+
+
+def test_game_embedded():
+    assert (
+        H.game_embedded(0x8005EDD0).render() == f"{h.HAZARD_GAME_EMBEDDED}:0x8005EDD0"
+    )
+
+
+def test_game_embedded_for_synthesis():
+    """game_embedded_for fires only on coddog-mirror + game-region-mirror + a coddog-subset signal
+    (fncount-mismatch / structural / partial) — the S128 audio grab-bag shape — and never otherwise."""
+    region = H.game_region_mirror(0x8005EDD0, 0x3A1D0)
+    mirror = H.coddog_mirror("src/libc/llcvt.c", 99.99)
+    subset = H(h.HAZARD_CODDOG_FNCOUNT_MISMATCH, "8vs55")
+
+    # All three present → fires, detail is the passed vram.
+    ge = H.game_embedded_for([region, mirror, subset], 0x8005EDD0)
+    assert ge is not None
+    assert ge.render() == f"{h.HAZARD_GAME_EMBEDDED}:0x8005EDD0"
+
+    # coddog-structural / coddog-partial also count as the subset signal.
+    assert (
+        H.game_embedded_for(
+            [region, mirror, H(h.HAZARD_CODDOG_STRUCTURAL, "x@99.99")], 0x8005EDD0
+        )
+        is not None
+    )
+    assert (
+        H.game_embedded_for(
+            [region, mirror, H(h.HAZARD_CODDOG_PARTIAL, "4of9fn")], 0x8005EDD0
+        )
+        is not None
+    )
+
+    # Missing any leg → no fire: clean game-region mirror (full match, no subset signal),
+    # a non-game-region coddog-mirror, and a game-region row with no coddog-mirror.
+    assert H.game_embedded_for([region, mirror], 0x8005EDD0) is None
+    assert H.game_embedded_for([mirror, subset], 0x8005EDD0) is None
+    assert H.game_embedded_for([region, subset], 0x8005EDD0) is None
+    # vram unknown → no fire (the advisory needs an address to point at).
+    assert H.game_embedded_for([region, mirror, subset], None) is None
