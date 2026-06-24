@@ -3216,35 +3216,11 @@ def _resolve_tail_coddog(st, coddog_index, upstream_index):
             st.up_lib = "libultra"
 
 
-def _build_row(
-    off,
-    typ,
-    path,
-    size,
-    args,
-    upstream_index,
-    carried,
-    sig_index,
-    coddog_index,
-    nusys_index,
-    _libultra_band_start,
-):
-    """Classify one subseg and produce its scored row dict, or None to skip it (bss,
-    scope-filtered, or a de-ranked carry-over). The per-subseg body of build_rows;
-    the resolved identity lives on a _RowState (st) the coddog/nusys passes rebind in
-    place as they run."""
-    classified = classify_subseg(off, typ, path, size, upstream_index)
-    if classified is None:
-        return None
-    kind, fns, hazards = classified
-
-    _append_caller_evict(fns, hazards)
-
-    st = _RowState.create(off, size, kind, fns, hazards, upstream_index)
-    _resolve_named_upstream(st, upstream_index, coddog_index, sig_index)
-    _resolve_primary_coddog(st, coddog_index, upstream_index)
-    _resolve_tail_coddog(st, coddog_index, upstream_index)
-
+def _resolve_nusys(st, nusys_index):
+    """The libnusys analog of the libultra coddog passes, kept SEPARATE so an absent nusys map leaves
+    libultra ranking byte-identical. Fires only when no libultra coddog/name identity won (up_lib
+    None or already libnusys); scans primary + all members, flags + re-runs the trap battery against
+    the real nusys `.c`, applies the single-identity structural guard, and re-prices to libnusys."""
     # Nusys coddog cross-ref: the libnusys analog of the libultra blocks above, kept as a SEPARATE
     # additive pass so an absent nusys_map.tsv leaves libultra ranking byte-identical. Fires only when
     # no libultra coddog/name identity won (up_lib still None, or already libnusys). Scans primary +
@@ -3284,6 +3260,37 @@ def _build_row(
                     st.hazards.append(Hazard.coddog_structural(distinct[0], cpct))
             if st.up_lib is None:
                 st.up_lib = "libnusys"
+
+
+def _build_row(
+    off,
+    typ,
+    path,
+    size,
+    args,
+    upstream_index,
+    carried,
+    sig_index,
+    coddog_index,
+    nusys_index,
+    _libultra_band_start,
+):
+    """Classify one subseg and produce its scored row dict, or None to skip it (bss,
+    scope-filtered, or a de-ranked carry-over). The per-subseg body of build_rows;
+    the resolved identity lives on a _RowState (st) the coddog/nusys passes rebind in
+    place as they run."""
+    classified = classify_subseg(off, typ, path, size, upstream_index)
+    if classified is None:
+        return None
+    kind, fns, hazards = classified
+
+    _append_caller_evict(fns, hazards)
+
+    st = _RowState.create(off, size, kind, fns, hazards, upstream_index)
+    _resolve_named_upstream(st, upstream_index, coddog_index, sig_index)
+    _resolve_primary_coddog(st, coddog_index, upstream_index)
+    _resolve_tail_coddog(st, coddog_index, upstream_index)
+    _resolve_nusys(st, nusys_index)
 
     # A `coddog-mirror` hazard pins the row to an ultralib(libultra) source even when up_lib stayed
     # None — audio coddog hits are deliberately NOT re-priced to libultra (they were header-`-I`-
