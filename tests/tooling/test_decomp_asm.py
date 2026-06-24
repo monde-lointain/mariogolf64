@@ -12,7 +12,6 @@ scan, sizing the sibling split to 4 of 8 doubles).
 from __future__ import annotations
 
 import pytest
-
 from conftest import load_tool
 
 # A 2-function subseg listing. The PRIMARY (fnA) pools one double; the SIBLING

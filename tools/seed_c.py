@@ -371,7 +371,7 @@ def sanitize_ghidra_body(text: str, placeholder: str) -> str:
     # or `<retty>\n<name>(...)` (Ghidra's 2-line style).
     # The placeholder MUST appear as the function name in base.c so that
     # objdump --disassemble=<placeholder> finds it.
-    def _rename(match: "re.Match[str]") -> str:
+    def _rename(match: re.Match[str]) -> str:
         return match.group(1) + placeholder + match.group(3)
 
     # Match: identifier( before optional whitespace + opening paren, where the
@@ -565,11 +565,11 @@ def stitch_base_c(spec: BaseCSpec) -> Path:
             f"// TODO: agent — paste Ghidra MCP `decompile_function` output for {placeholder}"
         )
         lines.append(
-            f"// here, then rename m2c synthetics per CLAUDE.md naming conventions."
+            "// here, then rename m2c synthetics per CLAUDE.md naming conventions."
         )
         lines.append(f"void {placeholder}(void) {{")
-        lines.append(f"    /* unimplemented */")
-        lines.append(f"}}")
+        lines.append("    /* unimplemented */")
+        lines.append("}")
     lines.append("")
 
     out_path = out_dir / "base.c"
@@ -602,7 +602,7 @@ def main() -> None:
     log(f"[seed] segment: {seg_stem}")
 
     target_asm = slice_target_asm(placeholder, seg_stem, out_dir)
-    log(f"[seed] target.s written")
+    log("[seed] target.s written")
 
     rodata_path, missing_rodata, pointer_labels = slice_rodata_phase(
         target_asm, out_dir, args.no_rodata

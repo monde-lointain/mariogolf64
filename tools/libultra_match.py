@@ -42,8 +42,8 @@ import decomp_common  # noqa: E402
 
 decomp_common.reexec_into_venv(os.path.abspath(__file__))
 
-import rabbitizer  # noqa: E402  (after venv re-exec)
 import pick_target as pt  # noqa: E402  (parse_subsegs / upstream + asm-tu indices / ROOT)
+import rabbitizer  # noqa: E402  (after venv re-exec)
 
 # --- config (derived from decomp_common's libultra source pin) ------------------------------
 # Reference = the UNION of several libgultra_rom builds, not just J. The project pins
@@ -357,7 +357,7 @@ def main():
     # worklist: unnamed func_ matches, filtered for disjointness + min length
     emitted = 0
     print(
-        f"\n=== symbol_addrs.txt worklist: unnamed libultra blocks (add-only, gate-applied) ==="
+        "\n=== symbol_addrs.txt worklist: unnamed libultra blocks (add-only, gate-applied) ==="
     )
     print(
         "# review before applying; opcode-only match — confirm at the gate. min-insns=%d"

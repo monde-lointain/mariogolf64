@@ -12,6 +12,7 @@ usage: basis_gaps.py <src.py> <cov.json> <func_name>
 import ast
 import json
 import sys
+from pathlib import Path
 
 
 def decisions(fn):
@@ -46,7 +47,8 @@ def _src(node):
 
 def main():
     src_path, cov_path, func = sys.argv[1], sys.argv[2], sys.argv[3]
-    tree = ast.parse(open(src_path).read())
+    src_text = Path(src_path).read_text()
+    tree = ast.parse(src_text)
     target = next(
         (
             n
@@ -65,13 +67,13 @@ def main():
     decs = decisions(target)
     cc = 1 + len(decs)
 
-    cov = json.load(open(cov_path))
+    cov = json.loads(Path(cov_path).read_text())
     f = next(k for k in cov["files"] if k.endswith(src_path.split("/")[-1]))
     fd = cov["files"][f]
     missing_arcs = [a for a in fd["missing_branches"] if lo <= a[0] <= hi]
-    missing_lines = [l for l in fd["missing_lines"] if lo <= l <= hi]
+    missing_lines = [ln for ln in fd["missing_lines"] if lo <= ln <= hi]
 
-    srclines = open(src_path).read().splitlines()
+    srclines = src_text.splitlines()
     print(f"== {func}  lines {lo}-{hi} ==")
     print(
         f"basis-test cases needed (cyclomatic complexity) = {cc}  "

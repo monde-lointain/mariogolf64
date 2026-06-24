@@ -14,7 +14,6 @@ from __future__ import annotations
 import json
 
 import pytest
-
 from conftest import golden_dir, load_tool, regen, run_tool  # noqa: F401
 
 ROWS = "50"

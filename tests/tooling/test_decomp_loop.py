@@ -11,7 +11,6 @@ from __future__ import annotations
 import json
 
 import pytest
-
 from conftest import ROOT, golden_dir, load_tool, regen, run_tool  # noqa: F401
 
 dl = load_tool("decomp_loop")

@@ -2,8 +2,8 @@
 
 import argparse
 import os
-import sys
 import subprocess
+import sys
 import tempfile
 
 import decomp_common as dc

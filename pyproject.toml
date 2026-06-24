@@ -36,11 +36,23 @@ extend-exclude = [
 # error/warning Pylint rules (PLE/PLW). PLR (refactor) is intentionally omitted -
 # this is a lint pass, not the structural refactor (that is PR-2).
 select = ["E", "F", "I", "UP", "B", "SIM", "PLE", "PLW"]
-ignore = []
+ignore = [
+  # ruff format governs line width; residual E501 is unsplittable strings
+  # (docstrings, log f-strings, URLs). Ruff's own guidance: disable E501 under
+  # the formatter.
+  "E501",
+  # Tool entry points import heavy deps AFTER decomp_common.reexec_into_venv()
+  # and the tools/ sys.path setup - imports cannot be at top of file.
+  "E402",
+  # subprocess callers here capture and inspect returncode by hand; check=True
+  # would raise and change behavior.
+  "PLW1510",
+]
 
 [tool.ruff.lint.per-file-ignores]
-# Tests carry long golden/expectation strings; do not reflow-police them.
-"tests/tooling/*" = ["E501"]
+# Tests reuse helper/param names across cases (F811) and carry long golden
+# strings (E501, already globally ignored - kept here for intent).
+"tests/tooling/*" = ["F811"]
 
 [tool.basedpyright]
 pythonVersion = "3.12"
@@ -63,7 +75,10 @@ exclude = [
 ]
 
 [tool.vulture]
-paths = ["tools", "tests/tooling"]
+# Dead-code detection targets the first-party tools only. The test scaffolding
+# legitimately has unused stub params (lambda signatures matching the functions
+# they replace), which vulture cannot distinguish from real dead code.
+paths = ["tools"]
 exclude = [
   "tools/m2c",
   "tools/asm-differ",

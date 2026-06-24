@@ -30,7 +30,6 @@ import json
 import math
 import os
 import re
-import sys
 
 import decomp_common as dc
 
@@ -38,31 +37,11 @@ import decomp_common as dc
 # extracted to a leaf. _build_version_ord / _strip_inactive_version_branches plus the 3 PP/version
 # regexes the staying preprocessor scanners reference are re-imported here.
 from build_config import (
+    _BUILD_VERSION_IF_RE,
+    _PP_ENDIF_LINE_RE,
+    _PP_OPENING_DIRECTIVE_RE,
     _build_version_ord,
     _strip_inactive_version_branches,
-    _BUILD_VERSION_IF_RE,
-    _PP_OPENING_DIRECTIVE_RE,
-    _PP_ENDIF_LINE_RE,
-)
-
-# Asm-scanning layer (the per-`asm/<ROM>.s` body walk + the scans over it). Self-contained
-# and stdlib-only; imported here so this module keeps the yaml/upstream/hazard/scoring logic.
-# _FRAME_IMMS is shared with the C-side _c_signature below.
-from decomp_asm import (
-    _asm_jal_count,
-    _asm_signature,
-    _FRAME_IMMS,
-    asm_functions,
-    asm_function_addrs,
-    code_end_rom,
-    intrinsic_likely,
-    privileged_asm,
-    recover_unplaced_call_vram,
-    recover_unplaced_vram,
-    rodata_jtbls,
-    rodata_literals,
-    rodata_word_refs,
-    subseg_vram,
 )
 
 # C-source text strippers (extracted from this module; re-imported so call sites here read
@@ -74,6 +53,26 @@ from cpreprocess import (
     _strip_string_literals,
 )
 
+# Asm-scanning layer (the per-`asm/<ROM>.s` body walk + the scans over it). Self-contained
+# and stdlib-only; imported here so this module keeps the yaml/upstream/hazard/scoring logic.
+# _FRAME_IMMS is shared with the C-side _c_signature below.
+from decomp_asm import (
+    _FRAME_IMMS,
+    _asm_jal_count,
+    _asm_signature,
+    asm_function_addrs,
+    asm_functions,
+    code_end_rom,
+    intrinsic_likely,
+    privileged_asm,
+    recover_unplaced_call_vram,
+    recover_unplaced_vram,
+    rodata_jtbls,
+    rodata_literals,
+    rodata_word_refs,
+    subseg_vram,
+)
+
 # Hazard taxonomy (the Hazard record + its HAZARD_* kind vocabulary + coddog tuning),
 # extracted to a stdlib-only leaf so every module imports it without a cycle; call sites
 # (Hazard(...), HAZARD_*) read unchanged. See tools/pick_target_hazards.py.
@@ -82,44 +81,40 @@ from cpreprocess import (
 # kind args, and `.kind ==` comparisons. The detail-FORMAT kinds are now emitted via Hazard.<kind>()
 # factories, so their constants live only in pick_target_hazards (not re-imported here).
 from pick_target_hazards import (
-    Hazard,
     CODDOG_MIRROR_PCT,
-    HAZARD_FILE_STATIC,
-    HAZARD_DEFINES_DATA,
-    HAZARD_REFS_UNPLACED,
-    HAZARD_CALLS_UNPLACED,
-    HAZARD_NEEDS_HEADER,
-    HAZARD_NEEDS_DEFINE,
-    HAZARD_PACK,
-    HAZARD_SINGLE_FILE_PACK,
-    HAZARD_JAL_COUNT_MISMATCH,
-    HAZARD_ONE_TU,
-    HAZARD_CODDOG_FNCOUNT_MISMATCH,
     CODDOG_STRUCTURAL_BYTES_PER_LOC,
-    HAZARD_COMBINED_SUBSEG,
-    HAZARD_NON16ALIGN,
-    HAZARD_INTRINSIC_LIKELY,
-    HAZARD_RODATA_LITERAL,
-    HAZARD_RODATA_JTBL,
-    HAZARD_DATA_STATIC,
+    HAZARD_CALLS_UNPLACED,
+    HAZARD_CODDOG_FNCOUNT_MISMATCH,
     HAZARD_CODDOG_MIRROR,
-    HAZARD_CODDOG_STRUCTURAL,
     HAZARD_CODDOG_SOURCE_BANKED,
+    HAZARD_CODDOG_STRUCTURAL,
     HAZARD_CODDOG_TWIN,
-    HAZARD_GAME_REGION_MIRROR,
-    HAZARD_BLOCK_REORDER_SIBLING,
-    HAZARD_UNATTRIB_LEAF,
+    HAZARD_COMBINED_SUBSEG,
+    HAZARD_DATA_STATIC,
+    HAZARD_DEFINES_DATA,
+    HAZARD_FILE_STATIC,
+    HAZARD_INTRINSIC_LIKELY,
+    HAZARD_JAL_COUNT_MISMATCH,
+    HAZARD_NEEDS_DEFINE,
+    HAZARD_NEEDS_HEADER,
+    HAZARD_NON16ALIGN,
+    HAZARD_ONE_TU,
+    HAZARD_PACK,
+    HAZARD_REFS_UNPLACED,
+    HAZARD_RODATA_JTBL,
+    HAZARD_RODATA_LITERAL,
+    HAZARD_SINGLE_FILE_PACK,
+    Hazard,
 )
 
 # splat-yaml subseg parsing + .rodata carve-range helpers, extracted to a self-contained leaf;
 # call sites (parse_subsegs(), the _rodata_* carve helpers) read unchanged. See tools/pick_target_yaml.py.
 from pick_target_yaml import (
     YAML,
-    parse_subsegs,
-    _rodata_rom_ranges,
     _literal_in_rodata,
-    _rodata_carve_start_vram,
     _rodata_carve_end_vram,
+    _rodata_carve_start_vram,
+    parse_subsegs,
 )
 
 ROOT = dc.PROJECT_ROOT  # literal, symlink-stable root (see decomp_common.PROJECT_ROOT)
@@ -765,7 +760,7 @@ def _iter_upstream_functions(text):
         i = b + 1  # skip the consumed body so depth stays 0
 
 
-@functools.lru_cache(maxsize=None)
+@functools.cache
 def _upstream_file_func_count(lib, cpath):
     """Count top-level function DEFINITIONS in an upstream .c (version-active branches only).
 
@@ -783,7 +778,7 @@ def _upstream_file_func_count(lib, cpath):
     return sum(1 for _ in _iter_upstream_functions(text))
 
 
-@functools.lru_cache(maxsize=None)
+@functools.cache
 def _meaningful_loc(cpath):
     """Count non-blank, non-comment, non-preprocessor source lines of an upstream .c — a crude proxy
     for its compiled .text size, used by the coddog-structural size-ratio guard. Line-based
