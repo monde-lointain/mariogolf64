@@ -15,3 +15,11 @@ If:
 CompileFlags:
   Add:
     - -DUSE_EPI
+---
+If:
+  PathMatch: src/libnaudio/.*
+CompileFlags:
+  Add:
+    - -Isrc/libnaudio
+    - -Iinclude/libnaudio
+    - -Iinclude/libultra/PR
