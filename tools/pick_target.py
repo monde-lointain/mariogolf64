@@ -1645,6 +1645,23 @@ def placed_symbols():
     return names
 
 
+@functools.cache
+def placed_symbol_addrs():
+    """name -> address string for every curated symbol in the two name files (first wins) — the
+    name->addr companion to placed_symbols(), built once per process. Used by the
+    static-name-collision scan to cite the EXISTING placed address."""
+    addrs = {}
+    for nf in NAME_FILES:
+        if not os.path.exists(nf):
+            continue
+        with open(nf, errors="ignore") as f:
+            for line in f:
+                m = re.match(r"\s*([A-Za-z_]\w+)\s*=\s*(0x[0-9A-Fa-f]+)", line)
+                if m:
+                    addrs.setdefault(m.group(1), m.group(2))
+    return addrs
+
+
 # An un-named decomp symbol: `func_<vram>` or `func_ovl<n>_<vram>` (the splat scaffold placeholder).
 _FUNC_TOKEN_RE = re.compile(r"\bfunc_(?:ovl\d+_)?[0-9A-Fa-f]{6,8}\b")
 
@@ -3485,6 +3502,66 @@ def _resolve_audio(st, audio_indexes, audio_roots):
                 st.hazards.append(Hazard.coddog_structural(distinct[0], cpct))
         if st.up_lib is None:
             st.up_lib = lib
+    _deblk_audio_variant_misresolve(st)
+    _append_static_name_collisions(st)
+
+
+def _deblk_audio_variant_misresolve(st):
+    """Lift a FALSE `blk` an audio row inherited from the C-name index resolving `up_path` to the
+    WRONG source variant. The game's libnaudio C-name index can point `up_path` at the NON-sc
+    `libnaudio/src/<f>.c`, whose `#include "add/<f>_addNN.c"` body-fragments live in a tree the project
+    does NOT mirror (so they price NON-vendorable -> the named pass set `blocked` -> `blk`), while the
+    AUTHORITATIVE source is the coddog-confirmed n_audio_sc `<f>.c` with VENDORABLE
+    `inc/<f>_addNN.inc.c` fragments. The bogus `add/*.c` block masked the pickable mirror (it hid
+    n_save S133, n_resample S134, n_load S135). When a definitive audio coddog-mirror replaced
+    `up_path` with a DIFFERENT `mirror_path`, that coddog source is authoritative: drop the
+    wrong-variant needs-header hazard and re-derive `blocked` from the coddog source's (vendorable)
+    includes only. S135."""
+    if not (
+        st.blocked
+        and st.up_path
+        and st.mirror_path
+        and st.mirror_path != st.up_path
+        and any(
+            h.is_coddog_mirror() and h.coddog_pct() >= CODDOG_MIRROR_PCT
+            for h in st.hazards
+        )
+    ):
+        return
+    named_tagged, named_blk = _tagged_missing_includes(st.up_path, st.up_lib)
+    if not named_blk:
+        return  # the named pass was not the block source — leave blocked as-is
+    bogus = ",".join(named_tagged)
+    st.hazards[:] = [
+        h
+        for h in st.hazards
+        if not (h.kind == HAZARD_NEEDS_HEADER and h.detail == bogus)
+    ]
+    _, st.blocked = _tagged_missing_includes(st.mirror_path, st.up_lib)
+
+
+def _append_static_name_collisions(st):
+    """Flag each upstream function whose verbatim name is ALREADY a curated symbol placed OUTSIDE this
+    subseg (present in placed_symbols but absent from st.fns) -> a FILE-STATIC whose name reuses a
+    global that names a DIFFERENT vram (a non-micro twin holds it). Naming THIS subseg's instance as
+    that global would multiply-define the label at the gate scaffold, so the gate keeps it file-local
+    instead of adding a colliding symbol_addrs entry. Keyed on the coddog `mirror_path`; audio-scoped
+    (the n_audio_sc N_MICRO statics mirror non-micro twins, e.g. _decodeChunk @0x8009FA14 vs the placed
+    _decodeChunk @0x800A4E3C). Advisory. S135."""
+    if not st.mirror_path or not any(h.is_coddog_mirror() for h in st.hazards):
+        return
+    try:
+        text = UpstreamSource.get(st.mirror_path).text
+    except OSError:
+        return
+    placed = placed_symbol_addrs()
+    members = set(st.fns)
+    seen = set()
+    for name, _body in _iter_upstream_functions(text):
+        if name in members or name in seen or name not in placed:
+            continue
+        seen.add(name)
+        st.hazards.append(Hazard.static_name_collision(name, placed[name]))
 
 
 def _row_filtered(st, args, path, carried, cod_srcs):

@@ -1779,6 +1779,42 @@ read of the `#else`/`SAMPLE_ROUND` branch, not a full divergence hunt). This is 
 of the `coddog 99.99 == STRUCTURE` guard for one well-characterized family, NOT a license to skip the
 body check for heavier n_audio_sc files (`n_synthesizer.c`, `n_reverb.c`) or other libs.
 
+**Audio C-name-index mis-resolution de-blk (S135, `_deblk_audio_variant_misresolve`).** The game's
+libnaudio C-name index can resolve a fn's `up_path` to the **non-sc** `libnaudio/src/<f>.c` variant,
+whose `#include "add/<f>_addNN.c"` body-fragments live in a tree the project does NOT mirror, so the
+named-upstream pass prices them NON-vendorable and sets `blocked` → the row shows a FALSE `blk`. The
+AUTHORITATIVE source is the coddog-confirmed **n_audio_sc** `<f>.c` with VENDORABLE
+`inc/<f>_addNN.inc.c` fragments (the N_MICRO command-stream bodies). The bogus `add/*.c` block hid
+three pickable mirrors in a row (`n_save` S133, `n_resample` S134, `n_load` S135 — each a clean
+first-build atomic mirror once the false `blk` was seen through). `_resolve_audio` now lifts it: when
+a definitive (`>=CODDOG_MIRROR_PCT`) audio coddog-mirror replaced `up_path` with a DIFFERENT
+`mirror_path`, that coddog source is authoritative — it drops the wrong-variant `needs-header` hazard
+and re-derives `blocked` from the coddog source's (vendorable) includes only. A genuinely blocked
+audio row (the libmus `aud_*` DAG: real `libmus_config.h` / `libaudio.h` non-vendorable headers on the
+coddog source itself) stays `blk`, because the re-derive still finds a hard block. See also
+`#static-name-collision` for the companion static-name guard the same mirror surfaces.
+
+---
+
+## static-name-collision (an upstream file-static reuses a placed global name)
+
+**Flag:** `static-name-collision:<name>@<existing-addr>` (advisory, audio-scoped). Fires when a
+coddog-mirror's upstream `.c` defines a function whose verbatim name is ALREADY a curated symbol in
+`symbol_addrs.txt`/`ghidra_symbols.txt` placed at a DIFFERENT vram (the name is in `placed_symbols`
+but is NOT one of this subseg's member fns). The classic case is an N_MICRO file-static mirroring a
+non-micro twin that already holds the name: S135 `n_load.c`'s static `_decodeChunk` (this subseg's
+instance at `0x8009FA14`) versus the placed `_decodeChunk = 0x800A4E3C` (the non-micro audio decoder's
+static).
+
+**Why it matters:** a file-scope `static` is file-LOCAL — it emits no global symbol — so the verbatim
+mirror keeps the upstream name in the C body and needs NO `symbol_addrs.txt` entry. Adding one would
+be a duplicate global label (two `_decodeChunk` symbols at different vrams) and multiply-defines at the
+gate scaffold, breaking the green-ROM check. The flag tells the gate up-front: keep the static
+file-local, do not add a colliding `symbol_addrs` entry. Confirm the static has no EXTERNAL refs (a
+`jal func_<vram>` only from within its own subseg `.s`) — then the file-local static is correct and
+self-contained. S135 `n_load` carried `_decodeChunk` this way; `func_8009E4B0` (n_env/n_auxbus/
+n_drvrNew) shows the same on `_pullSubFrame`/`_getRate`/`_getVol`.
+
 ---
 
 ## vendored-header-incomplete (a reconstructed header is `(already-vendored)` yet missing a macro)

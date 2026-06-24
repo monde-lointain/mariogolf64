@@ -117,6 +117,11 @@ def test_coddog_factories():
         H.body_divergence_suspect("f.c", 99.99).render()
         == f"{h.HAZARD_BODY_DIVERGENCE_SUSPECT}:f.c@99.99"
     )
+    # static_name_collision (S135): an upstream file-static whose name already names a different vram
+    assert (
+        H.static_name_collision("_decodeChunk", "0x800A4E3C").render()
+        == f"{h.HAZARD_STATIC_NAME_COLLISION}:_decodeChunk@0x800A4E3C"
+    )
 
 
 def test_no_detail_factories():

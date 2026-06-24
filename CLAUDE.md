@@ -421,6 +421,7 @@ When `pick_target.py` flags a hazard (or a match shows its symptom), read the ma
 | `coddog-fncount-mismatch:<m>vs<n>` | #coddog-cross-ref |
 | `coddog-structural:<file>@<pct>` | #coddog-cross-ref |
 | `coddog-partial:<m>of<n>fn` | #coddog-cross-ref |
+| `static-name-collision:<name>@<addr>` | #static-name-collision |
 | `game-region-mirror:0x<vram>` | #game-region-mirror-o2-profile |
 | `game-embedded:0x<vram>` | #game-region-mirror-o2-profile |
 | libultra leaf, bare std header | #per-library-standard-c-header-isolation |

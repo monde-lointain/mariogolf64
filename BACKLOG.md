@@ -16,6 +16,34 @@ subordinate to the libultra goal. Target selection is `tools/pick_target.py` (sm
 the 8-point decompose gate fires on any seed ≥8. v2 classical track is active (since S11);
 mirror is the default, classical is first-class when the asm warrants it.
 
+**S135 — `n_load.c` BANKED (n_audio_sc N_MICRO ADPCM-decoder mirror; the cleanest inc-vendor yet).** The
+S134-"Next" #2, all 3 fns Match on the FIRST build → **md5-candidate 191→192**; asm subsegs 95→94.
+`n_alAdpcmPull` (the ADPCM pull iface) + `n_alLoadParam` (the AL_FILTER_SET_WAVETABLE/RESET setter) +
+the file-static `_decodeChunk` (func_8009FA14, called 3x from n_alAdpcmPull), a 1824B verbatim N_MICRO
+copy with the 2 `inc/n_load_add0{1,2}.inc.c` body-fragments vendored. **No rodata/data hazard** (unlike
+S134's MAX_RATIO carve) — a pure text mirror like n_save, first-build SHA with zero carve. The `blk`
+was a FALSE-FLAG from the named C-index resolving `up_path` to the WRONG non-sc `libnaudio/src/n_load.c`
+variant (`add/*.c` fragments, a tree not in UPSTREAM_SRC_ROOTS); the authoritative coddog source is the
+n_audio_sc `n_load.c` with vendorable `inc/*.inc.c` (exactly the mis-resolution the S134 retro
+predicted). **Only gate enabler = the subseg flip** (`[0x7A840]→[c, libnaudio/n_load]`); both real
+callees were named at the S134 gate. The static `_decodeChunk` stayed file-local (NO symbol_addrs add —
+a global would collide with the placed `_decodeChunk = 0x800A4E3C`, the non-micro decoder; func_8009FA14
+has no external refs). Quality 0/0/0/0 (first-build atomic, no spike). seed 8 / banked 8pt (mirror,
+seed-only; single-file-pack exemption). Retro applied 2 of 2: #1 `pick_target.py`
+`_deblk_audio_variant_misresolve` (drop the wrong-variant `add/*.c` block + re-derive `blocked` from the
+authoritative coddog `inc/*.inc.c` when a definitive audio coddog-mirror replaced `up_path`; libmus
+`aud_*` real-header rows stay `blk`); #2 `_append_static_name_collisions` + `static_name_collision`
+Hazard + `placed_symbol_addrs` (flags `static-name-collision:<name>@<addr>` when a coddog upstream
+file-static name is already placed at another vram; live on `func_8009E4B0`
+`_pullSubFrame`/`_getRate`/`_getVol`); factory test + `docs/hazards.md#static-name-collision` +
+`#coddog-cross-ref` de-blk note + CLAUDE.md index row; 4 goldens regen'd, suite 89 pass. **Cross-repo
+follow-up:** none new (callees named S134; the static is file-local). **Next:** the heavier remaining
+n_audio_sc band — `n_reverb.c` (`func_8009FD40`, pts13, 6 fns, 4 inc fragments + `defines-data:val,blob`
++ `refs-unplaced:L_INC` + `rodata-jtbl`/`rodata-literal` + 2 calls-unplaced; decompose/mixed) and
+`func_8009E4B0` (n_auxbus/n_drvrNew/n_env, pts13, 8 fns, multi-coddog-source pack now carrying the
+static-name-collision flags). The libmus `aud_*` DAG (`file-static` + BSS statics + real non-vendorable
+headers) stays genuinely `blk`. No carry-overs.
+
 **S134 — `n_resample.c` BANKED (n_audio_sc N_MICRO mirror + MAX_RATIO rodata-literal carve).** The
 S133-"Next" #1, both fns Match → **md5-candidate 190→191**; asm subsegs 96→95. `n_alResamplePull` +
 `n_alResampleParam` (the N_MICRO `switch` degenerates to `default:`→`n_alLoadParam`, no jtbl), a 480B

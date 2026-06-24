@@ -171,6 +171,15 @@ HAZARD_BODY_DIVERGENCE_SUSPECT = (
 # misread as a #cross-jump-tail-merge wall for 5 sprints; resolved S127 with a one-branch fix. Detail
 # `<file>@<pct>`. Advisory. See docs/hazards.md#cross-jump-tail-merge
 
+HAZARD_STATIC_NAME_COLLISION = (
+    "static-name-collision"  # a coddog-mirror upstream defines a FILE-STATIC whose
+)
+# verbatim name is ALREADY a curated symbol placed at a DIFFERENT vram (a non-micro twin holds the
+# name): naming THIS subseg's instance as that global would multiply-define the label at the gate
+# scaffold, so the gate keeps it file-local instead of adding a colliding symbol_addrs entry. Detail
+# `<name>@<existing-addr>`. Advisory. S135 n_load _decodeChunk (0x8009FA14) vs the placed
+# _decodeChunk @0x800A4E3C. See docs/hazards.md#static-name-collision
+
 
 @dataclasses.dataclass
 class Hazard:
@@ -469,6 +478,12 @@ class Hazard:
         return cls(
             HAZARD_GAME_REGION_MIRROR, f"0x{vram:08X}" if vram is not None else hex(off)
         )
+
+    @classmethod
+    def static_name_collision(cls, name: str, existing_addr: str) -> "Hazard":
+        """`<name>@<existing-addr>` — an upstream file-static whose name already names a DIFFERENT
+        placed vram (keep this instance file-local, no colliding symbol_addrs add)."""
+        return cls(HAZARD_STATIC_NAME_COLLISION, f"{name}@{existing_addr}")
 
     def coddog_file(self) -> str:
         """The `<file>` half of a coddog `<file>@<pct>` detail."""

@@ -156,19 +156,6 @@
     "vram": "0x800328E0"
   },
   {
-    "band": "cold",
-    "func": "n_alAdpcmPull",
-    "hazards": "single-file-pack:3fn[n_alAdpcmPull=n_load,n_alLoadParam=?,func_8009FA14=?],one-tu,needs-header:add/n_load_add01.c,add/n_load_add02.c,jal-count-mismatch:4vs3",
-    "kind": "asm-flip",
-    "nfns": 3,
-    "pts": "blk",
-    "rom": "0x7A840",
-    "score": -1624,
-    "size": 1824,
-    "upstream": "libnaudio",
-    "vram": "0x8009F440"
-  },
-  {
     "band": "-",
     "func": "mus_dma_init",
     "hazards": "pack:10fn[mus_dma_init=?,mus_dma_process=?,mus_dma_cb_new=?,mus_dma_callback=?,func_8009DBA0=?,mus_dma_sample=?,mus_set_sched=?,func_8009DDCC=?,func_8009DE30=?,mus_sched_install=?]",
@@ -648,5 +635,18 @@
     "size": 11936,
     "upstream": "none",
     "vram": "0x8021B030"
+  },
+  {
+    "band": "-",
+    "func": "func_ovl7_802033B0",
+    "hazards": "pack:18fn[func_ovl7_802033B0=?,func_ovl7_8020356C=?,func_ovl7_802035BC=?,func_ovl7_802035E4=?,func_ovl7_802035F8=?,func_ovl7_8020360C=?,func_ovl7_80203620=?,func_ovl7_8020370C=?,func_ovl7_80203984=?,func_ovl7_80203A30=?,func_ovl7_80203B60=?,func_ovl7_80203C90=?,func_ovl7_80203DC4=?,func_ovl7_80203DE8=?,func_ovl7_80203E14=?,func_ovl7_80203F70=?,func_ovl7_80204EA8=?,func_ovl7_802065FC=?]",
+    "kind": "asm-flip",
+    "nfns": 18,
+    "pts": 13,
+    "rom": "0x145A30",
+    "score": -13008,
+    "size": 13008,
+    "upstream": "none",
+    "vram": "0x802033B0"
   }
 ]
