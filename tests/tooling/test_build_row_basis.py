@@ -37,6 +37,8 @@ def _row(
     upstream_index=None,
     coddog_index=None,
     nusys_index=None,
+    audio_indexes=None,
+    audio_roots=None,
     lib=None,
     libultra_band_start=None,
     carried=frozenset(),
@@ -47,6 +49,8 @@ def _row(
     upstream_index = upstream_index or {}
     coddog_index = coddog_index or {}
     nusys_index = nusys_index or {}
+    audio_indexes = audio_indexes or {}
+    audio_roots = audio_roots or {}
     defaults = {
         "classify_subseg": lambda off, typ, path, sz, ui: (kind, list(fns), []),
         "src_func_callers": lambda: {},
@@ -76,6 +80,8 @@ def _row(
         {},
         coddog_index,
         nusys_index,
+        audio_indexes,
+        audio_roots,
         libultra_band_start,
     )
 

@@ -1692,6 +1692,33 @@ vs EN comments), so prefer the English 2.05. Tooling follow-up: `build_nusys_ref
 versions, or `pick_target` could cross-check the coddog hit against the subseg byte-size and flag a
 `coddog-size-mismatch` when they disagree.
 
+**Audio libraries (libmus / libnaudio / nuaulstl): a multi-version, multi-compiler sweep that pins
+the toolchain too.** MG64 embeds libmus (the Software Creations `mus_*` sequence player) plus an
+n_audio synth layer. These had no prebuilt reference at the project profile AND an unknown
+version/compiler, so `tools/build_audio_refs.sh` builds a `{compiler × opt × version}` MATRIX from
+the manifest `tools/audio_ref_versions.tsv` (one row per lib+version; the script expands compilers ×
+opts). Compilers: `kmc` (project KMC gcc 2.7.2, the proven path), `ido53`/`ido71` (IDO `cc` via
+ido-static-recomp, the authentic vendor compiler). Each cell → `build/audio-ref/<cell>/ref.o`;
+`tools/audio_sweep.sh` fingerprints MG64 against every cell → `tools/coddog/audio/<cell>_map.tsv`;
+`tools/audio_pin.py` ranks cells per lib by `(#exact-100%, #>=99%, #total, mean%)`, writes the
+canonical `tools/coddog/<lib>_map.tsv` + `tools/coddog/audio_pins.tsv` (lib → pinned src root), and a
+`PIN_REPORT.md`. `pick_target.py`'s `_resolve_audio` pass (the libmus/libnaudio/nuaulstl analog of
+`_resolve_nusys`) reads those maps + pins: a `>=99%` member hit flags `coddog-mirror:<file>@<pct>`,
+re-runs the trap battery against the pinned `.c`, and re-prices `upstream <lib>`. Absent maps leave
+ranking byte-identical (additive-pass invariant). Run via `make coddog-sweep-audio`.
+
+**Audio toolchain gotchas (resolved):** (1) the PC-distribution SDK headers/source (`~/n64sdk`,
+`~/development/sdks/n64-sdk`) have **CRLF** line terminators that IDO's IRIX `cfe` mishandles at
+`\`-continued macros (`gbi.h` combiner macros → "Illegal macro parameter name"); the build stages
+CR-stripped copies for IDO cells (KMC/GNU cpp tolerates CR and uses the project headers directly).
+(2) IDO emits IRIX `.options` + `.gptab.*` sections GNU `ld -r` can't represent → stripped after
+compile. (3) IDO `uopt -O3` SIGSEGVs on some TUs (logged + skipped, best-effort). **Result (this
+sweep):** libmus pins to KMC gcc `-O2` with the n64sdkmod source — `mus_cmd_*`↔`F*` and
+`func_<vram>`↔`__MusInt*` at 100% — confirming the audio engine is libmus built by the game's KMC
+toolchain (IDO cells matched 0, ruling IDO out). The `.text`-size cross-check is implicit in coddog's
+per-fn pct (an exact-100% match is byte-identical incl. size; a wrong version shows structural ~99%
+twins but few exact hits, the same discriminator as the nusys version-hunt above).
+
 ---
 
 ## vendored-header-incomplete (a reconstructed header is `(already-vendored)` yet missing a macro)

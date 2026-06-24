@@ -164,6 +164,23 @@ CODDOG_MAP = os.environ.get(
 NUSYS_CODDOG_MAP = os.environ.get(
     "NUSYS_CODDOG_MAP", os.path.join(ROOT, "tools/coddog/nusys_map.tsv")
 )
+# Optional audio coddog cross-ref maps — libmus / libnaudio / nuaulstl, written by
+# tools/audio_sweep.sh and pinned (version+compiler+flags) by tools/audio_pin.py, which also writes
+# audio_pins.tsv (lib -> the pinned on-disk source root). Absent by default → build_audio_indexes()
+# returns {} per lib and ranking is unchanged. A ≥CODDOG_MIRROR_PCT hit re-prices an un-named/none
+# candidate as that lib's verbatim mirror. The canonical `<lib>_map.tsv` is the winning matrix cell's
+# map; its `cfile` paths are source basenames resolved against the pinned root. See
+# docs/hazards.md#coddog-cross-ref.
+AUDIO_CODDOG_LIBS = ("libmus", "libnaudio", "nuaulstl")
+AUDIO_CODDOG_MAPS = {
+    lib: os.environ.get(
+        f"{lib.upper()}_CODDOG_MAP", os.path.join(ROOT, f"tools/coddog/{lib}_map.tsv")
+    )
+    for lib in AUDIO_CODDOG_LIBS
+}
+AUDIO_PINS = os.environ.get(
+    "AUDIO_PINS", os.path.join(ROOT, "tools/coddog/audio_pins.tsv")
+)
 
 # Approximate C function-definition: a return-type-led line ending in `name(`.
 UPSTREAM_DEF_RE = re.compile(r"^[A-Za-z_][\w \t\*]*?\b([A-Za-z_]\w+)\s*\(", re.M)
@@ -879,6 +896,44 @@ def _coddog_nusys_path(cfile):
     path, or None. The libnusys analog of _coddog_upstream_path; the 2.07 source lives under
     `<LIBNUSYS>/nusys/src/`."""
     p = os.path.join(LIBNUSYS, "nusys/src", cfile)
+    return p if os.path.isfile(p) else None
+
+
+def build_audio_indexes():
+    """Load the optional audio coddog maps -> {lib: {mgname: (cfile, pct)}} for each of
+    AUDIO_CODDOG_LIBS (libmus / libnaudio / nuaulstl), written by tools/audio_sweep.sh and pinned by
+    tools/audio_pin.py. Each `cfile` is a source basename resolved by _coddog_audio_path against the
+    pinned root. An absent map -> {} for that lib (ranking unchanged)."""
+    return {lib: _load_coddog_map(path) for lib, path in AUDIO_CODDOG_MAPS.items()}
+
+
+def build_audio_pin_roots():
+    """Parse tools/coddog/audio_pins.tsv -> {lib: pinned_srcdir}. audio_pin.py records the winning
+    matrix cell's source root per pinned lib; _coddog_audio_path joins map basenames against it.
+    Absent file -> {} (the audio resolver then can't resolve a path and skips its trap re-scan, but
+    still flags the coddog-mirror hit)."""
+    roots = {}
+    try:
+        with open(AUDIO_PINS, errors="ignore") as f:
+            for line in f:
+                if line.lstrip().startswith("#") or not line.strip():
+                    continue
+                parts = line.rstrip("\n").split("\t")
+                if len(parts) >= 5:
+                    roots[parts[0]] = os.path.expanduser(parts[4])
+    except OSError:
+        return {}
+    return roots
+
+
+def _coddog_audio_path(cfile, roots, lib):
+    """Resolve an audio coddog map `cfile` (a source basename) to an on-disk path under the pinned
+    `lib` root (from build_audio_pin_roots), or None. The libmus/libnaudio/nuaulstl analog of
+    _coddog_nusys_path."""
+    root = roots.get(lib)
+    if not root:
+        return None
+    p = os.path.join(root, cfile)
     return p if os.path.isfile(p) else None
 
 
@@ -3266,6 +3321,41 @@ def _resolve_nusys(st, nusys_index):
                 st.up_lib = "libnusys"
 
 
+def _resolve_audio(st, audio_indexes, audio_roots):
+    """The libmus / libnaudio / nuaulstl analog of _resolve_nusys, kept SEPARATE so absent audio maps
+    leave libultra/libnusys ranking byte-identical. The game links libmus (the `mus_*` sequence
+    player) plus an n_audio synth layer; tools/audio_pin.py picks the matching version+compiler+flags
+    and writes the canonical per-lib maps. Iterate the audio libs in order; the first whose members
+    coddog-match at >= CODDOG_MIRROR_PCT claims the subseg: flag coddog-mirror, re-run the trap battery
+    against the pinned `.c` (clib=lib), apply the single-identity structural guard, and re-price to
+    that lib so seed_points drops it off the classical path. up_lib gating makes it one-lib-per-subseg
+    and idempotent across the three passes."""
+    for lib in AUDIO_CODDOG_LIBS:
+        index = audio_indexes.get(lib) or {}
+        if not index or st.up_lib not in (None, lib):
+            continue
+        az = [
+            (fn, index[fn][0], index[fn][1])
+            for fn in st.fns
+            if fn in index and index[fn][1] >= CODDOG_MIRROR_PCT
+        ]
+        if not az:
+            continue
+
+        def resolver(cfile, _lib=lib):
+            return _coddog_audio_path(cfile, audio_roots, _lib)
+
+        distinct = _append_coddog_mirror_sources(st, az, resolver, lib)
+        if len(st.fns) > 1 and len(distinct) == 1:
+            cl1 = resolver(distinct[0])
+            loc = _meaningful_loc(cl1) if cl1 else 0
+            if loc and st.size > CODDOG_STRUCTURAL_BYTES_PER_LOC * loc:
+                cpct = max(p for _, c, p in az if c == distinct[0])
+                st.hazards.append(Hazard.coddog_structural(distinct[0], cpct))
+        if st.up_lib is None:
+            st.up_lib = lib
+
+
 def _row_filtered(st, args, path, carried, cod_srcs):
     """Return True to DROP the row. Two skip conditions: (1) the --lib scope filter — a row whose
     path / coddog-source / up_lib / member names don't match the requested library; and (2) a
@@ -3299,6 +3389,8 @@ def _build_row(
     sig_index,
     coddog_index,
     nusys_index,
+    audio_indexes,
+    audio_roots,
     _libultra_band_start,
 ):
     """Classify one subseg and produce its scored row dict, or None to skip it (bss,
@@ -3317,6 +3409,7 @@ def _build_row(
     _resolve_primary_coddog(st, coddog_index, upstream_index)
     _resolve_tail_coddog(st, coddog_index, upstream_index)
     _resolve_nusys(st, nusys_index)
+    _resolve_audio(st, audio_indexes, audio_roots)
 
     # A `coddog-mirror` hazard pins the row to an ultralib(libultra) source even when up_lib stayed
     # None — audio coddog hits are deliberately NOT re-priced to libultra (they were header-`-I`-
@@ -3360,10 +3453,19 @@ def _build_row(
 
 
 def build_rows(
-    args, upstream_index, carried, sig_index, coddog_index=None, nusys_index=None
+    args,
+    upstream_index,
+    carried,
+    sig_index,
+    coddog_index=None,
+    nusys_index=None,
+    audio_indexes=None,
+    audio_roots=None,
 ):
     coddog_index = coddog_index or {}
     nusys_index = nusys_index or {}
+    audio_indexes = audio_indexes or {}
+    audio_roots = audio_roots or {}
     subs = parse_subsegs()
     # The lowest-rom `libultra/` subseg = the start of the libultra code band. A libultra-source
     # mirror BELOW it is game-region (-O2), not libultra-band (-O3) — feeds HAZARD_GAME_REGION_MIRROR.
@@ -3384,6 +3486,8 @@ def build_rows(
             sig_index,
             coddog_index,
             nusys_index,
+            audio_indexes,
+            audio_roots,
             _libultra_band_start,
         )
         if row is not None:
@@ -3411,6 +3515,8 @@ def main():
         build_signature_index(),
         build_coddog_index(),
         build_coddog_nusys_index(),
+        build_audio_indexes(),
+        build_audio_pin_roots(),
     )
     if args.json:
         print(json.dumps(rows, indent=1))

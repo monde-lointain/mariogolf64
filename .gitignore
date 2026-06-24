@@ -95,3 +95,11 @@ ghidra/
 tools/coddog/coddog_map.tsv
 # nusys coddog cross-ref map (local, depends on the build/nusys-ref/ reference + coddog)
 tools/coddog/nusys_map.tsv
+# audio coddog cross-ref maps + version pin (local, depend on the build/audio-ref/ matrix + coddog).
+# The scripts (tools/audio_*.sh, tools/audio_pin.py) and the manifest (tools/audio_ref_versions.tsv)
+# stay tracked; only their generated output is ignored.
+tools/coddog/audio/
+tools/coddog/libmus_map.tsv
+tools/coddog/libnaudio_map.tsv
+tools/coddog/nuaulstl_map.tsv
+tools/coddog/audio_pins.tsv

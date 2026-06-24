@@ -21,10 +21,16 @@ ROWS = "50"
 
 @pytest.fixture(autouse=True)
 def _no_live_nusys_map(monkeypatch):
-    """Keep the live, gitignored, build-dependent nusys coddog map (tools/coddog/nusys_map.tsv,
-    written by tools/nusys_sweep.sh) out of every test so the goldens stay reproducible — the same
-    reason each golden neutralizes CODDOG_MAP. A nusys-specific test can override NUSYS_CODDOG_MAP."""
+    """Keep the live, gitignored, build-dependent coddog maps (tools/coddog/nusys_map.tsv +
+    the audio maps written by tools/audio_sweep.sh + tools/audio_pin.py) out of every test so the
+    goldens stay reproducible — the same reason each golden neutralizes CODDOG_MAP. A lib-specific
+    test can override the relevant var. The additive-pass invariant: with these absent, ranking is
+    byte-identical to the pre-audio behavior the committed goldens capture."""
     monkeypatch.setenv("NUSYS_CODDOG_MAP", "/nonexistent/nusys_map.tsv")
+    monkeypatch.setenv("LIBMUS_CODDOG_MAP", "/nonexistent/libmus_map.tsv")
+    monkeypatch.setenv("LIBNAUDIO_CODDOG_MAP", "/nonexistent/libnaudio_map.tsv")
+    monkeypatch.setenv("NUAULSTL_CODDOG_MAP", "/nonexistent/nuaulstl_map.tsv")
+    monkeypatch.setenv("AUDIO_PINS", "/nonexistent/audio_pins.tsv")
 
 
 def test_vendorable_tu_missing_defines(tmp_path, monkeypatch):

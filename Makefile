@@ -191,6 +191,16 @@ coddog-sweep-nusys:
 	./tools/build_nusys_ref.sh
 	./tools/nusys_sweep.sh
 
+# The audio analog: build the libmus / libnaudio / nuaulstl reference matrix (build/audio-ref/, a
+# {compiler x opt x version} sweep over tools/audio_ref_versions.tsv), fingerprint MG64 against every
+# cell, then pin the version+compiler+flags and write the canonical tools/coddog/<lib>_map.tsv +
+# audio_pins.tsv that pick_target.py reads. All outputs gitignored. The build is the slow step (IDO +
+# KMC across the matrix); re-run audio_sweep.sh + audio_pin.py alone after each `make`.
+coddog-sweep-audio:
+	./tools/build_audio_refs.sh
+	./tools/audio_sweep.sh
+	./venv/bin/python3 tools/audio_pin.py
+
 sync-names:
 	-GHIDRA_REPO="$${MARIOGOLF64_GHIDRA_REPO:-$$HOME/development/reversing/ghidra/mariogolf64}"; \
 	  SYNC_PY="$$GHIDRA_REPO/venv/bin/python3"; \
@@ -209,6 +219,7 @@ help:
 	@echo '  test-tools/check run the tooling characterization suite'
 	@echo '  coddog-sweep     fingerprint vs ultralib VERSION_J'
 	@echo '  coddog-sweep-nusys  build the nusys-2.07 reference + fingerprint vs it'
+	@echo '  coddog-sweep-audio  build the libmus/libnaudio/nuaulstl matrix + fingerprint + pin'
 	@echo '  sync-names       import curated names from the Ghidra workspace'
 	@echo 'Variables: V=1 (full commands), NONMATCHING=1 (WIP C, skip md5).'
 
@@ -239,4 +250,4 @@ spotcheck-build:
 clean-nonmatchings:
 	rm -rf nonmatchings/*/
 
-.PHONY: all clean distclean setup setup-dev extract test-tools check check-all format format-check lint typecheck deadcode coddog-sweep coddog-sweep-nusys sync-names help nonmatching-func spotcheck-build clean-nonmatchings
+.PHONY: all clean distclean setup setup-dev extract test-tools check check-all format format-check lint typecheck deadcode coddog-sweep coddog-sweep-nusys coddog-sweep-audio sync-names help nonmatching-func spotcheck-build clean-nonmatchings

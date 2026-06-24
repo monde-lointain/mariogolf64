@@ -183,19 +183,6 @@
   },
   {
     "band": "-",
-    "func": "audio_sched_thread_entry",
-    "hazards": "intrinsic-likely:cp0-asm(identify-TU)",
-    "kind": "asm-flip",
-    "nfns": 1,
-    "pts": 5,
-    "rom": "0x8F250",
-    "score": -496,
-    "size": 496,
-    "upstream": "none",
-    "vram": "0x800B3E50"
-  },
-  {
-    "band": "-",
     "func": "mus_heap_init",
     "hazards": "pack:8fn[mus_heap_init=?,func_8009E28C=?,func_8009E2BC=?,func_8009E2D4=?,func_8009E2E0=?,func_8009E30C=?,mus_samples_init=?,mus_samples_current=?]",
     "kind": "asm-flip",

@@ -1,0 +1,25 @@
+# Audio-library reference matrix manifest (tab-separated). One row per (lib, version, source tree).
+# tools/build_audio_refs.sh expands each row over the compiler x opt matrix
+#   compilers: kmc ido53 ido71   (override: COMPILERS="kmc ido53")
+#   opt levels: O1 O2 O3          (override: OPTS="O2")
+# producing one coddog reference object per cell at build/audio-ref/<lib>_<ver>_<compiler>_<opt>/.
+# Columns:  lib  ver  srcdir  defines  incdirs
+#   lib      libmus | libnaudio | nuaulstl   (the pick_target upstream key)
+#   ver      short label, unique within lib   (e.g. n64sdkmod, sdk40v312)
+#   srcdir   dir whose top-level *.c are the TUs (~ ok); nested .inc.c are #included, not compiled
+#   defines  comma-separated -D names (no -D), or "none"
+#   incdirs  extra comma-separated -I dirs (~ ok), or "none"  (srcdir, srcdir/.., srcdir/../include
+#            and the project include set are always added)
+#
+# lib	ver	srcdir	defines	incdirs
+libmus	n64sdkmod	~/development/repos/n64sdkmod/packages/libmus/usr/src/PR/libsrc/libmus/src	none	none
+libmus	n64sdkmod_naudio	~/development/repos/n64sdkmod/packages/libmus/usr/src/PR/libsrc/libmus/src	SUPPORT_NAUDIO	none
+libmus	sdk30v200	~/n64sdk/3.0/SGI/usr/local/n64kit/nusys/src/nusys-1.10/mus	none	none
+libmus	sdk40v312	~/n64sdk/4.0/N64SoundTools/DiskLS/lib-src	none	none
+libmus	sdk40v312_naudio	~/n64sdk/4.0/N64SoundTools/DiskLS/lib-src	SUPPORT_NAUDIO	none
+libnaudio	n64sdkmod_sc	~/development/repos/n64sdkmod/packages/libnaudio/usr/src/PR/libsrc/n_audio_sc/src	N_MICRO	none
+libnaudio	sdkJ	~/n64sdk/J/pc/Ultra_Dev_Demo/usr/src/PR/libsrc/libnaudio	N_MICRO	none
+libnaudio	ultra20K	~/development/sdks/n64-sdk/ultra/usr/src/pr/libsrc/libnaudio	N_MICRO	none
+nuaulstl	n64sdkmod207	~/development/repos/n64sdkmod/packages/libnusys/usr/src/PR/libsrc/nusys-2.07/nualstl3/src	NU_SYSTEM,USE_EPI	~/development/repos/n64sdkmod/packages/libmus/usr/include/n64
+nuaulstl	sdk30v110	~/n64sdk/3.0/SGI/usr/local/n64kit/nusys/src/nusys-1.10/nualstl	NU_SYSTEM,USE_EPI	~/development/repos/n64sdkmod/packages/libmus/usr/include/n64
+nuaulstl	sdk205	~/development/sdks/n64-sdk/nintendo/n64kit/nusys/src/nusys-2.05/nualstl3	NU_SYSTEM,USE_EPI	~/development/repos/n64sdkmod/packages/libmus/usr/include/n64
