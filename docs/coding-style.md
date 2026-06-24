@@ -1,14 +1,18 @@
 # Coding guidelines (on-demand reference)
 
+<role>
 The C quality bar and naming conventions for code promoted into the tree, grounded in Steve
 McConnell's *Code Complete* (ch 11 for variable names, ch 31 for layout and style, ch 32 for
 self-documenting code). `CLAUDE.md` keeps a compact naming table; read this when writing or naming
 non-trivial C (classical matches, struct authoring, new helpers).
+</role>
 
-Scope: these rules govern classical / hand-authored C only. Verbatim upstream mirrors under
+<scope>
+These rules govern classical / hand-authored C only. Verbatim upstream mirrors under
 `src/libultra/`, `src/libkmc/`, and `src/mgu/` are exempt and stay byte-identical to upstream: never
 rename, reformat, re-comment, or split-to-one-statement-per-line a mirror, since that breaks the
 match.
+</scope>
 
 ## Prime directive: manage complexity
 
