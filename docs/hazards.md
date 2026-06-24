@@ -1949,6 +1949,8 @@ transitive header's macro is undone) and before the function definition; then th
 name-macro/`INITIALIZE_FUNC` reconcile exports the curated symbol. SHA-neutral (a symbol-name change,
 not a byte change). Same one-line fix as the S31 `#undef nuGfxInit`.
 
+**Caveats:**
+
 **NOT this hazard (the S102 contrast):** if the upstream does NOT define a function named
 `<curated_fn>` (the curated name is a macro ALIAS for a DIFFERENT symbol the upstream defines, namely
 the macro's RHS), then the body never contains the `<curated_fn>` token, no `#undef` is needed, and the
@@ -2056,6 +2058,8 @@ func_<vram>` from a banked C object after a `symbol_addrs.txt` add.
 name (both the `extern` declaration and the call). The codegen is identical (same `jal` target), so
 the ROM SHA-1 is unchanged. S77: adding `__osSpGetStatus`=0x800B16A0 evicted `src/main/func_800AB600.c`
 (`extern u32 func_800B16A0(void)` + `func_800B16A0()` → `__osSpGetStatus`).
+
+**Sub-cases / variants:**
 
 **Companion case A: multi-global mirror flip evicts STILL-ASM callers (S106).** The dual direction:
 flipping a mirror whose source defines ≥2 GLOBAL functions makes the C object export those globals
