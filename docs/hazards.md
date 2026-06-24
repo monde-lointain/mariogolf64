@@ -1727,6 +1727,17 @@ toolchain (IDO cells matched 0, ruling IDO out). The `.text`-size cross-check is
 per-fn pct (an exact-100% match is byte-identical incl. size; a wrong version shows structural ~99%
 twins but few exact hits, the same discriminator as the nusys version-hunt above).
 
+**The n_audio_sc `n_syn*` setter vein is empirically clean-verbatim @99.99 (S129/S130, 6/6).** Every
+`n_alSyn*` setter mirror banked so far has been a byte-verbatim first-build despite carrying
+`body-divergence-suspect:<file>@99.99`: S129 banked SetPan/SetPitch/StartVoice/StopVoice (4/4) and
+S130 banked AddPlayer/SetVol (2/2), all Match on the first `make`. These setters are tiny
+(`__n_allocParam` → fill an `ALParam`/`ALStartParam` → `n_alEnvmixerParam`, or a list-prepend under an
+interrupt mask), so for THIS homogeneous vein the `@99.99` body-divergence flag is a reliable false
+fire and the diagnosis pass (`#cross-jump-tail-merge`) can stay lightweight (a quick asm-vs-upstream
+read of the `#else`/`SAMPLE_ROUND` branch, not a full divergence hunt). This is an empirical narrowing
+of the `coddog 99.99 == STRUCTURE` guard for one well-characterized family, NOT a license to skip the
+body check for heavier n_audio_sc files (`n_synthesizer.c`, `n_reverb.c`) or other libs.
+
 ---
 
 ## vendored-header-incomplete (a reconstructed header is `(already-vendored)` yet missing a macro)

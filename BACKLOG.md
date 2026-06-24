@@ -16,6 +16,22 @@ subordinate to the libultra goal. Target selection is `tools/pick_target.py` (sm
 the 8-point decompose gate fires on any seed ≥8. v2 classical track is active (since S11);
 mirror is the default, classical is first-class when the asm warrants it.
 
+**S130 — `n_synaddplayer.c` + `n_synsetvol.c` BANKED (libnaudio n_audio_sc setter vein, cont.).** Two
+verbatim `@99.99` single-fn mirrors → **md5-candidate 183→185**; asm subsegs 102→100. `n_alSynAddPlayer`
+(0x800A07B0, interrupt-masked player list-prepend) was a pure cp; `n_alSynSetVol` (0x800A0BB0, the
+set-pan sibling + a `_n_timeToSamples(t)` transition-time line) needed one callee recover
+(`_n_timeToSamples`=0x800A1274). The flagged `calls-unplaced:SAMPLE184,__osError` were BOTH false
+positives (asm-verified): SAMPLE184 = dead `#ifdef SAMPLE_ROUND` macro, __osError = non-_DEBUG ALFailIf.
+Both Match FIRST build. Quality 0/0/0/0. seed 5 / banked 5pt (mirror, seed-only). Post-bank PO-directed
+ch31/32 rework (codegen-neutral, ROM byte-identical). Retro applied 3 of 3: #1 `pick_target.py`
+calls-unplaced asm-jal reconciliation + band-internal-macro exclusion (drops the SAMPLE184/__osError/
+__assertBreak/`__MusIntSched_*` phantoms, real callees preserved; suite 89 pass); #2 `#coddog-cross-ref`
+n_syn* @99.99 empirically-verbatim note (6/6); #3 `n_mainbus.c` carry-over. **Cross-repo follow-up:** 2
+fn names + `_n_timeToSamples` → `sync_decomp_names.py --import-from-decomp`. **Next:** the de-phantomed
+n_syn* setters are the cleanest pickable — `func_800A09E0` (n_synsetfxmix, pts-3), `func_800A0800`
+(n_synallocvoice, pts-3), `func_800A1320`/`n_mainbus.c` needs a split first (see Carry-overs); the `blk`
+audio libs (`n_save`/`n_load`/`n_reverb` `.inc.c` headers; the libmus `aud_*` DAG) remain.
+
 **S129 — `src/libnaudio` STOOD UP + 4 n_syn* setter mirrors BANKED (n_audio_sc header band unlock).**
 The `audio` scope's only pickable work was the game-fault grab-bag (classical) or the `blk` audio libs
 (header-rejects); PO pulled the **header enabler** as the goal (the 8-gate's scaffolding branch). Stood
@@ -1968,6 +1984,22 @@ by `/sprint-plan`:
   vendored upstream version can diverge from the game's rev on a single immediate (S122 nusys-2.07
   `NU_CONT_THREAD_ID=6` vs MG64's 5), and that surfaces only at first build unless reconciled here.
   A near-free retry missing any of these is a half-scoped spike — finish the scope before deferring.
+
+- **Spike (S130) — `n_mainbus.c` (`[0x7C720, asm]`, 2-fn subseg vs 1 upstream fn).** The subseg holds
+  TWO fns — `func_800A1320` (0x800A1320, ~0x50/80B) + `func_800A1370` (= `n_alMainBusPull`, referenced
+  as a `calls-unplaced` callee by `n_save.c`/func_800A12D0) — but coddog flags `coddog-mirror:n_mainbus.c@99.99`
+  on the subseg while upstream `n_audio_sc/src/n_mainbus.c` defines only ONE function (`n_alMainBusPull`).
+  So `func_800A1320` is NOT n_mainbus.c (a coddog structural fingerprint match, the `#coddog-cross-ref`
+  step-5/6 class), and the subseg is multi-file → it is NOT a clean seed-only verbatim mirror.
+  **Blocker / scope before retry:** (1) disassemble `func_800A1320` and identify its true upstream —
+  likely an adjacent n_audio_sc bus/save pull fn coddog mis-attributed to n_mainbus (check `n_auxbus.c`
+  `n_alAuxBusPull`, `n_save.c` save/buffer fns; the SC bus-pull fns share the aClearBuffer/aMix shape
+  coddog hashes); (2) split `[0x7C720]` at the upstream-file boundary (func_800A1320 head vs
+  n_alMainBusPull @0x800A1370 = +0x50) so each half mirrors its own `.c`; (3) then mirror `n_mainbus.c`
+  (just `n_alMainBusPull`, ~128B, a verbatim `aClearBuffer`/`(mainBus->filter.handler)()`/`aMix` cp).
+  Note `n_alMainBusPull`=0x800A1370 is already needed as the `n_save.c` callee, so placing it serves both.
+  The rest of the n_syn* setter vein (n_synsetfxmix/n_synallocvoice/n_sl, now de-phantomed by the S130
+  calls-unplaced reconciliation) is cleaner and should be mined first.
 
 - _(Spike (S121) — `contRmbControl` (0x800A19E0), the last INCLUDE_ASM stub in
   `src/libnusys/mainlib/nucontrmbmgr.c` **RESOLVED + banked S127** — the "compiler wall" was a

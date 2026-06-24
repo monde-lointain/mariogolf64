@@ -25,6 +25,15 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 130 — n_synaddplayer.c + n_synsetvol.c (libnaudio n_audio_sc setter mirrors) — 2026-06-24
+- Increment: 2 verbatim `@99.99` mirrors banked (n_alSynAddPlayer + n_alSynSetVol), both Match FIRST build. md5-candidate **183→185** (+2); asm subsegs 102→100 (2 flips). ROM SHA-1 == baserom.
+- Quality: 0/0/0/0 this sprint (stuck-far/permuter/carried/re-opened).
+- Seed: committed 5pt; banked 5pt; regime mirror (8-gate clear at 5<8; 2× single-file-pack verbatim exemption).
+- What helped: the S129-laid n_audio_sc header DAG + placed shared externs made this a near-free vein continuation; the gate's asm-vs-upstream check unmasked both `calls-unplaced` flags as false (SAMPLE184 = dead `#ifdef SAMPLE_ROUND` macro, __osError = non-_DEBUG ALFailIf), leaving one real callee to recover (`_n_timeToSamples`=func_800A1274). Both files first-build Match.
+- Friction: none on the bank. The post-bank ch31/32 rework was PO-directed out-of-band (codegen-neutral, ROM byte-identical); the only retro engineering cost was suggestion #1 (the calls-unplaced reconciliation + the banked-fixture test repoint).
+- Applied: 3 of 3 — #1 `pick_target.py` `_reconcile_calls_unplaced` (asm-jal-budget ground-truth filter: budget==0 → drop all, surplus → drop debug-only-callee family) + `_local_header_macro_names` (exclude band-internal `"..."`-header macros, e.g. SAMPLE184, and macro-shadowed prototypes like `__MusIntSched_*`); drops SAMPLE184/__osError/__assertBreak phantoms with all real callees preserved (audited vs asm); repointed `test_coddog_suppresses_maybe_upstream` off the now-banked `func_800A07B0` fixture → `func_80070FD0`; 4 golden regen; suite 89 pass. #2 `docs/hazards.md#coddog-cross-ref` note: the n_audio_sc n_syn* setter vein is empirically clean-verbatim @99.99 (6/6 S129+S130), so its body-divergence diagnosis pass stays lightweight. #3 BACKLOG carry-over: n_mainbus.c (2-fn subseg pack vs 1 upstream fn — identify func_800A1320 + split before mirroring).
+- Carry-over: none from committed work. New: n_mainbus.c (see `## Carry-overs`).
+
 ## Sprint 129 — src/libnaudio stood up + 4 n_syn* setter mirrors (n_audio_sc header band unlock) — 2026-06-24
 - Increment: 4 verbatim mirrors banked (n_alSynSetPan/SetPitch/StartVoice/StopVoice), all Match FIRST build. md5-candidate **179→183** (+4); asm subsegs 106→102 (4 flips). ROM SHA-1 == baserom.
 - Quality: 0/0/0/0 this sprint (stuck-far/permuter/carried/re-opened).

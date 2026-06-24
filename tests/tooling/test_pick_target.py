@@ -371,34 +371,34 @@ def test_coddog_suppresses_maybe_upstream(tmp_path, monkeypatch):
     the IDF guess is redundant noise that can point at the WRONG file (S75 func_800A7190 carried
     coddog-mirror:src/io/contquery.c@99.99 AND a mis-pointed maybe-upstream:voice*). An audio or
     sub-threshold coddog hit stays advisory, so the guess is NOT suppressed there."""
-    # Baseline, map-free: func_800A07B0 is an un-named candidate carrying the IDF guess.
+    # Baseline, map-free: func_80070FD0 is an un-named candidate carrying the IDF guess.
     monkeypatch.setenv("CODDOG_MAP", "/nonexistent/coddog_map.tsv")
     base = {
         r["func"]: r
         for r in json.loads(run_tool("pick_target", "--json", "-n", "400").stdout)
     }
-    assert "maybe-upstream" in base["func_800A07B0"]["hazards"], (
+    assert "maybe-upstream" in base["func_80070FD0"]["hazards"], (
         "baseline expects the IDF guess"
     )
 
     # Definitive non-audio coddog hit -> maybe-upstream suppressed; coddog-mirror stands alone.
     mapf = tmp_path / "coddog_map.tsv"
-    mapf.write_text("func_800A07B0\t__osFakeMirror\tsrc/io/fake.c\t99.99\n")
+    mapf.write_text("func_80070FD0\t__osFakeMirror\tsrc/io/fake.c\t99.99\n")
     monkeypatch.setenv("CODDOG_MAP", str(mapf))
     hit = {
         r["func"]: r
         for r in json.loads(run_tool("pick_target", "--json", "-n", "400").stdout)
-    }["func_800A07B0"]
+    }["func_80070FD0"]
     assert "coddog-mirror:src/io/fake.c@99.99" in hit["hazards"]
     assert "maybe-upstream" not in hit["hazards"], hit["hazards"]
 
     # Audio coddog hit is advisory-only (header-gated, not re-priced) -> the guess is retained.
-    mapf.write_text("func_800A07B0\t__alFakeAudio\tsrc/audio/fake.c\t99.99\n")
+    mapf.write_text("func_80070FD0\t__alFakeAudio\tsrc/audio/fake.c\t99.99\n")
     monkeypatch.setenv("CODDOG_MAP", str(mapf))
     aud = {
         r["func"]: r
         for r in json.loads(run_tool("pick_target", "--json", "-n", "400").stdout)
-    }["func_800A07B0"]
+    }["func_80070FD0"]
     assert "coddog-mirror:src/audio/fake.c@99.99" in aud["hazards"]
     assert "maybe-upstream" in aud["hazards"], aud["hazards"]
 

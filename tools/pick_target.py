@@ -1962,6 +1962,65 @@ def _fn_ptr_param_names(text):
     return names
 
 
+_LOCAL_INCLUDE_RE = re.compile(r'^\s*#\s*include\s+"([^"]+)"', re.M)
+_MACRO_DEF_NAME_RE = re.compile(r"^\s*#\s*define\s+([A-Za-z_]\w*)", re.M)
+
+
+def _local_header_macro_names(cpath):
+    """Object- and function-like macro names `#define`d in the `"..."`-quoted headers the .c
+    includes, resolved relative to the .c's own directory. all_func_macros() scans only the fixed
+    libultra/PR header set, so a band-internal header (n_audio_sc's n_synthInternals.h, which
+    `#define`s SAMPLE184) is invisible to it and its macros over-flag calls_unplaced as phantom
+    callees. A macro inlines to arithmetic and never emits a named `jal`, so excluding these is
+    always safe (it can only remove a false flag, never hide a real callee)."""
+    names = set()
+    try:
+        text = UpstreamSource.get(cpath).text
+    except OSError:
+        return names
+    base = os.path.dirname(cpath)
+    for inc in _LOCAL_INCLUDE_RE.findall(text):
+        hpath = os.path.normpath(os.path.join(base, inc))
+        try:
+            names.update(_MACRO_DEF_NAME_RE.findall(UpstreamSource.get(hpath).text))
+        except OSError:
+            continue
+    return names
+
+
+# Functions that appear ONLY inside `#ifdef _DEBUG`-guarded code (libaudio's ALFailIf expands to
+# `__osError`, <assert.h> to `__assert`) that this release build strips. The hand-rolled CPP
+# emulation can capture the _DEBUG side of a dual macro definition (all_func_macros reads the first
+# `#define ALFailIf`, the _DEBUG one with __osError), over-flagging them; the asm reconciliation
+# below drops them when the ROM fn has no unnamed `jal` budget for them. Used only to choose WHICH
+# surplus name to drop, never to drop below the asm budget.
+_DEBUG_ONLY_CALLEES = frozenset({"__osError", "__assert", "__osAssert", "osSyncPrintf"})
+
+
+def _reconcile_calls_unplaced(flagged, rom_off, primary, unnamed_jal_addrs):
+    """Ground-truth filter over `flagged` (a `calls_unplaced` result) using the candidate fn's asm
+    `jal` evidence. The count of distinct unnamed `jal func_<addr>` targets is a HARD budget on how
+    many flagged names can be real: each real unplaced callee IS exactly one unnamed jal, so a real
+    callee is always within budget and never dropped. When more names are flagged than the asm has
+    unnamed jals, the surplus are phantoms the CPP-emulation over-kept (a dead `#ifdef _DEBUG` call
+    all_func_macros captured); drop the known debug-only family first, up to the surplus, and keep
+    the rest (conservative — an extra flag the gate reconciles beats a dropped real callee). budget
+    0 with the asm present → every flag is phantom (no unnamed callee exists). Asm absent (the
+    candidate has no extracted body to read) → keep all, since the budget is unknown."""
+    if not flagged:
+        return flagged
+    if _asm_jal_count(rom_off, primary) is None:  # asm not extracted → budget unknown, keep all
+        return flagged
+    budget = len(unnamed_jal_addrs)
+    if budget >= len(flagged):
+        return flagged
+    if budget == 0:
+        return []  # no unnamed callee in the asm → all flagged names are phantom
+    surplus = len(flagged) - budget
+    drop = [n for n in sorted(flagged) if n in _DEBUG_ONLY_CALLEES][:surplus]
+    return [n for n in flagged if n not in drop]
+
+
 def calls_unplaced(cpath, primary, placed, lib=None):
     """Functions the upstream .c *calls* by name that are absent from BOTH name files — the
     function dual of refs_unplaced. A verbatim mirror link-FAILS on these once the C body calls
@@ -1975,8 +2034,9 @@ def calls_unplaced(cpath, primary, placed, lib=None):
     symbol_addrs.txt (add-only) BEFORE the flip. Heuristic, gate-confirmed: a `name(` call token
     in the dead-block-stripped body (so a dead `#ifdef _DEBUG` call like __osError does not
     over-flag), not a control keyword, not defined in the same file (those resolve locally), and
-    absent from placed. A function-like macro could over-flag; the gate reconciles against the
-    asm jals (the same disassemble pass that confirms the recover-extern vram)."""
+    absent from placed. A function-like macro or a dead `#ifdef _DEBUG` callee the CPP-emulation
+    over-keeps could still over-flag; `_reconcile_calls_unplaced` (applied at the call site) drops
+    those against the asm jal budget — the automated form of the old hand reconcile at the gate."""
     try:
         text = UpstreamSource.get(cpath).text
     except OSError:
@@ -1999,6 +2059,9 @@ def calls_unplaced(cpath, primary, placed, lib=None):
     local_macro_names = set(
         re.findall(r"^\s*#\s*define\s+([A-Za-z_]\w*)\s*\(", text, re.M)
     )
+    # macro_names (from all_func_macros) covers only the fixed libultra/PR header set, so a macro
+    # from a `"..."`-included band-internal header (n_audio_sc's SAMPLE184) would over-flag; add it.
+    local_header_macros = _local_header_macro_names(cpath)
     text = _strip_define_lines(
         text
     )  # an in-body `#define NAME (expr)` is a macro def, not a call
@@ -2011,6 +2074,7 @@ def calls_unplaced(cpath, primary, placed, lib=None):
         if n not in _C_NONCALL
         and n not in macro_names
         and n not in local_macro_names
+        and n not in local_header_macros
         and n not in fn_ptr_params
         and not n.startswith("__builtin_")
     }
@@ -2602,10 +2666,14 @@ def _append_recover_hazards(off, primary, up_path, up_lib, hazards):
         ]
         hazards.append(Hazard.refs_unplaced(refs))  # asm-data-recovery before flip
     unplaced_calls = calls_unplaced(up_path, primary, placed, up_lib)
+    ccands = recover_unplaced_call_vram(off, primary) if unplaced_calls else []
+    # Drop phantom flags (a macro that inlines, or a dead `#ifdef _DEBUG` callee the CPP-emulation
+    # over-kept) against the asm jal budget before annotating — the real callees are exactly the
+    # unnamed jals, so this never hides one.
+    unplaced_calls = _reconcile_calls_unplaced(unplaced_calls, off, primary, ccands)
     if unplaced_calls:
         # Annotate the recovered vram inline when unambiguous (one unplaced call ∩ one
         # unnamed jal), mirroring refs-unplaced, so the gate copy-pastes the func entry.
-        ccands = recover_unplaced_call_vram(off, primary)
         if len(unplaced_calls) == 1 and len(ccands) == 1:
             crefs = [f"{unplaced_calls[0]}@0x{ccands[0]:08X}"]
         else:
