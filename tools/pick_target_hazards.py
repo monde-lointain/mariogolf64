@@ -8,6 +8,7 @@ imports nothing back from pick_target.
 """
 
 import dataclasses
+from typing import ClassVar
 
 # Coddog match-confidence threshold (percent): a >= hit re-prices an un-named
 # candidate as a libultra mirror.
@@ -175,8 +176,45 @@ class Hazard:
     kind: str
     detail: str | None = None
 
+    # Semantic kind groups: one source of truth for the "is this kind in group X"
+    # tests the ranker used to spell out inline (ClassVar -> not dataclass fields).
+    CARVE_SIGNALS: ClassVar[frozenset[str]] = frozenset(
+        {HAZARD_RODATA_LITERAL, HAZARD_DATA_STATIC, HAZARD_RODATA_JTBL}
+    )
+    CODDOG_MASKS: ClassVar[frozenset[str]] = frozenset(
+        {HAZARD_CODDOG_STRUCTURAL, HAZARD_CODDOG_SOURCE_BANKED}
+    )
+    RODATA_OWNERS: ClassVar[frozenset[str]] = frozenset(
+        {HAZARD_RODATA_JTBL, HAZARD_RODATA_LITERAL}
+    )
+
     def render(self) -> str:
         return self.kind if self.detail is None else f"{self.kind}:{self.detail}"
+
+    # --- semantic predicates (centralize the scattered kind-knowledge) ----------------------
+    def is_coddog_mirror(self) -> bool:
+        return self.kind == HAZARD_CODDOG_MIRROR
+
+    def is_file_static(self) -> bool:
+        return self.kind == HAZARD_FILE_STATIC
+
+    def is_carve_signal(self) -> bool:
+        """A `.rodata`/`.data` carve signal (rodata-literal/jtbl, data-static)."""
+        return self.kind in self.CARVE_SIGNALS
+
+    def is_coddog_mask(self) -> bool:
+        """A coddog hit that masks divergence (structural / already-banked source)."""
+        return self.kind in self.CODDOG_MASKS
+
+    def is_rodata_owner(self) -> bool:
+        """A pooled-rodata owner (literal or switch jtbl) the sibling carve places."""
+        return self.kind in self.RODATA_OWNERS
+
+    def is_unexplained_jal(self) -> bool:
+        """A jal-count mismatch NOT annotated as a known per-version wrapper artifact."""
+        return self.kind == HAZARD_JAL_COUNT_MISMATCH and "(version-artifact?)" not in (
+            self.detail or ""
+        )
 
     @classmethod
     def coddog_mirror(cls, cfile: str, pct: float) -> "Hazard":

@@ -80,7 +80,11 @@ from decomp_asm import (
 # one-tu, non16align, combined-subseg, intrinsic-likely, needs-define, rodata-literal), the pack
 # kind args, and `.kind ==` comparisons. The detail-FORMAT kinds are now emitted via Hazard.<kind>()
 # factories, so their constants live only in pick_target_hazards (not re-imported here).
-from pick_target_hazards import (
+# Re-exports the HAZARD_* namespace: tests/tooling/test_pick_target.py references
+# these as pt.HAZARD_* (a transitional contract). After Phase E most are no longer
+# used by pick_target's own code, hence the statement-level F401 suppression - drop
+# it once the tests migrate to pick_target_hazards.HAZARD_*.
+from pick_target_hazards import (  # noqa: F401
     CODDOG_MIRROR_PCT,
     CODDOG_STRUCTURAL_BYTES_PER_LOC,
     HAZARD_CALLS_UNPLACED,
@@ -1320,12 +1324,8 @@ def _block_reorder_sibling(up_path, hazards, lib):
     (S119 -> S120). Never flags the registered sibling against itself."""
     if lib != "libnusys" or not up_path:
         return None
-    jal_unexplained = any(
-        h.kind == HAZARD_JAL_COUNT_MISMATCH
-        and "(version-artifact?)" not in (h.detail or "")
-        for h in hazards
-    )
-    has_coddog = any(h.kind == HAZARD_CODDOG_MIRROR for h in hazards)
+    jal_unexplained = any(h.is_unexplained_jal() for h in hazards)
+    has_coddog = any(h.is_coddog_mirror() for h in hazards)
     if not (jal_unexplained and not has_coddog):
         return None
     base = os.path.basename(up_path)
@@ -2197,11 +2197,7 @@ def seed_points(size, upstream, band, nfns, hazards, blocked):
     # reorder breaks coddog's fingerprint. (S119 nuContGBPakFread: jal `5vs9` macro-artifact + no
     # coddog, planned 2pt clean mirror, realized 3pt block-reorder near-verbatim.) See
     # docs/hazards.md#near-verbatim-mirror-jal-count-mismatch.
-    jal_unexplained = any(
-        h.kind == HAZARD_JAL_COUNT_MISMATCH
-        and "(version-artifact?)" not in (h.detail or "")
-        for h in hazards
-    )
+    jal_unexplained = any(h.is_unexplained_jal() for h in hazards)
     # A coddog-mirror SUPPRESSES the near-verbatim bump only when it is a CLEAN structural identity.
     # A coddog-structural / coddog-source-banked hit is the S123/S124 customization-MASK tell: the
     # 99.99 fingerprint matches a game-DIVERGENT body (or an already-banked false source), not a
@@ -2211,13 +2207,8 @@ def seed_points(size, upstream, band, nfns, hazards, blocked):
     # `jal func_<vram>` game-callee tell is a stronger signal still, but needs the call list here — a
     # tracked follow-up; until then a masking coddog on a pack carries the risk price. See
     # docs/hazards.md#coddog-cross-ref and CLAUDE.md ## Story points (exemption-GUARD).
-    coddog_masks = any(
-        h.kind in (HAZARD_CODDOG_STRUCTURAL, HAZARD_CODDOG_SOURCE_BANKED)
-        for h in hazards
-    )
-    has_clean_coddog = (
-        any(h.kind == HAZARD_CODDOG_MIRROR for h in hazards) and not coddog_masks
-    )
+    coddog_masks = any(h.is_coddog_mask() for h in hazards)
+    has_clean_coddog = any(h.is_coddog_mirror() for h in hazards) and not coddog_masks
     if (jal_unexplained and not has_clean_coddog) or (coddog_masks and pack):
         base += 1  # near-verbatim / game-modified risk (the verbatim cp won't match; plan classical)
     if pack or big:
@@ -2870,7 +2861,7 @@ def append_upstream_hazards(off, primary, up_lib, up_path, hazards, member_paths
     # per-member attribution + label-range-bounded carve-end: a BACKLOG tooling follow-up.
     if member_paths:
         for h in hazards:
-            if h.kind in (HAZARD_RODATA_JTBL, HAZARD_RODATA_LITERAL):
+            if h.is_rodata_owner():
                 h.mark_owner_per_member()
     band = "warm" if band_is_warm(mirror_dir) else "cold"
     return band, blocked
@@ -2910,13 +2901,12 @@ def drop_static_mirror_hazard(mirror_path, hazards):
     Advisory + graceful: a candidate with a NONZERO-initialized global (real .data, not modelled as a
     distinct flag) that slips the condition degrades to the documented carve playbook when the gate
     SHA misses — never a silent wrong bank."""
-    kinds = {h.kind for h in hazards}
-    if HAZARD_FILE_STATIC not in kinds:
+    if not any(h.is_file_static() for h in hazards):
         return None
-    if kinds & {HAZARD_RODATA_LITERAL, HAZARD_DATA_STATIC, HAZARD_RODATA_JTBL}:
+    if any(h.is_carve_signal() for h in hazards):
         return None  # a carve signal disqualifies the pure-.bss drop
     definitive = any(
-        h.kind == HAZARD_CODDOG_MIRROR
+        h.is_coddog_mirror()
         and not h.coddog_file().startswith("src/audio")
         and h.coddog_pct() >= CODDOG_MIRROR_PCT
         for h in hazards
@@ -3105,7 +3095,7 @@ def _build_row(
         and not coddog_index[fn][0].startswith("src/audio")
     ]
     if cod_members:
-        already = {h.coddog_file() for h in hazards if h.kind == HAZARD_CODDOG_MIRROR}
+        already = {h.coddog_file() for h in hazards if h.is_coddog_mirror()}
         for cfile in sorted({c for _, c, _ in cod_members}):
             if cfile in already:
                 continue
@@ -3168,9 +3158,7 @@ def _build_row(
             if fn in nusys_index and nusys_index[fn][1] >= CODDOG_MIRROR_PCT
         ]
         if nz:
-            already = {
-                h.coddog_file() for h in hazards if h.kind == HAZARD_CODDOG_MIRROR
-            }
+            already = {h.coddog_file() for h in hazards if h.is_coddog_mirror()}
             for cfile in sorted({c for _, c, _ in nz}):
                 if cfile in already:
                     continue
@@ -3200,7 +3188,7 @@ def _build_row(
     # gated), so a clean audio mirror surfaced as `upstream none` and `--lib libultra` skipped it.
     # The coddog map IS the ultralib sweep, so any coddog-mirror match means libultra; also honor a
     # sub-path scope (e.g. `--lib audio` -> src/audio/...) via the matched-source path substring.
-    cod_srcs = [h.coddog_source() for h in hazards if h.kind == HAZARD_CODDOG_MIRROR]
+    cod_srcs = [h.coddog_source() for h in hazards if h.is_coddog_mirror()]
     # Flag a coddog match to an already-banked source as structural (advisory) — its mirror is fully
     # decompiled, so the hit is a fingerprint coincidence, not a fresh attribution.
     for s in sorted({c for c in cod_srcs if _coddog_source_banked(c)}):
@@ -3214,13 +3202,13 @@ def _build_row(
         {
             h.coddog_file()
             for h in hazards
-            if h.kind == HAZARD_CODDOG_MIRROR and h.coddog_pct() < 100.0
+            if h.is_coddog_mirror() and h.coddog_pct() < 100.0
         }
     ):
         pct = max(
             h.coddog_pct()
             for h in hazards
-            if h.kind == HAZARD_CODDOG_MIRROR and h.coddog_file() == cf
+            if h.is_coddog_mirror() and h.coddog_file() == cf
         )
         hazards.append(Hazard.body_divergence_suspect(cf, pct))
     # A libultra-source mirror whose vram is BELOW the libultra code band is game-linked at -O2, not
