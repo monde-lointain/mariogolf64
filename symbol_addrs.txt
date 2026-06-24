@@ -288,7 +288,12 @@ nuRDPOutputBuf = 0x8010CFC0; // size:0x20000
 nuDramStack = 0x801B7F80; // size:0x400
 nuYieldBuf = 0x8010C2E0; // size:0xC00
 rspbootTextStart = 0x800B3E50; // rom:0x8F250 size:0xD0
-rspbootTextEnd = 0x800B3F20; // rom:0x8F320 size:0x120
+rspbootTextEnd = 0x800B3F20; // rom:0x8F320 size:0xC60 -- == n_aspMainTextStart, audio ucode text
+gspF3DEX2_fifoTextStart = 0x800B4B80; // rom:0x8FF80 size:0x1390 -- == n_aspMainTextEnd, nuGfxUcode target
+gspF3DEX2_fifoTextEnd = 0x800B5F10; // rom:0x91310 -- main_data start
+n_aspMainDataStart = 0x800C9890; // rom:0xA4C90 size:0x2B0 -- mus_audio_thread target
+gspF3DEX2_fifoDataStart = 0x800C9B40; // rom:0xA4F40 size:0x420 -- == n_aspMainDataEnd
+gspF3DEX2_fifoDataEnd = 0x800C9F60; // rom:0xA5360
 nuGfxTask = 0x801B5D08; // size:0x370
 nuGfxTask_ptr = 0x800D8984; // size:0x4
 taskDoneMsg = 0x800D8988; // size:0x2

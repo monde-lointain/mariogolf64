@@ -1,4 +1,5 @@
 tlb_refill = 0x80000000;
+rspbootTextStart = 0x800B3E50;
 func_801F4A40 = 0x801F4A40;
 func_801F4AA4 = 0x801F4AA4;
 func_801F4AD8 = 0x801F4AD8;
