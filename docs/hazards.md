@@ -124,8 +124,8 @@ mirror. Pilot: S56 (`getcount`/`getcause`/`getsr`/`setcompare`).
 **Trigger:** `pick_target.py` flags `intrinsic-likely:<tu>.s` (a vendorable ultralib TU exists) on an
 `asm-flip` candidate. A bare `intrinsic-likely` (no `:<tu>`) is a no-source shim, so plain `hasm`.
 
-`intrinsic-likely:cp0-asm(identify-TU)` (S70 #1) is the same asm-mirror class for an un-named
-`func_<addr>` subseg whose body holds a privileged op gcc never emits (`tlbwi`/`tlbwr`/`tlbp`/`tlbr`,
+**Sub-trigger, `intrinsic-likely:cp0-asm(identify-TU)` (S70 #1).** This is the same asm-mirror class
+for an un-named `func_<addr>` subseg whose body holds a privileged op gcc never emits (`tlbwi`/`tlbwr`/`tlbp`/`tlbr`,
 `mfc0`/`mtc0`/`dmfc0`/`dmtc0`/`cfc0`/`ctc0`, `cfc1`/`ctc1`, `cache`, `eret`). The op proves a
 vendorable ultralib source exists, but the un-named primary cannot resolve the `.s`, so the gate
 identifies the TU first: one MCP `disassemble_function` names it by its CP0/TLB signature (e.g.
@@ -197,8 +197,10 @@ falls back to plain `hasm`.
   the flips at a time. The reverted TU's vendored `.s` stays in `src/libultra/` (unused while `asm`)
   for a later retry against a different ultralib revision. Banked TUs in the same batch are unaffected:
   each subseg's `.o` is independent.
-- Do **not** blanket-vendor a mixed `pack:` (e.g. `osSetIntMask` shares its subseg with the C
-  mirrors `osCreatePiManager`/`__osEPiRawStartDma`); split first and vendor only the asm member.
+- For a mixed `pack:` (e.g. `osSetIntMask` shares its subseg with the C mirrors
+  `osCreatePiManager`/`__osEPiRawStartDma`), split first and vendor only the asm member.
+
+**Sub-cases / variants:**
 - **Vendored `.s` carrying a non-`.text` section (`.rodata`/`.data`/`.bss`) → vendor `.text` only
   (S84).** splat auto-links a `hasm` `.o`'s `.data`/`.rodata`/`.bss` at the **END** of each output
   section, NOT in address order. See the generated `mariogolf64.ld`: the
