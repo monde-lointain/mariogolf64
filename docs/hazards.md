@@ -2,8 +2,11 @@
 
 This is the detail layer for the MG64 execution loop. `CLAUDE.md` holds the always-loaded core
 and a hazard index; read the matching section here when `tools/pick_target.py` flags a hazard or a
-match behaves as one of the symptoms below. Each entry is **Rule / Trigger / Procedure /
-Provenance**. The S-numbers are provenance tags pointing at the sprint that established the rule.
+match behaves as one of the symptoms below. Each entry follows the same shape where it fits:
+**Rule** (the invariant), **Trigger** (the flag or symptom that sends you here), **Procedure** (the
+steps to a green ROM SHA-1), then optional **Sub-cases / variants** and **Caveats**, and
+**Provenance**. Short principle/note sections carry only the labels that apply. The S-numbers are
+provenance tags pointing at the sprint that established the rule.
 
 The deterministic-vram recovery and the byte-`cmp` rules are load-bearing: follow the procedures
 exactly rather than re-deriving them.
