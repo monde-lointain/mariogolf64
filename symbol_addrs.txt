@@ -340,7 +340,12 @@ n_alSynSetPan = 0x800A0A90; // type:func
 n_alSynSetPitch = 0x800A0B20; // type:func
 n_alSynStartVoice = 0x800A0C60; // type:func
 n_alSynStopVoice = 0x800A0CF0; // type:func
+// S130: n_synaddplayer.c + n_synsetvol.c mirrors.
+n_alSynAddPlayer = 0x800A07B0; // type:func
+n_alSynSetVol = 0x800A0BB0; // type:func
 // shared n_syn* callees/global, recovered from the n_alSynSetPan asm (still-asm siblings + n_sl.c global).
 __n_allocParam = 0x800A1148; // type:func
 n_alEnvmixerParam = 0x8009EFE8; // type:func
 n_syn = 0x800C7DB4; // size:0x4
+// S130: n_alSynSetVol callee, recovered from func_800A0BB0 jal (in still-asm n_synthesizer.c subseg).
+_n_timeToSamples = 0x800A1274; // type:func
