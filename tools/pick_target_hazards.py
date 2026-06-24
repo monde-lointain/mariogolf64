@@ -190,10 +190,45 @@ class Hazard:
 
     # --- detail-format factories ------------------------------------------------------------
     # One source of truth for each kind's `detail` encoding; render() output is byte-identical to
-    # the old inline f-strings (the goldens + test_hazard_factories.py pin every format). The four
-    # kinds whose detail is a pre-assembled variable (combined-subseg, intrinsic-likely,
-    # rodata-literal, needs-define) and the bare no-detail kinds (one-tu, non16align, file-static)
-    # carry no format literal and are constructed directly at their call sites.
+    # the old inline f-strings (the goldens + test_hazard_factories.py pin every format). ALL
+    # construction goes through a factory (no bare `Hazard(KIND, ...)` at call sites): the bare
+    # no-detail kinds and the pass-through-detail kinds get trivial factories below so the kind
+    # constant is referenced in exactly one place.
+
+    @classmethod
+    def one_tu(cls) -> "Hazard":
+        """A single hand-asm TU subseg (no detail)."""
+        return cls(HAZARD_ONE_TU)
+
+    @classmethod
+    def non16align(cls) -> "Hazard":
+        """A non-16-aligned inner boundary (no detail)."""
+        return cls(HAZARD_NON16ALIGN)
+
+    @classmethod
+    def file_static(cls) -> "Hazard":
+        """A file-scope static the verbatim mirror must place (no detail)."""
+        return cls(HAZARD_FILE_STATIC)
+
+    @classmethod
+    def combined_subseg(cls, detail: str) -> "Hazard":
+        """A multi-TU asm subseg; `detail` is pre-assembled by the caller."""
+        return cls(HAZARD_COMBINED_SUBSEG, detail)
+
+    @classmethod
+    def intrinsic_likely(cls, detail: str) -> "Hazard":
+        """An intrinsic-likely asm-mirror TU; `detail` is pre-assembled by the caller."""
+        return cls(HAZARD_INTRINSIC_LIKELY, detail)
+
+    @classmethod
+    def needs_define(cls, detail: str) -> "Hazard":
+        """A missing `-D` define gating the mirror; `detail` is pre-assembled by the caller."""
+        return cls(HAZARD_NEEDS_DEFINE, detail)
+
+    @classmethod
+    def rodata_literal(cls, detail: str) -> "Hazard":
+        """A pooled `.rodata` literal needing a sibling carve; `detail` pre-assembled by the caller."""
+        return cls(HAZARD_RODATA_LITERAL, detail)
 
     @classmethod
     def pack(cls, kind: str, n_fns: int, members) -> "Hazard":

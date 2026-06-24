@@ -119,6 +119,31 @@ def test_coddog_factories():
     )
 
 
+def test_no_detail_factories():
+    # bare kinds render to just the constant (no colon/detail)
+    assert H.one_tu().render() == h.HAZARD_ONE_TU
+    assert H.non16align().render() == h.HAZARD_NON16ALIGN
+    assert H.file_static().render() == h.HAZARD_FILE_STATIC
+
+
+def test_passthrough_detail_factories():
+    # detail is pre-assembled by the caller; the factory just attaches the kind
+    assert (
+        H.combined_subseg("2tu[a,b]").render() == f"{h.HAZARD_COMBINED_SUBSEG}:2tu[a,b]"
+    )
+    assert (
+        H.intrinsic_likely("bcopy.s(kmc-as)").render()
+        == f"{h.HAZARD_INTRINSIC_LIKELY}:bcopy.s(kmc-as)"
+    )
+    assert (
+        H.needs_define("F3DEX_GBI_2").render() == f"{h.HAZARD_NEEDS_DEFINE}:F3DEX_GBI_2"
+    )
+    assert (
+        H.rodata_literal("0x80001000").render()
+        == f"{h.HAZARD_RODATA_LITERAL}:0x80001000"
+    )
+
+
 def test_game_region_mirror():
     assert (
         H.game_region_mirror(0x800298E0, 0x298E0).render()

@@ -2362,7 +2362,7 @@ def _classify_pack_hazards(off, fns, upstream_index):
     # a one-.o pack with a 16-multiple-sized member won't fire (conservative).
     addrs = [a for _, a in asm_function_addrs(off)]
     if len(addrs) == len(fns) and all(a % 16 != 0 for a in addrs[1:]):
-        hz.append(Hazard(HAZARD_ONE_TU))
+        hz.append(Hazard.one_tu())
     # C analog of combined-subseg: ≥2 *distinct* C upstream files share one asm subseg → a
     # multi-file C-mirror pack the gate splits at the upstream-file boundary, then mirrors each
     # verbatim. A big combined subseg ranks by its WHOLE size and buries a cheap clean leaf past
@@ -2396,7 +2396,7 @@ def _classify_pack_hazards(off, fns, upstream_index):
         miss = sorted({m for t in asm_tus for m in vendorable_tu_missing_defines(t)})
         if miss:
             detail = f"{detail}(needs-define:{','.join(miss)})"
-        hz.append(Hazard(HAZARD_COMBINED_SUBSEG, detail))
+        hz.append(Hazard.combined_subseg(detail))
     return hz
 
 
@@ -2446,7 +2446,7 @@ def _classify_asm_mirror_hazards(off, fns, upstream_index):
             detail = "cp0-asm(identify-TU)"
         else:
             detail = None  # genuine no-source shim (handwritten leaf, no privileged op, no TU)
-        hz.append(Hazard(HAZARD_INTRINSIC_LIKELY, detail))
+        hz.append(Hazard.intrinsic_likely(detail))
     else:
         # A libkmc soft-float / 64-bit math TU the pure-shim + privileged tests both miss (a
         # branchy cvt routine like mcvtld.s, no CP0/FPU-ctrl op, no `handwritten` tag) is STILL a
@@ -2458,7 +2458,7 @@ def _classify_asm_mirror_hazards(off, fns, upstream_index):
         # See docs/hazards.md#asm-mirror-vendoring (kmc-as sub-lane).
         kmc_tu = build_kmc_asm_tu_index().get(fns[0])
         if kmc_tu and fns[0] not in upstream_index:
-            hz.append(Hazard(HAZARD_INTRINSIC_LIKELY, f"{kmc_tu}(kmc-as)"))
+            hz.append(Hazard.intrinsic_likely(f"{kmc_tu}(kmc-as)"))
     return hz
 
 
@@ -2481,7 +2481,7 @@ def classify_subseg(off, typ, path, size, upstream_index):
             return None
         hazards = []
         if size and size % 16 != 0:
-            hazards.append(Hazard(HAZARD_NON16ALIGN))
+            hazards.append(Hazard.non16align())
         # Trailing-alignment pad: splat extracts the whole subseg slot (function + the nop
         # padding up to the next, higher-aligned subseg). A flipped C mirror's compiler only
         # 16-aligns its `.text`, so a pad beyond that 16B fill is dropped → ROM short → SHA-miss
@@ -2679,7 +2679,7 @@ def _append_coddog_trap_hazards(off, primary, cl_path, up_lib, hazards):
     defines-data `.data` carve on a sibling whose hit keys on a non-leader name)."""
     clib = up_lib or "libultra"
     if has_file_scope_static(cl_path):
-        hazards.append(Hazard(HAZARD_FILE_STATIC))
+        hazards.append(Hazard.file_static())
     cdefs = defines_data_globals(cl_path) + defines_local_static_data(
         cl_path
     )  # + fn-local statics
@@ -2722,11 +2722,11 @@ def _append_header_version_hazards(off, primary, up_path, up_lib, hazards):
         hazards.append(Hazard.stale_header(stale))
     gating = function_gating_define(up_path, primary)
     if gating and gating not in _active_defines_for_lib(up_lib):
-        hazards.append(Hazard(HAZARD_NEEDS_DEFINE, gating))
+        hazards.append(Hazard.needs_define(gating))
     gbi_def = gbi_value_guard_needs_define(up_path, up_lib)
     if gbi_def:
         hazards.append(
-            Hazard(HAZARD_NEEDS_DEFINE, gbi_def)
+            Hazard.needs_define(gbi_def)
         )  # GBI-value-guarded macro (e.g. OS_YIELD_DATA_SIZE)
     divergence = call_divergence(off, primary, up_path, up_lib)
     if divergence:
@@ -2786,7 +2786,7 @@ def _append_rodata_carve_hazards(off, up_path, hazards):
         end = _rodata_carve_end_vram(off, max(rodata_lits))
         if end and end > max(rodata_lits):
             detail += f";carve-end=0x{end:08X}"
-        hazards.append(Hazard(HAZARD_RODATA_LITERAL, detail))
+        hazards.append(Hazard.rodata_literal(detail))
     if data_statics:
         # A function-local static the mirror must drop to a file-scope extern + recover.
         hazards.append(Hazard.data_static(data_statics))
@@ -2807,7 +2807,7 @@ def append_upstream_hazards(off, primary, up_lib, up_path, hazards, member_paths
     # scan below already does. A primary-only scan would miss it.
     if any(has_file_scope_static(p) for p in (up_path, *member_paths)):
         hazards.append(
-            Hazard(HAZARD_FILE_STATIC)
+            Hazard.file_static()
         )  # route to the classical loop, not the mirror
     # defines-data over the primary + c-combined members (+ fn-local statics).
     data_defs = list(
