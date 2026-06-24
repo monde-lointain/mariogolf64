@@ -360,3 +360,6 @@ n_alClose = 0x800A0774; // type:func
 // n_sl.c callee (head of still-asm n_synthesizer.c) + its drop-def global (adjacent to n_syn).
 n_alSynNew = 0x800A0D70; // type:func
 n_alGlobals = 0x800C7DB0; // size:0x4
+// S133: n_save.c (n_alSavePull) + its calls-unplaced callee n_alMainBusPull (stays asm @0x7C720).
+n_alSavePull = 0x800A12D0; // type:func
+n_alMainBusPull = 0x800A1370; // type:func

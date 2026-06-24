@@ -9,5 +9,13 @@
 # -I include/libultra/PR resolves the bare <os_internal.h> / <ultraerror.h> /
 # <libaudio.h> includes (those headers already live under include/libultra/PR).
 # The public n_libaudio_sc.h resolves via the global -I include/libnaudio.
-LIBNAUDIO_CFLAGS := -I src/libnaudio $(subst -O2,-O3,$(CFLAGS)) -I include/libultra/PR
+#
+# -DN_MICRO=1 mirrors the upstream n_audio_sc Makefile, which builds the WHOLE
+# library with N_MICRO=1 (the "micro" command-stream variant). Functions that
+# branch on `#ifdef N_MICRO` (n_save.c, n_resample.c, n_reverb.c, n_env.c,
+# n_load.c, n_synthesizer.c) emit the micro path; without the pin n_save.c takes
+# the longer non-micro path and SHA-misses (the #needs-define hazard, same class
+# as the -DF3DEX_GBI_2 libultra pin). The setter mirrors (n_syn*.c) have no
+# N_MICRO branch, so the pin is byte-neutral for them.
+LIBNAUDIO_CFLAGS := -I src/libnaudio $(subst -O2,-O3,$(CFLAGS)) -I include/libultra/PR -DN_MICRO=1
 $(BUILD_DIR)/$(SRC_DIR)/libnaudio/%.o: C_PROFILE_CFLAGS = $(LIBNAUDIO_CFLAGS)

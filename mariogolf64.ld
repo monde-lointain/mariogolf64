@@ -135,7 +135,7 @@ SECTIONS
         build/src/libnaudio/n_synstartvoice.o(.text);
         build/src/libnaudio/n_synstopvoice.o(.text);
         build/asm/7C170.o(.text);
-        build/asm/7C6D0.o(.text);
+        build/src/libnaudio/n_save.o(.text);
         build/asm/7C720.o(.text);
         build/src/libnusys/nuprenmifuncset.o(.text);
         build/src/libnusys/nugfxthread.o(.text);
@@ -402,7 +402,7 @@ SECTIONS
         build/src/libnaudio/n_synstartvoice.o(.data);
         build/src/libnaudio/n_synstopvoice.o(.data);
         build/asm/7C170.o(.data);
-        build/asm/7C6D0.o(.data);
+        build/src/libnaudio/n_save.o(.data);
         build/asm/7C720.o(.data);
         build/src/libnusys/nuprenmifuncset.o(.data);
         build/src/libnusys/nugfxthread.o(.data);
@@ -682,7 +682,7 @@ SECTIONS
         build/src/libnaudio/n_synstartvoice.o(.rodata);
         build/src/libnaudio/n_synstopvoice.o(.rodata);
         build/asm/7C170.o(.rodata);
-        build/asm/7C6D0.o(.rodata);
+        build/src/libnaudio/n_save.o(.rodata);
         build/asm/7C720.o(.rodata);
         build/src/libnusys/nuprenmifuncset.o(.rodata);
         build/src/libnusys/nugfxthread.o(.rodata);
@@ -968,7 +968,7 @@ SECTIONS
         build/src/libnaudio/n_synstartvoice.o(.bss);
         build/src/libnaudio/n_synstopvoice.o(.bss);
         build/asm/7C170.o(.bss);
-        build/asm/7C6D0.o(.bss);
+        build/src/libnaudio/n_save.o(.bss);
         build/asm/7C720.o(.bss);
         build/src/libnusys/nuprenmifuncset.o(.bss);
         build/src/libnusys/nugfxthread.o(.bss);
