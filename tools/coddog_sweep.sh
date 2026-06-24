@@ -16,6 +16,8 @@
 set -euo pipefail
 
 REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# shellcheck source=tools/sweep_lib.sh
+source "$REPO/tools/sweep_lib.sh"
 CODDOG="${CODDOG:-$HOME/development/repos/coddog/target/release/coddog}"
 ULTRALIB="${ULTRALIB:-$HOME/development/repos/ultralib}"
 ULVER="${ULVER:-J}"
@@ -44,7 +46,7 @@ echo "coddog_sweep: building combined ultralib $ULVER ELF from $UL_OBJDIR ..." >
 rm -rf "$WORK/stripped" && mkdir -p "$WORK/stripped"
 ( cd "$UL_OBJDIR" && find . -name '*.o' -print0 | while IFS= read -r -d '' o; do
     out="$WORK/stripped/$(echo "$o" | sed 's#[/.]#_#g').o"
-    "$OBJCOPY" -R .mdebug -R .mdebug.abi32 -R .reginfo -R .pdr -R .comment "$o" "$out"
+    "$OBJCOPY" "${MG_KMC_STRIP_SECTIONS[@]}" "$o" "$out"
   done )
 "$LD" -r --allow-multiple-definition "$WORK"/stripped/*.o -o "$UL_ELF"
 

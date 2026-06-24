@@ -37,6 +37,8 @@ PLACEHOLDER_RE = dc.PLACEHOLDER_RE
 SYM_LINE_RE = dc.SYM_LINE_RE
 emit = dc.emit
 log = dc.log
+safe_read_text = dc.safe_read_text
+capture_stderr = dc.capture_stderr
 
 ASMDIFF_DIR = SCRIPT_DIR / "asm-differ"
 OBJDUMP = os.environ.get("OBJDUMP", "mips-linux-gnu-objdump")
@@ -74,7 +76,7 @@ def resolve_placeholder(name: str) -> str:
     for f in SYMBOL_FILES:
         if not f.exists():
             continue
-        for line in f.read_text(encoding="utf-8", errors="replace").splitlines():
+        for line in safe_read_text(f).splitlines():
             stripped = line.strip()
             if not stripped or stripped.startswith("//"):
                 continue
@@ -118,6 +120,30 @@ LIBKMC_SRC = dc.LIBKMC_SRC
 LIBULTRA_SRC = dc.LIBULTRA_SRC
 
 
+def _detect_in_upstream(src_root: Path, placeholder: str, *, recursive: bool) -> bool:
+    """True if <placeholder> is defined as a function in `src_root`'s .c files.
+
+    Shared by the libkmc/libultra profile detectors; `recursive` selects rglob
+    (libultra's nested io/os/audio tree) vs glob (libkmc's flat src). Matches a
+    K&R `int rand()` or a prototype `int rand(void)` at line start.
+    """
+    if not src_root.exists():
+        return False
+    pat = re.compile(
+        rf"^[A-Za-z_][A-Za-z0-9_ *]*\b{re.escape(placeholder)}\s*\(",
+        re.MULTILINE,
+    )
+    files = src_root.rglob("*.c") if recursive else src_root.glob("*.c")
+    for f in files:
+        try:
+            text = safe_read_text(f)
+        except OSError:
+            continue
+        if pat.search(text):
+            return True
+    return False
+
+
 def detect_libkmc_profile(placeholder: str) -> bool:
     """True if <placeholder> appears as a function definition in libkmc upstream.
 
@@ -125,21 +151,7 @@ def detect_libkmc_profile(placeholder: str) -> bool:
     libkmc-only compile profile via LIBKMC_CFLAGS. The loop must mirror that
     to produce ground-truth bytes — see CLAUDE.md "libkmc compile profile is `-O`".
     """
-    if not LIBKMC_SRC.exists():
-        return False
-    # Match either K&R `int rand()` or prototype `int rand(void)` at line start.
-    pat = re.compile(
-        rf"^[A-Za-z_][A-Za-z0-9_ *]*\b{re.escape(placeholder)}\s*\(",
-        re.MULTILINE,
-    )
-    for f in LIBKMC_SRC.glob("*.c"):
-        try:
-            text = f.read_text(encoding="utf-8", errors="replace")
-        except OSError:
-            continue
-        if pat.search(text):
-            return True
-    return False
+    return _detect_in_upstream(LIBKMC_SRC, placeholder, recursive=False)
 
 
 def detect_libultra_profile(placeholder: str) -> bool:
@@ -149,20 +161,7 @@ def detect_libultra_profile(placeholder: str) -> bool:
     (ultralib gcc.mk, VERSION_J libgultra_rom). The loop must mirror LIBULTRA_CFLAGS
     to produce ground-truth bytes — affects inlining and delay-slot scheduling.
     """
-    if not LIBULTRA_SRC.exists():
-        return False
-    pat = re.compile(
-        rf"^[A-Za-z_][A-Za-z0-9_ *]*\b{re.escape(placeholder)}\s*\(",
-        re.MULTILINE,
-    )
-    for f in LIBULTRA_SRC.rglob("*.c"):
-        try:
-            text = f.read_text(encoding="utf-8", errors="replace")
-        except OSError:
-            continue
-        if pat.search(text):
-            return True
-    return False
+    return _detect_in_upstream(LIBULTRA_SRC, placeholder, recursive=True)
 
 
 def compile_candidate(
@@ -210,7 +209,7 @@ def objdump_function(obj_path: Path, placeholder: str) -> str:
     ]
     proc = subprocess.run(cmd, capture_output=True, text=True)
     if proc.returncode != 0:
-        fail(f"objdump failed on {obj_path}: {proc.stderr.strip()[:500]}")
+        fail(f"objdump failed on {obj_path}: {capture_stderr(proc)}")
     return proc.stdout
 
 

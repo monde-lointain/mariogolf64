@@ -8,6 +8,7 @@ imports nothing back from pick_target.
 """
 
 import dataclasses
+from typing import ClassVar
 
 # Coddog match-confidence threshold (percent): a >= hit re-prices an un-named
 # candidate as a libultra mirror.
@@ -175,8 +176,45 @@ class Hazard:
     kind: str
     detail: str | None = None
 
+    # Semantic kind groups: one source of truth for the "is this kind in group X"
+    # tests the ranker used to spell out inline (ClassVar -> not dataclass fields).
+    CARVE_SIGNALS: ClassVar[frozenset[str]] = frozenset(
+        {HAZARD_RODATA_LITERAL, HAZARD_DATA_STATIC, HAZARD_RODATA_JTBL}
+    )
+    CODDOG_MASKS: ClassVar[frozenset[str]] = frozenset(
+        {HAZARD_CODDOG_STRUCTURAL, HAZARD_CODDOG_SOURCE_BANKED}
+    )
+    RODATA_OWNERS: ClassVar[frozenset[str]] = frozenset(
+        {HAZARD_RODATA_JTBL, HAZARD_RODATA_LITERAL}
+    )
+
     def render(self) -> str:
         return self.kind if self.detail is None else f"{self.kind}:{self.detail}"
+
+    # --- semantic predicates (centralize the scattered kind-knowledge) ----------------------
+    def is_coddog_mirror(self) -> bool:
+        return self.kind == HAZARD_CODDOG_MIRROR
+
+    def is_file_static(self) -> bool:
+        return self.kind == HAZARD_FILE_STATIC
+
+    def is_carve_signal(self) -> bool:
+        """A `.rodata`/`.data` carve signal (rodata-literal/jtbl, data-static)."""
+        return self.kind in self.CARVE_SIGNALS
+
+    def is_coddog_mask(self) -> bool:
+        """A coddog hit that masks divergence (structural / already-banked source)."""
+        return self.kind in self.CODDOG_MASKS
+
+    def is_rodata_owner(self) -> bool:
+        """A pooled-rodata owner (literal or switch jtbl) the sibling carve places."""
+        return self.kind in self.RODATA_OWNERS
+
+    def is_unexplained_jal(self) -> bool:
+        """A jal-count mismatch NOT annotated as a known per-version wrapper artifact."""
+        return self.kind == HAZARD_JAL_COUNT_MISMATCH and "(version-artifact?)" not in (
+            self.detail or ""
+        )
 
     @classmethod
     def coddog_mirror(cls, cfile: str, pct: float) -> "Hazard":
@@ -190,10 +228,45 @@ class Hazard:
 
     # --- detail-format factories ------------------------------------------------------------
     # One source of truth for each kind's `detail` encoding; render() output is byte-identical to
-    # the old inline f-strings (the goldens + test_hazard_factories.py pin every format). The four
-    # kinds whose detail is a pre-assembled variable (combined-subseg, intrinsic-likely,
-    # rodata-literal, needs-define) and the bare no-detail kinds (one-tu, non16align, file-static)
-    # carry no format literal and are constructed directly at their call sites.
+    # the old inline f-strings (the goldens + test_hazard_factories.py pin every format). ALL
+    # construction goes through a factory (no bare `Hazard(KIND, ...)` at call sites): the bare
+    # no-detail kinds and the pass-through-detail kinds get trivial factories below so the kind
+    # constant is referenced in exactly one place.
+
+    @classmethod
+    def one_tu(cls) -> "Hazard":
+        """A single hand-asm TU subseg (no detail)."""
+        return cls(HAZARD_ONE_TU)
+
+    @classmethod
+    def non16align(cls) -> "Hazard":
+        """A non-16-aligned inner boundary (no detail)."""
+        return cls(HAZARD_NON16ALIGN)
+
+    @classmethod
+    def file_static(cls) -> "Hazard":
+        """A file-scope static the verbatim mirror must place (no detail)."""
+        return cls(HAZARD_FILE_STATIC)
+
+    @classmethod
+    def combined_subseg(cls, detail: str) -> "Hazard":
+        """A multi-TU asm subseg; `detail` is pre-assembled by the caller."""
+        return cls(HAZARD_COMBINED_SUBSEG, detail)
+
+    @classmethod
+    def intrinsic_likely(cls, detail: str) -> "Hazard":
+        """An intrinsic-likely asm-mirror TU; `detail` is pre-assembled by the caller."""
+        return cls(HAZARD_INTRINSIC_LIKELY, detail)
+
+    @classmethod
+    def needs_define(cls, detail: str) -> "Hazard":
+        """A missing `-D` define gating the mirror; `detail` is pre-assembled by the caller."""
+        return cls(HAZARD_NEEDS_DEFINE, detail)
+
+    @classmethod
+    def rodata_literal(cls, detail: str) -> "Hazard":
+        """A pooled `.rodata` literal needing a sibling carve; `detail` pre-assembled by the caller."""
+        return cls(HAZARD_RODATA_LITERAL, detail)
 
     @classmethod
     def pack(cls, kind: str, n_fns: int, members) -> "Hazard":
