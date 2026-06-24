@@ -150,6 +150,30 @@ test-tools:
 
 check: test-tools
 
+# --- Python static analysis (config in pyproject.toml) -----------------------
+# Dev-only; kept out of `setup`/CI build path. Install with `make setup-dev`.
+setup-dev:
+	./venv/bin/pip install -r tools/requirements-dev.txt
+
+format:
+	./venv/bin/ruff format tools tests/tooling
+
+format-check:
+	./venv/bin/ruff format --check tools tests/tooling
+
+lint:
+	./venv/bin/ruff check tools tests/tooling
+
+typecheck:
+	./venv/bin/basedpyright
+
+deadcode:
+	./venv/bin/vulture
+
+# Full local gate (test-tools is the only hard gate in CI; the rest are advisory
+# there until the tree is clean).
+check-all: test-tools format-check lint typecheck deadcode
+
 # Fingerprint MG64's functions against ultralib VERSION_J and write
 # tools/coddog/coddog_map.tsv, which pick_target.py reads to re-price
 # none-classified verbatim mirrors. Needs a fresh `make`, a built ultralib, and
@@ -212,4 +236,4 @@ spotcheck-build:
 clean-nonmatchings:
 	rm -rf nonmatchings/*/
 
-.PHONY: all clean distclean setup extract test-tools check coddog-sweep coddog-sweep-nusys sync-names help nonmatching-func spotcheck-build clean-nonmatchings
+.PHONY: all clean distclean setup setup-dev extract test-tools check check-all format format-check lint typecheck deadcode coddog-sweep coddog-sweep-nusys sync-names help nonmatching-func spotcheck-build clean-nonmatchings

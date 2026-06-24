@@ -4,14 +4,12 @@ These lock the behavior Phase 2 refactors touch (sanitize_ghidra_body, the
 auto-extern classifier, parent-scan helpers) so a structural refactor can be
 proven behavior-preserving.
 """
+
 from __future__ import annotations
-
-import json
-
-import pytest
 
 from pathlib import Path
 
+import pytest
 from conftest import load_tool
 
 seed = load_tool("seed_c")
@@ -21,6 +19,7 @@ seed = load_tool("seed_c")
 # Locks the assembled base.c text before stitch_base_c's 8-arg signature is
 # refactored into a parameter object. Exercises every section: rodata warning,
 # parent externs, sibling asm, auto-externs, m2c reference, sanitized ghidra body.
+
 
 def _stitch_inputs(tmp_path: Path):
     (tmp_path / "m2c.c").write_text("int m2c_ref(void) { return 0; }\n")
@@ -53,6 +52,7 @@ def test_stitch_base_c_golden(tmp_path, golden_dir, regen):
 
 # --- sanitize_ghidra_body -------------------------------------------------
 
+
 def test_sanitize_maps_ghidra_types():
     body = "undefined4 func_80012345(void)\n{\n    byte x;\n    ulonglong y;\n    return;\n}"
     out = seed.sanitize_ghidra_body(body, "func_80012345")
@@ -78,8 +78,15 @@ def test_sanitize_strips_ghidra_audit_header():
 
 # --- auto_externs_for_hi_lo ----------------------------------------------
 
+
 def test_auto_externs_classification():
-    labels = {"jtbl_80100000", "func_80011111", "D_80022222", "D_80033333", "someGlobal"}
+    labels = {
+        "jtbl_80100000",
+        "func_80011111",
+        "D_80022222",
+        "D_80033333",
+        "someGlobal",
+    }
     out = seed.auto_externs_for_hi_lo(
         labels,
         placeholder="func_80099999",
@@ -90,9 +97,9 @@ def test_auto_externs_classification():
     joined = "\n".join(out)
     assert "extern void *jtbl_80100000[];" in joined
     assert "extern void func_80011111(void);" in joined
-    assert "extern u32 D_80022222;" in joined            # non-pointer D_ -> u32
-    assert "extern void *D_80033333;" in joined           # pointer-detected D_
-    assert "extern char someGlobal[];" in joined          # fallthrough
+    assert "extern u32 D_80022222;" in joined  # non-pointer D_ -> u32
+    assert "extern void *D_80033333;" in joined  # pointer-detected D_
+    assert "extern char someGlobal[];" in joined  # fallthrough
 
 
 def test_auto_externs_skips_known_and_placeholder():
@@ -109,6 +116,7 @@ def test_auto_externs_skips_known_and_placeholder():
 
 # --- parent_has_real_c / collect_parent_externs ---------------------------
 
+
 def test_parent_has_real_c_stub_only(tmp_path: Path):
     p = tmp_path / "stub.c"
     p.write_text('#include <ultra64.h>\n\nINCLUDE_ASM("asm/x", func_80099999);\n')
@@ -117,7 +125,7 @@ def test_parent_has_real_c_stub_only(tmp_path: Path):
 
 def test_parent_has_real_c_with_real_code(tmp_path: Path):
     p = tmp_path / "real.c"
-    p.write_text('#include <ultra64.h>\n\nvoid foo(void) { }\n')
+    p.write_text("#include <ultra64.h>\n\nvoid foo(void) { }\n")
     assert seed.parent_has_real_c(p) is True
 
 
@@ -133,9 +141,9 @@ def test_slice_rodata_pointer_detection(tmp_path, monkeypatch):
     path, missing, pointers = seed.slice_rodata(
         {"D_80001000", "D_80001004", "D_80009999"}, out
     )
-    assert "D_80001000" in pointers        # single `.word <symbol>` => pointer-typed
-    assert "D_80001004" not in pointers    # `.word <hex imm>` => not a pointer
-    assert missing == ["D_80009999"]       # absent from all data files
+    assert "D_80001000" in pointers  # single `.word <symbol>` => pointer-typed
+    assert "D_80001004" not in pointers  # `.word <hex imm>` => not a pointer
+    assert missing == ["D_80009999"]  # absent from all data files
     assert path == out and out.exists()
 
 

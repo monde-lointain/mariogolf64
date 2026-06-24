@@ -5,18 +5,19 @@ Two layers:
   - end-to-end: run the real loop on `rand` (a banked, score-0 leaf) and lock
     the resulting score JSON as a golden snapshot.
 """
+
 from __future__ import annotations
 
 import json
 
 import pytest
-
 from conftest import ROOT, golden_dir, load_tool, regen, run_tool  # noqa: F401
 
 dl = load_tool("decomp_loop")
 
 
 # --- score_diff (pure) ----------------------------------------------------
+
 
 def _row(key_base, key_cur, text="insn"):
     mk = lambda k: {"key": k, "text": [{"text": text}]} if k is not None else {}
@@ -65,8 +66,16 @@ def test_score_diff_respects_max_mismatches():
 
 GOLDEN_FN = "rand"
 STABLE_KEYS = (
-    "compile_ok", "placeholder", "segment", "score", "percent",
-    "total_rows", "match_count", "max_score", "reference_path", "current_path",
+    "compile_ok",
+    "placeholder",
+    "segment",
+    "score",
+    "percent",
+    "total_rows",
+    "match_count",
+    "max_score",
+    "reference_path",
+    "current_path",
 )
 
 
@@ -82,9 +91,13 @@ def test_decomp_loop_rand_scores_zero(golden_dir, regen):
     # score_diff unit tests above carry the characterization load.
     base_c = ROOT / "nonmatchings" / GOLDEN_FN / "base.c"
     if not base_c.exists():
-        pytest.skip(f"{base_c.relative_to(ROOT)} absent (gitignored scratch); run seed_c first")
+        pytest.skip(
+            f"{base_c.relative_to(ROOT)} absent (gitignored scratch); run seed_c first"
+        )
     if dl.dc.find_segment(GOLDEN_FN) is None:
-        pytest.skip(f"no `glabel {GOLDEN_FN}` in any asm/*.s (banked fn; reference asm absent on a clean tree)")
+        pytest.skip(
+            f"no `glabel {GOLDEN_FN}` in any asm/*.s (banked fn; reference asm absent on a clean tree)"
+        )
 
     proc = run_tool("decomp_loop", "--func", GOLDEN_FN, "--score-only")
     assert proc.returncode == 0, proc.stderr

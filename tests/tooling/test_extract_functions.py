@@ -1,4 +1,5 @@
 """Characterization tests for tools/extract_functions.py (pure formatting logic)."""
+
 from __future__ import annotations
 
 from conftest import load_tool
@@ -26,13 +27,15 @@ def test_format_line_skips_non_matching():
 
 
 def test_extract_functions_single():
-    content = "\n".join([
-        "glabel test_fn",
-        "    /* 0 80000000 27BDFFE8 */  addiu      $sp, $sp, -0x18",
-        "  .L80000004:",
-        "    /* 4 80000004 03E00008 */  jr         $ra",
-        "endlabel test_fn",
-    ])
+    content = "\n".join(
+        [
+            "glabel test_fn",
+            "    /* 0 80000000 27BDFFE8 */  addiu      $sp, $sp, -0x18",
+            "  .L80000004:",
+            "    /* 4 80000004 03E00008 */  jr         $ra",
+            "endlabel test_fn",
+        ]
+    )
     funcs = ef.extract_functions(content)
     assert len(funcs) == 1
     name, body = funcs[0]
@@ -46,13 +49,15 @@ def test_extract_functions_single():
 
 
 def test_extract_functions_multiple():
-    content = "\n".join([
-        "glabel a",
-        "    /* 0 0 0 */  nop",
-        "endlabel a",
-        "glabel b",
-        "    /* 0 0 0 */  nop",
-        "endlabel b",
-    ])
+    content = "\n".join(
+        [
+            "glabel a",
+            "    /* 0 0 0 */  nop",
+            "endlabel a",
+            "glabel b",
+            "    /* 0 0 0 */  nop",
+            "endlabel b",
+        ]
+    )
     names = [n for n, _ in ef.extract_functions(content)]
     assert names == ["a", "b"]

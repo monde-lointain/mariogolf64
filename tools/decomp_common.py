@@ -9,6 +9,7 @@ JSON/stderr emitters, and find_segment.
 Import-time imports are stdlib-only so this module stays cheap to import and the
 re-exec bootstrap can run before a caller pulls in its heavier dependencies.
 """
+
 from __future__ import annotations
 
 import json
@@ -89,7 +90,9 @@ def find_segment(placeholder: str, asm_dir: Path = ASM_DIR) -> str | None:
     `glabel <placeholder>`, or None if no asm/*.s file declares it."""
     for s_file in sorted(asm_dir.glob("*.s")):
         try:
-            for line in s_file.read_text(encoding="utf-8", errors="replace").splitlines():
+            for line in s_file.read_text(
+                encoding="utf-8", errors="replace"
+            ).splitlines():
                 m = GLABEL_RE.match(line)
                 if m and m.group(1) == placeholder:
                     return s_file.stem

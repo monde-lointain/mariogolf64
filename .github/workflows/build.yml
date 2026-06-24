@@ -46,3 +46,39 @@ jobs:
       # then checks SHA-1 == baserom (the mandated stale-green guard).
       - name: Build + verify ROM SHA-1
         run: tools/verify-rom.sh
+
+  # Python static analysis for tools/ + tests/tooling/. ADVISORY for now: every
+  # step is continue-on-error, so this job never blocks merge (ROM SHA-1 in
+  # `build` stays the only hard gate). Flip the steps to required once the tree
+  # is clean. Runs on plain ubuntu (no ROM, no container/secrets, fork-safe) and
+  # invokes the tools directly, NOT via make: the Makefile errors at parse time
+  # without baserom.z64. basedpyright needs the runtime venv to resolve imports,
+  # so it stays local-only (`make typecheck`) until a deps-cached job is added.
+  lint:
+    name: Python static analysis (advisory)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dev tooling
+        run: pip install -r tools/requirements-dev.txt
+
+      - name: ruff format --check
+        continue-on-error: true
+        run: ruff format --check tools tests/tooling
+
+      - name: ruff check
+        continue-on-error: true
+        run: ruff check tools tests/tooling
+
+      - name: vulture (dead code)
+        continue-on-error: true
+        run: vulture

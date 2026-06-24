@@ -5,6 +5,7 @@ Self-contained stdlib leaf (imports only decomp_asm, like the other extracted
 layers), so pick_target imports the parse without a cycle. Owns the YAML path and
 the subseg-line regex; pick_target re-imports them.
 """
+
 import functools
 import os
 import re

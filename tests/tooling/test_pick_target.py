@@ -8,12 +8,12 @@ the scoring/sort in one shot. A diff after refactoring = a behavior regression.
 The golden is a *refactor-session* snapshot tied to current repo state; if the
 yaml/asm/symbols change for unrelated reasons, regenerate with REGEN_GOLDEN=1.
 """
+
 from __future__ import annotations
 
 import json
 
 import pytest
-
 from conftest import golden_dir, load_tool, regen, run_tool  # noqa: F401
 
 ROWS = "50"
@@ -44,16 +44,20 @@ def test_vendorable_tu_missing_defines(tmp_path, monkeypatch):
 
     # Synthetic TU: point LIBULTRA at a temp tree, seed the macro denominator directly.
     monkeypatch.setattr(pt, "LIBULTRA", str(tmp_path))
-    monkeypatch.setattr(pt, "_intree_asm_macros", lambda: frozenset({"K0BASE", "C0_ENTRYHI", "LEAF", "END"}))
+    monkeypatch.setattr(
+        pt,
+        "_intree_asm_macros",
+        lambda: frozenset({"K0BASE", "C0_ENTRYHI", "LEAF", "END"}),
+    )
     (tmp_path / "os").mkdir()
     (tmp_path / "os" / "fake.s").write_text(
         '#include "PR/R4300.h"      /* TLB stuff for the RDBPORT comment */\n'
         ".text\n"
         "LEAF(fake)\n"
-        "    li      t0, K0BASE\n"            # defined → no flag
-        "    mtc0    t0, C0_ENTRYHI\n"        # defined
-        "    li      t1, MISSING_MACRO\n"     # undefined → flag
-        "    li      t2, ANOTHER_GAP\n"       # undefined → flag
+        "    li      t0, K0BASE\n"  # defined → no flag
+        "    mtc0    t0, C0_ENTRYHI\n"  # defined
+        "    li      t1, MISSING_MACRO\n"  # undefined → flag
+        "    li      t2, ANOTHER_GAP\n"  # undefined → flag
         "END(fake)\n"
     )
     miss = pt.vendorable_tu_missing_defines("os/fake.s")
@@ -97,11 +101,15 @@ def test_gbi_value_guard_needs_define(tmp_path, monkeypatch):
     }
 
     # no GBI define active → flagged, canonical F3DEX_GBI_2 reported
-    monkeypatch.setattr(pt, "_active_defines_for_lib", lambda lib: frozenset({"_FINALROM"}))
+    monkeypatch.setattr(
+        pt, "_active_defines_for_lib", lambda lib: frozenset({"_FINALROM"})
+    )
     assert pt.gbi_value_guard_needs_define(str(cand), "libultra") == "F3DEX_GBI_2"
 
     # F3DEX_GBI_2 active → the macro resolves, no flag (the standing LIBULTRA_CFLAGS case)
-    monkeypatch.setattr(pt, "_active_defines_for_lib", lambda lib: frozenset({"F3DEX_GBI_2"}))
+    monkeypatch.setattr(
+        pt, "_active_defines_for_lib", lambda lib: frozenset({"F3DEX_GBI_2"})
+    )
     assert pt.gbi_value_guard_needs_define(str(cand), "libultra") is None
 
     # a candidate that never uses the macro → no flag even with nothing active
@@ -151,12 +159,14 @@ def test_wrong_ghidra_name_override(tmp_path, monkeypatch):
     inc.mkdir()
     (inc / "os_motor.h").write_text(
         "#define osMotorStop(x) __osMotorAccess((x), 0)\n"
-        "extern s32 __osMotorAccess(OSPfs *, s32);\n")
+        "extern s32 __osMotorAccess(OSPfs *, s32);\n"
+    )
     cand = tmp_path / "motor.c"
     cand.write_text(
         '#include "os_motor.h"\n'
         "s32 __osMotorAccess(OSPfs* pfs, s32 flag) { return flag; }\n"
-        "s32 osMotorInit(OSMesgQueue* mq, OSPfs* pfs, int ch) { return 0; }\n")
+        "s32 osMotorInit(OSMesgQueue* mq, OSPfs* pfs, int ch) { return 0; }\n"
+    )
     monkeypatch.setattr(pt, "INCLUDE_DIRS", [str(inc)])
 
     # the header macro-renames osMotorStop ...
@@ -179,7 +189,9 @@ def test_pick_target_json_golden(golden_dir, regen, monkeypatch):
     proc = run_tool("pick_target", "--json", "-n", ROWS)
     assert proc.returncode == 0, proc.stderr
     rows = json.loads(proc.stdout)
-    assert isinstance(rows, list) and rows, "expected a non-empty list of candidate rows"
+    assert isinstance(rows, list) and rows, (
+        "expected a non-empty list of candidate rows"
+    )
 
     gpath = golden_dir / "pick_target.json"
     if regen or not gpath.exists():
@@ -197,7 +209,9 @@ def test_pick_target_deep_json_golden(golden_dir, regen, monkeypatch):
     proc = run_tool("pick_target", "--json", "-n", "200")
     assert proc.returncode == 0, proc.stderr
     rows = json.loads(proc.stdout)
-    assert isinstance(rows, list) and len(rows) > 50, "expected the full backlog, deeper than -n 50"
+    assert isinstance(rows, list) and len(rows) > 50, (
+        "expected the full backlog, deeper than -n 50"
+    )
 
     gpath = golden_dir / "pick_target_deep.json"
     if regen or not gpath.exists():
@@ -241,7 +255,9 @@ def test_pick_target_ranked_by_descending_score(golden_dir, regen, monkeypatch):
     proc = run_tool("pick_target", "--json", "-n", ROWS)
     rows = json.loads(proc.stdout)
     scores = [r["score"] for r in rows]
-    assert scores == sorted(scores, reverse=True), "rows must be ranked by descending score"
+    assert scores == sorted(scores, reverse=True), (
+        "rows must be ranked by descending score"
+    )
 
 
 def test_coddog_mirror_repricing(tmp_path, monkeypatch):
@@ -257,14 +273,23 @@ def test_coddog_mirror_repricing(tmp_path, monkeypatch):
         "func_800A09E0\t__alFakeAudio\tsrc/audio/fake.c\t99.99\n"
     )
     monkeypatch.setenv("CODDOG_MAP", str(mapf))
-    rows = {r["func"]: r for r in json.loads(run_tool("pick_target", "--json", "-n", "200").stdout)}
+    rows = {
+        r["func"]: r
+        for r in json.loads(run_tool("pick_target", "--json", "-n", "200").stdout)
+    }
 
     hit = rows.get("func_800A0730")
     assert hit is not None and "coddog-mirror:src/io/fake.c@99.99" in hit["hazards"]
-    assert hit["upstream"] == "libultra" and hit["pts"] < 13  # re-priced off the classical-pack 13
+    assert (
+        hit["upstream"] == "libultra" and hit["pts"] < 13
+    )  # re-priced off the classical-pack 13
 
-    audio = rows.get("func_800A09E0")  # audio hit: flagged but NOT re-priced (header-gated)
-    assert audio is not None and "coddog-mirror:src/audio/fake.c@99.99" in audio["hazards"]
+    audio = rows.get(
+        "func_800A09E0"
+    )  # audio hit: flagged but NOT re-priced (header-gated)
+    assert (
+        audio is not None and "coddog-mirror:src/audio/fake.c@99.99" in audio["hazards"]
+    )
     assert audio["upstream"] == "none"
 
 
@@ -281,19 +306,31 @@ def test_lib_filter_surfaces_audio_coddog_mirror(tmp_path, monkeypatch):
     monkeypatch.setenv("CODDOG_MAP", str(mapf))
 
     # --lib libultra: the audio coddog row (upstream none) is now in scope.
-    ultra = {r["func"] for r in json.loads(
-        run_tool("pick_target", "--lib", "libultra", "--json", "-n", "400").stdout)}
+    ultra = {
+        r["func"]
+        for r in json.loads(
+            run_tool("pick_target", "--lib", "libultra", "--json", "-n", "400").stdout
+        )
+    }
     assert "func_800A09E0" in ultra, "audio coddog row missing under --lib libultra"
 
     # --lib audio: the same row surfaces via the matched-source path substring.
-    aud = {r["func"] for r in json.loads(
-        run_tool("pick_target", "--lib", "audio", "--json", "-n", "400").stdout)}
+    aud = {
+        r["func"]
+        for r in json.loads(
+            run_tool("pick_target", "--lib", "audio", "--json", "-n", "400").stdout
+        )
+    }
     assert "func_800A09E0" in aud, "audio coddog row missing under --lib audio"
 
     # Guard: a scope matching no path/name/up_lib/coddog-source still excludes the row (the filter
     # is widened for in-scope coddog hits only, not disabled).
-    none = {r["func"] for r in json.loads(
-        run_tool("pick_target", "--lib", "zzznomatch", "--json", "-n", "400").stdout)}
+    none = {
+        r["func"]
+        for r in json.loads(
+            run_tool("pick_target", "--lib", "zzznomatch", "--json", "-n", "400").stdout
+        )
+    }
     assert "func_800A09E0" not in none
 
 
@@ -306,7 +343,10 @@ def test_coddog_trap_rescan(tmp_path, monkeypatch):
     mapf = tmp_path / "coddog_map.tsv"
     mapf.write_text("func_800A0730\t__osPiCreateAccessQueue\tsrc/io/piacs.c\t99.99\n")
     monkeypatch.setenv("CODDOG_MAP", str(mapf))
-    rows = {r["func"]: r for r in json.loads(run_tool("pick_target", "--json", "-n", "200").stdout)}
+    rows = {
+        r["func"]: r
+        for r in json.loads(run_tool("pick_target", "--json", "-n", "200").stdout)
+    }
 
     hit = rows.get("func_800A0730")
     assert hit is not None, "mapped candidate missing from output"
@@ -327,21 +367,32 @@ def test_coddog_suppresses_maybe_upstream(tmp_path, monkeypatch):
     sub-threshold coddog hit stays advisory, so the guess is NOT suppressed there."""
     # Baseline, map-free: func_800A07B0 is an un-named candidate carrying the IDF guess.
     monkeypatch.setenv("CODDOG_MAP", "/nonexistent/coddog_map.tsv")
-    base = {r["func"]: r for r in json.loads(run_tool("pick_target", "--json", "-n", "400").stdout)}
-    assert "maybe-upstream" in base["func_800A07B0"]["hazards"], "baseline expects the IDF guess"
+    base = {
+        r["func"]: r
+        for r in json.loads(run_tool("pick_target", "--json", "-n", "400").stdout)
+    }
+    assert "maybe-upstream" in base["func_800A07B0"]["hazards"], (
+        "baseline expects the IDF guess"
+    )
 
     # Definitive non-audio coddog hit -> maybe-upstream suppressed; coddog-mirror stands alone.
     mapf = tmp_path / "coddog_map.tsv"
     mapf.write_text("func_800A07B0\t__osFakeMirror\tsrc/io/fake.c\t99.99\n")
     monkeypatch.setenv("CODDOG_MAP", str(mapf))
-    hit = {r["func"]: r for r in json.loads(run_tool("pick_target", "--json", "-n", "400").stdout)}["func_800A07B0"]
+    hit = {
+        r["func"]: r
+        for r in json.loads(run_tool("pick_target", "--json", "-n", "400").stdout)
+    }["func_800A07B0"]
     assert "coddog-mirror:src/io/fake.c@99.99" in hit["hazards"]
     assert "maybe-upstream" not in hit["hazards"], hit["hazards"]
 
     # Audio coddog hit is advisory-only (header-gated, not re-priced) -> the guess is retained.
     mapf.write_text("func_800A07B0\t__alFakeAudio\tsrc/audio/fake.c\t99.99\n")
     monkeypatch.setenv("CODDOG_MAP", str(mapf))
-    aud = {r["func"]: r for r in json.loads(run_tool("pick_target", "--json", "-n", "400").stdout)}["func_800A07B0"]
+    aud = {
+        r["func"]: r
+        for r in json.loads(run_tool("pick_target", "--json", "-n", "400").stdout)
+    }["func_800A07B0"]
     assert "coddog-mirror:src/audio/fake.c@99.99" in aud["hazards"]
     assert "maybe-upstream" in aud["hazards"], aud["hazards"]
 
@@ -381,22 +432,38 @@ def _coddog_rows(pt, monkeypatch, *, ui, carried, coddog):
     """Drive build_rows over ONE synthetic 2-fn asm subseg with the file-reading helpers stubbed,
     so the new coddog-tail logic is tested in isolation (no tree deps). Leader is `namedLeader`
     (named, in ui+carried); tail is `func_1100`."""
+
     class A:
         lib = None
         include_stuck = False
         n = 999
-    monkeypatch.setattr(pt, "parse_subsegs", lambda: [(0x1000, "asm", None), (0x2000, "asm", None)])
-    monkeypatch.setattr(pt, "classify_subseg",
-                        lambda off, typ, path, size, _ui:
-                        ("asm-flip", ["namedLeader", "func_1100"], []) if off == 0x1000 else None)
+
+    monkeypatch.setattr(
+        pt, "parse_subsegs", lambda: [(0x1000, "asm", None), (0x2000, "asm", None)]
+    )
+    monkeypatch.setattr(
+        pt,
+        "classify_subseg",
+        lambda off, typ, path, size, _ui: (
+            ("asm-flip", ["namedLeader", "func_1100"], []) if off == 0x1000 else None
+        ),
+    )
     monkeypatch.setattr(pt, "src_func_callers", lambda: {})
     monkeypatch.setattr(pt, "append_upstream_hazards", lambda *a, **k: ("warm", False))
-    monkeypatch.setattr(pt, "score_row",
-                        lambda cand, hz, carr: {
-                            "func": cand.primary, "rom": hex(cand.off), "upstream": cand.up_lib,
-                            "score": 0, "size": cand.size,
-                            "hazards": ",".join(h.detail for h in hz
-                                                if h.kind == pt.HAZARD_CODDOG_MIRROR)})
+    monkeypatch.setattr(
+        pt,
+        "score_row",
+        lambda cand, hz, carr: {
+            "func": cand.primary,
+            "rom": hex(cand.off),
+            "upstream": cand.up_lib,
+            "score": 0,
+            "size": cand.size,
+            "hazards": ",".join(
+                h.detail for h in hz if h.kind == pt.HAZARD_CODDOG_MIRROR
+            ),
+        },
+    )
     return pt.build_rows(A(), ui, carried, {}, coddog)
 
 
@@ -410,10 +477,14 @@ def test_coddog_tail_overrides_carried_namedrop(monkeypatch):
     (named, mis-attributed to gbpakreadwrite.c via a forward prototype) + tail func_->pfsisplug.c."""
     pt = load_tool("pick_target")
     rows = _coddog_rows(
-        pt, monkeypatch,
-        ui={"namedLeader": ("libultra", "/x/wrong.c")},   # mis-attributed (prototype) upstream
-        carried={"namedLeader"},                          # name-dropped in the digest log
-        coddog={"func_1100": ("src/io/pfsisplug.c", 99.99)})
+        pt,
+        monkeypatch,
+        ui={
+            "namedLeader": ("libultra", "/x/wrong.c")
+        },  # mis-attributed (prototype) upstream
+        carried={"namedLeader"},  # name-dropped in the digest log
+        coddog={"func_1100": ("src/io/pfsisplug.c", 99.99)},
+    )
     got = [r for r in rows if r["func"] == "namedLeader"]
     assert got, "a coddog-identified subseg must survive the carried name-drop filter"
     assert "src/io/pfsisplug.c@99.99" in got[0]["hazards"], got[0]["hazards"]
@@ -425,10 +496,12 @@ def test_carried_namedrop_still_drops_without_coddog(monkeypatch):
     S78 exemption is scoped strictly to definitive coddog identities, not a blanket disable."""
     pt = load_tool("pick_target")
     rows = _coddog_rows(
-        pt, monkeypatch,
+        pt,
+        monkeypatch,
         ui={"namedLeader": ("libultra", "/x/wrong.c")},
         carried={"namedLeader"},
-        coddog={})  # no coddog identity -> the name-drop drop still applies
+        coddog={},
+    )  # no coddog identity -> the name-drop drop still applies
     assert not [r for r in rows if r["func"] == "namedLeader"]
 
 
@@ -441,18 +514,25 @@ def test_resolve_include_vendored_basename_fallback(tmp_path, monkeypatch):
     inc = tmp_path / "inc"
     (inc / "internal").mkdir(parents=True)
     (inc / "internal" / "controller.h").write_text(
-        "typedef struct {\n    int rxsize;\n} __OSContRequesFormatShort;\n")
+        "typedef struct {\n    int rxsize;\n} __OSContRequesFormatShort;\n"
+    )
     monkeypatch.setattr(pt, "INCLUDE_DIRS", [str(inc), str(inc / "internal")])
     # exact prefixed path misses; basename `controller.h` resolves under internal/
-    assert pt._resolve_include("PRinternal/controller.h") == str(inc / "internal" / "controller.h")
+    assert pt._resolve_include("PRinternal/controller.h") == str(
+        inc / "internal" / "controller.h"
+    )
     # a bare basename absent everywhere still returns None (no false resolution)
     assert pt._resolve_include("nope.h") is None
     cfile = tmp_path / "src.c"
-    cfile.write_text('#include "PRinternal/controller.h"\n'
-                     "void f(void){ __OSContRequesFormatShort t; }\n")
+    cfile.write_text(
+        '#include "PRinternal/controller.h"\n'
+        "void f(void){ __OSContRequesFormatShort t; }\n"
+    )
     assert "__OSContRequesFormatShort" in pt.declared_type_names(str(cfile))
     # ...so refs_unplaced excludes it (a TYPE, not an unplaced data extern)
-    assert "__OSContRequesFormatShort" not in pt.refs_unplaced(str(cfile), set(), "libultra")
+    assert "__OSContRequesFormatShort" not in pt.refs_unplaced(
+        str(cfile), set(), "libultra"
+    )
 
 
 def test_refs_unplaced_drops_initializer_only_self_defined_global(tmp_path):
@@ -470,11 +550,16 @@ def test_refs_unplaced_drops_initializer_only_self_defined_global(tmp_path):
         "void __osTimerServicesInit(void) {\n"
         "    __osViIntrCount = 0;\n"
         "    __osTimerList->next = __osTimerList;\n"
-        "}\n")
+        "}\n"
+    )
     refs = pt.refs_unplaced(str(cfile), set(), "libultra")
-    assert "__osBaseTimer" not in refs        # initializer-only self-def → drop-def removes it
-    assert "__osViIntrCount" in refs           # body-referenced → still owed a recovery
-    assert "__osTimerList" in refs             # body-referenced (->next) → still owed (if unplaced)
+    assert (
+        "__osBaseTimer" not in refs
+    )  # initializer-only self-def → drop-def removes it
+    assert "__osViIntrCount" in refs  # body-referenced → still owed a recovery
+    assert (
+        "__osTimerList" in refs
+    )  # body-referenced (->next) → still owed (if unplaced)
 
 
 def test_call_divergence_strips_inactive_version_branch(monkeypatch):
@@ -484,18 +569,25 @@ def test_call_divergence_strips_inactive_version_branch(monkeypatch):
     Without the lib's build_ord (None → 0) the strip is a no-op and the phantom returns."""
     pt = load_tool("pick_target")
     # _upstream_body returns the brace body (no signature line), so name only real call sites.
-    body = ("#if BUILD_VERSION >= VERSION_J\n"
-            "    foo(a, b);\n"
-            "#else\n"
-            "    foo(a);\n"        # dead under J — must NOT count
-            "#endif\n"
-            "    bar();\n")
+    body = (
+        "#if BUILD_VERSION >= VERSION_J\n"
+        "    foo(a, b);\n"
+        "#else\n"
+        "    foo(a);\n"  # dead under J — must NOT count
+        "#endif\n"
+        "    bar();\n"
+    )
     monkeypatch.setattr(pt, "_upstream_body", lambda cp, pr: body)
     monkeypatch.setattr(pt, "_asm_jal_count", lambda off, pr: 2)  # J build: foo + bar
-    monkeypatch.setattr(pt, "_build_version_ord",
-                        lambda lib: load_tool("build_config")._VERSION_ORD["VERSION_J"] if lib else 0)
-    assert pt.call_divergence(0x1000, "ff", "x.c", "libultra") is None  # strip → 2vs2 → no hazard
-    d = pt.call_divergence(0x1000, "ff", "x.c", None)                   # no strip → foo doubles → 3vs2
+    monkeypatch.setattr(
+        pt,
+        "_build_version_ord",
+        lambda lib: load_tool("build_config")._VERSION_ORD["VERSION_J"] if lib else 0,
+    )
+    assert (
+        pt.call_divergence(0x1000, "ff", "x.c", "libultra") is None
+    )  # strip → 2vs2 → no hazard
+    d = pt.call_divergence(0x1000, "ff", "x.c", None)  # no strip → foo doubles → 3vs2
     assert d is not None and d.detail == "3vs2"
 
 
@@ -505,12 +597,16 @@ def test_call_divergence_libnusys_intmask_version_artifact(monkeypatch):
     so smallest-first is not deterred from a clean near-verbatim drop (nuContRmbModeSet `2vs0`). The
     flag is libnusys-only and requires the surplus (n_c - n_asm) to equal the osSetIntMask count."""
     pt = load_tool("pick_target")
-    body = ("    OSIntMask mask;\n"
-            "    mask = osSetIntMask(OS_IM_NONE);\n"
-            "    foo(a);\n"
-            "    osSetIntMask(mask);\n")  # 3 calls C-side; leaf asm omits the 2 wrapper calls
+    body = (
+        "    OSIntMask mask;\n"
+        "    mask = osSetIntMask(OS_IM_NONE);\n"
+        "    foo(a);\n"
+        "    osSetIntMask(mask);\n"
+    )  # 3 calls C-side; leaf asm omits the 2 wrapper calls
     monkeypatch.setattr(pt, "_upstream_body", lambda cp, pr: body)
-    monkeypatch.setattr(pt, "_asm_jal_count", lambda off, pr: 1)  # leaf-ish: only foo survives
+    monkeypatch.setattr(
+        pt, "_asm_jal_count", lambda off, pr: 1
+    )  # leaf-ish: only foo survives
     monkeypatch.setattr(pt, "_build_version_ord", lambda lib: 0)
     d = pt.call_divergence(0x1000, "ff", "x.c", "libnusys")
     assert d is not None and d.detail == "3vs1(version-artifact?)"
@@ -528,15 +624,32 @@ def test_block_reorder_sibling_libnusys_family():
     pt = load_tool("pick_target")
     H = load_tool("pick_target_hazards").Hazard
     jal = [H.jal_count_mismatch(5, 10)]  # the unexplained-mismatch tell
-    assert pt._block_reorder_sibling("a/nucontgbpakfwrite.c", jal, "libnusys") == "nucontgbpakfread.c"
-    assert pt._block_reorder_sibling("a/nucontgbpakfread.c", jal, "libnusys") is None  # no self-flag
-    assert pt._block_reorder_sibling(  # coddog match explains the structure → suppress
-        "a/nucontgbpakfwrite.c", jal + [H.coddog_mirror("x.c", 99.0)], "libnusys") is None
-    va = [H.jal_count_mismatch(2, 0, version_artifact=True)]  # clean-drop, not the reorder tell
+    assert (
+        pt._block_reorder_sibling("a/nucontgbpakfwrite.c", jal, "libnusys")
+        == "nucontgbpakfread.c"
+    )
+    assert (
+        pt._block_reorder_sibling("a/nucontgbpakfread.c", jal, "libnusys") is None
+    )  # no self-flag
+    assert (
+        pt._block_reorder_sibling(  # coddog match explains the structure → suppress
+            "a/nucontgbpakfwrite.c", jal + [H.coddog_mirror("x.c", 99.0)], "libnusys"
+        )
+        is None
+    )
+    va = [
+        H.jal_count_mismatch(2, 0, version_artifact=True)
+    ]  # clean-drop, not the reorder tell
     assert pt._block_reorder_sibling("a/nucontgbpakfwrite.c", va, "libnusys") is None
-    assert pt._block_reorder_sibling("a/nucontgbpakfwrite.c", jal, "libultra") is None  # wrong lib
-    assert pt._block_reorder_sibling("a/nusched.c", jal, "libnusys") is None  # out of family
-    assert pt._block_reorder_sibling("a/nucontgbpakfwrite.c", [], "libnusys") is None  # no mismatch
+    assert (
+        pt._block_reorder_sibling("a/nucontgbpakfwrite.c", jal, "libultra") is None
+    )  # wrong lib
+    assert (
+        pt._block_reorder_sibling("a/nusched.c", jal, "libnusys") is None
+    )  # out of family
+    assert (
+        pt._block_reorder_sibling("a/nucontgbpakfwrite.c", [], "libnusys") is None
+    )  # no mismatch
 
 
 def test_straddling_unattrib_inter_file_leaf():
@@ -545,20 +658,41 @@ def test_straddling_unattrib_inter_file_leaf():
     those. Models the pre-split S120 [0x7D970] pack: Fwrite(A), func_800A2780(?), nuSiMgrInit(B),
     nuSiSendMesg(B), then 3 trailing `?` within B. Leading and same-stem-flanked `?` do NOT straddle."""
     pt = load_tool("pick_target")
-    fns = ["nuContGBPakFwrite", "func_800A2780", "nuSiMgrInit", "nuSiSendMesg",
-           "func_800A2888", "func_800A28A8", "func_800A28C8"]
+    fns = [
+        "nuContGBPakFwrite",
+        "func_800A2780",
+        "nuSiMgrInit",
+        "nuSiSendMesg",
+        "func_800A2888",
+        "func_800A28A8",
+        "func_800A28C8",
+    ]
     stems = ["nucontgbpakfwrite", None, "nusimgr", "nusimgr", None, None, None]
     unattrib = {"func_800A2780", "func_800A2888", "func_800A28A8", "func_800A28C8"}
     name_vram = {nm: 0x800A2570 + i * 0x10 for i, nm in enumerate(fns)}
-    assert pt._straddling_unattrib(fns, stems, unattrib, name_vram) == [name_vram["func_800A2780"]]
+    assert pt._straddling_unattrib(fns, stems, unattrib, name_vram) == [
+        name_vram["func_800A2780"]
+    ]
     # a LEADING `?` (no named member before it) does NOT straddle
-    assert pt._straddling_unattrib(
-        ["func_x", "alSynNew", "alSynDelete"], [None, "synthesizer", "syndelete"],
-        {"func_x"}, {"func_x": 1, "alSynNew": 2, "alSynDelete": 3}) == []
+    assert (
+        pt._straddling_unattrib(
+            ["func_x", "alSynNew", "alSynDelete"],
+            [None, "synthesizer", "syndelete"],
+            {"func_x"},
+            {"func_x": 1, "alSynNew": 2, "alSynDelete": 3},
+        )
+        == []
+    )
     # a `?` flanked by the SAME stem both sides (within one file) does NOT straddle
-    assert pt._straddling_unattrib(
-        ["a", "func_y", "b"], ["nusimgr", None, "nusimgr"],
-        {"func_y"}, {"a": 1, "func_y": 2, "b": 3}) == []
+    assert (
+        pt._straddling_unattrib(
+            ["a", "func_y", "b"],
+            ["nusimgr", None, "nusimgr"],
+            {"func_y"},
+            {"a": 1, "func_y": 2, "b": 3},
+        )
+        == []
+    )
 
 
 def test_coddog_tail_trap_rescan(monkeypatch):
@@ -574,21 +708,43 @@ def test_coddog_tail_trap_rescan(monkeypatch):
         lib = None
         include_stuck = False
         n = 999
+
     monkeypatch.setattr(pt, "parse_subsegs", lambda: [(0x1000, "asm", None)])
-    monkeypatch.setattr(pt, "classify_subseg",
-                        lambda off, typ, path, size, _ui: ("asm-flip", ["namedLeader", "func_1100"], []))
+    monkeypatch.setattr(
+        pt,
+        "classify_subseg",
+        lambda off, typ, path, size, _ui: (
+            "asm-flip",
+            ["namedLeader", "func_1100"],
+            [],
+        ),
+    )
     monkeypatch.setattr(pt, "src_func_callers", lambda: {})
     monkeypatch.setattr(pt, "append_upstream_hazards", lambda *a, **k: ("warm", False))
     # asm-reading helpers: off=0x1000 is synthetic, return empty so only the upstream .c is read.
     monkeypatch.setattr(pt, "recover_unplaced_vram", lambda off: [])
     monkeypatch.setattr(pt, "recover_unplaced_call_vram", lambda off, primary: [])
     monkeypatch.setattr(pt, "rodata_jtbls", lambda off: [])
-    monkeypatch.setattr(pt, "score_row",
-                        lambda cand, hz, carr: {
-                            "func": cand.primary, "upstream": cand.up_lib, "score": 0, "size": cand.size,
-                            "hazards": ",".join(h.kind + (":" + h.detail if h.detail else "") for h in hz)})
-    rows = pt.build_rows(A(), {"namedLeader": ("libultra", "/x/wrong.c")}, set(), {},
-                         {"func_1100": ("src/io/piacs.c", 99.99)})
+    monkeypatch.setattr(
+        pt,
+        "score_row",
+        lambda cand, hz, carr: {
+            "func": cand.primary,
+            "upstream": cand.up_lib,
+            "score": 0,
+            "size": cand.size,
+            "hazards": ",".join(
+                h.kind + (":" + h.detail if h.detail else "") for h in hz
+            ),
+        },
+    )
+    rows = pt.build_rows(
+        A(),
+        {"namedLeader": ("libultra", "/x/wrong.c")},
+        set(),
+        {},
+        {"func_1100": ("src/io/piacs.c", 99.99)},
+    )
     hit = next(r for r in rows if r["func"] == "namedLeader")
     assert "coddog-mirror:src/io/piacs.c@99.99" in hit["hazards"]
     assert "file-static" in hit["hazards"], hit["hazards"]
@@ -599,20 +755,33 @@ def _hazard_rows(pt, monkeypatch, *, subs, classify, ui, coddog):
     """Drive build_rows over synthetic subsegs with file-reading helpers stubbed; score_row emits
     every hazard kind:detail so the assertion can match the advisory flags. Shared by the S103
     coddog-partial + game-region-mirror tests."""
+
     class A:
         lib = None
         include_stuck = False
         n = 999
+
     monkeypatch.setattr(pt, "parse_subsegs", lambda: subs)
     monkeypatch.setattr(pt, "classify_subseg", classify)
     monkeypatch.setattr(pt, "src_func_callers", lambda: {})
     monkeypatch.setattr(pt, "append_upstream_hazards", lambda *a, **k: ("warm", False))
-    monkeypatch.setattr(pt, "_coddog_upstream_path", lambda cfile: None)  # skip trap-rescan/fncount file reads
+    monkeypatch.setattr(
+        pt, "_coddog_upstream_path", lambda cfile: None
+    )  # skip trap-rescan/fncount file reads
     monkeypatch.setattr(pt, "subseg_vram", lambda off: 0x80067B00)
-    monkeypatch.setattr(pt, "score_row",
-                        lambda cand, hz, carr: {
-                            "func": cand.primary, "upstream": cand.up_lib, "score": 0, "size": cand.size,
-                            "hazards": ",".join(h.kind + (":" + h.detail if h.detail else "") for h in hz)})
+    monkeypatch.setattr(
+        pt,
+        "score_row",
+        lambda cand, hz, carr: {
+            "func": cand.primary,
+            "upstream": cand.up_lib,
+            "score": 0,
+            "size": cand.size,
+            "hazards": ",".join(
+                h.kind + (":" + h.detail if h.detail else "") for h in hz
+            ),
+        },
+    )
     return pt.build_rows(A(), ui, set(), {}, coddog)
 
 
@@ -623,18 +792,30 @@ def test_coddog_partial_twin_subset(monkeypatch):
     so the gate per-fn-verifies. The multi-twin companion to the len(distinct)==1-only fncount-mismatch."""
     pt = load_tool("pick_target")
     rows = _hazard_rows(
-        pt, monkeypatch,
+        pt,
+        monkeypatch,
         subs=[(0x1000, "asm", None)],
-        classify=lambda off, typ, path, size, _ui:
-            ("asm-flip", ["leader", "guMtxL2F", "guMtxIdentF"], []),
-        ui={"leader": ("libultra", "/x/wrong.c"),            # named leader, distinct upstream
-            "guMtxL2F": ("libultra", "/x/mtxutil.c"),        # members named -> combined mtxutil
-            "guMtxIdentF": ("libultra", "/x/mtxutil.c")},
-        coddog={"guMtxL2F": ("src/mgu/mtxl2f.c", 100.0),     # 2 distinct per-fn twins
-                "guMtxIdentF": ("src/mgu/mtxidentf.c", 100.0)})
+        classify=lambda off, typ, path, size, _ui: (
+            "asm-flip",
+            ["leader", "guMtxL2F", "guMtxIdentF"],
+            [],
+        ),
+        ui={
+            "leader": ("libultra", "/x/wrong.c"),  # named leader, distinct upstream
+            "guMtxL2F": (
+                "libultra",
+                "/x/mtxutil.c",
+            ),  # members named -> combined mtxutil
+            "guMtxIdentF": ("libultra", "/x/mtxutil.c"),
+        },
+        coddog={
+            "guMtxL2F": ("src/mgu/mtxl2f.c", 100.0),  # 2 distinct per-fn twins
+            "guMtxIdentF": ("src/mgu/mtxidentf.c", 100.0),
+        },
+    )
     hz = next(r for r in rows if r["func"] == "leader")["hazards"]
-    assert "coddog-partial:2of3fn" in hz, hz                 # 2 coddog'd of 3 pack fns
-    assert "coddog-twin:" in hz                              # the twins that drove the partial flag
+    assert "coddog-partial:2of3fn" in hz, hz  # 2 coddog'd of 3 pack fns
+    assert "coddog-twin:" in hz  # the twins that drove the partial flag
 
 
 def test_game_region_mirror_below_libultra_band(monkeypatch):
@@ -643,24 +824,38 @@ def test_game_region_mirror_below_libultra_band(monkeypatch):
     (which forces -O3 → wrong inlining). Band start = lowest-rom `libultra/` subseg (0x9000 here)."""
     pt = load_tool("pick_target")
     rows = _hazard_rows(
-        pt, monkeypatch,
-        subs=[(0x1000, "asm", None), (0x9000, "c", "libultra/io/pimgr")],  # band starts at 0x9000
-        classify=lambda off, typ, path, size, _ui:
-            ("asm-flip", ["leader"], []) if off == 0x1000 else None,
-        ui={"leader": ("libultra", "/x/gu/mtxutil.c")},      # libultra source, but rom 0x1000 < 0x9000
-        coddog={})
+        pt,
+        monkeypatch,
+        subs=[
+            (0x1000, "asm", None),
+            (0x9000, "c", "libultra/io/pimgr"),
+        ],  # band starts at 0x9000
+        classify=lambda off, typ, path, size, _ui: (
+            ("asm-flip", ["leader"], []) if off == 0x1000 else None
+        ),
+        ui={
+            "leader": ("libultra", "/x/gu/mtxutil.c")
+        },  # libultra source, but rom 0x1000 < 0x9000
+        coddog={},
+    )
     hz = next(r for r in rows if r["func"] == "leader")["hazards"]
     assert "game-region-mirror:0x80067B00" in hz, hz
     # a libultra subseg ABOVE the band must NOT be flagged: re-run with the source row at 0xA000
     rows2 = _hazard_rows(
-        pt, monkeypatch,
-        subs=[(0x9000, "c", "libultra/io/pimgr"), (0xA000, "asm", None)],  # band starts at 0x9000
-        classify=lambda off, typ, path, size, _ui:
-            ("asm-flip", ["leader"], []) if off == 0xA000 else None,
+        pt,
+        monkeypatch,
+        subs=[
+            (0x9000, "c", "libultra/io/pimgr"),
+            (0xA000, "asm", None),
+        ],  # band starts at 0x9000
+        classify=lambda off, typ, path, size, _ui: (
+            ("asm-flip", ["leader"], []) if off == 0xA000 else None
+        ),
         ui={"leader": ("libultra", "/x/gu/mtxutil.c")},
-        coddog={})
+        coddog={},
+    )
     hz2 = next(r for r in rows2 if r["func"] == "leader")["hazards"]
-    assert "game-region-mirror" not in hz2, hz2              # 0xA000 > band start -> no flag
+    assert "game-region-mirror" not in hz2, hz2  # 0xA000 > band start -> no flag
 
 
 def test_coddog_nusys_repricing(monkeypatch):
@@ -675,21 +870,42 @@ def test_coddog_nusys_repricing(monkeypatch):
         lib = None
         include_stuck = False
         n = 999
+
     monkeypatch.setattr(pt, "parse_subsegs", lambda: [(0x1000, "asm", None)])
-    monkeypatch.setattr(pt, "classify_subseg",
-                        lambda off, typ, path, size, _ui: ("asm-flip", ["func_1000"], []))
+    monkeypatch.setattr(
+        pt,
+        "classify_subseg",
+        lambda off, typ, path, size, _ui: ("asm-flip", ["func_1000"], []),
+    )
     monkeypatch.setattr(pt, "src_func_callers", lambda: {})
     monkeypatch.setattr(pt, "append_upstream_hazards", lambda *a, **k: ("warm", False))
-    monkeypatch.setattr(pt, "_coddog_nusys_path", lambda cfile: None)  # skip trap-rescan file read
-    monkeypatch.setattr(pt, "_coddog_source_banked", lambda s: False)  # tree-independent
-    monkeypatch.setattr(pt, "signature_hint", lambda off, primary, si: None)  # no libultra IDF guess
+    monkeypatch.setattr(
+        pt, "_coddog_nusys_path", lambda cfile: None
+    )  # skip trap-rescan file read
+    monkeypatch.setattr(
+        pt, "_coddog_source_banked", lambda s: False
+    )  # tree-independent
+    monkeypatch.setattr(
+        pt, "signature_hint", lambda off, primary, si: None
+    )  # no libultra IDF guess
     monkeypatch.setattr(pt, "subseg_vram", lambda off: 0x800A0000)
-    monkeypatch.setattr(pt, "score_row",
-                        lambda cand, hz, carr: {
-                            "func": cand.primary, "upstream": cand.up_lib, "score": 0, "size": cand.size,
-                            "hazards": ",".join(h.kind + (":" + h.detail if h.detail else "") for h in hz)})
+    monkeypatch.setattr(
+        pt,
+        "score_row",
+        lambda cand, hz, carr: {
+            "func": cand.primary,
+            "upstream": cand.up_lib,
+            "score": 0,
+            "size": cand.size,
+            "hazards": ",".join(
+                h.kind + (":" + h.detail if h.detail else "") for h in hz
+            ),
+        },
+    )
     # un-named func_1000 coddog-matched a nusys source -> re-price libnusys + flag.
-    rows = pt.build_rows(A(), {}, set(), {}, {}, {"func_1000": ("mainlib/nusimgr.c", 99.99)})
+    rows = pt.build_rows(
+        A(), {}, set(), {}, {}, {"func_1000": ("mainlib/nusimgr.c", 99.99)}
+    )
     row = next(r for r in rows if r["func"] == "func_1000")
     assert row["upstream"] == "libnusys", row
     assert "coddog-mirror:mainlib/nusimgr.c@99.99" in row["hazards"], row["hazards"]
@@ -721,19 +937,37 @@ def test_drop_static_mirror_hazard(tmp_path):
         "OSDevMgr __osViDevMgr = { 0 };\n"
         "static OSThread viThread;\n"
         "static OSMesgQueue viEventQueue;\n"
-        "void osCreateViManager(int p){ (void)viThread; }\n")
+        "void osCreateViManager(int p){ (void)viThread; }\n"
+    )
     got = pt.drop_static_mirror_hazard(str(up), [cod, fs, dd])
     assert got is not None and got.detail == "3bss", got
 
     # a carve signal (rodata-jtbl / data-static / rodata-literal) disqualifies the pure-.bss drop
-    for carve in (pt.HAZARD_RODATA_JTBL, pt.HAZARD_DATA_STATIC, pt.HAZARD_RODATA_LITERAL):
-        assert pt.drop_static_mirror_hazard(None, [cod, fs, dd, H(carve, "0x800D0000")]) is None
+    for carve in (
+        pt.HAZARD_RODATA_JTBL,
+        pt.HAZARD_DATA_STATIC,
+        pt.HAZARD_RODATA_LITERAL,
+    ):
+        assert (
+            pt.drop_static_mirror_hazard(None, [cod, fs, dd, H(carve, "0x800D0000")])
+            is None
+        )
 
     # no file-static (a plain drop-def mirror) → not this tag
     assert pt.drop_static_mirror_hazard(None, [cod, dd]) is None
     # an audio or sub-threshold coddog hit is advisory, not a confirmed mirror → no tag
-    assert pt.drop_static_mirror_hazard(None, [H(pt.HAZARD_CODDOG_MIRROR, "src/audio/x.c@99.99"), fs]) is None
-    assert pt.drop_static_mirror_hazard(None, [H(pt.HAZARD_CODDOG_MIRROR, "src/io/x.c@88.00"), fs]) is None
+    assert (
+        pt.drop_static_mirror_hazard(
+            None, [H(pt.HAZARD_CODDOG_MIRROR, "src/audio/x.c@99.99"), fs]
+        )
+        is None
+    )
+    assert (
+        pt.drop_static_mirror_hazard(
+            None, [H(pt.HAZARD_CODDOG_MIRROR, "src/io/x.c@88.00"), fs]
+        )
+        is None
+    )
     # no coddog identity at all → no tag (the file-static still routes via the classical/carve playbook)
     assert pt.drop_static_mirror_hazard(None, [fs, dd]) is None
 
@@ -753,7 +987,8 @@ def test_file_static_const_array_widens_rodata_carve_start(tmp_path):
     up.write_text(
         '#include "stdlib.h"\n'
         "static const ldouble pows[] = {10e0L, 10e1L, 10e3L};\n"
-        "void _Ldtob(int code) { (void)pows[code]; }\n")
+        "void _Ldtob(int code) { (void)pows[code]; }\n"
+    )
     assert pt.defines_file_static_const_array(str(up)) == ["pows"]
 
     # a NON-const mutable array (xlitob's ldigs/udigs) → NOT detected: it lands in .data (its own
@@ -761,16 +996,15 @@ def test_file_static_const_array_widens_rodata_carve_start(tmp_path):
     mutable = tmp_path / "xlitob.c"
     mutable.write_text(
         'static char ldigs[] = "0123456789abcdef";\n'
-        "void _Litob(int code) { (void)ldigs[code]; }\n")
+        "void _Litob(int code) { (void)ldigs[code]; }\n"
+    )
     assert pt.defines_file_static_const_array(str(mutable)) == []
 
     # a brace-depth>=1 function-local const array is not file-scope → excluded (depth tracking)
     local = tmp_path / "loc.c"
     local.write_text(
-        "void f(int i) {\n"
-        "    static const int t[2] = {1, 2};\n"
-        "    (void)t[i];\n"
-        "}\n")
+        "void f(int i) {\n    static const int t[2] = {1, 2};\n    (void)t[i];\n}\n"
+    )
     assert pt.defines_file_static_const_array(str(local)) == []
 
     # a scalar const (not an array) is not this signal
@@ -786,18 +1020,19 @@ def test_iter_upstream_functions_def_shapes(tmp_path):
     pt = load_tool("pick_target")
     c = tmp_path / "u.c"
     c.write_text(
-        "/* banner: double atan(double) */\n"           # doc-comment signature → NOT a def
-        "#define PUT(x) sink(x)\n"                        # function-like macro header → NOT a def
-        "static void _Putfld(int x);\n"                  # forward declaration → NOT a def
+        "/* banner: double atan(double) */\n"  # doc-comment signature → NOT a def
+        "#define PUT(x) sink(x)\n"  # function-like macro header → NOT a def
+        "static void _Putfld(int x);\n"  # forward declaration → NOT a def
         "int _Printf(void* pfn(int), int a) {\n"
-        "    if (a) { PUT(a); }\n"                        # in-body call/control → NOT a def
+        "    if (a) { PUT(a); }\n"  # in-body call/control → NOT a def
         "    return 0;\n"
         "}\n"
-        "_xatan(u, v)\n"                                  # single-token implicit-int K&R def
+        "_xatan(u, v)\n"  # single-token implicit-int K&R def
         "int u, v;\n"
         "{ return u; }\n"
-        " void leading(void) { return; }\n"              # stray-leading-space top-level def
-        "static void _Putfld(int x) { (void)x; }\n")
+        " void leading(void) { return; }\n"  # stray-leading-space top-level def
+        "static void _Putfld(int x) { (void)x; }\n"
+    )
     names = [n for n, _ in pt._iter_upstream_functions(c.read_text())]
     assert names == ["_Printf", "_xatan", "leading", "_Putfld"]
     assert pt._upstream_file_func_count("libultra", str(c)) == 4
@@ -809,8 +1044,10 @@ def test_jal_count_drops_local_macros():
     reads as a stripped re-impl (the phantom `14vs3`)."""
     pt = load_tool("pick_target")
     body = "{ PUT(a); PUT(b); PAD(c); realcall(d); }"
-    assert pt._c_jal_count(body) == 4                       # no local-macro set: PUT/PAD counted
-    assert pt._c_jal_count(body, {"PUT", "PAD"}) == 1       # local macros dropped → only realcall
+    assert pt._c_jal_count(body) == 4  # no local-macro set: PUT/PAD counted
+    assert (
+        pt._c_jal_count(body, {"PUT", "PAD"}) == 1
+    )  # local macros dropped → only realcall
 
 
 def test_calls_unplaced_skips_fn_ptr_param(tmp_path):
@@ -819,10 +1056,8 @@ def test_calls_unplaced_skips_fn_ptr_param(tmp_path):
     pt = load_tool("pick_target")
     c = tmp_path / "p.c"
     c.write_text(
-        "int run(void* pfn(int, char*), int x) {\n"
-        "    pfn(x, 0);\n"
-        "    realcall(x);\n"
-        "}\n")
+        "int run(void* pfn(int, char*), int x) {\n    pfn(x, 0);\n    realcall(x);\n}\n"
+    )
     got = pt.calls_unplaced(str(c), "run", set(), "libultra")
     assert "pfn" not in got and "realcall" in got
 
@@ -837,9 +1072,12 @@ def test_upstream_fncount_mismatch_and_data_carve(tmp_path):
         'static char spaces[] = "   ";\n'
         "static const char fchar[] = {1, 2};\n"
         "static int scalar = 5;\n"
-        "void f(void) { static int loc[2] = {1, 2}; (void)loc; }\n")
+        "void f(void) { static int loc[2] = {1, 2}; (void)loc; }\n"
+    )
     assert pt.defines_file_static_init_array(str(c)) == ["spaces"]
-    assert pt.defines_file_static_const_array(str(c)) == ["fchar"]   # unchanged: const stays rodata
+    assert pt.defines_file_static_const_array(str(c)) == [
+        "fchar"
+    ]  # unchanged: const stays rodata
 
 
 # --- refactor pre-flight characterization (tooling/refactor-pick-target) -------------------
@@ -871,28 +1109,57 @@ def test_seed_points_characterization():
     pt = load_tool("pick_target")
     H = pt.Hazard
     sp = pt.seed_points  # (size, upstream, band, nfns, hazards, blocked) -> seed
-    assert sp(100, "none", "-", 1, [], False) == 5            # small single classical
-    assert sp(100, "libultra", "warm", 1, [], False) == 1     # warm enabler-free mirror
-    assert sp(100, "libultra", "cold", 1, [], False) == 2     # cold mirror
-    assert sp(100, "libultra", "warm", 2, [], False) == 2     # + pack
-    assert sp(2000, "libultra", "warm", 1, [], False) == 13   # huge -> must decompose
-    assert sp(100, "none", "-", 2, [], False) == 13           # classical pack -> 13
-    assert sp(100, "none", "-", 1, [], True) == "blk"         # blocked -> un-pickable
+    assert sp(100, "none", "-", 1, [], False) == 5  # small single classical
+    assert sp(100, "libultra", "warm", 1, [], False) == 1  # warm enabler-free mirror
+    assert sp(100, "libultra", "cold", 1, [], False) == 2  # cold mirror
+    assert sp(100, "libultra", "warm", 2, [], False) == 2  # + pack
+    assert sp(2000, "libultra", "warm", 1, [], False) == 13  # huge -> must decompose
+    assert sp(100, "none", "-", 2, [], False) == 13  # classical pack -> 13
+    assert sp(100, "none", "-", 1, [], True) == "blk"  # blocked -> un-pickable
     assert sp(100, "libultra", "warm", 1, [H(pt.HAZARD_FILE_STATIC)], False) == 2
-    assert sp(100, "libultra", "warm", 1, [H(pt.HAZARD_NEEDS_HEADER, "x.h")], False) == 2
-    assert sp(100, "libultra", "warm", 1, [H(pt.HAZARD_REFS_UNPLACED, "a@0x1")], False) == 2
-    assert sp(100, "libultra", "cold", 4, [], False) == 8     # large pack must decompose
-    assert sp(100, "none", "-", 1, [H(pt.HAZARD_FILE_STATIC)], False) == 8  # classical+drop gate
-    assert [pt.snap_fib(n) for n in (0, 1, 2, 3, 4, 5, 6, 9)] == [1, 1, 2, 3, 5, 5, 8, 13]
+    assert (
+        sp(100, "libultra", "warm", 1, [H(pt.HAZARD_NEEDS_HEADER, "x.h")], False) == 2
+    )
+    assert (
+        sp(100, "libultra", "warm", 1, [H(pt.HAZARD_REFS_UNPLACED, "a@0x1")], False)
+        == 2
+    )
+    assert sp(100, "libultra", "cold", 4, [], False) == 8  # large pack must decompose
+    assert (
+        sp(100, "none", "-", 1, [H(pt.HAZARD_FILE_STATIC)], False) == 8
+    )  # classical+drop gate
+    assert [pt.snap_fib(n) for n in (0, 1, 2, 3, 4, 5, 6, 9)] == [
+        1,
+        1,
+        2,
+        3,
+        5,
+        5,
+        8,
+        13,
+    ]
     # S119: unexplained jal-count-mismatch + NO coddog-mirror = probable near-verbatim → +1 over the
     # mirror floor (the verbatim cp SHA-misses, needs an asm-driven diagnosis + hand-edit).
     JAL = pt.HAZARD_JAL_COUNT_MISMATCH
-    assert sp(100, "libnusys", "cold", 1, [H(JAL, "5vs9")], False) == 3       # cold 2 +1 near-verbatim
+    assert (
+        sp(100, "libnusys", "cold", 1, [H(JAL, "5vs9")], False) == 3
+    )  # cold 2 +1 near-verbatim
     # A coddog-mirror structural match explains the row as a clean verbatim mirror → NO bump.
-    assert sp(100, "libnusys", "cold", 1,
-              [H(JAL, "5vs9"), H(pt.HAZARD_CODDOG_MIRROR, "x.c@99.99")], False) == 2
+    assert (
+        sp(
+            100,
+            "libnusys",
+            "cold",
+            1,
+            [H(JAL, "5vs9"), H(pt.HAZARD_CODDOG_MIRROR, "x.c@99.99")],
+            False,
+        )
+        == 2
+    )
     # The (version-artifact?) annotation is a known clean-drop → NO bump (S118 nuContRmbModeSet).
-    assert sp(100, "libnusys", "cold", 1, [H(JAL, "2vs0(version-artifact?)")], False) == 2
+    assert (
+        sp(100, "libnusys", "cold", 1, [H(JAL, "2vs0(version-artifact?)")], False) == 2
+    )
 
 
 def test_score_row_characterization():
@@ -901,20 +1168,41 @@ def test_score_row_characterization():
     rendered hazard string, BEFORE Phase 2 collapses its 10 args into a Candidate."""
     pt = load_tool("pick_target")
     H = pt.Hazard
-    KEYS = ["func", "rom", "vram", "size", "nfns", "pts", "kind",
-            "upstream", "band", "hazards", "score"]
+    KEYS = [
+        "func",
+        "rom",
+        "vram",
+        "size",
+        "nfns",
+        "pts",
+        "kind",
+        "upstream",
+        "band",
+        "hazards",
+        "score",
+    ]
     C = pt.Candidate
-    r = pt.score_row(C(0x99999, "func_x", "asm-flip", ["func_x"], 100, "libultra", "warm", False),
-                     [H(pt.HAZARD_FILE_STATIC), H(pt.HAZARD_NEEDS_HEADER, "x.h")], set())
+    r = pt.score_row(
+        C(0x99999, "func_x", "asm-flip", ["func_x"], 100, "libultra", "warm", False),
+        [H(pt.HAZARD_FILE_STATIC), H(pt.HAZARD_NEEDS_HEADER, "x.h")],
+        set(),
+    )
     assert list(r.keys()) == KEYS
-    assert r["vram"] == "?"                       # synthetic off: no asm listing
+    assert r["vram"] == "?"  # synthetic off: no asm listing
     assert r["hazards"] == "file-static,needs-header:x.h"
-    assert r["score"] == -100 + 200 + 64          # 164: upstream + warm bonuses
-    r2 = pt.score_row(C(0x99999, "func_y", "asm-flip", ["func_y", "func_z"], 64, None, "-", False),
-                      [], {"func_y"})
-    assert r2["hazards"] == "-"                    # no hazards renders "-"
-    assert r2["score"] == -64 - 1000              # carried penalty, no bonuses
-    assert (pt.UPSTREAM_BONUS, pt.BAND_WARM_BONUS, pt.CARRYOVER_PENALTY) == (200, 64, 1000)
+    assert r["score"] == -100 + 200 + 64  # 164: upstream + warm bonuses
+    r2 = pt.score_row(
+        C(0x99999, "func_y", "asm-flip", ["func_y", "func_z"], 64, None, "-", False),
+        [],
+        {"func_y"},
+    )
+    assert r2["hazards"] == "-"  # no hazards renders "-"
+    assert r2["score"] == -64 - 1000  # carried penalty, no bonuses
+    assert (pt.UPSTREAM_BONUS, pt.BAND_WARM_BONUS, pt.CARRYOVER_PENALTY) == (
+        200,
+        64,
+        1000,
+    )
 
 
 def test_hazard_detail_accessors():
@@ -929,7 +1217,9 @@ def test_hazard_detail_accessors():
     assert h.render() == "coddog-mirror:src/io/contquery.c@99.99"
     assert h.coddog_file() == "src/io/contquery.c"
     assert h.coddog_pct() == 99.99
-    assert h.coddog_source() == "src/io/contquery.c"   # rsplit form, same when no `@` in path
+    assert (
+        h.coddog_source() == "src/io/contquery.c"
+    )  # rsplit form, same when no `@` in path
     # malformed pct degrades to 0.0 (the old _coddog_pct contract)
     assert H(pt.HAZARD_CODDOG_MIRROR, "src/io/x.c").coddog_pct() == 0.0
 
@@ -940,7 +1230,7 @@ def test_hazard_detail_accessors():
     j = H(pt.HAZARD_RODATA_JTBL, "0x800D23E8")
     j.mark_owner_per_member()
     assert j.detail == "0x800D23E8;owner-per-member"
-    j.mark_owner_per_member()                          # second call is a no-op
+    j.mark_owner_per_member()  # second call is a no-op
     assert j.detail == "0x800D23E8;owner-per-member"
     n = H(pt.HAZARD_RODATA_LITERAL)
     n.mark_owner_per_member()

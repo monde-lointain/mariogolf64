@@ -11,6 +11,7 @@ ROOT is the literal, symlink-stable root from decomp_common.PROJECT_ROOT (os.pat
 NOT pathlib .resolve()): .resolve() follows symlinks, which could shift the asm/
 lookup and change ranked rows -- so the rankers share the os.path-based root.
 """
+
 import os
 import re
 
@@ -90,7 +91,9 @@ def asm_functions(rom_off):
 
 
 # `/* ROM VRAM BYTES */` with the ROM (1st) field captured, for reading each glabel's ROM start.
-_ROM_FIELD_RE = re.compile(r"/\*\s*([0-9A-Fa-f]+)\s+[0-9A-Fa-f]{8}\s+[0-9A-Fa-f]{8}\s*\*/")
+_ROM_FIELD_RE = re.compile(
+    r"/\*\s*([0-9A-Fa-f]+)\s+[0-9A-Fa-f]{8}\s+[0-9A-Fa-f]{8}\s*\*/"
+)
 
 
 def asm_function_addrs(rom_off):
@@ -121,7 +124,9 @@ def asm_function_addrs(rom_off):
 # splat emitted for that ROM offset. Surfacing it spares the gate a rom→vram derivation for
 # the mandatory recover-extern re-confirm (a hand-guessed flat `rom + <const>` can resolve
 # mid-function and return a wrong containing fn — read the vram, never guess it).
-VRAM_COMMENT_RE = re.compile(r"/\*\s*[0-9A-Fa-f]+\s+([0-9A-Fa-f]{8})\s+[0-9A-Fa-f]{8}\s*\*/")
+VRAM_COMMENT_RE = re.compile(
+    r"/\*\s*[0-9A-Fa-f]+\s+([0-9A-Fa-f]{8})\s+[0-9A-Fa-f]{8}\s*\*/"
+)
 
 
 def subseg_vram(rom_off):
@@ -141,7 +146,9 @@ def subseg_vram(rom_off):
 # `/* ROM VRAM BYTES */` with the BYTES (3rd) field captured, for spotting trailing 0x00000000
 # nop padding (a higher-alignment gap the next subseg sits at) that a verbatim C mirror can't
 # reproduce — the compiler only 16-aligns its `.text`. See code_end_rom + pick_target trailing-pad.
-PAD_INSN_RE = re.compile(r"/\*\s*([0-9A-Fa-f]+)\s+[0-9A-Fa-f]{8}\s+([0-9A-Fa-f]{8})\s*\*/")
+PAD_INSN_RE = re.compile(
+    r"/\*\s*([0-9A-Fa-f]+)\s+[0-9A-Fa-f]{8}\s+([0-9A-Fa-f]{8})\s*\*/"
+)
 
 
 def code_end_rom(rom_off):
@@ -175,8 +182,14 @@ def code_end_rom(rom_off):
 # and a bare FPU sqrt. A tiny leaf whose only work is one of these is really `hasm`,
 # not a classical target — flag it so smallest-first stops surfacing it as the pick.
 INTRINSIC_OPS = {
-    "mfc0", "mtc0", "dmfc0", "dmtc0", "cfc0", "ctc0",
-    "sqrt.s", "sqrt.d",
+    "mfc0",
+    "mtc0",
+    "dmfc0",
+    "dmtc0",
+    "cfc0",
+    "ctc0",
+    "sqrt.s",
+    "sqrt.d",
 }
 INSN_RE = re.compile(r"/\*\s*[0-9A-Fa-f]+\s+[0-9A-Fa-f]+\s+[0-9A-Fa-f]+\s*\*/\s+(\S+)")
 
@@ -194,12 +207,12 @@ def intrinsic_likely(rom_off, primary):
         insn = INSN_RE.search(line)
         if insn:
             mnemonics.append(insn.group(1))
-    if "jal" in mnemonics:          # a wrapper/has calls → decompilable
+    if "jal" in mnemonics:  # a wrapper/has calls → decompilable
         return False
     work = [m for m in mnemonics if m not in ("jr", "nop")]
     if work and all(m in INTRINSIC_OPS for m in work):
         return True
-    return handwritten             # spimdisasm-tagged handwritten leaf (no jal)
+    return handwritten  # spimdisasm-tagged handwritten leaf (no jal)
 
 
 # Privileged ops gcc never emits from C: TLB writes/probes, CP0 register moves (32/64-bit),
@@ -211,10 +224,20 @@ def intrinsic_likely(rom_off, primary):
 # privileged op — branches/loads (osMapTLB/osUnmapTLB) or even calls (exception dispatch) —
 # slips past intrinsic_likely yet is just as much hand-asm.
 PRIVILEGED_OPS = {
-    "tlbwi", "tlbwr", "tlbp", "tlbr",
-    "mfc0", "mtc0", "dmfc0", "dmtc0", "cfc0", "ctc0",
-    "cfc1", "ctc1",
-    "cache", "eret",
+    "tlbwi",
+    "tlbwr",
+    "tlbp",
+    "tlbr",
+    "mfc0",
+    "mtc0",
+    "dmfc0",
+    "dmtc0",
+    "cfc0",
+    "ctc0",
+    "cfc1",
+    "ctc1",
+    "cache",
+    "eret",
 }
 
 
@@ -238,11 +261,26 @@ def privileged_asm(rom_off, primary):
 CALL_INSN_RE = re.compile(r"\bjal\s+([A-Za-z_]\w+)")
 # Immediate-bearing ALU/load-imm ops; the operand we want is the trailing immediate literal.
 IMM_INSN_RE = re.compile(
-    r"\b(?:addiu|ori|andi|xori|lui|li|slti|sltiu|daddiu)\b.*?(-?0x[0-9A-Fa-f]+)\s*$")
+    r"\b(?:addiu|ori|andi|xori|lui|li|slti|sltiu|daddiu)\b.*?(-?0x[0-9A-Fa-f]+)\s*$"
+)
 # Stack-frame / register-save offsets dominate addiu/sw immediates and carry no identity;
 # ignore them so the constant signal isn't pure noise. (Kept tiny — callees do the real work.)
-_FRAME_IMMS = {"0x10", "0x14", "0x18", "0x1c", "0x20", "0x24", "0x28", "-0x10",
-               "-0x14", "-0x18", "-0x1c", "-0x20", "-0x24", "-0x28"}
+_FRAME_IMMS = {
+    "0x10",
+    "0x14",
+    "0x18",
+    "0x1c",
+    "0x20",
+    "0x24",
+    "0x28",
+    "-0x10",
+    "-0x14",
+    "-0x18",
+    "-0x1c",
+    "-0x20",
+    "-0x24",
+    "-0x28",
+}
 
 
 def _asm_signature(rom_off, primary):

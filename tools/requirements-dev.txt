@@ -1,0 +1,7 @@
+# Dev-only static-analysis + test tooling for the decomp Python scripts.
+# Install with `make setup-dev` (kept OUT of `make setup` / the CI build path).
+# Config lives in pyproject.toml. See docs / the static-analysis plan.
+ruff==0.15.19
+basedpyright==1.39.8
+vulture==2.16
+coverage==7.14.3

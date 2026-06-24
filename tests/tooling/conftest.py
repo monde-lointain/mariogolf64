@@ -4,6 +4,7 @@ Tool scripts under tools/ are not a package, so we load them by file path. The
 suite runs under ./venv (via `make test-tools`), so the scripts' venv re-exec
 guard is a no-op here.
 """
+
 from __future__ import annotations
 
 import importlib.util

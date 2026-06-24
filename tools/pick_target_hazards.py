@@ -6,6 +6,7 @@ import the Hazard type and the HAZARD_* kinds (referenced across the whole ranke
 without a cycle. Mirrors the decomp_asm.py / cpreprocess.py split: this module
 imports nothing back from pick_target.
 """
+
 import dataclasses
 
 # Coddog match-confidence threshold (percent): a >= hit re-prices an un-named
@@ -22,7 +23,9 @@ CODDOG_MIRROR_PCT = 99.0
 # the printed/JSON form stays exactly what the gate + the hazard index read.
 HAZARD_FILE_STATIC = "file-static"
 HAZARD_DEFINES_DATA = "defines-data"
-HAZARD_BARE_ASSERT = "bare-assert"  # a non-`#ifdef _DEBUG`-guarded upstream assert() the verbatim
+HAZARD_BARE_ASSERT = (
+    "bare-assert"  # a non-`#ifdef _DEBUG`-guarded upstream assert() the verbatim
+)
 # mirror compiles in (this build defines neither NDEBUG nor _DEBUG, so <assert.h> expands to a live
 # __assert) while the ROM's release libultra stripped asserts → SHA-miss; wrap it in `#ifdef _DEBUG`.
 # Advisory, a cheap finalize edit. See docs/hazards.md#assert-strip
@@ -34,19 +37,27 @@ HAZARD_NEEDS_DEFINE = "needs-define"
 HAZARD_JAL_COUNT_MISMATCH = "jal-count-mismatch"
 HAZARD_PACK = "pack"
 HAZARD_SINGLE_FILE_PACK = "single-file-pack"
-HAZARD_ONE_TU = "one-tu"  # every inner fn boundary of a pack is non-16-aligned → ONE .o (the linker
+HAZARD_ONE_TU = (
+    "one-tu"  # every inner fn boundary of a pack is non-16-aligned → ONE .o (the linker
+)
 # 16-aligns each .o's .text start, so any second .o begins on a 16 boundary). Confirms a
 # single-file-pack structurally even when members are un-named, and signals that a per-fn decompose
 # split is mechanically blocked.
-HAZARD_CODDOG_FNCOUNT_MISMATCH = "coddog-fncount-mismatch"  # a coddog-mirror file defines FEWER fns
+HAZARD_CODDOG_FNCOUNT_MISMATCH = (
+    "coddog-fncount-mismatch"  # a coddog-mirror file defines FEWER fns
+)
 # than the pack holds → a structural fingerprint match, NOT a source attribution; the pack's real
 # source is multi-file. Under-count direction only (a true single source can define MORE, via
 # version/_DEBUG-gated extras). Also fires when the coddog identity is carried by a TAIL member, not
 # only the leader.
-HAZARD_CODDOG_STRUCTURAL = "coddog-structural"  # a coddog-mirror hit whose matched source's expected
+HAZARD_CODDOG_STRUCTURAL = (
+    "coddog-structural"  # a coddog-mirror hit whose matched source's expected
+)
 # compiled size is far below the matched subseg's → a structural fingerprint match, not a source
 # attribution. The size-dimension companion to coddog-fncount-mismatch; advisory (does not re-price).
-CODDOG_STRUCTURAL_BYTES_PER_LOC = 64  # subseg bytes / source meaningful-LOC above this, on a
+CODDOG_STRUCTURAL_BYTES_PER_LOC = (
+    64  # subseg bytes / source meaningful-LOC above this, on a
+)
 # single-identity multi-fn pack, marks the coddog match structural (conservative: ~4x a dense -O2 fn)
 HAZARD_COMBINED_SUBSEG = "combined-subseg"
 HAZARD_C_COMBINED = "c-combined"
@@ -54,50 +65,74 @@ HAZARD_NON16ALIGN = "non16align"
 HAZARD_INTRINSIC_LIKELY = "intrinsic-likely"
 HAZARD_MAYBE_UPSTREAM = "maybe-upstream"
 HAZARD_RODATA_LITERAL = "rodata-literal"
-HAZARD_RODATA_JTBL = "rodata-jtbl"  # a switch jump table the mirror re-emits → .rodata sibling carve
+HAZARD_RODATA_JTBL = (
+    "rodata-jtbl"  # a switch jump table the mirror re-emits → .rodata sibling carve
+)
 HAZARD_DATA_STATIC = "data-static"
 HAZARD_TWIN_OF = "twin-of"
 HAZARD_REMAINING = "remaining"
 HAZARD_CODDOG_MIRROR = "coddog-mirror"  # a coddog compare2 match to an ultralib fn
-HAZARD_CODDOG_TWIN = "coddog-twin"  # coddog matched a near-identical TWIN file, but the named members
+HAZARD_CODDOG_TWIN = (
+    "coddog-twin"  # coddog matched a near-identical TWIN file, but the named members
+)
 # name the real source; mirror from the member-named source, not the matched file.
-HAZARD_CODDOG_SOURCE_BANKED = "coddog-source-banked"  # a coddog-mirror hit whose project mirror is
+HAZARD_CODDOG_SOURCE_BANKED = (
+    "coddog-source-banked"  # a coddog-mirror hit whose project mirror is
+)
 # ALREADY banked (0-stub) in-tree — the source is fully decompiled, so the match can't be a fresh
 # attribution; necessarily a fingerprint coincidence. Advisory (does not re-price).
-HAZARD_CALLER_EVICT = "caller-evict"  # an un-named func_ member a banked C file calls by name
+HAZARD_CALLER_EVICT = (
+    "caller-evict"  # an un-named func_ member a banked C file calls by name
+)
 HAZARD_TRAILING_PAD = "trailing-pad"  # trailing nop pad to a higher-aligned next subseg a C mirror can't emit
-HAZARD_DROP_STATIC_MIRROR = "drop-static-mirror"  # a coddog-confirmed verbatim mirror whose
+HAZARD_DROP_STATIC_MIRROR = (
+    "drop-static-mirror"  # a coddog-confirmed verbatim mirror whose
+)
 # file-static + defines-data + refs-unplaced cluster is ONE drop-to-extern enabler (pure .bss, no
 # carve) — re-frames the cluster so the gate prices it as a seed-only N-symbol mirror, not a
 # carve/classical spike. See docs/hazards.md#file-static-bss-layout-conflict
-HAZARD_HEADER_RENAMES_SYMBOL = "header-renames-symbol"  # a (transitively-)vendored header rewrites the
+HAZARD_HEADER_RENAMES_SYMBOL = (
+    "header-renames-symbol"  # a (transitively-)vendored header rewrites the
+)
 # candidate's curated symbol via a macro `#define <curated_fn>(...) <other>` (e.g. the os_host.h K->J
 # shim `#define __osInitialize_common() osInitialize()`) → needs a `#undef <curated_fn>` enabler in
 # the mirror. See docs/hazards.md#header-renames-symbol
-HAZARD_WRONG_GHIDRA_NAME = "wrong-ghidra-name"  # ghidra_symbols mislabels the primary vram with a
+HAZARD_WRONG_GHIDRA_NAME = (
+    "wrong-ghidra-name"  # ghidra_symbols mislabels the primary vram with a
+)
 # macro NAME (e.g. os_motor.h `#define osMotorStop(x) __osMotorAccess(...)`) while the upstream defines
 # the macro's RHS (`__osMotorAccess`) at that vram. Bank under the correct (RHS) name via a
 # symbol_addrs maintainer-override (a `rom:<off>` qualifier dodges splat's same-rom+segment dup error;
 # symbol_addrs is read first so it wins the reference) — NOT the destructive `make sync-names`.
 # Detail `<ghidra_name>-><correct_name>@<header>`. See docs/hazards.md#wrong-ghidra-name-override
-HAZARD_CODDOG_PARTIAL = "coddog-partial"  # coddog matched >=2 DISTINCT per-fn TWIN files to ONE
+HAZARD_CODDOG_PARTIAL = (
+    "coddog-partial"  # coddog matched >=2 DISTINCT per-fn TWIN files to ONE
+)
 # multi-fn subseg, covering only a SUBSET of its fns → a per-fn fingerprint SET, NOT a single-file
 # mirror; the un-matched fns need per-fn verification. The multi-twin companion to
 # coddog-fncount-mismatch (which fires only at len(distinct)==1). Advisory. See docs/hazards.md#coddog-cross-ref
-HAZARD_GAME_REGION_MIRROR = "game-region-mirror"  # a coddog/libultra-source mirror whose vram is BELOW
+HAZARD_GAME_REGION_MIRROR = (
+    "game-region-mirror"  # a coddog/libultra-source mirror whose vram is BELOW
+)
 # the libultra code band is statically linked INTO THE GAME and compiled -O2 (game CFLAGS), NOT -O3
 # (LIBULTRA_CFLAGS) — the src/libultra/ path would force -O3 → wrong auto-inlining. Route the mirror
 # to a -O2 path (src/mgu/…). Advisory. Detail `0x<vram>`. See docs/hazards.md#game-region-mirror-o2-profile
-HAZARD_UPSTREAM_FNCOUNT_MISMATCH = "upstream-fncount-mismatch"  # a pack with ONE named C stem whose
+HAZARD_UPSTREAM_FNCOUNT_MISMATCH = (
+    "upstream-fncount-mismatch"  # a pack with ONE named C stem whose
+)
 # upstream .c defines FEWER functions than the pack holds → the extra members are a FOREIGN TU bundled
 # in the subseg (split it off, mirror only the upstream's fns). The named-symbol analog of
 # coddog-fncount-mismatch. Detail `<members>vs<defs>`. Advisory. See docs/hazards.md#upstream-mirror-pattern
-HAZARD_DATA_CARVE = "data-carve"  # the upstream .c defines a file-scope INITIALIZED static array
+HAZARD_DATA_CARVE = (
+    "data-carve"  # the upstream .c defines a file-scope INITIALIZED static array
+)
 # (`static <type> <name>[…] = <init>;`, NON-const → .data) the verbatim mirror re-emits → needs a
 # `.data` sibling carve at the asm-recovered vram. `static` bars cross-file linkage so the array is
 # file-PRIVATE. Fired ONLY on the single-file (non c-combined) subset. Detail `<names>`. Advisory.
 # See docs/hazards.md#defines-data
-HAZARD_BLOCK_REORDER_SIBLING = "block-reorder-sibling"  # a libnusys candidate carrying the
+HAZARD_BLOCK_REORDER_SIBLING = (
+    "block-reorder-sibling"  # a libnusys candidate carrying the
+)
 # block-reorder tell (an unexplained jal-mismatch + NO coddog-mirror; the reorder breaks coddog's
 # fingerprint) whose upstream-file family has an ALREADY-BANKED block-reorder mirror — MG64's per-file
 # nusys revision swaps two source blocks vs every archived SDK (the GBPak F-variants run the RAM-enable
@@ -105,14 +140,18 @@ HAZARD_BLOCK_REORDER_SIBLING = "block-reorder-sibling"  # a libnusys candidate c
 # the gate applies it UP-FRONT instead of rediscovering it via a re-attempt (S119 nucontgbpakfread ->
 # S120 nucontgbpakfwrite, first-build clean). Detail `<sibling.c>`. Advisory. See
 # docs/hazards.md#near-verbatim-mirror-jal-count-mismatch
-HAZARD_UNATTRIB_LEAF = "unattrib-leaf"  # within a c-combined pack (≥2 distinct C upstream files), a
+HAZARD_UNATTRIB_LEAF = (
+    "unattrib-leaf"  # within a c-combined pack (≥2 distinct C upstream files), a
+)
 # `func_<addr>=?` member attributed to NEITHER file that STRADDLES a file boundary — the nearest named-C
 # members before AND after it resolve to DIFFERENT upstream stems. The file-boundary split must assign it
 # to one side; a silent `?` could ride into the wrong singleton (S120 func_800A2780, between
 # nucontgbpakfwrite and nusimgr). Front/trailing `?` (within one file) do NOT fire. Fired only for a
 # LONE straddler (a clean 2-file split with one stray leaf, not a whole interleaved foreign TU).
 # Detail `0x<vram>` (comma list). Advisory. See docs/hazards.md#multi-function-segment-splitting-pack
-HAZARD_BODY_DIVERGENCE_SUSPECT = "body-divergence-suspect"  # a SUB-100 coddog-mirror (near-verbatim
+HAZARD_BODY_DIVERGENCE_SUSPECT = (
+    "body-divergence-suspect"  # a SUB-100 coddog-mirror (near-verbatim
+)
 # but NOT byte-exact, e.g. @99.99) can mask a GAME-MODIFIED body, not just a block-reorder/compiler
 # artifact: an extra branch/store the literal upstream lacks. Flags the row for a body-store-value
 # diagnosis (read the target's store SEQUENCE + VALUES) BEFORE declaring a clean mirror OR a compiler
@@ -169,10 +208,14 @@ class Hazard:
     @classmethod
     def c_combined(cls, c_stems) -> "Hazard":
         """`<n>file[stem|stem|...]` — ≥2 distinct C upstream files in one asm subseg."""
-        return cls(HAZARD_C_COMBINED, f"{len(c_stems)}file[" + "|".join(sorted(c_stems)) + "]")
+        return cls(
+            HAZARD_C_COMBINED, f"{len(c_stems)}file[" + "|".join(sorted(c_stems)) + "]"
+        )
 
     @classmethod
-    def jal_count_mismatch(cls, n_c: int, n_asm: int, version_artifact: bool = False) -> "Hazard":
+    def jal_count_mismatch(
+        cls, n_c: int, n_asm: int, version_artifact: bool = False
+    ) -> "Hazard":
         """`<c>vs<asm>` jal-count divergence. `version_artifact` appends `(version-artifact?)` when
         the surplus C calls are a known per-version wrapper rather than a logic divergence (libnusys
         cont/RMB family's nusys-2.05+ `osSetIntMask` pair vs the pre-2.05 leaf asm, S118) — an
@@ -303,7 +346,9 @@ class Hazard:
     @classmethod
     def game_region_mirror(cls, vram, off: int) -> "Hazard":
         """`0x%08X` of the vram (or hex(off) fallback) for a game-region (-O2) mirror."""
-        return cls(HAZARD_GAME_REGION_MIRROR, f"0x{vram:08X}" if vram is not None else hex(off))
+        return cls(
+            HAZARD_GAME_REGION_MIRROR, f"0x{vram:08X}" if vram is not None else hex(off)
+        )
 
     def coddog_file(self) -> str:
         """The `<file>` half of a coddog `<file>@<pct>` detail."""

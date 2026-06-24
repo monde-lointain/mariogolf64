@@ -8,10 +8,10 @@ literal loaded by a *non-primary* pack function must be in the flagged extent
 (S55: guPerspective's 0x800D2540..0x2558 were undercounted by the old per-primary
 scan, sizing the sibling split to 4 of 8 doubles).
 """
+
 from __future__ import annotations
 
 import pytest
-
 from conftest import load_tool
 
 # A 2-function subseg listing. The PRIMARY (fnA) pools one double; the SIBLING
