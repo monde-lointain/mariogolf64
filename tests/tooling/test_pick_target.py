@@ -231,10 +231,12 @@ def test_pick_target_coddog_json_golden(golden_dir, regen, monkeypatch):
     build-dependent), so the coddog re-ranking path — coddog-mirror flagging, the non-audio
     re-pricing, the audio advisory-only branch, and the `@`/`.split` detail parsing — was never
     byte-pinned. Drive pick_target with a COMMITTED synthetic map (golden/coddog_map_fixture.tsv,
-    the proven func_800A0730 non-audio + a stable overlay audio entry) and snapshot, so the coddog
-    detail strings are a stable contract. The audio subject is an OVERLAY func (func_ovl10_801F4A40),
-    insulated from the audio-mirror mining that banked the original func_800A09E0 (S131). This is the
-    gate for Phase-A Hazard.coddog_* methods + the cluster-7 (coddog) extraction."""
+    a stable overlay non-audio subject + a stable overlay audio subject) and snapshot, so the coddog
+    detail strings are a stable contract. BOTH subjects are OVERLAY funcs (non-audio
+    func_ovl6_8024D800, audio func_ovl10_801F4A40), insulated from the libultra/audio-mirror mining
+    that banks main-segment subjects out from under the test (S131 banked the original func_800A09E0;
+    S132 banked func_800A0730, the prior non-audio subject). This is the gate for Phase-A
+    Hazard.coddog_* methods + the cluster-7 (coddog) extraction."""
     fixture = golden_dir / "coddog_map_fixture.tsv"
     monkeypatch.setenv("CODDOG_MAP", str(fixture))
     proc = run_tool("pick_target", "--json", "-n", "200")
@@ -242,7 +244,7 @@ def test_pick_target_coddog_json_golden(golden_dir, regen, monkeypatch):
     rows = json.loads(proc.stdout)
     # sanity: the fixture's non-audio hit re-prices to libultra, the audio hit stays none-but-flagged
     by_func = {r["func"]: r for r in rows}
-    assert "coddog-mirror:src/io/fake.c@99.99" in by_func["func_800A0730"]["hazards"]
+    assert "coddog-mirror:src/io/fake.c@99.99" in by_func["func_ovl6_8024D800"]["hazards"]
     assert (
         "coddog-mirror:src/audio/fake.c@99.99"
         in by_func["func_ovl10_801F4A40"]["hazards"]
@@ -381,14 +383,17 @@ def test_coddog_trap_rescan(tmp_path, monkeypatch):
     with the trap — src/io/piacs.c DEFINES `__osPiAccessQueueEnabled` + a `static OSMesg piAccessBuf`
     — and assert both hazards surface (and the seed re-prices off the bare-coddog clean look)."""
     mapf = tmp_path / "coddog_map.tsv"
-    mapf.write_text("func_800A0730\t__osPiCreateAccessQueue\tsrc/io/piacs.c\t99.99\n")
+    # Subject is a stable OVERLAY func (mined last); S132 banked the prior func_800A0730 subject.
+    mapf.write_text(
+        "func_ovl6_8024D800\t__osPiCreateAccessQueue\tsrc/io/piacs.c\t99.99\n"
+    )
     monkeypatch.setenv("CODDOG_MAP", str(mapf))
     rows = {
         r["func"]: r
         for r in json.loads(run_tool("pick_target", "--json", "-n", "200").stdout)
     }
 
-    hit = rows.get("func_800A0730")
+    hit = rows.get("func_ovl6_8024D800")
     assert hit is not None, "mapped candidate missing from output"
     assert "coddog-mirror:src/io/piacs.c@99.99" in hit["hazards"]
     # The trap the bare coddog flag hid: piacs.c is NOT an atomic verbatim cp.
@@ -400,11 +405,14 @@ def test_coddog_trap_rescan(tmp_path, monkeypatch):
 
 
 def test_coddog_suppresses_maybe_upstream(tmp_path, monkeypatch):
-    """S75: a definitive (>=CODDOG_MIRROR_PCT, non-audio) coddog identity suppresses the weaker
+    """S75 + S132: a definitive (>=CODDOG_MIRROR_PCT) coddog identity suppresses the weaker
     maybe-upstream IDF guess on the same row. Once coddog has named the fn's exact upstream file,
     the IDF guess is redundant noise that can point at the WRONG file (S75 func_800A7190 carried
-    coddog-mirror:src/io/contquery.c@99.99 AND a mis-pointed maybe-upstream:voice*). An audio or
-    sub-threshold coddog hit stays advisory, so the guess is NOT suppressed there."""
+    coddog-mirror:src/io/contquery.c@99.99 AND a mis-pointed maybe-upstream:voice*; S132 func_800A0800
+    carried coddog-mirror:n_synallocvoice.c@99.99 AND a mis-pointed maybe-upstream:n_synstopvoice,...).
+    S132 EXTENDED the suppression to AUDIO hits: the libnaudio tree is stood up (S129), so an audio
+    coddog @>=pct is a bankable identity, not a header-gated advisory. A SUB-threshold coddog hit
+    stays advisory, so its guess is retained as a second opinion."""
     # Baseline, map-free: func_80070FD0 is an un-named candidate carrying the IDF guess.
     monkeypatch.setenv("CODDOG_MAP", "/nonexistent/coddog_map.tsv")
     base = {
@@ -426,7 +434,7 @@ def test_coddog_suppresses_maybe_upstream(tmp_path, monkeypatch):
     assert "coddog-mirror:src/io/fake.c@99.99" in hit["hazards"]
     assert "maybe-upstream" not in hit["hazards"], hit["hazards"]
 
-    # Audio coddog hit is advisory-only (header-gated, not re-priced) -> the guess is retained.
+    # S132: a definitive AUDIO coddog hit now ALSO suppresses the guess (libnaudio is stood up).
     mapf.write_text("func_80070FD0\t__alFakeAudio\tsrc/audio/fake.c\t99.99\n")
     monkeypatch.setenv("CODDOG_MAP", str(mapf))
     aud = {
@@ -434,7 +442,17 @@ def test_coddog_suppresses_maybe_upstream(tmp_path, monkeypatch):
         for r in json.loads(run_tool("pick_target", "--json", "-n", "400").stdout)
     }["func_80070FD0"]
     assert "coddog-mirror:src/audio/fake.c@99.99" in aud["hazards"]
-    assert "maybe-upstream" in aud["hazards"], aud["hazards"]
+    assert "maybe-upstream" not in aud["hazards"], aud["hazards"]
+
+    # A SUB-threshold coddog hit (<CODDOG_MIRROR_PCT) is advisory only -> the guess is retained.
+    mapf.write_text("func_80070FD0\t__osWeakMirror\tsrc/io/fake.c\t98.00\n")
+    monkeypatch.setenv("CODDOG_MAP", str(mapf))
+    weak = {
+        r["func"]: r
+        for r in json.loads(run_tool("pick_target", "--json", "-n", "400").stdout)
+    }["func_80070FD0"]
+    assert "coddog-mirror:src/io/fake.c@98.00" in weak["hazards"]
+    assert "maybe-upstream" in weak["hazards"], weak["hazards"]
 
 
 def test_caller_evict_flag(tmp_path, monkeypatch):

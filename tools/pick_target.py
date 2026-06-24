@@ -99,6 +99,7 @@ from pick_target_hazards import (  # noqa: F401
     HAZARD_FILE_STATIC,
     HAZARD_INTRINSIC_LIKELY,
     HAZARD_JAL_COUNT_MISMATCH,
+    HAZARD_MAYBE_UPSTREAM,
     HAZARD_NEEDS_DEFINE,
     HAZARD_NEEDS_HEADER,
     HAZARD_NON16ALIGN,
@@ -3504,6 +3505,18 @@ def _build_row(
     _resolve_tail_coddog(st, coddog_index, upstream_index)
     _resolve_nusys(st, nusys_index)
     _resolve_audio(st, audio_indexes, audio_roots)
+
+    # Suppress the `maybe-upstream` signature guess once a DEFINITIVE (>=CODDOG_MIRROR_PCT)
+    # `coddog-mirror` is on the row. `_resolve_named_upstream` skips the guess only when the
+    # *libultra* coddog_index holds the fn (`cod_definitive`); an AUDIO mirror's identity arrives
+    # later from `_resolve_audio`'s separate audio_indexes, so the guess was appended before the
+    # coddog-mirror existed and stayed as noise that points at the WRONG file (S132 func_800A0800:
+    # maybe-upstream listed n_synstopvoice / n_synstartvoiceparam / n_synstartvoice while the
+    # coddog-mirror correctly named n_synallocvoice.c, both fns from it). The libnaudio tree is stood
+    # up (S129), so an audio coddog @>=pct is now a bankable identity, not a header-gated advisory.
+    # A SUB-threshold coddog hit stays advisory, so its guess is retained as a second opinion.
+    if any(h.is_coddog_mirror() and h.coddog_pct() >= CODDOG_MIRROR_PCT for h in st.hazards):
+        st.hazards[:] = [h for h in st.hazards if h.kind != HAZARD_MAYBE_UPSTREAM]
 
     # A `coddog-mirror` hazard pins the row to an ultralib(libultra) source even when up_lib stayed
     # None — audio coddog hits are deliberately NOT re-priced to libultra (they were header-`-I`-

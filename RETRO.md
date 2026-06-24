@@ -25,6 +25,17 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 132 — n_synallocvoice.c + n_sl.c (libnaudio n_audio_sc mirror cluster: clean cp + drop-def) — 2026-06-24
+- Increment: 2 mirrors banked (n_alSynAllocVoice + static _allocatePVoice; n_alInit + n_alClose), both Match FIRST build. md5-candidate **187→189** (+2); asm subsegs 99→97 (2 flips). ROM SHA-1 == baserom.
+- Quality: 0/0/0/0 this sprint (stuck-far/permuter/carried/re-opened).
+- Seed: committed 8pt; banked 8pt; regime mirror. The combined-8 cluster ran as a 2-file increment (3+5), NOT a single-increment 8-gate stall: per-file all-or-nothing banking + each file individually verbatim-mirror-exempt (single-file-pack cp / drop-def) means the cluster is already decomposed at the file boundary.
+- What helped: the gate read both bodies' asm before the flip. n_synallocvoice.c's callees were all placed (no `calls-unplaced` on the row) → pure `cp`. n_sl.c's `defines-data:n_alGlobals,n_syn` resolved to a DROP-DEF (S86 pattern), not a carve: both globals are `=0` BSS already provided by the extracted blob (n_syn placed S129) and `n_libaudio_sc.h` already declares them extern, so the two def lines just dropped. The one `calls-unplaced` (n_alSynNew=0x800A0D70, head of the still-asm n_synthesizer.c) was dual-named at the gate; n_alSynDelete was already placed (S131).
+- Friction: none on the bank. The retro cost was suggestion #1 plus banking fallout — 2 coddog tests hardcoded the now-banked `func_800A0730` as a committed-fixture subject (the S131 de-hardcoding had missed these two), surfacing as KeyError/missing-row. Re-pointed both to a stable overlay subject (`func_ovl6_8024D800`, single-fn, no hazards, mined last) so banking can't break them again; regen'd 4 goldens for the bank+fixture drift.
+- Applied: 1 of 1 — #1 `pick_target.py` post-pass: once a DEFINITIVE (`>=CODDOG_MIRROR_PCT`) `coddog-mirror` is on a row, the weaker `maybe-upstream` IDF guess is dropped. The existing `cod_definitive` guard (S75) consulted only the libultra `coddog_index` and excluded audio; an AUDIO mirror's identity arrives later from the separate `_resolve_audio` pass, AFTER the guess was appended, so the guess survived as noise pointing at the WRONG file (S132 func_800A0800: `maybe-upstream:n_synstopvoice,n_synstartvoiceparam,n_synstartvoice` vs the correct `coddog-mirror:n_synallocvoice.c`). The post-pass is pct-gated, so a SUB-threshold coddog hit keeps its guess as a second opinion. Behavioral test `test_coddog_suppresses_maybe_upstream` updated (audio-now-suppresses + a new sub-threshold-retain case); `docs/hazards.md#intrinsic-likely--maybe-upstream-signature-hints` notes the suppression. Suite **89 pass**.
+- Carry-over: none from committed work.
+
+---
+
 ## Sprint 131 — n_syndelete.c + n_synsetfxmix.c (libnaudio n_audio_sc verbatim mirrors; split a 2-file pack) — 2026-06-24
 - Increment: 2 verbatim `@99.99` mirrors banked (n_alSynDelete + n_alSynSetFXMix), both Match FIRST build. md5-candidate **185→187** (+2); asm subsegs 100→99 (1 asm subseg split into 2 c). ROM SHA-1 == baserom.
 - Quality: 0/0/0/0 this sprint (stuck-far/permuter/carried/re-opened).

@@ -16,6 +16,24 @@ subordinate to the libultra goal. Target selection is `tools/pick_target.py` (sm
 the 8-point decompose gate fires on any seed ≥8. v2 classical track is active (since S11);
 mirror is the default, classical is first-class when the asm warrants it.
 
+**S132 — `n_synallocvoice.c` + `n_sl.c` BANKED (n_audio_sc mirror cluster: clean cp + drop-def).** The
+S131-"Next" #1+#2, both Match FIRST build → **md5-candidate 187→189**; asm subsegs 99→97.
+`n_synallocvoice.c` (`n_alSynAllocVoice` + static `_allocatePVoice`) was a pure verbatim cp (all callees
+placed S129). `n_sl.c` (`n_alInit` + `n_alClose`) was a **drop-def** mirror: `n_alGlobals`=0x800C7DB0 /
+`n_syn`=0x800C7DB4 (both `=0` BSS, already declared extern by `n_libaudio_sc.h`) dropped to the header
+externs — storage from the extracted blob, NO carve. Gate enablers: 4 fn names + `n_alGlobals`
+recover-extern + `n_alSynNew`=0x800A0D70 dual-name (the one `calls-unplaced`). Combined seed 8 (3+5) ran
+as a 2-file cluster (decomposed at the file boundary, per-file all-or-nothing). Quality 0/0/0/0. seed 8 /
+banked 8pt (mirror, seed-only). Retro applied 1 of 1: #1 `pick_target.py` suppresses `maybe-upstream`
+when a definitive `coddog-mirror` is on the row, EXTENDED to audio (S75 was libultra-only) → drops the
+`func_800A0800` wrong-file IDF noise; sub-threshold hits stay advisory; 2 coddog fixture subjects
+de-hardcoded off the banked `func_800A0730` → stable overlay `func_ovl6_8024D800`; suite 89 pass.
+**Cross-repo follow-up:** 5 fn names + `n_alGlobals` → `sync_decomp_names.py --import-from-decomp`.
+**Next:** `func_800A0D70`/`n_synthesizer.c` (pts-8, 8 fns) is the next n_audio_sc file but trips the
+8-gate AND has 3 `calls-unplaced` (alN_PVoiceNew, n_alSavePull, n_alSynAllocFX) — decompose or place
+those callees first. `n_mainbus.c` (`[0x7C720]`) still needs its file-boundary split (Carry-overs). The
+`blk` audio libs (`n_save`/`n_load`/`n_reverb` `.inc.c` headers; the libmus `aud_*` DAG) remain.
+
 **S131 — `n_syndelete.c` + `n_synsetfxmix.c` BANKED (split a 2-file pack at `0x7BDE0`).** The
 S130-"Next" `func_800A09E0` (`n_synsetfxmix`) turned out to be a **c-combined:2file** pack, not a
 single file: coddog flagged only `coddog-mirror:n_synsetfxmix.c@99.99` (matching `func_800A09F0` =

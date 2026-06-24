@@ -1564,7 +1564,12 @@ the trailing pad. The contramread sibling (slot == 16-aligned fn size) mirrored 
   no `cp0-asm`) is a no-source shim → plain `hasm`.
 - `maybe-upstream:<lib>:<bases>`: an un-named subseg (`func_<addr>`) that the signature matcher
   thinks is an un-named SDK mirror (the S13 trap). Verify against the candidate upstream at the gate
-  before treating it as classical.
+  before treating it as classical. **A definitive (`>=CODDOG_MIRROR_PCT`) `coddog-mirror` on the same
+  row suppresses this guess** (S75 for libultra, extended to audio S132): coddog has named the exact
+  upstream file, so the weaker IDF guess is redundant noise that can point at the WRONG file (S132
+  `func_800A0800` listed `n_synstopvoice,n_synstartvoiceparam,n_synstartvoice` while the coddog-mirror
+  correctly named `n_synallocvoice.c`, the actual source of both fns). A sub-threshold coddog hit
+  stays advisory, so the guess is retained there as a second opinion.
 
 **Trigger:** `pick_target.py` flags `intrinsic-likely` / `maybe-upstream:…`.
 

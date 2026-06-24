@@ -14,19 +14,6 @@
   },
   {
     "band": "-",
-    "func": "func_800A0730",
-    "hazards": "pack:2fn[func_800A0730=?,func_800A0774=?],one-tu",
-    "kind": "asm-flip",
-    "nfns": 2,
-    "pts": 13,
-    "rom": "0x7BB30",
-    "score": -128,
-    "size": 128,
-    "upstream": "none",
-    "vram": "0x800A0730"
-  },
-  {
-    "band": "-",
     "func": "func_ovl10_801F4A40",
     "hazards": "pack:2fn[func_ovl10_801F4A40=?,func_ovl10_801F4AD8=?],one-tu",
     "kind": "asm-flip",
@@ -50,19 +37,6 @@
     "size": 480,
     "upstream": "none",
     "vram": "0x8009FB60"
-  },
-  {
-    "band": "-",
-    "func": "func_800A0800",
-    "hazards": "pack:2fn[func_800A0800=?,func_800A0918=?],one-tu,maybe-upstream:libnaudio:n_synstopvoice,n_synstartvoiceparam,n_synstartvoice",
-    "kind": "asm-flip",
-    "nfns": 2,
-    "pts": 13,
-    "rom": "0x7BC00",
-    "score": -480,
-    "size": 480,
-    "upstream": "none",
-    "vram": "0x800A0800"
   },
   {
     "band": "-",
@@ -169,6 +143,19 @@
     "vram": "0x80070FD0"
   },
   {
+    "band": "cold",
+    "func": "n_alSynNew",
+    "hazards": "pack:8fn[n_alSynNew=n_synthesizer,func_800A0FE0=?,__n_allocParam=n_synthesizer,func_800A1174=?,func_800A118C=?,func_800A11EC=?,func_800A1224=?,_n_timeToSamples=n_synthesizer],calls-unplaced:alN_PVoiceNew,n_alSavePull,n_alSynAllocFX,jal-count-mismatch:3vs8,rodata-literal:0x800D21E0,0x800D21E8,0x800D21F0,0x800D21F8;carve-end=0x800D2930",
+    "kind": "asm-flip",
+    "nfns": 8,
+    "pts": 8,
+    "rom": "0x7C170",
+    "score": -1176,
+    "size": 1376,
+    "upstream": "libnaudio",
+    "vram": "0x800A0D70"
+  },
+  {
     "band": "-",
     "func": "func_ovl6_8024D800",
     "hazards": "-",
@@ -180,19 +167,6 @@
     "size": 1264,
     "upstream": "none",
     "vram": "0x8024D800"
-  },
-  {
-    "band": "-",
-    "func": "func_800A0D70",
-    "hazards": "pack:8fn[func_800A0D70=?,func_800A0FE0=?,__n_allocParam=n_synthesizer,func_800A1174=?,func_800A118C=?,func_800A11EC=?,func_800A1224=?,_n_timeToSamples=n_synthesizer]",
-    "kind": "asm-flip",
-    "nfns": 8,
-    "pts": 13,
-    "rom": "0x7C170",
-    "score": -1376,
-    "size": 1376,
-    "upstream": "none",
-    "vram": "0x800A0D70"
   },
   {
     "band": "-",
