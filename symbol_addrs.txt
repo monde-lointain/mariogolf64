@@ -224,7 +224,7 @@ __osThreadSave = 0x800FC6A8; // size:0x1B0
 
 // Unattributed libultra read-only data (atan/libm constants @ 0x8E110/0x8E660 asm TUs);
 // left unattributed, RO_ naming per drmario64 convention (curated cordic_atan_divisor_2_60 / __libm_qnan_f kept)
-_atbl = 0x800C9690; // size:0xBD8  CORDIC atan(2^-i) table (libkmc atbl.c), extern from atan.c/sin.c
+_atbl = 0x800C9690; // size:0x200  CORDIC atan(2^-i) table (libkmc atbl.c), extern from atan.c/sin.c
 RO_800D2848 = 0x800D2848; //
 RO_800D2850 = 0x800D2850; //
 RO_800D2858 = 0x800D2858; //

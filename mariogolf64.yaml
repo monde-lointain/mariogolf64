@@ -380,7 +380,7 @@ segments:
       - [0xA49C0, .data, libultra/vimodes/vimodepallan1]
       - [0xA4A10, .data, libultra/vimodes/vimodempallan1]
       - [0xA4A60, .data, libultra/libc/xlitob]
-      - [0xA4A90, data]
+      - [0xA4A90, .data, libkmc/atbl]
       - [0xA4C90, databin, rsp/n_aspMain_data]
       - [0xA4F40, databin, rsp/gspF3DEX2_fifo_data]
       - [0xA5360, data]

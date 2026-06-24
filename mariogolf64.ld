@@ -601,7 +601,7 @@ SECTIONS
         build/asm/data/rsp/rspboot.o(.data);
         build/asm/data/rsp/n_aspMain_text.o(.data);
         build/asm/data/rsp/gspF3DEX2_fifo_text.o(.data);
-        build/asm/data/A4A90.data.o(.data);
+        build/src/libkmc/atbl.o(.data);
         build/asm/data/rsp/n_aspMain_data.o(.data);
         build/asm/data/rsp/gspF3DEX2_fifo_data.o(.data);
         build/asm/data/A5360.data.o(.data);
