@@ -103,7 +103,10 @@ include mk/src.mk
 # at nested paths (src/libultra/vi/*.c, src/libkmc/*.s, src/entry/entry.s).
 # $(wildcard) is non-recursive and would silently drop them, surfacing only as
 # link-time "undefined reference".
-ASM_FILES := $(wildcard $(ASM_DIR)/*.s) $(wildcard $(ASM_DIR)/data/*.s)
+# asm/data/*/*.s catches nested textbin subsegs (e.g. asm/data/rsp/rspboot.s from
+# `[..., textbin, rsp/rspboot]`); kept as a targeted wildcard, NOT `find asm`, so
+# the asm/nonmatchings/ scratch .s are never swept into the ROM build.
+ASM_FILES := $(wildcard $(ASM_DIR)/*.s) $(wildcard $(ASM_DIR)/data/*.s) $(wildcard $(ASM_DIR)/data/*/*.s)
 BIN_FILES := $(wildcard $(ASSETS_DIR)/*.bin)
 C_FILES := $(shell find $(SRC_DIR) -name '*.c')
 SRC_ASM_FILES := $(shell find $(SRC_DIR) -name '*.s')
@@ -119,7 +122,7 @@ O_FILES := $(ASM_O_FILES) $(BIN_O_FILES) $(C_O_FILES) $(SRC_ASM_O_FILES)
 # $(sort $(dir ...)) over the object lists is REQUIRED: nested sources write to
 # build/src/<tree>/<dir>/, and that parent must exist or the assemble step fails
 # on a missing .o.tmp path.
-$(shell mkdir -p $(BUILD_DIR)/$(ASM_DIR)/data $(BUILD_DIR)/$(ASSETS_DIR) $(BUILD_DIR)/$(SRC_DIR) $(sort $(dir $(C_O_FILES)) $(dir $(SRC_ASM_O_FILES))))
+$(shell mkdir -p $(BUILD_DIR)/$(ASM_DIR)/data $(BUILD_DIR)/$(ASSETS_DIR) $(BUILD_DIR)/$(SRC_DIR) $(sort $(dir $(ASM_O_FILES)) $(dir $(C_O_FILES)) $(dir $(SRC_ASM_O_FILES))))
 
 # Link the objects into the ELF, then strip it to the raw ROM image.
 $(BUILD_DIR)/$(TARGET): $(BUILD_DIR)/$(BASENAME).elf

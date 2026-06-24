@@ -325,7 +325,9 @@ SECTIONS
         build/src/libkmc/mmuldi3.o(.text);
         build/src/libkmc/mcvtld.o(.text);
         build/src/libkmc/matherr.o(.text);
-        build/asm/8F250.o(.text);
+        build/asm/data/rsp/rspboot.o(.text);
+        build/asm/data/rsp/n_aspMain_text.o(.text);
+        build/asm/data/rsp/gspF3DEX2_fifo_text.o(.text);
         main_TEXT_END = .;
         main_TEXT_SIZE = ABSOLUTE(main_TEXT_END - main_TEXT_START);
         main_DATA_START = .;
@@ -596,9 +598,13 @@ SECTIONS
         build/src/libkmc/mmuldi3.o(.data);
         build/src/libkmc/mcvtld.o(.data);
         build/src/libkmc/matherr.o(.data);
-        build/asm/8F250.o(.data);
+        build/asm/data/rsp/rspboot.o(.data);
+        build/asm/data/rsp/n_aspMain_text.o(.data);
+        build/asm/data/rsp/gspF3DEX2_fifo_text.o(.data);
         build/src/libkmc/atbl.o(.data);
-        build/asm/data/A4C90.data.o(.data);
+        build/asm/data/rsp/n_aspMain_data.o(.data);
+        build/asm/data/rsp/gspF3DEX2_fifo_data.o(.data);
+        build/asm/data/A5360.data.o(.data);
         main_DATA_END = .;
         main_DATA_SIZE = ABSOLUTE(main_DATA_END - main_DATA_START);
         main_RODATA_START = .;
@@ -874,7 +880,9 @@ SECTIONS
         build/src/libkmc/mmuldi3.o(.rodata);
         build/src/libkmc/mcvtld.o(.rodata);
         build/src/libkmc/matherr.o(.rodata);
-        build/asm/8F250.o(.rodata);
+        build/asm/data/rsp/rspboot.o(.rodata);
+        build/asm/data/rsp/n_aspMain_text.o(.rodata);
+        build/asm/data/rsp/gspF3DEX2_fifo_text.o(.rodata);
         main_RODATA_END = .;
         main_RODATA_SIZE = ABSOLUTE(main_RODATA_END - main_RODATA_START);
     }
@@ -1141,7 +1149,9 @@ SECTIONS
         build/src/libkmc/mmuldi3.o(.bss);
         build/src/libkmc/mcvtld.o(.bss);
         build/src/libkmc/matherr.o(.bss);
-        build/asm/8F250.o(.bss);
+        build/asm/data/rsp/rspboot.o(.bss);
+        build/asm/data/rsp/n_aspMain_text.o(.bss);
+        build/asm/data/rsp/gspF3DEX2_fifo_text.o(.bss);
         build/asm/data/ADD30.bss.o(.bss);
         main_BSS_END = .;
         main_BSS_SIZE = ABSOLUTE(main_BSS_END - main_BSS_START);
