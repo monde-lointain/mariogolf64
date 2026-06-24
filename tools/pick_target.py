@@ -2969,6 +2969,44 @@ def score_row(cand, hazards, carried):
     }
 
 
+def _append_caller_evict(fns, hazards):
+    """Flag each un-named `func_<vram>` member a banked C file calls BY NAME: the gate's curated-symbol
+    rename EVICTS it (splat renames the member -> the caller's hard-coded name fails to link), so the
+    one-line fixup is priced up-front, not discovered as a build-check link error. Display-only
+    (seed_points ignores HAZARD_CALLER_EVICT)."""
+    callers = src_func_callers()
+    evicts = [
+        f"{fn}@{','.join(callers[fn])}"
+        for fn in fns
+        if fn.startswith("func_") and fn in callers
+    ]
+    if evicts:
+        hazards.append(Hazard.caller_evict(evicts))
+
+
+def _append_coddog_aux(hazards, cod_srcs):
+    """Two advisory coddog passes over the resolved hazard set: flag a match to an ALREADY-BANKED
+    source (the mirror is fully decompiled, so the hit is a fingerprint coincidence, not a fresh
+    attribution), and flag a SUB-100 coddog-mirror as body-divergence-suspect (it may mask a
+    game-modified body; the gate runs a store-value diagnosis before declaring a clean mirror or a
+    compiler wall, S127)."""
+    for s in sorted({c for c in cod_srcs if _coddog_source_banked(c)}):
+        hazards.append(Hazard.coddog_source_banked(os.path.basename(s)))
+    for cf in sorted(
+        {
+            h.coddog_file()
+            for h in hazards
+            if h.is_coddog_mirror() and h.coddog_pct() < 100.0
+        }
+    ):
+        pct = max(
+            h.coddog_pct()
+            for h in hazards
+            if h.is_coddog_mirror() and h.coddog_file() == cf
+        )
+        hazards.append(Hazard.body_divergence_suspect(cf, pct))
+
+
 def _build_row(
     off,
     typ,
@@ -2991,18 +3029,7 @@ def _build_row(
         return None
     kind, fns, hazards = classified
 
-    # An un-named `func_<vram>` member a banked C file calls by name will be EVICTED when the gate
-    # adds its curated symbol (splat renames it → the caller's hard-coded name fails to link). Flag
-    # the caller so the one-line rename fixup is priced at the gate, not discovered as a build-check
-    # link error. Display-only (seed_points ignores this kind).
-    _callers = src_func_callers()
-    _evicts = [
-        f"{fn}@{','.join(_callers[fn])}"
-        for fn in fns
-        if fn.startswith("func_") and fn in _callers
-    ]
-    if _evicts:
-        hazards.append(Hazard.caller_evict(_evicts))
+    _append_caller_evict(fns, hazards)
 
     primary = fns[0]
     up_lib, up_path = upstream_index.get(primary, (None, None))
@@ -3189,28 +3216,7 @@ def _build_row(
     # The coddog map IS the ultralib sweep, so any coddog-mirror match means libultra; also honor a
     # sub-path scope (e.g. `--lib audio` -> src/audio/...) via the matched-source path substring.
     cod_srcs = [h.coddog_source() for h in hazards if h.is_coddog_mirror()]
-    # Flag a coddog match to an already-banked source as structural (advisory) — its mirror is fully
-    # decompiled, so the hit is a fingerprint coincidence, not a fresh attribution.
-    for s in sorted({c for c in cod_srcs if _coddog_source_banked(c)}):
-        hazards.append(Hazard.coddog_source_banked(os.path.basename(s)))
-    # body-divergence-suspect (S127): a SUB-100 coddog-mirror (near-verbatim but NOT byte-exact) can
-    # mask a GAME-MODIFIED body, not just a block-reorder/compiler artifact. Flag it so the gate runs a
-    # body-store-value diagnosis (read the target's store SEQUENCE + VALUES) before declaring a clean
-    # mirror OR a compiler wall. S121 contRmbControl @99.99 was a game-modified FORCESTOP, misread as a
-    # #cross-jump-tail-merge wall for 5 sprints; resolved S127 with a one-branch fix.
-    for cf in sorted(
-        {
-            h.coddog_file()
-            for h in hazards
-            if h.is_coddog_mirror() and h.coddog_pct() < 100.0
-        }
-    ):
-        pct = max(
-            h.coddog_pct()
-            for h in hazards
-            if h.is_coddog_mirror() and h.coddog_file() == cf
-        )
-        hazards.append(Hazard.body_divergence_suspect(cf, pct))
+    _append_coddog_aux(hazards, cod_srcs)
     # A libultra-source mirror whose vram is BELOW the libultra code band is game-linked at -O2, not
     # -O3 — route it to a -O2 path (src/mgu/…), NOT src/libultra/ (which forces -O3 → wrong
     # auto-inlining). Gated on up_lib == "libultra" (excludes audio coddog hits, which stay
