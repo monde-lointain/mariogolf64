@@ -317,3 +317,21 @@ nuAuStlMgrInit = 0x8005EDD0; // rom:0x3A1D0 type:func
 nuAuStlSchedInstall = 0x8005EE94; // type:func
 nuAuStlSchedWaitFrame = 0x8005EEF8; // type:func
 nuAuStlSchedDoTask = 0x8005EF88; // type:func
+// nuaustlmgr.c file-scope data/bss, drop-def externs (S128)
+nuAuTaskStop = 0x800C2FFC; // size:0x1
+nuAuPreNMI = 0x800C2FFD; // size:0x1
+nuAuPreNMIFunc = 0x800C3000; // size:0x4
+nuAuStlSchedFunc = 0x800C3004; // size:0xC
+nuAuMesgBuf = 0x800E1290; // size:0x8
+nuAuRtnMesgBuf = 0x800E1298; // size:0x4
+nuAuClient = 0x800E129C; // size:0xC
+nuAuRtnMesgQ = 0x800FC8C0; // size:0x18
+nuAuTask = 0x800FF188; // size:0x58
+nuAuMesgQ = 0x80132198; // size:0x18
+// libmus callees, UPSTREAM public names (S128). MusInitialize/MusStartSong override the WRONG ghidra
+// mus_initialize/mus_play_song_ptr via rom: qualifier (#wrong-ghidra-name-override); MusSetScheduler +
+// __MusIntMemMalloc are uncurated func_ adds.
+MusInitialize = 0x8009973C; // rom:0x74B3C type:func
+MusStartSong = 0x800999F0; // rom:0x74DF0 type:func
+MusSetScheduler = 0x8009A53C; // type:func
+__MusIntMemMalloc = 0x8009E28C; // type:func
