@@ -1486,6 +1486,8 @@ mis-place downstream bytes.
 
 **Procedure:** Split the yaml at the alignment boundary or add a `.balign`.
 
+**Sub-cases / variants:**
+
 **Combined-subseg case (S51):** When a 2-fn pack has fn2 packed tight after fn1 at a non-16 offset
 (fn1's size is not a 16-multiple), you cannot split into per-fn subsegs: KMC `as` pads fn1's
 standalone `.o` `.text` to 16, inserting bytes that shift fn2 downstream and breaking the ROM SHA-1
@@ -1652,6 +1654,8 @@ gate-safe drop-def symbol-add note also landed in #defines-data); S88 (`coddog-f
 S92 (the fncount check extended to tail-carried identities + the `coddog-structural` size guard,
 both retiring the llcvt false-positive class, where one tiny source fingerprint-matched 3 subsegs).
 
+**Sub-cases / variants:**
+
 **Nusys sweep (libnusys analog):** the same machinery pointed at the nusys-2.07 library instead of
 ultralib. `make coddog-sweep-nusys` runs `tools/build_nusys_ref.sh` (compile every
 `nusys/src/mainlib/*.c` with the project's KMC GCC + `LIBNUSYS_CFLAGS`, the in-tree mirror recipe,
@@ -1754,6 +1758,8 @@ set does not `#define` (and the lib actually sets `-DBUILD_VERSION`). Distinct f
 **Provenance:** S60 (gu/mtxcatl.c: `guMtxXFML` under `#if BUILD_VERSION < VERSION_K`; the in-tree
 os_version.h was the 2.0L revision; the `pick_target` `_strip_inactive_version_branches`/`build_ord`
 machinery already existed for ref/call scanning, reused here for the detector).
+
+**Sub-cases / variants:**
 
 **S103 partial-twin subset (`coddog-partial:<m>of<n>fn`).** coddog matches per-FUNCTION; when its
 corpus splits a combined source into per-fn files (`mtxidentf.c`, `mtxl2f.c`) and a multi-fn subseg's
