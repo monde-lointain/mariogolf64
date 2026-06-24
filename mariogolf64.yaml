@@ -112,6 +112,8 @@ segments:
       - [0x2FD00, asm]
       - [0x34FA0, asm]
       - [0x396C0, asm]
+      - [0x3A1D0, c, main/audio_mgr]
+      - [0x3A490, asm]
       - [0x40180, asm]
       - [0x414A0, asm]
       - [0x42F00, c, mgu/mtxutil]

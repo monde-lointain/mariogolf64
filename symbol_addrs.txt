@@ -311,3 +311,9 @@ nuScGraphicsStack = 0x800D6970; // size:0x2000
 nuContRmbForceStopEnd = 0x800A2090; // type:func
 nuContRmbSearchTime = 0x800C7DD0; // size:0x4
 nuContRmbCallBack = 0x800C7DF0; // size:0xC
+// nualstl3 audio-manager fns embedded in game audio TU (src/main/audio_mgr.c) -- S128. audio_config_init@
+// 0x8005EDD0 is the WRONG ghidra name (#wrong-ghidra-name-override): the rom: qualifier overrides it to nuAuStlMgrInit.
+nuAuStlMgrInit = 0x8005EDD0; // rom:0x3A1D0 type:func
+nuAuStlSchedInstall = 0x8005EE94; // type:func
+nuAuStlSchedWaitFrame = 0x8005EEF8; // type:func
+nuAuStlSchedDoTask = 0x8005EF88; // type:func
