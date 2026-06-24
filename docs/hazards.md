@@ -708,6 +708,8 @@ from `refs-unplaced`, where a merely *referenced* extern is safe to place.)
 **Trigger:** `pick_target.py` flag `defines-data:<g>,...`. Note `__osDequeueThread` is a
 `defines-data` false-clean even inside the warm thread band; it does not fast-path.
 
+**Sub-cases / variants:**
+
 **Dual-section carve (S96).** A verbatim coddog mirror can need BOTH a `.data` carve (here) AND a
 `.rodata` carve ([`.rodata sibling-yaml pattern`](#rodata-sibling-yaml-pattern)) in the SAME
 increment when the upstream file has file-scope `static` *initialized* arrays **and** a `switch` /
@@ -915,6 +917,8 @@ random's `xseed` remainder; align/rotate are the identical 16B precedents; first
 project `-I` set: `include/{,libultra,libultra/internal,libkmc,libnusys}`; the grep is `#ifdef`-blind
 so a dead-`_DEBUG` include can over-flag, so confirm against the upstream).
 
+**Sub-cases / variants:**
+
 **Vendorable annotation (S54).** `pick_target` tags each missing header `<inc>(vendorable)` when it
 is copyable from upstream: a public companion under an `UPSTREAM_INC_ROOTS` include dir (copy into
 an `-I` dir) OR a source-private header found by basename under an `UPSTREAM_SRC_ROOTS` source tree
@@ -1059,7 +1063,7 @@ twin epirawwrite's 0x170, so the ROM carries no assert code for the bare `assert
    banked mirror guards them in `#ifdef _DEBUG`. With `_DEBUG` undefined the assert tokens are never
    compiled → zero code → matches the release ROM. Fold a bare assert adjacent to an existing
    `#ifdef _DEBUG` block (the `devAddr & 0x3` __osError class) into that same block.
-2. The proof stays the full-make ROM SHA-1. Do NOT instead define `NDEBUG` globally; it would also
+2. The proof stays the full-make ROM SHA-1. Do not instead define `NDEBUG` globally; it would also
    silence asserts the ROM might genuinely retain elsewhere, and the band has not been rebuilt under
    it; the `#ifdef _DEBUG` wrap is the surgical, per-call strip.
 3. `assert.h` need not be included once every assert is `_DEBUG`-wrapped (the token never reaches the
