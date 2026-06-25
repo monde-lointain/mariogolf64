@@ -117,19 +117,6 @@
     "vram": "0x80070FD0"
   },
   {
-    "band": "cold",
-    "func": "n_alSynNew",
-    "hazards": "pack:8fn[n_alSynNew=n_synthesizer,func_800A0FE0=?,__n_allocParam=n_synthesizer,func_800A1174=?,func_800A118C=?,func_800A11EC=?,func_800A1224=?,_n_timeToSamples=n_synthesizer],calls-unplaced:alN_PVoiceNew,n_alSynAllocFX,jal-count-mismatch:3vs8,rodata-literal:0x800D21E0,0x800D21E8,0x800D21F0,0x800D21F8;carve-end=0x800D2930",
-    "kind": "asm-flip",
-    "nfns": 8,
-    "pts": 8,
-    "rom": "0x7C170",
-    "score": -1176,
-    "size": 1376,
-    "upstream": "libnaudio",
-    "vram": "0x800A0D70"
-  },
-  {
     "band": "-",
     "func": "func_ovl6_8024D800",
     "hazards": "-",
@@ -247,6 +234,19 @@
     "vram": "0x80050400"
   },
   {
+    "band": "cold",
+    "func": "n_alFxPull",
+    "hazards": "single-file-pack:6fn[n_alFxPull=n_reverb,func_800A0050=?,func_800A0240=?,func_800A0450=?,func_800A0578=?,func_800A0690=?],defines-data:val,blob,refs-unplaced:L_INC,rodata-jtbl:0x800D21A0,needs-header:add/n_reverb_add04.c,add/n_reverb_add01.c,add/n_reverb_add02.c,add/n_reverb_add03.c,rodata-literal:0x800D21C0,0x800D21C8,0x800D21D0;extent-end=0x800D21D8;carve-end=0x800D2200",
+    "kind": "asm-flip",
+    "nfns": 6,
+    "pts": "blk",
+    "rom": "0x7B140",
+    "score": -2344,
+    "size": 2544,
+    "upstream": "libnaudio",
+    "vram": "0x8009FD40"
+  },
+  {
     "band": "-",
     "func": "func_800772B0",
     "hazards": "pack:6fn[func_800772B0=?,func_800772C4=?,func_8007775C=?,func_800779A8=?,func_80077AD4=?,func_80077BD8=?],one-tu",
@@ -271,19 +271,6 @@
     "size": 2528,
     "upstream": "none",
     "vram": "0x8009CF30"
-  },
-  {
-    "band": "-",
-    "func": "func_8009FD40",
-    "hazards": "pack:6fn[func_8009FD40=?,func_800A0050=?,func_800A0240=?,func_800A0450=?,func_800A0578=?,func_800A0690=?]",
-    "kind": "asm-flip",
-    "nfns": 6,
-    "pts": 13,
-    "rom": "0x7B140",
-    "score": -2544,
-    "size": 2544,
-    "upstream": "none",
-    "vram": "0x8009FD40"
   },
   {
     "band": "-",
@@ -377,16 +364,16 @@
     "vram": "0x800521C0"
   },
   {
-    "band": "-",
-    "func": "func_8009E4B0",
-    "hazards": "pack:8fn[func_8009E4B0=?,func_8009E550=?,func_8009E93C=?,func_8009EA70=?,n_alEnvmixerParam=?,func_8009F08C=?,func_8009F2AC=?,func_8009F3EC=?]",
+    "band": "cold",
+    "func": "n_alAuxBusPull",
+    "hazards": "pack:8fn[n_alAuxBusPull=n_auxbus,func_8009E550=?,alN_PVoiceNew=n_drvrNew,func_8009EA70=?,n_alEnvmixerParam=?,func_8009F08C=?,func_8009F2AC=?,func_8009F3EC=?],c-combined:2file[n_auxbus|n_drvrNew],unattrib-leaf:0x8009E550,calls-unplaced:n_alEnvmixerPull@0x8009EA70,rodata-jtbl:0x800D20F0,0x800D2120;owner-per-member,rodata-literal:0x800D2108,0x800D2110,0x800D2168,0x800D2170,0x800D2178,0x800D2180;extent-end=0x800D2188;carve-end=0x800D21A0;owner-per-member",
     "kind": "asm-flip",
     "nfns": 8,
     "pts": 13,
     "rom": "0x798B0",
-    "score": -3984,
+    "score": -3784,
     "size": 3984,
-    "upstream": "none",
+    "upstream": "libnaudio",
     "vram": "0x8009E4B0"
   },
   {

@@ -16,6 +16,27 @@ subordinate to the libultra goal. Target selection is `tools/pick_target.py` (sm
 the 8-point decompose gate fires on any seed ≥8. v2 classical track is active (since S11);
 mirror is the default, classical is first-class when the asm warrants it.
 
+**S136 — `n_synthesizer.c` BANKED (n_audio_sc synth-driver core; 8-fn verbatim N_MICRO mirror + rodata carve).**
+The S135-"Next" #2-class file, all 8 fns Match → **md5-candidate 192→193**; asm subsegs 94→93. The
+synthesis-driver core: `n_alSynNew` (the synth `new`) + `n_alAudioFrame` (the per-frame command build,
+`ONLY_ONE_PLAYER`) + `__n_allocParam`/`_n_freeParam`/`_n_collectPVoices`/`_n_freePVoice` + the file-static
+`_n_timeToSamplesNoRound` (func_800A1224, kept file-local) + `_n_timeToSamples`. A 1376B verbatim cp on the
+existing vendored headers (no new header). First-build SHA-missed on the EXPECTED S134-class rodata-literal
+(GCC pooled `1000000.0`/`0.5` doubles @0x800D21E0, 0x20); byte-cmp localized it (all 8 bodies byte-identical,
+only the unplaced rodata) → SPLIT the generic `[0xAD5E0, rodata]` (0xA0) into `[0xAD5E0, .rodata,
+libnaudio/n_synthesizer]` (0x20) + `[0xAD600, rodata]`. `body-divergence-suspect@99.99` + `jal-count-mismatch:3vs8`
+were BOTH false (the jal gap = `alHeapAlloc` macro ×5). Gate enablers: flip `[0x7C170]` + 8 symbol_addrs (4
+member fns + calls-unplaced `alN_PVoiceNew`/`n_alSynAllocFX` + handler refs `n_alFxPull`=0x8009FD40 /
+`n_alAuxBusPull`=0x8009E4B0). **The handler pre-naming RESOLVED the S130 `n_mainbus` spike** (`func_800A1320` =
+`n_alSynAllocFX`) and PRE-NAMED the next 2 candidates' leaders. Quality 0/0/0/0. seed 8 / banked 8pt (mirror,
+seed-only; single-file-pack exemption). Retro applied 3 of 3 (rodata `extent-end`; `(macro-artifact?)` jal
+annotation + body-divergence suppression; gate pre-naming docs note); +3 unit tests, suite 92 pass. **Cross-repo
+follow-up:** 8 names → `sync_decomp_names.py --import-from-decomp`. **Next:** the smallest libnaudio candidate is
+now `n_alSynAllocFX` (`[0x7C720]`, pts-5, `c-combined:2file[n_mainbus|n_synallocfx]` — the resolved S130 spike,
+both callees placed; split at the file boundary). Then the heavier `n_alFxPull`/`n_reverb.c` (pts-13, 6 fns,
+4 inc fragments + `defines-data:val,blob` + `refs-unplaced:L_INC` + rodata-jtbl/literal; decompose/mixed) and
+`func_8009E4B0`/`n_alAuxBusPull` (n_auxbus/n_drvrNew/n_env multi-coddog pack, pts-13). No carry-overs.
+
 **S135 — `n_load.c` BANKED (n_audio_sc N_MICRO ADPCM-decoder mirror; the cleanest inc-vendor yet).** The
 S134-"Next" #2, all 3 fns Match on the FIRST build → **md5-candidate 191→192**; asm subsegs 95→94.
 `n_alAdpcmPull` (the ADPCM pull iface) + `n_alLoadParam` (the AL_FILTER_SET_WAVETABLE/RESET setter) +
@@ -2099,21 +2120,21 @@ by `/sprint-plan`:
   `NU_CONT_THREAD_ID=6` vs MG64's 5), and that surfaces only at first build unless reconciled here.
   A near-free retry missing any of these is a half-scoped spike — finish the scope before deferring.
 
-- **Spike (S130) — `n_mainbus.c` (`[0x7C720, asm]`, 2-fn subseg vs 1 upstream fn).** The subseg holds
-  TWO fns — `func_800A1320` (0x800A1320, ~0x50/80B) + `func_800A1370` (= `n_alMainBusPull`, referenced
-  as a `calls-unplaced` callee by `n_save.c`/func_800A12D0) — but coddog flags `coddog-mirror:n_mainbus.c@99.99`
-  on the subseg while upstream `n_audio_sc/src/n_mainbus.c` defines only ONE function (`n_alMainBusPull`).
-  So `func_800A1320` is NOT n_mainbus.c (a coddog structural fingerprint match, the `#coddog-cross-ref`
-  step-5/6 class), and the subseg is multi-file → it is NOT a clean seed-only verbatim mirror.
-  **Blocker / scope before retry:** (1) disassemble `func_800A1320` and identify its true upstream —
-  likely an adjacent n_audio_sc bus/save pull fn coddog mis-attributed to n_mainbus (check `n_auxbus.c`
-  `n_alAuxBusPull`, `n_save.c` save/buffer fns; the SC bus-pull fns share the aClearBuffer/aMix shape
-  coddog hashes); (2) split `[0x7C720]` at the upstream-file boundary (func_800A1320 head vs
-  n_alMainBusPull @0x800A1370 = +0x50) so each half mirrors its own `.c`; (3) then mirror `n_mainbus.c`
-  (just `n_alMainBusPull`, ~128B, a verbatim `aClearBuffer`/`(mainBus->filter.handler)()`/`aMix` cp).
-  Note `n_alMainBusPull`=0x800A1370 is already needed as the `n_save.c` callee, so placing it serves both.
-  The rest of the n_syn* setter vein (n_synsetfxmix/n_synallocvoice/n_sl, now de-phantomed by the S130
-  calls-unplaced reconciliation) is cleaner and should be mined first.
+- **Near-free retry (S130 spike, blocker RESOLVED S136) — `n_alSynAllocFX` + `n_mainbus.c` (`[0x7C720, asm]`,
+  c-combined:2file).** The S130 spike's open blocker — "identify `func_800A1320`'s true upstream" — was RESOLVED
+  at the S136 gate: `func_800A1320` = `n_alSynAllocFX` (n_synallocfx.c), placed via the n_alSynNew handler-ref
+  disassembly (`jal 0x800a1320` at the `c->fxType != AL_FX_NONE` branch). pick_target now prices the subseg
+  `n_alSynAllocFX 0x7C720 pts-5 c-combined:2file[n_mainbus|n_synallocfx], calls-unplaced:n_alFxNew@0x8009E550`.
+  Completeness checklist for the retry (mechanical replay): **(1)** split `[0x7C720, asm]` at the file boundary
+  → `[0x7C720, c, libnaudio/n_synallocfx]` (n_alSynAllocFX @0x800A1320, +0x50) + `[0x7C770, c, libnaudio/n_mainbus]`
+  (n_alMainBusPull @0x800A1370); confirm the 0x7C770 boundary against the asm (n_alSynAllocFX end). **(2)** placed
+  refs: `n_alSynAllocFX`=0x800A1320 (S136), `n_alMainBusPull`=0x800A1370 (S133), both already in symbol_addrs.
+  **(3)** NEW callee to place: `n_alFxNew`=0x8009E550 (the one `calls-unplaced` from n_alSynAllocFX; an n_auxbus/
+  func_8009E4B0-pack member — verify the vram from the n_alSynAllocFX asm jal at the gate). **(4)** include: the
+  vendored n_synthInternals.h/n_libaudio_sc.h cover both files. **(5)** upstream pin: n_audio_sc VERSION_J, KMC-O3,
+  -DN_MICRO=1. n_mainbus.c is a verbatim `aClearBuffer`/`(mainBus->filter.handler)()`/`aMix` cp (~128B);
+  n_synallocfx.c is the FX allocator (alHeapAlloc-heavy → expect a `(macro-artifact?)` jal flag, S136). Watch for
+  a rodata-literal carve (use the new `extent-end` to size it).
 
 - _(Spike (S121) — `contRmbControl` (0x800A19E0), the last INCLUDE_ASM stub in
   `src/libnusys/mainlib/nucontrmbmgr.c` **RESOLVED + banked S127** — the "compiler wall" was a

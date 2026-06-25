@@ -448,8 +448,21 @@ Body-compare proved a *different* fn (game region; −0x28 frame + `osSyncPrintf
 error path + (0,1,0) fallback + bare `sqrt.s`, vs `guNormalize`'s −0x20 frame + `sqrtf` NaN-check, no
 error path), so the body edit `guNormalize`→`vec3f_normalize` was correct, not a name reconciliation.)
 
+**Handler address-of ref, not a jal — pre-name the next candidate's leader (S136).** A verbatim mirror
+can reference a function *by address* rather than by call: a `(handler = (Cast)fn)` assignment compiles
+to a `lui/addiu %hi/%lo(fn)` pair, NOT a `jal`. `pick_target.py`'s `calls-unplaced` scan keys on `jal`
+targets, so an address-of ref to a `func_<vram>` is NOT flagged there (nor as `refs-unplaced`, which is
+data) — it surfaces only when the body compiles. Recover it the same way: read the `lui/addiu` pair in
+the disassemble pass that confirms the jal callees, and add `<fn> = 0x<vram>; // type:func` at the gate.
+Frequently the target is the LEADER of another still-asm candidate subseg, so naming it correctly
+**pre-names that future candidate** (its `pick_target` row shows the curated name, not `func_<vram>`) and
+can resolve a sibling spike for free. (S136 n_synthesizer's `mainBus->filter.handler = n_alFxPull` /
+`n_alAuxBusPull` placed `0x8009FD40`=n_alFxPull (n_reverb leader) + `0x8009E4B0`=n_alAuxBusPull (n_auxbus
+leader), and the `n_alSynAllocFX`=0x800A1320 jal target resolved the S130 `n_mainbus` 2-fn-subseg spike's
+`func_800A1320` identity.) Confirm the name by semantics (which handler slot / call site) before adding.
+
 **Provenance:** S23 (`osEPiStartDma` → `osPiGetCmdQueue`@0x800B06F0); S61 (`guRotateF` substituted
-`vec3f_normalize`).
+`vec3f_normalize`); S136 (handler address-of pre-naming the n_reverb/n_auxbus leaders).
 
 ---
 

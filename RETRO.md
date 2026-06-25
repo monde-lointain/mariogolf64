@@ -25,6 +25,15 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 136 — n_synthesizer.c (n_audio_sc synth-driver core, 8-fn verbatim N_MICRO mirror) — 2026-06-24
+- Increment: 1 file banked, 8 fns matched (n_alSynNew + n_alAudioFrame + __n_allocParam + _n_freeParam + _n_collectPVoices + _n_freePVoice + static _n_timeToSamplesNoRound + _n_timeToSamples), 1376B verbatim N_MICRO mirror. md5-candidate **192→193** (+1); asm subsegs 94→93 (1 flip). ROM SHA-1 == baserom.
+- Quality: 0/0/0/0 this sprint (stuck-far/permuter/carried/re-opened). 1 diagnosis pass (the expected rodata carve), no spike, no body divergence.
+- Seed: committed 8pt; banked 8pt; regime mirror (8-gate FIRED → single-file-pack verbatim-mirror exemption held).
+- What helped: the gate disassembly of n_alSynNew up-front confirmed all 8 jals match upstream, de-risking the `body-divergence-suspect@99.99` hedge before execution. Existing vendored audio headers (n_synthInternals.h / n_libaudio_sc.h / the `_DEBUG`-off `alHeapAlloc`→`alHeapDBAlloc(0,0,…)` macro, S96/S129) → ZERO new header. The S134 MAX_RATIO rodata-carve pattern + byte-cmp localization turned the first-build SHA-miss into a 1-line yaml split, not a body hunt. The gate pre-naming of the 2 handler address-of refs resolved the S130 `n_mainbus` spike (`func_800A1320`=`n_alSynAllocFX`).
+- Friction: the rodata-literal flag's `carve-end` was the POOL boundary (0x800D2930), far past the file's actual 0x20 extent (0x800D21E0..0x2200) — I had to objdump the built object to learn the real extent and split a 0xA0 generic subseg. Both `body-divergence-suspect` + `jal-count-mismatch:3vs8` were false (the jal gap = `alHeapAlloc` macro ×5).
+- Applied: PO-selected 3 of 3: #1 `pick_target.py` rodata-literal `extent-end` (file's own carve length → split-vs-whole signal); #2 `pick_target.py`/`_hazards` `(macro-artifact?)` jal annotation (`_macro_single_real_call`/`call_divergence`) + single-coddog body-divergence suppression (`is_jal_artifact`); #3 `docs/hazards.md` note on gate handler-ref pre-naming. 3 unit tests added (`test_jal_count_artifact_annotations`/`test_macro_single_real_call`/`test_body_divergence_suppressed_on_single_coddog_artifact_jal`); goldens regen'd (bank drift + extent-end), suite 92 pass.
+- Carry-over: none. n_synthesizer.c is md5-candidate.
+
 ## Sprint 135 — n_load.c / n_alAdpcmPull + n_alLoadParam + static _decodeChunk (n_audio_sc N_MICRO ADPCM-decoder mirror) — 2026-06-24
 - Increment: 1 file banked, 3 fns matched (n_alAdpcmPull + n_alLoadParam + the file-static _decodeChunk), 1824B verbatim N_MICRO mirror. md5-candidate **191→192** (+1); asm subsegs 95→94 (1 flip). ROM SHA-1 == baserom.
 - Quality: 0/0/0/0 this sprint (stuck-far/permuter/carried/re-opened). MATCH on the first build, no diagnosis pass — the cleanest of the n_audio_sc inc-vendor mirrors so far.

@@ -244,10 +244,21 @@ class Hazard:
         return self.kind in self.CODDOG_SUBSET_SIGNALS
 
     def is_unexplained_jal(self) -> bool:
-        """A jal-count mismatch NOT annotated as a known per-version wrapper artifact."""
-        return self.kind == HAZARD_JAL_COUNT_MISMATCH and "(version-artifact?)" not in (
-            self.detail or ""
+        """A jal-count mismatch NOT annotated as a known artifact: a per-version wrapper (S118
+        libnusys `osSetIntMask` pair) or a single-real-call macro expansion (S136 n_synthesizer's
+        `alHeapAlloc`->`alHeapDBAlloc`, 5 invocations = the whole 3vs8 gap). Either annotation means
+        the surplus jals are accounted for, not a logic divergence."""
+        d = self.detail or ""
+        return (
+            self.kind == HAZARD_JAL_COUNT_MISMATCH
+            and "(version-artifact?)" not in d
+            and "(macro-artifact?)" not in d
         )
+
+    def is_jal_artifact(self) -> bool:
+        """A jal-count mismatch ANNOTATED as a known artifact (version wrapper / macro expansion).
+        The complement of is_unexplained_jal, restricted to the jal-count kind."""
+        return self.kind == HAZARD_JAL_COUNT_MISMATCH and not self.is_unexplained_jal()
 
     @classmethod
     def coddog_mirror(cls, cfile: str, pct: float) -> "Hazard":
@@ -343,13 +354,24 @@ class Hazard:
 
     @classmethod
     def jal_count_mismatch(
-        cls, n_c: int, n_asm: int, version_artifact: bool = False
+        cls,
+        n_c: int,
+        n_asm: int,
+        version_artifact: bool = False,
+        macro_artifact: bool = False,
     ) -> "Hazard":
-        """`<c>vs<asm>` jal-count divergence. `version_artifact` appends `(version-artifact?)` when
-        the surplus C calls are a known per-version wrapper rather than a logic divergence (libnusys
-        cont/RMB family's nusys-2.05+ `osSetIntMask` pair vs the pre-2.05 leaf asm, S118) — an
-        advisory hint that smallest-first should not be deterred from a clean near-verbatim drop."""
-        suffix = "(version-artifact?)" if version_artifact else ""
+        """`<c>vs<asm>` jal-count divergence. An artifact suffix marks the surplus jals as accounted
+        for (not a logic divergence), an advisory hint that smallest-first should not be deterred from
+        a clean near-verbatim drop: `(version-artifact?)` for a known per-version wrapper (libnusys
+        cont/RMB family's nusys-2.05+ `osSetIntMask` pair vs the pre-2.05 leaf asm, S118);
+        `(macro-artifact?)` when the asm surplus is EXACTLY the count of single-real-call macros the C
+        invokes (each emits one `jal` but `_c_jal_count` drops it as a macro -> the C side under-counts;
+        S136 n_synthesizer 3vs8 = 5 `alHeapAlloc` calls). version_artifact takes precedence if both."""
+        suffix = (
+            "(version-artifact?)"
+            if version_artifact
+            else "(macro-artifact?)" if macro_artifact else ""
+        )
         return cls(HAZARD_JAL_COUNT_MISMATCH, f"{n_c}vs{n_asm}{suffix}")
 
     @classmethod

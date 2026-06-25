@@ -1356,6 +1356,25 @@ def _c_jal_count(body, local_macros=()):
     )
 
 
+def _macro_single_real_call(name, macros):
+    """True if the function-like macro `name`'s replacement body wraps EXACTLY ONE real named call
+    (e.g. `alHeapAlloc(hp,n,sz)` -> `alHeapDBAlloc(0,0,hp,n,sz)`). Such a macro emits one `jal` per
+    invocation, but `_c_jal_count` drops it like any macro (most emit none), under-counting the C side
+    by one per invocation. One level only — the body's own nested macros are not recursed, matching the
+    one-level expansion the gate reconciles against the asm. S136."""
+    entry = macros.get(name)
+    if not entry:
+        return False
+    plist, body = entry
+    pset = set(plist)
+    inner = [
+        n
+        for n in C_CALL_RE.findall(body)
+        if n not in _C_NONCALL and n not in macros and n not in pset
+    ]
+    return len(inner) == 1
+
+
 def call_divergence(rom_off, primary, up_cpath, lib=None):
     """Advisory `jal-count-mismatch:<C>vs<asm>` when the upstream call count for `primary` differs
     from the ROM fn's jal count — an upstream-vs-ROM build divergence. None when they agree, the
@@ -1395,7 +1414,20 @@ def call_divergence(rom_off, primary, up_cpath, lib=None):
     # only (upstream has MORE: n_c > n_asm); see docs/hazards.md#near-verbatim-mirror-jal-count-mismatch.
     n_wrap = len(re.findall(r"\bosSetIntMask\b", stripped))
     version_artifact = lib == "libnusys" and n_wrap > 0 and (n_c - n_asm) == n_wrap
-    return Hazard.jal_count_mismatch(n_c, n_asm, version_artifact=version_artifact)
+    # Macro-expansion artifact: a function-like macro that wraps exactly one real call (alHeapAlloc ->
+    # alHeapDBAlloc) emits one jal per invocation, but _c_jal_count drops it -> the C side under-counts.
+    # When the asm surplus (n_asm > n_c) is EXACTLY the count of such single-real-call macro invocations,
+    # the mismatch is the macro expansion, not a logic divergence (S136 n_synthesizer 3vs8 = 5 alHeapAlloc).
+    macros = all_func_macros()
+    n_macro_calls = sum(
+        1
+        for name in C_CALL_RE.findall(stripped)
+        if name in macros and _macro_single_real_call(name, macros)
+    )
+    macro_artifact = n_macro_calls > 0 and (n_asm - n_c) == n_macro_calls
+    return Hazard.jal_count_mismatch(
+        n_c, n_asm, version_artifact=version_artifact, macro_artifact=macro_artifact
+    )
 
 
 def _block_reorder_sibling(up_path, hazards, lib):
@@ -2957,7 +2989,18 @@ def _append_rodata_carve_hazards(off, up_path, hazards):
             rodata_lits.append(start)
     if rodata_lits:
         # Pre-note the full vram extent as a DoR enabler so it is not a finalize-time SHA-miss.
-        detail = ",".join(f"0x{a:08X}" for a in sorted(rodata_lits))
+        slits = sorted(rodata_lits)
+        detail = ",".join(f"0x{a:08X}" for a in slits)
+        # Carve EXTENT-END: the file's own `.rodata` ends at the last literal + its width (the min
+        # consecutive gap — 8 for a pooled double, 4 for a float; 8 for a lone literal). This is the
+        # length the mirror's `.rodata` actually emits, distinct from carve-end below. When extent-end
+        # < carve-end, the carve is a SPLIT of a larger generic subseg (carve [start, extent-end),
+        # leave the remainder generic), NOT a whole-subseg flip — so the gate knows split-vs-whole
+        # without an objdump of the built object (S136 n_synthesizer emitted 0x20 = 0x800D21E0..2200
+        # inside a 0xA0 generic subseg, whose carve-end pool boundary was a misleading 0x800D2930).
+        gaps = [b - a for a, b in zip(slits, slits[1:]) if b > a]
+        width = min(gaps) if gaps else 8
+        detail += f";extent-end=0x{max(slits) + width:08X}"
         # Append the carve-end boundary: the sibling-split runs to the next `.rodata` subseg
         # boundary, which can exceed the last `%lo`-referenced literal (a multi-`du` dlabel block's
         # trailing word has no ref of its own).
@@ -3179,19 +3222,31 @@ def _append_coddog_aux(hazards, cod_srcs):
     compiler wall, S127)."""
     for s in sorted({c for c in cod_srcs if _coddog_source_banked(c)}):
         hazards.append(Hazard.coddog_source_banked(os.path.basename(s)))
-    for cf in sorted(
-        {
-            h.coddog_file()
-            for h in hazards
-            if h.is_coddog_mirror() and h.coddog_pct() < 100.0
-        }
-    ):
-        pct = max(
-            h.coddog_pct()
-            for h in hazards
-            if h.is_coddog_mirror() and h.coddog_file() == cf
-        )
-        hazards.append(Hazard.body_divergence_suspect(cf, pct))
+    # De-weight the body-divergence hedge on a SINGLE-coddog row whose only divergence signal is a
+    # jal-count-mismatch ALREADY explained as an artifact (version wrapper / single-real-call macro
+    # expansion): the surplus jals are accounted for, so the sub-100 coddog is a literal/rodata-carve
+    # near-match, not a game-modified body — the rodata-literal/jtbl flags carry the real first-build
+    # signal. Keep the hedge for a MULTI-coddog pack (genuinely suspect, most bodies diverge) and for
+    # an UNexplained mismatch (a real corroborator). S136 n_synthesizer: 3vs8(macro-artifact?) + the
+    # lone n_synthesizer.c coddog -> suppressed; banked atomically as a clean mirror + rodata carve.
+    cod_files = {h.coddog_file() for h in hazards if h.is_coddog_mirror()}
+    suppress_body_div = len(cod_files) == 1 and any(
+        h.is_jal_artifact() for h in hazards
+    )
+    if not suppress_body_div:
+        for cf in sorted(
+            {
+                h.coddog_file()
+                for h in hazards
+                if h.is_coddog_mirror() and h.coddog_pct() < 100.0
+            }
+        ):
+            pct = max(
+                h.coddog_pct()
+                for h in hazards
+                if h.is_coddog_mirror() and h.coddog_file() == cf
+            )
+            hazards.append(Hazard.body_divergence_suspect(cf, pct))
 
 
 @dataclasses.dataclass

@@ -30,6 +30,30 @@ def test_pack_factories():
     assert H.c_combined(["b", "a"]).render() == f"{h.HAZARD_C_COMBINED}:2file[a|b]"
 
 
+def test_jal_count_artifact_annotations():
+    """jal-count-mismatch artifact suffixes + their is_unexplained_jal / is_jal_artifact predicates.
+    The macro-artifact variant (S136 n_synthesizer 3vs8 = 5 alHeapAlloc macro calls) has no live
+    candidate trigger once banked, so it is pinned here directly."""
+    plain = H.jal_count_mismatch(3, 8)
+    assert plain.render() == f"{h.HAZARD_JAL_COUNT_MISMATCH}:3vs8"
+    assert plain.is_unexplained_jal() and not plain.is_jal_artifact()
+
+    macro = H.jal_count_mismatch(3, 8, macro_artifact=True)
+    assert macro.render() == f"{h.HAZARD_JAL_COUNT_MISMATCH}:3vs8(macro-artifact?)"
+    assert macro.is_jal_artifact() and not macro.is_unexplained_jal()
+
+    ver = H.jal_count_mismatch(2, 0, version_artifact=True)
+    assert ver.render() == f"{h.HAZARD_JAL_COUNT_MISMATCH}:2vs0(version-artifact?)"
+    assert ver.is_jal_artifact() and not ver.is_unexplained_jal()
+
+    # version takes precedence if both flags set
+    both = H.jal_count_mismatch(2, 0, version_artifact=True, macro_artifact=True)
+    assert both.render() == f"{h.HAZARD_JAL_COUNT_MISMATCH}:2vs0(version-artifact?)"
+
+    # a non-jal hazard is never a jal artifact
+    assert not H.trailing_pad(8, 16).is_jal_artifact()
+
+
 def test_scalar_factories():
     assert H.jal_count_mismatch(2, 0).render() == f"{h.HAZARD_JAL_COUNT_MISMATCH}:2vs0"
     assert (

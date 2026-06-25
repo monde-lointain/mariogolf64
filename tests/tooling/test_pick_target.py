@@ -1293,3 +1293,60 @@ def test_hazard_detail_accessors():
     n = H(pt.HAZARD_RODATA_LITERAL)
     n.mark_owner_per_member()
     assert n.detail == ";owner-per-member"
+
+
+def test_macro_single_real_call():
+    """S136: a function-like macro that wraps EXACTLY ONE real call (alHeapAlloc -> alHeapDBAlloc)
+    emits one jal per invocation; _macro_single_real_call recognises it so call_divergence can mark
+    the surplus a macro-artifact. Synthetic macro table (golden-independent of the live headers)."""
+    pt = load_tool("pick_target")
+    macros = {
+        "alHeapAlloc": (["hp", "n", "sz"], "alHeapDBAlloc(0, 0, (hp), (n), (sz))"),
+        "MQ_IS_FULL": (["mq"], "((mq)->validCount >= (mq)->msgCount)"),  # 0 real calls
+        "TWO_CALLS": (["x"], "f((x)); g((x))"),  # 2 real calls
+    }
+    assert pt._macro_single_real_call("alHeapAlloc", macros) is True
+    assert pt._macro_single_real_call("MQ_IS_FULL", macros) is False
+    assert pt._macro_single_real_call("TWO_CALLS", macros) is False
+    assert pt._macro_single_real_call("absent", macros) is False
+
+
+def test_body_divergence_suppressed_on_single_coddog_artifact_jal():
+    """S136: the body-divergence hedge is suppressed on a SINGLE-coddog row whose only divergence
+    signal is an artifact jal-count-mismatch (the surplus jals are accounted for -> a clean mirror +
+    literal carve, not a game-modified body). Kept for multi-coddog packs and unexplained mismatches."""
+    pt = load_tool("pick_target")
+    H = pt.Hazard
+
+    def bd(hz):
+        return [x for x in hz if x.render().startswith("body-divergence-suspect")]
+
+    # single coddog + macro-artifact jal -> SUPPRESSED (the n_synthesizer case)
+    hz = [
+        H.coddog_mirror("n_synthesizer.c", 99.99),
+        H.jal_count_mismatch(3, 8, macro_artifact=True),
+    ]
+    pt._append_coddog_aux(hz, [])
+    assert bd(hz) == []
+
+    # single coddog + UNexplained jal -> KEPT (a real divergence corroborator)
+    hz = [
+        H.coddog_mirror("n_synthesizer.c", 99.99),
+        H.jal_count_mismatch(3, 8),
+    ]
+    pt._append_coddog_aux(hz, [])
+    assert len(bd(hz)) == 1
+
+    # single coddog + NO jal mismatch -> KEPT (the normal sub-100 hedge)
+    hz = [H.coddog_mirror("n_reverb.c", 99.99)]
+    pt._append_coddog_aux(hz, [])
+    assert len(bd(hz)) == 1
+
+    # MULTI coddog + artifact jal -> KEPT (genuinely suspect multi-source pack)
+    hz = [
+        H.coddog_mirror("n_auxbus.c", 99.99),
+        H.coddog_mirror("n_env.c", 99.99),
+        H.jal_count_mismatch(3, 8, macro_artifact=True),
+    ]
+    pt._append_coddog_aux(hz, [])
+    assert len(bd(hz)) == 2
