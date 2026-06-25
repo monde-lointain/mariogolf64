@@ -25,6 +25,15 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 145 — aud_sched.c COMPLETE (libmus scheduler verbatim .data-carve mirror) — 2026-06-25
+- Increment: 1 file banked / 4 fns matched (`__MusIntSchedInit` + static `__OsSched{Install,WaitFrame,DoTask}`), `aud_sched.c` → md5-candidate. md5-candidate **202→203**; c-subsegs 195→196; asm subsegs **88** (unchanged — the split is asm-neutral, the aud_dma carry `[0x78D10]` remains). ROM SHA-1 == baserom (after a 1-step `-U_FINALROM` re-attempt).
+- Quality: 0/0/0/0 (stuck-far/permuter/carried/re-opened). One in-sprint re-attempt (the `-U_FINALROM` diagnosis), not a spike.
+- Seed: committed 5pt; banked 5pt; regime mirror (8-gate clear; seed-only, no freeze).
+- What helped: splitting the last libmus pack at the upstream-file boundary banked the CLEAN file (aud_sched, stock bodies + byte-verified stock `default_sched` data) and deferred the game-modified aud_dma; the `.data` carve + drop-statics followed the S116/S142 adjacent precedent; the 5-byte miss was localized fast by `cmp -l` (all in one fn's stack frame → struct SIZE drift, not a body edit).
+- Friction: the `OSScTask` `_FINALROM` struct-drift — a clean verbatim mirror SHA-missed by 16 B of stack frame purely because MG64's 3rd-party libmus was built NON-FINALROM (carries `OSScTask`'s `#ifndef _FINALROM` startTime+totalTime) while the base CFLAGS are `-D_FINALROM`. Diagnosed via the uniform frame-immediate shift (field stores unchanged); fixed with `mk/libmus.mk -U_FINALROM`. The `@99.99` body-divergence flag was a false alarm (coddog structural).
+- Applied (2 of 2): #1 `docs/hazards.md#upstream-mirror-pattern` `_FINALROM`/build-config struct-size-drift sub-note (the TELL: one fn's frame immediates shift by a fixed struct delta, field stores unchanged) + CLAUDE.md hazard-index row; #2 `docs/hazards.md#cross-jump-tail-merge` widened the `@99.99` body-divergence diagnosis to the build-config/struct-size axis. Both DOC, no tooling/golden touch. (Deferred: the optional `pick_target.py finalrom-struct:<struct>` pre-flag → noted in the hazard sub-note as a tracked follow-up, not built.)
+- Carry-over: aud_dma.c (`[0x78D10, asm]`, the LAST libmus asm subseg) — game-modified (N64DD/diskrom path stripped, `__MusIntDmaSample` control-flag check reordered, an empty 0x8 stub) → classical/mixed track. Banking it completes the libmus tree.
+
 ## Sprint 144 — aud_thread.c COMPLETE (libmus `__MusIntThreadProcess` classical; first classically-decompiled libmus fn) — 2026-06-25
 - Increment: 1 fn banked (`__MusIntThreadProcess`, the audio-thread frame loop), `aud_thread.c` COMPLETE (0 INCLUDE_ASM stubs → md5-candidate). matched **+1**; md5-candidate **201→202**; asm-backed subsegs **89→88** (the last stub cleared). ROM SHA-1 == baserom, MATCH first build, 0 iteration.
 - Quality: 0/0/0/0 (stuck-far/permuter/carried/re-opened).

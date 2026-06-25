@@ -16,6 +16,23 @@ subordinate to the libultra goal. Target selection is `tools/pick_target.py` (sm
 the 8-point decompose gate fires on any seed ≥8. v2 classical track is active (since S11);
 mirror is the default, classical is first-class when the asm warrants it.
 
+**S145 — `aud_sched.c` COMPLETE (libmus scheduler verbatim `.data`-carve mirror) → md5-candidate.**
+Split the last libmus asm pack `[0x78D10]` (aud_dma.c + aud_sched.c, the S144-flagged 2-file pack) at the
+upstream-file boundary (rom 0x791C0 / vram 0x8009DDC0, 16-aligned); banked the cleaner **aud_sched.c** (4
+STOCK libmus 3.14 scheduler fns: `__MusIntSchedInit` + static `__OsSched{Install,WaitFrame,DoTask}`), carried
+game-modified aud_dma.c. Verbatim cp, bodies byte-stock. **`.data` carve** `[0xA2ED0,.data,libmus/aud_sched]`=0x10
+(`default_sched` musSched vtable + `__libmus_current_sched`=&default_sched), 3-way `main_data` split w/
+`main_data_1a` tail; `__libmus_current_sched` shared (MusSetScheduler asm) but undroppable → forced in-section
+carve (S116). **drop-static:2bss** (`audio_sched`→curated `g_mus_sched_ptr`@0x800E70E0, `sched_mem`@0x800E70E4).
+**GOTCHA (1 re-attempt): `OSScTask` `_FINALROM` struct-drift** — first build missed 5 bytes in `__OsSchedDoTask`'s
+stack frame (0x90 vs ROM 0xA0); MG64's 3rd-party libmus was built NON-FINALROM (OSScTask carries its
+`#ifndef _FINALROM` startTime+totalTime = 0x10) while base CFLAGS are `-D_FINALROM` → fixed `mk/libmus.mk`
+`-U_FINALROM` (game/libultra stays FINALROM; 3 banked siblings re-matched). `@99.99` body-divergence was a FALSE
+flag. md5-candidate **202→203**; asm subsegs **88** (the aud_dma carry `[0x78D10]` remains). Quality 0/0/0/0.
+**Next libmus:** `[0x78D10]` (aud_dma.c, the LAST libmus asm subseg — game-modified classical, see Carry-overs)
+and `[0x78330]` (player_fx.c / `al_init`, bundled-n_audio dup). **Cross-repo follow-up:** 1 name
+(`__MusIntSchedInit`) → `sync_decomp_names.py --import-from-decomp`.
+
 **S144 — `aud_thread.c` COMPLETE (libmus `__MusIntThreadProcess` classical) → md5-candidate; the libmus band's FIRST classical bank.**
 The S143 carry-over banked. `__MusIntThreadProcess` (the audio-thread frame loop) was framed S143 as a
 from-scratch MG64-custom body; once `aud_sched.h` was vendored it proved to be the STOCK libmus **3.14**
@@ -2323,6 +2340,26 @@ by `/sprint-plan`:
   load-bearing detector → run off-cadence golden-gated (the tooling-refactor discipline). Until then the gate applies
   the guard by reading `player_fx.h`'s `#define n_alInit CustomInit` + the asm callees
   (`docs/hazards.md#libmus-bundled-n_audio-duplicate`). Companion to the S140 coddog-callee-tell + S141 vendor-header pricing.
+
+- _(CLASSICAL/MIXED carry (S145 planned decompose remainder) — `aud_dma.c` (`[0x78D10, asm]`, the LAST
+  libmus asm subseg; banking it COMPLETES the libmus tree). NOT a verbatim mirror — GAME-MODIFIED, so it
+  was the heterogeneous-batch trim when S145 banked the clean aud_sched.c sibling. **Track: regime mixed
+  (bank-stock-carry-custom likely).** **6 labels** (upstream n64sdkmod libmus 3.14 `aud_dma.c` has 5 source
+  fns): `__MusIntDmaInit`@0x8009D910 (placed S143) + `__MusIntDmaProcess`@0x8009DA8C (placed S144) +
+  `__CallBackDmaNew`/`__CallBackDmaProcess` (statics) + an **empty 0x8 `func_8009DBA0` stub** (`jr ra;nop` —
+  a function MG64 emptied) + `__MusIntDmaSample` (`mus_dma_sample`@0x8009DBA8, static, the large one).
+  **Body divergence is REAL (asm-confirmed at the S145 gate):** `__MusIntDmaSample` checks
+  `g_mus_control_flag & 1` (=`__muscontrol_flag & MUSCONTROL_RAM`) FIRST and the N64DD/diskrom path is
+  STRIPPED (MG64 is cart-only; upstream checks the DD-ROM `0xff000000` test first). The 4 stock fns
+  (DmaInit/DmaProcess/CallBackDmaNew/CallBackDmaProcess) likely mirror verbatim → write them as C, carry
+  `__MusIntDmaSample` (+ the empty stub) as `INCLUDE_ASM` until classically decompiled (per-file partial =
+  not md5-candidate until the last stub clears). **Hazards/enablers:** recover-extern `__muscontrol_flag`
+  (= ghidra `g_mus_control_flag`@0x80132368, a `refs-unplaced` — use the curated ghidra name or a coexisting
+  override); BSS file-statics (dma_buffer_head/free/list, audio_IO_mess_buf, audio_mess_buf, audio_dma_size/
+  count, audDMAMessageQ, cartrom_handle) → drop-static; `defines-data:diskrom_handle` (the non-`static`
+  global, possibly dead under cart-only). **Profile:** `-U_FINALROM` (S145) is libmus-wide; aud_dma.c uses
+  OSIoMesg/OSMesgQueue (verify any `_FINALROM`-sized struct, though OSMesgQueue is unconditional). Diff the 4
+  stock fns vs upstream + classically decompile `__MusIntDmaSample`'s cart-only body before banking.)_
 
 - _(SPIKE (S143) — `__MusIntThreadProcess` (`mus_audio_thread` @0x8009E0A8), the last INCLUDE_ASM stub in
   `src/libmus/aud_thread.c`. **RESOLVED + banked S144** — the "MG64-CUSTOM body → classical" framing was

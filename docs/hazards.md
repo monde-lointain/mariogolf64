@@ -128,6 +128,29 @@ stock 2.05 source's 4; the vendored `include/libnualstl/nualstl.h` was edited to
 the target instruction (the `li`/`addiu` immediate), do not trust the stock constant — a wrong constant
 is a single-immediate SHA-miss the same class as a wrong struct offset.
 
+**`_FINALROM` (build-config) struct-size drift — a clean mirror can SHA-miss with the body byte-stock
+(S145).** Generalizes the perf-struct rule to the build-config axis: a vendored header struct whose
+SIZE depends on a `#ifndef _FINALROM` / `#ifdef _DEBUG` block can drift between the ROM's library and
+the in-tree `-D_FINALROM` profile, with NO body change. MG64's game/libultra is `-D_FINALROM` (base
+CFLAGS), but the 3rd-party Software Creations **libmus** library object was built **non-FINALROM**, so
+`OSScTask` (`sched.h`) carries its `#ifndef _FINALROM` trailing `startTime`+`totalTime` (2× `OSTime` =
+0x10) that the FINALROM build drops. `aud_sched.c`'s `__OsSchedDoTask` declares an `OSScTask` on the
+stack, so the 16 B size delta surfaced as a 5-byte SHA-miss. Fix: per-library profile undef in
+`mk/libmus.mk` (`-U_FINALROM`); the game/libultra stays FINALROM (e.g. `src/libultra/sched/sched.c`
+matched with the smaller `OSScTask`), and no other libmus file is `_FINALROM`-sensitive (the remaining
+conditionals are `OS_NUM_EVENTS` macros + an `alParseAbiCL` proto, not codegen), so the banked siblings
+re-match on a full rebuild (`rm build/src/<lib>/*.o` — the build tracks no flag deps).
+- **TELL (distinguishes a struct SIZE drift from a body edit).** The miss is confined to ONE function's
+  **stack-frame immediates** — the `addiu sp,sp,-N` frame size, the `sw/lw ra,M(sp)` save/restore offset,
+  and any trailing local's `sp`-relative offset all shift by the SAME struct delta, while every FIELD
+  store offset (`sw …,K(sp)` into the struct) is UNCHANGED. Field-stores-shift = wrong field offset
+  (perf-struct S125); frame-immediates-shift-uniformly = wrong struct SIZE (this). Read which class of
+  offset moved before assuming a game-modified body.
+- **PRE-FLAG follow-up (tracked, not yet built).** `pick_target.py` could pre-flag a libmus/libultra fn
+  that declares a `#ifndef _FINALROM`-sized struct (`OSScTask`; sweep `os_message.h`/`osint.h` too) as
+  `finalrom-struct:<struct>`, the build-config analogue of the perf-struct pre-flag. Until then the gate
+  applies this by reading the target fn's struct locals.
+
 **Provenance:** S15 unlocked the libnusys band by vendoring one `include/libnusys/nusys.h` +
 `-I include/libnusys`; `-I include/libultra/PR` is the precedent for unblocking a band. S51 is the
 cautionary case for step 1's "do not consult `libultra_modern`": its split `gu/` layout (hand-asm
@@ -2607,6 +2630,19 @@ osAiSetNextBuffer(silence, 0x10); continue; }`) was genuinely MG64-custom. Seedi
 rule-out-body-before-compiler-wall discipline to the carry-triage direction: a "custom body" label set
 BEFORE the headers are in place over-prices the work — defer the classical-vs-mirror verdict until the
 stock diff is possible.
+
+**Check the build-config / struct-size axis too — a `@99.99` miss is not always a body edit (S145).** A
+`body-divergence-suspect:<file>@<pct>` miss has THREE non-body causes to clear before concluding the
+body diverges, distinguished by the offset pattern: (1) cross-jump = build instr COUNT **< target**;
+(2) block-reorder (`#near-verbatim-mirror-jal-count-mismatch`) = **equal** count, insns reordered;
+(3) **build-config struct-size drift** (`_FINALROM` / `_DEBUG`; see the `_FINALROM` note under
+[`#upstream-mirror-pattern`](#upstream-mirror-pattern)) = equal count, but ONE function's stack-frame
+immediates (`addiu sp`, `sw/lw ra`, trailing-local `sp`-offsets) all shift by the SAME struct delta
+while field stores are unchanged. S145 `aud_sched.c` `__OsSchedDoTask` was a `@99.99` flagged file whose
+miss was cause (3) — a 16 B `OSScTask` `_FINALROM` size drift, body byte-STOCK; the `@99.99` was coddog
+structural noise (func_/ghidra naming), not a body change. Read the offset pattern (count-short vs
+reordered vs uniform-frame-shift vs an extra store/branch with a new value) before assuming a
+game-modified body.
 
 ## struct-init-loop (dup-store / dual-induction-var)
 
