@@ -25,6 +25,17 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 137 — n_synallocfx.c + n_mainbus.c (n_audio_sc 2-file N_MICRO mirror, retires S130 spike) — 2026-06-24
+- Increment: 2 files banked, 2 fns matched (`n_alSynAllocFX` + `n_alMainBusPull`), split from the c-combined `[0x7C720,asm]`. md5-candidate **193→195** (+2); asm subsegs 93→**91** (2 flips). ROM SHA-1 == baserom.
+- Quality: 0/0/0/0 this sprint (stuck-far/permuter/carried/re-opened). Both fns Match on the FIRST build, seed-only, NO diagnosis pass, NO rodata/data carve.
+- Seed: committed 5pt; banked 5pt; regime mirror (8-gate clear).
+- What helped: the S130 near-free-retry completeness-checklist (authored S130, blocker resolved at the S136 gate) replayed verbatim-correct — boundary 0x7C770, callee `n_alFxNew`=0x8009E550 (jal-confirmed at gate), no carve — 0 rework, re-confirming the S74→S75 protocol. The S136 gate had already pre-named both leaders (`n_alSynAllocFX`/`n_alMainBusPull`) and identified `func_800A1320`=`n_alSynAllocFX`, so the only NEW gate add was the 1 callee `n_alFxNew`. Both `body-divergence-suspect@99.99` flags were FALSE (asm == upstream exactly, both fns).
+- Friction: none.
+- Applied (2 of 2; both knowledge-capture, no tooling edit): #1 log-only — the completeness-checklist verbatim-replay confirmation; #2 planning note — the 2 remaining libnaudio pts-13 packs (`n_reverb` single-file-pack, `n_auxbus` 2-file) carry `body-divergence-suspect@99.99` + heavier hazards (n_reverb: 4× `inc.c` + defines-data:val + refs-unplaced:L_INC + rodata carve; n_auxbus: static-name-collision×3 + c-combined), so triage BODIES (asm-vs-upstream diff) before assuming the clean S133–S137 verbatim pattern (S123 exemption-GUARD); both pts-13 → 8-gate fires unless the single-file-pack exemption applies (n_reverb qualifies structurally, n_auxbus does NOT). No `tools/*.py`/`CLAUDE.md`/`docs/*` edit; no golden/test touch.
+- Carry-over: none. `n_alFxNew` (1 name) is a cross-repo follow-up → `sync_decomp_names.py --import-from-decomp`.
+
+---
+
 ## Sprint 136 — n_synthesizer.c (n_audio_sc synth-driver core, 8-fn verbatim N_MICRO mirror) — 2026-06-24
 - Increment: 1 file banked, 8 fns matched (n_alSynNew + n_alAudioFrame + __n_allocParam + _n_freeParam + _n_collectPVoices + _n_freePVoice + static _n_timeToSamplesNoRound + _n_timeToSamples), 1376B verbatim N_MICRO mirror. md5-candidate **192→193** (+1); asm subsegs 94→93 (1 flip). ROM SHA-1 == baserom.
 - Quality: 0/0/0/0 this sprint (stuck-far/permuter/carried/re-opened). 1 diagnosis pass (the expected rodata carve), no spike, no body divergence.

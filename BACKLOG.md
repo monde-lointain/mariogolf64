@@ -16,6 +16,24 @@ subordinate to the libultra goal. Target selection is `tools/pick_target.py` (sm
 the 8-point decompose gate fires on any seed ≥8. v2 classical track is active (since S11);
 mirror is the default, classical is first-class when the asm warrants it.
 
+**S137 — `n_synallocfx.c` + `n_mainbus.c` BANKED (n_audio_sc 2-file N_MICRO mirror; retires S130 spike).**
+The S136-"Next" #1 increment, both fns Match FIRST build → **md5-candidate 193→195**; asm subsegs 93→91. Split the
+c-combined `[0x7C720, asm]` at vram 0x800A1370 → `n_synallocfx.c` (`n_alSynAllocFX`, 0x50: `n_alFxNew(&n_syn->
+auxBus->fx_array[bus],c,hp)` + return — pure call+return) + `n_mainbus.c` (`n_alMainBusPull`, 0x80: N_MICRO
+aClearBuffer + indirect `mainBus->filter.handler` + 2× aMix, 8B trailing-pad@16 absorbed by the cp). Both verbatim
+n_audio_sc cps on the existing vendored `n_synthInternals.h` (NO new header, NO rodata/data carve). The S130
+near-free-retry completeness checklist replayed verbatim-correct (boundary 0x7C770, callee `n_alFxNew`=0x8009E550
+jal-confirmed) — 0 rework. Gate enablers: split `[0x7C720]`→2 subsegs + 1 symbol add (`n_alFxNew`=0x8009E550; the
+lone calls-unplaced callee, stays asm in the n_auxbus pack — also pre-resolves one n_auxbus-pack callee).
+`n_alSynAllocFX`/`n_alMainBusPull` already named S136/S133. `body-divergence-suspect@99.99` FALSE both fns (asm ==
+upstream). Quality 0/0/0/0. seed 5 / banked 5pt (mirror, seed-only, 8-gate clear). Retro applied 2 of 2 (both
+knowledge-capture, no tooling edit); no golden/test touch. **Cross-repo follow-up:** 1 name (`n_alFxNew`) →
+`sync_decomp_names.py --import-from-decomp`. **Next:** the 2 remaining libnaudio candidates are both pts-13 with
+`body-divergence-suspect@99.99` + heavier hazards — `n_alFxPull`/`n_reverb.c` (single-file-pack:6fn, 4 inc
+fragments + `defines-data:val,blob` + `refs-unplaced:L_INC` + rodata-jtbl/literal; 8-gate exemption may apply but
+TRIAGE BODIES first per the S123 guard) and `func_8009E4B0`/`n_alAuxBusPull` (n_auxbus/n_drvrNew/n_env multi-coddog
+2-file pack, static-name-collision×3; 8-gate FIRES, decompose at the file boundary). No carry-overs.
+
 **S136 — `n_synthesizer.c` BANKED (n_audio_sc synth-driver core; 8-fn verbatim N_MICRO mirror + rodata carve).**
 The S135-"Next" #2-class file, all 8 fns Match → **md5-candidate 192→193**; asm subsegs 94→93. The
 synthesis-driver core: `n_alSynNew` (the synth `new`) + `n_alAudioFrame` (the per-frame command build,
@@ -2120,21 +2138,17 @@ by `/sprint-plan`:
   `NU_CONT_THREAD_ID=6` vs MG64's 5), and that surfaces only at first build unless reconciled here.
   A near-free retry missing any of these is a half-scoped spike — finish the scope before deferring.
 
-- **Near-free retry (S130 spike, blocker RESOLVED S136) — `n_alSynAllocFX` + `n_mainbus.c` (`[0x7C720, asm]`,
-  c-combined:2file).** The S130 spike's open blocker — "identify `func_800A1320`'s true upstream" — was RESOLVED
-  at the S136 gate: `func_800A1320` = `n_alSynAllocFX` (n_synallocfx.c), placed via the n_alSynNew handler-ref
-  disassembly (`jal 0x800a1320` at the `c->fxType != AL_FX_NONE` branch). pick_target now prices the subseg
-  `n_alSynAllocFX 0x7C720 pts-5 c-combined:2file[n_mainbus|n_synallocfx], calls-unplaced:n_alFxNew@0x8009E550`.
-  Completeness checklist for the retry (mechanical replay): **(1)** split `[0x7C720, asm]` at the file boundary
-  → `[0x7C720, c, libnaudio/n_synallocfx]` (n_alSynAllocFX @0x800A1320, +0x50) + `[0x7C770, c, libnaudio/n_mainbus]`
-  (n_alMainBusPull @0x800A1370); confirm the 0x7C770 boundary against the asm (n_alSynAllocFX end). **(2)** placed
-  refs: `n_alSynAllocFX`=0x800A1320 (S136), `n_alMainBusPull`=0x800A1370 (S133), both already in symbol_addrs.
-  **(3)** NEW callee to place: `n_alFxNew`=0x8009E550 (the one `calls-unplaced` from n_alSynAllocFX; an n_auxbus/
-  func_8009E4B0-pack member — verify the vram from the n_alSynAllocFX asm jal at the gate). **(4)** include: the
-  vendored n_synthInternals.h/n_libaudio_sc.h cover both files. **(5)** upstream pin: n_audio_sc VERSION_J, KMC-O3,
-  -DN_MICRO=1. n_mainbus.c is a verbatim `aClearBuffer`/`(mainBus->filter.handler)()`/`aMix` cp (~128B);
-  n_synallocfx.c is the FX allocator (alHeapAlloc-heavy → expect a `(macro-artifact?)` jal flag, S136). Watch for
-  a rodata-literal carve (use the new `extent-end` to size it).
+- _(Near-free retry (S130 spike, blocker RESOLVED S136) — `n_alSynAllocFX` + `n_mainbus.c` (`[0x7C720, asm]`,
+  c-combined:2file) **RESOLVED + banked S137** — the completeness checklist replayed verbatim-correct, 0 rework.
+  Split `[0x7C720, asm]` → `[0x7C720, c, libnaudio/n_synallocfx]` (n_alSynAllocFX @0x800A1320, +0x50) +
+  `[0x7C770, c, libnaudio/n_mainbus]` (n_alMainBusPull @0x800A1370); the 0x7C770 boundary confirmed against the
+  asm at the gate (n_alSynAllocFX ends 0x800A136C). The 1 NEW callee `n_alFxNew`=0x8009E550 was jal-confirmed
+  (`jal 0x8009e550`) and added to symbol_addrs (stays asm in the n_auxbus pack — also pre-resolves one
+  n_auxbus-pack callee). Both verbatim n_audio_sc cps on the existing vendored `n_synthInternals.h`, NO new
+  header, NO rodata/data carve (n_synallocfx = pure call+return; n_mainbus = N_MICRO aClearBuffer + indirect
+  handler + 2× aMix, the `alHeapAlloc`/`(macro-artifact?)`/rodata watches were FALSE for these two tiny fns).
+  Both Match FIRST build, seed-only (5pt), Quality 0/0/0/0. The S130-spike `func_800A1320` block is fully
+  cleared; `body-divergence-suspect@99.99` was FALSE both fns (asm == upstream).)_
 
 - _(Spike (S121) — `contRmbControl` (0x800A19E0), the last INCLUDE_ASM stub in
   `src/libnusys/mainlib/nucontrmbmgr.c` **RESOLVED + banked S127** — the "compiler wall" was a
