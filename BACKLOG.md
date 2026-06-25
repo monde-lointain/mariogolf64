@@ -16,6 +16,26 @@ subordinate to the libultra goal. Target selection is `tools/pick_target.py` (sm
 the 8-point decompose gate fires on any seed ≥8. v2 classical track is active (since S11);
 mirror is the default, classical is first-class when the asm warrants it.
 
+**S141 — `lib_memory.c` BANKED + the libmus band OPENED (header-vendoring enabler + first leaf mirror).**
+The S140-directed next audio vein. Because libnaudio is 100% and pre-paid the n_audio_sc header base,
+opening libmus cost only ~3 vendored headers (`n_libaudio_sn_sc.h`→include/libnaudio; `libmus_config.h`
++ `lib_memory.h`→src/libmus) + a 2-line `mk/libmus.mk` (KMC -O3, `-DSUPPORT_NAUDIO`, `-I src/libmus`) +
+a mechanical `pick_target.py` libmus registration. First mirror `lib_memory.c` (the `@100.00` coddog
+LEAF, 6 `__MusIntMem*` fns) **MATCH first build** → **md5-candidate 199→200**; asm subsegs stayed 90
+(the `[0x79640]` pack split into `[0x79640, c, libmus/lib_memory]` + `[0x79780, asm]` aud_samples
+remainder, a new asm subseg). Verbatim n_audio_sc-path cp + drop-static (`audio_heap`→extern
+@0x800E72B0, ALHeap=0x10) + wrong-ghidra-name override (`__MusIntMemInit` overrides ghidra
+`mus_heap_init` via `rom:0x79640` qualifier, S128 mechanism). Only external calls `alHeapInit`/
+`alHeapDBAlloc` (placed in libnaudio) → NO calls-unplaced; places the `__MusIntMem*` allocator the whole
+band depends on. Quality 0/0/0/0, seed-only (mirror). Retro applied 4 of 4: #1 sibling-audio-lib hedge
+DOWNGRADE (CLAUDE.md story-points + the S140 note below), #2 `@100.00`-leaf-first band-open heuristic
+(`docs/hazards.md#upstream-mirror-pattern`), #3 pick_target per-file blk-delta hint (deferred to a
+golden-gated tooling branch, tracked in Carry-overs), #4 cross-repo name sync. **Cross-repo follow-up:**
+6 lib_memory names → `sync_decomp_names.py --import-from-decomp` (esp. `__MusIntMemInit`). **Next:**
+libmus band OPEN; smallest follow-on `aud_samples.c` (`mus_samples_init`, the `[0x79780]` split
+remainder, 2fn) then aud_thread / aud_dma / aud_sched / player_fx (each vendors its own `aud_*.h`;
+`file-static` + `body-divergence-suspect` per row, hedge per-coddog-score). No carry-overs.
+
 **S140 — `n_env.c` BANKED (the LAST libnaudio asm subseg → `src/libnaudio/` tree 100%; 5 fns).**
 The S139 carry-over `[0x79E70]` (n_env.c, pts-13, the final libnaudio asm subseg). Verbatim n_audio_sc
 N_MICRO mirror of `n_alEnvmixerPull` + `n_alEnvmixerParam` + 3 file-statics, MATCH first build, 0 re-attempt
@@ -38,6 +58,11 @@ n_audio_sc 10/10-verbatim confidence into it: those rows carry heavier flags (`f
 + `body-divergence-suspect` + nearly all `blk` needs-header on `libmus_config.h`/`libaudio.h`/etc.), so the band
 likely needs a **header-vendoring ENABLER sprint first** and may have genuinely divergent (game-customized) bodies.
 Reset the body-divergence hedge to FULL for libmus (treat like the S123 libnusys class, not the n_audio_sc class).
+**DOWNGRADED S141 (see S141 above):** the enabler was SMALL (libnaudio pre-paid the shared n_audio_sc header
+DAG — ~3 headers + a 2-line mk profile + a mechanical pick_target add), and the `@100.00` leaf `lib_memory.c`
+banked first-build seed-only (NOT a customized body). Hedge body-divergence **per-coddog-score** going forward —
+`@100.00` = trust the verbatim mirror, `@99.99` = the S121/S123 diagnosis-pass / exemption-guard — not a
+blanket-FULL-by-lib reset. Each remaining libmus `.c` vendors only its own private `aud_*.h` at bank time.
 
 **S139 — `n_auxbus.c` + `n_drvrNew.c` BANKED (DECOMPOSE the last libnaudio pack func_8009E4B0; 3 fns).**
 The S138-"Next" increment. The last libnaudio asm subseg `[0x798B0]` (func_8009E4B0, 8 fns, pts-13) was a
@@ -2214,6 +2239,16 @@ by `/sprint-plan`:
   disambiguate before emitting an address. Run it off-cadence on a branch, golden-gated + reassess
   checkpoints (the tooling-refactor discipline), since it adds FP/regression surface to a load-bearing
   detector. Spec is also inline at `docs/hazards.md#defines-data` (Tooling follow-up (S138)).
+
+- **Tooling follow-up (S141, PO-selected #3; deferred to a golden-gated tooling branch, NOT a
+  review-gate edit).** After a new lib is registered, make `pick_target.py` emit a per-file
+  band-open hint: for each `needs-header:<h>` on a row whose lib is now registered, resolve `<h>`
+  against the lib's coddog-pin srcdir (`audio_pins.tsv` for audio libs) and emit
+  `vendor-header:<h>@<pin>/<h>` so the next gate's header enabler is a mechanical copy instead of a
+  manual hunt (S141 read each libmus row's `needs-header:aud_*.h` by hand). **Why a branch:** it
+  reaches into the pin-srcdir resolution + adds a new advisory column (FP/regression surface on a
+  load-bearing detector), so run it off-cadence golden-gated with reassess checkpoints (the
+  tooling-refactor discipline). Companion to the S140-deferred coddog-callee-tell pricing.
 
 - _(Near-free retry (S139 decompose remainder) — `n_env.c` (`[0x79E70, asm]`, the LAST libnaudio asm
   subseg) **RESOLVED + banked S140** — the completeness checklist replayed verbatim-correct, 0 rework,

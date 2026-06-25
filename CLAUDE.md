@@ -254,6 +254,17 @@ the summary.
       triage (`docs/hazards.md#upstream-mirror-pattern`) before concluding the divergence is custom.
       (pick_target.py automation to price the non-lib-`func_`-callee tell is a tracked follow-up;
       until then the gate applies this guard by reading the pack's asm callees.)
+    - **New-audio-sub-lib band-open is a SMALL incremental enabler when the n_audio_sc header DAG is
+      shared (S141).** S140 hedged "libmus needs a full header-vendoring sprint first + reset
+      body-divergence to FULL"; in practice libnaudio had pre-paid the shared audio header base
+      (libmus.h, n_libaudio_sc.h, libaudio.h, the SC internal hdrs + the base `-I include/libmus
+      include/libnaudio`), so opening libmus was ~3 small headers + a 2-line `mk/libmus.mk` profile +
+      a mechanical `pick_target.py` add, and the `@100.00` leaf `lib_memory.c` banked first-build
+      seed-only. Reframe a sibling audio lib that SHARES the n_audio_sc header DAG as a CHEAP
+      incremental enabler (each `.c` vendors only its own private `aud_*.h` at bank time), NOT a full
+      header sprint. Keep the body-divergence hedge PER-CODDOG-SCORE — `@100.00` = byte-identical,
+      trust the verbatim mirror; `@99.99` = the diagnosis-pass / exemption-guard above — not a
+      blanket-FULL-by-lib reset.
     - **Mixed mirror+INCLUDE_ASM partial bank is first-class (S121 generalized, S123).** A
       `coddog-mirror` file can be PARTIALLY stock: some fns byte-match the upstream, others are
       game-customized. The right play is **bank-stock-carry-custom** — write the stock fns as C and

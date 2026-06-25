@@ -31,6 +31,17 @@ iteration, no byte-`cmp` (that guard is classical-loop-only).
   a single-file-pack even for un-named coddog packs, and marks per-fn decompose as blocked (see also
   #non16align).
 
+**Band-open: pick the `@100.00` leaf FIRST to prove a new lib's profile (S141).** When opening a
+fresh upstream band (vendoring its first headers + a new `mk/<lib>.mk` profile), the lowest-risk first
+pick is a `coddog-mirror:<file>@100.00` row that is a LEAF (0 `calls-unplaced`, no rodata/data carve,
+at most a drop-static). `@100.00` is byte-identical structure (not a customized body), and the leaf
+has no cross-file callees to recover, so it validates the new profile with ZERO confounds: a SHA-miss
+is then unambiguously the build profile (wrong `-O`/`-D`/`-I`), not a body or a missing extern. It
+also tends to place the allocator/util the rest of the band calls (S141 `lib_memory.c`: the `@100.00`
+`__MusIntMem*` leaf, banked first-build, placed the allocator the whole libmus band depends on).
+Prefer it over a larger `@99.99` API file (which carries the diagnosis-pass + cross-file
+recover-extern cost) as the band's first increment.
+
 **Procedure:**
 1. Upstream roots: libultra `~/development/repos/ultralib/src/`, libkmc
    `~/development/repos/libkmc/src/`, libnusys
