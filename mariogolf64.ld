@@ -118,6 +118,7 @@ SECTIONS
         build/asm/748B0.o(.text);
         build/asm/78330.o(.text);
         build/asm/78D10.o(.text);
+        build/src/libmus/aud_sched.o(.text);
         build/src/libmus/aud_thread.o(.text);
         build/src/libmus/lib_memory.o(.text);
         build/src/libmus/aud_samples.o(.text);
@@ -389,9 +390,11 @@ SECTIONS
         build/asm/748B0.o(.data);
         build/asm/78330.o(.data);
         build/asm/78D10.o(.data);
+        build/asm/data/main_data.data.o(.data);
+        build/src/libmus/aud_sched.o(.data);
         build/src/libmus/aud_thread.o(.data);
         build/src/libmus/lib_memory.o(.data);
-        build/asm/data/main_data.data.o(.data);
+        build/asm/data/main_data_1a.data.o(.data);
         build/src/libmus/aud_samples.o(.data);
         build/src/libnaudio/n_auxbus.o(.data);
         build/src/libnaudio/n_drvrNew.o(.data);
@@ -674,6 +677,7 @@ SECTIONS
         build/asm/748B0.o(.rodata);
         build/asm/78330.o(.rodata);
         build/asm/78D10.o(.rodata);
+        build/src/libmus/aud_sched.o(.rodata);
         build/src/libmus/aud_thread.o(.rodata);
         build/src/libmus/lib_memory.o(.rodata);
         build/src/libmus/aud_samples.o(.rodata);
@@ -961,6 +965,7 @@ SECTIONS
         build/asm/748B0.o(.bss);
         build/asm/78330.o(.bss);
         build/asm/78D10.o(.bss);
+        build/src/libmus/aud_sched.o(.bss);
         build/src/libmus/aud_thread.o(.bss);
         build/src/libmus/lib_memory.o(.bss);
         build/src/libmus/aud_samples.o(.bss);

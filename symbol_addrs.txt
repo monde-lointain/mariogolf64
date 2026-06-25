@@ -373,6 +373,15 @@ __libmus_current_sched = 0x800C7ADC; // size:0x4
 g_mus_audio_paused = 0x800C7AE0; // size:0x1
 g_mus_audio_last_task = 0x800C7AE4; // size:0x4
 g_mus_audio_silence_buffer = 0x800C7AE8; // size:0x10
+// libmus aud_sched.c, UPSTREAM names (S145, libmus v3.14 n64sdkmod = game rev; STOCK scheduler fns).
+// __MusIntSchedInit (the one external fn) overrides the WRONG ghidra mus_set_sched via rom:
+// (#wrong-ghidra-name-override; caller MusInitialize jal's it). The 3 __OsSched{Install,WaitFrame,
+// DoTask} are file-statics: left scaffold-named (mus_sched_install/func_) so the verbatim mirror
+// defines them static and default_sched references the locals after the .data carve (exec-time).
+// default_sched (musSched vtable) + __libmus_current_sched (=&default_sched, already placed S144 @
+// 0x800C7ADC) are the .data-carve at rom 0xA2ED0 (0x10B, before the aud_samples carve @ 0xA2F00).
+__MusIntSchedInit = 0x8009DDC0; // rom:0x791C0 type:func
+sched_mem = 0x800E70E4; // size:0x4
 // libnaudio n_audio_sc n_syn* setter family, UPSTREAM names (S129 header-enabler sprint).
 n_alSynSetPan = 0x800A0A90; // type:func
 n_alSynSetPitch = 0x800A0B20; // type:func
