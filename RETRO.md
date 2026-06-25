@@ -25,6 +25,15 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 144 — aud_thread.c COMPLETE (libmus `__MusIntThreadProcess` classical; first classically-decompiled libmus fn) — 2026-06-25
+- Increment: 1 fn banked (`__MusIntThreadProcess`, the audio-thread frame loop), `aud_thread.c` COMPLETE (0 INCLUDE_ASM stubs → md5-candidate). matched **+1**; md5-candidate **201→202**; asm-backed subsegs **89→88** (the last stub cleared). ROM SHA-1 == baserom, MATCH first build, 0 iteration.
+- Quality: 0/0/0/0 (stuck-far/permuter/carried/re-opened).
+- Seed: committed 5pt; seed 5 / realized 4 / residual −1; regime classical (v2 two-pass freeze: seed frozen at commit `2866ba1` pre-`src/`, realized at this review).
+- What helped: re-diffing the "MG64-custom body" carry vs the STOCK libmus 3.14 source AFTER `aud_sched.h` was vendored (S143) — the body was the stock thread-proc + a ~4-instr pause insert, not from-scratch classical; the `musSched` vtable macros (`__MusIntSched_*`) + `musTask` struct were already in the vendored headers; the recover-externs + callee override were applied up-front from the traced asm → banked near-verbatim first build, 0 iteration.
+- Friction: one LINK-time `undefined reference to __MusIntDmaProcess` (the `aud_dma.h` callee name vs ghidra `mus_dma_process`) — fixed with a `rom:` callee override; the gate stub built green on the ghidra name, so it surfaced only at the C link, not the gate.
+- Applied (3 of 3): #1 `docs/hazards.md#cross-jump-tail-merge` rule-out-stock-plus-insert-before-from-scratch-custom sibling rule + BACKLOG carry-convention tighten; #2 `docs/hazards.md#wrong-ghidra-name-override` duplicate-vram-alias → reference-the-placed-name sub-note; #3 same-section callee-override sub-note (link-time tell). All DOC, no tooling/golden touch.
+- Carry-over: none (the S143 carry `__MusIntThreadProcess` is RESOLVED + banked).
+
 ## Sprint 143 — aud_thread.c (libmus, PARTIAL: `__MusIntAudManInit` banked, `__MusIntThreadProcess` carried) + the deeper libmus band opened — 2026-06-25
 - Increment: 1 fn banked (`__MusIntAudManInit`, the audio-manager init), `aud_thread.c` PARTIAL (1 INCLUDE_ASM stub). matched **+1**; md5-candidate **201→201** (file partial); asm subsegs **89→88** (flip). ROM SHA-1 == baserom, MATCH first build.
 - Quality: 0/0/**1**/0 (stuck-far/permuter/carried/re-opened). 1 carried (`__MusIntThreadProcess`, MG64-custom body — bank-stock-carry-custom, the hedge fired as predicted).

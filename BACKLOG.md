@@ -16,6 +16,23 @@ subordinate to the libultra goal. Target selection is `tools/pick_target.py` (sm
 the 8-point decompose gate fires on any seed ≥8. v2 classical track is active (since S11);
 mirror is the default, classical is first-class when the asm warrants it.
 
+**S144 — `aud_thread.c` COMPLETE (libmus `__MusIntThreadProcess` classical) → md5-candidate; the libmus band's FIRST classical bank.**
+The S143 carry-over banked. `__MusIntThreadProcess` (the audio-thread frame loop) was framed S143 as a
+from-scratch MG64-custom body; once `aud_sched.h` was vendored it proved to be the STOCK libmus **3.14**
+thread-proc (the `musSched` vtable via `__MusIntSched_{install,waitframe,dotask}` macros + the stock
+`last_task` func-static), with only a ~4-instr MG64 pause/mute insert (`if (paused@0x800C7AE0) {
+osAiSetNextBuffer(silence@0x800C7AE8, 0x10); continue; }`) genuinely custom. Seeded from the stock 3.14
+source + the insert; banked near-verbatim **MATCH first build, 0 iteration**. 4 drop-static recover-externs
+(`__libmus_current_sched`@0x800C7ADC + `g_mus_audio_{paused,last_task,silence_buffer}`@AE0/AE4/AE8) + 1
+callee `rom:` override (`__MusIntDmaProcess`@0x8009DA8C vs ghidra `mus_dma_process`, surfaced as a LINK-time
+`undefined reference`); `MICROCODE_CODE` referenced the placed `rspbootTextEnd` (== `n_aspMainTextStart`
+@0x800B3F20) via a local `#define` (no dup-vram add). md5-candidate **201→202**; asm-backed subsegs
+**89→88** (last `aud_thread` stub cleared). Quality 0/0/0/0; classical track seed 5 / realized 4 / residual −1.
+**Next libmus:** `[0x78D10]` (aud_dma.c + aud_sched.c, a `blk` 10-fn 2-file pack, double
+`body-divergence-suspect@99.99` → decompose at the file boundary + body-triage at the gate) and `[0x78330]`
+(player_fx.c / `al_init`, the bundled-n_audio dup, `coddog-fncount-mismatch:6vs13`). **Cross-repo follow-up:**
+5 names → `sync_decomp_names.py --import-from-decomp`.
+
 **S143 — `aud_thread.c` PARTIAL (libmus integrator init banked; threadproc carried) + the deeper libmus band opened.**
 The S142-directed smallest libmus follow-on. `aud_thread.c` (`[0x79370]`, 2 fns) flipped to `c`; **`__MusIntAudManInit`
 (the audio-manager init) banked C** as a verbatim libmus **3.14** mirror, **`__MusIntThreadProcess` carried INCLUDE_ASM**
@@ -2308,20 +2325,17 @@ by `/sprint-plan`:
   (`docs/hazards.md#libmus-bundled-n_audio-duplicate`). Companion to the S140 coddog-callee-tell + S141 vendor-header pricing.
 
 - _(SPIKE (S143) — `__MusIntThreadProcess` (`mus_audio_thread` @0x8009E0A8), the last INCLUDE_ASM stub in
-  `src/libmus/aud_thread.c`. **Blocker:** MG64-CUSTOM body (classical track), NOT in stock libmus 3.14 (the 3.14 source
-  diff vs 3.11 is only the version comment + `EXTRA_SAMPLES_N`). The customization: after `__MusIntSched_waitframe()`,
-  a pause/mute block — `if (*(u8*)0x800C7AE0) { osAiSetNextBuffer((void*)0x800C7AE8, 0x10); continue; }` — and `last_task`
-  is a sched-state GLOBAL @0x800C7AE4 (not the func-static the source declares). **Completeness checklist for retry:**
-  (1) flip DONE (subseg is `c`; the file exists with `__MusIntAudManInit` banked + this lone stub); (2) placed refs:
-  `__libmus_current_sched`@0x800C7ADC (aud_sched.h extern, aud_sched.c asm), `audio_command_list`@0x800E72A8 /
-  `audio_tasks`@0x800E72A4 (curated `g_mus_*`), `__MusIntDmaProcess`@0x8009DA8C, `__MusIntSamplesCurrent` (S142),
-  `n_alAudioFrame`@0x800A0FE0, `osAiGetStatus`/`osAiGetLength`/`osAiSetNextBuffer`/`osVirtualToPhysical` (ultra64);
-  (3) NEW recover-externs to name+place: the pause flag @0x800C7AE0 + silence buffer @0x800C7AE8 + `last_task`
-  @0x800C7AE4 (3 MG64-custom bss globals) + MICROCODE `n_aspMainTextStart`@0x800B3F20 / `n_aspMainDataStart`@0x800C9890;
-  (4) include: same file, already set up; (5) pin: n64sdkmod libmus 3.14 `__MusIntThreadProcess` body + the inserted MG64
-  pause block; (6) the `% NUM_OUTPUT_BUFFERS` (=3) compiles as the `0xAAAAAAAB` reciprocal-multiply. Asm FULLY TRACED
-  S143 (0x8009E0A8-0x8009E220). The sched calls are macro indirect-calls through `__libmus_current_sched` (no `__MusIntSched_*`
-  symbols needed).)_
+  `src/libmus/aud_thread.c`. **RESOLVED + banked S144** — the "MG64-CUSTOM body → classical" framing was
+  over-pessimistic. Once `aud_sched.h` (vendored S143) exposed the stock `musSched` vtable + the
+  `__MusIntSched_{install,waitframe,dotask}` macros, the body was the STOCK libmus 3.14 thread-proc and
+  `last_task`@0x800C7AE4 was the STOCK func-static (not a custom global) — only a ~4-instr MG64 pause/mute
+  insert (`if (paused@0x800C7AE0) { osAiSetNextBuffer(silence@0x800C7AE8, 0x10); continue; }`) was genuinely
+  custom. Seeded from the stock 3.14 source + the insert; 4 drop-static recover-externs
+  (`__libmus_current_sched`@0x800C7ADC + `g_mus_audio_{paused,last_task,silence_buffer}`@AE0/AE4/AE8) + 1
+  callee `rom:` override (`__MusIntDmaProcess`@0x8009DA8C vs ghidra `mus_dma_process`); `MICROCODE_CODE`
+  referenced the placed `rspbootTextEnd` (== `n_aspMainTextStart`@0x800B3F20) via a local `#define`. MATCH
+  first build, 0 iteration. Lesson: re-diff a "custom body" carry vs the stock source AFTER the headers are
+  vendored before assuming from-scratch classical — see `docs/hazards.md#cross-jump-tail-merge` sibling rule.)_
 
 - _(Near-free retry (S139 decompose remainder) — `n_env.c` (`[0x79E70, asm]`, the LAST libnaudio asm
   subseg) **RESOLVED + banked S140** — the completeness checklist replayed verbatim-correct, 0 rework,

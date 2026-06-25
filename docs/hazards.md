@@ -2367,6 +2367,29 @@ the same as a macro alias even though no `pick_target.py` flag fires.
    **Cross-repo follow-up:** rename the vram in the Ghidra workspace to `<correct_name>` so the
    source-of-truth matches; a future reconciled sync can drop the override.
 
+**A CALLEE the new C body calls can need the same override (S144).** The override is not only for the
+function being banked. A verbatim/classical body that calls a STILL-ASM sibling by its vendored-header
+UPSTREAM name needs a `rom:` override for the CALLEE too when `ghidra_symbols.txt` labels that vram with
+a different name. S144 `aud_thread.c` called `__MusIntDmaProcess` (the `aud_dma.h` name); ghidra had
+`mus_dma_process`@0x8009DA8C, so the C linked with `undefined reference to __MusIntDmaProcess`. **The
+tell is a LINK-time `undefined reference` to an upstream callee name, NOT a gate-time scaffold mismatch**
+— the gate `INCLUDE_ASM` stub referenced the ghidra name and built green, so it surfaces only when the
+new C object links. `pick_target.py` does not flag this (the callee lives in a different still-asm TU);
+read the new body's vendored-header callees against `ghidra_symbols.txt` before building, or let the
+link error surface it, then add `<upstream> = 0x<vram>; // rom:0x<off> type:func` (same mechanism).
+
+**Aliasing an ALREADY-PLACED `symbol_addrs` name at the same vram → reference it, do NOT duplicate
+(S144).** Distinct from the ghidra-clash case above: when the name your C body needs is an ALIAS of a
+symbol already placed in `symbol_addrs.txt` at the SAME vram, do NOT add a second `symbol_addrs` entry —
+`symbol_addrs` has no duplicate-vram support (`grep -oE '= 0x[0-9A-Fa-f]+;' symbol_addrs.txt | sort |
+uniq -d` is empty project-wide; a 2nd entry at one vram risks dropping the canonical name's link).
+Instead reference the PLACED name via a local `#undef`/`#define` (or an `extern` decl) in the C. S144
+`aud_thread.c`: `MICROCODE_CODE` is `n_aspMainTextStart`@0x800B3F20, but that vram is already placed as
+the canonical boundary name `rspbootTextEnd` (rspboot text end == aspMain text start), so the C did
+`extern long long int rspbootTextEnd[]; #undef MICROCODE_CODE; #define MICROCODE_CODE rspbootTextEnd`.
+(The `rom:` override above is for a symbol_addrs↔ghidra clash; this is a symbol_addrs↔symbol_addrs alias,
+which the override does not solve.)
+
 **Verify at the gate:** after the flip + override, `make extract`, then confirm (a) the scaffolded
 `src/.../<file>.c` stub is `INCLUDE_ASM(..., <correct_name>)` and (b) the still-asm caller's
 `asm/<seg>.s` relocs `jal <correct_name>`; both prove the override won before you write the body.
@@ -2570,6 +2593,20 @@ exact stores + values, only then suspect a compiler-build divergence — and re-
 first. A genuinely stuck mirror fn then falls back to: partial-bank the matching siblings as C + carry
 the stuck fn as `INCLUDE_ASM` (ROM stays green; forward-decl `extern` since the asm `glabel` is
 `.globl`), or `hasm`-split it. A `jump.c` patch is NOT a banking path (open toolchain research only).
+
+**Sibling rule — rule out STOCK-plus-insert before treating a carry as from-scratch custom (S144).**
+The plan/seed-time inverse of the above triage. A carry tagged "MG64-custom body → classical" is
+**stock-source-plus-a-small-insert until proven otherwise** — re-diff the asm against the STOCK upstream
+AFTER the library's headers are vendored, before assuming from-scratch classical work. S144
+`__MusIntThreadProcess` was carried (S143) as an "MG64-custom body" with `last_task` called a "custom
+sched-state global"; once `aud_sched.h` was vendored (exposing the stock `musSched` vtable + the
+`__MusIntSched_{install,waitframe,dotask}` macros @ offsets 0/4/8), the body was the STOCK libmus 3.14
+thread-proc and `last_task` was the stock func-static — only a ~4-instr pause/mute insert (`if (paused) {
+osAiSetNextBuffer(silence, 0x10); continue; }`) was genuinely MG64-custom. Seeding from the stock source
++ the insert banked it near-verbatim FIRST build vs hand-writing ~100 instrs. This generalizes the
+rule-out-body-before-compiler-wall discipline to the carry-triage direction: a "custom body" label set
+BEFORE the headers are in place over-prices the work — defer the classical-vs-mirror verdict until the
+stock diff is possible.
 
 ## struct-init-loop (dup-store / dual-induction-var)
 
