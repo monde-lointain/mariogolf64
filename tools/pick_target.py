@@ -41,6 +41,7 @@ from build_config import (
     _PP_ENDIF_LINE_RE,
     _PP_OPENING_DIRECTIVE_RE,
     _build_version_ord,
+    _strip_inactive_define_branches,
     _strip_inactive_version_branches,
 )
 
@@ -1390,6 +1391,9 @@ def call_divergence(rom_off, primary, up_cpath, lib=None):
     # mirror (e.g. pfsgetstatus's non-J `__osPfsRequestOneChannel(channel)` inflates 6→7, a false
     # `7vs6`). refs_unplaced strips the same way; without the lib's build_ord this is a no-op.
     body = _strip_inactive_version_branches(body, _build_version_ord(lib))
+    # Same for the profile's `-D` define gates (libnaudio `-DN_MICRO=1`): the non-micro `_getRate`'s
+    # `_frexpf`/`_ldexpf` inflated n_env's `jal-count-mismatch:20vs15` on a byte-clean N_MICRO mirror.
+    body = _strip_inactive_define_branches(body, _active_defines_for_lib(lib))
     # Local function-like macros the .c #defines itself (e.g. xprintf's PUT/PAD/ATOI) are not in
     # all_func_macros() (headers only) → drop them too, else a callback-wrapping macro reads as a call.
     try:
@@ -1992,6 +1996,9 @@ def refs_unplaced(cpath, placed, lib=None):
     # Drop the inactive `#if BUILD_VERSION` side so a ref in the dead branch (e.g. `CartRomHandle`
     # in a non-J `#else`) is not phantom-flagged.
     text = _strip_inactive_version_branches(text, _build_version_ord(lib))
+    # Same for the profile's `-D` define gates (`-DN_MICRO=1`): a data extern referenced only in the
+    # dead side of `#ifndef N_MICRO` is phantom; symmetric with calls_unplaced/call_divergence.
+    text = _strip_inactive_define_branches(text, _active_defines_for_lib(lib))
     # Also drop dead `#ifdef _DEBUG/NU_DEBUG/AUD_PROFILE` / `#ifndef _FINALROM` / `#if 0` blocks
     # (symmetric with calls_unplaced) so a data extern referenced ONLY in a dead branch (e.g. an
     # AUD_PROFILE-guarded `extern u32 ...[]` decl + its use) is not phantom-flagged.
@@ -2160,6 +2167,9 @@ def calls_unplaced(cpath, primary, placed, lib=None):
     # Drop the inactive `#if BUILD_VERSION` side first (e.g. `osPiRawReadIo` called only in a non-J
     # `#else` branch) so its calls are not phantom-flagged.
     text = _strip_inactive_version_branches(text, _build_version_ord(lib))
+    # Same for the profile's `-D` define gates: a callee only in the dead side of `#ifndef N_MICRO`
+    # (n_env's non-micro `__pow`/`_frexpf`/`_ldexpf`) is phantom under `-DN_MICRO=1`, not unplaced.
+    text = _strip_inactive_define_branches(text, _active_defines_for_lib(lib))
     # Same-file function-like macros (`#define READFORMAT(ptr) ((__OSContRamReadFormat*)(ptr))` in
     # motor.c) expand to casts/exprs, not jals — collect their names so a `READFORMAT(ptr)` use is
     # not flagged as an unplaced function. macro_hidden_text only captures HEADER macros, so the .c's

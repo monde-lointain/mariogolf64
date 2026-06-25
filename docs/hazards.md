@@ -1887,6 +1887,14 @@ file-local, do not add a colliding `symbol_addrs` entry. Confirm the static has 
 self-contained. S135 `n_load` carried `_decodeChunk` this way; `func_8009E4B0` (n_env/n_auxbus/
 n_drvrNew) shows the same on `_pullSubFrame`/`_getRate`/`_getVol`.
 
+**It is benign, not a problem to solve.** When the colliding names are the mirror file's OWN
+file-statics (the usual case), there is NO real collision: the statics stay `static` C, emit no global
+symbol, and the only action the flag implies is the no-op the verbatim track already takes (add
+nothing to `symbol_addrs`). The "collision" only bites if you try to GLOBALIZE one of these statics (the
+S135 `_decodeChunk` multiply-define). So read the flag as "these N names stay file-local," not as a
+blocker. S140 `n_env.c` banked the `_pullSubFrame`/`_getRate`/`_getVol` trio first-try with zero
+collision (all three left `func_<vram>` in the scaffold, kept their upstream `static` names in the C).
+
 ---
 
 ## vendored-header-incomplete (a reconstructed header is `(already-vendored)` yet missing a macro)

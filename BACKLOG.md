@@ -16,6 +16,29 @@ subordinate to the libultra goal. Target selection is `tools/pick_target.py` (sm
 the 8-point decompose gate fires on any seed ≥8. v2 classical track is active (since S11);
 mirror is the default, classical is first-class when the asm warrants it.
 
+**S140 — `n_env.c` BANKED (the LAST libnaudio asm subseg → `src/libnaudio/` tree 100%; 5 fns).**
+The S139 carry-over `[0x79E70]` (n_env.c, pts-13, the final libnaudio asm subseg). Verbatim n_audio_sc
+N_MICRO mirror of `n_alEnvmixerPull` + `n_alEnvmixerParam` + 3 file-statics, MATCH first build, 0 re-attempt
+→ **md5-candidate 198→199**; **libnaudio asm subsegs → 0 (the entire `src/libnaudio/` n_audio_sc N_MICRO
+mirror tree, 20/20 .c, is decompiled).** Both carves were clean 1-line ATTRIBUTE FLIPS (no splits): `.data`
+n_eqpower[128]=0x100 was `main_data_1a` exactly; `.rodata` jtbl_800D2120 + `_getRate` f64 consts=0x70 was the
+generic `[0xAD520,0xAD590)` block exactly; n_env.o sections matched to the byte (`.text` 0x9d0). The scary gate
+flags were FALSE: `calls-unplaced:__pow` + `jal-count-mismatch:20vs15` = pick_target counting the `#ifndef
+N_MICRO` branch (asm/79E70.s has zero `__pow`/`_frexpf`/`_ldexpf` under `-DN_MICRO=1`); `static-name-collision`×3
+benign (file-statics). `body-divergence-suspect@99.99` FALSE → **10 consecutive on n_audio_sc (S133-S140)**. ZERO
+symbol adds. Quality 0/0/0/0. seed 13 / banked 13pt (mirror, seed-only; verbatim-mirror single-file-pack
+exemption). Retro applied 3 of 3: #1 `build_config.py` `_strip_inactive_define_branches` wired into
+`pick_target.py` call_divergence/calls_unplaced/refs_unplaced (profile `-D` set strips `#ifndef N_MICRO` phantom
+calls, retires the `__pow`/jal-count class; suite 94 pass, no golden regen); #2 `docs/hazards.md#static-name-collision`
+benign-reframe; #3 this libmus hedge reset (below). **Cross-repo follow-up:** none (all names pre-curated).
+**Milestone: `src/libnaudio/` is 100% — a publish-to-master candidate (PO deferred; staying on dev).**
+**Next band — libmus `aud_*.c` (HEDGE RESET):** the next audio sub-band is libmus (`mus_thread_create`/aud_thread.c,
+`mus_heap_init`/aud_samples.c, `mus_dma_init`/aud_dma.c, `al_init`/player_fx.c, …). Do **NOT** carry the
+n_audio_sc 10/10-verbatim confidence into it: those rows carry heavier flags (`file-static` + `drop-static-mirror:Nbss`
++ `body-divergence-suspect` + nearly all `blk` needs-header on `libmus_config.h`/`libaudio.h`/etc.), so the band
+likely needs a **header-vendoring ENABLER sprint first** and may have genuinely divergent (game-customized) bodies.
+Reset the body-divergence hedge to FULL for libmus (treat like the S123 libnusys class, not the n_audio_sc class).
+
 **S139 — `n_auxbus.c` + `n_drvrNew.c` BANKED (DECOMPOSE the last libnaudio pack func_8009E4B0; 3 fns).**
 The S138-"Next" increment. The last libnaudio asm subseg `[0x798B0]` (func_8009E4B0, 8 fns, pts-13) was a
 c-combined 3-file pack; the 8-gate fired so it was DECOMPOSED at the 3 upstream-file boundaries
@@ -2192,40 +2215,19 @@ by `/sprint-plan`:
   checkpoints (the tooling-refactor discipline), since it adds FP/regression surface to a load-bearing
   detector. Spec is also inline at `docs/hazards.md#defines-data` (Tooling follow-up (S138)).
 
-- **Near-free retry (S139 decompose remainder) — `n_env.c` (`[0x79E70, asm]`, the LAST libnaudio asm
-  subseg), the heavy 3rd file of the func_8009E4B0 c-combined pack.** 5 fns: `n_alEnvmixerPull`
-  (0x8009EA70, leader, placed S139) + `n_alEnvmixerParam` (0x8009EFE8, placed) + file-static
-  `_pullSubFrame` / `_getRate` / `_getVol`. Completeness checklist (triage BODIES first per S123, but
-  the n_audio_sc trend is 9/9 verbatim):
-  **(1) flip:** `[0x79E70, asm]` → `[0x79E70, c, libnaudio/n_env]` (single file, no split; extent
-  [0x79E70, 0x7A840) = 0x9D0, the whole remaining subseg up to n_load.c).
-  **(2) placed-ref inventory:** `n_alEnvmixerPull`=0x8009EA70 (S139), `n_alEnvmixerParam`=0x8009EFE8,
-  `_n_timeToSamples`=0x800A1274 (S130) if referenced; `alHeapDBAlloc` (the `alHeapAlloc` macro), the
-  `n_a*` N_MICRO command macros — all placed.
-  **(3) NEW recover-externs/callees to add at gate (read vrams from `asm/798B0.s`):** `__pow`
-  (calls-unplaced:__pow, the libm pow), and check `_frexpf` / `_ldexpf` (the n_env externs) — confirm
-  each is placed or recover its vram from the asm jal/`%hi%lo`. The 3 statics
-  `_pullSubFrame`/`_getRate`/`_getVol` **STAY FILE-LOCAL — do NOT add to symbol_addrs** (the same
-  names are already placed at the NON-micro env.c vrams 0x800A56A4/0x800A5A7C/0x800A5CFC →
-  `static-name-collision`; a global add multiply-defines, the S135 `_decodeChunk` pattern). `func_8009F08C`/
-  `func_8009F2AC`/`func_8009F3EC` are these statics — leave un-named.
-  **(4) include adaptation:** n_env.c includes `"n_synthInternals.h"` (vendored) + `<os.h>` + `<assert.h>`
-  + the `#include "inc/n_env_add01.inc.c"` body-fragment (VENDORABLE from n_audio_sc `src/inc/`, the
-  S133 pattern — copy to `src/libnaudio/inc/`). Confirm `<assert.h>` resolves (ALFailIf/assert may be
-  non-_DEBUG no-ops). Beware `_getRate`/`_getVol` are each defined TWICE under `#ifdef` branches —
-  `-DN_MICRO=1` + the precision `#if` select which compiles; verify the active branch matches the asm.
-  **(5) upstream pin:** n_audio_sc `src/n_env.c`, KMC GCC 2.7.2 `-O3`, `-DN_MICRO=1` (LIBNAUDIO profile).
-  **(6) carves:** `.rodata` `[0x800D2120, 0x800D2188)` = rom `[0xAD520, 0xAD588)` — the `n_alEnvmixerPull`
-  em_motion-switch jtbl_800D2120 + the 4 `_getRate` math doubles (M_LN2 / __pow constants). The generic
-  `[0xAD520, rodata]` block already spans `[0xAD520, 0xAD590)` (0x70, next is n_resample @0xAD590), so
-  it is likely a 1-line attribute flip `[0xAD520, .rodata, libnaudio/n_env]` IF GCC emits jtbl + 4
-  doubles + pad = 0x70 (confirm the n_env.o `.rodata` size at execution; if it's 0x68 + an 8B pad split,
-  carve `[0xAD520, .rodata, libnaudio/n_env]` (0x68) + a generic pad remainder). **Check for `.data`:**
-  scan n_env.c for a file-scope EQPOWER/table (the `N_EQPOWER_LENGTH 128` `#define` hints at one) — if
-  present it needs a `.data`/`.rodata` carve too (read its asm `%hi/%lo`). **Pricing note:** the default
-  `pick_target` run mis-resolves the body-include to the non-sc `add/n_env_add01.c` (a FALSE `blk`, the
-  S135 `_deblk_audio_variant_misresolve` class); the `--lib libnaudio` coddog run resolves it correctly
-  to `inc/n_env_add01.inc.c(vendorable)` and prices it pts-13 — use the coddog source.
+- _(Near-free retry (S139 decompose remainder) — `n_env.c` (`[0x79E70, asm]`, the LAST libnaudio asm
+  subseg) **RESOLVED + banked S140** — the completeness checklist replayed verbatim-correct, 0 rework,
+  MATCH first build. Flipped `[0x79E70, asm]` → `[0x79E70, c, libnaudio/n_env]` (single file, 0x9D0);
+  verbatim n_audio_sc cp of `n_alEnvmixerPull` + `n_alEnvmixerParam` + 3 file-statics + newly-vendored
+  `inc/n_env_add01.inc.c`, on the existing `n_synthInternals.h`, NO new header. Both carves were clean
+  1-line attribute flips (NO splits): `.data` n_eqpower[128]=0x100 was `main_data_1a` exactly; `.rodata`
+  jtbl_800D2120 + `_getRate` f64 consts=0x70 was the generic `[0xAD520,0xAD590)` block exactly. The gate's
+  `calls-unplaced:__pow` + `jal-count-mismatch:20vs15` were FALSE (pick_target read the `#ifndef N_MICRO`
+  branch; under `-DN_MICRO=1` `_getRate`/`_getVol` are integer, asm has zero `__pow`/`_frexpf`/`_ldexpf`) —
+  retro #1 retires that class (`_strip_inactive_define_branches`). The 3 statics stayed file-local
+  (`static-name-collision` benign). `body-divergence-suspect@99.99` FALSE → 10 consecutive on n_audio_sc.
+  ZERO symbol adds. Quality 0/0/0/0, seed-only 13pt. **Milestone: `src/libnaudio/` 100% (libnaudio asm
+  subsegs → 0).** Cross-repo follow-up: none (all names pre-curated).)_
 
 - _(Near-free retry (S130 spike, blocker RESOLVED S136) — `n_alSynAllocFX` + `n_mainbus.c` (`[0x7C720, asm]`,
   c-combined:2file) **RESOLVED + banked S137** — the completeness checklist replayed verbatim-correct, 0 rework.
