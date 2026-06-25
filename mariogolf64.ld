@@ -391,11 +391,12 @@ SECTIONS
         build/asm/79370.o(.data);
         build/asm/79640.o(.data);
         build/src/libnaudio/n_auxbus.o(.data);
+        build/asm/data/main_data.data.o(.data);
         build/src/libnaudio/n_drvrNew.o(.data);
         build/asm/79E70.o(.data);
         build/src/libnaudio/n_load.o(.data);
         build/src/libnaudio/n_resample.o(.data);
-        build/asm/data/main_data.data.o(.data);
+        build/asm/data/main_data_1a.data.o(.data);
         build/src/libnaudio/n_reverb.o(.data);
         build/src/libnaudio/n_sl.o(.data);
         build/src/libnaudio/n_synaddplayer.o(.data);
@@ -675,9 +676,6 @@ SECTIONS
         build/asm/79370.o(.rodata);
         build/asm/79640.o(.rodata);
         build/src/libnaudio/n_auxbus.o(.rodata);
-        build/src/libnaudio/n_drvrNew.o(.rodata);
-        build/asm/79E70.o(.rodata);
-        build/src/libnaudio/n_load.o(.rodata);
         build/asm/data/main_rodata.rodata.o(.rodata);
         build/asm/data/A5CE0.rodata.o(.rodata);
         build/asm/data/A5D30.rodata.o(.rodata);
@@ -687,6 +685,9 @@ SECTIONS
         build/asm/data/ACAD0.rodata.o(.rodata);
         build/asm/data/ACD00.rodata.o(.rodata);
         build/asm/data/AD490.rodata.o(.rodata);
+        build/src/libnaudio/n_drvrNew.o(.rodata);
+        build/asm/79E70.o(.rodata);
+        build/src/libnaudio/n_load.o(.rodata);
         build/asm/data/AD520.rodata.o(.rodata);
         build/src/libnaudio/n_resample.o(.rodata);
         build/src/libnaudio/n_reverb.o(.rodata);
