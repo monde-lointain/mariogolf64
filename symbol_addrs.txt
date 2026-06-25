@@ -344,6 +344,12 @@ __MusIntMemGetHeapAddr = 0x8009E2D4; // type:func
 __MusIntMemSet = 0x8009E2E0; // type:func
 __MusIntMemMove = 0x8009E30C; // type:func
 audio_heap = 0x800E72B0; // size:0x10
+// libmus aud_samples.c, UPSTREAM names (S142, libmus v3.12 sdk40v312_naudio). __MusIntSamplesInit/
+// __MusIntSamplesCurrent override the WRONG ghidra mus_samples_init/mus_samples_current via rom:
+// qualifier (#wrong-ghidra-name-override). frame_samples{,_min,_max}/extra_samples are the dropped
+// file-statics (drop-static-mirror:4bss -> extern at placed main_bss vrams, recovered at exec).
+__MusIntSamplesInit = 0x8009E380; // rom:0x79780 type:func
+__MusIntSamplesCurrent = 0x8009E424; // rom:0x79824 type:func
 // libnaudio n_audio_sc n_syn* setter family, UPSTREAM names (S129 header-enabler sprint).
 n_alSynSetPan = 0x800A0A90; // type:func
 n_alSynSetPitch = 0x800A0B20; // type:func

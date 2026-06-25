@@ -120,7 +120,7 @@ SECTIONS
         build/asm/78D10.o(.text);
         build/asm/79370.o(.text);
         build/src/libmus/lib_memory.o(.text);
-        build/asm/79780.o(.text);
+        build/src/libmus/aud_samples.o(.text);
         build/src/libnaudio/n_auxbus.o(.text);
         build/src/libnaudio/n_drvrNew.o(.text);
         build/src/libnaudio/n_env.o(.text);
@@ -391,9 +391,9 @@ SECTIONS
         build/asm/78D10.o(.data);
         build/asm/79370.o(.data);
         build/src/libmus/lib_memory.o(.data);
-        build/asm/79780.o(.data);
-        build/src/libnaudio/n_auxbus.o(.data);
         build/asm/data/main_data.data.o(.data);
+        build/src/libmus/aud_samples.o(.data);
+        build/src/libnaudio/n_auxbus.o(.data);
         build/src/libnaudio/n_drvrNew.o(.data);
         build/src/libnaudio/n_env.o(.data);
         build/src/libnaudio/n_load.o(.data);
@@ -676,7 +676,7 @@ SECTIONS
         build/asm/78D10.o(.rodata);
         build/asm/79370.o(.rodata);
         build/src/libmus/lib_memory.o(.rodata);
-        build/asm/79780.o(.rodata);
+        build/src/libmus/aud_samples.o(.rodata);
         build/src/libnaudio/n_auxbus.o(.rodata);
         build/asm/data/main_rodata.rodata.o(.rodata);
         build/asm/data/A5CE0.rodata.o(.rodata);
@@ -963,7 +963,7 @@ SECTIONS
         build/asm/78D10.o(.bss);
         build/asm/79370.o(.bss);
         build/src/libmus/lib_memory.o(.bss);
-        build/asm/79780.o(.bss);
+        build/src/libmus/aud_samples.o(.bss);
         build/src/libnaudio/n_auxbus.o(.bss);
         build/src/libnaudio/n_drvrNew.o(.bss);
         build/src/libnaudio/n_env.o(.bss);
