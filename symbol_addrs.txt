@@ -391,3 +391,7 @@ _n_filterBuffer = 0x800A0690; // type:func
 // [0x7C720,asm]. n_synallocfx's lone calls-unplaced callee n_alFxNew (jal 0x8009e550, confirmed at
 // gate) is an n_auxbus/func_8009E4B0-pack member, stays asm until that pack is mirrored.
 n_alFxNew = 0x8009E550; // type:func
+// S139: decompose the func_8009E4B0 pack at the file boundary -> n_auxbus.c [0x798B0] +
+// n_drvrNew.c [0x79950] mirrors. n_alEnvmixerPull (func_8009EA70) is n_auxbus's lone callee
+// and the n_env.c leader; placed so the n_auxbus body resolves. n_env.c [0x79E70] stays asm (carry).
+n_alEnvmixerPull = 0x8009EA70; // type:func

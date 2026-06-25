@@ -120,7 +120,9 @@ SECTIONS
         build/asm/78D10.o(.text);
         build/asm/79370.o(.text);
         build/asm/79640.o(.text);
-        build/asm/798B0.o(.text);
+        build/src/libnaudio/n_auxbus.o(.text);
+        build/src/libnaudio/n_drvrNew.o(.text);
+        build/asm/79E70.o(.text);
         build/src/libnaudio/n_load.o(.text);
         build/src/libnaudio/n_resample.o(.text);
         build/src/libnaudio/n_reverb.o(.text);
@@ -388,7 +390,9 @@ SECTIONS
         build/asm/78D10.o(.data);
         build/asm/79370.o(.data);
         build/asm/79640.o(.data);
-        build/asm/798B0.o(.data);
+        build/src/libnaudio/n_auxbus.o(.data);
+        build/src/libnaudio/n_drvrNew.o(.data);
+        build/asm/79E70.o(.data);
         build/src/libnaudio/n_load.o(.data);
         build/src/libnaudio/n_resample.o(.data);
         build/asm/data/main_data.data.o(.data);
@@ -670,7 +674,9 @@ SECTIONS
         build/asm/78D10.o(.rodata);
         build/asm/79370.o(.rodata);
         build/asm/79640.o(.rodata);
-        build/asm/798B0.o(.rodata);
+        build/src/libnaudio/n_auxbus.o(.rodata);
+        build/src/libnaudio/n_drvrNew.o(.rodata);
+        build/asm/79E70.o(.rodata);
         build/src/libnaudio/n_load.o(.rodata);
         build/asm/data/main_rodata.rodata.o(.rodata);
         build/asm/data/A5CE0.rodata.o(.rodata);
@@ -955,7 +961,9 @@ SECTIONS
         build/asm/78D10.o(.bss);
         build/asm/79370.o(.bss);
         build/asm/79640.o(.bss);
-        build/asm/798B0.o(.bss);
+        build/src/libnaudio/n_auxbus.o(.bss);
+        build/src/libnaudio/n_drvrNew.o(.bss);
+        build/asm/79E70.o(.bss);
         build/src/libnaudio/n_load.o(.bss);
         build/src/libnaudio/n_resample.o(.bss);
         build/src/libnaudio/n_reverb.o(.bss);
