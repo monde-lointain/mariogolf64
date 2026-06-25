@@ -136,7 +136,7 @@ segments:
       - [0x748B0, asm]
       - [0x78330, asm]
       - [0x78D10, asm]
-      - [0x79370, asm]
+      - [0x79370, c, libmus/aud_thread]
       - [0x79640, c, libmus/lib_memory]
       - [0x79780, c, libmus/aud_samples]
       - [0x798B0, c, libnaudio/n_auxbus]

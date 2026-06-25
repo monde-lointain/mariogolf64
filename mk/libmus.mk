@@ -14,5 +14,5 @@
 # -DSUPPORT_NAUDIO selects the naudio path: lib_memory.c's `#ifndef SUPPORT_NAUDIO`
 # picks <n_libaudio_sc.h> + <n_libaudio_sn_sc.h> (the alSyn*->n_alSyn* alias macros)
 # over <libaudio.h>. (SUPPORT_FXCHANGE is set in libmus_config.h itself, not a -D.)
-LIBMUS_CFLAGS := -I src/libmus $(subst -O2,-O3,$(CFLAGS)) -DSUPPORT_NAUDIO
+LIBMUS_CFLAGS := -I src/libmus -I include/libmus/PR $(subst -O2,-O3,$(CFLAGS)) -I include/libultra/PR -DSUPPORT_NAUDIO
 $(BUILD_DIR)/$(SRC_DIR)/libmus/%.o: C_PROFILE_CFLAGS = $(LIBMUS_CFLAGS)

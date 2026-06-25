@@ -350,6 +350,19 @@ audio_heap = 0x800E72B0; // size:0x10
 // file-statics (drop-static-mirror:4bss -> extern at placed main_bss vrams, recovered at exec).
 __MusIntSamplesInit = 0x8009E380; // rom:0x79780 type:func
 __MusIntSamplesCurrent = 0x8009E424; // rom:0x79824 type:func
+// libmus aud_thread.c, UPSTREAM names (S143, libmus v3.14 n64sdkmod = game rev; bodies match 3.14,
+// EXTRA_SAMPLES_N=20). __MusIntAudManInit/__MusIntThreadProcess override the WRONG ghidra
+// mus_thread_create/mus_audio_thread via rom: (#wrong-ghidra-name-override). __MusIntThreadProcess
+// is CARRIED as INCLUDE_ASM (MG64-custom pause/mute block not in the 3.14 source). __MusIntDmaInit
+// (aud_dma.c, still asm) + CustomInit (player_fx.c bundled n_alInit, ghidra mis-named al_init; the
+// n_libaudio_sn_sc.h alInit->n_alInit then player_fx.h n_alInit->CustomInit chain) are recover-extern
+// callees. g_mus_audio_thread/__libmus_alglobals are the dropped statics/global (drop-static/drop-def).
+__MusIntAudManInit = 0x8009DF70; // rom:0x79370 type:func
+__MusIntThreadProcess = 0x8009E0A8; // rom:0x794A8 type:func
+__MusIntDmaInit = 0x8009D910; // rom:0x78D10 type:func
+CustomInit = 0x8009CF30; // rom:0x78330 type:func
+g_mus_audio_thread = 0x800E70F0; // size:0x1B0
+__libmus_alglobals = 0x801B56A0; // size:0x50
 // libnaudio n_audio_sc n_syn* setter family, UPSTREAM names (S129 header-enabler sprint).
 n_alSynSetPan = 0x800A0A90; // type:func
 n_alSynSetPitch = 0x800A0B20; // type:func
