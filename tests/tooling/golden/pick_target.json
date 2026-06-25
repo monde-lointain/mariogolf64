@@ -14,6 +14,19 @@
   },
   {
     "band": "-",
+    "func": "mus_samples_init",
+    "hazards": "pack:2fn[mus_samples_init=?,mus_samples_current=?],one-tu",
+    "kind": "asm-flip",
+    "nfns": 2,
+    "pts": 13,
+    "rom": "0x79780",
+    "score": -304,
+    "size": 304,
+    "upstream": "none",
+    "vram": "0x8009E380"
+  },
+  {
+    "band": "-",
     "func": "func_80029250",
     "hazards": "pack:2fn[func_80029250=?,func_800292FC=?],one-tu,caller-evict:func_80029250@src/libnusys/nugfxinit.c",
     "kind": "asm-flip",
@@ -24,19 +37,6 @@
     "size": 496,
     "upstream": "none",
     "vram": "0x80029250"
-  },
-  {
-    "band": "-",
-    "func": "mus_heap_init",
-    "hazards": "pack:8fn[mus_heap_init=?,__MusIntMemMalloc=lib_memory,func_8009E2BC=?,func_8009E2D4=?,func_8009E2E0=?,func_8009E30C=?,mus_samples_init=?,mus_samples_current=?],upstream-fncount-mismatch:8vs6",
-    "kind": "asm-flip",
-    "nfns": 8,
-    "pts": 13,
-    "rom": "0x79640",
-    "score": -624,
-    "size": 624,
-    "upstream": "none",
-    "vram": "0x8009E240"
   },
   {
     "band": "-",

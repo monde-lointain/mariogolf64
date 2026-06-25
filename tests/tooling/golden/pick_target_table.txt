@@ -1,7 +1,7 @@
 func                               rom       vram  size nfn pts kind     upstream  band hazards
 func_ovl10_801F4A40           0x1508E0 0x801F4A40   176   2  13 asm-flip none      -    pack:2fn[func_ovl10_801F4A40=?,func_ovl10_801F4AD8=?],one-tu
+mus_samples_init               0x79780 0x8009E380   304   2  13 asm-flip none      -    pack:2fn[mus_samples_init=?,mus_samples_current=?],one-tu
 func_80029250                   0x4650 0x80029250   496   2  13 asm-flip none      -    pack:2fn[func_80029250=?,func_800292FC=?],one-tu,caller-evict:func_80029250@src/libnusys/nugfxinit.c
-mus_heap_init                  0x79640 0x8009E240   624   8  13 asm-flip none      -    pack:8fn[mus_heap_init=?,__MusIntMemMalloc=lib_memory,func_8009E2BC=?,func_8009E2D4=?,func_8009E2E0=?,func_8009E30C=?,mus_samples_init=?,mus_samples_current=?],upstream-fncount-mismatch:8vs6
 vector_magnitude_safe          0x45400 0x8006A000   704   8  13 asm-flip none      -    pack:8fn[vector_magnitude_safe=?,calculate_hypotenuse_safe=?,func_8006A174=?,update_rng_seed=?,hypotf_2d=?,calc_vec3_magnitude=?,func_8006A1EC=?,func_8006A274=?]
 mus_thread_create              0x79370 0x8009DF70   720   2  13 asm-flip none      -    pack:2fn[mus_thread_create=?,mus_audio_thread=?],one-tu
 func_800500E0                  0x2B4E0 0x800500E0   800   3  13 asm-flip none      -    pack:3fn[func_800500E0=?,func_80050274=?,func_8005029C=?],one-tu

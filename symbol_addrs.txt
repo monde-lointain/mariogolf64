@@ -334,7 +334,16 @@ nuAuMesgQ = 0x80132198; // size:0x18
 MusInitialize = 0x8009973C; // rom:0x74B3C type:func
 MusStartSong = 0x800999F0; // rom:0x74DF0 type:func
 MusSetScheduler = 0x8009A53C; // type:func
+// libmus lib_memory.c, UPSTREAM names (S141 header-enabler sprint, libmus v3.12 sdk40v312_naudio).
+// __MusIntMemInit overrides the WRONG ghidra mus_heap_init via rom: qualifier (#wrong-ghidra-name-override);
+// audio_heap is the dropped file-static (drop-static-mirror:1bss -> extern at placed main_bss vram).
+__MusIntMemInit = 0x8009E240; // rom:0x79640 type:func
 __MusIntMemMalloc = 0x8009E28C; // type:func
+__MusIntMemRemaining = 0x8009E2BC; // type:func
+__MusIntMemGetHeapAddr = 0x8009E2D4; // type:func
+__MusIntMemSet = 0x8009E2E0; // type:func
+__MusIntMemMove = 0x8009E30C; // type:func
+audio_heap = 0x800E72B0; // size:0x10
 // libnaudio n_audio_sc n_syn* setter family, UPSTREAM names (S129 header-enabler sprint).
 n_alSynSetPan = 0x800A0A90; // type:func
 n_alSynSetPitch = 0x800A0B20; // type:func

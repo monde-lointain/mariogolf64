@@ -329,6 +329,18 @@ LIB_EXTRA_INCLUDE_DIRS = {
         os.path.join(ROOT, "src/libnaudio"),
         os.path.join(ROOT, "include/libultra/PR"),
     ],
+    # LIBMUS_CFLAGS (mk/libmus.mk) prepends `-I src/libmus` (the libmus source-private internal
+    # headers libmus_config.h/lib_memory.h/aud_*.h); the public libmus.h and bare
+    # <libaudio.h>/<n_libaudio_*.h> resolve through include/libmus + include/libultra/PR + the base
+    # include/libnaudio set. Without these a libmus mirror false-flags needs-header → blk (S141:
+    # lib_memory.c was hidden this way until libmus_config.h/lib_memory.h were vendored). Each libmus
+    # file vendors its own aud_*.h as it is banked, so a row still un-vendored stays blk on its own
+    # headers (expected — the band opens incrementally, like libnaudio's n_syn* did).
+    "libmus": [
+        os.path.join(ROOT, "src/libmus"),
+        os.path.join(ROOT, "include/libmus"),
+        os.path.join(ROOT, "include/libultra/PR"),
+    ],
 }
 # Upstream include trees a missing companion header can be *copied from* (the execution-middle
 # mirror, e.g. assert.h). A header absent here and absent from the project tree is a system
@@ -1155,6 +1167,7 @@ def _parse_makefile_defines():
         "libnusys": set(),
         "libultra": set(),
         "libnaudio": set(),
+        "libmus": set(),
     }
     for path in build_files:
         try:
@@ -1166,6 +1179,7 @@ def _parse_makefile_defines():
                         ("LIBNUSYS_CFLAGS", "libnusys"),
                         ("LIBULTRA_CFLAGS", "libultra"),
                         ("LIBNAUDIO_CFLAGS", "libnaudio"),
+                        ("LIBMUS_CFLAGS", "libmus"),
                     ]:
                         if re.match(rf"^\s*{var}\s*[:+]?=", line):
                             raw[key].update(
@@ -1173,18 +1187,19 @@ def _parse_makefile_defines():
                             )
         except OSError:
             continue
-    for k in ("libkmc", "libnusys", "libultra", "libnaudio"):
+    for k in ("libkmc", "libnusys", "libultra", "libnaudio", "libmus"):
         raw[k] |= raw["main"]
     return {k: frozenset(v) for k, v in raw.items()}
 
 
 def _active_defines_for_lib(lib):
-    """Effective -D defines for an upstream library key (libultra, libkmc, libnusys, libnaudio)."""
+    """Effective -D defines for an upstream library key (libultra, libkmc, libnusys, libnaudio, libmus)."""
     key = {
         "libkmc": "libkmc",
         "libnusys": "libnusys",
         "libultra": "libultra",
         "libnaudio": "libnaudio",
+        "libmus": "libmus",
     }.get(lib or "", "main")
     return _parse_makefile_defines()[key]
 
