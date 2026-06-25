@@ -25,6 +25,17 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 138 — n_reverb.c (n_alFxPull single-file-pack, n_audio_sc N_MICRO mirror) — 2026-06-24
+- Increment: 1 file banked, 6 fns matched (`n_alFxPull` + `n_alFxParamHdl` + `_n_loadOutputBuffer` + `_n_loadBuffer` + `_n_saveBuffer` + `_n_filterBuffer`). md5-candidate **195→196** (+1); asm subsegs 92→**91** (1 flip, at gate). ROM SHA-1 == baserom.
+- Quality: 0/0/0/0 this sprint (stuck-far/permuter/carried/re-opened). All 6 fns banked atomically; 1 diagnosis pass (the `.data` carve), no spike, no body divergence.
+- Seed: committed 13pt; banked 13pt; regime mirror (13/8-gate FIRED → verbatim-mirror single-file-pack exemption applied).
+- What helped: the S137 planning note pre-scoped n_reverb as the cleaner of the 2 pts-13 candidates (single-file-pack, all callees placed). At the plan gate, reading `asm/7B140.s` proved `L_INC` is a dead extern (not in asm) and `init_lpfilter`→`_init_lpfilter` is already placed — both pick_target false flags retired before execution. The S134/S136 rodata-literal carve pattern (generic-line flip) replayed exactly for the `n_alFxParamHdl` jtbl + 3 f64 literals. The 4 `inc/*.inc.c` body-include vendoring + N_MICRO pin (S133) were already established infrastructure.
+- Friction: the `defines-data:val,blob` flag named the unused statics but NOT their `.data` address, so build #1 SHA-missed 16 B LARGER (KMC -O3 emits unused function-local statics; they carry no asm `%hi/%lo`, so the recover-from-asm path can't find them). Cost a build + cmp + baserom value-search to localize rom 0xA31A0 (and disambiguate vs the libultra reverb block at 0xA356C). The DoR hedged "likely emits" rather than "certainly emits + needs a value-search localization."
+- Applied (3 of 3): #1 `docs/hazards.md#defines-data` — unused-function-local-static sub-case (KMC -O3 emits them; localize-by-VALUE not asm-ref; value-FP disambiguation vs the libultra twin). #3 `pick_target.py` `_append_coddog_aux` — body-divergence-suspect suppression extended to n_audio_sc/libnaudio single-file-packs (single coddog + single-file-pack + libnaudio src; libnusys EXCLUDED to keep the S121/S127 real-game-mod hedge); unit-verified narrow (no current candidate affected, n_reverb now banked); goldens regen'd for bank drift, suite 92 pass. #2 DEFERRED with spec to a golden-gated tooling branch (BACKLOG) — a `data-static:<addr>` resolver for `defines-data` needs a link-cluster/positional anchor to beat the multi-hit value-FP, a feature with regression surface, not a review-gate quick edit.
+- Carry-over: none (sprint fully banked). 5 names → `sync_decomp_names.py --import-from-decomp`. 1 tooling task (#2 data-static resolver) parked in BACKLOG.
+
+---
+
 ## Sprint 137 — n_synallocfx.c + n_mainbus.c (n_audio_sc 2-file N_MICRO mirror, retires S130 spike) — 2026-06-24
 - Increment: 2 files banked, 2 fns matched (`n_alSynAllocFX` + `n_alMainBusPull`), split from the c-combined `[0x7C720,asm]`. md5-candidate **193→195** (+2); asm subsegs 93→**91** (2 flips). ROM SHA-1 == baserom.
 - Quality: 0/0/0/0 this sprint (stuck-far/permuter/carried/re-opened). Both fns Match on the FIRST build, seed-only, NO diagnosis pass, NO rodata/data carve.

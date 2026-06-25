@@ -3230,9 +3230,24 @@ def _append_coddog_aux(hazards, cod_srcs):
     # an UNexplained mismatch (a real corroborator). S136 n_synthesizer: 3vs8(macro-artifact?) + the
     # lone n_synthesizer.c coddog -> suppressed; banked atomically as a clean mirror + rodata carve.
     cod_files = {h.coddog_file() for h in hazards if h.is_coddog_mirror()}
-    suppress_body_div = len(cod_files) == 1 and any(
-        h.is_jal_artifact() for h in hazards
-    )
+    single_cod = len(cod_files) == 1
+    suppress_body_div = single_cod and any(h.is_jal_artifact() for h in hazards)
+    # Also suppress on an n_audio_sc N_MICRO single-file-pack: a single coddog hit on a libnaudio /
+    # n_audio_sc source whose row is a single-file-pack. The sub-100 (e.g. @99.99) on these is a
+    # STRUCTURAL artifact of N_MICRO macro / inc-include expansion diverging from the non-micro
+    # upstream coddog fingerprint, NOT a game-modified body — it fired FALSE on 6 consecutive
+    # n_audio_sc mirrors (S133-S138, all banked atomically as clean verbatim mirrors + carves). The
+    # libnaudio restriction is load-bearing: a libnusys single-file-pack @99.99 CAN be a real
+    # game-modified body (S121/S127 contRmbControl FORCESTOP), so it keeps the hedge. The build SHA-1
+    # oracle still catches any real divergence; this only drops a 6x-false up-front warning. See
+    # docs/hazards.md#coddog-cross-ref.
+    if not suppress_body_div and single_cod:
+        naudio_pack = (
+            bool(cod_srcs)
+            and all(("n_audio_sc" in s or "libnaudio" in s) for s in cod_srcs)
+            and any(h.kind == HAZARD_SINGLE_FILE_PACK for h in hazards)
+        )
+        suppress_body_div = naudio_pack
     if not suppress_body_div:
         for cf in sorted(
             {

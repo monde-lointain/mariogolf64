@@ -803,6 +803,30 @@ data segment. Always size the carve from `mips-linux-gnu-objdump -h build/.../<f
 sum of `symbol_addrs` sizes; the ROM zero-padding at `carve_end..section_end` is the mirror's, owned by the
 carve (it matches the compiler's `.data` tail-padding bytes).
 
+**Unused function-local statics still emit `.data`; localize by VALUE, not asm ref (S138).** KMC GCC
+2.7.2 `-O3` does NOT dead-strip an unused function-local `static` — `static f32 val=0.0,
+lastval=-10.0; static f32 blob=0;` that NO code path reads still emits its `.data` (here 0x10:
+`0x00000000 0xC1200000 0x00000000` + tail pad). So `defines-data` on an n_audio_sc / verbatim mirror
+is a CERTAIN `.data` carve enabler, never a "maybe pure-cp": pre-scope the carve. The localization
+twist: an unused static carries NO `%hi/%lo(D_<vram>)` in the subseg asm (nothing references it), so
+the recover-vram-from-asm path that finds rodata-literals does NOT find it. Localize by VALUE instead
+— compile the verbatim body, read the `.o` `.data` size (`objdump -h`), then search the baserom
+`.data` region for the static block's initializer byte pattern; a clean SHA-miss that is exactly the
+`.o` `.data` size LARGER than baserom is this hazard. `n_reverb.c`: build #1 was 16 B larger (the 0x10
+`.data`, nothing carved), located at rom 0xA31A0 via the `00000000 C1200000 00000000` pattern, carved
+(3-way `main_data | n_reverb .data | main_data_1b` split), then byte-exact. Beware value-FP: the same
+block appears at the *libultra* `reverb.c` `.data` (rom 0xA356C, its own val/lastval/blob), so
+disambiguate by the n_audio_sc `.data` link-cluster (it sits just below the libnusys `.data` carves,
+before 0xA31D0), not value alone.
+
+**Tooling follow-up (S138).** `pick_target.py` reports `defines-data:<names>` but not the resolved
+`.data` rom address (`data-static:<addr>`), so the gate spends a build + cmp + value-search to
+localize. A detector could resolve it by parsing the static's initializer to bytes and searching the
+baserom `.data`, BUT must disambiguate the multi-hit value-FP (n_reverb's block matched 2 sites) via
+a link-cluster / positional anchor before emitting an address — a value-only unique-hit is not safe.
+Deferred to a golden-gated tooling branch (see `BACKLOG.md ## Carry-overs`; a feature with FP /
+regression surface, not a quick edit).
+
 **Procedure:** Classical loop, drop the definition; the linker resolves to the splat-side global.
 
 **Verbatim-body fast path (S42).** When the *only* edit from upstream is dropping the file-scope

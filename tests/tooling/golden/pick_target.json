@@ -234,19 +234,6 @@
     "vram": "0x80050400"
   },
   {
-    "band": "cold",
-    "func": "n_alFxPull",
-    "hazards": "single-file-pack:6fn[n_alFxPull=n_reverb,func_800A0050=?,func_800A0240=?,func_800A0450=?,func_800A0578=?,func_800A0690=?],defines-data:val,blob,refs-unplaced:L_INC,rodata-jtbl:0x800D21A0,needs-header:add/n_reverb_add04.c,add/n_reverb_add01.c,add/n_reverb_add02.c,add/n_reverb_add03.c,rodata-literal:0x800D21C0,0x800D21C8,0x800D21D0;extent-end=0x800D21D8;carve-end=0x800D2200",
-    "kind": "asm-flip",
-    "nfns": 6,
-    "pts": "blk",
-    "rom": "0x7B140",
-    "score": -2344,
-    "size": 2544,
-    "upstream": "libnaudio",
-    "vram": "0x8009FD40"
-  },
-  {
     "band": "-",
     "func": "func_800772B0",
     "hazards": "pack:6fn[func_800772B0=?,func_800772C4=?,func_8007775C=?,func_800779A8=?,func_80077AD4=?,func_80077BD8=?],one-tu",
@@ -366,7 +353,7 @@
   {
     "band": "cold",
     "func": "n_alAuxBusPull",
-    "hazards": "pack:8fn[n_alAuxBusPull=n_auxbus,func_8009E550=?,alN_PVoiceNew=n_drvrNew,func_8009EA70=?,n_alEnvmixerParam=?,func_8009F08C=?,func_8009F2AC=?,func_8009F3EC=?],c-combined:2file[n_auxbus|n_drvrNew],unattrib-leaf:0x8009E550,calls-unplaced:n_alEnvmixerPull@0x8009EA70,rodata-jtbl:0x800D20F0,0x800D2120;owner-per-member,rodata-literal:0x800D2108,0x800D2110,0x800D2168,0x800D2170,0x800D2178,0x800D2180;extent-end=0x800D2188;carve-end=0x800D21A0;owner-per-member",
+    "hazards": "pack:8fn[n_alAuxBusPull=n_auxbus,n_alFxNew=n_drvrNew,alN_PVoiceNew=n_drvrNew,func_8009EA70=?,n_alEnvmixerParam=?,func_8009F08C=?,func_8009F2AC=?,func_8009F3EC=?],c-combined:2file[n_auxbus|n_drvrNew],calls-unplaced:n_alEnvmixerPull@0x8009EA70,rodata-jtbl:0x800D20F0,0x800D2120;owner-per-member,rodata-literal:0x800D2108,0x800D2110,0x800D2168,0x800D2170,0x800D2178,0x800D2180;extent-end=0x800D2188;carve-end=0x800D2200;owner-per-member",
     "kind": "asm-flip",
     "nfns": 8,
     "pts": 13,
@@ -648,5 +635,18 @@
     "size": 13840,
     "upstream": "none",
     "vram": "0x80241800"
+  },
+  {
+    "band": "-",
+    "func": "get_tile_attribute",
+    "hazards": "pack:44fn[get_tile_attribute=?,func_8004018C=?,ci8_to_rgba5551=?,func_800402F4=?,load_club_offset_pair=?,get_ground_attribute=?,func_800407D8=?,get_dominant_terrain_attribute=?,query_terrain_at_position=?,func_80040E3C=?,get_terrain_type=?,blend_terrain_color=?,func_80041058=?,func_8004107C=?,func_80041160=?,get_direct_grid_vertex=?,func_800413A0=?,func_800413C0=?,func_80041464=?,func_80041490=?,func_800414C0=?,get_terrain_vertex_pointer=?,func_800415C4=?,func_80041878=?,func_80041AA8=?,func_80041B98=?,func_80041D44=?,func_80041E8C=?,func_80041EC0=?,func_80042228=?,func_80042318=?,func_800425C8=?,func_80042720=?,func_80042738=?,func_800427E8=?,func_80042DF4=?,func_80042E40=?,detect_terrain_collision=?,func_800432E4=?,func_8004333C=?,compute_triangle_plane=?,get_interpolated_terrain_height=?,get_interpolated_terrain_height_wrapper=?,get_lowest_height_at_position=?]",
+    "kind": "asm-flip",
+    "nfns": 44,
+    "pts": 13,
+    "rom": "0x1B4A0",
+    "score": -14928,
+    "size": 14928,
+    "upstream": "none",
+    "vram": "0x800400A0"
   }
 ]

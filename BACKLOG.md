@@ -16,6 +16,27 @@ subordinate to the libultra goal. Target selection is `tools/pick_target.py` (sm
 the 8-point decompose gate fires on any seed ≥8. v2 classical track is active (since S11);
 mirror is the default, classical is first-class when the asm warrants it.
 
+**S138 — `n_reverb.c` BANKED (n_alFxPull single-file-pack, n_audio_sc N_MICRO mirror; 6 fns).**
+The S137-"Next" #1 increment, all 6 fns Match → **md5-candidate 195→196**; asm subsegs 92→91 (1 flip, at gate).
+Verbatim cp of n_audio_sc `n_reverb.c` (`n_alFxPull` + `n_alFxParamHdl` + 4 static helpers `_n_loadOutputBuffer`/
+`_n_loadBuffer`/`_n_saveBuffer`/`_n_filterBuffer`) + 4 verbatim `inc/n_reverb_add0{1..4}.inc.c` body-includes, on
+the existing vendored `n_synthInternals.h` (NO new header). **Two carves:** (a) the expected rodata-literal — the
+`n_alFxParamHdl` jtbl @0x800D21A0 + 3 f64 literals — a 1-line flip of generic `[0xAD5A0, rodata]` → `[0xAD5A0,
+.rodata, libnaudio/n_reverb]` (0x40); (b) a **NEW `.data` carve** the gate priced only by NAME (`defines-data:val,
+blob`): KMC -O3 emits the UNUSED function-local statics (`val/lastval/blob`, no asm `%hi/%lo`) → build #1 was 16 B
+larger; localized by VALUE to rom 0xA31A0 (vs the libultra reverb twin @0xA356C), 3-way split `main_data | n_reverb
+.data | main_data_1b`, then byte-exact. `body-divergence-suspect@99.99` (6th consecutive FALSE on n_audio_sc),
+`refs-unplaced:L_INC` (dead extern), `calls-unplaced:init_lpfilter` (`_init_lpfilter` placed) all false. Gate
+enablers: flip `[0x7B140]` + 5 symbol_addrs (n_alFxParamHdl + 4 `_n_`-helpers, disjoint from libultra reverb's
+@0x800A67xx); n_alFxPull already placed S136. Quality 0/0/0/0 (1 diagnosis pass = the `.data` carve). seed 13 /
+banked 13pt (mirror, seed-only, 13-gate fired → single-file-pack exemption). Retro applied 3 of 3: #1
+`docs/hazards.md#defines-data` unused-static sub-case; #3 `pick_target.py` body-divergence suppression for
+n_audio_sc single-file-packs (libnusys excluded); #2 DEFERRED with spec to a golden-gated tooling branch (see
+Carry-overs). Goldens regen'd (bank drift; suite 92 pass). **Cross-repo follow-up:** 5 names →
+`sync_decomp_names.py --import-from-decomp`. **Next:** libnaudio band down to 1 — `func_8009E4B0`/`n_alAuxBusPull`
+(n_auxbus/n_drvrNew/n_env multi-coddog c-combined 2-file pack, static-name-collision×3; pts-13, 8-gate FIRES,
+decompose at the file boundary; body-divergence-suspect KEPT — multi-file, not exempt). No carry-overs.
+
 **S137 — `n_synallocfx.c` + `n_mainbus.c` BANKED (n_audio_sc 2-file N_MICRO mirror; retires S130 spike).**
 The S136-"Next" #1 increment, both fns Match FIRST build → **md5-candidate 193→195**; asm subsegs 93→91. Split the
 c-combined `[0x7C720, asm]` at vram 0x800A1370 → `n_synallocfx.c` (`n_alSynAllocFX`, 0x50: `n_alFxNew(&n_syn->
@@ -2137,6 +2158,20 @@ by `/sprint-plan`:
   vendored upstream version can diverge from the game's rev on a single immediate (S122 nusys-2.07
   `NU_CONT_THREAD_ID=6` vs MG64's 5), and that surfaces only at first build unless reconciled here.
   A near-free retry missing any of these is a half-scoped spike — finish the scope before deferring.
+
+- **Tooling follow-up (S138, PO-selected #2; deferred to a golden-gated tooling branch, NOT a
+  review-gate edit).** Make `pick_target.py`'s `defines-data` detector resolve + emit the static's
+  `.data` rom address (`data-static:<addr>`), so the gate plans the `.data` carve instead of spending a
+  build + cmp + value-search to localize it (S138 n_reverb cost exactly that). Algorithm: parse each
+  `defines-data` static's initializer to its `.data` byte block (the contiguous `val/lastval/blob`
+  pattern, here `00000000 C1200000 00000000`), search the baserom `.data` region for it, emit
+  `data-static:<addr>` on a hit. **Hard requirement (why it's a branch, not a quick edit):** the
+  value-search is multi-hit (n_reverb's block matched BOTH the n_audio_sc reverb @0xA31A0 AND the
+  libultra `reverb.c` twin @0xA356C), so a value-only unique-hit is unsafe — it needs a link-cluster /
+  positional anchor (the n_audio_sc `.data` cluster sits just below the libnusys `.data` carves) to
+  disambiguate before emitting an address. Run it off-cadence on a branch, golden-gated + reassess
+  checkpoints (the tooling-refactor discipline), since it adds FP/regression surface to a load-bearing
+  detector. Spec is also inline at `docs/hazards.md#defines-data` (Tooling follow-up (S138)).
 
 - _(Near-free retry (S130 spike, blocker RESOLVED S136) — `n_alSynAllocFX` + `n_mainbus.c` (`[0x7C720, asm]`,
   c-combined:2file) **RESOLVED + banked S137** — the completeness checklist replayed verbatim-correct, 0 rework.
