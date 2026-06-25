@@ -1,6 +1,8 @@
 # libmus (the "Software Creations" Music Tools library, libn_mus / SUPPORT_NAUDIO
 # variant): KMC GCC -O3 per the audio coddog pin (tools/coddog/audio_pins.tsv:
-# libmus = sdk40v312_naudio, kmc, O3). -O3 is bumped from the base -O2 the same
+# libmus = n64sdkmod_naudio, kmc, O3 -- the game rev is libmus 3.14 = n64sdkmod, NOT
+# the DiskLS 3.11 sdk40v312 rows (S143: identical leaf bodies but aud_thread
+# EXTRA_SAMPLES_N 20 vs 15; see tools/audio_ref_versions.tsv). -O3 is bumped from the base -O2 the same
 # way libnaudio/libultra do it. The upstream SGI Makefile.sgi builds libn_mus with
 # DEFINES='-DSUPPORT_NAUDIO' (the n_audio library/microcode variant MG64 links);
 # audio_pin.py pins the empirical KMC -O3 over the SGI Makefile's -O2.

@@ -1932,6 +1932,42 @@ collision (all three left `func_<vram>` in the scaffold, kept their upstream `st
 
 ---
 
+## libmus-bundled-n_audio duplicate (a SUPPORT_NAUDIO libmus archive links its OWN n_audio synth copy)
+
+**Pattern (not yet auto-flagged; a `game-embedded:libmus` / `coddog-bundled-dup` pricing tell is a
+deferred follow-up).** The `-DSUPPORT_NAUDIO` libmus archive STATICALLY LINKS its own copy of the
+n_audio synth driver (the `alInit`/`alSyn*` family + the FX-change `Custom*` replacements from
+`player_fx.c`), a DUPLICATE of the standalone n_audio_sc copies that already live in the libnaudio
+region (`n_al*`). In MG64 the bundled copy sits in the `[0x78330]` `al_init`/player_fx candidate
+(`coddog-fncount-mismatch:6vs13` = player_fx's 6 fns + ~7 bundled-synth fns). The two copies are the
+same source compiled into two archives; the original linker resolved each archive's calls to its OWN
+copy. Our flat decomp namespace cannot, so the copies need DISTINCT decomp names.
+
+**The call resolves through TWO macro layers to the BUNDLED copy, not the standalone one.** A libmus
+mirror's `alInit(...)` expands `alInit` -> (`n_libaudio_sn_sc.h`) `n_alInit` -> (`player_fx.h`, under
+`SUPPORT_NAUDIO`+`SUPPORT_FXCHANGE`) `CustomInit`. So the verbatim source call lands on `CustomInit`
+= the bundled FX-change synth init (S143: `0x8009CF30`, which ghidra MIS-NAMED `al_init`). The
+standalone n_audio_sc `n_alInit` (S143: `0x800A0730`) is DEAD (zero xrefs) -- nothing reaches it
+because libmus, not the standalone n_audio manager, drives the synth.
+
+**Why it matters / procedure.** Do NOT read the `alInit`->`n_alInit` alias as "resolve to the placed
+`n_al*` standalone symbol" (wrong address -> SHA-miss) and do NOT reach for a `#undef`/`#define`
+redirect hack: the verbatim macro chain ALREADY points at the bundled copy. Before concluding a
+duplicate-symbol blocker, READ `player_fx.h` for the `#define n_alInit CustomInit` (and the
+`alSyn*`->`Custom*` replacements) -- that line is the whole resolution. Then add `CustomInit = <bundled
+vram>; // type:func` (recover-extern; overrides the wrong ghidra `al_init` via the `rom:` qualifier,
+`#wrong-ghidra-name-override`) and the verbatim mirror compiles + matches. When the `[0x78330]`
+bundled-synth subseg itself banks, name its fns by their libmus/player_fx identities (`CustomInit`,
+`CustomSynNew`, `CustomAllocFX`, ...), distinct from the standalone `n_al*` -- per-region distinct
+names, bank-stock-carry-custom. This is the audio-band specialization of the game-embedded duplicate
+theme (the libmus/nualstl fns compiled INTO game audio TUs, no object boundary).
+
+**Provenance:** S143 `aud_thread.c` `__MusIntAudManInit`: the lone `alInit(&__libmus_alglobals,
+&syn_config)` call resolved verbatim to `CustomInit@0x8009CF30` via the two-layer chain; banked C
+first build. Standalone `n_alInit@0x800A0730` confirmed dead (Ghidra `get_xrefs_to` = none).
+
+---
+
 ## vendored-header-incomplete (a reconstructed header is `(already-vendored)` yet missing a macro)
 
 **Rule:** The project's vendored internal headers (`include/libultra/internal/controller.h`,

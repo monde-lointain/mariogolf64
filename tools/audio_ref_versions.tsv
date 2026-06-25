@@ -15,8 +15,13 @@
 libmus	n64sdkmod	~/development/repos/n64sdkmod/packages/libmus/usr/src/PR/libsrc/libmus/src	none	none
 libmus	n64sdkmod_naudio	~/development/repos/n64sdkmod/packages/libmus/usr/src/PR/libsrc/libmus/src	SUPPORT_NAUDIO	none
 libmus	sdk30v200	~/n64sdk/3.0/SGI/usr/local/n64kit/nusys/src/nusys-1.10/mus	none	none
-libmus	sdk40v312	~/n64sdk/4.0/N64SoundTools/DiskLS/lib-src	none	none
-libmus	sdk40v312_naudio	~/n64sdk/4.0/N64SoundTools/DiskLS/lib-src	SUPPORT_NAUDIO	none
+# S143: the GAME libmus rev is 3.14 (n64sdkmod), pin libmus = n64sdkmod_naudio (above), NOT the
+# DiskLS sdk40v312 (3.11) rows below. The two are body-identical for the leaf TUs (lib_memory,
+# aud_samples) so the auto-rank near-tied and historically misselected sdk40v312_naudio, but they
+# DIVERGE on aud_thread (3.14 EXTRA_SAMPLES_N=20 matches the asm `li a3,0x14`; 3.11=15). DiskLS rows
+# disabled so the sweep cannot re-pin the wrong 3.11 rev; re-enable only to compare an older rev.
+#libmus	sdk40v312	~/n64sdk/4.0/N64SoundTools/DiskLS/lib-src	none	none
+#libmus	sdk40v312_naudio	~/n64sdk/4.0/N64SoundTools/DiskLS/lib-src	SUPPORT_NAUDIO	none
 libnaudio	n64sdkmod_sc	~/development/repos/n64sdkmod/packages/libnaudio/usr/src/PR/libsrc/n_audio_sc/src	N_MICRO	none
 libnaudio	sdkJ	~/n64sdk/J/pc/Ultra_Dev_Demo/usr/src/PR/libsrc/libnaudio	N_MICRO	none
 libnaudio	ultra20K	~/development/sdks/n64-sdk/ultra/usr/src/pr/libsrc/libnaudio	N_MICRO	none

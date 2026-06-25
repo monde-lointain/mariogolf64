@@ -16,6 +16,26 @@ subordinate to the libultra goal. Target selection is `tools/pick_target.py` (sm
 the 8-point decompose gate fires on any seed ≥8. v2 classical track is active (since S11);
 mirror is the default, classical is first-class when the asm warrants it.
 
+**S143 — `aud_thread.c` PARTIAL (libmus integrator init banked; threadproc carried) + the deeper libmus band opened.**
+The S142-directed smallest libmus follow-on. `aud_thread.c` (`[0x79370]`, 2 fns) flipped to `c`; **`__MusIntAudManInit`
+(the audio-manager init) banked C** as a verbatim libmus **3.14** mirror, **`__MusIntThreadProcess` carried INCLUDE_ASM**
+(MG64-custom) → bank-stock-carry-custom PARTIAL: matched **+1**, md5-candidate **201→201** (file 1 stub), asm subsegs
+**89→88**. **VERSION CORRECTION: the game libmus = 3.14 (n64sdkmod), NOT the DiskLS 3.11 pin** — 3.14 `aud_thread.c`
+has `EXTRA_SAMPLES_N=20` (asm `li a3,0x14`), 3.11=15 (the only body diff vs 3.11). Pin corrected in
+`tools/audio_ref_versions.tsv` (DiskLS rows disabled) + `mk/libmus.mk` comment. **alInit duplicate-symbol chain RESOLVED:**
+`alInit`→(`n_libaudio_sn_sc.h`)`n_alInit`→(`player_fx.h` under FXCHANGE)`CustomInit`@0x8009CF30 = the libmus-BUNDLED synth
+init (ghidra mis-named `al_init`); standalone `n_alInit`@0x800A0730 DEAD (0 xrefs) → verbatim macro chain + a `CustomInit`
+recover-extern, NO redirect hack (see `docs/hazards.md#libmus-bundled-n_audio-duplicate`). **Band-open enabler:**
+`mk/libmus.mk` += `-I include/libmus/PR` + `-I include/libultra/PR`; 7 vendored `src/libmus` headers (aud_sched/aud_dma/
+aud_thread/player_fx/synthInternals/n_synthInternals/n_abi) → **unblocks `aud_dma.c` + `player_fx.c`** (the remaining 2
+libmus subsegs). drop-static:4bss (`thread`@0x800E70F0 +symbol add / `stack_addr` / `audio_tasks` / `audio_command_list`
+→ extern `g_mus_audio_*`) + drop-def `__libmus_alglobals`@0x801B56A0 (`N_ALGlobals`=0x50). Quality 0/0/**1**/0 (1 carried),
+seed 8 / banked **0pt** (partial; +1 matched-fn is the value signal). Retro applied 3 of 4 (#1 pin→3.14, #2 hazard doc +
+index, #4 this capture; #3 pricing-tell DEFERRED to a golden-gated branch). **Cross-repo follow-up:** 4 names → 
+`sync_decomp_names.py --import-from-decomp`. **Next:** `aud_dma.c` (10fn, 2-file aud_dma+aud_sched pack) / `player_fx.c`
+(the `[0x78330]` bundled-synth, 13fn, fncount-mismatch 6vs13 → the duplicate-naming plan); both header-unblocked now.
+Plus the `__MusIntThreadProcess` carry (MG64-custom, completeness checklist below).
+
 **S142 — `aud_samples.c` BANKED (libmus, the `[0x79780]` split remainder; 2 fns).**
 The S141-directed smallest libmus follow-on. `aud_samples.c` (`__MusIntSamplesInit` + `__MusIntSamplesCurrent`)
 is the `[0x79780]` split remainder S141 left when it decomposed the `[0x79640]` pack. Verbatim libmus
@@ -2275,6 +2295,33 @@ by `/sprint-plan`:
   reaches into the pin-srcdir resolution + adds a new advisory column (FP/regression surface on a
   load-bearing detector), so run it off-cadence golden-gated with reassess checkpoints (the
   tooling-refactor discipline). Companion to the S140-deferred coddog-callee-tell pricing.
+
+- **Tooling follow-up (S143, PO-deferred #3; golden-gated tooling branch, NOT a review-gate edit).**
+  Price the libmus-bundled-n_audio DUPLICATE: emit a `game-embedded:libmus` / `coddog-bundled-dup` tell on the
+  `[0x78330]` `al_init`/player_fx candidate (`coddog-fncount-mismatch:6vs13` = player_fx's 6 fns + the bundled n_audio
+  synth ~7). The bundled copy duplicates the standalone n_audio_sc `n_al*` (libnaudio); a libmus mirror's `alInit`
+  resolves through the `n_libaudio_sn_sc.h`→`player_fx.h` macro chain to the BUNDLED `CustomInit`, NOT the standalone
+  `n_al*` (which may be DEAD, 0 xrefs). **Why a branch:** detecting the bundled-dup needs cross-region coddog reasoning
+  (a fn whose coddog source is an n_audio_sc file but whose vram is in the libmus region) + a new advisory column on a
+  load-bearing detector → run off-cadence golden-gated (the tooling-refactor discipline). Until then the gate applies
+  the guard by reading `player_fx.h`'s `#define n_alInit CustomInit` + the asm callees
+  (`docs/hazards.md#libmus-bundled-n_audio-duplicate`). Companion to the S140 coddog-callee-tell + S141 vendor-header pricing.
+
+- _(SPIKE (S143) — `__MusIntThreadProcess` (`mus_audio_thread` @0x8009E0A8), the last INCLUDE_ASM stub in
+  `src/libmus/aud_thread.c`. **Blocker:** MG64-CUSTOM body (classical track), NOT in stock libmus 3.14 (the 3.14 source
+  diff vs 3.11 is only the version comment + `EXTRA_SAMPLES_N`). The customization: after `__MusIntSched_waitframe()`,
+  a pause/mute block — `if (*(u8*)0x800C7AE0) { osAiSetNextBuffer((void*)0x800C7AE8, 0x10); continue; }` — and `last_task`
+  is a sched-state GLOBAL @0x800C7AE4 (not the func-static the source declares). **Completeness checklist for retry:**
+  (1) flip DONE (subseg is `c`; the file exists with `__MusIntAudManInit` banked + this lone stub); (2) placed refs:
+  `__libmus_current_sched`@0x800C7ADC (aud_sched.h extern, aud_sched.c asm), `audio_command_list`@0x800E72A8 /
+  `audio_tasks`@0x800E72A4 (curated `g_mus_*`), `__MusIntDmaProcess`@0x8009DA8C, `__MusIntSamplesCurrent` (S142),
+  `n_alAudioFrame`@0x800A0FE0, `osAiGetStatus`/`osAiGetLength`/`osAiSetNextBuffer`/`osVirtualToPhysical` (ultra64);
+  (3) NEW recover-externs to name+place: the pause flag @0x800C7AE0 + silence buffer @0x800C7AE8 + `last_task`
+  @0x800C7AE4 (3 MG64-custom bss globals) + MICROCODE `n_aspMainTextStart`@0x800B3F20 / `n_aspMainDataStart`@0x800C9890;
+  (4) include: same file, already set up; (5) pin: n64sdkmod libmus 3.14 `__MusIntThreadProcess` body + the inserted MG64
+  pause block; (6) the `% NUM_OUTPUT_BUFFERS` (=3) compiles as the `0xAAAAAAAB` reciprocal-multiply. Asm FULLY TRACED
+  S143 (0x8009E0A8-0x8009E220). The sched calls are macro indirect-calls through `__libmus_current_sched` (no `__MusIntSched_*`
+  symbols needed).)_
 
 - _(Near-free retry (S139 decompose remainder) — `n_env.c` (`[0x79E70, asm]`, the LAST libnaudio asm
   subseg) **RESOLVED + banked S140** — the completeness checklist replayed verbatim-correct, 0 rework,
