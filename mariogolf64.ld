@@ -123,7 +123,7 @@ SECTIONS
         build/asm/798B0.o(.text);
         build/src/libnaudio/n_load.o(.text);
         build/src/libnaudio/n_resample.o(.text);
-        build/asm/7B140.o(.text);
+        build/src/libnaudio/n_reverb.o(.text);
         build/src/libnaudio/n_sl.o(.text);
         build/src/libnaudio/n_synaddplayer.o(.text);
         build/src/libnaudio/n_synallocvoice.o(.text);
@@ -391,7 +391,8 @@ SECTIONS
         build/asm/798B0.o(.data);
         build/src/libnaudio/n_load.o(.data);
         build/src/libnaudio/n_resample.o(.data);
-        build/asm/7B140.o(.data);
+        build/asm/data/main_data.data.o(.data);
+        build/src/libnaudio/n_reverb.o(.data);
         build/src/libnaudio/n_sl.o(.data);
         build/src/libnaudio/n_synaddplayer.o(.data);
         build/src/libnaudio/n_synallocvoice.o(.data);
@@ -420,7 +421,7 @@ SECTIONS
         build/src/libnusys/nupireadwritesram.o(.data);
         build/src/libnusys/nucontinit.o(.data);
         build/src/libnusys/nucontdatagetex.o(.data);
-        build/asm/data/main_data.data.o(.data);
+        build/asm/data/main_data_1b.data.o(.data);
         build/src/libnusys/nucontrmbmgr.o(.data);
         build/src/libnusys/nucontrmbstart.o(.data);
         build/src/libnusys/nucontrmbcheck.o(.data);
@@ -682,7 +683,7 @@ SECTIONS
         build/asm/data/AD490.rodata.o(.rodata);
         build/asm/data/AD520.rodata.o(.rodata);
         build/src/libnaudio/n_resample.o(.rodata);
-        build/asm/7B140.o(.rodata);
+        build/src/libnaudio/n_reverb.o(.rodata);
         build/src/libnaudio/n_sl.o(.rodata);
         build/src/libnaudio/n_synaddplayer.o(.rodata);
         build/src/libnaudio/n_synallocvoice.o(.rodata);
@@ -693,7 +694,6 @@ SECTIONS
         build/src/libnaudio/n_synsetvol.o(.rodata);
         build/src/libnaudio/n_synstartvoice.o(.rodata);
         build/src/libnaudio/n_synstopvoice.o(.rodata);
-        build/asm/data/AD5A0.rodata.o(.rodata);
         build/src/libnaudio/n_synthesizer.o(.rodata);
         build/src/libnaudio/n_save.o(.rodata);
         build/src/libnaudio/n_synallocfx.o(.rodata);
@@ -958,7 +958,7 @@ SECTIONS
         build/asm/798B0.o(.bss);
         build/src/libnaudio/n_load.o(.bss);
         build/src/libnaudio/n_resample.o(.bss);
-        build/asm/7B140.o(.bss);
+        build/src/libnaudio/n_reverb.o(.bss);
         build/src/libnaudio/n_sl.o(.bss);
         build/src/libnaudio/n_synaddplayer.o(.bss);
         build/src/libnaudio/n_synallocvoice.o(.bss);

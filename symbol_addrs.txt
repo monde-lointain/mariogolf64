@@ -380,6 +380,13 @@ alN_PVoiceNew = 0x8009E93C; // type:func
 n_alSynAllocFX = 0x800A1320; // type:func
 n_alFxPull = 0x8009FD40; // type:func
 n_alAuxBusPull = 0x8009E4B0; // type:func
+// S138: n_reverb.c (n_alFxPull single-file-pack) curated names. n_-prefixed static helpers stay
+// disjoint from the libultra reverb.c helpers (_loadOutputBuffer etc. @0x800A67xx).
+n_alFxParamHdl = 0x800A0050; // type:func
+_n_loadOutputBuffer = 0x800A0240; // type:func
+_n_loadBuffer = 0x800A0450; // type:func
+_n_saveBuffer = 0x800A0578; // type:func
+_n_filterBuffer = 0x800A0690; // type:func
 // S137: n_synallocfx.c (n_alSynAllocFX) + n_mainbus.c (n_alMainBusPull, named S133) split from
 // [0x7C720,asm]. n_synallocfx's lone calls-unplaced callee n_alFxNew (jal 0x8009e550, confirmed at
 // gate) is an n_auxbus/func_8009E4B0-pack member, stays asm until that pack is mirrored.
