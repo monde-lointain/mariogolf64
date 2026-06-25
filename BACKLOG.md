@@ -16,6 +16,32 @@ subordinate to the libultra goal. Target selection is `tools/pick_target.py` (sm
 the 8-point decompose gate fires on any seed ≥8. v2 classical track is active (since S11);
 mirror is the default, classical is first-class when the asm warrants it.
 
+**S142 — `aud_samples.c` BANKED (libmus, the `[0x79780]` split remainder; 2 fns).**
+The S141-directed smallest libmus follow-on. `aud_samples.c` (`__MusIntSamplesInit` + `__MusIntSamplesCurrent`)
+is the `[0x79780]` split remainder S141 left when it decomposed the `[0x79640]` pack. Verbatim libmus
+n_audio_sc-path cp (active `#else SUPPORT_NAUDIO` branch, N_SAMPLES=184), **MATCH first build** →
+**md5-candidate 200→201**; asm subsegs **90→89** (1 flip). **First libmus body-divergence diagnosis pass:
+`@99.99` = a VERSION delta** (file header v3.11 vs the v3.12 pin), NOT a customized body — the asm == upstream
+byte-for-byte (`0xB21642C9` /184 + `0x51EB851F` /100 magics, ±0xB8 min/max, the `only_one_flag` logic), and
+ZERO callees (no jal) → no customization tell → the verbatim-mirror single-file-pack exemption held. This
+reinforces the S141 per-coddog-score hedge: a libmus single-file-pack with NO customization tell (no non-lib
+`func_` callee, no unexplained jal-count-mismatch) is structural`@99.99` → trust after a 1-pass asm diff — but
+**re-confirm PER FILE** (do NOT yet blanket-trust the whole band; the remaining `aud_*.c` carry heavier flags).
+**drop-static:4bss (pre-curated sub-case):** `frame_samples{,_min,_max}`/`extra_samples` → `extern g_mus_*`
+@0x800E72C0+, already in `ghidra_symbols.txt` → NO symbol add, just rename the active body to the curated
+names (`.o .bss`=0). **defines-data:** `only_one_flag` (func-local static=1, automatic sole-referrer) → `.data`
+carve `[0xA2F00,0xA2F10)`=0x10 (4 B + 0xC pad), a 1-line split of `main_data`'s tail. **wrong-ghidra-name
+override:** `__MusIntSamples{Init,Current}` override ghidra `mus_samples_{init,current}` via `rom:` qualifier
+(gate). Quality 0/0/0/0, seed 5 / banked 5pt (mirror, seed-only). Retro applied 3 of 3 (all DOC, no
+tooling/golden touch): #1 `docs/hazards.md#file-static` pre-curated drop sub-case (reference the ghidra name,
+no symbol add); #2 this libmus `@99.99`=version-delta data point; #3 `docs/hazards.md#defines-data`
+func-local-static auto-sole-referrer note. **Cross-repo follow-up:** `__MusIntSamplesInit`/`__MusIntSamplesCurrent`
+→ `sync_decomp_names.py --import-from-decomp`. **Next:** libmus band continues; the smallest remaining is
+`aud_thread.c` (`mus_thread_create`, 2fn, 720B) but heavier — 6 vendored headers (libmus.h/aud_sched.h/aud_dma.h/
+aud_samples.h/player_fx.h/aud_thread.h), `refs-unplaced:__libmus_alglobals`, `drop-static-mirror:5bss`,
+`defines-data:__libmus_alglobals,last_task` — then aud_dma.c (10fn, 2-file aud_dma+aud_sched pack) / player_fx.c
+(`al_init`, 13fn, calls-unplaced + coddog-fncount-mismatch). No carry-overs.
+
 **S141 — `lib_memory.c` BANKED + the libmus band OPENED (header-vendoring enabler + first leaf mirror).**
 The S140-directed next audio vein. Because libnaudio is 100% and pre-paid the n_audio_sc header base,
 opening libmus cost only ~3 vendored headers (`n_libaudio_sn_sc.h`→include/libnaudio; `libmus_config.h`

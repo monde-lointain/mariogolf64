@@ -700,6 +700,20 @@ static carries a **nonzero** initializer (real `.data` bytes that DO shift the i
 0 carve, first-build SHA match; the carry-over's "heavy `.bss` carve" framing was the false-flag this
 retires.)
 
+**Pre-curated `.bss` static ⇒ reference the ghidra name, NO symbol add (S142).** The drop-to-extern
+above has two naming sub-cases, set by whether the placed `.bss` symbol is already named: (a)
+**unnamed** (only a splat `D_<vram>`, in neither name file) ⇒ drop to `extern <T> <upstream_name>;`
+AND add `<upstream_name> = 0x<vram>; // size:0x<n>` to `symbol_addrs.txt` (S81 `siacs.c`; S141
+lib_memory `audio_heap`). (b) **pre-curated** (the vram already carries a curated data name in
+`ghidra_symbols.txt`) ⇒ drop to `extern <T> <ghidra_name>;` and RENAME the active-branch body
+references to that name, with **NO `symbol_addrs` add** (a same-vram add would dup-clash the existing
+ghidra entry, the disjoint-files rule). The rename is the forced verbatim divergence the `.text`
+relocs require: the body's `lui/%lo` must resolve to the placed vram, so the C must spell the symbol
+exactly as splat names it. S142 `aud_samples.c`: `frame_samples{,_min,_max}`/`extra_samples` were
+pre-curated `g_mus_frame_samples`@0x800E72C0 / `_min`@72C4 / `_max`@72C8 / `g_mus_extra_samples`@72CC,
+so the drop was 4 `extern u32 g_mus_*;` + renaming the `#else SUPPORT_NAUDIO` body, zero symbol adds,
+`.o .bss`=0, first-build SHA match.
+
 **hasm referrers need a byte-neutral symbol sync (S117).** A BSS drop-to-extern (or recover-extern)
 names a `D_<vram>` that `make extract` re-labels everywhere EXCEPT `hasm` files (the entry stub,
 vendored asm), which are never re-extracted. If a `hasm` referenced the old `D_<vram>`, naming the
@@ -798,6 +812,16 @@ referrers across `asm/` + `src/`: >1 distinct subseg ⇒ shared ⇒ DROP. S97 `s
 `alGlobals=0x800C8180 // size:0x4`; the 16 B `.data` (4 B ptr + 12 B section-align pad) stayed
 splat-side. `pick_target.py` now unions `defines-data` over a `c-combined` pack's member upstreams
 (S97), so a secondary member's defined global is priced at the gate, not at execution.
+
+**Function-local static ⇒ automatic sole-referrer carve (S142).** A `static <T> <name> = <init>;`
+declared INSIDE a function is file-private by construction (no external linkage, no `D_<vram>` a
+sibling can name), so it is ALWAYS the sole referrer ⇒ carve, and the `asm/`+`src/` share-grep above
+is unnecessary (the share-vs-drop question only arises for file-scope `defines-data`). Used-vs-unused
+does not change this: both carve (KMC -O3 emits the initialized local to `.data`) — S138 n_reverb's
+`val`/`lastval`/`blob` were UNUSED, S142 aud_samples's `only_one_flag`=1 was USED, both sole-referrer
+carves. S142 `aud_samples.c`: `only_one_flag` (a `__MusIntSamplesCurrent` local) carved
+`[0xA2F00,0xA2F10)`=0x10 (4 B + 0xC section-align pad), `.o .data`=0x10, a 1-line split of
+`main_data`'s tail.
 
 **Shared at a FIELD, and undroppable ⇒ carve + canonical-addend (S116).** Two refinements to the
 S97 share-check. (1) Sweep the WHOLE object range `base..base+size`, not just the base `D_<vram>`: a
