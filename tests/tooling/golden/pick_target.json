@@ -351,19 +351,6 @@
     "vram": "0x800521C0"
   },
   {
-    "band": "cold",
-    "func": "n_alAuxBusPull",
-    "hazards": "pack:8fn[n_alAuxBusPull=n_auxbus,n_alFxNew=n_drvrNew,alN_PVoiceNew=n_drvrNew,func_8009EA70=?,n_alEnvmixerParam=?,func_8009F08C=?,func_8009F2AC=?,func_8009F3EC=?],c-combined:2file[n_auxbus|n_drvrNew],calls-unplaced:n_alEnvmixerPull@0x8009EA70,rodata-jtbl:0x800D20F0,0x800D2120;owner-per-member,rodata-literal:0x800D2108,0x800D2110,0x800D2168,0x800D2170,0x800D2178,0x800D2180;extent-end=0x800D2188;carve-end=0x800D2200;owner-per-member",
-    "kind": "asm-flip",
-    "nfns": 8,
-    "pts": 13,
-    "rom": "0x798B0",
-    "score": -3784,
-    "size": 3984,
-    "upstream": "libnaudio",
-    "vram": "0x8009E4B0"
-  },
-  {
     "band": "-",
     "func": "play_sound_effect",
     "hazards": "pack:26fn[play_sound_effect=?,func_80050DA0=?,update_object_group_by_id=?,func_80050FC0=?,set_field_0x9E_for_object_group_if_type_matches=?,update_indexed_slot_at_0xCB_atomic=?,func_800510EC=?,func_80051100=?,func_80051164=?,func_800511D8=?,func_80051210=?,update_indexed_slot_at_0x60_atomic=?,bgm_tick=?,func_80051A08=?,bgm_request_stop=?,func_80051A88=?,func_80051AE4=?,func_80051B40=?,func_80051B9C=?,func_80051BFC=?,play_bgm_by_id=?,func_80051D8C=?,alSynNew=synthesizer,alSynDelete=syndelete,__freeParam=synthesizer,_freePVoice=synthesizer],c-combined:2file[syndelete|synthesizer]",
@@ -648,5 +635,18 @@
     "size": 14928,
     "upstream": "none",
     "vram": "0x800400A0"
+  },
+  {
+    "band": "-",
+    "func": "func_80095A10",
+    "hazards": "pack:31fn[func_80095A10=?,func_80095A68=?,func_80095C10=?,func_80095D10=?,func_80095D64=?,func_80095D70=?,func_80095DE0=?,func_8009676C=?,func_800967F4=?,func_80096C04=?,func_80096F44=?,func_80097218=?,func_800974D8=?,func_800977E0=?,func_80097A08=?,func_80097C18=?,func_80097E30=?,func_8009806C=?,func_80098310=?,func_800985B4=?,func_8009874C=?,func_80098758=?,func_800989C4=?,func_800989EC=?,func_80098C6C=?,func_80098CA0=?,func_80098CD8=?,func_80098D70=?,func_80098E48=?,func_800990D0=?,func_80099454=?]",
+    "kind": "asm-flip",
+    "nfns": 31,
+    "pts": 13,
+    "rom": "0x70E10",
+    "score": -14976,
+    "size": 14976,
+    "upstream": "none",
+    "vram": "0x80095A10"
   }
 ]

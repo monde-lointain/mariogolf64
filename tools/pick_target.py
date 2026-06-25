@@ -1888,6 +1888,39 @@ def all_func_macros():
     return macros
 
 
+# A function-pointer TYPEDEF in a header: `typedef <ret> (*NAME)(args);` — captures NAME. A
+# parameter typed by such a typedef (`ALDMANew dmaNew`) is invoked by a verbatim mirror through a
+# `jalr` on the pointer, not a `jal` to a named symbol, so it must not flag calls-unplaced. Unlike
+# the explicit `T (*name)(args)` param form (caught syntactically in _fn_ptr_param_names), a
+# typedef'd param reads as a plain scalar (`ALDMANew dmaNew`), so it needs the typedef NAME set.
+FN_PTR_TYPEDEF_RE = re.compile(
+    r"typedef\b[^;{}]*?\(\s*\*\s*([A-Za-z_]\w*)\s*\)\s*\("
+)
+
+
+@functools.cache
+def all_fn_ptr_typedefs():
+    """The set of function-pointer typedef NAMEs defined anywhere under the project -I set, scanned
+    once per process (the all_func_macros analog for typedefs). Project-wide so a param typed by a
+    typedef defined beyond the .c's own include depth is still recognized — e.g. n_drvrNew.c's
+    `alN_PVoiceNew(.., ALDMANew dmaNew, ..)` invokes `dmaNew(..)` via jalr, and ALDMANew lives in
+    include/libultra/PR/libaudio.h (`typedef ALDMAproc (*ALDMANew)(void*)`), so without this scan
+    calls_unplaced phantom-flags `calls-unplaced:dmaNew` (S139). Recurs across the audio `*New`
+    constructors. The build SHA-1 oracle still catches any real divergence; this drops a phantom."""
+    names = set()
+    for d in INCLUDE_DIRS:
+        for root, _dirs, files in os.walk(d):
+            for fn in files:
+                if not fn.endswith((".h", ".inc")):
+                    continue
+                try:
+                    text = open(os.path.join(root, fn), errors="ignore").read()
+                except OSError:
+                    continue
+                names.update(FN_PTR_TYPEDEF_RE.findall(text))
+    return names
+
+
 def macro_hidden_text(cpath):
     """One-level macro expansion of `cpath`: the replacement bodies of the function-like macros the
     .c *invokes*, plus the set of all function-like macro names in scope. Lets refs_unplaced /
@@ -2012,6 +2045,7 @@ def _fn_ptr_param_names(text):
     (e.g. _Printf's `pfn` would be a phantom `calls-unplaced:pfn`). Scans each def header's matched
     param list only, so an in-body real call of the same spelling elsewhere is unaffected."""
     names = set()
+    fn_ptr_typedefs = all_fn_ptr_typedefs()  # typedef'd fn-ptr params (`ALDMANew dmaNew`)
     for m in UPSTREAM_DEF_RE.finditer(text):
         depth, p = 0, m.end() - 1  # at the header '('
         while p < len(text):
@@ -2027,6 +2061,12 @@ def _fn_ptr_param_names(text):
             re.findall(r"\(\s*\*\s*([A-Za-z_]\w+)\s*\)\s*\(", params)
         )  # T (*name)(...)
         names.update(re.findall(r"\b([A-Za-z_]\w+)\s*\(", params))  # T name(...)
+        # A param typed by a fn-ptr typedef (`ALDMANew dmaNew`) reads as a plain scalar, so the
+        # syntactic forms above miss it — match `<typedef> name` against the project typedef set.
+        for td in fn_ptr_typedefs:
+            names.update(
+                re.findall(r"\b" + re.escape(td) + r"\s+\*?\s*([A-Za-z_]\w+)", params)
+            )
     return names
 
 
@@ -3215,11 +3255,12 @@ def _append_caller_evict(fns, hazards):
 
 
 def _append_coddog_aux(hazards, cod_srcs):
-    """Two advisory coddog passes over the resolved hazard set: flag a match to an ALREADY-BANKED
+    """Three advisory coddog passes over the resolved hazard set: flag a match to an ALREADY-BANKED
     source (the mirror is fully decompiled, so the hit is a fingerprint coincidence, not a fresh
-    attribution), and flag a SUB-100 coddog-mirror as body-divergence-suspect (it may mask a
-    game-modified body; the gate runs a store-value diagnosis before declaring a clean mirror or a
-    compiler wall, S127)."""
+    attribution); flag a `c-combined-undercount` when coddog fingerprints MORE upstream files than the
+    named-symbol c-combined sees (extra files' members are un-named); and flag a SUB-100 coddog-mirror
+    as body-divergence-suspect (it may mask a game-modified body; the gate runs a store-value diagnosis
+    before declaring a clean mirror or a compiler wall, S127)."""
     for s in sorted({c for c in cod_srcs if _coddog_source_banked(c)}):
         hazards.append(Hazard.coddog_source_banked(os.path.basename(s)))
     # De-weight the body-divergence hedge on a SINGLE-coddog row whose only divergence signal is a
@@ -3231,23 +3272,43 @@ def _append_coddog_aux(hazards, cod_srcs):
     # lone n_synthesizer.c coddog -> suppressed; banked atomically as a clean mirror + rodata carve.
     cod_files = {h.coddog_file() for h in hazards if h.is_coddog_mirror()}
     single_cod = len(cod_files) == 1
+    # c-combined-undercount: the named-symbol c-combined file count is BELOW the distinct coddog-mirror
+    # file count → the pack spans more upstream files than the named index sees (the extra files'
+    # members are `func_<addr>`, un-named, so c-combined misses them but coddog fingerprints them). The
+    # FILE analog of the S131 coddog-fncount-mismatch under-count guard: tells the gate to decompose at
+    # MORE boundaries than c-combined lists, and to hand-trace the extra file's boundary from its named
+    # member fns. S139 func_8009E4B0: c-combined saw n_auxbus|n_drvrNew (2), coddog saw +n_env (3) ->
+    # `2vs3`. Advisory (display-only). The per-file vram-boundary + carve-extent pricing the gate still
+    # hand-traces is a tracked follow-up (it needs the member asm %hi/%lo refs at pricing time).
+    cc = next((h for h in hazards if h.is_c_combined()), None)
+    if cc is not None and len(cod_files) > cc.c_combined_count():
+        hazards.append(Hazard.c_combined_undercount(cc.c_combined_count(), len(cod_files)))
     suppress_body_div = single_cod and any(h.is_jal_artifact() for h in hazards)
-    # Also suppress on an n_audio_sc N_MICRO single-file-pack: a single coddog hit on a libnaudio /
-    # n_audio_sc source whose row is a single-file-pack. The sub-100 (e.g. @99.99) on these is a
-    # STRUCTURAL artifact of N_MICRO macro / inc-include expansion diverging from the non-micro
-    # upstream coddog fingerprint, NOT a game-modified body — it fired FALSE on 6 consecutive
-    # n_audio_sc mirrors (S133-S138, all banked atomically as clean verbatim mirrors + carves). The
-    # libnaudio restriction is load-bearing: a libnusys single-file-pack @99.99 CAN be a real
-    # game-modified body (S121/S127 contRmbControl FORCESTOP), so it keeps the hedge. The build SHA-1
-    # oracle still catches any real divergence; this only drops a 6x-false up-front warning. See
+    # Also suppress on an n_audio_sc N_MICRO clean single-source row: a single coddog hit on a
+    # libnaudio / n_audio_sc source whose row is a single-file-pack OR a plain single-fn file (no
+    # pack hazard at all). The sub-100 (e.g. @99.99) on these is a STRUCTURAL artifact of N_MICRO
+    # macro / inc-include expansion diverging from the non-micro upstream coddog fingerprint, NOT a
+    # game-modified body — it fired FALSE on 9 consecutive n_audio_sc mirrors (S133-S139, all banked
+    # atomically as clean verbatim mirrors + carves; S139 added n_auxbus + n_drvrNew x2 after a
+    # c-combined DECOMPOSE). Keying on `up_lib == libnaudio` + a clean single-source SHAPE (rather
+    # than the single-file-pack shape alone) is load-bearing: a c-combined pack DECOMPOSED at the gate
+    # becomes per-file single-fn rows (n_auxbus is 1 fn → no pack hazard), which the old
+    # single-file-pack-only key would re-flag. `single_cod` already excludes a still-combined
+    # multi-coddog pack (n != 1 distinct coddog files → hedge kept, the S123 customization guard). The
+    # libnaudio restriction is load-bearing the other way: a libnusys single-file-pack @99.99 CAN be a
+    # real game-modified body (S121/S127 contRmbControl FORCESTOP), so it keeps the hedge. The build
+    # SHA-1 oracle still catches any real divergence; this only drops a 9x-false up-front warning. See
     # docs/hazards.md#coddog-cross-ref.
     if not suppress_body_div and single_cod:
-        naudio_pack = (
+        clean_single_source = any(
+            h.kind == HAZARD_SINGLE_FILE_PACK for h in hazards
+        ) or not any(h.kind in (HAZARD_PACK, HAZARD_SINGLE_FILE_PACK) for h in hazards)
+        naudio_clean = (
             bool(cod_srcs)
             and all(("n_audio_sc" in s or "libnaudio" in s) for s in cod_srcs)
-            and any(h.kind == HAZARD_SINGLE_FILE_PACK for h in hazards)
+            and clean_single_source
         )
-        suppress_body_div = naudio_pack
+        suppress_body_div = naudio_clean
     if not suppress_body_div:
         for cf in sorted(
             {

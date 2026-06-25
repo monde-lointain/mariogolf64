@@ -16,6 +16,25 @@ subordinate to the libultra goal. Target selection is `tools/pick_target.py` (sm
 the 8-point decompose gate fires on any seed ≥8. v2 classical track is active (since S11);
 mirror is the default, classical is first-class when the asm warrants it.
 
+**S139 — `n_auxbus.c` + `n_drvrNew.c` BANKED (DECOMPOSE the last libnaudio pack func_8009E4B0; 3 fns).**
+The S138-"Next" increment. The last libnaudio asm subseg `[0x798B0]` (func_8009E4B0, 8 fns, pts-13) was a
+c-combined 3-file pack; the 8-gate fired so it was DECOMPOSED at the 3 upstream-file boundaries
+(n_auxbus | n_drvrNew | n_env, all 16-aligned: 0x798B0/0x79950/0x79E70) and the cleanest 2 banked →
+**md5-candidate 196→198**. `n_auxbus.c` (`n_alAuxBusPull`, 1 fn) = pure-text N_MICRO mirror, MATCH first
+build, no carve (lone callee `n_alEnvmixerPull`=0x8009EA70 placed at gate). `n_drvrNew.c` (`n_alFxNew` +
+`alN_PVoiceNew`, 2 fns) = verbatim mirror + `.data` carve [0xA2F10,0xA30A0)=0x190 (6 contiguous PARAMS
+arrays, 3-way main_data split) + `.rodata` carve [0xAD4F0,0xAD520)=0x30 (fxType jtbl + 2 doubles, a clean
+PREFIX of n_env's rodata). `body-divergence-suspect@99.99` FALSE all 3 (9 consecutive on n_audio_sc);
+`dmaNew` = `ALDMANew` fn-ptr param via jalr (false calls-unplaced). Quality 0/0/0/1 (the 1 carry = n_env,
+the planned decompose remainder). seed 5 / banked 5pt (mirror, seed-only; 8-gate resolved by decompose).
+Retro applied 3 of 3: #1 `pick_target.py` `c-combined-undercount` (FILE analog of coddog-fncount-mismatch);
+#2 body-divergence suppression re-keyed on `up_lib==libnaudio` + clean single-source shape (post-decompose);
+#3 `all_fn_ptr_typedefs` drops the typedef'd-fn-ptr-param calls-unplaced phantom (ALDMANew). +2 unit tests,
+goldens regen'd (bank drift), suite 94 pass. **Cross-repo follow-up:** `n_alEnvmixerPull` →
+`sync_decomp_names.py --import-from-decomp`. **Next:** `n_env.c` (`[0x79E70]`, the carry — last libnaudio
+asm subseg, 5 fns: inc-vendor + `__pow` rodata pool + own jtbl + 3 static-name-collisions; see Carry-overs
+for the completeness checklist). Carry-over: n_env.c.
+
 **S138 — `n_reverb.c` BANKED (n_alFxPull single-file-pack, n_audio_sc N_MICRO mirror; 6 fns).**
 The S137-"Next" #1 increment, all 6 fns Match → **md5-candidate 195→196**; asm subsegs 92→91 (1 flip, at gate).
 Verbatim cp of n_audio_sc `n_reverb.c` (`n_alFxPull` + `n_alFxParamHdl` + 4 static helpers `_n_loadOutputBuffer`/
@@ -2172,6 +2191,41 @@ by `/sprint-plan`:
   disambiguate before emitting an address. Run it off-cadence on a branch, golden-gated + reassess
   checkpoints (the tooling-refactor discipline), since it adds FP/regression surface to a load-bearing
   detector. Spec is also inline at `docs/hazards.md#defines-data` (Tooling follow-up (S138)).
+
+- **Near-free retry (S139 decompose remainder) — `n_env.c` (`[0x79E70, asm]`, the LAST libnaudio asm
+  subseg), the heavy 3rd file of the func_8009E4B0 c-combined pack.** 5 fns: `n_alEnvmixerPull`
+  (0x8009EA70, leader, placed S139) + `n_alEnvmixerParam` (0x8009EFE8, placed) + file-static
+  `_pullSubFrame` / `_getRate` / `_getVol`. Completeness checklist (triage BODIES first per S123, but
+  the n_audio_sc trend is 9/9 verbatim):
+  **(1) flip:** `[0x79E70, asm]` → `[0x79E70, c, libnaudio/n_env]` (single file, no split; extent
+  [0x79E70, 0x7A840) = 0x9D0, the whole remaining subseg up to n_load.c).
+  **(2) placed-ref inventory:** `n_alEnvmixerPull`=0x8009EA70 (S139), `n_alEnvmixerParam`=0x8009EFE8,
+  `_n_timeToSamples`=0x800A1274 (S130) if referenced; `alHeapDBAlloc` (the `alHeapAlloc` macro), the
+  `n_a*` N_MICRO command macros — all placed.
+  **(3) NEW recover-externs/callees to add at gate (read vrams from `asm/798B0.s`):** `__pow`
+  (calls-unplaced:__pow, the libm pow), and check `_frexpf` / `_ldexpf` (the n_env externs) — confirm
+  each is placed or recover its vram from the asm jal/`%hi%lo`. The 3 statics
+  `_pullSubFrame`/`_getRate`/`_getVol` **STAY FILE-LOCAL — do NOT add to symbol_addrs** (the same
+  names are already placed at the NON-micro env.c vrams 0x800A56A4/0x800A5A7C/0x800A5CFC →
+  `static-name-collision`; a global add multiply-defines, the S135 `_decodeChunk` pattern). `func_8009F08C`/
+  `func_8009F2AC`/`func_8009F3EC` are these statics — leave un-named.
+  **(4) include adaptation:** n_env.c includes `"n_synthInternals.h"` (vendored) + `<os.h>` + `<assert.h>`
+  + the `#include "inc/n_env_add01.inc.c"` body-fragment (VENDORABLE from n_audio_sc `src/inc/`, the
+  S133 pattern — copy to `src/libnaudio/inc/`). Confirm `<assert.h>` resolves (ALFailIf/assert may be
+  non-_DEBUG no-ops). Beware `_getRate`/`_getVol` are each defined TWICE under `#ifdef` branches —
+  `-DN_MICRO=1` + the precision `#if` select which compiles; verify the active branch matches the asm.
+  **(5) upstream pin:** n_audio_sc `src/n_env.c`, KMC GCC 2.7.2 `-O3`, `-DN_MICRO=1` (LIBNAUDIO profile).
+  **(6) carves:** `.rodata` `[0x800D2120, 0x800D2188)` = rom `[0xAD520, 0xAD588)` — the `n_alEnvmixerPull`
+  em_motion-switch jtbl_800D2120 + the 4 `_getRate` math doubles (M_LN2 / __pow constants). The generic
+  `[0xAD520, rodata]` block already spans `[0xAD520, 0xAD590)` (0x70, next is n_resample @0xAD590), so
+  it is likely a 1-line attribute flip `[0xAD520, .rodata, libnaudio/n_env]` IF GCC emits jtbl + 4
+  doubles + pad = 0x70 (confirm the n_env.o `.rodata` size at execution; if it's 0x68 + an 8B pad split,
+  carve `[0xAD520, .rodata, libnaudio/n_env]` (0x68) + a generic pad remainder). **Check for `.data`:**
+  scan n_env.c for a file-scope EQPOWER/table (the `N_EQPOWER_LENGTH 128` `#define` hints at one) — if
+  present it needs a `.data`/`.rodata` carve too (read its asm `%hi/%lo`). **Pricing note:** the default
+  `pick_target` run mis-resolves the body-include to the non-sc `add/n_env_add01.c` (a FALSE `blk`, the
+  S135 `_deblk_audio_variant_misresolve` class); the `--lib libnaudio` coddog run resolves it correctly
+  to `inc/n_env_add01.inc.c(vendorable)` and prices it pts-13 — use the coddog source.
 
 - _(Near-free retry (S130 spike, blocker RESOLVED S136) — `n_alSynAllocFX` + `n_mainbus.c` (`[0x7C720, asm]`,
   c-combined:2file) **RESOLVED + banked S137** — the completeness checklist replayed verbatim-correct, 0 rework.

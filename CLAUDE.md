@@ -419,6 +419,7 @@ When `pick_target.py` flags a hazard (or a match shows its symptom), read the ma
 | `coddog-mirror:<file>@<pct>` | #coddog-cross-ref |
 | `coddog-twin:<matched>!=<member-src>` | #coddog-cross-ref |
 | `coddog-fncount-mismatch:<m>vs<n>` | #coddog-cross-ref |
+| `c-combined-undercount:<m>vs<n>` | #coddog-cross-ref |
 | `coddog-structural:<file>@<pct>` | #coddog-cross-ref |
 | `coddog-partial:<m>of<n>fn` | #coddog-cross-ref |
 | `static-name-collision:<name>@<addr>` | #static-name-collision |

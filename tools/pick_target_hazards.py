@@ -62,6 +62,14 @@ CODDOG_STRUCTURAL_BYTES_PER_LOC = (
 # single-identity multi-fn pack, marks the coddog match structural (conservative: ~4x a dense -O2 fn)
 HAZARD_COMBINED_SUBSEG = "combined-subseg"
 HAZARD_C_COMBINED = "c-combined"
+HAZARD_C_COMBINED_UNDERCOUNT = (
+    "c-combined-undercount"  # the named-symbol c-combined file count is BELOW the distinct
+)
+# coddog-mirror file count → the pack spans MORE upstream files than the named-symbol index sees (the
+# extra files' members are `func_<addr>`, un-named, so c-combined misses them but coddog fingerprints
+# them). The FILE analog of coddog-fncount-mismatch; tells the gate to decompose at MORE boundaries
+# than c-combined alone lists. Advisory (display-only). S139: n_auxbus|n_drvrNew (2) vs coddog's
+# n_auxbus|n_drvrNew|n_env (3) → `2vs3`; the n_env members were all un-named.
 HAZARD_NON16ALIGN = "non16align"
 HAZARD_INTRINSIC_LIKELY = "intrinsic-likely"
 HAZARD_MAYBE_UPSTREAM = "maybe-upstream"
@@ -243,6 +251,14 @@ class Hazard:
         """A coddog hit covering only a SUBSET of the subseg (fncount-mismatch/structural/partial)."""
         return self.kind in self.CODDOG_SUBSET_SIGNALS
 
+    def is_c_combined(self) -> bool:
+        """A `c-combined` multi-file C-mirror pack (≥2 distinct named C upstreams in one subseg)."""
+        return self.kind == HAZARD_C_COMBINED
+
+    def c_combined_count(self) -> int:
+        """The named-symbol file count of a `c-combined` hazard (its `<n>file[...]` prefix)."""
+        return int(self.detail.split("file", 1)[0])
+
     def is_unexplained_jal(self) -> bool:
         """A jal-count mismatch NOT annotated as a known artifact: a per-version wrapper (S118
         libnusys `osSetIntMask` pair) or a single-real-call macro expansion (S136 n_synthesizer's
@@ -350,6 +366,14 @@ class Hazard:
         """`<n>file[stem|stem|...]` — ≥2 distinct C upstream files in one asm subseg."""
         return cls(
             HAZARD_C_COMBINED, f"{len(c_stems)}file[" + "|".join(sorted(c_stems)) + "]"
+        )
+
+    @classmethod
+    def c_combined_undercount(cls, n_named_files: int, n_coddog_files: int) -> "Hazard":
+        """`<named>vs<coddog>` — c-combined's named-symbol file count is below the distinct
+        coddog-mirror file count (the pack spans more upstream files than the named index sees)."""
+        return cls(
+            HAZARD_C_COMBINED_UNDERCOUNT, f"{n_named_files}vs{n_coddog_files}"
         )
 
     @classmethod

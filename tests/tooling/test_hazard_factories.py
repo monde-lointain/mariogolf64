@@ -27,7 +27,16 @@ def test_pack_factories():
         H.upstream_fncount_mismatch(3, 2).render()
         == f"{h.HAZARD_UPSTREAM_FNCOUNT_MISMATCH}:3vs2"
     )
-    assert H.c_combined(["b", "a"]).render() == f"{h.HAZARD_C_COMBINED}:2file[a|b]"
+    cc = H.c_combined(["b", "a"])
+    assert cc.render() == f"{h.HAZARD_C_COMBINED}:2file[a|b]"
+    # c_combined predicate + named-file-count accessor (drives the undercount comparison).
+    assert cc.is_c_combined() and cc.c_combined_count() == 2
+    assert not H.pack(h.HAZARD_PACK, 2, ["a=?", "b=?"]).is_c_combined()
+    # c-combined-undercount (S139): named-symbol file count BELOW the distinct coddog file count.
+    assert (
+        H.c_combined_undercount(2, 3).render()
+        == f"{h.HAZARD_C_COMBINED_UNDERCOUNT}:2vs3"
+    )
 
 
 def test_jal_count_artifact_annotations():

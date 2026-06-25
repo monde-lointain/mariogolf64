@@ -461,8 +461,22 @@ can resolve a sibling spike for free. (S136 n_synthesizer's `mainBus->filter.han
 leader), and the `n_alSynAllocFX`=0x800A1320 jal target resolved the S130 `n_mainbus` 2-fn-subseg spike's
 `func_800A1320` identity.) Confirm the name by semantics (which handler slot / call site) before adding.
 
+**Typedef'd function-pointer PARAM is a `jalr`, not a callee (S139).** A parameter typed by a
+function-pointer TYPEDEF (`alN_PVoiceNew(N_PVoice *mv, ALDMANew dmaNew, ALHeap *hp)`) is invoked
+`dmaNew(&mv->dc_dmaState)` via a `jalr` through the pointer, not a named `jal`, so it must NOT flag
+`calls-unplaced`. `_fn_ptr_param_names` already drops the explicit `T (*name)(args)` and `T name(args)`
+param forms, but a typedef'd param reads as a plain scalar (`ALDMANew dmaNew`), so it needs the project
+typedef set: `all_fn_ptr_typedefs` scans the `-I` headers for `typedef <ret> (*NAME)(args)` (ALDMANew
+lives in `include/libultra/PR/libaudio.h`) and `_fn_ptr_param_names` matches `<typedef> name`. Recurs
+across the audio `*New` constructors. Without it, `calls-unplaced:dmaNew` is a phantom on n_drvrNew.c.
+(The asm-jal-budget `_reconcile_calls_unplaced` already drops such phantoms for a SINGLE-fn row via the
+unnamed-`jal` count, but the per-coddog-member c-combined path prices each member file's
+`calls_unplaced` without that per-member reconcile, so the source-side typedef suppression is the
+robust fix.)
+
 **Provenance:** S23 (`osEPiStartDma` → `osPiGetCmdQueue`@0x800B06F0); S61 (`guRotateF` substituted
-`vec3f_normalize`); S136 (handler address-of pre-naming the n_reverb/n_auxbus leaders).
+`vec3f_normalize`); S136 (handler address-of pre-naming the n_reverb/n_auxbus leaders); S139 (typedef'd
+fn-ptr param `ALDMANew dmaNew` is a `jalr`, suppressed via `all_fn_ptr_typedefs`).
 
 ---
 
@@ -1815,6 +1829,27 @@ fire and the diagnosis pass (`#cross-jump-tail-merge`) can stay lightweight (a q
 read of the `#else`/`SAMPLE_ROUND` branch, not a full divergence hunt). This is an empirical narrowing
 of the `coddog 99.99 == STRUCTURE` guard for one well-characterized family, NOT a license to skip the
 body check for heavier n_audio_sc files (`n_synthesizer.c`, `n_reverb.c`) or other libs.
+
+**S139: c-combined DECOMPOSE + the `c-combined-undercount` file-count reconcile + body-divergence
+post-decompose suppression.** The last libnaudio asm subseg `func_8009E4B0` was a 3-file
+`c-combined` pack (n_auxbus | n_drvrNew | n_env) the named-symbol index priced as only `c-combined:2file`
+(the n_env members were all un-named `func_<addr>`, so the named index missed them), while coddog
+fingerprinted all THREE files. Two tooling refinements:
+- **`c-combined-undercount:<named>vs<coddog>`** (`_append_coddog_aux`): when the distinct
+  coddog-mirror file count exceeds the `c-combined` hazard's named-symbol file count, the pack spans
+  MORE upstream files than the named index sees → flag it (`2vs3` here). The FILE analog of
+  `coddog-fncount-mismatch`; tells the gate to decompose at MORE boundaries than `c-combined` lists and
+  to hand-trace the extra file's boundary from its named member fns (the per-file vram-boundary +
+  carve-extent pricing the gate still hand-traces is a tracked follow-up — it needs the member asm
+  `%hi/%lo` refs at pricing time).
+- **Body-divergence suppression now keys on `up_lib == libnaudio` + a CLEAN single-source SHAPE**
+  (single-file-pack OR a plain single-fn row), not the single-file-pack shape alone. A `c-combined`
+  pack DECOMPOSED at the gate becomes per-file rows, and the smallest (n_auxbus, 1 fn) has NO pack
+  hazard, so the old single-file-pack-only key would re-flag it. `single_cod` (exactly 1 distinct
+  coddog file) still gates it, so a STILL-combined multi-coddog pack keeps the hedge (the S123
+  customization guard); the libnaudio restriction keeps the libnusys S121/S127 FORCESTOP hedge. S139
+  banked n_auxbus + n_drvrNew (×2 fns) verbatim first-build after the decompose, all
+  `body-divergence-suspect@99.99` FALSE → **9 consecutive FALSE on n_audio_sc (S133-S139).**
 
 **Audio C-name-index mis-resolution de-blk (S135, `_deblk_audio_variant_misresolve`).** The game's
 libnaudio C-name index can resolve a fn's `up_path` to the **non-sc** `libnaudio/src/<f>.c` variant,

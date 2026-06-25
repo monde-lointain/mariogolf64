@@ -72,6 +72,71 @@ def test_vendorable_tu_missing_defines(tmp_path, monkeypatch):
     assert "R4300" not in miss and "RDBPORT" not in miss and "TLB" not in miss
 
 
+def test_fn_ptr_typedef_param_suppressed():
+    """S139 retro #3: a parameter typed by a function-pointer TYPEDEF (`ALDMANew dmaNew`) is invoked
+    via jalr through the pointer, not a named `jal`, so it must not flag calls-unplaced. The typedef'd
+    param reads as a plain scalar (unlike the `T (*name)(...)` form), so _fn_ptr_param_names needs the
+    project typedef set: all_fn_ptr_typedefs scans the -I headers (ALDMANew lives in
+    include/libultra/PR/libaudio.h)."""
+    pt = load_tool("pick_target")
+    assert "ALDMANew" in pt.all_fn_ptr_typedefs()
+    src = (
+        "void alN_PVoiceNew(N_PVoice *mv, ALDMANew dmaNew, ALHeap *hp)\n"
+        "{\n  mv->dc_dma = dmaNew(&mv->dc_dmaState);\n}\n"
+    )
+    assert "dmaNew" in pt._fn_ptr_param_names(src)
+    # the explicit `T (*name)(...)` form still works (regression guard)
+    assert "pfn" in pt._fn_ptr_param_names(
+        "void _Printf(void* (*pfn)(void*, const char*, size_t))\n{\n}\n"
+    )
+
+
+def test_append_coddog_aux_undercount_and_body_div(monkeypatch):
+    """S139 retro #1+#2: _append_coddog_aux emits c-combined-undercount when coddog fingerprints MORE
+    upstream files than the named-symbol c-combined sees, and (S139 #2) suppresses
+    body-divergence-suspect on a CLEAN single-source n_audio_sc row (single-file-pack OR a single-fn
+    row, the post-c-combined-decompose shape) while KEEPING it on a still-combined multi-coddog pack
+    and on a non-n_audio_sc row (the S123 customization guard)."""
+    pt = load_tool("pick_target")
+    H = pt.Hazard
+    monkeypatch.setattr(pt, "_coddog_source_banked", lambda c: False)
+    SC = "/x/n_audio_sc/src/"
+
+    def body_div(hz):
+        return any(x.render().startswith("body-divergence-suspect") for x in hz)
+
+    # (a) multi-coddog c-combined: named sees 2 files, coddog fingerprints 3 -> undercount 2vs3,
+    #     and the hedge is KEPT on each sub-100 file (S123: most bodies may diverge).
+    hz = [
+        H.c_combined(["n_auxbus", "n_drvrNew"]),
+        H.coddog_mirror("n_auxbus.c", 99.99),
+        H.coddog_mirror("n_drvrNew.c", 99.99),
+        H.coddog_mirror("n_env.c", 99.99),
+    ]
+    pt._append_coddog_aux(hz, [SC + "n_auxbus.c", SC + "n_drvrNew.c", SC + "n_env.c"])
+    assert "c-combined-undercount:2vs3" in [x.render() for x in hz]
+    assert body_div(hz)  # multi-coddog pack keeps the hedge
+
+    # (b) clean single-fn n_audio_sc row (no pack hazard) -> body-div SUPPRESSED, no undercount.
+    hz2 = [H.coddog_mirror("n_auxbus.c", 99.99)]
+    pt._append_coddog_aux(hz2, [SC + "n_auxbus.c"])
+    assert not body_div(hz2)
+    assert not any(x.render().startswith("c-combined-undercount") for x in hz2)
+
+    # (c) single-file-pack n_audio_sc -> also suppressed.
+    hz3 = [
+        H.pack(pt.HAZARD_SINGLE_FILE_PACK, 2, ["a=x", "b=x"]),
+        H.coddog_mirror("n_save.c", 99.99),
+    ]
+    pt._append_coddog_aux(hz3, [SC + "n_save.c"])
+    assert not body_div(hz3)
+
+    # (d) a non-n_audio_sc single-fn coddog row KEEPS the hedge (libnusys S121/S127 FORCESTOP).
+    hz4 = [H.coddog_mirror("nucontrmbmgr.c", 99.99)]
+    pt._append_coddog_aux(hz4, ["/x/libnusys/src/nucontrmbmgr.c"])
+    assert body_div(hz4)
+
+
 def test_gbi_value_guard_needs_define(tmp_path, monkeypatch):
     """S83 retro #1: a mirror candidate using a GBI-value-guarded macro (OS_YIELD_DATA_SIZE) is
     flagged needs-define when NO guard microcode define is active, and clean when one is. Also

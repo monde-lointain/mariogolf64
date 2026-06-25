@@ -351,19 +351,6 @@
     "vram": "0x800521C0"
   },
   {
-    "band": "cold",
-    "func": "n_alAuxBusPull",
-    "hazards": "pack:8fn[n_alAuxBusPull=n_auxbus,n_alFxNew=n_drvrNew,alN_PVoiceNew=n_drvrNew,func_8009EA70=?,n_alEnvmixerParam=?,func_8009F08C=?,func_8009F2AC=?,func_8009F3EC=?],c-combined:2file[n_auxbus|n_drvrNew],calls-unplaced:n_alEnvmixerPull@0x8009EA70,rodata-jtbl:0x800D20F0,0x800D2120;owner-per-member,rodata-literal:0x800D2108,0x800D2110,0x800D2168,0x800D2170,0x800D2178,0x800D2180;extent-end=0x800D2188;carve-end=0x800D2200;owner-per-member",
-    "kind": "asm-flip",
-    "nfns": 8,
-    "pts": 13,
-    "rom": "0x798B0",
-    "score": -3784,
-    "size": 3984,
-    "upstream": "libnaudio",
-    "vram": "0x8009E4B0"
-  },
-  {
     "band": "-",
     "func": "play_sound_effect",
     "hazards": "pack:26fn[play_sound_effect=?,func_80050DA0=?,update_object_group_by_id=?,func_80050FC0=?,set_field_0x9E_for_object_group_if_type_matches=?,update_indexed_slot_at_0xCB_atomic=?,func_800510EC=?,func_80051100=?,func_80051164=?,func_800511D8=?,func_80051210=?,update_indexed_slot_at_0x60_atomic=?,bgm_tick=?,func_80051A08=?,bgm_request_stop=?,func_80051A88=?,func_80051AE4=?,func_80051B40=?,func_80051B9C=?,func_80051BFC=?,play_bgm_by_id=?,func_80051D8C=?,alSynNew=synthesizer,alSynDelete=syndelete,__freeParam=synthesizer,_freePVoice=synthesizer],c-combined:2file[syndelete|synthesizer]",
