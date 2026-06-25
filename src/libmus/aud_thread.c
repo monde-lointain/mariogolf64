@@ -36,10 +36,6 @@
 /* include current header file */
 #include "aud_thread.h"
 
-/* __MusIntThreadProcess is CARRIED as INCLUDE_ASM (MG64-custom body); needs the
- * macro */
-#include "include_asm.h"
-
 /* internal macros */
 #define AUDIO_STACKSIZE 0x2000 /* size of stack for thread (in bytes) */
 #define EXTRA_SAMPLES 30       /* ratio[%] of extra samples per frame */
@@ -54,14 +50,22 @@
 #define MICROCODE_DATA n_aspMainDataStart
 #endif
 
+/* The audio microcode text start (0x800B3F20, == n_aspMainTextStart) is placed
+   under the project's canonical boundary name rspbootTextEnd (rspboot text end
+   == aspMain text start); reference it directly for MICROCODE_CODE.
+   n_aspMainDataStart is placed. */
+extern long long int rspbootTextEnd[];
+#undef MICROCODE_CODE
+#define MICROCODE_CODE rspbootTextEnd
+
 /* internal data structures */
 typedef struct {
   short* data;
   int frame_samples;
 } audio_task_t;
 
-/* internal function prototypes (carried, see INCLUDE_ASM at end of file) */
-void __MusIntThreadProcess(void* ignored);
+/* internal function prototypes */
+static void __MusIntThreadProcess(void* ignored);
 
 /* internal workspace (drop-static-mirror: placed at curated/recovered main_bss
  * vrams) */
@@ -69,6 +73,15 @@ extern audio_task_t* g_mus_audio_tasks; /* audio_tasks        @ 0x800E72A4 */
 extern Acmd* g_mus_audio_command_list;  /* audio_command_list @ 0x800E72A8 */
 extern OSThread g_mus_audio_thread;     /* thread (func-static) @ 0x800E70F0 */
 extern u64* g_mus_audio_stack; /* stack_addr (func-static) @ 0x800E72A0 */
+
+/* thread-proc workspace: last_task is the stock func-static (drop-static);
+   paused + silence_buffer are the MG64 pause/mute globals.
+   __libmus_current_sched is declared in aud_sched.h. */
+extern audio_task_t*
+    g_mus_audio_last_task;    /* last_task (func-static) @ 0x800C7AE4 */
+extern u8 g_mus_audio_paused; /* MG64 pause flag        @ 0x800C7AE0 */
+extern u8
+    g_mus_audio_silence_buffer[0x10]; /* MG64 silence buffer    @ 0x800C7AE8 */
 
 /* global workspace (drop-def: placed at recovered main_bss vram 0x801B56A0) */
 extern ALGlobals __libmus_alglobals;
@@ -136,7 +149,78 @@ void __MusIntAudManInit(musConfig* config, int vsyncs_per_second, int fx_type) {
   osStartThread(&g_mus_audio_thread);
 }
 
-/* __MusIntThreadProcess: MG64-customized body (a pause/mute block on the byte
-   flag @0x800C7AE0 + sched-state globals @0x800C7AE4/AE8 not in the libmus 3.14
-   source) -> classical, carried S143. */
-INCLUDE_ASM("asm/nonmatchings/libmus/aud_thread", __MusIntThreadProcess);
+/*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
+  [INTERNAL FUNCTION]
+  __MusIntThreadProcess(ignored)
+
+  [Parameters]
+  ignored      ignored
+
+  [Explanation]
+  Audio thread. Loop forever process sound data and generating output. MG64 adds
+a pause/mute block: while paused, feed a silence buffer to the AI and skip
+synthesis.
+
+  [Return value]
+  NONE
+*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
+
+static void __MusIntThreadProcess(void* ignored) {
+  Acmd* cmdp;
+  s32 commands;
+  u32 task_count;
+  u32 samples;
+  u32 status;
+  audio_task_t* task;
+  musTask sched_task;
+
+  /* initialise */
+  sched_task.ucode = (u64*)MICROCODE_CODE;
+  sched_task.ucode_data = (u64*)MICROCODE_DATA;
+  sched_task.data = (u64*)g_mus_audio_command_list;
+  task_count = 0;
+
+  /* initialise scheduler functionality */
+  __MusIntSched_install();
+
+  /* infinite loop */
+  while (1) {
+    /* wait for frame sync message */
+    __MusIntSched_waitframe();
+
+    /* MG64-custom: while paused, output silence and skip this frame */
+    if (g_mus_audio_paused) {
+      osAiSetNextBuffer(g_mus_audio_silence_buffer, 0x10);
+      continue;
+    }
+
+    /* get AI parameters */
+    status = osAiGetStatus();
+    samples = osAiGetLength() >> 2;
+
+    /* check AI status */
+    if (status & AI_STATUS_FIFO_FULL) continue;
+
+    /* process dma buffers (find free ones) */
+    __MusIntDmaProcess();
+
+    /* set relevant output buffer */
+    if (g_mus_audio_last_task && commands)
+      osAiSetNextBuffer(g_mus_audio_last_task->data,
+                        g_mus_audio_last_task->frame_samples << 2);
+
+    /* call driver to generate audio commands and download samples */
+    task = &g_mus_audio_tasks[task_count];
+    task->frame_samples = __MusIntSamplesCurrent(samples);
+    cmdp = alAudioFrame(g_mus_audio_command_list, &commands,
+                        (short*)osVirtualToPhysical(task->data),
+                        task->frame_samples);
+    /* start audio task if required */
+    if (commands) {
+      sched_task.data_size = (cmdp - g_mus_audio_command_list) * sizeof(Acmd);
+      __MusIntSched_dotask(&sched_task);
+      g_mus_audio_last_task = task;
+    }
+    task_count = (task_count + 1) % NUM_OUTPUT_BUFFERS;
+  }
+}
