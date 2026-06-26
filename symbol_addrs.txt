@@ -382,6 +382,21 @@ g_mus_audio_silence_buffer = 0x800C7AE8; // size:0x10
 // 0x800C7ADC) are the .data-carve at rom 0xA2ED0 (0x10B, before the aud_samples carve @ 0xA2F00).
 __MusIntSchedInit = 0x8009DDC0; // rom:0x791C0 type:func
 sched_mem = 0x800E70E4; // size:0x4
+// libmus aud_dma.c, UPSTREAM names (S146, libmus v3.14 n64sdkmod = game rev; GAME-MODIFIED cart-only).
+// Drop-static block @ 0x800E70A0 (the file-statics: list ptrs, dma message buffers, sizes, msgQ, cart
+// handle). g_mus_dma_buffer_count @ 0x800C7AC0 is the MG64-added persisted buffer count (DmaInit stores
+// it, DmaProcess ages the flat dma_buffer_list[] under it). diskrom_handle @ 0x800E70DC is the dead
+// non-static N64DD global (cart-only rev strips its only ref) -> left unnamed/unreferenced.
+dma_buffer_head = 0x800E70A0; // size:0x4
+dma_buffer_free = 0x800E70A4; // size:0x4
+dma_buffer_list = 0x800E70A8; // size:0x4
+audio_IO_mess_buf = 0x800E70AC; // size:0x4
+audio_mess_buf = 0x800E70B0; // size:0x4
+audio_dma_size = 0x800E70B4; // size:0x4
+audio_dma_count = 0x800E70B8; // size:0x4
+audDMAMessageQ = 0x800E70C0; // size:0x18
+cartrom_handle = 0x800E70D8; // size:0x4
+g_mus_dma_buffer_count = 0x800C7AC0; // size:0x4
 // libnaudio n_audio_sc n_syn* setter family, UPSTREAM names (S129 header-enabler sprint).
 n_alSynSetPan = 0x800A0A90; // type:func
 n_alSynSetPitch = 0x800A0B20; // type:func

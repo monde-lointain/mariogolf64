@@ -135,7 +135,7 @@ segments:
       - [0x74890, c, main/func_80099490]
       - [0x748B0, asm]
       - [0x78330, asm]
-      - [0x78D10, asm]
+      - [0x78D10, c, libmus/aud_dma]
       - [0x791C0, c, libmus/aud_sched]
       - [0x79370, c, libmus/aud_thread]
       - [0x79640, c, libmus/lib_memory]
