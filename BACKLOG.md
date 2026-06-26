@@ -16,6 +16,28 @@ subordinate to the libultra goal. Target selection is `tools/pick_target.py` (sm
 the 8-point decompose gate fires on any seed ≥8. v2 classical track is active (since S11);
 mirror is the default, classical is first-class when the asm warrants it.
 
+**S146 — `aud_dma.c` COMPLETE (libmus DMA buffer mgr, game-modified cart-only) → md5-candidate; `src/libmus/` 100%.**
+Banked the S145 carry (`[0x78D10]`, the LAST libmus leaf asm subseg) FULLY as C — all 6 fns, ROM SHA-1
+== baserom. `src/libmus/` now 0 INCLUDE_ASM stubs (all 5 carved leaf files md5-candidate). **ASM-first
+overturned the carry-over's "4 stock + carry DmaSample" premise:** only `__CallBackDmaNew`/
+`__CallBackDmaProcess` pure stock (DDROM test intact) + `func_8009DBA0` an MG64-emptied `jr ra` stub
+(free at the gate); THREE game-modified — `__MusIntDmaInit` stock+1-insert (persists `dma_buffer_count`
+→ new `g_mus_dma_buffer_count`@0x800C7AC0), `__MusIntDmaProcess` 2nd-half rewritten (flat-array
+`keep_count` ageing under `osSetIntMask`, not the upstream linked-list free-walk), `__MusIntDmaSample`
+classical rewrite (cart-only, `g_mus_control_flag&1` first, `keep_count=0x20000001`, + an added
+min-`keep_count` eviction loop). DmaSample matched with 4 GCC-codegen levers (`docs/hazards.md#cross-jump-tail-merge`
+inverse-levers note): explicit `else` → branch flip; shared `goto` → block a false value-prop
+tail-merge; goto-skip → mid-fn failure-block; best-first operand order → load order. Enablers: subseg
+flip `[0x78D10]` + 10 symbol adds (9 drop-static bss @0x800E70A0 block + `g_mus_dma_buffer_count`
+drop-def). md5-candidate **203→204**; asm subsegs **88→87**. Quality 0/0/0/0; seed 8 / realized 10 /
+residual +2; regime mixed (FULLY banked). **Cross-repo follow-up:** 10 new symbols + correct stale
+ghidra `mus_dma_{cb_new,callback,sample}` → `__CallBack{DmaNew,DmaProcess}`/`__MusIntDmaSample` via
+`sync_decomp_names.py --import-from-decomp`. No carry-overs. Retro applied 4 of 4 (#1 ASM-verify-each-fn
+caveat; #2 sprint-plan auto-freeze classical/mixed; #3 gitignore `*.u`; #4 inverse-tail-merge 4-lever
+note). **The libmus carved-leaf tree is DONE; the next libmus units are the game-embedded player TUs
+(`[0x748B0]` player_api/player/player_fifo, `[0x78330]` CustomInit/player_fx bundled synth) — a
+separate src/main/ game-region-carve track, not carved leaves.**
+
 **S145 — `aud_sched.c` COMPLETE (libmus scheduler verbatim `.data`-carve mirror) → md5-candidate.**
 Split the last libmus asm pack `[0x78D10]` (aud_dma.c + aud_sched.c, the S144-flagged 2-file pack) at the
 upstream-file boundary (rom 0x791C0 / vram 0x8009DDC0, 16-aligned); banked the cleaner **aud_sched.c** (4
@@ -2342,7 +2364,12 @@ by `/sprint-plan`:
   (`docs/hazards.md#libmus-bundled-n_audio-duplicate`). Companion to the S140 coddog-callee-tell + S141 vendor-header pricing.
 
 - _(CLASSICAL/MIXED carry (S145 planned decompose remainder) — `aud_dma.c` (`[0x78D10, asm]`, the LAST
-  libmus asm subseg; banking it COMPLETES the libmus tree). NOT a verbatim mirror — GAME-MODIFIED, so it
+  libmus asm subseg; banking it COMPLETES the libmus tree). **RESOLVED + FULLY banked S146** — NOT the
+  planned mixed-partial: all 6 fns banked C, `src/libmus/` 100%. ASM-first overturned the "4 stock + carry
+  DmaSample" premise below: 3 of the "4 stock" were game-modified (DmaInit stock+1-insert, DmaProcess
+  2nd-half rewritten, DmaSample classical incl. an added eviction loop); DmaSample matched via 4
+  GCC-codegen levers (`docs/hazards.md#cross-jump-tail-merge` inverse-levers). The original checklist
+  below is retained for provenance. NOT a verbatim mirror — GAME-MODIFIED, so it
   was the heterogeneous-batch trim when S145 banked the clean aud_sched.c sibling. **Track: regime mixed
   (bank-stock-carry-custom likely).** **6 labels** (upstream n64sdkmod libmus 3.14 `aud_dma.c` has 5 source
   fns): `__MusIntDmaInit`@0x8009D910 (placed S143) + `__MusIntDmaProcess`@0x8009DA8C (placed S144) +

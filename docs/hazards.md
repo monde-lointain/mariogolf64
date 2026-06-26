@@ -2644,6 +2644,37 @@ structural noise (func_/ghidra naming), not a body change. Read the offset patte
 reordered vs uniform-frame-shift vs an extra store/branch with a new value) before assuming a
 game-modified body.
 
+**Companion to the sibling rule — ASM-verify EACH fn in a "mostly stock" mirror; a carry-over's per-fn
+"likely stock" label is a HYPOTHESIS, not a finding (S146).** The sibling rule above guards against
+OVER-pricing a carry ("custom body" that is really stock-plus-insert); the inverse UNDER-prices just as
+often — a carry-over checklist that pre-labels "the N stock fns mirror verbatim" can hide per-fn
+game-modification. S146 `aud_dma.c` was carried (S145) as "4 stock fns + 1 game-modified (DmaSample)";
+ASM-first found 3 of the "4 stock" diverged: `__MusIntDmaInit` stock+1-insert (persists a count global),
+`__MusIntDmaProcess`'s whole second half rewritten (a flat-array `keep_count` ageing pass under
+`osSetIntMask` replacing the upstream linked-list free-walk), `__MusIntDmaSample` heavy. All banked
+in-sprint, but the per-fn divergence WAS the work, not the lone labeled carry. **Disassemble and diff
+EVERY member fn vs the stock upstream before trusting a "likely stock" label** — the same per-fn
+ASM-authority (`#decompile-vs-asm-authority`) applied member-by-member, not file-wide.
+
+**The INVERSE lever-set — PREVENTING a false tail-merge in a game-modified body (S146).** The section
+top rules out a merge you cannot stop (it is a body artifact); this is the opposite — a merge GCC
+performs that you must BLOCK to match. S146 `__MusIntDmaSample`: an early `if (cond) return NULL;` plus
+a later `if (!free_buffer) return dma_buffer_head;` (where `free_buffer == dma_buffer_head` and
+`!free_buffer`, so GCC value-propagated the second to `return NULL`) got tail-merged into one block; the
+TARGET keeps them separate because its `return dma_buffer_head` block is SHARED with a third
+non-NULL-provable path, blocking the simplification. Four reusable KMC GCC 2.7.2 -O3 codegen levers, each
+verified against the ELF-disasm word-diff (count first, then per-instruction — 5 of 6 fns hit the target
+instr-COUNT on first compile, isolating the lone short/reordered fn fast):
+- **explicit `else`** on an early-return flips the condition's branch direction (`bnez`↔`beqz`): `if (c)
+  return; else x;` placed the return-block inline (target) where `if (c) return; x;` reordered it.
+- **a shared `goto fail;`** for two identical-tail failure returns merges them into ONE block BEFORE
+  value-prop can specialize one — so a `return GLOBAL` reached from a non-NULL path is neither simplified
+  to `return NULL` nor false-merged with an unrelated `return NULL`.
+- **goto-skip** (`…success path…; goto ok; fail: return X; ok: …`) reproduces a failure-block placed
+  MID-function (the target's `j <continue>` over the failure return), not pushed to the function end.
+- **compare operand order** (`a->f > b->f` vs `b->f < a->f`) controls which operand LOADS first inside a
+  min/compare loop.
+
 ## struct-init-loop (dup-store / dual-induction-var)
 
 **Trigger:** A near-verbatim mirror's **array-of-struct init loop** (`for(i){ arr[i].next = &arr[i+1];

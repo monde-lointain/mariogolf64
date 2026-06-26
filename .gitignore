@@ -103,3 +103,7 @@ tools/coddog/libmus_map.tsv
 tools/coddog/libnaudio_map.tsv
 tools/coddog/nuaulstl_map.tsv
 tools/coddog/audio_pins.tsv
+
+# Compiled-ucode build byproducts that build_audio_refs.sh (make coddog-sweep-audio)
+# leaks into the repo root (e.g. n_csq.u); no .u file is tracked (S146).
+*.u

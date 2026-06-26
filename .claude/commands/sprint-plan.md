@@ -157,9 +157,20 @@ Once the PO approves, perform the enablers, then confirm the scaffold still buil
 
 ## Step 8, write SPRINT.md and hand off
 
-On a green validation, write `SPRINT.md` (gitignored: ephemeral scratch and resume surface). Then run
-the `## Execution loop` (`CLAUDE.md`) inline over the committed backlog, one function at a time, no
-per-function PO stop. Each banked function appends a standup line + its suggestion buffer to
+On a green validation, write `SPRINT.md` (gitignored: ephemeral scratch and resume surface).
+
+**v2 freeze commit (classical/mixed regime only).** Before running the execution loop, if the
+committed regime is `classical` or `mixed`, commit the gate state as the seed freeze: stage the
+gate enablers (the `mariogolf64.yaml` flip, `symbol_addrs.txt` adds, and the `make extract`-regenerated
+`mariogolf64.ld` / `undefined_syms_auto.txt`) and commit with a message naming the seed and regime,
+e.g. `S<N> freeze: <increment>, seed <S> <classical|mixed>`. This locks the plan-time seed in git
+BEFORE any `src/` body lands, so the realized tier scored at `/sprint-review` cannot be retro-fitted
+(`SPRINT.md` is gitignored, so it is not a durable freeze on its own). A `mirror` regime has NO freeze
+commit (seed-only, re-derivable; logged to `VELOCITY.md` at review). S146 skipped this and banked in a
+single commit; the freeze is the anti-gaming guard the two-pass tier depends on.
+
+Then run the `## Execution loop` (`CLAUDE.md`) inline over the committed backlog, one function at a
+time, no per-function PO stop. Each banked function appends a standup line + its suggestion buffer to
 `SPRINT.md` and applies no tooling edits (those wait for the retro). Run `/sprint-review` when every
 committed item is banked or spiked/carried.
 
