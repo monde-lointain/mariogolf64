@@ -542,3 +542,49 @@ n_alMainBusPull = 0x800A1370; // type:func
 // pointers, defined in still-asm game bss; stay extern until the game lands).
 n_alGlobals = 0x800C7DB0; // size:0x4
 n_syn = 0x800C7DB4; // size:0x4
+
+// libmus symbols (libn_mus SUPPORT_NAUDIO music driver: DMA / samples /
+// scheduler / thread / heap mgr; ghidra names folded in, symbol_addrs wins).
+// The __MusInt* API + __libmus_current_sched are library-defined.
+__MusIntDmaInit = 0x8009D910; // type:func
+__MusIntDmaProcess = 0x8009DA8C; // type:func
+__MusIntSchedInit = 0x8009DDC0; // type:func
+__MusIntAudManInit = 0x8009DF70; // type:func
+__MusIntMemInit = 0x8009E240; // type:func
+__MusIntMemMalloc = 0x8009E28C; // type:func
+__MusIntMemRemaining = 0x8009E2BC; // type:func
+__MusIntMemGetHeapAddr = 0x8009E2D4; // type:func
+__MusIntMemSet = 0x8009E2E0; // type:func
+__MusIntMemMove = 0x8009E30C; // type:func
+__MusIntSamplesInit = 0x8009E380; // type:func
+__MusIntSamplesCurrent = 0x8009E424; // type:func
+__libmus_current_sched = 0x800C7ADC; // size:0x4
+// game-owned audio globals + the CustomInit hook (rom 0x78330) libmus
+// references; extern until the game lands.
+CustomInit = 0x8009CF30; // type:func
+g_mus_dma_buffer_count = 0x800C7AC0; // size:0x4
+g_mus_audio_paused = 0x800C7AE0; // size:0x1
+g_mus_audio_last_task = 0x800C7AE4; // size:0x4
+g_mus_audio_silence_buffer = 0x800C7AE8; // size:0x10
+dma_buffer_head = 0x800E70A0; // size:0x4
+dma_buffer_free = 0x800E70A4; // size:0x4
+dma_buffer_list = 0x800E70A8; // size:0x4
+audio_IO_mess_buf = 0x800E70AC; // size:0x4
+audio_mess_buf = 0x800E70B0; // size:0x4
+audio_dma_size = 0x800E70B4; // size:0x4
+audio_dma_count = 0x800E70B8; // size:0x4
+audDMAMessageQ = 0x800E70C0; // size:0x18
+cartrom_handle = 0x800E70D8; // size:0x4
+g_mus_sched_ptr = 0x800E70E0; // type:u32 size:0x4
+sched_mem = 0x800E70E4; // size:0x4
+g_mus_audio_thread = 0x800E70F0; // size:0x1B0
+g_mus_audio_stack = 0x800E72A0; // type:u32 size:0x4
+g_mus_audio_tasks = 0x800E72A4; // type:u32 size:0x4
+g_mus_audio_command_list = 0x800E72A8; // type:u32 size:0x4
+audio_heap = 0x800E72B0; // size:0x10
+g_mus_frame_samples = 0x800E72C0; // type:u32 size:0x4
+g_mus_frame_samples_min = 0x800E72C4; // type:u32 size:0x4
+g_mus_frame_samples_max = 0x800E72C8; // type:u32 size:0x4
+g_mus_extra_samples = 0x800E72CC; // type:u32 size:0x4
+g_mus_control_flag = 0x80132368; // type:u32 size:0x4
+__libmus_alglobals = 0x801B56A0; // size:0x50
