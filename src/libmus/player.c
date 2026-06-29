@@ -212,7 +212,11 @@ INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_cmd_vibrato_up);
 
 INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_cmd_vibrato_down);
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_cmd_vibrato_off);
+unsigned char* mus_cmd_vibrato_off(channel_t* cp, unsigned char* ptr) {
+  cp->vib_speed = 0;
+  cp->vibrato = 0;
+  return (ptr);
+}
 
 unsigned char* mus_cmd_length(channel_t* cp, unsigned char* ptr) {
   int length;
