@@ -8,7 +8,7 @@
  * driver state, defined elsewhere; both are non-null only between init and
  * close.
  */
-#include "n_synthInternals.h"
+#include "n_synthInternals.h"  // IWYU pragma: keep
 
 /*
  * Bring up the naudio library: adopt g as the globals block and build the

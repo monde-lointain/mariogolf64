@@ -11,7 +11,6 @@
  */
 
 #include "n_synthInternals.h"
-#include <os.h>
 #include <R4300.h>
 
 #ifndef MIN

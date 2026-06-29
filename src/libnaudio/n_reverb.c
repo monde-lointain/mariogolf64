@@ -11,9 +11,6 @@
  * fragments) in place of the full a* command sequences.
  */
 #include "n_synthInternals.h"
-#include <ultraerror.h>
-#include <os.h>
-#include <os_internal.h>
 
 /* Chorus LFO full-scale range multiplier (see CHORUSRATE handling). */
 #define RANGE 2.0
@@ -58,7 +55,8 @@ Acmd* n_alFxPull(s32 sampleOffset, Acmd* p) {
   s16* out_ptr;
   s16 gain;
   s16* prev_out_ptr = 0;
-  ALDelay *d, *pd;
+  ALDelay* d;
+  ALDelay* pd;
 #ifdef AUD_PROFILE
   lastCnt[++cnt_index] = osGetCount();
 #endif
@@ -228,10 +226,13 @@ s32 n_alFxParamHdl(void* filter, s32 paramID, void* param) {
 Acmd* _n_loadOutputBuffer(ALFx* r, ALDelay* d, s32 buff, Acmd* p) {
   Acmd* ptr = p;
 #ifndef N_MICRO
-  s32 ratio, count, rbuff = AL_TEMP_2;
+  s32 ratio;
+  s32 count;
+  s32 rbuff = AL_TEMP_2;
 #else
-  s32 ratio, count,
-      rbuff = N_AL_TEMP_2;  // scratch DMEM for the pre-resample load
+  s32 ratio;
+  s32 count;
+  s32 rbuff = N_AL_TEMP_2;  // scratch DMEM for the pre-resample load
 #endif
   s16* out_ptr;
   f32 fincount;
@@ -291,7 +292,8 @@ Acmd* _n_loadBuffer(ALFx* r, s16* curr_ptr, s32 buff, s32 count, Acmd* p) {
   Acmd* ptr = p;
   s32 after_end;
   s32 before_end;  // wrapped / pre-wrap chunk sample counts
-  s16 *updated_ptr, *delay_end;
+  s16* updated_ptr;
+  s16* delay_end;
 #ifdef AUD_PROFILE
   lastCnt[++cnt_index] = osGetCount();
 #endif
@@ -338,7 +340,8 @@ Acmd* _n_saveBuffer(ALFx* r, s16* curr_ptr, s32 buff, Acmd* p) {
   Acmd* ptr = p;
   s32 after_end;
   s32 before_end;  // wrapped / pre-wrap chunk sample counts
-  s16 *updated_ptr, *delay_end;
+  s16* updated_ptr;
+  s16* delay_end;
 #ifdef AUD_PROFILE
   lastCnt[++cnt_index] = osGetCount();
 #endif

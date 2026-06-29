@@ -4,7 +4,7 @@
  * naudio synthesizer driver: tear-down. Detaches every client from the global
  * synthesizer instance so the audio frame builder stops servicing them.
  */
-#include "n_synthInternals.h"
+#include "n_synthInternals.h"  // IWYU pragma: keep
 
 /*
  * Shut the synthesizer down by emptying its client list: clearing the head of

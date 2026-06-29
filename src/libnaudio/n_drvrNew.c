@@ -8,7 +8,6 @@
  * All storage comes from the audio heap; both routines run at synthesizer init.
  */
 #include "n_synthInternals.h"
-#include <os.h>
 
 /* Fixed-point unit (1.0 == 16384) for the low-pass filter coefficients. Unused
    in this file: it is carried over from the drvrnew.c source this mirrors,

@@ -8,7 +8,6 @@
  */
 
 #include "n_synthInternals.h"
-#include <os.h>
 
 /*
  * Builds the command list that produces one frame of finished stereo audio:

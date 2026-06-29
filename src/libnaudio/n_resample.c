@@ -11,7 +11,6 @@
  */
 
 #include "n_synthInternals.h"
-#include <os.h>
 
 /* Profiling counters; compiled in only for instrumented AUD_PROFILE builds. */
 #ifdef AUD_PROFILE

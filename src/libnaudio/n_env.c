@@ -11,7 +11,6 @@
  * n_aEnvMixer) over a fixed 184-sample frame.
  */
 #include "n_synthInternals.h"
-#include <os.h>
 #ifdef _DEBUG
 #include <assert.h>
 #endif
@@ -496,7 +495,9 @@ static s16 _getRate(f64 vol, f64 tgt, s32 count, u16* ratel) {
   static s16 _getRate(f64 vol, f64 tgt, s32 count, u16 * ratel) {
     s16 s;
     s16 tmp;
-    f64 invn, a, f;
+    f64 invn;
+    f64 a;
+    f64 f;
 #ifdef AUD_PROFILE
     lastCnt[++cnt_index] = osGetCount();
 #endif

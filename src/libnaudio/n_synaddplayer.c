@@ -6,8 +6,8 @@
  * when its next scheduled parameter change comes due; this routine links the
  * player into the synth's client list.
  */
-#include <os_internal.h>
-#include "n_synthInternals.h"
+#include <os_internal.h>       // IWYU pragma: keep
+#include "n_synthInternals.h"  // IWYU pragma: keep
 
 /*
  * Add a client to the head of the synthesizer's player list. The list is walked

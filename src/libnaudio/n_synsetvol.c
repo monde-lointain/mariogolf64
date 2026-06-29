@@ -6,8 +6,6 @@
  * record and enqueues it on the voice's envmixer, which slews the level toward
  * the target over the requested interval starting at the next synthesis frame.
  */
-#include <os_internal.h>
-#include <ultraerror.h>
 #include "n_synthInternals.h"
 
 /*

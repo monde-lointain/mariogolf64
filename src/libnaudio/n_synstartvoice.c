@@ -6,8 +6,6 @@
  * record and enqueues it on the voice's envmixer so playback begins at the next
  * synthesis frame.
  */
-#include <os_internal.h>
-#include <ultraerror.h>
 #include "n_synthInternals.h"
 
 /*

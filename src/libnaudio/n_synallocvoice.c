@@ -7,8 +7,6 @@
  * Stealing fades the displaced voice out and schedules its stop so the swap is
  * click-free.
  */
-#include <os_internal.h>
-#include <ultraerror.h>
 #include "n_synthInternals.h"
 
 static s32 _allocatePVoice(N_PVoice** pvoice, s16 priority);
