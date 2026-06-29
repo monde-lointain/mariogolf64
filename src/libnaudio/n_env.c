@@ -433,8 +433,14 @@ static Acmd* _pullSubFrame(N_PVoice* filter, s16* inp, s16* outp, s32 outCount,
 #define MANT_MASK 0x807fffff
 static s16 _getRate(f64 vol, f64 tgt, s32 count, u16* ratel) {
   s16 s;
-  f64 invn = 1.0 / count, eps, a, fs, mant;
-  s32 i_invn, ex, indx;
+  f64 invn = 1.0 / count;
+  f64 eps;
+  f64 a;
+  f64 fs;
+  f64 mant;
+  s32 i_invn;
+  s32 ex;
+  s32 indx;
 #ifdef AUD_PROFILE
   lastCnt[++cnt_index] = osGetCount();
 #endif
@@ -552,7 +558,8 @@ static s16 _getRate(f64 vol, f64 tgt, s32 count, u16* ratel) {
  */
 #ifndef N_MICRO
 static f32 _getVol(f32 ivol, s32 samples, s16 ratem, u16 ratel) {
-  f32 r, a;
+  f32 r;
+  f32 a;
   s32 i;
 #ifdef AUD_PROFILE
   lastCnt[++cnt_index] = osGetCount();
