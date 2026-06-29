@@ -107,12 +107,13 @@ include mk/src.mk
 # asm/data/*/*.s catches nested textbin subsegs (e.g. asm/data/rsp/rspboot.s from
 # `[..., textbin, rsp/rspboot]`); kept as a targeted wildcard, NOT `find asm`, so
 # the asm/nonmatchings/ scratch .s are never swept into the ROM build.
-# `! -name '*.inc.c'` drops vendored body-includes (e.g. the n_audio_sc
-# `inc/*.inc.c` fragments `#include`d inside a function body): they are not
-# standalone TUs and must not be compiled as their own objects.
+# Vendored body-includes (e.g. the n_audio_sc `inc/*.inc` fragments `#include`d
+# inside a function body) use the `.inc` extension, so `find -name '*.c'` never
+# sweeps them: they are not standalone TUs and must not be compiled as their own
+# objects.
 ASM_FILES := $(wildcard $(ASM_DIR)/*.s) $(wildcard $(ASM_DIR)/data/*.s) $(wildcard $(ASM_DIR)/data/*/*.s)
 BIN_FILES := $(wildcard $(ASSETS_DIR)/*.bin)
-C_FILES := $(shell find $(SRC_DIR) -name '*.c' ! -name '*.inc.c')
+C_FILES := $(shell find $(SRC_DIR) -name '*.c')
 SRC_ASM_FILES := $(shell find $(SRC_DIR) -name '*.s')
 
 ASM_O_FILES := $(patsubst $(ASM_DIR)/%.s,$(BUILD_DIR)/$(ASM_DIR)/%.o,$(ASM_FILES))

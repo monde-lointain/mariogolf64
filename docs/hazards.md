@@ -1070,15 +1070,19 @@ gate-time re-diagnosis (S49 guint.h, S53 PR-band, S54 sprintf's `xstdio.h`/`stri
 `#include "inc/<x>.inc.c"` in the `#else` of an `#ifdef N_MICRO`, where the fragment is a few bare
 statements (`n_aInterleave(ptr++); n_aSaveBuffer(...);`), not a TU. Three rules:
 - **Vendorable, not `blk`.** The fragment lives in the upstream `src/inc/` tree, so it is a +1
-  `needs-copy` enabler like any source-private header, copied source-relative next to the mirror
-  (`inc/n_save_add01.inc.c` → `src/libnaudio/inc/`). `include_is_vendorable` matches it by its full
-  source-relative path under `UPSTREAM_SRC_ROOTS` (the n_audio_sc `src/` is registered there), so it
-  no longer false-flags `blk`. Before S133 the detector scanned only `.h` basenames and missed the
+  `needs-copy` enabler like any source-private header, copied source-relative next to the mirror, but
+  **renamed `.inc.c` → `.inc` locally** (upstream `inc/n_save_add01.inc.c` → `src/libnaudio/inc/`
+  `n_save_add01.inc`). `include_is_vendorable` matches the upstream `#include "inc/<x>.inc.c"` by its
+  full source-relative path under `UPSTREAM_SRC_ROOTS` (the n_audio_sc `src/` is registered there), so
+  it no longer false-flags `blk`. Before S133 the detector scanned only `.h` basenames and missed the
   whole inc set; that masked it as a DoR reject when it was a 1pt cp.
-- **NOT a standalone TU.** The build's source discovery is `find $(SRC_DIR) -name '*.c'`, which would
-  sweep the fragment in and try to compile it (`parse error before '++'`). The Makefile excludes it
-  with `! -name '*.inc.c'`. Any new body-include MUST use the `.inc.c` suffix so this exclusion
-  catches it.
+- **NOT a standalone TU.** The build's source discovery is `find $(SRC_DIR) -name '*.c'`, so vendor
+  the local copy with the **`.inc` extension** (not `.c`/`.inc.c`): `find -name '*.c'` then never
+  sweeps it in as a standalone object (it is a few bare statements, `parse error before '++'` if
+  compiled alone). Update the host `.c`'s `#include` to the `.inc` name to match. The `.inc` extension
+  also keeps clang-tidy's `bugprone-suspicious-include` quiet — a `.c` include trips it. (The `.inc`
+  rename (2026-06-29) retired the prior `.inc.c` local suffix and the Makefile `! -name '*.inc.c'`
+  exclusion.)
 - **Do NOT clang-format the fragment.** It is a body-include with function-body indentation; running
   `clang-format-22` on it standalone reindents to column 0 (it parses as a TU). Keep it verbatim;
   codegen is unaffected (preprocessor text-inclusion, whitespace-irrelevant). Format only the host
