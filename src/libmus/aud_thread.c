@@ -1,19 +1,15 @@
-
-/*************************************************************
-
-  aud_thread.c : Nintendo 64 Music Tools Programmers Library
-  (c) Copyright 1997/1998, Software Creations (Holdings) Ltd.
-
-  Version 3.14
-
-  Music library thread base audio manager.
-
-**************************************************************/
-
-/* include configuartion */
+/*
+ * aud_thread.c
+ *
+ * libmus audio manager and its OS thread. __MusIntAudManInit builds the audio
+ * synthesis driver (alInit), sizes per-frame sample timing, allocates the RSP
+ * command list, the round-robin output buffers, and the thread stack, then
+ * creates and starts the audio thread. __MusIntThreadProcess is that thread:
+ * once per video retrace it hands the buffer it synthesized last frame to the
+ * audio interface, builds the next frame's audio command list, and dispatches
+ * the RSP audio task.
+ */
 #include "libmus_config.h"
-
-/* include system headers */
 #include <ultra64.h>
 #ifndef SUPPORT_NAUDIO
 #include <libaudio.h>
@@ -21,27 +17,29 @@
 #include <n_libaudio_sc.h>
 #include <n_libaudio_sn_sc.h>
 #endif
-
-/* include other header files */
 #include "libmus.h"
 #include "lib_memory.h"
 #include "aud_sched.h"
 #include "aud_dma.h"
 #include "aud_samples.h"
-
 #ifdef SUPPORT_FXCHANGE
 #include "player_fx.h"
 #endif
-
-/* include current header file */
 #include "aud_thread.h"
 
-/* internal macros */
-#define AUDIO_STACKSIZE 0x2000 /* size of stack for thread (in bytes) */
-#define EXTRA_SAMPLES 30       /* ratio[%] of extra samples per frame */
-#define EXTRA_SAMPLES_N 20     /* ratio[%] of extra eamples (if n_audio) */
-#define NUM_OUTPUT_BUFFERS 3   /* number of output buffers */
+// Audio thread stack size, in bytes.
+#define AUDIO_STACKSIZE 0x2000
 
+// Per-frame synth headroom, expressed as a percentage of the nominal sample
+// count (applied as samples * rate / 100); the libaudio and naudio builds use
+// different margins.
+#define EXTRA_SAMPLES 30
+#define EXTRA_SAMPLES_N 20
+
+// Triple-buffered output: one playing, one queued, one being filled.
+#define NUM_OUTPUT_BUFFERS 3
+
+// Audio synthesis microcode symbols, selected by build (libaudio vs n_audio).
 #ifndef SUPPORT_NAUDIO
 #define MICROCODE_CODE aspMainTextStart
 #define MICROCODE_DATA aspMainDataStart
@@ -49,66 +47,47 @@
 #define MICROCODE_CODE n_aspMainTextStart
 #define MICROCODE_DATA n_aspMainDataStart
 #endif
-
-/* The audio microcode text start (0x800B3F20, == n_aspMainTextStart) is placed
-   under the project's canonical boundary name rspbootTextEnd (rspboot text end
-   == aspMain text start); reference it directly for MICROCODE_CODE.
-   n_aspMainDataStart is placed. */
 extern long long int rspbootTextEnd[];
+
+// Build-specific override: this ROM links the audio microcode text immediately
+// after the rspboot text, so the task's microcode pointer is taken as the end
+// of rspboot rather than the aspMain start symbol. Only the code pointer is
+// redirected; MICROCODE_DATA still names the aspMain data symbol.
 #undef MICROCODE_CODE
 #define MICROCODE_CODE rspbootTextEnd
 
-/* internal data structures */
+/* One synthesized output frame: its sample buffer and the count it holds. */
 typedef struct {
   short* data;
   int frame_samples;
 } audio_task_t;
 
-/* internal function prototypes */
 static void __MusIntThreadProcess(void* ignored);
 
-/* internal workspace (drop-static-mirror: placed at curated/recovered main_bss
- * vrams) */
-extern audio_task_t* g_mus_audio_tasks; /* audio_tasks        @ 0x800E72A4 */
-extern Acmd* g_mus_audio_command_list;  /* audio_command_list @ 0x800E72A8 */
-extern OSThread g_mus_audio_thread;     /* thread (func-static) @ 0x800E70F0 */
-extern u64* g_mus_audio_stack; /* stack_addr (func-static) @ 0x800E72A0 */
-
-/* thread-proc workspace: last_task is the stock func-static (drop-static);
-   paused + silence_buffer are the MG64 pause/mute globals.
-   __libmus_current_sched is declared in aud_sched.h. */
-extern audio_task_t*
-    g_mus_audio_last_task;    /* last_task (func-static) @ 0x800C7AE4 */
-extern u8 g_mus_audio_paused; /* MG64 pause flag        @ 0x800C7AE0 */
-extern u8
-    g_mus_audio_silence_buffer[0x10]; /* MG64 silence buffer    @ 0x800C7AE8 */
-
-/* global workspace (drop-def: placed at recovered main_bss vram 0x801B56A0) */
+extern audio_task_t* g_mus_audio_tasks;
+extern Acmd* g_mus_audio_command_list;
+extern OSThread g_mus_audio_thread;
+extern u64* g_mus_audio_stack;
+extern audio_task_t* g_mus_audio_last_task;
+extern u8 g_mus_audio_paused;
+extern u8 g_mus_audio_silence_buffer[0x10];
 extern ALGlobals __libmus_alglobals;
 
-/*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
-  [EXTERNAL FUNCTION]
-  __MusIntAudManInit(config, vsyncs_per_second, fx_type)
-
-  [Parameters]
-  config       address of library configuration structure
-  vsyncs_per_second  number of video refreshes per seconds
-  fx_type      audio library effect type
-
-  [Explanation]
-  Initialise audio thread and all audio managment functionality.
-
-  [Return value]
-  NONE
-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
-
+/*
+ * Audio manager setup: stand up the audio subsystem from the caller's
+ * musConfig. Configure and initialize the synthesis driver, work out the
+ * per-frame sample budget, allocate the command list / output buffers / thread
+ * stack, then create and start the audio manager thread.
+ */
 void __MusIntAudManInit(musConfig* config, int vsyncs_per_second, int fx_type) {
   u32 i;
   ALSynConfig syn_config;
   u32 extra_rate;
   u32 samples_per_frame;
 
-  /* setup syn configuartion structure */
+  // Translate the public config into a synthesis config. Virtual and physical
+  // voice counts are both the requested channel count; osAiSetFrequency
+  // programs the audio interface and returns the actual rate it could achieve.
   syn_config.maxVVoices = syn_config.maxPVoices = config->channels;
   syn_config.maxUpdates = config->syn_updates;
   syn_config.dmaproc =
@@ -116,32 +95,29 @@ void __MusIntAudManInit(musConfig* config, int vsyncs_per_second, int fx_type) {
   syn_config.fxType = fx_type;
   syn_config.outputRate = osAiSetFrequency(config->syn_output_rate);
   syn_config.heap = __MusIntMemGetHeapAddr();
-
-  /* initialise syn driver */
   alInit(&__libmus_alglobals, &syn_config);
 
-  /* initialise sample buffer manager */
+  // The headroom percentage differs between the libaudio and n_audio builds.
 #ifndef SUPPORT_NAUDIO
   extra_rate = EXTRA_SAMPLES;
 #else
   extra_rate = EXTRA_SAMPLES_N;
 #endif
-
   samples_per_frame = __MusIntSamplesInit((u32)config->syn_retraceCount,
                                           (u32)syn_config.outputRate,
                                           (u32)vsyncs_per_second, extra_rate);
 
-  /* allocate audio command list */
+  // Allocate the RSP command list and the output buffers. Each output buffer
+  // holds samples_per_frame stereo 16-bit samples (4 bytes apiece).
   g_mus_audio_command_list =
       (Acmd*)__MusIntMemMalloc(config->syn_rsp_cmds * sizeof(Acmd));
-
-  /* initialise task control structures */
   g_mus_audio_tasks =
       __MusIntMemMalloc(NUM_OUTPUT_BUFFERS * sizeof(audio_task_t));
   for (i = 0; i < NUM_OUTPUT_BUFFERS; i++)
     g_mus_audio_tasks[i].data = __MusIntMemMalloc(4 * samples_per_frame);
 
-  /* create and start thread */
+  // Allocate the stack and launch the audio thread. The stack grows down, so
+  // the entry stack pointer is the top of the freshly allocated block.
   g_mus_audio_stack = __MusIntMemMalloc(AUDIO_STACKSIZE);
   osCreateThread(&g_mus_audio_thread, 3, __MusIntThreadProcess, 0,
                  (void*)(g_mus_audio_stack + AUDIO_STACKSIZE / sizeof(u64)),
@@ -149,22 +125,12 @@ void __MusIntAudManInit(musConfig* config, int vsyncs_per_second, int fx_type) {
   osStartThread(&g_mus_audio_thread);
 }
 
-/*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
-  [INTERNAL FUNCTION]
-  __MusIntThreadProcess(ignored)
-
-  [Parameters]
-  ignored      ignored
-
-  [Explanation]
-  Audio thread. Loop forever process sound data and generating output. MG64 adds
-a pause/mute block: while paused, feed a silence buffer to the AI and skip
-synthesis.
-
-  [Return value]
-  NONE
-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
-
+/*
+ * Audio manager thread body: after installing the scheduler it loops forever,
+ * synthesizing one audio frame per video retrace: output the previous frame's
+ * buffer, build the next command list, dispatch the RSP audio task, and rotate
+ * through the output buffers. The argument is unused.
+ */
 static void __MusIntThreadProcess(void* ignored) {
   Acmd* cmdp;
   s32 commands;
@@ -174,48 +140,42 @@ static void __MusIntThreadProcess(void* ignored) {
   audio_task_t* task;
   musTask sched_task;
 
-  /* initialise */
+  // Constant parts of every dispatched task: the microcode and command list.
   sched_task.ucode = (u64*)MICROCODE_CODE;
   sched_task.ucode_data = (u64*)MICROCODE_DATA;
   sched_task.data = (u64*)g_mus_audio_command_list;
   task_count = 0;
-
-  /* initialise scheduler functionality */
   __MusIntSched_install();
-
-  /* infinite loop */
   while (1) {
-    /* wait for frame sync message */
     __MusIntSched_waitframe();
 
-    /* MG64-custom: while paused, output silence and skip this frame */
+    // While paused, keep the audio interface fed with a buffer of silence.
     if (g_mus_audio_paused) {
       osAiSetNextBuffer(g_mus_audio_silence_buffer, 0x10);
       continue;
     }
 
-    /* get AI parameters */
+    // AI backlog: length in bytes, converted to samples (4 bytes each).
     status = osAiGetStatus();
     samples = osAiGetLength() >> 2;
-
-    /* check AI status */
     if (status & AI_STATUS_FIFO_FULL) continue;
-
-    /* process dma buffers (find free ones) */
     __MusIntDmaProcess();
 
-    /* set relevant output buffer */
+    // Queue the buffer synthesized last frame for playback. commands carries
+    // the previous frame's alAudioFrame count; g_mus_audio_last_task is NULL
+    // until the first task runs, so this is skipped on the first frame.
     if (g_mus_audio_last_task && commands)
       osAiSetNextBuffer(g_mus_audio_last_task->data,
                         g_mus_audio_last_task->frame_samples << 2);
 
-    /* call driver to generate audio commands and download samples */
+    // Pick this frame's output buffer and decide how many samples to make.
     task = &g_mus_audio_tasks[task_count];
     task->frame_samples = __MusIntSamplesCurrent(samples);
     cmdp = alAudioFrame(g_mus_audio_command_list, &commands,
                         (short*)osVirtualToPhysical(task->data),
                         task->frame_samples);
-    /* start audio task if required */
+
+    // Dispatch the RSP task only if synthesis actually produced commands.
     if (commands) {
       sched_task.data_size = (cmdp - g_mus_audio_command_list) * sizeof(Acmd);
       __MusIntSched_dotask(&sched_task);
