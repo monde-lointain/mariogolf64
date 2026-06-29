@@ -408,6 +408,7 @@ segments:
       - [0xAC770, rodata]
       - [0xACAD0, rodata]
       - [0xACD00, rodata]
+      - [0xAD450, .rodata, libmus/player]
       - [0xAD490, rodata]
       - [0xAD4F0, .rodata, libnaudio/n_drvrNew]
       - [0xAD520, .rodata, libnaudio/n_env]

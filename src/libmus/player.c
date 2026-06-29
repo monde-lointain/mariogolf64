@@ -187,7 +187,70 @@ unsigned char* mus_cmd_port_off(channel_t* cp, unsigned char* ptr) {
   return (ptr);
 }
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_cmd_default_adsr);
+unsigned char* mus_cmd_default_adsr(channel_t* cp, unsigned char* ptr) {
+  unsigned char value;
+
+  // get envelope speed...
+  value = *ptr++;
+  if (value == 0)  // cannot be zero!!!
+    value = 1;
+  cp->env_speed = value;
+  cp->env_speed_calc = 1024 / value;
+
+  // get envelope initial volume level...
+  cp->env_init_vol = *ptr++;
+
+  // get attack speed...
+  value = *ptr++;
+#ifdef _AUDIODEBUG
+  if (value == 0) {
+    osSyncPrintf(
+        "PLAYER_COMMANDS.C: Fdefa() attempting to set speed of zero.\n");
+    value = 1;
+  }
+#endif
+  cp->env_attack_speed = value;
+
+  // get peak volume...
+  cp->env_max_vol = *ptr++;
+
+  // get attack precalc value...
+  cp->env_attack_calc =
+      (1.0 / ((float)value)) * ((float)(cp->env_max_vol - cp->env_init_vol));
+
+  // get decay speed...
+  value = *ptr++;
+#ifdef _AUDIODEBUG
+  if (value == 0) {
+    osSyncPrintf(
+        "PLAYER_COMMANDS.C: Fdefa() attempting to set decay speed of zero.\n");
+    value = 1;
+  }
+#endif
+  cp->env_decay_speed = value;
+
+  // get sustain volume level...
+  cp->env_sustain_vol = *ptr++;
+
+  // get sustain precalc value...
+  cp->env_decay_calc =
+      (1.0 / ((float)value)) * ((float)(cp->env_sustain_vol - cp->env_max_vol));
+
+  // get release speed...
+  value = *ptr++;
+#ifdef _AUDIODEBUG
+  if (value == 0) {
+    osSyncPrintf(
+        "PLAYER_COMMANDS.C: Fdefa() attempting to set release speed of "
+        "zero.\n");
+    value = 1;
+  }
+#endif
+  cp->env_release_speed = value;
+  cp->env_release_calc = 1.0 / ((float)value);
+
+  return (ptr);
+}
 
 INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_cmd_tempo);
 
@@ -208,9 +271,21 @@ unsigned char* mus_cmd_cutoff(channel_t* cp, unsigned char* ptr) {
   return (ptr);
 }
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_cmd_vibrato_up);
+unsigned char* mus_cmd_vibrato_up(channel_t* cp, unsigned char* ptr) {
+  cp->vib_delay = *ptr++;
+  cp->vib_speed = *ptr++;
+  cp->vib_amount = ((float)*ptr++) / 50.0;
+  cp->vib_precalc = (2 * 3.1415926) / (float)cp->vib_speed;
+  return (ptr);
+}
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_cmd_vibrato_down);
+unsigned char* mus_cmd_vibrato_down(channel_t* cp, unsigned char* ptr) {
+  cp->vib_delay = *ptr++;
+  cp->vib_speed = *ptr++;
+  cp->vib_amount = (-((float)*ptr++)) / 50.0;
+  cp->vib_precalc = (2 * 3.1415926) / (float)cp->vib_speed;
+  return (ptr);
+}
 
 unsigned char* mus_cmd_vibrato_off(channel_t* cp, unsigned char* ptr) {
   cp->vib_speed = 0;
@@ -246,7 +321,19 @@ unsigned char* mus_cmd_ignore_transpose(channel_t* cp, unsigned char* ptr) {
   return (ptr);
 }
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_cmd_distort);
+unsigned char* mus_cmd_distort(channel_t* cp, unsigned char* ptr) {
+  int c;
+  float f;
+
+  c = (int)(*ptr++);
+  if (c & 0x80) c |= 0xffffff00;  // signed chars don't work
+  f = (float)(c) / 100.0;
+
+  cp->freqoffset -= cp->distort;
+  cp->freqoffset += f;
+  cp->distort = f;
+  return (ptr);
+}
 
 unsigned char* mus_cmd_env_off(channel_t* cp, unsigned char* ptr) {
   cp->env_trigger_off = 1;
@@ -330,7 +417,11 @@ unsigned char* mus_cmd_volume(channel_t* cp, unsigned char* ptr) {
 
 INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_cmd_start_fx);
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_cmd_bend_range);
+unsigned char* mus_cmd_bend_range(channel_t* cp, unsigned char* ptr) {
+  cp->bendrange = (float)(*ptr++) * (1.0 / 64.0);
+  cp->pitchbend_precalc = cp->pitchbend * cp->bendrange;
+  return (ptr);
+}
 
 INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_cmd_sweep);
 
