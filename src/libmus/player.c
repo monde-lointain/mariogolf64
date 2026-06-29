@@ -355,11 +355,53 @@ unsigned char* mus_cmd_trigger_on(channel_t* cp, unsigned char* ptr) {
   return (ptr);
 }
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_cmd_for);
+unsigned char* mus_cmd_for(channel_t* cp, unsigned char* ptr) {
+  int index;
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_cmd_next);
+  index = cp->for_stack_count;
+  cp->for_count[index] = *ptr++;
+  cp->for_stack[index] = ptr;
+  cp->for_stackvol[index] = cp->pvolume;
+  cp->for_stackpb[index] = cp->ppitchbend;
+  cp->for_volume[index] = cp->volume;
+  cp->for_pitchbend[index] = cp->pitchbend;
+  cp->for_vol_count[index] = cp->cont_vol_repeat_count;
+  cp->for_pb_count[index] = cp->cont_pb_repeat_count;
+  cp->for_stack_count++;
+  return (ptr);
+}
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_cmd_wobble);
+unsigned char* mus_cmd_next(channel_t* cp, unsigned char* ptr) {
+  int index;
+
+  index = cp->for_stack_count - 1;
+  /* infinite loop? */
+  if (cp->for_count[index] != 0xff) { /* still looping? */
+    if (--(cp->for_count[index]) == 0) {
+      cp->for_stack_count = index;
+      index = -1;
+    }
+  }
+  /* unstack pointers if necessary */
+  if (index > -1) {
+    ptr = cp->for_stack[index];
+    cp->pvolume = cp->for_stackvol[index];
+    cp->ppitchbend = cp->for_stackpb[index];
+    cp->volume = cp->for_volume[index];
+    cp->pitchbend = cp->for_pitchbend[index];
+    cp->cont_vol_repeat_count = cp->for_vol_count[index];
+    cp->cont_pb_repeat_count = cp->for_pb_count[index];
+    cp->pitchbend_precalc = cp->pitchbend * cp->bendrange;
+  }
+  return (ptr);
+}
+
+unsigned char* mus_cmd_wobble(channel_t* cp, unsigned char* ptr) {
+  cp->wobble_amount = *ptr++;
+  cp->wobble_on_speed = *ptr++;
+  cp->wobble_off_speed = *ptr++;
+  return (ptr);
+}
 
 unsigned char* mus_cmd_wobble_off(channel_t* cp, unsigned char* ptr) {
   cp->wobble_on_speed = 0;
@@ -398,11 +440,45 @@ unsigned char* mus_cmd_drums_off(channel_t* cp, unsigned char* ptr) {
   return (ptr);
 }
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_cmd_print);
+unsigned char* mus_cmd_print(channel_t* cp, unsigned char* ptr) {
+#ifdef _AUDIODEBUG
+  osSyncPrintf("PLAYER_COMMANDS.C: Fprint() -  %d (channel frame=%d)\n", *ptr++,
+               cp->channel_frame);
+  return (ptr);
+#else
+  ptr++;
+  return (ptr);
+#endif
+}
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_cmd_goto);
+unsigned char* mus_cmd_goto(channel_t* cp, unsigned char* ptr) {
+  int off, off1;
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_cmd_reverb);
+  /* 2 bytes for song offset */
+  off1 = *ptr++ << 8;
+  off1 += *ptr++;
+
+  /* get volume offset BEFORE updating pointer */
+  /* 2 bytes for volume offset (never inside a run length bit) */
+  off = *ptr++ << 8;
+  off += *ptr++;
+  cp->pvolume = cp->pvolumebase + off;
+  cp->cont_vol_repeat_count = 1;
+
+  /* get pitchbend offset BEFORE updating pointer */
+  /* 2 bytes for pitchbend offset (never inside a run length bit) */
+  off = *ptr++ << 8;
+  off += *ptr++;
+  cp->ppitchbend = cp->ppitchbendbase + off;
+  cp->cont_pb_repeat_count = 1;
+
+  return (cp->pbase + off1);
+}
+
+unsigned char* mus_cmd_reverb(channel_t* cp, unsigned char* ptr) {
+  cp->reverb = *ptr++;
+  return (ptr);
+}
 
 INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_cmd_rand_note);
 
@@ -423,7 +499,10 @@ unsigned char* mus_cmd_bend_range(channel_t* cp, unsigned char* ptr) {
   return (ptr);
 }
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_cmd_sweep);
+unsigned char* mus_cmd_sweep(channel_t* cp, unsigned char* ptr) {
+  cp->sweep_speed = *ptr++;
+  return (ptr);
+}
 
 INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_cmd_change_fx);
 
