@@ -23,3 +23,17 @@ CompileFlags:
     - -Isrc/libnaudio
     - -Iinclude/libnaudio
     - -Iinclude/libultra/PR
+    - -DN_MICRO=1
+---
+If:
+  PathMatch: src/libmus/.*
+CompileFlags:
+  Add:
+    - -Isrc/libmus
+    - -Iinclude/libmus/PR
+    - -Iinclude/libmus
+    - -Iinclude/libnualstl
+    - -Iinclude/libnaudio
+    - -Iinclude/libultra/PR
+    - -DSUPPORT_NAUDIO
+    - -U_FINALROM
