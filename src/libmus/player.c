@@ -23,6 +23,19 @@
 #include "player_fx.h"
 #endif
 
+// player.c file-scope statics, placed in BSS and referenced via their curated
+// ghidra names while this TU is a partial mixed carve. #define-aliased to the
+// upstream names so banked bodies stay verbatim (these become file-scope defs
+// once the full TU banks).
+extern int g_mus_channel_count;
+extern channel_t* g_mus_channel_array;
+extern int g_mus_vsyncs_per_sec;
+extern LIBMUScb_marker g_mus_marker_callback;
+#define max_channels g_mus_channel_count
+#define mus_channels g_mus_channel_array
+#define mus_vsyncs_per_second g_mus_vsyncs_per_sec
+#define marker_callback g_mus_marker_callback
+
 INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_cmd_envelope);
 
 INCLUDE_ASM("asm/nonmatchings/libmus/player", MusInitialize);
@@ -252,7 +265,30 @@ unsigned char* mus_cmd_default_adsr(channel_t* cp, unsigned char* ptr) {
   return (ptr);
 }
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_cmd_tempo);
+unsigned char* mus_cmd_tempo(channel_t* cp, unsigned char* ptr) {
+  // tempo   = bpm
+  // fps     = mus_vsyncs_per_second
+  // 120 bpm = 96 fps
+  // therefore tempo = bmp(required)/120*96/mus_vsyncs_per_second
+
+  channel_t* sp;
+  int i;
+  int temp, temp2;
+
+  temp = (*ptr++) * 256 * 96 / 120 / mus_vsyncs_per_second;
+  temp2 = (temp * cp->temscale) >> 7;
+  if (cp->fx_addr) {
+    cp->channel_tempo = temp;
+  } else {
+    for (i = 0, sp = mus_channels; i < max_channels; i++, sp++) {
+      if (sp->song_addr == cp->song_addr) {
+        sp->channel_tempo_save = temp;
+        sp->channel_tempo = temp2;
+      }
+    }
+  }
+  return (ptr);
+}
 
 unsigned char* mus_cmd_endit(channel_t* cp, unsigned char* ptr) {
   cp->endit = *ptr++;
@@ -506,7 +542,25 @@ unsigned char* mus_cmd_sweep(channel_t* cp, unsigned char* ptr) {
 
 INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_cmd_change_fx);
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_cmd_marker);
+unsigned char* mus_cmd_marker(channel_t* cp, unsigned char* ptr) {
+  int rest;
+  int number;
+
+  number = *ptr++; /* marker number */
+  rest = *ptr++;
+  if (rest & 0x80) {
+    rest &= 0x7f;
+    rest <<= 8;
+    rest |= *ptr++;
+  }
+  /* if not going to a marker but marker is found on the mastertrack try
+   * callback */
+  if ((cp->channel_flag & CHFLAG_MASTERTRACK) &&
+      !(cp->channel_flag & CHFLAG_PAUSE)) {
+    if (marker_callback) marker_callback(cp->handle, number);
+  }
+  return (ptr);
+}
 
 unsigned char* mus_cmd_length0(channel_t* cp, unsigned char* ptr) {
   cp->fixed_length = 0;
