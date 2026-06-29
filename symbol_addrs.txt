@@ -496,3 +496,49 @@ nusched = 0x801B8380; // size:0x680
 nuContPfs = 0x801B8A18; // size:0x1A0
 nuSiMesgQ = 0x801B93C0; // type:u8 size:0x18
 nuContDataMutexQ = 0x801F43D0; // size:0x18
+
+// libnaudio symbols (n_audio_sc software-synth driver: synth/voice/bus/env/
+// resample/reverb/save + the audio frame entry; ghidra names folded in,
+// symbol_addrs wins). Drives the n_aspMain RSP synth ucode. The reverb/fx
+// param tables (*_PARAMS_N / n_eqpower) are object-defined in the carved
+// .data/.rodata, so they need no table entry.
+n_alAuxBusPull = 0x8009E4B0; // type:func
+n_alFxNew = 0x8009E550; // type:func
+alN_PVoiceNew = 0x8009E93C; // type:func
+n_alEnvmixerPull = 0x8009EA70; // type:func
+n_alEnvmixerParam = 0x8009EFE8; // type:func
+n_alAdpcmPull = 0x8009F440; // type:func
+n_alLoadParam = 0x8009F888; // type:func
+n_alResamplePull = 0x8009FB60; // type:func
+n_alResampleParam = 0x8009FD1C; // type:func
+n_alFxPull = 0x8009FD40; // type:func
+n_alFxParamHdl = 0x800A0050; // type:func
+_n_loadOutputBuffer = 0x800A0240; // type:func
+_n_loadBuffer = 0x800A0450; // type:func
+_n_saveBuffer = 0x800A0578; // type:func
+_n_filterBuffer = 0x800A0690; // type:func
+n_alInit = 0x800A0730; // type:func
+n_alClose = 0x800A0774; // type:func
+n_alSynAddPlayer = 0x800A07B0; // type:func
+n_alSynAllocVoice = 0x800A0800; // type:func
+n_alSynDelete = 0x800A09E0; // type:func
+n_alSynSetFXMix = 0x800A09F0; // type:func
+n_alSynSetPan = 0x800A0A90; // type:func
+n_alSynSetPitch = 0x800A0B20; // type:func
+n_alSynSetVol = 0x800A0BB0; // type:func
+n_alSynStartVoice = 0x800A0C60; // type:func
+n_alSynStopVoice = 0x800A0CF0; // type:func
+n_alSynNew = 0x800A0D70; // type:func
+n_alAudioFrame = 0x800A0FE0; // type:func
+__n_allocParam = 0x800A1148; // type:func
+_n_freeParam = 0x800A1174; // type:func
+_n_collectPVoices = 0x800A118C; // type:func
+_n_freePVoice = 0x800A11EC; // type:func
+_n_timeToSamples = 0x800A1274; // type:func
+n_alSavePull = 0x800A12D0; // type:func
+n_alSynAllocFX = 0x800A1320; // type:func
+n_alMainBusPull = 0x800A1370; // type:func
+// game-owned audio globals libnaudio references (the global synth + audio-state
+// pointers, defined in still-asm game bss; stay extern until the game lands).
+n_alGlobals = 0x800C7DB0; // size:0x4
+n_syn = 0x800C7DB4; // size:0x4
