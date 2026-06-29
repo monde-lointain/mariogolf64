@@ -1,4 +1,27 @@
-#include "common.h"
+#include "include_asm.h"
+
+// Game-embedded libmus 3.14 sequence player (player.c TU: player_api +
+// player_fifo
+// + player_commands, one #include-chained translation unit). Banked
+// incrementally as a mixed game-region carve: stock fns as C, game-modified fns
+// kept as INCLUDE_ASM.
+#include "libmus_config.h"
+#include <ultra64.h>
+#ifndef SUPPORT_NAUDIO
+#include <libaudio.h>
+#else
+#include <n_libaudio_sc.h>
+#include <n_libaudio_sn_sc.h>
+#endif
+#include "libmus.h"
+#include "lib_memory.h"
+#include "aud_sched.h"
+#include "aud_thread.h"
+#include "player.h"
+#include "player_fifo.h"
+#ifdef SUPPORT_FXCHANGE
+#include "player_fx.h"
+#endif
 
 INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_cmd_envelope);
 
@@ -130,21 +153,60 @@ INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_start_song);
 
 INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_handle_set_flag);
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_cmd_stop);
+unsigned char* mus_cmd_stop(channel_t* cp, unsigned char* ptr) {
+  cp->pvolume = NULL;
+  cp->ppitchbend = NULL;
+  cp->song_addr = NULL;
+  cp->fx_addr = NULL;
+  cp->handle = 0;
+  cp->pending = NULL;
+  return (NULL);
+}
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_cmd_wave);
+unsigned char* mus_cmd_wave(channel_t* cp, unsigned char* ptr) {
+  unsigned short wave;
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_cmd_port_on);
+  wave = *ptr++;
+  if (wave & 0x80) {
+    wave &= 0x7f;
+    wave <<= 8;
+    wave |= *ptr++;
+  }
+  cp->wave = wave;
+  return (ptr);
+}
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_cmd_port_off);
+unsigned char* mus_cmd_port_on(channel_t* cp, unsigned char* ptr) {
+  cp->port = *ptr++;
+  if (cp->port) cp->port_base = cp->base_note;
+  return (ptr);
+}
+
+unsigned char* mus_cmd_port_off(channel_t* cp, unsigned char* ptr) {
+  cp->port = 0;
+  return (ptr);
+}
 
 INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_cmd_default_adsr);
 
 INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_cmd_tempo);
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_cmd_endit);
+unsigned char* mus_cmd_endit(channel_t* cp, unsigned char* ptr) {
+  cp->endit = *ptr++;
+  cp->cutoff = 0;
+  return (ptr);
+}
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_cmd_cutoff);
+unsigned char* mus_cmd_cutoff(channel_t* cp, unsigned char* ptr) {
+  short tmp;
+
+  tmp = (*ptr++) << 8;
+  tmp |= *ptr++;
+
+  cp->cutoff = tmp;
+  cp->endit = 0;
+  return (ptr);
+}
 
 INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_cmd_vibrato_up);
 
