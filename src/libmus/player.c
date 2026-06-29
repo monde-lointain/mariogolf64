@@ -41,8 +41,12 @@ extern LIBMUScb_marker g_mus_marker_callback;
 extern int func_8009BC58(int);  // __MusIntRandom
 extern musHandle allocate_object_slot(fx_header_t*, int, int, int,
                                       int);  // __MusIntFindChannelAndStart
+extern int func_8009D8A8(s32);               // ChangeCustomEffect
+extern musBool g_mus_fx_enabled;             // mus_songfxchange_flag
 #define __MusIntRandom func_8009BC58
 #define __MusIntFindChannelAndStart allocate_object_slot
+#define ChangeCustomEffect func_8009D8A8
+#define mus_songfxchange_flag g_mus_fx_enabled
 
 INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_cmd_envelope);
 
@@ -599,7 +603,18 @@ unsigned char* mus_cmd_sweep(channel_t* cp, unsigned char* ptr) {
   return (ptr);
 }
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_cmd_change_fx);
+unsigned char* mus_cmd_change_fx(channel_t* cp, unsigned char* ptr) {
+  int fxtype;
+
+  fxtype = *ptr++;
+#ifdef SUPPORT_FXCHANGE
+  if (mus_songfxchange_flag == MUSBOOL_ON) {
+    ChangeCustomEffect(fxtype);
+  }
+#endif
+
+  return (ptr);
+}
 
 unsigned char* mus_cmd_marker(channel_t* cp, unsigned char* ptr) {
   int rest;
