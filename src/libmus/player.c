@@ -214,23 +214,55 @@ INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_cmd_vibrato_down);
 
 INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_cmd_vibrato_off);
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_cmd_length);
+unsigned char* mus_cmd_length(channel_t* cp, unsigned char* ptr) {
+  int length;
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_cmd_ignore);
+  length = *ptr++;
+  if (length >= 0x80) {
+    length &= 0x7f;
+    length <<= 8;
+    length |= *ptr++;
+  }
+  cp->fixed_length = length;
+  return (ptr);
+}
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_cmd_transpose);
+unsigned char* mus_cmd_ignore(channel_t* cp, unsigned char* ptr) {
+  cp->ignore = 1;
+  return (ptr);
+}
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_cmd_ignore_transpose);
+unsigned char* mus_cmd_transpose(channel_t* cp, unsigned char* ptr) {
+  cp->transpose = *ptr++;
+  return (ptr);
+}
+
+unsigned char* mus_cmd_ignore_transpose(channel_t* cp, unsigned char* ptr) {
+  cp->ignore_transpose = 1;
+  return (ptr);
+}
 
 INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_cmd_distort);
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_cmd_env_off);
+unsigned char* mus_cmd_env_off(channel_t* cp, unsigned char* ptr) {
+  cp->env_trigger_off = 1;
+  return (ptr);
+}
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_cmd_env_on);
+unsigned char* mus_cmd_env_on(channel_t* cp, unsigned char* ptr) {
+  cp->env_trigger_off = 0;
+  return (ptr);
+}
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_cmd_trigger_off);
+unsigned char* mus_cmd_trigger_off(channel_t* cp, unsigned char* ptr) {
+  cp->trigger_off = 1;
+  return (ptr);
+}
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_cmd_trigger_on);
+unsigned char* mus_cmd_trigger_on(channel_t* cp, unsigned char* ptr) {
+  cp->trigger_off = 0;
+  return (ptr);
+}
 
 INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_cmd_for);
 
@@ -238,21 +270,42 @@ INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_cmd_next);
 
 INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_cmd_wobble);
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_cmd_wobble_off);
+unsigned char* mus_cmd_wobble_off(channel_t* cp, unsigned char* ptr) {
+  cp->wobble_on_speed = 0;
+  return (ptr);
+}
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_cmd_velocity_on);
+unsigned char* mus_cmd_velocity_on(channel_t* cp, unsigned char* ptr) {
+  cp->velocity_on = 1;
+  return (ptr);
+}
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_cmd_velocity_off);
+unsigned char* mus_cmd_velocity_off(channel_t* cp, unsigned char* ptr) {
+  cp->velocity_on = 0;
+  return (ptr);
+}
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_cmd_velocity);
+unsigned char* mus_cmd_velocity(channel_t* cp, unsigned char* ptr) {
+  cp->default_velocity = *ptr++;
+  cp->velocity_on = 0;
+  return (ptr);
+}
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_cmd_pan);
+unsigned char* mus_cmd_pan(channel_t* cp, unsigned char* ptr) {
+  cp->pan = (*ptr++) / 2;
+  return (ptr);
+}
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_cmd_stereo);
+unsigned char* mus_cmd_stereo(channel_t* cp, unsigned char* ptr) {
+  return (ptr + 2);
+}
 
 INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_cmd_drums_on);
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_cmd_drums_off);
+unsigned char* mus_cmd_drums_off(channel_t* cp, unsigned char* ptr) {
+  cp->pdrums = NULL;
+  return (ptr);
+}
 
 INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_cmd_print);
 
@@ -266,7 +319,10 @@ INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_cmd_rand_volume);
 
 INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_cmd_rand_pan);
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_cmd_volume);
+unsigned char* mus_cmd_volume(channel_t* cp, unsigned char* ptr) {
+  cp->volume = *ptr++;
+  return (ptr);
+}
 
 INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_cmd_start_fx);
 
@@ -278,4 +334,7 @@ INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_cmd_change_fx);
 
 INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_cmd_marker);
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_cmd_length0);
+unsigned char* mus_cmd_length0(channel_t* cp, unsigned char* ptr) {
+  cp->fixed_length = 0;
+  return (ptr);
+}
