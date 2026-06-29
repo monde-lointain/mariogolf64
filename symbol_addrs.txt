@@ -457,3 +457,13 @@ n_alFxNew = 0x8009E550; // type:func
 // n_drvrNew.c [0x79950] mirrors. n_alEnvmixerPull (func_8009EA70) is n_auxbus's lone callee
 // and the n_env.c leader; placed so the n_auxbus body resolves. n_env.c [0x79E70] stays asm (carry).
 n_alEnvmixerPull = 0x8009EA70; // type:func
+// S147 (master libnaudio publish): inverse-nm backport of the n_drvrNew / n_env reverb+fx
+// param tables -- object-defined .data globals that were un-tabled. ROM-neutral (the objects
+// define them); tabling them keeps the name files complete for coddog / cross-ref.
+SMALLROOM_PARAMS_N = 0x800C7B10; // size:0x68
+BIGROOM_PARAMS_N = 0x800C7B78; // size:0x88
+ECHO_PARAMS_N = 0x800C7C00; // size:0x28
+CHORUS_PARAMS_N = 0x800C7C28; // size:0x28
+FLANGE_PARAMS_N = 0x800C7C50; // size:0x28
+NULL_PARAMS_N = 0x800C7C78; // size:0x28
+n_eqpower = 0x800C7CA0; // size:0x100
