@@ -52,7 +52,7 @@ u32 __MusIntSamplesInit(u32 retrace_count, u32 output_rate, u32 vsyncs_per_sec,
   u32 calc;
 
   // Samples produced across retrace_count video frames, rounded up.
-  calc = (retrace_count * output_rate + vsyncs_per_sec - 1) / vsyncs_per_sec;
+  calc = ((retrace_count * output_rate) + vsyncs_per_sec - 1) / vsyncs_per_sec;
 
   // Round up to an N_SAMPLES block (the +1 leaves headroom above calc), then
   // derive the low/high water marks and the percentage headroom.

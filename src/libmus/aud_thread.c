@@ -47,7 +47,6 @@
 #define MICROCODE_CODE n_aspMainTextStart
 #define MICROCODE_DATA n_aspMainDataStart
 #endif
-extern long long int rspbootTextEnd[];
 
 // Build-specific override: this ROM links the audio microcode text immediately
 // after the rspboot text, so the task's microcode pointer is taken as the end
@@ -71,7 +70,6 @@ extern u64* g_mus_audio_stack;
 extern audio_task_t* g_mus_audio_last_task;
 extern u8 g_mus_audio_paused;
 extern u8 g_mus_audio_silence_buffer[0x10];
-extern ALGlobals __libmus_alglobals;
 
 /*
  * Audio manager setup: stand up the audio subsystem from the caller's
@@ -113,14 +111,15 @@ void __MusIntAudManInit(musConfig* config, int vsyncs_per_second, int fx_type) {
       (Acmd*)__MusIntMemMalloc(config->syn_rsp_cmds * sizeof(Acmd));
   g_mus_audio_tasks =
       __MusIntMemMalloc(NUM_OUTPUT_BUFFERS * sizeof(audio_task_t));
-  for (i = 0; i < NUM_OUTPUT_BUFFERS; i++)
+  for (i = 0; i < NUM_OUTPUT_BUFFERS; i++) {
     g_mus_audio_tasks[i].data = __MusIntMemMalloc(4 * samples_per_frame);
+  }
 
   // Allocate the stack and launch the audio thread. The stack grows down, so
   // the entry stack pointer is the top of the freshly allocated block.
   g_mus_audio_stack = __MusIntMemMalloc(AUDIO_STACKSIZE);
   osCreateThread(&g_mus_audio_thread, 3, __MusIntThreadProcess, 0,
-                 (void*)(g_mus_audio_stack + AUDIO_STACKSIZE / sizeof(u64)),
+                 (void*)(g_mus_audio_stack + (AUDIO_STACKSIZE / sizeof(u64))),
                  config->thread_priority);
   osStartThread(&g_mus_audio_thread);
 }
@@ -158,15 +157,18 @@ static void __MusIntThreadProcess(void* ignored) {
     // AI backlog: length in bytes, converted to samples (4 bytes each).
     status = osAiGetStatus();
     samples = osAiGetLength() >> 2;
-    if (status & AI_STATUS_FIFO_FULL) continue;
+    if (status & AI_STATUS_FIFO_FULL) {
+      continue;
+    }
     __MusIntDmaProcess();
 
     // Queue the buffer synthesized last frame for playback. commands carries
     // the previous frame's alAudioFrame count; g_mus_audio_last_task is NULL
     // until the first task runs, so this is skipped on the first frame.
-    if (g_mus_audio_last_task && commands)
+    if (g_mus_audio_last_task && commands) {
       osAiSetNextBuffer(g_mus_audio_last_task->data,
                         g_mus_audio_last_task->frame_samples << 2);
+    }
 
     // Pick this frame's output buffer and decide how many samples to make.
     task = &g_mus_audio_tasks[task_count];

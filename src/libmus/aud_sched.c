@@ -103,8 +103,8 @@ static void __OsSchedDoTask(musTask* task) {
   t.list.t.flags = 0;
 
   // Audio synthesis microcode (fixed 4 KB text, standard data size).
-  t.list.t.ucode = (u64*)task->ucode;
-  t.list.t.ucode_data = (u64*)task->ucode_data;
+  t.list.t.ucode = task->ucode;
+  t.list.t.ucode_data = task->ucode_data;
   t.list.t.ucode_size = 4096;
   t.list.t.ucode_data_size = SP_UCODE_DATA_SIZE;
 

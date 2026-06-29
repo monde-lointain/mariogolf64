@@ -48,7 +48,9 @@ ALHeap* __MusIntMemGetHeapAddr(void) { return (&audio_heap); }
 void __MusIntMemSet(void* dest, unsigned char value, int length) {
   unsigned char* a;
   a = dest;
-  while (length--) *a++ = value;
+  while (length--) {
+    *a++ = value;
+  }
 }
 
 /*
@@ -57,14 +59,19 @@ void __MusIntMemSet(void* dest, unsigned char value, int length) {
  * it has not read yet; otherwise it runs front-to-back.
  */
 void __MusIntMemMove(void* dest, void* src, int length) {
-  unsigned char *a, *b;
+  unsigned char* a;
+  unsigned char* b;
   a = dest;
   b = src;
   if (b < a) {
     a += length;
     b += length;
-    while (length--) *--a = *--b;
+    while (length--) {
+      *--a = *--b;
+    }
   } else {
-    while (length--) *a++ = *b++;
+    while (length--) {
+      *a++ = *b++;
+    }
   }
 }

@@ -124,7 +124,9 @@ void __MusIntDmaProcess(void) {
   // Age the buffers (lower keep_count == less recently used).
   prev_mask = osSetIntMask(OS_IM_NONE);
   for (i = 0; i < g_mus_dma_buffer_count; i++) {
-    if (dma_buffer_list[i].keep_count) dma_buffer_list[i].keep_count--;
+    if (dma_buffer_list[i].keep_count) {
+      dma_buffer_list[i].keep_count--;
+    }
   }
   osSetIntMask(prev_mask);
 }
@@ -147,7 +149,9 @@ static s32 __CallBackDmaProcess(s32 addr, s32 len, void* ignored) {
   dma_list_t* buffer;
   unsigned char* ram_addr;
   buffer = __MusIntDmaSample(addr, len);
-  if (!buffer) return (osVirtualToPhysical((void*)addr));
+  if (!buffer) {
+    return (osVirtualToPhysical((void*)addr));
+  }
 
   // A 0xff high byte tags a 64DD wave-data address; rebase it into the DD ROM.
   if ((addr & 0xff000000) == 0xff000000) {
@@ -172,16 +176,18 @@ void func_8009DBA0(void) {}
  */
 static dma_list_t* __MusIntDmaSample(unsigned long sample_addr,
                                      int sample_length) {
-  dma_list_t *current_dma_buffer, *free_buffer, *last_buffer;
+  dma_list_t* current_dma_buffer;
+  dma_list_t* free_buffer;
+  dma_list_t* last_buffer;
   unsigned long sample_addr_end;
   OSPiHandle* pi_handle;
   OSIoMesg* io_msg;
 
   // In RAM mode the samples are already resident, so no transfer is needed.
-  if (g_mus_control_flag & MUSCONTROL_RAM)
+  if (g_mus_control_flag & MUSCONTROL_RAM) {
     return (NULL);
-  else
-    pi_handle = cartrom_handle;
+  }
+  pi_handle = cartrom_handle;
   sample_addr_end = sample_addr + sample_length;
 
   // Scan the sorted active list for a buffer whose cached range covers the
@@ -190,7 +196,9 @@ static dma_list_t* __MusIntDmaSample(unsigned long sample_addr,
   last_buffer = NULL;
   for (current_dma_buffer = dma_buffer_head; current_dma_buffer;
        current_dma_buffer = current_dma_buffer->next) {
-    if (sample_addr < current_dma_buffer->sample_addr) break;
+    if (sample_addr < current_dma_buffer->sample_addr) {
+      break;
+    }
     if (sample_addr_end <= current_dma_buffer->sample_addr + audio_dma_size) {
       current_dma_buffer->keep_count = 1 + FRAME_LAG;
       return (current_dma_buffer);
@@ -203,22 +211,32 @@ static dma_list_t* __MusIntDmaSample(unsigned long sample_addr,
   if (!free_buffer) {
     // Free list empty: evict the active buffer with the lowest keep_count.
     free_buffer = dma_buffer_head;
-    if (!free_buffer) goto no_free_buffer;
+    if (!free_buffer) {
+      goto no_free_buffer;
+    }
     for (current_dma_buffer = dma_buffer_head; current_dma_buffer;
          current_dma_buffer = current_dma_buffer->next) {
-      if (free_buffer->keep_count > current_dma_buffer->keep_count)
+      if (free_buffer->keep_count > current_dma_buffer->keep_count) {
         free_buffer = current_dma_buffer;
+      }
     }
-    if (!free_buffer) goto no_free_buffer;
+    if (!free_buffer) {
+      goto no_free_buffer;
+    }
 
     // Unlink the victim from the active list, fixing up the insert predecessor
     // and head, then push it onto the free list.
-    if (free_buffer == last_buffer) last_buffer = free_buffer->prev;
-    if (free_buffer->next) free_buffer->next->prev = free_buffer->prev;
-    if (free_buffer->prev)
+    if (free_buffer == last_buffer) {
+      last_buffer = free_buffer->prev;
+    }
+    if (free_buffer->next) {
+      free_buffer->next->prev = free_buffer->prev;
+    }
+    if (free_buffer->prev) {
       free_buffer->prev->next = free_buffer->next;
-    else
+    } else {
       dma_buffer_head = free_buffer->next;
+    }
     free_buffer->prev = NULL;
     free_buffer->next = dma_buffer_free;
     dma_buffer_free = free_buffer;
@@ -235,13 +253,17 @@ got_free_buffer:
   // at the head when the request sorts before everything.
   if (last_buffer) {
     free_buffer->next = last_buffer->next;
-    if (free_buffer->next) free_buffer->next->prev = free_buffer;
+    if (free_buffer->next) {
+      free_buffer->next->prev = free_buffer;
+    }
     free_buffer->prev = last_buffer;
     last_buffer->next = free_buffer;
   } else {
     free_buffer->next = dma_buffer_head;
     free_buffer->prev = NULL;
-    if (dma_buffer_head) dma_buffer_head->prev = free_buffer;
+    if (dma_buffer_head) {
+      dma_buffer_head->prev = free_buffer;
+    }
     dma_buffer_head = free_buffer;
   }
 
