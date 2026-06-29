@@ -35,7 +35,9 @@ void n_alSynSetFXMix(N_ALVoice* v, u8 fxmix) {
 
     // Effects (wet) send is a 7-bit level; clamp to its 0..127 range.
     update->type = AL_FILTER_SET_FXAMT;
-    if (fxmix > 127) fxmix = 127;
+    if (fxmix > 127) {
+      fxmix = 127;
+    }
     update->data.i = fxmix;
     update->next = 0;
 

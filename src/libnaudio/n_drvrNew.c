@@ -53,7 +53,9 @@ s32 NULL_PARAMS_N[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
  * (chorus/flange) and an optional one-pole low-pass on its output.
  */
 void n_alFxNew(ALFx** fx_ar, ALSynConfig* c, ALHeap* hp) {
-  u16 i, j, k;
+  u16 i;
+  u16 j;
+  u16 k;
   s32* param = 0;
   ALDelay* d;
   ALFx* r;
@@ -93,7 +95,9 @@ void n_alFxNew(ALFx** fx_ar, ALSynConfig* c, ALHeap* hp) {
   r->delay = alHeapAlloc(hp, r->section_count, sizeof(ALDelay));
   r->base = alHeapAlloc(hp, r->length, sizeof(s16));
   r->input = r->base;
-  for (k = 0; k < r->length; k++) r->base[k] = 0;
+  for (k = 0; k < r->length; k++) {
+    r->base[k] = 0;
+  }
 
   /* Initialize each delay section from the preset stream. */
   for (i = 0; i < r->section_count; i++) {

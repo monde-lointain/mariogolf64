@@ -51,7 +51,9 @@ Acmd* n_alResamplePull(N_PVoice* e, s16* outp, Acmd* p) {
   } else {
     // General case: convert the decoded samples to the output rate. Clamp the
     // pitch to at most +1 octave first.
-    if (e->rs_ratio > MAX_RATIO) e->rs_ratio = MAX_RATIO;
+    if (e->rs_ratio > MAX_RATIO) {
+      e->rs_ratio = MAX_RATIO;
+    }
 
     // Quantize the ratio onto the resampler's fixed-point pitch grid.
     e->rs_ratio = (s32)(e->rs_ratio * UNITY_PITCH);
@@ -73,7 +75,7 @@ Acmd* n_alResamplePull(N_PVoice* e, s16* outp, Acmd* p) {
     aSetBuffer(ptr++, 0, inp, *outp, FIXED_SAMPLE << 1);
     aResample(ptr++, e->rs_first, incr, osVirtualToPhysical(e->rs_state));
 #else
-#include "inc/n_resample_add01.inc.c"
+#include "inc/n_resample_add01.inc"
 #endif
     e->rs_first = 0;
   }
@@ -85,36 +87,10 @@ Acmd* n_alResamplePull(N_PVoice* e, s16* outp, Acmd* p) {
 
 /*
  * Resampler parameter handler. In this build every parameter is forwarded to
- * the load filter (n_alLoadParam); the original pitch / reset / unity-pitch
- * cases are retained below but compiled out (#if 0), so the locals r and data
- * are unused here. Always returns 0.
+ * the load filter (n_alLoadParam). Always returns 0.
  */
 s32 n_alResampleParam(N_PVoice* filter, s32 paramID, void* param) {
-  N_PVoice* r = filter;
-  union {
-    f32 f;
-    s32 i;
-  } data;
   switch (paramID) {
-    // Original per-parameter handling, kept for reference but disabled here.
-#if 0
-        case (AL_FILTER_RESET):
-            r->rs_delta  = 0.0;
-            r->rs_first  = 1;
-            r->rs_upitch = 0;
-	    n_alLoadParam(filter, AL_FILTER_RESET, 0);
-            break;
-        case (AL_FILTER_START):
-	    n_alLoadParam(filter, AL_FILTER_START, 0);
-            break;
-        case (AL_FILTER_SET_PITCH):
-            data.i = (s32) param;
-            r->rs_ratio = data.f;
-            break;
-	case (AL_FILTER_SET_UNITY_PITCH):
-	    r->rs_upitch = 1;
-            break;
-#endif
     default:
       n_alLoadParam(filter, paramID, param);
       break;

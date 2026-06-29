@@ -58,7 +58,9 @@ Acmd* n_alAdpcmPull(N_PVoice* filter, s16* outp, s32 outCount, Acmd* p) {
   lastCnt[++cnt_index] = osGetCount();
 #endif
   // Nothing requested: emit no commands.
-  if (outCount == 0) return ptr;
+  if (outCount == 0) {
+    return ptr;
+  }
 
   // The decoder reads its compressed input from the decoder-input DMEM buffer.
 #ifndef N_MICRO
@@ -77,22 +79,26 @@ Acmd* n_alAdpcmPull(N_PVoice* filter, s16* outp, s32 outCount, Acmd* p) {
 
   // nSam = samples to decode before the next loop boundary (the whole request
   // when not looping).
-  if (looped)
+  if (looped) {
     nSam = f->dc_loop.end - f->dc_sample;
-  else
+  } else {
     nSam = outCount;
+  }
 
   // nLeft = samples already buffered in the partial frame carried from the
   // previous call (0 when the last call ended on a frame boundary).
-  if (f->dc_lastsam)
+  if (f->dc_lastsam) {
     nLeft = ADPCMFSIZE - f->dc_lastsam;
-  else
+  } else {
     nLeft = 0;
+  }
 
   // tsam = new samples to decode this pass; round up to whole ADPCM frames to
   // size the compressed read (nframes frames, nbytes bytes).
   tsam = nSam - nLeft;
-  if (tsam < 0) tsam = 0;
+  if (tsam < 0) {
+    tsam = 0;
+  }
   nframes = (tsam + ADPCMFSIZE - 1) >> LFSAMPLES;
   nbytes = nframes * ADPCMFBYTES;
   // Looping case: decode the run up to the loop end, then restart at the loop
@@ -102,15 +108,16 @@ Acmd* n_alAdpcmPull(N_PVoice* filter, s16* outp, s32 outCount, Acmd* p) {
 
     // Advance *outp past the leading partial frame so the following filter's
     // input pointer lands on the first decoded sample.
-    if (f->dc_lastsam)
+    if (f->dc_lastsam) {
       *outp += (f->dc_lastsam << 1);
-    else
+    } else {
       *outp += (ADPCMFSIZE << 1);
+    }
 
     // Rewind decode state to the loop-start point for the upcoming passes.
     f->dc_lastsam = f->dc_loop.start & 0xf;
     f->dc_memin = (s32)f->dc_table->base +
-                  ADPCMFBYTES * ((s32)(f->dc_loop.start >> LFSAMPLES) + 1);
+                  (ADPCMFBYTES * ((s32)(f->dc_loop.start >> LFSAMPLES) + 1));
     f->dc_sample = f->dc_loop.start;
     bEnd = *outp;
     // Each pass decodes one loop-length chunk and stitches it onto the end of
@@ -121,25 +128,24 @@ Acmd* n_alAdpcmPull(N_PVoice* filter, s16* outp, s32 outCount, Acmd* p) {
       // Decode target for this pass: (nframes+1) frames past bEnd, ahead of the
       // data assembled so far (the decoded chunk is DMEM-moved back to bEnd
       // below). <<(LFSAMPLES+1) converts frames to bytes; the +16 before &
-      // ~0x1f rounds the base to the nearest 32-byte frame boundary instead of
-      // down (the disabled #if 0 line is the stock round-down form).
-#if 0
-      op = (bEnd + ((nframes+1)<<(LFSAMPLES+1))) & ~0x1f;
-#else
+      // ~0x1f rounds the base to the nearest 32-byte frame boundary, diverging
+      // from the stock form, which omits the +16 and rounds down.
       op = (bEnd + ((nframes + 1) << (LFSAMPLES + 1)) + 16) & ~0x1f;
-#endif
 
       // bEnd marks the true end of the data written so far.
       bEnd += (nSam << 1);
 
       // Consume one loop iteration; a count of -1 means loop forever.
-      if ((f->dc_loop.count != -1) && (f->dc_loop.count != 0))
+      if ((f->dc_loop.count != -1) && (f->dc_loop.count != 0)) {
         f->dc_loop.count--;
+      }
 
       // Size the next chunk: the smaller of what remains and one loop length.
       nSam = MIN(outCount, f->dc_loop.end - f->dc_loop.start);
       tsam = nSam - ADPCMFSIZE + f->dc_lastsam;
-      if (tsam < 0) tsam = 0;
+      if (tsam < 0) {
+        tsam = 0;
+      }
       nframes = (tsam + ADPCMFSIZE - 1) >> LFSAMPLES;
       nbytes = nframes * ADPCMFBYTES;
       ptr = _decodeChunk(ptr, f, tsam, nbytes, op, inp, f->dc_first | A_LOOP);
@@ -163,11 +169,15 @@ Acmd* n_alAdpcmPull(N_PVoice* filter, s16* outp, s32 outCount, Acmd* p) {
 
   // overFlow = bytes the read would run past the end of the sample data.
   overFlow = f->dc_memin + nbytes - ((s32)f->dc_table->base + f->dc_table->len);
-  if (overFlow < 0) overFlow = 0;
+  if (overFlow < 0) {
+    overFlow = 0;
+  }
 
   // nOver = the samples that overflow maps to, clamped to this request.
   nOver = (overFlow / ADPCMFBYTES) << LFSAMPLES;
-  if (nOver > nSam + nLeft) nOver = nSam + nLeft;
+  if (nOver > nSam + nLeft) {
+    nOver = nSam + nLeft;
+  }
 
   // Trim the compressed read back to the real end of the data.
   nbytes -= overFlow;
@@ -178,10 +188,11 @@ Acmd* n_alAdpcmPull(N_PVoice* filter, s16* outp, s32 outCount, Acmd* p) {
     ptr = _decodeChunk(ptr, f, nSam - nOver, nbytes, *outp, inp, f->dc_first);
 
     // Advance *outp past the leading partial frame, as in the looping case.
-    if (f->dc_lastsam)
+    if (f->dc_lastsam) {
       *outp += (f->dc_lastsam << 1);
-    else
+    } else {
       *outp += (ADPCMFSIZE << 1);
+    }
 
     // Advance decode/play state by the samples produced.
     f->dc_lastsam = (outCount + f->dc_lastsam) & 0xf;
@@ -195,10 +206,11 @@ Acmd* n_alAdpcmPull(N_PVoice* filter, s16* outp, s32 outCount, Acmd* p) {
   // the fill to just after whatever was decoded.
   if (nOver) {
     f->dc_lastsam = 0;
-    if (decoded)
+    if (decoded) {
       startZero = (nLeft + nSam - nOver) << 1;
-    else
+    } else {
       startZero = 0;
+    }
     aClearBuffer(ptr++, startZero + *outp, nOver << 1);
   }
 #ifdef AUD_PROFILE
@@ -215,9 +227,6 @@ Acmd* n_alAdpcmPull(N_PVoice* filter, s16* outp, s32 outCount, Acmd* p) {
  */
 s32 n_alLoadParam(N_PVoice* filter, s32 paramID, void* param) {
   N_PVoice* a = filter;
-#if 0
-  ALFilter *f = (ALFilter *) filter;
-#endif
   switch (paramID) {
     // Bind a new wavetable and point the read cursor at its start.
     case (AL_FILTER_SET_WAVETABLE):
@@ -268,11 +277,13 @@ s32 n_alLoadParam(N_PVoice* filter, s32 paramID, void* param) {
       if (a->dc_table) {
         a->dc_memin = (s32)a->dc_table->base;
         if (a->dc_table->type == AL_ADPCM_WAVE) {
-          if (a->dc_table->waveInfo.adpcmWave.loop)
+          if (a->dc_table->waveInfo.adpcmWave.loop) {
             a->dc_loop.count = a->dc_table->waveInfo.adpcmWave.loop->count;
+          }
         } else if (a->dc_table->type == AL_RAW16_WAVE) {
-          if (a->dc_table->waveInfo.rawWave.loop)
+          if (a->dc_table->waveInfo.rawWave.loop) {
             a->dc_loop.count = a->dc_table->waveInfo.rawWave.loop->count;
+          }
         }
       }
       break;
@@ -291,7 +302,8 @@ s32 n_alLoadParam(N_PVoice* filter, s32 paramID, void* param) {
  */
 Acmd* _decodeChunk(Acmd* ptr, N_PVoice* f, s32 tsam, s32 nbytes, s16 outp,
                    s16 inp, u32 flags) {
-  s32 dramAlign, dramLoc;
+  s32 dramAlign;
+  s32 dramLoc;
 
   // DMA the compressed data in; skip entirely when there is nothing to load.
   if (nbytes > 0) {
@@ -305,10 +317,11 @@ Acmd* _decodeChunk(Acmd* ptr, N_PVoice* f, s32 tsam, s32 nbytes, s16 outp,
     aSetBuffer(ptr++, 0, inp, 0, nbytes + 8 - (nbytes & 0x7));
     aLoadBuffer(ptr++, dramLoc - dramAlign);
 #else
-#include "inc/n_load_add01.inc.c"
+#include "inc/n_load_add01.inc"
 #endif
-  } else
+  } else {
     dramAlign = 0;
+  }
 
   // At a loop restart, reload the saved ADPCM predictor state.
   if (flags & A_LOOP) {
@@ -320,7 +333,7 @@ Acmd* _decodeChunk(Acmd* ptr, N_PVoice* f, s32 tsam, s32 nbytes, s16 outp,
   aSetBuffer(ptr++, 0, inp + dramAlign, outp, tsam << 1);
   aADPCMdec(ptr++, flags, K0_TO_PHYS(f->dc_state));
 #else
-#include "inc/n_load_add02.inc.c"
+#include "inc/n_load_add02.inc"
 #endif
   f->dc_first = 0;
   return ptr;

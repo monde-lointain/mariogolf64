@@ -250,7 +250,7 @@ void _n_freePVoice(N_PVoice* pvoice) {
    rate, with no frame-boundary alignment. The +0.5 offsets the average error
    of truncating the float-to-int cast. */
 s32 _n_timeToSamplesNoRound(s32 micros) {
-  f32 tmp = ((f32)micros) * n_syn->outputRate / 1000000.0 + 0.5;
+  f32 tmp = (((f32)micros) * n_syn->outputRate / 1000000.0) + 0.5;
   return (s32)tmp;
 }
 

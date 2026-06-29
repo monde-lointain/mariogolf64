@@ -7,7 +7,7 @@
  * feedback coefficients, an optional chorus resampler, and an optional damping
  * low-pass, then mixes its wet output into the effect accumulator. The routines
  * here only build the Acmd command list; the sample math itself runs on the
- * RSP. The N_MICRO build selects the compact n_a* commands (the ".inc.c"
+ * RSP. The N_MICRO build selects the compact n_a* commands (the ".inc"
  * fragments) in place of the full a* command sequences.
  */
 #include "n_synthInternals.h"
@@ -28,8 +28,8 @@ extern u32 load_num, load_cnt, load_max, load_min, save_num, save_cnt, save_max,
 #define SWAP(in, out) \
   {                   \
     s16 t = out;      \
-    out = in;         \
-    in = t;           \
+    (out) = in;       \
+    (in) = t;         \
   }
 
 Acmd* _n_loadOutputBuffer(ALFx* r, ALDelay* d, s32 buff, Acmd* p);
@@ -48,9 +48,16 @@ extern s32 L_INC[];
  */
 Acmd* n_alFxPull(s32 sampleOffset, Acmd* p) {
   Acmd* ptr = p;
-  ALFx* r = (ALFx*)n_syn->auxBus->fx;  // state of the single aux-bus FX slot
-  s16 i, buff1, buff2, input, output;  // loop index + DMEM scratch-buffer ids
-  s16 *in_ptr, *out_ptr, gain, *prev_out_ptr = 0;
+  ALFx* r = n_syn->auxBus->fx;  // state of the single aux-bus FX slot
+  s16 i;
+  s16 buff1;
+  s16 buff2;
+  s16 input;
+  s16 output;  // loop index + DMEM scratch-buffer ids
+  s16* in_ptr;
+  s16* out_ptr;
+  s16 gain;
+  s16* prev_out_ptr = 0;
   ALDelay *d, *pd;
 #ifdef AUD_PROFILE
   lastCnt[++cnt_index] = osGetCount();
@@ -116,8 +123,12 @@ Acmd* n_alFxPull(s32 sampleOffset, Acmd* p) {
       ptr = _n_saveBuffer(r, in_ptr, buff1, ptr);
     }
 
-    if (d->lp) ptr = _n_filterBuffer(d->lp, buff2, ptr);  // optional damping
-    if (!d->rs) ptr = _n_saveBuffer(r, out_ptr, buff2, ptr);
+    if (d->lp) {
+      ptr = _n_filterBuffer(d->lp, buff2, ptr);  // optional damping
+    }
+    if (!d->rs) {
+      ptr = _n_saveBuffer(r, out_ptr, buff2, ptr);
+    }
     if (d->gain)
       aMix(ptr++, 0, (u16)d->gain, buff2, output);  // wet output -> accumulator
     prev_out_ptr = &r->input[d->output];
@@ -125,7 +136,9 @@ Acmd* n_alFxPull(s32 sampleOffset, Acmd* p) {
 
   /* Advance the delay-line write pointer, wrapping at the ring buffer end. */
   r->input += FIXED_SAMPLE;
-  if (r->input > &r->base[r->length]) r->input -= r->length;
+  if (r->input > &r->base[r->length]) {
+    r->input -= r->length;
+  }
 
   /* Move the finished reverb output up to the aux bus. */
 #ifndef N_MICRO
@@ -221,9 +234,13 @@ Acmd* _n_loadOutputBuffer(ALFx* r, ALDelay* d, s32 buff, Acmd* p) {
       rbuff = N_AL_TEMP_2;  // scratch DMEM for the pre-resample load
 #endif
   s16* out_ptr;
-  f32 fincount, fratio, delta;
-  s32 ramalign = 0, length;
-  static f32 val = 0.0, lastval = -10.0;
+  f32 fincount;
+  f32 fratio;
+  f32 delta;
+  s32 ramalign = 0;
+  s32 length;
+  static f32 val = 0.0;
+  static f32 lastval = -10.0;
   static f32 blob = 0;
   s32 incount =
       FIXED_SAMPLE;  // samples wanted out of the resampler (one frame)
@@ -252,7 +269,7 @@ Acmd* _n_loadOutputBuffer(ALFx* r, ALDelay* d, s32 buff, Acmd* p) {
     aSetBuffer(ptr++, 0, rbuff + (ramalign << 1), buff, incount << 1);
     aResample(ptr++, d->rs->first, ratio, osVirtualToPhysical(d->rs->state));
 #else
-#include "inc/n_reverb_add04.inc.c"
+#include "inc/n_reverb_add04.inc"
 #endif
     d->rs->first = 0;
     d->rsdelta += count - incount;  // carry the source/dest length drift
@@ -272,7 +289,8 @@ Acmd* _n_loadOutputBuffer(ALFx* r, ALDelay* d, s32 buff, Acmd* p) {
  */
 Acmd* _n_loadBuffer(ALFx* r, s16* curr_ptr, s32 buff, s32 count, Acmd* p) {
   Acmd* ptr = p;
-  s32 after_end, before_end;  // wrapped / pre-wrap chunk sample counts
+  s32 after_end;
+  s32 before_end;  // wrapped / pre-wrap chunk sample counts
   s16 *updated_ptr, *delay_end;
 #ifdef AUD_PROFILE
   lastCnt[++cnt_index] = osGetCount();
@@ -282,7 +300,9 @@ Acmd* _n_loadBuffer(ALFx* r, s16* curr_ptr, s32 buff, s32 count, Acmd* p) {
   if (curr_ptr > delay_end)
     __osError(ERR_ALMODDELAYOVERFLOW, 1, delay_end - curr_ptr);
 #endif
-  if (curr_ptr < r->base) curr_ptr += r->length;  // wrap a pre-base pointer
+  if (curr_ptr < r->base) {
+    curr_ptr += r->length;  // wrap a pre-base pointer
+  }
   updated_ptr = curr_ptr + count;
 
   if (updated_ptr > delay_end) {
@@ -300,7 +320,7 @@ Acmd* _n_loadBuffer(ALFx* r, s16* curr_ptr, s32 buff, s32 count, Acmd* p) {
   }
   aSetBuffer(ptr++, 0, 0, 0, count << 1);
 #else
-#include "inc/n_reverb_add01.inc.c"
+#include "inc/n_reverb_add01.inc"
 #endif
 #ifdef AUD_PROFILE
   PROFILE_AUD(load_num, load_cnt, load_max, load_min);
@@ -316,13 +336,16 @@ Acmd* _n_loadBuffer(ALFx* r, s16* curr_ptr, s32 buff, s32 count, Acmd* p) {
  */
 Acmd* _n_saveBuffer(ALFx* r, s16* curr_ptr, s32 buff, Acmd* p) {
   Acmd* ptr = p;
-  s32 after_end, before_end;  // wrapped / pre-wrap chunk sample counts
+  s32 after_end;
+  s32 before_end;  // wrapped / pre-wrap chunk sample counts
   s16 *updated_ptr, *delay_end;
 #ifdef AUD_PROFILE
   lastCnt[++cnt_index] = osGetCount();
 #endif
   delay_end = &r->base[r->length];
-  if (curr_ptr < r->base) curr_ptr += r->length;  // wrap a pre-base pointer
+  if (curr_ptr < r->base) {
+    curr_ptr += r->length;  // wrap a pre-base pointer
+  }
   updated_ptr = curr_ptr + FIXED_SAMPLE;
 
   if (updated_ptr > delay_end) {
@@ -340,7 +363,7 @@ Acmd* _n_saveBuffer(ALFx* r, s16* curr_ptr, s32 buff, Acmd* p) {
     aSaveBuffer(ptr++, osVirtualToPhysical(curr_ptr));
   }
 #else
-#include "inc/n_reverb_add02.inc.c"
+#include "inc/n_reverb_add02.inc"
 #endif
 #ifdef AUD_PROFILE
   PROFILE_AUD(save_num, save_cnt, save_max, save_min);
@@ -361,7 +384,7 @@ Acmd* _n_filterBuffer(ALLowPass* lp, s32 buff, Acmd* p) {
   aLoadADPCM(ptr++, 32, osVirtualToPhysical(lp->fcvec.fccoef));
   aPoleFilter(ptr++, lp->first, lp->fgain, osVirtualToPhysical(lp->fstate));
 #else
-#include "inc/n_reverb_add03.inc.c"
+#include "inc/n_reverb_add03.inc"
 #endif
   lp->first = 0;
   return ptr;

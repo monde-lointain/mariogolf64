@@ -76,7 +76,7 @@ static s16 _getVol(s16 ivol, s32 samples, s16 ratem, u16 ratel);
  */
 Acmd* n_alEnvmixerPull(N_PVoice* filter, s32 sampleOffset, Acmd* p) {
   Acmd* ptr = p;
-  N_PVoice* e = (N_PVoice*)filter;
+  N_PVoice* e = filter;
   s16 inp;
   s32 lastOffset;
   s32 thisOffset = sampleOffset;
@@ -105,12 +105,16 @@ Acmd* n_alEnvmixerPull(N_PVoice* filter, s32 sampleOffset, Acmd* p) {
     thisOffset = e->em_ctrlList->delta;
 #ifdef FINAL_ROUND
     samples = SAMPLE184(thisOffset - lastOffset);
-    if (!samples) thisOffset = lastOffset;
+    if (!samples) {
+      thisOffset = lastOffset;
+    }
 #else
     samples = thisOffset - lastOffset;
 #endif
     /* Event lands past the end of this frame: defer it to a later Pull. */
-    if (samples > outCount) break;
+    if (samples > outCount) {
+      break;
+    }
 #ifdef _DEBUG
     assert(samples >= 0);
 #ifndef N_MICRO
@@ -198,13 +202,18 @@ Acmd* n_alEnvmixerPull(N_PVoice* filter, s32 sampleOffset, Acmd* p) {
         }
 
         /* Clamp to >=1: a zero current volume would stall the ramp solve. */
-        if (e->em_cvolL == 0) e->em_cvolL = 1;
-        if (e->em_cvolR == 0) e->em_cvolR = 1;
+        if (e->em_cvolL == 0) {
+          e->em_cvolL = 1;
+        }
+        if (e->em_cvolR == 0) {
+          e->em_cvolR = 1;
+        }
 
         /* Apply just the field this event changes (pan, squared volume target
          * plus a fresh ramp length, or dry/wet fx send). */
-        if (e->em_ctrlList->type == AL_FILTER_SET_PAN)
+        if (e->em_ctrlList->type == AL_FILTER_SET_PAN) {
           e->em_pan = (s16)e->em_ctrlList->data.i;
+        }
         if (e->em_ctrlList->type == AL_FILTER_SET_VOLUME) {
           /* New target volume (squared, Q15) over a new ramp length. */
           e->em_delta = 0;
@@ -252,7 +261,6 @@ Acmd* n_alEnvmixerPull(N_PVoice* filter, s32 sampleOffset, Acmd* p) {
         _n_freePVoice((N_PVoice*)param->pvoice);
       } break;
 
-#if 1
       /* Pitch / wavetable changes: flush audio, then update the resampler. */
       case (AL_FILTER_SET_PITCH):
         ptr = _pullSubFrame(e, &inp, &loutp, samples, ptr);
@@ -267,7 +275,6 @@ Acmd* n_alEnvmixerPull(N_PVoice* filter, s32 sampleOffset, Acmd* p) {
         n_alLoadParam(e, AL_FILTER_SET_WAVETABLE,
                       (void*)e->em_ctrlList->data.i);
         break;
-#endif
 
       /* Any other parameter: flush audio, forward to the loader. */
       default:
@@ -283,14 +290,18 @@ Acmd* n_alEnvmixerPull(N_PVoice* filter, s32 sampleOffset, Acmd* p) {
     outCount -= samples;
     thisParam = e->em_ctrlList;
     e->em_ctrlList = e->em_ctrlList->next;
-    if (e->em_ctrlList == 0) e->em_ctrlTail = 0;
+    if (e->em_ctrlList == 0) {
+      e->em_ctrlTail = 0;
+    }
     _n_freeParam(thisParam);
   }
 
   /* Emit the rest of the frame past the last event, then clamp the envelope
    * clock to the segment end. */
   ptr = _pullSubFrame(e, &inp, &loutp, outCount, ptr);
-  if (e->em_delta > e->em_segEnd) e->em_delta = e->em_segEnd;
+  if (e->em_delta > e->em_segEnd) {
+    e->em_delta = e->em_segEnd;
+  }
 #ifdef AUD_PROFILE
   PROFILE_AUD(env_num, env_cnt, env_max, env_min);
 #endif
@@ -336,11 +347,7 @@ s32 n_alEnvmixerParam(N_PVoice* filter, s32 paramID, void* param) {
 
     /* Forward any other op to the loader (resampler) stage. */
     default:
-#if 1
       n_alLoadParam(e, paramID, param);
-#else
-      n_alResampleParam(e, paramID, param);
-#endif
       break;
   }
   return 0;
@@ -365,7 +372,9 @@ static Acmd* _pullSubFrame(N_PVoice* filter, s16* inp, s16* outp, s32 outCount,
   s16* inpp = N_AL_RESAMPLER_OUT;
 #endif
 
-  if (e->em_motion != AL_PLAYING || !outCount) return ptr;
+  if (e->em_motion != AL_PLAYING || !outCount) {
+    return ptr;
+  }
 
   /* Pull the resampled sub-frame this stage will scale and mix. */
   ptr = n_alResamplePull(e, inp, p);
@@ -399,7 +408,7 @@ static Acmd* _pullSubFrame(N_PVoice* filter, s16* inp, s16* outp, s32 outCount,
 #else
     /* Micro command stream: same init / continue split, packed into the naudio
      * n_aSetVolume / n_aEnvMixer commands (see inc/n_env_add01.inc.c). */
-#include "inc/n_env_add01.inc.c"
+#include "inc/n_env_add01.inc"
 #endif
 
   /* Advance one frame: *inp by 184 samples (<<1 = 2 bytes each), clock by 184.
@@ -485,7 +494,8 @@ static s16 _getRate(f64 vol, f64 tgt, s32 count, u16* ratel) {
 /* Micro variant (built): a linear (additive) per-8-sample step. */
 #else
   static s16 _getRate(f64 vol, f64 tgt, s32 count, u16 * ratel) {
-    s16 s, tmp;
+    s16 s;
+    s16 tmp;
     f64 invn, a, f;
 #ifdef AUD_PROFILE
     lastCnt[++cnt_index] = osGetCount();
@@ -495,15 +505,18 @@ static s16 _getRate(f64 vol, f64 tgt, s32 count, u16* ratel) {
       if (tgt >= vol) {
         *ratel = 0xffff;
         return 0x7fff;
-      } else {
-        *ratel = 0;
-        return 0x8000;
       }
+      *ratel = 0;
+      return 0x8000;
     }
 
     invn = 1.0 / count;
-    if (tgt < 1.0) tgt = 1.0;
-    if (vol <= 0.0) vol = 1.0;
+    if (tgt < 1.0) {
+      tgt = 1.0;
+    }
+    if (vol <= 0.0) {
+      vol = 1.0;
+    }
 
     /* Volume change per 8-sample step. */
     a = (tgt - vol) * invn * 8.0;

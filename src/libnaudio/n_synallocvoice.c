@@ -54,10 +54,8 @@ s32 n_alSynAllocVoice(N_ALVoice* voice, ALVoiceConfig* vc) {
       // 552 - 184 samples, ending one 184-sample frame before that stop.
       pvoice->offset = 552;
       pvoice->vvoice->pvoice = 0;
-#if 1
       pvoice->vvoice = voice;
       voice->pvoice = pvoice;
-#endif
 
       // Ramp the stolen voice to silence (volume 0) over 368 samples (the
       // 552-sample offset less one 184-sample frame) so it fades out instead
@@ -93,16 +91,9 @@ s32 n_alSynAllocVoice(N_ALVoice* voice, ALVoiceConfig* vc) {
     } else {
       // Fresh voice: no fade needed, just cross-link it.
       pvoice->offset = 0;
-#if 1
       pvoice->vvoice = voice;
       voice->pvoice = pvoice;
-#endif
     }
-    // Disabled alternative: cross-link once here instead of per-branch above.
-#if 0
-        pvoice->vvoice = voice;
-        voice->pvoice  = pvoice;
-#endif
   }
 
   return (pvoice != 0);

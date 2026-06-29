@@ -36,7 +36,8 @@ Acmd* n_alAuxBusPull(s32 sampleOffset, Acmd* p) {
 #endif
 
   /* Pull every attached source voice into the mix. */
-  for (i = 0; i < m->sourceCount; i++)
+  for (i = 0; i < m->sourceCount; i++) {
     ptr = n_alEnvmixerPull(sources[i], sampleOffset, ptr);
+  }
   return ptr;
 }

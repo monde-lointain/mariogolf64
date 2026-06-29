@@ -31,7 +31,7 @@ Acmd* n_alSavePull(s32 sampleOffset, Acmd* p) {
   aSetBuffer(ptr++, 0, 0, 0, FIXED_SAMPLE << 2);
   aSaveBuffer(ptr++, n_syn->sv_dramout);
 #else
-#include "inc/n_save_add01.inc.c"
+#include "inc/n_save_add01.inc"
 #endif
   return ptr;
 }
