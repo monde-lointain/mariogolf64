@@ -1,49 +1,45 @@
-/*====================================================================
+/*
+ * n_synsetfxmix.c
  *
- * Copyright 1993, Silicon Graphics, Inc.
- * All Rights Reserved.
- *
- * This is UNPUBLISHED PROPRIETARY SOURCE CODE of Silicon Graphics,
- * Inc.; the contents of this file may not be disclosed to third
- * parties, copied or duplicated in any form, in whole or in part,
- * without the prior written permission of Silicon Graphics, Inc.
- *
- * RESTRICTED RIGHTS LEGEND:
- * Use, duplication or disclosure by the Government is subject to
- * restrictions as set forth in subdivision (c)(1)(ii) of the Rights
- * in Technical Data and Computer Software clause at DFARS
- * 252.227-7013, and/or in similar or successor clauses in the FAR,
- * DOD or NASA FAR Supplement. Unpublished - rights reserved under the
- * Copyright Laws of the United States.
- *====================================================================*/
-
+ * naudio synthesizer driver: set a voice's effects (wet) send level. Part of
+ * the n_alSyn* per-voice parameter API. Builds a timestamped update record and
+ * enqueues it on the voice's envmixer so the new level takes effect at the next
+ * synthesis frame.
+ */
 #include <os_internal.h>
 #include <ultraerror.h>
 #include "n_synthInternals.h"
 
+/*
+ * Set the effects-send (wet) level for voice v to fxmix, clamped to 0..127.
+ * No-op when v has no physical voice. Side effect: enqueues a parameter update
+ * timestamped to the next frame.
+ */
 void n_alSynSetFXMix(N_ALVoice* v, u8 fxmix) {
   ALParam* update;
 
+  // Parameter changes apply only to a voice bound to a physical voice.
   if (v->pvoice) {
-    /*
-     * get new update struct from the free list
-     */
+    // Take a record from the parameter free pool; fail if it is empty.
     update = __n_allocParam();
     ALFailIf(update == 0, ERR_ALSYN_NO_UPDATE);
 
-    /*
-     * set offset and fxmix data
-     */
+    // Stamp the update with the sample time the envmixer should apply it:
+    // the start of this voice's next frame. (SAMPLE_ROUND, when enabled,
+    // snaps the delta to a whole number of 184-sample frames.)
 #ifdef SAMPLE_ROUND
     update->delta = SAMPLE184(n_syn->paramSamples + v->pvoice->offset);
 #else
     update->delta = n_syn->paramSamples + v->pvoice->offset;
 #endif
+
+    // Effects (wet) send is a 7-bit level; clamp to its 0..127 range.
     update->type = AL_FILTER_SET_FXAMT;
     if (fxmix > 127) fxmix = 127;
     update->data.i = fxmix;
     update->next = 0;
 
+    // Queue the one-element update list onto the voice's envmixer.
     n_alEnvmixerParam(v->pvoice, AL_FILTER_ADD_UPDATE, update);
   }
 }

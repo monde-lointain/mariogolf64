@@ -1,23 +1,18 @@
-/*====================================================================
+/*
+ * n_synallocfx.c
  *
- * Copyright 1993, Silicon Graphics, Inc.
- * All Rights Reserved.
- *
- * This is UNPUBLISHED PROPRIETARY SOURCE CODE of Silicon Graphics,
- * Inc.; the contents of this file may not be disclosed to third
- * parties, copied or duplicated in any form, in whole or in part,
- * without the prior written permission of Silicon Graphics, Inc.
- *
- * RESTRICTED RIGHTS LEGEND:
- * Use, duplication or disclosure by the Government is subject to
- * restrictions as set forth in subdivision (c)(1)(ii) of the Rights
- * in Technical Data and Computer Software clause at DFARS
- * 252.227-7013, and/or in similar or successor clauses in the FAR,
- * DOD or NASA FAR Supplement. Unpublished - rights reserved under the
- * Copyright Laws of the United States.
- *====================================================================*/
+ * naudio synthesizer driver: allocate an effects (reverb) unit on the aux bus.
+ * The naudio synth routes its aux bus through an array of effect slots; this
+ * builds a fresh effect and binds it into the requested slot.
+ */
 #include "n_synthInternals.h"
 
+/*
+ * Build an effects unit from config c into aux-bus effect slot `bus`, drawing
+ * its working storage from heap hp, and return a reference to it. Unlike the
+ * stock synth the bus-to-main routing is wired statically, so no extra source
+ * linking is done here.
+ */
 ALFxRef n_alSynAllocFX(s16 bus, ALSynConfig* c, ALHeap* hp) {
   n_alFxNew(&n_syn->auxBus->fx_array[bus], c, hp);
   return (n_syn->auxBus->fx_array[bus]);

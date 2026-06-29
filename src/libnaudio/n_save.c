@@ -1,31 +1,30 @@
-/*====================================================================
+/*
+ * n_save.c
  *
- * Copyright 1993, Silicon Graphics, Inc.
- * All Rights Reserved.
- *
- * This is UNPUBLISHED PROPRIETARY SOURCE CODE of Silicon Graphics,
- * Inc.; the contents of this file may not be disclosed to third
- * parties, copied or duplicated in any form, in whole or in part,
- * without the prior written permission of Silicon Graphics, Inc.
- *
- * RESTRICTED RIGHTS LEGEND:
- * Use, duplication or disclosure by the Government is subject to
- * restrictions as set forth in subdivision (c)(1)(ii) of the Rights
- * in Technical Data and Computer Software clause at DFARS
- * 252.227-7013, and/or in similar or successor clauses in the FAR,
- * DOD or NASA FAR Supplement. Unpublished - rights reserved under the
- * Copyright Laws of the United States.
- *====================================================================*/
+ * n_audio (microcode-variant) save filter: the tail of the synthesis chain.
+ * It drives the main bus to build the final mix, interleaves the separate left
+ * and right mix buffers into one stereo buffer, and DMAs the result out to the
+ * DRAM output buffer (n_syn->sv_dramout) where the audio interface plays it.
+ */
 
 #include "n_synthInternals.h"
-
 #include <os.h>
 
+/*
+ * Builds the command list that produces one frame of finished stereo audio:
+ * pulls the main-bus mix, interleaves the left/right mix buffers, and saves
+ * (DMAs) the stereo result out to DRAM. sampleOffset, the frame's start time in
+ * samples, is forwarded to the main-bus pull. Returns the advanced command
+ * pointer.
+ */
 Acmd* n_alSavePull(s32 sampleOffset, Acmd* p) {
   Acmd* ptr = p;
 
+  // Let the main bus build the left/right mix in DMEM.
   ptr = n_alMainBusPull(sampleOffset, ptr);
-
+  // Interleave the separate left and right mix buffers into one stereo buffer
+  // (<<1 = the per-channel byte count, <<2 = the interleaved-stereo byte
+  // count), then DMA it out to the DRAM output buffer.
 #ifndef N_MICRO
   aSetBuffer(ptr++, 0, 0, 0, FIXED_SAMPLE << 1);
   aInterleave(ptr++, AL_MAIN_L_OUT, AL_MAIN_R_OUT);

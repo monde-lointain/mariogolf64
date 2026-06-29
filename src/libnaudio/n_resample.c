@@ -1,87 +1,73 @@
-/*====================================================================
+/*
+ * n_resample.c
  *
- * Copyright 1993, Silicon Graphics, Inc.
- * All Rights Reserved.
- *
- * This is UNPUBLISHED PROPRIETARY SOURCE CODE of Silicon Graphics,
- * Inc.; the contents of this file may not be disclosed to third
- * parties, copied or duplicated in any form, in whole or in part,
- * without the prior written permission of Silicon Graphics, Inc.
- *
- * RESTRICTED RIGHTS LEGEND:
- * Use, duplication or disclosure by the Government is subject to
- * restrictions as set forth in subdivision (c)(1)(ii) of the Rights
- * in Technical Data and Computer Software clause at DFARS
- * 252.227-7013, and/or in similar or successor clauses in the FAR,
- * DOD or NASA FAR Supplement. Unpublished - rights reserved under the
- * Copyright Laws of the United States.
- *====================================================================*/
+ * n_audio (microcode-variant) resampler / pitch-shift filter. Pulls decoded
+ * samples from the ADPCM load filter and time-stretches them to the playback
+ * rate using a fixed-point pitch ratio (UNITY_PITCH represents 1.0), carrying
+ * the fractional sample position across command-list frames in rs_delta so
+ * pitch does not drift. At unity pitch the resample step is skipped and the
+ * decoded samples pass straight through. n_alResampleParam handles the pitch
+ * and reset parameters and defers everything else to the load filter.
+ */
 
 #include "n_synthInternals.h"
-
 #include <os.h>
 
+/* Profiling counters; compiled in only for instrumented AUD_PROFILE builds. */
 #ifdef AUD_PROFILE
 extern u32 cnt_index, resampler_num, resampler_cnt, resampler_max,
     resampler_min, lastCnt[];
 #endif
 
-/***********************************************************************
- * Resampler filter public interfaces
- ***********************************************************************/
+/*
+ * Builds the resampler's portion of the command list: asks the ADPCM load
+ * filter for enough input samples, then emits an aResample command that
+ * stretches them into FIXED_SAMPLE output samples at *outp. The input-sample
+ * count follows the pitch ratio, with the leftover fraction accumulated in
+ * rs_delta so pitch stays drift-free across frames. Returns the advanced
+ * command pointer.
+ */
 Acmd* n_alResamplePull(N_PVoice* e, s16* outp, Acmd* p) {
   Acmd* ptr = p;
   s16 inp;
   s32 inCount;
   s32 incr;
   f32 finCount;
-
 #ifdef AUD_PROFILE
   lastCnt[++cnt_index] = osGetCount();
 #endif
-
+  // Decoded input arrives in the decoder-output DMEM buffer.
 #ifndef N_MICRO
   inp = AL_DECODER_OUT;
 #else
   inp = N_AL_DECODER_OUT;
 #endif
 
-  /*
-   * check if resampler is required
-   */
+  // Unity-pitch fast path: no rate conversion, just copy the decoded samples
+  // straight to the output buffer.
   if (e->rs_upitch) {
     ptr = n_alAdpcmPull(e, &inp, FIXED_SAMPLE, p);
     aDMEMMove(ptr++, inp, *outp, FIXED_SAMPLE << 1);
-
   } else {
-    /*
-     * clip to maximum allowable pitch
-     * FIXME: should we check for some minimum as well?
-     */
+    // General case: convert the decoded samples to the output rate. Clamp the
+    // pitch to at most +1 octave first.
     if (e->rs_ratio > MAX_RATIO) e->rs_ratio = MAX_RATIO;
 
-    /*
-     * quantize the pitch
-     */
+    // Quantize the ratio onto the resampler's fixed-point pitch grid.
     e->rs_ratio = (s32)(e->rs_ratio * UNITY_PITCH);
     e->rs_ratio = e->rs_ratio / UNITY_PITCH;
 
-    /*
-     * determine how many samples to generate
-     */
+    // Input samples needed = ratio * output count plus the fraction carried
+    // from the previous frame; keep the new remainder in rs_delta.
     finCount = e->rs_delta + (e->rs_ratio * (f32)FIXED_SAMPLE);
     inCount = (s32)finCount;
     e->rs_delta = finCount - (f32)inCount;
 
-    /*
-     * ask all filters upstream from us to build their command
-     * lists.
-     */
+    // Pull exactly that many decoded samples from the load filter.
     ptr = n_alAdpcmPull(e, &inp, inCount, p);
 
-    /*
-     * construct our portion of the command list
-     */
+    // Emit the resample command. incr is the per-sample pitch step in
+    // UNITY_PITCH fixed point.
     incr = (s32)(e->rs_ratio * UNITY_PITCH);
 #ifndef N_MICRO
     aSetBuffer(ptr++, 0, inp, *outp, FIXED_SAMPLE << 1);
@@ -91,21 +77,26 @@ Acmd* n_alResamplePull(N_PVoice* e, s16* outp, Acmd* p) {
 #endif
     e->rs_first = 0;
   }
-
 #ifdef AUD_PROFILE
   PROFILE_AUD(resampler_num, resampler_cnt, resampler_max, resampler_min);
 #endif
   return ptr;
 }
 
+/*
+ * Resampler parameter handler. In this build every parameter is forwarded to
+ * the load filter (n_alLoadParam); the original pitch / reset / unity-pitch
+ * cases are retained below but compiled out (#if 0), so the locals r and data
+ * are unused here. Always returns 0.
+ */
 s32 n_alResampleParam(N_PVoice* filter, s32 paramID, void* param) {
   N_PVoice* r = filter;
   union {
     f32 f;
     s32 i;
   } data;
-
   switch (paramID) {
+    // Original per-parameter handling, kept for reference but disabled here.
 #if 0
         case (AL_FILTER_RESET):
             r->rs_delta  = 0.0;
