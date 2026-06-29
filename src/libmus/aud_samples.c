@@ -10,8 +10,7 @@
  * N_SAMPLES for the naudio build).
  */
 
-#include "libmus_config.h"
-#include <ultra64.h>
+#include <ultra64.h>  // IWYU pragma: keep
 #include "aud_samples.h"
 
 /* Sample-count quantization block for the naudio build; the stock libaudio

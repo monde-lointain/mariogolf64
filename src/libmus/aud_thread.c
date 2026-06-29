@@ -10,7 +10,6 @@
  * the RSP audio task.
  */
 #include "libmus_config.h"
-#include <ultra64.h>
 #ifndef SUPPORT_NAUDIO
 #include <libaudio.h>
 #else

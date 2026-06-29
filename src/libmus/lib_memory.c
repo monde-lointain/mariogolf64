@@ -7,12 +7,10 @@
  * forward bump pointer. MemSet/MemMove are in-library replacements for
  * memset/memmove so libmus needs no libc.
  */
-#include "libmus_config.h"
-#include <ultra64.h>
+#include <ultra64.h>  // IWYU pragma: keep
 #ifndef SUPPORT_NAUDIO
 #include <libaudio.h>
 #else
-#include <n_libaudio_sc.h>
 #include <n_libaudio_sn_sc.h>
 #endif
 #include "lib_memory.h"

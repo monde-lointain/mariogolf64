@@ -10,13 +10,10 @@
  * it from ROM.
  */
 
-#include "libmus_config.h"
-#include <ultra64.h>
 // Audio-library API; the SUPPORT_NAUDIO build links the n_audio variant.
 #ifndef SUPPORT_NAUDIO
 #include <libaudio.h>
 #else
-#include <n_libaudio_sc.h>
 #include <n_libaudio_sn_sc.h>
 #endif
 #include "libmus.h"

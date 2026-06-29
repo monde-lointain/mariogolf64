@@ -8,8 +8,6 @@
  * The three routines are wired into a musSched vtable so the audio thread
  * reaches them indirectly through __libmus_current_sched.
  */
-#include "libmus_config.h"
-#include <ultra64.h>
 #include <sched.h>
 #include "libmus.h"
 #include "lib_memory.h"
