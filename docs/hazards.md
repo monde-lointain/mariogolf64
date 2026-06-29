@@ -58,8 +58,9 @@ recover-extern cost) as the band's first increment.
 3. Verbatim means verbatim: keep dead `#ifdef _DEBUG` blocks and their unconditional companion
    `#include`s (they compile out because `_DEBUG` is undefined). If such a block needs a header
    missing from the tree, copy that header rather than trimming the include.
-4. Skip clang-format under `src/libultra/` and `src/libkmc/` (verbatim cross-reference copies; both
-   dirs carry a local `.clang-format` with `DisableFormat: true`).
+4. `clang-format-22 -i` the copied files under `src/libultra/` and `src/libkmc/` (both dirs carry a
+   local `.clang-format` = `BasedOnStyle: Google` + `SortIncludes: Never`; formatting does not change
+   codegen).
 5. `make`, and the ROM SHA-1 must equal the baserom.
 
 Before declaring a clean verbatim mirror, reconcile the upstream's full call + data-ref list
@@ -2117,8 +2118,9 @@ Advisory (display-only).
 
 **Procedure:**
 - Mirror the file under a -O2 path, NOT `src/libultra/…`. The project convention is `src/mgu/`
-  for the game-embedded ultralib gu/mgu matrix source (the Monegi variant); a `.clang-format`
-  (`DisableFormat: true`) guards it as a verbatim-upstream dir (see CLAUDE.md). Any non-`libultra/`,
+  for the game-embedded ultralib gu/mgu matrix source (the Monegi variant); a local `.clang-format`
+  (`BasedOnStyle: Google` + `SortIncludes: Never`) formats it like the other library trees (see
+  CLAUDE.md). Any non-`libultra/`,
   non-`libkmc/` path gives -O2; pick one that reflects the source (`src/mgu/`, `src/main/…`).
 - Includes: the game `-I` set lacks `src/libultra/gu` and `include/libultra/PR`, so a source-private
   companion (`guint.h`) won't resolve; include via the public path instead (`#include <ultra64.h>`

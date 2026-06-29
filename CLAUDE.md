@@ -344,8 +344,9 @@ below).
   you changed. When a mirror or enabler edits a widely-included header (e.g.
   `include/libultra/PR/os_version.h`), the banking SHA-1 must come from `make clean && make extract &&
   make`, not an incremental build (`docs/hazards.md#clean-rebuild-after-shared-header-edit`).
-- **Library code under `src/libultra/`, `src/libkmc/`, `src/libnusys/`, `src/libnaudio/`, and
-  `src/mgu/` is clang-format-22 formatted** (stock Google with `SortIncludes: Never`; each dir carries a local
+- **Library code under `src/libultra/`, `src/libkmc/`, `src/libnusys/`, `src/libnaudio/`,
+  `src/libmus/`, and `src/mgu/` (plus the audio-lib include trees `include/libnaudio/`,
+  `include/libnualstl/`, and `include/libmus/`) is clang-format-22 formatted** (stock Google with `SortIncludes: Never`; each dir carries a local
   `.clang-format` = `BasedOnStyle: Google` + `SortIncludes: Never`, which SUPERSEDES the old
   `DisableFormat: true`). These trees were reworked (2026-06-23) to the Code Complete ch31/ch32
   layout + comment style and deliberately diverge from the upstream SOURCE formatting, so they no
@@ -357,10 +358,14 @@ below).
   `docs/hazards.md#game-region-mirror-o2-profile`).
 - **Vendored-header placement (PO directive, S129).** When a mirror needs headers vendored, split them
   by the SDK's own public/internal layout: a **public** header (the SDK's `include/` side, what a
-  consumer `#include`s) goes to `include/<lib>/` verbatim with NO local `.clang-format` (the include
-  trees stay unformatted, like `include/libmus`); a **source-private/internal** header (the SDK's
-  `src/` side) goes to `src/<lib>/` mirroring the include sub-structure, under the tree's local
-  `.clang-format`. When an internal header shares a name with an existing one on the `-I` path (e.g.
+  consumer `#include`s) goes to `include/<lib>/`; a **source-private/internal** header (the SDK's
+  `src/` side) goes to `src/<lib>/` mirroring the include sub-structure. Both the `include/<lib>/`
+  and `src/<lib>/` audio trees carry a local `.clang-format` = `BasedOnStyle: Google` +
+  `SortIncludes: Never` and are `clang-format-22` formatted (the audio-lib include trees
+  `include/libnaudio/`, `include/libnualstl/`, and `include/libmus/` were reworked to the Code
+  Complete ch31/ch32 style on 2026-06-29; the prior "include trees stay verbatim/unformatted" default
+  no longer holds for them). `SortIncludes: Never` is load-bearing: stock Google sorts `#include`s and
+  can break a byte-exact match. When an internal header shares a name with an existing one on the `-I` path (e.g.
   the n_audio_sc `synthInternals.h` vs `include/libultra/internal/synthInternals.h`), the build
   profile PREPENDS `-I src/<lib>` so the vendored SC copy wins (`mk/libnaudio.mk`, S129). Add the new
   tree's profile include dirs to `pick_target.py`'s `LIB_EXTRA_INCLUDE_DIRS`/`INCLUDE_DIRS` so its
