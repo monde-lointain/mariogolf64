@@ -36,6 +36,14 @@ extern LIBMUScb_marker g_mus_marker_callback;
 #define mus_vsyncs_per_second g_mus_vsyncs_per_sec
 #define marker_callback g_mus_marker_callback
 
+// player.c internal callees (still INCLUDE_ASM); aliased to their curated
+// ghidra symbols so banked bodies call the right address verbatim.
+extern int func_8009BC58(int);  // __MusIntRandom
+extern musHandle allocate_object_slot(fx_header_t*, int, int, int,
+                                      int);  // __MusIntFindChannelAndStart
+#define __MusIntRandom func_8009BC58
+#define __MusIntFindChannelAndStart allocate_object_slot
+
 INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_cmd_envelope);
 
 INCLUDE_ASM("asm/nonmatchings/libmus/player", MusInitialize);
@@ -469,7 +477,18 @@ unsigned char* mus_cmd_stereo(channel_t* cp, unsigned char* ptr) {
   return (ptr + 2);
 }
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_cmd_drums_on);
+unsigned char* mus_cmd_drums_on(channel_t* cp, unsigned char* ptr) {
+  int index;
+
+  index = *ptr++;
+  if (index >= 0x80) {
+    index &= 0x7f;
+    index <<= 8;
+    index |= *ptr++;
+  }
+  cp->pdrums = &cp->song_addr->drum_table[index];
+  return (ptr);
+}
 
 unsigned char* mus_cmd_drums_off(channel_t* cp, unsigned char* ptr) {
   cp->pdrums = NULL;
@@ -516,18 +535,58 @@ unsigned char* mus_cmd_reverb(channel_t* cp, unsigned char* ptr) {
   return (ptr);
 }
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_cmd_rand_note);
+unsigned char* mus_cmd_rand_note(channel_t* cp, unsigned char* ptr) {
+  // rand_amount,rand_base  -- 20,-3 would give -3 to 16 as the value
+  cp->transpose = __MusIntRandom(*ptr++);
+  cp->transpose += *ptr++;
+  return (ptr);
+}
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_cmd_rand_volume);
+unsigned char* mus_cmd_rand_volume(channel_t* cp, unsigned char* ptr) {
+  // rand_amount,base
+  cp->volume = __MusIntRandom(*ptr++);
+  cp->volume += *ptr++;
+  return (ptr);
+}
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_cmd_rand_pan);
+unsigned char* mus_cmd_rand_pan(channel_t* cp, unsigned char* ptr) {
+  // rand_amount,base
+  cp->pan = __MusIntRandom(*ptr++);
+  cp->pan += *ptr++;
+  return (ptr);
+}
 
 unsigned char* mus_cmd_volume(channel_t* cp, unsigned char* ptr) {
   cp->volume = *ptr++;
   return (ptr);
 }
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_cmd_start_fx);
+unsigned char* mus_cmd_start_fx(channel_t* cp, unsigned char* ptr) {
+  int i, number;
+  channel_t* sp;
+  unsigned long new_handle;
+
+  number = *ptr++;
+  if (number >= 0x80) number = ((number & 0x7f) << 8) + *ptr++;
+
+  /* increase priority */
+  cp->priority++;
+  /* start sub effect */
+  new_handle = __MusIntFindChannelAndStart(cp->fx_addr, number, cp->volscale,
+                                           cp->panscale, cp->priority);
+  /* decrease priority back to normal */
+  cp->priority--;
+  /* copy handle and sample bank setting */
+  if (new_handle) {
+    for (i = 0, sp = mus_channels; i < max_channels; i++, sp++) {
+      if (sp->handle == new_handle) {
+        sp->handle = cp->handle;
+        sp->sample_bank = cp->sample_bank;
+      }
+    }
+  }
+  return (ptr);
+}
 
 unsigned char* mus_cmd_bend_range(channel_t* cp, unsigned char* ptr) {
   cp->bendrange = (float)(*ptr++) * (1.0 / 64.0);
