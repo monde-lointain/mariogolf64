@@ -286,7 +286,47 @@ musHandle try_spawn_global_object(int number) {
   return (handle);
 }
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player", func_80099CF0);
+// MusStartEffect2
+musHandle func_80099CF0(int number, int volume, int pan, int restartflag,
+                        int priority) {
+  int i;
+  channel_t* cp;
+  musHandle handle;
+  fx_header_t* header;
+
+  if (libmus_fxheader_single) {
+    header = libmus_fxheader_single;
+    libmus_fxheader_single = NULL;
+  } else {
+    header = libmus_fxheader_current;
+    /* are effects present? */
+    if (!header) {
+      mus_init_bank = NULL;
+      return (0);
+    }
+  }
+
+  /* set FX default sample bank */
+  if (!mus_init_bank) mus_init_bank = header->ptr_addr;
+  /* overwrite same effect if it exists */
+  if (restartflag) {
+    for (i = MAX_SONGS, cp = mus_channels2; i < max_channels; i++, cp++) {
+      if (cp->fx_number == number && cp->fx_addr == header) {
+        /* get default priority if required */
+        if (priority == -1) priority = header->effects[number].priority;
+        handle = __MusIntStartEffect(cp, header, number, volume, pan, priority);
+        /* reset any single sample bank override */
+        mus_init_bank = NULL;
+        return (handle);
+      }
+    }
+  }
+  /* start effect using parameters */
+  handle = __MusIntFindChannelAndStart(header, number, volume, pan, priority);
+  /* reset any single sample bank override */
+  mus_init_bank = NULL;
+  return (handle);
+}
 
 // MusStop
 void mus_stop(unsigned long flags, int speed) {
