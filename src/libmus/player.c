@@ -45,8 +45,18 @@ extern int func_8009D8A8(s32);                 // ChangeCustomEffect
 extern musBool g_mus_fx_enabled;               // mus_songfxchange_flag
 extern void func_8009BFF0(void*, void*, int);  // __MusIntRemapPtrs
 extern N_ALVoice* g_mus_voice_array;           // mus_voices
+extern ALMicroTime g_mus_usec_per_frame;       // mus_next_frame_time
+extern command_func_t D_800C76BC[];            // jumptable
+extern void func_8009B360(channel_t*);         // __MusIntInitEnvelope
+extern void func_8009B5C4(channel_t*);         // __MusIntInitSweep
+extern void func_8009B060(channel_t*, int);    // __MusIntFlushPending
 float func_8009B92C(float);  // __MusIntPowerOf2 (defined below)
 #define mus_voices g_mus_voice_array
+#define mus_next_frame_time g_mus_usec_per_frame
+#define jumptable D_800C76BC
+#define __MusIntInitEnvelope func_8009B360
+#define __MusIntInitSweep func_8009B5C4
+#define __MusIntFlushPending func_8009B060
 #define __MusIntPowerOf2 func_8009B92C
 #define __MusIntRandom func_8009BC58
 #define __MusIntFindChannelAndStart allocate_object_slot
@@ -59,7 +69,45 @@ float func_8009B92C(float);  // __MusIntPowerOf2 (defined below)
 #define BASEOFFSET 48
 #define U8_TO_FLOAT(c) ((c) & 128) ? -(256 - (c)) : (c)
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_cmd_envelope);
+// Default-ADSR setup, extracted as a static helper so GCC -O3 auto-inlines it
+// into mus_cmd_envelope + func_8009AB18 exactly as the upstream inlines Fdefa
+// (defining it before its callers is what lets the inline reproduce; the
+// standalone Fdefa lives in mus_cmd_default_adsr for the command jumptable).
+static void env_set_adsr(channel_t* cp, unsigned char* ptr) {
+  unsigned char value;
+
+  value = *ptr++;
+  if (value == 0) value = 1;
+  cp->env_speed = value;
+  cp->env_speed_calc = 1024 / value;
+  cp->env_init_vol = *ptr++;
+  value = *ptr++;
+  cp->env_attack_speed = value;
+  cp->env_max_vol = *ptr++;
+  cp->env_attack_calc =
+      (1.0 / ((float)value)) * ((float)(cp->env_max_vol - cp->env_init_vol));
+  value = *ptr++;
+  cp->env_decay_speed = value;
+  cp->env_sustain_vol = *ptr++;
+  cp->env_decay_calc =
+      (1.0 / ((float)value)) * ((float)(cp->env_sustain_vol - cp->env_max_vol));
+  value = *ptr++;
+  cp->env_release_speed = value;
+  cp->env_release_calc = 1.0 / ((float)value);
+}
+
+unsigned char* mus_cmd_envelope(channel_t* cp, unsigned char* ptr) {
+  int tmp;
+
+  tmp = *ptr++;
+  if (tmp & 0x80) {
+    tmp &= 0x7f;
+    tmp <<= 8;
+    tmp |= *ptr++;
+  }
+  env_set_adsr(cp, &cp->song_addr->env_table[tmp * 7]);
+  return (ptr);
+}
 
 INCLUDE_ASM("asm/nonmatchings/libmus/player", MusInitialize);
 
@@ -143,7 +191,155 @@ INCLUDE_ASM("asm/nonmatchings/libmus/player", func_8009A7C8);
 
 INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_player_frame_handler);
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player", func_8009AB18);
+// __MusIntGetNewNote: advance past commands (jumptable dispatch), then fetch
+// the next note + length + velocity, set up the wave/drum sample, envelope and
+// reverb.
+void func_8009AB18(channel_t* cp, int x) {
+  unsigned char* ptr;
+  unsigned char command;
+
+  ptr = cp->pdata;
+  while (ptr && (command = *ptr) > 127) {
+#ifdef _AUDIODEBUG
+    if (command >= Clast) {
+      osSyncPrintf("PLAYER.C: Channel %d is corrupt (command=%02x)\n", x,
+                   command);
+      cp->pdata = NULL;
+      break;
+    }
+#endif
+    /* Execute the relevant code for the token.  */
+    ptr = (jumptable[command & 0x7f].func)(cp, ptr + 1);
+  }
+  cp->pdata = ptr;
+
+  /* new note */
+  if (ptr) {
+    int note;
+
+    cp->last_note = cp->port_base;
+    note = *(cp->pdata++);
+
+    if (cp->velocity_on) {
+      u8 vel = *cp->pdata++;
+      /* NOTE: MG64's libmus predates the 98.12.15 "rests don't store velocity"
+         change, so velocity is assigned unconditionally (no note!=REST guard).
+       */
+      cp->velocity = vel;
+      if (vel >= 0x80) {
+        cp->velocity = vel & 0x7F;
+        cp->velocity_on = 0;
+        cp->default_velocity = cp->velocity;
+      }
+    } else
+      cp->velocity = cp->default_velocity;
+
+    if (cp->fixed_length) {
+      if (!cp->ignore)
+        cp->length = cp->fixed_length;
+      else {
+        cp->ignore = 0;
+        command = *(cp->pdata++);
+        if (command < 128)
+          cp->length = command;
+        else
+          cp->length = ((int)(command & 0x7f) << 8) + *(cp->pdata++);
+      }
+    } else {
+      command = *(cp->pdata++);
+      if (command < 128)
+        cp->length = command;
+      else
+        cp->length = ((int)(command & 0x7f) << 8) + *(cp->pdata++);
+    }
+
+    /* set length and timer */
+    cp->note_start_frame = cp->note_end_frame;
+    cp->note_end_frame += cp->length * 256;
+    cp->count = 0;
+    /* initialise wobble */
+    cp->wobble_count = cp->wobble_off_speed;
+    cp->wobble_current = 0;
+
+    /* check to see if wave is valid */
+    if (cp->song_addr && !cp->pdrums) {
+      if (cp->song_addr->wave_table[cp->wave] == 0xffff) note = REST;
+    }
+
+    if (note != REST) {
+      int wave;
+      ptr_bank_t* bank;
+
+      /* get current sample bank */
+      bank = cp->sample_bank;
+
+      /* check for drums */
+      if (cp->pdrums != NULL) {
+        cp->wave = cp->pdrums[note].wave;
+        cp->pan = cp->pdrums[note].pan / 2;
+        env_set_adsr(cp, &cp->song_addr->env_table[cp->pdrums[note].adsr * 7]);
+        note = cp->pdrums[note].pitch;
+      }
+
+      /* initialise envelope */
+      if (!cp->env_trigger_off) __MusIntInitEnvelope(cp);
+
+      /* initialise sweep */
+      if (cp->sweep_speed) __MusIntInitSweep(cp);
+
+      /* get current wave number */
+      wave = cp->wave;
+
+      if (cp->song_addr)
+        wave = cp->song_addr->wave_table[wave];
+      else
+        wave = cp->fx_addr->wave_table[wave];
+
+      /* start relevant sample if required */
+      if (!cp->trigger_off) {
+        ALWaveTable* wave_addr;
+
+        wave_addr = bank->wave_list[wave];
+        cp->pending = wave_addr;
+        if (cp->playing && cp->old_volume) {
+          cp->old_volume = 0;
+          alSynSetVol(&__libmus_alglobals.drvr, mus_voices + x, 0,
+                      mus_next_frame_time);
+        } else
+          __MusIntFlushPending(cp, x);
+      }
+      cp->base_note = (float)note + bank->detune[wave];
+      command = cp->transpose * (1 - cp->ignore_transpose);
+      cp->base_note += (float)U8_TO_FLOAT(command);
+
+      /* set reverb level if required */
+      if (cp->reverb != cp->old_reverb) {
+        unsigned char work;
+
+        work = cp->reverb_base;
+        work += ((128 - work) * cp->reverb) >> 7;
+        cp->old_reverb = cp->reverb;
+        alSynSetFXMix(&__libmus_alglobals.drvr, mus_voices + x, work);
+      }
+    } else {
+      /* rest allows previous notes release to finish */
+      if (cp->env_phase < 4) {
+        cp->env_phase = 4; /* Start Release */
+        cp->release_frame = cp->channel_frame;
+        cp->env_count = 1;
+        cp->release_start_vol = cp->env_current;
+      }
+    }
+  } else /* must have hit a Cstop so stop its voice */
+  {
+    if (cp->playing) {
+      cp->playing = 0;
+      alSynSetVol(&__libmus_alglobals.drvr, mus_voices + x, 0,
+                  mus_next_frame_time);
+      alSynStopVoice(&__libmus_alglobals.drvr, mus_voices + x);
+    }
+  }
+}
 
 INCLUDE_ASM("asm/nonmatchings/libmus/player", func_8009B060);
 
