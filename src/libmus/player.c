@@ -63,13 +63,25 @@ float func_8009B92C(float);  // __MusIntPowerOf2 (defined below)
 #define ChangeCustomEffect func_8009D8A8
 #define mus_songfxchange_flag g_mus_fx_enabled
 #define __MusIntRemapPtrs func_8009BFF0
-extern unsigned short g_mus_master_vol_left;   // mus_master_volume_effects
-extern unsigned short g_mus_master_vol_right;  // mus_master_volume_songs
-extern musSched* __libmus_current_sched;       // @0x800C7ADC (symbol_addrs)
-extern int mus_fifo_enqueue(fifo_t*);          // __MusIntFifoAddCommand
+extern unsigned short g_mus_master_vol_left;     // mus_master_volume_effects
+extern unsigned short g_mus_master_vol_right;    // mus_master_volume_songs
+extern musSched* __libmus_current_sched;         // @0x800C7ADC (symbol_addrs)
+extern int mus_fifo_enqueue(fifo_t*);            // __MusIntFifoAddCommand
+extern int g_mus_fifo_read_idx;                  // fifo_start
+extern int g_mus_fifo_write_idx;                 // fifo_current
+extern int g_mus_fifo_size;                      // fifo_limit
+extern fifo_t* g_mus_fifo_base;                  // fifo_addr
+extern void __MusIntMemMove(void*, void*, int);  // @0x8009E30C (symbol_addrs)
+extern void mus_handle_set_flag(unsigned long, unsigned long,
+                                unsigned long);  // __MusIntHandleSetFlag
 #define mus_master_volume_effects g_mus_master_vol_left
 #define mus_master_volume_songs g_mus_master_vol_right
 #define __MusIntFifoAddCommand mus_fifo_enqueue
+#define fifo_start g_mus_fifo_read_idx
+#define fifo_current g_mus_fifo_write_idx
+#define fifo_limit g_mus_fifo_size
+#define fifo_addr g_mus_fifo_base
+#define __MusIntHandleSetFlag mus_handle_set_flag
 
 // player.c file-scope macros (verbatim).
 #define REST 96
@@ -388,9 +400,35 @@ INCLUDE_ASM("asm/nonmatchings/libmus/player", func_8009A630);
 
 INCLUDE_ASM("asm/nonmatchings/libmus/player", func_8009A64C);
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_fifo_dispatch);
+// __MusIntFifoProcessCommand
+void mus_fifo_dispatch(fifo_t* command) {
+  switch (command->command) {
+    case FIFOCMD_PAUSE:
+      __MusIntHandleSetFlag(command->data, ~CHFLAG_PAUSE, CHFLAG_PAUSE);
+      break;
+    case FIFOCMD_UNPAUSE:
+      __MusIntHandleSetFlag(command->data, ~CHFLAG_PAUSE, 0);
+      break;
+    case FIFOCMD_CHANGEFX:
+#ifdef SUPPORT_FXCHANGE
+      ChangeCustomEffect(command->data);
+#endif
+      break;
+  }
+}
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_fifo_enqueue);
+// __MusIntFifoAddCommand
+int mus_fifo_enqueue(fifo_t* command) {
+  int index;
+
+  index = (fifo_current + 1) % fifo_limit;
+  if (index == fifo_start) {
+    return (0);
+  }
+  __MusIntMemMove(&fifo_addr[fifo_current], command, sizeof(fifo_t));
+  fifo_current = index;
+  return (1);
+}
 
 INCLUDE_ASM("asm/nonmatchings/libmus/player", func_8009A7C8);
 
@@ -772,7 +810,19 @@ INCLUDE_ASM("asm/nonmatchings/libmus/player", allocate_object_slot);
 
 INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_start_song);
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_handle_set_flag);
+// __MusIntHandleSetFlag
+void mus_handle_set_flag(unsigned long handle, unsigned long clear,
+                         unsigned long set) {
+  int i;
+  channel_t* cp;
+
+  for (i = 0, cp = mus_channels; i < max_channels; i++, cp++) {
+    if (cp->handle == handle) {
+      cp->channel_flag &= clear;
+      cp->channel_flag |= set;
+    }
+  }
+}
 
 unsigned char* mus_cmd_stop(channel_t* cp, unsigned char* ptr) {
   cp->pvolume = NULL;
