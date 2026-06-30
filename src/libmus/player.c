@@ -1107,11 +1107,12 @@ void mus_remap_ptr_bank(char* pptr, char* wptr) {
   osWritebackDCacheAll();
 }
 
-// __MusIntRandom (MG64-divergent PRNG) -- CARRIED as asm: the C body matches
-// byte-for-byte standalone, but with the body visible GCC inlines it into the
-// rand command handlers (which the ROM keeps as `jal func_8009BC58`). No
-// noinline in GCC 2.7.2 and it cannot be reordered past its callers, so it
-// stays INCLUDE_ASM.
+// __MusIntRandom (MG64-divergent PRNG) -- CARRIED as asm. The C body matches
+// byte-for-byte standalone, but GCC 2.7.2 -O3 inlines it into the rand command
+// handlers (the ROM keeps `jal func_8009BC58`). Tried global and static
+// linkage; both inline (static also drops the standalone). No noinline in
+// GCC 2.7.2. Resolving this needs a mips-gcc-2.7.2 integrate.c inline-heuristic
+// deep-dive.
 INCLUDE_ASM("asm/nonmatchings/libmus/player", func_8009BC58);
 
 // __MusIntInitialiseChannel
