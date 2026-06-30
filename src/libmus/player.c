@@ -115,7 +115,9 @@ extern void func_8009B818(channel_t*);    // __MusIntProcessContinuousPitchBend
 #define __MusIntStartEffect func_8009C028
 #define __MusIntProcessContinuousVolume func_8009B754
 #define __MusIntProcessContinuousPitchBend func_8009B818
-extern int g_mus_pan_enabled;  // @0x800C76B8 (MG64-added pan-enable flag)
+extern int g_mus_pan_enabled;     // @0x800C76B8 (MG64-added pan-enable flag)
+extern int g_mus_frame_counter;   // @0x800C7770
+extern void func_8009DBA0(void);  // empty routine (aud_dma.c)
 
 // player.c file-scope macros (verbatim).
 #define REST 96
@@ -593,7 +595,7 @@ void func_8009A624(void* callback) {
   marker_callback = (LIBMUScb_marker)callback;
 }
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player", func_8009A630);
+void func_8009A630(void) { func_8009DBA0(); }
 
 // __MusIntFifoOpen
 void func_8009A64C(int commands) {
@@ -637,7 +639,7 @@ int mus_fifo_enqueue(fifo_t* command) {
   return (1);
 }
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player", func_8009A7C8);
+int func_8009A7C8(void) { return g_mus_frame_counter; }
 
 INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_player_frame_handler);
 
@@ -1105,6 +1107,11 @@ void mus_remap_ptr_bank(char* pptr, char* wptr) {
   osWritebackDCacheAll();
 }
 
+// __MusIntRandom (MG64-divergent PRNG) -- CARRIED as asm: the C body matches
+// byte-for-byte standalone, but with the body visible GCC inlines it into the
+// rand command handlers (which the ROM keeps as `jal func_8009BC58`). No
+// noinline in GCC 2.7.2 and it cannot be reordered past its callers, so it
+// stays INCLUDE_ASM.
 INCLUDE_ASM("asm/nonmatchings/libmus/player", func_8009BC58);
 
 // __MusIntInitialiseChannel
