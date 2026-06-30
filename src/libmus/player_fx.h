@@ -1,42 +1,44 @@
 /*
  * player_fx.h
  *
- * Custom effects (reverb) unit for the libmus music driver. libmus supplies its
- * own multi-section reverb in place of the stock audio-library effect so that a
- * song can carry and switch effect presets at runtime. This header declares the
- * custom synth/effect constructors, which deliberately alias the standard
- * audio-library entry points (alInit, etc.) so existing callers transparently
- * pick up libmus's effect, plus the REVERB_MEM working state. Declarations come
- * in parallel non-naudio and naudio (SUPPORT_NAUDIO) forms.
+ * libmus player: custom audio-effect (reverb) support.
+ *
+ * Declares the "Custom" overrides for the audio library's synth-driver and
+ * effect bring-up path (alInit / alSynNew / alSynAllocFX / alFxNew), plus
+ * REVERB_MEM -- the block that records every audio-heap allocation behind the
+ * player's single, reusable effect. Audio-heap memory is never freed, so one
+ * effect is allocated once at its worst-case size and then re-parameterized in
+ * place rather than reallocated whenever the active effect changes.
  */
 #ifndef _PLAYER_FX_H_
 #define _PLAYER_FX_H_
 
 #include "synthInternals.h"
 
-// Under the naudio synth, pull in the naudio-side audio headers and internals
-// so the Custom* hooks below match the naudio driver's signatures.
+/*
+ * n_audio variant: when the game links the "n_audio" synthesizer instead of
+ * the classic audio library, pull in its parallel type and entry-point
+ * headers. The Custom* signatures below switch to match.
+ */
 #ifdef SUPPORT_NAUDIO
 #include <n_libaudio_sc.h>
 #include <n_libaudio_sn_sc.h>
 #include "n_synthInternals.h"
 #endif
 
-// Select a different custom effect/reverb preset while playing (the
-// SUPPORT_FXCHANGE runtime hook); the argument is the effect index.
+/* Public API: switch the active effect to the preset selected by index. */
 int ChangeCustomEffect(s32);
 
-// Initialise the synth driver with libmus's custom effect installed. Aliased to
-// the library's standard init entry (see the alInit/n_alInit define below) so
-// every caller of alInit() gets the reverb-aware driver.
+/* Replacement for alInit(): one-time synth-driver bring-up. */
 void CustomInit(ALGlobals*, ALSynConfig*);
-// Redirect the audio library's standard synth-init entry to CustomInit, so any
-// client that calls alInit() (or n_alInit() under naudio) builds the driver
-// with libmus's effect rather than the stock one.
-//
-// CustomSynNew builds the synth driver; CustomAllocFX allocates the custom
-// effect on a synth bus (replacing alSynAllocFX). The naudio variants drop the
-// ALSynth* argument because naudio keeps the driver in a global.
+
+/*
+ * Redirect the library's standard init symbol to CustomInit so existing call
+ * sites reach the custom path unchanged. CustomSynNew / CustomAllocFX mirror
+ * alSynNew() / alSynAllocFX(); the n_audio synth keeps its driver and bus
+ * state in a global, so its variants drop the leading ALSynth* and return the
+ * FX reference by value rather than by pointer.
+ */
 #ifndef SUPPORT_NAUDIO
 #define alInit CustomInit
 void CustomSynNew(ALSynth*, ALSynConfig*);
@@ -47,30 +49,41 @@ void CustomSynNew(ALSynConfig*);
 ALFxRef CustomAllocFX(s16, ALSynConfig*, ALHeap*);
 #endif
 
-// Construct the custom effect node in the supplied heap (naudio takes an
-// out-pointer because it returns the node by reference).
+/*
+ * Allocate the effect's heap blocks at worst-case size, then hand off to
+ * CustomFxSet(). The n_audio variant also allocates the ALFx object itself,
+ * so it takes the slot by reference (ALFx**) rather than a caller-owned ALFx*.
+ */
 #ifndef SUPPORT_NAUDIO
 void CustomFxNew(ALFx*, ALSynConfig*, ALHeap*);
 #else
 void CustomFxNew(ALFx**, ALSynConfig*, ALHeap*);
 #endif
 
-// Load the reverb's parameters from a preset, passed as a flat s32 array.
+/* (Re)program the effect filter from an s32 param table; no allocation. */
 void CustomFxSet(s32*);
-// Working memory for the custom multi-section reverb: the owning driver, the
-// per-section delay lines, and the resampler/low-pass DSP blocks (with their
-// RSP working states) that form the feedback path.
+
+/*
+ * Records the audio-heap allocations behind the single shared effect, so a
+ * later effect change can reuse the same memory instead of allocating again.
+ */
 typedef struct {
-  ALSynth* synth;           // owning synth driver
-  int sections;             // number of reverb delay sections (taps)
-  u32 length;               // delay-line length, in samples
-  s32* pParams;             // active preset parameters driving the effect
-  ALDelay* pDelay;          // per-section delay-line descriptors
-  s16* pBase;               // base of the delay-line sample buffer
-  ALResampler* pResampler;  // resampler for pitch-modulated delay
-  RESAMPLE_STATE* pResampleState;  // its RSP working state
-  ALLowPass* pLowPass;             // low-pass filter on the feedback path
-  POLEF_STATE* pLpfState;          // pole-filter working state for the low-pass
+  ALSynth* synth; /* synth driver this effect is attached to */
+
+  /* Active effect description. */
+  int sections; /* number of delay sections */
+  u32 length;   /* delay-line length, in samples */
+  s32* pParams; /* parameter table driving the active effect */
+
+  /* ALFx delay line wired onto the aux bus. */
+  ALDelay* pDelay; /* per-section delay descriptors (worst-case count) */
+  s16* pBase;      /* delay-line sample buffer (worst-case length) */
+
+  /* Per-tap resampler (chorus / flange) and low-pass (damping) filter. */
+  ALResampler* pResampler;
+  RESAMPLE_STATE* pResampleState;
+  ALLowPass* pLowPass;
+  POLEF_STATE* pLpfState;
 } REVERB_MEM;
 
 #endif

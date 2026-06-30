@@ -1,20 +1,17 @@
 /*
  * n_abi.h
  *
- * naudio audio-command (Acmd) assembly macros for libmus. Each macro writes one
- * RSP audio DSP operation into the 64-bit Acmd at pkt, packing the opcode and
- * operands into the command's two 32-bit words (w0/w1). _SHIFTL(value, shift,
- * width) places each operand into a width-bit field starting at bit `shift`;
- * the high byte of w0 always holds the A_* opcode. These "n_a" variants fold
- * the DMEM/DRAM buffer addresses directly into each command, matching the
- * naudio microcode's command layout (the stock ABI instead issues a separate
- * aSetBuffer). Each macro's operands are listed below with their word and bit
- * range, written w<n>[hi:lo].
+ * n_audio ("single command") RSP audio command builders. Each macro writes one
+ * 8-byte audio command -- an Acmd word pair (w0, w1) -- into the command list
+ * at `pkt`, packing the opcode (A_*) into the top byte of w0 and the operands
+ * into the remaining bit-fields via _SHIFTL(value, shift, width). Unlike the
+ * stock builders in abi.h, these variants carry the source/destination DMEM
+ * addresses inline in the command word, so the synth driver issues one command
+ * per pipeline stage over a fixed 184-sample frame instead of pairing each op
+ * with a separate aSetBuffer. Bit positions below are given as w<n>[hi:lo].
  */
 #ifndef _N_ABI__
 #define _N_ABI__
-
-// Only expose the assembly macros to C / C++ translation units.
 #if defined(_LANGUAGE_C) || defined(_LANGUAGE_C_PLUS_PLUS)
 
 /*
@@ -35,7 +32,7 @@
   }
 
 /*
- * Run the one-pole low-pass filter on the reverb feedback path.
+ * Run the one-pole low-pass filter (used by the reverb/FX path).
  *   f = flags: first-frame A_INIT vs A_CONTINUE  (w0[23:16])
  *   g = filter gain                              (w0[15:0])
  *   t = DMEM buffer address operated on          (w1[31:24])
@@ -69,7 +66,7 @@
   }
 
 /*
- * Interleave the separate left/right mix buffers into one stereo stream. The
+ * Interleave the separate left/right mix buffers into one stereo stream; the
  * DMEM buffer addresses are implicit in this variant, so only the opcode (w0)
  * is written and w1 is left untouched.
  */
@@ -81,7 +78,7 @@
   }
 
 /*
- * DMA a sample buffer from DRAM into DMEM.
+ * DMA a buffer from DRAM into DMEM.
  *   c = byte count to load                       (w0[23:12])
  *   d = destination DMEM address                 (w0[11:0])
  *   s = physical (DRAM) source address           (w1)
@@ -96,7 +93,7 @@
   }
 
 /*
- * Pitch-shift / resample a DMEM buffer.
+ * Pitch-shift / resample a buffer.
  *   s = physical address of the resampler state  (w0[23:0])
  *   f = flags: first-frame select                (w1[31:30])
  *   p = 16-bit pitch increment (phase step)      (w1[29:14])
@@ -113,7 +110,7 @@
   }
 
 /*
- * DMA a sample buffer from DMEM back out to DRAM.
+ * DMA a buffer from DMEM back out to DRAM.
  *   c = byte count to save                       (w0[23:12])
  *   d = source DMEM address                      (w0[11:0])
  *   s = physical (DRAM) destination address      (w1)
@@ -147,7 +144,7 @@
   }
 
 /*
- * Load the ADPCM predictor codebook into the RSP.
+ * Load the ADPCM codebook (predictor coefficient table) into the RSP.
  *   c = byte count of the codebook               (w0[23:0])
  *   d = physical (DRAM) address of the codebook  (w1)
  */

@@ -1,55 +1,61 @@
 /*
  * aud_sched.c
  *
- * Built-in libmus audio scheduler: it bridges the RSP audio task to the
- * libultra OS scheduler (OSSched). It registers as a scheduler client to
- * receive video-retrace notifications, blocks the audio thread until each
- * retrace, and submits one audio RSP job per frame, waiting for it to finish.
- * The three routines are wired into a musSched vtable so the audio thread
- * reaches them indirectly through __libmus_current_sched.
+ * libmus's default audio-frame scheduler back-end: it paces the audio thread
+ * off the RCP task scheduler the game is already running. The back-end joins
+ * that scheduler as a client to learn when each VI retrace occurs, and hands
+ * the per-frame audio synthesis task to the RSP, blocking until it completes.
+ *
+ * The audio thread reaches these routines indirectly through the musSched
+ * vtable (__libmus_current_sched), so a game may substitute its own scheduling
+ * back-end; this file supplies the stock OSSched-based one.
  */
+
 #include <sched.h>
 #include "libmus.h"
 #include "lib_memory.h"
 #include "aud_sched.h"
 
-// Depth of the per-client retrace and task-done message queues.
+/* Depth of the retrace and task-completion message queues. */
 #define QUEUE_SIZE 4
 
-// The default vtable's three entry points (see __libmus_current_sched).
+/* Stock back-end operations, wired into default_sched below. */
 static void __OsSchedInstall(void);
 static void __OsSchedWaitFrame(void);
 static void __OsSchedDoTask(musTask* task);
 
-/*
- * Working set for the built-in scheduler client: the OSSched client
- * registration plus two message queues, one fed retrace notifications and one
- * that receives the acknowledgement when a dispatched RSP task completes.
- */
+/* State this back-end keeps alive for the lifetime of the audio thread. */
 typedef struct {
-  OSScClient client;
-  OSMesgQueue frame_queue;
+  OSScClient client;       /* scheduler-client registration */
+  OSMesgQueue frame_queue; /* VI-retrace notifications land here */
   OSMesg frame_messages[QUEUE_SIZE];
-  OSMesgQueue task_queue;
+  OSMesgQueue task_queue; /* audio-task completions land here */
   OSMesg task_messages[QUEUE_SIZE];
 } ossched_workspace_t;
 
+/*
+ * Globals defined in the audio data segment:
+ *   audio_sched - the game's OS scheduler, recorded by __MusIntSchedInit
+ *   sched_mem   - this back-end's workspace, allocated from the audio heap
+ */
 extern OSSched* audio_sched;
 extern ossched_workspace_t* sched_mem;
 
-// Built-in scheduler implementation, installed unless a game overrides it.
+/* Default vtable: the three operations the audio thread drives each frame. */
 static musSched default_sched = {__OsSchedInstall, __OsSchedWaitFrame,
                                  __OsSchedDoTask};
+
+/* Back-end the audio thread currently uses; a game may point this elsewhere. */
 musSched* __libmus_current_sched = &default_sched;
 
-/* Scheduler binding: remember the host game's OS scheduler so install() can
- * register against it. */
+/* Remember which OS scheduler the audio thread should attach to. */
 void __MusIntSchedInit(void* sched) { audio_sched = (OSSched*)sched; }
 
 /*
- * Install handler: allocate the client workspace, create the retrace and
- * task-done queues, and join the OS scheduler so this client starts receiving
- * retrace messages.
+ * Join the OS scheduler as a client; called once before the frame loop.
+ *
+ * Allocates the workspace, opens the retrace and task-completion queues, and
+ * registers so the scheduler posts a message to frame_queue on every retrace.
  */
 static void __OsSchedInstall(void) {
   sched_mem = __MusIntMemMalloc(sizeof(ossched_workspace_t));
@@ -61,10 +67,12 @@ static void __OsSchedInstall(void) {
 }
 
 /*
- * Wait-frame handler: block the audio thread until the next video retrace. Each
- * pass takes one message (blocking) and then drains a second one (non-blocking)
- * so the fixed-size queue cannot back up, looping until the message taken is a
- * retrace notification.
+ * Block the audio thread until the next VI retrace.
+ *
+ * The blocking receive waits for a message; the non-blocking one discards a
+ * second if the queue has backed up, so the thread resumes on the most recent
+ * frame instead of chasing a backlog. Non-retrace messages (e.g. pre-NMI) are
+ * ignored.
  */
 static void __OsSchedWaitFrame(void) {
   OSScMsg* message;
@@ -75,46 +83,39 @@ static void __OsSchedWaitFrame(void) {
 }
 
 /*
- * Do-task handler: describe one audio RSP job and submit it to the scheduler,
- * then block until the scheduler reports the task done on task_queue. The job
- * runs the rspboot loader followed by the audio synthesis microcode over the
- * caller's command list; it needs the RSP but no DRAM stack, output buffer, or
- * yield buffer.
+ * Submit one frame's audio task to the RSP and wait for it to finish.
+ *
+ * Describes the audio command list plus the boot and synthesis microcode as an
+ * OSScTask, hands it to the scheduler's command queue, then blocks until the
+ * scheduler reports the task done on task_queue.
  */
 static void __OsSchedDoTask(musTask* task) {
   OSScTask t;
   OSScMsg message;
-
   t.next = 0;
   t.msgQ = &sched_mem->task_queue;
   t.msg = &message;
-  t.flags = OS_SC_NEEDS_RSP;
-
-  // The generated audio command list to execute.
+  t.flags = OS_SC_NEEDS_RSP; /* audio drives the RSP only, never the RDP */
   t.list.t.data_ptr = task->data;
   t.list.t.data_size = task->data_size;
   t.list.t.type = M_AUDTASK;
-
-  // rspboot loader: the bytes between its start and end symbols.
   t.list.t.ucode_boot = (u64*)rspbootTextStart;
   t.list.t.ucode_boot_size = ((int)rspbootTextEnd - (int)rspbootTextStart);
   t.list.t.flags = 0;
-
-  // Audio synthesis microcode (fixed 4 KB text, standard data size).
   t.list.t.ucode = task->ucode;
   t.list.t.ucode_data = task->ucode_data;
   t.list.t.ucode_size = 4096;
   t.list.t.ucode_data_size = SP_UCODE_DATA_SIZE;
-
-  // Audio tasks use none of the stack/output/yield facilities.
+  /* DRAM matrix stack and framebuffer output are graphics-only; an audio
+   * task leaves them empty. */
   t.list.t.dram_stack = (u64*)NULL;
   t.list.t.dram_stack_size = 0;
   t.list.t.output_buff = (u64*)NULL;
   t.list.t.output_buff_size = 0;
+  /* Audio tasks are short enough that the scheduler never yields them. */
   t.list.t.yield_data_ptr = NULL;
   t.list.t.yield_data_size = 0;
 
-  // Hand the job to the scheduler and wait for it to finish.
   osSendMesg(osScGetCmdQ(audio_sched), (OSMesg)&t, OS_MESG_BLOCK);
   osRecvMesg(&sched_mem->task_queue, NULL, OS_MESG_BLOCK);
 }

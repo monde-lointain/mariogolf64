@@ -1,22 +1,19 @@
 /*
  * synthInternals.h
  *
- * Internal interface of the N64 audio-library synthesis driver. It declares the
- * RSP DMEM scratch-buffer offsets, the parameter-event and per-filter state
- * structs that form the synthesis pipeline (decoder -> resampler -> envelope
- * mixer -> buses -> save), and the driver-private constructors and per-stage
- * pull/param routines. Game/library clients drive playback through the public
- * libaudio API; this header is for the driver itself and its custom-effect
- * extensions.
+ * Private interface of the stock libaudio software synthesizer (the SGI "AL"
+ * audio library) that libmus drives. Declares the pull-model filter graph that
+ * turns active voices into an RSP audio command list: the per-stage filter
+ * structs (ADPCM decoder, resampler, envelope mixer, FX, main/aux bus, save),
+ * the control-parameter messages queued to those filters, the fixed DMEM
+ * scratch-buffer layout, and the private driver prototypes. The n_audio variant
+ * flattens these same stages into one node; see n_synthInternals.h.
  */
 #ifndef __audioInternals__
 #define __audioInternals__
-
 #include <libaudio.h>
 
-// Parameter/command selectors passed to a filter's setParam handler: each names
-// the voice operation to apply (set source, set pitch, start/stop a voice,
-// ...).
+/* Parameter-message ids: the "set" operations a filter understands. */
 enum {
   AL_FILTER_FREE_VOICE,
   AL_FILTER_SET_SOURCE,
@@ -37,12 +34,14 @@ enum {
   AL_FILTER_SET_FXAMT
 };
 
-// Samples the RSP processes per pass (the stock block size).
+/* Most samples the RSP processes in one frame; sets the scratch-buffer size. */
 #define AL_MAX_RSP_SAMPLES 160
 
-// Byte offsets of the audio scratch buffers within RSP DMEM. Each slot holds
-// one 160-sample block (320 bytes); names sharing an offset mark a buffer
-// reused between pipeline stages (decoder input == resampler output == temp 0).
+/*
+ * Fixed DMEM scratch-buffer layout, as byte offsets. Each half-buffer holds
+ * AL_MAX_RSP_SAMPLES (160) s16 samples = 320 bytes; the pipeline reuses the low
+ * region in place (decoder-in, resampler-out and temp 0 all start at 0).
+ */
 #define AL_DECODER_IN 0
 #define AL_RESAMPLER_OUT 0
 #define AL_TEMP_0 0
@@ -54,7 +53,7 @@ enum {
 #define AL_AUX_L_OUT 1728
 #define AL_AUX_R_OUT 2048
 
-// Filter type tags (the `type` field of ALFilter), one per pipeline stage.
+/* Filter (pipeline-stage) type tags, stored in ALFilter.type. */
 enum {
   AL_ADPCM,
   AL_RESAMPLE,
@@ -65,14 +64,17 @@ enum {
   AL_AUXBUS,
   AL_MAINBUS
 };
-// A scheduled parameter-change event in a filter's control list. Events are
-// kept time-ordered as a singly linked list: `delta` is the tick count from the
-// previous event to this one, `type` selects the parameter, and the four
-// generic data slots carry its operands (each readable as float or int).
+
+/*
+ * Control message queued to a filter, applied `delta` samples in the future.
+ * `type` is one of the AL_FILTER_* ids; the four unions carry up to four typed
+ * payload words (float or int) whose meaning depends on `type`. The Start/Free
+ * param structs below overlay this same node with named fields.
+ */
 typedef struct ALParam_s {
   struct ALParam_s* next;
-  s32 delta;  // ticks from the previous event to this one
-  s16 type;   // parameter selector (an AL_FILTER_* value)
+  s32 delta; /* ticks from the previous event to this one */
+  s16 type;  /* parameter selector (an AL_FILTER_* value) */
   union {
     f32 f;
     s32 i;
@@ -91,31 +93,31 @@ typedef struct ALParam_s {
   } yetstillmoredata;
 } ALParam;
 
-// Start-voice event (full form): hands the decoder its initial pitch, volume,
-// pan, effect-send level, and wavetable when a note begins.
+/* Start a voice with full parameters (pitch, volume, pan, fx mix, wavetable).
+ */
 typedef struct {
   struct ALParam_s* next;
   s32 delta;
   s16 type;
-  s16 unity;  // unity-pitch flag
+  s16 unity; /* nonzero: play at unity pitch (resampler disabled) */
   f32 pitch;
   s16 volume;
   ALPan pan;
-  u8 fxMix;  // effect-send (wet) amount
+  u8 fxMix; /* effect-send (wet) amount */
   s32 samples;
   struct ALWaveTable_s* wave;
 } ALStartParamAlt;
 
-// Start-voice event (short form): wavetable and unity pitch only.
+/* Start a voice from just a wavetable (pitch/volume left at current state). */
 typedef struct {
   struct ALParam_s* next;
   s32 delta;
   s16 type;
-  s16 unity;
+  s16 unity; /* nonzero: play at unity pitch (resampler disabled) */
   struct ALWaveTable_s* wave;
 } ALStartParam;
 
-// Free-voice event: release the named physical voice when it fires.
+/* Return a physical voice to the free pool. */
 typedef struct {
   struct ALParam_s* next;
   s32 delta;
@@ -123,219 +125,230 @@ typedef struct {
   struct PVoice_s* pvoice;
 } ALFreeParam;
 
-// A filter's per-block command emitter and its parameter handler.
+/* Pull entry point: a filter appends its RSP commands and returns the new tail.
+ */
 typedef Acmd* (*ALCmdHandler)(void*, s16*, s32, s32, Acmd*);
+/* Apply one AL_FILTER_* parameter to a filter. */
 typedef s32 (*ALSetParam)(void*, s32, void*);
 
-// Base filter: one node in the synthesis pipeline. Nodes chain via `source`;
-// `inp`/`outp` are the DMEM buffers it reads from and writes to.
+/*
+ * Base of every pipeline stage. `source` is the upstream filter pulled from;
+ * `inp`/`outp` are its DMEM in/out buffer offsets; `type` is an AL_* tag.
+ */
 typedef struct ALFilter_s {
-  struct ALFilter_s* source;  // upstream node feeding this one
-  ALCmdHandler handler;       // per-block command emitter
-  ALSetParam setParam;        // parameter-change handler
-  s16 inp;                    // input DMEM offset
-  s16 outp;                   // output DMEM offset
-  s32 type;                   // filter type tag (an AL_* value)
+  struct ALFilter_s* source; /* upstream node feeding this one */
+  ALCmdHandler handler;      /* per-block command emitter */
+  ALSetParam setParam;       /* parameter-change handler */
+  s16 inp;                   /* input DMEM offset */
+  s16 outp;                  /* output DMEM offset */
+  s32 type;                  /* filter type tag (an AL_* value) */
 } ALFilter;
 
-// Initialise the base fields common to every filter.
 void alFilterNew(ALFilter* f, ALCmdHandler h, ALSetParam s, s32 type);
+
+/* Concurrent decoder states needed (depends on subframes per frame + loop len).
+ */
 #define AL_MAX_ADPCM_STATES 3
 
-// The decode ("load") stage: DMAs compressed samples from DRAM and
-// ADPCM-decodes them, tracking loop bounds and the running decoder history.
+/* ADPCM decoder stage: streams compressed samples from DRAM and decodes them.
+ */
 typedef struct {
   ALFilter filter;
-  ADPCM_STATE* state;   // decoder history (current)
-  ADPCM_STATE* lstate;  // decoder history saved at the loop point
+  ADPCM_STATE* state;  /* decoder history (current) */
+  ADPCM_STATE* lstate; /* decoder history saved at the loop point */
   ALRawLoop loop;
   struct ALWaveTable_s* table;
-  s32 bookSize;   // ADPCM codebook size, bytes
-  ALDMAproc dma;  // DMA callback feeding the decoder
+  s32 bookSize;  /* ADPCM codebook size, bytes */
+  ALDMAproc dma; /* DMA callback feeding the decoder */
   void* dmaState;
-  s32 sample;  // current decode position
+  s32 sample; /* current decode position */
   s32 lastsam;
-  s32 first;  // first-block flag
+  s32 first; /* first-block flag */
   s32 memin;
 } ALLoadFilter;
+
 void alLoadNew(ALLoadFilter* f, ALDMANew dma, ALHeap* hp);
 Acmd* alAdpcmPull(void* f, s16* outp, s32 byteCount, s32 sampleOffset, Acmd* p);
 Acmd* alRaw16Pull(void* f, s16* outp, s32 byteCount, s32 sampleOffset, Acmd* p);
 s32 alLoadParam(void* filter, s32 paramID, void* param);
 
-// The resample stage: rate-converts the decoded stream to the requested pitch,
-// keeping a fractional position (`delta`) and a list of pending pitch changes.
+/* Pitch resampler stage: ratio/delta drive the fractional sample step. */
 typedef struct ALResampler_s {
   ALFilter filter;
   RESAMPLE_STATE* state;
-  f32 ratio;          // output/input rate ratio (pitch)
-  s32 upitch;         // unity-pitch (no resample) flag
-  f32 delta;          // fractional sample position
-  s32 first;          // first-block flag
-  ALParam* ctrlList;  // pending parameter-change events
+  f32 ratio;         /* output/input rate ratio (pitch) */
+  s32 upitch;        /* unity-pitch (no resample) flag */
+  f32 delta;         /* fractional sample position */
+  s32 first;         /* first-block flag */
+  ALParam* ctrlList; /* pending parameter-change events */
   ALParam* ctrlTail;
-  s32 motion;  // play state: AL_PLAYING or AL_STOPPED
+  s32 motion;
 } ALResampler;
 
-// One-pole low-pass filter used on the reverb feedback path. The coefficient
-// vector is unioned with an s64 only to force 8-byte alignment for the RSP.
+/* One-pole low-pass filter used by the FX (reverb) path. */
 typedef struct {
-  s16 fc;     // cutoff coefficient
-  s16 fgain;  // filter gain
+  s16 fc;    /* cutoff coefficient */
+  s16 fgain; /* filter gain */
   union {
-    s16 fccoef[16];     // computed pole-filter coefficients
-    s64 force_aligned;  // alignment padding only
+    s16 fccoef[16];    /* computed pole-filter coefficients */
+    s64 force_aligned; /* forces 8-byte alignment of the coefficient vector */
   } fcvec;
   POLEF_STATE* fstate;
-  s32 first;  // first-block flag
+  s32 first; /* first-block flag */
 } ALLowPass;
 
-// A reverb delay line: feeds samples through a DMEM delay buffer with
-// feed-forward/feedback taps, optionally resampled and low-pass filtered for a
-// pitch-modulated, damped echo.
+/* One tap of the reverb delay line: a delayed, filtered, resampled feedback. */
 typedef struct {
-  u32 input;        // delay-line input DMEM offset
-  u32 output;       // delay-line output DMEM offset
-  s16 ffcoef;       // feed-forward coefficient
-  s16 fbcoef;       // feedback coefficient
-  s16 gain;         // output gain
-  f32 rsinc;        // chorus/flange modulation step per sample (sweep rate)
-  f32 rsval;        // current modulation phase (triangle wave)
-  s32 rsdelta;      // running sample offset of the modulated read tap
-  f32 rsgain;       // modulation depth: scales the phase into a delay offset
-  ALLowPass* lp;    // optional low-pass on the feedback
-  ALResampler* rs;  // optional resampler for modulated delay
+  u32 input;  /* delay-line input DMEM offset */
+  u32 output; /* delay-line output DMEM offset */
+  s16 ffcoef; /* feed-forward coefficient */
+  s16 fbcoef; /* feedback coefficient */
+  s16 gain;   /* output gain */
+  f32 rsinc;  /* resampler increment (delay modulation) */
+  f32 rsval;
+  s32 rsdelta;
+  f32 rsgain;
+  ALLowPass* lp;   /* optional low-pass on the feedback */
+  ALResampler* rs; /* optional resampler for modulated delay */
 } ALDelay;
+
 typedef s32 (*ALSetFXParam)(void*, s32, void*);
 
-// The effects (reverb) filter: runs `section_count` delay lines over a working
-// buffer to build the wet signal mixed back into the buses.
+/* Effects (reverb) stage: a ring buffer of `section_count` delay taps. */
 typedef struct {
   struct ALFilter_s filter;
-  s16* base;              // base of the reverb delay buffer
-  s16* input;             // current input pointer
-  u32 length;             // delay buffer length, samples
-  ALDelay* delay;         // array of delay-line sections
-  u8 section_count;       // number of delay sections
-  ALSetFXParam paramHdl;  // effect-specific parameter handler
+  s16* base;             /* base of the reverb delay buffer */
+  s16* input;            /* current input pointer */
+  u32 length;            /* delay buffer length, samples */
+  ALDelay* delay;        /* array of delay-line sections */
+  u8 section_count;      /* number of delay sections */
+  ALSetFXParam paramHdl; /* effect-specific parameter handler */
 } ALFx;
+
 void alFxNew(ALFx* r, ALSynConfig* c, ALHeap* hp);
 Acmd* alFxPull(void* f, s16* outp, s32 out, s32 sampleOffset, Acmd* p);
 s32 alFxParam(void* filter, s32 paramID, void* param);
 s32 alFxParamHdl(void* filter, s32 paramID, void* param);
 
-// The main bus: sums its source filters into the final stereo output.
 #define AL_MAX_MAIN_BUS_SOURCES 1
+
+/* Main bus: sums its source filters into the final stereo output. */
 typedef struct ALMainBus_s {
   ALFilter filter;
-  s32 sourceCount;  // active sources
-  s32 maxSources;   // capacity
+  s32 sourceCount; /* active sources */
+  s32 maxSources;  /* capacity */
   ALFilter** sources;
 } ALMainBus;
+
 void alMainBusNew(ALMainBus* m, void* ptr, s32 len);
 Acmd* alMainBusPull(void* f, s16* outp, s32 outCount, s32 sampleOffset,
                     Acmd* p);
 s32 alMainBusParam(void* filter, s32 paramID, void* param);
 
-// An aux bus: sums its sources and applies its built-in effect (reverb).
 #define AL_MAX_AUX_BUS_SOURCES 8
 #define AL_MAX_AUX_BUS_FX 1
+
+/* Aux bus: sums its sources, then runs them through its FX before the main bus.
+ */
 typedef struct ALAuxBus_s {
   ALFilter filter;
-  s32 sourceCount;  // active sources
-  s32 maxSources;   // capacity
+  s32 sourceCount; /* active sources */
+  s32 maxSources;  /* capacity */
   ALFilter** sources;
-  ALFx fx[AL_MAX_AUX_BUS_FX];  // effect applied to the summed signal
+  ALFx fx[AL_MAX_AUX_BUS_FX]; /* effect applied to the summed signal */
 } ALAuxBus;
+
 void alAuxBusNew(ALAuxBus* m, void* ptr, s32 len);
 Acmd* alAuxBusPull(void* f, s16* outp, s32 outCount, s32 sampleOffset, Acmd* p);
 s32 alAuxBusParam(void* filter, s32 paramID, void* param);
-
 void alResampleNew(ALResampler* r, ALHeap* hp);
 Acmd* alResamplePull(void* f, s16* outp, s32 out, s32 sampleOffset, Acmd* p);
 s32 alResampleParam(void* f, s32 paramID, void* param);
-// The save stage: writes the finished block from DMEM out to a DRAM output
-// buffer (`dramout`) for DMA to the audio DAC.
+
+/* Save stage: DMAs the finished frame from DMEM out to the DRAM output buffer.
+ */
 typedef struct ALSave_s {
   ALFilter filter;
-  s32 dramout;  // DRAM address of the output buffer
-  s32 first;    // first-block flag
+  s32 dramout; /* DRAM address of the output buffer */
+  s32 first;   /* first-block flag */
 } ALSave;
+
 void alSaveNew(ALSave* r);
 Acmd* alSavePull(void* f, s16* outp, s32 outCount, s32 sampleOffset, Acmd* p);
 s32 alSaveParam(void* f, s32 paramID, void* param);
 
-// The envelope/pan mixer: ramps left/right gains toward their targets across
-// the block and splits the signal into dry and wet (effect-send) amounts. The
-// l/r ramp rates are split into low (u16) and mid (s16) words for the RSP.
+/*
+ * Envelope mixer stage: ramps left/right volume toward target at a given rate
+ * and splits each voice into dry (main) and wet (aux/fx) amounts. Each left and
+ * right rate is split into mantissa (m) and low (l) words for the RSP.
+ */
 typedef struct ALEnvMixer_s {
   ALFilter filter;
   ENVMIX_STATE* state;
   s16 pan;
   s16 volume;
-  s16 cvolL;   // current left volume
-  s16 cvolR;   // current right volume
-  s16 dryamt;  // dry (unreverbed) mix amount
-  s16 wetamt;  // wet (reverb send) mix amount
-  u16 lratl;   // left gain ramp rate, low word
-  s16 lratm;   // left gain ramp rate, mid word
-  s16 ltgt;    // left gain target
-  u16 rratl;   // right gain ramp rate, low word
-  s16 rratm;   // right gain ramp rate, mid word
-  s16 rtgt;    // right gain target
+  s16 cvolL;  /* current left volume */
+  s16 cvolR;  /* current right volume */
+  s16 dryamt; /* dry (unreverbed) mix amount */
+  s16 wetamt; /* wet (reverb send) mix amount */
+  u16 lratl;  /* left gain ramp rate, low word */
+  s16 lratm;  /* left gain ramp rate, mid word */
+  s16 ltgt;   /* left gain target */
+  u16 rratl;  /* right gain ramp rate, low word */
+  s16 rratm;  /* right gain ramp rate, mid word */
+  s16 rtgt;   /* right gain target */
   s32 delta;
-  s32 segEnd;         // end of the current envelope segment
-  s32 first;          // first-block flag
-  ALParam* ctrlList;  // pending parameter-change events
+  s32 segEnd;        /* end of the current envelope segment */
+  s32 first;         /* first-block flag */
+  ALParam* ctrlList; /* pending parameter-change events */
   ALParam* ctrlTail;
   ALFilter** sources;
-  s32 motion;  // play state: AL_PLAYING or AL_STOPPED
+  s32 motion;
 } ALEnvMixer;
+
 void alEnvmixerNew(ALEnvMixer* e, ALHeap* hp);
 Acmd* alEnvmixerPull(void* f, s16* outp, s32 out, s32 sampleOffset, Acmd* p);
 s32 alEnvmixerParam(void* filter, s32 paramID, void* param);
 
-// Per-allocation header prepended to each block in the audio heap; the
-// file/line and magic support leak/overrun debugging of the allocator.
+/* Per-allocation header prepended to each debug-heap block. */
 typedef struct {
-  s32 magic;  // sentinel marking a valid block
-  s32 size;   // payload size, bytes
-  u8* file;   // source file of the allocation call
-  s32 line;   // source line of the allocation call
-  s32 count;  // allocation sequence number
+  s32 magic; /* sentinel used to check block integrity */
+  s32 size;  /* size of this allocated block, in bytes */
+  u8* file;  /* source file the allocation was requested from */
+  s32 line;  /* source line the allocation was requested from */
+  s32 count; /* sequential heap-call number */
   s32 pad0;
   s32 pad1;
-  s32 pad2;
+  s32 pad2; /* pads the header out to 32 bytes */
 } HeapInfo;
 
-// Mask to round an allocation up to a 16-byte data-cache line.
+/* Heap allocations are rounded/aligned to (this + 1) = 16-byte cache lines. */
 #define AL_CACHE_ALIGN 15
 
-// A physical voice: one sounding sample. It embeds the three pipeline stages a
-// sample flows through each block -- decoder, resampler, then envelope mixer.
+/*
+ * Physical voice: one hardware playback channel, built as a decoder ->
+ * resampler -> envelope-mixer chain. `vvoice` links back to the virtual voice
+ * that currently owns it; `offset` is its sample offset within the frame.
+ */
 typedef struct PVoice_s {
-  ALLink node;               // free/active list link
-  struct ALVoice_s* vvoice;  // virtual voice driving this physical voice
+  ALLink node;              /* free/active list link */
+  struct ALVoice_s* vvoice; /* virtual voice driving this physical voice */
   ALFilter* channelKnob;
-  ALLoadFilter decoder;   // ADPCM decode stage
-  ALResampler resampler;  // pitch/rate-convert stage
-  ALEnvMixer envmixer;    // envelope/pan mix stage
-  s32 offset;             // DMEM offset of this voice's scratch buffer
+  ALLoadFilter decoder;  /* ADPCM decode stage */
+  ALResampler resampler; /* pitch/rate-convert stage */
+  ALEnvMixer envmixer;   /* envelope/pan mix stage */
+  s32 offset;            /* DMEM offset of this voice's scratch buffer */
 } PVoice;
 
-// Parameter-list node pool and physical-voice lifetime management.
+/* Private driver routines: parameter pool, voice reclaim, and time conversion.
+ */
 ALParam* __allocParam(void);
 void __freeParam(ALParam* param);
 void _freePVoice(ALSynth* drvr, PVoice* pvoice);
 void _collectPVoices(ALSynth* drvr);
-
-// Convert between wall-clock microseconds and sample counts at the output rate.
 s32 _timeToSamples(ALSynth* ALSynth, s32 micros);
 ALMicroTime _samplesToTime(ALSynth* synth, s32 samples);
-
-// Reverb low-pass initialiser, present only in the current audio library.
 #ifndef _OLD_AUDIO_LIBRARY
 void _init_lpfilter(ALLowPass* lp);
 #endif
-
 #endif

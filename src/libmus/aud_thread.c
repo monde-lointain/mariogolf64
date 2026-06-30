@@ -1,13 +1,13 @@
 /*
  * aud_thread.c
  *
- * libmus audio manager and its OS thread. __MusIntAudManInit builds the audio
- * synthesis driver (alInit), sizes per-frame sample timing, allocates the RSP
- * command list, the round-robin output buffers, and the thread stack, then
- * creates and starts the audio thread. __MusIntThreadProcess is that thread:
- * once per video retrace it hands the buffer it synthesized last frame to the
- * audio interface, builds the next frame's audio command list, and dispatches
- * the RSP audio task.
+ * The libmus audio manager thread. At startup it programs the DAC, brings up
+ * the synthesizer, and allocates the RSP command list plus a set of rotating
+ * output buffers sized to the per-frame sample budget. It then runs a
+ * never-ending per-frame loop that renders one buffer of audio into an RSP
+ * command list, hands that list to the scheduler for the RSP to execute, and
+ * queues finished buffers to the audio DAC. Output is triple-buffered so the
+ * RSP can render one buffer while the DAC plays another.
  */
 #include "libmus_config.h"
 #ifndef SUPPORT_NAUDIO
@@ -26,19 +26,19 @@
 #endif
 #include "aud_thread.h"
 
-// Audio thread stack size, in bytes.
-#define AUDIO_STACKSIZE 0x2000
+#define AUDIO_STACKSIZE 0x2000 /* bytes of stack for the audio thread */
 
-// Per-frame synth headroom, expressed as a percentage of the nominal sample
-// count (applied as samples * rate / 100); the libaudio and naudio builds use
-// different margins.
+/* Headroom, as a percent of the per-frame sample budget, that the synth may
+ * render past the nominal frame length to absorb retrace jitter. naudio and
+ * libaudio pace differently, so each build gets its own margin. */
 #define EXTRA_SAMPLES 30
 #define EXTRA_SAMPLES_N 20
 
-// Triple-buffered output: one playing, one queued, one being filled.
-#define NUM_OUTPUT_BUFFERS 3
+#define NUM_OUTPUT_BUFFERS 3 /* rotating output buffers (triple buffering) */
 
-// Audio synthesis microcode symbols, selected by build (libaudio vs n_audio).
+/* Audio microcode symbols: which RSP task image runs the synth, picked by
+ * build. MICROCODE_DATA stays the audio ucode's data half; MICROCODE_CODE is
+ * immediately overridden below. */
 #ifndef SUPPORT_NAUDIO
 #define MICROCODE_CODE aspMainTextStart
 #define MICROCODE_DATA aspMainDataStart
@@ -47,14 +47,14 @@
 #define MICROCODE_DATA n_aspMainDataStart
 #endif
 
-// Build-specific override: this ROM links the audio microcode text immediately
-// after the rspboot text, so the task's microcode pointer is taken as the end
-// of rspboot rather than the aspMain start symbol. Only the code pointer is
-// redirected; MICROCODE_DATA still names the aspMain data symbol.
+/* The audio microcode text is linked directly after the RSP boot stub, so its
+ * first instruction sits at the boot stub's end label. Point the task's text
+ * pointer there instead of at the ucode's own start symbol. */
 #undef MICROCODE_CODE
 #define MICROCODE_CODE rspbootTextEnd
 
-/* One synthesized output frame: its sample buffer and the count it holds. */
+/* One rotating output buffer: its rendered PCM and the sample count the synth
+ * actually wrote into it this frame. */
 typedef struct {
   short* data;
   int frame_samples;
@@ -62,6 +62,15 @@ typedef struct {
 
 static void __MusIntThreadProcess(void* ignored);
 
+/*
+ * Shared audio-thread state, defined in the libmus globals TU: audio_tasks is
+ * the array of NUM_OUTPUT_BUFFERS rotating output buffers; audio_command_list
+ * is the RSP command-list scratch; thread/stack_addr are the audio thread and
+ * its stack base; last_task is the buffer currently queued to the DAC (played
+ * next frame); g_mus_audio_paused gates rendering; and
+ * g_mus_audio_silence_buffer is the 16-byte run of silence emitted while
+ * paused.
+ */
 extern audio_task_t* audio_tasks;
 extern Acmd* audio_command_list;
 extern OSThread thread;
@@ -71,10 +80,12 @@ extern u8 g_mus_audio_paused;
 extern u8 g_mus_audio_silence_buffer[0x10];
 
 /*
- * Audio manager setup: stand up the audio subsystem from the caller's
- * musConfig. Configure and initialize the synthesis driver, work out the
- * per-frame sample budget, allocate the command list / output buffers / thread
- * stack, then create and start the audio manager thread.
+ * One-time startup for the audio manager: assemble the synth configuration,
+ * program the DAC rate, bring up the synthesizer, allocate the RSP command list
+ * and the rotating output buffers sized to the frame's sample budget, then
+ * create and start the audio thread. config carries the caller's voice, update,
+ * DMA, and heap choices; vsyncs_per_second and fx_type tune the sample pacing
+ * and the effects unit.
  */
 void __MusIntAudManInit(musConfig* config, int vsyncs_per_second, int fx_type) {
   u32 i;
@@ -82,39 +93,45 @@ void __MusIntAudManInit(musConfig* config, int vsyncs_per_second, int fx_type) {
   u32 extra_rate;
   u32 samples_per_frame;
 
-  // Translate the public config into a synthesis config. Virtual and physical
-  // voice counts are both the requested channel count; osAiSetFrequency
-  // programs the audio interface and returns the actual rate it could achieve.
+  /* Both the virtual and physical voice counts track the requested channels. */
   syn_config.maxVVoices = syn_config.maxPVoices = config->channels;
   syn_config.maxUpdates = config->syn_updates;
+
+  /* Stand up the sample-streaming DMA subsystem; it returns the callback the
+   * synth invokes to fetch wavetable data. */
   syn_config.dmaproc =
       __MusIntDmaInit(config->syn_num_dma_bufs, config->syn_dma_buf_size);
   syn_config.fxType = fx_type;
+
+  /* osAiSetFrequency programs the DAC and returns the nearest rate it could
+   * actually achieve, which the synth must render at. */
   syn_config.outputRate = osAiSetFrequency(config->syn_output_rate);
   syn_config.heap = __MusIntMemGetHeapAddr();
   alInit(&__libmus_alglobals, &syn_config);
 
-  // The headroom percentage differs between the libaudio and n_audio builds.
 #ifndef SUPPORT_NAUDIO
   extra_rate = EXTRA_SAMPLES;
 #else
   extra_rate = EXTRA_SAMPLES_N;
 #endif
+
+  /* Derive the per-frame sample budget from the retrace rate versus the DAC
+   * rate, plus the jitter headroom. */
   samples_per_frame = __MusIntSamplesInit((u32)config->syn_retraceCount,
                                           (u32)syn_config.outputRate,
                                           (u32)vsyncs_per_second, extra_rate);
 
-  // Allocate the RSP command list and the output buffers. Each output buffer
-  // holds samples_per_frame stereo 16-bit samples (4 bytes apiece).
   audio_command_list =
       (Acmd*)__MusIntMemMalloc(config->syn_rsp_cmds * sizeof(Acmd));
   audio_tasks = __MusIntMemMalloc(NUM_OUTPUT_BUFFERS * sizeof(audio_task_t));
+
+  /* 4 bytes per sample (16-bit stereo) times the frame budget per buffer. */
   for (i = 0; i < NUM_OUTPUT_BUFFERS; i++) {
     audio_tasks[i].data = __MusIntMemMalloc(4 * samples_per_frame);
   }
 
-  // Allocate the stack and launch the audio thread. The stack grows down, so
-  // the entry stack pointer is the top of the freshly allocated block.
+  /* Launch the thread with its stack pointer at the top of the block, since
+   * the MIPS stack grows downward. */
   stack_addr = __MusIntMemMalloc(AUDIO_STACKSIZE);
   osCreateThread(&thread, 3, __MusIntThreadProcess, 0,
                  (void*)(stack_addr + (AUDIO_STACKSIZE / sizeof(u64))),
@@ -123,10 +140,11 @@ void __MusIntAudManInit(musConfig* config, int vsyncs_per_second, int fx_type) {
 }
 
 /*
- * Audio manager thread body: after installing the scheduler it loops forever,
- * synthesizing one audio frame per video retrace: output the previous frame's
- * buffer, build the next command list, dispatch the RSP audio task, and rotate
- * through the output buffers. The argument is unused.
+ * Audio thread body; never returns. Each scheduler frame it renders one buffer
+ * of audio, submits the resulting RSP command list as an audio task, and queues
+ * the previous frame's finished buffer to the DAC. The output buffers cycle so
+ * the RSP can work on one while the DAC plays another. While paused it emits
+ * silence and skips rendering.
  */
 static void __MusIntThreadProcess(void* ignored) {
   Acmd* cmdp;
@@ -137,49 +155,67 @@ static void __MusIntThreadProcess(void* ignored) {
   audio_task_t* task;
   musTask sched_task;
 
-  // Constant parts of every dispatched task: the microcode and command list.
+  /* Per-frame task template; the ucode and command-list pointers stay constant
+   * across frames, so only data_size is refilled each iteration. */
   sched_task.ucode = (u64*)MICROCODE_CODE;
   sched_task.ucode_data = (u64*)MICROCODE_DATA;
   sched_task.data = (u64*)audio_command_list;
   task_count = 0;
+
   __MusIntSched_install();
   while (1) {
+    /* Block until the scheduler reports a VI retrace (one audio frame). */
     __MusIntSched_waitframe();
 
-    // While paused, keep the audio interface fed with a buffer of silence.
+    /* While paused, keep the DAC fed with a short run of silence and render
+     * nothing this frame. */
     if (g_mus_audio_paused) {
       osAiSetNextBuffer(g_mus_audio_silence_buffer, 0x10);
       continue;
     }
 
-    // AI backlog: length in bytes, converted to samples (4 bytes each).
+    /* Samples still queued in the AI DMA: byte length / 4 (16-bit stereo). */
     status = osAiGetStatus();
     samples = osAiGetLength() >> 2;
+
+    /* Both AI DMA slots are busy, so there is no room to enqueue; skip. */
     if (status & AI_STATUS_FIFO_FULL) {
       continue;
     }
+
+    /* Retire completed sample DMAs and age the wavetable keep-counts. */
     __MusIntDmaProcess();
 
-    // Queue the buffer synthesized last frame for playback. commands carries
-    // the previous frame's alAudioFrame count; last_task is NULL
-    // until the first task runs, so this is skipped on the first frame.
+    /* Once a frame has been rendered, hand the previous frame's finished buffer
+     * to the DAC (frame_samples << 2 = byte length). last_task stays NULL until
+     * the first task is submitted, so commands is always set by alAudioFrame
+     * before it is read here. */
     if (last_task && commands) {
       osAiSetNextBuffer(last_task->data, last_task->frame_samples << 2);
     }
 
-    // Pick this frame's output buffer and decide how many samples to make.
+    /* Pick this frame's buffer, then choose its render length to track the
+     * DAC's consumption: grow or shrink toward the budget by how many samples
+     * remain queued (drift control). */
     task = &audio_tasks[task_count];
     task->frame_samples = __MusIntSamplesCurrent(samples);
+
+    /* Render the frame: build the command list into audio_command_list,
+     * targeting the buffer's physical address. commands is set nonzero when the
+     * synth produced work, and cmdp points just past the last command. */
     cmdp = alAudioFrame(audio_command_list, &commands,
                         (short*)osVirtualToPhysical(task->data),
                         task->frame_samples);
 
-    // Dispatch the RSP task only if synthesis actually produced commands.
+    /* Submit the command list to the scheduler for the RSP to run, and remember
+     * this buffer so the next frame queues it to the DAC. */
     if (commands) {
       sched_task.data_size = (cmdp - audio_command_list) * sizeof(Acmd);
       __MusIntSched_dotask(&sched_task);
       last_task = task;
     }
+
+    /* Advance to the next output buffer. */
     task_count = (task_count + 1) % NUM_OUTPUT_BUFFERS;
   }
 }

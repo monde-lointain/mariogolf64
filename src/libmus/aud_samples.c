@@ -1,103 +1,127 @@
 /*
  * aud_samples.c
  *
- * Per-frame audio sample budgeting for the libmus sequence player. The synth
- * runs off the video retrace clock but feeds a DAC running on its own sample
- * clock, so the two drift relative to each other. SamplesInit sizes the output
- * buffers once at startup; SamplesCurrent then decides, frame by frame, how
- * many samples to synthesize so the queued depth stays near a target band.
- * Sizes are quantized to a fixed block of samples (16 for stock libaudio,
- * N_SAMPLES for the naudio build).
+ * Sizes libmus's audio output budget. The synth runs one buffer per scheduler
+ * frame, so the driver must decide how many samples that buffer should hold.
+ * __MusIntSamplesInit turns the host's retrace timing into a nominal per-frame
+ * sample count once at startup; __MusIntSamplesCurrent then nudges that count
+ * up or down every frame so the AI output queue neither drains (a gap) nor
+ * overflows (a dropped frame). The audio thread in aud_thread.c is the only
+ * caller.
  */
 
-#include <ultra64.h>  // IWYU pragma: keep
+#include <ultra64.h>
+
 #include "aud_samples.h"
 
-/* Sample-count quantization block for the naudio build; the stock libaudio
- * path uses a block of 16 instead. All buffer sizes are rounded to this. */
+/*
+ * Sample quantum for the SUPPORT_NAUDIO build; the stock build quantizes to a
+ * fixed 16 samples instead (see the per-branch arithmetic below).
+ */
 #define N_SAMPLES 184
 
-/* Audio queue-depth state, in DAC samples (naudio path). Written by
- * SamplesInit, read each frame by SamplesCurrent. */
-extern u32 frame_samples;      // nominal samples synthesized per frame
-extern u32 frame_samples_min;  // low-water target (nominal - one block)
-extern u32 frame_samples_max;  // high-water target (nominal + one block)
-extern u32 extra_samples;      // headroom = nominal * extra_rate / 100
+/*
+ * The per-frame budget, published by __MusIntSamplesInit and read back by
+ * __MusIntSamplesCurrent (and by the audio thread). Defined and placed
+ * elsewhere; this module only computes and consumes them.
+ *   frame_samples     - nominal samples to synthesize per frame
+ *   frame_samples_min - lower bound the running count may fall to
+ *   frame_samples_max - upper bound (SUPPORT_NAUDIO build only)
+ *   extra_samples     - jitter headroom, a percentage of frame_samples
+ */
+extern u32 frame_samples;
+extern u32 frame_samples_min;
+extern u32 frame_samples_max;
+extern u32 extra_samples;
 
 /*
- * Size the audio sample buffers at startup and return the worst-case buffer
- * size, in samples, the caller must allocate. retrace_count is the number of
- * video retraces per audio update, output_rate the DAC rate in Hz,
- * vsyncs_per_sec the video field rate, and extra_rate a headroom percentage.
- * Establishes the nominal/min/max per-frame counts used by SamplesCurrent.
+ * Compute the per-frame sample budget from the scheduler's audio timing and
+ * publish it through the module globals. retrace_count retraces are serviced
+ * per scheduler frame at output_rate samples/sec against a vsyncs_per_sec
+ * refresh; extra_rate is the jitter-headroom percentage. Returns the worst-case
+ * sample count a single frame can need, which the caller uses to size its
+ * output buffers.
  */
 #ifndef SUPPORT_NAUDIO
 u32 __MusIntSamplesInit(u32 retrace_count, u32 output_rate, u32 vsyncs_per_sec,
                         u32 extra_rate) {
   u32 calc;
 
-  // Samples produced across retrace_count video frames, rounded up.
+  /* Samples produced across the serviced retraces, rounded up. */
   calc = (retrace_count * output_rate + vsyncs_per_sec - 1) / vsyncs_per_sec;
 
-  // Round up to a 16-sample block; the +1 always leaves headroom above calc.
+  /* Snap up to the next 16-sample boundary, always one quantum clear of calc.
+   */
   frame_samples = ((calc / 16) + 1) * 16;
   frame_samples_min = frame_samples - 16;
   extra_samples = frame_samples * extra_rate / 100;
+
   return (frame_samples + 16 + extra_samples);
 }
 #else
+/*
+ * SUPPORT_NAUDIO build: the same budget quantized to N_SAMPLES, and an explicit
+ * upper bound is tracked since this synth corrects in whole-quantum steps.
+ */
 u32 __MusIntSamplesInit(u32 retrace_count, u32 output_rate, u32 vsyncs_per_sec,
                         u32 extra_rate) {
   u32 calc;
 
-  // Samples produced across retrace_count video frames, rounded up.
   calc = ((retrace_count * output_rate) + vsyncs_per_sec - 1) / vsyncs_per_sec;
 
-  // Round up to an N_SAMPLES block (the +1 leaves headroom above calc), then
-  // derive the low/high water marks and the percentage headroom.
   frame_samples = ((calc / N_SAMPLES) + 1) * N_SAMPLES;
   frame_samples_min = frame_samples - N_SAMPLES;
   frame_samples_max = frame_samples + N_SAMPLES;
   extra_samples = frame_samples * extra_rate / 100;
+
   return (frame_samples + N_SAMPLES + extra_samples);
 }
 #endif
 
 /*
- * Return how many samples to synthesize this frame to hold the DAC queue near
- * its target depth. samples is the count still queued in the DAC. Because the
- * synth and DAC clocks drift, production is nudged up or down by one block when
- * the queue strays outside the normal band.
+ * Decide how many samples to synthesize for the current frame, given how many
+ * are still queued in the AI output (samples). Tracks the nominal budget while
+ * counter-steering toward the target fill, so the output queue stays between
+ * underrun and overflow.
  */
 #ifndef SUPPORT_NAUDIO
 u32 __MusIntSamplesCurrent(u32 samples) {
-  // Amount to top the queue back up to the target depth, aligned down to a
-  // 16-sample block; never fall below the low-water mark.
+  /*
+   * Refill the gap up to the target (budget + headroom + one quantum), snapped
+   * down to a 16-sample boundary: produce more when the queue is drained, less
+   * when it is full.
+   */
   samples = (frame_samples + extra_samples + 16 - samples) & (~15);
   if (samples < frame_samples_min) return (frame_samples_min);
   return (samples);
 }
 #else
+/*
+ * SUPPORT_NAUDIO build: rather than a continuous gap fill, emit a single
+ * corrective frame whenever the queue drifts outside its band, then hold
+ * nominal. only_one_flag arms the one-shot and re-arms only once the queue
+ * returns to the band, so the correction cannot oscillate.
+ */
 u32 __MusIntSamplesCurrent(u32 samples) {
-  // Fire each correction only once per excursion; re-armed on return to band.
   static u32 only_one_flag = 1;
 
   if (samples > N_SAMPLES + extra_samples) {
-    // Queue too deep: synthesize one short frame to let it drain.
+    /* Queue overfull: undershoot once to let it drain. */
     if (only_one_flag) {
       only_one_flag = 0;
       return (frame_samples_min);
     }
   } else if (samples < extra_samples) {
-    // Queue too shallow: synthesize one long frame to refill it.
+    /* Queue running dry: overshoot once to refill it. */
     if (only_one_flag) {
       only_one_flag = 0;
       return (frame_samples_max);
     }
   } else {
-    // Within the normal band: re-arm and run at the nominal rate.
+    /* Back inside the band: re-arm the one-shot. */
     only_one_flag = 1;
   }
+
   return (frame_samples);
 }
 #endif
