@@ -653,12 +653,19 @@ int mus_fifo_enqueue(fifo_t* command) {
 
 int func_8009A7C8(void) { return g_mus_frame_counter; }
 
-// __MusIntMain (frame handler) -- CARRIED as asm. The full C body builds, but
-// it has MULTIPLE opposite-direction inline mismatches vs the ROM at -O3: my
-// build inlines mus_fifo_dispatch (ROM jal's it) yet does NOT inline
-// Fstop/mus_cmd_stop (ROM inlines it). Same intractable gcc-2.7.2
-// inline-heuristic family as func_8009BC58/allocate_object_slot, compounded
-// across ~11 callees. Carry.
+// __MusIntMain (frame handler) -- CARRIED as asm; genuinely unbankable. The full
+// C body builds, but my -O3 build inlines mus_fifo_dispatch where the ROM jal's it.
+// This is the same gcc-2.7.2 raw-RTL-count inline issue as func_8009BC58, BUT here
+// the cross-TU escape that fixed those (player_commands.c split) is IMPOSSIBLE:
+// mus_fifo_dispatch is in this same .o as the frame handler and cannot be peeled
+// out. PROOF (S147): the .rodata section is 16-aligned, yet mus_cmd_envelope's
+// constant D_800D1FB0 and func_8009AB18's D_800D1FB8 are only 8 bytes apart -- two
+// separate 16-aligned .o rodata sections can never be 8 bytes apart, so the whole
+// span mus_cmd_envelope..func_8009AB18 (which contains __MusIntMain AND
+// mus_fifo_dispatch) is one object file. A player_api split was tried and produced
+// a player.o rodata at 0x800d1fc0 (forced up from the carve's 0x800d1fb8 by the
+// 16-align) that overlapped player_commands' rodata -> corrupt ROM. No TU boundary
+// separates __MusIntMain from mus_fifo_dispatch. Carry.
 INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_player_frame_handler);
 
 // __MusIntGetNewNote: advance past commands (jumptable dispatch), then fetch
