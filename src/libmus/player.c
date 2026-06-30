@@ -1320,6 +1320,13 @@ unsigned long func_8009C028(channel_t* cp, fx_header_t* header, int number,
   return (cp->handle);
 }
 
+// __MusIntFindChannelAndStart -- CARRIED as asm. The standalone C body matches
+// (106 insns), but my reconstruction is leaner than the ROM original (raw <104,
+// the 5-arg INTEGRATE_THRESHOLD), so GCC marks it DECL_INLINE and its caller
+// mus_cmd_start_fx inlines it (the ROM jal's it). Same
+// underdetermined-raw-count issue as func_8009BC58/Random: the game source had
+// >=104 raw insns optimizing to the same 106 final. The ROM ALSO inlines
+// __MusIntStartEffect here (func_8009C028, manual since it never auto-inlines).
 INCLUDE_ASM("asm/nonmatchings/libmus/player", allocate_object_slot);
 
 // __MusIntStartSong
