@@ -2579,6 +2579,59 @@ leave it a blob.
   `_1/_2/_3`). Add the missing define from the `~/development/repos/ultralib` authority; a shared-header
   edit then needs a clean rebuild (`#clean-rebuild-after-shared-header-edit`).
 
+## same-TU inline mismatch (definition-order + cross-TU split)
+
+**Trigger:** A fn builds + links clean but ROM SHA-misses, and the in-tree-vs-target objdump shows my
+build **inlines a small static callee the ROM keeps as `jal`** (build LONGER than target, the callee's
+body appears inline), or the reverse. The classic case is a per-frame/dispatch fn that calls a helper
+the ROM out-of-lines. (S147 libmus `__MusIntMain`: my drain hand-inline pulled `mus_fifo_dispatch`'s
+switch inline, +24 insns.)
+
+**Rule.** GCC 2.7.2 `-O3` inlines a small static callee only when it is **visible** (defined, not just
+forward-declared) **within the same TU** at the call site. So an over-inline has two independent cures;
+pick by where the callee actually lives in the original:
+
+1. **Cross-TU split (callee is in a different `.o` than its caller).** Split the carve at the real
+   `.o` boundary so caller and callee land in separate TUs → cross-TU `jal`. Boundaries must be
+   **16-aligned** (`.text`/`.rodata` sections are `2**4`-aligned). Use the **rodata-gap diagnostic** to
+   decide if this is even possible: if two fns' `.rodata` constants are **< 16 bytes apart**, they are
+   in the **same `.o`** (two separate 16-aligned `.o` rodata sections can never be < 16 B apart), so
+   the split is impossible — go to cure 2. (S147: `mus_cmd_envelope`@D_800D1FB0 and
+   `func_8009AB18`@D_800D1FB8 are 8 B apart ⇒ one `.o`; `func_8009BC58`/`allocate_object_slot` vs their
+   command-handler callers WERE cross-`.o` ⇒ split at 0x8009C540 banked them.)
+2. **Same-TU definition order (callee shares the caller's `.o`).** Make the caller a **separate static
+   helper defined BEFORE the callee**, so the callee is only **forward-declared** at the helper's call
+   site → GCC can't inline it (`jal`), while the tiny helper itself inlines into its parent. (S147:
+   `__MusIntFifoProcess` (the fifo drain) defined ABOVE `mus_fifo_dispatch`, with a forward decl of the
+   dispatch, kept the dispatch out-of-line; the drain inlined into `__MusIntMain`. Canonical libmus has
+   the same order: `player_fifo.inc.c` drain @73, dispatch @101.) A static helper called once is
+   inlined+eliminated, so it adds no symbol and does not shift the layout.
+
+**Two more S147 `__MusIntMain` match details that compound an inline mismatch:**
+
+- **SUPPORT_PROFILER on.** 2× `jal osGetCount` bracketing the body + `g_mus_cpu_last`/`g_mus_cpu_worst`
+  stores at the end (the +15 insns vs a profiler-off reference). The `_mus_cpu_*` globals existing in
+  `ghidra_symbols` is the tell; the matched reference games (PPL/drmario64) have it OFF.
+- **Cross-TU helper hand-inlined.** A helper the one-TU reference games just *call* (and GCC inlines,
+  e.g. `Fstop`) is **cross-TU** here, so GCC can't inline it — reproduce by **manually inlining its
+  field-clears** in the body. The ROM showing **no `jal` to the helper** + inline field stores is the
+  tell.
+
+**Signed-subtraction comparison tell.** When the ROM shows `subu rd,a,b; bgez/bltz` (not `slt`/`sltu`)
+for a frame/counter/index `<` compare, write it as **`(s32)(a - b) < 0`**, NOT `a < b`. `a < b` on
+unsigned fields → `sltu`; an `(s32)a < (s32)b` cast → `slt`; only the explicit difference-vs-0 form
+emits `subu + bgez`. (S147: `__MusIntMain`'s 4 `*_frame < channel_frame` tests, all on `unsigned long`
+fields, needed `(s32)(cp->X_frame - cp->channel_frame) < 0`.)
+
+**Before declaring a same-TU inline mismatch unbankable, BUILD THE MATCHED REFERENCE GAMES and compare
+the source STRUCTURE** (defn order, separate-helper vs hand-inline, config flags), not just the bodies.
+S147 twice wrongly wrote off `__MusIntMain` (once "compiler wall", once "permanent same-TU carry");
+both fell to a structural fix found by disassembling PPL's byte-exact `-O3` `__MusIntMain`. The matched
+libmus games are `../drmario64`, `../hm64-decomp`, `../snowboardkids2-decomp`, `../puzzleleague64`
+(KMC gcc; PPL builds byte-exact at the same `-O3 -mips3`); ROMs in `~/games/N64/`. See
+[the "rule out body before compiler wall" memory] and `#cross-jump-tail-merge` (the sibling
+shorter-build symptom).
+
 ## cross-jump-tail-merge
 
 **Trigger:** A verbatim/near-verbatim mirror builds + links clean but ROM SHA-misses, and the

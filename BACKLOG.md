@@ -16,6 +16,29 @@ subordinate to the libultra goal. Target selection is `tools/pick_target.py` (sm
 the 8-point decompose gate fires on any seed ≥8. v2 classical track is active (since S11);
 mirror is the default, classical is first-class when the asm warrants it.
 
+**S147 — libmus `player.c` TU COMPLETE (the whole 109-fn game-embedded sequence player) → md5-candidate.**
+Planned a cap-small first batch; banked the ENTIRE 109-fn `#include`-chained TU (internals + Mus* API +
+fifo + 44 `mus_cmd_*` handlers), split into `src/libmus/player.c` + `src/libmus/player_commands.c`. The
+bulk banked verbatim vs libmus 3.14 (ASM-first per-fn; 6-7 game-divergences reconstructed classically).
+**The 3 inline-bound tail fns fell to a multi-TU split + a cross-game reference build.** `func_8009BC58`
+(__MusIntRandom) + `allocate_object_slot`: split the carve at 16-aligned 0x8009C540 (internals \|
+command handlers) so their callers became cross-TU → `jal` (not inlined). **`__MusIntMain` was twice
+wrongly declared unbankable** (a "compiler wall", then a "permanent same-TU carry" w/ a rodata-gap proof
+that `mus_fifo_dispatch` shares its `.o`); both overturned by building the 4 matched reference games
+(drmario64/hm64/snowboardkids2/puzzleleague64; PPL byte-exact at the same -O3). The fix was source
+STRUCTURE, not a TU wall: `__MusIntFifoProcess` (drain) defined BEFORE `mus_fifo_dispatch` keeps the
+dispatch forward-declared → out-of-line (`jal`) while the tiny drain inlines into `__MusIntMain`;
+SUPPORT_PROFILER on (2× osGetCount); manual Fstop field-clear inline (Fstop cross-TU); and the 4
+`*_frame < channel_frame` tests as the signed-subtraction `(s32)(a - channel_frame) < 0` (`subu`+`bgez`).
+md5-candidate **204→206**; asm subsegs 87→**86** (main+idle `[0x748B0]` stays asm). Quality 0/0/0/**1**
+(re-opened = the frame handler unbankable→banked); seed 13 / realized 17 / residual +4; regime mixed
+(FULLY banked, the full 13pt). **Cross-repo follow-up:** ~109 names → `sync_decomp_names.py
+--import-from-decomp`. No carry-overs. Retro applied 3 of 3 (#1
+`docs/hazards.md#same-tu-inline-mismatch-definition-order--cross-tu-split` + index rows; #2 CLAUDE.md
+"build references before unbankable" rule; #3 `pick_target.py` phantom de-rank). **`src/libmus/`
+player.c — the largest game-embedded lib file — is DONE; next libmus unit is `[0x78330]` CustomInit/
+player_fx bundled synth.**
+
 **S146 — `aud_dma.c` COMPLETE (libmus DMA buffer mgr, game-modified cart-only) → md5-candidate; `src/libmus/` 100%.**
 Banked the S145 carry (`[0x78D10]`, the LAST libmus leaf asm subseg) FULLY as C — all 6 fns, ROM SHA-1
 == baserom. `src/libmus/` now 0 INCLUDE_ASM stubs (all 5 carved leaf files md5-candidate). **ASM-first

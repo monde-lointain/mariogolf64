@@ -124,7 +124,14 @@ Ghidra MCP is used inline at seed time. For each target function:
 
 A function that locks below `0.97 percent`, needs the permuter, or hits a BSS-layout or alignment
 wall is a spike: note it, carry its file to `BACKLOG.md ## Carry-overs`, and move on. Hold the DoD
-firm; a spike is carried, not banked. The increment (the `src/<seg>.c` file) banks only when its last
+firm; a spike is carried, not banked. **Before declaring a same-TU inline mismatch (a callee my build
+inlines but the ROM `jal`s, or the reverse) a permanent carry, BUILD the matched reference games and
+compare the source STRUCTURE** (defn order, separate-helper vs hand-inline, config flags), not just the
+bodies: S147 twice wrongly wrote off `__MusIntMain` as a compiler/same-TU wall, and both fell to a
+structural fix (a drain-before-dispatch helper + the `(s32)(a-b)<0` signed compare) found by
+disassembling PPL's byte-exact `-O3` build. See
+`docs/hazards.md#same-tu-inline-mismatch-definition-order--cross-tu-split`. The increment (the
+`src/<seg>.c` file) banks only when its last
 `INCLUDE_ASM` stub is gone.
 
 The context window auto-compacts as it fills, so do not stop early on budget concerns; save progress
@@ -458,6 +465,8 @@ When `pick_target.py` flags a hazard (or a match shows its symptom), read the ma
 | clean mirror SHA-miss, same insn count reordered / jal-mismatch + no `coddog-mirror` | #near-verbatim-mirror-jal-count-mismatch |
 | clean mirror SHA-miss, build instr-count < target (shorter) / collateral post-fn addr shifts | #cross-jump-tail-merge |
 | `body-divergence-suspect:<file>@<pct>` | #cross-jump-tail-merge |
+| build over-inlines a small callee the ROM `jal`s (or reverse), same/cross TU | #same-tu-inline-mismatch-definition-order--cross-tu-split |
+| ROM `subu`+`bgez`/`bltz` for a `<` compare (not `slt`/`sltu`) | #same-tu-inline-mismatch-definition-order--cross-tu-split |
 | clean mirror SHA-miss, one fn's frame immediates shift by a fixed delta (`_FINALROM`/build-config struct size) | #upstream-mirror-pattern |
 | array-of-struct init loop shorter than target + a field stored twice (doubled store-offset) | #struct-init-loop-dup-store--dual-induction-var |
 | permuter on a KMC-toolchain (libnusys/libultra/libkmc) mirror fn | #permuter-setup-for-kmc-toolchain-mirrors |

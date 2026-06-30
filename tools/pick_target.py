@@ -3886,7 +3886,19 @@ def build_rows(
         )
         if row is not None:
             rows.append(row)
-    rows.sort(key=lambda r: (-r["score"], r["size"]))
+    # Phantom de-rank (S147): a row whose attribution is ONLY a low-confidence phantom signal
+    # (`maybe-upstream` hint, or `coddog-source-banked` match to an already-banked source) sinks below
+    # every genuine candidate, so phantoms stop crowding the top-N and burying real work behind size.
+    # A genuine fresh mirror (coddog-mirror to an UNbanked source) carries no phantom-risk hazard, so
+    # it is unaffected. The agent must verify bodies before chasing any phantom-risk row.
+    # Both phantom kinds always carry a detail, so they render as "<kind>:<detail>" tokens inside the
+    # comma-joined r["hazards"] string; a "<kind>:" substring test is exact.
+    _phantom_tokens = (HAZARD_MAYBE_UPSTREAM + ":", HAZARD_CODDOG_SOURCE_BANKED + ":")
+
+    def _phantom(r):
+        return 1 if any(tok in r["hazards"] for tok in _phantom_tokens) else 0
+
+    rows.sort(key=lambda r: (_phantom(r), -r["score"], r["size"]))
     return rows[: args.n]
 
 

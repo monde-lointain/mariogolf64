@@ -212,6 +212,11 @@ class Hazard:
     CODDOG_MASKS: ClassVar[frozenset[str]] = frozenset(
         {HAZARD_CODDOG_STRUCTURAL, HAZARD_CODDOG_SOURCE_BANKED}
     )
+    # Low-confidence attributions (a signature-hint guess / a match to an already-banked source) that
+    # are most often a fingerprint coincidence — de-ranked for an un-named candidate (S147 phantom fix).
+    PHANTOM_RISK: ClassVar[frozenset[str]] = frozenset(
+        {HAZARD_MAYBE_UPSTREAM, HAZARD_CODDOG_SOURCE_BANKED}
+    )
     RODATA_OWNERS: ClassVar[frozenset[str]] = frozenset(
         {HAZARD_RODATA_JTBL, HAZARD_RODATA_LITERAL}
     )
@@ -238,6 +243,16 @@ class Hazard:
     def is_coddog_mask(self) -> bool:
         """A coddog hit that masks divergence (structural / already-banked source)."""
         return self.kind in self.CODDOG_MASKS
+
+    def is_phantom_risk(self) -> bool:
+        """A LOW-CONFIDENCE attribution that is most often a fingerprint coincidence, NOT fresh
+        mirror work: a `maybe-upstream` signature-hint guess, or a `coddog-source-banked` hit (the
+        matched source is ALREADY 0-stub in-tree, so it can't be a fresh attribution). Both cost
+        gate rounds when an un-named candidate ranks high purely on one of them (S147: `llcvt.c@99.99`
+        ovl8 + `maybe-upstream:libmus:player` were both false — game code, not the named lib). The
+        ranker de-ranks an un-named candidate whose only attribution is phantom; the agent must
+        VERIFY BODIES (diff the asm vs the named upstream) before chasing one of these rows."""
+        return self.kind in self.PHANTOM_RISK
 
     def is_rodata_owner(self) -> bool:
         """A pooled-rodata owner (literal or switch jtbl) the sibling carve places."""
