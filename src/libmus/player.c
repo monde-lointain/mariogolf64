@@ -86,9 +86,11 @@ extern ptr_bank_t* g_mus_current_ptr_bank;  // mus_default_bank
 extern int D_800E7074;                      // mus_last_fxtype
 extern fx_header_t* D_800E7078;             // libmus_fxheader_current
 void mus_remap_ptr_bank(char*, char*);  // __MusIntRemapPtrBank (defined below)
+extern fx_header_t* D_800E707C;         // libmus_fxheader_single
 #define mus_default_bank g_mus_current_ptr_bank
 #define mus_last_fxtype D_800E7074
 #define libmus_fxheader_current D_800E7078
+#define libmus_fxheader_single D_800E707C
 #define __MusIntRemapPtrBank mus_remap_ptr_bank
 extern channel_t* g_mus_sound_channel_base;    // mus_channels2
 extern unsigned long g_mus_handle_counter;     // mus_current_handle
@@ -332,11 +334,27 @@ void mus_ptr_bank_initialize(void* pbank, void* wbank) {
   if (!mus_default_bank) mus_default_bank = pbank;
 }
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player", func_8009A2F0);
+// MusPtrBankSetSingle
+void* func_8009A2F0(void* ipbank) {
+  ptr_bank_t* pptr;
+  if (ipbank) {
+    pptr = (ptr_bank_t*)ipbank;
+    if (pptr->flags & PTRFLAG_REMAPPED) mus_init_bank = pptr;
+  }
+  return (mus_init_bank);
+}
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player", func_8009A318);
+// MusPtrBankSetCurrent
+void func_8009A318(void* ipbank) {
+  ptr_bank_t* pptr;
+  if (ipbank) {
+    pptr = (ptr_bank_t*)ipbank;
+    if (pptr->flags & PTRFLAG_REMAPPED) mus_default_bank = pptr;
+  }
+}
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player", func_8009A33C);
+// MusPtrBankGetCurrent
+void* func_8009A33C(void) { return (mus_default_bank); }
 
 // MusHandleGetPtrBank
 void* mus_handle_get_ptr_bank(musHandle handle) {
@@ -399,17 +417,33 @@ void mus_fx_bank_initialize(void* fxbank) {
         (unsigned char*)OFFSETTOPOINTER(fxbank, header->effects[i].fxdata);
 }
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player", func_8009A500);
+// MusFxBankNumberOfEffects
+int func_8009A500(void* ifxbank) {
+  return (((fx_header_t*)ifxbank)->number_of_effects);
+}
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player", func_8009A508);
+// MusFxBankSetCurrent
+void func_8009A508(void* ifxbank) {
+  libmus_fxheader_current = (fx_header_t*)ifxbank;
+}
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player", func_8009A514);
+// MusFxBankSetSingle
+void func_8009A514(void* ifxbank) {
+  libmus_fxheader_single = (fx_header_t*)ifxbank;
+}
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player", func_8009A520);
+// MusFxBankGetCurrent
+void* func_8009A520(void) { return (libmus_fxheader_current); }
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player", func_8009A52C);
+// MusFxBankSetPtrBank
+void func_8009A52C(void* ifxbank, void* ipbank) {
+  ((fx_header_t*)ifxbank)->ptr_addr = (ptr_bank_t*)ipbank;
+}
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player", func_8009A534);
+// MusFxBankGetPtrBank
+void* func_8009A534(void* ifxbank) {
+  return (((fx_header_t*)ifxbank)->ptr_addr);
+}
 
 // MusSetScheduler
 void MusSetScheduler(musSched* sched_list) {
@@ -450,7 +484,10 @@ unsigned short* mus_handle_wave_address(musHandle handle) {
   return (NULL);
 }
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player", func_8009A624);
+// MusSetMarkerCallback
+void func_8009A624(void* callback) {
+  marker_callback = (LIBMUScb_marker)callback;
+}
 
 INCLUDE_ASM("asm/nonmatchings/libmus/player", func_8009A630);
 
