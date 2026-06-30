@@ -341,7 +341,14 @@ void func_8009AB18(channel_t* cp, int x) {
   }
 }
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player", func_8009B060);
+// __MusIntFlushPending
+void func_8009B060(channel_t* cp, int x) {
+  if (cp->playing) alSynStopVoice(&__libmus_alglobals.drvr, mus_voices + x);
+  cp->playing = 1;
+  /* start sample */
+  alSynStartVoice(&__libmus_alglobals.drvr, mus_voices + x, cp->pending);
+  cp->pending = NULL;
+}
 
 INCLUDE_ASM("asm/nonmatchings/libmus/player", func_8009B0DC);
 
@@ -388,11 +395,35 @@ void func_8009B254(channel_t* cp, int x, float offset) {
   alSynSetPitch(&__libmus_alglobals.drvr, mus_voices + x, frequency);
 }
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player", func_8009B360);
+// __MusIntInitEnvelope
+void func_8009B360(channel_t* cp) {
+  if (cp->length != 0x7fff) {
+    if (cp->cutoff != 0) /* release time is from start of note */
+      cp->release_frame = cp->note_start_frame + (cp->cutoff << 8);
+    else /* release time is from end of note */
+      cp->release_frame = cp->note_end_frame - (cp->endit << 8);
+#ifdef _FX_FULL_RELEASE_MODE
+    if (cp->fx_addr)
+      cp->note_end_frame +=
+          (((cp->env_release_speed << 10) / cp->env_speed_calc) << 8);
+#endif
+  } else {
+    cp->release_frame =
+        cp->note_start_frame + 0x7fffffff; /* release tomorrow please! */
+  }
+  cp->env_current = cp->env_init_vol;
+  cp->env_count = cp->env_speed;
+  cp->env_phase = 1;
+}
 
 INCLUDE_ASM("asm/nonmatchings/libmus/player", func_8009B3D0);
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player", func_8009B5C4);
+// __MusIntInitSweep
+void func_8009B5C4(channel_t* cp) {
+  cp->sweep_frame = cp->note_start_frame;
+  cp->sweep_timer = 0;
+  cp->sweep_dir = cp->pan & 0x40;
+}
 
 INCLUDE_ASM("asm/nonmatchings/libmus/player", func_8009B5E0);
 
@@ -519,7 +550,16 @@ INCLUDE_ASM("asm/nonmatchings/libmus/player", init_struct_defaults);
 
 INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_alloc_channel);
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player", func_8009BFF0);
+// __MusIntRemapPtrs
+void func_8009BFF0(void* addr, void* offset, int count) {
+  unsigned long *dest, add;
+  int i;
+
+  dest = (unsigned long*)addr;
+  add = (unsigned long)offset;
+  for (i = 0; i < count; i++)
+    if (dest[i]) dest[i] += add;
+}
 
 INCLUDE_ASM("asm/nonmatchings/libmus/player", func_8009C028);
 
