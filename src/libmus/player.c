@@ -621,6 +621,24 @@ void func_8009A64C(int commands) {
   fifo_start = fifo_current = 0;
 }
 
+// __MusIntFifoProcess: drain the command fifo. Defined BEFORE mus_fifo_dispatch
+// so the dispatch is only forward-declared here -> GCC cannot inline it -> it
+// stays a jal. __MusIntFifoProcess is static + called once (by __MusIntMain),
+// so GCC -O3 inlines this drain loop INTO __MusIntMain while keeping
+// mus_fifo_dispatch out-of-line. That definition-order trick (NOT a
+// hand-inlined loop) is what reproduces the ROM -- confirmed byte-exact in PPL
+// (-O3) and drmario64 (-O2). The canonical libmus has the same order
+// (player_fifo.inc.c: drain @73, dispatch @101).
+void mus_fifo_dispatch(fifo_t* command);  // forward decl (defined just below)
+static void __MusIntFifoProcess(void) {
+  if (fifo_start == fifo_current) return;
+  while (fifo_start != fifo_current) {
+    mus_fifo_dispatch(&fifo_addr[fifo_start]);
+    fifo_start++;
+    if (fifo_start == fifo_limit) fifo_start = 0;
+  }
+}
+
 // __MusIntFifoProcessCommand
 void mus_fifo_dispatch(fifo_t* command) {
   switch (command->command) {
@@ -653,20 +671,82 @@ int mus_fifo_enqueue(fifo_t* command) {
 
 int func_8009A7C8(void) { return g_mus_frame_counter; }
 
-// __MusIntMain (frame handler) -- CARRIED as asm; genuinely unbankable. The full
-// C body builds, but my -O3 build inlines mus_fifo_dispatch where the ROM jal's it.
-// This is the same gcc-2.7.2 raw-RTL-count inline issue as func_8009BC58, BUT here
-// the cross-TU escape that fixed those (player_commands.c split) is IMPOSSIBLE:
-// mus_fifo_dispatch is in this same .o as the frame handler and cannot be peeled
-// out. PROOF (S147): the .rodata section is 16-aligned, yet mus_cmd_envelope's
-// constant D_800D1FB0 and func_8009AB18's D_800D1FB8 are only 8 bytes apart -- two
-// separate 16-aligned .o rodata sections can never be 8 bytes apart, so the whole
-// span mus_cmd_envelope..func_8009AB18 (which contains __MusIntMain AND
-// mus_fifo_dispatch) is one object file. A player_api split was tried and produced
-// a player.o rodata at 0x800d1fc0 (forced up from the carve's 0x800d1fb8 by the
-// 16-align) that overlapped player_commands' rodata -> corrupt ROM. No TU boundary
-// separates __MusIntMain from mus_fifo_dispatch. Carry.
-INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_player_frame_handler);
+// __MusIntMain callees defined later in this TU (forward-declared so they emit
+// as jal -- defined-after-caller means not visible for inlining at the call
+// site).
+extern void func_8009AB18(channel_t*, int);           // __MusIntGetNewNote
+extern void func_8009B254(channel_t*, int, float);    // __MusIntSetPitch
+extern void func_8009B3D0(channel_t*);                // __MusIntProcessEnvelope
+extern void func_8009B5E0(channel_t*);                // __MusIntProcessSweep
+extern float func_8009B698(channel_t*);               // __MusIntProcessWobble
+extern float func_8009B6F0(channel_t*);               // __MusIntProcessVibrato
+extern void mus_set_volume_and_pan(channel_t*, int);  // __MusIntSetVolumeAndPan
+extern u32 g_mus_cpu_last;   // _mus_cpu_last  (SUPPORT_PROFILER timing)
+extern u32 g_mus_cpu_worst;  // _mus_cpu_worst
+
+// __MusIntMain: per-frame sequence-player handler. SUPPORT_PROFILER is on (the
+// osGetCount bracket + g_mus_cpu_last/worst); g_mus_frame_counter++ and the
+// inline channel-stop (Fstop is cross-TU in player_commands.c, so it cannot be
+// GCC-inlined) are MG64 customizations.
+ALMicroTime mus_player_frame_handler(void* node) {
+  int x;
+  channel_t* cp;
+  u32 start = osGetCount();
+
+  g_mus_frame_counter++;
+  __MusIntFifoProcess();
+
+  for (x = -MAX_SONGS, cp = mus_channels; x < max_channels - MAX_SONGS;
+       x++, cp++) {
+    if (cp->pdata == NULL || (cp->channel_flag & CHFLAG_PAUSE)) continue;
+    if (cp->pending) func_8009B060(cp, x);
+    cp->channel_frame += cp->channel_tempo;
+    if (cp->length != 0x7fff) {
+      while ((s32)(cp->note_end_frame - cp->channel_frame) < 0 &&
+             cp->pdata != NULL)
+        func_8009AB18(cp, x);
+      if (!cp->pdata) continue;
+    }
+    if (cp->pvolume && (s32)(cp->volume_frame - cp->channel_frame) < 0)
+      func_8009B754(cp);
+    if (cp->ppitchbend && (s32)(cp->pitchbend_frame - cp->channel_frame) < 0)
+      func_8009B818(cp);
+    if (cp->stopping != -1) {
+      cp->stopping--;
+      if (cp->stopping == -1) {
+        cp->pvolume = NULL;
+        cp->ppitchbend = NULL;
+        cp->song_addr = NULL;
+        cp->fx_addr = NULL;
+        cp->handle = 0;
+        cp->pending = NULL;
+        cp->pdata = NULL;
+        if (cp->playing) {
+          cp->playing = 0;
+          alSynStopVoice(&__libmus_alglobals.drvr, mus_voices + x);
+        }
+      }
+    }
+    if (cp->playing) {
+      float total;
+      if (cp->env_phase) func_8009B3D0(cp);
+      if (cp->sweep_speed && (s32)(cp->sweep_frame - cp->channel_frame) < 0)
+        func_8009B5E0(cp);
+      total = cp->freqoffset;
+      if (cp->vib_speed) total += func_8009B6F0(cp);
+      if (cp->wobble_on_speed) total += func_8009B698(cp);
+      if (!cp->pending) {
+        func_8009B254(cp, x, total);
+        mus_set_volume_and_pan(cp, x);
+      }
+    }
+    cp->count = (cp->channel_frame - cp->note_start_frame) >> 8;
+  }
+
+  g_mus_cpu_last = osGetCount() - start;
+  if (g_mus_cpu_last > g_mus_cpu_worst) g_mus_cpu_worst = g_mus_cpu_last;
+  return (mus_next_frame_time);
+}
 
 // __MusIntGetNewNote: advance past commands (jumptable dispatch), then fetch
 // the next note + length + velocity, set up the wave/drum sample, envelope and
