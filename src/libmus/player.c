@@ -102,6 +102,8 @@ extern void init_struct_defaults(channel_t*);  // __MusIntInitialiseChannel
 #define mus_init_bank g_mus_last_started_handle
 #define __MusIntFindChannel mus_alloc_channel
 #define __MusIntInitialiseChannel init_struct_defaults
+extern long g_mus_rng_seed;  // mus_random_seed
+#define mus_random_seed g_mus_rng_seed
 
 // player.c file-scope macros (verbatim).
 #define REST 96
@@ -491,7 +493,17 @@ void func_8009A624(void* callback) {
 
 INCLUDE_ASM("asm/nonmatchings/libmus/player", func_8009A630);
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player", func_8009A64C);
+// __MusIntFifoOpen
+void func_8009A64C(int commands) {
+  if (commands < MIN_FIFO_COMMANDS) {
+    commands = MIN_FIFO_COMMANDS;
+  } else if (commands > MAX_FIFO_COMMANDS) {
+    commands = MAX_FIFO_COMMANDS;
+  }
+  fifo_addr = __MusIntMemMalloc(commands * sizeof(fifo_t));
+  fifo_limit = commands;
+  fifo_start = fifo_current = 0;
+}
 
 // __MusIntFifoProcessCommand
 void mus_fifo_dispatch(fifo_t* command) {
