@@ -179,7 +179,83 @@ musHandle MusStartSong(void* addr) {
   return (handle);
 }
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_start_song_from_marker);
+// MusStartSongFromMarker
+musHandle mus_start_song_from_marker(void* addr, int marker) {
+  musHandle handle;
+  unsigned char command, *ptr;
+  int i, note;
+  channel_t* cp;
+
+  handle = __MusIntStartSong(addr);
+
+  /* skip to correct marker */
+  for (i = 0, cp = mus_channels; i < max_channels; i++, cp++) {
+    if (cp->handle == handle && cp->song_addr == (song_t*)addr && (cp->pdata)) {
+      /* skip to marker */
+      while (cp->pdata) {
+        /* commands must be processed */
+        ptr = cp->pdata;
+        if (*ptr >= 128) {
+          if (*ptr == Cmarker && *(ptr + 1) == marker) break;
+
+          command = *ptr++;
+          cp->pdata = (jumptable[command & 0x7f].func)(cp, ptr);
+          continue;
+        }
+        note = *(cp->pdata++);
+        /* velocity must be processed (MG64 game-divergent block, matches
+           func_8009AB18: velocity assigned via temp, masked into velocity not
+           vel, default reloaded) */
+        if (cp->velocity_on) {
+          unsigned char vel = *(cp->pdata++);
+          cp->velocity = vel;
+          if (vel >= 0x80) {
+            cp->velocity = vel & 0x7f;
+            cp->velocity_on = 0;
+            cp->default_velocity = cp->velocity;
+          }
+        } else {
+          cp->velocity = cp->default_velocity;
+        }
+        /* get length for continuous data update */
+        if (cp->fixed_length && !cp->ignore) {
+          cp->length = cp->fixed_length;
+        } else {
+          cp->ignore = 0;
+          command = *(cp->pdata++);
+          if (command < 128)
+            cp->length = command;
+          else
+            cp->length = ((int)(command & 0x7f) << 8) + *(cp->pdata++);
+        }
+        cp->channel_frame += cp->length * 256;
+      }
+
+      cp->note_end_frame = cp->channel_frame;
+      if (cp->pdata) {
+        /* get marker delay vaule */
+        ptr = cp->pdata + 2;
+        note = *ptr++;
+        if (note >= 0x80) {
+          note &= 0x7f;
+          note <<= 8;
+          note |= *ptr++;
+        }
+        cp->channel_frame -= note * 256;
+        cp->count = 0;
+        cp->length = note;
+        cp->pdata = ptr;
+      }
+      cp->note_start_frame = cp->channel_frame;
+      /* advance through volume data */
+      if (cp->pvolume) __MusIntProcessContinuousVolume(cp);
+      /* advance through pitchbend data */
+      if (cp->ppitchbend) __MusIntProcessContinuousPitchBend(cp);
+    }
+  }
+  MusHandleUnPause(handle);
+  return (handle);
+}
 
 INCLUDE_ASM("asm/nonmatchings/libmus/player", try_spawn_global_object);
 
