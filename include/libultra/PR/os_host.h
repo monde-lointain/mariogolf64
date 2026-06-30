@@ -61,7 +61,12 @@ extern "C" {
  * Macro definitions
  *
  */
-#define __osInitialize_common() osInitialize()
+/* The cart entry calls osInitialize(); upstream defines it as a macro over the
+ * real __osInitialize_common symbol (os_host.h). MG64 always builds _FINALROM,
+ * whose form is a single call. */
+extern void __osInitialize_common(void);
+
+#define osInitialize() __osInitialize_common()
 
 /**************************************************************************
  *

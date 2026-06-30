@@ -622,4 +622,5 @@ diskrom_handle = 0x800FEF78; // size:0x4
 plr_player = 0x800E7030; // size:0xC
 IdleThread = 0x800E4CD0; // size:0x1B0 allow_duplicated:True
 MainThread = 0x800E4E80; // size:0x1B0 allow_duplicated:True
+IdleStack = 0x800E5030; // size:0x2000 allow_duplicated:True
 nuIdleFunc = 0x80132398; // size:0x4 allow_duplicated:True

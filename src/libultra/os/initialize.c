@@ -18,7 +18,6 @@
 #include "PR/rcp.h"
 #include "PR/os_version.h"
 #include "piint.h"
-#undef __osInitialize_common
 
 // The exception-vector preamble is a 4-instruction trampoline copied verbatim
 // into each of the CPU's fixed exception entry points.
@@ -53,7 +52,7 @@ void* __printfunc = NULL;
 #define INITIALIZE_FUNC __osInitialize_common
 #define SPEED_PARAM_FUNC __createSpeedParam
 #else
-#define INITIALIZE_FUNC __osInitialize_common
+#define INITIALIZE_FUNC osInitialize
 #define SPEED_PARAM_FUNC create_speed_param
 #if BUILD_VERSION >= VERSION_J
 static void ptstart(void);

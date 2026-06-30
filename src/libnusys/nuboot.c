@@ -6,38 +6,30 @@
  * entry stub jumps to) brings up the OS and spawns idle, the nusys idle thread.
  *
  * It is a SEPARATE, game-embedded nusys instance from the mapped libnusys
- * library, so its IdleThread / MainThread / nuIdleFunc are this instance's own
- * objects (a distinct address set); the symbol names are shared with the
- * library copy via allow_duplicated in symbol_addrs.txt.
+ * library, so its IdleThread / MainThread / IdleStack / nuIdleFunc are this
+ * instance's own objects (a distinct address set); the symbol names are shared
+ * with the library copy via allow_duplicated in symbol_addrs.txt.
  *
  * Customizations vs stock nuboot: nuBoot sets the audio DAC to 32 kHz before
- * spawning idle, and the idle/main thread stacks reuse existing data regions
- * (plr_player / nuContNum); the original relocs name them, so they are
- * referenced as-is.
+ * spawning idle. (The main-thread stack passed in idle resolves to nuContNum,
+ * the game's reused boot-stack region.)
  */
-#include "common.h"
+#include <nusys.h>
 
-/* os_host.h aliases __osInitialize_common() to osInitialize(); the cart calls
- * the real symbol directly, so drop the alias before declaring it. */
-#undef __osInitialize_common
-extern void __osInitialize_common(void);
-
-extern void nuPiInit(void);
-extern void nuScCreateScheduler(u8 video_mode, u8 num_fields);
 extern void mainproc(void* arg);
 
+/* This instance's own thread/stack objects (static in stock nuboot). */
 extern OSThread IdleThread;
 extern OSThread MainThread;
-extern void (*nuIdleFunc)(void); /* idle-loop callback */
-extern u8 plr_player[];          /* reused as the idle-thread boot stack */
-extern u32 nuContNum; /* its address is reused as the main-thread stack */
+extern u64 IdleStack[NU_IDLE_STACK_SIZE / sizeof(u64)];
 
 void idle(void* arg);
 
 void nuBoot(void) {
-  __osInitialize_common();
-  osAiSetFrequency(0x7D00);
-  osCreateThread(&IdleThread, 1, idle, NULL, plr_player, 0xA);
+  osInitialize();
+  osAiSetFrequency(32000);
+  osCreateThread(&IdleThread, NU_IDLE_THREAD_ID, idle, NULL,
+                 IdleStack + NU_IDLE_STACK_SIZE / 8, 10);
   osStartThread(&IdleThread);
 }
 
