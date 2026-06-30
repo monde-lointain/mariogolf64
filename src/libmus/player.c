@@ -82,11 +82,20 @@ extern void mus_handle_set_flag(unsigned long, unsigned long,
 #define fifo_limit g_mus_fifo_size
 #define fifo_addr g_mus_fifo_base
 #define __MusIntHandleSetFlag mus_handle_set_flag
+extern ptr_bank_t* g_mus_current_ptr_bank;  // mus_default_bank
+extern int D_800E7074;                      // mus_last_fxtype
+extern fx_header_t* D_800E7078;             // libmus_fxheader_current
+void mus_remap_ptr_bank(char*, char*);  // __MusIntRemapPtrBank (defined below)
+#define mus_default_bank g_mus_current_ptr_bank
+#define mus_last_fxtype D_800E7074
+#define libmus_fxheader_current D_800E7078
+#define __MusIntRemapPtrBank mus_remap_ptr_bank
 
 // player.c file-scope macros (verbatim).
 #define REST 96
 #define BASEOFFSET 48
 #define U8_TO_FLOAT(c) ((c) & 128) ? -(256 - (c)) : (c)
+#define OFFSETTOPOINTER(base, offset) ((u32)(base) + (u32)(offset))
 
 // Default-ADSR setup, extracted as a static helper so GCC -O3 auto-inlines it
 // into mus_cmd_envelope + func_8009AB18 exactly as the upstream inlines Fdefa
@@ -307,7 +316,11 @@ int mus_handle_set_reverb(musHandle handle, int reverb) {
   return (count);
 }
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_ptr_bank_initialize);
+// MusPtrBankInitialize
+void mus_ptr_bank_initialize(void* pbank, void* wbank) {
+  __MusIntRemapPtrBank(pbank, wbank);
+  if (!mus_default_bank) mus_default_bank = pbank;
+}
 
 INCLUDE_ASM("asm/nonmatchings/libmus/player", func_8009A2F0);
 
@@ -337,11 +350,44 @@ int mus_handle_pause(musHandle handle) {
 
 INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_cmd_start_song);
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_set_fx_type);
+// MusSetFxType
+int mus_set_fx_type(int fxtype) {
+  fifo_t fifo_command;
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_set_song_fx_change);
+  fifo_command.command = FIFOCMD_CHANGEFX;
+  fifo_command.data = fxtype;
+  mus_last_fxtype = fxtype;
+  return (__MusIntFifoAddCommand(&fifo_command));
+}
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_fx_bank_initialize);
+// MusSetSongFxChange
+int mus_set_song_fx_change(musBool onoff) {
+  int changed;
+
+  changed = 1;
+  if (onoff == MUSBOOL_OFF) changed = mus_set_fx_type(mus_last_fxtype);
+  if (changed) mus_songfxchange_flag = onoff;
+  return (changed);
+}
+
+// MusFxBankInitialize
+void mus_fx_bank_initialize(void* fxbank) {
+  int i;
+  fx_header_t* header;
+
+  header = (fx_header_t*)fxbank;
+  if (header->flags & FXFLAG_INITIALISED) {
+    return;
+  }
+  if (!libmus_fxheader_current) libmus_fxheader_current = header;
+  header->flags = FXFLAG_INITIALISED;
+  header->ptr_addr = NULL;
+  header->wave_table =
+      (unsigned short*)OFFSETTOPOINTER(fxbank, header->wave_table);
+  for (i = 0; i < header->number_of_components; i++)
+    header->effects[i].fxdata =
+        (unsigned char*)OFFSETTOPOINTER(fxbank, header->effects[i].fxdata);
+}
 
 INCLUDE_ASM("asm/nonmatchings/libmus/player", func_8009A500);
 
