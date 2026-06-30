@@ -705,6 +705,12 @@ int mus_fifo_enqueue(fifo_t* command) {
 
 int func_8009A7C8(void) { return g_mus_frame_counter; }
 
+// __MusIntMain (frame handler) -- CARRIED as asm. The full C body builds, but
+// it has MULTIPLE opposite-direction inline mismatches vs the ROM at -O3: my
+// build inlines mus_fifo_dispatch (ROM jal's it) yet does NOT inline
+// Fstop/mus_cmd_stop (ROM inlines it). Same intractable gcc-2.7.2
+// inline-heuristic family as func_8009BC58/allocate_object_slot, compounded
+// across ~11 callees. Carry.
 INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_player_frame_handler);
 
 // __MusIntGetNewNote: advance past commands (jumptable dispatch), then fetch
