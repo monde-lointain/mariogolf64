@@ -104,6 +104,17 @@ extern void init_struct_defaults(channel_t*);  // __MusIntInitialiseChannel
 #define __MusIntInitialiseChannel init_struct_defaults
 extern long g_mus_rng_seed;  // mus_random_seed
 #define mus_random_seed g_mus_rng_seed
+extern int mus_cmd_start_song(musHandle);  // MusHandleUnPause
+extern musHandle mus_start_song(void*);    // __MusIntStartSong
+extern unsigned long func_8009C028(channel_t*, fx_header_t*, int, int, int,
+                                   int);  // __MusIntStartEffect
+extern void func_8009B754(channel_t*);    // __MusIntProcessContinuousVolume
+extern void func_8009B818(channel_t*);    // __MusIntProcessContinuousPitchBend
+#define MusHandleUnPause mus_cmd_start_song
+#define __MusIntStartSong mus_start_song
+#define __MusIntStartEffect func_8009C028
+#define __MusIntProcessContinuousVolume func_8009B754
+#define __MusIntProcessContinuousPitchBend func_8009B818
 
 // player.c file-scope macros (verbatim).
 #define REST 96
@@ -159,7 +170,14 @@ void mus_set_master_volume(unsigned long flags, int volume) {
   if (flags & MUSFLAG_SONGS) mus_master_volume_songs = volume;
 }
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player", MusStartSong);
+// MusStartSong
+musHandle MusStartSong(void* addr) {
+  musHandle handle;
+
+  handle = __MusIntStartSong(addr);
+  MusHandleUnPause(handle);
+  return (handle);
+}
 
 INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_start_song_from_marker);
 
@@ -378,7 +396,14 @@ int mus_handle_pause(musHandle handle) {
   return (__MusIntFifoAddCommand(&fifo_command));
 }
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_cmd_start_song);
+// MusHandleUnPause
+int mus_cmd_start_song(musHandle handle) {
+  fifo_t fifo_command;
+
+  fifo_command.command = FIFOCMD_UNPAUSE;
+  fifo_command.data = handle;
+  return (__MusIntFifoAddCommand(&fifo_command));
+}
 
 // MusSetFxType
 int mus_set_fx_type(int fxtype) {
