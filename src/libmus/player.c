@@ -260,7 +260,31 @@ musHandle mus_start_song_from_marker(void* addr, int marker) {
   return (handle);
 }
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player", try_spawn_global_object);
+// MusStartEffect
+musHandle try_spawn_global_object(int number) {
+  musHandle handle;
+  fx_header_t* header;
+
+  if (libmus_fxheader_single) {
+    header = libmus_fxheader_single;
+    libmus_fxheader_single = NULL;
+  } else {
+    header = libmus_fxheader_current;
+    /* are effects present? */
+    if (!header) {
+      mus_init_bank = NULL;
+      return (0);
+    }
+  }
+
+  /* set FX default sample bank */
+  if (!mus_init_bank) mus_init_bank = header->ptr_addr;
+  /* start effect default priority */
+  handle = __MusIntFindChannelAndStart(header, number, 0x80, 0x80, -1);
+  /* reset any single sample bank override */
+  mus_init_bank = NULL;
+  return (handle);
+}
 
 INCLUDE_ASM("asm/nonmatchings/libmus/player", func_80099CF0);
 
