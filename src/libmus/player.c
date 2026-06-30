@@ -115,6 +115,7 @@ extern void func_8009B818(channel_t*);    // __MusIntProcessContinuousPitchBend
 #define __MusIntStartEffect func_8009C028
 #define __MusIntProcessContinuousVolume func_8009B754
 #define __MusIntProcessContinuousPitchBend func_8009B818
+extern int g_mus_pan_enabled;  // @0x800C76B8 (MG64-added pan-enable flag)
 
 // player.c file-scope macros (verbatim).
 #define REST 96
@@ -799,9 +800,41 @@ void func_8009B060(channel_t* cp, int x) {
   cp->pending = NULL;
 }
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player", func_8009B0DC);
+// MG64-added: enable/disable stereo pan processing.
+void func_8009B0DC(int mode) { g_mus_pan_enabled = (mode == 1); }
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_set_volume_and_pan);
+// __MusIntSetVolumeAndPan (MG64 pan-enable mod: pan defaults to centre 0x40,
+// the real pan is computed only when g_mus_pan_enabled is set)
+void mus_set_volume_and_pan(channel_t* cp, int x) {
+  u32 volume;
+
+  /* process volume */
+  volume = ((u32)(cp->volume) * (u32)(cp->env_current) * (u32)(cp->velocity) *
+            (u32)(cp->volscale)) >>
+           13;
+  if (volume > 32767) volume = 32767;
+
+  if (!cp->fx_addr)
+    volume *= mus_master_volume_songs;
+  else
+    volume *= mus_master_volume_effects;
+  volume >>= 15;
+  if (cp->stopping != -1) volume = (volume * cp->stopping) / cp->stopping_speed;
+
+  if (volume != cp->old_volume) {
+    cp->old_volume = volume;
+    alSynSetVol(&__libmus_alglobals.drvr, mus_voices + x, volume,
+                mus_next_frame_time);
+  }
+
+  /* process pan */
+  volume = 0x40;
+  if (g_mus_pan_enabled) volume = ((cp->pan * cp->panscale) >> 7) & 0x7f;
+  if (volume != cp->old_pan) {
+    cp->old_pan = volume;
+    alSynSetPan(&__libmus_alglobals.drvr, mus_voices + x, volume);
+  }
+}
 
 // __MusIntSetPitch: compute the channel frequency (portamento + pitchbend +
 // 2^(semitones/12)) and push it to the synth voice.
