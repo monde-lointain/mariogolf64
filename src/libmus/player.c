@@ -63,6 +63,13 @@ float func_8009B92C(float);  // __MusIntPowerOf2 (defined below)
 #define ChangeCustomEffect func_8009D8A8
 #define mus_songfxchange_flag g_mus_fx_enabled
 #define __MusIntRemapPtrs func_8009BFF0
+extern unsigned short g_mus_master_vol_left;   // mus_master_volume_effects
+extern unsigned short g_mus_master_vol_right;  // mus_master_volume_songs
+extern musSched* __libmus_current_sched;       // @0x800C7ADC (symbol_addrs)
+extern int mus_fifo_enqueue(fifo_t*);          // __MusIntFifoAddCommand
+#define mus_master_volume_effects g_mus_master_vol_left
+#define mus_master_volume_songs g_mus_master_vol_right
+#define __MusIntFifoAddCommand mus_fifo_enqueue
 
 // player.c file-scope macros (verbatim).
 #define REST 96
@@ -111,7 +118,11 @@ unsigned char* mus_cmd_envelope(channel_t* cp, unsigned char* ptr) {
 
 INCLUDE_ASM("asm/nonmatchings/libmus/player", MusInitialize);
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_set_master_volume);
+// MusSetMasterVolume
+void mus_set_master_volume(unsigned long flags, int volume) {
+  if (flags & MUSFLAG_EFFECTS) mus_master_volume_effects = volume;
+  if (flags & MUSFLAG_SONGS) mus_master_volume_songs = volume;
+}
 
 INCLUDE_ASM("asm/nonmatchings/libmus/player", MusStartSong);
 
@@ -292,9 +303,25 @@ INCLUDE_ASM("asm/nonmatchings/libmus/player", func_8009A318);
 
 INCLUDE_ASM("asm/nonmatchings/libmus/player", func_8009A33C);
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_handle_get_ptr_bank);
+// MusHandleGetPtrBank
+void* mus_handle_get_ptr_bank(musHandle handle) {
+  channel_t* cp;
+  int i, count;
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_handle_pause);
+  if (!handle) return (NULL);
+  for (i = 0, cp = mus_channels, count = 0; i < max_channels; i++, cp++)
+    if (cp->handle == handle) return (cp->sample_bank);
+  return (NULL);
+}
+
+// MusHandlePause
+int mus_handle_pause(musHandle handle) {
+  fifo_t fifo_command;
+
+  fifo_command.command = FIFOCMD_PAUSE;
+  fifo_command.data = handle;
+  return (__MusIntFifoAddCommand(&fifo_command));
+}
 
 INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_cmd_start_song);
 
@@ -316,11 +343,44 @@ INCLUDE_ASM("asm/nonmatchings/libmus/player", func_8009A52C);
 
 INCLUDE_ASM("asm/nonmatchings/libmus/player", func_8009A534);
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player", MusSetScheduler);
+// MusSetScheduler
+void MusSetScheduler(musSched* sched_list) {
+  __libmus_current_sched = sched_list;
+}
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_handle_wave_count);
+// MusHandleWaveCount
+int mus_handle_wave_count(musHandle handle) {
+  channel_t* cp;
+  int i;
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_handle_wave_address);
+  if (!handle) return (0);
+  for (i = 0, cp = mus_channels; i < max_channels; i++, cp++) {
+    if (cp->handle == handle) {
+      if (cp->song_addr)
+        return (cp->song_addr->num_waves);
+      else
+        return (cp->fx_addr->num_waves);
+    }
+  }
+  return (0);
+}
+
+// MusHandleWaveAddress
+unsigned short* mus_handle_wave_address(musHandle handle) {
+  channel_t* cp;
+  int i;
+
+  if (!handle) return (NULL);
+  for (i = 0, cp = mus_channels; i < max_channels; i++, cp++) {
+    if (cp->handle == handle) {
+      if (cp->song_addr)
+        return (cp->song_addr->wave_table);
+      else
+        return (cp->fx_addr->wave_table);
+    }
+  }
+  return (NULL);
+}
 
 INCLUDE_ASM("asm/nonmatchings/libmus/player", func_8009A624);
 
