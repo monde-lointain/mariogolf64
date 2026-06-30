@@ -90,6 +90,16 @@ void mus_remap_ptr_bank(char*, char*);  // __MusIntRemapPtrBank (defined below)
 #define mus_last_fxtype D_800E7074
 #define libmus_fxheader_current D_800E7078
 #define __MusIntRemapPtrBank mus_remap_ptr_bank
+extern channel_t* g_mus_sound_channel_base;    // mus_channels2
+extern unsigned long g_mus_handle_counter;     // mus_current_handle
+extern ptr_bank_t* g_mus_last_started_handle;  // mus_init_bank
+extern int mus_alloc_channel(song_t*, int);    // __MusIntFindChannel
+extern void init_struct_defaults(channel_t*);  // __MusIntInitialiseChannel
+#define mus_channels2 g_mus_sound_channel_base
+#define mus_current_handle g_mus_handle_counter
+#define mus_init_bank g_mus_last_started_handle
+#define __MusIntFindChannel mus_alloc_channel
+#define __MusIntInitialiseChannel init_struct_defaults
 
 // player.c file-scope macros (verbatim).
 #define REST 96
@@ -835,9 +845,102 @@ void mus_remap_ptr_bank(char* pptr, char* wptr) {
 
 INCLUDE_ASM("asm/nonmatchings/libmus/player", func_8009BC58);
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player", init_struct_defaults);
+// __MusIntInitialiseChannel
+void init_struct_defaults(channel_t* cp) {
+  unsigned char old_playing, *work_ptr;
+  int i;
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_alloc_channel);
+  /* disable channel processing 1st!!! */
+  cp->pdata = NULL;
+  old_playing = cp->playing;
+
+  /* zero out channel */
+  work_ptr = (unsigned char*)cp;
+  for (i = 0; i < sizeof(channel_t); i++) *work_ptr++ = 0;
+
+  /* set none zero values */
+  cp->old_volume = 0xffff;
+  cp->old_reverb = 0xff;
+  cp->old_pan = 0xff;
+  cp->old_frequency = 99.9;
+
+  cp->channel_tempo = cp->channel_tempo_save = 96 * 256 / mus_vsyncs_per_second;
+
+  cp->length = 1;
+
+  cp->default_velocity = 127;
+  cp->volume = 127;
+  cp->bendrange = 2 * (1.0 / 64.0);
+  cp->pan = 64;
+
+  cp->cont_vol_repeat_count = 1;
+  cp->cont_pb_repeat_count = 1;
+
+  cp->stopping = -1;
+
+  /* new volume and pan scales */
+  cp->volscale = 0x80;
+  cp->panscale = 0x80;
+  cp->temscale = 0x80;
+
+  /* setup a default envelope */
+  cp->env_speed = 1;
+  cp->env_attack_speed = 1;
+  cp->env_attack_calc = 1.0F;
+  cp->env_max_vol = 127;
+  cp->env_decay_speed = 255;
+  cp->env_decay_calc = 1.0 / 255.0;
+  cp->env_sustain_vol = 127;
+  cp->env_release_speed = 15;
+  cp->env_release_calc = 1.0 / 15.0;
+
+  /* set current sample bank */
+  cp->sample_bank = mus_init_bank ? mus_init_bank : mus_default_bank;
+
+  /* restore channel status flag */
+  cp->playing = old_playing;
+}
+
+// __MusIntFindChannel
+int mus_alloc_channel(song_t* addr, int song_chan) {
+  channel_t* cp;
+  int i, current, current_channel;
+
+  /* master tacks can use channels reserved for them */
+  if (song_chan < 0) {
+    for (i = 0, cp = mus_channels; i < MAX_SONGS; i++, cp++)
+      if (!cp->pdata) return (i);
+  }
+
+  /* 1st scan for empty channel */
+  for (i = MAX_SONGS, cp = mus_channels2; i < max_channels; i++, cp++)
+    if (!cp->pdata) return (i);
+
+  /* 2nd scan for sfx channel to override */
+  for (i = MAX_SONGS, cp = mus_channels2, current = 0x7fffffff,
+      current_channel = MAX_SONGS - 1;
+       i < max_channels; i++, cp++) {
+    if (cp->fx_addr) {
+      if (cp->priority <= current) {
+        current = cp->priority;
+        current_channel = i;
+      }
+    }
+  }
+  if (current_channel >= MAX_SONGS) return (current_channel);
+
+  /* 3rd scan for song channel (not this song) */
+  for (i = MAX_SONGS, cp = mus_channels2; i < max_channels; i++)
+    if (!cp->fx_addr && cp->song_addr != addr) return (i);
+
+  /* 4th scan for same tune, same channel */
+  for (i = MAX_SONGS, cp = mus_channels2; i < max_channels; i++, cp++)
+    if (cp->song_addr == addr && addr->data_list[song_chan] == cp->pbase)
+      return (i);
+
+  /* get any channel */
+  return ((song_chan % (max_channels - MAX_SONGS)) + MAX_SONGS);
+}
 
 // __MusIntRemapPtrs
 void func_8009BFF0(void* addr, void* offset, int count) {
@@ -854,7 +957,56 @@ INCLUDE_ASM("asm/nonmatchings/libmus/player", func_8009C028);
 
 INCLUDE_ASM("asm/nonmatchings/libmus/player", allocate_object_slot);
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_start_song);
+// __MusIntStartSong
+musHandle mus_start_song(void* addr) {
+  song_t* song_addr;
+  int i, channels;
+  channel_t* cp;
+  unsigned long handle;
+
+  song_addr = addr;
+  channels = song_addr->num_channels;
+
+  if (!song_addr->flags & SONGFLAG_INITIALISED) {
+    song_addr->flags |= SONGFLAG_INITIALISED;
+    /* convert header offsets to pointers */
+    __MusIntRemapPtrs(SONGHDR_ADR(song_addr), addr, SONGHDR_COUNT);
+    /* convert pointer tables */
+    __MusIntRemapPtrs(song_addr->data_list, addr, channels);
+    __MusIntRemapPtrs(song_addr->volume_list, addr, channels);
+    __MusIntRemapPtrs(song_addr->pbend_list, addr, channels);
+  }
+  /* get next handle */
+  handle = mus_current_handle++;
+
+  /* start master track last - always gets started! */
+  cp = mus_channels + __MusIntFindChannel(song_addr, -1);
+  __MusIntInitialiseChannel(cp);
+  cp->velocity_on = 1; /* enable velocity for songs */
+  cp->channel_flag |= CHFLAG_PAUSE | CHFLAG_MASTERTRACK;
+  cp->song_addr = song_addr;
+  cp->pdata = cp->pbase = song_addr->master_track;
+  cp->handle = handle;
+
+  for (i = 0; i < channels; i++) {
+    if (song_addr->data_list[i]) /* should never happen but just in case! */
+    {
+      cp = mus_channels + __MusIntFindChannel(song_addr, i);
+      __MusIntInitialiseChannel(cp);
+      cp->velocity_on = 1; /* enable velocity for songs */
+      cp->channel_flag |= CHFLAG_PAUSE;
+      cp->song_addr = song_addr;
+      cp->pvolume = cp->pvolumebase = song_addr->volume_list[i];
+      cp->ppitchbend = cp->ppitchbendbase = song_addr->pbend_list[i];
+      /* pdata must be set last to avoid processing clash */
+      cp->pdata = cp->pbase = song_addr->data_list[i];
+      cp->handle = handle;
+    }
+  }
+  /* reset any single sample bank override */
+  mus_init_bank = NULL;
+  return (handle);
+}
 
 // __MusIntHandleSetFlag
 void mus_handle_set_flag(unsigned long handle, unsigned long clear,
