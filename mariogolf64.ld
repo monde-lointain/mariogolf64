@@ -1603,17 +1603,17 @@ SECTIONS
         FILL(0x00000000);
         overlay_10_TEXT_START = .;
         build/asm/1508D0.o(.text);
-        build/asm/1508E0.o(.text);
+        build/src/overlay_10/func_ovl10_801F4A40.o(.text);
         overlay_10_TEXT_END = .;
         overlay_10_TEXT_SIZE = ABSOLUTE(overlay_10_TEXT_END - overlay_10_TEXT_START);
         overlay_10_DATA_START = .;
         build/asm/1508D0.o(.data);
-        build/asm/1508E0.o(.data);
+        build/src/overlay_10/func_ovl10_801F4A40.o(.data);
         overlay_10_DATA_END = .;
         overlay_10_DATA_SIZE = ABSOLUTE(overlay_10_DATA_END - overlay_10_DATA_START);
         overlay_10_RODATA_START = .;
         build/asm/1508D0.o(.rodata);
-        build/asm/1508E0.o(.rodata);
+        build/src/overlay_10/func_ovl10_801F4A40.o(.rodata);
         overlay_10_RODATA_END = .;
         overlay_10_RODATA_SIZE = ABSOLUTE(overlay_10_RODATA_END - overlay_10_RODATA_START);
     }
@@ -1623,7 +1623,7 @@ SECTIONS
         FILL(0x00000000);
         overlay_10_BSS_START = .;
         build/asm/1508D0.o(.bss);
-        build/asm/1508E0.o(.bss);
+        build/src/overlay_10/func_ovl10_801F4A40.o(.bss);
         build/asm/data/150990.bss.o(.bss);
         overlay_10_BSS_END = .;
         overlay_10_BSS_SIZE = ABSOLUTE(overlay_10_BSS_END - overlay_10_BSS_START);

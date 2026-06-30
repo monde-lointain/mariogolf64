@@ -587,7 +587,7 @@ segments:
     symbol_name_format: ovl10_$VRAM
     subsegments:
       - [0x1508D0, asm]
-      - [0x1508E0, asm]
+      - [0x1508E0, c, overlay_10/func_ovl10_801F4A40]
       - { start: 0x150990, type: bss, vram: 0x801F4AF0 }
 
   # Overlay 11
