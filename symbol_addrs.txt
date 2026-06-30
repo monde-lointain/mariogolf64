@@ -356,22 +356,22 @@ __MusIntSamplesCurrent = 0x8009E424; // rom:0x79824 type:func
 // is CARRIED as INCLUDE_ASM (MG64-custom pause/mute block not in the 3.14 source). __MusIntDmaInit
 // (aud_dma.c, still asm) + CustomInit (player_fx.c bundled n_alInit, ghidra mis-named al_init; the
 // n_libaudio_sn_sc.h alInit->n_alInit then player_fx.h n_alInit->CustomInit chain) are recover-extern
-// callees. g_mus_audio_thread/__libmus_alglobals are the dropped statics/global (drop-static/drop-def).
+// callees. thread (UPSTREAM name)/__libmus_alglobals are the dropped statics/global (drop-static/drop-def).
 __MusIntAudManInit = 0x8009DF70; // rom:0x79370 type:func
 __MusIntThreadProcess = 0x8009E0A8; // rom:0x794A8 type:func
 __MusIntDmaInit = 0x8009D910; // rom:0x78D10 type:func
 __MusIntDmaProcess = 0x8009DA8C; // rom:0x78E8C type:func
 CustomInit = 0x8009CF30; // rom:0x78330 type:func
-g_mus_audio_thread = 0x800E70F0; // size:0x1B0
+thread = 0x800E70F0; // size:0x1B0
 __libmus_alglobals = 0x801B56A0; // size:0x50
 // S144 __MusIntThreadProcess recover-externs (drop-static @ 0x800C7Axx main_bss block).
-// __libmus_current_sched is the stock aud_sched.c global (still asm); g_mus_audio_last_task is the
-// stock func-static last_task; g_mus_audio_paused + g_mus_audio_silence_buffer are the MG64
+// __libmus_current_sched is the stock aud_sched.c global (still asm); last_task is the
+// stock func-static (UPSTREAM name); g_mus_audio_paused + g_mus_audio_silence_buffer are the MG64
 // pause/mute feature (a silence DMA on a flag, not in stock libmus 3.14). MICROCODE_CODE references
 // the already-placed rspbootTextEnd (== n_aspMainTextStart @ 0x800B3F20).
 __libmus_current_sched = 0x800C7ADC; // size:0x4
 g_mus_audio_paused = 0x800C7AE0; // size:0x1
-g_mus_audio_last_task = 0x800C7AE4; // size:0x4
+last_task = 0x800C7AE4; // size:0x4
 g_mus_audio_silence_buffer = 0x800C7AE8; // size:0x10
 // libmus aud_sched.c, UPSTREAM names (S145, libmus v3.14 n64sdkmod = game rev; STOCK scheduler fns).
 // __MusIntSchedInit (the one external fn) overrides the WRONG ghidra mus_set_sched via rom:
@@ -397,6 +397,157 @@ audio_dma_count = 0x800E70B8; // size:0x4
 audDMAMessageQ = 0x800E70C0; // size:0x18
 cartrom_handle = 0x800E70D8; // size:0x4
 g_mus_dma_buffer_count = 0x800C7AC0; // size:0x4
+// ============================================================================
+// libmus UPSTREAM-name pass: rename the decomp-curated g_mus_*/D_*/mus_* symbols
+// to the libmus 3.14 SDK names (n64sdkmod = game rev; matches drmario64 +
+// puzzleleague64 verbatim mirrors). These OVERRIDE the ghidra g_mus_*/mus_*
+// names (#wrong-ghidra-name-override; make sync-names drops the ghidra entries,
+// keeping the two files disjoint). The 5 MG64-added globals with no upstream
+// equivalent (g_mus_pan_enabled, g_mus_frame_counter, g_mus_dma_buffer_count,
+// g_mus_audio_paused, g_mus_audio_silence_buffer) keep their g_mus_ names.
+// --- player.c globals (ghidra -> upstream; 0x800C76 .data + 0x800E70 bss) ---
+_mus_cpu_last = 0x800C76B0; // size:0x4
+_mus_cpu_worst = 0x800C76B4; // size:0x4
+jumptable = 0x800C76BC; // size:0xB4
+max_channels = 0x800E7044; // size:0x4
+mus_voices = 0x800E7048; // size:0x4
+mus_channels = 0x800E704C; // size:0x4
+mus_channels2 = 0x800E7050; // size:0x4
+mus_vsyncs_per_second = 0x800E7054; // size:0x4
+mus_next_frame_time = 0x800E7058; // size:0x4
+mus_master_volume_effects = 0x800E705C; // size:0x2
+mus_master_volume_songs = 0x800E705E; // size:0x2
+mus_current_handle = 0x800E7060; // size:0x4
+mus_random_seed = 0x800E7064; // size:0x4
+mus_init_bank = 0x800E7068; // size:0x4
+mus_default_bank = 0x800E706C; // size:0x4
+mus_songfxchange_flag = 0x800E7070; // size:0x4
+mus_last_fxtype = 0x800E7074; // size:0x4
+libmus_fxheader_current = 0x800E7078; // size:0x4
+libmus_fxheader_single = 0x800E707C; // size:0x4
+marker_callback = 0x800E7080; // size:0x4
+fifo_start = 0x800E7084; // size:0x4
+fifo_current = 0x800E7088; // size:0x4
+fifo_limit = 0x800E708C; // size:0x4
+fifo_addr = 0x800E7090; // size:0x4
+__muscontrol_flag = 0x80132368; // size:0x4
+// --- aud_sched / aud_thread / aud_samples globals (ghidra -> upstream) ---
+audio_sched = 0x800E70E0; // size:0x4
+stack_addr = 0x800E72A0; // size:0x4
+audio_tasks = 0x800E72A4; // size:0x4
+audio_command_list = 0x800E72A8; // size:0x4
+frame_samples = 0x800E72C0; // size:0x4
+frame_samples_min = 0x800E72C4; // size:0x4
+frame_samples_max = 0x800E72C8; // size:0x4
+extra_samples = 0x800E72CC; // size:0x4
+// --- libmus functions (ghidra decomp-name -> upstream) ---
+MusPtrBankInitialize = 0x8009A2B4; // type:func
+MusFxBankInitialize = 0x8009A47C; // type:func
+MusSetMasterVolume = 0x800999C4; // type:func
+__MusIntMain = 0x8009A7D4; // type:func
+__MusIntStartSong = 0x8009C280; // type:func
+MusHandleUnPause = 0x8009A3C8; // type:func
+__MusIntFindChannel = 0x8009BE28; // type:func
+__MusIntInitialiseChannel = 0x8009BCEC; // type:func
+__MusIntFifoAddCommand = 0x8009A730; // type:func
+__MusIntHandleSetFlag = 0x8009C4EC; // type:func
+__MusIntRemapPtrBank = 0x8009BAC0; // type:func
+__MusIntFindChannelAndStart = 0x8009C0D8; // type:func
+// --- libmus functions (auto func_ -> upstream) ---
+__MusIntFifoOpen = 0x8009A64C; // type:func
+__MusIntFlushPending = 0x8009B060; // type:func
+__MusIntInitEnvelope = 0x8009B360; // type:func
+__MusIntInitSweep = 0x8009B5C4; // type:func
+__MusIntProcessContinuousVolume = 0x8009B754; // type:func
+__MusIntProcessContinuousPitchBend = 0x8009B818; // type:func
+__MusIntPowerOf2 = 0x8009B92C; // type:func
+__MusIntRandom = 0x8009BC58; // type:func
+__MusIntRemapPtrs = 0x8009BFF0; // type:func
+__MusIntStartEffect = 0x8009C028; // type:func
+ChangeCustomEffect = 0x8009D8A8; // type:func
+// --- libmus bytecode command handlers: jumptable[] Fxxx (decomp mus_cmd_* ->
+//     upstream Fxxx; positional match vs n64sdkmod player_commands.inc.c) ---
+Fstop = 0x8009C540; // type:func
+Fwave = 0x8009C560; // type:func
+Fport = 0x8009C590; // type:func
+Fportoff = 0x8009C5B0; // type:func
+Fdefa = 0x8009C5BC; // type:func
+Ftempo = 0x8009C6E4; // type:func
+Fcutoff = 0x8009C7DC; // type:func
+Fendit = 0x8009C7C8; // type:func
+Fvibup = 0x8009C800; // type:func
+Fvibdown = 0x8009C870; // type:func
+Fviboff = 0x8009C8E4; // type:func
+Flength = 0x8009C8F4; // type:func
+Fignore = 0x8009C924; // type:func
+Ftrans = 0x8009C934; // type:func
+Fignore_trans = 0x8009C944; // type:func
+Fdistort = 0x8009C954; // type:func
+Fenvelope = 0x800995F0; // type:func
+Fenvoff = 0x8009C9AC; // type:func
+Fenvon = 0x8009C9BC; // type:func
+Ftroff = 0x8009C9C8; // type:func
+Ftron = 0x8009C9D8; // type:func
+Ffor = 0x8009C9E4; // type:func
+Fnext = 0x8009CA50; // type:func
+Fwobble = 0x8009CAEC; // type:func
+Fwobbleoff = 0x8009CB14; // type:func
+Fvelon = 0x8009CB20; // type:func
+Fveloff = 0x8009CB30; // type:func
+Fvelocity = 0x8009CB3C; // type:func
+Fpan = 0x8009CB50; // type:func
+Fstereo = 0x8009CB64; // type:func
+Fdrums = 0x8009CB6C; // type:func
+Fdrumsoff = 0x8009CBB4; // type:func
+Fprint = 0x8009CBC0; // type:func
+Fgoto = 0x8009CBC8; // type:func
+Freverb = 0x8009CC38; // type:func
+FrandNote = 0x8009CC48; // type:func
+FrandVolume = 0x8009CC98; // type:func
+FrandPan = 0x8009CCE8; // type:func
+Fvolume = 0x8009CD38; // type:func
+Fstartfx = 0x8009CD48; // type:func
+Fbendrange = 0x8009CE18; // type:func
+Fsweep = 0x8009CE54; // type:func
+Fchangefx = 0x8009CE64; // type:func
+Fmarker = 0x8009CEA8; // type:func
+Flength0 = 0x8009CF18; // type:func
+// --- libmus public API + internal helpers (decomp mus_*/func_ -> upstream) ---
+MusAsk = 0x80099ED4; // type:func
+MusStop = 0x80099E08; // type:func
+MusStartSongFromMarker = 0x80099A20; // type:func
+MusHandleAsk = 0x8009A008; // type:func
+MusHandleGetPtrBank = 0x8009A348; // type:func
+MusHandlePause = 0x8009A3A4; // type:func
+MusHandleSetFreqOffset = 0x8009A130; // type:func
+MusHandleSetPan = 0x8009A0C0; // type:func
+MusHandleSetReverb = 0x8009A22C; // type:func
+MusHandleSetTempo = 0x8009A1A0; // type:func
+MusHandleSetVolume = 0x8009A060; // type:func
+MusHandleStop = 0x80099F54; // type:func
+MusHandleWaveAddress = 0x8009A5AC; // type:func
+MusHandleWaveCount = 0x8009A548; // type:func
+MusSetFxType = 0x8009A3F0; // type:func
+MusSetSongFxChange = 0x8009A420; // type:func
+__MusIntSetVolumeAndPan = 0x8009B0F0; // type:func
+__MusIntFifoProcessCommand = 0x8009A6B0; // type:func
+MusStartEffect2 = 0x80099CF0; // type:func
+MusPtrBankSetSingle = 0x8009A2F0; // type:func
+MusPtrBankSetCurrent = 0x8009A318; // type:func
+MusPtrBankGetCurrent = 0x8009A33C; // type:func
+MusFxBankNumberOfEffects = 0x8009A500; // type:func
+MusFxBankSetCurrent = 0x8009A508; // type:func
+MusFxBankSetSingle = 0x8009A514; // type:func
+MusFxBankGetCurrent = 0x8009A520; // type:func
+MusFxBankSetPtrBank = 0x8009A52C; // type:func
+MusFxBankGetPtrBank = 0x8009A534; // type:func
+MusSetMarkerCallback = 0x8009A624; // type:func
+__MusIntGetNewNote = 0x8009AB18; // type:func
+__MusIntSetPitch = 0x8009B254; // type:func
+__MusIntProcessEnvelope = 0x8009B3D0; // type:func
+__MusIntProcessSweep = 0x8009B5E0; // type:func
+__MusIntProcessWobble = 0x8009B698; // type:func
+__MusIntProcessVibrato = 0x8009B6F0; // type:func
 // libnaudio n_audio_sc n_syn* setter family, UPSTREAM names (S129 header-enabler sprint).
 n_alSynSetPan = 0x800A0A90; // type:func
 n_alSynSetPitch = 0x800A0B20; // type:func

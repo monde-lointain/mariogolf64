@@ -19,10 +19,10 @@
 
 /* Audio queue-depth state, in DAC samples (naudio path). Written by
  * SamplesInit, read each frame by SamplesCurrent. */
-extern u32 g_mus_frame_samples;      // nominal samples synthesized per frame
-extern u32 g_mus_frame_samples_min;  // low-water target (nominal - one block)
-extern u32 g_mus_frame_samples_max;  // high-water target (nominal + one block)
-extern u32 g_mus_extra_samples;      // headroom = nominal * extra_rate / 100
+extern u32 frame_samples;      // nominal samples synthesized per frame
+extern u32 frame_samples_min;  // low-water target (nominal - one block)
+extern u32 frame_samples_max;  // high-water target (nominal + one block)
+extern u32 extra_samples;      // headroom = nominal * extra_rate / 100
 
 /*
  * Size the audio sample buffers at startup and return the worst-case buffer
@@ -55,11 +55,11 @@ u32 __MusIntSamplesInit(u32 retrace_count, u32 output_rate, u32 vsyncs_per_sec,
 
   // Round up to an N_SAMPLES block (the +1 leaves headroom above calc), then
   // derive the low/high water marks and the percentage headroom.
-  g_mus_frame_samples = ((calc / N_SAMPLES) + 1) * N_SAMPLES;
-  g_mus_frame_samples_min = g_mus_frame_samples - N_SAMPLES;
-  g_mus_frame_samples_max = g_mus_frame_samples + N_SAMPLES;
-  g_mus_extra_samples = g_mus_frame_samples * extra_rate / 100;
-  return (g_mus_frame_samples + N_SAMPLES + g_mus_extra_samples);
+  frame_samples = ((calc / N_SAMPLES) + 1) * N_SAMPLES;
+  frame_samples_min = frame_samples - N_SAMPLES;
+  frame_samples_max = frame_samples + N_SAMPLES;
+  extra_samples = frame_samples * extra_rate / 100;
+  return (frame_samples + N_SAMPLES + extra_samples);
 }
 #endif
 
@@ -82,22 +82,22 @@ u32 __MusIntSamplesCurrent(u32 samples) {
   // Fire each correction only once per excursion; re-armed on return to band.
   static u32 only_one_flag = 1;
 
-  if (samples > N_SAMPLES + g_mus_extra_samples) {
+  if (samples > N_SAMPLES + extra_samples) {
     // Queue too deep: synthesize one short frame to let it drain.
     if (only_one_flag) {
       only_one_flag = 0;
-      return (g_mus_frame_samples_min);
+      return (frame_samples_min);
     }
-  } else if (samples < g_mus_extra_samples) {
+  } else if (samples < extra_samples) {
     // Queue too shallow: synthesize one long frame to refill it.
     if (only_one_flag) {
       only_one_flag = 0;
-      return (g_mus_frame_samples_max);
+      return (frame_samples_max);
     }
   } else {
     // Within the normal band: re-arm and run at the nominal rate.
     only_one_flag = 1;
   }
-  return (g_mus_frame_samples);
+  return (frame_samples);
 }
 #endif

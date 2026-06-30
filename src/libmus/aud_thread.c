@@ -62,11 +62,11 @@ typedef struct {
 
 static void __MusIntThreadProcess(void* ignored);
 
-extern audio_task_t* g_mus_audio_tasks;
-extern Acmd* g_mus_audio_command_list;
-extern OSThread g_mus_audio_thread;
-extern u64* g_mus_audio_stack;
-extern audio_task_t* g_mus_audio_last_task;
+extern audio_task_t* audio_tasks;
+extern Acmd* audio_command_list;
+extern OSThread thread;
+extern u64* stack_addr;
+extern audio_task_t* last_task;
 extern u8 g_mus_audio_paused;
 extern u8 g_mus_audio_silence_buffer[0x10];
 
@@ -106,21 +106,20 @@ void __MusIntAudManInit(musConfig* config, int vsyncs_per_second, int fx_type) {
 
   // Allocate the RSP command list and the output buffers. Each output buffer
   // holds samples_per_frame stereo 16-bit samples (4 bytes apiece).
-  g_mus_audio_command_list =
+  audio_command_list =
       (Acmd*)__MusIntMemMalloc(config->syn_rsp_cmds * sizeof(Acmd));
-  g_mus_audio_tasks =
-      __MusIntMemMalloc(NUM_OUTPUT_BUFFERS * sizeof(audio_task_t));
+  audio_tasks = __MusIntMemMalloc(NUM_OUTPUT_BUFFERS * sizeof(audio_task_t));
   for (i = 0; i < NUM_OUTPUT_BUFFERS; i++) {
-    g_mus_audio_tasks[i].data = __MusIntMemMalloc(4 * samples_per_frame);
+    audio_tasks[i].data = __MusIntMemMalloc(4 * samples_per_frame);
   }
 
   // Allocate the stack and launch the audio thread. The stack grows down, so
   // the entry stack pointer is the top of the freshly allocated block.
-  g_mus_audio_stack = __MusIntMemMalloc(AUDIO_STACKSIZE);
-  osCreateThread(&g_mus_audio_thread, 3, __MusIntThreadProcess, 0,
-                 (void*)(g_mus_audio_stack + (AUDIO_STACKSIZE / sizeof(u64))),
+  stack_addr = __MusIntMemMalloc(AUDIO_STACKSIZE);
+  osCreateThread(&thread, 3, __MusIntThreadProcess, 0,
+                 (void*)(stack_addr + (AUDIO_STACKSIZE / sizeof(u64))),
                  config->thread_priority);
-  osStartThread(&g_mus_audio_thread);
+  osStartThread(&thread);
 }
 
 /*
@@ -141,7 +140,7 @@ static void __MusIntThreadProcess(void* ignored) {
   // Constant parts of every dispatched task: the microcode and command list.
   sched_task.ucode = (u64*)MICROCODE_CODE;
   sched_task.ucode_data = (u64*)MICROCODE_DATA;
-  sched_task.data = (u64*)g_mus_audio_command_list;
+  sched_task.data = (u64*)audio_command_list;
   task_count = 0;
   __MusIntSched_install();
   while (1) {
@@ -162,25 +161,24 @@ static void __MusIntThreadProcess(void* ignored) {
     __MusIntDmaProcess();
 
     // Queue the buffer synthesized last frame for playback. commands carries
-    // the previous frame's alAudioFrame count; g_mus_audio_last_task is NULL
+    // the previous frame's alAudioFrame count; last_task is NULL
     // until the first task runs, so this is skipped on the first frame.
-    if (g_mus_audio_last_task && commands) {
-      osAiSetNextBuffer(g_mus_audio_last_task->data,
-                        g_mus_audio_last_task->frame_samples << 2);
+    if (last_task && commands) {
+      osAiSetNextBuffer(last_task->data, last_task->frame_samples << 2);
     }
 
     // Pick this frame's output buffer and decide how many samples to make.
-    task = &g_mus_audio_tasks[task_count];
+    task = &audio_tasks[task_count];
     task->frame_samples = __MusIntSamplesCurrent(samples);
-    cmdp = alAudioFrame(g_mus_audio_command_list, &commands,
+    cmdp = alAudioFrame(audio_command_list, &commands,
                         (short*)osVirtualToPhysical(task->data),
                         task->frame_samples);
 
     // Dispatch the RSP task only if synthesis actually produced commands.
     if (commands) {
-      sched_task.data_size = (cmdp - g_mus_audio_command_list) * sizeof(Acmd);
+      sched_task.data_size = (cmdp - audio_command_list) * sizeof(Acmd);
       __MusIntSched_dotask(&sched_task);
-      g_mus_audio_last_task = task;
+      last_task = task;
     }
     task_count = (task_count + 1) % NUM_OUTPUT_BUFFERS;
   }

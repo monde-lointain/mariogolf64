@@ -28,8 +28,8 @@
 // Base offset of wave data within the 64DD ROM.
 #define DDROM_WAVEDATA_START 0x00140000
 
-extern u32 g_mus_control_flag;  // global libmus mode flags (MUSCONTROL_RAM ==
-                                // samples already in RAM)
+extern u32 __muscontrol_flag;  // global libmus mode flags (MUSCONTROL_RAM ==
+                               // samples already in RAM)
 
 // One pool buffer. Active nodes form a doubly-linked list sorted by
 // sample_addr; the rest sit on the free list.
@@ -181,7 +181,7 @@ static dma_list_t* __MusIntDmaSample(unsigned long sample_addr,
   OSIoMesg* io_msg;
 
   // In RAM mode the samples are already resident, so no transfer is needed.
-  if (g_mus_control_flag & MUSCONTROL_RAM) {
+  if (__muscontrol_flag & MUSCONTROL_RAM) {
     return (NULL);
   }
   pi_handle = cartrom_handle;

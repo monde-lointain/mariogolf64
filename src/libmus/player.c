@@ -1,9 +1,9 @@
 #include "player_priv.h"
 
 // Default-ADSR setup, extracted as a static helper so GCC -O3 auto-inlines it
-// into mus_cmd_envelope + func_8009AB18 exactly as the upstream inlines Fdefa
+// into Fenvelope + __MusIntGetNewNote exactly as the upstream inlines Fdefa
 // (defining it before its callers is what lets the inline reproduce; the
-// standalone Fdefa lives in mus_cmd_default_adsr for the command jumptable).
+// standalone Fdefa lives in Fdefa for the command jumptable).
 static void env_set_adsr(channel_t* cp, unsigned char* ptr) {
   unsigned char value;
 
@@ -27,7 +27,7 @@ static void env_set_adsr(channel_t* cp, unsigned char* ptr) {
   cp->env_release_calc = 1.0 / ((float)value);
 }
 
-unsigned char* mus_cmd_envelope(channel_t* cp, unsigned char* ptr) {
+unsigned char* Fenvelope(channel_t* cp, unsigned char* ptr) {
   int tmp;
 
   tmp = *ptr++;
@@ -41,20 +41,14 @@ unsigned char* mus_cmd_envelope(channel_t* cp, unsigned char* ptr) {
 }
 
 // MusInitialize deps (callees defined later; globals).
-extern OSPiHandle* diskrom_handle;        // @0x800FEF78
-extern unsigned long g_mus_control_flag;  // __muscontrol_flag @0x80132368
-extern ALPlayer plr_player;               // @0x800E7030
-extern void func_8009A64C(int);           // __MusIntFifoOpen
-extern void mus_ptr_bank_initialize(void*, void*);      // MusPtrBankInitialize
-extern void mus_fx_bank_initialize(void*);              // MusFxBankInitialize
-extern void mus_set_master_volume(unsigned long, int);  // MusSetMasterVolume
-extern ALMicroTime mus_player_frame_handler(void*);     // __MusIntMain
-#define __muscontrol_flag g_mus_control_flag
-#define __MusIntFifoOpen func_8009A64C
-#define MusPtrBankInitialize mus_ptr_bank_initialize
-#define MusFxBankInitialize mus_fx_bank_initialize
-#define MusSetMasterVolume mus_set_master_volume
-#define __MusIntMain mus_player_frame_handler
+extern OSPiHandle* diskrom_handle;       // @0x800FEF78
+extern unsigned long __muscontrol_flag;  // __muscontrol_flag @0x80132368
+extern ALPlayer plr_player;              // @0x800E7030
+extern void __MusIntFifoOpen(int);       // __MusIntFifoOpen
+extern void MusPtrBankInitialize(void*, void*);      // MusPtrBankInitialize
+extern void MusFxBankInitialize(void*);              // MusFxBankInitialize
+extern void MusSetMasterVolume(unsigned long, int);  // MusSetMasterVolume
+extern ALMicroTime __MusIntMain(void*);              // __MusIntMain
 
 int MusInitialize(musConfig* config) {
   ALVoiceConfig vc;
@@ -116,7 +110,7 @@ int MusInitialize(musConfig* config) {
 }
 
 // MusSetMasterVolume
-void mus_set_master_volume(unsigned long flags, int volume) {
+void MusSetMasterVolume(unsigned long flags, int volume) {
   if (flags & MUSFLAG_EFFECTS) mus_master_volume_effects = volume;
   if (flags & MUSFLAG_SONGS) mus_master_volume_songs = volume;
 }
@@ -131,7 +125,7 @@ musHandle MusStartSong(void* addr) {
 }
 
 // MusStartSongFromMarker
-musHandle mus_start_song_from_marker(void* addr, int marker) {
+musHandle MusStartSongFromMarker(void* addr, int marker) {
   musHandle handle;
   unsigned char command, *ptr;
   int i, note;
@@ -155,8 +149,8 @@ musHandle mus_start_song_from_marker(void* addr, int marker) {
         }
         note = *(cp->pdata++);
         /* velocity must be processed (MG64 game-divergent block, matches
-           func_8009AB18: velocity assigned via temp, masked into velocity not
-           vel, default reloaded) */
+           __MusIntGetNewNote: velocity assigned via temp, masked into velocity
+           not vel, default reloaded) */
         if (cp->velocity_on) {
           unsigned char vel = *(cp->pdata++);
           cp->velocity = vel;
@@ -235,8 +229,8 @@ musHandle try_spawn_global_object(int number) {
 }
 
 // MusStartEffect2
-musHandle func_80099CF0(int number, int volume, int pan, int restartflag,
-                        int priority) {
+musHandle MusStartEffect2(int number, int volume, int pan, int restartflag,
+                          int priority) {
   int i;
   channel_t* cp;
   musHandle handle;
@@ -277,7 +271,7 @@ musHandle func_80099CF0(int number, int volume, int pan, int restartflag,
 }
 
 // MusStop
-void mus_stop(unsigned long flags, int speed) {
+void MusStop(unsigned long flags, int speed) {
   int i, speed2;
   channel_t* cp;
 
@@ -300,7 +294,7 @@ void mus_stop(unsigned long flags, int speed) {
 }
 
 // MusAsk
-int mus_ask(unsigned long flags) {
+int MusAsk(unsigned long flags) {
   int i, count;
   channel_t* cp;
 
@@ -315,7 +309,7 @@ int mus_ask(unsigned long flags) {
 }
 
 // MusHandleStop
-int mus_handle_stop(musHandle handle, int speed) {
+int MusHandleStop(musHandle handle, int speed) {
   int i, speed2, count;
   channel_t* cp;
 
@@ -339,7 +333,7 @@ int mus_handle_stop(musHandle handle, int speed) {
 }
 
 // MusHandleAsk
-int mus_handle_ask(musHandle handle) {
+int MusHandleAsk(musHandle handle) {
   channel_t* cp;
   int i, count;
 
@@ -350,7 +344,7 @@ int mus_handle_ask(musHandle handle) {
 }
 
 // MusHandleSetVolume
-int mus_handle_set_volume(musHandle handle, int volume) {
+int MusHandleSetVolume(musHandle handle, int volume) {
   channel_t* cp;
   int i, count;
 
@@ -365,7 +359,7 @@ int mus_handle_set_volume(musHandle handle, int volume) {
 }
 
 // MusHandleSetPan
-int mus_handle_set_pan(musHandle handle, int pan) {
+int MusHandleSetPan(musHandle handle, int pan) {
   channel_t* cp;
   int i, count;
 
@@ -381,7 +375,7 @@ int mus_handle_set_pan(musHandle handle, int pan) {
 }
 
 // MusHandleSetFreqOffset
-int mus_handle_set_freq_offset(musHandle handle, float offset) {
+int MusHandleSetFreqOffset(musHandle handle, float offset) {
   channel_t* cp;
   int i, count;
 
@@ -396,7 +390,7 @@ int mus_handle_set_freq_offset(musHandle handle, float offset) {
 }
 
 // MusHandleSetTempo
-int mus_handle_set_tempo(musHandle handle, int tempo) {
+int MusHandleSetTempo(musHandle handle, int tempo) {
   channel_t* cp;
   int i, count;
 
@@ -418,7 +412,7 @@ int mus_handle_set_tempo(musHandle handle, int tempo) {
 }
 
 // MusHandleSetReverb
-int mus_handle_set_reverb(musHandle handle, int reverb) {
+int MusHandleSetReverb(musHandle handle, int reverb) {
   channel_t* cp;
   int i, count;
 
@@ -440,13 +434,13 @@ int mus_handle_set_reverb(musHandle handle, int reverb) {
 }
 
 // MusPtrBankInitialize
-void mus_ptr_bank_initialize(void* pbank, void* wbank) {
+void MusPtrBankInitialize(void* pbank, void* wbank) {
   __MusIntRemapPtrBank(pbank, wbank);
   if (!mus_default_bank) mus_default_bank = pbank;
 }
 
 // MusPtrBankSetSingle
-void* func_8009A2F0(void* ipbank) {
+void* MusPtrBankSetSingle(void* ipbank) {
   ptr_bank_t* pptr;
   if (ipbank) {
     pptr = (ptr_bank_t*)ipbank;
@@ -456,7 +450,7 @@ void* func_8009A2F0(void* ipbank) {
 }
 
 // MusPtrBankSetCurrent
-void func_8009A318(void* ipbank) {
+void MusPtrBankSetCurrent(void* ipbank) {
   ptr_bank_t* pptr;
   if (ipbank) {
     pptr = (ptr_bank_t*)ipbank;
@@ -465,10 +459,10 @@ void func_8009A318(void* ipbank) {
 }
 
 // MusPtrBankGetCurrent
-void* func_8009A33C(void) { return (mus_default_bank); }
+void* MusPtrBankGetCurrent(void) { return (mus_default_bank); }
 
 // MusHandleGetPtrBank
-void* mus_handle_get_ptr_bank(musHandle handle) {
+void* MusHandleGetPtrBank(musHandle handle) {
   channel_t* cp;
   int i, count;
 
@@ -479,7 +473,7 @@ void* mus_handle_get_ptr_bank(musHandle handle) {
 }
 
 // MusHandlePause
-int mus_handle_pause(musHandle handle) {
+int MusHandlePause(musHandle handle) {
   fifo_t fifo_command;
 
   fifo_command.command = FIFOCMD_PAUSE;
@@ -488,7 +482,7 @@ int mus_handle_pause(musHandle handle) {
 }
 
 // MusHandleUnPause
-int mus_cmd_start_song(musHandle handle) {
+int MusHandleUnPause(musHandle handle) {
   fifo_t fifo_command;
 
   fifo_command.command = FIFOCMD_UNPAUSE;
@@ -497,7 +491,7 @@ int mus_cmd_start_song(musHandle handle) {
 }
 
 // MusSetFxType
-int mus_set_fx_type(int fxtype) {
+int MusSetFxType(int fxtype) {
   fifo_t fifo_command;
 
   fifo_command.command = FIFOCMD_CHANGEFX;
@@ -507,17 +501,17 @@ int mus_set_fx_type(int fxtype) {
 }
 
 // MusSetSongFxChange
-int mus_set_song_fx_change(musBool onoff) {
+int MusSetSongFxChange(musBool onoff) {
   int changed;
 
   changed = 1;
-  if (onoff == MUSBOOL_OFF) changed = mus_set_fx_type(mus_last_fxtype);
+  if (onoff == MUSBOOL_OFF) changed = MusSetFxType(mus_last_fxtype);
   if (changed) mus_songfxchange_flag = onoff;
   return (changed);
 }
 
 // MusFxBankInitialize
-void mus_fx_bank_initialize(void* fxbank) {
+void MusFxBankInitialize(void* fxbank) {
   int i;
   fx_header_t* header;
 
@@ -536,30 +530,30 @@ void mus_fx_bank_initialize(void* fxbank) {
 }
 
 // MusFxBankNumberOfEffects
-int func_8009A500(void* ifxbank) {
+int MusFxBankNumberOfEffects(void* ifxbank) {
   return (((fx_header_t*)ifxbank)->number_of_effects);
 }
 
 // MusFxBankSetCurrent
-void func_8009A508(void* ifxbank) {
+void MusFxBankSetCurrent(void* ifxbank) {
   libmus_fxheader_current = (fx_header_t*)ifxbank;
 }
 
 // MusFxBankSetSingle
-void func_8009A514(void* ifxbank) {
+void MusFxBankSetSingle(void* ifxbank) {
   libmus_fxheader_single = (fx_header_t*)ifxbank;
 }
 
 // MusFxBankGetCurrent
-void* func_8009A520(void) { return (libmus_fxheader_current); }
+void* MusFxBankGetCurrent(void) { return (libmus_fxheader_current); }
 
 // MusFxBankSetPtrBank
-void func_8009A52C(void* ifxbank, void* ipbank) {
+void MusFxBankSetPtrBank(void* ifxbank, void* ipbank) {
   ((fx_header_t*)ifxbank)->ptr_addr = (ptr_bank_t*)ipbank;
 }
 
 // MusFxBankGetPtrBank
-void* func_8009A534(void* ifxbank) {
+void* MusFxBankGetPtrBank(void* ifxbank) {
   return (((fx_header_t*)ifxbank)->ptr_addr);
 }
 
@@ -569,7 +563,7 @@ void MusSetScheduler(musSched* sched_list) {
 }
 
 // MusHandleWaveCount
-int mus_handle_wave_count(musHandle handle) {
+int MusHandleWaveCount(musHandle handle) {
   channel_t* cp;
   int i;
 
@@ -586,7 +580,7 @@ int mus_handle_wave_count(musHandle handle) {
 }
 
 // MusHandleWaveAddress
-unsigned short* mus_handle_wave_address(musHandle handle) {
+unsigned short* MusHandleWaveAddress(musHandle handle) {
   channel_t* cp;
   int i;
 
@@ -603,14 +597,14 @@ unsigned short* mus_handle_wave_address(musHandle handle) {
 }
 
 // MusSetMarkerCallback
-void func_8009A624(void* callback) {
+void MusSetMarkerCallback(void* callback) {
   marker_callback = (LIBMUScb_marker)callback;
 }
 
 void func_8009A630(void) { func_8009DBA0(); }
 
 // __MusIntFifoOpen
-void func_8009A64C(int commands) {
+void __MusIntFifoOpen(int commands) {
   if (commands < MIN_FIFO_COMMANDS) {
     commands = MIN_FIFO_COMMANDS;
   } else if (commands > MAX_FIFO_COMMANDS) {
@@ -621,26 +615,28 @@ void func_8009A64C(int commands) {
   fifo_start = fifo_current = 0;
 }
 
-// __MusIntFifoProcess: drain the command fifo. Defined BEFORE mus_fifo_dispatch
-// so the dispatch is only forward-declared here -> GCC cannot inline it -> it
-// stays a jal. __MusIntFifoProcess is static + called once (by __MusIntMain),
-// so GCC -O3 inlines this drain loop INTO __MusIntMain while keeping
-// mus_fifo_dispatch out-of-line. That definition-order trick (NOT a
+// __MusIntFifoProcess: drain the command fifo. Defined BEFORE
+// __MusIntFifoProcessCommand so the dispatch is only forward-declared here ->
+// GCC cannot inline it -> it stays a jal. __MusIntFifoProcess is static +
+// called once (by __MusIntMain), so GCC -O3 inlines this drain loop INTO
+// __MusIntMain while keeping
+// __MusIntFifoProcessCommand out-of-line. That definition-order trick (NOT a
 // hand-inlined loop) is what reproduces the ROM -- confirmed byte-exact in PPL
 // (-O3) and drmario64 (-O2). The canonical libmus has the same order
 // (player_fifo.inc.c: drain @73, dispatch @101).
-void mus_fifo_dispatch(fifo_t* command);  // forward decl (defined just below)
+void __MusIntFifoProcessCommand(
+    fifo_t* command);  // forward decl (defined just below)
 static void __MusIntFifoProcess(void) {
   if (fifo_start == fifo_current) return;
   while (fifo_start != fifo_current) {
-    mus_fifo_dispatch(&fifo_addr[fifo_start]);
+    __MusIntFifoProcessCommand(&fifo_addr[fifo_start]);
     fifo_start++;
     if (fifo_start == fifo_limit) fifo_start = 0;
   }
 }
 
 // __MusIntFifoProcessCommand
-void mus_fifo_dispatch(fifo_t* command) {
+void __MusIntFifoProcessCommand(fifo_t* command) {
   switch (command->command) {
     case FIFOCMD_PAUSE:
       __MusIntHandleSetFlag(command->data, ~CHFLAG_PAUSE, CHFLAG_PAUSE);
@@ -657,7 +653,7 @@ void mus_fifo_dispatch(fifo_t* command) {
 }
 
 // __MusIntFifoAddCommand
-int mus_fifo_enqueue(fifo_t* command) {
+int __MusIntFifoAddCommand(fifo_t* command) {
   int index;
 
   index = (fifo_current + 1) % fifo_limit;
@@ -674,21 +670,21 @@ int func_8009A7C8(void) { return g_mus_frame_counter; }
 // __MusIntMain callees defined later in this TU (forward-declared so they emit
 // as jal -- defined-after-caller means not visible for inlining at the call
 // site).
-extern void func_8009AB18(channel_t*, int);           // __MusIntGetNewNote
-extern void func_8009B254(channel_t*, int, float);    // __MusIntSetPitch
-extern void func_8009B3D0(channel_t*);                // __MusIntProcessEnvelope
-extern void func_8009B5E0(channel_t*);                // __MusIntProcessSweep
-extern float func_8009B698(channel_t*);               // __MusIntProcessWobble
-extern float func_8009B6F0(channel_t*);               // __MusIntProcessVibrato
-extern void mus_set_volume_and_pan(channel_t*, int);  // __MusIntSetVolumeAndPan
-extern u32 g_mus_cpu_last;   // _mus_cpu_last  (SUPPORT_PROFILER timing)
-extern u32 g_mus_cpu_worst;  // _mus_cpu_worst
-
+extern void __MusIntGetNewNote(channel_t*, int);       // __MusIntGetNewNote
+extern void __MusIntSetPitch(channel_t*, int, float);  // __MusIntSetPitch
+extern void __MusIntProcessEnvelope(channel_t*);  // __MusIntProcessEnvelope
+extern void __MusIntProcessSweep(channel_t*);     // __MusIntProcessSweep
+extern float __MusIntProcessWobble(channel_t*);   // __MusIntProcessWobble
+extern float __MusIntProcessVibrato(channel_t*);  // __MusIntProcessVibrato
+extern void __MusIntSetVolumeAndPan(channel_t*,
+                                    int);  // __MusIntSetVolumeAndPan
+extern u32 _mus_cpu_last;  // _mus_cpu_last  (SUPPORT_PROFILER timing)
+extern u32 _mus_cpu_worst;
 // __MusIntMain: per-frame sequence-player handler. SUPPORT_PROFILER is on (the
-// osGetCount bracket + g_mus_cpu_last/worst); g_mus_frame_counter++ and the
+// osGetCount bracket + _mus_cpu_last/worst); g_mus_frame_counter++ and the
 // inline channel-stop (Fstop is cross-TU in player_commands.c, so it cannot be
 // GCC-inlined) are MG64 customizations.
-ALMicroTime mus_player_frame_handler(void* node) {
+ALMicroTime __MusIntMain(void* node) {
   int x;
   channel_t* cp;
   u32 start = osGetCount();
@@ -699,18 +695,18 @@ ALMicroTime mus_player_frame_handler(void* node) {
   for (x = -MAX_SONGS, cp = mus_channels; x < max_channels - MAX_SONGS;
        x++, cp++) {
     if (cp->pdata == NULL || (cp->channel_flag & CHFLAG_PAUSE)) continue;
-    if (cp->pending) func_8009B060(cp, x);
+    if (cp->pending) __MusIntFlushPending(cp, x);
     cp->channel_frame += cp->channel_tempo;
     if (cp->length != 0x7fff) {
       while ((s32)(cp->note_end_frame - cp->channel_frame) < 0 &&
              cp->pdata != NULL)
-        func_8009AB18(cp, x);
+        __MusIntGetNewNote(cp, x);
       if (!cp->pdata) continue;
     }
     if (cp->pvolume && (s32)(cp->volume_frame - cp->channel_frame) < 0)
-      func_8009B754(cp);
+      __MusIntProcessContinuousVolume(cp);
     if (cp->ppitchbend && (s32)(cp->pitchbend_frame - cp->channel_frame) < 0)
-      func_8009B818(cp);
+      __MusIntProcessContinuousPitchBend(cp);
     if (cp->stopping != -1) {
       cp->stopping--;
       if (cp->stopping == -1) {
@@ -729,29 +725,29 @@ ALMicroTime mus_player_frame_handler(void* node) {
     }
     if (cp->playing) {
       float total;
-      if (cp->env_phase) func_8009B3D0(cp);
+      if (cp->env_phase) __MusIntProcessEnvelope(cp);
       if (cp->sweep_speed && (s32)(cp->sweep_frame - cp->channel_frame) < 0)
-        func_8009B5E0(cp);
+        __MusIntProcessSweep(cp);
       total = cp->freqoffset;
-      if (cp->vib_speed) total += func_8009B6F0(cp);
-      if (cp->wobble_on_speed) total += func_8009B698(cp);
+      if (cp->vib_speed) total += __MusIntProcessVibrato(cp);
+      if (cp->wobble_on_speed) total += __MusIntProcessWobble(cp);
       if (!cp->pending) {
-        func_8009B254(cp, x, total);
-        mus_set_volume_and_pan(cp, x);
+        __MusIntSetPitch(cp, x, total);
+        __MusIntSetVolumeAndPan(cp, x);
       }
     }
     cp->count = (cp->channel_frame - cp->note_start_frame) >> 8;
   }
 
-  g_mus_cpu_last = osGetCount() - start;
-  if (g_mus_cpu_last > g_mus_cpu_worst) g_mus_cpu_worst = g_mus_cpu_last;
+  _mus_cpu_last = osGetCount() - start;
+  if (_mus_cpu_last > _mus_cpu_worst) _mus_cpu_worst = _mus_cpu_last;
   return (mus_next_frame_time);
 }
 
 // __MusIntGetNewNote: advance past commands (jumptable dispatch), then fetch
 // the next note + length + velocity, set up the wave/drum sample, envelope and
 // reverb.
-void func_8009AB18(channel_t* cp, int x) {
+void __MusIntGetNewNote(channel_t* cp, int x) {
   unsigned char* ptr;
   unsigned char command;
 
@@ -899,7 +895,7 @@ void func_8009AB18(channel_t* cp, int x) {
 }
 
 // __MusIntFlushPending
-void func_8009B060(channel_t* cp, int x) {
+void __MusIntFlushPending(channel_t* cp, int x) {
   if (cp->playing) alSynStopVoice(&__libmus_alglobals.drvr, mus_voices + x);
   cp->playing = 1;
   /* start sample */
@@ -912,7 +908,7 @@ void func_8009B0DC(int mode) { g_mus_pan_enabled = (mode == 1); }
 
 // __MusIntSetVolumeAndPan (MG64 pan-enable mod: pan defaults to centre 0x40,
 // the real pan is computed only when g_mus_pan_enabled is set)
-void mus_set_volume_and_pan(channel_t* cp, int x) {
+void __MusIntSetVolumeAndPan(channel_t* cp, int x) {
   u32 volume;
 
   /* process volume */
@@ -945,7 +941,7 @@ void mus_set_volume_and_pan(channel_t* cp, int x) {
 
 // __MusIntSetPitch: compute the channel frequency (portamento + pitchbend +
 // 2^(semitones/12)) and push it to the synth voice.
-void func_8009B254(channel_t* cp, int x, float offset) {
+void __MusIntSetPitch(channel_t* cp, int x, float offset) {
   float frequency, temp;
 
   /* base frequency */
@@ -985,7 +981,7 @@ void func_8009B254(channel_t* cp, int x, float offset) {
 }
 
 // __MusIntInitEnvelope
-void func_8009B360(channel_t* cp) {
+void __MusIntInitEnvelope(channel_t* cp) {
   if (cp->length != 0x7fff) {
     if (cp->cutoff != 0) /* release time is from start of note */
       cp->release_frame = cp->note_start_frame + (cp->cutoff << 8);
@@ -1008,7 +1004,7 @@ void func_8009B360(channel_t* cp) {
 // __MusIntProcessEnvelope (MG64 restores the upstream-removed 99.01.29
 // env_count guard; uses an early-return rather than wrapping the switch in an
 // if-block)
-void func_8009B3D0(channel_t* cp) {
+void __MusIntProcessEnvelope(channel_t* cp) {
   int env_phase_count;
 
   if (((long)(cp->release_frame - cp->channel_frame)) < 0 &&
@@ -1075,14 +1071,14 @@ void func_8009B3D0(channel_t* cp) {
 }
 
 // __MusIntInitSweep
-void func_8009B5C4(channel_t* cp) {
+void __MusIntInitSweep(channel_t* cp) {
   cp->sweep_frame = cp->note_start_frame;
   cp->sweep_timer = 0;
   cp->sweep_dir = cp->pan & 0x40;
 }
 
 // __MusIntProcessSweep
-void func_8009B5E0(channel_t* cp) {
+void __MusIntProcessSweep(channel_t* cp) {
   unsigned long calc;
 
   do {
@@ -1111,7 +1107,7 @@ void func_8009B5E0(channel_t* cp) {
 }
 
 // __MusIntProcessWobble
-float func_8009B698(channel_t* cp) {
+float __MusIntProcessWobble(channel_t* cp) {
   cp->wobble_count--;
   if (!cp->wobble_count) {
     if (cp->wobble_current == 0) {
@@ -1126,7 +1122,7 @@ float func_8009B698(channel_t* cp) {
 }
 
 // __MusIntProcessVibrato
-float func_8009B6F0(channel_t* cp) {
+float __MusIntProcessVibrato(channel_t* cp) {
   int temp;
   float temp1;
 
@@ -1141,7 +1137,7 @@ float func_8009B6F0(channel_t* cp) {
 }
 
 // __MusIntProcessContinuousVolume
-void func_8009B754(channel_t* cp) {
+void __MusIntProcessContinuousVolume(channel_t* cp) {
   unsigned char work_vol;
 
   do {
@@ -1169,7 +1165,7 @@ void func_8009B754(channel_t* cp) {
 }
 
 // __MusIntProcessContinuousPitchBend
-void func_8009B818(channel_t* cp) {
+void __MusIntProcessContinuousPitchBend(channel_t* cp) {
   unsigned char work_pb;
 
   do {
@@ -1199,7 +1195,7 @@ void func_8009B818(channel_t* cp) {
 }
 
 // __MusIntPowerOf2: 2^x via a 6-term polynomial (x>0) or its reciprocal (x<0).
-float func_8009B92C(float x) {
+float __MusIntPowerOf2(float x) {
   float x2;
 
   if (x == 0) return 1;
@@ -1222,7 +1218,7 @@ float func_8009B92C(float x) {
 }
 
 // __MusIntRemapPtrBank: convert pointer-bank file offsets to RAM pointers.
-void mus_remap_ptr_bank(char* pptr, char* wptr) {
+void __MusIntRemapPtrBank(char* pptr, char* wptr) {
   int i;
   ptr_bank_t* ptrfile_addr;
   unsigned char *chardetune, charwork;
@@ -1281,7 +1277,7 @@ void mus_remap_ptr_bank(char* pptr, char* wptr) {
 
 // __MusIntRandom. Banked now that player_commands.c is a separate TU: the rand
 // command handlers call it cross-TU (jal), so GCC -O3 keeps it out-of-line.
-int func_8009BC58(int range) {
+int __MusIntRandom(int range) {
   unsigned int seed_shifted;
   unsigned int seed_masked;
   int x;
@@ -1300,7 +1296,7 @@ int func_8009BC58(int range) {
 }
 
 // __MusIntInitialiseChannel
-void init_struct_defaults(channel_t* cp) {
+void __MusIntInitialiseChannel(channel_t* cp) {
   unsigned char old_playing, *work_ptr;
   int i;
 
@@ -1356,7 +1352,7 @@ void init_struct_defaults(channel_t* cp) {
 }
 
 // __MusIntFindChannel
-int mus_alloc_channel(song_t* addr, int song_chan) {
+int __MusIntFindChannel(song_t* addr, int song_chan) {
   channel_t* cp;
   int i, current, current_channel;
 
@@ -1397,7 +1393,7 @@ int mus_alloc_channel(song_t* addr, int song_chan) {
 }
 
 // __MusIntRemapPtrs
-void func_8009BFF0(void* addr, void* offset, int count) {
+void __MusIntRemapPtrs(void* addr, void* offset, int count) {
   unsigned long *dest, add;
   int i;
 
@@ -1408,8 +1404,9 @@ void func_8009BFF0(void* addr, void* offset, int count) {
 }
 
 // __MusIntStartEffect
-unsigned long func_8009C028(channel_t* cp, fx_header_t* header, int number,
-                            int volume, int pan, int priority) {
+unsigned long __MusIntStartEffect(channel_t* cp, fx_header_t* header,
+                                  int number, int volume, int pan,
+                                  int priority) {
   __MusIntInitialiseChannel(cp);
 
   cp->fx_number = number;
@@ -1428,12 +1425,12 @@ unsigned long func_8009C028(channel_t* cp, fx_header_t* header, int number,
   return (cp->handle);
 }
 
-// __MusIntFindChannelAndStart. Banked: its caller mus_cmd_start_fx is now in
+// __MusIntFindChannelAndStart. Banked: its caller Fstartfx is now in
 // the separate player_commands.c TU (cross-TU jal), so GCC -O3 keeps this
 // out-of-line. The ROM inlines __MusIntStartEffect at both sites (manual inline
 // reproduced).
-musHandle allocate_object_slot(fx_header_t* header, int number, int volume,
-                               int pan, int priority) {
+musHandle __MusIntFindChannelAndStart(fx_header_t* header, int number,
+                                      int volume, int pan, int priority) {
   int i, current_priority;
   channel_t *cp, *current_cp;
 
@@ -1474,7 +1471,7 @@ musHandle allocate_object_slot(fx_header_t* header, int number, int volume,
 }
 
 // __MusIntStartSong
-musHandle mus_start_song(void* addr) {
+musHandle __MusIntStartSong(void* addr) {
   song_t* song_addr;
   int i, channels;
   channel_t* cp;
@@ -1525,8 +1522,8 @@ musHandle mus_start_song(void* addr) {
 }
 
 // __MusIntHandleSetFlag
-void mus_handle_set_flag(unsigned long handle, unsigned long clear,
-                         unsigned long set) {
+void __MusIntHandleSetFlag(unsigned long handle, unsigned long clear,
+                           unsigned long set) {
   int i;
   channel_t* cp;
 

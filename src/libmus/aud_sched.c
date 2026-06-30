@@ -34,7 +34,7 @@ typedef struct {
   OSMesg task_messages[QUEUE_SIZE];
 } ossched_workspace_t;
 
-extern OSSched* g_mus_sched_ptr;
+extern OSSched* audio_sched;
 extern ossched_workspace_t* sched_mem;
 
 // Built-in scheduler implementation, installed unless a game overrides it.
@@ -44,7 +44,7 @@ musSched* __libmus_current_sched = &default_sched;
 
 /* Scheduler binding: remember the host game's OS scheduler so install() can
  * register against it. */
-void __MusIntSchedInit(void* sched) { g_mus_sched_ptr = (OSSched*)sched; }
+void __MusIntSchedInit(void* sched) { audio_sched = (OSSched*)sched; }
 
 /*
  * Install handler: allocate the client workspace, create the retrace and
@@ -57,7 +57,7 @@ static void __OsSchedInstall(void) {
                     QUEUE_SIZE);
   osCreateMesgQueue(&sched_mem->task_queue, &sched_mem->task_messages[0],
                     QUEUE_SIZE);
-  osScAddClient(g_mus_sched_ptr, &sched_mem->client, &sched_mem->frame_queue);
+  osScAddClient(audio_sched, &sched_mem->client, &sched_mem->frame_queue);
 }
 
 /*
@@ -115,6 +115,6 @@ static void __OsSchedDoTask(musTask* task) {
   t.list.t.yield_data_size = 0;
 
   // Hand the job to the scheduler and wait for it to finish.
-  osSendMesg(osScGetCmdQ(g_mus_sched_ptr), (OSMesg)&t, OS_MESG_BLOCK);
+  osSendMesg(osScGetCmdQ(audio_sched), (OSMesg)&t, OS_MESG_BLOCK);
   osRecvMesg(&sched_mem->task_queue, NULL, OS_MESG_BLOCK);
 }

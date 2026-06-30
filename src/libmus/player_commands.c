@@ -3,7 +3,7 @@
 // (cross-TU jal) under the game -O3, matching the ROM.
 #include "player_priv.h"
 
-unsigned char* mus_cmd_stop(channel_t* cp, unsigned char* ptr) {
+unsigned char* Fstop(channel_t* cp, unsigned char* ptr) {
   cp->pvolume = NULL;
   cp->ppitchbend = NULL;
   cp->song_addr = NULL;
@@ -13,7 +13,7 @@ unsigned char* mus_cmd_stop(channel_t* cp, unsigned char* ptr) {
   return (NULL);
 }
 
-unsigned char* mus_cmd_wave(channel_t* cp, unsigned char* ptr) {
+unsigned char* Fwave(channel_t* cp, unsigned char* ptr) {
   unsigned short wave;
 
   wave = *ptr++;
@@ -26,18 +26,18 @@ unsigned char* mus_cmd_wave(channel_t* cp, unsigned char* ptr) {
   return (ptr);
 }
 
-unsigned char* mus_cmd_port_on(channel_t* cp, unsigned char* ptr) {
+unsigned char* Fport(channel_t* cp, unsigned char* ptr) {
   cp->port = *ptr++;
   if (cp->port) cp->port_base = cp->base_note;
   return (ptr);
 }
 
-unsigned char* mus_cmd_port_off(channel_t* cp, unsigned char* ptr) {
+unsigned char* Fportoff(channel_t* cp, unsigned char* ptr) {
   cp->port = 0;
   return (ptr);
 }
 
-unsigned char* mus_cmd_default_adsr(channel_t* cp, unsigned char* ptr) {
+unsigned char* Fdefa(channel_t* cp, unsigned char* ptr) {
   unsigned char value;
 
   // get envelope speed...
@@ -102,7 +102,7 @@ unsigned char* mus_cmd_default_adsr(channel_t* cp, unsigned char* ptr) {
   return (ptr);
 }
 
-unsigned char* mus_cmd_tempo(channel_t* cp, unsigned char* ptr) {
+unsigned char* Ftempo(channel_t* cp, unsigned char* ptr) {
   // tempo   = bpm
   // fps     = mus_vsyncs_per_second
   // 120 bpm = 96 fps
@@ -127,13 +127,13 @@ unsigned char* mus_cmd_tempo(channel_t* cp, unsigned char* ptr) {
   return (ptr);
 }
 
-unsigned char* mus_cmd_endit(channel_t* cp, unsigned char* ptr) {
+unsigned char* Fendit(channel_t* cp, unsigned char* ptr) {
   cp->endit = *ptr++;
   cp->cutoff = 0;
   return (ptr);
 }
 
-unsigned char* mus_cmd_cutoff(channel_t* cp, unsigned char* ptr) {
+unsigned char* Fcutoff(channel_t* cp, unsigned char* ptr) {
   short tmp;
 
   tmp = (*ptr++) << 8;
@@ -144,7 +144,7 @@ unsigned char* mus_cmd_cutoff(channel_t* cp, unsigned char* ptr) {
   return (ptr);
 }
 
-unsigned char* mus_cmd_vibrato_up(channel_t* cp, unsigned char* ptr) {
+unsigned char* Fvibup(channel_t* cp, unsigned char* ptr) {
   cp->vib_delay = *ptr++;
   cp->vib_speed = *ptr++;
   cp->vib_amount = ((float)*ptr++) / 50.0;
@@ -152,7 +152,7 @@ unsigned char* mus_cmd_vibrato_up(channel_t* cp, unsigned char* ptr) {
   return (ptr);
 }
 
-unsigned char* mus_cmd_vibrato_down(channel_t* cp, unsigned char* ptr) {
+unsigned char* Fvibdown(channel_t* cp, unsigned char* ptr) {
   cp->vib_delay = *ptr++;
   cp->vib_speed = *ptr++;
   cp->vib_amount = (-((float)*ptr++)) / 50.0;
@@ -160,13 +160,13 @@ unsigned char* mus_cmd_vibrato_down(channel_t* cp, unsigned char* ptr) {
   return (ptr);
 }
 
-unsigned char* mus_cmd_vibrato_off(channel_t* cp, unsigned char* ptr) {
+unsigned char* Fviboff(channel_t* cp, unsigned char* ptr) {
   cp->vib_speed = 0;
   cp->vibrato = 0;
   return (ptr);
 }
 
-unsigned char* mus_cmd_length(channel_t* cp, unsigned char* ptr) {
+unsigned char* Flength(channel_t* cp, unsigned char* ptr) {
   int length;
 
   length = *ptr++;
@@ -179,22 +179,22 @@ unsigned char* mus_cmd_length(channel_t* cp, unsigned char* ptr) {
   return (ptr);
 }
 
-unsigned char* mus_cmd_ignore(channel_t* cp, unsigned char* ptr) {
+unsigned char* Fignore(channel_t* cp, unsigned char* ptr) {
   cp->ignore = 1;
   return (ptr);
 }
 
-unsigned char* mus_cmd_transpose(channel_t* cp, unsigned char* ptr) {
+unsigned char* Ftrans(channel_t* cp, unsigned char* ptr) {
   cp->transpose = *ptr++;
   return (ptr);
 }
 
-unsigned char* mus_cmd_ignore_transpose(channel_t* cp, unsigned char* ptr) {
+unsigned char* Fignore_trans(channel_t* cp, unsigned char* ptr) {
   cp->ignore_transpose = 1;
   return (ptr);
 }
 
-unsigned char* mus_cmd_distort(channel_t* cp, unsigned char* ptr) {
+unsigned char* Fdistort(channel_t* cp, unsigned char* ptr) {
   int c;
   float f;
 
@@ -208,27 +208,27 @@ unsigned char* mus_cmd_distort(channel_t* cp, unsigned char* ptr) {
   return (ptr);
 }
 
-unsigned char* mus_cmd_env_off(channel_t* cp, unsigned char* ptr) {
+unsigned char* Fenvoff(channel_t* cp, unsigned char* ptr) {
   cp->env_trigger_off = 1;
   return (ptr);
 }
 
-unsigned char* mus_cmd_env_on(channel_t* cp, unsigned char* ptr) {
+unsigned char* Fenvon(channel_t* cp, unsigned char* ptr) {
   cp->env_trigger_off = 0;
   return (ptr);
 }
 
-unsigned char* mus_cmd_trigger_off(channel_t* cp, unsigned char* ptr) {
+unsigned char* Ftroff(channel_t* cp, unsigned char* ptr) {
   cp->trigger_off = 1;
   return (ptr);
 }
 
-unsigned char* mus_cmd_trigger_on(channel_t* cp, unsigned char* ptr) {
+unsigned char* Ftron(channel_t* cp, unsigned char* ptr) {
   cp->trigger_off = 0;
   return (ptr);
 }
 
-unsigned char* mus_cmd_for(channel_t* cp, unsigned char* ptr) {
+unsigned char* Ffor(channel_t* cp, unsigned char* ptr) {
   int index;
 
   index = cp->for_stack_count;
@@ -244,7 +244,7 @@ unsigned char* mus_cmd_for(channel_t* cp, unsigned char* ptr) {
   return (ptr);
 }
 
-unsigned char* mus_cmd_next(channel_t* cp, unsigned char* ptr) {
+unsigned char* Fnext(channel_t* cp, unsigned char* ptr) {
   int index;
 
   index = cp->for_stack_count - 1;
@@ -269,44 +269,42 @@ unsigned char* mus_cmd_next(channel_t* cp, unsigned char* ptr) {
   return (ptr);
 }
 
-unsigned char* mus_cmd_wobble(channel_t* cp, unsigned char* ptr) {
+unsigned char* Fwobble(channel_t* cp, unsigned char* ptr) {
   cp->wobble_amount = *ptr++;
   cp->wobble_on_speed = *ptr++;
   cp->wobble_off_speed = *ptr++;
   return (ptr);
 }
 
-unsigned char* mus_cmd_wobble_off(channel_t* cp, unsigned char* ptr) {
+unsigned char* Fwobbleoff(channel_t* cp, unsigned char* ptr) {
   cp->wobble_on_speed = 0;
   return (ptr);
 }
 
-unsigned char* mus_cmd_velocity_on(channel_t* cp, unsigned char* ptr) {
+unsigned char* Fvelon(channel_t* cp, unsigned char* ptr) {
   cp->velocity_on = 1;
   return (ptr);
 }
 
-unsigned char* mus_cmd_velocity_off(channel_t* cp, unsigned char* ptr) {
+unsigned char* Fveloff(channel_t* cp, unsigned char* ptr) {
   cp->velocity_on = 0;
   return (ptr);
 }
 
-unsigned char* mus_cmd_velocity(channel_t* cp, unsigned char* ptr) {
+unsigned char* Fvelocity(channel_t* cp, unsigned char* ptr) {
   cp->default_velocity = *ptr++;
   cp->velocity_on = 0;
   return (ptr);
 }
 
-unsigned char* mus_cmd_pan(channel_t* cp, unsigned char* ptr) {
+unsigned char* Fpan(channel_t* cp, unsigned char* ptr) {
   cp->pan = (*ptr++) / 2;
   return (ptr);
 }
 
-unsigned char* mus_cmd_stereo(channel_t* cp, unsigned char* ptr) {
-  return (ptr + 2);
-}
+unsigned char* Fstereo(channel_t* cp, unsigned char* ptr) { return (ptr + 2); }
 
-unsigned char* mus_cmd_drums_on(channel_t* cp, unsigned char* ptr) {
+unsigned char* Fdrums(channel_t* cp, unsigned char* ptr) {
   int index;
 
   index = *ptr++;
@@ -319,12 +317,12 @@ unsigned char* mus_cmd_drums_on(channel_t* cp, unsigned char* ptr) {
   return (ptr);
 }
 
-unsigned char* mus_cmd_drums_off(channel_t* cp, unsigned char* ptr) {
+unsigned char* Fdrumsoff(channel_t* cp, unsigned char* ptr) {
   cp->pdrums = NULL;
   return (ptr);
 }
 
-unsigned char* mus_cmd_print(channel_t* cp, unsigned char* ptr) {
+unsigned char* Fprint(channel_t* cp, unsigned char* ptr) {
 #ifdef _AUDIODEBUG
   osSyncPrintf("PLAYER_COMMANDS.C: Fprint() -  %d (channel frame=%d)\n", *ptr++,
                cp->channel_frame);
@@ -335,7 +333,7 @@ unsigned char* mus_cmd_print(channel_t* cp, unsigned char* ptr) {
 #endif
 }
 
-unsigned char* mus_cmd_goto(channel_t* cp, unsigned char* ptr) {
+unsigned char* Fgoto(channel_t* cp, unsigned char* ptr) {
   int off, off1;
 
   /* 2 bytes for song offset */
@@ -359,38 +357,38 @@ unsigned char* mus_cmd_goto(channel_t* cp, unsigned char* ptr) {
   return (cp->pbase + off1);
 }
 
-unsigned char* mus_cmd_reverb(channel_t* cp, unsigned char* ptr) {
+unsigned char* Freverb(channel_t* cp, unsigned char* ptr) {
   cp->reverb = *ptr++;
   return (ptr);
 }
 
-unsigned char* mus_cmd_rand_note(channel_t* cp, unsigned char* ptr) {
+unsigned char* FrandNote(channel_t* cp, unsigned char* ptr) {
   // rand_amount,rand_base  -- 20,-3 would give -3 to 16 as the value
   cp->transpose = __MusIntRandom(*ptr++);
   cp->transpose += *ptr++;
   return (ptr);
 }
 
-unsigned char* mus_cmd_rand_volume(channel_t* cp, unsigned char* ptr) {
+unsigned char* FrandVolume(channel_t* cp, unsigned char* ptr) {
   // rand_amount,base
   cp->volume = __MusIntRandom(*ptr++);
   cp->volume += *ptr++;
   return (ptr);
 }
 
-unsigned char* mus_cmd_rand_pan(channel_t* cp, unsigned char* ptr) {
+unsigned char* FrandPan(channel_t* cp, unsigned char* ptr) {
   // rand_amount,base
   cp->pan = __MusIntRandom(*ptr++);
   cp->pan += *ptr++;
   return (ptr);
 }
 
-unsigned char* mus_cmd_volume(channel_t* cp, unsigned char* ptr) {
+unsigned char* Fvolume(channel_t* cp, unsigned char* ptr) {
   cp->volume = *ptr++;
   return (ptr);
 }
 
-unsigned char* mus_cmd_start_fx(channel_t* cp, unsigned char* ptr) {
+unsigned char* Fstartfx(channel_t* cp, unsigned char* ptr) {
   int i, number;
   channel_t* sp;
   unsigned long new_handle;
@@ -417,18 +415,18 @@ unsigned char* mus_cmd_start_fx(channel_t* cp, unsigned char* ptr) {
   return (ptr);
 }
 
-unsigned char* mus_cmd_bend_range(channel_t* cp, unsigned char* ptr) {
+unsigned char* Fbendrange(channel_t* cp, unsigned char* ptr) {
   cp->bendrange = (float)(*ptr++) * (1.0 / 64.0);
   cp->pitchbend_precalc = cp->pitchbend * cp->bendrange;
   return (ptr);
 }
 
-unsigned char* mus_cmd_sweep(channel_t* cp, unsigned char* ptr) {
+unsigned char* Fsweep(channel_t* cp, unsigned char* ptr) {
   cp->sweep_speed = *ptr++;
   return (ptr);
 }
 
-unsigned char* mus_cmd_change_fx(channel_t* cp, unsigned char* ptr) {
+unsigned char* Fchangefx(channel_t* cp, unsigned char* ptr) {
   int fxtype;
 
   fxtype = *ptr++;
@@ -441,7 +439,7 @@ unsigned char* mus_cmd_change_fx(channel_t* cp, unsigned char* ptr) {
   return (ptr);
 }
 
-unsigned char* mus_cmd_marker(channel_t* cp, unsigned char* ptr) {
+unsigned char* Fmarker(channel_t* cp, unsigned char* ptr) {
   int rest;
   int number;
 
@@ -461,7 +459,7 @@ unsigned char* mus_cmd_marker(channel_t* cp, unsigned char* ptr) {
   return (ptr);
 }
 
-unsigned char* mus_cmd_length0(channel_t* cp, unsigned char* ptr) {
+unsigned char* Flength0(channel_t* cp, unsigned char* ptr) {
   cp->fixed_length = 0;
   return (ptr);
 }
