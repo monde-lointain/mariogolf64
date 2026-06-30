@@ -23,8 +23,8 @@ glabel _start
     /* 101C 80025C1C 2129FFF8 */  addi       $t1, $t1, -0x8 /* handwritten instruction */
     /* 1020 80025C20 1520FFFB */  bnez       $t1, .L80025C10
     /* 1024 80025C24 00000000 */   nop
-    /* 1028 80025C28 3C0A800A */  lui        $t2, %hi(main)
-    /* 102C 80025C2C 254A94B0 */  addiu      $t2, $t2, %lo(main)
+    /* 1028 80025C28 3C0A800A */  lui        $t2, %hi(nuBoot)
+    /* 102C 80025C2C 254A94B0 */  addiu      $t2, $t2, %lo(nuBoot)
     /* 1030 80025C30 3C1D8011 */  lui        $sp, %hi(nuContNum)
     /* 1034 80025C34 01400008 */  jr         $t2
     /* 1038 80025C38 27BDC2D0 */   addiu     $sp, $sp, %lo(nuContNum)
