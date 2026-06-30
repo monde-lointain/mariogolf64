@@ -25,6 +25,15 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 149 — src/libnusys/nuboot.c COMPLETE (game-embedded nusys boot: nuBoot + idle) — 2026-06-30
+- Increment: 1 file banked (`src/libnusys/nuboot.c`) / **2 functions matched** (`nuBoot` cart entry + `idle` boot thread — the game's copy of nusys `nuboot.c`). md5-candidate **207→208**; matched +2; asm subsegs 85→**84** (`[0x748B0]` retired).
+- Quality: 0/0/0/0 (stuck-far/permuter/carried/re-opened).
+- Seed: committed 13pt; banked 13pt; regime classical. v2: seed 13; realized 13; residual 0 (+1 novel bank-gotcha = the -O0 profile pin, but the seed is already at the 13 Fibonacci ceiling; NOT a verbatim first-try, so no −1; the seed over-prices a 320B/2-fn pack — the pts-recalibration follow-up, a seed issue not a residual one).
+- What helped: the **NuBoot reference** (the PO-flagged nusys-2.07 `nuboot.c`) made the byte-match a transcription; the **profile-probe** flag-pin (assemble-target + KMC-compile-candidate normalized `objdump -dr` diff) decisively isolated the -O0 root cause in seconds (idle byte-exact at -O0, 53 instrs); **verifying against the ultralib pin** (the PO directive) exposed the `os_host.h` macro inversion as the real cause behind the `osInitialize`/`__osInitialize_common` confusion (a header bug, not a ghidra mislabel).
+- Friction: the asm-first seed's first build SHA-MISSED with no obvious cause — a **profile** (opt-level) mismatch masquerading as a C-logic miss; the fp-kept + no-CSE + arg-spill codegen tell is what unlocked it. The profile-probe normalizer's first cut compared only reloc lines (POSIX awk has no `\s`), reading as false 0-diffs — a one-round detour now baked into the tool.
+- Applied: 5 of 5: #1 `docs/hazards.md#-o0-bootsdk-glue-file-profile` + the per-file -O0 mk override pattern (+ CLAUDE.md path-convention exception + index row); #2 `tools/profile_probe.py` (+ `#profile-probe` hazard); #3 CLAUDE.md carve-to-libnusys path convention (`pick_target` auto-routing of the `idle=nuboot` tell is a tracked follow-up); #4 `docs/hazards.md#overlapping-symbols--allow_duplicated` (+ index row + the sync-managed-name caveat); #5 `docs/hazards.md#vendored-header-inversion` + `tools/audit_libultra_headers.py` (+ CLAUDE.md libultra-pin pointer + the `rcp.h VI_CTRL_PIXEL_ADV_MASK` fix it found).
+- Carry-over: none.
+
 ## Sprint 148 — func_ovl10_801F4A40.c COMPLETE (the FIRST classical game-code bank; Epic 1 → Epic 2) — 2026-06-30
 - Increment: 1 file banked (`src/overlay_10/func_ovl10_801F4A40.c`) / **2 functions matched** (`func_ovl10_801F4A40` flag-gated sound/setup + `func_ovl10_801F4AD8` `*p=*p` accessor). md5-candidate **206→207**; remaining 1523→**1521** asm fns / 78→**77** rows; asm subsegs 86→85.
 - Quality: 0/0/0/0 (stuck-far/permuter/carried/re-opened). Banked atomically, first build, 0 iteration.

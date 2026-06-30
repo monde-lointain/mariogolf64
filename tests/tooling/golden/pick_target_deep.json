@@ -1,32 +1,6 @@
 [
   {
     "band": "-",
-    "func": "func_ovl10_801F4A40",
-    "hazards": "pack:2fn[func_ovl10_801F4A40=?,func_ovl10_801F4AD8=?],one-tu",
-    "kind": "asm-flip",
-    "nfns": 2,
-    "pts": 13,
-    "rom": "0x1508E0",
-    "score": -176,
-    "size": 176,
-    "upstream": "none",
-    "vram": "0x801F4A40"
-  },
-  {
-    "band": "-",
-    "func": "main",
-    "hazards": "single-file-pack:2fn[main=?,idle=nuboot],one-tu",
-    "kind": "asm-flip",
-    "nfns": 2,
-    "pts": 13,
-    "rom": "0x748B0",
-    "score": -320,
-    "size": 320,
-    "upstream": "none",
-    "vram": "0x800994B0"
-  },
-  {
-    "band": "-",
     "func": "func_80029250",
     "hazards": "pack:2fn[func_80029250=?,func_800292FC=?],one-tu,caller-evict:func_80029250@src/libnusys/nugfxinit.c",
     "kind": "asm-flip",
@@ -284,19 +258,6 @@
     "size": 3616,
     "upstream": "none",
     "vram": "0x800521C0"
-  },
-  {
-    "band": "-",
-    "func": "play_sound_effect",
-    "hazards": "pack:26fn[play_sound_effect=?,func_80050DA0=?,update_object_group_by_id=?,func_80050FC0=?,set_field_0x9E_for_object_group_if_type_matches=?,update_indexed_slot_at_0xCB_atomic=?,func_800510EC=?,func_80051100=?,func_80051164=?,func_800511D8=?,func_80051210=?,update_indexed_slot_at_0x60_atomic=?,bgm_tick=?,func_80051A08=?,bgm_request_stop=?,func_80051A88=?,func_80051AE4=?,func_80051B40=?,func_80051B9C=?,func_80051BFC=?,play_bgm_by_id=?,func_80051D8C=?,alSynNew=synthesizer,alSynDelete=syndelete,__freeParam=synthesizer,_freePVoice=synthesizer],c-combined:2file[syndelete|synthesizer]",
-    "kind": "asm-flip",
-    "nfns": 26,
-    "pts": 13,
-    "rom": "0x2BFF0",
-    "score": -4768,
-    "size": 4768,
-    "upstream": "none",
-    "vram": "0x80050BF0"
   },
   {
     "band": "-",
@@ -860,7 +821,7 @@
   {
     "band": "-",
     "func": "func_8008D100",
-    "hazards": "pack:26fn[func_8008D100=?,func_8008D1DC=?,func_8008D3F4=?,func_8008DDDC=?,func_8008E164=?,per_hole_skybox_palette_load=?,func_8008E82C=?,update_sky_panel_verts=?,func_8008FF14=?,emit_sky_bg_panel_dl=?,emit_sky_panorama_strips_dl=?,func_8009226C=?,func_80092324=?,func_8009232C=?,func_80092E10=?,func_80092F18=?,func_800934CC=?,func_8009351C=?,func_800939E8=?,func_80094228=?,func_800947A8=?,func_80095150=?,func_8009548C=?,func_800957F0=?,func_800958D8=?,func_800959F8=?],caller-evict:func_8008D1DC@src/libnusys/nusched.c;func_80092324@src/libnusys/nusched.c",
+    "hazards": "pack:26fn[func_8008D100=?,func_8008D1DC=?,func_8008D3F4=?,func_8008DDDC=?,func_8008E164=?,per_hole_skybox_palette_load=?,func_8008E82C=?,update_sky_panel_verts=?,func_8008FF14=?,emit_sky_bg_panel_dl=?,emit_sky_panorama_strips_dl=?,func_8009226C=?,func_80092324=?,func_8009232C=?,func_80092E10=?,func_80092F18=?,func_800934CC=?,func_8009351C=?,func_800939E8=?,func_80094228=?,func_800947A8=?,func_80095150=?,func_8009548C=?,func_800957F0=?,func_800958D8=?,func_800959F8=?],caller-evict:func_8008D1DC@src/libnusys/nusched.c;func_8009226C@src/overlay_10/func_ovl10_801F4A40.c;func_80092324@src/libnusys/nusched.c",
     "kind": "asm-flip",
     "nfns": 26,
     "pts": 13,
@@ -990,7 +951,7 @@
   {
     "band": "-",
     "func": "func_80071370",
-    "hazards": "pack:39fn[func_80071370=?,func_800715A0=?,func_80071608=?,func_800718C4=?,func_800718F4=?,func_80071924=?,func_80071954=?,func_800719A0=?,func_80071B34=?,func_80071C74=?,func_80071C9C=?,func_80071CE4=?,func_80072A08=?,func_800734F0=?,func_800738BC=?,func_8007399C=?,func_80073BF0=?,func_80073C14=?,func_80073F24=?,func_80074230=?,func_80074500=?,func_800747B0=?,func_80074840=?,func_800748D0=?,func_80074960=?,func_80074968=?,func_80074CA8=?,func_80074D0C=?,func_80074E5C=?,func_80074EFC=?,func_80075010=?,func_8007512C=?,func_8007515C=?,func_800754BC=?,func_8007580C=?,func_80075E48=?,func_800760CC=?,func_80076138=?,func_8007624C=?],maybe-upstream:libnusys:nuaustlsndplayerdataset,nuaustlseqplayerdataset,nuaustlptrbankset",
+    "hazards": "pack:39fn[func_80071370=?,func_800715A0=?,func_80071608=?,func_800718C4=?,func_800718F4=?,func_80071924=?,func_80071954=?,func_800719A0=?,func_80071B34=?,func_80071C74=?,func_80071C9C=?,func_80071CE4=?,func_80072A08=?,func_800734F0=?,func_800738BC=?,func_8007399C=?,func_80073BF0=?,func_80073C14=?,func_80073F24=?,func_80074230=?,func_80074500=?,func_800747B0=?,func_80074840=?,func_800748D0=?,func_80074960=?,func_80074968=?,func_80074CA8=?,func_80074D0C=?,func_80074E5C=?,func_80074EFC=?,func_80075010=?,func_8007512C=?,func_8007515C=?,func_800754BC=?,func_8007580C=?,func_80075E48=?,func_800760CC=?,func_80076138=?,func_8007624C=?],caller-evict:func_800719A0@src/overlay_10/func_ovl10_801F4A40.c,maybe-upstream:libnusys:nuaustlsndplayerdataset,nuaustlseqplayerdataset,nuaustlptrbankset",
     "kind": "asm-flip",
     "nfns": 39,
     "pts": 13,

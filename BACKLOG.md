@@ -24,6 +24,29 @@ runs seed-only). v2 classical realized tier scored at review (since S11). Seed a
 (MCP-independent; see the Seed fast-path in `CLAUDE.md`). Path convention `overlay_<N>/<stem>` or
 `main/<stem>`, default -O2 game profile (no mk edit). Note: `pick_target.py`'s size-pts over-prices
 tiny none-upstream packs (S148 priced a 176B trivial pack at 13) — a calibration follow-up (below).
+**Path-convention exception (S149):** nusys/SDK-template main-segment code (the `idle=nuboot` coddog
+tell) is carved to its LIBRARY tree (`libnusys/<file>`), not `main/<stem>` — yaml path-qualifier only,
+placement unchanged (see `CLAUDE.md` path convention). A per-FILE -O0 override is the one mk edit a
+boot/SDK-glue TU may need.
+
+**S149 BANKED — `src/libnusys/nuboot.c` (the game-embedded nusys boot: `nuBoot` + `idle`).** The 2-fn
+`[0x748B0]` main-segment pack is the game's nusys `nuboot.c` (cart entry + idle thread). Asm-first
+seed built first-try but the full-make SHA-MISSED: **root cause was the PROFILE, not the C** — the boot
+file shipped at **-O0** (fp kept, no CSE, unused-arg spill), fixed with a file-specific -O0 mk override
+(`mk/libnusys.mk`). Then 4 PO-directed refinements, all ROM byte-exact: CARVED `main/main` ->
+`libnusys/nuboot` (nuboot is libnusys); RENAMED to official nusys names (`nuBoot`/`IdleThread`/
+`MainThread`/`IdleStack`/`nuIdleFunc`, with splat `allow_duplicated:True` for the 2nd nusys instance);
+nusys DEFINES + the stock `IdleStack + NU_IDLE_STACK_SIZE/8` stack calc; `osInitialize()` not
+`__osInitialize_common()` — which exposed MG64's `os_host.h` macro shipped BACKWARDS vs ultralib (fixed
+header + reverted `initialize.c` to VERSION_J). Closed with a macro-audit of all 91 libultra headers
+vs the pin (`tools/audit_libultra_headers.py`): one more latent/unused bug found + fixed
+(`rcp.h VI_CTRL_PIXEL_ADV_MASK 0x01000->0x0F000`). md5-candidate **207→208**; matched +2; asm subsegs
+85→**84**. Quality 0/0/0/0; seed 13 / realized 13 / residual 0; regime classical. Retro applied **5 of
+5** (new hazards `#-o0-bootsdk-glue-file-profile`, `#profile-probe`, `#overlapping-symbols--allow_duplicated`,
+`#vendored-header-inversion`; new tools `profile_probe.py` + `audit_libultra_headers.py`; CLAUDE.md
+carve-to-libnusys convention). **Cross-repo follow-up:** `nuBoot`/`IdleThread`/`MainThread`/`nuIdleFunc`
+-> `sync_decomp_names.py --import-from-decomp`. **Tracked tooling follow-up:** teach `pick_target.py`
+to auto-route the `idle=nuboot`/nusys-template tell to the `libnusys/` path. No carry-overs.
 
 **S148 BANKED — `overlay_10/func_ovl10_801F4A40.c` (the FIRST classical game-code bank).** The 2-fn
 overlay_10 .text pack (`func_ovl10_801F4A40` flag-gated sound/setup + `func_ovl10_801F4AD8` `*p=*p`

@@ -2897,3 +2897,104 @@ rather than computed once) is **`volatile`** in the original.
   (S126 `nugfxtaskmgr.c`). To find the grower fast, **map-diff the per-object section sizes**:
   `diff <(grep '\.text.*0x' base.map) <(grep '\.text.*0x' edits.map)` after a clean build of each — the
   one object whose `.text`/`.rodata` size changed is the volatile-sensitive consumer.
+
+---
+
+## -O0 boot/SDK-glue file profile (a per-file opt-level exception)
+
+**Rule:** a few game/SDK-glue TUs shipped compiled at **-O0**, not the -O2 game profile (nor the -O3
+lib profile) the rest of the segment uses. The nusys boot file (`src/libnusys/nuboot.c` = `nuBoot` +
+`idle`, the cart entry) is the known case (S149). -O0 codegen is unmistakable and is the TELL:
+
+- the **frame pointer is kept** (`addu $fp, $sp, $zero`; objdump `move s8,sp`, and the epilogue
+  `addu $sp, $fp, $zero` / `move sp,s8`) — -O1+ omits it here;
+- address loads are **recomputed inline**, NOT CSE'd into a saved register across calls;
+- an **unused parameter is spilled** to its stack home (`sw $a0, 0xNN($fp)`);
+- delay slots are still filled — so it is -O0 *with* `-fdelayed-branch` (the KMC default), not raw -O0.
+
+**Trigger / symptom:** a clean-looking asm-first seed (the C logic is right) builds but the full-make
+ROM SHA-1 MISSES, and an isolated disasm of the built `.o` shows the codegen tells above while the
+target shows fp + recompute + arg-spill. This is an **opt-level mismatch, NOT a C-logic bug** — do not
+iterate the C or reach for the permuter. Pin the level with the profile-probe
+(`#profile-probe`); at -O0 the body matches
+(only same-TU section-relative reloc reps may differ, e.g. `.text+0x6c` vs the `idle` symbol, which
+link identically).
+
+**Procedure:** add a **file-specific** mk override (a file target is more specific than the tree
+pattern, so it wins): `$(BUILD_DIR)/$(SRC_DIR)/<tree>/<file>.o: C_PROFILE_CFLAGS := $(subst
+-O2,-O0,$(CFLAGS))`, placed in the tree's `mk/<lib>.mk` (or a new fragment `include`d after
+`mk/src.mk`). NEVER a `<tree>/%.o` pattern — the sibling TUs in the same tree stay -O2/-O3. S149
+`nuboot.o` overrode to -O0 in `mk/libnusys.mk`, beating the `libnusys/%.o` -O2 pattern; `idle` was
+byte-exact at -O0 (53 instrs).
+
+---
+
+## profile-probe (pinning the flags of a SHA-missing build)
+
+**Use:** when a built `.o` SHA-misses and you suspect the COMPILE FLAGS (opt level, `-g`,
+`-fdelayed-branch`, frame pointer), not the C. `tools/profile_probe.py --seg <seg> --func <fn>`
+assembles the target subseg `.s` into a relocatable object and KMC-compiles the candidate
+`src/<seg>.c` at each of a set of flag combos, then diffs the normalized `objdump -dr` (instruction
+stream + reloc-symbol lines) per function — pinning the matching flags in seconds, no full make.
+
+**Gotchas baked into the tool (the S149 grind):** assemble the target with **modern GAS**
+(`mips-linux-gnu-as -I include`), NOT `cpp -P | as` (cpp silently empties `.text` and the pipe
+"succeeds") and NOT KMC `as` (rejects `.set gp=64`); the candidate uses the KMC `gcc -S` + KMC `as`
+pipeline (`mk/src.mk`). Both objdumped with `mips-linux-gnu-objdump`, so the unresolved relocs (zeroed
+fields) compare directly. Normalizer note: POSIX awk has no `\s` — use `[[:space:]]` (the `\s` bug made
+the first S149 comparison match only reloc lines and read as false 0-diffs). Pairs with
+`#-o0-bootsdk-glue-file-profile`.
+
+---
+
+## overlapping symbols — allow_duplicated (two instances share one official static name)
+
+**Rule:** splat dedups `symbol_addrs.txt` by symbol NAME: two entries with the SAME name at DIFFERENT
+vrams error `Duplicate symbol detected` (splat `util/symbols.py`, the `seen_symbols` map) UNLESS BOTH
+entries set `allow_duplicated:True`. This bites when one official name legitimately recurs across two
+instances — MG64's two nusys instances (the mapped libnusys + the game-embedded nuboot, S149) each
+have their own `IdleThread` / `MainThread` / `IdleStack` / `nuIdleFunc` / `idle` (file-statics in stock
+nuboot, file-local per TU, but the curated NAME is shared).
+
+**Procedure:** when naming an instance's symbol with an official name the second instance also uses,
+append `allow_duplicated:True` to the `symbol_addrs.txt` entry. It is harmless when no duplicate yet
+exists (splat only checks when a dup is present), and BOTH entries need it, so set it pre-emptively on
+the first instance to prepare for the second. S149 added `IdleThread`/`MainThread`/`IdleStack`/
+`nuIdleFunc` with `allow_duplicated:True`.
+
+**CAVEAT — sync-managed names can't take the flag by hand.** `idle`/`mainproc` live in
+`ghidra_symbols.txt` (sync-owned, never hand-edited), which carries no `allow_duplicated`. A future
+second-instance `idle` cannot coexist via a hand-edit; it needs the sync tool to emit the flag, or a
+`symbol_addrs` `rom:`-qualifier override path (cf. `#wrong-ghidra-name-override`).
+Distinct from `#static-name-collision`
+(same name, same TU, no global emitted, no action); here the names ARE placed globals at distinct vrams.
+
+---
+
+## vendored-header inversion (a curated libultra header diverges from the ultralib pin)
+
+**Rule:** a vendored libultra header can ship a macro that is WRONG vs the upstream pin — not merely
+reformatted but functionally INVERTED. S149 `include/libultra/PR/os_host.h` had
+`#define __osInitialize_common() osInitialize()`, the inverse of upstream's
+`#define osInitialize() __osInitialize_common()`. The real VERSION_J symbol is `__osInitialize_common`
+(Ghidra correct) and `osInitialize()` is the public macro OVER it; the inverted macro forced a
+work-around (`#undef __osInitialize_common` + a non-upstream `INITIALIZE_FUNC __osInitialize_common` in
+`src/libultra/os/initialize.c`) that silently deviated from the pin.
+
+**Tell:** a public-API rename "resists" — you want to call the SDK public name (`osInitialize()`) but
+the symbol is the `__*` internal, and `#wrong-ghidra-name-override`
+does NOT fire (the name is C-DEFINED, not a bare ghidra label, AND the header macro is reversed).
+Before assuming a ghidra mislabel, **DIFF THE VENDORED HEADER against `~/development/repos/ultralib`**
+(the pin) — the header itself may be inverted. Fix the header to the upstream direction (trim to MG64's
+only config, e.g. the `_FINALROM` branch) and revert the work-around to upstream; the ROM stays
+byte-exact (the symbol name is unchanged).
+
+**Audit (S149, `tools/audit_libultra_headers.py`):** a macro-RHS diff of all 91
+`include/libultra/**/*.h` vs the pin found only two real issues — this `os_host.h` inversion and
+`rcp.h` `VI_CTRL_PIXEL_ADV_MASK` (`0x01000`, should be `0x0F000` for the [15:12] field; UNUSED in-tree,
+latent). Everything else was version-conditional branches MG64 matches (`EPI_SYNC`/`SELECT_BANK`
+`>= VERSION_J`), value-equal cosmetics (`OS_STATE_*` `1` vs `(1<<0)`, `OS_MESG_TYPE_*` whitespace),
+masked-vs-unmasked VI macros (identical for the fixed VI timings), or the moot `assert` `#EX` (asserts
+compiled out — 0 `__assert` calls in `sched.o`). **Audit the macro RHS, ignore `#if BUILD_VERSION`
+branches** (the tool can't evaluate them — they false-positive; hand-check each against the
+`>= VERSION_J` branch).

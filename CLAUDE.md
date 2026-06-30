@@ -87,7 +87,10 @@ Ghidra MCP is used inline at seed time. For each target function:
      the C mirror and the hand-asm `intrinsic-likely:<tu>.s` asm-mirror
      (`docs/hazards.md#asm-mirror-vendoring`): the project mirrors ultralib's `gcc.mk` profile
      (`LIBULTRA_CFLAGS` for C, `LIBULTRA_ASFLAGS` for vendored asm TUs, both in `mk/libultra.mk`).
-     libkmc is `~/development/repos/libkmc`; libnusys is the n64sdkmod nusys tree.
+     libkmc is `~/development/repos/libkmc`; libnusys is the n64sdkmod nusys tree. The vendored
+     `include/libultra/**` headers can DIVERGE from this pin (an inverted/wrong-value macro):
+     `tools/audit_libultra_headers.py` macro-diffs them vs ultralib (see
+     `docs/hazards.md#vendored-header-inversion`).
 
 3. **Classical branch** (no upstream, or a hazard routes here): seed, iterate, spot-check, finalize.
    - **Seed** `nonmatchings/<func>/base.c`: fetch the Ghidra decompile via MCP, then
@@ -358,6 +361,21 @@ below).
   new `src/overlay_<N>/` tree builds with zero mk edits. Overlay vram is reused across overlays
   (>=0x801F4A30 is ambiguous; see the Ghidra-map memory), so seed overlay fns by ROM offset / the
   splat `.s`, not MCP-by-vram.
+  - **EXCEPTION — nusys/SDK-template main-segment code goes to its library tree, not `main/` (S149).**
+    A main-segment subseg that is actually a game-embedded copy of an SDK file (the `idle=nuboot`
+    coddog tell on `nuboot.c`; a `nuSc*`/`nu*` template) is pathed under its library tree,
+    `libnusys/<file>` (not `main/<stem>`), so it sits with the rest of that library. The placement is
+    unchanged by this: libnusys subsegs already interleave the main segment by path qualifier, so the
+    carve is a yaml path-qualifier edit ONLY (`[0x.., c, main/<stem>]` -> `[0x.., c, libnusys/<file>]`),
+    the `.text` stays at its vram. (`pick_target.py` could route the `idle=nuboot`/nusys-template tell
+    to the library path — a tracked follow-up; for now the gate applies this by reading the coddog
+    tag.) S149 carved `main/main` -> `libnusys/nuboot`.
+  - **A per-FILE -O0 override is the one mk edit a game/SDK-glue tree may need (S149).** Most game/
+    overlay code is -O2 (above), but a boot/SDK-glue TU can be -O0 (the codegen tell: fp kept, no CSE,
+    unused-arg spill; see `docs/hazards.md#-o0-bootsdk-glue-file-profile`). Add a FILE-specific
+    override (`$(BUILD_DIR)/$(SRC_DIR)/<tree>/<file>.o: C_PROFILE_CFLAGS := $(subst -O2,-O0,$(CFLAGS))`),
+    never a `<tree>/%.o` pattern (the siblings stay -O2). S149 `libnusys/nuboot.o` overrode to -O0 in
+    `mk/libnusys.mk`, beating that fragment's `libnusys/%.o` -O2 pattern.
 - **`hasm` subsegments stay raw asm forever** (entry stub, `__muldi3` libkmc math module, RSP
   microcode entries). The execution loop refuses these. The project sets `hasm_in_src_path: True`, so
   a `hasm` `.s` lives under `src/<dir>/<stem>.s` (each `hasm` yaml line carries a `<dir>/<stem>` name
@@ -478,9 +496,13 @@ When `pick_target.py` flags a hazard (or a match shows its symptom), read the ma
 | `coddog-structural:<file>@<pct>` | #coddog-cross-ref |
 | `coddog-partial:<m>of<n>fn` | #coddog-cross-ref |
 | `static-name-collision:<name>@<addr>` | #static-name-collision |
+| official static name shared across two instances / splat `Duplicate symbol detected` | #overlapping-symbols--allow_duplicated |
 | SUPPORT_NAUDIO libmus mirror `alInit`→dead `n_al*` / bundled-synth `fncount-mismatch` | #libmus-bundled-n_audio-duplicate |
 | `game-region-mirror:0x<vram>` | #game-region-mirror-o2-profile |
 | `game-embedded:0x<vram>` | #game-region-mirror-o2-profile |
+| clean asm-first seed, full-make SHA-miss, build .o shows fp-kept + no-CSE + arg-spill | #-o0-bootsdk-glue-file-profile |
+| build SHA-miss, suspect compile FLAGS (opt/-g/-fdelayed-branch) not the C | #profile-probe |
+| public-API rename "resists" (`__*` symbol), vendored header macro may be inverted vs ultralib | #vendored-header-inversion |
 | libultra leaf, bare std header | #per-library-standard-c-header-isolation |
 | match locks ~0.9 on a lib target | #compile-profiles-libkmc--o-libultra--o3 |
 | compiler rodata wrong offset / `rodata-literal:<addr>` | #rodata-sibling-yaml-pattern |

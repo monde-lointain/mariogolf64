@@ -298,10 +298,12 @@ def test_pick_target_coddog_json_golden(golden_dir, regen, monkeypatch):
     byte-pinned. Drive pick_target with a COMMITTED synthetic map (golden/coddog_map_fixture.tsv,
     a stable overlay non-audio subject + a stable overlay audio subject) and snapshot, so the coddog
     detail strings are a stable contract. BOTH subjects are OVERLAY funcs (non-audio
-    func_ovl6_8024D800, audio func_ovl10_801F4A40), insulated from the libultra/audio-mirror mining
-    that banks main-segment subjects out from under the test (S131 banked the original func_800A09E0;
-    S132 banked func_800A0730, the prior non-audio subject). This is the gate for Phase-A
-    Hazard.coddog_* methods + the cluster-7 (coddog) extraction."""
+    func_ovl6_8024D800, audio func_ovl9_801F4A40). NOTE: overlays are NO LONGER insulated — Epic 2
+    (since S148) banks overlay code, so a subject CAN get banked out from under the test (S131 banked
+    func_800A09E0; S132 func_800A0730; S148 banked func_ovl10_801F4A40, the prior audio subject → S149
+    repointed to func_ovl9_801F4A40). Pick LARGE overlay subjects (deep in the smallest-first queue) to
+    delay recurrence; making this test state-independent is a tracked follow-up. This is the gate for
+    Phase-A Hazard.coddog_* methods + the cluster-7 (coddog) extraction."""
     fixture = golden_dir / "coddog_map_fixture.tsv"
     monkeypatch.setenv("CODDOG_MAP", str(fixture))
     proc = run_tool("pick_target", "--json", "-n", "200")
@@ -312,7 +314,7 @@ def test_pick_target_coddog_json_golden(golden_dir, regen, monkeypatch):
     assert "coddog-mirror:src/io/fake.c@99.99" in by_func["func_ovl6_8024D800"]["hazards"]
     assert (
         "coddog-mirror:src/audio/fake.c@99.99"
-        in by_func["func_ovl10_801F4A40"]["hazards"]
+        in by_func["func_ovl9_801F4A40"]["hazards"]
     )
 
     gpath = golden_dir / "pick_target_coddog.json"
