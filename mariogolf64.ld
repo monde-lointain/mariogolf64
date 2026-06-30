@@ -115,7 +115,7 @@ SECTIONS
         build/asm/68500.o(.text);
         build/asm/70E10.o(.text);
         build/src/main/func_80099490.o(.text);
-        build/asm/748B0.o(.text);
+        build/src/main/main.o(.text);
         build/src/libmus/player.o(.text);
         build/src/libmus/player_commands.o(.text);
         build/asm/78330.o(.text);
@@ -389,7 +389,7 @@ SECTIONS
         build/asm/68500.o(.data);
         build/asm/70E10.o(.data);
         build/src/main/func_80099490.o(.data);
-        build/asm/748B0.o(.data);
+        build/src/main/main.o(.data);
         build/src/libmus/player.o(.data);
         build/src/libmus/player_commands.o(.data);
         build/asm/78330.o(.data);
@@ -678,7 +678,7 @@ SECTIONS
         build/asm/68500.o(.rodata);
         build/asm/70E10.o(.rodata);
         build/src/main/func_80099490.o(.rodata);
-        build/asm/748B0.o(.rodata);
+        build/src/main/main.o(.rodata);
         build/asm/data/main_rodata.rodata.o(.rodata);
         build/asm/data/A5CE0.rodata.o(.rodata);
         build/asm/data/A5D30.rodata.o(.rodata);
@@ -968,7 +968,7 @@ SECTIONS
         build/asm/68500.o(.bss);
         build/asm/70E10.o(.bss);
         build/src/main/func_80099490.o(.bss);
-        build/asm/748B0.o(.bss);
+        build/src/main/main.o(.bss);
         build/src/libmus/player.o(.bss);
         build/src/libmus/player_commands.o(.bss);
         build/asm/78330.o(.bss);
