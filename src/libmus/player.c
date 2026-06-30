@@ -44,6 +44,10 @@ extern musHandle allocate_object_slot(fx_header_t*, int, int, int,
 extern int func_8009D8A8(s32);                 // ChangeCustomEffect
 extern musBool g_mus_fx_enabled;               // mus_songfxchange_flag
 extern void func_8009BFF0(void*, void*, int);  // __MusIntRemapPtrs
+extern N_ALVoice* g_mus_voice_array;           // mus_voices
+float func_8009B92C(float);  // __MusIntPowerOf2 (defined below)
+#define mus_voices g_mus_voice_array
+#define __MusIntPowerOf2 func_8009B92C
 #define __MusIntRandom func_8009BC58
 #define __MusIntFindChannelAndStart allocate_object_slot
 #define ChangeCustomEffect func_8009D8A8
@@ -147,7 +151,46 @@ INCLUDE_ASM("asm/nonmatchings/libmus/player", func_8009B0DC);
 
 INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_set_volume_and_pan);
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player", func_8009B254);
+// __MusIntSetPitch: compute the channel frequency (portamento + pitchbend +
+// 2^(semitones/12)) and push it to the synth voice.
+void func_8009B254(channel_t* cp, int x, float offset) {
+  float frequency, temp;
+
+  /* base frequency */
+  frequency = cp->base_note;
+
+  /* incorporate portamento */
+  if (cp->port != 0) {
+    if (cp->count <= cp->port) {
+      temp = (frequency - cp->last_note) / (float)(cp->port);
+      temp *= (float)cp->count;
+      frequency = cp->last_note + temp;
+    }
+    cp->port_base = frequency;
+  }
+
+  /* incorporate offsets */
+  frequency += offset + cp->pitchbend_precalc;
+
+  /* only output it if it's changed! */
+  if (frequency == cp->old_frequency) return;
+  cp->old_frequency = frequency;
+  frequency = __MusIntPowerOf2(frequency * (1.0 / 12.0));
+#ifdef _AUDIODEBUG
+  if (frequency <= 0) {
+    osSyncPrintf("PLAYER.C: frequency underflow.\n");
+    frequency = 1.0;
+  }
+#endif
+  if (frequency > 2.0) {
+#ifdef _AUDIODEBUG
+    osSyncPrintf("PLAYER.C: frequency overflow (note silenced).\n");
+#endif
+    frequency = 2.0;
+    cp->velocity = 0;
+  }
+  alSynSetPitch(&__libmus_alglobals.drvr, mus_voices + x, frequency);
+}
 
 INCLUDE_ASM("asm/nonmatchings/libmus/player", func_8009B360);
 
