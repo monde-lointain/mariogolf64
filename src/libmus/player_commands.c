@@ -48,7 +48,9 @@ unsigned char* Fwave(channel_t* cp, unsigned char* ptr) {
  * setting anchors the glide origin at the current base note. */
 unsigned char* Fport(channel_t* cp, unsigned char* ptr) {
   cp->port = *ptr++;
-  if (cp->port) cp->port_base = cp->base_note;
+  if (cp->port) {
+    cp->port_base = cp->base_note;
+  }
   return (ptr);
 }
 
@@ -66,7 +68,9 @@ unsigned char* Fportoff(channel_t* cp, unsigned char* ptr) {
 unsigned char* Fdefa(channel_t* cp, unsigned char* ptr) {
   unsigned char value;
   value = *ptr++;
-  if (value == 0) value = 1; /* overall pace; also guards 1024/value below */
+  if (value == 0) {
+    value = 1; /* overall pace; also guards 1024/value below */
+  }
   cp->env_speed = value;
   cp->env_speed_calc = 1024 / value;
   cp->env_init_vol = *ptr++;
@@ -122,7 +126,8 @@ unsigned char* Fdefa(channel_t* cp, unsigned char* ptr) {
 unsigned char* Ftempo(channel_t* cp, unsigned char* ptr) {
   channel_t* sp;
   int i;
-  int temp, temp2;
+  int temp;
+  int temp2;
   temp = (*ptr++) * 256 * 96 / 120 / mus_vsyncs_per_second;
   temp2 =
       (temp * cp->temscale) >> 7; /* apply channel tempo scale (>>7 == /128) */
@@ -227,7 +232,9 @@ unsigned char* Fdistort(channel_t* cp, unsigned char* ptr) {
   int c;
   float f;
   c = (int)(*ptr++);
-  if (c & 0x80) c |= 0xffffff00; /* sign-extend the 8-bit operand */
+  if (c & 0x80) {
+    c |= 0xffffff00; /* sign-extend the 8-bit operand */
+  }
   f = (float)(c) / 100.0;
   cp->freqoffset -= cp->distort;
   cp->freqoffset += f;
@@ -387,7 +394,8 @@ unsigned char* Fprint(channel_t* cp, unsigned char* ptr) {
  * pitch-bend envelope streams relative to their bases. Resets the
  * continuous-envelope repeat counters and returns the new code pointer. */
 unsigned char* Fgoto(channel_t* cp, unsigned char* ptr) {
-  int off, off1;
+  int off;
+  int off1;
 
   /* Branch target into the channel's code stream. */
   off1 = *ptr++ << 8;
@@ -447,11 +455,14 @@ unsigned char* Fvolume(channel_t* cp, unsigned char* ptr) {
  * its handle and sample bank to this channel's, so the effect plays under the
  * song's identity. */
 unsigned char* Fstartfx(channel_t* cp, unsigned char* ptr) {
-  int i, number;
+  int i;
+  int number;
   channel_t* sp;
   unsigned long new_handle;
   number = *ptr++;
-  if (number >= 0x80) number = ((number & 0x7f) << 8) + *ptr++;
+  if (number >= 0x80) {
+    number = ((number & 0x7f) << 8) + *ptr++;
+  }
   cp->priority++; /* spawn one priority above the song channel */
   new_handle = __MusIntFindChannelAndStart(cp->fx_addr, number, cp->volscale,
                                            cp->panscale, cp->priority);
@@ -510,7 +521,9 @@ unsigned char* Fmarker(channel_t* cp, unsigned char* ptr) {
   }
   if ((cp->channel_flag & CHFLAG_MASTERTRACK) &&
       !(cp->channel_flag & CHFLAG_PAUSE)) {
-    if (marker_callback) marker_callback(cp->handle, number);
+    if (marker_callback) {
+      marker_callback(cp->handle, number);
+    }
   }
   return (ptr);
 }

@@ -46,7 +46,9 @@ static void env_set_adsr(channel_t* cp, unsigned char* ptr) {
   unsigned char value;
 
   value = *ptr++;
-  if (value == 0) value = 1; /* never divide by zero below */
+  if (value == 0) {
+    value = 1; /* never divide by zero below */
+  }
   cp->env_speed = value;
   cp->env_speed_calc = 1024 / value;
   cp->env_init_vol = *ptr++;
@@ -87,15 +89,11 @@ unsigned char* Fenvelope(channel_t* cp, unsigned char* ptr) {
   return (ptr);
 }
 
-/* Globals seeded at startup, and the routines MusInitialize wires together. */
+/* Globals seeded at startup, plus the frame handler MusInitialize installs. */
 extern OSPiHandle* diskrom_handle;
 extern unsigned long __muscontrol_flag;
 extern ALPlayer plr_player;
-extern void __MusIntFifoOpen(int);
-extern void MusPtrBankInitialize(void*, void*);
-extern void MusFxBankInitialize(void*);
-extern void MusSetMasterVolume(unsigned long, int);
-extern ALMicroTime __MusIntMain(void*);
+extern ALMicroTime __MusIntMain(void* node);
 
 /*
  * Bring the whole music driver up from a caller-supplied configuration. Records
@@ -116,10 +114,11 @@ int MusInitialize(musConfig* config) {
   /* The first MAX_SONGS channels are reserved for song master (timing) tracks;
    * the audio frame rate follows the TV standard. */
   max_channels = config->channels + MAX_SONGS;
-  if (osTvType == 0)
+  if (osTvType == 0) {
     mus_vsyncs_per_second = 50;
-  else
+  } else {
     mus_vsyncs_per_second = 60;
+  }
   mus_next_frame_time = 1000000 / mus_vsyncs_per_second;
 
   __MusIntMemInit(config->heap, config->heap_length);
@@ -133,10 +132,13 @@ int MusInitialize(musConfig* config) {
   __MusIntFifoOpen(config->fifo_length);
 
   mus_default_bank = mus_init_bank = NULL;
-  if (config->ptr && config->wbk)
+  if (config->ptr && config->wbk) {
     MusPtrBankInitialize(config->ptr, config->wbk);
+  }
   libmus_fxheader_current = libmus_fxheader_single = NULL;
-  if (config->default_fxbank) MusFxBankInitialize(config->default_fxbank);
+  if (config->default_fxbank) {
+    MusFxBankInitialize(config->default_fxbank);
+  }
 
   marker_callback = NULL;
   mus_last_fxtype = AL_FX_BIGROOM;
@@ -158,17 +160,22 @@ int MusInitialize(musConfig* config) {
     vc.unityPitch = 0;
     vc.priority = config->thread_priority;
     vc.fxBus = 0;
-    if (i >= MAX_SONGS)
+    if (i >= MAX_SONGS) {
       alSynAllocVoice(&__libmus_alglobals.drvr, &mus_voices[i - MAX_SONGS],
                       &vc);
+    }
   }
   return (__MusIntMemRemaining());
 }
 
 /* Set the master volume applied to effects and/or songs, selected by flags. */
 void MusSetMasterVolume(unsigned long flags, int volume) {
-  if (flags & MUSFLAG_EFFECTS) mus_master_volume_effects = volume;
-  if (flags & MUSFLAG_SONGS) mus_master_volume_songs = volume;
+  if (flags & MUSFLAG_EFFECTS) {
+    mus_master_volume_effects = volume;
+  }
+  if (flags & MUSFLAG_SONGS) {
+    mus_master_volume_songs = volume;
+  }
 }
 
 /* Start a song from the top and release it from its initial pause so it begins
@@ -190,8 +197,10 @@ musHandle MusStartSong(void* addr) {
  */
 musHandle MusStartSongFromMarker(void* addr, int marker) {
   musHandle handle;
-  unsigned char command, *ptr;
-  int i, note;
+  unsigned char command;
+  unsigned char* ptr;
+  int i;
+  int note;
   channel_t* cp;
 
   handle = __MusIntStartSong(addr);
@@ -201,7 +210,9 @@ musHandle MusStartSongFromMarker(void* addr, int marker) {
       while (cp->pdata) {
         ptr = cp->pdata;
         if (*ptr >= 128) { /* a command byte, not a note */
-          if (*ptr == Cmarker && *(ptr + 1) == marker) break;
+          if (*ptr == Cmarker && *(ptr + 1) == marker) {
+            break;
+          }
           command = *ptr++;
           cp->pdata = (jumptable[command & 0x7f].func)(cp, ptr);
           continue;
@@ -224,10 +235,11 @@ musHandle MusStartSongFromMarker(void* addr, int marker) {
           cp->ignore = 0;
           command = *(cp->pdata++);
           /* note length: one byte, or 15 bits when the high bit is set */
-          if (command < 128)
+          if (command < 128) {
             cp->length = command;
-          else
+          } else {
             cp->length = ((int)(command & 0x7f) << 8) + *(cp->pdata++);
+          }
         }
         cp->channel_frame += cp->length * 256;
       }
@@ -248,8 +260,12 @@ musHandle MusStartSongFromMarker(void* addr, int marker) {
         cp->pdata = ptr;
       }
       cp->note_start_frame = cp->channel_frame;
-      if (cp->pvolume) __MusIntProcessContinuousVolume(cp);
-      if (cp->ppitchbend) __MusIntProcessContinuousPitchBend(cp);
+      if (cp->pvolume) {
+        __MusIntProcessContinuousVolume(cp);
+      }
+      if (cp->ppitchbend) {
+        __MusIntProcessContinuousPitchBend(cp);
+      }
     }
   }
   MusHandleUnPause(handle);
@@ -275,7 +291,9 @@ musHandle try_spawn_global_object(int number) {
       return (0);
     }
   }
-  if (!mus_init_bank) mus_init_bank = header->ptr_addr;
+  if (!mus_init_bank) {
+    mus_init_bank = header->ptr_addr;
+  }
   handle = __MusIntFindChannelAndStart(header, number, 0x80, 0x80, -1);
   mus_init_bank = NULL;
   return (handle);
@@ -304,13 +322,17 @@ musHandle MusStartEffect2(int number, int volume, int pan, int restartflag,
       return (0);
     }
   }
-  if (!mus_init_bank) mus_init_bank = header->ptr_addr;
+  if (!mus_init_bank) {
+    mus_init_bank = header->ptr_addr;
+  }
 
   /* When asked, retrigger an already-playing instance of this effect. */
   if (restartflag) {
     for (i = MAX_SONGS, cp = mus_channels2; i < max_channels; i++, cp++) {
       if (cp->fx_number == number && cp->fx_addr == header) {
-        if (priority == -1) priority = header->effects[number].priority;
+        if (priority == -1) {
+          priority = header->effects[number].priority;
+        }
         handle = __MusIntStartEffect(cp, header, number, volume, pan, priority);
         mus_init_bank = NULL;
         return (handle);
@@ -329,7 +351,8 @@ musHandle MusStartEffect2(int number, int volume, int pan, int restartflag,
  * (stopping != -1) are left alone.
  */
 void MusStop(unsigned long flags, int speed) {
-  int i, speed2;
+  int i;
+  int speed2;
   channel_t* cp;
 
   speed2 = speed ? speed : 1;
@@ -353,14 +376,16 @@ void MusStop(unsigned long flags, int speed) {
 
 /* Count the channels currently sounding in the requested categories. */
 int MusAsk(unsigned long flags) {
-  int i, count;
+  int i;
+  int count;
   channel_t* cp;
 
   for (i = 0, cp = mus_channels, count = 0; i < max_channels; i++, cp++) {
     if (cp->pdata) {
       if ((cp->fx_addr && flags & MUSFLAG_EFFECTS) ||
-          (!cp->fx_addr && flags & MUSFLAG_SONGS))
+          (!cp->fx_addr && flags & MUSFLAG_SONGS)) {
         count++;
+      }
     }
   }
   return (count);
@@ -371,10 +396,14 @@ int MusAsk(unsigned long flags) {
  * paused channel is released at once. Returns how many channels were affected.
  */
 int MusHandleStop(musHandle handle, int speed) {
-  int i, speed2, count;
+  int i;
+  int speed2;
+  int count;
   channel_t* cp;
 
-  if (!handle) return (0);
+  if (!handle) {
+    return (0);
+  }
   speed2 = speed ? speed : 1;
   for (i = 0, cp = mus_channels, count = 0; i < max_channels; i++, cp++) {
     if (cp->handle == handle && cp->stopping == -1) {
@@ -395,20 +424,29 @@ int MusHandleStop(musHandle handle, int speed) {
 /* Count the channels still alive under `handle`. */
 int MusHandleAsk(musHandle handle) {
   channel_t* cp;
-  int i, count;
+  int i;
+  int count;
 
-  if (!handle) return (0);
-  for (i = 0, cp = mus_channels, count = 0; i < max_channels; i++, cp++)
-    if (cp->handle == handle) count++;
+  if (!handle) {
+    return (0);
+  }
+  for (i = 0, cp = mus_channels, count = 0; i < max_channels; i++, cp++) {
+    if (cp->handle == handle) {
+      count++;
+    }
+  }
   return (count);
 }
 
 /* Scale the playback volume of every channel under `handle`. */
 int MusHandleSetVolume(musHandle handle, int volume) {
   channel_t* cp;
-  int i, count;
+  int i;
+  int count;
 
-  if (!handle) return (0);
+  if (!handle) {
+    return (0);
+  }
   for (i = 0, cp = mus_channels, count = 0; i < max_channels; i++, cp++) {
     if (cp->handle == handle) {
       cp->volscale = volume;
@@ -422,9 +460,12 @@ int MusHandleSetVolume(musHandle handle, int volume) {
  * value out on the next update. */
 int MusHandleSetPan(musHandle handle, int pan) {
   channel_t* cp;
-  int i, count;
+  int i;
+  int count;
 
-  if (!handle) return (0);
+  if (!handle) {
+    return (0);
+  }
   for (i = 0, cp = mus_channels, count = 0; i < max_channels; i++, cp++) {
     if (cp->handle == handle) {
       cp->panscale = pan;
@@ -439,9 +480,12 @@ int MusHandleSetPan(musHandle handle, int pan) {
  * each channel's own distort amount. */
 int MusHandleSetFreqOffset(musHandle handle, float offset) {
   channel_t* cp;
-  int i, count;
+  int i;
+  int count;
 
-  if (!handle) return (0);
+  if (!handle) {
+    return (0);
+  }
   for (i = 0, cp = mus_channels, count = 0; i < max_channels; i++, cp++) {
     if (cp->handle == handle) {
       cp->freqoffset = offset + cp->distort;
@@ -455,13 +499,17 @@ int MusHandleSetFreqOffset(musHandle handle, float offset) {
  * channel under `handle`. */
 int MusHandleSetTempo(musHandle handle, int tempo) {
   channel_t* cp;
-  int i, count;
+  int i;
+  int count;
 
-  if (!handle) return (0);
-  if (tempo < 1)
+  if (!handle) {
+    return (0);
+  }
+  if (tempo < 1) {
     tempo = 1;
-  else if (tempo > 256)
+  } else if (tempo > 256) {
     tempo = 256;
+  }
   for (i = 0, cp = mus_channels, count = 0; i < max_channels; i++, cp++) {
     if (cp->handle == handle) {
       cp->temscale = tempo;
@@ -476,13 +524,17 @@ int MusHandleSetTempo(musHandle handle, int tempo) {
  * `handle`; old_reverb is invalidated to force a resend on the next note. */
 int MusHandleSetReverb(musHandle handle, int reverb) {
   channel_t* cp;
-  int i, count;
+  int i;
+  int count;
 
-  if (!handle) return (0);
-  if (reverb < 0)
+  if (!handle) {
+    return (0);
+  }
+  if (reverb < 0) {
     reverb = 0;
-  else if (reverb > 127)
+  } else if (reverb > 127) {
     reverb = 127;
+  }
   for (i = 0, cp = mus_channels, count = 0; i < max_channels; i++, cp++) {
     if (cp->handle == handle) {
       cp->reverb_base = reverb;
@@ -497,7 +549,9 @@ int MusHandleSetReverb(musHandle handle, int reverb) {
  * none has been chosen yet. */
 void MusPtrBankInitialize(void* pbank, void* wbank) {
   __MusIntRemapPtrBank(pbank, wbank);
-  if (!mus_default_bank) mus_default_bank = pbank;
+  if (!mus_default_bank) {
+    mus_default_bank = pbank;
+  }
 }
 
 /* Arm a sample bank for the very next start only (a one-shot override). Banks
@@ -507,7 +561,9 @@ void* MusPtrBankSetSingle(void* ipbank) {
 
   if (ipbank) {
     pptr = (ptr_bank_t*)ipbank;
-    if (pptr->flags & PTRFLAG_REMAPPED) mus_init_bank = pptr;
+    if (pptr->flags & PTRFLAG_REMAPPED) {
+      mus_init_bank = pptr;
+    }
   }
   return (mus_init_bank);
 }
@@ -518,7 +574,9 @@ void MusPtrBankSetCurrent(void* ipbank) {
 
   if (ipbank) {
     pptr = (ptr_bank_t*)ipbank;
-    if (pptr->flags & PTRFLAG_REMAPPED) mus_default_bank = pptr;
+    if (pptr->flags & PTRFLAG_REMAPPED) {
+      mus_default_bank = pptr;
+    }
   }
 }
 
@@ -528,11 +586,17 @@ void* MusPtrBankGetCurrent(void) { return (mus_default_bank); }
 /* Return the sample bank in use by `handle`'s first channel, or NULL. */
 void* MusHandleGetPtrBank(musHandle handle) {
   channel_t* cp;
-  int i, count;
+  int i;
+  int count;
 
-  if (!handle) return (NULL);
-  for (i = 0, cp = mus_channels, count = 0; i < max_channels; i++, cp++)
-    if (cp->handle == handle) return (cp->sample_bank);
+  if (!handle) {
+    return (NULL);
+  }
+  for (i = 0, cp = mus_channels, count = 0; i < max_channels; i++, cp++) {
+    if (cp->handle == handle) {
+      return (cp->sample_bank);
+    }
+  }
   return (NULL);
 }
 
@@ -573,8 +637,12 @@ int MusSetSongFxChange(musBool onoff) {
   int changed;
 
   changed = 1;
-  if (onoff == MUSBOOL_OFF) changed = MusSetFxType(mus_last_fxtype);
-  if (changed) mus_songfxchange_flag = onoff;
+  if (onoff == MUSBOOL_OFF) {
+    changed = MusSetFxType(mus_last_fxtype);
+  }
+  if (changed) {
+    mus_songfxchange_flag = onoff;
+  }
   return (changed);
 }
 
@@ -592,14 +660,17 @@ void MusFxBankInitialize(void* fxbank) {
   if (header->flags & FXFLAG_INITIALISED) {
     return;
   }
-  if (!libmus_fxheader_current) libmus_fxheader_current = header;
+  if (!libmus_fxheader_current) {
+    libmus_fxheader_current = header;
+  }
   header->flags = FXFLAG_INITIALISED;
   header->ptr_addr = NULL;
   header->wave_table =
       (unsigned short*)OFFSETTOPOINTER(fxbank, header->wave_table);
-  for (i = 0; i < header->number_of_components; i++)
+  for (i = 0; i < header->number_of_components; i++) {
     header->effects[i].fxdata =
         (unsigned char*)OFFSETTOPOINTER(fxbank, header->effects[i].fxdata);
+  }
 }
 
 /* Report how many effects a bank defines. */
@@ -640,13 +711,15 @@ int MusHandleWaveCount(musHandle handle) {
   channel_t* cp;
   int i;
 
-  if (!handle) return (0);
+  if (!handle) {
+    return (0);
+  }
   for (i = 0, cp = mus_channels; i < max_channels; i++, cp++) {
     if (cp->handle == handle) {
-      if (cp->song_addr)
+      if (cp->song_addr) {
         return (cp->song_addr->num_waves);
-      else
-        return (cp->fx_addr->num_waves);
+      }
+      return (cp->fx_addr->num_waves);
     }
   }
   return (0);
@@ -658,13 +731,15 @@ unsigned short* MusHandleWaveAddress(musHandle handle) {
   channel_t* cp;
   int i;
 
-  if (!handle) return (NULL);
+  if (!handle) {
+    return (NULL);
+  }
   for (i = 0, cp = mus_channels; i < max_channels; i++, cp++) {
     if (cp->handle == handle) {
-      if (cp->song_addr)
+      if (cp->song_addr) {
         return (cp->song_addr->wave_table);
-      else
-        return (cp->fx_addr->wave_table);
+      }
+      return (cp->fx_addr->wave_table);
     }
   }
   return (NULL);
@@ -693,19 +768,21 @@ void __MusIntFifoOpen(int commands) {
   fifo_start = fifo_current = 0;
 }
 
-void __MusIntFifoProcessCommand(fifo_t* command); /* defined just below */
-
 /*
  * Drain the control FIFO on the audio thread, dispatching every queued command
  * and wrapping the read cursor around the ring. Runs once at the top of each
  * audio frame so game-thread requests take effect in step with playback.
  */
 static void __MusIntFifoProcess(void) {
-  if (fifo_start == fifo_current) return;
+  if (fifo_start == fifo_current) {
+    return;
+  }
   while (fifo_start != fifo_current) {
     __MusIntFifoProcessCommand(&fifo_addr[fifo_start]);
     fifo_start++;
-    if (fifo_start == fifo_limit) fifo_start = 0;
+    if (fifo_start == fifo_limit) {
+      fifo_start = 0;
+    }
   }
 }
 
@@ -749,13 +826,13 @@ int func_8009A7C8(void) { return g_mus_frame_counter; }
 
 /* Per-note processors the frame loop calls into, plus the CPU-time gauges it
  * updates on each pass. */
-extern void __MusIntGetNewNote(channel_t*, int);
-extern void __MusIntSetPitch(channel_t*, int, float);
-extern void __MusIntProcessEnvelope(channel_t*);
-extern void __MusIntProcessSweep(channel_t*);
-extern float __MusIntProcessWobble(channel_t*);
-extern float __MusIntProcessVibrato(channel_t*);
-extern void __MusIntSetVolumeAndPan(channel_t*, int);
+extern void __MusIntGetNewNote(channel_t* cp, int x);
+extern void __MusIntSetPitch(channel_t* cp, int x, float offset);
+extern void __MusIntProcessEnvelope(channel_t* cp);
+extern void __MusIntProcessSweep(channel_t* cp);
+extern float __MusIntProcessWobble(channel_t* cp);
+extern float __MusIntProcessVibrato(channel_t* cp);
+extern void __MusIntSetVolumeAndPan(channel_t* cp, int x);
 extern u32 _mus_cpu_last;
 extern u32 _mus_cpu_worst;
 
@@ -780,23 +857,32 @@ ALMicroTime __MusIntMain(void* node) {
    * indices and never start a voice. */
   for (x = -MAX_SONGS, cp = mus_channels; x < max_channels - MAX_SONGS;
        x++, cp++) {
-    if (cp->pdata == NULL || (cp->channel_flag & CHFLAG_PAUSE)) continue;
-    if (cp->pending) __MusIntFlushPending(cp, x);
+    if (cp->pdata == NULL || (cp->channel_flag & CHFLAG_PAUSE)) {
+      continue;
+    }
+    if (cp->pending) {
+      __MusIntFlushPending(cp, x);
+    }
 
     cp->channel_frame += cp->channel_tempo;
     /* 0x7fff is a held/infinite note that never auto-advances. */
     if (cp->length != 0x7fff) {
       /* Pull notes until the channel clock catches up (wraparound-safe). */
       while ((s32)(cp->note_end_frame - cp->channel_frame) < 0 &&
-             cp->pdata != NULL)
+             cp->pdata != NULL) {
         __MusIntGetNewNote(cp, x);
-      if (!cp->pdata) continue;
+      }
+      if (!cp->pdata) {
+        continue;
+      }
     }
 
-    if (cp->pvolume && (s32)(cp->volume_frame - cp->channel_frame) < 0)
+    if (cp->pvolume && (s32)(cp->volume_frame - cp->channel_frame) < 0) {
       __MusIntProcessContinuousVolume(cp);
-    if (cp->ppitchbend && (s32)(cp->pitchbend_frame - cp->channel_frame) < 0)
+    }
+    if (cp->ppitchbend && (s32)(cp->pitchbend_frame - cp->channel_frame) < 0) {
       __MusIntProcessContinuousPitchBend(cp);
+    }
 
     /* Count down an in-progress stop fade; at -1 the channel is fully torn
      * down and its voice silenced. */
@@ -820,12 +906,19 @@ ALMicroTime __MusIntMain(void* node) {
     /* Update a sounding voice: envelope, modulation, then pitch and level. */
     if (cp->playing) {
       float total;
-      if (cp->env_phase) __MusIntProcessEnvelope(cp);
-      if (cp->sweep_speed && (s32)(cp->sweep_frame - cp->channel_frame) < 0)
+      if (cp->env_phase) {
+        __MusIntProcessEnvelope(cp);
+      }
+      if (cp->sweep_speed && (s32)(cp->sweep_frame - cp->channel_frame) < 0) {
         __MusIntProcessSweep(cp);
+      }
       total = cp->freqoffset;
-      if (cp->vib_speed) total += __MusIntProcessVibrato(cp);
-      if (cp->wobble_on_speed) total += __MusIntProcessWobble(cp);
+      if (cp->vib_speed) {
+        total += __MusIntProcessVibrato(cp);
+      }
+      if (cp->wobble_on_speed) {
+        total += __MusIntProcessWobble(cp);
+      }
       if (!cp->pending) {
         __MusIntSetPitch(cp, x, total);
         __MusIntSetVolumeAndPan(cp, x);
@@ -837,7 +930,9 @@ ALMicroTime __MusIntMain(void* node) {
   }
 
   _mus_cpu_last = osGetCount() - start;
-  if (_mus_cpu_last > _mus_cpu_worst) _mus_cpu_worst = _mus_cpu_last;
+  if (_mus_cpu_last > _mus_cpu_worst) {
+    _mus_cpu_worst = _mus_cpu_last;
+  }
   return (mus_next_frame_time);
 }
 
@@ -884,28 +979,31 @@ void __MusIntGetNewNote(channel_t* cp, int x) {
         cp->velocity_on = 0;
         cp->default_velocity = cp->velocity;
       }
-    } else
+    } else {
       cp->velocity = cp->default_velocity;
+    }
 
     /* Length: a fixed length unless told to read one (one byte, or 15 bits
      * when the high bit is set). */
     if (cp->fixed_length) {
-      if (!cp->ignore)
+      if (!cp->ignore) {
         cp->length = cp->fixed_length;
-      else {
+      } else {
         cp->ignore = 0;
         command = *(cp->pdata++);
-        if (command < 128)
+        if (command < 128) {
           cp->length = command;
-        else
+        } else {
           cp->length = ((int)(command & 0x7f) << 8) + *(cp->pdata++);
+        }
       }
     } else {
       command = *(cp->pdata++);
-      if (command < 128)
+      if (command < 128) {
         cp->length = command;
-      else
+      } else {
         cp->length = ((int)(command & 0x7f) << 8) + *(cp->pdata++);
+      }
     }
 
     /* Schedule the note's frame window and reset its modulation state. */
@@ -917,7 +1015,9 @@ void __MusIntGetNewNote(channel_t* cp, int x) {
 
     /* An empty (0xffff) wave-table slot means "no instrument" -> rest. */
     if (cp->song_addr && !cp->pdrums) {
-      if (cp->song_addr->wave_table[cp->wave] == 0xffff) note = REST;
+      if (cp->song_addr->wave_table[cp->wave] == 0xffff) {
+        note = REST;
+      }
     }
 
     if (note != REST) {
@@ -933,14 +1033,19 @@ void __MusIntGetNewNote(channel_t* cp, int x) {
         env_set_adsr(cp, &cp->song_addr->env_table[cp->pdrums[note].adsr * 7]);
         note = cp->pdrums[note].pitch;
       }
-      if (!cp->env_trigger_off) __MusIntInitEnvelope(cp);
-      if (cp->sweep_speed) __MusIntInitSweep(cp);
+      if (!cp->env_trigger_off) {
+        __MusIntInitEnvelope(cp);
+      }
+      if (cp->sweep_speed) {
+        __MusIntInitSweep(cp);
+      }
 
       wave = cp->wave;
-      if (cp->song_addr)
+      if (cp->song_addr) {
         wave = cp->song_addr->wave_table[wave];
-      else
+      } else {
         wave = cp->fx_addr->wave_table[wave];
+      }
 
       /* Arm the voice with the new wave. If a note is already sounding, fade
        * it out this frame and swap on the next; otherwise start at once. */
@@ -952,8 +1057,9 @@ void __MusIntGetNewNote(channel_t* cp, int x) {
           cp->old_volume = 0;
           alSynSetVol(&__libmus_alglobals.drvr, mus_voices + x, 0,
                       mus_next_frame_time);
-        } else
+        } else {
           __MusIntFlushPending(cp, x);
+        }
       }
 
       /* Base pitch = note + bank detune, plus transpose unless opted out. */
@@ -995,7 +1101,9 @@ void __MusIntGetNewNote(channel_t* cp, int x) {
  * frame loop ramp the previous note down before the swap.
  */
 void __MusIntFlushPending(channel_t* cp, int x) {
-  if (cp->playing) alSynStopVoice(&__libmus_alglobals.drvr, mus_voices + x);
+  if (cp->playing) {
+    alSynStopVoice(&__libmus_alglobals.drvr, mus_voices + x);
+  }
   cp->playing = 1;
   alSynStartVoice(&__libmus_alglobals.drvr, mus_voices + x, cp->pending);
   cp->pending = NULL;
@@ -1018,13 +1126,18 @@ void __MusIntSetVolumeAndPan(channel_t* cp, int x) {
   volume = ((u32)(cp->volume) * (u32)(cp->env_current) * (u32)(cp->velocity) *
             (u32)(cp->volscale)) >>
            13;
-  if (volume > 32767) volume = 32767;
-  if (!cp->fx_addr)
+  if (volume > 32767) {
+    volume = 32767;
+  }
+  if (!cp->fx_addr) {
     volume *= mus_master_volume_songs;
-  else
+  } else {
     volume *= mus_master_volume_effects;
+  }
   volume >>= 15; /* fold the 15-bit master volume back down */
-  if (cp->stopping != -1) volume = (volume * cp->stopping) / cp->stopping_speed;
+  if (cp->stopping != -1) {
+    volume = (volume * cp->stopping) / cp->stopping_speed;
+  }
   if (volume != cp->old_volume) {
     cp->old_volume = volume;
     alSynSetVol(&__libmus_alglobals.drvr, mus_voices + x, volume,
@@ -1032,7 +1145,9 @@ void __MusIntSetVolumeAndPan(channel_t* cp, int x) {
   }
 
   volume = 0x40; /* 0x40 is dead center */
-  if (g_mus_pan_enabled) volume = ((cp->pan * cp->panscale) >> 7) & 0x7f;
+  if (g_mus_pan_enabled) {
+    volume = ((cp->pan * cp->panscale) >> 7) & 0x7f;
+  }
   if (volume != cp->old_pan) {
     cp->old_pan = volume;
     alSynSetPan(&__libmus_alglobals.drvr, mus_voices + x, volume);
@@ -1048,7 +1163,8 @@ void __MusIntSetVolumeAndPan(channel_t* cp, int x) {
  * note.
  */
 void __MusIntSetPitch(channel_t* cp, int x, float offset) {
-  float frequency, temp;
+  float frequency;
+  float temp;
 
   /* Portamento: glide linearly from last_note to the target over `port`
    * frames, then hold. */
@@ -1062,7 +1178,9 @@ void __MusIntSetPitch(channel_t* cp, int x, float offset) {
     cp->port_base = frequency;
   }
   frequency += offset + cp->pitchbend_precalc;
-  if (frequency == cp->old_frequency) return;
+  if (frequency == cp->old_frequency) {
+    return;
+  }
   cp->old_frequency = frequency;
 
   frequency =
@@ -1091,10 +1209,11 @@ void __MusIntSetPitch(channel_t* cp, int x, float offset) {
  */
 void __MusIntInitEnvelope(channel_t* cp) {
   if (cp->length != 0x7fff) {
-    if (cp->cutoff != 0)
+    if (cp->cutoff != 0) {
       cp->release_frame = cp->note_start_frame + (cp->cutoff << 8);
-    else
+    } else {
       cp->release_frame = cp->note_end_frame - (cp->endit << 8);
+    }
 #ifdef _FX_FULL_RELEASE_MODE
     if (cp->fx_addr)
       cp->note_end_frame +=
@@ -1126,7 +1245,9 @@ void __MusIntProcessEnvelope(channel_t* cp) {
     cp->release_start_vol = cp->env_current;
   }
   cp->env_count--;
-  if (cp->env_count) return;
+  if (cp->env_count) {
+    return;
+  }
   cp->env_count = cp->env_speed;
 
   switch (cp->env_phase) {
@@ -1135,30 +1256,28 @@ void __MusIntProcessEnvelope(channel_t* cp) {
                          cp->env_speed_calc) >>
                         10;
       if (env_phase_count < cp->env_attack_speed) {
-        cp->env_current =
-            (int)cp->env_init_vol +
-            (int)((float)(cp->env_attack_calc * (float)env_phase_count));
-        return;
-      } else {
-        cp->env_phase++;
-        cp->env_current = cp->env_max_vol;
+        cp->env_current = (int)cp->env_init_vol +
+                          (int)((cp->env_attack_calc * (float)env_phase_count));
         return;
       }
+      cp->env_phase++;
+      cp->env_current = cp->env_max_vol;
+      return;
+
     case 2: /* decay: fall from the max level toward the sustain level */
       env_phase_count = (((cp->channel_frame - cp->note_start_frame) >> 8) -
                          cp->env_attack_speed) *
                             cp->env_speed_calc >>
                         10;
       if (env_phase_count < cp->env_decay_speed) {
-        cp->env_current =
-            (int)cp->env_max_vol +
-            (int)((float)(cp->env_decay_calc * (float)env_phase_count));
-        return;
-      } else {
-        cp->env_phase++;
-        cp->env_current = cp->env_sustain_vol;
+        cp->env_current = (int)cp->env_max_vol +
+                          (int)((cp->env_decay_calc * (float)env_phase_count));
         return;
       }
+      cp->env_phase++;
+      cp->env_current = cp->env_sustain_vol;
+      return;
+
     case 3: /* sustain: hold the current level */
       return;
     case 4: /* release: fall from the held level to silence */
@@ -1166,16 +1285,14 @@ void __MusIntProcessEnvelope(channel_t* cp) {
                          cp->env_speed_calc) >>
                         10;
       if (env_phase_count < cp->env_release_speed) {
-        cp->env_current =
-            (int)cp->release_start_vol -
-            (int)((float)(cp->env_release_calc * (float)env_phase_count *
-                          (float)cp->release_start_vol));
-        return;
-      } else {
-        cp->env_phase++;
-        cp->env_current = 0;
+        cp->env_current = (int)cp->release_start_vol -
+                          (int)((cp->env_release_calc * (float)env_phase_count *
+                                 (float)cp->release_start_vol));
         return;
       }
+      cp->env_phase++;
+      cp->env_current = 0;
+      return;
   }
 }
 
@@ -1274,8 +1391,9 @@ void __MusIntProcessContinuousVolume(channel_t* cp) {
         if (work_vol > 127) { /* 15-bit repeat count spans two bytes */
           cp->cont_vol_repeat_count = ((int)(work_vol & 0x7f) * 256);
           cp->cont_vol_repeat_count += (int)*(cp->pvolume++) + 2;
-        } else
+        } else {
           cp->cont_vol_repeat_count = (int)work_vol + 2;
+        }
       } else {
         cp->volume = work_vol;
         cp->cont_vol_repeat_count = 1;
@@ -1303,8 +1421,9 @@ void __MusIntProcessContinuousPitchBend(channel_t* cp) {
         if (work_pb > 127) { /* 15-bit repeat count spans two bytes */
           cp->cont_pb_repeat_count = ((int)(work_pb & 0x7f) * 256);
           cp->cont_pb_repeat_count += (int)*(cp->ppitchbend++) + 2;
-        } else
+        } else {
           cp->cont_pb_repeat_count = (int)work_pb + 2;
+        }
       } else {
         cp->pitchbend = ((float)work_pb) - 64.0;
         cp->pitchbend_precalc = cp->pitchbend * cp->bendrange;
@@ -1322,22 +1441,23 @@ void __MusIntProcessContinuousPitchBend(channel_t* cp) {
 float __MusIntPowerOf2(float x) {
   float x2;
 
-  if (x == 0) return 1;
+  if (x == 0) {
+    return 1;
+  }
   if (x > 0) {
     x2 = x * x;
     return (1 + (x * .693147180559945) + (x2 * .240226506959101) +
             (x2 * x * 5.55041086648216E-02) + (x2 * x2 * 9.61812910762848E-03) +
             (x2 * x2 * x * 1.33335581464284E-03) +
             (x2 * x2 * x2 * 1.54035303933816E-04));
-  } else {
-    x = -x;
-    x2 = x * x;
-    return (1 / (1 + (x * .693147180559945) + (x2 * .240226506959101) +
-                 (x2 * x * 5.55041086648216E-02) +
-                 (x2 * x2 * 9.61812910762848E-03) +
-                 (x2 * x2 * x * 1.33335581464284E-03) +
-                 (x2 * x2 * x2 * 1.54035303933816E-04)));
   }
+  x = -x;
+  x2 = x * x;
+  return (1 /
+          (1 + (x * .693147180559945) + (x2 * .240226506959101) +
+           (x2 * x * 5.55041086648216E-02) + (x2 * x2 * 9.61812910762848E-03) +
+           (x2 * x2 * x * 1.33335581464284E-03) +
+           (x2 * x2 * x2 * 1.54035303933816E-04)));
 }
 
 /*
@@ -1348,15 +1468,19 @@ float __MusIntPowerOf2(float x) {
  * each wave's sample, loop and ADPCM-book pointers against the wave-data file.
  * Finishes by writing the dirty cache back so the RSP sees the fixed-up bank.
  */
-void __MusIntRemapPtrBank(char* pptr, char* wptr) {
+void __MusIntRemapPtrBank(char* pptr, const char* wptr) {
   int i;
   ptr_bank_t* ptrfile_addr;
-  unsigned char *chardetune, charwork;
-  float *floatdetune, floatwork;
+  unsigned char* chardetune;
+  unsigned char charwork;
+  float* floatdetune;
+  float floatwork;
   unsigned long base;
 
   ptrfile_addr = (ptr_bank_t*)pptr;
-  if (ptrfile_addr->flags & PTRFLAG_REMAPPED) return; /* relocate once only */
+  if (ptrfile_addr->flags & PTRFLAG_REMAPPED) {
+    return; /* relocate once only */
+  }
   ptrfile_addr->flags |= PTRFLAG_REMAPPED;
   __MusIntRemapPtrs(&ptrfile_addr->basenote, pptr, 3);
   __MusIntRemapPtrs(&ptrfile_addr->wave_list[0], pptr, ptrfile_addr->count);
@@ -1380,16 +1504,18 @@ void __MusIntRemapPtrBank(char* pptr, char* wptr) {
         ptrfile_addr->wave_list[i]->base = (u8*)base;
       }
       ptrfile_addr->wave_list[i]->flags = 1;
-      if (ptrfile_addr->wave_list[i]->waveInfo.adpcmWave.loop)
+      if (ptrfile_addr->wave_list[i]->waveInfo.adpcmWave.loop) {
         ptrfile_addr->wave_list[i]->waveInfo.adpcmWave.loop =
             (ALADPCMloop*)((u32)(ptrfile_addr->wave_list[i]
                                      ->waveInfo.adpcmWave.loop) +
                            (u32)(pptr));
-      if (ptrfile_addr->wave_list[i]->type == AL_ADPCM_WAVE)
+      }
+      if (ptrfile_addr->wave_list[i]->type == AL_ADPCM_WAVE) {
         ptrfile_addr->wave_list[i]->waveInfo.adpcmWave.book =
             (ALADPCMBook*)((u32)(ptrfile_addr->wave_list[i]
                                      ->waveInfo.adpcmWave.book) +
                            (u32)(pptr));
+      }
     }
   }
   osWritebackDCacheAll(); /* flush so the RSP reads the relocated bank */
@@ -1411,8 +1537,9 @@ int __MusIntRandom(int range) {
     seed_shifted = mus_random_seed << 1;
     seed_masked = mus_random_seed & 0x48000000;
     mus_random_seed = seed_shifted;
-    if (seed_masked == 0x48000000 || seed_masked == 0x08000000)
+    if (seed_masked == 0x48000000 || seed_masked == 0x08000000) {
       mus_random_seed = seed_shifted | 1;
+    }
   }
   f = (float)(mus_random_seed) / (1 << 16);
   f /= (1 << 16);
@@ -1427,14 +1554,17 @@ int __MusIntRandom(int range) {
  * the active sample bank. The playing flag is preserved across the wipe.
  */
 void __MusIntInitialiseChannel(channel_t* cp) {
-  unsigned char old_playing, *work_ptr;
+  unsigned char old_playing;
+  unsigned char* work_ptr;
   int i;
 
   /* Wipe every field, then re-establish the defaults below. */
   cp->pdata = NULL;
   old_playing = cp->playing;
   work_ptr = (unsigned char*)cp;
-  for (i = 0; i < sizeof(channel_t); i++) *work_ptr++ = 0;
+  for (i = 0; i < sizeof(channel_t); i++) {
+    *work_ptr++ = 0;
+  }
 
   /* Sentinels chosen so the first volume/pan/reverb/pitch update is sent. */
   cp->old_volume = 0xffff;
@@ -1479,17 +1609,25 @@ void __MusIntInitialiseChannel(channel_t* cp) {
  */
 int __MusIntFindChannel(song_t* addr, int song_chan) {
   channel_t* cp;
-  int i, current, current_channel;
+  int i;
+  int current;
+  int current_channel;
 
   /* A master track may use one of the reserved song slots. */
   if (song_chan < 0) {
-    for (i = 0, cp = mus_channels; i < MAX_SONGS; i++, cp++)
-      if (!cp->pdata) return (i);
+    for (i = 0, cp = mus_channels; i < MAX_SONGS; i++, cp++) {
+      if (!cp->pdata) {
+        return (i);
+      }
+    }
   }
 
   /* Otherwise take the first free effect slot. */
-  for (i = MAX_SONGS, cp = mus_channels2; i < max_channels; i++, cp++)
-    if (!cp->pdata) return (i);
+  for (i = MAX_SONGS, cp = mus_channels2; i < max_channels; i++, cp++) {
+    if (!cp->pdata) {
+      return (i);
+    }
+  }
 
   /* None free: find the lowest-priority effect to evict. */
   for (i = MAX_SONGS, cp = mus_channels2, current = 0x7fffffff,
@@ -1502,28 +1640,39 @@ int __MusIntFindChannel(song_t* addr, int song_chan) {
       }
     }
   }
-  if (current_channel >= MAX_SONGS) return (current_channel);
+  if (current_channel >= MAX_SONGS) {
+    return (current_channel);
+  }
 
   /* No effect to evict: take a slot used by a different song, else reuse the
    * one that previously held this exact song track. */
-  for (i = MAX_SONGS, cp = mus_channels2; i < max_channels; i++)
-    if (!cp->fx_addr && cp->song_addr != addr) return (i);
-  for (i = MAX_SONGS, cp = mus_channels2; i < max_channels; i++, cp++)
-    if (cp->song_addr == addr && addr->data_list[song_chan] == cp->pbase)
+  for (i = MAX_SONGS, cp = mus_channels2; i < max_channels; i++) {
+    if (!cp->fx_addr && cp->song_addr != addr) {
       return (i);
+    }
+  }
+  for (i = MAX_SONGS, cp = mus_channels2; i < max_channels; i++, cp++) {
+    if (cp->song_addr == addr && addr->data_list[song_chan] == cp->pbase) {
+      return (i);
+    }
+  }
   return ((song_chan % (max_channels - MAX_SONGS)) + MAX_SONGS);
 }
 
 /* Relocate a table of `count` self-relative offsets into absolute pointers by
  * adding `offset` to each nonzero entry. */
 void __MusIntRemapPtrs(void* addr, void* offset, int count) {
-  unsigned long *dest, add;
+  unsigned long* dest;
+  unsigned long add;
   int i;
 
   dest = (unsigned long*)addr;
   add = (unsigned long)offset;
-  for (i = 0; i < count; i++)
-    if (dest[i]) dest[i] += add;
+  for (i = 0; i < count; i++) {
+    if (dest[i]) {
+      dest[i] += add;
+    }
+  }
 }
 
 /*
@@ -1542,7 +1691,9 @@ unsigned long __MusIntStartEffect(channel_t* cp, fx_header_t* header,
   cp->panscale = pan;
   cp->handle = mus_current_handle++;
   cp->priority = priority;
-  if (header->ptr_addr) cp->sample_bank = header->ptr_addr;
+  if (header->ptr_addr) {
+    cp->sample_bank = header->ptr_addr;
+  }
   cp->pdata = cp->pbase = header->effects[number].fxdata;
   return (cp->handle);
 }
@@ -1555,10 +1706,14 @@ unsigned long __MusIntStartEffect(channel_t* cp, fx_header_t* header,
  */
 musHandle __MusIntFindChannelAndStart(fx_header_t* header, int number,
                                       int volume, int pan, int priority) {
-  int i, current_priority;
-  channel_t *cp, *current_cp;
+  int i;
+  int current_priority;
+  channel_t* cp;
+  channel_t* current_cp;
 
-  if (priority == -1) priority = header->effects[number].priority;
+  if (priority == -1) {
+    priority = header->effects[number].priority;
+  }
   current_priority = priority + 1;
 
   /* Use the first free slot; meanwhile track the weakest effect playing. */
@@ -1571,7 +1726,9 @@ musHandle __MusIntFindChannelAndStart(fx_header_t* header, int number,
       cp->panscale = pan;
       cp->handle = mus_current_handle++;
       cp->priority = priority;
-      if (header->ptr_addr) cp->sample_bank = header->ptr_addr;
+      if (header->ptr_addr) {
+        cp->sample_bank = header->ptr_addr;
+      }
       cp->pdata = cp->pbase = header->effects[number].fxdata;
       return (cp->handle);
     }
@@ -1590,7 +1747,9 @@ musHandle __MusIntFindChannelAndStart(fx_header_t* header, int number,
     current_cp->panscale = pan;
     current_cp->handle = mus_current_handle++;
     current_cp->priority = priority;
-    if (header->ptr_addr) current_cp->sample_bank = header->ptr_addr;
+    if (header->ptr_addr) {
+      current_cp->sample_bank = header->ptr_addr;
+    }
     current_cp->pdata = current_cp->pbase = header->effects[number].fxdata;
     return (current_cp->handle);
   }
@@ -1607,7 +1766,8 @@ musHandle __MusIntFindChannelAndStart(fx_header_t* header, int number,
  */
 musHandle __MusIntStartSong(void* addr) {
   song_t* song_addr;
-  int i, channels;
+  int i;
+  int channels;
   channel_t* cp;
   unsigned long handle;
 
