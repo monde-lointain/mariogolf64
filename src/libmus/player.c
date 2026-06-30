@@ -121,23 +121,168 @@ INCLUDE_ASM("asm/nonmatchings/libmus/player", try_spawn_global_object);
 
 INCLUDE_ASM("asm/nonmatchings/libmus/player", func_80099CF0);
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_stop);
+// MusStop
+void mus_stop(unsigned long flags, int speed) {
+  int i, speed2;
+  channel_t* cp;
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_ask);
+  speed2 = speed ? speed : 1;
+  for (i = 0, cp = mus_channels; i < max_channels; i++, cp++) {
+    if ((cp->fx_addr && flags & MUSFLAG_EFFECTS) ||
+        (!cp->fx_addr && flags & MUSFLAG_SONGS)) {
+      if (cp->pdata && cp->stopping == -1) {
+        if (cp->channel_flag & CHFLAG_PAUSE) {
+          cp->stopping_speed = 1;
+          cp->stopping = 0;
+          cp->channel_flag &= ~CHFLAG_PAUSE;
+        } else {
+          cp->stopping_speed = speed2;
+          cp->stopping = speed;
+        }
+      }
+    }
+  }
+}
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_handle_stop);
+// MusAsk
+int mus_ask(unsigned long flags) {
+  int i, count;
+  channel_t* cp;
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_handle_ask);
+  for (i = 0, cp = mus_channels, count = 0; i < max_channels; i++, cp++) {
+    if (cp->pdata) {
+      if ((cp->fx_addr && flags & MUSFLAG_EFFECTS) ||
+          (!cp->fx_addr && flags & MUSFLAG_SONGS))
+        count++;
+    }
+  }
+  return (count);
+}
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_handle_set_volume);
+// MusHandleStop
+int mus_handle_stop(musHandle handle, int speed) {
+  int i, speed2, count;
+  channel_t* cp;
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_handle_set_pan);
+  if (!handle) return (0);
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_handle_set_freq_offset);
+  speed2 = speed ? speed : 1;
+  for (i = 0, cp = mus_channels, count = 0; i < max_channels; i++, cp++) {
+    if (cp->handle == handle && cp->stopping == -1) {
+      if (cp->channel_flag & CHFLAG_PAUSE) {
+        cp->stopping_speed = 1;
+        cp->stopping = 0;
+        cp->channel_flag &= ~CHFLAG_PAUSE;
+      } else {
+        cp->stopping_speed = speed2;
+        cp->stopping = speed;
+      }
+      count++;
+    }
+  }
+  return (count);
+}
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_handle_set_tempo);
+// MusHandleAsk
+int mus_handle_ask(musHandle handle) {
+  channel_t* cp;
+  int i, count;
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_handle_set_reverb);
+  if (!handle) return (0);
+  for (i = 0, cp = mus_channels, count = 0; i < max_channels; i++, cp++)
+    if (cp->handle == handle) count++;
+  return (count);
+}
+
+// MusHandleSetVolume
+int mus_handle_set_volume(musHandle handle, int volume) {
+  channel_t* cp;
+  int i, count;
+
+  if (!handle) return (0);
+  for (i = 0, cp = mus_channels, count = 0; i < max_channels; i++, cp++) {
+    if (cp->handle == handle) {
+      cp->volscale = volume;
+      count++;
+    }
+  }
+  return (count);
+}
+
+// MusHandleSetPan
+int mus_handle_set_pan(musHandle handle, int pan) {
+  channel_t* cp;
+  int i, count;
+
+  if (!handle) return (0);
+  for (i = 0, cp = mus_channels, count = 0; i < max_channels; i++, cp++) {
+    if (cp->handle == handle) {
+      cp->panscale = pan;
+      cp->old_pan = 0xff;
+      count++;
+    }
+  }
+  return (count);
+}
+
+// MusHandleSetFreqOffset
+int mus_handle_set_freq_offset(musHandle handle, float offset) {
+  channel_t* cp;
+  int i, count;
+
+  if (!handle) return (0);
+  for (i = 0, cp = mus_channels, count = 0; i < max_channels; i++, cp++) {
+    if (cp->handle == handle) {
+      cp->freqoffset = offset + cp->distort;
+      count++;
+    }
+  }
+  return (count);
+}
+
+// MusHandleSetTempo
+int mus_handle_set_tempo(musHandle handle, int tempo) {
+  channel_t* cp;
+  int i, count;
+
+  if (!handle) return (0);
+
+  if (tempo < 1)
+    tempo = 1;
+  else if (tempo > 256)
+    tempo = 256;
+
+  for (i = 0, cp = mus_channels, count = 0; i < max_channels; i++, cp++) {
+    if (cp->handle == handle) {
+      cp->temscale = tempo;
+      cp->channel_tempo = (cp->channel_tempo_save * tempo) >> 7;
+      count++;
+    }
+  }
+  return (count);
+}
+
+// MusHandleSetReverb
+int mus_handle_set_reverb(musHandle handle, int reverb) {
+  channel_t* cp;
+  int i, count;
+
+  if (!handle) return (0);
+
+  if (reverb < 0)
+    reverb = 0;
+  else if (reverb > 127)
+    reverb = 127;
+
+  for (i = 0, cp = mus_channels, count = 0; i < max_channels; i++, cp++) {
+    if (cp->handle == handle) {
+      cp->reverb_base = reverb;
+      cp->old_reverb = 0xff;
+      count++;
+    }
+  }
+  return (count);
+}
 
 INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_ptr_bank_initialize);
 
