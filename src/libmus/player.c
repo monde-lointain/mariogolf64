@@ -964,7 +964,74 @@ void func_8009B360(channel_t* cp) {
   cp->env_phase = 1;
 }
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player", func_8009B3D0);
+// __MusIntProcessEnvelope (MG64 restores the upstream-removed 99.01.29
+// env_count guard; uses an early-return rather than wrapping the switch in an
+// if-block)
+void func_8009B3D0(channel_t* cp) {
+  int env_phase_count;
+
+  if (((long)(cp->release_frame - cp->channel_frame)) < 0 &&
+      cp->env_phase < 4) {
+    cp->env_phase = 4;
+    cp->env_count = 1;
+    cp->release_start_vol = cp->env_current;
+  }
+
+  cp->env_count--;
+  if (cp->env_count) return;
+  cp->env_count = cp->env_speed;
+
+  switch (cp->env_phase) {
+    case 1:
+      env_phase_count = (((cp->channel_frame - cp->note_start_frame) >> 8) *
+                         cp->env_speed_calc) >>
+                        10;
+      if (env_phase_count < cp->env_attack_speed) {
+        cp->env_current =
+            (int)cp->env_init_vol +
+            (int)((float)(cp->env_attack_calc * (float)env_phase_count));
+        return;
+      } else {
+        cp->env_phase++;
+        cp->env_current = cp->env_max_vol;
+        return;
+      }
+    case 2:
+      /* MG64 subtracts env_attack_speed BEFORE the multiply (upstream does it
+       * after) */
+      env_phase_count = (((cp->channel_frame - cp->note_start_frame) >> 8) -
+                         cp->env_attack_speed) *
+                            cp->env_speed_calc >>
+                        10;
+      if (env_phase_count < cp->env_decay_speed) {
+        cp->env_current =
+            (int)cp->env_max_vol +
+            (int)((float)(cp->env_decay_calc * (float)env_phase_count));
+        return;
+      } else {
+        cp->env_phase++;
+        cp->env_current = cp->env_sustain_vol;
+        return;
+      }
+    case 3:
+      return;
+    case 4:
+      env_phase_count = (((cp->channel_frame - cp->release_frame) >> 8) *
+                         cp->env_speed_calc) >>
+                        10;
+      if (env_phase_count < cp->env_release_speed) {
+        cp->env_current =
+            (int)cp->release_start_vol -
+            (int)((float)(cp->env_release_calc * (float)env_phase_count *
+                          (float)cp->release_start_vol));
+        return;
+      } else {
+        cp->env_phase++;
+        cp->env_current = 0;
+        return;
+      }
+  }
+}
 
 // __MusIntInitSweep
 void func_8009B5C4(channel_t* cp) {
