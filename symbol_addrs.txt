@@ -467,3 +467,5 @@ CHORUS_PARAMS_N = 0x800C7C28; // size:0x28
 FLANGE_PARAMS_N = 0x800C7C50; // size:0x28
 NULL_PARAMS_N = 0x800C7C78; // size:0x28
 n_eqpower = 0x800C7CA0; // size:0x100
+diskrom_handle = 0x800FEF78; // size:0x4
+plr_player = 0x800E7030; // size:0xC

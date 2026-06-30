@@ -165,7 +165,80 @@ unsigned char* mus_cmd_envelope(channel_t* cp, unsigned char* ptr) {
   return (ptr);
 }
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player", MusInitialize);
+// MusInitialize deps (callees defined later; globals).
+extern OSPiHandle* diskrom_handle;        // @0x800FEF78
+extern unsigned long g_mus_control_flag;  // __muscontrol_flag @0x80132368
+extern ALPlayer plr_player;               // @0x800E7030
+extern void func_8009A64C(int);           // __MusIntFifoOpen
+extern void mus_ptr_bank_initialize(void*, void*);      // MusPtrBankInitialize
+extern void mus_fx_bank_initialize(void*);              // MusFxBankInitialize
+extern void mus_set_master_volume(unsigned long, int);  // MusSetMasterVolume
+extern ALMicroTime mus_player_frame_handler(void*);     // __MusIntMain
+#define __muscontrol_flag g_mus_control_flag
+#define __MusIntFifoOpen func_8009A64C
+#define MusPtrBankInitialize mus_ptr_bank_initialize
+#define MusFxBankInitialize mus_fx_bank_initialize
+#define MusSetMasterVolume mus_set_master_volume
+#define __MusIntMain mus_player_frame_handler
+
+int MusInitialize(musConfig* config) {
+  ALVoiceConfig vc;
+  int i;
+
+  diskrom_handle = config->diskrom_handle;
+  __muscontrol_flag = config->control_flag;
+  max_channels = config->channels + MAX_SONGS;
+
+  if (osTvType == 0)
+    mus_vsyncs_per_second = 50;
+  else
+    mus_vsyncs_per_second = 60;
+  mus_next_frame_time = 1000000 / mus_vsyncs_per_second;
+
+  __MusIntMemInit(config->heap, config->heap_length);
+  __MusIntSchedInit(config->sched);
+
+  mus_voices =
+      __MusIntMemMalloc((max_channels - MAX_SONGS) * sizeof(N_ALVoice));
+  mus_channels = __MusIntMemMalloc(max_channels * sizeof(channel_t));
+  mus_channels2 = mus_channels + MAX_SONGS;
+  __MusIntFifoOpen(config->fifo_length);
+
+  mus_default_bank = mus_init_bank = NULL;
+  if (config->ptr && config->wbk)
+    MusPtrBankInitialize(config->ptr, config->wbk);
+
+  libmus_fxheader_current = libmus_fxheader_single = NULL;
+  if (config->default_fxbank) MusFxBankInitialize(config->default_fxbank);
+
+  marker_callback = NULL;
+
+  mus_last_fxtype = AL_FX_BIGROOM;
+  __MusIntAudManInit(config, mus_vsyncs_per_second, mus_last_fxtype);
+
+  MusSetMasterVolume(MUSFLAG_EFFECTS | MUSFLAG_SONGS, 0x7fff);
+
+  mus_current_handle = 1;
+  mus_random_seed = 0x12345678;
+
+  plr_player.next = NULL;
+  plr_player.handler = __MusIntMain;
+  plr_player.clientData = &plr_player;
+  alSynAddPlayer(&__libmus_alglobals.drvr, &plr_player);
+
+  for (i = 0; i < max_channels; i++) {
+    mus_channels[i].playing = 0;
+    __MusIntInitialiseChannel(&mus_channels[i]);
+
+    vc.unityPitch = 0;
+    vc.priority = config->thread_priority;
+    vc.fxBus = 0;
+    if (i >= MAX_SONGS)
+      alSynAllocVoice(&__libmus_alglobals.drvr, &mus_voices[i - MAX_SONGS],
+                      &vc);
+  }
+  return (__MusIntMemRemaining());
+}
 
 // MusSetMasterVolume
 void mus_set_master_volume(unsigned long flags, int volume) {
