@@ -773,13 +773,92 @@ void func_8009B5C4(channel_t* cp) {
   cp->sweep_dir = cp->pan & 0x40;
 }
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player", func_8009B5E0);
+// __MusIntProcessSweep
+void func_8009B5E0(channel_t* cp) {
+  unsigned long calc;
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player", func_8009B698);
+  do {
+    cp->sweep_frame += 256;
+    calc = cp->sweep_timer + cp->sweep_speed;
+    if (calc < 64) {
+      cp->sweep_timer = calc;
+      continue;
+    }
+    cp->sweep_timer = calc & 63;
+    calc >>= 6;
+    if (!cp->sweep_dir) {
+      cp->pan += calc;
+      if (cp->pan > 0x7f) {
+        cp->pan = 0x7f;
+        cp->sweep_dir = 1;
+      }
+    } else {
+      cp->pan -= calc;
+      if (cp->pan >= 0x80 || cp->pan == 0) {
+        cp->pan = 0;
+        cp->sweep_dir = 0;
+      }
+    }
+  } while ((long)(cp->sweep_frame - cp->channel_frame) < 0);
+}
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player", func_8009B6F0);
+// __MusIntProcessWobble
+float func_8009B698(channel_t* cp) {
+  cp->wobble_count--;
+  if (!cp->wobble_count) {
+    if (cp->wobble_current == 0) {
+      cp->wobble_current = cp->wobble_amount;
+      cp->wobble_count = cp->wobble_on_speed;
+    } else {
+      cp->wobble_current = 0;
+      cp->wobble_count = cp->wobble_off_speed;
+    }
+  }
+  return ((float)cp->wobble_current);
+}
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player", func_8009B754);
+// __MusIntProcessVibrato
+float func_8009B6F0(channel_t* cp) {
+  int temp;
+  float temp1;
+
+  temp = cp->count - cp->vib_delay;
+  if (temp > 0) {
+    temp1 = sinf((float)temp * cp->vib_precalc) * cp->vib_amount;
+    cp->vibrato = temp1;
+  } else {
+    return (0);
+  }
+  return (cp->vibrato);
+}
+
+// __MusIntProcessContinuousVolume
+void func_8009B754(channel_t* cp) {
+  unsigned char work_vol;
+
+  do {
+    cp->volume_frame += 256;
+    cp->cont_vol_repeat_count--;
+    if (cp->cont_vol_repeat_count == 0) /* already repeating? */
+    {
+      work_vol = *(cp->pvolume++);
+      if (work_vol > 127) /* does count follow? */
+      {
+        /* yes  volume is followed by run length data */
+        cp->volume = work_vol & 0x7f;
+        work_vol = *(cp->pvolume++);
+        if (work_vol > 127) {
+          cp->cont_vol_repeat_count = ((int)(work_vol & 0x7f) * 256);
+          cp->cont_vol_repeat_count += (int)*(cp->pvolume++) + 2;
+        } else
+          cp->cont_vol_repeat_count = (int)work_vol + 2;
+      } else {
+        cp->volume = work_vol;
+        cp->cont_vol_repeat_count = 1;
+      }
+    }
+  } while ((long)(cp->volume_frame - cp->channel_frame) < 0);
+}
 
 // __MusIntProcessContinuousPitchBend
 void func_8009B818(channel_t* cp) {
@@ -1002,7 +1081,26 @@ void func_8009BFF0(void* addr, void* offset, int count) {
     if (dest[i]) dest[i] += add;
 }
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player", func_8009C028);
+// __MusIntStartEffect
+unsigned long func_8009C028(channel_t* cp, fx_header_t* header, int number,
+                            int volume, int pan, int priority) {
+  __MusIntInitialiseChannel(cp);
+
+  cp->fx_number = number;
+  cp->fx_addr = header;
+  cp->volscale = volume;
+  cp->panscale = pan;
+  cp->handle = mus_current_handle++;
+  cp->priority = priority;
+
+  /* set sample bank pointer */
+  if (header->ptr_addr) cp->sample_bank = header->ptr_addr;
+
+  /* pdata must be set last to avoid processing clash */
+  cp->pdata = cp->pbase = header->effects[number].fxdata;
+
+  return (cp->handle);
+}
 
 INCLUDE_ASM("asm/nonmatchings/libmus/player", allocate_object_slot);
 
