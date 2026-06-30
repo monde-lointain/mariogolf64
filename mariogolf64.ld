@@ -117,6 +117,7 @@ SECTIONS
         build/src/main/func_80099490.o(.text);
         build/asm/748B0.o(.text);
         build/src/libmus/player.o(.text);
+        build/src/libmus/player_commands.o(.text);
         build/asm/78330.o(.text);
         build/src/libmus/aud_dma.o(.text);
         build/src/libmus/aud_sched.o(.text);
@@ -390,6 +391,7 @@ SECTIONS
         build/src/main/func_80099490.o(.data);
         build/asm/748B0.o(.data);
         build/src/libmus/player.o(.data);
+        build/src/libmus/player_commands.o(.data);
         build/asm/78330.o(.data);
         build/src/libmus/aud_dma.o(.data);
         build/asm/data/main_data.data.o(.data);
@@ -686,6 +688,7 @@ SECTIONS
         build/asm/data/ACAD0.rodata.o(.rodata);
         build/asm/data/ACD00.rodata.o(.rodata);
         build/src/libmus/player.o(.rodata);
+        build/src/libmus/player_commands.o(.rodata);
         build/asm/78330.o(.rodata);
         build/src/libmus/aud_dma.o(.rodata);
         build/src/libmus/aud_sched.o(.rodata);
@@ -967,6 +970,7 @@ SECTIONS
         build/src/main/func_80099490.o(.bss);
         build/asm/748B0.o(.bss);
         build/src/libmus/player.o(.bss);
+        build/src/libmus/player_commands.o(.bss);
         build/asm/78330.o(.bss);
         build/src/libmus/aud_dma.o(.bss);
         build/src/libmus/aud_sched.o(.bss);
