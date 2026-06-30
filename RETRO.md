@@ -25,6 +25,17 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 148 — func_ovl10_801F4A40.c COMPLETE (the FIRST classical game-code bank; Epic 1 → Epic 2) — 2026-06-30
+- Increment: 1 file banked (`src/overlay_10/func_ovl10_801F4A40.c`) / **2 functions matched** (`func_ovl10_801F4A40` flag-gated sound/setup + `func_ovl10_801F4AD8` `*p=*p` accessor). md5-candidate **206→207**; remaining 1523→**1521** asm fns / 78→**77** rows; asm subsegs 86→85.
+- Quality: 0/0/0/0 (stuck-far/permuter/carried/re-opened). Banked atomically, first build, 0 iteration.
+- Seed: committed 13pt; banked 13pt; regime classical. v2: seed 13; realized 12; residual −1 (−1 verbatim first-try, both fns 1-build; the size-pts over-pricing of a 176B pack is in the seed, not the residual).
+- What helped: (1) **Phase-transition survey at the gate** — `--lib` on every band returned no candidates, so the increment choice was correctly framed as "first classical game-code unit", not another mirror. (2) **asm-first seed** straight from the splat `.s` — Ghidra MCP was DOWN all sprint and it didn't matter; the 2 small fns translated cleanly from the instruction listing (callee/global types read from call-site arg setup + `lhu`/`sw` widths). (3) The auto `func_`/`D_` symbols resolved from their home subsegs, so plain `extern` decls + ROM-SHA-1 gate was the whole loop. (4) First overlay-to-C flip just worked via the generic `mk/src.mk` rule + default -O2 profile (zero mk edit).
+- Friction: the **8-gate false-fired** on the SMALLEST candidate (176B priced pts-13) — `pick_target.py` barely weights byte-size against the none-upstream/nfns/one-tu bumps. Handled by the new small-pack exemption; root-cause pts recalibration deferred to a tooling branch. Ghidra MCP down → names left as placeholders (deferred follow-up).
+- Applied: PO-selected 4 of 5 — #1 CLAUDE.md small classical pack exemption (+ BACKLOG pts-recalibration tooling follow-up); #2 CLAUDE.md asm-first seed fast-path; #3 CLAUDE.md overlay path convention; #5 BACKLOG Epic-2 reframe + mirror-era PO-note archive. (#4 deferred name follow-up → BACKLOG Carry-overs, not a tooling edit.)
+- Carry-over: none (file fully banked). Name follow-up note in BACKLOG (curate func_ovl10_801F4A40/AD8 when Ghidra is up).
+
+---
+
 ## Sprint 147 — player.c TU COMPLETE (the whole 109-fn game-embedded libmus sequence player, banked from 0) — 2026-06-30
 - Increment: 2 files banked (`src/libmus/player.c` + `src/libmus/player_commands.c`, split mid-sprint) / **109 functions matched** (the full `#include`-chained TU). md5-candidate **204→206**; asm subsegs 87→86 (main+idle `[0x748B0]` stays asm).
 - Quality: 0/0/0/**1** (stuck-far/permuter/carried/re-opened). The frame handler `__MusIntMain` was committed as an "unbankable carry" then re-opened + banked (the re-open). Random + allocate_object_slot were intra-sprint carries → banked (not cross-gate).

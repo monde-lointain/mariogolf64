@@ -95,6 +95,16 @@ Ghidra MCP is used inline at seed time. For each target function:
      (`disassemble_function`) is ground truth, not the Ghidra decompile (see
      `docs/hazards.md#decompile-vs-asm-authority`). Use the decompile for shape and types; translate
      the logic from the instruction listing.
+     - **asm-first seed fast-path (S148; MCP-independent, for small fns ~<40 instrs).** The splat
+       `.s` under `asm/nonmatchings/<seg>/<func>/<func>.s` is the same ground truth as
+       `disassemble_function`, so a small classical fn does NOT need MCP: hand-translate straight from
+       the `.s` (resolve callee/global names + types from the name files / call-site arg setup),
+       write the body directly into `src/<seg>.c` (declare each `extern`; auto `func_`/`D_` symbols
+       resolve from their home subseg), and gate on the full-`make` ROM SHA-1. Skip
+       seed_c.py/base.c/decomp_loop entirely unless the first build misses, then drop into the
+       isolated Iterate loop below. Use this when Ghidra MCP is unavailable (`list_instances` empty)
+       or the fn is small enough that the decompile adds no shape/type value. S148 banked a 2-fn
+       176B pack this way, first build, MCP down.
    - **Iterate** at most 25 times: `venv/bin/python3 tools/decomp_loop.py --func <placeholder>`, then
      parse the JSON. `score == 0` is a candidate; 5 consecutive `compile_ok == False` means a broken
      seed, so stop; otherwise read the top mismatches, edit `base.c`, and re-run. Run the permuter
@@ -214,6 +224,18 @@ the summary.
   runs as a 1-increment sprint: decompose it (split the subseg at the upstream-file or function
   boundary) or pull a scaffolding enabler as the goal instead. Applied at the `/sprint-plan` gate. This prevents an all-or-nothing
   bank stall. Expect it to fire once the mirror band is mined out and classical units dominate.
+  - **Small classical pack exemption (S148; the classical analog of the verbatim-mirror exemption).**
+    A `regime: classical` (or `mixed`) increment may run as a normal 1-increment sprint despite an 8/13
+    seed when ALL of these hold: (a) the increment is a single subseg pack of **<=2 fns AND <256B total
+    AND `one-tu`**, so decompose-into-independent-singletons is mechanically blocked (the inner fn
+    boundary is non-16-aligned or the fns share a TU's rodata/data, so you cannot independently compile
+    half a one-tu); and (b) each fn is short and self-contained (no permuter-class control flow). Like
+    the verbatim-mirror exemption, the all-or-nothing concern is moot at this size: a 2-fn tiny pack
+    banks atomically (or is a quick spike), so a size-only 8/13 is a false fire (the size-pts
+    mis-prices tiny none-upstream packs; see the pts-recalibration follow-up). Document the exemption in
+    `SPRINT.md ## Estimate`; it never covers a pack of 3+ fns, a >=256B fn, or any unit that needs the
+    permuter. S148 `overlay_10/func_ovl10_801F4A40` (2fn, 176B, one-tu, pts-13) banked first-build
+    seed-only under this exemption.
   - **Verbatim-mirror exemption (S64; generalized S69).** A seed-8/13 increment may run as a normal
     1-increment sprint when ALL of these hold:
     - (a) `regime: mirror` plus a verbatim copy of a single upstream file. A drop-def mirror
@@ -326,6 +348,16 @@ below).
   Leave the segment and memory-map structure, `mariogolf64.ld`, and segment boundaries unchanged.
   Subseg flips, multi-file splits, and the `make extract` that regenerates the scaffold are gate
   actions (or inline when a split is needed mid-flight).
+- **Game/overlay-code path convention (S148; the classical endgame).** A flipped non-lib subseg is
+  pathed `<tree>/<stem>`: main-segment game code under `main/<stem>` (e.g. `main/func_80099490`),
+  overlay code under `overlay_<N>/<stem>` (e.g. `[0x1508E0, c, overlay_10/func_ovl10_801F4A40]` ->
+  `src/overlay_10/func_ovl10_801F4A40.c`), `<stem>` being the lead-fn placeholder (`func_<vram>`).
+  No per-tree `mk/*.mk` fragment is needed: the generic `mk/src.mk` rule (`%` spans slashes) builds
+  any `src/<tree>/%.c` with the default **-O2 game profile** (`C_PROFILE_CFLAGS = $(CFLAGS)`; the
+  `mk/lib*.mk` overrides are more-specific and win only for their own `src/lib*/` trees). So a brand-
+  new `src/overlay_<N>/` tree builds with zero mk edits. Overlay vram is reused across overlays
+  (>=0x801F4A30 is ambiguous; see the Ghidra-map memory), so seed overlay fns by ROM offset / the
+  splat `.s`, not MCP-by-vram.
 - **`hasm` subsegments stay raw asm forever** (entry stub, `__muldi3` libkmc math module, RSP
   microcode entries). The execution loop refuses these. The project sets `hasm_in_src_path: True`, so
   a `hasm` `.s` lives under `src/<dir>/<stem>.s` (each `hasm` yaml line carries a `<dir>/<stem>` name

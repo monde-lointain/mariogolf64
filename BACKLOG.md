@@ -8,13 +8,32 @@ This file holds only the *ordering rationale*, *enabler items* (gate actions), a
 
 ## Active phase / epic
 
-**Epic 1 — complete the libultra function set (mirrors + classical), smallest-first.** All
-remaining libultra functions are in scope: verbatim mirrors, known-edit sub-cases (near-verbatim
-drop, file-static drop), recover-extern mirrors, and classical-loop targets. libkmc and libnusys
-remain pickable fillers when needed to hit the ≥5pt sprint target (S26 directive), but are
-subordinate to the libultra goal. Target selection is `tools/pick_target.py` (smallest-first);
-the 8-point decompose gate fires on any seed ≥8. v2 classical track is active (since S11);
-mirror is the default, classical is first-class when the asm warrants it.
+**Epic 1 — complete the vendored-library function set — DONE (S148).** Every vendored-library band is
+banked: libultra (clean-mirror vein), libnusys, libkmc, libnaudio, libmus, libnualstl, mgu. `--lib`
+on any of these reports no candidates. The only rows still TAGGED libultra/libnusys are coddog
+*structural* false-hits (`body-divergence-suspect`, `game-region-mirror`, the "second libnusys
+instance") — game code that fingerprints to lib source but is NOT a verbatim mirror, so they belong
+to Epic 2.
+
+**Epic 2 — decompile the game's own code, smallest-first classical (active since S148).** ~1521 fns
+across 77 game TUs remain (post-S148): `none`-upstream packs plus the game-region/structural rows
+above. All classical track (the mirror regime is mined out). Target selection stays
+`tools/pick_target.py` (smallest-first); the 8-point decompose gate fires on any seed ≥8, now tempered
+by the **small classical pack exemption** (`CLAUDE.md ## Story points`: <=2 fns AND <256B AND one-tu
+runs seed-only). v2 classical realized tier scored at review (since S11). Seed asm-first for small fns
+(MCP-independent; see the Seed fast-path in `CLAUDE.md`). Path convention `overlay_<N>/<stem>` or
+`main/<stem>`, default -O2 game profile (no mk edit). Note: `pick_target.py`'s size-pts over-prices
+tiny none-upstream packs (S148 priced a 176B trivial pack at 13) — a calibration follow-up (below).
+
+**S148 BANKED — `overlay_10/func_ovl10_801F4A40.c` (the FIRST classical game-code bank).** The 2-fn
+overlay_10 .text pack (`func_ovl10_801F4A40` flag-gated sound/setup + `func_ovl10_801F4AD8` `*p=*p`
+accessor, 176B, one-tu) banked first-build seed-only, asm-first (Ghidra MCP was down all sprint), ROM
+SHA-1 == baserom. md5-candidate **206→207**; remaining 1523→**1521** asm fns / 78→**77** rows. Quality
+0/0/0/0; seed 13 / realized 12 / residual −1; regime classical (small-pack exemption applied). Names
+kept as `func_ovl10_*` placeholders (MCP down → cross-repo name follow-up DEFERRED; curate +
+`sync_decomp_names.py --import-from-decomp` when Ghidra is back). Retro applied 4 of 5 (#1 small-pack
+classical exemption + pts-recalibration tooling follow-up; #2 asm-first seed fast-path; #3 overlay
+path convention; #5 this Epic-2 reframe). #4 = the deferred name follow-up (carry-over note, below).
 
 **S147 — libmus `player.c` TU COMPLETE (the whole 109-fn game-embedded sequence player) → md5-candidate.**
 Planned a cap-small first batch; banked the ENTIRE 109-fn `#include`-chained TU (internals + Mus* API +
@@ -2143,6 +2162,11 @@ sub-sprints).
   `jal` both = osSetIntMask, reconciled clean (no jal-count flag). seed 5 / banked 5pt. Retro:
   **0 of 0** (suggestion buffer "None new"). No carry-overs.
 
+> **ARCHIVED (S148) — the mirror-era PO ordering notes below (S94…S11) are superseded by Epic 2.**
+> They guided target selection while the libultra/libnusys/audio MIRROR bands were open; those bands
+> are now fully banked (Epic 1 DONE). Kept for provenance only. Epic 2 ordering is plain
+> smallest-first classical off `tools/pick_target.py` (no special mirror-band survey).
+
 ## PO ordering note (S94 retro — the audio sub-band is partially open; survey by the coddog column)
 
 S94 banked the first audio mirror (`auxbus.c`); S95 banked the 2nd (`load.c`, 4fn). Live ordering
@@ -2350,6 +2374,27 @@ by `/sprint-plan`:
   vendored upstream version can diverge from the game's rev on a single immediate (S122 nusys-2.07
   `NU_CONT_THREAD_ID=6` vs MG64's 5), and that surfaces only at first build unless reconciled here.
   A near-free retry missing any of these is a half-scoped spike — finish the scope before deferring.
+
+- **Tooling follow-up (S148, PO-selected #1 companion; deferred to a golden-gated tooling branch, NOT
+  a review-gate edit).** Recalibrate `pick_target.py`'s `pts` so it does not over-price tiny
+  `none`-upstream classical packs. S148's increment was the SMALLEST candidate (176B, 2fn) yet priced
+  `pts=13` — size is barely weighted against the none-upstream + nfns + one-tu bumps, so the 8-gate
+  false-fired on a trivially-bankable pack. The CLAUDE.md **small classical pack exemption** (S148)
+  handles the gate symptom by-hand; this follow-up fixes the root pricing: give raw byte-size a larger
+  weight (or a small-pack floor that caps pts for `<256B AND <=2fn AND one-tu`). **Why a branch:** pts
+  feeds the displayed estimate and the 8-gate, a load-bearing surface, so re-weighting needs the
+  golden-gated + reassess-checkpoint discipline (byte-identical goldens on the ranker output) to avoid
+  silently reshuffling the smallest-first sort. Companion to the small-pack exemption text.
+
+- **Name follow-up (S148; near-free, do at the next gate with Ghidra up).** `func_ovl10_801F4A40` and
+  `func_ovl10_801F4AD8` (`src/overlay_10/func_ovl10_801F4A40.c`, banked S148) kept `func_` placeholder
+  names because Ghidra MCP was DOWN all sprint. When an instance is up: (1) check Ghidra for curated
+  names at vram 0x801F4A40 / 0x801F4AD8 (overlay_10 / `exclusive_ram_id: ovl10`; vram is
+  overlay-ambiguous, so use the overlay context); (2) if named, add to `symbol_addrs.txt` (add-only),
+  rename in the body, `make` to re-confirm ROM SHA-1; (3) propagate via `sync_decomp_names.py
+  --import-from-decomp`. Behaviour understood: `_801F4A40` is a flag-gated (`D_800FBDC4 & 0x9000`)
+  sound/setup routine (sets 4 globals @0x800BB020/024/02C/030 then `play_sound_effect` +
+  `func_800719A0`); `_801F4AD8` is a 3-insn `*p = *p` accessor.
 
 - **Tooling follow-up (S138, PO-selected #2; deferred to a golden-gated tooling branch, NOT a
   review-gate edit).** Make `pick_target.py`'s `defines-data` detector resolve + emit the static's
