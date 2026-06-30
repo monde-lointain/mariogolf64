@@ -40,13 +40,20 @@ extern LIBMUScb_marker g_mus_marker_callback;
 // ghidra symbols so banked bodies call the right address verbatim.
 extern int func_8009BC58(int);  // __MusIntRandom
 extern musHandle allocate_object_slot(fx_header_t*, int, int, int,
-                                      int);  // __MusIntFindChannelAndStart
-extern int func_8009D8A8(s32);               // ChangeCustomEffect
-extern musBool g_mus_fx_enabled;             // mus_songfxchange_flag
+                                      int);    // __MusIntFindChannelAndStart
+extern int func_8009D8A8(s32);                 // ChangeCustomEffect
+extern musBool g_mus_fx_enabled;               // mus_songfxchange_flag
+extern void func_8009BFF0(void*, void*, int);  // __MusIntRemapPtrs
 #define __MusIntRandom func_8009BC58
 #define __MusIntFindChannelAndStart allocate_object_slot
 #define ChangeCustomEffect func_8009D8A8
 #define mus_songfxchange_flag g_mus_fx_enabled
+#define __MusIntRemapPtrs func_8009BFF0
+
+// player.c file-scope macros (verbatim).
+#define REST 96
+#define BASEOFFSET 48
+#define U8_TO_FLOAT(c) ((c) & 128) ? -(256 - (c)) : (c)
 
 INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_cmd_envelope);
 
@@ -156,11 +163,116 @@ INCLUDE_ASM("asm/nonmatchings/libmus/player", func_8009B6F0);
 
 INCLUDE_ASM("asm/nonmatchings/libmus/player", func_8009B754);
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player", func_8009B818);
+// __MusIntProcessContinuousPitchBend
+void func_8009B818(channel_t* cp) {
+  unsigned char work_pb;
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player", func_8009B92C);
+  do {
+    cp->pitchbend_frame += 256;
+    cp->cont_pb_repeat_count--;
+    if (cp->cont_pb_repeat_count == 0) /* already repeating? */
+    {
+      work_pb = *(cp->ppitchbend++);
+      if (work_pb > 127) /* does count follow? */
+      {
+        /* yes  pitchbend is followed by run length data */
+        cp->pitchbend = ((float)(work_pb & 0x7f)) - 64.0;
+        cp->pitchbend_precalc = cp->pitchbend * cp->bendrange;
+        work_pb = *(cp->ppitchbend++);
+        if (work_pb > 127) {
+          cp->cont_pb_repeat_count = ((int)(work_pb & 0x7f) * 256);
+          cp->cont_pb_repeat_count += (int)*(cp->ppitchbend++) + 2;
+        } else
+          cp->cont_pb_repeat_count = (int)work_pb + 2;
+      } else {
+        cp->pitchbend = ((float)work_pb) - 64.0;
+        cp->pitchbend_precalc = cp->pitchbend * cp->bendrange;
+        cp->cont_pb_repeat_count = 1;
+      }
+    }
+  } while ((long)(cp->pitchbend_frame - cp->channel_frame) < 0);
+}
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player", mus_remap_ptr_bank);
+// __MusIntPowerOf2: 2^x via a 6-term polynomial (x>0) or its reciprocal (x<0).
+float func_8009B92C(float x) {
+  float x2;
+
+  if (x == 0) return 1;
+
+  if (x > 0) {
+    x2 = x * x;
+    return (1 + (x * .693147180559945) + (x2 * .240226506959101) +
+            (x2 * x * 5.55041086648216E-02) + (x2 * x2 * 9.61812910762848E-03) +
+            (x2 * x2 * x * 1.33335581464284E-03) +
+            (x2 * x2 * x2 * 1.54035303933816E-04));
+  } else {
+    x = -x;
+    x2 = x * x;
+    return (1 / (1 + (x * .693147180559945) + (x2 * .240226506959101) +
+                 (x2 * x * 5.55041086648216E-02) +
+                 (x2 * x2 * 9.61812910762848E-03) +
+                 (x2 * x2 * x * 1.33335581464284E-03) +
+                 (x2 * x2 * x2 * 1.54035303933816E-04)));
+  }
+}
+
+// __MusIntRemapPtrBank: convert pointer-bank file offsets to RAM pointers.
+void mus_remap_ptr_bank(char* pptr, char* wptr) {
+  int i;
+  ptr_bank_t* ptrfile_addr;
+  unsigned char *chardetune, charwork;
+  float *floatdetune, floatwork;
+  unsigned long base;
+
+  ptrfile_addr = (ptr_bank_t*)pptr;
+  /* return if already remapped */
+  if (ptrfile_addr->flags & PTRFLAG_REMAPPED) return;
+  /* set remapped flag */
+  ptrfile_addr->flags |= PTRFLAG_REMAPPED;
+
+  /* remap first set of pointers */
+  __MusIntRemapPtrs(&ptrfile_addr->basenote, pptr, 3);
+  /* remap wave list pointers */
+  __MusIntRemapPtrs(&ptrfile_addr->wave_list[0], pptr, ptrfile_addr->count);
+
+  /* now calculate detune values and remap wave list */
+  for (i = 0; i < ptrfile_addr->count; i++) {
+    floatdetune = &ptrfile_addr->detune[i];
+    chardetune = (unsigned char*)floatdetune;
+    charwork = *chardetune;
+
+    floatwork = U8_TO_FLOAT(charwork);
+    *floatdetune = floatwork / 100.0;
+
+    charwork = ptrfile_addr->basenote[i] - BASEOFFSET;
+    floatwork = U8_TO_FLOAT(charwork);
+    *floatdetune += floatwork;
+
+    /* remap pointers inside ALWaveTable structures */
+    if (!ptrfile_addr->wave_list[i]->flags) {
+      base = (unsigned long)ptrfile_addr->wave_list[i]->base;
+      if ((base & 0xff000000) != 0xff000000) /* not n64dd sample */
+      {
+        base += (unsigned long)wptr;
+        ptrfile_addr->wave_list[i]->base = (u8*)base;
+      }
+      ptrfile_addr->wave_list[i]->flags = 1;
+
+      if (ptrfile_addr->wave_list[i]->waveInfo.adpcmWave.loop)
+        ptrfile_addr->wave_list[i]->waveInfo.adpcmWave.loop =
+            (ALADPCMloop*)((u32)(ptrfile_addr->wave_list[i]
+                                     ->waveInfo.adpcmWave.loop) +
+                           (u32)(pptr));
+      if (ptrfile_addr->wave_list[i]->type == AL_ADPCM_WAVE)
+        ptrfile_addr->wave_list[i]->waveInfo.adpcmWave.book =
+            (ALADPCMBook*)((u32)(ptrfile_addr->wave_list[i]
+                                     ->waveInfo.adpcmWave.book) +
+                           (u32)(pptr));
+    }
+  }
+  /* flush data cache so the new sample pointers are visible to the RSP */
+  osWritebackDCacheAll();
+}
 
 INCLUDE_ASM("asm/nonmatchings/libmus/player", func_8009BC58);
 
