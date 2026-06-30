@@ -1113,6 +1113,16 @@ void mus_remap_ptr_bank(char* pptr, char* wptr) {
 // linkage; both inline (static also drops the standalone). No noinline in
 // GCC 2.7.2. Resolving this needs a mips-gcc-2.7.2 integrate.c inline-heuristic
 // deep-dive.
+// __MusIntRandom (MG64-divergent PRNG) -- CARRIED as asm. ROOT CAUSE FOUND
+// (gcc-2.7.2 integrate.c deep-dive): the C body matches byte-for-byte
+// standalone, but the libmus profile's -O3 enables -finline-functions, which
+// auto-inlines this 36-raw-insn fn into its 3 rand-handler callers; the ROM
+// keeps `jal func_8009BC58`. Confirmed empirically: at -O2 the handlers emit
+// the jal (match); at -O3 they inline. Not a size issue (threshold 8*(8+1)=72
+// >> 36). The fix is a profile change to -O2 for player.c + manual
+// source-inline of the cases that currently RELY on -O3 auto- inline
+// (env_set_adsr/Fdefa, StartEffect-in-allocate_object_slot) -- a PO-gated pin
+// change, since at -O2 those auto-inlines stop happening. See SPRINT.md.
 INCLUDE_ASM("asm/nonmatchings/libmus/player", func_8009BC58);
 
 // __MusIntInitialiseChannel
