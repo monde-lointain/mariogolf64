@@ -1113,16 +1113,18 @@ void mus_remap_ptr_bank(char* pptr, char* wptr) {
 // linkage; both inline (static also drops the standalone). No noinline in
 // GCC 2.7.2. Resolving this needs a mips-gcc-2.7.2 integrate.c inline-heuristic
 // deep-dive.
-// __MusIntRandom (MG64-divergent PRNG) -- CARRIED as asm. ROOT CAUSE FOUND
-// (gcc-2.7.2 integrate.c deep-dive): the C body matches byte-for-byte
-// standalone, but the libmus profile's -O3 enables -finline-functions, which
-// auto-inlines this 36-raw-insn fn into its 3 rand-handler callers; the ROM
-// keeps `jal func_8009BC58`. Confirmed empirically: at -O2 the handlers emit
-// the jal (match); at -O3 they inline. Not a size issue (threshold 8*(8+1)=72
-// >> 36). The fix is a profile change to -O2 for player.c + manual
-// source-inline of the cases that currently RELY on -O3 auto- inline
-// (env_set_adsr/Fdefa, StartEffect-in-allocate_object_slot) -- a PO-gated pin
-// change, since at -O2 those auto-inlines stop happening. See SPRINT.md.
+// __MusIntRandom (MG64-divergent PRNG) -- CARRIED as asm. The C body matches
+// byte-for-byte standalone, but at this TU's -O3, -finline-functions
+// auto-inlines this 36-raw-insn fn into its 3 rand-handler callers (the ROM
+// keeps `jal`). The inline gate is the RAW (pre-opt) RTL insn count vs
+// INTEGRATE_THRESHOLD=8*(8+1)=72 (gcc-2.7.2 integrate.c:88, decided at
+// toplev.c:2676 before jump/cse). MG64 is -O3 (its ROM inlines mus_set_fx_type,
+// Fdefa, etc. -- confirmed: -O2 breaks those), so -O2 is NOT the fix; it would
+// mis-call every ROM-inlined fn (drmario64's libmus is -O2 and CALLS them all,
+// but that's a different game). MG64's ROM does NOT inline only Random -> its
+// original source must have had >=72 raw insns (dodging the threshold) while
+// optimizing to the same 37-insn final; a clean reconstruction can't reproduce
+// that raw count (underdetermined). Genuine carry.
 INCLUDE_ASM("asm/nonmatchings/libmus/player", func_8009BC58);
 
 // __MusIntInitialiseChannel
