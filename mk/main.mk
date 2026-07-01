@@ -12,3 +12,10 @@ $(BUILD_DIR)/$(SRC_DIR)/main/%.o: C_PROFILE_CFLAGS = $(MAIN_CFLAGS)
 # sqrt.d + library `jal sqrt` fallback. Per-file override (the sibling main/ files
 # stay on the plain profile: mgu/mtxutil's float math matched without it).
 $(BUILD_DIR)/$(SRC_DIR)/main/func_8006A000.o: C_PROFILE_CFLAGS := $(MAIN_CFLAGS) -ffast-math
+
+# func_8006A180.c (the [0x45580] tail of the same math one-tu) does the same, but
+# single-precision: hypotf_2d's `sqrtf` is the BUILT_IN_FSQRT builtin (identical
+# expr.c path to double sqrt, mode SF -> sqrtsf2). Without -ffast-math it emits a
+# c.eq.s/bc1t NaN guard + `jal sqrt` fallback (verified vs align.o); the ROM has a
+# bare sqrt.s, so it needs the same -ffast-math (not a separate sqrtf-intrinsic path).
+$(BUILD_DIR)/$(SRC_DIR)/main/func_8006A180.o: C_PROFILE_CFLAGS := $(MAIN_CFLAGS) -ffast-math
