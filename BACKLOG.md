@@ -29,6 +29,27 @@ tell) is carved to its LIBRARY tree (`libnusys/<file>`), not `main/<stem>` — y
 placement unchanged (see `CLAUDE.md` path convention). A per-FILE -O0 override is the one mk edit a
 boot/SDK-glue TU may need.
 
+**S154 BANKED — `src/main/func_8006A000.c` (math/RNG one-tu now **8/8 fns** — banked the `[0x455C0]`
+3-fn tail AND RECOMBINED the S152/S153 3+2+3 decomposition into one file).** `calc_vec3_magnitude`
+(`sqrtf(x²+y²+z²)`, bare single `sqrt.s`, 3rd arg z in GPR `$a2`), `crc16_ccitt` (was `func_8006A1EC`;
+CRC-16/X.25, poly 0x8408), `report_div_error` (was `func_8006A274`; log `$ra` + `(s32)(1.0f/D_800C3FB4)`).
+Deleted `func_8006A180.c` + `func_8006A1C0.c`; text `[0x45580]`/`[0x455C0]` merged into `[0x45400]`;
+`-ffast-math` consolidated to `func_8006A000.o`. **Three codegen gotchas:** (1) `crc16_ccitt`'s bit-loop
+needed a **goto** — `loop.c` `check_dbra_loop` REVERSES any count-only loop from 0, but the ROM up-counts
+(both natural forms verified to reverse first, PO "goto = last resort"); the outer loop matched as a
+natural indexed `for` (strength reduction → `addu a1,a1,a0`). (2) `report_div_error` captures `$ra` via a
+`volatile` inline-asm barrier (`__builtin_return_address(0)` broken here). (3) **strings kept as ACTUAL
+LITERALS via the TU-recombine** (PO directive): a rodata carve can't 8-align the next-TU double because
+`OBJCOPY_ALIGN` force-4-aligns every ASM rodata — one `.c` lets func_8006A000's 16-aligned `2^31` doubles
+pad the section tail to `0x800D1440` (new `docs/hazards.md#decomposed-one-tu-rodata-alignment-split`, a
+counter-case to the 8-point decompose gate). md5-candidate **212→211** (merge consolidation, +3 matched,
+all 211 C files fully-C). Quality **0/0/0/0**. seed 13 / realized 13 / residual 0; regime classical.
+Retro applied 4 of 4 PO-picks (#1 rodata-split hazard + index; #2 `#top-tested-loop-goto-local-hoist`
+`check_dbra_loop` corollary + index; #3 `#capturing-ra-return-address-as-a-call-argument` + index; #4
+pts-recalibration 6th data point). **Cross-repo follow-up:** `crc16_ccitt`/`report_div_error` →
+`sync_decomp_names.py --import-from-decomp`. No carry-over (one-tu fully banked). **6th data point for the
+pts-recalibration follow-up** (3-fn 256B none-upstream priced pts-13; also flags rodata-adjacency pricing).
+
 **S153 BANKED — `src/main/func_8006A180.c` (2-fn head slice: `update_rng_seed` + `hypotf_2d`,
 decomposed from the S152 `[0x45580]` remainder at the 16-aligned 0x8006A1C0).** `update_rng_seed`
 (LCG `rng_seed = rng_seed*0x5D588B65 + 1`) + `hypotf_2d` (`sqrtf(a*a + b*b)`, bare single `sqrt.s`).
@@ -2473,29 +2494,9 @@ by `/sprint-plan`:
   `NU_CONT_THREAD_ID=6` vs MG64's 5), and that surfaces only at first build unless reconciled here.
   A near-free retry missing any of these is a half-scoped spike — finish the scope before deferring.
 
-- **Near-free retry (S153): the 3-fn `[0x455C0]` tail of the `main/func_8006A000` math/RNG one-tu.**
-  The `[0x45400]` 8-fn one-tu was decomposed 3 (S152) + 2 (S153, `[0x45580]` head banked) + this 3-fn
-  tail. Fully scoped:
-  1. **Flip line:** `c`-flip `[0x455C0, asm]` → `[0x455C0, c, main/func_8006A1C0]` (lead fn
-     `calc_vec3_magnitude` @0x8006A1C0, rom 0x455C0; vram→rom delta 0x80024C00). No further 16-aligned
-     internal split (0x8006A1EC / 0x8006A274 are non-16-aligned), so the 3 bank together.
-  2. **Placed-ref inventory (all already resolved externs):** `osSyncPrintf` @0x800AAE80 (CONFIRMED
-     placed/named in ghidra_symbols; jal'd by `func_8006A1EC` + `func_8006A274`); a float global
-     @0x800C3FB4 (read by `func_8006A274`, `lwc1`; NOT yet named).
-  3. **New recover-extern / callee vrams:** name `D_800C3FB4` (a float; likely a frame-rate or scale
-     global — `func_8006A274` computes `(s32)(1.0f / it)`) at bank time. `osSyncPrintf` already named.
-  4. **Rodata carve:** 2 STRINGS at 0x800D1420 / 0x800D142C (rom 0xAC820 / 0xAC82C), referenced by
-     `func_8006A1EC` / `func_8006A274` — carve `[0xAC820, .rodata, main/func_8006A1C0]` split out of the
-     generic `[0xAC820, rodata]` tail the S152 carve left.
-  5. **Upstream pin:** none (classical game code).
-  6. **Per-fn notes / HAZARD:** `calc_vec3_magnitude` (0x8006A1C0, `sqrtf(x*x+y*y+z*z)` single `sqrt.s`;
-     note the 3rd term is `mtc1 a2` twice + `mul.s` = the int `a2` bit-pattern squared as a float) — needs
-     a **per-file `-ffast-math` override for `func_8006A1C0.o`** in `mk/main.mk` (the SAME fix as S152/S153,
-     NOT a separate sqrtf-intrinsic path — the S153 KMC-gcc-source verification proved single-precision is
-     the same `-ffast-math` mechanism; see the rewritten `#double-sqrt-fast-math`). `func_8006A1EC`
-     (CRC16-CCITT poly 0x8408 reflected byte loop, init 0xFFFF, `~crc & 0xFFFF` then `osSyncPrintf(str,crc)`
-     — likely ANOTHER goto-loop, see `#top-tested-loop-goto-local-hoist`). `func_8006A274`
-     (`osSyncPrintf(str, ra)` + `(s32)(1.0f / float@0x800C3FB4)` via `div.s`+`trunc.w.s`).
+- **(S154 BANKED, removed from carry-overs)** The 3-fn `[0x455C0]` tail (`calc_vec3_magnitude`,
+  `crc16_ccitt`, `report_div_error`) banked S154 by RECOMBINING the whole `func_8006A000` one-tu into one
+  file. See the `## Active phase` S154 BANKED paragraph and `#decomposed-one-tu-rodata-alignment-split`.
 
 - **Tooling follow-up (S148, PO-selected #1 companion; deferred to a golden-gated tooling branch, NOT
   a review-gate edit).** Recalibrate `pick_target.py`'s `pts` so it does not over-price tiny
@@ -2525,6 +2526,13 @@ by `/sprint-plan`:
   the strongest under-weighting evidence yet — the recalibration's `<256B AND <=2fn AND one-tu` floor (or
   a raw-byte term) would drop this to a low single-digit pts and stop the 8-gate false-fire on the smallest
   possible packs.
+  **S154 6th data point:** the 3-fn 256B none-upstream `[0x455C0]` tail priced `pts=13`; the small-pack
+  exemption did NOT cover it (3 fns > the `<=2` cap), so it ran as a normal 1-increment classical sprint —
+  and then, mid-sprint, MERGED back into the 8-fn `func_8006A000.c` for a rodata-alignment fix (see
+  `docs/hazards.md#decomposed-one-tu-rodata-alignment-split`). So a 256B/3fn slice AND its 800B/8fn parent
+  both price `pts=13`: another decompose invisible in the pts. Reinforces the raw-byte term AND flags that
+  the pts should also weigh rodata-adjacency (a decompose the ranker prices as free can carry an
+  unfixable rodata split).
 
 - **Name follow-up (S148; near-free, do at the next gate with Ghidra up).** `func_ovl10_801F4A40` and
   `func_ovl10_801F4AD8` (`src/overlay_10/func_ovl10_801F4A40.c`, banked S148) kept `func_` placeholder

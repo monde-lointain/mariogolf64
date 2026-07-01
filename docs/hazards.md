@@ -3135,3 +3135,60 @@ the permuter. Confirm the direction against a matched sibling: a single-conditio
 inverted (guard + bottom test, e.g. S151 `func_8005029C`'s `for(i != count)`) proves inversion is the
 compiler default, not a flag; a top-tested multi-`||` ROM loop that is NOT inverted is the goto case.
 Pairs with `#double-sqrt-fast-math` (both were the same S152 range-scaling fns).
+
+**The reversal corollary (S154, a distinct loop.c pass).** `expand_end_loop` INVERTS (above); a
+SEPARATE `loop.c` pass, `check_dbra_loop`, REVERSES a structured count-only loop into a
+decrement-and-branch. When the loop variable is used ONLY to count (dead in the body), starts at 0, and
+the trip count is a constant, `-O2` rewrites `for(i=0;i<N;i++)` to count DOWN (`li vN, N-1` / `addiu vN,
+-1` / `bgez`) because the down-test is one insn cheaper. When the ROM keeps the UP-count (`addu
+vN,zero,zero` / `addiu +1` / `sltiu vN, N` / `bnez`), NO structured loop reproduces it — the `for` AND
+the `do-while` both reverse (verified S154 `crc16_ccitt`'s 8-bit CRC loop) — so the SAME goto-loop fix
+applies: a goto loop carries no `NOTE_INSN_LOOP` notes and is invisible to `loop.c`, so
+`check_dbra_loop` never reverses it, and the delay-slot filler still hoists the loop-top condition
+recompute into the back-branch slot. TELL: byte-exact except the counter runs backwards
+(`li vN,<N-1>`/`addiu -1`/`bgez` vs the ROM's `addiu +1`/`sltiu vN,<N>`/`bnez`). The reversal is BLOCKED
+by a `jal` in the loop, a non-fixed memory read, or any use of the counter in the body (`no_use_except_counting`
+in `loop.c:5761`), so a natural loop matches when one of those holds — TRY NATURAL FORMS FIRST, goto only
+after they demonstrably reverse.
+
+## decomposed-one-tu rodata alignment split (a counter-case to the 8-point decompose gate)
+
+**Rule:** when the 8-point decompose gate splits a one-tu into N `.c`/`.o` files, the LAST piece's
+`.rodata` can be followed IN MEMORY by the NEXT TU's higher-aligned constant (a `.double`, an 8-aligned
+jumptable). The build force-4-aligns every ASM `.rodata` section (`OBJCOPY_ALIGN :=
+--set-section-alignment .rodata=4 ...` in `Makefile`, plus `ASFLAGS --no-pad-sections`), so the
+asm-sourced next-TU rodata canNOT self-8-align at the `.o` boundary: it lands right after the split
+piece's rodata (which ends 4/8 bytes short of the boundary) and every downstream data symbol shifts.
+The C `.o` recipe (`mk/src.mk`, KMC `as`) does NOT get that objcopy, so a C `.o`'s rodata keeps its
+natural (higher) alignment.
+
+**TELL:** clean per-function match (isolated diff shows only relocations), full-make SHA-miss, and
+hundreds of SCATTERED single-byte diffs across the whole text, each `built = base - 4` (or `- 8`) — the
+low byte of a `%lo(D_xxxx)` for every data symbol past the shifted boundary. `verify-rom.sh` fails
+while the `.o` is byte-perfect.
+
+**FIX (S154):** do NOT decompose a one-tu whose tail rodata abuts a higher-aligned next-TU constant —
+keep the whole one-tu as ONE `.c` file. An internal higher-aligned constant (S154: func_8006A000's two
+`2^31` cast `double`s, 16-align) makes the combined section 16/8-aligned, and KMC `as` pads its TAIL to
+the boundary (S154: 48B = 2 doubles + 2 string literals + pad, ending exactly at `0x800D1440` where the
+next TU's 8-aligned double sits). This also keeps format strings as ACTUAL C LITERALS rather than
+`extern D_xxxx[]` refs into the generic asm blob (see [[rodata-strings-as-literals-via-tu-combine]]).
+Splat's per-subseg `align:` is segment-level only (gated by `ld_align_segment_vram_end: False`), so it
+canNOT force an intra-section pad. Weigh rodata-alignment adjacency BEFORE decomposing a one-tu at the
+plan gate.
+
+## capturing $ra (return address) as a call argument
+
+**Rule:** a ROM function that logs its caller's PC does `addu aN, $ra, $0` (copy the return-address
+register into an arg reg) right after the prologue `sw ra`. `__builtin_return_address(0)` does NOT
+produce this on KMC gcc 2.7.2: `RETURN_ADDR_RTX` is undefined for MIPS (`config/mips/`), so
+`expand_builtin_return_addr` (`expr.c:7199`) falls back to a `MEM(frame + Pmode_size)` load — a
+wrong-offset stack read (`lw aN, 4(sp)`), not the register. A `register u32 ra asm("$31")` reads `$ra`
+with the correct `addu` encoding BUT confuses the prologue scheduler: it delays the `sw ra` below the
+string-address load, so the delay-slot filler leaves an unfilled jal slot (`+1 nop`, everything shifts).
+
+**FIX (S154 `report_div_error`):** a `volatile` inline-asm read is the reliable form —
+`__asm__ __volatile__("addu %0, $31, $0" : "=r"(ra));` then use `ra`. gcc allocates `%0` directly to
+the arg register (giving the exact `addu aN, $ra, $0`), and the `volatile` barrier keeps the prologue
+first so the format-string `addiu` fills the jal delay slot (ROM order). TELL you need this: the ROM
+reads `$ra` (reg 31) as a printf/log arg; the naive builtin emits a stack-slot `lw`.
