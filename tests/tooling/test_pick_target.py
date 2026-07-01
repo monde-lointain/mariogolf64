@@ -49,9 +49,12 @@ def test_vendorable_tu_missing_defines(tmp_path, monkeypatch):
     assert pt.vendorable_tu_missing_defines("os/does_not_exist.s") == []
 
     # Synthetic TU: point LIBULTRA at a temp tree, seed the macro denominator directly.
-    monkeypatch.setattr(pt, "LIBULTRA", str(tmp_path))
-    monkeypatch.setattr(
-        pt,
+    # vendorable_tu_missing_defines now lives in pick_target_index; patch the globals it
+    # actually resolves against (its module dict), not the pt re-export alias.
+    g = pt.vendorable_tu_missing_defines.__globals__
+    monkeypatch.setitem(g, "LIBULTRA", str(tmp_path))
+    monkeypatch.setitem(
+        g,
         "_intree_asm_macros",
         lambda: frozenset({"K0BASE", "C0_ENTRYHI", "LEAF", "END"}),
     )
