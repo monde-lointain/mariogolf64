@@ -190,7 +190,13 @@ def existing_names_and_addrs():
     return names, addrs
 
 
-def main():
+# libultra is resident in the boot/main segment; it is NEVER in a relocatable overlay, so an
+# overlay function matching a short libultra opcode-skeleton is a false positive (osSetTime
+# "matching" four ovl stubs). Candidates at/above this vram (or named func_ovl*) are dropped.
+OVERLAY_VRAM = 0x80100000
+
+
+def parse_args():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument(
         "--min-insns",
@@ -203,8 +209,11 @@ def main():
         action="store_true",
         help="also list matches that land in already-`c` subsegs (sanity)",
     )
-    args = ap.parse_args()
+    return ap.parse_args()
 
+
+def resolve_archives():
+    """The present reference archives, or exit with a not-found error. Prints the header."""
     present = [a for a in ARCHIVES if os.path.exists(a)]
     if not present:
         sys.exit(
@@ -212,25 +221,17 @@ def main():
             + "\n  ".join(ARCHIVES)
             + "\n(set MG_LIBULTRA_ARCHIVES, os.pathsep-separated)"
         )
-
     print("reference (union):")
     for a in present:
         print(f"  {a}")
-    by_name, by_sig = build_reference(present)
-    print(
-        f"  {len(by_name)} archive functions, {len(by_sig)} distinct opcode signatures"
-    )
+    return present
 
-    upstream = pt.build_upstream_index()
-    subs = pt.parse_subsegs()
-    claimed_names, claimed_addrs = existing_names_and_addrs()
 
-    # Walk every candidate function once, partition by subseg type. libultra is resident in the
-    # boot/main segment; it is NEVER in a relocatable overlay, so overlay functions matching a
-    # short libultra opcode-skeleton are false positives (osSetTime "matching" four ovl stubs).
-    # Drop them up front (vram in the overlay range, or a func_ovl* name).
-    OVERLAY_VRAM = 0x80100000
-    asm_funcs, c_funcs = [], []  # (rom_off, name, vram, sig, nins)
+def partition_candidates(subs):
+    """Walk every candidate fn once; partition into (asm_funcs, c_funcs), each record
+    (rom_off, name, vram, sig, nins). Overlay matches are dropped up front. Returns
+    (asm_funcs, c_funcs, overlay_skipped)."""
+    asm_funcs, c_funcs = [], []
     overlay_skipped = 0
     for off, typ, _path in subs:
         for nm, vram, words in parse_asm_functions(off):
@@ -239,18 +240,23 @@ def main():
                 continue
             rec = (off, nm, vram, opcode_sig(words), len(words))
             (asm_funcs if typ == "asm" else c_funcs).append(rec)
+    return asm_funcs, c_funcs, overlay_skipped
 
-    # Candidate-side signature frequency: a sig appearing at many candidate addresses is a
-    # generic skeleton (FP-prone for short funcs), independent of reference ambiguity.
-    cand_sig_freq = {}
+
+def candidate_sig_freq(asm_funcs):
+    """Candidate-side signature frequency: a sig appearing at many candidate addresses is a
+    generic skeleton (FP-prone for short funcs), independent of reference ambiguity."""
+    freq = {}
     for _off, _nm, _vram, sig, _nins in asm_funcs:
-        cand_sig_freq[sig] = cand_sig_freq.get(sig, 0) + 1
+        freq[sig] = freq.get(sig, 0) + 1
+    return freq
 
-    # --- calibration (#7): compiled-C libultra funcs still in asm, vs the archive ----------
-    # Two failure buckets: same-length opcode swaps = compiler/flag divergence (a faithful
-    # rebuild with tools/cc/gcc + LIBULTRA_CFLAGS would fix); different-length = a different
-    # source version / impl (rebuild of the same source won't reconcile). Hand-asm (.s) funcs
-    # are excluded — they involve no compiler, so they can't probe gcc fidelity.
+
+def report_calibration(asm_funcs, upstream, by_name):
+    """#7 calibration report (prints only): compiled-C libultra funcs still in asm vs the archive.
+    Two failure buckets: same-length opcode swaps = compiler/flag divergence (a faithful rebuild
+    with tools/cc/gcc + LIBULTRA_CFLAGS would fix); different-length = a different source
+    version/impl. Hand-asm (.s) funcs are excluded — no compiler, so they can't probe gcc fidelity."""
     cal_ok = cal_total = 0
     cal_flag, cal_impl = [], []
     for off, nm, vram, sig, nins in asm_funcs:
@@ -264,86 +270,77 @@ def main():
             else:
                 cal_impl.append((nm, off))  # different length → different impl/version
     print("\n=== calibration (#7: prebuilt-archive gcc vs the ROM) ===")
-    if cal_total:
-        print(
-            f"  {cal_ok}/{cal_total} compiled-C libultra funcs (still asm) opcode-match the archive"
-        )
-        print(
-            f"  {len(cal_flag)} same-length opcode-swaps (compiler/flag divergence — e.g. -funsigned-char lb/lbu)"
-        )
-        print(
-            f"  {len(cal_impl)} different-length (different source version/impl in the prebuilt tree)"
-        )
-        for label, lst in (("flag", cal_flag), ("impl", cal_impl)):
-            for nm, off in lst[:8]:
-                print(f"    [{label}] {nm} @ 0x{off:X}")
-        if cal_ok / cal_total < 0.8:
-            print(
-                "  WARNING: <80% calibration — the prebuilt build/J archive is only a partial reference."
-            )
-            print(
-                "  Trust matches below (full opcode-seq equality is strong); treat NON-matches as"
-            )
-            print(
-                "  'not in this reference', not 'not libultra'. For a complete worklist, rebuild the"
-            )
-            print(
-                "  reference from ultralib source with tools/cc/gcc + LIBULTRA_CFLAGS (plan #7 fallback)."
-            )
-    else:
+    if not cal_total:
         print(
             "  no compiled-C libultra funcs available to calibrate (matcher pipeline unverified for gcc fidelity)"
         )
+        return
+    print(
+        f"  {cal_ok}/{cal_total} compiled-C libultra funcs (still asm) opcode-match the archive"
+    )
+    print(
+        f"  {len(cal_flag)} same-length opcode-swaps (compiler/flag divergence — e.g. -funsigned-char lb/lbu)"
+    )
+    print(
+        f"  {len(cal_impl)} different-length (different source version/impl in the prebuilt tree)"
+    )
+    for label, lst in (("flag", cal_flag), ("impl", cal_impl)):
+        for nm, off in lst[:8]:
+            print(f"    [{label}] {nm} @ 0x{off:X}")
+    if cal_ok / cal_total < 0.8:
+        print(
+            "  WARNING: <80% calibration — the prebuilt build/J archive is only a partial reference."
+        )
+        print(
+            "  Trust matches below (full opcode-seq equality is strong); treat NON-matches as"
+        )
+        print(
+            "  'not in this reference', not 'not libultra'. For a complete worklist, rebuild the"
+        )
+        print(
+            "  reference from ultralib source with tools/cc/gcc + LIBULTRA_CFLAGS (plan #7 fallback)."
+        )
 
-    # --- match every asm-subseg function against the reference ------------------------------
+
+def match_candidates(asm_funcs, c_funcs, by_sig, want_all):
+    """Match every asm-subseg fn against the reference by opcode signature. Returns
+    (validation, worklist, conflicts, notes); each row is
+    (off, name, vram, ref_names, src, nins, ambig, sig)."""
     validation, worklist, conflicts, notes = [], [], [], []
     for off, nm, vram, sig, nins in asm_funcs:
         hits = by_sig.get(sig)
         if not hits:
             continue
         ref_names = sorted({h[0] for h in hits})
-        member = hits[0][1]
-        src = member_src(member)
+        src = member_src(hits[0][1])
         ambig = len(ref_names) > 1
-        row = (off, nm, vram, ref_names, src, nins, ambig)
+        row = (off, nm, vram, ref_names, src, nins, ambig, sig)
         if not nm.startswith("func_"):
-            if nm in ref_names:
-                validation.append(row)  # already named correctly
-            else:
-                conflicts.append(row)  # named X, opcode-matches libultra Y
+            (validation if nm in ref_names else conflicts).append(row)
         else:
             worklist.append(row)  # unnamed func_ -> a libultra match
-
     # matches that fell in already-decompiled `c` subsegs (sanity only)
-    if args.all:
+    if want_all:
         for off, nm, vram, sig, nins in c_funcs:
             if sig in by_sig:
-                notes.append(
-                    (
-                        off,
-                        nm,
-                        vram,
-                        sorted({h[0] for h in by_sig[sig]}),
-                        None,
-                        nins,
-                        False,
-                    )
-                )
+                names = sorted({h[0] for h in by_sig[sig]})
+                notes.append((off, nm, vram, names, None, nins, False, sig))
+    return validation, worklist, conflicts, notes
 
-    def fmt(row):
-        off, nm, vram, ref_names, src, nins, ambig = row
-        vs = f"0x{vram:08X}" if vram is not None else "?"
-        tag = " [AMBIG]" if ambig else ""
-        return (
-            f"  0x{off:X} {vs} {nm:<26} -> {','.join(ref_names)} ({src}, {nins}i){tag}"
-        )
 
+def fmt_row(row):
+    off, nm, vram, ref_names, src, nins, ambig = row[:7]
+    vs = f"0x{vram:08X}" if vram is not None else "?"
+    tag = " [AMBIG]" if ambig else ""
+    return f"  0x{off:X} {vs} {nm:<26} -> {','.join(ref_names)} ({src}, {nins}i){tag}"
+
+
+def print_matches(validation, conflicts):
     print(
         f"\n=== validation: named asm blocks confirmed libultra by opcode ({len(validation)}) ==="
     )
     for row in sorted(validation):
-        print(fmt(row))
-
+        print(fmt_row(row))
     print(
         f"\n=== CONFLICTS: named asm block opcode-matches a DIFFERENT libultra fn ({len(conflicts)}) ==="
     )
@@ -352,9 +349,15 @@ def main():
             "  (likely a name-collision false-positive in pick_target's labeling — verify)"
         )
     for row in sorted(conflicts):
-        print(fmt(row))
+        print(fmt_row(row))
 
-    # worklist: unnamed func_ matches, filtered for disjointness + min length
+
+def emit_worklist(
+    worklist, args, claimed_names, claimed_addrs, cand_sig_freq, overlay_skipped, _leaked_sig
+):
+    """Print the add-only symbol_addrs.txt worklist. `_leaked_sig` reproduces the pre-existing
+    behavior where the common-skeleton frequency read a `sig` leaked from the match loop rather
+    than each row's own signature (fixed in the next commit)."""
     emitted = 0
     print(
         "\n=== symbol_addrs.txt worklist: unnamed libultra blocks (add-only, gate-applied) ==="
@@ -363,14 +366,14 @@ def main():
         "# review before applying; opcode-only match — confirm at the gate. min-insns=%d"
         % args.min_insns
     )
-    for off, nm, vram, ref_names, src, nins, ambig in sorted(worklist):
+    for off, nm, vram, ref_names, src, nins, ambig, sig in sorted(worklist):
         if nins < args.min_insns:
             continue
         name = ref_names[0]
         flags = []
         if ambig:
             flags.append("AMBIG:" + "|".join(ref_names))
-        freq = cand_sig_freq.get(sig, 1)
+        freq = cand_sig_freq.get(_leaked_sig, 1)
         if freq > 1:
             flags.append(f"common-skeleton x{freq}")
         if name in claimed_names:
@@ -399,6 +402,33 @@ def main():
     )
     print(
         "# any still un-named are simply not opcode-unique enough to auto-name (raise --min-insns to trim)."
+    )
+
+
+def main():
+    args = parse_args()
+    present = resolve_archives()
+    by_name, by_sig = build_reference(present)
+    print(
+        f"  {len(by_name)} archive functions, {len(by_sig)} distinct opcode signatures"
+    )
+
+    upstream = pt.build_upstream_index()
+    subs = pt.parse_subsegs()
+    claimed_names, claimed_addrs = existing_names_and_addrs()
+
+    asm_funcs, c_funcs, overlay_skipped = partition_candidates(subs)
+    cand_freq = candidate_sig_freq(asm_funcs)
+    report_calibration(asm_funcs, upstream, by_name)
+    validation, worklist, conflicts, _notes = match_candidates(
+        asm_funcs, c_funcs, by_sig, args.all
+    )
+    print_matches(validation, conflicts)
+    # PRESERVE: main() historically read the `sig` LEFT OVER from the match loop (the last
+    # asm_func's sig) when computing the common-skeleton frequency — see emit_worklist.
+    leaked_sig = asm_funcs[-1][3] if asm_funcs else None
+    emit_worklist(
+        worklist, args, claimed_names, claimed_addrs, cand_freq, overlay_skipped, leaked_sig
     )
 
 
