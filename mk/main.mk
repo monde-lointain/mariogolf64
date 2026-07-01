@@ -5,3 +5,10 @@
 # This overrides the generic src/%.o rule (mk/src.mk) for main/ targets.
 MAIN_CFLAGS := $(CFLAGS) -DF3DEX_GBI_2
 $(BUILD_DIR)/$(SRC_DIR)/main/%.o: C_PROFILE_CFLAGS = $(MAIN_CFLAGS)
+
+# func_8006A000.c (integer vector-magnitude helpers) computes its magnitude with
+# a double sqrt. KMC GCC only emits the bare `sqrt.d` opcode (no errno/NaN guard,
+# matching the ROM) under -ffast-math; the default profile emits a guarded
+# sqrt.d + library `jal sqrt` fallback. Per-file override (the sibling main/ files
+# stay on the plain profile: mgu/mtxutil's float math matched without it).
+$(BUILD_DIR)/$(SRC_DIR)/main/func_8006A000.o: C_PROFILE_CFLAGS := $(MAIN_CFLAGS) -ffast-math

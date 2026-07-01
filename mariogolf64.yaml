@@ -408,6 +408,8 @@ segments:
       - [0xA5FD0, rodata]
       - [0xAC760, rodata]
       - [0xAC770, rodata]
+      - [0xAC810, .rodata, main/func_8006A000]
+      - [0xAC820, rodata]
       - [0xACAD0, rodata]
       - [0xACD00, rodata]
       - [0xAD3B0, .rodata, libmus/player]
