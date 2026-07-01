@@ -49,15 +49,35 @@ the whole cluster, so sibling-pair batching is never punished.
 ```
 blk  : a needs-header that can't be fixed by a companion-copy (unindexed -I / system header,
        e.g. <libaudio.h>, guint.h) → un-pickable, a DoR reject (not a cheap seed)
-13   : size>=1536, or any classical multi-fn pack                  → must decompose
+13   : size>=1536 (huge), or a DECOMPOSABLE classical multi-fn pack (NOT one-tu) → must decompose
+one-tu classical pack (NON-decomposable: one .o / non-16-aligned inner boundaries; nfns<4, not
+       huge): SIZE-graded 3 (tiny <256 B) / 5 (mid) / 8 (big >=768 B); deweight to 3 if `jal-free`
+       (0 callee-resolution cost, size-agnostic under 768 B); +1 if `rodata-straddle` (a >=8-align
+       pooled `ldc1` double makes a decompose hit the OBJCOPY_ALIGN wall, S154); + the same enabler
+       bumps as the mirror path {drop, header-copy, needs-define, recover}. Folds the small classical
+       pack exemption (a1/a2) into the ranker so a decomposed slice reads strictly BELOW its parent.
 8    : nfns>=4 (large pack, any path), or a classical fn that is big/pack/drop/needs-copy
 5    : a small single classical fn (no upstream, unproven, high variance)
 mirror (has upstream): base = 1 if warm else 2;  +1 each for {static/data-drop, header-copy,
        needs-define, recover-extern, pack-or-big};  snap to Fibonacci (4→5, 6→8)
 ```
 `drop` = `file-static`/`defines-data` (classical fallback, defs dropped). `warm` = the mirror
-dir already holds a banked sibling (enabler-free). `big` = size≥768 B, `huge` = ≥1536 B. The
-byte gates are dormant in the current <256 B regime and only bite for large/classical fns.
+dir already holds a banked sibling (enabler-free). `big` = size≥768 B, `huge` = ≥1536 B. Byte
+gates now BITE for a one-tu classical pack (the size-graded rung above); for a non-one-tu
+classical pack they only bite at the large/huge thresholds.
+
+**S155 re-anchor (pts-recalibration; velocity discontinuity, McConnell Ch 19).** The one-tu
+size-graded rung above replaced the flat `classical multi-fn pack → 13` on the tooling branch
+`tooling/pts-recalibration`. `pts` seeds BEFORE S155 are NOT directly comparable to those after:
+a small non-decomposable classical pack that used to read 13 now reads 3/5. Do not compare the
+rolling-5 velocity across the S155 boundary as if the estimation scale were unchanged; re-baseline
+from S155 forward. Empirical anchors (all banked seed-only at the old `pts=13`, ~0 realized
+residual — the measurement the re-weighting calibrates to): S148 `overlay_10/func_ovl10_801F4A40`
+176 B/2fn; S150 `main/func_80029250` cfb pack 496 B/2fn/0-jal; S152 `main/func_8006A000` slice
+384 B/3fn; S153 `main/func_8006A180` 64 B/2fn/jal-free; S154 `[0x455C0]` tail 256 B/3fn (+ the
+800 B/8fn parent). The vein was mined out at recalibration time (0 live rows changed pts), so the
+change is future-proofing; regression safety is the `test_seed_points_characterization` assertions
+pinning those six points.
 
 **S94 note: clean-atomic-mirror seed inflation (display-only, accepted as-is).** A coddog-matched
 AUDIO mirror is NOT re-priced to `libultra`, since the S71 header-`-I`-gate carve-out left audio

@@ -2498,6 +2498,16 @@ by `/sprint-plan`:
   `crc16_ccitt`, `report_div_error`) banked S154 by RECOMBINING the whole `func_8006A000` one-tu into one
   file. See the `## Active phase` S154 BANKED paragraph and `#decomposed-one-tu-rodata-alignment-split`.
 
+- **(S155 DONE, branch `tooling/pts-recalibration`).** Recalibrated: `seed_points` now size-grades a
+  one-tu classical pack of `nfns<4` (tiny <256 B → 3, mid → 5, big → 8; deweight to 3 if `jal-free`;
+  +1 if `rodata-straddle`) + enabler bumps, instead of the flat `classical and pack → 13`. Phase 2a
+  `HAZARD_JAL_FREE` (0-jal deweight, a2) and Phase 2b `HAZARD_RODATA_STRADDLE` + `rodata_double_literals`
+  (the S154 alignment-wall detector) both landed. Golden gate held: formula diff was hazards-column
+  ONLY (new tags on 5 live packs), zero pts/score/size/row-order change. Vein was mined out (0 live
+  rows changed pts) → future-proofing; regression-guarded by the `test_seed_points_characterization`
+  assertions on S148-S154. See VELOCITY.md ## Seed rubric (S155 re-anchor) + CLAUDE.md ## Story points.
+  The original follow-up rationale is retained below for the record.
+
 - **Tooling follow-up (S148, PO-selected #1 companion; deferred to a golden-gated tooling branch, NOT
   a review-gate edit).** Recalibrate `pick_target.py`'s `pts` so it does not over-price tiny
   `none`-upstream classical packs. S148's increment was the SMALLEST candidate (176B, 2fn) yet priced
