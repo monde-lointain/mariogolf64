@@ -9,7 +9,29 @@ otherwise an empty/absent SRC_OBJ_TREE would silently pin only the fallback.
 
 from __future__ import annotations
 
-from conftest import load_tool
+import os
+
+import pytest
+from conftest import golden_dir, load_tool, regen  # noqa: F401
+from conftest import run_tool
+
+
+def test_worklist_golden(golden_dir, regen):
+    """End-to-end characterization of the whole matcher pipeline (partition -> calibrate ->
+    match -> emit-worklist) in one shot; a diff after refactoring = a behavior change. Env-gated:
+    the union reference archives must be present (skipped on a checkout with no built ultralib).
+    HOME-normalized so the golden is host-portable."""
+    lm = load_tool("libultra_match")
+    if not any(os.path.exists(a) for a in lm.ARCHIVES):
+        pytest.skip("no libultra reference archive present")
+    proc = run_tool("libultra_match", "--min-insns", "5")
+    assert proc.returncode == 0, proc.stderr
+    out = proc.stdout.replace(os.path.expanduser("~"), "~")
+    gpath = golden_dir / "libultra_match.txt"
+    if regen or not gpath.exists():
+        gpath.write_text(out)
+        pytest.skip(f"golden regenerated: {gpath.name}")
+    assert out == gpath.read_text()
 
 
 def test_member_src_index_hit_and_fallback(tmp_path, monkeypatch):
