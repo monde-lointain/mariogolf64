@@ -589,7 +589,7 @@ def _coddog_rows(pt, monkeypatch, *, ui, carried, coddog):
             ),
         },
     )
-    return pt.build_rows(A(), ui, carried, {}, coddog)
+    return pt.build_rows(A(), pt.Indexes(ui, {}, coddog, {}, {}, {}), carried)
 
 
 def test_coddog_tail_overrides_carried_namedrop(monkeypatch):
@@ -865,10 +865,15 @@ def test_coddog_tail_trap_rescan(monkeypatch):
     )
     rows = pt.build_rows(
         A(),
-        {"namedLeader": ("libultra", "/x/wrong.c")},
+        pt.Indexes(
+            {"namedLeader": ("libultra", "/x/wrong.c")},
+            {},
+            {"func_1100": ("src/io/piacs.c", 99.99)},
+            {},
+            {},
+            {},
+        ),
         set(),
-        {},
-        {"func_1100": ("src/io/piacs.c", 99.99)},
     )
     hit = next(r for r in rows if r["func"] == "namedLeader")
     assert "coddog-mirror:src/io/piacs.c@99.99" in hit["hazards"]
@@ -907,7 +912,7 @@ def _hazard_rows(pt, monkeypatch, *, subs, classify, ui, coddog):
             ),
         },
     )
-    return pt.build_rows(A(), ui, set(), {}, coddog)
+    return pt.build_rows(A(), pt.Indexes(ui, {}, coddog, {}, {}, {}), set())
 
 
 def test_coddog_partial_twin_subset(monkeypatch):
@@ -1029,13 +1034,15 @@ def test_coddog_nusys_repricing(monkeypatch):
     )
     # un-named func_1000 coddog-matched a nusys source -> re-price libnusys + flag.
     rows = pt.build_rows(
-        A(), {}, set(), {}, {}, {"func_1000": ("mainlib/nusimgr.c", 99.99)}
+        A(),
+        pt.Indexes({}, {}, {}, {"func_1000": ("mainlib/nusimgr.c", 99.99)}, {}, {}),
+        set(),
     )
     row = next(r for r in rows if r["func"] == "func_1000")
     assert row["upstream"] == "libnusys", row
     assert "coddog-mirror:mainlib/nusimgr.c@99.99" in row["hazards"], row["hazards"]
     # absent nusys map -> no-op: stays unclassified (the libultra path is untouched).
-    rows0 = pt.build_rows(A(), {}, set(), {}, {}, {})
+    rows0 = pt.build_rows(A(), pt.Indexes({}, {}, {}, {}, {}, {}), set())
     assert next(r for r in rows0 if r["func"] == "func_1000")["upstream"] is None
 
 

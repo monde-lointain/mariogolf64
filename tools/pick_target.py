@@ -3767,6 +3767,20 @@ class Indexes:
     audio: dict
     audio_roots: dict
 
+    @classmethod
+    def build(cls):
+        """Construct the full catalog from the on-disk index builders (the six
+        build_*_index passes). Used by main(); tests construct Indexes directly with
+        synthetic maps."""
+        return cls(
+            build_upstream_index(),
+            build_signature_index(),
+            build_coddog_index(),
+            build_coddog_nusys_index(),
+            build_audio_indexes(),
+            build_audio_pin_roots(),
+        )
+
 
 def _build_row(off, typ, path, size, args, idx, carried, _libultra_band_start):
     """Classify one subseg and produce its scored row dict, or None to skip it (bss,
@@ -3855,23 +3869,7 @@ def _build_row(off, typ, path, size, args, idx, carried, _libultra_band_start):
     return score_row(cand, st.hazards, carried)
 
 
-def build_rows(
-    args,
-    upstream_index,
-    carried,
-    sig_index,
-    coddog_index=None,
-    nusys_index=None,
-    audio_indexes=None,
-    audio_roots=None,
-):
-    coddog_index = coddog_index or {}
-    nusys_index = nusys_index or {}
-    audio_indexes = audio_indexes or {}
-    audio_roots = audio_roots or {}
-    idx = Indexes(
-        upstream_index, sig_index, coddog_index, nusys_index, audio_indexes, audio_roots
-    )
+def build_rows(args, idx, carried):
     subs = parse_subsegs()
     # The lowest-rom `libultra/` subseg = the start of the libultra code band. A libultra-source
     # mirror BELOW it is game-region (-O2), not libultra-band (-O3) — feeds HAZARD_GAME_REGION_MIRROR.
@@ -3914,16 +3912,7 @@ def main():
     ap.add_argument("--json", action="store_true")
     args = ap.parse_args()
 
-    rows = build_rows(
-        args,
-        build_upstream_index(),
-        carry_over_names(),
-        build_signature_index(),
-        build_coddog_index(),
-        build_coddog_nusys_index(),
-        build_audio_indexes(),
-        build_audio_pin_roots(),
-    )
+    rows = build_rows(args, Indexes.build(), carry_over_names())
     if args.json:
         print(json.dumps(rows, indent=1))
         return
