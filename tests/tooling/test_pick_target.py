@@ -19,6 +19,14 @@ from conftest import golden_dir, load_tool, regen, run_tool  # noqa: F401
 ROWS = "50"
 
 
+def _classify_globals(pt):
+    """Post-split, the hazard detectors live in pick_target_classify. A test that stubs a
+    constant/helper those detectors read must patch the module dict they resolve names
+    against (patching pt.<name> rebinds only pt's re-export alias, not the reader's global).
+    Any classify fn's __globals__ IS that module dict."""
+    return pt.classify_subseg.__globals__
+
+
 @pytest.fixture(autouse=True)
 def _no_live_nusys_map(monkeypatch):
     """Keep the live, gitignored, build-dependent coddog maps (tools/coddog/nusys_map.tsv +
@@ -145,6 +153,7 @@ def test_gbi_value_guard_needs_define(tmp_path, monkeypatch):
     flagged needs-define when NO guard microcode define is active, and clean when one is. Also
     confirms LIBULTRA_CFLAGS's -DF3DEX_GBI_2 / -DBUILD_VERSION reach the libultra active-define set."""
     pt = load_tool("pick_target")
+    cg = _classify_globals(pt)
 
     # Part A: the live Makefile's LIBULTRA_CFLAGS defines now reach the libultra active set
     # (previously libultra fell through to the bare main CFLAGS, hiding the GBI define).
@@ -165,8 +174,8 @@ def test_gbi_value_guard_needs_define(tmp_path, monkeypatch):
     cand = tmp_path / "sptask.c"
     cand.write_text("void f(void){ g(p + OS_YIELD_DATA_SIZE - 4); }\n")
 
-    monkeypatch.setattr(pt, "INCLUDE_DIRS", [str(inc)])
-    monkeypatch.setattr(pt, "LIB_EXTRA_INCLUDE_DIRS", {})
+    monkeypatch.setitem(cg, "INCLUDE_DIRS", [str(inc)])
+    monkeypatch.setitem(cg, "LIB_EXTRA_INCLUDE_DIRS", {})
     pt._gbi_guarded_macros.cache_clear()
 
     # the value-guard shape is detected (guard defines preserved in source order)
@@ -175,19 +184,19 @@ def test_gbi_value_guard_needs_define(tmp_path, monkeypatch):
     }
 
     # no GBI define active → flagged, canonical F3DEX_GBI_2 reported
-    monkeypatch.setattr(
-        pt, "_active_defines_for_lib", lambda lib: frozenset({"_FINALROM"})
+    monkeypatch.setitem(
+        cg, "_active_defines_for_lib", lambda lib: frozenset({"_FINALROM"})
     )
     assert pt.gbi_value_guard_needs_define(str(cand), "libultra") == "F3DEX_GBI_2"
 
     # F3DEX_GBI_2 active → the macro resolves, no flag (the standing LIBULTRA_CFLAGS case)
-    monkeypatch.setattr(
-        pt, "_active_defines_for_lib", lambda lib: frozenset({"F3DEX_GBI_2"})
+    monkeypatch.setitem(
+        cg, "_active_defines_for_lib", lambda lib: frozenset({"F3DEX_GBI_2"})
     )
     assert pt.gbi_value_guard_needs_define(str(cand), "libultra") is None
 
     # a candidate that never uses the macro → no flag even with nothing active
-    monkeypatch.setattr(pt, "_active_defines_for_lib", lambda lib: frozenset())
+    monkeypatch.setitem(cg, "_active_defines_for_lib", lambda lib: frozenset())
     other = tmp_path / "other.c"
     other.write_text("void h(void){ return; }\n")
     assert pt.gbi_value_guard_needs_define(str(other), "libultra") is None
@@ -200,6 +209,7 @@ def test_header_renames_symbol(tmp_path, monkeypatch):
     pre-flagged so the `#undef <fn>` enabler is priced at the gate. Verifies transitive reach,
     exact-name (`\\b`) matching, and no false-flag for a sibling the shim does not rename."""
     pt = load_tool("pick_target")
+    cg = _classify_globals(pt)
     inc = tmp_path / "inc"
     inc.mkdir()
     # transitive chain: candidate.c -> os_internal.h -> os_host.h (the renaming shim)
@@ -207,7 +217,7 @@ def test_header_renames_symbol(tmp_path, monkeypatch):
     (inc / "os_internal.h").write_text('#include "os_host.h"\n')
     cand = tmp_path / "initialize.c"
     cand.write_text('#include "os_internal.h"\nvoid __osInitialize_common(){ }\n')
-    monkeypatch.setattr(pt, "INCLUDE_DIRS", [str(inc)])
+    monkeypatch.setitem(cg, "INCLUDE_DIRS", [str(inc)])
 
     # the curated leader is renamed by a transitively-included header → flagged with that header
     assert pt.header_renames_symbol(str(cand), "__osInitialize_common") == "os_host.h"
@@ -229,6 +239,7 @@ def test_wrong_ghidra_name_override(tmp_path, monkeypatch):
     _upstream_defines_function distinguishes it from the S85 source-compat rename (body DOES define
     the macro name); _macro_alias_target names the correction target for the wrong-ghidra-name tag."""
     pt = load_tool("pick_target")
+    cg = _classify_globals(pt)
     inc = tmp_path / "inc"
     inc.mkdir()
     (inc / "os_motor.h").write_text(
@@ -241,7 +252,7 @@ def test_wrong_ghidra_name_override(tmp_path, monkeypatch):
         "s32 __osMotorAccess(OSPfs* pfs, s32 flag) { return flag; }\n"
         "s32 osMotorInit(OSMesgQueue* mq, OSPfs* pfs, int ch) { return 0; }\n"
     )
-    monkeypatch.setattr(pt, "INCLUDE_DIRS", [str(inc)])
+    monkeypatch.setitem(cg, "INCLUDE_DIRS", [str(inc)])
 
     # the header macro-renames osMotorStop ...
     assert pt.header_renames_symbol(str(cand), "osMotorStop") == "os_motor.h"
@@ -535,6 +546,7 @@ def test_caller_evict_flag(tmp_path, monkeypatch):
     eviction). Verifies: a real call site is mapped; the own-stub line is not counted; an
     un-referenced func_ is absent."""
     pt = load_tool("pick_target")
+    cg = _classify_globals(pt)
     src = tmp_path / "src"
     (src / "main").mkdir(parents=True)
     (src / "libultra" / "io").mkdir(parents=True)
@@ -548,7 +560,7 @@ def test_caller_evict_flag(tmp_path, monkeypatch):
         '#include "common.h"\n'
         'INCLUDE_ASM("asm/nonmatchings/libultra/io/spgetstat", func_800B16A0);\n'
     )
-    monkeypatch.setattr(pt, "ROOT", str(tmp_path))
+    monkeypatch.setitem(cg, "ROOT", str(tmp_path))
     pt.src_func_callers.cache_clear()
     callers = pt.src_func_callers()
     assert callers.get("func_800B16A0") == ["src/main/caller.c"], callers
@@ -639,12 +651,13 @@ def test_resolve_include_vendored_basename_fallback(tmp_path, monkeypatch):
     it and refs_unplaced no longer phantom-flags a struct TYPE it typedefs as an unplaced data extern
     (the __OSContRequesFormatShort false-positive on pfsgetstatus.c)."""
     pt = load_tool("pick_target")
+    cg = _classify_globals(pt)
     inc = tmp_path / "inc"
     (inc / "internal").mkdir(parents=True)
     (inc / "internal" / "controller.h").write_text(
         "typedef struct {\n    int rxsize;\n} __OSContRequesFormatShort;\n"
     )
-    monkeypatch.setattr(pt, "INCLUDE_DIRS", [str(inc), str(inc / "internal")])
+    monkeypatch.setitem(cg, "INCLUDE_DIRS", [str(inc), str(inc / "internal")])
     # exact prefixed path misses; basename `controller.h` resolves under internal/
     assert pt._resolve_include("PRinternal/controller.h") == str(
         inc / "internal" / "controller.h"
@@ -696,6 +709,7 @@ def test_call_divergence_strips_inactive_version_branch(monkeypatch):
     non-J `__osPfsRequestOneChannel(channel)` inflated 6→7, a phantom `7vs6` on a byte-clean mirror).
     Without the lib's build_ord (None → 0) the strip is a no-op and the phantom returns."""
     pt = load_tool("pick_target")
+    cg = _classify_globals(pt)
     # _upstream_body returns the brace body (no signature line), so name only real call sites.
     body = (
         "#if BUILD_VERSION >= VERSION_J\n"
@@ -705,10 +719,10 @@ def test_call_divergence_strips_inactive_version_branch(monkeypatch):
         "#endif\n"
         "    bar();\n"
     )
-    monkeypatch.setattr(pt, "_upstream_body", lambda cp, pr: body)
-    monkeypatch.setattr(pt, "_asm_jal_count", lambda off, pr: 2)  # J build: foo + bar
-    monkeypatch.setattr(
-        pt,
+    monkeypatch.setitem(cg, "_upstream_body", lambda cp, pr: body)
+    monkeypatch.setitem(cg, "_asm_jal_count", lambda off, pr: 2)  # J build: foo + bar
+    monkeypatch.setitem(
+        cg,
         "_build_version_ord",
         lambda lib: load_tool("build_config")._VERSION_ORD["VERSION_J"] if lib else 0,
     )
@@ -725,17 +739,18 @@ def test_call_divergence_libnusys_intmask_version_artifact(monkeypatch):
     so smallest-first is not deterred from a clean near-verbatim drop (nuContRmbModeSet `2vs0`). The
     flag is libnusys-only and requires the surplus (n_c - n_asm) to equal the osSetIntMask count."""
     pt = load_tool("pick_target")
+    cg = _classify_globals(pt)
     body = (
         "    OSIntMask mask;\n"
         "    mask = osSetIntMask(OS_IM_NONE);\n"
         "    foo(a);\n"
         "    osSetIntMask(mask);\n"
     )  # 3 calls C-side; leaf asm omits the 2 wrapper calls
-    monkeypatch.setattr(pt, "_upstream_body", lambda cp, pr: body)
-    monkeypatch.setattr(
-        pt, "_asm_jal_count", lambda off, pr: 1
+    monkeypatch.setitem(cg, "_upstream_body", lambda cp, pr: body)
+    monkeypatch.setitem(
+        cg, "_asm_jal_count", lambda off, pr: 1
     )  # leaf-ish: only foo survives
-    monkeypatch.setattr(pt, "_build_version_ord", lambda lib: 0)
+    monkeypatch.setitem(cg, "_build_version_ord", lambda lib: 0)
     d = pt.call_divergence(0x1000, "ff", "x.c", "libnusys")
     assert d is not None and d.detail == "3vs1(version-artifact?)"
     # non-libnusys: same body, no version annotation (the wrapper tell is nusys-family specific)
@@ -837,6 +852,7 @@ def test_coddog_tail_trap_rescan(monkeypatch):
         include_stuck = False
         n = 999
 
+    cg = _classify_globals(pt)
     monkeypatch.setattr(pt, "parse_subsegs", lambda: [(0x1000, "asm", None)])
     monkeypatch.setattr(
         pt,
@@ -849,10 +865,11 @@ def test_coddog_tail_trap_rescan(monkeypatch):
     )
     monkeypatch.setattr(pt, "src_func_callers", lambda: {})
     monkeypatch.setattr(pt, "append_upstream_hazards", lambda *a, **k: ("warm", False))
-    # asm-reading helpers: off=0x1000 is synthetic, return empty so only the upstream .c is read.
-    monkeypatch.setattr(pt, "recover_unplaced_vram", lambda off: [])
-    monkeypatch.setattr(pt, "recover_unplaced_call_vram", lambda off, primary: [])
-    monkeypatch.setattr(pt, "rodata_jtbls", lambda off: [])
+    # asm-reading helpers: off=0x1000 is synthetic, return empty so only the upstream .c is
+    # read. These feed the classify trap battery, so patch the classify module dict.
+    monkeypatch.setitem(cg, "recover_unplaced_vram", lambda off: [])
+    monkeypatch.setitem(cg, "recover_unplaced_call_vram", lambda off, primary: [])
+    monkeypatch.setitem(cg, "rodata_jtbls", lambda off: [])
     monkeypatch.setattr(
         pt,
         "score_row",
