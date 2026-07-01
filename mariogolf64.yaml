@@ -90,7 +90,7 @@ segments:
       - [0x17B0, asm]
       - [0x3700, c, libnusys/nugfxinit]
       - [0x37B0, c, libnusys/nusched]
-      - [0x4650, asm]
+      - [0x4650, c, main/func_80029250]
       - [0x4840, c, libnusys/nugfxtaskmgr]
       - [0x4CE0, asm]
       - [0x5A40, asm]
