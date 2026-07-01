@@ -86,7 +86,7 @@ segments:
     bss_size: 0x122100
     subsegments:
       - [0x1050, c, libnusys/nupireadrom]
-      - [0x1130, asm]
+      - [0x1130, c, main/func_80025D30]
       - [0x17B0, asm]
       - [0x3700, c, libnusys/nugfxinit]
       - [0x37B0, c, libnusys/nusched]

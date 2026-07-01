@@ -68,7 +68,7 @@ SECTIONS
         FILL(0x00000000);
         main_TEXT_START = .;
         build/src/libnusys/nupireadrom.o(.text);
-        build/asm/1130.o(.text);
+        build/src/main/func_80025D30.o(.text);
         build/asm/17B0.o(.text);
         build/src/libnusys/nugfxinit.o(.text);
         build/src/libnusys/nusched.o(.text);
@@ -343,7 +343,7 @@ SECTIONS
         main_TEXT_SIZE = ABSOLUTE(main_TEXT_END - main_TEXT_START);
         main_DATA_START = .;
         build/src/libnusys/nupireadrom.o(.data);
-        build/asm/1130.o(.data);
+        build/src/main/func_80025D30.o(.data);
         build/asm/17B0.o(.data);
         build/src/libnusys/nugfxinit.o(.data);
         build/src/libnusys/nusched.o(.data);
@@ -633,7 +633,7 @@ SECTIONS
         main_DATA_SIZE = ABSOLUTE(main_DATA_END - main_DATA_START);
         main_RODATA_START = .;
         build/src/libnusys/nupireadrom.o(.rodata);
-        build/asm/1130.o(.rodata);
+        build/src/main/func_80025D30.o(.rodata);
         build/asm/17B0.o(.rodata);
         build/src/libnusys/nugfxinit.o(.rodata);
         build/src/libnusys/nusched.o(.rodata);
@@ -925,7 +925,7 @@ SECTIONS
         FILL(0x00000000);
         main_BSS_START = .;
         build/src/libnusys/nupireadrom.o(.bss);
-        build/asm/1130.o(.bss);
+        build/src/main/func_80025D30.o(.bss);
         build/asm/17B0.o(.bss);
         build/src/libnusys/nugfxinit.o(.bss);
         build/src/libnusys/nusched.o(.bss);
