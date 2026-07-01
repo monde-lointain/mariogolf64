@@ -1601,7 +1601,24 @@ permuter. Go straight to the in-tree spot-check / full-make ROM SHA-1, which is 
 S43 `osGbpakGetStatus` scored 15 / 99.8% this way (76/76 rows, empty mismatches) and the full make
 matched the baserom unchanged.
 
-**Procedure:** Trust the in-tree spot-check, not the isolated score.
+**Inverse trap: the isolated score can UNDER-report an intra-fn instruction-SCHEDULING reorder
+(S150).** The artifact signal above is a FALSE-CLEAR direction (isolated looks worse than reality).
+The opposite also happens: isolated looks BETTER than reality. When your candidate and the target
+share the same instructions but in a different ORDER (a scheduling reorder, e.g. a load hoisted to
+the top of a block vs kept near its use), asm-differ's alignment matches the moved instruction across
+its move and nets only the surrounding reloc noise, so the isolated `score`/`match_count` reads
+near-perfect while the full-make ROM SHA still MISSES. S150 `cfb_setup`: the isolated diff showed
+44/45 rows (only the `D_800B67A4+0x2` vs `D_800B67A6` reloc-addend row), yet the full make missed on
+an else-branch `lw framebuf[2]` that the target hoisted to the block head and the build kept late.
+**Recipe:** when the isolated diff reads "near-perfect / artifact" but the full-make SHA misses, do
+NOT trust the isolated score. Localize with `cmp -l build/mariogolf64.z64 baserom.z64 | head`: the
+first field is the 1-based DECIMAL byte offset, so `rom = offset - 1` (hex it, map to the function
+via the subseg rom base), and the differing bytes point at the exact mismatched instructions. Fix
+the source (an ordering swap, or force an early read into a temp to hoist a load) and re-`cmp` to
+converge. The full-make ROM SHA-1 is the only authority; the isolated score is advisory in BOTH
+directions.
+
+**Procedure:** Trust the in-tree spot-check / full-make SHA, not the isolated score.
 
 ---
 

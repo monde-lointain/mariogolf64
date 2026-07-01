@@ -25,6 +25,15 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 150 — func_80029250.c (cfb_setup + cfb_set_num — game-custom nusys CFB setup; 2nd classical Epic-2 pack) — 2026-06-30
+- Increment: 1 file banked (`src/main/func_80029250.c`) / **2 functions matched** (`cfb_setup` = the game's rewritten `nuGfxSetCfb`; `cfb_set_num` = dynamic active-framebuffer-count change, widely called). md5-candidate **208→209**; matched +2; asm subsegs 85→**84** (`[0x4650]` retired).
+- Quality: 0/0/0/0 (stuck-far/permuter/carried/re-opened).
+- Seed: committed 13pt; banked 13pt; regime classical. v2: seed 13; realized 13; residual 0 (no escalation fired: not first-build so no −1 verbatim-first-try, the 2 fixes were routine classical convergence not a novel gotcha so no +1; capped at the 13 Fibonacci ceiling; the over-pricing is a SEED issue = pts-recalibration follow-up, not a residual one — same shape as S149).
+- What helped: (1) **asm-first seed** straight from `asm/4650.s` (Ghidra had `func_` only) — the pack is a pure global data-shuffle (0 `jal`), so plain `extern` decls + the ROM-SHA-1 gate was nearly the whole loop. (2) **Isolated `decomp_loop`** localized the first fix fast (the `num==3` `nuGfxCfbNum` store-order, from the `> nuGfxCfbNum` insertion rows). (3) **`cmp -l build vs baserom`** localized the second fix when the isolated diff read near-perfect (the else-branch load hoist). (4) `nugfxtaskmgr.c`'s existing `extern u8 D_800B67A4[]` + the stock nusys `nuGfxSetCfb` source confirmed the CFB rotation-state model up front.
+- Friction: (1) the **8-gate false-fired** again (496B priced pts-13) and decompose was one-tu-blocked, forcing a PO 8-gate question — the recurring pts-overpricing symptom (now softened by the new (a2) exemption branch; root fix still the tracked recalibration). (2) the **isolated `decomp_loop` UNDER-reported a scheduling reorder** — 44/45 rows, reloc-addend noise only, yet the full-make SHA missed on a hoisted `lw framebuf[2]`; asm-differ matched the moved load across its move. Cost one full-make miss before `cmp` localized it.
+- Applied: PO-selected 2 of 3 — #3 `docs/hazards.md#isolated-compile-caveat` inverse-trap note (scheduling-reorder under-report + the `cmp -l` localize recipe); #1 CLAUDE.md small-pack exemption generalized to a new **(a2) 0-call size-agnostic** branch (+ BACKLOG pts-recalibration reinforced as a 2nd data point). (#2 asm-first fast-path confirmation = positive signal, no edit.)
+- Carry-over: none (file fully banked). Cross-repo name follow-up: `cfb_setup`/`cfb_set_num` → `sync_decomp_names.py --import-from-decomp`.
+
 ## Sprint 149 — src/libnusys/nuboot.c COMPLETE (game-embedded nusys boot: nuBoot + idle) — 2026-06-30
 - Increment: 1 file banked (`src/libnusys/nuboot.c`) / **2 functions matched** (`nuBoot` cart entry + `idle` boot thread — the game's copy of nusys `nuboot.c`). md5-candidate **207→208**; matched +2; asm subsegs 85→**84** (`[0x748B0]` retired).
 - Quality: 0/0/0/0 (stuck-far/permuter/carried/re-opened).

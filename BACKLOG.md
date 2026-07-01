@@ -29,6 +29,24 @@ tell) is carved to its LIBRARY tree (`libnusys/<file>`), not `main/<stem>` — y
 placement unchanged (see `CLAUDE.md` path convention). A per-FILE -O0 override is the one mk edit a
 boot/SDK-glue TU may need.
 
+**S150 BANKED — `src/main/func_80029250.c` (`cfb_setup` + `cfb_set_num`, game-custom nusys CFB setup).**
+The 2-fn one-tu `[0x4650]` main-segment pack is the game's customized nusys color-framebuffer
+management: `cfb_setup` is the rewritten `nuGfxSetCfb` (drives a custom `D_800B67A4[]` advance-table /
+`D_800B67A0` held-ptr rotation instead of stock's `nuGfxRetraceWait`/`nuScSetFrameBufferNum`),
+`cfb_set_num` dynamically changes the active framebuffer count (widely called from gameplay/course/
+overlay code). Pure global data-shuffle, **0 `jal`**. Asm-first seed; compiled clean but full-make
+SHA-MISSED, converged in 2 codegen fixes (no permuter): `num==3` `nuGfxCfbNum` store-order, and an
+else-branch `framebuf[2]` load-hoist (early temp). The **8-gate false-fired again** (496B pts-13,
+one-tu decompose-blocked); PO ran it as-is and the retro GENERALIZED the small-pack exemption to a new
+**(a2) 0-call size-agnostic** branch (`CLAUDE.md ## Story points`). md5-candidate **208→209**; matched
++2; asm subsegs 85→**84**. Quality 0/0/0/0; seed 13 / realized 13 / residual 0; regime classical.
+Retro applied 2 of 3 (#3 `docs/hazards.md#isolated-compile-caveat` scheduling-reorder inverse-trap +
+`cmp`-localize recipe; #1 the (a2) exemption branch; #2 asm-first confirmation = no edit). **Cross-repo
+follow-up:** `cfb_setup`/`cfb_set_num` → `sync_decomp_names.py --import-from-decomp` (Ghidra had `func_`
+only). No carry-overs. **2nd data point for the pts-recalibration follow-up** (a tiny none-upstream
+one-tu pack priced pts-13; the (a2) branch handles the gate symptom by-hand, the pricing fix is the
+root).
+
 **S149 BANKED — `src/libnusys/nuboot.c` (the game-embedded nusys boot: `nuBoot` + `idle`).** The 2-fn
 `[0x748B0]` main-segment pack is the game's nusys `nuboot.c` (cart entry + idle thread). Asm-first
 seed built first-try but the full-make SHA-MISSED: **root cause was the PROFILE, not the C** — the boot
@@ -2408,6 +2426,12 @@ by `/sprint-plan`:
   feeds the displayed estimate and the 8-gate, a load-bearing surface, so re-weighting needs the
   golden-gated + reassess-checkpoint discipline (byte-identical goldens on the ranker output) to avoid
   silently reshuffling the smallest-first sort. Companion to the small-pack exemption text.
+  **S150 2nd data point:** `main/func_80029250` (`cfb_setup`+`cfb_set_num`, 496B, 2fn, one-tu, 0 `jal`)
+  also priced `pts=13` and false-fired the 8-gate. It exceeded the exemption's original `<256B` cap, so
+  the retro added a `(a2) 0-call size-agnostic` exemption branch by-hand — but that is a 2nd by-hand
+  patch on the same root mispricing. Two false-fires in three sprints; the recalibration should now
+  weight raw byte-size AND deweight/floor a `0-jal` one-tu pack (a `jal`-free pack has no
+  callee-resolution cost, so its true effort is far below the nfns/one-tu bumps that inflate its pts).
 
 - **Name follow-up (S148; near-free, do at the next gate with Ghidra up).** `func_ovl10_801F4A40` and
   `func_ovl10_801F4AD8` (`src/overlay_10/func_ovl10_801F4A40.c`, banked S148) kept `func_` placeholder

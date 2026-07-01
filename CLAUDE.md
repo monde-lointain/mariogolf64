@@ -229,16 +229,20 @@ the summary.
   bank stall. Expect it to fire once the mirror band is mined out and classical units dominate.
   - **Small classical pack exemption (S148; the classical analog of the verbatim-mirror exemption).**
     A `regime: classical` (or `mixed`) increment may run as a normal 1-increment sprint despite an 8/13
-    seed when ALL of these hold: (a) the increment is a single subseg pack of **<=2 fns AND <256B total
-    AND `one-tu`**, so decompose-into-independent-singletons is mechanically blocked (the inner fn
-    boundary is non-16-aligned or the fns share a TU's rodata/data, so you cannot independently compile
-    half a one-tu); and (b) each fn is short and self-contained (no permuter-class control flow). Like
-    the verbatim-mirror exemption, the all-or-nothing concern is moot at this size: a 2-fn tiny pack
-    banks atomically (or is a quick spike), so a size-only 8/13 is a false fire (the size-pts
-    mis-prices tiny none-upstream packs; see the pts-recalibration follow-up). Document the exemption in
-    `SPRINT.md ## Estimate`; it never covers a pack of 3+ fns, a >=256B fn, or any unit that needs the
-    permuter. S148 `overlay_10/func_ovl10_801F4A40` (2fn, 176B, one-tu, pts-13) banked first-build
-    seed-only under this exemption.
+    seed when ALL of these hold: (a) the increment is a single subseg pack of **<=2 fns AND `one-tu`**
+    that is EITHER (a1) **<256B total**, OR (a2) **`0 calls` (`jal`-free), size-agnostic** (S150), so
+    decompose-into-independent-singletons is mechanically blocked (the inner fn boundary is
+    non-16-aligned or the fns share a TU's rodata/data, so you cannot independently compile half a
+    one-tu); and (b) each fn is short and self-contained (no permuter-class control flow). Like the
+    verbatim-mirror exemption, the all-or-nothing concern is moot here: such a pack banks atomically
+    (or is a quick spike), so a size-only 8/13 is a false fire (the size-pts mis-prices tiny
+    none-upstream packs; see the pts-recalibration follow-up). The (a2) `0-call` branch drops the size
+    cap because a `jal`-free pack has no callee-resolution work and, with (b), no permuter-class
+    control flow, so it stays a bounded codegen-convergence exercise regardless of byte size (S150 was
+    a pure global data-shuffle). Document the exemption + which branch (a1/a2) in `SPRINT.md ## Estimate`;
+    it never covers a pack of 3+ fns, a unit that needs the permuter, or (under a1) a `>=256B` fn.
+    S148 `overlay_10/func_ovl10_801F4A40` (2fn, 176B, one-tu, pts-13) banked seed-only under (a1); S150
+    `main/func_80029250` (`cfb_setup`+`cfb_set_num`, 2fn, 496B, one-tu, 0 calls, pts-13) banked under (a2).
   - **Verbatim-mirror exemption (S64; generalized S69).** A seed-8/13 increment may run as a normal
     1-increment sprint when ALL of these hold:
     - (a) `regime: mirror` plus a verbatim copy of a single upstream file. A drop-def mirror
