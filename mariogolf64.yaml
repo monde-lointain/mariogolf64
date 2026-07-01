@@ -107,6 +107,7 @@ segments:
       - [0x2B800, asm]
       - [0x2BFF0, asm]
       - [0x2D290, asm]
+      - [0x2D470, c, main/func_80052070]
       - [0x2D5C0, asm]
       - [0x2E3E0, asm]
       - [0x2FD00, asm]
