@@ -6,16 +6,12 @@
 MAIN_CFLAGS := $(CFLAGS) -DF3DEX_GBI_2
 $(BUILD_DIR)/$(SRC_DIR)/main/%.o: C_PROFILE_CFLAGS = $(MAIN_CFLAGS)
 
-# func_8006A000.c (integer vector-magnitude helpers) computes its magnitude with
-# a double sqrt. KMC GCC only emits the bare `sqrt.d` opcode (no errno/NaN guard,
-# matching the ROM) under -ffast-math; the default profile emits a guarded
-# sqrt.d + library `jal sqrt` fallback. Per-file override (the sibling main/ files
-# stay on the plain profile: mgu/mtxutil's float math matched without it).
+# func_8006A000.c is the whole main-segment math one-tu (0x8006A000-0x8006A2C0).
+# Its double-precision magnitudes (calculate_*_safe) emit a bare `sqrt.d`, and its
+# single-precision helpers (hypotf_2d, calc_vec3_magnitude) a bare `sqrt.s`; both
+# are the BUILT_IN_FSQRT builtin (identical expr.c path, mode DF->sqrtdf2 vs
+# SF->sqrtsf2). Without -ffast-math KMC GCC guards each with a c.eq/bc1t NaN check
+# + library `jal sqrt` fallback the ROM lacks; -ffast-math drops the guard to the
+# bare opcode. Per-file override (sibling main/ files stay on the plain -O2 profile;
+# mgu/mtxutil's float math matched without it).
 $(BUILD_DIR)/$(SRC_DIR)/main/func_8006A000.o: C_PROFILE_CFLAGS := $(MAIN_CFLAGS) -ffast-math
-
-# func_8006A180.c (the [0x45580] tail of the same math one-tu) does the same, but
-# single-precision: hypotf_2d's `sqrtf` is the BUILT_IN_FSQRT builtin (identical
-# expr.c path to double sqrt, mode SF -> sqrtsf2). Without -ffast-math it emits a
-# c.eq.s/bc1t NaN guard + `jal sqrt` fallback (verified vs align.o); the ROM has a
-# bare sqrt.s, so it needs the same -ffast-math (not a separate sqrtf-intrinsic path).
-$(BUILD_DIR)/$(SRC_DIR)/main/func_8006A180.o: C_PROFILE_CFLAGS := $(MAIN_CFLAGS) -ffast-math

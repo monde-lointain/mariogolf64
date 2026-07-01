@@ -627,3 +627,5 @@ IdleStack = 0x800E5030; // size:0x2000 allow_duplicated:True
 nuIdleFunc = 0x80132398; // size:0x4 allow_duplicated:True
 glistp = 0x801B93DC; // size:0x4
 set_rng_seed = 0x8006A174; // type:func
+crc16_ccitt = 0x8006A1EC; // type:func
+report_div_error = 0x8006A274; // type:func
