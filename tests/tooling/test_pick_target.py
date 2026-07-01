@@ -1316,6 +1316,75 @@ def test_seed_points_characterization():
     assert (
         sp(100, "libnusys", "cold", 1, [H(JAL, "2vs0(version-artifact?)")], False) == 2
     )
+    # --- one-tu size-graded classical pack (pts-recalibration) ------------------------------
+    # A `one-tu` classical pack is mechanically non-decomposable, so the 8-gate's "must decompose"
+    # 13 is a false fire: size-grade it (tiny<256→3, mid→5, big→8, huge→13) + enabler load, folding
+    # the by-hand small classical pack exemption (a1/a2) into the ranker. Data points S148-S154.
+    one = [H(pt.HAZARD_ONE_TU)]
+    assert sp(64, "none", "-", 2, one, False) == 3  # S153 64B/2fn head slice
+    assert sp(176, "none", "-", 2, one, False) == 3  # S148 176B/2fn (smallest candidate)
+    assert sp(256, "none", "-", 3, one, False) == 5  # S154 256B/3fn tail
+    assert sp(384, "none", "-", 3, one, False) == 5  # S152 384B/3fn slice
+    assert sp(496, "none", "-", 2, one, False) == 5  # S150 496B/2fn cfb pack
+    assert (  # S150 is 0-jal (pure data-shuffle) → a2 deweight to 3, size-agnostic under 768B
+        sp(496, "none", "-", 2, [H(pt.HAZARD_ONE_TU), H(pt.HAZARD_JAL_FREE)], False) == 3
+    )
+    assert sp(1000, "none", "-", 3, one, False) == 8  # big one-tu (768-1536B) → 8
+    assert sp(2000, "none", "-", 2, one, False) == 13  # huge one-tu escapes to 13
+    assert sp(800, "none", "-", 8, one, False) == 13  # 8fn parent: 4+fn stays at the decompose gate
+    # Scoping guard: a bare classical pack WITHOUT one-tu is genuinely decomposable → UNCHANGED 13.
+    assert sp(100, "none", "-", 2, [], False) == 13
+    # Enabler accounting: a one-tu slice that also needs a header-copy costs +1 (3+1 → snap 5).
+    assert (
+        sp(176, "none", "-", 2, [H(pt.HAZARD_ONE_TU), H(pt.HAZARD_NEEDS_HEADER, "x.h")], False)
+        == 5
+    )
+    # rodata-straddle: a decompose-blocking pooled double bumps the slice +1 (5+1 → snap 8).
+    assert (
+        sp(256, "none", "-", 3, [H(pt.HAZARD_ONE_TU), H(pt.HAZARD_RODATA_STRADDLE, "0x1")], False)
+        == 8
+    )
+
+
+def _pack_hazard_kinds(pt, monkeypatch, *, jal, doubles):
+    """Drive _classify_pack_hazards on a synthetic pure-classical 2-fn one-tu pack. `jal` is the
+    per-member jal count `_asm_jal_count` returns; `doubles` the pooled ldc1-double vrams. Returns
+    the set of hazard kinds emitted."""
+    cg = _classify_globals(pt)
+    # one-tu: 2 addrs, the 2nd non-16-aligned. Pure classical: empty asm-TU index + upstream index.
+    monkeypatch.setitem(cg, "asm_function_addrs", lambda off: [("func_a", 0x1000), ("func_b", 0x1004)])
+    monkeypatch.setitem(cg, "build_asm_tu_index", lambda: {})
+    monkeypatch.setitem(cg, "_asm_jal_count", lambda off, nm: jal)
+    monkeypatch.setitem(cg, "rodata_double_literals", lambda off: list(doubles))
+    monkeypatch.setitem(cg, "_literal_in_rodata", lambda a, off: True)
+    hz = cg["_classify_pack_hazards"](0xDEAD, ["func_a", "func_b"], {})
+    return {h.kind for h in hz}
+
+
+def test_classify_pack_emits_jal_free_and_rodata_straddle(monkeypatch):
+    """A pure-classical one-tu pack surfaces jal-free (every member 0-jal) + rodata-straddle (a
+    pooled >=8-align double), the two decompose-cost signals seed_points consumes."""
+    pt = load_tool("pick_target")
+    kinds = _pack_hazard_kinds(pt, monkeypatch, jal=0, doubles=[0x800D1440])
+    assert pt.HAZARD_ONE_TU in kinds
+    assert pt.HAZARD_JAL_FREE in kinds
+    assert pt.HAZARD_RODATA_STRADDLE in kinds
+
+
+def test_classify_pack_no_jal_free_when_member_calls(monkeypatch):
+    """A jal-bearing member suppresses jal-free; no pooled double suppresses rodata-straddle."""
+    pt = load_tool("pick_target")
+    kinds = _pack_hazard_kinds(pt, monkeypatch, jal=2, doubles=[])
+    assert pt.HAZARD_ONE_TU in kinds
+    assert pt.HAZARD_JAL_FREE not in kinds
+    assert pt.HAZARD_RODATA_STRADDLE not in kinds
+
+
+def test_classify_pack_jal_free_needs_all_members_known(monkeypatch):
+    """`_asm_jal_count` None (asm absent) is UNKNOWN, not 0 — a None member blocks the jal-free tag."""
+    pt = load_tool("pick_target")
+    kinds = _pack_hazard_kinds(pt, monkeypatch, jal=None, doubles=[])
+    assert pt.HAZARD_JAL_FREE not in kinds
 
 
 def test_score_row_characterization():

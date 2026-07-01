@@ -29,6 +29,7 @@ from decomp_asm import (
     privileged_asm,
     recover_unplaced_call_vram,
     recover_unplaced_vram,
+    rodata_double_literals,
     rodata_jtbls,
     rodata_literals,
     rodata_word_refs,
@@ -1396,9 +1397,24 @@ def _classify_pack_hazards(off, fns, upstream_index):
     # single-file-pack structurally even when members are un-named (the coddog-mirror case),
     # and marks a per-fn decompose split as mechanically blocked. Sufficient, not necessary:
     # a one-.o pack with a 16-multiple-sized member won't fire (conservative).
-    addrs = [a for _, a in asm_function_addrs(off)]
-    if len(addrs) == len(fns) and all(a % 16 != 0 for a in addrs[1:]):
+    named_addrs = asm_function_addrs(off)
+    addrs = [a for _, a in named_addrs]
+    is_one_tu = len(addrs) == len(fns) and all(a % 16 != 0 for a in addrs[1:])
+    if is_one_tu:
         hz.append(Hazard.one_tu())
+    # For a PURE-classical one-tu pack (no C upstream, no vendorable asm TU = the game-code set
+    # seed_points size-grades), surface the two decompose-cost signals right after one-tu, in a
+    # DETERMINISTIC position (keeps the golden diff minimal):
+    #   jal-free       = every member has 0 `jal` → no callee-resolution work (pts a2-deweight).
+    #   rodata-straddle = the pooled .rodata holds a >=8-aligned `ldc1` double → decomposing hits the
+    #                     OBJCOPY_ALIGN wall (S154); gate advice to keep the one-tu as ONE .c.
+    if is_one_tu and not c_stems and not asm_tus:
+        jal_counts = [_asm_jal_count(off, nm) for nm, _ in named_addrs]
+        if jal_counts and all(c == 0 for c in jal_counts):  # None (asm absent) => unknown, not 0
+            hz.append(Hazard.jal_free())
+        doubles = [a for a in rodata_double_literals(off) if _literal_in_rodata(a, off)]
+        if doubles:
+            hz.append(Hazard.rodata_straddle(doubles))
     # C analog of combined-subseg: ≥2 *distinct* C upstream files share one asm subseg → a
     # multi-file C-mirror pack the gate splits at the upstream-file boundary, then mirrors each
     # verbatim. A big combined subseg ranks by its WHOLE size and buries a cheap clean leaf past

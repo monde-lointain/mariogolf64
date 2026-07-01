@@ -21,6 +21,7 @@ from pick_target_config import (
     FILE_STATIC_RE,
     HUGE_FN_BYTES,
     PACK_DECOMPOSE_NFNS,
+    SMALL_PACK_BYTES,
     UPSTREAM_BONUS,
     UpstreamSource,
 )
@@ -29,10 +30,13 @@ from pick_target_hazards import (
     HAZARD_CALLS_UNPLACED,
     HAZARD_DEFINES_DATA,
     HAZARD_FILE_STATIC,
+    HAZARD_JAL_FREE,
     HAZARD_NEEDS_DEFINE,
     HAZARD_NEEDS_HEADER,
+    HAZARD_ONE_TU,
     HAZARD_PACK,
     HAZARD_REFS_UNPLACED,
+    HAZARD_RODATA_STRADDLE,
     HAZARD_SINGLE_FILE_PACK,
     Hazard,
 )
@@ -87,6 +91,25 @@ def seed_points(size, upstream, band, nfns, hazards, blocked):
     )
     big = size >= BIG_FN_BYTES
     huge = size >= HUGE_FN_BYTES
+    # Non-decomposable classical pack: `one-tu` = every inner fn boundary is non-16-aligned, so the
+    # pack is ONE .o (shared rodata/data) and a per-fn decompose split is mechanically BLOCKED. The
+    # 8-gate's "must decompose" 13 is therefore a FALSE fire — the pack banks atomically as one
+    # vertical slice (S148/S150/S152/S153/S154; folds the by-hand small classical pack exemption
+    # a1/a2 into the ranker). Price it by SIZE (graded), then add the enabler load, so a decomposed
+    # slice reads strictly BELOW its parent pack. The nfns<PACK_DECOMPOSE_NFNS cap is deliberate: a
+    # 4+fn pack is a genuine "large pack, decompose" candidate that stays at the gate; a genuinely
+    # huge one-tu (>=1536B) still flags 13 (size, not fn-count, is the risk there). See VELOCITY.md
+    # + CLAUDE.md ## Story points. Display-only, like the rest of seed_points.
+    if classical and HAZARD_ONE_TU in kinds and not huge and nfns < PACK_DECOMPOSE_NFNS:
+        base = 8 if big else (5 if size >= SMALL_PACK_BYTES else 3)
+        if HAZARD_JAL_FREE in kinds and not big:
+            base = min(base, 3)  # 0-jal: no callee-resolution cost (exemption a2, size-agnostic)
+        # Enabler load, same groups the mirror path sums (a one-tu pack that ALSO needs a
+        # header-copy / data-drop / symbol-recovery is more work than a bare slice).
+        base += sum(1 for x in (drop, needs_copy, recover, present["needs_define"]) if x)
+        if HAZARD_RODATA_STRADDLE in kinds:
+            base += 1  # a >=8-aligned pooled constant makes a decompose hit the align wall (S154)
+        return snap_fib(base)
     if huge or (classical and pack):
         return 13  # must decompose; never a 1-increment sprint
     if nfns >= PACK_DECOMPOSE_NFNS:

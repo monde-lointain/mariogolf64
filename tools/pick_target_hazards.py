@@ -44,6 +44,11 @@ HAZARD_ONE_TU = (
 # 16-aligns each .o's .text start, so any second .o begins on a 16 boundary). Confirms a
 # single-file-pack structurally even when members are un-named, and signals that a per-fn decompose
 # split is mechanically blocked.
+HAZARD_JAL_FREE = (
+    "jal-free"  # a classical none-upstream pack whose every member has 0 `jal` (no callee
+)
+# resolution work) → the pts seed a2-deweights it (its true effort is far below the nfns/one-tu
+# bumps that would otherwise inflate it; S150 cfb pack was a pure global data-shuffle, 0 jal).
 HAZARD_CODDOG_FNCOUNT_MISMATCH = (
     "coddog-fncount-mismatch"  # a coddog-mirror file defines FEWER fns
 )
@@ -77,6 +82,13 @@ HAZARD_RODATA_LITERAL = "rodata-literal"
 HAZARD_RODATA_JTBL = (
     "rodata-jtbl"  # a switch jump table the mirror re-emits → .rodata sibling carve
 )
+HAZARD_RODATA_STRADDLE = (
+    "rodata-straddle"  # a one-tu classical pack whose pooled .rodata holds a >=8-aligned
+)
+# constant (a `ldc1` double): OBJCOPY_ALIGN force-4-aligns every asm .rodata, so decomposing the
+# pack scatters every downstream `%lo(D_)` by 4/8 (the S154 alignment wall). Gate advice = keep the
+# one-tu as ONE .c; the pts seed +1s the size-graded slice. See
+# docs/hazards.md#decomposed-one-tu-rodata-alignment-split.
 HAZARD_DATA_STATIC = "data-static"
 HAZARD_TWIN_OF = "twin-of"
 HAZARD_REMAINING = "remaining"
@@ -337,6 +349,11 @@ class Hazard:
         return cls(HAZARD_ONE_TU)
 
     @classmethod
+    def jal_free(cls) -> "Hazard":
+        """A classical pack whose every member is 0-jal (no detail)."""
+        return cls(HAZARD_JAL_FREE)
+
+    @classmethod
     def non16align(cls) -> "Hazard":
         """A non-16-aligned inner boundary (no detail)."""
         return cls(HAZARD_NON16ALIGN)
@@ -432,6 +449,11 @@ class Hazard:
     def rodata_jtbl(cls, addrs) -> "Hazard":
         """Comma list of `0x%08X` switch-jtbl vrams (sorted)."""
         return cls(HAZARD_RODATA_JTBL, ",".join(f"0x{a:08X}" for a in sorted(addrs)))
+
+    @classmethod
+    def rodata_straddle(cls, addrs) -> "Hazard":
+        """Comma list of `0x%08X` >=8-aligned pooled-rodata vrams (sorted) that block a decompose."""
+        return cls(HAZARD_RODATA_STRADDLE, ",".join(f"0x{a:08X}" for a in sorted(addrs)))
 
     @classmethod
     def data_static(cls, addrs) -> "Hazard":

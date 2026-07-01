@@ -58,6 +58,41 @@ def test_rodata_literals_include_sibling_function(asm):
     assert asm.rodata_literals(0xDEADBE) == [0x800D2520, 0x800D2540]
 
 
+# rodata_double_literals is the 8-align SUBSET of rodata_literals: an `ldc1` double (8-align) trips
+# the decomposed-one-tu alignment wall (S154); a `lwc1` float (4-align) does not. A mixed fixture
+# proves the discrimination.
+MIXED_FP_ASM = """\
+glabel fnC
+/* 2000 800A0000 3C01800D */  lui   $at, %hi(D_800D3000)
+/* 2004 800A0004 D4223000 */  ldc1  $f2, %lo(D_800D3000)($at)
+/* 2008 800A0008 C4243100 */  lwc1  $f4, %lo(D_800D3100)($at)
+/* 200C 800A000C 03E00008 */  jr    $ra
+endlabel fnC
+"""
+
+
+@pytest.fixture
+def mixed_fp_asm(tmp_path, monkeypatch):
+    """Load decomp_asm with asm_path pinned to a listing mixing an ldc1 double + an lwc1 float."""
+    mod = load_tool("decomp_asm")
+    f = tmp_path / "F00D.s"
+    f.write_text(MIXED_FP_ASM)
+    monkeypatch.setattr(mod, "asm_path", lambda rom_off: str(f))
+    return mod
+
+
+def test_rodata_double_literals_excludes_float(mixed_fp_asm):
+    """Only the 8-align `ldc1` double is a straddle tell; the 4-align `lwc1` float is excluded."""
+    assert mixed_fp_asm.rodata_double_literals(0xF00D) == [0x800D3000]
+    # The rodata_literals superset still sees both (ldc1 AND lwc1).
+    assert mixed_fp_asm.rodata_literals(0xF00D) == [0x800D3000, 0x800D3100]
+
+
+def test_rodata_double_literals_absent_file(mixed_fp_asm, monkeypatch):
+    monkeypatch.setattr(mixed_fp_asm, "asm_path", lambda rom_off: "/no/such/asm.s")
+    assert mixed_fp_asm.rodata_double_literals(0xF00D) == []
+
+
 def test_rodata_word_refs_include_sibling_function(asm):
     """Integer 2nd-word refs are also scanned whole-subseg (sibling fnB's lw)."""
     assert asm.rodata_word_refs(0xDEADBE) == [0x800D2544]

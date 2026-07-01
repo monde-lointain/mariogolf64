@@ -287,6 +287,12 @@ BAND_WARM_BONUS = 64
 BIG_FN_BYTES = 768
 HUGE_FN_BYTES = 1536
 PACK_DECOMPOSE_NFNS = 4
+# The tiny/mid boundary for a NON-decomposable (one-tu) classical pack: below it a pack is priced
+# a tier lower (the smallest atomic slices — S148 176B, S153 64B). A one-tu pack is mechanically
+# un-splittable (shared .o rodata/data, non-16-aligned inner boundaries), so the 8-gate's "must
+# decompose" 13 is a false fire; seed_points size-grades it (tiny<256 -> 3, mid -> 5, big -> 8)
+# instead. See VELOCITY.md and CLAUDE.md ## Story points (small classical pack exemption).
+SMALL_PACK_BYTES = 256
 
 # Banked block-reorder mirror families, keyed by upstream-file basename PREFIX. MG64's per-file nusys
 # revision reorders two source blocks vs every archived SDK (the GBPak F-variants run the RAM-enable

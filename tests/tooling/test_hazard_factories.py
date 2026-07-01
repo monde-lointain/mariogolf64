@@ -82,6 +82,10 @@ def test_address_list_factories():
         H.rodata_jtbl([0x80001000, 0x80000000]).render()
         == f"{h.HAZARD_RODATA_JTBL}:0x80000000,0x80001000"
     )
+    assert (
+        H.rodata_straddle([0x800D1440, 0x800D1430]).render()
+        == f"{h.HAZARD_RODATA_STRADDLE}:0x800D1430,0x800D1440"
+    )
     assert H.data_static([0x80000000]).render() == f"{h.HAZARD_DATA_STATIC}:0x80000000"
     assert H.defines_data(["a", "b"]).render() == f"{h.HAZARD_DEFINES_DATA}:a,b"
     assert (
@@ -162,6 +166,7 @@ def test_no_detail_factories():
     assert H.one_tu().render() == h.HAZARD_ONE_TU
     assert H.non16align().render() == h.HAZARD_NON16ALIGN
     assert H.file_static().render() == h.HAZARD_FILE_STATIC
+    assert H.jal_free().render() == h.HAZARD_JAL_FREE
 
 
 def test_passthrough_detail_factories():

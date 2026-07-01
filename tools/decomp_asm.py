@@ -385,6 +385,22 @@ def rodata_literals(rom_off):
     return _scan_rodata(rom_off, RODATA_LITERAL_RE)
 
 
+# The 8-aligned SUBSET of RODATA_LITERAL_RE: a `ldc1` loads a `double` (8 bytes, 8-align), whereas a
+# `lwc1` loads a `float` (4 bytes, 4-align). Only the 8-align double trips the decomposed-one-tu
+# alignment wall (OBJCOPY_ALIGN force-4-aligns every asm .rodata, so a split piece cannot preserve an
+# 8-align constant across the .o boundary; docs/hazards.md#decomposed-one-tu-rodata-alignment-split).
+RODATA_DOUBLE_RE = re.compile(r"\bldc1\b[^\n]*%lo\(D_(?:ovl\d+_)?([0-9A-Fa-f]{8})\)")
+
+
+def rodata_double_literals(rom_off):
+    """VRAMs of the 8-aligned `double` constants the *whole subseg* loads via `ldc1 %lo(D_<addr>)` in
+    asm/<ROM>.s — the >4-aligned pooled rodata that blocks a clean one-tu decompose (S154). A subset
+    of rodata_literals (which also matches 4-aligned `lwc1` floats). The caller band-filters to
+    code-segment `.rodata` (a data-segment double is a placed/static ref, not a pooled literal).
+    Returns a sorted list of distinct addresses."""
+    return _scan_rodata(rom_off, RODATA_DOUBLE_RE)
+
+
 # Integer loads of an anonymous pooled constant: `lw/lwu/ld $r, %lo(D_<addr>)($reg)`. GCC moves a
 # pooled `double` into an FP register pair with two `lw`s + `mtc1`s (not `ldc1`), so the 2nd (+ any
 # further) word of a rodata literal block is invisible to RODATA_LITERAL_RE's FP-only scan.
