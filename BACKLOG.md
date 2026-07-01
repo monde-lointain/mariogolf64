@@ -29,6 +29,29 @@ tell) is carved to its LIBRARY tree (`libnusys/<file>`), not `main/<stem>` — y
 placement unchanged (see `CLAUDE.md` path convention). A per-FILE -O0 override is the one mk edit a
 boot/SDK-glue TU may need.
 
+**S156 BANKED — `src/main/func_80052070.c` (4-fn jal-free scenario/terrain config-accessor slice,
+carved off the `func_80051E90` jtbl pair).** The smallest main-segment classical candidate
+`func_80051E90` (6-fn pack, pts-13) carries a rodata jump table (`jtbl_800CCC30`) only in its first
+2 fns; the LOWER 4 (`func_80052070`/`func_800520DC`/`func_80052100`/`func_80052168`) are jal-free with
+no local rodata, so they carved cleanly at the 16-aligned `0x2D470` boundary as a seed-5 sub-slice
+(the 8-gate DECOMPOSE via the new `docs/hazards.md#multi-function-segment-splitting-pack` jal-free
+sub-slice strategy), leaving the jtbl pair asm. All 4 are terrain/scenario config getters over extern
+game globals; seeded asm-first (Ghidra MCP returned stale `_NON_MATCHING` bodies). Two codegen nudges,
+no permuter: invert-the-guard regalloc coloring + array-index `+` operand-order (both now documented
+in `#register-reuse-nudge`). md5-candidate 210→211 (+1); +4 matched; asm subsegs 82→82 (the
+`[0x2D290,asm]` jtbl-pair remainder stays). Names kept `func_` (Ghidra had none). **First post-S155
+decomposed classical slice priced BELOW the old flat-13 (seed 5), validating the recalibrated rubric.**
+**Tracked tooling follow-up (S156):** teach `pick_target.py` to auto-detect a pack's carve-able
+sub-slice — a CONTIGUOUS run of members all (a) `jal`-free AND (b) referencing no TU-local rodata
+(`rodata-jtbl`/`straddle`/`literal` absent on those members; an already-placed jtbl/table is an
+extern, not a blocker), bounded by 16-aligned ROM offsets — and emit an advisory
+`subslice-carve:<lo>-<hi>@<pts>` flag with the sub-slice's own seed. Data is available (`_asm_jal_count`
+per member + member addrs); needs a new hazard kind + factory + render format + score-neutral
+integration + hazard-index row + golden regen, so it runs OFF-CADENCE on a golden-gated branch
+(`make test-tools`, `REGEN_GOLDEN=1`) per the tooling-refactor policy, not at a review gate. Until
+then the gate applies the strategy MANUALLY by reading the pack's `.s`. Also a pts data point: a
+jal-free accessor sub-slice realized 5 (the recalibrated ranker priced it 5, not the old 13).
+
 **S154 BANKED — `src/main/func_8006A000.c` (math/RNG one-tu now **8/8 fns** — banked the `[0x455C0]`
 3-fn tail AND RECOMBINED the S152/S153 3+2+3 decomposition into one file).** `calc_vec3_magnitude`
 (`sqrtf(x²+y²+z²)`, bare single `sqrt.s`, 3rd arg z in GPR `$a2`), `crc16_ccitt` (was `func_8006A1EC`;
@@ -2493,6 +2516,21 @@ by `/sprint-plan`:
   vendored upstream version can diverge from the game's rev on a single immediate (S122 nusys-2.07
   `NU_CONT_THREAD_ID=6` vs MG64's 5), and that surfaces only at first build unless reconciled here.
   A near-free retry missing any of these is a half-scoped spike — finish the scope before deferring.
+
+- **(S156 spike) `func_80051E90` + `func_80051FCC` jtbl pair — `[0x2D290, asm]` (the upper 2 fns of
+  the region S156 carved).** The S156 sub-slice took the lower 4 jal-free accessors and left this
+  2-fn head as asm (their inner boundary `0x2D3CC` is non-16-aligned, so they carve only as a pair,
+  and the pair starts at the 16-aligned `0x2D290`). **DoD blocker:** `func_80051E90` (0x13C) is a
+  `switch`-style dispatch that reads the rodata jump table `jtbl_800CCC30` (vram `0x800CCC30`, NOT yet
+  placed/named). To match, the classical `switch` must emit its jtbl at exactly `0x800CCC30` → a
+  `rodata-jtbl` sibling carve (`docs/hazards.md#rodata-sibling-yaml-pattern`), the real work of this
+  carry. `func_80051FCC` (0xA4) is the EASY sibling — jal-free, extern refs only (`D_801B608C`,
+  `D_801B6098`, `scenario_mode_id`, the `D_800C1B28` byte-table, `g_terrain_vtx_xform_mode`), plus a
+  magic-multiply `0x55555556` (signed /3-or-mod) — but the file banks only when BOTH match, so the
+  jtbl is the gating item. Retry plan: (1) flip `[0x2D290, c, main/func_80051E90]`; (2) seed both
+  asm-first from `asm/2D290.s`; (3) resolve/place `jtbl_800CCC30` + its sibling `.rodata` carve at the
+  gate; (4) the accessors' externs are already resolved (S156 placed none new — all auto/named).
+  Extern-decl types from the asm loads (`lb`→`s8`, `lw`→`s32`; `scenario_mode_id` is SIGNED via `slti`).
 
 - **(S154 BANKED, removed from carry-overs)** The 3-fn `[0x455C0]` tail (`calc_vec3_magnitude`,
   `crc16_ccitt`, `report_div_error`) banked S154 by RECOMBINING the whole `func_8006A000` one-tu into one

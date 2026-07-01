@@ -1489,6 +1489,21 @@ a leaf still needs manual identification (S64 `cosf` was found by disassembly, r
 
 **Sub-cases / variants:**
 
+**Decompose strategy — carve a pack's jal-free + rodata-free sub-slice first (S156).** A `none`-upstream
+classical pack priced 8/13 by the 8-gate can hold a clean, low-risk sub-slice: a CONTIGUOUS run of
+members that are all (a) `jal`-free (no callee resolution) AND (b) reference no TU-LOCAL rodata (no
+`rodata-jtbl`/`rodata-straddle`/`rodata-literal` on those members — an ALREADY-placed/named jtbl or
+data table is an extern ref, which does NOT block a carve), whose start (and, if not the pack tail,
+end) is a 16-aligned ROM boundary. Such members compile position-independently (branches are
+fn-local, data refs are `%hi/%lo` externs), so splitting them into their own `.o` is byte-neutral —
+carve just that sub-slice as `[0x<16aligned>, c, <tree>/<lead-fn>]` and leave the rest asm. This
+sidesteps the harder members (a jtbl-carrying head, a `jal`-heavy tail) and banks the easy accessors
+atomically. S156 `func_80051E90` (6-fn pack, pts-13): the first 2 fns carry `jtbl_800CCC30`; the
+LOWER 4 (`func_80052070`/`func_800520DC`/`func_80052100`/`func_80052168`) are jal-free with no local
+rodata, so they carved cleanly at the 16-aligned `0x2D470` boundary and banked as a seed-5 sprint,
+leaving the jtbl pair asm. The ranker does not yet auto-suggest the sub-slice (a tracked follow-up);
+apply this manually at the plan gate by reading the pack's `.s` for `jal`s and rodata `%lo` refs.
+
 **Inter-file stray leaf: `unattrib-leaf:0x<vram>` (S120).** Within a `c-combined` pack, a lone `=?`
 member whose nearest named-C members BEFORE and AFTER resolve to DIFFERENT stems straddles the
 file boundary — the split must consciously assign it to one singleton, or a silent `?` rides into the
@@ -1580,6 +1595,25 @@ pressure.
 
 **Provenance:** S11 (flipped score 400→0 in one iteration).
 
+**Variant — inverted-guard for a `return DEFAULT` tail (S156).** For `if (cond) return A; return
+DEFAULT;` where the guard variable lands in the WRONG scratch reg (mine `slti v0`/`beqz v0`, target
+`slti v1`/`beqz v1`) — same branch encoding, result correctly in `v0`, only the guard temp differs —
+INVERT the guard: `if (!cond) return DEFAULT; return A;`. The two forms emit the identical `slti`+
+`beqz` (gcc computes `cond` and branches on its negation either way), but inverting swaps which value
+is the fall-through, which flips the pseudo COLORING so the guard temp goes to `v1` and the returned
+value to `v0` (no trailing `move v0,v1`; the `beqz` delay slot becomes `move v0,zero`/`nop`). Root
+cause: `REG_ALLOC_ORDER` is UNDEFINED in the KMC `config/mips/mips.h`, so gcc 2.7.2 falls back to
+default ascending order (`$2`/`v0` before `$3`/`v1`); whichever pseudo is processed first greedily
+grabs `v0`, and inverting the guard reorders that. S156 `func_800520DC` + the `func_80052070`
+scenario-tail (`if (scenario_mode_id >= 12) return 0; return D_801B6098;`).
+
+**Variant — array-index `+` operand order picks the `v0` accumulator (S156).** For `arr[termA +
+termB]` where both terms are strength-reduced multiplies, gcc computes the RIGHT `+` operand's term
+into `v0` (the accumulator that receives the final `addu v0,v0,v1`) and the LEFT into `v1`. So to
+make the target's "computed-into-`v0` term" match, put that term on the RIGHT of the `+`. S156:
+`arg0*200 + arg1*10` put `arg1*10` in `v0` (target did `a1*10` first); `scenario*12 + D_801B6098*2`
+put `D_801B6098*2` in `v0`. Same value, same instructions, only the two multiply blocks swap order.
+
 ---
 
 ## isolated-compile caveat
@@ -1630,6 +1664,16 @@ from the instruction listing.
 
 **Provenance:** S11 (Ghidra rendered `func_800AB600`'s return as `return 0` when the asm returns
 `(status>>8)&1`).
+
+**A `_NON_MATCHING`-suffixed MCP decompile = distrust the WHOLE body, not just types (S156).** When
+the Ghidra function name in the MCP decompile carries a `.NON_MATCHING` suffix (or the plate comment
+cites a prior non-matching attempt), the cached pseudocode can be ACTIVELY WRONG, not merely
+imprecise: it may return a literal `0` with no body, or render a phantom operation the bytes do not
+contain. S156's four accessors: `func_80052100`/`func_80052168` both decompiled to `return 0;` (no
+body at all), and `func_80052070`/`func_800520DC` showed a phantom `DAT_801b6098 >> 0x1f` where the
+raw bytes `8C426098` are a plain `lw` with NO shift. The asm-first fast-path ignored all of it and
+matched. Treat a `_NON_MATCHING` decompile as shape-only-if-that (often not even shape); the `.s` is
+the sole authority.
 
 ---
 
