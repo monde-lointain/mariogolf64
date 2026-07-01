@@ -3752,25 +3752,34 @@ def _row_filtered(st, args, path, carried, cod_srcs):
     return st.primary in carried and not args.include_stuck and not st.cod_members
 
 
-def _build_row(
-    off,
-    typ,
-    path,
-    size,
-    args,
-    upstream_index,
-    carried,
-    sig_index,
-    coddog_index,
-    nusys_index,
-    audio_indexes,
-    audio_roots,
-    _libultra_band_start,
-):
+@dataclasses.dataclass(frozen=True)
+class Indexes:
+    """The cross-reference catalog build_rows/_build_row/_resolve_* consult together:
+    the six lookup tables that always travel as a unit. Bundled into one parameter
+    object so the per-subseg _build_row takes one catalog instead of six indexes
+    (Introduce Parameter Object). coddog/nusys/audio/audio_roots are normalized to {}
+    by build_rows before construction."""
+
+    upstream: dict
+    signature: tuple
+    coddog: dict
+    nusys: dict
+    audio: dict
+    audio_roots: dict
+
+
+def _build_row(off, typ, path, size, args, idx, carried, _libultra_band_start):
     """Classify one subseg and produce its scored row dict, or None to skip it (bss,
     scope-filtered, or a de-ranked carry-over). The per-subseg body of build_rows;
     the resolved identity lives on a _RowState (st) the coddog/nusys passes rebind in
-    place as they run."""
+    place as they run. `idx` is the Indexes catalog, unpacked below into the local
+    index names the body and resolve passes use."""
+    upstream_index = idx.upstream
+    sig_index = idx.signature
+    coddog_index = idx.coddog
+    nusys_index = idx.nusys
+    audio_indexes = idx.audio
+    audio_roots = idx.audio_roots
     classified = classify_subseg(off, typ, path, size, upstream_index)
     if classified is None:
         return None
@@ -3860,6 +3869,9 @@ def build_rows(
     nusys_index = nusys_index or {}
     audio_indexes = audio_indexes or {}
     audio_roots = audio_roots or {}
+    idx = Indexes(
+        upstream_index, sig_index, coddog_index, nusys_index, audio_indexes, audio_roots
+    )
     subs = parse_subsegs()
     # The lowest-rom `libultra/` subseg = the start of the libultra code band. A libultra-source
     # mirror BELOW it is game-region (-O2), not libultra-band (-O3) — feeds HAZARD_GAME_REGION_MIRROR.
@@ -3870,19 +3882,7 @@ def build_rows(
     for i, (off, typ, path) in enumerate(subs):
         size = subs[i + 1][0] - off if i + 1 < len(subs) else 0
         row = _build_row(
-            off,
-            typ,
-            path,
-            size,
-            args,
-            upstream_index,
-            carried,
-            sig_index,
-            coddog_index,
-            nusys_index,
-            audio_indexes,
-            audio_roots,
-            _libultra_band_start,
+            off, typ, path, size, args, idx, carried, _libultra_band_start
         )
         if row is not None:
             rows.append(row)

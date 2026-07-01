@@ -69,19 +69,17 @@ def _row(
     for name, fn in defaults.items():
         monkeypatch.setattr(pt, name, fn)
     args = types.SimpleNamespace(lib=lib, include_stuck=False)
+    idx = pt.Indexes(
+        upstream_index, {}, coddog_index, nusys_index, audio_indexes, audio_roots
+    )
     return pt._build_row(
         0x1000,
         "asm",
         None,
         size,
         args,
-        upstream_index,
+        idx,
         carried,
-        {},
-        coddog_index,
-        nusys_index,
-        audio_indexes,
-        audio_roots,
         libultra_band_start,
     )
 
@@ -277,3 +275,37 @@ def test_block_reorder_sibling(pt, monkeypatch):
         stubs={"_block_reorder_sibling": lambda up, hz, lib_: "siblings.c"},
     )
     assert "block-reorder-sibling:siblings.c" in row["hazards"]
+
+
+# --- Indexes parameter-object wiring (the autouse-blanked paths) -------------
+
+
+def test_indexes_wiring_nusys_audio_reach_their_resolvers(pt, monkeypatch):
+    """Guard the field->resolver wiring the goldens CANNOT reach: `_no_live_nusys_map`
+    is autouse and blanks nusys/audio in every golden, so a swapped Indexes field
+    (nusys<->audio<->audio_roots) would ship silently. Assert _build_row unpacks
+    idx.nusys -> _resolve_nusys and idx.audio / idx.audio_roots -> _resolve_audio."""
+    seen = {}
+
+    def rec_nusys(st, nusys_index):
+        seen["nusys"] = nusys_index
+
+    def rec_audio(st, audio_indexes, audio_roots):
+        seen["audio"] = audio_indexes
+        seen["audio_roots"] = audio_roots
+
+    nus = {"func_A": ("mainlib/n.c", 99.99)}
+    aud = {"libmus": {"func_A": ("src/audio/a.c", 99.99)}}
+    roots = {"libmus": "/x/audio"}
+    _row(
+        pt,
+        monkeypatch,
+        fns=["func_A"],
+        nusys_index=nus,
+        audio_indexes=aud,
+        audio_roots=roots,
+        stubs={"_resolve_nusys": rec_nusys, "_resolve_audio": rec_audio},
+    )
+    assert seen["nusys"] is nus
+    assert seen["audio"] is aud
+    assert seen["audio_roots"] is roots
