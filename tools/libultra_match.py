@@ -353,11 +353,11 @@ def print_matches(validation, conflicts):
 
 
 def emit_worklist(
-    worklist, args, claimed_names, claimed_addrs, cand_sig_freq, overlay_skipped, _leaked_sig
+    worklist, args, claimed_names, claimed_addrs, cand_sig_freq, overlay_skipped
 ):
-    """Print the add-only symbol_addrs.txt worklist. `_leaked_sig` reproduces the pre-existing
-    behavior where the common-skeleton frequency read a `sig` leaked from the match loop rather
-    than each row's own signature (fixed in the next commit)."""
+    """Print the add-only symbol_addrs.txt worklist. The common-skeleton frequency reads each
+    row's OWN signature: a generic opcode skeleton shared across many candidate addresses is
+    FP-prone, so such a short match is flagged `common-skeleton xN` for review."""
     emitted = 0
     print(
         "\n=== symbol_addrs.txt worklist: unnamed libultra blocks (add-only, gate-applied) ==="
@@ -373,7 +373,7 @@ def emit_worklist(
         flags = []
         if ambig:
             flags.append("AMBIG:" + "|".join(ref_names))
-        freq = cand_sig_freq.get(_leaked_sig, 1)
+        freq = cand_sig_freq.get(sig, 1)
         if freq > 1:
             flags.append(f"common-skeleton x{freq}")
         if name in claimed_names:
@@ -424,11 +424,8 @@ def main():
         asm_funcs, c_funcs, by_sig, args.all
     )
     print_matches(validation, conflicts)
-    # PRESERVE: main() historically read the `sig` LEFT OVER from the match loop (the last
-    # asm_func's sig) when computing the common-skeleton frequency — see emit_worklist.
-    leaked_sig = asm_funcs[-1][3] if asm_funcs else None
     emit_worklist(
-        worklist, args, claimed_names, claimed_addrs, cand_freq, overlay_skipped, leaked_sig
+        worklist, args, claimed_names, claimed_addrs, cand_freq, overlay_skipped
     )
 
 

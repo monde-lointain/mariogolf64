@@ -10,10 +10,35 @@ otherwise an empty/absent SRC_OBJ_TREE would silently pin only the fallback.
 from __future__ import annotations
 
 import os
+import types
 
 import pytest
 from conftest import golden_dir, load_tool, regen  # noqa: F401
 from conftest import run_tool
+
+
+def test_emit_worklist_common_skeleton_is_per_row(capsys):
+    """Regression for the sig-leak fix: the `common-skeleton xN` frequency is read from EACH
+    worklist row's OWN signature, not a `sig` left over from the match loop. Row A's sig recurs
+    across candidates (flagged xN); row B's sig is unique (unflagged). Before the fix both rows
+    read the same leaked sig, so the flag was applied to all or none, never per-row."""
+    lm = load_tool("libultra_match")
+    args = types.SimpleNamespace(min_insns=1)
+    sig_a, sig_b = ("lui", "addiu", "jr"), ("jr", "nop")
+    # row: (off, name, vram, ref_names, src, nins, ambig, sig)
+    worklist = [
+        (0x1000, "func_1000", 0x80001000, ["nameA"], "gu/a", 8, False, sig_a),
+        (0x2000, "func_2000", 0x80002000, ["nameB"], "gu/b", 8, False, sig_b),
+    ]
+    cand_sig_freq = {sig_a: 4, sig_b: 1}
+    lm.emit_worklist(worklist, args, set(), set(), cand_sig_freq, 0)
+    lines = {
+        ln.split(" = ", 1)[0]: ln
+        for ln in capsys.readouterr().out.splitlines()
+        if " = 0x" in ln
+    }
+    assert "common-skeleton x4" in lines["nameA"]
+    assert "common-skeleton" not in lines["nameB"]
 
 
 def test_worklist_golden(golden_dir, regen):
