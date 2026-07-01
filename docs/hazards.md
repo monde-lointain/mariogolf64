@@ -2899,6 +2899,22 @@ the last instruction. When a classical match is a rows-aligned regalloc/frame ne
 externs (isolated == in-tree), run the permuter even below the 0.97 asm-differ gate (asm-differ
 normalizes registers, so its `percent` under-reports a pure-regalloc miss).
 
+**Two KMC-gcc permuter tuning facts (S157):**
+- **`perm_sameline` is a NO-OP for KMC gcc 2.7.2.** gcc 2.7.2 ignores source line numbers, so
+  same-line source produces byte-identical codegen (verified empirically; UNLIKE IDO, where
+  same-lineness is a real scheduling lever). Do NOT weight `perm_sameline` up in `settings.toml` for
+  this project — it burns iterations for zero effect. The effective regalloc/scheduling passes here
+  are `perm_temp_for_expr`, `perm_refer_to_var`, `perm_ins_block`, `perm_reorder_stmts` (default
+  weights are fine; over-customizing can STARVE these).
+- **`--best-only` cannot cross equal-score PLATEAUS.** A 1-instruction miss often needs an
+  intermediate transform that keeps the SAME score (e.g. a temp that just moves WHICH instruction
+  pair is swapped) before a second transform reaches 0. `run-permuter.sh`'s default `--best-only`
+  (monotonic-improvement) gets stuck on such a plateau (S157: 250k+ iterations flat at score 60/50).
+  For a plateau case, DROP `--best-only` (default simulated-annealing accepts equal/worse moves), OR
+  seed `base.c` past the plateau by hand. (But first check whether the miss is a known STRUCTURE
+  hazard — S157's stalls were all the indexed-vs-pointer loop form, see
+  `#indexed-vs-pointer-loop-strength-reduction`; a structural fix beats a permuter grind.)
+
 ## NU_DEBUG-stock-not-custom (carried perf fn triage)
 
 **Rule:** A `libnusys` carry framed as "heavily game-customized, classical RE" is often NOT custom at
@@ -3236,3 +3252,50 @@ string-address load, so the delay-slot filler leaves an unfilled jal slot (`+1 n
 the arg register (giving the exact `addu aN, $ra, $0`), and the `volatile` barrier keeps the prologue
 first so the format-string `addiu` fills the jal delay slot (ROM order). TELL you need this: the ROM
 reads `$ra` (reg 31) as a printf/log arg; the naive builtin emits a stack-slot `lw`.
+
+## indexed-vs-pointer loop (strength-reduction preheader ordering)
+
+**Rule:** for a sentinel-terminated (`!= -1`) array walk, the ROM's scheduling around the loop
+(entry-branch delay-slot fill, and whether a loop-invariant constant is hoisted) depends on whether
+the source iterates by INDEX (`for(i=0; a[i]!=X; i++){ v=a[i]; use(v); }`, a `u32` index + a value
+temp) or by POINTER (`p=a; do{ use(*p); p++; }while(*p!=X)`). The two forms are BYTE-IDENTICAL in
+isolation (gcc strength-reduces `a[i]` to a pointer either way), so a small isolated compile hides
+the difference — but they DIVERGE inside a full TU. **TELL:** a seg/segment/id-list walk (or any
+`-1`/sentinel-terminated array loop) that matches the whole function EXCEPT a 1-instruction swap in
+the loop preheader — a `move reg,base` vs a `li` constant filling the entry `beq`/`bne` delay slot,
+or a loop-invariant `-1` hoisted to an OUTER loop's preheader (an extra `li aN,-1` before the loop
+and a shifted scratch reg). When you see that, **try the INDEXED + value-temp form FIRST** before
+reaching for the permuter. S157 `load_overlay`/`unload_overlay`/`func_80025F18` all matched only in
+the indexed form (`for(byte_index=0; seg[byte_index]!=-1; byte_index++){ byte = seg[byte_index]; ...}`),
+after the pointer form left a `move v1,s2`-in-the-delay-slot miss (load/unload) and a `-1`-hoisted-to-a3
+miss (F18). Also fold multiple `if(cond) continue;` guards into ONE `if(a||b||c) continue;` when the
+ROM uses a single combined test (F18's three range guards).
+
+**WHY (KMC gcc 2.7.2, grounded — verified against the source):** `scan_loop` runs
+`move_movables` (invariant hoist, `loop.c:966`) BEFORE `strength_reduce` (`loop.c:976`). The hoisted
+loop constants (the store value, the `-1` terminator) are inserted immediately before `loop_start`
+by move_movables. Then:
+- **Indexed `a[i]`:** the walk pointer is a strength-reduced *general* induction variable (giv); its
+  initialization emits via `emit_iv_add_mult(bl->initial_value, …, loop_start)` (`loop.c:666`), also
+  inserted immediately before `loop_start` — i.e. AFTER the already-hoisted constants. Preheader
+  order = `[li const][… ][move giv-ptr]`.
+- **Pointer `p = a`:** `p` is a *basic* induction variable (biv); `move p,base` is ORIGINAL preheader
+  code, sitting BEFORE the constants move_movables inserts. Order = `[move biv-ptr][li const]`.
+- The delay-slot filler (`reorg.c` `fill_slots_from_thread`) fills the entry-check `beq` delay with
+  the FIRST preheader instruction → the CONSTANT (indexed, matches the ROM) vs the MOVE (pointer,
+  miss). The same reordering keeps a nested-loop `-1` from being hoisted to the outer preheader.
+
+**Assembler note (binutils 2.6):** gcc wraps the branch + its delay slot in `.set noreorder` /
+`.set nomacro`, so the assembler does NOT touch the delay-slot fill (it is gcc's reorg). binutils
+only expands macros (`move`→`addu` `0x…21`, `li`→`addiu`/`lui+ori`) and schedules the `.set reorder`
+spans. **False lead retired:** KMC gcc 2.7.2 IGNORES source line numbers — same-line source produces
+byte-identical codegen (verified empirically), UNLIKE IDO. So the permuter's `perm_sameline` pass is
+a no-op for this toolchain; do not weight it (see `#permuter-setup-for-kmc-toolchain-mirrors`).
+
+**gcc-source cross-ref (regalloc / scheduling misses generally):** ground a "structure is right,
+scheduling/regalloc is wrong" miss in the KMC gcc 2.7.2 source at `~/development/repos/mips-gcc-2.7.2`
+(memory `kmc-compiler-source-locations`): register assignment order is `global.c` `allocno_compare`
+(priority `= floor_log2(n_refs)*n_refs/live_length * size`; higher → earlier hard reg → drove the
+S157 param-reuse fix for the s0/s1/s2 rotation); loop-invariant hoist vs induction-var init ordering
+is `loop.c` `move_movables`/`strength_reduce` (above); delay-slot fill is `reorg.c`
+`fill_slots_from_thread`; loop inversion is `stmt.c` `expand_end_loop` and `loop.c` `check_dbra_loop`.

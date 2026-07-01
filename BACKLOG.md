@@ -29,6 +29,30 @@ tell) is carved to its LIBRARY tree (`libnusys/<file>`), not `main/<stem>` — y
 placement unchanged (see `CLAUDE.md` path convention). A per-FILE -O0 override is the one mk edit a
 boot/SDK-glue TU may need.
 
+**S157 BANKED — `src/main/func_80025D30.c` (9-fn integer overlay/moduleset load-unload module,
+whole `[0x1130]` subseg).** The overlay loader over a 0x28-byte `OverlayDesc[]` table (`D_800B5F58`):
+`load_overlay`/`unload_overlay` DMA an overlay's text from ROM, zero its BSS, flush caches, run its
+ctor/dtor, and claim/free its segment slots; `func_80025F18` rejects a load that would overlap a
+resident overlay or reuse a live segment; `func_80025D8C` rebuilds the seg→overlay map; the rest are
+id-normalize/getter/debug helpers. Pure INTEGER, no local rodata, all externs placed. **8-gate FIRED
+(seed 13, 9-fn); PO approved run-WHOLE** — the sole 16-aligned inner boundary was 0x1630 (→7+2, no
+clean 3-4 slice), and the module banks atomically. **6/9 fns cracked by grounding in the KMC gcc 2.7.2
+source** (`global.c` `allocno_compare` → the s0/s1/s2 register rotation, fixed by reusing the
+`overlayId` param for the index; mixed signed/unsigned range check; single-counter + CSE + `(u32)`
+bound). **The 3 hardest (`func_80025F18`/`load_overlay`/`unload_overlay`) were 1-instruction
+scheduling/hoisting misses that resisted manual variation AND the permuter (250k+ iters flat); cracked
+by the ORIGINAL loop STRUCTURE (PO reference impl): INDEXED segment walk (`seg[i]` + a value temp) not
+pointer-increment, and F18's 3 `continue` guards folded into one `||`.** WHY is grounded in
+`docs/hazards.md#indexed-vs-pointer-loop-strength-reduction` (move_movables@loop.c:966 before
+strength_reduce@976 → a giv pointer-init emits after the hoisted loop constants → reorg fills the
+entry-`beq` delay with the constant; a pointer biv-init emits first → the move fills the delay, miss).
+md5-candidate 212→213 (+1); +9 matched; asm subsegs 81→81 (flip was a gate action). Quality 0/3/0/0
+(3 permuter-escalated, all resolved by the reference not the permuter); seed 13 / realized 16 /
+residual +3. Names kept `func_` (Ghidra had none). **Global-rename follow-up:** `D_800B5F58`→`overlays`
+and `D_800B67C0`→`debug_mode` are the reference's clear names, but `D_800B67C0` is SHARED by
+`func_80052070.c` + `libnusys/nusched.c`, so the rename must update all consumers in lockstep
+(symbol_addrs add-only + `make extract`) — deferred as a cross-repo naming pass, not a single-file edit.
+
 **S156 BANKED — `src/main/func_80052070.c` (4-fn jal-free scenario/terrain config-accessor slice,
 carved off the `func_80051E90` jtbl pair).** The smallest main-segment classical candidate
 `func_80051E90` (6-fn pack, pts-13) carries a rodata jump table (`jtbl_800CCC30`) only in its first
@@ -2608,6 +2632,30 @@ by `/sprint-plan`:
   `docs/hazards.md#double-sqrt-fast-math`), else the isolated `decomp_loop` mis-compiles `sqrt` (`jal`
   or a guarded form) and reads a false diff. Bundle with the `main`/F3DEX_GBI_2 profile add above (one
   `main`-profile detector serving both `-DF3DEX_GBI_2` and, when tagged, `-ffast-math`).
+
+- **Tooling follow-up (S157, PO-selected #4; deferred to a golden-gated tooling branch, NOT a
+  review-gate edit).** Running the permuter on a game/-O2 `main/`+`overlay_*` fn currently needs a
+  manual setup that the mirror-oriented tooling misses: (a) `permuter_settings.toml`'s
+  `compiler_command` is stale for non-mirror fns (only `-I include`, `-mips2`; misses the libultra
+  include DAG, `-mips3`, `-D_FINALROM`, `-DF3DEX_GBI_2`), so `import.py`'s preprocess fails on
+  `PR/ultratypes.h` — add a `[game]` profile (or refresh the base command) matching `mk/main.mk`
+  (template: `nonmatchings/func_800500E0-2/compile.sh`); (b) the isolated `target.o` must be assembled
+  with MODERN GAS (`mips-linux-gnu-as -march=vr4300 -32 -I include`) after prepending
+  `.include "macro.inc"` to the per-fn `.s` — KMC `as` can't parse splat's `glabel`/`nonmatching`
+  macros, and it uses the correct explicit-`addu` encoding that KMC-`as`-compiled `base.o` also
+  produces. Promote a `setup-game-permuter.sh` helper wrapping both. **Why a branch:** it touches
+  `permuter_settings.toml` (load-bearing preprocess surface) and a new helper; golden-gate per the
+  tooling-refactor policy. (Until then, S157's manual recipe in `docs/hazards.md#permuter-setup-for-
+  kmc-toolchain-mirrors` applies by hand.)
+
+- **pts data point (S157).** A 9-fn 1664B none-upstream INTEGER pack priced `pts=13` and realized far
+  above (16, +3 residual): register-alloc rotation + delay-slot scheduling + a loop-invariant hoist
+  across 3 fns needed a KMC-gcc-source deep-dive AND a PO reference impl. A 9-fn integer module is NOT
+  "trivial" despite no float/rodata — `nfns` alone does not predict effort, and the seed ceiling (13)
+  under-prices a module whose difficulty is register-alloc/scheduling. Not a decompose target (only
+  16-aligned inner boundary 0x1630 → 7+2, no clean 3-4 slice); running WHOLE was correct (banked
+  atomically). Data for any future `pts` refinement that wants a scheduling/regalloc-difficulty term
+  (hard to predict statically; a `coddog`-style structural signal would be needed).
 
 - **Name follow-up (S151; near-free, do at the next gate).** `func_80050274` / `func_800500E0` /
   `func_8005029C` (`src/main/func_800500E0.c`, banked S151) kept `func_` placeholders — Ghidra had only
