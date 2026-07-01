@@ -524,7 +524,6 @@ wind_dir_angle_rad       = 0x801B7F68; // type:u32 size:0x4
 putting_meter_level      = 0x801B7F74; // type:u32 size:0x4
 nuSiMesgQ                = 0x801B93C0; // type:u8 size:0x18
 g_terrain_midpole_scratch_ptr = 0x801B93D8; // type:u32 size:0x4
-gfx_dl_write_cursor      = 0x801B93DC; // type:u32 size:0x4
 current_game_mode        = 0x801EFFA0; // type:u32 size:0x4
 course_panorama_ptr      = 0x801EFFA4; // type:u32 size:0x4
 g_scenery_transform_pool = 0x801EFFD0; // type:u32 size:0x4
