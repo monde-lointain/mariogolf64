@@ -1,45 +1,6 @@
 [
   {
     "band": "-",
-    "func": "func_80029250",
-    "hazards": "pack:2fn[func_80029250=?,func_800292FC=?],one-tu,caller-evict:func_80029250@src/libnusys/nugfxinit.c",
-    "kind": "asm-flip",
-    "nfns": 2,
-    "pts": 13,
-    "rom": "0x4650",
-    "score": -496,
-    "size": 496,
-    "upstream": "none",
-    "vram": "0x80029250"
-  },
-  {
-    "band": "-",
-    "func": "vector_magnitude_safe",
-    "hazards": "pack:8fn[vector_magnitude_safe=?,calculate_hypotenuse_safe=?,func_8006A174=?,update_rng_seed=?,hypotf_2d=?,calc_vec3_magnitude=?,func_8006A1EC=?,func_8006A274=?]",
-    "kind": "asm-flip",
-    "nfns": 8,
-    "pts": 13,
-    "rom": "0x45400",
-    "score": -704,
-    "size": 704,
-    "upstream": "none",
-    "vram": "0x8006A000"
-  },
-  {
-    "band": "-",
-    "func": "func_800500E0",
-    "hazards": "pack:3fn[func_800500E0=?,func_80050274=?,func_8005029C=?],one-tu",
-    "kind": "asm-flip",
-    "nfns": 3,
-    "pts": 13,
-    "rom": "0x2B4E0",
-    "score": -800,
-    "size": 800,
-    "upstream": "none",
-    "vram": "0x800500E0"
-  },
-  {
-    "band": "-",
     "func": "func_80051E90",
     "hazards": "trailing-pad:16B@64,pack:6fn[func_80051E90=?,func_80051FCC=?,func_80052070=?,func_800520DC=?,func_80052100=?,func_80052168=?]",
     "kind": "asm-flip",
@@ -648,5 +609,44 @@
     "size": 21520,
     "upstream": "none",
     "vram": "0x801FD5F0"
+  },
+  {
+    "band": "-",
+    "func": "func_ovl3_802266F0",
+    "hazards": "pack:33fn[func_ovl3_802266F0=?,func_ovl3_8022671C=?,func_ovl3_80226754=?,func_ovl3_80226764=?,func_ovl3_80226788=?,func_ovl3_802267B0=?,func_ovl3_80226904=?,func_ovl3_80226958=?,func_ovl3_802269AC=?,func_ovl3_80226A34=?,func_ovl3_80226A58=?,func_ovl3_8022747C=?,func_ovl3_802287EC=?,func_ovl3_80228A80=?,func_ovl3_80228B60=?,func_ovl3_80228C00=?,func_ovl3_80229278=?,func_ovl3_802296C4=?,func_ovl3_80229CB0=?,func_ovl3_8022A090=?,func_ovl3_8022A43C=?,func_ovl3_8022A8F4=?,func_ovl3_8022ADE8=?,func_ovl3_8022B360=?,func_ovl3_8022B46C=?,func_ovl3_8022B5E0=?,func_ovl3_8022B668=?,func_ovl3_8022B75C=?,func_ovl3_8022B7E0=?,func_ovl3_8022BDB0=?,func_ovl3_8022BDC4=?,func_ovl3_8022BDD0=?,func_ovl3_8022BDF8=?]",
+    "kind": "asm-flip",
+    "nfns": 33,
+    "pts": 13,
+    "rom": "0x110670",
+    "score": -22288,
+    "size": 22288,
+    "upstream": "none",
+    "vram": "0x802266F0"
+  },
+  {
+    "band": "-",
+    "func": "bgm_load_song_from_rom",
+    "hazards": "pack:40fn[bgm_load_song_from_rom=?,func_8005F0BC=?,spawn_object_simple=?,func_8005F0FC=?,func_8005F11C=?,func_8005F180=?,func_8005F1C8=?,func_8005F224=?,func_8005F248=?,func_8005F290=?,func_8005F30C=?,func_8005F360=?,func_8005F4AC=?,func_8005F518=?,init_per_player_state=?,func_8005F838=?,func_8005F964=?,func_8005FB58=?,func_8005FCB8=?,func_8005FE8C=?,func_800600C0=?,func_80060128=?,func_80060190=?,func_80060210=?,func_800602B4=?,func_8006034C=?,func_80060358=?,func_800603A8=?,func_80060434=?,func_800604F4=?,func_800605EC=?,gen_terrain_detail_texture=?,setup_terrain_detail_default=?,emit_per_phase_fog_state=?,func_800627F8=?,func_8006280C=?,clear_terrain_emit_scratch=?,init_terrain_vertex_texcoords=?,emit_terrain_state_prefix_block=?,emit_course_terrain_dl=?]",
+    "kind": "asm-flip",
+    "nfns": 40,
+    "pts": 13,
+    "rom": "0x3A490",
+    "score": -23792,
+    "size": 23792,
+    "upstream": "none",
+    "vram": "0x8005F090"
+  },
+  {
+    "band": "-",
+    "func": "get_table_entry",
+    "hazards": "pack:11fn[get_table_entry=?,func_80032E88=?,play_sound_at_meter_ratio_gameplay=?,update_rotation_matrix=?,play_sound_at_meter_ratio=?,play_sound_for_meter_phase=?,read_meter_stick_normalized=?,update_ball_physics=?,func_80037E50=?,calc_stick_offset_with_noise=?,init_ball_for_shot=?]",
+    "kind": "asm-flip",
+    "nfns": 11,
+    "pts": 13,
+    "rom": "0xE260",
+    "score": -24656,
+    "size": 24656,
+    "upstream": "none",
+    "vram": "0x80032E60"
   }
 ]
