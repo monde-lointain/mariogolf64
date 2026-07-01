@@ -118,7 +118,7 @@ segments:
       - [0x40180, asm]
       - [0x414A0, asm]
       - [0x42F00, c, mgu/mtxutil]
-      - [0x43140, asm]
+      - [0x43140, c, main/func_80067D40]
       - [0x43810, asm]
       - [0x45400, c, main/func_8006A000]
       - [0x456C0, asm]
