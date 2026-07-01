@@ -362,9 +362,18 @@ below).
   No per-tree `mk/*.mk` fragment is needed: the generic `mk/src.mk` rule (`%` spans slashes) builds
   any `src/<tree>/%.c` with the default **-O2 game profile** (`C_PROFILE_CFLAGS = $(CFLAGS)`; the
   `mk/lib*.mk` overrides are more-specific and win only for their own `src/lib*/` trees). So a brand-
-  new `src/overlay_<N>/` tree builds with zero mk edits. Overlay vram is reused across overlays
-  (>=0x801F4A30 is ambiguous; see the Ghidra-map memory), so seed overlay fns by ROM offset / the
-  splat `.s`, not MCP-by-vram.
+  new `src/overlay_<N>/` tree builds with zero mk edits for plain game code (but a DL TU needs the
+  F3DEX2 profile, and a boot/SDK-glue TU an -O0 override — the two mk exceptions below). Overlay vram
+  is reused across overlays (>=0x801F4A30 is ambiguous; see the Ghidra-map memory), so seed overlay
+  fns by ROM offset / the splat `.s`, not MCP-by-vram.
+  - **The `main` tree needs the F3DEX2 build profile for display-list code (S151).** MG64 is F3DEX2
+    (gspF3DEX2.fifo), so a `src/main/` game TU that builds display lists needs `-DF3DEX_GBI_2` to get
+    the F3DEX2 GBI opcodes (`G_RDPHALF_1=0xE1`/`G_RDPHALF_2=0xF1`, not F3DEX `0xB4`/`0xB3`). This is a
+    STANDING profile (not a per-file override like -O0): `mk/main.mk` sets
+    `MAIN_CFLAGS = $(CFLAGS) -DF3DEX_GBI_2` and `$(BUILD_DIR)/$(SRC_DIR)/main/%.o: C_PROFILE_CFLAGS =
+    $(MAIN_CFLAGS)` (included after `mk/libmus.mk`, before `mk/src.mk`). Non-DL main/ code is
+    unaffected (the define only changes gbi.h/sptask.h consumers). See
+    `docs/hazards.md#display-lists` (the DL reconstruction workflow + the mask-narrowing lesson).
   - **EXCEPTION — nusys/SDK-template main-segment code goes to its library tree, not `main/` (S149).**
     A main-segment subseg that is actually a game-embedded copy of an SDK file (the `idle=nuboot`
     coddog tell on `nuboot.c`; a `nuSc*`/`nu*` template) is pathed under its library tree,
@@ -550,6 +559,19 @@ When `pick_target.py` flags a hazard (or a match shows its symptom), read the ma
   name back into the Ghidra workspace
   (`python3 ~/development/reversing/ghidra/mariogolf64/scripts/sync_decomp_names.py
   --import-from-decomp`) is a cross-repo follow-up, surfaced in the final response.
+  - **Renaming a symbol that already lives in `ghidra_symbols.txt` (S151).** You cannot hand-edit
+    `ghidra_symbols.txt` (owned by the sync) and cannot add the address to `symbol_addrs.txt` while
+    the old name is still in `ghidra_symbols.txt` (splat errors on the duplicate address). The move:
+    add the new name to `symbol_addrs.txt` (add-only), then `make sync-names` — `sync_decomp_names.py`
+    DROPS any address present in `symbol_addrs.txt` from the generated `ghidra_symbols.txt`, so the old
+    name evaporates and the two files stay disjoint (verify `make sync-names` reports `removed=1`,
+    `renamed=0`). S151 renamed `gfx_dl_write_cursor` -> `glistp` this way.
+  - **Ghidra MCP idiomatic-name bypass (S151).** The MG64 Ghidra MCP enforces Hungarian `g_`+type
+    globals and REJECTS a plain idiomatic name (`glistp`, the SGI/nusys demo name) on `rename_data`/
+    `set_global` (`name_quality`/`missing_g_prefix`). Bypass per-call with
+    `rename_or_label(address, name, strict_mode="off")` — `strict_mode` is `off`/`warn`/`enforce`; the
+    decomp is authoritative for names, so `off` is correct when the decomp wants the demo idiom over
+    `g_pGlistp`. (memory: [[ghidra-mcp-naming-enforcement-bypass]].)
 - **Structs:** pull from Ghidra MCP, cross-check against `re_tracking/structs.yml`, append to
   `include/structs.h`. Discrepancies between MCP-live and the snapshot are surfaced and block the
   write.

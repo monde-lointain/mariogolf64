@@ -29,6 +29,26 @@ tell) is carved to its LIBRARY tree (`libnusys/<file>`), not `main/<stem>` — y
 placement unchanged (see `CLAUDE.md` path convention). A per-FILE -O0 override is the one mk edit a
 boot/SDK-glue TU may need.
 
+**S151 BANKED — `src/main/func_800500E0.c` (3-fn Gfx display-list "wipe box" TU; the FIRST main-segment
+game DISPLAY-LIST TU).** The one-tu `[0x2B4E0]` pack is a UI wipe/reveal system: `func_80050274`
+registers a box into `D_80132370[]`/`D_800C0E50`, `func_8005029C` emits the shared XLU render setup
+(`gDPPipeSync/SetCycleType/SetAlphaCompare/SetRenderMode/SetCombine`) via `gDPxxx(glistp++)` then draws
+every registered box (`for(i != count)`) and clears the count, `func_800500E0` advances one box's wipe
+(state 0 center-out open → 1 hold → 2 close → 3 done, over a 4-frame sub-timer) and emits its
+`gDPSetPrimColor` + `gSPTextureRectangle`. All 3 matched, ROM SHA-1 == baserom. **New standing enabler
+`mk/main.mk`** (`MAIN_CFLAGS = $(CFLAGS) -DF3DEX_GBI_2`): MG64 is F3DEX2, so game DL code needs the
+F3DEX2 GBI opcodes — this REVISES the S148 "main/ needs zero mk edits" convention (a DL TU needs the
+F3DEX2 profile). `func_800500E0` matched via the **permuter** (regalloc + phantom -16 frame near-miss;
+the coord retype `u16 left; s16 right;` cracked it). `gfx_dl_write_cursor` renamed to `glistp` (demo
+idiom). md5-candidate **209→210**; matched +3; asm subsegs 84→**83**. Quality 0/1/0/0; seed 13 /
+realized 15 / residual +2; regime classical. Retro applied 4 PO-picks (3 doc groups + 1 tooling defer):
+`docs/hazards.md#display-lists` DL-reconstruction workflow + mask-narrowing lesson; CLAUDE.md main-tree
+F3DEX2 convention + `mk/main.mk`; `#permuter-setup-for-kmc-toolchain-mirrors` game-O2 recipe + coord-width
+lever; CLAUDE.md Ghidra `strict_mode` bypass + `symbol_addrs`-rename recipe. **Cross-repo follow-up:** 3
+function names (behavior understood) → `sync_decomp_names.py --import-from-decomp`; `glistp` already
+propagated to Ghidra live. No carry-overs. **3rd data point for the pts-recalibration follow-up** (a
+800B 3-fn one-tu classical pack priced pts-13, capped at the ceiling).
+
 **S150 BANKED — `src/main/func_80029250.c` (`cfb_setup` + `cfb_set_num`, game-custom nusys CFB setup).**
 The 2-fn one-tu `[0x4650]` main-segment pack is the game's customized nusys color-framebuffer
 management: `cfb_setup` is the rewritten `nuGfxSetCfb` (drives a custom `D_800B67A4[]` advance-table /
@@ -2442,6 +2462,30 @@ by `/sprint-plan`:
   --import-from-decomp`. Behaviour understood: `_801F4A40` is a flag-gated (`D_800FBDC4 & 0x9000`)
   sound/setup routine (sets 4 globals @0x800BB020/024/02C/030 then `play_sound_effect` +
   `func_800719A0`); `_801F4AD8` is a 3-insn `*p = *p` accessor.
+
+- **Tooling follow-up (S151, PO-selected #4; deferred to a golden-gated tooling branch, NOT a
+  review-gate edit).** Two DL-related tooling adds surfaced this sprint: (a) promote
+  `dl_fold_check.py` (currently in the session scratchpad) to `tools/` — it scans a `gfxdis` decode for
+  the texture-LOAD composite opcodes (SETTIMG/SETTILE/LOADBLOCK/LOADTILE/LOADTLUT/SETTILESIZE) so the
+  gate knows whether a higher-level `gsDPLoadTextureBlock/Tile/TLUT` macro must be reconstructed (gfxdis
+  does not fold those). (b) Teach `decomp_loop.py` a `main` (F3DEX_GBI_2) compile profile like its
+  existing libkmc/libultra profile detectors, so isolated diffs of a `src/main/` DL fn use the same
+  `-DF3DEX_GBI_2` as the real build (else the RSP opcodes read `0xB4`/`0xB3`, a false diff — S151
+  worked around it with `#define F3DEX_GBI_2` atop `base.c`). **Why a branch:** both touch load-bearing
+  detectors (decode-scan FP surface; a new `decomp_loop` profile changes isolated bytes), so run
+  off-cadence golden-gated with reassess checkpoints (the tooling-refactor discipline).
+
+- **Name follow-up (S151; near-free, do at the next gate).** `func_80050274` / `func_800500E0` /
+  `func_8005029C` (`src/main/func_800500E0.c`, banked S151) kept `func_` placeholders — Ghidra had only
+  `func_` at 0x80050274 / 0x800500E0 / 0x8005029C. Behavior understood (a UI wipe/reveal-box system):
+  `func_80050274` REGISTERS a `WipeBox*` into `D_80132370[D_800C0E50++]`; `func_800500E0` DRAWS one box
+  (advances its wipe state/timer, emits `gDPSetPrimColor`+`gSPTextureRectangle` into `*glistp`);
+  `func_8005029C` emits the shared XLU render setup then DRAWS ALL registered boxes and clears the
+  count. Suggested names (confirm the game term first): e.g. `wipebox_add` / `wipebox_draw` /
+  `wipebox_draw_all`. When confirmed: add to `symbol_addrs.txt` (add-only; `type:func`), rename in the
+  body + at all asm call sites via `make extract`, `make` to re-confirm ROM SHA-1, then propagate via
+  `sync_decomp_names.py --import-from-decomp`. The `WipeBox` struct (TU-local) + `glistp` global are
+  already named (`glistp` propagated to Ghidra live).
 
 - **Tooling follow-up (S138, PO-selected #2; deferred to a golden-gated tooling branch, NOT a
   review-gate edit).** Make `pick_target.py`'s `defines-data` detector resolve + emit the static's

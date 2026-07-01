@@ -2528,11 +2528,46 @@ cosmetic mismatch, optional follow-up rename).
 
 ## Display lists
 
-**Rule:** F3DEX2 microcode. Include `<PR/gbi.h>` when the target manipulates `Gfx*`.
+**Rule:** MG64 uses **F3DEX2** microcode (gspF3DEX2.fifo 2.08). Include `<PR/gbi.h>` when the target
+manipulates `Gfx*`. **A `src/main/` (or `src/overlay_*/`) game TU that builds display lists needs the
+F3DEX2 build profile** (`mk/main.mk`: `MAIN_CFLAGS = $(CFLAGS) -DF3DEX_GBI_2`) — `-DF3DEX_GBI_2`
+selects the F3DEX2 GBI opcodes in `PR/gbi.h` (`G_RDPHALF_1=0xE1`/`G_RDPHALF_2=0xF1`, vs the F3DEX
+`0xB4`/`0xB3`). WITHOUT it the RSP-command opcodes are wrong; the RDP commands (PipeSync/SetCombine/
+SetOtherMode) are ucode-independent so they match either way. This UPDATES the S148 "main/ needs zero
+mk edits" convention: the F3DEX2 profile is a standing enabler for any main-segment DL TU. **Caveat:**
+`decomp_loop.py` compiles `base.c` with `$(CFLAGS)` (no `-DF3DEX_GBI_2`), so isolated RSP opcodes read
+`0xB4`/`0xB3` (a false diff) — put `#define F3DEX_GBI_2` atop `base.c` for a main/ DL fn (tracked
+tooling follow-up: a `decomp_loop` `main` profile like its libkmc/libultra detectors).
 
-**Procedure:** For static dlists in rodata, run `~/development/repos/n64-tools/src/gfxdis-rom/gfxdis`
-(build once with `make -C ~/development/repos/n64-tools`). `gfxdis` only handles static dlists;
-dynamic builders are hand-decompiled.
+**Procedure (static dlists in rodata):** run `~/development/repos/n64-tools/src/gfxdis-rom/gfxdis`
+(build once with `make -C ~/development/repos/n64-tools`). `gfxdis` only handles static dlists.
+
+**Procedure (dynamic builders — S151, first main-seg DL TU).** A dynamic builder writes command words
+into a running `Gfx*` cursor. Decode + reconstruct, do not hand-transcribe:
+- **Decode the command words** with `gfxdis.f3dex2` (`~/development/repos/n64-tools/src/gfxdis/`; the
+  F3DEX2 variant, NOT gfxdis.f3d/f3db/f3dex): `gfxdis.f3dex2 -x -w <concatenated-hex-words>` prints the
+  `gsDP*`/`gsSP*` macros. `extract_dlist.py` parses `sw`-immediate stores and folds primitive
+  sequences. gfxdis does NOT fold the higher-level texture-LOAD composites
+  (LoadTextureBlock/Tile/TLUT/MultiBlock) — scan the decoded opcodes for the load primitives (SETTIMG
+  0xFD / SETTILE 0xF5 / LOADBLOCK 0xF3 / LOADTILE 0xF4 / LOADTLUT 0xF0 / SETTILESIZE 0xF2) to know if a
+  higher-level macro must be reconstructed by hand (helper: `dl_fold_check.py`, tracked for promotion
+  to `tools/`).
+- **Write it with the stock dynamic GBI macros**, matching the game's idiom (see the n64demos
+  `~/development/n64/n64demos` tile_rect2d + kantan-demos `.../kantan/2d/src/main/2d.c`): cache
+  `Gfx *gfx = *glistp;` (or use the global cursor `glistp++` directly), emit `gDPPipeSync(gfx++)`,
+  `gDPSetCycleType(gfx++, …)`, `gDPSetPrimColor(gfx++, …)`, `gSPTextureRectangle(gfx++, ulx, uly, lrx,
+  lry, tile, s, t, dsdx, dtdy)`, then `*glistp = gfx;`. A per-entry helper takes `Gfx **glistp` (the
+  demo signature). The global DL cursor's idiomatic decomp name is `glistp` (a `Gfx*`).
+- **MASK-NARROWING lesson (do NOT hand-inline a texrect on a mask-constant hunch).** A `andi 0xFFC` in
+  the ROM where the stock `gSPTextureRectangle` macro masks `0xFFF` is NOT proof of a custom/inline
+  texrect. GBI texrect coords are **10.2 fixed (12-bit)**, and the macro packs each via
+  `_SHIFTL(_, _, 12)` = `& 0xFFF`. When the caller passes a `<<2` (pixel→10.2) coord, GCC knows the low
+  2 bits are 0 and **narrows** the emitted mask: `((coord<<2) & 0xFFF) << 12` → `andi 0xFFC` on the
+  shifted x-fields, while `(coord<<2) & 0xFFF` (un-shifted y-fields) stays `andi 0xFFF` — BOTH matching
+  the ROM. TEST the stock `gSPTextureRectangle` before concluding "custom"; S151 first wrongly
+  hand-inlined the texrect, then the stock macro proved byte-identical. Coord locals are typically
+  `u16` (per the kantan demo + the permuter's rediscovery); see
+  `#permuter-setup-for-kmc-toolchain-mirrors` for the coord-width regalloc lever.
 
 ---
 
@@ -2806,6 +2841,19 @@ three fixes the generic setup misses (hit S121 contRmbControl).
 - **(c) body + extracted target.** `import.py` accepts a `c_file` with the function BODY plus a target
   `.s` extracted from `asm/<seg>.s` (`glabel`..`endlabel`) — no `INCLUDE_ASM` / `mg_resolve_c_asm`
   round-trip is needed.
+
+**Generalizes to game -O2 (main-profile) code (S151).** The same three fixes apply to a `src/main/`
+(or overlay) game fn, with the `compiler_command` mirroring `MAIN_CFLAGS` (`$(CFLAGS)` + all the base
+`-I` + `-DF3DEX_GBI_2` for a DL fn) piped `tools/cc/gcc -S | tools/cc/as -EB -mips2 -G 0 -I include`.
+Without `-DF3DEX_GBI_2` a DL fn never converges (wrong RSP opcodes). **Coord/local integer WIDTH
+(`u16`/`s16` vs `s32`) is a first-class permuter lever for frame/regalloc near-misses:** S151
+`func_800500E0` was a byte-perfect STRUCTURE that locked ~185 on a register-allocation + a phantom
+`-16` stack frame (a reload spill-slot artifact reachable only through register pressure); the permuter
+cracked it by retyping the two texrect coords `u16 left; s16 right;` (which the kantan demo confirms is
+the idiomatic coord type), then a final commutative operand-order swap (`offset + (x0+half)`) closed
+the last instruction. When a classical match is a rows-aligned regalloc/frame near-miss with no
+externs (isolated == in-tree), run the permuter even below the 0.97 asm-differ gate (asm-differ
+normalizes registers, so its `percent` under-reports a pure-regalloc miss).
 
 ## NU_DEBUG-stock-not-custom (carried perf fn triage)
 
