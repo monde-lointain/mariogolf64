@@ -110,7 +110,11 @@ def test_append_coddog_aux_undercount_and_body_div(monkeypatch):
     and on a non-n_audio_sc row (the S123 customization guard)."""
     pt = load_tool("pick_target")
     H = pt.Hazard
-    monkeypatch.setattr(pt, "_coddog_source_banked", lambda c: False)
+    # _append_coddog_aux lives in pick_target_score; patch the _coddog_source_banked it
+    # resolves against there, not the pt re-export alias.
+    monkeypatch.setitem(
+        pt._append_coddog_aux.__globals__, "_coddog_source_banked", lambda c: False
+    )
     SC = "/x/n_audio_sc/src/"
 
     def body_div(hz):
