@@ -541,6 +541,8 @@ When `pick_target.py` flags a hazard (or a match shows its symptom), read the ma
 | libnusys inline `divu`, build byte-perfect except 2 missing `nop`s after `mflo` | #libnusys-inline-div-mflo-hazard-nop |
 | mirror global w/ dead-reload-after-store on `x++` or recompute-not-CSE of `a-b` | #volatile-global-tell-dead-reload--recompute-not-cse |
 | Gfx* manipulation | #display-lists |
+| ROM has bare `sqrt.d` (double), build links `jal sqrt` or a guarded `sqrt.d`+`c.eq.d`/`jal sqrt` | #double-sqrt-fast-math |
+| ROM loop top-tested plain `beq`/`bne`, build inverts to guard-`j`+`beql` or reloads loop-invariant constants | #top-tested-loop-goto-local-hoist |
 
 </hazard_index>
 

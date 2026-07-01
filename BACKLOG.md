@@ -29,6 +29,25 @@ tell) is carved to its LIBRARY tree (`libnusys/<file>`), not `main/<stem>` — y
 placement unchanged (see `CLAUDE.md` path convention). A per-FILE -O0 override is the one mk edit a
 boot/SDK-glue TU may need.
 
+**S152 BANKED — `src/main/func_8006A000.c` (3-fn FP vector-magnitude slice, decomposed from the
+`[0x45400]` 8-fn math/RNG one-tu).** `vector_magnitude_safe` (3D `sqrt(x^2+y^2+z^2)` with overflow
+range-scaling → u32), `calculate_hypotenuse_safe` (2D, same idiom), `set_rng_seed` (trivial `rng_seed`
+setter). The 8-fn `[0x45400]` one-tu was DECOMPOSED at the 16-aligned 0x8006A180 boundary (8-gate
+resolved by the decompose; the 5-fn remainder `[0x45580]` is carried, see `## Carry-overs`). All 3
+matched ROM-byte-exact **without the permuter**, but the two magnitude fns took a systematic-debug dive
+into the KMC gcc 2.7.2 source for **three interlocking codegen requirements**: (1) bare `sqrt.d` needs a
+per-file `-ffast-math` override (`mk/main.mk`) — default emits `jal sqrt`, `#pragma intrinsic(sqrt)` a
+guarded `sqrt.d`+`jal sqrt` NaN-fallback (new `docs/hazards.md#double-sqrt-fast-math`); (2) the top-tested
+plain-branch loop needs `goto`s because `expand_end_loop` inverts every structured top-tested loop at -O2;
+(3) the loop-invariant range bounds need to be LOCAL variables to hoist (since `loop.c` ignores
+goto-loops) — new `docs/hazards.md#top-tested-loop-goto-local-hoist`. Rodata carve `[0xAC810,.rodata]` =
+2 per-fn 2^31 doubles (0x800D1410/0x1418, no cross-fn dedup). md5-candidate **210→211**; matched +3.
+Quality **0/0/0/0**. seed 13 / realized 15 / residual +2; regime classical. Retro applied all 4 PO-picks
+(2 new hazards + 2 BACKLOG follow-ups). **Cross-repo follow-up:** `set_rng_seed` →
+`sync_decomp_names.py --import-from-decomp` (the 2 magnitude fns were pre-named in ghidra_symbols).
+**4th data point for the pts-recalibration follow-up** (a decomposed 384B 3-fn none-upstream subseg
+re-priced pts-13, unchanged from the 8-fn pack).
+
 **S151 BANKED — `src/main/func_800500E0.c` (3-fn Gfx display-list "wipe box" TU; the FIRST main-segment
 game DISPLAY-LIST TU).** The one-tu `[0x2B4E0]` pack is a UI wipe/reveal system: `func_80050274`
 registers a box into `D_80132370[]`/`D_800C0E50`, `func_8005029C` emits the shared XLU render setup
@@ -2436,6 +2455,30 @@ by `/sprint-plan`:
   `NU_CONT_THREAD_ID=6` vs MG64's 5), and that surfaces only at first build unless reconciled here.
   A near-free retry missing any of these is a half-scoped spike — finish the scope before deferring.
 
+- **Near-free retry (S152): the 5-fn `[0x45580]` remainder of the `main/func_8006A000` math/RNG one-tu.**
+  The `[0x45400]` 8-fn one-tu was decomposed at 0x8006A180 and the first 3 fns banked (S152); these 5
+  are the un-flipped tail, fully scoped:
+  1. **Flip line:** split `[0x45580, asm]` (a `c`-flip; a further 16-aligned decompose is available at
+     0x8006A1C0 = `calc_vec3_magnitude` if the 5 want splitting into 2+3, but the whole 5 fit a sprint).
+     Path `main/func_8006A180` (lead fn `update_rng_seed` @0x8006A180, rom 0x45580; vram→rom delta 0x80024C00).
+  2. **Placed-ref inventory (all already resolved externs):** `rng_seed` @0x800C3FB0 (u32 global, in
+     ghidra_symbols; read+written by `update_rng_seed`, set by the banked `set_rng_seed`); the log/print
+     callee @0x800AAE80 (jal'd by the last 2 fns — CONFIRM it is placed/named at flip; if unnamed,
+     `calls-unplaced` recover it); a float global @0x800C3FB4 (read by `func_8006A274`, `lwc1`).
+  3. **New recover-extern / callee vrams:** name 0x800AAE80 (behavior = a printf/log helper) and
+     0x800C3FB4 (a float; likely a frame-rate or scale global) at bank time.
+  4. **Rodata carve:** 2 STRINGS at 0x800D1420 / 0x800D142C (rom 0xAC820 / 0xAC82C), referenced by
+     `func_8006A1EC` / `func_8006A274` via the 0x800AAE80 log call — carve `[0xAC820, .rodata,
+     main/func_8006A180]` (split further out of the generic `[0xAC820, rodata]` tail the S152 carve left).
+  5. **Upstream pin:** none (classical game code).
+  6. **Per-fn notes / HAZARD:** `update_rng_seed` (LCG `state*0x5D588B65 + 1` on `rng_seed`, no rodata),
+     `func_8006A1EC` (CRC16-CCITT poly 0x8408 byte loop — likely ANOTHER goto-loop, see
+     `#top-tested-loop-goto-local-hoist`), `func_8006A274` (log + `1.0f / float@0x800C3FB4` → `trunc`).
+     **`hypotf_2d` (0x8006A1A8) + `calc_vec3_magnitude` (0x8006A1C0) use single-precision `sqrt.S`** —
+     these need the **sqrtf-intrinsic path** (`#pragma intrinsic(sqrtf)` / the hand-written
+     `src/libultra/gu/sqrtf.s` pattern), NOT S152's `-ffast-math` double-`sqrt.d` fix (see
+     `#double-sqrt-fast-math`: single-precision differs). Confirm how the game emits `sqrt.S` before seeding.
+
 - **Tooling follow-up (S148, PO-selected #1 companion; deferred to a golden-gated tooling branch, NOT
   a review-gate edit).** Recalibrate `pick_target.py`'s `pts` so it does not over-price tiny
   `none`-upstream classical packs. S148's increment was the SMALLEST candidate (176B, 2fn) yet priced
@@ -2452,6 +2495,12 @@ by `/sprint-plan`:
   patch on the same root mispricing. Two false-fires in three sprints; the recalibration should now
   weight raw byte-size AND deweight/floor a `0-jal` one-tu pack (a `jal`-free pack has no
   callee-resolution cost, so its true effort is far below the nfns/one-tu bumps that inflate its pts).
+  **S152 4th data point:** the DECOMPOSED 3-fn 384B none-upstream subseg `main/func_8006A000` re-priced
+  `pts=13` — unchanged from the full 8-fn pack, i.e. decomposing 8fn→3fn did NOT lower the pts (size is
+  so weakly weighted that a 384B/3fn slice and an 800B/8fn pack both hit the ceiling). Here the 8-gate
+  was resolved by a genuine decompose (so no by-hand exemption needed), but the mispricing means a
+  decompose can't be *seen* in the pts. Reinforces: raw byte-size needs real weight so a decomposed
+  slice prices below its parent pack.
 
 - **Name follow-up (S148; near-free, do at the next gate with Ghidra up).** `func_ovl10_801F4A40` and
   `func_ovl10_801F4AD8` (`src/overlay_10/func_ovl10_801F4A40.c`, banked S148) kept `func_` placeholder
@@ -2474,6 +2523,11 @@ by `/sprint-plan`:
   worked around it with `#define F3DEX_GBI_2` atop `base.c`). **Why a branch:** both touch load-bearing
   detectors (decode-scan FP surface; a new `decomp_loop` profile changes isolated bytes), so run
   off-cadence golden-gated with reassess checkpoints (the tooling-refactor discipline).
+  **S152 addition (PO-selected #3):** the same `main` profile detector should also add `-ffast-math`
+  for a `needs-fast-math`-tagged fn (one whose asm has a bare `sqrt.d`/`sqrt.s` — see
+  `docs/hazards.md#double-sqrt-fast-math`), else the isolated `decomp_loop` mis-compiles `sqrt` (`jal`
+  or a guarded form) and reads a false diff. Bundle with the `main`/F3DEX_GBI_2 profile add above (one
+  `main`-profile detector serving both `-DF3DEX_GBI_2` and, when tagged, `-ffast-math`).
 
 - **Name follow-up (S151; near-free, do at the next gate).** `func_80050274` / `func_800500E0` /
   `func_8005029C` (`src/main/func_800500E0.c`, banked S151) kept `func_` placeholders — Ghidra had only

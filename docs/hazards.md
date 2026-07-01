@@ -3063,3 +3063,64 @@ masked-vs-unmasked VI macros (identical for the fixed VI timings), or the moot `
 compiled out — 0 `__assert` calls in `sched.o`). **Audit the macro RHS, ignore `#if BUILD_VERSION`
 branches** (the tool can't evaluate them — they false-positive; hand-check each against the
 `>= VERSION_J` branch).
+
+---
+
+## double-sqrt fast-math (bare sqrt.d needs a per-file -ffast-math override)
+
+**Rule:** a game/main TU that computes a **double** magnitude with `sqrt()` needs a per-file
+`-ffast-math` override to emit the ROM's bare `sqrt.d`. KMC GCC 2.7.2's default profile does NOT
+inline `sqrt`: a plain `sqrt()` call links to an undefined `sqrt` (`jal sqrt`), and `#pragma
+intrinsic(sqrt)` emits a GUARDED inline — `sqrt.d` + a `c.eq.d $fN,$fN` self-equality (NaN) test +
+`bc1t` that falls back to `jal sqrt` for the errno/domain path (this needs a stack frame to save
+`$ra`). `-ffast-math` drops the errno/NaN guard, leaving the bare unguarded `sqrt.d` a leaf ROM fn
+has. (S152 `vector_magnitude_safe` / `calculate_hypotenuse_safe`.)
+
+**Tell:** the ROM fn is a leaf (no frame) whose only sqrt is a bare `sqrt.d` immediately followed by
+the value's use (S152: the `(u32)(double)` cast's `c.le.d`), with NO `c.eq.d`/`bc1t` NaN guard and NO
+`jal sqrt`. The default-profile build either fails to link (`undefined reference to sqrt`) or, with
+the intrinsic pragma, emits the guarded `sqrt.d`+`jal sqrt` form (extra frame + branch).
+
+**Procedure:** add a **file-specific** mk override (a file target beats the tree `%.o` pattern):
+`$(BUILD_DIR)/$(SRC_DIR)/main/<file>.o: C_PROFILE_CFLAGS := $(MAIN_CFLAGS) -ffast-math` in
+`mk/main.mk`. Declare `double sqrt(double);` in the TU (no `#pragma intrinsic` needed once
+`-ffast-math` is on). NEVER a `main/%.o` pattern — the sibling main/ TUs keep the plain profile
+(`mgu/mtxutil`'s float math matched WITHOUT `-ffast-math`, so it is NOT a standing main flag; it is
+per-file like the `#-o0-bootsdk-glue-file-profile` override). `-ffast-math` is the ONLY errno-drop
+flag in this compiler (`-fno-math-errno` / `-funsafe-math-optimizations` do not exist in 2.7.2). NOTE
+the single-precision counterpart differs: `sqrtf` (single) will NOT inline even with the intrinsic
+pragma (the KMC "compiler bug" — libultra ships a hand-written `src/libultra/gu/sqrtf.s`), so a
+single-precision `sqrt.S` fn uses the sqrtf-intrinsic path, NOT this `-ffast-math` double-`sqrt.d` fix.
+
+---
+
+## top-tested-loop goto local-hoist (matching an un-inverted -O2 loop)
+
+**Rule:** GCC 2.7.2 `expand_end_loop` (stmt.c, the "roll the entry test to the end" reorder) INVERTS
+every structured top-tested loop at -O2 — a `while` / `for` / `for(;;)+break` whose test is at the top
+becomes a guard-`j` + body-first + bottom test, and the delay-slot filler then annuls the back-branch
+into a **branch-likely** (`beql`/`bnel`; `BRANCH_LIKELY_P() = mips_isa >= 2` in `config/mips/mips.h`,
+so any `-mips2`+ target may emit it). When the ROM loop is **top-tested with PLAIN `beq`/`bne`** (falls
+straight into the test, a `j` back-edge, delay slots filled from fall-through, NO branch-likely), no
+structured loop reproduces it — reconstruct the control flow with explicit **`goto`s**. `loop.c` only
+optimizes loops marked with `NOTE_INSN_LOOP_BEG`/`_END` notes, which ONLY the structured loop
+constructs emit (stmt.c `expand_start_loop`), so a goto-loop is invisible to `expand_end_loop` and is
+never inverted. (S152 `vector_magnitude_safe` / `calculate_hypotenuse_safe` range-scaling loops.)
+
+**The hoist corollary:** because `loop.c` also ignores goto-loops, their loop-invariant constants are
+NOT hoisted — the goto-loop re-materializes them every iteration (its `j` back-edge targets the
+constant loads). To match a ROM that hoists them (constants in the preamble, `j` back-edge targets the
+*test*), declare each invariant as a **local variable** initialized before the loop (`s32 off =
+0xE0000000; u32 bound = 0xBFFFFFFF;`): the register allocator keeps the local live across the loop = a
+manual hoist. The local-decl ORDER also fixes the preamble load order (declare/use the one the ROM
+loads first, first). Write the compare in the ROM's operand form (e.g. `bound < (u32)(x + off)`
+reproduces `sltu vN, bound, x+off`, not the swapped `sltu vN, x+off, 0xC0000000`).
+
+**Tell / distinguishing it from a bug:** the build is byte-exact EXCEPT the loop is shape-shifted (the
+shift/body block emitted before the test, a guard `j` to the bottom, `beql` where the ROM has plain
+`beq`, and/or the `j` back-edge targets the constant-load block instead of the test). This is a
+loop-FORM codegen mismatch, NOT a C-logic bug — do NOT iterate the condition expression or reach for
+the permuter. Confirm the direction against a matched sibling: a single-condition ROM loop that IS
+inverted (guard + bottom test, e.g. S151 `func_8005029C`'s `for(i != count)`) proves inversion is the
+compiler default, not a flag; a top-tested multi-`||` ROM loop that is NOT inverted is the goto case.
+Pairs with `#double-sqrt-fast-math` (both were the same S152 range-scaling fns).
