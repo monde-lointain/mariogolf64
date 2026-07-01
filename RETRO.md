@@ -25,6 +25,17 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 153 — func_8006A180.c (2-fn head slice: update_rng_seed + hypotf_2d, decomposed from the [0x45580] S152 remainder) — 2026-07-01
+- Increment: 1 file banked (`src/main/func_8006A180.c`) / **2 functions matched** (`update_rng_seed` = LCG `rng_seed = rng_seed*0x5D588B65 + 1`; `hypotf_2d` = `sqrtf(a*a + b*b)`, bare single `sqrt.s`). Head-2 of the S152 `[0x45580]` carry-over, decomposed at the sole 16-aligned internal boundary 0x8006A1C0. md5-candidate **211→212**; matched +2; asm subsegs unchanged (split; the 3-fn `[0x455C0]` tail carried).
+- Quality: 0/0/0/0 (stuck-far/permuter/carried/re-opened). Both fns MATCH first-build; the tail carry is the PLANNED decompose remainder, not a spike.
+- Seed: committed 13pt; banked 13pt; regime classical (v2: seed 13; realized 13; residual 0 — verbatim-first-try −1 offset by the +1 codegen-enabler discovery + KMC-gcc-source verification; capped-13 seed is pts-recalibration territory).
+- What helped: the **KMC gcc 2.7.2 source verification** (PO-requested) resolved the load-bearing sqrt.s unknown cleanly and REFUTED the S152 carry-note. `sqrtf` is `BUILT_IN_FSQRT` (`c-decl.c:3230`), expanded by the SAME `expr.c:7243` path as double `sqrt` (mode-only difference → `sqrtsf2` `mips.md:1506`, gated `mips_isa>=2`); `! flag_fast_math` appends the `c.eq.s`/`bc1t`+`jal sqrt` guard (proven by `align.o`), so the ROM's bare `sqrt.s` needs the SAME per-file `-ffast-math` as S152 — NOT a separate "sqrtf-intrinsic path." Asm-first seed (both fns tiny, ground truth in `asm/45580.s`); MCP not needed. The head-2 slice isolated the sqrt.s discovery cheaply (de-risks the tail).
+- Friction: none. The S152 carry-note's incorrect "single-precision differs" hypothesis would have sent this down a dead `#pragma intrinsic(sqrtf)` path; the source dive corrected it (now fixed in `docs/hazards.md#double-sqrt-fast-math`).
+- Applied (2 of 2 PO-picks; #2 = mandatory bookkeeping): #1 rewrote `docs/hazards.md#double-sqrt-fast-math` mode-agnostic (covers `sqrt.d` AND `sqrt.s`; the fix is `-ffast-math` for either; the builtin is always active; `#pragma intrinsic` dead on KMC) + synced the CLAUDE.md hazard-index row; #3 logged the pts-recalibration 5th data point (64B/2fn priced pts-13) to BACKLOG; #2 moved the tail carry-over to BACKLOG.
+- Carry-over: the `[0x455C0]` 3-fn tail (`calc_vec3_magnitude` [same `-ffast-math` sqrt.s], `func_8006A1EC` [CRC16 goto-loop], `func_8006A274` [log + 1.0f/float→trunc]).
+
+---
+
 ## Sprint 152 — func_8006A000.c (3-fn FP vector-magnitude slice, decomposed from the [0x45400] 8-fn math/RNG one-tu) — 2026-07-01
 - Increment: 1 file banked (`src/main/func_8006A000.c`) / **3 functions matched** (`vector_magnitude_safe` = 3D sqrt-magnitude w/ overflow range-scaling → u32; `calculate_hypotenuse_safe` = 2D, same idiom; `set_rng_seed` = trivial `rng_seed` setter). Decomposed from the `[0x45400]` 8-fn FP-math/RNG one-tu (split at the 16-aligned 0x8006A180 boundary; the 5-fn remainder is carried). md5-candidate **210→211**; matched +3; `[0x45400]` subseg split (`[0x45400,c]` banked + `[0x45580,asm]` carried, net asm-subseg count unchanged).
 - Quality: 0/0/0/0 (stuck-far/permuter/carried/re-opened). Matched WITHOUT the permuter despite the depth; the 5-fn remainder is a PLANNED decompose carry, not a spike.

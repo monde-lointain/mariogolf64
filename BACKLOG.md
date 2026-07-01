@@ -29,6 +29,24 @@ tell) is carved to its LIBRARY tree (`libnusys/<file>`), not `main/<stem>` — y
 placement unchanged (see `CLAUDE.md` path convention). A per-FILE -O0 override is the one mk edit a
 boot/SDK-glue TU may need.
 
+**S153 BANKED — `src/main/func_8006A180.c` (2-fn head slice: `update_rng_seed` + `hypotf_2d`,
+decomposed from the S152 `[0x45580]` remainder at the 16-aligned 0x8006A1C0).** `update_rng_seed`
+(LCG `rng_seed = rng_seed*0x5D588B65 + 1`) + `hypotf_2d` (`sqrtf(a*a + b*b)`, bare single `sqrt.s`).
+Both MATCHED first-build. The load-bearing unknown (bare single-precision `sqrt.s`) resolved by
+**verifying against the KMC gcc 2.7.2 source, which REFUTED the S152 carry-note's "sqrtf needs a
+separate intrinsic path, NOT -ffast-math" hypothesis:** `sqrtf` is `BUILT_IN_FSQRT` (`c-decl.c:3230`),
+expanded by the SAME `expr.c:7243` path as double `sqrt` (mode-only diff → `sqrtsf2` `mips.md:1506`,
+gated `mips_isa>=2`); without `-ffast-math` gcc emits `sqrt.s` + a `c.eq.s`/`bc1t` NaN guard + `jal sqrt`
+fallback (proven by `align.o`), WITH it the bare `sqrt.s` the ROM has. So single-precision uses the SAME
+per-file `-ffast-math` as S152 (`func_8006A180.o` in `mk/main.mk`). **8-gate FIRED (seed 13)** → small
+classical pack exemption BOTH branches (a1 `<256B`=64B AND a2 `0-call`; inner boundary 0x8006A1A8
+non-16-aligned = mechanically non-decomposable). md5-candidate **211→212**; matched +2. Quality
+**0/0/0/0**. seed 13 / realized 13 / residual 0; regime classical. Retro applied 2 of 2 PO-picks (#1
+`#double-sqrt-fast-math` rewritten mode-agnostic + CLAUDE.md index sync; #3 pts-recalibration 5th data
+point; #2 tail carry-over bookkeeping). **Cross-repo follow-up:** none (both fns pre-named in
+ghidra_symbols). Carry-over: the `[0x455C0]` 3-fn tail (see `## Carry-overs`). **5th data point for the
+pts-recalibration follow-up** (a 64B 2-fn head slice priced pts-13 — the strongest under-weighting case).
+
 **S152 BANKED — `src/main/func_8006A000.c` (3-fn FP vector-magnitude slice, decomposed from the
 `[0x45400]` 8-fn math/RNG one-tu).** `vector_magnitude_safe` (3D `sqrt(x^2+y^2+z^2)` with overflow
 range-scaling → u32), `calculate_hypotenuse_safe` (2D, same idiom), `set_rng_seed` (trivial `rng_seed`
@@ -2455,29 +2473,29 @@ by `/sprint-plan`:
   `NU_CONT_THREAD_ID=6` vs MG64's 5), and that surfaces only at first build unless reconciled here.
   A near-free retry missing any of these is a half-scoped spike — finish the scope before deferring.
 
-- **Near-free retry (S152): the 5-fn `[0x45580]` remainder of the `main/func_8006A000` math/RNG one-tu.**
-  The `[0x45400]` 8-fn one-tu was decomposed at 0x8006A180 and the first 3 fns banked (S152); these 5
-  are the un-flipped tail, fully scoped:
-  1. **Flip line:** split `[0x45580, asm]` (a `c`-flip; a further 16-aligned decompose is available at
-     0x8006A1C0 = `calc_vec3_magnitude` if the 5 want splitting into 2+3, but the whole 5 fit a sprint).
-     Path `main/func_8006A180` (lead fn `update_rng_seed` @0x8006A180, rom 0x45580; vram→rom delta 0x80024C00).
-  2. **Placed-ref inventory (all already resolved externs):** `rng_seed` @0x800C3FB0 (u32 global, in
-     ghidra_symbols; read+written by `update_rng_seed`, set by the banked `set_rng_seed`); the log/print
-     callee @0x800AAE80 (jal'd by the last 2 fns — CONFIRM it is placed/named at flip; if unnamed,
-     `calls-unplaced` recover it); a float global @0x800C3FB4 (read by `func_8006A274`, `lwc1`).
-  3. **New recover-extern / callee vrams:** name 0x800AAE80 (behavior = a printf/log helper) and
-     0x800C3FB4 (a float; likely a frame-rate or scale global) at bank time.
+- **Near-free retry (S153): the 3-fn `[0x455C0]` tail of the `main/func_8006A000` math/RNG one-tu.**
+  The `[0x45400]` 8-fn one-tu was decomposed 3 (S152) + 2 (S153, `[0x45580]` head banked) + this 3-fn
+  tail. Fully scoped:
+  1. **Flip line:** `c`-flip `[0x455C0, asm]` → `[0x455C0, c, main/func_8006A1C0]` (lead fn
+     `calc_vec3_magnitude` @0x8006A1C0, rom 0x455C0; vram→rom delta 0x80024C00). No further 16-aligned
+     internal split (0x8006A1EC / 0x8006A274 are non-16-aligned), so the 3 bank together.
+  2. **Placed-ref inventory (all already resolved externs):** `osSyncPrintf` @0x800AAE80 (CONFIRMED
+     placed/named in ghidra_symbols; jal'd by `func_8006A1EC` + `func_8006A274`); a float global
+     @0x800C3FB4 (read by `func_8006A274`, `lwc1`; NOT yet named).
+  3. **New recover-extern / callee vrams:** name `D_800C3FB4` (a float; likely a frame-rate or scale
+     global — `func_8006A274` computes `(s32)(1.0f / it)`) at bank time. `osSyncPrintf` already named.
   4. **Rodata carve:** 2 STRINGS at 0x800D1420 / 0x800D142C (rom 0xAC820 / 0xAC82C), referenced by
-     `func_8006A1EC` / `func_8006A274` via the 0x800AAE80 log call — carve `[0xAC820, .rodata,
-     main/func_8006A180]` (split further out of the generic `[0xAC820, rodata]` tail the S152 carve left).
+     `func_8006A1EC` / `func_8006A274` — carve `[0xAC820, .rodata, main/func_8006A1C0]` split out of the
+     generic `[0xAC820, rodata]` tail the S152 carve left.
   5. **Upstream pin:** none (classical game code).
-  6. **Per-fn notes / HAZARD:** `update_rng_seed` (LCG `state*0x5D588B65 + 1` on `rng_seed`, no rodata),
-     `func_8006A1EC` (CRC16-CCITT poly 0x8408 byte loop — likely ANOTHER goto-loop, see
-     `#top-tested-loop-goto-local-hoist`), `func_8006A274` (log + `1.0f / float@0x800C3FB4` → `trunc`).
-     **`hypotf_2d` (0x8006A1A8) + `calc_vec3_magnitude` (0x8006A1C0) use single-precision `sqrt.S`** —
-     these need the **sqrtf-intrinsic path** (`#pragma intrinsic(sqrtf)` / the hand-written
-     `src/libultra/gu/sqrtf.s` pattern), NOT S152's `-ffast-math` double-`sqrt.d` fix (see
-     `#double-sqrt-fast-math`: single-precision differs). Confirm how the game emits `sqrt.S` before seeding.
+  6. **Per-fn notes / HAZARD:** `calc_vec3_magnitude` (0x8006A1C0, `sqrtf(x*x+y*y+z*z)` single `sqrt.s`;
+     note the 3rd term is `mtc1 a2` twice + `mul.s` = the int `a2` bit-pattern squared as a float) — needs
+     a **per-file `-ffast-math` override for `func_8006A1C0.o`** in `mk/main.mk` (the SAME fix as S152/S153,
+     NOT a separate sqrtf-intrinsic path — the S153 KMC-gcc-source verification proved single-precision is
+     the same `-ffast-math` mechanism; see the rewritten `#double-sqrt-fast-math`). `func_8006A1EC`
+     (CRC16-CCITT poly 0x8408 reflected byte loop, init 0xFFFF, `~crc & 0xFFFF` then `osSyncPrintf(str,crc)`
+     — likely ANOTHER goto-loop, see `#top-tested-loop-goto-local-hoist`). `func_8006A274`
+     (`osSyncPrintf(str, ra)` + `(s32)(1.0f / float@0x800C3FB4)` via `div.s`+`trunc.w.s`).
 
 - **Tooling follow-up (S148, PO-selected #1 companion; deferred to a golden-gated tooling branch, NOT
   a review-gate edit).** Recalibrate `pick_target.py`'s `pts` so it does not over-price tiny
@@ -2501,6 +2519,12 @@ by `/sprint-plan`:
   was resolved by a genuine decompose (so no by-hand exemption needed), but the mispricing means a
   decompose can't be *seen* in the pts. Reinforces: raw byte-size needs real weight so a decomposed
   slice prices below its parent pack.
+  **S153 5th data point:** the 64B 2-fn `jal`-free head slice `main/func_8006A180` (`update_rng_seed` +
+  `hypotf_2d`, decomposed from the S152 remainder) again priced `pts=13`; the small-pack exemption ran it
+  seed-only via BOTH branches at once (a1 `<256B` AND a2 `0-call`). A 64B/2fn slice hitting the ceiling is
+  the strongest under-weighting evidence yet — the recalibration's `<256B AND <=2fn AND one-tu` floor (or
+  a raw-byte term) would drop this to a low single-digit pts and stop the 8-gate false-fire on the smallest
+  possible packs.
 
 - **Name follow-up (S148; near-free, do at the next gate with Ghidra up).** `func_ovl10_801F4A40` and
   `func_ovl10_801F4AD8` (`src/overlay_10/func_ovl10_801F4A40.c`, banked S148) kept `func_` placeholder

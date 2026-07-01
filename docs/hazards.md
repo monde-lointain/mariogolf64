@@ -3068,29 +3068,40 @@ branches** (the tool can't evaluate them — they false-positive; hand-check eac
 
 ## double-sqrt fast-math (bare sqrt.d needs a per-file -ffast-math override)
 
-**Rule:** a game/main TU that computes a **double** magnitude with `sqrt()` needs a per-file
-`-ffast-math` override to emit the ROM's bare `sqrt.d`. KMC GCC 2.7.2's default profile does NOT
-inline `sqrt`: a plain `sqrt()` call links to an undefined `sqrt` (`jal sqrt`), and `#pragma
-intrinsic(sqrt)` emits a GUARDED inline — `sqrt.d` + a `c.eq.d $fN,$fN` self-equality (NaN) test +
-`bc1t` that falls back to `jal sqrt` for the errno/domain path (this needs a stack frame to save
-`$ra`). `-ffast-math` drops the errno/NaN guard, leaving the bare unguarded `sqrt.d` a leaf ROM fn
-has. (S152 `vector_magnitude_safe` / `calculate_hypotenuse_safe`.)
+**Rule:** a game/main TU that computes a magnitude with `sqrt()` (double) OR `sqrtf()` (single) needs
+a per-file `-ffast-math` override to emit the ROM's bare `sqrt.d`/`sqrt.s`. **Both precisions are the
+SAME mechanism** — this is mode-agnostic; there is no separate single-precision path. Without
+`-ffast-math`, KMC GCC 2.7.2 emits a GUARDED inline: the `sqrt.d`/`sqrt.s` opcode + a
+`c.eq.d`/`c.eq.s $fN,$fN` self-equality (NaN) test + `bc1t` that falls back to `jal sqrt`/`jal sqrtf`
+for the errno/domain path (needs a stack frame to save `$ra`). `-ffast-math` drops the errno/NaN guard,
+leaving the bare unguarded opcode a leaf ROM fn has. (S152 double `vector_magnitude_safe` /
+`calculate_hypotenuse_safe`; S153 single `hypotf_2d`.)
 
-**Tell:** the ROM fn is a leaf (no frame) whose only sqrt is a bare `sqrt.d` immediately followed by
-the value's use (S152: the `(u32)(double)` cast's `c.le.d`), with NO `c.eq.d`/`bc1t` NaN guard and NO
-`jal sqrt`. The default-profile build either fails to link (`undefined reference to sqrt`) or, with
-the intrinsic pragma, emits the guarded `sqrt.d`+`jal sqrt` form (extra frame + branch).
+**Mechanism (verified vs KMC gcc 2.7.2 source):** `sqrt`, `sqrtf`, `sqrtl` are ALL registered as
+`BUILT_IN_FSQRT` (`c-decl.c:3230-3232`), active by default unless `-fno-builtin` — so `sqrtf` IS a
+builtin, contra the old "sqrtf never inlines" claim. `expand_builtin` handles all three identically
+(`expr.c:7243`, one `case BUILT_IN_FSQRT`; only the optab MODE differs). At `! optimize` it calls the
+library fn; otherwise `expand_unop` emits the backend insn — `sqrtdf2` / `sqrtsf2` (`mips.md:1497/1506`),
+both gated `TARGET_HARD_FLOAT && HAVE_SQRT_P()` = `mips_isa >= 2` (`mips.h:463`), satisfied by `-mips3`.
+Then `if (! flag_fast_math)` (`expr.c:7299`) it appends the NaN guard + errno `jal`. So `flag_fast_math`
+is the ONLY lever, for either precision.
+
+**Tell:** the ROM fn is a leaf (no frame) whose only sqrt is a bare `sqrt.d`/`sqrt.s` with NO
+`c.eq.d`/`c.eq.s`+`bc1t` NaN guard and NO `jal sqrt`/`jal sqrtf`. The default-profile build emits the
+guarded form (extra frame + `c.eq`/`bc1t` + `jal` fallback) — e.g. `build/src/libultra/gu/align.o`
+(libultra -O3, no -ffast-math) shows `sqrt.s` immediately followed by `c.eq.s`/`bc1t`, the reference
+guarded shape.
 
 **Procedure:** add a **file-specific** mk override (a file target beats the tree `%.o` pattern):
 `$(BUILD_DIR)/$(SRC_DIR)/main/<file>.o: C_PROFILE_CFLAGS := $(MAIN_CFLAGS) -ffast-math` in
-`mk/main.mk`. Declare `double sqrt(double);` in the TU (no `#pragma intrinsic` needed once
-`-ffast-math` is on). NEVER a `main/%.o` pattern — the sibling main/ TUs keep the plain profile
-(`mgu/mtxutil`'s float math matched WITHOUT `-ffast-math`, so it is NOT a standing main flag; it is
-per-file like the `#-o0-bootsdk-glue-file-profile` override). `-ffast-math` is the ONLY errno-drop
-flag in this compiler (`-fno-math-errno` / `-funsafe-math-optimizations` do not exist in 2.7.2). NOTE
-the single-precision counterpart differs: `sqrtf` (single) will NOT inline even with the intrinsic
-pragma (the KMC "compiler bug" — libultra ships a hand-written `src/libultra/gu/sqrtf.s`), so a
-single-precision `sqrt.S` fn uses the sqrtf-intrinsic path, NOT this `-ffast-math` double-`sqrt.d` fix.
+`mk/main.mk`. Declare the prototype in the TU (`double sqrt(double);` or `extern f32 sqrtf(f32);`); a
+matching redeclaration KEEPS the builtin, and no `#pragma intrinsic` is needed. NEVER a `main/%.o`
+pattern — the sibling main/ TUs keep the plain profile (`mgu/mtxutil`'s float math matched WITHOUT
+`-ffast-math`, so it is per-file like the `#-o0-bootsdk-glue-file-profile` override). `-ffast-math` is
+the ONLY errno-drop flag in this compiler (`-fno-math-errno` / `-funsafe-math-optimizations` do not
+exist in 2.7.2). The `#pragma intrinsic(sqrtf)` in `include/libultra/PR/gu.h` is `#ifdef __sgi` (DEAD
+on KMC) and irrelevant; the hand-written `src/libultra/gu/sqrtf.s` LEAF is only the `-O0`/non-inlined
+fallback, not the intrinsic path — do NOT reach for a "sqrtf-intrinsic path" for single precision.
 
 ---
 
