@@ -10,12 +10,12 @@
 #include <nusys.h>
 #undef nuGfxInit
 
-// Appears to configure the graphics buffer/microcode setup; called with the
-// block below and the constant 3.
-extern void func_80029250(void*, s32);
+// Configures the color framebuffer setup; called with the framebuffer array
+// block below and the buffer count 3 (triple-buffered).
+extern void cfb_setup(void*, s32);
 
-// Used as the configuration block passed to func_80029250 (appears to hold the
-// frame buffers and related setup).
+// Used as the configuration block passed to cfb_setup (holds the frame buffer
+// pointer array).
 extern u32 D_800B6688;
 
 // Used as the default microcode descriptor wired into the task manager below.
@@ -34,7 +34,7 @@ void nuGfxInit(void) {
 
   // Start the retrace/PRE_NMI graphics thread and configure its buffers.
   nuGfxThreadStart();
-  func_80029250(&D_800B6688, 3);
+  cfb_setup(&D_800B6688, 3);
 
   // Z-buffer is placed at a fixed RDRAM address; install the default swap
   // callback.
