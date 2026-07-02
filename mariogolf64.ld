@@ -676,6 +676,7 @@ SECTIONS
         build/asm/data/AC770.rodata.o(.rodata);
         build/src/main/func_8006A000.o(.rodata);
         build/asm/456C0.o(.rodata);
+        build/asm/data/AC840.rodata.o(.rodata);
         build/src/main/func_8006EA90.o(.rodata);
         build/asm/4A5A0.o(.rodata);
         build/asm/4C3D0.o(.rodata);
@@ -689,7 +690,7 @@ SECTIONS
         build/asm/70E10.o(.rodata);
         build/src/main/func_80099490.o(.rodata);
         build/src/libnusys/nuboot.o(.rodata);
-        build/asm/data/AC840.rodata.o(.rodata);
+        build/asm/data/AC8C0.rodata.o(.rodata);
         build/asm/data/ACAD0.rodata.o(.rodata);
         build/asm/data/ACD00.rodata.o(.rodata);
         build/src/libmus/player.o(.rodata);
