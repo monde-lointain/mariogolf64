@@ -17,7 +17,7 @@ extern void emit_per_phase_fog_state(Gfx**);
 extern u32 D_800FC89C;
 extern u32 D_80132CEC;
 extern u32 D_800C42C4;
-extern u8 D_800C4160[];
+extern Vtx D_800C4160[];
 
 void func_8006EA90(void) {
   s32 i;
@@ -63,61 +63,48 @@ void func_8006EA90(void) {
 
 void func_8006ED2C(void) {}
 
-/* Builds a fixed screen-space filter/texture display list into *arg0, splicing
- * in emit_per_phase_fog_state() midway. Command words are emitted verbatim. */
-#define GFX_CMD(cw0, cw1) (g = dl++, g->words.w0 = (cw0), g->words.w1 = (cw1))
-
+/* Builds a fixed screen-space two-texture filter (fog-blended, scrolling second
+ * layer) display list into *arg0, splicing emit_per_phase_fog_state() in after
+ * the render-state setup. */
 void func_8006ED34(Gfx** arg0) {
-  Gfx* dl;
-  Gfx* g;
-  u32 tileLo;
-  u32 tileHi;
+  Gfx* dl = *arg0;
+  u32 uls;
+  u32 lrs;
 
-  dl = *arg0;
-  GFX_CMD(0xE7000000, 0);
-  GFX_CMD(0xE3001801, 0);
-  GFX_CMD(0xE7000000, 0);
-  GFX_CMD(0xE7000000, 0);
-  GFX_CMD(0xE3000A01, 0x100000);
-  GFX_CMD(0xE7000000, 0);
-  GFX_CMD(0xE2001E01, 0);
-  GFX_CMD(0xE7000000, 0);
-  GFX_CMD(0xE3001201, 0x2000);
-  GFX_CMD(0xE7000000, 0);
-  GFX_CMD(0xE200001C, 0xC81049D8);
-  GFX_CMD(0xFC157E60, 0x2FFD77F8);
-  GFX_CMD(0xFA000000, 0x7F7F7FBF);
-  GFX_CMD(0xFB000000, 0x3F7F9FFF);
+  gDPPipeSync(dl++);
+  gDPSetColorDither(dl++, G_CD_MAGICSQ);
+  gDPPipeSync(dl++);
+  gDPPipeSync(dl++);
+  gDPSetCycleType(dl++, G_CYC_2CYCLE);
+  gDPPipeSync(dl++);
+  gDPSetAlphaCompare(dl++, G_AC_NONE);
+  gDPPipeSync(dl++);
+  gDPSetTextureFilter(dl++, G_TF_BILERP);
+  gDPPipeSync(dl++);
+  gDPSetRenderMode(dl++, G_RM_FOG_SHADE_A, G_RM_AA_ZB_XLU_SURF2);
+  gDPSetCombineLERP(dl++, TEXEL0, TEXEL1, PRIMITIVE_ALPHA, TEXEL1, 0, 0, 0,
+                    PRIMITIVE, PRIMITIVE, 0, COMBINED, 0, 0, 0, 0, COMBINED);
+  gDPSetPrimColor(dl++, 0, 0, 0x7F, 0x7F, 0x7F, 0xBF);
+  gDPSetEnvColor(dl++, 0x3F, 0x7F, 0x9F, 0xFF);
   emit_per_phase_fog_state(&dl);
-  GFX_CMD(0xD9000000, 0);
-  GFX_CMD(0xD9FFFFFF, 0x210005);
-  GFX_CMD(0xFD100000, (D_800FC89C + 8) & ~7);
-  GFX_CMD(0xF5100000, 0x7014050);
-  GFX_CMD(0xE6000000, 0);
-  GFX_CMD(0xF3000000, 0x73FF100);
-  GFX_CMD(0xE7000000, 0);
-  GFX_CMD(0xF5101000, 0x14050);
-  GFX_CMD(0xF2000000, 0x7C07C);
-  GFX_CMD(0xFD100000, (D_80132CEC + 8) & ~7);
-  GFX_CMD(0xF5100100, 0x7014050);
-  GFX_CMD(0xE6000000, 0);
-  GFX_CMD(0xF3000000, 0x73FF100);
-  GFX_CMD(0xE7000000, 0);
-  GFX_CMD(0xF5101100, 0x1014050);
-  GFX_CMD(0xF2000000, 0x107C07C);
-  GFX_CMD(0xD7000002, 0xFFFFFFFF);
-  GFX_CMD(0xF2000000, 0x40040);
-  tileLo = D_800C42C4 + 1;
-  tileHi = D_800C42C4 + 0x41;
-  D_800C42C4 = tileLo;
-  GFX_CMD((tileLo & 0xFFF) << 0xC | 0xF2000000,
-          (tileHi & 0xFFF) << 0xC | 0x1000040);
-  GFX_CMD(0xE7000000, 0);
-  GFX_CMD(0x100600C, (u32)&D_800C4160);
-  GFX_CMD(0x6020004, 0x20406);
-  GFX_CMD(0x6060408, 0x6080A);
-  GFX_CMD(0xE7000000, 0);
+  gSPLoadGeometryMode(dl++, 0);
+  gSPSetGeometryMode(dl++, G_ZBUFFER | G_SHADE | G_FOG | G_SHADING_SMOOTH);
+  gDPLoadTextureBlock(dl++, (D_800FC89C + 8) & ~7, G_IM_FMT_RGBA, G_IM_SIZ_16b,
+                      32, 32, 0, G_TX_NOMIRROR | G_TX_WRAP,
+                      G_TX_NOMIRROR | G_TX_WRAP, 5, 5, G_TX_NOLOD, G_TX_NOLOD);
+  gDPLoadMultiBlock(dl++, (D_80132CEC + 8) & ~7, 0x0100, 1, G_IM_FMT_RGBA,
+                    G_IM_SIZ_16b, 32, 32, 0, G_TX_NOMIRROR | G_TX_WRAP,
+                    G_TX_NOMIRROR | G_TX_WRAP, 5, 5, G_TX_NOLOD, G_TX_NOLOD);
+  gSPTexture(dl++, 0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_ON);
+  gDPSetTileSize(dl++, G_TX_RENDERTILE, 0, 0, 0x40, 0x40);
+  uls = D_800C42C4 + 1;
+  lrs = D_800C42C4 + 0x41;
+  D_800C42C4 = uls;
+  gDPSetTileSize(dl++, 1, uls, 0, lrs, 0x40);
+  gDPPipeSync(dl++);
+  gSPVertex(dl++, D_800C4160, 6, 0);
+  gSP2Triangles(dl++, 1, 0, 2, 0, 1, 2, 3, 0);
+  gSP2Triangles(dl++, 3, 2, 4, 0, 3, 4, 5, 0);
+  gDPPipeSync(dl++);
   *arg0 = dl;
 }
-
-#undef GFX_CMD
