@@ -3572,3 +3572,80 @@ symptom. Guard: when a same-file sibling's length is still wrong, do NOT trust a
 S162 `func_80076500` looked "wrong" (bytes `c4205b5c`) purely because `func_80076558` was 0x10 short;
 both matched the instant `func_80076558` reached its exact 0xE8 length (via the
 [mem-in-struct lever](#mem-in-struct-scheduling-lever) above).
+
+## goto-dispatch branch-toward vs branchless (constant dispatch through a shared return)
+
+**Trigger:** a classical fn dispatches a small `switch`-like selector to a few CONSTANT results returned
+through one shared variable, and the ROM emits, PER CASE, a branch-likely `beql cond, RETURN` with the
+`li v,CONST` stolen into the annulled delay slot. Every structured idiom (`if`/`else if`, `switch`,
+ternary, `{body; goto end}`, do-while+break) locks with a PERVASIVE basic-block-layout miss (same
+length, ~half the rows differ by form/position, NOT a 1-2 insn near-miss), and a lone innermost
+`if (x == K) v = CONST;` (with `v` provably 0 in an all-constant arm) branchless-if-converts to
+`mask & CONST`. `-O1/-O2/-O3` and every `-fno-schedule*`/`-fno-*` flag give the SAME wrong layout.
+
+**Cause (KMC gcc 2.7.2, cited):** a structured `if (cond) { body }` lowers via `do_jump` with an
+`if_false_label` (`expr.c:9532-9545`) to a branch AROUND the body (`bne cond, skip`; body inline on the
+fall-through). MIPS has NO annul-TRUE slot (`mips.md:127` = nil), so a fall-through body can NEVER be
+pulled into a branch-likely delay slot; only `optimize_skip` (`reorg.c:1141,1167-1172`) can rescue it,
+and only for the ONE case whose skip-target abuts the shared return (the last). To branch TOWARD the
+body (`beq cond, body`), the then-clause must be a BARE jump: `if (cond) goto L;` hands `do_jump` an
+`if_true_label` (`expr.c:9522`), and `jump.c:1743` ("condjump over an unconditional jump") inverts it.
+Once branch-toward, `fill_slots_from_thread` (`reorg.c:3257,3404-3616`) steals the single-insn body
+into the annulled `beql`. A `li`/`addiu` const is annul-eligible (`type=arith`, `dslot=no`); a memory
+LOAD (`lh`) is `dslot=yes` (`mips.md:79-82`) and can never ride the slot. Stock gcc, no KMC patches.
+
+**Fix:** write the dispatch as `if (selector == K) goto L_k;` per case, `goto end;` for the default,
+then the bodies OUT OF LINE after the tests, each `v = CONST; goto end;`, and a single `end: return v;`.
+Order the body labels so any LOAD-valued case is declared LAST (it becomes a plain `beq` to a tail block
+that falls through into the shared return). GOTOLESS IS PROVABLY IMPOSSIBLE here (the lone
+`if (x==K) v=CONST` always branchless-if-converts). This is the Code Complete ch17 documented-goto case
+(emulating a structured dispatch, forward-only, all labels used) -- KEEP the explanatory comment so it
+is not "simplified" back to a switch/if-else. The permuter PLATEAUS on it (S163 extent: 700; it cannot
+invent the polarity flip); crack it via the fan-out compiler-source dive + isolated-scoring harness (see
+[#compiler-source-fan-out-escalation-above-the-permuter](#compiler-source-fan-out-escalation-above-the-permuter)).
+
+**Provenance:** S163 `get_club_meter_extent` (`src/main/func_80043AF0.c`): flag-gated (putter) dispatch
+on `category` returning golf-yardage constants (or `power_a` / `power_a*1.1f`), result through `$v1`,
+shared `jr ra; move v0,v1`.
+
+## call-result a0-vs-v0 single-allocno (force a scratch reg via both-arm reuse)
+
+**Trigger:** a classical fn's CALL RESULT (or any value) is held by the ROM in a SCRATCH GPR (`$a0`)
+with `move a0,v0` right after the `jal` (often in a branch delay slot) and a trailing `move v0,a0` at
+the return, but my build COALESCES the value straight into `$v0` (no moves, 2-3 insns shorter) so the
+whole int/FP chain runs in `$v0`. Distinct-variable / extra-use / operand-swap / if-else-factor levers
+do NOT move it.
+
+**Cause (KMC gcc 2.7.2, cited):** the call-result copy `pseudo = $v0` gives the pseudo a COPY PREFERENCE
+for `$v0` (`global.c:1005-1034`); `find_reg` scans hard regs ascending (`REG_ALLOC_ORDER` undefined ->
+`$2`/`$v0` first) and `$v0` is free across the value's live range, so the preference wins and the pseudo
+coalesces into `$v0`. Bumping ref-count / live-length does NOT help: it still copy-prefers a FREE `$v0`.
+
+**Fix:** make the value ONE reused variable assigned in BOTH arms of an `if/else`, each arm the full
+expression. That makes it a single global allocno whose live range now CONFLICTS with `$v0` (the
+preference no longer wins a free reg), so `find_reg`'s ascending scan lands on `$a0`. gcc cross-jumps /
+tail-merges the two arms back into one select + one op, so the source stays clean (no object
+duplication). The permuter PLATEAUS (S163 units: 235); cracked by an empirical isolated-harness agent +
+the `global.c` allocno dump.
+
+**Provenance:** S163 `get_club_meter_units` (`src/main/func_80043AF0.c`): `units = get_club_meter_extent
+(...); if (putter) units = (s32)((f32)units * A); else units = (s32)((f32)units * B); return units;` ->
+the ROM's `$a0` chain + `move a0,v0` / `move v0,a0` bookends.
+
+## compiler-source fan-out (escalation above the permuter)
+
+**When:** a classical fn locks with a PERVASIVE BB-layout / regalloc / scheduling miss (not a 1-2 insn
+near-miss) that resists every source idiom AND the permuter plateaus (it cannot invent a structural
+polarity / allocation lever -- S163 extent 700, units 235). Before carrying it as a spike, escalate to
+a compiler-source dive.
+
+**How (S163, the winning pattern):** fan out parallel subagents over the KMC gcc 2.7.2 tree
+(`~/development/repos/mips-gcc-2.7.2`, see the KMC-compiler-source memory) and binutils 2.6
+(`~/development/repos/mips-binutils-2.6`), ONE per RTL pass -- `reorg.c` (delay-slot / branch-likely /
+annul eligibility), `jump.c`+`flow.c`+`stmt.c` (block layout / cross-jump / `do_jump` polarity), and
+`config/mips/{mips.md,mips.c,mips.h}` (patterns, `define_delay`, `REG_ALLOC_ORDER`) -- to recover the
+EXACT mechanism (and prove which source shapes are impossible). IN PARALLEL, run an empirical agent on
+an isolated-scoring harness (compile the exact `src/main` -O2 profile standalone, normalize branch/jal
+target addresses, print an aligned TGT-vs-CAND diff + a layout-shift-insensitive diff count) that tries
+30-60+ source variations. The mechanism agents prove WHY; the empirical agent FINDS the source. This
+tier cracked two permuter-plateau fns in S163 that would otherwise have carried.

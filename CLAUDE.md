@@ -560,6 +560,9 @@ When `pick_target.py` flags a hazard (or a match shows its symptom), read the ma
 | ROM cond-branch is plain `beqz`+`li v0,CONST`+`move v0,<scratch>` but build emits branch-likely `beqzl` skipping the lone `li v0,CONST` (return-var coalesced to v0) | #register-reuse-nudge-classical-regalloc |
 | classical fn's global load/store schedules differently (build pipelines indep load-stores the ROM keeps strict-`$f0`-pairs, OR hoists a `& K` flag load past a pointer store the ROM keeps late+`nop`) | #mem-in-struct-scheduling-lever |
 | classical fn full-make SHA-miss AND a same-file SIBLING reads wrong data addr (`%lo` off a fixed delta, whole `0x8010xxxx` .bss region shifted) | #short-text-shifts-flowing-bss |
+| classical constant-dispatch (small selector to CONST results via a shared return var; ROM per-case `beql cond,RETURN`) locks pervasive BB-layout, resists if-else/switch/ternary/goto-end, lone `if(x==K)v=CONST` branchless-if-converts | #goto-dispatch-branch-toward-vs-branchless |
+| classical call result the ROM holds in `$a0` (`move a0,v0` / `move v0,a0` bookends) but build coalesces into `$v0` (shorter); distinct-var/extra-use levers fail | #call-result-a0-vs-v0-single-allocno |
+| pervasive classical BB-layout/regalloc/scheduling miss resists every idiom AND the permuter plateaus | #compiler-source-fan-out-escalation-above-the-permuter |
 
 </hazard_index>
 

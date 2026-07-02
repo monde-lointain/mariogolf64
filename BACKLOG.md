@@ -35,6 +35,26 @@ tell) is carved to its LIBRARY tree (`libnusys/<file>`), not `main/<stem>` — y
 placement unchanged (see `CLAUDE.md` path convention). A per-FILE -O0 override is the one mk edit a
 boot/SDK-glue TU may need.
 
+**S163 BANKED — `src/main/func_80043AF0.c` (4-fn club-meter head, DECOMPOSED from the 25-fn `[0x1EEF0]`
+subseg).** md5-candidate 218→**219**; matched +4; asm subsegs 78→78. `func_80043AF0` (club-table ptr
+`&D_800CABD0[i*24]`) + `func_80043B0C` (splat auto-decompiled the no-op) matched first build. The two
+club-meter fns were permuter-PLATEAU classical walls cracked by the new **compiler-source fan-out
+escalation ABOVE the permuter** (`docs/hazards.md#compiler-source-fan-out-escalation-above-the-permuter`):
+`get_club_meter_extent` needed a **goto-dispatch to out-of-line bodies, load-case last**
+(`#goto-dispatch-branch-toward-vs-branchless`; gotoless proven impossible), `get_club_meter_units`
+needed **one reused var in both if/else arms** to force the `$a0` allocation
+(`#call-result-a0-vs-v0-single-allocno`). Split `[0x1EEF0]` at 16-aligned `0x1F020`; 21-fn tail stays
+asm. No carry-overs. **Tooling follow-up (S163, PO-pick #3, deferred to a golden-gated tooling branch,
+NOT a review-gate edit):** promote the isolated-scoring harness pattern (scratchpad
+`score_extent.py`/`score_units.py`: prepend typedefs, compile the exact `src/main` -O2 profile
+standalone, objdump, normalize branch/jal target addresses to a token, print an aligned TGT-vs-CAND
+diff + a layout-shift-insensitive diff count) to `tools/`. It made the empirical structural search
+tractable for the double compiler-wall (fast, in-tree-equivalent, target-shift-insensitive) and pairs
+with `decomp_loop` for classical BB-layout/regalloc/scheduling near-misses where asm-differ's score is
+dominated by cascade/target-shift noise. **Why a branch:** a new measurement surface feeds the loop, so
+golden-gate it (byte-identical harness output on a fixed corpus) with reassess checkpoints per the
+tooling-refactor discipline.
+
 **S162 BANKED — `src/main/func_80076500.c` (3-fn debug-Vec3f-buffer head, DECOMPOSED from the 6-fn
 `[0x51900]` subseg — main-segment classical endgame).** `func_80076500` = copy two `Vec3f` global
 constants (`D_80105B6C`/`D_80105F30`) into two output buffers; `func_8007654C` = reset counter
