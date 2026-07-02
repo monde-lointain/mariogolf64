@@ -122,7 +122,7 @@ segments:
       - [0x43810, asm]
       - [0x45400, c, main/func_8006A000]
       - [0x456C0, asm]
-      - [0x49E90, asm]
+      - [0x49E90, c, main/func_8006EA90]
       - [0x4A5A0, asm]
       - [0x4C3D0, asm]
       - [0x4C770, asm]
