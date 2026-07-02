@@ -97,7 +97,12 @@ This is the only place the sprint's process/tooling edits land:
 4. Move carry-overs to `BACKLOG.md ## Carry-overs` (follow the two-kind format in that section's
    header: a **spike** records its DoD blocker; a **near-free retry** uses the 5-point completeness
    checklist so the next gate is a mechanical replay); add an `## Active phase` BANKED paragraph for
-   the increment.
+   the increment. **Prune resolved carry-overs first:** a `## Carry-overs` entry whose file is now
+   md5-candidate (its bank commit is in `git log`, or its `src/<seg>.c` shows `grep -c INCLUDE_ASM` ==
+   0) is DONE — delete it and note the bank in the `## Active phase` BANKED paragraph, matching the
+   S154 "BANKED, removed from carry-overs" pattern. An un-pruned resolved carry-over re-surfaces at the
+   next `/sprint-plan` as a stale "retry-first" candidate (S161: the S156 `func_80051E90` jtbl spike
+   banked S159 but lingered, mis-topping the next plan gate).
 
 Durable lessons stay in `RETRO.md`; the PO promotes them into the memory dir manually. Do not
 auto-write memory.

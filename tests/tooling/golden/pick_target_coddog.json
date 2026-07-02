@@ -144,6 +144,19 @@
   },
   {
     "band": "-",
+    "func": "func_80052250",
+    "hazards": "pack:9fn[func_80052250=?,func_80052264=?,func_80052324=?,func_80052384=?,func_8005244C=?,func_800525C4=?,func_80052834=?,func_80052A68=?,func_80052CF0=?]",
+    "kind": "asm-flip",
+    "nfns": 9,
+    "pts": 13,
+    "rom": "0x2D650",
+    "score": -3472,
+    "size": 3472,
+    "upstream": "none",
+    "vram": "0x80052250"
+  },
+  {
+    "band": "-",
     "func": "func_80076500",
     "hazards": "pack:6fn[func_80076500=?,func_8007654C=?,func_80076558=?,func_80076640=?,func_80076778=?,func_8007680C=?]",
     "kind": "asm-flip",
@@ -154,19 +167,6 @@
     "size": 3504,
     "upstream": "none",
     "vram": "0x80076500"
-  },
-  {
-    "band": "-",
-    "func": "func_800521C0",
-    "hazards": "pack:12fn[func_800521C0=?,func_800521DC=?,func_80052220=?,func_80052250=?,func_80052264=?,func_80052324=?,func_80052384=?,func_8005244C=?,func_800525C4=?,func_80052834=?,func_80052A68=?,func_80052CF0=?]",
-    "kind": "asm-flip",
-    "nfns": 12,
-    "pts": 13,
-    "rom": "0x2D5C0",
-    "score": -3616,
-    "size": 3616,
-    "upstream": "none",
-    "vram": "0x800521C0"
   },
   {
     "band": "-",

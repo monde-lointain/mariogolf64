@@ -16,7 +16,11 @@ global or callee inlined only through an invoked library macro (EPI_SYNC →
 __osCurrentHandle) is flagged, not deferred to a mid-execution link failure.
 
 Usage:
-  venv/bin/python3 tools/pick_target.py [--lib SUBSTR] [-n N] [--include-stuck] [--json]
+  venv/bin/python3 tools/pick_target.py [--lib SUBSTR] [--segment SEG] [-n N] [--include-stuck] [--json]
+
+`--segment main` is a vram-RANGE filter (main-segment game code), distinct from the `--lib`
+SUBSTRING filter: `--lib main` matches only the coddog `mainlib/*` packs (the game-embedded 2nd
+libnusys instance), NOT the classical main-segment `none` subsegs; the vram range does.
 
 Replaces the old `/decomp-lead` roadmap: target selection is now a tool the plan
 gate calls, mirroring marioparty7's pick_target.py.
@@ -63,6 +67,7 @@ from pick_target_hazards import (  # noqa: F401
     HAZARD_DATA_STATIC,
     HAZARD_DEFINES_DATA,
     HAZARD_FILE_STATIC,
+    HAZARD_GAME_EMBEDDED,
     HAZARD_INTRINSIC_LIKELY,
     HAZARD_JAL_COUNT_MISMATCH,
     HAZARD_JAL_FREE,
@@ -775,12 +780,30 @@ def _append_static_name_collisions(st):
         st.hazards.append(Hazard.static_name_collision(name, placed[name]))
 
 
+# vram RANGES for the `--segment` filter (distinct from the `--lib` substring). main-SEGMENT game
+# code is 0x80025C50..0x801F4A2F; overlays reuse vram >= 0x801F4A30, so the main upper bound also
+# excludes them (memory: mg64-ghidra-main-segment-map). Add a new segment here when a range is defined.
+SEGMENT_RANGES = {
+    "main": (0x80025C50, 0x801F4A2F),
+}
+
+
 def _row_filtered(st, args, path, carried, cod_srcs):
-    """Return True to DROP the row. Two skip conditions: (1) the --lib scope filter — a row whose
-    path / coddog-source / up_lib / member names don't match the requested library; and (2) a
+    """Return True to DROP the row. Skip conditions: (0) the `--segment` vram-range filter — a row
+    whose subseg vram falls outside the requested segment's range; (1) the --lib scope filter — a row
+    whose path / coddog-source / up_lib / member names don't match the requested library; and (2) a
     de-ranked BACKLOG carry-over (retrieved via --include-stuck or the BACKLOG, NOT smallest-first;
     carry_over_names() is region+symbol scoped, and a definitively-coddog'd subseg whose leader was
     merely prose-mentioned overrides the drop via st.cod_members)."""
+    # (0) `--segment main` catches the classical main-segment `none` subsegs that `--lib main` (a
+    # substring match on the coddog `mainlib/*` packs) misses; keyed on the subseg vram, not a string.
+    seg = getattr(args, "segment", None)
+    if seg:
+        lo, hi = SEGMENT_RANGES.get(seg, (None, None))
+        if lo is not None:
+            v = subseg_vram(st.off)
+            if v is None or not (lo <= v <= hi):
+                return True
     # `--lib audio` is a SCOPE ALIAS for the game's audio libraries (libmus / libnaudio / nuaulstl),
     # not a literal substring: an n_audio_sc mirror whose coddog source is a bare basename (e.g.
     # "n_resample.c") and whose up_lib is "libnaudio" would otherwise DROP, since "audio" is not a
@@ -951,7 +974,17 @@ def build_rows(args, idx, carried):
     def _phantom(r):
         return 1 if any(tok in r["hazards"] for tok in _phantom_tokens) else 0
 
-    rows.sort(key=lambda r: (_phantom(r), -r["score"], r["size"]))
+    # Deferred-mirror de-rank (S161): a `game-embedded` coddog-mirror (coddog-mirror + game-region +
+    # a subset signal → a MIXED 16-aligned game-region carve, NOT a seed-only verbatim mirror) sinks
+    # below every clean classical `none` / genuine-mirror candidate, so the smallest-first top-N stops
+    # surfacing the llcvt/settime embedded packs the PO defers until that track opens. Still ABOVE pure
+    # phantoms. The token always renders as `game-embedded:0x<vram>`, so a `<kind>:` substring is exact.
+    _deferred_token = HAZARD_GAME_EMBEDDED + ":"
+
+    def _deferred(r):
+        return 1 if _deferred_token in r["hazards"] else 0
+
+    rows.sort(key=lambda r: (_phantom(r), _deferred(r), -r["score"], r["size"]))
     return rows[: args.n]
 
 
@@ -960,6 +993,11 @@ def main():
         description="Rank the next decomp target, smallest-first."
     )
     ap.add_argument("--lib", help="substring filter on subseg path or function name")
+    ap.add_argument(
+        "--segment",
+        help="vram-range segment filter (e.g. `main`), distinct from the --lib substring; "
+        f"segments: {', '.join(sorted(SEGMENT_RANGES))}",
+    )
     ap.add_argument("-n", type=int, default=20, help="max rows (default 20)")
     ap.add_argument(
         "--include-stuck", action="store_true", help="include BACKLOG carry-overs"
