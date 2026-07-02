@@ -3507,3 +3507,68 @@ golf-yardage constants, default 200).
 
 **Provenance:** S159 `func_80051E90` (2/2 fns, no permuter; all three levers + the operand-order and
 branch-likely nudges in [#register-reuse-nudge-classical-regalloc](#register-reuse-nudge-classical-regalloc)).
+
+## mem-in-struct scheduling lever (model a fixed global as a struct/array member)
+
+**Trigger:** a classical fn's global load/store SCHEDULES differently than the ROM and every body
+lever fails. Two shapes: (a) the compiler PIPELINES independent global-load/pointer-store pairs into
+several FP scratch regs (`$f0/$f2/$f4`) where the ROM keeps STRICT pairs reusing one reg (`$f0`); or
+(b) the compiler HOISTS a plain global load (e.g. a `& K` flag test) ABOVE a pointer store the ROM
+keeps LATE (so the ROM leaves the guard-branch delay slot a `nop`, and the build fills it + shifts
+the register allocation).
+
+**Cause (gcc 2.7.2 `sched.c`, the memory-dependency model the instruction scheduler uses):**
+`true_dependence` (~line 817) treats two MEMs as INDEPENDENT (reorderable) when one is `MEM_IN_STRUCT`
+at a VARYING address and the other is NON-`MEM_IN_STRUCT` at a FIXED address (the rule commented at
+`sched.c:797`). A pointer store `*(T*)p` is MEM_IN_STRUCT + varying; a SCALAR global `D_xxx` is
+non-struct + fixed. So the scheduler judges `store-via-pointer` and `load-of-scalar-global`
+non-conflicting and freely reorders/hoists. `memrefs_conflict_p(symbol, reg)` itself returns 1
+(may-conflict), so the MEM_IN_STRUCT terms are the sole discriminator.
+
+**Fix:** make the FIXED global a struct/array MEMBER so its load becomes MEM_IN_STRUCT → the term
+flips → the pair CONFLICTS → the scheduler serializes (strict pairs) or cannot hoist (late load).
+Concretely: a triple of contiguous floats read as a vector is a `Vec3f` global (`extern Vec3f g;
+… g.x/g.y/g.z`); a lone flag word becomes `extern u16 g[]; … g[0] & K` (a 1-element array is
+MEM_IN_STRUCT via `ARRAY_REF`). The store side is usually ALREADY MEM_IN_STRUCT (`p[i]`, `p->f`), so
+only the LOAD side needs retyping. S162 used this TWICE in one file: `func_80076500` (six scalar
+globals → two `Vec3f` constants → strict `$f0` pairs) and `func_80076558` (`D_800FBDA6` → `[0]`
+struct-flag → late load → `nop` in the guard delay slot → i allocated to `a1` → exact 58-instr match).
+No permuter; found by reading `~/development/repos/mips-gcc-2.7.2/sched.c`.
+
+**Confirming tell it IS separate symbols (not one shared struct base):** the ROM re-emits `lui at,
+%hi(sym)` PER access even for addresses that share the same %hi (all 0x8010) — a single struct/array
+base would CSE to ONE `lui`. Separate `lui`s ⟹ separate symbols; the struct-member reloc addend
+(`%lo(D_xxx)+4` == `%lo(D_xxx+4)`) resolves to the SAME bytes as the next symbol, so a `Vec3f` view
+that references only the base symbol is byte-safe (verify by full-make ROM SHA-1, an
+[isolated-compile caveat](#isolated-compile-caveat): asm-differ shows `sym+4` vs `sym_next` as a diff).
+An array-of-struct `T g[]` (stride = sizeof struct, fields folded into `%lo(at)`) reproduces the ROM's
+"separate `lui %hi(Cxx)` per field, fresh recompute per use" shape when the parallel field symbols
+(C50/C54/C58) are 4-apart at stride 12 — the ROM is `struct{f32 x,y,z;} g[]`, not three `f32[]`.
+Cross-refs [#struct-access-folding-changes-scheduling](#struct-access-folding-changes-scheduling) and
+[#return-type-is-load-bearing](#return-type-is-load-bearing) (same "types are load-bearing for codegen"
+class).
+
+## short-text shifts flowing-bss (a length miss surfaces as a SIBLING's wrong data addr)
+
+**Trigger:** a classical fn compiles cleanly but full-make ROM SHA-1 misses, AND a SIBLING fn in the
+same file reads the WRONG data address — its `%lo(D_xxx)` resolves off by a fixed delta, with the
+`.bss` symbol map showing a whole `0x8010xxxx` region shifted by that delta. Easy to misdiagnose as a
+data-placement / symbol bug in the sibling.
+
+**Cause:** the game's `.bss` (e.g. `main_bss`, symbols at `0x800D2930+`) is INTERLEAVED in the main
+segment and FLOWS after the `.text` that precedes it in ROM order. When a fn is N bytes short (or
+long) of its target length, everything after it — including that flowing `.bss` — shifts by N. So a
+BYTE miss in fn A (wrong .text length) manifests as WRONG DATA ADDRESSES in a sibling fn B that reads
+those `.bss` globals. B's codegen may be perfectly correct.
+
+**Diagnose:** `objdump -h build/src/<seg>/<file>.o` `.text` size vs the subseg's reserved span (the
+yaml `[start..next]` extent). S162: built `.text` 0x130 vs reserved 0x140 → `func_80076558` was 0x10
+short → the `0x8010xxxx` `.bss` shifted -0x10 → `func_80076500`'s `%lo(D_80105B6C)` read `0x80105B5C`.
+The `build/mariogolf64.map` shows the shifted region re-syncing at the next FIXED-address symbol.
+
+**Fix:** correct the SHORT fn's length (its codegen), NOT the sibling's reloc — the sibling is a
+symptom. Guard: when a same-file sibling's length is still wrong, do NOT trust an isolated per-fn
+`objdump`'s resolved addresses; gate on the full-make ROM SHA-1 with ALL fns at their correct length.
+S162 `func_80076500` looked "wrong" (bytes `c4205b5c`) purely because `func_80076558` was 0x10 short;
+both matched the instant `func_80076558` reached its exact 0xE8 length (via the
+[mem-in-struct lever](#mem-in-struct-scheduling-lever) above).

@@ -113,6 +113,12 @@ Ghidra MCP is used inline at seed time. For each target function:
      seed, so stop; otherwise read the top mismatches, edit `base.c`, and re-run. Run the permuter
      (`./run-permuter.sh`) only at `percent >= 0.97`. For a near-miss whose only diff is which scratch
      register holds an intermediate, see `docs/hazards.md#register-reuse-nudge-classical-regalloc`.
+     Before the permuter, rule out two source-typing fixes that both close WITHOUT it (S162): a
+     scheduling miss on a global load/store (pipelined vs strict-`$f0`-pairs, or a hoisted `& K` flag
+     load) is often the `docs/hazards.md#mem-in-struct-scheduling-lever` (retype the fixed global as a
+     struct/array member); and a full-make SHA-miss where a same-file SIBLING reads a wrong data
+     address is `docs/hazards.md#short-text-shifts-flowing-bss` (a length miss shifts the flowing
+     `.bss`, so fix the SHORT fn, not the sibling).
    - **Spot-check** (only at score 0): byte-level `cmp` of the in-tree compiled `.text` against the
      isolated one. The `cmp` is the truth, not the mnemonic diff (see
      `docs/hazards.md#assembler-differences--byte-cmp-spot-check`). A non-zero score with empty
@@ -552,6 +558,8 @@ When `pick_target.py` flags a hazard (or a match shows its symptom), read the ma
 | struct-array fn byte-matches with per-field base symbols but NOT the combined struct (link-identical) | #struct-access-folding-changes-scheduling |
 | classical `switch(x)` dispatch via a compiler jump table (`jtbl_<vram>`, `sltiu`+`jr $v0`), esp. w/ sparse inner cases or `a==K1\|\|K2` | #switch-jtbl-dispatch |
 | ROM cond-branch is plain `beqz`+`li v0,CONST`+`move v0,<scratch>` but build emits branch-likely `beqzl` skipping the lone `li v0,CONST` (return-var coalesced to v0) | #register-reuse-nudge-classical-regalloc |
+| classical fn's global load/store schedules differently (build pipelines indep load-stores the ROM keeps strict-`$f0`-pairs, OR hoists a `& K` flag load past a pointer store the ROM keeps late+`nop`) | #mem-in-struct-scheduling-lever |
+| classical fn full-make SHA-miss AND a same-file SIBLING reads wrong data addr (`%lo` off a fixed delta, whole `0x8010xxxx` .bss region shifted) | #short-text-shifts-flowing-bss |
 
 </hazard_index>
 

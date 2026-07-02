@@ -35,6 +35,30 @@ tell) is carved to its LIBRARY tree (`libnusys/<file>`), not `main/<stem>` — y
 placement unchanged (see `CLAUDE.md` path convention). A per-FILE -O0 override is the one mk edit a
 boot/SDK-glue TU may need.
 
+**S162 BANKED — `src/main/func_80076500.c` (3-fn debug-Vec3f-buffer head, DECOMPOSED from the 6-fn
+`[0x51900]` subseg — main-segment classical endgame).** `func_80076500` = copy two `Vec3f` global
+constants (`D_80105B6C`/`D_80105F30`) into two output buffers; `func_8007654C` = reset counter
+`D_800E1CD0 = 0`; `func_80076558` = push a `Vec3f`+scalar into slot `i` of the debug buffer
+`D_800E1C50[8]`/`D_800E1CB0[8]`, optional `osSyncPrintf` under `D_800FBDA6 & 4`, increment. **All 3
+ROM-byte-exact WITHOUT the permuter, cracked by ONE lever: MEM_IN_STRUCT source typing (gcc 2.7.2
+`sched.c` `true_dependence`, PO struct hint).** Both hard fns diverged at -O2 as "compiler optimizes
+more than the ROM": `func_80076500` pipelined 6 global-load/pointer-store pairs into `$f0/$f2/$f4`
+(ROM strict `$f0`); `func_80076558` hoisted the flag load past the store + materialized/reused array
+pointers (ROM: late load + `nop`, folded fresh recompute). Fix = retype the fixed globals as struct/
+array members (`sched.c:797`: a MEM_IN_STRUCT ref at a varying addr never conflicts with a non-struct
+ref at a fixed addr, so a scalar-global load is judged independent of a pointer store → serialize/
+late-load once it becomes MEM_IN_STRUCT): two `Vec3f` constants → strict pairs; `D_800E1C50` array-of-
+`Vec3f` (C54/C58 = `.y/.z` field addrs, stride 12) → folded addressing; `D_800FBDA6[0]` → late flag
+load → exact 58-instr match. New hazards `#mem-in-struct-scheduling-lever` + `#short-text-shifts-
+flowing-bss` (the length-miss-shifts-the-sibling's-.bss diagnostic that unlocked it). Split `[0x51900]`
+at 16-aligned `0x51A40`; 3-fn tail (`func_80076640` `guRotateF`/`guMtxCatF` matrix code) stays asm.
+`Vec3f*` args (PO-directed, byte-identical). md5-candidate **217→218** (+1); matched +3; asm subsegs
+**78→78** (split adds the `[0x51A40]` tail; net unchanged). Quality **0/0/0/0**. seed 5 / realized 7 /
+residual +2; regime classical. Retro applied **3 of 4 PO-picks** (PO away, best judgment): 2 new
+hazards + a CLAUDE.md Iterate pointer; #3 pts data point folded into VELOCITY. **Cross-repo follow-up:**
+3 fns kept `func_` (Ghidra had only `_NON_MATCHING`); now matched, a follow-up can clear the tag.
+**Next natural slice:** the `[0x51A40]` 3-fn matrix/DL tail.
+
 **S161 BANKED — `src/main/func_800521C0.c` (3-fn scenario-flag get/set head, DECOMPOSED from the 12-fn
 `[0x2D5C0]` subseg — main-segment classical endgame).** `func_800521C0` = branchless flag getter
 `-((D_801B60AC & 2) != 0) & 9`; `func_800521DC` = `flag_is_set(0x3D)?2 : (D_801B60AC & 6)?9 : 0x12`;
