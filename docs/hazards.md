@@ -2899,6 +2899,16 @@ the last instruction. When a classical match is a rows-aligned regalloc/frame ne
 externs (isolated == in-tree), run the permuter even below the 0.97 asm-differ gate (asm-differ
 normalizes registers, so its `percent` under-reports a pure-regalloc miss).
 
+**Committed main-profile setup (S158).** `tools/permuter_settings_main.toml` (MAIN_CFLAGS:
+`-mips3 -mgp32 -mfp32 -mno-abicalls -O2` + all base `-I` + `-DF3DEX_GBI_2`, `tools/cc/gcc -S | tools/cc/as -EB -mips3 -G 0 -I include`, VERIFIED to reproduce the in-tree `.o`) and `tools/kmc_main_prelude.inc`
+(the decomp-permuter `prelude.inc` minus its `.set gp=64` line, which KMC binutils-2.6 `as` rejects
+with `Expected comma after name gp`) are checked in — pass `--settings tools/permuter_settings_main.toml`
+to `import.py`. GOTCHA: the extracted target `.s` MUST keep the `.LXXXX:` local-label lines
+(`awk '/^glabel <fn>/{p=1}/^endlabel/{p=0}p'`, NOT a `grep` of only the `/* */` instruction rows) —
+dropping them leaves the intra-function branches referencing undefined labels and `as` fails with
+`Can not represent relocation in this object file format`. For the full whole-function playbook this
+setup feeds, see `#pervasive-regalloc-classical-main`.
+
 **Two KMC-gcc permuter tuning facts (S157):**
 - **`perm_sameline` is a NO-OP for KMC gcc 2.7.2.** gcc 2.7.2 ignores source line numbers, so
   same-line source produces byte-identical codegen (verified empirically; UNLIKE IDO, where
@@ -3299,3 +3309,95 @@ scheduling/regalloc is wrong" miss in the KMC gcc 2.7.2 source at `~/development
 S157 param-reuse fix for the s0/s1/s2 rotation); loop-invariant hoist vs induction-var init ordering
 is `loop.c` `move_movables`/`strength_reduce` (above); delay-slot fill is `reorg.c`
 `fill_slots_from_thread`; loop inversion is `stmt.c` `expand_end_loop` and `loop.c` `check_dbra_loop`.
+
+## pervasive-regalloc-classical-main (the S158 whole-function register-allocation playbook)
+
+**Trigger:** a classical (usually `src/main/`, game-O2) function whose C is STRUCTURALLY correct
+(asm-differ rows all align, `match_count == total_rows`) but locks with a HIGH score because the
+register allocation is PERVASIVELY wrong (a systematic hard-reg permutation like `i:s4↔s5`, plus
+scratch-reg swaps, spill-slot ordering, and delay-slot scheduling). Not a 1-2 instruction near-miss.
+This is the hardest classical class; S158 hit it on all three non-trivial fns of a 5-fn one-tu
+(`func_80067D40.c`: a 226-instr FP/trig/RNG generator, a 137-instr sort/rank, a 76-instr table
+builder) and cracked all three.
+
+**The playbook (in order):**
+
+1. **Build an EXACT-SYMBOL isolated base.** Use PER-FIELD structs so each accessed field is its OWN
+   base symbol at offset 0 (`Esc D_801B711A[]` for the score field, `Eho D_801B711C[]` for hole,
+   etc.), NOT one combined struct + folded offset (`D_801B7118[i].score` = base+`i*stride`+2). Two
+   reasons: (a) the decomp-permuter's scorer and asm-differ both count a reloc-symbol/addend mismatch
+   (`D_801B7118+2` vs the target's `D_801B711A`) as a permanent nonzero FLOOR even though they LINK to
+   identical bytes, so exact symbols are required for the permuter to reach 0; (b) the offset-folding
+   itself changes SCHEDULING (see `#struct-access-folding-changes-scheduling`). The combined-struct
+   form is fine for the final in-tree file (it links identically); use per-field only for the
+   permuter/measurement base, then translate back.
+
+2. **Apply REF-COUNT / LIVE-RANGE levers — DECL ORDER IS INERT.** KMC gcc 2.7.2 allocates by
+   `global.c` allocno priority (`floor_log2(n_refs)*n_refs/live_length`), NOT declaration order
+   (verified S158: every decl permutation gave the identical object). So to flip which of two
+   variables gets the earlier hard register, change a REF COUNT or a LIVE RANGE, not the decl order.
+   Levers that worked: **param/var-reuse** (clamp/compute into an existing arg in place instead of a
+   fresh local — `if (arg0 > 0x12) arg0 = 0x12;` drops a `base` local; use `i - 1` inline instead of a
+   `seq` counter — this is the S157 trick generalized); **init-early / compute-late** to lengthen or
+   shorten a live range by even one instruction (S158 func_80068308: computing `lo` as the LAST
+   prologue statement dropped its live range 27→26 insns, enough to outrank `found` for s2);
+   **struct alignment** (align-2 the copied entry struct so a 6-byte struct-copy emits word+halfword
+   `lwl/lwr`+`lh/sh` instead of word+`lb`/`sb`); **LICM-alias defeat** (store through a symbol-less
+   const-pointer base `T *rp = D_XXXX; rp[j].field = …` so GCC's `memrefs_conflict_p` can't prove
+   non-aliasing and does NOT hoist a loop-invariant load that the ROM recomputes — an indexed
+   `D_XXXX[j]` with a distinct symbol disambiguates and wrongly hoists); **loop form** (for vs
+   do-while vs pointer-walk changes the strength-reduced giv-init placement in the preheader);
+   **operand/eval order** (swap `a > b` operands, or cast pointer arith to integer to force
+   offset-first `addu`); and the **return type** (see `#return-type-is-load-bearing`).
+
+3. **THEN run the boosted-weight permuter** from the best structural base to close the residual
+   spill-slot ordering + scheduling. Boost the stack-layout passes in `settings.toml`
+   `[weight_overrides]`: `perm_reorder_decls`, `perm_pad_var_decl`, `perm_reorder_stmts`,
+   `perm_temp_for_expr`, `perm_commutative`, `perm_randomize_function_type`. Run ANNEALING (drop
+   `--best-only`, which stalls on plateaus). If it plateaus, seed `base.c` with the current best
+   `output-<score>/source.c` and re-run. S158's fns closed at permuter iterations in the hundreds to
+   low-thousands ONCE the structural base was right; from a wrong base they plateaued indefinitely
+   (the permuter cannot invent the param-reuse / align / LICM levers — do those by hand first).
+
+**Metric caveat (do not trust the score for "matched"):** the permuter's own score and asm-differ's
+`current_score` weight VERY differently (S158: permuter 895 == asm-differ 6620 == 66 diff rows), and
+BOTH count link-identical reloc artifacts as false diffs — the per-field/combined addend
+(`D_801B711A` vs `D_801B7118+2`) and the intra-file `jal` shown as a `.text`-relative reloc (isolated
+target.o) vs a named-symbol reloc (in-tree). VERIFY a match by a RAW-INSTRUCTION diff of the LINKED
+bytes (`objdump -d … | awk '{$1=""}'` both sides) or the full-make ROM SHA-1 — not the score, which
+floors above 0 on these artifacts.
+
+**Process — multi-agent fan-out is the tool for this wall.** Solo attempts + a solo permuter plateau;
+S158 cracked it with a worktree fan-out (`isolation: worktree`): each agent SYMLINKS the gitignored
+toolchain (`tools/cc`, `venv`, `tools/decomp-permuter`) from the main repo into its worktree, `cp`s
+the isolated base + builds the reference object, then sweeps logic-preserving structural variants
+(measuring each) and runs a boosted permuter. The SYSTEMATIC order-sweep agent (many variants, each
+measured) is what discovered the param-reuse / align / return-type levers the permuter alone could
+not. Run one agent per remaining function.
+
+## return-type is load-bearing
+
+**Trigger:** a `void`-semantics function (no used return value; the ROM falls off the end) whose C is
+otherwise structurally correct still mis-allocates at the loop-entry / a delay slot, and the miss
+resists every body-level lever.
+
+**Fix:** declare the function `s32` (not `void`), with NO return statement. A non-void return type
+RESERVES `$v0` as the return register, which changes the register allocation / delay-slot fill enough
+to match a ROM whose original TU returned an (unused) value. S158 `func_80067D74` matched ONLY with
+`s32` return; `void` differed at the entry-`beqz` delay slot; `s32`/`u32`/`long long` all matched
+(`s64`/`u64` fail to compile with no return), so use the clean `s32`. Found via the permuter's
+`perm_randomize_function_type` pass — weight it up when a void classical fn won't close.
+
+## struct-access-folding-changes-scheduling
+
+**Trigger:** a struct-array function that byte-matches when written with per-field base symbols but
+NOT when written with a combined struct, even though the two forms link to identical addresses.
+
+**Cause:** for a combined global struct array, `D_801B7118[i].score` folds the field offset into the
+`%lo` (`sh v, %lo(D_801B7118+2)(hi+i*stride)`, addend 2); a per-field symbol `D_801B711A[i].score`
+uses `%lo(D_801B711A)` (addend 0). The LINKED bytes are identical, but GCC 2.7.2's instruction
+SELECTION / SCHEDULING for the two address forms differs (S158: the combined form changed the
+loop-entry `beqz` delay-slot fill on `func_80067D74`). When a struct-array classical fn won't match,
+split the accessed fields into separate per-field base symbols (`Eid@D_801B7118` / `Esc@D_801B711A` /
+`Eho@D_801B711C`, each a struct whose field is at offset 0). A 6-byte struct COPY can still use one of
+these (align-2 the type so the copy emits `lwl/lwr`+`lh/sh`).

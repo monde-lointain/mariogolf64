@@ -24,6 +24,12 @@ runs seed-only). v2 classical realized tier scored at review (since S11). Seed a
 (MCP-independent; see the Seed fast-path in `CLAUDE.md`). Path convention `overlay_<N>/<stem>` or
 `main/<stem>`, default -O2 game profile (no mk edit). Note: `pick_target.py`'s size-pts over-prices
 tiny none-upstream packs (S148 priced a 176B trivial pack at 13) — a calibration follow-up (below).
+**pts follow-up — regalloc-heavy dimension (S158):** the S155 rubric prices a one-tu classical pack by
+size/nfns, but S158's seed-13 5-fn one-tu was MASSIVELY under-priced (realized 18) because all 3
+non-trivial fns needed the full pervasive-regalloc playbook + a 3-round multi-agent fan-out + permuter.
+Difficulty is driven by FP/trig + many callee-saved regs + struct-array pressure, none of which the
+size/nfns model sees. Consider a `regalloc-heavy` pts bump in `pick_target.py` (detect FP ops / high
+callee-saved count / struct-array access) — off-cadence, golden-gated tooling branch.
 **Path-convention exception (S149):** nusys/SDK-template main-segment code (the `idle=nuboot` coddog
 tell) is carved to its LIBRARY tree (`libnusys/<file>`), not `main/<stem>` — yaml path-qualifier only,
 placement unchanged (see `CLAUDE.md` path convention). A per-FILE -O0 override is the one mk edit a
@@ -52,6 +58,27 @@ residual +3. Names kept `func_` (Ghidra had none). **Global-rename follow-up:** 
 and `D_800B67C0`→`debug_mode` are the reference's clear names, but `D_800B67C0` is SHARED by
 `func_80052070.c` + `libnusys/nusched.c`, so the rename must update all consumers in lockstep
 (symbol_addrs add-only + `make extract`) — deferred as a cross-repo naming pass, not a single-file edit.
+
+**S158 BANKED — `src/main/func_80067D40.c` (5-fn one-tu golf-tournament module,
+whole `[0x43140]` subseg).** RNG pair (`func_80067D40` set / `func_80067D4C` LCG-next on a 2nd seed,
+mult 0x5D588B65) + a 226-instr CPU-field score generator (`func_80067D74`: per-entry mod-arith + the
+LCG + `sin(hole·π/18)`) + a 137-instr leaderboard build/sort/rank (`func_800680FC`, sort via
+`func_8005B150`) + a 76-instr scenario name-table builder (`func_80068308`). All 3 non-trivial fns
+were STRUCTURALLY correct first-pass but locked on **PERVASIVE register allocation** — the hardest
+classical class, cracked by a **3-round multi-agent worktree fan-out + decomp-permuter** and a new
+playbook `docs/hazards.md#pervasive-regalloc-classical-main`: exact-symbol per-field structs (no
+reloc-addend false floor) + ref-count/live-range levers (DECL ORDER IS INERT for KMC gcc 2.7.2) +
+boosted permuter. Load-bearing levers: **param-reuse** (clamp `arg0` in place, no `base`/`seq`),
+**`s32` return type** (reserves v0; `#return-type-is-load-bearing`), **per-field structs** (combined
+offset-folding changes scheduling; `#struct-access-folding-changes-scheduling`), align-2 struct copy,
+const-pointer LICM-alias defeat, live-range trim. md5-candidate 213→214 (+1); +5 matched; asm subsegs
+unchanged (flip was a gate action). Quality 0/3/0/0 (3 permuter-escalated); seed 13 / realized 18 /
+residual +5 (a seed-13 one-tu massively under-priced — pervasive-regalloc difficulty not captured by
+size/nfns). Committed the main-profile permuter tooling (`tools/permuter_settings_main.toml` +
+`tools/kmc_main_prelude.inc`). **Cross-repo naming follow-up:** curate the 5 fns (RNG pair /
+score-gen / leaderboard / scenario-table) + data syms (2nd RNG seed `D_800C3600`, per-hole table
+`D_800C3604`, 30-entry ScoreEntry array `D_801B7118`, scenario table `D_80132CB0`) → decomp names +
+`sync_decomp_names.py --import-from-decomp`. Kept `func_`/generic `D_` (Ghidra had none).
 
 **S156 BANKED — `src/main/func_80052070.c` (4-fn jal-free scenario/terrain config-accessor slice,
 carved off the `func_80051E90` jtbl pair).** The smallest main-segment classical candidate

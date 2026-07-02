@@ -1,0 +1,4 @@
+compiler_type = "gcc"
+compiler_command = "COMPILER_PATH=tools/cc tools/cc/gcc -S -nostdinc -G 0 -mips3 -mgp32 -mfp32 -mno-abicalls -O2 -I include -I include/libultra -I include/libultra/internal -I include/libkmc -I include/libnusys -I include/libmus -I include/libnualstl -I include/libnaudio -DINCLUDE_ASM_USE_MACRO_INC -D_LANGUAGE_C -D_FINALROM -DNONMATCHING -DF3DEX_GBI_2 -o /dev/stdout | tools/cc/as -EB -mips3 -G 0 -I include"
+assembler_command = "tools/cc/as -EB -mips3 -G 0 -I include"
+asm_prelude_file = "tools/kmc_main_prelude.inc"
