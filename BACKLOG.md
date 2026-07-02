@@ -35,6 +35,19 @@ tell) is carved to its LIBRARY tree (`libnusys/<file>`), not `main/<stem>` — y
 placement unchanged (see `CLAUDE.md` path convention). A per-FILE -O0 override is the one mk edit a
 boot/SDK-glue TU may need.
 
+**S160 BANKED — `src/main/func_8006EA90.c` (3-fn one-tu classical slice, whole `[0x49E90]` subseg — FIRST
+bank of the pure classical asm-flip endgame).** `func_8006EA90` = putter/physics byte-flag table setup
+(0-jal, FP: outer4/inner3 dup-store `*0.3f` loop + three `*0.35f` signed byte blocks + three
+`(u32)(f64)*0.8` unsigned-cast blocks); `func_8006ED2C` = no-op; `func_8006ED34` = two-texture
+fog/scroll screen-filter DISPLAY-LIST builder (1 jal `emit_per_phase_fog_state`). md5-candidate 215→216;
+asm subsegs 79→78. `func_8006EA90` needed the **permuter** for a prologue instruction-GROUP schedule swap
+(structure was 165/165 with identical reg-alloc; grounded in `sched.c rank_for_schedule` LUID tiebreak,
+run without `--best-only` — the equal-score plateau); FP-double pool (0.8/2^31 ×3, NOT 0.3) carved to a
+`.rodata` sibling. `func_8006ED34` matched via the `gDPxxx(dl++)` **post-increment** idiom, then
+PO-directed refine to idiomatic gbi macros (composite `gDPLoadTextureBlock`/`gDPLoadMultiBlock`) decoded
+with gfxdis.f3dex2. Retro applied 4 of 4: `lib.sh` grep-bug fix, `#display-lists` addendum,
+`#permuter-setup` sub-0.97 scheduling extension, new `tools/fpdecode.py`. Quality 0/1/0/0. No carry-over.
+
 **S159 BANKED — `src/main/func_80051E90.c` (2-fn one-tu jtbl-pair, whole `[0x2D290]` subseg — the
 S156 jtbl-pair remainder).** `func_80051E90` = `switch(course)` over the 8-entry compiler jump table
 `jtbl_800CCC30` + a sparse per-case `if`-chain on `hole` returning golf-yardage constants (default

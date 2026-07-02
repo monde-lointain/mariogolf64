@@ -32,13 +32,17 @@ mg_find_permuter_dir() {
 # Sets C_FILE and ASM_FILE; aborts if either cannot be found.
 mg_resolve_c_asm() {
     local func="$1" asm_line asm_dir
-    C_FILE=$(grep -rl "INCLUDE_ASM.*${func}" src/ 2>/dev/null | head -1)
+    # Anchor on the exact `, <func>);` argument position, NOT a bare `.*${func}`:
+    # in a multi-fn subseg the target's stem also appears inside a SIBLING stub's
+    # asm PATH string (INCLUDE_ASM("asm/nonmatchings/main/func_8006EA90", func_8006ED34)),
+    # so a loose grep matches both lines and garbles ASM_FILE (S160).
+    C_FILE=$(grep -rl "INCLUDE_ASM(.*, ${func});" src/ 2>/dev/null | head -1)
     if [ -z "$C_FILE" ]; then
         echo "Error: Could not find C file containing INCLUDE_ASM for ${func}" >&2
         exit 1
     fi
     # INCLUDE_ASM line format: INCLUDE_ASM("path", func_name);
-    asm_line=$(grep "INCLUDE_ASM.*${func}" "$C_FILE")
+    asm_line=$(grep "INCLUDE_ASM(.*, ${func});" "$C_FILE" | head -1)
     asm_dir=$(echo "$asm_line" | sed 's/.*INCLUDE_ASM("\([^"]*\)".*/\1/')
     ASM_FILE="${asm_dir}/${func}.s"
     if [ ! -f "$ASM_FILE" ]; then

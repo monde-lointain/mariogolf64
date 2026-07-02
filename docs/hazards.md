@@ -2639,6 +2639,36 @@ into a running `Gfx*` cursor. Decode + reconstruct, do not hand-transcribe:
   `u16` (per the kantan demo + the permuter's rediscovery); see
   `#permuter-setup-for-kmc-toolchain-mirrors` for the coord-width regalloc lever.
 
+**Dynamic-builder POST-INCREMENT idiom + composite folding (S160, 2nd main-seg DL TU).** From
+`func_8006ED34` (a two-texture fog/scroll screen filter):
+- **`gDPxxx(gfx++)` post-increment is load-bearing, not cosmetic.** When the cursor is a LOCAL
+  `Gfx *gfx` whose ADDRESS is taken (`emit_per_phase_fog_state(&gfx)`), gcc forces it to a stack slot
+  and every command spills the advanced pointer (dead intermediate spills to `sp+off`). The stock
+  macros expand `_g = (Gfx*)(pkt); _g->words.w0/w1 = …` with NO self-increment, so the caller's `gfx++`
+  supplies the advance. The POST-increment form (write via the OLD pointer THEN advance) matches the
+  ROM's base+offset-write-then-spill-advance codegen; a hand PRE-store-then-advance form
+  (`gfx->words.w0=..; gfx++`) emits an EXTRA pointer `addiu` at each call/return boundary. So build with
+  `gDPxxx(gfx++)` and cache `Gfx *gfx = *glistp; …; *glistp = gfx;` (the func_800500E0/func_8005029C idiom).
+- **gfxdis.f3dex2 -f DOES fold the texture-LOAD composites** (corrects the "gfxdis does NOT fold" note
+  above): `gfxdis.f3dex2 -f <binfile-of-BE-u32-words>` emits `gsDPLoadTextureBlock`/`gsDPLoadMultiBlock`
+  folded from the 7-primitive SETTIMG/SETTILE/LOADSYNC/LOADBLOCK/PIPESYNC/SETTILE/SETTILESIZE run. The
+  dynamic `gDPLoadTextureBlock(gfx++, …)` works BY TEXTUAL SUBSTITUTION — `gfx++` is pasted into all 7
+  sub-macros, so ONE call advances the cursor 7 (matching the ROM's 7 spills). Verified byte-exact by
+  full-make.
+- **RECIPE — bank raw, then refine.** First bank the VERBATIM command words (a
+  `g = dl++, g->words.w0 = .., g->words.w1 = ..` blob) for a guaranteed score-0 match; THEN (at review
+  or a refine pass) decode with gfxdis and rewrite to stock macros, re-verifying byte-exact by
+  full-make. Feed a DYNAMIC address (texture image / scroll coord / vtx pointer) to gfxdis as a
+  placeholder word, then swap the real expression back into the macro arg. gfxdis input quirks for MG64
+  asm: `extract_dlist.py` wants bare mnemonics at line start, so strip the `/* … */` prefix and the `$`
+  from registers (`sed -E 's|/\*[^*]*\*/||; s/\$//g; s/^[[:space:]]+//'`). Decode FP-looking words with
+  `tools/fpdecode.py` before writing a C literal.
+- **Macro param/field-name collision (parse trap).** A word-write helper macro whose PARAMETER shares a
+  name with a struct field it writes (`#define G(w0, w1) g->words.w0 = (w0)`) silently rewrites
+  `g->words.w0` → `g->words.<arg>` via preprocessor token replacement → KMC-gcc `parse error`. The
+  isolated `decomp_loop` base.c may use safe param names (`a,b`) and pass, so ONLY the in-tree build
+  catches it. Use distinct param names (`cw0/cw1`) — or just the stock GBI macros.
+
 ---
 
 ## data-rodata-carve
@@ -2923,7 +2953,17 @@ cracked it by retyping the two texrect coords `u16 left; s16 right;` (which the 
 the idiomatic coord type), then a final commutative operand-order swap (`offset + (x0+half)`) closed
 the last instruction. When a classical match is a rows-aligned regalloc/frame near-miss with no
 externs (isolated == in-tree), run the permuter even below the 0.97 asm-differ gate (asm-differ
-normalizes registers, so its `percent` under-reports a pure-regalloc miss).
+normalizes registers, so its `percent` under-reports a pure-regalloc miss). **This extends to a pure
+prologue-SCHEDULING swap (S160 `func_8006EA90`):** when `match_count == total_rows` AND the register
+allocation is IDENTICAL but `percent` sits ~0.90 because a handful of reordered early insns cascade the
+score, the structure is provably right — the miss is which of two equal-priority preheader insn GROUPS
+the post-reload scheduler emits first (`sched.c` `rank_for_schedule` breaks priority ties by `INSN_LUID`
+= physical/hoist order; see the gcc-source cross-ref above). Run the permuter WITHOUT `--best-only` (the
+equal-score PLATEAU case: the fix needs an intermediate transform that keeps the SAME score before a
+second move reaches 0 — S160's winner was a `scale = 0.3f` in-loop assignment plus a pointer alias that
+reordered the FP-const load ahead of the base pointers). Structure levers that got it to score-0-modulo-
+rodata first: hoist the invariant base pointer INSIDE the loop (fixes `off+base` addu operand order) and
+express the offset as a strength-reduced IV (`off = 0x40 + i*0x10`, moves its init late).
 
 **Committed main-profile setup (S158).** `tools/permuter_settings_main.toml` (MAIN_CFLAGS:
 `-mips3 -mgp32 -mfp32 -mno-abicalls -O2` + all base `-I` + `-DF3DEX_GBI_2`, `tools/cc/gcc -S | tools/cc/as -EB -mips3 -G 0 -I include`, VERIFIED to reproduce the in-tree `.o`) and `tools/kmc_main_prelude.inc`
