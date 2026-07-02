@@ -35,6 +35,18 @@ tell) is carved to its LIBRARY tree (`libnusys/<file>`), not `main/<stem>` — y
 placement unchanged (see `CLAUDE.md` path convention). A per-FILE -O0 override is the one mk edit a
 boot/SDK-glue TU may need.
 
+**S161 BANKED — `src/main/func_800521C0.c` (3-fn scenario-flag get/set head, DECOMPOSED from the 12-fn
+`[0x2D5C0]` subseg — main-segment classical endgame).** `func_800521C0` = branchless flag getter
+`-((D_801B60AC & 2) != 0) & 9`; `func_800521DC` = `flag_is_set(0x3D)?2 : (D_801B60AC & 6)?9 : 0x12`;
+`func_80052220` = `func_800521C0() + func_800521DC() - 1`. All 3 tiny fns (<10 instrs) matched on the
+FIRST build via the **asm-first fast-path** (S148, no MCP) — verbatim first-try, no permuter. Split
+`[0x2D5C0]` at the 16-aligned `0x2D650` (head emits no rodata → decomposition-safe); the `[0x2D650]`
+9-fn tail stays asm (natural next slice, surfaced via the new `--segment main`). md5-candidate 215→216;
+asm subsegs 78→78 (split adds the tail). Retro applied **3 of 3**: `pick_target.py --segment main`
+vram-range filter, `/sprint-review` carry-over-hygiene prune (+ pruned the stale S156 jtbl spike banked
+S159), `game-embedded` mirror sort de-rank; goldens regen'd (4). Quality 0/0/0/0. No carry-over.
+seed 3; realized 2; residual −1 (first sub-5 classical).
+
 **S160 BANKED — `src/main/func_8006EA90.c` (3-fn one-tu classical slice, whole `[0x49E90]` subseg — FIRST
 bank of the pure classical asm-flip endgame).** `func_8006EA90` = putter/physics byte-flag table setup
 (0-jal, FP: outer4/inner3 dup-store `*0.3f` loop + three `*0.35f` signed byte blocks + three
@@ -2598,20 +2610,10 @@ by `/sprint-plan`:
   `NU_CONT_THREAD_ID=6` vs MG64's 5), and that surfaces only at first build unless reconciled here.
   A near-free retry missing any of these is a half-scoped spike — finish the scope before deferring.
 
-- **(S156 spike) `func_80051E90` + `func_80051FCC` jtbl pair — `[0x2D290, asm]` (the upper 2 fns of
-  the region S156 carved).** The S156 sub-slice took the lower 4 jal-free accessors and left this
-  2-fn head as asm (their inner boundary `0x2D3CC` is non-16-aligned, so they carve only as a pair,
-  and the pair starts at the 16-aligned `0x2D290`). **DoD blocker:** `func_80051E90` (0x13C) is a
-  `switch`-style dispatch that reads the rodata jump table `jtbl_800CCC30` (vram `0x800CCC30`, NOT yet
-  placed/named). To match, the classical `switch` must emit its jtbl at exactly `0x800CCC30` → a
-  `rodata-jtbl` sibling carve (`docs/hazards.md#rodata-sibling-yaml-pattern`), the real work of this
-  carry. `func_80051FCC` (0xA4) is the EASY sibling — jal-free, extern refs only (`D_801B608C`,
-  `D_801B6098`, `scenario_mode_id`, the `D_800C1B28` byte-table, `g_terrain_vtx_xform_mode`), plus a
-  magic-multiply `0x55555556` (signed /3-or-mod) — but the file banks only when BOTH match, so the
-  jtbl is the gating item. Retry plan: (1) flip `[0x2D290, c, main/func_80051E90]`; (2) seed both
-  asm-first from `asm/2D290.s`; (3) resolve/place `jtbl_800CCC30` + its sibling `.rodata` carve at the
-  gate; (4) the accessors' externs are already resolved (S156 placed none new — all auto/named).
-  Extern-decl types from the asm loads (`lb`→`s8`, `lw`→`s32`; `scenario_mode_id` is SIGNED via `slti`).
+- **(S159 BANKED, removed from carry-overs)** The S156-spike `func_80051E90` + `func_80051FCC` jtbl
+  pair (`[0x2D290, asm]`) banked S159 (`c774454`) as `src/main/func_80051E90.c` — the `rodata-jtbl`
+  sibling carve for `jtbl_800CCC30` was the real work, resolved at the S159 gate. Pruned at S161 per
+  the carry-over-hygiene rule (`/sprint-review` Step 5.4).
 
 - **(S154 BANKED, removed from carry-overs)** The 3-fn `[0x455C0]` tail (`calc_vec3_magnitude`,
   `crc16_ccitt`, `report_div_error`) banked S154 by RECOMBINING the whole `func_8006A000` one-tu into one
