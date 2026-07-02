@@ -550,6 +550,8 @@ When `pick_target.py` flags a hazard (or a match shows its symptom), read the ma
 | classical fn STRUCTURALLY correct (rows align) but locks HIGH on a pervasive hard-reg permutation (`i:s4↔s5`) + spill-slot order + scheduling | #pervasive-regalloc-classical-main |
 | `void` classical fn mis-allocates at loop-entry/delay-slot, resists every body lever | #return-type-is-load-bearing |
 | struct-array fn byte-matches with per-field base symbols but NOT the combined struct (link-identical) | #struct-access-folding-changes-scheduling |
+| classical `switch(x)` dispatch via a compiler jump table (`jtbl_<vram>`, `sltiu`+`jr $v0`), esp. w/ sparse inner cases or `a==K1\|\|K2` | #switch-jtbl-dispatch |
+| ROM cond-branch is plain `beqz`+`li v0,CONST`+`move v0,<scratch>` but build emits branch-likely `beqzl` skipping the lone `li v0,CONST` (return-var coalesced to v0) | #register-reuse-nudge-classical-regalloc |
 
 </hazard_index>
 

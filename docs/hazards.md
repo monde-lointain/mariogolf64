@@ -1607,12 +1607,38 @@ default ascending order (`$2`/`v0` before `$3`/`v1`); whichever pseudo is proces
 grabs `v0`, and inverting the guard reorders that. S156 `func_800520DC` + the `func_80052070`
 scenario-tail (`if (scenario_mode_id >= 12) return 0; return D_801B6098;`).
 
-**Variant — array-index `+` operand order picks the `v0` accumulator (S156).** For `arr[termA +
-termB]` where both terms are strength-reduced multiplies, gcc computes the RIGHT `+` operand's term
-into `v0` (the accumulator that receives the final `addu v0,v0,v1`) and the LEFT into `v1`. So to
-make the target's "computed-into-`v0` term" match, put that term on the RIGHT of the `+`. S156:
-`arg0*200 + arg1*10` put `arg1*10` in `v0` (target did `a1*10` first); `scenario*12 + D_801B6098*2`
-put `D_801B6098*2` in `v0`. Same value, same instructions, only the two multiply blocks swap order.
+**Variant — array-index `+` operand order picks the `v0` accumulator (S156; gcc-grounded S159).** For
+`arr[termA + termB]` where both terms are strength-reduced multiplies, gcc computes the RIGHT `+`
+operand's term into `v0` (the accumulator that receives the final `addu v0,v0,v1`) and the LEFT into
+`v1`. So to make the target's "computed-into-`v0` term" match, put that term on the RIGHT of the `+`.
+S156: `arg0*200 + arg1*10` put `arg1*10` in `v0` (target did `a1*10` first); `scenario*12 +
+D_801B6098*2` put `D_801B6098*2` in `v0` (target loaded `D_801B6098` FIRST). Same value, same
+instructions, only the two multiply blocks swap order. **WHY (KMC gcc 2.7.2 `expr.c:5248-5290`,
+`both_summands`):** after expanding both operands, the `PLUS`-sum path reassociates and "puts a
+multiplication first" (5289-5290 swap) + folds constants; the emitted order of the two multiply
+subtrees is driven by that reorder, so swapping the source order of the two terms flips which global
+is loaded first. Empirical rule: if a near-miss only differs by which term is loaded/accumulated
+first, try both `A + B` orders. S159 `func_80051FCC` matched with `scenario*12 + D_801B6098*2` (the
+cheap `D_801B6098*2` on the right → loaded first).
+
+**Variant — branch-LIKELY (`beqzl`) on a coalesced return-var; invert the branch (S159).** A
+`return-DEFAULT` tail can miss NOT on the guard-temp coloring (the S156 variant above) but on the
+BRANCH FORM: `if (cond) return VAR; return CONST;` where `VAR` coalesces into `v0` makes gcc emit a
+branch-LIKELY (`beqzl`) that annuls the lone `li v0,CONST` in the delay slot (so `v0` keeps `VAR` on
+the not-taken path) — 4 insns. If the ROM instead uses a PLAIN `beqz` + `li v0,CONST` (delay, always
+run) + `addu/move v0,<scratch>,0` on the fall-through (i.e. `VAR` is held in a SCRATCH reg, NOT `v0`)
+— 5 insns — INVERT the branch so the CONSTANT is the early return: `if (!cond) return CONST; return
+VAR;`. That makes `VAR` no longer the coalesced-into-`v0` fall-through value, so it lands in a scratch
+reg and the single-insn-skip annul pattern no longer fires → the plain `beqz` + `move` form. **WHY
+(KMC gcc 2.7.2 `reorg.c:1141-1211`, `optimize_skip`):** the comment at 1161-1166 states it directly —
+when a conditional branch "goes around a single insn", gcc INVERTS+ANNULS the jump ("the same effect
+in fewer insns"), which is the `beqzl`. That optimization only applies when the skipped insn (`li
+v0,CONST`) is the LONE difference, i.e. when `VAR` already occupies `v0`; inverting so `CONST` is the
+early return removes the single-skip shape. S159 `func_80051FCC` scenario tail: `if
+(scenario_mode_id < 12) return scenario_mode_id; return 8;` emitted `beqzl` (sm→v0); inverting to `if
+(scenario_mode_id >= 12) return 8; return scenario_mode_id;` gave the ROM's `beqz; li v0,8; addu
+v0,a0,0`. (Sibling of the guard-temp inverted-guard variant above and of
+[#return-type-is-load-bearing](#return-type-is-load-bearing): all three turn on what occupies `v0`.)
 
 ---
 
@@ -3401,3 +3427,43 @@ loop-entry `beqz` delay-slot fill on `func_80067D74`). When a struct-array class
 split the accessed fields into separate per-field base symbols (`Eid@D_801B7118` / `Esc@D_801B711A` /
 `Eho@D_801B711C`, each a struct whose field is at offset 0). A 6-byte struct COPY can still use one of
 these (align-2 the type so the copy emits `lwl/lwr`+`lh/sh`).
+
+## switch-jtbl-dispatch (compiler jump table + sparse inner cases)
+
+**Context:** a classical fn that dispatches on a small dense index (`switch (x)` with cases `0..N`,
+`sltiu x,N+1` bound-check) via a compiler-generated `.rodata` jump table (`jtbl_<vram>`, `jr $v0`),
+often with a per-case sparse secondary dispatch returning constants. S159 `func_80051E90` (a
+course/hole yardage lookup: `switch(course)` over 8 cases, each a sparse `hole` dispatch returning
+golf-yardage constants, default 200).
+
+**Three levers for a byte-exact match:**
+
+1. **`switch` for the jtbl dispatch ONLY; `if`-chains for sparse inner cases.** A `switch` on the
+   dense outer index emits the jump table you want (one `jtbl_<vram>` to carve). But a `switch` on the
+   SPARSE inner values (e.g. `hole ∈ {2,4,9,10,11,12,13,16}`) risks gcc emitting a SECOND table (a
+   `casesi`/range table), which is a second rodata blob to carve and a different code shape. Write the
+   sparse inner dispatch as an `if (x == K1) …; if (x == K2) …;` chain so it always compiles to a
+   linear `beq/bne` comparison chain (gcc sorts the tests ascending, matching the ROM's order). Net:
+   exactly one compiler table in the TU.
+
+2. **`a == K1 || a == K2` compiles BRANCHLESS — split it into two `if`s.** For a case that returns the
+   same value for two inputs, `if (a == 10 || a == 16) return V;` compiles to a branchLESS
+   `xori/sltiu` per test + `or` + one `beqz` (a bitwise merge, no short-circuit). If the ROM uses the
+   SHORT-CIRCUIT branch form (`beq a,10,ret; … bne a,16,default`), write two separate statements
+   (`if (a == 10) return V; if (a == 16) return V;`). This also lets gcc CROSS-JUMP the second test's
+   "check-K-else-default" tail into a SIBLING case's identical block (S159: case 0's `bne hole,16 →
+   default` merged into case 5's `bne hole,17 → default`, with the compare constant riding in the
+   shared `v0`). The cross-jump is automatic once the tail shapes match; you only need the branch
+   (not branchless) form.
+
+3. **`.rodata` sibling carve for the jump table (see
+   [#rodata-sibling-yaml-pattern](#rodata-sibling-yaml-pattern)).** The compiler table lands in the C
+   object's `.rodata`; carve it so it places at the ROM's `jtbl_<vram>`. The text flip is the gate
+   enabler; the rodata carve lands at BODY time (a stub emits no rodata). Split the generic rodata
+   subseg around the table's extent (S159: `jtbl_800CCC30` = 8 × 4B = 0x20 at rom 0xA8030, 8-aligned,
+   flanked by unrelated strings → `[0xA8030, .rodata, main/func_80051E90]` + `[0xA8050, rodata]`
+   tail). This is the first carve of a compiler SWITCH table (prior carves were FP-literal /
+   const-array rodata); the mechanics are identical (attribute + split at 16/word-aligned bounds).
+
+**Provenance:** S159 `func_80051E90` (2/2 fns, no permuter; all three levers + the operand-order and
+branch-likely nudges in [#register-reuse-nudge-classical-regalloc](#register-reuse-nudge-classical-regalloc)).

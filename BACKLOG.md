@@ -35,6 +35,23 @@ tell) is carved to its LIBRARY tree (`libnusys/<file>`), not `main/<stem>` — y
 placement unchanged (see `CLAUDE.md` path convention). A per-FILE -O0 override is the one mk edit a
 boot/SDK-glue TU may need.
 
+**S159 BANKED — `src/main/func_80051E90.c` (2-fn one-tu jtbl-pair, whole `[0x2D290]` subseg — the
+S156 jtbl-pair remainder).** `func_80051E90` = `switch(course)` over the 8-entry compiler jump table
+`jtbl_800CCC30` + a sparse per-case `if`-chain on `hole` returning golf-yardage constants (default
+200, cases 6/7→30); `func_80051FCC` = scenario/terrain config accessor (`D_801B608C==9` table lookup
+/ `g_terrain!=0` signed-`%3`-magic 0x55555556 / else `sm<12` clamp-to-8). Both jal-free. **MILESTONE:
+this was the LAST c-stub file — every `src/*.c` is now fully-C (md5-candidate 215/215); the c-stub
+backlog is drained and all remaining work is the 79 un-flipped asm subsegs.** Matched with **4
+codegen nudges, no permuter**, all grounded in the KMC gcc 2.7.2 source per PO directive: new
+`docs/hazards.md#switch-jtbl-dispatch` (switch-for-jtbl-only + if-chains for sparse inner cases;
+`a==K1||a==K2` → two `if`s for the short-circuit + cross-jump; `.rodata` sibling carve of the switch
+table — first carve of a compiler jump table) + two `#register-reuse-nudge` variants (index-add
+operand order → `expr.c:5248-5290 both_summands`; branch-LIKELY `beqzl` on a coalesced return-var →
+INVERT the branch, `reorg.c:1141-1211 optimize_skip`). md5-candidate 214→**215** (+1); +2 matched; asm
+subsegs 79→79 (the flip was the gate action; +1 rodata carve). Quality 0/0/0/0; seed 5 / realized 5 /
+residual 0 (2nd post-S155 sub-13 classical data point after S156, validating the recalibrated rubric).
+Names kept `func_` (Ghidra had none). No carry-overs.
+
 **S157 BANKED — `src/main/func_80025D30.c` (9-fn integer overlay/moduleset load-unload module,
 whole `[0x1130]` subseg).** The overlay loader over a 0x28-byte `OverlayDesc[]` table (`D_800B5F58`):
 `load_overlay`/`unload_overlay` DMA an overlay's text from ROM, zero its BSS, flush caches, run its
