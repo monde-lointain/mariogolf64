@@ -64,47 +64,47 @@ void func_8006EA90(void) {
 void func_8006ED2C(void) {}
 
 /* Builds a fixed screen-space two-texture filter (fog-blended, scrolling second
- * layer) display list into *arg0, splicing emit_per_phase_fog_state() in after
- * the render-state setup. */
-void func_8006ED34(Gfx** arg0) {
-  Gfx* dl = *arg0;
+ * layer) display list into *glistp, splicing emit_per_phase_fog_state() in
+ * after the render-state setup. */
+void func_8006ED34(Gfx** glistp) {
+  Gfx* gfx = *glistp;
   u32 uls;
   u32 lrs;
 
-  gDPPipeSync(dl++);
-  gDPSetColorDither(dl++, G_CD_MAGICSQ);
-  gDPPipeSync(dl++);
-  gDPPipeSync(dl++);
-  gDPSetCycleType(dl++, G_CYC_2CYCLE);
-  gDPPipeSync(dl++);
-  gDPSetAlphaCompare(dl++, G_AC_NONE);
-  gDPPipeSync(dl++);
-  gDPSetTextureFilter(dl++, G_TF_BILERP);
-  gDPPipeSync(dl++);
-  gDPSetRenderMode(dl++, G_RM_FOG_SHADE_A, G_RM_AA_ZB_XLU_SURF2);
-  gDPSetCombineLERP(dl++, TEXEL0, TEXEL1, PRIMITIVE_ALPHA, TEXEL1, 0, 0, 0,
+  gDPPipeSync(gfx++);
+  gDPSetColorDither(gfx++, G_CD_MAGICSQ);
+  gDPPipeSync(gfx++);
+  gDPPipeSync(gfx++);
+  gDPSetCycleType(gfx++, G_CYC_2CYCLE);
+  gDPPipeSync(gfx++);
+  gDPSetAlphaCompare(gfx++, G_AC_NONE);
+  gDPPipeSync(gfx++);
+  gDPSetTextureFilter(gfx++, G_TF_BILERP);
+  gDPPipeSync(gfx++);
+  gDPSetRenderMode(gfx++, G_RM_FOG_SHADE_A, G_RM_AA_ZB_XLU_SURF2);
+  gDPSetCombineLERP(gfx++, TEXEL0, TEXEL1, PRIMITIVE_ALPHA, TEXEL1, 0, 0, 0,
                     PRIMITIVE, PRIMITIVE, 0, COMBINED, 0, 0, 0, 0, COMBINED);
-  gDPSetPrimColor(dl++, 0, 0, 0x7F, 0x7F, 0x7F, 0xBF);
-  gDPSetEnvColor(dl++, 0x3F, 0x7F, 0x9F, 0xFF);
-  emit_per_phase_fog_state(&dl);
-  gSPLoadGeometryMode(dl++, 0);
-  gSPSetGeometryMode(dl++, G_ZBUFFER | G_SHADE | G_FOG | G_SHADING_SMOOTH);
-  gDPLoadTextureBlock(dl++, (D_800FC89C + 8) & ~7, G_IM_FMT_RGBA, G_IM_SIZ_16b,
+  gDPSetPrimColor(gfx++, 0, 0, 0x7F, 0x7F, 0x7F, 0xBF);
+  gDPSetEnvColor(gfx++, 0x3F, 0x7F, 0x9F, 0xFF);
+  emit_per_phase_fog_state(&gfx);
+  gSPLoadGeometryMode(gfx++, 0);
+  gSPSetGeometryMode(gfx++, G_ZBUFFER | G_SHADE | G_FOG | G_SHADING_SMOOTH);
+  gDPLoadTextureBlock(gfx++, (D_800FC89C + 8) & ~7, G_IM_FMT_RGBA, G_IM_SIZ_16b,
                       32, 32, 0, G_TX_NOMIRROR | G_TX_WRAP,
                       G_TX_NOMIRROR | G_TX_WRAP, 5, 5, G_TX_NOLOD, G_TX_NOLOD);
-  gDPLoadMultiBlock(dl++, (D_80132CEC + 8) & ~7, 0x0100, 1, G_IM_FMT_RGBA,
+  gDPLoadMultiBlock(gfx++, (D_80132CEC + 8) & ~7, 0x0100, 1, G_IM_FMT_RGBA,
                     G_IM_SIZ_16b, 32, 32, 0, G_TX_NOMIRROR | G_TX_WRAP,
                     G_TX_NOMIRROR | G_TX_WRAP, 5, 5, G_TX_NOLOD, G_TX_NOLOD);
-  gSPTexture(dl++, 0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_ON);
-  gDPSetTileSize(dl++, G_TX_RENDERTILE, 0, 0, 0x40, 0x40);
+  gSPTexture(gfx++, 0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_ON);
+  gDPSetTileSize(gfx++, G_TX_RENDERTILE, 0, 0, 0x40, 0x40);
   uls = D_800C42C4 + 1;
   lrs = D_800C42C4 + 0x41;
   D_800C42C4 = uls;
-  gDPSetTileSize(dl++, 1, uls, 0, lrs, 0x40);
-  gDPPipeSync(dl++);
-  gSPVertex(dl++, D_800C4160, 6, 0);
-  gSP2Triangles(dl++, 1, 0, 2, 0, 1, 2, 3, 0);
-  gSP2Triangles(dl++, 3, 2, 4, 0, 3, 4, 5, 0);
-  gDPPipeSync(dl++);
-  *arg0 = dl;
+  gDPSetTileSize(gfx++, 1, uls, 0, lrs, 0x40);
+  gDPPipeSync(gfx++);
+  gSPVertex(gfx++, D_800C4160, 6, 0);
+  gSP2Triangles(gfx++, 1, 0, 2, 0, 1, 2, 3, 0);
+  gSP2Triangles(gfx++, 3, 2, 4, 0, 3, 4, 5, 0);
+  gDPPipeSync(gfx++);
+  *glistp = gfx;
 }
