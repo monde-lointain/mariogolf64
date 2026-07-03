@@ -3341,67 +3341,72 @@ that beats the tree pattern).
 
 ## profile-probe (pinning the flags of a SHA-missing build)
 
-**Use:** when a built `.o` SHA-misses and you suspect the COMPILE FLAGS (opt level, `-g`,
+**Use:** when a built `.o` SHA-misses and you suspect the **compile flags** (opt level, `-g`,
 `-fdelayed-branch`, frame pointer), not the C. `tools/profile_probe.py --seg <seg> --func <fn>`
 assembles the target subseg `.s` into a relocatable object and KMC-compiles the candidate
 `src/<seg>.c` at each of a set of flag combos, then diffs the normalized `objdump -dr` (instruction
 stream + reloc-symbol lines) per function — pinning the matching flags in seconds, no full make.
 
-**Gotchas baked into the tool (the S149 grind):** assemble the target with **modern GAS**
-(`mips-linux-gnu-as -I include`), NOT `cpp -P | as` (cpp silently empties `.text` and the pipe
-"succeeds") and NOT KMC `as` (rejects `.set gp=64`); the candidate uses the KMC `gcc -S` + KMC `as`
+**Gotchas baked into the tool:** assemble the target with **modern GAS**
+(`mips-linux-gnu-as -I include`), not `cpp -P | as` (cpp silently empties `.text` and the pipe
+"succeeds") and not KMC `as` (rejects `.set gp=64`); the candidate uses the KMC `gcc -S` + KMC `as`
 pipeline (`mk/src.mk`). Both objdumped with `mips-linux-gnu-objdump`, so the unresolved relocs (zeroed
 fields) compare directly. Normalizer note: POSIX awk has no `\s` — use `[[:space:]]` (the `\s` bug made
-the first S149 comparison match only reloc lines and read as false 0-diffs). Pairs with
+the first comparison match only reloc lines and read as false 0-diffs). Pairs with
 `#-o0-bootsdk-glue-file-profile`.
+
+**Provenance:** S149 (the profile-probe grind: assemble the target with modern GAS; the
+`\s`-vs-`[[:space:]]` awk-normalizer false-0-diff bug).
 
 ---
 
 ## overlapping symbols — allow_duplicated (two instances share one official static name)
 
-**Rule:** splat dedups `symbol_addrs.txt` by symbol NAME: two entries with the SAME name at DIFFERENT
-vrams error `Duplicate symbol detected` (splat `util/symbols.py`, the `seen_symbols` map) UNLESS BOTH
+**Rule:** splat dedups `symbol_addrs.txt` by symbol name: two entries with the same name at different
+vrams error `Duplicate symbol detected` (splat `util/symbols.py`, the `seen_symbols` map) unless both
 entries set `allow_duplicated:True`. This bites when one official name legitimately recurs across two
-instances — MG64's two nusys instances (the mapped libnusys + the game-embedded nuboot, S149) each
+instances — MG64's two nusys instances (the mapped libnusys + the game-embedded nuboot) each
 have their own `IdleThread` / `MainThread` / `IdleStack` / `nuIdleFunc` / `idle` (file-statics in stock
-nuboot, file-local per TU, but the curated NAME is shared).
+nuboot, file-local per TU, but the curated name is shared).
 
 **Procedure:** when naming an instance's symbol with an official name the second instance also uses,
 append `allow_duplicated:True` to the `symbol_addrs.txt` entry. It is harmless when no duplicate yet
-exists (splat only checks when a dup is present), and BOTH entries need it, so set it pre-emptively on
-the first instance to prepare for the second. S149 added `IdleThread`/`MainThread`/`IdleStack`/
-`nuIdleFunc` with `allow_duplicated:True`.
+exists (splat only checks when a dup is present), and both entries need it, so set it pre-emptively on
+the first instance to prepare for the second.
 
-**CAVEAT — sync-managed names can't take the flag by hand.** `idle`/`mainproc` live in
+**Caveat — sync-managed names can't take the flag by hand.** `idle`/`mainproc` live in
 `ghidra_symbols.txt` (sync-owned, never hand-edited), which carries no `allow_duplicated`. A future
 second-instance `idle` cannot coexist via a hand-edit; it needs the sync tool to emit the flag, or a
 `symbol_addrs` `rom:`-qualifier override path (cf. `#wrong-ghidra-name-override`).
 Distinct from `#static-name-collision`
-(same name, same TU, no global emitted, no action); here the names ARE placed globals at distinct vrams.
+(same name, same TU, no global emitted, no action); here the names are placed globals at distinct vrams.
+
+**Provenance:** S149 (MG64's two nusys instances — mapped libnusys + game-embedded nuboot; added
+`IdleThread`/`MainThread`/`IdleStack`/`nuIdleFunc` with `allow_duplicated:True`).
 
 ---
 
 ## vendored-header inversion (a curated libultra header diverges from the ultralib pin)
 
-**Rule:** a vendored libultra header can ship a macro that is WRONG vs the upstream pin — not merely
-reformatted but functionally INVERTED. S149 `include/libultra/PR/os_host.h` had
+**Rule:** a vendored libultra header can ship a macro that is wrong vs the upstream pin — not merely
+reformatted but functionally **inverted**. `include/libultra/PR/os_host.h` had
 `#define __osInitialize_common() osInitialize()`, the inverse of upstream's
 `#define osInitialize() __osInitialize_common()`. The real VERSION_J symbol is `__osInitialize_common`
-(Ghidra correct) and `osInitialize()` is the public macro OVER it; the inverted macro forced a
+(Ghidra correct) and `osInitialize()` is the public macro over it; the inverted macro forced a
 work-around (`#undef __osInitialize_common` + a non-upstream `INITIALIZE_FUNC __osInitialize_common` in
 `src/libultra/os/initialize.c`) that silently deviated from the pin.
 
 **Tell:** a public-API rename "resists" — you want to call the SDK public name (`osInitialize()`) but
 the symbol is the `__*` internal, and `#wrong-ghidra-name-override`
-does NOT fire (the name is C-DEFINED, not a bare ghidra label, AND the header macro is reversed).
-Before assuming a ghidra mislabel, **DIFF THE VENDORED HEADER against `~/development/repos/ultralib`**
+does not fire (the name is C-defined, not a bare ghidra label, and the header macro is reversed).
+Before assuming a ghidra mislabel, **diff the vendored header against `~/development/repos/ultralib`**
 (the pin) — the header itself may be inverted. Fix the header to the upstream direction (trim to MG64's
 only config, e.g. the `_FINALROM` branch) and revert the work-around to upstream; the ROM stays
 byte-exact (the symbol name is unchanged).
 
-**Audit (S149, `tools/audit_libultra_headers.py`):** a macro-RHS diff of all 91
+**Audit (`tools/audit_libultra_headers.py`):** a macro-RHS diff of all 91
 `include/libultra/**/*.h` vs the pin found only two real issues — this `os_host.h` inversion and
-`rcp.h` `VI_CTRL_PIXEL_ADV_MASK` (`0x01000`, should be `0x0F000` for the [15:12] field; UNUSED in-tree,
+`rcp.h` `VI_CTRL_PIXEL_ADV_MASK` (`0x01000`, should be `0x0F000` for the [15:12] field; unused in-tree,
 latent). Everything else was version-conditional branches MG64 matches (`EPI_SYNC`/`SELECT_BANK`
 `>= VERSION_J`), value-equal cosmetics (`OS_STATE_*` `1` vs `(1<<0)`, `OS_MESG_TYPE_*` whitespace),
 masked-vs-unmasked VI macros (identical for the fixed VI timings), or the moot `assert` `#EX` (asserts
@@ -3409,30 +3414,33 @@ compiled out — 0 `__assert` calls in `sched.o`). **Audit the macro RHS, ignore
 branches** (the tool can't evaluate them — they false-positive; hand-check each against the
 `>= VERSION_J` branch).
 
+**Provenance:** S149 (`os_host.h` `__osInitialize_common`/`osInitialize()` macro inversion +
+`initialize.c` work-around; `tools/audit_libultra_headers.py` macro-RHS audit of all 91 headers,
+which also flagged latent `rcp.h` `VI_CTRL_PIXEL_ADV_MASK`).
+
 ---
 
 ## double-sqrt fast-math (bare sqrt.d needs a per-file -ffast-math override)
 
-**Rule:** a game/main TU that computes a magnitude with `sqrt()` (double) OR `sqrtf()` (single) needs
+**Rule:** a game/main TU that computes a magnitude with `sqrt()` (double) or `sqrtf()` (single) needs
 a per-file `-ffast-math` override to emit the ROM's bare `sqrt.d`/`sqrt.s`. **Both precisions are the
-SAME mechanism** — this is mode-agnostic; there is no separate single-precision path. Without
-`-ffast-math`, KMC GCC 2.7.2 emits a GUARDED inline: the `sqrt.d`/`sqrt.s` opcode + a
+same mechanism** — this is mode-agnostic; there is no separate single-precision path. Without
+`-ffast-math`, KMC GCC 2.7.2 emits a guarded inline: the `sqrt.d`/`sqrt.s` opcode + a
 `c.eq.d`/`c.eq.s $fN,$fN` self-equality (NaN) test + `bc1t` that falls back to `jal sqrt`/`jal sqrtf`
 for the errno/domain path (needs a stack frame to save `$ra`). `-ffast-math` drops the errno/NaN guard,
-leaving the bare unguarded opcode a leaf ROM fn has. (S152 double `vector_magnitude_safe` /
-`calculate_hypotenuse_safe`; S153 single `hypotf_2d`.)
+leaving the bare unguarded opcode a leaf ROM fn has.
 
-**Mechanism (verified vs KMC gcc 2.7.2 source):** `sqrt`, `sqrtf`, `sqrtl` are ALL registered as
-`BUILT_IN_FSQRT` (`c-decl.c:3230-3232`), active by default unless `-fno-builtin` — so `sqrtf` IS a
+**Mechanism (verified vs KMC gcc 2.7.2 source):** `sqrt`, `sqrtf`, `sqrtl` are all registered as
+`BUILT_IN_FSQRT` (`c-decl.c:3230-3232`), active by default unless `-fno-builtin` — so `sqrtf` is a
 builtin, contra the old "sqrtf never inlines" claim. `expand_builtin` handles all three identically
-(`expr.c:7243`, one `case BUILT_IN_FSQRT`; only the optab MODE differs). At `! optimize` it calls the
+(`expr.c:7243`, one `case BUILT_IN_FSQRT`; only the optab mode differs). At `! optimize` it calls the
 library fn; otherwise `expand_unop` emits the backend insn — `sqrtdf2` / `sqrtsf2` (`mips.md:1497/1506`),
 both gated `TARGET_HARD_FLOAT && HAVE_SQRT_P()` = `mips_isa >= 2` (`mips.h:463`), satisfied by `-mips3`.
 Then `if (! flag_fast_math)` (`expr.c:7299`) it appends the NaN guard + errno `jal`. So `flag_fast_math`
-is the ONLY lever, for either precision.
+is the only lever, for either precision.
 
-**Tell:** the ROM fn is a leaf (no frame) whose only sqrt is a bare `sqrt.d`/`sqrt.s` with NO
-`c.eq.d`/`c.eq.s`+`bc1t` NaN guard and NO `jal sqrt`/`jal sqrtf`. The default-profile build emits the
+**Tell:** the ROM fn is a leaf (no frame) whose only sqrt is a bare `sqrt.d`/`sqrt.s` with no
+`c.eq.d`/`c.eq.s`+`bc1t` NaN guard and no `jal sqrt`/`jal sqrtf`. The default-profile build emits the
 guarded form (extra frame + `c.eq`/`bc1t` + `jal` fallback) — e.g. `build/src/libultra/gu/align.o`
 (libultra -O3, no -ffast-math) shows `sqrt.s` immediately followed by `c.eq.s`/`bc1t`, the reference
 guarded shape.
@@ -3440,61 +3448,68 @@ guarded shape.
 **Procedure:** add a **file-specific** mk override (a file target beats the tree `%.o` pattern):
 `$(BUILD_DIR)/$(SRC_DIR)/main/<file>.o: C_PROFILE_CFLAGS := $(MAIN_CFLAGS) -ffast-math` in
 `mk/main.mk`. Declare the prototype in the TU (`double sqrt(double);` or `extern f32 sqrtf(f32);`); a
-matching redeclaration KEEPS the builtin, and no `#pragma intrinsic` is needed. NEVER a `main/%.o`
-pattern — the sibling main/ TUs keep the plain profile (`mgu/mtxutil`'s float math matched WITHOUT
+matching redeclaration keeps the builtin, and no `#pragma intrinsic` is needed. Never a `main/%.o`
+pattern — the sibling main/ TUs keep the plain profile (`mgu/mtxutil`'s float math matched without
 `-ffast-math`, so it is per-file like the `#-o0-bootsdk-glue-file-profile` override). `-ffast-math` is
-the ONLY errno-drop flag in this compiler (`-fno-math-errno` / `-funsafe-math-optimizations` do not
-exist in 2.7.2). The `#pragma intrinsic(sqrtf)` in `include/libultra/PR/gu.h` is `#ifdef __sgi` (DEAD
-on KMC) and irrelevant; the hand-written `src/libultra/gu/sqrtf.s` LEAF is only the `-O0`/non-inlined
-fallback, not the intrinsic path — do NOT reach for a "sqrtf-intrinsic path" for single precision.
+the only errno-drop flag in this compiler (`-fno-math-errno` / `-funsafe-math-optimizations` do not
+exist in 2.7.2). The `#pragma intrinsic(sqrtf)` in `include/libultra/PR/gu.h` is `#ifdef __sgi` (dead
+on KMC) and irrelevant; the hand-written `src/libultra/gu/sqrtf.s` leaf is only the `-O0`/non-inlined
+fallback, not the intrinsic path — do not reach for a "sqrtf-intrinsic path" for single precision.
+
+**Provenance:** S152 (double `vector_magnitude_safe` / `calculate_hypotenuse_safe`, the range-scaling
+fns); S153 (single `hypotf_2d`).
 
 ---
 
 ## top-tested-loop goto local-hoist (matching an un-inverted -O2 loop)
 
-**Rule:** GCC 2.7.2 `expand_end_loop` (stmt.c, the "roll the entry test to the end" reorder) INVERTS
+**Rule:** GCC 2.7.2 `expand_end_loop` (stmt.c, the "roll the entry test to the end" reorder) inverts
 every structured top-tested loop at -O2 — a `while` / `for` / `for(;;)+break` whose test is at the top
 becomes a guard-`j` + body-first + bottom test, and the delay-slot filler then annuls the back-branch
 into a **branch-likely** (`beql`/`bnel`; `BRANCH_LIKELY_P() = mips_isa >= 2` in `config/mips/mips.h`,
-so any `-mips2`+ target may emit it). When the ROM loop is **top-tested with PLAIN `beq`/`bne`** (falls
-straight into the test, a `j` back-edge, delay slots filled from fall-through, NO branch-likely), no
+so any `-mips2`+ target may emit it). When the ROM loop is **top-tested with plain `beq`/`bne`** (falls
+straight into the test, a `j` back-edge, delay slots filled from fall-through, no branch-likely), no
 structured loop reproduces it — reconstruct the control flow with explicit **`goto`s**. `loop.c` only
-optimizes loops marked with `NOTE_INSN_LOOP_BEG`/`_END` notes, which ONLY the structured loop
+optimizes loops marked with `NOTE_INSN_LOOP_BEG`/`_END` notes, which only the structured loop
 constructs emit (stmt.c `expand_start_loop`), so a goto-loop is invisible to `expand_end_loop` and is
-never inverted. (S152 `vector_magnitude_safe` / `calculate_hypotenuse_safe` range-scaling loops.)
+never inverted.
 
 **The hoist corollary:** because `loop.c` also ignores goto-loops, their loop-invariant constants are
-NOT hoisted — the goto-loop re-materializes them every iteration (its `j` back-edge targets the
+not hoisted — the goto-loop re-materializes them every iteration (its `j` back-edge targets the
 constant loads). To match a ROM that hoists them (constants in the preamble, `j` back-edge targets the
 *test*), declare each invariant as a **local variable** initialized before the loop (`s32 off =
 0xE0000000; u32 bound = 0xBFFFFFFF;`): the register allocator keeps the local live across the loop = a
-manual hoist. The local-decl ORDER also fixes the preamble load order (declare/use the one the ROM
+manual hoist. The local-decl order also fixes the preamble load order (declare/use the one the ROM
 loads first, first). Write the compare in the ROM's operand form (e.g. `bound < (u32)(x + off)`
 reproduces `sltu vN, bound, x+off`, not the swapped `sltu vN, x+off, 0xC0000000`).
 
-**Tell / distinguishing it from a bug:** the build is byte-exact EXCEPT the loop is shape-shifted (the
+**Tell / distinguishing it from a bug:** the build is byte-exact except the loop is shape-shifted (the
 shift/body block emitted before the test, a guard `j` to the bottom, `beql` where the ROM has plain
 `beq`, and/or the `j` back-edge targets the constant-load block instead of the test). This is a
-loop-FORM codegen mismatch, NOT a C-logic bug — do NOT iterate the condition expression or reach for
-the permuter. Confirm the direction against a matched sibling: a single-condition ROM loop that IS
-inverted (guard + bottom test, e.g. S151 `func_8005029C`'s `for(i != count)`) proves inversion is the
-compiler default, not a flag; a top-tested multi-`||` ROM loop that is NOT inverted is the goto case.
-Pairs with `#double-sqrt-fast-math` (both were the same S152 range-scaling fns).
+loop-form codegen mismatch, not a C-logic bug — do not iterate the condition expression or reach for
+the permuter. Confirm the direction against a matched sibling: a single-condition ROM loop that is
+inverted (guard + bottom test, e.g. `func_8005029C`'s `for(i != count)`, S151) proves inversion is the
+compiler default, not a flag; a top-tested multi-`||` ROM loop that is not inverted is the goto case.
+Pairs with `#double-sqrt-fast-math` (both were the same range-scaling fns).
 
-**The reversal corollary (S154, a distinct loop.c pass).** `expand_end_loop` INVERTS (above); a
-SEPARATE `loop.c` pass, `check_dbra_loop`, REVERSES a structured count-only loop into a
-decrement-and-branch. When the loop variable is used ONLY to count (dead in the body), starts at 0, and
-the trip count is a constant, `-O2` rewrites `for(i=0;i<N;i++)` to count DOWN (`li vN, N-1` / `addiu vN,
--1` / `bgez`) because the down-test is one insn cheaper. When the ROM keeps the UP-count (`addu
-vN,zero,zero` / `addiu +1` / `sltiu vN, N` / `bnez`), NO structured loop reproduces it — the `for` AND
-the `do-while` both reverse (verified S154 `crc16_ccitt`'s 8-bit CRC loop) — so the SAME goto-loop fix
+**The reversal corollary (a distinct loop.c pass).** `expand_end_loop` inverts (above); a
+separate `loop.c` pass, `check_dbra_loop`, reverses a structured count-only loop into a
+decrement-and-branch. When the loop variable is used only to count (dead in the body), starts at 0, and
+the trip count is a constant, `-O2` rewrites `for(i=0;i<N;i++)` to count down (`li vN, N-1` / `addiu vN,
+-1` / `bgez`) because the down-test is one insn cheaper. When the ROM keeps the up-count (`addu
+vN,zero,zero` / `addiu +1` / `sltiu vN, N` / `bnez`), no structured loop reproduces it — the `for` and
+the `do-while` both reverse (verified `crc16_ccitt`'s 8-bit CRC loop, S154) — so the same goto-loop fix
 applies: a goto loop carries no `NOTE_INSN_LOOP` notes and is invisible to `loop.c`, so
 `check_dbra_loop` never reverses it, and the delay-slot filler still hoists the loop-top condition
-recompute into the back-branch slot. TELL: byte-exact except the counter runs backwards
-(`li vN,<N-1>`/`addiu -1`/`bgez` vs the ROM's `addiu +1`/`sltiu vN,<N>`/`bnez`). The reversal is BLOCKED
+recompute into the back-branch slot. Tell: byte-exact except the counter runs backwards
+(`li vN,<N-1>`/`addiu -1`/`bgez` vs the ROM's `addiu +1`/`sltiu vN,<N>`/`bnez`). The reversal is blocked
 by a `jal` in the loop, a non-fixed memory read, or any use of the counter in the body (`no_use_except_counting`
-in `loop.c:5761`), so a natural loop matches when one of those holds — TRY NATURAL FORMS FIRST, goto only
+in `loop.c:5761`), so a natural loop matches when one of those holds — try natural forms first, goto only
 after they demonstrably reverse.
+
+**Provenance:** established: S152 (`vector_magnitude_safe` / `calculate_hypotenuse_safe` range-scaling
+loops, shared with `#double-sqrt-fast-math`); reversal corollary: S154 (the `check_dbra_loop`
+count-only reversal).
 
 ## decomposed-one-tu rodata alignment split (a counter-case to the 8-point decompose gate)
 
