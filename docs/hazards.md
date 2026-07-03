@@ -273,12 +273,12 @@ flag.
 hand-written assembly (a register/FPU/cache/TLB primitive, the `intrinsic-likely` shims). Instead of
 leaving it as an anonymous `asm/<rom>.s` disassembly or a bare `hasm`, vendor the real ultralib `.s`
 TU into `src/libultra/<dir>/` and build it. The proof is the full-`make` ROM SHA-1, same as the C
-mirror. Pilot: S56 (`getcount`/`getcause`/`getsr`/`setcompare`).
+mirror.
 
 **Trigger:** `pick_target.py` flags `intrinsic-likely:<tu>.s` (a vendorable ultralib TU exists) on an
 `asm-flip` candidate. A bare `intrinsic-likely` (no `:<tu>`) is a no-source shim, so plain `hasm`.
 
-**Sub-trigger, `intrinsic-likely:cp0-asm(identify-TU)` (S70 #1).** This is the same asm-mirror class
+**Sub-trigger, `intrinsic-likely:cp0-asm(identify-TU)`.** This is the same asm-mirror class
 for an un-named `func_<addr>` subseg whose body holds a privileged op gcc never emits (`tlbwi`/`tlbwr`/`tlbp`/`tlbr`,
 `mfc0`/`mtc0`/`dmfc0`/`dmtc0`/`cfc0`/`ctc0`, `cfc1`/`ctc1`, `cache`, `eret`). The op proves a
 vendorable ultralib source exists, but the un-named primary cannot resolve the `.s`, so the gate
@@ -304,19 +304,19 @@ falls back to plain `hasm`.
      touches no `.text` byte, so the full-`make` SHA-1 stays the verbatim proof. Skipping it is a
      first-build `No such file or directory` parse error, not a SHA miss (S107 exceptasm rewrote
      `exceptasm.h`+`threadasm.h`; S108 interrupt.s rewrote `threadasm.h`).
-2. **Vendor any missing asm macros** into the project headers (verbatim from ultralib). The MONEGI
+2. **Vendor any missing asm macros** into the project headers (verbatim from ultralib). The Monegi
    `include/sys/asm.h` lacked `MFC0`/`MTC0` (S56 added them). The TU's `#include "PR/R4300.h"`
    resolves via `-I include/libultra`; `sys/asm.h`/`sys/regdef.h` via `-I include`.
    `pick_target.py` pre-flags this as `intrinsic-likely:<tu>.s(needs-define:<MACROS>)` when the
    vendorable `.s` references an `UPPER_CASE` macro that none of the in-tree asm `-I` headers
    (`include`, `include/libultra`, `include/libultra/PR`, `include/libultra/compiler/gcc`) define, so
-   the enabler is priced at the gate, not at a failing vendor-compile (S57 retro #1). The whole
+   the enabler is priced at the gate, not at a failing vendor-compile. The whole
    current cache/TLB/gu backlog is self-contained (all `DCACHE_*`/`C_*`/`TLB*`/`C0_*` ship in
    `include/libultra/PR/R4300.h`, `RDB_*` in `PR/rdb.h`), so the pre-check reports nothing for it.
-3. **Assemble with ultralib's exact toolchain and flags: KMC/N64 gcc, gcc.mk profile, NOT modern
+3. **Assemble with ultralib's exact toolchain and flags: KMC/N64 gcc, gcc.mk profile, not modern
    `mips-linux-gnu as`.** This is the load-bearing step: KMC `as` pads each function's `.text` up to
    its 16-byte ROM slot, so the verbatim 0xC TU lands as the 0x10 the ROM expects. Modern `as` emits
-   the bare 0xC and every following subseg shifts, breaking the SHA-1 (the entire S56 failure mode
+   the bare 0xC and every following subseg shifts, breaking the SHA-1 (the entire failure mode
    before the toolchain switch). `mk/libultra.mk` carries this as `LIBULTRA_ASFLAGS` plus a path-based
    pattern rule `build/src/libultra/%.o: src/libultra/%.s` that assembles every `.s` under
    `src/libultra/` with `$(CC) $(LIBULTRA_ASFLAGS)` plus the section-alignment `objcopy` (the
@@ -355,9 +355,9 @@ falls back to plain `hasm`.
   `osCreatePiManager`/`__osEPiRawStartDma`), split first and vendor only the asm member.
 
 **Sub-cases / variants:**
-- **Vendored `.s` carrying a non-`.text` section (`.rodata`/`.data`/`.bss`) → vendor `.text` only
-  (S84).** splat auto-links a `hasm` `.o`'s `.data`/`.rodata`/`.bss` at the **END** of each output
-  section, NOT in address order. See the generated `mariogolf64.ld`: the
+- **Vendored `.s` carrying a non-`.text` section (`.rodata`/`.data`/`.bss`) → vendor `.text` only.**
+  splat auto-links a `hasm` `.o`'s `.data`/`.rodata`/`.bss` at the **end** of each output
+  section, not in address order. See the generated `mariogolf64.ld`: the
   `build/src/libultra/os/invaldcache.o(.rodata)` / `writebackdcache.o(.rodata)` lines sit at the
   `.rodata` section tail, after the address-ordered C/data-file
   siblings. For a TU whose data section is empty this is a harmless 0-byte line; for a TU with a real
@@ -366,7 +366,7 @@ falls back to plain `hasm`.
   break. **Fix:** copy the `.s` but **strip the data block** (the `.rdata`/`.data` directive through
   EOF), vendoring only `.text`; keep that data as the existing splat-extracted generic blob
   (`asm/data/<rom>.rodata.s`), renamed to the upstream symbol via a `symbol_addrs.txt` add
-  (`__osRcpImTable = 0x800D2200; // size:0x80`). splat then renames `D_<vram>` → the symbol in BOTH
+  (`__osRcpImTable = 0x800D2200; // size:0x80`). splat then renames `D_<vram>` → the symbol in both
   the generic blob (which now *defines* it) and every referencer, **including cross-TU ones** (S84:
   the exception dispatcher `asm/8AF90.s` also loads `__osRcpImTable`), and the vendored `.text`'s
   `%hi/%lo(<sym>)` resolves to it. It is a `D_<vram>` rename across asm, so it needs a clean rebuild
@@ -374,37 +374,37 @@ falls back to plain `hasm`.
   `.globl <sym>` line (now a harmless external declaration). Afterward confirm
   `build/src/libultra/<dir>/<stem>.o` is `.text`-only
   (`mips-linux-gnu-objdump -h build/src/libultra/<dir>/<stem>.o`), so the auto-link line carries 0 bytes.
-  `pick_target.py` pre-flags this as `intrinsic-likely:<tu>.s(has-rodata:<sym>)` (S84 #3) so the
+  `pick_target.py` pre-flags this as `intrinsic-likely:<tu>.s(has-rodata:<sym>)` so the
   strip+rename enabler is priced at the gate. (Keeping the table in the shared blob is arguably *more*
   correct than carving it into one TU when it is referenced cross-TU, as `__osRcpImTable` is.)
-  - **The has-rodata pre-flag is gated to the ACTIVE build (S91 #1).** `vendorable_tu_data_symbols`
+  - **The has-rodata pre-flag is gated to the active build.** `vendorable_tu_data_symbols`
     strips `#ifndef _FINALROM` + inactive `BUILD_VERSION` branches before scanning the data section, so
-    an EXPORT only the debug/other-version build emits is NOT listed (S91: exceptasm.s's
+    an export only the debug/other-version build emits is not listed (S91: exceptasm.s's
     `__osCauseTable_pt` lives in `#ifndef _FINALROM` → excluded under the `-D_FINALROM` asm profile; the
     real active rodata is `__osIntOffTable`/`__osIntTable`/`__osHwIntTable`/`__osPiIntTable`). Price the
     strip set the vendored `.o` actually carries, not the all-branches union.
-- **A SYMBOLIC-pointer table in the data section → the LABEL-EXPORT procedure (S107; was mis-framed
-  a spike at S91).** The S84 strip-and-rename works for a *numeric* LUT (`.word 0,0` / `.half …`): the
+- **A symbolic-pointer table in the data section → the label-export procedure.** The S84
+  strip-and-rename works for a *numeric* LUT (`.word 0,0` / `.half …`): the
   bytes are self-contained, so keeping the extracted blob + renaming `D_<vram>` resolves cleanly. A
-  table of `.word <label>` entries needs ONE more step. Such a table is a switch jump table
+  table of `.word <label>` entries needs one more step. Such a table is a switch jump table
   (`__osIntTable: .word redispatch, sw1, …`, whose active `__osException` `jr`s through it) or any
   function-pointer table.
-  splat extracts such a table to a SEPARATE rodata blob (`asm/data/<rom>.rodata.s`) with the entries
-  emitted SYMBOLICALLY (`.word .L800B00A0, …`) as references to `.text`-internal labels (these are
-  global: `jlabel` = `.global`+label, `include/macro.inc`). Two paths FAIL:
+  splat extracts such a table to a separate rodata blob (`asm/data/<rom>.rodata.s`) with the entries
+  emitted symbolically (`.word .L800B00A0, …`) as references to `.text`-internal labels (these are
+  global: `jlabel` = `.global`+label, `include/macro.inc`). Two paths fail:
   (a) vendoring `.text`-only and doing nothing makes `asm/<rom>.s` go vestigial, so the `.L…` labels
-  the blob references are no longer DEFINED → undefined at link;
+  the blob references are no longer defined → undefined at link;
   (b) carve-placing the table in the vendored `.o` fails because a `hasm` `.o`'s `.rodata` auto-links
-  at the section END → wrong addr → SHA break. **The fix is neither: RE-EXPORT the labels** (S91's
+  at the section end → wrong addr → SHA break. **The fix is neither: re-export the labels** (S91's
   listed-but-untried option, proven S107 exceptasm). The blob lives
-  in its OWN data subseg (`asm/data/<rom>.rodata.s`), which is **already address-placed and survives
-  the `.text` flip**, and after the flip it KEEPS emitting `.word .L<addr>` (symbolic, not literal).
-  So make the vendored `.text` DEFINE those labels:
-  1. **Phase 1: rename-isolation (do FIRST, subseg still `asm`).** `symbol_addrs` add-only: rename the
-     jtbl head (`jtbl_<addr>` → its upstream name, e.g. `__osIntTable`) AND every byte/word/data table
+  in its own data subseg (`asm/data/<rom>.rodata.s`), which is **already address-placed and survives
+  the `.text` flip**, and after the flip it keeps emitting `.word .L<addr>` (symbolic, not literal).
+  So make the vendored `.text` define those labels:
+  1. **Phase 1: rename-isolation (do first, subseg still `asm`).** `symbol_addrs` add-only: rename the
+     jtbl head (`jtbl_<addr>` → its upstream name, e.g. `__osIntTable`) and every byte/word/data table
      the `.text` references by upstream name (`D_<vram>` → `__osIntOffTable`/`__osHwIntTable`/…), plus
-     any externalized scratch (`__osThreadSave`). `make extract && make` → must stay GREEN. This proves
-     the renames don't break the still-`asm` build and that the jtbl rename PRESERVES the symbolic
+     any externalized scratch (`__osThreadSave`). `make extract && make` → must stay green. This proves
+     the renames don't break the still-`asm` build and that the jtbl rename preserves the symbolic
      entries, isolating rename risk from the flip. (S107: a clean green checkpoint.)
   2. **Phase 2: vendor `.text`-only + export the labels.** Copy the ultralib `.s`, strip `.rdata`/
      `.data` (S84), `.globl`-declare the stripped tables (harmless external decls). Then **insert
@@ -416,10 +416,10 @@ falls back to plain `hasm`.
      `.text` globals; `objdump -h build/src/libultra/<dir>/<stem>.o` confirms `.text`-only (empty
      `.data`/`.rodata`/`.bss` → 0-byte auto-link lines). SHA-1 == baserom.
   `pick_target.py` flags it `intrinsic-likely:<tu>.s(asm-mirror-jtbl:<head>)` (the `.word <label>`
-  table's head symbol), now a ROUTINE label-export asm-mirror, NOT a spike. (S107 exceptasm is the
+  table's head symbol), now a routine label-export asm-mirror, not a spike. (S107 exceptasm is the
   worked example: 8-fn OS exception/dispatch TU, 9 jtbl targets, banked first-try after the mechanism.)
 - **Combined-subseg sub-pattern (≥2 distinct asm TUs in one subseg).** When one `asm` subseg holds
-  ≥2 asm-ONLY functions (no C mirror) from *different* ultralib `.s` files, `pick_target.py` flags
+  ≥2 asm-only functions (no C mirror) from *different* ultralib `.s` files, `pick_target.py` flags
   `combined-subseg:<n>tu[a.s|b.s]`. Split the subseg at each TU boundary first (one `hasm` subseg per
   `.s`, the asm analog of the multi-file C-pack split), qualify each new `hasm` line with its
   `src/libultra/<dir>/<stem>` path, then vendor each `.s` verbatim there. splat writes each split
@@ -435,13 +435,13 @@ falls back to plain `hasm`.
   but vendors only the asm TUs and C-mirrors the rest (S63: `[0x8CA50,asm]` = 3 reg-shim TUs + the
   C-mirror `__osSpDeviceBusy` → 3 `hasm` + 1 `c, libultra/io/sp`). Distinct from the two cases above: (a) the mixed-pack caveat
   fires when ≥1 member has a C mirror (a member with a C upstream is excluded from the TU count, so
-  the flag does NOT fire); (b) a *partial-TU* pack whose asm members share ONE `.s` (e.g.
-  `__osDisableInt`/`__osRestoreInt` both in `setintmask.s`) is a single distinct TU → also does NOT
+  the flag does not fire); (b) a *partial-TU* pack whose asm members share one `.s` (e.g.
+  `__osDisableInt`/`__osRestoreInt` both in `setintmask.s`) is a single distinct TU → also does not
   fire, and needs a harder partial-TU carve (still a spike).
 
 **KMC-as sub-lane (libkmc soft-float / 64-bit math TUs).** libkmc's hand-asm TUs (`mmuldi3.s`
-`__muldi3`; `mcvtld.s` `__fixdfdi`/`__fixunsdfdi`+`__floatdidf`) are NOT ultralib `LEAF`/`XLEAF` TUs
-and do NOT assemble under `LIBULTRA_ASFLAGS`. They use **KMC register conventions** (`move dst,zero`
+`__muldi3`; `mcvtld.s` `__fixdfdi`/`__fixunsdfdi`+`__floatdidf`) are not ultralib `LEAF`/`XLEAF` TUs
+and do not assemble under `LIBULTRA_ASFLAGS`. They use **KMC register conventions** (`move dst,zero`
 → `addu` encoding) and must be assembled with the **KMC assembler** `$(KMC_AS)`, the same toolchain
 the in-tree disassembly-reassembly path uses. `mk/libkmc.mk` carries these under a **path-based pattern
 rule** `build/src/libkmc/%.o: src/libkmc/%.s` (separate from the ultralib `src/libultra/%.o` rule,
@@ -449,10 +449,10 @@ which hard-codes the `LIBULTRA_ASFLAGS` profile): `$(KMC_AS) -EB -mips2 -I src/l
 cp $@.tmp $@; rm $@.tmp` (no objcopy; the 16-byte-slot pad happens inside KMC `as`).
 `pick_target.py` flags it `intrinsic-likely:<tu>.s(kmc-as)` so the
 gate reaches for the KMC-as recipe, not the ultralib one: the libkmc analog of the ultralib
-`intrinsic-likely:<tu>.s` (S109). It fires when an asm-only primary the pure-shim + privileged tests
-both MISS (a branchy cvt routine, no CP0/FPU-ctrl op, no `handwritten` tag) matches a libkmc `.s`
-`.globl` AND has no C upstream; the `not in upstream_index` guard excludes the C-mirrorable libkmc
-files (`memset`/`strcmp`/`rand` resolve via the C index), leaving only the asm-ONLY math TUs. Three
+`intrinsic-likely:<tu>.s`. It fires when an asm-only primary the pure-shim + privileged tests
+both miss (a branchy cvt routine, no CP0/FPU-ctrl op, no `handwritten` tag) matches a libkmc `.s`
+`.globl` and has no C upstream; the `not in upstream_index` guard excludes the C-mirrorable libkmc
+files (`memset`/`strcmp`/`rand` resolve via the C index), leaving only the asm-only math TUs. Three
 KMC-as specifics:
 - **`.include "mips_as.h"`.** A libkmc `.s` may `.include` its tiny KMC header (`mcvtld.s` →
   `mips_as.h`, one line `.equ FPU,1`). Vendor that header alongside the `.s` (`src/libkmc/mips_as.h`)
@@ -460,34 +460,39 @@ KMC-as specifics:
 - **`li $X,0xffffffff` → `addiu $X,$0,-1` (the documented encoding edit).** KMC `as` expands
   `li reg,0xffffffff` to a 2-insn `lui+ori`; the ROM uses the 1-insn `addiu reg,$0,-1`
   (`2403ffff`/`2407ffff`). Each extra word shifts the rest of the TU down → SHA-1 break (the
-  `.align`/trailing-nop pad absorbs the size so the FUNCTION boundaries hold, but the bytes diverge).
+  `.align`/trailing-nop pad absorbs the size so the function boundaries hold, but the bytes diverge).
   Rewrite each such `li` to the explicit `addiu`, the **only** allowed edit to the vendored libkmc
   `.s`, touching no real `.text` semantics. Same divergence already applied to the vendored
   `mmuldi3.s` (six `li $9,0xffffffff`); S109 applied two in `mcvtld.s`. Diagnose by `cmp`-ing the
   assembled `.o`'s `.text` against the baserom bytes (Python byte-slice; `dd` is hook-blocked): a
   one-word downstream shift starting at a `lui …ffff` / `ori …ffff` pair is this exact case.
-- **Multi-fn TU spanning >1 splat subseg → merge to ONE `hasm`.** A KMC-as TU defining several
+- **Multi-fn TU spanning >1 splat subseg → merge to one `hasm`.** A KMC-as TU defining several
   functions (`mcvtld.s` = `__fixunsdfdi`@0x8F020 + `__floatdidf`@0x8F140) extracts as several
-  ADJACENT `asm` subsegs (one per fn). One source `.s` → one `.o`, so merge them into a single
+  adjacent `asm` subsegs (one per fn). One source `.s` → one `.o`, so merge them into a single
   `[<first-rom>, hasm, libkmc/<stem>]` (delete the later subseg line(s)); the merged
   subseg's extent (to the next subseg) must equal the TU's assembled size. The asm analog of the C
   `single-file-pack` (one upstream file → one atomic mirror, no inter-fn split). 0 `symbol_addrs`
-  adds when both fns are already named (S109).
+  adds when both fns are already named.
 
-**Provenance:** S56 (4 reg shims; KMC-as padding the load-bearing discovery, per PO directive to use
-ultralib's exact flags). S57 (4 cache/TLB primitives `osWritebackDCacheAll`/`osWritebackDCache`/
-`osUnmapTLBAll`/`__osProbeTLB`, all first-try clean; added the `needs-define` pre-check + this bisect
-protocol). S58 (3 cross-dir TUs: `sqrtf`/`osMapTLBRdb`/`bcopy`, clearing the `WEAK`-alias + FPU-op
-cases). S62 (`osInvalDCache`+`osInvalICache`: the combined-subseg split sub-pattern + the
-`combined-subseg` pre-flag). S63 (the `[0x8CA50]` reg-shim "set" family `setfpccsr`/`setsr`/
-`setwatchlo` + the C-mirror `__osSpDeviceBusy`: first mixed asm-mirror + C-mirror subseg-clear;
-extended the `needs-define` pre-check to the `combined-subseg` path after `CFC1`/`CTC1` surfaced at a
-failing vendor-compile). S84 (`osSetIntMask` from `[0x7E360]` mixed pack: first vendored `.s` with a
+**Provenance:** S56 (pilot; 4 reg shims `getcount`/`getcause`/`getsr`/`setcompare`; KMC-as padding the
+load-bearing discovery, per PO directive to use ultralib's exact flags). S57 (4 cache/TLB primitives
+`osWritebackDCacheAll`/`osWritebackDCache`/`osUnmapTLBAll`/`__osProbeTLB`, all first-try clean; added
+the `needs-define` pre-check + this bisect protocol). S58 (3 cross-dir TUs:
+`sqrtf`/`osMapTLBRdb`/`bcopy`, clearing the `WEAK`-alias + FPU-op cases). S62
+(`osInvalDCache`+`osInvalICache`: the combined-subseg split sub-pattern + the `combined-subseg`
+pre-flag). S63 (the `[0x8CA50]` reg-shim "set" family `setfpccsr`/`setsr`/`setwatchlo` + the C-mirror
+`__osSpDeviceBusy`: first mixed asm-mirror + C-mirror subseg-clear; extended the `needs-define`
+pre-check to the `combined-subseg` path after `CFC1`/`CTC1` surfaced at a failing vendor-compile). S70
+(`intrinsic-likely:cp0-asm(identify-TU)` sub-trigger for an un-named privileged-op `func_<addr>`, e.g.
+`osMapTLB`/`osUnmapTLB`). S84 (`osSetIntMask` from `[0x7E360]` mixed pack: first vendored `.s` with a
 `.rodata` LUT; added the `has-rodata` pre-flag + the vendor-`.text`-only / strip+rename-the-blob
-sub-case above; `pimgr` C member carried, `epirawdma` C member banked same sprint). S109 (`mcvtld.s` `__fixunsdfdi`+`__floatdidf`: first
-documented **KMC-as sub-lane** TU: the libkmc `$(KMC_AS)` explicit-rule path + `.include
-"mips_as.h"` via `-I src/libkmc` + the `li 0xffffffff`→`addiu` encoding edit + the multi-subseg
-merge-to-one-`hasm`; the `intrinsic-likely:<tu>.s(kmc-as)` flag).
+sub-case above; `pimgr` C member carried, `epirawdma` C member banked same sprint). S91 (has-rodata
+pre-flag gated to the active build; the symbolic-pointer-table label-export first listed as an untried
+option, then mis-framed a spike). S107 (`exceptasm` label-export asm-mirror: the symbolic
+`.word <label>` jtbl re-export procedure, 8-fn OS exception/dispatch TU). S109 (`mcvtld.s`
+`__fixunsdfdi`+`__floatdidf`: first documented **KMC-as sub-lane** TU: the libkmc `$(KMC_AS)`
+explicit-rule path + `.include "mips_as.h"` via `-I src/libkmc` + the `li 0xffffffff`→`addiu` encoding
+edit + the multi-subseg merge-to-one-`hasm`; the `intrinsic-likely:<tu>.s(kmc-as)` flag).
 
 ---
 
@@ -496,7 +501,7 @@ merge-to-one-`hasm`; the `intrinsic-likely:<tu>.s(kmc-as)` flag).
 **Rule:** A clean verbatim leaf often references a global the upstream declares `extern` (defined in
 not-yet-decompiled lib code) that is absent from both name files. A *referenced* extern is safe to
 place; recover its vram deterministically and add it to `symbol_addrs.txt` before the flip. This is
-the lowest-risk mirror and batches well (S19 banked the `nuGfx*FuncSet` trio at one-file risk).
+the lowest-risk mirror and batches well.
 
 **Trigger:** `pick_target.py` flag `refs-unplaced:<g>@0x<ADDR>`. The vram is inlined when the binding
 is unambiguous (one unplaced name ∩ one asm candidate); otherwise bare names.
@@ -521,25 +526,25 @@ is unambiguous (one unplaced name ∩ one asm candidate); otherwise bare names.
 
 **Sub-cases / variants:**
 
-**Contiguous `.bss`-block fast-path (S90):** a file-static drop-to-extern mirror often references a
-whole RUN of adjacent `.bss` statics declared together in the upstream `.c` (e.g. pimgr.c's
-`piThread` / `piThreadStack` / `piEventQueue` / `piEventBuf`). Recover the entire block from a SINGLE
+**Contiguous `.bss`-block fast-path:** a file-static drop-to-extern mirror often references a
+whole run of adjacent `.bss` statics declared together in the upstream `.c` (e.g. pimgr.c's
+`piThread` / `piThreadStack` / `piEventQueue` / `piEventBuf`). Recover the entire block from a single
 `disassemble_function` of the one fn that touches them: each base is a `lui/addiu` HI/LO16 pair (or a
 `STACK_START` top-of-stack value = base + sizeof), and each **size is the gap to the next symbol in
 the run**, cross-checked against the C type (`OSThread`=0x1B0, `OSMesgQueue`=0x18, `OSMesg[1]`=0x4,
 `STACK(_,N)`=`ALIGN8(N)`). The run is laid out in source-declaration order at consecutive `main_bss`
 vrams (pimgr's block sat immediately below the prior io file's `piAccessBuf`), so one disassembly plus
 the gap arithmetic yields every `symbol_addrs` size:-extern at once, with no per-symbol re-disassembly.
-**Stack-top-equals-named-adjacent-symbol tell (S115).** A thread-stack `static T Stack[N]` passes its
+**Stack-top-equals-named-adjacent-symbol tell.** A thread-stack `static T Stack[N]` passes its
 *top* (`Stack + N`, stacks grow down) as the `osCreateThread` sp arg, so its asm `%hi/%lo` resolves to
-`Stack`'s **end**, not its base. When that end lands exactly on an ALREADY-PLACED symbol from a
-DIFFERENT TU, the asm shows `%lo(<NamedSymbol>)` (a real name, not a `D_<addr>` auto-label): that named
-symbol's addr IS the stack's exact end, so `base = <NamedSymbol> addr - STACK_SIZE` with zero gap
+`Stack`'s **end**, not its base. When that end lands exactly on an already-placed symbol from a
+different TU, the asm shows `%lo(<NamedSymbol>)` (a real name, not a `D_<addr>` auto-label): that named
+symbol's addr is the stack's exact end, so `base = <NamedSymbol> addr - STACK_SIZE` with zero gap
 arithmetic. (S115 `nugfxthread.c` `GfxStack`: sp arg `%lo(PiMesgQ)`=0x800F74A0, `PiMesgQ` placed
 S99/nupiinit.c → `GfxStack` base 0x800F54A0, size 0x2000 = `NU_GFX_STACK_SIZE`.) A `D_<addr>` label
 there means the next symbol is itself still un-named — fall back to `base = top - sizeof`.
 
-**Unindexed-upstream mirror → no auto refs-unplaced (S112).** A mirror candidate whose `upstream`
+**Unindexed-upstream mirror → no auto refs-unplaced.** A mirror candidate whose `upstream`
 column is `none` (a coddog-match, a de-ranked carry-over, or any source not in the upstream index)
 gets **no** refs-unplaced scan at all; the hazard is computed only for a candidate with an indexed
 upstream `.c`. So an inline `extern <type> <name>[];` data dep declared in the upstream BODY (not a
@@ -550,8 +555,9 @@ add-only before the flip. NB the *detection* is not the gap: `EXTERN_DATA_DECL_R
 carry-overs) needed `_atbl`@0x800C9690 placed by hand; indexing libkmc math was rejected as low-value
 (carry-overs) plus reclassification-risk.
 
-**Provenance:** S12 (inline-vram idea), S19 (3/3 trio), S20 (indexed-array base correction), S22
-(flat-guess trap), S90 (contiguous `.bss`-block sized by inter-symbol gaps), S112 (unindexed-mirror
+**Provenance:** S12 (inline-vram idea), S19 (3/3 `nuGfx*FuncSet` trio banked at one-file risk), S20
+(indexed-array base correction), S22 (flat-guess trap), S90 (contiguous `.bss`-block sized by
+inter-symbol gaps), S115 (stack-top-equals-named-adjacent-symbol tell), S112 (unindexed-mirror
 no-scan note).
 
 ---
@@ -573,7 +579,7 @@ vram (the asm jal list is already in hand).
 
 **Sub-cases / variants:**
 
-**Renamed-vs-substituted callee, body-compare before editing (S61).** When the upstream calls
+**Renamed-vs-substituted callee, body-compare before editing.** When the upstream calls
 `fooBar` but the jal target is already named *something else* (`calls-unplaced:fooBar` flagged, yet
 the asm `jal`s a placed symbol with a different name), there are two cases needing opposite
 fixes. **(1) renamed:** same function, decomp gave it a different name, so the mirror is still
@@ -589,28 +595,28 @@ Body-compare proved a *different* fn (game region; −0x28 frame + `osSyncPrintf
 error path + (0,1,0) fallback + bare `sqrt.s`, vs `guNormalize`'s −0x20 frame + `sqrtf` NaN-check, no
 error path), so the body edit `guNormalize`→`vec3f_normalize` was correct, not a name reconciliation.)
 
-**Handler address-of ref, not a jal — pre-name the next candidate's leader (S136).** A verbatim mirror
+**Handler address-of ref, not a jal — pre-name the next candidate's leader.** A verbatim mirror
 can reference a function *by address* rather than by call: a `(handler = (Cast)fn)` assignment compiles
-to a `lui/addiu %hi/%lo(fn)` pair, NOT a `jal`. `pick_target.py`'s `calls-unplaced` scan keys on `jal`
-targets, so an address-of ref to a `func_<vram>` is NOT flagged there (nor as `refs-unplaced`, which is
+to a `lui/addiu %hi/%lo(fn)` pair, not a `jal`. `pick_target.py`'s `calls-unplaced` scan keys on `jal`
+targets, so an address-of ref to a `func_<vram>` is not flagged there (nor as `refs-unplaced`, which is
 data) — it surfaces only when the body compiles. Recover it the same way: read the `lui/addiu` pair in
 the disassemble pass that confirms the jal callees, and add `<fn> = 0x<vram>; // type:func` at the gate.
-Frequently the target is the LEADER of another still-asm candidate subseg, so naming it correctly
+Frequently the target is the leader of another still-asm candidate subseg, so naming it correctly
 **pre-names that future candidate** (its `pick_target` row shows the curated name, not `func_<vram>`) and
 can resolve a sibling spike for free. (S136 n_synthesizer's `mainBus->filter.handler = n_alFxPull` /
 `n_alAuxBusPull` placed `0x8009FD40`=n_alFxPull (n_reverb leader) + `0x8009E4B0`=n_alAuxBusPull (n_auxbus
 leader), and the `n_alSynAllocFX`=0x800A1320 jal target resolved the S130 `n_mainbus` 2-fn-subseg spike's
 `func_800A1320` identity.) Confirm the name by semantics (which handler slot / call site) before adding.
 
-**Typedef'd function-pointer PARAM is a `jalr`, not a callee (S139).** A parameter typed by a
-function-pointer TYPEDEF (`alN_PVoiceNew(N_PVoice *mv, ALDMANew dmaNew, ALHeap *hp)`) is invoked
-`dmaNew(&mv->dc_dmaState)` via a `jalr` through the pointer, not a named `jal`, so it must NOT flag
+**Typedef'd function-pointer param is a `jalr`, not a callee.** A parameter typed by a
+function-pointer typedef (`alN_PVoiceNew(N_PVoice *mv, ALDMANew dmaNew, ALHeap *hp)`) is invoked
+`dmaNew(&mv->dc_dmaState)` via a `jalr` through the pointer, not a named `jal`, so it must not flag
 `calls-unplaced`. `_fn_ptr_param_names` already drops the explicit `T (*name)(args)` and `T name(args)`
 param forms, but a typedef'd param reads as a plain scalar (`ALDMANew dmaNew`), so it needs the project
 typedef set: `all_fn_ptr_typedefs` scans the `-I` headers for `typedef <ret> (*NAME)(args)` (ALDMANew
 lives in `include/libultra/PR/libaudio.h`) and `_fn_ptr_param_names` matches `<typedef> name`. Recurs
 across the audio `*New` constructors. Without it, `calls-unplaced:dmaNew` is a phantom on n_drvrNew.c.
-(The asm-jal-budget `_reconcile_calls_unplaced` already drops such phantoms for a SINGLE-fn row via the
+(The asm-jal-budget `_reconcile_calls_unplaced` already drops such phantoms for a single-fn row via the
 unnamed-`jal` count, but the per-coddog-member c-combined path prices each member file's
 `calls_unplaced` without that per-member reconcile, so the source-side typedef suppression is the
 robust fix.)
