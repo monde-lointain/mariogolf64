@@ -128,7 +128,7 @@ segments:
       - [0x49E90, c, main/func_8006EA90]
       - [0x4A5A0, asm]
       - [0x4C3D0, c, main/func_80070FD0]
-      - [0x4C620, asm]
+      - [0x4C620, c, main/func_80071220]
       - [0x4C770, asm]
       - [0x51900, c, main/func_80076500]
       - [0x51A40, asm]
