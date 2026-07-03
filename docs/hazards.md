@@ -1224,13 +1224,13 @@ body-include vendoring: S133 (n_audio_sc).
 
 ## per-library standard-C-header isolation
 
-**Rule:** libultra and libkmc each ship their own standard C headers and they are NOT interchangeable
+**Rule:** libultra and libkmc each ship their own standard C headers and they are not interchangeable
 (libultra's `stdlib.h` defines `lldiv_t`; libkmc's lacks it). The `-I` order puts `include/libultra`
 before `include/libkmc`, but neither holds the std headers directly, so a bare `#include "stdlib.h"`
 from any source falls through to `include/libkmc/stdlib.h`. A verbatim libultra mirror needing a
 libultra-only type therefore fails against the libkmc header. **This is a pick/DoR blind spot:**
 `needs-header` greps resolvability, not which library's header resolves nor whether it has the needed
-types: a resolvable-but-wrong-library include passes the grep AND the gate build-check (the
+types: a resolvable-but-wrong-library include passes the grep and the gate build-check (the
 `INCLUDE_ASM` scaffold never compiles the C body), surfacing only mid-execution (like `calls-unplaced`).
 
 **Trigger:** Mirroring a libultra leaf that includes a bare standard header (`stdlib.h`, …).
@@ -1254,19 +1254,19 @@ same compiler at the wrong level produces a byte mismatch.
 
 - **libkmc = `-O`** (per `libkmc/src/genn64.bat`), not `-O2`. At `-O` rand.c stores `next` between
   the two `addiu` ops; at `-O2` it moves to the end.
-  - **CORDIC `double↔long long` cvt helper (S112/S113).** The libkmc math mirrors (`atan.c`, `sin.c`)
+  - **CORDIC `double↔long long` cvt helper.** The libkmc math mirrors (`atan.c`, `sin.c`)
     convert `XLONG = (double)expr * MBIT` where the source double can be negative, yet KMC GCC at `-O`
-    emits **`__fixunsdfdi`** (the UNSIGNED `double→u64` helper, @0x800B3C20), never `__fixdfdi`. So a
+    emits **`__fixunsdfdi`** (the unsigned `double→u64` helper, @0x800B3C20), never `__fixdfdi`. So a
     libkmc CORDIC C-mirror needs only `__fixunsdfdi` + `__floatdidf` (@0x800B3D40) placed; there is no
     signed-cvt-helper enabler to recover. Confirmed identical in both atan.c and sin.c (verify at the
     gate by reading the subseg's jal list, never by assuming `__fixdfdi` from the C signedness). The
     long-long shifts (`x>>i`) are inlined (no `__ashrdi3`/shift-helper jal).
 - **libultra = `-O3 -fsigned-char`** with `MIPS_VERSION=-mips3` for VERSION_J (ultralib gcc.mk,
-  but see the char-signedness note). Global CFLAGS uses `-mips3` (changed from `-mips2` in S33).
+  but see the char-signedness note). Global CFLAGS uses `-mips3` (changed from `-mips2`).
   `-O3` enables inlining of small same-TU functions and affects delay-slot scheduling.
-  **Char signedness is `-fsigned-char`, NOT ultralib-J's `-funsigned-char` (S65).** ultralib's
-  `gcc.mk` adds `-funsigned-char` for VERSION_J, but this ROM's libultra was built signed: an S65
-  full `make clean` rebuild under `-fsigned-char` reproduced the baserom SHA-1 exactly (every
+  **Char signedness is `-fsigned-char`, not ultralib-J's `-funsigned-char`.** ultralib's
+  `gcc.mk` adds `-funsigned-char` for VERSION_J, but this ROM's libultra was built signed: a full
+  `make clean` rebuild under `-fsigned-char` reproduced the baserom SHA-1 exactly (every
   current libultra C file matches signed). See `#char-signedness` for the symptom + the per-file
   override mechanism if a future TU ever needs the opposite.
 
@@ -1280,7 +1280,8 @@ specificity-winning pattern rule. `decomp_loop.py` auto-applies the right profil
 loop is using the correct profile (compile `base.c` with `-O` directly, or pass `LIBULTRA=1` /
 `--profile libultra`) before iterating further on the C.
 
-**Provenance:** S33 (`-mips3`).
+**Provenance:** S33 (`-mips3`); S112/S113 (libkmc CORDIC `__fixunsdfdi` helper); S65 (`-fsigned-char`
+band default).
 
 ---
 
@@ -1292,7 +1293,7 @@ band default `LIBULTRA_CFLAGS` therefore carries `-fsigned-char`. Most libultra 
 char-signedness-*ambiguous* (matches under either flag), so this only ever surfaces on a file whose
 codegen actually depends on `char` signedness.
 
-**Symptom (the S65 discriminator):** a verbatim C mirror SHA-misses, and the only diff is byte-load
+**Symptom (the discriminator):** a verbatim C mirror SHA-misses, and the only diff is byte-load
 signedness: the ROM loads `lb` + `sll/sra` sign-extend (and may emit a phantom empty stack frame),
 while the wrong flag gives `lbu` + `andi 0xff`. The exposing pattern is a `char` lvalue compared
 against a **non-zero** value (e.g. `strchr`'s `*s != ch`); a comparison against literal `0` is
@@ -1300,14 +1301,14 @@ signedness-invariant (`strlen`/`memcpy` matched under both: `memcpy` fully, `str
 compiler's free choice for a `!= 0` test).
 
 **Procedure:**
-1. The band default is already `-fsigned-char` (S65), so a new libultra mirror compiles signed with no
+1. The band default is already `-fsigned-char`, so a new libultra mirror compiles signed with no
    action. If a mirror SHA-misses with the `lbu/andi` vs `lb/sll-sra` signature, you have the inverse
    case (a TU that wants the *opposite* signedness).
 2. Per-file override mechanism (add in `mk/libultra.mk`; the explicit-target var beats the `libultra/%.o` pattern):
    `$(BUILD_DIR)/$(SRC_DIR)/libultra/<rel>.o: C_PROFILE_CFLAGS = $(subst -fsigned-char,-funsigned-char,$(LIBULTRA_CFLAGS))`
    (or the reverse subst). Append-and-last-wins also works since gcc takes the final `-f*-char`.
 3. To re-settle the band default after several such files, run `make clean && make` with the global
-   flag flipped and compare the ROM SHA-1: the S65 authoritative test (a clean rebuild under
+   flag flipped and compare the ROM SHA-1: the authoritative test (a clean rebuild under
    `-fsigned-char` reproduced the baserom exactly, proving the global default, not a per-file patch).
 
 **Distinct from** the per-field **cast-divergence** hazard (a 2.0L-vs-J `(type)` widening on one
@@ -1344,17 +1345,17 @@ twin epirawwrite's 0x170, so the ROM carries no assert code for the bare `assert
    it; the `#ifdef _DEBUG` wrap is the surgical, per-call strip.
 3. `assert.h` need not be included once every assert is `_DEBUG`-wrapped (the token never reaches the
    macro phase), but mirroring the upstream include is harmless.
-4. **An assert that is the SOLE body of an `if` cannot be wrapped alone:** `#ifdef _DEBUG`-wrapping
-   just the assert leaves the `if (...)` bodyless under non-`_DEBUG` → a syntax error. Wrap the WHOLE
+4. **An assert that is the sole body of an `if` cannot be wrapped alone:** `#ifdef _DEBUG`-wrapping
+   just the assert leaves the `if (...)` bodyless under non-`_DEBUG` → a syntax error. Wrap the whole
    `if`+assert in the `#ifdef _DEBUG` block (S106 sched.c:575 `if (avail & OS_SC_DP == 0) assert(...)`,
    an always-false dead branch: the `&`-vs-`==` precedence makes the guard `avail & 0`, so the whole
    thing is zero code in the release ROM either way; wrapping it is SHA-neutral). Same for an assert
    that is the body of any other bodyless control statement.
 5. **Count every assert with `assert\s*\(` (allow whitespace before the paren).** `pick_target`'s
    `bare_asserts` already does (`re.findall(r"\bassert\s*\(", ...)`), so its `bare-assert:N` count is
-   authoritative; the agent's manual strip grep MUST match it. S106 sched.c had 9 bare asserts but a
+   authoritative; the agent's manual strip grep must match it. S106 sched.c had 9 bare asserts but a
    manual `^\s*assert\(` grep found only 7: it missed `assert (t->msgQ)` and `assert ( (type == …))`
-   (a SPACE before the paren), so 2 asserts compiled in on the first build (`.text` +0x80 `jal
+   (a space before the paren), so 2 asserts compiled in on the first build (`.text` +0x80 `jal
    __assert`, `.rodata` +0x50 stringized-expr/`__FILE__`) → SHA-miss, fixed by wrapping the 2. Always
    reconcile the manual count against pick's `bare-assert:N` before declaring the strip complete.
 
