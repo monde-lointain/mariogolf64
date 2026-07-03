@@ -2770,8 +2770,8 @@ cosmetic mismatch, optional follow-up rename).
 manipulates `Gfx*`. **A `src/main/` (or `src/overlay_*/`) game TU that builds display lists needs the
 F3DEX2 build profile** (`mk/main.mk`: `MAIN_CFLAGS = $(CFLAGS) -DF3DEX_GBI_2`) — `-DF3DEX_GBI_2`
 selects the F3DEX2 GBI opcodes in `PR/gbi.h` (`G_RDPHALF_1=0xE1`/`G_RDPHALF_2=0xF1`, vs the F3DEX
-`0xB4`/`0xB3`). WITHOUT it the RSP-command opcodes are wrong; the RDP commands (PipeSync/SetCombine/
-SetOtherMode) are ucode-independent so they match either way. This UPDATES the S148 "main/ needs zero
+`0xB4`/`0xB3`). Without it the RSP-command opcodes are wrong; the RDP commands (PipeSync/SetCombine/
+SetOtherMode) are ucode-independent so they match either way. This updates the "main/ needs zero
 mk edits" convention: the F3DEX2 profile is a standing enabler for any main-segment DL TU. **Caveat:**
 `decomp_loop.py` compiles `base.c` with `$(CFLAGS)` (no `-DF3DEX_GBI_2`), so isolated RSP opcodes read
 `0xB4`/`0xB3` (a false diff) — put `#define F3DEX_GBI_2` atop `base.c` for a main/ DL fn (tracked
@@ -2780,12 +2780,12 @@ tooling follow-up: a `decomp_loop` `main` profile like its libkmc/libultra detec
 **Procedure (static dlists in rodata):** run `~/development/repos/n64-tools/src/gfxdis-rom/gfxdis`
 (build once with `make -C ~/development/repos/n64-tools`). `gfxdis` only handles static dlists.
 
-**Procedure (dynamic builders — S151, first main-seg DL TU).** A dynamic builder writes command words
+**Procedure (dynamic builders — first main-seg DL TU).** A dynamic builder writes command words
 into a running `Gfx*` cursor. Decode + reconstruct, do not hand-transcribe:
 - **Decode the command words** with `gfxdis.f3dex2` (`~/development/repos/n64-tools/src/gfxdis/`; the
-  F3DEX2 variant, NOT gfxdis.f3d/f3db/f3dex): `gfxdis.f3dex2 -x -w <concatenated-hex-words>` prints the
+  F3DEX2 variant, not gfxdis.f3d/f3db/f3dex): `gfxdis.f3dex2 -x -w <concatenated-hex-words>` prints the
   `gsDP*`/`gsSP*` macros. `extract_dlist.py` parses `sw`-immediate stores and folds primitive
-  sequences. gfxdis does NOT fold the higher-level texture-LOAD composites
+  sequences. gfxdis does not fold the higher-level texture-load composites
   (LoadTextureBlock/Tile/TLUT/MultiBlock) — scan the decoded opcodes for the load primitives (SETTIMG
   0xFD / SETTILE 0xF5 / LOADBLOCK 0xF3 / LOADTILE 0xF4 / LOADTLUT 0xF0 / SETTILESIZE 0xF2) to know if a
   higher-level macro must be reconstructed by hand (helper: `dl_fold_check.py`, tracked for promotion
@@ -2796,53 +2796,57 @@ into a running `Gfx*` cursor. Decode + reconstruct, do not hand-transcribe:
   `gDPSetCycleType(gfx++, …)`, `gDPSetPrimColor(gfx++, …)`, `gSPTextureRectangle(gfx++, ulx, uly, lrx,
   lry, tile, s, t, dsdx, dtdy)`, then `*glistp = gfx;`. A per-entry helper takes `Gfx **glistp` (the
   demo signature). The global DL cursor's idiomatic decomp name is `glistp` (a `Gfx*`).
-- **MASK-NARROWING lesson (do NOT hand-inline a texrect on a mask-constant hunch).** A `andi 0xFFC` in
-  the ROM where the stock `gSPTextureRectangle` macro masks `0xFFF` is NOT proof of a custom/inline
+- **Mask-narrowing lesson (do not hand-inline a texrect on a mask-constant hunch).** A `andi 0xFFC` in
+  the ROM where the stock `gSPTextureRectangle` macro masks `0xFFF` is not proof of a custom/inline
   texrect. GBI texrect coords are **10.2 fixed (12-bit)**, and the macro packs each via
   `_SHIFTL(_, _, 12)` = `& 0xFFF`. When the caller passes a `<<2` (pixel→10.2) coord, GCC knows the low
   2 bits are 0 and **narrows** the emitted mask: `((coord<<2) & 0xFFF) << 12` → `andi 0xFFC` on the
-  shifted x-fields, while `(coord<<2) & 0xFFF` (un-shifted y-fields) stays `andi 0xFFF` — BOTH matching
-  the ROM. TEST the stock `gSPTextureRectangle` before concluding "custom"; S151 first wrongly
-  hand-inlined the texrect, then the stock macro proved byte-identical. Coord locals are typically
-  `u16` (per the kantan demo + the permuter's rediscovery); see
+  shifted x-fields, while `(coord<<2) & 0xFFF` (un-shifted y-fields) stays `andi 0xFFF` — both matching
+  the ROM. Test the stock `gSPTextureRectangle` before concluding "custom": the first attempt wrongly
+  hand-inlined the texrect, then the stock macro proved byte-identical (S151). Coord locals are
+  typically `u16` (per the kantan demo + the permuter's rediscovery); see
   `#permuter-setup-for-kmc-toolchain-mirrors` for the coord-width regalloc lever.
 
-**Dynamic-builder POST-INCREMENT idiom + composite folding (S160, 2nd main-seg DL TU).** From
+**Dynamic-builder post-increment idiom + composite folding (2nd main-seg DL TU).** From
 `func_8006ED34` (a two-texture fog/scroll screen filter):
-- **`gDPxxx(gfx++)` post-increment is load-bearing, not cosmetic.** When the cursor is a LOCAL
-  `Gfx *gfx` whose ADDRESS is taken (`emit_per_phase_fog_state(&gfx)`), gcc forces it to a stack slot
+- **`gDPxxx(gfx++)` post-increment is load-bearing, not cosmetic.** When the cursor is a local
+  `Gfx *gfx` whose address is taken (`emit_per_phase_fog_state(&gfx)`), gcc forces it to a stack slot
   and every command spills the advanced pointer (dead intermediate spills to `sp+off`). The stock
-  macros expand `_g = (Gfx*)(pkt); _g->words.w0/w1 = …` with NO self-increment, so the caller's `gfx++`
-  supplies the advance. The POST-increment form (write via the OLD pointer THEN advance) matches the
-  ROM's base+offset-write-then-spill-advance codegen; a hand PRE-store-then-advance form
-  (`gfx->words.w0=..; gfx++`) emits an EXTRA pointer `addiu` at each call/return boundary. So build with
+  macros expand `_g = (Gfx*)(pkt); _g->words.w0/w1 = …` with no self-increment, so the caller's `gfx++`
+  supplies the advance. The post-increment form (write via the old pointer then advance) matches the
+  ROM's base+offset-write-then-spill-advance codegen; a hand pre-store-then-advance form
+  (`gfx->words.w0=..; gfx++`) emits an extra pointer `addiu` at each call/return boundary. So build with
   `gDPxxx(gfx++)` and cache `Gfx *gfx = *glistp; …; *glistp = gfx;` (the func_800500E0/func_8005029C idiom).
-- **gfxdis.f3dex2 -f DOES fold the texture-LOAD composites** (corrects the "gfxdis does NOT fold" note
+- **gfxdis.f3dex2 -f does fold the texture-load composites** (corrects the "gfxdis does not fold" note
   above): `gfxdis.f3dex2 -f <binfile-of-BE-u32-words>` emits `gsDPLoadTextureBlock`/`gsDPLoadMultiBlock`
   folded from the 7-primitive SETTIMG/SETTILE/LOADSYNC/LOADBLOCK/PIPESYNC/SETTILE/SETTILESIZE run. The
-  dynamic `gDPLoadTextureBlock(gfx++, …)` works BY TEXTUAL SUBSTITUTION — `gfx++` is pasted into all 7
-  sub-macros, so ONE call advances the cursor 7 (matching the ROM's 7 spills). Verified byte-exact by
+  dynamic `gDPLoadTextureBlock(gfx++, …)` works by textual substitution — `gfx++` is pasted into all 7
+  sub-macros, so one call advances the cursor 7 (matching the ROM's 7 spills). Verified byte-exact by
   full-make.
-- **RECIPE — bank raw, then refine.** First bank the VERBATIM command words (a
-  `g = dl++, g->words.w0 = .., g->words.w1 = ..` blob) for a guaranteed score-0 match; THEN (at review
+- **Recipe — bank raw, then refine.** First bank the verbatim command words (a
+  `g = dl++, g->words.w0 = .., g->words.w1 = ..` blob) for a guaranteed score-0 match; then (at review
   or a refine pass) decode with gfxdis and rewrite to stock macros, re-verifying byte-exact by
-  full-make. Feed a DYNAMIC address (texture image / scroll coord / vtx pointer) to gfxdis as a
+  full-make. Feed a dynamic address (texture image / scroll coord / vtx pointer) to gfxdis as a
   placeholder word, then swap the real expression back into the macro arg. gfxdis input quirks for MG64
   asm: `extract_dlist.py` wants bare mnemonics at line start, so strip the `/* … */` prefix and the `$`
   from registers (`sed -E 's|/\*[^*]*\*/||; s/\$//g; s/^[[:space:]]+//'`). Decode FP-looking words with
   `tools/fpdecode.py` before writing a C literal.
-- **Macro param/field-name collision (parse trap).** A word-write helper macro whose PARAMETER shares a
+- **Macro param/field-name collision (parse trap).** A word-write helper macro whose parameter shares a
   name with a struct field it writes (`#define G(w0, w1) g->words.w0 = (w0)`) silently rewrites
   `g->words.w0` → `g->words.<arg>` via preprocessor token replacement → KMC-gcc `parse error`. The
-  isolated `decomp_loop` base.c may use safe param names (`a,b`) and pass, so ONLY the in-tree build
+  isolated `decomp_loop` base.c may use safe param names (`a,b`) and pass, so only the in-tree build
   catches it. Use distinct param names (`cw0/cw1`) — or just the stock GBI macros.
+
+**Provenance:** S148 (the "main/ needs zero mk edits" convention this rule updates); S151 (first
+main-seg DL TU: the dynamic-builder decode-and-reconstruct procedure and the mask-narrowing lesson);
+S160 (2nd main-seg DL TU: the post-increment idiom and composite folding).
 
 ---
 
 ## data-rodata-carve
 
 **Trigger:** resolving the anonymous `.data`/`.rodata` blocks in a whole library region into named
-`.data`/`.rodata, libultra/<tu>` subsegs (S111 swept the libultra `.data` block 0xA32D0–0xA5668).
+`.data`/`.rodata, libultra/<tu>` subsegs (e.g. the libultra `.data` block 0xA32D0–0xA5668).
 
 **Rule:** A libultra `.data` region is a contiguous link-order run; each TU is carved independently by
 splitting the anonymous `[0xXXXX, data]` around its `[start, end)`.
@@ -2851,7 +2855,7 @@ splitting the anonymous `[0xXXXX, data]` around its `[start, end)`.
 
 **Attribution oracle.** `make extract` (splat) prints `Rodata segment 'X' may belong to the text
 segment 'Y'` (splat `rodata.py`) for each anonymous rodata referenced by a single function; capture
-stderr. `.data` blocks get NO such hint: attribute by grepping the **defining** upstream file in
+stderr. `.data` blocks get no such hint: attribute by grepping the **defining** upstream file in
 `~/development/repos/ultralib/src` for the symbol (`OSThread *__osRunQueue;`, not just an `extern`),
 then confirm placed-status in the yaml. `../drmario64/lib/ultralib/src` is the cross-ref for TUs MG64
 hasn't placed; a block drmario64 also leaves generic (`RO_<vram>`) is genuinely unattributable, so
@@ -2859,7 +2863,7 @@ leave it a blob.
 
 **Three carve kinds:**
 
-1. **Placed drop-def restore.** The TU is placed but mirrored "drop-def" (its data DEF was turned
+1. **Placed drop-def restore.** The TU is placed but mirrored "drop-def" (its data def was turned
    into an `extern`). Restore the upstream initializer in declaration = ROM-address order
    (`extern T x;` → `T x = <upstream init>;`), confirm bytes vs `asm/data/<blk>.data.s`. Function
    statics (`dtor`, `nintendo[]`, `xseed`) go back as `static` (file-scope static byte-matches the
@@ -2869,26 +2873,26 @@ leave it a blob.
 2. **Not-placed data TU vendor.** Pure-data upstream TUs (`io/vitbl.c` osViModeTable, `vimodes/*.c`)
    are copied verbatim (`PRinternal/viint.h`→`viint.h` rewrite). Code+data TUs whose `.text` is still
    asm (`os/thread.c`, `io/vi.c`) get a data-only file emitting just the globals (empty `.text`,
-   no text subseg); see the two GOTCHAS below.
+   no text subseg); see the two gotchas below.
 
-3. **asm-mirror un-strip.** An S107 stripped-jtbl `hasm` keeps its tables as blobs only while their
+3. **asm-mirror un-strip.** A stripped-jtbl `hasm` keeps its tables as blobs only while their
    target labels aren't exported. Once the vendored `.text` re-exports the jtbl-target `.L<addr>`
    labels, append the tables back to the `.s` as `.section .rodata`/`.section .data` and carve; the
    `.word .L<addr>` resolves locally (S111 exceptasm: `__osIntOffTable`+`__osIntTable` rodata,
-   `__osHwIntTable`+`__osPiIntTable` data). A stripped-jtbl hasm's tables are CARVE-ABLE, not
-   permanent blobs (corrects the S107 "must stay anon" framing).
+   `__osHwIntTable`+`__osPiIntTable` data). A stripped-jtbl hasm's tables are carve-able, not
+   permanent blobs (corrects the earlier "must stay anon" framing).
 
-**The four SHA/link gotchas (S111, all were masked by an ungated `sha1sum`; use
+**The four SHA/link gotchas (all were masked by an ungated `sha1sum`; use
 `tools/verify-rom.sh`):**
 
 - **0x10 `.data`-size-pad boundary.** GCC pads each `.o`'s `.data` *size* up to 0x10. The carve's
-  next-subseg boundary is the 0x10-aligned end of the TU's data, NOT the last symbol's end: the
-  "Automatically generated and unreferenced pad" `D_<vram>` syms ARE that trailing pad (initialize:
+  next-subseg boundary is the 0x10-aligned end of the TU's data, not the last symbol's end: the
+  "Automatically generated and unreferenced pad" `D_<vram>` syms are that trailing pad (initialize:
   0x14 data → next subseg at +0x20). Wrong boundary = exact-N×byte SHA miss.
 - **reloc-to-bss needs placement.** A restored pointer init to an uninitialized `.bss` symbol
   (`OSTimer* __osTimerList = &__osBaseTimer;`) is a `.data` reloc; if the bss target isn't a placed
   symbol the link fails `undefined reference`. Name it in `symbol_addrs.txt` at its baserom bss vram
-  (read from the ROM pointer value); do NOT `define` it in the `.c` (that perturbs bss layout and the
+  (read from the ROM pointer value); do not `define` it in the `.c` (that perturbs bss layout and the
   pointer value won't match).
 - **cross-TU-split data needs non-`static`.** Upstream keeps file data `static` because the function
   using it is in the same `.c`. When MG64 has split that function into its own TU (`io/viinit.c`'s
@@ -2899,13 +2903,16 @@ leave it a blob.
   `_1/_2/_3`). Add the missing define from the `~/development/repos/ultralib` authority; a shared-header
   edit then needs a clean rebuild (`#clean-rebuild-after-shared-header-edit`).
 
+**Provenance:** S111 (swept the libultra `.data` block 0xA32D0–0xA5668; named the four SHA/link gotchas
+and the exceptasm jtbl un-strip); S107 (the stripped-jtbl `hasm` "must stay anon" framing this
+corrects).
+
 ## same-TU inline mismatch (definition-order + cross-TU split)
 
 **Trigger:** A fn builds + links clean but ROM SHA-misses, and the in-tree-vs-target objdump shows my
-build **inlines a small static callee the ROM keeps as `jal`** (build LONGER than target, the callee's
+build **inlines a small static callee the ROM keeps as `jal`** (build longer than target, the callee's
 body appears inline), or the reverse. The classic case is a per-frame/dispatch fn that calls a helper
-the ROM out-of-lines. (S147 libmus `__MusIntMain`: my drain hand-inline pulled `mus_fifo_dispatch`'s
-switch inline, +24 insns.)
+the ROM out-of-lines.
 
 **Rule.** GCC 2.7.2 `-O3` inlines a small static callee only when it is **visible** (defined, not just
 forward-declared) **within the same TU** at the call site. So an over-inline has two independent cures;
@@ -2918,178 +2925,193 @@ pick by where the callee actually lives in the original:
    in the **same `.o`** (two separate 16-aligned `.o` rodata sections can never be < 16 B apart), so
    the split is impossible — go to cure 2. (S147: `mus_cmd_envelope`@D_800D1FB0 and
    `func_8009AB18`@D_800D1FB8 are 8 B apart ⇒ one `.o`; `func_8009BC58`/`allocate_object_slot` vs their
-   command-handler callers WERE cross-`.o` ⇒ split at 0x8009C540 banked them.)
+   command-handler callers were cross-`.o` ⇒ split at 0x8009C540 banked them.)
 2. **Same-TU definition order (callee shares the caller's `.o`).** Make the caller a **separate static
-   helper defined BEFORE the callee**, so the callee is only **forward-declared** at the helper's call
+   helper defined before the callee**, so the callee is only **forward-declared** at the helper's call
    site → GCC can't inline it (`jal`), while the tiny helper itself inlines into its parent. (S147:
-   `__MusIntFifoProcess` (the fifo drain) defined ABOVE `mus_fifo_dispatch`, with a forward decl of the
+   `__MusIntFifoProcess` (the fifo drain) defined above `mus_fifo_dispatch`, with a forward decl of the
    dispatch, kept the dispatch out-of-line; the drain inlined into `__MusIntMain`. Canonical libmus has
    the same order: `player_fifo.inc.c` drain @73, dispatch @101.) A static helper called once is
    inlined+eliminated, so it adds no symbol and does not shift the layout.
 
-**Two more S147 `__MusIntMain` match details that compound an inline mismatch:**
+**Two more `__MusIntMain` match details that compound an inline mismatch:**
 
 - **SUPPORT_PROFILER on.** 2× `jal osGetCount` bracketing the body + `g_mus_cpu_last`/`g_mus_cpu_worst`
   stores at the end (the +15 insns vs a profiler-off reference). The `_mus_cpu_*` globals existing in
-  `ghidra_symbols` is the tell; the matched reference games (PPL/drmario64) have it OFF.
+  `ghidra_symbols` is the tell; the matched reference games (PPL/drmario64) have it off.
 - **Cross-TU helper hand-inlined.** A helper the one-TU reference games just *call* (and GCC inlines,
   e.g. `Fstop`) is **cross-TU** here, so GCC can't inline it — reproduce by **manually inlining its
   field-clears** in the body. The ROM showing **no `jal` to the helper** + inline field stores is the
   tell.
 
 **Signed-subtraction comparison tell.** When the ROM shows `subu rd,a,b; bgez/bltz` (not `slt`/`sltu`)
-for a frame/counter/index `<` compare, write it as **`(s32)(a - b) < 0`**, NOT `a < b`. `a < b` on
+for a frame/counter/index `<` compare, write it as **`(s32)(a - b) < 0`**, not `a < b`. `a < b` on
 unsigned fields → `sltu`; an `(s32)a < (s32)b` cast → `slt`; only the explicit difference-vs-0 form
 emits `subu + bgez`. (S147: `__MusIntMain`'s 4 `*_frame < channel_frame` tests, all on `unsigned long`
 fields, needed `(s32)(cp->X_frame - cp->channel_frame) < 0`.)
 
-**Before declaring a same-TU inline mismatch unbankable, BUILD THE MATCHED REFERENCE GAMES and compare
-the source STRUCTURE** (defn order, separate-helper vs hand-inline, config flags), not just the bodies.
-S147 twice wrongly wrote off `__MusIntMain` (once "compiler wall", once "permanent same-TU carry");
+**Before declaring a same-TU inline mismatch unbankable, build the matched reference games and compare
+the source structure** (defn order, separate-helper vs hand-inline, config flags), not just the bodies.
+`__MusIntMain` was twice wrongly written off (once "compiler wall", once "permanent same-TU carry");
 both fell to a structural fix found by disassembling PPL's byte-exact `-O3` `__MusIntMain`. The matched
 libmus games are `../drmario64`, `../hm64-decomp`, `../snowboardkids2-decomp`, `../puzzleleague64`
 (KMC gcc; PPL builds byte-exact at the same `-O3 -mips3`); ROMs in `~/games/N64/`. See
 [the "rule out body before compiler wall" memory] and `#cross-jump-tail-merge` (the sibling
 shorter-build symptom).
 
+**Provenance:** S147 — the libmus `__MusIntMain` match: the drain hand-inline that pulled
+`mus_fifo_dispatch`'s switch inline (+24 insns) seeded the Trigger; the SUPPORT_PROFILER-on 2×
+`osGetCount` bracket + `g_mus_cpu_*` stores and the cross-TU `Fstop` hand-inline are the compounding
+details; the class was twice wrongly written off and both times fell to a structural fix from PPL's
+byte-exact `-O3` build.
+
 ## cross-jump-tail-merge
 
 **Trigger:** A verbatim/near-verbatim mirror builds + links clean but ROM SHA-misses, and the
-in-tree-vs-target objdump shows the build is **SHORTER than the target** (instruction COUNT < target),
-with collateral `-0x10`-style address shifts on every symbol AFTER the short function (their CODE
+in-tree-vs-target objdump shows the build is **shorter than the target** (instruction count < target),
+with collateral `-0x10`-style address shifts on every symbol after the short function (their code
 matches; only referenced addresses shifted).
 
 **Rule:**
 
-**RULE OUT A GAME-MODIFIED BODY FIRST (S127, the contRmbControl reversal).** This symptom is NOT proof
+**Rule out a game-modified body first.** This symptom is not proof
 of a compiler cross-jump merge; it is far more often a **body-semantics divergence** the literal
-upstream lacks. S121 declared `contRmbControl` an "exhaustively-proven-unbankable cross-jump wall" and
-carried it 5 sprints (+ a 145k-iter permuter run); S127 banked it byte-exact (full ROM SHA-1) with a
-**one-branch body fix and NO compiler change**. The real cause: MG64's FORCESTOP case is game-modified
-— on `osMotorInit` FAILURE it sets `state = STOPPED`, on SUCCESS `state = STOPPING; counter = 2` (an
-`if/else`), where the nusys/papermario upstream sets `state = STOPPING` UNCONDITIONALLY.
-- **The tell:** the target's FORCESTOP epilogue has TWO `sb v0,6(s0)` state stores with DIFFERENT
+upstream lacks. `contRmbControl` was declared an "exhaustively-proven-unbankable cross-jump wall" and
+carried it 5 sprints (+ a 145k-iter permuter run), then banked it byte-exact (full ROM SHA-1) with a
+**one-branch body fix and no compiler change**. The real cause: MG64's FORCESTOP case is game-modified
+— on `osMotorInit` failure it sets `state = STOPPED`, on success `state = STOPPING; counter = 2` (an
+`if/else`), where the nusys/papermario upstream sets `state = STOPPING` unconditionally.
+- **The tell:** the target's FORCESTOP epilogue has two `sb v0,6(s0)` state stores with different
   values (`li v0,1` in one branch; `li v0,2` from the `bnez` delay slot in the other). A single
   unconditional `state =` cannot emit two differing state stores → the body has a branch the upstream
-  lacks. **Read the target's store SEQUENCE and VALUES, not just the control-flow shape.**
+  lacks. **Read the target's store sequence and values, not just the control-flow shape.**
 - **Rule:** a "shorter + collateral-shift" mirror miss is a **body bug until proven a compiler
   artifact**. A store your upstream body cannot produce (extra branch, different constant, doubled
-  field) IS the fix. Same class as `#struct-init-loop` (a dup-store body artifact, also "count-short").
+  field) is the fix. Same class as `#struct-init-loop` (a dup-store body artifact, also "count-short").
 
 - **Tell from block-reorder (`#near-verbatim-mirror-jal-count-mismatch`).** cross-jump = build instr
-  COUNT **< target** (a merge deleted instrs). block-reorder = **equal** count, same insns reordered.
+  count **< target** (a merge deleted instrs). block-reorder = **equal** count, same insns reordered.
   Measure the count first.
-- **The actual cross-jump pass (why a BODY fix moves it).** `jump.c:find_cross_jump` can merge two
+- **The actual cross-jump pass (why a body fix moves it).** `jump.c:find_cross_jump` can merge two
   identical `j .L_ret; sh <reg>,<off>(<base>)` tails via the `minimum=1` "cross-jump to code before the
   label" path (jump.c ~1978): **one** matching insn before the shared epilogue label suffices
-  (`--minimum` → `minimum <= 0` after a single match). So the merge is driven by basic-block **LAYOUT**
-  — which store lands immediately before the epilogue label — and the layout is driven by the BODY.
+  (`--minimum` → `minimum <= 0` after a single match). So the merge is driven by basic-block **layout**
+  — which store lands immediately before the epilogue label — and the layout is driven by the body.
   Change the body → change the layout → the "merge" moves or vanishes. The pass is always-on
   (`toplev.c:3142` `jump_optimize(insns, 1, 1, 0)`, gated only by `optimize > 0`; no disabling flag —
-  `-fno-thread-jumps` gates the SEPARATE `thread_jumps` pass), which is exactly why its layout effects
+  `-fno-thread-jumps` gates the separate `thread_jumps` pass), which is exactly why its layout effects
   get misread as an irreducible compiler wall.
 
-**No compiler cross-jump WALL is confirmed in this project.** The sole candidate (S121 contRmbControl)
-was a body bug. If you ever reach byte-identical-unmerged tails with a body PROVEN to emit the target's
+**No compiler cross-jump wall is confirmed in this project.** The sole candidate (`contRmbControl`)
+was a body bug. If you ever reach byte-identical-unmerged tails with a body proven to emit the target's
 exact stores + values, only then suspect a compiler-build divergence — and re-audit the body once more
 first. A genuinely stuck mirror fn then falls back to: partial-bank the matching siblings as C + carry
 the stuck fn as `INCLUDE_ASM` (ROM stays green; forward-decl `extern` since the asm `glabel` is
-`.globl`), or `hasm`-split it. A `jump.c` patch is NOT a banking path (open toolchain research only).
+`.globl`), or `hasm`-split it. A `jump.c` patch is not a banking path (open toolchain research only).
 
-**Sibling rule — rule out STOCK-plus-insert before treating a carry as from-scratch custom (S144).**
+**Sibling rule — rule out stock-plus-insert before treating a carry as from-scratch custom.**
 The plan/seed-time inverse of the above triage. A carry tagged "MG64-custom body → classical" is
-**stock-source-plus-a-small-insert until proven otherwise** — re-diff the asm against the STOCK upstream
-AFTER the library's headers are vendored, before assuming from-scratch classical work. S144
-`__MusIntThreadProcess` was carried (S143) as an "MG64-custom body" with `last_task` called a "custom
+**stock-source-plus-a-small-insert until proven otherwise** — re-diff the asm against the stock upstream
+after the library's headers are vendored, before assuming from-scratch classical work.
+`__MusIntThreadProcess` was carried as an "MG64-custom body" with `last_task` called a "custom
 sched-state global"; once `aud_sched.h` was vendored (exposing the stock `musSched` vtable + the
-`__MusIntSched_{install,waitframe,dotask}` macros @ offsets 0/4/8), the body was the STOCK libmus 3.14
+`__MusIntSched_{install,waitframe,dotask}` macros @ offsets 0/4/8), the body was the stock libmus 3.14
 thread-proc and `last_task` was the stock func-static — only a ~4-instr pause/mute insert (`if (paused) {
 osAiSetNextBuffer(silence, 0x10); continue; }`) was genuinely MG64-custom. Seeding from the stock source
-+ the insert banked it near-verbatim FIRST build vs hand-writing ~100 instrs. This generalizes the
++ the insert banked it near-verbatim first build vs hand-writing ~100 instrs. This generalizes the
 rule-out-body-before-compiler-wall discipline to the carry-triage direction: a "custom body" label set
-BEFORE the headers are in place over-prices the work — defer the classical-vs-mirror verdict until the
+before the headers are in place over-prices the work — defer the classical-vs-mirror verdict until the
 stock diff is possible.
 
-**Check the build-config / struct-size axis too — a `@99.99` miss is not always a body edit (S145).** A
-`body-divergence-suspect:<file>@<pct>` miss has THREE non-body causes to clear before concluding the
-body diverges, distinguished by the offset pattern: (1) cross-jump = build instr COUNT **< target**;
+**Check the build-config / struct-size axis too — a `@99.99` miss is not always a body edit.** A
+`body-divergence-suspect:<file>@<pct>` miss has three non-body causes to clear before concluding the
+body diverges, distinguished by the offset pattern: (1) cross-jump = build instr count **< target**;
 (2) block-reorder (`#near-verbatim-mirror-jal-count-mismatch`) = **equal** count, insns reordered;
 (3) **build-config struct-size drift** (`_FINALROM` / `_DEBUG`; see the `_FINALROM` note under
-[`#upstream-mirror-pattern`](#upstream-mirror-pattern)) = equal count, but ONE function's stack-frame
-immediates (`addiu sp`, `sw/lw ra`, trailing-local `sp`-offsets) all shift by the SAME struct delta
-while field stores are unchanged. S145 `aud_sched.c` `__OsSchedDoTask` was a `@99.99` flagged file whose
-miss was cause (3) — a 16 B `OSScTask` `_FINALROM` size drift, body byte-STOCK; the `@99.99` was coddog
+[`#upstream-mirror-pattern`](#upstream-mirror-pattern)) = equal count, but one function's stack-frame
+immediates (`addiu sp`, `sw/lw ra`, trailing-local `sp`-offsets) all shift by the same struct delta
+while field stores are unchanged. `aud_sched.c`'s `__OsSchedDoTask` was a `@99.99` flagged file whose
+miss was cause (3) — a 16 B `OSScTask` `_FINALROM` size drift, body byte-stock; the `@99.99` was coddog
 structural noise (func_/ghidra naming), not a body change. Read the offset pattern (count-short vs
 reordered vs uniform-frame-shift vs an extra store/branch with a new value) before assuming a
 game-modified body.
 
-**Companion to the sibling rule — ASM-verify EACH fn in a "mostly stock" mirror; a carry-over's per-fn
-"likely stock" label is a HYPOTHESIS, not a finding (S146).** The sibling rule above guards against
-OVER-pricing a carry ("custom body" that is really stock-plus-insert); the inverse UNDER-prices just as
+**Companion to the sibling rule — ASM-verify each fn in a "mostly stock" mirror; a carry-over's per-fn
+"likely stock" label is a hypothesis, not a finding.** The sibling rule above guards against
+over-pricing a carry ("custom body" that is really stock-plus-insert); the inverse under-prices just as
 often — a carry-over checklist that pre-labels "the N stock fns mirror verbatim" can hide per-fn
-game-modification. S146 `aud_dma.c` was carried (S145) as "4 stock fns + 1 game-modified (DmaSample)";
+game-modification. `aud_dma.c` was carried as "4 stock fns + 1 game-modified (DmaSample)";
 ASM-first found 3 of the "4 stock" diverged: `__MusIntDmaInit` stock+1-insert (persists a count global),
 `__MusIntDmaProcess`'s whole second half rewritten (a flat-array `keep_count` ageing pass under
 `osSetIntMask` replacing the upstream linked-list free-walk), `__MusIntDmaSample` heavy. All banked
-in-sprint, but the per-fn divergence WAS the work, not the lone labeled carry. **Disassemble and diff
-EVERY member fn vs the stock upstream before trusting a "likely stock" label** — the same per-fn
+in-sprint, but the per-fn divergence was the work, not the lone labeled carry. **Disassemble and diff
+every member fn vs the stock upstream before trusting a "likely stock" label** — the same per-fn
 ASM-authority (`#decompile-vs-asm-authority`) applied member-by-member, not file-wide.
 
-**The INVERSE lever-set — PREVENTING a false tail-merge in a game-modified body (S146).** The section
+**The inverse lever-set — preventing a false tail-merge in a game-modified body.** The section
 top rules out a merge you cannot stop (it is a body artifact); this is the opposite — a merge GCC
-performs that you must BLOCK to match. S146 `__MusIntDmaSample`: an early `if (cond) return NULL;` plus
+performs that you must block to match. `__MusIntDmaSample`: an early `if (cond) return NULL;` plus
 a later `if (!free_buffer) return dma_buffer_head;` (where `free_buffer == dma_buffer_head` and
 `!free_buffer`, so GCC value-propagated the second to `return NULL`) got tail-merged into one block; the
-TARGET keeps them separate because its `return dma_buffer_head` block is SHARED with a third
+target keeps them separate because its `return dma_buffer_head` block is shared with a third
 non-NULL-provable path, blocking the simplification. Four reusable KMC GCC 2.7.2 -O3 codegen levers, each
 verified against the ELF-disasm word-diff (count first, then per-instruction — 5 of 6 fns hit the target
-instr-COUNT on first compile, isolating the lone short/reordered fn fast):
+instr-count on first compile, isolating the lone short/reordered fn fast):
 - **explicit `else`** on an early-return flips the condition's branch direction (`bnez`↔`beqz`): `if (c)
   return; else x;` placed the return-block inline (target) where `if (c) return; x;` reordered it.
-- **a shared `goto fail;`** for two identical-tail failure returns merges them into ONE block BEFORE
+- **a shared `goto fail;`** for two identical-tail failure returns merges them into one block before
   value-prop can specialize one — so a `return GLOBAL` reached from a non-NULL path is neither simplified
   to `return NULL` nor false-merged with an unrelated `return NULL`.
 - **goto-skip** (`…success path…; goto ok; fail: return X; ok: …`) reproduces a failure-block placed
-  MID-function (the target's `j <continue>` over the failure return), not pushed to the function end.
-- **compare operand order** (`a->f > b->f` vs `b->f < a->f`) controls which operand LOADS first inside a
+  mid-function (the target's `j <continue>` over the failure return), not pushed to the function end.
+- **compare operand order** (`a->f > b->f` vs `b->f < a->f`) controls which operand loads first inside a
   min/compare loop.
+
+**Provenance:** rule-out-body-first (`contRmbControl`): S121 (the 5-sprint "cross-jump wall" carry + a
+145k-iter permuter run) → S127 (the one-branch FORCESTOP body fix, byte-exact, no compiler change).
+Carry-triage siblings: S143 (`__MusIntThreadProcess` carried as a "custom body") → S144 (the
+stock-plus-insert rule-out); S145 (`aud_sched.c` `__OsSchedDoTask`, the `_FINALROM` struct-size axis);
+S146 (`aud_dma.c` per-fn ASM-verify + the false-tail-merge lever-set on `__MusIntDmaSample`).
 
 ## struct-init-loop (dup-store / dual-induction-var)
 
 **Trigger:** A near-verbatim mirror's **array-of-struct init loop** (`for(i){ arr[i].next = &arr[i+1];
-arr[i].f = …; }` over a large struct) builds + links clean but ROM SHA-misses, the build is **SHORTER
-than the target** (instr COUNT < target, ~2 instrs short, with the usual `-0x10`-style collateral
+arr[i].f = …; }` over a large struct) builds + links clean but ROM SHA-misses, the build is **shorter
+than the target** (instr count < target, ~2 instrs short, with the usual `-0x10`-style collateral
 address shifts on everything after it), and the in-tree-vs-target objdump shows the target storing
-**one field TWICE** (the same value to the same offset at the loop body's HEAD and TAIL) via a
+**one field twice** (the same value to the same offset at the loop body's head and tail) via a
 **running address pointer**, while your build stores it once via indexed `lui %hi(base); addu …,v1`.
 
-**Rule:** This is NOT a cross-jump wall (`#cross-jump-tail-merge`, which DELETES instrs) and NOT
+**Rule:** This is not a cross-jump wall (`#cross-jump-tail-merge`, which deletes instrs) and not
 permuter territory (the byte-match is far below 0.97) — it is a **source artifact**: the original loop
 body has a **duplicate field assignment** the literal upstream lacks.
 
 **Procedure:**
 
-- **Mechanism.** Taking an address INTO the array (`next = &arr[i+1]`) makes gcc 2.7.2 strength-reduce
-  that to a running induction var (e.g. `a1 = &arr[i+1]`, stride = sizeof). A SECOND assignment of a
+- **Mechanism.** Taking an address into the array (`next = &arr[i+1]`) makes gcc 2.7.2 strength-reduce
+  that to a running induction var (e.g. `a1 = &arr[i+1]`, stride = sizeof). A second assignment of a
   field whose address is a fixed offset below the next element (`arr[i].msgQ` at `next_elem - 8`) lets
-  gcc derive a SECOND running pointer (`a0 = a1 - 8`) and store that field via `0(a0)` at both the
+  gcc derive a second running pointer (`a0 = a1 - 8`) and store that field via `0(a0)` at both the
   head and tail of the body — the **double-store tell**. Your single-assignment source gives gcc one
   IV (it picks one field for the running pointer, indexes the rest), so it is 1–2 instrs short and the
   registers/addressing cascade-diverge.
-- **Fix.** Re-add the duplicate field assignment at the loop **tail** (the MG64 edit artifact: S124
+- **Fix.** Re-add the duplicate field assignment at the loop **tail** (the MG64 edit artifact:
   `nuGfxTaskMgrInit` has a trailing `nuGfxTask[cnt].msgQ = &nuGfxTaskMgrMesgQ;` after the field block).
   That single line reproduces gcc's dual-IV + double-store and lands the exact instr count → byte-match
-  first build after. Match driver: the asm STORE ORDER (`next, msgQ, …, msgQ`) — a field that appears
+  first build after. Match driver: the asm store order (`next, msgQ, …, msgQ`) — a field that appears
   at both ends of the store sequence is your duplicate-assignment cue.
-- **Watch the value defines too.** S124 also needed `yield_data_size = OS_YIELD_DATA_SIZE` (0xC00), NOT
+- **Watch the value defines too.** MG64 also needs `yield_data_size = OS_YIELD_DATA_SIZE` (0xC00), not
   the 2.07 `NU_GFX_YIELD_BUF_SIZE` (= `OS_YIELD_DATA_SIZE + 0x10` = 0xC10) — the MG64 rev dropped the
   `+0x10` (a `#needs-define` version value). Size the extern array (`extern T arr[N]`, not `arr[]`) so
-  gcc has the bound. The asm is authoritative for the store ORDER and the immediate values; the
-  upstream `.c` is the SHAPE only.
+  gcc has the bound. The asm is authoritative for the store order and the immediate values; the
+  upstream `.c` is the shape only.
 
 (A `pick_target.py` `struct-init-loop` detection tag — a multi-store loop whose asm has a doubled
 field-store offset — is a tracked follow-up; until then this is recognized by the build-shorter +
 doubled-store-offset tell at match time.)
+
+**Provenance:** S124 (`nuGfxTaskMgrInit`: the trailing `msgQ` dup-store that reproduces gcc's dual-IV,
+and the `yield_data_size = OS_YIELD_DATA_SIZE` 0xC00 vs 2.07 `NU_GFX_YIELD_BUF_SIZE` 0xC10 value fix).
 
 ## permuter setup for KMC-toolchain mirrors
 
