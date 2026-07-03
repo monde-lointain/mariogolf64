@@ -125,21 +125,21 @@ iteration, no byte-`cmp` (that guard is classical-loop-only).
 
 **Trigger:** `pick_target.py`'s `upstream` column is `libultra` / `libkmc` / `libnusys` / `libmus`
 (not `none`). Three related flags also land here:
-- `single-file-pack:<n>fn[…]`: every member fn comes from ONE upstream `.c`, so the pack is an atomic
+- `single-file-pack:<n>fn[…]`: every member fn comes from one upstream `.c`, so the pack is an atomic
   verbatim mirror with no split.
-- `upstream-fncount-mismatch:<m>vs<n>` (S104): a single-named-stem pack holds MORE fns than the
+- `upstream-fncount-mismatch:<m>vs<n>`: a single-named-stem pack holds more fns than the
   upstream `.c` defines, so a foreign TU is bundled in the subseg. Split it off and mirror only the
   upstream's fns. This is the named-symbol analog of `coddog-fncount-mismatch` (xprintf's
   `func_800B1580` `__osDpDeviceBusy` TU). Advisory.
-- `one-tu` (S88): every inner fn boundary is non-16-aligned, so the subseg is ONE `.o`. This confirms
+- `one-tu`: every inner fn boundary is non-16-aligned, so the subseg is one `.o`. This confirms
   a single-file-pack even for un-named coddog packs, and marks per-fn decompose as blocked (see also
   #non16align).
 
-**Band-open: pick the `@100.00` leaf FIRST to prove a new lib's profile (S141).** When opening a
+**Band-open: pick the `@100.00` leaf first to prove a new lib's profile.** When opening a
 fresh upstream band (vendoring its first headers + a new `mk/<lib>.mk` profile), the lowest-risk first
-pick is a `coddog-mirror:<file>@100.00` row that is a LEAF (0 `calls-unplaced`, no rodata/data carve,
+pick is a `coddog-mirror:<file>@100.00` row that is a leaf (0 `calls-unplaced`, no rodata/data carve,
 at most a drop-static). `@100.00` is byte-identical structure (not a customized body), and the leaf
-has no cross-file callees to recover, so it validates the new profile with ZERO confounds: a SHA-miss
+has no cross-file callees to recover, so it validates the new profile with zero confounds: a SHA-miss
 is then unambiguously the build profile (wrong `-O`/`-D`/`-I`), not a body or a missing extern. It
 also tends to place the allocator/util the rest of the band calls (S141 `lib_memory.c`: the `@100.00`
 `__MusIntMem*` leaf, banked first-build, placed the allocator the whole libmus band depends on).
@@ -174,7 +174,7 @@ line-drop, recover-extern placement.
 
 **Sub-cases / variants:**
 
-**Authoritative symbol set via `nm` (S102).** For a mirror that is `#if BUILD_VERSION`-branched or
+**Authoritative symbol set via `nm`.** For a mirror that is `#if BUILD_VERSION`-branched or
 inline-ambiguous (a `pack` where a static helper may or may not be inlined), read the matching
 prebuilt object rather than reasoning from the source alone:
 `mips-linux-gnu-nm ~/development/repos/ultralib/build/J/libgultra_rom/src/<dir>/<file>.o`. It gives
@@ -185,24 +185,24 @@ that `__osMakeMotorData` is inlined (so `pack:2fn`, not 3), and that `__MotorDat
 (so drop-static-to-extern, not a defined global). `libgultra_rom` is the release/ROM profile that
 matches MG64's build; `libgultra`/`libgultra_d` are the debug profiles.
 
-**libnusys multi-version triage before concluding "custom" (S123).** The pinned libnusys source is
-nusys-2.07 (`coddog-sweep-nusys` builds its ref), but MG64 forked an EARLIER rev with game edits, so a
+**libnusys multi-version triage before concluding "custom".** The pinned libnusys source is
+nusys-2.07 (`coddog-sweep-nusys` builds its ref), but MG64 forked an earlier rev with game edits, so a
 2.07 mirror can SHA-miss or only structurally match. Before declaring a function MG64-custom, triage
-across ALL on-disk nusys versions and pin the rev from the ROM:
+across all on-disk nusys versions and pin the rev from the ROM:
 - Sources: `~/n64sdk/.../nusys/src/nusys-{1.10,1.20,2.00}/nusys/*.c` (note CRLF + Shift-JIS comments;
   UTF-clean or strip comments when copying) plus the pinned `~/development/repos/n64sdkmod/.../nusys-2.07/`.
-- Pin the rev with two ROM-side tells: (1) `strings baserom.z64 | grep -i NuSystem` — ABSENT means the
-  `nuVersion[]="NuSystem"NU_VERSION` marker was removed (so NOT a stock 2.07 with its `.data` string;
+- Pin the rev with two ROM-side tells: (1) `strings baserom.z64 | grep -i NuSystem` — absent means the
+  `nuVersion[]="NuSystem"NU_VERSION` marker was removed (so not a stock 2.07 with its `.data` string;
   `nuScRetraceCounter` is then uninitialized bss, no `.data` carve). (2) per-function feature diffs —
   e.g. the `nuScAddClient` PRENMI-dispatch block is a 1998/12 (2.06/2.07) addition; its presence in
   the asm dates the fork ≥2.06 even when the version string is gone (S123 nusched = ~2.07-minus-nuVersion).
-- A function that matches NO version (game-fn callees, added display/swap blocks, a tvtype hang-guard)
-  is genuinely MG64-custom -> classical track. A function that matches a SPECIFIC older version is a
-  near-verbatim mirror of THAT version (the per-file/per-fn version rule, #near-verbatim-mirror-jal-count-mismatch).
+- A function that matches no version (game-fn callees, added display/swap blocks, a tvtype hang-guard)
+  is genuinely MG64-custom -> classical track. A function that matches a specific older version is a
+  near-verbatim mirror of that version (the per-file/per-fn version rule, #near-verbatim-mirror-jal-count-mismatch).
 This generalizes the libultra coddog cross-ref (`#coddog-cross-ref`) and the S117 nusys-version-hunt to
-the per-FUNCTION grain: in one subseg, stock fns and custom fns coexist (bank-stock-carry-custom).
+the per-function grain: in one subseg, stock fns and custom fns coexist (bank-stock-carry-custom).
 
-**`#pragma weak` alias mirror (S66, no special handling).** A libultra C file whose ROM/curated
+**`#pragma weak` alias mirror (no special handling).** A libultra C file whose ROM/curated
 symbol is a weak alias mirrors verbatim with zero edits. `gu/cosf.c` / `gu/sinf.c` carry
 `#pragma weak cosf = __cosf` + `#define fcos __cosf`, so the defined function is `__cosf` and `cosf`
 is a weak alias at the same address. KMC gcc 2.7.2 emits both symbols; the linker resolves the
@@ -215,17 +215,17 @@ shared `__`-prefixed data extern reached only through the weak fn (S66: `__libm_
 return refd by both cosf and sinf as an anonymous `D_<addr>`): a recover-extern the `refs-unplaced`
 flag misses when the fn is a hidden pack member (see #recover-extern).
 
-**Perf/debug struct version drift (S125).** A vendored header struct that is referenced ONLY by
-carried / `INCLUDE_ASM` fns is **UNVALIDATED** — it was copied from the upstream version verbatim and
+**Perf/debug struct version drift (S125).** A vendored header struct that is referenced only by
+carried / `INCLUDE_ASM` fns is **unvalidated** — it was copied from the upstream version verbatim and
 never checked against the asm. When the first consumer is finally decompiled, the layout can be a
 different library rev: MG64's `nusys.h` `NUDebTaskPerf` carried the 2.07 `markerTime[10]` field
 (a 1999/05/30 feature) that MG64's pre-1999 rev lacks, so `auTaskCnt` was at 0x59 / `auTaskTime` at
 0x1A0 in the header but the asm needs 0x9 / 0x150 (struct size 0x1F0, asm-confirmed via the
 `idx * 0x1F0` array stride and the `lbu …,0x9` count load). Validate perf/debug struct offsets against
-the asm BEFORE banking the first perf-using fn; fix the vendored header to the game's rev (drop
+the asm before banking the first perf-using fn; fix the vendored header to the game's rev (drop
 markerTime). A header struct is not ground truth until a matching fn proves its offsets.
 
-**Header CONSTANTS reach codegen too — validate each against the asm (S128, generalizes the perf-struct
+**Header constants reach codegen too — validate each against the asm (S128, generalizes the perf-struct
 rule).** Not just struct offsets: any vendored-header `#define` that flows into an instruction
 (array sizes, message counts, loop bounds, masks) must be reconciled with the asm before banking. MG64's
 nualstl `NU_AU_MESG_MAX` is 2 (the `osCreateMesgQueue(&nuAuMesgQ, …, 2)` count in the asm), not the
@@ -235,8 +235,8 @@ is a single-immediate SHA-miss the same class as a wrong struct offset.
 
 **`_FINALROM` (build-config) struct-size drift — a clean mirror can SHA-miss with the body byte-stock
 (S145).** Generalizes the perf-struct rule to the build-config axis: a vendored header struct whose
-SIZE depends on a `#ifndef _FINALROM` / `#ifdef _DEBUG` block can drift between the ROM's library and
-the in-tree `-D_FINALROM` profile, with NO body change. MG64's game/libultra is `-D_FINALROM` (base
+size depends on a `#ifndef _FINALROM` / `#ifdef _DEBUG` block can drift between the ROM's library and
+the in-tree `-D_FINALROM` profile, with no body change. MG64's game/libultra is `-D_FINALROM` (base
 CFLAGS), but the 3rd-party Software Creations **libmus** library object was built **non-FINALROM**, so
 `OSScTask` (`sched.h`) carries its `#ifndef _FINALROM` trailing `startTime`+`totalTime` (2× `OSTime` =
 0x10) that the FINALROM build drops. `aud_sched.c`'s `__OsSchedDoTask` declares an `OSScTask` on the
@@ -245,13 +245,13 @@ stack, so the 16 B size delta surfaced as a 5-byte SHA-miss. Fix: per-library pr
 matched with the smaller `OSScTask`), and no other libmus file is `_FINALROM`-sensitive (the remaining
 conditionals are `OS_NUM_EVENTS` macros + an `alParseAbiCL` proto, not codegen), so the banked siblings
 re-match on a full rebuild (`rm build/src/<lib>/*.o` — the build tracks no flag deps).
-- **TELL (distinguishes a struct SIZE drift from a body edit).** The miss is confined to ONE function's
+- **Tell (distinguishes a struct size drift from a body edit).** The miss is confined to one function's
   **stack-frame immediates** — the `addiu sp,sp,-N` frame size, the `sw/lw ra,M(sp)` save/restore offset,
-  and any trailing local's `sp`-relative offset all shift by the SAME struct delta, while every FIELD
-  store offset (`sw …,K(sp)` into the struct) is UNCHANGED. Field-stores-shift = wrong field offset
-  (perf-struct S125); frame-immediates-shift-uniformly = wrong struct SIZE (this). Read which class of
+  and any trailing local's `sp`-relative offset all shift by the same struct delta, while every field
+  store offset (`sw …,K(sp)` into the struct) is unchanged. Field-stores-shift = wrong field offset
+  (perf-struct S125); frame-immediates-shift-uniformly = wrong struct size (this). Read which class of
   offset moved before assuming a game-modified body.
-- **PRE-FLAG follow-up (tracked, not yet built).** `pick_target.py` could pre-flag a libmus/libultra fn
+- **Pre-flag follow-up (tracked, not yet built).** `pick_target.py` could pre-flag a libmus/libultra fn
   that declares a `#ifndef _FINALROM`-sized struct (`OSScTask`; sweep `os_message.h`/`osint.h` too) as
   `finalrom-struct:<struct>`, the build-config analogue of the perf-struct pre-flag. Until then the gate
   applies this by reading the target fn's struct locals.
@@ -260,8 +260,10 @@ re-match on a full rebuild (`rm build/src/<lib>/*.o` — the build tracks no fla
 `-I include/libnusys`; `-I include/libultra/PR` is the precedent for unblocking a band. S51 is the
 cautionary case for step 1's "do not consult `libultra_modern`": its split `gu/` layout (hand-asm
 `mtxcatf.s` + C `mtxxfmf.c`) mis-suggested `guMtxCatF` was hand-asm at the gate, while ultralib's
-`src/gu/mtxcatf.c` (the sole source) holds BOTH fns as clean C, which the ROM matched verbatim. Reach
-for ultralib first; a `libultra_modern` `.s` is not evidence the ROM fn is hand-asm.
+`src/gu/mtxcatf.c` (the sole source) holds both fns as clean C, which the ROM matched verbatim. Reach
+for ultralib first; a `libultra_modern` `.s` is not evidence the ROM fn is hand-asm. S88 named the
+`one-tu` non-16-aligned single-`.o` flag; S104 named the `upstream-fncount-mismatch` bundled-foreign-TU
+flag.
 
 ---
 
