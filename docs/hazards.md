@@ -1380,24 +1380,23 @@ subseg's `out_path()` returns the compiled C object, placing `build/src/xxx.o(.r
 correct VRAM. `should_self_split()` = False for dot-prefix types (no asm file extracted), and
 `auto_link_sections` won't insert a duplicate. When the same mirror also defines file-scope `static`
 initialized arrays, this `.rodata` carve pairs with a `.data` carve; see the
-[dual-section carve note](#defines-data) (S96 drvrnew.c: jtbl+consts `.rodata` here + `*_PARAMS[]`
-`.data` there).
+[dual-section carve note](#defines-data).
 
 **Trigger:** A libultra/libkmc/libnaudio file with a compiler-generated rodata constant at a different
 ROM offset than its text (e.g. a `2^32` double, or the `MAX_RATIO` 1.99996 double a resampler clamps
 against). `pick_target.py` pre-flags this as `rodata-literal:0x<vram>[,0x<vram>…]` on a mirror
 candidate whose asm loads an anonymous pooled FP constant (`ldc1/lwc1 %lo(D_<addr>)`), so the sibling
-split is a known DoR enabler, not a finalize surprise. The scan runs on BOTH the named-upstream path
-(`append_upstream_hazards`) AND the coddog/audio path (`_append_coddog_trap_hazards`, S134): pre-S134
-the literal scan was named-path-only, so an n_audio_sc coddog mirror's FP-pool double (S134
+split is a known DoR enabler, not a finalize surprise. The scan runs on both the named-upstream path
+(`append_upstream_hazards`) and the coddog/audio path (`_append_coddog_trap_hazards`): originally the
+literal scan was named-path-only, so an n_audio_sc coddog mirror's FP-pool double (S134
 `n_resample` `MAX_RATIO` @0x800D2190) was an unflagged first-build SHA-miss while the rodata-jtbl
 analog already rode the shared recover battery. The address is classified by segment first
-(data-segment statics are `data-static`, not `rodata-literal`; see #defines-data, S52). The pre-flag lists the full extent: GCC moves a
+(data-segment statics are `data-static`, not `rodata-literal`; see #defines-data). The pre-flag lists the full extent: GCC moves a
 pooled `double` into an FP register pair via an `lw` pair + `mtc1` (not `ldc1`), so a literal's 2nd
 (and further) word is an integer `lw %lo(D_<addr>)` invisible to the FP-only scan. pick_target adds
 the rodata-band `lw` refs so the split width is sized correctly (S52 `guLookAtReflectF`: `-1.0`
 @0x800D2510 via `ldc1` + `1.0` @0x800D2518 via an `lw` pair = a 16-byte block, not 8). The pre-flag
-also appends `;carve-end=0x<vram>` (S64 #2): a multi-`du` dlabel block's trailing word has no `%lo`
+also appends `;carve-end=0x<vram>`: a multi-`du` dlabel block's trailing word has no `%lo`
 of its own, so the scan's max referenced literal can understate the carve end (S64 `lookathil`: the
 `.double 0` @0x800D2508 sat inside the `D_800D2500` block, so the scan's max 0x800D2500 understated
 the 0x800D2510 carve end = the `lookatref` `.rodata` boundary). `carve-end` is the next `.rodata`
@@ -1410,7 +1409,7 @@ case); the finalize carve is still `.o`-sized, but the gate now sees the planned
 holds a banked sibling with a proven `.data`/`.rodata` ld-section carve, `pick_target.py` flags
 `twin-of:<file>` naming that sibling, so the matching carve is expected here and priced at the gate.
 Routes to this section or #defines-data per which section the sibling carved.
-**Generic-subseg-bound carve = exact extent, no split (S101).** When a carve start or end coincides
+**Generic-subseg-bound carve = exact extent, no split.** When a carve start or end coincides
 with an existing generic `[off, (ro)data]` subseg boundary, that generic subseg's opposite boundary
 is the exact carve extent: the linker already split the section there, so the carve is a 1-line
 attribute flip of the existing generic subseg (`[off, data]` → `[off, .data, path]`), not a split,
@@ -1420,7 +1419,7 @@ both sections were whole-subseg flips. `.data` `eqpower[128]` = the entire gener
 (0xF0 B, vram 0x800D22F0). pick's `carve-end=0x800D25C0` over-stated (real end 0x800D23E0 = the next
 named `.rodata` boundary 0xAD7E0). After the env|filter split, env is a single-file-pack and the sole
 owner, so the `;owner-per-member` marker is moot.
-**Carve-START widening (S93): the reported min can understate the carve start.** The FP/`lw` scans
+**Carve-start widening: the reported min can understate the carve start.** The FP/`lw` scans
 see only scalar `%lo` loads; a `.rodata` block that opens with a file-scope `static const <type>
 name[]` array begins at the array base (an `addiu %lo` address-of) and may carry string literals
 ("NaN"/"Inf") ahead of the scalar pool, both invisible to the scans, so `min(rodata_lits)` is too
@@ -1429,11 +1428,11 @@ the `pows[]` dlabel 0x800D27D0). `pick_target.py` widens the carve-start to the 
 boundary (symmetric to `carve-end`), but only when the upstream defines a file-scope `static const`
 array (`defines_file_static_const_array`): a `const` static is file-private rodata, so the whole
 code-segment rodata subseg is this object's own, which makes the widening FP-safe. (The direct
-`addiu %lo` band scan that would find the base without the source gate was reverted S92: in the
+`addiu %lo` band scan that would find the base without the source gate was reverted: in the
 `.data` band it could not tell a file's own static from a shared cross-file extern; the `static
 const` source gate confines this to rodata where that ambiguity does not arise.)
 
-**Carve-START past a FOREIGN leading symbol; the `.o` section size is the extent oracle (S104).** A
+**Carve-start past a foreign leading symbol; the `.o` section size is the extent oracle.** A
 generic `[off, rodata]` subseg can begin with a symbol owned by a different, already-banked file;
 then the carve must start at the target's first symbol, not the subseg boundary (so the carve-start
 widening above does not apply: the leading bytes are not this object's). S104 `xprintf`: the generic
@@ -1445,7 +1444,7 @@ size: `mips-linux-gnu-objdump -h build/src/<path>.o` (xprintf.o: `.data` 0x50 = 
 zeroes[33]+pad, `.rodata` 0x178 = fchar+fbit+"hlL"+jtbl). Read it once the body compiles (even at a
 link-failing build) to size each carve exactly, rather than inferring from the asm `%lo` span.
 
-**Named vs anonymous pool (S66): no difference; the named-rodata caveat is retired.** A pooled
+**Named vs anonymous pool: no difference; the named-rodata caveat is retired.** A pooled
 constant block whose words are named in `ghidra_symbols.txt` (e.g. cosf's
 `kCoeff4`/`kCoeff3`/…/`kInvPi`/`kPiHi`/`kPiLo`/`kZero`/`zOneHalf1`/`kOneHalf2` at 0x800D2460..0x24B8)
 carves exactly like an anonymous `D_<addr>` pool. Splat extracts the dot-prefixed `.rodata`
@@ -1457,7 +1456,7 @@ byte-compare the compiled `.o(.rodata)` against the ROM bytes at the target offs
 verbatim mirror's pool must equal upstream; if it doesn't, the source/version is wrong, discard the
 mirror), then carve as usual.
 
-**Switch jump table (S76): same carve, automatic byte-match.** A `switch` with a contiguous-ish case
+**Switch jump table: same carve, automatic byte-match.** A `switch` with a contiguous-ish case
 range compiles to a `jtbl_<addr>` in the code-segment `.rodata`, a block of `.word .L<addr>` entries
 that are the function's own internal labels (the case-body targets), reached by an indexed
 `lui %hi(jtbl_…)` / `lw %lo(jtbl_…)` / `jr`. The carve is identical to a literal pool: split the
@@ -1478,8 +1477,8 @@ link-fails with `undefined reference to .L<addr>`. `pick_target.py` pre-flags th
 recover-battery so it prices both named-upstream and coddog candidates) so the carve is a known DoR
 enabler, not a first-build link error.
 
-**c-combined pack: the carve owner is per-member, not the primary (S98).** The rodata-literal/jtbl
-scans span the whole subseg (S55: one `.c` → one `.o` → one `.rodata`, so a sibling fn's pooled
+**c-combined pack: the carve owner is per-member, not the primary.** The rodata-literal/jtbl
+scans span the whole subseg (one `.c` → one `.o` → one `.rodata`, so a sibling fn's pooled
 literals belong to the same carve). That is correct for a single-file pack, but a c-combined
 pack (≥2 distinct upstream `.c` in one asm subseg) lumps both members' rodata onto the primary row,
 yet the carve owner is the member file whose function actually references each literal/jtbl. S98
@@ -1504,7 +1503,7 @@ confirm step cover the gate today.
 **Procedure:** Split the adjacent autogenerated asm rodata subseg so the new `.rodata` subseg covers
 only the correct bytes (the full flagged extent, rounded to the literal block), then insert
 `[0x<RODATA_ROM>, .rodata, path/to/file]` (dot-prefixed, same name as the `c` subseg). **First check
-whether splat already bounded the carve (S93): no split when the generic subseg's extent already
+whether splat already bounded the carve: no split when the generic subseg's extent already
 matches.** Splat's per-TU auto-segmentation often already brackets the mirror's rodata as its own
 generic `[0x<ROM>, rodata]` subseg; compare its `[start, next-start)` extent to the `.o(.rodata)`
 size before computing a split point. When they match (xldtob.c: `[0xADBD0, rodata]` already spanned
@@ -1513,25 +1512,33 @@ size before computing a split point. When they match (xldtob.c: `[0xADBD0, rodat
 for cleanly-segmented libc/gu mirrors. **Timing: do this during execution with the body, not at the
 plan gate.** Like the `.data` carve, a `.rodata`
 sibling added against an `INCLUDE_ASM` stub carves an empty range (the stub emits no `.rodata`) and
-reflows the rodata segment, failing the gate green-ROM check (see `#defines-data` "Carve timing",
-S68). The gate flips text only.
+reflows the rodata segment, failing the gate green-ROM check (see `#defines-data` "Carve timing").
+The gate flips text only.
 
 **Provenance:** S38 (`osAiSetFrequency`: split `[0xAD5E0, rodata]` at 0xAD6A0; inserted
 `[0xAD6A0, .rodata, libultra/monegi/ai/aisetfreq]` = 8-byte double + 8-byte pad at 0x800D22A0).
 S48 (`__osViSwapContext`: same `2^32` double; split `[0xAD9C0, rodata]` at 0xAD9E0; inserted
 `[0xAD9E0, .rodata, libultra/io/viswapcontext]`; this sprint added the `rodata-literal` pre-flag).
+S55 (whole-subseg rodata scan: one `.c` → one `.o` → one `.rodata`, so a sibling fn's pooled literals
+share the carve).
 S66 (`sinf`: anonymous pool, split `[0xAD960, rodata]` → `[0xAD960, .rodata, libultra/gu/sinf]`,
 exact `.o`-size 0x60 fit; `cosf`: named pool, split `[0xAD6F0, rodata]` at 0xAD860 → inserted
 `[0xAD860, .rodata, libultra/gu/cosf]`, retiring the named-rodata collision caveat as a phantom).
+S68 (`.rodata` carve timing: the gate flips text only, so carve the sibling with the body, not against
+an `INCLUDE_ASM` stub).
 S76 (`__osDevMgrMain`: first switch jump table sibling, `switch (mb->hdr.type)` → `jtbl_800D2280`;
 split `[0xAD5E0, rodata]` at 0xAD680 → inserted `[0xAD680, .rodata, libultra/io/devmgr]` = 7 case
 `.word`s + 1 zero pad to 0x20; byte-matched first build with no confidence check; added the
 `rodata-jtbl` pre-flag).
+S92 (reverted the direct `addiu %lo` band scan; the `defines_file_static_const_array` source gate
+replaced it, confining carve-start widening to rodata).
 S93 (`xldtob.c`: `static const ldouble pows[]` + "NaN"/"Inf"/"0" strings + 1.0/1e8 literals = 0x70;
 the generic `[0xADBD0, rodata]` subseg already bounded the exact extent → 1-line attribute change
 `rodata` → `.rodata, libultra/libc/xldtob`, no split; added the carve-start widening pre-flag, where
 `defines_file_static_const_array` source-gates the rodata-subseg-start carve-start, since the FP scan
 missed the `pows[]` base 0x800D27D0 by 0x50 B).
+S96 (`drvrnew.c`: the dual-section carve pair, jtbl+consts `.rodata` here + `*_PARAMS[]` `.data`
+there).
 S98 (`[0x811A0]` `c-combined:2file[mainbus|resample]`: split text at 0x81310, then resample's `.rodata`
 carve split `[0xAD6F0, rodata]` 3-way → inserted `[0xAD7E0, .rodata, libultra/audio/resample]` = the
 MAX_RATIO double `D_800D23E0` (8B) + `jtbl_800D23E8` (10 words, 40B) = 0x30; mainbus.c carve-free.
@@ -1541,7 +1548,7 @@ S112 (`atan.c`: first libkmc C-mirror; generic `[0xADC40, rodata]` (`cordic_atan
 + 10 pooled FP literals + the `"atan2"` string, 0x60 B) already bounded the extent → 1-line
 attribute flip `rodata` → `.rodata, libkmc/atan`, no split; byte-matched first build).
 
-**Stale orphan after a retype-carve (S112): expected, harmless.** Flipping a generic `[ADDR, rodata]`
+**Stale orphan after a retype-carve: expected, harmless.** Flipping a generic `[ADDR, rodata]`
 → `[ADDR, .rodata, <file>]` leaves the pre-carve `asm/data/<ADDR>.rodata.s` (and, on an incremental
 build, a stale `build/asm/data/<ADDR>.rodata.o`) on disk: `make extract` does not prune a removed
 subseg's per-file output, and `make clean` wipes `build/` but not `asm/`. Both are gitignored and
@@ -1566,7 +1573,7 @@ mismatched `lui` immediates (up to 600-point penalty, `total_rows == match_count
 upstream is correct), inline the body, run the in-tree byte-`cmp` spot-check, then `make` + ROM
 SHA-1. Do not waste iterations.
 
-**Provenance:** S34 (`osAiSetNextBuffer`, score=600 throughout, spot-check MATCH).
+**Provenance:** S34 (`osAiSetNextBuffer`, score=600 throughout, spot-check match).
 
 ---
 
@@ -1584,7 +1591,7 @@ need ground truth.
 
 **Procedure:**
 - `cmp` raw `.text` bytes of the in-tree compiled object vs the reference object.
-- **Split-subseg target:** `decomp_loop.py` resolves the function to the OLD pre-split segment label
+- **Split-subseg target:** `decomp_loop.py` resolves the function to the old pre-split segment label
   and references the combined parent object. Use `build/asm/<subseg_hex_offset>.o` for the specific
   subseg (e.g. `build/asm/7E350.o`), not the combined parent (`build/asm/7E330.o`).
 - **Struct-field reloc-addend artifact (classical libultra):** when a C file accesses struct fields
@@ -1608,7 +1615,7 @@ need ground truth.
 flipping rather than flipping the whole block.
 
 **Trigger:** `pick_target.py` flag `pack:<n>fn[fn=stem,...]` (different stems → multi-file pack).
-Also `c-combined:<n>file[stem1|stem2|…]` (S64 #3): the C analog of `combined-subseg`, firing when ≥2
+Also `c-combined:<n>file[stem1|stem2|…]`: the C analog of `combined-subseg`, firing when ≥2
 distinct C upstream files share one asm subseg, naming the split targets. It pre-prices the split
 and surfaces a cheap clean leaf that a big combined subseg buries past smallest-first (e.g. the sp
 register-shim pack `func_800B16A0` → `3file[sprawdma|spsetpc|spsetstat]`, hidden under `upstream
@@ -1619,47 +1626,47 @@ a leaf still needs manual identification (S64 `cosf` was found by disassembly, r
 
 **Sub-cases / variants:**
 
-**Decompose strategy — carve a pack's jal-free + rodata-free sub-slice first (S156).** A `none`-upstream
-classical pack priced 8/13 by the 8-gate can hold a clean, low-risk sub-slice: a CONTIGUOUS run of
-members that are all (a) `jal`-free (no callee resolution) AND (b) reference no TU-LOCAL rodata (no
-`rodata-jtbl`/`rodata-straddle`/`rodata-literal` on those members — an ALREADY-placed/named jtbl or
-data table is an extern ref, which does NOT block a carve), whose start (and, if not the pack tail,
+**Decompose strategy — carve a pack's jal-free + rodata-free sub-slice first.** A `none`-upstream
+classical pack priced 8/13 by the 8-gate can hold a clean, low-risk sub-slice: a contiguous run of
+members that are all (a) `jal`-free (no callee resolution) and (b) reference no TU-local rodata (no
+`rodata-jtbl`/`rodata-straddle`/`rodata-literal` on those members — an already-placed/named jtbl or
+data table is an extern ref, which does not block a carve), whose start (and, if not the pack tail,
 end) is a 16-aligned ROM boundary. Such members compile position-independently (branches are
 fn-local, data refs are `%hi/%lo` externs), so splitting them into their own `.o` is byte-neutral —
 carve just that sub-slice as `[0x<16aligned>, c, <tree>/<lead-fn>]` and leave the rest asm. This
 sidesteps the harder members (a jtbl-carrying head, a `jal`-heavy tail) and banks the easy accessors
 atomically. S156 `func_80051E90` (6-fn pack, pts-13): the first 2 fns carry `jtbl_800CCC30`; the
-LOWER 4 (`func_80052070`/`func_800520DC`/`func_80052100`/`func_80052168`) are jal-free with no local
+lower 4 (`func_80052070`/`func_800520DC`/`func_80052100`/`func_80052168`) are jal-free with no local
 rodata, so they carved cleanly at the 16-aligned `0x2D470` boundary and banked as a seed-5 sprint,
 leaving the jtbl pair asm. The ranker does not yet auto-suggest the sub-slice (a tracked follow-up);
 apply this manually at the plan gate by reading the pack's `.s` for `jal`s and rodata `%lo` refs.
 
-**Inter-file stray leaf: `unattrib-leaf:0x<vram>` (S120).** Within a `c-combined` pack, a lone `=?`
-member whose nearest named-C members BEFORE and AFTER resolve to DIFFERENT stems straddles the
+**Inter-file stray leaf: `unattrib-leaf:0x<vram>`.** Within a `c-combined` pack, a lone `=?`
+member whose nearest named-C members before and after resolve to different stems straddles the
 file boundary — the split must consciously assign it to one singleton, or a silent `?` rides into the
-wrong side. `pick_target.py` flags its vram, but only for a LONE straddler (a clean 2-file split with
+wrong side. `pick_target.py` flags its vram, but only for a lone straddler (a clean 2-file split with
 one stray leaf); a whole foreign TU interleaved in (e.g. the `__assert`/`nuboot` game-boot region's 11
 interspersed game `?`s) is the messier `pack`/`upstream-fncount-mismatch`/`game-region-mirror` case,
-not a stray boundary leaf, so it does NOT fire. Motivating case: the pre-split S120 `[0x7D970]`
+not a stray boundary leaf, so it does not fire. Motivating case: the pre-split S120 `[0x7D970]`
 `c-combined:2file[nucontgbpakfwrite|nusimgr]` pack, where `func_800A2780` (a 0xC-byte leaf returning
-`&0x800F77D0`, in NEITHER upstream source) sat exactly between `nuContGBPakFwrite` and `nuSiMgrInit`.
+`&0x800F77D0`, in neither upstream source) sat exactly between `nuContGBPakFwrite` and `nuSiMgrInit`.
 The S120 split at the 16-aligned `0x7DB80` boundary left it in the trailing `[0x7DB80,asm]` subseg
 with `nusimgr` (a carry-over), but the flag would have surfaced it at the gate.
 
-**Resolution rule — a leaf returning `&<static>` is SAME-TU, not foreign (S122).** S120's "in NEITHER
+**Resolution rule — a leaf returning `&<static>` is same-TU, not foreign.** S120's "in neither
 upstream source" framing for `func_800A2780` was incomplete: the 0xC leaf is `return siMgrStack;` —
-its `&0x800F77D0` target is the BASE of `nusimgr.c`'s own file-static `siMgrStack` (siMgrThread
-0x800F7620 + 0x1B0 = 0x800F77D0). A static is file-local, so a function that takes its address MUST be
-compiled in the same TU. The leaf therefore IS `nusimgr.c` — an MG64-added leading accessor the
-2.07 upstream lacks — and banks WITH it (written `return siMgrStack;`, `func_` name kept), NOT as a
+its `&0x800F77D0` target is the base of `nusimgr.c`'s own file-static `siMgrStack` (siMgrThread
+0x800F7620 + 0x1B0 = 0x800F77D0). A static is file-local, so a function that takes its address must be
+compiled in the same TU. The leaf therefore is `nusimgr.c` — an MG64-added leading accessor the
+2.07 upstream lacks — and banks with it (written `return siMgrStack;`, `func_` name kept), not as a
 foreign micro-TU. **So when an `unattrib-leaf` / stray boundary leaf returns `&<addr>`, resolve `<addr>`
-against the placed static map of the two neighbors BEFORE deciding foreign-vs-same-TU: an address
+against the placed static map of the two neighbors before deciding foreign-vs-same-TU: an address
 inside a neighbor's static (file-local) range proves same-TU; only an address in a global/other-TU
 range (or an unrelated MMIO/const) leaves it genuinely foreign.** (A `pick_target` `leaf-returns-static:
 <file>` annotation that resolves the leaf's `lui/addiu` target against the static map would surface this
 at the gate; deferred tooling.)
 
-**Not every pack splits: `single-file-pack` (S67 #2).** When every pack member resolves to one
+**Not every pack splits: `single-file-pack`.** When every pack member resolves to one
 upstream C file (one stem, no `=?`/asm members), `pick_target.py` emits `single-file-pack:<n>fn[…]`
 instead of `pack:<n>fn[…]`. This is the atomic-verbatim-mirror class (guPerspectiveF+guPerspective
 S55, guLookAtHiliteF+guLookAtHilite S64, guTranslateF+guTranslate S67): the whole subseg is one
@@ -1669,7 +1676,7 @@ unchanged (the pack penalty keys on `nfns>1`, not the kind), so the relabel is d
 stops the gate reading an atomic mirror as a split-required blocker. A mixed asm+C pack or a
 multi-stem pack keeps `pack`.
 
-**Foreign TU bundled in a single-stem pack: `upstream-fncount-mismatch:<m>vs<n>` (S104).** The
+**Foreign TU bundled in a single-stem pack: `upstream-fncount-mismatch:<m>vs<n>`.** The
 mirror-image hazard: a pack has one named C stem but more functions (`m`) than that upstream `.c`
 defines (`n`), so the surplus members are a separate TU sharing the subseg. Split it off and mirror
 only the upstream's `n` fns. This is the named-symbol analog of `coddog-fncount-mismatch` (which keys on the
@@ -1682,7 +1689,7 @@ implicit-int K&R (`_xatan(u,v)`), and stray-leading-space headers) and skips pro
 macro headers / doc-comment signatures; an under-count there would false-fire this on a genuine
 single-file pack (the nugfxtaskmgr ` void nuGfxTaskStart(...)` near-miss). Advisory/display-only.
 
-**The split-off TU's carried label is a HINT, not a source attribution (S105).** When you split a
+**The split-off TU's carried label is a hint, not a source attribution.** When you split a
 foreign TU off and leave it `asm` for a later sprint, whatever you call it in the split-sprint's
 notes is a quick guess: re-derive its real source with coddog + the asm at the next gate, never
 trust the carried label. S104 split `func_800B1580` off xprintf and called it the "`__osDpDeviceBusy`
@@ -1699,8 +1706,10 @@ block the mirror) → flip the first chunk to `[0x<seg>, c]` so the scaffold onl
 
 **Provenance:** 0x8E620 (`rand`+`srand` from `rand.c` packed with `_xsincos`+`sin`+`cos`+`tan` from
 `sin.c`).
+S122 (a `&<static>` leaf resolving to `nusimgr.c`'s `siMgrStack` base is same-TU; it banks with
+`nusimgr.c`, not as a foreign micro-TU).
 
-**Per-distribution upstream caveat (S51):** `pick_target.py`'s `upstream` column and the gate's
+**Per-distribution upstream caveat:** `pick_target.py`'s `upstream` column and the gate's
 "upstream availability" note come from the pack name-map, not the bytes. A fn the map calls a
 mirror may ship as hand-asm `.s` in one distribution (libultra_modern) yet have been compiled from
 the original combined `.c` in this ROM. Before flagging the `.s`-mapped fn classical/hand-asm,
