@@ -3386,6 +3386,19 @@ This is the hardest classical class; S158 hit it on all three non-trivial fns of
 (`func_80067D40.c`: a 226-instr FP/trig/RNG generator, a 137-instr sort/rank, a 76-instr table
 builder) and cracked all three.
 
+**TRIAGE TELL — a pure-integer DECODER/codec is this wall, not a "clean leaf" (S164).** At the plan
+gate, `0-jal + no-float + no-rodata/data + args-only` reads as a LOW-risk seed-5 leaf — but a tight
+DECODER/codec (LZ/RLE, CRC, a bit-stream/ring-buffer walker: many back-to-back `sll`/`srl`, a
+software-pipelined load-store copy chain, a self-recursive or ring-buffer INDEX, a control-word bit
+loop) is the OPPOSITE. The dense scheduling + a handful of long-lived pointers packed into `t0-t9`
+puts it squarely on THIS wall, and it will need the permuter/fan-out, not a first-build match. Price
+such a fn as a pervasive-regalloc unit (**seed 8+, expect permuter**), NOT seed-5. S164 mis-priced a
+3-fn LZ trio (`lz_decompress_simple.c`) seed-5 and carried all 3 (`dma` matched only because its
+residual was reloc artifacts; `simple`/`extended` reached structural-complete but locked on the
+register permutation — `control` grabs `$v0` first via its short live range, target keeps it in `$a2`).
+`pick_target.py` has no codec signal yet (tracked follow-up); until then the gate applies this by
+reading the fn's shape.
+
 **The playbook (in order):**
 
 1. **Build an EXACT-SYMBOL isolated base.** Use PER-FIELD structs so each accessed field is its OWN
@@ -3441,6 +3454,17 @@ the isolated base + builds the reference object, then sweeps logic-preserving st
 measured) is what discovered the param-reuse / align / return-type levers the permuter alone could
 not. Run one agent per remaining function.
 
+**Fan-out robustness (S164).** A shared-account SESSION-USAGE LIMIT can kill every agent mid-run with
+no partial-result handoff (S164: all 3 agents died at once on the reset boundary). Harden the fan-out:
+(a) each agent `cp`s its best `base.c` to a durable path (e.g. `scratchpad/best_<fn>.c`) on EVERY new
+best score, so a mid-run kill leaves the best state, not whatever was last written; (b) stagger/cap
+the concurrent permuter agents (`-j 4` each, not `nproc-1`) to bound the account-usage burn; (c) the
+usage window RESETS on a clock (the kill message names the reset time) — a killed fan-out can be
+RE-LAUNCHED verbatim after the reset (resume from the on-disk `base.c`), so a limit-kill is a pause,
+not a dead end. Agents that only touch their own `nonmatchings/<fn>/` + isolated `decomp_loop.py` +
+their own permuter dir do NOT need worktrees (no `src/`/`make`/yaml writes → no shared-tree race);
+skip the `isolation: worktree` cost when the work is measurement-only.
+
 ## return-type is load-bearing
 
 **Trigger:** a `void`-semantics function (no used return value; the ROM falls off the end) whose C is
@@ -3467,6 +3491,20 @@ loop-entry `beqz` delay-slot fill on `func_80067D74`). When a struct-array class
 split the accessed fields into separate per-field base symbols (`Eid@D_801B7118` / `Esc@D_801B711A` /
 `Eho@D_801B711C`, each a struct whose field is at offset 0). A 6-byte struct COPY can still use one of
 these (align-2 the type so the copy emits `lwl/lwr`+`lh/sh`).
+
+**Param-struct at the gate — check Ghidra, but VERIFY vs the asm (S164).** When a classical fn takes a
+`<T> *param_1` accessed as `param_1[N]` + `*(u16 *)(param_1 + k)` casts, its original source likely used
+a real STRUCT, and struct member access (proper field types) can change instruction selection /
+scheduling / regalloc vs int-array indexing. So at the plan gate, query Ghidra for an existing param
+struct (`search_data_types`, `get_struct_layout`). TWO cautions: (1) the Ghidra struct may be MIS-RE'd
+— S164's `LzDecompressState` was marked packed (align 1, `ring_buffer@0x16`, size 0x24) but the asm
+ground truth is naturally aligned (`flags@0x14` u16 + 2 pad, `ring@0x18`, `ridx@0x1C` u16, `run@0x1E`
+s16, `hidx@0x20` u16, `hbase@0x24`, size ≥0x28) — reconcile field offsets/alignment/size against the
+load/store widths in the asm BEFORE trusting it (surface a corrected layout as a cross-repo Ghidra
+follow-up). (2) It is NOT a cure-all: struct-typing S164's `lz_decompress_simple` param (`u8*` fields)
+gave the IDENTICAL score + register permutation, because that fn's miss was INTERNAL allocno priority
+(a control var, not a param field). Test it, but if the diff shows the permutation is on internal
+temps/pointers (not the param loads), the struct won't move it — go to the permuter/fan-out.
 
 ## switch-jtbl-dispatch (compiler jump table + sparse inner cases)
 
