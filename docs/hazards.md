@@ -88,6 +88,7 @@ The hazard families below group the sections that follow. Each links to its exis
 - [mem-in-struct scheduling lever (model a fixed global as a struct/array member)](#mem-in-struct-scheduling-lever-model-a-fixed-global-as-a-structarray-member)
 - [call-result a0-vs-v0 single-allocno (force a scratch reg via both-arm reuse)](#call-result-a0-vs-v0-single-allocno-force-a-scratch-reg-via-both-arm-reuse)
 - [compiler-source fan-out (escalation above the permuter)](#compiler-source-fan-out-escalation-above-the-permuter)
+- [cse make_regs_eqv branch-fold (reused-var canonical fold on a `?:`-with-flag store)](#cse-make-regs-eqv-branch-fold-reused-var-canonical-fold-on-a--with-flag-store)
 
 **Classical control-flow & scheduling**
 - [struct-init-loop (dup-store / dual-induction-var)](#struct-init-loop-dup-store--dual-induction-var)
@@ -3135,7 +3136,14 @@ three fixes the generic setup misses.
 **Generalizes to game -O2 (main-profile) code.** The same three fixes apply to a `src/main/`
 (or overlay) game fn, with the `compiler_command` mirroring `MAIN_CFLAGS` (`$(CFLAGS)` + all the base
 `-I` + `-DF3DEX_GBI_2` for a DL fn) piped `tools/cc/gcc -S | tools/cc/as -EB -mips2 -G 0 -I include`.
-Without `-DF3DEX_GBI_2` a DL fn never converges (wrong RSP opcodes). **Coord/local integer width
+Without `-DF3DEX_GBI_2` a DL fn never converges (wrong RSP opcodes). **S167 confirmed the full recipe
+end-to-end** for a `src/main/` fn: scratch settings with `gcc -S -nostdinc -G 0 -mips3 -mgp32 -mfp32
+-mno-abicalls -O2` + the full base `-I` set + `-DINCLUDE_ASM_USE_MACRO_INC -D_LANGUAGE_C -D_FINALROM
+-DF3DEX_GBI_2`, piped to `tools/cc/as -EB -mips2 -G 0 -I include`, and a one-line
+`sed -i '/^.set gp=64$/d' <dir>/target.s` after import (fix (b)) -- it built base+target and ran 43k
+iterations cleanly. Committing a `permuter_settings_main.toml` + a `run-permuter.sh --main` is a
+tracked golden-gated tooling follow-up so the classical endgame needs no per-run setup. **Coord/local
+integer width
 (`u16`/`s16` vs `s32`) is a first-class permuter lever for frame/regalloc near-misses:** S151
 `func_800500E0` was a byte-perfect structure that locked ~185 on a register-allocation + a phantom
 `-16` stack frame (a reload spill-slot artifact reachable only through register pressure); the permuter
@@ -4028,3 +4036,49 @@ an isolated-scoring harness (compile the exact `src/main` -O2 profile standalone
 target addresses, print an aligned TGT-vs-CAND diff + a layout-shift-insensitive diff count) that tries
 30-60+ source variations. The mechanism agents prove why; the empirical agent finds the source. This
 tier cracked two permuter-plateau fns in S163 that would otherwise have carried.
+
+**Per-FUNCTION fan-out for a sibling set (S167).** When a decompose head holds several sibling fns
+that share a divergence class (e.g. all access one call-return game-state struct), fan out **one
+subagent per FUNCTION** in parallel, not one per RTL pass. Give each a strict **input contract**: the
+exact instruction-level divergence you have ALREADY isolated (mine-vs-target, register by register),
+the paths to read (the target `asm/nonmatchings/.../<fn>.s` + your own `objdump`/`M_<fn>.txt` + the C
+source lines), the specific mechanism question, and the two repo roots -- so the agent derives the
+lever instead of rediscovering the diff. The payoff is a **unifying model**: S167's `func_800710C4`
+agent found the `func_8005AF50()` return is a game-save **struct** (`SaveBlock{u8 pad[0xF4]; s8
+tbl[6][0x12]; ...}`), and modelling the accesses as `base->tbl[i][j]` (COMPONENT_REF bitpos keeps
+`+0xf4` explicit, `expr.c:4882`; MEM_IN_STRUCT scheduling) fixed **both** siblings byte-exact; the
+`func_8007117C` agent independently found the loop levers (`p[j]` index form -> biv-elimination
+synthesizes `end=start+N`, `loop.c:6165`; `s32`-load for `lb` not `lbu`, `mips.c:1029`). The third
+agent PROVED a fundamental wall (see `#cse-make-regs-eqv-branch-fold`), which is a valid, budget-saving
+outcome -- carry fast on a proven-impossible, don't grind. Verify each lever with an isolated
+reloc-aware byte-cmp (`objcopy --only-section=.text <fn>.o` vs the ROM at the fn's rom offset), NOT the
+full-make SHA (which is all-or-nothing across the file).
+
+---
+
+## cse make_regs_eqv branch-fold (reused-var canonical fold on a `?:`-with-flag store)
+
+**Symptom:** a classical fn is **byte-exact except a 3-word branch-direction triple** in a
+store-then-print (or store) tail: mine `beqz X; op a1,v0,K; move a1,v0` vs the target `bnez X; move
+a1,v0; op a1,v0,K` (or the mirror). The value being stored/passed is `cond ? (t|K) : t` where
+`t = f(loaded)` and the **same variable holds the loaded value AND the final result** (so the load is
+`lb/lbu a1` into the arg register). Everything else -- regalloc, the `t` computation, the compare --
+matches. S167 `func_80070FD0` (a COM-win byte: `t=count|(old&0x80); nv=(D_801B60C5==0)?t|0x80:t`).
+
+**Root cause (`cse.c make_regs_eqv`:840-862):** the default arm's plain copy `old = t` merges the two
+into one quantity, and `old` becomes the **canonical** register because it **outlives `t` and its
+last use (the store/printf) crosses the post-branch EBB boundary** (the merge label has 2 preds). cse
+then rewrites the *other* arm's `t|K` -> `old|K`, so `t` dies single-use and global.c coalesces it
+onto `$a1` -- the fold (1 instr short, but the correct `bnez` polarity). The only form that keeps `t`
+separate makes the **default** arm a non-copy (`old = t|K; if(!cond) old = t`), which gives `beqz`
+polarity instead. **Branch-direction and the fold are LOCKED:** `(cond?t|K:t)` has exactly two C
+shapes and each pins one of {right-polarity+fold, separate-t+wrong-polarity}.
+
+**Verdict -- carry fast, do NOT grind.** This is **not reachable from equivalent single-TU C**: the
+load-in-`$a1` requires reusing the loaded var as the arg, which forces the canonical fold. Proven at
+S167 by ~35 hand variants + 43k permuter iterations (the permuter only makes equivalent transforms,
+so it cannot escape it either) + a full cse/combine/greg RTL-dump trace. The target was compiled from
+a shape not recoverable from the byte behavior (a different flag/print data-flow, a helper, or a
+macro). Recognize the symptom, bank the file's other fns (`#cross-jump-tail-merge` mixed partial), and
+**carry this one for game-source insight** -- not another permuter run. Save the near-match
+(`beqz`-polarity, byte-exact minus the 3 words) so the retry starts one lever away.

@@ -30,10 +30,34 @@ non-trivial fns needed the full pervasive-regalloc playbook + a 3-round multi-ag
 Difficulty is driven by FP/trig + many callee-saved regs + struct-array pressure, none of which the
 size/nfns model sees. Consider a `regalloc-heavy` pts bump in `pick_target.py` (detect FP ops / high
 callee-saved count / struct-array access) — off-cadence, golden-gated tooling branch.
+**Extend it beyond FP/trig (S167):** a 3-fn head priced seed-5 (tiny, 0-FP, no-jtbl) was an S158-class
+cse/regalloc slog because the fns shared a **call-return game-state base pointer**
+(`func_8005AF50()+0x990`) with **dense multi-field byte access** + a printf. A shared call-return
+base-ptr + many byte-field loads/stores is a difficulty signal too — not just FP. And one fn hit the
+`#cse-make-regs-eqv-branch-fold` wall (unreachable-from-equivalent-C), which no pts model predicts;
+the mitigation is fast-carry recognition (the new hazard), not a price bump.
 **Path-convention exception (S149):** nusys/SDK-template main-segment code (the `idle=nuboot` coddog
 tell) is carved to its LIBRARY tree (`libnusys/<file>`), not `main/<stem>` — yaml path-qualifier only,
 placement unchanged (see `CLAUDE.md` path convention). A per-FILE -O0 override is the one mk edit a
 boot/SDK-glue TU may need.
+
+**S167 PARTIAL — `src/main/func_80070FD0.c` (3-fn char/scenario stat-updater head, decomposed from
+`[0x4C3D0]`; 2 of 3 banked, func_80070FD0 CARRIED).** matched **+2** (`func_800710C4`, `func_8007117C`
+byte-exact C); md5-candidate 219→**219** (file MIXED-PARTIAL — 1 stub — so no flip); asm subsegs 78→78.
+The 2 fell to the **per-function compiler-source fan-out** (3 opus subagents over mips-gcc-2.7.2 +
+mips-binutils-2.6, one per fn, each fed the exact byte-diff): the unifying key was the `func_8005AF50()`
+return being a game-save **struct** (`SaveBlock{u8 pad[0xF4]; s8 tbl[6][0x12]; u8 wins[13][0x12][2]}` @
+base990), so `base->tbl[i][j]` (MEM_IN_STRUCT COMPONENT_REF) keeps `+0xf4` explicit + base in `$a0`;
+plus biv-elimination (`p[j]` index -> `end=start+0x12`), `s32`-load for `lb`, `i`-before-`rp` init.
+`func_80070FD0` CARRIED at a **3-word branch-direction miss** on the new `#cse-make-regs-eqv-branch-fold`
+wall (default `old=t` copy makes old canonical -> cse folds t; bnez+separate-t unreachable from
+equivalent C; proven by 35 variants + 43k permuter iters + a full RTL-dump trace). Needs game-source
+insight, not more permuter. Split `[0x4C3D0]` at 16-aligned `0x4C620`; 1-fn tail func_80071220 stays
+asm. seed 5 / banked 0pt (per-file all-or-nothing, partial); realized ~13 (S158-class cse/regalloc
+slog); regime classical. Quality 0/1/1/0. Retro applied **4 of 4**: fan-out escalation doc + new
+cse-fold hazard (+ CLAUDE.md index) + main-profile permuter recipe + regalloc-heavy pts extension; also
+PRUNED 2 stale carry-overs (motor.c S102, sched.c S106). **Cross-repo follow-up:** name
+`func_800710C4`/`func_8007117C` + push the `SaveBlock` struct to the Ghidra workspace.
 
 **S166 PARTIAL — `src/main/lz_decompress_simple.c` (retry the 2 carried LZ fns; `lz_decompress_simple`
 MATCHED, `lz_decompress_extended` CARRIED).** matched **+1** (simple); md5-candidate 219→**219** (file
@@ -2994,16 +3018,10 @@ by `/sprint-plan`:
   band refrain is stale on piacs; NOTE `func_800AC110` in the old pairing was a mislabel — that vram
   is `__osSiCreateAccessQueue`/siacs.c (banked S81), a different file. The genuine remaining io traps
   are `motor.c` + `pimgr.c` below.)_
-- **io coddog-mirror trap — `motor.c` (`osMotorStop` pack:2fn, [0x89780, asm]).** A 99.99% coddog
-  match but NOT an atomic verbatim cp — a **version-branch trap**. Upstream `motor.c`'s
-  `#if BUILD_VERSION >= VERSION_J` branch defines `__osMotorAccess`+`__osMakeMotorData`+`osMotorInit`
-  and does **NOT** define `osMotorStop` (or `osMotorStart`) at all — those live only in the `#else`
-  (`< VERSION_J`) branch. So a verbatim VERSION_J mirror of `motor.c` yields the WRONG function set;
-  the ROM's `osMotorStop` corresponds to the older `#else` source, conflicting with the project's
-  VERSION_J pin. `pick_target`'s hazards mix both branches (`READFORMAT`/`SELECT_BANK` are J-only,
-  `__osMotorinitialized` is else-only — cpreprocess does not version-gate motor.c here). Do NOT
-  pursue `osMotorStop` as a routine drop-static/drop-def mirror; it needs the `#else`-branch source
-  (a per-file build-version override or a vendored old-branch copy), a distinct un-priced enabler.
+- _(io `motor.c` carry-over **RESOLVED + banked S102** — flipped `[0x89780, c, libultra/io/motor]`,
+  0 stubs, md5-candidate. The "osMotorStop version-branch trap" framing rested on a MISLABEL: the
+  `osMotorStop` vram 0x800AE380 is actually `__osMotorAccess` (os_motor.h `#define osMotorStop(x)
+  __osMotorAccess(...)`), banked with `osMotorInit` as the J-branch pair — no `#else` source needed.)_
 - _(io `pimgr.c` (`osCreatePiManager`) carry-over **RESOLVED + banked S90** — the "mixed `.data`/`.bss`
   carve" spike framing was over-cautious, the same false-frame the vimgr S87 carry-over got. Under
   `-D_FINALROM -DBUILD_VERSION=VERSION_J` it compiles ONE fn; the only `.data` global
@@ -3015,19 +3033,10 @@ by `/sprint-plan`:
   below piacs's `piAccessBuf`@0x800FA9B0. Byte-clean first build, 0 iteration. The earlier
   0x800FA990/0x800FA9A8 framed here as `__Dom*SpeedParam` were WRONG (those are piEventQueue/piEventBuf);
   `__Dom1/2SpeedParam` are at 0x80106248/0x800FEC98 per S85.)_
-- **sched.c head — `osCreateScheduler` + ~13 sched fns, `[0x86A50, asm]` (0x800AB650..0x800AC060,
-  the head left by S89's sched|sirawdma decompose).** Spike (heavy) — a GENUINE carve/recover spike,
-  not the pimgr/vimgr over-frame: it is NOT a single drop-def. Coddog `src/sched/sched.c`@99.99 but a
-  stacked-hazard mirror: **file-static** + **defines-data:count,firsttime** (apply the S87
-  drop-static-mirror test at the gate — uninitialized→drop-to-extern, nonzero-init→carve; verify
-  `count`/`firsttime` placement before assuming a carve) + a **`rodata-jtbl:0x800D25C0`** switch table
-  (needs the `.rodata` sibling carve, `docs/hazards.md#rodata-sibling-yaml-pattern`, S76 devmgr
-  pattern) + **5 calls-unplaced log callees** (`osCreateLog`/`osDpSetNextBuffer`/`osFlushLog`/
-  `osLogEvent`/`osSpTaskYielded` — recover or place from the still-asm log/sp subsegs) +
-  `jal-count-mismatch:12vs11` (verify at the gate — likely an indirect-call false-positive class).
-  Header `PRinternal/siint.h` already vendored. Pursue when the data-sibling + log-callee enablers
-  are the sprint goal; the sirawdma tail is already off it (S89). seed ~13 → the 8-gate applies
-  (single-file once split, but the carve+jtbl+5-recover load is real work).
+- _(`sched.c` head carry-over **RESOLVED + banked S106** — flipped `[0x86A50, c, libultra/sched/sched]`,
+  0 stubs, md5-candidate (`osCreateScheduler` + 13 helpers). The stacked-hazard spike (file-static +
+  defines-data:count,firsttime + rodata-jtbl:0x800D25C0 + 5 log callees) was worked through at the S106
+  gate.)_
 - _(os/exceptasm.s asm-mirror (`__osExceptionPreamble` + 7 dispatch fns, `[0x8AF90]`) carry-over
   **RESOLVED + banked S107** — the "both dead-ends proven, needs a novel mechanism" spike framing was
   an over-generalization. S91 proved 2 paths fail (strip-and-rename a SYMBOLIC table; carve a `hasm`
