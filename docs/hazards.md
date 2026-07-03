@@ -664,7 +664,7 @@ the gate by disassembling and comparing the jal list against the upstream call l
   `__osEnqueueThread(&__osRunQueue, t)` sites merged.) **Do not hand-fold an early-return to force
   the count.** When the upstream has two *identical* tail blocks (an early-return
   `if (cond) { f(); return X; }` plus the same `f(); return X;` at the end), -O3 **cross-jumps**
-  them into one shared tail itself, which IS the `jal N-1`. Copy verbatim and let the compiler do
+  them into one shared tail itself, which **is** the `jal N-1`. Copy verbatim and let the compiler do
   it; rewriting to `if (!cond) { body }` changes register allocation and can emit a *different-sized*
   function. **Wrong-size diagnostic:** if a verbatim/near-verbatim mirror's built function differs
   from the baserom in *instruction count* (not just a local field), the cause is regalloc /
@@ -679,7 +679,7 @@ the gate by disassembling and comparing the jal list against the upstream call l
 - **Confirmed clean drop:** stays a mirror. Copy verbatim, drop the diverging line(s)
   (deterministic from the asm jal list), `make` → ROM SHA-1 is the proof. (S18: `nuContInit` drops
   the absent `nuContPakMgrInit` call.)
-- **Jal-less dropped block (jal count can MATCH).** A dropped block need not contain a call, so the
+- **Jal-less dropped block (jal count can match).** A dropped block need not contain a call, so the
   jal count can agree while the build still diverges and `pick_target.py` flags nothing. A verbatim
   mirror that links fine but misses the ROM SHA-1, with no flagged hazard, often means this ROM omits
   a jal-less upstream guard/early-return (or replaces a multi-call block with a one-liner). Don't
@@ -689,51 +689,51 @@ the gate by disassembling and comparing the jal list against the upstream call l
   path; `osGbpakReadId` replaces the upstream `if(bcmp){ write-temp; reread; recheck }` retry block
   (5 calls + a `temp[32]` local) with `if (bcmp(...)) return 4;`, where the jal count *did* diverge.)
 - **nusys per-file version wrapper (libnusys int-mask drop).** A libnusys mirror can mismatch
-  because MG64's build pins an OLDER nusys revision *per file* than the in-tree default (the
-  n64sdkmod nusys-2.07 tree); the version is NOT uniform (S117 established the divergence). The
+  because MG64's build pins an older nusys revision *per file* than the in-tree default (the
+  n64sdkmod nusys-2.07 tree); the version is not uniform. The
   concrete recurring delta in the `cont`/RMB family: nusys-2.05 wrapped the function body in an
   `osSetIntMask(OS_IM_NONE)` ... `osSetIntMask(mask)` pair (a `OSIntMask mask;` decl + the two
   calls), kept through 2.07; the pre-2.05 (2.00/1.x) source omits it. **Tell:** MG64's asm is a
   **leaf** (no `addiu $sp,-N` / `sw $ra`, 0 jals) but the 2.05+ upstream wraps the body in two
   `osSetIntMask` jals → a `jal-count-mismatch:2vs0`-style flag whose surplus is exactly the wrapper.
   **Confirmed clean drop:** stays a mirror — copy the 2.07-sdk file verbatim, drop the 3-line
-  int-mask wrapper (keep the English comments), which IS the 2.00 leaf code; ROM SHA-1 is the proof.
+  int-mask wrapper (keep the English comments), which **is** the 2.00 leaf code; ROM SHA-1 is the proof.
   A sibling whose code is version-identical (comments-only diff) copies straight from 2.07-sdk.
   Diagnose the version with the per-revision source set under `~/development/repos/nusys/src/<ver>/`
   (`grep -c osSetIntMask <ver>/nusys/<file>.c`). `pick_target.py` now annotates this case
-  `jal-count-mismatch:<c>vs<asm>(version-artifact?)` for libnusys so smallest-first is not deterred
-  (S118 #2). (S118 `nuContRmbModeSet` — leaf 0-jal = 2.00 variant, int-mask dropped; sibling
+  `jal-count-mismatch:<c>vs<asm>(version-artifact?)` for libnusys so smallest-first is not deterred.
+  (S118 `nuContRmbModeSet` — leaf 0-jal = 2.00 variant, int-mask dropped; sibling
   `nuContRmbForceStop` was version-identical and copied straight from 2.07-sdk.)
-- **nusys per-file version BLOCK REORDER (no count signal; "no coddog" is the tell).** A per-file
-  version divergence need not change the call/instruction COUNT — it can be pure block ORDER. MG64's
+- **nusys per-file version block reorder (no count signal; "no coddog" is the tell).** A per-file
+  version divergence need not change the call/instruction count — it can be pure block order. MG64's
   per-file nusys revision can order two top-level blocks differently from every archived rev, and no
   available source reproduces it. **Nothing count-based fires:** the jal count agrees with the asm and
-  the instruction count is identical; the only standing tell is the ABSENCE of a `coddog-mirror:`
+  the instruction count is identical; the only standing tell is the absence of a `coddog-mirror:`
   match (a reorder breaks coddog's structural fingerprint, so "no coddog" on a jal-flagged libnusys
   target is a divergence signal, not noise — `pick_target.py` now prices a jal-mismatch-without-coddog
-  target one above the mirror floor, S119 #1). **Symptom:** the verbatim cp builds + links clean but
-  the ROM SHA-1 misses; an in-tree-`.o` vs baserom-asm objdump diff shows the SAME instruction count,
-  same ops, REORDERED (with cascading regalloc differences). **Procedure:** read the asm's jal/block
-  order (which call/block executes first), reconstruct the true source order — a C compiler does NOT
-  reorder across an early-return-gated side-effecting call, so the asm order IS the source order —
+  target one above the mirror floor). **Symptom:** the verbatim cp builds + links clean but
+  the ROM SHA-1 misses; an in-tree-`.o` vs baserom-asm objdump diff shows the same instruction count,
+  same ops, reordered (with cascading regalloc differences). **Procedure:** read the asm's jal/block
+  order (which call/block executes first), reconstruct the true source order — a C compiler does not
+  reorder across an early-return-gated side-effecting call, so the asm order **is** the source order —
   hand-swap the blocks in the closest English rev (2.07), and verify insn-identical (`objdump -d`
   diff of the in-tree `.o` vs `build/asm/<rom>.o`) plus full-make ROM SHA-1. (S119 `nuContGBPakFread`:
-  the RAM-enable block — `bzero` / `data[31]=…` / `nuContGBPakWrite` — runs BEFORE
+  the RAM-enable block — `bzero` / `data[31]=…` / `nuContGBPakWrite` — runs before
   `nuContGBPakCheckConnector` (`ram=0` in the range-check `beqz` delay slot, `jal CheckConnector` at
   the skip-label), but every archived 1.20/2.00/2.05/2.06/2.07 is CheckConnector-first; swapping the
-  two source blocks gave the byte match. Its `jal-count-mismatch:5vs9` was an unrelated MACRO
+  two source blocks gave the byte match. Its `jal-count-mismatch:5vs9` was an unrelated macro
   artifact: nusys.h `nuContGBPakRead`/`Write` expand to `nuContGBPakReadWrite`, so 9 asm jals == 9
   expanded call sites — confirm by expanding the macros before counting, do not read it as 4 dropped
-  calls.) Generalizes the S117/S118 "nusys version is per-file" finding from wrapper-PRESENCE to
-  block-ORDER divergence.
+  calls.) Generalizes the "nusys version is per-file" finding from wrapper-presence to
+  block-order divergence.
 
 **Sub-cases / variants:**
 
-**Sibling-replay (S120).** Once one fn in a family is confirmed a block-reorder mirror, its siblings
-replay the SAME swap: `nuContGBPakFwrite` (S120) is the direct sibling of S119's `nuContGBPakFread`
+**Sibling-replay.** Once one fn in a family is confirmed a block-reorder mirror, its siblings
+replay the same swap: `nuContGBPakFwrite` (S120) is the direct sibling of S119's `nuContGBPakFread`
 (its asm runs the RAM-enable block before `nuContGBPakCheckConnector` identically, with the same
 benign `nuContGBPakRead`/`Write`→`ReadWrite` macro `jal-count-mismatch:5vs10`). Applying the swap
-UP-FRONT from the asm + the sibling precedent banked it FIRST-BUILD, 0 iteration (vs S119, which
+up-front from the asm + the sibling precedent banked it first-build, 0 iteration (vs S119, which
 discovered the reorder via a re-attempt). `pick_target.py` now surfaces
 `block-reorder-sibling:<sibling.c>` on a libnusys candidate carrying the tell (unexplained
 jal-mismatch + no `coddog-mirror`) whose upstream-file basename is in a known block-reorder family
@@ -742,7 +742,7 @@ it. The flag is advisory: the seed keeps its +1 near-verbatim risk (the hand-edi
 plan time), but a sibling-known swap that banks first-try scores the realized −1 verbatim-first-try
 tier (VELOCITY S120 #3).
 
-**Provenance:** S18, S30, S35, S45, S47, S118, S119, S120.
+**Provenance:** S18, S30, S35, S45, S47, S117, S118, S119, S120.
 
 ---
 
@@ -753,8 +753,8 @@ context/field assignment, when this ROM's source casts differently from the upst
 emits `sra rd,rs,0x1f` for a sign-extending `(s64)(s32)x` but `move rd,zero` (writing the high word)
 for a zero-extending `(u64)(u32)x`: same low word, different high word. Invisible to every gate
 check (jal count, ref/header grep) and the `INCLUDE_ASM` gate build; surfaces only as a full-make
-ROM SHA-1 miss in the execution middle (same late-surfacing class as jal-count-mismatch S18 /
-wrong-lib-header S40).
+ROM SHA-1 miss in the execution middle (the same late-surfacing class as jal-count-mismatch /
+wrong-lib-header).
 
 **Trigger:** a clean-mirror flip (no hazard flagged) whose verbatim copy links fine but the ROM
 SHA-1 doesn't match, and the byte diff is isolated to one field's high word.
@@ -769,10 +769,11 @@ neighbors.
 **Provenance:** S44 (`osCreateThread`: `context.ra = (s64)(s32)__osCleanupThread` sign-extend, vs
 the old 2.0L upstream's `(u64)(u32)` zero-extend; sibling `sp`/`a0` already sign-extended). This
 divergence is one reason the project standardized on ultralib VERSION_J as the sole upstream.
+Late-surfacing analogues: jal-count-mismatch S18, wrong-lib-header S40.
 
 **Sub-cases / variants:**
 
-**S103 float-literal single-vs-double (classical FP reconstruction).** When a classical/mirror
+**Float-literal single-vs-double (classical FP reconstruction).** When a classical/mirror
 reconstruction adds a float comparison or clamp against a literal (`if (x < -32768.0)`), a **bare
 floating literal is `double`**: KMC GCC promotes the `f32` operand (`cvt.d.s`), compares as double
 (`c.lt.d`), and **loads the double constant from `.rodata`** (`lui at,0; ldc1`). The ROM, built from
@@ -796,16 +797,16 @@ breaking every code reloc into that range (10,853 ROM bytes diff for `rand`). Fu
 
 **Trigger:** `pick_target.py` flag `file-static`. **Static *functions* do not count:** a
 file-scope `static <type> <name>(...);` (proto/def) shares the mirror's TU and is no BSS hazard, so
-`has_file_scope_static` skips it (S54: sprintf's `static void* proutSprintf(...);` was a false flag
+`has_file_scope_static` skips it (sprintf's `static void* proutSprintf(...);` was a false flag
 that mis-routed a clean 2-fn mirror toward the classical loop). The detector strips
 `__attribute__((...))` before the declarator check so an attributed static *array*
-(`static OSMesg buf[N] __attribute__((aligned(8)));`) still flags. **S99: the scan runs on
-comment-STRIPPED text.** `FILE_STATIC_RE` anchors on `;\s*$`, so a trailing `/* ... */` after the
+(`static OSMesg buf[N] __attribute__((aligned(8)));`) still flags. **The scan runs on
+comment-stripped text.** `FILE_STATIC_RE` anchors on `;\s*$`, so a trailing `/* ... */` after the
 `;` (nupiinit.c's `static OSMesgQueue PiMesgQ __attribute__((aligned(8)));  /* PI message queue */`)
 silently defeated the match pre-fix; the same comment-strip un-suppressed `defines-data` (a
 `/* ... ( ... */` banner like `Copyright (C) 1997` falsely tripped the K&R-param guard, hiding every
-subsequent depth-0 global across the whole nusys band). **Also S99: `file-static` now unions over a
-c-combined pack's members** (like `defines-data` since S97): a SECONDARY member's file-scope static
+subsequent depth-0 global across the whole nusys band). **Also `file-static` now unions over a
+c-combined pack's members** (like `defines-data`): a secondary member's file-scope static
 (`nuContGBPakFwrite`'s `nusimgr` member) is a pack-level drop-static enabler the primary-only scan
 missed. Known gap: an *initialized*
 static (`static T x[] = {...};`) carries `=` and is invisible to the regex, so it is not flagged
@@ -816,7 +817,7 @@ then resolves to the splat-side global at the correct vram.
 
 **Sub-cases / variants:**
 
-**Uninitialized file-static is a drop-to-extern MIRROR, not a carve/classical spike (S87).** Be
+**Uninitialized file-static is a drop-to-extern mirror, not a carve/classical spike.** Be
 precise about what "BSS-layout-conflict" costs. An *uninitialized* file-scope static (`static T x;`,
 no `=`) is **pure `.bss`**: it occupies no ROM bytes (`.bss` is zero-filled at runtime, absent from
 the image), so it cannot shift the ROM. The only requirement is that the `.text` `%hi/%lo` relocs
@@ -830,19 +831,19 @@ is byte-identical → it banks atomically on the full-make SHA, exactly like an 
 uninitialized form (an `=`-bearing static is invisible to it), so a flagged `file-static` is already
 the pure-`.bss` kind. A **func-local** uninitialized `static` (S87 `vimgr` `retrace`) is the same:
 hoist it to a file-scope `extern` + place it (it would otherwise emit a local `.bss` symbol the linker
-places at the wrong address). Escalate to a `.data` **carve** (the `rand`/S61 playbook) ONLY when a
-static carries a **nonzero** initializer (real `.data` bytes that DO shift the image); `={0}` is still
+places at the wrong address). Escalate to a `.data` **carve** (the `rand`/S61 playbook) only when a
+static carries a **nonzero** initializer (real `.data` bytes that do shift the image); `={0}` is still
 `.bss`. (S87 `io/vimgr.c`: 6 file-statics + 2 globals + 1 func-local static, all dropped to externs,
 0 carve, first-build SHA match; the carry-over's "heavy `.bss` carve" framing was the false-flag this
 retires.)
 
-**Pre-curated `.bss` static ⇒ reference the ghidra name, NO symbol add (S142).** The drop-to-extern
+**Pre-curated `.bss` static ⇒ reference the ghidra name, no symbol add.** The drop-to-extern
 above has two naming sub-cases, set by whether the placed `.bss` symbol is already named: (a)
 **unnamed** (only a splat `D_<vram>`, in neither name file) ⇒ drop to `extern <T> <upstream_name>;`
-AND add `<upstream_name> = 0x<vram>; // size:0x<n>` to `symbol_addrs.txt` (S81 `siacs.c`; S141
+and add `<upstream_name> = 0x<vram>; // size:0x<n>` to `symbol_addrs.txt` (S81 `siacs.c`; S141
 lib_memory `audio_heap`). (b) **pre-curated** (the vram already carries a curated data name in
-`ghidra_symbols.txt`) ⇒ drop to `extern <T> <ghidra_name>;` and RENAME the active-branch body
-references to that name, with **NO `symbol_addrs` add** (a same-vram add would dup-clash the existing
+`ghidra_symbols.txt`) ⇒ drop to `extern <T> <ghidra_name>;` and rename the active-branch body
+references to that name, with **no `symbol_addrs` add** (a same-vram add would dup-clash the existing
 ghidra entry, the disjoint-files rule). The rename is the forced verbatim divergence the `.text`
 relocs require: the body's `lui/%lo` must resolve to the placed vram, so the C must spell the symbol
 exactly as splat names it. S142 `aud_samples.c`: `frame_samples{,_min,_max}`/`extra_samples` were
@@ -850,27 +851,27 @@ pre-curated `g_mus_frame_samples`@0x800E72C0 / `_min`@72C4 / `_max`@72C8 / `g_mu
 so the drop was 4 `extern u32 g_mus_*;` + renaming the `#else SUPPORT_NAUDIO` body, zero symbol adds,
 `.o .bss`=0, first-build SHA match.
 
-**hasm referrers need a byte-neutral symbol sync (S117).** A BSS drop-to-extern (or recover-extern)
-names a `D_<vram>` that `make extract` re-labels everywhere EXCEPT `hasm` files (the entry stub,
+**hasm referrers need a byte-neutral symbol sync.** A BSS drop-to-extern (or recover-extern)
+names a `D_<vram>` that `make extract` re-labels everywhere except `hasm` files (the entry stub,
 vendored asm), which are never re-extracted. If a `hasm` referenced the old `D_<vram>`, naming the
 symbol orphans that reference (`undefined reference to D_<vram>` at link). S117: naming
 `nuContNum`=0x8010C2D0 broke `src/entry/entry.s`, which loads that address as the `_start` initial
-`$sp` (the boot stack top IS `&nuContNum`, the highest BSS global, so the boot stack grows down through
+`$sp` (the boot stack top **is** `&nuContNum`, the highest BSS global, so the boot stack grows down through
 the lower BSS and abandons it before `nucontmgr` runs). Fix: a byte-neutral `D_<vram>`->`<name>` edit in
 the `hasm` (same address => identical `%hi/%lo`, ROM SHA-1 unchanged). Anticipate it at the gate: grep
-`src/**/*.s` for the `D_<vram>` of each to-be-named drop-def/recover-extern symbol BEFORE the build, so
+`src/**/*.s` for the `D_<vram>` of each to-be-named drop-def/recover-extern symbol before the build, so
 the sync is planned, not a mid-build link error. (A [`caller-evict`](#caller-evict) sub-case for data
 symbols.)
 
-**The `drop-static-mirror:<n>bss` re-frame tag (S87).** When a `coddog-mirror:<file>@≥99` (non-audio)
+**The `drop-static-mirror:<n>bss` re-frame tag.** When a `coddog-mirror:<file>@≥99` (non-audio)
 is on the row, a `file-static` is present, and there is **no** carve signal (`rodata-literal` /
 `data-static` / `rodata-jtbl`), `pick_target.py` appends `drop-static-mirror:<n>bss`: the leading
 verdict that the co-listed `file-static` + `defines-data` + `refs-unplaced` flags are **one
 drop-to-extern enabler** (the pure-`.bss` case above), not the scary 4-flag carve cluster they read as.
 `<n>` counts the detector-visible defined `.bss` symbols (file-scope static lines + `defines-data`
 globals); a func-local static is a known under-count, recovered at the gate with the rest. **A second
-under-count class (S115): a file-scope UNINITIALIZED non-static global that the upstream header already
-declares `extern`** (S115 `nugfxthread.c`'s `nuGfxMesgQ`) is a `.bss` drop-def but is NOT in the
+under-count class: a file-scope uninitialized non-static global that the upstream header already
+declares `extern`** (S115 `nugfxthread.c`'s `nuGfxMesgQ`) is a `.bss` drop-def but is not in the
 `<n>bss` tally — it carries no `=` (so `defines-data`'s K&R-guarded init scan skips it) yet is not a
 file-scope `static` either, so it falls between both detectors and surfaces only under `refs-unplaced`.
 The gate's per-symbol `refs-unplaced` recovery still places it, so the tally undercount is graceful
@@ -880,13 +881,13 @@ flags stay (the gate's per-symbol recovery + `seed_points` read them); the tag t
 a **seed-only N-symbol mirror**. A nonzero-initialized global that slips the gate degrades gracefully
 to the carve playbook on the SHA miss, never a silent wrong bank.
 
-**Batch-adding a pack's recovered statics transiently reds the build (S99; data-symbol caller-evict).**
+**Batch-adding a pack's recovered statics transiently reds the build (data-symbol caller-evict).**
 When drop-static-mirroring a multi-member pack one member at a time, add each member's recovered `.bss`
 statics to `symbol_addrs.txt` **with (or just before) writing that member's body**, not all up front.
 A static added while its consuming member is still an `INCLUDE_ASM` stub **evicts the asm stub's
 sub-field auto-labels** (`SramHandle = 0x800F7580` killed the still-asm `nupiinitsram` stub's
 `D_800F758C`/`D_800F7584`/… → undefined-reference link errors), exactly like the `#caller-evict` /
-`make-sync-names` eviction but for a DATA symbol. It is benign and resolves the moment the consuming
+`make-sync-names` eviction but for a data symbol. It is benign and resolves the moment the consuming
 body lands (the C references `SramHandle` directly, no `D_` labels), but a red build between the symbol
 add and the last body is expected, not a regression. (S99 `nuPiInitSram`: added all 3 pack statics at
 once, red until both pi bodies landed, then SHA-clean.)
@@ -894,7 +895,8 @@ once, red until both pi bodies landed, then SHA-clean.)
 **Provenance:** `rand` (file-scope-static pre-flight); `sprintf` (static-function false-flag, S54);
 `io/vimgr.c` (S87: uninitialized file-static = pure-`.bss` drop-to-extern mirror, the
 `drop-static-mirror` tag); `nupiinit`/`nupiinitsram` (S99: 3-file c-combined drop-static pack;
-comment-strip + member-union detector fix; batch-add transient-red note).
+comment-strip + member-union detector fix; batch-add transient-red note); `defines-data`
+member-union precedent (S97).
 
 ---
 
