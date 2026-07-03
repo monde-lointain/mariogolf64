@@ -81,14 +81,14 @@ Ghidra MCP is used inline at seed time. For each target function:
    e. Before declaring a clean mirror, reconcile the upstream's call and data-ref list (including one
       level of macro expansion) against the name files, and handle any flagged hazard via the index
       below.
-   - **NOTE, libultra source pin.** libultra source is `~/development/repos/ultralib` (gcc.mk /
+   - **Note, libultra source pin.** libultra source is `~/development/repos/ultralib` (gcc.mk /
      KMC-N64 profile, `-DBUILD_VERSION=VERSION_J`); use it, not `libultra_modern` (deprecated 2.0L,
      casts diverge; it is an `additional working dir` but is not the source). This pin holds for both
      the C mirror and the hand-asm `intrinsic-likely:<tu>.s` asm-mirror
      (`docs/hazards.md#asm-mirror-vendoring`): the project mirrors ultralib's `gcc.mk` profile
      (`LIBULTRA_CFLAGS` for C, `LIBULTRA_ASFLAGS` for vendored asm TUs, both in `mk/libultra.mk`).
      libkmc is `~/development/repos/libkmc`; libnusys is the n64sdkmod nusys tree. The vendored
-     `include/libultra/**` headers can DIVERGE from this pin (an inverted/wrong-value macro):
+     `include/libultra/**` headers can diverge from this pin (an inverted/wrong-value macro):
      `tools/audit_libultra_headers.py` macro-diffs them vs ultralib (see
      `docs/hazards.md#vendored-header-inversion`).
 
@@ -98,31 +98,31 @@ Ghidra MCP is used inline at seed time. For each target function:
      (`disassemble_function`) is ground truth, not the Ghidra decompile (see
      `docs/hazards.md#decompile-vs-asm-authority`). Use the decompile for shape and types; translate
      the logic from the instruction listing.
-     - **asm-first seed fast-path (S148; MCP-independent, for small fns ~<40 instrs).** The splat
+     - **asm-first seed fast-path (MCP-independent, for small fns ~<40 instrs).** The splat
        `.s` under `asm/nonmatchings/<seg>/<func>/<func>.s` is the same ground truth as
-       `disassemble_function`, so a small classical fn does NOT need MCP: hand-translate straight from
+       `disassemble_function`, so a small classical fn does not need MCP: hand-translate straight from
        the `.s` (resolve callee/global names + types from the name files / call-site arg setup),
        write the body directly into `src/<seg>.c` (declare each `extern`; auto `func_`/`D_` symbols
        resolve from their home subseg), and gate on the full-`make` ROM SHA-1. Skip
        seed_c.py/base.c/decomp_loop entirely unless the first build misses, then drop into the
        isolated Iterate loop below. Use this when Ghidra MCP is unavailable (`list_instances` empty)
-       or the fn is small enough that the decompile adds no shape/type value. S148 banked a 2-fn
-       176B pack this way, first build, MCP down.
+       or the fn is small enough that the decompile adds no shape/type value. The fast-path banked a
+       2-fn 176B pack this way, first build, MCP down (S148).
    - **Iterate** at most 25 times: `venv/bin/python3 tools/decomp_loop.py --func <placeholder>`, then
      parse the JSON. `score == 0` is a candidate; 5 consecutive `compile_ok == False` means a broken
      seed, so stop; otherwise read the top mismatches, edit `base.c`, and re-run. Run the permuter
      (`./run-permuter.sh`) only at `percent >= 0.97`. For a near-miss whose only diff is which scratch
      register holds an intermediate, see `docs/hazards.md#register-reuse-nudge-classical-regalloc`.
-     Before the permuter, rule out two source-typing fixes that both close WITHOUT it (S162): a
+     Before the permuter, rule out two source-typing fixes that both close without it (S162): a
      scheduling miss on a global load/store (pipelined vs strict-`$f0`-pairs, or a hoisted `& K` flag
      load) is often the `docs/hazards.md#mem-in-struct-scheduling-lever` (retype the fixed global as a
-     struct/array member); and a full-make SHA-miss where a same-file SIBLING reads a wrong data
+     struct/array member); and a full-make SHA-miss where a same-file sibling reads a wrong data
      address is `docs/hazards.md#short-text-shifts-flowing-bss` (a length miss shifts the flowing
-     `.bss`, so fix the SHORT fn, not the sibling).
+     `.bss`, so fix the short fn, not the sibling).
    - **Spot-check** (only at score 0): byte-level `cmp` of the in-tree compiled `.text` against the
      isolated one. The `cmp` is the truth, not the mnemonic diff (see
      `docs/hazards.md#assembler-differences--byte-cmp-spot-check`). A non-zero score with empty
-     `top_mismatches` AND `match_count == total_rows` is an isolation artifact (struct-field reloc
+     `top_mismatches` and `match_count == total_rows` is an isolation artifact (struct-field reloc
      addend, or extern HI/LO16), not a near-miss: go straight to the in-tree spot-check and full-make
      SHA-1; do not iterate C or reach for the permuter (see `docs/hazards.md#isolated-compile-caveat`).
    - **Finalize** (only if the spot-check passes): inline the body into `src/<seg>.c`, drop the
@@ -134,8 +134,8 @@ Ghidra MCP is used inline at seed time. For each target function:
    a. Give it its curated Ghidra name: add to `symbol_addrs.txt`, rename in the body, re-`make`.
    b. On `git commit`, stage the `make extract`-regenerated artifacts too (`undefined_syms_auto.txt`
       and `mariogolf64.ld`): they change on a subseg flip or `symbol_addrs.txt` add and must travel
-      with the commit, or the regen bleeds into the next sprint's dirty tree (S85 to S86: a
-      `D_`-to-named BOOT_GLOBALS regen left uncommitted surfaced as a stray diff at the next gate).
+      with the commit, or the regen bleeds into the next sprint's dirty tree (a `D_`-to-named
+      BOOT_GLOBALS regen left uncommitted surfaced as a stray diff at the next gate, S85 to S86).
       `git status` should be clean after commit.
    c. Append a standup line to `SPRINT.md`, and record the run's numbered "Suggested workflow
       improvements" into the `SPRINT.md` buffer; apply these at `/sprint-review` only, not
@@ -144,11 +144,11 @@ Ghidra MCP is used inline at seed time. For each target function:
 A function that locks below `0.97 percent`, needs the permuter, or hits a BSS-layout or alignment
 wall is a spike: note it, carry its file to `BACKLOG.md ## Carry-overs`, and move on. Hold the DoD
 firm; a spike is carried, not banked. **Before declaring a same-TU inline mismatch (a callee my build
-inlines but the ROM `jal`s, or the reverse) a permanent carry, BUILD the matched reference games and
-compare the source STRUCTURE** (defn order, separate-helper vs hand-inline, config flags), not just the
-bodies: S147 twice wrongly wrote off `__MusIntMain` as a compiler/same-TU wall, and both fell to a
-structural fix (a drain-before-dispatch helper + the `(s32)(a-b)<0` signed compare) found by
-disassembling PPL's byte-exact `-O3` build. See
+inlines but the ROM `jal`s, or the reverse) a permanent carry, build the matched reference games and
+compare the source structure** (defn order, separate-helper vs hand-inline, config flags), not just the
+bodies: `__MusIntMain` was twice wrongly written off as a compiler/same-TU wall, and both times
+fell to a structural fix (a drain-before-dispatch helper + the `(s32)(a-b)<0` signed compare) found
+by disassembling PPL's byte-exact `-O3` build (S147). See
 `docs/hazards.md#same-tu-inline-mismatch-definition-order--cross-tu-split`. The increment (the
 `src/<seg>.c` file) banks only when its last
 `INCLUDE_ASM` stub is gone.
@@ -233,15 +233,15 @@ the summary.
   runs as a 1-increment sprint: decompose it (split the subseg at the upstream-file or function
   boundary) or pull a scaffolding enabler as the goal instead. Applied at the `/sprint-plan` gate. This prevents an all-or-nothing
   bank stall. Expect it to fire once the mirror band is mined out and classical units dominate.
-  - **Small classical pack exemption (S148; NOW folded into the ranker at S155).** A `one-tu`
+  - **Small classical pack exemption (now folded into the ranker).** A `one-tu`
     classical pack is mechanically non-decomposable (non-16-aligned inner boundaries, or the fns share
     a TU's rodata/data, so you cannot independently compile half a one-tu), so the 8-gate's "must
-    decompose" verdict is a false fire: it banks atomically as one vertical slice. **S155
-    (`tools/pick_target.py seed_points`) folds this into the `pts` column:** a one-tu classical pack of
-    `nfns<4` now SEEDS 3/5/8 by size (tiny <256 B → 3, mid → 5, big >=768 B → 8; deweight to 3 if
-    `jal-free`; +1 if `rodata-straddle`), NOT the old flat 8/13. So the gate no longer fires on these,
-    and this bullet is now the BANKING-BEHAVIOR note (bank atomically, or a quick spike; no
-    permuter-class control flow) rather than a pts workaround. The residual manual override the
+    decompose" verdict is a false fire: it banks atomically as one vertical slice. **The ranker folds
+    this into the `pts` column** (`tools/pick_target.py seed_points`): a one-tu classical pack of
+    `nfns<4` now seeds 3/5/8 by size (tiny <256 B → 3, mid → 5, big >=768 B → 8; deweight to 3 if
+    `jal-free`; +1 if `rodata-straddle`), not the old flat 8/13 (S155). So the gate no longer fires
+    on these, and this bullet is now the banking-behavior note (bank atomically, or a quick spike;
+    no permuter-class control flow) rather than a pts workaround. The residual manual override the
     ranker still leaves: a big/huge or 4+fn one-tu pack the ranker prices 8/13 that you nonetheless
     know banks atomically (it can't decompose) — run it seed-only and record it in
     `SPRINT.md ## Estimate`. The historical a1 (`<256B AND <=2fn`) / a2 (`0-jal size-agnostic`) branches
@@ -249,66 +249,66 @@ the summary.
     re-anchor). S148 `overlay_10/func_ovl10_801F4A40` (2fn, 176B, one-tu) and S150 `main/func_80029250`
     (`cfb_setup`+`cfb_set_num`, 2fn, 496B, one-tu, 0-jal) both banked seed-only; both now seed 3/5 (not
     13) automatically.
-  - **Verbatim-mirror exemption (S64; generalized S69).** A seed-8/13 increment may run as a normal
-    1-increment sprint when ALL of these hold:
+  - **Verbatim-mirror exemption.** A seed-8/13 increment may run as a normal
+    1-increment sprint when all of these hold:
     - (a) `regime: mirror` plus a verbatim copy of a single upstream file. A drop-def mirror
-      qualifies: the function bodies are byte-verbatim, and only the file-scope data DEFS become
+      qualifies: the function bodies are byte-verbatim, and only the file-scope data defs become
       `extern` decls, which emit nothing, so it banks atomically exactly like a pure `cp` (S86
       `os/timerintr.c`, pts-8 single-file-pack, banked first-try seed-only). A `.data`-carve mirror
-      qualifies even more directly: the data DEFS STAY defined and the `.data` is carved to its placed
+      qualifies even more directly: the data defs stay defined and the `.data` is carved to its placed
       vram, so it is a pure verbatim `cp` of the whole file (S116 `nucontgbpakmgr.c`, pts-8
       single-file-pack, banked first-try seed-only, the first libnusys `.data` carve).
     - (b) The decompose path is mechanically blocked: the increment is a `single-file-pack` (every
-      member fn comes from ONE upstream `.c`), so there is no inter-file boundary to split at and an
+      member fn comes from one upstream `.c`), so there is no inter-file boundary to split at and an
       intra-file split cannot be independently mirrored. This holds regardless of inner-boundary
       16-alignment: S64 `lookathil`'s inner boundary was `non16align`, S69 `lookat`'s was 16-aligned,
       and both were decompose-blocked (you cannot mirror half a source file). `pick_target.py`'s
-      `single-file-pack:<n>fn[…]` tag (S67) is the signal; the old `non16align`-on-the-inner-boundary
+      `single-file-pack:<n>fn[…]` tag is the signal (S67); the old `non16align`-on-the-inner-boundary
       test was one mechanical case of it, not the rule.
     - (c) Every callee is placed and all names are curated (the "no residual variance" condition).
 
-    The gate's all-or-nothing concern guards CLASSICAL iteration stalls; a verbatim single-file mirror
+    The gate's all-or-nothing concern guards classical iteration stalls; a verbatim single-file mirror
     banks atomically (or is a quick spike), so a size-only 8/13 is a false fire, the same false-flag
     class the hazard detectors keep retiring. Document the exemption in `SPRINT.md ## Estimate`; the
     increment stays seed-only (S64 `gu/lookathil.c` + S69 `gu/lookat.c`, both pts-13, banked
     first-try). The exemption never covers classical or multi-file packs (a `pack` or `c-combined` of
     2 or more distinct upstream files decomposes at the file boundary as usual).
-    - **Sub-100 coddog hedge (S121; corrected S127).** A `single-file-pack` with a sub-100 coddog score
+    - **Sub-100 coddog hedge.** A `single-file-pack` with a sub-100 coddog score
       (e.g. `@99.99`, the same near-verbatim tell that flags block-reorders) still qualifies for the
-      exemption, but budget a **body-divergence diagnosis pass**: the "banks atomically OR is a quick
+      exemption, but budget a **body-divergence diagnosis pass**: the "banks atomically or is a quick
       spike" assumption can be violated by a per-fn divergence (block-reorder, or a **game-modified
       body** — an extra branch/store the literal upstream lacks) that turns the "quick spike" into a
-      PARTIAL bank (S121 `nucontrmbmgr.c`: 8/9 banked C, 1 carried as `INCLUDE_ASM`). Hedge the estimate
+      partial bank (S121 `nucontrmbmgr.c`: 8/9 banked C, 1 carried as `INCLUDE_ASM`). Hedge the estimate
       "<=1 re-attempt" and expect a per-file score of 0 pt if the file ends partial (the matched-fn
       count is the value signal, not the file point). **Prove the body emits the target's exact
       stores + values before concluding "compiler wall":** the S121 carry was misframed as an
-      unbankable `#cross-jump-tail-merge` for 5 sprints, then banked S127 with a one-branch FORCESTOP
+      unbankable `#cross-jump-tail-merge` for 5 sprints, then banked S127 with a one-branch force-stop
       fix (`state = STOPPED` on `osMotorInit` error). See `#cross-jump-tail-merge`.
-    - **coddog 99.99 == STRUCTURE, not bytes; the exemption-GUARD (S123).** A `coddog-mirror:<f>@99.99`
-      can mask a HEAVILY game-customized file where MOST bodies diverge, not just a block-reorder
+    - **coddog 99.99 == structure, not bytes; the exemption-guard.** A `coddog-mirror:<f>@99.99`
+      can mask a heavily game-customized file where most bodies diverge, not just a block-reorder
       (S123 `nusched.c`: a game scheduler that shares only the nusys skeleton). The verbatim-mirror
       exemption does not apply when the pack carries a **customization tell**: a `jal` to a non-lib
-      `func_<vram>` game callee (a callee that is not `os*`/`nuSc*`/`al*`/lib), OR a large
+      `func_<vram>` game callee (a callee that is not `os*`/`nuSc*`/`al*`/lib), or a large
       `jal-count-mismatch` not explained by a known macro/version artifact. Those signal pervasive
-      per-fn divergence -> route to the CLASSICAL track with the **mixed bank-stock-carry-custom**
-      plan (next bullet), not a seed-only atomic mirror. Verify BODIES before trusting a 99.99 row:
+      per-fn divergence -> route to the classical track with the **mixed bank-stock-carry-custom**
+      plan (next bullet), not a seed-only atomic mirror. Verify bodies before trusting a 99.99 row:
       diff the asm against the upstream for the heavy functions, and run the nusys/libultra version
       triage (`docs/hazards.md#upstream-mirror-pattern`) before concluding the divergence is custom.
       (pick_target.py automation to price the non-lib-`func_`-callee tell is a tracked follow-up;
       until then the gate applies this guard by reading the pack's asm callees.)
-    - **New-audio-sub-lib band-open is a SMALL incremental enabler when the n_audio_sc header DAG is
-      shared (S141).** S140 hedged "libmus needs a full header-vendoring sprint first + reset
-      body-divergence to FULL"; in practice libnaudio had pre-paid the shared audio header base
+    - **New-audio-sub-lib band-open is a small incremental enabler when the n_audio_sc header DAG is
+      shared.** An earlier hedge said "libmus needs a full header-vendoring sprint first + reset
+      body-divergence to full"; in practice libnaudio had pre-paid the shared audio header base
       (libmus.h, n_libaudio_sc.h, libaudio.h, the SC internal hdrs + the base `-I include/libmus
       include/libnaudio`), so opening libmus was ~3 small headers + a 2-line `mk/libmus.mk` profile +
       a mechanical `pick_target.py` add, and the `@100.00` leaf `lib_memory.c` banked first-build
-      seed-only. Reframe a sibling audio lib that SHARES the n_audio_sc header DAG as a CHEAP
-      incremental enabler (each `.c` vendors only its own private `aud_*.h` at bank time), NOT a full
-      header sprint. Keep the body-divergence hedge PER-CODDOG-SCORE — `@100.00` = byte-identical,
-      trust the verbatim mirror; `@99.99` = the diagnosis-pass / exemption-guard above — not a
-      blanket-FULL-by-lib reset.
-    - **Mixed mirror+INCLUDE_ASM partial bank is first-class (S121 generalized, S123).** A
-      `coddog-mirror` file can be PARTIALLY stock: some fns byte-match the upstream, others are
+      seed-only (S140 hedge, S141 reality). Reframe a sibling audio lib that shares the n_audio_sc
+      header DAG as a cheap incremental enabler (each `.c` vendors only its own private `aud_*.h` at
+      bank time), not a full header sprint. Keep the body-divergence hedge per-coddog-score — `@100.00`
+      = byte-identical, trust the verbatim mirror; `@99.99` = the diagnosis-pass / exemption-guard
+      above — not a blanket-full-by-lib reset.
+    - **Mixed mirror+INCLUDE_ASM partial bank is first-class** (S121 generalized to S123). A
+      `coddog-mirror` file can be partially stock: some fns byte-match the upstream, others are
       game-customized. The right play is **bank-stock-carry-custom** — write the stock fns as C and
       keep the customized fns as `INCLUDE_ASM` in the same `src/<seg>.c` (the ROM stays green; the
       file is partial / not md5-candidate until the customized fns are classically decompiled). Plan
@@ -361,10 +361,10 @@ below).
   Leave the segment and memory-map structure, `mariogolf64.ld`, and segment boundaries unchanged.
   Subseg flips, multi-file splits, and the `make extract` that regenerates the scaffold are gate
   actions (or inline when a split is needed mid-flight).
-- **Game/overlay-code path convention (S148; the classical endgame).** A flipped non-lib subseg is
+- **Game/overlay-code path convention (the classical endgame).** A flipped non-lib subseg is
   pathed `<tree>/<stem>`: main-segment game code under `main/<stem>` (e.g. `main/func_80099490`),
   overlay code under `overlay_<N>/<stem>` (e.g. `[0x1508E0, c, overlay_10/func_ovl10_801F4A40]` ->
-  `src/overlay_10/func_ovl10_801F4A40.c`), `<stem>` being the lead-fn placeholder (`func_<vram>`).
+  `src/overlay_10/func_ovl10_801F4A40.c`), `<stem>` being the lead-fn placeholder (`func_<vram>`) (S148).
   No per-tree `mk/*.mk` fragment is needed: the generic `mk/src.mk` rule (`%` spans slashes) builds
   any `src/<tree>/%.c` with the default **-O2 game profile** (`C_PROFILE_CFLAGS = $(CFLAGS)`; the
   `mk/lib*.mk` overrides are more-specific and win only for their own `src/lib*/` trees). So a brand-
@@ -372,26 +372,26 @@ below).
   F3DEX2 profile, and a boot/SDK-glue TU an -O0 override — the two mk exceptions below). Overlay vram
   is reused across overlays (>=0x801F4A30 is ambiguous; see the Ghidra-map memory), so seed overlay
   fns by ROM offset / the splat `.s`, not MCP-by-vram.
-  - **The `main` tree needs the F3DEX2 build profile for display-list code (S151).** MG64 is F3DEX2
+  - **The `main` tree needs the F3DEX2 build profile for display-list code.** MG64 is F3DEX2
     (gspF3DEX2.fifo), so a `src/main/` game TU that builds display lists needs `-DF3DEX_GBI_2` to get
     the F3DEX2 GBI opcodes (`G_RDPHALF_1=0xE1`/`G_RDPHALF_2=0xF1`, not F3DEX `0xB4`/`0xB3`). This is a
-    STANDING profile (not a per-file override like -O0): `mk/main.mk` sets
+    standing profile (not a per-file override like -O0): `mk/main.mk` sets
     `MAIN_CFLAGS = $(CFLAGS) -DF3DEX_GBI_2` and `$(BUILD_DIR)/$(SRC_DIR)/main/%.o: C_PROFILE_CFLAGS =
-    $(MAIN_CFLAGS)` (included after `mk/libmus.mk`, before `mk/src.mk`). Non-DL main/ code is
+    $(MAIN_CFLAGS)` (included after `mk/libmus.mk`, before `mk/src.mk`) (S151). Non-DL main/ code is
     unaffected (the define only changes gbi.h/sptask.h consumers). See
     `docs/hazards.md#display-lists` (the DL reconstruction workflow + the mask-narrowing lesson).
-  - **EXCEPTION — nusys/SDK-template main-segment code goes to its library tree, not `main/` (S149).**
+  - **Exception: nusys/SDK-template main-segment code goes to its library tree, not `main/`.**
     A main-segment subseg that is actually a game-embedded copy of an SDK file (the `idle=nuboot`
     coddog tell on `nuboot.c`; a `nuSc*`/`nu*` template) is pathed under its library tree,
     `libnusys/<file>` (not `main/<stem>`), so it sits with the rest of that library. The placement is
     unchanged by this: libnusys subsegs already interleave the main segment by path qualifier, so the
-    carve is a yaml path-qualifier edit ONLY (`[0x.., c, main/<stem>]` -> `[0x.., c, libnusys/<file>]`),
+    carve is a yaml path-qualifier edit only (`[0x.., c, main/<stem>]` -> `[0x.., c, libnusys/<file>]`),
     the `.text` stays at its vram. (`pick_target.py` could route the `idle=nuboot`/nusys-template tell
     to the library path — a tracked follow-up; for now the gate applies this by reading the coddog
     tag.) S149 carved `main/main` -> `libnusys/nuboot`.
-  - **A per-FILE -O0 override is the one mk edit a game/SDK-glue tree may need (S149).** Most game/
+  - **A per-file -O0 override is the one mk edit a game/SDK-glue tree may need.** Most game/
     overlay code is -O2 (above), but a boot/SDK-glue TU can be -O0 (the codegen tell: fp kept, no CSE,
-    unused-arg spill; see `docs/hazards.md#-o0-bootsdk-glue-file-profile`). Add a FILE-specific
+    unused-arg spill; see `docs/hazards.md#-o0-bootsdk-glue-file-profile`). Add a file-specific
     override (`$(BUILD_DIR)/$(SRC_DIR)/<tree>/<file>.o: C_PROFILE_CFLAGS := $(subst -O2,-O0,$(CFLAGS))`),
     never a `<tree>/%.o` pattern (the siblings stay -O2). S149 `libnusys/nuboot.o` overrode to -O0 in
     `mk/libnusys.mk`, beating that fragment's `libnusys/%.o` -O2 pattern.
@@ -451,7 +451,9 @@ below).
 - **Prompt authoring.** Every prompt surface in this project (`CLAUDE.md`, `docs/*`,
   `.claude/commands/*`, and the artifact templates) follows `PROMPT_GUIDELINES.md` at the project root
   when created or modified. That file is a managed copy of the canonical guide; re-sync its
-  `Prompting Claude Opus 4.8` section when Anthropic updates the upstream.
+  `Prompting Claude Opus 4.8` section when Anthropic updates the upstream. `docs/prompt-style.md` is
+  the project-specific application of those guidelines to these surfaces; its conformance checklist is
+  the gate to run before committing a prompt-surface edit.
 
 ### C naming (compact; full guide in `docs/coding-style.md`)
 
@@ -520,7 +522,7 @@ When `pick_target.py` flags a hazard (or a match shows its symptom), read the ma
 | `game-region-mirror:0x<vram>` | #game-region-mirror--o2-profile |
 | `game-embedded:0x<vram>` | #game-region-mirror--o2-profile |
 | clean asm-first seed, full-make SHA-miss, build .o shows fp-kept + no-CSE + arg-spill | #-o0-bootsdk-glue-file-profile |
-| build SHA-miss, suspect compile FLAGS (opt/-g/-fdelayed-branch) not the C | #profile-probe |
+| build SHA-miss, suspect compile flags (opt/-g/-fdelayed-branch) not the C | #profile-probe |
 | public-API rename "resists" (`__*` symbol), vendored header macro may be inverted vs ultralib | #vendored-header-inversion |
 | libultra leaf, bare std header | #per-library-standard-c-header-isolation |
 | match locks ~0.9 on a lib target | #compile-profiles-libkmc--o-libultra--o3 |
@@ -553,16 +555,16 @@ When `pick_target.py` flags a hazard (or a match shows its symptom), read the ma
 | clean per-fn match, full-make SHA-miss, hundreds of scattered 1-byte `%lo` diffs all `base-4` (decomposed one-tu rodata split) | #decomposed-one-tu-rodata-alignment-split |
 | ROM reads `$ra` (reg 31) as a printf/log arg; `__builtin_return_address(0)` emits a stack-slot `lw` | #capturing-ra-return-address-as-a-call-argument |
 | sentinel (`!=-1`) array walk matches except a 1-instr preheader swap (`move base` vs `li` const in the entry-`beq` delay slot, or a `-1` hoisted to an outer loop) | #indexed-vs-pointer-loop-strength-reduction |
-| classical fn STRUCTURALLY correct (rows align) but locks HIGH on a pervasive hard-reg permutation (`i:s4↔s5`) + spill-slot order + scheduling | #pervasive-regalloc-classical-main |
+| classical fn structurally correct (rows align) but locks high on a pervasive hard-reg permutation (`i:s4↔s5`) + spill-slot order + scheduling | #pervasive-regalloc-classical-main |
 | `void` classical fn mis-allocates at loop-entry/delay-slot, resists every body lever | #return-type-is-load-bearing |
-| struct-array fn byte-matches with per-field base symbols but NOT the combined struct (link-identical) | #struct-access-folding-changes-scheduling |
+| struct-array fn byte-matches with per-field base symbols but not the combined struct (link-identical) | #struct-access-folding-changes-scheduling |
 | classical `switch(x)` dispatch via a compiler jump table (`jtbl_<vram>`, `sltiu`+`jr $v0`), esp. w/ sparse inner cases or `a==K1\|\|K2` | #switch-jtbl-dispatch |
 | ROM cond-branch is plain `beqz`+`li v0,CONST`+`move v0,<scratch>` but build emits branch-likely `beqzl` skipping the lone `li v0,CONST` (return-var coalesced to v0) | #register-reuse-nudge-classical-regalloc |
-| classical fn's global load/store schedules differently (build pipelines indep load-stores the ROM keeps strict-`$f0`-pairs, OR hoists a `& K` flag load past a pointer store the ROM keeps late+`nop`) | #mem-in-struct-scheduling-lever |
-| classical fn full-make SHA-miss AND a same-file SIBLING reads wrong data addr (`%lo` off a fixed delta, whole `0x8010xxxx` .bss region shifted) | #short-text-shifts-flowing-bss |
+| classical fn's global load/store schedules differently (build pipelines indep load-stores the ROM keeps strict-`$f0`-pairs, or hoists a `& K` flag load past a pointer store the ROM keeps late+`nop`) | #mem-in-struct-scheduling-lever |
+| classical fn full-make SHA-miss and a same-file sibling reads wrong data addr (`%lo` off a fixed delta, whole `0x8010xxxx` .bss region shifted) | #short-text-shifts-flowing-bss |
 | classical constant-dispatch (small selector to CONST results via a shared return var; ROM per-case `beql cond,RETURN`) locks pervasive BB-layout, resists if-else/switch/ternary/goto-end, lone `if(x==K)v=CONST` branchless-if-converts | #goto-dispatch-branch-toward-vs-branchless |
 | classical call result the ROM holds in `$a0` (`move a0,v0` / `move v0,a0` bookends) but build coalesces into `$v0` (shorter); distinct-var/extra-use levers fail | #call-result-a0-vs-v0-single-allocno |
-| pervasive classical BB-layout/regalloc/scheduling miss resists every idiom AND the permuter plateaus | #compiler-source-fan-out-escalation-above-the-permuter |
+| pervasive classical BB-layout/regalloc/scheduling miss resists every idiom and the permuter plateaus | #compiler-source-fan-out-escalation-above-the-permuter |
 | structural-complete regalloc miss = which value wins an earlier caller-saved reg; before "irreducible" | #loop-weight-and-live-length-regalloc-steering |
 | tempted to structure/clean a matched goto-loop fn's loops; zero-goto rewrite attempt | #loop-weight-and-live-length-regalloc-steering |
 | permuter "best" on a goto-loop fn beats the hand-derived structural floor by a suspicious margin | #permuter-goto-backedge-liveness-unsound |
