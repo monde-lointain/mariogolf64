@@ -102,23 +102,24 @@ plus a `pick_target.py` count).
 
 ## Step 5b, estimate the sprint (story points) + the 8-point gate
 
-Story-point velocity is live: the v1 seed everyday, plus the v2 realized tier on the classical track
-since Sprint 11 (mirror sprints stay seed-only). Fibonacci 1, 2, 3, 5, 8, 13; current
-`regime: mirror`. See `VELOCITY.md` for the rules and anchors. For the chosen increment:
+Story-point velocity is live. Run the v1 seed every sprint. Add the v2 realized tier on the
+classical track only; the mirror track stays seed-only (the tier has been active since Sprint 11).
+The scale is Fibonacci 1, 2, 3, 5, 8, 13, and the current phase is `regime: mirror`. See
+`VELOCITY.md` for the rules and anchors. For the chosen increment:
 
 1. **Seed** is the `pts` column from the Step 1 table (deterministic). For a cluster, the committed
    seed is the sum of its files' `pts`. A `blk` seed is an un-pickable needs-header (a DoR reject):
    swap the increment, do not commit it.
-2. **8-point gate.** A committed 8 or 13 must not run as a normal 1-increment sprint: decompose it
-   (split the subseg at the upstream-file or function boundary) or pull a scaffolding enabler as the
-   sprint goal instead. This prevents an all-or-nothing bank stall. (Expect this gate to fire once the
-   mirror band is mined out and classical units dominate.) The verbatim-mirror exemption in
+2. **8-point gate.** Do not run a committed 8 or 13 as a normal 1-increment sprint. Instead
+   decompose it (split the subseg at the upstream-file or function boundary), or pull a scaffolding
+   enabler as the sprint goal, which prevents an all-or-nothing bank stall. Expect this gate to fire
+   once the mirror band is mined out and classical units dominate. The verbatim-mirror exemption in
    `CLAUDE.md ## Story points` lets a single-file-pack mirror run seed-only despite an 8/13 seed.
-3. **Adjust** (optional, plus or minus one ladder step) by comparing the increment's profile to the
-   `VELOCITY.md` anchor rows. This is the committed estimate, surfaced to the PO in Step 6. A mirror
-   increment has no freeze commit (seed-only, re-derivable), logged to `VELOCITY.md` at
-   `/sprint-review`. A classical/mixed increment uses the v2 two-pass freeze (commit the plan-time
-   seed before `src/`, realized in a second commit); see `VELOCITY.md`.
+3. **Adjust** the seed by at most one ladder step (optional), comparing the increment's profile to
+   the `VELOCITY.md` anchor rows. This is the committed estimate, surfaced to the PO in Step 6. A
+   mirror increment has no freeze commit (seed-only and re-derivable), logged to `VELOCITY.md` at
+   `/sprint-review`. A classical/mixed increment uses the v2 two-pass freeze: commit the plan-time
+   seed before `src/`, then the realized tier in a second commit (see `VELOCITY.md`).
 
 ## Step 6, PO approval gate
 
@@ -135,14 +136,14 @@ Once the PO approves, perform the enablers, then confirm the scaffold still buil
    `ghidra_symbols.txt`/`symbol_addrs.txt`): append `<curated_name> = 0x<vram>; // type:func` to
    `symbol_addrs.txt` (add-only). This must land before `make extract` so splat scaffolds the curated
    name, not `func_<VRAM>`.
-2. **Flip the subseg** in `mariogolf64.yaml`: `[0x<off>, asm]` becomes `[0x<off>, c, <path>]` (split a
-   multi-file pack at the upstream-file boundary first, if needed). **Text only at the gate.** An
-   ld-section sibling (`.data`/`.rodata`/`.bss` carved from the C compile) is NOT a gate enabler: an
-   `INCLUDE_ASM` stub emits no such section, so a sibling added here carves an empty range and shifts
-   every following data/rodata byte, failing the green-ROM check below. The ld-section split lands
-   during execution with the real body (S68; see `docs/hazards.md#defines-data` for the `.data` carve
-   and `#rodata-sibling-yaml-pattern` for `.rodata`). At the gate, leave the data/rodata region as its
-   existing generic subseg; the stub's `%lo(D_<vram>)` resolves from it.
+2. **Flip the subseg** in `mariogolf64.yaml`: `[0x<off>, asm]` becomes `[0x<off>, c, <path>]`. Split
+   a multi-file pack at the upstream-file boundary first, if needed. **Flip text only at the gate.**
+   An ld-section sibling (`.data`/`.rodata`/`.bss` carved from the C compile) is not a gate enabler:
+   an `INCLUDE_ASM` stub emits no such section, so a sibling added here carves an empty range and
+   shifts every following data/rodata byte, failing the green-ROM check below. The ld-section split
+   lands during execution with the real body instead; see `docs/hazards.md#defines-data` for the
+   `.data` carve and `#rodata-sibling-yaml-pattern` for `.rodata` (S68). At the gate, leave the
+   data/rodata region as its existing generic subseg; the stub's `%lo(D_<vram>)` resolves from it.
 3. **Validate**:
 
    ```bash
@@ -159,15 +160,15 @@ Once the PO approves, perform the enablers, then confirm the scaffold still buil
 
 On a green validation, write `SPRINT.md` (gitignored: ephemeral scratch and resume surface).
 
-**v2 freeze commit (classical/mixed regime only).** Before running the execution loop, if the
-committed regime is `classical` or `mixed`, commit the gate state as the seed freeze: stage the
-gate enablers (the `mariogolf64.yaml` flip, `symbol_addrs.txt` adds, and the `make extract`-regenerated
-`mariogolf64.ld` / `undefined_syms_auto.txt`) and commit with a message naming the seed and regime,
+**v2 freeze commit (classical/mixed regime only).** If the committed regime is `classical` or
+`mixed`, commit the gate state as the seed freeze before running the execution loop. Stage the gate
+enablers (the `mariogolf64.yaml` flip, `symbol_addrs.txt` adds, and the `make extract`-regenerated
+`mariogolf64.ld` / `undefined_syms_auto.txt`), and commit with a message naming the seed and regime,
 e.g. `S<N> freeze: <increment>, seed <S> <classical|mixed>`. This locks the plan-time seed in git
-BEFORE any `src/` body lands, so the realized tier scored at `/sprint-review` cannot be retro-fitted
-(`SPRINT.md` is gitignored, so it is not a durable freeze on its own). A `mirror` regime has NO freeze
-commit (seed-only, re-derivable; logged to `VELOCITY.md` at review). S146 skipped this and banked in a
-single commit; the freeze is the anti-gaming guard the two-pass tier depends on.
+before any `src/` body lands, so the realized tier scored at `/sprint-review` cannot be retro-fitted;
+`SPRINT.md` is gitignored, so it is not a durable freeze on its own. A `mirror` regime has no freeze
+commit (seed-only and re-derivable; logged to `VELOCITY.md` at review). The freeze is the anti-gaming
+guard the two-pass tier depends on (S146 skipped it and banked in a single commit).
 
 Then run the `## Execution loop` (`CLAUDE.md`) inline over the committed backlog, one function at a
 time, no per-function PO stop. Each banked function appends a standup line + its suggestion buffer to
@@ -183,17 +184,17 @@ A completed `SPRINT.md` for a single recover-extern mirror sprint:
 # Sprint 41, bank __osEPiRawWriteIo (libultra pi IO_WRITE mirror)
 
 ## Goal (Commander's Intent)
-Bank `__osEPiRawWriteIo` into `src/libultra/nintendo/pi/epirawwrite.c`, a verbatim IO_WRITE
-mirror in the warm pi band. Recover the macro-hidden `__osCurrentHandle` extern before the flip,
-copy upstream verbatim, prove via full-make ROM SHA-1.
-Success: 0 INCLUDE_ASM stubs in the file + ROM SHA-1 == baserom + committed, so md5-candidate.
+Bank `__osEPiRawWriteIo` into `src/libultra/nintendo/pi/epirawwrite.c`, a verbatim IO_WRITE mirror
+in the warm pi band. First recover the macro-hidden `__osCurrentHandle` extern, then flip the
+subseg, copy the upstream file verbatim, and prove the match with a full-make ROM SHA-1.
+Success: 0 INCLUDE_ASM stubs in the file, ROM SHA-1 == baserom, and committed, so md5-candidate.
 
 ## Committed backlog
 - [ ] src/libultra/nintendo/pi/epirawwrite.c  (1 fn, ~120 instrs, upstream: libultra)  DoR: ok (flip validated)
 - [x] enabler (agent, at gate): symbol_addrs += __osCurrentHandle = 0x800C7E90; // size:0x8, recovered from lui/lo16, validated
 
 ## Estimate (story points)
-committed 2pt  (seed 2 from pts to adjusted 2; 8-gate: clear; regime: mirror)
+committed 2pt  (seed 2 from pts, adjusted 2; 8-gate clear; regime: mirror)
 
 ## DoR notes
 - subseg: flipped; upstream: libultra/nintendo/pi/epirawwrite; hazards: macro-hidden recover-extern (EPI_SYNC to __osCurrentHandle)
@@ -204,7 +205,7 @@ matched 312/1180 fns (26.4%); md5-candidate files 47/130   (2026-06-13)
 ## Standup log
 (execution appends: <fn>, <Match|stuck-far|spiked>, next)
 
-## Suggestion buffer (recorded, applied at /sprint-review, NOT mid-sprint)
+## Suggestion buffer (recorded, applied at /sprint-review, not mid-sprint)
 (the execution loop appends its numbered "Suggested workflow improvements" here)
 ```
 </example>
