@@ -3513,83 +3513,86 @@ count-only reversal).
 
 ## decomposed-one-tu rodata alignment split (a counter-case to the 8-point decompose gate)
 
-**Rule:** when the 8-point decompose gate splits a one-tu into N `.c`/`.o` files, the LAST piece's
-`.rodata` can be followed IN MEMORY by the NEXT TU's higher-aligned constant (a `.double`, an 8-aligned
-jumptable). The build force-4-aligns every ASM `.rodata` section (`OBJCOPY_ALIGN :=
+**Rule:** when the 8-point decompose gate splits a one-tu into N `.c`/`.o` files, the **last** piece's
+`.rodata` can be followed **in memory** by the **next** TU's higher-aligned constant (a `.double`, an
+8-aligned jumptable). The build force-4-aligns every asm `.rodata` section (`OBJCOPY_ALIGN :=
 --set-section-alignment .rodata=4 ...` in `Makefile`, plus `ASFLAGS --no-pad-sections`), so the
-asm-sourced next-TU rodata canNOT self-8-align at the `.o` boundary: it lands right after the split
+asm-sourced next-TU rodata cannot self-8-align at the `.o` boundary: it lands right after the split
 piece's rodata (which ends 4/8 bytes short of the boundary) and every downstream data symbol shifts.
-The C `.o` recipe (`mk/src.mk`, KMC `as`) does NOT get that objcopy, so a C `.o`'s rodata keeps its
+The C `.o` recipe (`mk/src.mk`, KMC `as`) does not get that objcopy, so a C `.o`'s rodata keeps its
 natural (higher) alignment.
 
-**TELL:** clean per-function match (isolated diff shows only relocations), full-make SHA-miss, and
-hundreds of SCATTERED single-byte diffs across the whole text, each `built = base - 4` (or `- 8`) — the
-low byte of a `%lo(D_xxxx)` for every data symbol past the shifted boundary. `verify-rom.sh` fails
-while the `.o` is byte-perfect.
+**Tell:** clean per-function match (isolated diff shows only relocations), full-make SHA-miss, and
+hundreds of **scattered** single-byte diffs across the whole text, each `built = base - 4` (or `- 8`)
+— the low byte of a `%lo(D_xxxx)` for every data symbol past the shifted boundary. `verify-rom.sh`
+fails while the `.o` is byte-perfect.
 
-**FIX (S154):** do NOT decompose a one-tu whose tail rodata abuts a higher-aligned next-TU constant —
-keep the whole one-tu as ONE `.c` file. An internal higher-aligned constant (S154: func_8006A000's two
-`2^31` cast `double`s, 16-align) makes the combined section 16/8-aligned, and KMC `as` pads its TAIL to
-the boundary (S154: 48B = 2 doubles + 2 string literals + pad, ending exactly at `0x800D1440` where the
-next TU's 8-aligned double sits). This also keeps format strings as ACTUAL C LITERALS rather than
-`extern D_xxxx[]` refs into the generic asm blob (see [[rodata-strings-as-literals-via-tu-combine]]).
-Splat's per-subseg `align:` is segment-level only (gated by `ld_align_segment_vram_end: False`), so it
-canNOT force an intra-section pad. Weigh rodata-alignment adjacency BEFORE decomposing a one-tu at the
-plan gate.
+**Fix:** do not decompose a one-tu whose tail rodata abuts a higher-aligned next-TU constant — keep
+the whole one-tu as **one** `.c` file. An internal higher-aligned constant (S154 func_8006A000's two
+`2^31` cast `double`s, 16-align) makes the combined section 16/8-aligned, and KMC `as` pads its tail
+to the boundary (S154 48B = 2 doubles + 2 string literals + pad, ending exactly at `0x800D1440` where
+the next TU's 8-aligned double sits). This also keeps format strings as **actual** C literals rather
+than `extern D_xxxx[]` refs into the generic asm blob (see
+[[rodata-strings-as-literals-via-tu-combine]]). Splat's per-subseg `align:` is segment-level only
+(gated by `ld_align_segment_vram_end: False`), so it cannot force an intra-section pad. Weigh
+rodata-alignment adjacency before decomposing a one-tu at the plan gate.
 
 ## capturing $ra (return address) as a call argument
 
 **Rule:** a ROM function that logs its caller's PC does `addu aN, $ra, $0` (copy the return-address
-register into an arg reg) right after the prologue `sw ra`. `__builtin_return_address(0)` does NOT
+register into an arg reg) right after the prologue `sw ra`. `__builtin_return_address(0)` does not
 produce this on KMC gcc 2.7.2: `RETURN_ADDR_RTX` is undefined for MIPS (`config/mips/`), so
 `expand_builtin_return_addr` (`expr.c:7199`) falls back to a `MEM(frame + Pmode_size)` load — a
 wrong-offset stack read (`lw aN, 4(sp)`), not the register. A `register u32 ra asm("$31")` reads `$ra`
-with the correct `addu` encoding BUT confuses the prologue scheduler: it delays the `sw ra` below the
+with the correct `addu` encoding but confuses the prologue scheduler: it delays the `sw ra` below the
 string-address load, so the delay-slot filler leaves an unfilled jal slot (`+1 nop`, everything shifts).
 
-**FIX (S154 `report_div_error`):** a `volatile` inline-asm read is the reliable form —
+**Fix:** a `volatile` inline-asm read is the reliable form —
 `__asm__ __volatile__("addu %0, $31, $0" : "=r"(ra));` then use `ra`. gcc allocates `%0` directly to
 the arg register (giving the exact `addu aN, $ra, $0`), and the `volatile` barrier keeps the prologue
-first so the format-string `addiu` fills the jal delay slot (ROM order). TELL you need this: the ROM
-reads `$ra` (reg 31) as a printf/log arg; the naive builtin emits a stack-slot `lw`.
+first so the format-string `addiu` fills the jal delay slot (ROM order; S154 `report_div_error`).
+Tell you need this: the ROM reads `$ra` (reg 31) as a printf/log arg; the naive builtin emits a
+stack-slot `lw`.
 
 ## indexed-vs-pointer loop (strength-reduction preheader ordering)
 
 **Rule:** for a sentinel-terminated (`!= -1`) array walk, the ROM's scheduling around the loop
 (entry-branch delay-slot fill, and whether a loop-invariant constant is hoisted) depends on whether
-the source iterates by INDEX (`for(i=0; a[i]!=X; i++){ v=a[i]; use(v); }`, a `u32` index + a value
-temp) or by POINTER (`p=a; do{ use(*p); p++; }while(*p!=X)`). The two forms are BYTE-IDENTICAL in
-isolation (gcc strength-reduces `a[i]` to a pointer either way), so a small isolated compile hides
-the difference — but they DIVERGE inside a full TU. **TELL:** a seg/segment/id-list walk (or any
-`-1`/sentinel-terminated array loop) that matches the whole function EXCEPT a 1-instruction swap in
-the loop preheader — a `move reg,base` vs a `li` constant filling the entry `beq`/`bne` delay slot,
-or a loop-invariant `-1` hoisted to an OUTER loop's preheader (an extra `li aN,-1` before the loop
-and a shifted scratch reg). When you see that, **try the INDEXED + value-temp form FIRST** before
-reaching for the permuter. S157 `load_overlay`/`unload_overlay`/`func_80025F18` all matched only in
-the indexed form (`for(byte_index=0; seg[byte_index]!=-1; byte_index++){ byte = seg[byte_index]; ...}`),
-after the pointer form left a `move v1,s2`-in-the-delay-slot miss (load/unload) and a `-1`-hoisted-to-a3
-miss (F18). Also fold multiple `if(cond) continue;` guards into ONE `if(a||b||c) continue;` when the
+the source iterates by **index** (`for(i=0; a[i]!=X; i++){ v=a[i]; use(v); }`, a `u32` index + a
+value temp) or by **pointer** (`p=a; do{ use(*p); p++; }while(*p!=X)`). The two forms are
+**byte-identical** in isolation (gcc strength-reduces `a[i]` to a pointer either way), so a small
+isolated compile hides the difference — but they **diverge** inside a full TU. **Tell:** a
+seg/segment/id-list walk (or any `-1`/sentinel-terminated array loop) that matches the whole
+function except a 1-instruction swap in the loop preheader — a `move reg,base` vs a `li` constant
+filling the entry `beq`/`bne` delay slot, or a loop-invariant `-1` hoisted to an outer loop's
+preheader (an extra `li aN,-1` before the loop and a shifted scratch reg). When you see that,
+**try the indexed + value-temp form first** before reaching for the permuter. S157
+`load_overlay`/`unload_overlay`/`func_80025F18` all matched only in the indexed form
+(`for(byte_index=0; seg[byte_index]!=-1; byte_index++){ byte = seg[byte_index]; ...}`), after the
+pointer form left a `move v1,s2`-in-the-delay-slot miss (load/unload) and a `-1`-hoisted-to-a3 miss
+(F18). Also fold multiple `if(cond) continue;` guards into **one** `if(a||b||c) continue;` when the
 ROM uses a single combined test (F18's three range guards).
 
-**WHY (KMC gcc 2.7.2, grounded — verified against the source):** `scan_loop` runs
-`move_movables` (invariant hoist, `loop.c:966`) BEFORE `strength_reduce` (`loop.c:976`). The hoisted
+**Why (KMC gcc 2.7.2, grounded — verified against the source):** `scan_loop` runs
+`move_movables` (invariant hoist, `loop.c:966`) before `strength_reduce` (`loop.c:976`). The hoisted
 loop constants (the store value, the `-1` terminator) are inserted immediately before `loop_start`
 by move_movables. Then:
 - **Indexed `a[i]`:** the walk pointer is a strength-reduced *general* induction variable (giv); its
   initialization emits via `emit_iv_add_mult(bl->initial_value, …, loop_start)` (`loop.c:666`), also
-  inserted immediately before `loop_start` — i.e. AFTER the already-hoisted constants. Preheader
+  inserted immediately before `loop_start` — i.e. after the already-hoisted constants. Preheader
   order = `[li const][… ][move giv-ptr]`.
-- **Pointer `p = a`:** `p` is a *basic* induction variable (biv); `move p,base` is ORIGINAL preheader
-  code, sitting BEFORE the constants move_movables inserts. Order = `[move biv-ptr][li const]`.
+- **Pointer `p = a`:** `p` is a *basic* induction variable (biv); `move p,base` is original preheader
+  code, sitting before the constants move_movables inserts. Order = `[move biv-ptr][li const]`.
 - The delay-slot filler (`reorg.c` `fill_slots_from_thread`) fills the entry-check `beq` delay with
-  the FIRST preheader instruction → the CONSTANT (indexed, matches the ROM) vs the MOVE (pointer,
-  miss). The same reordering keeps a nested-loop `-1` from being hoisted to the outer preheader.
+  the first preheader instruction → the **constant** (indexed, matches the ROM) vs the **move**
+  (pointer, miss). The same reordering keeps a nested-loop `-1` from being hoisted to the outer
+  preheader.
 
 **Assembler note (binutils 2.6):** gcc wraps the branch + its delay slot in `.set noreorder` /
-`.set nomacro`, so the assembler does NOT touch the delay-slot fill (it is gcc's reorg). binutils
+`.set nomacro`, so the assembler does not touch the delay-slot fill (it is gcc's reorg). binutils
 only expands macros (`move`→`addu` `0x…21`, `li`→`addiu`/`lui+ori`) and schedules the `.set reorder`
-spans. **False lead retired:** KMC gcc 2.7.2 IGNORES source line numbers — same-line source produces
-byte-identical codegen (verified empirically), UNLIKE IDO. So the permuter's `perm_sameline` pass is
+spans. **False lead retired:** KMC gcc 2.7.2 ignores source line numbers — same-line source produces
+byte-identical codegen (verified empirically), unlike IDO. So the permuter's `perm_sameline` pass is
 a no-op for this toolchain; do not weight it (see `#permuter-setup-for-kmc-toolchain-mirrors`).
 
 **gcc-source cross-ref (regalloc / scheduling misses generally):** ground a "structure is right,
