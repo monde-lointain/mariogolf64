@@ -3116,160 +3116,172 @@ and the `yield_data_size = OS_YIELD_DATA_SIZE` 0xC00 vs 2.07 `NU_GFX_YIELD_BUF_S
 ## permuter setup for KMC-toolchain mirrors
 
 **Rule:** Running decomp-permuter on a `libnusys`/`libultra`/`libkmc` (KMC-toolchain) function needs
-three fixes the generic setup misses (hit S121 contRmbControl).
+three fixes the generic setup misses.
 
 **Procedure:**
 
-- **(a) custom `--settings`.** The root `permuter_settings.toml` `compiler_command` is GENERIC (`-I
+- **(a) custom `--settings`.** The root `permuter_settings.toml` `compiler_command` is **generic** (`-I
   include` only, no `-DUSE_EPI` / per-library include paths), so `import.py` preprocessing fails on
   `#include <nusys.h>`. Pass `--settings <custom>.toml` whose `compiler_command` carries the file's real
   CFLAGS (the per-library `-I include/libnusys …` + `-D` defines), piped through `tools/cc/gcc -S` to
   `tools/cc/as`.
 - **(b) KMC-safe `asm_prelude_file`.** decomp-permuter's default `prelude.inc` has `.set gp=64`, which
-  KMC binutils-2.6 `tools/cc/as` REJECTS (`Expected comma after name gp`). Supply an `asm_prelude_file`
+  KMC binutils-2.6 `tools/cc/as` rejects (`Expected comma after name gp`). Supply an `asm_prelude_file`
   that drops that line (harmless at `-G 0`).
-- **(c) body + extracted target.** `import.py` accepts a `c_file` with the function BODY plus a target
+- **(c) body + extracted target.** `import.py` accepts a `c_file` with the function body plus a target
   `.s` extracted from `asm/<seg>.s` (`glabel`..`endlabel`) — no `INCLUDE_ASM` / `mg_resolve_c_asm`
   round-trip is needed.
 
-**Generalizes to game -O2 (main-profile) code (S151).** The same three fixes apply to a `src/main/`
+**Generalizes to game -O2 (main-profile) code.** The same three fixes apply to a `src/main/`
 (or overlay) game fn, with the `compiler_command` mirroring `MAIN_CFLAGS` (`$(CFLAGS)` + all the base
 `-I` + `-DF3DEX_GBI_2` for a DL fn) piped `tools/cc/gcc -S | tools/cc/as -EB -mips2 -G 0 -I include`.
-Without `-DF3DEX_GBI_2` a DL fn never converges (wrong RSP opcodes). **Coord/local integer WIDTH
+Without `-DF3DEX_GBI_2` a DL fn never converges (wrong RSP opcodes). **Coord/local integer width
 (`u16`/`s16` vs `s32`) is a first-class permuter lever for frame/regalloc near-misses:** S151
-`func_800500E0` was a byte-perfect STRUCTURE that locked ~185 on a register-allocation + a phantom
+`func_800500E0` was a byte-perfect structure that locked ~185 on a register-allocation + a phantom
 `-16` stack frame (a reload spill-slot artifact reachable only through register pressure); the permuter
 cracked it by retyping the two texrect coords `u16 left; s16 right;` (which the kantan demo confirms is
 the idiomatic coord type), then a final commutative operand-order swap (`offset + (x0+half)`) closed
 the last instruction. When a classical match is a rows-aligned regalloc/frame near-miss with no
 externs (isolated == in-tree), run the permuter even below the 0.97 asm-differ gate (asm-differ
 normalizes registers, so its `percent` under-reports a pure-regalloc miss). **This extends to a pure
-prologue-SCHEDULING swap (S160 `func_8006EA90`):** when `match_count == total_rows` AND the register
-allocation is IDENTICAL but `percent` sits ~0.90 because a handful of reordered early insns cascade the
-score, the structure is provably right — the miss is which of two equal-priority preheader insn GROUPS
+prologue-scheduling swap** (S160 `func_8006EA90`): when `match_count == total_rows` and the register
+allocation is identical but `percent` sits ~0.90 because a handful of reordered early insns cascade the
+score, the structure is provably right — the miss is which of two equal-priority preheader insn groups
 the post-reload scheduler emits first (`sched.c` `rank_for_schedule` breaks priority ties by `INSN_LUID`
-= physical/hoist order; see the gcc-source cross-ref above). Run the permuter WITHOUT `--best-only` (the
-equal-score PLATEAU case: the fix needs an intermediate transform that keeps the SAME score before a
-second move reaches 0 — S160's winner was a `scale = 0.3f` in-loop assignment plus a pointer alias that
+= physical/hoist order; see the gcc-source cross-ref above). Run the permuter without `--best-only` (the
+equal-score plateau case: the fix needs an intermediate transform that keeps the same score before a
+second move reaches 0 — the winner was a `scale = 0.3f` in-loop assignment plus a pointer alias that
 reordered the FP-const load ahead of the base pointers). Structure levers that got it to score-0-modulo-
-rodata first: hoist the invariant base pointer INSIDE the loop (fixes `off+base` addu operand order) and
+rodata first: hoist the invariant base pointer inside the loop (fixes `off+base` addu operand order) and
 express the offset as a strength-reduced IV (`off = 0x40 + i*0x10`, moves its init late).
 
-**Committed main-profile setup (S158).** `tools/permuter_settings_main.toml` (MAIN_CFLAGS:
-`-mips3 -mgp32 -mfp32 -mno-abicalls -O2` + all base `-I` + `-DF3DEX_GBI_2`, `tools/cc/gcc -S | tools/cc/as -EB -mips3 -G 0 -I include`, VERIFIED to reproduce the in-tree `.o`) and `tools/kmc_main_prelude.inc`
+**Committed main-profile setup.** `tools/permuter_settings_main.toml` (MAIN_CFLAGS:
+`-mips3 -mgp32 -mfp32 -mno-abicalls -O2` + all base `-I` + `-DF3DEX_GBI_2`, `tools/cc/gcc -S | tools/cc/as -EB -mips3 -G 0 -I include`, verified to reproduce the in-tree `.o`) and `tools/kmc_main_prelude.inc`
 (the decomp-permuter `prelude.inc` minus its `.set gp=64` line, which KMC binutils-2.6 `as` rejects
 with `Expected comma after name gp`) are checked in — pass `--settings tools/permuter_settings_main.toml`
-to `import.py`. GOTCHA: the extracted target `.s` MUST keep the `.LXXXX:` local-label lines
-(`awk '/^glabel <fn>/{p=1}/^endlabel/{p=0}p'`, NOT a `grep` of only the `/* */` instruction rows) —
+to `import.py`. Gotcha: the extracted target `.s` must keep the `.LXXXX:` local-label lines
+(`awk '/^glabel <fn>/{p=1}/^endlabel/{p=0}p'`, not a `grep` of only the `/* */` instruction rows) —
 dropping them leaves the intra-function branches referencing undefined labels and `as` fails with
 `Can not represent relocation in this object file format`. For the full whole-function playbook this
 setup feeds, see `#pervasive-regalloc-classical-main`.
 
-**Two KMC-gcc permuter tuning facts (S157):**
-- **`perm_sameline` is a NO-OP for KMC gcc 2.7.2.** gcc 2.7.2 ignores source line numbers, so
-  same-line source produces byte-identical codegen (verified empirically; UNLIKE IDO, where
-  same-lineness is a real scheduling lever). Do NOT weight `perm_sameline` up in `settings.toml` for
+**Two KMC-gcc permuter tuning facts:**
+- **`perm_sameline` is a no-op for KMC gcc 2.7.2.** gcc 2.7.2 ignores source line numbers, so
+  same-line source produces byte-identical codegen (verified empirically; unlike IDO, where
+  same-lineness is a real scheduling lever). Do not weight `perm_sameline` up in `settings.toml` for
   this project — it burns iterations for zero effect. The effective regalloc/scheduling passes here
   are `perm_temp_for_expr`, `perm_refer_to_var`, `perm_ins_block`, `perm_reorder_stmts` (default
-  weights are fine; over-customizing can STARVE these).
-- **`--best-only` cannot cross equal-score PLATEAUS.** A 1-instruction miss often needs an
-  intermediate transform that keeps the SAME score (e.g. a temp that just moves WHICH instruction
+  weights are fine; over-customizing can starve these).
+- **`--best-only` cannot cross equal-score plateaus.** A 1-instruction miss often needs an
+  intermediate transform that keeps the same score (e.g. a temp that just moves which instruction
   pair is swapped) before a second transform reaches 0. `run-permuter.sh`'s default `--best-only`
-  (monotonic-improvement) gets stuck on such a plateau (S157: 250k+ iterations flat at score 60/50).
-  For a plateau case, DROP `--best-only` (default simulated-annealing accepts equal/worse moves), OR
-  seed `base.c` past the plateau by hand. (But first check whether the miss is a known STRUCTURE
-  hazard — S157's stalls were all the indexed-vs-pointer loop form, see
+  (monotonic-improvement) gets stuck on such a plateau (250k+ iterations flat at score 60/50).
+  For a plateau case, drop `--best-only` (default simulated-annealing accepts equal/worse moves), or
+  seed `base.c` past the plateau by hand. (But first check whether the miss is a known structure
+  hazard — the stalls were all the indexed-vs-pointer loop form, see
   `#indexed-vs-pointer-loop-strength-reduction`; a structural fix beats a permuter grind.)
+
+**Provenance:** S121 (contRmbControl: the three KMC-toolchain fixes); S151 (generalized to the game
+-O2 main-profile + the coord-width permuter lever); S157 (KMC-gcc tuning: `perm_sameline` no-op,
+`--best-only` plateaus); S158 (committed `permuter_settings_main.toml` + `kmc_main_prelude.inc`).
 
 ## NU_DEBUG-stock-not-custom (carried perf fn triage)
 
-**Rule:** A `libnusys` carry framed as "heavily game-customized, classical RE" is often NOT custom at
-all — it is the **stock upstream body that failed to match because the file was compiled WITHOUT
+**Rule:** A `libnusys` carry framed as "heavily game-customized, classical RE" is often not custom at
+all — it is the **stock upstream body that failed to match because the file was compiled without
 `NU_DEBUG`**, so the `#ifdef NU_DEBUG` performance machinery is absent from the C while the asm has it
 (osGetTime / osDpSetStatus / __udivdi3 calls).
 
-**Trigger:** The tell: **the carried fns are EXACTLY the upstream fns that carry `#ifdef NU_DEBUG`
-blocks** (S123 carried nusched's 4 NU_DEBUG fns — nuScCreateScheduler / nuScEventHandler /
-nuScExecuteAudio / nuScExecuteGraphics — as "custom"; S125 found nuScExecuteAudio is a pure
+**Trigger:** The tell: **the carried fns are exactly the upstream fns that carry `#ifdef NU_DEBUG`
+blocks** (nusched's 4 NU_DEBUG fns — nuScCreateScheduler / nuScEventHandler /
+nuScExecuteAudio / nuScExecuteGraphics — carried as "custom"; nuScExecuteAudio is a pure
 stock-NU_DEBUG mirror).
 
 **Procedure:**
 
 - **Triage before classical-RE.** Diff the carried fn's asm against the upstream's **NU_DEBUG** body
   (not the non-debug body). If the calls line up, it is stock: bank it as a mirror.
-- **Fix recipe (S125 nuScExecuteAudio, banked first build).** (a) `#define NU_DEBUG` at the top of the
-  `.c` BEFORE `#include <nusys.h>` (matches the MG64 TU compile); (b) validate the perf/debug struct
+- **Fix recipe** (S125 nuScExecuteAudio, banked first build). (a) `#define NU_DEBUG` at the top of the
+  `.c` before `#include <nusys.h>` (matches the MG64 TU compile); (b) validate the perf/debug struct
   offsets vs the asm and fix the vendored header (see the perf-struct note in `#upstream-mirror-pattern`
   — MG64's `NUDebTaskPerf` lacked the 2.07 `markerTime[10]`); (c) drop-def the `static` perf pointers
   (`debTaskPerfPtr` etc.) to extern at their asm-recovered vrams. The stock body is then verbatim
   (drop-static).
-- **Caveat.** NU_DEBUG-on covers ONLY the carried perf fns; the already-banked stock siblings have no
+- **Caveat.** NU_DEBUG-on covers only the carried perf fns; the already-banked stock siblings have no
   NU_DEBUG blocks so the file-wide `#define` does not perturb them. A fn with NU_DEBUG-stock perf code
-  PLUS genuine MG64 edits (swap-gate, game hooks) is still classical on top of the NU_DEBUG stock
+  plus genuine MG64 edits (swap-gate, game hooks) is still classical on top of the NU_DEBUG stock
   skeleton (S125 nuScEventHandler / ExecuteGraphics).
+
+**Provenance:** S123 (carried nusched's 4 NU_DEBUG fns as "custom"); S125 (found the stock-NU_DEBUG
+mirror class + the fix recipe).
 
 ## libnusys inline-div mflo-hazard nop
 
 **Trigger:** A `libnusys` fn with an **inline integer division** (`a / b` compiled to `divu` + `mflo`,
-not a `__udivdi3` call) can build + link clean and be **byte-perfect EXCEPT for 2 missing `nop`s after
+not a `__udivdi3` call) can build + link clean and be **byte-perfect except for 2 missing `nop`s after
 `mflo`** (the VR4300 mflo→consumer hazard padding) — a `mflo; nop; nop; <use>` in the target vs
 `mflo; <use>` in your build. Net: the build is 2 instrs short with the usual collateral address shifts.
 
 **Procedure:**
 
-- **Root cause (S125 nuScEventHandler).** KMC gcc emits the GNU `div` **macro**; the assembler
-  (`tools/cc/as`) expands it and inserts the hazard nops — but ONLY when it can see the consumer is too
+- **Root cause** (S125 nuScEventHandler). KMC gcc emits the GNU `div` **macro**; the assembler
+  (`tools/cc/as`) expands it and inserts the hazard nops — but only when it can see the consumer is too
   close. When gcc -O2 schedules the mflo consumer **into a loop-back `j`'s delay slot** (`mflo; j;
-  addiu` — consumer 2 slots after mflo across the branch), `as` does NOT pad, while the original build
+  addiu` — consumer 2 slots after mflo across the branch), `as` does not pad, while the original build
   emitted `mflo; nop; nop; j; addiu` (consumer 3 slots after). A standalone `int d(int a,int b){return
-  a/b - 3;}` DOES get the 2 nops by default, so it is **not a blanket missing flag** — it is the
+  a/b - 3;}` does get the 2 nops by default, so it is **not a blanket missing flag** — it is the
   loop-back-delay-slot scheduling that suppresses the pad.
-- **Flags do not help.** KMC gcc/as REJECT `-mfix4300`, `-mcpu=vr4300`, `-mtune=vr4300`,
+- **Flags do not help.** KMC gcc/as reject `-mfix4300`, `-mcpu=vr4300`, `-mtune=vr4300`,
   `-mfix-vr4300`, `-Wa,-mfix-vr4300` (modern-gcc/binutils flags absent in the KMC 2.7.2 / binutils-2.6
   toolchain).
-- **NOT a permuter wall (S126 overturns S125).** S125 framed this as a permuter candidate. S126 banked
-  nuScEventHandler with NO permuter: the 2 nops appear **naturally** once the function's data + volatility
-  scaffold is COMPLETE — specifically `nuScRetraceCounter` as a proper **per-TU volatile** (see
-  `#volatile-global tell`) AND `nuDebTaskPerf` placed in `symbol_addrs`. The S125 "missing nops" was a
-  **scaffold artifact** (an incomplete/header-flipped attempt scheduled the consumer differently), not a
-  KMC-as scheduling wall. **Lesson: complete the per-TU-volatile + data scaffold and RE-DIFF before
+- **Not a permuter wall.** This was earlier framed as a permuter candidate, then nuScEventHandler
+  banked with no permuter: the 2 nops appear **naturally** once the function's data + volatility
+  scaffold is complete — specifically `nuScRetraceCounter` as a proper **per-TU volatile** (see
+  `#volatile-global tell`) and `nuDebTaskPerf` placed in `symbol_addrs`. The earlier "missing nops" was
+  a **scaffold artifact** (an incomplete/header-flipped attempt scheduled the consumer differently), not
+  a KMC-as scheduling wall. **Lesson: complete the per-TU-volatile + data scaffold and re-diff before
   concluding a mflo-hazard near-miss needs the permuter.** Most "byte-perfect except 2 nops" libnusys
   near-misses are an unfinished scaffold, not an assembler interaction.
 - **Resolution ladder.** (a) **Finish the scaffold first** — per-TU volatile globals + every referenced
-  data symbol placed, then re-diff; the nops usually resolve (S126). (b) Only if a complete-scaffold build
+  data symbol placed, then re-diff; the nops usually resolve. (b) Only if a complete-scaffold build
   still SHA-misses by exactly the 2 nops is it a genuine scheduler/assembler wall → **permuter** (a source
-  form that keeps the mflo consumer OUT of the `j` delay slot, so it lands ≥3 slots after mflo, lets `as`
-  insert the nops; `#permuter-setup-for-kmc-toolchain-mirrors`). Do NOT treat the 2-nop gap as a "try
+  form that keeps the mflo consumer out of the `j` delay slot, so it lands ≥3 slots after mflo, lets `as`
+  insert the nops; `#permuter-setup-for-kmc-toolchain-mirrors`). Do not treat the 2-nop gap as a "try
   harder C" iteration — it is a scheduler/assembler interaction, not a logic mismatch.
 
+**Provenance:** S125 (root cause on nuScEventHandler; first framed as a permuter candidate); S126
+(overturned that — banked nuScEventHandler with no permuter once the per-TU-volatile + data scaffold
+was complete; the 2-nop gap was a scaffold artifact, not an assembler wall).
+
 ## volatile-global tell (dead-reload + recompute-not-CSE)
+
+**Rule:** Declare a volatile-tell mirror global `vu32`/`vs32` (the ultra64 volatile types), not
+`u32`/`s32`.
 
 **Trigger:** A `libnusys`/game mirror global that the asm accesses with **a dead reload immediately
 after a store** (`lw t,X; addiu t,t,1; sw t,X; lw t,X` where the 4th load's value is discarded) and/or
 is **re-read fresh on every reference instead of CSE'd** (e.g. `a - b` recomputed at each `==` compare
 rather than computed once) is **`volatile`** in the original.
 
-**Rule:** Declare it `vu32`/`vs32` (the ultra64 volatile types), not `u32`/`s32`.
-
 **Procedure:**
 
 - **Tells.** (1) The dead reload-after-store is the **`volatile x++`** signature (gcc 2.7.2 re-reads
   the volatile lvalue). (2) The per-read recompute (no common-subexpression elimination of `a - b`)
-  means BOTH operands are volatile, so each read is a fresh load. S125 nuScEventHandler:
+  means both operands are volatile, so each read is a fresh load. S125 nuScEventHandler:
   `nuScRetraceCounter`, `D_801B68E0`, `D_800B678C`, `D_8012F4D4` are all volatile.
 - **Consequence for source form.** Because volatile blocks CSE, a sub-expression reused across several
   comparisons (`(nuScRetraceCounter - D_8012F4D4)` against `0x20` and `0x36`) must be captured in a
   **single non-volatile local** (`s32 frame = a - b;`) so gcc computes it once and reuses it — matching
   the target's single `subu` + two compares. Inlining the volatile expression at each compare instead
-  emits a reload+recompute per site AND lets gcc canonicalize `(a-b)==c` to `(a-c)==b` (wrong codegen).
+  emits a reload+recompute per site and lets gcc canonicalize `(a-b)==c` to `(a-c)==b` (wrong codegen).
   Also place that local's computation in program order relative to the other volatile reads so the
-  scheduler reproduces the target load order (S125: compute `frame` inside the `>=0x1F` block, before
+  scheduler reproduces the target load order (compute `frame` inside the `>=0x1F` block, before
   the non-volatile pointer test, so the volatile reloads precede the pointer load).
 - **Shared-header caution.** Flipping a header-declared global to `vu32` (e.g. `nuScRetraceCounter` in
-  `nusys.h`) changes codegen for EVERY consumer — re-verify the already-banked consumers on a clean-rebuild
+  `nusys.h`) changes codegen for every consumer — re-verify the already-banked consumers on a clean-rebuild
   SHA check (no header-dep tracking, so an incremental build hides the breakage; `#clean-rebuild-after-shared-header-edit`).
-- **Per-TU volatile (S126) — the global is volatile in ONE TU, plain in others.** A global can read
-  `volatile` in the scheduler TU (dead-reload tell) yet `u32` in a sibling TU that is already BANKED
+- **Per-TU volatile — the global is volatile in one TU, plain in others.** A global can read
+  `volatile` in the scheduler TU (dead-reload tell) yet `u32` in a sibling TU that is already banked
   non-volatile. The original compiled each TU against its own declaration. Replicating it: **keep the
   shared header non-volatile** (so the banked consumers stay matching) and add a **localized
   `extern volatile u32 <g>;` redeclaration in the volatile TU only** (after the header include). GCC 2.7.2
@@ -3277,17 +3289,21 @@ rather than computed once) is **`volatile`** in the original.
   external decl` and emits per-access `lui`/`lo` absolute volatile addressing — matching the reference.
   (S126 nuScEventHandler: `nuScRetraceCounter` is volatile in `nusched.c`, plain `u32` in `nugfxtaskmgr.c`
   + `nucontrmbmgr.c`.)
-- **Do NOT use a cast macro for per-TU volatile.** `#define g (*(vu32 *)&g)` does NOT reproduce the
+- **Do not use a cast macro for per-TU volatile.** `#define g (*(vu32 *)&g)` does not reproduce the
   codegen: GCC computes `&g` once into a held register and accesses `0(reg)` (and burns an extra saved
   reg in the prologue), instead of the reference's per-access `lui %hi(g); lw lo(g)` absolute addressing.
   Use the redeclaration, not the cast.
 - **Diagnosis when a shared-header volatile flip SHA-misses.** A single-read **modulo/division**
-  (`x % n`, `x / n`) IS volatile-sensitive (it changes scheduling/CSE) — S126 `nucontrmbmgr.c`'s lone
+  (`x % n`, `x / n`) is volatile-sensitive (it changes scheduling/CSE) — S126 `nucontrmbmgr.c`'s lone
   `nuScRetraceCounter % nuContRmbSearchTime` grew `.text` +0x10 under the flip, cascading
-  `main_RODATA_END`/BSS by +0x10 into a ~21M-byte ROM diff; a plain reload-pair read is volatile-NEUTRAL
+  `main_RODATA_END`/BSS by +0x10 into a ~21M-byte ROM diff; a plain reload-pair read is volatile-neutral
   (S126 `nugfxtaskmgr.c`). To find the grower fast, **map-diff the per-object section sizes**:
   `diff <(grep '\.text.*0x' base.map) <(grep '\.text.*0x' edits.map)` after a clean build of each — the
   one object whose `.text`/`.rodata` size changed is the volatile-sensitive consumer.
+
+**Provenance:** S125 (the dead-reload / recompute-not-CSE tells + single-local capture on
+nuScEventHandler); S126 (per-TU volatile — volatile in one TU, plain in banked siblings; the
+modulo/division volatile-sensitivity + map-diff locator).
 
 ---
 
@@ -3295,17 +3311,17 @@ rather than computed once) is **`volatile`** in the original.
 
 **Rule:** a few game/SDK-glue TUs shipped compiled at **-O0**, not the -O2 game profile (nor the -O3
 lib profile) the rest of the segment uses. The nusys boot file (`src/libnusys/nuboot.c` = `nuBoot` +
-`idle`, the cart entry) is the known case (S149). -O0 codegen is unmistakable and is the TELL:
+`idle`, the cart entry) is the known case. -O0 codegen is unmistakable and is the tell:
 
 - the **frame pointer is kept** (`addu $fp, $sp, $zero`; objdump `move s8,sp`, and the epilogue
   `addu $sp, $fp, $zero` / `move sp,s8`) — -O1+ omits it here;
-- address loads are **recomputed inline**, NOT CSE'd into a saved register across calls;
+- address loads are **recomputed inline**, not CSE'd into a saved register across calls;
 - an **unused parameter is spilled** to its stack home (`sw $a0, 0xNN($fp)`);
 - delay slots are still filled — so it is -O0 *with* `-fdelayed-branch` (the KMC default), not raw -O0.
 
 **Trigger / symptom:** a clean-looking asm-first seed (the C logic is right) builds but the full-make
-ROM SHA-1 MISSES, and an isolated disasm of the built `.o` shows the codegen tells above while the
-target shows fp + recompute + arg-spill. This is an **opt-level mismatch, NOT a C-logic bug** — do not
+ROM SHA-1 misses, and an isolated disasm of the built `.o` shows the codegen tells above while the
+target shows fp + recompute + arg-spill. This is an **opt-level mismatch, not a C-logic bug** — do not
 iterate the C or reach for the permuter. Pin the level with the profile-probe
 (`#profile-probe`); at -O0 the body matches
 (only same-TU section-relative reloc reps may differ, e.g. `.text+0x6c` vs the `idle` symbol, which
@@ -3314,9 +3330,12 @@ link identically).
 **Procedure:** add a **file-specific** mk override (a file target is more specific than the tree
 pattern, so it wins): `$(BUILD_DIR)/$(SRC_DIR)/<tree>/<file>.o: C_PROFILE_CFLAGS := $(subst
 -O2,-O0,$(CFLAGS))`, placed in the tree's `mk/<lib>.mk` (or a new fragment `include`d after
-`mk/src.mk`). NEVER a `<tree>/%.o` pattern — the sibling TUs in the same tree stay -O2/-O3. S149
+`mk/src.mk`). Never a `<tree>/%.o` pattern — the sibling TUs in the same tree stay -O2/-O3. S149
 `nuboot.o` overrode to -O0 in `mk/libnusys.mk`, beating the `libnusys/%.o` -O2 pattern; `idle` was
 byte-exact at -O0 (53 instrs).
+
+**Provenance:** S149 (nusys boot file `nuboot.c` = `nuBoot` + `idle` at -O0; the per-file mk override
+that beats the tree pattern).
 
 ---
 
