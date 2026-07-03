@@ -24,6 +24,7 @@ dc.reexec_into_venv(__file__)
 import argparse
 import re
 import subprocess
+from dataclasses import dataclass
 
 # Shared constants/helpers live in decomp_common (single source of truth);
 # re-bound here so the rest of this module reads unchanged.
@@ -164,16 +165,87 @@ def detect_libultra_profile(placeholder: str) -> bool:
     return _detect_in_upstream(LIBULTRA_SRC, placeholder, recursive=True)
 
 
+# A bare FPU sqrt (the sqrt.s/sqrt.d subset of decomp_asm.INTRINSIC_OPS). A
+# game/main fn with one of these only matches KMC GCC under -ffast-math (else the
+# guarded c.eq/bc1t NaN check + library `jal sqrt` fallback appears, which the ROM
+# lacks). The regex matches the mnemonic in BOTH the raw `/* ROM VRAM WORD */
+# sqrt.s` asm and the seed's reformatted target.s (no hex comment); `jal sqrt` (the
+# library call, no .s/.d suffix) is not matched. See
+# docs/hazards.md#double-sqrt-fast-math and mk/main.mk.
+BARE_SQRT_RE = re.compile(r"\bsqrt\.[sd]\b")
+
+
+def _function_asm_text(placeholder: str, seg_stem: str) -> str:
+    """The target function's asm text, for the profile heuristics.
+
+    Prefers the seed's nonmatchings/<func>/target.s (seed_c.py writes it next to
+    base.c); falls back to slicing asm/<seg>.s between `glabel <placeholder>` and
+    the next glabel/.section so a standalone loop run still works.
+    """
+    target_s = NONMATCHINGS_DIR / placeholder / "target.s"
+    if target_s.exists():
+        return safe_read_text(target_s)
+    seg_path = ASM_DIR / f"{seg_stem}.s"
+    if not seg_path.exists():
+        return ""
+    out: list[str] = []
+    collecting = False
+    for line in safe_read_text(seg_path).splitlines():
+        m = dc.GLABEL_RE.match(line)
+        if m:
+            if collecting:
+                break  # reached the next function
+            if m.group(1) == placeholder:
+                collecting = True
+                out.append(line)
+            continue
+        if collecting:
+            if line.lstrip().startswith(".section"):
+                break
+            out.append(line)
+    return "\n".join(out)
+
+
+def detect_needs_fastmath(placeholder: str, seg_stem: str) -> bool:
+    """True if the target's asm contains a bare `sqrt.s`/`sqrt.d`.
+
+    A hit means the isolated compile needs -ffast-math to reproduce the ROM's bare
+    opcode. Format-agnostic (see BARE_SQRT_RE) so it works whether the slice came
+    from the seed's reformatted target.s or the raw asm/<seg>.s fallback.
+    """
+    return bool(BARE_SQRT_RE.search(_function_asm_text(placeholder, seg_stem)))
+
+
+@dataclass
+class CompileProfile:
+    """The resolved isolated-compile flags for `make nonmatching-func`.
+
+    Mirrors the per-tree CFLAGS the in-tree build uses so the candidate object is
+    ground-truth: libkmc -O, libultra -O3 -funsigned-char, main -DF3DEX_GBI_2, and
+    -ffast-math when the fn has a bare FPU sqrt. At most one of libkmc/libultra/main
+    is set; fastmath composes with main/default (never with a lib profile).
+    """
+
+    libkmc: bool = False
+    libultra: bool = False
+    main: bool = False
+    fastmath: bool = False
+
+
 def compile_candidate(
-    placeholder: str, libkmc: bool, libultra: bool = False
+    placeholder: str, profile: CompileProfile
 ) -> tuple[bool, str, Path]:
-    """Run `make nonmatching-func FUNC=<placeholder> [LIBKMC=1|LIBULTRA=1]`."""
+    """Run `make nonmatching-func FUNC=<placeholder> [LIBKMC=1|LIBULTRA=1|MAIN=1] [FASTMATH=1]`."""
     current_o = NONMATCHINGS_DIR / placeholder / "current.o"
     cmd = ["make", "nonmatching-func", f"FUNC={placeholder}"]
-    if libkmc:
+    if profile.libkmc:
         cmd.append("LIBKMC=1")
-    elif libultra:
+    elif profile.libultra:
         cmd.append("LIBULTRA=1")
+    elif profile.main:
+        cmd.append("MAIN=1")
+    if profile.fastmath:
+        cmd.append("FASTMATH=1")
     proc = subprocess.run(
         cmd,
         cwd=ROOT_DIR,
@@ -320,29 +392,42 @@ def score_diff(raw: dict, max_mismatches: int = 5) -> dict:
     }
 
 
-def resolve_profile(profile: str, placeholder: str) -> tuple[bool, bool]:
-    """Resolve the compile profile to (libkmc, libultra) flags.
+def resolve_profile(profile: str, placeholder: str, seg_stem: str) -> CompileProfile:
+    """Resolve the compile profile to the isolated-compile flags.
 
-    `auto` detects by upstream-src presence; the explicit choices force a
-    profile. Mirrors the Makefile's per-library CFLAGS so the candidate object
-    reflects ground-truth bytes (libkmc -O, libultra -O3 -funsigned-char).
+    `auto` detects libkmc/libultra by upstream-src presence; the explicit choices
+    force a profile. `main` mirrors mk/main.mk's -DF3DEX_GBI_2 game profile for a
+    src/main/ DL fn. -ffast-math is auto-detected from the asm (a bare sqrt), for
+    the game/main profile ONLY — a lib profile's CFLAGS are already ground truth.
+    main is explicit-only under `auto` (the F3DEX define has no reliable asm tell);
+    pass --profile main for a DL fn (docs/hazards.md#display-lists).
     """
+    libkmc = libultra = main = False
     if profile == "libkmc":
-        libkmc, libultra = True, False
+        libkmc = True
     elif profile == "libultra":
-        libkmc, libultra = False, True
+        libultra = True
+    elif profile == "main":
+        main = True
     elif profile == "default":
-        libkmc, libultra = False, False
-    else:
+        pass
+    else:  # auto
         libkmc = detect_libkmc_profile(placeholder)
         libultra = (not libkmc) and detect_libultra_profile(placeholder)
+    fastmath = (not libkmc and not libultra) and detect_needs_fastmath(
+        placeholder, seg_stem
+    )
     if libkmc:
         log(f"[profile] libkmc (-O) — placeholder found in {LIBKMC_SRC}")
     elif libultra:
         log(
             f"[profile] libultra (-O3 -funsigned-char) — placeholder found in {LIBULTRA_SRC}"
         )
-    return libkmc, libultra
+    elif main:
+        log("[profile] main (-DF3DEX_GBI_2)")
+    if fastmath:
+        log("[profile] +fast-math (bare sqrt.s/sqrt.d in target asm)")
+    return CompileProfile(libkmc=libkmc, libultra=libultra, main=main, fastmath=fastmath)
 
 
 def main() -> None:
@@ -355,10 +440,12 @@ def main() -> None:
     )
     parser.add_argument(
         "--profile",
-        choices=["auto", "libkmc", "libultra", "default"],
+        choices=["auto", "libkmc", "libultra", "main", "default"],
         default="auto",
-        help="Compile profile. auto = detect by upstream-src presence; "
-        "libkmc = force -O; libultra = force -O3 -funsigned-char; default = force -O2.",
+        help="Compile profile. auto = detect by upstream-src presence "
+        "(+ -ffast-math on a bare-sqrt fn); libkmc = force -O; "
+        "libultra = force -O3 -funsigned-char; main = force -O2 -DF3DEX_GBI_2 (DL); "
+        "default = force -O2.",
     )
     args = parser.parse_args()
 
@@ -373,9 +460,9 @@ def main() -> None:
     reference_o = ensure_reference_object(seg_stem)
     log(f"[reference] {reference_o.relative_to(ROOT_DIR)}")
 
-    libkmc, libultra = resolve_profile(args.profile, placeholder)
+    profile = resolve_profile(args.profile, placeholder, seg_stem)
 
-    ok, compile_log, current_o = compile_candidate(placeholder, libkmc, libultra)
+    ok, compile_log, current_o = compile_candidate(placeholder, profile)
     if not ok:
         emit(
             {

@@ -31,6 +31,9 @@ glabel func_80012345
 /* === end asm ground truth ====================================== */
 
 // === Function body ============================================
+// SUSPECT: Ghidra _NON_MATCHING/degenerate decompile — likely wrong.
+// Translate from the asm ground-truth block above; the body below is
+// shape-only, not to be trusted.
 u32 func_80012345(void)
 {
     return 0;

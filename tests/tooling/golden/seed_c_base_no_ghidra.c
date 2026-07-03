@@ -31,7 +31,8 @@ glabel func_80012345
 /* === end asm ground truth ====================================== */
 
 // === Function body ============================================
-u32 func_80012345(void)
-{
-    return 0;
+// TODO: no Ghidra decompile for func_80012345 — translate from the asm
+// ground-truth block above, then rename m2c synthetics per CLAUDE.md.
+void func_80012345(void) {
+    /* unimplemented */
 }

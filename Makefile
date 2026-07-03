@@ -234,9 +234,9 @@ help:
 # tools/decomp_loop.py. base.c has no INCLUDE_ASM, so a single-step `gcc -c`
 # mirrors what decomp.me produces. Always defines NONMATCHING.
 nonmatching-func:
-	@test -n "$(FUNC)" || { echo "Usage: make nonmatching-func FUNC=<func_XXXXXXXX> [LIBKMC=1|LIBULTRA=1]" >&2; exit 1; }
+	@test -n "$(FUNC)" || { echo "Usage: make nonmatching-func FUNC=<func_XXXXXXXX> [LIBKMC=1|LIBULTRA=1|MAIN=1] [FASTMATH=1]" >&2; exit 1; }
 	@test -f nonmatchings/$(FUNC)/base.c || { echo "nonmatchings/$(FUNC)/base.c not found; run tools/seed_c.py first" >&2; exit 1; }
-	$(CC) -c $(if $(LIBKMC),$(LIBKMC_CFLAGS),$(if $(LIBULTRA),$(LIBULTRA_CFLAGS),$(CFLAGS))) -DNONMATCHING -o nonmatchings/$(FUNC)/current.o nonmatchings/$(FUNC)/base.c
+	$(CC) -c $(if $(LIBKMC),$(LIBKMC_CFLAGS),$(if $(LIBULTRA),$(LIBULTRA_CFLAGS),$(if $(MAIN),$(MAIN_CFLAGS),$(CFLAGS)))) $(if $(FASTMATH),-ffast-math,) -DNONMATCHING -o nonmatchings/$(FUNC)/current.o nonmatchings/$(FUNC)/base.c
 
 # In-tree spot-check build. Compiles src/$(SEG).c.spotcheck (the parent with the
 # target function's INCLUDE_ASM swapped for its candidate C body under NONMATCHING)

@@ -16,15 +16,23 @@ seed = load_tool("seed_c")
 
 
 # --- stitch_base_c (golden) ----------------------------------------------
-# Locks the assembled base.c text before stitch_base_c's 8-arg signature is
-# refactored into a parameter object. Exercises every section: rodata warning,
-# parent externs, sibling asm, auto-externs, m2c reference, sanitized ghidra body.
+# Locks the assembled base.c text. Exercises every section: rodata warning,
+# parent externs, sibling asm, auto-externs, m2c reference, the asm ground-truth
+# block, and the sanitized ghidra body. Three variants cover the body-routing
+# branches: a trusted decompile, a degenerate (_NON_MATCHING) decompile, and an
+# absent ghidra.c (MCP-down / asm-first).
 
 
 def _stitch_inputs(tmp_path: Path):
     (tmp_path / "m2c.c").write_text("int m2c_ref(void) { return 0; }\n")
     (tmp_path / "ghidra.c").write_text(
         "/* [MM12] copied from ELF */\nundefined4 returns_0(void)\n{\n    return 0;\n}\n"
+    )
+    (tmp_path / "target.s").write_text(
+        "glabel func_80012345\n"
+        "/* 0000 3C048001 */  lui   $a0, 0x8001\n"
+        "/* 0004 03E00008 */  jr    $ra\n"
+        "/* 0008 24840010 */  addiu $a0, $a0, 0x10\n"
     )
     return dict(
         out_dir=tmp_path,
@@ -35,19 +43,81 @@ def _stitch_inputs(tmp_path: Path):
         m2c_path=tmp_path / "m2c.c",
         ghidra_path=tmp_path / "ghidra.c",
         missing_rodata=["D_80099999"],
+        target_s_path=tmp_path / "target.s",
     )
 
 
-def test_stitch_base_c_golden(tmp_path, golden_dir, regen):
-    kwargs = _stitch_inputs(tmp_path)
-    out_path = seed.stitch_base_c(seed.BaseCSpec(**kwargs))
-    produced = out_path.read_text()
-
-    gpath = golden_dir / "seed_c_base.c"
+def _assert_golden(produced: str, gpath, regen):
     if regen or not gpath.exists():
         gpath.write_text(produced)
         pytest.skip(f"golden regenerated: {gpath.name}")
     assert produced == gpath.read_text()
+
+
+def test_stitch_base_c_golden(tmp_path, golden_dir, regen):
+    """Trusted decompile: body kept as the active start, asm block above it."""
+    kwargs = _stitch_inputs(tmp_path)
+    out_path = seed.stitch_base_c(seed.BaseCSpec(**kwargs))
+    _assert_golden(out_path.read_text(), golden_dir / "seed_c_base.c", regen)
+
+
+def test_stitch_base_c_degenerate_golden(tmp_path, golden_dir, regen):
+    """Degenerate decompile: SUSPECT banner routes the agent to the asm block."""
+    kwargs = _stitch_inputs(tmp_path)
+    kwargs["ghidra_degenerate"] = True
+    out_path = seed.stitch_base_c(seed.BaseCSpec(**kwargs))
+    _assert_golden(
+        out_path.read_text(), golden_dir / "seed_c_base_degenerate.c", regen
+    )
+
+
+def test_stitch_base_c_no_ghidra_golden(tmp_path, golden_dir, regen):
+    """Absent ghidra.c (MCP down): TODO body points at the asm ground truth."""
+    kwargs = _stitch_inputs(tmp_path)
+    kwargs["ghidra_path"] = tmp_path / "missing-ghidra.c"  # does not exist
+    out_path = seed.stitch_base_c(seed.BaseCSpec(**kwargs))
+    _assert_golden(
+        out_path.read_text(), golden_dir / "seed_c_base_no_ghidra.c", regen
+    )
+
+
+# --- is_degenerate_ghidra_body -------------------------------------------
+
+
+def test_degenerate_non_matching_suffix():
+    # S156: a `_NON_MATCHING`-suffixed decompile is untrustworthy whole-body.
+    body = "undefined4 func_80052100_NON_MATCHING(void)\n{\n    return 0;\n}\n"
+    assert seed.is_degenerate_ghidra_body(body) is True
+
+
+def test_degenerate_phantom_shift_flagged_via_suffix():
+    # S156 phantom `>> 0x1f` on a plain lw — carried a _NON_MATCHING name.
+    body = (
+        "undefined4 func_80052070_NON_MATCHING(void)\n"
+        "{\n    return DAT_801b6098 >> 0x1f;\n}\n"
+    )
+    assert seed.is_degenerate_ghidra_body(body) is True
+
+
+def test_degenerate_return_const_without_suffix():
+    # A bare `return 0;` shell is degenerate even without the suffix tell.
+    assert seed.is_degenerate_ghidra_body("s32 f(void)\n{\n    return 0;\n}\n") is True
+    assert seed.is_degenerate_ghidra_body("void f(void)\n{\n}\n") is True
+
+
+def test_real_body_not_degenerate():
+    # A genuine multi-statement body must NOT be flagged (conservative).
+    body = (
+        "s32 f(s32 a)\n{\n    s32 x;\n    x = a + 1;\n"
+        "    foo(x);\n    return x;\n}\n"
+    )
+    assert seed.is_degenerate_ghidra_body(body) is False
+
+
+def test_terse_real_expression_not_degenerate():
+    # `return a + 1;` is terse but real (not a bare const) — not flagged.
+    body = "s32 f(s32 a)\n{\n    return a + 1;\n}\n"
+    assert seed.is_degenerate_ghidra_body(body) is False
 
 
 # --- sanitize_ghidra_body -------------------------------------------------

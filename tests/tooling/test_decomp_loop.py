@@ -62,6 +62,76 @@ def test_score_diff_respects_max_mismatches():
     assert out["top_mismatches"] == []
 
 
+# --- detect_needs_fastmath / resolve_profile (pure) -----------------------
+# Lock the `main`/F3DEX2 + fast-math profile detector (S151/S152).
+
+
+def _write_target_s(tmp_path, placeholder, body):
+    d = tmp_path / placeholder
+    d.mkdir()
+    (d / "target.s").write_text(f"glabel {placeholder}\n{body}")
+
+
+def test_detect_needs_fastmath_positive(tmp_path, monkeypatch):
+    # A bare FPU `sqrt.s` (real asm format: /* ROM VRAM WORD */ mnemonic).
+    _write_target_s(
+        tmp_path,
+        "func_8003E790",
+        "    /* 19B90 8003E790 27BDFFE8 */  addiu   $sp, $sp, -0x18\n"
+        "    /* 19B98 8003E798 46007384 */  sqrt.s  $fa1, $fa1\n"
+        "    /* 19B9C 8003E79C 03E00008 */  jr      $ra\n",
+    )
+    monkeypatch.setattr(dl, "NONMATCHINGS_DIR", tmp_path)
+    assert dl.detect_needs_fastmath("func_8003E790", "193D0") is True
+
+
+def test_detect_needs_fastmath_negative_library_call(tmp_path, monkeypatch):
+    # `jal sqrt` (library call) is NOT the bare FPU opcode — must not fire.
+    _write_target_s(
+        tmp_path,
+        "func_80012345",
+        "    /* 0000 80012345 3C048001 */  lui   $a0, 0x8001\n"
+        "    /* 0004 80012349 0C001234 */  jal   sqrt\n"
+        "    /* 0008 8001234D 03E00008 */  jr    $ra\n",
+    )
+    monkeypatch.setattr(dl, "NONMATCHINGS_DIR", tmp_path)
+    assert dl.detect_needs_fastmath("func_80012345", "1050") is False
+
+
+def test_resolve_profile_main_explicit(monkeypatch):
+    monkeypatch.setattr(dl, "detect_needs_fastmath", lambda p, s: False)
+    prof = dl.resolve_profile("main", "func_80012345", "1050")
+    assert (prof.main, prof.libkmc, prof.libultra, prof.fastmath) == (
+        True,
+        False,
+        False,
+        False,
+    )
+
+
+def test_resolve_profile_main_with_fastmath(monkeypatch):
+    monkeypatch.setattr(dl, "detect_needs_fastmath", lambda p, s: True)
+    prof = dl.resolve_profile("main", "func_8006A100", "6A000")
+    assert prof.main is True and prof.fastmath is True
+
+
+def test_resolve_profile_lib_never_gets_fastmath(monkeypatch):
+    # A lib profile's CFLAGS are already ground truth — never add -ffast-math,
+    # even if the asm has a bare sqrt (detector short-circuited out).
+    monkeypatch.setattr(dl, "detect_needs_fastmath", lambda p, s: True)
+    prof = dl.resolve_profile("libultra", "func_x", "1050")
+    assert prof.libultra is True and prof.fastmath is False
+
+
+def test_resolve_profile_auto_never_forces_main(monkeypatch):
+    # auto must not guess `main` (the F3DEX define has no reliable asm tell).
+    monkeypatch.setattr(dl, "detect_libkmc_profile", lambda p: False)
+    monkeypatch.setattr(dl, "detect_libultra_profile", lambda p: False)
+    monkeypatch.setattr(dl, "detect_needs_fastmath", lambda p, s: False)
+    prof = dl.resolve_profile("auto", "func_80012345", "1050")
+    assert (prof.main, prof.libkmc, prof.libultra) == (False, False, False)
+
+
 # --- end-to-end golden ----------------------------------------------------
 
 GOLDEN_FN = "rand"
