@@ -51,6 +51,10 @@ asm_extracted/
 nonmatchings/
 permuter_settings.toml
 
+# Session working scratch (kill-durable bases, permuter logs, mechanism proofs;
+# see docs/hazards.md#pervasive-regalloc-classical-main scratchpad/best_<fn>.c convention)
+scratchpad/
+
 # In-tree spot-check scratch (created and removed during the execution loop's finalize step)
 src/*.c.spotcheck
 build/src/*.spotcheck.o
