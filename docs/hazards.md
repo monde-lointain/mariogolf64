@@ -911,60 +911,60 @@ from `refs-unplaced`, where a merely *referenced* extern is safe to place.)
 
 **Sub-cases / variants:**
 
-**Dual-section carve (S96).** A verbatim coddog mirror can need BOTH a `.data` carve (here) AND a
-`.rodata` carve ([`.rodata sibling-yaml pattern`](#rodata-sibling-yaml-pattern)) in the SAME
+**Dual-section carve.** A verbatim coddog mirror can need both a `.data` carve (here) and a
+`.rodata` carve ([`.rodata sibling-yaml pattern`](#rodata-sibling-yaml-pattern)) in the same
 increment when the upstream file has file-scope `static` *initialized* arrays **and** a `switch` /
 pooled FP constants. drvrnew.c (the al synth driver) had both: six `static s32 *_PARAMS[]` arrays
 + a `switch(fxType)` jtbl + SCALE/CONVERT/2³² f64 consts. Size each carve from the `%hi(D_<vram>)`
 address band: a `0x800Cxxxx`-range ref is `.data` (carved out of `main_data` with a 3-way
 split: `[start,data]` / `[carve,.data,<file>]` / `[end,data]`), a `0x800D2xxx`/`jtbl_` ref is
-`.rodata` (its own subseg → attribute-change carve, or split). Both are execution-time (NOT gate)
+`.rodata` (its own subseg → attribute-change carve, or split). Both are execution-time (not gate)
 enablers, landed with the real body; confirm the C-object section sizes match the carve extents
-(drvrnew.o: `.data` 0x190 = 100 `s32`, `.rodata` 0x40). The `static` arrays do NOT trip
+(drvrnew.o: `.data` 0x190 = 100 `s32`, `.rodata` 0x40). The `static` arrays do not trip
 `file-static` (that's the BSS/uninitialized hazard); initialized statics are a `.data` carve, not a
 classical reroute.
 
-**`.data` init-static-array pre-flag (S104).** A file-scope NON-const initialized `static <type>
+**`.data` init-static-array pre-flag.** A file-scope non-const initialized `static <type>
 <name>[…] = <init>;` array (`.data` the verbatim mirror re-emits) is now pre-flagged
 `data-carve:<names>` by `pick_target.py`, the `.data` analogue of the `static const` rodata-widening
 signal. It is the recurring S92/S101 un-flagged class no other detector caught (`FILE_STATIC_RE`
 excludes `=`-initialized lines, `defines_data_globals` skips `static`, `defines_local_static_data` is
 depth≥1): xprintf's `spaces`/`zeroes`, env's `eqpower[128]`, _Litob's `ldigs`/`udigs`. `static` bars
-cross-file linkage, so the array is file-PRIVATE and the source-scan sidesteps the S92 own-vs-extern
-blocker (the reason the asm `addiu %lo` scan was reverted). Fired ONLY on the single-file (non
+cross-file linkage, so the array is file-private and the source-scan sidesteps the S92 own-vs-extern
+blocker (the reason the asm `addiu %lo` scan was reverted). Fired only on the single-file (non
 `c-combined`) subset (S101 safe slice; the multi-file per-member attribution stays a BACKLOG
 follow-up). Advisory/display-only: recover the vram + exact extent from the asm at execution, then
 carve as above (confirm against the `.o` `.data` section size, per the rodata extent-oracle note).
 
-**Shared global ⇒ DROP, never carve (S97).** The carve-vs-drop choice is not free when the defined
-global is *shared*, referenced by OTHER still-asm subsegs via the splat `D_<vram>` name. Then the
-**DROP-to-extern is mandatory** and a carve cannot work: a carve makes the mirror `.o` define the C
+**Shared global ⇒ drop, never carve.** The carve-vs-drop choice is not free when the defined
+global is *shared*, referenced by other still-asm subsegs via the splat `D_<vram>` name. Then the
+**drop-to-extern is mandatory** and a carve cannot work: a carve makes the mirror `.o` define the C
 *name* (e.g. `alGlobals`) while the un-flipped siblings still reference `D_<vram>`, so they go
 unresolved; bridging them with a `symbol_addrs` entry then creates an absolute-symbol-vs-`.data`
-double-definition. DROP is clean: one splat-side def (the `make extract` rename names the existing
+double-definition. Drop is clean: one splat-side def (the `make extract` rename names the existing
 `.data` dlabel), and every referrer (the mirror's `extern` + all sibling asm) resolves to it. Carve
-ONLY when THIS file is the **sole referrer** (a file-private initialized array/const with content the
+only when this file is the **sole referrer** (a file-private initialized array/const with content the
 compiler must emit, like drvrnew.c's `static s32 *_PARAMS[]`). Tell them apart by grepping the `D_<vram>`
-referrers across `asm/` + `src/`: >1 distinct subseg ⇒ shared ⇒ DROP. S97 `sl.c` `alGlobals`
+referrers across `asm/` + `src/`: >1 distinct subseg ⇒ shared ⇒ drop. S97 `sl.c` `alGlobals`
 (`D_800C8180`, refd by env @804D0 + fx @815C0 + sl @82160) dropped to the `libaudio.h` extern +
 `alGlobals=0x800C8180 // size:0x4`; the 16 B `.data` (4 B ptr + 12 B section-align pad) stayed
-splat-side. `pick_target.py` now unions `defines-data` over a `c-combined` pack's member upstreams
-(S97), so a secondary member's defined global is priced at the gate, not at execution.
+splat-side. `pick_target.py` now unions `defines-data` over a `c-combined` pack's member upstreams,
+so a secondary member's defined global is priced at the gate, not at execution.
 
-**Function-local static ⇒ automatic sole-referrer carve (S142).** A `static <T> <name> = <init>;`
-declared INSIDE a function is file-private by construction (no external linkage, no `D_<vram>` a
-sibling can name), so it is ALWAYS the sole referrer ⇒ carve, and the `asm/`+`src/` share-grep above
+**Function-local static ⇒ automatic sole-referrer carve.** A `static <T> <name> = <init>;`
+declared inside a function is file-private by construction (no external linkage, no `D_<vram>` a
+sibling can name), so it is always the sole referrer ⇒ carve, and the `asm/`+`src/` share-grep above
 is unnecessary (the share-vs-drop question only arises for file-scope `defines-data`). Used-vs-unused
 does not change this: both carve (KMC -O3 emits the initialized local to `.data`) — S138 n_reverb's
-`val`/`lastval`/`blob` were UNUSED, S142 aud_samples's `only_one_flag`=1 was USED, both sole-referrer
+`val`/`lastval`/`blob` were unused, S142 aud_samples's `only_one_flag`=1 was used, both sole-referrer
 carves. S142 `aud_samples.c`: `only_one_flag` (a `__MusIntSamplesCurrent` local) carved
 `[0xA2F00,0xA2F10)`=0x10 (4 B + 0xC section-align pad), `.o .data`=0x10, a 1-line split of
 `main_data`'s tail.
 
-**Shared at a FIELD, and undroppable ⇒ carve + canonical-addend (S116).** Two refinements to the
-S97 share-check. (1) Sweep the WHOLE object range `base..base+size`, not just the base `D_<vram>`: a
+**Shared at a field, and undroppable ⇒ carve + canonical-addend.** Two refinements to the
+S97 share-check. (1) Sweep the whole object range `base..base+size`, not just the base `D_<vram>`: a
 sibling that reads a *field* references `D_<base+N>` (a different label), so a base-only grep misses
-it and wrongly reads "sole-referrer." (2) "Shared ⇒ DROP" needs an **"AND droppable"** qualifier — a
+it and wrongly reads "sole-referrer." (2) "Shared ⇒ drop" needs an **"and droppable"** qualifier — a
 shared global whose initializer chains to file-private `static`s cannot be dropped (dropping the def
 orphans the statics → the compiler can dead-strip them → `.text` mismatch), so the **carve is forced
 even though it is shared**. Resolve the sibling's field reference by naming the carved global
@@ -981,42 +981,42 @@ only the link error (`undefined reference to D_800C7E24`) surfaced the field ref
 `pick_target.py` could report a defines-data global's field-level `base+N` external refs (not just the
 base) so the share-status is priced at the gate.
 
-**Carve extent = the `.o` `.data` SECTION size (16-aligned), not the symbol-content sum (S117).** The
+**Carve extent = the `.o` `.data` section size (16-aligned), not the symbol-content sum.** The
 compiler pads `.data` up to the section's 16-byte alignment, so the carve runs to the next 16 boundary,
-PAST the last placed symbol. `nucontmgr.c`'s `.data` content is 0x24 (`nuContReadFunc` 0x4 + `funcList`
-0x14 + `nuContCallBack` 0xC) but the `.o` `.data` SECTION is **0x30** (0xC of END padding); carving 0x24
+past the last placed symbol. `nucontmgr.c`'s `.data` content is 0x24 (`nuContReadFunc` 0x4 + `funcList`
+0x14 + `nuContCallBack` 0xC) but the `.o` `.data` section is **0x30** (0xC of end padding); carving 0x24
 left the next subseg 0xC inside the section, so the link placed the 0x30 section over it and shifted the
 data segment. Always size the carve from `mips-linux-gnu-objdump -h build/.../<file>.o` `.data`, never the
 sum of `symbol_addrs` sizes; the ROM zero-padding at `carve_end..section_end` is the mirror's, owned by the
 carve (it matches the compiler's `.data` tail-padding bytes).
 
-**Unused function-local statics still emit `.data`; localize by VALUE, not asm ref (S138).** KMC GCC
-2.7.2 `-O3` does NOT dead-strip an unused function-local `static` — `static f32 val=0.0,
-lastval=-10.0; static f32 blob=0;` that NO code path reads still emits its `.data` (here 0x10:
+**Unused function-local statics still emit `.data`; localize by value, not asm ref.** KMC GCC
+2.7.2 `-O3` does not dead-strip an unused function-local `static` — `static f32 val=0.0,
+lastval=-10.0; static f32 blob=0;` that no code path reads still emits its `.data` (here 0x10:
 `0x00000000 0xC1200000 0x00000000` + tail pad). So `defines-data` on an n_audio_sc / verbatim mirror
-is a CERTAIN `.data` carve enabler, never a "maybe pure-cp": pre-scope the carve. The localization
-twist: an unused static carries NO `%hi/%lo(D_<vram>)` in the subseg asm (nothing references it), so
-the recover-vram-from-asm path that finds rodata-literals does NOT find it. Localize by VALUE instead
+is a certain `.data` carve enabler, never a "maybe pure-cp": pre-scope the carve. The localization
+twist: an unused static carries no `%hi/%lo(D_<vram>)` in the subseg asm (nothing references it), so
+the recover-vram-from-asm path that finds rodata-literals does not find it. Localize by value instead
 — compile the verbatim body, read the `.o` `.data` size (`objdump -h`), then search the baserom
 `.data` region for the static block's initializer byte pattern; a clean SHA-miss that is exactly the
-`.o` `.data` size LARGER than baserom is this hazard. `n_reverb.c`: build #1 was 16 B larger (the 0x10
+`.o` `.data` size larger than baserom is this hazard. `n_reverb.c`: build #1 was 16 B larger (the 0x10
 `.data`, nothing carved), located at rom 0xA31A0 via the `00000000 C1200000 00000000` pattern, carved
 (3-way `main_data | n_reverb .data | main_data_1b` split), then byte-exact. Beware value-FP: the same
 block appears at the *libultra* `reverb.c` `.data` (rom 0xA356C, its own val/lastval/blob), so
 disambiguate by the n_audio_sc `.data` link-cluster (it sits just below the libnusys `.data` carves,
 before 0xA31D0), not value alone.
 
-**Tooling follow-up (S138).** `pick_target.py` reports `defines-data:<names>` but not the resolved
+**Tooling follow-up.** `pick_target.py` reports `defines-data:<names>` but not the resolved
 `.data` rom address (`data-static:<addr>`), so the gate spends a build + cmp + value-search to
 localize. A detector could resolve it by parsing the static's initializer to bytes and searching the
-baserom `.data`, BUT must disambiguate the multi-hit value-FP (n_reverb's block matched 2 sites) via
+baserom `.data`, but must disambiguate the multi-hit value-FP (n_reverb's block matched 2 sites) via
 a link-cluster / positional anchor before emitting an address — a value-only unique-hit is not safe.
 Deferred to a golden-gated tooling branch (see `BACKLOG.md ## Carry-overs`; a feature with FP /
 regression surface, not a quick edit).
 
 **Procedure:** Classical loop, drop the definition; the linker resolves to the splat-side global.
 
-**Verbatim-body fast path (S42).** When the *only* edit from upstream is dropping the file-scope
+**Verbatim-body fast path.** When the *only* edit from upstream is dropping the file-scope
 definitions (the function body is otherwise verbatim), this is a known-edit **mirror**, not a true
 classical target: prove it by full-make ROM SHA-1 like any mirror, skip the seed / `decomp_loop` /
 spot-check cycle. The dropped def changes only the `.data`/`.bss` allocation (moved splat-side); the
@@ -1027,7 +1027,7 @@ in one `make`. Only reach for the classical seed loop when dropping the def forc
 `symbol_addrs.txt` at its asm-recovered vram (scalar `// size:0x4`, array `// size:stride×count`);
 `pick_target.py` surfaces the array dimension as `defines-data:<name>[DIM]`.
 
-**Function-local statics in a shared data blob (S45).** The fast path also covers a *function-local*
+**Function-local statics in a shared data blob.** The fast path also covers a *function-local*
 `static` array whose initialized bytes live in a shared data segment (`main_data`), not in this
 object's `.data` and not in a `.rodata` sibling. `pick_target.py` won't flag it (a `static` is
 invisible to the refs-unplaced extern grep, and the asm names it `D_<vram>` which resolves from
@@ -1041,7 +1041,7 @@ on `sizeof applied to an incomplete type`), then add the symbol add-only at its 
 a `.NON_MATCHING`-suffixed map address is an alias, not the storage. (S45 `osGbpakReadId`:
 `nintendo`@0x800C93F0 size:0x30, `mmc_type`@0x800C9420 size:0x14.)
 
-**Function-local static FP constant: the `data-static` pre-flag (S52).** A function-local
+**Function-local static FP constant: the `data-static` pre-flag.** A function-local
 `static float`/`double` initializer (e.g. `static float dtor = 3.1415926/180.0`) is the FP analogue
 of the S45 array case: the mirror re-emits its initialized bytes into the data segment, shifting it
 → full-make SHA miss. Unlike the array case it *is* visible in asm (the fn loads it via
@@ -1054,7 +1054,7 @@ vram so `make extract` renames the `D_<vram>` dlabel; no `.data` emitted, `.text
 **not** a `.rodata` sibling split. (S49 `xseed`@0x800C81C0; S52 `dtor`@0x800C81E0 for `guRotateRPYF`;
 the same gu data band holds `guRotateF`@0x800C81D0, `guAlignF`@0x800C81A0.)
 
-**The drop-extern *hoist* vs. the verbatim-static *carve* (S61).** Be precise about scope: this is a
+**The drop-extern *hoist* vs. the verbatim-static *carve*.** Be precise about scope: this is a
 **function-local** `static` (declared inside the fn, persists across calls, *internal linkage*), not
 a file-scope `static`. Compiled verbatim, the compiler emits it as a **local** symbol (`dtor.2` in the
 `.o`'s symbol table), so two siblings' identically-named function-local statics **never collide**:
@@ -1068,7 +1068,7 @@ dtor;` is a duplicate symbol / binds the wrong vram). So two ways place a functi
 symbol add, no `.data` emitted; **(b) keep it verbatim** (preserving the function-local semantics)
 and carve a `.data` subseg for the file: `[<rom>, .data, lib<...>/<file>]` + a continuation
 `[<rom+ext>, data]`. The carve is the more verbatim option (no source edit, no hoist). **If you carve,
-size the extent from the COMPILED object, not the static's byte size:**
+size the extent from the compiled object, not the static's byte size:**
 `mips-linux-gnu-objdump -s -j .data build/.../<file>.o` (the section is alignment-padded: `dtor` is
 4B but `rotate.o(.data)` is **16B** = 4B + 12B pad), cross-checked against the baserom bytes to the
 next data symbol. A short carve double-counts (the compiled `.data` injects its full padded extent
@@ -1077,15 +1077,15 @@ reflows (S61: a 4B carve grew the ROM +16B; the misleading `cmp` first-diff was 
 artifact of the size-grown file, not the real divergence). Clean-rebuild to verify. (S61 `guRotateF`:
 16B carve `0xA35D0`→`0xA35E0`.)
 
-**Unreferenced carve: locate the offset by ROM byte-search (S100).** The carved `.data` bytes may be
-entirely UNREFERENCED: file-scope / function-local `static`s that no function reads, but which KMC GCC
+**Unreferenced carve: locate the offset by ROM byte-search.** The carved `.data` bytes may be
+entirely unreferenced: file-scope / function-local `static`s that no function reads, but which KMC GCC
 2.7.2 still emits (an explicitly-`=0`-initialized static lands in `.data` not `.bss`, and an unused
-initialized static is NOT elided at `-O3`). Then there is no `%hi/%lo(D_<vram>)` in any body: the
+initialized static is not elided at `-O3`). Then there is no `%hi/%lo(D_<vram>)` in any body: the
 S61/S96 "size from the address band" step has nothing to read, and `pick_target`'s `defines-data`
 flag names the symbols but can't bind a vram. **Locate it by byte-search:**
 `mips-linux-gnu-objdump -s -j .data build/.../<file>.o` for the compiled bytes, then search the
 baserom for that exact pattern (`xxd baserom.z64 | grep '<hex words>'`) → the ROM offset is the carve
-start. The link order does NOT place it immediately after the previous mirror's carve; other files'
+start. The link order does not place it immediately after the previous mirror's carve; other files'
 `.data` interleave (S100 `reverb.c`'s 0x20 sat at `0xA3560`, 0x100 B past drvrnew's `0xA3460` tail).
 Confirm the extent against the next baserom data symbol, then 3-way split as usual. (S100 `reverb.c`:
 `L_INC[]`={0x10,0x10,0x20} + `val`=0.0 + `lastval`=-10.0 (`0xC1200000`) + `blob`=0, 0x20 at `0xA3560`.)
@@ -1093,7 +1093,7 @@ Tooling follow-up (S100 #1, deferred off-cadence ranker change): `pick_target.py
 `defines-data:<g>;unref` when the flagged global has no `%lo` ref in the owning fn bodies, signalling
 the gate to byte-search rather than asm-recover.
 
-**Carve timing: execution, never the plan gate (S68).** A `.data` (or any ld-section) sibling
+**Carve timing: execution, never the plan gate.** A `.data` (or any ld-section) sibling
 carved from the C compile cannot land at the `/sprint-plan` gate: the gate validates the *stub*
 state, where an `INCLUDE_ASM` `.text`-only object emits no `.data`, so the sibling carves an empty
 range and shifts every following data byte → the gate green-ROM SHA check fails. The gate flips
@@ -1102,13 +1102,13 @@ makes the `.o` emit the real `.data`). The stub's `%lo(D_<vram>)` resolves from 
 `data` subseg in the meantime. (S68 `gu/align.c`: deferred the `[0xA35A0, .data, libultra/gu/align]`
 carve from gate to the body step; the verbatim twin of S61's carve, first-build match.)
 
-**Symbol-add vs. section-carve: the gate-safe drop-def sub-case (S81).** The S68 "execution, never
+**Symbol-add vs. section-carve: the gate-safe drop-def sub-case.** The S68 "execution, never
 the gate" rule is specifically about an **ld-section sibling carve** (a `[<rom>, .data, …]` /
 `.bss` / `.rodata` yaml subseg), which carves an empty range against the `.text`-only stub and shifts
-every following data byte → gate SHA break. It does **NOT** cover a plain `symbol_addrs.txt` data
+every following data byte → gate SHA break. It does **not** cover a plain `symbol_addrs.txt` data
 entry that merely **names an existing auto `D_<vram>` label** (the global already lives in a generic
 `data`/`bss` subseg; the add only renames the dlabel, emits no new section). That symbol-add is
-**SHA-neutral at the stub stage** and so MAY be performed at the plan gate alongside the function
+**SHA-neutral at the stub stage** and so may be performed at the plan gate alongside the function
 symbol, saving the mid-execution second `make extract` the recover-extern otherwise forces. The tell
 that a drop-def is the gate-safe symbol-add kind (not a carve): the dropped globals' vrams are already
 visible as `%lo(D_<vram>)` in the **scaffold `.s`** (so they resolve from an existing region, no new
@@ -1116,20 +1116,20 @@ section needed). When in doubt, the gate `make extract && make` green-ROM SHA is
 pre-existing `D_` label is inert, a section carve is not. (S81 `io/siacs.c`: the 3 SI globals
 `__osSiAccessQueueEnabled`@0x800C8210 / `__osSiAccessQueue`@0x801EFFB0 / `siAccessBuf`@0x800FAA00 were
 all visible as `D_<vram>` in the scaffold asm; placing them at the gate would have avoided the 2nd
-extract. Contrast the gu carves S61/S68/S73, which inject real `.data` and MUST stay at execution.)
+extract. Contrast the gu carves S61/S68/S73, which inject real `.data` and must stay at execution.)
 
-**Validate a `D_<vram>` rename with a CLEAN rebuild, not an incremental `make` (S82).** The symbol-add
+**Validate a `D_<vram>` rename with a clean rebuild, not an incremental `make`.** The symbol-add
 is SHA-neutral, but `make` does **not** track the INCLUDE_ASM `.s` dependency of the stub object. After
 the gate `make extract` renames `D_<vram>`→`<name>` in the scaffold `.s`, an *incremental* `make` does
-NOT recompile the stub `.o` (its `.c` is unchanged) → the stale object still references the now-removed
+not recompile the stub `.o` (its `.c` is unchanged) → the stale object still references the now-removed
 `D_<vram>` auto-symbol → `undefined reference to D_<vram>` link failure, masked by a stale-`.z64`
 false-positive SHA. Run `make clean && make extract && make` (or `rm` the affected stub `.o`) to
-validate the rename. This holds whether the rename happens at the gate OR mid-execution, so the gate
+validate the rename. This holds whether the rename happens at the gate or mid-execution, so the gate
 pre-place's only real saving over deferring is one fewer `make extract`; both still need the clean
 rebuild. (S82 `io/controller.c`: gate-placing `__osEepromTimerMsg`@0x8012F4DC et al. failed the
 incremental link with `undefined reference to D_8012F4DC`; `make clean` produced the green ROM.)
 
-**Source-side detector: the coddog-band backstop (S73).** The S52 `data-static`/`rodata-literal`
+**Source-side detector: the coddog-band backstop.** The S52 `data-static`/`rodata-literal`
 pre-flag is **asm-side** (it classifies the fn's `lwc1/ldc1 %lo(D_<addr>)`), and it does **not** fire
 on an un-named **coddog** candidate: `gu/position.c` (`func_800A9C60`, a 99.99 coddog mirror) ranked
 a clean pts-3 with *no* data-static/defines-data flag, hiding its `dtor` carve, even though guPositionF
@@ -1141,6 +1141,16 @@ brace-depth 0, doubly blind to a fn-local static). This is the source-side backs
 needed. Sizing is unchanged from S61: a single `static float` → a **16B** `.data` carve (4B + 12B pad).
 (S73 `gu/position.c`: 16B carve `[0xA35B0, .data, libultra/gu/position]`→`[0xA35C0, data]` for
 random's `xseed` remainder; align/rotate are the identical 16B precedents; first-build SHA match.)
+
+**Provenance:** carve-vs-drop decision: S96 (drvrnew dual `.data`+`.rodata` carve), S97 (shared ⇒
+drop, sl.c `alGlobals`), S116 (field-shared ⇒ carve + canonical addend, nucontgbpakmgr), S142
+(fn-local ⇒ sole-referrer carve, aud_samples); carve extent/sizing: S117 (`.o` `.data` section size,
+nucontmgr), S61 (compiled-object extent, hoist-vs-carve, guRotateF); unref localization: S100 (ROM
+byte-search, reverb.c), S138 (localize-by-value + `data-static` tooling follow-up, n_reverb);
+pre-flags: S104 (`data-carve` init-static array), S52 (`data-static` FP, dtor), S73 (coddog
+source-side backstop, gu/position); drop-def fast paths: S42 (verbatim-body drop-def, osSetEventMesg),
+S45 (shared-data-blob fn-local static, osGbpakReadId); carve timing: S68 (execution not gate,
+gu/align), S81 (gate-safe symbol-add, siacs), S82 (clean-rebuild validate, controller).
 
 ---
 
@@ -1154,9 +1164,9 @@ so a dead-`_DEBUG` include can over-flag, so confirm against the upstream).
 
 **Sub-cases / variants:**
 
-**Vendorable annotation (S54).** `pick_target` tags each missing header `<inc>(vendorable)` when it
+**Vendorable annotation.** `pick_target` tags each missing header `<inc>(vendorable)` when it
 is copyable from upstream: a public companion under an `UPSTREAM_INC_ROOTS` include dir (copy into
-an `-I` dir) OR a source-private header found by basename under an `UPSTREAM_SRC_ROOTS` source tree
+an `-I` dir) or a source-private header found by basename under an `UPSTREAM_SRC_ROOTS` source tree
 (`ultralib/src/**`, copy source-relative next to the mirror, e.g. `xstdio.h`, `guint.h`). A vendorable
 header is a one-time header-vendor *enabler* (pts `needs-copy` +1), **not** a `blk` DoR reject; only
 a *bare* (untagged) header sets `blocked` → `blk`: one present in-tree but unreachable (deferred `-I`),
@@ -1169,8 +1179,8 @@ gate-time re-diagnosis (S49 guint.h, S53 PR-band, S54 sprintf's `xstdio.h`/`stri
   the mirror like `xstdio.h` → `src/libultra/libc/`).
 - **Band-local quote-include (already resolved)** → a `#include "x.h"` resolves source-relative to
   the dir the mirror compiles in, so once the first band sibling has shipped its companion at
-  `src/lib<...>/<band>/x.h` (e.g. `gu/guint.h`, copied alongside `gu/random.c` in S49), every
-  later sibling that quote-includes it is already clean, no enabler. Since S50 `missing_includes`
+  `src/lib<...>/<band>/x.h` (e.g. `gu/guint.h`, copied alongside `gu/random.c`), every
+  later sibling that quote-includes it is already clean, no enabler. Since `missing_includes`
   takes the mirror dir and drops these, so they no longer over-flag as `needs-header`/`blk`. This
   is the include-side of `#open-band-fast-path`; the over-flag only persists for an angle-include
   (`<x.h>`), which is never source-relative.
@@ -1179,7 +1189,7 @@ gate-time re-diagnosis (S49 guint.h, S53 PR-band, S54 sprintf's `xstdio.h`/`stri
   but there is no `-I include/libultra/PR`) is the standing example: flagging an audio leaf as a
   clean flip without that path is a false-clean. Prefer `<PR/x.h>`-style `monegi/` upstreams.
 
-**`.inc.c` body-include vendoring (S133, n_audio_sc).** Some upstreams `#include` a `.inc.c`
+**`.inc.c` body-include vendoring (n_audio_sc).** Some upstreams `#include` a `.inc.c`
 **fragment inside a function body** (not a header): the n_audio_sc N_MICRO command-stream files do
 `#include "inc/<x>.inc.c"` in the `#else` of an `#ifdef N_MICRO`, where the fragment is a few bare
 statements (`n_aInterleave(ptr++); n_aSaveBuffer(...);`), not a TU. Three rules:
@@ -1188,22 +1198,27 @@ statements (`n_aInterleave(ptr++); n_aSaveBuffer(...);`), not a TU. Three rules:
   **renamed `.inc.c` → `.inc` locally** (upstream `inc/n_save_add01.inc.c` → `src/libnaudio/inc/`
   `n_save_add01.inc`). `include_is_vendorable` matches the upstream `#include "inc/<x>.inc.c"` by its
   full source-relative path under `UPSTREAM_SRC_ROOTS` (the n_audio_sc `src/` is registered there), so
-  it no longer false-flags `blk`. Before S133 the detector scanned only `.h` basenames and missed the
+  it no longer false-flags `blk`. Before that the detector scanned only `.h` basenames and missed the
   whole inc set; that masked it as a DoR reject when it was a 1pt cp.
-- **NOT a standalone TU.** The build's source discovery is `find $(SRC_DIR) -name '*.c'`, so vendor
+- **Not a standalone TU.** The build's source discovery is `find $(SRC_DIR) -name '*.c'`, so vendor
   the local copy with the **`.inc` extension** (not `.c`/`.inc.c`): `find -name '*.c'` then never
   sweeps it in as a standalone object (it is a few bare statements, `parse error before '++'` if
   compiled alone). Update the host `.c`'s `#include` to the `.inc` name to match. The `.inc` extension
   also keeps clang-tidy's `bugprone-suspicious-include` quiet — a `.c` include trips it. (The `.inc`
   rename (2026-06-29) retired the prior `.inc.c` local suffix and the Makefile `! -name '*.inc.c'`
   exclusion.)
-- **Do NOT clang-format the fragment.** It is a body-include with function-body indentation; running
+- **Do not clang-format the fragment.** It is a body-include with function-body indentation; running
   `clang-format-22` on it standalone reindents to column 0 (it parses as a TU). Keep it verbatim;
   codegen is unaffected (preprocessor text-inclusion, whitespace-irrelevant). Format only the host
   `.c`.
 
 These files also branch on `N_MICRO`, an n_audio_sc-wide define: see `#needs-define` (the
 `-DN_MICRO=1` `LIBNAUDIO_CFLAGS` pin), the same class as the `-DF3DEX_GBI_2` libultra pin.
+
+**Provenance:** vendorable annotation: S54 (the `(vendorable)` tag + `needs-copy` pts, retiring the
+"blk that's a 1pt cp" re-diagnosis; sprintf `xstdio.h`/`string.h`); band precedents: S49 (`guint.h`),
+S53 (PR-band); band-local quote-include drop: S50 (`missing_includes` takes the mirror dir); `.inc.c`
+body-include vendoring: S133 (n_audio_sc).
 
 ---
 
