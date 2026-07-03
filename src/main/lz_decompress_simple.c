@@ -16,134 +16,165 @@ typedef struct {
 
 extern OSPiHandle* nuPiCartHandle;
 
-s32 lz_decompress_simple(LzDecompressState* param_1) {
-  u16 uVar1;
-  u16 uVar2;
-  u16 uVar3;
-  u16* puVar4;
-  u32 acc;
-  u16* puVar6;
-  u16* puVar7;
-  u16* puVar8;
-  u16* puVar9;
-  u16* puVar10;
-  u16* puVar11;
-  u16* puVar12;
-  u16 desc;
-  u32 t4;
-  if (param_1->flags & 1) {
-    puVar10 = (u16*)param_1->src_cur;
-    puVar10 += 2;
-    puVar4 = (u16*)param_1->dst_start;
+/*
+ * Streaming LZ decompressor over a sliding pair of 4 KiB DMA windows
+ * (called by lz_decompress_dma below, once per filled window).
+ *
+ * CONTROL-FLOW NOTE: the gotos here are load-bearing for the byte-exact KMC
+ * GCC 2.7.2 -O2 match and cannot be replaced with structured loops. Proven
+ * against the compiler source
+ * (docs/hazards.md#pervasive-regalloc-classical-main):
+ *   - The outer dispatch is a goto-loop on purpose. A structured for(;;)/while
+ *     emits NOTE_INSN_LOOP_BEG (stmt.c expand_start_loop), which (a) raises
+ * every outer value's register-allocation loop-depth weight by one (flow.c
+ *     reg_n_refs += loop_depth -> global.c allocno priority), repermuting hard
+ *     registers, and (b) makes loop.c run invariant-motion + induction-variable
+ *     strength reduction, adding ~5 instructions. A goto-loop emits no note, so
+ *     the optimizer leaves it alone.
+ *   - The forward gotos (skip_flush, decode, done) fix the out-of-line block
+ *     placement and branch polarity; GCC 2.7.2 has no basic-block reorder pass,
+ *     so physical layout follows source order and only a goto+label can put a
+ *     block where control does not structurally fall through.
+ */
+s32 lz_decompress_simple(LzDecompressState* state) {
+  u16 flags_raw;
+  u16 w0;
+  u16 w1;
+  u16* dst;
+  u32 bits;
+  u16* tail_dst;
+  u16* copy_end;
+  u16* src_ahead;
+  u16* copy_dst;
+  u16* src;
+  u16* src_end;
+  u16* ref_src;
+  u16 token;
+  u32 is_final;
+
+  if (state->flags & 1) {
+    /* Continuation window: skip the 2-halfword block header. */
+    src = (u16*)state->src_cur;
+    src += 2;
+    dst = (u16*)state->dst_start;
   } else {
-    puVar10 = (u16*)param_1->src_cur;
-    puVar4 = (u16*)param_1->dst_alt;
+    src = (u16*)state->src_cur;
+    dst = (u16*)state->dst_alt;
   }
-  uVar1 = param_1->flags;
-  puVar11 = (u16*)param_1->src_end;
-  puVar8 = puVar10 + 0xf;
-  t4 = ((uVar1 >> 1) ^ 1) & 1;
-loop_top:
-  if (puVar10 < (puVar11 + (-0x10))) {
-    goto body;
-  }
+  flags_raw = state->flags;
+  src_end = (u16*)state->src_end;
+  src_ahead = src + 0xf;
+  is_final = ((flags_raw >> 1) ^ 1) & 1;
 
-  if (t4 == 0) {
-    goto body;
+dispatch:
+  if (src < (src_end + (-0x10))) {
+    goto skip_flush;
   }
-  puVar6 = (u16*)param_1->dst_cur;
-  while (puVar10 < puVar11) {
-    puVar11 = puVar11 + (-1);
-    puVar6 = puVar6 + (-1);
-    *puVar6 = *puVar11;
+  if (is_final == 0) {
+    goto skip_flush;
   }
-
-  param_1->src_cur = (u8*)puVar6;
-  param_1->dst_alt = (u8*)puVar4;
+  /* Near the window end and not the final block: flush the unconsumed tail
+   * backwards into the carry buffer and ask the caller for more input. */
+  tail_dst = (u16*)state->dst_cur;
+  while (src < src_end) {
+    src_end = src_end + (-1);
+    tail_dst = tail_dst + (-1);
+    *tail_dst = *src_end;
+  }
+  state->src_cur = (u8*)tail_dst;
+  state->dst_alt = (u8*)dst;
   return -1;
-body:
-  acc = *puVar10;
 
-  puVar8 = puVar8 + 1;
-  puVar10 = puVar10 + 1;
-  if (acc != 0) {
+skip_flush:
+  bits = *src;
+  src_ahead = src_ahead + 1;
+  src = src + 1;
+  if (bits != 0) {
     goto decode;
   }
-  uVar2 = *puVar10;
-  uVar3 = puVar8[-0xe];
-  *puVar4 = uVar2;
-  uVar2 = puVar8[-0xd];
-  puVar4[1] = uVar3;
-  uVar3 = puVar8[-0xc];
-  puVar4[2] = uVar2;
-  uVar2 = puVar8[-0xb];
-  puVar4[3] = uVar3;
-  uVar3 = puVar8[-0xa];
-  puVar4[4] = uVar2;
-  uVar2 = puVar8[-9];
-  puVar4[5] = uVar3;
-  uVar3 = puVar8[-8];
-  puVar4[6] = uVar2;
-  uVar2 = puVar8[-7];
-  puVar4[7] = uVar3;
-  uVar3 = puVar8[-6];
-  puVar4[8] = uVar2;
-  uVar2 = puVar8[-5];
-  puVar4[9] = uVar3;
-  uVar3 = puVar8[-4];
-  puVar4[10] = uVar2;
-  uVar2 = puVar8[-3];
-  puVar4[0xb] = uVar3;
-  uVar3 = puVar8[-2];
-  puVar4[0xc] = uVar2;
-  uVar2 = puVar8[-1];
-  puVar4[0xd] = uVar3;
-  uVar3 = *puVar8;
-  puVar10 = puVar10 + 0x10;
-  puVar8 = puVar8 + 0x10;
-  puVar4[0xe] = uVar2;
-  puVar4[0xf] = uVar3;
-  puVar4 = puVar4 + 0x10;
-  goto loop_top;
-do_return:
-  return (s32)puVar4 - (s32)param_1->dst_start;
+  /* Control word 0: copy a raw run of 16 halfwords. The paired w0/w1
+   * temporaries and the src_ahead[-n] addressing reproduce the compiler's
+   * load/store pairing. */
+  w0 = *src;
+  w1 = src_ahead[-0xe];
+  *dst = w0;
+  w0 = src_ahead[-0xd];
+  dst[1] = w1;
+  w1 = src_ahead[-0xc];
+  dst[2] = w0;
+  w0 = src_ahead[-0xb];
+  dst[3] = w1;
+  w1 = src_ahead[-0xa];
+  dst[4] = w0;
+  w0 = src_ahead[-9];
+  dst[5] = w1;
+  w1 = src_ahead[-8];
+  dst[6] = w0;
+  w0 = src_ahead[-7];
+  dst[7] = w1;
+  w1 = src_ahead[-6];
+  dst[8] = w0;
+  w0 = src_ahead[-5];
+  dst[9] = w1;
+  w1 = src_ahead[-4];
+  dst[10] = w0;
+  w0 = src_ahead[-3];
+  dst[0xb] = w1;
+  w1 = src_ahead[-2];
+  dst[0xc] = w0;
+  w0 = src_ahead[-1];
+  dst[0xd] = w1;
+  w1 = *src_ahead;
+  src = src + 0x10;
+  src_ahead = src_ahead + 0x10;
+  dst[0xe] = w0;
+  dst[0xf] = w1;
+  dst = dst + 0x10;
+  goto dispatch;
+
+done:
+  return (s32)dst - (s32)state->dst_start;
+
 decode:
-  acc <<= 0x10;
-
-  acc |= 0x8000;
+  /* Compressed token stream: `bits` is a bit accumulator with a 0x8000 sentinel
+   * marking when the low 16 bits are exhausted. */
+  bits <<= 0x10;
+  bits |= 0x8000;
   do {
-    while (0 <= ((s32)acc)) {
-      puVar8 = puVar8 + 1;
-      uVar2 = *puVar10;
-      puVar10 = puVar10 + 1;
-      acc = acc << 1;
-      *puVar4 = uVar2;
-      puVar4 = puVar4 + 1;
+    while (0 <= ((s32)bits)) {
+      /* Top bit clear: emit one literal halfword. */
+      src_ahead = src_ahead + 1;
+      w0 = *src;
+      src = src + 1;
+      bits = bits << 1;
+      *dst = w0;
+      dst = dst + 1;
     }
 
-    acc = acc << 1;
-    if (acc == 0) {
-      goto loop_top;
+    bits = bits << 1;
+    if (bits == 0) {
+      goto dispatch;
     }
-    desc = *puVar10;
-    puVar8 = puVar8 + 1;
-    puVar10 = puVar10 + 1;
-    if (desc == 0) {
-      goto do_return;
+    token = *src;
+    src_ahead = src_ahead + 1;
+    src = src + 1;
+    if (token == 0) {
+      goto done;
     }
-    puVar12 = (u16*)(((s32)puVar4) - ((desc >> 5) << 1));
-    puVar7 = puVar4 + ((desc & 0x1f) + 2);
-    uVar2 = *puVar12;
-    puVar12 = puVar12 + 1;
-    puVar9 = puVar4 + 1;
-    *puVar4 = uVar2;
+    /* Back-reference: distance = token>>5 halfwords, length = (token&0x1f)+2.
+     */
+    ref_src = (u16*)(((s32)dst) - ((token >> 5) << 1));
+    copy_end = dst + ((token & 0x1f) + 2);
+    w0 = *ref_src;
+    ref_src = ref_src + 1;
+    copy_dst = dst + 1;
+    *dst = w0;
     do {
-      ;
-      *puVar9 = *puVar12;
-      puVar9 = puVar9 + 1;
-      puVar12 = puVar12 + 1;
-    } while (puVar9 != puVar7);
-    puVar4 = puVar9;
+      *copy_dst = *ref_src;
+      copy_dst = copy_dst + 1;
+      ref_src = ref_src + 1;
+    } while (copy_dst != copy_end);
+    dst = copy_dst;
   } while (1);
 }
 
