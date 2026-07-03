@@ -2165,26 +2165,26 @@ coddog source itself) stays `blk`, because the re-derive still finds a hard bloc
 ## static-name-collision (an upstream file-static reuses a placed global name)
 
 **Flag:** `static-name-collision:<name>@<existing-addr>` (advisory, audio-scoped). Fires when a
-coddog-mirror's upstream `.c` defines a function whose verbatim name is ALREADY a curated symbol in
-`symbol_addrs.txt`/`ghidra_symbols.txt` placed at a DIFFERENT vram (the name is in `placed_symbols`
-but is NOT one of this subseg's member fns). The classic case is an N_MICRO file-static mirroring a
+coddog-mirror's upstream `.c` defines a function whose verbatim name is already a curated symbol in
+`symbol_addrs.txt`/`ghidra_symbols.txt` placed at a **different** vram (the name is in `placed_symbols`
+but is **not** one of this subseg's member fns). The classic case is an N_MICRO file-static mirroring a
 non-micro twin that already holds the name: S135 `n_load.c`'s static `_decodeChunk` (this subseg's
 instance at `0x8009FA14`) versus the placed `_decodeChunk = 0x800A4E3C` (the non-micro audio decoder's
 static).
 
-**Why it matters:** a file-scope `static` is file-LOCAL — it emits no global symbol — so the verbatim
-mirror keeps the upstream name in the C body and needs NO `symbol_addrs.txt` entry. Adding one would
+**Why it matters:** a file-scope `static` is **file-local** — it emits no global symbol — so the verbatim
+mirror keeps the upstream name in the C body and needs **no** `symbol_addrs.txt` entry. Adding one would
 be a duplicate global label (two `_decodeChunk` symbols at different vrams) and multiply-defines at the
 gate scaffold, breaking the green-ROM check. The flag tells the gate up-front: keep the static
-file-local, do not add a colliding `symbol_addrs` entry. Confirm the static has no EXTERNAL refs (a
+file-local, do not add a colliding `symbol_addrs` entry. Confirm the static has no **external** refs (a
 `jal func_<vram>` only from within its own subseg `.s`) — then the file-local static is correct and
 self-contained. S135 `n_load` carried `_decodeChunk` this way; `func_8009E4B0` (n_env/n_auxbus/
 n_drvrNew) shows the same on `_pullSubFrame`/`_getRate`/`_getVol`.
 
-**It is benign, not a problem to solve.** When the colliding names are the mirror file's OWN
-file-statics (the usual case), there is NO real collision: the statics stay `static` C, emit no global
+**It is benign, not a problem to solve.** When the colliding names are the mirror file's own
+file-statics (the usual case), there is **no** real collision: the statics stay `static` C, emit no global
 symbol, and the only action the flag implies is the no-op the verbatim track already takes (add
-nothing to `symbol_addrs`). The "collision" only bites if you try to GLOBALIZE one of these statics (the
+nothing to `symbol_addrs`). The "collision" only bites if you try to globalize one of these statics (the
 S135 `_decodeChunk` multiply-define). So read the flag as "these N names stay file-local," not as a
 blocker. S140 `n_env.c` banked the `_pullSubFrame`/`_getRate`/`_getVol` trio first-try with zero
 collision (all three left `func_<vram>` in the scaffold, kept their upstream `static` names in the C).
@@ -2194,32 +2194,32 @@ collision (all three left `func_<vram>` in the scaffold, kept their upstream `st
 ## libmus-bundled-n_audio duplicate (a SUPPORT_NAUDIO libmus archive links its OWN n_audio synth copy)
 
 **Pattern (not yet auto-flagged; a `game-embedded:libmus` / `coddog-bundled-dup` pricing tell is a
-deferred follow-up).** The `-DSUPPORT_NAUDIO` libmus archive STATICALLY LINKS its own copy of the
+deferred follow-up).** The `-DSUPPORT_NAUDIO` libmus archive **statically links** its own copy of the
 n_audio synth driver (the `alInit`/`alSyn*` family + the FX-change `Custom*` replacements from
-`player_fx.c`), a DUPLICATE of the standalone n_audio_sc copies that already live in the libnaudio
+`player_fx.c`), a **duplicate** of the standalone n_audio_sc copies that already live in the libnaudio
 region (`n_al*`). In MG64 the bundled copy sits in the `[0x78330]` `al_init`/player_fx candidate
 (`coddog-fncount-mismatch:6vs13` = player_fx's 6 fns + ~7 bundled-synth fns). The two copies are the
-same source compiled into two archives; the original linker resolved each archive's calls to its OWN
-copy. Our flat decomp namespace cannot, so the copies need DISTINCT decomp names.
+same source compiled into two archives; the original linker resolved each archive's calls to its own
+copy. Our flat decomp namespace cannot, so the copies need **distinct** decomp names.
 
-**The call resolves through TWO macro layers to the BUNDLED copy, not the standalone one.** A libmus
+**The call resolves through two macro layers to the bundled copy, not the standalone one.** A libmus
 mirror's `alInit(...)` expands `alInit` -> (`n_libaudio_sn_sc.h`) `n_alInit` -> (`player_fx.h`, under
 `SUPPORT_NAUDIO`+`SUPPORT_FXCHANGE`) `CustomInit`. So the verbatim source call lands on `CustomInit`
-= the bundled FX-change synth init (S143: `0x8009CF30`, which ghidra MIS-NAMED `al_init`). The
-standalone n_audio_sc `n_alInit` (S143: `0x800A0730`) is DEAD (zero xrefs) -- nothing reaches it
+= the bundled FX-change synth init (S143: `0x8009CF30`, which ghidra mis-named `al_init`). The
+standalone n_audio_sc `n_alInit` (S143: `0x800A0730`) is dead (zero xrefs) -- nothing reaches it
 because libmus, not the standalone n_audio manager, drives the synth.
 
-**Why it matters / procedure.** Do NOT read the `alInit`->`n_alInit` alias as "resolve to the placed
-`n_al*` standalone symbol" (wrong address -> SHA-miss) and do NOT reach for a `#undef`/`#define`
-redirect hack: the verbatim macro chain ALREADY points at the bundled copy. Before concluding a
-duplicate-symbol blocker, READ `player_fx.h` for the `#define n_alInit CustomInit` (and the
+**Why it matters / procedure.** Do not read the `alInit`->`n_alInit` alias as "resolve to the placed
+`n_al*` standalone symbol" (wrong address -> SHA-miss) and do not reach for a `#undef`/`#define`
+redirect hack: the verbatim macro chain already points at the bundled copy. Before concluding a
+duplicate-symbol blocker, read `player_fx.h` for the `#define n_alInit CustomInit` (and the
 `alSyn*`->`Custom*` replacements) -- that line is the whole resolution. Then add `CustomInit = <bundled
 vram>; // type:func` (recover-extern; overrides the wrong ghidra `al_init` via the `rom:` qualifier,
 `#wrong-ghidra-name-override`) and the verbatim mirror compiles + matches. When the `[0x78330]`
 bundled-synth subseg itself banks, name its fns by their libmus/player_fx identities (`CustomInit`,
 `CustomSynNew`, `CustomAllocFX`, ...), distinct from the standalone `n_al*` -- per-region distinct
 names, bank-stock-carry-custom. This is the audio-band specialization of the game-embedded duplicate
-theme (the libmus/nualstl fns compiled INTO game audio TUs, no object boundary).
+theme (the libmus/nualstl fns compiled into game audio TUs, no object boundary).
 
 **Provenance:** S143 `aud_thread.c` `__MusIntAudManInit`: the lone `alInit(&__libmus_alglobals,
 &syn_config)` call resolved verbatim to `CustomInit@0x8009CF30` via the two-layer chain; banked C
@@ -2266,24 +2266,24 @@ other consumers, clean-rebuild, banked seed-only first try). The `(already-vendo
 
 ## crlf-vendored-header (a copied SDK header breaks KMC cpp's `\` continuations)
 
-**Rule:** N64 SDK source ships with CRLF (DOS) line endings. A vendored HEADER copied verbatim keeps
-its CRLF, and KMC GCC 2.7.2's preprocessor treats a `\` at end-of-line as a line-continuation ONLY when
-the `\` is immediately followed by the newline. With CRLF the `\` is followed by `\r`, so EVERY
+**Rule:** N64 SDK source ships with CRLF (DOS) line endings. A vendored header copied verbatim keeps
+its CRLF, and KMC GCC 2.7.2's preprocessor treats a `\` at end-of-line as a line-continuation **only** when
+the `\` is immediately followed by the newline. With CRLF the `\` is followed by `\r`, so **every**
 multi-line macro continuation breaks: the `#define` ends early, its body's following lines fall through
-to the C parser as code, and you get a SILENT cascade of `parse error` (reported at the macro-DEFINITION
+to the C parser as code, and you get a silent cascade of `parse error` (reported at the macro-definition
 lines, not the call site) plus `stray '\' in program`. The `.c` mirror itself can be fine; the bad file
 is the included header. Plain single-line `#define`s are unaffected, so the first error lands at the
 first `\`-continuation macro in the header.
 
 **Trigger:** after vendoring an SDK-sourced header, the build throws a run of `parse error before <tok>`
-at the header's macro-definition lines (often the FIRST function-like macro) + `stray '\' in program`.
+at the header's macro-definition lines (often the first function-like macro) + `stray '\' in program`.
 `file include/<lib>/<hdr>.h` reports `CRLF line terminators`.
 
 **Procedure:** strip CR on copy — `sed -i 's/\r$//' include/<lib>/<hdr>.h` (or `dos2unix`). CRLF-clean
 the header before relying on it. (Comments/whitespace are codegen-neutral, so this never affects the
 ROM; it only un-breaks cpp.) This generalizes the `#upstream-mirror-pattern` CRLF note (which covered
-nusys `.c` SOURCES) to vendored headers. S128: `include/libnualstl/nualstl.h` from nusys-2.05 had CRLF;
-its `\`-continued seq-player macros cascaded into ~12 parse errors until stripped. The git-managed
+nusys `.c` sources) to vendored headers. `include/libnualstl/nualstl.h` from nusys-2.05 had CRLF;
+its `\`-continued seq-player macros cascaded into ~12 parse errors until stripped (S128). The git-managed
 n64sdkmod headers (e.g. `libmus.h`) were already LF and fine, so suspect the SDK-extracted ones.
 
 ---
@@ -2323,12 +2323,12 @@ machinery already existed for ref/call scanning, reused here for the detector).
 
 **Sub-cases / variants:**
 
-**S103 partial-twin subset (`coddog-partial:<m>of<n>fn`).** coddog matches per-FUNCTION; when its
+**partial-twin subset (`coddog-partial:<m>of<n>fn`).** coddog matches per-function; when its
 corpus splits a combined source into per-fn files (`mtxidentf.c`, `mtxl2f.c`) and a multi-fn subseg's
-fns match ONLY SOME of them, the bare `coddog-mirror`/`coddog-twin` flags over-promise a clean
-single-file mirror. `pick_target` flags `coddog-partial` when ≥2 DISTINCT per-fn twin files matched
+fns match **only** some of them, the bare `coddog-mirror`/`coddog-twin` flags over-promise a clean
+single-file mirror. `pick_target` flags `coddog-partial` when ≥2 **distinct** per-fn twin files matched
 a pack covering fewer fns than it holds (`len(cod_members) < nfns`): the multi-twin companion to
-`coddog-fncount-mismatch` (which fires only at `len(distinct)==1`). The un-matched fns are NOT
+`coddog-fncount-mismatch` (which fires only at `len(distinct)==1`). The un-matched fns are **not**
 verified upstream → per-fn verify before mirroring. **Provenance:** S103 (`func_800660A0`:
 `mtxidentf.c`+`mtxl2f.c` @100 matched only `guMtxIdentF`/`guMtxL2F`; the combined `mtxutil.c`'s
 `guMtxF2L` (Monegi clamp variant) + `guMtxIdent` (-O2 non-inline) diverged from every available
