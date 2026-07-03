@@ -2670,6 +2670,24 @@ by `/sprint-plan`:
   `NU_CONT_THREAD_ID=6` vs MG64's 5), and that surfaces only at first build unless reconciled here.
   A near-free retry missing any of these is a half-scoped spike — finish the scope before deferring.
 
+- **(S167 SPIKE — carried, cse/regalloc branch-fold wall; 2 of 3 head fns BANKED)** `func_80070FD0`
+  in `src/main/func_80070FD0.c` — ONLY `func_80070FD0` remains INCLUDE_ASM (func_800710C4 +
+  func_8007117C banked byte-exact C). The fn is BYTE-EXACT except a **3-word branch-direction triple**
+  in the osSyncPrintf tail (mine `beqz v1;ori a1,v0,0x80;move a1,v0` vs target `bnez v1;move a1,v0;ori
+  a1,v0,0x80`). **Root cause (fully traced, cse.c `make_regs_eqv`:840-862):** the value is
+  `nv=(D_801B60C5==0)?t|0x80:t` where `t=count|(old&0x80)`, `old` reused for the loaded byte (`lbu a1`)
+  AND the printf arg. The two C forms are LOCKED to the fold: default `old=t` -> the copy makes `old`
+  canonical (it outlives `t` + crosses the post-branch EBB) -> cse rewrites the other arm's `t|0x80`
+  -> `old|0x80` -> `t` folds into $a1 (gives the target's **bnez** but 60 instrs, 1 short); default
+  `old=t|0x80` -> `t` stays separate in $v0 but gives **beqz** (lever-2, 61/61, the 3-word miss).
+  Branch-direction and the fold are inseparable. **35 hand source-variants + 43k permuter iterations**
+  all plateau at these 3 words; NOT reachable from equivalent single-TU C (the load-in-$a1 requires
+  reusing `old`, which forces the fold). **UNTRIED / needs the ORIGINAL source shape** — the target
+  was compiled from a form that keeps `t` alive across the branch without the canonical-old fold
+  (likely a different flag/print data-flow, a helper, or a macro). Retry needs game-source insight,
+  not more permuter. Near-match C saved: `docs/wip/func_80070FD0.near-match.c.txt` (lever-2, byte-exact
+  minus the 3 words). Struct model `SaveBlock{u8 pad[0xF4]; s8 tbl[6][0x12]; u8 wins[13][0x12][2]}` @
+  base990 is the MEM_IN_STRUCT key (folded from the func_800710C4 subagent; nailed the 2 banked fns).
 - **(S166 SPIKE — carried, pervasive-regalloc; 2 of 3 fns now BANKED)** `src/main/lz_decompress_simple.c`
   — ONLY `lz_decompress_extended` remains a stub. `lz_decompress_dma` banked S165 (`20ff76d`),
   `lz_decompress_simple` banked S166 (`60ecb9a`, the wall CRACKED byte-exact via the loop-weight lever;
