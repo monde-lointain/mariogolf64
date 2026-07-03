@@ -1930,17 +1930,18 @@ the trailing pad. The contramread sibling (slot == 16-aligned fn size) mirrored 
   subseg (also `#asm-mirror-vendoring`; identify the TU first). A bare `intrinsic-likely` (no `:<tu>`,
   no `cp0-asm`) is a no-source shim → plain `hasm`.
 - `maybe-upstream:<lib>:<bases>`: an un-named subseg (`func_<addr>`) that the signature matcher
-  thinks is an un-named SDK mirror (the S13 trap). Verify against the candidate upstream at the gate
+  thinks is an un-named SDK mirror. Verify against the candidate upstream at the gate
   before treating it as classical. **A definitive (`>=CODDOG_MIRROR_PCT`) `coddog-mirror` on the same
-  row suppresses this guess** (S75 for libultra, extended to audio S132): coddog has named the exact
-  upstream file, so the weaker IDF guess is redundant noise that can point at the WRONG file (S132
+  row suppresses this guess**: coddog has named the exact
+  upstream file, so the weaker IDF guess is redundant noise that can point at the wrong file (S132
   `func_800A0800` listed `n_synstopvoice,n_synstartvoiceparam,n_synstartvoice` while the coddog-mirror
   correctly named `n_synallocvoice.c`, the actual source of both fns). A sub-threshold coddog hit
   stays advisory, so the guess is retained there as a second opinion.
 
 **Trigger:** `pick_target.py` flags `intrinsic-likely` / `maybe-upstream:…`.
 
-**Provenance:** S13 (un-named SDK mirror trap).
+**Provenance:** S13 (un-named SDK mirror trap); S75 (coddog-mirror suppresses the IDF guess for
+libultra); S132 (guess-suppression extended to audio).
 
 For a definitive (not IDF-guess) version of `maybe-upstream`, see `#coddog-cross-ref`: it pairs the
 un-named fn with its ultralib identity by instruction-hash match.
@@ -1951,10 +1952,10 @@ un-named fn with its ultralib identity by instruction-hash match.
 
 **Rule:** `pick_target.py` classifies an un-named (`func_<addr>`) subseg as `upstream none` →
 classical, even when it is a verbatim ultralib mirror. The names being absent is the only reason.
-S71 crc.c was mis-seeded pts-13 classical (`none` + `pack:2fn`) but is a trivial verbatim
+crc.c was mis-seeded pts-13 classical (`none` + `pack:2fn`) but is a trivial verbatim
 2-fn mirror. coddog (`compare2`, reloc-masked instruction hashes) pairs each MG64 fn with the
 ultralib fn it matches, revealing the source file: this turns the `none`/classical guess into a known
-mirror target. Per the S71 sweep, ~all of the remaining libultra band is verbatim-mirrorable.
+mirror target. Per the sweep, ~all of the remaining libultra band is verbatim-mirrorable.
 
 **When:** an `upstream none` candidate in the libultra vram range (`0x800A_xxxx`–`0x800B_xxxx`)
 carrying `pack` / `jal-count-mismatch` / `maybe-upstream`, before committing it to the classical loop.
@@ -1972,21 +1973,21 @@ carrying `pack` / `jal-count-mismatch` / `maybe-upstream`, before committing it 
    13 → 3). Audio hits stay advisory (the one-time audio-header enabler is not modeled). Absent map
    → ranking unchanged (the committed golden is map-free; `CODDOG_MAP` env overrides the path).
 3. Treat a `coddog-mirror` candidate as `#upstream-mirror-pattern` (verbatim cp from the matched
-   `.c`); the `@<pct>` is the confidence (99.99 = byte-verbatim once placed). NOT every coddog
+   `.c`); the `@<pct>` is the confidence (99.99 = byte-verbatim once placed). Not every coddog
    match is an atomic verbatim cp; see step 4.
-4. **S72 trap re-scan:** because the candidate is un-named (`func_<addr>`), its own
+4. **Trap re-scan:** because the candidate is un-named (`func_<addr>`), its own
    `defines-data` / `file-static` / `needs-header` detectors (which key off the *named* upstream)
    never ran, so a coddog match to a file that defines data or a file-scope static looked clean
    under the bare flag. `build_rows` now re-runs those three *file-level* (name-independent)
    detectors on the coddog-resolved `.c` and appends their hazards (and `seed_points` re-prices via
    `drop`/`needs_copy`). So a `coddog-mirror` candidate carrying `file-static` / `defines-data`
    routes to `#file-static-bss-layout-conflict` / `#defines-data` (a `.data`/`.bss` sibling carve or
-   classical), NOT an atomic verbatim cp. Motivating case: `func_800AC110 → piacs.c` ranks pts-5
-   (not the bare-coddog pts-3) because piacs.c DEFINES `__osPiAccessQueueEnabled` + a
+   classical), not an atomic verbatim cp. Motivating case: `func_800AC110 → piacs.c` ranks pts-5
+   (not the bare-coddog pts-3) because piacs.c defines `__osPiAccessQueueEnabled` + a
    `static OSMesg piAccessBuf[]`; `osMotorStop → motor.c` likewise surfaces
    `defines-data:__osMotorinitialized[...]`.
 
-5. **S81 twin disambiguation:** coddog's reloc-masked hashes can pair a candidate with a
+5. **Twin disambiguation:** coddog's reloc-masked hashes can pair a candidate with a
    near-identical twin file rather than its real source. `func_800AC110`+`__osSiGetAccess`+
    `__osSiRelAccess` (the SI access-queue subseg) coddog-matched `src/io/piacs.c@99.99`, but its
    named members name `siacs`. `pick_target.py` cross-checks the coddog basename against the pack's
@@ -1996,43 +1997,43 @@ carrying `pack` / `jal-count-mismatch` / `maybe-upstream`, before committing it 
    reconcile step, but it pins which upstream the agent copies + which symbol names it places. No-ops
    when the candidate has no named member (nothing to disagree with) or the basenames agree.
 
-6. **S88/S92 structural-fingerprint guards (a @99% match that is NOT a source attribution).** coddog
-   hashes a fn's branch/call SHAPE, so a small source can fingerprint-match a much larger, unrelated
-   pack. Two name-independent guards fire when ONE coddog `.c` claims a whole multi-fn pack:
-   - **`coddog-fncount-mismatch:<m>vs<n>`** (S88): the matched source defines FEWER fns (`m`) than the
+6. **Structural-fingerprint guards (a @99% match that is not a source attribution).** coddog
+   hashes a fn's branch/call shape, so a small source can fingerprint-match a much larger, unrelated
+   pack. Two name-independent guards fire when one coddog `.c` claims a whole multi-fn pack:
+   - **`coddog-fncount-mismatch:<m>vs<n>`**: the matched source defines fewer fns (`m`) than the
      pack holds (`n`), so it cannot be the sole source → the pack is multi-file. Under-count only (a
-     true single source may define MORE via version/`_DEBUG`-gated extras). S92: the check now also
-     runs when the coddog identity is carried by an un-named TAIL member (not the pack leader), the
-     case the S88 primary-only check missed. `func_80050400`'s leader is absent from the map but a tail
-     member carries `llcvt.c` (8 fns vs the 11fn pack). S131: the same under-count check now also runs
+     true single source may define more via version/`_DEBUG`-gated extras). The check now also
+     runs when the coddog identity is carried by an un-named tail member (not the pack leader), the
+     case the primary-only check missed. `func_80050400`'s leader is absent from the map but a tail
+     member carries `llcvt.c` (8 fns vs the 11fn pack). The same under-count check now also runs
      in the `_resolve_audio` pass (libmus/libnaudio/nuaulstl), where it had been omitted — `al_init`'s
      13fn pack coddog-matches `player_fx.c`@99.99 but that file defines 6 fns → `coddog-fncount-mismatch:6vs13`
-     (was a bare, clean-looking mirror). Motivated by the S131 `0x7BDE0` 2-file pack: its sub-coddog-floor
+     (was a bare, clean-looking mirror). Motivated by the `0x7BDE0` 2-file pack: its sub-coddog-floor
      4-instr `n_alSynDelete` leaf went unmatched, leaving `n_synsetfxmix.c`@99.99 looking single-file
      until hand-disassembly at the gate revealed the second file.
-   - **`coddog-structural:<file>@<pct>`** (S92): the matched source's meaningful-LOC implies a compiled
+   - **`coddog-structural:<file>@<pct>`**: the matched source's meaningful-LOC implies a compiled
      size far below the subseg's (`subseg_bytes > 64 × source_LOC`). `llcvt.c` is 8 trivial `return d;`
-     conversion stubs (~250 B) yet coddog matched it @99.99 to THREE distinct subsegs (2032 B / 2912 B /
+     conversion stubs (~250 B) yet coddog matched it @99.99 to three distinct subsegs (2032 B / 2912 B /
      7728 B). Advisory/display-only, the size-dimension companion to the fn-count guard. When either
-     guard is on a coddog row, do NOT treat the `coddog-mirror` flag as a single-file mirror identity.
-     - **S108: `llcvt.c` is not linked at all (workhorse-linked / wrapper-absent).** Beyond the
+     guard is on a coddog row, do not treat the `coddog-mirror` flag as a single-file mirror identity.
+     - **`llcvt.c` is not linked at all (workhorse-linked / wrapper-absent).** Beyond the
        structural over-match: MG64 never links `llcvt.c`. Its 8 stubs are thin wrappers that `jal` the
        libgcc soft-float workhorses (`__fixdfdi`, `__floatdidf`, …); KMC GCC emits calls to those
-       workhorses directly, so the workhorses ARE present (`__floatdidf` @0x800B3D40,
+       workhorses directly, so the workhorses are present (`__floatdidf` @0x800B3D40,
        `__fixunsdfdi` @0x800B3C20, in the libkmc/libgcc band, already named) while the `__d_to_ll`…
        `__ull_to_f` wrapper TU is absent everywhere (name files + asm). So every `__d_to_ll @99.99`
        row is a reloc-masked FP on the stack→`jal`→return stub shape (`func_800504E8` calls a game fn;
-       `spawn_object_simple` IS a game fn). Lesson for a future planner: a tiny-stub coddog identity
+       `spawn_object_simple` is a game fn). Lesson for a future planner: a tiny-stub coddog identity
        can mean the source TU was never linked, not just over-matched; confirm the *workhorse*
        symbols, not the wrapper, before chasing the `.c`.
-   - **NOT done (S92 carry-over):** a `.data`-carve detector for a file's OWN initialized file-statics
+   - **Not done (carry-over):** a `.data`-carve detector for a file's own initialized file-statics
      (the `_Litob` ldigs/udigs class). An `addiu %lo(D_<addr>)` into the `.data` range cannot be
-     distinguished from a SHARED extern reference by asm alone (the same instruction serves both), and
+     distinguished from a shared extern reference by asm alone (the same instruction serves both), and
      `refs-unplaced` has gaps, so a naive scan mis-routes cross-file externs to a phantom carve. Deferred
      to a dedicated tooling sprint; see `BACKLOG.md ## Carry-overs`.
 
 **Trigger:** `pick_target.py` flags `coddog-mirror:<file>@<pct>` (only when the map exists); any
-`file-static` / `defines-data` / `needs-header` on the *same row* is the S72 trap re-scan; a
+`file-static` / `defines-data` / `needs-header` on the *same row* is the trap re-scan; a
 `coddog-twin:<matched>!=<member-src>` on the same row means coddog named the twin, so mirror from
 `<member-src>`; a `coddog-fncount-mismatch` / `coddog-structural` on the same row means the @99%
 match is a structural fingerprint, not a source attribution (the pack is multi-file / mis-attributed).
@@ -2043,6 +2044,8 @@ S81 (`io/siacs.c`: coddog named the twin `piacs.c`, named members → real sourc
 gate-safe drop-def symbol-add note also landed in #defines-data); S88 (`coddog-fncount-mismatch`);
 S92 (the fncount check extended to tail-carried identities + the `coddog-structural` size guard,
 both retiring the llcvt false-positive class, where one tiny source fingerprint-matched 3 subsegs);
+S108 (`llcvt.c` never linked: KMC emits the libgcc soft-float workhorses directly, the wrapper TU is
+absent, so a tiny-stub coddog identity can mean the source was never linked);
 S131 (the fncount under-count check ported into the `_resolve_audio` pass, where it had been omitted;
 surfaced by the `0x7BDE0` 2-file pack whose sub-floor `n_alSynDelete` leaf hid the second file).
 
@@ -2054,7 +2057,7 @@ ultralib. `make coddog-sweep-nusys` runs `tools/build_nusys_ref.sh` (compile eve
 into `build/nusys-ref/`, then merge to one relocatable ELF) then `tools/nusys_sweep.sh` (`compare2`
 MG64 vs that ELF, writing `tools/coddog/nusys_map.tsv`, format
 `mgname<TAB>nusysname<TAB>mainlib/<file>.c<TAB>pct`). `pick_target.py` (`build_coddog_nusys_index`)
-reads it as a SEPARATE additive pass: a `>=99%` hit on an un-named subseg flags
+reads it as a separate additive pass: a `>=99%` hit on an un-named subseg flags
 `coddog-mirror:mainlib/<file>.c@<pct>` and re-prices `upstream libnusys` (libnusys is already a
 first-class upstream lib, so the column / `--lib` / `seed_points` need no other change). The pass is
 keyed on the nusys map alone, so an absent `nusys_map.tsv` leaves libultra ranking byte-identical;
@@ -2065,9 +2068,9 @@ against unrelated small fns, the same structural-fingerprint class as steps 5 an
 + the gate read filter them (a big pack mis-re-priced to libnusys ranks last by size). **Provenance:**
 this sweep.
 
-**Nusys version divergence (S117): MG64's libnusys is NOT uniformly nusys-2.07.** `build_nusys_ref.sh`
-compiles the pinned 2.07, so `coddog-mirror:mainlib/<file>.c@99.99` is a STRUCTURAL match, not a
-byte-exact source pin. Some files are an EARLIER revision: `nucontmgr.c` is **2.05** (the 2.06/2.07
+**Nusys version divergence: MG64's libnusys is not uniformly nusys-2.07.** `build_nusys_ref.sh`
+compiles the pinned 2.07, so `coddog-mirror:mainlib/<file>.c@99.99` is a structural match, not a
+byte-exact source pin. Some files are an earlier revision: `nucontmgr.c` is **2.05** (the 2.06/2.07
 rewrite changed `nuContMgrInit`'s loop from `for(...;cnt++){ ...; bitmask<<=1; }` to the comma-operator
 `for(...; bitmask<<=1, cnt++)`, which the KMC compiler emits 2 instrs shorter, `-0x10` `.text`, so the
 `.ld`'s concatenated subsegs cascade a ROM-wide `-0x10` shift). **The tell:** a clean verbatim mirror
@@ -2077,12 +2080,13 @@ whose compiled `.o` `.text`/`.data` section size differs from the subseg size de
 `objdump -h` `.text`/`.data` sizes match the subseg; 2.00 and 2.05 are code-identical (only JP-Shift_JIS
 vs EN comments), so prefer the English 2.05. Tooling follow-up: `build_nusys_ref` could sweep multiple
 versions, or `pick_target` could cross-check the coddog hit against the subseg byte-size and flag a
-`coddog-size-mismatch` when they disagree.
+`coddog-size-mismatch` when they disagree. **Provenance:** S117 (nucontmgr.c is a 2.05 revision, not
+the pinned 2.07).
 
 **Audio libraries (libmus / libnaudio / nuaulstl): a multi-version, multi-compiler sweep that pins
 the toolchain too.** MG64 embeds libmus (the Software Creations `mus_*` sequence player) plus an
-n_audio synth layer. These had no prebuilt reference at the project profile AND an unknown
-version/compiler, so `tools/build_audio_refs.sh` builds a `{compiler × opt × version}` MATRIX from
+n_audio synth layer. These had no prebuilt reference at the project profile and an unknown
+version/compiler, so `tools/build_audio_refs.sh` builds a `{compiler × opt × version}` matrix from
 the manifest `tools/audio_ref_versions.tsv` (one row per lib+version; the script expands compilers ×
 opts). Compilers: `kmc` (project KMC gcc 2.7.2, the proven path), `ido53`/`ido71` (IDO `cc` via
 ido-static-recomp, the authentic vendor compiler). Each cell → `build/audio-ref/<cell>/ref.o`;
@@ -2092,7 +2096,7 @@ canonical `tools/coddog/<lib>_map.tsv` + `tools/coddog/audio_pins.tsv` (lib → 
 `PIN_REPORT.md`. `pick_target.py`'s `_resolve_audio` pass (the libmus/libnaudio/nuaulstl analog of
 `_resolve_nusys`) reads those maps + pins: a `>=99%` member hit flags `coddog-mirror:<file>@<pct>`,
 re-runs the trap battery against the pinned `.c`, and re-prices `upstream <lib>`. A single-identity
-multi-fn pack gets the `coddog-fncount-mismatch` under-count guard (S131) + the `coddog-structural`
+multi-fn pack gets the `coddog-fncount-mismatch` under-count guard + the `coddog-structural`
 size guard, so a coddog `.c` that defines fewer fns than the pack is surfaced as multi-file rather
 than a clean single-file mirror. Absent maps leave ranking byte-identical (additive-pass invariant).
 Run via `make coddog-sweep-audio`.
@@ -2109,47 +2113,47 @@ toolchain (IDO cells matched 0, ruling IDO out). The `.text`-size cross-check is
 per-fn pct (an exact-100% match is byte-identical incl. size; a wrong version shows structural ~99%
 twins but few exact hits, the same discriminator as the nusys version-hunt above).
 
-**The n_audio_sc `n_syn*` setter vein is empirically clean-verbatim @99.99 (S129/S130, 6/6).** Every
+**The n_audio_sc `n_syn*` setter vein is empirically clean-verbatim @99.99 (6/6).** Every
 `n_alSyn*` setter mirror banked so far has been a byte-verbatim first-build despite carrying
 `body-divergence-suspect:<file>@99.99`: S129 banked SetPan/SetPitch/StartVoice/StopVoice (4/4) and
 S130 banked AddPlayer/SetVol (2/2), all Match on the first `make`. These setters are tiny
 (`__n_allocParam` → fill an `ALParam`/`ALStartParam` → `n_alEnvmixerParam`, or a list-prepend under an
-interrupt mask), so for THIS homogeneous vein the `@99.99` body-divergence flag is a reliable false
+interrupt mask), so for this homogeneous vein the `@99.99` body-divergence flag is a reliable false
 fire and the diagnosis pass (`#cross-jump-tail-merge`) can stay lightweight (a quick asm-vs-upstream
 read of the `#else`/`SAMPLE_ROUND` branch, not a full divergence hunt). This is an empirical narrowing
-of the `coddog 99.99 == STRUCTURE` guard for one well-characterized family, NOT a license to skip the
+of the `coddog 99.99 == STRUCTURE` guard for one well-characterized family, not a license to skip the
 body check for heavier n_audio_sc files (`n_synthesizer.c`, `n_reverb.c`) or other libs.
 
-**S139: c-combined DECOMPOSE + the `c-combined-undercount` file-count reconcile + body-divergence
+**c-combined decompose + the `c-combined-undercount` file-count reconcile + body-divergence
 post-decompose suppression.** The last libnaudio asm subseg `func_8009E4B0` was a 3-file
 `c-combined` pack (n_auxbus | n_drvrNew | n_env) the named-symbol index priced as only `c-combined:2file`
 (the n_env members were all un-named `func_<addr>`, so the named index missed them), while coddog
-fingerprinted all THREE files. Two tooling refinements:
+fingerprinted all three files. Two tooling refinements:
 - **`c-combined-undercount:<named>vs<coddog>`** (`_append_coddog_aux`): when the distinct
   coddog-mirror file count exceeds the `c-combined` hazard's named-symbol file count, the pack spans
-  MORE upstream files than the named index sees → flag it (`2vs3` here). The FILE analog of
-  `coddog-fncount-mismatch`; tells the gate to decompose at MORE boundaries than `c-combined` lists and
+  more upstream files than the named index sees → flag it (`2vs3` here). The file analog of
+  `coddog-fncount-mismatch`; tells the gate to decompose at more boundaries than `c-combined` lists and
   to hand-trace the extra file's boundary from its named member fns (the per-file vram-boundary +
   carve-extent pricing the gate still hand-traces is a tracked follow-up — it needs the member asm
   `%hi/%lo` refs at pricing time).
-- **Body-divergence suppression now keys on `up_lib == libnaudio` + a CLEAN single-source SHAPE**
-  (single-file-pack OR a plain single-fn row), not the single-file-pack shape alone. A `c-combined`
-  pack DECOMPOSED at the gate becomes per-file rows, and the smallest (n_auxbus, 1 fn) has NO pack
+- **Body-divergence suppression now keys on `up_lib == libnaudio` + a clean single-source shape**
+  (single-file-pack or a plain single-fn row), not the single-file-pack shape alone. A `c-combined`
+  pack decomposed at the gate becomes per-file rows, and the smallest (n_auxbus, 1 fn) has no pack
   hazard, so the old single-file-pack-only key would re-flag it. `single_cod` (exactly 1 distinct
-  coddog file) still gates it, so a STILL-combined multi-coddog pack keeps the hedge (the S123
+  coddog file) still gates it, so a still-combined multi-coddog pack keeps the hedge (the S123
   customization guard); the libnaudio restriction keeps the libnusys S121/S127 FORCESTOP hedge. S139
   banked n_auxbus + n_drvrNew (×2 fns) verbatim first-build after the decompose, all
-  `body-divergence-suspect@99.99` FALSE → **9 consecutive FALSE on n_audio_sc (S133-S139).**
+  `body-divergence-suspect@99.99` false → **9 consecutive false on n_audio_sc (S133-S139).**
 
-**Audio C-name-index mis-resolution de-blk (S135, `_deblk_audio_variant_misresolve`).** The game's
+**Audio C-name-index mis-resolution de-blk (`_deblk_audio_variant_misresolve`).** The game's
 libnaudio C-name index can resolve a fn's `up_path` to the **non-sc** `libnaudio/src/<f>.c` variant,
-whose `#include "add/<f>_addNN.c"` body-fragments live in a tree the project does NOT mirror, so the
-named-upstream pass prices them NON-vendorable and sets `blocked` → the row shows a FALSE `blk`. The
-AUTHORITATIVE source is the coddog-confirmed **n_audio_sc** `<f>.c` with VENDORABLE
+whose `#include "add/<f>_addNN.c"` body-fragments live in a tree the project does not mirror, so the
+named-upstream pass prices them non-vendorable and sets `blocked` → the row shows a false `blk`. The
+authoritative source is the coddog-confirmed **n_audio_sc** `<f>.c` with vendorable
 `inc/<f>_addNN.inc.c` fragments (the N_MICRO command-stream bodies). The bogus `add/*.c` block hid
 three pickable mirrors in a row (`n_save` S133, `n_resample` S134, `n_load` S135 — each a clean
 first-build atomic mirror once the false `blk` was seen through). `_resolve_audio` now lifts it: when
-a definitive (`>=CODDOG_MIRROR_PCT`) audio coddog-mirror replaced `up_path` with a DIFFERENT
+a definitive (`>=CODDOG_MIRROR_PCT`) audio coddog-mirror replaced `up_path` with a different
 `mirror_path`, that coddog source is authoritative — it drops the wrong-variant `needs-header` hazard
 and re-derives `blocked` from the coddog source's (vendorable) includes only. A genuinely blocked
 audio row (the libmus `aud_*` DAG: real `libmus_config.h` / `libaudio.h` non-vendorable headers on the
