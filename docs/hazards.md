@@ -2566,55 +2566,58 @@ N×8B whole-instruction SHA-miss tell).
 via a source-compat macro. `os_host.h`: `#define __osInitialize_common() osInitialize()` (the K-era
 worker name → the J public name). When the mirror body defines `void __osInitialize_common() {...}`,
 the function-like macro fires and the object exports `osInitialize` instead, leaving the curated symbol
-the entry stub / callers reference (`__osInitialize_common`) undefined at link. S31 `nuGfxInit`
-(nusys.h) was the 1st instance, S85 `initialize.c` the 2nd: a real class.
+the entry stub / callers reference (`__osInitialize_common`) undefined at link. This is a recurring
+class, not a one-off.
 
-**Trigger:** `pick_target.py` flag `header-renames-symbol:<fn>@<header>` (S85; scans the candidate's
-transitively-included resolvable headers for `#define <curated_leader>...`), OR a link
+**Trigger:** `pick_target.py` flag `header-renames-symbol:<fn>@<header>` (scans the candidate's
+transitively-included resolvable headers for `#define <curated_leader>...`), or a link
 `undefined reference to <curated_fn>` where the `.o` `nm` shows the function exported under a
-DIFFERENT name. Invisible to the gate stub build: the macro bites only a real function definition,
+**different** name. Invisible to the gate stub build: the macro bites only a real function definition,
 which an `INCLUDE_ASM` stub never has (same late-surface class as #needs-define).
 
-**Procedure:** Add `#undef <curated_fn>` to the mirrored `.c` AFTER the `#include`s (so the
+**Procedure:** Add `#undef <curated_fn>` to the mirrored `.c` after the `#include`s (so the
 transitive header's macro is undone) and before the function definition; then the
 name-macro/`INITIALIZE_FUNC` reconcile exports the curated symbol. SHA-neutral (a symbol-name change,
-not a byte change). Same one-line fix as the S31 `#undef nuGfxInit`.
+not a byte change). Same one-line fix as the `#undef nuGfxInit`.
 
 **Caveats:**
 
-**NOT this hazard (the S102 contrast):** if the upstream does NOT define a function named
-`<curated_fn>` (the curated name is a macro ALIAS for a DIFFERENT symbol the upstream defines, namely
-the macro's RHS), then the body never contains the `<curated_fn>` token, no `#undef` is needed, and the
-real issue is a mislabeled ghidra name → see `#wrong-ghidra-name-override`. `pick_target.py` now
-suppresses `header-renames-symbol` in that case (`_upstream_defines_function` gate) and emits
+**Not this hazard (the contrast case):** if the upstream does not define a function named
+`<curated_fn>` (the curated name is a macro alias for a **different** symbol the upstream defines,
+namely the macro's RHS), then the body never contains the `<curated_fn>` token, no `#undef` is needed,
+and the real issue is a mislabeled ghidra name → see `#wrong-ghidra-name-override`. `pick_target.py`
+now suppresses `header-renames-symbol` in that case (`_upstream_defines_function` gate) and emits
 `wrong-ghidra-name` instead.
+
+**Provenance:** first instance: S31 (`nuGfxInit`, nusys.h); second instance + `pick_target.py` flag:
+S85 (`initialize.c`); the `_upstream_defines_function` contrast/suppression case: S102.
 
 ---
 
 ## wrong-ghidra-name-override (correct a mislabeled symbol without sync-names)
 
-**Rule:** `ghidra_symbols.txt` can name a function vram with the WRONG symbol: a macro ALIAS rather
-than the real function. S102 motor.c: ghidra labels 0x800AE380 `osMotorStop`, but os_motor.h
+**Rule:** `ghidra_symbols.txt` can name a function vram with the **wrong** symbol: a macro alias rather
+than the real function. motor.c: ghidra labels 0x800AE380 `osMotorStop`, but os_motor.h
 `#define osMotorStop(x) __osMotorAccess((x), MOTOR_STOP)` makes that a *macro*; the function the
 VERSION_J build defines at 0x800AE380 is `__osMotorAccess` (verified in `build/J/libgultra_rom/motor.o`:
 `T __osMotorAccess`@0, no `osMotorStop` symbol). A verbatim mirror names the body `__osMotorAccess`
 (correct), so the still-asm callers' relocs (`jal osMotorStop`) and the C object (`__osMotorAccess`)
 disagree → `undefined reference`.
 
-**Why not `make sync-names`:** the canonical fix (rename in Ghidra → sync) is a FULL
-`--export-to-decomp --write-in-place` regen, still destructive (~250-symbol Ghidra↔decomp drift,
-S20/S87). And you can't hand-edit `ghidra_symbols.txt` (sync-owned) nor naively add the correct name
+**Why not `make sync-names`:** the canonical fix (rename in Ghidra → sync) is a full
+`--export-to-decomp --write-in-place` regen, still destructive (~250-symbol Ghidra↔decomp drift).
+And you can't hand-edit `ghidra_symbols.txt` (sync-owned) nor naively add the correct name
 to `symbol_addrs.txt` (same vram already in ghidra_symbols → splat dup error).
 
-**Trigger:** `pick_target.py` flag `wrong-ghidra-name:<ghidra_name>-><correct_name>@<header>` (S102)
-fires when a header macro `#define <ghidra_name>(...)` exists, the version-stripped upstream does NOT
-define a function named `<ghidra_name>`, and the macro's RHS leading symbol IS defined in the upstream.
-It is the distinguishing companion of `#header-renames-symbol` (which fires when the body DOES define
+**Trigger:** `pick_target.py` flag `wrong-ghidra-name:<ghidra_name>-><correct_name>@<header>`
+fires when a header macro `#define <ghidra_name>(...)` exists, the version-stripped upstream does not
+define a function named `<ghidra_name>`, and the macro's RHS leading symbol is defined in the upstream.
+It is the distinguishing companion of `#header-renames-symbol` (which fires when the body does define
 the macro name → a real `#undef`).
 
-**The override MECHANISM is not limited to macro aliases (S128).** `pick_target.py` only auto-flags the
-macro-alias case, but the `rom:`-qualifier override below corrects ANY wrong `ghidra_symbols.txt` name a
-coddog/upstream cross-ref proves wrong — a plain bad GUESS, not just a macro. S128 audio_mgr.c:
+**The override mechanism is not limited to macro aliases.** `pick_target.py` only auto-flags the
+macro-alias case, but the `rom:`-qualifier override below corrects any wrong `ghidra_symbols.txt` name a
+coddog/upstream cross-ref proves wrong — a plain bad guess, not just a macro. audio_mgr.c (S128):
 `audio_config_init`@0x8005EDD0 was really `nuAuStlMgrInit`, and the libmus callees `mus_initialize`@
 0x8009973C / `mus_play_song_ptr`@0x800999F0 were really `MusInitialize` / `MusStartSong` (coddog
 libmus_map confirmed); the RSP-boot sprint likewise corrected `audio_sched_thread_entry`. In each the
@@ -2623,39 +2626,39 @@ mirror body and every still-asm caller to the correct name. Treat a coddog/upstr
 the same as a macro alias even though no `pick_target.py` flag fires.
 
 **Procedure (the non-destructive override):**
-1. Add a `symbol_addrs.txt` maintainer-override for the CORRECT name with a `rom:` qualifier:
+1. Add a `symbol_addrs.txt` maintainer-override for the correct name with a `rom:` qualifier:
    `<correct_name> = 0x<vram>; // rom:0x<off> type:func`. The `rom:` (or `segment:`) qualifier is
    load-bearing: splat's dup-symbol error (`util/symbols.py`, the `have_same_rom_addresses and
-   same_segment` test) fires ONLY when a same-vram symbol shares BOTH rom AND segment; a bare entry has
+   same_segment` test) fires only when a same-vram symbol shares both rom and segment; a bare entry has
    rom=None (== the ghidra entry's None) + same segment → clash. The qualifier makes
    `have_same_rom_addresses` False → no clash.
-2. `symbol_addrs.txt` is loaded FIRST (splat `initialize`, before `ghidra_symbols.txt`), so the
-   override WINS the reference: both the scaffolded `INCLUDE_ASM` stub and the still-asm callers' relocs
+2. `symbol_addrs.txt` is loaded first (splat `initialize`, before `ghidra_symbols.txt`), so the
+   override wins the reference: both the scaffolded `INCLUDE_ASM` stub and the still-asm callers' relocs
    resolve to `<correct_name>`. (The link also runs `--allow-multiple-definition` as a safety net.)
-3. Name the mirror body `<correct_name>` (verbatim, since it is the real upstream name). NO `#undef` needed:
+3. Name the mirror body `<correct_name>` (verbatim, since it is the real upstream name). No `#undef` needed:
    the body never contains the macro-name token, so the alias macro is inert (this is why
-   `#header-renames-symbol` does NOT apply: the curated name IS the macro's RHS).
+   `#header-renames-symbol` does not apply: the curated name is the macro's RHS).
 4. The stale `ghidra_symbols.txt` entry + the override coexist deliberately; the override wins.
    **Cross-repo follow-up:** rename the vram in the Ghidra workspace to `<correct_name>` so the
    source-of-truth matches; a future reconciled sync can drop the override.
 
-**A CALLEE the new C body calls can need the same override (S144).** The override is not only for the
-function being banked. A verbatim/classical body that calls a STILL-ASM sibling by its vendored-header
-UPSTREAM name needs a `rom:` override for the CALLEE too when `ghidra_symbols.txt` labels that vram with
-a different name. S144 `aud_thread.c` called `__MusIntDmaProcess` (the `aud_dma.h` name); ghidra had
+**A callee the new C body calls can need the same override.** The override is not only for the
+function being banked. A verbatim/classical body that calls a still-asm sibling by its vendored-header
+upstream name needs a `rom:` override for the callee too when `ghidra_symbols.txt` labels that vram with
+a different name. `aud_thread.c` (S144) called `__MusIntDmaProcess` (the `aud_dma.h` name); ghidra had
 `mus_dma_process`@0x8009DA8C, so the C linked with `undefined reference to __MusIntDmaProcess`. **The
-tell is a LINK-time `undefined reference` to an upstream callee name, NOT a gate-time scaffold mismatch**
+tell is a link-time `undefined reference` to an upstream callee name, not a gate-time scaffold mismatch**
 — the gate `INCLUDE_ASM` stub referenced the ghidra name and built green, so it surfaces only when the
 new C object links. `pick_target.py` does not flag this (the callee lives in a different still-asm TU);
 read the new body's vendored-header callees against `ghidra_symbols.txt` before building, or let the
 link error surface it, then add `<upstream> = 0x<vram>; // rom:0x<off> type:func` (same mechanism).
 
-**Aliasing an ALREADY-PLACED `symbol_addrs` name at the same vram → reference it, do NOT duplicate
-(S144).** Distinct from the ghidra-clash case above: when the name your C body needs is an ALIAS of a
-symbol already placed in `symbol_addrs.txt` at the SAME vram, do NOT add a second `symbol_addrs` entry —
+**Aliasing an already-placed `symbol_addrs` name at the same vram → reference it, do not duplicate.**
+Distinct from the ghidra-clash case above: when the name your C body needs is an alias of a
+symbol already placed in `symbol_addrs.txt` at the same vram, do not add a second `symbol_addrs` entry —
 `symbol_addrs` has no duplicate-vram support (`grep -oE '= 0x[0-9A-Fa-f]+;' symbol_addrs.txt | sort |
 uniq -d` is empty project-wide; a 2nd entry at one vram risks dropping the canonical name's link).
-Instead reference the PLACED name via a local `#undef`/`#define` (or an `extern` decl) in the C. S144
+Instead reference the placed name via a local `#undef`/`#define` (or an `extern` decl) in the C.
 `aud_thread.c`: `MICROCODE_CODE` is `n_aspMainTextStart`@0x800B3F20, but that vram is already placed as
 the canonical boundary name `rspbootTextEnd` (rspboot text end == aspMain text start), so the C did
 `extern long long int rspbootTextEnd[]; #undef MICROCODE_CODE; #define MICROCODE_CODE rspbootTextEnd`.
@@ -2665,6 +2668,10 @@ which the override does not solve.)
 **Verify at the gate:** after the flip + override, `make extract`, then confirm (a) the scaffolded
 `src/.../<file>.c` stub is `INCLUDE_ASM(..., <correct_name>)` and (b) the still-asm caller's
 `asm/<seg>.s` relocs `jal <correct_name>`; both prove the override won before you write the body.
+
+**Provenance:** the mislabeled-symbol class + the `wrong-ghidra-name` flag: S102 (`motor.c`); the
+destructive full-regen drift count: S20/S87; the same-vram alias → reference-not-duplicate variant:
+S144 (`aud_thread.c`, `MICROCODE_CODE`).
 
 ---
 
@@ -2686,7 +2693,7 @@ it via the splat-side file.
 ## stale top-level asm label sync
 
 **Rule:** After a gate rename or a `symbol_addrs.txt` add, `make extract` regenerates the
-per-function stub in `asm/nonmatchings/...` but does NOT update the stale top-level `asm/<seg>.s`
+per-function stub in `asm/nonmatchings/...` but does not update the stale top-level `asm/<seg>.s`
 (no longer regenerated once the subseg is c-flipped). `decomp_loop.py` uses the top-level file, so a
 stale label breaks loop resolution or masks the real score with a reloc-name mismatch.
 
@@ -2698,7 +2705,9 @@ a renamed global.
   stale `asm/<seg>.s` (3 occurrences: `nonmatching`, `glabel`, `endlabel`), then rebuild the
   reference object (`make build/asm/<seg>.o`).
 - **Data global add** (e.g. `hdwrBugFlag = 0x800C7EC0`): replace all `D_<ADDR>` occurrences in
-  `asm/<seg>.s` with the new name, then rebuild (S34: `asm/7EFE0.s`, 3× `D_800C7EC0` → `hdwrBugFlag`).
+  `asm/<seg>.s` with the new name, then rebuild (`asm/7EFE0.s`, 3× `D_800C7EC0` → `hdwrBugFlag`).
+
+**Provenance:** data-global worked example: S34 (`asm/7EFE0.s`).
 
 ---
 
@@ -2706,11 +2715,11 @@ a renamed global.
 
 **Rule:** Adding a curated name for an un-named `func_<vram>` to `symbol_addrs.txt` (a common gate
 enabler when naming a coddog / upstream-mirror leader) makes `make extract` rename that symbol in the
-scaffold. Any ALREADY-BANKED C file that hard-codes the old `func_<vram>` name (an `extern` decl +
+scaffold. Any already-banked C file that hard-codes the old `func_<vram>` name (an `extern` decl +
 call) then fails to link with `undefined reference to func_<vram>`. Same class as
-`#stale-top-level-asm-label-sync`, but reaching the gate via a symbol ADD rather than `make sync-names`.
+`#stale-top-level-asm-label-sync`, but reaching the gate via a symbol add rather than `make sync-names`.
 
-**Pre-flag:** `pick_target.py` flags `caller-evict:<func_vram>@<file>[;…]` (S77); it walks `src/`
+**Pre-flag:** `pick_target.py` flags `caller-evict:<func_vram>@<file>[;…]`; it walks `src/`
 for every un-named member a banked C file references by name (INCLUDE_ASM stub lines excluded). When
 the flip will name that `func_`, the listed caller's call site must be renamed in the same flip.
 Display-only (does not change `pts`); the fixup is one line and SHA-neutral (same address).
@@ -2720,35 +2729,38 @@ func_<vram>` from a banked C object after a `symbol_addrs.txt` add.
 
 **Procedure:** rename the call site(s) in the flagged banked C file from `func_<vram>` to the curated
 name (both the `extern` declaration and the call). The codegen is identical (same `jal` target), so
-the ROM SHA-1 is unchanged. S77: adding `__osSpGetStatus`=0x800B16A0 evicted `src/main/func_800AB600.c`
+the ROM SHA-1 is unchanged. Adding `__osSpGetStatus`=0x800B16A0 evicted `src/main/func_800AB600.c`
 (`extern u32 func_800B16A0(void)` + `func_800B16A0()` → `__osSpGetStatus`).
 
 **Sub-cases / variants:**
 
-**Companion case A: multi-global mirror flip evicts STILL-ASM callers (S106).** The dual direction:
-flipping a mirror whose source defines ≥2 GLOBAL functions makes the C object export those globals
-under their real names (osCreateScheduler, osScAddClient, …). Any STILL-ASM file that called them by
+**Companion case A: multi-global mirror flip evicts still-asm callers.** The dual direction:
+flipping a mirror whose source defines ≥2 global functions makes the C object export those globals
+under their real names (osCreateScheduler, osScAddClient, …). Any still-asm file that called them by
 the old `func_<vram>` name then link-fails (`undefined reference to func_<vram>`): the asm reloc
 points at a name nothing defines. `pick_target`'s `caller-evict` only walks banked C callers, so an
 asm caller is invisible at the gate; it surfaces as the execution-time link error. Fix: add each
 externally-referenced global's curated name to `symbol_addrs.txt`; `make extract` re-extracts the asm
-caller with the new name and it resolves against the mirror's def. S106 sched.c: still-asm mus_dma
+caller with the new name and it resolves against the mirror's def. sched.c: still-asm mus_dma
 (`asm/78D10.s`) called `func_800AB798`/`func_800AB880` → named `osScAddClient`=0x800AB798 +
 `osScGetCmdQ`=0x800AB880 (the file's other globals, osScRemoveClient/__scTaskReady, had no external
 caller → no add needed). Name only the globals the link error names.
 
-**Companion case B: a mirror's recover-callee IS an already-banked `func_` (S106).** A new mirror
+**Companion case B: a mirror's recover-callee is an already-banked `func_`.** A new mirror
 calls a libultra fn by name (`osSpTaskYielded`); the recover resolves not to still-asm but to a
-function ALREADY banked classically under its `func_<vram>` placeholder (`func_800AB600`, banked S11
+function already banked classically under its `func_<vram>` placeholder (`func_800AB600`, banked S11
 as a "main" leaf: it was the un-named `osSpTaskYielded` all along, revealed by the mirror's call).
-Fix: RENAME the banked func_ to the libultra name (symbol_addrs add + the C body's function name) AND
+Fix: rename the banked func_ to the libultra name (symbol_addrs add + the C body's function name) and
 match the header signature (`OSYieldResult osSpTaskYielded(OSTask *tp)` from sptask.h). Critically,
-keep the VERIFIED classical body, not the upstream-verbatim form: the S11 match used
+keep the verified classical body, not the upstream-verbatim form: the S11 match used
 `bit = (status>>8)&1` and the upstream uses `(status & SP_STATUS_YIELDED) ? OS_TASK_YIELDED : 0`,
-which can codegen differently (`srl;andi` vs `andi;sltu`) at the game `-O2` profile. Do NOT relocate
+which can codegen differently (`srl;andi` vs `andi;sltu`) at the game `-O2` profile. Do not relocate
 the file into `src/libultra/` (would force the `-O3` band → possible divergence; see
 `#game-region-mirror-o2-profile`); leave it where it banked (the file name stays `func_<vram>.c`, a
 cosmetic mismatch, optional follow-up rename).
+
+**Provenance:** the `caller-evict` flag + the banked-C worked example: S77 (`func_800AB600.c`,
+`__osSpGetStatus`); both companion cases (still-asm caller, recover-callee): S106.
 
 ---
 
