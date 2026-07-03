@@ -431,7 +431,7 @@ below).
   not source-text). Format any new or edited file in these trees with `clang-format-22 -i`, like the
   rest of the tree. `src/mgu/` (S103) holds the game-embedded ultralib gu/mgu matrix source (the
   Monegi variant, compiled at the game `-O2` profile, NOT the libultra `-O3` band; see
-  `docs/hazards.md#game-region-mirror-o2-profile`).
+  `docs/hazards.md#game-region-mirror--o2-profile`).
 - **Vendored-header placement (PO directive, S129).** When a mirror needs headers vendored, split them
   by the SDK's own public/internal layout: a **public** header (the SDK's `include/` side, what a
   consumer `#include`s) goes to `include/<lib>/`; a **source-private/internal** header (the SDK's
@@ -517,8 +517,8 @@ When `pick_target.py` flags a hazard (or a match shows its symptom), read the ma
 | `static-name-collision:<name>@<addr>` | #static-name-collision |
 | official static name shared across two instances / splat `Duplicate symbol detected` | #overlapping-symbols--allow_duplicated |
 | SUPPORT_NAUDIO libmus mirror `alInit`→dead `n_al*` / bundled-synth `fncount-mismatch` | #libmus-bundled-n_audio-duplicate |
-| `game-region-mirror:0x<vram>` | #game-region-mirror-o2-profile |
-| `game-embedded:0x<vram>` | #game-region-mirror-o2-profile |
+| `game-region-mirror:0x<vram>` | #game-region-mirror--o2-profile |
+| `game-embedded:0x<vram>` | #game-region-mirror--o2-profile |
 | clean asm-first seed, full-make SHA-miss, build .o shows fp-kept + no-CSE + arg-spill | #-o0-bootsdk-glue-file-profile |
 | build SHA-miss, suspect compile FLAGS (opt/-g/-fdelayed-branch) not the C | #profile-probe |
 | public-API rename "resists" (`__*` symbol), vendored header macro may be inverted vs ultralib | #vendored-header-inversion |

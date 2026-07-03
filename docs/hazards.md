@@ -783,7 +783,7 @@ mirror would need to carve. **Fix:** suffix every FP literal in a compare/clamp/
 (`-32768.0f`, `32766.0f`) so it stays single-precision and inline. Provenance: S103 (`guMtxF2L`'s
 Monegi clamp, `if (mf[i][j*2] < -32768.0f) … > 32766.0f`, consts `0xc7000000`/`0x46fffc00`; bare
 doubles first compiled `c.lt.d`+`cvt.d.s`+a rodata pair before the `f` suffix fixed it in one
-iteration). See #game-region-mirror-o2-profile for the same sprint's profile gotcha.
+iteration). See #game-region-mirror--o2-profile for the same sprint's profile gotcha.
 
 ---
 
@@ -2332,7 +2332,7 @@ a pack covering fewer fns than it holds (`len(cod_members) < nfns`): the multi-t
 verified upstream → per-fn verify before mirroring. **Provenance:** S103 (`func_800660A0`:
 `mtxidentf.c`+`mtxl2f.c` @100 matched only `guMtxIdentF`/`guMtxL2F`; the combined `mtxutil.c`'s
 `guMtxF2L` (Monegi clamp variant) + `guMtxIdent` (-O2 non-inline) diverged from every available
-upstream, so the planned verbatim cp failed first build, banked classical via #game-region-mirror-o2-profile).
+upstream, so the planned verbatim cp failed first build, banked classical via #game-region-mirror--o2-profile).
 
 ---
 
@@ -2756,7 +2756,7 @@ keep the verified classical body, not the upstream-verbatim form: the S11 match 
 `bit = (status>>8)&1` and the upstream uses `(status & SP_STATUS_YIELDED) ? OS_TASK_YIELDED : 0`,
 which can codegen differently (`srl;andi` vs `andi;sltu`) at the game `-O2` profile. Do not relocate
 the file into `src/libultra/` (would force the `-O3` band → possible divergence; see
-`#game-region-mirror-o2-profile`); leave it where it banked (the file name stays `func_<vram>.c`, a
+`#game-region-mirror--o2-profile`); leave it where it banked (the file name stays `func_<vram>.c`, a
 cosmetic mismatch, optional follow-up rename).
 
 **Provenance:** the `caller-evict` flag + the banked-C worked example: S77 (`func_800AB600.c`,

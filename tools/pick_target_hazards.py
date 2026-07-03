@@ -137,7 +137,7 @@ HAZARD_GAME_REGION_MIRROR = (
 )
 # the libultra code band is statically linked INTO THE GAME and compiled -O2 (game CFLAGS), NOT -O3
 # (LIBULTRA_CFLAGS) — the src/libultra/ path would force -O3 → wrong auto-inlining. Route the mirror
-# to a -O2 path (src/mgu/…). Advisory. Detail `0x<vram>`. See docs/hazards.md#game-region-mirror-o2-profile
+# to a -O2 path (src/mgu/…). Advisory. Detail `0x<vram>`. See docs/hazards.md#game-region-mirror--o2-profile
 HAZARD_GAME_EMBEDDED = (
     "game-embedded"  # a coddog-mirror that is NOT a standalone-carvable object: it is
 )
@@ -148,7 +148,7 @@ HAZARD_GAME_EMBEDDED = (
 # carve at 16-aligned bounds (bank the lib fns as a mirror + the adjacent game fns classical), NOT a
 # seed-only verbatim mirror. The synthesis of game-region-mirror + a coddog-subset signal (S128
 # audio_mgr.c: nualstl3 embedded in a 27KB game audio grab-bag). Detail `0x<vram>`. Advisory. See
-# docs/hazards.md#game-region-mirror-o2-profile
+# docs/hazards.md#game-region-mirror--o2-profile
 HAZARD_UPSTREAM_FNCOUNT_MISMATCH = (
     "upstream-fncount-mismatch"  # a pack with ONE named C stem whose
 )
