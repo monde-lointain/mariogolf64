@@ -35,6 +35,22 @@ tell) is carved to its LIBRARY tree (`libnusys/<file>`), not `main/<stem>` — y
 placement unchanged (see `CLAUDE.md` path convention). A per-FILE -O0 override is the one mk edit a
 boot/SDK-glue TU may need.
 
+**S166 PARTIAL — `src/main/lz_decompress_simple.c` (retry the 2 carried LZ fns; `lz_decompress_simple`
+MATCHED, `lz_decompress_extended` CARRIED).** matched **+1** (simple); md5-candidate 219→**219** (file
+still MIXED-PARTIAL — 2/3 fns C, 1 stub — so no md5-candidate flip); asm subsegs 78→78. **The project's
+single hardest fn CRACKED byte-exact** (`lz_decompress_simple`, 8600→0, carried S164/S165 and declared
+"irreducible" 3×): the crack was the **loop-weight lever** (new `#loop-weight-and-live-length-regalloc-
+steering`) — re-grounding root cause in `flow.c:2067` showed that structuring ONLY the inner decode-
+dispatch `do{…}while(1)` (keeping the outer a goto-loop) weights `control`'s refs ×2 asymmetrically so
+it wins `$a2` = target layout. Struct unified to `LzDecompressState` (0x28) preserving the S165 dma
+match. `lz_decompress_extended` CARRIED at greg-proven floor raw-185 (two coupled near-tied 3-cycles,
+dual-confirmed a genuine live-length+ring-ref conflict; see `## Carry-overs`). Post-sprint (PO
+systematic-debugging): reworked simple to the cleanest byte-matching form (names+comments, control flow
+unchanged) and proved zero-goto impossible (3-agent source fan-out, CS1/CS2/CS3 file:line-cited). seed
+8 / banked 0pt (per-file all-or-nothing, partial); regime classical. Quality 0/1/1/0. Retro applied 4
+of 4 (2 new hazards + triage upgrade + rework commit). **Cross-repo follow-up:** push corrected
+`LzDecompressState` to Ghidra.
+
 **S163 BANKED — `src/main/func_80043AF0.c` (4-fn club-meter head, DECOMPOSED from the 25-fn `[0x1EEF0]`
 subseg).** md5-candidate 218→**219**; matched +4; asm subsegs 78→78. `func_80043AF0` (club-table ptr
 `&D_800CABD0[i*24]`) + `func_80043B0C` (splat auto-decompiled the no-op) matched first build. The two
@@ -2654,30 +2670,27 @@ by `/sprint-plan`:
   `NU_CONT_THREAD_ID=6` vs MG64's 5), and that surfaces only at first build unless reconciled here.
   A near-free retry missing any of these is a half-scoped spike — finish the scope before deferring.
 
-- **(S164 SPIKE — carried, pervasive-regalloc)** `src/main/lz_decompress_simple.c` (3-fn LZ-decompress
-  trio, decomposed from the 18-fn `[0x43810]` subseg; head slice `[0x43810..0x440A0]` = 2192B, flipped
-  to `c` at the gate with 3 `INCLUDE_ASM` stubs; ROM green, freeze `a0c50b1`). **Blocker:**
-  `#pervasive-regalloc-classical-main` register permutation on 2 of 3 fns (the codec-triage MISS: these
-  are tight LZ codecs, NOT clean seed-5 leaves — mis-priced, is really seed-8+). **State (bases in
-  `nonmatchings/<fn>/base.c`, on-disk, gitignored):** `lz_decompress_dma` MATCHED (157/157; residual
-  only isolated reloc artifacts — ready to inline); `lz_decompress_simple` STRUCTURAL-COMPLETE 123/124
-  (score 8600; `control`→`$v0` vs target `$a2`, an internal allocno-priority equilibrium); 
-  `lz_decompress_extended` STRUCTURAL-COMPLETE 290/298 (284/282 instrs; same wall). **Retry checklist
-  (mechanical replay):** (1) split ALREADY DONE (`[0x43810, c, main/lz_decompress_simple]` +
-  `[0x440A0, asm]`, 16-aligned; 15-fn tail stays asm); (2) placed-ref inventory: all callees placed
-  (self-internal `jal lz_decompress_simple`, libultra OS fns, `nuPiCartHandle` auto-extern), NO
-  rodata/data carve, all 3 names pre-curated in `ghidra_symbols` (NO symbol adds); (3) NO new
-  recover-externs; (4) no upstream (classical, `none`); (5) resume the 3-agent fan-out
-  (`docs/hazards.md#pervasive-regalloc-classical-main`) with FRESH budget for LONG annealing permuter
-  runs. **UNTRIED levers (spike verdict gated on trying all — S107 rule):** the careful `control`
-  live-range fix (span body→decode, PROVABLY dead in the raw-copy path, so the hi-freq copy temps
-  outrank it for `$v0/$v1` → control lands `$a2`); the corrected `LzDecompressState` struct on
-  `extended` (Ghidra's is mis-RE'd — the correct layout is natural-aligned: `flags@0x14` u16 +2pad,
-  `ring@0x18`, `ridx@0x1C` u16, `run@0x1E` s16, `hidx@0x20` u16, `hbase@0x24`, size ≥0x28); a multi-hour
-  permuter run; and the `#compiler-source-fan-out-escalation-above-the-permuter` deep-dive. **Cross-repo
-  follow-up:** push the corrected `LzDecompressState` layout to the Ghidra workspace (fix packing/size/
-  offsets). Also available: `lz_decompress_dma` is inline-able NOW as a `regime: mixed` partial bank
-  (1 C body + 2 stubs, ROM stays green) if a durable lock of that match is wanted before the full trio.
+- **(S166 SPIKE — carried, pervasive-regalloc; 2 of 3 fns now BANKED)** `src/main/lz_decompress_simple.c`
+  — ONLY `lz_decompress_extended` remains a stub. `lz_decompress_dma` banked S165 (`20ff76d`),
+  `lz_decompress_simple` banked S166 (`60ecb9a`, the wall CRACKED byte-exact via the loop-weight lever;
+  struct unified to `LzDecompressState` 0x28). File is MIXED-PARTIAL (2 C + 1 stub, ROM green) → NOT
+  md5-candidate until `extended` lands. **Blocker:** `#pervasive-regalloc-classical-main` register-
+  permutation floor at valid **raw-185** (from prior 208), GREG-PROVEN and DUAL-CONFIRMED: two coupled
+  near-tied 3-cycles — Cycle A {ridx,src,dist} (ridx pinned highest by its dual-emit ring refs
+  `ridx+1&0x7ff`/`ro=ridx*2`), Cycle B {param,end,ring} (param a binary t1↔t8 live-length switch,
+  target t6 unreachable in between; param L pinned by 5 post-loop exit stores). Both value-distinct
+  (safe permuter number-reorder can't flip) AND structurally pinned (no single manual nudge). **State:**
+  base = `nonmatchings/lz_decompress_extended/base.c` (= `scratchpad/lz/best_extended.c`, decomp_loop
+  21220, 290/292, ridx increment intact). **Retry checklist (mechanical replay):** (1) split ALREADY
+  DONE (`[0x43810, c, main/lz_decompress_simple]`; 15-fn tail `[0x440A0]` stays asm); (2) placed-ref
+  inventory: all callees placed, NO rodata/data carve, `extended` name pre-curated (NO symbol adds);
+  (3) NO recover-externs; (4) no upstream (classical); (5) the honest verdict is that raw-185 is the
+  floor — a genuine live-length+ring-ref conflict, not unfinished work. A further attempt should test
+  a STRUCTURAL change that breaks the ridx/param live-range pins (e.g. re-express the ring index or the
+  exit-store ordering), NOT another permuter grind (safe-passes-only already plateaued 230→208; see
+  `#permuter-goto-backedge-liveness-unsound`) — apply the `#loop-weight-and-live-length-regalloc-
+  steering` levers first. **Cross-repo follow-up:** push the corrected `LzDecompressState` layout to
+  the Ghidra workspace (natural-aligned, size ≥0x28).
 
 - **(S159 BANKED, removed from carry-overs)** The S156-spike `func_80051E90` + `func_80051FCC` jtbl
   pair (`[0x2D290, asm]`) banked S159 (`c774454`) as `src/main/func_80051E90.c` — the `rodata-jtbl`

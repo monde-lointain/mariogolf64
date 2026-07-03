@@ -3399,6 +3399,15 @@ register permutation — `control` grabs `$v0` first via its short live range, t
 `pick_target.py` has no codec signal yet (tracked follow-up); until then the gate applies this by
 reading the fn's shape.
 
+**RESOLUTION UPGRADE (S166) — this wall is SOURCE-STEERABLE, not permuter-only.** The codec triage
+tell was re-confirmed (both LZ leaves hit it), but a codec/decoder is no longer only "structural-
+complete + carry": the loop-weight / live-length levers in `#loop-weight-and-live-length-regalloc-
+steering` can carry it to a full byte MATCH (S166 cracked `lz_decompress_simple`, the project's
+hardest wall, 8600→0). Price it seed-8+/expect-permuter still, but before concluding "irreducible,"
+run the loop-weight/live-length source levers FIRST (they precede the permuter); the permuter closes
+only the residual allocno-number tiebreak, and on a goto-loop fn it must run SAFE-passes-only (see
+`#permuter-goto-backedge-liveness-unsound`).
+
 **The playbook (in order):**
 
 1. **Build an EXACT-SYMBOL isolated base.** Use PER-FIELD structs so each accessed field is its OWN
@@ -3437,6 +3446,12 @@ reading the fn's shape.
    `output-<score>/source.c` and re-run. S158's fns closed at permuter iterations in the hundreds to
    low-thousands ONCE the structural base was right; from a wrong base they plateaued indefinitely
    (the permuter cannot invent the param-reuse / align / LICM levers — do those by hand first).
+   **On a GOTO-loop fn, restrict `[weight_overrides]` to SAFE passes only** (`perm_reorder_decls`,
+   `perm_pad_var_decl`, `perm_randomize_function_type`) and zero the var-reuse passes: the reuse
+   passes produce semantically-invalid sub-floor minima that also poison the resume seed (S166, two
+   instances; see `#permuter-goto-backedge-liveness-unsound`). Apply the source-side loop-weight /
+   live-length levers (`#loop-weight-and-live-length-regalloc-steering`) BEFORE this step — they can
+   carry the match on their own, leaving the permuter only the allocno-number tiebreak.
 
 **Metric caveat (do not trust the score for "matched"):** the permuter's own score and asm-differ's
 `current_score` weight VERY differently (S158: permuter 895 == asm-differ 6620 == 66 diff rows), and
@@ -3464,6 +3479,93 @@ RE-LAUNCHED verbatim after the reset (resume from the on-disk `base.c`), so a li
 not a dead end. Agents that only touch their own `nonmatchings/<fn>/` + isolated `decomp_loop.py` +
 their own permuter dir do NOT need worktrees (no `src/`/`make`/yaml writes → no shared-tree race);
 skip the `isolation: worktree` cost when the work is measurement-only.
+
+## loop-weight and live-length regalloc steering (the S166 source-side allocation levers)
+
+**Trigger:** a `#pervasive-regalloc-classical-main` fn that is STRUCTURALLY complete but locks on a
+hard-register permutation the permuter alone plateaus on — specifically, the miss is WHICH of two
+values wins an earlier caller-saved reg. Before concluding "irreducible," the KMC gcc 2.7.2 allocno
+priority `floor_log2(n_refs)*n_refs / live_length` (global.c:594-601) is STEERABLE from C source along
+two independent axes. S166 cracked `lz_decompress_simple` (the project's hardest wall, 8600→0, carried
+and declared "irreducible" 3×) with these.
+
+**Axis 1 — loop-weight (the numerator).** `reg_n_refs` is LOOP-DEPTH-WEIGHTED: flow.c:2067
+`reg_n_refs[regno] += loop_depth` (also :2315/:2501/:2711). `loop_depth` starts 1 (flow.c:434) and
+increments +1 ONLY at a `NOTE_INSN_LOOP_BEG` (flow.c:441), which `expand_start_loop` emits for EVERY
+structured `for`/`while`/`do` (stmt.c:2171) and which a `goto`-loop NEVER emits (expand_goto ends in a
+bare `emit_jump`, stmt.c:833). So a value referenced inside a STRUCTURED loop gets its refs ×(depth); a
+goto-loop body stays ×1. You can only RAISE priority via nesting (weight floor 1), never lower it.
+  - **ASYMMETRIC NESTING decouples two registers.** Structure ONLY the loop holding the value you want
+    HIGHER one level deeper; keep the competitor's loop a goto (shallower). A symmetric structure moves
+    BOTH together (verified: wrapping the whole outer dispatch in `for(;;)` weights control AND the
+    copy pointer equally, ratio preserved, no match). S166 seated `control`→$a2 by structuring ONLY the
+    inner decode-dispatch as `do { <inner literal while>; if(…) goto loop_top; … } while(1)` so
+    control's decode refs weight ×2 while the 16-store raw-copy block (in the OUTER goto-loop) stayed
+    ×1 — control overtakes the copy pointer for $a2. Exact flow.c:2067 differential.
+
+**Axis 2 — live-length (the denominator).** priority = numerator / L, so LENGTHENING a value's live
+range DROPS its priority (counterintuitive; caching/shortening L RAISES it). Reference the value at a
+later program point to lengthen L. But L can be PINNED: `lz_decompress_extended`'s param is a binary
+t1↔t8 switch (rc-alias present→t8, absent→t1, target t6 unreachable in between) because its 5 exit
+stores are reachable only after the decode loop iterates, so param is irreducibly live across the whole
+loop — a live-length CONFLICT that is a genuine floor (carried raw-185).
+
+**Numerator hygiene — WEB-SPLIT avoidance.** Write `x <<= k; x |= K;` (in-place self-assign = ONE web,
+full n_refs) NOT `x = (x<<k)|K` (a nested subexpr spawns a temp → local-alloc splits the read-web from
+the build-web → halves the value's n_refs). Same for pointer init: `p = base; p += n;` NOT
+`p = (T*)(base+n)`. S166 needed the self-assign form on both the control-word build and the entry
+pointer bump to keep control's refs high enough to clear the copy pointer.
+
+**ZERO-goto is IMPOSSIBLE on a matched goto-heavy fn (S166, 3-agent source proof).** A goto-loop and a
+structured loop are NOT interchangeable, for three independent, source-cited reasons — so an
+all-structured rewrite of a matched goto fn generally cannot byte-match:
+  1. **Loop-weight (above):** any structured loop emits the LOOP_BEG note → +1 depth → repermutes the
+     outer body's hard regs (flow.c:2067 → global.c:594-601; MIPS defines no REG_ALLOC_ORDER, so
+     find_reg takes the lowest free reg and a priority flip changes who claims it).
+  2. **Loop optimizer:** loop.c only sees note-delimited loops (loop.c:349-361), so a goto-loop escapes
+     invariant motion + IV strength reduction; a structured loop ALWAYS runs `strength_reduce`
+     (loop.c:975), adding preheader IV setup + shifting load/store displacements (~5 extra instrs).
+  3. **No BB reorder:** gcc 2.7.2 `rest_of_compilation` (toplev.c:2647) has no basic-block-reorder pass;
+     final.c emits in RTL-chain (source) order, so only a goto+label can place a block OFF the
+     fall-through path (an out-of-line return, a two-branch dispatch join). Inlining such a block
+     inverts the branch polarity (jump.c reverses the now-fall-through jump). Also: two separate
+     `if(c) goto L;` emit two short-circuit branches; merging to `if(a||b)` / `if(!a&&b)` computes a
+     combined boolean (xori/and) instead — NOT equivalent.
+  Corollary: variable RENAMES + COMMENTS are 100% codegen-neutral (verified via isolated `.s` diff +
+  full-make ROM SHA-1), so the CLEANEST MATCHING version keeps the compiler-forced control flow and
+  improves only names/labels/comments (S166 reworked `lz_decompress_simple` this way, byte-exact). Do
+  NOT "clean up" a matched goto fn by structuring its loops.
+
+**Process.** The lever set was DERIVED by a compiler-source fan-out: 3 read-only mechanism-RE agents
+over gcc-2.7.2 (flow/global/local-alloc/reload/sched/reorg/stmt/jump/loop/toplev) + N measurement
+agents iterating from the isolated base — it turned a 3×-"irreducible" verdict into a byte match. See
+`#compiler-source-fan-out-escalation-above-the-permuter`. This is the SOURCE-side precursor to
+`#pervasive-regalloc-classical-main` step 3 (the boosted permuter): apply loop-weight/live-length
+FIRST; the permuter (safe passes only on a goto-loop) closes only the residual allocno-number tiebreak.
+
+## permuter goto-backedge liveness unsound (var-reuse passes corrupt live-across-backedge values)
+
+**Trigger:** on a GOTO-loop function, a decomp-permuter "best" that beats your hand-derived structural
+floor by a suspiciously large margin. decomp-permuter's liveness analysis does NOT model `goto`
+back-edges, so its variable-reuse passes (`perm_temp_for_expr`, `perm_split_assignment`,
+`perm_ins_block`, `perm_reorder_stmts`, `perm_condition`) treat a variable that is live ACROSS a
+back-edge as a dead temp and REUSE it — a semantically-INVALID mutation that scores below the valid
+floor but can never reach a valid 0, and (worse) poisons a resume seed so the wall looks reducible when
+it is not.
+
+**S166 saw two instances:** `lz_decompress_simple` hit raw-104 vs a valid floor of 146 via
+`acc=*p; uVar2=acc` clobbering the live control word; `lz_decompress_extended` hit decomp_loop 20400 /
+perm 3805 vs a valid floor 208 via `perm_split_assignment` rewriting the live ring index
+`ridx = ridx+1 & 0x7ff` into a constant-2 clobber across every back-edge — a corrupt resume seed that
+mis-measured the wall for a full sub-phase until caught.
+
+**FIX/RULE.** On a goto-loop fn, restrict `[weight_overrides]` to SEMANTICS-SAFE passes ONLY
+(`perm_reorder_decls`, `perm_pad_var_decl`, `perm_randomize_function_type` — these only renumber
+allocnos, cannot change semantics) and set the var-reuse passes to 0. ALWAYS re-verify any sub-floor
+permuter output with a manual liveness check across every goto back-edge before trusting it as a match
+OR a resume seed. Bonus: allocno-renumber-only IS the correct tool for a pure register-PERMUTATION
+residual anyway (what a `#pervasive-regalloc-classical-main` tail usually is). See
+`#pervasive-regalloc-classical-main` step 3 and `#permuter-setup-for-kmc-toolchain-mirrors`.
 
 ## return-type is load-bearing
 
