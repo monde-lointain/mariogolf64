@@ -49,12 +49,12 @@ The hazard families below group the sections that follow. Each links to its exis
 - [crlf-vendored-header (a copied SDK header breaks KMC cpp's `\` continuations)](#crlf-vendored-header-a-copied-sdk-header-breaks-kmc-cpps--continuations)
 - [stale-vendored-header](#stale-vendored-header)
 - [clean-rebuild-after-shared-header-edit](#clean-rebuild-after-shared-header-edit)
-- [shared-callee RENAME (S129: stale stub `.o` after a `symbol_addrs` rename)](#shared-callee-rename-s129-stale-stub-o-after-a-symbol_addrs-rename)
+- [shared-callee RENAME](#shared-callee-rename)
 - [needs-define](#needs-define)
-- [N_MICRO library-wide pin (S133: n_audio_sc command-stream variant)](#n_micro-library-wide-pin-s133-n_audio_sc-command-stream-variant)
-- [GBI-microcode define (S83: value-guarded macro, not a whole-body gate)](#gbi-microcode-define-s83-value-guarded-macro-not-a-whole-body-gate)
-- [Version-rev `#define` VALUE divergence (S122: single `li`/`addiu` immediate byte)](#version-rev-define-value-divergence-s122-single-liaddiu-immediate-byte)
-- [VERSION_K-gated statement present in MG64's J build (S85: exact N×8B SHA-miss)](#version_k-gated-statement-present-in-mg64s-j-build-s85-exact-n8b-sha-miss)
+- [N_MICRO library-wide pin](#n_micro-library-wide-pin)
+- [GBI-microcode define](#gbi-microcode-define)
+- [Version-rev `#define` value divergence](#version-rev-define-value-divergence)
+- [VERSION_K-gated statement present in MG64's J build](#version_k-gated-statement-present-in-mg64s-j-build)
 - [vendored-header inversion (a curated libultra header diverges from the ultralib pin)](#vendored-header-inversion-a-curated-libultra-header-diverges-from-the-ultralib-pin)
 
 **Data / rodata carve**
@@ -2338,12 +2338,12 @@ upstream, so the planned verbatim cp failed first build, banked classical via #g
 
 ## game-region mirror (-O2 profile)
 
-**Rule:** A libultra/SDK source can be statically linked into the GAME (not the libultra code
+**Rule:** A libultra/SDK source can be statically linked into the game (not the libultra code
 band): its subseg sits at a low rom/vram, and the build compiles it with the game `CFLAGS` (-O2),
-NOT `LIBULTRA_CFLAGS` (-O3 via `$(subst -O2,-O3,…)`). The build selects the profile by src path
+**not** `LIBULTRA_CFLAGS` (-O3 via `$(subst -O2,-O3,…)`). The build selects the profile by src path
 prefix (the `mk/lib*.mk` `C_PROFILE_CFLAGS` overrides): only `src/libultra/%` and `src/libkmc/%`
 get the lib profiles; everything else is -O2. So a
-game-embedded SDK mirror placed under `src/libultra/` compiles at the WRONG -O3 → `-finline-functions`
+game-embedded SDK mirror placed under `src/libultra/` compiles at the wrong -O3 → `-finline-functions`
 inlines its small callees (the ROM, at -O2, keeps the `jal`s). Symptom: a verbatim mirror where a
 caller fn balloons (e.g. `guMtxIdent` 240 B vs ROM 60 B) because -O3 inlined `guMtxIdentF`/`guMtxF2L`.
 
@@ -2352,7 +2352,7 @@ caller fn balloons (e.g. `guMtxIdent` 240 B vs ROM 60 B) because -O3 inlined `gu
 Advisory (display-only).
 
 **Procedure:**
-- Mirror the file under a -O2 path, NOT `src/libultra/…`. The project convention is `src/mgu/`
+- Mirror the file under a -O2 path, **not** `src/libultra/…`. The project convention is `src/mgu/`
   for the game-embedded ultralib gu/mgu matrix source (the Monegi variant); a local `.clang-format`
   (`BasedOnStyle: Google` + `SortIncludes: Never`) formats it like the other library trees (see
   CLAUDE.md). Any non-`libultra/`,
@@ -2364,16 +2364,16 @@ Advisory (display-only).
   reconstruction on the -O2 file (the verbatim siblings stay byte-exact); see the float-literal note in
   #mirror-cast-divergence-sign--vs-zero-extend for the single-precision FP gotcha.
 
-**`game-embedded` sub-case — not standalone-carvable (S128).** A game-region mirror can be worse than
-"compile at -O2": the upstream file's functions are compiled INTO a larger game TU, tight-packed (no
-16-byte object padding) against game functions, so there is NO object boundary to carve a standalone
-mirror at. The natural end of the matched block lands on a non-16 address with REAL game code (not
+**`game-embedded` sub-case — not standalone-carvable.** A game-region mirror can be worse than
+"compile at -O2": the upstream file's functions are compiled into a larger game TU, tight-packed (no
+16-byte object padding) against game functions, so there is **no** object boundary to carve a standalone
+mirror at. The natural end of the matched block lands on a non-16 address with real game code (not
 nops) immediately after; a standalone `[..,c,..]` subseg there SHA-misses because KMC `as` 16-pads the
 `.o` `.text` and shifts the tail (#non16align — the gate-build canary: a correctly-named stub that
 SHA-misses is alignment, not a bad offset). `pick_target.py` flags this as `game-embedded:0x<vram>`
 (the synthesis of `game-region-mirror` + a coddog-subset signal — `coddog-fncount-mismatch` /
-`coddog-structural` / `coddog-partial` — i.e. only SOME of the subseg's fns match the upstream).
-- **Plan a MIXED carve, not a seed-only mirror.** Carve `[A, B)` where BOTH A and B are 16-aligned
+`coddog-structural` / `coddog-partial` — i.e. only some of the subseg's fns match the upstream).
+- **Plan a mixed carve, not a seed-only mirror.** Carve `[A, B)` where **both** A and B are 16-aligned
   function boundaries (a 16-aligned carve always matches byte-wise, no padding inserted, regardless of
   the true object boundary). The carve pulls in the adjacent game fns between the lib block and the next
   16-aligned boundary; write the lib fns as verbatim mirrors and the game fns classical (or carry them
@@ -2394,7 +2394,7 @@ SHA-misses is alignment, not a bad offset). `pick_target.py` flags this as `game
 **Rule:** The build tracks no header dependencies: a `make` recompiles only the `.c` files whose
 objects are missing or older than the source, not the consumers of a header you edited. So when a
 mirror/enabler edits a *shared vendored header* (e.g. `include/libultra/PR/os_version.h`, included
-transitively by many libultra TUs), the post-edit verification MUST be a clean rebuild, or a stale
+transitively by many libultra TUs), the post-edit verification **must** be a clean rebuild, or a stale
 object can mask a divergence the header change introduced elsewhere.
 
 **Trigger:** the finalize/enabler step modifies a header under `include/` that more than one already-
@@ -2410,21 +2410,21 @@ banked TU includes (directly or via `guint.h`/`gu.h`/etc.).
 until the touched object was removed; a `make clean` rebuild then confirmed the add was globally
 SHA-safe across all os_version.h consumers).
 
-### shared-callee RENAME (S129: stale stub `.o` after a `symbol_addrs` rename)
+### shared-callee RENAME
 
-The same no-header-dep-tracking gap bites a different way when a bank RENAMES a shared callee/global
+The same no-header-dep-tracking gap bites a different way when a bank renames a shared callee/global
 in `symbol_addrs.txt` (a recover-extern), not just edits a header. Renaming e.g. `func_800A1148` to
 `__n_allocParam` and re-running `make extract` regenerates every `.s` that references it to the new
-name, but `make` does NOT recompile the still-`INCLUDE_ASM` sibling `.c` files (their `.c` did not
+name, but `make` does **not** recompile the still-`INCLUDE_ASM` sibling `.c` files (their `.c` did not
 change, and the build tracks no dep on the `.s` the macro includes). So their stale `.o` still
-references the OLD `func_<vram>` name, and the link fails `undefined reference to func_<vram>` even
+references the old `func_<vram>` name, and the link fails `undefined reference to func_<vram>` even
 though the regenerated `.s` is correct.
 
 **Trigger:** banking one member of a homogeneous sibling set that share a recovered callee/global,
 while the other members are still `INCLUDE_ASM` stubs; link error names the pre-rename `func_<vram>`/
 `D_<vram>`.
 
-**Procedure:** for a homogeneous sibling set sharing recovered externs, write ALL the sibling bodies
+**Procedure:** for a homogeneous sibling set sharing recovered externs, write **all** the sibling bodies
 before building — each becomes a fresh-compiled `.c` referencing the new name, so no stale stub `.o`
 survives. Otherwise `rm` (or `touch` the source of) the still-stub `.o` after the rename to force its
 recompile. The shared extern only needs recovering once (it serves the whole set).
@@ -2445,24 +2445,27 @@ build as written.
 **Procedure:** Confirm the gating define against the upstream. If it is not in the lib's active
 define set, the leaf is not a clean flip: defer, or handle the define at the gate.
 
-### N_MICRO library-wide pin (S133: n_audio_sc command-stream variant)
+### N_MICRO library-wide pin
 
-The n_audio_sc upstream Makefile builds the WHOLE library with `-DN_MICRO=1` (the "micro" command
+The n_audio_sc upstream Makefile builds the whole library with `-DN_MICRO=1` (the "micro" command
 stream). Files that branch on it (`n_save.c`, `n_resample.c`, `n_reverb.c`, `n_env.c`, `n_load.c`,
-`n_synthesizer.c`) emit the micro path; with NO define they take the longer non-micro path and
+`n_synthesizer.c`) emit the micro path; with **no** define they take the longer non-micro path and
 SHA-miss. The fix is a library-wide pin: `-DN_MICRO=1` in `LIBNAUDIO_CFLAGS` (`mk/libnaudio.mk`), the
 same standing-pin pattern as `-DF3DEX_GBI_2`. The setter mirrors (`n_syn*.c`) have no N_MICRO branch,
 so the pin is byte-neutral for them. `pick_target` parses `LIBNAUDIO_CFLAGS` into the libnaudio
-active-define set (S133), so N_MICRO reads as satisfied and a libnaudio mirror does not false-flag
+active-define set, so N_MICRO reads as satisfied and a libnaudio mirror does not false-flag
 `needs-define:N_MICRO`. The first miss surfaced at the full-make ROM SHA-1 (`n_save.c` built the
 4-command non-micro path vs the target's 2 commands), invisible to the gate stub — the same
 late-surface class as the GBI sub-case below. See `#needs-header` for the paired `.inc.c`
 body-include the N_MICRO branch pulls in.
 
-### GBI-microcode define (S83: value-guarded macro, not a whole-body gate)
+**Provenance:** S133 (n_audio_sc `-DN_MICRO=1` library-wide pin; parsed into libnaudio's
+active-define set).
+
+### GBI-microcode define
 
 A subtler sub-case: not a `#ifdef DEFINE` wrapping the whole function, but an object-like macro
-whose VALUE is GBI-microcode-guarded, used inside an otherwise-verbatim body. `PR/sptask.h`:
+whose value is GBI-microcode-guarded, used inside an otherwise-verbatim body. `PR/sptask.h`:
 
 ```c
 #if (defined(F3DEX_GBI)||defined(F3DLP_GBI)||defined(F3DEX_GBI_2))
@@ -2473,11 +2476,11 @@ whose VALUE is GBI-microcode-guarded, used inside an otherwise-verbatim body. `P
 ```
 
 ultralib builds `libgultra_rom` with a global default `GBIDEFINE := -DF3DEX_GBI`. MG64 runs the
-F3DEX2 microcode, so the project pins `-DF3DEX_GBI_2` in `LIBULTRA_CFLAGS` (`mk/libultra.mk`). With NO
+F3DEX2 microcode, so the project pins `-DF3DEX_GBI_2` in `LIBULTRA_CFLAGS` (`mk/libultra.mk`). With **no**
 GBI define the macro silently takes the `#else` value. The standing pin resolves this for every
 libultra mirror; it is documented here because the failure mode is invisible to every gate check.
 
-**The tell (S83 `sptask.c`):** the mirror compiles and LINKS clean (all symbols resolve), but the
+**The tell (`sptask.c`):** the mirror compiles and links clean (all symbols resolve), but the
 full-make ROM SHA-1 misses by exactly one word: an `addiu rX, rX, imm` whose immediate is off by
 the macro delta (built `0x8FC` vs baserom `0xBFC`, i.e. `OS_YIELD_DATA_SIZE - 4` at `0x900` vs
 `0xc00`). It is invisible to the gate because the `INCLUDE_ASM` stub never compiles the body (same
@@ -2493,58 +2496,67 @@ whole-body divergence is a different (version / cast / char-signedness) class.
 GBI-value-guarded macro and no guard define is active for the lib (`gbi_value_guard_needs_define`,
 keyed off the parsed `LIBULTRA_CFLAGS` define set). Dormant while `-DF3DEX_GBI_2` stands, by design.
 
-### Version-rev `#define` VALUE divergence (S122: single `li`/`addiu` immediate byte)
+**Provenance:** S83 (`sptask.c`'s `OS_YIELD_DATA_SIZE` immediate proved the standing `-DF3DEX_GBI_2`
+pin over the `#else` value).
 
-The same link-clean / one-word-SHA-miss class as the S83 GBI sub-case, but the gating is NOT a build
-flag: it is the vendored upstream version diverging from the GAME's library rev on a plain object-like
-`#define` value. S122 `nusimgr.c` (libnusys): a byte-verbatim drop-static mirror SHA-missed by exactly
-ONE byte, vram 0x800A27E0 `li a1,6` (build) vs `5` (ROM) — the `osCreateThread` thread-id arg. Root
+### Version-rev `#define` value divergence
+
+The same link-clean / one-word-SHA-miss class as the S83 GBI sub-case, but the gating is **not** a build
+flag: it is the vendored upstream version diverging from the game's library rev on a plain object-like
+`#define` value. A byte-verbatim drop-static `nusimgr.c` (libnusys) mirror SHA-missed by exactly
+one byte, vram 0x800A27E0 `li a1,6` (build) vs `5` (ROM) — the `osCreateThread` thread-id arg. Root
 cause: vendored nusys-2.07 `include/libnusys/nusys.h` has `NU_CONT_THREAD_ID 6`, but MG64's nusys rev
 compacts the controller/SI thread to slot 5 (the IDs run idle=1/rmon=2/main=3/gfx=4/[audio-gap=5]/
 cont=6 in 2.07; MG64 drops the audio slot so cont=5).
 
 **The tell vs a reloc:** the lone differing word is a `li`/`addiu` whose immediate is a small literal
-(an enum/macro VALUE), NOT a `lui`+`addiu`/`lw` hi/lo PAIR carrying a relocated address. An immediate
+(an enum/macro value), **not** a `lui`+`addiu`/`lw` hi/lo pair carrying a relocated address. An immediate
 mismatch is a `#define`/enum value; a hi/lo address mismatch is a symbol-placement problem. Localize
 with the S44 `.o`-diff byte form (venv-python region cmp of `baserom.z64` vs `build/mariogolf64.z64`
 at the ROM offset) → the single off-by-constant immediate → grep the macro back through the header.
 
 **Fix + blast radius:** correct the vendored header to the game's value, then **grep `src/` +
 `include/` for every consumer of the macro before editing** — if the candidate is the sole consumer
-(S122: `nusimgr.c` was the only `NU_CONT_THREAD_ID`/`NU_SI_THREAD_ID` user in the tree), the change is
-collateral-free; otherwise a co-consumer that was matched at the OLD value will break. The build tracks
+(`nusimgr.c` was the only `NU_CONT_THREAD_ID`/`NU_SI_THREAD_ID` user in the tree), the change is
+collateral-free; otherwise a co-consumer that was matched at the old value will break. The build tracks
 no header deps, so bank from a `make clean && make extract && make` (the shared-header-edit rule), not
 an incremental build.
 
-### VERSION_K-gated statement present in MG64's J build (S85: exact N×8B SHA-miss)
+**Provenance:** S122 (`nusimgr.c` drop-static mirror; `NU_CONT_THREAD_ID` 6→5 vendored-header value
+fix for MG64's compacted nusys rev).
+
+### VERSION_K-gated statement present in MG64's J build
 
 The ultralib reconstruction's `#if BUILD_VERSION >= VERSION_K` gates are sometimes too aggressive
 for MG64's actual VERSION_J build: a call/statement the source gates K-only is in fact present in the
 J ROM. `pick_target.py`'s `_strip_inactive_version_branches` strips `>= VERSION_K` under J, so the
 mirror compiles short of the asm by whole instructions.
 
-**S85 `initialize.c`, two instances in one file (verify each independently):**
+**`initialize.c`, two instances in one file (verify each independently):**
 - `__osSetWatchLo(0x4900000)` was gated `#if BUILD_VERSION >= VERSION_K`; un-gating it to
-  `>= VERSION_J` restored the missing `jal __osSetWatchLo; lui a0,0x490`, the EXACT 8-byte/2-instr
+  `>= VERSION_J` restored the missing `jal __osSetWatchLo; lui a0,0x490`, the exact 8-byte/2-instr
   miss.
 - `createSpeedParam`'s body, by contrast, has a `#elif BUILD_VERSION == VERSION_J` branch
-  (reconstruction lines 210-224) so it DID compile under J as-is. Check the J branch exists before
+  (reconstruction lines 210-224) so it did compile under J as-is. Check the J branch exists before
   assuming a K-gate needs un-gating; not every K-gated thing is missing under J.
 
-**The tell:** the mirror compiles + LINKS clean, but the full-make ROM SHA-1 misses by an exact
-multiple of 8 bytes (whole instructions) localized to ONE contiguous region, distinct from the
+**The tell:** the mirror compiles + links clean, but the full-make ROM SHA-1 misses by an exact
+multiple of 8 bytes (whole instructions) localized to one contiguous region, distinct from the
 GBI/enum off-by-constant *immediate* class above. Cross-check the `.o` function size against the asm:
-the next symbol's `nm` offset vs the asm `nonmatching <fn>, 0x<size>` comment (S85
-`__osInitialize_common` compiled `0x228` vs baserom `0x230`).
+the next symbol's `nm` offset vs the asm `nonmatching <fn>, 0x<size>` comment (`__osInitialize_common`
+compiled `0x228` vs baserom `0x230`).
 
 **Localize:** disassemble the `.o` (`mips-linux-gnu-objdump -d build/<path>.o`) and the baserom fn
 (Ghidra MCP `disassemble_function`), align; the divergence is a contiguous run of asm-only
 instructions matching a `>= VERSION_K`-gated statement in the upstream (the 8-byte shift then
 propagates cleanly through the rest).
 
-**Fix:** change ONLY that one gate `>= VERSION_K` → `>= VERSION_J` in the mirrored copy (a
+**Fix:** change only that one gate `>= VERSION_K` → `>= VERSION_J` in the mirrored copy (a
 near-verbatim version-gate edit, same class as #char-signedness / #assert-strip; confirm the gated
-callee is a placed symbol). NOT a blanket un-gate of every K-block.
+callee is a placed symbol). **Not** a blanket un-gate of every K-block.
+
+**Provenance:** S85 (`initialize.c`'s `__osSetWatchLo` K-gate un-gated to `>= VERSION_J`; the exact
+N×8B whole-instruction SHA-miss tell).
 
 ---
 
