@@ -1734,25 +1734,25 @@ pressure.
 
 **Provenance:** S11 (flipped score 400→0 in one iteration).
 
-**Variant — inverted-guard for a `return DEFAULT` tail (S156).** For `if (cond) return A; return
-DEFAULT;` where the guard variable lands in the WRONG scratch reg (mine `slti v0`/`beqz v0`, target
+**Variant — inverted-guard for a `return DEFAULT` tail.** For `if (cond) return A; return
+DEFAULT;` where the guard variable lands in the wrong scratch reg (mine `slti v0`/`beqz v0`, target
 `slti v1`/`beqz v1`) — same branch encoding, result correctly in `v0`, only the guard temp differs —
-INVERT the guard: `if (!cond) return DEFAULT; return A;`. The two forms emit the identical `slti`+
+invert the guard: `if (!cond) return DEFAULT; return A;`. The two forms emit the identical `slti`+
 `beqz` (gcc computes `cond` and branches on its negation either way), but inverting swaps which value
-is the fall-through, which flips the pseudo COLORING so the guard temp goes to `v1` and the returned
+is the fall-through, which flips the pseudo coloring so the guard temp goes to `v1` and the returned
 value to `v0` (no trailing `move v0,v1`; the `beqz` delay slot becomes `move v0,zero`/`nop`). Root
-cause: `REG_ALLOC_ORDER` is UNDEFINED in the KMC `config/mips/mips.h`, so gcc 2.7.2 falls back to
+cause: `REG_ALLOC_ORDER` is undefined in the KMC `config/mips/mips.h`, so gcc 2.7.2 falls back to
 default ascending order (`$2`/`v0` before `$3`/`v1`); whichever pseudo is processed first greedily
 grabs `v0`, and inverting the guard reorders that. S156 `func_800520DC` + the `func_80052070`
 scenario-tail (`if (scenario_mode_id >= 12) return 0; return D_801B6098;`).
 
-**Variant — array-index `+` operand order picks the `v0` accumulator (S156; gcc-grounded S159).** For
-`arr[termA + termB]` where both terms are strength-reduced multiplies, gcc computes the RIGHT `+`
-operand's term into `v0` (the accumulator that receives the final `addu v0,v0,v1`) and the LEFT into
-`v1`. So to make the target's "computed-into-`v0` term" match, put that term on the RIGHT of the `+`.
+**Variant — array-index `+` operand order picks the `v0` accumulator.** For
+`arr[termA + termB]` where both terms are strength-reduced multiplies, gcc computes the right `+`
+operand's term into `v0` (the accumulator that receives the final `addu v0,v0,v1`) and the left into
+`v1`. So to make the target's "computed-into-`v0` term" match, put that term on the right of the `+`.
 S156: `arg0*200 + arg1*10` put `arg1*10` in `v0` (target did `a1*10` first); `scenario*12 +
-D_801B6098*2` put `D_801B6098*2` in `v0` (target loaded `D_801B6098` FIRST). Same value, same
-instructions, only the two multiply blocks swap order. **WHY (KMC gcc 2.7.2 `expr.c:5248-5290`,
+D_801B6098*2` put `D_801B6098*2` in `v0` (target loaded `D_801B6098` first). Same value, same
+instructions, only the two multiply blocks swap order. **Why (KMC gcc 2.7.2 `expr.c:5248-5290`,
 `both_summands`):** after expanding both operands, the `PLUS`-sum path reassociates and "puts a
 multiplication first" (5289-5290 swap) + folds constants; the emitted order of the two multiply
 subtrees is driven by that reorder, so swapping the source order of the two terms flips which global
@@ -1760,19 +1760,19 @@ is loaded first. Empirical rule: if a near-miss only differs by which term is lo
 first, try both `A + B` orders. S159 `func_80051FCC` matched with `scenario*12 + D_801B6098*2` (the
 cheap `D_801B6098*2` on the right → loaded first).
 
-**Variant — branch-LIKELY (`beqzl`) on a coalesced return-var; invert the branch (S159).** A
-`return-DEFAULT` tail can miss NOT on the guard-temp coloring (the S156 variant above) but on the
-BRANCH FORM: `if (cond) return VAR; return CONST;` where `VAR` coalesces into `v0` makes gcc emit a
-branch-LIKELY (`beqzl`) that annuls the lone `li v0,CONST` in the delay slot (so `v0` keeps `VAR` on
-the not-taken path) — 4 insns. If the ROM instead uses a PLAIN `beqz` + `li v0,CONST` (delay, always
-run) + `addu/move v0,<scratch>,0` on the fall-through (i.e. `VAR` is held in a SCRATCH reg, NOT `v0`)
-— 5 insns — INVERT the branch so the CONSTANT is the early return: `if (!cond) return CONST; return
+**Variant — branch-likely (`beqzl`) on a coalesced return-var; invert the branch.** A
+`return-DEFAULT` tail can miss not on the guard-temp coloring (the inverted-guard variant above) but on the
+branch form: `if (cond) return VAR; return CONST;` where `VAR` coalesces into `v0` makes gcc emit a
+branch-likely (`beqzl`) that annuls the lone `li v0,CONST` in the delay slot (so `v0` keeps `VAR` on
+the not-taken path) — 4 insns. If the ROM instead uses a plain `beqz` + `li v0,CONST` (delay, always
+run) + `addu/move v0,<scratch>,0` on the fall-through (i.e. `VAR` is held in a scratch reg, not `v0`)
+— 5 insns — invert the branch so the constant is the early return: `if (!cond) return CONST; return
 VAR;`. That makes `VAR` no longer the coalesced-into-`v0` fall-through value, so it lands in a scratch
-reg and the single-insn-skip annul pattern no longer fires → the plain `beqz` + `move` form. **WHY
+reg and the single-insn-skip annul pattern no longer fires → the plain `beqz` + `move` form. **Why
 (KMC gcc 2.7.2 `reorg.c:1141-1211`, `optimize_skip`):** the comment at 1161-1166 states it directly —
-when a conditional branch "goes around a single insn", gcc INVERTS+ANNULS the jump ("the same effect
+when a conditional branch "goes around a single insn", gcc inverts+annuls the jump ("the same effect
 in fewer insns"), which is the `beqzl`. That optimization only applies when the skipped insn (`li
-v0,CONST`) is the LONE difference, i.e. when `VAR` already occupies `v0`; inverting so `CONST` is the
+v0,CONST`) is the lone difference, i.e. when `VAR` already occupies `v0`; inverting so `CONST` is the
 early return removes the single-skip shape. S159 `func_80051FCC` scenario tail: `if
 (scenario_mode_id < 12) return scenario_mode_id; return 8;` emitted `beqzl` (sm→v0); inverting to `if
 (scenario_mode_id >= 12) return 8; return scenario_mode_id;` gave the ROM's `beqz; li v0,8; addu
@@ -1791,8 +1791,8 @@ the truth.
 
 **Trigger:** Score ≠ 0 in isolation but the mismatches are HI/LO16 reloc address loads.
 
-**Fast recognition signal (S43):** `decomp_loop.py` reports a non-zero `score` with empty
-`top_mismatches` AND `match_count == total_rows` (every row matched, yet a residual score). That
+**Fast recognition signal:** `decomp_loop.py` reports a non-zero `score` with empty
+`top_mismatches` and `match_count == total_rows` (every row matched, yet a residual score). That
 combination is definitionally an isolation artifact: asm-differ found no mnemonic-row diff, so the
 score is pure reloc/addend noise (struct-field LO16 addends like `pfs->queue`/`pfs->channel`, extern
 HI/LO16 calls against now-placed symbols). It is not a near-miss: do not iterate C, do not run the
@@ -1800,21 +1800,21 @@ permuter. Go straight to the in-tree spot-check / full-make ROM SHA-1, which is 
 S43 `osGbpakGetStatus` scored 15 / 99.8% this way (76/76 rows, empty mismatches) and the full make
 matched the baserom unchanged.
 
-**Inverse trap: the isolated score can UNDER-report an intra-fn instruction-SCHEDULING reorder
-(S150).** The artifact signal above is a FALSE-CLEAR direction (isolated looks worse than reality).
-The opposite also happens: isolated looks BETTER than reality. When your candidate and the target
-share the same instructions but in a different ORDER (a scheduling reorder, e.g. a load hoisted to
+**Inverse trap: the isolated score can under-report an intra-fn instruction-scheduling reorder.**
+The artifact signal above is a false-clear direction (isolated looks worse than reality).
+The opposite also happens: isolated looks better than reality. When your candidate and the target
+share the same instructions but in a different order (a scheduling reorder, e.g. a load hoisted to
 the top of a block vs kept near its use), asm-differ's alignment matches the moved instruction across
 its move and nets only the surrounding reloc noise, so the isolated `score`/`match_count` reads
-near-perfect while the full-make ROM SHA still MISSES. S150 `cfb_setup`: the isolated diff showed
+near-perfect while the full-make ROM SHA still misses. S150 `cfb_setup`: the isolated diff showed
 44/45 rows (only the `D_800B67A4+0x2` vs `D_800B67A6` reloc-addend row), yet the full make missed on
 an else-branch `lw framebuf[2]` that the target hoisted to the block head and the build kept late.
 **Recipe:** when the isolated diff reads "near-perfect / artifact" but the full-make SHA misses, do
-NOT trust the isolated score. Localize with `cmp -l build/mariogolf64.z64 baserom.z64 | head`: the
-first field is the 1-based DECIMAL byte offset, so `rom = offset - 1` (hex it, map to the function
+not trust the isolated score. Localize with `cmp -l build/mariogolf64.z64 baserom.z64 | head`: the
+first field is the 1-based decimal byte offset, so `rom = offset - 1` (hex it, map to the function
 via the subseg rom base), and the differing bytes point at the exact mismatched instructions. Fix
 the source (an ordering swap, or force an early read into a temp to hoist a load) and re-`cmp` to
-converge. The full-make ROM SHA-1 is the only authority; the isolated score is advisory in BOTH
+converge. The full-make ROM SHA-1 is the only authority; the isolated score is advisory in both
 directions.
 
 **Procedure:** Trust the in-tree spot-check / full-make SHA, not the isolated score.
@@ -1830,13 +1830,13 @@ from the instruction listing.
 **Provenance:** S11 (Ghidra rendered `func_800AB600`'s return as `return 0` when the asm returns
 `(status>>8)&1`).
 
-**A `_NON_MATCHING`-suffixed MCP decompile = distrust the WHOLE body, not just types (S156).** When
+**A `_NON_MATCHING`-suffixed MCP decompile = distrust the whole body, not just types.** When
 the Ghidra function name in the MCP decompile carries a `.NON_MATCHING` suffix (or the plate comment
-cites a prior non-matching attempt), the cached pseudocode can be ACTIVELY WRONG, not merely
+cites a prior non-matching attempt), the cached pseudocode can be actively wrong, not merely
 imprecise: it may return a literal `0` with no body, or render a phantom operation the bytes do not
 contain. S156's four accessors: `func_80052100`/`func_80052168` both decompiled to `return 0;` (no
 body at all), and `func_80052070`/`func_800520DC` showed a phantom `DAT_801b6098 >> 0x1f` where the
-raw bytes `8C426098` are a plain `lw` with NO shift. The asm-first fast-path ignored all of it and
+raw bytes `8C426098` are a plain `lw` with no shift. The asm-first fast-path ignored all of it and
 matched. Treat a `_NON_MATCHING` decompile as shape-only-if-that (often not even shape); the `.s` is
 the sole authority.
 
@@ -1867,11 +1867,11 @@ mis-place downstream bytes.
 
 **Sub-cases / variants:**
 
-**Combined-subseg case (S51):** When a 2-fn pack has fn2 packed tight after fn1 at a non-16 offset
+**Combined-subseg case:** When a 2-fn pack has fn2 packed tight after fn1 at a non-16 offset
 (fn1's size is not a 16-multiple), you cannot split into per-fn subsegs: KMC `as` pads fn1's
 standalone `.o` `.text` to 16, inserting bytes that shift fn2 downstream and breaking the ROM SHA-1
 on a bare stub flip. The fix is the opposite of the normal pack split: flip the whole pack to one
-combined `[0x<rom>, c, lib<name>/<basename>]` subseg holding BOTH functions in one `.o` (both
+combined `[0x<rom>, c, lib<name>/<basename>]` subseg holding both functions in one `.o` (both
 `INCLUDE_ASM` stubs, then decompile each). Padding then lands only at the object's end, matching the
 original single-`.o` layout. S51 `guMtxCatF`(0xDC)+`guMtxXFMF`(0xAC, at non-16 `0x848AC`) → one
 `gu/mtxcatf.c`. A bare-stub split flip is the gate-build canary: SHA-miss with a correctly-named
@@ -1888,19 +1888,19 @@ fixup commit).
 
 ## trailing-alignment pad after a C mirror
 
-**Rule:** splat extracts the whole subseg slot: the function PLUS the `0x00000000` nop padding that
+**Rule:** splat extracts the whole subseg slot: the function plus the `0x00000000` nop padding that
 fills the gap up to the next subseg. When that next subseg sits at an alignment above 16 (32/64/128),
 the pad is larger than the ≤12B a compiler's 16-byte `.text` alignment emits. A verbatim C mirror
 therefore compiles short of the slot, the ROM shrinks, and everything downstream shifts → a SHA-miss
 in the execution middle. It is invisible to every gate check: the `INCLUDE_ASM` stub carries the pad,
-so the gate build is green; only the real C body drops it (the S18/S44 late-surfacing class). The
+so the gate build is green; only the real C body drops it (the late-surfacing class). The
 sibling guard: a function whose 16-aligned size already fills its slot (the same-subseg neighbor)
 mirrors clean; only the one preceding a higher-aligned boundary pays.
 
-**Trigger:** `pick_target.py` flag `trailing-pad:<n>B@<align>` (S79). `<n>` = the residual pad bytes
+**Trigger:** `pick_target.py` flag `trailing-pad:<n>B@<align>`. `<n>` = the residual pad bytes
 beyond the compiler's 16-align, `<align>` = the next boundary's alignment (e.g. `96B@128`). Pre-flags
 it at the gate so the split is priced, not localized mid-execution. (`docs/hazards.md:122`: the `.ld`
-does NOT `ALIGN` between subsegs, so the pad must live in an object; there is no linker fallback. This
+does not `ALIGN` between subsegs, so the pad must live in an object; there is no linker fallback. This
 is the C-mirror dual of the KMC-`as` 16-pad note in `#asm-mirror-vendoring`.)
 
 **Procedure:** flip the function subseg to `c` as usual, then split a nop-pad `[0x<gcc_o_end>, asm]`
@@ -1911,12 +1911,13 @@ baserom nops at those addresses; the pad subseg supplies the rest up to the high
 A pure-nop subseg is never a pick: `pick_target.py` skips any all-nop asm subseg (`code_end_rom` None
 with a present listing), which also retired 8 pre-existing all-nop overlay stubs (`func_ovl*_801F4A30`).
 
-**Worked example (S79 `__osContRamWrite`):** function 0x204 (516B) → GCC `.o` `.text` 0x210 (528B,
+**Worked example (`__osContRamWrite`):** function 0x204 (516B) → GCC `.o` `.text` 0x210 (528B,
 16-aligned) → real slot 0x270 (624B) up to the 128-aligned `osAfterPreNMI` (0x800AF880). Split
 `[0x8AC20, asm]` (= 0x8AA10 + 0x210) carries the residual 0x60 (96B) of nops. Re-extract + `make` →
 ROM SHA-1 == baserom. The body itself never diverged (129 instrs byte-identical); the gap was purely
 the trailing pad. The contramread sibling (slot == 16-aligned fn size) mirrored clean, no split.
 
+**Provenance:** late-surfacing class: S18, S44; flag and `__osContRamWrite` worked example: S79.
 
 ---
 
