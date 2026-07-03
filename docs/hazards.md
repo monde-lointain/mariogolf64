@@ -3784,25 +3784,25 @@ project's hardest wall, 8600→0, carried and declared "irreducible" 3×).
 
 ## permuter goto-backedge liveness unsound (var-reuse passes corrupt live-across-backedge values)
 
-**Trigger:** on a GOTO-loop function, a decomp-permuter "best" that beats your hand-derived structural
-floor by a suspiciously large margin. decomp-permuter's liveness analysis does NOT model `goto`
+**Trigger:** on a goto-loop function, a decomp-permuter "best" that beats your hand-derived structural
+floor by a suspiciously large margin. decomp-permuter's liveness analysis does not model `goto`
 back-edges, so its variable-reuse passes (`perm_temp_for_expr`, `perm_split_assignment`,
-`perm_ins_block`, `perm_reorder_stmts`, `perm_condition`) treat a variable that is live ACROSS a
-back-edge as a dead temp and REUSE it — a semantically-INVALID mutation that scores below the valid
+`perm_ins_block`, `perm_reorder_stmts`, `perm_condition`) treat a variable that is live across a
+back-edge as a dead temp and reuse it — a semantically-invalid mutation that scores below the valid
 floor but can never reach a valid 0, and (worse) poisons a resume seed so the wall looks reducible when
 it is not.
 
-**S166 saw two instances:** `lz_decompress_simple` hit raw-104 vs a valid floor of 146 via
+**Two instances.** In S166, `lz_decompress_simple` hit raw-104 vs a valid floor of 146 via
 `acc=*p; uVar2=acc` clobbering the live control word; `lz_decompress_extended` hit decomp_loop 20400 /
 perm 3805 vs a valid floor 208 via `perm_split_assignment` rewriting the live ring index
 `ridx = ridx+1 & 0x7ff` into a constant-2 clobber across every back-edge — a corrupt resume seed that
 mis-measured the wall for a full sub-phase until caught.
 
-**FIX/RULE.** On a goto-loop fn, restrict `[weight_overrides]` to SEMANTICS-SAFE passes ONLY
+**Fix/rule.** On a goto-loop fn, restrict `[weight_overrides]` to semantics-safe passes only
 (`perm_reorder_decls`, `perm_pad_var_decl`, `perm_randomize_function_type` — these only renumber
-allocnos, cannot change semantics) and set the var-reuse passes to 0. ALWAYS re-verify any sub-floor
+allocnos, cannot change semantics) and set the var-reuse passes to 0. Always re-verify any sub-floor
 permuter output with a manual liveness check across every goto back-edge before trusting it as a match
-OR a resume seed. Bonus: allocno-renumber-only IS the correct tool for a pure register-PERMUTATION
+or a resume seed. Bonus: allocno-renumber-only is the correct tool for a pure register-permutation
 residual anyway (what a `#pervasive-regalloc-classical-main` tail usually is). See
 `#pervasive-regalloc-classical-main` step 3 and `#permuter-setup-for-kmc-toolchain-mirrors`.
 
@@ -3812,38 +3812,38 @@ residual anyway (what a `#pervasive-regalloc-classical-main` tail usually is). S
 otherwise structurally correct still mis-allocates at the loop-entry / a delay slot, and the miss
 resists every body-level lever.
 
-**Fix:** declare the function `s32` (not `void`), with NO return statement. A non-void return type
-RESERVES `$v0` as the return register, which changes the register allocation / delay-slot fill enough
-to match a ROM whose original TU returned an (unused) value. S158 `func_80067D74` matched ONLY with
-`s32` return; `void` differed at the entry-`beqz` delay slot; `s32`/`u32`/`long long` all matched
+**Fix:** declare the function `s32` (not `void`), with no return statement. A non-void return type
+reserves `$v0` as the return register, which changes the register allocation / delay-slot fill enough
+to match a ROM whose original TU returned an (unused) value. `func_80067D74` matched only with `s32`
+return (S158); `void` differed at the entry-`beqz` delay slot; `s32`/`u32`/`long long` all matched
 (`s64`/`u64` fail to compile with no return), so use the clean `s32`. Found via the permuter's
 `perm_randomize_function_type` pass — weight it up when a void classical fn won't close.
 
 ## struct-access-folding-changes-scheduling
 
 **Trigger:** a struct-array function that byte-matches when written with per-field base symbols but
-NOT when written with a combined struct, even though the two forms link to identical addresses.
+not when written with a combined struct, even though the two forms link to identical addresses.
 
 **Cause:** for a combined global struct array, `D_801B7118[i].score` folds the field offset into the
 `%lo` (`sh v, %lo(D_801B7118+2)(hi+i*stride)`, addend 2); a per-field symbol `D_801B711A[i].score`
-uses `%lo(D_801B711A)` (addend 0). The LINKED bytes are identical, but GCC 2.7.2's instruction
-SELECTION / SCHEDULING for the two address forms differs (S158: the combined form changed the
+uses `%lo(D_801B711A)` (addend 0). The linked bytes are identical, but GCC 2.7.2's instruction
+selection / scheduling for the two address forms differs (S158: the combined form changed the
 loop-entry `beqz` delay-slot fill on `func_80067D74`). When a struct-array classical fn won't match,
 split the accessed fields into separate per-field base symbols (`Eid@D_801B7118` / `Esc@D_801B711A` /
-`Eho@D_801B711C`, each a struct whose field is at offset 0). A 6-byte struct COPY can still use one of
+`Eho@D_801B711C`, each a struct whose field is at offset 0). A 6-byte struct copy can still use one of
 these (align-2 the type so the copy emits `lwl/lwr`+`lh/sh`).
 
-**Param-struct at the gate — check Ghidra, but VERIFY vs the asm (S164).** When a classical fn takes a
+**Param-struct at the gate — check Ghidra, but verify vs the asm.** When a classical fn takes a
 `<T> *param_1` accessed as `param_1[N]` + `*(u16 *)(param_1 + k)` casts, its original source likely used
-a real STRUCT, and struct member access (proper field types) can change instruction selection /
+a real struct, and struct member access (proper field types) can change instruction selection /
 scheduling / regalloc vs int-array indexing. So at the plan gate, query Ghidra for an existing param
-struct (`search_data_types`, `get_struct_layout`). TWO cautions: (1) the Ghidra struct may be MIS-RE'd
+struct (`search_data_types`, `get_struct_layout`). Two cautions: (1) the Ghidra struct may be mis-RE'd
 — S164's `LzDecompressState` was marked packed (align 1, `ring_buffer@0x16`, size 0x24) but the asm
 ground truth is naturally aligned (`flags@0x14` u16 + 2 pad, `ring@0x18`, `ridx@0x1C` u16, `run@0x1E`
 s16, `hidx@0x20` u16, `hbase@0x24`, size ≥0x28) — reconcile field offsets/alignment/size against the
-load/store widths in the asm BEFORE trusting it (surface a corrected layout as a cross-repo Ghidra
-follow-up). (2) It is NOT a cure-all: struct-typing S164's `lz_decompress_simple` param (`u8*` fields)
-gave the IDENTICAL score + register permutation, because that fn's miss was INTERNAL allocno priority
+load/store widths in the asm before trusting it (surface a corrected layout as a cross-repo Ghidra
+follow-up). (2) It is not a cure-all: struct-typing S164's `lz_decompress_simple` param (`u8*` fields)
+gave the identical score + register permutation, because that fn's miss was internal allocno priority
 (a control var, not a param field). Test it, but if the diff shows the permutation is on internal
 temps/pointers (not the param loads), the struct won't move it — go to the permuter/fan-out.
 
@@ -3851,26 +3851,26 @@ temps/pointers (not the param loads), the struct won't move it — go to the per
 
 **Context:** a classical fn that dispatches on a small dense index (`switch (x)` with cases `0..N`,
 `sltiu x,N+1` bound-check) via a compiler-generated `.rodata` jump table (`jtbl_<vram>`, `jr $v0`),
-often with a per-case sparse secondary dispatch returning constants. S159 `func_80051E90` (a
+often with a per-case sparse secondary dispatch returning constants. `func_80051E90` (a
 course/hole yardage lookup: `switch(course)` over 8 cases, each a sparse `hole` dispatch returning
 golf-yardage constants, default 200).
 
 **Three levers for a byte-exact match:**
 
-1. **`switch` for the jtbl dispatch ONLY; `if`-chains for sparse inner cases.** A `switch` on the
+1. **`switch` for the jtbl dispatch only; `if`-chains for sparse inner cases.** A `switch` on the
    dense outer index emits the jump table you want (one `jtbl_<vram>` to carve). But a `switch` on the
-   SPARSE inner values (e.g. `hole ∈ {2,4,9,10,11,12,13,16}`) risks gcc emitting a SECOND table (a
+   sparse inner values (e.g. `hole ∈ {2,4,9,10,11,12,13,16}`) risks gcc emitting a second table (a
    `casesi`/range table), which is a second rodata blob to carve and a different code shape. Write the
    sparse inner dispatch as an `if (x == K1) …; if (x == K2) …;` chain so it always compiles to a
    linear `beq/bne` comparison chain (gcc sorts the tests ascending, matching the ROM's order). Net:
    exactly one compiler table in the TU.
 
-2. **`a == K1 || a == K2` compiles BRANCHLESS — split it into two `if`s.** For a case that returns the
-   same value for two inputs, `if (a == 10 || a == 16) return V;` compiles to a branchLESS
+2. **`a == K1 || a == K2` compiles branchless — split it into two `if`s.** For a case that returns the
+   same value for two inputs, `if (a == 10 || a == 16) return V;` compiles to a branchless
    `xori/sltiu` per test + `or` + one `beqz` (a bitwise merge, no short-circuit). If the ROM uses the
-   SHORT-CIRCUIT branch form (`beq a,10,ret; … bne a,16,default`), write two separate statements
-   (`if (a == 10) return V; if (a == 16) return V;`). This also lets gcc CROSS-JUMP the second test's
-   "check-K-else-default" tail into a SIBLING case's identical block (S159: case 0's `bne hole,16 →
+   short-circuit branch form (`beq a,10,ret; … bne a,16,default`), write two separate statements
+   (`if (a == 10) return V; if (a == 16) return V;`). This also lets gcc cross-jump the second test's
+   "check-K-else-default" tail into a sibling case's identical block (S159: case 0's `bne hole,16 →
    default` merged into case 5's `bne hole,17 → default`, with the compare constant riding in the
    shared `v0`). The cross-jump is automatic once the tail shapes match; you only need the branch
    (not branchless) form.
@@ -3878,10 +3878,10 @@ golf-yardage constants, default 200).
 3. **`.rodata` sibling carve for the jump table (see
    [#rodata-sibling-yaml-pattern](#rodata-sibling-yaml-pattern)).** The compiler table lands in the C
    object's `.rodata`; carve it so it places at the ROM's `jtbl_<vram>`. The text flip is the gate
-   enabler; the rodata carve lands at BODY time (a stub emits no rodata). Split the generic rodata
+   enabler; the rodata carve lands at body time (a stub emits no rodata). Split the generic rodata
    subseg around the table's extent (S159: `jtbl_800CCC30` = 8 × 4B = 0x20 at rom 0xA8030, 8-aligned,
    flanked by unrelated strings → `[0xA8030, .rodata, main/func_80051E90]` + `[0xA8050, rodata]`
-   tail). This is the first carve of a compiler SWITCH table (prior carves were FP-literal /
+   tail). This is the first carve of a compiler switch table (prior carves were FP-literal /
    const-array rodata); the mechanics are identical (attribute + split at 16/word-aligned bounds).
 
 **Provenance:** S159 `func_80051E90` (2/2 fns, no permuter; all three levers + the operand-order and
@@ -3889,35 +3889,35 @@ branch-likely nudges in [#register-reuse-nudge-classical-regalloc](#register-reu
 
 ## mem-in-struct scheduling lever (model a fixed global as a struct/array member)
 
-**Trigger:** a classical fn's global load/store SCHEDULES differently than the ROM and every body
-lever fails. Two shapes: (a) the compiler PIPELINES independent global-load/pointer-store pairs into
-several FP scratch regs (`$f0/$f2/$f4`) where the ROM keeps STRICT pairs reusing one reg (`$f0`); or
-(b) the compiler HOISTS a plain global load (e.g. a `& K` flag test) ABOVE a pointer store the ROM
-keeps LATE (so the ROM leaves the guard-branch delay slot a `nop`, and the build fills it + shifts
+**Trigger:** a classical fn's global load/store schedules differently than the ROM and every body
+lever fails. Two shapes: (a) the compiler pipelines independent global-load/pointer-store pairs into
+several FP scratch regs (`$f0/$f2/$f4`) where the ROM keeps strict pairs reusing one reg (`$f0`); or
+(b) the compiler hoists a plain global load (e.g. a `& K` flag test) above a pointer store the ROM
+keeps late (so the ROM leaves the guard-branch delay slot a `nop`, and the build fills it + shifts
 the register allocation).
 
 **Cause (gcc 2.7.2 `sched.c`, the memory-dependency model the instruction scheduler uses):**
-`true_dependence` (~line 817) treats two MEMs as INDEPENDENT (reorderable) when one is `MEM_IN_STRUCT`
-at a VARYING address and the other is NON-`MEM_IN_STRUCT` at a FIXED address (the rule commented at
-`sched.c:797`). A pointer store `*(T*)p` is MEM_IN_STRUCT + varying; a SCALAR global `D_xxx` is
+`true_dependence` (~line 817) treats two MEMs as independent (reorderable) when one is `MEM_IN_STRUCT`
+at a varying address and the other is non-`MEM_IN_STRUCT` at a fixed address (the rule commented at
+`sched.c:797`). A pointer store `*(T*)p` is MEM_IN_STRUCT + varying; a scalar global `D_xxx` is
 non-struct + fixed. So the scheduler judges `store-via-pointer` and `load-of-scalar-global`
 non-conflicting and freely reorders/hoists. `memrefs_conflict_p(symbol, reg)` itself returns 1
 (may-conflict), so the MEM_IN_STRUCT terms are the sole discriminator.
 
-**Fix:** make the FIXED global a struct/array MEMBER so its load becomes MEM_IN_STRUCT → the term
-flips → the pair CONFLICTS → the scheduler serializes (strict pairs) or cannot hoist (late load).
+**Fix:** make the fixed global a struct/array member so its load becomes MEM_IN_STRUCT → the term
+flips → the pair conflicts → the scheduler serializes (strict pairs) or cannot hoist (late load).
 Concretely: a triple of contiguous floats read as a vector is a `Vec3f` global (`extern Vec3f g;
 … g.x/g.y/g.z`); a lone flag word becomes `extern u16 g[]; … g[0] & K` (a 1-element array is
-MEM_IN_STRUCT via `ARRAY_REF`). The store side is usually ALREADY MEM_IN_STRUCT (`p[i]`, `p->f`), so
-only the LOAD side needs retyping. S162 used this TWICE in one file: `func_80076500` (six scalar
+MEM_IN_STRUCT via `ARRAY_REF`). The store side is usually already MEM_IN_STRUCT (`p[i]`, `p->f`), so
+only the load side needs retyping. S162 used this twice in one file: `func_80076500` (six scalar
 globals → two `Vec3f` constants → strict `$f0` pairs) and `func_80076558` (`D_800FBDA6` → `[0]`
 struct-flag → late load → `nop` in the guard delay slot → i allocated to `a1` → exact 58-instr match).
 No permuter; found by reading `~/development/repos/mips-gcc-2.7.2/sched.c`.
 
-**Confirming tell it IS separate symbols (not one shared struct base):** the ROM re-emits `lui at,
-%hi(sym)` PER access even for addresses that share the same %hi (all 0x8010) — a single struct/array
-base would CSE to ONE `lui`. Separate `lui`s ⟹ separate symbols; the struct-member reloc addend
-(`%lo(D_xxx)+4` == `%lo(D_xxx+4)`) resolves to the SAME bytes as the next symbol, so a `Vec3f` view
+**Confirming tell it is separate symbols (not one shared struct base):** the ROM re-emits `lui at,
+%hi(sym)` per access even for addresses that share the same %hi (all 0x8010) — a single struct/array
+base would CSE to one `lui`. Separate `lui`s ⟹ separate symbols; the struct-member reloc addend
+(`%lo(D_xxx)+4` == `%lo(D_xxx+4)`) resolves to the same bytes as the next symbol, so a `Vec3f` view
 that references only the base symbol is byte-safe (verify by full-make ROM SHA-1, an
 [isolated-compile caveat](#isolated-compile-caveat): asm-differ shows `sym+4` vs `sym_next` as a diff).
 An array-of-struct `T g[]` (stride = sizeof struct, fields folded into `%lo(at)`) reproduces the ROM's
