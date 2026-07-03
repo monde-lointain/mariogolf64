@@ -13,6 +13,110 @@ exactly rather than re-deriving them.
 
 ---
 
+## Playbook index
+
+The hazard families below group the sections that follow. Each links to its existing anchor;
+`CLAUDE.md`'s hazard index maps every `pick_target.py` flag to the same anchors.
+
+**Upstream verbatim mirror & build profile**
+- [Upstream-mirror pattern](#upstream-mirror-pattern)
+- [asm-mirror vendoring](#asm-mirror-vendoring)
+- [per-library standard-C-header isolation](#per-library-standard-c-header-isolation)
+- [Compile profiles (libkmc -O, libultra -O3)](#compile-profiles-libkmc--o-libultra--o3)
+- [isolated-compile caveat](#isolated-compile-caveat)
+- [open-band fast-path](#open-band-fast-path)
+- [intrinsic-likely / maybe-upstream (signature hints)](#intrinsic-likely--maybe-upstream-signature-hints)
+
+**Coddog cross-ref & symbol collisions**
+- [coddog cross-ref](#coddog-cross-ref)
+- [static-name-collision (an upstream file-static reuses a placed global name)](#static-name-collision-an-upstream-file-static-reuses-a-placed-global-name)
+- [overlapping symbols — allow_duplicated (two instances share one official static name)](#overlapping-symbols--allow_duplicated-two-instances-share-one-official-static-name)
+
+**Recover-extern & symbol placement / sync**
+- [recover-extern (refs-unplaced)](#recover-extern-refs-unplaced)
+- [calls-unplaced (function-callee dual)](#calls-unplaced-function-callee-dual)
+- [Macro-hidden recover-extern](#macro-hidden-recover-extern)
+- [header-renames-symbol (vendored header rewrites the curated symbol)](#header-renames-symbol-vendored-header-rewrites-the-curated-symbol)
+- [wrong-ghidra-name-override (correct a mislabeled symbol without sync-names)](#wrong-ghidra-name-override-correct-a-mislabeled-symbol-without-sync-names)
+- [make sync-names eviction recovery](#make-sync-names-eviction-recovery)
+- [stale top-level asm label sync](#stale-top-level-asm-label-sync)
+- [caller-evict](#caller-evict)
+
+**Vendored headers & preprocessor defines**
+- [defines-data](#defines-data)
+- [needs-header](#needs-header)
+- [vendored-header-incomplete (a reconstructed header is `(already-vendored)` yet missing a macro)](#vendored-header-incomplete-a-reconstructed-header-is-already-vendored-yet-missing-a-macro)
+- [crlf-vendored-header (a copied SDK header breaks KMC cpp's `\` continuations)](#crlf-vendored-header-a-copied-sdk-header-breaks-kmc-cpps--continuations)
+- [stale-vendored-header](#stale-vendored-header)
+- [clean-rebuild-after-shared-header-edit](#clean-rebuild-after-shared-header-edit)
+- [shared-callee RENAME (S129: stale stub `.o` after a `symbol_addrs` rename)](#shared-callee-rename-s129-stale-stub-o-after-a-symbol_addrs-rename)
+- [needs-define](#needs-define)
+- [N_MICRO library-wide pin (S133: n_audio_sc command-stream variant)](#n_micro-library-wide-pin-s133-n_audio_sc-command-stream-variant)
+- [GBI-microcode define (S83: value-guarded macro, not a whole-body gate)](#gbi-microcode-define-s83-value-guarded-macro-not-a-whole-body-gate)
+- [Version-rev `#define` VALUE divergence (S122: single `li`/`addiu` immediate byte)](#version-rev-define-value-divergence-s122-single-liaddiu-immediate-byte)
+- [VERSION_K-gated statement present in MG64's J build (S85: exact N×8B SHA-miss)](#version_k-gated-statement-present-in-mg64s-j-build-s85-exact-n8b-sha-miss)
+- [vendored-header inversion (a curated libultra header diverges from the ultralib pin)](#vendored-header-inversion-a-curated-libultra-header-diverges-from-the-ultralib-pin)
+
+**Data / rodata carve**
+- [.rodata sibling-yaml pattern](#rodata-sibling-yaml-pattern)
+- [data-rodata-carve](#data-rodata-carve)
+- [decomposed-one-tu rodata alignment split (a counter-case to the 8-point decompose gate)](#decomposed-one-tu-rodata-alignment-split-a-counter-case-to-the-8-point-decompose-gate)
+
+**Near-verbatim mirror byte-edits**
+- [Near-verbatim mirror (jal-count-mismatch)](#near-verbatim-mirror-jal-count-mismatch)
+- [Mirror cast divergence (sign- vs zero-extend)](#mirror-cast-divergence-sign--vs-zero-extend)
+- [char-signedness (libultra is -fsigned-char)](#char-signedness-libultra-is--fsigned-char)
+- [assert-strip (bare upstream assert vs NDEBUG)](#assert-strip-bare-upstream-assert-vs-ndebug)
+- [same-TU inline mismatch (definition-order + cross-TU split)](#same-tu-inline-mismatch-definition-order--cross-tu-split)
+- [cross-jump-tail-merge](#cross-jump-tail-merge)
+- [double-sqrt fast-math (bare sqrt.d needs a per-file -ffast-math override)](#double-sqrt-fast-math-bare-sqrtd-needs-a-per-file--ffast-math-override)
+
+**Segment splitting & bss layout**
+- [file-static (BSS-layout-conflict)](#file-static-bss-layout-conflict)
+- [Multi-function-segment splitting (pack)](#multi-function-segment-splitting-pack)
+- [non16align](#non16align)
+- [trailing-alignment pad after a C mirror](#trailing-alignment-pad-after-a-c-mirror)
+
+**Classical register allocation (the wall)**
+- [register-reuse nudge (classical regalloc)](#register-reuse-nudge-classical-regalloc)
+- [permuter setup for KMC-toolchain mirrors](#permuter-setup-for-kmc-toolchain-mirrors)
+- [pervasive-regalloc-classical-main (the S158 whole-function register-allocation playbook)](#pervasive-regalloc-classical-main-the-s158-whole-function-register-allocation-playbook)
+- [loop-weight and live-length regalloc steering (the S166 source-side allocation levers)](#loop-weight-and-live-length-regalloc-steering-the-s166-source-side-allocation-levers)
+- [permuter goto-backedge liveness unsound (var-reuse passes corrupt live-across-backedge values)](#permuter-goto-backedge-liveness-unsound-var-reuse-passes-corrupt-live-across-backedge-values)
+- [return-type is load-bearing](#return-type-is-load-bearing)
+- [struct-access-folding-changes-scheduling](#struct-access-folding-changes-scheduling)
+- [mem-in-struct scheduling lever (model a fixed global as a struct/array member)](#mem-in-struct-scheduling-lever-model-a-fixed-global-as-a-structarray-member)
+- [call-result a0-vs-v0 single-allocno (force a scratch reg via both-arm reuse)](#call-result-a0-vs-v0-single-allocno-force-a-scratch-reg-via-both-arm-reuse)
+- [compiler-source fan-out (escalation above the permuter)](#compiler-source-fan-out-escalation-above-the-permuter)
+
+**Classical control-flow & scheduling**
+- [struct-init-loop (dup-store / dual-induction-var)](#struct-init-loop-dup-store--dual-induction-var)
+- [volatile-global tell (dead-reload + recompute-not-CSE)](#volatile-global-tell-dead-reload--recompute-not-cse)
+- [top-tested-loop goto local-hoist (matching an un-inverted -O2 loop)](#top-tested-loop-goto-local-hoist-matching-an-un-inverted--o2-loop)
+- [capturing $ra (return address) as a call argument](#capturing-ra-return-address-as-a-call-argument)
+- [indexed-vs-pointer loop (strength-reduction preheader ordering)](#indexed-vs-pointer-loop-strength-reduction-preheader-ordering)
+- [switch-jtbl-dispatch (compiler jump table + sparse inner cases)](#switch-jtbl-dispatch-compiler-jump-table--sparse-inner-cases)
+- [short-text shifts flowing-bss (a length miss surfaces as a SIBLING's wrong data addr)](#short-text-shifts-flowing-bss-a-length-miss-surfaces-as-a-siblings-wrong-data-addr)
+- [goto-dispatch branch-toward vs branchless (constant dispatch through a shared return)](#goto-dispatch-branch-toward-vs-branchless-constant-dispatch-through-a-shared-return)
+
+**libnusys / audio-band specifics**
+- [libmus-bundled-n_audio duplicate (a SUPPORT_NAUDIO libmus archive links its OWN n_audio synth copy)](#libmus-bundled-n_audio-duplicate-a-support_naudio-libmus-archive-links-its-own-n_audio-synth-copy)
+- [NU_DEBUG-stock-not-custom (carried perf fn triage)](#nu_debug-stock-not-custom-carried-perf-fn-triage)
+- [libnusys inline-div mflo-hazard nop](#libnusys-inline-div-mflo-hazard-nop)
+
+**Build-profile probe & per-file opt exceptions**
+- [game-region mirror (-O2 profile)](#game-region-mirror--o2-profile)
+- [-O0 boot/SDK-glue file profile (a per-file opt-level exception)](#-o0-bootsdk-glue-file-profile-a-per-file-opt-level-exception)
+- [profile-probe (pinning the flags of a SHA-missing build)](#profile-probe-pinning-the-flags-of-a-sha-missing-build)
+
+**Toolchain oracles & spot-checks**
+- [IO_WRITE/IO_READ isolation artifact](#io_writeio_read-isolation-artifact)
+- [Assembler differences + byte-cmp spot-check](#assembler-differences--byte-cmp-spot-check)
+- [Decompile-vs-asm authority](#decompile-vs-asm-authority)
+- [Display lists](#display-lists)
+
+---
+
 ## Upstream-mirror pattern
 
 **Rule:** When a target maps to a known SDK upstream, copy the upstream `.c` verbatim instead of
