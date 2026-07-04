@@ -3596,15 +3596,21 @@ goto-loop.
 **re-materializes a compiler-generated `%`/`/` magic** at the loop tail each iteration (loop.c ran out
 of hoisting registers after the bases and left the magic in the loop). A structured `do-while`/`while(1)`
 hoists **both** (bases and magic → too many held constants); a plain **goto** outer loop de-hoists
-**both** (loop.c skips it → bases re-loaded too, also wrong). To de-hoist ONLY the magic while keeping
-the bases hoisted is the hard case: the goto fixes the magic (re-materialized at the tail, matching the
-ROM) but loses the base hoist as collateral, so it is a **partial** fix — treat it as a structural step,
-not a full match. S172 `func_8004DC44` (a ring-buffer→grid blit with `%4800` wrap): the do-while hoisted
-`0x1B4E81B5` to `t1`; the outer-goto moved it back to the tail (matching ROM lines 55-57) but the
-residual — a dead spill frame + the register permutation it drives — then routes to the permuter/carry
+**both** (loop.c skips it → bases re-loaded too). The fix that gets BOTH right (**S173 resolution of
+the S172 "partial fix"**): keep the outer loop `goto` (de-hoists the magic → re-materialized at the
+tail, matching the ROM), AND **pre-declare each array base as a pointer variable initialized before the
+`goto`-loop label** (`u8 *grid = D_800DAF60; u8 *ring = D_800DB410;` … `outer: … grid[dst] … goto
+outer;`). Because loop.c is invisible to the goto-loop, **program order is the only hoist mechanism**:
+the base `la`/`lui+addiu` executes once (textually outside the back-edge region) and nothing re-derives
+it — a manual base-hoist that leaves the magic correctly de-hoisted. So the goto is NOT a partial lever
+here; base-pointer vars restore the base hoist. Declare the bases AFTER the entry guard (`if(n<=0)
+return;`) so they land in the loop preheader (after the `blez`), like the ROM. S172/S173 `func_8004DC44`
+(a ring-buffer→grid blit with `%4800` wrap): do-while hoisted `0x1B4E81B5` to `t1`; the outer-goto +
+pre-declared base-pointer vars gives base-hoist + magic-remat with **operations 100% matching** — the
+only residual is then a dead spill frame + register permutation, which routes to the permuter/carry
 (`#dead-frame-reload-artifact-regalloc-wall`). **Tell:** a structured-loop build is byte-close but a
 compiler magic is held in a register across the loop where the ROM re-loads `lui/ori` at the tail, AND
-the ROM still holds other invariants (bases) hoisted — the goto is a partial lever, not a finisher.
+the ROM still holds other invariants (bases) hoisted — use goto + base-pointer vars, not a structured loop.
 
 **Tell / distinguishing it from a bug:** the build is byte-exact except the loop is shape-shifted (the
 shift/body block emitted before the test, a guard `j` to the bottom, `beql` where the ROM has plain
@@ -4279,6 +4285,21 @@ outcome -- carry fast on a proven-impossible, don't grind. Verify each lever wit
 reloc-aware byte-cmp (`objcopy --only-section=.text <fn>.o` vs the ROM at the fn's rom offset), NOT the
 full-make SHA (which is all-or-nothing across the file).
 
+**Applies to dead-frame / pure-regalloc walls, not just BB-layout (S173).** The tier is the right
+escalation for a `#dead-frame-reload-artifact-regalloc-wall` too. Fan out **one subagent per allocation
+mechanism**: `config/mips/mips.c` (frame-size / `MIPS_STACK_ALIGN` / prologue emit), `reload1.c` +
+`global.c` + `local-alloc.c` (spill slot commit + `allocno_compare` / `qty_compare_1` priority +
+`find_free_reg`), `loop.c` (LICM / `NOTE_INSN_LOOP` goto-invisibility / strength reduction), and
+`expmed.c` + `optabs.c` (divide/multiply-by-constant operand + pseudo creation order). Give each the
+isolated `objdump -dr` diff vs `target.o` and have them **verify with gcc RTL dumps** (`-dr` rtl, `-dl`
+lreg, `-dg` greg, `-dS` sched) on a scratch compile, not just source-read. The payoff is often a
+**dump-verified negative**: S173 `func_8004DC44` proved the residual `v0`/`v1` swap is a fixed
+`expmed.c` operand order + life-length-dominated `local-alloc.c` priority (magic scores 6666 vs the
+dividend's 1666 → grabs `$v0`), unflippable across ~35 variants + 275k permuter iters — which converts
+an open permuter grind into a **documented carry with an ops-100%-match seed** rather than a bank. Proving
+un-source-reachability IS the deliverable when the answer is "carry"; save the near-match seed
+(`docs/wip/`) so the retry starts one artifact away.
+
 ---
 
 ## cse make_regs_eqv branch-fold (reused-var canonical fold on a `?:`-with-flag store)
@@ -4350,24 +4371,45 @@ two locals swapped like `dst`/`row` = `a3`↔`t0`). Confirm the dead frame by gr
 byte-identical after the `#top-tested-loop-goto-local-hoist` selective-hoist fix).
 
 **Root cause:** GCC 2.7.2 `reload` assigned a **spill slot** to a pseudo (counted into `frame_size` via
-`get_frame_size()`), then eliminated the actual spill store/load because the value was available in a
-register at the spill point — leaving the slot allocated but never accessed (a "dead frame"). No
-callee-saved regs are involved (no `s0-s7`, no `ra` save), so the whole frame is that one eliminated
-spill. Which pseudo spills, and the register permutation that follows, are set by the exact
-register-pressure/allocation-order at reload — an internal artifact, not a source-visible choice.
+`get_frame_size()`; `mips.c` `MIPS_STACK_ALIGN` rounds one 4-byte slot up to 8; the `addiu sp` emits ONLY
+when `get_frame_size()>0` post-reload, and is gcc-emitted, NOT assembler-injected — S173 dump-verified),
+then eliminated the actual spill store/load because the value was available in a register at the spill
+point — leaving the slot allocated but never accessed (a "dead frame"). No callee-saved regs are involved
+(no `s0-s7`, no `ra` save), so the whole frame is that one eliminated spill. Which pseudo spills, and the
+register permutation that follows, are set by the exact register-pressure/allocation-order at reload — an
+internal artifact.
 
-**Verdict — permuter or carry; do NOT grind source levers.** There is **no clean source trigger** for a
-dead frame: taking a local's address (`s32 *p = &i;`, the mutation the permuter itself tries) forces the
-var to memory and emits **real** `sp` loads/stores the ROM lacks (a live frame, not a dead one). Every
-statement-reorder, expression-split, and increment-order variant leaves `frame_adj:0` (proven S172:
-~15 hand variants, all no-frame). Once structure + scheduling + hoisting are settled and the only
-residual is the dead frame + its driven permutation, route straight to the permuter (it may stumble on a
-pressure-raising mutation) or **carry** — do not burn iterations on frame-forcing source tricks. Save
-the structurally-settled near-match (the `#top-tested-loop-goto-local-hoist` selective-hoist form for
-S172 `func_8004DC44`) so the retry starts one artifact away. Sibling to `#pervasive-regalloc-classical-main`,
-`#cse-make-regs-eqv-branch-fold`, and `#abs-coalescing-reg-swap` (all "structure matches, a reload/alloc
-artifact locks it; carry for game-source insight, not another grind").
+**S173 deep dive (4 GCC-2.7.2/binutils-2.6 subagents, ~35 variants, 275k permuter iters — dump-verified).**
+Two refinements to the S172 framing, both important:
+1. **The dead frame IS reachable** (retract "no source trigger for the frame"). A **structured** outer loop
+   produces the spill (its LICM hoists an extra invariant into a held reg, raising pressure), and the
+   **permuter hit a frame-bearing 75-insn candidate** from the improved seed (frame at the exact ROM
+   position). The frame and the goto-vs-structured control-flow choice are **orthogonal** — by reload time
+   the loop history is gone (just basic blocks + a conflict graph).
+2. **The true, un-source-reachable wall is the coupled register permutation, rooted in a `v0`/`v1` swap in
+   a signed-divide-by-constant.** For `x / 40`: `expmed.c` `force_reg`'s the dividend first, then
+   `expand_mult_highpart`/`optabs.c copy_to_mode_reg` creates the magic (`0x66666667`) as a **later** pseudo;
+   `local-alloc.c`'s **life-length-dominated** priority (`floor_log2(refs)*refs*size/life`, deliberately
+   matched to `global.c allocno_compare`) scores the tiny-live-range magic **6666 vs the dividend's 1666**,
+   so the magic is allocated first and `find_free_reg` (ascending scan, no `REG_ALLOC_ORDER` on MIPS) hands
+   it `$v0`. The ROM assigns dividend→`$v0`, magic→`$v1` with an **outwardly identical instruction sequence**;
+   the model above predicts the opposite and reproduces every build — the ROM's assignment is a mechanism
+   the model does not capture, so its divide source-shape is **unrecoverable from asm**. Not flippable by
+   reorder, extra dividend refs (life grows in lockstep), explicit reciprocal-multiply (`(s64)x*magic>>32`,
+   real `mult`, moves the dividend reg but magic stays `$v0`), interleave, or tie-break temps.
+
+**Verdict — permuter or carry; the frame is reachable but the divide-swap is not.** Once structure +
+scheduling + hoisting are settled and the residual is the dead frame + its driven permutation, route to
+the permuter (it can reach the frame; it must ALSO flip the divide-swap in the same candidate — low odds)
+or **carry**. Do NOT grind source levers for the frame (address-taking a local forces a **live** frame with
+real `sp` loads the ROM lacks) and do NOT grind the divide-swap (dump-proven not source-reachable). Save the
+structurally-settled near-match so the retry starts from ops-100%-match: for `func_8004DC44` the seed is
+**pre-declared base-pointer vars + structured inner `for` + goto outer** (`#top-tested-loop-goto-local-hoist`;
+the base-hoist the S172 seed lacked). Sibling to `#pervasive-regalloc-classical-main`,
+`#cse-make-regs-eqv-branch-fold`, and `#abs-coalescing-reg-swap`. A **dump-verified negative** (proven
+can't-be-source-fixed) is itself a valid, valuable outcome — it converts an open grind into a documented
+carry (`#compiler-source-fan-out-escalation-above-the-permuter`).
 
 **Provenance:** S172 `func_8004DC44` (the S171 `print_string_at_grid.c` regalloc-wall carry; its sibling
-`print_string_at_grid` banked S172 via `#cross-jump-tail-merge` nested-if, `func_8004DC44` carried as
-this dead-frame wall).
+`print_string_at_grid` banked S172 via `#cross-jump-tail-merge` nested-if). **S173 re-carry** after the
+deep compiler-source dive above; improved seed + full analysis in `docs/wip/func_8004DC44.wip.md`.
