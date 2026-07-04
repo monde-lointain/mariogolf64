@@ -86,6 +86,7 @@ The hazard families below group the sections that follow. Each links to its exis
 - [permuter goto-backedge liveness unsound (var-reuse passes corrupt live-across-backedge values)](#permuter-goto-backedge-liveness-unsound-var-reuse-passes-corrupt-live-across-backedge-values)
 - [return-type is load-bearing](#return-type-is-load-bearing)
 - [struct-access-folding-changes-scheduling](#struct-access-folding-changes-scheduling)
+- [offset-0-symbol re-materialization (fixed-global field RMW)](#offset-0-symbol-re-materialization-fixed-global-field-rmw)
 - [mem-in-struct scheduling lever (model a fixed global as a struct/array member)](#mem-in-struct-scheduling-lever-model-a-fixed-global-as-a-structarray-member)
 - [call-result a0-vs-v0 single-allocno (force a scratch reg via both-arm reuse)](#call-result-a0-vs-v0-single-allocno-force-a-scratch-reg-via-both-arm-reuse)
 - [compiler-source fan-out (escalation above the permuter)](#compiler-source-fan-out-escalation-above-the-permuter)
@@ -1591,6 +1592,16 @@ emits `or` (`0x…1025`), and auto-pads `.text` to 16-byte section alignment. `a
 (raw asm uses modern-only directives). Because objdump renders both `…1021` and `…1025` as
 `move v0,zero`, mnemonic-level diff silently false-positives. **Spot-check by byte-level `cmp` of
 raw `.text` only.**
+
+**Never judge delay slots / instruction counts from GCC `-S` output — objdump the ASSEMBLED `.o`
+(S177).** GCC emits in `.set reorder`/macro mode, where a branch's fall-through instruction sits
+TEXTUALLY right under the branch (looking like a filled delay slot) and unfilled slots show only a
+`#nop` COMMENT. The KMC assembler then fills the real slot — often with a `nop` it could not fill from
+the fall-through (e.g. a load whose base/result conflicts with the branch's tested reg cannot be
+hoisted into a non-annulling slot). So a `-S` read miscounts by ±1 and mis-attributes a "filled" slot.
+S177 wrongly diagnosed `heap3_get_largest_free` as "1 word short, needs a synthetic no-op" from the
+`-S` text — the clean inline-head source was already a byte-exact 21-word match once ASSEMBLED. Always
+`mips-linux-gnu-objdump -d build/src/<...>.o` (or `tools/cc/as` then objdump), never the `.s`.
 
 **Trigger:** Finalizing a classical match (the spot-check step). Mnemonic diff looks clean but you
 need ground truth.
@@ -4020,6 +4031,22 @@ or a resume seed. Bonus: allocno-renumber-only is the correct tool for a pure re
 residual anyway (what a `#pervasive-regalloc-classical-main` tail usually is). See
 `#pervasive-regalloc-classical-main` step 3 and `#permuter-setup-for-kmc-toolchain-mirrors`.
 
+**Axis-4: caller-saved competitor count (a constant loop-invariant is a competitor a variable one is
+not; S177 `func_8004E2DC` = WALL).** When a call-crossing loop-invariant (e.g. a heap `head`) is a
+**variable** address (`&arr[i]`), it lives in a CALLEE-saved reg (it crosses the `osSetIntMask` call →
+`$s3`), so it is NOT a caller-saved competitor for the loop's temps. The SAME value as a **constant**
+(`&arr[3]`) is re-materializable, so GCC keeps it caller-saved — an extra competitor in the loop. That
+one extra competitor flips a call-argument copy-preference: with N competitors an interrupt-`mask`
+(live whole-fn, copy-prefers `$a0` from `osSetIntMask(mask)`) loses/wins `$a0` differently. The
+variable-index `heap_alloc` matched (5 caller-saved competitors, `mask`→`$a0`); the slot-3 constant
+`heap_alloc` has 6, and the ROM's 6-value allocation needs `mask`→`$t1` / `bsize`→`$a0` — reachable
+only if `bsize` carries its OWN `$a0` copy-pref (passing it as a call's arg0), which is synthetic. No
+clean lever (Axis-1..3 all fail: the pref is fixed by the source's constant-ness, not by weight,
+in-place mutation, or param-hood; `global.c` `prune_preferences` reserves `$a0` for `mask` regardless).
+**Diagnosis:** count the caller-saved values live across the loop; a constant that "should" be a base
+pointer but is caller-saved is the tell. Escalation = cross-project matched-corpus mining (S174), not
+another single-fn permuter run.
+
 ## return-type is load-bearing
 
 **Trigger:** a `void`-semantics function (no used return value; the ROM falls off the end) whose C is
@@ -4100,6 +4127,44 @@ golf-yardage constants, default 200).
 
 **Provenance:** S159 `func_80051E90` (2/2 fns, no permuter; all three levers + the operand-order and
 branch-likely nudges in [#register-reuse-nudge-classical-regalloc](#register-reuse-nudge-classical-regalloc)).
+
+## offset-0-symbol re-materialization (fixed-global field RMW)
+
+**Trigger:** a clean classical/mirror fn is byte-exact except a read-modify-write on a **fixed global
+struct/array field** at a NON-zero offset. The ROM **re-materializes** the address (`lui r,%hi(SYM);
+lw r,%lo(SYM)(r)` … `lui at,%hi(SYM); sw v0,%lo(SYM)(at)`), but the build folds it into a shared
+**base register** (`la $t, ARR+off; lw 0($t); …; sw 0($t)`), and that base reg reuse cascades a
+register permutation through the rest of the fn.
+
+**Mechanism (KMC GCC 2.7.2, dumped from cse.c + global.c).** GCC re-materializes `%hi/%lo` ONLY for a
+`symbol+0` address. Any `symbol+offset` — an array element `ARR[k].field` or a struct field at a
+non-zero member offset — is an rtx CSE recognizes as a common sub-expression and hoists into a `la`
+base register that it REUSES across the load and the store (and any sibling field access). That base
+register is one more caller-saved competitor, so it also shifts the surrounding allocation.
+
+**Lever.** Reference the offending field as its OWN offset-0 `extern`, aliasing the array-element
+address:
+```c
+extern Slot D_800DC6E0[];
+extern s32  D_800DC738;        /* == &D_800DC6E0[3].total (offset 0x58), its own offset-0 symbol */
+...
+    D_800DC738 += block->size;  /* re-materializes %hi/%lo; NOT `D_800DC6E0[3].total += …` (base reg) */
+```
+The final link resolves `D_800DC738` and `D_800DC6E0+0x58` to the same address, so the bytes are
+identical; the only change is the addressing FORM the compiler picks, which re-materializes and
+un-reserves the base register. This frequently **cascades the whole allocation into place** for free
+(S177 `heap3_free`: the offset-0 `D_800DC738` for `total +=` re-materialized AND pushed `block->prev`
+→`$a3`, `mask`→`$t0` — the ROM's exact assignment, from that one edit).
+
+**Scope + non-firing note.** A field accessed ONCE (a plain read, or a write-only store) already
+re-materializes in the array form (`D_800DC6E0[3].unk_14 = max` emits `lui/sw %lo`), because a single
+access has no common sub-expression to fold — so leave those as the struct/array form and only switch
+the RMW (`+=`/`-=`) field. Multiple accesses to the SAME field across disjoint branches also
+re-materialize (no CSE across the branch). This is the INVERSE of
+[#mem-in-struct-scheduling-lever](#mem-in-struct-scheduling-lever) (which retypes a fixed global AS a
+struct member to change scheduling); here you split a struct field OUT to its own symbol to change the
+addressing form. Provenance: S177 `heap3_free`, found by a GCC-source subagent fan-out (see
+[#compiler-source-fan-out-escalation-above-the-permuter](#compiler-source-fan-out-escalation-above-the-permuter)).
 
 ## mem-in-struct scheduling lever (model a fixed global as a struct/array member)
 
@@ -4384,6 +4449,19 @@ divide stayed swapped at every new best). But it produces the tightest documente
 carry, and a genuinely-new best is worth the two bounded runs. Preserve the best `output-*/` dirs in
 `docs/wip/` provenance so the next retry reseeds from them.
 
+**Fan out BEFORE declaring a wall OR reaching for a synthetic-no-op permuter match (S177).** On a
+regalloc/scheduling near-match, the compiler-source fan-out is the FIRST escalation, not the last: of
+four S177 near-misses it flipped two apparent-walls to CLEAN banks and proved two real walls.
+(a) `heap3_free` — a mechanism agent found the offset-0-symbol re-materialization rule in cse.c/global.c
+(the winning clean lever, `#offset-0-symbol-re-materialization`). (b) `heap3_get_largest_free` — an agent
+caught that the "1 word short / needs a synthetic no-op" verdict was a `-S` reorder-mode MISREAD (the
+clean source already matched on the assembled object; see the Assembler-differences `-S` note). Without
+the fan-out, (a) would have carried and (b) would have banked an unnecessary `p = p + 0` no-op (banned).
+(c)+(d) `func_8004E1E0` / `func_8004E2DC` — agents PROVED the CSE-reload and mask-rotation walls from
+cse.c/global.c, so they carry fast with an exact mechanism rather than another grind. **Doctrine: a
+regalloc/CSE/scheduling near-match that resists 2-3 hand levers routes here, before the permuter and
+before "wall".** The empirical agent must judge the ASSEMBLED `.o`, never `-S`.
+
 ---
 
 ## cse make_regs_eqv branch-fold (reused-var canonical fold on a `?:`-with-flag store)
@@ -4636,6 +4714,28 @@ is nested in `func_8004E1E0` at `0x8004E1E0`; the true TU boundary `0x8004E184` 
 cluster A's `0x295E0` split over-reached by one fn — the child was carried.) `pick_target.py` flagging
 a `static-chain-callee` (a fn whose caller does `addiu v0,sp,K` before its `jal`) is a tracked
 follow-up.
+
+**Recombine-to-land-the-child (the bank enabler, S177).** To place the child at its non-16-aligned
+address, RECOMBINE the decomposed pack into ONE object: at the gate, remove the inner `[<child-addr>,
+asm]`-side subseg line so the C subseg spans the WHOLE pack from its 16-aligned start, and add
+`INCLUDE_ASM` stubs for the pulled-in fns. The object then starts at the 16-aligned pack head, and GCC
+emits the nested child just ahead of the parent — landing it at its true mid-object offset with no
+alignment gap. (S177: removed `[0x295E0, asm]`, extended `[0x29260, c, main/func_8004DE60]` over the
+whole 9-fn pack; `func_8004E184` then compiled to `0x8004E184` as `func_8004E184.N` inside
+`func_8004E1E0`.)
+
+**CSE-reload wall on the PARENT (S177 carry, subagent-verified).** The child can bank perfectly and
+the PARENT still be a wall. `func_8004E1E0`'s init does `D_800DC6E0[3].next = D_800DC6E0[3].prev`,
+which the ROM emits as a **RELOAD** of the just-stored field (`lui v1,%hi(D_800DC734); lw
+v1,%lo(...)`), but KMC GCC 2.7.2 -O2 value-FORWARDS it (reuses the register) for any faithful C. The
+reload is a CSE **varying-address invalidation** (cse.c `note_mem_written` sets `nonscalar` only for a
+`(plus reg off)` runtime base/index, purging the in-struct cache → reload); the ROM's field stores are
+pure ABSOLUTE (`(symbol+off)`, non-varying → precise invalidate → forward). Absolute stores + a reload
+are **mutually exclusive** under this profile (the reload-triggering register is the same one that
+blocks the absolute fold), and register pressure does NOT trigger it (pressure-tested negative). So the
+init is unreachable from faithful C AND the permuter is blocked (pycparser rejects the nested fn) — a
+genuine carry, well-characterized like [#signed-divide-const-v0v1-quotient-destination](#signed-divide-const-v0v1-quotient-destination)
+and [#dead-frame-reload-artifact-regalloc-wall](#dead-frame-reload-artifact-regalloc-wall).
 
 **Standalone reproduction (UB; do NOT prefer over the real nested form).** A byte-exact standalone
 `.c` (no parent, no inline asm) can force the same spill: `volatile u32 a = (u32)uninit_ptr;` reads an

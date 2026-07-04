@@ -36,10 +36,37 @@ cse/regalloc slog because the fns shared a **call-return game-state base pointer
 base-ptr + many byte-field loads/stores is a difficulty signal too — not just FP. And one fn hit the
 `#cse-make-regs-eqv-branch-fold` wall (unreachable-from-equivalent-C), which no pts model predicts;
 the mitigation is fast-carry recognition (the new hazard), not a price bump.
+**Re-confirmed (S177):** a seed-8 6-fn one-tu heap pack realized ~11 (2 subagent-proven CSE/regalloc
+WALLS + a 2-subagent GCC-source fan-out + 3 permuter setups). The unpriced difficulty signal here is
+**`osSetIntMask`-guarded + constant-index struct-array (`D_800DC6E0[3]`) + ra-capture** heap/pointer fns:
+the interrupt-mask's whole-fn liveness + the constant (caller-saved) loop-invariant drive an unreachable
+regalloc rotation the size/nfns model can't see. Candidate detector: `jal osSetIntMask` + a fixed
+`ARR[K]` struct-array base + `__builtin_return_address`-style ra read. Still a golden-gated tooling
+follow-up (off-cadence), not a mid-sprint edit.
 **Path-convention exception (S149):** nusys/SDK-template main-segment code (the `idle=nuboot` coddog
 tell) is carved to its LIBRARY tree (`libnusys/<file>`), not `main/<stem>` — yaml path-qualifier only,
 placement unchanged (see `CLAUDE.md` path convention). A per-FILE -O0 override is the one mk edit a
 boot/SDK-glue TU may need.
+
+**S177 MIXED-PARTIAL — `src/main/func_8004DE60.c` slot-3 heap module, 6/9 (+3 this sprint).** matched
+**+3**; md5-candidate **221 → 221** (file has 3 stubs → not md5-candidate); asm subsegs **77 → 76**
+(recombined the 9-fn pack into one object, removing `[0x295E0, asm]`). Banked byte-exact C:
+`heap3_get_total`, `heap3_get_largest_free` (list-scan+cache), `heap3_free` (coalescing + ra-capture).
+**Two NEW clean levers from a PO-directed GCC-source fan-out:** (1) `heap3_free` closed via the
+**offset-0-symbol re-materialization** lever (new `#offset-0-symbol-re-materialization`: alias
+`D_800DC6E0[3].total` as its own extern `D_800DC738` for the `+=` so GCC re-materializes `%hi/%lo`
+instead of CSE-folding a base register — cascaded block->prev→`$a3`, mask→`$t0` for free); (2)
+`heap3_get_largest_free` was NOT a wall — the "needs a synthetic no-op" verdict was a GCC-`-S`
+reorder-mode misread; the clean inline-head already matched on the assembled `.o`. **Two subagent-proven
+WALLS carried** (see `## Carry-overs`): `func_8004E1E0`+`func_8004E184` (nested pair, CSE varying-address
+reload wall + permuter-blocked) and `func_8004E2DC` (heap_alloc slot3, mask→`$a0` 6-register rotation
+wall). The S176 nested-carry is NOT resolved but the recombine + nested-fn approach is proven (the child
+matches perfectly) and both walls are pinned to exact GCC-2.7.2 mechanisms. Quality 0/3/3/0 (permuter-set
+3, carried 3 fns). Retro applied **6 of 6** (new offset-0 hazard + `-S`-vs-assembled note + nested-fn
+recombine/CSE-reload + loop-weight Axis-4 + fan-out doctrine + pts follow-up re-confirm). Cross-repo
+follow-up: 3 new names (`heap3_get_total`/`heap3_get_largest_free`/`heap3_free`) →
+`sync_decomp_names.py --import-from-decomp`. **Next natural slice:** a FRESH main pack (`func_8004D190`
+7fn, `func_80052250` 9fn) — do NOT re-attempt the func_8004DE60 walls without a genuinely new lever.
 
 **S176 BANKED — `src/main/func_8004DE60.c` heap-allocator TU, 3/4 mixed-partial.** matched **+3**;
 md5-candidate **221 → 221** (file has 1 stub → not md5-candidate). Decomposed the `func_8004DE60` 9-fn
@@ -2855,26 +2882,33 @@ by `/sprint-plan`:
   `NU_CONT_THREAD_ID=6` vs MG64's 5), and that surfaces only at first build unless reconciled here.
   A near-free retry missing any of these is a half-scoped spike — finish the scope before deferring.
 
-- **(S176 MIXED-PARTIAL — carried; 3 of 4 banked)** `src/main/func_8004DE60.c` (heap-allocator TU,
-  decomposed cluster A of the `func_8004DE60` pack). BANKED byte-exact C (S176): `heap_get_largest_free`,
-  `heap_alloc`, `heap_free`. ONE `INCLUDE_ASM` stub remains: `func_8004E184`. File → NOT md5-candidate.
-  - **func_8004E184 (0x8004E184, 92B — a GCC NESTED FUNCTION of `func_8004E1E0`, not a match failure;
-    `#nested-function-static-chain-spill`).** The dead `sw v0,0(sp)` is GCC saving the incoming static
-    chain (o32 `STATIC_CHAIN_REGNUM=$2`); the caller `func_8004E1E0` sets `v0=&sp[0x10]` before each
-    `jal` (verified). It is lexically nested in `func_8004E1E0`, so parent + child are **one TU** and
-    cannot be split into separate `.c` files. **Resolution (NOT a spike — a scope/structure carry):**
-    bank it as the real nested function *inside* `func_8004E1E0` when that TU is decompiled — this is a
-    **near-free retry gated on cluster B**, not a blocked spike. Completeness checklist for the cluster-B
-    sprint: **(1)** extend the flip to include `func_8004E1E0`'s whole TU (the next 16-aligned boundary
-    after 0x8004E1E0 is the pack end 0x8004E5A0, so cluster B = func_8004E1E0/E27C/E288/E2DC/E47C, 5 fns);
-    **(2)** write `func_8004E184` as `void func_8004E184(u32 start, u32 end){…}` nested inside
-    `func_8004E1E0`'s body, before the two `func_8004E184(a,b)` call sites (GCC mangles the symbol to
-    `func_8004E184.N`, irrelevant to the address-based oracle); **(3)** the body is already derived (the
-    slot-3 list-append, same as `func_8004DD70` hardcoded to `D_800DC6E0[3]`); **(4)** a byte-exact
-    standalone UB reproduction (`volatile u32 a=(u32)uninit_sentinel;`) is the fallback ONLY if
-    func_8004E1E0 proves intractable and the PO re-accepts a pseudo-fakematch. See
-    `#nested-function-static-chain-spill`. **Do NOT bank func_8004E184 alone** — it needs its parent.
-  - Next natural slice = cluster B `[0x295E0]` (resolves this carry + banks 5 more fns).
+- **(S177 MIXED-PARTIAL — carried; 6 of 9 banked)** `src/main/func_8004DE60.c` (slot-3 heap module,
+  the whole 9-fn pack RECOMBINED into one object). BANKED byte-exact C: S176 `heap_get_largest_free`,
+  `heap_alloc`, `heap_free`; S177 `heap3_get_total` (0x8004E27C), `heap3_get_largest_free` (0x8004E288),
+  `heap3_free` (0x8004E47C). THREE `INCLUDE_ASM` stubs remain → NOT md5-candidate. Subseg is
+  `[0x29260, c, main/func_8004DE60]` spanning 0x8004DE60..0x8004E5A0; all refs placed externs (incl. the
+  offset-0 alias `D_800DC738`), NO carve; permuter dirs live for E2DC (b64literal-wrapped). Both remaining
+  fns are **subagent-verified WALLS** (retry needs a genuinely new mechanism, not another same-fn dive):
+  - **func_8004E184 + func_8004E1E0 (0x8004E184 + 0x8004E1E0 — NESTED PAIR, atomic).** The child banks
+    perfectly as a `void func_8004E184(Slot* node, void* end)` nested in the parent (dead static-chain
+    `sw v0,0(sp)` emerges; recombine lands it at 0x8004E184 mid-object). The **PARENT is the wall**:
+    `func_8004E1E0`'s init `D_800DC6E0[3].next = D_800DC6E0[3].prev` is a ROM RELOAD of D_800DC734 that
+    KMC GCC 2.7.2 -O2 value-FORWARDS for any faithful C — a CSE varying-address invalidation (cse.c)
+    mutually exclusive with the ROM's absolute field stores, register-pressure-tested negative. Permuter
+    also blocked (pycparser rejects nested fns). **Do NOT bank func_8004E184 alone.** Retry needs a new
+    mechanism (cross-project matched-corpus mining for an absolute-store-plus-reload analog); do NOT
+    re-run structured/pointer/do-while variants (S177 exhausted). See `#nested-function-static-chain-spill`.
+  - **func_8004E2DC (0x8004E2DC, 416B — heap_alloc slot3; MASK-ROTATION WALL).** The clean structural
+    source (drop the `head` local → `p != &D_800DC6E0[3]` inline) is 104/104 instrs + every register
+    EXCEPT a 6-value caller-saved rotation forced by `mask`→`$a0` (global.c `prune_preferences` reserves
+    the `osSetIntMask(mask)` arg-reg). The matched variable-index `heap_alloc` escapes via callee-saved
+    `head` ($s3); the slot-3 constant head is a 6th caller-saved competitor (see
+    `#loop-weight-and-live-length-regalloc-steering` Axis-4). No clean lever; register hints are -O2
+    no-ops. Retry = cross-project matched-corpus mining (S174), NOT a single-fn permuter grind. Structural
+    base saved (isolated `nonmatchings/func_8004E2DC`). See `#caller-saved-competitor-count` /
+    `#pervasive-regalloc-classical-main`.
+  - Next natural slice = a FRESH main-segment pack (do NOT re-attempt these two walls without a new lever;
+    e.g. `func_8004D190` 7fn `[0x28590]`, `func_80052250` 9fn, or the `func_8004E5A0` one-tu 3-fn pack).
 
 - **(S175 MIXED-PARTIAL — carried; 5 of 6 banked; new project-best 13530/13235, `register` ruled out)** `src/main/print_string_at_grid.c` (the grid-print
   debug cluster `[0x28DC0]`). BANKED byte-exact C (S171): `check_and_print_grid`, `func_8004DA4C`,
