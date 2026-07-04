@@ -632,3 +632,6 @@ report_div_error = 0x8006A274; // type:func
 heap_get_largest_free = 0x8004DE60; // type:func
 heap_alloc = 0x8004DE7C; // type:func
 heap_free = 0x8004E058; // type:func
+heap3_get_total = 0x8004E27C; // type:func
+heap3_get_largest_free = 0x8004E288; // type:func
+heap3_free = 0x8004E47C; // type:func
