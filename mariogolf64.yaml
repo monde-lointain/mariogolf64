@@ -103,6 +103,8 @@ segments:
       - [0x1F020, asm]
       - [0x207E0, asm]
       - [0x28590, asm]
+      - [0x29170, c, main/func_8004DD70]
+      - [0x29260, asm]
       - [0x299A0, asm]
       - [0x2B4E0, c, main/func_800500E0]
       - [0x2B800, asm]
