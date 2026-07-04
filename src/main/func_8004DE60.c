@@ -115,9 +115,20 @@ void heap_free(s32 i, void** pptr) {
   osSetIntMask(mask);
 }
 
-/* func_8004E184 is a GCC nested function of func_8004E1E0 (in the still-asm
- * cluster [0x295E0]): the dead `sw v0, 0(sp)` in the ROM is GCC saving the
- * incoming static chain, which o32 passes in $v0 (STATIC_CHAIN_REGNUM=$2).
- * Bank it as the real nested function once func_8004E1E0's TU is decompiled;
- * carried this sprint. */
+/* func_8004E184 is a GCC nested function of func_8004E1E0: the dead
+ * `sw v0, 0(sp)` in the ROM is GCC saving the incoming static chain, which o32
+ * passes in $v0 (STATIC_CHAIN_REGNUM=$2). It is banked as the real nested
+ * function inside func_8004E1E0's body (see #nested-function-static-chain-spill).
+ * The whole func_8004DE60..func_8004E5A0 pack is recombined into this one object
+ * so the nested child lands at its true 0x8004E184 boundary mid-object. */
 INCLUDE_ASM("asm/nonmatchings/main/func_8004DE60", func_8004E184);
+
+INCLUDE_ASM("asm/nonmatchings/main/func_8004DE60", func_8004E1E0);
+
+INCLUDE_ASM("asm/nonmatchings/main/func_8004DE60", func_8004E27C);
+
+INCLUDE_ASM("asm/nonmatchings/main/func_8004DE60", func_8004E288);
+
+INCLUDE_ASM("asm/nonmatchings/main/func_8004DE60", func_8004E2DC);
+
+INCLUDE_ASM("asm/nonmatchings/main/func_8004DE60", func_8004E47C);
