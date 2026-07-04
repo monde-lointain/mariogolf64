@@ -131,7 +131,7 @@ segments:
       - [0x4C620, c, main/func_80071220]
       - [0x4C770, asm]
       - [0x51900, c, main/func_80076500]
-      - [0x51A40, asm]
+      - [0x51A40, c, main/func_80076640]
       - [0x526B0, asm]
       - [0x52FF0, asm]
       - [0x53D10, asm]
