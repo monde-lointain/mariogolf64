@@ -41,6 +41,25 @@ tell) is carved to its LIBRARY tree (`libnusys/<file>`), not `main/<stem>` — y
 placement unchanged (see `CLAUDE.md` path convention). A per-FILE -O0 override is the one mk edit a
 boot/SDK-glue TU may need.
 
+**S169 MIXED-PARTIAL — `src/main/func_80076640.c` (3-fn one-tu S162 tail `[0x51A40]`; `func_80076778`
+BANKED C, 2 carried).** matched **+1** (`func_80076778`, a point×matrix transform); md5-candidate
+**220 → 220** (file mixed-partial, 2 `INCLUDE_ASM` stubs); asm subsegs **77 → 76** (the flip). The
+PO-picked main-segment one-tu tail was FP-monster-dominated, as the plan hedged. Banked +1 via the
+**one-tu partial-bank pattern extended to shared rodata**: the matched fn is C, the two hard fns stay
+`INCLUDE_ASM`, and the TU's shared `ACAD0` rodata (FP doubles + printf strings) is referenced `extern`
+by all (no `.rodata` carve, so a one-tu is not strictly atomic-or-nothing). `func_80076640`
+(2-rotation-matrix builder) CARRIED at score 25 on the new `#abs-coalescing-reg-swap` wall (permuter
+PLATEAUED 338k iters); `func_8007680C` (679i FP camera-frustum-bound) CARRIED S158-class (structure
+complete 721/756, but an 8-byte frame cascade + deep pressure-driven regalloc). Two real levers landed
+on func_80076640: `const`-extern doubles → callee-saved-reg 1-load cross-call CSE, and the permuter's
+`do{}while(0)`+`cosf`-temp fixed the count 77→78. seed 13 / banked 0pt (per-file all-or-nothing,
+partial); realized 17 (residual +4); regime classical. Quality **1/1/2/0**. Retro applied **4 of 4**
+(PO accept-partial; all DOC): const-extern inverse lever (`#volatile-global-tell`) + `do{}while(0)`
+schedule lever + mixed-partial one-tu-shared-rodata generalization (`CLAUDE.md`) + new
+`#abs-coalescing-reg-swap`. Both carried fns compile in-tree; WIP `docs/wip/func_80076640.3fn-wip.c.txt`,
+permuter scaffold `nonmatchings/func_80076640/`. **Cross-repo follow-up:** none (auto `func_` name);
+optional later: curate a Ghidra name for `func_80076778` (a clear transform-point-by-matrix helper).
+
 **S168 BANKED — `src/main/func_80071220.c` (scenario-unlock dispatcher; the `[0x4C620]` 1-fn tail split
 from `[0x4C3D0]` at S167, the "next natural slice").** matched **+1**; md5-candidate **219 → 220**; asm
 subsegs **78 → 77**. A single classical game fn (scenario completion/unlock) matched **byte-exact via a
@@ -2708,6 +2727,27 @@ by `/sprint-plan`:
   `NU_CONT_THREAD_ID=6` vs MG64's 5), and that surfaces only at first build unless reconciled here.
   A near-free retry missing any of these is a half-scoped spike — finish the scope before deferring.
 
+- **(S169 MIXED-PARTIAL — carried; 1 of 3 banked)** `src/main/func_80076640.c` — `func_80076778`
+  BANKED byte-exact C; `func_80076640` + `func_8007680C` remain `INCLUDE_ASM`. File is mixed-partial
+  (ROM green off the matched fn + the shared `ACAD0` rodata referenced extern, NO carve). Retry =
+  decompile the 2 carried fns from the saved WIP `docs/wip/func_80076640.3fn-wip.c.txt` (both compile
+  in-tree today, the gap is pure regalloc). **No flip/data enablers left:** subseg already `[0x51A40,
+  c, main/func_80076640]`; rodata stays in the blob referenced extern; placed callees are all named/
+  placed main-segment fns. Permuter scaffold live `nonmatchings/func_80076640/` (main settings).
+  - **func_80076640 (NEAR-FREE RETRY, score 25):** byte-exact structure + count (78/78); the 1 residual
+    is a 3-instr abs/const **register swap** (`#abs-coalescing-reg-swap`: target `abs.s f2,f0`+const in
+    `f0`, mine `abs.s f0,f0` in-place+const in `f2`). KEEP the landed levers (const-extern doubles;
+    `do{ if(fabsf(cosPitch)<0.1f){...} }while(0)` + `cosPitch=cosf(pitch)` temp). Permuter PLATEAUED at
+    25 over 338k iters; 3 hand levers (flip / abs-temp / thresh-temp) all failed. **Untried:**
+    compiler-source fan-out on GCC 2.7.2 `local-alloc.c`/`reload.c` abs-coalescing + preferred-reg logic
+    (why `y=fabsf(x)` coalesces in-place vs a fresh reg).
+  - **func_8007680C (SPIKE, S158-class deep regalloc):** structure complete (721/756 mnemonics; logic
+    fully RE'd from asm). Blocked by pressure-driven regalloc: (1) frame -496 vs -504 (target spills 1
+    more scalar, `zHi`@0x174, dead-after-loop5, that mine keeps in a reg); (2) min/max trackers as
+    float-bits in GPRs s3/s4/s5 (`mtc1`/`mfc1`) under loop5 FP pressure, mine keeps more in FP; (3)
+    target keeps the 30000/-30000 tracker-init int-bits in callee-saved GPRs s3/s5 (reused for the
+    loop1+loop5 resets), mine rematerializes. **Untried:** permuter (scaffold-able via the same
+    main-settings recipe) + compiler-source fan-out on the FP-vs-GPR spill/rematerialization.
 - **(S167 SPIKE — carried, cse/regalloc branch-fold wall; 2 of 3 head fns BANKED)** `func_80070FD0`
   in `src/main/func_80070FD0.c` — ONLY `func_80070FD0` remains INCLUDE_ASM (func_800710C4 +
   func_8007117C banked byte-exact C). The fn is BYTE-EXACT except a **3-word branch-direction triple**

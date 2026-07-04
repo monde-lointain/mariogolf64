@@ -315,6 +315,17 @@ the summary.
       such a file as a `regime: mixed` increment, not a seed-only mirror: per-file all-or-nothing
       means the partial file banks 0 pt, and the matched-fn count is the value signal (S123 nusched.c:
       10/14 banked C, 4 carried, 0 pt, +10 matched).
+      - **Extends to a CLASSICAL one-tu with SHARED rodata (S169).** A one-tu classical pack can
+        partial-bank too: write the matched fns as C and keep the unmatched fns as `INCLUDE_ASM` in the
+        same `src/<seg>.c`, **as long as the TU's shared rodata (strings, FP-double pool constants)
+        stays in the extracted blob and every fn references it `extern`** (no `.rodata` carve). The ROM
+        stays green off the matched fns. So a hard FP fn does not block banking its tractable siblings,
+        and the one-tu is NOT strictly atomic-or-nothing when the rodata is referenced extern rather
+        than emitted as literals. S169 `func_80076640.c` banked `func_80076778` (+1) as C while
+        `func_80076640` (score-25 reg-swap) and `func_8007680C` (S158-class FP) stayed `INCLUDE_ASM`,
+        all referencing the shared `ACAD0` rodata blob. (Emitting the rodata as source LITERALS would
+        force the carve and re-impose atomicity, so prefer extern refs for a partial one-tu; see
+        `docs/hazards.md#rodata-sibling-yaml-pattern`.)
 - **Per-file all-or-nothing banking.** Points bank per file: a spiked/carried file scores 0 pt, a
   banked sibling still counts. This is a separate ledger from the function-level quality
   counter-metric.
@@ -567,6 +578,7 @@ When `pick_target.py` flags a hazard (or a match shows its symptom), read the ma
 | classical call result the ROM holds in `$a0` (`move a0,v0` / `move v0,a0` bookends) but build coalesces into `$v0` (shorter); distinct-var/extra-use levers fail | #call-result-a0-vs-v0-single-allocno |
 | pervasive classical BB-layout/regalloc/scheduling miss resists every idiom and the permuter plateaus | #compiler-source-fan-out-escalation-above-the-permuter |
 | classical fn byte-exact except a 3-word branch-direction triple (bnez/beqz+delay) on a `cond?t\|K:t` store/print through a reused loaded-var arg | #cse-make-regs-eqv-branch-fold |
+| classical fn byte-exact except a 3-instr reg swap in `if(fabsf(x)<K)` (target `abs.s f2,f0`+const in `f0`; build `abs.s f0,f0` in-place+const in `f2`); permuter plateaus | #abs-coalescing-reg-swap |
 | structural-complete regalloc miss = which value wins an earlier caller-saved reg; before "irreducible" | #loop-weight-and-live-length-regalloc-steering |
 | tempted to structure/clean a matched goto-loop fn's loops; zero-goto rewrite attempt | #loop-weight-and-live-length-regalloc-steering |
 | permuter "best" on a goto-loop fn beats the hand-derived structural floor by a suspicious margin | #permuter-goto-backedge-liveness-unsound |

@@ -90,6 +90,7 @@ The hazard families below group the sections that follow. Each links to its exis
 - [call-result a0-vs-v0 single-allocno (force a scratch reg via both-arm reuse)](#call-result-a0-vs-v0-single-allocno-force-a-scratch-reg-via-both-arm-reuse)
 - [compiler-source fan-out (escalation above the permuter)](#compiler-source-fan-out-escalation-above-the-permuter)
 - [cse make_regs_eqv branch-fold (reused-var canonical fold on a `?:`-with-flag store)](#cse-make-regs-eqv-branch-fold-reused-var-canonical-fold-on-a--with-flag-store)
+- [abs-coalescing reg-swap (fabsf in-place vs fresh reg on a const compare)](#abs-coalescing-reg-swap)
 
 **Classical control-flow & scheduling**
 - [struct-init-loop (dup-store / dual-induction-var)](#struct-init-loop-dup-store--dual-induction-var)
@@ -3221,9 +3222,25 @@ setup feeds, see `#pervasive-regalloc-classical-main`.
   hazard — the stalls were all the indexed-vs-pointer loop form, see
   `#indexed-vs-pointer-loop-strength-reduction`; a structural fix beats a permuter grind.)
 
+**Two more S169 facts:**
+- **`do{ body }while(0)` is a hand-seedable schedule lever.** Wrapping an `if` (or a small block) in
+  `do{ ... }while(0)` shifts the -O2 instruction schedule without changing the logic. S169
+  `func_80076640`'s `if(fabsf(cosPitch)<0.1f)` gimbal test scheduled the const-load FIRST (no stall,
+  1 instr short); the permuter found `do{ if(fabsf(cosPitch)<0.1f){...} }while(0)` (plus a
+  `cosPitch = cosf(pitch)` temp) which forces const-load-LAST and re-adds the `mtc1`->`c.lt.s` stall
+  nop, fixing the count 77->78. Seed it by hand when a byte-exact-structure fn is one instr short/long
+  around a branch. (It did NOT fix the residual register swap; see `#abs-coalescing-reg-swap`.)
+- **Venv gotcha: `import.py` needs `toml`.** Run the permuter tools through the venv
+  (`venv/bin/python3 ...`, or `mg_activate_venv` as `setup-permuter.sh` does); a bare
+  `./tools/decomp-permuter/import.py ...` fails `ModuleNotFoundError: No module named 'toml'` even
+  though the venv has it. And `mg_resolve_c_asm` needs an `INCLUDE_ASM` stub, so for an already-inlined
+  one-tu fn pass `import.py <src.c> <awk-sliced target.s> --settings tools/permuter_settings_main.toml`
+  directly (the src file is still in the build, so its main-profile compile command is extracted).
+
 **Provenance:** S121 (contRmbControl: the three KMC-toolchain fixes); S151 (generalized to the game
 -O2 main-profile + the coord-width permuter lever); S157 (KMC-gcc tuning: `perm_sameline` no-op,
-`--best-only` plateaus); S158 (committed `permuter_settings_main.toml` + `kmc_main_prelude.inc`).
+`--best-only` plateaus); S158 (committed `permuter_settings_main.toml` + `kmc_main_prelude.inc`);
+S169 (`do{}while(0)` schedule lever + the venv/inlined-fn import path).
 
 ## NU_DEBUG-stock-not-custom (carried perf fn triage)
 
@@ -3317,6 +3334,15 @@ rather than computed once) is **`volatile`** in the original.
   Also place that local's computation in program order relative to the other volatile reads so the
   scheduler reproduces the target load order (compute `frame` inside the `>=0x1F` block, before
   the non-volatile pointer test, so the volatile reloads precede the pointer load).
+- **Inverse lever, `const`-extern forces cross-call CSE into a callee-saved reg.** The mirror of the
+  volatile tell: a FIXED rodata constant read from an **extern global** and used across a `jal`
+  RELOADS on each use (gcc assumes the call may write the global) unless the extern is declared
+  `const`, which lets gcc keep it in ONE callee-saved reg (a single load, reused across the calls).
+  S169 `func_80076640` read a rad-to-deg double (`D_800D1868` / `D_800D18F0`) across two `guRotateF`
+  calls; the plain extern reloaded (an extra `ldc1` plus a smaller frame), while
+  `extern const f64 D_800D1868;` produced the target's single callee-saved load. Declare `const` for
+  any extern rodata constant a classical/mirror fn reads across a call; use `vu32`/`vs32` (above) for
+  the opposite, when a per-read reload is wanted.
 - **Shared-header caution.** Flipping a header-declared global to `vu32` (e.g. `nuScRetraceCounter` in
   `nusys.h`) changes codegen for every consumer — re-verify the already-banked consumers on a clean-rebuild
   SHA check (no header-dep tracking, so an incremental build hides the breakage; `#clean-rebuild-after-shared-header-edit`).
@@ -4138,3 +4164,30 @@ a shape not recoverable from the byte behavior (a different flag/print data-flow
 macro). Recognize the symptom, bank the file's other fns (`#cross-jump-tail-merge` mixed partial), and
 **carry this one for game-source insight** -- not another permuter run. Save the near-match
 (`beqz`-polarity, byte-exact minus the 3 words) so the retry starts one lever away.
+
+---
+
+## abs-coalescing reg-swap
+
+**Symptom:** a byte-exact-structure classical fn locks at a **small (3-instr) register swap** in an
+`if(fabsf(x) < K)` unary-op-then-const-compare: the target computes `abs.s f2,f0` (abs into a FRESH
+reg, keeping the operand's reg `f0`) then loads the const into `f0`; mine emits `abs.s f0,f0`
+(in-place, coalescing operand->result) and loads the const into `f2`, so the `abs`/`mtc1`/`c.lt.s`
+operands are register-swapped. Everything else matches. S169 `func_80076640`
+(`if(fabsf(cosf(pitch)) < 0.1f) pitch += 0.34906584f`, score 25).
+
+**Root cause:** gcc 2.7.2 coalesces `y = fabsf(x)` in-place (the result reuses `x`'s hard reg) when
+`x` dies at the abs. The target did NOT coalesce: it kept the operand reg free for the two branch
+constants (`0.1` in the test, then the increment `0.349` in the taken arm, both wanting the same reg)
+and put the abs in a fresh reg. Which value "owns" the low reg is a local-alloc preference tie, not a
+scheduling choice.
+
+**Verdict, carry fast (near-free retry), do NOT grind.** Permuter-resistant: the main-profile permuter
+(no `--best-only`) PLATEAUED at score 25 over 338k iterations, and three hand levers (comparison flip,
+abs-into-a-temp, const-into-a-temp) all failed (the flip is a codegen no-op; the temps regress the
+schedule). The permuter's `do{}while(0)` + `cosf` temp fixed the instruction COUNT but not the swap.
+Like `#cse-make-regs-eqv-branch-fold`, this is likely **not reachable from equivalent C**: the target
+was compiled from a source shape that keeps the operand reg live for the constants (untried:
+compiler-source fan-out on gcc's `local-alloc.c` / `reload.c` abs-coalescing + preferred-reg logic).
+Recognize the symptom, bank the file's matched fns (one-tu mixed-partial), and carry this one with the
+score-25 near-match saved.
