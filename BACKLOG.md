@@ -41,6 +41,22 @@ tell) is carved to its LIBRARY tree (`libnusys/<file>`), not `main/<stem>` — y
 placement unchanged (see `CLAUDE.md` path convention). A per-FILE -O0 override is the one mk edit a
 boot/SDK-glue TU may need.
 
+**S176 BANKED — `src/main/func_8004DE60.c` heap-allocator TU, 3/4 mixed-partial.** matched **+3**;
+md5-candidate **221 → 221** (file has 1 stub → not md5-candidate). Decomposed the `func_8004DE60` 9-fn
+main pack (cluster A) and banked the per-slot best-fit heap allocator over `Slot D_800DC6E0[]` as clean
+C: `heap_get_largest_free` (accessor → `.unk_14`), `heap_alloc` (best-fit, block-split, `0x12345678`
+guard), `heap_free` (coalescing). **Two compiler-source cracks:** (1) `heap_alloc`'s 3-way
+`{best_rem,best,need}`↔`{s0,s1,s2}` permutation — the permuter plateaued (1595→605), but the
+`#loop-weight-and-live-length-regalloc-steering` **Axis-3** lever (rename param `size`→`need`, mutate
+**in place** so local-alloc stops parking the call-crossing local in `$s0`) closed it 119/119; (2)
+`func_8004E184`'s dead `sw v0,0(sp)` = a GCC **nested-function static-chain spill** (new
+`#nested-function-static-chain-spill` hazard) → it belongs in `func_8004E1E0`'s TU, **carried** (see
+`## Carry-overs`). Quality 0/1/1/0. Retro applied **7 of 7** (new nested-fn hazard + Axis-3 regalloc
+lever + `-dg` diagnostic + permuter b64literal fix + `#capturing-ra` re-confirm + 2 CLAUDE index rows).
+Cross-repo follow-up: 3 new names (`heap_get_largest_free`/`heap_alloc`/`heap_free`) →
+`sync_decomp_names.py --import-from-decomp`. **Next natural slice:** cluster B `[0x295E0]`
+(`func_8004E1E0` + its nested `func_8004E184` + the 4 remaining pack fns).
+
 **S175 CARRIED (retry of the S174 `func_8004DC44` carry; PO-approved bounded new-angle try) — 0 banks;
 new project-best + `register` keyword ruled out.** matched **+0**; md5-candidate **221 → 221** (file still
 5/6 mixed-partial, 1 stub). Two genuinely-new probes, both advance the characterization, neither matches.
@@ -2838,6 +2854,27 @@ by `/sprint-plan`:
   vendored upstream version can diverge from the game's rev on a single immediate (S122 nusys-2.07
   `NU_CONT_THREAD_ID=6` vs MG64's 5), and that surfaces only at first build unless reconciled here.
   A near-free retry missing any of these is a half-scoped spike — finish the scope before deferring.
+
+- **(S176 MIXED-PARTIAL — carried; 3 of 4 banked)** `src/main/func_8004DE60.c` (heap-allocator TU,
+  decomposed cluster A of the `func_8004DE60` pack). BANKED byte-exact C (S176): `heap_get_largest_free`,
+  `heap_alloc`, `heap_free`. ONE `INCLUDE_ASM` stub remains: `func_8004E184`. File → NOT md5-candidate.
+  - **func_8004E184 (0x8004E184, 92B — a GCC NESTED FUNCTION of `func_8004E1E0`, not a match failure;
+    `#nested-function-static-chain-spill`).** The dead `sw v0,0(sp)` is GCC saving the incoming static
+    chain (o32 `STATIC_CHAIN_REGNUM=$2`); the caller `func_8004E1E0` sets `v0=&sp[0x10]` before each
+    `jal` (verified). It is lexically nested in `func_8004E1E0`, so parent + child are **one TU** and
+    cannot be split into separate `.c` files. **Resolution (NOT a spike — a scope/structure carry):**
+    bank it as the real nested function *inside* `func_8004E1E0` when that TU is decompiled — this is a
+    **near-free retry gated on cluster B**, not a blocked spike. Completeness checklist for the cluster-B
+    sprint: **(1)** extend the flip to include `func_8004E1E0`'s whole TU (the next 16-aligned boundary
+    after 0x8004E1E0 is the pack end 0x8004E5A0, so cluster B = func_8004E1E0/E27C/E288/E2DC/E47C, 5 fns);
+    **(2)** write `func_8004E184` as `void func_8004E184(u32 start, u32 end){…}` nested inside
+    `func_8004E1E0`'s body, before the two `func_8004E184(a,b)` call sites (GCC mangles the symbol to
+    `func_8004E184.N`, irrelevant to the address-based oracle); **(3)** the body is already derived (the
+    slot-3 list-append, same as `func_8004DD70` hardcoded to `D_800DC6E0[3]`); **(4)** a byte-exact
+    standalone UB reproduction (`volatile u32 a=(u32)uninit_sentinel;`) is the fallback ONLY if
+    func_8004E1E0 proves intractable and the PO re-accepts a pseudo-fakematch. See
+    `#nested-function-static-chain-spill`. **Do NOT bank func_8004E184 alone** — it needs its parent.
+  - Next natural slice = cluster B `[0x295E0]` (resolves this carry + banks 5 more fns).
 
 - **(S175 MIXED-PARTIAL — carried; 5 of 6 banked; new project-best 13530/13235, `register` ruled out)** `src/main/print_string_at_grid.c` (the grid-print
   debug cluster `[0x28DC0]`). BANKED byte-exact C (S171): `check_and_print_grid`, `func_8004DA4C`,

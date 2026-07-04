@@ -103,6 +103,7 @@ The hazard families below group the sections that follow. Each links to its exis
 - [short-text shifts flowing-bss (a length miss surfaces as a SIBLING's wrong data addr)](#short-text-shifts-flowing-bss-a-length-miss-surfaces-as-a-siblings-wrong-data-addr)
 - [struct-array-of-BSS direct-index vs base-pointer var](#struct-array-of-bss-direct-index-vs-base-pointer-var)
 - [goto-dispatch branch-toward vs branchless (constant dispatch through a shared return)](#goto-dispatch-branch-toward-vs-branchless-constant-dispatch-through-a-shared-return)
+- [nested-function static-chain spill (leaf dead `sw v0,0(sp)` + caller sets `v0=&frame` per-call)](#nested-function-static-chain-spill)
 
 **libnusys / audio-band specifics**
 - [libmus-bundled-n_audio duplicate (a SUPPORT_NAUDIO libmus archive links its OWN n_audio synth copy)](#libmus-bundled-n_audio-duplicate-a-support_naudio-libmus-archive-links-its-own-n_audio-synth-copy)
@@ -3262,10 +3263,24 @@ setup feeds, see `#pervasive-regalloc-classical-main`.
   one-tu fn pass `import.py <src.c> <awk-sliced target.s> --settings tools/permuter_settings_main.toml`
   directly (the src file is still in the build, so its main-profile compile command is extracted).
 
+- **Inline-asm base.c fails pycparser — b64literal-wrap the line by hand (S176).** A `base.c`
+  containing a `__asm__ __volatile__(...)` (e.g. the `#capturing-ra` `addu %0,$31,$0` read) makes
+  `permuter.py` abort with `Syntax error in base.c … before: __volatile__`. import.py's
+  `-D__asm__(...)=_permuter_ignore_line __asm__(__VA_ARGS__)` macro does **not** fire here because
+  `__volatile__` sits between `__asm__` and `(`, so the function-like macro never matches (and cpp
+  won't re-scan after `-D__volatile__=` strips it). Manually convert that one line to the pragma
+  import.py would have emitted (`import.py:481-484`): `#pragma _permuter b64literal <base64 of the
+  original line>` (e.g. `venv/bin/python3 -c "import base64;print(base64.b64encode(open('L').read().strip().encode()).decode())"`).
+  pycparser parses the pragma (skipped by the randomizer, so the asm line is held fixed) and the
+  permuter decodes it back to the real `__asm__` for each candidate compile. This is how S176's
+  `heap_alloc` (ra-capture inline asm) was made permuter-loadable; the base scored 1595 and drove down
+  to 605 (the register lever, not the permuter, closed it — see `#loop-weight-and-live-length-regalloc-steering`).
+
 **Provenance:** S121 (contRmbControl: the three KMC-toolchain fixes); S151 (generalized to the game
 -O2 main-profile + the coord-width permuter lever); S157 (KMC-gcc tuning: `perm_sameline` no-op,
 `--best-only` plateaus); S158 (committed `permuter_settings_main.toml` + `kmc_main_prelude.inc`);
-S169 (`do{}while(0)` schedule lever + the venv/inlined-fn import path).
+S169 (`do{}while(0)` schedule lever + the venv/inlined-fn import path); S176 (the b64literal inline-asm
+base.c fix).
 
 ## NU_DEBUG-stock-not-custom (carried perf fn triage)
 
@@ -3684,6 +3699,12 @@ first so the format-string `addiu` fills the jal delay slot (ROM order; S154 `re
 Tell you need this: the ROM reads `$ra` (reg 31) as a printf/log arg; the naive builtin emits a
 stack-slot `lw`.
 
+**Re-confirmed S176** (`heap_alloc` OOM `osSyncPrintf(fmt, ra)`): swapping the inline asm for
+`__builtin_return_address(0)` on the exact function emitted `lw s5,4(sp)` (a `MEM(frame+4)` read,
+`expr.c:7199`, since `RETURN_ADDR_RTX` is undefined for MIPS in `config/mips/`), NOT the ROM's
+`addu s5,ra,0`. The `__asm__ __volatile__("addu %0, $31, $0" : "=r"(ra))` form is required; gcc parks
+`ra` in a callee-saved reg (here `$s5`) because it is live across the intervening `jal`s.
+
 ## indexed-vs-pointer loop (strength-reduction preheader ordering)
 
 **Rule:** for a sentinel-terminated (`!= -1`) array walk, the ROM's scheduling around the loop
@@ -3934,6 +3955,35 @@ all-structured rewrite of a matched goto fn generally cannot byte-match (S166, 3
   improves only names/labels/comments (S166 reworked `lz_decompress_simple` this way, byte-exact). Do
   **not** "clean up" a matched goto fn by structuring its loops.
 
+**Axis 3 — local-alloc pre-emption (make a call-crossing PARAM a global quantity, S176).** A
+**parameter** (or any local) that is born in the entry block, dies early there, yet must survive an
+intervening `jal` is a **call-crossing LOCAL quantity**: `local-alloc.c` `find_free_reg` picks
+`call_used_reg_set`-avoiding regs (~:2103-2106) then scans hard regs **ascending** (~:2158-2182; MIPS
+defines no `REG_ALLOC_ORDER`), so it parks the value in the **lowest free callee-saved reg, `$s0`** —
+*before* global alloc runs. That pre-occupancy makes the true loop-heavy vars (`best_rem`, `best`)
+conflict with `$s0` in `global.c global_conflicts`, so `find_reg`'s lowest-free-reg pass gives them
+`$s1`/`$s2` and the param grabs `$s0` — a 3-way rotation vs the target. **Fix:** make the param a
+**global** quantity so local-alloc skips it entirely: reference it in BOTH the entry block AND the
+loop body by **mutating it in place** — `p = f(p);` (self-assign), NOT a fresh `q = f(p);`. Now
+global alloc assigns all three purely by `allocno_compare` priority (`best_rem` > `best` > param),
+and the lowest-free-reg pass hands out `$s0=best_rem, $s1=best, $s2=param` — the target. S176
+`heap_alloc`: renaming param `size`→`need` and writing `need = (need + 0x17) & ~7;` in place flipped
+`{need,best_rem,best}` off `s0/s1/s2` to the target `best_rem/best/need`, 119/119. The permuter alone
+plateaued (1595→605); the source lever cracked it. Verify with the `.lreg` dump: the fixed version
+shows **no** pseudo assigned to hard reg 16/17/18 in local-alloc (the param is now global). This axis
+is complementary to Axes 1–2: those steer *global* priority; Axis 3 removes a *local-alloc*
+pre-emption that pins the ordering before priority is even consulted.
+
+**Diagnostic — the `-dg`/`-dl` allocno dumps.** Compile a candidate with `-dg` (global) / `-dl`
+(local): `COMPILER_PATH=tools/cc tools/cc/gcc -S -G0 -mips3 -mgp32 -mfp32 -mno-abicalls -O2 -I include
+-dg -o out.s cand.c` writes `cand.c.greg` (and `.lreg`). Read the header: `;; N regs to allocate: …`
+is the **priority order** (highest first), `;; K conflicts: …` lists conflicting pseudos/hard-regs
+(a bare number < FIRST_PSEUDO_REGISTER is a hard reg — `16`=`$s0`), `;; K preferences: …` is the
+copy-preference, and `;; Register dispositions:` / `Register K in HH` is the final assignment. This
+turns "which value wins `$s0`" from guesswork into a read: find the pseudo pinned to 16 in `.lreg`
+(local pre-emption, Axis 3) vs a copy-preference for 16 in `.greg` (steer via Axes 1–2). Run it
+**before** the permuter on any structural-complete register permutation.
+
 **Process.** The lever set was **derived** by a compiler-source fan-out: 3 read-only mechanism-RE agents
 over gcc-2.7.2 (flow/global/local-alloc/reload/sched/reorg/stmt/jump/loop/toplev) + N measurement
 agents iterating from the isolated base — it turned a 3×-"irreducible" verdict into a byte match. See
@@ -3942,7 +3992,9 @@ agents iterating from the isolated base — it turned a 3×-"irreducible" verdic
 **first**; the permuter (safe passes only on a goto-loop) closes only the residual allocno-number tiebreak.
 
 **Provenance.** S166 (source-side loop-weight/live-length levers; cracked `lz_decompress_simple`, the
-project's hardest wall, 8600→0, carried and declared "irreducible" 3×).
+project's hardest wall, 8600→0, carried and declared "irreducible" 3×). S176 (Axis 3 param-in-place +
+the `-dg`/`-dl` diagnostic; cracked `heap_alloc`'s 3-way `{best_rem,best,need}` permutation the
+permuter plateaued on at 605).
 
 ## permuter goto-backedge liveness unsound (var-reuse passes corrupt live-across-backedge values)
 
@@ -4546,3 +4598,55 @@ co-symptom of the same pressure peak) and `#register-reuse-nudge-classical-regal
 hm64, puzzleleague64; matched dividend-`$v0` examples: puzzleleague64 `gTheGame.menu[i].unk_4/100`
 indexed, hm64 `(a+b+c)/3` multi-term, marioparty3 `x/10%10` CSE). Corrects the S172/S173
 `#dead-frame-reload-artifact-regalloc-wall` "irreducible" framing.
+
+## nested-function static-chain spill
+
+**Rule.** A **leaf** function that opens with `addiu sp,sp,-8` + a `sw $v0,0(sp)` that is **never
+reloaded** — a dead spill of the *incoming* `$v0` — and whose single caller sets `$v0 = &sp[N]` (a
+pointer into the caller's OWN frame) right before **each** `jal` to it, is a **GCC nested function**.
+The dead store is GCC saving the incoming **static chain**: MIPS o32 passes the static chain in
+`$v0` (`config/mips/mips.h` `#define STATIC_CHAIN_REGNUM (GP_REG_FIRST + 2)` = `$2`). For any
+lexically-nested function, `function.c` `expand_function_start` (~:5011-5023) grabs the first stack
+slot (offset 0) and `emit_move_insn(last_ptr, static_chain_incoming_rtx)` → `sw v0,0(sp)`; the body
+never reads the chain, so it is a dead spill. The caller side is `calls.c:293`
+`emit_move_insn(static_chain_rtx, static_chain_value)` → the parent loads `$v0 = &<its frame>` before
+the call. This is **NOT** a `#dead-frame-reload-artifact-regalloc-wall` (that has no source trigger;
+this one does — the nesting).
+
+**Tell (the discriminator).** Distinguish from a random dead-frame artifact by reading the CALLER:
+if the caller materializes `$v0 = &sp[K]` (an `addiu v0,sp,K`) into the `jal`'s live range for **each**
+call site, it is the static chain, and the callee is nested inside that caller.
+
+**Real bank.** Write the function as a C **nested function** inside its caller/parent (same TU):
+```c
+void parent(void) { /* = the caller */
+  void child(u32 a, u32 b) { ... }   /* the nested fn; GCC mangles the symbol to child.N */
+  ... child(x, y); ...               /* parent sets $v0 = static chain before the jal */
+}
+```
+The mangled `child.N` symbol is irrelevant to the ROM-byte oracle (splat names by address). The
+parent and child are **one compilation unit** — they cannot be split into separate `.c` files.
+
+**Decompose-gate corollary (orphaned nested child).** A subseg decompose can **orphan** a nested
+child from its parent: the child's `.text` sits *before* the parent's (GCC emits the nested fn
+ahead), so the true TU boundary is the child's address (often non-16-aligned), not the parent's. When
+a pack member's caller passes a static chain, keep the parent + child in **one** increment, or carry
+the child to the parent's sprint. Do NOT bank the child alone. (S176: `func_8004E184` at `0x8004E184`
+is nested in `func_8004E1E0` at `0x8004E1E0`; the true TU boundary `0x8004E184` is non-16-aligned, so
+cluster A's `0x295E0` split over-reached by one fn — the child was carried.) `pick_target.py` flagging
+a `static-chain-callee` (a fn whose caller does `addiu v0,sp,K` before its `jal`) is a tracked
+follow-up.
+
+**Standalone reproduction (UB; do NOT prefer over the real nested form).** A byte-exact standalone
+`.c` (no parent, no inline asm) can force the same spill: `volatile u32 a = (u32)uninit_ptr;` reads an
+**uninitialized** pointer local (which local-alloc parks in `$v0`, the first allocable GPR since MIPS
+has no `REG_ALLOC_ORDER`), the `volatile` store survives DSE (`flow.c` `insn_dead_p && !INSN_VOLATILE`)
+and reserves the 8-byte frame, then the same reg is reused for the real value → `sw v0,0(sp)`. This is
+UB and is **not** the original source; use only if the parent is genuinely unavailable and the PO
+accepts a documented pseudo-fakematch. `#capturing-ra` (which also reads a fixed reg) and
+`#dead-frame-reload-artifact-regalloc-wall` are the sibling reg/frame hazards.
+
+**Provenance:** S176 `func_8004E184` (slot-3 list-insert leaf, a nested fn of the heap-init
+`func_8004E1E0`); mechanism dumped from `mips-gcc-2.7.2` (`mips.h` STATIC_CHAIN_REGNUM, `function.c`
+expand_function_start, `calls.c` static_chain pass). Two subagents converged: one on the nested-fn
+structure, one on the standalone UB reproduction; PO chose to carry for the real nested form.
