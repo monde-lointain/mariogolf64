@@ -10,7 +10,27 @@ extern s32 D_800DC6D0;
 void print_string_at_grid(char* str, s32 col, s32 row);
 void check_and_print_grid(char* str, s32 col, s32 row);
 
-INCLUDE_ASM("asm/nonmatchings/main/print_string_at_grid", print_string_at_grid);
+void print_string_at_grid(char* str, s32 col, s32 row) {
+  u8 f = flag;
+  u8* dst = &D_800DAF60[row * 40 + col];
+  u8* end = &D_800DAF60[0x4B0];
+  s32 c;
+  while (1) {
+    c = *str++;
+    if (c == 0) {
+      break;
+    }
+    if (dst >= D_800DAF60) {
+      if (dst < end) {
+        *dst = f | c;
+      }
+      dst++;
+    } else {
+      dst++;
+    }
+  }
+  flag = 0;
+}
 
 void check_and_print_grid(char* str, s32 col, s32 row) {
   if (D_800B67C0 != 0) {
