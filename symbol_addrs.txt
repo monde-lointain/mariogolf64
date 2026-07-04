@@ -629,3 +629,6 @@ glistp = 0x801B93DC; // size:0x4
 set_rng_seed = 0x8006A174; // type:func
 crc16_ccitt = 0x8006A1EC; // type:func
 report_div_error = 0x8006A274; // type:func
+heap_get_largest_free = 0x8004DE60; // type:func
+heap_alloc = 0x8004DE7C; // type:func
+heap_free = 0x8004E058; // type:func
