@@ -41,6 +41,24 @@ tell) is carved to its LIBRARY tree (`libnusys/<file>`), not `main/<stem>` — y
 placement unchanged (see `CLAUDE.md` path convention). A per-FILE -O0 override is the one mk edit a
 boot/SDK-glue TU may need.
 
+**S170 BANKED — `src/main/func_8004DD70.c` (3-fn slot-allocator module; the 16-aligned mid-slice
+`[0x29170,0x29260)` decomposed from the 25-fn FP-free debug subseg `[0x28590]`).** matched **+3**;
+md5-candidate **220 → 221**; asm subsegs **76 → 77** (the mid-slice decompose split off the `[0x29260]`
+tail). A cohesive circular-doubly-linked-list slot module (`func_8004DD70` append / `func_8004DDE4` init
+/ `func_8004DE44` get-total) over `Slot D_800DC6E0[]` (stride 0x18) matched **byte-exact, no permuter,
+no carry** via 2 documented struct-array-of-BSS reloc levers: (1) DIRECT `D_800DC6E0[i].field` indexing
+(NOT a `Slot *s=&arr[i]` base-pointer var → per-field `%hi/%lo` re-derivation matching the ROM's
+per-symbol relocs); (2) the lone `prev=s` self-store through a pointer var (`sw v1,0xC(v1)`), the rest
+direct. Diagnosis rabbit-hole: a +2-instr overflow in `func_8004DDE4` pushed object `.text` `0xF0→0x100`,
+overflowed the 240B slice, and floated every `D_800DC6xx` bss symbol +0x10 (the long-text mirror of
+`#short-text-shifts-flowing-bss`; root cause was the `.text` length, not the symbols). seed 3 / **banked
+3pt** / realized 4 (residual +1). Quality **0/0/0/0**. Names kept `func_`/`D_` (PO: auto). Retro applied
+3 of 3 (all DOC; the decomp_loop `--target-s` code change deferred to a golden-gated tooling branch): new
+`#struct-array-of-bss-direct-index-vs-base-pointer-var`, `#short-text-shifts-flowing-bss` long-overflow
+variant, decomp_loop post-flip `find_segment` gap note. No carry-over. **Cross-repo follow-up:** none
+(auto names). **Next natural slice:** the `[0x29260]` tail (16 more FP-free debug fns incl the
+`print_string_at_grid` grid-print cluster + the `osSetIntMask`/`osSyncPrintf` logging helpers).
+
 **S169 MIXED-PARTIAL — `src/main/func_80076640.c` (3-fn one-tu S162 tail `[0x51A40]`; `func_80076778`
 BANKED C, 2 carried).** matched **+1** (`func_80076778`, a point×matrix transform); md5-candidate
 **220 → 220** (file mixed-partial, 2 `INCLUDE_ASM` stubs); asm subsegs **77 → 76** (the flip). The
@@ -2884,6 +2902,20 @@ by `/sprint-plan`:
   `permuter_settings.toml` (load-bearing preprocess surface) and a new helper; golden-gate per the
   tooling-refactor policy. (Until then, S157's manual recipe in `docs/hazards.md#permuter-setup-for-
   kmc-toolchain-mirrors` applies by hand.)
+
+- **Tooling follow-up (S170, PO-selected #3; deferred to a golden-gated tooling branch, NOT a
+  review-gate edit).** `tools/decomp_loop.py`'s `find_segment` resolves a placeholder by grepping
+  top-level `asm/<off>.s` for its `glabel`, so it **fails on a fn whose subseg is already flipped to
+  `c`** (the asm then lives under `asm/nonmatchings/<seg>/<fn>.s`, not `asm/*.s`) with `no glabel
+  <fn> found in any asm/*.s file`. This breaks the asm-first fast-path miss-recovery: once you inline
+  a C body and the first full-make misses, `decomp_loop` can't run the isolated per-fn diff. Add a
+  `--target-s <path>` arg (or extend `find_segment`/`dc.find_segment` to also search
+  `asm/nonmatchings/**`) so the isolated loop works post-flip. **Why a branch:** `find_segment` is in
+  `tools/decomp_common.py` (shared, characterization-tested), so golden-gate per the tooling-refactor
+  policy. (Until then, S170's manual recipe applies by hand: `mips-linux-gnu-objdump -d
+  build/src/<seg>/<file>.o` vs the `asm/nonmatchings/<seg>/<fn>.s` hex, gating on the full-make SHA
+  since the isolated reloc-hi/lo diffs are the `#isolated-compile-caveat` artifact; see
+  `docs/hazards.md#short-text-shifts-flowing-bss` tooling note.)
 
 - **Tooling follow-up (S168, PO away → best-judgment doc-only applied at review; the CODE fix deferred
   to a golden-gated tooling branch, NOT a review-gate edit).** `decomp_loop.py` / `dc.find_segment`

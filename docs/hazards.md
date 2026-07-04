@@ -100,6 +100,7 @@ The hazard families below group the sections that follow. Each links to its exis
 - [indexed-vs-pointer loop (strength-reduction preheader ordering)](#indexed-vs-pointer-loop-strength-reduction-preheader-ordering)
 - [switch-jtbl-dispatch (compiler jump table + sparse inner cases)](#switch-jtbl-dispatch-compiler-jump-table--sparse-inner-cases)
 - [short-text shifts flowing-bss (a length miss surfaces as a SIBLING's wrong data addr)](#short-text-shifts-flowing-bss-a-length-miss-surfaces-as-a-siblings-wrong-data-addr)
+- [struct-array-of-BSS direct-index vs base-pointer var](#struct-array-of-bss-direct-index-vs-base-pointer-var)
 - [goto-dispatch branch-toward vs branchless (constant dispatch through a shared return)](#goto-dispatch-branch-toward-vs-branchless-constant-dispatch-through-a-shared-return)
 
 **libnusys / audio-band specifics**
@@ -4027,6 +4028,55 @@ symptom. Guard: when a same-file sibling's length is still wrong, do not trust a
 `func_80076500` looked "wrong" (bytes `c4205b5c`) purely because `func_80076558` was 0x10 short (S162);
 both matched the instant `func_80076558` reached its exact 0xE8 length (via the
 [mem-in-struct lever](#mem-in-struct-scheduling-lever) above).
+
+**Long-text variant — a decomposed-subseg OVERFLOW shifts the flowing `.bss` SYMBOLS themselves
+(S170).** The mirror image of the short case, and easier to misdiagnose: a classical fn N bytes *too
+long* overflows its decomposed subseg's reserved span, and the shift surfaces not as a sibling's
+reload but as the auto-`.bss` symbols floating. Those symbols (`D_<vram>` defined in the
+splat-generated `asm/data/<seg>.bss.s`, placed by cumulative `.main_bss` object order) ALL move to
+`name+N` — which reads like symbol-table / reloc corruption (`D_800DC6E0` resolving to `0x800DC6F0`,
+the head-asm sibling's `%lo` going wrong too), not a length bug. S170: `func_8004DDE4` compiled 2 instrs
+(8 B) long → object `.text` rounded `0xF0→0x100` → overflowed the 240 B `[0x29170,0x29260)` slice → every
+`D_800DC6xx` bss symbol shifted +0x10. **Diagnose the SAME way and FIRST — object `.text` size vs the
+subseg span** (`objdump -h build/src/<seg>/<file>.o` vs the yaml `[start..next)` extent), before chasing
+the symbol addresses; the symbol shift is a downstream symptom, and `asm/data/<seg>.bss.s` being
+gitignored hides it from `git status`. The 2-instr overflow itself was a `&D_arr[i]` self-store
+re-derived instead of reusing the live pointer; see the
+[struct-array-of-BSS direct-index lever](#struct-array-of-bss-direct-index-vs-base-pointer-var) below.
+**Tooling note (S170):** `decomp_loop.py`'s `find_segment` can't locate a fn whose subseg is already
+flipped to `c` (its asm is under `asm/nonmatchings/<seg>/`, not top-level `asm/<off>.s`), so the
+asm-first fast-path miss-recovery fails with `no glabel found`. Workaround: manual
+`mips-linux-gnu-objdump -d build/src/<seg>/<file>.o` vs the `asm/nonmatchings/<seg>/<fn>.s` hex (the
+reloc-hi/lo diffs there are the [isolated-compile caveat](#isolated-compile-caveat); gate on the
+full-make SHA). A `--target-s <path>` arg for `decomp_loop` is a tracked tooling follow-up.
+
+## struct-array-of-BSS direct-index vs base-pointer var
+
+**Trigger:** a classical fn accesses a global struct-array in `.bss` (`extern Slot D_<vram>[];` with a
+runtime index `[i]`), and the build's field addressing diverges from the ROM: the ROM re-derives each
+field via `%hi(D_<field>)/%lo` off the scaled index (a distinct reloc per field, e.g. `lw %lo(D_800DC6F0)`
+for `.total` at +0x10), but the build keeps a base pointer and uses immediate offsets (`lw 16(v1)`),
+producing FEWER, different instructions. Or the reverse: a self-referential store the ROM writes through
+a live pointer (`sw v1,0xC(v1)`) the build re-derives via `%hi/%lo` (2 extra instrs → a subseg-length
+[overflow](#short-text-shifts-flowing-bss-a-length-miss-surfaces-as-a-siblings-wrong-data-addr)).
+
+**Cause (KMC gcc 2.7.2):** `Type *s = &D_arr[i]; ... s->field` materializes the full pointer `&D_arr[i]`
+once and CSEs it, so every field access is `offset(s)` (base+immediate). Writing `D_arr[i].field`
+*directly* (no pointer variable) makes GCC re-materialize `%hi(D_arr)+i*stride` per access and fold the
+field offset into the `%lo` addend (`%lo(D_arr)+0x10` = `%lo(D_800DC6F0)`, which the disassembler names
+by the effective symbol) — one reloc per field, matching the ROM. The original source almost always
+used direct `arr[i].field` indexing; the reloc addend resolving to a different `D_<vram>` name than the
+base is the [isolated-compile caveat](#isolated-compile-caveat), harmless under the full-make link.
+
+**Fix:** default to **direct `D_arr[i].field` indexing**, NOT a `Type *s = &D_arr[i]` base-pointer var.
+Reach for a pointer variable ONLY for the specific store the ROM expresses as `base+offset` off a live
+`&D_arr[i]` — typically a self-referential init like `arr[i].prev = &arr[i]`: writing `s->prev = s`
+(pointer form) emits `sw v1,0xC(v1)` (1 instr, reusing the self-ptr `v1` as base), while the direct
+`D_arr[i].prev = &D_arr[i]` re-derives the address (3 instrs). S170 `func_8004DDE4` needed the mix — the
+lone `prev=s` self-store through the pointer, `next`/scalars direct — to hit the exact 24-instr length;
+`func_8004DD70`/`func_8004DE44` were all-direct. See also
+[struct-access-folding-changes-scheduling](#struct-access-folding-changes-scheduling) (a related but
+distinct scheduling effect of combining per-field base symbols into one struct).
 
 ## goto-dispatch branch-toward vs branchless (constant dispatch through a shared return)
 

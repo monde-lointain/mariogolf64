@@ -25,6 +25,17 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 170 — src/main/func_8004DD70.c (3-fn slot-allocator module decomposed from the FP-free debug subseg `[0x28590]`) — 2026-07-03
+- Increment: **1 file banked / 3 fns matched** (func_8004DD70 append / func_8004DDE4 init / func_8004DE44 get-total, over a circular doubly-linked list of sized nodes on the `Slot D_800DC6E0[]` stride-0x18 array); md5-candidate 220 → 221; asm subsegs 76 → 77 (mid-slice decompose split off the `[0x29260]` tail). DoD verified (make OK, SHA-1 `e2c4e7a9…`, `grep -c INCLUDE_ASM` = 0).
+- Quality: 0 stuck-far / 0 permuter / 0 carried / 0 re-opened — clean.
+- Seed: committed 3pt; banked 3pt (full bank); regime classical (v2: realized 4, residual +1).
+- What helped: **two struct-array-of-BSS reloc levers, no permuter** (asm-first fast-path, MCP-independent). (1) DIRECT `D_800DC6E0[i].field` indexing — NOT a `Slot *s=&arr[i]` base-pointer var — makes GCC re-derive each field via `%hi/%lo(D_<field>)` off the scaled index, matching the ROM's per-symbol relocs; a pointer var CSEs the base into shorter `offset(v1)` addressing. (2) The lone self-store `prev=s` routed THROUGH the pointer var → `sw v1,0xC(v1)` (1 instr, reusing the live self-ptr as base), while `next`/scalars stay direct. The reloc-hi/lo diffs in the isolated objdump were the `#isolated-compile-caveat` artifact, resolved by the full-make link.
+- Friction: a **too-LONG `func_8004DDE4`** (routing `prev` direct = +2 instrs) pushed the object `.text` `0xF0→0x100`, overflowed the 240B `[0x29170,0x29260)` slice, and floated EVERY `D_800DC6xx` bss symbol +0x10 — which presented as symbol-table / reloc corruption (`D_800DC6E0`→`0x800DC6F0`, the head-asm sibling going wrong too) and sent the diagnosis down a long rabbit-hole before the object-`.text`-size-vs-subseg-span check found the real cause. `asm/data/<seg>.bss.s` being gitignored hid the shift from `git status`. Also: decomp_loop `find_segment` can't locate a fn whose subseg is already flipped to C (asm under `asm/nonmatchings/`), so the isolated per-fn diff was a manual objdump.
+- Applied (3 of 3; all doc, PO-picked; the decomp_loop `--target-s` code change deferred to a golden-gated tooling branch): #1 new `docs/hazards.md#struct-array-of-bss-direct-index-vs-base-pointer-var` + `CLAUDE.md` hazard-index row; #2 `docs/hazards.md#short-text-shifts-flowing-bss` long-overflow-floats-bss-symbols variant + index row; #3 decomp_loop post-flip `find_segment` gap (doc note in the #short-text section; tooling follow-up in BACKLOG).
+- Carry-over: none.
+
+---
+
 ## Sprint 169 — src/main/func_80076640.c (3-fn one-tu S162 tail; MIXED-PARTIAL) — 2026-07-03
 - Increment: 0 files banked / **1 fn matched** (func_80076778); md5-candidate 220 → 220 (file mixed-partial, 2 stubs); asm subsegs 77 → 76 (the flip). DoD verified (make OK, SHA-1 `e2c4e7a9…`, `grep -c INCLUDE_ASM` = 2). One-tu MIXED-PARTIAL: matched fn banked as C, hard fns stay `INCLUDE_ASM`, ROM green.
 - Quality: 1 stuck-far (func_8007680C) / 1 permuter (func_80076640) / 2 carried / 0 re-opened.
