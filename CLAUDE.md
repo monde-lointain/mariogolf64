@@ -534,6 +534,7 @@ When `pick_target.py` flags a hazard (or a match shows its symptom), read the ma
 | `undefined reference` after mid-sprint sync-names | #make-sync-names-eviction-recovery |
 | `caller-evict:<func_vram>@<file>` | #caller-evict |
 | loop cannot find label / reloc-name mismatch | #stale-top-level-asm-label-sync |
+| decomp_loop bogus near-match (empty `base_text`, ref names the parent seg) just after a subseg split | #stale-parent-asm-relic-find_segment-mis-resolution-after-a-decompose-split |
 | clean mirror SHA-miss, one field's high word | #mirror-cast-divergence-sign--vs-zero-extend |
 | clean mirror SHA-miss, char load lb/sll-sra vs lbu/andi | #char-signedness |
 | clean mirror SHA-miss, extra `jal __assert` / bare `assert()` / `bare-assert:<n>` | #assert-strip |

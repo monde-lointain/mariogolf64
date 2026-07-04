@@ -40,6 +40,7 @@ The hazard families below group the sections that follow. Each links to its exis
 - [wrong-ghidra-name-override (correct a mislabeled symbol without sync-names)](#wrong-ghidra-name-override-correct-a-mislabeled-symbol-without-sync-names)
 - [make sync-names eviction recovery](#make-sync-names-eviction-recovery)
 - [stale top-level asm label sync](#stale-top-level-asm-label-sync)
+- [stale parent asm relic (find_segment mis-resolution after a decompose-split)](#stale-parent-asm-relic-find_segment-mis-resolution-after-a-decompose-split)
 - [caller-evict](#caller-evict)
 
 **Vendored headers & preprocessor defines**
@@ -2712,6 +2713,37 @@ a renamed global.
 
 ---
 
+## stale parent asm relic (find_segment mis-resolution after a decompose-split)
+
+**Rule:** A subseg SPLIT (decomposing `[0x<A>, asm]` into `[0x<A>, c, …]` + `[0x<B>, c, …]`) leaves the
+**pre-split** top-level `asm/<A>.s` relic on disk -- the multi-function file covering the WHOLE original
+range. `make extract` writes the new per-fn ground truth to `asm/nonmatchings/<tree>/<fn>/` but does NOT
+delete or regenerate that relic (verified: its mtime is unchanged across extract). Both the parent relic
+AND the correct child `asm/<B>.s` then declare `glabel <child_fn>`, and `dc.find_segment` globs `asm/*.s`
+**sorted**, returning the FIRST match -- so a child at a numerically larger offset (`4C620.s`) loses to the
+stale parent (`4C3D0.s`), and `decomp_loop.py` builds a MULTI-function reference object. asm-differ then
+mis-aligns the 1-fn candidate against the N-fn reference and reports a bogus near-match (`base_text=""`,
+`match_count == total_rows`, a large score) -- NOT the `#isolated-compile-caveat` artifact (there the
+rows carry real text; here the reference rows are empty because it is the wrong, longer object).
+
+**Trigger:** `decomp_loop` on a just-split classical fn reports a high score whose top mismatches are all
+current-only (`>`) rows with EMPTY `base_text`, and the JSON `reference_path` names the PARENT segment
+(`build/asm/<A>.o`), not the fn's own child segment. Objdump the reference
+(`mips-linux-gnu-objdump -d build/asm/<A>.o`) and it holds several functions, not one.
+
+**By-hand fix (until the tooling fix lands):** move the stale parent relic out of `asm/` so find_segment
+resolves to the correct 1-fn child: `mv asm/<A>.s <scratch>/ && rm -f build/asm/<A>.o`, then re-run
+`decomp_loop`. The relic is a gitignored regen artifact, not used by `INCLUDE_ASM` (that reads
+`asm/nonmatchings/…`) or the full build, so removing it is safe and durable (extract does not recreate
+it). This recurs on EVERY classical-endgame decompose-split; the tooling fix (prefer the
+`asm/nonmatchings/<tree>/<fn>/<fn>.s` target as the reference, or skip a seg file whose glabel set spans a
+now-`c` sibling) is a golden-gated `tools/` branch item (see BACKLOG).
+
+**Provenance:** S168 `func_80071220` (split from `[0x4C3D0]` at S167): the stale `asm/4C3D0.s` (4 original
+funcs) shadowed the correct `asm/4C620.s` (1 fn), giving a false 94/100 with an all-empty `base_text`.
+
+---
+
 ## caller-evict
 
 **Rule:** Adding a curated name for an un-named `func_<vram>` to `symbol_addrs.txt` (a common gate
@@ -3581,6 +3613,16 @@ pointer form left a `move v1,s2`-in-the-delay-slot miss (load/unload) and a `-1`
 (F18). Also fold multiple `if(cond) continue;` guards into **one** `if(a||b||c) continue;` when the
 ROM uses a single combined test (F18's three range guards).
 
+**Sub-lever — index a pointer variable, not the array symbol (S168).** Within the indexed form, the
+walk must index a pointer *variable* (`Type *t = ARR; ... t[i]`), not the global array symbol
+directly (`ARR[i]`). The symbol form keeps `&ARR` as a `%hi/%lo` constant and recomputes
+`base + i*stride` every iteration (`lui;addu;lb 0(tmp)`, an extra insn/iter); the pointer-variable
+form loads the base once and folds it into the strength-reduced giv (`lb 0(p)`, the ROM's form). Both
+are "indexed", but only the pointer-variable spelling matches when the ROM folds the base into the
+IV. S168 `func_80071220`'s 30-entry `tag==-1` walk matched byte-exact only after
+`D_801B7118[i]` → `Entry *table = D_801B7118; table[i]` (the loop went from a base-reload each
+iteration to the ROM's single `move v1,a0` dual-IV).
+
 **Why (KMC gcc 2.7.2, grounded — verified against the source):** `scan_loop` runs
 `move_movables` (invariant hoist, `loop.c:966`) before `strength_reduce` (`loop.c:976`). The hoisted
 loop constants (the store value, the `-1` terminator) are inserted immediately before `loop_start`
@@ -3990,6 +4032,20 @@ block that falls through into the shared return). **Gotoless is provably impossi
 is not "simplified" back to a switch/if-else. The permuter plateaus on it (extent 700; it cannot invent
 the polarity flip); crack it via the fan-out compiler-source dive + isolated-scoring harness (see
 [#compiler-source-fan-out-escalation-above-the-permuter](#compiler-source-fan-out-escalation-above-the-permuter)).
+
+**Dispatch lever ladder — try `switch` first for a dense selector with a shared post-store (S168).**
+The per-case documented-goto above is the fix for the *constant-return-through-a-shared-var* shape
+(S163). A different but adjacent shape -- a **dense** `1..N` selector where each case sets a
+pointer/field plus a flag, then a **shared** post-dispatch `if(flag) *dst=…` -- matches as a plain
+`switch(sel){ case K: …; break; … }`, and the ladder is: `if/else-if` branches **AWAY**
+(`bne sel,K,skip`, wrong polarity); the per-case **goto** form branches toward but GCC **tail-merges**
+the identical `flag=1; goto store` tails across cases (collapsing the ROM's separate per-case
+`li flag,1`); only `switch` branches toward **and** keeps each case's tail distinct (a per-case `break`
+into the shared store). So for a dense-selector-with-shared-store, try `switch` **first**; reserve the
+per-case-goto fix for the S163 constant-return shape where the switch is a jump table
+(`#switch-jtbl-dispatch`) or the lone case branchless-if-converts. S168 `func_80071220`'s 4-way
+`sel` dispatch (1/2/3 + default, each picking a `rec` field ptr + a set flag, then a shared
+`if(set) *dst=1`) matched byte-exact as a `switch` after the goto form tail-merged the shared `set=1`.
 
 **Provenance:** S163 `get_club_meter_extent` (`src/main/func_80043AF0.c`): flag-gated (putter) dispatch
 on `category` returning golf-yardage constants (or `power_a` / `power_a*1.1f`), result through `$v1`,

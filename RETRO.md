@@ -25,6 +25,17 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 168 — src/main/func_80071220.c (scenario-unlock dispatcher; the `[0x4C620]` tail split from `[0x4C3D0]` at S167) — 2026-07-03
+- Increment: 1 file banked / 1 fn matched byte-exact (md5-candidate 219 → 220; asm subsegs 78 → 77; matched +1). Single-fn increment, banked atomically. DoD verified (make OK, SHA-1 `e2c4e7a9…`, 0 `INCLUDE_ASM`).
+- Quality: 0 stuck-far / 0 permuter / 0 carried / 0 re-opened.
+- Seed: committed 5pt; banked 5pt; regime classical (v2: realized 6, residual +1).
+- What helped: a **4-lever documented-hazard stack** took a single main-segment fn from score 8540 → 0 with **no permuter and no carry** — the cleanest classical-endgame match to date. In order: (1) declare the loop vars AFTER the last pre-loop call so they stay in temp regs (3 saved, not 5); (2) `#indexed-vs-pointer` indexed form `table[i]` for the `move v1,a0` dual-IV; (3) index a pointer **variable** (`Entry *table = D_801B7118`) not the array symbol (folds the base into the strength-reduced IV — a new sub-lever); (4) a `switch` for the 4-way dispatch (branch-toward, per-case distinct tails — if/else branched away, the goto form tail-merged the shared `set=1`). The S167 struct model (`func_8005AF50()` base + a struct-field `Entry`/`ScenarioRec` view) carried straight over, so the addressing + mixed `lb`/`lbu` signedness matched first-try.
+- Friction: one **tooling gotcha** — `decomp_loop` first diffed against a stale 4-func reference. After the S167/S168 split of `[0x4C3D0]`, the pre-split relic `asm/4C3D0.s` (all 4 original funcs) lingered and `find_segment` (sorted glob, first match) shadowed the correct 1-fn `asm/4C620.s`, giving a bogus 94/100 "match" with empty `base_text`. Fixed by hand (`mv asm/4C3D0.s` aside; gitignored relic, not regenerated). This recurs on every classical-endgame decompose-split.
+- Applied (3 of 3; PO away past the 60s prompt → best judgment, all doc/review-gate edits; the `find_segment` code fix is deferred to a golden-gated `tools/` branch): #1 new `#stale-parent-asm-relic` hazard + ToC + `CLAUDE.md` index row; #2 `#goto-dispatch` switch-first dispatch-ladder note; #3 `#indexed-vs-pointer` pointer-var-vs-array-symbol sub-lever.
+- Carry-over: none new. The S167 `func_80070FD0` (cse branch-fold wall) and S166 `lz_decompress_extended` (regalloc floor) spikes remain carried, out of scope this sprint.
+
+---
+
 ## Sprint 167 — src/main/func_80070FD0.c (3-fn char/scenario stat-updater head; PARTIAL) — 2026-07-03
 - Increment: `func_800710C4` + `func_8007117C` MATCHED + banked byte-exact C (0e8ded3); `func_80070FD0` CARRIED. File MIXED-PARTIAL (2/3 fns C, 1 stub) → NOT md5-candidate. matched +2; md5-candidate 219 → 219 (unchanged — file didn't flip); asm subsegs 78 → 78.
 - Quality: 0 stuck-far / 1 permuter / 1 carried / 0 re-opened.

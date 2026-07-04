@@ -41,6 +41,20 @@ tell) is carved to its LIBRARY tree (`libnusys/<file>`), not `main/<stem>` — y
 placement unchanged (see `CLAUDE.md` path convention). A per-FILE -O0 override is the one mk edit a
 boot/SDK-glue TU may need.
 
+**S168 BANKED — `src/main/func_80071220.c` (scenario-unlock dispatcher; the `[0x4C620]` 1-fn tail split
+from `[0x4C3D0]` at S167, the "next natural slice").** matched **+1**; md5-candidate **219 → 220**; asm
+subsegs **78 → 77**. A single classical game fn (scenario completion/unlock) matched **byte-exact via a
+4-lever documented-hazard stack, no permuter, no carry** (score 8540 → 0): (1) loop vars declared after
+the last pre-loop call keep 3 saved regs not 5; (2) `#indexed-vs-pointer` indexed form `table[i]` for the
+`move v1,a0` dual-IV; (3) index a pointer **variable** (`Entry *table = D_801B7118`), not the array symbol,
+to fold the base into the giv (new sub-lever); (4) a `switch(sel)` for the 4-way dispatch (branch-toward,
+per-case distinct tails). The S167 struct model (`func_8005AF50()` base + `Entry{s8 tag@0; u8 flags@5}` /
+`ScenarioRec` 0x74 @ base+0xE98) carried straight over. Seed 5 / **banked 5pt** / realized 6 (residual +1:
+the one novel gotcha below). Quality **0/0/0/0**. Retro applied 3 of 3 (all doc/review-gate; PO away → best
+judgment): new `#stale-parent-asm-relic` hazard, `#goto-dispatch` switch-ladder note, `#indexed-vs-pointer`
+pointer-var sub-lever. No carry-over. **Cross-repo follow-up:** none (auto `func_` name; Ghidra has no
+curated name at 0x80071220 — a later naming pass can add one once the surrounding callees are understood).
+
 **S167 PARTIAL — `src/main/func_80070FD0.c` (3-fn char/scenario stat-updater head, decomposed from
 `[0x4C3D0]`; 2 of 3 banked, func_80070FD0 CARRIED).** matched **+2** (`func_800710C4`, `func_8007117C`
 byte-exact C); md5-candidate 219→**219** (file MIXED-PARTIAL — 1 stub — so no flip); asm subsegs 78→78.
@@ -2830,6 +2844,23 @@ by `/sprint-plan`:
   `permuter_settings.toml` (load-bearing preprocess surface) and a new helper; golden-gate per the
   tooling-refactor policy. (Until then, S157's manual recipe in `docs/hazards.md#permuter-setup-for-
   kmc-toolchain-mirrors` applies by hand.)
+
+- **Tooling follow-up (S168, PO away → best-judgment doc-only applied at review; the CODE fix deferred
+  to a golden-gated tooling branch, NOT a review-gate edit).** `decomp_loop.py` / `dc.find_segment`
+  mis-resolve a just-split classical fn to its STALE pre-split parent `asm/<A>.s` relic. After a
+  decompose-split (`[0x<A>,asm]` → `[0x<A>,c] + [0x<B>,c]`), the pre-split top-level `asm/<A>.s` (the
+  whole N-fn range) lingers on disk (make extract does not delete or regenerate it), so both it and the
+  correct child `asm/<B>.s` declare `glabel <child_fn>`; `find_segment` globs `asm/*.s` SORTED and
+  returns the FIRST, picking the parent (`4C3D0.s` < `4C620.s`) → `decomp_loop` builds an N-function
+  reference and asm-differ reports a bogus near-match (empty `base_text`, `match_count==total_rows`,
+  large score). **Fix (golden-gated):** for a c-flipped fn prefer the `asm/nonmatchings/<tree>/<fn>/<fn>.s`
+  target as the reference source (always the exact 1-fn ground truth), OR make `find_segment` skip a seg
+  file whose `glabel` set spans a now-`c` sibling (cross-check the yaml), OR have `make extract` delete
+  stale top-level `asm/<off>.s` for a now-`c` subseg. **Why a branch:** touches `find_segment` /
+  `ensure_reference_object` (load-bearing reference resolution feeding every isolated diff); golden-gate
+  per the tooling-refactor policy. This RECURS on every classical-endgame decompose-split. Until then the
+  by-hand workaround (`mv asm/<A>.s` aside) is documented at
+  `docs/hazards.md#stale-parent-asm-relic-find_segment-mis-resolution-after-a-decompose-split`.
 
 - **pts data point (S157).** A 9-fn 1664B none-upstream INTEGER pack priced `pts=13` and realized far
   above (16, +3 residual): register-alloc rotation + delay-slot scheduling + a loop-invariant hoist
