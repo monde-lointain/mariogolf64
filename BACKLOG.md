@@ -41,6 +41,25 @@ tell) is carved to its LIBRARY tree (`libnusys/<file>`), not `main/<stem>` — y
 placement unchanged (see `CLAUDE.md` path convention). A per-FILE -O0 override is the one mk edit a
 boot/SDK-glue TU may need.
 
+**S174 CARRIED (retry of the S173 `func_8004DC44` carry; PO-directed cross-project + coalescing dive) — 0
+banks; the S172/S173 "irreducible" verdict was CORRECTED.** matched **+0**; md5-candidate **221 → 221**
+(file still 5/6 mixed-partial, 1 stub). Another pure-investigation sprint, but the deliverable is a
+verdict correction: **the `v0/v1` divide-swap is FLIPPABLE-IN-ISOLATION** (`return D_800DC6D0/40`
+reproduces the ROM's `/40` bytes exactly), not "irreducible." An 8-project cross-decomp sweep (all KMC
+gcc 2.7.2: marioparty1/2/3, snowboardkids2, drmario64, hm64, puzzleleague64) + ~12 compiler-source
+subagents + RTL dumps pinned the mechanism: dividend→`$v0` needs a physical **reg-2 SET** (return/call
+copy) that lands the chain in local-alloc's suggestion pass; `func_8004DC44`, a **void/callless/
+returnless leaf whose quotient feeds arithmetic then a loop-carried store**, emits no reg-2 mention →
+deterministically magic→`$v0`. Every faithful lever failed *in that context* (24 control-flow × src
+combos, multi-term dividends, all associativity, sched1 lifetime, memcpy, m2c); `register asm("$2")`
+forces it (28 diffs) but is unfaithful + incomplete. seed 3 / banked 0pt / realized 6; regime classical.
+Quality **1/1/1/1**. Retro applied **3 of 3** (all DOC): #1 correct `#dead-frame-reload-artifact-regalloc-wall`
+framing; #2 new `#signed-divide-const-v0v1-quotient-destination` playbook; #3 cross-project matched-corpus
+mining in `#compiler-source-fan-out-escalation-above-the-permuter`. Carry kept RETRYABLE (needs a new
+mechanism, not another same-fn dive — ~430k iters exhausted). **Next natural slice:** a FRESH main-segment
+pack (e.g. `func_8004DE60` 9fn, `func_8004D190` 7fn) for reliable banks — stop re-attempting func_8004DC44
+without a new lever.
+
 **S173 CARRIED (retry of the S172 `func_8004DC44` carry; PO-directed compiler-source dive) — 0 banks.**
 matched **+0**; md5-candidate **221 → 221** (file still 5/6 mixed-partial, 1 stub); asm/c-subsegs
 unchanged. A pure-investigation sprint: a 4-subagent GCC-2.7.2/binutils-2.6 dive (before the permuter)
@@ -2801,7 +2820,7 @@ by `/sprint-plan`:
   `NU_CONT_THREAD_ID=6` vs MG64's 5), and that surfaces only at first build unless reconciled here.
   A near-free retry missing any of these is a half-scoped spike — finish the scope before deferring.
 
-- **(S173 MIXED-PARTIAL — carried; 5 of 6 banked)** `src/main/print_string_at_grid.c` (the grid-print
+- **(S174 MIXED-PARTIAL — carried; 5 of 6 banked; S173 "irreducible" verdict CORRECTED)** `src/main/print_string_at_grid.c` (the grid-print
   debug cluster `[0x28DC0]`). BANKED byte-exact C (S171): `check_and_print_grid`, `func_8004DA4C`,
   `convert_and_print_hex`, `func_8004DAF4`; BANKED (S172): `print_string_at_grid` (the S171-rated harder
   carry — broke via the nested-if branch-likely + lazy-base levers, now `#cross-jump-tail-merge`). ONE
@@ -2819,19 +2838,29 @@ by `/sprint-plan`:
        at `get_frame_size()>0` post-reload). **REACHABLE** (S172's "no clean source trigger" framing is
        RETIRED): a structured outer loop produces it (via magic-hoist pressure), and the permuter hit a
        frame-bearing 75-insn candidate (score 14450, frame at exact ROM position). Frame ⊥ control flow.
-    2. **`v0<->v1` swap in the signed-divide-by-40** (THE true wall, NOT source-reachable): `expmed.c`
-       force_reg's the dividend first + creates the `0x66666667` magic as a LATER pseudo; `local-alloc.c`
-       life-dominated priority (`log2(refs)*refs*size/life`) gives the tiny-life magic 6666 vs the
-       dividend's 1666 → magic grabs `$v0` (ROM: dividend→$v0, magic→$v1). Cascades ~32/75 insns. Never
-       flips across ~35 variants (reorder / extra dividend refs / explicit reciprocal-multiply /
-       interleave / tie-break) or 275k permuter iters. ROM does it with an outwardly identical insn
-       sequence → its divide source-shape is unrecoverable from asm.
+    2. **`v0<->v1` swap in the signed-divide-by-40** (THE true wall — **S174 CORRECTION: flippable-in-
+       isolation, NOT "unrecoverable" as S173 claimed**). `local-alloc.c` life-dominated priority
+       (`log2(refs)*refs*size/life`) gives the tiny-life magic 6666 vs the dividend's 1666 → magic grabs
+       `$v0` (ROM: dividend→$v0, magic→$v1). **BUT `return D_800DC6D0/40` reproduces the ROM's `/40` bytes
+       EXACTLY** — the divide flips when the quotient reaches `$v0` via a **reg-2 SET** (return/call copy)
+       that lands the chain in local-alloc's **suggestion pass** before the general pass (grounded: SA-A
+       `local-alloc.c` combine_regs/suggestion; SA-B `sched.c` life formula; 8-project cross-decomp
+       sweep). The REAL blocker: `func_8004DC44` is a **void/callless/returnless leaf whose quotient
+       feeds arithmetic then a loop-carried store** → it emits **no reg-2 mention** → deterministically
+       magic→`$v0`. Every faithful lever fails *in that context* (24 control-flow × src combos, multi-term
+       dividends, all associativity, the sched1 lifetime lever, memcpy [`lwl/lwr`], m2c [plain global
+       divide]); `register asm("$2")` forces it (28 diffs) but is unfaithful AND incomplete (quotient→v1
+       not `a3`, frame absent). See `#signed-divide-const-v0v1-quotient-destination`.
     - **Seed superseded:** scaffold `nonmatchings/func_8004DC44/` now holds the IMPROVED **vA seed**
       (base-hoist via pre-declared base pointer vars + structured inner `for` + goto outer; the old S172
       seed LACKED the base-hoist, which is why its permuter run plateaued). See docs/wip for the exact
-      source + all levers. **Retry:** permuter from vA (must flip BOTH frame + v0/v1 simultaneously — low
-      odds), or reverse-engineer the ROM divide source-shape (only path to v0/v1, low EV), or accept as a
-      permanent `#dead-frame-reload-artifact-regalloc-wall` carry.
+      source + all levers. **Retry (kept retryable per S174 PO):** the divide is flippable-in-isolation
+      but the void-loop-fed context is deterministically magic→`$v0` — no faithful source lever survives
+      the loop (S174 exhausted control-flow, association, schedule, cross-project corpus). A future retry
+      needs a genuinely NEW mechanism (e.g. a sched1/pressure state that reproduces the ROM's coordinated
+      dividend-`$v0` + quotient-`a3` + dead-frame together), or accept as a permanent
+      `#signed-divide-const-v0v1-quotient-destination` / `#dead-frame-reload-artifact-regalloc-wall` carry.
+      Do NOT re-run the same permuter/single-fn dive — S172+S173+S174 exhausted it (~430k iters).
   - **Retry checklist (near-free):** (1) subseg flip DONE; (2) placed refs: `flag`=0x800BFEE4,
     `D_800BFEE8`/`D_800DAF60`/`D_800DB410`/`D_800DC6D0` all placed externs, NO carve; (3) NO
     recover-externs; (4) classical (no upstream); (5) permuter scaffold live at the vA seed;

@@ -89,6 +89,7 @@ The hazard families below group the sections that follow. Each links to its exis
 - [mem-in-struct scheduling lever (model a fixed global as a struct/array member)](#mem-in-struct-scheduling-lever-model-a-fixed-global-as-a-structarray-member)
 - [call-result a0-vs-v0 single-allocno (force a scratch reg via both-arm reuse)](#call-result-a0-vs-v0-single-allocno-force-a-scratch-reg-via-both-arm-reuse)
 - [compiler-source fan-out (escalation above the permuter)](#compiler-source-fan-out-escalation-above-the-permuter)
+- [signed-divide-const v0/v1 quotient-destination](#signed-divide-const-v0v1-quotient-destination)
 - [cse make_regs_eqv branch-fold (reused-var canonical fold on a `?:`-with-flag store)](#cse-make-regs-eqv-branch-fold-reused-var-canonical-fold-on-a--with-flag-store)
 - [abs-coalescing reg-swap (fabsf in-place vs fresh reg on a const compare)](#abs-coalescing-reg-swap)
 
@@ -4293,12 +4294,29 @@ mechanism**: `config/mips/mips.c` (frame-size / `MIPS_STACK_ALIGN` / prologue em
 `expmed.c` + `optabs.c` (divide/multiply-by-constant operand + pseudo creation order). Give each the
 isolated `objdump -dr` diff vs `target.o` and have them **verify with gcc RTL dumps** (`-dr` rtl, `-dl`
 lreg, `-dg` greg, `-dS` sched) on a scratch compile, not just source-read. The payoff is often a
-**dump-verified negative**: S173 `func_8004DC44` proved the residual `v0`/`v1` swap is a fixed
-`expmed.c` operand order + life-length-dominated `local-alloc.c` priority (magic scores 6666 vs the
-dividend's 1666 → grabs `$v0`), unflippable across ~35 variants + 275k permuter iters — which converts
-an open permuter grind into a **documented carry with an ops-100%-match seed** rather than a bank. Proving
-un-source-reachability IS the deliverable when the answer is "carry"; save the near-match seed
-(`docs/wip/`) so the retry starts one artifact away.
+**dump-verified negative**: S173 `func_8004DC44` characterized the residual `v0`/`v1` swap as a
+life-length-dominated `local-alloc.c` priority (magic scores 6666 vs the dividend's 1666 → grabs `$v0`).
+**S174 CAVEAT — a "dump-verified negative" can be over-scoped.** S173 called the swap "unflippable /
+unrecoverable"; S174 showed that was wrong — `return g/40` reproduces the ROM's `/40` bytes exactly (the
+swap is flippable-in-isolation via a reg-2 SET → the suggestion pass; see
+`#signed-divide-const-v0v1-quotient-destination`). The correct negative is narrower: dividend→`$v0` is
+unreachable *in a void/callless/returnless loop-fed leaf*, not universally. Lesson: state a regalloc
+negative with its **exact enabling context**, and before declaring "unflippable" run the
+cross-project sweep below — a single-function dive can miss a lever another codebase exhibits.
+
+**Cross-project matched-corpus mining (S174).** For a reg-alloc / scheduling wall, the highest-value
+escalation is to fan out **one subagent per same-toolchain N64 decomp** that shares the compiler
+(KMC gcc 2.7.2/2.7: `../marioparty`, `../marioparty2`, `../marioparty3`, `../snowboardkids2-decomp`,
+`../drmario64` [EGCS+KMC], `../puzzleleague64` [IDO+KMC], `../hm64-decomp`; `../papermario` is gcc 2.8.1,
+weaker signal). Give each the exact asm signature and have it (1) confirm the per-TU compiler, (2) grep
+the disassembly/`build/*.o` for the idiom, (3) classify the register outcome, (4) extract the C source +
+**provenance** of any MATCHED example that shows the wanted polarity. A matched analog IS the lever (its
+C reveals the source shape); the *absence* of one across all projects is itself strong evidence the ROM's
+form is a non-source pressure artifact → carry with confidence. Pair with RTL pass dumps (`-dl`/`-dg`/
+`-ds`) on your own scratch compile as ground truth. S174 ran this over 8 projects to correct the S173
+over-scoped negative and pin the quotient-destination lever. Proving un-source-reachability IS the
+deliverable when the answer is "carry"; save the near-match seed (`docs/wip/`) so the retry starts one
+artifact away.
 
 ---
 
@@ -4398,11 +4416,37 @@ Two refinements to the S172 framing, both important:
    reorder, extra dividend refs (life grows in lockstep), explicit reciprocal-multiply (`(s64)x*magic>>32`,
    real `mult`, moves the dividend reg but magic stays `$v0`), interleave, or tie-break temps.
 
-**Verdict — permuter or carry; the frame is reachable but the divide-swap is not.** Once structure +
+**S174 CORRECTION — the divide-swap is FLIPPABLE-IN-ISOLATION, not "irreducible"; retract "unrecoverable
+from asm."** An 8-project cross-decomp sweep (all KMC gcc 2.7.2: marioparty1/2/3, snowboardkids2,
+drmario64, hm64, puzzleleague64) + ~12 compiler-source subagents + RTL pass dumps (`-dl`/`-dg`/`-ds`)
+pinned the real mechanism, and it is a **quotient-destination / register-coalescing** effect, NOT an
+unrepeatable artifact. See the dedicated playbook `#signed-divide-const-v0v1-quotient-destination`. In
+one line: **dividend→`$v0` requires a physical reg-2 SET (a `(set $v0 …)`/`(set … $v0)` copy) adjacent
+to the divide chain**, which lands the chain in local-alloc's **suggestion pass** (`local-alloc.c`
+1466-1477 + `combine_regs` 1798-1838) *before* the life-priority general pass. `return g/40` supplies
+it (the return copy coalesces back through the in-place `sra`/`subu` chain to the dividend) and
+reproduces the ROM's `/40` bytes **exactly**. The reason `func_8004DC44` still can't be matched: it is a
+**void, callless, returnless leaf whose quotient feeds arithmetic then a loop-carried store** — it emits
+**no reg-2 mention anywhere**, so the chain falls to the general pass where the 2-insn magic (shortest
+life) deterministically wins `$v0`. Every faithful lever fails *in that context*: 24 control-flow × src
+combos, multi-term dividends, all associativity, and the sched1 lifetime lever (`life_magic >
+⅔·life_dividend`; the loop-setup pressure sinks the magic to life ~3 in every form) — all magic→`$v0`.
+A `register asm("$2")` binding forces the dividend (28 diffs, down from 38) but is unfaithful **and**
+incomplete (leaves the quotient intermediate in `v1` where the ROM uses `a3`, and the frame absent).
+So the corrected framing is **"flippable-in-isolation; a void-loop-fed leaf is deterministically
+magic→`$v0` by local-alloc"** — the ROM's coordinated dividend-`$v0` + quotient-`a3` + dead-frame is a
+sched1/pressure state this toolchain does not produce from any source-equivalent void-leaf input (SA-A
+`local-alloc` + SA-B `sched.c`/`reload1.c`, both source-grounded). The dead frame is a **co-symptom** of
+the same 3-live-value pressure peak, NOT a cause: reload never reassigns an already-allocated pseudo's
+hard reg (only spills to memory), so "add a frame to force `$v0`" is false.
+
+**Verdict — permuter or carry; the frame is reachable but the divide-swap is not (in a void loop-fed leaf).** Once structure +
 scheduling + hoisting are settled and the residual is the dead frame + its driven permutation, route to
 the permuter (it can reach the frame; it must ALSO flip the divide-swap in the same candidate — low odds)
 or **carry**. Do NOT grind source levers for the frame (address-taking a local forces a **live** frame with
-real `sp` loads the ROM lacks) and do NOT grind the divide-swap (dump-proven not source-reachable). Save the
+real `sp` loads the ROM lacks) and do NOT grind the divide-swap in a **void loop-fed leaf** (per the S174
+correction above it is flippable-in-isolation but deterministically magic→`$v0` here — see
+`#signed-divide-const-v0v1-quotient-destination`). Save the
 structurally-settled near-match so the retry starts from ops-100%-match: for `func_8004DC44` the seed is
 **pre-declared base-pointer vars + structured inner `for` + goto outer** (`#top-tested-loop-goto-local-hoist`;
 the base-hoist the S172 seed lacked). Sibling to `#pervasive-regalloc-classical-main`,
@@ -4412,4 +4456,64 @@ carry (`#compiler-source-fan-out-escalation-above-the-permuter`).
 
 **Provenance:** S172 `func_8004DC44` (the S171 `print_string_at_grid.c` regalloc-wall carry; its sibling
 `print_string_at_grid` banked S172 via `#cross-jump-tail-merge` nested-if). **S173 re-carry** after the
-deep compiler-source dive above; improved seed + full analysis in `docs/wip/func_8004DC44.wip.md`.
+deep compiler-source dive above; improved seed + full analysis in `docs/wip/func_8004DC44.wip.md`. **S174
+re-carry** after the cross-project + coalescing correction above (retired the "irreducible/unrecoverable"
+framing) — see `#signed-divide-const-v0v1-quotient-destination`.
+
+## signed-divide-const v0/v1 quotient-destination
+
+**Symptom:** a signed divide-by-constant (reciprocal-magic highpart-multiply: `mult div,magic; mfhi;
+sra hi,k; sra div,div,31; subu`) is byte-close but the **dividend and the magic constant occupy the
+wrong two registers** — your build puts the short-lived magic in the numerically-LOWER reg (`$v0`) and
+the dividend in the higher (`$v1`), while the ROM has the reverse (dividend→`$v0`, magic→`$v1`), or vice
+versa. Common magics: `0x66666667` (/5,/10,/20,/40,/80), `0x55555556` (/3), `0x2AAAAAAB` (/6),
+`0x38E38E39` (/9), `0x51EB851F` (/100), `0x1B4E81B5` (/4800), `0x92492493` (/7 w/ add-back). The
+sign-extended reg (`sra r,r,0x1f`) IS the dividend; the `lui 0x<magic>` reg is the magic.
+
+**Root cause (RTL-dump + `local-alloc.c`/`sched.c` grounded, S174).** Neither operand carries a hard-reg
+suggestion by default (a `li` of the magic and a `lw`/compute of the dividend, tied to no hard reg), so
+both fall to local-alloc's **general (life-priority) pass**: `qty_compare` priority `=
+floor_log2(refs)*refs*size / (death-birth)`, higher wins, and `find_free_reg` scans hard regs ascending
+(MIPS has **no `REG_ALLOC_ORDER`**), so the earlier-ordered qty takes the lower reg. The magic's
+2-insn life makes `pri_magic` (~6666) ≫ `pri_dividend` (~1666), so **magic→`$v0` is the DEFAULT** for a
+plain dividend. **The dividend wins `$v0` only when it out-lives-or-out-suggests the magic**, via one of
+these levers (empirically confirmed across 8 KMC gcc 2.7.2 decomps):
+
+1. **Quotient reaches `$v0` directly (a reg-2 SET → the suggestion pass).** `return x/40;`, or `y=x/40;
+   return y;` — the return copy `(set $v0 quotient)` records a `$v0` **copy-suggestion** (`combine_regs`,
+   `local-alloc.c` 1824-1838) on the divide chain's qty (dividend/sign/quotient share one qty via the
+   in-place `sra`/`subu` union, 1840-1885), and the **suggestion pass** (1466-1477) pins it to `$v0`
+   *before* the general pass runs. **ANY arithmetic on the quotient before it reaches `$v0` breaks this**
+   (`-(x/40)`, `x/40+K`, a store, a call-arg all give magic→`$v0`). This is the cleanest lever, and the
+   only one available to a fn that returns the quotient.
+2. **Multi-term dividend `(a±b)/K`.** The extra operand load steals `$v0` from the magic (can flip even
+   under a store). Changes the asm (adds the operand load), so it only helps if the ROM's dividend is
+   genuinely multi-term.
+3. **Magic CSE-shared across ≥2 same-family divides** (`/5,/10,/20,/40,/80` all emit `lui 0x6666;ori
+   0x6667`, e.g. `x/10%10` = two `/10`s): the shared magic's live range outlasts the single-use dividend
+   → dividend wins. (marioparty3 `UpdatePlayerBoardStatus` A/B is the decisive matched proof.)
+4. **Magic loop-hoisted to a callee-saved reg** (divide inside a loop, loop-invariant magic → `$sN`):
+   the per-iteration dividend then wins any low temp.
+5. **Indexed struct/array-member or call-return dividend** (`base[i].f/K`, `f()/K`): the dividend is
+   freshly materialized into `$v0` at the divide (pressure-dependent, not deterministic).
+
+**The BLOCKER (why a void loop-fed leaf can't flip):** a **void, callless, returnless** leaf whose
+quotient feeds arithmetic then a **loop-carried store** emits **no reg-2 mention anywhere** → no
+suggestion (lever 1 unavailable), the loop-carried `src` is a multi-block pseudo (global.c, not unioned
+with the local divide chain), and the loop-setup register pressure sinks the magic to life ~3 in **every**
+control-flow structure / associativity / schedule (so `life_magic > ⅔·life_dividend` is unreachable).
+`func_8004DC44` is exactly this. The `register asm("$2")` binding creates a synthetic reg-2 SET and does
+force the dividend to `$v0`, but it is non-idiomatic (shows as `asm` in the decompile) **and** does not
+reproduce the ROM's coordinated allocation (quotient→`a3`, dead frame) — not a faithful match.
+
+**Escalation.** For a same-toolchain reg-alloc wall, mine the OTHER N64 decomps for a **matched** analog
+of the exact pattern (see `#compiler-source-fan-out-escalation-above-the-permuter` for the cross-project
++ RTL-dump methodology); if none exists (as here — no matched plain-global single-magic dividend wins
+`$v0` in a real fn across 8 projects), the ROM's assignment is a scheduling/pressure state the toolchain
+doesn't reproduce → carry. Sibling to `#dead-frame-reload-artifact-regalloc-wall` (the frame is a
+co-symptom of the same pressure peak) and `#register-reuse-nudge-classical-regalloc`.
+
+**Provenance:** S174 `func_8004DC44` cross-project sweep (marioparty1/2/3, snowboardkids2, drmario64,
+hm64, puzzleleague64; matched dividend-`$v0` examples: puzzleleague64 `gTheGame.menu[i].unk_4/100`
+indexed, hm64 `(a+b+c)/3` multi-term, marioparty3 `x/10%10` CSE). Corrects the S172/S173
+`#dead-frame-reload-artifact-regalloc-wall` "irreducible" framing.
