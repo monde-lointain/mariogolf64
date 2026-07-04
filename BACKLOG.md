@@ -2745,6 +2745,37 @@ by `/sprint-plan`:
   `NU_CONT_THREAD_ID=6` vs MG64's 5), and that surfaces only at first build unless reconciled here.
   A near-free retry missing any of these is a half-scoped spike — finish the scope before deferring.
 
+- **(S171 MIXED-PARTIAL — carried; 4 of 6 banked)** `src/main/print_string_at_grid.c` (the grid-print
+  debug cluster `[0x28DC0]`). BANKED byte-exact C: `check_and_print_grid`, `func_8004DA4C`,
+  `convert_and_print_hex`, `func_8004DAF4`. Two `INCLUDE_ASM` stubs remain — both **regalloc-
+  permutation near-matches** (structure + logic fully RE'd, permuter scaffolds live). File mixed-partial
+  (2 stubs) → NOT md5-candidate. **No flip/data/symbol enablers left** (subseg already `[0x28DC0, c,
+  main/print_string_at_grid]`; all refs are placed `D_`/`flag` externs, NO rodata carve; names curated).
+  - **print_string_at_grid (0x8004D9C0, 100B — PERMUTER SPIKE, plateaued).** Writes `flag|char` into
+    grid `D_800DAF60[row*40+col]`, bounds `[0,0x4B0)`, then `flag=0`. Structure/logic correct (25/25
+    instrs). Wall = (a) a cyclic **register permutation** ({f,base,dst,end,c} = mine {t0,a3,v1,a2,a1} vs
+    target {a3,v1,a1,t0,a2}) + (b) a reorg **branch tail-merge**: target keeps the `bnel`-continue's
+    `dst++` in the annulled branch-delay SEPARATE from the bottom `j`'s `dst++`; my build cross-jumps the
+    two `dst++;goto loop` tails into a double-jump. Landed levers (keep): `&base[row*40+col]` index-group
+    (fixes the row*40+col-then-+base op order), `u8 *base` local (hoists base into a reg), top-tested
+    goto/while(1). Permuter PLATEAUED ~20725 (from base 22190) — NOT converging; needs a register-steering
+    insight or compiler-source fan-out on GCC 2.7.2 reorg.c (why the continue annuls vs cross-jumps) +
+    local-alloc.c (the a3/v1/t0 preference). Scaffold `nonmatchings/print_string_at_grid/` (base.c.raw =
+    best src). **Untried:** compiler-source fan-out; a structural re-expression of the two-`dst++` continue.
+  - **func_8004DC44 (0x8004DC44, 300B — PERMUTER, structurally IDENTICAL).** Renders `D_800BFEE8` rows ×
+    40 chars from ring `D_800DB410` (start `((D_800DC6D0/40-nrows)*40+4800)%4800`, wrapping `%4800`) into
+    grid `D_800DAF60` (start `1200-(nrows+3)*40`), dual-IV (offset + pointer). Structure IDENTICAL (75/75
+    opcodes, all div-magics + the dual-IV copy loop match after adding explicit `dp`/`sp` pointers
+    alongside `src`/`dst` offsets). Wall = pure regalloc (dst/row swapped a3↔t0, `mfhi t4` vs t3) + target
+    reserves a **dead 8-byte frame** (higher pressure, no spill store) mine doesn't. IDEAL permuter
+    candidate. Permuter improving (16870→~15330) but not yet 0. Scaffold `nonmatchings/func_8004DC44/`
+    (base.c.raw = best src, dual-IV). **Retry:** resume the permuter (scaffold live, main-seg flags), or
+    introduce a temp to trigger the dead-frame; the `#top-tested-loop` / dual-IV structure is settled.
+  - **Retry checklist (near-free):** (1) subseg flip DONE; (2) placed refs: `flag`=0x800BFEE4,
+    `D_800B67C0`/`D_800BFEE8`/`D_800DAF60`/`D_800DB410`/`D_800DC6D0` all placed externs, NO carve; (3) NO
+    recover-externs; (4) classical (no upstream); (5) permuter scaffolds live for both fns. Inline any
+    `output-0-*` the permuter produces, clang-format, full-make SHA, done.
+
 - **(S169 MIXED-PARTIAL — carried; 1 of 3 banked)** `src/main/func_80076640.c` — `func_80076778`
   BANKED byte-exact C; `func_80076640` + `func_8007680C` remain `INCLUDE_ASM`. File is mixed-partial
   (ROM green off the matched fn + the shared `ACAD0` rodata referenced extern, NO carve). Retry =
