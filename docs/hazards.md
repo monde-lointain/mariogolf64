@@ -3102,6 +3102,29 @@ instr-count on first compile, isolating the lone short/reordered fn fast):
 - **compare operand order** (`a->f > b->f` vs `b->f < a->f`) controls which operand loads first inside a
   min/compare loop.
 
+**The classical continue-loop tail-merge — nested-if forces the branch-likely (S172).** A CLASSICAL
+(non-mirror) instance of the same "block a merge GCC performs" pattern, and the primary source lever
+for it. A guard-then-continue inside a top-tested loop — `while(1){ …; if (x < lo) { x++; continue; }
+if (x < hi) *x = v; x++; }` — has two identical `x++; j <loop-top>` tails (the `continue` one and the
+bottom one). GCC 2.7.2 **cross-jumps them into one block** (both paths reach a single `x++; j` = a
+double-jump), where the ROM keeps them separate: the `x < lo` branch is a **branch-likely** (`bnezl`/
+`beqzl`) whose **annulled delay slot** holds its own `x++`, and the bottom `x++` sits in the `j`'s
+delay slot. Re-express the guard as a **nested `if/else` with a duplicated increment in each arm** —
+`if (x >= lo) { if (x < hi) *x = v; x++; } else { x++; }` — and GCC fills the `x < lo` branch's delay
+slot with the annulled `x++` (emitting the `bnezl`) instead of merging the tails. Banked
+`print_string_at_grid` S172 (the S171 `#pervasive-regalloc-classical-main` carry): 25/25 word-exact.
+This is the source lever to try **before** the permuter when a classical loop's only structural miss is
+a cross-jumped `{x++;continue;}` guard vs a ROM branch-likely.
+- **Companion reg-cycle lever — lazy global-base load (S172).** After the nested-if fixes the
+  structure, a residual **cyclic register permutation** (the target reuses a freed argument register for
+  a running pointer) closes by loading the array base **lazily**: reference the global directly
+  (`&G[idx]`, `&G[N]`, `x >= G`) instead of pinning it in a `T *base = G;` local. The local forces the
+  base load early (before the offset), so the base gets a fresh register; the direct reference defers it
+  **past** the offset computation, letting the offset's arg-register free up and be reused for the base
+  — snapping the `{f,base,dst,end,c}` 5-cycle on `print_string_at_grid`. Generalizes the S171
+  `&base[i]` index-group lever (`#indexed-vs-pointer-loop-strength-reduction`) from op-order to
+  load-timing. Pair it with the nested-if lever above.
+
 **Provenance:** rule-out-body-first (`contRmbControl`): S121 (the 5-sprint "cross-jump wall" carry + a
 145k-iter permuter run) → S127 (the one-branch FORCESTOP body fix, byte-exact, no compiler change).
 Carry-triage siblings: S143 (`__MusIntThreadProcess` carried as a "custom body") → S144 (the
@@ -3566,6 +3589,22 @@ each iteration; swapping to `while(1){…break}` hoisted them to `t2`/`t0`/`t1` 
 **Decide by what's hoisted:** ROM hoists a source invariant you can name → goto-loop + local decl; ROM
 hoists a compiler magic/literal → structured `while(1)`; ROM hoists nothing (re-materializes) → plain
 goto-loop.
+
+**The SELECTIVE-hoist case — goto de-hoists a compiler magic the structured loop wrongly hoists
+(S172).** A fourth case sits between "hoists everything" and "hoists nothing": the ROM does a
+**pressure-limited partial hoist** — it hoists the loop-invariant *array bases* to held registers but
+**re-materializes a compiler-generated `%`/`/` magic** at the loop tail each iteration (loop.c ran out
+of hoisting registers after the bases and left the magic in the loop). A structured `do-while`/`while(1)`
+hoists **both** (bases and magic → too many held constants); a plain **goto** outer loop de-hoists
+**both** (loop.c skips it → bases re-loaded too, also wrong). To de-hoist ONLY the magic while keeping
+the bases hoisted is the hard case: the goto fixes the magic (re-materialized at the tail, matching the
+ROM) but loses the base hoist as collateral, so it is a **partial** fix — treat it as a structural step,
+not a full match. S172 `func_8004DC44` (a ring-buffer→grid blit with `%4800` wrap): the do-while hoisted
+`0x1B4E81B5` to `t1`; the outer-goto moved it back to the tail (matching ROM lines 55-57) but the
+residual — a dead spill frame + the register permutation it drives — then routes to the permuter/carry
+(`#dead-frame-reload-artifact-regalloc-wall`). **Tell:** a structured-loop build is byte-close but a
+compiler magic is held in a register across the loop where the ROM re-loads `lui/ori` at the tail, AND
+the ROM still holds other invariants (bases) hoisted — the goto is a partial lever, not a finisher.
 
 **Tell / distinguishing it from a bug:** the build is byte-exact except the loop is shape-shifted (the
 shift/body block emitted before the test, a guard `j` to the bottom, `beql` where the ROM has plain
@@ -4295,3 +4334,40 @@ was compiled from a source shape that keeps the operand reg live for the constan
 compiler-source fan-out on gcc's `local-alloc.c` / `reload.c` abs-coalescing + preferred-reg logic).
 Recognize the symptom, bank the file's matched fns (one-tu mixed-partial), and carry this one with the
 score-25 near-match saved.
+
+---
+
+## dead-frame reload-artifact regalloc-wall
+
+**Symptom:** a classical fn whose structure, scheduling, loop-hoisting, and instruction sequence are
+**fully matched** to the ROM, and the ONLY residual is that the target **reserves a dead stack frame**
+— `addiu sp,sp,-N` in the prologue + `addiu sp,sp,+N` in the epilogue with **zero `sp`-relative
+load/store between them** — that your build (a leaf fn with no spill) does not, PLUS the pervasive
+**register permutation the frame drives** (a first-load `v0`/`v1` swap that cascades, `mfhi t3` vs `t4`,
+two locals swapped like `dst`/`row` = `a3`↔`t0`). Confirm the dead frame by grepping the target for
+`sp)` inside the fn: none = the `-N`/`+N` is a pure reserved slot, not a real spill. S172
+`func_8004DC44` (ring-buffer→grid blit, target reserves a dead 8-byte frame; structure otherwise
+byte-identical after the `#top-tested-loop-goto-local-hoist` selective-hoist fix).
+
+**Root cause:** GCC 2.7.2 `reload` assigned a **spill slot** to a pseudo (counted into `frame_size` via
+`get_frame_size()`), then eliminated the actual spill store/load because the value was available in a
+register at the spill point — leaving the slot allocated but never accessed (a "dead frame"). No
+callee-saved regs are involved (no `s0-s7`, no `ra` save), so the whole frame is that one eliminated
+spill. Which pseudo spills, and the register permutation that follows, are set by the exact
+register-pressure/allocation-order at reload — an internal artifact, not a source-visible choice.
+
+**Verdict — permuter or carry; do NOT grind source levers.** There is **no clean source trigger** for a
+dead frame: taking a local's address (`s32 *p = &i;`, the mutation the permuter itself tries) forces the
+var to memory and emits **real** `sp` loads/stores the ROM lacks (a live frame, not a dead one). Every
+statement-reorder, expression-split, and increment-order variant leaves `frame_adj:0` (proven S172:
+~15 hand variants, all no-frame). Once structure + scheduling + hoisting are settled and the only
+residual is the dead frame + its driven permutation, route straight to the permuter (it may stumble on a
+pressure-raising mutation) or **carry** — do not burn iterations on frame-forcing source tricks. Save
+the structurally-settled near-match (the `#top-tested-loop-goto-local-hoist` selective-hoist form for
+S172 `func_8004DC44`) so the retry starts one artifact away. Sibling to `#pervasive-regalloc-classical-main`,
+`#cse-make-regs-eqv-branch-fold`, and `#abs-coalescing-reg-swap` (all "structure matches, a reload/alloc
+artifact locks it; carry for game-source insight, not another grind").
+
+**Provenance:** S172 `func_8004DC44` (the S171 `print_string_at_grid.c` regalloc-wall carry; its sibling
+`print_string_at_grid` banked S172 via `#cross-jump-tail-merge` nested-if, `func_8004DC44` carried as
+this dead-frame wall).

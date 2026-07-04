@@ -551,6 +551,7 @@ When `pick_target.py` flags a hazard (or a match shows its symptom), read the ma
 | clean mirror SHA-miss, extra `jal __assert` / bare `assert()` / `bare-assert:<n>` | #assert-strip |
 | clean mirror SHA-miss, same insn count reordered / jal-mismatch + no `coddog-mirror` | #near-verbatim-mirror-jal-count-mismatch |
 | clean mirror SHA-miss, build instr-count < target (shorter) / collateral post-fn addr shifts | #cross-jump-tail-merge |
+| classical top-tested loop's `if(x<lo){x++;continue;}` guard: build cross-jumps the two `x++;j loop` tails vs ROM branch-likely (`bnezl`+annulled `x++`) — re-express as nested `if(x>=lo){…;x++}else{x++}` (+ lazy global-base load for the reg cycle) | #cross-jump-tail-merge |
 | `body-divergence-suspect:<file>@<pct>` | #cross-jump-tail-merge |
 | build over-inlines a small callee the ROM `jal`s (or reverse), same/cross TU | #same-tu-inline-mismatch-definition-order--cross-tu-split |
 | ROM `subu`+`bgez`/`bltz` for a `<` compare (not `slt`/`sltu`) | #same-tu-inline-mismatch-definition-order--cross-tu-split |
@@ -565,6 +566,7 @@ When `pick_target.py` flags a hazard (or a match shows its symptom), read the ma
 | ROM loop top-tested plain `beq`/`bne`, build inverts to guard-`j`+`beql` or reloads loop-invariant constants | #top-tested-loop-goto-local-hoist |
 | ROM up-counts a loop (`addiu +1`/`sltiu`), build reverses to `li N-1`/`addiu -1`/`bgez` | #top-tested-loop-goto-local-hoist |
 | near-match, ROM HOISTS a compiler-generated div/mod magic (`0x66666667`/`0x1B4E81B5`) or a loop char-literal into the preamble but the goto-loop rematerializes it each iter (use structured `while(1){…break}`) | #top-tested-loop-goto-local-hoist |
+| ROM SELECTIVELY hoists (holds invariant array bases in regs but re-materializes a `%`/`/` magic at the loop tail); structured loop hoists both, plain goto de-hoists both (goto = partial fix) | #top-tested-loop-goto-local-hoist |
 | clean per-fn match, full-make SHA-miss, hundreds of scattered 1-byte `%lo` diffs all `base-4` (decomposed one-tu rodata split) | #decomposed-one-tu-rodata-alignment-split |
 | ROM reads `$ra` (reg 31) as a printf/log arg; `__builtin_return_address(0)` emits a stack-slot `lw` | #capturing-ra-return-address-as-a-call-argument |
 | sentinel (`!=-1`) array walk matches except a 1-instr preheader swap (`move base` vs `li` const in the entry-`beq` delay slot, or a `-1` hoisted to an outer loop) | #indexed-vs-pointer-loop-strength-reduction |
@@ -586,6 +588,7 @@ When `pick_target.py` flags a hazard (or a match shows its symptom), read the ma
 | structural-complete regalloc miss = which value wins an earlier caller-saved reg; before "irreducible" | #loop-weight-and-live-length-regalloc-steering |
 | tempted to structure/clean a matched goto-loop fn's loops; zero-goto rewrite attempt | #loop-weight-and-live-length-regalloc-steering |
 | permuter "best" on a goto-loop fn beats the hand-derived structural floor by a suspicious margin | #permuter-goto-backedge-liveness-unsound |
+| classical fn structure/scheduling/hoisting fully matched, only residual = target reserves a DEAD stack frame (`addiu sp,-N`/`+N`, zero `sp)` access) + the reg permutation it drives; no source trigger (address-taken forces real sp loads) | #dead-frame-reload-artifact-regalloc-wall |
 
 </hazard_index>
 

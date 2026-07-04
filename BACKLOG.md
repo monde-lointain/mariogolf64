@@ -41,6 +41,24 @@ tell) is carved to its LIBRARY tree (`libnusys/<file>`), not `main/<stem>` — y
 placement unchanged (see `CLAUDE.md` path convention). A per-FILE -O0 override is the one mk edit a
 boot/SDK-glue TU may need.
 
+**S172 MIXED-PARTIAL (retry of the S171 carry) — `src/main/print_string_at_grid.c`; `print_string_at_grid`
+BANKED byte-exact C, `func_8004DC44` still CARRIED.** matched **+1**; md5-candidate **221 → 221** (file
+still mixed-partial, 1 `INCLUDE_ASM` stub); asm subsegs **77**, c-subsegs **218** (unchanged). The
+S171-rated HARDER carry fell to a **compiler-source insight**: the `if(dst<base){dst++;continue;}` guard
+that GCC 2.7.2 cross-jumped into the bottom `dst++;j loop` tail matched the ROM's branch-likely `bnezl`
+(annulled-delay `dst++`) once re-expressed as nested `if(dst>=base){ if(dst<end)*dst=f|c; dst++; } else
+{ dst++; }` (NEW `#cross-jump-tail-merge` classical-loop lever), and the residual `{f,base,dst,end,c}`
+5-cycle closed via **lazy global-base load** (reference `D_800DAF60[...]` directly, no `u8 *base` local).
+25/25 word-exact, full-make ROM SHA-1 == baserom. `func_8004DC44` remains a **dead-frame reload wall**
+(structure driven fully identical via the NEW outer-goto magic-de-hoist, but locked on a reserved dead
+8-byte spill frame + its driven reg permutation; 31k-iter permuter no zero). seed 3 / banked 0pt
+(per-file all-or-nothing, still partial) / realized 6 (residual +3); regime classical. Quality **0/1/1/0**.
+Retro applied **4 of 4** (all DOC): nested-if branch-likely + lazy-base levers (`#cross-jump-tail-merge`),
+outer-goto SELECTIVE-hoist case (`#top-tested-loop-goto-local-hoist`), new
+`#dead-frame-reload-artifact-regalloc-wall` section (+3 hazard-index rows). **Cross-repo follow-up:** none.
+See `## Carry-overs` for `func_8004DC44` (the lone remaining stub). **Next natural slice:** finish
+`func_8004DC44` (permuter/game-source), or the head `[0x28590]` (7 fns) / tail `[0x29260]` (9 FP-free debug fns).
+
 **S171 MIXED-PARTIAL — `src/main/print_string_at_grid.c` (6-fn grid-print/debug cluster `[0x28DC0]`,
 decomposed from the 13-fn FP-free debug subseg `[0x28590]` at 16-aligned `0x8004D9C0`; 4 of 6 banked).**
 matched **+4**; md5-candidate **221 → 221** (file mixed-partial, 2 `INCLUDE_ASM` stubs); asm subsegs **77**
@@ -2767,35 +2785,31 @@ by `/sprint-plan`:
   `NU_CONT_THREAD_ID=6` vs MG64's 5), and that surfaces only at first build unless reconciled here.
   A near-free retry missing any of these is a half-scoped spike — finish the scope before deferring.
 
-- **(S171 MIXED-PARTIAL — carried; 4 of 6 banked)** `src/main/print_string_at_grid.c` (the grid-print
-  debug cluster `[0x28DC0]`). BANKED byte-exact C: `check_and_print_grid`, `func_8004DA4C`,
-  `convert_and_print_hex`, `func_8004DAF4`. Two `INCLUDE_ASM` stubs remain — both **regalloc-
-  permutation near-matches** (structure + logic fully RE'd, permuter scaffolds live). File mixed-partial
-  (2 stubs) → NOT md5-candidate. **No flip/data/symbol enablers left** (subseg already `[0x28DC0, c,
-  main/print_string_at_grid]`; all refs are placed `D_`/`flag` externs, NO rodata carve; names curated).
-  - **print_string_at_grid (0x8004D9C0, 100B — PERMUTER SPIKE, plateaued).** Writes `flag|char` into
-    grid `D_800DAF60[row*40+col]`, bounds `[0,0x4B0)`, then `flag=0`. Structure/logic correct (25/25
-    instrs). Wall = (a) a cyclic **register permutation** ({f,base,dst,end,c} = mine {t0,a3,v1,a2,a1} vs
-    target {a3,v1,a1,t0,a2}) + (b) a reorg **branch tail-merge**: target keeps the `bnel`-continue's
-    `dst++` in the annulled branch-delay SEPARATE from the bottom `j`'s `dst++`; my build cross-jumps the
-    two `dst++;goto loop` tails into a double-jump. Landed levers (keep): `&base[row*40+col]` index-group
-    (fixes the row*40+col-then-+base op order), `u8 *base` local (hoists base into a reg), top-tested
-    goto/while(1). Permuter PLATEAUED ~20725 (from base 22190) — NOT converging; needs a register-steering
-    insight or compiler-source fan-out on GCC 2.7.2 reorg.c (why the continue annuls vs cross-jumps) +
-    local-alloc.c (the a3/v1/t0 preference). Scaffold `nonmatchings/print_string_at_grid/` (base.c.raw =
-    best src). **Untried:** compiler-source fan-out; a structural re-expression of the two-`dst++` continue.
-  - **func_8004DC44 (0x8004DC44, 300B — PERMUTER, structurally IDENTICAL).** Renders `D_800BFEE8` rows ×
-    40 chars from ring `D_800DB410` (start `((D_800DC6D0/40-nrows)*40+4800)%4800`, wrapping `%4800`) into
-    grid `D_800DAF60` (start `1200-(nrows+3)*40`), dual-IV (offset + pointer). Structure IDENTICAL (75/75
-    opcodes, all div-magics + the dual-IV copy loop match after adding explicit `dp`/`sp` pointers
-    alongside `src`/`dst` offsets). Wall = pure regalloc (dst/row swapped a3↔t0, `mfhi t4` vs t3) + target
-    reserves a **dead 8-byte frame** (higher pressure, no spill store) mine doesn't. IDEAL permuter
-    candidate. Permuter improving (16870→~15330) but not yet 0. Scaffold `nonmatchings/func_8004DC44/`
-    (base.c.raw = best src, dual-IV). **Retry:** resume the permuter (scaffold live, main-seg flags), or
-    introduce a temp to trigger the dead-frame; the `#top-tested-loop` / dual-IV structure is settled.
+- **(S172 MIXED-PARTIAL — carried; 5 of 6 banked)** `src/main/print_string_at_grid.c` (the grid-print
+  debug cluster `[0x28DC0]`). BANKED byte-exact C (S171): `check_and_print_grid`, `func_8004DA4C`,
+  `convert_and_print_hex`, `func_8004DAF4`; BANKED (S172): `print_string_at_grid` (the S171-rated harder
+  carry — broke via the nested-if branch-likely + lazy-base levers, now `#cross-jump-tail-merge`). ONE
+  `INCLUDE_ASM` stub remains: `func_8004DC44`. File mixed-partial (1 stub) → NOT md5-candidate. **No
+  flip/data/symbol enablers left** (subseg `[0x28DC0, c, main/print_string_at_grid]`; all refs placed
+  `D_`/`flag` externs, NO rodata carve; name auto `func_`).
+  - **func_8004DC44 (0x8004DC44, 300B — DEAD-FRAME RELOAD WALL, permuter non-converging).** Renders
+    `D_800BFEE8` rows × 40 chars from ring `D_800DB410` (start `((D_800DC6D0/40-nrows)*40+4800)%4800`,
+    wrapping `%4800`) into grid `D_800DAF60` (start `1200-(nrows+3)*40`), dual-IV (offset + pointer).
+    Structure now IDENTICAL to the ROM after the **outer-goto magic-de-hoist** (S172): the `0x1B4E81B5`
+    `%4800` magic rematerializes at the loop tail (matching ROM lines 55-57) instead of loop.c hoisting
+    it to a held reg — SELECTIVE-hoist case, `#top-tested-loop-goto-local-hoist`. Wall = a reserved
+    **DEAD 8-byte frame** (`addiu sp,-8`/`+8`, zero `sp)` access) + the register permutation it drives
+    (first-load v0/v1 swap on `D_800DC6D0/40`, dst/row a3↔t0, `mfhi t3` vs t4). This is a reload
+    spill-then-eliminate artifact with **NO clean source trigger** (`#dead-frame-reload-artifact-regalloc-wall`):
+    address-taken locals (permuter's `&i`) force REAL sp loads/stores the ROM lacks; ~15 hand variants
+    all `frame_adj:0`. Permuter ran 31k iters (best 15305, NO zero). Scaffold `nonmatchings/func_8004DC44/`
+    at the improved **wd seed** (base.c.raw/base.c = outer-goto magic-de-hoist + increment order
+    i,sp,src,dst,dp; word 17/75, mnem 32/75). **Retry:** permuter from the wd seed (may stumble on a
+    pressure-raising mutation), or **carry for game-source insight** (the exact source shape that spills
+    one pseudo); do NOT burn iterations on frame-forcing source tricks.
   - **Retry checklist (near-free):** (1) subseg flip DONE; (2) placed refs: `flag`=0x800BFEE4,
-    `D_800B67C0`/`D_800BFEE8`/`D_800DAF60`/`D_800DB410`/`D_800DC6D0` all placed externs, NO carve; (3) NO
-    recover-externs; (4) classical (no upstream); (5) permuter scaffolds live for both fns. Inline any
+    `D_800BFEE8`/`D_800DAF60`/`D_800DB410`/`D_800DC6D0` all placed externs, NO carve; (3) NO
+    recover-externs; (4) classical (no upstream); (5) permuter scaffold live at the wd seed. Inline any
     `output-0-*` the permuter produces, clang-format, full-make SHA, done.
 
 - **(S169 MIXED-PARTIAL — carried; 1 of 3 banked)** `src/main/func_80076640.c` — `func_80076778`
