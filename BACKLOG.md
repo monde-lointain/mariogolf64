@@ -41,6 +41,25 @@ tell) is carved to its LIBRARY tree (`libnusys/<file>`), not `main/<stem>` — y
 placement unchanged (see `CLAUDE.md` path convention). A per-FILE -O0 override is the one mk edit a
 boot/SDK-glue TU may need.
 
+**S175 CARRIED (retry of the S174 `func_8004DC44` carry; PO-approved bounded new-angle try) — 0 banks;
+new project-best + `register` keyword ruled out.** matched **+0**; md5-candidate **221 → 221** (file still
+5/6 mixed-partial, 1 stub). Two genuinely-new probes, both advance the characterization, neither matches.
+**(1) Permuter-reseed from the frame-bearing best** (S173/S174 always seeded from the frameless vA):
+broke the 3-sprint-stuck 14450 floor → `13530 → 13235`. The 13530 candidate is structurally identical to
+the ROM (frame + schedule + all ops match); every remaining diff is a register name cascading from the one
+`/40` dividend-register choice (zero op/shape diffs) — the tightest documented near-match. **(2) Plain
+`register` keyword ruled out DEFINITIVELY** (PO /systematic-debugging): controlled A/B `.text`
+byte-identical + both permuter-score 16613 (via new `tools/pscore.py`); 3 mips-gcc-2.7.2 subagents proved
+`REG_USERVAR_P` is absent from `local-alloc.c`/`global.c` priority and `DECL_REGISTER` ignored at -O2. The
+`register asm("$2")` hack from the frame-correct base is *worse* (51 diffs; quotient→`$v1`, ROM wants fresh
+`$a3`) → confirms a coordinated `{dividend-$v0, quotient-$a3-fresh, dead-frame}` alloc. seed 3 / banked 0pt
+/ realized 6; regime classical. Quality **1/1/1/0**. Retro applied **3 of 3** (2 DOC + 1 TOOL): #1
+permuter-reseed doctrine (`#compiler-source-fan-out-escalation-above-the-permuter`); #2 `register`-keyword
+no-op note (`#signed-divide-const-v0v1-quotient-destination`); #3 new `tools/pscore.py` single-candidate
+scorer. Carry kept RETRYABLE (needs a new mechanism; permuter-reseed + `register` now spent). **Next
+natural slice:** a FRESH main-segment pack (e.g. `func_8004DE60` 9fn, `func_8004D190` 7fn) — stop
+re-attempting func_8004DC44 without a genuinely new lever.
+
 **S174 CARRIED (retry of the S173 `func_8004DC44` carry; PO-directed cross-project + coalescing dive) — 0
 banks; the S172/S173 "irreducible" verdict was CORRECTED.** matched **+0**; md5-candidate **221 → 221**
 (file still 5/6 mixed-partial, 1 stub). Another pure-investigation sprint, but the deliverable is a
@@ -2820,7 +2839,7 @@ by `/sprint-plan`:
   `NU_CONT_THREAD_ID=6` vs MG64's 5), and that surfaces only at first build unless reconciled here.
   A near-free retry missing any of these is a half-scoped spike — finish the scope before deferring.
 
-- **(S174 MIXED-PARTIAL — carried; 5 of 6 banked; S173 "irreducible" verdict CORRECTED)** `src/main/print_string_at_grid.c` (the grid-print
+- **(S175 MIXED-PARTIAL — carried; 5 of 6 banked; new project-best 13530/13235, `register` ruled out)** `src/main/print_string_at_grid.c` (the grid-print
   debug cluster `[0x28DC0]`). BANKED byte-exact C (S171): `check_and_print_grid`, `func_8004DA4C`,
   `convert_and_print_hex`, `func_8004DAF4`; BANKED (S172): `print_string_at_grid` (the S171-rated harder
   carry — broke via the nested-if branch-likely + lazy-base levers, now `#cross-jump-tail-merge`). ONE
@@ -2851,21 +2870,36 @@ by `/sprint-plan`:
        dividends, all associativity, the sched1 lifetime lever, memcpy [`lwl/lwr`], m2c [plain global
        divide]); `register asm("$2")` forces it (28 diffs) but is unfaithful AND incomplete (quotient→v1
        not `a3`, frame absent). See `#signed-divide-const-v0v1-quotient-destination`.
-    - **Seed superseded:** scaffold `nonmatchings/func_8004DC44/` now holds the IMPROVED **vA seed**
-      (base-hoist via pre-declared base pointer vars + structured inner `for` + goto outer; the old S172
-      seed LACKED the base-hoist, which is why its permuter run plateaued). See docs/wip for the exact
-      source + all levers. **Retry (kept retryable per S174 PO):** the divide is flippable-in-isolation
-      but the void-loop-fed context is deterministically magic→`$v0` — no faithful source lever survives
-      the loop (S174 exhausted control-flow, association, schedule, cross-project corpus). A future retry
-      needs a genuinely NEW mechanism (e.g. a sched1/pressure state that reproduces the ROM's coordinated
-      dividend-`$v0` + quotient-`a3` + dead-frame together), or accept as a permanent
-      `#signed-divide-const-v0v1-quotient-destination` / `#dead-frame-reload-artifact-regalloc-wall` carry.
-      Do NOT re-run the same permuter/single-fn dive — S172+S173+S174 exhausted it (~430k iters).
+    - **S175 progress (permuter-reseed + `register` ruled out):** reseeding the permuter from the
+      frame-bearing best (S173/S174 always seeded from the frameless vA) broke the 3-sprint-stuck floor:
+      `14450 → 13530 → 13235` (new project-best). The **13530** candidate (`output-13530-1/`) is
+      structurally identical to the ROM — frame present, schedule + ALL operations match — with *every*
+      remaining diff a register name cascading from the one `/40` dividend-register choice (zero op/shape
+      diffs). The **plain `register` keyword was ruled out DEFINITIVELY** (PO /systematic-debugging):
+      controlled A/B (`s32 seed` vs `register s32 seed`) → `.text` byte-identical + both permuter-score
+      16613 (via new `tools/pscore.py`); source-proven (3 mips-gcc-2.7.2 subagents) that REG_USERVAR_P is
+      absent from `local-alloc.c`/`global.c` priority and `DECL_REGISTER` is ignored at -O2. The
+      `register asm("$2")` hard-reg hack from the frame-correct base is *worse* (51 diffs: quotient→`$v1`,
+      ROM wants fresh `$a3`) — confirms a *coordinated* `{dividend→$v0, quotient→$a3-fresh, dead-frame}`
+      alloc. See `#signed-divide-const-v0v1-quotient-destination` + `docs/wip/func_8004DC44.wip.md ## S175`.
+    - **Seed + scaffold:** `nonmatchings/func_8004DC44/` base.c restored to the vA seed; best candidates
+      preserved in `output-13530-1/` (cleanest) + `output-13235-*/`. **Retry (kept retryable per S175 PO):**
+      the divide is flippable-in-isolation but the void-loop-fed context is deterministically magic→`$v0`
+      — no faithful source lever survives the loop (S174 control-flow/association/schedule/cross-project
+      corpus; S175 permuter-reseed + `register`). A future retry needs a genuinely NEW mechanism (a
+      sched1/pressure state reproducing the coordinated `{dividend-$v0, quotient-$a3-fresh, dead-frame}`),
+      or accept as a permanent `#signed-divide-const-v0v1-quotient-destination` /
+      `#dead-frame-reload-artifact-regalloc-wall` carry. Do NOT re-run the same permuter/single-fn dive
+      or the `register`/associativity levers — S172–S175 exhausted them (~430k+ iters). Only untried lever
+      left: cross-project mining for a matched plain-global-divide with quotient-to-loop-var analog
+      (S174 found none in 8 decomps).
   - **Retry checklist (near-free):** (1) subseg flip DONE; (2) placed refs: `flag`=0x800BFEE4,
     `D_800BFEE8`/`D_800DAF60`/`D_800DB410`/`D_800DC6D0` all placed externs, NO carve; (3) NO
-    recover-externs; (4) classical (no upstream); (5) permuter scaffold live at the vA seed;
-    (6) full context + seed source in `docs/wip/func_8004DC44.wip.md`. Inline any `output-0-*` the
-    permuter produces, clang-format, full-make SHA, done.
+    recover-externs; (4) classical (no upstream); (5) permuter scaffold live — reseed from
+    `output-13530-1/source.c` (the frame-bearing best), NOT vA (S175 doctrine: reseed from best);
+    (6) full context + seed source in `docs/wip/func_8004DC44.wip.md`. Score variants with
+    `venv/bin/python3 tools/pscore.py nonmatchings/func_8004DC44 <cand.c>`. Inline any `output-0-*`
+    the permuter produces, clang-format, full-make SHA, done.
 
 - **(S169 MIXED-PARTIAL — carried; 1 of 3 banked)** `src/main/func_80076640.c` — `func_80076778`
   BANKED byte-exact C; `func_80076640` + `func_8007680C` remain `INCLUDE_ASM`. File is mixed-partial

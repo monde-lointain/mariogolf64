@@ -4318,6 +4318,20 @@ over-scoped negative and pin the quotient-destination lever. Proving un-source-r
 deliverable when the answer is "carry"; save the near-match seed (`docs/wip/`) so the retry starts one
 artifact away.
 
+**Permuter-reseed from the best candidate, not the clean seed (S175).** When re-running the permuter on
+a same-fn regalloc carry, seed it from the **best prior candidate** (`nonmatchings/<fn>/output-<score>-*/
+source.c`), not the hand-written clean seed, and **reseed again from each new best**. The permuter's
+randomizer explores a neighborhood around its base; a frame-bearing / structurally-closer candidate opens
+a different neighborhood than the clean seed. S175 `func_8004DC44` broke a **3-sprint-stuck floor** this
+way: vA-seeded runs never beat 14450 in ~430k cumulative iters (S173+S174), but reseeding from the
+frame-bearing 14450 candidate reached 13530, then reseeding from 13530 reached 13235 (frame + schedule +
+all operations matching the ROM; only the divide-register cascade remaining). The lower score does not
+imply a reachable zero — a permuter that keeps improving the *matchable* parts (loop/guard shape) while
+the true blocker is a source-unreachable allocation decision will asymptote above 0 (S175 confirmed the
+divide stayed swapped at every new best). But it produces the tightest documented near-match for the
+carry, and a genuinely-new best is worth the two bounded runs. Preserve the best `output-*/` dirs in
+`docs/wip/` provenance so the next retry reseeds from them.
+
 ---
 
 ## cse make_regs_eqv branch-fold (reused-var canonical fold on a `?:`-with-flag store)
@@ -4504,7 +4518,22 @@ with the local divide chain), and the loop-setup register pressure sinks the mag
 control-flow structure / associativity / schedule (so `life_magic > ⅔·life_dividend` is unreachable).
 `func_8004DC44` is exactly this. The `register asm("$2")` binding creates a synthetic reg-2 SET and does
 force the dividend to `$v0`, but it is non-idiomatic (shows as `asm` in the decompile) **and** does not
-reproduce the ROM's coordinated allocation (quotient→`a3`, dead frame) — not a faithful match.
+reproduce the ROM's coordinated allocation (quotient→`a3`, dead frame) — not a faithful match (S175:
+applied to the frame-correct base it is *worse*, 51 diffs — the forced dividend leaves the quotient in
+`$v1` where the ROM uses a fresh `$a3`, proving the ROM state is a *coordinated* `{dividend→$v0,
+quotient→$a3-fresh, dead-frame}` coloring, not a single-reg pin).
+
+**Do NOT reach for the plain `register` keyword (no `asm`) as a lever — it is a zero-`.text`-effect
+no-op at -O2** (S175, controlled A/B: `s32 seed` vs `register s32 seed` at identical structure →
+`.text` byte-identical; both keep the swap). Source-proven three ways on `mips-gcc-2.7.2`: (a) at -O2
+`obey_regdecls==0`, so `DECL_REGISTER` is ignored (`stmt.c:3364`), and a plain local ALSO gets
+`REG_USERVAR_P` (`stmt.c:3390`) → register-vs-plain RTL is identical; (b) `REG_USERVAR_P` has **0 hits**
+in `local-alloc.c` and `global.c` — it is absent from the `qty_compare` priority, the `find_free_reg`
+scan, and the suggestion machinery, so it cannot reorder the dividend-vs-magic allocno; (c) the flag
+*does* survive into the multiply's dividend operand (`force_reg` passes a REG through, `explow.c:638`;
+no `PROMOTE_MODE` on MIPS → no stripping SUBREG; the magic is always a fresh `copy_to_mode_reg` pseudo,
+`optabs.c:474`) but per (b) allocation never reads it, so reaching it is moot. A specific hard reg needs
+`register T x asm("$N")` (routes `toplev.c:2601` → `varasm.c:536`), which is the unfaithful hack above.
 
 **Escalation.** For a same-toolchain reg-alloc wall, mine the OTHER N64 decomps for a **matched** analog
 of the exact pattern (see `#compiler-source-fan-out-escalation-above-the-permuter` for the cross-project

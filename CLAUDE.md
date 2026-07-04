@@ -590,6 +590,7 @@ When `pick_target.py` flags a hazard (or a match shows its symptom), read the ma
 | permuter "best" on a goto-loop fn beats the hand-derived structural floor by a suspicious margin | #permuter-goto-backedge-liveness-unsound |
 | classical fn structure/scheduling/hoisting fully matched, only residual = target reserves a DEAD stack frame (`addiu sp,-N`/`+N`, zero `sp)` access) + the reg permutation it drives; no source trigger (address-taken forces real sp loads) | #dead-frame-reload-artifact-regalloc-wall |
 | signed divide-by-const dividend/magic in the wrong two regs (`sra r,r,0x1f` reg = dividend, `lui 0x<magic>` reg = magic); flippable-in-isolation (return/reg-2-SET → local-alloc suggestion pass), but a VOID/callless/returnless loop-fed leaf is deterministically magic-in-low-reg; cross-project matched-corpus mining is the escalation | #signed-divide-const-v0v1-quotient-destination |
+| tempted to use the plain `register` keyword (no `asm`) as a regalloc match lever — it is a zero-`.text`-effect no-op at -O2 (REG_USERVAR_P absent from local-alloc/global priority; DECL_REGISTER ignored when obey_regdecls==0) | #signed-divide-const-v0v1-quotient-destination |
 
 </hazard_index>
 
