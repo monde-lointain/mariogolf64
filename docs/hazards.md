@@ -3550,6 +3550,23 @@ manual hoist. The local-decl order also fixes the preamble load order (declare/u
 loads first, first). Write the compare in the ROM's operand form (e.g. `bound < (u32)(x + off)`
 reproduces `sltu vN, bound, x+off`, not the swapped `sltu vN, x+off, 0xC0000000`).
 
+**The hoist corollary, inverted — when the ROM DOES hoist and the constant is COMPILER-generated
+(S171).** The corollary above hoists *source-level* invariants via a local decl. But a
+compiler-generated constant — the magic multiplier of a `/`/`%` by a constant (`0x66666667` for /10·k,
+`0x1B4E81B5` for /4800), or a small literal like `' '` used in the loop — has no source variable to
+declare, so a goto-loop CANNOT hoist it and re-materializes it every iteration. When the ROM hoists
+these (magics/literals in the preamble, `j` back-edge targets the test), the fix is the OPPOSITE of a
+goto-loop: use a **structured `while(1){ … if(exit) break; … }`**, which carries the
+`NOTE_INSN_LOOP` markers so `loop.c` hoists the magic-constant loads — and when the loop's exit test
+reads memory (`c = *p++`), `expand_end_loop` does NOT rotate it (the non-fixed memory read blocks the
+roll-to-end, same predicate as `check_dbra_loop`), so the structured `while(1)` stays **top-tested**,
+giving BOTH the hoist and the un-inverted shape. S171 `func_8004DAF4` (a scrollback console-puts with
+`/40` + `%4800` + a `' '`-fill loop): the goto-loop rematerialized `0x66666667`/`0x1B4E81B5`/`0x20`
+each iteration; swapping to `while(1){…break}` hoisted them to `t2`/`t0`/`t1` and matched byte-exact.
+**Decide by what's hoisted:** ROM hoists a source invariant you can name → goto-loop + local decl; ROM
+hoists a compiler magic/literal → structured `while(1)`; ROM hoists nothing (re-materializes) → plain
+goto-loop.
+
 **Tell / distinguishing it from a bug:** the build is byte-exact except the loop is shape-shifted (the
 shift/body block emitted before the test, a guard `j` to the bottom, `beql` where the ROM has plain
 `beq`, and/or the `j` back-edge targets the constant-load block instead of the test). This is a
@@ -3649,6 +3666,28 @@ are "indexed", but only the pointer-variable spelling matches when the ROM folds
 IV. S168 `func_80071220`'s 30-entry `tag==-1` walk matched byte-exact only after
 `D_801B7118[i]` → `Entry *table = D_801B7118; table[i]` (the loop went from a base-reload each
 iteration to the ROM's single `move v1,a0` dual-IV).
+
+**Sub-lever — index-grouping `&base[i]` fixes the pointer-add operand ORDER (S171).** When a running
+pointer is a base plus a computed index (`dst = base + row*40 + col`), C associativity groups it
+`(base + row*40) + col` — the build adds `base` BEFORE `col`, so `base` is materialized early (into
+whatever reg the allocator picks) and `col` stays live an extra step. If the ROM instead computes the
+INDEX first and adds `base` last (`addu vN, row*40, col` then `addu ptr, vN, base`), it frees the
+`col` arg-reg the instant the index is formed and REUSES it for the running pointer. Force the ROM's
+order by grouping the index in a subscript: `dst = &base[row*40 + col]` emits `row*40+col` first, then
+`+base`. S171 `print_string_at_grid`: the `&base[i]` spelling flipped the op order to match (row*40+col
+then +base) — a prerequisite for the ROM's `dst`-in-`col`'s-register allocation. (A necessary op-order
+fix, not always sufficient: the remaining allocno permutation may still need the permuter.)
+
+**Sub-lever — dual-IV needs BOTH an explicit pointer AND the running offset (S171).** When a copy/scan
+loop dereferences a pointer but ALSO needs the running integer offset — for a per-row `&arr[off]`
+recompute across an outer loop, or an `off %= N` wrap — the ROM keeps a dual induction: a
+strength-reduced pointer (giv) for the load/store AND the offset (biv) for the recompute/wrap.
+Offset-only C (`arr[off]` with `off++`) makes gcc RE-INDEX `&arr[off]` each iteration (`lui;addu;lb`,
+fewer setup insns but wrong shape); declare BOTH — `u8 *p = &arr[off]; … *p = …; off++; p++;` — to get
+the ROM's pointer-increment inner loop plus the persistent offset. S171 `func_8004DC44` (renders N rows
+from a ring buffer, offset wrapping `%4800` per row): adding explicit `dp`/`sp` alongside `src`/`dst`
+took the opcode structure from 71→75 insns, byte-for-byte the target's dual-IV (the residual is then
+pure allocno/frame permutation).
 
 **Why (KMC gcc 2.7.2, grounded — verified against the source):** `scan_loop` runs
 `move_movables` (invariant hoist, `loop.c:966`) before `strength_reduce` (`loop.c:976`). The hoisted
@@ -4043,12 +4082,27 @@ the symbol addresses; the symbol shift is a downstream symptom, and `asm/data/<s
 gitignored hides it from `git status`. The 2-instr overflow itself was a `&D_arr[i]` self-store
 re-derived instead of reusing the live pointer; see the
 [struct-array-of-BSS direct-index lever](#struct-array-of-bss-direct-index-vs-base-pointer-var) below.
-**Tooling note (S170):** `decomp_loop.py`'s `find_segment` can't locate a fn whose subseg is already
+**Tooling note (S170).** `decomp_loop.py`'s `find_segment` can't locate a fn whose subseg is already
 flipped to `c` (its asm is under `asm/nonmatchings/<seg>/`, not top-level `asm/<off>.s`), so the
 asm-first fast-path miss-recovery fails with `no glabel found`. Workaround: manual
 `mips-linux-gnu-objdump -d build/src/<seg>/<file>.o` vs the `asm/nonmatchings/<seg>/<fn>.s` hex (the
 reloc-hi/lo diffs there are the [isolated-compile caveat](#isolated-compile-caveat); gate on the
 full-make SHA). A `--target-s <path>` arg for `decomp_loop` is a tracked tooling follow-up.
+
+**Permuter workaround for a flipped-subseg fn (S171).** The same post-flip gap breaks
+`setup-permuter.sh` two ways: `mg_resolve_c_asm` can't find an `INCLUDE_ASM(…, <fn>)` line once the fn
+is inlined C, and `import.py`'s default preprocess set is bare `-I include` (misses
+`include/libultra`, so `PR/ultratypes.h` fails). **Hand-build the scaffold** in
+`nonmatchings/<fn>/`: (1) copy an existing MAIN-seg `compile.sh` (e.g. `nonmatchings/func_80076640/`)
+and `sed` the func name — it carries the full profile `-mips3 -G 0 -O2 -I include -I include/libultra
+-I include/libultra/internal -I include/lib{kmc,nusys,mus,nualstl,naudio} -DF3DEX_GBI_2 -D_FINALROM`;
+(2) write `settings.toml` (`func_name`, `compiler_type = "gcc"`); (3) `cpp -P -undef base.c.raw … <same
+-I set> -DPERMUTER …` to a **self-contained** `base.c` (the permuter's own preprocess is bare, so it
+must be pre-expanded); (4) `cp build/src/<seg>/<file>.o nonmatchings/<fn>/target.o` — the current
+INCLUDE_ASM build object holds the real target bytes for that fn. Then `./run-permuter.sh <fn>`
+(`mg_find_permuter_dir` globs `nonmatchings/<fn>*`, so it finds the hand-built dir). This is how S171
+scaffolded `print_string_at_grid` + `func_8004DC44` after their flip. Same tracked tooling follow-up
+(teach `decomp_loop`/`setup-permuter` to search `asm/nonmatchings/**` + derive the main-seg `-I` set).
 
 ## struct-array-of-BSS direct-index vs base-pointer var
 

@@ -564,9 +564,11 @@ When `pick_target.py` flags a hazard (or a match shows its symptom), read the ma
 | ROM has bare `sqrt.d`/`sqrt.s`, build links `jal sqrt`/`jal sqrtf` or a guarded `sqrt.{d,s}`+`c.eq.{d,s}`/`bc1t` | #double-sqrt-fast-math |
 | ROM loop top-tested plain `beq`/`bne`, build inverts to guard-`j`+`beql` or reloads loop-invariant constants | #top-tested-loop-goto-local-hoist |
 | ROM up-counts a loop (`addiu +1`/`sltiu`), build reverses to `li N-1`/`addiu -1`/`bgez` | #top-tested-loop-goto-local-hoist |
+| near-match, ROM HOISTS a compiler-generated div/mod magic (`0x66666667`/`0x1B4E81B5`) or a loop char-literal into the preamble but the goto-loop rematerializes it each iter (use structured `while(1){…break}`) | #top-tested-loop-goto-local-hoist |
 | clean per-fn match, full-make SHA-miss, hundreds of scattered 1-byte `%lo` diffs all `base-4` (decomposed one-tu rodata split) | #decomposed-one-tu-rodata-alignment-split |
 | ROM reads `$ra` (reg 31) as a printf/log arg; `__builtin_return_address(0)` emits a stack-slot `lw` | #capturing-ra-return-address-as-a-call-argument |
 | sentinel (`!=-1`) array walk matches except a 1-instr preheader swap (`move base` vs `li` const in the entry-`beq` delay slot, or a `-1` hoisted to an outer loop) | #indexed-vs-pointer-loop-strength-reduction |
+| copy/scan loop re-indexes `arr[off]` each iter (insn count SHORT vs ROM's pointer+offset dual-IV), or a running ptr-add groups base-before-index (`base+i*s+c` vs the ROM's `&base[i*s+c]`) | #indexed-vs-pointer-loop-strength-reduction |
 | classical fn structurally correct (rows align) but locks high on a pervasive hard-reg permutation (`i:s4↔s5`) + spill-slot order + scheduling | #pervasive-regalloc-classical-main |
 | `void` classical fn mis-allocates at loop-entry/delay-slot, resists every body lever | #return-type-is-load-bearing |
 | struct-array fn byte-matches with per-field base symbols but not the combined struct (link-identical) | #struct-access-folding-changes-scheduling |

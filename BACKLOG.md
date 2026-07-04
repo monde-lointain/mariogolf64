@@ -41,6 +41,28 @@ tell) is carved to its LIBRARY tree (`libnusys/<file>`), not `main/<stem>` — y
 placement unchanged (see `CLAUDE.md` path convention). A per-FILE -O0 override is the one mk edit a
 boot/SDK-glue TU may need.
 
+**S171 MIXED-PARTIAL — `src/main/print_string_at_grid.c` (6-fn grid-print/debug cluster `[0x28DC0]`,
+decomposed from the 13-fn FP-free debug subseg `[0x28590]` at 16-aligned `0x8004D9C0`; 4 of 6 banked).**
+matched **+4**; md5-candidate **221 → 221** (file mixed-partial, 2 `INCLUDE_ASM` stubs); asm subsegs **77**
+(the split kept the 7-fn head `[0x28590]` asm); c-subsegs **217 → 218**. The whole cluster references
+placed `D_`/`flag` externs (NO rodata carve), so the tractable fns bank as C while the hard fns stay
+`INCLUDE_ASM`, ROM green. BANKED byte-exact: `check_and_print_grid` (guard), `func_8004DA4C` (var-width
+hex), `convert_and_print_hex` (8-digit hex; 1 setup-order fix), `func_8004DAF4` (scrollback console-puts;
+the **`while(1)`-hoists-compiler-div-magic** lever — a goto-loop rematerialized `0x66666667`/`0x1B4E81B5`
+/`' '` each iter, structured `while(1){…break}` hoisted them + stayed top-tested via the `*str` exit).
+CARRIED (regalloc walls, permuters plateaued): `print_string_at_grid` (allocno permutation +
+reorg-branch-tail-merge; `&base[i]` index-group + base-hoist levers landed but not sufficient) +
+`func_8004DC44` (structurally IDENTICAL 75/75 opcodes via the **dual-IV offset+pointer** lever; residual
+is pure register permutation + a dead 8-byte frame). seed 5 / banked 0pt (per-file all-or-nothing,
+partial) / realized 9 (residual +4); regime classical/mixed. Quality **0/2/2/0**. Names: 3 curated +
+3 auto `func_`. Retro applied **4 of 4** (all DOC): permuter post-flip hand-scaffold workaround +
+`while(1)`-vs-goto compiler-constant hoist + `&base[i]` index-group + dual-IV levers (+2 hazard-index
+rows). **Cross-repo follow-up:** none (3 curated names came from Ghidra; the 3 `func_` helpers —
+`func_8004DAF4`=scrollback console-puts, `func_8004DC44`=scrollback→grid renderer, `func_8004DA4C`=min-
+width hex printer — are optional later naming-pass candidates). See `## Carry-overs` for the 2 carried
+fns. **Next natural slice:** the head `[0x28590]` (7 fns incl `func_8004D190` 808B), or the tail
+`[0x29260]` (9 FP-free debug fns).
+
 **S170 BANKED — `src/main/func_8004DD70.c` (3-fn slot-allocator module; the 16-aligned mid-slice
 `[0x29170,0x29260)` decomposed from the 25-fn FP-free debug subseg `[0x28590]`).** matched **+3**;
 md5-candidate **220 → 221**; asm subsegs **76 → 77** (the mid-slice decompose split off the `[0x29260]`
