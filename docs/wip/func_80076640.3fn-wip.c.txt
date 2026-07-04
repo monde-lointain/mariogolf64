@@ -1,0 +1,261 @@
+#include "common.h"
+#include "PR/gu.h"
+
+typedef struct {
+  f32 x, y, z;
+} Vec3f;
+
+extern Vec3f D_80105B6C;
+extern Vec3f D_80105F30;
+extern Vec3f D_800E1C50[];
+extern f32 D_800E1CB0[];
+extern s32 D_800E1CD0;
+extern f32 D_800E1CD4;
+extern f32 D_800E1CD8;
+extern f32 D_800E1CE0[4][4];
+extern f32 D_801B5530;
+extern u16 D_800FBDA6[];
+extern const f64 D_800D1868;
+extern u8 D_800D1870[];
+extern u8 D_800D187C[];
+extern u8 D_800D18A0[];
+extern u8 D_800D18BC[];
+extern u8 D_800D18C4[];
+extern u8 D_800D18D8[];
+extern const f64 D_800D18F0;
+
+void func_80076778(f32 mf[4][4], Vec3f* in, Vec3f* out);
+
+void func_80076640(f32 pitch, f32 yaw) {
+  f32 mtxPitch[4][4];
+  f32 mtxYaw[4][4];
+
+  f32 cosPitch = cosf(pitch);
+  do {
+    if (fabsf(cosPitch) < 0.1f) {
+      pitch += 0.34906584f;
+    }
+  } while (0);
+  D_800E1CD4 = pitch;
+  D_800E1CD8 = yaw;
+  guRotateF(mtxPitch, (f32)(s32)((f64)pitch * D_800D1868), -1.0f, 0.0f, 0.0f);
+  guRotateF(mtxYaw, (f32)(s32)((f64)yaw * D_800D1868), 0.0f, -1.0f, 0.0f);
+  guMtxCatF(mtxYaw, mtxPitch, D_800E1CE0);
+}
+
+void func_80076778(f32 mf[4][4], Vec3f* in, Vec3f* out) {
+  f32 x = in->x;
+  f32 y = in->y;
+  f32 z = in->z;
+  out->x = mf[0][0] * x + mf[1][0] * y + mf[2][0] * z + mf[3][0];
+  out->y = mf[0][1] * x + mf[1][1] * y + mf[2][1] * z + mf[3][1];
+  out->z = mf[0][2] * x + mf[1][2] * y + mf[2][2] * z + mf[3][2];
+}
+
+void func_8007680C(f32 param_1) {
+  f32 mtx[4][4];
+  f32 mtxA[4][4];
+  f32 mtxB[4][4];
+  f32 mtxC[4][4];
+  Vec3f out;
+  f32 half;
+  f32 negHalf;
+  f32 threeQ;
+  f32 negThreeQ;
+  f32 zLo;
+  f32 zHi;
+  f32 savedParam;
+  f32 minX;
+  f32 maxX;
+  f32 minY;
+  f32 maxY;
+  f32 buf;
+  f32 v;
+  f32 xd;
+  f32 yd;
+  f32 xzd;
+  f32 yzd;
+  f32 c17;
+  f32 c18;
+  f32 rMinX;
+  f32 rMaxX;
+  f32 rMinY;
+  f32 rMaxY;
+  f32 depth;
+  f32 sHalf;
+  f32 sNegHalf;
+  f32 sThreeQ;
+  f32 sNegThreeQ;
+  f32 xc;
+  f32 yc;
+  f64 diffA;
+  f64 diffB;
+  s32 i;
+
+  half = D_801B5530 * 0.5f;
+  negHalf = -half;
+  threeQ = half * 0.75f;
+  negThreeQ = negHalf * 0.75f;
+  zLo = 10.0f;
+  zHi = -10.0f;
+  savedParam = param_1;
+  minX = 30000.0f;
+  maxX = -30000.0f;
+  minY = 30000.0f;
+  maxY = -30000.0f;
+
+  if (D_800FBDA6[0] & 4) {
+    osSyncPrintf((const char*)D_800D1870, (f64)D_801B5530);
+  }
+
+  guRotateF(mtx, half, 0.0f, 1.0f, 0.0f);
+  guMtxCatF(D_800E1CE0, mtx, mtx);
+  for (i = 0; i < D_800E1CD0; i++) {
+    func_80076778(mtx, &D_800E1C50[i], &out);
+    if (out.x - D_800E1CB0[i] < minX) {
+      minX = out.x - D_800E1CB0[i];
+    }
+  }
+
+  guRotateF(mtx, negHalf, 0.0f, 1.0f, 0.0f);
+  guMtxCatF(D_800E1CE0, mtx, mtx);
+  for (i = 0; i < D_800E1CD0; i++) {
+    func_80076778(mtx, &D_800E1C50[i], &out);
+    buf = D_800E1CB0[i];
+    v = out.x + buf;
+    if (out.x + buf <= maxX) {
+      v = maxX;
+    }
+    maxX = v;
+  }
+
+  guRotateF(mtx, threeQ, -1.0f, 0.0f, 0.0f);
+  guMtxCatF(D_800E1CE0, mtx, mtx);
+  for (i = 0; i < D_800E1CD0; i++) {
+    func_80076778(mtx, &D_800E1C50[i], &out);
+    buf = D_800E1CB0[i];
+    v = out.y - buf;
+    if (minY <= out.y - buf) {
+      v = minY;
+    }
+    minY = v;
+  }
+
+  guRotateF(mtx, negThreeQ, -1.0f, 0.0f, 0.0f);
+  guMtxCatF(D_800E1CE0, mtx, mtx);
+  for (i = 0; i < D_800E1CD0; i++) {
+    func_80076778(mtx, &D_800E1C50[i], &out);
+    buf = D_800E1CB0[i];
+    v = out.y + buf;
+    if (out.y + buf <= maxY) {
+      v = maxY;
+    }
+    maxY = v;
+  }
+
+  if (D_800FBDA6[0] & 4) {
+    osSyncPrintf((const char*)D_800D187C, (f64)maxX, (f64)minX, (f64)maxY,
+                 (f64)minY);
+  }
+
+  c17 = (half - negHalf) * 0.017453294f - 1.5707964f;
+  rMinX = -minX / cosf(c17);
+  xd = sinf(negHalf * 0.017453294f) * rMinX;
+  xzd = cosf(negHalf * 0.017453294f) * rMinX;
+  rMaxX = maxX / cosf(c17);
+  xd = xd + sinf(half * 0.017453294f) * rMaxX;
+  xzd = xzd + cosf(half * 0.017453294f) * rMaxX;
+
+  c18 = (threeQ - negThreeQ) * 0.017453294f - 1.5707964f;
+  rMinY = -minY / cosf(c18);
+  rMaxY = maxY / cosf(-c18);
+  yd = sinf(negThreeQ * 0.017453294f) * rMinY + sinf(threeQ * 0.017453294f) * rMaxY;
+  yzd = cosf(negThreeQ * 0.017453294f) * rMinY + cosf(threeQ * 0.017453294f) * rMaxY;
+
+  if (D_800FBDA6[0] & 4) {
+    osSyncPrintf((const char*)D_800D18A0, (f64)xd, (f64)yd, (f64)xzd,
+                 (f64)yzd);
+  }
+
+  depth = yzd;
+  if (yzd <= xzd) {
+    depth = xzd;
+  }
+
+  minX = 30000.0f;
+  maxX = -30000.0f;
+  minY = 30000.0f;
+  maxY = -30000.0f;
+  guTranslateF(mtx, -xd, -yd, depth);
+  guMtxCatF(D_800E1CE0, mtx, mtx);
+  for (i = 0; i < D_800E1CD0; i++) {
+    func_80076778(mtx, &D_800E1C50[i], &out);
+    if (D_800FBDA6[0] & 4) {
+      osSyncPrintf((const char*)D_800D18BC, (f64)out.z);
+    }
+    buf = D_800E1CB0[i];
+    if (out.z - buf < zLo) {
+      zLo = out.z - buf;
+    }
+    if (zHi < out.z + buf) {
+      zHi = out.z + buf;
+    }
+    if (out.x - buf < minX) {
+      minX = out.x - buf;
+    }
+    v = out.x + buf;
+    if (out.x + buf <= maxX) {
+      v = maxX;
+    }
+    maxX = v;
+    v = out.y - buf;
+    if (minY <= out.y - buf) {
+      v = minY;
+    }
+    minY = v;
+    v = out.y + buf;
+    if (out.y + buf <= maxY) {
+      v = maxY;
+    }
+    maxY = v;
+  }
+
+  depth = (10.0f - zLo) + depth;
+  diffA = (f64)(depth - xzd);
+  sHalf = (f32)(diffA * tan((f64)(half * 0.017453294f)));
+  sNegHalf = (f32)(diffA * tan((f64)(negHalf * 0.017453294f)));
+  diffB = (f64)(depth - yzd);
+  sThreeQ = (f32)(diffB * tan((f64)(threeQ * 0.017453294f)));
+  sNegThreeQ = (f32)(diffB * tan((f64)(negThreeQ * 0.017453294f)));
+  xc = (minX + maxX) * 0.5f;
+  yc = (minY + maxY) * 0.5f;
+  if (xc < sNegHalf) {
+    xc = sNegHalf;
+  }
+  if (sHalf < xc) {
+    xc = sHalf;
+  }
+  if (yc < sNegThreeQ) {
+    yc = sNegThreeQ;
+  }
+  if (sThreeQ < yc) {
+    yc = sThreeQ;
+  }
+  xd = xd + xc;
+  yd = yd + yc;
+  guRotateF(mtxA, (f32)(s32)((f64)D_800E1CD4 * D_800D18F0), 1.0f, 0.0f, 0.0f);
+  guRotateF(mtxB, (f32)(s32)((f64)D_800E1CD8 * D_800D18F0), 0.0f, 1.0f, 0.0f);
+  guMtxCatF(mtxA, mtxB, mtxC);
+  depth = savedParam - depth;
+  guMtxXFMF(mtxC, xd, yd, depth, &D_80105B6C.x, &D_80105B6C.y, &D_80105B6C.z);
+  guMtxXFMF(mtxC, xd, yd, depth + 10.0f, &D_80105F30.x, &D_80105F30.y,
+            &D_80105F30.z);
+  if (D_800FBDA6[0] & 4) {
+    osSyncPrintf((const char*)D_800D18C4, (f64)D_80105B6C.x, (f64)D_80105B6C.y,
+                 (f64)D_80105B6C.z);
+    if (D_800FBDA6[0] & 4) {
+      osSyncPrintf((const char*)D_800D18D8, (f64)D_80105F30.x,
+                   (f64)D_80105F30.y, (f64)D_80105F30.z);
+    }
+  }
+}
