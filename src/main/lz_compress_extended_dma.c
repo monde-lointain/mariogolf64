@@ -6,6 +6,7 @@ extern s8 g_terrain_vtx_xform_mode;
 extern s32 scenario_mode_id;
 extern s32 D_801B6098;
 extern const char D_800D1380[]; /* "putter%d:course%d:hole%d\n" */
+extern u32 D_800C3FA0;          /* LCG scratch-RNG state */
 
 /* Hole-terrain loader thread + its stack (overlay 4 data). */
 extern OSThread D_800E1A50;
@@ -30,11 +31,26 @@ extern void func_80069D08(void*);
 INCLUDE_ASM("asm/nonmatchings/main/lz_compress_extended_dma",
             lz_compress_extended_dma);
 
-INCLUDE_ASM("asm/nonmatchings/main/lz_compress_extended_dma", func_80068F00);
+/*
+ * A small LCG scratch RNG (state D_800C3FA0). The two helpers are GCC nested
+ * functions of func_80068F4C: only this parent calls them, and each call site
+ * materializes the static chain ($v0 = &frame) before the jal, so they emit
+ * with the chain prologue (dead `sw v0,0(sp)`) at 0x80068F00 / 0x80068F18 ahead
+ * of the parent (0x80068F4C). See
+ * docs/hazards.md#nested-function-static-chain-spill. The parent is called
+ * externally by func_800695F8, so it stays top-level.
+ */
+void func_80068F4C(s32 arg0, u32 seed) {
+  void rng_seed(u32 v) { D_800C3FA0 = v; } /* 0x80068F00 */
+  u32 rng_next(void) {
+    return D_800C3FA0 = D_800C3FA0 * 0x5D588B65 + 1;
+  } /* 0x80068F18 */
 
-INCLUDE_ASM("asm/nonmatchings/main/lz_compress_extended_dma", func_80068F18);
-
-INCLUDE_ASM("asm/nonmatchings/main/lz_compress_extended_dma", func_80068F4C);
+  rng_seed(seed);
+  arg0 += rng_next();
+  rng_seed(arg0);
+  rng_next();
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/lz_compress_extended_dma", func_80068F98);
 
