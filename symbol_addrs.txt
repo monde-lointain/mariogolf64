@@ -636,4 +636,5 @@ heap3_add_region = 0x8004E184; // type:func
 heap3_init = 0x8004E1E0; // type:func
 heap3_get_total = 0x8004E27C; // type:func
 heap3_get_largest_free = 0x8004E288; // type:func
+heap3_alloc = 0x8004E2DC; // type:func
 heap3_free = 0x8004E47C; // type:func

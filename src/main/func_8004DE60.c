@@ -19,10 +19,12 @@ extern Slot D_800DC6E0[];
 extern char D_800CCA90[];
 extern char D_800CCAAC[];
 extern char D_800CCAD0[];
-/* D_800DC6E0[3].total, referenced as its own offset-0 symbol so a read-modify-
- * write re-materializes %hi/%lo (matching the ROM) instead of CSE-folding the
- * D_800DC6E0+0x58 address into a base register. */
+/* D_800DC6E0[3].total (0x800DC738) and .unk_14 (0x800DC73C), referenced as
+ * their own offset-0 symbols so a store / read-modify-write re-materializes
+ * %hi/%lo (matching the ROM) instead of CSE-folding the D_800DC6E0+0x58 address
+ * into a base register. */
 extern s32 D_800DC738;
+extern s32 D_800DC73C;
 
 s32 heap_get_largest_free(s32 i) { return D_800DC6E0[i].unk_14; }
 
@@ -177,21 +179,73 @@ s32 heap3_get_largest_free(void) {
   return max;
 }
 
-/* func_8004E2DC is heap_alloc for slot 3 (best-fit over D_800DC6E0[3]'s free
- * list, same block-split + 0x12345678 guard as heap_alloc, ra-capture for the
- * OOM osSyncPrintf). CARRY: the clean structural source (drop the `head` local,
- * use `p != &D_800DC6E0[3]` inline) matches 104/104 instrs and every register
- * EXCEPT a 6-value caller-saved rotation driven by mask->$a0. Subagent +
- * global.c: mask is live across the whole fn (conflicts with all loop values)
- * and copy-prefers $a0 (the osSetIntMask(mask) arg), which prune_preferences
- * reserves, so mask takes $a0; the ROM needs mask->$t1 (bsize->$a0), reachable
- * only if bsize carries its own $a0 copy-pref (synthetic). The matched
- * variable-index heap_alloc escapes this because its `head` is callee-saved
- * ($s3, crosses the osSetIntMask call), leaving 5 caller-saved competitors; the
- * slot-3 constant head is a 6th. No clean trigger; permuter-escalation only
- * (register hints are -O2 no-ops). See #pervasive-regalloc-classical-main /
- * #loop-weight-and-live-length-regalloc-steering. */
-INCLUDE_ASM("asm/nonmatchings/main/func_8004DE60", func_8004E2DC);
+/* heap3_alloc is heap_alloc specialized to slot 3 (best-fit over
+ * D_800DC6E0[3]'s free list, same block-split + 0x12345678 guard as heap_alloc,
+ * ra-capture for the OOM osSyncPrintf). The sentinel is written inline (`p !=
+ * &D_800DC6E0[3]`, no `head` local): with the sentinel expressed as an offset
+ * off D_800DC6E0[3], CSE derives it from the `.next` load base (one `addiu
+ * v1,v1,-8`), which lets the register allocator keep the sentinel in $v1 for
+ * the entry guard and copy it to $t0 for the loop (`move t0,v1`) exactly as the
+ * ROM does, with the second 0x7FFFFFFF in $a3. A precomputed `head` local (or
+ * the &D_800DC730-8 anchor idiom) instead pins the sentinel into one loop reg
+ * with no copy, missing that instruction. */
+void* heap3_alloc(u32 need) {
+  u32 ra;
+  u32 best_rem, minsize, bsize;
+  Slot *best, *p;
+  OSIntMask mask;
+
+  __asm__ __volatile__("addu %0, $31, $0" : "=r"(ra));
+  best_rem = 0;
+  mask = osSetIntMask(1);
+  need = (need + 0x17) & ~7;
+  minsize = 0x7FFFFFFF;
+  best = NULL;
+  for (p = D_800DC6E0[3].next; p != &D_800DC6E0[3]; p = p->next) {
+    if (p->unk_04 == 0) {
+      bsize = p->size;
+      if (bsize >= need) {
+        if (bsize < minsize) {
+          if ((best_rem < minsize) & (minsize != 0x7FFFFFFF)) {
+            best_rem = minsize;
+          }
+          minsize = bsize;
+          if (best_rem < minsize - need) {
+            best_rem = minsize - need;
+          }
+          best = p;
+        } else if (best_rem < bsize) {
+          best_rem = bsize;
+        }
+      }
+    }
+  }
+  D_800DC73C = best_rem;
+  if (best == NULL) {
+    osSetIntMask(mask);
+    osSyncPrintf(D_800CCA90, ra);
+    return NULL;
+  }
+  if ((u32)(best->size - need) >= 0x11) {
+    u32 sz;
+    Slot* split;
+    D_800DC738 -= need;
+    sz = best->size;
+    split = (Slot*)((u8*)best + need);
+    split->unk_04 = 0;
+    split->size = sz - need;
+    best->next->prev = split;
+    split->next = best->next;
+    best->next = split;
+    split->prev = best;
+    best->size = need;
+  } else {
+    D_800DC738 -= minsize;
+  }
+  best->unk_04 = 0x12345678;
+  osSetIntMask(mask);
+  return &best->total;
+}
 
 /* heap_free for slot 3 (the coalescing free that mirrors heap_free), with the
  * caller's return address captured for the double-free osSyncPrintf. */
