@@ -102,7 +102,7 @@ segments:
       - [0x1EEF0, c, main/func_80043AF0]
       - [0x1F020, asm]
       - [0x207E0, asm]
-      - [0x28590, asm]
+      - [0x28590, c, main/func_8004D190]
       - [0x28DC0, c, main/print_string_at_grid]
       - [0x29170, c, main/func_8004DD70]
       - [0x29260, c, main/func_8004DE60]
