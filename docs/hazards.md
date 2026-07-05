@@ -87,6 +87,7 @@ The hazard families below group the sections that follow. Each links to its exis
 - [return-type is load-bearing](#return-type-is-load-bearing)
 - [struct-access-folding-changes-scheduling](#struct-access-folding-changes-scheduling)
 - [offset-0-symbol re-materialization (fixed-global field RMW)](#offset-0-symbol-re-materialization-fixed-global-field-rmw)
+- [volatile-view CSE reload (force a just-stored global to reload)](#volatile-view-cse-reload-force-a-just-stored-global-to-reload)
 - [mem-in-struct scheduling lever (model a fixed global as a struct/array member)](#mem-in-struct-scheduling-lever-model-a-fixed-global-as-a-structarray-member)
 - [call-result a0-vs-v0 single-allocno (force a scratch reg via both-arm reuse)](#call-result-a0-vs-v0-single-allocno-force-a-scratch-reg-via-both-arm-reuse)
 - [compiler-source fan-out (escalation above the permuter)](#compiler-source-fan-out-escalation-above-the-permuter)
@@ -4005,7 +4006,8 @@ agents iterating from the isolated base — it turned a 3×-"irreducible" verdic
 **Provenance.** S166 (source-side loop-weight/live-length levers; cracked `lz_decompress_simple`, the
 project's hardest wall, 8600→0, carried and declared "irreducible" 3×). S176 (Axis 3 param-in-place +
 the `-dg`/`-dl` diagnostic; cracked `heap_alloc`'s 3-way `{best_rem,best,need}` permutation the
-permuter plateaued on at 605).
+permuter plateaued on at 605). S178 (Axis-5 define-point liveness + inline-sentinel; cracked
+`heap3_alloc`, the S177 mask-rotation "wall", byte-exact with no permuter).
 
 ## permuter goto-backedge liveness unsound (var-reuse passes corrupt live-across-backedge values)
 
@@ -4039,13 +4041,28 @@ not; S177 `func_8004E2DC` = WALL).** When a call-crossing loop-invariant (e.g. a
 one extra competitor flips a call-argument copy-preference: with N competitors an interrupt-`mask`
 (live whole-fn, copy-prefers `$a0` from `osSetIntMask(mask)`) loses/wins `$a0` differently. The
 variable-index `heap_alloc` matched (5 caller-saved competitors, `mask`→`$a0`); the slot-3 constant
-`heap_alloc` has 6, and the ROM's 6-value allocation needs `mask`→`$t1` / `bsize`→`$a0` — reachable
-only if `bsize` carries its OWN `$a0` copy-pref (passing it as a call's arg0), which is synthetic. No
-clean lever (Axis-1..3 all fail: the pref is fixed by the source's constant-ness, not by weight,
-in-place mutation, or param-hood; `global.c` `prune_preferences` reserves `$a0` for `mask` regardless).
-**Diagnosis:** count the caller-saved values live across the loop; a constant that "should" be a base
-pointer but is caller-saved is the tell. Escalation = cross-project matched-corpus mining (S174), not
-another single-fn permuter run.
+`heap_alloc` has 6, and the ROM's 6-value allocation needs `mask`→`$t1` / `bsize`→`$a0`. **S177 declared
+this a WALL ("no clean lever; carry"). S178 REFUTED it — the clean lever is Axis-5 below.** The S177
+error was fixating on `bsize`'s missing `$a0` copy-pref and testing only "force head callee-saved" (the
+wrong polarity); the real steer is head's DEFINE POINT relative to the call. **Diagnosis:** count the
+caller-saved values live across the loop; a constant that "should" be a base pointer but is caller-saved
+is the tell.
+
+**Axis-5: define-point liveness (a constant crosses a call → callee-saved; define it AFTER the call to
+keep it caller-saved, S178 `func_8004E2DC`).** Whether a re-materializable constant loop-invariant
+(`head = &heap_slots[3]`) is caller- or callee-saved is controlled by WHERE in the source it is first
+materialized relative to the guarding call. Define it BEFORE `osSetIntMask(1)` and GCC keeps it live
+across the call → callee-saved `$s3` → bumps `ra` to a 6th saved reg → displaces `mask` onto `$a0`
+(the S177 near-miss). Define it AFTER the call and it stays caller-saved → `ra`→`$s3` → `mask`→`$t1`
+(the ROM). So MOVE the `head = &arr[K]` (and any anchor-pointer setup) to just below the call. This is
+complementary to Axis-3 (which controls a call-crossing PARAM); Axis-5 controls a call-crossing CONSTANT
+by its materialization point. **Then close the residual head↔const swap with the INLINE-SENTINEL form:**
+drop the `head` local entirely and write the loop guard as `block != &arr[K]` off the same base as the
+`.next` load, so CSE derives the sentinel with one `addiu v1,v1,-8` and the allocator copies it to the
+loop reg (`move t0,v1`) exactly as the ROM does (a precomputed `head` local, OR a `&arr[K]-off` anchor,
+instead pins the sentinel into one reg with no copy, one instruction short). S178 `heap3_alloc` banked
+byte-exact from these two levers — no permuter, no cross-project mining. Verify with the `-dg` dump:
+`mask` should show hard-reg 9 (`$t1`), not 4 (`$a0`).
 
 ## return-type is load-bearing
 
@@ -4165,6 +4182,52 @@ re-materialize (no CSE across the branch). This is the INVERSE of
 struct member to change scheduling); here you split a struct field OUT to its own symbol to change the
 addressing form. Provenance: S177 `heap3_free`, found by a GCC-source subagent fan-out (see
 [#compiler-source-fan-out-escalation-above-the-permuter](#compiler-source-fan-out-escalation-above-the-permuter)).
+
+**Naming the alias + splat overlap (S178).** When the alias is promoted to a curated name, the
+offset-0 symbol overlaps the enclosing array symbol (e.g. `heap3_total_free`@0x800DC738 sits inside
+`heap_slots[4]`@0x800DC6E0). splat TOLERATES the overlap (it truncates the enclosing symbol with a
+`Range check triggered` WARNING and keeps the alias separate), but to keep `make extract` clean, size
+the enclosing symbol to STOP at the first alias: `heap_slots = 0x800DC6E0; // size:0x58` +
+`heap3_total_free = 0x800DC738; // size:0x4` + `heap3_largest_free = 0x800DC73C; // size:0x4` partitions
+the 0x60 array's last two words as the aliases with no warning. The C array-form access
+(`heap_slots[3].total_free` = `heap_slots+0x58`) still link-resolves through the addend; only the
+compiler-chosen form differs (verify by full-make SHA-1).
+
+## volatile-view CSE reload (force a just-stored global to reload)
+
+**Trigger:** a clean classical/mirror fn is byte-exact except the ROM **RELOADS a global struct field
+right after storing it**, with NO intervening varying-address store to invalidate it — most often a
+self-referential list init `x.prev = &x; x.next = x.prev;` where the ROM does `sw v1,prev; lw
+v1,prev; sw v1,next` (reload) but the build does `sw v1,prev; sw v1,next` (forwards v1, one load
+short). Distinct from the child-fn case where an intervening `node->field = …` store through a runtime
+pointer legitimately triggers the reload via CSE varying-address invalidation.
+
+**Mechanism (KMC GCC 2.7.2, cse.c).** Store-to-load forwarding of a plain absolute-addressed global IS
+the -O2 default: a store enters its dest MEM into the CSE table equivalenced to the stored value
+(`cse.c:7358`), so a later read of the same `symbol+0` address forwards the register — no reload. A
+faithful `next = prev` therefore reuses the stored reg. There is NO non-volatile source that both keeps
+the absolute stores AND reloads: forcing the reload by un-aliasing the read (separate symbol) makes the
+scheduler HOIST the read above the store (stale value), and register pressure does not trigger it.
+
+**Lever — a per-ACCESS volatile view.** Cast the lvalues to `volatile`-qualified pointers so the struct
+itself stays non-volatile (siblings unaffected):
+```c
+*(volatile s32*)&x.size  = 0;               /* volatile STORE: pins ahead of the reload */
+*(volatile s32*)&x.state = HEAP_BLOCK_HEAD; /* volatile STORE */
+*(T* volatile*)&x.prev   = &x;              /* volatile STORE */
+x.next = *(T* volatile*)&x.prev;            /* volatile READ = the RELOAD (do_not_record) */
+x.total = 0;                                 /* non-volatile: fills the reload's load-delay slot */
+```
+A `MEM_VOLATILE_P` read hits `do_not_record` (`cse.c:1942`) so it is never looked up/forwarded → the
+load survives as the reload, AND (unlike the separate-symbol trick) it keeps the true store→read
+dependency so the load stays adjacent to the store in the right register. **The non-obvious part
+(scheduling):** GCC 2.7.2's list scheduler creates NO dependency between a volatile store and
+independent NON-volatile stores, so any field that must schedule AHEAD of the reload (here size/state)
+must ALSO be volatile — else it floats down into the reload's load-delay shadow. Leave the delay-slot
+filler field (here total) non-volatile. **Provenance:** S178 `heap3_init` (the S177 CSE-reload "wall",
+refuted). Found by the ADVERSARIAL agent of a two-agents-per-wall fan-out
+([#compiler-source-fan-out-escalation-above-the-permuter](#compiler-source-fan-out-escalation-above-the-permuter));
+the primary cse-only agent tried volatile-on-prev-only, saw it float, and wrongly declared "unreachable".
 
 ## mem-in-struct scheduling lever (model a fixed global as a struct/array member)
 
@@ -4457,10 +4520,26 @@ four S177 near-misses it flipped two apparent-walls to CLEAN banks and proved tw
 caught that the "1 word short / needs a synthetic no-op" verdict was a `-S` reorder-mode MISREAD (the
 clean source already matched on the assembled object; see the Assembler-differences `-S` note). Without
 the fan-out, (a) would have carried and (b) would have banked an unnecessary `p = p + 0` no-op (banned).
-(c)+(d) `func_8004E1E0` / `func_8004E2DC` — agents PROVED the CSE-reload and mask-rotation walls from
-cse.c/global.c, so they carry fast with an exact mechanism rather than another grind. **Doctrine: a
-regalloc/CSE/scheduling near-match that resists 2-3 hand levers routes here, before the permuter and
-before "wall".** The empirical agent must judge the ASSEMBLED `.o`, never `-S`.
+(c)+(d) `func_8004E1E0` / `func_8004E2DC` — agents claimed to PROVE the CSE-reload and mask-rotation
+walls from cse.c/global.c. **Both proofs were WRONG (S178 banked both);** see the two-agents-per-wall
+correction below. **Doctrine: a regalloc/CSE/scheduling near-match that resists 2-3 hand levers routes
+here, before the permuter and before "wall".** The empirical agent must judge the ASSEMBLED `.o`, never `-S`.
+
+**Two agents per wall — never trust a single "unreachable", even a source-proved one (S178).** S177's
+mechanism agents PROVED `func_8004E1E0` (CSE reload) and `func_8004E2DC` (mask rotation) unreachable
+from the compiler source; S178 ran the fan-out again with **two agents per wall — a primary and an
+adversarial one attacking from orthogonal angles (volatile / aliasing / scheduling / liveness)** — and
+the adversarial agent cracked BOTH, byte-exact. A source-cited "unreachable" is a HYPOTHESIS, not a
+proof: the primary agent proved only that ITS candidate class forwards/allocates a certain way, not
+that no faithful C reaches the ROM. The levers it missed: (c) a per-access **volatile view** of the
+reloaded field ([#volatile-view-cse-reload](#volatile-view-cse-reload)) — the primary tried
+volatile-on-one-field-only and saw it float, without also volatiling the fields that must schedule
+ahead; (d) the **define-after-call** caller-saved placement plus an **inline sentinel** (no `head`
+local) so CSE derives it from the load base and copies it to the loop reg — the primary tested only
+"force head callee-saved" (the wrong polarity). **Doctrine: require a second, adversarial agent before
+accepting any "unreachable" verdict; each finds what the other's candidate set structurally cannot.**
+Both walls were S177 carries the BACKLOG had flagged "do NOT retry without a new mechanism" — the
+second-agent fan-out WAS that mechanism.
 
 ---
 
@@ -4664,6 +4743,12 @@ scan, and the suggestion machinery, so it cannot reorder the dividend-vs-magic a
 no `PROMOTE_MODE` on MIPS → no stripping SUBREG; the magic is always a fresh `copy_to_mode_reg` pseudo,
 `optabs.c:474`) but per (b) allocation never reads it, so reaching it is moot. A specific hard reg needs
 `register T x asm("$N")` (routes `toplev.c:2601` → `varasm.c:536`), which is the unfaithful hack above.
+**S178 re-confirmed the split empirically:** on `func_8004E2DC`, plain `register OSIntMask mask` was a
+`.text` no-op, but `register OSIntMask mask asm("$9")` DID force `mask`→`$t1` at -O2 (all registers then
+matched the ROM, leaving only a 2-instr scheduler swap). So `asm("$N")` is a valid DIAGNOSTIC to confirm
+"which register does the ROM want" — but it stays an unfaithful hack for a bank (and here still left a
+residual), so a clean SOURCE lever must reproduce the same allocation (S178 did it via the
+[define-after-call caller-saved placement](#loop-weight-and-live-length-regalloc-steering) + inline sentinel).
 
 **Escalation.** For a same-toolchain reg-alloc wall, mine the OTHER N64 decomps for a **matched** analog
 of the exact pattern (see `#compiler-source-fan-out-escalation-above-the-permuter` for the cross-project

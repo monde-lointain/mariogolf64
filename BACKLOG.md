@@ -48,6 +48,25 @@ tell) is carved to its LIBRARY tree (`libnusys/<file>`), not `main/<stem>` — y
 placement unchanged (see `CLAUDE.md` path convention). A per-FILE -O0 override is the one mk edit a
 boot/SDK-glue TU may need.
 
+**S178 BANKED — `src/main/func_8004DE60.c` slot-3 heap walls → md5-candidate (the 3 S177 "unreachable"
+walls) + whole heap module rewritten to Code Complete.** matched **+3** (`heap3_add_region`,
+`heap3_init`, `heap3_alloc`); md5-candidate **221 → 222** (file now 0 `INCLUDE_ASM`); 0 carries.
+**Refuted BOTH S177 subagent-"proved" walls via a PO-directed two-agents-per-wall GCC-source fan-out**
+(the adversarial agent per wall found what the primary's candidate set structurally couldn't): (1) the
+CSE-reload wall (`heap3_init`/`heap3_add_region`) fell to the NEW **`#volatile-view-cse-reload`** lever
+(per-access `volatile` view forces the `next=prev` reload the primary's volatile-one-field test
+rejected; volatile size/state pin them ahead of the load-delay shadow); (2) the mask-rotation wall
+(`heap3_alloc`, S177 Axis-4 "no clean lever") fell to **Axis-5 define-point liveness** (define `head`
+AFTER `osSetIntMask(1)` → caller-saved → mask→$t1) + the **inline sentinel** (no head local → CSE
+`move t0,v1`). No permuter, no cross-project mining. Then a **Code Complete rewrite** of the whole 2-file
+heap module (new `src/main/heap.h` ADT; `Slot`→`HeapBlock`, `D_800DC6E0`→`heap_slots`, `unk_04`→`state`,
+magic→`HEAP_*` constants, offset-0 aliases documented) — byte-exact on a clean-from-scratch build.
+Quality **0/0/0/0** (and cleared 3 prior carries). Retro applied **4 of 4** (new `#volatile-view-cse-reload`
++ `#loop-weight` Axis-5 + two-agents-per-wall doctrine + `register asm("$N")` S178 confirm). Cross-repo
+follow-up: the 3 new fn names + renamed globals → `sync_decomp_names.py --import-from-decomp`.
+**Next natural slice:** the fresh main-segment **display-list** packs (see the forward note in
+`## Carry-overs`) — `#display-lists` classical track, F3DEX2 profile, not a mirror.
+
 **S177 MIXED-PARTIAL — `src/main/func_8004DE60.c` slot-3 heap module, 6/9 (+3 this sprint).** matched
 **+3**; md5-candidate **221 → 221** (file has 3 stubs → not md5-candidate); asm subsegs **77 → 76**
 (recombined the 9-fn pack into one object, removing `[0x295E0, asm]`). Banked byte-exact C:
@@ -2882,33 +2901,14 @@ by `/sprint-plan`:
   `NU_CONT_THREAD_ID=6` vs MG64's 5), and that surfaces only at first build unless reconciled here.
   A near-free retry missing any of these is a half-scoped spike — finish the scope before deferring.
 
-- **(S177 MIXED-PARTIAL — carried; 6 of 9 banked)** `src/main/func_8004DE60.c` (slot-3 heap module,
-  the whole 9-fn pack RECOMBINED into one object). BANKED byte-exact C: S176 `heap_get_largest_free`,
-  `heap_alloc`, `heap_free`; S177 `heap3_get_total` (0x8004E27C), `heap3_get_largest_free` (0x8004E288),
-  `heap3_free` (0x8004E47C). THREE `INCLUDE_ASM` stubs remain → NOT md5-candidate. Subseg is
-  `[0x29260, c, main/func_8004DE60]` spanning 0x8004DE60..0x8004E5A0; all refs placed externs (incl. the
-  offset-0 alias `D_800DC738`), NO carve; permuter dirs live for E2DC (b64literal-wrapped). Both remaining
-  fns are **subagent-verified WALLS** (retry needs a genuinely new mechanism, not another same-fn dive):
-  - **func_8004E184 + func_8004E1E0 (0x8004E184 + 0x8004E1E0 — NESTED PAIR, atomic).** The child banks
-    perfectly as a `void func_8004E184(Slot* node, void* end)` nested in the parent (dead static-chain
-    `sw v0,0(sp)` emerges; recombine lands it at 0x8004E184 mid-object). The **PARENT is the wall**:
-    `func_8004E1E0`'s init `D_800DC6E0[3].next = D_800DC6E0[3].prev` is a ROM RELOAD of D_800DC734 that
-    KMC GCC 2.7.2 -O2 value-FORWARDS for any faithful C — a CSE varying-address invalidation (cse.c)
-    mutually exclusive with the ROM's absolute field stores, register-pressure-tested negative. Permuter
-    also blocked (pycparser rejects nested fns). **Do NOT bank func_8004E184 alone.** Retry needs a new
-    mechanism (cross-project matched-corpus mining for an absolute-store-plus-reload analog); do NOT
-    re-run structured/pointer/do-while variants (S177 exhausted). See `#nested-function-static-chain-spill`.
-  - **func_8004E2DC (0x8004E2DC, 416B — heap_alloc slot3; MASK-ROTATION WALL).** The clean structural
-    source (drop the `head` local → `p != &D_800DC6E0[3]` inline) is 104/104 instrs + every register
-    EXCEPT a 6-value caller-saved rotation forced by `mask`→`$a0` (global.c `prune_preferences` reserves
-    the `osSetIntMask(mask)` arg-reg). The matched variable-index `heap_alloc` escapes via callee-saved
-    `head` ($s3); the slot-3 constant head is a 6th caller-saved competitor (see
-    `#loop-weight-and-live-length-regalloc-steering` Axis-4). No clean lever; register hints are -O2
-    no-ops. Retry = cross-project matched-corpus mining (S174), NOT a single-fn permuter grind. Structural
-    base saved (isolated `nonmatchings/func_8004E2DC`). See `#caller-saved-competitor-count` /
-    `#pervasive-regalloc-classical-main`.
-  - Next natural slice = a FRESH main-segment pack (do NOT re-attempt these two walls without a new lever;
-    e.g. `func_8004D190` 7fn `[0x28590]`, `func_80052250` 9fn, or the `func_8004E5A0` one-tu 3-fn pack).
+- **(S178 forward note — NOT a carry, the S177 heap walls are all BANKED; see Active phase.)** The next
+  natural main-segment slice is a **fresh display-list pack**: the whole region after the heap module is
+  DL-building game code (verified S178 — `func_800328E0` @0xDCE0 is a false coddog-mirror to
+  nucontgbpakmgr.c; it and `func_8004D190` @0x28590 / `func_8004E5A0` @0x299A0 all build GBI display
+  lists: RDPPIPESYNC/MOVEWORD/MOVEMEM/SETOTHERMODE/SETCOMBINE command words). Route to the classical
+  **`#display-lists`** track (F3DEX2 profile via mk/main.mk; gfxdis reconstruction), NOT a mirror. The
+  DCE0 pack (6-fn one-tu, ~1408B, data refs `D_800B78xx` extern no-carve, callees osVirtualToPhysical +
+  set_camera_matrices_fixed placed) is the smallest coherent DL bite.
 
 - **(S175 MIXED-PARTIAL — carried; 5 of 6 banked; new project-best 13530/13235, `register` ruled out)** `src/main/print_string_at_grid.c` (the grid-print
   debug cluster `[0x28DC0]`). BANKED byte-exact C (S171): `check_and_print_grid`, `func_8004DA4C`,
