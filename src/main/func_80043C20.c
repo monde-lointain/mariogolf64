@@ -62,6 +62,12 @@ extern u8 D_800CC520[];
 extern u8 g_terrain_vtx_xform_mode;
 extern s32 func_8021EA48(void);
 extern void play_sound_effect(s32 sfx, s32 arg1, s32 arg2);
+extern void* heap3_alloc(s32 size);
+extern void heap3_free(void* ptr);
+extern void func_80028110(void* buf, s32 len);
+s32 predict_shot_distance_variant(s32 idx, s32 category);
+extern char D_800CC370[], D_800CC374[], D_800CC388[], D_800CC3EC[], D_800CC40C[];
+extern char D_800CC454[], D_800CC474[], D_800CC478[], D_800CC480[], D_800CC484[], D_800CC488[];
 
 s32 resolve_club_terrain_mask(s32 arg0, void* arg1);
 s32 resolve_shot_quality_table(s32 arg0, s32 arg1, s32 arg2);
@@ -70,9 +76,69 @@ void func_80043C64(void);
 ClubShot* get_shot_data(void);
 ClubShot* get_club_param(u32 id);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80043C20", func_80043C20);
+// Debug club-data dump. func_80043C20 is a GCC nested string-appender (static chain = &line, with
+// buf_pos/buf_end reached at chain+0x100/+0x104); GCC 2.7.2 emits it immediately before this parent,
+// landing it at the pack-lead vram 0x80043C20.
+void func_80043C64(void) {
+  char line[0x100];
+  u8* buf_pos;
+  u8* buf_end;
+  u8* buf_start;
+  ClubShot* cs;
+  s32 club;
+  s32 category;
+  s32 power;
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80043C20", func_80043C64);
+  void func_80043C20(u8* s) {
+    for (;;) {
+      u8 c = *s++;
+      if (c == 0) {
+        break;
+      }
+      if (buf_pos < buf_end) {
+        *buf_pos++ = c;
+      }
+    }
+  }
+
+  buf_start = heap3_alloc(0x8000);
+  buf_pos = buf_start;
+  buf_end = buf_start + 0x8000;
+  if (buf_start == NULL) {
+    __assert(D_800CC370, D_800CC374, 0x21F);
+  }
+  sprintf(line, D_800CC388);
+  func_80043C20((u8*)line);
+  club = 0;
+  do {
+    cs = &D_800BB258[club];
+    sprintf(line, D_800CC3EC, cs->dist[0], cs->dist[1], cs->dist[2], cs->unk28, cs->unk2A, cs->unk2C);
+    club++;
+    func_80043C20((u8*)line);
+  } while (club < 0xFC);
+  sprintf(line, D_800CC40C);
+  func_80043C20((u8*)line);
+  func_80043C20((u8*)D_800CC454);
+  category = 0;
+  do {
+    func_80043C20((u8*)D_800CC474);
+    power = 1;
+    do {
+      sprintf(line, D_800CC478, predict_shot_distance_variant((power << 8) / 30, category));
+      func_80043C20((u8*)line);
+      power++;
+    } while (power < 0x1F);
+    func_80043C20((u8*)D_800CC480);
+    category++;
+  } while (category < 3);
+  func_80043C20((u8*)D_800CC484);
+  line[0] = 0x1A;
+  line[1] = 0;
+  func_80043C20((u8*)line);
+  sprintf(line, D_800CC488);
+  func_80028110(line, buf_pos - buf_start);
+  heap3_free(&buf_start);
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80043C20", lerp_int_v2);
 
