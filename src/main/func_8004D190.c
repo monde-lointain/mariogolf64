@@ -2,12 +2,28 @@
 
 extern s8 flag;
 extern u8 D_800DAF60[];
+extern u16 D_800BE6E0[];
+
+void print_string_at_grid(char* str, s32 col, s32 row);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_8004D190", func_8004D190);
 
+/* func_8004D4B8: string -> glyph-tile blit. CARRIED (S182) as a
+ * #dead-frame-reload-artifact-regalloc-wall: structurally byte-exact except the
+ * target reserves a dead 8-byte frame + the reg permutation it drives.
+ * Near-match + root cause in docs/wip/func_8004D4B8.near-match.c.txt. */
 INCLUDE_ASM("asm/nonmatchings/main/func_8004D190", func_8004D4B8);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_8004D190", func_8004D580);
+void func_8004D5F0(s32 c, s32 x, s32 y);
+
+void func_8004D580(char* str, s32 x, s32 y) {
+  print_string_at_grid(str, x, y);
+  while (*str != 0) {
+    func_8004D5F0(*str, x, y);
+    str++;
+    x++;
+  }
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_8004D190", func_8004D5F0);
 
