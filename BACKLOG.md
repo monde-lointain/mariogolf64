@@ -56,6 +56,35 @@ tell) is carved to its LIBRARY tree (`libnusys/<file>`), not `main/<stem>` — y
 placement unchanged (see `CLAUDE.md` path convention). A per-FILE -O0 override is the one mk edit a
 boot/SDK-glue TU may need.
 
+**Test-tools hygiene (S184, deferred, off-cadence golden-gated):** `make test-tools` carried 2
+PRE-EXISTING non-golden failures, surfaced (not introduced) at the S184 review: (1) a broken
+`## Playbook index` anchor `cse-make-regs-eqv-branch-fold...` in `docs/hazards.md` — the heading uses
+`make_regs_eqv` (underscores) but the index link + the `CLAUDE.md`/`pick_target` citations use
+`make-regs-eqv` (hyphens); reconcile in LOCKSTEP per the prompt-surface-as-API rule (heading is cited, so
+fixing it means updating every reference). (2) `test_coddog_suppresses_maybe_upstream` KeyError (stale
+fixture — the fn it probes changed state). The 4 `pick_target` live-state goldens were regenerated at the
+S184 review (`REGEN_GOLDEN=1`, banking-only drift from S182–S184); consider making them fixture-based so
+they stop drifting each banking sprint.
+
+**S184 MIXED-PARTIAL — `src/main/func_80043C20.c` main-segment [0x1F020] golf-shot/club logic pack, 13/21
+(+13 this sprint).** matched **+13** — the **highest single-file classical bank to date**. BANKED
+byte-exact C: 7 getters/wrappers (`get_club_distance_slot`/`get_club_param`/`get_shot_data`/
+`get_shot_param`/`get_shot_progress`/`func_80044A8C`/`func_80044C7C`) + `func_800444B8`/`func_80044470`
+nested pair (init loop + /14 lookup) + `func_80044254` (club-param init) + `func_80044FDC`
+(auto-select-club) + `func_80043C64`/`func_80043C20` nested formatter pair. NEW reusable levers (all
+applied to docs this review): **`combine_givs` base-IV de-bias** (`&ARR[i]` recompute inside the loop vs
+carried `p++`), the **nested-function bank-the-pair recipe** confirmed on 4 nested fns (child emits before
+parent; pure-leaf still framed when nested), **`for(;;)`+`break`** for an un-rotated top-test loop, and the
+**/14 shared-magic** shift. **7-way parallel subagent fan-out** over the hard tail (decomp_loop is
+parallel-safe across fns; orchestrator integrates + full-makes serially). **8 CARRIED** (see
+`## Carry-overs`). Quality **0/1/8/0**. Retro applied **6 of 6**. **Next natural slice:** a rodata-carve
+increment for the 3 jtbl/f64 carries (`resolve_club_terrain_mask`, `resolve_shot_quality_table`,
+`predict_shot_distance`), OR a permuter/`#cross-project-matched-corpus-mining` increment for the 3
+pervasive-regalloc carries (`func_80044CCC`, `func_800451E4`, `predict_shot_distance_variant`), OR a FRESH
+main pack whose tail is NOT shot-math/dispatch (this pack's non-getter tail is the same
+`#pervasive-regalloc-classical-main` wall class as S182/S183). Cross-repo: no new curated names to sync
+(all pre-curated; no `symbol_addrs` adds).
+
 **S183 MIXED-PARTIAL — `src/main/func_80052250.c` main-segment [0x2D650] game-code pack, 2/9 (+2 this
 sprint).** matched **+2** (`func_80052250` = `scenario_mode_id == 0xC` predicate; `func_80052324` =
 scenario table lookup `D_801B71F3[a0*0xB8] + func_80052264(scenario_mode_id, D_801B6098,
@@ -2986,6 +3015,26 @@ by `/sprint-plan`:
   `NU_CONT_THREAD_ID=6` vs MG64's 5), and that surfaces only at first build unless reconciled here.
   A near-free retry missing any of these is a half-scoped spike — finish the scope before deferring.
 
+- **(S184 MIXED-PARTIAL — carried; 13 of 21 banked; highest single-file classical bank)**
+  `src/main/func_80043C20.c` (main-segment `[0x1F020]` golf-shot/club logic pack). BANKED byte-exact C
+  (13): 7 getters/wrappers + `func_800444B8`/`func_80044470` nested pair + `func_80044254` + `func_80044FDC`
+  + `func_80043C64`/`func_80043C20` nested formatter pair. Subseg `[0x1F020, c, main/func_80043C20]`
+  flipped; refs all placed; NO rodata carve; `ClubShot` (0x34) + `ShotInput` structs defined; all names
+  pre-curated (no `symbol_addrs` adds). **8 CARRIED, two DoD-blocker classes:**
+  - **Rodata-carve blockers (3)** — need a `.rodata` carve (out of scope the no-carve rule): `resolve_club_terrain_mask`
+    (compiler `jtbl_800CC530`), `resolve_shot_quality_table` (`jtbl_800CC700` + 23 digit-string tables
+    `D_800CC590`..`6F0`, 16B each; ALSO a 3-instr v0/v1 regalloc residual), `predict_shot_distance` (f64 rodata
+    literal `D_800CC508` via `ldc1`; ALSO `#abs-coalescing-reg-swap` irreducible — its nested `lerp_int_v2` child is byte-exact).
+  - **Pervasive-regalloc walls (3, structurally-complete near-misses)** — `#pervasive-regalloc-classical-main`,
+    "mine more optimal than target", not source-reachable: `func_80044CCC` (arg0↔lp allocno swap by loop-weight
+    priority + a folded dead guard via DCE; permuter 800→575 plateau, 195/196), `func_800451E4` (const-1 CSE +
+    allocno tiebreak + reorg delay-slot, 136/139), `predict_shot_distance_variant` (pseudo82=`&D_800BB4FC` claims
+    `$s0`, pushes category; mine 3 instrs SHORTER — its nested `lerp_int` child is byte-exact).
+  - Near-match seeds in `nonmatchings/<fn>/base.c`; recovered structs/externs/levers + carry-detail in the
+    session scratchpad `result_*.md`. **Retry:** SPLIT into a rodata-carve increment (the 3 jtbl/f64 fns, via
+    `#rodata-sibling-yaml-pattern` owner-per-member) + a permuter/`#cross-project-matched-corpus-mining`
+    increment (the 3 regalloc fns + the FP-pair parents). The nested `lerp` children bank ONLY WITH their
+    `predict_*` parents (never alone — the pair carries together). No cross-repo name sync.
 - **(S183 MIXED-PARTIAL — carried; 2 of 9 banked; DEFINITIVE pervasive-regalloc TU)**
   `src/main/func_80052250.c` (main-segment `[0x2D650]` game-code pack). BANKED byte-exact C:
   `func_80052250` (0x80052250, `scenario_mode_id==0xC`), `func_80052324` (0x80052324, scenario table

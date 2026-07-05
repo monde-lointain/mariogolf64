@@ -42,6 +42,16 @@ resume surface when the middle spans context windows.
 - **Parallelism.** Read-only context gathering may run in parallel (read `BACKLOG.md`, run
   `pick_target.py`, and read the flagged hazard sections at once). Keep MCP, build, and edit steps
   serial, since the session holds no MCP lock and the build is one shared tree.
+  - **Subagent decomp fan-out (a large classical pack's hard tail, S184).** `make nonmatching-func
+    FUNC=<f>` compiles a per-function `nonmatchings/<f>/base.c` to a per-function `nonmatchings/<f>/current.o`
+    and reads the shared `build/asm/<seg>.o` reference read-only (built once at bootstrap), so
+    `tools/decomp_loop.py` on DISTINCT functions is parallel-safe. For a big pack, dispatch one subagent
+    per hard standalone (or per nested pair) to iterate to score-0 in isolation and RETURN the matching C
+    + struct/extern additions; the orchestrator then integrates each and runs the full-make + ROM-SHA-1
+    gate SERIALLY (never full-`make` in the main thread while subagents run — that races the shared
+    `build/`). S184 fanned 7 subagents over the golf-pack tail; both isolated matches held in-tree, the
+    rest surfaced as well-characterized regalloc/rodata carries. Seed each subagent with the canonical
+    struct/extern preamble + the levers so its base.c stays reconcilable at integration.
 
 </workflow_overview>
 

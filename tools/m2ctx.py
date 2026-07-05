@@ -16,7 +16,17 @@ root_dir = (
 # ultralib's tree — PR/, PRinternal/, compiler/gcc; libnusys from ~/development/repos/n64sdkmod),
 # so a single -Iinclude covers them all (PR/, n64/nusys/, top-level).
 CPP_FLAGS = [
-    "-Iinclude",
+    # Mirror the Makefile CFLAGS -I set: ultra64.h pulls PR/ultratypes.h from
+    # include/libultra/PR, so a bare -Iinclude fails to preprocess any file that
+    # includes common.h (main/lib targets). Keep this in sync with `Makefile` CFLAGS.
+    "-I", "include",
+    "-I", "include/libultra",
+    "-I", "include/libultra/internal",
+    "-I", "include/libkmc",
+    "-I", "include/libnusys",
+    "-I", "include/libmus",
+    "-I", "include/libnualstl",
+    "-I", "include/libnaudio",
     "-D_LANGUAGE_C",
     "-D__USE_ISOC99",
     "-D_MIPS_SZLONG=32",
@@ -51,7 +61,8 @@ def import_c_file(in_file) -> str:
         )
     except subprocess.CalledProcessError:
         print(
-            "Failed to preprocess input file, when running command:\n" + cpp_command,
+            "Failed to preprocess input file, when running command:\n"
+            + " ".join(cpp_command),
             file=sys.stderr,
         )
         sys.exit(1)

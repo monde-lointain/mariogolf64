@@ -3758,9 +3758,19 @@ by a `jal` in the loop, a non-fixed memory read, or any use of the counter in th
 in `loop.c:5761`), so a natural loop matches when one of those holds — try natural forms first, goto only
 after they demonstrably reverse.
 
+**Sub-lever — `for(;;)`+`break` vs `while` for an UN-rotated top-test loop (S184).** Distinct from the
+reversal above: when the ROM keeps a pointer/sentinel loop as a single top-test with an UNCONDITIONAL `j`
+back-edge (loop top = the `lbu`/test; both the mid-loop `continue` and the tail `j` target it), a
+`while((c=*s++)!=0){…}` build LOOP-ROTATES — GCC copies the exit test to the loop bottom (a second
+`lbu … ; bnez … , top` re-entry), +2 instrs, so the child is over-long and shifts everything after it.
+Re-spell as an infinite loop with an explicit break: `for(;;){ u8 c=*s++; if(c==0) break; … }` — an
+already-infinite loop has no top test to rotate, so GCC emits the ROM's single top-test + `j`-back shape.
+S184 nested `func_80043C20` (a bounded string-appender `while((c=*s++)) if(pos<end)*pos++=c;`) was 19
+instrs as a `while` (rotated) and the exact 17-instr ROM form as `for(;;){…;if(!c)break;…}`.
+
 **Provenance:** established: S152 (`vector_magnitude_safe` / `calculate_hypotenuse_safe` range-scaling
 loops, shared with `#double-sqrt-fast-math`); reversal corollary: S154 (the `check_dbra_loop`
-count-only reversal).
+count-only reversal); rotation corollary: S184 (`for(;;)`+`break` for an un-rotated top-test loop).
 
 ## decomposed-one-tu rodata alignment split (a counter-case to the 8-point decompose gate)
 
@@ -3861,6 +3871,21 @@ the ROM's pointer-increment inner loop plus the persistent offset. S171 `func_80
 from a ring buffer, offset wrapping `%4800` per row): adding explicit `dp`/`sp` alongside `src`/`dst`
 took the opcode structure from 71→75 insns, byte-for-byte the target's dual-IV (the residual is then
 pure allocno/frame permutation).
+
+**Sub-lever — `&ARR[i]`-recompute de-biases a `combine_givs`-biased base register (S184).** A
+struct-array STORE loop can byte-match the ROM in every way EXCEPT the base register's bias: the ROM keeps
+the running pointer at the ELEMENT START (init `addiu base,%lo(ARR)` addend 0, positive field stores
+`sw v0,0x18(base)`…`sb v0,0x30(base)`), but a carried `T *dst = ARR; …dst->f…; dst++;` build biases the
+base to the MAX accessed offset (init `addiu base,%lo(ARR)+0x30`, NEGATIVE stores `sw v0,-0x18(base)`…
+`sb v0,0(base)`) — same instruction count, same structure, only the immediates differ. **Cause:** with a
+carried pointer, GCC 2.7.2 `loop.c` `combine_givs` reduces the per-field store-address givs
+(`base+0x18`,`base+0x1C`,…,`base+0x30`) to ONE combined giv whose base = the first-in-list giv (the max
+offset), expressing the rest as negative deltas. **Fix:** compute the per-element pointer INSIDE the loop
+as a strength-reduced giv of the counter — `T *dst = &ARR[i];` (not carried `dst++`). The recompute form
+keeps the biv at the element base (positive offsets = the ROM). Cracked `func_800444B8` (the
+`D_800BB258[i]` copy loop, s0 biased +0x30) and `func_80043C64`'s per-club dump loop (s0 biased +0x1C) in
+S184; both matched after `cs = &D_800BB258[club];` inside the loop. (Kin to the S168/S171 pointer-variable
+levers above, but the tell is the base *bias immediate*, not a base *reload*.)
 
 **Why (KMC gcc 2.7.2, grounded — verified against the source):** `scan_loop` runs
 `move_movables` (invariant hoist, `loop.c:966`) before `strength_reduce` (`loop.c:976`). The hoisted
@@ -4892,8 +4917,12 @@ sra hi,k; sra div,div,31; subu`) is byte-close but the **dividend and the magic 
 wrong two registers** — your build puts the short-lived magic in the numerically-LOWER reg (`$v0`) and
 the dividend in the higher (`$v1`), while the ROM has the reverse (dividend→`$v0`, magic→`$v1`), or vice
 versa. Common magics: `0x66666667` (/5,/10,/20,/40,/80), `0x55555556` (/3), `0x2AAAAAAB` (/6),
-`0x38E38E39` (/9), `0x51EB851F` (/100), `0x1B4E81B5` (/4800), `0x92492493` (/7 w/ add-back). The
-sign-extended reg (`sra r,r,0x1f`) IS the dividend; the `lui 0x<magic>` reg is the magic.
+`0x38E38E39` (/9), `0x51EB851F` (/100), `0x1B4E81B5` (/4800), `0x92492493` (/7 or /14 w/ add-back). The
+sign-extended reg (`sra r,r,0x1f`) IS the dividend; the `lui 0x<magic>` reg is the magic. **The add-back
+shift disambiguates the divisor for a shared magic:** `0x92492493` + `sra hi,2` = `/7`; the SAME magic +
+`sra hi,3` (one more shift, since 14 = 7<<1) = `/14`. S184 `func_80044470` divided the loop index by 14
+(shift-3); a `/7` C emitted shift-2 and missed by that one bit — read the post-`mfhi` `sra` amount, not
+just the magic, to pin the divisor.
 
 **Root cause (RTL-dump + `local-alloc.c`/`sched.c` grounded, S174).** Neither operand carries a hard-reg
 suggestion by default (a `li` of the magic and a `lw`/compute of the dividend, tied to no hard reg), so
@@ -5023,6 +5052,23 @@ blocks the absolute fold), and register pressure does NOT trigger it (pressure-t
 init is unreachable from faithful C AND the permuter is blocked (pycparser rejects the nested fn) — a
 genuine carry, well-characterized like [#signed-divide-const-v0v1-quotient-destination](#signed-divide-const-v0v1-quotient-destination)
 and [#dead-frame-reload-artifact-regalloc-wall](#dead-frame-reload-artifact-regalloc-wall).
+
+**Recipe confirmed end-to-end (S184, 4 nested fns).** The "Real bank" recipe byte-matched two full pairs
+in `src/main/func_80043C20.c`: `func_80044470` ⊂ `func_800444B8` (divide-by-14 table lookup) and
+`func_80043C20` ⊂ `func_80043C64` (a `for(;;){c=*s++; if(!c)break; if(pos<end)*pos++=c;}` string-appender
+that reaches the parent's `buf_pos`/`buf_end` at static-chain `+0x100`/`+0x104`). Three confirmations:
+(1) **Child-emits-before-parent lands the child.** GCC outputs the nested child immediately BEFORE the
+parent, so writing the parent's C at the source position where the CHILD's lead-vram stub sat places the
+child at that lead vram — `func_80043C20` is the pack lead (0x80043C20) and banked by defining
+`func_80043C64` first with the child nested inside it (child → local `func_80043C20.2` at offset 0).
+(2) **A pure leaf helper is still framed when nested.** A nested child that references NO parent local
+(e.g. the `lerp` helpers `(s32)((f64)from + (f64)(to-from)*(f64)t)`, `t` an `f32` in `$a2`) STILL gets the
+`addiu sp,-8; sw v0,0(sp)` chain prologue — compiled standalone it is 14 instrs with no frame, nested it is
+17. So a leaf math helper whose ONLY caller sets `$v0 = &sp[K]` before the `jal` MUST be written nested to
+match; a standalone def will never emit the frame. (3) **Parent can wall while the child matches.**
+`predict_shot_distance` + `predict_shot_distance_variant` carried on `#pervasive-regalloc-classical-main` /
+`#abs-coalescing-reg-swap` while their nested `lerp_int_v2`/`lerp_int` children were byte-exact — the pair
+carries together (the child cannot bank without the parent's `.text`).
 
 **Standalone reproduction (UB; do NOT prefer over the real nested form).** A byte-exact standalone
 `.c` (no parent, no inline asm) can force the same spill: `volatile u32 a = (u32)uninit_ptr;` reads an
