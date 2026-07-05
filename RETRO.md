@@ -25,6 +25,17 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 181 — src/main/func_80076640.c abs-coalescing reg-swap: the func_80076640 wall DEFINITIVELY CLOSED (0-bank diagnostic carry) — 2026-07-05
+- Increment: **0 files banked / 0 functions matched** (delta: md5-candidate 223/227 unchanged). `func_80076640` proven an irreducible `#abs-coalescing-reg-swap` wall; `func_8007680C` (stretch) untouched — file stays mixed-partial.
+- Quality: **0 / 0 / 1 / 0** (0 stuck-far, 0 permuter [proven futile, not run], 1 carried, 0 re-opened).
+- Seed: committed 5pt; banked 0pt (file carried, not md5-candidate); regime classical/mixed (0-bank carry; realized n/a — the value is diagnostic, not points).
+- What helped: PO-directed systematic-debugging turned a "carry it" into a definitively-closed wall. 4 parallel GCC-2.7.2-source lenses converged on the exact mechanism (`combine_regs` suggested-reg pre-pass, local-alloc.c:1813-1817 / 1469-1477: a dying-hard-reg abs operand gets an unconditional `$f0` arithmetic suggestion the literal const can never contest). An 8-project **cross-project mining** sweep (new method) established the byte-cmp-proven fresh-reg unary-float LAW on the identical KMC GCC 2.7.2 (5 corpora: MP1/MP2/MP3/drmario64/sbk2; hm64+pl64 NULL). A 12-flag profile-probe + a direct **2.8.1 cross-compile** (in-place + 80 insns; same-TU `func_80076778` matched at 2.7.2 ⇒ TU provably 2.7.2) closed the wrong-pin / compiler-version door. The literal fix (`0.34906584f`→`0.3490659f`=0x3EB2B8C4) tightened the near-match to 75/78 (only the 3 abs-region regs differ).
+- Friction: the ROM's fresh-reg abs for a provably single-use magnitude is genuinely anomalous vs. every same-compiler corpus — a 2.7.2 patchlevel micro-divergence the reconstruction can't reproduce, so there is no faithful fix (the honest systematic-debugging "no root-cause fix exists" outcome). A whole sprint of deep investigation banked 0 code; the value is entirely retiring an open lever + a reusable escalation method.
+- Applied: 3 of 4: #1 rewrote `#abs-coalescing-reg-swap` to PROVEN-irreducible + folded in the fresh-reg unary-float LAW; #2 new `#cross-project-matched-corpus-mining` section (+ hazards TOC + CLAUDE hazard index); #3 fresh-reg law folded into #1 (same edit); (#4 "mark func_80076640 do-not-retry" NOT selected — stays a retryable carry pending a genuinely-new zero-insn lever or the original binary).
+- Carry-over: src/main/func_80076640.c — `func_80076640` (proven `#abs-coalescing-reg-swap`, all faithful/flag levers exhausted; retry only on a new zero-insn mechanism) + `func_8007680C` (S158-class FP-spill regalloc wall, untouched this sprint).
+
+---
+
 ## Sprint 180 — src/main/func_800328E0.c DCE0 DL pack COMPLETE: func_800329F4 banked via Color-struct mem-in-struct lever (S179 scheduler-load-pair carry resolved) — 2026-07-05
 - Increment: **1 file md5-candidate** (`func_800328E0.c`, 0 `INCLUDE_ASM`) / **1 function matched** (`func_800329F4`); md5-candidate **222 → 223**.
 - Quality: **0 / 0 / 0 / 0** (0 stuck-far, 0 permuter [deliberately avoided], 0 carried, 0 re-opened) — and RESOLVED the 1 S179 carry.

@@ -91,6 +91,7 @@ The hazard families below group the sections that follow. Each links to its exis
 - [mem-in-struct scheduling lever (model a fixed global as a struct/array member)](#mem-in-struct-scheduling-lever-model-a-fixed-global-as-a-structarray-member)
 - [call-result a0-vs-v0 single-allocno (force a scratch reg via both-arm reuse)](#call-result-a0-vs-v0-single-allocno-force-a-scratch-reg-via-both-arm-reuse)
 - [compiler-source fan-out (escalation above the permuter)](#compiler-source-fan-out-escalation-above-the-permuter)
+- [cross-project matched-corpus mining (sibling-decomp byte-exact escalation above the source dive)](#cross-project-matched-corpus-mining)
 - [signed-divide-const v0/v1 quotient-destination](#signed-divide-const-v0v1-quotient-destination)
 - [cse make_regs_eqv branch-fold (reused-var canonical fold on a `?:`-with-flag store)](#cse-make-regs-eqv-branch-fold-reused-var-canonical-fold-on-a--with-flag-store)
 - [abs-coalescing reg-swap (fabsf in-place vs fresh reg on a const compare)](#abs-coalescing-reg-swap)
@@ -4664,23 +4665,90 @@ macro). Recognize the symptom, bank the file's other fns (`#cross-jump-tail-merg
 reg, keeping the operand's reg `f0`) then loads the const into `f0`; mine emits `abs.s f0,f0`
 (in-place, coalescing operand->result) and loads the const into `f2`, so the `abs`/`mtc1`/`c.lt.s`
 operands are register-swapped. Everything else matches. S169 `func_80076640`
-(`if(fabsf(cosf(pitch)) < 0.1f) pitch += 0.34906584f`, score 25).
+(`if(fabsf(cosf(pitch)) < 0.1f) pitch += 0.3490659f`; 75/78 near-match, ONLY the 3 abs-region regs
+differ). Note the `0.3490659f` literal is exact (0x3EB2B8C4); `0.34906584f` is 2 ULP low (0x3EB2B8C2).
 
-**Root cause:** gcc 2.7.2 coalesces `y = fabsf(x)` in-place (the result reuses `x`'s hard reg) when
-`x` dies at the abs. The target did NOT coalesce: it kept the operand reg free for the two branch
-constants (`0.1` in the test, then the increment `0.349` in the taken arm, both wanting the same reg)
-and put the abs in a fresh reg. Which value "owns" the low reg is a local-alloc preference tie, not a
-scheduling choice.
+**Root cause (S181, source-proven):** gcc 2.7.2 `combine_regs` (local-alloc.c:1813-1817) records the
+operand's hard reg (`f0`) as an ARITHMETIC suggestion on the abs-result qty **unconditionally whenever
+`abssf2` reads a dying hard reg**; the suggested-reg pre-pass (local-alloc.c:1469-1477) then assigns
+the abs that `f0` BEFORE the const qty reaches the fallback pass — and a literal const has no register
+source, so `combine_regs` can never give it a competing suggestion. So the abs claims the operand's
+low reg (in-place) and the const takes a fresh reg — the reverse of the ROM. The `absSF2` pattern
+(mips.md:1578, `=f`/`f`, no `0` matching-constraint) merely PERMITS in-place, never forces it; gas is
+inert (`abs.s` is a real opcode, never macro-expanded). Which value "owns" the low reg is this
+local-alloc suggested-pass tie, not a scheduling choice. The ROM's fresh-reg form corresponds to the
+abs result being GLOBAL-allocated (`global.c`), which needs a cross-block use of the abs result — a
+state a block-local abs-of-a-dying-hard-reg deterministically cannot reach at this profile.
 
-**Verdict, carry fast (near-free retry), do NOT grind.** Permuter-resistant: the main-profile permuter
-(no `--best-only`) PLATEAUED at score 25 over 338k iterations, and three hand levers (comparison flip,
-abs-into-a-temp, const-into-a-temp) all failed (the flip is a codegen no-op; the temps regress the
-schedule). The permuter's `do{}while(0)` + `cosf` temp fixed the instruction COUNT but not the swap.
-Like `#cse-make-regs-eqv-branch-fold`, this is likely **not reachable from equivalent C**: the target
-was compiled from a source shape that keeps the operand reg live for the constants (untried:
-compiler-source fan-out on gcc's `local-alloc.c` / `reload.c` abs-coalescing + preferred-reg logic).
-Recognize the symptom, bank the file's matched fns (one-tu mixed-partial), and carry this one with the
-score-25 near-match saved.
+**The fresh-reg unary-float LAW (cross-project, byte-cmp-proven on the identical KMC GCC 2.7.2).**
+Fresh-reg `abs.s`/`neg.s` (D != S) is emitted **iff** the RESULT is reused (>=2 uses / lives across a
+call) OR the OPERAND is kept live past the op OR the operand is a non-hard-reg (memory/struct-field)
+value. A **single-use result with a dying hard-reg operand ALWAYS coalesces in-place.** Verified across
+5 same-compiler byte-matched corpora (Mario Party 1/2/3, Dr. Mario 64, Snowboard Kids 2; Harvest Moon
+64 + Puzzle League 64 are same-compiler NULLs — no float abs in the whole game, the idiom is rare).
+gcc 2.8.1 (Paper Mario) has a WEAKER coalescer (fresh even for a dying single-use *pseudo* operand)
+but STILL coalesces a dying *call-return* operand in-place — so the compiler VERSION is not the lever.
+Use this law to classify any FP unary-op reg-swap on sight: single-use + dying hard-reg = irreducible.
+
+**Verdict, carry (all faithful/flag levers EXHAUSTED; not do-not-retry).** S181 closed every avenue
+with source-grounded rigor: 4 GCC-source lenses + an 8-project cross-project mining sweep
+(`#cross-project-matched-corpus-mining`) + a 12-flag profile-probe (O1/O2/O3/-ffast-math/-g/
+-fno-schedule-insns/-fno-delayed-branch/... ALL in-place) + a direct **2.8.1 cross-compile** (in-place
+AND 80 insns, strictly worse; and the same-TU sibling `func_80076778` is matched at 2.7.2, so the TU
+is PROVABLY 2.7.2 — not a wrong-version pin). MG64's exact signature (dying + hard-reg + single-use +
+single-precision -> fresh) appears in NO project at EITHER compiler version, so the ROM's form is a
+2.7.2 patchlevel/build artifact the reconstruction 2.7.2 cannot reproduce; a source reuse can't be the
+answer (it adds an instruction the 78-insn ROM lacks, and a DEAD reuse is DCE'd before allocation). The
+permuter is proven futile (it only mutates source shape; plateaued at the swap over 338k iters).
+Recognize the symptom via the LAW above, bank the file's matched fns (one-tu mixed-partial), and carry
+with the 75/78 near-match saved (`base.c`: the `do{}while(0)` + `cosf`-temp wrapper is load-bearing for
+the schedule). Retry ONLY on a genuinely-NEW mechanism (a faithful source shape that keeps the abs
+result or operand live at ZERO added instructions, or the exact original build binary) — do NOT re-run
+the source dive / permuter / flag probe / 2.8.1 cross-compile (S181 exhausted all four).
+
+---
+
+## cross-project matched-corpus mining
+
+**When:** a structural-complete classical fn locks on a codegen/regalloc artifact that the
+`#compiler-source-fan-out-escalation-above-the-permuter` dive has proven **unreachable from faithful C**
+at our profile, and you need either (a) the missing source idiom, or (b) confirmation the ROM's form is
+a compiler-config/patchlevel origin (not a source shape). This is the escalation ABOVE the source dive
+and the permuter -- it reads OTHER games' matched decomps as a byte-exact corpus of "what the real
+compiler actually emits" for the exact pattern. First flagged as the last untried lever in the S175
+`#signed-divide-const-v0v1-quotient-destination` note; first EXECUTED as a method in S181
+(`#abs-coalescing-reg-swap`).
+
+**The sibling-project compiler map (relevance gate).** Only a project on the SAME compiler is
+authoritative; a different compiler is at most mechanism-informative. As of S181, the local N64 decomps
+that share MG64's **KMC GCC 2.7.2** are: `marioparty` (MP1), `marioparty2`, `marioparty3`, `drmario64`
+(us/gw), `snowboardkids2-decomp`, `hm64-decomp`, `puzzleleague64` -- all `-mips3 -mgp32 -mfp32`, game
+code at `-O1` (MP1/MP2/MP3) or `-O2` (drmario64/sbk2/MG64); the discriminator for a regalloc tie holds
+within a single `-O` level, so the O1-vs-O2 default is not a confound. `papermario` game code is **gcc
+2.8.1** (same egcs/local-alloc lineage, one minor version off) -- mechanism-informative but NOT
+authoritative; its 2.7.2 `os/*` libultra is `-O3` and typically has no float-abs. Confirm each
+project's compiler from its `Makefile`/`permuter_settings.toml`/`configure` before trusting a hit.
+
+**Method (fan out one agent per project).** Give each a shared context file (the exact target-vs-mine
+asm, the pattern signature, the relevance gate) and have it: (1) confirm the compiler+version+flags;
+(2) grep `src/` for the idiom AND scan the byte-exact ROM asm -- an `INCLUDE_ASM` stub is byte-exact
+ORIGINAL-compiler output, so it authoritatively shows what the real compiler does even where no matched
+C exists yet; (3) for any hit, report the matched C SOURCE + the asm allocation (in-place vs fresh) +
+that TU's `-O`, prioritizing an example that matches YOUR signature; (4) verdict: transferable source
+idiom, or a compiler-config confirmation. A project with the identical compiler but ZERO instances of
+the idiom (e.g. no float abs in the whole game) is a clean NULL -- it confirms the toolchain and the
+idiom's rarity, neither confirms nor denies. Read-only; agents touch nothing.
+
+**What it buys.** S181's 8-project sweep established a byte-cmp-proven LAW (the fresh-reg unary-float
+rule in `#abs-coalescing-reg-swap`) from 5 same-compiler corpora, and -- with a direct 2.8.1
+cross-compile -- proved MG64's exact signature is produced by NO project at EITHER compiler version,
+converting an open "untried lever" carry into a definitively-closed one. A NULL result (no corpus has
+your signature) is itself the answer: the ROM's form is a build artifact, carry it. Pair the sweep with
+a **compile-with-the-other-compiler probe** when a version origin is suspected (fetch the sibling
+project's gcc binary, e.g. `papermario/tools/build/cc/gcc/gcc` = 2.8.1, and compile your isolated TU
+with it): if the OTHER version reproduces the ROM form, you have a wrong-pin; if it does not (S181:
+2.8.1 gave in-place + 80 insns, worse) and a same-TU sibling already matches at your pinned version,
+the pin is confirmed correct and the artifact is a patchlevel micro-divergence.
 
 ---
 

@@ -3005,13 +3005,26 @@ by `/sprint-plan`:
   in-tree today, the gap is pure regalloc). **No flip/data enablers left:** subseg already `[0x51A40,
   c, main/func_80076640]`; rodata stays in the blob referenced extern; placed callees are all named/
   placed main-segment fns. Permuter scaffold live `nonmatchings/func_80076640/` (main settings).
-  - **func_80076640 (NEAR-FREE RETRY, score 25):** byte-exact structure + count (78/78); the 1 residual
-    is a 3-instr abs/const **register swap** (`#abs-coalescing-reg-swap`: target `abs.s f2,f0`+const in
-    `f0`, mine `abs.s f0,f0` in-place+const in `f2`). KEEP the landed levers (const-extern doubles;
-    `do{ if(fabsf(cosPitch)<0.1f){...} }while(0)` + `cosPitch=cosf(pitch)` temp). Permuter PLATEAUED at
-    25 over 338k iters; 3 hand levers (flip / abs-temp / thresh-temp) all failed. **Untried:**
-    compiler-source fan-out on GCC 2.7.2 `local-alloc.c`/`reload.c` abs-coalescing + preferred-reg logic
-    (why `y=fabsf(x)` coalesces in-place vs a fresh reg).
+  - **func_80076640 (S181: PROVEN `#abs-coalescing-reg-swap` wall — NOT near-free; retry ONLY on a NEW
+    zero-insn mechanism):** 75/78 byte-exact (fixed the literal `0.34906584f`→`0.3490659f`=0x3EB2B8C4;
+    ONLY the 3 abs-region regs differ: target `abs.s f2,f0`+const in `f0`, mine `abs.s f0,f0`
+    in-place+const in `f2`). **S181 EXHAUSTED every faithful/flag lever — do NOT re-run:** (1) 4
+    GCC-2.7.2-source lenses → root cause = `combine_regs` suggested-reg pre-pass (local-alloc.c:1813-1817
+    / 1469-1477): a dying-`$f0` abs operand gets an unconditional `$f0` arithmetic suggestion the literal
+    const can never contest → in-place; the `absSF2` MD (mips.md:1578 `=f`/`f`) merely permits. (2) An
+    8-project cross-project mining sweep (`#cross-project-matched-corpus-mining`) proved the byte-cmp
+    fresh-reg unary-float LAW on the identical KMC GCC 2.7.2 (5 corpora MP1/MP2/MP3/drmario64/sbk2;
+    hm64+pl64 NULL): single-use + dying-hard-reg → ALWAYS in-place. (3) A 12-flag profile-probe (all
+    in-place). (4) A direct 2.8.1 cross-compile (in-place + 80 insns, worse; and same-TU `func_80076778`
+    matches at 2.7.2 ⇒ the TU is PROVABLY 2.7.2, NOT a wrong pin). MG64's exact signature (dying +
+    hard-reg + single-use + single-precision) appears in NO same-compiler corpus at EITHER version → a
+    2.7.2 patchlevel/build artifact the reconstruction cannot reproduce. Permuter PROVEN FUTILE
+    (plateaued 338k; only mutates source shape). KEEP the landed levers (const-extern doubles;
+    `do{ if(fabsf(cosPitch)<0.1f){...} }while(0)` + `cosPitch=cosf(pitch)` temp — load-bearing for the
+    schedule). **Retry ONLY on a genuinely-NEW mechanism** (a faithful source keeping the abs
+    result/operand live at ZERO added insns, or the exact original build binary); see
+    `#abs-coalescing-reg-swap`. Do NOT re-run the source dive / permuter / flag probe / 2.8.1
+    cross-compile.
   - **func_8007680C (SPIKE, S158-class deep regalloc):** structure complete (721/756 mnemonics; logic
     fully RE'd from asm). Blocked by pressure-driven regalloc: (1) frame -496 vs -504 (target spills 1
     more scalar, `zHi`@0x174, dead-after-loop5, that mine keeps in a reg); (2) min/max trackers as
