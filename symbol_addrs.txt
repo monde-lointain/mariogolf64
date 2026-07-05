@@ -650,3 +650,4 @@ heap3_largest_free = 0x800DC73C; // size:0x4
 heap_msg_alloc_fail = 0x800CCA90; // size:0x1C
 heap_msg_free_null = 0x800CCAAC; // size:0x24
 heap3_msg_free_null = 0x800CCAD0; // size:0x40
+clear_text_grid = 0x8004D794; // type:func
