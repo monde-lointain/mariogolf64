@@ -125,7 +125,7 @@ segments:
       - [0x42F00, c, mgu/mtxutil]
       - [0x43140, c, main/func_80067D40]
       - [0x43810, c, main/lz_decompress_simple]
-      - [0x440A0, asm]
+      - [0x440A0, c, main/lz_compress_extended_dma]
       - [0x45400, c, main/func_8006A000]
       - [0x456C0, asm]
       - [0x49E90, c, main/func_8006EA90]
