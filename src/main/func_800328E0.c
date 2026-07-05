@@ -1,19 +1,22 @@
 #include "common.h"
 
 /* Display-list builders for the per-frame RCP viewport/scissor setup and the
- * full-screen fill clears. func_800328E0 emits the segment/viewport preamble and
- * splices the camera matrices in; func_800329F4 clears the play field to the RGB
- * set by func_800329D8; func_80032B78 clears the color/Z framebuffers with a
- * mode selector. func_800329B8/func_80032E34 are the &glistp wrappers. */
+ * full-screen fill clears. func_800328E0 emits the segment/viewport preamble
+ * and splices the camera matrices in; func_800329F4 clears the play field to
+ * the RGB held in clear_color (set by func_800329D8); func_80032B78 clears the
+ * color/Z framebuffers with a mode selector. func_800329B8/func_80032E34 are
+ * the &glistp wrappers. */
+
+typedef struct {
+  s32 r, g, b;
+} Color;
 
 extern Gfx* glistp;
 
 extern Vp D_800B7790[];
 extern Gfx D_800B77F0[];
 extern Gfx D_800B7820[];
-extern s32 D_800B7840;
-extern s32 D_800B7844;
-extern s32 D_800B7848;
+extern Color clear_color;
 
 extern u16* nuGfxZBuffer;
 extern u16* nuGfxCfb_ptr;
@@ -34,17 +37,36 @@ void func_800328E0(s32 arg0, Gfx** glistp) {
   *glistp = gfx;
 }
 
-void func_800329B8(s32 arg0) {
-  func_800328E0(arg0, &glistp);
-}
+void func_800329B8(s32 arg0) { func_800328E0(arg0, &glistp); }
 
 void func_800329D8(s32 arg0, s32 arg1, s32 arg2) {
-  D_800B7840 = arg0;
-  D_800B7844 = arg1;
-  D_800B7848 = arg2;
+  clear_color.r = arg0;
+  clear_color.g = arg1;
+  clear_color.b = arg2;
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_800328E0", func_800329F4);
+/* Clear the play field to clear_color. Uses the global glistp++ idiom
+ * (SGI/nusys gfxClearCfb style); sourcing the fill color from the clear_color
+ * struct members pins the color loads after the command stores (they may-alias
+ * the *glistp writes), matching the ROM's deferred load schedule. */
+void func_800329F4(void) {
+  gDPPipeSync(glistp++);
+  gDPSetRenderMode(glistp++, G_RM_NOOP, G_RM_NOOP2);
+  gDPPipeSync(glistp++);
+  gDPPipeSync(glistp++);
+  gDPSetCycleType(glistp++, G_CYC_FILL);
+  gDPSetFillColor(
+      glistp++,
+      (GPACK_RGBA5551(clear_color.r, clear_color.g, clear_color.b, 1) << 16 |
+       GPACK_RGBA5551(clear_color.r, clear_color.g, clear_color.b, 1)));
+  gDPPipeSync(glistp++);
+  gDPFillRectangle(glistp++, 8, 8, 311, 231);
+  gDPPipeSync(glistp++);
+  gDPPipeSync(glistp++);
+  gDPPipeSync(glistp++);
+  gDPSetCycleType(glistp++, G_CYC_1CYCLE);
+  gDPPipeSync(glistp++);
+}
 
 void func_80032B78(s32 arg0, Gfx** glistp) {
   Gfx* gfx = *glistp;
@@ -86,6 +108,4 @@ void func_80032B78(s32 arg0, Gfx** glistp) {
   *glistp = gfx;
 }
 
-void func_80032E34(s32 arg0) {
-  func_80032B78(arg0, &glistp);
-}
+void func_80032E34(s32 arg0) { func_80032B78(arg0, &glistp); }

@@ -1,4 +1,5 @@
 nuBoot = 0x800994B0; // type:func
+clear_color = 0x800B7840; // type:Color size:0xC
 __osDpDeviceBusy = 0x800B2B10; // type:func
 osDpSetNextBuffer = 0x800B1580; // type:func
 osSpTaskYielded = 0x800AB600; // type:func
