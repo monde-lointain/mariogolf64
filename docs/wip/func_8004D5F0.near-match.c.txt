@@ -1,0 +1,71 @@
+// func_8004D5F0 (0x8004D5F0, src/main/func_8004D190.c) — S182 CARRY
+// #dead-frame-reload-artifact-regalloc-wall family (register-COALESCING artifact)
+//
+// Framebuffer glyph renderer: renders one 8x8 glyph (char c) to BOTH the current and next
+// VI framebuffers (double-buffered, uncached K1) at grid cell (x,y). Nibble-per-pixel from
+// the D_800BE6E0 glyph LUT; pixel = (glyph nibble == 0xF) ? 0xFFF : 1.
+//
+// STATUS: 99/105 instructions, structurally near-exact. Permuter-CONFIRMED WALL
+// (main-profile setup, base score 2055 -> plateaued ~1190, NO path to 0).
+//
+// ROOT CAUSE (systematic-debugging): the target keeps TWO non-coalesced copies of `c` in
+// callee-saved regs -- s0 (original, consumed by the first `(s8)c` clamp compare) and s2
+// (working/clamped) -- using 6 s-regs (s0-s5, frame 0x30). MY -O2 build COALESCES them to one
+// (frame 0x28, s0-s4). This cascades: the target's first clamp works on the s0 copy, freeing
+// v0 so `t3 = next_fb K1` DEFERS into the beqz delay slot (plain branch); mine clamps through
+// v0, forcing eager t3 + a branch-LIKELY (bnezl). Mine is STRICTLY MORE OPTIMAL than the target
+// -- the target's 2-copy is a GCC global-alloc non-coalescing artifact not reachable from
+// faithful C (this is the documented MG64 main-segment pattern: simple fns match, register-
+// pressure-heavy fns hit allocation-artifact walls -- cf. func_8004D4B8 dead-frame, func_80076640
+// abs-swap, func_8004DC44 v0/v1-divide).
+//
+// LEVERS TRIED (S182), none forced the 2-copy: separate `c2 = c` (coalesced), two explicit
+// copies `raw`+`clamped` (both coalesced), permuter (main profile, plateaued 1190).
+//
+// RETRY: only a genuinely-new mechanism reproducing the non-coalesced 2-copy-of-c global-alloc
+// state, OR a compiler-config/patchlevel confirmation (#cross-project-matched-corpus-mining /
+// #profile-probe -- note func_8004D4B8 in the SAME TU is also a coalescing/dead-frame wall, so a
+// TU-wide profile probe could be worthwhile). Do NOT re-run the c-copy source levers.
+//
+// Near-match source (99/105; OS_PHYSICAL_TO_K1 + D_A0000000 handling all confirmed correct):
+
+extern u16 D_800BE6E0[];
+extern u16* D_800BFEE0;
+
+void func_8004D5F0(s32 c, s32 x, s32 y) {
+    u16* cur;
+    u16* next;
+    s32 base;
+    s32 g;
+    s32 row;
+
+    cur = (u16*)OS_PHYSICAL_TO_K1(osVirtualToPhysical(osViGetCurrentFramebuffer()));
+    next = (u16*)OS_PHYSICAL_TO_K1(osVirtualToPhysical(osViGetNextFramebuffer()));
+    D_800BFEE0 = cur;
+
+    if ((s8)c < 0x20) {
+        c = 0x20;
+    }
+    if ((s8)c > 0x7A) {
+        c = 0x20;
+    }
+    g = c - 0x20;
+    base = ((g & 0x1F) << 1) + (((s8)g / 32) << 9);
+
+    if ((u32)x < 0x28 && (u32)y < 0x1E) {
+        for (row = 0; row < 8; row++) {
+            s32 rowOff = (y * 8 + row) * 0x140;
+            s32 col;
+
+            for (col = 0; col < 8; col++) {
+                s32 nibble = (D_800BE6E0[base + col / 4] >> ((3 - (col & 3)) * 4)) & 0xF;
+                u16 pixel = (-(nibble == 0xF) & 0xFFF) | 1;
+                s32 off = (rowOff + x * 8 + col) * 2;
+                *(u16*)((u8*)cur + off) = pixel;
+                *(u16*)((u8*)next + off) = pixel;
+            }
+            base += 0x40;
+        }
+        osViBlack(0);
+    }
+}
