@@ -1,6 +1,8 @@
 #include "common.h"
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80052250", func_80052250);
+extern s32 scenario_mode_id;
+
+s32 func_80052250(void) { return scenario_mode_id == 0xC; }
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80052250", func_80052264);
 
