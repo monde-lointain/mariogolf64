@@ -120,22 +120,45 @@ void heap_free(s32 i, void** pptr) {
   osSetIntMask(mask);
 }
 
-/* func_8004E1E0 is the slot-3 heap initializer (resets D_800DC6E0[3] to an
- * empty self-linked list, then appends one or two RAM regions via the nested
- * helper func_8004E184; the second, the 2 MB expansion-pak window, only when
- * param==1). func_8004E184 is a GCC nested function (dead static-chain `sw
- * v0,0(sp)`, banks perfectly as `void func_8004E184(Slot* node, void* end)`
- * nested in the parent), so the two are ONE TU and are carried together.
+/* heap3_init resets slot 3 (D_800DC6E0[3]) to an empty self-linked list, then
+ * appends one or two RAM regions via the nested helper heap3_add_region (the
+ * second, the 2 MB expansion-pak window, only when param==1). heap3_add_region
+ * is a GCC nested function (dead static-chain `sw v0,0(sp)`), so the two are
+ * ONE C translation unit; GCC emits the child body first, landing it at
+ * 0x8004E184 just before the parent at 0x8004E1E0.
  *
- * CARRY (both): func_8004E1E0's init emits `next = prev` as a RELOAD of
- * D_800DC734 that no faithful C reproduces under KMC GCC 2.7.2 -O2 (subagent +
- * cse.c: the reload is a CSE varying-address invalidation, mutually exclusive
- * with the ROM's pure-absolute field stores; register pressure does not trigger
- * it). Permuter is also blocked (pycparser rejects the nested fn). Do NOT bank
- * func_8004E184 alone. See #nested-function-static-chain-spill. */
-INCLUDE_ASM("asm/nonmatchings/main/func_8004DE60", func_8004E184);
+ * The head-node reset writes size/unk_04/prev through a volatile-qualified view
+ * of D_800DC6E0[3] (the struct itself stays non-volatile, so the slot-list
+ * siblings are unaffected). That is the byte-exact lever for the ROM's `next =
+ * prev` RELOAD of D_800DC734: KMC GCC 2.7.2 -O2 CSE-forwards a plain absolute
+ * store, so a faithful `next = prev` reuses the stored register with no reload;
+ * the volatile read forces the reload back from memory, and marking size/unk_04
+ * volatile too keeps them scheduled ahead of prev (a non-volatile store would
+ * be pulled into the reload's load-delay shadow) so the whole schedule matches.
+ */
+void heap3_init(s32 param) {
+  void heap3_add_region(Slot * node, void* end) {
+    s32 size = (u8*)end - (u8*)node;
+    node->size = size;
+    node->unk_04 = 0;
+    node->next = &D_800DC6E0[3];
+    node->prev = D_800DC6E0[3].prev;
+    D_800DC6E0[3].total += size;
+    D_800DC6E0[3].prev->next = node;
+    D_800DC6E0[3].prev = node;
+  }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_8004DE60", func_8004E1E0);
+  *(volatile s32*)&D_800DC6E0[3].size = 0;
+  *(volatile s32*)&D_800DC6E0[3].unk_04 = -1;
+  *(Slot* volatile*)&D_800DC6E0[3].prev = &D_800DC6E0[3];
+  D_800DC6E0[3].next = *(Slot* volatile*)&D_800DC6E0[3].prev;
+  D_800DC6E0[3].total = 0;
+  heap3_add_region((Slot*)0x8025D800, (void*)0x802EA000);
+  if (param == 1) {
+    heap3_add_region((Slot*)0x80600000, (void*)0x80800000);
+  }
+  D_800DC6E0[3].unk_14 = -1;
+}
 
 s32 heap3_get_total(void) { return D_800DC6E0[3].total; }
 
