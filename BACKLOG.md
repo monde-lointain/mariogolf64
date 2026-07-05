@@ -48,6 +48,30 @@ tell) is carved to its LIBRARY tree (`libnusys/<file>`), not `main/<stem>` — y
 placement unchanged (see `CLAUDE.md` path convention). A per-FILE -O0 override is the one mk edit a
 boot/SDK-glue TU may need.
 
+**S182 MIXED-PARTIAL — `src/main/func_8004D190.c` VI/framebuffer + grid-print debug-display pack, 3/7
+(+3 this sprint).** matched **+3** (`clear_text_grid` [0x8004D794, backward buffer clear],
+`set_flag_based_on_param` [`flag` is s8: the `-0x80` immediate, not u8's 0x80], `func_8004D580`
+[string-render wrapper; the `lb`(test)+`lbu`(arg) double-load is natural — the callee may clobber
+`*str`]); md5-candidate **223 → 223** (file has 4 stubs → not md5-candidate). Flipped the 7-fn `[0x28590]`
+pack (NO rodata carve; all `D_` externs placed). **4 CARRIED, 2 distinct hard classes.** (1) **Two
+regalloc-ARTIFACT walls where MINE is more optimal than the target** — `func_8004D4B8` (string→glyph-tile
+blit) is a `#dead-frame-reload-artifact-regalloc-wall` (structurally byte-exact once `c-=0x20` in-place +
+the clean `for` inner loop matched the branch-likely shape; only the target's DEAD 8-byte frame + the
+reg-perm it drives differ; root cause confirmed in `mips.c` compute_frame_size — local-alloc reserves a
+slot despite free `t7-t9`, global fills it → dead slot); `func_8004D5F0` (framebuffer glyph renderer,
+double-buffered) is a register-COALESCING wall (99/105; target keeps 2 non-coalesced copies of `c`, mine
+coalesces; permuter main-profile base 2055 → plateau 1190, no path to 0). Both are the documented
+MG64 main-segment pattern (cf. `func_80076640` S181, `func_8004DC44` S172-S175). (2) **Two `#display-lists`
+builders** deferred to a dedicated DL sprint: `func_8004D190` (~200-insn unrolled texture-load DL preamble,
+leaf) + `func_8004D7B8` (~120-insn text-grid render loop). Near-matches + root causes in
+`docs/wip/func_8004D4B8.near-match.c.txt` and `docs/wip/func_8004D5F0.near-match.c.txt`. Quality 0/1/4/0
+(permuter 1, carried 4). Seed 13; banked 0pt (mixed-partial, per-file all-or-nothing); realized 14;
+residual +1; regime classical/mixed. Retro applied **3 of 3** (new `#profile-probe` TU-wide-cluster
+doctrine; `#permuter-setup` direct-import bypass for an inlined multi-fn-file near-match; 2 deferred
+golden-gated tooling follow-ups below). Cross-repo follow-up: `clear_text_grid = 0x8004D794` →
+`sync_decomp_names.py --import-from-decomp`. **Next natural slice:** a FRESH main pack (e.g. `func_80052250`
+9fn, `func_800660A0` 8fn) for reliable banks, OR a dedicated DL sprint for the `func_8004D190` DL builders.
+
 **S180 BANKED — `src/main/func_800328E0.c` DCE0 DL pack COMPLETE → md5-candidate (+1 fn, the S179 carry
 RESOLVED).** matched **+1** (`func_800329F4`, fill-rect RCP clear); md5-candidate **222 → 223** (file now
 0 `INCLUDE_ASM`). RETIRED the S179 "permuter-class" scheduler-load-pair wall via a FAITHFUL
@@ -2936,6 +2960,49 @@ by `/sprint-plan`:
   `NU_CONT_THREAD_ID=6` vs MG64's 5), and that surfaces only at first build unless reconciled here.
   A near-free retry missing any of these is a half-scoped spike — finish the scope before deferring.
 
+- **(S182 MIXED-PARTIAL — carried; 3 of 7 banked)** `src/main/func_8004D190.c` (the VI/framebuffer +
+  grid-print debug-display pack `[0x28590]`). BANKED byte-exact C: `clear_text_grid` (0x8004D794),
+  `set_flag_based_on_param` (0x8004D99C), `func_8004D580` (0x8004D580). FOUR `INCLUDE_ASM` stubs remain →
+  NOT md5-candidate. **No flip/data/symbol enablers left** (subseg `[0x28590, c, main/func_8004D190]`; all
+  refs placed `D_`/`flag`/`D_A0000000` externs, NO rodata carve; only `clear_text_grid` newly named).
+  Two distinct carry classes:
+  - **`func_8004D4B8` (0x8004D4B8, ~50 insns — SPIKE, `#dead-frame-reload-artifact-regalloc-wall`):**
+    string→glyph-tile blit into a `u16* out` tilemap from the `D_800BE6E0` glyph LUT. STRUCTURALLY
+    BYTE-EXACT (48 non-frame insns match in order+opcode) except the target reserves a DEAD 8-byte frame
+    (no `($sp)` body access) + the `t1<->t2`/`t3<->t4` reg-perm it drives. Root cause (mips.c
+    compute_frame_size): local-alloc reserves a slot despite free `t7-t9`, global-alloc fills it → dead
+    slot; not reachable from faithful C. **Levers landed (KEEP):** `c-=0x20` in-place (fixed char→v1 +
+    dropped an extra `move`); clean `for(a3=0;a3<2;a3++) out[t0*2+a3]=LUT[t1+a3]` (fixed the branch-likely
+    inner loop). Tried-and-failed: explicit `base=t1` invariant copy (no frame). Near-match in
+    `docs/wip/func_8004D4B8.near-match.c.txt`. **Retry:** a genuinely-new mechanism that makes local-alloc
+    spill one inner-block pseudo, OR the TU-wide `#profile-probe` (see next bullet). Do NOT re-run the
+    in-place/for-loop/base-copy levers.
+  - **`func_8004D5F0` (0x8004D5F0, 105 insns — SPIKE, register-COALESCING regalloc wall, permuter-CONFIRMED):**
+    framebuffer glyph renderer, double-buffered (writes both current+next VI fb, uncached K1). 99/105
+    near-exact. Target keeps 2 NON-coalesced copies of `c` (s0 original for the first `(s8)c` compare, s2
+    working; frame 0x30/s0-s5, defers `t3=next K1` into the beqz delay slot); mine COALESCES to one (frame
+    0x28, s0-s4) = MORE optimal. Permuter (main profile, direct import.py — see
+    `#permuter-setup-for-kmc-toolchain-mirrors`) base 2055 → plateau 1190, NO path to 0. Tried-and-failed:
+    `c2=c` split, two explicit copies `raw`+`clamped` (all coalesced). `OS_PHYSICAL_TO_K1` + `D_A0000000`
+    handling all confirmed correct. Near-match in `docs/wip/func_8004D5F0.near-match.c.txt`. **Retry:** the
+    non-coalesced-2-copy global-alloc state, OR a compiler-config confirmation.
+  - **TU-wide `#profile-probe` FIRST on the two above (S182 doctrine).** `func_8004D4B8` (dead-frame) and
+    `func_8004D5F0` (coalescing) are BOTH the "mine-more-optimal-than-target" class clustered in ONE TU. A
+    single subtle flag/patchlevel that makes GCC coalesce-less / spill-more could flip BOTH at once — run
+    `tools/profile_probe.py` on the whole TU before another per-fn dive (see
+    `docs/hazards.md#profile-probe`). Only if that finds nothing are they genuine per-fn 2.7.2 artifacts.
+  - **`func_8004D190` (0x8004D190, ~200 insns) + `func_8004D7B8` (0x8004D7B8, ~120 insns) — DL BUILDERS,
+    dedicated `#display-lists` sprint.** `func_8004D190` = leaf unrolled texture-load + render-mode DL
+    preamble (GBI opcodes SETTIMG/SETTILE/LOADBLOCK/SETTILESIZE/SETCOMBINE/SETOTHERMODE/TEXTURE/sync);
+    `func_8004D7B8` calls it + `flag_is_set(0x1D)` then a nested row/col loop over the `D_800DAF60` text
+    grid emitting glyph DL commands. Reconstruct with m2c + `gfxdis.f3dex2` (F3DEX2 profile via
+    `mk/main.mk`) — the DCE0 DL-pack workflow (S179/S180). Not attempted S182.
+  - **Retry checklist (near-free):** (1) subseg flip DONE (`[0x28590, c, main/func_8004D190]`); (2) placed
+    refs: `flag`(0x800BFEE4), `D_800DAF60`, `D_800BE6E0`, `D_800BFEE0`, `D_A0000000` all placed externs, NO
+    carve; (3) NO recover-externs; (4) classical (no upstream); (5) permuter scaffold live
+    `nonmatchings/func_8004D5F0/` (main settings; output-1190-1 best); (6) near-matches in the two WIP
+    files above.
+
 - **(S175 MIXED-PARTIAL — carried; 5 of 6 banked; new project-best 13530/13235, `register` ruled out)** `src/main/print_string_at_grid.c` (the grid-print
   debug cluster `[0x28DC0]`). BANKED byte-exact C (S171): `check_and_print_grid`, `func_8004DA4C`,
   `convert_and_print_hex`, `func_8004DAF4`; BANKED (S172): `print_string_at_grid` (the S171-rated harder
@@ -3169,6 +3236,24 @@ by `/sprint-plan`:
   tooling-refactor policy. (Until then, S157's manual recipe in `docs/hazards.md#permuter-setup-for-
   kmc-toolchain-mirrors` applies by hand.)
 
+- **Tooling follow-up (S182, PO-selected #1; deferred to a golden-gated tooling branch, NOT a
+  review-gate edit).** `setup-permuter.sh` / `mg_resolve_c_asm` (tools/lib.sh) resolve the C file by
+  grepping `INCLUDE_ASM(.*, <fn>);`, which is GONE once the fn is a C body (a near-match you want to
+  permute in place). The resolver sets `C_FILE=` empty and `set -e` aborts SILENTLY. Fix: teach
+  `mg_resolve_c_asm` to also resolve a fn defined as C — grep for the `<fn>(` definition in `src/**`
+  + resolve the asm at `asm/nonmatchings/**/<fn>/<fn>.s`. **Why a branch:** `mg_resolve_c_asm` is a
+  shared shell helper feeding the permuter setup; golden-gate per the tooling-refactor policy. Kin to
+  the S170/S168 `find_segment` follow-ups (same "already-flipped-to-c" resolution gap, shell side).
+  Until then the by-hand direct-`import.py` recipe applies (`docs/hazards.md#permuter-setup-for-kmc-
+  toolchain-mirrors`, the S182 bullet).
+- **Tooling follow-up (S182, PO-selected #3; deferred to a golden-gated tooling branch, NOT a
+  review-gate edit).** Teach `pick_target.py` to flag a DL-builder fn — a **leaf** (no `jal`) with
+  dense GBI-opcode command-word stores (top bytes E2/E3/FC/FD/F5/F3/F2/D7/E6/E7 written as `sw`
+  immediates into a Gfx buffer) — so the gate routes it to the `#display-lists` track (m2c + gfxdis,
+  F3DEX2) upfront instead of the classical track. **Why a branch:** touches the ranker's hazard
+  detectors (FP surface feeding the displayed estimate + the 8-gate); golden-gate per policy. Kin to
+  the S180 DL-fill-color `mem-in-struct` detector follow-up. Data points: `func_8004D190` +
+  `func_8004D7B8` (S182 carries).
 - **Tooling follow-up (S170, PO-selected #3; deferred to a golden-gated tooling branch, NOT a
   review-gate edit).** `tools/decomp_loop.py`'s `find_segment` resolves a placeholder by grepping
   top-level `asm/<off>.s` for its `glabel`, so it **fails on a fn whose subseg is already flipped to

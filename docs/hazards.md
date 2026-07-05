@@ -3346,11 +3346,23 @@ setup feeds, see `#pervasive-regalloc-classical-main`.
   `heap_alloc` (ra-capture inline asm) was made permuter-loadable; the base scored 1595 and drove down
   to 605 (the register lever, not the permuter, closed it — see `#loop-weight-and-live-length-regalloc-steering`).
 
+- **Setup on a fn ALREADY inlined as C in a multi-fn file (S182).** `setup-permuter.sh` /
+  `mg_resolve_c_asm` (tools/lib.sh) resolve the C file by grepping for `INCLUDE_ASM(.*, <fn>);` — which
+  is **gone** once the fn is a C body (a near-match you want to permute in place). The resolver then
+  sets `C_FILE=` empty and `set -e` aborts SILENTLY (no output). **Workaround:** bypass the resolver and
+  call `import.py` directly with the containing C file + the exact per-fn target `.s` (venv-run):
+  `venv/bin/python3 tools/decomp-permuter/import.py --settings permuter_settings_main.toml
+  src/<seg>.c asm/nonmatchings/<tree>/<file>/<fn>.s`. import.py picks the target fn by the `.s`
+  filename, so a multi-fn `src/<seg>.c` is fine. (Golden-gated tooling follow-up: teach
+  `mg_resolve_c_asm` to also resolve a fn defined as C — grep for the `<fn>(` definition + resolve the
+  asm at `asm/nonmatchings/**/<fn>/<fn>.s`; kin to the S170/S168 `find_segment` follow-ups. Until then,
+  the direct-import recipe applies by hand.)
+
 **Provenance:** S121 (contRmbControl: the three KMC-toolchain fixes); S151 (generalized to the game
 -O2 main-profile + the coord-width permuter lever); S157 (KMC-gcc tuning: `perm_sameline` no-op,
 `--best-only` plateaus); S158 (committed `permuter_settings_main.toml` + `kmc_main_prelude.inc`);
 S169 (`do{}while(0)` schedule lever + the venv/inlined-fn import path); S176 (the b64literal inline-asm
-base.c fix).
+base.c fix); S182 (direct-import bypass for an already-inlined multi-fn-file near-match).
 
 ## NU_DEBUG-stock-not-custom (carried perf fn triage)
 
@@ -3533,6 +3545,21 @@ the first comparison match only reloc lines and read as false 0-diffs). Pairs wi
 
 **Provenance:** S149 (the profile-probe grind: assemble the target with modern GAS; the
 `\s`-vs-`[[:space:]]` awk-normalizer false-0-diff bug).
+
+**TU-wide probe when >=2 alloc-artifact walls CLUSTER in one TU (S182).** When a single classical TU
+banks its simple fns clean at `-O2` but two-or-more register-pressure-heavy fns each hit a distinct
+regalloc-*artifact* wall (a DEAD frame the source can't force, a non-coalesced register copy the `-O2`
+build coalesces away, a spill the build doesn't emit — the "MINE is more optimal than the target"
+class), do NOT profile-probe-then-carry each fn in isolation. Run **one TU-wide profile-probe first**:
+a single subtle flag/patchlevel that makes GCC coalesce-less or spill-more would flip MULTIPLE fns at
+once, so the whole-TU probe is cheaper than N per-fn dives and, if it hits, converts several carries to
+banks together. If the TU-wide probe finds nothing (the simple fns already pin the profile, and no flag
+reproduces the target's less-optimal allocation), THEN the walls are genuine per-fn 2.7.2
+patchlevel/build artifacts and each carries individually. S182 `func_8004D190.c` clustered a dead-frame
+wall (`func_8004D4B8`) and a coalescing wall (`func_8004D5F0`) in one TU; both are the "more-optimal-
+than-target" class. Cf. `func_80076640` (S181) and `func_8004DC44` (S172-S175) reaching the same
+per-fn "2.7.2 patchlevel artifact" verdict. Pairs with `#dead-frame-reload-artifact-regalloc-wall` and
+`#cross-project-matched-corpus-mining`.
 
 ---
 
