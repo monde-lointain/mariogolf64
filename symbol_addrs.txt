@@ -638,3 +638,14 @@ heap3_get_total = 0x8004E27C; // type:func
 heap3_get_largest_free = 0x8004E288; // type:func
 heap3_alloc = 0x8004E2DC; // type:func
 heap3_free = 0x8004E47C; // type:func
+heap_add_region = 0x8004DD70; // type:func
+heap_init = 0x8004DDE4; // type:func
+heap_get_total = 0x8004DE44; // type:func
+// heap slot array (heap_slots[4], 0x18 each); slot 3's total_free/largest_free
+// are carved out as offset-0 aliases so the ROM's %hi/%lo re-materialization matches.
+heap_slots = 0x800DC6E0; // size:0x58
+heap3_total_free = 0x800DC738; // size:0x4
+heap3_largest_free = 0x800DC73C; // size:0x4
+heap_msg_alloc_fail = 0x800CCA90; // size:0x1C
+heap_msg_free_null = 0x800CCAAC; // size:0x24
+heap3_msg_free_null = 0x800CCAD0; // size:0x40

@@ -1,40 +1,35 @@
 #include "common.h"
 
-/* A circular doubly-linked list of sized nodes, one list per slot index.
- * The array element at D_800DC6E0[i] doubles as the list head (self-linked
- * when empty) and the running-total accumulator for slot i. */
-typedef struct Slot {
-  /* 0x00 */ s32 size; /* byte length of this node's region */
-  /* 0x04 */ s32 unk_04;
-  /* 0x08 */ struct Slot* next;
-  /* 0x0C */ struct Slot* prev;
-  /* 0x10 */ s32 total; /* accumulated size across the slot's list */
-  /* 0x14 */ s32 unk_14;
-} Slot; /* 0x18 */
+#include "heap.h"
 
-extern Slot D_800DC6E0[];
+/* Slot-indexed free-list maintenance, shared by every heap slot. The slot-3
+ * hot path has its own specialized copies in func_8004DE60.c. */
 
-void func_8004DD70(s32 i, Slot* node, void* end) {
-  s32 len = (u8*)end - (u8*)node;
+/* Append the region [block, end) to slot `slot`'s free list as one free block,
+ * linking it before the head sentinel (i.e. at the tail of the ring). */
+void heap_add_region(s32 slot, HeapBlock* block, void* end) {
+  s32 size = (u8*)end - (u8*)block;
 
-  node->size = len;
-  D_800DC6E0[i].total += len;
-  node->unk_04 = 0;
-  node->next = &D_800DC6E0[i];
-  node->prev = D_800DC6E0[i].prev;
-  D_800DC6E0[i].prev->next = node;
-  D_800DC6E0[i].prev = node;
+  block->size = size;
+  heap_slots[slot].total_free += size;
+  block->state = HEAP_BLOCK_FREE;
+  block->next = &heap_slots[slot];
+  block->prev = heap_slots[slot].prev;
+  heap_slots[slot].prev->next = block;
+  heap_slots[slot].prev = block;
 }
 
-void func_8004DDE4(s32 i) {
-  Slot* s = &D_800DC6E0[i];
+/* Reset slot `slot` to an empty list: the head sentinel points at itself, with
+ * zero free bytes and no largest-free block recorded yet. */
+void heap_init(s32 slot) {
+  HeapBlock* head = &heap_slots[slot];
 
-  D_800DC6E0[i].total = 0;
-  D_800DC6E0[i].size = 0;
-  D_800DC6E0[i].unk_04 = -1;
-  s->prev = s;
-  D_800DC6E0[i].next = s;
-  D_800DC6E0[i].unk_14 = -1;
+  heap_slots[slot].total_free = 0;
+  heap_slots[slot].size = 0;
+  heap_slots[slot].state = HEAP_BLOCK_HEAD;
+  head->prev = head;
+  heap_slots[slot].next = head;
+  heap_slots[slot].largest_free = -1;
 }
 
-s32 func_8004DE44(s32 i) { return D_800DC6E0[i].total; }
+s32 heap_get_total(s32 slot) { return heap_slots[slot].total_free; }

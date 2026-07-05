@@ -1,287 +1,305 @@
 #include "common.h"
 
-/* Interrupt-guarded best-fit heap allocator over the per-slot free lists in
- * D_800DC6E0[] (see the Slot struct in func_8004DD70.c). Each Slot node carries
- * a 16-byte header {size, unk_04 (in-use flag / 0x12345678 guard), next, prev};
- * the payload begins at node+0x10. The head element D_800DC6E0[i] doubles as
- * the list sentinel, `total` holds the slot's free byte count, and `unk_14`
- * tracks the largest free block seen. */
-typedef struct Slot {
-  /* 0x00 */ s32 size;
-  /* 0x04 */ s32 unk_04;
-  /* 0x08 */ struct Slot* next;
-  /* 0x0C */ struct Slot* prev;
-  /* 0x10 */ s32 total;
-  /* 0x14 */ s32 unk_14;
-} Slot; /* 0x18 */
+#include "heap.h"
 
-extern Slot D_800DC6E0[];
-extern char D_800CCA90[];
-extern char D_800CCAAC[];
-extern char D_800CCAD0[];
-/* D_800DC6E0[3].total (0x800DC738) and .unk_14 (0x800DC73C), referenced as
- * their own offset-0 symbols so a store / read-modify-write re-materializes
- * %hi/%lo (matching the ROM) instead of CSE-folding the D_800DC6E0+0x58 address
- * into a base register. */
-extern s32 D_800DC738;
-extern s32 D_800DC73C;
+/* Slot 3 is the game's general-purpose dynamic heap. This file holds its
+ * specialized allocate / free / query path (heap3_*), plus the generic
+ * slot-indexed allocate, free, and largest-free query (heap_*). The free-list
+ * maintenance shared by every slot lives in func_8004DD70.c; the HeapBlock
+ * layout and shared constants live in heap.h.
+ *
+ * heap_alloc walks a slot's free list keeping the smallest block that fits
+ * (best fit). If the chosen block has enough slack it is split, and the tail
+ * returned to the free list; otherwise the whole block is handed out. Freeing
+ * coalesces a block with an immediately adjacent free neighbor on either side.
+ */
 
-s32 heap_get_largest_free(s32 i) { return D_800DC6E0[i].unk_14; }
+/* Debug-console diagnostics (Shift-JIS), printed on the error paths. */
+extern char heap_msg_alloc_fail[]; /* allocation failed; arg is the caller PC */
+extern char heap_msg_free_null[];  /* NULL passed to heap_free */
+extern char heap3_msg_free_null[]; /* NULL passed to heap3_free */
 
-void* heap_alloc(s32 i, u32 need) {
-  u32 ra;
-  Slot* head;
-  u32 best_rem, minsize, bsize;
-  Slot *best, *p;
-  OSIntMask mask;
+/* heap_slots[3].total_free and .largest_free, aliased as their own offset-0
+ * symbols. KMC GCC 2.7.2 -O2 re-materializes %hi/%lo for a symbol+0 address but
+ * folds symbol+offset (heap_slots + 0x58 / + 0x5C) into a reused base register.
+ * The ROM re-materializes, so heap3_alloc and heap3_free must reach these two
+ * words through the aliases; the heap3_* query/init paths, which the ROM does
+ * fold, reach them through heap_slots[3] instead. Do not unify the two forms.
+ */
+extern s32 heap3_total_free;   /* == heap_slots[3].total_free  (0x800DC738) */
+extern s32 heap3_largest_free; /* == heap_slots[3].largest_free (0x800DC73C) */
 
-  __asm__ __volatile__("addu %0, $31, $0" : "=r"(ra));
-  best_rem = 0;
-  head = &D_800DC6E0[i];
-  mask = osSetIntMask(1);
-  need = (need + 0x17) & ~7;
-  minsize = 0x7FFFFFFF;
-  best = NULL;
-  for (p = head->next; p != head; p = p->next) {
-    if (p->unk_04 == 0) {
-      bsize = p->size;
-      if (bsize >= need) {
-        if (bsize < minsize) {
-          if ((best_rem < minsize) & (minsize != 0x7FFFFFFF)) {
-            best_rem = minsize;
+s32 heap_get_largest_free(s32 slot) { return heap_slots[slot].largest_free; }
+
+void* heap_alloc(s32 slot, u32 need) {
+  u32 caller_ra;
+  HeapBlock* head;
+  u32 largest_free, best_fit_size, block_size;
+  HeapBlock *best_fit, *block;
+  OSIntMask saved_mask;
+
+  __asm__ __volatile__("addu %0, $31, $0" : "=r"(caller_ra));
+  largest_free = 0;
+  head = &heap_slots[slot];
+  saved_mask = osSetIntMask(1);
+  need = (need + HEAP_HEADER_SIZE + HEAP_ALIGN - 1) & ~(HEAP_ALIGN - 1);
+  best_fit_size = HEAP_MINSIZE_NONE;
+  best_fit = NULL;
+  for (block = head->next; block != head; block = block->next) {
+    if (block->state == HEAP_BLOCK_FREE) {
+      block_size = block->size;
+      if (block_size >= need) {
+        if (block_size < best_fit_size) {
+          /* Bitwise `&`, not `&&`: the branchless form is what reproduces the
+           * ROM's instruction schedule. */
+          if ((largest_free < best_fit_size) &
+              (best_fit_size != HEAP_MINSIZE_NONE)) {
+            largest_free = best_fit_size;
           }
-          minsize = bsize;
-          if (best_rem < minsize - need) {
-            best_rem = minsize - need;
+          best_fit_size = block_size;
+          if (largest_free < best_fit_size - need) {
+            largest_free = best_fit_size - need;
           }
-          best = p;
-        } else if (best_rem < bsize) {
-          best_rem = bsize;
+          best_fit = block;
+        } else if (largest_free < block_size) {
+          largest_free = block_size;
         }
       }
     }
   }
-  D_800DC6E0[i].unk_14 = best_rem;
-  if (best == NULL) {
-    osSetIntMask(mask);
-    osSyncPrintf(D_800CCA90, ra);
+  heap_slots[slot].largest_free = largest_free;
+  if (best_fit == NULL) {
+    osSetIntMask(saved_mask);
+    osSyncPrintf(heap_msg_alloc_fail, caller_ra);
     return NULL;
   }
-  if ((u32)(best->size - need) >= 0x11) {
-    u32 sz;
-    Slot* split;
-    D_800DC6E0[i].total -= need;
-    sz = best->size;
-    split = (Slot*)((u8*)best + need);
-    split->unk_04 = 0;
-    split->size = sz - need;
-    best->next->prev = split;
-    split->next = best->next;
-    best->next = split;
-    split->prev = best;
-    best->size = need;
+  /* Split only if the remainder can hold a header plus at least one byte. */
+  if ((u32)(best_fit->size - need) >= HEAP_HEADER_SIZE + 1) {
+    u32 whole_size;
+    HeapBlock* split;
+    heap_slots[slot].total_free -= need;
+    whole_size = best_fit->size;
+    split = (HeapBlock*)((u8*)best_fit + need);
+    split->state = HEAP_BLOCK_FREE;
+    split->size = whole_size - need;
+    best_fit->next->prev = split;
+    split->next = best_fit->next;
+    best_fit->next = split;
+    split->prev = best_fit;
+    best_fit->size = need;
   } else {
-    D_800DC6E0[i].total -= minsize;
+    heap_slots[slot].total_free -= best_fit_size;
   }
-  best->unk_04 = 0x12345678;
-  osSetIntMask(mask);
-  return &best->total;
+  best_fit->state = HEAP_BLOCK_IN_USE;
+  osSetIntMask(saved_mask);
+  return &best_fit->total_free; /* the payload overlays total_free on a block */
 }
 
-void heap_free(s32 i, void** pptr) {
-  OSIntMask mask = osSetIntMask(1);
-  void* payload = *pptr;
-  Slot* block;
-  Slot* cur;
+void heap_free(s32 slot, void** payload_ptr) {
+  OSIntMask saved_mask = osSetIntMask(1);
+  void* payload = *payload_ptr;
+  HeapBlock* block;
+  HeapBlock* merged;
 
   if (payload == NULL) {
-    osSetIntMask(mask);
-    osSyncPrintf(D_800CCAAC);
+    osSetIntMask(saved_mask);
+    osSyncPrintf(heap_msg_free_null);
     return;
   }
 
-  block = (Slot*)((u8*)payload - 0x10);
-  D_800DC6E0[i].total += block->size;
-  cur = block;
-  if (block->prev->unk_04 == 0 &&
-      (Slot*)((u8*)block->prev + block->prev->size) == block) {
+  block = (HeapBlock*)((u8*)payload - HEAP_HEADER_SIZE);
+  heap_slots[slot].total_free += block->size;
+  merged = block;
+  /* Coalesce with the previous block if it is free and physically adjacent. */
+  if (block->prev->state == HEAP_BLOCK_FREE &&
+      (HeapBlock*)((u8*)block->prev + block->prev->size) == block) {
     block->next->prev = block->prev;
     block->prev->next = block->next;
     block->prev->size += block->size;
-    cur = block->prev;
+    merged = block->prev;
   }
-  if (cur->next->unk_04 == 0) {
-    if ((Slot*)((u8*)cur + cur->size) == cur->next) {
-      cur->next->next->prev = cur;
-      cur->size += cur->next->size;
-      cur->next = cur->next->next;
+  /* Then with the next block, under the same condition. */
+  if (merged->next->state == HEAP_BLOCK_FREE) {
+    if ((HeapBlock*)((u8*)merged + merged->size) == merged->next) {
+      merged->next->next->prev = merged;
+      merged->size += merged->next->size;
+      merged->next = merged->next->next;
     }
   }
-  cur->unk_04 = 0;
-  *pptr = NULL;
-  osSetIntMask(mask);
+  merged->state = HEAP_BLOCK_FREE;
+  *payload_ptr = NULL;
+  osSetIntMask(saved_mask);
 }
 
-/* heap3_init resets slot 3 (D_800DC6E0[3]) to an empty self-linked list, then
- * appends one or two RAM regions via the nested helper heap3_add_region (the
- * second, the 2 MB expansion-pak window, only when param==1). heap3_add_region
- * is a GCC nested function (dead static-chain `sw v0,0(sp)`), so the two are
- * ONE C translation unit; GCC emits the child body first, landing it at
- * 0x8004E184 just before the parent at 0x8004E1E0.
+/* Slot 3 spans main RAM above the loaded program, plus the upper 2 MB of the
+ * 8 MB Expansion Pak when it is fitted. */
+#define MAIN_HEAP_START 0x8025D800
+#define MAIN_HEAP_END 0x802EA000
+#define EXPANSION_HEAP_START 0x80600000
+#define EXPANSION_HEAP_END 0x80800000
+
+/* heap3_init resets slot 3 to an empty list, then appends one or two RAM
+ * regions via the nested helper heap3_add_region (the second, the expansion-pak
+ * window, only when with_expansion_pak == 1). heap3_add_region is a GCC nested
+ * function (dead static-chain `sw v0,0(sp)`), so the two are ONE C translation
+ * unit; GCC emits the child body first, landing it at 0x8004E184 just before
+ * the parent at 0x8004E1E0.
  *
- * The head-node reset writes size/unk_04/prev through a volatile-qualified view
- * of D_800DC6E0[3] (the struct itself stays non-volatile, so the slot-list
+ * The head-node reset writes size/state/prev through a volatile-qualified view
+ * of heap_slots[3] (the struct itself stays non-volatile, so the slot-list
  * siblings are unaffected). That is the byte-exact lever for the ROM's `next =
- * prev` RELOAD of D_800DC734: KMC GCC 2.7.2 -O2 CSE-forwards a plain absolute
- * store, so a faithful `next = prev` reuses the stored register with no reload;
- * the volatile read forces the reload back from memory, and marking size/unk_04
- * volatile too keeps them scheduled ahead of prev (a non-volatile store would
- * be pulled into the reload's load-delay shadow) so the whole schedule matches.
- */
-void heap3_init(s32 param) {
-  void heap3_add_region(Slot * node, void* end) {
-    s32 size = (u8*)end - (u8*)node;
-    node->size = size;
-    node->unk_04 = 0;
-    node->next = &D_800DC6E0[3];
-    node->prev = D_800DC6E0[3].prev;
-    D_800DC6E0[3].total += size;
-    D_800DC6E0[3].prev->next = node;
-    D_800DC6E0[3].prev = node;
+ * prev` RELOAD of heap_slots[3].prev: KMC GCC 2.7.2 -O2 CSE-forwards a plain
+ * absolute store, so a faithful `next = prev` reuses the stored register with
+ * no reload; the volatile read forces the reload back from memory, and marking
+ * size/state volatile too keeps them scheduled ahead of prev (a non-volatile
+ * store would be pulled into the reload's load-delay shadow), matching the
+ * schedule. */
+void heap3_init(s32 with_expansion_pak) {
+  void heap3_add_region(HeapBlock * block, void* end) {
+    s32 size = (u8*)end - (u8*)block;
+    block->size = size;
+    block->state = HEAP_BLOCK_FREE;
+    block->next = &heap_slots[3];
+    block->prev = heap_slots[3].prev;
+    heap_slots[3].total_free += size;
+    heap_slots[3].prev->next = block;
+    heap_slots[3].prev = block;
   }
 
-  *(volatile s32*)&D_800DC6E0[3].size = 0;
-  *(volatile s32*)&D_800DC6E0[3].unk_04 = -1;
-  *(Slot* volatile*)&D_800DC6E0[3].prev = &D_800DC6E0[3];
-  D_800DC6E0[3].next = *(Slot* volatile*)&D_800DC6E0[3].prev;
-  D_800DC6E0[3].total = 0;
-  heap3_add_region((Slot*)0x8025D800, (void*)0x802EA000);
-  if (param == 1) {
-    heap3_add_region((Slot*)0x80600000, (void*)0x80800000);
+  *(volatile s32*)&heap_slots[3].size = 0;
+  *(volatile s32*)&heap_slots[3].state = HEAP_BLOCK_HEAD;
+  *(HeapBlock* volatile*)&heap_slots[3].prev = &heap_slots[3];
+  heap_slots[3].next = *(HeapBlock* volatile*)&heap_slots[3].prev;
+  heap_slots[3].total_free = 0;
+  heap3_add_region((HeapBlock*)MAIN_HEAP_START, (void*)MAIN_HEAP_END);
+  if (with_expansion_pak == 1) {
+    heap3_add_region((HeapBlock*)EXPANSION_HEAP_START,
+                     (void*)EXPANSION_HEAP_END);
   }
-  D_800DC6E0[3].unk_14 = -1;
+  heap_slots[3].largest_free = -1;
 }
 
-s32 heap3_get_total(void) { return D_800DC6E0[3].total; }
+s32 heap3_get_total(void) { return heap_slots[3].total_free; }
 
 s32 heap3_get_largest_free(void) {
-  Slot* p = D_800DC6E0[3].next;
-  u32 max = 0;
+  HeapBlock* block = heap_slots[3].next;
+  u32 largest = 0;
 
-  for (; p != &D_800DC6E0[3]; p = p->next) {
-    if (p->unk_04 == 0) {
-      if (max < (u32)p->size) {
-        max = p->size;
+  for (; block != &heap_slots[3]; block = block->next) {
+    if (block->state == HEAP_BLOCK_FREE) {
+      if (largest < (u32)block->size) {
+        largest = block->size;
       }
     }
   }
-  D_800DC6E0[3].unk_14 = max;
-  return max;
+  heap_slots[3].largest_free = largest;
+  return largest;
 }
 
-/* heap3_alloc is heap_alloc specialized to slot 3 (best-fit over
- * D_800DC6E0[3]'s free list, same block-split + 0x12345678 guard as heap_alloc,
- * ra-capture for the OOM osSyncPrintf). The sentinel is written inline (`p !=
- * &D_800DC6E0[3]`, no `head` local): with the sentinel expressed as an offset
- * off D_800DC6E0[3], CSE derives it from the `.next` load base (one `addiu
- * v1,v1,-8`), which lets the register allocator keep the sentinel in $v1 for
+/* heap3_alloc is heap_alloc specialized to slot 3. The list-head sentinel is
+ * written inline (`block != &heap_slots[3]`, with no `head` local): expressed
+ * as an offset off heap_slots[3], CSE derives it from the `.next` load base
+ * (one `addiu v1,v1,-8`), which lets the allocator keep the sentinel in $v1 for
  * the entry guard and copy it to $t0 for the loop (`move t0,v1`) exactly as the
- * ROM does, with the second 0x7FFFFFFF in $a3. A precomputed `head` local (or
- * the &D_800DC730-8 anchor idiom) instead pins the sentinel into one loop reg
- * with no copy, missing that instruction. */
+ * ROM does, with the second HEAP_MINSIZE_NONE constant in $a3. A precomputed
+ * `head` local (or a &heap_slots[3] anchor) instead pins the sentinel into one
+ * loop register with no copy, one instruction short of the ROM. */
 void* heap3_alloc(u32 need) {
-  u32 ra;
-  u32 best_rem, minsize, bsize;
-  Slot *best, *p;
-  OSIntMask mask;
+  u32 caller_ra;
+  u32 largest_free, best_fit_size, block_size;
+  HeapBlock *best_fit, *block;
+  OSIntMask saved_mask;
 
-  __asm__ __volatile__("addu %0, $31, $0" : "=r"(ra));
-  best_rem = 0;
-  mask = osSetIntMask(1);
-  need = (need + 0x17) & ~7;
-  minsize = 0x7FFFFFFF;
-  best = NULL;
-  for (p = D_800DC6E0[3].next; p != &D_800DC6E0[3]; p = p->next) {
-    if (p->unk_04 == 0) {
-      bsize = p->size;
-      if (bsize >= need) {
-        if (bsize < minsize) {
-          if ((best_rem < minsize) & (minsize != 0x7FFFFFFF)) {
-            best_rem = minsize;
+  __asm__ __volatile__("addu %0, $31, $0" : "=r"(caller_ra));
+  largest_free = 0;
+  saved_mask = osSetIntMask(1);
+  need = (need + HEAP_HEADER_SIZE + HEAP_ALIGN - 1) & ~(HEAP_ALIGN - 1);
+  best_fit_size = HEAP_MINSIZE_NONE;
+  best_fit = NULL;
+  for (block = heap_slots[3].next; block != &heap_slots[3];
+       block = block->next) {
+    if (block->state == HEAP_BLOCK_FREE) {
+      block_size = block->size;
+      if (block_size >= need) {
+        if (block_size < best_fit_size) {
+          /* Bitwise `&`, not `&&` (see heap_alloc). */
+          if ((largest_free < best_fit_size) &
+              (best_fit_size != HEAP_MINSIZE_NONE)) {
+            largest_free = best_fit_size;
           }
-          minsize = bsize;
-          if (best_rem < minsize - need) {
-            best_rem = minsize - need;
+          best_fit_size = block_size;
+          if (largest_free < best_fit_size - need) {
+            largest_free = best_fit_size - need;
           }
-          best = p;
-        } else if (best_rem < bsize) {
-          best_rem = bsize;
+          best_fit = block;
+        } else if (largest_free < block_size) {
+          largest_free = block_size;
         }
       }
     }
   }
-  D_800DC73C = best_rem;
-  if (best == NULL) {
-    osSetIntMask(mask);
-    osSyncPrintf(D_800CCA90, ra);
+  heap3_largest_free = largest_free;
+  if (best_fit == NULL) {
+    osSetIntMask(saved_mask);
+    osSyncPrintf(heap_msg_alloc_fail, caller_ra);
     return NULL;
   }
-  if ((u32)(best->size - need) >= 0x11) {
-    u32 sz;
-    Slot* split;
-    D_800DC738 -= need;
-    sz = best->size;
-    split = (Slot*)((u8*)best + need);
-    split->unk_04 = 0;
-    split->size = sz - need;
-    best->next->prev = split;
-    split->next = best->next;
-    best->next = split;
-    split->prev = best;
-    best->size = need;
+  if ((u32)(best_fit->size - need) >= HEAP_HEADER_SIZE + 1) {
+    u32 whole_size;
+    HeapBlock* split;
+    heap3_total_free -= need;
+    whole_size = best_fit->size;
+    split = (HeapBlock*)((u8*)best_fit + need);
+    split->state = HEAP_BLOCK_FREE;
+    split->size = whole_size - need;
+    best_fit->next->prev = split;
+    split->next = best_fit->next;
+    best_fit->next = split;
+    split->prev = best_fit;
+    best_fit->size = need;
   } else {
-    D_800DC738 -= minsize;
+    heap3_total_free -= best_fit_size;
   }
-  best->unk_04 = 0x12345678;
-  osSetIntMask(mask);
-  return &best->total;
+  best_fit->state = HEAP_BLOCK_IN_USE;
+  osSetIntMask(saved_mask);
+  return &best_fit->total_free;
 }
 
-/* heap_free for slot 3 (the coalescing free that mirrors heap_free), with the
- * caller's return address captured for the double-free osSyncPrintf. */
-void heap3_free(void** pptr) {
-  u32 ra;
-  OSIntMask mask;
+/* heap_free specialized to slot 3, with the caller PC captured for the
+ * double-free diagnostic. */
+void heap3_free(void** payload_ptr) {
+  u32 caller_ra;
+  OSIntMask saved_mask;
   void* payload;
-  Slot* block;
-  Slot* cur;
+  HeapBlock* block;
+  HeapBlock* merged;
 
-  __asm__ __volatile__("addu %0, $31, $0" : "=r"(ra));
-  mask = osSetIntMask(1);
-  payload = *pptr;
+  __asm__ __volatile__("addu %0, $31, $0" : "=r"(caller_ra));
+  saved_mask = osSetIntMask(1);
+  payload = *payload_ptr;
   if (payload == NULL) {
-    osSetIntMask(mask);
-    osSyncPrintf(D_800CCAD0, ra);
+    osSetIntMask(saved_mask);
+    osSyncPrintf(heap3_msg_free_null, caller_ra);
     return;
   }
-  block = (Slot*)((u8*)payload - 0x10);
-  D_800DC738 += block->size;
-  cur = block;
-  if (block->prev->unk_04 == 0 &&
-      (Slot*)((u8*)block->prev + block->prev->size) == block) {
+  block = (HeapBlock*)((u8*)payload - HEAP_HEADER_SIZE);
+  heap3_total_free += block->size;
+  merged = block;
+  if (block->prev->state == HEAP_BLOCK_FREE &&
+      (HeapBlock*)((u8*)block->prev + block->prev->size) == block) {
     block->next->prev = block->prev;
     block->prev->next = block->next;
     block->prev->size += block->size;
-    cur = block->prev;
+    merged = block->prev;
   }
-  if (cur->next->unk_04 == 0) {
-    if ((Slot*)((u8*)cur + cur->size) == cur->next) {
-      cur->next->next->prev = cur;
-      cur->size += cur->next->size;
-      cur->next = cur->next->next;
+  if (merged->next->state == HEAP_BLOCK_FREE) {
+    if ((HeapBlock*)((u8*)merged + merged->size) == merged->next) {
+      merged->next->next->prev = merged;
+      merged->size += merged->next->size;
+      merged->next = merged->next->next;
     }
   }
-  cur->unk_04 = 0;
-  *pptr = NULL;
-  osSetIntMask(mask);
+  merged->state = HEAP_BLOCK_FREE;
+  *payload_ptr = NULL;
+  osSetIntMask(saved_mask);
 }
