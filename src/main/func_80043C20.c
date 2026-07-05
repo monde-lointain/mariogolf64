@@ -1,24 +1,24 @@
 #include "common.h"
 
 typedef struct {
-  u8 unk0;        // 0x00
-  u8 pad01[7];    // 0x01
-  s32 unk8;       // 0x08
-  s16 unkC;       // 0x0C
-  s16 unkE;       // 0x0E
-  u8 pad10[4];    // 0x10
-  s16 unk14;      // 0x14
-  u8 pad16[2];    // 0x16
-  s32 dist[3];    // 0x18, 0x1C, 0x20
-  u8 pad24[2];    // 0x24
-  s16 unk26;      // 0x26
-  s16 unk28;      // 0x28
-  s16 unk2A;      // 0x2A
-  s16 unk2C;      // 0x2C
-  u8 pad2E[2];    // 0x2E
-  s8 unk30;       // 0x30
-  u8 pad31[3];    // 0x31
-} ClubShot;       // 0x34
+  u8 unk0;      // 0x00
+  u8 pad01[7];  // 0x01
+  s32 unk8;     // 0x08
+  s16 unkC;     // 0x0C
+  s16 unkE;     // 0x0E
+  u8 pad10[4];  // 0x10
+  s16 unk14;    // 0x14
+  u8 pad16[2];  // 0x16
+  s32 dist[3];  // 0x18, 0x1C, 0x20
+  u8 pad24[2];  // 0x24
+  s16 unk26;    // 0x26
+  s16 unk28;    // 0x28
+  s16 unk2A;    // 0x2A
+  s16 unk2C;    // 0x2C
+  u8 pad2E[2];  // 0x2E
+  s8 unk30;     // 0x30
+  u8 pad31[3];  // 0x31
+} ClubShot;     // 0x34
 
 typedef struct {
   s32 w[6];  // 0x00..0x14
@@ -39,8 +39,9 @@ extern s32 get_club_meter_units(void* club, s32 category);
 extern void* get_table_entry(void* table);
 extern u8* func_80043AF0(s32 index);
 
-// Source struct that func_80044254's arg1 points at: fixed fields at 0x1C-0x1F, and a 6-byte-stride
-// array region from 0x3C (unk3C/unk3E/unk41 read via a running pointer stepping +6 per iteration).
+// Source struct that func_80044254's arg1 points at: fixed fields at 0x1C-0x1F,
+// and a 6-byte-stride array region from 0x3C (unk3C/unk3E/unk41 read via a
+// running pointer stepping +6 per iteration).
 typedef struct {
   u8 pad00[0x1C];
   u8 unk1C;  // 0x1C
@@ -54,20 +55,23 @@ typedef struct {
   u8 unk41;   // 0x41
 } ShotInput;
 
-extern s32 active_player_idx_alt;  // 0x800FBE78 (active_club_id/idx/idx_alt are adjacent @0x800FBE58/74/78)
+extern s32 active_player_idx_alt;  // 0x800FBE78 (active_club_id/idx/idx_alt are
+                                   // adjacent @0x800FBE58/74/78)
 extern u16 D_800FED18[];
 extern u8 D_800BE5E0[];
 extern u8 D_800CC510[];
 extern u8 D_800CC520[];
-extern u8 g_terrain_vtx_xform_mode;
+extern s8 g_terrain_vtx_xform_mode;
 extern s32 func_8021EA48(void);
 extern void play_sound_effect(s32 sfx, s32 arg1, s32 arg2);
 extern void* heap3_alloc(s32 size);
 extern void heap3_free(void* ptr);
 extern void func_80028110(void* buf, s32 len);
 s32 predict_shot_distance_variant(s32 idx, s32 category);
-extern char D_800CC370[], D_800CC374[], D_800CC388[], D_800CC3EC[], D_800CC40C[];
-extern char D_800CC454[], D_800CC474[], D_800CC478[], D_800CC480[], D_800CC484[], D_800CC488[];
+extern char D_800CC370[], D_800CC374[], D_800CC388[], D_800CC3EC[],
+    D_800CC40C[];
+extern char D_800CC454[], D_800CC474[], D_800CC478[], D_800CC480[],
+    D_800CC484[], D_800CC488[];
 
 s32 resolve_club_terrain_mask(s32 arg0, void* arg1);
 s32 resolve_shot_quality_table(s32 arg0, s32 arg1, s32 arg2);
@@ -76,9 +80,10 @@ void func_80043C64(void);
 ClubShot* get_shot_data(void);
 ClubShot* get_club_param(u32 id);
 
-// Debug club-data dump. func_80043C20 is a GCC nested string-appender (static chain = &line, with
-// buf_pos/buf_end reached at chain+0x100/+0x104); GCC 2.7.2 emits it immediately before this parent,
-// landing it at the pack-lead vram 0x80043C20.
+// Debug club-data dump. func_80043C20 is a GCC nested string-appender (static
+// chain = &line, with buf_pos/buf_end reached at chain+0x100/+0x104); GCC 2.7.2
+// emits it immediately before this parent, landing it at the pack-lead vram
+// 0x80043C20.
 void func_80043C64(void) {
   char line[0x100];
   u8* buf_pos;
@@ -89,7 +94,7 @@ void func_80043C64(void) {
   s32 category;
   s32 power;
 
-  void func_80043C20(u8* s) {
+  void func_80043C20(u8 * s) {
     for (;;) {
       u8 c = *s++;
       if (c == 0) {
@@ -112,7 +117,8 @@ void func_80043C64(void) {
   club = 0;
   do {
     cs = &D_800BB258[club];
-    sprintf(line, D_800CC3EC, cs->dist[0], cs->dist[1], cs->dist[2], cs->unk28, cs->unk2A, cs->unk2C);
+    sprintf(line, D_800CC3EC, cs->dist[0], cs->dist[1], cs->dist[2], cs->unk28,
+            cs->unk2A, cs->unk2C);
     club++;
     func_80043C20((u8*)line);
   } while (club < 0xFC);
@@ -124,7 +130,8 @@ void func_80043C64(void) {
     func_80043C20((u8*)D_800CC474);
     power = 1;
     do {
-      sprintf(line, D_800CC478, predict_shot_distance_variant((power << 8) / 30, category));
+      sprintf(line, D_800CC478,
+              predict_shot_distance_variant((power << 8) / 30, category));
       func_80043C20((u8*)line);
       power++;
     } while (power < 0x1F);
@@ -218,8 +225,9 @@ void func_80044254(s32 arg0, ShotInput* arg1) {
   } while (i < 0xE);
 }
 
-// func_80044470 is a GCC nested function of func_800444B8 (static chain in $v0);
-// GCC 2.7.2 emits it immediately before the parent. Defined inside func_800444B8 below.
+// func_80044470 is a GCC nested function of func_800444B8 (static chain in
+// $v0); GCC 2.7.2 emits it immediately before the parent. Defined inside
+// func_800444B8 below.
 
 void func_800444B8(void) {
   s32 i;
@@ -254,7 +262,8 @@ void func_800444B8(void) {
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80043C20", lerp_int);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80043C20", predict_shot_distance_variant);
+INCLUDE_ASM("asm/nonmatchings/main/func_80043C20",
+            predict_shot_distance_variant);
 
 s32 get_club_distance_slot(ClubShot* c, s32 i) { return c->dist[i]; }
 
@@ -280,7 +289,62 @@ s32 get_shot_progress(void) {
   return get_club_meter_units(get_shot_data(), active_meter_category);
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80043C20", resolve_club_terrain_mask);
+// The switch funnels through `r` + a single trailing `return r` (NOT per-case
+// returns): this gives its cases a distinct switch-exit label from the early
+// `if (g_terrain) return 1`, so GCC 2.7.2's jump.c cross-jump (find_cross_jump,
+// rtx_renumbered_equal_p on the jump target) does not tail-merge case 11's
+// `return 1` with the g_terrain `return 1`. Merging them would give g_terrain's
+// return block 2 predecessors, blocking reorg from folding it to the ROM's
+// tight `bnez end`+delay. The three early `if` returns stay direct (they must
+// jump to the true epilogue for that fold). See
+// docs/hazards.md#cross-jump-tail-merge (S185 compiler-source fan-out).
+s32 resolve_club_terrain_mask(s32 arg0, void* arg1) {
+  s32 terrain = *(s32*)arg1;
+  s32 r;
+
+  if (flag_is_set(0x98)) {
+    return -1;
+  }
+  if (g_terrain_vtx_xform_mode != 0) {
+    return 1;
+  }
+  if (arg0 == 0) {
+    return (terrain == 0xB) ? 1 : -1;
+  }
+  switch (terrain) {
+    case 3:
+    case 16:
+    case 18:
+    case 19:
+    case 23:
+      r = 2;
+      break;
+    case 11:
+      r = 1;
+      break;
+    case 4:
+    case 6:
+    case 7:
+    case 8:
+      r = 4;
+      break;
+    case 15:
+      r = 8;
+      break;
+    case 0:
+    case 1:
+    case 2:
+      r = 0x10;
+      break;
+    case 17:
+      r = 0x20;
+      break;
+    default:
+      r = -1;
+      break;
+  }
+  return r;
+}
 
 s32 func_80044A8C(s32 arg0) {
   return resolve_club_terrain_mask(arg0, get_table_entry(D_800FBE70));
@@ -306,7 +370,9 @@ void func_80044FDC(void) {
   u16 flags;
 
   if (func_8021EA48() != 0) {
-    s32* alt = &active_player_idx_alt;  // 0x800FBE78; base=alt-1=&active_player_idx, base[-7]=active_club_id
+    s32* alt =
+        &active_player_idx_alt;  // 0x800FBE78; base=alt-1=&active_player_idx,
+                                 // base[-7]=active_club_id
     flags = D_800FED18[*alt * 4];
     if (flags & 0x400) {
       s32* base = alt - 1;

@@ -414,6 +414,8 @@ segments:
       - [0xA5CE0, rodata]
       - [0xA5D30, rodata]
       - [0xA5FD0, rodata]
+      - [0xA7930, .rodata, main/func_80043C20]
+      - [0xA7990, rodata]
       - [0xA8030, .rodata, main/func_80051E90]
       - [0xA8050, rodata]
       - [0xAC760, rodata]
