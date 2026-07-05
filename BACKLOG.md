@@ -66,6 +66,27 @@ fixture — the fn it probes changed state). The 4 `pick_target` live-state gold
 S184 review (`REGEN_GOLDEN=1`, banking-only drift from S182–S184); consider making them fixture-based so
 they stop drifting each banking sprint.
 
+**S185 MIXED-PARTIAL — `src/main/func_80043C20.c` S184-tail rodata-carve retry, 14/21 (+1 this sprint).**
+matched **+1** (`resolve_club_terrain_mask`, the terrain-mask switch). md5-candidate **223 → 223** (file
+has 7 stubs). PO chose the rodata-carve retry of the 3 S184 jtbl/f64 carries + directed a compiler-source
+fan-out before the permuter (systematic-debugging, `@mips-gcc-2.7.2` + `@mips-binutils-2.6`). Banked
+`resolve_club_terrain_mask` byte-exact: the jtbl_800CC530 `.rodata` carve + a **cross-jump-tail-merge**
+fix (two equal-constant `return 1` sites merged, blocking the ROM's tight `bnez end`+delay fold →
+**switch-funnel-through-result-var** gives the switch cases a distinct exit label so `find_cross_jump`
+never merges; reorg + jump.c subagents root-caused it, binutils ruled out). **Solved the
+interleaved-one-tu rodata carve** (`resolve_shot_quality_table`: individual `static const char[16]`, NOT
+2D/extern → GCC emits `[jtbl530][23 tables][jtbl700]`=0x230 matching the ROM) + the **address-select
+lever** (22→3 diffs), but the last 3-insn v0/v1 residual is a **proven-irreducible** sched artifact
+(sched.c subagent, load-latency-3 fixed point) → carried structural-complete with a decomp.me scratch
+(`dZACn`). `predict_shot_distance` not attempted (S181 abs-coalescing class). Seed 5; banked 0pt
+(mixed-partial); realized 8; residual +3; regime classical/mixed. Quality **0/0/2/0**. Retro applied **3
+of 4** (interleaved-rodata recipe + address-select lever + sched-irreducible note; decomp.me note NOT
+selected). **The PO-directed fan-out (5 subagents) did its job: cracked one wall, proved one irreducible,
+zero premature permuter.** Cross-repo: no new curated names (all pre-curated). See `## Carry-overs`.
+**Next natural slice:** the `resolve_shot_quality_table` near-free replay (carve done, needs a NEW
+`power`→`$v0` reg-pressure idiom), OR a FRESH main pack (the func_80043C20.c tail is now regalloc/abs/DL
+wall-class), OR a dedicated permuter/`#cross-project-matched-corpus-mining` sprint on the 3 regalloc carries.
+
 **S184 MIXED-PARTIAL — `src/main/func_80043C20.c` main-segment [0x1F020] golf-shot/club logic pack, 13/21
 (+13 this sprint).** matched **+13** — the **highest single-file classical bank to date**. BANKED
 byte-exact C: 7 getters/wrappers (`get_club_distance_slot`/`get_club_param`/`get_shot_data`/
@@ -3015,26 +3036,33 @@ by `/sprint-plan`:
   `NU_CONT_THREAD_ID=6` vs MG64's 5), and that surfaces only at first build unless reconciled here.
   A near-free retry missing any of these is a half-scoped spike — finish the scope before deferring.
 
-- **(S184 MIXED-PARTIAL — carried; 13 of 21 banked; highest single-file classical bank)**
-  `src/main/func_80043C20.c` (main-segment `[0x1F020]` golf-shot/club logic pack). BANKED byte-exact C
-  (13): 7 getters/wrappers + `func_800444B8`/`func_80044470` nested pair + `func_80044254` + `func_80044FDC`
-  + `func_80043C64`/`func_80043C20` nested formatter pair. Subseg `[0x1F020, c, main/func_80043C20]`
-  flipped; refs all placed; NO rodata carve; `ClubShot` (0x34) + `ShotInput` structs defined; all names
-  pre-curated (no `symbol_addrs` adds). **8 CARRIED, two DoD-blocker classes:**
-  - **Rodata-carve blockers (3)** — need a `.rodata` carve (out of scope the no-carve rule): `resolve_club_terrain_mask`
-    (compiler `jtbl_800CC530`), `resolve_shot_quality_table` (`jtbl_800CC700` + 23 digit-string tables
-    `D_800CC590`..`6F0`, 16B each; ALSO a 3-instr v0/v1 regalloc residual), `predict_shot_distance` (f64 rodata
-    literal `D_800CC508` via `ldc1`; ALSO `#abs-coalescing-reg-swap` irreducible — its nested `lerp_int_v2` child is byte-exact).
+- **(S184→S185 MIXED-PARTIAL — carried; 14 of 21 banked; highest single-file classical bank)**
+  `src/main/func_80043C20.c` (main-segment `[0x1F020]` golf-shot/club logic pack). Subseg
+  `[0x1F020, c, main/func_80043C20]` flipped; `ClubShot` (0x34) + `ShotInput` structs defined; all names
+  pre-curated (no `symbol_addrs` adds). S184 banked 13 (getters/wrappers + 2 nested pairs). **S185 banked
+  `resolve_club_terrain_mask`** (+1, jtbl_800CC530 `.rodata` carve at `[0xA7930, .rodata, main/func_80043C20]`
+  0x60 + cross-jump switch-funnel fix; see RETRO S185). **7 CARRIED now, two DoD-blocker classes:**
+  - **`resolve_shot_quality_table` — STRUCTURAL-COMPLETE near-free retry (carve SOLVED, sched-irreducible).**
+    109/109 insns, only a 3-instr v0/v1 load-schedule residual proven irreducible by the S185 sched.c
+    subagent (`#register-reuse-nudge` load-use-interlock variant; permuter useless). **Retry checklist
+    (near-free):** (1) restore the saved near-match `docs/wip/func_80043C20.resolve_shot_quality.near-match.c.txt`
+    + the 0x230 carve `[0xA7930, .rodata, main/func_80043C20]`(over jtbl530+23 tables+jtbl700), `[0xA7B60, rodata]`;
+    (2) all refs placed (get_table_entry; digit tables are TU-local `static const char[16]`, NOT extern/2D —
+    see `#rodata-sibling-yaml-pattern` interleaved-partial-TU); (3) no recover-externs/symbol adds; (4) classical;
+    (5) `docs/wip/resolve_shot_quality_table.near-match.md` + decomp.me scratch `dZACn`. Only closes with a NEW
+    faithful reg-pressure idiom that allocates `power`→`$v0`; else stays a documented irreducible carry.
+  - **`predict_shot_distance` — NOT ATTEMPTED (S181 abs-coalescing class + f64 carve + nested child).** f64
+    rodata literal `D_800CC508` via `ldc1` (carve, interleaved with strings — see the S185 layout notes) +
+    fresh-reg `abs.s $fv1,$fs1` = the `#abs-coalescing-reg-swap` fresh-reg LAW single-use+dying-hard-reg
+    irreducible class. Its nested `lerp_int_v2` child is byte-exact and banks ONLY with the parent. Dedicated retry.
   - **Pervasive-regalloc walls (3, structurally-complete near-misses)** — `#pervasive-regalloc-classical-main`,
     "mine more optimal than target", not source-reachable: `func_80044CCC` (arg0↔lp allocno swap by loop-weight
     priority + a folded dead guard via DCE; permuter 800→575 plateau, 195/196), `func_800451E4` (const-1 CSE +
     allocno tiebreak + reorg delay-slot, 136/139), `predict_shot_distance_variant` (pseudo82=`&D_800BB4FC` claims
-    `$s0`, pushes category; mine 3 instrs SHORTER — its nested `lerp_int` child is byte-exact).
-  - Near-match seeds in `nonmatchings/<fn>/base.c`; recovered structs/externs/levers + carry-detail in the
-    session scratchpad `result_*.md`. **Retry:** SPLIT into a rodata-carve increment (the 3 jtbl/f64 fns, via
-    `#rodata-sibling-yaml-pattern` owner-per-member) + a permuter/`#cross-project-matched-corpus-mining`
-    increment (the 3 regalloc fns + the FP-pair parents). The nested `lerp` children bank ONLY WITH their
-    `predict_*` parents (never alone — the pair carries together). No cross-repo name sync.
+    `$s0`, pushes category; mine 3 instrs SHORTER — its nested `lerp_int` child is byte-exact, banks with parent).
+  - Near-match seeds in `nonmatchings/<fn>/base.c`. **Retry:** the `resolve_shot_quality_table` near-free replay
+    (carve done) OR a permuter/`#cross-project-matched-corpus-mining` increment (the 3 regalloc fns + the FP-pair
+    parents). No cross-repo name sync.
 - **(S183 MIXED-PARTIAL — carried; 2 of 9 banked; DEFINITIVE pervasive-regalloc TU)**
   `src/main/func_80052250.c` (main-segment `[0x2D650]` game-code pack). BANKED byte-exact C:
   `func_80052250` (0x80052250, `scenario_mode_id==0xC`), `func_80052324` (0x80052324, scenario table

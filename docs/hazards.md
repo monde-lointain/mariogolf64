@@ -1565,6 +1565,30 @@ absent from `mariogolf64.ld` (unlinked), so a clean-rebuild ROM SHA-1 == baserom
 inert. Do not mistake the leftover `.s` at verify time for a double-carve (a double-link would
 overlap and break the SHA, so a green clean-rebuild already rules it out).
 
+**Interleaved-partial-TU carve: make each fn's data TU-OWNED in the right C form, one carve over the
+whole `.o(.rodata)` extent.** When a partial-banked classical TU (a `src/<seg>.c` still holding
+`INCLUDE_ASM` siblings) has MULTIPLE compiler-rodata fns whose rodata is INTERLEAVED with other data in
+the ROM — e.g. `[jtblA @X][a 0x170 data table @Y][jtblB @Z]`, not the two jtbls adjacent — you cannot
+carve each fn's rodata as its own dot-prefix subseg (splat places a `.c`'s whole `.o(.rodata)` at ONE
+vram; two subsegs with the same `.c` name double-place it). Instead exploit that GCC emits the whole
+TU's `.o(.rodata)` **grouped per-function in SOURCE order** (a fn's own const pool + its jump table,
+before the next fn's), then carve the ONE `.o(.rodata)` block over its full extent. The trick is making
+each interleaved item TU-OWNED as the C form that reproduces the ROM's layout AND its `.text`:
+- **A compiler jump table** comes for free from writing the `switch` (see #switch-jtbl-dispatch).
+- **A data table the fn indexes** must be **INDIVIDUAL `static const T name[N]` objects, NOT a 2D
+  array and NOT `extern`.** A 2D array `t[R][C]` lets GCC fold a sibling row `t[k+1] = &t[k]+C` into a
+  single `addiu base,+C` (1 insn short per reference vs the ROM's independent `%hi/%lo` per row);
+  `extern` (data left in the blob) makes the `.o(.rodata)` emit ONLY the jump tables, which then pack
+  contiguously (`[jtblA][jtblB]`, 0x60 apart) instead of the ROM's `[jtblA][table][jtblB]` spacing — a
+  whole-ROM byte shift (the `.text` size is right, so the shift is a same-size-region MISPLACEMENT, not
+  a `#short-text-shifts-flowing-bss` length bug: check the *rodata* symbol addresses, not the .text).
+  Individual `static const` reproduces both the independent per-row `%hi/%lo` loads AND (emitted in
+  declaration order between the two jump tables) the interleaved layout. Confirm with
+  `objdump -s -j .rodata build/src/<path>.o`: the section must read `[jtblA][table0..N][jtblB]` at the
+  ROM's sizes; then extend the single `[X, .rodata, <path>]` subseg to cover `X..(X+.o(.rodata)size)`.
+  S185 `resolve_shot_quality_table` (jtbl_800CC530 + 23× `static const char q[16]` + jtbl_800CC700 =
+  0x230 at 0xA7930; a 2D array was 10 insns short, `extern` was a 0x30 whole-ROM shift).
+
 ---
 
 ## IO_WRITE/IO_READ isolation artifact
@@ -1806,6 +1830,39 @@ early return removes the single-skip shape. S159 `func_80051FCC` scenario tail: 
 (scenario_mode_id >= 12) return 8; return scenario_mode_id;` gave the ROM's `beqz; li v0,8; addu
 v0,a0,0`. (Sibling of the guard-temp inverted-guard variant above and of
 [#return-type-is-load-bearing](#return-type-is-load-bearing): all three turn on what occupies `v0`.)
+
+**Variant — address-select for a pointer/index `a0↔a1` swap + `beql`-vs-`bne` branch.** A
+`cond ? p2[i] : p1[i]` value-select (where `p1`/`p2` are switch-picked pointers and `i` is a loaded
+index) can lock on a PERVASIVE register swap: the ROM puts the pointer in `$a1` and the index in `$a0`
+(`addu v0,a1,a0`), yours the reverse — repeated across every switch case's pointer load (`addiu a0,`
+vs `addiu a1,`) — plus the guard compiles `beql cond,2` + a `p1=p2` move where the ROM has `bne cond,2`
+with the address `addu` in the delay slot. Fix by selecting the ADDRESS, not the pointer:
+`cond ? &p2[i] : &p1[i]` then deref. GCC then computes `p1+i` and `p2+i` in the two branch arms
+(matching the ROM's `bne cond; addu v0,p1,i; addu v0,p2,i`) instead of a pointer-move + shared index,
+which also settles the pointer→`$a1` / index→`$a0` coloring. S185 `resolve_shot_quality_table`: 22
+register/branch diffs → 3. (Same family as the array-index-`+`-operand-order variant above: which value
+"owns" the low arg reg is decided by how the source spells the address computation.)
+
+**Variant — load-use interlock vs hoisted independent load (`v0`/`v1` scratch swap) is IRREDUCIBLE;
+classify and carry, do NOT permuter.** A 2-instruction schedule swap where the ROM ACCEPTS a load-use
+interlock (`lbu v0; addiu ...,v0` back-to-back, reusing the dying load reg) and your build HOISTS an
+independent load into the load-shadow (`lbu v0; lh v1,<indep>; addiu v0,...`) — flipping which of
+`v0`/`v1` holds each value and the downstream `mult`/op operand order, everything else byte-identical —
+is a deterministic KMC gcc 2.7.2 sched+regalloc **fixed point**, not a source-reachable near-miss.
+Root cause (source-proven, S185 sched.c fan-out): the load result-latency is 3 (`config/mips/mips.md`
+`define_function_unit "memory"`), so the bottom-up list scheduler (`sched.c` queue-by-latency) pulls the
+independent load ≥3 slots ahead of the `mult`, into the earlier load's shadow; that hoist lengthens the
+load's pre-reload live range (`sched.c` `sched_reg_live_length` feedback) so the allocator gives it a
+FRESH reg — whereas the ROM allocated it to the dying load's reg (reuse), whose write-after-read
+anti-dep (`sched.c` `sched_analyze_1`) then makes the hoist ILLEGAL. The schedule is a pure function of
+the allocation and vice-versa (self-consistent). No faithful C rewrite of the immediate dataflow reaches
+it — explicit temp, split statement, mult-operand swap, and load-operand-first are all DAG-identical and
+inert; only a genuine surrounding register-pressure difference (an extra value live across the region)
+could flip it, which by definition cannot exist when the rest of the fn is byte-identical. **The
+permuter cannot help** (it mutates C; no C mutation changes the DAG the allocator sees). Recognize on
+sight and carry as a structural-complete spike (kin to `#pervasive-regalloc-classical-main` /
+`#loop-weight-and-live-length-regalloc-steering` / the `#abs-coalescing` fresh-reg LAW: same
+"which scratch reg holds the intermediate, decided upstream of source" class).
 
 ---
 
