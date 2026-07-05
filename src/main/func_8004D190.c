@@ -7,6 +7,12 @@ extern u16* D_800BFEE0;
 
 void print_string_at_grid(char* str, s32 col, s32 row);
 
+/* func_8004D190: unrolled texture-load + render-mode DL preamble (leaf, ~200
+ * insns; GBI opcodes
+ * SETTIMG/SETTILE/LOADBLOCK/SETTILESIZE/SETCOMBINE/SETOTHERMODE/TEXTURE/sync).
+ * CARRIED (S182) for a dedicated #display-lists sprint (m2c + gfxdis.f3dex2
+ * reconstruction, F3DEX2 profile via mk/main.mk) -- the DCE0 DL-pack workflow
+ * (S179/S180); not attempted this sprint. */
 INCLUDE_ASM("asm/nonmatchings/main/func_8004D190", func_8004D190);
 
 /* func_8004D4B8: string -> glyph-tile blit. CARRIED (S182) as a
@@ -42,6 +48,10 @@ void clear_text_grid(void) {
   }
 }
 
+/* func_8004D7B8: text-grid render DL loop (~120 insns; calls func_8004D190
+ * preamble + flag_is_set(0x1D), then a nested row/col loop over the D_800DAF60
+ * text grid emitting glyph DL commands). CARRIED (S182) for the same dedicated
+ * #display-lists sprint as func_8004D190. */
 INCLUDE_ASM("asm/nonmatchings/main/func_8004D190", func_8004D7B8);
 
 void set_flag_based_on_param(s32 enable) {
