@@ -43,10 +43,36 @@ the interrupt-mask's whole-fn liveness + the constant (caller-saved) loop-invari
 regalloc rotation the size/nfns model can't see. Candidate detector: `jal osSetIntMask` + a fixed
 `ARR[K]` struct-array base + `__builtin_return_address`-style ra read. Still a golden-gated tooling
 follow-up (off-cadence), not a mid-sprint edit.
+**Pervasive-regalloc TU detector (S183, off-cadence golden-gated):** `src/main/func_80052250.c` is a
+`none` pack whose 2 trivial predicates bank but EVERY non-trivial fn (8/8) is a regalloc/structure wall
+— compare/score/dispatch fns over `func_80052324`/`func_8005244C` + `D_801B71Fx` s8 byte-tables
+(`[x*0xB8]` row stride) + struct-folded adjacent `D_801B609x`/`D_801B60A0` globals (accessed via a
+`base - 0xC` derivation). Candidate `pick_target.py` signal: a `none` pack where fns share a
+call-return/table-scan idiom (repeated `jal` to 2-3 same in-pack callees) + a fixed-stride byte-table
+index + struct-folded neighbor globals → price it `regalloc-heavy` (bump pts) OR flag it as a partial-
+bank-expected TU. Kin to the S158 FP/trig and S177 `osSetIntMask` regalloc-heavy pts follow-ups above.
 **Path-convention exception (S149):** nusys/SDK-template main-segment code (the `idle=nuboot` coddog
 tell) is carved to its LIBRARY tree (`libnusys/<file>`), not `main/<stem>` — yaml path-qualifier only,
 placement unchanged (see `CLAUDE.md` path convention). A per-FILE -O0 override is the one mk edit a
 boot/SDK-glue TU may need.
+
+**S183 MIXED-PARTIAL — `src/main/func_80052250.c` main-segment [0x2D650] game-code pack, 2/9 (+2 this
+sprint).** matched **+2** (`func_80052250` = `scenario_mode_id == 0xC` predicate; `func_80052324` =
+scenario table lookup `D_801B71F3[a0*0xB8] + func_80052264(scenario_mode_id, D_801B6098,
+D_801B71F9[a0*0xB8])`, fixed via the `#register-reuse-nudge` addu-operand-order lever). md5-candidate
+**223 → 223** (file has 7 stubs). **DEFINITIVE `#pervasive-regalloc-classical-main` TU: 8/8 non-trivial
+fns are regalloc/structure walls; only the 2 trivial predicates banked.** 7 CARRIED (see `## Carry-overs`),
+all with `docs/wip/*.near-match.md`. Key: `func_80052264` root-caused to a genuine 1-scratch-register
+`REG_ALLOC_ORDER` artifact (m2c + GCC-2.7.2/binutils-2.6 source proven — hazard `nop`s CORRECT, table
+index matched via operand-order lever; permuter 42k-iter plateau; TU-wide `#profile-probe` confirmed -O2
+best, no flag flips the walls). Seed 13; banked 0pt (mixed-partial); realized ~18; residual +5; regime
+classical/mixed. Retro applied **3 of 3** (objdump `-dz` byte-diff doctrine → `#assembler-differences`;
+`(&PLACED)[-N]` struct-fold idiom → `#struct-access-folding`; pervasive-regalloc TU detector → BACKLOG
+pts follow-up above). PO chose "attempt remaining 4" → 3 built+confirmed walls (5C4/834/A68, growing
+diffs 84/128/150), CF0 decoded. Quality 0/1/7/0. **Next natural slice:** a FRESH main pack that is NOT a
+compare/dispatch cluster (this TU's wall class), OR a dedicated permuter/cross-project-mining sprint on
+the closest S183 carries (`func_80052264` 1-reg, `func_800525C4` struct-fold cascade). Cross-repo: no new
+curated names to sync (250/324 stayed auto `func_`; Ghidra had no names).
 
 **S182 MIXED-PARTIAL — `src/main/func_8004D190.c` VI/framebuffer + grid-print debug-display pack, 3/7
 (+3 this sprint).** matched **+3** (`clear_text_grid` [0x8004D794, backward buffer clear],
@@ -2959,6 +2985,38 @@ by `/sprint-plan`:
   vendored upstream version can diverge from the game's rev on a single immediate (S122 nusys-2.07
   `NU_CONT_THREAD_ID=6` vs MG64's 5), and that surfaces only at first build unless reconciled here.
   A near-free retry missing any of these is a half-scoped spike — finish the scope before deferring.
+
+- **(S183 MIXED-PARTIAL — carried; 2 of 9 banked; DEFINITIVE pervasive-regalloc TU)**
+  `src/main/func_80052250.c` (main-segment `[0x2D650]` game-code pack). BANKED byte-exact C:
+  `func_80052250` (0x80052250, `scenario_mode_id==0xC`), `func_80052324` (0x80052324, scenario table
+  lookup). SEVEN `INCLUDE_ASM` stubs remain → NOT md5-candidate. **No flip/data/symbol enablers left**
+  (subseg `[0x2D650, c, main/func_80052250]`; refs all placed; NO rodata carve; auto `func_` names).
+  All 7 carries have a `docs/wip/<fn>.near-match.md` with FULL decoded logic + residual + retry ideas.
+  Two distinct carry classes:
+  - **`func_80052264` (0x80052264, ~48 insns — SPIKE, 1-scratch-register `REG_ALLOC_ORDER` wall,
+    permuter+source-CONFIRMED):** `-arg2/18 - (arg2%18 >= D_800C1435[func_80051FCC()*200 + arg1*10])`.
+    Byte-exact EXCEPT the divide-1 `mfhi` transient scratch (`t0`/$8 ROM vs `a0`/$4 mine) + its 1 `sra`
+    use. Table index matched via the `#register-reuse-nudge` array-index `+` operand-order lever (arg1*10
+    on the RIGHT). `mfhi→mult` hazard `nop`s CORRECT (KMC-`as` inserts, interlocks=0). Permuter (--main,
+    2 bases, 42k iters) plateaus at this exact register; TU `#profile-probe` -O2-best-no-flag. Retry:
+    `#cross-jump-tail-merge`… no — `#cross-project-matched-corpus-mining` for the idiom that makes the
+    post-jal `arg1*10` qty win `a0` before the `mfhi`-hi qty. `docs/wip/func_80052264.near-match.md`.
+  - **`func_80052384` (0x80052384, 50 insns — SPIKE, base-pointer-hoist wall):** `void(void)` 8-row
+    fill/sort(`func_8005B150`)/rank over `D_800C1435`. Inner1 load matches; inner2 store HOISTS
+    `&D_800C1435` into callee-saved `s3` (+8 frame) where ROM copies row `s0→a3` + re-materializes. 52 vs
+    50. Permuter 850→250. `docs/wip/func_80052384.near-match.md`.
+  - **`func_8005244C`/`func_800525C4`/`func_80052834`/`func_80052A68` — 4 large compare/dispatch fns,
+    BUILT as growing-diff `#pervasive-regalloc-classical-main` near-misses** (89v94/89-short;
+    156v156/84-diff struct-fold cascade via `(&D_801B60A0)[-3]`; 136v141 shared-block structure; 165v162
+    output-param 3-loop). Each `docs/wip/*.near-match.md`. Retry: permuter --main (big cascades) +
+    control-flow shaping; these are the TU's dominant wall class.
+  - **`func_80052CF0` (0x80052CF0, 188 insns — DECODED, not built).** `switch(D_801B608C)` game-mode
+    dispatcher; carried without a build given the 8/8 definitive wall pattern. Retry: write from m2c +
+    `#switch-jtbl-dispatch` + permuter, dedicated sprint. `docs/wip/func_80052CF0.near-match.md`.
+  - **Retry checklist (near-free):** (1) subseg flip DONE (`[0x2D650, c, main/func_80052250]`); (2) all
+    refs placed (`D_800C1435`, `D_801B71F6/F9/FB`, `D_801B6090/98`, `D_801B60A0`, `scenario_mode_id`,
+    `func_80051FCC`/`80052264`/`800521C0`/`800521DC`/`8005B150`), NO carve; (3) NO recover-externs;
+    (4) classical; (5) the 7 WIP near-match files above; (6) TU `#profile-probe` = -O2, no-flag-flip.
 
 - **(S182 MIXED-PARTIAL — carried; 3 of 7 banked)** `src/main/func_8004D190.c` (the VI/framebuffer +
   grid-print debug-display pack `[0x28590]`). BANKED byte-exact C: `clear_text_grid` (0x8004D794),

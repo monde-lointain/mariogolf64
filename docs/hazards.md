@@ -1605,6 +1605,15 @@ S177 wrongly diagnosed `heap3_get_largest_free` as "1 word short, needs a synthe
 `-S` text — the clean inline-head source was already a byte-exact 21-word match once ASSEMBLED. Always
 `mips-linux-gnu-objdump -d build/src/<...>.o` (or `tools/cc/as` then objdump), never the `.s`.
 
+**objdump `-dz` is MANDATORY when word-diffing the assembled `.o`, and keep EVERY line (S183).** Plain
+`objdump -d` COLLAPSES a run of identical zero words (`nop; nop`, or a zero-filled `.text`) to a single
+`...` line, and a normalizer like `awk 'NF>2'` then silently DROPS that `...` line — so a byte-perfect
+match with 2 real post-`mflo`/`mfhi` hazard `nop`s reads as a FALSE "2 nops missing" near-miss. S183
+burned a multi-step `mflo`-hazard chase (KMC-`as` interlocks / GCC `#nop`-comment) on `func_80052264`
+that was really an objdump-collapse artifact — the nops WERE present; the diff tooling hid them. Use
+`mips-linux-gnu-objdump -dz` (disassemble zeroes, no `...` collapse) and word-diff EVERY line (do not
+`awk 'NF>2'`-filter). The residual there was a single scratch register, not a missing instruction.
+
 **Trigger:** Finalizing a classical match (the spot-check step). Mnemonic diff looks clean but you
 need ground truth.
 
@@ -4189,6 +4198,19 @@ follow-up). (2) It is not a cure-all: struct-typing S164's `lz_decompress_simple
 gave the identical score + register permutation, because that fn's miss was internal allocno priority
 (a control var, not a param field). Test it, but if the diff shows the permutation is on internal
 temps/pointers (not the param loads), the struct won't move it — go to the permuter/fan-out.
+
+**`(&PLACED)[-N]` for a struct-folded global that is NOT a placed symbol (S183).** When the ROM accesses
+an UNNAMED address via a base derived from a nearby PLACED symbol — e.g. `s7 = &D_801B60A0 - 0xC` then
+`lw 0(s7)` (= `D_801B6094`, unnamed) and `lw 4(s7)` (= `D_801B6098`) — writing `extern s32 D_801B6094;`
+link-fails (splat never generated that `D_` name; nothing references 0x801B6094 by symbol). Reference it
+as a **negative index off the placed neighbor**: `(&D_801B60A0)[-3]` (= addr 0xC below, an `s32`) and
+`(&D_801B60A0)[-2]` (= `D_801B6098`). This BOTH compiles (resolves through the placed `D_801B60A0`) AND
+reproduces the ROM's shared `base - 0xC` derivation (GCC CSEs `&D_801B60A0` and offsets from it), instead
+of re-materializing each `%hi/%lo` separately. Keep any access the ROM does DIRECTLY (`%hi/%lo(D_801B6098)`
+in a pre-loop bound check) as the plain `D_801B6098` symbol — the negative-index form is only for the
+struct-folded (base-relative) accesses. S183 `func_800525C4` reproduced the frame + all reg-saves + the
+`addiu base,base,-12` this way (residual was a downstream register-permutation cascade, a
+`#pervasive-regalloc-classical-main` wall, not the addressing).
 
 ## switch-jtbl-dispatch (compiler jump table + sparse inner cases)
 
