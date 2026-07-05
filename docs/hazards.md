@@ -2904,20 +2904,40 @@ fill-clear pack (S179 DCE0 pack `func_800328E0`):
   gDPxxx(gfx++); *glistp = gfx;`) matches cleanly (func_800328E0/func_80032B78 — the `*glistp` deref is
   a param-pointer, not a symbol-load). A fn using the **global `glistp++` directly** (13 stores of the
   `%lo(glistp)` symbol, 1 load) whose fill color is computed from **global** vars is the
-  **scheduler-load-pair wall** (S179 carry `func_800329F4`): GCC 2.7.2's list scheduler pairs the color
-  global symbol-load with the glistp global symbol-load in glistp's 2-cycle load-latency shadow (both
-  priority-1 class-3 in `rank_for_schedule`), where the ROM defers the color load to its 6th-command
-  slot — a full register cascade (77/97 words), structurally-complete otherwise. The faithful
-  double-GPACK, `-mips2`/`-mips3`, `vs32` volatile, and the local-pointer idiom (adds a stack frame)
-  ALL still hoist; it is not a source-idiom bug. Escalate to the permuter **without `--best-only`**
-  (the S160 equal-score-plateau doctrine — S179 stalled at 2765/5210 WITH `--best-only`); the only
-  improving mutation was an (unfaithful) pointer-alias constraining the scheduler.
+  **scheduler-load-pair wall** (S179 carry `func_800329F4`): GCC 2.7.2's sched1 hoists the color
+  global symbol-load into glistp's 2-cycle load-latency shadow, where the ROM defers the color load to
+  its 6th-command slot — a full register cascade (77/97 words), structurally-complete otherwise.
+  - **This wall has a FAITHFUL FIX — it is NOT permuter-class (S180 retired the S179 "escalate to the
+    permuter" verdict).** It is the [#mem-in-struct-scheduling-lever](#mem-in-struct-scheduling-lever):
+    the color globals as plain `s32` no-alias the `mem/s` `*glistp` stores, so `true_dependence`
+    (`sched.c:817`, guard 834-836) gives the load empty LOG_LINKS → it is a free root, and the sticky
+    `LAUNCH_PRIORITY` (0x7f000001) "birthing-insn" boost (`sched.c:3902`/2543; `priority()` early-returns
+    at 1435 so it never decays; `rank_for_schedule` keys priority first at 2395, so it DOMINATES — not a
+    tie-break) floats it backward on the load-use latency to the shadow. **Retype the RGB triple as one
+    `Color {s32 r,g,b;}` struct** (or `s32[3]`): the loads become `mem/s`, may-alias the `*glistp`
+    writes, and are NOT ready until those stores are placed → absent from the ready set when the shadow
+    opens → the constant `lui`s fill it = the ROM's deferred schedule. Regalloc is 100% downstream of
+    the schedule (leaf, no `$s` regs), so this snaps the whole 77/97 permutation exact. **Second
+    required ingredient:** the color compute must land AFTER the fill-color w0 store — use the demo
+    `gfxClearCfb` idiom (inline the double-`GPACK_RGBA5551` in the `gDPSetFillColor` arg, evaluated at
+    w1) OR a temp `c` computed after the w0 assignment; a leading `c = …;` statement caps at 61/97.
+    Data-side: declare the struct symbol in `symbol_addrs.txt` (`clear_color = 0x800B7840; //
+    type:Color size:0xC`) — the data stays as-is in `main_data`, no carve. **Tell it is a color
+    struct:** a SIBLING setter writes the N globals as N consecutive words (S180 `func_800329D8` writes
+    `D_800B7840/44/48` from `a0/a1/a2`), and the fill fn reads them as R/G/B channels. The faithful
+    double-GPACK, `-mips2`/`-mips3`, `vs32` volatile, local-pointer idiom, and every color-expr /
+    associativity / reorder form ALL still hoist while the colors are plain scalars (18-30/97) — the
+    retype is the unique lever, so do NOT reach for the permuter first. Found by the two-agents-per-wall
+    GCC-source fan-out (S180; both agents independently converged on the `mem/s` lever). Permuter only
+    as a last-resort fallback (and then **without `--best-only`**, the S160 plateau doctrine).
 
 **Provenance:** S148 (the "main/ needs zero mk edits" convention this rule updates); S151 (first
 main-seg DL TU: the dynamic-builder decode-and-reconstruct procedure and the mask-narrowing lesson);
 S160 (2nd main-seg DL TU: the post-increment idiom and composite folding); S179 (3rd main-seg DL TU:
 the m2c-body + gfxdis.f3dex2-`extract_dlist.py` seed combo, the RCP-clear/`& ~7`-game-mod idiom, and
-the global-`glistp++` scheduler-load-pair wall).
+the global-`glistp++` scheduler-load-pair wall); S180 (BANKED that wall byte-exact via the
+color-struct `#mem-in-struct-scheduling-lever` — the n64demos `gfxClearCfb` global-`glistp++` idiom is
+the faithful reference, confirmed by `~/development/n64/n64demos/nusys/nu2/src/main/graphic.c`).
 
 ---
 
@@ -4293,6 +4313,19 @@ globals → two `Vec3f` constants → strict `$f0` pairs) and `func_80076558` (`
 struct-flag → late load → `nop` in the guard delay slot → i allocated to `a1` → exact 58-instr match).
 No permuter; found by reading `~/development/repos/mips-gcc-2.7.2/sched.c`.
 
+**Extends to DISPLAY-LIST fns (S180), not just classical scheduling misses.** A global-`glistp++` DL
+fill fn whose fill color comes from N separate `D_` global scalars hoists the color loads into the
+`glistp` load-shadow (the [#display-lists](#display-lists) scheduler-load-pair wall) for exactly this
+reason: plain-scalar color loads no-alias the `mem/s` `*glistp` stores → free roots → the sticky
+`LAUNCH_PRIORITY` birthing-boost floats them to the shadow. Retype the color scalars as one
+`Color {s32 r,g,b;}` struct (or `s32[3]`) → the loads become `mem/s`, may-alias the `*glistp` writes,
+and are pinned after the stores = the ROM's deferred schedule (S180 `func_800329F4`, byte-exact, no
+permuter). The mechanical **tell it is one struct**: a sibling setter writes the N globals as N
+consecutive words (`func_800329D8` writes `D_800B7840/44/48` from `a0/a1/a2`). Second required
+ingredient for a DL fill: the color compute must land after the fill-color w0 store (inline the pack
+in the `gDPSetFillColor` arg — the demo `gfxClearCfb` idiom — or use a temp computed after w0). See
+[#display-lists](#display-lists) for the full DL playbook.
+
 **Confirming tell it is separate symbols (not one shared struct base):** the ROM re-emits `lui at,
 %hi(sym)` per access even for addresses that share the same %hi (all 0x8010) — a single struct/array
 base would CSE to one `lui`. Separate `lui`s ⟹ separate symbols; the struct-member reloc addend
@@ -4577,6 +4610,21 @@ local) so CSE derives it from the load base and copies it to the loop reg — th
 accepting any "unreachable" verdict; each finds what the other's candidate set structurally cannot.**
 Both walls were S177 carries the BACKLOG had flagged "do NOT retry without a new mechanism" — the
 second-agent fan-out WAS that mechanism.
+
+**Pair ORTHOGONAL LENSES, not two of the same (S180, 2nd confirmation).** S180 cracked the DL
+scheduler-load-pair wall (`func_800329F4`, a `docs/hazards.md`-documented "escalate to the permuter"
+carry) by fanning out **a scheduler/priority agent and a memory-model/alias agent** (plus an
+assembler rule-out). The priority agent's track — hunt a faithful source REORDER that lowers the
+color load's schedule priority — was a **proven dead end** (every color-expr / associativity / reorder
+form stalled at 18-30/97, because the load carries a sticky `LAUNCH_PRIORITY` boost that dominates,
+not a tie-break). The alias agent's track — could a faithful type change add a memory DEPENDENCE that
+pins the loads? — found the `mem/s` color-struct lever ([#mem-in-struct-scheduling-lever](#mem-in-struct-scheduling-lever)),
+byte-exact. **Both agents independently converged on the same `mem/s` lever = strong corroboration**,
+but the alias lens reached it directly while the priority lens could only prove its own class
+couldn't. Lesson: when assigning the two agents, give them **structurally different lenses** (here:
+list-scheduler priority vs. the `true_dependence` memory-alias model), so one covers what the other's
+candidate set cannot. The assembler rule-out (gas `.set reorder` is a faithful 1:1 transcriber under
+`-mips2`) correctly scoped the wall to GCC before the lever hunt.
 
 ---
 

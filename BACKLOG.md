@@ -48,6 +48,26 @@ tell) is carved to its LIBRARY tree (`libnusys/<file>`), not `main/<stem>` — y
 placement unchanged (see `CLAUDE.md` path convention). A per-FILE -O0 override is the one mk edit a
 boot/SDK-glue TU may need.
 
+**S180 BANKED — `src/main/func_800328E0.c` DCE0 DL pack COMPLETE → md5-candidate (+1 fn, the S179 carry
+RESOLVED).** matched **+1** (`func_800329F4`, fill-rect RCP clear); md5-candidate **222 → 223** (file now
+0 `INCLUDE_ASM`). RETIRED the S179 "permuter-class" scheduler-load-pair wall via a FAITHFUL
+`#mem-in-struct-scheduling-lever`: the 3 RGB fill globals (`D_800B7840/44/48`) as plain `s32` no-alias the
+`mem/s` `*glistp` stores, so GCC 2.7.2 sched1's sticky `LAUNCH_PRIORITY` birthing-boost hoists the color
+loads into the glistp load-shadow; retyping them as one `Color {s32 r,g,b;}` struct (symbol
+`clear_color = 0x800B7840; // type:Color size:0xC`, data as-is in main_data, NO carve) makes the loads
+`mem/s` → may-alias → pinned after the stores = the ROM's deferred schedule. Paired with the n64demos
+`gfxClearCfb` idiom (inline double-`GPACK_RGBA5551` in the `gDPSetFillColor` arg, so the color compute
+lands after the fill-color w0 store). `func_800329D8` setter now writes `clear_color.r/.g/.b`. Clean-rebuild
+ROM SHA-1 byte-exact; no permuter. Found by the PO-directed systematic-debugging two-agents-per-wall
+GCC-2.7.2+binutils-2.6 fan-out (3 subagents, ORTHOGONAL lenses: scheduler-priority + machine/alias + gas
+rule-out; both compiler agents independently converged on the `mem/s` lever). Quality 0/0/0/0. Retro applied
+4 of 4 (`#display-lists` permuter-class retirement + `#mem-in-struct-scheduling-lever` DL extension + CLAUDE
+index row; two-agents ORTHOGONAL-LENSES 2nd confirmation; n64demos provenance). See RETRO S180.
+**Tooling follow-up (S180 #5, DEFERRED, off-cadence golden-gated):** teach `pick_target.py` to flag a DL fill
+fn that reads its color from ≥2 separate `D_` globals which a SIBLING fn writes as consecutive words →
+`mem-in-struct` color-struct candidate (the consecutive-word setter is the mechanical tell); kin to the S158
+regalloc-heavy / S177 `osSetIntMask` pts-detector follow-ups above.
+
 **S179 MIXED-PARTIAL — `src/main/func_800328E0.c` DCE0 display-list pack, 5/6 (+5 this sprint).** matched
 **+5** (`func_800328E0` viewport/segment/camera DL preamble, `func_800329B8`/`func_80032E34` &glistp
 wrappers, `func_800329D8` set-fill-RGB, `func_80032B78` color/Z framebuffer clear); md5-candidate **222
@@ -2915,47 +2935,6 @@ by `/sprint-plan`:
   vendored upstream version can diverge from the game's rev on a single immediate (S122 nusys-2.07
   `NU_CONT_THREAD_ID=6` vs MG64's 5), and that surfaces only at first build unless reconciled here.
   A near-free retry missing any of these is a half-scoped spike — finish the scope before deferring.
-
-- **(S179 MIXED-PARTIAL — carried; 5 of 6 banked)** `src/main/func_800328E0.c` (the DCE0 DL pack
-  `[0xDCE0]`, the S178 forward note's slice; seeded via m2c bodies + gfxdis.f3dex2 `extract_dlist.py`
-  GBI reconstruction, PO-directed). BANKED byte-exact C (S179): `func_800328E0` (viewport/segment/camera
-  DL preamble), `func_800329B8`/`func_80032E34` (&glistp wrappers), `func_800329D8` (set fill-color RGB),
-  `func_80032B78` (color/Z framebuffer clear — mode-select fill loop; zbuf via `OS_K0_TO_PHYSICAL`, the
-  `& ~7` masks are byte-required, NOT auto-inserted). ONE `INCLUDE_ASM` stub remains: `func_800329F4`.
-  File mixed-partial (1 stub) → NOT md5-candidate. **No flip/data/symbol enablers left** (subseg
-  `[0xDCE0, c, main/func_800328E0]`; all refs placed extern, NO carve; names auto `func_`).
-  - **func_800329F4 (0x800329F4, 97 insns — GCC-SCHEDULER load-hoist wall, dump-verified S179).** The
-    fill-rect RCP clear (`gDPPipeSync`×N / `gDPSetRenderMode` / `gDPSetCycleType(FILL/1CYCLE)` /
-    `gDPSetFillColor` from the RGB globals / `gDPFillRectangle(8,8,311,231)`), global `glistp++` idiom.
-    **STRUCTURAL MATCH: 97 insns, identical op multiset to target.** Only residual = GCC 2.7.2 list
-    scheduler HOISTS the `D_800B7840` color load to pair with the `glistp` load in its 2-cycle latency
-    shadow (both are priority-1 class-3 loads; after all priority-3 constants schedule, the two loads
-    pair — sched1 dump: insn 96 pri=1 rc=2 lands right after insn 10). Target defers the load to the
-    6th-command position. Cascades to a full register permutation (77/97 words differ, first at 0xDDF4
-    `lui $v0` vs `lui $a0`). **Ruled out (all still hoist, full-build verified):** volatile globals
-    (`vs32`); double-`GPACK_RGBA5551` (6-ori un-fold but CSE-hoists the base loads worse); single-local
-    `((c|1)<<16)|(c|1)` t3-form (produces the exact `ori;sll;ori;or` combine, still hoists). See
-    `#top-tested-loop-goto-local-hoist` / a new scheduler-load-pair hazard.
-  - **FAITHFUL SOURCE CONFIRMED via n64demos (S179).** `~/development/n64/n64demos/nusys/*/src/main/graphic.c`
-    `gfxClearCfb` is the reference: the fill color is the **double-GPACK** idiom
-    `(GPACK_RGBA5551(r,g,b,1) << 16 | GPACK_RGBA5551(r,g,b,1))`, addresses use `OS_K0_TO_PHYSICAL` (the
-    demo has NO `& ~7`; the GAME added it — func_80032B78 matched byte-exact WITH `& ~7`, so the mask is
-    game-specific, not auto-aligned). func_800329F4 substitutes the D_800B784x RGB globals into the
-    demo's `GPACK_RGBA5551(0,0,0,1)`. **The faithful double-GPACK gives the identical 77/97 hoist miss**
-    as the t3-form (both 97 insns) — the wall is NOT a source-idiom bug; it is the game's global-`glistp++`
-    structure. func_800329F4 is the ONLY fn in the pack using the global `glistp` directly (13 stores,
-    1 load); func_800328E0/func_80032B78 take a `Gfx**` param whose param-deref pointer does NOT pair
-    with the color symbol-load. Also ruled out: `-mips2` vs `-mips3` (both hoist); local-pointer idiom
-    (adds a stack frame + still hoists, 100 insns).
-  - **PERMUTER RUN (S179): 5210 → 2765, plateaued, no output-0.** Setup for a main/ DL fn needs
-    `setup-permuter.sh --main func_800329F4` (the S179 retro built the `--main` flag +
-    `permuter_settings_main.toml` — game -O2/F3DEX2 profile + modern-GAS target assembler; no per-run
-    patching). **The S179 run used `--best-only` and stalled at 2765/5210 — RETRY WITHOUT `--best-only`
-    (the `#permuter-setup` S160 equal-score-plateau doctrine): the only improving mutation was an
-    unfaithful pointer-alias (`Gfx **nv=&_g; (*nv)->words.w0=...`) constraining the scheduler, and a
-    plateau like this needs a same-score intermediate transform before a second move reaches 0, which
-    `--best-only` discards.** Near-match + faithful double-GPACK bodies in scratch
-    (`func_800329F4_nearmatch.c`, `f4_demo.c`).
 
 - **(S175 MIXED-PARTIAL — carried; 5 of 6 banked; new project-best 13530/13235, `register` ruled out)** `src/main/print_string_at_grid.c` (the grid-print
   debug cluster `[0x28DC0]`). BANKED byte-exact C (S171): `check_and_print_grid`, `func_8004DA4C`,
