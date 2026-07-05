@@ -15,8 +15,11 @@ extern s32 D_800B7840;
 extern s32 D_800B7844;
 extern s32 D_800B7848;
 
+extern u16* nuGfxZBuffer;
+extern u16* nuGfxCfb_ptr;
+
 extern void set_camera_matrices_fixed(s32, s32, Vp*);
-extern void func_80032B78(s32, Gfx**);
+extern u32 osVirtualToPhysical(void*);
 
 void func_800328E0(s32 arg0, Gfx** glistp) {
   Gfx* gfx = *glistp;
@@ -43,7 +46,45 @@ void func_800329D8(s32 arg0, s32 arg1, s32 arg2) {
 
 INCLUDE_ASM("asm/nonmatchings/main/func_800328E0", func_800329F4);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_800328E0", func_80032B78);
+void func_80032B78(s32 arg0, Gfx** glistp) {
+  Gfx* gfx = *glistp;
+  s32 i;
+  u32 zbuf = OS_K0_TO_PHYSICAL(nuGfxZBuffer) & ~7;
+
+  gDPPipeSync(gfx++);
+  gDPSetScissor(gfx++, G_SC_NON_INTERLACE, 0, 0, 320, 240);
+  gDPSetDepthImage(gfx++, zbuf);
+  gDPPipeSync(gfx++);
+  gDPSetRenderMode(gfx++, G_RM_NOOP, G_RM_NOOP2);
+  gDPPipeSync(gfx++);
+  gDPPipeSync(gfx++);
+  gDPSetCycleType(gfx++, G_CYC_FILL);
+  gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 320, zbuf);
+  gDPSetFillColor(gfx++, 0xFFFCFFFC);
+  gDPFillRectangle(gfx++, 0, 0, 319, 239);
+  gDPPipeSync(gfx++);
+  gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 320,
+                   osVirtualToPhysical(nuGfxCfb_ptr) & ~7);
+
+  if (arg0 == 1) {
+    for (i = 0; i < 239; i++) {
+      gDPSetFillColor(gfx++, 0x00010001);
+      gDPFillRectangle(gfx++, 0, i, 319, i);
+    }
+    gDPPipeSync(gfx++);
+  } else if (arg0 == 2) {
+    gDPSetFillColor(gfx++, 0x00010001);
+    gDPPipeSync(gfx++);
+    gDPFillRectangle(gfx++, 0, 0, 319, 239);
+    gDPPipeSync(gfx++);
+  }
+
+  gDPPipeSync(gfx++);
+  gDPPipeSync(gfx++);
+  gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+  gDPPipeSync(gfx++);
+  *glistp = gfx;
+}
 
 void func_80032E34(s32 arg0) {
   func_80032B78(arg0, &glistp);
