@@ -2886,9 +2886,38 @@ into a running `Gfx*` cursor. Decode + reconstruct, do not hand-transcribe:
   isolated `decomp_loop` base.c may use safe param names (`a,b`) and pass, so only the in-tree build
   catches it. Use distinct param names (`cw0/cw1`) — or just the stock GBI macros.
 
+**RCP-init / framebuffer-clear idiom + the `& ~7` game-mod (3rd main-seg DL TU, S179).** The
+`gfxRCPInit` / `gfxClearCfb` reference is `~/development/n64/n64demos/nusys/*/src/main/graphic.c`
+(nu2/nu3/nuxbus). Match it against a viewport/segment/camera-preamble + scissor/depth+color-image +
+fill-clear pack (S179 DCE0 pack `func_800328E0`):
+- **Fill color = double-`GPACK_RGBA5551`.** `gDPSetFillColor(gfx++, (GPACK_RGBA5551(r,g,b,1) << 16 |
+  GPACK_RGBA5551(r,g,b,1)))` — the demo idiom (game fills substitute RGB globals/args for the demo's
+  literal `0,0,0`). Z clear uses `GPACK_ZDZ(G_MAXFBZ,0)` the same way.
+- **Physical addresses via `OS_K0_TO_PHYSICAL` (macro, the `subu 0x80000000`) for the Z-buffer and
+  `osVirtualToPhysical()` (the `jal`) for the CFB** — the demo's exact split.
+- **The `& ~7` (8-byte align, `and $reg,-8`) on the physical address is GAME-SPECIFIC, not
+  auto-inserted.** The demo has NO `& ~7`; MG64's `gDPSetColorImage`/`gDPSetDepthImage` args need it
+  byte-exact (`OS_K0_TO_PHYSICAL(nuGfxZBuffer) & ~7`, `osVirtualToPhysical(nuGfxCfb_ptr) & ~7`) — S179
+  `func_80032B78` matched WITH it (dropping it is 4 insns short). gSetImage stores the arg raw, so the
+  mask lives in the source.
+- **Idiom split determines matchability:** a helper taking `Gfx **glistp` (`Gfx *gfx = *glistp; …
+  gDPxxx(gfx++); *glistp = gfx;`) matches cleanly (func_800328E0/func_80032B78 — the `*glistp` deref is
+  a param-pointer, not a symbol-load). A fn using the **global `glistp++` directly** (13 stores of the
+  `%lo(glistp)` symbol, 1 load) whose fill color is computed from **global** vars is the
+  **scheduler-load-pair wall** (S179 carry `func_800329F4`): GCC 2.7.2's list scheduler pairs the color
+  global symbol-load with the glistp global symbol-load in glistp's 2-cycle load-latency shadow (both
+  priority-1 class-3 in `rank_for_schedule`), where the ROM defers the color load to its 6th-command
+  slot — a full register cascade (77/97 words), structurally-complete otherwise. The faithful
+  double-GPACK, `-mips2`/`-mips3`, `vs32` volatile, and the local-pointer idiom (adds a stack frame)
+  ALL still hoist; it is not a source-idiom bug. Escalate to the permuter **without `--best-only`**
+  (the S160 equal-score-plateau doctrine — S179 stalled at 2765/5210 WITH `--best-only`); the only
+  improving mutation was an (unfaithful) pointer-alias constraining the scheduler.
+
 **Provenance:** S148 (the "main/ needs zero mk edits" convention this rule updates); S151 (first
 main-seg DL TU: the dynamic-builder decode-and-reconstruct procedure and the mask-narrowing lesson);
-S160 (2nd main-seg DL TU: the post-increment idiom and composite folding).
+S160 (2nd main-seg DL TU: the post-increment idiom and composite folding); S179 (3rd main-seg DL TU:
+the m2c-body + gfxdis.f3dex2-`extract_dlist.py` seed combo, the RCP-clear/`& ~7`-game-mod idiom, and
+the global-`glistp++` scheduler-load-pair wall).
 
 ---
 
@@ -3212,8 +3241,16 @@ end-to-end** for a `src/main/` fn: scratch settings with `gcc -S -nostdinc -G 0 
 -mno-abicalls -O2` + the full base `-I` set + `-DINCLUDE_ASM_USE_MACRO_INC -D_LANGUAGE_C -D_FINALROM
 -DF3DEX_GBI_2`, piped to `tools/cc/as -EB -mips2 -G 0 -I include`, and a one-line
 `sed -i '/^.set gp=64$/d' <dir>/target.s` after import (fix (b)) -- it built base+target and ran 43k
-iterations cleanly. Committing a `permuter_settings_main.toml` + a `run-permuter.sh --main` is a
-tracked golden-gated tooling follow-up so the classical endgame needs no per-run setup. **Coord/local
+iterations cleanly. **DONE (S179): `permuter_settings_main.toml` + `setup-permuter.sh --main <func>`
+now exist** — the flag passes `--settings permuter_settings_main.toml` to `import.py`, which bakes the
+game -O2/F3DEX2 `compiler_command` (full `-I`/`-D` set + `-mips3`) and a **modern-GAS
+`assembler_command`** (`mips-linux-gnu-as -march=vr4300 -32 -EB -I include --no-pad-sections`) that
+assembles the `.set gp=64` target `.s` directly (replacing the `sed`-strip fix (b); the target's
+explicit `addu`→0x1021 matches KMC-as `move`→0x1021, so the mixed assemblers stay byte-consistent). So
+a main/ DL fn is now a one-flag setup. **Reminder for a scheduler/regalloc plateau: run WITHOUT
+`--best-only`** (the equal-score-plateau case above) — S179 `func_800329F4` stalled at 2765/5210 WITH
+`--best-only`, the classic symptom that the fix needs a same-score intermediate transform before a
+second move reaches 0. **Coord/local
 integer width
 (`u16`/`s16` vs `s32`) is a first-class permuter lever for frame/regalloc near-misses:** S151
 `func_800500E0` was a byte-perfect structure that locked ~185 on a register-allocation + a phantom

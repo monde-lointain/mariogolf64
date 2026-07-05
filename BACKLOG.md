@@ -48,6 +48,21 @@ tell) is carved to its LIBRARY tree (`libnusys/<file>`), not `main/<stem>` — y
 placement unchanged (see `CLAUDE.md` path convention). A per-FILE -O0 override is the one mk edit a
 boot/SDK-glue TU may need.
 
+**S179 MIXED-PARTIAL — `src/main/func_800328E0.c` DCE0 display-list pack, 5/6 (+5 this sprint).** matched
+**+5** (`func_800328E0` viewport/segment/camera DL preamble, `func_800329B8`/`func_80032E34` &glistp
+wrappers, `func_800329D8` set-fill-RGB, `func_80032B78` color/Z framebuffer clear); md5-candidate **222
+→ 222** (file has 1 stub → not md5-candidate). The **first PO-directed m2c + gfxdis.f3dex2 DL seed**:
+m2c for the bodies, `extract_dlist.py`/`gfxdis.f3dex2 -d` to reconstruct the GBI macros from the
+immediate command words. Reference idiom confirmed via `~/development/n64/n64demos` `graphic.c`
+(`gfxRCPInit`/`gfxClearCfb`): double-`GPACK_RGBA5551` fill color, `OS_K0_TO_PHYSICAL`/`osVirtualToPhysical`
+addresses, and the `& ~7` phys-align mask is GAME-SPECIFIC (demo lacks it; `func_80032B78` needs it).
+Carried: `func_800329F4` (global-`glistp++` scheduler-load-pair wall; see `## Carry-overs`). Quality
+0/1/1/0. Retro applied **4 of 4**: permuter `--main` flag + `permuter_settings_main.toml`; `#display-lists`
+RCP-clear/`& ~7`/scheduler-load-pair additions + CLAUDE index rows; n64demos `graphic.c` reference
+memory; this DL-track routing note. **DL-track routing (S179):** a display-list pack (a `glistp`/`nuGfx*`/
+raw-GBI-command-word `.text`, e.g. a `coddog-mirror` false-hit like the DCE0 pack's nucontgbpakmgr.c) is
+CLASSICAL `#display-lists`, NOT a mirror — seed with m2c + gfxdis, F3DEX2 profile via `mk/main.mk`.
+
 **S178 BANKED — `src/main/func_8004DE60.c` slot-3 heap walls → md5-candidate (the 3 S177 "unreachable"
 walls) + whole heap module rewritten to Code Complete.** matched **+3** (`heap3_add_region`,
 `heap3_init`, `heap3_alloc`); md5-candidate **221 → 222** (file now 0 `INCLUDE_ASM`); 0 carries.
@@ -2933,14 +2948,14 @@ by `/sprint-plan`:
     with the color symbol-load. Also ruled out: `-mips2` vs `-mips3` (both hoist); local-pointer idiom
     (adds a stack frame + still hoists, 100 insns).
   - **PERMUTER RUN (S179): 5210 → 2765, plateaued, no output-0.** Setup for a main/ DL fn needs
-    `permuter_settings.toml` patched: `compiler_command` = full main `-I`/`-D` set + `-mips3` (bare
-    `-I include -mips2` cannot resolve `PR/*.h`); `assembler_command` = modern GAS
-    (`mips-linux-gnu-as -march=vr4300 -32 -EB -I include --no-pad-sections`) since the target `.s` uses
-    `.set gp=64` (KMC `as` rejects it; target's explicit `addu`→0x1021 matches KMC-as `move`→0x1021, so
-    the mixed assemblers stay byte-consistent). Only improving mutation was unfaithful pointer-indirection
-    (`Gfx **nv=&_g; (*nv)->words.w0=...`); random search stalled. A longer/reseeded or PERM-macro-guided
-    permuter run is the remaining escalation; profile patch now known (above). Near-match + faithful
-    double-GPACK bodies in scratch (`func_800329F4_nearmatch.c`, `f4_demo.c`).
+    `setup-permuter.sh --main func_800329F4` (the S179 retro built the `--main` flag +
+    `permuter_settings_main.toml` — game -O2/F3DEX2 profile + modern-GAS target assembler; no per-run
+    patching). **The S179 run used `--best-only` and stalled at 2765/5210 — RETRY WITHOUT `--best-only`
+    (the `#permuter-setup` S160 equal-score-plateau doctrine): the only improving mutation was an
+    unfaithful pointer-alias (`Gfx **nv=&_g; (*nv)->words.w0=...`) constraining the scheduler, and a
+    plateau like this needs a same-score intermediate transform before a second move reaches 0, which
+    `--best-only` discards.** Near-match + faithful double-GPACK bodies in scratch
+    (`func_800329F4_nearmatch.c`, `f4_demo.c`).
 
 - **(S175 MIXED-PARTIAL — carried; 5 of 6 banked; new project-best 13530/13235, `register` ruled out)** `src/main/print_string_at_grid.c` (the grid-print
   debug cluster `[0x28DC0]`). BANKED byte-exact C (S171): `check_and_print_grid`, `func_8004DA4C`,

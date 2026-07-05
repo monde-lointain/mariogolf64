@@ -1,0 +1,25 @@
+compiler_type = "gcc"
+
+# Main-profile (game -O2 / F3DEX2) permuter settings, for a src/main/ or src/overlay_*/
+# function. Select it with `./setup-permuter.sh --main <func>` (and `--main` on run-permuter.sh).
+# See docs/hazards.md#permuter-setup-for-kmc-toolchain-mirrors ("Generalizes to game -O2").
+#
+# Two differences from the root (KMC-toolchain) permuter_settings.toml:
+#  1. compiler_command carries the full MAIN_CFLAGS -I/-D set + `-mips3` (the bare `-I include
+#     -mips2` root command cannot resolve <PR/*.h> for a file that includes <ultra64.h>), and
+#     `-DF3DEX_GBI_2` so a DL fn gets the F3DEX2 RSP opcodes. The permuted C is still assembled
+#     by KMC `tools/cc/as` (the correct `move`->`addu` 0x1021 encoding).
+#  2. assembler_command is MODERN GAS, because the extracted target `.s` carries `.set gp=64`
+#     which KMC binutils-2.6 `as` rejects. The target `.s` uses explicit `addu $x,$y,$zero`
+#     (spimdisasm never emits the `move` pseudo-op), which modern GAS encodes 0x1021 -- identical
+#     to KMC-as's `move`->0x1021 -- so the two assemblers stay byte-consistent. (This replaces the
+#     older `sed -i '/^.set gp=64$/d' target.s` post-import step; either works.)
+compiler_command = "COMPILER_PATH=tools/cc tools/cc/gcc -S -nostdinc -G 0 -mips3 -mgp32 -mfp32 -mno-abicalls -O2 -I include -I include/libultra -I include/libultra/internal -I include/libkmc -I include/libnusys -I include/libmus -I include/libnualstl -I include/libnaudio -D_LANGUAGE_C -D_FINALROM -DF3DEX_GBI_2 -DNONMATCHING -DINCLUDE_ASM_USE_MACRO_INC -o /dev/stdout | tools/cc/as -EB -mips2 -G 0 -I include"
+assembler_command = "mips-linux-gnu-as -march=vr4300 -32 -EB -I include --no-pad-sections"
+
+[decompme]
+flags = "-O2 -G 0 -mips3 -mgp32 -mfp32 -DF3DEX_GBI_2"
+
+[decompme.compilers]
+"mips-linux-gnu-gcc" = "gcc2.7.2kmc"
+"COMPILER_PATH=tools/cc" = "gcc2.7.2kmc"

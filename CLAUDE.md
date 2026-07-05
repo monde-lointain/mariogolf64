@@ -562,6 +562,8 @@ When `pick_target.py` flags a hazard (or a match shows its symptom), read the ma
 | libnusys inline `divu`, build byte-perfect except 2 missing `nop`s after `mflo` | #libnusys-inline-div-mflo-hazard-nop |
 | mirror global w/ dead-reload-after-store on `x++` or recompute-not-CSE of `a-b` | #volatile-global-tell-dead-reload--recompute-not-cse |
 | Gfx* manipulation | #display-lists |
+| global-`glistp++` DL fn with fill color computed from GLOBAL vars: color symbol-load hoisted to pair with the glistp symbol-load (full reg cascade, structurally complete); `& ~7` on a phys addr is game-specific | #display-lists |
+| permuter on a `src/main/`/overlay -O2/F3DEX2 fn (`setup-permuter.sh --main`) | #permuter-setup-for-kmc-toolchain-mirrors |
 | ROM has bare `sqrt.d`/`sqrt.s`, build links `jal sqrt`/`jal sqrtf` or a guarded `sqrt.{d,s}`+`c.eq.{d,s}`/`bc1t` | #double-sqrt-fast-math |
 | ROM loop top-tested plain `beq`/`bne`, build inverts to guard-`j`+`beql` or reloads loop-invariant constants | #top-tested-loop-goto-local-hoist |
 | ROM up-counts a loop (`addiu +1`/`sltiu`), build reverses to `li N-1`/`addiu -1`/`bgez` | #top-tested-loop-goto-local-hoist |
