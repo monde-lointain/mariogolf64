@@ -1904,6 +1904,20 @@ directions.
 
 **Procedure:** Trust the in-tree spot-check / full-make SHA, not the isolated score.
 
+**Flipped-subseg / partial-one-tu case (S187): the isolated reference is STALE, not merely noisy.**
+Once you flip the subseg to `c` and start banking fns into `src/<file>.c`, the isolated
+`nonmatching-func` / `decomp_loop.py` path reads `build/asm/<seg>.o` (built at bootstrap), which no
+longer carries the flipped fns as standalone objects. For a fn you seed AFTER the flip, the differ
+has no valid base: it reports empty `base_text` rows and a bogus low percent (S187 `func_80077C18`
+read 0.21 with the C already ~93% correct). Do NOT read that as a near-miss regression. For an in-tree
+partial one-tu, the authoritative per-fn check is `mips-linux-gnu-objdump -d build/src/<tree>/<file>.o`
+sliced to the fn vs its `asm/nonmatchings/<seg>/<lead>/<func>.s`, diffed after normalizing
+objdump's pseudo-ops (`move rd,rs` ≡ `addu rd,rs,zero`; `li rd,N` ≡ `addiu rd,zero,N`; `nop` ≡
+`sll zero,zero,0`) and masking reloc/immediate operands (`%hi`/`%lo`/branch targets/frame offsets) —
+the raw mnemonic diff over-reports by counting those display-only forms as mismatches. Use this
+objdump slice, not the stale isolated score, to measure a post-flip fn; the full-make ROM SHA-1
+remains the only authority.
+
 ---
 
 ## Decompile-vs-asm authority
@@ -4406,6 +4420,19 @@ the enclosing symbol to STOP at the first alias: `heap_slots = 0x800DC6E0; // si
 the 0x60 array's last two words as the aliases with no warning. The C array-form access
 (`heap_slots[3].total_free` = `heap_slots+0x58`) still link-resolves through the addend; only the
 compiler-chosen form differs (verify by full-make SHA-1).
+
+**Converse (S187): an INDEXED struct-array field folds to the splat per-field symbol for free.** When
+splat has named each field of a fixed struct-array as its own `D_<addr>` symbol (e.g. the group table
+at `D_80105140` where `.count`@+4 = `D_80105144`, `.unk08`@+8 = `D_80105148`, … each got a distinct
+`D_` name), you do NOT need to declare or reference those per-field externs. Type the base as the
+struct array (`extern SparkGroup D_80105140[];`) and write `D_80105140[i].count = 0`: the compiler
+emits `lui at,%hi(D_80105140); addu at,at,<i*stride>; sw ...,%lo(D_80105140+4)(at)`, and `%lo(base+4)`
+link-resolves to exactly the field's own `D_80105144` symbol in the disassembly. So the index-register
+form (`%hi/%lo(base) + i*stride` with the field offset in `%lo`) is the SAME bytes whether the source
+names the field symbol or the struct member — write the struct member. (This is the loop/indexed
+counterpart of the single-fixed-field RMW lever above: there you SPLIT a field out to its own symbol to
+force re-materialization; here the struct-fold already reproduces the per-field symbols, so keep the
+struct.) S187 `func_80077C18`/`func_80077DEC` (the `D_80105140` `SparkGroup[]` table).
 
 ## volatile-view CSE reload (force a just-stored global to reload)
 

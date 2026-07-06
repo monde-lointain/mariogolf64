@@ -37,16 +37,25 @@ mg_resolve_c_asm() {
     # asm PATH string (INCLUDE_ASM("asm/nonmatchings/main/func_8006EA90", func_8006ED34)),
     # so a loose grep matches both lines and garbles ASM_FILE (S160).
     C_FILE=$(grep -rl "INCLUDE_ASM(.*, ${func});" src/ 2>/dev/null | head -1)
-    if [ -z "$C_FILE" ]; then
-        echo "Error: Could not find C file containing INCLUDE_ASM for ${func}" >&2
-        exit 1
+    if [ -n "$C_FILE" ]; then
+        # INCLUDE_ASM line format: INCLUDE_ASM("path", func_name);
+        asm_line=$(grep "INCLUDE_ASM(.*, ${func});" "$C_FILE" | head -1)
+        asm_dir=$(echo "$asm_line" | sed 's/.*INCLUDE_ASM("\([^"]*\)".*/\1/')
+        ASM_FILE="${asm_dir}/${func}.s"
+    else
+        # Fallback (S187): the target is already a C BODY in a multi-fn file (a partial one-tu:
+        # some fns banked, this one carried), so it has NO INCLUDE_ASM stub. Resolve C_FILE from
+        # the DEFINITION line (return type at col 0, e.g. `void func_80077C18(...)`) and the
+        # ASM_FILE by unique `<func>.s` filename under asm/nonmatchings/.
+        C_FILE=$(grep -rlE "^[A-Za-z_][A-Za-z0-9_* ]*[ *]${func}\(" src/ 2>/dev/null | head -1)
+        if [ -z "$C_FILE" ]; then
+            echo "Error: no INCLUDE_ASM stub AND no C definition found for ${func} in src/" >&2
+            exit 1
+        fi
+        ASM_FILE=$(find asm/nonmatchings -name "${func}.s" 2>/dev/null | head -1)
     fi
-    # INCLUDE_ASM line format: INCLUDE_ASM("path", func_name);
-    asm_line=$(grep "INCLUDE_ASM(.*, ${func});" "$C_FILE" | head -1)
-    asm_dir=$(echo "$asm_line" | sed 's/.*INCLUDE_ASM("\([^"]*\)".*/\1/')
-    ASM_FILE="${asm_dir}/${func}.s"
-    if [ ! -f "$ASM_FILE" ]; then
-        echo "Error: Assembly file not found: $ASM_FILE" >&2
+    if [ -z "$ASM_FILE" ] || [ ! -f "$ASM_FILE" ]; then
+        echo "Error: Assembly file not found for ${func}: ${ASM_FILE:-<none>}" >&2
         exit 1
     fi
 }
