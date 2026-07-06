@@ -14,12 +14,6 @@ extern void siblingFn(void); // TODO: refine signature from MCP
 // --- auto-extern (refine types during iteration) ---
 extern void *D_80022222;
 
-/* === m2c reference (do not compile) =========================== */
-#if 0
-int m2c_ref(void) { return 0; }
-#endif
-/* === end m2c reference ========================================= */
-
 /* === asm ground truth (translate from THIS; the decompile can be
        silently wrong) ============================================= */
 #if 0
@@ -30,9 +24,9 @@ glabel func_80012345
 #endif
 /* === end asm ground truth ====================================== */
 
-// === Function body ============================================
-// TODO: no Ghidra decompile for func_80012345 — translate from the asm
-// ground-truth block above, then rename m2c synthetics per CLAUDE.md.
+// === Function body (SEED — edit during Iterate) ==============
+// TODO: no m2c seed and no trustworthy decompile for func_80012345 —
+// translate from the asm ground-truth block above.
 void func_80012345(void) {
     /* unimplemented */
 }

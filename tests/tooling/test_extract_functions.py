@@ -41,7 +41,7 @@ def test_extract_functions_single():
     name, body = funcs[0]
     assert name == "test_fn"
     assert body.splitlines() == [
-        "test_fn",
+        "glabel test_fn",
         "        addiu      sp, sp, -0x18",
         ".L80000004:",
         "        jr         ra",

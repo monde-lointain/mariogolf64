@@ -14,11 +14,15 @@ extern void siblingFn(void); // TODO: refine signature from MCP
 // --- auto-extern (refine types during iteration) ---
 extern void *D_80022222;
 
-/* === m2c reference (do not compile) =========================== */
+/* === Ghidra decompile (shape/type reference; do not compile) === */
 #if 0
-int m2c_ref(void) { return 0; }
+/* [MM12] copied from ELF */
+undefined4 returns_0(void)
+{
+    return 0;
+}
 #endif
-/* === end m2c reference ========================================= */
+/* === end Ghidra decompile ====================================== */
 
 /* === asm ground truth (translate from THIS; the decompile can be
        silently wrong) ============================================= */
@@ -30,8 +34,8 @@ glabel func_80012345
 #endif
 /* === end asm ground truth ====================================== */
 
-// === Function body ============================================
-u32 func_80012345(void)
-{
-    return 0;
+// === Function body (SEED — edit during Iterate) ==============
+// m2c seed: rename synthetics + reconcile the extern preamble.
+s32 func_80012345(void) {
+    return D_80022222;
 }

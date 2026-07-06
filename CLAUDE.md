@@ -11,9 +11,9 @@ literally and precisely, since every instruction here drives that byte-exact ora
 <context>
 
 This project decompiles Mario Golf 64 (N64) one function at a time. Tooling: splat (file splitting),
-KMC GCC 2.7.2 (`tools/cc/gcc`), m2c (asm to C seed), asm-differ (library mode), decomp-permuter
-(escalation), the Ghidra MCP bridge (live decompile + struct/symbol lookup, port 8089; every call
-passes `program="baserom.z64"`), and coddog (`make coddog-sweep`: fingerprints MG64 fns against
+KMC GCC 2.7.2 (`tools/cc/gcc`), m2c (`tools/m2c`; the seed-body generator, driven with a Ghidra-typed
+struct context), asm-differ (library mode), decomp-permuter (escalation), the Ghidra MCP bridge (live
+decompile + struct/symbol lookup, port 8089; every call passes `program="baserom.z64"`), and coddog (`make coddog-sweep`: fingerprints MG64 fns against
 ultralib VERSION_J to reveal an un-named `func_`'s upstream source; see
 `docs/hazards.md#coddog-cross-ref`).
 
@@ -103,11 +103,37 @@ Ghidra MCP is used inline at seed time. For each target function:
      `docs/hazards.md#vendored-header-inversion`).
 
 3. **Classical branch** (no upstream, or a hazard routes here): seed, iterate, spot-check, finalize.
-   - **Seed** `nonmatchings/<func>/base.c`: fetch the Ghidra decompile via MCP, then
-     `venv/bin/python3 tools/seed_c.py --func <placeholder> --parent src/<seg>.c`. The asm
-     (`disassemble_function`) is ground truth, not the Ghidra decompile (see
-     `docs/hazards.md#decompile-vs-asm-authority`). Use the decompile for shape and types; translate
-     the logic from the instruction listing.
+   - **Seed** `nonmatchings/<func>/base.c` with the combined m2c-body + Ghidra-typed-context seed.
+     m2c translates the asm into the compiled seed body, typed by a Ghidra-MCP struct context; the
+     Ghidra decompile drops to a shape/type reference and the asm stays the sole authority (see
+     `docs/hazards.md#decompile-vs-asm-authority`). Fetch three things from Ghidra MCP: the asm
+     (`disassemble_function`), the decompile (write it to `nonmatchings/<func>/ghidra.c`), and the
+     RE'd struct defs plus signatures. Write the struct context to `nonmatchings/<func>/ghidra_ctx.c`
+     = `#include "common.h"` (OS structs + `os*`/nusys externs) + the RE'd struct defs + best-guess
+     `extern`s for the pack's game callees and globals. Then run `venv/bin/python3 tools/seed_c.py
+     --func <placeholder> --parent src/<seg>.c`, which drives the vendored `tools/m2c` (target
+     `mips-gcc-c`) with the Ghidra struct context and the parent types, and emits m2c's output as the
+     body. Ghidra often has not named a game-specific control struct (it shows loose stack vars +
+     stock OS structs), so the RE'd struct may live in a sibling decomp, not the Ghidra DB — check
+     both. m2c keeps a rodata string as an `extern D_<addr>` data ref (ideal for a partial one-tu: no
+     carve). Rename m2c's `temp_*`/`local_*`/`arg_*` synthetics and reconcile its extern preamble
+     against the concrete externs during Iterate.
+     - **When the seed body is not m2c.** seed_c.py's JSON reports `body_source`. If m2c fails
+       (`body_source: "ghidra"` or `"stub"`), the body falls back to the sanitized decompile or a TODO
+       stub; translate from the inlined asm block. A large auto-generated parent context can exceed
+       m2c's parser, so a clean `ghidra_ctx.c` is the reliable context, not `--parent` alone.
+     - **Two recurring seed-refinement levers.** (a) A bounds-clamp array index wants the ternary
+       `(idx < N) ? idx : 0` form (branchless `sltiu`/`negu`/`and`); the m2c-emitted
+       `&arr[idx & -(idx<N)]` form branch-folds the mask into a `beqz`. (b) An extern-symbol-base
+       pointer return with a variable index wants stepwise pointer arith (`p = base + a*K; return p +
+       b*K2;`), not a flat `a*K + base + b*K2` (GCC reassociates the flat form; see
+       `docs/hazards.md#loop-weight-and-live-length-regalloc-steering` Axis 6).
+     - **Provenance.** S186 seeded the whole `lz_compress_extended_dma.c` terrain-loader pack this way
+       (context = common.h + the sibling `lz_decompress_simple.c`'s `LzDecompressState` + game
+       externs); the call-glue seeds were byte-faithful first-build. S191 confirmed the recipe on a
+       classical main logic pack (`get_table_entry.c`: context = common.h + the Ghidra-DB
+       `TerrainAttrEntry` + a synthesized 0xB8 `ShotInitRecord` + game externs; all 3 standalone fns
+       banked, and both levers above surfaced there).
      - **asm-first seed fast-path (MCP-independent, for small fns ~<40 instrs).** The splat
        `.s` under `asm/nonmatchings/<seg>/<func>/<func>.s` is the same ground truth as
        `disassemble_function`, so a small classical fn does not need MCP: hand-translate straight from
@@ -118,30 +144,6 @@ Ghidra MCP is used inline at seed time. For each target function:
        isolated Iterate loop below. Use this when Ghidra MCP is unavailable (`list_instances` empty)
        or the fn is small enough that the decompile adds no shape/type value. The fast-path banked a
        2-fn 176B pack this way, first build, MCP down (S148).
-     - **m2c-with-RE'd-struct-context seed (for a call-glue / struct-typed pack).** For a pack of
-       state-machine / call-glue fns, drive m2c with a context enriched by the *previously-RE'd*
-       structs so it types the accesses instead of emitting raw offsets: write a scratch context `.c`
-       = `#include "common.h"` (OS structs + `os*`/nusys externs) + the RE'd struct defs (pulled from
-       the Ghidra DB, or verbatim from a sibling decomp's `.c`) + best-guess `extern`s for the pack's
-       game callees/globals; run `venv/bin/python3 tools/m2ctx.py <scratch>.c` to preprocess it to
-       `ctx.c`, then `python3 ~/development/repos/m2c/m2c.py -t mips-gcc-c --context ctx.c
-       asm/nonmatchings/<seg>/<file>/<fn>.s` per fn. The repo m2c and the vendored `tools/m2c` produce
-       equivalent seeds (m2c output is only a SEED; the ROM SHA-1 is the arbiter), so either is fine.
-       Ghidra often has NOT named a game-specific control struct (it shows loose stack vars + stock OS
-       structs); the RE'd struct then lives in a sibling decomp, not the Ghidra DB — check both. m2c
-       keeps a rodata string as an `extern D_<addr>` data ref (ideal for a partial one-tu: no carve).
-       S186 seeded the whole `lz_compress_extended_dma.c` terrain-loader pack this way (context =
-       common.h + the sibling `lz_decompress_simple.c`'s `LzDecompressState` + game externs); the
-       call-glue seeds were byte-faithful first-build. S191 confirmed the recipe on a classical main
-       LOGIC pack (`get_table_entry.c`: table lookup, struct-array init, club/terrain address select),
-       not just call-glue: context = common.h + the Ghidra-DB `TerrainAttrEntry` + a synthesized 0xB8
-       `ShotInitRecord` (the struct-array init base) + game externs; all 3 standalone fns banked. Two
-       recurring seed-refinement levers surfaced there: (a) a bounds-clamp array index wants the
-       **ternary** `(idx < N) ? idx : 0` form (branchless `sltiu`/`negu`/`and`); the m2c-emitted
-       `&arr[idx & -(idx<N)]` form BRANCH-FOLDS the mask into a `beqz`. (b) an extern-symbol-base
-       pointer return with a variable index wants **stepwise** pointer arith (`p = base + a*K; return
-       p + b*K2;`) not a flat `a*K + base + b*K2` (GCC reassociates the flat form; see
-       `docs/hazards.md#loop-weight-and-live-length-regalloc-steering` Axis 6).
    - **Iterate** at most 25 times: `venv/bin/python3 tools/decomp_loop.py --func <placeholder>`, then
      parse the JSON. `score == 0` is a candidate; 5 consecutive `compile_ok == False` means a broken
      seed, so stop; otherwise read the top mismatches, edit `base.c`, and re-run. Run the permuter
@@ -509,8 +511,8 @@ below).
 | Enum constant / macro / global+static const | `UPPER_CASE` | `MAX_CONNECTIONS` |
 
 That table is the case convention. Naming quality (descriptive, problem-oriented, length-by-scope)
-follows `docs/coding-style.md`. When stitching m2c output, rename its `temp_*` / `local_*` / `arg_*`
-synthetics before promoting. This applies to classical / hand-authored C only; verbatim mirrors keep
+follows `docs/coding-style.md`. The m2c seed body is compiled, so rename its `temp_*` / `local_*` /
+`arg_*` synthetics before promoting. This applies to classical / hand-authored C only; verbatim mirrors keep
 their upstream names unchanged.
 
 <hazard_index>

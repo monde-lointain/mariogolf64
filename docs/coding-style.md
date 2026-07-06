@@ -265,9 +265,9 @@ Measure before tuning, and again after; intuition about hot spots is usually wro
 - **Enums** are `CamelCase`; enumerators are `UPPER_CASE`.
 - **Functions, variables, parameters, globals, statics** are `lower_case`.
 
-When stitching m2c output into `base.c`, rename m2c's `temp_*` / `local_*` / `arg_*` synthetics
-before promoting. Use ultra64.h types (`s32`/`u64`/`vu32`/`f32`/…), never raw `int`/`long long`/
-`volatile unsigned long`.
+The m2c seed body is the compiled body of `base.c`, so rename m2c's `temp_*` / `local_*` / `arg_*`
+synthetics before promoting. Use ultra64.h types (`s32`/`u64`/`vu32`/`f32`/…), never raw `int`/`long
+long`/`volatile unsigned long`.
 
 ## Library near-implementations: keep the `gu*` name vs. rename as custom
 

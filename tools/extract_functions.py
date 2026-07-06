@@ -55,7 +55,10 @@ def extract_functions(content: str) -> list[tuple[str, str]]:
         glabel_match = GLABEL_RE.match(line)
         if glabel_match:
             func_name = glabel_match.group(1)
-            func_lines = [func_name]
+            # Emit the function start as `glabel <name>`, not a bare name: m2c's
+            # asm parser needs a recognized label to open the function, and a
+            # bare col-0 token reads as an instruction outside any function.
+            func_lines = [f"glabel {func_name}"]
             i += 1
 
             # Collect lines until endlabel

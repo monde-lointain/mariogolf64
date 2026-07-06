@@ -17,14 +17,17 @@ seed = load_tool("seed_c")
 
 # --- stitch_base_c (golden) ----------------------------------------------
 # Locks the assembled base.c text. Exercises every section: rodata warning,
-# parent externs, sibling asm, auto-externs, m2c reference, the asm ground-truth
-# block, and the sanitized ghidra body. Three variants cover the body-routing
-# branches: a trusted decompile, a degenerate (_NON_MATCHING) decompile, and an
-# absent ghidra.c (MCP-down / asm-first).
+# parent externs, sibling asm, auto-externs, the Ghidra decompile reference
+# block, the asm ground-truth block, and the body. Four variants cover the
+# body-routing chain (m2c body, then the fallbacks): m2c body + trusted
+# decompile reference, m2c body + suppressed degenerate decompile, a Ghidra
+# fallback when m2c failed, and the TODO stub when neither is available.
 
 
 def _stitch_inputs(tmp_path: Path):
-    (tmp_path / "m2c.c").write_text("int m2c_ref(void) { return 0; }\n")
+    (tmp_path / "m2c.c").write_text(
+        "s32 func_80012345(void) {\n    return D_80022222;\n}\n"
+    )
     (tmp_path / "ghidra.c").write_text(
         "/* [MM12] copied from ELF */\nundefined4 returns_0(void)\n{\n    return 0;\n}\n"
     )
@@ -44,6 +47,7 @@ def _stitch_inputs(tmp_path: Path):
         ghidra_path=tmp_path / "ghidra.c",
         missing_rodata=["D_80099999"],
         target_s_path=tmp_path / "target.s",
+        m2c_ok=True,
     )
 
 
@@ -55,14 +59,14 @@ def _assert_golden(produced: str, gpath, regen):
 
 
 def test_stitch_base_c_golden(tmp_path, golden_dir, regen):
-    """Trusted decompile: body kept as the active start, asm block above it."""
+    """m2c body: the compiled seed, with the trusted decompile as a reference."""
     kwargs = _stitch_inputs(tmp_path)
     out_path = seed.stitch_base_c(seed.BaseCSpec(**kwargs))
     _assert_golden(out_path.read_text(), golden_dir / "seed_c_base.c", regen)
 
 
 def test_stitch_base_c_degenerate_golden(tmp_path, golden_dir, regen):
-    """Degenerate decompile: SUSPECT banner routes the agent to the asm block."""
+    """m2c body with a degenerate decompile: the decompile reference is suppressed."""
     kwargs = _stitch_inputs(tmp_path)
     kwargs["ghidra_degenerate"] = True
     out_path = seed.stitch_base_c(seed.BaseCSpec(**kwargs))
@@ -71,9 +75,20 @@ def test_stitch_base_c_degenerate_golden(tmp_path, golden_dir, regen):
     )
 
 
-def test_stitch_base_c_no_ghidra_golden(tmp_path, golden_dir, regen):
-    """Absent ghidra.c (MCP down): TODO body points at the asm ground truth."""
+def test_stitch_base_c_ghidra_fallback_golden(tmp_path, golden_dir, regen):
+    """m2c failed: the sanitized Ghidra decompile becomes the body."""
     kwargs = _stitch_inputs(tmp_path)
+    kwargs["m2c_ok"] = False
+    out_path = seed.stitch_base_c(seed.BaseCSpec(**kwargs))
+    _assert_golden(
+        out_path.read_text(), golden_dir / "seed_c_base_ghidra_fallback.c", regen
+    )
+
+
+def test_stitch_base_c_stub_golden(tmp_path, golden_dir, regen):
+    """No m2c body and no ghidra.c: the TODO stub points at the asm ground truth."""
+    kwargs = _stitch_inputs(tmp_path)
+    kwargs["m2c_ok"] = False
     kwargs["ghidra_path"] = tmp_path / "missing-ghidra.c"  # does not exist
     out_path = seed.stitch_base_c(seed.BaseCSpec(**kwargs))
     _assert_golden(

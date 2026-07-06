@@ -15,8 +15,13 @@ extern void siblingFn(void); // TODO: refine signature from MCP
 extern void *D_80022222;
 
 /* === Ghidra decompile (shape/type reference; do not compile) === */
-// Suppressed: _NON_MATCHING/degenerate decompile — untrustworthy.
-// Types below come from the m2c body and the externs above.
+#if 0
+/* [MM12] copied from ELF */
+undefined4 returns_0(void)
+{
+    return 0;
+}
+#endif
 /* === end Ghidra decompile ====================================== */
 
 /* === asm ground truth (translate from THIS; the decompile can be
@@ -30,7 +35,8 @@ glabel func_80012345
 /* === end asm ground truth ====================================== */
 
 // === Function body (SEED — edit during Iterate) ==============
-// m2c seed: rename synthetics + reconcile the extern preamble.
-s32 func_80012345(void) {
-    return D_80022222;
+// m2c failed; falling back to the Ghidra decompile — verify vs the asm.
+u32 func_80012345(void)
+{
+    return 0;
 }

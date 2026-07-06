@@ -1936,8 +1936,14 @@ remains the only authority.
 ## Decompile-vs-asm authority
 
 **Rule:** The asm (`disassemble_function`) is ground truth, not the Ghidra decompile. The decompiler
-can be silently wrong on classical leaves. Use the decompile for shape/types; translate the logic
-from the instruction listing.
+can be silently wrong on classical leaves. The standard classical seed is the combined m2c-body +
+Ghidra-typed-context seed: m2c translates the asm into the compiled seed body, typed by a Ghidra-MCP
+struct context (`ghidra_ctx.c`); the decompile is a shape/type reference only, never the body. Verify
+the m2c seed against the asm block, since m2c can also be silently wrong.
+
+**Seed roles.** `tools/seed_c.py` writes `base.c` with the m2c output as the compiled body, the
+decompile as a `#if 0` reference (suppressed when degenerate), and the asm as the labeled authority.
+Its JSON `body_source` is `m2c`, or `ghidra`/`stub` when m2c fails.
 
 **Provenance:** S11 (Ghidra rendered `func_800AB600`'s return as `return 0` when the asm returns
 `(status>>8)&1`).
@@ -2512,8 +2518,8 @@ its descriptive Ghidra name (the canonical SDK name is already taken by the firs
 lives at 0x80067B00, so 0x80065DD8 stays `convert_and_pack_floats_to_fixed`).
 
 **m2c-with-Mtx4f context + the 2D-index combine_givs de-bias (S188).** Seed a game gu/mgu math pack
-via m2c with a Ghidra RE'd-struct context (`ctx.c` = `common.h` + the `Mtx4f`=`float[4][4]` typedef
-from the Ghidra DB + the loose camera globals). Ghidra typically has NO camera/matrix struct, just
+with the standard combined seed, writing the `ghidra_ctx.c` as `common.h` + the `Mtx4f`=`float[4][4]`
+typedef from the Ghidra DB + the loose camera globals. Ghidra typically has NO camera/matrix struct, just
 loose float globals + the `Mtx4f` typedef; the typedef is the lever. A 4x4-matrix fn m2c-seeded as a
 `void*`/`f32*` walking-pointer form triggers loop.c `combine_givs` base-bias (a biased base reg + neg
 offsets); rewriting with `f32 m[4][4]` params and 2D `a[i][k]`/`b[k][j]` indexing produces the ROM's
