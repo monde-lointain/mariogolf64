@@ -41,7 +41,7 @@
   {
     "band": "-",
     "func": "func_80050400",
-    "hazards": "pack:11fn[func_80050400=?,func_80050428=?,func_800504E8=?,func_80050504=?,func_80050588=?,func_80050598=?,func_800505A0=?,func_8005062C=?,func_800506D4=?,func_80050710=?,func_80050914=?]",
+    "hazards": "pack:11fn[func_80050400=?,func_80050428=?,func_800504E8=?,func_80050504=?,func_80050588=?,func_80050598=?,func_800505A0=?,func_8005062C=?,func_800506D4=?,func_80050710=?,func_80050914=?],caller-evict:func_8005062C@src/main/func_80077BF0.c;func_800506D4@src/main/func_80077BF0.c",
     "kind": "asm-flip",
     "nfns": 11,
     "pts": 13,
@@ -91,19 +91,6 @@
     "vram": "0x801F4A40"
   },
   {
-    "band": "cold",
-    "func": "__assert",
-    "hazards": "pack:19fn[__assert=assert,vec3f_normalize=?,func_800299D0=?,flag_is_set=?,func_80029A30=?,func_80029A6C=?,func_80029AA8=?,func_80029AE4=?,func_80029B08=?,func_80029B58=?,func_80029BD8=?,func_80029C00=?,mainproc=nuboot,func_80029EEC=?,func_80029F28=?,func_80029F6C=?,func_8002A144=?,func_8002A310=?,game_draw_callback=?],c-combined:2file[assert|nuboot],file-static,needs-header:PRinternal/osint.h(already-vendored,adapt->libultra/internal/osint.h),jal-count-mismatch:0vs1,game-region-mirror:0x800298E0",
-    "kind": "asm-flip",
-    "nfns": 19,
-    "pts": 13,
-    "rom": "0x4CE0",
-    "score": -3224,
-    "size": 3424,
-    "upstream": "libultra",
-    "vram": "0x800298E0"
-  },
-  {
     "band": "-",
     "func": "func_ovl9_801F4A40",
     "hazards": "pack:4fn[func_ovl9_801F4A40=?,func_ovl9_801F4B68=?,func_ovl9_801F4DA0=?,func_ovl9_801F4FF4=?]",
@@ -141,19 +128,6 @@
     "size": 6432,
     "upstream": "none",
     "vram": "0x80052FE0"
-  },
-  {
-    "band": "-",
-    "func": "func_8004E5A0",
-    "hazards": "pack:3fn[func_8004E5A0=?,func_8004E924=?,func_8004FDB4=?],one-tu,rodata-straddle:0x800CCB20,0x800CCB28,0x800CCB30,0x800CCB38,0x800CCB40,0x800CCB48,0x800CCB50",
-    "kind": "asm-flip",
-    "nfns": 3,
-    "pts": 13,
-    "rom": "0x299A0",
-    "score": -6976,
-    "size": 6976,
-    "upstream": "none",
-    "vram": "0x8004E5A0"
   },
   {
     "band": "-",
@@ -505,19 +479,6 @@
     "size": 23792,
     "upstream": "none",
     "vram": "0x8005F090"
-  },
-  {
-    "band": "-",
-    "func": "get_table_entry",
-    "hazards": "pack:11fn[get_table_entry=?,func_80032E88=?,play_sound_at_meter_ratio_gameplay=?,update_rotation_matrix=?,play_sound_at_meter_ratio=?,play_sound_for_meter_phase=?,read_meter_stick_normalized=?,update_ball_physics=?,func_80037E50=?,calc_stick_offset_with_noise=?,init_ball_for_shot=?],caller-evict:func_80032E88@src/main/lz_compress_extended_dma.c",
-    "kind": "asm-flip",
-    "nfns": 11,
-    "pts": 13,
-    "rom": "0xE260",
-    "score": -24656,
-    "size": 24656,
-    "upstream": "none",
-    "vram": "0x80032E60"
   },
   {
     "band": "-",

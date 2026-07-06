@@ -25,6 +25,15 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 193 — src/libultra/debug/assert.c COMPLETE: `__assert` split from 0x4CE0 and banked — 2026-07-06
+- Increment: 1 file md5-candidate / +1 function matched (delta 223/236 -> 224/237). Split the 0x4CE0 pack into `src/libultra/debug/assert.c` plus the 0x4D00 asm remainder. ROM green at `83f4ac6`.
+- Quality: 0 stuck-far / 0 permuter-escalated / 0 carried / 0 re-opened.
+- Seed: committed 1pt; banked 1pt; regime mirror.
+- What helped: the 8-gate was resolved by a 0x20-byte split. The upstream libultra source at `~/development/repos/ultralib/src/debug/assert.c` gave the function identity, while the target asm showed the ROM's older one-argument `osSyncPrintf` shape and existing `D_800CA184` string.
+- Friction: the first C body emitted a new string literal in `.rodata`, so the text shape was right but the ROM SHA missed by shifting data. Referencing `extern const char D_800CA184[]` kept the bytes in the extracted data blob and matched full ROM.
+- Applied: 1 of 1: #1 existing extracted string/data symbol note -> `docs/hazards.md#recover-extern-refs-unplaced`.
+- Carry-over: none. The 0x4D00 asm remainder (`vec3f_normalize` and 17 following funcs) stays out of scope for a future sprint.
+
 ## Sprint 192 — src/main/func_80077BF0.c MIXED-PARTIAL retry: func_80077C18 banked, 2 FP/DL carries remain — 2026-07-06
 - Increment: 0 files md5-candidate / +1 function matched (delta 223->223 md5-candidate files, total .c 236->236). File 5/7, 2 stubs. ROM green at `dacbf3f`.
 - Quality: 0 stuck-far / 0 permuter-escalated / 2 carried / 0 re-opened.

@@ -564,10 +564,15 @@ add-only before the flip. NB the *detection* is not the gap: `EXTERN_DATA_DECL_R
 carry-overs) needed `_atbl`@0x800C9690 placed by hand; indexing libkmc math was rejected as low-value
 (carry-overs) plus reclassification-risk.
 
+**Existing extracted data/string symbol:** when the target asm loads an existing extracted data symbol,
+reference that symbol as an `extern` instead of emitting a C literal or definition. A text-identical
+tiny mirror can still SHA-miss if the C body creates a new `.rodata` entry and shifts later data; the
+target's own `%hi/%lo` pair tells whether the bytes should stay in the extracted blob.
+
 **Provenance:** S12 (inline-vram idea), S19 (3/3 `nuGfx*FuncSet` trio banked at one-file risk), S20
 (indexed-array base correction), S22 (flat-guess trap), S90 (contiguous `.bss`-block sized by
 inter-symbol gaps), S115 (stack-top-equals-named-adjacent-symbol tell), S112 (unindexed-mirror
-no-scan note).
+no-scan note), S193 (existing string extern).
 
 ---
 

@@ -90,6 +90,15 @@ written back (`*arg = cursor`), regardless of jal/FP count. So a debug/HUD DL-re
 emitters) prices partial-bank-expected-**ZERO** and stops topping the smallest-first sort. Same
 golden-gated off-cadence tooling follow-up; kin to the S158/S177/S183/S189 rows above.
 
+**S193 BANKED — `src/libultra/debug/assert.c` (`__assert`, 0x20-byte leaf split from 0x4CE0).** matched
+**+1**. md5-candidate **223/236→224/237**. Split the 19-fn 0x4CE0 pack at 0x4D00, banked only
+`__assert`, and left `vec3f_normalize` + 17 following funcs in asm. Upstream source:
+`~/development/repos/ultralib/src/debug/assert.c`; ROM body is an older one-argument `osSyncPrintf`
+shape that loads existing `D_800CA184`, so the C references `extern const char D_800CA184[]` instead of
+emitting a literal. Quality **0/0/0/0**. Seed 1; banked 1pt; regime mirror. Retro applied **1 of 1**
+(existing extracted string/data symbol note → `docs/hazards.md#recover-extern-refs-unplaced`). Cross-repo:
+none (`__assert` already curated).
+
 **S191 MIXED-PARTIAL — `src/main/get_table_entry.c` meter-stick/ball-physics/sound-trigger logic pack
 [0xE260], 3/11 (+3 this sprint).** matched **+3**. md5-candidate **223→223** (file 3/11, 8 stubs; total
 .c 235→236). Seeded via **m2c-from-repo + RE'd-struct `--context`** (Ghidra `TerrainAttrEntry` + a
