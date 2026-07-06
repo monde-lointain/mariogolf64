@@ -25,8 +25,36 @@ extern void func_8004D148(void);
  * sites). */
 extern void func_80068F98(void);
 extern void func_800695F8(void);
+extern void func_80069124(void);
 extern void func_80069BCC(void);
 extern void func_80069D08(void*);
+
+/* func_8006955C deps (mode-select dispatch). */
+extern u32 D_800BA9FC;
+extern s32 D_800BB0E8;
+extern void func_80253234(s32);
+extern void func_80253270(void);
+extern void func_80057914(void);
+
+/* func_80069BCC deps (camera + terrain-array reset). */
+extern s32 camera_position_x;
+extern s32 camera_position_y;
+extern s32 camera_position_z;
+extern s32 get_interpolated_terrain_height_wrapper(s32, s32);
+extern s32 flag_is_set(s32);
+extern void func_8005F964(void);
+extern void func_80080220(void);
+extern void func_8005F1C8(void);
+extern void func_80032E88(void);
+extern const char D_800D139C[];
+extern const char D_800D13A8[];
+extern const char D_800D13B4[];
+extern s32 D_800FBE70;
+extern s32 D_801B60B0;
+extern s32 D_80105B20[];
+extern s32 D_80104E70[];
+extern s32 D_8010CF60[];
+extern s32 D_80106148[];
 
 INCLUDE_ASM("asm/nonmatchings/main/lz_compress_extended_dma",
             lz_compress_extended_dma);
@@ -66,7 +94,29 @@ void func_800690C0(void) {
 
 INCLUDE_ASM("asm/nonmatchings/main/lz_compress_extended_dma", func_80069124);
 
-INCLUDE_ASM("asm/nonmatchings/main/lz_compress_extended_dma", func_8006955C);
+void func_8006955C(void) {
+  s32 mode;
+
+  D_800BB0E8 = 1;
+  switch (D_800BA9FC) {
+    case 0:
+      mode = 2;
+      break;
+    case 6:
+      mode = 1;
+      break;
+    case 10:
+      mode = 0;
+      break;
+  }
+  if (!flag_is_set(0x11)) {
+    func_80253234(mode);
+  }
+  D_800BB0E8 = 0;
+  func_80253270();
+  func_80057914();
+  func_80069124();
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/lz_compress_extended_dma", func_800695F8);
 
