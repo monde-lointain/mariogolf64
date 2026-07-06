@@ -25,6 +25,15 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 192 — src/main/func_80077BF0.c MIXED-PARTIAL retry: func_80077C18 banked, 2 FP/DL carries remain — 2026-07-06
+- Increment: 0 files md5-candidate / +1 function matched (delta 223->223 md5-candidate files, total .c 236->236). File 5/7, 2 stubs. ROM green at `dacbf3f`.
+- Quality: 0 stuck-far / 0 permuter-escalated / 2 carried / 0 re-opened.
+- Seed: committed 5pt; banked 0pt (partial file, per-file all-or-nothing); realized 5; residual 0; regime classical/mixed.
+- What helped: the S187 `func_80077C18` near-free retry was valid. Inlining the saved typed `SparkGroup`/`SparkSrc`/`SparkParticle` shape plus the count-reload, `D_800C4660 = groupCount`, and index-order fixes produced a ROM-green match. The final one-byte ROM diff was just commutative add order in the grid load; `*(col + n + src->grid)` forced the target `addu v0,v0,a3` form. The full ROM SHA-1 was the oracle because isolated score remained nonzero on reloc/addend noise with all rows aligned.
+- Friction: `func_80077E94` m2c + typed seeds compiled but were not structural (`percent < 0`), so the compiler-source/permuter path was premature. `render_spark_effects` remains the larger FP+DL tail and was carried by sprint scope.
+- Applied: 0 of 0; no buffered process/tooling suggestions.
+- Carry-over: `src/main/func_80077BF0.c` 2 stubs — `func_80077E94` (165, FP particle initializer, S158 class; needs a structural seed before compiler-source/permuter work) and `render_spark_effects` (506, FP+DL render tail; dedicated FP/display-list sprint).
+
 ## Sprint 191 — src/main/get_table_entry.c MIXED-PARTIAL: 3/11 banked (m2c + RE'd-struct context; .greg-dump regalloc crack, zero permuter), 8 carried — 2026-07-06
 - Increment: 0 files md5-candidate / +3 functions matched (delta 223→223 md5-candidate files, total .c 235→236). File 3/11, 8 stubs. ROM green at freeze `b10b8ab` + `[2/11]` `22d7128` + `[3/11]` `97d5430`.
 - Quality: 0 stuck-far / 0 permuter-escalated / 8 carried / 0 re-opened.

@@ -3241,29 +3241,21 @@ by `/sprint-plan`:
   (A1C/898), OR `func_80065E6C` as a jtbl-carve increment. m2c context (`ctx.c` with the Ghidra `Mtx4f`
   typedef) is re-derivable. Do NOT re-attempt A1C without a new idiom — it is source-proven irreducible.
 
-- **(S187 MIXED-PARTIAL — carried; 4 of 7 banked)** `src/main/func_80077BF0.c` (main-segment
+- **(S192 MIXED-PARTIAL — carried; 5 of 7 banked)** `src/main/func_80077BF0.c` (main-segment
   `[0x52FF0]` spark-effect one-tu pack). Subseg `[0x52FF0, c, main/func_80077BF0]` flipped; all fns
   `func_`/`render_spark_effects` (render_spark_effects@0x80078128 already curated; no `symbol_addrs`
-  adds). S187 banked 4 (BF0/C0C global-init glue + DEC heap3_free group loop + E6C bgtzl decrement).
-  **3 CARRIED** (no rodata carve — shared TU rodata referenced extern; ROM green off the 4 banked):
-  - `func_80077C18` (0x80077C18, 117 insn) — **STRUCTURAL-COMPLETE near-free retry** (`#pervasive-regalloc-classical-main`).
-    Particle-group table builder over `SparkGroup D_80105140[]` (0x2C stride; splat names each field
-    `D_801051xx`). 117==117, logic fully decoded, 3 source fixes already folded into the saved
-    near-match. **Retry checklist (near-free):** (1) paste `docs/wip/func_80077C18.near-match.c.txt`
-    over the `func_80077C18` INCLUDE_ASM in `src/main/func_80077BF0.c` + retype `D_80105140` to
-    `SparkGroup[]` (update DEC's free to `&D_80105140[i]`); (2) all refs placed (heap3_free/heap3_alloc/
-    func_8005062C/func_800506D4; the `D_800C46xx`/`D_801051xx`/`D_800FE338` auto `D_`); (3) no
-    recover-externs / symbol adds; (4) classical, no carve; (5) `docs/wip/func_80077C18.near-match.md`.
-    Residual = a ~6-8 insn inner grid-loop micro-regalloc cluster (rows t1-vs-t0, `beqz`-vs-`beqzl`,
-    a `t0=a1` base-copy, two commutative-add operand orders). Permuter `--main` plateaued (garbage-390);
-    closes only with a NEW faithful idiom that steers `rows`→t1 + the base-copy, or `#cross-project-matched-corpus-mining`.
-  - `func_80077E94` (0x80077E94, 165 insn) — **NOT ATTEMPTED (S158 FP class).** FP particle initializer:
-    `guRandom` ×N + `cvt.s.w`/`add.s`/`mul.s`, FP consts 64.0/0.1/0.0005 via `lui`+`mtc1` (no rodata
-    carve), nested grid loop writing particle fields @0x80/0x84 of the 0x98 `SparkParticle`.
+  adds). S187 banked 4 (BF0/C0C global-init glue + DEC heap3_free group loop + E6C bgtzl decrement);
+  S192 banked `func_80077C18` via the saved typed `SparkGroup` near-free retry plus a final
+  commutative-add source-order nudge (`*(col + n + src->grid)`). **2 CARRIED** (no rodata carve —
+  shared TU rodata referenced extern; ROM green off the 5 banked):
+  - `func_80077E94` (0x80077E94, 165 insn) — **S158 FP class, non-structural seed so far.** FP particle
+    initializer: `guRandom` ×N + `cvt.s.w`/`add.s`/`mul.s`, FP consts 64.0/0.1/0.0005 via `lui`+`mtc1`
+    (no rodata carve), nested grid loop writing particle fields @0x80/0x84 of the 0x98 `SparkParticle`.
+    S192 m2c + typed seeds compiled but stayed far below structural threshold (`percent < 0`), so
+    compiler-source/permuter escalation is premature. Retry only with a better structural seed first.
   - `render_spark_effects` (0x80078128, 506 insn) — **NOT ATTEMPTED.** 63 FP ops + 6 jals, the DL/render
     tail. FP + display-list heavy; dedicated `#display-lists` sprint (F3DEX2 auto via `mk/main.mk`).
-  **Retry:** the `func_80077C18` near-free replay (fixes done, needs the last regalloc idiom) OR a
-  dedicated FP/DL sprint for E94 + render. No cross-repo name sync (all `func_`).
+  **Retry:** dedicated FP/DL sprint for E94 + render. No cross-repo name sync (all `func_`).
 
 - **(S186 MIXED-PARTIAL — carried; 10 of 15 banked)** `src/main/lz_compress_extended_dma.c`
   (main-segment `[0x440A0]` terrain/hole-loader pack — NOT pure LZ; the lead-fn name misleads). Subseg
