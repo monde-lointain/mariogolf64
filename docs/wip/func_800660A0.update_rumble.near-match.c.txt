@@ -1,0 +1,34 @@
+// update_rumble_intensity_table @ 0x800679DC (33i) — STRUCTURAL-COMPLETE near-match.
+// Byte-exact except a 3-register rotation among the outer counter i and the two inner
+// loop-invariant bounds: BUILD {i=a1, row+n=a3, row+3=a2} vs ROM {i=a3, row+n=a2, row+3=a1}.
+// #loop-weight-and-live-length-regalloc-steering: i is a global allocno (crosses the inner
+// loop) that GCC pins to a1; the higher-freq invariants want the lower regs (ROM) but don't
+// get them. Loop FORM already matched via goto-outer (up-count + plain bnez, reversal corollary).
+// Decl-order lever (i last) had no effect. Retry: permuter --main, or a define-point/mutate lever.
+void update_rumble_intensity_table(void) {
+  s32 n;
+  u8* row;
+  u8* p;
+  s32 i;
+
+  func_800674B8();
+  n = func_80067730();
+  if (n >= 3) {
+    n = 3;
+  }
+  i = 0;
+  if (D_801B60B8 != 2) {
+    row = &D_801B7248;
+  loop_outer:
+    p = row;
+    do {
+      *p = ((s32)p < (s32)(row + n));
+      p++;
+    } while ((s32)p < (s32)(row + 3));
+    i++;
+    row += 0xB8;
+    if (i < 4) {
+      goto loop_outer;
+    }
+  }
+}

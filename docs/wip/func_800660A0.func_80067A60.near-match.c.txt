@@ -1,0 +1,25 @@
+// func_80067A60 @ 0x80067A60 (40i) — STRUCTURAL-COMPLETE near-match (build 37i, MORE optimal than ROM).
+// Structure matches: early mask, dup address calc per branch, signed lh, per-branch arg1+=4,
+// shared jal + arg4-store in jal delay. Residual +3: ROM has a REDUNDANT mask save/restore
+// (move t1,a3 / move a3,t1 — a3 is never clobbered, a GCC coalescing artifact) + ROM does NOT
+// fold %lo into the else-branch lh (keeps addiu base separate). Build reproduces neither (it is
+// tighter). 'mine more optimal than target' regalloc wall -> permuter --main / cross-corpus.
+void func_80067A60(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
+  s16* p;
+  s32 val;
+  s32 idx;
+  s32 mask = -(arg0 != 3) & 0x14;
+
+  if (arg3 == -1) {
+    p = (s16*)&D_800C3130[arg0 * 0x44 + arg2 * 2];
+    val = p[0];
+    idx = p[1];
+    arg1 += 4;
+  } else {
+    p = (s16*)&D_800C3130[arg0 * 0x44 + arg2 * 2];
+    val = p[0];
+    idx = arg3;
+    arg1 += 4;
+  }
+  func_80050DA0(val, arg1, idx, mask, arg4);
+}
