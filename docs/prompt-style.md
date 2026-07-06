@@ -3,18 +3,14 @@
 <role>
 The house style for this project's agent-facing prompt surfaces: `AGENTS.md`, `CLAUDE.md`,
 `docs/agent-workflow.md`, `docs/hazards.md`, `docs/coding-style.md`, this file,
-`.agents/skills/*/SKILL.md`, and `.claude/commands/*.md`. It applies `PROMPT_GUIDELINES.md` to these
-surfaces. Read it when writing or editing any of them, and use the checklist at the end as the
-conformance gate.
+`.agents/skills/*/SKILL.md`, and `.claude/commands/*.md`. Read it when writing or editing any of
+them, and use the checklist at the end as the conformance gate.
 </role>
 
 <scope>
-This governs prompt text that an agent executes. `PROMPT_GUIDELINES.md` is the upstream authority;
-when the two disagree, the guide wins and this file gets corrected. The living-state artifacts
-(`BACKLOG.md`, `RETRO.md`, `VELOCITY.md`, `SPRINT.md`) are append-only logs, not instruction
-surfaces: their headings are frozen anchors, but their historical entry prose is out of scope.
-`PROMPT_GUIDELINES.md` is vendored and is not hand-edited except to re-sync from
-`~/development/PROMPT-GUIDELINES-GPT5.5.md`.
+This governs prompt text that an agent executes. The living-state artifacts (`BACKLOG.md`,
+`RETRO.md`, `VELOCITY.md`, `SPRINT.md`) are append-only logs, not instruction surfaces: their
+headings are frozen anchors, but their historical entry prose is out of scope.
 </scope>
 
 ## Prime directive: outcome first, gates explicit

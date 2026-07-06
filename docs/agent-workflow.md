@@ -25,8 +25,7 @@ on-demand references:
   hazard index below maps each flag to its section.
 - `docs/coding-style.md`: the C quality bar and naming conventions for code promoted into the tree.
 
-Prompt authoring for this workflow follows `PROMPT_GUIDELINES.md` at the project root (see
-Conventions).
+Prompt authoring for this workflow follows the project style in `docs/prompt-style.md`.
 
 </context>
 
@@ -499,11 +498,9 @@ below).
 - **Use ultra64.h types** in decomp C (`s32`/`u64`/`vu32`/`f32`/...) for every integer and float;
   these replace raw `int`/`long long`/`volatile unsigned long`.
 - **Prompt authoring.** Every prompt surface in this project (`AGENTS.md`, `CLAUDE.md`, `docs/*`,
-  `.agents/skills/*`, `.claude/commands/*`, and artifact templates) follows `PROMPT_GUIDELINES.md`
-  at the project root when created or modified. That file is a vendored GPT-5.5 guide. Re-sync it
-  from `~/development/PROMPT-GUIDELINES-GPT5.5.md` when the canonical guide changes.
-  `docs/prompt-style.md` is the project-specific application of those guidelines to these surfaces;
-  its conformance checklist is the gate to run before committing a prompt-surface edit.
+  `.agents/skills/*`, `.claude/commands/*`, and artifact templates) follows `docs/prompt-style.md`
+  when created or modified. Its conformance checklist is the gate to run before committing a
+  prompt-surface edit.
 
 ### C naming (compact; full guide in `docs/coding-style.md`)
 

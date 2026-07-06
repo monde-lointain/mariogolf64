@@ -20,4 +20,5 @@ Codex project instructions. Keep this file concise so it stays inside Codex proj
 
 ## Prompt style
 
-Prompt-surface edits follow `PROMPT_GUIDELINES.md` and the project checklist in `docs/prompt-style.md`. Prefer GPT-5.5 style: outcome-first, concise, explicit validation, and clear stop conditions.
+Prompt-surface edits follow the project checklist in `docs/prompt-style.md`. Prefer GPT-5.5 style:
+outcome-first, concise, explicit validation, and clear stop conditions.
