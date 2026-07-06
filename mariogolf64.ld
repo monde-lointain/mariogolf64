@@ -103,7 +103,7 @@ SECTIONS
         build/src/main/audio_mgr.o(.text);
         build/asm/3A490.o(.text);
         build/src/main/set_camera_matrices_fixed.o(.text);
-        build/asm/414A0.o(.text);
+        build/src/main/func_800660A0.o(.text);
         build/src/mgu/mtxutil.o(.text);
         build/src/main/func_80067D40.o(.text);
         build/src/main/lz_decompress_simple.o(.text);
@@ -386,7 +386,7 @@ SECTIONS
         build/src/main/audio_mgr.o(.data);
         build/asm/3A490.o(.data);
         build/src/main/set_camera_matrices_fixed.o(.data);
-        build/asm/414A0.o(.data);
+        build/src/main/func_800660A0.o(.data);
         build/src/mgu/mtxutil.o(.data);
         build/src/main/func_80067D40.o(.data);
         build/src/main/lz_decompress_simple.o(.data);
@@ -689,7 +689,7 @@ SECTIONS
         build/src/main/audio_mgr.o(.rodata);
         build/asm/3A490.o(.rodata);
         build/src/main/set_camera_matrices_fixed.o(.rodata);
-        build/asm/414A0.o(.rodata);
+        build/src/main/func_800660A0.o(.rodata);
         build/src/mgu/mtxutil.o(.rodata);
         build/src/main/func_80067D40.o(.rodata);
         build/src/main/lz_decompress_simple.o(.rodata);
@@ -987,7 +987,7 @@ SECTIONS
         build/src/main/audio_mgr.o(.bss);
         build/asm/3A490.o(.bss);
         build/src/main/set_camera_matrices_fixed.o(.bss);
-        build/asm/414A0.o(.bss);
+        build/src/main/func_800660A0.o(.bss);
         build/src/mgu/mtxutil.o(.bss);
         build/src/main/func_80067D40.o(.bss);
         build/src/main/lz_decompress_simple.o(.bss);

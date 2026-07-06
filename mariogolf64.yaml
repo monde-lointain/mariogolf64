@@ -121,7 +121,7 @@ segments:
       - [0x3A1D0, c, main/audio_mgr]
       - [0x3A490, asm]
       - [0x40180, c, main/set_camera_matrices_fixed]
-      - [0x414A0, asm]
+      - [0x414A0, c, main/func_800660A0]
       - [0x42F00, c, mgu/mtxutil]
       - [0x43140, c, main/func_80067D40]
       - [0x43810, c, main/lz_decompress_simple]
