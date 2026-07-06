@@ -3,8 +3,8 @@
 The Product Owner (you) orders this. The live candidate list is **not** duplicated here;
 target selection is `tools/pick_target.py` (smallest-first ranker, run at `/sprint-plan`).
 This file holds only the *ordering rationale*, *enabler items* (gate actions), and
-*carry-overs*. `/sprint-plan` re-refines the slice each sprint;
-`/sprint-review` reprioritizes. See `CLAUDE.md ## Scrum operating model` for the cadence.
+*carry-overs*. `sprint-plan` re-refines the slice each sprint;
+`sprint-review` reprioritizes. See `docs/agent-workflow.md ## Scrum operating model` for the cadence.
 
 ## Active phase / epic
 
@@ -18,10 +18,10 @@ to Epic 2.
 **Epic 2 — decompile the game's own code, smallest-first classical (active since S148).** ~1521 fns
 across 77 game TUs remain (post-S148): `none`-upstream packs plus the game-region/structural rows
 above. All classical track (the mirror regime is mined out). Target selection stays
-`tools/pick_target.py` (smallest-first); the 8-point decompose gate fires on any seed ≥8, now tempered
-by the **small classical pack exemption** (`CLAUDE.md ## Story points`: <=2 fns AND <256B AND one-tu
+`tools/pick_target.py` (smallest-first); the 8-point decompose gate fires on any seed >=8, now tempered
+by the **small classical pack exemption** (`docs/agent-workflow.md ## Story points`: <=2 fns AND <256B AND one-tu
 runs seed-only). v2 classical realized tier scored at review (since S11). Seed asm-first for small fns
-(MCP-independent; see the Seed fast-path in `CLAUDE.md`). Path convention `overlay_<N>/<stem>` or
+(MCP-independent; see the Seed fast-path in `docs/agent-workflow.md`). Path convention `overlay_<N>/<stem>` or
 `main/<stem>`, default -O2 game profile (no mk edit). Note: `pick_target.py`'s size-pts over-prices
 tiny none-upstream packs (S148 priced a 176B trivial pack at 13) — a calibration follow-up (below).
 **pts follow-up — regalloc-heavy dimension (S158):** the S155 rubric prices a one-tu classical pack by
@@ -761,7 +761,7 @@ overlay code). Pure global data-shuffle, **0 `jal`**. Asm-first seed; compiled c
 SHA-MISSED, converged in 2 codegen fixes (no permuter): `num==3` `nuGfxCfbNum` store-order, and an
 else-branch `framebuf[2]` load-hoist (early temp). The **8-gate false-fired again** (496B pts-13,
 one-tu decompose-blocked); PO ran it as-is and the retro GENERALIZED the small-pack exemption to a new
-**(a2) 0-call size-agnostic** branch (`CLAUDE.md ## Story points`). md5-candidate **208→209**; matched
+**(a2) 0-call size-agnostic** branch (`docs/agent-workflow.md ## Story points`). md5-candidate **208→209**; matched
 +2; asm subsegs 85→**84**. Quality 0/0/0/0; seed 13 / realized 13 / residual 0; regime classical.
 Retro applied 2 of 3 (#3 `docs/hazards.md#isolated-compile-caveat` scheduling-reorder inverse-trap +
 `cmp`-localize recipe; #1 the (a2) exemption branch; #2 asm-first confirmation = no edit). **Cross-repo
@@ -3541,14 +3541,14 @@ by `/sprint-plan`:
   (the S154 alignment-wall detector) both landed. Golden gate held: formula diff was hazards-column
   ONLY (new tags on 5 live packs), zero pts/score/size/row-order change. Vein was mined out (0 live
   rows changed pts) → future-proofing; regression-guarded by the `test_seed_points_characterization`
-  assertions on S148-S154. See VELOCITY.md ## Seed rubric (S155 re-anchor) + CLAUDE.md ## Story points.
+  assertions on S148-S154. See VELOCITY.md ## Seed rubric (S155 re-anchor) + `docs/agent-workflow.md ## Story points`.
   The original follow-up rationale is retained below for the record.
 
 - **Tooling follow-up (S148, PO-selected #1 companion; deferred to a golden-gated tooling branch, NOT
   a review-gate edit).** Recalibrate `pick_target.py`'s `pts` so it does not over-price tiny
   `none`-upstream classical packs. S148's increment was the SMALLEST candidate (176B, 2fn) yet priced
   `pts=13` — size is barely weighted against the none-upstream + nfns + one-tu bumps, so the 8-gate
-  false-fired on a trivially-bankable pack. The CLAUDE.md **small classical pack exemption** (S148)
+  false-fired on a trivially-bankable pack. The `docs/agent-workflow.md` **small classical pack exemption** (S148)
   handles the gate symptom by-hand; this follow-up fixes the root pricing: give raw byte-size a larger
   weight (or a small-pack floor that caps pts for `<256B AND <=2fn AND one-tu`). **Why a branch:** pts
   feeds the displayed estimate and the 8-gate, a load-bearing surface, so re-weighting needs the

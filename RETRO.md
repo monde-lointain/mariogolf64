@@ -1,13 +1,13 @@
 # Mario Golf 64 decomp sprint retros
 
-One short digest per sprint, newest first, written at the `/sprint-review` gate. This is
+One short digest per sprint, newest first, written at the `sprint-review` gate. This is
 the *consolidated* record so lessons compound across sprints (McConnell, *More Effective
 Agile*, Ch.19: retros must change behavior). The PO promotes durable lessons into the memory
 dir manually; the review gate does not auto-write memory.
 
 Process/tooling edits are **retro-gated**: the "Suggested workflow improvements" the
 execution loop records into `SPRINT.md` are applied here, at review, not mid-sprint (see
-`CLAUDE.md ## Scrum operating model`). The `Applied:` line below is the audit trail of which
+`docs/agent-workflow.md ## Scrum operating model`). The `Applied:` line below is the audit trail of which
 numbered suggestions the PO accepted.
 
 ## Entry format

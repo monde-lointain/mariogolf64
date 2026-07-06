@@ -1,0 +1,6 @@
+interface:
+  display_name: "MG64 Sprint Plan"
+  short_description: "Plan an MG64 decomp sprint"
+  default_prompt: "Use $mg64-sprint-plan to plan the next Mario Golf 64 decomp sprint."
+policy:
+  allow_implicit_invocation: false

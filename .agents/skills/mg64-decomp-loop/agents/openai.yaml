@@ -1,0 +1,6 @@
+interface:
+  display_name: "MG64 Decomp Loop"
+  short_description: "Run the MG64 decomp execution loop"
+  default_prompt: "Use $mg64-decomp-loop to execute the current Mario Golf 64 sprint backlog."
+policy:
+  allow_implicit_invocation: true

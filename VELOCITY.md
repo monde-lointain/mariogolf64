@@ -1,14 +1,14 @@
 # Mario Golf 64 decomp sprint velocity (story points)
 
 The story-point dashboard, activated 2026-06-11 by PO directive at the Sprint-5 review (the
-"phase 2" named trigger in `CLAUDE.md`, fired at the ≈5-sprint mark). Scale = Fibonacci
+"phase 2" named trigger now documented in `docs/agent-workflow.md`, fired at the ≈5-sprint mark). Scale = Fibonacci
 1, 2, 3, 5, 8, 13. Scope = the current phase, the libultra/libkmc upstream-mirror band
 (`regime: mirror`). The classical/game-code regime gets a separate track when it starts.
 Never compare velocity across regimes (McConnell, *More Effective Agile*, Ch. 19).
 
 Ported from `../marioparty7/VELOCITY.md` (23-sprint sibling system), but shipped in two
 phases because MG64 differs from MP7: its cost axis is deterministic and its functions are
-tiny and uniform (see `CLAUDE.md ## Story points`).
+tiny and uniform (see `docs/agent-workflow.md ## Story points`).
 
 - **v1 (now): deterministic seed + the 8-point decompose gate.** The part with signal
   today. The seed is a pure function of `tools/pick_target.py`'s columns, so it is
@@ -32,7 +32,7 @@ tiny and uniform (see `CLAUDE.md ## Story points`).
    mirror (every member fn from ONE upstream `.c`) with all callees placed + names curated may run as a
    normal sprint. It banks atomically, no iteration stall. Decompose is blocked because there is no
    inter-file split point, regardless of inner-boundary 16-alignment (S64 `lookathil` non16align,
-   S69 `lookat` 16-aligned, both blocked). Full rule in `CLAUDE.md ## Story points`. First uses:
+   S69 `lookat` 16-aligned, both blocked). Full rule in `docs/agent-workflow.md ## Story points`. First uses:
    S64 `gu/lookathil.c` + S69 `gu/lookat.c` (both pts-13, banked first-try).
 2. **Regime indicator (primary).** A sustained seed/velocity shift flags the mirror→classical
    transition so the PO re-plans cadence and triggers v2.

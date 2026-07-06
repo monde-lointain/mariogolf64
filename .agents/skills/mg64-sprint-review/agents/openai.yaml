@@ -1,0 +1,6 @@
+interface:
+  display_name: "MG64 Sprint Review"
+  short_description: "Review and close an MG64 sprint"
+  default_prompt: "Use $mg64-sprint-review to close the current Mario Golf 64 decomp sprint."
+policy:
+  allow_implicit_invocation: false
