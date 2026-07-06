@@ -132,7 +132,16 @@ Ghidra MCP is used inline at seed time. For each target function:
        keeps a rodata string as an `extern D_<addr>` data ref (ideal for a partial one-tu: no carve).
        S186 seeded the whole `lz_compress_extended_dma.c` terrain-loader pack this way (context =
        common.h + the sibling `lz_decompress_simple.c`'s `LzDecompressState` + game externs); the
-       call-glue seeds were byte-faithful first-build.
+       call-glue seeds were byte-faithful first-build. S191 confirmed the recipe on a classical main
+       LOGIC pack (`get_table_entry.c`: table lookup, struct-array init, club/terrain address select),
+       not just call-glue: context = common.h + the Ghidra-DB `TerrainAttrEntry` + a synthesized 0xB8
+       `ShotInitRecord` (the struct-array init base) + game externs; all 3 standalone fns banked. Two
+       recurring seed-refinement levers surfaced there: (a) a bounds-clamp array index wants the
+       **ternary** `(idx < N) ? idx : 0` form (branchless `sltiu`/`negu`/`and`); the m2c-emitted
+       `&arr[idx & -(idx<N)]` form BRANCH-FOLDS the mask into a `beqz`. (b) an extern-symbol-base
+       pointer return with a variable index wants **stepwise** pointer arith (`p = base + a*K; return
+       p + b*K2;`) not a flat `a*K + base + b*K2` (GCC reassociates the flat form; see
+       `docs/hazards.md#loop-weight-and-live-length-regalloc-steering` Axis 6).
    - **Iterate** at most 25 times: `venv/bin/python3 tools/decomp_loop.py --func <placeholder>`, then
      parse the JSON. `score == 0` is a candidate; 5 consecutive `compile_ok == False` means a broken
      seed, so stop; otherwise read the top mismatches, edit `base.c`, and re-run. Run the permuter

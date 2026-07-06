@@ -90,6 +90,31 @@ written back (`*arg = cursor`), regardless of jal/FP count. So a debug/HUD DL-re
 emitters) prices partial-bank-expected-**ZERO** and stops topping the smallest-first sort. Same
 golden-gated off-cadence tooling follow-up; kin to the S158/S177/S183/S189 rows above.
 
+**S191 MIXED-PARTIAL — `src/main/get_table_entry.c` meter-stick/ball-physics/sound-trigger logic pack
+[0xE260], 3/11 (+3 this sprint).** matched **+3**. md5-candidate **223→223** (file 3/11, 8 stubs; total
+.c 235→236). Seeded via **m2c-from-repo + RE'd-struct `--context`** (Ghidra `TerrainAttrEntry` + a
+synthesized 0xB8 `ShotInitRecord` for the struct-array init base) — confirms the recipe on a classical
+main LOGIC pack, not just call-glue (S186). Banked byte-exact: `get_table_entry` (terrain-attr LUT
+index; the **ternary** `(idx<27)?idx:0` clamp gives branchless `sltiu`/`negu`/`and`, where m2c's
+`&arr[idx & -(idx<27)]` BRANCH-FOLDS), `func_80032E88` (0xB8 struct-array single-pass init, first
+integrate), `func_80037E50` (club/terrain table-address select). **`func_80037E50` cracked a `$a0`-vs-
+`$v1` regalloc with ZERO permuter** via the gcc-2.7.2 `.greg`-dump method (new Axis 6): `quality`
+(allocno 76) conflicted with both `$v0`+`$v1` because the return `A+base+C` (base = symbol addr)
+reassociated to a 2nd `$v1` accumulator → forced `$a0`; FAITHFUL fix = **stepwise pointer arith**
+`p=base+quality*K; return p+arg3*K2;` (single-accumulator-`$v0` eval, frees `$v1`) + the
+`if(arg3<6)return general; return edge;` block reorder. **Pre-classified 6 of 11 as nested children**
+(dead-`$v0`-spill / `$v0`-chain tell) of the 2 FP-wall parents → focused seeding on the 3 standalone
+fns. Quality **0/0/8/0** (0 stuck-far, 0 permuter, 8 carried, 0 re-opened). Seed 13; banked 0pt
+(mixed-partial); realized 15; residual +2; regime classical/mixed. Retro applied **4 of 4** (`.greg`
+Axis-6 eval-order lever → `#loop-weight-and-live-length-regalloc-steering`; isolation-noise-masks-reg-
+permutation corollary → `#isolated-compile-caveat`; callee-side nested-child pre-classify + a
+`nested-child:<parent>` pick_target follow-up → `#nested-function-static-chain-spill`; m2c-classical-
+logic confirmation + ternary/stepwise levers → `CLAUDE.md` Seed step). **8 CARRIED** (see
+`## Carry-overs`). Cross-repo: no new curated names (all `func_`/pre-curated). **Next natural slice:**
+a FRESH main pack that is NOT rendering/FP-heavy (this pack's tail is 2 FP-wall parents + their nested
+children), OR a dedicated FP-wall-parent sprint (`update_ball_physics` / `init_ball_for_shot`) where
+the 6 nested children bank FREE alongside the parent (child-before-parent, one TU).
+
 **S189 MIXED-PARTIAL — `src/main/func_800660A0.c` course-decal/aim-target/rumble rendering pack
 [0x414A0], 2/8 (+2 this sprint).** matched **+2**. md5-candidate **223→223** (file 2/8, 6 stubs; total .c
 233→234). Banked byte-exact via **m2c + Ghidra shape** (no RE'd struct — Ghidra models the collision-record
@@ -3114,6 +3139,24 @@ by `/sprint-plan`:
   `NU_CONT_THREAD_ID=6` vs MG64's 5), and that surfaces only at first build unless reconciled here.
   A near-free retry missing any of these is a half-scoped spike — finish the scope before deferring.
 
+- **(S191 MIXED-PARTIAL — carried; 3 of 11 banked)** `src/main/get_table_entry.c` (main-segment
+  `[0xE260]` meter/ball/sound logic pack). Subseg `[0xE260, c, main/get_table_entry]` flipped; 3
+  standalone fns banked C (`get_table_entry`/`func_80032E88`/`func_80037E50`); 8 stubs remain, ROM
+  green off the extracted asm. **All 8 carries are FP-wall parents or their nested children** — bank
+  each nested child FREE inside its parent's C TU (child emits before parent, one compilation unit,
+  `#nested-function-static-chain-spill`), so the retry is an FP-wall-parent sprint, not per-fn.
+  - `update_ball_physics` (0x8003327C, ~19KB, 21-FP) — main ball-physics FP wall (S158 class).
+    **Parent TU** of the 5 nested children below (all sit at 0x80032F70-0x80033228, just ahead of it):
+    `play_sound_at_meter_ratio_gameplay` (0x80032F70, uses `$v0`-chain, reads `BallObject` via +0x40),
+    `update_rotation_matrix` (0x80032FE8, FP, `$v0`-chain), `play_sound_at_meter_ratio` (0x800330D0,
+    dead-`$v0`-spill leaf), `play_sound_for_meter_phase` (0x80033134, dead-`$v0`-spill, phase beq-chain),
+    `read_meter_stick_normalized` (0x80033228, `$v0`-chain, controller-axis normalize `1/127.5`).
+  - `init_ball_for_shot` (0x80037F94, ~3.8KB, 21-FP + sprintf debug HUD) — shot-init FP wall (S158 class).
+    **Parent TU** of `calc_stick_offset_with_noise` (0x80037EE0, nested child; the parent sets
+    `$v0=sp+0x10` before its `jal 0x80037ee0`).
+  - **Retry:** open one of the two FP-wall parents as its own increment (the nested children come free
+    with a banked parent). Until then the ranker should DE-RANK this partial file. No cross-repo name
+    sync (all `func_`). pick_target follow-up: emit `nested-child:<parent>` from the callee-side tell.
 - **(S190 SPIKE — carried; 0 of 3 banked)** `src/main/func_8004E5A0.c` (main-segment `[0x299A0]`
   3-fn one-tu **debug/HUD display-list renderer**). Subseg `[0x299A0, c, main/func_8004E5A0]` flipped;
   all 3 fns auto `func_`, no `symbol_addrs` adds. ROM green off the extracted asm (0 banked). This is

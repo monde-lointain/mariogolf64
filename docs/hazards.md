@@ -1902,6 +1902,19 @@ the source (an ordering swap, or force an early read into a temp to hoist a load
 converge. The full-make ROM SHA-1 is the only authority; the isolated score is advisory in both
 directions.
 
+**Register-permutation case (S191): the isolated score is IDENTICAL across a reg nudge, so an
+unchanged score is NOT "no progress."** When a fn has extern refs (reloc noise) AND its only real
+diff is a register permutation (the same instructions, same order, one value in a different reg),
+asm-differ's row-matcher normalizes register numbers, so both the wrong and the right allocation align
+every row and net the SAME reloc-noise score. S191 `func_80037E50` scored an identical 3320 / 0.1487
+(39/39 rows, empty `top_mismatches`) with `quality` in `$a0` (wrong) and in `$v1` (byte-exact) — the
+decomp_loop score could not distinguish them. **Recipe:** for an extern-ref fn whose residual is a
+register choice, iterate on the **in-tree `.o` objdump register operands** (ignore the `lui`/`addiu`/
+`jal` reloc-immediate slots, which read `0x0` unresolved), NOT the decomp_loop score; a nudge that
+flips the score by zero can still be the one that lands the match. Pair this with the
+`#loop-weight-and-live-length-regalloc-steering` `.greg`-dump method to see which hard reg the target
+var needs free.
+
 **Procedure:** Trust the in-tree spot-check / full-make SHA, not the isolated score.
 
 **Flipped-subseg / partial-one-tu case (S187): the isolated reference is STALE, not merely noisy.**
@@ -4273,6 +4286,22 @@ turns "which value wins `$s0`" from guesswork into a read: find the pseudo pinne
 (local pre-emption, Axis 3) vs a copy-preference for 16 in `.greg` (steer via Axes 1–2). Run it
 **before** the permuter on any structural-complete register permutation.
 
+**Axis 6 — expression eval-order / reassociation (a symbol-address base in a 3-term pointer sum).**
+When the miss is "my var landed in `$a0`, the ROM keeps it in `$v1`", read `.greg`: the
+`;; N conflicts:` line shows the var's global allocno conflicting with the wanted hard reg, and the
+`;; Register dispositions` line shows where it went. S191 `func_80037E50`: `quality`(allocno 76)
+conflicted with BOTH `$v0`(2) and `$v1`(3) → forced to `$a0`(4), because the return expression
+`quality*K + base + arg3*K2` (with `base` a **symbol address**, i.e. a loop-invariant constant) was
+**reassociated** by GCC to group the constant base with the variable term — `quality*K + (arg3*K2 +
+base)` — which uses `$v1` as a **second accumulator** during `quality`'s live range. The **faithful**
+fix is to write the pointer arithmetic **stepwise** so the eval order is pinned to a single
+accumulator: `p = base + quality*K; return p + arg3*K2;` forces `(base + quality*K)` first
+(complex operand `quality*K` evaluated first, then `+base`), freeing the other temp reg for the var
+(→ `$v1`), then `+ arg3*K2`. A flat `A + base + C` expression lets GCC reassociate; stepwise
+statements defeat it. This is byte-exact and permuter-free; it also removes the block-reorder step
+(write the branch that falls through to the common tail last: `if (cond) return general; return
+edge;`). Run it **before** the permuter on any extern-symbol-base pointer-return regalloc permutation.
+
 **Process.** The lever set was **derived** by a compiler-source fan-out: 3 read-only mechanism-RE agents
 over gcc-2.7.2 (flow/global/local-alloc/reload/sched/reorg/stmt/jump/loop/toplev) + N measurement
 agents iterating from the isolated base — it turned a 3×-"irreducible" verdict into a byte match. See
@@ -4284,7 +4313,9 @@ agents iterating from the isolated base — it turned a 3×-"irreducible" verdic
 project's hardest wall, 8600→0, carried and declared "irreducible" 3×). S176 (Axis 3 param-in-place +
 the `-dg`/`-dl` diagnostic; cracked `heap_alloc`'s 3-way `{best_rem,best,need}` permutation the
 permuter plateaued on at 605). S178 (Axis-5 define-point liveness + inline-sentinel; cracked
-`heap3_alloc`, the S177 mask-rotation "wall", byte-exact with no permuter).
+`heap3_alloc`, the S177 mask-rotation "wall", byte-exact with no permuter). S191 (Axis 6 eval-order /
+reassociation `.greg`-read; cracked `func_80037E50`'s `quality` `$a0`→`$v1` via stepwise pointer arith,
+byte-exact, no permuter).
 
 ## permuter goto-backedge liveness unsound (var-reuse passes corrupt live-across-backedge values)
 
@@ -5231,6 +5262,22 @@ is nested in `func_8004E1E0` at `0x8004E1E0`; the true TU boundary `0x8004E184` 
 cluster A's `0x295E0` split over-reached by one fn — the child was carried.) `pick_target.py` flagging
 a `static-chain-callee` (a fn whose caller does `addiu v0,sp,K` before its `jal`) is a tracked
 follow-up.
+
+**Callee-side tell + pre-classify the whole pack at seed time (S191).** You do not need the caller to
+spot a nested child: the child's OWN entry carries the tell. Two forms, both read straight off the
+child's `.s`: (a) **dead-spill leaf** — `addiu sp,-8; sw v0,0(sp)` with `$v0` never reloaded (a nested
+fn that does NOT use its static chain; GCC still frames it, "pure-leaf still framed when nested"); and
+(b) **chain-using** — `sw v0,X(sp); lw v0,OFF(v0)` (or `move sN,v0` then `lw ...,OFF(sN)`), the child
+dereferencing the parent's frame through the incoming `$v0`. Either way `$v0` is meaningful on entry,
+which is impossible for a standalone o32 fn (`$v0` is not an incoming arg). **Because GCC emits nested
+children immediately BEFORE their parent, a run of such fns sitting just ahead of a big FP/complex fn
+are its children.** So at pack-seed time, scan every member's `.s` for the tell FIRST and route the
+nested children to carry-with-parent BEFORE seeding — do not waste an m2c seed + iterate loop on an
+orphan that cannot bank standalone. S191 `get_table_entry.c`: 6 of 11 fns were nested children of two
+FP-wall parents (`update_ball_physics`, `init_ball_for_shot`); pre-classifying focused the seed effort
+on the 3 true standalone fns (all banked). The `static-chain-callee` `pick_target.py` follow-up should
+also emit the callee-side `nested-child:<parent>` tag from this dead-`$v0`-spill / `$v0`-base-load
+signature (no caller scan needed).
 
 **Recombine-to-land-the-child (the bank enabler, S177).** To place the child at its non-16-aligned
 address, RECOMBINE the decomposed pack into ONE object: at the gate, remove the inner `[<child-addr>,
