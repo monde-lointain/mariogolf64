@@ -4,7 +4,14 @@
 extern s32 g_terrain_enable_gate;
 extern s8 g_terrain_vtx_xform_mode;
 extern s32 scenario_mode_id;
-extern s32 D_801B6098;
+/*
+ * Read as an array (offset 0) so its load carries MEM_IN_STRUCT_P. In
+ * func_80069BCC the nonscalar store `D_80105B20[D_801B6098[0]] = 0` must
+ * invalidate the cached value so the guard re-loads it (matches the ROM);
+ * a bare scalar survives CSE and forwards. See
+ * docs/hazards.md#mem-in-struct-scheduling-lever.
+ */
+extern s32 D_801B6098[];
 extern const char D_800D1380[]; /* "putter%d:course%d:hole%d\n" */
 extern u32 D_800C3FA0;          /* LCG scratch-RNG state */
 
@@ -86,7 +93,7 @@ void func_800690C0(void) {
   s32 temp_s0;
 
   osSyncPrintf(D_800D1380, g_terrain_vtx_xform_mode, scenario_mode_id,
-               D_801B6098);
+               D_801B6098[0]);
   temp_s0 = func_80051FCC();
   load_hole_terrain_assets(temp_s0, func_80052070());
   func_80068F98();
@@ -120,7 +127,34 @@ void func_8006955C(void) {
 
 INCLUDE_ASM("asm/nonmatchings/main/lz_compress_extended_dma", func_800695F8);
 
-INCLUDE_ASM("asm/nonmatchings/main/lz_compress_extended_dma", func_80069BCC);
+void func_80069BCC(void) {
+  s32 i;
+
+  camera_position_y = get_interpolated_terrain_height_wrapper(
+      camera_position_x, camera_position_z);
+  if (flag_is_set(0x43)) {
+    for (;;) {
+    }
+  }
+  func_8005F964();
+  D_800FBE70 = 0;
+  osSyncPrintf(D_800D139C);
+  func_80080220();
+  osSyncPrintf(D_800D13A8);
+  func_8005F1C8();
+  osSyncPrintf(D_800D13B4);
+  func_80032E88();
+  D_80105B20[D_801B6098[0]] = 0;
+  if (D_801B6098[0] == 0) {
+    D_801B60B0 = 0;
+    for (i = 0; i != 0x12; i++) {
+      D_80105B20[i] = 0;
+      D_80104E70[i] = 0;
+      D_8010CF60[i] = 0;
+      D_80106148[i] = 0;
+    }
+  }
+}
 
 void func_80069CE4(void) {
   func_800695F8();
