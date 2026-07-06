@@ -78,7 +78,24 @@ INCLUDE_ASM("asm/nonmatchings/main/get_table_entry",
 
 INCLUDE_ASM("asm/nonmatchings/main/get_table_entry", update_ball_physics);
 
-INCLUDE_ASM("asm/nonmatchings/main/get_table_entry", func_80037E50);
+u8* func_80037E50(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
+  s32 quality;
+  u8* p;
+
+  quality = resolve_shot_quality_table(arg0, arg1, arg2) - 1;
+  quality = quality & ((s32)~quality >> 0x1F);
+  if (quality >= 6) {
+    quality = 5;
+  }
+  if (arg3 < -5) {
+    return D_800B7C00;
+  }
+  if (arg3 < 6) {
+    p = D_800B7C2E + quality * 0x42;
+    return p + arg3 * 6;
+  }
+  return D_800B7C08;
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/get_table_entry",
             calc_stick_offset_with_noise);
