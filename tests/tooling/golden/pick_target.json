@@ -105,19 +105,6 @@
   },
   {
     "band": "-",
-    "func": "func_80077BF0",
-    "hazards": "pack:7fn[func_80077BF0=?,func_80077C0C=?,func_80077C18=?,func_80077DEC=?,func_80077E6C=?,func_80077E94=?,render_spark_effects=?],one-tu,rodata-straddle:0x800D1900,0x800D1908",
-    "kind": "asm-flip",
-    "nfns": 7,
-    "pts": 13,
-    "rom": "0x52FF0",
-    "score": -3360,
-    "size": 3360,
-    "upstream": "none",
-    "vram": "0x80077BF0"
-  },
-  {
-    "band": "-",
     "func": "func_ovl9_801F4A40",
     "hazards": "pack:4fn[func_ovl9_801F4A40=?,func_ovl9_801F4B68=?,func_ovl9_801F4DA0=?,func_ovl9_801F4FF4=?]",
     "kind": "asm-flip",
@@ -128,19 +115,6 @@
     "size": 3376,
     "upstream": "none",
     "vram": "0x801F4A40"
-  },
-  {
-    "band": "-",
-    "func": "set_camera_matrices_fixed",
-    "hazards": "pack:11fn[set_camera_matrices_fixed=?,set_camera_matrices_float=?,frustum_cull_point_with_radius=?,project_point_view_depth=?,project_point_to_screen=?,func_80065898=?,func_80065A1C=?,mtx_from_rts=?,func_80065D5C=?,convert_and_pack_floats_to_fixed=?,func_80065E6C=?]",
-    "kind": "asm-flip",
-    "nfns": 11,
-    "pts": 13,
-    "rom": "0x40180",
-    "score": -4896,
-    "size": 4896,
-    "upstream": "none",
-    "vram": "0x80064D80"
   },
   {
     "band": "-",
@@ -167,19 +141,6 @@
     "size": 6432,
     "upstream": "none",
     "vram": "0x80052FE0"
-  },
-  {
-    "band": "-",
-    "func": "func_800660A0",
-    "hazards": "pack:8fn[func_800660A0=?,draw_course_decal_triangles=?,emit_aim_target_ring=?,func_800674B8=?,func_800676B0=?,func_80067730=?,update_rumble_intensity_table=?,func_80067A60=?]",
-    "kind": "asm-flip",
-    "nfns": 8,
-    "pts": 13,
-    "rom": "0x414A0",
-    "score": -6752,
-    "size": 6752,
-    "upstream": "none",
-    "vram": "0x800660A0"
   },
   {
     "band": "-",
@@ -648,5 +609,44 @@
     "size": 32176,
     "upstream": "none",
     "vram": "0x800453E0"
+  },
+  {
+    "band": "-",
+    "func": "func_ovl11_802443D0",
+    "hazards": "pack:14fn[func_ovl11_802443D0=?,func_ovl11_802444B8=?,func_ovl11_802445C0=?,func_ovl11_80244748=?,func_ovl11_802448D4=?,func_ovl11_80244CA0=?,func_ovl11_80245184=?,func_ovl11_802460F8=?,func_ovl11_80246804=?,func_ovl11_802478B0=?,func_ovl11_80247D80=?,func_ovl11_80247E3C=?,func_ovl11_802493DC=?,func_ovl11_8024C1D8=?]",
+    "kind": "asm-flip",
+    "nfns": 14,
+    "pts": 13,
+    "rom": "0x153560",
+    "score": -32896,
+    "size": 32896,
+    "upstream": "none",
+    "vram": "0x802443D0"
+  },
+  {
+    "band": "-",
+    "func": "func_8002A640",
+    "hazards": "pack:24fn[func_8002A640=?,func_8002A90C=?,func_8002A944=?,func_8002A97C=?,func_8002A9C4=?,emit_sky_dome_dl=?,emit_sky_horizon_compositor_dl=?,init_rdp_and_draw_sky_background=?,func_8002BD9C=?,setup_view_by_camera_mode=?,func_8002BE78=?,draw_ground_shadow_decals=?,func_8002CDA8=?,func_8002DAC0=?,render_frame=?,func_80031450=?,func_800318A8=?,func_80031AF4=?,func_80032520=?,func_80032658=?,func_80032668=?,func_800326C4=?,func_800326FC=?,func_80032720=?]",
+    "kind": "asm-flip",
+    "nfns": 24,
+    "pts": 13,
+    "rom": "0x5A40",
+    "score": -33440,
+    "size": 33440,
+    "upstream": "none",
+    "vram": "0x8002A640"
+  },
+  {
+    "band": "-",
+    "func": "func_ovl0_8020E740",
+    "hazards": "pack:29fn[func_ovl0_8020E740=?,func_ovl0_8020E78C=?,func_ovl0_8020E7B4=?,func_ovl0_8020EBBC=?,func_ovl0_8020ED54=?,func_ovl0_8020EEEC=?,func_ovl0_8020EEF8=?,func_ovl0_8020FAE8=?,func_ovl0_8020FC10=?,func_ovl0_8020FFD8=?,func_ovl0_8020FFEC=?,func_ovl0_8021035C=?,func_ovl0_80210370=?,func_ovl0_802104BC=?,func_ovl0_80210F40=?,func_ovl0_8021169C=?,func_ovl0_80211D60=?,func_ovl0_80212590=?,func_ovl0_802129C0=?,func_ovl0_80212CE0=?,func_ovl0_80213038=?,func_ovl0_80213634=?,func_ovl0_80213C64=?,func_ovl0_80213C78=?,func_ovl0_80213D70=?,func_ovl0_8021419C=?,func_ovl0_80214250=?,func_ovl0_80216130=?,func_ovl0_802161D4=?]",
+    "kind": "asm-flip",
+    "nfns": 29,
+    "pts": 13,
+    "rom": "0xC7A40",
+    "score": -33744,
+    "size": 33744,
+    "upstream": "none",
+    "vram": "0x8020E740"
   }
 ]

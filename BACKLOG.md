@@ -66,6 +66,38 @@ fixture — the fn it probes changed state). The 4 `pick_target` live-state gold
 S184 review (`REGEN_GOLDEN=1`, banking-only drift from S182–S184); consider making them fixture-based so
 they stop drifting each banking sprint.
 
+**FP/DL-wall pack pts detector (S189, off-cadence golden-gated):** `src/main/func_800660A0.c` is an
+8-fn `none` pack where only the 4 non-FP fns were tractable (2 banked, 2 regalloc near-match walls) and
+the 4 FP/DL fns are S158/`#display-lists`-class walls: `func_800674B8` (cosf/sinf/vec3f_normalize loop),
+`func_80067730` (guAlignF/guScaleF/guMtxCatF/guTranslateF/guMtxF2L matrix builder), `emit_aim_target_ring`
++ `draw_course_decal_triangles` (F3DEX2 display-list emitters, 602/680i). The size/nfns model priced it 13;
+realized 14 but only +2 banked. Same "FP/DL-heavy TU is partial-bank-expected, not size-13-worth-of-bank"
+follow-up as S158/S177/S183: a `pick_target.py` detector for `gu*`/`cosf`/`sinf`/`guMtxF2L` FP calls +
+`glistp++`/DL-command-word stores (`0xE7000000`/`0xDB…`/`0xFA…` literal stores) → flag the pack
+**partial-bank-expected** (price the FP/DL fns at 0 expected-bank, the glue/init fns at their size). Kin to
+the S158 FP/trig, S177 `osSetIntMask`, and S183 pervasive-regalloc pts follow-ups above. Golden-gated,
+off-cadence, not a mid-sprint edit.
+
+**S189 MIXED-PARTIAL — `src/main/func_800660A0.c` course-decal/aim-target/rumble rendering pack
+[0x414A0], 2/8 (+2 this sprint).** matched **+2**. md5-candidate **223→223** (file 2/8, 6 stubs; total .c
+233→234). Banked byte-exact via **m2c + Ghidra shape** (no RE'd struct — Ghidra models the collision-record
+fields as separate symbols + running offset, matching ROM codegen): `func_800660A0` (D_800C3100 flag set)
++ `func_800676B0` (collision-record[0] `s16`-field init). **New seed-order sub-lever:** `func_800676B0`
+missed in Ghidra's compiler-SCHEDULED store order (collapsed the reused-constant live ranges → `0x800`→`v0`)
+and matched first build in human **row/field order** (spreads the live ranges → ROM's front-loaded
+`a0=0x800`/`v1=-0x100`) → `#pervasive-regalloc-classical-main` seed-order sub-lever. **6 CARRIED:** 2
+regalloc near-matches — `update_rumble_intensity_table` (loop FORM solved via goto-outer for the
+`#top-tested-loop` reversal corollary + signed pointer compares → plain `bnez`; residual a 3-reg rotation
+`i`/`row+n`/`row+3`, `#loop-weight`, permuter `--main` plateaus 45/55) and `func_80067A60` (structure
+matched but build MORE optimal than ROM — ROM's redundant mask save/restore + no `%lo`-fold not
+source-reachable); + 4 FP/DL walls (`func_800674B8`/`func_80067730` S158 FP, `emit_aim_target_ring`/
+`draw_course_decal_triangles` F3DEX2 DL). Seed 13; banked 0pt (mixed-partial); realized 14; residual +1;
+regime classical/mixed. Quality **0/1/6/0**. Retro applied **3 of 3** (row-order seed lever →
+`#pervasive-regalloc`; `setup-permuter.sh` `set -u` guard; FP/DL-wall pts detector → follow-up above).
+Cross-repo: no new curated names (all `func_`, Ghidra default-named). **Next natural slice:** a FRESH main
+pack that is NOT FP/DL-dominated, OR a permuter/`#cross-project-matched-corpus-mining` increment on the 2
+regalloc near-matches (rumble/A60).
+
 **S188 MIXED-PARTIAL — `src/main/set_camera_matrices_fixed.c` camera/projection FP-math pack [0x40180],
 3/11 (+3 this sprint).** matched **+3**. md5-candidate **223→223** (file 3/11, 8 stubs; total .c 232→233).
 Banked byte-exact via **PO-directed m2c + Ghidra RE'd `Mtx4f` struct context**: `project_point_view_depth`
@@ -3069,6 +3101,36 @@ by `/sprint-plan`:
   vendored upstream version can diverge from the game's rev on a single immediate (S122 nusys-2.07
   `NU_CONT_THREAD_ID=6` vs MG64's 5), and that surfaces only at first build unless reconciled here.
   A near-free retry missing any of these is a half-scoped spike — finish the scope before deferring.
+
+- **(S189 MIXED-PARTIAL — carried; 2 of 8 banked)** `src/main/func_800660A0.c` (main-segment
+  `[0x414A0]` course-decal/aim-target/rumble rendering pack). Subseg `[0x414A0, c, main/func_800660A0]`
+  flipped; `draw_course_decal_triangles`/`emit_aim_target_ring`/`update_rumble_intensity_table` curated in
+  `ghidra_symbols`, other 5 auto `func_`; no `symbol_addrs` adds. S189 banked 2 (`func_800660A0` flag set +
+  `func_800676B0` record-field init). **6 CARRIED** (no rodata carve — shared TU rodata referenced extern;
+  ROM green off the 2 banked). Two regalloc near-matches (retry via permuter/`#cross-project-matched-corpus-mining`):
+  - `func_80067A60` (0x80067A60, 40i) — **STRUCTURAL-COMPLETE near-match, build MORE optimal than ROM.**
+    Structure matched (early mask, dup addr calc per branch, signed `lh`, per-branch `arg1+=4`, shared
+    `jal` + arg4-store in the jal delay). Residual +3 = the ROM has a REDUNDANT mask save/restore
+    (`move t1,a3`/`move a3,t1` — `a3` is never clobbered) + does NOT `%lo`-fold the else-branch `lh`; the
+    build reproduces neither (it is tighter). "mine more optimal" wall — not source-reachable; needs the
+    permuter (to find the less-optimal form) or cross-corpus. wip `docs/wip/func_800660A0.func_80067A60.near-match.c.txt`.
+  - `update_rumble_intensity_table` (0x800679DC, 33i) — **STRUCTURAL-COMPLETE near-match, 3-reg rotation.**
+    Loop FORM fully solved: goto-outer for the `#top-tested-loop` reversal corollary (up-count + plain
+    `bnez` + delay-slot recompute) + signed pointer compares (`(s32)p < (s32)(row+n)` → `slt` not `sltu`).
+    Residual = `i`/`row+n`/`row+3` land in a1/a3/a2 vs ROM a3/a2/a1 (`#loop-weight`: `i` is the most-global
+    allocno so GCC pins it low a1; decl-order lever no-op). Permuter `--main` plateaus at 45 (base 55) over
+    500+ iters, never 0 → genuine regalloc wall. wip `docs/wip/func_800660A0.update_rumble.near-match.c.txt`.
+  Four FP/DL walls (NOT attempted; `#pervasive-regalloc`/S158/`#display-lists`):
+  - `func_800674B8` (0x800674B8, 126i) — FP loop (32-iter cosf/sinf, `fVar*fVar*16.0`/`*128.0`,
+    vec3f_normalize, stride-0x10 `s16`/`s8` writes to `D_800E1850`). S158 FP class.
+  - `func_80067730` (0x80067730, 171i) — FP matrix builder over the collision-record array
+    (guMtxIdentF/guAlignF/guScaleF/guMtxCatF/guTranslateF/guMtxF2L → `D_80104A00[i*0x40]`). S158 FP class.
+  - `emit_aim_target_ring` (0x80066B50, 602i) — F3DEX2 display-list emitter (guRotateRPY/guMtxL2F/
+    guMtxXFMF/cosf/sinf, 8-segment ring, counter-gated fade via `D_801B7248`). DL+FP wall (`#display-lists`).
+  - `draw_course_decal_triangles` (0x800660B0, 680i) — F3DEX2 display-list builder (per-record type
+    dispatch, vec3f_normalize, `glistp++` DL-word stores). DL+FP wall (`#display-lists`).
+  **Retry:** a permuter/`#cross-project-matched-corpus-mining` increment on the 2 regalloc near-matches, OR
+  a dedicated FP/`#display-lists` sprint for the 4 walls. No cross-repo name sync (all `func_`/pre-curated).
 
 - **(S188 MIXED-PARTIAL — carried; 3 of 11 banked)** `src/main/set_camera_matrices_fixed.c`
   (main-segment `[0x40180]` camera/projection FP-math pack). Subseg `[0x40180, c, main/set_camera_matrices_fixed]`

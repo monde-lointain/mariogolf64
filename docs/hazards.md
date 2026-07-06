@@ -4058,6 +4058,20 @@ run the loop-weight/live-length source levers **first** (they precede the permut
 only the residual allocno-number tiebreak, and on a goto-loop fn it must run **safe-passes-only** (see
 `#permuter-goto-backedge-liveness-unsound`).
 
+**Seed-order sub-lever — a scalar/record init fn: seed in FIELD/ROW order, NOT Ghidra's statement
+order (S189).** For a fn that is just a run of scalar global stores (a table/record initializer), the
+Ghidra decompile reconstructs the **compiler-scheduled** store order, which has already collapsed the
+reused-constant live ranges (it groups the two `= 0x800` stores adjacent so one register serves both,
+etc.). Seeding in that order reproduces the *collapse*, not the ROM: GCC then packs the reused
+constant into a scratch reg (`v0`) instead of the ROM's front-loaded dedicated reg. Re-seed in the
+human **row/field order** (record[0].f0, .f1, .f2, record[1].f0, …): that spreads each reused
+constant's first and last use apart so its live range crosses the intervening stores, forcing GCC to
+front-load it into its own register (`li a0,0x800` / `li v1,-0x100` up top) exactly as the ROM does.
+S189 `func_800676B0` (9 `s16` record-field stores + a `sw`) missed in Ghidra's order (`0x800`→`v0`,
+collapsed) and matched first build in row order (`0x800`→`a0`, `-0x100`→`v1`, front-loaded). Tell:
+byte-exact structure, only the *register/immediate* holding a reused constant differs, and the two
+reuses of that constant are adjacent in your seed. Cheap to try before any deeper lever.
+
 **The playbook (in order):**
 
 1. **Build an exact-symbol isolated base.** Use **per-field** structs so each accessed field is its **own**

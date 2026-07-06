@@ -105,19 +105,6 @@
   },
   {
     "band": "-",
-    "func": "func_80077BF0",
-    "hazards": "pack:7fn[func_80077BF0=?,func_80077C0C=?,func_80077C18=?,func_80077DEC=?,func_80077E6C=?,func_80077E94=?,render_spark_effects=?],one-tu,rodata-straddle:0x800D1900,0x800D1908",
-    "kind": "asm-flip",
-    "nfns": 7,
-    "pts": 13,
-    "rom": "0x52FF0",
-    "score": -3360,
-    "size": 3360,
-    "upstream": "none",
-    "vram": "0x80077BF0"
-  },
-  {
-    "band": "-",
     "func": "func_ovl9_801F4A40",
     "hazards": "pack:4fn[func_ovl9_801F4A40=?,func_ovl9_801F4B68=?,func_ovl9_801F4DA0=?,func_ovl9_801F4FF4=?]",
     "kind": "asm-flip",
@@ -128,19 +115,6 @@
     "size": 3376,
     "upstream": "none",
     "vram": "0x801F4A40"
-  },
-  {
-    "band": "-",
-    "func": "set_camera_matrices_fixed",
-    "hazards": "pack:11fn[set_camera_matrices_fixed=?,set_camera_matrices_float=?,frustum_cull_point_with_radius=?,project_point_view_depth=?,project_point_to_screen=?,func_80065898=?,func_80065A1C=?,mtx_from_rts=?,func_80065D5C=?,convert_and_pack_floats_to_fixed=?,func_80065E6C=?]",
-    "kind": "asm-flip",
-    "nfns": 11,
-    "pts": 13,
-    "rom": "0x40180",
-    "score": -4896,
-    "size": 4896,
-    "upstream": "none",
-    "vram": "0x80064D80"
   },
   {
     "band": "-",
@@ -167,19 +141,6 @@
     "size": 6432,
     "upstream": "none",
     "vram": "0x80052FE0"
-  },
-  {
-    "band": "-",
-    "func": "func_800660A0",
-    "hazards": "pack:8fn[func_800660A0=?,draw_course_decal_triangles=?,emit_aim_target_ring=?,func_800674B8=?,func_800676B0=?,func_80067730=?,update_rumble_intensity_table=?,func_80067A60=?]",
-    "kind": "asm-flip",
-    "nfns": 8,
-    "pts": 13,
-    "rom": "0x414A0",
-    "score": -6752,
-    "size": 6752,
-    "upstream": "none",
-    "vram": "0x800660A0"
   },
   {
     "band": "-",

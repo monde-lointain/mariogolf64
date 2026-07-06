@@ -36,4 +36,6 @@ echo "C file: $C_FILE"
 echo "ASM file: $ASM_FILE"
 echo "Running import.py${SETTINGS_ARGS:+ (${SETTINGS_ARGS[*]})}..."
 
-./tools/decomp-permuter/import.py "${SETTINGS_ARGS[@]}" "$C_FILE" "$ASM_FILE" "$@"
+# Guard the array expansion: under `set -u`, "${SETTINGS_ARGS[@]}" errors on an EMPTY array (bash
+# < 4.4), which aborted the wrapper silently while a direct import.py call worked (S189).
+./tools/decomp-permuter/import.py ${SETTINGS_ARGS[@]+"${SETTINGS_ARGS[@]}"} "$C_FILE" "$ASM_FILE" "$@"
