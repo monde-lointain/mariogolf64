@@ -2822,8 +2822,23 @@ it). This recurs on EVERY classical-endgame decompose-split; the tooling fix (pr
 `asm/nonmatchings/<tree>/<fn>/<fn>.s` target as the reference, or skip a seg file whose glabel set spans a
 now-`c` sibling) is a golden-gated `tools/` branch item (see BACKLOG).
 
+**Also fires on a WHOLE-PACK flip, not just a decompose-split (S186).** Flipping `[0x<A>, asm]` →
+`[0x<A>, c, <tree>/<file>]` (no split) leaves the pre-flip `asm/<A>.s` relic AND any older enclosing
+relic (S186: BOTH `asm/440A0.s` and `asm/43810.s` — the latter a stale wider-range relic from the S166
+`lz_decompress_simple` carve — shadow-declared the pack's fns). Worse, for a whole-pack flip the per-fn
+ground truth lives ONLY in `asm/nonmatchings/<tree>/<file>/<fn>.s`, so the seg-object reference model
+does not fit AT ALL (there is no correct child `asm/<B>.s` to resolve to). Two options: (1) move every
+shadowing relic aside (`mv asm/<X>.s <scratch>/ && rm -f build/asm/<X>.o`) — safe/gitignored/durable —
+but `decomp_loop` still can't build a 1-fn reference for a whole-pack flip; (2) skip `decomp_loop` for
+whole-pack-flip fns and diff the FULL build directly: `mips-linux-gnu-objdump -d
+build/src/<tree>/<file>.o` for your fn vs `asm/nonmatchings/<tree>/<file>/<fn>.s`. S186 used (2). This
+strengthens the tracked tooling fix: prefer `asm/nonmatchings/<tree>/<fn>/<fn>.s` as the reference (and
+assemble a 1-fn reference object from it) instead of the whole-seg `build/asm/<seg>.o`.
+
 **Provenance:** S168 `func_80071220` (split from `[0x4C3D0]` at S167): the stale `asm/4C3D0.s` (4 original
 funcs) shadowed the correct `asm/4C620.s` (1 fn), giving a false 94/100 with an all-empty `base_text`.
+S186 `func_80069BCC` (whole-pack flip of `[0x440A0]`): `asm/440A0.s` + `asm/43810.s` both shadowed;
+fell back to full-build objdump diff.
 
 ---
 
@@ -4331,8 +4346,18 @@ golf-yardage constants, default 200).
    tail). This is the first carve of a compiler switch table (prior carves were FP-literal /
    const-array rodata); the mechanics are identical (attribute + split at 16/word-aligned bounds).
 
+4. **The switch value's SIGNEDNESS picks `sltiu` vs `slti` for the bound-check (a one-instr lever).**
+   The dispatch bound-check is `sltiu x,N+1` when the switch value is UNSIGNED and `slti x,N+1` when
+   SIGNED. So a per-fn build that is byte-exact EXCEPT a lone `slti`↔`sltiu` at the switch entry is a
+   **global-typedness** fix, not a control-flow one: retype the switch-value `extern` (`u32` → `sltiu`,
+   `s32` → `slti`). Applies to any range/bound compare on a global, not only jtbl dispatch. S186
+   `func_8006955C` (sparse mode switch, cases 0/6/10): `D_800BA9FC` retyped `s32`→`u32` gave the ROM's
+   `sltiu`; the whole branch-chain dispatch (incl. the `beql` branch-likely delay slots) was already
+   byte-identical, so the type was the sole residual.
+
 **Provenance:** S159 `func_80051E90` (2/2 fns, no permuter; all three levers + the operand-order and
-branch-likely nudges in [#register-reuse-nudge-classical-regalloc](#register-reuse-nudge-classical-regalloc)).
+branch-likely nudges in [#register-reuse-nudge-classical-regalloc](#register-reuse-nudge-classical-regalloc));
+S186 `func_8006955C` (lever 4, sltiu/slti signedness).
 
 ## offset-0-symbol re-materialization (fixed-global field RMW)
 
@@ -4457,6 +4482,26 @@ consecutive words (`func_800329D8` writes `D_800B7840/44/48` from `a0/a1/a2`). S
 ingredient for a DL fill: the color compute must land after the fill-color w0 store (inline the pack
 in the `gDPSetFillColor` arg — the demo `gfxClearCfb` idiom — or use a temp computed after w0). See
 [#display-lists](#display-lists) for the full DL playbook.
+
+**Extends to CSE-invalidation RELOADS (S186), a second pass that reads the same `MEM_IN_STRUCT_P`
+flag.** Same lever, different symptom + different compiler pass. When a fixed global is READ, then a
+**nonscalar** store `arr[runtime_idx] = 0` runs, then the global is READ again with no intervening
+store to it, the ROM RE-LOADS the global (2 `lw`s) but the build CSE-forwards it (1 `lw`, the cached
+value reused — 1 load short, and the reg it was kept in cascades). This is `cse.c`, not `sched.c`:
+`note_mem_written` (~7538) grades a varying-address store into `{sp,var,nonscalar,all}` — an
+`int_array[var]=0` lowers (expr.c ARRAY_REF→INDIRECT_REF, ~4620) to a `(mem/s (plus reg const))` and
+is graded **`nonscalar`** (MEM_IN_STRUCT + non-QImode, so NOT `all`). `invalidate_memory` (~1700)
+then purges a cached load `p` only when `all || (nonscalar && p->in_struct) || cse_rtx_addr_varies_p`.
+A bare-scalar `extern s32 G;` load has `in_struct=0` → the `nonscalar` store does NOT purge it → CSE
+forwards (build, 1 load). Read the global as an **array element** (`extern s32 G[]; … G[0]`) → its
+load gets `MEM_IN_STRUCT_P` → `nonscalar && in_struct` is true → purged → the second read RELOADS
+(ROM, 2 loads). **`volatile` is the WRONG lever here** — it hoists the reload ABOVE the store into a
+preserved reg (does not match the ROM's load-after-store). The offset-0 array form (`G[0]`) is the
+byte-safe minimal fix (identical `%hi/%lo(G)` reloc). Local to the reloading TU: sibling files that
+read `G` as a bare scalar still match (no intervening nonscalar store between two reads), but every
+read of `G` **in the same TU** must switch to `G[0]` (byte-neutral for a single read — same `lw`).
+S186 `func_80069BCC`: `D_80105B20[D_801B6098[0]] = 0; if (D_801B6098[0] == 0)`, full-fn byte-exact,
+no permuter (root-caused by a `~/development/repos/mips-gcc-2.7.2/cse.c` subagent fan-out).
 
 **Confirming tell it is separate symbols (not one shared struct base):** the ROM re-emits `lui at,
 %hi(sym)` per access even for addresses that share the same %hi (all 0x8010) — a single struct/array

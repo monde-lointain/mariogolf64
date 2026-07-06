@@ -66,6 +66,24 @@ fixture — the fn it probes changed state). The 4 `pick_target` live-state gold
 S184 review (`REGEN_GOLDEN=1`, banking-only drift from S182–S184); consider making them fixture-based so
 they stop drifting each banking sprint.
 
+**S186 MIXED-PARTIAL — `src/main/lz_compress_extended_dma.c` terrain/hole-loader pack [0x440A0], 10/15
+(+10 this sprint).** matched **+10** (5 call-glue getters/setters + nested-RNG triple `func_80068F4C`+
+nested `func_80068F00/F18` + `func_8006955C` switch + `func_80069BCC` mem-in-struct). md5-candidate
+**223 → 223** (file has 5 stubs; total .c 230→231). NOT pure LZ despite the lead-fn name (a hole/terrain-
+loader TU: LCG RNG, overlay/thread mgmt, asset loading + the LZ/DMA core). Seeded via **m2c-from-repo +
+RE'd `LzDecompressState`/OS-struct `--context`** (PO directive) — byte-faithful call-glue seeds first-
+build. The **PO-directed compiler-source fan-out** (2 gcc-2.7.2 subagents) cracked `func_80069BCC`'s tail
+CSE-reload: root-caused to `cse.c invalidate_memory` (`nonscalar && p->in_struct` purge), fixed by reading
+`D_801B6098[0]` (MEM_IN_STRUCT_P) → byte-exact, **ZERO permuter, ZERO stuck-far**. Nested-RNG triple = 3rd
+end-to-end nested-fn recipe confirmation (pure-global-only children still framed). `func_8006955C` = a
+one-instr `sltiu`/`slti` signedness fix (`D_800BA9FC` u32). Seed 13; banked 0pt (mixed-partial); realized
+15; residual +2; regime classical/mixed. Quality **0/0/5/0**. Retro applied **4 of 5** (mem-in-struct
+cse.c CSE-reload variant + sltiu/slti lever + m2c seeding recipe + whole-pack-flip relic note; nested-fn
+anchor = no-op). 5 walls carried (see `## Carry-overs`). Cross-repo: no new curated names (all `func_`).
+**Next natural slice:** a FRESH main pack (this pack's remaining tail is FP-scaler + two big compression
+cores + thread-dispatch + DMA-goto wall-class), OR a permuter/`#cross-project-matched-corpus-mining`
+increment on the 5 carries.
+
 **S185 MIXED-PARTIAL — `src/main/func_80043C20.c` S184-tail rodata-carve retry, 14/21 (+1 this sprint).**
 matched **+1** (`resolve_club_terrain_mask`, the terrain-mask switch). md5-candidate **223 → 223** (file
 has 7 stubs). PO chose the rodata-carve retry of the 3 S184 jtbl/f64 carries + directed a compiler-source
@@ -3035,6 +3053,28 @@ by `/sprint-plan`:
   vendored upstream version can diverge from the game's rev on a single immediate (S122 nusys-2.07
   `NU_CONT_THREAD_ID=6` vs MG64's 5), and that surfaces only at first build unless reconciled here.
   A near-free retry missing any of these is a half-scoped spike — finish the scope before deferring.
+
+- **(S186 MIXED-PARTIAL — carried; 10 of 15 banked)** `src/main/lz_compress_extended_dma.c`
+  (main-segment `[0x440A0]` terrain/hole-loader pack — NOT pure LZ; the lead-fn name misleads). Subseg
+  `[0x440A0, c, main/lz_compress_extended_dma]` flipped; all fns `func_` (no `symbol_addrs` adds). S186
+  banked 10 (5 call-glue + nested-RNG triple `func_80068F4C`+`func_80068F00/F18` + `func_8006955C` switch
+  + `func_80069BCC` via `#mem-in-struct-scheduling-lever`). **5 CARRIED, all WALL-class** (no rodata carve
+  — the shared TU rodata is referenced extern; ROM green off the 10 banked; seeds via the S186 m2c+RE'd-
+  struct recipe):
+  - `func_80068F98` (0x80068F98, 83 insns) — FP nested-loop vec3-component scaler (3× outer × two inner
+    loops, `cvt.s.w`/`mul.s`/`trunc.w.s`, 4 running pointers + scale-array [0.25/0.25/0.125] index; scale
+    consts via `lui`+`mtc1`, no FP-pool rodata). `#pervasive-regalloc-classical-main` / S158 FP class; not
+    attempted deeply. Called by the banked `func_800690C0`.
+  - `func_80069124` (0x80069124, 294) + `func_800695F8` (0x800695F8, 414) — the big compression-core fns;
+    not attempted (large). `func_800695F8` calls the banked `func_80068F4C`; `func_80069124` is called by
+    the banked `func_8006955C`/`func_80069CE4`.
+  - `func_80069D08` (0x80069D08, 157) — loader-thread main loop (`func_80069F38` starts it): `do{}while(gate)`
+    + mode-dispatch on a loaded value vs 4/<2/3/5/1 + `D_801B6098==7` via `func_80029A30`/`func_80029A6C` +
+    debug-string spam (MPSTART/MP1..MP5) + calls the banked sub-loaders. Complex branch dispatch.
+  - `lz_compress_extended_dma` (0x80068CA0, 165) — DMA double-buffer orchestrator (`osEPiStartDma` +
+    mesg-queue ping-pong, calls `lz_decompress_extended`); goto-loop.
+  **Retry:** a permuter / `#cross-project-matched-corpus-mining` increment on the FP scaler + the big cores,
+  OR a dedicated compression-core/thread-dispatch sprint. No cross-repo name sync (all `func_`).
 
 - **(S184→S185 MIXED-PARTIAL — carried; 14 of 21 banked; highest single-file classical bank)**
   `src/main/func_80043C20.c` (main-segment `[0x1F020]` golf-shot/club logic pack). Subseg

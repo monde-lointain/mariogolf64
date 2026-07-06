@@ -144,19 +144,6 @@
   },
   {
     "band": "-",
-    "func": "lz_compress_extended_dma",
-    "hazards": "pack:15fn[lz_compress_extended_dma=?,func_80068F00=?,func_80068F18=?,func_80068F4C=?,func_80068F98=?,func_800690C0=?,func_80069124=?,func_8006955C=?,func_800695F8=?,func_80069BCC=?,func_80069CE4=?,func_80069D08=?,func_80069F28=?,func_80069F38=?,func_80069FBC=?]",
-    "kind": "asm-flip",
-    "nfns": 15,
-    "pts": 13,
-    "rom": "0x440A0",
-    "score": -4960,
-    "size": 4960,
-    "upstream": "none",
-    "vram": "0x80068CA0"
-  },
-  {
-    "band": "-",
     "func": "func_ovl0_8021E550",
     "hazards": "pack:8fn[func_ovl0_8021E550=?,func_ovl0_8021E5F4=?,func_ovl0_8021E6B8=?,func_ovl0_8021E710=?,func_ovl0_8021E724=?,func_ovl0_8021EA48=?,func_ovl0_8021EA58=?,func_ovl0_8021FC20=?]",
     "kind": "asm-flip",
@@ -167,19 +154,6 @@
     "size": 5920,
     "upstream": "none",
     "vram": "0x8021E550"
-  },
-  {
-    "band": "-",
-    "func": "lerp_int_v2",
-    "hazards": "remaining:8",
-    "kind": "c-stub",
-    "nfns": 8,
-    "pts": 13,
-    "rom": "0x1F020",
-    "score": -6080,
-    "size": 6080,
-    "upstream": "none",
-    "vram": "0x80043C20"
   },
   {
     "band": "-",
@@ -509,7 +483,7 @@
   {
     "band": "-",
     "func": "func_80054900",
-    "hazards": "pack:48fn[func_80054900=?,func_80054938=?,func_80054B7C=?,func_80054BC0=?,func_80054E20=?,func_80054E4C=?,collect_keyframe_events_at=?,find_keyframe_offset_by_tag=?,func_800550B8=?,update_vertex_texture_coords=?,update_vertex_texture_coords_per_frame=?,func_80055738=?,func_80055788=?,activate_texture_anim_slot=?,func_80055828=?,load_character_model=?,lookup_animation_by_id=?,func_80056060=?,animation_play=?,func_80056238=?,func_80056264=?,seek_current_frame_by=?,func_800562F4=?,func_80056324=?,func_80056350=?,func_8005637C=?,set_anim_flag_82=?,set_anim_speed_byte=?,func_80056400=?,func_8005642C=?,func_80056464=?,func_80056494=?,set_extra_flag_0=?,func_800564F0=?,func_80056520=?,animation_step=?,func_800568CC=?,animation_step_no_rotate=?,animation_tick_all_players=?,func_800577D0=?,func_800577DC=?,func_800578AC=?,func_80057914=?,func_80057FFC=?,func_80058ACC=?,func_80058B34=?,func_80058C58=?,func_80058D04=?]",
+    "hazards": "pack:48fn[func_80054900=?,func_80054938=?,func_80054B7C=?,func_80054BC0=?,func_80054E20=?,func_80054E4C=?,collect_keyframe_events_at=?,find_keyframe_offset_by_tag=?,func_800550B8=?,update_vertex_texture_coords=?,update_vertex_texture_coords_per_frame=?,func_80055738=?,func_80055788=?,activate_texture_anim_slot=?,func_80055828=?,load_character_model=?,lookup_animation_by_id=?,func_80056060=?,animation_play=?,func_80056238=?,func_80056264=?,seek_current_frame_by=?,func_800562F4=?,func_80056324=?,func_80056350=?,func_8005637C=?,set_anim_flag_82=?,set_anim_speed_byte=?,func_80056400=?,func_8005642C=?,func_80056464=?,func_80056494=?,set_extra_flag_0=?,func_800564F0=?,func_80056520=?,animation_step=?,func_800568CC=?,animation_step_no_rotate=?,animation_tick_all_players=?,func_800577D0=?,func_800577DC=?,func_800578AC=?,func_80057914=?,func_80057FFC=?,func_80058ACC=?,func_80058B34=?,func_80058C58=?,func_80058D04=?],caller-evict:func_80057914@src/main/lz_compress_extended_dma.c",
     "kind": "asm-flip",
     "nfns": 48,
     "pts": 13,
@@ -561,7 +535,7 @@
   {
     "band": "-",
     "func": "bgm_load_song_from_rom",
-    "hazards": "pack:40fn[bgm_load_song_from_rom=?,func_8005F0BC=?,spawn_object_simple=?,func_8005F0FC=?,func_8005F11C=?,func_8005F180=?,func_8005F1C8=?,func_8005F224=?,func_8005F248=?,func_8005F290=?,func_8005F30C=?,func_8005F360=?,func_8005F4AC=?,func_8005F518=?,init_per_player_state=?,func_8005F838=?,func_8005F964=?,func_8005FB58=?,func_8005FCB8=?,func_8005FE8C=?,func_800600C0=?,func_80060128=?,func_80060190=?,func_80060210=?,func_800602B4=?,func_8006034C=?,func_80060358=?,func_800603A8=?,func_80060434=?,func_800604F4=?,func_800605EC=?,gen_terrain_detail_texture=?,setup_terrain_detail_default=?,emit_per_phase_fog_state=?,func_800627F8=?,func_8006280C=?,clear_terrain_emit_scratch=?,init_terrain_vertex_texcoords=?,emit_terrain_state_prefix_block=?,emit_course_terrain_dl=?]",
+    "hazards": "pack:40fn[bgm_load_song_from_rom=?,func_8005F0BC=?,spawn_object_simple=?,func_8005F0FC=?,func_8005F11C=?,func_8005F180=?,func_8005F1C8=?,func_8005F224=?,func_8005F248=?,func_8005F290=?,func_8005F30C=?,func_8005F360=?,func_8005F4AC=?,func_8005F518=?,init_per_player_state=?,func_8005F838=?,func_8005F964=?,func_8005FB58=?,func_8005FCB8=?,func_8005FE8C=?,func_800600C0=?,func_80060128=?,func_80060190=?,func_80060210=?,func_800602B4=?,func_8006034C=?,func_80060358=?,func_800603A8=?,func_80060434=?,func_800604F4=?,func_800605EC=?,gen_terrain_detail_texture=?,setup_terrain_detail_default=?,emit_per_phase_fog_state=?,func_800627F8=?,func_8006280C=?,clear_terrain_emit_scratch=?,init_terrain_vertex_texcoords=?,emit_terrain_state_prefix_block=?,emit_course_terrain_dl=?],caller-evict:func_8005F1C8@src/main/lz_compress_extended_dma.c;func_8005F964@src/main/lz_compress_extended_dma.c",
     "kind": "asm-flip",
     "nfns": 40,
     "pts": 13,
@@ -574,7 +548,7 @@
   {
     "band": "-",
     "func": "get_table_entry",
-    "hazards": "pack:11fn[get_table_entry=?,func_80032E88=?,play_sound_at_meter_ratio_gameplay=?,update_rotation_matrix=?,play_sound_at_meter_ratio=?,play_sound_for_meter_phase=?,read_meter_stick_normalized=?,update_ball_physics=?,func_80037E50=?,calc_stick_offset_with_noise=?,init_ball_for_shot=?]",
+    "hazards": "pack:11fn[get_table_entry=?,func_80032E88=?,play_sound_at_meter_ratio_gameplay=?,update_rotation_matrix=?,play_sound_at_meter_ratio=?,play_sound_for_meter_phase=?,read_meter_stick_normalized=?,update_ball_physics=?,func_80037E50=?,calc_stick_offset_with_noise=?,init_ball_for_shot=?],caller-evict:func_80032E88@src/main/lz_compress_extended_dma.c",
     "kind": "asm-flip",
     "nfns": 11,
     "pts": 13,
@@ -665,7 +639,7 @@
   {
     "band": "-",
     "func": "func_800453E0",
-    "hazards": "pack:40fn[func_800453E0=?,calc_slope_side_pitch=?,calc_slope_uphill_pitch=?,func_80045A9C=?,func_80045AC0=?,func_80045AD4=?,func_80045B14=?,func_80045C00=?,func_80045CE0=?,func_80046604=?,func_800467DC=?,func_8004683C=?,func_80046898=?,func_800469E0=?,func_800469EC=?,func_800479C0=?,func_80047B34=?,func_80047CAC=?,func_80047D68=?,func_80047DBC=?,func_80047E9C=?,func_800484F8=?,func_80048690=?,func_8004876C=?,func_800487E4=?,func_8004887C=?,func_80048CF8=?,func_80048D7C=?,func_8004AC04=?,func_8004B474=?,func_8004C510=?,func_8004C51C=?,func_8004C6A8=?,func_8004C6B0=?,func_8004C6B8=?,func_8004C6C0=?,func_8004C860=?,func_8004C958=?,func_8004CDA0=?,func_8004D148=?]",
+    "hazards": "pack:40fn[func_800453E0=?,calc_slope_side_pitch=?,calc_slope_uphill_pitch=?,func_80045A9C=?,func_80045AC0=?,func_80045AD4=?,func_80045B14=?,func_80045C00=?,func_80045CE0=?,func_80046604=?,func_800467DC=?,func_8004683C=?,func_80046898=?,func_800469E0=?,func_800469EC=?,func_800479C0=?,func_80047B34=?,func_80047CAC=?,func_80047D68=?,func_80047DBC=?,func_80047E9C=?,func_800484F8=?,func_80048690=?,func_8004876C=?,func_800487E4=?,func_8004887C=?,func_80048CF8=?,func_80048D7C=?,func_8004AC04=?,func_8004B474=?,func_8004C510=?,func_8004C51C=?,func_8004C6A8=?,func_8004C6B0=?,func_8004C6B8=?,func_8004C6C0=?,func_8004C860=?,func_8004C958=?,func_8004CDA0=?,func_8004D148=?],caller-evict:func_8004D148@src/main/lz_compress_extended_dma.c",
     "kind": "asm-flip",
     "nfns": 40,
     "pts": 13,
@@ -756,7 +730,7 @@
   {
     "band": "-",
     "func": "func_80080220",
-    "hazards": "pack:43fn[func_80080220=?,init_sky_pool_and_world_state=?,func_80080564=?,func_8008060C=?,func_80080688=?,func_8008085C=?,func_80080C4C=?,func_80080DCC=?,func_80080E14=?,func_80080E7C=?,load_course_scenery_assets=?,func_80081550=?,func_8008156C=?,func_80081C90=?,func_80081D4C=?,func_80081EF8=?,func_800824E4=?,draw_terrain_aim_grid=?,func_80083A48=?,func_80083AC8=?,func_800842C0=?,func_80084468=?,func_80084EBC=?,func_800852A8=?,func_8008534C=?,func_80085F98=?,func_8008658C=?,func_8008679C=?,emit_ball_offscreen_indicator=?,func_800874D8=?,func_80087BAC=?,func_80087BE4=?,func_80087CB0=?,func_800880A0=?,func_80088890=?,func_80088A90=?,func_80088BDC=?,func_80089094=?,func_8008C520=?,func_8008C658=?,func_8008C6B0=?,func_8008CD30=?,func_8008D0DC=?],caller-evict:func_80080DCC@src/main/func_80025D30.c",
+    "hazards": "pack:43fn[func_80080220=?,init_sky_pool_and_world_state=?,func_80080564=?,func_8008060C=?,func_80080688=?,func_8008085C=?,func_80080C4C=?,func_80080DCC=?,func_80080E14=?,func_80080E7C=?,load_course_scenery_assets=?,func_80081550=?,func_8008156C=?,func_80081C90=?,func_80081D4C=?,func_80081EF8=?,func_800824E4=?,draw_terrain_aim_grid=?,func_80083A48=?,func_80083AC8=?,func_800842C0=?,func_80084468=?,func_80084EBC=?,func_800852A8=?,func_8008534C=?,func_80085F98=?,func_8008658C=?,func_8008679C=?,emit_ball_offscreen_indicator=?,func_800874D8=?,func_80087BAC=?,func_80087BE4=?,func_80087CB0=?,func_800880A0=?,func_80088890=?,func_80088A90=?,func_80088BDC=?,func_80089094=?,func_8008C520=?,func_8008C658=?,func_8008C6B0=?,func_8008CD30=?,func_8008D0DC=?],caller-evict:func_80080220@src/main/lz_compress_extended_dma.c;func_80080DCC@src/main/func_80025D30.c",
     "kind": "asm-flip",
     "nfns": 43,
     "pts": 13,

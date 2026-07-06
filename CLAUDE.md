@@ -118,6 +118,21 @@ Ghidra MCP is used inline at seed time. For each target function:
        isolated Iterate loop below. Use this when Ghidra MCP is unavailable (`list_instances` empty)
        or the fn is small enough that the decompile adds no shape/type value. The fast-path banked a
        2-fn 176B pack this way, first build, MCP down (S148).
+     - **m2c-with-RE'd-struct-context seed (for a call-glue / struct-typed pack).** For a pack of
+       state-machine / call-glue fns, drive m2c with a context enriched by the *previously-RE'd*
+       structs so it types the accesses instead of emitting raw offsets: write a scratch context `.c`
+       = `#include "common.h"` (OS structs + `os*`/nusys externs) + the RE'd struct defs (pulled from
+       the Ghidra DB, or verbatim from a sibling decomp's `.c`) + best-guess `extern`s for the pack's
+       game callees/globals; run `venv/bin/python3 tools/m2ctx.py <scratch>.c` to preprocess it to
+       `ctx.c`, then `python3 ~/development/repos/m2c/m2c.py -t mips-gcc-c --context ctx.c
+       asm/nonmatchings/<seg>/<file>/<fn>.s` per fn. The repo m2c and the vendored `tools/m2c` produce
+       equivalent seeds (m2c output is only a SEED; the ROM SHA-1 is the arbiter), so either is fine.
+       Ghidra often has NOT named a game-specific control struct (it shows loose stack vars + stock OS
+       structs); the RE'd struct then lives in a sibling decomp, not the Ghidra DB — check both. m2c
+       keeps a rodata string as an `extern D_<addr>` data ref (ideal for a partial one-tu: no carve).
+       S186 seeded the whole `lz_compress_extended_dma.c` terrain-loader pack this way (context =
+       common.h + the sibling `lz_decompress_simple.c`'s `LzDecompressState` + game externs); the
+       call-glue seeds were byte-faithful first-build.
    - **Iterate** at most 25 times: `venv/bin/python3 tools/decomp_loop.py --func <placeholder>`, then
      parse the JSON. `score == 0` is a candidate; 5 consecutive `compile_ok == False` means a broken
      seed, so stop; otherwise read the top mismatches, edit `base.c`, and re-run. Run the permuter
@@ -587,6 +602,8 @@ When `pick_target.py` flags a hazard (or a match shows its symptom), read the ma
 | `void` classical fn mis-allocates at loop-entry/delay-slot, resists every body lever | #return-type-is-load-bearing |
 | struct-array fn byte-matches with per-field base symbols but not the combined struct (link-identical) | #struct-access-folding-changes-scheduling |
 | classical `switch(x)` dispatch via a compiler jump table (`jtbl_<vram>`, `sltiu`+`jr $v0`), esp. w/ sparse inner cases or `a==K1\|\|K2` | #switch-jtbl-dispatch |
+| clean per-fn match, full-make SHA-miss, lone `slti`<->`sltiu` at a switch/range bound-check (global signedness) | #switch-jtbl-dispatch |
+| clean fn byte-exact except a fixed-global re-load after a nonscalar `arr[idx]=0` store (build CSE-forwards, 1 load short); read the global as `G[0]` array-elem for MEM_IN_STRUCT_P | #mem-in-struct-scheduling-lever |
 | ROM cond-branch is plain `beqz`+`li v0,CONST`+`move v0,<scratch>` but build emits branch-likely `beqzl` skipping the lone `li v0,CONST` (return-var coalesced to v0) | #register-reuse-nudge-classical-regalloc |
 | classical fn's global load/store schedules differently (build pipelines indep load-stores the ROM keeps strict-`$f0`-pairs, or hoists a `& K` flag load past a pointer store the ROM keeps late+`nop`) | #mem-in-struct-scheduling-lever |
 | clean fn byte-exact except a fixed-global struct/array field RMW (`+=`/`-=`): build folds `ARR[k].field` into a `la` base reg where the ROM re-materializes `%hi/%lo` (+ a cascading reg permutation) | #offset-0-symbol-re-materialization |
