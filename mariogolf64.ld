@@ -74,7 +74,8 @@ SECTIONS
         build/src/libnusys/nusched.o(.text);
         build/src/main/func_80029250.o(.text);
         build/src/libnusys/nugfxtaskmgr.o(.text);
-        build/asm/4CE0.o(.text);
+        build/src/libultra/debug/assert.o(.text);
+        build/asm/4D00.o(.text);
         build/asm/5A40.o(.text);
         build/src/main/func_800328E0.o(.text);
         build/src/main/get_table_entry.o(.text);
@@ -357,7 +358,8 @@ SECTIONS
         build/src/libnusys/nusched.o(.data);
         build/src/main/func_80029250.o(.data);
         build/src/libnusys/nugfxtaskmgr.o(.data);
-        build/asm/4CE0.o(.data);
+        build/src/libultra/debug/assert.o(.data);
+        build/asm/4D00.o(.data);
         build/asm/5A40.o(.data);
         build/src/main/func_800328E0.o(.data);
         build/src/main/get_table_entry.o(.data);
@@ -655,7 +657,8 @@ SECTIONS
         build/src/libnusys/nusched.o(.rodata);
         build/src/main/func_80029250.o(.rodata);
         build/src/libnusys/nugfxtaskmgr.o(.rodata);
-        build/asm/4CE0.o(.rodata);
+        build/src/libultra/debug/assert.o(.rodata);
+        build/asm/4D00.o(.rodata);
         build/asm/5A40.o(.rodata);
         build/src/main/func_800328E0.o(.rodata);
         build/src/main/get_table_entry.o(.rodata);
@@ -958,7 +961,8 @@ SECTIONS
         build/src/libnusys/nusched.o(.bss);
         build/src/main/func_80029250.o(.bss);
         build/src/libnusys/nugfxtaskmgr.o(.bss);
-        build/asm/4CE0.o(.bss);
+        build/src/libultra/debug/assert.o(.bss);
+        build/asm/4D00.o(.bss);
         build/asm/5A40.o(.bss);
         build/src/main/func_800328E0.o(.bss);
         build/src/main/get_table_entry.o(.bss);
