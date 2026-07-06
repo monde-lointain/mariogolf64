@@ -25,6 +25,17 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 188 — src/main/set_camera_matrices_fixed.c MIXED-PARTIAL: 3/11 banked (m2c+Mtx4f seeding), 8 FP-regalloc walls carried — 2026-07-05
+- Increment: **0 files banked / +3 functions matched** (delta: md5-candidate 223/232 → 223/233; the flipped camera/projection pack `set_camera_matrices_fixed.c` is 3/11, stays mixed-partial). Banked `project_point_view_depth` (view-depth dot product), `func_80065D5C` (in-place 4x4 matmul), `convert_and_pack_floats_to_fixed` (game guMtxF2L variant).
+- Quality: **0 / 1 / 8 / 0** (0 stuck-far, 1 permuter-escalated [`func_80065898`, 1470→670 over 117k iters no match], 8 carried [`func_80065A1C`, `func_80065898`, `set_camera_matrices_float`/`_fixed`, `frustum_cull_point_with_radius`, `project_point_to_screen`, `mtx_from_rts`, `func_80065E6C`], 0 re-opened).
+- Seed: committed **13pt**; banked **0pt** (partial file, per-file all-or-nothing); regime **classical/mixed**. Realized **15**; residual **+2** (seed 13 +1 permuter +1 game-gu-variant gotcha +1 combine_givs de-bias gotcha, −1 clean matmul/dot-product banks).
+- What helped: **PO-directed m2c seeding with a Ghidra RE'd-struct context** (`ctx.c` = `common.h` + the `Mtx4f`=`float[4][4]` typedef from the Ghidra DB + loose camera globals — Ghidra had NO camera struct). **2D-index combine_givs de-bias**: m2c's `void*` walking-pointer matmul seed tripped loop.c `combine_givs` base-bias; `f32 m[4][4]` params + 2D `a[i][k]`/`b[k][j]` indexing gave the ROM's direct-immediate form. **Game guMtxF2L variant identification**: cross-checked the ultralib BUILD .o (not just source) — the MG64 copy diverges from ultralib's own VERSION_J build via `!=` held-const loops + dropped-redundant `& 0xffff0000`. **PO-directed GCC-2.7.2-source root-cause** of `func_80065A1C`: `config/mips/mips.h` has no `REG_ALLOC_ORDER` → the 6th-callee-saved-FP-reg product-hoist is priority-driven and not forceable from source (confirmed irreducible, no thrash).
+- Friction: the whole pack is a camera/projection FP-math wall class (regalloc/scheduling); only the 3 structural fns (dot-product, 2D-indexed matmul, guMtxF2L-variant) were reachable from faithful C. The permuter plateaus on the FP-regalloc residuals.
+- Applied: **3 of 3**: #1 m2c+Mtx4f de-bias lever → `docs/hazards.md#game-region-mirror--o2-profile` + cross-ref `#indexed-vs-pointer-loop-strength-reduction`; #2 game-embedded-gu-variant-vs-BUILD-.o tell + 2nd-copy-keeps-descriptive-name → `#game-region-mirror--o2-profile`; #3 FP-camera regalloc sub-case (6th-callee-saved-FP-reg product-hoist, no REG_ALLOC_ORDER) → `#pervasive-regalloc-classical-main`.
+- Carry-over: `set_camera_matrices_fixed.c` (8 stubs) → BACKLOG; all FP-regalloc/scheduling walls, `func_80065A1C` compiler-source-confirmed irreducible, `func_80065898` permuter-plateau, `func_80065E6C` needs a rodata-jtbl carve.
+
+---
+
 ## Sprint 187 — src/main/func_80077BF0.c MIXED-PARTIAL: 4/7 banked (asm-first fast-path), 3 carried (C18 regalloc near-miss + 2 FP not-attempted) — 2026-07-05
 - Increment: **0 files banked / +4 functions matched** (delta: md5-candidate 223/231 → 223/232; the flipped spark-effect pack `func_80077BF0.c` is 4/7, stays mixed-partial). Banked `func_80077BF0`/`func_80077C0C` (global-init glue), `func_80077DEC` (heap3_free group loop), `func_80077E6C` (bgtzl decrement).
 - Quality: **0 / 1 / 3 / 0** (0 stuck-far, 1 permuter-escalated [`func_80077C18`], 3 carried [`func_80077C18`, `func_80077E94`, `render_spark_effects`], 0 re-opened).

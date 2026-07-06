@@ -66,6 +66,22 @@ fixture — the fn it probes changed state). The 4 `pick_target` live-state gold
 S184 review (`REGEN_GOLDEN=1`, banking-only drift from S182–S184); consider making them fixture-based so
 they stop drifting each banking sprint.
 
+**S188 MIXED-PARTIAL — `src/main/set_camera_matrices_fixed.c` camera/projection FP-math pack [0x40180],
+3/11 (+3 this sprint).** matched **+3**. md5-candidate **223→223** (file 3/11, 8 stubs; total .c 232→233).
+Banked byte-exact via **PO-directed m2c + Ghidra RE'd `Mtx4f` struct context**: `project_point_view_depth`
+(dot-product), `func_80065D5C` (in-place 4x4 matmul — **2D `a[i][k]` indexing de-biases loop.c
+`combine_givs`**, the walking-pointer m2c seed tripped it), `convert_and_pack_floats_to_fixed` (**game
+guMtxF2L variant** — ultralib `gu/mtxutil.c` source but NOT byte-id to ultralib's own J build; diverges
+via `!=` held-const loops + dropped-redundant `& 0xffff0000`; name kept, canonical `guMtxF2L` taken
+@0x80067B00). **8 CARRIED, all FP regalloc/scheduling walls** (see `## Carry-overs`), `func_80065A1C`
+GCC-source-confirmed IRREDUCIBLE (6th-callee-saved-FP-reg product-hoist, no `REG_ALLOC_ORDER`),
+`func_80065898` permuter-plateau (1470→670/117k). Quality **0/1/8/0**. Retro applied **3 of 3** (m2c+Mtx4f
+de-bias + game-gu-variant-vs-BUILD-.o tell → `#game-region-mirror--o2-profile`/`#indexed-vs-pointer`;
+FP-camera regalloc sub-case → `#pervasive-regalloc-classical-main`). Cross-repo: no new curated names.
+**Next natural slice:** a FRESH main pack that is NOT camera/projection FP-math (this pack is the FP-regalloc
+wall boundary), OR a dedicated permuter/`#cross-project-matched-corpus-mining` sprint on `func_80065898`,
+OR `func_80065E6C` as a rodata-jtbl-carve increment.
+
 **S186 MIXED-PARTIAL — `src/main/lz_compress_extended_dma.c` terrain/hole-loader pack [0x440A0], 10/15
 (+10 this sprint).** matched **+10** (5 call-glue getters/setters + nested-RNG triple `func_80068F4C`+
 nested `func_80068F00/F18` + `func_8006955C` switch + `func_80069BCC` mem-in-struct). md5-candidate
@@ -3053,6 +3069,33 @@ by `/sprint-plan`:
   vendored upstream version can diverge from the game's rev on a single immediate (S122 nusys-2.07
   `NU_CONT_THREAD_ID=6` vs MG64's 5), and that surfaces only at first build unless reconciled here.
   A near-free retry missing any of these is a half-scoped spike — finish the scope before deferring.
+
+- **(S188 MIXED-PARTIAL — carried; 3 of 11 banked)** `src/main/set_camera_matrices_fixed.c`
+  (main-segment `[0x40180]` camera/projection FP-math pack). Subseg `[0x40180, c, main/set_camera_matrices_fixed]`
+  flipped; named fns already curated in `ghidra_symbols` (`set_camera_matrices_fixed/_float`,
+  `frustum_cull_point_with_radius`, `project_point_to_screen`, `mtx_from_rts`,
+  `convert_and_pack_floats_to_fixed`); `func_80065898`/`func_80065A1C`/`func_80065E6C` auto-scaffold;
+  no `symbol_addrs` adds. S188 banked 3 (`project_point_view_depth` dot-product + `func_80065D5C` matmul
+  + `convert_and_pack_floats_to_fixed` guMtxF2L-variant). **8 CARRIED, all FP regalloc/scheduling walls
+  (this is the FP-camera sub-case of `#pervasive-regalloc-classical-main`, S188):**
+  - `func_80065A1C` (RPY rot+translate, 95i): **compiler-source-confirmed IRREDUCIBLE.** ROM hoists all
+    10 products before any store → parks `cp*sy` in a 6th callee-saved FP reg (`$f30`, frame -0x50);
+    faithful C (inline + 10-explicit-temp) gives 5 regs (-0x48) + cr/sp/cp permutation. No `REG_ALLOC_ORDER`
+    in `config/mips/mips.h` → priority-driven, not forceable from source. Escalation: cross-project
+    matched-corpus mining or accept as a permanent regalloc carry.
+  - `func_80065898` (persp-project+clamp, 97i): +1 `mov.s $f6,$f12`; permuter `--main` 1470→670 over
+    117k iters, no match. Struct `ProjectedPoint` + named globals (view_matrix/persp_scale_x/screen_center_y)
+    correct. Permuter/cross-mining escalation.
+  - `set_camera_matrices_float` (215i) / `set_camera_matrices_fixed` (188i): copy-loop (de-biasable via
+    2D indexing) + a 16-field perspNorm normalize held in registers + stored in a heavily-scheduled block
+    = severe FP-pressure wall.
+  - `frustum_cull_point_with_radius` (141i), `project_point_to_screen` (146i), `mtx_from_rts` (113i):
+    FP projection/matrix, same wall class (not deeply attempted).
+  - `func_80065E6C` (141i): Vtx triangle-normal with a jump-table `switch(mode)` (cases 0-3, fall-through)
+    → needs a rodata-jtbl carve (`#rodata-sibling-yaml-pattern` / `#switch-jtbl-dispatch`) + the FP normalize.
+  Retry framing: a dedicated permuter + `#cross-project-matched-corpus-mining` sprint on the 2 close ones
+  (A1C/898), OR `func_80065E6C` as a jtbl-carve increment. m2c context (`ctx.c` with the Ghidra `Mtx4f`
+  typedef) is re-derivable. Do NOT re-attempt A1C without a new idiom — it is source-proven irreducible.
 
 - **(S187 MIXED-PARTIAL — carried; 4 of 7 banked)** `src/main/func_80077BF0.c` (main-segment
   `[0x52FF0]` spark-effect one-tu pack). Subseg `[0x52FF0, c, main/func_80077BF0]` flipped; all fns

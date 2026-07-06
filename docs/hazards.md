@@ -2486,6 +2486,27 @@ SHA-misses is alignment, not a bad offset). `pick_target.py` flags this as `game
 `guMtxF2L`/`guMtxL2F`/`guMtxIdentF`/`guMtxIdent` banked at `src/mgu/mtxutil.c` -O2; the initial
 `src/libultra/gu/mtxutil.c` -O3 placement inlined `guMtxIdent` and never matched).
 
+**Game-embedded gu-variant is NOT byte-identical to stock ultralib (verify against the BUILD .o, not
+just the source) (S188).** A main-segment FP-math fn that STRUCTURALLY matches an ultralib gu fn is
+often a game-recompiled *variant*, not a verbatim copy. Cross-check the ultralib BUILD object
+(`~/development/repos/ultralib/build/J/libgultra_rom/src/**/*.o`, disassembled), not only the `.c`:
+S188's `convert_and_pack_floats_to_fixed` @0x80065DD8 is `gu/mtxutil.c guMtxF2L`, but ultralib's OWN
+VERSION_J build of `guMtxF2L` uses `<`/`slti` loop bounds and keeps the redundant `& 0xffff0000`,
+while the MG64 copy uses `!=` (held-const `bne`) and DROPS the redundant mask (the `sll 16` already
+zeroes the low half). So the match needed: upstream source + `!=` loop bounds + dropped-redundant-mask
+(3 game-divergence levers), NOT a verbatim `cp`. **Naming:** a SECOND embedded copy of a gu fn keeps
+its descriptive Ghidra name (the canonical SDK name is already taken by the first copy: `guMtxF2L`
+lives at 0x80067B00, so 0x80065DD8 stays `convert_and_pack_floats_to_fixed`).
+
+**m2c-with-Mtx4f context + the 2D-index combine_givs de-bias (S188).** Seed a game gu/mgu math pack
+via m2c with a Ghidra RE'd-struct context (`ctx.c` = `common.h` + the `Mtx4f`=`float[4][4]` typedef
+from the Ghidra DB + the loose camera globals). Ghidra typically has NO camera/matrix struct, just
+loose float globals + the `Mtx4f` typedef; the typedef is the lever. A 4x4-matrix fn m2c-seeded as a
+`void*`/`f32*` walking-pointer form triggers loop.c `combine_givs` base-bias (a biased base reg + neg
+offsets); rewriting with `f32 m[4][4]` params and 2D `a[i][k]`/`b[k][j]` indexing produces the ROM's
+direct-immediate-offset form (base + k*rowsize + j*4). S188 cracked the in-place matmul
+`func_80065D5C` this way (see also [#indexed-vs-pointer loop](#indexed-vs-pointer-loop-strength-reduction)).
+
 ---
 
 ## clean-rebuild-after-shared-header-edit
@@ -4112,6 +4133,22 @@ skip the `isolation: worktree` cost when the work is measurement-only.
 **Provenance.** whole-function regalloc wall established on all three non-trivial fns of a 5-fn one-tu
 (`func_80067D40.c`: a 226-instr FP/trig/RNG generator, a 137-instr sort/rank, a 76-instr table
 builder), all cracked: S158; codec-triage tell: S164; source-steerable resolution: S166.
+
+**FP-camera-math sub-case: the extra-callee-saved-FP-reg product-hoist artifact (S188).** A camera /
+projection FP-math pack (`set_camera_matrices_*`, RPY/matrix builders, perspective-project) is a
+pervasive FP-regalloc/scheduling wall class, the FP analogue of the S183 integer dispatch-cluster.
+The recurring irreducible tell: the ROM hoists ALL of a fn's products before any store (high
+simultaneous FP liveness) and parks one product in a 6th callee-saved FP reg (`$f30`/`fs5`, frame
+grows -0x48 → -0x50), while faithful C lets GCC interleave compute-and-store → 5 callee-saved regs +
+a callee-saved permutation of the sin/cos values. This is **priority-driven** allocation: `config/mips/mips.h`
+defines NO `REG_ALLOC_ORDER` (default ascending), so the assignment comes purely from live-range
+priority, and it is **NOT forceable from source** — neither inline expressions nor explicit product
+temps make GCC reserve the 6th reg (nothing crosses a call after the sin/cos, so the value doesn't
+*need* callee-saved; GCC just prices it there). Confirm-don't-thrash: read the ultralib gu source for
+the shape (e.g. `guRotateRPYF` for an RPY builder), verify the values/product-order match, then carry.
+The permuter plateaus on this class (S188 `func_80065898`: 1470→670 over 117k iters, no match).
+S188 banked the 3 structural fns (dot-product, 2D-indexed matmul, guMtxF2L-variant) and carried 8
+FP-regalloc walls (`func_80065A1C` compiler-source-confirmed irreducible).
 
 ## loop-weight and live-length regalloc steering
 
