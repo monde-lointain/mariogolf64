@@ -2939,9 +2939,13 @@ selects the F3DEX2 GBI opcodes in `PR/gbi.h` (`G_RDPHALF_1=0xE1`/`G_RDPHALF_2=0x
 `0xB4`/`0xB3`). Without it the RSP-command opcodes are wrong; the RDP commands (PipeSync/SetCombine/
 SetOtherMode) are ucode-independent so they match either way. This updates the "main/ needs zero
 mk edits" convention: the F3DEX2 profile is a standing enabler for any main-segment DL TU. **Caveat:**
-`decomp_loop.py` compiles `base.c` with `$(CFLAGS)` (no `-DF3DEX_GBI_2`), so isolated RSP opcodes read
-`0xB4`/`0xB3` (a false diff) — put `#define F3DEX_GBI_2` atop `base.c` for a main/ DL fn (tracked
-tooling follow-up: a `decomp_loop` `main` profile like its libkmc/libultra detectors).
+`decomp_loop.py`'s default compile omits `-DF3DEX_GBI_2`, so a **macro-based** DL seed's isolated RSP
+opcodes read `0xB4`/`0xB3` (a false diff, looks like a body bug). Pass **`--profile main`** (the
+now-live main/F3DEX2 profile, alongside its libkmc/libultra detectors) for any macro-based main/ DL
+fn; that adds `-DF3DEX_GBI_2` so the gDP macros expand to the F3DEX2 `0xE2..`/`0xE1`/`0xF1` opcodes.
+**Raw-literal DL words are define-independent** (a `gfx->words.w0 = 0xE7000000` store is the same byte
+value under either ucode), so a raw-word seed needs no profile — only macro seeds do. `setup-permuter.sh
+--main` / `permuter_settings_main.toml` carry the same define for the permuter (S190).
 
 **Procedure (static dlists in rodata):** run `~/development/repos/n64-tools/src/gfxdis-rom/gfxdis`
 (build once with `make -C ~/development/repos/n64-tools`). `gfxdis` only handles static dlists.
@@ -3048,13 +3052,30 @@ fill-clear pack (S179 DCE0 pack `func_800328E0`):
     GCC-source fan-out (S180; both agents independently converged on the `mem/s` lever). Permuter only
     as a last-resort fallback (and then **without `--best-only`**, the S160 plateau doctrine).
 
+**Header constant-staging scheduling wall (a DL emitter can be irreducible, not just FP).** A
+`glistp++` DL builder with a long fixed-command header (many `gDPxxx(gfx++)` in a row) can plateau on
+a whole-header instruction-scheduling divergence even when the body is byte-faithful and the fn is a
+0-jal / 0-FP "leaf": the ROM **front-stages the header command constants to scattered stack slots**
+(reusing one scratch reg: `lui s7;ori s7;sw s7,STACK` repeated) **and precomputes ALL command
+addresses into distinct registers** (`move v0,s8;addiu s8,8;move v1,s8;addiu s8,8;…` = running-ptr
+snapshots) before storing, while faithful `gDPxxx(gfx++)` C keeps the constants in registers and
+interleaves (smaller frame, ~10% fewer instrs). This is GCC's list scheduler choosing a
+compute-all-then-store batch the equivalent C doesn't trigger; the words/ops are identical, only the
+schedule differs. It is NOT the `#mem-in-struct-scheduling-lever` (no global load to retype) and the
+**permuter does not crack it** (S190 `func_8004E5A0` font-blitter: 225/233 rows, permuter
+`--best-only` plateaued 10065→6235 over 8000+ iters, no match). Treat such a header as a structural
+near-match **carry**, not a bank; a debug/HUD DL TU where the non-FP fns are all such emitters is
+**partial-bank-expected-ZERO** (see `BACKLOG.md` for the pts-detector follow-up). Diagnose by the
+frame-size + instr-count gap (ROM larger) with rows structurally aligned, not by a body diff.
+
 **Provenance:** S148 (the "main/ needs zero mk edits" convention this rule updates); S151 (first
 main-seg DL TU: the dynamic-builder decode-and-reconstruct procedure and the mask-narrowing lesson);
 S160 (2nd main-seg DL TU: the post-increment idiom and composite folding); S179 (3rd main-seg DL TU:
 the m2c-body + gfxdis.f3dex2-`extract_dlist.py` seed combo, the RCP-clear/`& ~7`-game-mod idiom, and
 the global-`glistp++` scheduler-load-pair wall); S180 (BANKED that wall byte-exact via the
 color-struct `#mem-in-struct-scheduling-lever` — the n64demos `gfxClearCfb` global-`glistp++` idiom is
-the faithful reference, confirmed by `~/development/n64/n64demos/nusys/nu2/src/main/graphic.c`).
+the faithful reference, confirmed by `~/development/n64/n64demos/nusys/nu2/src/main/graphic.c`); S190
+(the header constant-staging scheduling wall — a permuter-resistant DL-emitter carry class).
 
 ---
 

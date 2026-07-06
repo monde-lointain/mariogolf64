@@ -78,6 +78,18 @@ follow-up as S158/S177/S183: a `pick_target.py` detector for `gu*`/`cosf`/`sinf`
 the S158 FP/trig, S177 `osSetIntMask`, and S183 pervasive-regalloc pts follow-ups above. Golden-gated,
 off-cadence, not a mid-sprint edit.
 
+**Extend the detector to DL EMITTERS, not just FP (S190):** `src/main/func_8004E5A0.c` was a 3-fn
+one-tu the ranker surfaced smallest-first as a "+2 tractable" pick because 2 of 3 fns are 0-jal/0-FP —
+but they are `glistp++` **display-list emitters**, which are their OWN scheduling-wall class (the
+`#display-lists` header constant-staging wall the permuter can't crack, plateaued 10065→6235), NOT
+tractable integer glue. The S189 detector prices only FP fns at 0-expected-bank; it must ALSO price a
+non-FP fn that STORES DL command words (a `sw` of `0xE7000000`/`0xE2xxxxxx`/`0xFAxxxxxx`/`0xFCxxxxxx`
+literals through a `*glistp`-loaded running `Gfx*` cursor) at 0-expected-bank. Candidate signal for a
+`none` pack: `Gfx`/gbi types + DL-command-word literal stores through a cursor loaded from `*arg` and
+written back (`*arg = cursor`), regardless of jal/FP count. So a debug/HUD DL-renderer TU (all fns are
+emitters) prices partial-bank-expected-**ZERO** and stops topping the smallest-first sort. Same
+golden-gated off-cadence tooling follow-up; kin to the S158/S177/S183/S189 rows above.
+
 **S189 MIXED-PARTIAL — `src/main/func_800660A0.c` course-decal/aim-target/rumble rendering pack
 [0x414A0], 2/8 (+2 this sprint).** matched **+2**. md5-candidate **223→223** (file 2/8, 6 stubs; total .c
 233→234). Banked byte-exact via **m2c + Ghidra shape** (no RE'd struct — Ghidra models the collision-record
@@ -3101,6 +3113,33 @@ by `/sprint-plan`:
   vendored upstream version can diverge from the game's rev on a single immediate (S122 nusys-2.07
   `NU_CONT_THREAD_ID=6` vs MG64's 5), and that surfaces only at first build unless reconciled here.
   A near-free retry missing any of these is a half-scoped spike — finish the scope before deferring.
+
+- **(S190 SPIKE — carried; 0 of 3 banked)** `src/main/func_8004E5A0.c` (main-segment `[0x299A0]`
+  3-fn one-tu **debug/HUD display-list renderer**). Subseg `[0x299A0, c, main/func_8004E5A0]` flipped;
+  all 3 fns auto `func_`, no `symbol_addrs` adds. ROM green off the extracted asm (0 banked). This is
+  the S189 FP/DL-wall class taken to its limit: EVERY fn is a DL/FP wall, so partial-bank-expected-ZERO.
+  - `func_8004E5A0` (0x8004E5A0, 225i, 0-jal 0-FP) — **DL font-glyph blitter; `#display-lists` header
+    constant-staging scheduling wall.** FULLY reconstructed to a FAITHFUL structural near-match (225/233
+    rows): dynamic `gDP*` macros header (gfxdis: PipeSync/RenderMode XLU/PrimColor(FF,C8,00,FF)/
+    CombineMode MODULATEIA/LoadTextureBlock_4b IA 64×8 font @0x800C0D10) + per-char TEXRECT/RDPHALF loop,
+    needs `-DF3DEX_GBI_2` (macro words match ROM exactly). Blocker = GCC whole-header scheduling: ROM
+    front-stages ~11 constants to scattered stack slots + precomputes all ~14 command addresses then
+    stores; faithful `gDPxxx(gfx++)` C keeps constants in regs (frame −0x58 vs ROM −0x88, 204 vs 227
+    instrs). NOT `#mem-in-struct` (no global load). Permuter `--main --best-only` PLATEAUED 10065→6235
+    over 8000+ iters, no match. Reconstructed C in `nonmatchings/func_8004E5A0/base.c`. **Retry:** a
+    dedicated permuter (without `--best-only`, S160 plateau doctrine) OR `#cross-project-matched-corpus-mining`
+    for the exact header schedule — but this is the new `#display-lists` header-scheduling carry class.
+  - `func_8004FDB4` (0x8004FDB4, 203i, 10-jal 0-FP) — **DL HUD frame renderer, same class (NOT
+    reconstructed).** Debug heap-stats HUD: static-DL branch (0xDE000000 → `D_C0C40`) + SETCIMG cfb
+    (`osVirtualToPhysical(nuGfxCfb_ptr) & ~7`) + identical gDP-macro header + fillrect + sprintf
+    (`nuGfxCfbNum`/`heap3_get_largest_free`/`heap3_get_total`)×3 through `func_8004E5A0` + RDPFullSync/
+    EndDL + `nuGfxTaskStart`. Same header-scheduling wall as E5A0 + more complexity → carried on
+    shared-idiom basis. **Retry:** reconstruct + score only after E5A0's schedule wall is cracked (the
+    header idiom is shared).
+  - `func_8004E924` (0x8004E924, 1316i, 25-jal 21-FP) — 21-FP scene renderer, S158 FP class (NOT attempted).
+  **Retry:** a dedicated permuter/`#cross-project-matched-corpus-mining` sprint on the E5A0 header
+  schedule, OR skip this TU entirely until the ranker de-ranks DL-emitter packs (the pts follow-up
+  below). No cross-repo name sync (all `func_`).
 
 - **(S189 MIXED-PARTIAL — carried; 2 of 8 banked)** `src/main/func_800660A0.c` (main-segment
   `[0x414A0]` course-decal/aim-target/rumble rendering pack). Subseg `[0x414A0, c, main/func_800660A0]`

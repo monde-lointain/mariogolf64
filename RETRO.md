@@ -25,6 +25,15 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 190 — src/main/func_8004E5A0.c SPIKE: 0/3 banked (DL-emitter scheduling wall), 3 carried — 2026-07-06
+- Increment: 0 files md5-candidate / +0 functions matched (delta 223→223 md5-candidate files, total .c 234→235). File 0/3, 3 stubs. ROM green, freeze commit `ad225fd` only.
+- Quality: 0 stuck-far / 1 permuter-escalated (func_8004E5A0) / 3 carried / 0 re-opened.
+- Seed: committed 13pt; banked 0pt (spike, per-file all-or-nothing); realized 13 (seed 13 +1 permuter +1 carry, clamped at Fibonacci ceiling); residual 0; regime classical/mixed.
+- What helped: PO steers were all load-bearing. m2c seeding (`~/development/repos/m2c`) + Ghidra DB check (no game struct RE'd — hand-packed words) + gfxdis.f3dex2 decode (named the font-blit DL: PipeSync/RenderMode XLU/PrimColor/CombineMode MODULATEIA/LoadTextureBlock_4b IA 64×8 @0x800C0D10) + the gDPLoadTextureBlock_4b macro pointer → reconstructed func_8004E5A0 to a FAITHFUL structural near-match (225/233 rows). The `-DF3DEX_GBI_2` probe proved the dynamic gDP macros emit the ROM's exact words (F3DEX2 0xE2.. not F3DEX 0xB9..); `decomp_loop --profile main` is the correct isolated-compile flag for a macro DL seed.
+- Friction: the "+2 tractable non-FP fns" plan assumption was wrong — 0-jal/0-FP `glistp++` DL EMITTERS are a distinct scheduling-wall class. The residual is GCC's whole-header instruction scheduling (ROM front-stages ~11 constants to stack + precomputes all ~14 command addresses; faithful C keeps constants in regs, frame −0x58 vs ROM −0x88). Permuter `--main --best-only` plateaued 10065→6235 over 8000+ iters, no match. NOT the `#mem-in-struct` lever (no global load to retype). The ranker priced this size-13 TU as a smallest-first "+2 tractable" pick, but a debug/HUD DL TU where the non-FP fns are all emitters is partial-bank-expected-ZERO. setup-permuter dir-collision (import.py suffixed `-2` because a decomp_loop seed dir pre-existed; `mg_find_permuter_dir` grabbed the seed dir, missing compile.sh).
+- Applied: 3 of 3: #1 DL-emitter partial-bank-expected-ZERO pts detector → `BACKLOG.md` follow-up + `docs/hazards.md#display-lists` wall note; #2 `decomp_loop --profile main` for macro DL seeds → `#display-lists` caveat updated (profile now live, was a tracked follow-up); #3 `mg_find_permuter_dir` compile.sh-marker fix → `tools/lib.sh`.
+- Carry-over: `src/main/func_8004E5A0.c` — all 3 fns (func_8004E5A0 DL font-blitter scheduling wall + reconstructed near-match; func_8004FDB4 DL HUD renderer same class; func_8004E924 21-FP scene renderer S158 class). Reconstructed C in `nonmatchings/func_8004E5A0/base.c`.
+
 ## Sprint 189 — src/main/func_800660A0.c MIXED-PARTIAL: 2/8 banked (m2c+Ghidra, row-order seed lever), 6 carried (2 regalloc near-matches + 4 FP/DL walls) — 2026-07-05
 - Increment: 0 files md5-candidate / +2 functions matched (`func_800660A0`, `func_800676B0`; delta 223→223 md5-candidate files, total .c 233→234). File 2/8, 6 stubs.
 - Quality: 0 stuck-far / 1 permuter-escalated (rumble) / 6 carried / 0 re-opened.

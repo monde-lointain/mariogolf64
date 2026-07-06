@@ -1,0 +1,86 @@
+// S190 near-match: func_8004E5A0 (DL font-glyph blitter, src/main/func_8004E5A0.c [0x299A0]).
+// FAITHFUL structural near-match, 225/233 rows. Blocked by GCC whole-header instruction scheduling
+// (#display-lists header constant-staging wall): the ROM front-stages ~11 header constants to
+// scattered stack slots + precomputes all ~14 command addresses then stores; this C keeps constants
+// in registers and interleaves (frame -0x58 vs ROM -0x88, 204 vs 227 instrs). NOT #mem-in-struct.
+// Permuter --main --best-only plateaued 10065->6235 over 8000+ iters, no match.
+// MUST compile with -DF3DEX_GBI_2 (the gDP macros expand to F3DEX2 0xE2.. opcodes); decomp_loop needs
+// --profile main. gfxdis.f3dex2 -f decoded the constant header:
+//   PipeSync x2 / SetRenderMode(XLU_SURF,XLU_SURF2) / PipeSync x2 / SetCycleType(1CYCLE) /
+//   SetPrimColor(0,0,FF,C8,00,FF) / SetCombineMode(MODULATEIA_PRIM x2) / PipeSync / TexturePersp NONE
+//   / PipeSync / TextureLUT NONE / PipeSync / LoadTextureBlock_4b(&font, IA, 64, 8, ...).
+// Retry: dedicated permuter (no --best-only) or #cross-project-matched-corpus-mining for the schedule.
+
+#include <ultra64.h>
+
+extern u8 D_800C0D10;  // font texture (IA 4b 64x8 atlas)
+extern u32 D_800C0E10; // frame/timing counter (masked & 0x3FF)
+
+void func_8004E5A0(Gfx **glistp, u32 x, u32 y, u8 *str) {
+    Gfx *gfx = *glistp;
+    u8 c;
+
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+    gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xC8, 0x00, 0xFF);
+    gDPSetCombineMode(gfx++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
+    gDPPipeSync(gfx++);
+    gDPSetTexturePersp(gfx++, G_TP_NONE);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_NONE);
+    gDPPipeSync(gfx++);
+    gfx->words.w0 = 0xFD700000;
+    gfx->words.w1 = (u32)&D_800C0D10 & ~7;
+    gfx++;
+    gfx->words.w0 = 0xF5700000;
+    gfx->words.w1 = 0x07000000;
+    gfx++;
+    gfx->words.w0 = 0xE6000000;
+    gfx->words.w1 = 0;
+    gfx++;
+    gfx->words.w0 = 0xF3000000;
+    gfx->words.w1 = 0x0707F200;
+    gfx++;
+    gfx->words.w0 = 0xE7000000;
+    gfx->words.w1 = 0;
+    gfx++;
+    gfx->words.w0 = 0xF5600800;
+    gfx->words.w1 = 0;
+    gfx++;
+    gfx->words.w0 = 0xF2000000;
+    gfx->words.w1 = 0x000FC01C;
+    gfx++;
+    D_800C0E10 = (D_800C0E10 + 1) & 0x3FF;
+    gfx->words.w0 = 0xE7000000;
+    gfx->words.w1 = 0;
+    gfx++;
+
+    c = *str;
+    if (c != 0) {
+        do {
+            if (c != 0x20) {
+                gfx->words.w0 = ((((x & 0xFFFF) + 5) * 4 & 0xFFF) << 12) |
+                                (0xE4000000 | (((y & 0xFFFF) + 8) * 4 & 0xFFF));
+                gfx->words.w1 =
+                    (((x & 0xFFFF) * 4 & 0xFFF) << 12) | ((y & 0xFFFF) * 4 & 0xFFF);
+                gfx[1].words.w0 = 0xE1000000;
+                gfx[1].words.w1 = ((c - 0x30) & 0xF) * 0xA00000;
+                gfx[2].words.w0 = 0xF1000000;
+                gfx[2].words.w1 = 0x04000400;
+                gfx += 3;
+            }
+            str++;
+            c = *str;
+            x += 6;
+        } while (c != 0);
+    }
+
+    gfx->words.w0 = 0xE7000000;
+    gfx->words.w1 = 0;
+    gfx++;
+    *glistp = gfx;
+}

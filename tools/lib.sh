@@ -19,8 +19,18 @@ mg_activate_venv() {
 
 # Resolve the nonmatchings/<func>* scratch dir into PERMUTER_DIR; abort if absent.
 mg_find_permuter_dir() {
-    local func="$1"
-    PERMUTER_DIR=$(find nonmatchings -maxdepth 1 -type d -name "${func}*" | head -1)
+    local func="$1" d
+    # Prefer a dir that actually holds a permuter workspace (compile.sh): import.py suffixes to
+    # `<func>-2` when `nonmatchings/<func>/` already exists as a decomp_loop SEED dir (base.c +
+    # current.o, NO compile.sh). A bare name+`head -1` grabs the seed dir alphabetically and
+    # run-permuter fails "Missing file compile.sh" (S190). Match by the compile.sh marker first.
+    PERMUTER_DIR=""
+    for d in $(find nonmatchings -maxdepth 1 -type d -name "${func}*" | sort); do
+        if [ -f "$d/compile.sh" ]; then
+            PERMUTER_DIR="$d"
+            break
+        fi
+    done
     if [ -z "$PERMUTER_DIR" ]; then
         echo "Error: Permuter directory not found for ${func}" >&2
         echo "Run ./setup-permuter.sh ${func} first" >&2
