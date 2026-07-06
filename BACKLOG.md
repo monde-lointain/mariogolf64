@@ -90,6 +90,13 @@ written back (`*arg = cursor`), regardless of jal/FP count. So a debug/HUD DL-re
 emitters) prices partial-bank-expected-**ZERO** and stops topping the smallest-first sort. Same
 golden-gated off-cadence tooling follow-up; kin to the S158/S177/S183/S189 rows above.
 
+**S194 BANKED — `src/main/func_8005E2C0.c` 0x396C0 fault/debug head split COMPLETE.** matched
+**+3**. md5-candidate **224/237→225/238**. Split the 9-fn structural `libnusys@99.99` coddog pack at
+0x39780 and banked only the 0xC0-byte head: `func_8005E2C0` (dead-stack leaf), `func_8005E2CC`
+(fault-thread message loop), and `func_8005E360` (`osSyncPrintf` wrapper). Tail `func_8005E380` and
+following funcs stay asm. Quality **0/0/0/0**. Seed 3; banked 3pt; realized 2; residual -1; regime
+classical/mixed. Retro applied **0 of 0**. Cross-repo: no new curated names.
+
 **S193 BANKED — `src/libultra/debug/assert.c` (`__assert`, 0x20-byte leaf split from 0x4CE0).** matched
 **+1**. md5-candidate **223/236→224/237**. Split the 19-fn 0x4CE0 pack at 0x4D00, banked only
 `__assert`, and left `vec3f_normalize` + 17 following funcs in asm. Upstream source:

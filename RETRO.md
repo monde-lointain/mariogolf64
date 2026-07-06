@@ -25,6 +25,21 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 194 — src/main/func_8005E2C0.c COMPLETE: 0x396C0 head split banked — 2026-07-06
+- Increment: 1 file md5-candidate / +3 functions matched (delta 224/237 -> 225/238). Split the
+  0x396C0 game-embedded fault/debug pack into `src/main/func_8005E2C0.c` plus the 0x39780 asm tail.
+  ROM green at `81dcc09`.
+- Quality: 0 stuck-far / 0 permuter-escalated / 0 carried / 0 re-opened.
+- Seed: committed 3pt; banked 3pt; realized 2; residual -1; regime classical/mixed.
+- What helped: the asm-first fast-path fit the whole approved slice. `func_8005E2C0` matched with a
+  volatile dead stack object, `func_8005E2CC` matched as the fault-thread message loop with extracted
+  string refs, and `func_8005E360` matched as a one-call `osSyncPrintf` wrapper. The linked ROM slice
+  compare for 0x396C0..0x39780 plus full ROM SHA-1 proved the match.
+- Friction: raw object-byte cmp was noisy because unresolved reloc slots are zero in the `.o`; the
+  linked ROM slice was the correct byte proof.
+- Applied: 0 of 0; no buffered process/tooling suggestions.
+- Carry-over: none. The 0x39780 asm tail stays out of scope for a future sprint.
+
 ## Sprint 193 — src/libultra/debug/assert.c COMPLETE: `__assert` split from 0x4CE0 and banked — 2026-07-06
 - Increment: 1 file md5-candidate / +1 function matched (delta 223/236 -> 224/237). Split the 0x4CE0 pack into `src/libultra/debug/assert.c` plus the 0x4D00 asm remainder. ROM green at `83f4ac6`.
 - Quality: 0 stuck-far / 0 permuter-escalated / 0 carried / 0 re-opened.
