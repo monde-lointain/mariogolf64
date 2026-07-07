@@ -16,7 +16,26 @@ void func_8005EC10(NUAuPreNMIFunc func) {
   osSetIntMask(mask);
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_8005EC10", func_8005EC48);
+void func_8005EC48(s16 msg_type, s32 frame_count) {
+  if (msg_type == NU_SC_RETRACE_MSG) {
+    goto retrace;
+  }
+
+  if (msg_type == NU_SC_PRENMI_MSG) {
+    MusStop(1, 0);
+    MusSetFxType(0);
+  }
+  return;
+
+retrace:
+  if (frame_count == 20) {
+    MusSetFxType(0);
+  }
+
+  if (frame_count == 28) {
+    nuAuTaskStop = NU_AU_TASK_STOP;
+  }
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_8005EC10", func_8005ECC4);
 
