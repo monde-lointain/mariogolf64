@@ -28,6 +28,10 @@ INCLUDE_ASM("asm/nonmatchings/main/func_80050400", func_800504E8);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80050400", func_80050504);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80050400", func_80050588);
+void func_80050588(RomLoadSlot* slot) {
+  slot->end = 0;
+  slot->pos = 0;
+  slot->start = 0;
+}
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80050400", func_80050598);
+u32 func_80050598(RomLoadSlot* slot) { return slot->size; }
