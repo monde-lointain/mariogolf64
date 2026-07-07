@@ -90,6 +90,13 @@ written back (`*arg = cursor`), regardless of jal/FP count. So a debug/HUD DL-re
 emitters) prices partial-bank-expected-**ZERO** and stops topping the smallest-first sort. Same
 golden-gated off-cadence tooling follow-up; kin to the S158/S177/S183/S189 rows above.
 
+**S198 BANKED — `src/main/func_800505A0.c` ROM-load helper head slice COMPLETE.** matched **+3**.
+md5-candidate **227/241→228/242**. Split the S196 tail at the 16-aligned `0x2BB10` boundary and banked
+`func_800505A0` (bounded ROM read + cursor advance), `func_8005062C` (slot init + 4-byte header read),
+and `func_800506D4` (slot mode dispatcher). Quality **0/0/0/0**. Seed 5; banked 5pt; realized 4;
+residual -1; regime classical/mixed. Retro applied **0 of 0**. Cross-repo: no new curated names.
+**Next natural slice:** continue a fresh main pack, or return to `0x2BB10` tail with a new aligned slice.
+
 **S197 BANKED — `src/main/func_800263B0.c` first scenery-cache init slice COMPLETE.** matched **+1**.
 md5-candidate **226/240→227/241**. Split the 10-fn main pack at the 16-aligned `0x1800` boundary and
 banked `func_800263B0` (debug print, sprite decode cache clear, `heap_init(1)`, flag clear). Gate

@@ -25,6 +25,20 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 198 — src/main/func_800505A0.c COMPLETE: ROM-load helper head banked — 2026-07-07
+- Increment: 1 file md5-candidate / +3 functions matched (delta 227/241 -> 228/242). Split the
+  `0x2B9A0` ROM-load tail at `0x2BB10` and banked `func_800505A0`, `func_8005062C`, and
+  `func_800506D4`. ROM green at `6ffc6fc`.
+- Quality: 0 stuck-far / 0 permuter-escalated / 0 carried / 0 re-opened.
+- Seed: committed 5pt; banked 5pt; realized 4; residual -1; regime classical/mixed.
+- What helped: asm-first was enough for the whole approved slice. `func_800505A0` matched once its
+  signature followed the target ABI `(dst, size, slot)`; `func_8005062C` matched with the explicit
+  16-aligned scratch pointer and slot-wrapper/header-read shape; `func_800506D4` was a direct
+  dispatcher on `slot->pos == 1`.
+- Friction: one routine signature correction on `func_800505A0`; no permuter/m2c/Ghidra path needed.
+- Applied: 0 of 0; no buffered process/tooling suggestions.
+- Carry-over: none. `0x2BB10` tail stays asm, out of scope.
+
 ## Sprint 197 — src/main/func_800263B0.c COMPLETE: first scenery-cache init slice banked — 2026-07-07
 - Increment: 1 file md5-candidate / +1 function matched (delta 226/240 -> 227/241). Split the first
   aligned main slice of the 0x17B0 scenery/render pack into `src/main/func_800263B0.c`; tail starts
