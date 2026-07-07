@@ -25,6 +25,21 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 195 — src/main/func_8005EC10.c COMPLETE: aligned audio tail banked — 2026-07-06
+- Increment: 1 file md5-candidate / +4 functions matched (delta 225/238 -> 226/239). Split the
+  0x39780 tail at the aligned 0x3A010 boundary, banking `func_8005EC10`, `func_8005EC48`,
+  `func_8005ECC4`, and `audio_system_boot`. ROM green at `1b4b340`.
+- Quality: 0 stuck-far / 0 permuter-escalated / 0 carried / 0 re-opened.
+- Seed: committed 5pt; banked 5pt; realized 6; residual +1; regime classical/mixed.
+- What helped: the asm-first fast-path was enough for all four functions. `func_8005EC10` matched as
+  the stock pre-NMI callback setter, `audio_system_boot` matched as null-config default plus audio
+  setup, and `func_8005ECC4` needed only an unsigned loop counter to emit the target `sltiu`.
+- Friction: the initial plan split at `0x39ED4` failed the gate because the address is non-16-aligned
+  and linker input-section alignment shifted ROM bytes; the aligned `0x3A010` split fixed it. The
+  callback needed an explicit tail label to preserve the ROM branch layout.
+- Applied: 0 of 0; no buffered process/tooling suggestions.
+- Carry-over: none. `func_8005E380` and non-16-aligned `func_8005EAD4` stay asm, out of scope.
+
 ## Sprint 194 — src/main/func_8005E2C0.c COMPLETE: 0x396C0 head split banked — 2026-07-06
 - Increment: 1 file md5-candidate / +3 functions matched (delta 224/237 -> 225/238). Split the
   0x396C0 game-embedded fault/debug pack into `src/main/func_8005E2C0.c` plus the 0x39780 asm tail.

@@ -90,6 +90,14 @@ written back (`*arg = cursor`), regardless of jal/FP count. So a debug/HUD DL-re
 emitters) prices partial-bank-expected-**ZERO** and stops topping the smallest-first sort. Same
 golden-gated off-cadence tooling follow-up; kin to the S158/S177/S183/S189 rows above.
 
+**S195 BANKED — `src/main/func_8005EC10.c` aligned audio boot/pre-NMI tail COMPLETE.** matched **+4**.
+md5-candidate **225/238→226/239**. Split the S194 tail at the 16-aligned `0x3A010` boundary and banked
+`func_8005EC10` (pre-NMI callback setter), `func_8005EC48` (pre-NMI/retrace callback), `func_8005ECC4`
+(pointer-bank load/debug dump), and `audio_system_boot` (audio boot glue). Initial `0x39ED4` split was
+rejected by gate checksum: non-16-aligned C object padding shifted ROM bytes, so `func_8005EAD4` stays
+asm. Quality **0/0/0/0**. Seed 5; banked 5pt; realized 6; residual +1; regime classical/mixed. Retro
+applied **0 of 0**. Cross-repo: no new curated names.
+
 **S194 BANKED — `src/main/func_8005E2C0.c` 0x396C0 fault/debug head split COMPLETE.** matched
 **+3**. md5-candidate **224/237→225/238**. Split the 9-fn structural `libnusys@99.99` coddog pack at
 0x39780 and banked only the 0xC0-byte head: `func_8005E2C0` (dead-stack leaf), `func_8005E2CC`
