@@ -102,6 +102,7 @@ SECTIONS
         build/asm/34FA0.o(.text);
         build/src/main/func_8005E2C0.o(.text);
         build/asm/39780.o(.text);
+        build/src/main/func_8005EC10.o(.text);
         build/src/main/audio_mgr.o(.text);
         build/asm/3A490.o(.text);
         build/src/main/set_camera_matrices_fixed.o(.text);
@@ -387,6 +388,7 @@ SECTIONS
         build/asm/34FA0.o(.data);
         build/src/main/func_8005E2C0.o(.data);
         build/asm/39780.o(.data);
+        build/src/main/func_8005EC10.o(.data);
         build/src/main/audio_mgr.o(.data);
         build/asm/3A490.o(.data);
         build/src/main/set_camera_matrices_fixed.o(.data);
@@ -692,6 +694,7 @@ SECTIONS
         build/asm/34FA0.o(.rodata);
         build/src/main/func_8005E2C0.o(.rodata);
         build/asm/39780.o(.rodata);
+        build/src/main/func_8005EC10.o(.rodata);
         build/src/main/audio_mgr.o(.rodata);
         build/asm/3A490.o(.rodata);
         build/src/main/set_camera_matrices_fixed.o(.rodata);
@@ -992,6 +995,7 @@ SECTIONS
         build/asm/34FA0.o(.bss);
         build/src/main/func_8005E2C0.o(.bss);
         build/asm/39780.o(.bss);
+        build/src/main/func_8005EC10.o(.bss);
         build/src/main/audio_mgr.o(.bss);
         build/asm/3A490.o(.bss);
         build/src/main/set_camera_matrices_fixed.o(.bss);

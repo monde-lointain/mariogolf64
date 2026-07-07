@@ -120,6 +120,7 @@ segments:
       - [0x34FA0, asm]
       - [0x396C0, c, main/func_8005E2C0]
       - [0x39780, asm]
+      - [0x3A010, c, main/func_8005EC10]
       - [0x3A1D0, c, main/audio_mgr]
       - [0x3A490, asm]
       - [0x40180, c, main/set_camera_matrices_fixed]
