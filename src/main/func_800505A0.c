@@ -17,6 +17,8 @@ extern void osSyncPrintf(const char*, ...);
 extern void nuPiReadRom(u32 rom_addr, void* buf_ptr, u32 size);
 extern void func_800504E8(s32 index, RomLoadSlot* slot);
 extern u32 func_80050598(RomLoadSlot* slot);
+extern void func_80050710(void* data, RomLoadSlot* slot);
+extern void func_80050914(void* data, RomLoadSlot* slot);
 
 void func_800505A0(void* dst, u32 size, RomLoadSlot* slot) {
   if (slot->end < slot->start + size) {
@@ -49,4 +51,10 @@ u32 func_8005062C(u16 index, void* out) {
   return value;
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_800505A0", func_800506D4);
+void func_800506D4(void* data, RomLoadSlot* slot) {
+  if (slot->pos == 1) {
+    func_80050710(data, slot);
+  } else {
+    func_80050914(data, slot);
+  }
+}
