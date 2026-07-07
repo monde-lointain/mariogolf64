@@ -9,6 +9,10 @@ typedef struct {
 
 extern RomLoadSlot D_800DE8A0[2];
 
+extern void osSyncPrintf(const char*, ...);
+extern const char D_800CCB70[];
+extern const char D_800CCB7C[];
+
 void func_80050400(void) {
   s32 i;
   u8* slot;
@@ -28,7 +32,29 @@ void func_80050428(s32, RomLoadSlot*);
 
 void func_800504E8(s32 index, RomLoadSlot* slot) { func_80050428(index, slot); }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80050400", func_80050504);
+RomLoadSlot* func_80050504(s32 index) {
+  s32 count;
+  u8* slot_ptr;
+
+  count = 0;
+  slot_ptr = (u8*)D_800DE8A0;
+  while (1) {
+    RomLoadSlot* slot = (RomLoadSlot*)slot_ptr;
+    count += 1;
+    if (slot->start == 0) {
+      func_80050428(index, slot);
+      return slot;
+    }
+    if (count == 2) {
+      break;
+    }
+    slot_ptr += 0x10;
+  }
+
+  osSyncPrintf(D_800CCB70, index);
+  osSyncPrintf(D_800CCB7C, index);
+  return NULL;
+}
 
 void func_80050588(RomLoadSlot* slot) {
   slot->end = 0;
