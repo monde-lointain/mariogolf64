@@ -90,6 +90,14 @@ written back (`*arg = cursor`), regardless of jal/FP count. So a debug/HUD DL-re
 emitters) prices partial-bank-expected-**ZERO** and stops topping the smallest-first sort. Same
 golden-gated off-cadence tooling follow-up; kin to the S158/S177/S183/S189 rows above.
 
+**S197 BANKED — `src/main/func_800263B0.c` first scenery-cache init slice COMPLETE.** matched **+1**.
+md5-candidate **226/240→227/241**. Split the 10-fn main pack at the 16-aligned `0x1800` boundary and
+banked `func_800263B0` (debug print, sprite decode cache clear, `heap_init(1)`, flag clear). Gate
+triage rejected `0x526B0`: first split `0x526C4` was non-16-aligned and whole-pack scaffold lacked
+sibling fallback exports. Quality **0/0/0/0**. Seed 1; banked 1pt; realized 1; residual 0; regime
+classical/mixed. Retro applied **0 of 0**. Cross-repo: no new curated names. **Next natural slice:**
+continue a fresh main pack, or return to the `0x1800` tail with a new aligned slice.
+
 **S196 MIXED-PARTIAL — `src/main/func_80050400.c` main-slice ROM-load slot pack [0x2B800], 5/6
 (+5 this sprint).** matched **+5**. md5-candidate **226/239→226/240** (file 5/6, 1 stub). Split the
 structural `libc/llcvt.c@99.99` pack at `0x2B9A0`; banked `func_80050400` (slot-start clear),

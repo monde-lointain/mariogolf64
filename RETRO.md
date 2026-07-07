@@ -25,6 +25,20 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 197 — src/main/func_800263B0.c COMPLETE: first scenery-cache init slice banked — 2026-07-07
+- Increment: 1 file md5-candidate / +1 function matched (delta 226/240 -> 227/241). Split the first
+  aligned main slice of the 0x17B0 scenery/render pack into `src/main/func_800263B0.c`; tail starts
+  at `0x1800`. ROM green at `c1ead13`.
+- Quality: 0 stuck-far / 0 permuter-escalated / 0 carried / 0 re-opened.
+- Seed: committed 1pt; banked 1pt; realized 1; residual 0; regime classical/mixed.
+- What helped: asm-first was enough. A direct byte-offset zeroing loop matched after changing the
+  loop to a do/while up-count, preserving the ROM's `v1 += 0x10` + `sltiu` loop form.
+- Friction: gate triage first rejected `0x526B0`: its first split point `0x526C4` is non-16-aligned,
+  and the whole-pack scaffold did not auto-export sibling fallback stubs. The aligned `0x17B0`
+  slice avoided both issues.
+- Applied: 0 of 0; no buffered process/tooling suggestions.
+- Carry-over: none. `0x1800` tail stays asm, out of scope.
+
 ## Sprint 196 — src/main/func_80050400.c MIXED-PARTIAL: 5/6 banked, func_80050428 carried — 2026-07-07
 - Increment: 0 files md5-candidate / +5 functions matched (delta 226/239 -> 226/240). Split the
   first aligned main slice of the structural `libc/llcvt.c@99.99` pack into
