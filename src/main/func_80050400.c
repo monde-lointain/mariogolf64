@@ -24,7 +24,9 @@ void func_80050400(void) {
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80050400", func_80050428);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80050400", func_800504E8);
+void func_80050428(s32, RomLoadSlot*);
+
+void func_800504E8(s32 index, RomLoadSlot* slot) { func_80050428(index, slot); }
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80050400", func_80050504);
 
