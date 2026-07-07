@@ -10,9 +10,13 @@ typedef struct {
 extern s32 D_8012D3A8;
 
 extern const char D_800CCB9C[];
+extern const char D_800CCBAC[];
 
+extern s32 flag_is_set(s32 flag);
 extern void osSyncPrintf(const char*, ...);
 extern void nuPiReadRom(u32 rom_addr, void* buf_ptr, u32 size);
+extern void func_800504E8(s32 index, RomLoadSlot* slot);
+extern u32 func_80050598(RomLoadSlot* slot);
 
 void func_800505A0(void* dst, u32 size, RomLoadSlot* slot) {
   if (slot->end < slot->start + size) {
@@ -24,6 +28,25 @@ void func_800505A0(void* dst, u32 size, RomLoadSlot* slot) {
   slot->start += size;
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_800505A0", func_8005062C);
+u32 func_8005062C(u16 index, void* out) {
+  u8 scratch_storage[0x80];
+  u8* scratch = (u8*)(((u32)scratch_storage + 0xF) & ~0xF);
+  RomLoadSlot* slot;
+  u32 value;
+
+  if (flag_is_set(0x49)) {
+    osSyncPrintf(D_800CCBAC, index);
+  }
+
+  slot = (RomLoadSlot*)((u8*)out + 0x10);
+  func_800504E8(index, slot);
+  ((RomLoadSlot*)out)->end = func_80050598(slot);
+  func_800505A0(scratch, 4, slot);
+  ((RomLoadSlot*)out)->pos = scratch[0];
+
+  value = *(u32*)scratch & 0xFFFFFF;
+  *(u32*)scratch = value;
+  return value;
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_800505A0", func_800506D4);
