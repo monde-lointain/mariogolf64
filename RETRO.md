@@ -25,6 +25,24 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 196 — src/main/func_80050400.c MIXED-PARTIAL: 5/6 banked, func_80050428 carried — 2026-07-07
+- Increment: 0 files md5-candidate / +5 functions matched (delta 226/239 -> 226/240). Split the
+  first aligned main slice of the structural `libc/llcvt.c@99.99` pack into
+  `src/main/func_80050400.c`; file is 5/6 with one stub (`func_80050428`), ROM green at `74a4ff4`.
+- Quality: 1 stuck-far / 0 permuter-escalated / 1 carried / 0 re-opened.
+- Seed: committed 5pt; banked 0pt (partial file, per-file all-or-nothing); realized 7; residual +2;
+  regime classical/mixed.
+- What helped: the asm-first path banked all tractable functions. `func_80050400` needed a raw byte
+  pointer so GCC emitted the ROM's `+0x10` stride; `func_80050588`/`func_80050598` were direct slot
+  reset/getter leafs; `func_800504E8` was a direct wrapper; `func_80050504` matched with the ROM's
+  pre-increment loop counter and raw slot pointer.
+- Friction: `func_80050428` hit a saved-register/source-shape wall far below permuter threshold.
+  The correct stack layout is known (`0x40` scratch buffers, `&buf[0xF]` alignment), but unconstrained
+  C keeps rotating saved registers. Explicit register binding was rejected by PO and not used.
+- Applied: 0 of 0; no buffered process/tooling suggestions.
+- Carry-over: `src/main/func_80050400.c` one stub — `func_80050428` ROM table read/setup. Retry only
+  with a new source-shape/codegen insight; do not use explicit register allocation.
+
 ## Sprint 195 — src/main/func_8005EC10.c COMPLETE: aligned audio tail banked — 2026-07-06
 - Increment: 1 file md5-candidate / +4 functions matched (delta 225/238 -> 226/239). Split the
   0x39780 tail at the aligned 0x3A010 boundary, banking `func_8005EC10`, `func_8005EC48`,

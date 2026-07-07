@@ -90,6 +90,17 @@ written back (`*arg = cursor`), regardless of jal/FP count. So a debug/HUD DL-re
 emitters) prices partial-bank-expected-**ZERO** and stops topping the smallest-first sort. Same
 golden-gated off-cadence tooling follow-up; kin to the S158/S177/S183/S189 rows above.
 
+**S196 MIXED-PARTIAL — `src/main/func_80050400.c` main-slice ROM-load slot pack [0x2B800], 5/6
+(+5 this sprint).** matched **+5**. md5-candidate **226/239→226/240** (file 5/6, 1 stub). Split the
+structural `libc/llcvt.c@99.99` pack at `0x2B9A0`; banked `func_80050400` (slot-start clear),
+`func_800504E8` (wrapper), `func_80050504` (slot allocator/debug print), `func_80050588` (slot reset),
+and `func_80050598` (slot size getter). **1 CARRIED:** `func_80050428` ROM table read/setup; correct
+stack layout found (`0x40` scratch buffers, `&buf[0xF]`) but unconstrained C remains a saved-register
+rotation far below permuter threshold; explicit register binding rejected by PO. Quality **1/0/1/0**.
+Seed 5; banked 0pt; realized 7; residual +2; regime classical/mixed. Retro applied **0 of 0**.
+Cross-repo: no new curated names. **Next natural slice:** retry `func_80050428` only with a new
+source-shape/codegen insight, or continue a fresh main pack.
+
 **S195 BANKED — `src/main/func_8005EC10.c` aligned audio boot/pre-NMI tail COMPLETE.** matched **+4**.
 md5-candidate **225/238→226/239**. Split the S194 tail at the 16-aligned `0x3A010` boundary and banked
 `func_8005EC10` (pre-NMI callback setter), `func_8005EC48` (pre-NMI/retrace callback), `func_8005ECC4`
@@ -3162,6 +3173,15 @@ by `/sprint-plan`:
   vendored upstream version can diverge from the game's rev on a single immediate (S122 nusys-2.07
   `NU_CONT_THREAD_ID=6` vs MG64's 5), and that surfaces only at first build unless reconciled here.
   A near-free retry missing any of these is a half-scoped spike — finish the scope before deferring.
+
+- **(S196 MIXED-PARTIAL — carried; 5 of 6 banked)** `src/main/func_80050400.c` (main-segment
+  `[0x2B800]` ROM-load slot pack). Subseg `[0x2B800, c, main/func_80050400]` flipped; tail
+  `[0x2B9A0, asm]` holds the rest of the original pack. Banked `func_80050400`, `func_800504E8`,
+  `func_80050504`, `func_80050588`, and `func_80050598`; one stub remains, ROM green off extracted
+  asm. **Carry:** `func_80050428` (0x80050428, ROM table read/setup via `nuPiReadRom`). Correct stack
+  layout found (`0x40` scratch buffers with `&buf[0xF]` alignment), but unconstrained C rotates saved
+  registers and remains far below permuter threshold. Do not use explicit register allocation; retry
+  only with a new source-shape/codegen insight.
 
 - **(S191 MIXED-PARTIAL — carried; 3 of 11 banked)** `src/main/get_table_entry.c` (main-segment
   `[0xE260]` meter/ball/sound logic pack). Subseg `[0xE260, c, main/get_table_entry]` flipped; 3
