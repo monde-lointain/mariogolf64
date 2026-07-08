@@ -90,6 +90,16 @@ written back (`*arg = cursor`), regardless of jal/FP count. So a debug/HUD DL-re
 emitters) prices partial-bank-expected-**ZERO** and stops topping the smallest-first sort. Same
 golden-gated off-cadence tooling follow-up; kin to the S158/S177/S183/S189 rows above.
 
+**S199 MIXED-PARTIAL — `src/main/func_80050710.c` ROM-load helper tail [0x2BB10], 0/2 (+0).**
+matched **+0**. md5-candidate **228/242→228/242** (file 0/2, 2 stubs). `func_80050710` reached a
+structural-complete isolated near-match (143/143 rows; residual saved-register color swap `s1`/`s2`).
+`func_80050914` reached 200/202 rows; residual saved-register order plus one branch-likely detail in the
+two-byte RLE variant. Compiler-source fan-out confirmed the address-taken-local stack-counter lever
+(`mark_addressable` -> `put_var_into_stack`) but no faithful lever for the final register coloring. Quality
+**0/0/2/0**. Seed 8; banked 0pt; realized 10; residual +2; regime classical/mixed. Retro applied **0 of 0**.
+Cross-repo: no new curated names. **Next natural slice:** continue a fresh main pack, or retry this tail
+only with a new source-shape/compiler-codegen insight; no explicit register binding.
+
 **S198 BANKED — `src/main/func_800505A0.c` ROM-load helper head slice COMPLETE.** matched **+3**.
 md5-candidate **227/241→228/242**. Split the S196 tail at the 16-aligned `0x2BB10` boundary and banked
 `func_800505A0` (bounded ROM read + cursor advance), `func_8005062C` (slot init + 4-byte header read),
@@ -3188,6 +3198,15 @@ by `/sprint-plan`:
   vendored upstream version can diverge from the game's rev on a single immediate (S122 nusys-2.07
   `NU_CONT_THREAD_ID=6` vs MG64's 5), and that surfaces only at first build unless reconciled here.
   A near-free retry missing any of these is a half-scoped spike — finish the scope before deferring.
+
+- **(S199 MIXED-PARTIAL — carried; 0 of 2 banked)** `src/main/func_80050710.c` (main-segment
+  `[0x2BB10]` ROM-load helper tail). Subseg `[0x2BB10, c, main/func_80050710]` flipped; both functions
+  remain `INCLUDE_ASM`, ROM green off extracted asm. **Carries:** `func_80050710` (structural-complete
+  near-match, 143/143 rows; residual saved-register color swap `s1`/`s2`) and `func_80050914`
+  (structural near-match, 200/202 rows; residual saved-register order plus one branch-likely detail in
+  the two-byte RLE path). Compiler-source fan-out found the address-taken-local stack-counter lever
+  (`mark_addressable` -> `put_var_into_stack`) but no faithful final-coloring lever. Do not use explicit
+  register allocation; retry only with a new source-shape/compiler-codegen insight.
 
 - **(S196 MIXED-PARTIAL — carried; 5 of 6 banked)** `src/main/func_80050400.c` (main-segment
   `[0x2B800]` ROM-load slot pack). Subseg `[0x2B800, c, main/func_80050400]` flipped; tail

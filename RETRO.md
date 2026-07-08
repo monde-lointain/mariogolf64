@@ -25,6 +25,22 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 199 — src/main/func_80050710.c MIXED-PARTIAL: ROM-load helper tail carried — 2026-07-07
+- Increment: 0 files md5-candidate / +0 functions matched (delta 228/242 -> 228/242). Flipped the
+  `0x2BB10` ROM-load helper tail into `src/main/func_80050710.c`; both functions remain stubs.
+- Quality: 0 stuck-far / 0 permuter-escalated / 2 carried / 0 re-opened.
+- Seed: committed 8pt; banked 0pt (partial file, per-file all-or-nothing); realized 10; residual +2;
+  regime classical/mixed.
+- What helped: compiler-source fan-out confirmed the stack-counter lever: address-taken locals route
+  through `mark_addressable` -> `put_var_into_stack`. That produced structural-complete near-matches.
+- Friction: both functions stopped at saved-register coloring/order walls. `func_80050710` reached
+  143/143 rows with only `s1`/`s2` color swapped. `func_80050914` reached 200/202 rows; residual was
+  saved-register order plus one branch-likely detail in the two-byte RLE variant. No inline-asm register
+  assignment used.
+- Applied: 0 of 0; no buffered process/tooling suggestions.
+- Carry-over: `src/main/func_80050710.c` 2 stubs — `func_80050710` and `func_80050914`. Retry only with
+  a new source-shape/compiler-codegen insight; no explicit register binding.
+
 ## Sprint 198 — src/main/func_800505A0.c COMPLETE: ROM-load helper head banked — 2026-07-07
 - Increment: 1 file md5-candidate / +3 functions matched (delta 227/241 -> 228/242). Split the
   `0x2B9A0` ROM-load tail at `0x2BB10` and banked `func_800505A0`, `func_8005062C`, and
