@@ -2,11 +2,19 @@
 
 extern s8 D_800BA9A8;
 extern s8 D_800BA9A9;
+extern s32 D_800FBE70;
 extern void* D_800DAD00;
 extern void* D_800DAD04;
 extern void* D_800DAD08;
+extern s32 D_801B6088;
+extern s8 g_terrain_vtx_xform_mode;
 extern void* wind_dl_buffer_addr;
 
+typedef struct {
+  /* 0x00 */ u32 id;
+} TerrainAttrEntry;
+
+extern TerrainAttrEntry* get_table_entry(u32 idx);
 extern void heap3_free(void** payload_ptr);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_8003E400", func_8003E400);
@@ -25,4 +33,18 @@ void func_8003E628(void) { D_800BA9A8 = 1; }
 
 void func_8003E638(void) { D_800BA9A9 = 1; }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_8003E400", func_8003E648);
+s32 func_8003E648(void) {
+  if (D_800BA9A8 != 0 || D_800BA9A9 != 0) {
+    return 0;
+  }
+
+  if ((u32)(D_801B6088 - 6) >= 2) {
+    return 1;
+  }
+
+  if (g_terrain_vtx_xform_mode != 0) {
+    return 1;
+  }
+
+  return get_table_entry(D_800FBE70)->id != 0xB;
+}
