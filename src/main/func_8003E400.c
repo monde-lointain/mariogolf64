@@ -15,9 +15,23 @@ typedef struct {
 } TerrainAttrEntry;
 
 extern TerrainAttrEntry* get_table_entry(u32 idx);
+extern void* heap3_alloc(u32 need);
 extern void heap3_free(void** payload_ptr);
+extern u32 func_8005062C(u16 index, void* out);
+extern void func_800506D4(void* data, void* slot);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_8003E400", func_8003E400);
+void func_8003E400(void) {
+  u8 sp10[0x20];
+
+  D_800DAD04 = heap3_alloc(func_8005062C(0x4CA, sp10));
+  func_800506D4(D_800DAD04, sp10);
+  D_800DAD00 = heap3_alloc(func_8005062C(0x4C9, sp10));
+  func_800506D4(D_800DAD00, sp10);
+  D_800DAD08 = heap3_alloc(func_8005062C(0x703, sp10));
+  func_800506D4(D_800DAD08, sp10);
+  wind_dl_buffer_addr = heap3_alloc(func_8005062C(0x704, sp10));
+  func_800506D4(wind_dl_buffer_addr, sp10);
+}
 
 void func_8003E4B4(void) {
   heap3_free(&D_800DAD00);
