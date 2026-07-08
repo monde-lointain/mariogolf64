@@ -90,6 +90,16 @@ written back (`*arg = cursor`), regardless of jal/FP count. So a debug/HUD DL-re
 emitters) prices partial-bank-expected-**ZERO** and stops topping the smallest-first sort. Same
 golden-gated off-cadence tooling follow-up; kin to the S158/S177/S183/S189 rows above.
 
+**S200 MIXED-PARTIAL — `src/main/func_8003DFD0.c` main head slice [0x193D0], 1/3 (+1 this sprint).**
+matched **+1**. md5-candidate **228/242→228/243** (file 1/3, 2 stubs). Split the aligned main head
+slice at `0x19800` and banked `func_8003DFD0` byte-exact. `func_8003E004` reached a near-structural
+terrain-ring builder (`points[18][3]`, camera-base offset, three stride-0x10 s16 lanes) but stopped on
+saved-register/schedule mismatch. `func_8003E314` reached a raw display-list word-builder shape with
+volatile `glistp`, but stopped on constant-load/register order. Quality **0/0/2/0**. Seed 5; banked
+0pt; realized 7; residual +2; regime classical/mixed. Retro applied **0 of 0**. Cross-repo: no new
+curated names. **Next natural slice:** continue a fresh main pack, or retry either carry only with a
+new FP/DL scheduling or constant-register-order source insight.
+
 **S199 MIXED-PARTIAL — `src/main/func_80050710.c` ROM-load helper tail [0x2BB10], 0/2 (+0).**
 matched **+0**. md5-candidate **228/242→228/242** (file 0/2, 2 stubs). `func_80050710` reached a
 structural-complete isolated near-match (143/143 rows; residual saved-register color swap `s1`/`s2`).

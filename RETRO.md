@@ -25,6 +25,19 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 200 — src/main/func_8003DFD0.c MIXED-PARTIAL: main head slice 1/3 banked — 2026-07-07
+- Increment: 0 files md5-candidate / +1 function matched (delta 228/242 -> 228/243). Split the
+  aligned `0x193D0` main head slice into `src/main/func_8003DFD0.c`; file is 1/3 with 2 stubs.
+- Quality: 0 stuck-far / 0 permuter-escalated / 2 carried / 0 re-opened.
+- Seed: committed 5pt; banked 0pt (partial file, per-file all-or-nothing); realized 7; residual +2;
+  regime classical/mixed.
+- What helped: keeping the unsigned threshold branch in `func_8003DFD0` source order preserved the ROM
+  branch shape; precomputing the subtract if-converted to a branchless mask.
+- Friction: `func_8003E004` stopped at FP setup/output saved-register/schedule mismatch. `func_8003E314`
+  stopped at raw display-list constant-load/register order despite the required volatile `glistp` cursor.
+- Applied: 0 of 0; no buffered process/tooling suggestions.
+- Carry-over: `src/main/func_8003DFD0.c` 2 stubs — `func_8003E004` and `func_8003E314`.
+
 ## Sprint 199 — src/main/func_80050710.c MIXED-PARTIAL: ROM-load helper tail carried — 2026-07-07
 - Increment: 0 files md5-candidate / +0 functions matched (delta 228/242 -> 228/242). Flipped the
   `0x2BB10` ROM-load helper tail into `src/main/func_80050710.c`; both functions remain stubs.
