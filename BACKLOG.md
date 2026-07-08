@@ -90,6 +90,16 @@ written back (`*arg = cursor`), regardless of jal/FP count. So a debug/HUD DL-re
 emitters) prices partial-bank-expected-**ZERO** and stops topping the smallest-first sort. Same
 golden-gated off-cadence tooling follow-up; kin to the S158/S177/S183/S189 rows above.
 
+**S201 BANKED — `src/main/func_8003E400.c` main head slice [0x19800] COMPLETE.** matched **+6**.
+md5-candidate **228/243->229/244**. Split the S200 tail at the aligned `0x19AC0` boundary and banked
+`func_8003E400` (asset read/heap alloc setup), `func_8003E4B4` (heap frees),
+`build_pin_or_cup_matrix_for_dad10` (camera-relative matrix build), `func_8003E628`, `func_8003E638`,
+and `func_8003E648` (render eligibility predicate). Matrix helper needed final address association
+`(D_800B7780 << 6) + (arg << 7)` with the arg offset added in the call delay slot. Quality **0/0/0/0**.
+Seed 5; banked 5pt; realized 5; residual 0; regime classical/mixed. Retro applied **0 of 0**.
+Cross-repo: no new curated names. **Next natural slice:** continue a fresh main pack, or return to
+the `0x19AC0` render tail only with a display-list scheduling plan.
+
 **S200 MIXED-PARTIAL — `src/main/func_8003DFD0.c` main head slice [0x193D0], 1/3 (+1 this sprint).**
 matched **+1**. md5-candidate **228/242→228/243** (file 1/3, 2 stubs). Split the aligned main head
 slice at `0x19800` and banked `func_8003DFD0` byte-exact. `func_8003E004` reached a near-structural

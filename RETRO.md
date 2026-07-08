@@ -25,6 +25,18 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 201 — src/main/func_8003E400.c COMPLETE: main head slice banked — 2026-07-08
+- Increment: 1 file md5-candidate / +6 functions matched (delta 228/243 -> 229/244). Split the
+  aligned `0x19800` main head slice into `src/main/func_8003E400.c`; tail starts at `0x19AC0`.
+- Quality: 0 stuck-far / 0 permuter-escalated / 0 carried / 0 re-opened.
+- Seed: committed 5pt; banked 5pt; realized 5; residual 0; regime classical/mixed.
+- What helped: asm-first was enough for the call-glue and predicates. The matrix helper matched after
+  separating `D_800B7780 << 6` and `arg << 7`, leaving the arg offset add in the call delay slot.
+- Friction: first matrix-helper C was structurally right but associated the final address expression
+  differently, causing a ROM SHA miss until the object diff exposed the `s0`/`s1` lifetime issue.
+- Applied: 0 of 0; no buffered process/tooling suggestions.
+- Carry-over: none. `0x19AC0` render tail stays asm, out of scope.
+
 ## Sprint 200 — src/main/func_8003DFD0.c MIXED-PARTIAL: main head slice 1/3 banked — 2026-07-07
 - Increment: 0 files md5-candidate / +1 function matched (delta 228/242 -> 228/243). Split the
   aligned `0x193D0` main head slice into `src/main/func_8003DFD0.c`; file is 1/3 with 2 stubs.
