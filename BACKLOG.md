@@ -90,6 +90,16 @@ written back (`*arg = cursor`), regardless of jal/FP count. So a debug/HUD DL-re
 emitters) prices partial-bank-expected-**ZERO** and stops topping the smallest-first sort. Same
 golden-gated off-cadence tooling follow-up; kin to the S158/S177/S183/S189 rows above.
 
+**S202 MIXED-PARTIAL — `src/main/func_8005E380.c` debug/fault tail [0x39780], 1/2 (+1 this sprint).**
+matched **+1**. md5-candidate **229/244->229/245** (file 1/2, 1 stub). `func_8005EAD4`
+banked byte-exact as a fault/debug flag-label list printer over `{mask, value, label}` records.
+`func_8005E380` reached a struct-complete first pass over `OSThread.context`; raw context-pointer and
+32-bit `{hi, lo}` GPR-pair views fixed offset drift, but the function stopped on a whole-function
+`s0`/`s1` base-pointer color swap plus prologue order. Quality **1/0/1/0**. Seed 8; banked 0pt;
+realized 10; residual +2; regime classical/mixed. Retro applied **0 of 0**. Cross-repo: no new curated
+names. **Next natural slice:** continue a fresh main pack, or retry `func_8005E380` only with a new
+source-shape/codegen insight; no explicit register binding.
+
 **S201 BANKED — `src/main/func_8003E400.c` main head slice [0x19800] COMPLETE.** matched **+6**.
 md5-candidate **228/243->229/244**. Split the S200 tail at the aligned `0x19AC0` boundary and banked
 `func_8003E400` (asset read/heap alloc setup), `func_8003E4B4` (heap frees),

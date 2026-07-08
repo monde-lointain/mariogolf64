@@ -25,6 +25,21 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 202 — src/main/func_8005E380.c MIXED-PARTIAL: debug fault tail 1/2 banked — 2026-07-08
+- Increment: 0 files md5-candidate / +1 function matched (delta 229/244 -> 229/245). Flipped the
+  aligned `0x39780` main debug/fault tail into `src/main/func_8005E380.c`; file is 1/2 with one stub.
+- Quality: 1 stuck-far / 0 permuter-escalated / 1 carried / 0 re-opened.
+- Seed: committed 8pt; banked 0pt (partial file, per-file all-or-nothing); realized 10; residual +2;
+  regime classical/mixed.
+- What helped: `func_8005EAD4` banked as a fault/debug flag-label list printer over
+  `{mask, value, label}` records.
+- Friction: `func_8005E380` reached a struct-complete first pass over `OSThread.context`, but stopped
+  far below permuter threshold on whole-function saved-register/base-pointer coloring (`s0`/`s1`) plus
+  prologue order. No explicit register binding used.
+- Applied: 0 of 0; no buffered process/tooling suggestions.
+- Carry-over: `src/main/func_8005E380.c` one stub — `func_8005E380`. Retry only with a new
+  source-shape/codegen insight; no explicit register binding.
+
 ## Sprint 201 — src/main/func_8003E400.c COMPLETE: main head slice banked — 2026-07-08
 - Increment: 1 file md5-candidate / +6 functions matched (delta 228/243 -> 229/244). Split the
   aligned `0x19800` main head slice into `src/main/func_8003E400.c`; tail starts at `0x19AC0`.
