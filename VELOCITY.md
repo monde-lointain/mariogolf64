@@ -417,6 +417,19 @@ Three honest caveats:
   2 trivial glue fns banked free, 1 FP fn fell to a precise lever, 3 FP-math walls carried — reinforces
   the queued FP-pack `partial-bank-expected` pts detector (S189/S204). Method: 3 parallel isolated
   subagents (S184 recipe) characterized the FP tail with no build race, 1 returned a byte-match.
+  S207: seed 13 (`func_80026400.c`, 9-fn scenery/heap one-tu, sole increment), banked **0pt**
+  (mixed-partial, file 3/9 not md5-candidate; per-file all-or-nothing), **+3 matched** (`func_8002646C`
+  heap re-register byte-exact asm-first + `func_80028110`/`func_80028204` string-dup utils via 2 known
+  levers — `(u32)len` unsigned cast for `sltiu`, and `*out=0`-before-print statement-order for the
+  printf delay-slot fill). Realized ~14 (seed 13 +1 for the `func_80026400` attempted near-match carry;
+  the 3 banks were near-first-try with known levers, no novel-gotcha, no −1), residual **+1**.
+  Quality **0/0/6/0**. 6 carries: `func_80026400` (delay-slot-fill/regalloc near-match, build folds
+  `block+size` into printf's delay slot, ROM saves the arg + adds late — 4 source forms all hoist);
+  `project_sort_scenery_cylinders` (multi-IV FP insertion sort, S158 wall); 4 FP/DL scenery emitters
+  (S189/S190 predicted, not attempted). SECOND consecutive main mixed-partial pack (S206 all-FP, S207
+  FP/DL) where the size-only `pts` priced a partial-bank pack a flat 13 — the queued FP-and-DL-emitter
+  `partial-bank-expected` detector now has 2 more data points. Retro applied 0/1 (PO-declined the
+  delay-slot-fill near-match as a 4th regalloc-heavy detector signature; data point only).
   Rolling-5 (S34+S37+S39+S42+S43): seed 3.4 pt/sprint (17/5), realized 2.8 pt/sprint (14/5). S31 nuGfxInit is the first over-seed classical fn (+3 residual); rubric needs +1 for double-novel-gotcha libnusys classical targets. S42 defines-data verbatim-body drop: realized 2 = seed 3 − 1 (the fast path makes a defines-data leaf bank like a mirror) — confirms the −1 verbatim-first-try rule extends to known-edit-mirror defines-data, not just classical seeds. S43 is the new residual floor (−2): both gbpak fns were classical-FLAGGED (jal-count-mismatch) but proved pure verbatim mirrors once the macro-FP was stripped — the seed over-priced them because the hazard was a tooling artifact, now fixed in `_c_jal_count`, so future macro-heavy libultra leaves should seed lower.
 - **Regime:** `mirror` is a depleting minority (~22 % of ranked candidates: 56 mirror vs 194
   classical; 18 warm / 38 cold). The warm clean-singleton mirror pool is now **mined out** (S11

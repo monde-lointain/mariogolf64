@@ -25,6 +25,32 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 207 — func_80026400.c scenery/heap pack — 2026-07-09
+- Increment: 0 files banked / **3 functions matched** (delta: no md5-candidate change; file 3/9, 6
+  stubs remain). Subseg `[0x1800, asm] -> c` flipped.
+- Quality: 0/0/6/0 this sprint (stuck-far/permuter/carried/re-opened)
+- Seed: committed 13pt; banked 0pt (mixed-partial, per-file all-or-nothing); realized ~14, residual +1;
+  regime classical/mixed
+- What helped: asm-first hand-translate for the heap-region-init sibling `func_8002646C` (byte-exact
+  first build); 2 known levers cracked the string-dup-util pair (`func_80028110`/`func_80028204`) — an
+  `(u32)len >= K` unsigned cast to force `sltiu` over `slti` on the length bound, and a statement-order
+  swap (`*out=0` before `osSyncPrintf`) to fill the printf delay slot with the store rather than the
+  address `addiu`. The S189/S190 FP-and-DL-emitter partial-bank-expected detector was right: 6 of 9 fns
+  wall-class, only the integer heap/string glue banked.
+- Friction: `func_80026400` (heap-region-init head) is a structural-complete delay-slot-fill/regalloc
+  near-match — the build folds `block+size` into `osSyncPrintf`'s delay slot (block->s0), while TARGET
+  saves `size` there and computes `end` late in `func_800263B0`'s delay slot (block->s1). 4 source forms
+  (int-reuse / pointer-arith / late-decl / asm-memory-barrier) all hoist the add; no clean C trigger.
+  The size-only `pts` priced the pack a flat 13, blind to the 6-of-9 partial-bank reality.
+- Applied: 0 of 1 — the `func_80026400` delay-slot-fill/regalloc near-match signature (a 4th
+  regalloc-heavy detector wall pattern after S203 FP-hoist / S204 qty-perm / S205 base-canon) was a
+  PO-declined retro edit; kept as a standup data point only, not queued to the off-cadence branch.
+- Carry-over: `src/main/func_80026400.c` (3 of 9 banked; carries `func_80026400` delay-slot near-match +
+  `project_sort_scenery_cylinders` multi-IV FP insertion sort + `update_scenery_cylinder_transforms` +
+  `emit_scenery_billboard` / `draw_scenery_opaque_pass` / `draw_scenery_alpha_pass` FP/DL emitters).
+
+---
+
 ## Sprint 206 — func_800772B0.c float spline/curve-interpolation pack — 2026-07-09
 - Increment: 0 files banked / **3 functions matched** (delta: no md5-candidate change; file 3/6, 3
   stubs remain). Subseg `[0x526B0, asm] -> c` flipped.

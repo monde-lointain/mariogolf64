@@ -107,6 +107,26 @@ expected-bank) rather than a flat size-13. Also reconfirms the S204 coddog min-i
 was mis-tagged `coddog-mirror:src/os/settime.c@99.99` (false fingerprint collision, it is a `none`
 classical pack, NOT a libultra mirror) — no header vendoring was needed at the gate.
 
+**S207 MIXED-PARTIAL — `src/main/func_80026400.c` scenery/heap pack [0x1800], 3/9 (+3 this sprint).**
+matched **+3**. md5-candidate **223 -> 223** (file 3/9, 6 stubs). Subseg flip `[0x1800, asm] -> c`. A
+9-fn one-tu pack: 2 heap-region-init heads + 2 string-dup-util tails (integer glue) + 5 FP/DL
+scenery-render walls. BANKED: `func_8002646C` (slot-1 heap re-register, byte-exact asm-first
+first-build), `func_80028110` (string-dup-with-header util; levers `(u32)len>=0x100` -> `sltiu`),
+`func_80028204` (sibling w/ header read-back; lever `*out=0` before `osSyncPrintf` to steer the printf
+delay-slot fill). **6 CARRIED:** `func_80026400` (heap-region-init head; structural-complete
+delay-slot-fill/regalloc near-match — build folds `block+size` into printf's delay slot block->s0, ROM
+saves `size` there + adds `end` late in `func_800263B0`'s delay block->s1; 4 source forms all hoist,
+in-file note); `project_sort_scenery_cylinders` (analyzed = multi-IV FP insertion sort, 0x88-stride
+struct-array + `project_point_view_depth` FP + branch-likely, S158 wall, not attempted-to-floor);
+`update_scenery_cylinder_transforms` (FP32 wall) + `emit_scenery_billboard` / `draw_scenery_opaque_pass`
+(FP252+DL17) / `draw_scenery_alpha_pass` (S189/S190 DL-emitter walls, detector-predicted, not
+attempted). Seed 13; banked 0pt (mixed-partial); realized ~14; residual +1; regime classical/mixed.
+Quality **0/0/6/0**. Reconfirms the S189/S190 FP-and-DL-emitter `partial-bank-expected` pts detector
+(6 of 9 wall-class). Retro applied **0 of 1** (PO-declined: the delay-slot-fill/regalloc near-match as a
+4th regalloc-heavy detector signature — kept as a data point, NOT queued). Cross-repo: no new curated
+names (banked fns kept `func_`). **Next natural slice:** a fresh non-FP/DL main pack, OR a
+permuter/`#cross-project-matched-corpus-mining` sprint on the accumulating S206+S207 FP/regalloc carries.
+
 **S206 MIXED-PARTIAL — `src/main/func_800772B0.c` float spline/curve-interpolation pack [0x526B0],
 3/6 (+3 this sprint).** matched **+3**. md5-candidate **223 -> 223** (file 3/6, 3 stubs). Subseg
 flip `[0x526B0, asm] -> c`. A 6-fn all-FP one-tu pack (vec3f slots stride 0xC, shared globals
