@@ -14,6 +14,14 @@ s32 func_8003DFD0(s32 x, s32 z) {
   return distance;
 }
 
+/* func_8003E004: wind-indicator vertex generator. Fills the 18-entry Vtx array
+ * D_800BA888 (drawn by func_8003E314) with a fan of positions computed from the
+ * scenery wind angle via sinf/cosf, projected onto terrain height. Structure and
+ * math are fully solved (see nonmatchings/func_8003E004/base.c) but the body is
+ * carried as INCLUDE_ASM pending a permuter run: a pervasive-regalloc divergence
+ * (the (f64)base double and the scratch-buffer base pointer spill where the ROM
+ * keeps them in callee-saved regs). All rodata/data refs (D_800CA8E0/E8/F0 pi/2
+ * pool, D_800BA888, g_scenery_wind_angle_a) stay extern in the shared blob. */
 INCLUDE_ASM("asm/nonmatchings/main/func_8003DFD0", func_8003E004);
 
 extern Gfx* glistp;
