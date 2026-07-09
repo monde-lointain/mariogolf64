@@ -100,7 +100,7 @@ void func_8005D1E4(void) {
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80059BA0", func_8005D218);
 
-s8 func_8005D23C(void) {
+s32 func_8005D23C(void) {
     return D_80105DC2;
 }
 
@@ -113,7 +113,10 @@ s32 func_8005D258(void) {
     return (x & (~x >> 31)) + 0x16F;
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80059BA0", func_8005D274);
+s32 func_8005D274(void) {
+    s32 v = func_8005D23C();
+    return (v & (~v >> 31)) + 0x1EB;
+}
 
 s32 func_8005D2A0(void) {
     return (D_80105DCC > 0) ? D_80105DCC : 1;
