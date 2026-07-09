@@ -25,6 +25,29 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 203 — src/main/func_8003DFD0.c MIXED-PARTIAL: wind DL builder banked, vertex gen carried — 2026-07-09
+- Increment: 0 files md5-candidate / +1 function matched. Continued the S200 c-stub file
+  `src/main/func_8003DFD0.c` (was 1/3 → now 2/3, 1 stub). No flip enabler (already `c`).
+- Quality: 1/1/1/0 this sprint (`func_8003E004`: stuck-far + permuter + carried, one fn).
+- Seed: committed 13pt; banked 0pt (partial file, per-file all-or-nothing); realized 16; residual +3;
+  regime classical/mixed.
+- What helped: gfxdis (f3dex2) decoded `func_8003E314`'s 3 static head words (setcombine/pipesync/vtx)
+  and confirmed the gSP2Triangles loop — the macro's internal ×2 exactly matched the asm's
+  i*4/i*4+2/i*4+4/i*4+6 induction vars; the only source fix was `i!=8` (bne) vs `i<8` (slti). For the
+  carry, the full asm decode + a self-authored base.c seed made the wall precisely characterized
+  (206/223 rows; `(f64)base` + scratch-ptr spill vs ROM callee-saved alloc), and setup-permuter `--main`
+  drove it 7115→3505.
+- Friction: the two "stubs" were both mis-assessed at plan time as an easy leaf + an FP monster; the
+  "easy leaf" `func_8003E314` was actually a hand-rolled F3DEX2 display-list builder (needed gfxdis +
+  GBI-macro reconstruction), and the FP `func_8003E004` is a genuine S158-class pervasive-regalloc wall
+  the c-stub seed (13, size-only) can't price. Permuter (280s) did not converge — a longer dedicated run
+  is needed. seed dir collided (`func_8003E004` decomp_loop dir pre-existed, setup made `-2`).
+- Applied: 0 of 2 (PO deferred both buffered suggestions; #1 regalloc-heavy pts-detector data point —
+  already a tracked S158/S177/S183 follow-up; #2 permuter dup-seed-dir note — minor, both nonmatchings/
+  gitignored).
+- Carry-over: `src/main/func_8003DFD0.c` — `func_8003E004` (FP regalloc wall, structure solved, seed at
+  `nonmatchings/func_8003E004-2/base.c`; see `BACKLOG.md ## Carry-overs`).
+
 ## Sprint 202 — src/main/func_8005E380.c MIXED-PARTIAL: debug fault tail 1/2 banked — 2026-07-08
 - Increment: 0 files md5-candidate / +1 function matched (delta 229/244 -> 229/245). Flipped the
   aligned `0x39780` main debug/fault tail into `src/main/func_8005E380.c`; file is 1/2 with one stub.

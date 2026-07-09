@@ -383,8 +383,12 @@ Three honest caveats:
 - **Mirror track (v1): seed-velocity 2.0 pt/sprint** (n=5 anchors, all verbatim; seed-only —
   the mirror band is a point mass, no realized tier).
 - **Classical track (v2 ACTIVE since S11): n=9, seed 4.44 pt/sprint (S11+S30+S31+S33+S34+S37+S39+S42+S43: (5+5+8+5+2+3+3+3+6)/9=40/9), realized 4.33 pt/sprint ((5+5+10+5+2+3+3+2+4)/9=39/9), net residual −1 (S31 first positive +3; S34/S37/S39 residual 0; S42 −1; S43 −2, most-negative).**
-  Recent rolling-5 (S198-S202): seed 31/5 = 6.2 pt/sprint; realized 36/5 = 7.2 pt/sprint; banked 10pt;
-  quality 1/0/5/0. S202 is a mixed-partial debug/fault tail (seed 8, realized 10, residual +2).
+  Recent rolling-5 (S199-S203): seed 39/5 = 7.8 pt/sprint; realized 48/5 = 9.6 pt/sprint; banked 5pt;
+  quality 2/1/6/0. S202 is a mixed-partial debug/fault tail (seed 8, realized 10, residual +2). S203
+  continues the S200 c-stub file `func_8003DFD0.c` (2/3): banked the wind DL builder `func_8003E314`,
+  carried the FP wind-vertex generator `func_8003E004` (seed 13, realized 16, residual +3 = stuck-far +
+  permuter + carried on one fn; a c-stub size-only seed can't see the S158-class FP/6-callee-double
+  regalloc wall — another `regalloc-heavy` pts-detector data point, deferred at retro).
   Rolling-5 (S34+S37+S39+S42+S43): seed 3.4 pt/sprint (17/5), realized 2.8 pt/sprint (14/5). S31 nuGfxInit is the first over-seed classical fn (+3 residual); rubric needs +1 for double-novel-gotcha libnusys classical targets. S42 defines-data verbatim-body drop: realized 2 = seed 3 − 1 (the fast path makes a defines-data leaf bank like a mirror) — confirms the −1 verbatim-first-try rule extends to known-edit-mirror defines-data, not just classical seeds. S43 is the new residual floor (−2): both gbpak fns were classical-FLAGGED (jal-count-mismatch) but proved pure verbatim mirrors once the macro-FP was stripped — the seed over-priced them because the hazard was a tooling artifact, now fixed in `_c_jal_count`, so future macro-heavy libultra leaves should seed lower.
 - **Regime:** `mirror` is a depleting minority (~22 % of ranked candidates: 56 mirror vs 194
   classical; 18 warm / 38 cold). The warm clean-singleton mirror pool is now **mined out** (S11

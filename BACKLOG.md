@@ -110,15 +110,23 @@ Seed 5; banked 5pt; realized 5; residual 0; regime classical/mixed. Retro applie
 Cross-repo: no new curated names. **Next natural slice:** continue a fresh main pack, or return to
 the `0x19AC0` render tail only with a display-list scheduling plan.
 
-**S200 MIXED-PARTIAL — `src/main/func_8003DFD0.c` main head slice [0x193D0], 1/3 (+1 this sprint).**
-matched **+1**. md5-candidate **228/242→228/243** (file 1/3, 2 stubs). Split the aligned main head
-slice at `0x19800` and banked `func_8003DFD0` byte-exact. `func_8003E004` reached a near-structural
-terrain-ring builder (`points[18][3]`, camera-base offset, three stride-0x10 s16 lanes) but stopped on
-saved-register/schedule mismatch. `func_8003E314` reached a raw display-list word-builder shape with
-volatile `glistp`, but stopped on constant-load/register order. Quality **0/0/2/0**. Seed 5; banked
-0pt; realized 7; residual +2; regime classical/mixed. Retro applied **0 of 0**. Cross-repo: no new
-curated names. **Next natural slice:** continue a fresh main pack, or retry either carry only with a
-new FP/DL scheduling or constant-register-order source insight.
+**S203 MIXED-PARTIAL — `src/main/func_8003DFD0.c` main head slice [0x193D0], 2/3 (+1 this sprint; was
+S200 1/3).** md5-candidate unchanged (file 2/3, 1 stub). S203 banked `func_8003E314` byte-exact: it is
+the wind-indicator display-list builder — `gDPSetCombineLERP(SHADE/TEXEL0)` + `gDPPipeSync` +
+`gSPVertex(D_800BA888,18,0)` + `for(i=0;i!=8;i++) gSP2Triangles(glistp++, i*2, i*2+2, i*2+1, 0,
+i*2+1, i*2+2, i*2+3, 0)` (gfxdis decoded the head; the macro's ×2 matched the asm's i*4/+2/+4/+6
+induction vars; one fix `i!=8` not `i<8`). **Remaining stub — `func_8003E004` (SPIKE, FP regalloc
+wall):** the wind-vertex generator that fills the D_800BA888 Vtx array E314 draws. FULLY solved
+structurally + math (base angle = `(f32)((f64)((f32)wind_angle*2pi/65536)+pi/2)`; per i 0..8 two records
+`sin(base)*i*8533 + sin(base±pi/2)*(9-i)*46.079998` for x, the −cos analogue for z, y =
+terrain_height(base+off)−base_y; then /4-store as s16 into `D_800BA888[k].v.ob`). Isolated diff
+**206/223 rows**; only the `(f64)base` double + the scratch-buffer base pointer spill vs the ROM's
+callee-saved allocation (8 extra spill instrs). Permuter (setup `--main`, 280s, 15 threads,
+`--stop-on-zero`) drove base 7115 → **best 3505, no zero**. Candidate seed preserved at
+`nonmatchings/func_8003E004-2/base.c` for a dedicated longer permuter run. Same regalloc-wall class as
+the S202 sibling carry `func_8005E380`. Quality **1/1/1/0**. Seed 13 (c-stub); banked 0pt; realized 16;
+residual +3; regime classical/mixed. Retro applied **0 of 0**. Cross-repo: no new curated names.
+**Next natural slice:** longer permuter run on the preserved seed, or a fresh main pack.
 
 **S199 MIXED-PARTIAL — `src/main/func_80050710.c` ROM-load helper tail [0x2BB10], 0/2 (+0).**
 matched **+0**. md5-candidate **228/242→228/242** (file 0/2, 2 stubs). `func_80050710` reached a
