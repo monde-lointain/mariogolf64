@@ -26,9 +26,31 @@ void func_80050400(void) {
   } while (i != 2);
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80050400", func_80050428);
+extern u8 D_E473F0[];
+extern s32 D_8012D3A8;
 
-void func_80050428(s32, RomLoadSlot*);
+/* Read the size/offset directory entry for `index` from the D_E473F0 ROM table
+ * (8 bytes/entry) into 16-byte-aligned DMA scratch, then fill the load slot:
+ * start=pos=base+offset, size, end=start+size. Records index to D_8012D3A8.
+ * `size_val` caches the size read so the D_8012D3A8 store schedules between the
+ * end and size stores (matches ROM). */
+void func_80050428(s32 index, RomLoadSlot* slot) {
+  u8 offset_buf[0x40];
+  u8 size_buf[0x40];
+  u32 rom_offset = index * 8;
+  u8* offset_aligned = (u8*)(((u32)(&offset_buf[0xF])) & (~0xF));
+  u8* size_aligned = (u8*)(((u32)(&size_buf[0xF])) & (~0xF));
+  u32 size_val;
+
+  nuPiReadRom((u32)(D_E473F0 + rom_offset), size_aligned, 4);
+  nuPiReadRom((u32)(rom_offset + (D_E473F0 + 4)), offset_aligned, 4);
+  slot->pos = (u32)(D_E473F0 + (*((u32*)offset_aligned)));
+  slot->start = slot->pos;
+  slot->end = slot->pos + (*((u32*)size_aligned));
+  size_val = *((u32*)size_aligned);
+  D_8012D3A8 = index;
+  slot->size = size_val;
+}
 
 void func_800504E8(s32 index, RomLoadSlot* slot) { func_80050428(index, slot); }
 
