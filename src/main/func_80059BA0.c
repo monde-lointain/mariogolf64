@@ -4,6 +4,11 @@ extern u8 D_801323A0[];
 extern s8 D_80105DC2;
 extern s32 D_80105DC4;
 extern s32 D_800C2B28[];
+extern s32 D_800FE334;
+extern u8 D_801052E8;
+extern u8 D_801B9410;
+extern u8 D_800C2BD4;
+extern s32 current_game_mode;
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80059BA0", func_80059BA0);
 
@@ -99,19 +104,48 @@ INCLUDE_ASM("asm/nonmatchings/main/func_80059BA0", func_8005D3B8);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80059BA0", func_8005D9A0);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80059BA0", func_8005DAD4);
+void func_8005DAD4(void) {
+    D_800FE334 = 0;
+    D_801052E8 = 1;
+    D_801B9410 = 0;
+    D_800C2BD4 = 0;
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80059BA0", func_8005DAFC);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80059BA0", func_8005DC50);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80059BA0", func_8005DCDC);
+void func_8005DCDC(void) {
+    D_801052E8 = 1;
+    D_801B9410 = 1;
+    D_800FE334 = 0;
+    D_800C2BD4 = 0;
+    current_game_mode = 0x17;
+}
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80059BA0", func_8005DD10);
+void func_8005DD10(void) {
+    D_801052E8 = 1;
+    D_801B9410 = 1;
+    D_800FE334 = 0;
+    D_800C2BD4 = 0;
+    current_game_mode = 5;
+}
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80059BA0", func_8005DD44);
+void func_8005DD44(void) {
+    D_801052E8 = 1;
+    D_801B9410 = 1;
+    D_800FE334 = 0;
+    D_800C2BD4 = 0;
+    current_game_mode = 0x12;
+}
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80059BA0", func_8005DD78);
+void func_8005DD78(void) {
+    D_801052E8 = 1;
+    D_801B9410 = 1;
+    D_800FE334 = 0;
+    D_800C2BD4 = 0;
+    current_game_mode = 0xD;
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80059BA0", func_8005DDAC);
 
