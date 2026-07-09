@@ -98,6 +98,36 @@ min-instruction floor** — suppress a `coddog-mirror:<file>@<pct>` tag on a fn 
 fns fingerprint-collide; S204 `func_800772B0` writes ZERO to two globals but tagged `settime.c@99.99`
 because osSetTime is also a 2-store leaf). Both are golden-gated (`make test-tools`, then
 `REGEN_GOLDEN=1` for the intended re-price), NOT hand-edited inline at retro.
+**Data point (S206, same off-cadence branch):** `src/main/func_800772B0.c` is a 6-fn all-FP one-tu
+pack (spline/interpolation over vec3f arrays) whose 2 trivial glue fns banked free, 1 FP fn fell
+(`func_800779A8`, a precise local-alloc coloring lever), and 3 FP-math fns are S158 regalloc walls
+(`func_800772C4` 0.53, `func_8007775C` 0.73, `func_80077AD4` 0.62). Confirms the FP-pack detector:
+an all-FP one-tu should price partial-bank-expected (trivial/glue fns at size, FP-math fns at ~0
+expected-bank) rather than a flat size-13. Also reconfirms the S204 coddog min-instr floor: this pack
+was mis-tagged `coddog-mirror:src/os/settime.c@99.99` (false fingerprint collision, it is a `none`
+classical pack, NOT a libultra mirror) — no header vendoring was needed at the gate.
+
+**S206 MIXED-PARTIAL — `src/main/func_800772B0.c` float spline/curve-interpolation pack [0x526B0],
+3/6 (+3 this sprint).** matched **+3**. md5-candidate **223 -> 223** (file 3/6, 3 stubs). Subseg
+flip `[0x526B0, asm] -> c`. A 6-fn all-FP one-tu pack (vec3f slots stride 0xC, shared globals
+`D_800C45D0` seg-index / `D_800C45D4` substep counter), NOT a settime.c mirror (the
+`coddog-mirror:src/os/settime.c@99.99` tag is the S204-flagged false 2-store-leaf collision). BANKED
+byte-exact: `func_800772B0` (reset both globals) + `func_80077BD8` (`*a0=*a0` word RMW), both asm-first
+first-build; and `func_800779A8` (periodic cubic-Hermite spline lookup, 75/75, via a subagent's precise
+local-alloc coloring lever: `while`-loops not `if{do-while}`, split `t=x-base` to pin x in `$f12`,
+non-negated `bc1fl`, fully-inlined return). **3 CARRIED, all fully-RE'd S158 `#pervasive-regalloc-
+classical-main` FP walls** (`docs/wip/*.near-match.md`): `func_800772C4` (spline-segment stepper,
+switch-dispatch, 0.53 — buffer-ptr-in-`$t0` + 2-global address-CSE cascade), `func_8007775C` (cyclic
+cubic-spline solver Thomas+Sherman-Morrison, 0.73 — coupled loop-bound/FP-coloring), `func_80077AD4`
+(cubic finite-diff interp, 0.62 — int-temp hard-reg perm + `ia0*3` hoist). **Method:** 3 parallel
+isolated subagents over the FP tail (S184 recipe, each in its own `nonmatchings/<fn>/`, no build race);
+1 returned an unexpected byte-match. Seed 13; banked 0pt (mixed-partial); realized ~17; residual +4;
+regime classical/mixed. Quality **0/0/3/0**. Retro applied **3 of 3** (S1 decomp_loop mid-TU standalone-
+offset artifact -> `#isolated-compile-caveat`; S3 FP-subagent fan-out recipe -> `## Workflow at a glance`;
+S2 FP-pack pts detector data point + coddog min-instr floor reconfirm -> queued off-cadence branch).
+Cross-repo: no new curated names (all `func_`/`D_`). **Next natural slice:** a FRESH main pack that is
+NOT FP-dominated, OR a dedicated permuter/`#cross-project-matched-corpus-mining` sprint on the 3 S206
+FP-regalloc carries (all < 0.97, permuter N/A now).
 
 **S205 SPIKE/CARRY — `src/main/func_8005E380.c` fault register/flag dump printer, 0 banks (0 pt).**
 matched **+0**. Sole committed increment; carried. `func_8005E380` (469 instr / 66 jal / 56 FP-reg,
@@ -3294,6 +3324,26 @@ by `/sprint-plan`:
   vendored upstream version can diverge from the game's rev on a single immediate (S122 nusys-2.07
   `NU_CONT_THREAD_ID=6` vs MG64's 5), and that surfaces only at first build unless reconciled here.
   A near-free retry missing any of these is a half-scoped spike — finish the scope before deferring.
+
+- **(S206 MIXED-PARTIAL — carried; 3 of 6 banked)** `src/main/func_800772B0.c` (main-segment
+  `[0x526B0]` float spline/curve-interpolation pack; NOT a settime.c mirror — false coddog collision).
+  Subseg `[0x526B0, c, main/func_800772B0]` flipped; banked `func_800772B0`/`func_80077BD8`/
+  `func_800779A8`; 3 stubs remain, ROM green off extracted asm. **All 3 carries are fully-RE'd S158
+  `#pervasive-regalloc-classical-main` FP walls** (`docs/wip/<fn>.near-match.md` each; base.c in
+  `nonmatchings/<fn>/`), all < 0.97 so permuter N/A:
+  - `func_800772C4` (0x800772C4, spline-segment stepper, ~294 instr, switch-dispatch, 0.53). Wall =
+    ROM homes the buffer base in `$t0` (`addu t0,a0,zero`) + address-CSEs 2 scratch globals
+    (`&D_800E1D30->$a1`, `&D_800E1D20->$v1`), flipping the post-reload load scheduler; local-ptr copy
+    coalesces away. Semantics 100% (control flow + 9 cases + FP math all match).
+  - `func_8007775C` (0x8007775C, cyclic cubic-spline solver Thomas+Sherman-Morrison, ~158 instr, 0.73).
+    Wall = coupled global-vs-local register coloring (loop3 `slti` is a required local sub-optimum for
+    the good loop5/6 `$a0/$a1` coloring; a `d+d` accumulator lands `$f0` vs target `$f2`). All 7 loops
+    structurally correct.
+  - `func_80077AD4` (0x80077AD4, cubic finite-diff interp, ~70 instr, 0.62, 65/66 mnemonic rows). Wall =
+    int-temp hard-register permutation (ia0->$a2/ia1->$a0/d0->$a1/d1->$a3 in ROM) + an `ia0*3` hoist into
+    the truncation phase. Needs the `f32 v[3]` stack-array form for the dead-frame stores.
+  Retry: a from-scratch permuter (once seeded past the reg fold) or `#cross-project-matched-corpus-mining`
+  for the KMC-2.7.2 allocno idiom. Do NOT use explicit register allocation.
 
 - **(S199 MIXED-PARTIAL — carried; 0 of 2 banked)** `src/main/func_80050710.c` (main-segment
   `[0x2BB10]` ROM-load helper tail). Subseg `[0x2BB10, c, main/func_80050710]` flipped; both functions

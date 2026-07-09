@@ -25,6 +25,30 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 206 — func_800772B0.c float spline/curve-interpolation pack — 2026-07-09
+- Increment: 0 files banked / **3 functions matched** (delta: no md5-candidate change; file 3/6, 3
+  stubs remain). Subseg `[0x526B0, asm] -> c` flipped.
+- Quality: 0/0/3/0 this sprint (stuck-far/permuter/carried/re-opened)
+- Seed: committed 13pt; banked 0pt (mixed-partial, per-file all-or-nothing); realized ~17, residual +4;
+  regime classical/mixed
+- What helped: asm-first hand-translate for the 2 trivial glue fns (byte-exact first build); the S184
+  parallel-subagent fan-out over the FP tail (3 isolated `nonmatchings/<fn>/`, no build race) both
+  characterized 3 S158 FP-regalloc walls AND returned 1 unexpected byte-match (`func_800779A8`, cracked
+  via a subagent local-alloc coloring lever — `while` not `if{do-while}`, split `t=x-base` to pin x in
+  `$f12`, non-negated `bc1fl`, fully-inlined return); the S204 coddog-min-instr-floor call was right
+  (settime@99.99 was a false collision, this is a `none` pack, no header vendoring needed).
+- Friction: 3 of 4 non-trivial FP fns are irreducible-from-C S158 regalloc walls (buffer-ptr homing,
+  coupled global/local coloring, int-temp hard-reg perm) — all < 0.97 so the permuter is not yet
+  applicable; the size-only `pts` priced the all-FP pack a flat 13, blind to the partial-bank reality.
+  One decomp_loop trap: a mid-TU byte-exact fn scores >0 purely from TU-offset branch mis-flagging.
+- Applied: 3 of 3 — #S1 `docs/hazards.md#isolated-compile-caveat` mid-TU standalone-offset case
+  (preceding stubs as INCLUDE_ASM in base.c for true offset); #S3 `docs/agent-workflow.md ## Workflow at
+  a glance` FP-subagent fan-out recipe extension; #S2 FP-pack pts-detector data point + coddog
+  min-instr-floor reconfirm QUEUED to the off-cadence golden-gated `pick_target.py` branch (not inline).
+- Carry-over: `src/main/func_800772B0.c` (3 of 6 banked; carries `func_800772C4`/`func_8007775C`/
+  `func_80077AD4`, all fully-RE'd S158 FP-regalloc walls, `docs/wip/*.near-match.md`). Retry: permuter
+  once seeded past the reg fold, or `#cross-project-matched-corpus-mining`.
+
 ## Sprint 205 — complete func_8005E380.c (fault register/flag dump printer) — 2026-07-09
 - Increment: 0 files banked / 0 functions matched (delta: no md5-candidate change). Sole increment
   `func_8005E380` carried as a compiler wall. Stubs unchanged.

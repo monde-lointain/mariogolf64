@@ -51,7 +51,14 @@ resume surface when the middle spans context windows.
     gate SERIALLY (never full-`make` in the main thread while subagents run — that races the shared
     `build/`). S184 fanned 7 subagents over the golf-pack tail; both isolated matches held in-tree, the
     rest surfaced as well-characterized regalloc/rodata carries. Seed each subagent with the canonical
-    struct/extern preamble + the levers so its base.c stays reconcilable at integration.
+    struct/extern preamble + the levers so its base.c stays reconcilable at integration. S206 extended
+    the recipe to an all-FP one-tu pack: 3 subagents over the FP-math tail returned 2 fully-RE'd S158
+    regalloc carries + 1 unexpected byte-match (`func_800779A8`, cracked via a precise local-alloc
+    coloring lever the orchestrator would not have found inline), so the fan-out earns its keep as
+    FP-regalloc CHARACTERIZATION (each carry gets a `docs/wip/<fn>.near-match.md`), not just as a
+    match-finder. Give each FP subagent the m2c-seed step + the FP levers (`f32 v[N]` stack-array for a
+    dead-frame store block, float-diff computation ORDER, `while` vs `if{do-while}` loop form, split a
+    temp to pin a value in `$f12`, non-negated `bc1fl` polarity).
 
 </workflow_overview>
 

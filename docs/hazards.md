@@ -1938,6 +1938,20 @@ the raw mnemonic diff over-reports by counting those display-only forms as misma
 objdump slice, not the stale isolated score, to measure a post-flip fn; the full-make ROM SHA-1
 remains the only authority.
 
+**Mid-TU standalone-offset case (S206): a byte-exact fn scores >0 purely from its TU position.**
+When you seed a fn that lives in the MIDDLE of a multi-fn TU (not the lead fn) as a lone
+`nonmatchings/<func>/base.c`, it compiles at TU offset 0, but the ROM reference has it at its true
+offset (the preceding fns' bytes come first). asm-differ's branch-target normalization then mis-flags
+the fn's OWN internal branches (their absolute targets differ by the offset delta), netting a residual
+score on an otherwise byte-identical body — and `ignore_addr_diffs` does NOT cover this (it is a
+branch-target artifact, not a reloc-immediate one). S206 `func_800779A8` (4th fn of
+`func_800772B0.c`) read ~1200 / ~6 branch rows flagged despite being 75/75 byte-exact.
+**Recipe:** put the PRECEDING same-TU fns as `INCLUDE_ASM("asm/nonmatchings/<seg>", <fn>)` lines
+ABOVE the target in base.c, so it lands at its true TU offset (0x6f8 for 779A8) and the standalone
+score reads 0. This is a positioning fix only; the body was already correct. Kin to the S187 stale-
+reference case above — both are "the isolated path can't see the real TU layout," resolved by the
+full-make ROM SHA-1 either way.
+
 ---
 
 ## Decompile-vs-asm authority
