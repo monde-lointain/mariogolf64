@@ -14,6 +14,8 @@ extern s32 D_801B6098;
 extern s32 scenario_mode_id;
 extern u8 D_8012D400[];
 extern u32 D_8012F724;
+extern s32 D_80105DCC;
+extern s32 D_80105DC8;
 
 u8 *func_8005AF74(void);
 void func_8005DF54(u8 *, s32);
@@ -106,11 +108,16 @@ s32 func_8005D248(void) {
     return D_80105DC4 != 0;
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80059BA0", func_8005D258);
+s32 func_8005D258(void) {
+    s32 x = D_80105DC8;
+    return (x & (~x >> 31)) + 0x16F;
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80059BA0", func_8005D274);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80059BA0", func_8005D2A0);
+s32 func_8005D2A0(void) {
+    return (D_80105DCC > 0) ? D_80105DCC : 1;
+}
 
 void func_8005D2B8(u8 *arg0) {
     s32 i = 0;
