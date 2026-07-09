@@ -9,6 +9,12 @@ extern u8 D_801052E8;
 extern u8 D_801B9410;
 extern u8 D_800C2BD4;
 extern s32 current_game_mode;
+extern u8 D_8012F720[];
+extern s32 D_801B6098;
+extern s32 scenario_mode_id;
+
+u8 *func_8005AF74(void);
+void func_8005DF54(u8 *, s32);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80059BA0", func_80059BA0);
 
@@ -22,7 +28,10 @@ INCLUDE_ASM("asm/nonmatchings/main/func_80059BA0", func_8005A580);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80059BA0", func_8005ACF8);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80059BA0", func_8005AF50);
+u8 *func_8005AF50(void) {
+    func_8005AF74();
+    return D_8012F720;
+}
 
 u8 *func_8005AF74(void) {
     return D_801323A0;
@@ -74,7 +83,11 @@ INCLUDE_ASM("asm/nonmatchings/main/func_80059BA0", func_8005CF78);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80059BA0", func_8005D0D8);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80059BA0", func_8005D1E4);
+void func_8005D1E4(void) {
+    u8 *p = func_8005AF74();
+    p[0x2E] = D_801B6098;
+    p[0x2F] = scenario_mode_id;
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80059BA0", func_8005D218);
 
@@ -149,13 +162,21 @@ void func_8005DD78(void) {
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80059BA0", func_8005DDAC);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80059BA0", func_8005DE00);
+s8 func_8005DE00(void) {
+    return ((s8 *)func_8005AF50())[0x28];
+}
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80059BA0", func_8005DE20);
+s8 func_8005DE20(void) {
+    return ((s8 *)func_8005AF50())[0x29];
+}
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80059BA0", func_8005DE40);
+s8 func_8005DE40(void) {
+    return ((s8 *)func_8005AF50())[0x2B];
+}
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80059BA0", func_8005DE60);
+void func_8005DE60(void) {
+    func_8005DF54(func_8005AF50(), 1);
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80059BA0", func_8005DE88);
 
