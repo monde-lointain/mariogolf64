@@ -25,6 +25,31 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 208 — func_80059BA0.c integer-glue/accessor pack — 2026-07-09
+- Increment: 0 files banked / **23 functions matched** (delta: no md5-candidate change, 230→230; file
+  23/59, 36 stubs remain, NOT md5-candidate). Largest single-sprint match count to date.
+- Quality: 0/0/4/0 (0 stuck-far / 0 permuter-run / 4 carried-near-match / 0 re-opened)
+- Seed: committed 13pt; banked 0pt (per-file all-or-nothing, file partial); regime classical/mixed;
+  realized ~15, residual +2
+- What helped: pack was a DEEP non-FP integer vein (37/59 non-FP), not thin like S206/S207 FP/DL packs
+  → +23 vs the +4 hedge. asm-first fast-path (MCP down, irrelevant). -O2-no-inline fact (cross-calls
+  stay jal regardless of defn order). `tools/cc/gcc -S` as a build-free codegen oracle to pick loop/
+  switch/const-type spellings before touching the tree. Levers: branchless `x&(~x>>31)`, local-ptr
+  addr-reuse, s8/u8 store-const, s8→s32 return re-extension.
+- Friction: ~1hr lost treating 4 fns (D218/D2E4/D308/B070) as a `nonmatching`-bss WALL — their own
+  `D_80105DCx`/`D_800C2B3C` refs read +0x10 off. It was self-inflicted `#short-text-shifts-flowing-bss`
+  (over-long codegen shifts the flowing bss); revert-to-confirm snapped the symbols back. Root-caused
+  via systematic-debugging + gcc-2.7.2 source.
+- Applied: 4 of 4 — #1 flowing-bss self-ref +N tell → `#short-text-shifts-flowing-bss`; #2 goto
+  preamble-order/regalloc coupling + #3 `gcc -S` oracle method → `#top-tested-loop-goto-local-hoist`;
+  #4 s8/u8 store-const + return-type re-extension → `#char-signedness`.
+- Carry-over: `func_80059BA0.c` (36 stubs). 4 characterized ≥0.97 near-matches (`func_8005B070`
+  schedule-transposition, `func_8005D218`/`func_8005D2E4` switch branch-polarity, `func_8005D308`
+  regalloc) → permuter sprint. Plus C458/C4B4/C5B4/C614 nested 6×6 counters, DF54, D334/B28C/CEE0/
+  B0B4/C510, and ~23 larger/FP fns.
+
+---
+
 ## Sprint 207 — func_80026400.c scenery/heap pack — 2026-07-09
 - Increment: 0 files banked / **3 functions matched** (delta: no md5-candidate change; file 3/9, 6
   stubs remain). Subseg `[0x1800, asm] -> c` flipped.

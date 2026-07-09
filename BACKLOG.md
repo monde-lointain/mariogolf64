@@ -107,6 +107,25 @@ expected-bank) rather than a flat size-13. Also reconfirms the S204 coddog min-i
 was mis-tagged `coddog-mirror:src/os/settime.c@99.99` (false fingerprint collision, it is a `none`
 classical pack, NOT a libultra mirror) — no header vendoring was needed at the gate.
 
+**S208 MIXED-PARTIAL — `src/main/func_80059BA0.c` integer-glue/accessor pack [0x34FA0], 23/59 (+23
+this sprint).** matched **+23** (largest single-sprint count to date, 5.75× the +4 hedge). md5-candidate
+**230 -> 230** (file 23/59, 36 stubs). Subseg flip `[0x34FA0, asm] -> c`. Unlike the S206/S207 FP/DL
+packs, this 59-fn `none` pack was a DEEP non-FP integer vein (37/59 non-FP) — accessors, game-mode
+store-init setters, call-chain glue, small clamps/loops — all asm-first byte-exact. Levers: -O2-no-inline
+(cross-calls stay `jal`); branchless `max(x,0)`=`x&(~x>>31)`; local-ptr addr-reuse + bnel delay-store;
+s8/u8 store-const + s8→s32 return-type. Seed 13; banked 0pt (mixed-partial); realized ~15; residual +2;
+regime classical/mixed. Quality **0/0/4/0**. 4 CARRIED, all characterized ≥0.97 near-matches
+(permuter-class): `func_8005B070` (1-instr `li`/`la` schedule transposition w/ coupled regalloc),
+`func_8005D218`/`func_8005D2E4` (2-case switch `beq`-fallthrough+delay-fill vs gcc `bne`+`j`),
+`func_8005D308` (`$a0`-accumulator regalloc). **PO takeaway:** a big `none` pack with a DEEP non-FP head
+(many <16-instr 0-FP fns) is a high-yield partial — the `partial-bank-expected` detector should carry a
+non-FP-integer-vein DEPTH signal, not just the FP/DL wall signal; price the value not the atomic-13.
+Retro applied **4 of 4** (flowing-bss self-ref tell, goto preamble-order/regalloc coupling, `gcc -S`
+codegen oracle, s8/u8+return-type levers — all folded into `docs/hazards.md`). Cross-repo: no new
+curated names (banked fns kept `func_`). **Next natural slice:** a permuter sprint on the 4 S208
+near-matches + the C458/C4B4/C5B4/C614 nested-counter family (all ≥0.97 loop/switch/regalloc), OR a
+fresh non-FP main pack.
+
 **S207 MIXED-PARTIAL — `src/main/func_80026400.c` scenery/heap pack [0x1800], 3/9 (+3 this sprint).**
 matched **+3**. md5-candidate **223 -> 223** (file 3/9, 6 stubs). Subseg flip `[0x1800, asm] -> c`. A
 9-fn one-tu pack: 2 heap-region-init heads + 2 string-dup-util tails (integer glue) + 5 FP/DL
@@ -3344,6 +3363,23 @@ by `/sprint-plan`:
   vendored upstream version can diverge from the game's rev on a single immediate (S122 nusys-2.07
   `NU_CONT_THREAD_ID=6` vs MG64's 5), and that surfaces only at first build unless reconciled here.
   A near-free retry missing any of these is a half-scoped spike — finish the scope before deferring.
+
+- **(S208 MIXED-PARTIAL — carried; 23 of 59 banked)** `src/main/func_80059BA0.c` (main-segment
+  `[0x34FA0]` integer-glue/accessor pack). Subseg `[0x34FA0, c, main/func_80059BA0]` flipped; 23 banked
+  asm-first (accessors/setters/store-init/call-chain/clamps), 36 stubs remain, ROM green off extracted
+  asm. **4 characterized ≥0.97 near-matches for a permuter sprint** (NOT walls — the goto/switch forms
+  reach exact instructions, only schedule/regalloc/branch-polarity residual): `func_8005B070`
+  (nested-search goto-loop; only a 1-instr `li v1,5`/`la a1` schedule transposition with COUPLED
+  regalloc — decl-order flips both; `nonmatchings/func_8005B070/base.c` seeded, isolated 0.62 is the
+  addressing artifact, in-tree diff = 1 instr); `func_8005D218`/`func_8005D2E4` (2-case+default switch;
+  ROM's tight `beq`-fallthrough with `li v0,7` in the beq DELAY slot vs the KMC gcc's looser `bne`+`j`+dup
+  `move`, +1 instr, from every switch/if/ternary/goto spelling); `func_8005D308` (if/else-if return chain
+  routed through `$a0` + `move v0,a0` regalloc). Also queue the **C458/C4B4/C5B4/C614 family** (4 nested
+  6×6-grid non-zero-byte counters, same top-tested-loop peel sensitivity as B070 ×4). All ≥0.97, none
+  attempted-to-floor with the permuter this sprint. Remaining un-attempted tractable: `func_8005DF54`
+  (5-call branch), `func_8005D334`/`func_8005B28C`/`func_8005CEE0`/`func_8005B0B4`/`func_8005C510`, plus
+  ~23 larger/FP fns. See `docs/hazards.md#top-tested-loop-goto-local-hoist` (the S208 preamble-order/
+  regalloc-coupling addendum) and `#short-text-shifts-flowing-bss` (the S208 self-ref +N tell).
 
 - **(S206 MIXED-PARTIAL — carried; 3 of 6 banked)** `src/main/func_800772B0.c` (main-segment
   `[0x526B0]` float spline/curve-interpolation pack; NOT a settime.c mirror — false coddog collision).

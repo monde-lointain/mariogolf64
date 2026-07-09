@@ -1334,6 +1334,19 @@ struct field's high word): that is a source/version difference; this is a whole-
 fix, then the clean-rebuild test proved `-fsigned-char` is the correct band default and the override
 was removed).
 
+**Related — per-declaration type-choice levers for classical game (-O2) code (S208).** Distinct from
+the whole-TU flag above: in hand-authored classical C the DECLARED type of a byte global or a fn return
+steers codegen, and you pick the type by matching the ROM's instruction, not by semantics.
+- **Store-const materialization.** Storing `-1` to a byte global emits `li vN,-1` (`addiu vN,$0,-1`) if
+  the global is `extern s8`, but `li vN,0xff` (`ori`) if `extern u8` — the stored byte is identical
+  (`sb` low 8 bits) but the immediate-load instruction differs. Match the ROM's `li -1`/`li 0xff` to
+  pick `s8`/`u8`. S208 `func_8005DC50` needed `s8 D_800C1FF4-7` for `= -1` → `li v0,-1`.
+- **Return-type re-extension.** A callee declared to return `s8` makes the CALLER re-sign-extend the
+  result (`sll/sra …,0x18`) before use; declaring the callee `s32` drops the re-extension, and the
+  callee's own body is byte-identical (its `lb` already sign-extends the byte into the full register).
+  When the ROM caller has no `sll/sra` on the returned byte, type the callee `s32`. S208 `func_8005D274`
+  matched only after `func_8005D23C`'s return was changed `s8`→`s32`.
+
 ---
 
 ## assert-strip (bare upstream assert vs NDEBUG)
@@ -3936,9 +3949,28 @@ already-infinite loop has no top test to rotate, so GCC emits the ROM's single t
 S184 nested `func_80043C20` (a bounded string-appender `while((c=*s++)) if(pos<end)*pos++=c;`) was 19
 instrs as a `while` (rotated) and the exact 17-instr ROM form as `for(;;){…;if(!c)break;…}`.
 
+**Preamble-order vs regalloc coupling — when the decl-order hoist lever can't decouple (S208).** The
+hoist corollary says "declare/use the one the ROM loads first, first" to fix preamble load order. That
+lever has a failure mode: when the two preamble loads target SPECIFIC coupled hard regs (a counter in a
+v-reg vs a base pointer in an arg reg), flipping the decl order flips BOTH the schedule AND the
+register assignment together, so you can get right-order+wrong-regs or right-regs+wrong-order but not
+both from source alone. S208 `func_8005B070` (a backward 5-count sentinel search): the goto loop nailed
+the exact instruction set + registers (`i`=`v1`, `p`=`a1`, plain `bne` back-edge, `addiu -4` in the
+delay), but the ROM emits `li v1,5` BEFORE `la a1` while every right-regs source form emits `la` first;
+declaring `i` first put `li` first but swapped the regs (`i`→`a1`, `p`→`v1`). A 1-instruction schedule
+transposition with coupled regalloc = route to the permuter (it perturbs schedule and regalloc
+independently), do not keep spelling source. **Method that proved it (S208):** compile 3–4 candidate
+source spellings straight to `.s` with the project compiler — `COMPILER_PATH=tools/cc tools/cc/gcc -S
+-G 0 -mips3 -mgp32 -mfp32 -mno-abicalls -O2 -o t.s t.c` on a tiny standalone snippet (stub the callees,
+`extern` the globals) — and read the codegen side-by-side. It is a build-free, flowing-bss-immune
+codegen oracle: it isolated the natural-loop peel (`bnel`) vs the goto-loop plain-`bne`, and exposed
+the decl-order/regalloc coupling, without a single full `make`+diff cycle. Prefer it for any
+shape/schedule/regalloc question before iterating in-tree.
+
 **Provenance:** established: S152 (`vector_magnitude_safe` / `calculate_hypotenuse_safe` range-scaling
 loops, shared with `#double-sqrt-fast-math`); reversal corollary: S154 (the `check_dbra_loop`
-count-only reversal); rotation corollary: S184 (`for(;;)`+`break` for an un-rotated top-test loop).
+count-only reversal); rotation corollary: S184 (`for(;;)`+`break` for an un-rotated top-test loop);
+preamble-order/regalloc coupling + the `gcc -S` codegen-oracle method: S208 (`func_8005B070`).
 
 ## decomposed-one-tu rodata alignment split (a counter-case to the 8-point decompose gate)
 
@@ -4712,6 +4744,20 @@ the symbol addresses; the symbol shift is a downstream symptom, and `asm/data/<s
 gitignored hides it from `git status`. The 2-instr overflow itself was a `&D_arr[i]` self-store
 re-derived instead of reusing the live pointer; see the
 [struct-array-of-BSS direct-index lever](#struct-array-of-bss-direct-index-vs-base-pointer-var) below.
+**Self-ref variant — the SAME fn's OWN data ref reads `+N` (S208).** The most self-misleading form:
+a wrong-length fn's shift surfaces on **its own** `%lo(D_xxx)`, not a sibling's, so it reads like the
+symbol itself is mis-mapped. S208 (partial-bank `func_80059BA0.c`): two over-long switch bodies
+(`func_8005D218`+`func_8005D2E4`, +2 instrs each = +0x10 total) shifted the flowing `.bss`, so
+`func_8005D218`'s own `%lo(D_80105DC1)` resolved `0x80105DD1` (+0x10) and the `map` showed
+`D_80105DC1` at `0x80105dd1` with a `.NON_MATCHING` suffix — a convincing "nonmatching-bss wall"
+mirage. It is NOT a wall: a matched sibling reading the same region at exact length
+(`func_8005B0A0`/`D_800C2B28`) proves the region resolves fine. **Confirm by reverting** the
+suspect body to `INCLUDE_ASM` and rebuilding — if the symbol snaps back to its named address
+(`D_80105DC1` → `0x80105dc1`), the `+N` was the symptom of your instr-count miss, and the fix is the
+codegen length (match instruction count exactly), never the symbol ref. Diagnose with `objdump -h`
+(object `.text` size vs the yaml span) FIRST — faster and less ambiguous than reading `map` addresses.
+The `+N` == instr-count-miss × 4.
+
 **Tooling note (S170).** `decomp_loop.py`'s `find_segment` can't locate a fn whose subseg is already
 flipped to `c` (its asm is under `asm/nonmatchings/<seg>/`, not top-level `asm/<off>.s`), so the
 asm-first fast-path miss-recovery fails with `no glabel found`. Workaround: manual

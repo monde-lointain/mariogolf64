@@ -430,6 +430,25 @@ Three honest caveats:
   FP/DL) where the size-only `pts` priced a partial-bank pack a flat 13 — the queued FP-and-DL-emitter
   `partial-bank-expected` detector now has 2 more data points. Retro applied 0/1 (PO-declined the
   delay-slot-fill near-match as a 4th regalloc-heavy detector signature; data point only).
+  S208: seed 13 (`func_80059BA0.c`, 59-fn integer-glue/accessor pack, sole increment), banked **0pt**
+  (mixed-partial, file 23/59 not md5-candidate; per-file all-or-nothing), **+23 matched** — the largest
+  single-sprint match count to date, 5.75× the +4 hedge, because the pack was a deep NON-FP integer vein
+  (37/59 non-FP), unlike the S206/S207 FP/DL packs. Banks: 4 accessors + 5 game-mode store-init + 6
+  accessor/setter call-chain + 2 loop/min-store + 2 clamp + 1 clamp-offset + 3 reset/glue, all asm-first
+  byte-exact. Levers: -O2-no-inline (cross-calls stay jal, no defn-order wall); branchless `max(x,0)` =
+  `x&(~x>>31)` not the branching `(x<0)?0:x`; local-ptr `u32*p=&g` to force addr-reuse + bnel delay-store;
+  s8/u8 store-const + s8→s32 return-type levers (both retro'd to `#char-signedness`). Realized ~15 (seed
+  13 +1 novel flowing-bss-self-ref gotcha +1 the 4 near-match carries; the 15 first-try banks argue for a
+  −1, netted against the +2 = **+2 residual**). Quality **0/0/4/0**. 4 carries, ALL characterized ≥0.97
+  near-matches (permuter-class, NOT walls): `func_8005B070` (goto-loop = exact instrs+regs, only a 1-instr
+  `li`/`la` schedule transposition w/ coupled regalloc); `func_8005D218`/`func_8005D2E4` (2-case switch,
+  ROM's tight `beq`-fallthrough+delay-fill vs gcc's looser `bne`+`j`); `func_8005D308` (`$a0`-accumulator
+  regalloc). THIRD consecutive main partial-bank pack, but the FIRST where the non-FP head was DEEP not
+  thin — argues the `partial-bank-expected` FP/DL detector should also carry a NON-FP-integer-vein DEPTH
+  signal (a big `none` pack with many <16-instr 0-FP fns is a high-yield partial, price the value not the
+  atomic-13). Retro applied **4/4** (#1 flowing-bss self-ref tell → `#short-text-shifts-flowing-bss`;
+  #2 goto preamble-order/regalloc coupling + #3 `gcc -S` codegen oracle → `#top-tested-loop-goto-local-hoist`;
+  #4 s8/u8 + return-type levers → `#char-signedness`).
   Rolling-5 (S34+S37+S39+S42+S43): seed 3.4 pt/sprint (17/5), realized 2.8 pt/sprint (14/5). S31 nuGfxInit is the first over-seed classical fn (+3 residual); rubric needs +1 for double-novel-gotcha libnusys classical targets. S42 defines-data verbatim-body drop: realized 2 = seed 3 − 1 (the fast path makes a defines-data leaf bank like a mirror) — confirms the −1 verbatim-first-try rule extends to known-edit-mirror defines-data, not just classical seeds. S43 is the new residual floor (−2): both gbpak fns were classical-FLAGGED (jal-count-mismatch) but proved pure verbatim mirrors once the macro-FP was stripped — the seed over-priced them because the hazard was a tooling artifact, now fixed in `_c_jal_count`, so future macro-heavy libultra leaves should seed lower.
 - **Regime:** `mirror` is a depleting minority (~22 % of ranked candidates: 56 mirror vs 194
   classical; 18 warm / 38 cold). The warm clean-singleton mirror pool is now **mined out** (S11
