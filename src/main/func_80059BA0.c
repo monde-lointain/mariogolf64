@@ -1,6 +1,7 @@
 #include "common.h"
 
 extern u8 D_801323A0[];
+extern s8 D_80105DC1;
 extern s8 D_80105DC2;
 extern s32 D_80105DC4;
 extern s32 D_800C2B28[];
@@ -123,7 +124,15 @@ void func_8005D1E4(void) {
   p[0x2F] = scenario_mode_id;
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80059BA0", func_8005D218);
+s32 func_8005D218(void) {
+  switch (D_80105DC1) {
+    case 0:
+    default:
+      return 0;
+    case 1:
+      return 7;
+  }
+}
 
 s32 func_8005D23C(void) { return D_80105DC2; }
 
@@ -148,7 +157,15 @@ void func_8005D2B8(u8* arg0) {
   } while (++i != 3);
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80059BA0", func_8005D2E4);
+s32 func_8005D2E4(void) {
+  switch (D_80105DC1) {
+    case 0:
+    default:
+      return 158;
+    case 1:
+      return 157;
+  }
+}
 
 s32 func_8005D308(void) {
   s32 x = D_80105DC2;
