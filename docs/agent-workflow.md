@@ -163,6 +163,13 @@ Ghidra MCP is used inline at seed time. For each target function:
      `top_mismatches` and `match_count == total_rows` is an isolation artifact (struct-field reloc
      addend, or extern HI/LO16), not a near-miss: go straight to the in-tree spot-check and full-make
      SHA-1; do not iterate C or reach for the permuter (see `docs/hazards.md#isolated-compile-caveat`).
+     **But this signal is only an isolation artifact at HIGH percent** (a few reloc/HI-LO rows against
+     an otherwise-matching body); at LOW percent (S205 `func_8005E380`: 0.48 with 535/535 rows +
+     empty `top_mismatches`) it is a REAL pervasive near-miss whose per-row diffs asm-differ groups
+     out of `top_mismatches` (e.g. a `#cse-derived-pointer-base-canonicalization` base-reg fold hitting
+     every access). **Disambiguate with the in-tree `tools/asm-differ/diff.py <func>`** (diffs the real
+     build against the ROM via the mapfile): if it too diverges, it is a genuine near-miss/wall — do
+     NOT apply the isolation-caveat shortcut, root-cause the pervasive diff instead.
    - **Finalize** (only if the spot-check passes): inline the body into `src/<seg>.c`, drop the
      `INCLUDE_ASM` line, `clang-format-22 -i` (now applies to every tree, including `src/libultra/`,
      `src/libkmc/`, `src/libnusys/`, and `src/mgu/`), then `make` until `build/mariogolf64.z64: OK`
@@ -643,6 +650,7 @@ When `pick_target.py` flags a hazard (or a match shows its symptom), read the ma
 | tempted to use the plain `register` keyword (no `asm`) as a regalloc match lever — it is a zero-`.text`-effect no-op at -O2 (REG_USERVAR_P absent from local-alloc/global priority; DECL_REGISTER ignored when obey_regdecls==0) | #signed-divide-const-v0v1-quotient-destination |
 | straight-line (1 basic block, `.flow` dump) classical fn locks on a pure s-register permutation + 1 independent-store schedule move; source levers don't move it | #local-alloc-qty-permutation |
 | `nonmatching-func`/`decomp_loop` isolated object diverges from the in-tree build of the same 1-BB fn | #local-alloc-qty-permutation |
+| large straight-line dump fn (one `T* p` param, `sub=&p->big_substruct` at fixed offset, many `sub->field` accesses): ROM materializes `p+C` as base (`addiu sN,a0,C`), build keeps the PARAM base + folds `+C` into every displacement; pervasive base-reg + uniform-offset diff, `match_count==total_rows`+empty `top_mismatches` at LOW percent | #cse-derived-pointer-base-canonicalization |
 
 </hazard_index>
 

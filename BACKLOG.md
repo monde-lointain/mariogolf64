@@ -119,11 +119,13 @@ the `%f` single/double dump is game-specific), field names match. **NOT blind-re
 from-scratch permuter seeded PAST the base fold, or a source form forcing `thread+0x20` materialization
 (none found). Fresh main c-stub singles now exhausted (`func_8003E004` + `func_8005E380` both confirmed
 compiler walls); next main increment is a 13pt decompose-gated pack or the mispriced `func_800772B0`
-one-tu pack. **Retro follow-up (queued, off-cadence golden-gated `pick_target.py` branch):** add a
-`#cse-derived-pointer-base-canonicalization` detector (single pointer param + big-substruct-base dump +
-pervasive single-base-reg/uniform-displacement diff → price permuter/carry-expected), and a
-`docs/hazards.md` section; refine the isolation-caveat note (full-rows + empty-mismatches at LOW percent
-is not always an isolation artifact — disambiguate with in-tree `diff.py`).
+one-tu pack. **Retro applied 3/3 (S205):** #1 `docs/hazards.md#cse-derived-pointer-base-canonicalization`
+section + TOC + hazard-index rows (DONE inline); #3 isolation-caveat refinement in
+`docs/agent-workflow.md ## Execution loop` (low-percent full-rows + empty-mismatches ≠ always an
+isolation artifact — disambiguate with in-tree `diff.py`) (DONE inline); #2 `pick_target.py`
+regalloc-heavy pts-detector — add the CSE-base-canon signature (single pointer param + big-substruct-base
+dump → price permuter/carry-expected) QUEUED to the off-cadence golden-gated branch (joins the S158/
+S177/S183/S203/S204 detector, now 3 wall signatures: FP-hoist, qty-perm, base-canon).
 
 **S204 MIXED-PARTIAL — `src/main/func_80050400.c` ROM-load-slot head [0x2B800] COMPLETE + `func_8003E004`
 compiler-source spike.** matched **+1** (`func_80050428`); md5-candidate file `func_80050400.c` now 0

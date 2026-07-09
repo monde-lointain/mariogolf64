@@ -108,6 +108,7 @@ The hazard families below group the sections that follow. Each links to its exis
 - [goto-dispatch branch-toward vs branchless (constant dispatch through a shared return)](#goto-dispatch-branch-toward-vs-branchless-constant-dispatch-through-a-shared-return)
 - [nested-function static-chain spill (leaf dead `sw v0,0(sp)` + caller sets `v0=&frame` per-call)](#nested-function-static-chain-spill)
 - [local-alloc qty-permutation (1-basic-block reg swap, permuter-appropriate)](#local-alloc-qty-permutation)
+- [cse-derived-pointer base-canonicalization (sub-struct dump fn keeps the param base, folds the offset)](#cse-derived-pointer-base-canonicalization)
 
 **libnusys / audio-band specifics**
 - [libmus-bundled-n_audio duplicate (a SUPPORT_NAUDIO libmus archive links its OWN n_audio synth copy)](#libmus-bundled-n_audio-duplicate-a-support_naudio-libmus-archive-links-its-own-n_audio-synth-copy)
@@ -5381,3 +5382,43 @@ scratch buffers landed at `sp+0x1F`/`sp+0x5F` per which array was declared first
 build of the same fn (the minimal isolated context perturbs local allocation). **Gate on the in-tree
 object byte-`cmp` + the full ROM SHA-1, not the isolated score**, for a one-basic-block fn. (The
 isolated near-miss score is still a fine permuter SEED; just don't trust it as the match oracle.)
+
+## cse-derived-pointer base-canonicalization
+
+**Symptom (S205 `func_8005E380`).** A large straight-line fn takes ONE pointer parameter `T* p`,
+derives a fixed-offset sub-object pointer `sub = &p->big_substruct` (constant offset, e.g. `OSThread*
+thread` → `ctx = &thread->context` at +0x20), and does MANY `sub->field` accesses. Every build keeps
+the **parameter** in a callee reg (`move $16,$4`) and folds the sub-offset into each displacement
+(`0x11C($16)` for `ctx->pc`); the ROM instead materializes the sub-pointer as the base
+(`addiu $17,$4,0x20`, then `0xFC($17)`) with the buffer/other pointer in the other callee reg. Result:
+a **pervasive** base-register + uniform-displacement-offset diff on EVERY field access. The isolated
+`decomp_loop` shows `match_count == total_rows`, `top_mismatches == []`, yet a LOW percent (S205: 0.48)
+— looks like the `#io_write/io_read`/isolated-compile artifact, but the in-tree `diff.py` confirms it
+is a REAL pervasive near-miss (see the isolation-caveat note in `## Execution loop`).
+
+**Root cause (gcc-2.7.2, confirmed by exhaustive bisect).** CSE (`cse.c` `fold_rtx` /
+`simplify_plus_minus` address canonicalization) always canonicalizes `(plus (plus param C) off)` to
+`(plus param (C+off))` — it prefers the **base PARAMETER** as the single canonical base and eliminates
+the `param+C` intermediate, extending the parameter's live range across the calls (hence the
+`move $16,$4` preservation). It will not keep the derived `param+C` as the base even when the ROM does.
+The choice of WHICH of {param, sub, buf} keeps a callee reg is then a local-alloc tie, but the
+canonicalization itself is upstream and deterministic.
+
+**Levers that DO NOT work (all proven inert, S205 — do not re-try):**
+- Source (8): `register` kw, `(T*)((u8*)p + C)` char\* cast, an eager `sub`+`id` temp block, decl
+  order, and reading a pre-substruct field via `sub[-k]` (GCC **re-folds** `ctx[-3]` back to
+  `thread+0x14`). None move the score off the base fold.
+- Flags/opt (19): `-O0/-O1/-O2/-O3`, `-g`, `-funroll-loops`,
+  `-fno-{gcse,cse-follow-jumps,cse-skip-blocks,rerun-cse-after-loop,expensive-optimizations,defer-pop,strength-reduce,schedule-insns,schedule-insns2,...}`. Every one folds.
+- Permuter (`--main`, best-only, ~45k iters): valid-floor only ~1200 permuter-score (base ~27760 /
+  0.48 decomp_loop); anything lower is **semantically INVALID** (drops a print call, or uses `sub`
+  uninitialized) — the same UB-drift failure mode as the `func_8003E004` permuter runs.
+
+**Verdict.** This is a compiler wall distinct from `#local-alloc-qty-permutation` (that keeps the
+right base, permutes only s-regs — permuter-crackable) and from `#move_movables` FP-hoist
+(`func_8003E004`). It is NOT blind-retryable: it needs a from-scratch permuter seeded PAST the base
+fold, or a source form that forces the `param+C` materialization (none found across 8 forms). RE the
+body fully (it is 100% structural), commit a gold in-file root-cause note, and **carry** — do not burn
+sprints re-attempting the same levers. Detector signal for `pick_target.py` (queued, off-cadence
+golden-gated): single pointer param + large sub-struct-base dump access pattern + FP-reg reads →
+price permuter/carry-expected (kin to the S158/S177/S183/S203/S204 regalloc-heavy pts follow-up).

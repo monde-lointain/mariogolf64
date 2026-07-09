@@ -25,6 +25,30 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 205 — complete func_8005E380.c (fault register/flag dump printer) — 2026-07-09
+- Increment: 0 files banked / 0 functions matched (delta: no md5-candidate change). Sole increment
+  `func_8005E380` carried as a compiler wall. Stubs unchanged.
+- Quality: 1/1/1/0 this sprint (stuck-far/permuter/carried/re-opened)
+- Seed: committed 8pt; banked 0pt (per-file all-or-nothing, carried = 0); regime classical
+- What helped: asm-first hand-translate off `__OSThreadContext` u64/`__OSfp` fields → compiled +
+  100% structural (535/535 rows) first build; PO's ultralib pointer confirmed no verbatim source
+  (rmon copies raw words; `%f` dump is game-specific); compiler-source flag-bisect (19 opt/flag
+  variants) + source-lever sweep (8 forms) cleanly root-caused the wall as CSE base-canonicalization
+  (deterministic, unbreakable) rather than guessing; in-tree `diff.py` disambiguated the low-percent
+  full-rows/empty-mismatches signal from a true isolation artifact.
+- Friction: reached for the permuter before finishing the compiler-source dive (out of the PO-preferred
+  order per [[compiler-source-rootcause-before-permuter]]); the permuter drifted into UB (dropped print
+  calls / uninit ctx) below its valid floor ~1200, so it added no signal beyond confirming no valid
+  source form reaches 0. The size-only `pts` priced this c-stub 13, blind to the regalloc/CSE wall.
+- Applied: 3 of 3 — #1 new `docs/hazards.md#cse-derived-pointer-base-canonicalization` section + TOC +
+  hazard-index rows; #3 isolation-caveat refinement (low-percent full-rows ≠ always artifact,
+  disambiguate with in-tree `diff.py`); #2 ranker regalloc-heavy pts-detector (add CSE-base-canon
+  signature) QUEUED to the off-cadence golden-gated `pick_target.py` branch (not applied inline).
+- Carry-over: `src/main/func_8005E380.c` (spike; `func_8005E380` CSE derived-pointer base-canon wall,
+  gold in-file root-cause note commit 8fe89cc). Fresh main c-stub singles now exhausted (this +
+  `func_8003E004` both confirmed compiler walls); next main increment is a 13pt decompose-gated pack
+  or the mispriced `func_800772B0` one-tu pack.
+
 ## Sprint 204 — main c-stub file completion (func_80050400.c banked) + func_8003E004 compiler-source spike — 2026-07-09
 - Increment: 1 file md5-candidate (`src/main/func_80050400.c`, 0 stubs) / +1 function matched
   (`func_80050428`). Stubs 63→62. No flip enabler (file already `c`).

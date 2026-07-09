@@ -396,6 +396,17 @@ Three honest caveats:
   spike (0 bank, not re-scored) → definitive `move_movables` DFmode-hoist root cause + gold carry note.
   `func_8004DC44` (`#signed-divide-const`) carried un-attempted (stretch deferral). First data point that
   a permuter-won bank on a 1-BB fn is a real +2 residual (novel-gotcha), not the usual +1.
+  S205: seed 8 (`func_8005E380`, sole increment), banked **0** (carried spike; per-file all-or-nothing).
+  Realized N/A (carry scores 0 pt on the file ledger; the function-level effort would be seed 8 +1 carry
+  = 9 but the file banks 0). Quality **1/1/1/0**. The fault register/flag dump printer was fully RE'd +
+  100% structural (535/535 rows) but hit a NOVEL compiler wall — `#cse-derived-pointer-base-canonicalization`
+  (GCC 2.7.2 CSE always canonicalizes context-pointer arithmetic to the base param, folding the +0x20
+  sub-offset into every displacement; ROM materializes `thread+0x20` as the base). Distinct from S204's
+  `#local-alloc-qty-permutation` (permuter-crackable) and S203's `move_movables` FP-hoist. Ruled out 8
+  source forms + 19 flag/opt variants + permuter (valid-floor ~1200, lower = UB). THIRD consecutive
+  main c-stub whose size-only `pts` (priced 13) blind-missed a regalloc/CSE wall (S203 FP-hoist, S204
+  qty-perm won, S205 base-canon carry) — the `regalloc-heavy` pts-detector follow-up now has 3 wall
+  signatures to price; queued off-cadence. Fresh main c-stub singles exhausted.
   Rolling-5 (S34+S37+S39+S42+S43): seed 3.4 pt/sprint (17/5), realized 2.8 pt/sprint (14/5). S31 nuGfxInit is the first over-seed classical fn (+3 residual); rubric needs +1 for double-novel-gotcha libnusys classical targets. S42 defines-data verbatim-body drop: realized 2 = seed 3 − 1 (the fast path makes a defines-data leaf bank like a mirror) — confirms the −1 verbatim-first-try rule extends to known-edit-mirror defines-data, not just classical seeds. S43 is the new residual floor (−2): both gbpak fns were classical-FLAGGED (jal-count-mismatch) but proved pure verbatim mirrors once the macro-FP was stripped — the seed over-priced them because the hazard was a tooling artifact, now fixed in `_c_jal_count`, so future macro-heavy libultra leaves should seed lower.
 - **Regime:** `mirror` is a depleting minority (~22 % of ranked candidates: 56 mirror vs 194
   classical; 18 warm / 38 cold). The warm clean-singleton mirror pool is now **mined out** (S11
