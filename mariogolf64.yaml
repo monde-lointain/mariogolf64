@@ -88,7 +88,7 @@ segments:
       - [0x1050, c, libnusys/nupireadrom]
       - [0x1130, c, main/func_80025D30]
       - [0x17B0, c, main/func_800263B0]
-      - [0x1800, asm]
+      - [0x1800, c, main/func_80026400]
       - [0x3700, c, libnusys/nugfxinit]
       - [0x37B0, c, libnusys/nusched]
       - [0x4650, c, main/func_80029250]
