@@ -641,6 +641,8 @@ When `pick_target.py` flags a hazard (or a match shows its symptom), read the ma
 | >=2 alloc-artifact walls (dead-frame / non-coalesced reg-copy / target-spills-but-build-doesn't = "mine more optimal than target") CLUSTER in one classical TU whose simple fns bank clean | #profile-probe (run ONE TU-wide probe before N per-fn dives) |
 | signed divide-by-const dividend/magic in the wrong two regs (`sra r,r,0x1f` reg = dividend, `lui 0x<magic>` reg = magic); flippable-in-isolation (return/reg-2-SET → local-alloc suggestion pass), but a VOID/callless/returnless loop-fed leaf is deterministically magic-in-low-reg; cross-project matched-corpus mining is the escalation | #signed-divide-const-v0v1-quotient-destination |
 | tempted to use the plain `register` keyword (no `asm`) as a regalloc match lever — it is a zero-`.text`-effect no-op at -O2 (REG_USERVAR_P absent from local-alloc/global priority; DECL_REGISTER ignored when obey_regdecls==0) | #signed-divide-const-v0v1-quotient-destination |
+| straight-line (1 basic block, `.flow` dump) classical fn locks on a pure s-register permutation + 1 independent-store schedule move; source levers don't move it | #local-alloc-qty-permutation |
+| `nonmatching-func`/`decomp_loop` isolated object diverges from the in-tree build of the same 1-BB fn | #local-alloc-qty-permutation |
 
 </hazard_index>
 

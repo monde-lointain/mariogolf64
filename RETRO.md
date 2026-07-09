@@ -25,6 +25,32 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 204 — main c-stub file completion (func_80050400.c banked) + func_8003E004 compiler-source spike — 2026-07-09
+- Increment: 1 file md5-candidate (`src/main/func_80050400.c`, 0 stubs) / +1 function matched
+  (`func_80050428`). Stubs 63→62. No flip enabler (file already `c`).
+- Quality: 0/1/2/0 this sprint (`func_80050428` permuter-escalated & WON; carried: `func_8003E004`
+  continuing-carry root-cause-upgraded, `func_8004DC44` stretch-deferred).
+- Seed: committed 6pt (`func_80050428` 3 + `func_8004DC44` 3); banked 3pt; realized 5; residual +2;
+  regime classical.
+- What helped: **PO-directed compiler-source dives before the permuter (twice).** (1) `func_8003E004`:
+  4 subagents over gcc-2.7.2 + binutils-2.6 + `-dL`/`-da` RTL dumps → definitive `move_movables` DFmode
+  `(double)base` hoist root cause (loop.c:1630); gas exonerated; 9 clean variants plateau 12439-14020;
+  gold carry note in-source (commit 53977e0). (2) `func_80050428`: `.flow` dump proved 1 basic block →
+  `local-alloc.c` qty-priority regalloc (not global.c); permuter found score 0 (iter ~14250). Winning
+  levers: reference the global INLINE (no pointer local), cache a re-read to pin an independent store's
+  schedule slot, array decl-order sets aligned-scratch stack offsets. `pscore.py` + a pre/body/post
+  splice harness A/B'd variants fast against the authoritative scorer.
+- Friction: `nonmatching-func`/`decomp_loop` isolated object DIVERGED from the in-tree build for the
+  1-BB `func_80050428` (misleading isolated score); had to gate on the in-tree object + full ROM SHA-1.
+  The `func_8003E004` retry consumed most of the sprint for 0 bank (research spike), by PO direction.
+- Applied: PO-selected 4 of 5. #2 `#local-alloc-qty-permutation` hazards.md section + index rows (DONE);
+  #3 nonmatching-func-diverges-from-in-tree caveat (folded into #2 section, DONE); #1 `regalloc-heavy`
+  pts-detector and #4 coddog-min-instr-floor ACCEPTED → queued to the off-cadence golden-gated
+  `pick_target.py` tooling branch (specs in BACKLOG; not hand-edited inline). (#5 seed-dir dedup: minor,
+  not selected.)
+- Carry-over: `func_8003E004` (`src/main/func_8003DFD0.c`, confirmed `move_movables` hoist wall, gold
+  note); `func_8004DC44` (`src/main/print_string_at_grid.c`, `#signed-divide-const` grid-copy, stretch).
+
 ## Sprint 203 — src/main/func_8003DFD0.c MIXED-PARTIAL: wind DL builder banked, vertex gen carried — 2026-07-09
 - Increment: 0 files md5-candidate / +1 function matched. Continued the S200 c-stub file
   `src/main/func_8003DFD0.c` (was 1/3 → now 2/3, 1 stub). No flip enabler (already `c`).

@@ -89,6 +89,36 @@ literals through a `*glistp`-loaded running `Gfx*` cursor) at 0-expected-bank. C
 written back (`*arg = cursor`), regardless of jal/FP count. So a debug/HUD DL-renderer TU (all fns are
 emitters) prices partial-bank-expected-**ZERO** and stops topping the smallest-first sort. Same
 golden-gated off-cadence tooling follow-up; kin to the S158/S177/S183/S189 rows above.
+**Re-confirmed + reframed (S204, PO-accepted at retro, QUEUED to the off-cadence golden-gated
+`pick_target.py` branch):** `func_8003E004` (c-stub, priced 13) is another under-priced FP/6-callee-double
+regalloc wall — spec for the detector: on a `none`/c-stub fn, count FP ops + callee-saved-double pressure
++ (new) whether the residual is a straight-line `#local-alloc-qty-permutation`; price regalloc-heavy /
+flag partial-bank / permuter-expected. **Also accepted at S204 retro (#4, same branch): coddog
+min-instruction floor** — suppress a `coddog-mirror:<file>@<pct>` tag on a fn of <=8 instrs (tiny store
+fns fingerprint-collide; S204 `func_800772B0` writes ZERO to two globals but tagged `settime.c@99.99`
+because osSetTime is also a 2-store leaf). Both are golden-gated (`make test-tools`, then
+`REGEN_GOLDEN=1` for the intended re-price), NOT hand-edited inline at retro.
+
+**S204 MIXED-PARTIAL — `src/main/func_80050400.c` ROM-load-slot head [0x2B800] COMPLETE + `func_8003E004`
+compiler-source spike.** matched **+1** (`func_80050428`); md5-candidate file `func_80050400.c` now 0
+stubs. `func_80050428` (ROM-slot directory loader: two aligned `nuPiReadRom` DMAs from `D_E473F0[i*8]`,
+fills `RomLoadSlot`) is a straight-line (1 basic block) fn that seeded to a near-match with only a
+`local-alloc.c` s-register **permutation** + one independent-store schedule move. PO directed a
+codegen dive before the permuter: proved 1-BB → local-alloc qty priority (not global.c); 5 source levers
+didn't move it; **permuter found score 0 (iter ~14250)** → new `#local-alloc-qty-permutation` hazard.
+Winning levers: reference `D_E473F0` inline (no pointer local), cache the size re-read before the
+`D_8012D3A8` store, array decl-order sets the aligned-scratch stack offsets. Trap: the isolated
+`nonmatching-func` object DIVERGED from the in-tree build (gate on in-tree + ROM SHA-1). **Also this
+sprint:** re-investigated the S203 carry `func_8003E004` as a PO-directed compiler-source spike (0 bank)
+→ definitive `move_movables` DFmode `(double)base` hoist root cause (loop.c:1630, 4 subagents + RTL
+dumps, gas exonerated, 9 clean variants plateau 12439-14020); gold carry note in-source. Quality
+**0/1(won)/2/0**. Seed 6; banked 3pt; realized 5; residual +2; regime classical. Retro applied **4 of 5**
+(#2/#3 docs DONE; #1/#4 queued to tooling branch; #5 seed-dir dedup not selected). Cross-repo: no new
+curated names (siblings all `func_`). **Carry-overs:** `func_8003E004` (confirmed `move_movables`
+hoist wall, gold note); `func_8004DC44` (`#signed-divide-const` grid-copy, an already-multi-sprint carry
+S172-S175, deferred as the S204 stretch — NOT a fresh candidate). **Next natural slice:** a fresh main
+c-stub 1-stub file completion (`func_80070FD0.c`, or `lz_decompress_simple.c`'s `lz_decompress_extended`),
+or a fresh main pack.
 
 **S202 MIXED-PARTIAL — `src/main/func_8005E380.c` debug/fault tail [0x39780], 1/2 (+1 this sprint).**
 matched **+1**. md5-candidate **229/244->229/245** (file 1/2, 1 stub). `func_8005EAD4`

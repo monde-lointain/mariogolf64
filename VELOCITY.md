@@ -389,6 +389,13 @@ Three honest caveats:
   carried the FP wind-vertex generator `func_8003E004` (seed 13, realized 16, residual +3 = stuck-far +
   permuter + carried on one fn; a c-stub size-only seed can't see the S158-class FP/6-callee-double
   regalloc wall — another `regalloc-heavy` pts-detector data point, deferred at retro).
+  S204: seed 6 (`func_80050428` 3 + `func_8004DC44` 3), banked 3 (`func_80050400.c` md5-candidate),
+  realized 5, residual **+2** on `func_80050428` (+1 permuter-won + 1 novel-gotcha: 1-basic-block
+  `#local-alloc-qty-permutation` + the isolated-`nonmatching-func`-diverges-from-in-tree trap). Quality
+  0/1(won)/2/0. Also re-investigated the S203 carry `func_8003E004` as a PO-directed compiler-source
+  spike (0 bank, not re-scored) → definitive `move_movables` DFmode-hoist root cause + gold carry note.
+  `func_8004DC44` (`#signed-divide-const`) carried un-attempted (stretch deferral). First data point that
+  a permuter-won bank on a 1-BB fn is a real +2 residual (novel-gotcha), not the usual +1.
   Rolling-5 (S34+S37+S39+S42+S43): seed 3.4 pt/sprint (17/5), realized 2.8 pt/sprint (14/5). S31 nuGfxInit is the first over-seed classical fn (+3 residual); rubric needs +1 for double-novel-gotcha libnusys classical targets. S42 defines-data verbatim-body drop: realized 2 = seed 3 − 1 (the fast path makes a defines-data leaf bank like a mirror) — confirms the −1 verbatim-first-try rule extends to known-edit-mirror defines-data, not just classical seeds. S43 is the new residual floor (−2): both gbpak fns were classical-FLAGGED (jal-count-mismatch) but proved pure verbatim mirrors once the macro-FP was stripped — the seed over-priced them because the hazard was a tooling artifact, now fixed in `_c_jal_count`, so future macro-heavy libultra leaves should seed lower.
 - **Regime:** `mirror` is a depleting minority (~22 % of ranked candidates: 56 mirror vs 194
   classical; 18 warm / 38 cold). The warm clean-singleton mirror pool is now **mined out** (S11

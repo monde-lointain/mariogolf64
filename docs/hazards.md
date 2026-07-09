@@ -107,6 +107,7 @@ The hazard families below group the sections that follow. Each links to its exis
 - [struct-array-of-BSS direct-index vs base-pointer var](#struct-array-of-bss-direct-index-vs-base-pointer-var)
 - [goto-dispatch branch-toward vs branchless (constant dispatch through a shared return)](#goto-dispatch-branch-toward-vs-branchless-constant-dispatch-through-a-shared-return)
 - [nested-function static-chain spill (leaf dead `sw v0,0(sp)` + caller sets `v0=&frame` per-call)](#nested-function-static-chain-spill)
+- [local-alloc qty-permutation (1-basic-block reg swap, permuter-appropriate)](#local-alloc-qty-permutation)
 
 **libnusys / audio-band specifics**
 - [libmus-bundled-n_audio duplicate (a SUPPORT_NAUDIO libmus archive links its OWN n_audio synth copy)](#libmus-bundled-n_audio-duplicate-a-support_naudio-libmus-archive-links-its-own-n_audio-synth-copy)
@@ -5342,3 +5343,41 @@ accepts a documented pseudo-fakematch. `#capturing-ra` (which also reads a fixed
 `func_8004E1E0`); mechanism dumped from `mips-gcc-2.7.2` (`mips.h` STATIC_CHAIN_REGNUM, `function.c`
 expand_function_start, `calls.c` static_chain pass). Two subagents converged: one on the nested-fn
 structure, one on the standalone UB reproduction; PO chose to carry for the real nested form.
+
+## local-alloc qty-permutation (1-basic-block reg swap, permuter-appropriate)
+
+**Symptom (S204 `func_80050428`).** A straight-line classical fn (no branches) byte-matches the ROM in
+mnemonic sequence but locks on an s-register **permutation** (e.g. target `off→s4, slot→s3, base→s2`;
+build `off→s1, slot→s4, base→s3`) plus one independent-store schedule move. Not structural, not FP.
+
+**Root cause (gcc-2.7.2 codegen dive).** A fn with ONE basic block is register-allocated by
+**`local-alloc.c` (QTYs), NOT `global.c`** — confirm with the `.flow` dump (`1 basic blocks`). Local
+allocation orders QTYs by priority `floor_log2(n_refs)·n_refs·size / (death−birth)` (`local-alloc.c`
+`qty_compare` :1579), tie-broken by lower qty number (:1622). `find_free_reg` (:2073) returns the
+**lowest-numbered free callee-saved reg** (MIPS has no `REG_ALLOC_ORDER`, so the scan is ascending
+`$16=s0…$23=s7,$30=s8`), so the register NUMBER a value gets is just its rank in the priority order,
+minus regs already live in its range. When two competitors' priorities are close (e.g. a 2-ref
+short-life index vs a 3-ref long-life pointer) they swap, rotating the whole assignment by one.
+
+**Do NOT hand-iterate the source.** GCC's pre-alloc scheduler normalizes QTY births, so decl-order,
+expression-association, and pointer-hoist rewrites mostly DON'T move the permutation (S204: 5 source
+levers, zero movement). This is exactly the local-allocation space the **decomp-permuter** explores —
+run it (`setup-permuter.sh --main`, then `run-permuter.sh <fn> --stop-on-zero`). S204 found score 0 at
+iteration ~14250. Two winning shapes the permuter surfaces here recur:
+- **Reference a global INLINE, not via a pointer local** (`(u32)(D_E473F0 + x)`, not `u8* base =
+  D_E473F0; base + x`). The `base` copy creates an extra QTY that shifts the priority tie-breaks; the
+  inline form matches the ROM's qty numbering. (A leftover dead `u8* base;` decl the permuter keeps is a
+  no-op; remove it and re-verify SHA.)
+- **Cache a re-read value in a local to PIN an independent store's schedule slot.** The ROM stores
+  `D_8012D3A8 = index` between the `end` and `size` stores; the build hoisted it early. Reading
+  `size_val = *(u32*)size_aligned;` into a local right before the `D_8012D3A8` store forces that order.
+
+Also: **local (stack-slot) layout follows array DECL order** — `func_80050428`'s two 16-aligned DMA
+scratch buffers landed at `sp+0x1F`/`sp+0x5F` per which array was declared first; a 2-byte
+`27b1005f`↔`27b1001f` miss is fixed by swapping the two array declarations (not a codegen lever).
+
+**`nonmatching-func` isolated object can DIVERGE from in-tree for a 1-BB fn.** S204's isolated
+`make nonmatching-func` / `decomp_loop` object showed a DIFFERENT local-alloc result than the in-tree
+build of the same fn (the minimal isolated context perturbs local allocation). **Gate on the in-tree
+object byte-`cmp` + the full ROM SHA-1, not the isolated score**, for a one-basic-block fn. (The
+isolated near-miss score is still a fine permuter SEED; just don't trust it as the match oracle.)
