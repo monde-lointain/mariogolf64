@@ -150,7 +150,21 @@ void func_8005D2B8(u8* arg0) {
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80059BA0", func_8005D2E4);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80059BA0", func_8005D308);
+s32 func_8005D308(void) {
+  s32 x = D_80105DC2;
+  s32 r;
+
+  if (x >= 6) {
+    if (x >= 9) {
+      r = 0xC8;
+    } else {
+      r = 0xC7;
+    }
+  } else {
+    r = x + 0x1EB;
+  }
+  return r;
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80059BA0", func_8005D334);
 
