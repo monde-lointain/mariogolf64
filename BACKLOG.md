@@ -99,6 +99,32 @@ fns fingerprint-collide; S204 `func_800772B0` writes ZERO to two globals but tag
 because osSetTime is also a 2-store leaf). Both are golden-gated (`make test-tools`, then
 `REGEN_GOLDEN=1` for the intended re-price), NOT hand-edited inline at retro.
 
+**S205 SPIKE/CARRY — `src/main/func_8005E380.c` fault register/flag dump printer, 0 banks (0 pt).**
+matched **+0**. Sole committed increment; carried. `func_8005E380` (469 instr / 66 jal / 56 FP-reg,
+2192B) is a game reimpl of the SDK `__osDumpThreadContext` (output via the game text renderer
+`func_8005E360`/`func_8004D580`, not `osSyncPrintf`). FULLY RE'd off `__OSThreadContext` u64 GPR fields +
+`__OSfp` FP regs (single-as-`(f64)fpN.f.f_even` then `fpN.d` double), semantically exact, **100%
+structural (535/535 asm rows, identical mnemonic stream)** — in-file gold note (commit 8fe89cc) has the
+complete body. **NOVEL WALL: CSE derived-pointer base-canonicalization.** GCC 2.7.2 CSE always
+canonicalizes context-pointer arithmetic to the base PARAMETER `$4` (`move $16,$4`, folds +0x20 into every
+displacement, keeps `thread` in a callee reg); ROM keeps `ctx=thread+0x20` materialized as the base
+(`addiu $17,$4,0x20`). Distinct from `func_8003E004` (`move_movables` FP-hoist) and `func_80050428`
+(`#local-alloc-qty-permutation`, S204). Ruled out **8 source forms** (register kw / char*-cast / eager
+temp / decl order / `ctx[-3]` id read — GCC re-folds it back to `thread+0x14` / ...) and **19 flag/opt
+variants** (-O0/O1/O3, -g, -funroll, -fno-{gcse,cse-follow-jumps,expensive-optimizations,defer-pop,...});
+permuter (best-only `--main`, ~45k iters) **valid-floor ~1200** (base 27760 / 0.48 decomp_loop; lower
+scores are UB — dropped print calls, ctx used uninit). PO mid-sprint pointed to ultralib
+(`~/development/repos/ultralib`): confirmed NO verbatim source (rmon `__rmonCopyWords` copies raw words;
+the `%f` single/double dump is game-specific), field names match. **NOT blind-retryable:** needs a
+from-scratch permuter seeded PAST the base fold, or a source form forcing `thread+0x20` materialization
+(none found). Fresh main c-stub singles now exhausted (`func_8003E004` + `func_8005E380` both confirmed
+compiler walls); next main increment is a 13pt decompose-gated pack or the mispriced `func_800772B0`
+one-tu pack. **Retro follow-up (queued, off-cadence golden-gated `pick_target.py` branch):** add a
+`#cse-derived-pointer-base-canonicalization` detector (single pointer param + big-substruct-base dump +
+pervasive single-base-reg/uniform-displacement diff → price permuter/carry-expected), and a
+`docs/hazards.md` section; refine the isolation-caveat note (full-rows + empty-mismatches at LOW percent
+is not always an isolation artifact — disambiguate with in-tree `diff.py`).
+
 **S204 MIXED-PARTIAL — `src/main/func_80050400.c` ROM-load-slot head [0x2B800] COMPLETE + `func_8003E004`
 compiler-source spike.** matched **+1** (`func_80050428`); md5-candidate file `func_80050400.c` now 0
 stubs. `func_80050428` (ROM-slot directory loader: two aligned `nuPiReadRom` DMAs from `D_E473F0[i*8]`,
