@@ -12,6 +12,8 @@ extern s32 current_game_mode;
 extern u8 D_8012F720[];
 extern s32 D_801B6098;
 extern s32 scenario_mode_id;
+extern u8 D_8012D400[];
+extern u32 D_8012F724;
 
 u8 *func_8005AF74(void);
 void func_8005DF54(u8 *, s32);
@@ -59,7 +61,12 @@ INCLUDE_ASM("asm/nonmatchings/main/func_80059BA0", func_8005B7BC);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80059BA0", func_8005BC10);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80059BA0", func_8005C018);
+void func_8005C018(u32 arg0) {
+    u32 *p = &D_8012F724;
+    if (*p < arg0) {
+        *p = arg0;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80059BA0", func_8005C038);
 
@@ -105,7 +112,12 @@ INCLUDE_ASM("asm/nonmatchings/main/func_80059BA0", func_8005D274);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80059BA0", func_8005D2A0);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80059BA0", func_8005D2B8);
+void func_8005D2B8(u8 *arg0) {
+    s32 i = 0;
+    do {
+        *arg0++ = D_8012D400[i];
+    } while (++i != 3);
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80059BA0", func_8005D2E4);
 
