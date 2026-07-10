@@ -62,17 +62,49 @@ INCLUDE_ASM("asm/nonmatchings/main/func_80054900", seek_current_frame_by);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80054900", func_800562F4);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80054900", func_80056324);
+void func_80056324(s32 id, u8 value) {
+    u8 *cs = get_character_state(id);
+    if (cs != NULL) {
+        cs[0x83] = value;
+    }
+}
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80054900", func_80056350);
+void func_80056350(s32 id, u8 value) {
+    u8 *cs = get_character_state(id);
+    if (cs != NULL) {
+        cs[0x84] = value;
+    }
+}
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80054900", func_8005637C);
+void func_8005637C(s32 id, u8 value) {
+    u8 *cs = get_character_state(id);
+    if (cs != NULL) {
+        cs[0x60] = value;
+    }
+}
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80054900", set_anim_flag_82);
+void set_anim_flag_82(s32 id, u8 value) {
+    u8 *cs = get_character_state(id);
+    if (cs != NULL) {
+        cs[0x82] = value;
+    }
+}
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80054900", set_anim_speed_byte);
+void set_anim_speed_byte(s32 id, u8 value) {
+    u8 *cs = get_character_state(id);
+    if (cs != NULL) {
+        cs[0x61] = value;
+    }
+}
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80054900", func_80056400);
+s32 func_80056400(s32 id) {
+    u8 *cs = get_character_state(id);
+    s32 result = -1;
+    if (cs != NULL) {
+        result = *(s32 *)(cs + 0x18);
+    }
+    return result;
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80054900", func_8005642C);
 
@@ -80,7 +112,12 @@ INCLUDE_ASM("asm/nonmatchings/main/func_80054900", func_80056464);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80054900", func_80056494);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80054900", set_extra_flag_0);
+void set_extra_flag_0(s32 id, u8 value) {
+    u8 *cs = get_character_state(id);
+    if (cs != NULL) {
+        cs[0x188] = value;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80054900", func_800564F0);
 
