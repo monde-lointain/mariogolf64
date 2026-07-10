@@ -8,8 +8,14 @@ extern s32 D_800C4020;
 extern s32 D_800C4060;
 extern s32 D_800C4064;
 extern s32 D_800C4068;
+extern s32 D_800C0E60;
+extern u8 D_800C406C[];
+extern s32 D_800C411C;
+extern s32 D_800C4120;
 extern s32 D_800C4124;
+extern s32 D_800C4128;
 extern s32 D_800C4144;
+extern void play_sound_effect(s32 sfx, s32 arg1, s32 arg2);
 extern s32 D_800FF4B0;
 extern s32 D_800FF4B4;
 extern s32 D_800FF4B8;
@@ -115,7 +121,22 @@ void func_8006B9E4(void) {
 
 s32 func_8006BA10(void) { return !~D_800C4124; }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_8006A2C0", func_8006BA24);
+void func_8006BA24(s32 arg0) {
+  u8* e;
+  s32 t;
+
+  if (arg0 == -1) {
+    return;
+  }
+  e = D_800C406C + arg0 * 16;
+  D_800C4120 = 0;
+  D_800C411C = arg0;
+  func_8006B980();
+  t = *(s32*)(e + 4);
+  D_800C4124 = 0;
+  D_800C4128 = t;
+  play_sound_effect(0x64, D_800C0E60, 0x64);
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_8006A2C0", func_8006BA94);
 
