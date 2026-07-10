@@ -168,7 +168,41 @@ INCLUDE_ASM("asm/nonmatchings/main/get_tile_attribute", func_800425C8);
 
 s32 func_80042720(void) { return (u32)&load_hole_terrain_assets > 0x803FFFFFU; }
 
-INCLUDE_ASM("asm/nonmatchings/main/get_tile_attribute", func_80042738);
+typedef struct {
+  s16 val;
+  s8 pad[0xE];
+} CylFieldS16;
+
+typedef struct {
+  s8 val;
+  s8 pad[0xF];
+} CylFieldS8;
+
+extern CylFieldS16 collision_cylinders[];
+extern CylFieldS16 D_800FBEA4[];
+extern CylFieldS8 D_800FBEA6[];
+
+void mark_scenery_collision_cells(void) {
+  s32 mark = 0xF801;
+  u16* base = D_80132D4A;
+  s32 i;
+
+  for (i = 0; i < 128; i++) {
+    s32 gx, gz;
+    s32 sx, sz;
+    s32 block;
+
+    if (D_800FBEA6[i].val < 0) {
+      continue;
+    }
+    gx = collision_cylinders[i].val / 16;
+    gz = D_800FBEA4[i].val / 16;
+    block = (((u32)gx >> 5) + ((u32)gz >> 5) * 8) * 2560;
+    sx = gx & 0x1F;
+    sz = gz & 0x1F;
+    *(u16*)((u8*)(base + (sx + sz * 36)) + block) = mark;
+  }
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/get_tile_attribute", func_800427E8);
 
