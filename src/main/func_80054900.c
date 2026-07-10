@@ -28,6 +28,13 @@ extern f32 D_801B54F4;
 extern f32 D_801B54F8;
 extern f32 D_801B54FC;
 extern f32 D_801B5500;
+extern u8 polychara_buf[];
+extern u8 polychara_state[];
+extern u8 polychara_seg_ptr[];
+extern u8 polychara_alive_msg[];
+extern u8 polychara_assert_cond[];
+extern u8 polychara_assert_file[];
+extern void __assert(const char* cond, const char* file, s32 line);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80054900", func_80054900);
 
@@ -97,7 +104,19 @@ void func_80055788(s32 id) {
   }
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80054900", activate_texture_anim_slot);
+void activate_texture_anim_slot(s32 id, s32 slot) {
+  u8* cs = get_character_state(id);
+  if (slot >= 0x20) {
+    __assert((const char*)polychara_assert_cond,
+             (const char*)polychara_assert_file, 0x7A4);
+  }
+  if (cs != NULL) {
+    u8 val = 4;
+    u8* p = cs + slot * 8;
+    *(u8*)(p + 0x8c) = val;
+    *(s32*)(p + 0x88) = 0;
+  }
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80054900", func_80055828);
 
@@ -269,7 +288,27 @@ void animation_tick_all_players(void) {
 
 s32 func_800577D0(void) { return 0x23680; }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80054900", func_800577DC);
+void func_800577DC(s32 index, void* arg1) {
+  u32 aligned = ((u32)arg1 + 0xFFF) & 0xFFFFF000;
+  s32 stride = index * 0x18C;
+  if (*(s32*)(polychara_state + stride) != -1) {
+    s32 j = 0;
+    do {
+      osSyncPrintf((const char*)polychara_alive_msg, index);
+      j += 1;
+    } while (j < 10);
+  } else {
+    s32 i;
+    s32* p;
+    *(u32*)(polychara_buf + stride) = aligned;
+    i = 0;
+    p = (s32*)(polychara_seg_ptr + stride);
+    for (; i < 3; i++) {
+      *p = *(s32*)(polychara_buf + stride) + 0x20000 + i * 0x780;
+      p++;
+    }
+  }
+}
 
 void func_800578AC(void) {
   s32 i;
