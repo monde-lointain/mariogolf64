@@ -42,3 +42,19 @@ Nested-if gets the two skip branches, but BUILD emits plain `bne`/`beqz`+nop whe
 uses branch-LIKELY `bnel`/`beql` annulling `e+=4` into the delay slots (reorg replicates
 the increment), + `move v1,a0` walking-pointer copy (BUILD walks e in a0 directly).
 Same `#base-register-vs-displacement`/`#indexed-vs-pointer-loop-strength-reduction` class.
+
+## PROVEN WALL (S213 compiler-source dive, cse.c/loop.c)
+Confirmed permuter-territory via a gcc-2.7.2 source dive. The re-derivable
+loop-invariant `base+off` drives a COUPLED failure: loop.c peels/rotates the
+first iteration (loop.c:505-545), exposing the invariant to CSE within the
+peeled extended BB (cse.c:8008/4769/1224) -> base cached in a caller-saved temp
+($8), which then blocks `result` from promoting to the 3rd callee-saved reg.
+A `tr` local removes the peel but makes the cache PERMANENT; a while-loop
+re-derives base but caches `e->val`. No source form yields {no-peel +
+re-derive + reload-e->val + result-in-s1} together.
+Sibling collect_keyframe_events_at: loop.c strength_reduce (loop.c:3214) builds
+a 2nd giv (`e+3`) for the tag/pad byte loads, splitting `e+=4` into two pointer
+bumps -> defeats reorg optimize_skip (reorg.c:1137) branch-likely annul (needs a
+SINGLE-insn increment). Nested-if fixes the &&-merge but not the IV split.
+Both CARRY (regalloc/layout permutation). BINUTILS cross-check: subu->addiu is a
+gas M_SUBU_I macro (non-diff); all bnel/annul is gcc reorg output.
