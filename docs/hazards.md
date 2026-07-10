@@ -5733,3 +5733,72 @@ address != the symbol name, the region is a shifted `.NON_MATCHING` carve; do NO
 the data section is properly carved/placed (see [#defines-data] / [#data-rodata-carve]). Cleanly-placed
 globals show `.NON_MATCHING` at the SAME address as the real symbol (safe). This is the data-carve
 enabler that blocks `func_8005DE88` (logic fully decoded; carried pending the carve).
+
+## value-select-if-else vs branch-likely (the `p ? field : sentinel` accessor idiom)
+
+**Symptom (S211; `func_80056464` / `func_80056494` / `func_8005642C`).** A tiny accessor calls a
+lookup that returns a pointer, then returns a field-or-sentinel: the ROM emits the NON-annulled
+value-select layout `bnez v0,.Lval; nop; j .Lend; li v0,SENT (delay); .Lval: lh v0,OFF(v0); .Lend:`
+(5 insns). The natural early-return `if (p == NULL) return SENT; return p->field;` AND the ternary
+`return p ? p->field : SENT;` BOTH collapse to the SHORTER branch-likely form
+`beqzl v0,.Lend; li v0,SENT (annulled delay); lh v0,OFF(v0)` (3 insns) — 2 insns short each.
+
+**Fix.** Write the explicit VALUE-SELECT if-else assigning a result var, testing the null case first
+so the sentinel is the inline "then":
+```c
+s32 result;
+if (p == NULL) { result = SENT; } else { result = p->field; }
+return result;
+```
+This emits the target's `bnez/nop/j/li` layout. The distinguisher is that GCC materializes the
+sentinel into a named local whose two definitions live in separate basic blocks, defeating the
+branch-likely annul it applies to a single conditional-expression value.
+
+**Detection when wrong.** A 2-insn-per-fn length deficit cascades a whole-file symbol shift, so
+`cmp build/mariogolf64.z64 baserom.z64` shows THOUSANDS of scattered ±1-byte diffs (every reference to
+a now-shifted symbol), NOT a localized per-fn near-miss — `asm-differ diff.py` shows each fn internally
+clean-but-shifted. Sibling of [#top-tested-loop-goto-local-hoist] (both are -O2 branch-form matches).
+
+## delay-slot-fill of a null-guard `beqz` (body-first insn safe-on-the-taken-path)
+
+**Symptom (S211; `func_800564F0` `if(cs) cs[0x189]=1` / `func_80055738` `if(cs){p=cs+i*8; …}`).** A
+null-guarded block matches byte-for-byte EXCEPT the guard `beqz`'s delay slot: the ROM leaves it `nop`;
+the build fills it with the block's first computation (`li v0,1`, `sll v0,s0,3`), so the build is 1
+insn SHORT and shifts the rest of the file.
+
+**Root cause (the predictive rule).** GCC 2.7.2 `reorg` steals the block's first instruction into the
+guard `beqz`'s (non-annulled) delay slot ONLY when that instruction is SAFE to execute on the TAKEN
+(pointer-is-null) path. So:
+- Body-first DEREFERENCES the guarded pointer (`lwc1 $f0,0x10(v0)` / `lw v0,0(v0)`) — would fault at
+  the near-null address on the taken path, so reorg CANNOT steal it and correctly leaves the `nop`.
+  These match for FREE (S211 `func_80056264`, `seek_current_frame_by`, `func_80056520`).
+- Body-first is pointer-INDEPENDENT (`li CONST`, `sll index*K`) — safe on both paths, so reorg steals
+  it into the delay slot. The ROM's reference build did NOT (a reorg-heuristic/patchlevel divergence),
+  leaving `nop`. **Faithful C cannot make a safe op unsafe**, so this is a hard near-match.
+
+**What FAILS.** `if`, `if/else`, early-return, and hoisting the independent op before the guard all
+fail to suppress the fill (early-hoist trades the fill for a `move v1,v0` reg-swap, worse). Contrast the
+store-a-VARIABLE case (`func_80056238` `cs[0x85]=arg1`): its body-first `sb arg,OFF(v0)` derefs the
+pointer, so it correctly emits `bnel`+store-in-delay and matches. Escalation:
+[#cross-project-matched-corpus-mining] for a KMC-2.7.2 sibling, or a `reorg.c fill_simple_delay_slots`
+patchlevel probe; carry otherwise.
+
+## default-return-var must init AFTER the call (caller-saved sentinel frame lever)
+
+**Symptom (S211; `lookup_animation_by_id`, via systematic-debugging + gcc-2.7.2 source).** A fn returns
+a default sentinel (`result = 0`) overwritten only on some path. Seeding `s32 result = 0;` BEFORE the
+`get_character_state()` (or any) call makes `result` LIVE ACROSS the call, so GCC pins it to a
+callee-saved register (`s1`) → an extra `sw sN`/`lw sN` pair → the frame grows (`0x18` → `0x20`) and a
+pervasive downstream regalloc cascade (plus a spurious `beqzl`). The target keeps the sentinel in a
+CALLER-saved arg register (`a1`) and sets it in the guard branch's delay slot, POST-call.
+
+**Fix.** Initialize the default AFTER the call so it never crosses it:
+```c
+u8 *cs = get_character_state(id);
+s32 result = 0;   /* after the call → caller-saved a1, frame 0x18 */
+```
+Diagnostic: a frame-size mismatch plus exactly one extra saved `sN` register at the top of the diff is
+this, not a body bug. General to any default-then-conditionally-overwrite return and the whole
+`get_character_state` accessor family. (S211 `lookup_animation_by_id`: this dropped the score 2588→1340
+and byte-matched the prologue/setup; the residual loop shape is a separate
+[#goto-loop-vs-structured-loop-codegen] / [#top-tested-loop-goto-local-hoist] wall, carried.)

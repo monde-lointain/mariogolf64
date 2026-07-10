@@ -478,6 +478,18 @@ Three honest caveats:
   first is the wrong ranker on a hard residual tail (→ the `family-of` follow-up). Retro applied **4/4**
   (#1 new #base-register-vs-displacement; #2 .NON_MATCHING data-carve blocker+diagnostic; #3
   #grid-counter dispatch-tail; #4 family-of ranker RECORDED as a golden-gated tooling follow-up, not live).
+  S211: OPENED a FRESH 13pt pack `func_80054900.c` (48-fn animation, flip `[0x2FD00]`), banked **0pt**
+  (mixed-partial, file 20/48 not md5-candidate), **+20 matched** — the strongest single-sprint matched
+  count on the classical track, from a fresh smallest-first vein (validates the S210 lesson: prefer a
+  fresh pack's easy leaves over a mined-out residual tail). Quality **0/0/3/0** (0 permuter-runs — the
+  tiny get_character_state accessors banked via the asm-first fast-path in 2 green full-makes; 3 carried).
+  Two new REUSABLE codegen levers found this sprint (both now in hazards.md): the deref-guard rule for
+  #delay-slot-fill (a null-guarded block's `beqz` delay stays `nop` iff the body-first insn derefs the
+  guarded pointer — predicted `seek_current_frame_by`/FP-accessor first-try banks) and
+  #default-return-var-must-init-after-call (a sentinel return var init AFTER a call stays caller-saved →
+  frame 0x18 not 0x20; systematic-debugging + gcc-2.7.2 source cracked `lookup_animation_by_id`
+  2588→1340, residual = loop-optimizer branch-likely wall). Retro applied **3/3**, all to hazards.md +
+  3 index rows. The accessor/small-loop vein is now mined out; residual tail = FP/nested/≥884B dispatchers.
   Rolling-5 (S34+S37+S39+S42+S43): seed 3.4 pt/sprint (17/5), realized 2.8 pt/sprint (14/5). S31 nuGfxInit is the first over-seed classical fn (+3 residual); rubric needs +1 for double-novel-gotcha libnusys classical targets. S42 defines-data verbatim-body drop: realized 2 = seed 3 − 1 (the fast path makes a defines-data leaf bank like a mirror) — confirms the −1 verbatim-first-try rule extends to known-edit-mirror defines-data, not just classical seeds. S43 is the new residual floor (−2): both gbpak fns were classical-FLAGGED (jal-count-mismatch) but proved pure verbatim mirrors once the macro-FP was stripped — the seed over-priced them because the hazard was a tooling artifact, now fixed in `_c_jal_count`, so future macro-heavy libultra leaves should seed lower.
 - **Regime:** `mirror` is a depleting minority (~22 % of ranked candidates: 56 mirror vs 194
   classical; 18 warm / 38 cold). The warm clean-singleton mirror pool is now **mined out** (S11

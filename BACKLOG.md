@@ -3364,6 +3364,30 @@ by `/sprint-plan`:
   `NU_CONT_THREAD_ID=6` vs MG64's 5), and that surfaces only at first build unless reconciled here.
   A near-free retry missing any of these is a half-scoped spike — finish the scope before deferring.
 
+- **(S211 MIXED-PARTIAL — carried; 20 of 48 banked)** `src/main/func_80054900.c` (main-segment
+  `[0x2FD00]` character-animation pack). Subseg `[0x2FD00, c, main/func_80054900]` flipped; 20 banked
+  byte-exact (the get_character_state accessor family + FP int/float accessors, `func_80055788` down-loop,
+  `animation_tick_all_players`, `seek_current_frame_by` frame-clamp), **28 stubs remain**, ROM green off
+  extracted asm. The tiny-accessor / small-loop vein is MINED OUT. **3 characterized carries:**
+  - `func_800564F0` (`if(cs) cs[0x189]=1`) + `func_80055738` (`if(cs){p=cs+i*8; p->0x88=arg2; p->0x8C=3;}`)
+    — [#delay-slot-fill-of-a-null-guard-beqz]: the guard `beqz` delay stays `nop` in the ROM but GCC
+    steals the body's pointer-INDEPENDENT first insn (`li`/`sll`) into it (1 insn short). No faithful-C
+    lever (the body-first must deref the guarded ptr to force the nop, which these do not). Escalation =
+    corpus-mining / a `reorg.c` patchlevel probe.
+  - `lookup_animation_by_id` (0xC-stride list search) — `docs/wip/lookup_animation_by_id.near-match.md`.
+    FRAME/REGALLOC ROOT-CAUSE FIXED ([#default-return-var-must-init-after-call], score 2588→1340,
+    prologue/setup byte-match); residual = a loop-optimizer/reorg wall
+    ([#goto-loop-vs-structured-loop-codegen]): the target has an un-rotated head (goto-only) AND a
+    conditional branch-likely back-edge (do-while-only), and no single C loop idiom yields both (5 forms
+    tried). Escalation = corpus-mining the KMC-2.7.2 search-loop shape, or the permuter (structural).
+  - **Tail (~25 unprofiled):** FP walls (`func_80054900` lead FP-length + dead-frame v0 spill; the
+    ≥884B dispatchers `animation_step`/`func_800568CC`/`func_80058D04`/`func_80057FFC`), nested fns
+    (`func_80054B7C` v0-static-chain), mid-size logic (`find_keyframe_offset_by_tag`, `func_80054E4C`,
+    `func_800578AC` global-write to D_801F4424, `func_80056060` osVirtualToPhysical). **Next slice:** the
+    mid-size logic fns (non-FP, non-nested) are the next tractable vein; the FP/nested/dispatcher fns are
+    an FP-sprint / corpus-mining class. 3 new decomp names to add to `symbol_addrs.txt` are already
+    `func_`; ~20 curated names (`seek_current_frame_by` etc. already named) → cross-repo Ghidra sync.
+
 - **(S210 MIXED-PARTIAL — carried; 33 of 59 banked)** `src/main/func_80059BA0.c` (main-segment
   `[0x34FA0]` integer-glue/accessor pack). 33 banked (S208 +23 asm-first; S209 +9 compiler-source dive;
   S210 +1 `func_8005C510`), **26 stubs remain**, ROM green off extracted asm. **S210 +1:** `func_8005C510`

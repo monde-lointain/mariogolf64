@@ -25,6 +25,27 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 211 — open func_80054900.c animation pack (mixed-partial, smallest-first) — 2026-07-09
+- Increment: 0 files banked / **20 functions matched** (delta: no md5-candidate change, 230→230; file
+  20/48 banked, 28 stubs remain, NOT md5-candidate). Opened `src/main/func_80054900.c` (flip `[0x2FD00]`
+  asm→c, 48-fn pack).
+- Quality: **0/0/3/0** (0 stuck-far / 0 permuter-runs / 3 carried [`func_800564F0` + `func_80055738`
+  #delay-slot-fill; `lookup_animation_by_id` loop-optimizer wall] / 0 re-opened).
+- Seed: fresh big one-tu classical pack — committed **13pt** (booked at plan); banked **0pt** (per-file
+  all-or-nothing, file partial); regime classical/mixed. Value signal = **+20 matched**.
+- What helped: asm-first fast-path on tiny accessors (whole get_character_state family banked in 2 green
+  full-makes); the deref-guard root-cause let `seek_current_frame_by` / FP accessors bank first-try;
+  systematic-debugging + gcc-2.7.2 source cracked the `lookup_animation_by_id` frame/regalloc
+  (result-init-after-call, 2588→1340).
+- Friction: the #delay-slot-fill reorg divergence (2 carries, no faithful-C lever); the
+  `lookup_animation_by_id` loop shape (5 loop forms, no single idiom yields un-rotated head + conditional
+  branch-likely back-edge); one 3-fn value-select miss cascaded a whole-file ±1 shift before diagnosis.
+- Applied: **3 of 3** (#1 `docs/hazards.md` #value-select-if-else-vs-branch-likely; #2
+  #delay-slot-fill-of-a-null-guard-beqz + the safe-on-taken-path root-cause rule; #3
+  #default-return-var-must-init-after-call frame lever; + 3 hazard-index rows in `agent-workflow.md`).
+- Carry-over: `src/main/func_80054900.c` 20/48 banked, 28 stubs (3 characterized carries +
+  FP/nested/dispatcher tail). See `BACKLOG.md ## Carry-overs`.
+
 ## Sprint 210 — func_80059BA0.c continuation (D334 dive + fresh non-FP tail) — 2026-07-09
 - Increment: 0 files banked / **1 function matched** (`func_8005C510`) (delta: no md5-candidate change,
   230→230; file 33/59 banked, 26 stubs remain, NOT md5-candidate).

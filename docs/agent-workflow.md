@@ -660,6 +660,9 @@ When `pick_target.py` flags a hazard (or a match shows its symptom), read the ma
 | large straight-line dump fn (one `T* p` param, `sub=&p->big_substruct` at fixed offset, many `sub->field` accesses): ROM materializes `p+C` as base (`addiu sN,a0,C`), build keeps the PARAM base + folds `+C` into every displacement; pervasive base-reg + uniform-offset diff, `match_count==total_rows`+empty `top_mismatches` at LOW percent | #cse-derived-pointer-base-canonicalization |
 | clean fn byte-exact except N `r` rows on ONE data-access chain: ROM materializes a full base addr into a reg + `0(reg)` deref, build keeps `%hi`+index + folds `%lo`/const into the load/store DISPLACEMENT; struct-array or `T* row=` intermediates BACKFIRE (pervasive regalloc shift), permuter does not flip it | #base-register-vs-displacement |
 | new C references a `D_<addr>` global whose `build/*.map` addr != its name (shifted `.NON_MATCHING` carve, e.g. name+0x10); referencing it corrupts the whole region incl. banked siblings | #base-register-vs-displacement (data-carve subsection) / #defines-data |
+| `p ? field : sentinel` accessor (call returns ptr, return a field-or-default): build emits short branch-likely `beqzl` vs ROM `bnez/nop/j/li`; ternary + early-return both collapse; whole-file ±1 `cmp` cascade from the 2-insn deficit | #value-select-if-else-vs-branch-likely |
+| null-guard `if(p){…}` byte-exact except the guard `beqz` delay slot (ROM `nop`, build steals the block's first insn); fires when body-first is pointer-INDEPENDENT (`li`/`sll`), matches free when body-first DEREFS the guarded ptr | #delay-slot-fill-of-a-null-guard-beqz |
+| default-sentinel return var (`result=0`/`-1`) forces an extra saved `sN` + frame grows `0x18`->`0x20` + regalloc cascade because it is init BEFORE a call (crosses it -> callee-saved); init it AFTER the call | #default-return-var-must-init-after-call |
 
 </hazard_index>
 
