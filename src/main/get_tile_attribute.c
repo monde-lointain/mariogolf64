@@ -36,7 +36,28 @@ void* func_80040E3C(s32 x, s32 z) {
   return get_table_entry(query_terrain_at_position(x, z));
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/get_tile_attribute", get_terrain_type);
+extern u16 D_80132D4A[];
+
+u16 get_terrain_type(s32 x, s32 z) {
+  s32 gx, gz;
+  s32 sx, sz;
+  s32 block;
+  u16* base;
+
+  if ((u32)x > 0x3FFFFF) {
+    return 0;
+  }
+  if ((u32)z > 0x7FFFFF) {
+    return 0;
+  }
+  gx = x / 0x4000;
+  gz = z / 0x4000;
+  block = (((u32)gx >> 5) + ((u32)gz >> 5) * 8) * 2560;
+  sx = gx & 0x1F;
+  sz = gz & 0x1F;
+  base = D_80132D4A;
+  return *(u16*)((u8*)(base + (sx + sz * 36)) + block) | 1;
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/get_tile_attribute", blend_terrain_color);
 
