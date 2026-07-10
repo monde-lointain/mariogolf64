@@ -3364,6 +3364,17 @@ by `/sprint-plan`:
   `NU_CONT_THREAD_ID=6` vs MG64's 5), and that surfaces only at first build unless reconciled here.
   A near-free retry missing any of these is a half-scoped spike — finish the scope before deferring.
 
+- **(S214 MIXED-PARTIAL — carried; 5 of 8 banked)** `src/main/func_80026400.c` (main-segment scenery
+  render pack, subseg `[0x1800, c, main/func_80026400]` already flipped). S214 banked `func_80026400`
+  + `project_sort_scenery_cylinders` + `update_scenery_cylinder_transforms` (+3, byte-exact via
+  compiler-source fan-out). **3 stubs remain**, ROM green off extracted asm, NOT md5-candidate. The 3
+  carries are DL/FP-heavy display-list emitters (`#display-lists` + FP class, not attempted):
+  `emit_scenery_billboard` (274 instr), `draw_scenery_opaque_pass` (898 instr),
+  `draw_scenery_alpha_pass` (401 instr). Next slice: the F3DEX2 DL reconstruction workflow
+  (`docs/hazards.md#display-lists`, MAIN_CFLAGS `-DF3DEX_GBI_2` already standing) OR carry for a
+  dedicated DL sprint. Shared type model (CylField*/SceneryTransform/SceneryMtxPair alias structs) is
+  in the .c head for the emitters to reuse.
+
 - **(S213 MIXED-PARTIAL — carried; 28 of 48 banked)** `src/main/func_80054900.c` (main-segment
   `[0x2FD00]` character-animation pack). Subseg `[0x2FD00, c, main/func_80054900]` flipped; 28 banked
   byte-exact (S211 +20; S212 +5; **S213 +3 via a compiler-source dive**: `lookup_animation_by_id`

@@ -87,6 +87,7 @@ The hazard families below group the sections that follow. Each links to its exis
 - [return-type is load-bearing](#return-type-is-load-bearing)
 - [struct-access-folding-changes-scheduling](#struct-access-folding-changes-scheduling)
 - [offset-0-symbol re-materialization (fixed-global field RMW)](#offset-0-symbol-re-materialization-fixed-global-field-rmw)
+- [call-arg delay-slot fill + field-alias addend-0 (S214 scenery levers)](#call-arg-delay-slot-fill--field-alias-addend-0-s214-scenery-levers)
 - [volatile-view CSE reload (force a just-stored global to reload)](#volatile-view-cse-reload-force-a-just-stored-global-to-reload)
 - [mem-in-struct scheduling lever (model a fixed global as a struct/array member)](#mem-in-struct-scheduling-lever-model-a-fixed-global-as-a-structarray-member)
 - [call-result a0-vs-v0 single-allocno (force a scratch reg via both-arm reuse)](#call-result-a0-vs-v0-single-allocno-force-a-scratch-reg-via-both-arm-reuse)
@@ -4156,6 +4157,57 @@ scheduling/regalloc is wrong" miss in the KMC gcc 2.7.2 source at `~/development
 S157 param-reuse fix for the s0/s1/s2 rotation); loop-invariant hoist vs induction-var init ordering
 is `loop.c` `move_movables`/`strength_reduce` (above); delay-slot fill is `reorg.c`
 `fill_slots_from_thread`; loop inversion is `stmt.c` `expand_end_loop` and `loop.c` `check_dbra_loop`.
+
+## call-arg delay-slot fill + field-alias addend-0 (S214 scenery levers)
+
+Four levers from the `func_80026400.c` scenery pack (S214), all banked byte-exact via the
+compiler-source subagent fan-out with **zero permuter runs**. They compose with
+`#top-tested-loop-goto-local-hoist` and `#indexed-vs-pointer-loop`.
+
+**0. STALE-WALL RETIRED (the meta-lesson).** `func_80026400` carried 7 sprints as an S207
+"delay-slot-fill/regalloc near-match wall." The plain documented body matched first build. The S207
+carry was never compiler-source-*proven* (only ~30 min of source-form trials), so it was a stale/subtle
+artifact, not a wall. **Before spending a sprint on an old carry, run a cheap subagent
+reproduce-from-note pass** — if the documented body matches, the wall was stale. A note-tagged carry is
+only trustworthy when a rigorous dive cites the diverging pass+line (contrast the S213 walls, which
+did). See the `revalidate-old-carries-stale-wall` memory.
+
+**1. Call-crossing arg → statement-order delay-slot lever (func_80026400).** An expression whose inputs
+are live across a call, but which is only *used* after the call, must be **written late in source**
+(after the call, its result declared uninitialized). `void* end; osSyncPrintf(fmt); f(); end = block +
+size;` matches — `size` parks in a callee-saved reg across the printf (its arg-copy `move s0,a1` fills
+the printf's delay slot) and the `addu` lands after `f()`, filling `f()`'s delay slot. Writing `end`
+EARLY (`void* end = block + size;` before the calls) hoists the `addu`'s RTL ahead of the printf, so
+`reorg.c fill_slots_from_thread` consumes it into the printf's delay instead and rotates the callee-saved
+regs — the S207 near-miss. No scheduler exists (emit-order = source-order), so statement placement is the
+only control.
+
+**2. Per-field 0x10-stride alias structs → reloc addend 0 (project_sort / update_transforms).** When a
+game record's fields each carry a *distinct* symbol (`collision_cylinders`, `D_800FBEA2/A4/A6/AA/AC/AE`
+at offsets 0/2/4/6/A/C/E of a 0x10 record), model each as its **own 1-field 0x10-stride array**
+(`typedef struct { s16 val; s8 pad[0xE]; } CylFieldS16; extern CylFieldS16 SYM[];`), NOT one struct-array
+over a single base. The shared loop index then re-materialises each symbol's `%hi/%lo` with **addend 0**,
+matching the reference relocs. A single struct-array base would emit nonzero LO16 addends and miss. Kin
+to `#offset-0-symbol-re-materialization`.
+
+**3. `i != N` blocks `check_dbra_loop` reversal (update_transforms init loop).** A call-free counted
+store loop is reversed by `loop.c check_dbra_loop`, but its final gate requires `GET_CODE(comparison) ==
+LT` (`loop.c:~5847`). Writing the loop `for (i = 0; i != N; i++)` makes the condition NE, fails that
+gate, and keeps the forward-counting `bne` the ROM has. A call-bearing sibling loop keeps `< N` (calls
+block reversal anyway → `slti`). Pairs with the `#top-tested-loop-goto-local-hoist` reversal notes.
+
+**4. Two FP micro-levers (update_transforms).** (a) **Inline FP literals, not pre-loop `f32` locals:**
+writing `256.0f`/`1024.0f` inline lets `loop.c` invariant-motion hoist them into callee-saved `fs` regs
+in the preheader *after* the counter init (matches ROM ordering); a pre-loop `f32 k = 256.0f;` local
+hoists too early. (b) **`(s16)hf` direct float→short trunc, not `(s16)(s32)hf`:** the redundant `(s32)`
+truncs into a live FP reg forcing an extra `mov.s`; the direct short cast truncs into a fresh reg. (c)
+cull idiom: bitwise `|` *within* each compare pair (materialises both `?1:0` selects + `or` + one
+branch), `||` *between* pairs (short-circuit).
+
+**Provenance:** S214 (`func_80026400` false-wall retired; `project_sort_scenery_cylinders` +
+`update_scenery_cylinder_transforms` incl. a 152-instr FP/matrix fn, all byte-exact in isolation, 0
+permuter). Reconfirms `compiler-source-rootcause-before-permuter`: the fan-out both cracked the stale
+wall and matched the FP stretch the plan expected to carry.
 
 ## pervasive-regalloc-classical-main
 

@@ -513,6 +513,18 @@ Three honest caveats:
   applied **6/6** (5 hazards.md, 1 BACKLOG.md). THIRD sprint (S208/S209/S213) where the compiler-source
   dive beats the permuter on this compiler. The func_80054900.c tractable smallest-first vein is now
   EXHAUSTED; residual = a 5-fn proven-wall cluster + FP-dispatcher sprint (NOT more smallest-first).
+  S214: OPENED work on the already-flipped `func_80026400.c` scenery pack (no enabler), PO-directed
+  compiler-source dive. Banked **0pt** (mixed-partial, file 5/8 not md5-candidate), **+3 matched**
+  (`func_80026400`, `project_sort_scenery_cylinders`, `update_scenery_cylinder_transforms`) via a
+  3-subagent gcc-2.7.2/binutils-2.6 fan-out, all byte-exact in isolation, **ZERO permuter**. Quality
+  **0/0/0/0** — and notably RETIRED a 7-sprint carry: the S207 func_80026400 "delay-slot wall" was a
+  stale/subtle artifact (never compiler-source-proven), matched by writing `end=block+size` late.
+  FOURTH sprint (S208/S209/S213/S214) where the fan-out beats the permuter; here it also matched a
+  152-instr FP/matrix fn (`update_transforms`) the plan expected to carry. 4 NEW reusable levers
+  (hazards.md `#call-arg-delay-slot-fill--field-alias-addend-0`). Retro applied **4/4** (all hazards.md
+  + memory `revalidate-old-carries-stale-wall`). LESSON: revalidate old carries with a cheap
+  reproduce-from-note pass before spending a sprint — a note-tagged wall is only trustworthy when a
+  rigorous dive cites the diverging pass+line.
   Rolling-5 (S34+S37+S39+S42+S43): seed 3.4 pt/sprint (17/5), realized 2.8 pt/sprint (14/5). S31 nuGfxInit is the first over-seed classical fn (+3 residual); rubric needs +1 for double-novel-gotcha libnusys classical targets. S42 defines-data verbatim-body drop: realized 2 = seed 3 − 1 (the fast path makes a defines-data leaf bank like a mirror) — confirms the −1 verbatim-first-try rule extends to known-edit-mirror defines-data, not just classical seeds. S43 is the new residual floor (−2): both gbpak fns were classical-FLAGGED (jal-count-mismatch) but proved pure verbatim mirrors once the macro-FP was stripped — the seed over-priced them because the hazard was a tooling artifact, now fixed in `_c_jal_count`, so future macro-heavy libultra leaves should seed lower.
 - **Regime:** `mirror` is a depleting minority (~22 % of ranked candidates: 56 mirror vs 194
   classical; 18 warm / 38 cold). The warm clean-singleton mirror pool is now **mined out** (S11

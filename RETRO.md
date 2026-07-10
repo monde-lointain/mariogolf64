@@ -25,6 +25,31 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 214 — func_80026400.c scenery pack, compiler-source dive (PO-directed) — 2026-07-10
+- Increment: 0 files banked / **3 functions matched** (delta: no md5-candidate change, 230→230; file
+  5/8 banked, 3 stubs remain = emit_scenery_billboard/draw_scenery_opaque_pass/draw_scenery_alpha_pass
+  DL/FP walls, NOT md5-candidate). Committed func_80026400 + project_sort_scenery_cylinders; stretch
+  update_scenery_cylinder_transforms — all 3 banked byte-exact.
+- Quality: 0/0/0/0 (stuck-far/permuter/carried/re-opened) this sprint. **Retired a 7-sprint carry**
+  (S207 func_80026400 false-wall). ZERO permuter runs across all 3, incl. a 152-instr FP/matrix fn.
+- Seed: committed 5pt; banked **0pt** (per-file all-or-nothing, file partial); regime classical/mixed.
+  Realized tier: file 0pt (not md5-candidate); value signal = **+3 matched-fn count**. Residual n/a
+  (partial file).
+- What helped: 3-subagent compiler-source-dive fan-out (asm-first seeds, isolation `decomp_loop`,
+  gcc-2.7.2 + binutils-2.6 root-cause). All 3 matched in isolation (1st/3rd/8th build). New levers
+  (see `#call-arg-delay-slot-fill--field-alias-addend-0-s214-scenery-levers`): call-crossing arg
+  statement-order delay-slot fill, per-field 0x10-stride alias structs → reloc addend 0, `i != N`
+  blocks `check_dbra_loop` reversal (loop.c:5847 LT gate), inline-FP-literal preheader hoist,
+  `(s16)hf` direct trunc, `|`-within/`||`-between cull idiom.
+- Friction: the S207 in-file "wall" comment mis-scoped a stale artifact as a proven wall for 7 sprints;
+  a cheap reproduce-from-note pass would have caught it far earlier.
+- Applied: 4 of 4 — #1 (docs/hazards.md new `#call-arg-delay-slot-fill--field-alias-addend-0` section
+  incl. the stale-wall meta-lesson + `revalidate-old-carries-stale-wall` memory), #2 (project_sort
+  levers, same section), #3 (update_transforms levers, same section), #4 (foundational reconfirm:
+  compiler-source fan-out > permuter — provenance line in the new section + this digest).
+- Carry-over: func_80026400.c 3 DL/FP-wall stubs (emit_scenery_billboard/draw_scenery_opaque_pass/
+  draw_scenery_alpha_pass) to `BACKLOG.md ## Carry-overs`.
+
 ## Sprint 213 — func_80054900.c residual, compiler-source dive + m2c/Ghidra seeds (PO-directed) — 2026-07-10
 - Increment: 0 files banked / **3 functions matched** (delta: no md5-candidate change, 230→230; file
   25/48→**28/48** banked, 20 stubs remain, NOT md5-candidate). Continuation of S211/S212's
