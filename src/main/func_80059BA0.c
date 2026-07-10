@@ -1,5 +1,10 @@
 #include "common.h"
 
+typedef struct {
+  s32 unk_00[26];
+} Struct80131510;
+
+extern Struct80131510 D_80131510[];
 extern u8 D_801323A0[];
 extern s8 D_80105DC1;
 extern s8 D_80105DC2;
@@ -81,7 +86,10 @@ INCLUDE_ASM("asm/nonmatchings/main/func_80059BA0", func_8005B0B4);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80059BA0", func_8005B150);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80059BA0", func_8005B28C);
+void func_8005B28C(s32 idx, Struct80131510* src) {
+  D_80131510[idx] = *src;
+  func_8005DF54(func_8005AF50(), 1);
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80059BA0", func_8005B314);
 
