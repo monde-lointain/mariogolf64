@@ -14,6 +14,7 @@ extern u8 D_800E4C91;
 extern s32 D_800C73A0;
 extern s32 D_800C73E0;
 extern u8* D_800C73F0[];
+extern Light D_800C73B0[3];
 
 extern s32 func_80056494(s32 arg0, s32 arg1);
 extern void play_sound_effect(s32 sfx, s32 arg1, s32 arg2);
@@ -22,7 +23,22 @@ INCLUDE_ASM("asm/nonmatchings/main/func_80095A10", func_80095A10);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80095A10", func_80095A68);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80095A10", func_80095C10);
+s32 func_80095C10(Gfx** gdlp, Lights3* src) {
+  Gfx* gdl = *gdlp;
+  if (D_800E4C5C != 0) {
+    D_800C73B0[0] = src->l[0];
+    D_800C73B0[1] = src->l[1];
+    gSPNumLights(gdl++, NUMLIGHTS_3);
+    gSPLight(gdl++, &D_800C73B0[0], 1);
+    gSPLight(gdl++, &D_800C73B0[1], 2);
+    gSPLight(gdl++, &D_800C73B0[2], 3);
+    gSPLight(gdl++, (Light*)((u8*)D_800C73B0 - 8), 4);
+    *gdlp = gdl;
+    return 1;
+  }
+  *gdlp = gdl;
+  return 0;
+}
 
 void func_80095D10(s32 arg0, s32 arg1, s32 arg2) {
   D_800E4C50 = arg1;
