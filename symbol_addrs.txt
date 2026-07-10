@@ -658,3 +658,4 @@ polychara_assert_cond = 0x800D0620; // size:0x3
 polychara_assert_file = 0x800D0624; // size:0x1E
 polychara_alive_msg = 0x800D07F8; // size:0x34
 set_direct_grid_vertex = 0x800414C0; // type:func
+find_closest_palette_index = 0x8004018C; // type:func

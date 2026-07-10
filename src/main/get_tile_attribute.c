@@ -13,7 +13,48 @@ typedef struct {
 
 INCLUDE_ASM("asm/nonmatchings/main/get_tile_attribute", get_tile_attribute);
 
-INCLUDE_ASM("asm/nonmatchings/main/get_tile_attribute", func_8004018C);
+typedef struct {
+  s8 r, g, b, unk;
+} ColorEntry;
+
+extern ColorEntry D_800BB040[];
+
+s32 find_closest_palette_index(s32 color) {
+  s32 best_dist;
+  s32 best_idx;
+  s32 r, g, b;
+  s32 i;
+
+  best_dist = 1000000;
+  best_idx = 0;
+  r = (color >> 11) & 0x1F;
+  g = (color >> 6) & 0x1F;
+  b = (color >> 1) & 0x1F;
+  for (i = 0; i < 11; i++) {
+    s32 dr = r - D_800BB040[i].r;
+    s32 dg;
+    s32 db;
+    s32 sum;
+    if (dr < 0) {
+      dr = -dr;
+    }
+    dg = g - D_800BB040[i].g;
+    if (dg < 0) {
+      dg = -dg;
+    }
+    db = b - D_800BB040[i].b;
+    sum = dr + dg;
+    if (db < 0) {
+      db = -db;
+    }
+    sum = sum + db;
+    if (sum < best_dist) {
+      best_dist = sum;
+      best_idx = i;
+    }
+  }
+  return best_idx;
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/get_tile_attribute", ci8_to_rgba5551);
 
