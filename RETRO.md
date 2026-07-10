@@ -25,6 +25,32 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 212 — func_80054900.c mid-size logic vein (mixed-partial continuation) — 2026-07-09
+- Increment: 0 files banked / **5 functions matched** (delta: no md5-candidate change, 230→230; file
+  25/48 banked, 23 stubs remain, NOT md5-candidate). Continuation of S211's `src/main/func_80054900.c`
+  (no re-flip, no re-seed). Banked byte-exact: `func_800578AC`, `func_80058ACC`, `func_80058C58`,
+  `func_80054E4C`, `func_80058B34`.
+- Quality: **0/0/0/3** (0 stuck-far-banked / 0 permuter-runs / 0 re-attempt / 3 carried [`func_80056060`
+  callee-saved reg rotation; `find_keyframe_offset_by_tag` + `collect_keyframe_events_at`
+  #base-register-vs-displacement keyframe list-walk]).
+- Seed: continuation slice, committed **5pt** (plan-time); banked **0pt** (per-file all-or-nothing, file
+  partial); regime classical/mixed. Value signal = **+5 matched**. Committed backlog 2/3 (func_80056060
+  carried); stretch +3 banked.
+- What helped: three NEW reusable source levers, each banked a fn first-or-second-build — the S187
+  offset-0 struct-array form on a fixed-global INIT LOOP (`func_800578AC`); delay-slot-fill via
+  source-order + f32-locals-defer-truncs + `*(volatile f32*)`-reload combined (`func_80058C58`); a 4-case
+  dense switch lowering to GCC's exact compare-tree (`func_80054E4C`); straight-line FP with inline consts
+  in callee-saved fp regs (`func_80058B34`). Zero permuter, zero MCP.
+- Friction: `func_80056060`'s `beqz`-vs-`beqzl` residual was NOT an independent branch lever — it rode on
+  a callee-saved reg rotation (early-return + operand-flip both no-op); the keyframe list-walk
+  (find/collect) caches the base pointer in a reg where the ROM re-derives it (#base-register-vs-
+  displacement, no reliable source lever) — carried, not thrashed.
+- Applied: **3 of 3** (all `docs/hazards.md`: #offset-0-symbol-re-materialization init-loop extension;
+  #volatile-view-cse-reload → new "delay-slot fill via source order" subsection; #value-select-if-else-vs-
+  branch-likely direction-dependent + coupled-to-regalloc note).
+- Carry-over: `src/main/func_80054900.c` 25/48 banked, 23 stubs (3 NEW characterized carries + the 3 S211
+  carries + FP/nested/dispatcher tail). See `BACKLOG.md ## Carry-overs`.
+
 ## Sprint 211 — open func_80054900.c animation pack (mixed-partial, smallest-first) — 2026-07-09
 - Increment: 0 files banked / **20 functions matched** (delta: no md5-candidate change, 230→230; file
   20/48 banked, 28 stubs remain, NOT md5-candidate). Opened `src/main/func_80054900.c` (flip `[0x2FD00]`

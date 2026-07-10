@@ -4604,6 +4604,17 @@ counterpart of the single-fixed-field RMW lever above: there you SPLIT a field o
 force re-materialization; here the struct-fold already reproduces the per-field symbols, so keep the
 struct.) S187 `func_80077C18`/`func_80077DEC` (the `D_80105140` `SparkGroup[]` table).
 
+**Extends to a fixed-global INIT LOOP (S212 `func_800578AC`).** `for (i=0;i<N;i++) SYM[i].field = K`
+where `SYM` is a fixed global struct-array: the ROM keeps `i*stride` as a PURE offset IV (`move
+s1,zero`; `s1 += stride`) and re-materializes `lui at,%hi(SYM); addu at,at,s1; sw ...,%lo(SYM)(at)`
+EACH iteration. Write the struct-array indexed form `D_SYM[i].field = K` (`extern Slot D_SYM[];`) to get
+it. The raw pointer-arith form `*(T*)((u8*)&SYM + i*stride) = K` FOLDS the symbol base into the pointer
+IV's init (a single `lui/addiu` la-pair BEFORE the loop → `sw ...,0(iv)`), so the whole fn is 1 insn
+short and a whole-file symbol shift cascades (`cmp` shows thousands of scattered ±1-byte diffs; `diff.py`
+shows the fn clean-but-shifted). Provenance: S212 `func_800578AC` (`D_801F4424[i].unk_00 = -4`, stride
+0x18C). Same class as the SparkGroup converse above — the struct-array index form is the byte-faithful
+one; raw ptr-arith is the trap.
+
 ## volatile-view CSE reload (force a just-stored global to reload)
 
 **Trigger:** a clean classical/mirror fn is byte-exact except the ROM **RELOADS a global struct field
@@ -4639,6 +4650,30 @@ filler field (here total) non-volatile. **Provenance:** S178 `heap3_init` (the S
 refuted). Found by the ADVERSARIAL agent of a two-agents-per-wall fan-out
 ([#compiler-source-fan-out-escalation-above-the-permuter](#compiler-source-fan-out-escalation-above-the-permuter));
 the primary cse-only agent tried volatile-on-prev-only, saw it float, and wrongly declared "unreachable".
+
+### Landing an independent store in a `jal` delay slot — source order + defer-to-arg-eval (S212 `func_80058C58`)
+
+KMC cc1 has **no instruction scheduler** ([[kmc-cc1-no-instruction-scheduler]]): emit order == source
+order, and reorg's delay-slot fill only pulls the IMMEDIATELY-PRECEDING independent insn down into a
+`jal` delay slot. So to reproduce a ROM that fills a call's delay with an independent store
+(`swc1 f0,OFF(base)` after `jal`), that store must be the LAST statement before the call in SOURCE. Two
+combined levers cracked `func_80058C58` (byte-exact after both):
+
+1. **Store last.** Compute the call's argument VALUES into locals first, then the store, then the call:
+   ```c
+   f32 t2 = (f32)arg1[2];         /* CSE-shared with the arg below */
+   *(f32*)(cs+0x40) = t2;          /* independent store -> reorg fills the jal delay with it */
+   h = wrapper((s32)t38, (s32)t2);
+   ```
+   Writing the store as an EARLIER statement (before the arg exprs) emits it early → reorg finds nothing
+   movable → a `nop` fills the delay and the fn is 1 insn long (whole-tail shift).
+2. **f32 locals defer the truncs.** Keeping the two float operands in `f32` locals and casting `(s32)` at
+   the call makes BOTH `trunc.w.s`/`mfc1` emit at the arg eval (a0 then a1), adjacent, right before the
+   call — not an early trunc on the first operand.
+3. **Volatile reload for a store-then-read of the same field.** `cs->0x38 = (f32)arg1[0]; a0 =
+   (s32)cs->0x38;` — GCC forwards the stored reg (no reload). Read it back through
+   `*(volatile f32*)(cs+0x38)` to force the ROM's `swc1;lwc1` reload (the #volatile-view-cse-reload lever
+   above, per-access cast).
 
 ## mem-in-struct scheduling lever (model a fixed global as a struct/array member)
 
@@ -5758,6 +5793,18 @@ branch-likely annul it applies to a single conditional-expression value.
 `cmp build/mariogolf64.z64 baserom.z64` shows THOUSANDS of scattered ±1-byte diffs (every reference to
 a now-shifted symbol), NOT a localized per-fn near-miss — `asm-differ diff.py` shows each fn internally
 clean-but-shifted. Sibling of [#top-tested-loop-goto-local-hoist] (both are -O2 branch-form matches).
+
+**Direction-dependent, and often COUPLED to regalloc (S212 `func_80056060`).** The branch FORM the ROM
+wants runs both ways, and the source lever is NOT always independent. When the ROM COLLAPSES the null
+guard into a branch-likely `beqzl guard,end` (annulled `move v0,zero`) — the opposite of the
+`bnez/nop/j/li` value-select above — reach for the EARLY-RETURN form (`if (p == NULL) return 0;`), not
+the value-select if-else. BUT: in `func_80056060` the early-return did NOT flip the build's plain `beqz`
+to `beqzl` on its own — the branch form was DOWNSTREAM of a callee-saved register ROTATION
+(arg1/cs/arg0 → the wrong `s`-regs; the guard tests a different reg, and reorg's optimize_skip decision
+rode on it). So when a `beqz`-vs-`beqzl` residual survives every branch-form lever, stop treating it as an
+independent branch lever: it is likely a symptom of a [#loop-weight-and-live-length-regalloc-steering]
+coloring miss (fix the coloring first). `func_80056060` carried on exactly this coupled wall
+(`docs/wip/func_80056060.near-match.md`).
 
 ## delay-slot-fill of a null-guard `beqz` (body-first insn safe-on-the-taken-path)
 
