@@ -502,6 +502,17 @@ Three honest caveats:
   volatile-reload (`func_80058C58`); branch-form-is-downstream-of-regalloc (`func_80056060`). Retro
   applied **3/3**. Second consecutive fresh-pack sprint validating "prefer a fresh pack's easy leaves over
   a mined-out residual tail" (S210 lesson): S211 +20, S212 +5, both source-lever-only, zero permuter.
+  S213: CONTINUATION of `func_80054900.c` (PO chose the residual over a fresh ovl8 pack, then redirected
+  to a compiler-source dive + m2c/Ghidra seeds), banked **0pt** (mixed-partial, file 28/48 not
+  md5-candidate), **+3 matched** (`lookup_animation_by_id`, `activate_texture_anim_slot`,
+  `func_800577DC`) via a 4-subagent gcc-2.7.2/binutils-2.6 fan-out. Quality **0/0/5/0** — 0 permuter runs,
+  5 pre-existing carries UPGRADED to PROVEN walls (global.c allocno; reorg.c:3374 delay-slot ×2; loop.c
+  peel/CSE+IV-split ×2). The dive banked 3 via exact levers AND proved 5 standalone-irreproducible — the
+  "carry" is now proof-backed, not a guess. Data-carve hazard hit + fixed (6 offset-0 `polychara_*`
+  aliases; the `extern u8 D_x[]` common-symbol bss-flow that slid banked `func_800578AC` +0x40). Retro
+  applied **6/6** (5 hazards.md, 1 BACKLOG.md). THIRD sprint (S208/S209/S213) where the compiler-source
+  dive beats the permuter on this compiler. The func_80054900.c tractable smallest-first vein is now
+  EXHAUSTED; residual = a 5-fn proven-wall cluster + FP-dispatcher sprint (NOT more smallest-first).
   Rolling-5 (S34+S37+S39+S42+S43): seed 3.4 pt/sprint (17/5), realized 2.8 pt/sprint (14/5). S31 nuGfxInit is the first over-seed classical fn (+3 residual); rubric needs +1 for double-novel-gotcha libnusys classical targets. S42 defines-data verbatim-body drop: realized 2 = seed 3 − 1 (the fast path makes a defines-data leaf bank like a mirror) — confirms the −1 verbatim-first-try rule extends to known-edit-mirror defines-data, not just classical seeds. S43 is the new residual floor (−2): both gbpak fns were classical-FLAGGED (jal-count-mismatch) but proved pure verbatim mirrors once the macro-FP was stripped — the seed over-priced them because the hazard was a tooling artifact, now fixed in `_c_jal_count`, so future macro-heavy libultra leaves should seed lower.
 - **Regime:** `mirror` is a depleting minority (~22 % of ranked candidates: 56 mirror vs 194
   classical; 18 warm / 38 cold). The warm clean-singleton mirror pool is now **mined out** (S11

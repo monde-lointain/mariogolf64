@@ -545,6 +545,19 @@ is unambiguous (one unplaced name ∩ one asm candidate); otherwise bare names.
 
 **Sub-cases / variants:**
 
+**Shifted `.NON_MATCHING` region — alias by a NEW name, never re-use the shifted `D_<addr>` (S213).**
+When the extern lives in a region whose splat `D_<addr>` auto-symbols are name-vs-address shifted
+(`grep D_<region> build/mariogolf64.map | grep -v NON_MATCHING` shows mapped addr ≠ name — a
+`.NON_MATCHING` carve), referencing the shifted name as `extern u8 D_x[]` makes it a COMMON symbol that
+FLOWS the bss and corrupts already-banked siblings (S213: +0x40 slid `func_800578AC`'s `D_801F4424`). Do
+NOT re-use the `D_<addr>` name. Add a DISTINCT descriptive alias at the TRUE address (verified via
+`xxd -s <rom_off> baserom.z64`) — `polychara_state = 0x801F43F8; // size:0x4`,
+`polychara_assert_cond = 0x800D0620; // size:0x3` — and reference that; the absolute assignment aliases
+the correctly-placed bytes and allocates nothing. Isolate a suspected flow with `git stash` + rebuild
+HEAD (HEAD green ⇒ your C shifted it). S213 banked `func_800577DC` + `activate_texture_anim_slot` this
+way (pcsub.c polychara bss + shared assert/format strings). See the twin note in
+[#base-register-vs-displacement].
+
 **Contiguous `.bss`-block fast-path:** a file-static drop-to-extern mirror often references a
 whole run of adjacent `.bss` statics declared together in the upstream `.c` (e.g. pimgr.c's
 `piThread` / `piThreadStack` / `piEventQueue` / `piEventBuf`). Recover the entire block from a single
@@ -3975,10 +3988,29 @@ codegen oracle: it isolated the natural-loop peel (`bnel`) vs the goto-loop plai
 the decl-order/regalloc coupling, without a single full `make`+diff cycle. Prefer it for any
 shape/schedule/regalloc question before iterating in-tree.
 
+**The SEARCH-LOOP case — frame `while()` on the TERMINATOR test, found-check as interior `goto`
+(S213 `lookup_animation_by_id`, BANKED via a compiler-source dive).** A linear search over a
+NUL/terminator-ended list (return the index of the first entry matching a key) wants all three ROM
+properties at once: an un-rotated head (compare at loop top, counter-init hoisted BEFORE the loop), a
+conditional branch-likely (`bnel`) inline found-compare, AND a conditional `bnez` back-edge. Neither a
+`do{…}while(term)` (its entry `beqz` skips the shared return-tail → a duplicate `move v0,aN`
+return-materialization at the top) nor a `while(key-match){…}` (found-test as the loop condition rotates
+the counter-init INSIDE the loop) gives it. The framing that does: a **top-tested `while(<list-terminator
+test>)`** whose condition is the LIST-CONTINUE/terminator test (`while(*(s32*)e != 0)`), with the
+found-check as an INTERIOR `if(key==target){ result=idx; goto done; }` and the advance/`idx++` at the
+body bottom. GCC 2.7.2 then (i) hoists `idx=0` into the entry-guard's delay slot — no `loop.c` rotation,
+since 2.7.2 runs no `while`→do-while condition-copy pass — (ii) makes the bottom re-test a conditional
+`bnez` back-edge, and (iii) reorg (`fill_eager_delay_slots`, reorg.c:1157-1208, `INSN_ANNULLED_BRANCH_P`
+at 1208) annuls the advance into the `bnel` inline compare, with the found block INLINE between compare
+and advance. The earlier "no single idiom yields both un-rotated-head and conditional-annul, so it's a
+wall" was a WRONG framing, not a real wall. (Keep the frame-fix from
+[#default-return-var-must-init-after-call]: init `result=0` AFTER the call.)
+
 **Provenance:** established: S152 (`vector_magnitude_safe` / `calculate_hypotenuse_safe` range-scaling
 loops, shared with `#double-sqrt-fast-math`); reversal corollary: S154 (the `check_dbra_loop`
 count-only reversal); rotation corollary: S184 (`for(;;)`+`break` for an un-rotated top-test loop);
-preamble-order/regalloc coupling + the `gcc -S` codegen-oracle method: S208 (`func_8005B070`).
+preamble-order/regalloc coupling + the `gcc -S` codegen-oracle method: S208 (`func_8005B070`);
+search-loop terminator-condition framing: S213 (`lookup_animation_by_id`, byte-exact).
 
 ## decomposed-one-tu rodata alignment split (a counter-case to the 8-point decompose gate)
 
@@ -5064,6 +5096,19 @@ intermediate copy nor a pointer→int retype. **Doctrine: a pure-regalloc allocn
 WALLS the permuter routes HERE (compiler-source dive), not to an automatic carry.** The whole S209
 grid-counter family (C458/C4B4/C5B4/C614) banked this way, 0 permuter — see [#grid-counter-double-loop](#grid-counter-double-loop).
 
+**The dive also PROVES walls, not just cracks them (S213).** A 4-subagent fan-out over the
+`func_80054900.c` residual (gcc-2.7.2 `global.c`/`loop.c`/`reorg.c`/`cse.c` + binutils-2.6 `tc-mips.c`,
+each armed with the `gcc -S` oracle) banked 3 (`lookup_animation_by_id`, `activate_texture_anim_slot`,
+`func_800577DC`) AND returned 5 mechanism-backed WALL verdicts (`func_80056060` global.c allocno;
+`func_800564F0`/`func_80055738` reorg.c:3374 delay-slot; `find_keyframe_offset_by_tag`/
+`collect_keyframe_events_at` loop.c peel/CSE + IV split), all with `-S` empirical lever-tables — 0
+permuter runs. Two independent WALL proofs (allocno + delay-slot) converged on the same shape: the ROM's
+bytes need a DIFFERENT RTL context at the diverging pass than a standalone TU can produce, so the
+"carry" is now proof-backed, not a guess — cheaper and more certain than a permuter escalation that
+would never converge. Third consecutive sprint (S208/S209/S213) where the dive beats the permuter on
+this compiler. Give each subagent the `-S` oracle command + the specific fn's target-vs-build asm + the
+one pass to read; it returns a BANKABLE-with-exact-C or a WALL-with-line-refs verdict.
+
 ---
 
 ## cse make_regs_eqv branch-fold (reused-var canonical fold on a `?:`-with-flag store)
@@ -5769,6 +5814,20 @@ the data section is properly carved/placed (see [#defines-data] / [#data-rodata-
 globals show `.NON_MATCHING` at the SAME address as the real symbol (safe). This is the data-carve
 enabler that blocks `func_8005DE88` (logic fully decoded; carried pending the carve).
 
+**Refinement — a NEW-named offset-0 absolute alias at the TRUE address DOES win (S213, 3 fns banked
+into a shifted region).** The S210 "absolute does not win" is specifically about re-using the SHIFTED
+`D_<addr>` NAME: `extern u8 D_800D0620[];` on a name splat mapped to 0x800d0654 makes the linker treat
+it as a COMMON symbol, allocate storage, and FLOW the bss (S213: +0x40, corrupting the already-banked
+`func_800578AC` whose `D_801F4424` slid 0x4424→0x4464). The fix is to NEVER reference the shifted
+`D_<addr>` name; instead add a DISTINCT descriptive name at the TRUE address in `symbol_addrs.txt`
+(`polychara_assert_cond = 0x800D0620; // size:0x3`, `polychara_state = 0x801F43F8;`, …) and reference
+THAT — the absolute linker-script assignment aliases the correctly-placed bytes (verify the true bytes
+first: `xxd -s <rom_off> baserom.z64`) and allocates nothing, so no bss flow. This is the sanctioned
+[#recover-extern (refs-unplaced)] offset-0-alias pattern; it banked `func_800577DC` +
+`activate_texture_anim_slot` (pcsub.c polychara bss + shared assert/format strings) S213. Isolate a
+suspected flow by `git stash` + rebuild HEAD: if HEAD is green, your new C shifted the region — the tell
+is the `.NON_MATCHING` name-vs-address mismatch on a symbol you reference as `extern u8 D_x[]`.
+
 ## value-select-if-else vs branch-likely (the `p ? field : sentinel` accessor idiom)
 
 **Symptom (S211; `func_80056464` / `func_80056494` / `func_8005642C`).** A tiny accessor calls a
@@ -5830,6 +5889,30 @@ pointer, so it correctly emits `bnel`+store-in-delay and matches. Escalation:
 [#cross-project-matched-corpus-mining] for a KMC-2.7.2 sibling, or a `reorg.c fill_simple_delay_slots`
 patchlevel probe; carry otherwise.
 
+**Refined mechanism + PROVEN-WALL verdict (S213 compiler-source dive, gcc-2.7.2 `reorg.c`).** The fill
+is done by `fill_slots_from_thread` (reorg.c:3374), NOT `fill_simple_delay_slots` (which gates on
+`target==0` at reorg.c:3056 and so never fills a labelled condjump). The slot stays `nop` iff the
+block's FIRST insn hits one of: **(a)** its dest reg is live at the branch target/join (e.g. it is the
+function's return value — a non-void return), **(b)** `may_trap_p` (a load/deref/trapping op — the old
+"derefs the guarded pointer" rule is just this special case, and it is ANY trap, not specifically the
+guard pointer), or **(c)** `own_fallthrough==0` (a `CODE_LABEL` heads the block: a second predecessor).
+Otherwise reorg steals the first insn (slot filled, block shortens by one, branch offset −1). A **void,
+single-predecessor** guard block whose first emitted insn **materializes a constant** (`li`/`sll` into a
+scratch reg dead at the void return) is therefore a HARD WALL: `func_800564F0` (`cs[0x189]=1`) and
+`func_80055738` (`sll v0,s0,3` address) both fill and no byte-preserving C flips (a)/(b)/(c) without
+adding an epilogue insn (non-void), changing the store to a load, or adding control flow. Two
+independent proofs (this + the `-S` oracle) → the ROM's `nop` needs a different RTL context at
+delay-fill time, not a source rewrite. CARRY, permuter-proof.
+
+**Corollary FILL lever — to MATCH a target that FILLS the delay with a constant (S213
+`activate_texture_anim_slot`, BANKED).** When the ROM steals a CONSTANT into the guard-`beqz` delay
+(e.g. `_li v1,4` before the address `sll`), reorg picked the block's first-EMITTED insn; the constant
+must be emitted BEFORE the address. Materialize the value as its own statement first:
+`u8 val = 4; u8 *p = cs + slot*8; *(u8*)(p+0x8c) = val;` — GCC then emits `li v1,4` before `sll v0,s1,3`
+and reorg steals the `li` into the delay, matching the ROM (the natural `*(u8*)(cs+slot*8+0x8c)=4`
+emits the address `sll` first and steals THAT instead). Emit-order is the only lever
+([[kmc-cc1-no-instruction-scheduler]]).
+
 ## default-return-var must init AFTER the call (caller-saved sentinel frame lever)
 
 **Symptom (S211; `lookup_animation_by_id`, via systematic-debugging + gcc-2.7.2 source).** A fn returns
@@ -5847,5 +5930,6 @@ s32 result = 0;   /* after the call → caller-saved a1, frame 0x18 */
 Diagnostic: a frame-size mismatch plus exactly one extra saved `sN` register at the top of the diff is
 this, not a body bug. General to any default-then-conditionally-overwrite return and the whole
 `get_character_state` accessor family. (S211 `lookup_animation_by_id`: this dropped the score 2588→1340
-and byte-matched the prologue/setup; the residual loop shape is a separate
-[#goto-loop-vs-structured-loop-codegen] / [#top-tested-loop-goto-local-hoist] wall, carried.)
+and byte-matched the prologue/setup; the residual loop shape was a separate
+[#top-tested-loop-goto-local-hoist] wall, SOLVED and BANKED S213 via the terminator-condition loop
+framing — see that section.)

@@ -3364,42 +3364,34 @@ by `/sprint-plan`:
   `NU_CONT_THREAD_ID=6` vs MG64's 5), and that surfaces only at first build unless reconciled here.
   A near-free retry missing any of these is a half-scoped spike — finish the scope before deferring.
 
-- **(S212 MIXED-PARTIAL — carried; 25 of 48 banked)** `src/main/func_80054900.c` (main-segment
-  `[0x2FD00]` character-animation pack). Subseg `[0x2FD00, c, main/func_80054900]` flipped; 25 banked
-  byte-exact (S211 +20; S212 +5: `func_800578AC` D_801F4424 init-loop, `func_80058ACC` FP angle-mul,
-  `func_80058C58` FP terrain-setup, `func_80054E4C` switch-dispatch, `func_80058B34` FP camera-setup),
-  **23 stubs remain**, ROM green off extracted asm. Both the tiny-accessor/small-loop AND the mid-size
-  non-FP-logic + straight-line-FP veins are now MINED OUT. **6 characterized carries:**
-  - **(S212)** `func_80056060` (`cs`-guard + osVirtualToPhysical + lookup + branchless `entry?entry:0`) —
-    `docs/wip/func_80056060.near-match.md`. Structurally complete; residual = a callee-saved reg ROTATION
-    (arg1/cs/arg0 preference-driven per gcc `global.c` allocno priority) with the `beqz`-vs-`beqzl` branch
-    form COUPLED to it (early-return + operand-flip both no-op). Escalation = corpus-mining / permuter.
-  - **(S212)** `find_keyframe_offset_by_tag` + `collect_keyframe_events_at` (keyframe list-walk
-    `e=*(base+arg1*12); walk e+=4 while e->val!=-1`) — `docs/wip/find_keyframe_offset_by_tag.near-match.md`
-    (both). [#base-register-vs-displacement]: BUILD caches the base pointer in a reg where the ROM
-    re-derives `(cs->0)->0x14` + reuses `arg1*12`; + a callee-saved coloring perm; collect also wants the
-    branch-LIKELY `bnel`/`beql` annulling `e+=4` into the delay slots. No reliable source lever (S210
-    class). Escalation = corpus-mining the KMC-2.7.2 search-loop shape, or the permuter.
-  - `func_800564F0` (`if(cs) cs[0x189]=1`) + `func_80055738` (`if(cs){p=cs+i*8; p->0x88=arg2; p->0x8C=3;}`)
-    — [#delay-slot-fill-of-a-null-guard-beqz]: the guard `beqz` delay stays `nop` in the ROM but GCC
-    steals the body's pointer-INDEPENDENT first insn (`li`/`sll`) into it (1 insn short). No faithful-C
-    lever (the body-first must deref the guarded ptr to force the nop, which these do not). Escalation =
-    corpus-mining / a `reorg.c` patchlevel probe.
-  - `lookup_animation_by_id` (0xC-stride list search) — `docs/wip/lookup_animation_by_id.near-match.md`.
-    FRAME/REGALLOC ROOT-CAUSE FIXED ([#default-return-var-must-init-after-call], score 2588→1340,
-    prologue/setup byte-match); residual = a loop-optimizer/reorg wall
-    ([#goto-loop-vs-structured-loop-codegen]): the target has an un-rotated head (goto-only) AND a
-    conditional branch-likely back-edge (do-while-only), and no single C loop idiom yields both (5 forms
-    tried). Escalation = corpus-mining the KMC-2.7.2 search-loop shape, or the permuter (structural).
-  - **Tail (~17 unprofiled):** FP/large walls (`func_80054900` lead FP-length + dead-frame v0 spill; the
+- **(S213 MIXED-PARTIAL — carried; 28 of 48 banked)** `src/main/func_80054900.c` (main-segment
+  `[0x2FD00]` character-animation pack). Subseg `[0x2FD00, c, main/func_80054900]` flipped; 28 banked
+  byte-exact (S211 +20; S212 +5; **S213 +3 via a compiler-source dive**: `lookup_animation_by_id`
+  terminator-condition loop framing, `activate_texture_anim_slot` const-first delay-fill, `func_800577DC`
+  polychara init — the last two via 6 offset-0 `polychara_*` symbol_addrs aliases fixing a
+  `.NON_MATCHING` bss-flow). **20 stubs remain**, ROM green off extracted asm. Tiny-accessor,
+  small-loop, mid-size non-FP-logic, straight-line-FP, AND the tractable search-loop veins are now MINED
+  OUT. **5 PROVEN-WALL carries (S213 gcc-2.7.2 source dives — permuter-proof, do NOT re-attempt):**
+  - `func_80056060` — `docs/wip/func_80056060.near-match.md`. PROVEN WALL (`global.c` allocno_compare):
+    cs has forced max n_refs=4 + min live-span so it ALWAYS colors s0 first; target cs→s1 is unreachable
+    for this instruction stream in a standalone TU. Needs a different RTL context, not a source rewrite.
+  - `find_keyframe_offset_by_tag` + `collect_keyframe_events_at` —
+    `docs/wip/find_keyframe_offset_by_tag.near-match.md`. PROVEN WALL ([#base-register-vs-displacement]):
+    `loop.c` peel/CSE (loop.c:505-545) caches the re-derivable base in a caller-saved temp, blocking the
+    3rd callee-saved promotion; collect adds a `loop.c:3214` strength-reduction IV split that defeats
+    reorg `optimize_skip` annul. No source form suppresses the peel while keeping re-derivation.
+  - `func_800564F0` + `func_80055738` — `docs/wip/func_800564F0-func_80055738.delay-slot-wall.md`.
+    PROVEN WALL ([#delay-slot-fill-of-a-null-guard-beqz]): void single-pred const-store null-guard;
+    reorg.c:3374 `fill_slots_from_thread` ALWAYS fills the beqz delay with the const-materializing first
+    insn. No byte-preserving C flips the 3 escape conditions.
+  - **Tail (~15 unprofiled):** FP/large walls (`func_80054900` lead FP-length + dead-frame v0 spill; the
     ≥145-instr dispatchers `animation_step` 221 / `func_800568CC` 759 / `func_80058D04` 935 /
     `func_80057FFC` 692 / `func_80054938` 145 / `func_80054BC0` 152 / `animation_play` 79 (base-register
     class, func_80056060 sibling) / `update_vertex_texture_coords*` / `func_80055828` 179 /
-    `animation_step_no_rotate` 188), nested (`func_80054B7C` v0-static-chain), `func_800577DC` 52
-    (#top-tested-loop-goto accumulator + osSyncPrintf), `load_character_model` 322. **Next slice:** the
-    tractable smallest-first vein is EXHAUSTED — remaining tail is a base-register list-walk /
-    corpus-mining / permuter class + an FP-dispatcher sprint (NOT more smallest-first). All banked S212
-    names are already `func_`; the curated names (`seek_current_frame_by` etc.) → cross-repo Ghidra sync.
+    `animation_step_no_rotate` 188), nested (`func_80054B7C` v0-static-chain), `load_character_model` 322.
+    **Next slice:** the tractable smallest-first vein is EXHAUSTED — remaining tail is the proven wall
+    cluster (5 fns, permuter-proof) + an FP-dispatcher sprint (NOT more smallest-first). All banked S213
+    names are already `func_`/curated; the curated names → cross-repo Ghidra sync.
 
 - **(S210 MIXED-PARTIAL — carried; 33 of 59 banked)** `src/main/func_80059BA0.c` (main-segment
   `[0x34FA0]` integer-glue/accessor pack). 33 banked (S208 +23 asm-first; S209 +9 compiler-source dive;

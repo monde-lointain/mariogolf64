@@ -25,6 +25,39 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 213 — func_80054900.c residual, compiler-source dive + m2c/Ghidra seeds (PO-directed) — 2026-07-10
+- Increment: 0 files banked / **3 functions matched** (delta: no md5-candidate change, 230→230; file
+  25/48→**28/48** banked, 20 stubs remain, NOT md5-candidate). Continuation of S211/S212's
+  `src/main/func_80054900.c` (no re-flip). Banked byte-exact: `lookup_animation_by_id`,
+  `activate_texture_anim_slot`, `func_800577DC`. The `/sprint-plan` gate was interrupted mid-flight by
+  the PO redirecting to a compiler-source dive + m2c/Ghidra seeding; executed as a continuation.
+- Quality: **0/0/5/0** (0 stuck-far-banked / **0 permuter-runs** / 5 carried — all now PROVEN walls:
+  `func_80056060` global.c allocno; `func_800564F0`+`func_80055738` reorg.c:3374 delay-slot;
+  `find_keyframe_offset_by_tag`+`collect_keyframe_events_at` loop.c peel/CSE+IV-split). The 5 were all
+  pre-existing S211/S212 carries, upgraded from "carry, maybe permuter" to proof-backed permuter-proof.
+- Seed: continuation slice (no re-seed; S212 seed 5); banked **0pt** (per-file all-or-nothing, file
+  partial); regime classical/mixed. Value signal = **+3 matched** + 5 mechanism-backed wall proofs + a
+  reusable data-carve fix.
+- What helped: a **4-subagent compiler-source fan-out** (gcc-2.7.2 global.c/loop.c/reorg.c/cse.c +
+  binutils-2.6 tc-mips.c), each armed with the `gcc -S` codegen oracle — banked 3 via exact levers
+  (terminator-condition search-loop framing; const-materialize-first delay-fill; page-align hoist +
+  strength-reduced fill IV + counter-before-dest regalloc) and returned 5 WALL verdicts with line-refs +
+  empirical `-S` lever-tables. m2c+Ghidra MCP produced the seeds. Third sprint (S208/S209/S213) where the
+  dive beats the permuter.
+- Friction: the SPRINT.md-flagged data-carve hazard materialized — referencing the pcsub.c polychara bss
+  + shared strings as `extern u8 D_x[]` created COMMON symbols that FLOWED the bss +0x40 and corrupted
+  banked `func_800578AC` (`D_801F4424` 0x4424→0x4464). Caught by `git stash` + rebuild-HEAD isolation;
+  fixed with 6 offset-0 `polychara_*` absolute aliases (refining the S210 ".NON_MATCHING absolute doesn't
+  win" note: a NEW-named alias at the true addr DOES win, the shifted D_ name does not).
+- Applied: **6 of 6** — #1 rewrite #delay-slot-fill mechanism (reorg.c:3374 + 3 escape conditions +
+  const-first fill lever); #2 #top-tested-loop search-loop terminator-condition framing; #3
+  #base-register-vs-displacement peel/CSE+IV-split coupling; #4 #recover-extern shifted-region
+  NEW-name-alias fix + twin note in #base-register-vs-displacement; #5 #compiler-source-fan-out
+  proves-walls-not-just-cracks; #6 BACKLOG.md func_80054900.c wall-cluster residual note.
+- Carry-over: `src/main/func_80054900.c` 28/48, 20 stubs; the 5 proven walls + ~15 FP/nested/≥145-instr
+  dispatchers. Tractable smallest-first vein EXHAUSTED — remaining is the wall cluster + an FP-dispatcher
+  sprint.
+
 ## Sprint 212 — func_80054900.c mid-size logic vein (mixed-partial continuation) — 2026-07-09
 - Increment: 0 files banked / **5 functions matched** (delta: no md5-candidate change, 230→230; file
   25/48 banked, 23 stubs remain, NOT md5-candidate). Continuation of S211's `src/main/func_80054900.c`
