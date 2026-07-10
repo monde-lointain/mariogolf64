@@ -5,6 +5,7 @@ extern s32 get_interpolated_terrain_height(s32, s32);
 extern void load_hole_terrain_assets(void);
 extern void* get_table_entry(u32);
 extern s16* get_direct_grid_vertex(s32, s32);
+extern s16 g_terrain_grid_verts[];
 
 INCLUDE_ASM("asm/nonmatchings/main/get_tile_attribute", get_tile_attribute);
 
@@ -43,7 +44,17 @@ INCLUDE_ASM("asm/nonmatchings/main/get_tile_attribute", func_8004107C);
 
 INCLUDE_ASM("asm/nonmatchings/main/get_tile_attribute", func_80041160);
 
-INCLUDE_ASM("asm/nonmatchings/main/get_tile_attribute", get_direct_grid_vertex);
+s16* get_direct_grid_vertex(s32 col, s32 row) {
+  s16* result;
+
+  if (((u32)col >= 18) | ((u32)row >= 34)) {
+    result = g_terrain_grid_verts;
+  } else {
+    result = (s16*)((u8*)g_terrain_grid_verts +
+                    ((row * 17 + ((u32)col >> 1) + (col & 1) * 9) << 4));
+  }
+  return result;
+}
 
 s16 func_800413A0(s32 x, s32 z) { return get_direct_grid_vertex(x, z)[1]; }
 
@@ -110,7 +121,22 @@ s32 func_80042E40(s32 ax, s32 ay, s32 bx, s32 by, s32 cx, s32 cy) {
 INCLUDE_ASM("asm/nonmatchings/main/get_tile_attribute",
             detect_terrain_collision);
 
-INCLUDE_ASM("asm/nonmatchings/main/get_tile_attribute", func_800432E4);
+s32 func_800432E4(s16* a, s16* b) {
+  s32 i;
+
+  for (i = 0; i < 3; i++) {
+    if (a[i + 2] != b[i + 2]) {
+      return 1;
+    }
+    if (a[i + 5] != b[i + 5]) {
+      return 1;
+    }
+    if (a[i + 8] != b[i + 8]) {
+      return 1;
+    }
+  }
+  return 0;
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/get_tile_attribute", func_8004333C);
 
