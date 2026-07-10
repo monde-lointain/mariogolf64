@@ -4413,12 +4413,25 @@ by `/sprint-plan`:
   resolved `c-combined` member upstreams so the recover-extern is priced at the gate, not discovered
   at execution-time data-ref reconciliation. Not file-blocking (recover-extern is cheap in-execution).
 - _(osAiSetFrequency carry-over resolved and banked at S38 retroactive review)_
-- **Open (S215, in-progress mixed-partial, NOT a spike):** `src/main/get_tile_attribute.c` (44-fn
-  terrain-query `none` pack, subseg 0x1B4A0). 13 banked S215 (trivial getters/glue vein), 31 stubs
-  remain. The ranker naturally re-surfaces it as a c-stub `remaining:N` row (no BACKLOG de-rank
-  needed). Untried tail for the next smallest-first slice: `func_80041E8C` (anomalous dead-`sw v0`
-  entry spill — characterize), the 30+instr getters (`get_terrain_type`, `func_800413C0`,
-  `load_club_offset_pair`, `func_800414C0` unaligned lwl/lwr struct-copy → `#struct-copy-block-move-path`),
-  then the FP terrain-height interp (`get_interpolated_terrain_height`, `compute_triangle_plane`,
-  `get_lowest_height_at_position`) + jtbl-dispatch walls (rodata-jtbl 0x800CA930..0x800CAB20). File
-  md5-candidate only when all 44 bank.
+- **Open (S215→S216, in-progress mixed-partial, NOT a spike):** `src/main/get_tile_attribute.c` (44-fn
+  terrain-query `none` pack, subseg 0x1B4A0). 17 banked (13 S215 + 4 S216:
+  `set_direct_grid_vertex`/`get_terrain_type`/`find_closest_palette_index`/`mark_scenery_collision_cells`),
+  28 stubs remain. The ranker naturally re-surfaces it as a c-stub `remaining:N` row (no BACKLOG de-rank
+  needed). S216 carries with characterization: `get_tile_attribute` (lead, body fully solved) is a
+  NEAR-MATCH WALL — GCC bakes a phantom -0x10 in-place LO16 addend on the `D_800BAC0C` ref across all
+  index forms (see `#base-register-vs-displacement` new subsection); needs a GCC-source dive.
+  `func_80041E8C` = NESTED FN (static-chain-in-$v0, not portable-C — reclassified from the S215
+  "dead-`sw v0`" guess). `func_800402F4` = jtbl-dispatch (`jtbl_800CA958`, needs shared-rodata carve).
+  Untried tail for the next smallest-first slice: remaining getters (`func_8004107C`, `func_80042228`,
+  `load_club_offset_pair`, `func_800413C0`), then FP terrain-height interp (`get_interpolated_terrain_height`,
+  `compute_triangle_plane`, `get_lowest_height_at_position`) + the jtbl-dispatch vein (rodata-jtbl
+  0x800CA930..0x800CAB20). File md5-candidate only when all 44 bank.
+- **Tooling debt (test-tools, 3 PRE-EXISTING failures, off-cadence golden-gated).** Confirmed at S216
+  review to predate S216 (ran against pre-S216 tree): (1) `test_playbook_index_covers_all_sections` —
+  broken `## Playbook index` anchor `cse-make-regs-eqv-branch-fold…` (heading uses `make_regs_eqv`
+  underscores, index/citations use hyphens; reconcile in LOCKSTEP per prompt-surface-as-API, S184).
+  (2) `test_coddog_suppresses_maybe_upstream` + (3) `test_pick_target_ranked_by_descending_score` —
+  stale fixtures probing `func_80070FD0` state / a size-order tie the ranker doesn't stably break;
+  make them fixture-based so they stop drifting each banking sprint (extends the S184 golden-fixture
+  follow-up). The 5 live-state pick_target/libultra goldens are regenerated each banking review
+  (`REGEN_GOLDEN=1`).

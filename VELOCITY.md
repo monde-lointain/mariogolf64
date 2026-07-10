@@ -537,6 +537,18 @@ Three honest caveats:
   pointer typing, no per-fn MCP. Deferred non-carries: `func_80041E8C` (anomalous dead-`sw v0` entry
   spill) + the 30+instr tail (`func_800414C0` unaligned struct-copy, `get_terrain_type`, etc.) + the
   FP height-interp / jtbl-dispatch walls — never committed, so not carries.
+  S216: CONTINUED `get_tile_attribute.c` (mixed-partial). Banked **0pt** (file 17/44, not
+  md5-candidate), **+4 matched** (2 committed `set_direct_grid_vertex`/`get_terrain_type` + 2 stretch
+  `find_closest_palette_index`/`mark_scenery_collision_cells`), ZERO permuter. Quality **0/0/2/0** (2
+  carried-COMMITTED — the jal/fp tractability scan mis-flagged a nested-fn + a jtbl fn as tractable;
+  +1 stretch near-match wall `get_tile_attribute`). 2 NEW reusable regalloc levers (`#register-reuse
+  nudge`): masks-into-temps → base reuses a freed arg reg; named-invariant-const → preheader
+  materialization order. 1 NEW near-match class (`#base-register-vs-displacement` subsection): phantom
+  -0x10 in-place LO16 addend on a 2D-strength-reduced array ref, invariant across index forms, GCC-
+  source-dive escalation. Retro applied **3/3** (all hazards.md). LESSON: a jal/FP-only per-fn
+  tractability scan is BLIND to jtbl fns (they emit a shared-rodata table a partial bank can't carve)
+  and to nested/static-chain fns — 2 of 4 committed picks were dead; add a `jtbl_`/`.word .L` grep to
+  the triage (S216 suggestion #3, now doc'd in `#switch-jtbl-dispatch`).
   Rolling-5 (S34+S37+S39+S42+S43): seed 3.4 pt/sprint (17/5), realized 2.8 pt/sprint (14/5). S31 nuGfxInit is the first over-seed classical fn (+3 residual); rubric needs +1 for double-novel-gotcha libnusys classical targets. S42 defines-data verbatim-body drop: realized 2 = seed 3 − 1 (the fast path makes a defines-data leaf bank like a mirror) — confirms the −1 verbatim-first-try rule extends to known-edit-mirror defines-data, not just classical seeds. S43 is the new residual floor (−2): both gbpak fns were classical-FLAGGED (jal-count-mismatch) but proved pure verbatim mirrors once the macro-FP was stripped — the seed over-priced them because the hazard was a tooling artifact, now fixed in `_c_jal_count`, so future macro-heavy libultra leaves should seed lower.
 - **Regime:** `mirror` is a depleting minority (~22 % of ranked candidates: 56 mirror vs 194
   classical; 18 warm / 38 cold). The warm clean-singleton mirror pool is now **mined out** (S11

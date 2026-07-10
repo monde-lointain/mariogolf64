@@ -25,6 +25,34 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 216 — get_tile_attribute.c mixed-partial (cont.) — 2026-07-10
+- Increment: 0 files banked / **4 functions matched** (delta: no md5-candidate change; file 17/44
+  banked, 28 stubs remain = FP height-interp, jtbl dispatch, coddog-structural false-hits, NOT
+  md5-candidate). Committed 4 (2 banked, 2 carried mis-scoped) + stretch 3 (2 banked, 1 near-match
+  carry).
+- Quality: 0/0/**2**/0 (stuck-far/permuter/carried-committed/re-opened) this sprint, +1 stretch
+  near-match wall. ZERO permuter. 2 of the 4 committed items were mis-scoped by the jal/fp tractability
+  scan (nested-fn + jtbl, both carried).
+- Seed: committed 0pt; banked **0pt** (per-file all-or-nothing, file partial); regime mixed. Value
+  signal = **+4 matched-fn count**. Residual n/a (partial file).
+- What helped: asm-first fast-path again (no MCP/permuter). In-tree `asm-differ diff.py` isolated the
+  one near-miss per fn fast. 2 NEW reusable regalloc levers cracked near-matches: masks-into-temps
+  forces a base ptr to reuse a freed arg reg (`get_terrain_type`); naming a hoisted invariant const
+  before the base var controls preheader materialization order (`mark_scenery_collision_cells`).
+- Friction: `get_tile_attribute` (lead, body fully solved) is a NEAR-MATCH WALL — GCC bakes a phantom
+  -0x10 in-place LO16 addend onto the `D_800BAC0C` ref across ALL index forms (1D/2D/byte-offset/local
+  ptr), index value identical to ROM. Needs a GCC-source dive (addr-giv fold). The jal/fp scan
+  mis-flagged `func_800402F4` (jtbl) and `func_80041E8C` (nested fn) as tractable, costing 2 dead
+  committed picks.
+- Applied: 3 of 3 — #1 (`#phantom -N in-place addend` new hazard subsection under
+  `#base-register-vs-displacement`), #2 (2 regalloc levers into `#register-reuse nudge`), #3 (jtbl
+  per-fn triage-grep note into `#switch-jtbl-dispatch`). Live-state pick_target + libultra goldens
+  regenerated (banking drift). NOTE: 3 PRE-EXISTING `make test-tools` failures confirmed to predate
+  S216 (playbook-index `cse-make-regs-eqv` anchor, `coddog_suppresses`/`ranked_by_descending`
+  stale-fixtures) — carried to BACKLOG, not S216-induced.
+- Carry-over: `get_tile_attribute` (phantom-addend wall, characterized in-file), `func_800402F4`
+  (jtbl, shared-rodata carve), `func_80041E8C` (nested fn / static-chain-in-$v0). File stays open.
+
 ## Sprint 215 — get_tile_attribute.c terrain-query pack (mixed-partial) — 2026-07-10
 - Increment: 0 files banked / **13 functions matched** (delta: no md5-candidate change, 230→230; file
   13/44 banked, 31 stubs remain = FP terrain-height interp + jtbl dispatch + coddog-structural

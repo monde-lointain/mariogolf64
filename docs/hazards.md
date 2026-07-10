@@ -1828,6 +1828,25 @@ pressure.
 
 **Provenance:** S11 (flipped score 400→0 in one iteration).
 
+**Variant — masks-into-temps forces a base pointer to REUSE a freed arg register.** When a fn's only
+diff is that the ROM materializes a symbol base into a just-freed ARG register (reusing it after that
+arg's last use) while your build loads it into a fresh scratch (or too early), split the arg's final uses
+into named temps computed BEFORE the base assignment. S216 `get_terrain_type`: the ROM reuses `a2` (=`gx`)
+for `base = D_80132D4A` right after `gx`'s last use (`andi …,a2,0x1f`); writing `sx = gx & 0x1F; sz = gz &
+0x1F; base = D_80132D4A;` (masks first, THEN base) frees `gx`/`gz` and lets `base` land in `gx`'s
+register — full ROM match. The inline `base + ((gx&0x1F) + …)` form loaded `base` too early into its own
+reg (shifting `gx` to `a3`), and an explicit `base` hoist over-corrected (base BEFORE the masks). The
+lever is the ORDER of the base assignment relative to the arg's last-use masks.
+
+**Variant — name a hoisted loop-invariant constant to control preheader materialization ORDER.** When two
+loop-invariants are hoisted to the preheader and the ROM materializes them in a specific order (e.g. a
+store CONSTANT before a base ADDRESS), your build may pick the reverse and swap their registers. Declaring
+the constant as a named variable BEFORE the base-address variable fixes the emit order. S216
+`mark_scenery_collision_cells`: the ROM loads `li t1,0xF801` (the grid mark) FIRST, then `lui/addiu t0` (=
+`&D_80132D4A`); with `base = D_80132D4A;` first the build materialized base into `t1` and the hoisted
+`0xF801` into `t0` (swapped). Adding `s32 mark = 0xF801;` as the first statement (before `base`) flipped
+the preheader order and the register pair — single-instruction near-miss to full match.
+
 **Variant — inverted-guard for a `return DEFAULT` tail.** For `if (cond) return A; return
 DEFAULT;` where the guard variable lands in the wrong scratch reg (mine `slti v0`/`beqz v0`, target
 `slti v1`/`beqz v1`) — same branch encoding, result correctly in `v0`, only the guard temp differs —
@@ -4598,6 +4617,15 @@ often with a per-case sparse secondary dispatch returning constants. `func_80051
 course/hole yardage lookup: `switch(course)` over 8 cases, each a sparse `hole` dispatch returning
 golf-yardage constants, default 200).
 
+**Triage note (S216) — a jtbl fn hides from a jal/fp tractability scan.** When triaging a mixed-partial
+file smallest-first, a per-fn `jal`/FP-op instruction count (used to skip FP-math and heavy-callee fns)
+does NOT flag a jtbl-dispatch fn: it can be 0-fp and low-jal yet still emit a compiler jump table that
+lives in the file's shared `.rodata` blob, which a partial bank cannot carve without disturbing the still-
+asm siblings (see [#rodata-sibling-yaml-pattern]). S216 `func_800402F4` scanned as "35 instr, 1 jal, 0 fp
+= tractable" but is an 11-case `switch` over `jtbl_800CA958`, so it belongs to the jtbl-carry vein, not the
+quick getter vein. **Add `jtbl_`/`jr $v0`/`.word .L` to the per-fn triage grep** so jtbl fns route to the
+carry list automatically alongside the FP/heavy-callee skips.
+
 **Three levers for a byte-exact match:**
 
 1. **`switch` for the jtbl dispatch only; `if`-chains for sparse inner cases.** A `switch` on the
@@ -5853,6 +5881,31 @@ where the constant lives.
 compiler-source dive (mips.c `print_operand_address` / `simple_memory_operand` + reload's address
 legitimization) or [#cross-project-matched-corpus-mining]. Related base-register cases where a lever DID
 land: [#mem-in-struct-scheduling-lever], [#offset-0-symbol-re-materialization].
+
+### Phantom -N in-place addend on a 2D-strength-reduced array ref (S216 `get_tile_attribute`)
+
+**Symptom.** A classical fn is byte-exact except the ONE `lh/lhu/lw` off an extern array base carries a
+spurious constant addend: the build emits `lui %hi(SYM); addu index; lh …,%lo(SYM)-N(reg)` where the ROM
+emits `lh …,%lo(SYM)(reg)` (addend 0), with the INDEX register value IDENTICAL between the two. S216
+`get_tile_attribute`: `attr = D_800BAC0C[tx + tz*16]` (s16 coarse map, `tx=x/16`, `tz=z/16`) compiled to
+`lh a2,-0x5404(a2)` vs target `lh a2,-0x53f4(a2)` — a `-0x10` (-8 halfword) phantom addend on the
+`R_MIPS_HI16/LO16` pair against `D_800BAC0C`, even though the computed byte offset `tx*2 + tz*32` matches
+the ROM exactly. It is an in-place LO16 addend (o32 REL), NOT a wrong symbol; the .o reloc target is
+still `D_800BAC0C`.
+
+**What FAILS (all reproduce the SAME -0x10, do not cycle through these):** every index form — 1D
+`[tx + tz*16]`, transposed `[tz*16 + tx]`, 2D `s16 A[][16]` `[tz][tx]`, explicit byte-offset
+`*(s16*)((u8*)A + tx*2 + tz*32)`. A local base pointer (`s16 *cmap = A; cmap[…]`) removes the addend but
+switches the whole access to full-base materialization (`lh 0(reg)`), a different non-match (this is the
+[#base-register-vs-displacement] axis). So the two knobs trade one near-match for the other; neither lands.
+
+**Status.** Open near-match class, kin to [#base-register-vs-displacement] and
+[#short-text-shifts-flowing-bss] but distinct: a COMPILER address-giv fold (a constant biased out of a
+2D/strength-reduced index into the symbol's LO16 addend), on a rodata/data ref, not a bss length shift and
+not a full-base-vs-displacement choice. Escalation is a GCC-source dive (loop.c / cse.c giv formation +
+`fold`/`plus_constant` on the SYMBOL_REF address, and reload address legitimization) — a `git`-history
+copy of the fully-solved body is in the `get_tile_attribute` INCLUDE_ASM plate comment. Not
+permuter-reachable (an addressing-fold decision, like the parent section).
 
 ### Tracked ranker follow-up: `family-of:<banked-fn>` (S210)
 

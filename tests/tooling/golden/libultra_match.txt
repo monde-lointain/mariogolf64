@@ -18,21 +18,18 @@ reference (union):
 
 === validation: named asm blocks confirmed libultra by opcode (0) ===
 
-=== CONFLICTS: named asm block opcode-matches a DIFFERENT libultra fn (3) ===
+=== CONFLICTS: named asm block opcode-matches a DIFFERENT libultra fn (2) ===
   (likely a name-collision false-positive in pick_target's labeling — verify)
-  0x1B4A0 0x80043A04 get_interpolated_terrain_height_wrapper -> __d_to_ll,__d_to_ull,__f_to_ll,__f_to_ull,__ll_div,__ll_rem,__ll_to_d,__ll_to_f,__ull_div,__ull_rem (libc/ll, 7i) [AMBIG]
   0x2BFF0 0x80051E74 __freeParam                -> __osInitialize_autodetect,__osSyncVPrintf,alSynFreeFX (audio/synfreefx, 2i) [AMBIG]
   0x3A490 0x8005F0E0 spawn_object_simple        -> __d_to_ll,__d_to_ull,__f_to_ll,__f_to_ull,__ll_div,__ll_rem,__ll_to_d,__ll_to_f,__ull_div,__ull_rem (libc/ll, 7i) [AMBIG]
 
 === symbol_addrs.txt worklist: unnamed libultra blocks (add-only, gate-applied) ===
 # review before applying; opcode-only match — confirm at the gate. min-insns=5
 spScissor = 0x800326FC; // type:func  (sp/sprite, was func_800326FC, 9i)   # AMBIG:spScissor|spX2Scissor|spXScissor
-__d_to_ll = 0x800504E8; // type:func  (libc/ll, was func_800504E8, 7i)   # AMBIG:__d_to_ll|__d_to_ull|__f_to_ll|__f_to_ull|__ll_div|__ll_rem|__ll_to_d|__ll_to_f|__ull_div|__ull_rem common-skeleton x5
-__d_to_ll = 0x8006F4F0; // type:func  (libc/ll, was func_8006F4F0, 7i)   # AMBIG:__d_to_ll|__d_to_ull|__f_to_ll|__f_to_ull|__ll_div|__ll_rem|__ll_to_d|__ll_to_f|__ull_div|__ull_rem common-skeleton x5
-osSetTime = 0x800772B0; // type:func  (os/settime, was func_800772B0, 5i)
-__d_to_ll = 0x80081550; // type:func  (libc/ll, was func_80081550, 7i)   # AMBIG:__d_to_ll|__d_to_ull|__f_to_ll|__f_to_ull|__ll_div|__ll_rem|__ll_to_d|__ll_to_f|__ull_div|__ull_rem common-skeleton x5
+__d_to_ll = 0x8006F4F0; // type:func  (libc/ll, was func_8006F4F0, 7i)   # AMBIG:__d_to_ll|__d_to_ull|__f_to_ll|__f_to_ull|__ll_div|__ll_rem|__ll_to_d|__ll_to_f|__ull_div|__ull_rem common-skeleton x3
+__d_to_ll = 0x80081550; // type:func  (libc/ll, was func_80081550, 7i)   # AMBIG:__d_to_ll|__d_to_ull|__f_to_ll|__f_to_ull|__ll_div|__ll_rem|__ll_to_d|__ll_to_f|__ull_div|__ull_rem common-skeleton x3
 
-# 5 ready to add; 7 unnamed matches below min-insns (5) withheld; 745 overlay candidates excluded (libultra is never in an overlay).
+# 3 ready to add; 6 unnamed matches below min-insns (5) withheld; 745 overlay candidates excluded (libultra is never in an overlay).
 # AMBIG / common-skeleton flags mark short opcode-only matches that are not unique — verify those.
 # Leaf intrinsics under 20i are NOT a coddog blind spot here — this matcher includes them;
 # any still un-named are simply not opcode-unique enough to auto-name (raise --min-insns to trim).
