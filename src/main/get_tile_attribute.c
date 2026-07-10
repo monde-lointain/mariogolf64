@@ -6,6 +6,7 @@ extern void load_hole_terrain_assets(void);
 extern void* get_table_entry(u32);
 extern s16* get_direct_grid_vertex(s32, s32);
 extern s16 g_terrain_grid_verts[];
+extern s32 resolve_club_terrain_mask(s32, void*);
 
 typedef struct {
   s16 unk[8];
@@ -78,7 +79,22 @@ INCLUDE_ASM("asm/nonmatchings/main/get_tile_attribute", ci8_to_rgba5551);
 
 INCLUDE_ASM("asm/nonmatchings/main/get_tile_attribute", func_800402F4);
 
-INCLUDE_ASM("asm/nonmatchings/main/get_tile_attribute", load_club_offset_pair);
+void load_club_offset_pair(s8* club, s32* state, s32* out) {
+  s32 mask = resolve_club_terrain_mask(1, club);
+  if (state[2] & mask) {
+    out[0] = club[8];
+    out[1] = club[9];
+  } else {
+    out[0] = club[8] - club[0xA];
+    if (out[0] < 5) {
+      out[0] = 5;
+    }
+    out[1] = club[9] - club[0xA];
+    if (out[1] < 5) {
+      out[1] = 5;
+    }
+  }
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/get_tile_attribute", get_ground_attribute);
 
