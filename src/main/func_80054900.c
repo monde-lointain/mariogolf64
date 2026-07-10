@@ -73,7 +73,17 @@ void func_80056264(s32 id) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80054900", seek_current_frame_by);
+void seek_current_frame_by(s32 id, s32 delta) {
+    u8 *cs = get_character_state(id);
+    if (cs != NULL) {
+        f32 newval = *(f32 *)(cs + 0x10) + (f32)delta;
+        f32 limit = (f32)*(s32 *)(cs + 0x18);
+        *(f32 *)(cs + 0x10) = newval;
+        if (limit <= newval) {
+            *(f32 *)(cs + 0x10) = limit;
+        }
+    }
+}
 
 void func_800562F4(s32 id, f32 value) {
     u8 *cs = get_character_state(id);
