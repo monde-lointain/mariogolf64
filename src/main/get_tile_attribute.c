@@ -140,7 +140,21 @@ s32 func_80041058(s32 x, s32 unused, s32 z) {
   return query_terrain_at_position(x, z) == 5;
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/get_tile_attribute", func_8004107C);
+void average_grid_vertices(s16* a, s16* b, s16* out) {
+  u8* ab = (u8*)a;
+  u8* bb = (u8*)b;
+  u8* ob = (u8*)out;
+  out[0] = (a[0] + b[0]) / 2;
+  out[1] = (a[1] + b[1]) / 2;
+  out[2] = (a[2] + b[2]) / 2;
+  out[3] = 0;
+  out[4] = (a[4] + b[4]) / 2;
+  out[5] = (a[5] + b[5]) / 2;
+  ob[0xC] = (ab[0xC] + bb[0xC]) / 2;
+  ob[0xD] = (ab[0xD] + bb[0xD]) / 2;
+  ob[0xE] = (ab[0xE] + bb[0xE]) / 2;
+  ob[0xF] = (ab[0xF] + bb[0xF]) / 2;
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/get_tile_attribute", func_80041160);
 
