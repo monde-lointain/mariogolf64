@@ -37,6 +37,12 @@ typedef struct {
 } ColorEntry;
 
 extern ColorEntry D_800BB040[];
+/* ci8_to_rgba5551 reads the palette columns via per-field offset-0 symbols so
+ * GCC re-materializes %hi/%lo per load (matches the ROM); stride 4 = sizeof
+ * ColorEntry, indexed by palette_idx*4. */
+extern s8 D_800BB041[];
+extern s8 D_800BB042[];
+extern s8 D_800BB043[];
 
 s32 find_closest_palette_index(s32 color) {
   s32 best_dist;
@@ -75,7 +81,49 @@ s32 find_closest_palette_index(s32 color) {
   return best_idx;
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/get_tile_attribute", ci8_to_rgba5551);
+s32 ci8_to_rgba5551(s32 index) {
+  s32 palette_idx = 0;
+
+  switch (index) {
+    case 0:
+      palette_idx = 0;
+      break;
+    case 6:
+      palette_idx = 1;
+      break;
+    case 2:
+      palette_idx = 2;
+      break;
+    case 1:
+      palette_idx = 3;
+      break;
+    case 3:
+      palette_idx = 4;
+      break;
+    case 7:
+      palette_idx = 5;
+      break;
+    case 4:
+      palette_idx = 6;
+      break;
+    case 8:
+      palette_idx = 8;
+      break;
+    case 9:
+      palette_idx = 9;
+      break;
+    case 5:
+      palette_idx = 10;
+      break;
+  }
+  palette_idx <<= 2;
+  {
+    s32 r = ((s8*)D_800BB040)[palette_idx];
+    s32 g = D_800BB041[palette_idx];
+    s32 b = D_800BB042[palette_idx];
+    return (r << 11) | (g << 6) | (b << 1) | D_800BB043[palette_idx];
+  }
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/get_tile_attribute", func_800402F4);
 

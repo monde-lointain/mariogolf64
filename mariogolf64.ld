@@ -681,11 +681,11 @@ SECTIONS
         build/src/main/func_8003DFD0.o(.rodata);
         build/src/main/func_8003E400.o(.rodata);
         build/asm/19AC0.o(.rodata);
-        build/src/main/get_tile_attribute.o(.rodata);
-        build/src/main/func_80043AF0.o(.rodata);
         build/asm/data/main_rodata.rodata.o(.rodata);
         build/asm/data/A5CE0.rodata.o(.rodata);
-        build/asm/data/A5D30.rodata.o(.rodata);
+        build/src/main/get_tile_attribute.o(.rodata);
+        build/src/main/func_80043AF0.o(.rodata);
+        build/asm/data/A5D58.rodata.o(.rodata);
         build/asm/data/A5FD0.rodata.o(.rodata);
         build/src/main/func_80043C20.o(.rodata);
         build/asm/207E0.o(.rodata);
