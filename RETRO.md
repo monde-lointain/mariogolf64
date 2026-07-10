@@ -25,6 +25,34 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 209 — func_80059BA0.c near-match crack (compiler-source dive) — 2026-07-09
+- Increment: 0 files banked / **9 functions matched** (delta: no md5-candidate change, 230→230; file
+  32/59 banked, 27 stubs remain, NOT md5-candidate).
+- Quality: 0/1/1/0 (0 stuck-far / 1 permuter-run [C458, WALLED at 1.27M iters / score 55, banked by the
+  dive not the permuter] / 1 carried [D334] / 0 re-opened)
+- Seed: continuation of S208's 13pt pack — committed 0pt (no re-seed); banked 0pt (per-file
+  all-or-nothing, file partial); regime classical/mixed. Value = +9 matched.
+- What helped: the PO-directed compiler-source dive (subagent fan-out over gcc-2.7.2 + gas-2.6) cracked
+  ALL 4 committed near-matches (B070/D308/D218/D2E4) byte-exact with **0 permuter**, AND cracked the
+  C458 grid-counter family which had **walled** the permuter (1.27M iters / score 55). FOUNDATIONAL
+  discovery: KMC cc1 has NO instruction scheduler (INSN_SCHEDULING undefined; -fschedule-insns a byte
+  no-op) → source emit-order is the only ordering control (new memory `kmc-cc1-no-instruction-scheduler`).
+  Levers banked: gas `.set-reorder` textual≠machine nop (B070); reorg `optimize_skip` annulled bnel
+  (D308); switch shared-`case 0: default:` merged-default (D218/D2E4); global.c allocno live-length
+  steer via intermediate copy + integer-cast commutative order (C458 family); word-aligned-struct
+  block-move path (B28C); outer-limit-as-var setup order (C5B4/C614). `tools/cc/gcc -S/-c` + objdump as
+  the build-free byte oracle throughout.
+- Friction: the permuter walled on C458 (1.27M iters) before the PO re-directed to the dive —
+  reinforces `#compiler-source-fan-out` as the escalation for pure-regalloc allocno perms, not just
+  slow ones. D334's triple-IV struct-array init resisted the oracle (GCC merges the outer counter into
+  the byte-offset IV vs the ROM's 3 IVs) — carried for a loop.c dive.
+- Applied: 9 of 9 (#1 strengthen #compiler-source-fan-out walled-permuter case; #2 no-scheduler fact +
+  global.c allocno live-length lever; #3 integer-arith commutative order; #4 setup-block order; #5
+  struct-align block-move; #6 .set-reorder textual≠machine; #7 optimize_skip bnel; #8 switch
+  merged-default; #9 new #grid-counter-double-loop hazard). Memory added: kmc-cc1-no-instruction-scheduler.
+- Carry-over: `func_8005D334` (triple-IV struct-array init, loop.c strength-reduction divergence). ~23
+  larger/FP fns in the file still unprofiled.
+
 ## Sprint 208 — func_80059BA0.c integer-glue/accessor pack — 2026-07-09
 - Increment: 0 files banked / **23 functions matched** (delta: no md5-candidate change, 230→230; file
   23/59, 36 stubs remain, NOT md5-candidate). Largest single-sprint match count to date.

@@ -449,6 +449,23 @@ Three honest caveats:
   atomic-13). Retro applied **4/4** (#1 flowing-bss self-ref tell → `#short-text-shifts-flowing-bss`;
   #2 goto preamble-order/regalloc coupling + #3 `gcc -S` codegen oracle → `#top-tested-loop-goto-local-hoist`;
   #4 s8/u8 + return-type levers → `#char-signedness`).
+  S209: CONTINUATION of S208's `func_80059BA0.c` 13pt pack (no re-seed; seed booked at S208), banked
+  **0pt** (mixed-partial, file 32/59 not md5-candidate; per-file all-or-nothing), **+9 matched**. Banks:
+  the 4 S208-carried near-matches (B070/D308/D218/D2E4) + the full C458 grid-counter family
+  (C458/C4B4/C5B4/C614) + B28C, ALL byte-exact via the PO-directed compiler-source dive with **0
+  permuter-banks**. The dive cracked C458 which had **WALLED** the permuter (1.27M iters / score 55) — a
+  pure-regalloc global.c allocno permutation the permuter never reaches (its levers are source
+  restructures: intermediate-copy live-length steer + integer-cast commutative order). Realized effort
+  HIGH (a permuter-wall byte-exact crack + 4 carried-then-closed near-matches) but UNBOOKABLE — the file
+  is still partial so the 13pt banks only at completion; the value signal is +9 matched (S208 23 + S209
+  9 = 32/59). Quality **0/1/1/0** (1 permuter-run walled; 1 carry `func_8005D334` triple-IV struct-init
+  loop.c divergence). FOUNDATIONAL: KMC cc1 has NO instruction scheduler (INSN_SCHEDULING undefined →
+  source emit-order is the only ordering control; new memory `kmc-cc1-no-instruction-scheduler`). Retro
+  applied **9/9**, all to `docs/hazards.md` (#compiler-source-fan-out walled-permuter case; global.c
+  allocno live-length lever + no-scheduler fact; integer-arith commutative order; setup-block order;
+  struct-align block-move; .set-reorder textual≠machine; optimize_skip bnel; switch merged-default; new
+  #grid-counter-double-loop). Second consecutive sprint proving the compiler-source dive beats the
+  permuter on this compiler (S208 4 near-matches carried → S209 all closed by the dive, 0 permuter).
   Rolling-5 (S34+S37+S39+S42+S43): seed 3.4 pt/sprint (17/5), realized 2.8 pt/sprint (14/5). S31 nuGfxInit is the first over-seed classical fn (+3 residual); rubric needs +1 for double-novel-gotcha libnusys classical targets. S42 defines-data verbatim-body drop: realized 2 = seed 3 − 1 (the fast path makes a defines-data leaf bank like a mirror) — confirms the −1 verbatim-first-try rule extends to known-edit-mirror defines-data, not just classical seeds. S43 is the new residual floor (−2): both gbpak fns were classical-FLAGGED (jal-count-mismatch) but proved pure verbatim mirrors once the macro-FP was stripped — the seed over-priced them because the hazard was a tooling artifact, now fixed in `_c_jal_count`, so future macro-heavy libultra leaves should seed lower.
 - **Regime:** `mirror` is a depleting minority (~22 % of ranked candidates: 56 mirror vs 194
   classical; 18 warm / 38 cold). The warm clean-singleton mirror pool is now **mined out** (S11

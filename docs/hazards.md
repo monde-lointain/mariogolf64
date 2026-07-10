@@ -109,6 +109,12 @@ The hazard families below group the sections that follow. Each links to its exis
 - [nested-function static-chain spill (leaf dead `sw v0,0(sp)` + caller sets `v0=&frame` per-call)](#nested-function-static-chain-spill)
 - [local-alloc qty-permutation (1-basic-block reg swap, permuter-appropriate)](#local-alloc-qty-permutation)
 - [cse-derived-pointer base-canonicalization (sub-struct dump fn keeps the param base, folds the offset)](#cse-derived-pointer-base-canonicalization)
+- [integer-arith commutative operand order (pointer_int_sum pins pointer-first; int math keeps source order)](#integer-arith-commutative-operand-order)
+- [setup-block instruction order (a pre-base loop-limit const must be a variable)](#setup-block-instruction-order)
+- [struct-copy block-move path (alignment picks lwl/lwr vs aligned word-loop)](#struct-copy-block-move-path)
+- [reorg optimize_skip annulled bnel (single-skipped-insn branch-likely)](#reorg-optimize_skip-annulled-bnel)
+- [switch tight merged-default (shared case-0/default label + case-1 last)](#switch-tight-merged-default)
+- [grid-counter double-loop (non-zero-cell counter idiom)](#grid-counter-double-loop)
 
 **libnusys / audio-band specifics**
 - [libmus-bundled-n_audio duplicate (a SUPPORT_NAUDIO libmus archive links its OWN n_audio synth copy)](#libmus-bundled-n_audio-duplicate-a-support_naudio-libmus-archive-links-its-own-n_audio-synth-copy)
@@ -123,6 +129,7 @@ The hazard families below group the sections that follow. Each links to its exis
 **Toolchain oracles & spot-checks**
 - [IO_WRITE/IO_READ isolation artifact](#io_writeio_read-isolation-artifact)
 - [Assembler differences + byte-cmp spot-check](#assembler-differences--byte-cmp-spot-check)
+- [gas .set-reorder delay-slot fill (textual layout != machine; disasm the .o)](#gas-set-reorder-delay-slot-fill)
 - [Decompile-vs-asm authority](#decompile-vs-asm-authority)
 - [Display lists](#display-lists)
 
@@ -5006,6 +5013,21 @@ list-scheduler priority vs. the `true_dependence` memory-alias model), so one co
 candidate set cannot. The assembler rule-out (gas `.set reorder` is a faithful 1:1 transcriber under
 `-mips2`) correctly scoped the wall to GCC before the lever hunt.
 
+**A WALLED permuter is a dive TARGET, not an automatic carry (S209).** The escalation is not only for a
+*slow* permuter — it beats a fully **plateaued** one. `func_8005C458` (a 6×6 non-zero-cell grid counter)
+walled the permuter at **~1.27M iters / score 55** — a pure-regalloc allocno permutation (the row base
+and the loop counter swapped, plus one commutative `addu` operand order) — yet the compiler-source dive
+cracked it **byte-exact with ZERO permuter iterations**. Why the permuter cannot: both winning levers are
+SOURCE RESTRUCTURES outside its neighborhood — (a) introduce an intermediate call-result copy
+(`u8 *ret = func_8005AF50(); …; s8 *base = ret;`) to defer `base`'s materialization and shorten its
+live-length ([#local-alloc-qty-permutation](#local-alloc-qty-permutation), the global.c live-length
+steer), and (b) convert pointer arithmetic to INTEGER arithmetic to flip a commutative operand order
+([#integer-arith-commutative-operand-order](#integer-arith-commutative-operand-order)). The permuter
+reorders decls / splits-merges temps / hoists consts / wraps `do{}while(0)`; it never invents a semantic
+intermediate copy nor a pointer→int retype. **Doctrine: a pure-regalloc allocno/qty permutation that
+WALLS the permuter routes HERE (compiler-source dive), not to an automatic carry.** The whole S209
+grid-counter family (C458/C4B4/C5B4/C614) banked this way, 0 permuter — see [#grid-counter-double-loop](#grid-counter-double-loop).
+
 ---
 
 ## cse make_regs_eqv branch-fold (reused-var canonical fold on a `?:`-with-flag store)
@@ -5443,6 +5465,35 @@ build of the same fn (the minimal isolated context perturbs local allocation). *
 object byte-`cmp` + the full ROM SHA-1, not the isolated score**, for a one-basic-block fn. (The
 isolated near-miss score is still a fine permuter SEED; just don't trust it as the match oracle.)
 
+**Multi-BB analog — `global.c`, not `local-alloc.c` (S209 `func_8005C458`).** A fn with a NESTED loop
+has multiple basic blocks, so its cross-BB pseudos are allocated by **`global.c` (allocnos)**, the
+global analog of the QTY rule above (confirm with the `.greg` dump vs `.lreg`). `allocno_compare` orders
+allocnos by priority `floor_log2(n_refs)·n_refs·size / live_length` (**`global.c`:594-601**), higher
+first, tie-broken by lower allocno number; `find_reg` scans hard regs **ascending** (no `REG_ALLOC_ORDER`
+in `mips.h`), so the register NUMBER a value gets is just its rank in the priority order. When two
+competitors have EQUAL `n_refs`, **live_length decides** — the shorter-lived one wins the lower reg.
+
+**Allocno live-length steer (the S209 C458 lever).** To flip which of two equal-ref values takes the
+lower caller-saved reg, change one's LIVE LENGTH at the source. `s8 *base = (s8*)func_8005AF50()`
+coalesces `base` with the `$v0` return, so its defining `move` materializes FIRST (right after the call)
+→ long live range; the row counter `i` (a later `li`) then out-prioritizes it and grabs the lower reg
+(direct: base live_length 14 > i 12 → i wins `$a2`, base `$a3`). An **intermediate copy** —
+`u8 *ret = func_8005AF50(); s32 count=0,i=0,n=6; s8 *base = ret;` — gives `base` a SEPARATE pseudo whose
+`move $a2,$v0` is deferred to AFTER the const inits → short live range (base live_length drops to 11 <
+i's 13) → base out-prioritizes `i` and takes `$a2` (and count lands `$a1`, end `$a0`). This is the exact
+lever the permuter cannot reach — it never restructures the call materialization (see the walled-permuter
+note in [#compiler-source-fan-out-escalation-above-the-permuter](#compiler-source-fan-out-escalation-above-the-permuter)).
+Cross-ref [#loop-weight-and-live-length-regalloc-steering](#loop-weight-and-live-length-regalloc-steering).
+
+**FOUNDATIONAL — the KMC `cc1` has NO instruction scheduler (S209, confirmed).** `INSN_SCHEDULING` is
+undefined for this MIPS build, so `-fschedule-insns` / `-fschedule-insns2` are **byte no-ops** (verified:
+the `.o` is identical with and without them). Therefore **SOURCE EMIT-ORDER is the only control over
+instruction ordering** — there is no post-pass that reorders. Every apparent "schedule transposition" in
+these playbooks (S208 B070 `li`/`la`; S209 C5B4 `li $t0,6` placement; the base-copy materialization
+above) is really RTL EMISSION order = source statement/decl order. Reach for source restructuring, NOT a
+scheduling barrier. (The one reorderer that remains is `loop.c` via `NOTE_INSN_LOOP_BEG` — a loop
+optimization, not a scheduler; see the goto-loop-vs-structured-loop codegen memory.)
+
 ## cse-derived-pointer base-canonicalization
 
 **Symptom (S205 `func_8005E380`).** A large straight-line fn takes ONE pointer parameter `T* p`,
@@ -5482,3 +5533,141 @@ body fully (it is 100% structural), commit a gold in-file root-cause note, and *
 sprints re-attempting the same levers. Detector signal for `pick_target.py` (queued, off-cadence
 golden-gated): single pointer param + large sub-struct-base dump access pattern + FP-reg reads →
 price permuter/carry-expected (kin to the S158/S177/S183/S203/S204 regalloc-heavy pts follow-up).
+
+## integer-arith commutative operand order (pointer_int_sum pins pointer-first)
+
+**Symptom (S209 `func_8005C458` family).** A fn is byte-exact except a single commutative `addu` whose
+two register operands are SWAPPED vs the ROM: ROM `addu $a0,$t1,$v1` (n-first), build
+`addu $a0,$v1,$t1` (p-first). The swapped value is a pointer+int sum (`end = p + n`).
+
+**Root cause (gcc-2.7.2 C front end).** For `pointer + integer`, `c-typeck.c` `pointer_int_sum` always
+builds the tree with the **pointer as operand 0**, so the RTL `plus` is `(plus p n)` → `addu d,p,n`
+regardless of source spelling (writing `n + p` folds straight back to `p + n`). The commutative
+canonicalization is upstream and deterministic; no decl-order / `register` / re-association source lever
+moves it while the sum stays pointer arithmetic (all verified inert, S209).
+
+**Lever.** Do the address math in the INTEGER domain so it is an ordinary commutative int add kept in
+SOURCE operand order: `u32 p = (u32)base + 0x1320; u32 end = n + p;` emits `addu end,n,p` (n-first).
+Dereference through a cast — `*(s8*)p` (use `s8*` for the signed `lb`, not the `u8*`→`lbu`). The
+`(u32)`/`(s8*)` casts are register no-ops (zero extra instructions). Pairs with the base-copy live-length
+lever; see [#grid-counter-double-loop](#grid-counter-double-loop).
+
+**Provenance.** S209 C458/C4B4/C5B4/C614 (all banked byte-exact, no permuter).
+
+## setup-block instruction order (a pre-base loop-limit const must be a variable)
+
+**Symptom (S209 `func_8005C5B4` / `func_8005C614`).** A one-instruction transposition in the post-call
+setup block: the ROM emits the loop-limit `li $t0,6` BEFORE the `move $a2,$v0` base capture; the build
+emits it AFTER. Everything else byte-exact.
+
+**Root cause.** With no scheduler (see the no-scheduler note in
+[#local-alloc-qty-permutation](#local-alloc-qty-permutation)), the setup block is emitted in pure source
+order. A loop limit written as a bare literal in the exit test (`while (i != 6)`) is materialized lazily
+at first use — after the base copy. Declaring it as a VARIABLE among the pre-base consts forces its `li`
+to emit with them, before the base capture.
+
+**Lever.** When the inner extent and the outer limit DIFFER (so they are not one shared `n`), declare
+BOTH as pre-base variables: `s32 n = 18, lim = 6;` (before `s8 *base = ret;`), and test
+`while (i != lim)`. This orders `li $t1,0x12` and `li $t0,6` ahead of `move $a2,$v0`. (When inner ==
+outer, one shared `n` suffices — the C458 6×6 case, off 0x1320.)
+
+**Provenance.** S209 C5B4 (`>=50`) / C614 (`==108`), 6×18 grid, off 0xA84, row stride 0x12.
+
+## struct-copy block-move path (alignment picks lwl/lwr vs word-loop)
+
+**Symptom (S209 `func_8005B28C`).** A whole-struct copy `dst = *src` (or `arr[idx] = *src`) matches or
+misses depending on whether GCC emits a plain aligned word loop or a runtime-aligned `lwl`/`lwr` dual
+path. The ROM here is the aligned form (a 6×4-word unrolled loop + a 2-word tail, NO `lwl`/`lwr`).
+
+**Root cause.** GCC's block-move expansion picks the path from the struct TYPE's ALIGNMENT. A 1-byte-
+aligned struct (`u8` members, e.g. `u8 buf[104]`) forces a runtime align-check + an `lwl`/`lwr`
+unaligned dual path; a WORD-aligned struct (members are `s32`, so the type is 4-aligned) emits only the
+aligned word-loop + tail.
+
+**Lever.** Model the record with word-aligned members so the type alignment selects the aligned path.
+S209 B28C: declaring the 104-byte record as `struct { s32 unk_00[26]; }` (not `u8[104]`) yielded the
+ROM's aligned block-move, byte-exact. Match the ROM's path by picking the struct alignment.
+
+**Provenance.** S209 B28C (banked; `D_80131510[idx] = *src` + `func_8005DF54(func_8005AF50(), 1)`).
+
+## gas .set-reorder delay-slot fill (textual layout != machine)
+
+**Symptom (S209 `func_8005B070`).** The `-S` output shows a branch immediately followed by an
+instruction (e.g. `beq $2,$0,.L; addu $3,$3,-1`), which READS like a filled delay slot — but the
+assembled object has a `nop` in the slot and the `addu` AFTER it. A "the delay is already filled, we are
+1 insn short of the ROM's nop" verdict taken off the `.s` is a MISREAD.
+
+**Root cause (binutils-2.6 gas).** Under `.set reorder`, gas fills a branch delay slot by swapping the
+branch with the **PRECEDING** instruction ONLY (never the following one), and inserts a `nop` when that
+swap is unsafe — e.g. the preceding insn writes a register the branch reads (`tc-mips.c` ~L1525-1660).
+For B070 the preceding `slt` writes `$v0` and the `beq` reads `$v0`, so the swap is blocked → `nop`; the
+textual next insn is just the fall-through, emitted after the slot.
+
+**Lever / rule.** Judge delay slots on the ASSEMBLED object, never the `.s`: `objdump -d` the `.o`. This
+is the assembler analog of the compiler-source-fan-out doctrine "the empirical agent must judge the `.o`,
+never `-S`." Cross-ref [#assembler-differences--byte-cmp-spot-check](#assembler-differences--byte-cmp-spot-check).
+
+**Provenance.** S209 B070 (banked, no permuter). The while-form `while (i!=0){ if(arg0>=*p) break; i--;
+p--; }` was already byte-exact once assembled.
+
+## reorg optimize_skip annulled bnel (single-skipped-insn branch-likely)
+
+**Symptom (S209 `func_8005D308`).** A ternary / `if` chain that should emit a branch-LIKELY `bnel`
+(annulled, e.g. `0x54400005`) to a shared exit instead emits a negated `beql` + an extra `j`, or a plain
+(non-annulled) branch — off by the annul bit and often +1 instruction.
+
+**Root cause (gcc-2.7.2 reorg.c).** The annulled `bnel` comes ONLY from `optimize_skip`
+(`reorg.c`:1112-1215), gated (`reorg.c`:2960) by `delay_list == 0`: it fires when a conditional branch
+skips exactly ONE insn AND the delay slot is still empty after backward fill. A ternary / if-else-if
+branches AWAY (`beql` + extra `j`); a pre-assigned default gets the right direction but a PLAIN branch
+when backward fill already grabbed the preceding `addu` (`delay_list != 0` → `optimize_skip` gated out).
+
+**Lever.** Shape the source so the branch skips exactly ONE fall-through insn with the delay still empty:
+put the single skipped store in the ELSE arm — `if (x >= 6) { … } else r = x + 0x1EB;` — so the
+fall-through is one skippable insn and `optimize_skip` fires the annulled `bnel`.
+
+**Provenance.** S209 D308 (banked, no permuter).
+
+## switch tight merged-default (shared case-0/default label + case-1 last)
+
+**Symptom (S209 `func_8005D218` / `func_8005D2E4`).** A 2-value switch (`(x==1)?A:B`) should compile to
+a tight `beqz`/`beq` fall-through with the default MERGED into case 0 (no extra `j`); naive
+`switch`/`if`/ternary forms emit `bne` + `j` + a duplicated `move` (+1 instr), or fold to a branchless
+`xori`/`sltu`/`subu`/`andi`.
+
+**Root cause (gcc-2.7.2 jump.c).** Writing two separate zero-returning blocks lets -O2 `jump2`
+cross-jumping merge case-0 into the default, which places a `j default` BEFORE the case-1 body → fires
+the "conditional jump over an unconditional jump" rule (`jump.c`:1739) → `invert_jump` (`jump.c`:1757)
+rewrites the case-1 dispatch to `bne` + an extra `j` (the +1).
+
+**Lever.** Make `case 0:` and `default:` SHARE one label and emit `case 1` LAST:
+`switch (x) { case 0: default: return B; case 1: return A; }`. The shared label puts one `B`-return
+`code_label` physically before the case-1 body, so there is nothing to cross-jump; the case-1 dispatch
+stays `beq`, the `j default` is deleted as a fall-through, and reorg fills the `beq` delays → the exact
+tight merged-default.
+
+**Provenance.** S209 D218 (`(x==1)?7:0`) / D2E4 (`(x==1)?157:158`), both banked, no permuter.
+
+## grid-counter double-loop (non-zero-cell counter idiom)
+
+**Symptom (S209; ≥4 instances in `func_80059BA0.c`: `func_8005C458`/`C4B4`/`C5B4`/`C614`).** A small
+(~23-insn, one `jal`) fn calls `func_8005AF50()`, then walks a fixed R×C byte grid at a constant base
+offset counting non-zero cells, and returns a predicate on the count (`== 36`, `>= 30`, `>= 50`,
+`== 108`). The game reuses this idiom heavily — expect more. The instruction sequence RE's cleanly but
+the naive source locks on a base/counter regalloc swap + a commutative operand order, and the permuter
+WALLS (C458: ~1.27M iters / score 55).
+
+**Recipe (byte-exact, no permuter) — combine the S209 levers:**
+- **Base via an intermediate copy.** `u8 *ret = func_8005AF50(); s32 count=0,i=0,n=…; s8 *base = ret;`
+  so `base` out-prioritizes the row counter for `$a2`
+  ([#local-alloc-qty-permutation](#local-alloc-qty-permutation), the allocno live-length steer).
+- **Integer-domain end.** `u32 p=(u32)base+OFF; u32 end=n+p; do { count += (*(s8*)p != 0); p++; } while
+  (p != end);` for the n-first `addu` ([#integer-arith-commutative-operand-order](#integer-arith-commutative-operand-order)).
+- **Shared vs unshared `n`.** Inner-extent == outer-limit (6×6, off 0x1320) → one `n` serves both;
+  they differ (6×18, off 0xA84, row stride 0x12) → `n=18` for the inner end and a SEPARATE pre-base
+  **variable** `lim=6` for the outer test ([#setup-block-instruction-order](#setup-block-instruction-order)).
+- **Row advance + predicate.** `base += stride; i++;` then the return predicate sets the final
+  `slti`/`xori`/`sltiu` (`== 36` → `xori,0x24`+`sltiu,1`; `>= 50` → `slti,0x32`+`xori,1`; etc.).
+
+**Provenance.** S209 C458 (`==36`), C4B4 (`>=30`), C5B4 (`>=50`), C614 (`==108`) — all banked byte-exact,
+0 permuter, via the compiler-source dive ([#compiler-source-fan-out-escalation-above-the-permuter](#compiler-source-fan-out-escalation-above-the-permuter)).

@@ -3364,22 +3364,21 @@ by `/sprint-plan`:
   `NU_CONT_THREAD_ID=6` vs MG64's 5), and that surfaces only at first build unless reconciled here.
   A near-free retry missing any of these is a half-scoped spike — finish the scope before deferring.
 
-- **(S208 MIXED-PARTIAL — carried; 23 of 59 banked)** `src/main/func_80059BA0.c` (main-segment
-  `[0x34FA0]` integer-glue/accessor pack). Subseg `[0x34FA0, c, main/func_80059BA0]` flipped; 23 banked
-  asm-first (accessors/setters/store-init/call-chain/clamps), 36 stubs remain, ROM green off extracted
-  asm. **4 characterized ≥0.97 near-matches for a permuter sprint** (NOT walls — the goto/switch forms
-  reach exact instructions, only schedule/regalloc/branch-polarity residual): `func_8005B070`
-  (nested-search goto-loop; only a 1-instr `li v1,5`/`la a1` schedule transposition with COUPLED
-  regalloc — decl-order flips both; `nonmatchings/func_8005B070/base.c` seeded, isolated 0.62 is the
-  addressing artifact, in-tree diff = 1 instr); `func_8005D218`/`func_8005D2E4` (2-case+default switch;
-  ROM's tight `beq`-fallthrough with `li v0,7` in the beq DELAY slot vs the KMC gcc's looser `bne`+`j`+dup
-  `move`, +1 instr, from every switch/if/ternary/goto spelling); `func_8005D308` (if/else-if return chain
-  routed through `$a0` + `move v0,a0` regalloc). Also queue the **C458/C4B4/C5B4/C614 family** (4 nested
-  6×6-grid non-zero-byte counters, same top-tested-loop peel sensitivity as B070 ×4). All ≥0.97, none
-  attempted-to-floor with the permuter this sprint. Remaining un-attempted tractable: `func_8005DF54`
-  (5-call branch), `func_8005D334`/`func_8005B28C`/`func_8005CEE0`/`func_8005B0B4`/`func_8005C510`, plus
-  ~23 larger/FP fns. See `docs/hazards.md#top-tested-loop-goto-local-hoist` (the S208 preamble-order/
-  regalloc-coupling addendum) and `#short-text-shifts-flowing-bss` (the S208 self-ref +N tell).
+- **(S209 MIXED-PARTIAL — carried; 32 of 59 banked)** `src/main/func_80059BA0.c` (main-segment
+  `[0x34FA0]` integer-glue/accessor pack). 32 banked (S208 +23 asm-first; S209 +9 via the PO-directed
+  compiler-source dive), 27 stubs remain, ROM green off extracted asm. **S209 CLOSED all 4 S208
+  near-matches byte-exact with 0 permuter** — `func_8005B070` (while-loop; the `.set-reorder`
+  textual≠machine nop, not a schedule wall), `func_8005D218`/`func_8005D2E4` (shared `case 0: default:`
+  merged-default denies jump2 cross-jump inversion), `func_8005D308` (nested-if with the skipped store
+  in the ELSE → reorg `optimize_skip` annulled bnel) — AND the full **C458/C4B4/C5B4/C614 grid-counter
+  family** + `func_8005B28C` (word-aligned struct block-move). C458 WALLED the permuter (1.27M
+  iters/score 55) then fell to the dive (global.c allocno live-length steer via an intermediate copy +
+  integer-cast commutative operand order). **1 carry: `func_8005D334`** (triple-IV struct-array init —
+  GCC merges the outer counter into the byte-offset IV vs the ROM's 3 separate IVs + an up-pointer inner
+  loop; a loop.c strength-reduction divergence, characterized, oracle-close). ~23 larger/FP fns still
+  unprofiled. See the S209 hazards `#grid-counter-double-loop`, `#compiler-source-fan-out`
+  (walled-permuter case), `#local-alloc-qty-permutation` (global.c analog + no-scheduler fact), and
+  memory `kmc-cc1-no-instruction-scheduler`.
 
 - **(S206 MIXED-PARTIAL — carried; 3 of 6 banked)** `src/main/func_800772B0.c` (main-segment
   `[0x526B0]` float spline/curve-interpolation pack; NOT a settime.c mirror — false coddog collision).
