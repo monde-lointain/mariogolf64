@@ -148,7 +148,7 @@ segments:
       - [0x53D10, asm]
       - [0x5B620, asm]
       - [0x68500, asm]
-      - [0x70E10, asm]
+      - [0x70E10, c, main/func_80095A10]
       - [0x74890, c, main/func_80099490]
       - [0x748B0, c, libnusys/nuboot]
       - [0x749F0, c, libmus/player]

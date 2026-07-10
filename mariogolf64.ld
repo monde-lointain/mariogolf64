@@ -130,7 +130,7 @@ SECTIONS
         build/asm/53D10.o(.text);
         build/asm/5B620.o(.text);
         build/asm/68500.o(.text);
-        build/asm/70E10.o(.text);
+        build/src/main/func_80095A10.o(.text);
         build/src/main/func_80099490.o(.text);
         build/src/libnusys/nuboot.o(.text);
         build/src/libmus/player.o(.text);
@@ -421,7 +421,7 @@ SECTIONS
         build/asm/53D10.o(.data);
         build/asm/5B620.o(.data);
         build/asm/68500.o(.data);
-        build/asm/70E10.o(.data);
+        build/src/main/func_80095A10.o(.data);
         build/src/main/func_80099490.o(.data);
         build/src/libnusys/nuboot.o(.data);
         build/src/libmus/player.o(.data);
@@ -736,7 +736,7 @@ SECTIONS
         build/asm/53D10.o(.rodata);
         build/asm/5B620.o(.rodata);
         build/asm/68500.o(.rodata);
-        build/asm/70E10.o(.rodata);
+        build/src/main/func_80095A10.o(.rodata);
         build/src/main/func_80099490.o(.rodata);
         build/src/libnusys/nuboot.o(.rodata);
         build/asm/data/AC8C0.rodata.o(.rodata);
@@ -1038,7 +1038,7 @@ SECTIONS
         build/asm/53D10.o(.bss);
         build/asm/5B620.o(.bss);
         build/asm/68500.o(.bss);
-        build/asm/70E10.o(.bss);
+        build/src/main/func_80095A10.o(.bss);
         build/src/main/func_80099490.o(.bss);
         build/src/libnusys/nuboot.o(.bss);
         build/src/libmus/player.o(.bss);
