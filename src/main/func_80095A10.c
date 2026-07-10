@@ -6,6 +6,16 @@ extern s32 D_800E4C98;
 extern s32 D_800E4C9C;
 extern s32 D_800E4CA0;
 extern u8 D_800C7464[];
+extern s32 D_800E4C50;
+extern s32 D_800E4C54;
+extern s32 D_800E4C58;
+extern u8 D_800E4C90;
+extern u8 D_800E4C91;
+extern s32 D_800C73A0;
+extern s32 D_800C73E0;
+
+extern s32 func_80056494(s32 arg0, s32 arg1);
+extern void play_sound_effect(s32 sfx, s32 arg1, s32 arg2);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80095A10", func_80095A10);
 
@@ -13,11 +23,31 @@ INCLUDE_ASM("asm/nonmatchings/main/func_80095A10", func_80095A68);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80095A10", func_80095C10);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80095A10", func_80095D10);
+void func_80095D10(s32 arg0, s32 arg1, s32 arg2) {
+  D_800E4C50 = arg1;
+  D_800E4C5C = 0;
+  D_800C73A0 = 0;
+  D_800E4C90 = 0;
+  D_800E4C91 = 0;
+  D_800E4C54 = arg2;
+  D_800E4C58 = func_80056494(arg0, arg2);
+}
 
 void func_80095D64(void) { D_800E4C5C = 0; }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80095A10", func_80095D70);
+void func_80095D70(s32 arg0, s32 arg1) {
+  if (arg1 == -1) {
+    return;
+  }
+  if (D_800C73A0 - 1 != arg0) {
+    return;
+  }
+  play_sound_effect(arg1, D_800C73E0, 0x7F);
+  D_800C73E0 = D_800C73E0 + 1;
+  if (D_800C73E0 >= 8) {
+    D_800C73E0 = 4;
+  }
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80095A10", func_80095DE0);
 
