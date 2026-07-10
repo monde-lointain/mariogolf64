@@ -37,7 +37,15 @@ INCLUDE_ASM("asm/nonmatchings/main/func_80054900", update_vertex_texture_coords_
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80054900", func_80055738);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80054900", func_80055788);
+void func_80055788(s32 id) {
+    u8 *base = get_character_state(id);
+    s32 i = 0x1F;
+    u8 *p = base + 0xF8;
+    for (; i >= 0; i--) {
+        p[0x8C] = 0;
+        p -= 8;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80054900", activate_texture_anim_slot);
 
