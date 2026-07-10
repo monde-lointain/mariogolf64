@@ -13,6 +13,7 @@ extern u8 D_800E4C90;
 extern u8 D_800E4C91;
 extern s32 D_800C73A0;
 extern s32 D_800C73E0;
+extern u8* D_800C73F0[];
 
 extern s32 func_80056494(s32 arg0, s32 arg1);
 extern void play_sound_effect(s32 sfx, s32 arg1, s32 arg2);
@@ -115,7 +116,42 @@ s32 func_80098CA0(s32 arg0) {
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80095A10", func_80098CD8);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80095A10", func_80098D70);
+s32 func_80098D70(u8* dst, u8* src, s32 count) {
+  s32 offset;
+  s32 i;
+  for (i = 0; i < count; i++) {
+    s32 k;
+    s32 matched;
+    for (k = 0; k < 28; k++) {
+      u8* p = D_800C73F0[k];
+      matched = 0;
+      if (*p != 0) {
+        u8 c = src[i];
+        while (*p != 0) {
+          /* Empty block is codegen-load-bearing: the basic-block boundary
+             breaks the CSE extended-basic-block so `*p` reloads at the loop
+             top each iteration (matches ROM; permuter-confirmed). */
+          if (1) {
+          }
+          if (*p == c) {
+            matched = 1;
+            break;
+          }
+          p++;
+        }
+      }
+      if (matched) {
+        break;
+      }
+    }
+    if (k >= 28) {
+      return -1;
+    }
+    offset = i - 28;
+    dst[i] = (k - offset) % 28;
+  }
+  return 0;
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80095A10", func_80098E48);
 
