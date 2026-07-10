@@ -16,6 +16,7 @@ typedef struct {
 extern AnimSlot D_801F4424[];
 extern s16 D_800FBE48;
 extern void func_800453E0(void *a, void *b, void *c);
+extern s32 get_interpolated_terrain_height_wrapper(s32 x, s32 z);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80054900", func_80054900);
 
@@ -241,6 +242,25 @@ void func_80058ACC(s32 id) {
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80054900", func_80058B34);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80054900", func_80058C58);
+void func_80058C58(s32 id, s32 *arg1, f32 arg2) {
+    u8 *cs = get_character_state(id);
+    if (cs != NULL) {
+        s32 h;
+        f32 t38;
+        f32 t2;
+        *(f32 *)(cs + 0x38) = (f32)arg1[0];
+        t38 = *(volatile f32 *)(cs + 0x38);
+        t2 = (f32)arg1[2];
+        *(f32 *)(cs + 0x40) = t2;
+        h = get_interpolated_terrain_height_wrapper((s32)t38, (s32)t2);
+        *(f32 *)(cs + 0x3C) = (f32)h;
+        *(f32 *)(cs + 0x44) = 0.0f;
+        *(f32 *)(cs + 0x4C) = 0.0f;
+        *(f32 *)(cs + 0x48) = -arg2;
+        *(f32 *)(cs + 0x50) = 1.0f;
+        *(f32 *)(cs + 0x54) = 1.0f;
+        *(f32 *)(cs + 0x58) = 1.0f;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80054900", func_80058D04);
