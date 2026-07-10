@@ -573,6 +573,20 @@ Three honest caveats:
   "tractable non-FP getter/setter tail" the ranker surfaced was 3/4 regalloc/ABI-walled — the easy vein
   of this file is mined out; fan-out-up-front converts a would-be multi-sprint permuter slog into one
   parallel characterization pass.
+  S219: CONTINUED `get_tile_attribute.c` (mixed-partial). Banked **0pt** (file ~23/44, not
+  md5-candidate, 22 stubs remain), **+1 matched** (`ci8_to_rgba5551` jtbl switch + RGBA5551 pack),
+  **0 permuter** (blocked — bss-multi-symbol isolation artifact). Quality **0/0/4/0** (4 committed
+  carries). Seed committed 8 (c-stub continuation); realized ~12 (seed 8 + 4 carries), residual +4.
+  Method = classical iterate on ci8 (6-lever switch-bit-pack recipe cracked 3855→0 byte-exact) + a
+  jtbl-carve feasibility discovery: the shared-TU rodata blob only carves a switch table 8-aligned on
+  BOTH edges + standalone, so 3 of 4 jtbl fns are ATOMICITY-WALLED (`func_800402F4`/`func_80042228`/
+  `blend_terrain_color`); the 4th committed fn `func_800425C8` is a loop.c IV-bias near-match (~1615),
+  and S217's "one struct base" guidance was found INVERTED (ROM re-materializes 6 separate offset-0
+  symbols). Retro applied **3/3** (both-edge-8-align carve test + 6-lever recipe → docs/hazards.md
+  `#switch-jtbl-dispatch` levers 5+6 + memory; S217 inversion + bss-permuter-blocked → BACKLOG +
+  `#isolated-compile-caveat`). LESSON: the jtbl vein the ranker surfaced as "0-jal/0-fp tractable" is
+  mostly a rodata-atomicity wall; only a standalone 8-aligned-both-edges table banks partial — extends
+  the S218 lesson that this file's remaining tail is uniformly wall-class.
   Rolling-5 (S34+S37+S39+S42+S43): seed 3.4 pt/sprint (17/5), realized 2.8 pt/sprint (14/5). S31 nuGfxInit is the first over-seed classical fn (+3 residual); rubric needs +1 for double-novel-gotcha libnusys classical targets. S42 defines-data verbatim-body drop: realized 2 = seed 3 − 1 (the fast path makes a defines-data leaf bank like a mirror) — confirms the −1 verbatim-first-try rule extends to known-edit-mirror defines-data, not just classical seeds. S43 is the new residual floor (−2): both gbpak fns were classical-FLAGGED (jal-count-mismatch) but proved pure verbatim mirrors once the macro-FP was stripped — the seed over-priced them because the hazard was a tooling artifact, now fixed in `_c_jal_count`, so future macro-heavy libultra leaves should seed lower.
 - **Regime:** `mirror` is a depleting minority (~22 % of ranked candidates: 56 mirror vs 194
   classical; 18 warm / 38 cold). The warm clean-singleton mirror pool is now **mined out** (S11

@@ -25,6 +25,31 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 219 — get_tile_attribute.c jtbl vein + struct anchor (mixed-partial, cont.) — 2026-07-10
+- Increment: 0 files banked / **+1 function matched** (`ci8_to_rgba5551` jtbl switch + RGBA5551 pack;
+  ROM SHA-1 green e2c4e7a…; delta 230→230 md5-candidate, file ~23/44, 22 stubs remain).
+- Quality: 0 stuck-far / 0 permuter / **4 carried** / 0 re-opened (carries `func_800402F4`,
+  `func_80042228`, `blend_terrain_color` = jtbl atomicity wall; `func_800425C8` = loop.c IV-bias ~1615).
+- Seed: committed 8pt (c-stub continuation); banked 0pt (partial mixed, per-file all-or-nothing);
+  realized ~12 (seed 8 + 4 carries), residual +4; regime classical/mixed.
+- What helped: the **6-lever switch-bit-pack recipe** cracked `ci8_to_rgba5551` 3855→0 byte-exact
+  (offset-0 field syms → `lb`; s32 return drops `andi`; in-place index → arg-reg; output-ascending cases
+  + NO default → anti-cross-jump-tail-merge → value-ascending blocks; lazy last-field load). The
+  **both-edge-8-align carve test** predicted which jtbls are bankable (1 of 4).
+- Friction: the jtbl vein is mostly ATOMICITY-WALLED — one object's `.rodata` places contiguously, so a
+  table not 8-aligned-both-edges (or with a still-asm fn's string interleaved) can't carve without a
+  trailing-pad shift; only ci8's standalone `jtbl_800CA930` qualified. S217's `func_800425C8` struct-model
+  guidance was INVERTED (ROM re-materializes 6 SEPARATE offset-0 symbols, not one folded base). Permuter
+  useless on a bss-multi-symbol fn (0.04% isolated vs 1615 in-tree).
+- Applied: 3 of 3 — #1 both-edge-8-align carve-feasibility test → `docs/hazards.md#switch-jtbl-dispatch`
+  lever 5 + `#rodata-sibling-yaml-pattern` (+ pick_target follow-up flag); #2 6-lever switch-bit-pack
+  playbook → `#switch-jtbl-dispatch` lever 6 + memory `jtbl-carve-both-edge-8align`; #3 S217 inversion
+  corrected in BACKLOG + bss-multi-symbol permuter-blocked note → `#isolated-compile-caveat`.
+- Carry-over: `src/main/get_tile_attribute.c` — S219 carries `func_800402F4`/`func_80042228`/
+  `blend_terrain_color` (jtbl atomicity wall) + `func_800425C8` (IV-bias). Prior carries stand. No
+  plain-tractable stub remains; each further bank needs a wall break (FP-regalloc fan-out, an interleaved-
+  rodata co-bank to unwall a jtbl, or the IV-bias/phantom-addend GCC-source dives).
+
 ## Sprint 218 — get_tile_attribute.c non-FP tail via compiler-source fan-out (mixed-partial, cont.) — 2026-07-10
 - Increment: 0 files banked / **+1 function matched** (`func_80041B98` grid-vertex averager; ROM SHA-1
   green e2c4e7a…; delta 230→230 md5-candidate, file ~22/44, ~22 stubs remain).

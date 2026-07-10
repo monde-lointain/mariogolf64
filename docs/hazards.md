@@ -1978,6 +1978,17 @@ var needs free.
 
 **Procedure:** Trust the in-tree spot-check / full-make SHA, not the isolated score.
 
+**bss-multi-symbol case (S219): the isolated score can COLLAPSE far below the in-tree truth, so such
+a fn cannot be permuted.** A fn that stores to several distinct auto-`D_` `.bss` symbols (each a
+separate HI/LO16 reloc, more so with the [#offset-0-symbol-re-materialization](#offset-0-symbol-re-materialization-fixed-global-field-rmw)
+form) accumulates so much reloc/addend divergence in the isolated `build/asm/<seg>.o` reference that
+`decomp_loop.py` reports a near-zero percent (S219 `func_800425C8`: **0.04%** isolated vs a clean
+**~1615 in-tree** near-match — the 6 `D_8018D25x` bbox-output stores). The isolated harness is
+useless here in BOTH directions: the score is not advisory, it is garbage, so `run-permuter.sh` (which
+optimizes against that reference) will chase noise. **Do not seed the permuter for a bss-multi-symbol
+fn; iterate on the in-tree `tools/asm-differ/diff.py <func>` only.** This is why `func_800425C8`'s
+inner-loop IV-anchor bias stayed a characterized carry rather than a permuter run.
+
 **Flipped-subseg / partial-one-tu case (S187): the isolated reference is STALE, not merely noisy.**
 Once you flip the subseg to `c` and start banking fns into `src/<file>.c`, the isolated
 `nonmatching-func` / `decomp_loop.py` path reads `build/asm/<seg>.o` (built at bootstrap), which no
@@ -4664,9 +4675,48 @@ carry list automatically alongside the FP/heavy-callee skips.
    `sltiu`; the whole branch-chain dispatch (incl. the `beql` branch-likely delay slots) was already
    byte-identical, so the type was the sole residual.
 
+5. **The carve is only feasible when the table is 8-aligned on BOTH edges AND no still-asm fn's
+   rodata is interleaved before the next banked jtbl (S219).** A partial mixed file's `src/<seg>.c`
+   compiles to ONE object whose `.rodata` the linker places **contiguously**. GCC 2.7.2 emits a MIPS
+   jump table `.align 3` (8-aligned start) and pads the section's trailing edge to 8. So if the table's
+   END is only 4-aligned (an odd word count, e.g. an 11-entry `jtbl` = 0x2C from an 8-aligned start ends
+   4-aligned), the object pads +4 and **shoves the next generic-blob item** (typically a string owned by
+   a still-asm sibling) N bytes late → SHA miss. You cannot fill the pad by C-emitting that trailing
+   string when a still-asm fn owns it (its `INCLUDE_ASM` `.s` already defines the symbol → duplicate-symbol
+   link error). Net precondition for a standalone single-jtbl carve: the table must be 8-aligned on both
+   edges (even word count from an 8-aligned base) and stand alone in the blob (generic rodata on both
+   sides). To bank two adjacent jtbl fns together, their COMBINED rodata must be 8-aligned on both outer
+   edges with no foreign (still-asm-owned) rodata between them. S219 `get_tile_attribute.c`: only
+   `ci8_to_rgba5551`'s `jtbl_800CA930` (rom 0xA5D30-0xA5D58, 10 words = 0x28, 8-aligned both edges,
+   standalone) carved clean; `func_800402F4`'s `jtbl_800CA958` (ends 0xA5D84, 4-aligned, trailing string
+   `D_800CA984` "ratio %f,%x" owned by FP-carry `get_ground_attribute`) is atomicity-walled, as are
+   `func_80042228`/`blend_terrain_color` (tables buried in the 18-menu-label-string interleave). Kin to
+   the [decomposed-one-tu rodata alignment split](#decomposed-one-tu-rodata-alignment-split-a-counter-case-to-the-8-point-decompose-gate)
+   and the [.rodata sibling-yaml pattern](#rodata-sibling-yaml-pattern). (`pick_target.py` follow-up: flag
+   a jtbl fn whose table is not 8-aligned-both-edges as atomicity-walled-partial, not plain-tractable.)
+
+6. **The switch-to-byte-exact codegen playbook (S219 `ci8_to_rgba5551`, 6 levers, 3855→0).** A `switch`
+   that dispatches then BIT-PACKS a small record (palette/color pack, flag word) usually needs all of:
+   (a) a struct field at a NON-zero offset read via its OWN offset-0 `extern` (`D_XXX+1/+2/+3`) so GCC
+   re-materializes `%hi/%lo` per load instead of folding one base
+   ([#offset-0-symbol-re-materialization](#offset-0-symbol-re-materialization-fixed-global-field-rmw));
+   (b) assign each field to an `s32` local FIRST (`s32 r = fld;`) so the load is a sign-extending `lb`,
+   not `lbu` + `sll 0x18`/`sra` register sign-extension (a single inline `fld << K` fuses into the
+   shift-pair form); (c) return `s32`, not `u16`/`u8`, or GCC appends an `andi 0xffff` mask the ROM lacks;
+   (d) merge the switch result and its `<<`/index into ONE in-place variable (`idx <<= 2;`) so it lands in
+   a single register (often an arg reg like `a1`) matching the ROM, not a fresh `v1`; (e) write the `case`
+   bodies in **output-value-ascending** source order AND drop the explicit `default:` (pre-init the result
+   var before the switch instead) — this blocks GCC cross-jumping the `case 0`(=0) body into the `default`
+   body (both leave the var 0), which would drop `case 0`'s own jtbl block and reorder the layout; with no
+   shared-tail `default`, the blocks emit value-ascending like the ROM; (f) load the LAST packed field
+   INLINE in the return expression (lazy), not into a pre-loaded local, so its `lb` schedules mid-pack
+   where the ROM puts it. Levers (b)+(f) are load-scheduling, (d)+(e) are regalloc/block-layout, (a)+(c)
+   are addressing/width.
+
 **Provenance:** S159 `func_80051E90` (2/2 fns, no permuter; all three levers + the operand-order and
 branch-likely nudges in [#register-reuse-nudge-classical-regalloc](#register-reuse-nudge-classical-regalloc));
-S186 `func_8006955C` (lever 4, sltiu/slti signedness).
+S186 `func_8006955C` (lever 4, sltiu/slti signedness); S219 `ci8_to_rgba5551` (levers 5 carve-feasibility
++ 6 the switch-bit-pack playbook, banked byte-exact; 3 sibling jtbl fns atomicity-walled per lever 5).
 
 ## offset-0-symbol re-materialization (fixed-global field RMW)
 

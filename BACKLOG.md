@@ -4413,19 +4413,30 @@ by `/sprint-plan`:
   resolved `c-combined` member upstreams so the recover-extern is priced at the gate, not discovered
   at execution-time data-ref reconciliation. Not file-blocking (recover-extern is cheap in-execution).
 - _(osAiSetFrequency carry-over resolved and banked at S38 retroactive review)_
-- **Open (S215→S218, in-progress mixed-partial, NOT a spike):** `src/main/get_tile_attribute.c` (44-fn
-  terrain-query `none` pack, subseg 0x1B4A0). ~22 banked (13 S215 + 4 S216 + 4 S217 + 1 S218
-  `func_80041B98`), ~22 stubs remain. The ranker naturally re-surfaces it as a c-stub `remaining:N` row
-  (no BACKLOG de-rank needed).
+- **Open (S215→S219, in-progress mixed-partial, NOT a spike):** `src/main/get_tile_attribute.c` (44-fn
+  terrain-query `none` pack, subseg 0x1B4A0). ~23 banked (13 S215 + 4 S216 + 4 S217 + 1 S218
+  `func_80041B98` + 1 S219 `ci8_to_rgba5551`), 22 stubs remain. The ranker naturally re-surfaces it as a
+  c-stub `remaining:N` row (no BACKLOG de-rank needed).
   Carries with characterization: `get_tile_attribute` (lead, body fully solved) is a NEAR-MATCH WALL —
   GCC bakes a phantom -0x10 in-place LO16 addend on the `D_800BAC0C` ref across all index forms (see
   `#base-register-vs-displacement` subsection); needs a GCC-source dive. `func_80041E8C` = anomalous
   **$v0-ARG convention** (entry `sw $v0,0(sp)` — receives arg0 in `$v0`, not `$a0`; walls all callers in
-  o32 C — see memory `func-80041e8c-v0-arg-convention-wall`). `func_800402F4` = jtbl-dispatch
-  (`jtbl_800CA958`, needs shared-rodata carve). `func_800425C8` (S217) = MULTI-HAZARD flowing-bss on 6
-  auto-`D_` outputs (`D_8018D258`..`D_8018D262`) + 6-`s32` min/max stack-spill; fix = define
-  `collision_triangles` struct at `0x8018D220` (`verts[3]` + `s16 bbox[6]`) so refs re-materialize off
-  ONE base (see `#short-text shifts flowing-bss` multi-`D_`-write variant).
+  o32 C — see memory `func-80041e8c-v0-arg-convention-wall`). **JTBL-VEIN (S219): atomicity-walled EXCEPT
+  8-aligned-both-edges standalone tables.** `ci8_to_rgba5551` BANKED S219 (`jtbl_800CA930`, rom
+  0xA5D30-0xA5D58, 8-aligned both edges, standalone → clean carve; 6-lever switch-bit-pack recipe, see
+  `#switch-jtbl-dispatch` levers 5+6 + memory `jtbl-carve-both-edge-8align`). `func_800402F4`
+  (`jtbl_800CA958`, ends 0xA5D84 4-aligned, trailing string `D_800CA984` owned by FP-carry
+  `get_ground_attribute`) + `func_80042228` (`jtbl_800CAB20`, buried in 18-menu-label-string interleave)
+  + `blend_terrain_color` = ATOMICITY-WALLED (one object's `.rodata` places contiguously; a non-8-aligned-
+  both-edges table pads and shifts the next still-asm-owned string). Unblockable until the interleaved-
+  rodata owners bank too. `func_800425C8` (S217→S219) = **loop.c inner-IV-bias NEAR-MATCH (~1615 in-tree)**,
+  NOT a struct-model fix. CORRECTION to the S217 note: the ROM re-materializes 6 SEPARATE offset-0 symbols
+  (`D_8018D258/25A/25C/25E/260/262` via `*(s16*)((u8*)&sym + off)`) — a `collision_triangles` struct-ARRAY
+  base would FOLD to one register (the OPPOSITE of the ROM), so the "one base" S217 guidance was inverted.
+  Real residual: GCC biases the inner 3-vertex pointer IV to base `v+0xa` (neg offsets) + allocates it to
+  `a1` vs ROM `a0` (`#indexed-vs-pointer-loop-strength-reduction`, move_movables class). Structurally solved
+  (stack-spill via `s32 mn[3]`/`mx[3]` arrays; branch-likely stores; 6-symbol re-mat all match). PERMUTER
+  BLOCKED: bss-multi-symbol isolation artifact (0.04% isolated vs 1615 in-tree, see `#isolated-compile-caveat`).
   **S218 NEW carries (all fully root-caused, `docs/wip/<fn>.near-match.md` each; compiler-source fan-out):**
   `func_80041878` (LOD sub-tile attr setter, score 5420) + `func_800415C4` (16B-copy sibling, score
   10565) — both `#local-alloc-qty-permutation` WALLS in the signed div-by-4 idiom `(z/4)*8 + x/4`
@@ -4434,12 +4445,13 @@ by `/sprint-plan`:
   `func_80041E8C` `$v0`-arg callee (2 residual instrs only). S218 recovered the `Tile`/`TileEntry`
   0x10/0x100 type model @D_80185220 + `g_terrain_tile_lod_selector[]` 0x801336A4 (stride 640) +
   `D_800BA9B0[][8]`/`D_800BA9D0`/`D_800BA9B4` (own symbols) — reusable for the whole setter family.
-  Untried tail for the next smallest-first slice: FP terrain-height interp (`compute_triangle_plane`,
-  `get_ground_attribute`, `func_80041D44`, `func_80041AA8`, `func_8004333C`, `func_800427E8`) + the
-  jtbl-dispatch vein (rodata-jtbl 0x800CA930..0x800CAB20: `ci8_to_rgba5551`, `func_80042228`,
-  `blend_terrain_color`) — all wall/deferred class, NOT plain-tractable. The non-FP getter/setter vein
-  is now MINED OUT (S218 confirmed it is all regalloc/ABI-walled). File md5-candidate only when all 44
-  bank.
+  Remaining veins, all wall/deferred class (NOT plain-tractable): FP terrain-height interp
+  (`compute_triangle_plane`, `get_ground_attribute`, `func_80041D44`, `func_80041AA8`, `func_8004333C`,
+  `func_800427E8`, S158-class); the rest of the jtbl-dispatch vein (atomicity-walled per above); the
+  regalloc/ABI walls. Non-FP getter/setter vein MINED OUT (S218), jtbl vein now MINED OUT except
+  standalone-8-aligned tables (S219: 1 of 4 banked). No plain-tractable stub remains; each further bank
+  needs a wall break (FP-regalloc fan-out, an interleaved-rodata co-bank to unwall a jtbl, or the
+  IV-bias/phantom-addend GCC-source dives). File md5-candidate only when all 44 bank.
 - **Ranker follow-up (tracked, S218, off-cadence golden-gated).** Reinforces the pending regalloc-heavy
   pts detector (S158/S177/S183/S189): the **signed div-by-4 tile-index → `g_terrain_tile_lod_selector`
   table lookup → struct-cell write** idiom is a `#local-alloc-qty-permutation` wall tell (S218: 2 of 4
