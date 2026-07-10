@@ -4413,18 +4413,21 @@ by `/sprint-plan`:
   resolved `c-combined` member upstreams so the recover-extern is priced at the gate, not discovered
   at execution-time data-ref reconciliation. Not file-blocking (recover-extern is cheap in-execution).
 - _(osAiSetFrequency carry-over resolved and banked at S38 retroactive review)_
-- **Open (S220, in-progress mixed-partial, NOT a spike):** `src/main/func_80095A10.c` (31-fn main-seg
-  `none` pack, subseg 0x70E10; float-clamp/state system). 7 banked S220 (5 committed leaves + 2 stretch,
-  all byte-exact), 24 stubs remain. The ranker re-surfaces it as a c-stub continuation smallest-first.
-  **Remaining tail (carries):** signed-divide-by-28 pair `func_80098CD8`/`func_80098D70` (magic
-  `0x92492493`, `#signed-divide-const`); F3DEX2 display-list builder `func_80095C10` (64 instr,
-  gDMA/gMoveMem/gMtx, needs DL reconstruction); FP tail `func_80095A68`/`func_800977E0`/`func_80097A08`/
-  `func_80097C18`/`func_80097E30`/`func_8009676C`/… (S158-class); `func_800989EC` caller-evict (cross-TU
-  inline into src/main/func_80054900.c). File md5-candidate only when all 31 bank. **S220 lesson:** the
-  trivial getter/setter leaves banked cheap smallest-first, but 2 of 7 (bit-reversal + 3-word copy) were
-  regalloc/CSE near-matches cracked by gcc-2.7.2 subagent dives — the `#scheduler-load-hoist-serial-store-lever`
-  and `#cse-dest-preference-copy-collapse` levers, which ALSO retired the wrong "KMC has no scheduler"
-  foundational claim (scheduler IS active at -O2).
+- **Open (S220→S221, in-progress mixed-partial, NOT a spike):** `src/main/func_80095A10.c` (31-fn main-seg
+  `none` pack, subseg 0x70E10; float-clamp/state system). 8 banked (7 S220 + 1 S221 `func_80098D70`),
+  23 stubs remain. The ranker re-surfaces it as a c-stub continuation smallest-first.
+  **Remaining tail (carries):** `func_80098CD8` (the other half of the `#signed-divide-const %28` pair,
+  magic `0x92492493`) — **S221 permuter-confirmed `#local-alloc-qty-permutation` wall (366k iters, best
+  270); PO flagged for a dedicated `#cross-project-matched-corpus-mining` escalation** (a matched fn with
+  the same two-giv byte-map + `%K` idiom), NOT a plain permuter retry; see
+  `docs/wip/func_80098CD8.near-match.md`. F3DEX2 display-list builder `func_80095C10` (64 instr,
+  gDMA/gMoveMem/gMtx, gfxdis-reconstructable per S221 fan-out, F3DEX2 profile already set); FP tail
+  `func_80095A68`/`func_800977E0`/`func_80097A08`/`func_80097C18`/`func_80097E30`/`func_8009676C`/…
+  (S158-class); `func_800989EC` caller-evict (cross-TU inline into src/main/func_80054900.c). File
+  md5-candidate only when all 31 bank. **S221 lesson (clean A/B on one file):** `func_80098D70`'s CSE
+  extended-basic-block residual CRACKED via the permuter (`#cse-ebb-barrier-loop-reload` empty-`if(1){}`
+  barrier + `i-K` split), but `func_80098CD8`'s scheduler register-coloring tie-break did NOT — same idiom,
+  opposite permuter tractability. Disambiguate the residual class before budgeting permuter time.
 - **Ranker follow-up (tracked, S220, note-only, no code change).** The `func_80095A10` pack confirmed a
   fresh main-seg pack's trivial-leaf vein banks cheap under smallest-first per-fn mixed banking with
   extern-global refs (no rodata carve). No ranker change needed; recorded as a banking-behavior anchor.

@@ -25,6 +25,26 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 221 — func_80095A10.c signed-divide %28 pair (mixed-partial continuation) — 2026-07-10
+- Increment: 0 files banked / **+1 function matched** (`func_80095A10.c` 8/31, 23 stubs remain; ROM
+  SHA-1 green e2c4e7a…). `func_80098D70` byte-exact; `func_80098CD8` carried.
+- Quality: 0 stuck-far / **1 permuter (CRACKED)** / **1 carried** / 0 re-opened.
+- Seed: committed 3pt (2-fn `#signed-divide-const` continuation); banked 0pt (partial mixed, per-file
+  all-or-nothing); realized 5 (seed 3 + permuter + carry), residual +2; regime classical/mixed.
+- What helped: PO-directed compiler-source fan-out (3 subagents, gcc-2.7.2 + binutils-2.6) root-caused
+  the signed `/28` magic (expmed.c:3058) AND handed the exact fn2 nested-loop skeleton (reached score 300
+  hand-iterated) — the fan-out earns its keep as a SEED oracle, not just a wall-characterizer. Permuter
+  then cracked fn2's residual to 0 via an `if(1){}` CSE extended-basic-block barrier (forces the loop-top
+  `*p` reload) + an `i-K` subexpr split. Clean A/B: fn2's CSE-collapse residual is barrier/split-reachable
+  (permuter cracks); fn1's scheduler register-coloring tie-break is not (366k iters, 0).
+- Friction: a permuter `import.py make` left a stale `build/` object that an incremental `make` skipped,
+  so `diff.py` FALSE-POSITIVED byte-exact ("mirage"); clean-rebuild + the spot-check discipline caught it
+  before a bad bank. New `rm-object-before-diff` guard codified.
+- Applied: 3 of 3: #1 `#permuter-import-pollutes-build-stale-diff`, #2 `#cse-ebb-barrier-loop-reload`,
+  #3 permuter-tractability residual-class triage.
+- Carry-over: `func_80095A10.c` continues mixed-partial; `func_80098CD8` flagged for
+  `#cross-project-matched-corpus-mining` (PO), not a plain permuter retry.
+
 ## Sprint 220 — func_80095A10.c 31-fn main-seg pack (mixed-partial, smallest-first) — 2026-07-10
 - Increment: 0 files banked / **+7 functions matched** (`func_80095A10.c` 7/31, 24 stubs remain;
   ROM SHA-1 green e2c4e7a…). Committed backlog 5/5 + 2 stretch, all byte-exact.

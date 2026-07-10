@@ -89,6 +89,7 @@ The hazard families below group the sections that follow. Each links to its exis
 - [offset-0-symbol re-materialization (fixed-global field RMW)](#offset-0-symbol-re-materialization-fixed-global-field-rmw)
 - [call-arg delay-slot fill + field-alias addend-0 (S214 scenery levers)](#call-arg-delay-slot-fill--field-alias-addend-0-s214-scenery-levers)
 - [volatile-view CSE reload (force a just-stored global to reload)](#volatile-view-cse-reload-force-a-just-stored-global-to-reload)
+- [cse-ebb-barrier loop-reload (empty `if (1) {}` forces a loop-top memory reload past a guard-load CSE)](#cse-ebb-barrier-loop-reload)
 - [mem-in-struct scheduling lever (model a fixed global as a struct/array member)](#mem-in-struct-scheduling-lever-model-a-fixed-global-as-a-structarray-member)
 - [scheduler-load-hoist serial-store lever (shared temp pins independent global copies)](#scheduler-load-hoist-serial-store-lever)
 - [cse-dest-preference copy-collapse (narrow-unsigned-temp lever)](#cse-dest-preference-copy-collapse-narrow-unsigned-temp-lever)
@@ -5770,6 +5771,62 @@ scheduling barrier" is still the right first move for a dependent chain. But for
 scheduler is a real second lever: see [#scheduler-load-hoist-serial-store-lever](#scheduler-load-hoist-serial-store-lever).
 (`loop.c` via `NOTE_INSN_LOOP_BEG` remains a separate reorderer; see the goto-loop-vs-structured-loop
 codegen memory. Cross-ref [[kmc-cc1-no-instruction-scheduler]], now the S220-corrected memory.)
+
+**When the permuter does NOT crack it — residual-class triage (S221 clean A/B).** The
+"permuter-appropriate" verdict above is not universal for every reg-permutation near-match. S221 ran two
+sibling fns from ONE file (`func_80095A10.c`, the same signed-`%28`-into-`D_800C73F0` idiom) and the
+permuter cracked one, walled the other — the distinction is the RESIDUAL CLASS, and you should
+disambiguate it BEFORE budgeting permuter time:
+- **CSE-collapse / redundant-load / schedule-slot residual → the permuter CRACKS it.** `func_80098D70`'s
+  loop CSE-merged an `if`-guard's `*p` load with the loop-body's first read (dropping the ROM's loop-top
+  reload); the permuter found score 0 by inserting an empty `if (1) {}` basic-block barrier + an `i-K`
+  subexpr split (see [#cse-ebb-barrier-loop-reload](#cse-ebb-barrier-loop-reload)). These are reachable by
+  the permuter's ins-block / expr-split transforms.
+- **Whole-body register-coloring tie-break from a pre-reload SCHEDULER placement → the permuter PLATEAUS.**
+  `func_80098CD8` (a byte-map loop with TWO pointer givs `src++`/`dst++`) has the ROM scheduling its
+  independent `src++`/`i++` AFTER the store while the build hoists them before (`dst++` is WAR-pinned by
+  the store; the other two float). That schedule choice flips the whole local-alloc coloring. The permuter
+  ran **366,635 iterations, best 270, never 0** — its source transforms cannot steer the scheduler's free
+  placement of independent ops. Carry it (`docs/wip/<fn>.near-match.md`) and escalate to
+  [#compiler-source-fan-out](#compiler-source-fan-out-escalation-above-the-permuter) /
+  `#cross-project-matched-corpus-mining`, NOT more permuter time.
+So: read the residual — a redundant-load/CSE/schedule-slot miss = run the permuter; a pervasive whole-body
+register rotation with no CSE/reload tell = a scheduler tie-break, skip the permuter, carry + corpus-mine.
+
+**Stale-build "byte-exact mirage" after a permuter import (S221).** `import.py` builds the fn with `make`
+(PERMUTER=1) to create its reference `.o`; this writes into the shared `build/` tree. A subsequent
+incremental `make` (e.g. from `diff.py`) then finds the object timestamp up-to-date and SKIPS rebuilding
+it, so `diff.py` / the spot-check reads the STALE object and can FALSE-POSITIVE `CURRENT (0)` byte-exact
+on source that does not actually match. S221 fn2 read a spurious `CURRENT (0)` this way; a
+`make clean`/object-`rm` rebuild exposed the true near-match. **Guard: after ANY permuter
+`import.py`/`run-permuter` touch, `rm build/<obj>.o` (or `make clean`) before trusting an in-tree diff or
+spot-check.** The full-`make` ROM SHA-1 is not fooled (it relinks), but a per-fn `diff.py` mid-iterate is.
+
+## cse-ebb-barrier-loop-reload (force a loop-top memory reload past a guard-load CSE)
+
+**Symptom (S221 `func_80098D70`).** A search loop over a memory cell — `if (*p != 0) { … while (*p != 0)
+{ if (*p == c) …; p++; } }` — locks a few instructions short: the ROM RELOADS `*p` at the loop top every
+iteration, but the build CSE-reuses the value the `if (*p != 0)` guard already loaded (entering the loop
+mid-body, `j` to the bottom test), because both reads are the same `*p` with no store between and land in
+one CSE extended basic block.
+
+**The catch-22.** You cannot fix it by dropping the guard: the value read inside the loop (here `c =
+src[i]`, invariant across the inner loop) must stay CONDITIONAL, or `loop.c` invariant motion HOISTS it out
+of the loop entirely (the ROM keeps it per-iteration, loaded only when the guard passes). But a
+source-level `if`-guard is present during the CSE pass and merges its load with the body's first read —
+exactly the collapse. A bare `while` (whose entry guard is a late loop-rotation copy inserted post-CSE)
+reloads correctly but leaves the conditional value un-hoisted-blocked, so `loop.c` lifts it out.
+
+**Lever: an empty `if (1) {}` at the loop-body top.** The empty block emits a basic-block boundary
+(NOTE_INSN) that BREAKS CSE's extended-basic-block, so CSE cannot propagate the guard's loaded value into
+the body — the body reloads `*p` at the top each iteration, matching the ROM. It is CODEGEN-LOAD-BEARING
+(not dead code); comment it and it survives `clang-format-22`. The permuter discovers it via its ins-block
+transform (S221: score 300 → 0), usually paired with a subexpression split of an unrelated store
+expression (`offset = i - K; dst[i] = (k - offset) % K`) that relieves the coupled register pressure. This
+is the CSE-class residual that the permuter CRACKS (contrast the scheduler tie-break wall in the sibling
+`func_80098CD8`, above). Related but distinct: [#volatile-view-cse-reload](#volatile-view-cse-reload)
+(retype a global as a struct member to force a just-stored reload) — the `if (1) {}` barrier is the
+loop-body-boundary form, no retype needed.
 
 ## scheduler-load-hoist serial-store lever
 

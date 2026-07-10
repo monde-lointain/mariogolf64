@@ -601,6 +601,16 @@ Three honest caveats:
   note-only). LESSON: a fresh main-seg pack's trivial-leaf vein banks cheap smallest-first, but two
   regalloc/CSE near-matches on 10-14-instr fns fell to compiler-source root-cause (NOT permuter), which
   also retired a mis-stated toolchain invariant.
+  S221: CONTINUED `func_80095A10.c` (mixed-partial). Banked **0pt** (file 8/31, not md5-candidate, 23
+  stubs remain), **+1 matched** (`func_80098D70` byte-exact), **1 permuter (CRACKED)**, **1 carried**
+  (`func_80098CD8`). Quality **0/1/1/0**. Seed committed 3 (2-fn `#signed-divide-const` continuation);
+  realized 5 (seed 3 + permuter + carry), residual +2. Method = PO-directed compiler-source fan-out (3
+  subagents, gcc-2.7.2 + binutils-2.6) as a SEED oracle (root-caused the `/28` magic + handed the fn2
+  nested-loop skeleton to score 300), then the permuter cracked fn2's CSE residual to 0
+  (`#cse-ebb-barrier-loop-reload` `if(1){}` barrier + `i-K` split). Clean A/B: fn2's CSE-collapse cracks,
+  fn1's scheduler register-coloring tie-break does NOT (366k iters, 0). Retro applied **3/3**
+  (permuter-import stale-build guard + cse-ebb-barrier lever + permuter-tractability triage). LESSON:
+  disambiguate the residual class (CSE/reload vs scheduler qty-rotation) BEFORE budgeting permuter time.
   Rolling-5 (S34+S37+S39+S42+S43): seed 3.4 pt/sprint (17/5), realized 2.8 pt/sprint (14/5). S31 nuGfxInit is the first over-seed classical fn (+3 residual); rubric needs +1 for double-novel-gotcha libnusys classical targets. S42 defines-data verbatim-body drop: realized 2 = seed 3 − 1 (the fast path makes a defines-data leaf bank like a mirror) — confirms the −1 verbatim-first-try rule extends to known-edit-mirror defines-data, not just classical seeds. S43 is the new residual floor (−2): both gbpak fns were classical-FLAGGED (jal-count-mismatch) but proved pure verbatim mirrors once the macro-FP was stripped — the seed over-priced them because the hazard was a tooling artifact, now fixed in `_c_jal_count`, so future macro-heavy libultra leaves should seed lower.
 - **Regime:** `mirror` is a depleting minority (~22 % of ranked candidates: 56 mirror vs 194
   classical; 18 warm / 38 cold). The warm clean-singleton mirror pool is now **mined out** (S11
