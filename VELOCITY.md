@@ -525,6 +525,18 @@ Three honest caveats:
   + memory `revalidate-old-carries-stale-wall`). LESSON: revalidate old carries with a cheap
   reproduce-from-note pass before spending a sprint — a note-tagged wall is only trustworthy when a
   rigorous dive cites the diverging pass+line.
+  S215: OPENED `get_tile_attribute.c` (44-fn terrain-query `none` pack, subseg 0x1B4A0 flipped at
+  gate). Banked **0pt** (mixed-partial, file 13/44 not md5-candidate), **+13 matched** via the
+  asm-first fast-path (NO MCP, NO decomp_loop, ZERO permuter): 4 committed + 3 stretch + 6
+  opportunistic getters/glue, 186% of the 7-fn stretch plan. Quality **0/0/0/0** (0 stuck-far /
+  0 permuter / 0 carried-committed / 0 re-opened; 3 fns took a 2nd source-form). 2 NEW reusable
+  source-form levers (hazards.md `#value-select-if-else…` two-arm block-layout + `#indexed-vs-pointer
+  loop` fixed-trip multi-offset index form). Retro applied **2/2** (both hazards.md; S3 asm-first-vein
+  note declined as already-documented). LESSON: the asm-first fast-path scales past single fns to a
+  whole tractable getter/glue VEIN in one pass — 11/13 first-build with only opaque `void*`/`s16*`
+  pointer typing, no per-fn MCP. Deferred non-carries: `func_80041E8C` (anomalous dead-`sw v0` entry
+  spill) + the 30+instr tail (`func_800414C0` unaligned struct-copy, `get_terrain_type`, etc.) + the
+  FP height-interp / jtbl-dispatch walls — never committed, so not carries.
   Rolling-5 (S34+S37+S39+S42+S43): seed 3.4 pt/sprint (17/5), realized 2.8 pt/sprint (14/5). S31 nuGfxInit is the first over-seed classical fn (+3 residual); rubric needs +1 for double-novel-gotcha libnusys classical targets. S42 defines-data verbatim-body drop: realized 2 = seed 3 − 1 (the fast path makes a defines-data leaf bank like a mirror) — confirms the −1 verbatim-first-try rule extends to known-edit-mirror defines-data, not just classical seeds. S43 is the new residual floor (−2): both gbpak fns were classical-FLAGGED (jal-count-mismatch) but proved pure verbatim mirrors once the macro-FP was stripped — the seed over-priced them because the hazard was a tooling artifact, now fixed in `_c_jal_count`, so future macro-heavy libultra leaves should seed lower.
 - **Regime:** `mirror` is a depleting minority (~22 % of ranked candidates: 56 mirror vs 194
   classical; 18 warm / 38 cold). The warm clean-singleton mirror pool is now **mined out** (S11

@@ -4128,6 +4128,19 @@ keeps the biv at the element base (positive offsets = the ROM). Cracked `func_80
 S184; both matched after `cs = &D_800BB258[club];` inside the loop. (Kin to the S168/S171 pointer-variable
 levers above, but the tell is the base *bias immediate*, not a base *reload*.)
 
+**Sub-lever — fixed-trip multi-offset compare: INDEX form, not pointer-increment (S215).** A
+FIXED-trip loop (not sentinel-terminated) that reads several FIXED offsets off two pointers and
+advances both by one element per iteration (`func_800432E4`: 3 iters, compare `a`/`b` at byte offsets
+4/0xA/0x10, `a++;b++;` each iter). The pointer-increment form
+`for(i=0;i<3;i++,a++,b++){ if(a[2]!=b[2])… }` makes `loop.c` strength-reduce the `a++`/`b++` biv into
+a base PRE-incremented by the whole accessed SPAN (`addiu a0,0x10` at the loop top) with NEGATIVE
+displacements (`lh v1,-0xc(a0)`) — same structure, wrong immediates + an extra branch form. **Fix:**
+the INDEX form on NON-incremented bases — `for(i=0;i<3;i++){ if(a[i+2]!=b[i+2])… }` — keeps the base
+fixed with the ROM's positive offsets (`lh v1,4(a0)`) and emits the `beql` last-check the target uses.
+S215 `func_800432E4` matched byte-exact on the index form after the `a++` form strength-reduced wrong.
+(Distinct from the sentinel-walk levers above — those PREFER the strength-reduced pointer; a fixed-trip
+multi-field compare wants the base pinned so the several fixed offsets stay positive displacements.)
+
 **Why (KMC gcc 2.7.2, grounded — verified against the source):** `scan_loop` runs
 `move_movables` (invariant hoist, `loop.c:966`) before `strength_reduce` (`loop.c:976`). The hoisted
 loop constants (the store value, the `-1` terminator) are inserted immediately before `loop_start`
@@ -5916,6 +5929,21 @@ rode on it). So when a `beqz`-vs-`beqzl` residual survives every branch-form lev
 independent branch lever: it is likely a symptom of a [#loop-weight-and-live-length-regalloc-steering]
 coloring miss (fix the coloring first). `func_80056060` carried on exactly this coupled wall
 (`docs/wip/func_80056060.near-match.md`).
+
+**Sub-lever — two-arm both-return block LAYOUT (which arm falls through) (S215).** Same
+single-return-temp fix, different symptom: a two-arm select where BOTH arms `return` and one arm bears
+a `jal` (`func_80042DF4`: `if(flag&0x80) return grid_vertex(...); return base + (flag<<4);`). The ROM
+lays out the tested arm as the FALL-THROUGH with a `j` over the other (`beqz guard,else; <then>; j
+end; else: <B>; end:`), but the guard-clause form `if(c) return A; return B;` INVERTED it — the
+build emitted `bnez guard,then` with the call-bearing arm as the out-of-line branch target and the
+cheap arm as fall-through (and, in `get_direct_grid_vertex`, mis-folded the fall-back base pointer
++0x10). **Fix:** the single-return-temp form
+`{ T r; if(c){r=A;} else {r=B;} return r; }` restores the ROM's source-order layout (then-block
+fall-through, `j join` over the else). Same mechanism as the annul lever above (two definitions of a
+named local in separate basic blocks), but the tell is the branch POLARITY / which block is inline,
+not a branch-likely annul, and it fires even when neither arm is a bare sentinel. S215 banked
+`func_80042DF4` and `get_direct_grid_vertex` on this; the guard-clause form was 1 insn short and
+inverted. Kin to the S214 statement-order/delay-slot levers.
 
 ## delay-slot-fill of a null-guard `beqz` (body-first insn safe-on-the-taken-path)
 

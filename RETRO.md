@@ -25,6 +25,31 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 215 — get_tile_attribute.c terrain-query pack (mixed-partial) — 2026-07-10
+- Increment: 0 files banked / **13 functions matched** (delta: no md5-candidate change, 230→230; file
+  13/44 banked, 31 stubs remain = FP terrain-height interp + jtbl dispatch + coddog-structural
+  false-hits, NOT md5-candidate). Committed 4 trivial getters + stretch 3, banked those + 6
+  opportunistic (186% of the 7-fn stretch plan).
+- Quality: 0/0/0/0 (stuck-far/permuter/carried-committed/re-opened) this sprint. ZERO permuter, ZERO
+  MCP. 3 fns (func_80042DF4, get_direct_grid_vertex, func_800432E4) took a 2nd source-form (block
+  layout / IV strength-reduction); 10/13 first-build.
+- Seed: committed 5pt; banked **0pt** (per-file all-or-nothing, file partial); regime classical/mixed.
+  Realized tier: file 0pt (not md5-candidate); value signal = **+13 matched-fn count**. Residual n/a
+  (partial file).
+- What helped: asm-first fast-path (hand-translate from splat `.s`, no MCP/decomp_loop) scaled to a
+  whole tractable getter/glue vein in one session. Opaque pointer typing (`void*`/`s16*`/`u8*` + cast)
+  avoided duplicating a sibling's local typedef at gate. In-tree `asm-differ diff.py` isolated the one
+  SHA-breaking near-miss per batch fast.
+- Friction: 3 near-misses needed a source-form flip — guard-clause inverted a two-arm both-return
+  block layout (fixed with single-return-temp), and `a++` strength-reduced a fixed-trip multi-offset
+  compare (fixed with the index form `a[i+K]`). Both now documented levers.
+- Applied: 2 of 3 — #S1 (`#value-select-if-else…` two-arm block-layout sub-lever), #S2
+  (`#indexed-vs-pointer loop` fixed-trip multi-offset sub-lever); (#S3 asm-first-vein workflow note
+  NOT selected — fast-path already documented).
+- Carry-over: none committed. `get_tile_attribute.c` stays open (mixed-partial); the 31 remaining
+  stubs (FP height-interp, jtbl dispatch, `func_800414C0` unaligned struct-copy, anomalous
+  `func_80041E8C`) are the unmined tail for future smallest-first sprints, not spikes.
+
 ## Sprint 214 — func_80026400.c scenery pack, compiler-source dive (PO-directed) — 2026-07-10
 - Increment: 0 files banked / **3 functions matched** (delta: no md5-candidate change, 230→230; file
   5/8 banked, 3 stubs remain = emit_scenery_billboard/draw_scenery_opaque_pass/draw_scenery_alpha_pass
