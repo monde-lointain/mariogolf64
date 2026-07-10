@@ -229,7 +229,37 @@ INCLUDE_ASM("asm/nonmatchings/main/get_tile_attribute", func_80041878);
 
 INCLUDE_ASM("asm/nonmatchings/main/get_tile_attribute", func_80041AA8);
 
-INCLUDE_ASM("asm/nonmatchings/main/get_tile_attribute", func_80041B98);
+void func_80041B98(GridVertex* out, s32 tx, s32 tz) {
+  s16* grid[9];
+  s32 i;
+  s32 row;
+  s32 col;
+
+  i = 0;
+  for (row = 0; row < 3; row++) {
+    for (col = 0; col < 3; col++) {
+      grid[i] = get_direct_grid_vertex((tx << 1) + col, (tz << 1) + row);
+      i++;
+    }
+  }
+
+  average_grid_vertices(grid[0], grid[1], (s16*)&out[0]);
+  average_grid_vertices(grid[1], grid[2], (s16*)&out[1]);
+  average_grid_vertices(grid[0], grid[3], (s16*)&out[2]);
+  average_grid_vertices(grid[1], grid[4], (s16*)&out[9]);
+  average_grid_vertices(grid[2], grid[5], (s16*)&out[3]);
+  average_grid_vertices(grid[3], grid[4], (s16*)&out[11]);
+  average_grid_vertices(grid[4], grid[5], (s16*)&out[12]);
+  average_grid_vertices(grid[3], grid[6], (s16*)&out[4]);
+  average_grid_vertices(grid[4], grid[7], (s16*)&out[14]);
+  average_grid_vertices(grid[5], grid[8], (s16*)&out[5]);
+  average_grid_vertices(grid[6], grid[7], (s16*)&out[6]);
+  average_grid_vertices(grid[7], grid[8], (s16*)&out[7]);
+  average_grid_vertices(grid[1], grid[3], (s16*)&out[8]);
+  average_grid_vertices(grid[2], grid[4], (s16*)&out[10]);
+  average_grid_vertices(grid[4], grid[6], (s16*)&out[13]);
+  average_grid_vertices(grid[5], grid[7], (s16*)&out[15]);
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/get_tile_attribute", func_80041D44);
 
