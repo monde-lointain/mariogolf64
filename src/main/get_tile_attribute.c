@@ -156,7 +156,21 @@ void average_grid_vertices(s16* a, s16* b, s16* out) {
   ob[0xF] = (ab[0xF] + bb[0xF]) / 2;
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/get_tile_attribute", func_80041160);
+void lerp_grid_vertices(s16* a, s16* b, s16* out, s32 t) {
+  u8* ab = (u8*)a;
+  u8* bb = (u8*)b;
+  u8* ob = (u8*)out;
+  out[0] = (a[0] * (16 - t) + b[0] * t) / 16;
+  out[1] = (a[1] * (16 - t) + b[1] * t) / 16;
+  out[2] = (a[2] * (16 - t) + b[2] * t) / 16;
+  out[3] = 0;
+  out[4] = (a[4] * (16 - t) + b[4] * t) / 16;
+  out[5] = (a[5] * (16 - t) + b[5] * t) / 16;
+  ob[0xC] = (ab[0xC] * (16 - t) + bb[0xC] * t) / 16;
+  ob[0xD] = (ab[0xD] * (16 - t) + bb[0xD] * t) / 16;
+  ob[0xE] = (ab[0xE] * (16 - t) + bb[0xE] * t) / 16;
+  ob[0xF] = (ab[0xF] * (16 - t) + bb[0xF] * t) / 16;
+}
 
 s16* get_direct_grid_vertex(s32 col, s32 row) {
   s16* result;
