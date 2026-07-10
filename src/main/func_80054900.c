@@ -17,6 +17,10 @@ extern AnimSlot D_801F4424[];
 extern s16 D_800FBE48;
 extern void func_800453E0(void *a, void *b, void *c);
 extern s32 get_interpolated_terrain_height_wrapper(s32 x, s32 z);
+extern s32 func_800544B4(s32 arg0, s32 arg1);
+extern void func_800543DC(s32 arg0, s32 arg1);
+extern s32 func_8005342C(s32 a, s32 b, s32 c, s32 d, u32 phys);
+extern s32 D_800C1DEC;
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80054900", func_80054900);
 
@@ -32,7 +36,32 @@ void func_80054E20(void) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80054900", func_80054E4C);
+void func_80054E4C(s32 arg0, s32 arg1) {
+    u8 *cs = get_character_state(arg0);
+    if (cs != NULL) {
+        s32 mode;
+        D_800C1DEC = *(s32 *)(cs + 8);
+        switch (func_800544B4(arg0, arg1)) {
+            case 0:
+                mode = 0;
+                break;
+            case 1:
+                mode = 1;
+                break;
+            case 2:
+                mode = 2;
+                break;
+            case 3:
+                mode = 3;
+                break;
+            default:
+                mode = -1;
+                break;
+        }
+        func_8005342C(0, 0, 0x20, 0x2000000, osVirtualToPhysical(*(void **)(cs + 4)));
+        func_800543DC(arg0, mode);
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80054900", collect_keyframe_events_at);
 
