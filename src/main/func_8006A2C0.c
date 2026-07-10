@@ -13,6 +13,15 @@ extern s32 D_800C4144;
 extern s32 D_800FF4B0;
 extern s32 D_800FF4B4;
 extern s32 D_800FF4B8;
+extern s32 D_800FF4D0;
+extern s32 D_800FF4D4;
+extern s32 D_800FF4D8;
+extern s32 D_800FF4DC;
+extern s32 D_800FF4E0;
+extern s32 D_800FF4E4;
+extern s32 D_800FF4E8;
+extern s32 scenario_mode_id;
+extern u8* func_8005AF50(void);
 extern void* D_800E1C00;
 extern void* D_800E1C04;
 extern void* D_800E1C08;
@@ -159,9 +168,32 @@ INCLUDE_ASM("asm/nonmatchings/main/func_8006A2C0", func_8006D4EC);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_8006A2C0", func_8006D6D0);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_8006A2C0", func_8006DDCC);
+void func_8006DDCC(void) {
+  u8* p = func_8005AF50();
+  s32 v;
 
-INCLUDE_ASM("asm/nonmatchings/main/func_8006A2C0", func_8006DE44);
+  D_800FF4D0 = 0;
+  D_800FF4D4 = 0;
+  D_800FF4D8 = 0;
+  D_800FF4E4 = 0;
+  v = *(s32*)(p + scenario_mode_id * 116 + 0xEA4);
+  D_800FF4E0 = 0;
+  D_800FF4E8 = 0;
+  D_800FF4DC = v;
+}
+
+void func_8006DE44(void) {
+  u8* p = func_8005AF50();
+  s32 v;
+
+  D_800FF4D0 = 0;
+  D_800FF4D4 = 0;
+  D_800FF4D8 = 0;
+  D_800FF4E4 = 0;
+  v = *(s32*)(p + scenario_mode_id * 116 + 0xEA4);
+  D_800FF4E8 = 0;
+  D_800FF4DC = v;
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_8006A2C0", func_8006DEB4);
 
