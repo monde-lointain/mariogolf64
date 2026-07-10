@@ -106,7 +106,22 @@ void func_8005C018(u32 arg0) {
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80059BA0", func_8005C038);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80059BA0", func_8005C458);
+s32 func_8005C458(void) {
+  u8* ret = func_8005AF50();
+  s32 count = 0, i = 0, n = 6;
+  u8* base = ret;
+  do {
+    u32 p = (u32)base + 0x1320;
+    u32 end = n + p;
+    do {
+      count += (*(s8*)p != 0);
+      p++;
+    } while (p != end);
+    base += 6;
+    i++;
+  } while (i != n);
+  return count == 36;
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80059BA0", func_8005C4B4);
 
