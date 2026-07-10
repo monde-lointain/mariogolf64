@@ -1,10 +1,23 @@
 #include "common.h"
 
 extern s32 D_800C4020;
+extern s32 D_800C4060;
 extern s32 D_800C4064;
 extern s32 D_800C4068;
 extern s32 D_800C4124;
 extern s32 D_800C4144;
+extern s32 D_800FF4B0;
+extern s32 D_800FF4B4;
+extern s32 D_800FF4B8;
+extern void* D_800E1C04;
+extern void* D_800E1C08;
+extern void* D_800E1C0C;
+
+extern void* heap3_alloc(u32 need);
+extern void heap3_free(void** payload_ptr);
+extern u32 func_8005062C(u16 index, void* out);
+extern void func_800506D4(void* data, void* slot);
+void func_8006B54C(void);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_8006A2C0", func_8006A2C0);
 
@@ -16,7 +29,13 @@ INCLUDE_ASM("asm/nonmatchings/main/func_8006A2C0", func_8006A5E4);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_8006A2C0", func_8006A84C);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_8006A2C0", func_8006ACD8);
+void func_8006ACD8(void) {
+  u8 sp10[0x20];
+
+  D_800E1C04 = heap3_alloc(func_8005062C(0x63F, sp10));
+  func_800506D4(D_800E1C04, sp10);
+  func_8006B54C();
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_8006A2C0", func_8006AD1C);
 
@@ -34,15 +53,32 @@ void func_8006B54C(void) { D_800C4068 = -1; }
 
 s32 func_8006B55C(void) { return D_800C4064 < 2; }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_8006A2C0", func_8006B56C);
+void func_8006B56C(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
+  D_800C4068 = 0;
+  D_800C4060 = arg3;
+  D_800C4064 = arg3;
+  D_800FF4B0 = arg0;
+  D_800FF4B4 = arg1;
+  D_800FF4B8 = arg2;
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_8006A2C0", func_8006B5A0);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_8006A2C0", func_8006B5D8);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_8006A2C0", func_8006B980);
+void func_8006B980(void) {
+  u8 sp10[0x20];
 
-INCLUDE_ASM("asm/nonmatchings/main/func_8006A2C0", func_8006B9E4);
+  D_800E1C08 = heap3_alloc(func_8005062C(0x70B, sp10));
+  func_800506D4(D_800E1C08, sp10);
+  D_800E1C0C = heap3_alloc(func_8005062C(0x70C, sp10));
+  func_800506D4(D_800E1C0C, sp10);
+}
+
+void func_8006B9E4(void) {
+  heap3_free(&D_800E1C08);
+  heap3_free(&D_800E1C0C);
+}
 
 s32 func_8006BA10(void) { return !~D_800C4124; }
 
