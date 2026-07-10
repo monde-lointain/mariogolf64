@@ -4413,24 +4413,40 @@ by `/sprint-plan`:
   resolved `c-combined` member upstreams so the recover-extern is priced at the gate, not discovered
   at execution-time data-ref reconciliation. Not file-blocking (recover-extern is cheap in-execution).
 - _(osAiSetFrequency carry-over resolved and banked at S38 retroactive review)_
-- **Open (S215→S217, in-progress mixed-partial, NOT a spike):** `src/main/get_tile_attribute.c` (44-fn
-  terrain-query `none` pack, subseg 0x1B4A0). ~21 banked (13 S215 + 4 S216 + 4 S217:
-  `init_grid_vertex`/`load_club_offset_pair`/`average_grid_vertices`/`lerp_grid_vertices`), 23 stubs
-  remain. The ranker naturally re-surfaces it as a c-stub `remaining:N` row (no BACKLOG de-rank needed).
+- **Open (S215→S218, in-progress mixed-partial, NOT a spike):** `src/main/get_tile_attribute.c` (44-fn
+  terrain-query `none` pack, subseg 0x1B4A0). ~22 banked (13 S215 + 4 S216 + 4 S217 + 1 S218
+  `func_80041B98`), ~22 stubs remain. The ranker naturally re-surfaces it as a c-stub `remaining:N` row
+  (no BACKLOG de-rank needed).
   Carries with characterization: `get_tile_attribute` (lead, body fully solved) is a NEAR-MATCH WALL —
   GCC bakes a phantom -0x10 in-place LO16 addend on the `D_800BAC0C` ref across all index forms (see
-  `#base-register-vs-displacement` subsection); needs a GCC-source dive. `func_80041E8C` = NESTED FN
-  (static-chain-in-$v0, not portable-C). `func_800402F4` = jtbl-dispatch (`jtbl_800CA958`, needs
-  shared-rodata carve). **S217 NEW carry:** `func_800425C8` (bbox min/max nested loop + `jal
-  update_rumble_intensity_table`) — MULTI-HAZARD: flowing-bss on 6 auto-`D_` output symbols
-  (`D_8018D258`..`D_8018D262`, all float to region base) + target spills 6 `s32` min/max to stack from
-  2 held constant-regs where the build keeps them in registers. Fix = define the `collision_triangles`
-  struct at `0x8018D220` (`verts[3]` + `s16 bbox[6]`) so field refs re-materialize off ONE base and
-  the min/max become stack arrays (see `#short-text shifts flowing-bss` multi-`D_`-write variant). Untried
-  tail for the next smallest-first slice: `func_800415C4`/`func_80041878` (larger getters), then FP
-  terrain-height interp (`compute_triangle_plane`, `get_ground_attribute`) + the jtbl-dispatch vein
-  (rodata-jtbl 0x800CA930..0x800CAB20: `ci8_to_rgba5551`, `func_80042228`, `blend_terrain_color`). File
-  md5-candidate only when all 44 bank.
+  `#base-register-vs-displacement` subsection); needs a GCC-source dive. `func_80041E8C` = anomalous
+  **$v0-ARG convention** (entry `sw $v0,0(sp)` — receives arg0 in `$v0`, not `$a0`; walls all callers in
+  o32 C — see memory `func-80041e8c-v0-arg-convention-wall`). `func_800402F4` = jtbl-dispatch
+  (`jtbl_800CA958`, needs shared-rodata carve). `func_800425C8` (S217) = MULTI-HAZARD flowing-bss on 6
+  auto-`D_` outputs (`D_8018D258`..`D_8018D262`) + 6-`s32` min/max stack-spill; fix = define
+  `collision_triangles` struct at `0x8018D220` (`verts[3]` + `s16 bbox[6]`) so refs re-materialize off
+  ONE base (see `#short-text shifts flowing-bss` multi-`D_`-write variant).
+  **S218 NEW carries (all fully root-caused, `docs/wip/<fn>.near-match.md` each; compiler-source fan-out):**
+  `func_80041878` (LOD sub-tile attr setter, score 5420) + `func_800415C4` (16B-copy sibling, score
+  10565) — both `#local-alloc-qty-permutation` WALLS in the signed div-by-4 idiom `(z/4)*8 + x/4`
+  (allocno-creation-order coupled to emit-order; ~20 forms tried; permuter-proof per project note,
+  corpus-mining escalation). `func_80041EC0` (17-jal HUD/dispatch glue, 99.08%) — walled by the
+  `func_80041E8C` `$v0`-arg callee (2 residual instrs only). S218 recovered the `Tile`/`TileEntry`
+  0x10/0x100 type model @D_80185220 + `g_terrain_tile_lod_selector[]` 0x801336A4 (stride 640) +
+  `D_800BA9B0[][8]`/`D_800BA9D0`/`D_800BA9B4` (own symbols) — reusable for the whole setter family.
+  Untried tail for the next smallest-first slice: FP terrain-height interp (`compute_triangle_plane`,
+  `get_ground_attribute`, `func_80041D44`, `func_80041AA8`, `func_8004333C`, `func_800427E8`) + the
+  jtbl-dispatch vein (rodata-jtbl 0x800CA930..0x800CAB20: `ci8_to_rgba5551`, `func_80042228`,
+  `blend_terrain_color`) — all wall/deferred class, NOT plain-tractable. The non-FP getter/setter vein
+  is now MINED OUT (S218 confirmed it is all regalloc/ABI-walled). File md5-candidate only when all 44
+  bank.
+- **Ranker follow-up (tracked, S218, off-cadence golden-gated).** Reinforces the pending regalloc-heavy
+  pts detector (S158/S177/S183/S189): the **signed div-by-4 tile-index → `g_terrain_tile_lod_selector`
+  table lookup → struct-cell write** idiom is a `#local-alloc-qty-permutation` wall tell (S218: 2 of 4
+  "tractable non-FP" getter/setters walled on it). Candidate `pick_target.py` signal for a `none` c-stub
+  fn: a div-by-K index feeding an extern-table `[idx*STRIDE]` load then a struct-field store cluster →
+  price regalloc-heavy / flag partial-bank-expected, so the smallest-first sort stops surfacing them as
+  plain-tractable getters. Golden-gated (`make test-tools`, `REGEN_GOLDEN=1`), NOT a mid-sprint edit.
 - **Ranker follow-up (tracked, S217, off-cadence golden-gated).** `pick_target.py`'s tractability scan
   (jal/fp-only) mis-scoped `func_800425C8` as tractable; it should FLAG a fn writing ≥2 distinct auto-`D_`
   symbols in one carved `.NON_MATCHING` data region as `needs-struct-model` / `needs-symbol-aliases` and

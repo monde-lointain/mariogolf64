@@ -561,6 +561,18 @@ Three honest caveats:
   flowing-bss` multi-`D_`-write variant + ranker follow-up). LESSON: after the permuter wins a local-alloc
   permutation, retry the reorder ALONE — the clean reorder reproduced the match without the permuter's
   `<<var` shift artifact.
+  S218: CONTINUED `get_tile_attribute.c` (mixed-partial). Banked **0pt** (file ~22/44, not
+  md5-candidate, ~22 stubs remain), **+1 matched** (`func_80041B98` grid-vertex averager, byte-exact
+  first-try via subagent), **0 permuter** (PO skipped — wall class). Quality **0/0/3/0** (3 committed
+  carries). Seed committed 8 (c-stub continuation); realized ~11 (seed 8 + 3 carries), residual +3.
+  Method = a gcc-2.7.2/binutils-2.6 **compiler-source subagent fan-out UP FRONT** (4 parallel, PO
+  directive): 1 byte-match + 3 definitively root-caused walls in one pass — `func_80041878`/`func_800415C4`
+  (`#local-alloc-qty-permutation`, signed div-by-4 allocno-creation-order) + `func_80041EC0`
+  (`func_80041E8C` `$v0`-arg ABI). Retro applied **3/3** (fan-out note → agent-workflow; div-index→table
+  wall pts detector → BACKLOG follow-up; `func_80041E8C` `$v0`-arg → memory + docs/wip). LESSON: the
+  "tractable non-FP getter/setter tail" the ranker surfaced was 3/4 regalloc/ABI-walled — the easy vein
+  of this file is mined out; fan-out-up-front converts a would-be multi-sprint permuter slog into one
+  parallel characterization pass.
   Rolling-5 (S34+S37+S39+S42+S43): seed 3.4 pt/sprint (17/5), realized 2.8 pt/sprint (14/5). S31 nuGfxInit is the first over-seed classical fn (+3 residual); rubric needs +1 for double-novel-gotcha libnusys classical targets. S42 defines-data verbatim-body drop: realized 2 = seed 3 − 1 (the fast path makes a defines-data leaf bank like a mirror) — confirms the −1 verbatim-first-try rule extends to known-edit-mirror defines-data, not just classical seeds. S43 is the new residual floor (−2): both gbpak fns were classical-FLAGGED (jal-count-mismatch) but proved pure verbatim mirrors once the macro-FP was stripped — the seed over-priced them because the hazard was a tooling artifact, now fixed in `_c_jal_count`, so future macro-heavy libultra leaves should seed lower.
 - **Regime:** `mirror` is a depleting minority (~22 % of ranked candidates: 56 mirror vs 194
   classical; 18 warm / 38 cold). The warm clean-singleton mirror pool is now **mined out** (S11

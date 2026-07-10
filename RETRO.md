@@ -25,6 +25,30 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 218 — get_tile_attribute.c non-FP tail via compiler-source fan-out (mixed-partial, cont.) — 2026-07-10
+- Increment: 0 files banked / **+1 function matched** (`func_80041B98` grid-vertex averager; ROM SHA-1
+  green e2c4e7a…; delta 230→230 md5-candidate, file ~22/44, ~22 stubs remain).
+- Quality: 0 stuck-far / 0 permuter / **3 carried** / 0 re-opened (carries `func_80041878`,
+  `func_800415C4`, `func_80041EC0`, all root-caused).
+- Seed: committed 8pt (c-stub continuation); banked 0pt (partial mixed, per-file all-or-nothing);
+  realized ~11 (seed 8 + 3 carries), residual +3; regime classical/mixed.
+- What helped: **compiler-source subagent fan-out UP FRONT** (4 parallel over gcc-2.7.2 + binutils-2.6,
+  PO directive) — 1 byte-match + 3 walls each pinned to a diverging pass with file:line, in one pass
+  instead of sequential iterate-then-permuter. Recovered a reusable `Tile`/`TileEntry` (0x10/0x100) type
+  model @D_80185220 + selector-table stride for the whole setter family.
+- Friction: the ranker's "tractable non-FP getter/setter tail" was 3/4 regalloc/ABI-walled — smallest-
+  first surfaced walls as if tractable (reinforces the pending regalloc-heavy pts detector).
+- Applied: 3 of 3 — #1 fan-out-up-front note → `docs/agent-workflow.md ## Workflow at a glance`; #2
+  div-by-4-index→selector-table wall-tell → BACKLOG off-cadence golden-gated pts-detector follow-up
+  (not inline); #3 `func_80041E8C` `$v0`-arg ABI wall → verified asm + project memory
+  `func-80041e8c-v0-arg-convention-wall` + `docs/wip/func_80041EC0.near-match.md`. Permuter escalation
+  PO-declined (wall class = 0 cracks historically).
+- Carry-over: `src/main/get_tile_attribute.c` — S218 carries `func_80041878`/`func_800415C4`
+  (`#local-alloc-qty-permutation`, `docs/wip/` each) + `func_80041EC0` (`func_80041E8C` `$v0`-arg wall);
+  prior carries (lead `get_tile_attribute` phantom-addend, `func_80041E8C`, `func_800402F4` jtbl,
+  `func_800425C8` flowing-bss) stand. Non-FP getter/setter vein MINED OUT; remaining = FP interp + jtbl
+  + wall cluster. Next slice: FP/jtbl sprint or corpus-mining on the accumulated regalloc carries.
+
 ## Sprint 217 — get_tile_attribute.c clean-compute vein (mixed-partial, cont.) — 2026-07-10
 - Increment: 0 files banked / **4 functions matched** (delta: no md5-candidate change, 230→230; file
   ~21/44 banked, 23 stubs remain = FP terrain-height interp, jtbl dispatch, 17-jal dispatch, phantom-

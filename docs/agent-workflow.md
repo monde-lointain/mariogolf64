@@ -59,6 +59,19 @@ resume surface when the middle spans context windows.
     match-finder. Give each FP subagent the m2c-seed step + the FP levers (`f32 v[N]` stack-array for a
     dead-frame store block, float-diff computation ORDER, `while` vs `if{do-while}` loop form, split a
     temp to pin a value in `$f12`, non-negated `bc1fl` polarity).
+  - **Fan out compiler-source subagents UP FRONT for a suspected-walled c-stub tail (S218).** When
+    a c-stub `remaining:N` continuation's next smallest-first vein is suspected regalloc/ABI-walled
+    (e.g. a getter/setter family sharing a div-index-into-table + struct-cell-write idiom, kin to the
+    S158/S208 walls), do NOT iterate-then-permuter sequentially. Dispatch one subagent per target with
+    the gcc-2.7.2 (`~/development/repos/mips-gcc-2.7.2`) + binutils-2.6 (`~/development/repos/mips-binutils-2.6`)
+    pins in the prompt and have each seed asm-first, iterate isolated (`make nonmatching-func FUNC=<f>
+    MAIN=1`), then root-cause any residual to a diverging pass with a `file:line` citation. One parallel
+    pass then returns a definitive verdict per fn (byte-match OR a `docs/wip/<fn>.near-match.md`-grade
+    wall with the pass named), instead of N sequential permuter setups. S218 fanned 4 over the
+    `get_tile_attribute.c` non-FP getter/setter tail: 1 byte-match (`func_80041B98`) + 3 root-caused
+    walls (2 `#local-alloc-qty-permutation`, 1 `$v0`-arg ABI on `func_80041E8C`) in one pass. The
+    permuter stays post-root-cause; for a `#local-alloc-qty-permutation` verdict it is skipped outright
+    (project history = 0 cracks), and corpus-mining is the escalation.
 
 </workflow_overview>
 
