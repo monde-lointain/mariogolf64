@@ -3364,21 +3364,36 @@ by `/sprint-plan`:
   `NU_CONT_THREAD_ID=6` vs MG64's 5), and that surfaces only at first build unless reconciled here.
   A near-free retry missing any of these is a half-scoped spike — finish the scope before deferring.
 
-- **(S209 MIXED-PARTIAL — carried; 32 of 59 banked)** `src/main/func_80059BA0.c` (main-segment
-  `[0x34FA0]` integer-glue/accessor pack). 32 banked (S208 +23 asm-first; S209 +9 via the PO-directed
-  compiler-source dive), 27 stubs remain, ROM green off extracted asm. **S209 CLOSED all 4 S208
-  near-matches byte-exact with 0 permuter** — `func_8005B070` (while-loop; the `.set-reorder`
-  textual≠machine nop, not a schedule wall), `func_8005D218`/`func_8005D2E4` (shared `case 0: default:`
-  merged-default denies jump2 cross-jump inversion), `func_8005D308` (nested-if with the skipped store
-  in the ELSE → reorg `optimize_skip` annulled bnel) — AND the full **C458/C4B4/C5B4/C614 grid-counter
-  family** + `func_8005B28C` (word-aligned struct block-move). C458 WALLED the permuter (1.27M
-  iters/score 55) then fell to the dive (global.c allocno live-length steer via an intermediate copy +
-  integer-cast commutative operand order). **1 carry: `func_8005D334`** (triple-IV struct-array init —
-  GCC merges the outer counter into the byte-offset IV vs the ROM's 3 separate IVs + an up-pointer inner
-  loop; a loop.c strength-reduction divergence, characterized, oracle-close). ~23 larger/FP fns still
-  unprofiled. See the S209 hazards `#grid-counter-double-loop`, `#compiler-source-fan-out`
-  (walled-permuter case), `#local-alloc-qty-permutation` (global.c analog + no-scheduler fact), and
-  memory `kmc-cc1-no-instruction-scheduler`.
+- **(S210 MIXED-PARTIAL — carried; 33 of 59 banked)** `src/main/func_80059BA0.c` (main-segment
+  `[0x34FA0]` integer-glue/accessor pack). 33 banked (S208 +23 asm-first; S209 +9 compiler-source dive;
+  S210 +1 `func_8005C510`), **26 stubs remain**, ROM green off extracted asm. **S210 +1:** `func_8005C510`
+  (6×6 grid-counter, C458 family + a NEW `count`→code DISPATCH-TAIL variant — `if(count==4)return
+  1;…;return (count==20)?5:0;`), banked first-build reusing the S209 grid-counter levers.
+  **S210 hit the file's HARD RESIDUAL TAIL — a wall CLUSTER that source levers AND the permuter (3 runs,
+  ~9500/9500/150s iters, 0 cracks) do not flip:**
+  - `func_8005D334` (S209 carry; **compiler-source dive done, `docs/wip/func_8005D334.near-match.md`**) —
+    STRUCTURAL byte-match achieved (middle byte-identical) via 4 levers (walking-pointer inner loop keeps
+    the counter as a 3rd IV; up-pointer `p!=end`; `n=12` var; `do/while(++i!=4)`); residual = reload
+    keeps the hoisted exit-const `4` in a reg vs ROM rematerializing (+1-pressure/allocno decision,
+    root-caused to mips.c:1996 force_reg + loop.c:1630 hoist). Escalation = corpus-mining, not the permuter.
+  - `func_8005B0B4` (nibble-switch→code) — nested-if fixes lb+structure; residual = pervasive ret/nibble
+    `v1↔a1` allocno swap + a reorg delay-slot/block-order diff. Permuter 1990→1625, no crack.
+  - `func_8005AF80` (memset + 6×3 `-1` grid-init, `s8` counters, magic 0x12345678) — down to 3 `r` rows
+    (row/j allocno swap resolved via inline arith, but base `+0xDC0` hoist vs recompute). Permuter ~9500
+    iters base 220, no crack.
+  - `func_80059BA0` (fabsf via `&0x7FFFFFFF` sign-mask) — ROM keeps a redundant `mov.s $f0,$f12`; every
+    register-kept union-pun copy-propagates it away (15+ oracle variants). "target less-optimal" artifact.
+  - `func_8005CEE0` (nested table lookup + u16 sign-bit) — 4 `r` rows on the D_800C28E4 access
+    ([#base-register-vs-displacement](#base-register-vs-displacement)); struct/intermediate backfire to 9.
+  - `func_8005DE88` (flag pack/unpack) — **BLOCKED, logic fully decoded**: globals D_801323E5/D_800C1FFC
+    live in a shifted `.NON_MATCHING` carve; C-referencing them corrupts the region (even banked
+    func_8005AF74). Needs a data carve first — the enabler for this fn.
+  ~19 larger/FP fns still unprofiled (59BC0/59FAC/5A2AC/5D3B8 FP = S158-class; 5A580 478-instr/99-jal
+  dispatcher; deferred). See hazards `#grid-counter-double-loop` (dispatch-tail), `#base-register-vs-
+  displacement` (+ the `family-of` ranker follow-up + the .NON_MATCHING data-carve blocker),
+  `#local-alloc-qty-permutation`, memory `kmc-cc1-no-instruction-scheduler`. **Next slice:** a
+  permuter/`#cross-project-matched-corpus-mining` OR data-carve spike on these carries, OR the FP sprint —
+  NOT more smallest-first (the easy vein is mined out).
 
 - **(S206 MIXED-PARTIAL — carried; 3 of 6 banked)** `src/main/func_800772B0.c` (main-segment
   `[0x526B0]` float spline/curve-interpolation pack; NOT a settime.c mirror — false coddog collision).

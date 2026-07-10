@@ -115,6 +115,7 @@ The hazard families below group the sections that follow. Each links to its exis
 - [reorg optimize_skip annulled bnel (single-skipped-insn branch-likely)](#reorg-optimize_skip-annulled-bnel)
 - [switch tight merged-default (shared case-0/default label + case-1 last)](#switch-tight-merged-default)
 - [grid-counter double-loop (non-zero-cell counter idiom)](#grid-counter-double-loop)
+- [base-register-vs-displacement (full base materialized vs %lo-in-displacement; + family-of ranker follow-up + shifted .NON_MATCHING data-carve blocker)](#base-register-vs-displacement-full-symbolbase-materialized-vs-lo-in-displacement)
 
 **libnusys / audio-band specifics**
 - [libmus-bundled-n_audio duplicate (a SUPPORT_NAUDIO libmus archive links its OWN n_audio synth copy)](#libmus-bundled-n_audio-duplicate-a-support_naudio-libmus-archive-links-its-own-n_audio-synth-copy)
@@ -5668,6 +5669,67 @@ WALLS (C458: ~1.27M iters / score 55).
   **variable** `lim=6` for the outer test ([#setup-block-instruction-order](#setup-block-instruction-order)).
 - **Row advance + predicate.** `base += stride; i++;` then the return predicate sets the final
   `slti`/`xori`/`sltiu` (`== 36` → `xori,0x24`+`sltiu,1`; `>= 50` → `slti,0x32`+`xori,1`; etc.).
+- **`count`→code DISPATCH-TAIL variant (S210 `func_8005C510`).** The same grid-counter body can end in a
+  `count`-to-code dispatch instead of a boolean predicate: a `bne`-chain that maps discrete counts to
+  small codes, `if(count==4)return 1; if(count==8)return 2; …; return (count==20)?5:0;` (the LAST case
+  folds to the branchless `xori/sltiu/negu/andi` form). Write the whole tail as an `if`-chain of equality
+  tests + a final ternary for the branchless case; it banks byte-exact on top of the grid-counter body,
+  no permuter. Do NOT reach for a `switch` (the ROM is a plain equality `bne`-chain, not a jump table).
 
 **Provenance.** S209 C458 (`==36`), C4B4 (`>=30`), C5B4 (`>=50`), C614 (`==108`) — all banked byte-exact,
 0 permuter, via the compiler-source dive ([#compiler-source-fan-out-escalation-above-the-permuter](#compiler-source-fan-out-escalation-above-the-permuter)).
+S210 `func_8005C510` (6×6 grid, `count`→code dispatch tail) banked first-build reusing the same levers —
+the family is a reliable `family-of:func_8005C458` bank (see the tracked ranker follow-up in
+[#base-register-vs-displacement](#base-register-vs-displacement)).
+
+## base-register-vs-displacement (full symbol/base materialized vs %lo-in-displacement)
+
+**Symptom (S210; `func_8005DE88` / `func_8005AF80` / `func_8005CEE0`).** A classical fn is byte-exact
+except a run of N register-only (`r`) diff rows all on ONE data-access chain: the ROM materializes a
+FULL base address into a register and dereferences with a `0` (or small) displacement
+(`lhu/lw/sb …,0(reg)` after a `lui;addiu` la-pair, or a walking base pointer `0(v1)`), where the build
+keeps `%hi(sym)` in a scratch reg, adds the variable index, and folds the constant tail (`%lo(sym)`, or
+a fixed struct offset like `0xDC0`) into the load/store DISPLACEMENT (`lhu …,%lo(sym)(reg)` /
+`sw …,0xDC0(reg)`). Functionally identical; the divergence is purely which register holds the base and
+where the constant lives.
+
+**What FAILS / backfires (do not reach for these first):**
+- **Struct-array access** (`D_800C28E4[b].field[c]`) and **explicit intermediate pointers**
+  (`T *row = base + i*S; row[c]`) both perturb the WHOLE function's register allocation — S210 CEE0 went
+  from 4 `r` rows (raw inline pointer arith) to 9 `r` rows (pervasive shift) with either. The LEAST-
+  divergent form is raw inline pointer arithmetic (`*(u16*)((u8*)SYM + b*14 + c*2)`), so start there.
+- The **permuter does not flip it** (S210: AF80 ~9500 iters base 220, B0B4 ~9500 base 1990 — no crack):
+  it is an addressing-mode + allocno-coloring decision, not a source-reachable permutation.
+- This is DISTINCT from [#integer-arith-commutative-operand-order] (which fixes operand ORDER, e.g.
+  `n+p` vs `p+n`) and from [#struct-array-of-bss-direct-index-vs-base-pointer-var] (a bss RMW base-reg
+  choice). Here the base is a full symbol/pointer materialization vs a `%hi`+`%lo`-displacement split.
+
+**Status.** Open near-match class; no reliable source lever found in S210. Escalation is a dedicated
+compiler-source dive (mips.c `print_operand_address` / `simple_memory_operand` + reload's address
+legitimization) or [#cross-project-matched-corpus-mining]. Related base-register cases where a lever DID
+land: [#mem-in-struct-scheduling-lever], [#offset-0-symbol-re-materialization].
+
+### Tracked ranker follow-up: `family-of:<banked-fn>` (S210)
+
+pick_target smallest-first repeatedly surfaced these allocno/addressing walls on a HARD residual tail
+(the S208/S209 easy wins mined out), while the ONE S210 bank (`func_8005C510`) came from pattern-matching
+an already-banked FAMILY (the C458 grid-counters), not from the smallest raw fn. FOLLOW-UP: add a
+`family-of:<banked-fn>` ranker signal — flag an unbanked fn whose asm shares a banked sibling's shape
+(same lead helper call, e.g. `func_8005AF50`; same size band; same coddog cluster) so the gate prefers a
+known-bankable-pattern sibling over the smallest raw fn. NOT applied live at the S210 review: a
+pick_target/pick_target_hazards change must run on the golden-gated tooling branch
+(`make test-tools`, byte-identical goldens; see the tooling-refactor-style convention), not a retro
+in-place edit. Until then the gate applies it MANUALLY by reading the coddog/call tags for a family match.
+
+### Data-global in a shifted `.NON_MATCHING` carve (S210 `func_8005DE88` blocker)
+
+A separate but adjacent trap: C-referencing a data global that lives in a `.NON_MATCHING` data section
+whose alias is placed +0x10 off its name (S210: `D_801323E5`@0x801323d5, `D_800C1FFC`@0x800c1fec)
+CORRUPTS the whole region on `make extract` — even already-banked siblings start mismatching
+(`func_8005AF74` returning `D_801323A0` flipped from 0x801323a0 to 0x80132390). Adding an absolute to
+`symbol_addrs.txt` does NOT win over the shifted section symbol. **DIAGNOSTIC before referencing any
+`D_<addr>` from new C:** `grep D_<region> build/mariogolf64.map | grep -v NON_MATCHING` — if the mapped
+address != the symbol name, the region is a shifted `.NON_MATCHING` carve; do NOT C-reference it until
+the data section is properly carved/placed (see [#defines-data] / [#data-rodata-carve]). Cleanly-placed
+globals show `.NON_MATCHING` at the SAME address as the real symbol (safe). This is the data-carve
+enabler that blocks `func_8005DE88` (logic fully decoded; carried pending the carve).

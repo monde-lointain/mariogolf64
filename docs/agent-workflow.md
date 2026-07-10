@@ -658,6 +658,8 @@ When `pick_target.py` flags a hazard (or a match shows its symptom), read the ma
 | straight-line (1 basic block, `.flow` dump) classical fn locks on a pure s-register permutation + 1 independent-store schedule move; source levers don't move it | #local-alloc-qty-permutation |
 | `nonmatching-func`/`decomp_loop` isolated object diverges from the in-tree build of the same 1-BB fn | #local-alloc-qty-permutation |
 | large straight-line dump fn (one `T* p` param, `sub=&p->big_substruct` at fixed offset, many `sub->field` accesses): ROM materializes `p+C` as base (`addiu sN,a0,C`), build keeps the PARAM base + folds `+C` into every displacement; pervasive base-reg + uniform-offset diff, `match_count==total_rows`+empty `top_mismatches` at LOW percent | #cse-derived-pointer-base-canonicalization |
+| clean fn byte-exact except N `r` rows on ONE data-access chain: ROM materializes a full base addr into a reg + `0(reg)` deref, build keeps `%hi`+index + folds `%lo`/const into the load/store DISPLACEMENT; struct-array or `T* row=` intermediates BACKFIRE (pervasive regalloc shift), permuter does not flip it | #base-register-vs-displacement |
+| new C references a `D_<addr>` global whose `build/*.map` addr != its name (shifted `.NON_MATCHING` carve, e.g. name+0x10); referencing it corrupts the whole region incl. banked siblings | #base-register-vs-displacement (data-carve subsection) / #defines-data |
 
 </hazard_index>
 

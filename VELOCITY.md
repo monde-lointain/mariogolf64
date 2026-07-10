@@ -466,6 +466,18 @@ Three honest caveats:
   struct-align block-move; .set-reorder textual≠machine; optimize_skip bnel; switch merged-default; new
   #grid-counter-double-loop). Second consecutive sprint proving the compiler-source dive beats the
   permuter on this compiler (S208 4 near-matches carried → S209 all closed by the dive, 0 permuter).
+  S210: CONTINUATION of S208's `func_80059BA0.c` 13pt pack (no re-seed), banked **0pt** (mixed-partial,
+  file 33/59 not md5-candidate), **+1 matched** (`func_8005C510`, the C458 grid-counter family + a new
+  `count`→code dispatch-tail variant). Quality **0/3/6/0** — 3 permuter-runs ALL WALLED (B0B4 ~9500 iters,
+  AF80 ~9500, D334 150s; 0 permuter-banks), 6 carried. The S208/S209 easy vein is now MINED OUT: the
+  residual tail is a wall CLUSTER — allocno-swap (B0B4 ret/nibble, AF80 row/j) + a NEW
+  base-register-vs-displacement class (DE88/AF80/CEE0) that neither source levers nor the permuter flip,
+  + a shifted `.NON_MATCHING` data-carve blocking DE88. The D334 dive reached a STRUCTURAL byte-match
+  (unbankable +1-register-pressure residual, fully root-caused). Realized effort HIGH (deep multi-fn RE +
+  3 permuter escalations) but banked only the ONE family-matched fn — a velocity signal that smallest-
+  first is the wrong ranker on a hard residual tail (→ the `family-of` follow-up). Retro applied **4/4**
+  (#1 new #base-register-vs-displacement; #2 .NON_MATCHING data-carve blocker+diagnostic; #3
+  #grid-counter dispatch-tail; #4 family-of ranker RECORDED as a golden-gated tooling follow-up, not live).
   Rolling-5 (S34+S37+S39+S42+S43): seed 3.4 pt/sprint (17/5), realized 2.8 pt/sprint (14/5). S31 nuGfxInit is the first over-seed classical fn (+3 residual); rubric needs +1 for double-novel-gotcha libnusys classical targets. S42 defines-data verbatim-body drop: realized 2 = seed 3 − 1 (the fast path makes a defines-data leaf bank like a mirror) — confirms the −1 verbatim-first-try rule extends to known-edit-mirror defines-data, not just classical seeds. S43 is the new residual floor (−2): both gbpak fns were classical-FLAGGED (jal-count-mismatch) but proved pure verbatim mirrors once the macro-FP was stripped — the seed over-priced them because the hazard was a tooling artifact, now fixed in `_c_jal_count`, so future macro-heavy libultra leaves should seed lower.
 - **Regime:** `mirror` is a depleting minority (~22 % of ranked candidates: 56 mirror vs 194
   classical; 18 warm / 38 cold). The warm clean-singleton mirror pool is now **mined out** (S11

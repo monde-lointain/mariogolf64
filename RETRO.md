@@ -25,6 +25,35 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 210 — func_80059BA0.c continuation (D334 dive + fresh non-FP tail) — 2026-07-09
+- Increment: 0 files banked / **1 function matched** (`func_8005C510`) (delta: no md5-candidate change,
+  230→230; file 33/59 banked, 26 stubs remain, NOT md5-candidate).
+- Quality: **0/3/6/0** (0 stuck-far / 3 permuter-runs [B0B4, AF80, D334 — ALL WALLED, ~9500/9500/150s
+  iters, 0 banks] / 6 carried [D334, B0B4, AF80, func_80059BA0/fabsf, CEE0, DE88-blocked] / 0 re-opened).
+- Seed: continuation of S208's 13pt pack — committed 0pt (no re-seed); banked 0pt (per-file
+  all-or-nothing, file partial); regime classical/mixed. Value = **+1 matched**.
+- What helped: the **C458 grid-counter FAMILY recipe** banked `func_8005C510` first-build (base-via-ret
+  live-length + integer-arith end + the new `count`→code DISPATCH-TAIL variant). The **D334 compiler-
+  source dive** reached a STRUCTURAL byte-match (middle ~20 instrs byte-identical) + full root cause
+  (mips.c:1996 `!=K` force_reg → loop.c:1630 always-hoist → reload rematerialization is the +1-pressure
+  decision), a much sharper characterization than the prior "loop.c IV divergence" note.
+- Friction: **hard residual tail.** Post-S208/S209 the file's leftovers are a CLUSTER of allocno-swap
+  (B0B4 ret/nibble, AF80 row/j) + base-register-vs-displacement (DE88, AF80 0xDC0-fold, CEE0) walls that
+  neither source levers NOR the permuter (3 runs, ~9500 iters each, 0 cracks) flip. DE88 additionally
+  blocked by a shifted `.NON_MATCHING` data-carve (referencing its globals corrupts the region). Smallest-
+  first kept hitting walls; the ONE bank came from family-matching a banked pattern, not the smallest fn.
+- Applied: **4 of 4** — #1 new [#base-register-vs-displacement] hazard (DE88/AF80/CEE0, incl. what-
+  backfires + permuter-no-crack); #2 shifted-`.NON_MATCHING` data-carve blocker + `grep …map | grep -v
+  NON_MATCHING` diagnostic (folded into #1's subsection + workflow hazard-index rows); #3 strengthened
+  [#grid-counter-double-loop] with the `count`→code dispatch-tail variant (C510); #4 `family-of:<banked-
+  fn>` ranker signal RECORDED as a tracked follow-up (a live pick_target change needs the golden-gated
+  tooling branch per the tooling-refactor-style convention — NOT a retro in-place edit; gate applies it
+  manually meanwhile).
+- Carry-over: `func_80059BA0.c` 33/59 (26 stubs) — D334 (regalloc-pressure, `docs/wip/` note), B0B4
+  (ret/nibble allocno-swap, permuter no-crack), AF80 (row/j allocno-swap + 0xDC0-hoist, permuter
+  no-crack), func_80059BA0 (fabsf redundant-`mov.s` artifact), CEE0 (base-register 4-row), DE88 (blocked
+  on the `.NON_MATCHING` data-carve). ~19 larger/FP fns still unprofiled.
+
 ## Sprint 209 — func_80059BA0.c near-match crack (compiler-source dive) — 2026-07-09
 - Increment: 0 files banked / **9 functions matched** (delta: no md5-candidate change, 230→230; file
   32/59 banked, 27 stubs remain, NOT md5-candidate).
