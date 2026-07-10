@@ -4413,6 +4413,21 @@ by `/sprint-plan`:
   resolved `c-combined` member upstreams so the recover-extern is priced at the gate, not discovered
   at execution-time data-ref reconciliation. Not file-blocking (recover-extern is cheap in-execution).
 - _(osAiSetFrequency carry-over resolved and banked at S38 retroactive review)_
+- **Open (S220, in-progress mixed-partial, NOT a spike):** `src/main/func_80095A10.c` (31-fn main-seg
+  `none` pack, subseg 0x70E10; float-clamp/state system). 7 banked S220 (5 committed leaves + 2 stretch,
+  all byte-exact), 24 stubs remain. The ranker re-surfaces it as a c-stub continuation smallest-first.
+  **Remaining tail (carries):** signed-divide-by-28 pair `func_80098CD8`/`func_80098D70` (magic
+  `0x92492493`, `#signed-divide-const`); F3DEX2 display-list builder `func_80095C10` (64 instr,
+  gDMA/gMoveMem/gMtx, needs DL reconstruction); FP tail `func_80095A68`/`func_800977E0`/`func_80097A08`/
+  `func_80097C18`/`func_80097E30`/`func_8009676C`/… (S158-class); `func_800989EC` caller-evict (cross-TU
+  inline into src/main/func_80054900.c). File md5-candidate only when all 31 bank. **S220 lesson:** the
+  trivial getter/setter leaves banked cheap smallest-first, but 2 of 7 (bit-reversal + 3-word copy) were
+  regalloc/CSE near-matches cracked by gcc-2.7.2 subagent dives — the `#scheduler-load-hoist-serial-store-lever`
+  and `#cse-dest-preference-copy-collapse` levers, which ALSO retired the wrong "KMC has no scheduler"
+  foundational claim (scheduler IS active at -O2).
+- **Ranker follow-up (tracked, S220, note-only, no code change).** The `func_80095A10` pack confirmed a
+  fresh main-seg pack's trivial-leaf vein banks cheap under smallest-first per-fn mixed banking with
+  extern-global refs (no rodata carve). No ranker change needed; recorded as a banking-behavior anchor.
 - **Open (S215→S219, in-progress mixed-partial, NOT a spike):** `src/main/get_tile_attribute.c` (44-fn
   terrain-query `none` pack, subseg 0x1B4A0). ~23 banked (13 S215 + 4 S216 + 4 S217 + 1 S218
   `func_80041B98` + 1 S219 `ci8_to_rgba5551`), 22 stubs remain. The ranker naturally re-surfaces it as a

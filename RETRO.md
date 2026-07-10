@@ -25,6 +25,29 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 220 — func_80095A10.c 31-fn main-seg pack (mixed-partial, smallest-first) — 2026-07-10
+- Increment: 0 files banked / **+7 functions matched** (`func_80095A10.c` 7/31, 24 stubs remain;
+  ROM SHA-1 green e2c4e7a…). Committed backlog 5/5 + 2 stretch, all byte-exact.
+- Quality: 0 stuck-far / 0 permuter / **0 carried-on-committed** / 0 re-opened (both hard fns CRACKED,
+  not spiked; 3 stretch un-attempted by difficulty triage = backlog, not spikes).
+- Seed: committed 8pt (nfns≥4 large pack); banked 0pt (partial mixed, per-file all-or-nothing);
+  realized ~10 (seed 8 + 2 novel root-cause gotchas), residual +2; regime classical/mixed.
+- What helped: fan-out subagents over gcc-2.7.2 found 2 reusable levers AND corrected a wrong
+  foundational fact — the KMC scheduler IS active at -O2 (mips.md `define_function_unit`;
+  `-fno-schedule-insns` toggle changed the `.o`), superseding the S209 "no scheduler" claim.
+  `#scheduler-load-hoist-serial-store-lever` (shared temp pins independent global copies serial) cracked
+  `func_800989C4`; `#cse-dest-preference-copy-collapse` (`u16` temp → zero_extend blocks the cse.c:6714
+  copy-collapse) cracked `func_80098CA0`. Trivial getter/setter leaves banked first-build.
+- Friction: 2 of 7 needed compiler-source dives (the rest first-build). The profiling awk under-counted
+  tab-form `jal`s (stretch fns had calls). Stretch tail is a real difficulty step-change.
+- Applied: 3 of 3: #1 scheduler-correction (FOUNDATIONAL hazards.md rewrite + new
+  `#scheduler-load-hoist-serial-store-lever`, plus fixed 2 stale "no scheduler" refs and the
+  `[[kmc-cc1-no-instruction-scheduler]]` memory); #2 new `#cse-dest-preference-copy-collapse`; #3
+  pick_target leaf-vein banking-behavior anchor (note-only, no ranker change).
+- Carry-over: `func_80095A10.c` remaining 24 — signed-divide-by-28 pair (`func_80098CD8`/`func_80098D70`,
+  #signed-divide-const), F3DEX2 DL builder `func_80095C10`, FP tail (`func_80095A68`/`func_800977E0`/
+  `func_80097A08`/`func_80097C18`/`func_80097E30`/`func_8009676C`/…), `func_800989EC` caller-evict.
+
 ## Sprint 219 — get_tile_attribute.c jtbl vein + struct anchor (mixed-partial, cont.) — 2026-07-10
 - Increment: 0 files banked / **+1 function matched** (`ci8_to_rgba5551` jtbl switch + RGBA5551 pack;
   ROM SHA-1 green e2c4e7a…; delta 230→230 md5-candidate, file ~23/44, 22 stubs remain).

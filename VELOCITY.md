@@ -587,6 +587,20 @@ Three honest caveats:
   `#isolated-compile-caveat`). LESSON: the jtbl vein the ranker surfaced as "0-jal/0-fp tractable" is
   mostly a rodata-atomicity wall; only a standalone 8-aligned-both-edges table banks partial — extends
   the S218 lesson that this file's remaining tail is uniformly wall-class.
+  S220: NEW main-seg pack `func_80095A10.c` (mixed-partial, PO redirected off overlays to main
+  segment). Banked **0pt** (file 7/31, not md5-candidate, 24 stubs remain), **+7 matched** (5 committed
+  + 2 stretch, ALL byte-exact), **0 permuter**. Quality **0/0/0/0** (both hard fns CRACKED via
+  compiler-source dives, not spiked; 3 stretch un-attempted by difficulty triage = backlog not spikes).
+  Seed committed 8 (nfns≥4 large pack); realized ~10 (seed 8 + 2 novel root-cause gotchas), residual +2.
+  Method = smallest-first trivial getter/setter leaves (first-build) + 2 fan-out gcc-2.7.2 subagent
+  dives that found reusable levers AND corrected a wrong foundational fact: the KMC scheduler IS active
+  at -O2 (not "no scheduler" as S209 claimed). Levers: shared-pseudo anti-dep pins scheduler-hoisted
+  independent stores (`#scheduler-load-hoist-serial-store-lever`), and a `u16` temp zero_extend blocks
+  the CSE dest-preference copy-collapse at cse.c:6714 (`#cse-dest-preference-copy-collapse`). Retro
+  applied **3/3** (FOUNDATIONAL scheduler rewrite + 2 new hazards + index; pick_target leaf-vein anchor
+  note-only). LESSON: a fresh main-seg pack's trivial-leaf vein banks cheap smallest-first, but two
+  regalloc/CSE near-matches on 10-14-instr fns fell to compiler-source root-cause (NOT permuter), which
+  also retired a mis-stated toolchain invariant.
   Rolling-5 (S34+S37+S39+S42+S43): seed 3.4 pt/sprint (17/5), realized 2.8 pt/sprint (14/5). S31 nuGfxInit is the first over-seed classical fn (+3 residual); rubric needs +1 for double-novel-gotcha libnusys classical targets. S42 defines-data verbatim-body drop: realized 2 = seed 3 − 1 (the fast path makes a defines-data leaf bank like a mirror) — confirms the −1 verbatim-first-try rule extends to known-edit-mirror defines-data, not just classical seeds. S43 is the new residual floor (−2): both gbpak fns were classical-FLAGGED (jal-count-mismatch) but proved pure verbatim mirrors once the macro-FP was stripped — the seed over-priced them because the hazard was a tooling artifact, now fixed in `_c_jal_count`, so future macro-heavy libultra leaves should seed lower.
 - **Regime:** `mirror` is a depleting minority (~22 % of ranked candidates: 56 mirror vs 194
   classical; 18 warm / 38 cold). The warm clean-singleton mirror pool is now **mined out** (S11

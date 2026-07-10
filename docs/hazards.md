@@ -90,6 +90,8 @@ The hazard families below group the sections that follow. Each links to its exis
 - [call-arg delay-slot fill + field-alias addend-0 (S214 scenery levers)](#call-arg-delay-slot-fill--field-alias-addend-0-s214-scenery-levers)
 - [volatile-view CSE reload (force a just-stored global to reload)](#volatile-view-cse-reload-force-a-just-stored-global-to-reload)
 - [mem-in-struct scheduling lever (model a fixed global as a struct/array member)](#mem-in-struct-scheduling-lever-model-a-fixed-global-as-a-structarray-member)
+- [scheduler-load-hoist serial-store lever (shared temp pins independent global copies)](#scheduler-load-hoist-serial-store-lever)
+- [cse-dest-preference copy-collapse (narrow-unsigned-temp lever)](#cse-dest-preference-copy-collapse-narrow-unsigned-temp-lever)
 - [call-result a0-vs-v0 single-allocno (force a scratch reg via both-arm reuse)](#call-result-a0-vs-v0-single-allocno-force-a-scratch-reg-via-both-arm-reuse)
 - [compiler-source fan-out (escalation above the permuter)](#compiler-source-fan-out-escalation-above-the-permuter)
 - [cross-project matched-corpus mining (sibling-decomp byte-exact escalation above the source dive)](#cross-project-matched-corpus-mining)
@@ -4828,7 +4830,9 @@ the primary cse-only agent tried volatile-on-prev-only, saw it float, and wrongl
 
 ### Landing an independent store in a `jal` delay slot — source order + defer-to-arg-eval (S212 `func_80058C58`)
 
-KMC cc1 has **no instruction scheduler** ([[kmc-cc1-no-instruction-scheduler]]): emit order == source
+KMC cc1's pre-reload scheduler is INERT for a dependent chain (it reorders only INDEPENDENT ops; see
+the FOUNDATIONAL note under [#local-alloc-qty-permutation](#local-alloc-qty-permutation) and the S220
+correction in [[kmc-cc1-no-instruction-scheduler]]): for the dependent setup here emit order == source
 order, and reorg's delay-slot fill only pulls the IMMEDIATELY-PRECEDING independent insn down into a
 `jal` delay slot. So to reproduce a ROM that fills a call's delay with an independent store
 (`swc1 f0,OFF(base)` after `jal`), that store must be the LAST statement before the call in SOURCE. Two
@@ -5750,14 +5754,66 @@ lever the permuter cannot reach — it never restructures the call materializati
 note in [#compiler-source-fan-out-escalation-above-the-permuter](#compiler-source-fan-out-escalation-above-the-permuter)).
 Cross-ref [#loop-weight-and-live-length-regalloc-steering](#loop-weight-and-live-length-regalloc-steering).
 
-**FOUNDATIONAL — the KMC `cc1` has NO instruction scheduler (S209, confirmed).** `INSN_SCHEDULING` is
-undefined for this MIPS build, so `-fschedule-insns` / `-fschedule-insns2` are **byte no-ops** (verified:
-the `.o` is identical with and without them). Therefore **SOURCE EMIT-ORDER is the only control over
-instruction ordering** — there is no post-pass that reorders. Every apparent "schedule transposition" in
-these playbooks (S208 B070 `li`/`la`; S209 C5B4 `li $t0,6` placement; the base-copy materialization
-above) is really RTL EMISSION order = source statement/decl order. Reach for source restructuring, NOT a
-scheduling barrier. (The one reorderer that remains is `loop.c` via `NOTE_INSN_LOOP_BEG` — a loop
-optimization, not a scheduler; see the goto-loop-vs-structured-loop codegen memory.)
+**FOUNDATIONAL — the KMC `cc1` DOES have an active pre-reload scheduler at -O2 (S220 correction;
+supersedes the wrong S209 "no scheduler" claim).** The earlier assertion here (`INSN_SCHEDULING`
+undefined, `-fschedule-insns` a byte no-op) was WRONG — it over-generalized from a function whose deps
+already pinned the order. Verified S220 by a controlled `-fno-schedule-insns` toggle (a no-op flag
+cannot change the `.o`, but it did) plus `-da` RTL dumps against the real `tools/cc/gcc`:
+`config/mips/mips.md:153-177` declares `define_function_unit` ("memory" load ready-delay 3, "imuldiv"),
+so `genattr.c:154` emits `#define INSN_SCHEDULING` (`insn-attr.h:56`); `toplev.c:3387-3398` force-sets
+`flag_schedule_insns=1` (and `-fschedule-insns2`) at `optimize>=2`, and `schedule_insns()` (`sched.c`)
+runs PRE-local-alloc. The scheduler reorders INDEPENDENT same-BB ops to hide the load ready-delay.
+
+It is INERT (hence the S208/S209 observations that emit order == source order stayed true) whenever
+register anti/output deps already pin the order — which is the common case, so "reorder source, not a
+scheduling barrier" is still the right first move for a dependent chain. But for INDEPENDENT ops the
+scheduler is a real second lever: see [#scheduler-load-hoist-serial-store-lever](#scheduler-load-hoist-serial-store-lever).
+(`loop.c` via `NOTE_INSN_LOOP_BEG` remains a separate reorderer; see the goto-loop-vs-structured-loop
+codegen memory. Cross-ref [[kmc-cc1-no-instruction-scheduler]], now the S220-corrected memory.)
+
+## scheduler-load-hoist serial-store lever
+
+**Symptom (S220 `func_800989C4`).** A fn copies several INDEPENDENT globals into a destination
+(`arg0[0]=A; arg0[1]=B; arg0[2]=C;` with A/B/C separate `extern`s). The ROM is strictly serial —
+`lw $v0,A; sw $v0,0(a0); lw $v0,B; sw $v0,4(a0); lw $v0,C; sw $v0,8(a0)` — every load REUSING `$v0`.
+The build instead HOISTS the last load into a second register (`lw $v1,C`) ahead of the prior store, a
+one-register-extra near-miss (small score, e.g. 80).
+
+**Root cause (gcc-2.7.2 `sched.c`, confirmed by `-da` `.sched` dump).** The active pre-reload scheduler
+(see the FOUNDATIONAL note above) sees the three loads as independent (distinct pseudos, non-aliasing
+memory by its disambiguator), so it moves loadC up to hide the "memory" unit ready-delay (3). Distinct
+pseudos then take distinct hard regs at local-alloc.
+
+**Lever.** Force a single shared pseudo so anti/output deps forbid the hoist: one reused temp
+`s32 v; v=A; arg0[0]=v; v=B; arg0[1]=v; v=C; arg0[2]=v;`. The WAR (loadC vs the prior store that reads
+`v`) + WAW deps recorded by `sched_analyze` pin the serial order → single-`$v0` reuse → byte match. The
+direct `arg0[i]=D_..` form scored 80; the single-`v` form scored 0.
+
+## cse-dest-preference copy-collapse (narrow-unsigned-temp lever)
+
+**Symptom (S220 `func_80098CA0`).** A loop accumulator built through a temp —
+`temp = (result & 0xFF) << 1; result = temp; if (cond) result = temp | 1;` — should compile to a real
+`move` of the temp into the accumulator's own register plus a `beqz`-fallthrough conditional OR (14
+instrs, `result`→`$a1`, `temp`→`$v1`). The build instead FUSES `result` and `temp` into one register,
+deletes the `move`, and emits a branch-LIKELY `bnezl`+`ori` (13 instrs — ONE SHORT, so the fn's length
+is wrong and it shifts every following fn / breaks the ROM). Pure regalloc/shape near-miss.
+
+**Root cause (gcc-2.7.2, confirmed by `-dj`/`-ds`/`-dc` dumps).** It is CSE, not local-alloc. `cse.c`
+`cse_insn`'s destination-preference costing (`cse.c:6714-6726`) finds the copy's dest register
+equivalent to a DYING source and assigns it negative cost (`src_cost = -1`, "this insn will probably be
+eliminated"), so the `result = temp` copy collapses to a self-move and is deleted BEFORE regalloc/sched
+ever run. The two pseudos become one; the register assignment and the `bnezl` follow deterministically.
+(`if`/`if-else`/ternary phrasings all reduce to the same fused form — `combine` folds the single-use
+temp when CSE does not.)
+
+**Lever.** Give the temp a NARROWER UNSIGNED type so the copy becomes a `zero_extend`, which is neither
+a CSE dest-preference collapse nor a `combine` fold candidate — the temp then survives as a distinct
+pseudo (two reads: the extend and the `ori`), recovering the real `move` + `beqz` and the target
+regalloc. `u16 temp;` cracked `func_80098CA0` to score 0. Constraints: the value must fit the narrow
+type exactly (temp max 0x1FE < 0x10000, so `u16` elides any truncation); `s16`/`short` FAILS (the
+sign-extend splits into two `sll`s and reverts to `bnezl`) — it must be UNSIGNED. Distinct from
+[#local-alloc-qty-permutation](#local-alloc-qty-permutation): there the shape matches and only s-regs
+permute; here CSE changed the shape upstream, and a source type-narrowing fixes it (no permuter).
 
 ## cse-derived-pointer base-canonicalization
 
@@ -5825,7 +5881,7 @@ lever; see [#grid-counter-double-loop](#grid-counter-double-loop).
 setup block: the ROM emits the loop-limit `li $t0,6` BEFORE the `move $a2,$v0` base capture; the build
 emits it AFTER. Everything else byte-exact.
 
-**Root cause.** With no scheduler (see the no-scheduler note in
+**Root cause.** With the scheduler inert on this dependent setup chain (see the FOUNDATIONAL note in
 [#local-alloc-qty-permutation](#local-alloc-qty-permutation)), the setup block is emitted in pure source
 order. A loop limit written as a bare literal in the exit test (`while (i != 6)`) is materialized lazily
 at first use — after the base copy. Declaring it as a VARIABLE among the pre-base consts forces its `li`
