@@ -4926,6 +4926,25 @@ codegen length (match instruction count exactly), never the symbol ref. Diagnose
 (object `.text` size vs the yaml span) FIRST — faster and less ambiguous than reading `map` addresses.
 The `+N` == instr-count-miss × 4.
 
+**Multi-`D_`-write variant — a newly-inlined fn writing SEVERAL auto-`D_` symbols in one carved
+`.NON_MATCHING` region floats ALL of them (S217 `func_800425C8`).** Distinct from the length-shift cases
+above: the fn is not wrong-length, it references several distinct auto-`D_` output symbols
+(`D_8018D258`/`25A`/`25C`/`25E`/`260`/`262`, a 6-field bbox in the `collision_triangles` carve). Those
+symbols are `.NON_MATCHING`-region placeholders with no fixed placement, so when freshly-inlined C
+references them they resolve as COMMON-like and **float to region-base + consecutive addresses** (all 6
+landed at `0x8018d228`, `0x8018d22a`, … instead of their true `0x8018d258+`), corrupting the whole region
+including banked siblings. The build LINKS (no undefined ref) — the tell is the `map`: `D_8018D258`
+resolving to `0x8018d228`. **Fix options:** (a) add offset-0 absolute aliases to `symbol_addrs.txt`
+(`D_8018D258 = 0x8018D258; // size:0x2`, add-only) so each pins to its true address (the S213 polychara
+recipe); or, better, (b) define the underlying struct (here `collision_triangles` at `0x8018D220`:
+`verts[3]` + `s16 bbox[6]`) and reference `groups[i].field` so GCC re-materializes each field off ONE
+placed base symbol instead of 6 floating auto-`D_`s. Prefer (b) when the fn also needs a struct model for
+codegen (S217 `func_800425C8` also spills 6 `s32` min/max to stack from 2 held constant-regs — a
+struct-array bbox reconciles both). **Ranker follow-up (tracked, BACKLOG):** `pick_target.py`'s
+tractability scan should FLAG a fn that writes ≥2 distinct auto-`D_` symbols in one carved data region as
+`needs-struct-model` / `needs-symbol-aliases`, not price it as plain low-jal tractable — the S217 stretch
+carry was mis-scoped as tractable by the jal/fp-only scan.
+
 **Tooling note (S170).** `decomp_loop.py`'s `find_segment` can't locate a fn whose subseg is already
 flipped to `c` (its asm is under `asm/nonmatchings/<seg>/`, not top-level `asm/<off>.s`), so the
 asm-first fast-path miss-recovery fails with `no glabel found`. Workaround: manual
@@ -5639,6 +5658,28 @@ build of the same fn (the minimal isolated context perturbs local allocation). *
 object byte-`cmp` + the full ROM SHA-1, not the isolated score**, for a one-basic-block fn. (The
 isolated near-miss score is still a fine permuter SEED; just don't trust it as the match oracle.)
 
+**A multi-BB fn qualifies too, and the permuter reorder is often extractable clean (S217
+`init_grid_vertex`/`func_800413C0`).** A grid-vertex initializer (2 BBs, one `if(row==0x20)` guard) locked
+at 0.91: store order byte-matched the ROM but the entry-block compute cluster (`flag&mask`, `col<<10`,
+`row<<10`) was register-permuted, and source levers (direct writes, temp-hoist) folded to the SAME
+emission (confirming the "source levers mostly don't move it" note holds above 1-BB). The permuter found
+score 0 at iter 618; the WINNING form reordered `vtx[4]` (col-texcoord) before `vtx[5]` (row-texcoord) so
+GCC computes `col<<10` first — and that reorder held byte-exact **without** the permuter's incidental
+`long long v=10; x<<v` shift-var artifact. Lesson: after the permuter wins, try the reorder ALONE (drop
+the permuter's type/shift noise) — the clean reorder usually reproduces the match and reads as normal
+source. So "permuter-appropriate below 0.97" extends to a small multi-BB fn with a byte-exact store order
++ a compute-cluster reg permutation.
+
+**Permuter plumbing gotcha (S217).** `setup-permuter.sh --main <fn>` aborts silently (its
+`mg_resolve_c_asm` sets an empty `C_FILE` under `set -u`) once the fn has been INLINED as C in
+`src/<seg>.c` — the resolver expects the `INCLUDE_ASM` stub still present. Do NOT restore the stub just to
+set up the permuter. Instead drive `import.py` directly on the seeded scratch + the BUILD-generated asm:
+`./tools/decomp-permuter/import.py --settings permuter_settings_main.toml nonmatchings/<fn>/base.c
+asm/nonmatchings/<seg>/<fn>/<fn>.s` (seed `base.c` first with a minimal compilable preamble; use the
+`asm/nonmatchings/.../<fn>.s` splat file, NOT the `seed_c.py` `target.s` — the latter lacks the modern-GAS
+`.set` header and fails to assemble). Then run
+`./tools/decomp-permuter/permuter.py nonmatchings/<fn>-N -j <threads> --best-only --stop-on-zero`.
+
 **Multi-BB analog — `global.c`, not `local-alloc.c` (S209 `func_8005C458`).** A fn with a NESTED loop
 has multiple basic blocks, so its cross-BB pseudos are allocated by **`global.c` (allocnos)**, the
 global analog of the QTY rule above (confirm with the `.greg` dump vs `.lreg`). `allocno_compare` orders
@@ -5854,6 +5895,32 @@ WALLS (C458: ~1.27M iters / score 55).
 S210 `func_8005C510` (6×6 grid, `count`→code dispatch tail) banked first-build reusing the same levers —
 the family is a reliable `family-of:func_8005C458` bank (see the tracked ranker follow-up in
 [#base-register-vs-displacement](#base-register-vs-displacement)).
+
+## grid-vertex builder vein (16B Vtx-layout init/average/lerp family)
+
+**Symptom (S217 `get_tile_attribute.c`: `init_grid_vertex`, `average_grid_vertices`, `lerp_grid_vertices`).**
+A family of small fns that write a 16-byte grid vertex laid out like an N64 `Vtx`: `s16 ob[3]` (0/2/4),
+`s16 flag` (6, usually `= 0`, NOT averaged), `s16 tc[2]` (8/A), `u8 cn[4]` (C/D/E/F). They bank
+first-build once two recurring quirks are handled.
+
+**Lever A — field-store ORDER controls where an independent `flag=0` store lands.** The `sh zero, 6(...)`
+for the flag field is independent of the surrounding arithmetic, so GAS's `.set reorder` slots it into a
+neighboring load's delay slot. Write the fields in NATURAL index order (`out[0..2]`, then `out[3]=0`,
+then `out[4..5]`): that lets the assembler fill the `ob[2]` (`out[2]`) load-delay slot with the flag
+store, matching the ROM. Writing `out[3]=0` earlier (right after `out[1]`) emits it one slot too early
+and misses by one instruction. (Cross-ref [#gas-set-reorder-delay-slot-fill](#gas-set-reorder-delay-slot-fill).)
+
+**Lever B — a single `(a+b)/N` source matches BOTH signed-s16 and unsigned-byte fields.** For the s16
+`ob`/`tc` fields, `(a[f]+b[f])/2` emits the full signed round-toward-zero sequence (`srl 31; addu; sra`).
+For the `u8` `cn` fields, the SAME `(a[f]+b[f])/2` source emits a BARE `sra` (no rounding correction)
+because both operands are zero-extended (`lbu`), so GCC's `expand_divmod` reads `nonzero_bits` = 0x1FF,
+proves the sum non-negative, and drops the correction. So do NOT special-case the byte fields to `>>1` —
+uniform `/N` (or `/16` for the weighted lerp `(a*(16-t)+b*t)/16`) is correct for every field and matches
+per-field automatically. The lerp's `16 - t` CSEs to one `subu` reused across all fields.
+
+**Note.** `init_grid_vertex` additionally needed the permuter for a 0.91 local-alloc reg-permutation on
+its texcoord compute cluster — see [#local-alloc-qty-permutation](#local-alloc-qty-permutation) (the
+extractable-reorder + permuter-plumbing notes).
 
 ## base-register-vs-displacement (full symbol/base materialized vs %lo-in-displacement)
 

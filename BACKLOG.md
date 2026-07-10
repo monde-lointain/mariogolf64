@@ -4413,19 +4413,28 @@ by `/sprint-plan`:
   resolved `c-combined` member upstreams so the recover-extern is priced at the gate, not discovered
   at execution-time data-ref reconciliation. Not file-blocking (recover-extern is cheap in-execution).
 - _(osAiSetFrequency carry-over resolved and banked at S38 retroactive review)_
-- **Open (S215→S216, in-progress mixed-partial, NOT a spike):** `src/main/get_tile_attribute.c` (44-fn
-  terrain-query `none` pack, subseg 0x1B4A0). 17 banked (13 S215 + 4 S216:
-  `set_direct_grid_vertex`/`get_terrain_type`/`find_closest_palette_index`/`mark_scenery_collision_cells`),
-  28 stubs remain. The ranker naturally re-surfaces it as a c-stub `remaining:N` row (no BACKLOG de-rank
-  needed). S216 carries with characterization: `get_tile_attribute` (lead, body fully solved) is a
-  NEAR-MATCH WALL — GCC bakes a phantom -0x10 in-place LO16 addend on the `D_800BAC0C` ref across all
-  index forms (see `#base-register-vs-displacement` new subsection); needs a GCC-source dive.
-  `func_80041E8C` = NESTED FN (static-chain-in-$v0, not portable-C — reclassified from the S215
-  "dead-`sw v0`" guess). `func_800402F4` = jtbl-dispatch (`jtbl_800CA958`, needs shared-rodata carve).
-  Untried tail for the next smallest-first slice: remaining getters (`func_8004107C`, `func_80042228`,
-  `load_club_offset_pair`, `func_800413C0`), then FP terrain-height interp (`get_interpolated_terrain_height`,
-  `compute_triangle_plane`, `get_lowest_height_at_position`) + the jtbl-dispatch vein (rodata-jtbl
-  0x800CA930..0x800CAB20). File md5-candidate only when all 44 bank.
+- **Open (S215→S217, in-progress mixed-partial, NOT a spike):** `src/main/get_tile_attribute.c` (44-fn
+  terrain-query `none` pack, subseg 0x1B4A0). ~21 banked (13 S215 + 4 S216 + 4 S217:
+  `init_grid_vertex`/`load_club_offset_pair`/`average_grid_vertices`/`lerp_grid_vertices`), 23 stubs
+  remain. The ranker naturally re-surfaces it as a c-stub `remaining:N` row (no BACKLOG de-rank needed).
+  Carries with characterization: `get_tile_attribute` (lead, body fully solved) is a NEAR-MATCH WALL —
+  GCC bakes a phantom -0x10 in-place LO16 addend on the `D_800BAC0C` ref across all index forms (see
+  `#base-register-vs-displacement` subsection); needs a GCC-source dive. `func_80041E8C` = NESTED FN
+  (static-chain-in-$v0, not portable-C). `func_800402F4` = jtbl-dispatch (`jtbl_800CA958`, needs
+  shared-rodata carve). **S217 NEW carry:** `func_800425C8` (bbox min/max nested loop + `jal
+  update_rumble_intensity_table`) — MULTI-HAZARD: flowing-bss on 6 auto-`D_` output symbols
+  (`D_8018D258`..`D_8018D262`, all float to region base) + target spills 6 `s32` min/max to stack from
+  2 held constant-regs where the build keeps them in registers. Fix = define the `collision_triangles`
+  struct at `0x8018D220` (`verts[3]` + `s16 bbox[6]`) so field refs re-materialize off ONE base and
+  the min/max become stack arrays (see `#short-text shifts flowing-bss` multi-`D_`-write variant). Untried
+  tail for the next smallest-first slice: `func_800415C4`/`func_80041878` (larger getters), then FP
+  terrain-height interp (`compute_triangle_plane`, `get_ground_attribute`) + the jtbl-dispatch vein
+  (rodata-jtbl 0x800CA930..0x800CAB20: `ci8_to_rgba5551`, `func_80042228`, `blend_terrain_color`). File
+  md5-candidate only when all 44 bank.
+- **Ranker follow-up (tracked, S217, off-cadence golden-gated).** `pick_target.py`'s tractability scan
+  (jal/fp-only) mis-scoped `func_800425C8` as tractable; it should FLAG a fn writing ≥2 distinct auto-`D_`
+  symbols in one carved `.NON_MATCHING` data region as `needs-struct-model` / `needs-symbol-aliases` and
+  route it to the struct-model vein, not the plain-tractable one (kin to the S216 jtbl-triage follow-up).
 - **Tooling debt (test-tools, 3 PRE-EXISTING failures, off-cadence golden-gated).** Confirmed at S216
   review to predate S216 (ran against pre-S216 tree): (1) `test_playbook_index_covers_all_sections` —
   broken `## Playbook index` anchor `cse-make-regs-eqv-branch-fold…` (heading uses `make_regs_eqv`

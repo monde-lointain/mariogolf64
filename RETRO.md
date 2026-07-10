@@ -25,6 +25,36 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 217 — get_tile_attribute.c clean-compute vein (mixed-partial, cont.) — 2026-07-10
+- Increment: 0 files banked / **4 functions matched** (delta: no md5-candidate change, 230→230; file
+  ~21/44 banked, 23 stubs remain = FP terrain-height interp, jtbl dispatch, 17-jal dispatch, phantom-
+  addend lead-fn wall, nested-fn, NOT md5-candidate). Committed 3/3 banked + stretch 1/2 banked, 1
+  carried.
+- Quality: 0/**1**/**1**/0 (stuck-far/permuter/carried/re-opened) this sprint. 1 permuter
+  (`init_grid_vertex`, 0.91 local-alloc reg-permutation, score 0 at iter 618 — first permuter use on this
+  file). 1 stretch carried (`func_800425C8` multi-hazard).
+- Seed: committed 0pt; banked **0pt** (per-file all-or-nothing, file partial); regime mixed. Value
+  signal = **+4 matched-fn count**. Residual n/a (partial file).
+- What helped: found a reusable **grid-vertex builder vein** — `init_grid_vertex` (Vtx-init),
+  `average_grid_vertices` (midpoint), `lerp_grid_vertices` (weighted `(a*(16-t)+b*t)/16`) share the 16B
+  `s16 ob[3]`/`flag`/`tc[2]`/`u8 cn[4]` layout. Two levers bank the family first-build: (a) natural
+  field-store order lets GAS fill the `ob[2]` load-delay slot with the `flag=0` store; (b) uniform
+  `(a+b)/N` matches BOTH signed-s16 (full round-toward-zero) and unsigned-byte (bare `sra`, `nonzero_bits`
+  proves non-negative) fields — no per-field special-casing. `load_club_offset_pair` first-build too.
+- Friction: `init_grid_vertex` locked at 0.91 (store order byte-exact, entry-block compute cluster reg-
+  permuted); source levers folded to identical emission, so it needed the permuter. Plumbing gotcha:
+  `setup-permuter.sh --main` aborts once the fn is inlined-as-C — drove `import.py` directly on the
+  seeded `base.c` + build-generated `.s`. `func_800425C8` (stretch) is a multi-hazard carry: flowing-bss
+  on 6 auto-`D_` output symbols (floated to region-base) + target spills 6 min/max to stack from held
+  constant-regs; needs a `collision_triangles` struct model.
+- Applied: 3 of 3 — #1 (new `#grid-vertex builder vein` hazards.md subsection: delay-slot field-order +
+  `/N` `nonzero_bits` levers), #2 (`#local-alloc-qty-permutation`: extractable-clean-reorder note +
+  `setup-permuter --main` inlined-fn plumbing gotcha), #3 (`#short-text shifts flowing-bss` multi-`D_`-
+  write variant + tracked pick_target `needs-struct-model` ranker follow-up).
+- Carry-over: `func_800425C8` (multi-hazard: flowing-bss + stack-spill + struct-model). File stays open
+  (mixed-partial); remaining tail = FP height-interp, jtbl dispatch (shared-rodata carve), 17-jal
+  dispatch, `get_tile_attribute` phantom-addend wall, `func_80041E8C` nested fn.
+
 ## Sprint 216 — get_tile_attribute.c mixed-partial (cont.) — 2026-07-10
 - Increment: 0 files banked / **4 functions matched** (delta: no md5-candidate change; file 17/44
   banked, 28 stubs remain = FP height-interp, jtbl dispatch, coddog-structural false-hits, NOT
