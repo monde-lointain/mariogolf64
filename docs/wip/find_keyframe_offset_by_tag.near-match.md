@@ -34,3 +34,11 @@ found-branch base_offset access. BUILD (both struct-array `tracks[arg1]` and raw
 forms) caches the base pointer in a caller-saved reg (a3/t0) -> `lh v0,4(a3)` and rotates
 the whole allocation onto a-regs. `#base-register-vs-displacement` (no reliable source
 lever, S210). Escalation: corpus-mining the KMC-2.7.2 search-loop shape, or the permuter.
+
+## SIBLING: collect_keyframe_events_at (same wall)
+Same keyframe list-walk (`e=*(base+arg1*12); walk e+=4 while e->val!=-1`), collecting
+(e->tag, e[3]) pairs where `e->val==arg2 && count<0x10` into an out buffer, returns count.
+Nested-if gets the two skip branches, but BUILD emits plain `bne`/`beqz`+nop where TARGET
+uses branch-LIKELY `bnel`/`beql` annulling `e+=4` into the delay slots (reorg replicates
+the increment), + `move v1,a0` walking-pointer copy (BUILD walks e in a0 directly).
+Same `#base-register-vs-displacement`/`#indexed-vs-pointer-loop-strength-reduction` class.

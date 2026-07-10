@@ -21,6 +21,13 @@ extern s32 func_800544B4(s32 arg0, s32 arg1);
 extern void func_800543DC(s32 arg0, s32 arg1);
 extern s32 func_8005342C(s32 a, s32 b, s32 c, s32 d, u32 phys);
 extern s32 D_800C1DEC;
+extern void func_800989EC(void *a, void *b, void *c);
+extern f32 per_view_camera_state;
+extern f32 D_801B54F0;
+extern f32 D_801B54F4;
+extern f32 D_801B54F8;
+extern f32 D_801B54FC;
+extern f32 D_801B5500;
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80054900", func_80054900);
 
@@ -269,7 +276,20 @@ void func_80058ACC(s32 id) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80054900", func_80058B34);
+void func_80058B34(s32 id) {
+    u8 *cs = get_character_state(id);
+    if (cs != NULL) {
+        func_800989EC(cs + 0x38, cs + 0x44, cs + 0x50);
+        D_801B54F8 = *(f32 *)(cs + 0x38) * (1.0f / 1024.0f);
+        D_801B54FC = (*(f32 *)(cs + 0x3C) - 15360.0f) * (1.0f / 1024.0f);
+        D_801B5500 = *(f32 *)(cs + 0x40) * (1.0f / 1024.0f);
+        per_view_camera_state =
+            (*(f32 *)(cs + 0x38) + cosf(-*(f32 *)(cs + 0x48) - 1.57079637f) * 61440.0f) * (1.0f / 1024.0f);
+        D_801B54F0 = (*(f32 *)(cs + 0x3C) - 15360.0f) * (1.0f / 1024.0f);
+        D_801B54F4 =
+            (*(f32 *)(cs + 0x40) + sinf(-*(f32 *)(cs + 0x48) - 1.57079637f) * 61440.0f) * (1.0f / 1024.0f);
+    }
+}
 
 void func_80058C58(s32 id, s32 *arg1, f32 arg2) {
     u8 *cs = get_character_state(id);
