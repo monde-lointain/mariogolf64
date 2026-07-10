@@ -7,6 +7,10 @@ extern void* get_table_entry(u32);
 extern s16* get_direct_grid_vertex(s32, s32);
 extern s16 g_terrain_grid_verts[];
 
+typedef struct {
+  s16 unk[8];
+} GridVertex;
+
 INCLUDE_ASM("asm/nonmatchings/main/get_tile_attribute", get_tile_attribute);
 
 INCLUDE_ASM("asm/nonmatchings/main/get_tile_attribute", func_8004018C);
@@ -72,7 +76,10 @@ void func_80041490(s32 x, s32 z, s32 value) {
   vtx[0xE] = value;
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/get_tile_attribute", func_800414C0);
+void set_direct_grid_vertex(s32 col, s32 row, GridVertex* src) {
+  GridVertex* dst = (GridVertex*)get_direct_grid_vertex(col, row);
+  *dst = *src;
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/get_tile_attribute",
             get_terrain_vertex_pointer);
