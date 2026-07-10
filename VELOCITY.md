@@ -611,6 +611,19 @@ Three honest caveats:
   fn1's scheduler register-coloring tie-break does NOT (366k iters, 0). Retro applied **3/3**
   (permuter-import stale-build guard + cse-ebb-barrier lever + permuter-tractability triage). LESSON:
   disambiguate the residual class (CSE/reload vs scheduler qty-rotation) BEFORE budgeting permuter time.
+  S222: CONTINUED `func_80095A10.c` (mixed-partial). Banked **0pt** (file 9/31, not md5-candidate, 22
+  stubs remain), **+1 matched** (`func_80095C10` F3DEX2 DL builder byte-exact), **0 permuter**, **1
+  carried** (`func_80098C6C`). Quality **0/0/1/0**. Seed committed 3 (predicate + DL pair); realized 4
+  (seed 3 + carry), residual +1. Method = classical/asm-first, NO subagent fan-out needed. The DL fn
+  banked via the gfxdis/F3DEX2 workflow: decode the 5 command words -> `gSPSetLights3` unrolled to 5
+  advancing `gSPNumLights`/`gSPLight` calls; model the light buffer as `Light D_<a>[3]` + ambient
+  `(u8*)base-8` to match the asm's symbol anchor (`#dl-builder-symbol-anchor`); invert the guard `if`
+  to match ROM block layout (`#guard-block-layout-inversion`) -> byte-exact. The predicate carried: a
+  13-instr `fabsf==0` leaf whose branch/return half matched but whose 4 FP-setup instrs are a
+  source-invariant `#local-alloc-qty-permutation` + scheduler tie-break (5 source shapes tried, below
+  0.97 = permuter N/A). Retro applied **2/2** (both new levers). LESSON: a DL builder's match hinges on
+  the SYMBOL ANCHOR + the `if`-polarity block order, both codegen-load-bearing and source-steerable;
+  a tiny FP predicate can still be a hard local-alloc wall.
   Rolling-5 (S34+S37+S39+S42+S43): seed 3.4 pt/sprint (17/5), realized 2.8 pt/sprint (14/5). S31 nuGfxInit is the first over-seed classical fn (+3 residual); rubric needs +1 for double-novel-gotcha libnusys classical targets. S42 defines-data verbatim-body drop: realized 2 = seed 3 − 1 (the fast path makes a defines-data leaf bank like a mirror) — confirms the −1 verbatim-first-try rule extends to known-edit-mirror defines-data, not just classical seeds. S43 is the new residual floor (−2): both gbpak fns were classical-FLAGGED (jal-count-mismatch) but proved pure verbatim mirrors once the macro-FP was stripped — the seed over-priced them because the hazard was a tooling artifact, now fixed in `_c_jal_count`, so future macro-heavy libultra leaves should seed lower.
 - **Regime:** `mirror` is a depleting minority (~22 % of ranked candidates: 56 mirror vs 194
   classical; 18 warm / 38 cold). The warm clean-singleton mirror pool is now **mined out** (S11

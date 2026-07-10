@@ -137,6 +137,8 @@ The hazard families below group the sections that follow. Each links to its exis
 - [gas .set-reorder delay-slot fill (textual layout != machine; disasm the .o)](#gas-set-reorder-delay-slot-fill)
 - [Decompile-vs-asm authority](#decompile-vs-asm-authority)
 - [Display lists](#display-lists)
+- [DL-builder symbol anchor (match the asm's chosen base symbol)](#dl-builder-symbol-anchor-match-the-asms-chosen-base-symbol)
+- [guard-block-layout-inversion (early-return guard block order)](#guard-block-layout-inversion-early-return-guard-block-order)
 
 ---
 
@@ -3184,6 +3186,57 @@ the global-`glistp++` scheduler-load-pair wall); S180 (BANKED that wall byte-exa
 color-struct `#mem-in-struct-scheduling-lever` — the n64demos `gfxClearCfb` global-`glistp++` idiom is
 the faithful reference, confirmed by `~/development/n64/n64demos/nusys/nu2/src/main/graphic.c`); S190
 (the header constant-staging scheduling wall — a permuter-resistant DL-emitter carry class).
+
+### DL-builder symbol anchor (match the asm's chosen base symbol)
+
+A hand-unrolled light/matrix DL builder derives every command's `w1` pointer from ONE materialized
+base register (e.g. all `gSPLight` addresses are `base`, `base+0x10`, `base+0x20`, `base-8` off a
+single `lui/addiu %hi/%lo` of a light buffer). The match hinges on the C referencing the SAME symbol
+the asm anchored on:
+
+- If the asm anchors on the **light-array base** `D_<a>` (the ambient at `D_<a> - 8`, i.e. a NEGATIVE
+  offset), model the buffer as `Light D_<a>[N]` and express the ambient as pointer arith off that base:
+  `gSPLight(gdl++, (Light *)((u8 *)D_<a> - 8), 4)`. GCC then reuses the already-materialized base and
+  emits `addiu $reg, $reg, -8` (1 instr), matching.
+- Do NOT use a `Lightsn`/`Lights3` **struct** at `D_<a-8>` (`.a` at 0, `.l[0]` at +8). GCC anchors the
+  struct symbol at `D_<a-8>` and accesses members as POSITIVE offsets (`+8`, `+0x18`, `+0x28`, `+0`) off
+  it — a different base symbol + offset set than the asm's `D_<a>`-anchored `base-8`. Byte-mismatch even
+  though the linked addresses are identical.
+- Read the `%hi/%lo` target in the asm BEFORE picking struct-vs-array: the anchor symbol the compiler
+  materialized is the one your C must reference first. Source (`src`) can still be a `Lights3 *`
+  (`src->l[0]` at +8, `src->l[1]` at +0x18) for the light copy — only the DESTINATION anchor matters.
+- The 5-command `gSPSetLights3(pkt, name)` composite macro does NOT advance `pkt` (its `gDma1p`/`gDma2p`
+  sub-macros only write `*(Gfx*)pkt`), so a builder that advances the cursor by 5 slots is written as
+  FIVE individual advancing calls (`gSPNumLights(gdl++, NUMLIGHTS_3)` + 4× `gSPLight(gdl++, …, n)` with
+  F3DEX2 offset `(n)*24+24`), not one `gSPSetLights3` call. **Provenance:** S222 `func_80095C10`.
+
+---
+
+## guard-block-layout-inversion (early-return guard block order)
+
+**Symptom:** a fn with an early-return guard + a main body matches everything EXCEPT the branch polarity
+and block order at the top: the ROM has `bnez $v0, .Lmain` with the return-0 guard placed INLINE
+(fall-through, right after the branch, ending in `j .Lend`) and the main body as the taken-branch target;
+your build has `beqz $v0, .Lguard` with the main body inline and the guard hoisted to the END.
+
+**Cause + fix:** GCC 2.7.2 emits basic blocks in source order (no BB-reorder), so the `if` polarity is
+codegen-load-bearing. Writing `if (guard_cond) { guard; return 0; } main; return 1;` can let GCC pull
+the larger main block inline and push the guard out-of-line. Invert to put the return-0 guard as the
+INLINE fall-through and the main body inside the taken branch:
+
+```c
+if (main_cond) {        /* == the negation of the guard condition */
+  ... main body ...
+  *out = cursor;
+  return 1;
+}
+*out = cursor;          /* guard: fall-through, placed first */
+return 0;
+```
+
+One condition-inversion flipped S222 `func_80095C10` from a top-of-fn near-miss to byte-exact. Keep the
+two `*out = cursor;` stores DISTINCT (do not hoist to a single post-merge store) when the ROM has one per
+path. Related: `#cross-jump-tail-merge` (when the ROM instead SHARES a tail across the paths).
 
 ---
 

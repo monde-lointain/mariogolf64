@@ -4413,15 +4413,19 @@ by `/sprint-plan`:
   resolved `c-combined` member upstreams so the recover-extern is priced at the gate, not discovered
   at execution-time data-ref reconciliation. Not file-blocking (recover-extern is cheap in-execution).
 - _(osAiSetFrequency carry-over resolved and banked at S38 retroactive review)_
-- **Open (S220→S221, in-progress mixed-partial, NOT a spike):** `src/main/func_80095A10.c` (31-fn main-seg
-  `none` pack, subseg 0x70E10; float-clamp/state system). 8 banked (7 S220 + 1 S221 `func_80098D70`),
-  23 stubs remain. The ranker re-surfaces it as a c-stub continuation smallest-first.
-  **Remaining tail (carries):** `func_80098CD8` (the other half of the `#signed-divide-const %28` pair,
-  magic `0x92492493`) — **S221 permuter-confirmed `#local-alloc-qty-permutation` wall (366k iters, best
-  270); PO flagged for a dedicated `#cross-project-matched-corpus-mining` escalation** (a matched fn with
-  the same two-giv byte-map + `%K` idiom), NOT a plain permuter retry; see
-  `docs/wip/func_80098CD8.near-match.md`. F3DEX2 display-list builder `func_80095C10` (64 instr,
-  gDMA/gMoveMem/gMtx, gfxdis-reconstructable per S221 fan-out, F3DEX2 profile already set); FP tail
+- **Open (S220→S222, in-progress mixed-partial, NOT a spike):** `src/main/func_80095A10.c` (31-fn main-seg
+  `none` pack, subseg 0x70E10; float-clamp/state system). 9 banked (7 S220 + 1 S221 `func_80098D70` + 1
+  S222 `func_80095C10` DL builder), 22 stubs remain. The ranker re-surfaces it as a c-stub continuation
+  smallest-first.
+  **Remaining tail (carries):** `func_80098C6C` (S222 near-match, `fabsf(D_800E4C7C)==0.0f` 13-instr leaf)
+  — `#local-alloc-qty-permutation` + scheduler tie-break on the 4 FP-setup instrs, source-invariant (5
+  shapes tried), below 0.97 = permuter N/A; `docs/wip/func_80098C6C.near-match.md`. `func_80098CD8` (the
+  other half of the `#signed-divide-const %28` pair, magic `0x92492493`) — **S221 permuter-confirmed
+  `#local-alloc-qty-permutation` wall (366k iters, best 270); PO flagged for a dedicated
+  `#cross-project-matched-corpus-mining` escalation** (a matched fn with the same two-giv byte-map + `%K`
+  idiom), NOT a plain permuter retry; see `docs/wip/func_80098CD8.near-match.md`. `func_80098E48` (162-instr
+  `%28` divide-dispatcher, same idiom family, S222-assessed probable regalloc wall — divide-dispatcher
+  sprint, not smallest-first). FP tail
   `func_80095A68`/`func_800977E0`/`func_80097A08`/`func_80097C18`/`func_80097E30`/`func_8009676C`/…
   (S158-class); `func_800989EC` caller-evict (cross-TU inline into src/main/func_80054900.c). File
   md5-candidate only when all 31 bank. **S221 lesson (clean A/B on one file):** `func_80098D70`'s CSE

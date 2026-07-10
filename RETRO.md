@@ -25,6 +25,35 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 222 — func_80095A10.c predicate + DL builder (mixed-partial continuation) — 2026-07-10
+- Increment: 0 files banked / **+1 function matched** (`func_80095A10.c` 9/31, 22 stubs remain; ROM
+  SHA-1 green e2c4e7a…). `func_80095C10` byte-exact; `func_80098C6C` carried.
+- Quality: 0 stuck-far / 0 permuter / **1 carried** / 0 re-opened.
+- Seed: committed 3pt (predicate + DL pair); banked 0pt (partial mixed, per-file all-or-nothing);
+  realized 4 (seed 3 + carry), residual +1; regime classical/mixed.
+- What helped: the DL builder (`func_80095C10`) banked cleanly via the gfxdis/F3DEX2 workflow, NO
+  subagent fan-out. Two source-steerable levers cracked it: (1) `#dl-builder-symbol-anchor` — model the
+  light buffer as `Light D_<a>[3]` + ambient `(u8*)base-8` (array + ptr-arith) to match the asm's
+  `D_800C73B0`-anchored base, NOT a `Lights3` struct at `D_<a-8>` (which anchors the wrong symbol with
+  positive offsets); (2) `#guard-block-layout-inversion` — write the early-return guard as
+  `if (main_cond) {main; return 1;} guard; return 0;` so GCC lays the return-0 guard inline and main as
+  the taken branch, matching the ROM block order. One condition-inversion flipped it to byte-exact. The
+  5-cmd `gSPSetLights3` composite doesn't advance `pkt`, so it's 5 individual `gSPNumLights`/`gSPLight`
+  advancing calls (offset `(n)*24+24`).
+- Friction: `func_80098C6C` (a 13-instr `fabsf(D_800E4C7C)==0.0f` leaf, fabsf = gcc-2.7.2 builtin ->
+  inline `abs.s`) matched its branch/return half byte-exact (via the `s32 ret=0; if(..) ret=1;`
+  accumulator form) but its 4 FP-setup instrs (load f0-vs-f4, in-place-vs-distinct abs, mtc1/abs
+  schedule order) are a pure `#local-alloc-qty-permutation` + scheduler tie-break, source-invariant
+  across 5 shapes. Below 0.97 -> permuter N/A (0 project cracks this class). Stretch `func_80098E48`
+  (162-instr `%28` divide-dispatcher, same family as the carry) declined pre-attempt as a probable
+  regalloc wall.
+- Applied: 2 of 2 (#1 `#dl-builder-symbol-anchor`, #2 `#guard-block-layout-inversion`; both new
+  `docs/hazards.md` levers + index rows).
+- Carry-over: `func_80095A10.c` mixed-partial (22 stubs) — `func_80098C6C` near-match (docs/wip);
+  FP-dispatcher tail (S158-class) + caller-evict `func_800989EC` + carried `func_80098CD8` remain.
+
+---
+
 ## Sprint 221 — func_80095A10.c signed-divide %28 pair (mixed-partial continuation) — 2026-07-10
 - Increment: 0 files banked / **+1 function matched** (`func_80095A10.c` 8/31, 23 stubs remain; ROM
   SHA-1 green e2c4e7a…). `func_80098D70` byte-exact; `func_80098CD8` carried.
