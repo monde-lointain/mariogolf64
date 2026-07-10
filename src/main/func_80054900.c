@@ -4,6 +4,8 @@ extern s32 flag_is_set(s32 flag);
 extern s32 find_keyframe_offset_by_tag(void *base, s32 tag, s32 arg2);
 extern void func_80054BC0(void);
 extern u8 *get_character_state(s32 id);
+extern void *func_80056060(s32 id);
+extern void animation_step(s32 index);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80054900", func_80054900);
 
@@ -56,11 +58,21 @@ void func_80056238(s32 id, u8 value) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80054900", func_80056264);
+void func_80056264(s32 id) {
+    u8 *cs = get_character_state(id);
+    if (cs != NULL) {
+        *(f32 *)(cs + 0x10) = (f32)*(s32 *)(cs + 0x18);
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80054900", seek_current_frame_by);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80054900", func_800562F4);
+void func_800562F4(s32 id, f32 value) {
+    u8 *cs = get_character_state(id);
+    if (cs != NULL) {
+        *(f32 *)(cs + 0x5C) = value;
+    }
+}
 
 void func_80056324(s32 id, u8 value) {
     u8 *cs = get_character_state(id);
@@ -106,11 +118,38 @@ s32 func_80056400(s32 id) {
     return result;
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80054900", func_8005642C);
+s32 func_8005642C(s32 id) {
+    void *p = func_80056060(id);
+    s32 result;
+    if (p == NULL) {
+        result = -1;
+    } else {
+        result = *(s16 *)((u8 *)p + 4) + *(s16 *)((u8 *)p + 6);
+    }
+    return result;
+}
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80054900", func_80056464);
+s32 func_80056464(s32 id) {
+    void *p = func_80056060(id);
+    s32 result;
+    if (p == NULL) {
+        result = -1;
+    } else {
+        result = *(s16 *)((u8 *)p + 4);
+    }
+    return result;
+}
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80054900", func_80056494);
+s32 func_80056494(s32 id) {
+    void *p = func_80056060(id);
+    s32 result;
+    if (p == NULL) {
+        result = -1;
+    } else {
+        result = *(s16 *)((u8 *)p + 6);
+    }
+    return result;
+}
 
 void set_extra_flag_0(s32 id, u8 value) {
     u8 *cs = get_character_state(id);
@@ -121,7 +160,14 @@ void set_extra_flag_0(s32 id, u8 value) {
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80054900", func_800564F0);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80054900", func_80056520);
+s32 func_80056520(s32 id) {
+    u8 *cs = get_character_state(id);
+    s32 result = -1;
+    if (cs != NULL) {
+        result = (s32)*(f32 *)(cs + 0x10);
+    }
+    return result;
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80054900", animation_step);
 
@@ -129,7 +175,12 @@ INCLUDE_ASM("asm/nonmatchings/main/func_80054900", func_800568CC);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80054900", animation_step_no_rotate);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80054900", animation_tick_all_players);
+void animation_tick_all_players(void) {
+    s32 i;
+    for (i = 0; i < 4; i++) {
+        animation_step(i);
+    }
+}
 
 s32 func_800577D0(void) {
     return 0x23680;
