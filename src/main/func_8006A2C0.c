@@ -1,5 +1,8 @@
 #include "common.h"
 
+extern s32 D_800C4010;
+extern s32 D_800C4014;
+extern f32 D_800C401C;
 extern s32 D_800C4020;
 extern s32 D_800C4060;
 extern s32 D_800C4064;
@@ -43,7 +46,19 @@ void func_8006AD88(void) { D_800C4020 = 0; }
 
 s32 func_8006AD94(void) { return D_800C4020; }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_8006A2C0", func_8006ADA0);
+s32 func_8006ADA0(void) {
+  if (D_800C4010 == 0) {
+    return (s32)D_800C401C;
+  }
+  if (D_800C4014 == 1) {
+    return 0;
+  }
+  if (D_800C4014 == 3) {
+    D_800C4010 = 0;
+    return 20;
+  }
+  return 0;
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_8006A2C0", func_8006ADF8);
 
