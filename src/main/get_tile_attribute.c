@@ -142,7 +142,22 @@ s16* get_direct_grid_vertex(s32 col, s32 row) {
 
 s16 func_800413A0(s32 x, s32 z) { return get_direct_grid_vertex(x, z)[1]; }
 
-INCLUDE_ASM("asm/nonmatchings/main/get_tile_attribute", func_800413C0);
+void init_grid_vertex(s32 col, s32 row, s32 height, s32 color) {
+  s16* vtx = get_direct_grid_vertex(col, row);
+  vtx[0] = col << 8;
+  vtx[2] = row << 8;
+  vtx[1] = height & 0xFFFE;
+  vtx[3] = 0;
+  vtx[4] = (col << 10) + 0x20;
+  vtx[5] = (row << 10) + 0x20;
+  if (row == 0x20) {
+    vtx[5] = 0x7FFF;
+  }
+  ((u8*)vtx)[0xC] = color;
+  ((u8*)vtx)[0xD] = color;
+  ((u8*)vtx)[0xE] = color;
+  ((u8*)vtx)[0xF] = 0xFF;
+}
 
 void func_80041464(s32 x, s32 z, s32 value) {
   s16* vtx = get_direct_grid_vertex(x, z);

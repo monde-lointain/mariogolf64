@@ -660,3 +660,4 @@ polychara_alive_msg = 0x800D07F8; // size:0x34
 set_direct_grid_vertex = 0x800414C0; // type:func
 find_closest_palette_index = 0x8004018C; // type:func
 mark_scenery_collision_cells = 0x80042738; // type:func
+init_grid_vertex = 0x800413C0; // type:func
