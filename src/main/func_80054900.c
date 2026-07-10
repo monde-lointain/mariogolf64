@@ -6,6 +6,16 @@ extern void func_80054BC0(void);
 extern u8 *get_character_state(s32 id);
 extern void *func_80056060(s32 id);
 extern void animation_step(s32 index);
+extern void func_800543A4(void);
+extern void func_800577DC(s32 index, void *arg1);
+
+typedef struct {
+    s32 unk_00;
+    u8 unk_04[0x188];
+} AnimSlot;
+extern AnimSlot D_801F4424[];
+extern s16 D_800FBE48;
+extern void func_800453E0(void *a, void *b, void *c);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80054900", func_80054900);
 
@@ -206,13 +216,28 @@ s32 func_800577D0(void) {
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80054900", func_800577DC);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80054900", func_800578AC);
+void func_800578AC(void) {
+    s32 i;
+    func_800543A4();
+    for (i = 0; i < 4; i++) {
+        D_801F4424[i].unk_00 = -4;
+        func_800577DC(i, (void *)0x8030F800);
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80054900", func_80057914);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80054900", func_80057FFC);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80054900", func_80058ACC);
+void func_80058ACC(s32 id) {
+    u8 *cs = get_character_state(id);
+    if (cs != NULL) {
+        s32 angle;
+        func_800453E0(cs + 0x38, cs + 0x44, cs + 0x50);
+        angle = -D_800FBE48;
+        *(f32 *)(cs + 0x48) = (f32)(u16)angle * 9.5873802e-05f;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80054900", func_80058B34);
 
