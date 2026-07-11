@@ -70,7 +70,22 @@ INCLUDE_ASM("asm/nonmatchings/main/func_80078910", rumble_check_and_trigger);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80078910", func_8007E234);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80078910", func_8007E2B0);
+extern s32 D_800C5448;
+extern void* D_800FF4CC;
+extern void* D_801EFFA8;
+extern void* D_801B8BB8;
+extern void heap3_free(void** payload_ptr);
+extern void update_object_group_by_id(s32 id);
+
+void func_8007E2B0(void) {
+  if (D_800C5448 == 2) {
+    heap3_free(&D_800FF4CC);
+    heap3_free(&D_801EFFA8);
+    heap3_free(&D_801B8BB8);
+  }
+  update_object_group_by_id(9);
+  D_800C5448 = -1;
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80078910", func_8007E30C);
 
