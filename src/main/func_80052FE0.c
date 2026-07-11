@@ -9,6 +9,7 @@ extern u8 D_801F4424[];
 extern s32 D_800B67F0;
 extern s32 D_800C1DEC;
 extern void* get_club_param(u32 id);
+extern void func_8005470C(void* cs, f32 mtx[4][4]);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80052FE0", func_80052FE0);
 
@@ -117,6 +118,23 @@ INCLUDE_ASM("asm/nonmatchings/main/func_80052FE0", func_80054550);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80052FE0", func_8005470C);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80052FE0", func_8005483C);
+s32 func_8005483C(s32 arg0, s32 arg1, f32* out) {
+  f32 mtx[4][4];
+  f32 pos[3];
+  f32 zero;
+  s32 idx;
+
+  idx = func_80054550(arg0, arg1, (s32)pos);
+  if (idx < 0) {
+    zero = 0.0f;
+    out[2] = zero;
+    out[1] = zero;
+    out[0] = zero;
+  } else {
+    func_8005470C(get_character_state(arg0), mtx);
+    guMtxXFMF(mtx, pos[0], pos[1], pos[2], &out[0], &out[1], &out[2]);
+  }
+  return idx;
+}
 
 s32 func_800548DC(s32 arg0, s32 arg1) { return func_80054550(arg0, 2, arg1); }
