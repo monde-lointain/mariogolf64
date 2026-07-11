@@ -27,6 +27,13 @@ void* func_80045A9C(s32* arg0) { return func_80040E3C(arg0[4], arg0[6]); }
 
 s32 func_80045AC0(void) { return D_800BE62C == 4; }
 
+/* func_80045AD4: CARRIED (near-match). Logic RE'd: byte-swap of a D_800DAEE0[]
+ *   element pair (u8 t = D_800DAEE0[arg1]; D_800DAEE0[arg1] = D_800DAEE0[arg0];
+ *   D_800DAEE0[arg0] = t;). Wall = #dead-frame-reload-artifact-regalloc-wall: ROM
+ *   opens addiu sp,-8 + sw $v0,0(sp) (dead spill of incoming $v0, never reloaded)
+ *   with no address-taken trigger; caller func_80045B14 sets no static chain, so
+ *   it is a spurious dead frame, not a nested fn. No faithful-C source form emits
+ *   the frame. */
 INCLUDE_ASM("asm/nonmatchings/main/func_800453E0", func_80045AD4);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_800453E0", func_80045B14);
