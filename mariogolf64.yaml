@@ -105,7 +105,7 @@ segments:
       - [0x1B4A0, c, main/get_tile_attribute]
       - [0x1EEF0, c, main/func_80043AF0]
       - [0x1F020, c, main/func_80043C20]
-      - [0x207E0, asm]
+      - [0x207E0, c, main/func_800453E0]
       - [0x28590, c, main/func_8004D190]
       - [0x28DC0, c, main/print_string_at_grid]
       - [0x29170, c, main/func_8004DD70]
