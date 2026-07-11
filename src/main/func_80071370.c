@@ -2,7 +2,24 @@
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80071370", func_80071370);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80071370", func_800715A0);
+extern void heap3_free(void** payload_ptr);
+extern void* D_8012F4E0;
+extern void* D_800E1C30;
+extern void* D_800E1C34;
+extern void* D_800E1C38;
+extern void* D_800E1C4C;
+extern void* D_800E1C44;
+extern u16* D_800E1C48;
+
+void func_800715A0(void) {
+  heap3_free(&D_8012F4E0);
+  heap3_free(&D_800E1C30);
+  heap3_free(&D_800E1C34);
+  heap3_free(&D_800E1C38);
+  heap3_free(&D_800E1C4C);
+  heap3_free(&D_800E1C44);
+  heap3_free((void**)&D_800E1C48);
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80071370", func_80071608);
 
@@ -131,7 +148,14 @@ void func_80074960(void) {}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80071370", func_80074968);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80071370", func_80074CA8);
+void func_80074CA8(Gfx** pgfx, s32 r, s32 g, s32 b) {
+  Gfx* gfx = *pgfx;
+
+  gDPPipeSync(gfx++);
+  gDPSetPrimColor(gfx++, 0, 0, r, g, b, 0xFF);
+  gDPPipeSync(gfx++);
+  *pgfx = gfx;
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80071370", func_80074D0C);
 
