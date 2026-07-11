@@ -10,7 +10,56 @@ extern Particle particle_array[40];
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80078910", func_80078910);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80078910", func_800789C8);
+extern void func_80078910(void);
+extern u32 func_8005062C(u16 index, void* out);
+extern void* heap3_alloc(u32 need);
+extern void func_800506D4(void* arg0, void* arg1);
+extern s32 D_800C53B8;
+extern void* D_800E1DBC;
+extern void* D_800E1DB4;
+extern void* D_800E1DB8;
+extern void* D_800E1DA0;
+extern void* D_800E1DA4;
+extern void* D_800E1DA8;
+extern void* D_800E1DAC;
+extern void* D_800E1DB0;
+extern void* D_800E1DC0;
+extern void* D_800E1DC4;
+extern void* D_800E1DC8;
+extern void* D_800E1DCC;
+
+void func_800789C8(void) {
+  u8 spvar[0x20];
+
+  func_80078910();
+  if (D_800C53B8 == 0) {
+    D_800C53B8 = 1;
+    D_800E1DBC = heap3_alloc(func_8005062C(0x6B5, spvar));
+    func_800506D4(D_800E1DBC, spvar);
+    D_800E1DB4 = heap3_alloc(func_8005062C(0x6B5, spvar));
+    func_800506D4(D_800E1DB4, spvar);
+    D_800E1DB8 = heap3_alloc(func_8005062C(0x6B8, spvar));
+    func_800506D4(D_800E1DB8, spvar);
+    D_800E1DA0 = heap3_alloc(func_8005062C(0x6B0, spvar));
+    func_800506D4(D_800E1DA0, spvar);
+    D_800E1DA4 = heap3_alloc(func_8005062C(0x8EC, spvar));
+    func_800506D4(D_800E1DA4, spvar);
+    D_800E1DA8 = heap3_alloc(func_8005062C(0x6B2, spvar));
+    func_800506D4(D_800E1DA8, spvar);
+    D_800E1DAC = heap3_alloc(func_8005062C(0x6C0, spvar));
+    func_800506D4(D_800E1DAC, spvar);
+    D_800E1DB0 = heap3_alloc(func_8005062C(0x6C1, spvar));
+    func_800506D4(D_800E1DB0, spvar);
+    D_800E1DC0 = heap3_alloc(func_8005062C(0x71D, spvar));
+    func_800506D4(D_800E1DC0, spvar);
+    D_800E1DC4 = heap3_alloc(func_8005062C(0x6C2, spvar));
+    func_800506D4(D_800E1DC4, spvar);
+    D_800E1DC8 = heap3_alloc(func_8005062C(0x69E, spvar));
+    func_800506D4(D_800E1DC8, spvar);
+    D_800E1DCC = heap3_alloc(func_8005062C(0x93B, spvar));
+    func_800506D4(D_800E1DCC, spvar);
+  }
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80078910", func_80078BDC);
 
