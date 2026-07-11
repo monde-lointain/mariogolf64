@@ -189,7 +189,11 @@ Ghidra MCP is used inline at seed time. For each target function:
      load) is often the `docs/hazards.md#mem-in-struct-scheduling-lever` (retype the fixed global as a
      struct/array member); and a full-make SHA-miss where a same-file sibling reads a wrong data
      address is `docs/hazards.md#short-text-shifts-flowing-bss` (a length miss shifts the flowing
-     `.bss`, so fix the short fn, not the sibling).
+     `.bss`, so fix the short fn, not the sibling). And rule out a **missing callee prototype**: a
+     callee with no `extern` prototype in scope makes gcc assume implicit-int, which flips
+     regalloc/scheduling (a base-materialize hoist across a `jal`) and reads as a scheduling wall —
+     declare every callee with its real signature before reaching for the permuter
+     (`docs/hazards.md#callee-prototype-is-load-bearing-missing-prototype--implicit-int`, S225).
    - **Spot-check** (only at score 0): byte-level `cmp` of the in-tree compiled `.text` against the
      isolated one. The `cmp` is the truth, not the mnemonic diff (see
      `docs/hazards.md#assembler-differences--byte-cmp-spot-check`). A non-zero score with empty

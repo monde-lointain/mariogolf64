@@ -85,6 +85,8 @@ The hazard families below group the sections that follow. Each links to its exis
 - [loop-weight and live-length regalloc steering](#loop-weight-and-live-length-regalloc-steering)
 - [permuter goto-backedge liveness unsound (var-reuse passes corrupt live-across-backedge values)](#permuter-goto-backedge-liveness-unsound-var-reuse-passes-corrupt-live-across-backedge-values)
 - [return-type is load-bearing](#return-type-is-load-bearing)
+- [callee-prototype is load-bearing (missing prototype = implicit-int)](#callee-prototype-is-load-bearing-missing-prototype--implicit-int)
+- [counter-up pointer-giv fill loop (check_dbra_loop reversal)](#counter-up-pointer-giv-fill-loop-check_dbra_loop-reversal)
 - [struct-access-folding-changes-scheduling](#struct-access-folding-changes-scheduling)
 - [offset-0-symbol re-materialization (fixed-global field RMW)](#offset-0-symbol-re-materialization-fixed-global-field-rmw)
 - [call-arg delay-slot fill + field-alias addend-0 (S214 scenery levers)](#call-arg-delay-slot-fill--field-alias-addend-0-s214-scenery-levers)
@@ -4635,6 +4637,48 @@ to match a ROM whose original TU returned an (unused) value. `func_80067D74` mat
 return (S158); `void` differed at the entry-`beqz` delay slot; `s32`/`u32`/`long long` all matched
 (`s64`/`u64` fail to compile with no return), so use the clean `s32`. Found via the permuter's
 `perm_randomize_function_type` pass — weight it up when a void classical fn won't close.
+
+## callee-prototype is load-bearing (missing prototype = implicit-int)
+
+**Trigger:** a classical fn is structurally correct but locks at a stubborn scheduling/regalloc
+near-miss (S225 `rumble_check_and_trigger`: score-60, a base-address `la` materialized AFTER a `jal`
+where the ROM hoists it BEFORE the call to fill the delay slot). Looks exactly like a
+`#register-reuse-nudge-classical-regalloc` or delay-slot wall.
+
+**Root cause:** a callee with NO visible prototype makes KMC gcc 2.7.2 assume the K&R implicit-int
+declaration (`int f()`), which changes register allocation + pre-reload scheduling vs the correct
+`extern` prototype. Bisected S225: including `common.h`/`ultra64.h` did NOT flip it; the *absence* of
+`extern s32 nuContRmbCheck(u32)` did. Adding the two prototypes = byte match, first rebuild.
+
+**Fix / checklist:** before declaring any scheduling/regalloc near-match a wall, verify EVERY callee
+has an explicit `extern` prototype in scope with the REAL signature (arg types + return type). Two
+distinct wrong states both mis-schedule: (a) no prototype → implicit-int, and (b) the `seed_c.py`
+default `extern void f(void)` stub → wrong-arity void-arg. Neither equals the real signature; recover
+arity from the call-site arg setup (`a0..a3`/`f12..` loads) and return-type from
+`#return-type-is-load-bearing`. Get the ultra64 types right too (`u32`=`unsigned long`, `s32`=`long`;
+see the `ultra64-types-only` convention).
+
+## counter-up pointer-giv fill loop (check_dbra_loop reversal)
+
+**Trigger:** a small array-init/fill loop (set one struct field over N elements) won't match: the ROM
+counts an index UP (`move i,0 … bne i,N`) with a separately-incremented base pointer and materializes
+the base (`lui/addiu`, i.e. `la`) AFTER the two hoisted loop invariants (the store value + the bound),
+order `move i,0 / li val / li bound / la base`. Natural C forms diverge:
+- `for(i=0;i<N;i++) arr[i].f=v;` and `do{ arr[i].f=v; }while(++i!=N);` — gcc 2.7.2 loop.c
+  `check_dbra_loop` (loop.c:5655) REVERSES to a countdown (`addiu -stride … bgez`), folding the base
+  into the store or into a single decrementing offset IV.
+- `p=base; do{ p->f=v; p++; }while(++i!=N);` (explicit pointer) — keeps counter-up + pointer, but
+  emits the base `la` EARLY (as an explicit preheader stmt, before the hoisted invariants) = a 2-insn
+  scheduling miss.
+- `volatile`-field blocks reversal but folds the base into the store displacement (`sym+off($idx)`),
+  which the assembler expands to 3 insns/iter — worse.
+
+**Fix:** use the IN-LOOP giv form `s32 i=0; do{ (base+i)->f=v; }while(++i!=N);`. The `base+i` is a
+strength-reduced giv whose init the SR pass inserts AFTER invariant hoisting → `la` lands last
+(target order), reversal blocked, one source line, no permuter. Matched S225 `func_80078D94`
+(`particle_array[40]`, `unk_3A=-1`, stride 0x40). Cross-ref the `goto-is-last-resort` /
+`goto-loop-vs-structured-loop-codegen` conventions: this is the structured-form win for the
+`check_dbra_loop` case.
 
 ## struct-access-folding-changes-scheduling
 

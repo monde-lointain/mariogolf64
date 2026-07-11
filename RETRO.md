@@ -25,6 +25,39 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 225 — open fresh pack func_80078910.c (rumble/shadow/effects) — 2026-07-10
+- Increment: 0 files banked / **+7 functions matched** (`func_80078910.c` 7/37, 30 stubs remain; ROM
+  SHA-1 green e2c4e7a…). Opened a FRESH `none` pack (0x53D10) — PO chose it over raycast-FP /
+  f80071370 / an escalation slice, acting on the S224 plateaued-pack-tail lesson. One yaml flip, no
+  symbol_addrs/sync-names/mk edit.
+- Quality: 0 stuck-far / 0 permuter / **0 carried** / 0 re-opened. The score-60 `rumble` near-miss was
+  root-caused + banked, NOT carried. 5 of 7 first-build.
+- Seed: committed 3pt (mixed-partial per-fn override, ranker pts13, same as S215-S224); banked 0pt
+  (per-file all-or-nothing, file still partial 7/37); realized 5 (seed 3 + 2 novel root-cause levers −
+  first-build-heavy offset), residual +2; regime classical/mixed.
+- What helped: the S224 escalation-routing call paid off — a fresh pack's cheap non-FP vein banks far
+  cheaper than a plateaued-pack continuation (+7 @ 0/0/0/0 vs S224 +1/3-walls). The heap alloc/free/
+  dispatch family (`func_80078910` teardown + `func_800789C8` 12-block glue + `func_8007E234`/
+  `func_8007E2B0` per-mode init) banked as a coherent CLUSTER once the first member's D_-global/struct
+  model was set. `rumble_check_and_trigger`+`shot_start_rumble_trigger` are byte-identical twins.
+- Friction: two functions initially looked like compiler walls but were source-side misses. (1)
+  `func_80078D94` particle-init loop hit gcc `check_dbra_loop` REVERSAL (loop.c:5655) on the natural
+  `for`/`do-while` forms; cracked with the in-loop giv `(base+i)->f=v` (giv-init emitted after the
+  hoisted invariants, reversal blocked). (2) `rumble_check_and_trigger` locked at score-60 (a `la`
+  base-materialize scheduled AFTER a `jal` vs the ROM's before-jal delay-slot fill); bisected to a
+  MISSING callee prototype → gcc implicit-int → flipped scheduling. Both root-caused via the `-S`
+  codegen oracle + a gcc-2.7.2 source read, no permuter.
+- Applied: 2 of 2 — #1 `#counter-up-pointer-giv-fill-loop` recipe (→ docs/hazards.md); #2
+  `#callee-prototype-is-load-bearing` (→ docs/hazards.md + the before-permuter checklist in
+  docs/agent-workflow.md Execution loop). Memory saved: `missing-prototype-implicit-int-scheduling-flip`.
+- Carry-over: `func_80078910.c` (30 stubs) — no NEW carries. Next vein: the 187-208i pure-logic tier
+  (`func_8007D19C`/`func_8007DB08`/`func_8007FEAC`, jal0/8) then the FP walls (`func_8007B054`/
+  `func_8007A6C8`/`func_8007E980`) + DL (`draw_character_shadow`). LESSON: "declare every callee
+  prototype" is now a before-wall checklist item — a missing prototype is a cheap source-side cause
+  that masquerades as a scheduling wall.
+
+---
+
 ## Sprint 224 — func_8006A2C0.c mid-logic-tail mixed-partial continuation — 2026-07-10
 - Increment: 0 files banked / **+1 function matched** (`func_8006A2C0.c` 20/45, 25 stubs remain; ROM
   SHA-1 green e2c4e7a…). Continued the S223 pack (PO chose continue-open-file over a fresh-pack flip;

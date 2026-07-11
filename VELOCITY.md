@@ -656,6 +656,22 @@ Three honest caveats:
   or an escalation slice, not another continuation. Retro applied **2/2** (DEB4 lever hazards note +
   mid-logic-tail escalation-routing note in agent-workflow + tracked ranker follow-up). Confirms the
   S223 read (cheap getter/setter/dispatch vein banks 1-2 tries; the loop/struct-base residual walls).
+  S225: OPENED FRESH pack `func_80078910.c` (0x53D10, 37fn `none`; PO chose it over raycast-FP /
+  f80071370 / an escalation slice — acting on the S224 plateaued-pack-tail lesson). Banked **0pt**
+  (file 7/37, not md5-candidate, 30 stubs), **+7 matched**, **0 permuter**, **0 carried**, quality
+  **0/0/0/0**. Fns: `func_80078910`/`func_800789C8`/`func_8007E234`/`func_8007E2B0` (the heap
+  alloc/free/dispatch cluster) + `rumble_check_and_trigger`/`shot_start_rumble_trigger` (twins) +
+  `func_80078D94` (particle init). 5 of 7 first-build. Seed committed 3 (mixed-partial per-fn override,
+  ranker pts13, same as S215-S224); realized 5 (seed 3 + 2 novel root-cause levers − first-build-heavy
+  offset), residual +2. TWO NOVEL LEVERS (banked to hazards.md): (1) `#callee-prototype-is-load-bearing`
+  — a MISSING callee prototype makes gcc implicit-int, flipping a base-materialize hoist across a `jal`
+  (the score-60 `rumble` pseudo-wall; root-caused not carried); (2) `#counter-up-pointer-giv-fill-loop`
+  — in-loop giv `(base+i)->f` beats explicit-pointer (la-early) and plain `base[i]` (check_dbra_loop
+  reversal) for a counter-up fill loop. LESSON: the S224 escalation-routing call paid off — a fresh
+  `none` pack's cheap non-FP vein (heap glue + controller-pak dispatch + array-init) banks +7 at
+  0/0/0/0, vs S224's +1/3-walls continuation of a plateaued pack. The +7 also shows a call-glue
+  CLUSTER (alloc + free + per-block dispatch sharing D_ globals) banks as a coherent slice once the
+  first member's externs/struct model is established.
   Rolling-5 (S34+S37+S39+S42+S43): seed 3.4 pt/sprint (17/5), realized 2.8 pt/sprint (14/5). S31 nuGfxInit is the first over-seed classical fn (+3 residual); rubric needs +1 for double-novel-gotcha libnusys classical targets. S42 defines-data verbatim-body drop: realized 2 = seed 3 − 1 (the fast path makes a defines-data leaf bank like a mirror) — confirms the −1 verbatim-first-try rule extends to known-edit-mirror defines-data, not just classical seeds. S43 is the new residual floor (−2): both gbpak fns were classical-FLAGGED (jal-count-mismatch) but proved pure verbatim mirrors once the macro-FP was stripped — the seed over-priced them because the hazard was a tooling artifact, now fixed in `_c_jal_count`, so future macro-heavy libultra leaves should seed lower.
 - **Regime:** `mirror` is a depleting minority (~22 % of ranked candidates: 56 mirror vs 194
   classical; 18 warm / 38 cold). The warm clean-singleton mirror pool is now **mined out** (S11

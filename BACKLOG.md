@@ -4413,6 +4413,21 @@ by `/sprint-plan`:
   resolved `c-combined` member upstreams so the recover-extern is priced at the gate, not discovered
   at execution-time data-ref reconciliation. Not file-blocking (recover-extern is cheap in-execution).
 - _(osAiSetFrequency carry-over resolved and banked at S38 retroactive review)_
+- **Open (S225, in-progress mixed-partial, NOT a spike):** `src/main/func_80078910.c` (37-fn main-seg
+  `none` pack, subseg 0x53D10 flipped `c` at the S225 gate; rumble/shadow/effects + heap alloc/free
+  system). **7 banked** (the heap alloc/free/dispatch cluster `func_80078910`/`func_800789C8`/
+  `func_8007E234`/`func_8007E2B0`, the rumble twins `rumble_check_and_trigger`/
+  `shot_start_rumble_trigger`, and `func_80078D94` particle-init), 30 stubs remain. Quality 0/0/0/0,
+  **no carries.** Ranker re-surfaces it as a c-stub `remaining:N` continuation smallest-first; the
+  cheap non-FP vein is now mined. **Next vein (untried):** the 187-208i pure-logic tier
+  `func_8007D19C`/`func_8007DB08` (jal0) + `func_8007FEAC` (jal8). **Deferred (wall-class):** the FP
+  cluster `func_8007B054` (406i/224fp), `func_8007A6C8` (454i/195fp), `func_8007E980` (267i/142fp) +
+  the 79xxx fp fns (regalloc-nemesis); `draw_character_shadow` (239i, DL/shadow builder);
+  `func_8007B994` (735i state machine); `func_8007FE44` = caller-evict (inlined into
+  src/main/func_80070FD0.c, skip). File md5-candidate only when all 37 bank. **S225 levers (landed in
+  hazards.md):** `#counter-up-pointer-giv-fill-loop` (in-loop giv beats check_dbra_loop reversal) and
+  `#callee-prototype-is-load-bearing` (missing prototype → implicit-int scheduling flip; a cheap
+  source-side cause that masqueraded as a score-60 scheduling wall).
 - **Open (S223→S224, in-progress mixed-partial, NOT a spike):** `src/main/func_8006A2C0.c` (45-fn main-seg
   `none` pack, subseg 0x456C0 flipped `c` at the S223 gate; mode/asset state + DL + sfx system). **20
   banked** (19 S223 tiny/getter/setter/mode-state + asset-load/free `func_8003E400.c` twins; +1 S224
