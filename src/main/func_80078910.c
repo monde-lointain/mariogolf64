@@ -66,7 +66,32 @@ INCLUDE_ASM("asm/nonmatchings/main/func_80078910", func_8007DFD0);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80078910", shot_start_rumble_trigger);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80078910", rumble_check_and_trigger);
+typedef struct {
+  u8 pad_00[0x27];
+  s8 unk_27;
+} RumbleController;
+
+extern s8 rumble_disable_flag;
+extern u32 controller_handle_array[];
+extern s32 nuContRmbCheck(u32 contNo);
+extern void nuContRmbStart(u32 contNo, u16 freq, u16 frame);
+
+void rumble_check_and_trigger(RumbleController* actor) {
+  s32 result;
+
+  if (actor->unk_27 < 4) {
+    if (rumble_disable_flag == 0) {
+      result = nuContRmbCheck(controller_handle_array[actor->unk_27]);
+      if (result != 1) {
+        if (result < 2) {
+          if (result == 0) {
+            nuContRmbStart(controller_handle_array[actor->unk_27], 0x100, 0xA);
+          }
+        }
+      }
+    }
+  }
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80078910", func_8007E234);
 
