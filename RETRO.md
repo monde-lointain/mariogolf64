@@ -25,6 +25,33 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 228 — open fresh pack func_800453E0.c (main none pack) — 2026-07-11
+- Increment: 0 files banked / **+8 functions matched** (`func_800453E0.c` 0/40 → 11/40 C, 29 stubs
+  remain; ROM SHA-1 green e2c4e7a…). +8 hand-matched plus 3 free empty-leaf auto-C (2i `jr ra;nop` leaves
+  scaffold-emitted as `void f(void){}`; stub-count 37 < fn-count 40). OPENED a FRESH `none` pack (0x207E0,
+  flipped asm→c) — PO chose it over `raycast_terrain` (FP, 56i leaf floor) + the open wall-tails, on
+  cheap-leaf-depth (13+ sub-35i jal-light leaves). One yaml flip, no symbol_addrs/sync-names/mk edit.
+- Quality: 0 stuck-far / 0 permuter / **3 carried** / 0 re-opened. All 3 carries fully-RE'd
+  no-source-lever walls (in-file notes), NOT abandoned near-misses.
+- Seed: committed 3pt (mixed-partial per-fn override, ranker pts13, same as S215-S227); banked 0pt
+  (per-file all-or-nothing, file partial 11/40); realized 5 (seed 3 + strong +8 cheap-leaf mining incl. an
+  FP + a mod leaf the ranker priced wall-risk, − 3 no-lever walls), residual +2; regime classical/mixed.
+- What helped: the S224/S227 fresh-rotation call re-validated a 3rd time — a fresh pack's cheap-leaf vein
+  banks +8 at 0 permuter before the wall-class tail reasserts. `func_800467DC` banked first-build as
+  `(guRandom()>>2)%(arg0?:1)` — gcc's auto `break 7`/`break 6` divide-guards matched the ROM verbatim
+  (write `%`/`/` directly, never hand-emit the guards). `func_800467DC`+`func_80047D68` (a mod + a
+  straight-line FP leaf) banked despite living in the wall-risk size band.
+- Friction: 3 of the smallest stretch leaves were no-source-lever walls back-to-back (`func_8004683C`
+  local-alloc v0-permutation, `func_80048CF8` FP-regalloc, `func_80045AD4` dead-frame) — the same classes
+  S227's tail hit. Confirms: once a fresh pack's cheap head is banked, the residual concentrates on the
+  documented compiler walls; the RE work still lands (in-file notes) but does not bank.
+- Applied: 3 of 3 — #2 divide-guard positive lever → `docs/hazards.md#signed-divide`; #1 empty-leaf
+  auto-C stub-count note → `docs/agent-workflow.md` execution loop; #3 cheap-leaf-depth pack-score ranker
+  follow-up → `BACKLOG.md` (golden-gated, off-cadence).
+- Carry-over: `src/main/func_800453E0.c` partial (11/40 C, 29 stubs) — 3 characterized walls + the
+  deferred mid-logic/FP/`calc_slope` tail + lead `func_800453E0` (213i). Next slice: a fresh pack /
+  escalation, NOT a smallest-first continuation of this tail (S224 wall-class lesson).
+
 ## Sprint 227 — open fresh pack func_80071370.c (main none pack) — 2026-07-11
 - Increment: 0 files banked / **+8 functions matched** (`func_80071370.c` 0/39 → 8/39, 31 stubs
   remain; ROM SHA-1 green e2c4e7a…). OPENED a FRESH `none` pack (0x4C770, flipped asm→c) — PO chose

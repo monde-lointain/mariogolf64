@@ -5651,6 +5651,15 @@ framing) — see `#signed-divide-const-v0v1-quotient-destination`.
 
 ## signed-divide-const v0/v1 quotient-destination
 
+**Companion positive lever (S228): emit `%`/`/` directly; do NOT hand-write the divide guards.**
+gcc-2.7.2 auto-emits the div-by-zero (`break 7`) and INT_MIN/-1 overflow (`break 6`, guarded by a
+`bne div,-1` + `lui 0x8000`/`bne` pair) checks around a variable-denominator `mult`/`div`, and these
+are byte-faithful — `func_800467DC` banked first-build as `(guRandom()>>2) % (arg0 ? arg0 : 1)`, the
+compiler's implicit guard matching the ROM verbatim. So write the modulo/division as a plain C operator
+and let the compiler synthesize the trap sequence; reconstructing the `break 7`/`break 6` block by hand
+(or trying to suppress it) is wrong. This is orthogonal to the CONSTANT-denominator reciprocal-magic
+wall below (that path has no runtime guard).
+
 **Symptom:** a signed divide-by-constant (reciprocal-magic highpart-multiply: `mult div,magic; mfhi;
 sra hi,k; sra div,div,31; subu`) is byte-close but the **dividend and the magic constant occupy the
 wrong two registers** — your build puts the short-lived magic in the numerically-LOWER reg (`$v0`) and

@@ -707,6 +707,24 @@ Three honest caveats:
   size ≠ stub size (shift-masking) — cross-check `readelf` size vs the `.s` size directive before trust.
   Retro applied 3 of 3 (#1 size-check method note → hazards.md; #2 %lo-fold pricing tell → BACKLOG; #3
   fresh-rotation confirmation → RETRO).
+  S228: OPENED fresh `none` pack `func_800453E0.c` (subseg 0x207E0, 40fn golf-physics/slope; PO chose it
+  over `raycast_terrain` FP + the open wall-tails, on cheap-leaf-depth — 13+ sub-35i leaves vs raycast's
+  56i floor). Banked **0pt** (file 11/40, not md5-candidate, 29 stubs), **+8 hand-matched** (+3 free
+  empty-leaf auto-C), **0 permuter**, **3 carried**, quality **0/0/3/0**. Fns: `func_800469E0` (getter) +
+  `func_8004C510` (setter) + `func_80045AC0` (predicate `==4`) + `func_80045A9C` (tail-glue) +
+  `func_800467DC` (mod-clamp `(guRandom()>>2)%(arg0?:1)`) + `func_8004D148` (0x40x init loop) +
+  `func_8004876C` (two 10-arg init calls) + `func_80047D68` (3x `(f32)int*(1/1024)` FP stores). Seed
+  committed 3 (mixed-partial per-fn override, ranker pts13, same as S215-S227); realized 5 (seed 3 +
+  strong +8 cheap-leaf mining incl. an FP + a mod leaf the ranker priced wall-risk, offset by 3 no-lever
+  walls), residual +2. 3 CARRIES all fully-RE'd no-source-lever walls: `func_8004683C`
+  (`#local-alloc-qty-permutation`, v0-return-vs-scratch, 3 source forms permute identically), `func_80048CF8`
+  (`#pervasive-regalloc-classical-main` FP class, $f12/$f2/$f4 home + eager schedule), `func_80045AD4`
+  (`#dead-frame-reload-artifact-regalloc-wall`, spurious dead frame + `sw $v0` dead spill; caller sets no
+  static chain so NOT nested). LESSON: S224/S227 fresh-rotation call re-validated a 3rd time — a fresh
+  pack's cheap-leaf vein banks +8 at 0 permuter before the wall-class tail reasserts. New positive lever
+  banked (hazards.md #signed-divide): emit `%`/`/` directly, gcc's implicit `break 7`/`break 6` divide
+  guards are byte-faithful — do NOT hand-write them. Retro applied 3 of 3 (#2 divide-guard lever →
+  hazards.md; #1 empty-leaf stub-count note → agent-workflow.md; #3 cheap-leaf-depth ranker → BACKLOG).
 - **Regime:** `mirror` is a depleting minority (~22 % of ranked candidates: 56 mirror vs 194
   classical; 18 warm / 38 cold). The warm clean-singleton mirror pool is now **mined out** (S11
   plan gate: every top mirror candidate carries a blocking hazard), pushing the project onto the

@@ -235,6 +235,14 @@ by disassembling PPL's byte-exact `-O3` build (S147). See
 `src/<seg>.c` file) banks only when its last
 `INCLUDE_ASM` stub is gone.
 
+**Empty-leaf auto-C: stub-count < fn-count (S228).** `make extract` emits a body-less `void
+f(void){}` DIRECTLY (not an `INCLUDE_ASM` stub) for a 2-instr `jr ra; nop` leaf, so a freshly-opened
+pack's `INCLUDE_ASM` count is BELOW its function count by the number of such empties (S228
+`func_800453E0.c`: 37 stubs for 40 fns — 3 empty leaves pre-C at scaffold time, free byte-matches). So
+the matched-fn count is `fn-count − remaining-INCLUDE_ASM`, NOT the stub-count delta, and the plan
+gate's "N stubs" figure is not the total-fn count. Grep `INCLUDE_ASM` for the true remaining work; count
+the empty auto-C leaves toward banked.
+
 The context window auto-compacts as it fills, so do not stop early on budget concerns; save progress
 to `SPRINT.md` (standup line + suggestion buffer) as each function banks, so a fresh window resumes
 from it.

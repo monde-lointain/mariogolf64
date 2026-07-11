@@ -92,6 +92,16 @@ prices all three identically (tiny). Candidate `pick_target.py` tell: a pure sto
 partial-bank-risk so the plan gate expects a carry, not a bank. Kin to the S158/S177/S183/S189
 regalloc/FP-DL partial-bank-expected follow-ups above. Golden-gated, off-cadence, not a mid-sprint edit.
 
+**Cheap-leaf-depth pack score (S228, off-cadence golden-gated):** the plan gate now picks a fresh
+`none` pack by hand-counting its sub-35i jal-light leaves (S228 chose `func_800453E0.c` over
+`raycast_terrain` / the open wall-tails on exactly this basis, and the vein banked +8 at 0 permuter —
+3rd confirmation of the S224/S227 fresh-rotation call). `pick_target.py` could compute this directly: a
+**cheap-leaf-depth** column = count of a fresh pack's fns that are `<35i` AND `jal-count<=2` AND
+non-FP (getters/setters/predicates/glue), so the gate ranks the richest fresh pack without a manual
+per-`.s` instr-count pass. Pairs with the existing partial-bank-expected detectors (they price the
+wall-tail at 0-bank; this prices the cheap head at +1-bank each). Kin to the S158/S177/S183/S189/S227
+follow-ups above. Golden-gated, off-cadence, not a mid-sprint edit.
+
 **Extend the detector to DL EMITTERS, not just FP (S190):** `src/main/func_8004E5A0.c` was a 3-fn
 one-tu the ranker surfaced smallest-first as a "+2 tractable" pick because 2 of 3 fns are 0-jal/0-FP —
 but they are `glistp++` **display-list emitters**, which are their OWN scheduling-wall class (the
@@ -3377,6 +3387,26 @@ by `/sprint-plan`:
   vendored upstream version can diverge from the game's rev on a single immediate (S122 nusys-2.07
   `NU_CONT_THREAD_ID=6` vs MG64's 5), and that surfaces only at first build unless reconciled here.
   A near-free retry missing any of these is a half-scoped spike — finish the scope before deferring.
+
+- **(S228 MIXED-PARTIAL — carried; 11 of 40 banked)** `src/main/func_800453E0.c` (main-segment
+  `[0x207E0]` golf-physics/slope pack). Subseg `[0x207E0, c, main/func_800453E0]` flipped; **11 fns C**
+  (S228 +8 hand-matched: `func_800469E0`/`func_8004C510`/`func_80045AC0`/`func_80045A9C`/`func_800467DC`/
+  `func_8004D148`/`func_8004876C`/`func_80047D68`, plus 3 free empty-leaf auto-C). **29 stubs remain**,
+  ROM green off extracted asm, NOT md5-candidate. **3 PROVEN-WALL carries (S228, in-file notes, do NOT
+  re-attempt, permuter-proof):**
+  - `func_8004683C` — `#local-alloc-qty-permutation`: ROM dedicates `v0=0` for the return + uses `v1`/`a0`
+    as guard scratch; gcc-2.7.2 allocates `v0` as scratch (3 source forms permute identically), plus the
+    final `(x&2)!=0` canonicalizes to `srl`+`andi` vs ROM `andi`+`sltu`. Logic RE'd in-file.
+  - `func_80048CF8` — `#pervasive-regalloc-classical-main` (S158 FP class): ROM homes the FP temps in
+    `$f12/$f2/$f4` + eager-schedules the 2nd sub into the 1st `bnez` delay slot; gcc allocs `$f0/$f2` +
+    reorders the load block. Logic RE'd in-file (`||`-guarded `D_800BE654 = D_800CC860 - func_80059FAC()`).
+  - `func_80045AD4` — `#dead-frame-reload-artifact-regalloc-wall`: ROM opens `addiu sp,-8`+`sw $v0,0(sp)`
+    (dead spill, never reloaded) with no address-taken trigger; caller `func_80045B14` sets no static
+    chain, so it is a spurious dead frame, NOT a nested fn. Logic RE'd (D_800DAEE0[] byte-swap).
+  **Tail (~26 unprofiled):** mid-logic loops+struct-base fns (`func_80045B14`/`C00`/`CE0`/`46604`/`46898`/
+  `469EC`/`479C0`/…), the `calc_slope_*` FP pitch fns, and the lead `func_800453E0` (213i, caller-evict
+  into func_80054900.c). **Next slice:** a fresh pack / escalation, NOT a smallest-first continuation —
+  the cheap vein is mined out and the tail is S224 wall-class.
 
 - **(S214 MIXED-PARTIAL — carried; 5 of 8 banked)** `src/main/func_80026400.c` (main-segment scenery
   render pack, subseg `[0x1800, c, main/func_80026400]` already flipped). S214 banked `func_80026400`
