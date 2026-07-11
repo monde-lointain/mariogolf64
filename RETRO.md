@@ -25,6 +25,40 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 227 — open fresh pack func_80071370.c (main none pack) — 2026-07-11
+- Increment: 0 files banked / **+8 functions matched** (`func_80071370.c` 0/39 → 8/39, 31 stubs
+  remain; ROM SHA-1 green e2c4e7a…). OPENED a FRESH `none` pack (0x4C770, flipped asm→c) — PO chose
+  fresh rotation over the `func_80078910.c` wall-tail (S226 cheap vein exhausted; S224 plateau lesson).
+  One yaml flip, no symbol_addrs/sync-names/mk edit.
+- Quality: 0 stuck-far / 0 permuter / **3 carried** / 0 re-opened. All 3 carries fully-RE'd
+  no-source-lever walls (in-file notes), NOT abandoned near-misses. 6 of 8 first-build.
+- Seed: committed 3pt (mixed-partial per-fn override, ranker pts13, same as S215-S226); banked 0pt
+  (per-file all-or-nothing, file partial 8/39); realized 5 (seed 3 + strong +8 cheap-leaf mining
+  − first-build-heavy simple-fn offset + 3 no-lever walls), residual +2; regime classical/mixed.
+- What helped: the S224 fresh-rotation call re-validated — a fresh pack's ~11-fn sub-30i vein
+  (getter/setter/glue/strlen/DL-emitter) banks +8 at 0 permuter, far cheaper than grinding the
+  plateaued `func_80078910.c` tail. Stock gbi macros for the DL emitter (`func_80074CA8`
+  PipeSync/SetPrimColor) matched first-build (S226 lesson held). The struct-array setters/getters over
+  the shared 0x2C-stride `D_8012F510` array modeled cheaply once the first field-symbol was decoded.
+- Friction: burned ONE full-make cycle on a misleading signal — `func_80071924`/`func_8007512C` read
+  per-fn asm-differ `(0)` but were 8/4 bytes SHORT (a `%lo`-fold dropped an instr); the header score
+  shift-masked the deficit, surfacing only at the full-make SHA-miss (every downstream fn then
+  mis-aligned). Both then confirmed as `#base-register-vs-displacement` walls (gcc folds `%lo` into the
+  store where the ROM materializes the base; the single-index sibling `func_71C74` banked clean because
+  there the fold matches). `func_800718C4` is a separate `#local-alloc-qty-permutation` v0/v1 IV-swap wall.
+- Applied: 3 of 3 — #1 (size-check method note: cross-check `readelf` built size vs the `.s` size
+  directive before trusting a per-fn `(0)`) → `docs/hazards.md #assembler-differences`. #2 (%lo-fold
+  multi-index/in-loop-base D_-global store wall-risk pricing tell) → `BACKLOG.md` ranker follow-up,
+  golden-gated off-cadence. #3 (S224 fresh-rotation re-validated) → this RETRO note, no edit.
+- Carry-over: `func_80071370.c` (31 stubs) — 3 NEW documented walls (func_800718C4/func_80071924/
+  func_8007512C). Cheap sub-30i vein exhausted; remaining tail = func_800760CC (jtbl switch, defer) +
+  the 36-80i tier (747B0/74840/748D0 triplet call unbanked func_800738BC + div-round; 74E5C bnel
+  value-select) entering the regalloc/mid-logic wall-sensitive class, then the 140i+ mid-logic + FP
+  walls. Per S224: prefer a fresh pack / escalation next sprint over grinding this tail. Cross-repo: no
+  new curated names (all `func_`).
+
+---
+
 ## Sprint 226 — continue func_80078910.c (DL-emitter vein) — 2026-07-10
 - Increment: 0 files banked / **+3 functions matched** (`func_80078910.c` 7/37 → 10/37, 27 stubs
   remain; ROM SHA-1 green e2c4e7a…). CONTINUED the in-progress pack — PO chose continuation over a

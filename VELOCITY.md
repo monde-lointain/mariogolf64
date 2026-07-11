@@ -689,6 +689,24 @@ Three honest caveats:
   flip. Doc edits applied (hazards.md #display-lists: Scis-texrect note + static-emitter stock-macro
   primary path); `dl-emitter-tractable` ranker signal + `screen[6]` struct refine → BACKLOG (PO-accepted).
   Rolling-5 (S34+S37+S39+S42+S43): seed 3.4 pt/sprint (17/5), realized 2.8 pt/sprint (14/5). S31 nuGfxInit is the first over-seed classical fn (+3 residual); rubric needs +1 for double-novel-gotcha libnusys classical targets. S42 defines-data verbatim-body drop: realized 2 = seed 3 − 1 (the fast path makes a defines-data leaf bank like a mirror) — confirms the −1 verbatim-first-try rule extends to known-edit-mirror defines-data, not just classical seeds. S43 is the new residual floor (−2): both gbpak fns were classical-FLAGGED (jal-count-mismatch) but proved pure verbatim mirrors once the macro-FP was stripped — the seed over-priced them because the hazard was a tooling artifact, now fixed in `_c_jal_count`, so future macro-heavy libultra leaves should seed lower.
+  S227: OPENED fresh `none` pack `func_80071370.c` (subseg 0x4C770, flipped asm→c; PO chose fresh
+  rotation over the `func_80078910.c` wall-tail — S224/S226 plateau lesson). Banked **0pt** (file 8/39,
+  not md5-candidate, 31 stubs), **+8 matched**, **0 permuter**, **3 carried**, quality **0/0/3/0**. Fns:
+  `func_80074960` (empty leaf) + `func_80073BF0` (strlen) + `func_80071C74` (single-index struct-array
+  setter) + `func_800718F4` (3-byte RGB setter) + `func_80071C9C` (struct getter) + `func_80071954`
+  (19-char lowercase-case transform) + `func_800715A0` (7× heap3_free teardown) + `func_80074CA8`
+  (PipeSync/SetPrimColor/PipeSync DL emitter). Seed committed 3 (mixed-partial per-fn override, ranker
+  pts13, same as S215-S226); realized 5 (seed 3 + strong +8 cheap-leaf mining, offset by 3 no-lever
+  walls − first-build-heavy simple fns), residual +2. 3 CARRIES all fully-RE'd no-source-lever walls:
+  `func_800718C4` (`#local-alloc-qty-permutation`, counter/giv v0/v1 swap on a word-store init loop),
+  `func_80071924` + `func_8007512C` (`#base-register-vs-displacement`, gcc folds `%lo` into store where
+  ROM materializes base — while the single-index sibling `func_71C74` banked clean). LESSON: the S224
+  fresh-rotation call re-validated — a fresh pack's ~11-fn sub-30i getter/setter/glue/strlen/DL-emitter
+  vein banked +8 at 0 permuter, far cheaper than grinding the `func_80078910.c` wall-tail. Method note
+  banked (hazards.md #assembler-differences): a per-fn asm-differ `(0)` header is MISLEADING when built
+  size ≠ stub size (shift-masking) — cross-check `readelf` size vs the `.s` size directive before trust.
+  Retro applied 3 of 3 (#1 size-check method note → hazards.md; #2 %lo-fold pricing tell → BACKLOG; #3
+  fresh-rotation confirmation → RETRO).
 - **Regime:** `mirror` is a depleting minority (~22 % of ranked candidates: 56 mirror vs 194
   classical; 18 warm / 38 cold). The warm clean-singleton mirror pool is now **mined out** (S11
   plan gate: every top mirror candidate carries a blocking hazard), pushing the project onto the

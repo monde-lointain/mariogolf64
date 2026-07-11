@@ -1688,6 +1688,20 @@ that was really an objdump-collapse artifact — the nops WERE present; the diff
 `mips-linux-gnu-objdump -dz` (disassemble zeroes, no `...` collapse) and word-diff EVERY line (do not
 `awk 'NF>2'`-filter). The residual there was a single scratch register, not a missing instruction.
 
+**A per-fn asm-differ header score of `(0)` is MISLEADING when the built fn is SHORTER than its asm
+stub (S227).** `diff.py <fn>` locates the fn via the mapfile and aligns TARGET vs CURRENT; when the
+compiled fn is a few bytes short (a `%lo`-fold or base-hoist dropped an instruction), the alignment
+absorbs the deficit and the one-line HEADER can still read `CURRENT (0)` even though the fn does not
+match and the whole tail of the file has shifted. S227 burned one full-make cycle: `func_80071924`
+(built 0x28 vs stub 0x30) and `func_8007512C` (0x2C vs 0x30) both read per-fn `(0)` but were 8/4 bytes
+short, surfacing only at the full-make SHA-miss (every downstream fn then mis-aligned, all reading huge
+scores). **Guard: before trusting a per-fn `(0)`, cross-check the built symbol size against the `.s`
+size directive** — `readelf -s build/src/<...>.o | grep <fn>` (the FUNC size column) vs
+`grep "nonmatching <fn>," asm/<subseg>.s` (the `0xNN` byte size). Equal sizes make the `(0)` trustworthy;
+a mismatch means a codegen-length divergence (typically `#base-register-vs-displacement` %lo-fold or a
+hoisted loop base) regardless of the header score. Cheaper than the full-make relink that would
+otherwise catch it.
+
 **Trigger:** Finalizing a classical match (the spot-check step). Mnemonic diff looks clean but you
 need ground truth.
 

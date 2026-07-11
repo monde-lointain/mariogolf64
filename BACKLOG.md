@@ -78,6 +78,20 @@ follow-up as S158/S177/S183: a `pick_target.py` detector for `gu*`/`cosf`/`sinf`
 the S158 FP/trig, S177 `osSetIntMask`, and S183 pervasive-regalloc pts follow-ups above. Golden-gated,
 off-cadence, not a mid-sprint edit.
 
+**%lo-fold store wall-risk tell (S227, off-cadence golden-gated):** in `src/main/func_80071370.c`'s
+cheap-leaf vein, two trivial no-jal/no-FP fixed-`D_`-global store fns hit the
+`#base-register-vs-displacement` %lo-fold wall while their single-index sibling banked clean:
+`func_80071924` (2-index setter `D_8012F52C[idx][j]=v`) and `func_8007512C` (in-loop byte-init) both
+force gcc-2.7.2 to materialize the base where the ROM folds `%lo` into the store displacement (or the
+reverse), a documented no-source-lever/no-permuter wall; but `func_80071C74` (single-index setter, same
+struct array) banked first-build because there the `%lo` fold matches the ROM. The size/nfns model
+prices all three identically (tiny). Candidate `pick_target.py` tell: a pure store/init fn to a fixed
+`D_<addr>` global with EITHER two variable index terms OR a loop-carried base is coin-flip bankable
+(flag wall-risk), whereas a single-index fixed-global setter is reliably clean. Hard to price precisely
+(depends on which fold gcc picks); at minimum flag the multi-index/in-loop-base member as
+partial-bank-risk so the plan gate expects a carry, not a bank. Kin to the S158/S177/S183/S189
+regalloc/FP-DL partial-bank-expected follow-ups above. Golden-gated, off-cadence, not a mid-sprint edit.
+
 **Extend the detector to DL EMITTERS, not just FP (S190):** `src/main/func_8004E5A0.c` was a 3-fn
 one-tu the ranker surfaced smallest-first as a "+2 tractable" pick because 2 of 3 fns are 0-jal/0-FP —
 but they are `glistp++` **display-list emitters**, which are their OWN scheduling-wall class (the
@@ -4413,21 +4427,39 @@ by `/sprint-plan`:
   resolved `c-combined` member upstreams so the recover-extern is priced at the gate, not discovered
   at execution-time data-ref reconciliation. Not file-blocking (recover-extern is cheap in-execution).
 - _(osAiSetFrequency carry-over resolved and banked at S38 retroactive review)_
-- **Open (S225, in-progress mixed-partial, NOT a spike):** `src/main/func_80078910.c` (37-fn main-seg
-  `none` pack, subseg 0x53D10 flipped `c` at the S225 gate; rumble/shadow/effects + heap alloc/free
-  system). **7 banked** (the heap alloc/free/dispatch cluster `func_80078910`/`func_800789C8`/
-  `func_8007E234`/`func_8007E2B0`, the rumble twins `rumble_check_and_trigger`/
-  `shot_start_rumble_trigger`, and `func_80078D94` particle-init), 30 stubs remain. Quality 0/0/0/0,
-  **no carries.** Ranker re-surfaces it as a c-stub `remaining:N` continuation smallest-first; the
-  cheap non-FP vein is now mined. **Next vein (untried):** the 187-208i pure-logic tier
-  `func_8007D19C`/`func_8007DB08` (jal0) + `func_8007FEAC` (jal8). **Deferred (wall-class):** the FP
-  cluster `func_8007B054` (406i/224fp), `func_8007A6C8` (454i/195fp), `func_8007E980` (267i/142fp) +
-  the 79xxx fp fns (regalloc-nemesis); `draw_character_shadow` (239i, DL/shadow builder);
-  `func_8007B994` (735i state machine); `func_8007FE44` = caller-evict (inlined into
-  src/main/func_80070FD0.c, skip). File md5-candidate only when all 37 bank. **S225 levers (landed in
-  hazards.md):** `#counter-up-pointer-giv-fill-loop` (in-loop giv beats check_dbra_loop reversal) and
-  `#callee-prototype-is-load-bearing` (missing prototype → implicit-int scheduling flip; a cheap
-  source-side cause that masqueraded as a score-60 scheduling wall).
+- **Open (S227, in-progress mixed-partial, NOT a spike):** `src/main/func_80071370.c` (39-fn main-seg
+  `none` pack, subseg 0x4C770 flipped `c` at the S227 gate; string/struct-array/heap/DL glue). **8
+  banked** (`func_80074960` empty, `func_80073BF0` strlen, `func_80071C74` single-index struct-array
+  setter, `func_800718F4` 3-byte RGB setter, `func_80071C9C` struct getter over the 0x2C-stride
+  `D_8012F510` array, `func_80071954` 19-char case transform, `func_800715A0` 7× heap3_free teardown,
+  `func_80074CA8` PipeSync/SetPrimColor DL emitter), 31 stubs remain. Quality 0/0/3/0. **3 carries
+  (characterized, no-source-lever walls):** `func_800718C4` (`#local-alloc-qty-permutation` — counter/
+  giv v0/v1 swap on a word-store stride-0x2C count-12 init loop; 3 source forms identical);
+  `func_80071924` + `func_8007512C` (`#base-register-vs-displacement` — gcc folds `%lo` into the store
+  where the ROM materializes the base, and `li 0xff` vs `-1`; while the single-index sibling
+  `func_71C74` banked clean because there the fold matches). Ranker re-surfaces it as a c-stub
+  `remaining:N` continuation smallest-first, but the cheap sub-30i vein is now MINED. **Deferred
+  (wall-class):** `func_800760CC` (27i jtbl switch, `#switch-jtbl-dispatch`); the 36-80i tier
+  (`func_800747B0`/`func_80074840`/`func_800748D0` triplet — call unbanked `func_800738BC` + div-round;
+  `func_80074E5C` 40i `bnel` value-select) enters the regalloc/mid-logic wall-sensitive class; then the
+  140i+ mid-logic (`func_80072A08` 698i, `func_80071CE4` 841i, `func_8007580C` 399i) + FP fns
+  (`func_800754BC`/`func_8007515C`); `func_800719A0` = caller-evict (inlined into
+  src/overlay_10/func_ovl10_801F4A40.c, skip). File md5-candidate only when all 39 bank. Per the S224
+  plateau lesson, prefer a fresh pack / escalation over grinding this tail next sprint.
+- **Open (S225→S226, in-progress mixed-partial, NOT a spike):** `src/main/func_80078910.c` (37-fn
+  main-seg `none` pack, subseg 0x53D10 flipped `c` at the S225 gate; rumble/shadow/effects + heap
+  alloc/free system). **10 banked** (S225 heap alloc/free/dispatch cluster + rumble twins +
+  particle-init; S226 DL-emitter vein `func_8007DE9C`/`func_8007DFD0` billboard twins +
+  `func_8007CF10` offscreen-indicator), 27 stubs remain. Quality 0/0/0/0, **no carries.** The cheap
+  non-FP + low-FP-DL veins are now MINED (S226 stopped at cap; the tail is wall-class). **Deferred
+  (wall-class):** the 187-208i pure-logic tier `func_8007D19C`/`func_8007DB08` (jal0) + `func_8007FEAC`
+  (jal8) mid-logic base-register walls; the FP cluster `func_8007B054`/`func_8007A6C8`/`func_8007E980`
+  + the 79xxx fp fns (regalloc-nemesis); `draw_character_shadow` (DL/shadow builder); `func_8007B994`
+  (785i state machine); `func_8007FE44` = caller-evict (skip). File md5-candidate only when all 37
+  bank. **S225 levers (landed in hazards.md):** `#counter-up-pointer-giv-fill-loop` and
+  `#callee-prototype-is-load-bearing`. **S226 lesson:** a low-FP DL-emitter vein is TRACTABLE via stock
+  gbi macros (not wall-class). Per the S224 plateau lesson, prefer a fresh pack / escalation over
+  another smallest-first continuation of this mined pack.
 - **Open (S223→S224, in-progress mixed-partial, NOT a spike):** `src/main/func_8006A2C0.c` (45-fn main-seg
   `none` pack, subseg 0x456C0 flipped `c` at the S223 gate; mode/asset state + DL + sfx system). **20
   banked** (19 S223 tiny/getter/setter/mode-state + asset-load/free `func_8003E400.c` twins; +1 S224
