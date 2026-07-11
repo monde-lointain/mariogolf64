@@ -121,7 +121,36 @@ INCLUDE_ASM("asm/nonmatchings/main/func_80078910", func_8007B994);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80078910", func_8007C5D8);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80078910", func_8007CF10);
+typedef struct {
+  f32 unk_00;
+  u8 pad_04[0x4];
+  s32 unk_08;
+} ScreenMarker;
+
+extern s32 D_800FC8B8;
+extern s32 project_point_to_screen(f32, f32, s32, s32*);
+
+void func_8007CF10(Gfx** pgfx, ScreenMarker* m) {
+  Gfx* gfx = *pgfx;
+  s32 screen[6];
+  s32 z;
+
+  z = project_point_to_screen(m->unk_00, (f32)D_800FC8B8 * (1.0f / 1024.0f),
+                              m->unk_08, screen);
+  if ((f32)z < -3.0f && (f32)z > -60.0f) {
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
+    gDPSetCombineMode(gfx++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
+    gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, 0x3F);
+    gDPPipeSync(gfx++);
+    gSPScisTextureRectangle(gfx++, (screen[0] - 1) << 2, (screen[1] - 1) << 2,
+                            (screen[0] + 1) << 2, (screen[1] + 1) << 2,
+                            G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10);
+    gDPPipeSync(gfx++);
+  }
+  *pgfx = gfx;
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80078910", func_8007D19C);
 
