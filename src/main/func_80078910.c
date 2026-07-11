@@ -1,9 +1,13 @@
 #include "common.h"
 
 typedef struct {
-  u8 pad_00[0x3A];
+  u8 pad_00[0x28];
+  f32 unk_28;
+  u8 pad_2C[0xE];
   s8 unk_3A;
-  u8 pad_3B[0x5];
+  u8 pad_3B[0x1];
+  s8 unk_3C;
+  u8 pad_3D[0x3];
 } Particle; /* size 0x40 */
 
 extern Particle particle_array[40];
@@ -125,9 +129,38 @@ INCLUDE_ASM("asm/nonmatchings/main/func_80078910", draw_character_shadow);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80078910", func_8007DB08);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80078910", func_8007DE9C);
+extern Mtx D_FD8F0[];
+extern Vtx D_800C5338[];
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80078910", func_8007DFD0);
+void func_8007DE9C(Gfx** pgfx, Particle* p) {
+  Gfx* gfx = *pgfx;
+
+  gDPPipeSync(gfx++);
+  gDPSetPrimColor(gfx++, 0, 0, 0xE6, 0xE6, 0xE6, (u32)p->unk_28);
+  gSPMatrix(gfx++, &D_FD8F0[p->unk_3C], G_MTX_PUSH);
+  gSPVertex(gfx++, D_800C5338, 4, 0);
+  gDPPipeSync(gfx++);
+  gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
+  gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
+  gDPPipeSync(gfx++);
+  *pgfx = gfx;
+}
+
+extern Vtx D_800C5378[];
+
+void func_8007DFD0(Gfx** pgfx, Particle* p) {
+  Gfx* gfx = *pgfx;
+
+  gDPPipeSync(gfx++);
+  gDPSetPrimColor(gfx++, 0, 0, 0xE6, 0xE6, 0xE6, (u32)p->unk_28);
+  gSPMatrix(gfx++, &D_FD8F0[p->unk_3C], G_MTX_PUSH);
+  gSPVertex(gfx++, D_800C5378, 4, 0);
+  gDPPipeSync(gfx++);
+  gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
+  gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
+  gDPPipeSync(gfx++);
+  *pgfx = gfx;
+}
 
 typedef struct {
   u8 pad_00[0x27];
