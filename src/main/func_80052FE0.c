@@ -3,6 +3,8 @@
 extern void clear_animation_slot(s32 index);
 extern s32 func_800542A0(s32 index);
 extern s32 func_80054550(s32 id, s32 tag, s32 arg2);
+extern u8 polychara_state[];
+extern u8 D_801F43F0[];
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80052FE0", func_80052FE0);
 
@@ -12,6 +14,17 @@ INCLUDE_ASM("asm/nonmatchings/main/func_80052FE0", func_8005342C);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80052FE0", calculate_bone_matrices);
 
+/* clear_animation_slot: osSyncPrintf(fmt,index) then, if ((u32)index < 4),
+ * *(s32*)&polychara_state[index*0x18C] = -1 (clear the per-record sentinel at
+ * D_801F43F0+8). Body fully RE'd; carried INCLUDE_ASM as a 1-nop delay-slot
+ * reorg near-match. The ROM keeps a nop in the `beqz v0` delay slot; my build
+ * fills it with the fall-through `sll v0,s0,1`. The sibling get_character_state
+ * (identical bound+multiply shape, NO preceding call) fills the slot and
+ * MATCHES; the only structural difference is the preceding osSyncPrintf jal,
+ * which shifts the reorg-pass delay-slot decision
+ * (#delay-slot-fill-across-call). Not source-leverable (all valid C forms of a
+ * printf-then-guarded-store emit the fill); not permuter-reachable
+ * (post-schedule reorg). */
 INCLUDE_ASM("asm/nonmatchings/main/func_80052FE0", clear_animation_slot);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80052FE0", func_800542A0);
@@ -27,7 +40,14 @@ s32 func_80054310(void) {
   return 0;
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80052FE0", get_character_state);
+u8* get_character_state(s32 id) {
+  if ((u32)id < 4) {
+    if (*(s32*)&polychara_state[id * 0x18C] != -1) {
+      return &D_801F43F0[id * 0x18C];
+    }
+  }
+  return NULL;
+}
 
 void func_800543A4(void) {
   s32 i;
