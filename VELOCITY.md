@@ -725,6 +725,24 @@ Three honest caveats:
   banked (hazards.md #signed-divide): emit `%`/`/` directly, gcc's implicit `break 7`/`break 6` divide
   guards are byte-faithful — do NOT hand-write them. Retro applied 3 of 3 (#2 divide-guard lever →
   hazards.md; #1 empty-leaf stub-count note → agent-workflow.md; #3 cheap-leaf-depth ranker → BACKLOG).
+  S229: OPENED fresh `none` pack `func_80052FE0.c` (subseg 0x2E3E0, 15fn anim/character-state; PO chose it
+  over bgm/terrain-DL and `raycast_terrain` FP, on cheap-leaf-depth — ~8 sub-40i getter/setter/predicate
+  leaves, no DL reconstruction). Banked **0pt** (file 6/15, not md5-candidate, 9 stubs), **+6 hand-matched**,
+  **0 permuter**, **3 carried**, quality **0/0/3/0**. Fns: `func_800548DC` (tag=2 wrapper) + `func_800543A4`
+  (clear-slots loop) + `func_80054310` (any-active predicate) + `get_character_state` ((u32)id<4 sentinel
+  getter) + `func_800544B4` (club-kind switch, explicit-default lever) + `func_8005483C` (guMtxXFMF vec
+  transform, FPR float-zero store-order lever). Seed committed 3 (mixed-partial per-fn override, ranker
+  pts13, same as S215-S228); realized 5 (seed 3 + strong +6 cheap-leaf mining incl. a switch + an FP-transform
+  leaf the ranker priced wall-risk, offset by 3 no-lever near-matches), residual +2. 3 CARRIES all fully-RE'd
+  no-source-lever near-matches: `clear_animation_slot` (`#delay-slot-fill-across-call` — NEW sub-class: nop
+  kept in a guard delay slot after a printf jal, vs the no-call sibling `get_character_state` which fills it),
+  `func_800542A0` (`#local-alloc-qty-permutation`, a0↔a1 offset-vs-accumulator coloring swap), `func_800543DC`
+  (`#cross-jump-tail-merge`, 1-insn, permuter-candidate not hard wall). LESSON: S224/S227/S228 fresh-rotation
+  call re-validated a **4th** time. Two new positive levers banked (hazards.md): explicit `default:` re-assign
+  defeats the switch-default optimize_skip annul; named-`f32` float-zero keeps the FPR path AND source store
+  order. `contquery@99.99` coddog tag was a pure structural false-positive (0 mirrors). Retro applied 4 of 4
+  (#1 switch-default + #3 delay-slot-across-call + #2 FPR-float-zero → hazards.md; #4 fresh-rotation 4th + ranker
+  → BACKLOG).
 - **Regime:** `mirror` is a depleting minority (~22 % of ranked candidates: 56 mirror vs 194
   classical; 18 warm / 38 cold). The warm clean-singleton mirror pool is now **mined out** (S11
   plan gate: every top mirror candidate carries a blocking hazard), pushing the project onto the

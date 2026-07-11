@@ -100,7 +100,13 @@ regalloc/FP-DL partial-bank-expected follow-ups above. Golden-gated, off-cadence
 non-FP (getters/setters/predicates/glue), so the gate ranks the richest fresh pack without a manual
 per-`.s` instr-count pass. Pairs with the existing partial-bank-expected detectors (they price the
 wall-tail at 0-bank; this prices the cheap head at +1-bank each). Kin to the S158/S177/S183/S189/S227
-follow-ups above. Golden-gated, off-cadence, not a mid-sprint edit.
+follow-ups above. Golden-gated, off-cadence, not a mid-sprint edit. **S229 = 4th confirmation:**
+`func_80052FE0.c` (anim/character-state, hand-picked over bgm-DL and raycast on the same cheap-leaf-depth
+basis) banked +6 at 0 permuter before the FP/DL/mid-logic wall-class tail reasserted, with 3 walls in
+documented no-lever classes (#delay-slot-fill-across-call, #local-alloc-qty-permutation,
+#cross-jump-tail-merge). The `coddog-mirror:contquery.c@99.99` tag on the pack was a pure STRUCTURAL
+false-positive (0 fns were contquery mirrors) — reinforces pricing the non-lib-`func_`-callee /
+fncount-mismatch tell to DEWEIGHT such coddog rows on a fresh classical pack, not route it to mirror.
 
 **Extend the detector to DL EMITTERS, not just FP (S190):** `src/main/func_8004E5A0.c` was a 3-fn
 one-tu the ranker surfaced smallest-first as a "+2 tractable" pick because 2 of 3 fns are 0-jal/0-FP —

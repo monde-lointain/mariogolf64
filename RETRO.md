@@ -25,6 +25,40 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 229 — open fresh pack func_80052FE0.c (main none pack) — 2026-07-11
+- Increment: 0 files banked / **+6 functions matched** (`func_80052FE0.c` 0/15 → 6/15 C, 9 stubs
+  remain; ROM SHA-1 green e2c4e7a…). OPENED a FRESH `none` pack (0x2E3E0, flipped asm→c) — PO chose it
+  over bgm/terrain-DL and `raycast_terrain` (FP, no cheap leaves), on cheap-leaf-depth (~8 sub-40i
+  getter/setter/predicate leaves, no DL reconstruction). One yaml flip, no symbol_addrs/sync-names/mk edit.
+- Quality: 0 stuck-far / 0 permuter-run / 3 carried / 0 re-opened.
+- Seed: committed 3pt; banked 0pt (file partial 6/15, per-file all-or-nothing); regime classical/mixed.
+  Realized ~5 (seed 3 + strong +6 cheap-leaf mining incl. a switch + FP-transform leaf, − 3 no-lever
+  near-matches), residual +2. Mixed-partial per-fn override (ranker pts13), same as S215-S228.
+- Banked (+6): `func_800548DC` (tag=2 wrapper) · `func_800543A4` (clear-slots loop) · `func_80054310`
+  (any-active predicate) · `get_character_state` (`(u32)id<4` sentinel getter, 1 fix: unsigned-bounds
+  sltiu) · `func_800544B4` (club-kind switch; explicit `default: result=-1` lever) · `func_8005483C`
+  (guMtxXFMF vec transform; FPR float-zero store-order lever).
+- What helped: cheap-leaf-depth pick (4th fresh-rotation confirmation, S224/227/228 lineage). Two NEW
+  positive levers: (a) explicit `default: var=DEFAULT;` in a small switch defeats the reorg optimize_skip
+  branch-likely annul + routes through the common exit (`func_800544B4`); (b) named `f32 z=0.0f;` local
+  keeps the FPU zero-store path (`mtc1`+`swc1`) AND source store order, where plain `out[i]=0.0f` folds to
+  integer `sw zero` and chained assignment reverses order (`func_8005483C`). `contquery@99.99` coddog tag
+  was a pure structural false-positive as predicted — 0 fns were mirrors.
+- Friction: 3 no-source-lever near-matches consumed disproportionate time relative to +1-bank value —
+  `clear_animation_slot` (NEW `#delay-slot-fill-across-call`: printf jal shifts the guard delay-slot fill
+  vs the no-call sibling), `func_800542A0` (`#local-alloc-qty-permutation` a0↔a1 offset/accumulator swap;
+  permuter skipped, 0 project cracks), `func_800543DC` (`#cross-jump-tail-merge`, 1-insn; `==` merges the
+  post-loop -1 return, `!=` merges the loop-exit — no source form splits them; permuter-candidate). All
+  fully RE'd with body documented in-file; the mid-logic/FP tail (DL builder lead + FP matrix + bone-matrices)
+  deferred per S224 wall-class guidance.
+- Applied: 4 of 4 — #1 switch explicit-default lever → hazards.md (optimize_skip variant); #2 FPR float-zero
+  store-order → hazards.md (new section); #3 `#delay-slot-fill-across-call` → hazards.md (new section);
+  #4 fresh-rotation 4th confirmation + cheap-leaf-depth ranker reinforcement → BACKLOG.md.
+- Carry-over: `func_80052FE0.c` stays open (9 stubs: 3 carried near-matches + 6 deferred FP/DL/mid-logic:
+  `func_8005470C` S158-FP matrix, `calculate_bone_matrices` 783i FP, `func_80052FE0` DL-builder lead,
+  `func_80054550` 111i, `func_800530FC` 204i, `func_8005342C` 118i). Per plan: prefer a fresh pack /
+  escalation next sprint over grinding this tail.
+
 ## Sprint 228 — open fresh pack func_800453E0.c (main none pack) — 2026-07-11
 - Increment: 0 files banked / **+8 functions matched** (`func_800453E0.c` 0/40 → 11/40 C, 29 stubs
   remain; ROM SHA-1 green e2c4e7a…). +8 hand-matched plus 3 free empty-leaf auto-C (2i `jr ra;nop` leaves

@@ -119,6 +119,8 @@ The hazard families below group the sections that follow. Each links to its exis
 - [setup-block instruction order (a pre-base loop-limit const must be a variable)](#setup-block-instruction-order)
 - [struct-copy block-move path (alignment picks lwl/lwr vs aligned word-loop)](#struct-copy-block-move-path)
 - [reorg optimize_skip annulled bnel (single-skipped-insn branch-likely)](#reorg-optimize_skip-annulled-bnel)
+- [delay-slot-fill-across-call (printf-then-guarded-store keeps a nop the no-call sibling fills)](#delay-slot-fill-across-call-printf-then-guarded-store-keeps-a-nop-the-no-call-sibling-fills)
+- [FPR float-zero store-order (mtc1+swc1 vs folded sw zero, and store-order control)](#fpr-float-zero-store-order-mtc1swc1-vs-folded-sw-zero-and-store-order-control)
 - [nested-guard range-unfold + comparison-operand-order (blez/slti + branch polarity)](#nested-guard-range-unfold--comparison-operand-order-blezslti--branch-polarity)
 - [switch tight merged-default (shared case-0/default label + case-1 last)](#switch-tight-merged-default)
 - [grid-counter double-loop (non-zero-cell counter idiom)](#grid-counter-double-loop)
@@ -6178,6 +6180,50 @@ put the single skipped store in the ELSE arm — `if (x >= 6) { … } else r = x
 fall-through is one skippable insn and `optimize_skip` fires the annulled `bnel`.
 
 **Provenance.** S209 D308 (banked, no permuter).
+
+**Variant — explicit `default:` re-assignment defeats the switch-default annul (S229
+`func_800544B4`).** A small switch that maps `case k: r = k;` for a few values with a pre-init default
+(`s32 r = -1; switch(x){case 0:r=0;…}`) makes the DEFAULT sub-paths skip the value-set (r already holds
+the default), which fires `optimize_skip`: the target's plain `j <common exit>; li r,DEFAULT` becomes a
+branch-LIKELY that annuls the lone `li r,DEFAULT`. Add an explicit `default: r = DEFAULT; break;` so each
+default sub-path re-materializes DEFAULT and routes through the switch's common exit — the re-assignment
+is no longer a single skippable insn, so `optimize_skip` is gated out and the plain branch + `li` form
+returns. The club-kind switch (`case 0..3 -> 0..3`, else `-1`) matched only with the explicit
+`default: result = -1`. Sibling of [#switch-tight-merged-default](#switch-tight-merged-default): both turn
+on which store lands immediately before the shared exit label.
+
+## delay-slot-fill-across-call (printf-then-guarded-store keeps a nop the no-call sibling fills)
+
+**Symptom (S229 `clear_animation_slot` vs `get_character_state`).** Two leaves share the identical
+`(u32)i < 4` bound + `i*STRIDE` shift-multiply + guarded store shape. The one with NO preceding call
+(`get_character_state`) fills its `beqz` guard delay slot with the fall-through `sll` and MATCHES; the
+one with a preceding VARARGS jal (`clear_animation_slot`: `osSyncPrintf(fmt,i); if((u32)i<4) arr[i*K]=v;`)
+keeps a NOP in the `beqz` delay slot in the ROM, while the build fills it — a 1-nop miss.
+
+**Root cause.** The reorg (`-fdelayed-branch`) pass's delay-slot decision for the guard branch is
+perturbed by the preceding call: the basic-block boundary the call introduces shifts which fall-through
+insn the filler will steal, so the ROM leaves the slot empty where the no-call sibling fills it. A
+post-schedule reorg effect, not a C-level construct.
+
+**Verdict.** Not source-leverable (every valid C form of a printf-then-guarded-store emits the fill) and
+not permuter-reachable (post-schedule). Carry the fn INCLUDE_ASM as a fully-RE'd near-match, bank the
+no-call sibling. A sub-class of the delay-slot family ([#gas-set-reorder-delay-slot-fill](#gas-set-reorder-delay-slot-fill),
+[#reorg-optimize_skip-annulled-bnel](#reorg-optimize_skip-annulled-bnel)); diagnose by checking whether an
+otherwise-identical no-call sibling in the same pack matches before calling it a wall.
+
+## FPR float-zero store-order (mtc1+swc1 vs folded `sw zero`, and store-order control)
+
+**Symptom (S229 `func_8005483C`).** Zeroing a vec3 (`out[0..2] = 0.0f`) that the ROM writes via the FPU
+(`mtc1 zero,$f0` then `swc1 $f0,…` ×3) instead folds to integer `sw zero,…` in the build, because the
+`0.0f` bit pattern is `0x00000000` and gcc's SFmode-const-store optimizes a literal float-zero store to a
+GPR store. And the naive fixes trade one miss for another: a chained `out[2]=out[1]=out[0]=0.0f` keeps the
+FPR path but stores RIGHT-TO-LEFT (`0,4,8`), while three separate `out[i]=0.0f` statements fold to integer
+`sw zero`.
+
+**Lever.** Assign through a NAMED `f32` local: `f32 z = 0.0f; out[2] = z; out[1] = z; out[0] = z;`. The
+local makes each store an FPR-reg store (`mtc1`+`swc1`, not the const-fold to `sw zero`), and separate
+statements preserve SOURCE store order — so it matches both the FPR path AND the ROM's `8,4,0` order.
+Reusable for any FPU zero-fill where the ROM keeps `swc1` and a specific store order.
 
 ## nested-guard range-unfold + comparison-operand-order (blez/slti + branch polarity)
 
