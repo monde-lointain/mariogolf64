@@ -5,6 +5,8 @@ extern s32 func_800542A0(s32 index);
 extern s32 func_80054550(s32 id, s32 tag, s32 arg2);
 extern u8 polychara_state[];
 extern u8 D_801F43F0[];
+extern u8 D_801F4424[];
+extern s32 D_800B67F0;
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80052FE0", func_80052FE0);
 
@@ -27,6 +29,26 @@ INCLUDE_ASM("asm/nonmatchings/main/func_80052FE0", calculate_bone_matrices);
  * (post-schedule reorg). */
 INCLUDE_ASM("asm/nonmatchings/main/func_80052FE0", clear_animation_slot);
 
+/* func_800542A0: returns 1 if (u32)index >= 4, or the per-record sentinel
+ * polychara_state[index*0x18C] != -1, or (u32)(D_800B67F0 -
+ * D_801F4424[index*0x18C]) < 2; else 0. Body fully RE'd; the accumulator form
+ * below matches STRUCTURE + LENGTH exactly, leaving only an a0<->a1 coloring
+ * swap: the ROM holds the index*0x18C offset in a0 and the 0/1 accumulator in
+ * a1; my build swaps them. #local-alloc-qty-permutation (REG_ALLOC_ORDER
+ * undefined -> ascending default; the higher-refcount accumulator greedily
+ * grabs a0). No source lever flips it (explicit off-temp, inverted guard both
+ * tried; inverting also breaks the branch layout); permuter skipped for this
+ * class (0 project cracks). Carried INCLUDE_ASM.
+ *
+ *   s32 func_800542A0(s32 index) {
+ *     s32 r;
+ *     if ((u32)index >= 4) return 1;
+ *     r = 0;
+ *     if (*(s32*)&polychara_state[index * 0x18C] != -1) r = 1;
+ *     else if ((u32)(D_800B67F0 - *(s32*)&D_801F4424[index * 0x18C]) < 2) r =
+ * 1; return r;
+ *   }
+ */
 INCLUDE_ASM("asm/nonmatchings/main/func_80052FE0", func_800542A0);
 
 s32 func_80054310(void) {
