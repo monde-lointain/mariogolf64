@@ -4908,6 +4908,39 @@ combined levers cracked `func_80058C58` (byte-exact after both):
    `*(volatile f32*)(cs+0x38)` to force the ROM's `swc1;lwc1` reload (the #volatile-view-cse-reload lever
    above, per-access cast).
 
+### Temp-var store-order lever — pin an indexed/computed load between neighboring global zero-stores (S223 `func_8006A2C0.c`)
+
+**Trigger:** a fn reads a computed/indexed value (`*(s32*)(p + i*STRIDE + C)`, or a field read after a
+call) then stores it to a global that sits AMONG other same-region zero-stores, and the ROM schedules the
+load at a specific position (e.g. after the block's other zero-stores, or after a `jal`), but the direct
+`G_dst = <load>;` form makes the build store `G_dst` at the load's textual position — one or two
+zero-stores land on the wrong side. This is the flip-side of the "store last" delay-slot lever above: here
+you want the LOAD pinned, not the store.
+
+**Fix:** introduce an explicit local at the target's load position and store from it:
+```c
+D_D0 = 0; D_D4 = 0; D_D8 = 0; D_E4 = 0;      /* zero-stores the ROM emits BEFORE the load */
+s32 v = *(s32*)(p + scenario_mode_id * 116 + 0xEA4);   /* load pinned here */
+D_E0 = 0; D_E8 = 0;                           /* zero-stores AFTER the load */
+D_DC = v;                                     /* loaded-value store lands last */
+```
+The direct `D_DC = *(s32*)(...)` folds the load down to `D_DC`'s textual slot, emitting the neighboring
+`D_E0/E8` zero-stores before the multiply/load (target has them after). Same lever with a field read after
+a call: `t = e->field; D_x = 0; D_y = t;` pins the load before the `D_x=0` store. Matched
+`func_8006DDCC`/`func_8006DE44` (stride-116 table read) + `func_8006BA24` (post-call field read) in one
+sprint. Kin to [#mem-in-struct-scheduling-lever](#mem-in-struct-scheduling-lever) but for plain-global
+store ORDER, no retype needed.
+
+### `(u16 & 0x8000)` tail-return test collapses to `srl` (S223 `func_8006C8CC`, NOTE — no fix found)
+
+A cascaded predicate whose LAST arm is `if (u16val & 0x8000) return 1; return 0;` byte-matches every
+earlier arm (each a `beqz/bnez GLOBAL` + `li v0,1` branch) but the ROM keeps the tail as
+`andi v0,v0,0x8000; bnez; li v0,1 / move v0,zero` (branch form) while GCC 2.7.2 collapses it to
+`srl v0,v0,0xf` (single top-bit of a 16-bit value → shift-to-0/1). Single-return-var and explicit
+`!= 0` both still collapse. No source lever found in 2 tries; carried as a minor srl-vs-branch near-match
+(below the smallest-first threshold). Candidate future `fold.c` bit-extract compiler-source note if the
+pattern recurs.
+
 ## mem-in-struct scheduling lever (model a fixed global as a struct/array member)
 
 **Trigger:** a classical fn's global load/store schedules differently than the ROM and every body

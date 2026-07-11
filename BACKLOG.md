@@ -4413,6 +4413,24 @@ by `/sprint-plan`:
   resolved `c-combined` member upstreams so the recover-extern is priced at the gate, not discovered
   at execution-time data-ref reconciliation. Not file-blocking (recover-extern is cheap in-execution).
 - _(osAiSetFrequency carry-over resolved and banked at S38 retroactive review)_
+- **Open (S223, in-progress mixed-partial, NOT a spike):** `src/main/func_8006A2C0.c` (45-fn main-seg
+  `none` pack, subseg 0x456C0 flipped `c` at the S223 gate; mode/asset state + DL + sfx system). **19
+  banked S223** (tiny getter/setter/predicate leaves + asset-load/free `func_8003E400.c` twins +
+  mode-state resets + `func_8006BA24` slot-select), 26 stubs remain. The ranker re-surfaces it as a
+  c-stub `remaining:N` continuation smallest-first (once the tractable vein is mined it moves to
+  `--include-stuck`, as func_80095A10/get_tile_attribute did).
+  **Carries (characterized):** `func_8006C8CC` (S223 near-match — cascaded predicate byte-exact except the
+  tail `(u16 & 0x8000)` test collapses to `srl 15` vs ROM `andi;bnez;li`; see `#temp-var-store-order` /
+  the srl-fold NOTE in docs/hazards.md); `func_8006D164` (S223 near-match — strided u16 4×7 double-loop
+  copy, body + globals exact, residual = outer-limit de-hoist + IV coloring, `#top-tested-loop-goto-local-
+  hoist`). **Deferred (wall/large):** `func_8006AD1C` (`0x92492493` signed-divide `#local-alloc-qty-
+  permutation` wall family, func_80098CD8 kin); `func_8006DF84` (branch-likely + `D_800FF4D0` struct-base);
+  the large DL builders (`func_8006A548`/`func_8006B5D8` raw-word F3DEX2, `#display-lists`), `func_8006BA94`
+  (492B sfx/menu dispatch), and the mid-logic tail (CE88/D058/D214/D38C/D4EC/DEB4/DFF0 + the big
+  A2C0/A4A0/A5E4/A84C/BC80/C484/C918/D6D0/E210). `func_8006CD50` = caller-evict (inlined into
+  src/main/func_80071220.c, skip). File md5-candidate only when all 45 bank. **S223 lesson:** a FRESH
+  main-seg `none` pack's tiny+small vein banks FAR cheaper than a wall-tail continuation (+19 in one
+  sprint vs S221/S222's +1 each); the store-order temp-var lever recurred 3x.
 - **Open (S220→S222, in-progress mixed-partial, NOT a spike):** `src/main/func_80095A10.c` (31-fn main-seg
   `none` pack, subseg 0x70E10; float-clamp/state system). 9 banked (7 S220 + 1 S221 `func_80098D70` + 1
   S222 `func_80095C10` DL builder), 22 stubs remain. The ranker re-surfaces it as a c-stub continuation

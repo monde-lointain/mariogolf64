@@ -624,6 +624,21 @@ Three honest caveats:
   0.97 = permuter N/A). Retro applied **2/2** (both new levers). LESSON: a DL builder's match hinges on
   the SYMBOL ANCHOR + the `if`-polarity block order, both codegen-load-bearing and source-steerable;
   a tiny FP predicate can still be a hard local-alloc wall.
+  S223: OPENED `func_8006A2C0.c` (45fn `none` classical pack, subseg 0x456C0 flipped `c` at the gate;
+  fresh-pack mixed-partial mine, NOT a continuation). Banked **0pt** (file 19/45, not md5-candidate, 26
+  stubs remain), **+19 matched**, **0 permuter**, **2 carried** (`func_8006C8CC` srl-fold,
+  `func_8006D164` loop-regalloc). Quality **0/0/2/0**. Seed committed 3 (partial-bankable per-fn, ranker
+  pts13 override, same as S215-S222); realized 5 (seed 3 + 2 carries + re-attempts/novel-gotcha, −1
+  offset from 8 first-build tiny leaves), residual +2. Method = smallest-first per-fn inline mine, NO
+  subagent fan-out: tiny getter/setter/predicate leaves (12-20B) byte-exact first-build, then the
+  asset-load/free + mode-state vein 1-2 tries each. NOVEL LEVER (recurred 3x): the temp-var store-order
+  lever — pin an indexed/computed load into an explicit local between neighboring global zero-stores so
+  the loaded-value store lands last (matched `func_8006DDCC`/`func_8006DE44` stride-116 table read +
+  `func_8006BA24` post-call field read); the direct `G = <load>` form hoists the load to the store's
+  textual slot. LESSON: a fresh main-seg `none` pack's tiny+small vein banks FAR cheaper than a
+  wall-tail continuation (+19 vs the prior 2 sprints' +1 each); the ranker's `--include-stuck` gate
+  correctly signaled the OLD files were mined to walls. Retro applied **2/2** (store-order lever +
+  C8CC srl-fold note). +19 is the most productive single sprint of the mixed-partial phase.
   Rolling-5 (S34+S37+S39+S42+S43): seed 3.4 pt/sprint (17/5), realized 2.8 pt/sprint (14/5). S31 nuGfxInit is the first over-seed classical fn (+3 residual); rubric needs +1 for double-novel-gotcha libnusys classical targets. S42 defines-data verbatim-body drop: realized 2 = seed 3 − 1 (the fast path makes a defines-data leaf bank like a mirror) — confirms the −1 verbatim-first-try rule extends to known-edit-mirror defines-data, not just classical seeds. S43 is the new residual floor (−2): both gbpak fns were classical-FLAGGED (jal-count-mismatch) but proved pure verbatim mirrors once the macro-FP was stripped — the seed over-priced them because the hazard was a tooling artifact, now fixed in `_c_jal_count`, so future macro-heavy libultra leaves should seed lower.
 - **Regime:** `mirror` is a depleting minority (~22 % of ranked candidates: 56 mirror vs 194
   classical; 18 warm / 38 cold). The warm clean-singleton mirror pool is now **mined out** (S11

@@ -25,6 +25,34 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 223 — func_8006A2C0.c fresh-pack mixed-partial mine — 2026-07-10
+- Increment: 0 files banked / **+19 functions matched** (`func_8006A2C0.c` 19/45, 26 stubs remain; ROM
+  SHA-1 green e2c4e7a…). Fresh 45fn `none` pack opened this sprint (subseg 0x456C0 flipped `c` at gate).
+- Quality: 0 stuck-far / 0 permuter / **2 carried** (`func_8006C8CC`, `func_8006D164`) / 0 re-opened.
+- Seed: committed 3pt (partial-bankable per-fn, ranker pts13 override); banked 0pt (mixed-partial,
+  per-file all-or-nothing); realized 5 (seed 3 + 2 carries + re-attempts, −1 from 8 first-build leaves),
+  residual +2; regime classical/mixed.
+- What helped: smallest-first per-fn INLINE mine, no subagent fan-out. 8 tiny getter/setter/predicate
+  leaves (12-20B) byte-exact first-build; asset-load/free vein banked off the `func_8003E400.c` twin
+  (`u8 sp10[0x20]` + heap3_alloc/free); mode-state resets banked 1-2 tries. NOVEL LEVER (3x): temp-var
+  store-order — pin an indexed/computed load into a local BETWEEN neighboring global zero-stores so the
+  loaded-value store lands last (`func_8006DDCC`/`DE44` stride-116 table read + `func_8006BA24` post-call
+  field read); direct `G = <load>` hoists the load to the store's slot. Same-TU forward-decl
+  (`func_8006B54C`) blocked the -O2 inline so the caller `jal`s it.
+- Friction: `func_8006C8CC` — cascaded predicate byte-exact except the tail `(u16 & 0x8000)` test; GCC
+  2.7.2 collapses it to `srl v0,v0,0xf` while ROM keeps `andi 0x8000; bnez; li 1` (single-return-var +
+  explicit `!=0` both still collapse). `func_8006D164` — strided u16 4×7 double-loop copy: body + all
+  trailing globals byte-exact, residual = outer loop de-hoists the limit `li v0,4` INSIDE the loop + IV
+  register coloring (`#top-tested-loop-goto-local-hoist` / `#indexed-vs-pointer-loop-strength-reduction`).
+  Both minor near-matches, carried below the smallest-first threshold.
+- Applied: 2 of 2 — #1 temp-var store-order lever (→ docs/hazards.md, after the jal-delay-slot store
+  subsection); #2 C8CC srl-fold note (→ docs/hazards.md, same neighborhood, NOTE-only).
+- Carry-over: `func_8006A2C0.c` (26 stubs) — carries `func_8006C8CC` (srl-fold), `func_8006D164`
+  (loop-regalloc); deferred `func_8006AD1C` (`0x92492493` `#local-alloc-qty` divide wall), `func_8006DF84`
+  (branch-likely + struct-base), the large DL/dispatch/logic tail, `func_8006CD50` (caller-evict).
+
+---
+
 ## Sprint 222 — func_80095A10.c predicate + DL builder (mixed-partial continuation) — 2026-07-10
 - Increment: 0 files banked / **+1 function matched** (`func_80095A10.c` 9/31, 22 stubs remain; ROM
   SHA-1 green e2c4e7a…). `func_80095C10` byte-exact; `func_80098C6C` carried.
