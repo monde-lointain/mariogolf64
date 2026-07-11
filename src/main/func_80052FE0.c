@@ -7,6 +7,8 @@ extern u8 polychara_state[];
 extern u8 D_801F43F0[];
 extern u8 D_801F4424[];
 extern s32 D_800B67F0;
+extern s32 D_800C1DEC;
+extern void* get_club_param(u32 id);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80052FE0", func_80052FE0);
 
@@ -81,7 +83,35 @@ void func_800543A4(void) {
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80052FE0", func_800543DC);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80052FE0", func_800544B4);
+s32 func_800544B4(s32 arg0, s32 arg1) {
+  u8* cs;
+  s16 kind;
+  s32 result = -1;
+
+  cs = get_character_state(arg0);
+  if (cs != NULL) {
+    D_800C1DEC = *(s32*)(cs + 8);
+    kind = *(s16*)((u8*)get_club_param(arg1) + 0x24);
+    switch (kind) {
+      case 0:
+        result = 0;
+        break;
+      case 1:
+        result = 1;
+        break;
+      case 2:
+        result = 2;
+        break;
+      case 3:
+        result = 3;
+        break;
+      default:
+        result = -1;
+        break;
+    }
+  }
+  return result;
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80052FE0", func_80054550);
 
