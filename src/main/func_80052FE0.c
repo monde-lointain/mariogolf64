@@ -82,6 +82,35 @@ void func_800543A4(void) {
   }
 }
 
+/* func_800543DC(arg0, arg1) -> s32 (extern-typed void by its lone caller in
+ * func_80054900.c, which ignores the return). cs = get_character_state(arg0);
+ * NULL -> -1. arg1 == -1: write G_ENDDL (0xDF000000) + 0 into cs[0]->dl[0..1],
+ * return 0. Else scan cs[0]->slots[0..arg1) for the -1 sentinel (return -1 on
+ * hit); then the slots[arg1] slot: if -1 return -1, else write G_DL branch
+ * (0xDE000000) into dl[0] and slots[arg1] into dl[1], return 0. Body fully
+ * RE'd; the form below matches STRUCTURE, FRAME, and the loop exactly, leaving
+ * one instruction: the ROM keeps the post-loop `slots[arg1]==-1` return
+ * SEPARATE (reusing the compare's v0=-1, bare-epilogue jump, nop delay) while
+ * my build cross-jump-merges it into the shared `li v0,-1` block (delay filled
+ * with the next lui). #cross-jump-tail-merge: ROM's EBB layout links the
+ * compare's -1 to the return (CSE across the extended BB) so the li is skipped;
+ * my layout does not. The `==` form merges the post-loop return; inverting to
+ * `!=` merges the loop-exit return into the null path instead (+8) -- neither
+ * source form splits {null,loop-exit}(merged) from {post-loop}(separate) the
+ * way the ROM does. Permuter-candidate (statement-reorder / EBB perturbation),
+ * not a hard wall; carried INCLUDE_ASM as a stretch near-match.
+ *
+ *   typedef struct { u8 pad0[0xC]; u32* dl; s32* slots; } CharSub;  // dl@0xC,
+ * slots@0x10 s32 func_800543DC(s32 arg0, s32 arg1) { CharSub** cs =
+ * (CharSub**)get_character_state(arg0); s32 i; if (cs == NULL) return -1; i =
+ * 0; if (arg1 == -1) { cs[0]->dl[0] = 0xDF000000; cs[0]->dl[1] = 0; return 0; }
+ *     while (i < arg1) { if (cs[0]->slots[i] == -1) return -1; i++; }
+ *     if (cs[0]->slots[i] == -1) return -1;
+ *     cs[0]->dl[0] = 0xDE000000;
+ *     cs[0]->dl[1] = cs[0]->slots[i];
+ *     return 0;
+ *   }
+ */
 INCLUDE_ASM("asm/nonmatchings/main/func_80052FE0", func_800543DC);
 
 s32 func_800544B4(s32 arg0, s32 arg1) {
