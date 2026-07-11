@@ -25,6 +25,37 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 226 — continue func_80078910.c (DL-emitter vein) — 2026-07-10
+- Increment: 0 files banked / **+3 functions matched** (`func_80078910.c` 7/37 → 10/37, 27 stubs
+  remain; ROM SHA-1 green e2c4e7a…). CONTINUED the in-progress pack — PO chose continuation over a
+  fresh pack / escalation (pack not plateaued: S225 banked clean and stopped at cap). Zero enablers
+  (subseg already `c`).
+- Quality: 0 stuck-far / 0 permuter / **0 carried** / 0 re-opened. 2 of 3 first-build; 1 one-iteration
+  (`func_8007CF10`, frame-size fix only).
+- Seed: committed 3pt (mixed-partial per-fn override, ranker pts13, same as S215-S225); banked 0pt
+  (per-file all-or-nothing, file still partial 10/37); realized 3 (seed held — clean sprint, first-
+  build-heavy −1 offset balanced by genuine DL/Scis-macro decode + proto RE), residual 0; regime
+  classical/mixed.
+- What helped: a low-FP DL-emitter vein is TRACTABLE, not wall-class — the twins `func_8007DE9C`/
+  `func_8007DFD0` (8-cmd F3DEX2 billboard, differ only in vtx data) banked first-build, and the
+  stretch `func_8007CF10` one-iteration. Going STRAIGHT to stock gbi macros (each word verified vs
+  gbi.h + `gfxdis.f3dex2 -x -w`) beat the raw-word intermediate. The stretch's three "wall tells" all
+  dissolved: `MAX((s16),0)`+`0xFFC` texrect clamp = stock `gSPScisTextureRectangle`; declaring
+  `project_point_to_screen(f32,f32,s32,s32*)` avoided the missing-proto implicit-int flip; the FP
+  depth-cull guards emitted from a plain `if (z<-3 && z>-60)`.
+- Friction: `func_8007CF10` first build missed only on frame size (target 0x38 vs 0x28) — the
+  `project_point_to_screen` out buffer is 6 words, not the 2 I first reserved; `s32 screen[6]` fixed it
+  byte-exact. Minor; caught immediately by the in-tree asm-differ (body was already identical).
+- Applied: 2 of 4 — #2 (Scis-texrect hazard note) + #3 (gfxdis→stock-macro primary path) applied to
+  `docs/hazards.md #display-lists`. #1 (`dl-emitter-tractable` ranker signal, golden-gated off-cadence)
+  + #4 (`screen[6]`→named struct, blocked on `project_point_to_screen` RE) PO-accepted → recorded as
+  BACKLOG follow-ups.
+- Carry-over: none. `func_80078910.c` continues (27 stubs: FP-walls, `func_8007B994` 785i state
+  machine, mid-logic base-register walls func_8007D19C/DB08/FEAC). PO open question: continue the pack
+  vs rotate to a fresh pack next sprint given the remaining tail is all wall-class.
+
+---
+
 ## Sprint 225 — open fresh pack func_80078910.c (rumble/shadow/effects) — 2026-07-10
 - Increment: 0 files banked / **+7 functions matched** (`func_80078910.c` 7/37, 30 stubs remain; ROM
   SHA-1 green e2c4e7a…). Opened a FRESH `none` pack (0x53D10) — PO chose it over raycast-FP /

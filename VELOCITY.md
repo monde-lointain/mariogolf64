@@ -672,6 +672,22 @@ Three honest caveats:
   0/0/0/0, vs S224's +1/3-walls continuation of a plateaued pack. The +7 also shows a call-glue
   CLUSTER (alloc + free + per-block dispatch sharing D_ globals) banks as a coherent slice once the
   first member's externs/struct model is established.
+  S226: CONTINUED `func_80078910.c` (mined the untried low-FP DL-emitter vein; PO chose continuation
+  over fresh pack / escalation — pack not plateaued, S225 banked clean at cap). Banked **0pt** (file
+  10/37, not md5-candidate, 27 stubs), **+3 matched**, **0 permuter**, **0 carried**, quality
+  **0/0/0/0**. Fns: `func_8007DE9C`/`func_8007DFD0` (F3DEX2 billboard DL-emitter twins, first-build
+  both) + `func_8007CF10` (offscreen-indicator: `project_point_to_screen` depth-cull +
+  `gSPScisTextureRectangle` box, one-iteration — body byte-identical first build, only frame off 0x10
+  → `s32 screen[6]` out buffer). Seed committed 3 (mixed-partial per-fn override, ranker pts13, same
+  as S215-S225); realized 3 (seed held: clean sprint, first-build-heavy −1 offset balanced by genuine
+  RE — DL/Scis-macro decode + missing-proto decl), residual 0. LESSON: a low-FP **DL-emitter vein is
+  TRACTABLE, not wall-class** — the S225 profiler mis-deferred these over incidental fp ops; going
+  straight to STOCK gbi macros (each word verified vs gbi.h / `gfxdis.f3dex2`) matched first/near-first
+  build, no raw-word intermediate. All 3 `func_8007CF10` "wall tells" (branch-likely guards / texrect
+  coord-narrow / missing-proto callee) resolved cleanly: the `MAX((s16),0)`+`0xFFC` clamp is the STOCK
+  `gSPScisTextureRectangle` (scissored variant), and declaring the callee proto avoided the implicit-int
+  flip. Doc edits applied (hazards.md #display-lists: Scis-texrect note + static-emitter stock-macro
+  primary path); `dl-emitter-tractable` ranker signal + `screen[6]` struct refine → BACKLOG (PO-accepted).
   Rolling-5 (S34+S37+S39+S42+S43): seed 3.4 pt/sprint (17/5), realized 2.8 pt/sprint (14/5). S31 nuGfxInit is the first over-seed classical fn (+3 residual); rubric needs +1 for double-novel-gotcha libnusys classical targets. S42 defines-data verbatim-body drop: realized 2 = seed 3 − 1 (the fast path makes a defines-data leaf bank like a mirror) — confirms the −1 verbatim-first-try rule extends to known-edit-mirror defines-data, not just classical seeds. S43 is the new residual floor (−2): both gbpak fns were classical-FLAGGED (jal-count-mismatch) but proved pure verbatim mirrors once the macro-FP was stripped — the seed over-priced them because the hazard was a tooling artifact, now fixed in `_c_jal_count`, so future macro-heavy libultra leaves should seed lower.
 - **Regime:** `mirror` is a depleting minority (~22 % of ranked candidates: 56 mirror vs 194
   classical; 18 warm / 38 cold). The warm clean-singleton mirror pool is now **mined out** (S11

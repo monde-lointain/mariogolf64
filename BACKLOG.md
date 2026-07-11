@@ -4514,6 +4514,21 @@ by `/sprint-plan`:
   standalone-8-aligned tables (S219: 1 of 4 banked). No plain-tractable stub remains; each further bank
   needs a wall break (FP-regalloc fan-out, an interleaved-rodata co-bank to unwall a jtbl, or the
   IV-bias/phantom-addend GCC-source dives). File md5-candidate only when all 44 bank.
+- **Ranker follow-up (tracked, S226, off-cadence golden-gated; PO-accepted at S226 review).** A low-FP
+  **DL-emitter vein is TRACTABLE, not wall-class** — the OPPOSITE of the regalloc-heavy follow-ups above.
+  S226 banked 3 (`func_8007DE9C`/`func_8007DFD0` twins + `func_8007CF10`) at 0/0/0/0 quality (2 first-
+  build, 1 one-iteration) that the S225 profiler had lumped into the FP/mid-logic defer pile over a few
+  incidental `.s` fp ops (a color clamp / a `project_point_to_screen` call). Candidate `pick_target.py`
+  signal for a `none` c-stub fn: body dominated by GBI command-word literal stores (`0xE7`/`0xFA`/`0xDA`/
+  `0xDB`/`0xE2`/`0xE4`/`0xF1`/`0xF5`…) through a `*arg`/global `Gfx*` cursor (`lw cur,0(argN)` … `sw
+  cur,0(argN)` writeback) → flag `dl-emitter-tractable`, price LOW (these decode via `gfxdis.f3dex2` →
+  stock macros, see `#display-lists`). Distinguish from the `draw_character_shadow`-class (fp30, real
+  vertex geometry) by fp-op / command-store ratio. Golden-gated (`make test-tools`, `REGEN_GOLDEN=1`),
+  NOT a mid-sprint edit.
+- **Refine follow-up (tracked, S226; PO-accepted, blocked on RE).** `func_8007CF10`'s
+  `s32 screen[6]` out buffer is really the 0x18-byte struct `project_point_to_screen` writes (only
+  `[0]`/`[1]` = screen x,y are read). Name it a proper struct once `project_point_to_screen`
+  (INCLUDE_ASM in `src/main/set_camera_matrices_fixed.c`) is decompiled and its out-param layout known.
 - **Ranker follow-up (tracked, S218, off-cadence golden-gated).** Reinforces the pending regalloc-heavy
   pts detector (S158/S177/S183/S189): the **signed div-by-4 tile-index → `g_terrain_tile_lod_selector`
   table lookup → struct-cell write** idiom is a `#local-alloc-qty-permutation` wall tell (S218: 2 of 4

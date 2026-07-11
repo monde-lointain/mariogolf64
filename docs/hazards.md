@@ -3089,6 +3089,16 @@ into a running `Gfx*` cursor. Decode + reconstruct, do not hand-transcribe:
   hand-inlined the texrect, then the stock macro proved byte-identical (S151). Coord locals are
   typically `u16` (per the kantan demo + the permuter's rediscovery); see
   `#permuter-setup-for-kmc-toolchain-mirrors` for the coord-width regalloc lever.
+  - **Test the SCISSORED variant too (S226).** A texrect whose ROM adds a per-coord
+    negative-clamp (`sll 18`/`sra 16`/`nor`/`sra 31`/`and` = `MAX((s16)coord,0)`) on top of the
+    `0xFFC`-narrow, plus a `slti`/`negu`/`and`/`negu` MIN/MAX adjustment on the `RDPHALF_1` s/t word,
+    is the **stock `gSPScisTextureRectangle`** (the scissored variant), not a custom/inline texrect.
+    The whole clamp + s/t-adjust sequence falls straight out of that macro's `MAX((s16)(x),0)` coord
+    packing and its `((s)-(((s16)(xl)<0)?…MIN/MAX…:0))` `RDPHALF_1` computation. So before concluding
+    "custom", test BOTH `gSPTextureRectangle` AND `gSPScisTextureRectangle`. S226 `func_8007CF10`
+    (offscreen-indicator 2px box) matched byte-exact with the stock Scis macro,
+    `gSPScisTextureRectangle(gfx++, (x-1)<<2, (y-1)<<2, (x+1)<<2, (y+1)<<2, G_TX_RENDERTILE, 0, 0,
+    1<<10, 1<<10)`, coords from a `project_point_to_screen` out buffer.
 
 **Dynamic-builder post-increment idiom + composite folding (2nd main-seg DL TU).** From
 `func_8006ED34` (a two-texture fog/scroll screen filter):
@@ -3114,6 +3124,15 @@ into a running `Gfx*` cursor. Decode + reconstruct, do not hand-transcribe:
   asm: `extract_dlist.py` wants bare mnemonics at line start, so strip the `/* … */` prefix and the `$`
   from registers (`sed -E 's|/\*[^*]*\*/||; s/\$//g; s/^[[:space:]]+//'`). Decode FP-looking words with
   `tools/fpdecode.py` before writing a C literal.
+  - **For a FULLY-STATIC small emitter, go straight to stock macros (S226).** When every command word
+    is a literal (no dynamic texture-block / composite fold), skip the raw-word intermediate: decode
+    the block with `gfxdis.f3dex2 -x -w <hexwords>`, verify each `w0`/`w1` against `PR/gbi.h` by hand
+    (`G_MTX_PUSH=0x01` under F3DEX2, `gDma2p` idx encoding, `gSPVertex`/`gSP2Triangles` index packing),
+    then write the stock `gDPxxx(gfx++)` / `gSPxxx(gfx++)` calls directly and gate on full-make ROM-SHA-1
+    (macro seeds need `-DF3DEX_GBI_2`, standing in `mk/main.mk`; `decomp_loop --profile main`). S226
+    banked three such emitters (`func_8007DE9C`/`func_8007DFD0` twins + `func_8007CF10`) this way — 2
+    first-build, 1 one-iteration — the raw-word blob was unnecessary. Keep the raw-then-refine recipe
+    for emitters with a word that won't decode (dynamic address, unfolded composite).
 - **Macro param/field-name collision (parse trap).** A word-write helper macro whose parameter shares a
   name with a struct field it writes (`#define G(w0, w1) g->words.w0 = (w0)`) silently rewrites
   `g->words.w0` → `g->words.<arg>` via preprocessor token replacement → KMC-gcc `parse error`. The
