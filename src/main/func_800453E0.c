@@ -4,9 +4,12 @@ extern s32 D_800BE62C;
 extern u8 D_800BE6D8;
 extern s32 D_800BE688;
 extern s32 D_800BE68C;
+extern u8 D_801061CE;
 extern int guRandom(void);
 extern void* func_80040E3C(s32 x, s32 z);
 extern void func_8004CDA0(void);
+extern void func_800719A0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4,
+                          s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_800453E0", func_800453E0);
 
@@ -67,7 +70,11 @@ INCLUDE_ASM("asm/nonmatchings/main/func_800453E0", func_800484F8);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_800453E0", func_80048690);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_800453E0", func_8004876C);
+void func_8004876C(void) {
+  D_801061CE = 0;
+  func_800719A0(0, 0, -1, 1, 0, 0, 0, 0, 0, 0);
+  func_800719A0(0, 0, -1, 1, 1, 0, 0, 0, 0, 0);
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_800453E0", func_800487E4);
 
