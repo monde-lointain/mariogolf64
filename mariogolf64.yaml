@@ -145,7 +145,7 @@ segments:
       - [0x51A40, c, main/func_80076640]
       - [0x526B0, c, main/func_800772B0]
       - [0x52FF0, c, main/func_80077BF0]
-      - [0x53D10, asm]
+      - [0x53D10, c, main/func_80078910]
       - [0x5B620, asm]
       - [0x68500, asm]
       - [0x70E10, c, main/func_80095A10]
