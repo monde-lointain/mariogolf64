@@ -108,7 +108,27 @@ void rumble_check_and_trigger(RumbleController* actor) {
   }
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80078910", func_8007E234);
+extern s32 D_800C5448;
+extern void* D_800FF4CC;
+extern void* D_801EFFA8;
+extern void* D_801B8BB8;
+extern u32 func_8005062C(u16 index, void* out);
+extern void* heap3_alloc(u32 need);
+extern void func_800506D4(void* arg0, void* arg1);
+extern void func_8007E7B8(void);
+
+void func_8007E234(s32 arg) {
+  u8 spvar[0x20];
+
+  if (arg == 2) {
+    D_800FF4CC = heap3_alloc(func_8005062C(0x6BC, spvar));
+    func_800506D4(D_800FF4CC, spvar);
+    D_801EFFA8 = heap3_alloc(0x900);
+    D_801B8BB8 = heap3_alloc(0x380);
+    func_8007E7B8();
+  }
+  D_800C5448 = arg;
+}
 
 extern s32 D_800C5448;
 extern void* D_800FF4CC;
