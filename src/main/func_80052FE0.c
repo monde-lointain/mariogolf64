@@ -1,5 +1,7 @@
 #include "common.h"
 
+extern void clear_animation_slot(s32 index);
+extern s32 func_800542A0(s32 index);
 extern s32 func_80054550(s32 id, s32 tag, s32 arg2);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80052FE0", func_80052FE0);
@@ -14,11 +16,26 @@ INCLUDE_ASM("asm/nonmatchings/main/func_80052FE0", clear_animation_slot);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80052FE0", func_800542A0);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80052FE0", func_80054310);
+s32 func_80054310(void) {
+  s32 i;
+
+  for (i = 0; i < 4; i++) {
+    if (func_800542A0(i)) {
+      return 1;
+    }
+  }
+  return 0;
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80052FE0", get_character_state);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80052FE0", func_800543A4);
+void func_800543A4(void) {
+  s32 i;
+
+  for (i = 0; i < 4; i++) {
+    clear_animation_slot(i);
+  }
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80052FE0", func_800543DC);
 
