@@ -72,6 +72,19 @@ resume surface when the middle spans context windows.
     walls (2 `#local-alloc-qty-permutation`, 1 `$v0`-arg ABI on `func_80041E8C`) in one pass. The
     permuter stays post-root-cause; for a `#local-alloc-qty-permutation` verdict it is skipped outright
     (project history = 0 cracks), and corpus-mining is the escalation.
+  - **A mined fresh-pack's mid-logic tail is a wall-class cluster, not a smallest-first vein (S224).**
+    Once a fresh `none` pack's cheap leaves (getters/setters/predicates/dispatch) are banked, the
+    residual mid-logic fns (the loops+struct-base+`bnel` tells) concentrate on a small set of documented
+    no-source-lever classes — `#base-register-vs-displacement`, `#indexed-vs-pointer-loop-strength-reduction`,
+    `#value-select-if-else-vs-branch-likely`/address-fold — that iterate to a fully-RE'd near-match but
+    do NOT bank and are not permuter-reachable (extra-instruction or addressing-mode divergence). S224
+    banked 1 clean dispatch fn then hit 3 such walls (`func_8006DF84`/`func_8006DEB4`/`func_8006D058`)
+    back-to-back in `func_8006A2C0.c`; the next tier (`func_8006D38C`/`D214`/`CE88`) is the same combo.
+    So at the plan gate, when a pack's banked-count has plateaued and the smallest remaining fns carry
+    these tells, prefer a FRESH pack or an escalation slice (compiler-source fan-out / corpus-mining)
+    over another smallest-first continuation of the mined pack — the continuation yields
+    wall-characterizations (RETRO value), not banks. `pick_target.py` pricing this "plateaued-pack
+    mid-logic-tail" tell is a tracked follow-up (see `BACKLOG.md` ranker follow-ups).
 
 </workflow_overview>
 

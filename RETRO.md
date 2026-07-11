@@ -25,6 +25,37 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 224 — func_8006A2C0.c mid-logic-tail mixed-partial continuation — 2026-07-10
+- Increment: 0 files banked / **+1 function matched** (`func_8006A2C0.c` 20/45, 25 stubs remain; ROM
+  SHA-1 green e2c4e7a…). Continued the S223 pack (PO chose continue-open-file over a fresh-pack flip;
+  no enabler, subseg already `c`).
+- Quality: 0 stuck-far / 0 permuter / **3 carried** (`func_8006DF84`, `func_8006DEB4`, `func_8006D058`)
+  / 0 re-opened. All 3 fully RE'd (100% logic), each a NAMED wall class, none permuter-reachable.
+- Seed: committed 3pt (mixed-partial per-fn override, same as S215-S223); banked 0pt (per-file
+  all-or-nothing, file still partial); realized 5 (seed 3 + 3 carries − re-attempts folded), residual
+  +2; regime classical/mixed.
+- What helped: `func_8006ADF8` mode-gated club dispatch banked via the range-unfold lever (nested
+  `if(arg>0){if(arg<4)}` un-folds the `(u32)(arg-1)<3` sltiu to the target's blez+slti); float consts
+  12.0f/-2.0f as lui/mtc1 literals (no rodata); 5-arg call w/ stack 0x7F. On DEB4 a `<=` operand-order
+  lever pinned load-order + branch-polarity + inline-block + the p-base register (a1) all at once.
+- Friction: the mid-logic tail is a wall-class cluster. `func_8006DF84` — branch-likely `bnezl` +
+  `&SYM[const]` address-fold: `optimize_skip`'s annulled skip needs a 1-insn store, GCC folds to a
+  2-insn absolute → plain bnez + tail-merge. `func_8006DEB4` — `#base-register-vs-displacement`: matched
+  everything except the D_801B7270 chain (scalar folds w/ p=a1; pointer gets base-reg but swaps p→a2 +
+  caches; target wants base-reg+reload+p=a1, no modeling gives all three). `func_8006D058` — D164
+  loop-strength-reduction wall x2 (4×7 double-loops): iterated index→pointer-walk→`!=` (6180→4040→2960)
+  but stays structurally LONGER (extra setup/materialization insns), so not permuter-eligible.
+- Applied: 2 of 2 — #1 mid-logic-tail escalation-routing note (→ docs/agent-workflow.md workflow-overview
+  subagent-fanout, + a tracked ranker follow-up in BACKLOG.md); #2 DEB4/ADF8 lever chain (→
+  docs/hazards.md `#nested-guard-range-unfold--comparison-operand-order`).
+- Carry-over: `func_8006A2C0.c` (25 stubs) — new carries `func_8006DF84`/`func_8006DEB4`/`func_8006D058`
+  (+ S223's `func_8006C8CC`/`func_8006D164`); deferred `func_8006D38C`/`D214`/`CE88`/`D4EC` (same
+  base-register/loop/branch-likely combo), the large DL/dispatch tail, `func_8006CD50` (caller-evict).
+  LESSON: S223 (+19 easy leaves) → S224 (+1, 3 walls) is the fresh-pack productivity cliff; a plateaued
+  pack's mid-logic residual wants a fresh pack or escalation slice, not another smallest-first pass.
+
+---
+
 ## Sprint 223 — func_8006A2C0.c fresh-pack mixed-partial mine — 2026-07-10
 - Increment: 0 files banked / **+19 functions matched** (`func_8006A2C0.c` 19/45, 26 stubs remain; ROM
   SHA-1 green e2c4e7a…). Fresh 45fn `none` pack opened this sprint (subseg 0x456C0 flipped `c` at gate).

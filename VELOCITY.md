@@ -639,6 +639,23 @@ Three honest caveats:
   wall-tail continuation (+19 vs the prior 2 sprints' +1 each); the ranker's `--include-stuck` gate
   correctly signaled the OLD files were mined to walls. Retro applied **2/2** (store-order lever +
   C8CC srl-fold note). +19 is the most productive single sprint of the mixed-partial phase.
+  S224: CONTINUED `func_8006A2C0.c` (mixed-partial, the S223 pack's mid-logic tail; PO chose
+  continue-open-file over a fresh-pack flip). Banked **0pt** (file 20/45, not md5-candidate, 25 stubs),
+  **+1 matched** (`func_8006ADF8` mode-gated club dispatch), **0 permuter**, **3 carried**
+  (`func_8006DF84` branch-likely+address-fold, `func_8006DEB4` `#base-register-vs-displacement`,
+  `func_8006D058` loop-strength-reduction x2). Quality **0/0/3/0**. Seed committed 3 (mixed-partial per-fn
+  override, same as S215-S223); realized 5 (seed 3 + 3 carries − re-attempts folded in), residual +2.
+  ALL 3 carries fully RE'd (100% logic), locked below 0.97 on documented no-source-lever compiler
+  classes, none permuter-reachable (extra-instruction or addressing-mode divergence). LEVERS LANDED
+  (banked into `#nested-guard-range-unfold--comparison-operand-order`): nested `if(x>0){if(x<N)}`
+  un-folds the `(u32)(x-1)<N` sltiu to blez+slti (ADF8); a `<=`/`>` operand order pins load-order +
+  branch-polarity + inline-block together (DEB4 matched load-order+polarity+p=a1, residual was a
+  SEPARATE base-register chain). LESSON: a mined fresh-pack's mid-logic tail is a wall-class cluster
+  (base-register / loop-strength-reduction / branch-likely), NOT a smallest-first vein — S223 (+19 easy
+  leaves) then S224 (+1, 3 walls) is the productivity cliff; the plateaued-pack tail wants a fresh pack
+  or an escalation slice, not another continuation. Retro applied **2/2** (DEB4 lever hazards note +
+  mid-logic-tail escalation-routing note in agent-workflow + tracked ranker follow-up). Confirms the
+  S223 read (cheap getter/setter/dispatch vein banks 1-2 tries; the loop/struct-base residual walls).
   Rolling-5 (S34+S37+S39+S42+S43): seed 3.4 pt/sprint (17/5), realized 2.8 pt/sprint (14/5). S31 nuGfxInit is the first over-seed classical fn (+3 residual); rubric needs +1 for double-novel-gotcha libnusys classical targets. S42 defines-data verbatim-body drop: realized 2 = seed 3 − 1 (the fast path makes a defines-data leaf bank like a mirror) — confirms the −1 verbatim-first-try rule extends to known-edit-mirror defines-data, not just classical seeds. S43 is the new residual floor (−2): both gbpak fns were classical-FLAGGED (jal-count-mismatch) but proved pure verbatim mirrors once the macro-FP was stripped — the seed over-priced them because the hazard was a tooling artifact, now fixed in `_c_jal_count`, so future macro-heavy libultra leaves should seed lower.
 - **Regime:** `mirror` is a depleting minority (~22 % of ranked candidates: 56 mirror vs 194
   classical; 18 warm / 38 cold). The warm clean-singleton mirror pool is now **mined out** (S11

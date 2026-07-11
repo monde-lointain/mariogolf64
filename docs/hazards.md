@@ -117,6 +117,7 @@ The hazard families below group the sections that follow. Each links to its exis
 - [setup-block instruction order (a pre-base loop-limit const must be a variable)](#setup-block-instruction-order)
 - [struct-copy block-move path (alignment picks lwl/lwr vs aligned word-loop)](#struct-copy-block-move-path)
 - [reorg optimize_skip annulled bnel (single-skipped-insn branch-likely)](#reorg-optimize_skip-annulled-bnel)
+- [nested-guard range-unfold + comparison-operand-order (blez/slti + branch polarity)](#nested-guard-range-unfold--comparison-operand-order-blezslti--branch-polarity)
 - [switch tight merged-default (shared case-0/default label + case-1 last)](#switch-tight-merged-default)
 - [grid-counter double-loop (non-zero-cell counter idiom)](#grid-counter-double-loop)
 - [base-register-vs-displacement (full base materialized vs %lo-in-displacement; + family-of ranker follow-up + shifted .NON_MATCHING data-carve blocker)](#base-register-vs-displacement-full-symbolbase-materialized-vs-lo-in-displacement)
@@ -6091,6 +6092,33 @@ put the single skipped store in the ELSE arm — `if (x >= 6) { … } else r = x
 fall-through is one skippable insn and `optimize_skip` fires the annulled `bnel`.
 
 **Provenance.** S209 D308 (banked, no permuter).
+
+## nested-guard range-unfold + comparison-operand-order (blez/slti + branch polarity)
+
+**Symptom (S224 `func_8006ADF8` / `func_8006DEB4`).** Two coupled small-fn levers on a bounded-range
+`if` guard and a two-operand comparison, both codegen-neutral source rewrites.
+
+**(a) Range-check un-fold.** A contiguous bounded range `if (x > 0 && x < 4)` (or `x >= 1 && x <= 3`)
+folds to a single `(u32)(x-1) < 3` `sltiu` (one `addiu` + one `sltiu`), but the ROM wants TWO separate
+signed compares (`blez x, exit; slti v0,x,4; beqz v0, exit`). **Lever:** NEST the two bounds —
+`if (x > 0) { if (x < 4) { … } }` — so GCC emits the two short-circuit branches instead of the combined
+`sltiu`. (Mirror of the mode==1 arm which legitimately wants the fold: write THAT as `(u32)(x-2) < 2`.)
+S224 ADF8 banked with the nested form; the flat `&&` form was the only diff.
+
+**(b) Comparison operand order pins BOTH load order AND branch polarity.** For `if (A <cmp> B) THEN;
+else ELSE;`, GCC evaluates the LHS first (loads it first) and the `<`/`>`/`<=`/`>=` choice sets which
+block is inline (fall-through) vs out-of-line and thus the `beqz`/`bnez` polarity. To land a specific
+layout WITHOUT a goto: pick the operand whose load must come first as the LHS, and the relation that
+puts the fall-through block you want inline. S224 DEB4: target loads `D_801B71F3` first then branches
+`bnez`-to-`D_800FF4D4++` with `p[0]++` inline → `if (D_801B71F3 <= D_800BAA04) { p[0]++; } else {
+D_800FF4D4++; }` matched all of load-order + polarity + inline-block + the p-base register (a1); the
+naive `if (D_800BAA04 < D_801B71F3) …` and the `>=` form each fixed one axis and broke the other. Same
+`slt`/`beqz` encoding either way (gcc computes the relation and branches on its negation), so it is a
+pure logic-preserving rewrite — kin to the `#register-reuse-nudge` inverted-guard variant but for a
+two-operand compare, not a `return DEFAULT` tail.
+
+**Provenance.** S224 ADF8 (banked), DEB4 (levers landed load-order+polarity+p=a1; residual was the
+separate `#base-register-vs-displacement` wall on a different access chain).
 
 ## switch tight merged-default (shared case-0/default label + case-1 last)
 
