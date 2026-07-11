@@ -8,11 +8,9 @@ typedef struct {
 
 extern Particle particle_array[40];
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80078910", func_80078910);
-
-extern void func_80078910(void);
 extern u32 func_8005062C(u16 index, void* out);
 extern void* heap3_alloc(u32 need);
+extern void heap3_free(void** payload_ptr);
 extern void func_800506D4(void* arg0, void* arg1);
 extern s32 D_800C53B8;
 extern void* D_800E1DBC;
@@ -27,6 +25,24 @@ extern void* D_800E1DC0;
 extern void* D_800E1DC4;
 extern void* D_800E1DC8;
 extern void* D_800E1DCC;
+
+void func_80078910(void) {
+  if (D_800C53B8 != 0) {
+    heap3_free(&D_800E1DA0);
+    heap3_free(&D_800E1DA4);
+    heap3_free(&D_800E1DA8);
+    heap3_free(&D_800E1DAC);
+    heap3_free(&D_800E1DB0);
+    heap3_free(&D_800E1DB4);
+    heap3_free(&D_800E1DB8);
+    heap3_free(&D_800E1DBC);
+    heap3_free(&D_800E1DC0);
+    heap3_free(&D_800E1DC4);
+    heap3_free(&D_800E1DC8);
+    heap3_free(&D_800E1DCC);
+    D_800C53B8 = 0;
+  }
+}
 
 void func_800789C8(void) {
   u8 spvar[0x20];
