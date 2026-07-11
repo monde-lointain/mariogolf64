@@ -35,6 +35,7 @@ extern void* D_800E1C0C;
 
 extern void* heap3_alloc(u32 need);
 extern void heap3_free(void** payload_ptr);
+extern void func_80050DA0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
 extern u32 func_8005062C(u16 index, void* out);
 extern void func_800506D4(void* data, void* slot);
 void func_8006B54C(void);
@@ -77,7 +78,25 @@ s32 func_8006ADA0(void) {
   return 0;
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_8006A2C0", func_8006ADF8);
+void func_8006ADF8(s32 arg) {
+  if (D_800C4010 == 1) {
+    if ((u32)(arg - 2) < 2) {
+      D_800C4014 = 2;
+      D_800C4018 = -1;
+    }
+  } else {
+    D_800C4020 = arg;
+    if (arg == 1) {
+      D_800C401C = 12.0f;
+      func_80050DA0(0x64, 2, 0x28, 0x14, 0x7F);
+    } else if (arg > 0) {
+      if (arg < 4) {
+        D_800C401C = -2.0f;
+        func_80050DA0(0x65, 2, 0x28, 0x14, 0x7F);
+      }
+    }
+  }
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_8006A2C0", func_8006AEA4);
 
