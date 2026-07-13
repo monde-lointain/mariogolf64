@@ -40,6 +40,21 @@ extern s32 D_800C3088;
 extern s32 D_800C308C;
 extern s32 D_800C3090;
 
+extern s32 func_800525C4(s32 arg0, s32 arg1);
+extern s32 func_800521C0(void);
+extern s32 func_800521DC(void);
+extern s32 func_8006CD50(s32 arg0, s32 arg1);
+extern void func_800680FC(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
+extern s8 D_801B72A5;
+extern s32 D_801B60B4;
+
+typedef struct {
+  /* 0x0 */ s8 tag;
+  /* 0x1 */ u8 pad[4];
+  /* 0x5 */ u8 flags;
+} Entry; /* 0x6 */
+extern Entry D_801B7118[];
+
 typedef struct {
   u32 data[0x1A];
 } GolfModeRecord;
@@ -309,7 +324,33 @@ void func_800627F8(f64* src, f64* dst) {
   dst[1] = src[1];
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/bgm_load_song_from_rom", func_8006280C);
+void func_8006280C(s32 arg0, s32 arg1) {
+  s32 tx, ty;
+  s32 dx, dy;
+
+  if (g_terrain_vtx_xform_mode != 0) {
+    return;
+  }
+  tx = (u32)arg0 >> 19;
+  ty = (u32)arg1 >> 19;
+  if ((u32)tx >= 8) {
+    return;
+  }
+  if ((u32)ty >= 0x10) {
+    return;
+  }
+  for (dy = -1; dy < 2; dy++) {
+    s32 yy = ty + dy;
+    for (dx = -1; dx < 2; dx++) {
+      s32 xx = tx + dx;
+      if ((u32)xx < 8) {
+        if ((u32)yy < 0x10) {
+          g_terrain_tile_cull_exclude[yy * 8 + xx] = 1;
+        }
+      }
+    }
+  }
+}
 
 void clear_terrain_emit_scratch(void) {
   bzero(g_terrain_tile_cull_exclude, 0x80);
