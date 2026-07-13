@@ -115,7 +115,7 @@ segments:
       - [0x2B800, c, main/func_80050400]
       - [0x2B9A0, c, main/func_800505A0]
       - [0x2BB10, c, main/func_80050710]
-      - [0x2BFF0, asm]
+      - [0x2BFF0, c, main/play_sound_effect]
       - [0x2D290, c, main/func_80051E90]
       - [0x2D470, c, main/func_80052070]
       - [0x2D5C0, c, main/func_800521C0]
