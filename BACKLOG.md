@@ -107,6 +107,20 @@ documented no-lever classes (#delay-slot-fill-across-call, #local-alloc-qty-perm
 #cross-jump-tail-merge). The `coddog-mirror:contquery.c@99.99` tag on the pack was a pure STRUCTURAL
 false-positive (0 fns were contquery mirrors) — reinforces pricing the non-lib-`func_`-callee /
 fncount-mismatch tell to DEWEIGHT such coddog rows on a fresh classical pack, not route it to mirror.
+**S230 = 5th confirmation + two new detector refinements.** `play_sound_effect.c` (band `libnusys`,
+26fn mixed sound pack) banked **+20 of 26** at 0 permuter — ~3x the cheap-leaf-depth estimate — because
+(a) the ranker's `alSynNew=synthesizer`/`alSynDelete=syndelete` pack tags were pure NAME-based
+false-matches (the bodies are trivial game `osSyncPrintf`/`nop` debug-stubs, not libaudio mirrors), and
+(b) a 12-fn `osSetIntMask`-guarded `MusHandle*` wrapper family that the S177 "regalloc-heavy" pricing
+would flag as wall-class banked FIRST-BUILD (they lack the S177 loop + `ARR[K]` + ra-capture co-factors;
+see `docs/hazards.md#loop-weight-and-live-length-regalloc-steering` S230 note). Two off-cadence
+golden-gated `pick_target.py` follow-ups: (1) **stub-suspect flag** — emit `stub-suspect:<fn>` (and
+DEWEIGHT its `<fn>=<upstream>` mirror tag) when a fn tagged as a large-lib mirror is `<=8i`, so a
+printf/nop stub sharing a lib symbol name is not mis-priced as a verbatim mirror leaf (kin to the S229
+contquery + S230 nucontgbpakmgr structural false-positives); (2) **narrow the S177 regalloc-heavy tell**
+to require the loop + fixed-`ARR[K]` + ra-read co-factors, not `osSetIntMask` alone, so simple
+interrupt-guarded wrapper packs stop pricing as walls. Both raise the cheap-leaf-depth accuracy on
+audio/sound packs.
 
 **Extend the detector to DL EMITTERS, not just FP (S190):** `src/main/func_8004E5A0.c` was a 3-fn
 one-tu the ranker surfaced smallest-first as a "+2 tractable" pick because 2 of 3 fns are 0-jal/0-FP —
@@ -3393,6 +3407,21 @@ by `/sprint-plan`:
   vendored upstream version can diverge from the game's rev on a single immediate (S122 nusys-2.07
   `NU_CONT_THREAD_ID=6` vs MG64's 5), and that surfaces only at first build unless reconciled here.
   A near-free retry missing any of these is a half-scoped spike — finish the scope before deferring.
+
+- **(S230 MIXED-PARTIAL — carried; 20 of 26 banked)** `src/main/play_sound_effect.c` (main-segment
+  `[0x2BFF0]`, band `libnusys`, sound/bgm pack). Subseg `[0x2BFF0, c, main/play_sound_effect]` flipped;
+  **20 fns C** (S230 +19 hand-matched + 1 free auto-C `__freeParam`: 5 leaves, 2 game printf debug-stubs
+  `alSynNew`/`alSynDelete`, 12 `osSetIntMask`-guarded `MusHandle*` wrappers, `func_80051164` struct-array
+  writer). **6 stubs remain**, ROM green off extracted asm, NOT md5-candidate. **1 CARRY (S230, in-file
+  note, permuter-candidate):** `func_80051D8C` (`#cse-double-materialization` + loop-regalloc — ROM
+  materializes `D_18BE00` into two regs (size-operand + 3rd arg), build CSE-forwards one, 4 instr short +
+  flows `.bss`; int-casts don't split the shared address load). **5 DEFERRED mid-logic/FP tail (not
+  attempted, per S224 — defer wall-class tail to a fresh pack):** `play_sound_effect` (108i lead,
+  MusHandle+atomic dispatch), `func_80050DA0` (114i dispatcher), `func_80051210` (346i), `bgm_tick`
+  (138i FP), `play_bgm_by_id` (97i, 14-branch, 6 bgm globals). NOTE: the `coddog-mirror:nucontgbpakmgr.c
+  @99.99` + static-name-collision tags on this pack were a STRUCTURAL false-positive (0 fns were
+  nucontgbpakmgr mirrors), and the `alSynNew=synthesizer` upstream tags were NAME-only false-matches
+  (stub bodies) — treat the whole pack CLASSICAL/mixed on retry.
 
 - **(S228 MIXED-PARTIAL — carried; 11 of 40 banked)** `src/main/func_800453E0.c` (main-segment
   `[0x207E0]` golf-physics/slope pack). Subseg `[0x207E0, c, main/func_800453E0]` flipped; **11 fns C**

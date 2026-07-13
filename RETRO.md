@@ -25,6 +25,17 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 230 — open fresh mixed pack play_sound_effect.c (main sound/bgm pack) — 2026-07-13
+- Increment: 0 files banked / **+20 functions matched** (`play_sound_effect.c` 0/26 → 20/26 C, 6 stubs; NOT md5-candidate)
+- Quality: 0 stuck-far / 0 permuter / 1 carried / 0 re-opened
+- Seed: committed 3pt; banked 0pt (per-file all-or-nothing, file partial); realized ~9, residual +6; regime classical/mixed
+- What helped: the `osSetIntMask`-guarded `MusHandle*` wrapper pattern banked FIRST-BUILD (12 fns) — the S177 "regalloc-heavy" pricing over-flags it (that wall needs loop + `ARR[K]` + ra-capture co-factors, absent here). Two one-line reorder levers cracked the two near-matches: idx-hoist named local (`s32 idx=row*5`, hoists the index-multiply early, `func_80051164` 265→0) and split-base pseudo (`u16 *arr=D_G; arr+i*K`, forces full base-materialization vs `%lo`-fold, `func_800511D8`). PO-requested check confirmed `alSynNew`/`alSynDelete` are game `osSyncPrintf`/`nop` debug-stubs sharing libaudio names, NOT mirrors (game uses libmus).
+- Friction: two ranker PRICING false-positives cost early confidence — `alSynNew=synthesizer` was a NAME-only pack tag (stub body), and the `osSetIntMask` fns looked S177-walled but weren't. Two length-deficit flowing-`.bss` shifts (`func_800511D8` base-fold, `func_80051D8C` CSE) had to be diagnosed by readelf size vs the `.s` directive before the diff made sense.
+- Applied: 4 of 4 — #2 S177-narrow (require loop+`ARR[K]`+ra-capture, not `osSetIntMask` alone) → hazards.md; #3 idx-hoist + split-base levers → hazards.md; #4 wrapper A/B (guard-vs-mask order) recognition → hazards.md; #1 `stub-suspect` ranker flag (lib-mirror-tagged fn ≤8i = name false-match) → BACKLOG.
+- Carry-over: `play_sound_effect.c` (6 stubs) — `func_80051D8C` (`#cse-double-materialization` + loop-regalloc, permuter-candidate) + 5 deferred mid-logic/FP tail (`play_sound_effect` 108i lead, `func_80050DA0` 114i dispatcher, `func_80051210` 346i, `bgm_tick` 138i FP, `play_bgm_by_id` 97i 14-branch).
+
+---
+
 ## Sprint 229 — open fresh pack func_80052FE0.c (main none pack) — 2026-07-11
 - Increment: 0 files banked / **+6 functions matched** (`func_80052FE0.c` 0/15 → 6/15 C, 9 stubs
   remain; ROM SHA-1 green e2c4e7a…). OPENED a FRESH `none` pack (0x2E3E0, flipped asm→c) — PO chose it

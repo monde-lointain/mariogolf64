@@ -743,6 +743,24 @@ Three honest caveats:
   order. `contquery@99.99` coddog tag was a pure structural false-positive (0 mirrors). Retro applied 4 of 4
   (#1 switch-default + #3 delay-slot-across-call + #2 FPR-float-zero → hazards.md; #4 fresh-rotation 4th + ranker
   → BACKLOG).
+  S230: OPENED fresh mixed pack `play_sound_effect.c` (subseg 0x2BFF0, band `libnusys`, 26fn sound/bgm;
+  PO chose it as the richest fresh `main` cheap-leaf vein over bgm-DL and `raycast_terrain` FP). Banked
+  **0pt** (file 20/26, not md5-candidate, 6 stubs), **+20 matched** (19 hand + 1 auto `__freeParam`),
+  **0 permuter**, **1 carried**, quality **0/0/1/0**. This is the biggest single-pack matched-count in the
+  Epic-2 classical run — ~3x the +7 cheap-leaf-depth estimate. Fns: 5 leaves (`bgm_request_stop`,
+  `func_80051BFC`/`510EC`/`511D8`, `_freePVoice`) + 2 game `osSyncPrintf` debug-stubs (`alSynNew`/
+  `alSynDelete`, NOT libaudio mirrors) + **12 `osSetIntMask`-guarded `MusHandle*` wrappers** (two variants:
+  mask-always `object_id_table[index]` readers + guard-wraps-mask `g_bgm_active_handle`) + `func_80051164`
+  (5-field struct-array writer). Seed committed 3 (mixed-partial per-fn override, ranker pts13, same as
+  S215-S229); realized ~9 (seed 3 + MASSIVE cheap+wrapper vein overrun, +2 for the base-materialize/idx-hoist
+  levers, only 1 clean carry), residual +6. 1 CARRY: `func_80051D8C` (`#cse-double-materialization` +
+  loop-regalloc; ROM loads `D_18BE00` twice, build CSE-forwards one, 4 instr short + flows `.bss`;
+  int-casts don't split it; permuter-candidate). LESSON: two S177/coddog PRICING false-positives banked
+  first-build — the `alSynNew=synthesizer` pack tag was a NAME-only false-match (stub body), and 12
+  `osSetIntMask` wrappers lack the S177 loop+`ARR[K]`+ra-capture co-factors, so `osSetIntMask` alone
+  over-flags. Two positive levers banked (hazards.md): idx-hoist named local + split-base pseudo. Retro
+  applied 4 of 4 (#2 S177-narrow + #3 levers + #4 wrapper-A/B recognition → hazards.md; #1 stub-suspect
+  ranker flag → BACKLOG).
 - **Regime:** `mirror` is a depleting minority (~22 % of ranked candidates: 56 mirror vs 194
   classical; 18 warm / 38 cold). The warm clean-singleton mirror pool is now **mined out** (S11
   plan gate: every top mirror candidate carries a blocking hazard), pushing the project onto the

@@ -4660,6 +4660,39 @@ instead pins the sentinel into one reg with no copy, one instruction short). S17
 byte-exact from these two levers — no permuter, no cross-project mining. Verify with the `-dg` dump:
 `mask` should show hard-reg 9 (`$t1`), not 4 (`$a0`).
 
+**The `osSetIntMask` tell is over-broad — a plain interrupt-guarded WRAPPER is NOT this wall (S230).**
+The S177/S178 wall above needs three co-factors *together*: `osSetIntMask` + a call-crossing
+loop-invariant (a LOOP) + a re-materializable CONSTANT `&arr[K]` base competing for caller-saved regs.
+A fn that only has `osSetIntMask` around a single call — no loop, no `ARR[K]` base, no ra-capture — is a
+trivial wrapper that banks FIRST-BUILD. S230 `play_sound_effect.c` banked 12 such
+`MusHandle*`/`osSetIntMask` wrappers with zero regalloc trouble. **Before treating an `osSetIntMask` fn
+as an S177-class wall, confirm the loop + fixed-`ARR[K]` + ra-read co-factors are present; if absent,
+seed it as a wrapper.** The two source forms (read the asm's sentinel-`beq`-vs-`osSetIntMask` order to
+pick):
+- **A, mask-always:** `mask = osSetIntMask(OS_IM_NONE); if (h != -1) { MusHandleX(h, arg); }
+  osSetIntMask(mask);` — handle loaded AFTER the mask, held in one reg across the guard. Indexed variants
+  are 2-param `(index, value)` reading `object_id_table[index]` (a getter table, not a scalar); a
+  hardcoded call arg (`MusHandleStop(h, 0)`) appears as `addu a1,zero,zero`.
+- **B, guard-wraps-mask:** `if (h != -1) { mask = osSetIntMask(OS_IM_NONE); MusHandleX(h, arg);
+  osSetIntMask(mask); }` — handle RE-loaded after the mask (two `lw` of the same global, because the
+  `osSetIntMask` call clobbers the reg between the check and the call). An `f32` arg rides `fs0`
+  (`mtc1`/`mfc1 a1`), o32-passed in a GPR.
+`OS_IM_NONE == 1`; `musHandle == unsigned long` (u32). (`play_sound_effect.c`'s `al*` fns are game
+`osSyncPrintf`/`nop` debug-stubs sharing libaudio names, NOT mirrors — the game uses libmus, so the
+libaudio software synth is nulled; match the real `void alSynNew(ALSynth*, ALSynConfig*)` prototype and
+reference the format string as `extern const char D_<addr>[]`, no rodata carve.)
+
+**Two one-line source reorders that fix a structural-complete regalloc/schedule near-match (S230).**
+Both are cheap first-tries before the permuter on a fn whose ROWS align but regs/schedule diverge:
+- **idx-hoist local:** precompute a struct-array row index into a NAMED local BEFORE the field stores
+  (`s32 idx = row * 5; ARR_f0[idx] = ...; ARR_f4[idx] = ...;`). This hoists the index-multiply early to
+  match the scheduler's order; the inline `ARR_f0[row*5]` form computes the index LATE in the wrong reg
+  cycle (S230 `func_80051164`: score-265 → 0).
+- **split-base pseudo:** to force a full base-address materialization (`la reg` + `0(reg)` deref) instead
+  of a `%hi`+index with `%lo`-folded-into-displacement, split the base into its OWN pseudo:
+  `u16 *arr = D_GLOBAL; u16 *row_p = arr + row * K; ... row_p[col];` (S230 `func_800511D8`; a 1-instr
+  deficit that also flowed the `.bss`). See `#base-register-vs-displacement`.
+
 ## return-type is load-bearing
 
 **Trigger:** a `void`-semantics function (no used return value; the ROM falls off the end) whose C is
