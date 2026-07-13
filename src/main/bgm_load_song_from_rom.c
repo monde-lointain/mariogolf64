@@ -93,7 +93,19 @@ s32 func_8005F224(void) {
   return temp;
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/bgm_load_song_from_rom", func_8005F248);
+s32 func_8005F248(s32 arg0) {
+  s32 x;
+
+  if (arg0 < 0x1F) {
+    x = arg0;
+  } else {
+    x = 0x3C - arg0;
+  }
+  if (x < 0) {
+    x = 0;
+  }
+  return (x << 8) / 30;
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/bgm_load_song_from_rom", func_8005F290);
 
