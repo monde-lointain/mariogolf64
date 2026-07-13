@@ -23,6 +23,13 @@ void setup_terrain_detail_default(void);
 
 extern u32 scenario_mode_id;
 extern s32 D_801B608C;
+extern s8 D_800BAA04;
+extern u8 D_800FE330;
+extern const char D_800D1254[];
+
+typedef struct {
+  u32 data[0x1A];
+} GolfModeRecord;
 extern u8 D_800FED40[];
 extern s8 D_800FEE10;
 extern s8 D_800FEE11;
@@ -197,9 +204,24 @@ void func_80060128(s32 arg0) {
 
 INCLUDE_ASM("asm/nonmatchings/main/bgm_load_song_from_rom", func_80060190);
 
-INCLUDE_ASM("asm/nonmatchings/main/bgm_load_song_from_rom", func_80060210);
+void func_80060210(void* arg0) {
+  *(GolfModeRecord*)D_800FEDD8 = *(GolfModeRecord*)arg0;
+  D_801B608C = *(s32*)((u8*)arg0 + 0x34);
+  scenario_mode_id = *(s8*)((u8*)arg0 + 0x38);
+  D_801B6098 = *(s8*)((u8*)arg0 + 0x39);
+  D_800FE330 = *((u8*)arg0 + 0x3E);
+  init_per_player_state();
+  osSyncPrintf(D_800D1254);
+}
 
-INCLUDE_ASM("asm/nonmatchings/main/bgm_load_song_from_rom", func_800602B4);
+void func_800602B4(GolfModeRecord* arg0) {
+  *(GolfModeRecord*)D_80105F40 = *arg0;
+  D_801B608C = 9;
+  scenario_mode_id = *(s8*)((u8*)arg0 + 0x34);
+  D_801B6098 = *(s8*)((u8*)arg0 + 0x35);
+  D_800FE330 = *((u8*)arg0 + 0x3A);
+  init_per_player_state();
+}
 
 void func_8006034C(u8 arg0) { D_800C30A4 = arg0; }
 
