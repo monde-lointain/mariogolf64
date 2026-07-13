@@ -80,7 +80,16 @@ void func_8005F11C(u32 rom_addr, s32 size) {
   MusFxBankInitialize((void*)D_800C2FF4);
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/bgm_load_song_from_rom", func_8005F180);
+s32 func_8005F180(void) {
+  s32 r = 0;
+
+  if (flag_is_set(0x32)) {
+    r = 1;
+  } else if (flag_is_set(0x9B)) {
+    r = 1;
+  }
+  return r;
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/bgm_load_song_from_rom", func_8005F1C8);
 
