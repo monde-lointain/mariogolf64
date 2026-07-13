@@ -16,6 +16,11 @@ extern const char D_800CCC20[];
 extern s32 D_800C0EAC[];
 extern u16 D_800C0FF8[];
 extern s32 D_800C10F4[];
+extern s32 D_800C113C[];
+extern s32 D_800C1140[];
+extern s32 D_800C1144[];
+extern s32 D_800C1148[];
+extern s32 D_800C114C[];
 
 INCLUDE_ASM("asm/nonmatchings/main/play_sound_effect", play_sound_effect);
 
@@ -53,7 +58,17 @@ void func_80051100(s32 index, s32 tempo) {
   osSetIntMask(mask);
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/play_sound_effect", func_80051164);
+void func_80051164(s32 a0, s32 a1, s32 a2, s32 a3, s32 arg5) {
+  s32 idx = a1 * 5;
+  u16* arr = D_800C0FF8;
+  u16* r = arr + a2 * 18;
+  s32 val = r[a0];
+  D_800C113C[idx] = a0;
+  D_800C1144[idx] = a2;
+  D_800C1148[idx] = a3;
+  D_800C1140[idx] = val;
+  D_800C114C[idx] = arg5;
+}
 
 void func_800511D8(s32 col, s32 row) {
   u16* arr = D_800C0FF8;
