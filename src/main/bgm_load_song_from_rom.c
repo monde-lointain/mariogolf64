@@ -30,6 +30,15 @@ extern const char D_800D1254[];
 typedef struct {
   u32 data[0x1A];
 } GolfModeRecord;
+typedef struct {
+  u32 data[0x11];
+} Rec44;
+typedef struct {
+  u32 data[0x2E];
+} RecB8;
+extern u32 D_801B55F0;
+extern RecB8 D_801B71D0[];
+extern RecB8 D_8012D0C8[];
 extern u8 D_800FED40[];
 extern s8 D_800FEE10;
 extern s8 D_800FEE11;
@@ -244,7 +253,14 @@ s32 func_800603A8(void) {
   return (f82 << 4) | (f83 << 3) | (f84 << 2) | (f85 << 1) | f86;
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/bgm_load_song_from_rom", func_80060434);
+void func_80060434(void) {
+  s32 i;
+
+  *(Rec44*)&D_801B55F0 = *(Rec44*)&D_801B6088;
+  for (i = 0; i < 4; i++) {
+    D_8012D0C8[i] = D_801B71D0[i];
+  }
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/bgm_load_song_from_rom", func_800604F4);
 
