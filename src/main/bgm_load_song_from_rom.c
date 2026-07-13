@@ -9,6 +9,9 @@ extern void func_80407D64(void);
 extern s32 get_lowest_height_at_position(void);
 extern void func_8005B7BC(s32 arg0);
 extern void func_80216B74(s32 arg0);
+extern s32 flag_is_set(s32 flag);
+extern void* get_club_param(u32 id);
+extern s32 func_80044A8C(s32 arg0);
 
 extern u32 g_bgm_song_buffer;
 extern u8 g_terrain_tile_cull_exclude[];
@@ -140,7 +143,15 @@ void func_80060358(void) {
   D_800C30AC = 9;
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/bgm_load_song_from_rom", func_800603A8);
+s32 func_800603A8(void) {
+  s32 f82 = flag_is_set(0x82);
+  s32 f83 = flag_is_set(0x83);
+  s32 f84 = flag_is_set(0x84);
+  s32 f85 = flag_is_set(0x85);
+  s32 f86 = flag_is_set(0x86);
+
+  return (f82 << 4) | (f83 << 3) | (f84 << 2) | (f85 << 1) | f86;
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/bgm_load_song_from_rom", func_80060434);
 
