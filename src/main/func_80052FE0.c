@@ -1,9 +1,10 @@
 #include "common.h"
 
-extern void clear_animation_slot(s32 index);
+extern s32 clear_animation_slot(s32 index);
 extern s32 func_800542A0(s32 index);
 extern s32 func_80054550(s32 id, s32 tag, s32 arg2);
 extern u8 polychara_state[];
+extern u8 D_800D0488[];
 extern u8 D_801F43F0[];
 extern u8 D_801F4424[];
 extern s32 D_800B67F0;
@@ -20,39 +21,41 @@ INCLUDE_ASM("asm/nonmatchings/main/func_80052FE0", func_8005342C);
 INCLUDE_ASM("asm/nonmatchings/main/func_80052FE0", calculate_bone_matrices);
 
 /* clear_animation_slot: osSyncPrintf(fmt,index) then, if ((u32)index < 4),
- * *(s32*)&polychara_state[index*0x18C] = -1 (clear the per-record sentinel at
- * D_801F43F0+8). Body fully RE'd; carried INCLUDE_ASM as a 1-nop delay-slot
- * reorg near-match. The ROM keeps a nop in the `beqz v0` delay slot; my build
- * fills it with the fall-through `sll v0,s0,1`. The sibling get_character_state
- * (identical bound+multiply shape, NO preceding call) fills the slot and
- * MATCHES; the only structural difference is the preceding osSyncPrintf jal,
- * which shifts the reorg-pass delay-slot decision
- * (#delay-slot-fill-across-call). Not source-leverable (all valid C forms of a
- * printf-then-guarded-store emit the fill); not permuter-reachable
- * (post-schedule reorg). */
-INCLUDE_ASM("asm/nonmatchings/main/func_80052FE0", clear_animation_slot);
+ * *(s32*)&polychara_state[index*0x18C] = -1 (clear the per-record sentinel).
+ * The s32 return type is load-bearing: the `beqz` delay slot's candidate fill
+ * is `sll v0,s0,1`, which writes $v0. An s32 return marks $v0 live at the
+ * return block, so reorg's opposite-thread liveness test (reorg.c:3374-3376)
+ * rejects the fill and leaves the ROM's nop. A void return leaves $v0 dead and
+ * wrongly fills the slot. (Return value is unused by every caller.) */
+s32 clear_animation_slot(s32 index) {
+  osSyncPrintf(D_800D0488, index);
+  if ((u32)index < 4) {
+    *(s32*)&polychara_state[index * 0x18C] = -1;
+  }
+}
 
 /* func_800542A0: returns 1 if (u32)index >= 4, or the per-record sentinel
  * polychara_state[index*0x18C] != -1, or (u32)(D_800B67F0 -
- * D_801F4424[index*0x18C]) < 2; else 0. Body fully RE'd; the accumulator form
- * below matches STRUCTURE + LENGTH exactly, leaving only an a0<->a1 coloring
- * swap: the ROM holds the index*0x18C offset in a0 and the 0/1 accumulator in
- * a1; my build swaps them. #local-alloc-qty-permutation (REG_ALLOC_ORDER
- * undefined -> ascending default; the higher-refcount accumulator greedily
- * grabs a0). No source lever flips it (explicit off-temp, inverted guard both
- * tried; inverting also breaks the branch layout); permuter skipped for this
- * class (0 project cracks). Carried INCLUDE_ASM.
- *
- *   s32 func_800542A0(s32 index) {
- *     s32 r;
- *     if ((u32)index >= 4) return 1;
- *     r = 0;
- *     if (*(s32*)&polychara_state[index * 0x18C] != -1) r = 1;
- *     else if ((u32)(D_800B67F0 - *(s32*)&D_801F4424[index * 0x18C]) < 2) r =
- * 1; return r;
- *   }
- */
-INCLUDE_ASM("asm/nonmatchings/main/func_80052FE0", func_800542A0);
+ * D_801F4424[index*0x18C]) < 2; else 0. The single short-circuit `||` store is
+ * load-bearing: a two-branch `if(c1) r=1; else if(c2) r=1;` emits two r=1
+ * stores, giving the accumulator pseudo 4 refs; global.c's allocno priority
+ * (global.c:587-607, floor_log2(n_refs)*n_refs/live_length) then ranks it above
+ * the scaled-offset pseudo, so it grabs $a0 first (the a0<->a1 swap). The `||`
+ * form drops the accumulator to 3 refs, halving floor_log2, so the offset wins
+ * $a0 and matches the ROM. */
+s32 func_800542A0(s32 index) {
+  s32 r;
+
+  if ((u32)index >= 4) {
+    return 1;
+  }
+  r = 0;
+  if (*(s32*)&polychara_state[index * 0x18C] != -1 ||
+      (u32)(D_800B67F0 - *(s32*)&D_801F4424[index * 0x18C]) < 2) {
+    r = 1;
+  }
+  return r;
+}
 
 s32 func_80054310(void) {
   s32 i;
@@ -82,36 +85,51 @@ void func_800543A4(void) {
   }
 }
 
-/* func_800543DC(arg0, arg1) -> s32 (extern-typed void by its lone caller in
- * func_80054900.c, which ignores the return). cs = get_character_state(arg0);
- * NULL -> -1. arg1 == -1: write G_ENDDL (0xDF000000) + 0 into cs[0]->dl[0..1],
- * return 0. Else scan cs[0]->slots[0..arg1) for the -1 sentinel (return -1 on
- * hit); then the slots[arg1] slot: if -1 return -1, else write G_DL branch
- * (0xDE000000) into dl[0] and slots[arg1] into dl[1], return 0. Body fully
- * RE'd; the form below matches STRUCTURE, FRAME, and the loop exactly, leaving
- * one instruction: the ROM keeps the post-loop `slots[arg1]==-1` return
- * SEPARATE (reusing the compare's v0=-1, bare-epilogue jump, nop delay) while
- * my build cross-jump-merges it into the shared `li v0,-1` block (delay filled
- * with the next lui). #cross-jump-tail-merge: ROM's EBB layout links the
- * compare's -1 to the return (CSE across the extended BB) so the li is skipped;
- * my layout does not. The `==` form merges the post-loop return; inverting to
- * `!=` merges the loop-exit return into the null path instead (+8) -- neither
- * source form splits {null,loop-exit}(merged) from {post-loop}(separate) the
- * way the ROM does. Permuter-candidate (statement-reorder / EBB perturbation),
- * not a hard wall; carried INCLUDE_ASM as a stretch near-match.
- *
- *   typedef struct { u8 pad0[0xC]; u32* dl; s32* slots; } CharSub;  // dl@0xC,
- * slots@0x10 s32 func_800543DC(s32 arg0, s32 arg1) { CharSub** cs =
- * (CharSub**)get_character_state(arg0); s32 i; if (cs == NULL) return -1; i =
- * 0; if (arg1 == -1) { cs[0]->dl[0] = 0xDF000000; cs[0]->dl[1] = 0; return 0; }
- *     while (i < arg1) { if (cs[0]->slots[i] == -1) return -1; i++; }
- *     if (cs[0]->slots[i] == -1) return -1;
- *     cs[0]->dl[0] = 0xDE000000;
- *     cs[0]->dl[1] = cs[0]->slots[i];
- *     return 0;
- *   }
- */
-INCLUDE_ASM("asm/nonmatchings/main/func_80052FE0", func_800543DC);
+typedef struct {
+  u8 pad0[0xC];
+  u32* dl;    /* 0xC: display-list slot */
+  s32* slots; /* 0x10: sub-animation id array */
+} CharSub;
+
+/* func_800543DC: cs = get_character_state(arg0); NULL -> -1. arg1 == -1: write
+ * G_ENDDL (0xDF000000)+0 into cs[0]->dl[0..1], return 0. Else scan
+ * cs[0]->slots[0..arg1) for the -1 sentinel (return -1 on hit); then the
+ * slots[arg1] slot: if -1 return -1, else write a G_DL branch (0xDE000000) into
+ * dl[0] and slots[arg1] into dl[1], return 0. The `goto neg` routing is
+ * load-bearing: it splits {null-check, loop-exit}(shared -1 tail) from
+ * {post-loop}(inline return -1). Every natural early-return form leaves all
+ * three `return -1` tails structurally identical, so cross-jump (jump.c:1969)
+ * merges them into one `li v0,-1` block and reorg fills its delay slot; the ROM
+ * instead reuses the post-loop compare's v0=-1 with a bare-epilogue jump + nop.
+ * The goto makes the post-loop tail no longer a mergeable twin, matching. */
+s32 func_800543DC(s32 arg0, s32 arg1) {
+  CharSub** cs = (CharSub**)get_character_state(arg0);
+  s32 i;
+
+  if (cs == NULL) {
+    goto neg;
+  }
+  i = 0;
+  if (arg1 == -1) {
+    cs[0]->dl[0] = 0xDF000000;
+    cs[0]->dl[1] = 0;
+    return 0;
+  }
+  while (i < arg1) {
+    if (cs[0]->slots[i] == -1) {
+      goto neg;
+    }
+    i++;
+  }
+  if (cs[0]->slots[i] == -1) {
+    return -1;
+  }
+  cs[0]->dl[0] = 0xDE000000;
+  cs[0]->dl[1] = cs[0]->slots[i];
+  return 0;
+neg:
+  return -1;
+}
 
 s32 func_800544B4(s32 arg0, s32 arg1) {
   u8* cs;
