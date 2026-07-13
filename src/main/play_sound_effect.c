@@ -3,6 +3,8 @@
 extern u32 g_bgm_current_id;
 extern u32 g_bgm_pending_action;
 extern u32 g_bgm_action_delay;
+extern const char D_800CCC14[];
+extern const char D_800CCC20[];
 extern s32 D_800C0EAC[];
 extern u16 D_800C0FF8[];
 extern s32 D_800C10F4[];
@@ -63,9 +65,9 @@ INCLUDE_ASM("asm/nonmatchings/main/play_sound_effect", play_bgm_by_id);
 
 INCLUDE_ASM("asm/nonmatchings/main/play_sound_effect", func_80051D8C);
 
-INCLUDE_ASM("asm/nonmatchings/main/play_sound_effect", alSynNew);
+void alSynNew(ALSynth* s, ALSynConfig* config) { osSyncPrintf(D_800CCC14); }
 
-INCLUDE_ASM("asm/nonmatchings/main/play_sound_effect", alSynDelete);
+void alSynDelete(ALSynth* s) { osSyncPrintf(D_800CCC20); }
 
 void __freeParam(void) {}
 
