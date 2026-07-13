@@ -42,11 +42,21 @@ void func_80050FC0(s32 index, s32 pan) {
   osSetIntMask(mask);
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/play_sound_effect",
-            set_field_0x9E_for_object_group_if_type_matches);
+void set_field_0x9E_for_object_group_if_type_matches(s32 index, s32 volume) {
+  OSIntMask mask = osSetIntMask(OS_IM_NONE);
+  if (object_id_table[index] != -1) {
+    MusHandleSetVolume(object_id_table[index], volume);
+  }
+  osSetIntMask(mask);
+}
 
-INCLUDE_ASM("asm/nonmatchings/main/play_sound_effect",
-            update_indexed_slot_at_0xCB_atomic);
+void update_indexed_slot_at_0xCB_atomic(s32 index, s32 reverb) {
+  OSIntMask mask = osSetIntMask(OS_IM_NONE);
+  if (object_id_table[index] != -1) {
+    MusHandleSetReverb(object_id_table[index], reverb);
+  }
+  osSetIntMask(mask);
+}
 
 void func_800510EC(s32 idx, s32 val) { D_800C0EAC[idx] = val; }
 
@@ -78,8 +88,13 @@ void func_800511D8(s32 col, s32 row) {
 
 INCLUDE_ASM("asm/nonmatchings/main/play_sound_effect", func_80051210);
 
-INCLUDE_ASM("asm/nonmatchings/main/play_sound_effect",
-            update_indexed_slot_at_0x60_atomic);
+void update_indexed_slot_at_0x60_atomic(s32 index, f32 offset) {
+  OSIntMask mask = osSetIntMask(OS_IM_NONE);
+  if (object_id_table[index] != -1) {
+    MusHandleSetFreqOffset(object_id_table[index], offset);
+  }
+  osSetIntMask(mask);
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/play_sound_effect", bgm_tick);
 
