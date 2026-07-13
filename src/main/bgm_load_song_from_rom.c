@@ -6,12 +6,9 @@ extern musHandle try_spawn_global_object(int number);
 extern void gen_terrain_detail_texture(s32 arg0, s32 arg1);
 extern void func_80407D64(void);
 
-extern s32 get_lowest_height_at_position(void);
 extern void func_8005B7BC(s32 arg0);
 extern void func_80216B74(s32 arg0);
 extern s32 flag_is_set(s32 flag);
-extern void* get_club_param(u32 id);
-extern s32 func_80044A8C(s32 arg0);
 extern void func_8005F360(void);
 extern void func_8005F4AC(void);
 extern void func_80060210(void* arg0);
@@ -23,7 +20,6 @@ void setup_terrain_detail_default(void);
 
 extern u32 scenario_mode_id;
 extern s32 D_801B608C;
-extern s8 D_800BAA04;
 extern u8 D_800FE330;
 extern const char D_800D1254[];
 extern void* __MusIntMemMalloc(s32 size);
@@ -39,21 +35,6 @@ extern s32 D_800C3084;
 extern s32 D_800C3088;
 extern s32 D_800C308C;
 extern s32 D_800C3090;
-
-extern s32 func_800525C4(s32 arg0, s32 arg1);
-extern s32 func_800521C0(void);
-extern s32 func_800521DC(void);
-extern s32 func_8006CD50(s32 arg0, s32 arg1);
-extern void func_800680FC(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
-extern s8 D_801B72A5;
-extern s32 D_801B60B4;
-
-typedef struct {
-  /* 0x0 */ s8 tag;
-  /* 0x1 */ u8 pad[4];
-  /* 0x5 */ u8 flags;
-} Entry; /* 0x6 */
-extern Entry D_801B7118[];
 
 typedef struct {
   u32 data[0x1A];
@@ -85,7 +66,6 @@ extern s32 D_800B67C4;
 extern const char D_800D1238[];
 extern u32 D_800C2FF4;
 extern const char D_800D1220[];
-extern s32 D_800FBE68;
 extern s8 g_terrain_vtx_xform_mode;
 extern u8 D_800FEDD8[][8];
 extern u8 D_80105F40[][8];
