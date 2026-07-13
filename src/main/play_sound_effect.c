@@ -148,6 +148,13 @@ s32 func_80051BFC(void) { return g_bgm_current_id; }
 
 INCLUDE_ASM("asm/nonmatchings/main/play_sound_effect", play_bgm_by_id);
 
+// CARRY (S230): CSE-double-materialization + loop-regalloc near-match. Target
+// loads D_18BE00 into TWO regs (separate materializations for the
+// size-subtraction operand and the 3rd arg); my build CSE-forwards one load (4
+// instr short, flows .bss). Int-casts on the subtraction operands do not defeat
+// the CSE. Loop then diverges on register assignment (i-counter + dual running
+// pointers). No source lever splits the shared address load; permuter-candidate
+// (percent high).
 INCLUDE_ASM("asm/nonmatchings/main/play_sound_effect", func_80051D8C);
 
 void alSynNew(ALSynth* s, ALSynConfig* config) { osSyncPrintf(D_800CCC14); }
