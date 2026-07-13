@@ -6176,6 +6176,21 @@ ROM's aligned block-move, byte-exact. Match the ROM's path by picking the struct
 
 **Provenance.** S209 B28C (banked; `D_80131510[idx] = *src` + `func_8005DF54(func_8005AF50(), 1)`).
 
+**Extension — the aligned word-loop path also drives a struct assign to a CAST global + a NESTED
+struct-ARRAY copy loop (S231).** The same alignment rule reproduces two more block-move shapes, both
+byte-exact first build when the record type is word-aligned:
+- **Struct assign to a cast global base** (`func_800602B4`/`func_80060210`): `*(GolfModeRecord*)DST = *src`
+  where `DST` is a `u8[][8]` (or any non-record) global cast to the record pointer, and `src` is the
+  record-typed param. GCC trusts the cast's alignment → aligned 6×4-word loop + 2-word tail for 0x68B.
+  A `u8`-param `src` (byte-aligned) instead forces the `lwl`/`lwr` dual path AND (observed) mis-addresses
+  the dest base by +0x80 on the unaligned path — a compound tell that the record type must be word-aligned.
+- **Nested struct-array copy** (`func_80060434`): `for(i=0;i<N;i++) DSTARR[i] = SRCARR[i];` over
+  `RecB8 SRCARR[]`/`RecB8 DSTARR[]` (0xB8 word-aligned struct) emits the ROM's outer i-loop wrapping the
+  inner aligned block-move (0xB0 word-loop + 2-word tail, bases += 0xB8). Declare BOTH arrays as the same
+  word-aligned struct type and index `arr[i]` (do NOT hand-roll a pointer walk).
+Sizing: a byte count of `0xN` bytes is `u32 data[0xN/4]` (0x68→0x1A, 0x44→0x11, 0xB8→0x2E). S231 banked
+all three via word-aligned `struct { u32 data[K]; }`.
+
 ## gas .set-reorder delay-slot fill (textual layout != machine)
 
 **Symptom (S209 `func_8005B070`).** The `-S` output shows a branch immediately followed by an
@@ -6455,6 +6470,20 @@ first: `xxd -s <rom_off> baserom.z64`) and allocates nothing, so no bss flow. Th
 suspected flow by `git stash` + rebuild HEAD: if HEAD is green, your new C shifted the region — the tell
 is the `.NON_MATCHING` name-vs-address mismatch on a symbol you reference as `extern u8 D_x[]`.
 
+**Reverse lever — force base-materialize-FIRST + index-reg-reuse for a `base + idx*K` row pointer
+(S231 `func_800600C0`/`func_80060128`).** A field-copier `p = &BASE[idx]; DST = *(TYPE*)(p+off); …`
+that must emit the ROM's `lui/addiu(base); sll idx; addu p,idx,base` (base pair FIRST, then the shifted
+index reused AS the pointer reg) does NOT come from the obvious forms:
+- `(u8*)&BASE + idx*8` → schedules `sll` FIRST (index before base pair), +0 reg but wrong order.
+- `p = (u8*)&BASE; p += idx*8;` → base FIRST but the result lands in the WRONG reg (`v0`, not the
+  index reg `a0`).
+The form that gets BOTH (base-first order AND pointer-in-the-index-reg) is a **two-statement array-of-row
+split**: `u8 (*rows)[K] = BASE; u8 *p = rows[idx];` — the `rows = BASE` assignment materializes the base
+pair as statement 1, and the `rows[idx]` subscript reuses the index reg for the product+add. S231 banked
+both copiers this way after the flat/pointer-add forms each missed by one axis. General shape: when a
+base+scaled-index needs a specific instruction ORDER *and* reg, split the base into its own statement
+AND keep the scale as an array subscript on that base.
+
 ## value-select-if-else vs branch-likely (the `p ? field : sentinel` accessor idiom)
 
 **Symptom (S211; `func_80056464` / `func_80056494` / `func_8005642C`).** A tiny accessor calls a
@@ -6507,6 +6536,20 @@ not a branch-likely annul, and it fires even when neither arm is a bare sentinel
 `func_80042DF4` and `get_direct_grid_vertex` on this; the guard-clause form was 1 insn short and
 inverted. Kin to the S214 statement-order/delay-slot levers.
 
+**Reconfirm — a const-value select `(x==K) ? 1 : 0` is branchless and source-INVARIANT; it does NOT
+inherit the p?field:sentinel fix (S231, 3 walls).** Distinguish the two: the fixable case (above) selects
+a POINTER-DEREFERENCED field vs a sentinel (`p->field` vs SENT) — the two definitions live in separate
+BBs, so the single-return-temp form defeats the annul. But a select between two COMPILE-TIME CONSTANTS
+(`return (D_x == 9) ? 0x84 : 0;` / `if(D_x!=9) return 0; return 1;`) always if-converts to branchless
+`xori/sltiu` (or `sltiu/negu/andi`), regardless of `==`/`!=` polarity, early-return, `&&`, or
+single-return-temp — GCC computes `(x==K)*CONST` because both arms are cheap immediates with no
+side-effect anchor. When the ROM BRANCHES on such a select (`li v0,K; bne x,v0,exit; move v0,zero;
+li v0,CONST`) it is a genuine wall: **the whole enclosing structure can match** (S231 `func_80060190`'s
+4-case switch tree and `func_800604F4`'s mode==5 search-loop + call chain both matched byte-exact) with
+ONLY the const-select case body diverging. Also `(x>0)?x:0` clamp: GCC always picks the `~x>>31` sign-
+trick (`nor/sra/and`), never the ROM's `slt/negu/and` — `func_8005F30C` byte-exact but for that idiom.
+Carry these; the permuter does not flip if-conversion (it permutes regs/scheduling, not branch-vs-arith).
+
 ## delay-slot-fill of a null-guard `beqz` (body-first insn safe-on-the-taken-path)
 
 **Symptom (S211; `func_800564F0` `if(cs) cs[0x189]=1` / `func_80055738` `if(cs){p=cs+i*8; …}`).** A
@@ -6554,6 +6597,17 @@ must be emitted BEFORE the address. Materialize the value as its own statement f
 and reorg steals the `li` into the delay, matching the ROM (the natural `*(u8*)(cs+slot*8+0x8c)=4`
 emits the address `sll` first and steals THAT instead). Emit-order is the only lever
 ([[kmc-cc1-no-instruction-scheduler]]).
+
+**Corollary FILL lever #2 — hoist a LATER guard's independent operand to fill an EARLIER guard's branch
+delay (S231 `func_8006280C`, BANKED).** Two sequential range guards `if(A)return; if(B)return;` where B's
+compare operand is an independent computation (`ty = (u32)arg1>>19`): the ROM fills the FIRST guard's
+`beqz` delay with B's `srl` (compute-ty), then B's guard delay is `nop`. Writing `tx=…; if(txbad)return;
+ty=…; if(tybad)return;` (ty computed AFTER the tx guard) leaves the tx-guard delay a `nop` and puts the
+`srl` after — **+1 nop = +4 bytes**, which for a mid-subseg fn overflows into the flowing `.bss` and
+shows as a diff at a FAR-EARLIER rom offset ([#short-text-shifts-flowing-bss], not a local near-miss).
+Fix: compute BOTH guard operands up front (`tx=…; ty=…; if(txbad)return; if(tybad)return;`) so reorg has
+ty's `srl` available to steal into the tx-guard's delay slot. Verify the fn's assembled size equals the
+`.s` directive (`nm --print-size`) — a +4 is the tell before the ROM cmp even makes sense.
 
 ## default-return-var must init AFTER the call (caller-saved sentinel frame lever)
 

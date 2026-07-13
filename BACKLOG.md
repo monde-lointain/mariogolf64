@@ -4492,6 +4492,33 @@ by `/sprint-plan`:
   resolved `c-combined` member upstreams so the recover-extern is priced at the gate, not discovered
   at execution-time data-ref reconciliation. Not file-blocking (recover-extern is cheap in-execution).
 - _(osAiSetFrequency carry-over resolved and banked at S38 retroactive review)_
+- **Open (S231, in-progress mixed-partial, NOT a spike):** `src/main/bgm_load_song_from_rom.c` (40-fn
+  main-seg `none` deep-integer pack, subseg 0x3A490 flipped `c` at the S231 gate; bgm-loader + object-
+  spawn + per-player/terrain-detail state). **23 banked** (the whole cheap-leaf + integer-glue vein:
+  wrappers, 2-flag OR + 5-flag bitmask predicates, a 75i mode-init dispatcher, `(clamp<<8)/30` fixed-
+  point scale, field-copiers, 0x68/0x44/0xB8 aligned struct + struct-array copies, a 3x3 tile-cull double
+  loop, field-zero). 17 stubs remain. Quality 0/0/17/0. **Levers landed:** array-of-row base-order split,
+  word-aligned struct-copy (cast-global + nested), sequential-guard delay-slot-fill (all in hazards.md).
+  **Carries (characterized, no-source-lever classes):** #value-select — `func_8005F30C`
+  (`(x>0)?x:0` sign-trick vs ROM slt/negu), `func_80060190` (4-case switch tree BYTE-EXACT but for the
+  case-0 `D_801B608C==9` const-select), `func_800604F4` (mode==5 search-loop + 5-call chain byte-exact
+  but for the mode==4 `D_801B72A5==0xC` const-select); permuter-candidates — `func_8005F290`
+  (prologue saved-reg order s1,s2,s3 vs s3,s2,s1, body byte-exact), `gen_terrain_detail_texture`
+  (write-ptr/idx dual-counter regalloc, p→s1 vs s0); #base-register — `func_8005F4AC` (scenario_mode_id
+  cluster s0-relative vs absolute). **Deferred (unattempted, wall-class):** big non-FP dispatch +
+  `D_801B71DC` stride-0xB8 search loops (`func_8005FCB8` 117i, `func_8005FE8C`, `func_8005FB58`,
+  `init_per_player_state` 190i — high-value if a search-loop model holds), intricate fall-through switch
+  (`func_8005F360` 83i), FP (`func_8005F964`), FP-monster/DL-emitter S189/S190-predicted (`func_800605EC`
+  1985i/229jal/84fp, `emit_course_terrain_dl` 2237i F3DEX2, `emit_per_phase_fog_state`,
+  `emit_terrain_state_prefix_block` $v0-arg-convention wall, `init_terrain_vertex_texcoords` 88i unaligned-
+  copy). **S231 ranker data point (queued, off-cadence golden-gated):** the pack's
+  `coddog-mirror:src/libc/llcvt.c@99.99` + `coddog-fncount-mismatch:8vs40` tags were a pure STRUCTURAL
+  false-positive (0/40 fns were llcvt mirrors) — 4th confirmation (S229 contquery, S230 nucontgbpakmgr)
+  that a non-lib-`func_`-callee / fncount-mismatch coddog row on a fresh classical pack must DEWEIGHT, not
+  route to mirror. Also confirms the S228 cheap-leaf-depth column would have ranked this pack's ~22 sub-35i
+  jal-light NON-FP leaves highly. **Committed-seed convention (S231 retro):** a fresh mixed-partial `none`
+  pack commits seed **3** (per-fn override), NOT the ranker's pts13 — the plan gate must apply the S215-S230
+  override at commit time (S231 SPRINT.md mistakenly wrote 13; realigned at retro).
 - **Open (S227, in-progress mixed-partial, NOT a spike):** `src/main/func_80071370.c` (39-fn main-seg
   `none` pack, subseg 0x4C770 flipped `c` at the S227 gate; string/struct-array/heap/DL glue). **8
   banked** (`func_80074960` empty, `func_80073BF0` strlen, `func_80071C74` single-index struct-array

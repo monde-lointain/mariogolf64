@@ -25,6 +25,17 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 231 — open fresh deep-integer pack bgm_load_song_from_rom.c (main none pack) — 2026-07-13
+- Increment: 0 files banked / **+23 functions matched** (`bgm_load_song_from_rom.c` 0/40 → 23/40 C, 17 stubs; NOT md5-candidate). Ties the S208 record; top of the +15-25 plan hedge.
+- Quality: 0 stuck-far / 0 permuter / 17 carried / 0 re-opened
+- Seed: committed 3pt (mixed-partial per-fn override, ranker pts13; plan gate wrote 13, realigned to 3 at retro per accepted #4); banked 0pt (file partial); realized ~10, residual +7; regime classical/mixed
+- What helped: three novel byte-exact levers — (1) word-aligned struct-copy (`struct{u32 data[K];}`) reproduces the aligned lw/sw block-move for a struct-assign-to-cast-global AND a nested struct-array copy loop (byte struct → unaligned lwl/lwr + runtime check + base mis-addr); (2) array-of-row base-order split `u8(*rows)[K]=BASE; p=rows[idx];` forces base-materialize-first + index-reg-reuse (flat/pointer-add each missed one axis); (3) sequential-guard delay-slot fill (compute the 2nd guard operand up front to fill the 1st guard's branch delay — wrong order = +4 bytes = flowing-bss break, diagnosed by nm --print-size before the ROM cmp made sense). if/else-if reproduced bnel naturally (func_8005F180); a switch tree reproduced the beq/beql cascade (func_80060190). The func_80071220 sibling gave the Entry stride-6 struct + search idiom for func_800604F4.
+- Friction: the #value-select wall recurred 3x and swallowed effort — func_80060190 (switch tree) and func_800604F4 (mode==5 search loop + 5-call chain) both matched byte-exact EXCEPT a single const-select case body that GCC if-converts to branchless regardless of `==`/`!=`/early-return/`&&`/single-temp; and func_8005F30C's `(x>0)?x:0` clamp always takes the `~x>>31` sign-trick vs the ROM's slt/negu. All carried (permuter can't flip if-conversion). One +4-byte flowing-bss shift (func_8006280C delay-slot) surfaced as a diff at a far-earlier rom offset.
+- Applied: 4 of 4 — #1 aligned-struct-copy extension (cast-global + nested struct-array) → hazards.md #struct-copy-block-move; #2 array-of-row base-order lever → hazards.md #base-register-vs-displacement + sequential-guard delay-slot-fill lever → hazards.md #delay-slot-fill-null-guard; #3 const-value-select-is-source-invariant reconfirm (distinct from p?field:sentinel) → hazards.md #value-select; #4 mixed-partial committed-seed = 3 convention (not ranker 13) → VELOCITY + BACKLOG, plus the llcvt.c coddog structural false-positive (0/40 fns were llcvt mirrors) → BACKLOG.
+- Carry-over: `bgm_load_song_from_rom.c` (17 stubs) — #value-select (func_8005F30C, func_80060190, func_800604F4; last two byte-exact but for a const-select body), permuter-candidates (func_8005F290 prologue-reg-order, gen_terrain_detail_texture dual-counter regalloc), #base-register (func_8005F4AC), FP (func_8005F964), big non-FP dispatch + D_801B71DC search loops (func_8005FCB8, func_8005FE8C, func_8005FB58, init_per_player_state 190i), intricate fall-through switch (func_8005F360), FP-monster/DL-emitter (func_800605EC 1985i, emit_course_terrain_dl 2237i, emit_per_phase_fog_state, emit_terrain_state_prefix_block $v0-arg, init_terrain_vertex_texcoords 88i).
+
+---
+
 ## Sprint 230 — open fresh mixed pack play_sound_effect.c (main sound/bgm pack) — 2026-07-13
 - Increment: 0 files banked / **+20 functions matched** (`play_sound_effect.c` 0/26 → 20/26 C, 6 stubs; NOT md5-candidate)
 - Quality: 0 stuck-far / 0 permuter / 1 carried / 0 re-opened

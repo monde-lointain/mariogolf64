@@ -761,6 +761,24 @@ Three honest caveats:
   over-flags. Two positive levers banked (hazards.md): idx-hoist named local + split-base pseudo. Retro
   applied 4 of 4 (#2 S177-narrow + #3 levers + #4 wrapper-A/B recognition → hazards.md; #1 stub-suspect
   ranker flag → BACKLOG).
+  S231: OPENED fresh `none` deep-integer pack `bgm_load_song_from_rom.c` (subseg 0x3A490, 40fn bgm-loader
+  + object-spawn + per-player/terrain-detail state; PO chose it over func_8006F1A0 / func_80080220 on
+  cheap-leaf-depth: ~22 sub-35i jal-light NON-FP leaves + a deep integer mid-tier). Banked **0pt** (file
+  23/40, not md5-candidate, 17 stubs), **+23 matched**, **0 permuter**, **17 carried**, quality
+  **0/0/17/0**. **Ties the S208 record (+23)** — the biggest Epic-2 classical-pack matched-count, top of
+  the +15-25 plan hedge. Seed committed **3** (mixed-partial per-fn override, ranker pts13, same as
+  S215-S230; NOTE: the S231 plan gate SPRINT.md wrote seed 13 — realigned to 3 at this retro per the
+  accepted #4 convention, keeping the mixed-partial track comparable). Realized ~10 (seed 3 + massive
+  cheap-leaf + integer-glue overrun, +~4 for novel levers, offset by 0 stuck / 0 permuter), residual +7.
+  Levers banked (hazards.md): array-of-row base-order split, word-aligned struct-copy (assign-to-cast-
+  global + nested struct-array-copy), sequential-guard delay-slot-fill (+4-byte flowing-bss tell). 17
+  CARRIES concentrate on documented no-source-lever classes: #value-select (3, incl. func_80060190 switch-
+  tree + func_800604F4 search-loop both byte-exact but for a const-select case body), prologue-reg-order +
+  dual-counter regalloc (2 permuter-candidates), #base-register (func_8005F4AC), FP-monster/DL-emitter
+  (func_800605EC 1985i, emit_course_terrain_dl 2237i, +4), big non-FP dispatch (func_8005FCB8/FE8C/FB58,
+  init_per_player_state 190i). Productivity cliff reconfirmed (S224/S208): cheap-leaf vein banks far
+  cheaper than the FP/DL/value-select/big-dispatch tail. Retro applied 4 of 4 (#1/#2/#3 levers → hazards.md;
+  #4 committed-seed-convention + llcvt coddog false-positive → this row + BACKLOG).
 - **Regime:** `mirror` is a depleting minority (~22 % of ranked candidates: 56 mirror vs 194
   classical; 18 warm / 38 cold). The warm clean-singleton mirror pool is now **mined out** (S11
   plan gate: every top mirror candidate carries a blocking hazard), pushing the project onto the
