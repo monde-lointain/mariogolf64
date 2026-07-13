@@ -12,6 +12,26 @@ extern void func_80216B74(s32 arg0);
 extern s32 flag_is_set(s32 flag);
 extern void* get_club_param(u32 id);
 extern s32 func_80044A8C(s32 arg0);
+extern void func_8005F360(void);
+extern void func_8005F4AC(void);
+extern void func_80060210(void* arg0);
+extern void func_80052384(void);
+extern void init_per_player_state(void);
+extern void func_80080220(void);
+extern void func_80054E20(void);
+void setup_terrain_detail_default(void);
+
+extern u32 scenario_mode_id;
+extern s32 D_801B608C;
+extern u8 D_800FED40[];
+extern s8 D_800FEE10;
+extern s8 D_800FEE11;
+extern s8 D_801B60B8;
+extern s8 D_801B72A6;
+extern s32 D_801B6090;
+extern s32 D_801B6098;
+extern s32 D_801B609C;
+extern const char D_800D1240[];
 
 extern u32 g_bgm_song_buffer;
 extern u8 g_terrain_tile_cull_exclude[];
@@ -90,7 +110,35 @@ void func_8005F518(s32 arg0, char* arg1) {
 INCLUDE_ASM("asm/nonmatchings/main/bgm_load_song_from_rom",
             init_per_player_state);
 
-INCLUDE_ASM("asm/nonmatchings/main/bgm_load_song_from_rom", func_8005F838);
+void func_8005F838(s32 arg0) {
+  if (arg0 == 1) {
+    func_8005F360();
+  } else if (arg0 == 0) {
+    func_8005F4AC();
+  } else if (arg0 == 2) {
+    func_80060210(D_800FED40);
+    D_801B609C = 0;
+    D_801B6090 = 1;
+    D_801B6088 = 0;
+    D_801B608C = 0;
+    scenario_mode_id = D_800FEE10;
+    D_801B6098 = D_800FEE11;
+  }
+
+  func_80052384();
+  if (D_801B60B8 == 0) {
+    init_per_player_state();
+  }
+  if (2 * flag_is_set(0x33) + flag_is_set(0x34) == 2) {
+    D_801B72A6 = 1;
+  }
+  setup_terrain_detail_default();
+  if (arg0 != 3) {
+    func_80080220();
+  }
+  func_80054E20();
+  osSyncPrintf(D_800D1240);
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/bgm_load_song_from_rom", func_8005F964);
 
