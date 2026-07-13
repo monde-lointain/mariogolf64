@@ -26,6 +26,19 @@ extern s32 D_801B608C;
 extern s8 D_800BAA04;
 extern u8 D_800FE330;
 extern const char D_800D1254[];
+extern void* __MusIntMemMalloc(s32 size);
+extern s32 rand(void);
+extern u8 g_terrain_detail_texture[];
+extern s32 D_800C3070;
+extern s32 D_800C3074;
+extern u16 D_800C3078;
+extern u16 D_800C307A;
+extern s32 D_800C307C;
+extern s32 D_800C3080;
+extern s32 D_800C3084;
+extern s32 D_800C3088;
+extern s32 D_800C308C;
+extern s32 D_800C3090;
 
 typedef struct {
   u32 data[0x1A];
@@ -77,7 +90,7 @@ void bgm_load_song_from_rom(u32 rom_addr, s32 size) {
   nuPiReadRom(rom_addr, (void*)g_bgm_song_buffer, size + (size & 1));
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/bgm_load_song_from_rom", func_8005F0BC);
+void func_8005F0BC(s32 size) { D_800C2FF4 = (u32)__MusIntMemMalloc(size); }
 
 void spawn_object_simple(int number) { try_spawn_global_object(number); }
 
@@ -107,7 +120,19 @@ s32 func_8005F180(void) {
   return r;
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/bgm_load_song_from_rom", func_8005F1C8);
+void func_8005F1C8(void) {
+  D_800C306C = 0;
+  D_800C3070 = 0;
+  D_800C3074 = 0;
+  D_800C3078 = 0;
+  D_800C3084 = 0;
+  D_800C3088 = 0;
+  D_800C308C = 0;
+  D_800C3090 = 0;
+  D_800C307A = 0;
+  D_800C307C = 0;
+  D_800C3080 = 0;
+}
 
 s32 func_8005F224(void) {
   s32 temp = D_800FBE88;
