@@ -109,7 +109,7 @@ SECTIONS
         build/src/main/func_8005E380.o(.text);
         build/src/main/func_8005EC10.o(.text);
         build/src/main/audio_mgr.o(.text);
-        build/asm/3A490.o(.text);
+        build/src/main/bgm_load_song_from_rom.o(.text);
         build/src/main/set_camera_matrices_fixed.o(.text);
         build/src/main/func_800660A0.o(.text);
         build/src/mgu/mtxutil.o(.text);
@@ -400,7 +400,7 @@ SECTIONS
         build/src/main/func_8005E380.o(.data);
         build/src/main/func_8005EC10.o(.data);
         build/src/main/audio_mgr.o(.data);
-        build/asm/3A490.o(.data);
+        build/src/main/bgm_load_song_from_rom.o(.data);
         build/src/main/set_camera_matrices_fixed.o(.data);
         build/src/main/func_800660A0.o(.data);
         build/src/mgu/mtxutil.o(.data);
@@ -711,7 +711,7 @@ SECTIONS
         build/src/main/func_8005E380.o(.rodata);
         build/src/main/func_8005EC10.o(.rodata);
         build/src/main/audio_mgr.o(.rodata);
-        build/asm/3A490.o(.rodata);
+        build/src/main/bgm_load_song_from_rom.o(.rodata);
         build/src/main/set_camera_matrices_fixed.o(.rodata);
         build/src/main/func_800660A0.o(.rodata);
         build/src/mgu/mtxutil.o(.rodata);
@@ -1017,7 +1017,7 @@ SECTIONS
         build/src/main/func_8005E380.o(.bss);
         build/src/main/func_8005EC10.o(.bss);
         build/src/main/audio_mgr.o(.bss);
-        build/asm/3A490.o(.bss);
+        build/src/main/bgm_load_song_from_rom.o(.bss);
         build/src/main/set_camera_matrices_fixed.o(.bss);
         build/src/main/func_800660A0.o(.bss);
         build/src/mgu/mtxutil.o(.bss);

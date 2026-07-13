@@ -127,7 +127,7 @@ segments:
       - [0x39780, c, main/func_8005E380]
       - [0x3A010, c, main/func_8005EC10]
       - [0x3A1D0, c, main/audio_mgr]
-      - [0x3A490, asm]
+      - [0x3A490, c, main/bgm_load_song_from_rom]
       - [0x40180, c, main/set_camera_matrices_fixed]
       - [0x414A0, c, main/func_800660A0]
       - [0x42F00, c, mgu/mtxutil]
