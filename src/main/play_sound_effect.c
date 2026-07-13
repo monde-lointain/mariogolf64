@@ -3,6 +3,14 @@
 extern u32 g_bgm_current_id;
 extern u32 g_bgm_pending_action;
 extern u32 g_bgm_action_delay;
+extern u32 g_bgm_active_handle;
+extern u32 object_id_table[];
+extern s32 MusHandleStop(u32 handle, s32 speed);
+extern s32 MusHandleSetVolume(u32 handle, s32 volume);
+extern s32 MusHandleSetPan(u32 handle, s32 pan);
+extern s32 MusHandleSetReverb(u32 handle, s32 reverb);
+extern s32 MusHandleSetTempo(u32 handle, s32 tempo);
+extern s32 MusHandleSetFreqOffset(u32 handle, f32 offset);
 extern const char D_800CCC14[];
 extern const char D_800CCC20[];
 extern s32 D_800C0EAC[];
@@ -13,10 +21,21 @@ INCLUDE_ASM("asm/nonmatchings/main/play_sound_effect", play_sound_effect);
 
 INCLUDE_ASM("asm/nonmatchings/main/play_sound_effect", func_80050DA0);
 
-INCLUDE_ASM("asm/nonmatchings/main/play_sound_effect",
-            update_object_group_by_id);
+void update_object_group_by_id(s32 index) {
+  OSIntMask mask = osSetIntMask(OS_IM_NONE);
+  if (object_id_table[index] != -1) {
+    MusHandleStop(object_id_table[index], 0);
+  }
+  osSetIntMask(mask);
+}
 
-INCLUDE_ASM("asm/nonmatchings/main/play_sound_effect", func_80050FC0);
+void func_80050FC0(s32 index, s32 pan) {
+  OSIntMask mask = osSetIntMask(OS_IM_NONE);
+  if (object_id_table[index] != -1) {
+    MusHandleSetPan(object_id_table[index], pan);
+  }
+  osSetIntMask(mask);
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/play_sound_effect",
             set_field_0x9E_for_object_group_if_type_matches);
@@ -26,7 +45,13 @@ INCLUDE_ASM("asm/nonmatchings/main/play_sound_effect",
 
 void func_800510EC(s32 idx, s32 val) { D_800C0EAC[idx] = val; }
 
-INCLUDE_ASM("asm/nonmatchings/main/play_sound_effect", func_80051100);
+void func_80051100(s32 index, s32 tempo) {
+  OSIntMask mask = osSetIntMask(OS_IM_NONE);
+  if (object_id_table[index] != -1) {
+    MusHandleSetTempo(object_id_table[index], tempo);
+  }
+  osSetIntMask(mask);
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/play_sound_effect", func_80051164);
 
@@ -43,7 +68,13 @@ INCLUDE_ASM("asm/nonmatchings/main/play_sound_effect",
 
 INCLUDE_ASM("asm/nonmatchings/main/play_sound_effect", bgm_tick);
 
-INCLUDE_ASM("asm/nonmatchings/main/play_sound_effect", func_80051A08);
+void func_80051A08(s32 speed) {
+  OSIntMask mask = osSetIntMask(OS_IM_NONE);
+  if (g_bgm_active_handle != -1) {
+    MusHandleStop(g_bgm_active_handle, speed);
+  }
+  osSetIntMask(mask);
+}
 
 void bgm_request_stop(void) {
   g_bgm_pending_action = 2;
@@ -51,13 +82,37 @@ void bgm_request_stop(void) {
   g_bgm_current_id = -1;
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/play_sound_effect", func_80051A88);
+void func_80051A88(s32 volume) {
+  if (g_bgm_active_handle != -1) {
+    OSIntMask mask = osSetIntMask(OS_IM_NONE);
+    MusHandleSetVolume(g_bgm_active_handle, volume);
+    osSetIntMask(mask);
+  }
+}
 
-INCLUDE_ASM("asm/nonmatchings/main/play_sound_effect", func_80051AE4);
+void func_80051AE4(s32 reverb) {
+  if (g_bgm_active_handle != -1) {
+    OSIntMask mask = osSetIntMask(OS_IM_NONE);
+    MusHandleSetReverb(g_bgm_active_handle, reverb);
+    osSetIntMask(mask);
+  }
+}
 
-INCLUDE_ASM("asm/nonmatchings/main/play_sound_effect", func_80051B40);
+void func_80051B40(s32 tempo) {
+  if (g_bgm_active_handle != -1) {
+    OSIntMask mask = osSetIntMask(OS_IM_NONE);
+    MusHandleSetTempo(g_bgm_active_handle, tempo);
+    osSetIntMask(mask);
+  }
+}
 
-INCLUDE_ASM("asm/nonmatchings/main/play_sound_effect", func_80051B9C);
+void func_80051B9C(f32 offset) {
+  if (g_bgm_active_handle != -1) {
+    OSIntMask mask = osSetIntMask(OS_IM_NONE);
+    MusHandleSetFreqOffset(g_bgm_active_handle, offset);
+    osSetIntMask(mask);
+  }
+}
 
 s32 func_80051BFC(void) { return g_bgm_current_id; }
 
