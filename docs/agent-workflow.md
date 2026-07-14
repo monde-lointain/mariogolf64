@@ -85,6 +85,20 @@ resume surface when the middle spans context windows.
     over another smallest-first continuation of the mined pack — the continuation yields
     wall-characterizations (RETRO value), not banks. `pick_target.py` pricing this "plateaued-pack
     mid-logic-tail" tell is a tracked follow-up (see `BACKLOG.md` ranker follow-ups).
+    - **But the compiler-source fan-out on such a tail is often a BANK slice, not just characterization
+      (S232).** When the plateaued tail's smallest fns are already fully-RE'd DOCUMENTED near-match walls
+      (in-file near-match comments, even ones carrying a prior `file:line` compiler-source verdict),
+      dispatch one gcc-2.7.2 + binutils-2.6 subagent per wall to reproduce-and-crack, not to
+      re-characterize. S232 fanned 3 over the `func_80052FE0.c` tail and cracked ALL THREE — a documented
+      `#local-alloc-qty-permutation` (`||` single-store steers `global.c` allocno priority), a
+      `#delay-slot-fill-across-call` (`void`→`s32` return-reg liveness, reorg.c:3374-3376), and a
+      `#cross-jump-tail-merge` (`goto`-split the return tails) — each refuting its prior
+      "not source-leverable" verdict. So a prior wall verdict (even one with a pass citation) is a
+      HYPOTHESIS, not a terminal state: the citation may name the right pass yet miss the source lever
+      that steers it. Elevate the crack-attempt fan-out ABOVE "prefer a fresh pack" when the plateaued
+      tail carries fully-RE'd near-match comments; fall back to a fresh pack only if the fan-out returns
+      genuine walls. See `docs/hazards.md` (the three sections above) and the memory
+      `revalidate-old-carries-stale-wall`.
 
 </workflow_overview>
 
@@ -273,6 +287,15 @@ dashboard). Target selection is `tools/pick_target.py`, not a stored roadmap.
 - **Definition of Ready.**
   - Subseg flippable (not `hasm`); coarse size known; upstream-mirror availability noted; hazards
     flagged.
+  - **For a c-stub CONTINUATION (an already-`c` file), grep the target `src/<file>.c` for pre-existing
+    near-match / carry comments on each candidate leaf BEFORE committing it (S232).** `pick_target.py`'s
+    smallest-first sort and any FP/jal tell-filter do NOT see the in-file wall comments a prior sprint
+    wrote above a carried `INCLUDE_ASM` stub, so the smallest remaining leaves are often exactly the
+    documented walls. `grep -nE 'INCLUDE_ASM|/\*' src/<file>.c` (or read the stub's preceding comment):
+    a leaf with a fully-RE'd near-match comment is a carried wall, not a fresh tractable leaf. Committing
+    it is fine IF the goal is a crack-attempt slice (compiler-source fan-out, S232 cracked 3/3) — but
+    label it as such, do not price it as a clean leaf. (A `pick_target.py` `carried-wall:<fn>` detector
+    that reads the in-file comment is a tracked ranker follow-up; see `BACKLOG.md`.)
   - Enablers (subseg flip plus `make extract`, multi-file split, `symbol_addrs.txt` additions) are
     performed by the agent at the plan gate after the PO approves the goal/scope, and validated
     there: `make extract && make` must still produce the green baserom ROM with the new stubs. This

@@ -779,6 +779,24 @@ Three honest caveats:
   init_per_player_state 190i). Productivity cliff reconfirmed (S224/S208): cheap-leaf vein banks far
   cheaper than the FP/DL/value-select/big-dispatch tail. Retro applied 4 of 4 (#1/#2/#3 levers → hazards.md;
   #4 committed-seed-convention + llcvt coddog false-positive → this row + BACKLOG).
+  S232: CONTINUED `func_80052FE0.c` (subseg 0x2E3E0, anim/character-state) as a CRACK-ATTEMPT slice.
+  Plan gate picked the 3 smallest remaining leaves as tractable; all 3 were documented carried near-match
+  walls (plan-gate miss: the ranker + FP/jal filter don't see in-file near-match comments; PO approved a
+  pivot to crack-attempt). A 3-parallel gcc-2.7.2 + binutils-2.6 compiler-source fan-out **CRACKED ALL 3**,
+  each refuting its prior "not source-leverable" verdict: `func_800542A0` (`||` single-store drops the
+  accumulator ref-count 4→3, halving `floor_log2` in `global.c:587-607` allocno priority so the offset
+  pseudo wins `$a0`); `clear_animation_slot` (return `void`→`s32` marks `$v0` live at the return block,
+  reorg.c:3374-3376 rejects the delay-slot fill → ROM nop); `func_800543DC` (`goto neg` splits the three
+  identical `-1` return tails, jump.c:1969 cross-jump merged them otherwise; 9 natural forms merged first).
+  Banked **0pt** (file 3/9 → 6 stubs, NOT md5-candidate), **+3 matched**, **0 permuter**, **0 carried**,
+  **0 re-opened**, quality **0/0/0/0** (net −3 to the carried-wall backlog). Seed committed **3** (classical
+  partial slice); realized ~**5** (seed 3 + 2 for the 3 novel compiler-source cracks / plan-gate-miss
+  recovery), residual **+2**. LESSON: a documented near-match wall — even one with a prior `file:line` pass
+  citation — is a HYPOTHESIS, not terminal; a cheap parallel compiler-source reproduce-and-crack pass is
+  the escalation on a plateaued-pack tail, ABOVE "prefer a fresh pack" (S224). Retro applied 3 of 3 (#1
+  crack>fresh guidance → agent-workflow S224 note; #2 plan-gate wall-comment grep → agent-workflow DoR +
+  BACKLOG carried-wall ranker follow-up; #3 two levers → hazards.md local-alloc-qty / delay-slot-fill-
+  across-call / cross-jump-tail-merge). Memory `revalidate-old-carries-stale-wall` reinforced (3/3).
 - **Regime:** `mirror` is a depleting minority (~22 % of ranked candidates: 56 mirror vs 194
   classical; 18 warm / 38 cold). The warm clean-singleton mirror pool is now **mined out** (S11
   plan gate: every top mirror candidate carries a blocking hazard), pushing the project onto the

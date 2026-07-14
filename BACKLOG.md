@@ -122,6 +122,17 @@ to require the loop + fixed-`ARR[K]` + ra-read co-factors, not `osSetIntMask` al
 interrupt-guarded wrapper packs stop pricing as walls. Both raise the cheap-leaf-depth accuracy on
 audio/sound packs.
 
+**Carried-wall detector (S232, off-cadence golden-gated).** `pick_target.py` smallest-first surfaced the
+3 smallest remaining leaves of `func_80052FE0.c` as tractable, but all 3 were documented carried near-
+match walls (a prior sprint wrote fully-RE'd near-match comments above their `INCLUDE_ASM` stubs). The
+ranker cannot see the in-file comment, so it mis-priced them as fresh leaves. Follow-up: emit a
+`carried-wall:<fn>` tag (and deweight the leaf) when the candidate's `INCLUDE_ASM` stub in `src/<file>.c`
+is preceded by a near-match/RE'd-body comment block (grep the source file for the fn name near an
+`INCLUDE_ASM` + a preceding `/* … */`). Distinct from `stub-suspect` (which is about mirror-tag size);
+this is about in-tree carry provenance on a c-stub continuation. NOTE the S232 counter-lesson: a
+carried-wall is NOT terminal — the plan gate should still be ABLE to pick it as a labeled crack-attempt
+slice (S232 cracked 3/3 via compiler-source fan-out), so the tag deweights but does not blacklist.
+
 **Extend the detector to DL EMITTERS, not just FP (S190):** `src/main/func_8004E5A0.c` was a 3-fn
 one-tu the ranker surfaced smallest-first as a "+2 tractable" pick because 2 of 3 fns are 0-jal/0-FP —
 but they are `glistp++` **display-list emitters**, which are their OWN scheduling-wall class (the
@@ -3407,6 +3418,17 @@ by `/sprint-plan`:
   vendored upstream version can diverge from the game's rev on a single immediate (S122 nusys-2.07
   `NU_CONT_THREAD_ID=6` vs MG64's 5), and that surfaces only at first build unless reconciled here.
   A near-free retry missing any of these is a half-scoped spike — finish the scope before deferring.
+
+- **(S232 MIXED-PARTIAL — carried; 3 of 9 banked this sprint, file NOT md5-candidate)**
+  `src/main/func_80052FE0.c` (main-segment `[0x2E3E0]`, anim/character-state pack). Already-`c` c-stub
+  continuation. S232 CRACKED the 3 smallest remaining leaves — all documented carried walls — via a
+  gcc-2.7.2 compiler-source fan-out (`func_800542A0` `||`-store→`global.c` allocno priority;
+  `clear_animation_slot` `void`→`s32` return-reg liveness reorg.c:3374-3376; `func_800543DC` `goto`-split
+  cross-jump). **6 stubs remain, un-attempted (bare, no prior near-match comment):** `func_8005470C`
+  (76i, matrix/FP-suspect, called with `mtx`), `func_80054550` (111i), `func_8005342C` (118i),
+  `func_80052FE0` (71i), `func_800530FC` (204i), `calculate_bone_matrices` (783i). Per S224 these
+  mid-logic fns are likely wall-class, but S232 proved that tail crack-worthy — a fresh compiler-source
+  fan-out is the recommended slice over abandonment. ROM green off extracted asm.
 
 - **(S230 MIXED-PARTIAL — carried; 20 of 26 banked)** `src/main/play_sound_effect.c` (main-segment
   `[0x2BFF0]`, band `libnusys`, sound/bgm pack). Subseg `[0x2BFF0, c, main/play_sound_effect]` flipped;

@@ -25,6 +25,18 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 232 — crack 3 documented walls in func_80052FE0.c via compiler-source fan-out — 2026-07-13
+- Increment: 0 files banked / **+3 functions matched** (`func_80052FE0.c` 9 stubs → 6; NOT md5-candidate). All 3 were documented carried near-match walls, retired.
+- Quality: 0 stuck-far / 0 permuter / 0 carried / 0 re-opened (net −3 to the carried-wall backlog)
+- Seed: committed 3pt (classical partial slice); banked 0pt (file partial); realized ~5, residual +2; regime classical/mixed
+- Scope vs goal: goal was "bank 3 tractable leaves." At execution the 3 picked leaves proved to be documented carried walls (plan-gate miss — pick_target smallest-first + the FP/jal tell-filter don't see in-file near-match comments). PO approved a pivot to a crack-attempt slice; a 3-parallel gcc-2.7.2 + binutils-2.6 compiler-source fan-out CRACKED ALL 3. Count met, path diverged.
+- What helped: three byte-exact source levers, each refuting a prior "not source-leverable" verdict — (1) `func_800542A0`: collapse `if(c1)r=1;else if(c2)r=1;` → `if(c1||c2)r=1;`; the single store drops the accumulator ref-count 4→3, halving `floor_log2(n_refs)` in `global.c:587-607` allocno priority so the scaled-offset pseudo out-ranks it and wins `$a0` (fixes the `$a0`↔`$a1` swap; it's global.c, NOT local-alloc as the prior note claimed). (2) `clear_animation_slot`: return `void`→`s32`; the candidate delay-slot fill `sll v0` writes `$v0`, and an s32 return marks `$v0` live at the return block, so reorg's opposite-thread liveness test (reorg.c:3374-3376) rejects the fill → ROM's nop (NOT jal-driven as prior note claimed). (3) `func_800543DC`: `goto neg` routes null+loop-exit through a shared `-1` tail while leaving the post-loop `return -1` inline; jump.c:1969 cross-jump merges the three identical tails otherwise (9 natural forms all merged first — legitimate last-resort goto).
+- Friction: the plan gate committed 3 walls because it never grepped the target file for existing near-match comments; caught only at seed time. Compiler-source subagent fan-out is the fix and it earned its keep (3/3, ~530k-1.2M ms each) but a cheaper up-front detection would have framed the sprint correctly.
+- Applied: 3 of 3 — #1 crack>fresh guidance → agent-workflow.md S224 note (documented walls are a hypothesis; crack-attempt fan-out above "prefer fresh pack" when the tail carries RE'd near-match comments); #2 plan-gate wall-comment grep → agent-workflow.md Definition of Ready + a `carried-wall:<fn>` pick_target ranker follow-up in BACKLOG; #3 two levers → hazards.md (#local-alloc-qty-permutation multi-BB store-count lever, #delay-slot-fill-across-call return-type correction, #cross-jump-tail-merge classical goto-split). Memory `revalidate-old-carries-stale-wall` reinforced (3/3, even pass-cited walls fell).
+- Carry-over: `func_80052FE0.c` (6 stubs, un-attempted, no prior near-match comment) — `func_8005470C` (76i, matrix/FP-suspect), `func_80054550` (111i), `func_8005342C` (118i), `func_80052FE0` (71i), `func_800530FC` (204i), `calculate_bone_matrices` (783i). Likely wall-class per S224 but the tail is proven crack-worthy.
+
+---
+
 ## Sprint 231 — open fresh deep-integer pack bgm_load_song_from_rom.c (main none pack) — 2026-07-13
 - Increment: 0 files banked / **+23 functions matched** (`bgm_load_song_from_rom.c` 0/40 → 23/40 C, 17 stubs; NOT md5-candidate). Ties the S208 record; top of the +15-25 plan hedge.
 - Quality: 0 stuck-far / 0 permuter / 17 carried / 0 re-opened

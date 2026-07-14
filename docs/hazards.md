@@ -3444,6 +3444,21 @@ first. A genuinely stuck mirror fn then falls back to: partial-bank the matching
 the stuck fn as `INCLUDE_ASM` (ROM stays green; forward-decl `extern` since the asm `glabel` is
 `.globl`), or `hasm`-split it. A `jump.c` patch is not a banking path (open toolchain research only).
 
+**CLASSICAL fn: split identical error-return tails with a `goto` (S232 `func_800543DC`).** The
+classical dual of the mirror body-bug case. A fn with THREE `return -1` sites (null-check, in-loop
+sentinel hit, post-loop sentinel check) had all three tails compiled to identical `li v0,-1; j
+.epilogue` blocks, which `find_cross_jump` (jump.c ~1969) merges into one shared `li` block; reorg then
+fills that block's delay slot with the following `lui`. The ROM instead keeps the POST-LOOP return
+SEPARATE — it reuses the post-loop compare's `v0=-1` (`beq v1,v0,.epilogue; nop`) and shares a `li`
+block only for the null + loop-exit paths. Every NATURAL early-return form (`for`/`while`/`do-while`,
+`!=` inversion, shared `r=-1` var, `return lvalue`) leaves the three tails structurally identical → all
+merge (9 forms tried, all merged). **Lever: route SOME error paths through a shared `goto neg;` (with a
+single tail `neg: return -1;`) while leaving one path an inline `return -1;`.** That makes the inline
+tail no longer a mergeable twin of the shared block, so the layout matches the ROM's {null,loop-exit}
+merged / {post-loop} separate split. This is a legitimate last-resort `goto` (natural forms provably all
+merge; cf. [[goto-is-last-resort]]) and it is source-leverable, NOT a permuter/hard wall — refutes a
+prior "permuter-candidate / not a hard wall but carried" verdict on such a fn.
+
 **Sibling rule — rule out stock-plus-insert before treating a carry as from-scratch custom.**
 The plan/seed-time inverse of the above triage. A carry tagged "MG64-custom body → classical" is
 **stock-source-plus-a-small-insert until proven otherwise** — re-diff the asm against the stock upstream
@@ -6010,6 +6025,22 @@ on source that does not actually match. S221 fn2 read a spurious `CURRENT (0)` t
 `import.py`/`run-permuter` touch, `rm build/<obj>.o` (or `make clean`) before trusting an in-tree diff or
 spot-check.** The full-`make` ROM SHA-1 is not fooled (it relinks), but a per-fn `diff.py` mid-iterate is.
 
+**MULTI-BB arg-reg swap IS source-leverable via store count (S232 `func_800542A0`, corrects the
+"permuter-only" default).** A short multi-BB fn (guard + `||` accumulate) locked on an `$a0`↔`$a1` swap:
+ROM holds the scaled array offset in `$a0` (reused for two loads) and the 0/1 accumulator in `$a1`; the
+build swapped them. Because it has branches it is allocated by **`global.c`, not local-alloc**, and the
+tie is the allocno-priority formula `floor_log2(n_refs)·n_refs/live_length` (`global.c:587-607`,
+`allocno_compare`), with `find_reg` scanning hard regs ascending (`global.c:961-984`; MIPS has no
+`REG_ALLOC_ORDER`) so the first-ranked allocno grabs the lower reg (`$a0`=4 before `$a1`=5). **The
+accumulator's ref-count is the driving quantity, and the STORE COUNT of the C sets it:** a two-branch
+`if(c1) r=1; else if(c2) r=1;` emits TWO `r=1` stores (4 refs → priority beats the offset → grabs `$a0`,
+the swap); collapsing to the short-circuit `if(c1||c2) r=1;` drops it to ONE store (3 refs), which halves
+the `floor_log2` term (log2(4)=2 → log2(3)=1) so the offset pseudo now out-ranks it and wins `$a0` —
+byte-exact. So an arg-reg (`$a0`/`$a1`) qty-permutation on a branchy fn is a **store-count / branch-shape
+lever** (global.c priority), distinct from the 1-BB local-alloc swap above (which the permuter owns).
+Try the `||`/single-store collapse (or the reverse) BEFORE the permuter when the swapped regs are
+arg/caller-saved and the fn has branches.
+
 ## cse-ebb-barrier-loop-reload (force a loop-top memory reload past a guard-load CSE)
 
 **Symptom (S221 `func_80098D70`).** A search loop over a memory cell — `if (*p != 0) { … while (*p != 0)
@@ -6253,11 +6284,21 @@ perturbed by the preceding call: the basic-block boundary the call introduces sh
 insn the filler will steal, so the ROM leaves the slot empty where the no-call sibling fills it. A
 post-schedule reorg effect, not a C-level construct.
 
-**Verdict.** Not source-leverable (every valid C form of a printf-then-guarded-store emits the fill) and
-not permuter-reachable (post-schedule). Carry the fn INCLUDE_ASM as a fully-RE'd near-match, bank the
-no-call sibling. A sub-class of the delay-slot family ([#gas-set-reorder-delay-slot-fill](#gas-set-reorder-delay-slot-fill),
-[#reorg-optimize_skip-annulled-bnel](#reorg-optimize_skip-annulled-bnel)); diagnose by checking whether an
-otherwise-identical no-call sibling in the same pack matches before calling it a wall.
+**Verdict — CORRECTED (S232), the S229 "not source-leverable" verdict was WRONG.** `clear_animation_slot`
+banked byte-exact by changing the RETURN TYPE `void` → `s32` (an implicit no-return body; the value is
+unused by every caller). Root cause was NOT the preceding jal at all: the candidate fill `sll v0,s0,1`
+writes `$v0`, and reorg's `fill_slots_from_thread` offers it to the `beqz` slot only if `$v0` is not live
+on the opposite (fall-through/return) thread (`reorg.c:3374-3376`, `opposite_needed` from
+`mark_target_live_regs` :3293/:2440). A `void` return leaves `$v0` DEAD at the epilogue → fill accepted
+(the miss). An `s32` return marks `$v0` live at function exit (`end_of_function_needs`, folded in at
+reorg.c:2458/2660) → `$v0 ∈ opposite_needed` → fill rejected → the ROM's NOP. So the NOP is a
+compiler-faithful **return-register-liveness** decision, fully source-leverable via the declared return
+type, no permuter. The "no-call sibling matches, so the call is the cause" framing was a red herring (the
+sibling returns a pointer = `$v0` live for a different reason). **Before carrying a "call-perturbs-the-
+delay-slot" near-match, check whether a candidate fill writes `$v0` and the fn is declared `void`: retype
+to the real (value-returning) signature first.** Kin to [#return-type-is-load-bearing](#return-type-is-load-bearing).
+Diagnose by checking whether an otherwise-identical no-call sibling in the same pack matches, AND whether
+the return type is under-declared.
 
 ## FPR float-zero store-order (mtc1+swc1 vs folded `sw zero`, and store-order control)
 
