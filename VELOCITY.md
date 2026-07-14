@@ -818,6 +818,25 @@ Three honest caveats:
   hazards.md; #2 block-local latency-coin terminal sub-case → hazards.md; #3 FP/collision small-leaf
   deweight → BACKLOG ranker follow-up; #4 fan-out terminal-verdict value + S232↔S233 asymmetry →
   agent-workflow). Memory `revalidate-old-carries-stale-wall` cross-checked (this time the carries held).
+  S234: OPENED fresh `none` pack `func_8006F1A0.c` (subseg 0x4A5A0, 17fn game stat/score over a
+  fixed-stride array + rumble/GBPak glue; PO chose it on cheap-leaf-depth over the sky DL/FP pack
+  `func_8008D100` and the single-fn HUD monster `render_pin_assembly_with_wind_hud`). Banked **+7**, all
+  byte-exact FIRST build (asm-first fast-path, 0 permuter, 0 fan-out): `func_8006F1F0`/`func_8006F2F4`
+  (D_ getters), `func_8006F2E8` (setter), `func_8006F1FC` (predicate), `func_8006F4F0`/`func_8006F50C`
+  (nuContRmbForceStop+printf wrappers), `func_8006F228` (address-return). Banked **0pt** (file 17/17 →
+  10 stubs, NOT md5-candidate), **+7 matched**, quality **0 stuck / 0 permuter / 2 carried / 0
+  re-opened**. Seed committed **3** (mixed-partial per-fn override, ranker pts13); realized ~**5**
+  (seed 3 + 1/+1 two carries; strong +7 cheap-leaf vein hit mid of the +5-9 hedge, no bonus), residual
+  **+2**. LESSON: **access-multiplicity, not size/FP, is the bank/carry line for a fixed-stride `D_`
+  array pack** — single-access getters/setters/predicates/address-returns bank byte-exact; the same
+  array touched 2+ times (RMW `func_8006F1A0`) or in a loop (`func_8006F24C`) walls on
+  `#base-register-vs-displacement` / `#indexed-vs-pointer-loop-strength-reduction` (GCC base-CSE / loop
+  strength-reduction vs ROM indexed addressing; no source lever). 5th `coddog-mirror` structural
+  false-positive (llcvt.c on game code). S224 cheap-leaf-rotation confirmed AGAIN (6th: S224/227/228/
+  229/230→234), but the productivity cliff here was addressing-mode-driven (stride-array), not FP.
+  Retro applied 3 of 3 (#1 access-multiplicity ranker deweight → BACKLOG; #2 single-use-addr-vs-
+  multi-use-value lever → hazards.md #base-register-vs-displacement; #3 llcvt false-positive 5th
+  confirmation + func_8006F1A0/func_80080220 non-lib-callee deweight → BACKLOG).
 - **Regime:** `mirror` is a depleting minority (~22 % of ranked candidates: 56 mirror vs 194
   classical; 18 warm / 38 cold). The warm clean-singleton mirror pool is now **mined out** (S11
   plan gate: every top mirror candidate carries a blocking hazard), pushing the project onto the

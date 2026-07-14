@@ -156,6 +156,30 @@ callee set is geometry/collision/raycast/matrix-flavored (tell: many `mul.s`/`cv
 vein is SHALLOW (hedge the fresh-pack estimate lower for FP-domain packs). Fresh-pack cheap-leaf
 mining stays valid (S231 bgm-loader banked +23), but the productivity cliff (S224) is steeper for
 FP/geometry domains than integer/state domains. Same off-cadence golden-gated tooling follow-up.
+
+**Access-multiplicity deweight for a fixed-stride `D_` array pack (S234, off-cadence golden-gated).**
+`func_8006F1A0.c` (17-fn main `none` stat/score pack over a fixed-stride array `D_800FF1E8`/`D_800FF210`/
+`D_800FF21C`/`D_800FF220`, base `…E8`, stride 0x8C=140) split CLEANLY along access-multiplicity, not
+size or FP: **+7 single-access members banked** (getters/setters/predicates + an address-return, all
+byte-exact first build) while the members that touch the SAME slot 2+ times (`func_8006F1A0` RMW
+accumulate+clamp) or in a LOOP (`func_8006F24C` 4-iter fill) WALLED on `#base-register-vs-displacement` /
+`#indexed-vs-pointer-loop-strength-reduction` (GCC CSEs the base into one pointer / strength-reduces to
+walking pointers; the ROM keeps `%hi`+index+`%lo`-displacement per access). The size/nfns model prices
+all members identically (tiny). Candidate `pick_target.py` tell: for a `none` pack whose members share a
+fixed-stride `D_<addr>` array (detect a common `sll;addu;sll;subu;sll` stride-multiply into a shared
+`%hi/%lo` base), price members with REPEATED or LOOPED access to the array at 0-expected-bank
+(partial-bank-risk) and single-access members at +1. This is the ACCESS-MULTIPLICITY refinement of the
+S227 `%lo`-fold multi-index-setter wall-risk tell (same base-vs-displacement class; S227 keyed on
+index-count, S234 on access-count). Kin to the S158/S177/S183/S189/S227/S233 partial-bank-expected
+detectors. Golden-gated, off-cadence, not a mid-sprint edit. **Also: llcvt coddog false-positive, 5th
+confirmation** — `func_8006F1A0`'s `coddog-mirror:src/libc/llcvt.c@99.99` + `fncount-mismatch:8vs17` +
+`body-divergence-suspect` was a pure STRUCTURAL false-positive (0 of 17 fns are `__ll_*` long-long
+conversions; all are game stat-accumulators/getters + `nuContRmb*`/`nuContGBPak*`/`osSyncPrintf` glue).
+`func_8006F1A0` and `func_80080220` (43fn, also llcvt-tagged, `8vs43`) should be DEWEIGHTED off the
+llcvt mirror route via the non-lib-`func_`-callee tell (they call `nuCont*`/`os*`, not `__ll*`) —
+reinforces the tracked non-lib-callee coddog-deweight follow-up (kin to S229 contquery / S230
+nucontgbpakmgr / S231 llcvt structural false-positives).
+
 **Re-confirmed + reframed (S204, PO-accepted at retro, QUEUED to the off-cadence golden-gated
 `pick_target.py` branch):** `func_8003E004` (c-stub, priced 13) is another under-priced FP/6-callee-double
 regalloc wall — spec for the detector: on a `none`/c-stub fn, count FP ops + callee-saved-double pressure
@@ -3430,6 +3454,24 @@ by `/sprint-plan`:
   vendored upstream version can diverge from the game's rev on a single immediate (S122 nusys-2.07
   `NU_CONT_THREAD_ID=6` vs MG64's 5), and that surfaces only at first build unless reconciled here.
   A near-free retry missing any of these is a half-scoped spike — finish the scope before deferring.
+
+- **(S234 MIXED-PARTIAL — carried; 7 of 17 banked this sprint, file NOT md5-candidate)**
+  `src/main/func_8006F1A0.c` (main-segment `[0x4A5A0]`, game stat/score pack over a fixed-stride array
+  + rumble/GBPak glue). Flipped to `c` at the S234 gate. **7 fns C** (all byte-exact first build,
+  asm-first): `func_8006F1F0`/`func_8006F2F4` (`D_` getters), `func_8006F2E8` (setter),
+  `func_8006F1FC` (`D_800FF1E8[i*140]==1` predicate), `func_8006F4F0`/`func_8006F50C`
+  (`nuContRmbForceStop`+`osSyncPrintf` wrappers), `func_8006F228` (`&D_800FF1E9[i*140]` address-return).
+  **2 DOCUMENTED near-match carries (in-file, no-source-lever, do NOT re-grind):** `func_8006F1A0`
+  (`#base-register-vs-displacement` — RMW accumulate+clamp `D_800FF210[i*35]`, 3× same slot → GCC CSEs
+  the base into one pointer, ROM re-materializes `%hi`+index+`%lo`-disp per store) + `func_8006F24C`
+  (`#indexed-vs-pointer-loop-strength-reduction` — 4-iter stride-0x8C init fill → GCC walks 3 base
+  pointers, ROM keeps indexed addressing). Both on the SAME stride-0x8C array family (`D_800FF1E8`/
+  `F210`/`F21C`/`F220`); access-multiplicity is the bank/carry line (single-access banks, repeated/
+  looped walls). **8 stubs remain, un-attempted — the jal-dispatch + stride-array-loop tail** (S224
+  wall-class, expect walls): `func_8006F300` (nuContGBPak init dispatcher, 5 jal + s0-s3 +
+  switch-cascade + printf), `func_8006F404` (59i jal4), `func_8006F534` (43i jal9), `func_8006F5E0`
+  (85i jal6), `func_8006F734`, `func_8006FE88`, `func_800708B4` (198i), `func_80070BCC`. `coddog-mirror:
+  llcvt.c` = STRUCTURAL false-positive (game code, not `__ll_*`). ROM green off extracted asm.
 
 - **(S233 MIXED-PARTIAL — carried; 2 of 13 banked this sprint, file NOT md5-candidate)**
   `src/main/raycast_terrain.c` (main-segment `[0x142B0]`, collision/geometry/raycast pack). Flipped

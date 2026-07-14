@@ -25,6 +25,18 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 234 — open fresh func_8006F1A0.c (main stat/score pack); access-multiplicity sorts the cheap-leaf vein — 2026-07-14
+- Increment: 0 files banked / **+7 functions matched** (`func_8006F1A0.c` 17 stubs → 10; NOT md5-candidate).
+- Quality: 0 stuck-far / 0 permuter / 2 carried / 0 re-opened
+- Seed: committed 3pt (mixed-partial per-fn override, ranker pts13); banked 0pt (file partial); realized ~5, residual +2; regime classical/mixed
+- Scope vs goal: goal was "open func_8006F1A0.c, mine the cheap-leaf vein." MET — committed 3/3 banked + 4 stretch = +7, all byte-exact FIRST build (asm-first fast-path, 0 permuter, 0 fan-out); 2 carried walls, 8 un-attempted jal-dispatch/stride-loop tail deferred per S224. PO chose the pack on cheap-leaf-depth over the sky DL/FP pack `func_8008D100` and the single-fn HUD monster `render_pin_assembly_with_wind_hud`.
+- What helped: **access-multiplicity is the bank/carry discriminator for a fixed-stride `D_` array pack**, not size or FP. Single-use members banked byte-exact via the raw array-index form (getters `func_8006F1F0`/`func_8006F2F4`, setter `func_8006F2E8`, predicate `func_8006F1FC` `D_800FF1E8[i*140]==1`, address-return `func_8006F228` `&D_800FF1E9[i*140]`, rumble wrappers `func_8006F4F0`/`func_8006F50C`). The stride-multiply `sll;addu;sll;subu;sll` (×35/×140) reproduced free.
+- Friction: the two carries walled on the SAME stride-0x8C array family (`D_800FF1E8`/`F210`/`F21C`/`F220`) — `func_8006F1A0` (RMW accumulate+clamp `D_800FF210[i*35]`, 3× same slot → GCC CSEs the la-pair into ONE full base pointer where the ROM re-materializes `%hi`+index+`%lo`-disp per store; `#base-register-vs-displacement`, no lever) and `func_8006F24C` (4-iter stride-0x8C init fill → GCC strength-reduces to 3 walking base pointers + `slti` counter vs ROM indexed addressing + `bne`; `#indexed-vs-pointer-loop-strength-reduction`). `func_8006F228` (single-use ADDRESS of the same array) DID bank — confirming the access-multiplicity line. `coddog-mirror:llcvt.c` was a pure STRUCTURAL false-positive (5th; 0/17 fns are `__ll_*`). 6th confirmation of the S224 cheap-leaf fresh-rotation, but the cliff here was addressing-mode-driven, not FP.
+- Applied: 3 of 3 — #1 access-multiplicity ranker deweight (repeated/looped stride-`D_`-array access = partial-bank-risk, single-access = +1; refines the S227 %lo-fold index-count tell) → BACKLOG ranker follow-up; #2 single-use-address-vs-multi-use-value bank/carry lever → hazards.md `#base-register-vs-displacement`; #3 llcvt structural false-positive 5th confirmation + `func_8006F1A0`/`func_80080220` non-lib-callee deweight → BACKLOG.
+- Carry-over: `src/main/func_8006F1A0.c` (10 stubs) — 2 documented no-lever carries (`func_8006F1A0`, `func_8006F24C`) + 8 un-attempted jal-dispatch/stride-array-loop tail (`func_8006F300` GBPak dispatcher … `func_800708B4` 198i). See BACKLOG `## Carry-overs`.
+
+---
+
 ## Sprint 233 — open fresh raycast_terrain.c (main collision pack); compiler-source fan-out sorts the near-match tail — 2026-07-14
 - Increment: 0 files banked / **+2 functions matched** (`raycast_terrain.c` 13 stubs → 11; NOT md5-candidate).
 - Quality: 0 stuck-far / 1 permuter (`get_surface_type`, no crack) / 2 carried / 0 re-opened

@@ -6490,6 +6490,24 @@ compiler-source dive (mips.c `print_operand_address` / `simple_memory_operand` +
 legitimization) or [#cross-project-matched-corpus-mining]. Related base-register cases where a lever DID
 land: [#mem-in-struct-scheduling-lever], [#offset-0-symbol-re-materialization].
 
+**Access-multiplicity is the bank/carry line for a fixed-stride `D_` array pack (S234).** In a `none`
+pack sharing a fixed-stride global array (`func_8006F1A0.c`: `D_800FF1E8`/`D_800FF210`/`D_800FF21C`/
+`D_800FF220`, base `…E8`, stride 0x8C=140), whether a member banks or walls tracks how many times it
+touches the array, NOT its size or FP content:
+- **Single-use → banks byte-exact.** A getter/setter/predicate/address-return that touches the slot
+  ONCE (`return D_ARR[i*stride]`, `D_ARR[i*stride]=v`, `return D_ARR[i*stride]==K`, `return
+  &D_ARR[i*stride]`) has no address-CSE ambiguity: GCC materializes base + adds index once, matching
+  the ROM. S234 banked `func_8006F1F0`/`func_8006F1FC`/`func_8006F228` (address-return) this way,
+  first build, via the raw array-index form (NOT an `s32 *p=` intermediate).
+- **Multi-use / looped → walls (this section).** An RMW that reads+writes the SAME slot 2+ times
+  (`func_8006F1A0`: `D_800FF210[i*35] += a1; if(>=10000) =9999;`, 3× same slot) makes GCC CSE the
+  `la`-pair into ONE full base pointer (`addiu v1,v1,-0xdf0` → `0(v1)`) where the ROM re-materializes
+  `%hi`+index+`%lo`-displacement per access; and a loop-fill over the array (`func_8006F24C`, 4-iter)
+  makes GCC strength-reduce to walking base pointers + an `slti` counter where the ROM keeps indexed
+  `%hi`+index+`%lo` addressing + a `bne` counter ([#indexed-vs-pointer-loop-strength-reduction]).
+  Both are the no-source-lever wall above; array-access and `s32 *p=`/struct-array intermediates all
+  give the same base CSE. Carry.
+
 ### Phantom -N in-place addend on a 2D-strength-reduced array ref (S216 `get_tile_attribute`)
 
 **Symptom.** A classical fn is byte-exact except the ONE `lh/lhu/lw` off an extern array base carries a
