@@ -98,7 +98,7 @@ segments:
       - [0x5A40, asm]
       - [0xDCE0, c, main/func_800328E0]
       - [0xE260, c, main/get_table_entry]
-      - [0x142B0, asm]
+      - [0x142B0, c, main/raycast_terrain]
       - [0x193D0, c, main/func_8003DFD0]
       - [0x19800, c, main/func_8003E400]
       - [0x19AC0, asm]
