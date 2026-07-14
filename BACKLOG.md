@@ -144,6 +144,18 @@ literals through a `*glistp`-loaded running `Gfx*` cursor) at 0-expected-bank. C
 written back (`*arg = cursor`), regardless of jal/FP count. So a debug/HUD DL-renderer TU (all fns are
 emitters) prices partial-bank-expected-**ZERO** and stops topping the smallest-first sort. Same
 golden-gated off-cadence tooling follow-up; kin to the S158/S177/S183/S189 rows above.
+
+**FP/collision/geometry pack small-leaf deweight (S233).** `raycast_terrain.c` (13-fn main `none`
+collision/geometry pack) opened as a fresh cheap-leaf slice; its 5 SMALLEST leaves resolved to
+**1 clean integer bank + 4 compiler walls** (1 FP-store-scheduling crack via fan-out, 2 constant-15
+`#local-alloc-qty-permutation` scheduler coins, 1 more FP-dense). "Cheap leaf" SIZE did not predict
+tractability — in a collision/FP-math pack even a <300 B leaf carries FP truncation / table-index /
+scheduler-coin walls. Follow-up: deweight the `pts` seed for small leaves in a pack whose name or
+callee set is geometry/collision/raycast/matrix-flavored (tell: many `mul.s`/`cvt.s.w`/`c.lt.s` +
+`vec3f_*`/`calculate_*`/trig callees), and/or a plan-gate note that a collision/FP pack's cheap-leaf
+vein is SHALLOW (hedge the fresh-pack estimate lower for FP-domain packs). Fresh-pack cheap-leaf
+mining stays valid (S231 bgm-loader banked +23), but the productivity cliff (S224) is steeper for
+FP/geometry domains than integer/state domains. Same off-cadence golden-gated tooling follow-up.
 **Re-confirmed + reframed (S204, PO-accepted at retro, QUEUED to the off-cadence golden-gated
 `pick_target.py` branch):** `func_8003E004` (c-stub, priced 13) is another under-priced FP/6-callee-double
 regalloc wall — spec for the detector: on a `none`/c-stub fn, count FP ops + callee-saved-double pressure
@@ -3418,6 +3430,22 @@ by `/sprint-plan`:
   vendored upstream version can diverge from the game's rev on a single immediate (S122 nusys-2.07
   `NU_CONT_THREAD_ID=6` vs MG64's 5), and that surfaces only at first build unless reconciled here.
   A near-free retry missing any of these is a half-scoped spike — finish the scope before deferring.
+
+- **(S233 MIXED-PARTIAL — carried; 2 of 13 banked this sprint, file NOT md5-candidate)**
+  `src/main/raycast_terrain.c` (main-segment `[0x142B0]`, collision/geometry/raycast pack). Flipped
+  to `c` at the S233 gate. **2 fns C:** `get_triangle_normal_dominant_axis` (integer cross-product,
+  byte-exact first build) + `clamp_min_distance_from_target` (FP-store-scheduling wall CRACKED via
+  gcc-source fan-out: `cam[2]` varying-address memory-dep lever, `sched.c:834`). **2 TERMINAL
+  no-lever carries** (S233 compiler-source fan-out, do NOT re-grind): `get_surface_type` (450) +
+  `func_8003DE80` (350) — a shared constant-15 block-LOCAL scheduler coin (`mips.md:153-155` R4000
+  load-latency; the build is 1 instr SHORTER than the ROM; `#local-alloc-qty-permutation`, S232
+  `global.c` ref-count lever inapplicable; assembler ruled out). See
+  `docs/wip/{get_surface_type,func_8003DE80}.near-match.md`. **9 stubs remain, un-attempted — the
+  larger FP/collision TAIL** (S224 productivity cliff, expect walls): `func_8003AC80` (464B, 35 FP),
+  `check_line_cylinder_collision` (868B), `raycast_find_closest_triangle` (1428B),
+  `calculate_camera_attraction_vector` (1716B), `find_collision_triangle` (1844B),
+  `resolve_wall_collision` (1860B), `raycast_terrain_floor` (2100B), `raycast_terrain` (2200B),
+  `check_ray_triangle_collision` (7204B). ROM green off extracted asm.
 
 - **(S232 MIXED-PARTIAL — carried; 3 of 9 banked this sprint, file NOT md5-candidate)**
   `src/main/func_80052FE0.c` (main-segment `[0x2E3E0]`, anim/character-state pack). Already-`c` c-stub

@@ -25,6 +25,18 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 233 — open fresh raycast_terrain.c (main collision pack); compiler-source fan-out sorts the near-match tail — 2026-07-14
+- Increment: 0 files banked / **+2 functions matched** (`raycast_terrain.c` 13 stubs → 11; NOT md5-candidate).
+- Quality: 0 stuck-far / 1 permuter (`get_surface_type`, no crack) / 2 carried / 0 re-opened
+- Seed: committed 3pt (fresh `none` cheap-leaf slice); banked 0pt (file partial); realized ~6, residual +3; regime classical/mixed
+- Scope vs goal: goal was "open raycast_terrain.c, mine cheap-leaf vein, bank the 3 cheapest leaves." Result: 2 of 3 committed banked, 1 carried; the pack proved FP/collision-heavy (S224 productivity cliff) — its 5 smallest leaves were 1 clean integer bank + 4 compiler walls. Path diverged to a PO-directed gcc-2.7.2 + binutils-2.6 compiler-source fan-out over the near-match tail.
+- What helped: (1) `get_triangle_normal_dominant_axis` — integer cross-product dominant-axis, byte-exact FIRST build. (2) `clamp_min_distance_from_target` — fan-out CRACKED a 505→0 FP-store-scheduling wall: root `sched.c:834-839 true_dependence` (a fixed `symbol_ref` global load does not alias a varying in-struct store, so the scheduler floats the store the ROM pins); lever = read the adjacent global `camera_position_z` via the varying pointer `cam[2]` (=`camera_position_x`+8), creating a memory-dependency edge that pins the x-store early AND fixes the downstream `$f0/$f4` swap. New reusable hazard (mirror of the retype-global-as-struct lever). (3) Re-used cracked levers across siblings (col-pointer base split, C89 top-decl, in-place `cz=15-cz` register-reuse).
+- Friction: the two constant-15 walls (`get_surface_type` 450, `func_8003DE80` 350) are TERMINAL no-lever — a block-LOCAL constant materialized late to hide the R4000 load-latency (`mips.md:153-155` READY-DELAY 3; the scheduler front-loads the table `lbu`), so the build is 1 instr SHORTER than the ROM (the ROM lost a scheduler coin). The S232 `global.c` ref-count lever is INAPPLICABLE (block-local `local-alloc.c` qty, never enters the global sort); ~35 variants floored, `-fno-schedule-insns` worse. Spent a 4-min permuter (best 310) before the fan-out proved it terminal. KEY ASYMMETRY vs S232 (cracked 3/3): S232's walls were `global.c`-steerable; S233's were block-local scheduler coins — the fan-out's job is to SORT the tail into {crack, terminal-verdict}, not to crack everything. A no-lever verdict WITH a `file:line` citation is a real deliverable (stops re-grinding). Binutils subagent ruled the assembler out entirely (pure gcc codegen).
+- Applied: 4 of 4 — #1 varying-pointer store-pin lever → hazards.md (#mem-in-struct-scheduling-lever, as the inverse); #2 block-local latency-coin terminal sub-case → hazards.md (#local-alloc-qty-permutation); #3 FP/collision-pack small-leaf deweight → BACKLOG ranker follow-up; #4 fan-out-value/terminal-verdict + S232↔S233 asymmetry note → agent-workflow.md fan-out section.
+- Carry-over: `src/main/raycast_terrain.c` (11 stubs) — 2 terminal no-lever carries (`get_surface_type`, `func_8003DE80`) + 9 un-attempted larger FP/collision tail (`func_8003AC80` 464B … `check_ray_triangle_collision` 7204B). See BACKLOG `## Carry-overs`.
+
+---
+
 ## Sprint 232 — crack 3 documented walls in func_80052FE0.c via compiler-source fan-out — 2026-07-13
 - Increment: 0 files banked / **+3 functions matched** (`func_80052FE0.c` 9 stubs → 6; NOT md5-candidate). All 3 were documented carried near-match walls, retired.
 - Quality: 0 stuck-far / 0 permuter / 0 carried / 0 re-opened (net −3 to the carried-wall backlog)

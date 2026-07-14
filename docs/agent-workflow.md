@@ -99,6 +99,23 @@ resume surface when the middle spans context windows.
       tail carries fully-RE'd near-match comments; fall back to a fresh pack only if the fan-out returns
       genuine walls. See `docs/hazards.md` (the three sections above) and the memory
       `revalidate-old-carries-stale-wall`.
+      - **But not every wall is steerable — the fan-out ALSO earns its keep by returning terminal
+        no-lever VERDICTS (S233).** S233 fanned 3 gcc-2.7.2 + binutils-2.6 subagents over a fresh
+        `raycast_terrain.c` FP/collision pack's near-match tail: 1 genuine CRACK+bank
+        (`clamp_min_distance_from_target` 505→0, a `sched.c:834 true_dependence` fixed-vs-varying
+        address lever — read an adjacent global via a varying pointer to pin a floated struct-field
+        store) plus 2 definitively root-caused TERMINAL no-lever verdicts (`get_surface_type` /
+        `func_8003DE80`: a shared block-LOCAL constant materialized to hide the R4000 load-latency,
+        `mips.md:153-155` — my build is 1 instr SHORTER, the ROM lost a scheduler coin) plus the
+        assembler ruled out (a 3rd binutils subagent confirmed all divergences are pure gcc codegen).
+        KEY ASYMMETRY vs S232: S232's walls were `global.c` ref-count-steerable (crackable); S233's
+        constant walls were block-LOCAL `local-alloc.c` scheduler coins (NOT steerable — the S232
+        `||`-ref-count lever does not reach `local-alloc`). So the fan-out's deliverable is BOTH
+        cracks AND pass-cited terminal verdicts: a no-lever verdict with a `file:line` citation is a
+        REAL result — it retires the wall so no future sprint re-grinds it (write it into the
+        `docs/wip/<fn>.near-match.md` + the hazard entry). Do NOT expect a fresh-pack tail to crack
+        at the S232 3/3 rate: S232's tail was `global.c` walls; a fan-out's job is to SORT the tail
+        into {crack, terminal-verdict}, not to crack everything.
 
 </workflow_overview>
 

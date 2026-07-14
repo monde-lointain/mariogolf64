@@ -5142,6 +5142,26 @@ Cross-refs [#struct-access-folding-changes-scheduling](#struct-access-folding-ch
 [#return-type-is-load-bearing](#return-type-is-load-bearing) (same "types are load-bearing for codegen"
 class).
 
+**Inverse lever — pin a FLOATED store by giving a competing global load a VARYING address (S233
+`clamp_min_distance_from_target`, gcc-source fan-out CRACK 505→0).** A fn ends `target->x = f(...,
+camera_position_x); target->z = g(..., camera_position_z);` (two struct-field stores, each fed by a
+distinct global). The ROM computes+truncs+**stores** `target->x` (0x18) BEFORE it touches `z`; my build
+floated the x-store to the very end (both stores became dep-leaves) and swapped `$f0`↔`$f4` on the x
+product. Root cause `sched.c`:834-839 `true_dependence`: a **fixed `symbol_ref`** load
+(`camera_position_z`, non-`MEM_IN_STRUCT`, non-varying) is proved to NOT alias the varying in-struct
+store, so no memory edge pins the x-store before the z-load and the scheduler reorders freely. FIX:
+load the z-global through a VARYING (reg-based) address so the alias test can't prove them distinct.
+Here `camera_position_z == camera_position_x + 8`, so with `s32 *cam = &camera_position_x;` already in
+scope, change the z-store's `(f32)camera_position_z` to **`(f32)cam[2]`** — a `reg+8` address vs the
+store's `reg+24` → `memrefs_conflict_p` can't disambiguate → a memory dependency pins the x-store early,
+which ALSO fixes the downstream `$f0/$f4` allocation (reload follows the corrected schedule). NOTE: this
+is the MIRROR of the retype-a-fixed-global-AS-a-struct lever above — there you make a global look like a
+varying struct member to DEFER its load; here you make it varying to CREATE an ordering edge. The
+`MEM_IN_STRUCT` flag is NOT the pivot; the fixed-vs-varying ADDRESS of the load is. Only the pointer form
+works (a direct `camera_position_z` symbol, struct or `s32*` target, leaves the store floating —
+verified). Applicable whenever the ROM pins a struct-field store the build floats AND an adjacent global
+(same base ± a known constant offset) feeds the later store.
+
 ## short-text shifts flowing-bss (a length miss surfaces as a SIBLING's wrong data addr)
 
 **Trigger:** a classical fn compiles cleanly but full-make ROM SHA-1 misses, and a **sibling** fn in
@@ -6419,6 +6439,29 @@ per-field automatically. The lerp's `16 - t` CSEs to one `subu` reused across al
 **Note.** `init_grid_vertex` additionally needed the permuter for a 0.91 local-alloc reg-permutation on
 its texcoord compute cluster — see [#local-alloc-qty-permutation](#local-alloc-qty-permutation) (the
 extractable-reorder + permuter-plumbing notes).
+
+**A block-LOCAL constant materialized to HIDE a load-latency = a build-better-than-ROM scheduler coin,
+terminal (S233 `get_surface_type` 450 / `func_8003DE80` 350, gcc-source fan-out).** A pair of sibling
+tile-grid fns (`(int)(coord*16)` clamp → `col=D_800B7DB0+(D_800BA6B0[tile&0x3F]<<8)` → `15-cz` index)
+each locked on a SINGLE divergence: the ROM materializes the `15` of `15-cz` EARLY (`li v1,0xf` before
+the table `andi`/`lbu`), my build LATE (`li v0,0xf` after) — my build is **1 instruction SHORTER**. Root
+cause traced end-to-end: the R4000 `load` function-unit has READY-DELAY **3** (`config/mips/mips.md`
+:153-155), so the pre-reload scheduler front-loads the `lbu D_800BA6B0[...]` to hide that latency and
+fills the load-delay window with the independent `li 15`/`subu` chain → `li 15` lands after the load.
+`rank_for_schedule` (`sched.c`:2385-2430) gives the `andi` and the `li 15` EQUAL priority, so the tie
+falls to load-latency stall logic → the latency-OPTIMAL order. Then `local-alloc.c` gives the late
+const-15 `$v0` (lowest free), so the `tile` param (a `global.c` cross-block allocno with an `$a0`
+copy-preference) coalesces into `$a0` with no conflict → the ROM's `move v1,a0` is ELIDED. The ROM lost
+the scheduler coin (its `li 15` is early → 15 lives across the load → local-alloc must pick a non-`$v0`
+reg → tile's `$a0`-pref conflicts → `move v1,a0` survives). **This is NOT source-leverable and NOT the
+S209 `global.c` ref-count/live-length lever** — the const-15 is a block-LOCAL quantity handled by
+`local-alloc.c`, which never enters the `global.c` allocno sort, so raising its "ref count" (the S232
+`||`-single-store trick) does nothing. ~35 faithful-C variants floored at 316/345; `-fno-schedule-insns`
+is WORSE (confirms the ROM used the scheduler). **Recognize the tell — a structurally-complete near-match
+whose ONLY diff is a constant/temp materialized one slot later than the ROM AND your build is 1 instr
+shorter — as this terminal "latency-coin" sub-case and carry it WITHOUT a permuter run or a fan-out**
+(0-crack class; the S233 permuter reached 310, never 0). Cross-ref the multi-BB `global.c` analog above
+and [#value-select-if-else-vs-branch-likely].
 
 ## base-register-vs-displacement (full symbol/base materialized vs %lo-in-displacement)
 

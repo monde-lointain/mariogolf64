@@ -797,6 +797,27 @@ Three honest caveats:
   crack>fresh guidance → agent-workflow S224 note; #2 plan-gate wall-comment grep → agent-workflow DoR +
   BACKLOG carried-wall ranker follow-up; #3 two levers → hazards.md local-alloc-qty / delay-slot-fill-
   across-call / cross-jump-tail-merge). Memory `revalidate-old-carries-stale-wall` reinforced (3/3).
+  S233: OPENED fresh `raycast_terrain.c` (subseg 0x142B0, 13-fn main collision/geometry pack) as a
+  cheap-leaf slice. Banked **+2**: `get_triangle_normal_dominant_axis` (integer cross-product,
+  byte-exact first build) + `clamp_min_distance_from_target` (FP-store-scheduling wall CRACKED via a
+  PO-directed gcc-2.7.2 + binutils-2.6 compiler-source fan-out — `sched.c:834 true_dependence`
+  fixed-vs-varying address lever: read adjacent global via `cam[2]` varying pointer to pin a floated
+  struct store, 505→0). The fan-out (3 subagents) also returned **2 TERMINAL no-lever verdicts**
+  (`get_surface_type` 450, `func_8003DE80` 350: a shared constant-15 block-LOCAL scheduler coin,
+  `mips.md:153-155` R4000 load READY-DELAY 3 → build 1 instr SHORTER than the ROM; NOT `global.c`
+  ref-count-steerable like S232) + **assembler ruled out** (binutils subagent). Banked **0pt** (file
+  13/13 → 11 stubs, NOT md5-candidate), **+2 matched**, quality **0 stuck / 1 permuter / 2 carried /
+  0 re-opened**. Seed committed **3** (fresh `none` cheap-leaf slice); realized ~**6** (seed 3 −1
+  first-try get_triangle_normal +1 permuter +1 novel fan-out crack +1/+1 two carries), residual
+  **+3**. LESSON: KEY ASYMMETRY vs S232 — S232's walls were `global.c` ref-count-steerable (3/3
+  cracked); S233's constant walls were block-LOCAL `local-alloc.c` scheduler coins (0 steerable). So
+  a fan-out's deliverable is BOTH cracks AND pass-cited terminal verdicts; a no-lever verdict with a
+  `file:line` citation is a real result (retires the wall). S224 productivity cliff RE-confirmed and
+  steeper for FP/collision domains: the 5 smallest leaves = 1 integer bank + 4 compiler walls; "cheap
+  leaf" size did not predict tractability. Retro applied 4 of 4 (#1 varying-ptr store-pin lever →
+  hazards.md; #2 block-local latency-coin terminal sub-case → hazards.md; #3 FP/collision small-leaf
+  deweight → BACKLOG ranker follow-up; #4 fan-out terminal-verdict value + S232↔S233 asymmetry →
+  agent-workflow). Memory `revalidate-old-carries-stale-wall` cross-checked (this time the carries held).
 - **Regime:** `mirror` is a depleting minority (~22 % of ranked candidates: 56 mirror vs 194
   classical; 18 warm / 38 cold). The warm clean-singleton mirror pool is now **mined out** (S11
   plan gate: every top mirror candidate carries a blocking hazard), pushing the project onto the
