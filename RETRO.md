@@ -25,6 +25,15 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 238 — crack/decomp fan-out over the func_80071370.c 748xx triplet — 2026-07-16
+- Increment: 0 files banked / **+3 functions matched** (`func_80071370.c` 26 stubs → 23; NOT md5-candidate).
+- Quality: 0 stuck-far / 0 permuter / 0 carried / 0 re-opened.
+- Seed: committed 5pt; banked 0pt (per-file all-or-nothing, file partial); realized 5, residual 0 (all cracked, no escalation trigger); regime classical (crack/decomp slice).
+- What helped: 3 gcc-2.7.2 + binutils-2.6 subagents (parallel, isolated `decomp_loop --profile main`) over the 748xx triplet — the 3 smallest leaves, all `jal`ing the S237-banked helper `func_800738BC`. **3 cracks / 0 carries** (2 first-build, 1 single-lever). Triplet was STRAIGHT-LINE, so the S237 `func_80074E5C` `global.c:587` allocno copy-pref wall did NOT recur (plan hedge held). `func_800747B0` cracked 60→0 on a NEW gcc-2.7.2 `sched.c` LUID lever: fold the `arg1 - w/2` subtract INTO the call arg so the `&saved`→`$a0` setup emits first (priority():1488 ties all latency-1 ALU at prio 1, rank_for_schedule():2428 breaks by INSN_LUID = source-emission order). All 3 same shape (save `*arg0` across two calls, banked helper, signed `w/2` round, s16 sign-extends, sibling call). Only additions = 3 second-callee externs. **A freshly-banked shared helper unblocks its still-asm caller family as tractable leaves** — a positive tractability signal, not the S224 wall-sensitive tail. Pack scorecard: func_80071370.c = S236 3/3 + S237 2/3 + S238 3/3 = **8 of 9 attempted leaves cracked**.
+- Friction: none material. First-build 2/3; the lone lever was a clean 1-edit sched-order fix. Subagents applied the S235 hand-off contract cleanly (all 3 SendMessage'd verdicts, though 2 idle_notifications trailed the verdict — non-blocking).
+- Applied: 3 of 3 — #1 new memory `sched-luid-order-inline-arg-subexpr` (already authored by the crack subagent; MEMORY.md index added); #2 caller-of-a-freshly-banked-helper positive-tractability ranker follow-up → BACKLOG; #3 known-playbook-tail 8/9 scorecard retro note → BACKLOG (6th data point).
+- Carry-over: none. `func_80071370.c` retains 23 stubs (mid-logic/DL tail; the terminal `func_80074E5C` allocno wall stays carried from S237). LESSON: chain value across sprints — a helper banked one sprint pays off its caller family the next; the fan-out is the settled main-segment play.
+
 ## Sprint 237 — crack/decomp fan-out over 3 smallest wall-sensitive leaves in func_80071370.c — 2026-07-16
 - Increment: 0 files banked / **+2 functions matched** (`func_80071370.c` 28 stubs → 26; NOT md5-candidate) + 1 wall carried-with-citation.
 - Quality: 0 stuck-far / 0 permuter / **1 carried** / 0 re-opened.

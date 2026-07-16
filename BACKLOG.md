@@ -225,6 +225,17 @@ fan-out (4 documented walls → 2 cracked, 1 re-framed, 1 terminal):
      {has-recipe: bank-attempt | no-lever: characterize}; the fan-out then SORTS the tail rather than
      grinding it. First mid-pool partial jtbl-carve (jtbl_800D17E0) proved the `#switch-jtbl-dispatch`
      recipe reaches even a table buried in a multi-jtbl shared rodata pool.
+   - **6th data point (S238): a freshly-banked shared HELPER unblocks its caller family as tractable
+     leaves — 3/3 cracks, 2 first-build.** S237 banked `func_800738BC` (glyph-width helper); S238 fanned
+     over its 3 still-asm callers (the `func_80071370.c` 748xx triplet `func_800747B0`/`func_80074840`/
+     `func_800748D0`, each 36i, each `jal func_800738BC`) and cracked all 3 (2 first-build, 1 via the
+     new `sched.c` LUID inline-arg lever). RANKER FOLLOW-UP: **"caller-of-a-freshly-banked-helper" is a
+     POSITIVE tractability signal**, distinct from (and often overriding) the S224 wall-sensitive-tail
+     signal for the same pack — the caller was blocked only on the helper's prototype/shape, now
+     resolved. Tell: when a helper banks, boost its still-asm direct callers in the smallest-first sort
+     (they inherit the helper's now-known signature + the family idiom). Pack scorecard confirms the
+     known-playbook-tail thesis: `func_80071370.c` = S236 3/3 + S237 2/3 + S238 3/3 = **8 of 9 attempted
+     leaves cracked** (1 terminal carry `func_80074E5C`).
 
 **Re-confirmed + reframed (S204, PO-accepted at retro, QUEUED to the off-cadence golden-gated
 `pick_target.py` branch):** `func_8003E004` (c-stub, priced 13) is another under-priced FP/6-callee-double

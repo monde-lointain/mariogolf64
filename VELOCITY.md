@@ -900,6 +900,22 @@ Three honest caveats:
   applied 4 of 4 (#1 jtbl-carve mid-pool refinement → memory `jtbl-carve-both-edge-8align`; #2 new memory
   `gcc272-fold-range-test-slti-merge`; #3 loop-weight copy-pref terminal sub-case → hazards.md; #4
   known-playbook-vs-wall-sensitive tail split → BACKLOG).
+  S238: CRACK/DECOMP fan-out over the `func_80071370.c` 748xx triplet (`func_800747B0`/`func_80074840`/
+  `func_800748D0`, each 36i, each `jal` the S237-banked helper `func_800738BC`) — one gcc-2.7.2 +
+  binutils-2.6 subagent each. **3 cracks / 0 carries.** The triplet was STRAIGHT-LINE, so the S237
+  `func_80074E5C` `global.c:587` allocno copy-pref wall did NOT recur (plan hedge held). 2 first-build;
+  `func_800747B0` cracked 60→0 on the NEW `sched.c` LUID lever (fold the `arg1 - w/2` subtract INTO the
+  call argument so the `&saved`→`$a0` setup emits first, matching source-emission INSN_LUID order;
+  sched.c priority():1488 ties all latency-1 ALU at prio 1, rank_for_schedule():2428 breaks by LUID).
+  Banked **0pt** (`func_80071370.c` 26→23 stubs, NOT md5-candidate), **+3 matched**, quality **0 stuck /
+  0 permuter / 0 carried / 0 re-opened**. Seed committed **5** (crack/decomp slice); realized **5**,
+  residual **0** (all cracked, no escalation trigger). LESSON: a freshly-banked shared HELPER unblocks
+  its still-asm caller family as tractable leaves the SAME plateaued tail — "caller-of-a-banked-helper"
+  is a positive tractability signal distinct from the S224 wall-sensitive-tail signal. Pack scorecard:
+  `func_80071370.c` = S236 3/3 + S237 2/3 + S238 3/3 = **8 of 9 attempted leaves cracked**. Rolling-5
+  (S234-S238): crack-attempt/decomp slices banked 3+2+3+2+3 across 5 main-segment sprints. Retro applied
+  3 of 3 (#1 new memory `sched-luid-order-inline-arg-subexpr`; #2 caller-of-banked-helper ranker
+  follow-up → BACKLOG; #3 known-playbook-tail scorecard retro note).
 - **Regime:** `mirror` is a depleting minority (~22 % of ranked candidates: 56 mirror vs 194
   classical; 18 warm / 38 cold). The warm clean-singleton mirror pool is now **mined out** (S11
   plan gate: every top mirror candidate carries a blocking hazard), pushing the project onto the
