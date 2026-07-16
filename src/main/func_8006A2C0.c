@@ -42,9 +42,30 @@ void func_8006B54C(void);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_8006A2C0", func_8006A2C0);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_8006A2C0", func_8006A4A0);
+void func_8006A4A0(Gfx** pgfx, u32 pal, u32 addr) {
+  Gfx* gfx = *pgfx;
 
-INCLUDE_ASM("asm/nonmatchings/main/func_8006A2C0", func_8006A548);
+  gDPSetTextureImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, addr & ~7);
+  gDPTileSync(gfx++);
+  gDPSetTile(gfx++, 0, 0, 0, 256 | ((pal & 0xF) << 4), G_TX_LOADTILE, 0, 0, 0,
+             0, 0, 0, 0);
+  gDPLoadSync(gfx++);
+  gDPLoadTLUTCmd(gfx++, G_TX_LOADTILE, 15);
+  gDPPipeSync(gfx++);
+  *pgfx = gfx;
+}
+
+void func_8006A548(Gfx** pgfx, u32 arg1) {
+  Gfx* gfx = *pgfx;
+
+  gDPSetTextureImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, arg1 & ~7);
+  gDPTileSync(gfx++);
+  gDPSetTile(gfx++, 0, 0, 0, 256, G_TX_LOADTILE, 0, 0, 0, 0, 0, 0, 0);
+  gDPLoadSync(gfx++);
+  gDPLoadTLUTCmd(gfx++, G_TX_LOADTILE, 255);
+  gDPPipeSync(gfx++);
+  *pgfx = gfx;
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_8006A2C0", func_8006A5E4);
 
