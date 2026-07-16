@@ -5633,6 +5633,21 @@ with it): if the OTHER version reproduces the ROM form, you have a wrong-pin; if
 2.8.1 gave in-place + 80 insns, worse) and a same-TU sibling already matches at your pinned version,
 the pin is confirmed correct and the artifact is a patchlevel micro-divergence.
 
+**Terminal sub-case (S237 func_80074E5C): the copy-preference argreg swap.** When the miss is a plain
+`$a0`<->`$a1` swap between a loop accumulator `pos` and a loop-invariant compare-const, and `pos` is
+seeded `pos = argN` (a copy of an incoming arg reg), that copy hands `pos` a hardreg copy-preference
+for `argN`'s reg, so `pos` reclaims it and the pref-less const falls to the other argreg. The ROM does
+the OPPOSITE (copies `pos` OUT to a different reg, keeps `argN` live in its reg). To flip it you would
+need `argN` live across `pos`'s allocation (so the coalescer can't fold `pos`/`argN`) AND `argN`
+extracted before the loop -- **mutually exclusive when `argN`'s only other consumer dies before the
+region** (e.g. `base = (s16)argN` scheduled to die pre-loop). There is no clean-C lever: every
+structure that keeps `argN` live long enough misplaces the pre-loop extraction (the "base-after-loop"
+form emits the ROM's `move a0,a1` but drops `base` +2 instrs). This is a TERMINAL `global.c:587`
+`allocno_compare` copy-pref wall (no `REG_ALLOC_ORDER` in mips.h -> `find_reg` tries hardregs
+ascending). Permuter is weak here (allocno-tiebreak class); carry with the citation. See
+[[loop-weight-and-live-length-regalloc-steering]] memory note and the carry doc
+`docs/wip/func_80074E5C.near-match.md`.
+
 ---
 
 ## dead-frame reload-artifact regalloc-wall

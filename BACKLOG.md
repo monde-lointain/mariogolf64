@@ -210,6 +210,21 @@ fan-out (4 documented walls → 2 cracked, 1 re-framed, 1 terminal):
      materialized the base + stored `0(reg)`; real residual = a single expr.c binop expand-ORDER swap.
      So the anchor→crackable map is a HINT only; re-derive the actual residual from objdump before
      trusting a carry's stated class (a wall verdict, even class-tagged, is a hypothesis).
+   - **5th data point (S237): a FRESH (un-documented) plateaued-tail slice, not a carried-wall slice —
+     2 cracks + 1 terminal carry.** S237 fanned over the 3 smallest UN-attempted leaves of the same
+     `func_80071370.c` tail (not pre-RE'd walls): `func_800760CC` (27i `#switch-jtbl-dispatch`) and
+     `func_800738BC` (56i glyph-classify, `fold_range_test` goto-defeat) cracked; `func_80074E5C` (40i
+     `bnel` value-select) = TERMINAL `global.c:587` allocno-tiebreak copy-pref wall (permuter-weak,
+     carried). RANKER FOLLOW-UP: distinguish a **known-playbook tail** from a **wall-sensitive tail**.
+     S224 flags a plateaued mid-logic tail as characterization-only, but a leaf whose smallest-first
+     hazard has a DOCUMENTED source recipe (`#switch-jtbl-dispatch` jtbl-carve, glyph/char-classify
+     `fold_range_test`, `#indexed-vs-pointer`, `#base-register-vs-displacement` byte-offset-cast) is a
+     BANK-attemptable leaf (~0.6), not pure characterization — only the no-source-lever classes
+     (`global.c` copy-pref/allocno-tiebreak that needs a live arg the source can't hold, block-LOCAL
+     scheduler coin) are terminal-carry (price 0). Tell: map the smallest-leaf's hazard anchor →
+     {has-recipe: bank-attempt | no-lever: characterize}; the fan-out then SORTS the tail rather than
+     grinding it. First mid-pool partial jtbl-carve (jtbl_800D17E0) proved the `#switch-jtbl-dispatch`
+     recipe reaches even a table buried in a multi-jtbl shared rodata pool.
 
 **Re-confirmed + reframed (S204, PO-accepted at retro, QUEUED to the off-cadence golden-gated
 `pick_target.py` branch):** `func_8003E004` (c-stub, priced 13) is another under-priced FP/6-callee-double
@@ -4670,14 +4685,18 @@ by `/sprint-plan`:
   `func_80071924` + `func_8007512C` (`#base-register-vs-displacement` — gcc folds `%lo` into the store
   where the ROM materializes the base, and `li 0xff` vs `-1`; while the single-index sibling
   `func_71C74` banked clean because there the fold matches). Ranker re-surfaces it as a c-stub
-  `remaining:N` continuation smallest-first, but the cheap sub-30i vein is now MINED. **Deferred
-  (wall-class):** `func_800760CC` (27i jtbl switch, `#switch-jtbl-dispatch`); the 36-80i tier
-  (`func_800747B0`/`func_80074840`/`func_800748D0` triplet — call unbanked `func_800738BC` + div-round;
-  `func_80074E5C` 40i `bnel` value-select) enters the regalloc/mid-logic wall-sensitive class; then the
-  140i+ mid-logic (`func_80072A08` 698i, `func_80071CE4` 841i, `func_8007580C` 399i) + FP fns
+  `remaining:N` continuation smallest-first, but the cheap sub-30i vein is now MINED. **S237 UPDATE:
+  banked `func_800760CC` (27i jtbl char-classify — first mid-pool partial jtbl-carve, jtbl_800D17E0
+  3-way rodata split) + `func_800738BC` (font-width accum, `fold_range_test` goto-defeat); 28 → 26
+  stubs.** New carry `func_80074E5C` (40i `bnel` value-select) = TERMINAL `global.c:587` allocno-tiebreak
+  `a0`<->`a1` copy-pref wall (`docs/wip/func_80074E5C.near-match.md`; permuter denied 0.55<<0.97).
+  **Deferred (wall-class):** the 748xx triplet remainder (`func_800747B0`/`func_80074840`/`func_800748D0`
+  — now their helper `func_800738BC` is banked, so they lose the div-round unknown; re-price next visit);
+  then the 140i+ mid-logic (`func_80072A08` 698i, `func_80071CE4` 841i, `func_8007580C` 399i) + FP fns
   (`func_800754BC`/`func_8007515C`); `func_800719A0` = caller-evict (inlined into
-  src/overlay_10/func_ovl10_801F4A40.c, skip). File md5-candidate only when all 39 bank. Per the S224
-  plateau lesson, prefer a fresh pack / escalation over grinding this tail next sprint.
+  src/overlay_10/func_ovl10_801F4A40.c, skip). File md5-candidate only when all 39 bank. S237 lesson:
+  a plateaued/wall-sensitive tail (S224) is still a BANK slice for its known-playbook leaves (jtbl,
+  glyph-classify) — fan-out sorts crack-vs-terminal-carry rather than pure characterization.
 - **Open (S225→S226, in-progress mixed-partial, NOT a spike):** `src/main/func_80078910.c` (37-fn
   main-seg `none` pack, subseg 0x53D10 flipped `c` at the S225 gate; rumble/shadow/effects + heap
   alloc/free system). **10 banked** (S225 heap alloc/free/dispatch cluster + rumble twins +

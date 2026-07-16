@@ -880,6 +880,26 @@ Three honest caveats:
   (#1 byte-offset-cast pure-form refine + variable bound/val flippers → memory
   `byte-offset-cast-defeats-base-ptr-cse`; #2 verified subagent-written `pre-temp-defer-rowadd-lever.md`;
   #3 s8*-vs-u8* value-imm lever → same memory; #4 carried-wall crack-slice 4th confirmation → BACKLOG).
+
+  S237: CRACK/DECOMP fan-out over the 3 smallest FRESH (un-documented) wall-sensitive leaves of
+  `func_80071370.c` (gcc-2.7.2 + binutils-2.6, one subagent each; PO chose the productive-pack
+  continuation over the single-fn monster smallest-first pick). **2 cracks + 1 terminal carry** — the
+  S233-style sort the plan hedged for (NOT 3/3, because these were un-RE'd leaves not pre-cracked walls).
+  Banked **+2**: `func_800760CC` (27i `#switch-jtbl-dispatch` char-classify — case source-order forces
+  emission order; **first mid-pool partial jtbl-carve**, jtbl_800D17E0 3-way rodata split out of a
+  multi-jtbl shared pool) + `func_800738BC` (56i font-width accum — goto-to-shared-label defeats
+  gcc-2.7.2 `fold_range_test` slti-pair merge, the only matching structure). Carried **1**:
+  `func_80074E5C` (40i `bnel` value-select) = TERMINAL `global.c:587` allocno-tiebreak `a0`<->`a1`
+  copy-pref wall (permuter denied 0.55<<0.97, root-caused + doc). Banked **0pt** (`func_80071370.c`
+  28→26 stubs, NOT md5-candidate), **+2 matched**, quality **0 stuck / 0 permuter / 1 carried / 0
+  re-opened**. Seed committed **5** (crack/decomp slice); realized **7** (+1 carry, +1 novel mid-pool
+  jtbl-carve gotcha), residual **+2**. LESSON: a plateaued/wall-sensitive tail (S224) fan-out is BOTH
+  a bank slice AND a sorter — known-playbook leaves (jtbl, glyph-classify) crack; pure allocno-tiebreak
+  leaves terminal-carry. Rolling-5 (S233-S237): crack-attempt/decomp slices banked 1+3+2+3+2 across 5
+  main-segment sprints — the fan-out is the settled main-segment play once cheap veins are mined. Retro
+  applied 4 of 4 (#1 jtbl-carve mid-pool refinement → memory `jtbl-carve-both-edge-8align`; #2 new memory
+  `gcc272-fold-range-test-slti-merge`; #3 loop-weight copy-pref terminal sub-case → hazards.md; #4
+  known-playbook-vs-wall-sensitive tail split → BACKLOG).
 - **Regime:** `mirror` is a depleting minority (~22 % of ranked candidates: 56 mirror vs 194
   classical; 18 warm / 38 cold). The warm clean-singleton mirror pool is now **mined out** (S11
   plan gate: every top mirror candidate carries a blocking hazard), pushing the project onto the

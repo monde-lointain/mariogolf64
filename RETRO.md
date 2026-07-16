@@ -25,6 +25,15 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 237 — crack/decomp fan-out over 3 smallest wall-sensitive leaves in func_80071370.c — 2026-07-16
+- Increment: 0 files banked / **+2 functions matched** (`func_80071370.c` 28 stubs → 26; NOT md5-candidate) + 1 wall carried-with-citation.
+- Quality: 0 stuck-far / 0 permuter / **1 carried** / 0 re-opened.
+- Seed: committed 5pt; banked 0pt (per-file all-or-nothing, file partial); realized 7, residual +2 (+1 carry, +1 novel mid-pool jtbl-carve gotcha); regime classical (crack/decomp slice).
+- What helped: crack/decomp fan-out (gcc-2.7.2 + binutils-2.6, 3 parallel subagents, isolated `decomp_loop --profile main`) sorted the tail exactly as the S233 hedge predicted — **2 cracks + 1 terminal carry** (NOT 3/3). `func_800760CC` (27i switch jtbl char-classify) byte-matched; its jtbl carve was the **first partial-carve from the MIDDLE of a multi-jtbl shared rodata pool** — carving the 8-aligned-both-edge jtbl_800D17E0 (0xACBE0..0xACC48) with a 3-way yaml split left the still-asm sibling jtbls' `.L` labels intact. `func_800738BC` (font-width accum) cracked via goto-to-shared-label defeating gcc-2.7.2 `fold_range_test` slti-pair merge (the only matching structure) + `if(flags!=0)` polarity + guard+do-while. Even a plateaued/wall-sensitive tail (S224) still banked 2/3 on KNOWN-playbook leaves.
+- Friction: the pre-carve full-make failed with `undefined reference to .L80076124` from the extracted `ACAD0.rodata.o` (the tell that func_800760CC's own jtbl needed carving out of the shared pool). Both crack subagents edited the shared `src/main/func_80071370.c` in parallel — reconciled clean at integration (different regions, no conflict). `func_80074E5C`'s decomp_loop percent (0.55) understates a 100%-structure single-argreg-swap residual (asm-differ weights the reg rename); the in-tree structure analysis, not the score, was the real read.
+- Applied: 4 of 4 — #1 jtbl-carve mid-pool refinement → memory `jtbl-carve-both-edge-8align`; #2 new memory `gcc272-fold-range-test-slti-merge`; #3 loop-weight copy-pref terminal sub-case → `docs/hazards.md#loop-weight-and-live-length-regalloc-steering`; #4 ranker known-playbook-vs-wall-sensitive tail split → BACKLOG.
+- Carry-over: `func_80074E5C` (terminal `global.c:587` allocno-tiebreak `a0`<->`a1` copy-pref wall, root-caused + `docs/wip/func_80074E5C.near-match.md`; permuter denied at 0.55 << 0.97). `func_80071370.c` retains 26 stubs (mid-logic/DL tail). LESSON: a plateaued-tail fan-out is BOTH a bank slice AND a sorter — known-playbook leaves (jtbl, glyph-classify) crack; pure allocno-tiebreak leaves terminal-carry.
+
 ## Sprint 236 — crack-attempt fan-out over 3 documented walls in func_80071370.c — 2026-07-16
 - Increment: 0 files banked / **+3 functions matched** (`func_80071370.c` 31 stubs → 28; NOT md5-candidate).
 - Quality: 0 stuck-far / 0 permuter / 0 carried / 0 re-opened.
