@@ -220,11 +220,35 @@ INCLUDE_ASM("asm/nonmatchings/main/func_80071370", func_80074230);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80071370", func_80074500);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80071370", func_800747B0);
+extern void func_80073F24(Gfx** dl, s16 x, s16 y, u8* str);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80071370", func_80074840);
+void func_800747B0(Gfx** arg0, s32 arg1, s32 arg2, u8* str) {
+  Gfx* saved = *arg0;
+  s32 w = func_800738BC(str, 0xC, 2);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80071370", func_800748D0);
+  func_80073F24(&saved, arg1 - w / 2, arg2, str);
+  *arg0 = saved;
+}
+
+extern void func_80074230(s32* dst, s16 x, s16 y, u8* str);
+
+void func_80074840(s32* arg0, s32 arg1, s32 arg2, u8* str) {
+  s32 saved = *arg0;
+  s32 w = func_800738BC(str, 0xA, 2);
+
+  func_80074230(&saved, arg1 - w / 2, arg2, str);
+  *arg0 = saved;
+}
+
+extern void func_80074500(s32* dst, s16 x, s16 y, u8* str);
+
+void func_800748D0(s32* arg0, s32 arg1, s32 arg2, u8* str) {
+  s32 saved = *arg0;
+  s32 w = func_800738BC(str, 8, 2);
+
+  func_80074500(&saved, arg1 - w / 2, arg2, str);
+  *arg0 = saved;
+}
 
 void func_80074960(void) {}
 
