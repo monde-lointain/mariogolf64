@@ -322,6 +322,15 @@ dashboard). Target selection is `tools/pick_target.py`, not a stored roadmap.
     it is fine IF the goal is a crack-attempt slice (compiler-source fan-out, S232 cracked 3/3) — but
     label it as such, do not price it as a clean leaf. (A `pick_target.py` `carried-wall:<fn>` detector
     that reads the in-file comment is a tracked ranker follow-up; see `BACKLOG.md`.)
+    - **ALSO grep the `BACKLOG.md` carry list by fn name (S239+S240 DoR miss, RECURRED).** A wall
+      characterized in a PRIOR sprint often lives ONLY in the `BACKLOG.md ## Carry-overs` entry (or a
+      `docs/wip/<fn>.near-match.md`), NOT as an in-file comment above the stub — so the in-file grep above
+      misses it and the leaf re-surfaces as "fresh." S239 (`func_8006C8CC`) and S240
+      (`func_8006D164`/`func_8006DF84`) both re-committed already-characterized BACKLOG carries this way.
+      At the plan gate, `grep -n '<candidate_fn>' BACKLOG.md` for EACH committed leaf; if it is a listed
+      carry, either skip it or label the commit a crack-attempt/deepen slice (not a fresh leaf). Write new
+      wall characterizations to `docs/wip/<fn>.near-match.md` AT DISCOVERY (not only in the retro digest),
+      so the next sprint's DoR finds them. Fold into the `carried-wall:<fn>` ranker follow-up.
   - Enablers (subseg flip plus `make extract`, multi-file split, `symbol_addrs.txt` additions) are
     performed by the agent at the plan gate after the PO approves the goal/scope, and validated
     there: `make extract && make` must still produce the green baserom ROM with the new stubs. This

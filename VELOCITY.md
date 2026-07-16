@@ -932,6 +932,22 @@ Three honest caveats:
   main-segment slices banked 2+3+2+3+2. Retro applied 4 of 4 (#1 memory `subagent-diff-crack-not-a-bank`
   + hazards #display-lists; #2 DL `gDP*(gfx++)` macro hazard; #3 memory `store-flag-single-bit-terminal-
   wall` + hazards #value-select; #4 size≠tractable retro note).
+  S240: smallest-first slice over `src/main/func_8006A2C0.c` (S224 pack, 23 stubs) — **1 bank / 2 carries.**
+  `func_8006AD1C` BANKED first-build (signed `% 14` table-index leaf: magic 0x92492493 = /14 div, byte-
+  offset-cast u16 load `*(u16*)&D_800C4026[(arg0%14)*4]` + the sibling buffer idiom), RETIRING a BACKLOG
+  deferred-wall prediction (AD1C was mis-tagged `#local-alloc-qty-permutation` off the magic constant).
+  `func_8006D164` (byte-exact body, LICM selective-hoist + 3-reg rotation; `!=`-bounds/n-var/decl-swap/
+  do-while + 4-min permuter no crack) and `func_8006DF84` (base-reg factor CRACKED via the new Axis-7
+  cross-call live-range lever, but a cross-jump-tail-merge blocks reorg's annulled `bnezl` = terminal)
+  CARRIED with wip docs. Banked **0pt** (`func_8006A2C0.c` 23→22 stubs, NOT md5-candidate), **+1 matched**,
+  quality **0 stuck / 1 permuter / 2 carried / 0 re-opened**. Seed committed **3** (classical continuation);
+  realized **6** (+1 permuter, +2 carry), residual **+3**. LESSON: (a) a magic-constant deferred-wall
+  prediction is a HYPOTHESIS — verify by seeding, not by the tell (AD1C banked first-build); (b) the S239
+  DoR miss RECURRED — D164/DF84 were BACKLOG-only carries re-committed as "fresh"; the plan gate must grep
+  the BACKLOG carry list by fn name (elevated `carried-wall:<fn>` follow-up). Rolling-5 (S236-S240): main-
+  segment slices banked 3+2+3+2+1. Retro applied 3 of 3 (#1 elevated carried-wall DoR follow-up + AD1C
+  correction → BACKLOG; #2 hazards Axis-7 cross-call lever + memory `cross-call-live-range-callee-saved-
+  lever`; #3 agent-workflow DoR grep-BACKLOG + wip-at-discovery).
 - **Regime:** `mirror` is a depleting minority (~22 % of ranked candidates: 56 mirror vs 194
   classical; 18 warm / 38 cold). The warm clean-singleton mirror pool is now **mined out** (S11
   plan gate: every top mirror candidate carries a blocking hazard), pushing the project onto the

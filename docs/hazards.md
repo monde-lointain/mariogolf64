@@ -4641,6 +4641,19 @@ permuter plateaued on at 605). S178 (Axis-5 define-point liveness + inline-senti
 reassociation `.greg`-read; cracked `func_80037E50`'s `quality` `$a0`→`$v1` via stepwise pointer arith,
 byte-exact, no permuter).
 
+**Axis 7 — cross-call live-range forces callee-saved allocation (S240 `func_8006DF84`).** A value USED
+only AFTER a call (so it does not naturally cross the call) is allocated caller-saved (a0-a3/t0-t9), but
+the ROM may hold it in a callee-saved reg (s0-s7). Fix: **declare and assign the variable BEFORE the
+call** so its live range crosses the call -> local_alloc/global.c must give it a callee-saved reg (saved
+at entry, often in the call's delay slot). The address/value is still MATERIALIZED after the call (GCC
+schedules the `lui/addiu` at first use), only the register-class reservation moves. S240: a shared base
+`s32* base = &D_800FF4D0` (used for `0xC(base)` load + `0x18(base)` store) landed in caller-saved `a0`
+until moved above the `get_shot_data()` call, then correctly landed in callee-saved `s0` (frame + all
+downstream regs then matched). Distinct from Axis 5 (`#default-return-var-must-init-after-call` moves a
+define-point AFTER a call to make it caller-saved / drop a saved reg); Axis 7 is the mirror image — move
+the define-point BEFORE the call to make it callee-saved. (Cracks the base-reg factor; a second factor
+like a `#cross-jump-tail-merge` can still wall the fn — S240 DF84 stayed carried on the annul.)
+
 ## permuter goto-backedge liveness unsound (var-reuse passes corrupt live-across-backedge values)
 
 **Trigger:** on a goto-loop function, a decomp-permuter "best" that beats your hand-derived structural

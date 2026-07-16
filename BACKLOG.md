@@ -4722,34 +4722,47 @@ by `/sprint-plan`:
   `#callee-prototype-is-load-bearing`. **S226 lesson:** a low-FP DL-emitter vein is TRACTABLE via stock
   gbi macros (not wall-class). Per the S224 plateau lesson, prefer a fresh pack / escalation over
   another smallest-first continuation of this mined pack.
-- **Open (S223→S224→S239, in-progress mixed-partial, NOT a spike):** `src/main/func_8006A2C0.c` (45-fn main-seg
-  `none` pack, subseg 0x456C0 flipped `c` at the S223 gate; mode/asset state + DL + sfx system). **22
+- **Open (S223→S224→S239→S240, in-progress mixed-partial, NOT a spike):** `src/main/func_8006A2C0.c` (45-fn main-seg
+  `none` pack, subseg 0x456C0 flipped `c` at the S223 gate; mode/asset state + DL + sfx system). **23
   banked** (19 S223 tiny/getter/setter/mode-state + asset-load/free `func_8003E400.c` twins; +1 S224
-  `func_8006ADF8` mode-gated club dispatch; **+2 S239** DL-emitter twins `func_8006A4A0`/`func_8006A548`
-  6-cmd parameterized TLUT-load via stock `gDP*(gfx++)` macros), 23 stubs remain. The ranker re-surfaces it as a
+  `func_8006ADF8` mode-gated club dispatch; +2 S239 DL-emitter twins `func_8006A4A0`/`func_8006A548`
+  6-cmd parameterized TLUT-load via stock `gDP*(gfx++)` macros; **+1 S240** `func_8006AD1C`), 22 stubs remain. The ranker re-surfaces it as a
   c-stub `remaining:N` continuation smallest-first, but the tractable vein is now MINED (see the S224
   cliff lesson) — treat further continuation as escalation/fresh-pack territory, not smallest-first.
-  **S239 DoR MISS (retro note):** `func_8006C8CC` was committed as a "fresh cheap leaf" but was ALREADY a
-  characterized S223 carry (below) — the plan-gate DoR grep checks IN-FILE near-match comments, not
-  BACKLOG carries, so a BACKLOG-only carry re-surfaces as fresh. Ranker/DoR follow-up: a `carried-wall:
-  <fn>` detector should also cross-ref the BACKLOG carry list, not just in-file comments. (The re-visit
-  was not wasted: S239 UPGRADED the C8CC characterization from S223's one-line note to a 10-form-exhausted
-  terminal verdict + escalation path, `docs/wip/func_8006C8CC.near-match.md`.)
+  **S239→S240 DoR MISS (RECURRED, retro note):** S239 committed `func_8006C8CC` and S240 committed
+  `func_8006D164`+`func_8006DF84` as "fresh cheap leaves," but all THREE were ALREADY characterized
+  BACKLOG carries (below) — the plan-gate DoR grep checks IN-FILE near-match comments, not BACKLOG
+  carries, so a BACKLOG-only carry re-surfaces as fresh TWO sprints running. **Ranker/DoR follow-up
+  (ELEVATED, recurred):** a `carried-wall:<fn>` detector must cross-ref the BACKLOG carry list (this
+  file), not just in-file comments; until built, the plan gate MUST grep BACKLOG carries by fn name at
+  DoR. (Neither re-visit was wasted: S239 upgraded C8CC to a 10-form terminal verdict; S240 BANKED the
+  mis-predicted `func_8006AD1C` wall — see below — and refined DF84's terminal factor.)
   **Carries (characterized):** `func_8006C8CC` (S223, deepened S239 — terminal store-flag-single-bit fold:
   `(u16 & 0x8000)?1:0` collapses to `lhu;srl 0xf` vs ROM `andi;bnez;li 1;move 0`; source-INVARIANT across
   10 forms, permuter-denied length deficit; extends the S231 const-select wall to a single-bit/sign
   deciding term; `docs/wip/func_8006C8CC.near-match.md`; escalation = `do_store_flag` vs `do_jump`
-  BIT_AND_EXPR compiler-source dive); `func_8006D164` (S223 — strided u16 4×7 double-loop, residual = outer-limit
-  de-hoist + IV coloring, `#top-tested-loop-goto-local-hoist`); `func_8006DF84` (S224 — branch-likely
-  `bnezl` + `&D_800FF4D0[const]` address-fold blocks `optimize_skip`'s 1-insn annul, `#value-select-if-
-  else-vs-branch-likely` + address-fold); `func_8006DEB4` (S224 — `#base-register-vs-displacement` on the
+  BIT_AND_EXPR compiler-source dive); `func_8006D164` (S223, DEEPENED S240 — strided u16 4×7 double-loop,
+  body byte-exact; residual = ROM rematerializes the outer-limit `li 4` inside the loop (reuses the
+  set-in-loop data reg -> LICM can't hoist) but build hoists 4 to a fresh reg -> 3-reg rotation on the
+  pointer bases; `#top-tested-loop-goto-local-hoist` selective-hoist + live-length. S240 tried `!=`
+  bounds (fixed inner `bne`), n-variable/decl-swap/do-while, + a 4-min --main permuter — NO crack;
+  `docs/wip/func_8006D164.near-match.md`); `func_8006DF84` (S224, REFINED S240 — body byte-exact; the S224
+  "`&D_800FF4D0[const]` address-fold" was actually a solvable base-reg factor: `s32* base` declared BEFORE
+  the `get_shot_data()` call crosses the jal -> callee-saved `s0` (Axis 7 cross-call live-range lever,
+  `#loop-weight-and-live-length-regalloc-steering`). TERMINAL factor = cross-jump-tail-merge: the two
+  identical `base[6]=0` tails (field!=0 + v1<=0) merge in jump.c BEFORE reorg's `optimize_skip` can annul
+  one into the `bnezl` delay slot; flat/nested/goto all merge, not permuter-reachable;
+  `docs/wip/func_8006DF84.near-match.md`, `#cross-jump-tail-merge` + `#reorg-optimize_skip-annulled-bnel`); `func_8006DEB4` (S224 — `#base-register-vs-displacement` on the
   D_801B7270 chain: scalar folds w/ p=a1, pointer gets base-reg but swaps p→a2+caches, target wants
   base-reg+reload+p=a1; all levers else landed via `#nested-guard-range-unfold--comparison-operand-order`);
   `func_8006D058` (S224 — D164 loop-strength-reduction x2, iterated 6180→4040→2960 but stays
   structurally longer, not permuter-eligible). **Deferred (same wall combo, not attempted):** the
   mid-logic tail `func_8006D38C`/`D214`/`CE88`/`D4EC`/`DFF0` (base-register + search-loop + `bnel`
-  combo, S224-pattern-confirmed); `func_8006AD1C` (`0x92492493` `#local-alloc-qty-permutation` wall,
-  func_80098CD8 kin); the large DL builder `func_8006B5D8` (F3DEX2 `#display-lists` — use the S239
+  combo, S224-pattern-confirmed). **S240 wall-prediction CORRECTION:** `func_8006AD1C` was deferred here
+  as a `0x92492493` `#local-alloc-qty-permutation` wall (func_80098CD8 kin) — WRONG: it BANKED first-build
+  S240 as a plain signed `% 14` table-index leaf (`*(u16*)&D_800C4026[(arg0%14)*4]` byte-offset-cast u16
+  load; the 0x92492493 magic is just the /14 div, no permutation). A deferred-wall prediction from a magic
+  constant is a HYPOTHESIS — verify by seeding, not by the tell. The large DL builder `func_8006B5D8` (F3DEX2 `#display-lists` — use the S239
   `gDP*(gfx++)` MACRO form, NOT raw `gfx[i].words` indexing which diverges to base+displacement);
   `func_8006BA94` (492B sfx/menu dispatch), the big A2C0/A5E4/A84C/BC80/C484/C918/D6D0/E210. `func_8006CD50` = caller-evict (inlined into src/main/func_80071220.c, skip). File
   md5-candidate only when all 45 bank. **S223→S224 lesson (productivity cliff):** a fresh `none`

@@ -25,6 +25,17 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 240 — smallest-first slice over func_8006A2C0.c (AD1C bank + D164/DF84 crack-attempts) — 2026-07-16
+- Increment: 0 files banked / **+1 function matched** (`func_8006A2C0.c` 23 stubs → 22; NOT md5-candidate).
+- Quality: 0 stuck-far / **1 permuter** (`func_8006D164`, no crack) / **2 carried** (`func_8006D164`, `func_8006DF84`) / 0 re-opened.
+- Seed: committed 3pt; banked 0pt (per-file all-or-nothing, file partial); realized 6, residual +3 (+1 permuter, +2 carry); regime classical.
+- What helped: (a) `func_8006AD1C` BANKED first-build — a signed `% 14` table-index leaf (magic 0x92492493 = the /14 div, NOT a permutation) via the byte-offset-cast u16 load `*(u16*)&D_800C4026[(arg0%14)*4]` + the sibling `func_8006ACD8` buffer idiom (`u8 sp10[0x20]`, func_8005062C/func_800506D4). This RETIRED a BACKLOG deferred-wall prediction (`AD1C = #local-alloc-qty-permutation`) — a magic-constant tell is a HYPOTHESIS, verify by seeding not by the tell. (b) **New regalloc lever (Axis 7, cracked DF84's base-reg factor):** declare a post-call value's var BEFORE the call so its live range crosses the jal -> callee-saved `s0` (mirror of the init-after-call Axis 5). Fixed DF84's `&D_800FF4D0` base from caller-saved `a0` to the ROM's `s0` (frame + all downstream regs matched).
+- Friction: (a) **DoR miss RECURRED (S239→S240):** all 3 committed "fresh leaves" were ALREADY characterized BACKLOG carries (C8CC S239; D164/DF84 here) — the plan-gate DoR grep checks in-file comments, not the BACKLOG carry list. Both D164 and DF84 lived only in BACKLOG, so they re-surfaced as fresh. Not wasted (banked the mis-predicted AD1C, deepened D164, refined DF84), but the `carried-wall:<fn>` ranker/DoR follow-up is now ELEVATED — the plan gate must grep BACKLOG carries by fn name until built. (b) `func_8006D164` (byte-exact body) is a genuine LICM/regalloc coin: ROM rematerializes `li 4` inside the outer loop (reuses the set-in-loop data reg -> hoist blocked), build hoists it -> 3-reg rotation; `!=`-bounds/n-var/decl-swap/do-while + a 4-min permuter all failed. (c) `func_8006DF84` base-reg cracked but the TERMINAL factor is a cross-jump-tail-merge: the two identical `base[6]=0` tails merge in jump.c before reorg's optimize_skip can annul one into the `bnezl` — not permuter-reachable; S224's "address-fold" label was one of two factors, and the wrong one.
+- Applied: 3 of 3 — #1 elevated `carried-wall:<fn>` ranker/DoR follow-up (must cross-ref BACKLOG carries) + AD1C wall-prediction CORRECTION → BACKLOG; #2 hazards.md `#loop-weight-and-live-length-regalloc-steering` Axis 7 (cross-call live-range = callee-saved lever) + memory `cross-call-live-range-callee-saved-lever`; #3 agent-workflow.md DoR bullet (grep BACKLOG carries by fn name + write wip docs AT DISCOVERY).
+- Carry-over: `func_8006D164` (`docs/wip/func_8006D164.near-match.md`, LICM selective-hoist + regalloc-rotation wall) + `func_8006DF84` (`docs/wip/func_8006DF84.near-match.md`, cross-jump-tail-merge blocks annulled bnezl; base-reg factor SOLVED). `func_8006A2C0.c` retains 22 stubs (the S224 wall-class mid-logic tail).
+
+---
+
 ## Sprint 239 — smallest-first classical bank slice over func_8006A2C0.c fresh leaves — 2026-07-16
 - Increment: 0 files banked / **+2 functions matched** (`func_8006A2C0.c` 25 stubs → 23; NOT md5-candidate).
 - Quality: 0 stuck-far / 0 permuter / **1 carried** (`func_8006C8CC`) / 0 re-opened.
