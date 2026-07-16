@@ -5,6 +5,7 @@ extern s32 D_800C4014;
 extern s32 D_800C4018;
 extern f32 D_800C401C;
 extern s32 D_800C4020;
+extern u8 D_800C4026[];
 extern s32 D_800C4060;
 extern s32 D_800C4064;
 extern s32 D_800C4068;
@@ -79,7 +80,12 @@ void func_8006ACD8(void) {
   func_8006B54C();
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_8006A2C0", func_8006AD1C);
+void func_8006AD1C(s32 arg0) {
+  u8 sp10[0x20];
+
+  func_8005062C(*(u16*)&D_800C4026[(arg0 % 14) * 4], sp10);
+  func_800506D4(D_800E1C04, sp10);
+}
 
 void func_8006AD88(void) { D_800C4020 = 0; }
 
