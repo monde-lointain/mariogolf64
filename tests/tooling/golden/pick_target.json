@@ -14,19 +14,6 @@
   },
   {
     "band": "-",
-    "func": "func_8003E004",
-    "hazards": "remaining:1,caller-evict:func_8003E004@src/main/func_8003DFD0.c",
-    "kind": "c-stub",
-    "nfns": 1,
-    "pts": 8,
-    "rom": "0x193D0",
-    "score": -1072,
-    "size": 1072,
-    "upstream": "none",
-    "vram": "0x8003DFD0"
-  },
-  {
-    "band": "-",
     "func": "func_ovl6_8024D800",
     "hazards": "-",
     "kind": "asm-flip",
@@ -50,19 +37,6 @@
     "size": 1824,
     "upstream": "none",
     "vram": "0x801FB400"
-  },
-  {
-    "band": "-",
-    "func": "func_8005E380",
-    "hazards": "remaining:1,caller-evict:func_8005E380@src/main/func_8005E2C0.c,src/main/func_8005E380.c",
-    "kind": "c-stub",
-    "nfns": 1,
-    "pts": 13,
-    "rom": "0x39780",
-    "score": -2192,
-    "size": 2192,
-    "upstream": "none",
-    "vram": "0x8005E380"
   },
   {
     "band": "-",
@@ -105,19 +79,6 @@
   },
   {
     "band": "-",
-    "func": "func_80052FE0",
-    "hazards": "remaining:9,caller-evict:func_8005342C@src/main/func_80054900.c;func_800542A0@src/main/func_80052FE0.c;func_800543DC@src/main/func_80052FE0.c,src/main/func_80054900.c;func_80054550@src/main/func_80052FE0.c;func_8005470C@src/main/func_80052FE0.c",
-    "kind": "c-stub",
-    "nfns": 9,
-    "pts": 13,
-    "rom": "0x2E3E0",
-    "score": -6432,
-    "size": 6432,
-    "upstream": "none",
-    "vram": "0x80052FE0"
-  },
-  {
-    "band": "-",
     "func": "render_pin_assembly_with_wind_hud",
     "hazards": "-",
     "kind": "asm-flip",
@@ -128,19 +89,6 @@
     "size": 6624,
     "upstream": "none",
     "vram": "0x8003E6C0"
-  },
-  {
-    "band": "-",
-    "func": "func_8006F1A0",
-    "hazards": "pack:17fn[func_8006F1A0=?,func_8006F1F0=?,func_8006F1FC=?,func_8006F228=?,func_8006F24C=?,func_8006F2E8=?,func_8006F2F4=?,func_8006F300=?,func_8006F404=?,func_8006F4F0=?,func_8006F50C=?,func_8006F534=?,func_8006F5E0=?,func_8006F734=?,func_8006FE88=?,func_800708B4=?,func_80070BCC=?]",
-    "kind": "asm-flip",
-    "nfns": 17,
-    "pts": 13,
-    "rom": "0x4A5A0",
-    "score": -7728,
-    "size": 7728,
-    "upstream": "none",
-    "vram": "0x8006F1A0"
   },
   {
     "band": "-",
@@ -301,9 +249,9 @@
   {
     "band": "-",
     "func": "func_8006A2C0",
-    "hazards": "remaining:25,caller-evict:func_8006CD50@src/main/func_80071220.c",
+    "hazards": "remaining:22,carried-wall:func_8006C8CC,func_8006CE88,func_8006D164,func_8006D214,func_8006D38C,func_8006DF84;characterization-only,caller-evict:func_8006CD50@src/main/func_80071220.c",
     "kind": "c-stub",
-    "nfns": 25,
+    "nfns": 22,
     "pts": 13,
     "rom": "0x456C0",
     "score": -18384,
@@ -326,23 +274,10 @@
   },
   {
     "band": "-",
-    "func": "raycast_terrain",
-    "hazards": "pack:13fn[raycast_terrain=?,raycast_terrain_floor=?,get_surface_type=?,check_line_cylinder_collision=?,clamp_min_distance_from_target=?,calculate_camera_attraction_vector=?,get_triangle_normal_dominant_axis=?,func_8003AC80=?,find_collision_triangle=?,check_ray_triangle_collision=?,resolve_wall_collision=?,raycast_find_closest_triangle=?,func_8003DE80=?]",
-    "kind": "asm-flip",
-    "nfns": 13,
-    "pts": 13,
-    "rom": "0x142B0",
-    "score": -20768,
-    "size": 20768,
-    "upstream": "none",
-    "vram": "0x80038EB0"
-  },
-  {
-    "band": "-",
     "func": "func_80071370",
-    "hazards": "remaining:31,caller-evict:func_800718C4@src/main/func_80071370.c;func_80071924@src/main/func_80071370.c;func_800719A0@src/main/func_800453E0.c,src/overlay_10/func_ovl10_801F4A40.c;func_8007512C@src/main/func_80071370.c",
+    "hazards": "remaining:23,carried-wall:func_80074E5C,caller-evict:func_800719A0@src/main/func_800453E0.c,src/overlay_10/func_ovl10_801F4A40.c;func_80073F24@src/main/func_80071370.c;func_80074230@src/main/func_80071370.c;func_80074500@src/main/func_80071370.c",
     "kind": "c-stub",
-    "nfns": 31,
+    "nfns": 23,
     "pts": 13,
     "rom": "0x4C770",
     "score": -20880,

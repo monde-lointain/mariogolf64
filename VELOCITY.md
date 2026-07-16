@@ -948,6 +948,22 @@ Three honest caveats:
   segment slices banked 3+2+3+2+1. Retro applied 3 of 3 (#1 elevated carried-wall DoR follow-up + AD1C
   correction → BACKLOG; #2 hazards Axis-7 cross-call lever + memory `cross-call-live-range-callee-saved-
   lever`; #3 agent-workflow DoR grep-BACKLOG + wip-at-discovery).
+  S241: escalation crack-attempt fan-out over the S224 wall cluster in `src/main/func_8006A2C0.c` (3
+  never-seeded hypothesis walls) — **0 banks / 3 characterized carries.** A reproduce-first fan-out that
+  SORTED the tail (S233 model): the byte-offset-cast lever cracked all 3 array walks, isolating each
+  residual to its terminal class. `func_8006D38C`/`func_8006D214` = TERMINAL `#base-register-vs-displacement`
+  (a NEW scalar-global `%hi`-CSE-share sub-case, `mips.h GO_IF_LEGITIMATE_ADDRESS:2318-2349`); `func_8006CE88`
+  = body cracked 13000→5360/0.553 but a permuter-only allocno-coloring floor below the 0.97 gate. All 3
+  wip'd + `file:line`-cited. Banked **0pt** (file 22 stubs, NOT md5-candidate), **+0 matched**, quality
+  **0 stuck / 0 permuter / 3 carried / 0 re-opened**. Seed committed **3** (classical escalation); realized
+  **6** (+3 carry), residual **+3**. DATA POINT: a reproduce-first fan-out over never-seeded base-register/
+  regalloc hypothesis walls = **0/3 banks** (vs S232 3/3 on a `global.c`-steerable tail, S233 1/3) — the
+  plateaued-tail EV model now has a matching "characterization-only" verdict for the base-register combo.
+  Rolling-5 (S237-S241): main-segment slices banked 2+3+2+1+0 (the wall-cluster tail is banking out).
+  Retro applied 4 of 4 (#1 `carried-wall` ranker detector + #2 `;characterization-only` EV tag →
+  `pick_target`; #3 hazards scalar-global-CSE-share third-terminal-sub-case + mips.h citation; #4 CE88
+  cross-call base-allocation levers → hazards). NB: 3 pre-existing `test_pick_target.py` failures (stale
+  goldens/thresholds from repo drift) are unrelated to S241, deferred to a tooling pass.
 - **Regime:** `mirror` is a depleting minority (~22 % of ranked candidates: 56 mirror vs 194
   classical; 18 warm / 38 cold). The warm clean-singleton mirror pool is now **mined out** (S11
   plan gate: every top mirror candidate carries a blocking hazard), pushing the project onto the

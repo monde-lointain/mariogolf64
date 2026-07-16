@@ -92,6 +92,16 @@ HAZARD_RODATA_STRADDLE = (
 HAZARD_DATA_STATIC = "data-static"
 HAZARD_TWIN_OF = "twin-of"
 HAZARD_REMAINING = "remaining"
+HAZARD_CARRIED_WALL = (
+    "carried-wall"  # a c-stub continuation's remaining leaf(s) already characterized as a
+)
+# wall in a prior sprint (has a docs/wip/<fn>.near-match.md file). The smallest-first sort and the
+# tell-filters do NOT see a BACKLOG-only / wip-only carry, so such a leaf re-surfaces as "fresh"
+# (S239/S240/S241 DoR-miss, recurred 3x). This tag surfaces the wip'd leaves at the plan gate so the
+# DoR labels them crack-attempts, not fresh leaves; with >=2 wip'd leaves the detail carries
+# `;characterization-only` (the mid-logic tail is a wall-retirement slice, not a bank slice — S241
+# reproduce-first fan-out returned 0/3 banks on exactly this combo). Advisory: does NOT re-price the
+# row (the smallest-first oracle stays byte-driven). See docs/hazards.md#base-register-vs-displacement.
 HAZARD_CODDOG_MIRROR = "coddog-mirror"  # a coddog compare2 match to an ultralib fn
 HAZARD_CODDOG_TWIN = (
     "coddog-twin"  # coddog matched a near-identical TWIN file, but the named members
@@ -444,6 +454,16 @@ class Hazard:
     def remaining(cls, n: int) -> "Hazard":
         """`<n>` residual count."""
         return cls(HAZARD_REMAINING, str(n))
+
+    @classmethod
+    def carried_wall(cls, fns) -> "Hazard":
+        """`<fn>[,<fn>...]` remaining leaves already wip-characterized as walls; `;characterization-only`
+        appended when >=2 (the mid-logic tail is a wall-retirement slice, not a bank slice)."""
+        fns = sorted(fns)
+        detail = ",".join(fns)
+        if len(fns) >= 2:
+            detail += ";characterization-only"
+        return cls(HAZARD_CARRIED_WALL, detail)
 
     @classmethod
     def rodata_jtbl(cls, addrs) -> "Hazard":

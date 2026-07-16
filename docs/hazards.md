@@ -6599,6 +6599,39 @@ target's opposite choice (keep `thread+0x20` as base `s1`, let `a0` die after th
 from faithful C. **So: try the byte-offset-cast lever FIRST on a base-vs-disp near-match; it is terminal
 only when the divergence is the `sub=&param->sub` param-base fold, not a fixed-array-slot access.**
 
+**THIRD terminal sub-class: nearby-SCALAR-global `%hi`-base CSE-share (S241 `func_8006D38C`/`func_8006D214`).**
+DISTINCT from both the crackable array-slot shape and the param-base fold. When a fn touches several
+scalar globals that sit within one 64KB `%hi` window (here `D_801B60BB` the count + `D_801B6090` the list
+at `-0x2B`), the ROM materializes ONE global's full address into a reg (`lui;addiu;lb 0(reg)`) and reaches
+the neighbors off it (`lw t0,-0x2B(reg)`), CSE-sharing the `%hi` base and holding it callee-saved across the
+inner loop. gcc-2.7.2 does the OPPOSITE: it accepts `reg + symbol` and canonicalizes `&sym±k` to a single
+relocated load, emitting a fresh `lui %hi(sym)` per access — so it never CSE-shares the base, which cascades
+the loop's register coloring. Root = the SAME `mips.h GO_IF_LEGITIMATE_ADDRESS` (config/mips/mips.h:2318-2349,
+comment :2325-2335 "the assembler can use $r1 to load just the high 16 bits … CSE is not as effective"). In
+S241 the byte-offset-cast lever DID crack the 0xB8-stride struct-array walk (field byte-exact), isolating the
+residual to this scalar-global share; 3 source forms (plain globals; `char*`-base anchored at the count with
+`*(s32*)(p-0x2B)`; struct-anchored) all park at score ~10620/10900 with identical coloring — `&sym±const`
+always collapses to the folded path. Permuter-UNREACHABLE (addressing/coloring, not a source permutation).
+So a base-vs-disp near-match whose residual is on ADJACENT FIXED SCALAR globals (not a fixed-array slot) is
+terminal like the param-base fold — carry it. (S224 tagged D38C/D214 `#base-register-vs-displacement`; S241
+CONFIRMED the tag correct, not a misdiagnosis, and named the exact mips.h root.)
+
+**Cross-call base allocation levers (S241 `func_8006CE88`, grid builder).** A pervasive-regalloc near-match
+one axis narrower than the above (body cracked 13000→5360/0.553, residual pure allocno coloring, permuter-
+only). Two source levers that landed the STRUCTURE (kept for the next such fn):
+- **Array-index, NOT an explicit base pointer, for a cross-call table base (INVERSE of the cross-call
+  live-range lever [#loop-weight-and-live-length-regalloc-steering] Axis 7).** Reading a table as
+  `SYM[k]` lets gcc auto-hoist the base with a LOW direct ref-count so an incoming param keeps its
+  callee-saved reg (`$s1`); an explicit `s8 *p = SYM` gives the pointer a HIGH loop ref-count that STEALS
+  `$s1` from the param (`global.c:594-601` priority by ref-count). Use `SYM[k]` when a param must survive
+  a loop that also walks a global table. (Mirror of Axis 7's "declare before a call to CROSS it" — here you
+  want the base LOW-priority so it does NOT displace the param.)
+- **Block-scoped pointer for a scalar count-address re-materialization.** When the ROM re-materializes a
+  scalar global's address per loop (not one function-wide base), scope the pointer to the loop:
+  `{ s32 *cnt = &D_801B6090; …use *cnt…; }` — a function-scope pointer becomes an extra callee-saved reg
+  (wrong); a block-scoped one materializes per-block like the ROM. Declare it AFTER any preceding call in
+  the block so its live range does not cross the call.
+
 ### Phantom -N in-place addend on a 2D-strength-reduced array ref (S216 `get_tile_attribute`)
 
 **Symptom.** A classical fn is byte-exact except the ONE `lh/lhu/lw` off an extern array base carries a

@@ -4722,13 +4722,19 @@ by `/sprint-plan`:
   `#callee-prototype-is-load-bearing`. **S226 lesson:** a low-FP DL-emitter vein is TRACTABLE via stock
   gbi macros (not wall-class). Per the S224 plateau lesson, prefer a fresh pack / escalation over
   another smallest-first continuation of this mined pack.
-- **Open (S223→S224→S239→S240, in-progress mixed-partial, NOT a spike):** `src/main/func_8006A2C0.c` (45-fn main-seg
+- **Open (S223→S224→S239→S240→S241, in-progress mixed-partial, NOT a spike):** `src/main/func_8006A2C0.c` (45-fn main-seg
   `none` pack, subseg 0x456C0 flipped `c` at the S223 gate; mode/asset state + DL + sfx system). **23
   banked** (19 S223 tiny/getter/setter/mode-state + asset-load/free `func_8003E400.c` twins; +1 S224
   `func_8006ADF8` mode-gated club dispatch; +2 S239 DL-emitter twins `func_8006A4A0`/`func_8006A548`
-  6-cmd parameterized TLUT-load via stock `gDP*(gfx++)` macros; **+1 S240** `func_8006AD1C`), 22 stubs remain. The ranker re-surfaces it as a
+  6-cmd parameterized TLUT-load via stock `gDP*(gfx++)` macros; **+1 S240** `func_8006AD1C`), 22 stubs remain
+  (**S241 banked 0** — an escalation crack-attempt fan-out over the mid-logic wall cluster, all 3 targets
+  carried; see below). The ranker re-surfaces it as a
   c-stub `remaining:N` continuation smallest-first, but the tractable vein is now MINED (see the S224
   cliff lesson) — treat further continuation as escalation/fresh-pack territory, not smallest-first.
+  **S241 confirms:** the reproduce-first fan-out returned 0/3 banks on the base-register/regalloc combo,
+  VALIDATING the cliff lesson (vs S232's 3/3 on a `global.c`-steerable tail). `pick_target` now tags this
+  row `carried-wall:<fns>;characterization-only` (wip-existence detector) so the DoR labels these leaves
+  crack-attempts, not fresh — the S239/S240 recurred DoR-miss is now ranker-surfaced.
   **S239→S240 DoR MISS (RECURRED, retro note):** S239 committed `func_8006C8CC` and S240 committed
   `func_8006D164`+`func_8006DF84` as "fresh cheap leaves," but all THREE were ALREADY characterized
   BACKLOG carries (below) — the plan-gate DoR grep checks IN-FILE near-match comments, not BACKLOG
@@ -4756,9 +4762,24 @@ by `/sprint-plan`:
   D_801B7270 chain: scalar folds w/ p=a1, pointer gets base-reg but swaps p→a2+caches, target wants
   base-reg+reload+p=a1; all levers else landed via `#nested-guard-range-unfold--comparison-operand-order`);
   `func_8006D058` (S224 — D164 loop-strength-reduction x2, iterated 6180→4040→2960 but stays
-  structurally longer, not permuter-eligible). **Deferred (same wall combo, not attempted):** the
-  mid-logic tail `func_8006D38C`/`D214`/`CE88`/`D4EC`/`DFF0` (base-register + search-loop + `bnel`
-  combo, S224-pattern-confirmed). **S240 wall-prediction CORRECTION:** `func_8006AD1C` was deferred here
+  structurally longer, not permuter-eligible);
+  `func_8006D38C` + `func_8006D214` (**S241 — TERMINAL `#base-register-vs-displacement`, S224 tag
+  CONFIRMED**; 84i/94i min/max-search over the 0xB8-stride D_801B725x array + *14 u16-table redistribute.
+  Byte-offset-cast lever CRACKED the array walk byte-exact (D214's FP scale 0x3895508E also byte-exact),
+  isolating the residual to a NEW third terminal sub-case: nearby-SCALAR-global `%hi`-base CSE-share — ROM
+  materializes `&D_801B60BB` full + reaches count via `lw t0,-0x2B(reg)` + holds it callee-saved; gcc-2.7.2
+  folds `%lo` per access w/ fresh `lui %hi`, cascading loop coloring. Root `mips.h GO_IF_LEGITIMATE_ADDRESS`
+  config/mips/mips.h:2318-2349; 3 source forms all park ~10620/10900; permuter-UNREACHABLE.
+  `docs/wip/func_8006D38C.near-match.md` + `.../func_8006D214.near-match.md`, `docs/hazards.md#base-register-vs-displacement`);
+  `func_8006CE88` (**S241 — permuter-only regalloc floor**; 116i grid clear/scan + sprintf builder. Body
+  CRACKED 13000→5360/0.553: loop1 pointer-walk reload+`bne` (`sched.c:834`), block-scoped count-address
+  ptr, byte-offset flag-array re-materialize, and the `arg0`/state $s1/$s2 swap fixed via ARRAY-INDEX
+  `D_801050BC[k]` not an explicit `s8*` ptr (`global.c:594-601` ref-count steals $s1). Residual = 3
+  clusters of pure allocno coloring below the 0.97 gate; source levers exhausted, only a boosted permuter
+  accepting the sub-gate start remains. `docs/wip/func_8006CE88.near-match.md`; 2 levers folded into
+  `docs/hazards.md#base-register-vs-displacement`). **Deferred (same wall combo, not attempted):** the
+  residual mid-logic tail `func_8006D4EC`/`DFF0` (base-register + search-loop + `bnel` combo,
+  S224-pattern-confirmed). **S240 wall-prediction CORRECTION:** `func_8006AD1C` was deferred here
   as a `0x92492493` `#local-alloc-qty-permutation` wall (func_80098CD8 kin) — WRONG: it BANKED first-build
   S240 as a plain signed `% 14` table-index leaf (`*(u16*)&D_800C4026[(arg0%14)*4]` byte-offset-cast u16
   load; the 0x92492493 magic is just the /14 div, no permutation). A deferred-wall prediction from a magic

@@ -1512,6 +1512,10 @@ def _classify_asm_mirror_hazards(off, fns, upstream_index):
             hz.append(Hazard.intrinsic_likely(f"{kmc_tu}(kmc-as)"))
     return hz
 
+def _wip_near_match_path(fn):
+    """Path to a function's carried-wall characterization doc (docs/wip/<fn>.near-match.md)."""
+    return os.path.join(ROOT, "docs", "wip", f"{fn}.near-match.md")
+
 def classify_subseg(off, typ, path, size, upstream_index):
     """Classify one subseg into (kind, fns, hazards), or None to skip it.
 
@@ -1566,7 +1570,16 @@ def classify_subseg(off, typ, path, size, upstream_index):
         fns = re.findall(r"INCLUDE_ASM\([^,]+,\s*([A-Za-z_]\w+)", text)
         if not fns:  # 0 stubs => already an md5-candidate
             return None
-        return "c-stub", fns, [Hazard.remaining(len(fns))]
+        hz = [Hazard.remaining(len(fns))]
+        # carried-wall detector (S241): a remaining leaf with a docs/wip/<fn>.near-match.md file is an
+        # already-characterized wall a prior sprint carried. The smallest-first sort + tell-filters
+        # don't see it, so it re-surfaces as "fresh" (S239/S240/S241 DoR-miss). Surface the wip'd
+        # leaves here so the plan gate labels them crack-attempts, not fresh leaves. Cheap first cut =
+        # wip-file existence (a BACKLOG-carry cross-ref is the fuller follow-up). Advisory only.
+        walled = [fn for fn in fns if os.path.exists(_wip_near_match_path(fn))]
+        if walled:
+            hz.append(Hazard.carried_wall(walled))
+        return "c-stub", fns, hz
     return None
 
 def _append_recover_hazards(off, primary, up_path, up_lib, hazards):
