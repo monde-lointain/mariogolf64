@@ -434,6 +434,8 @@ segments:
       - [0xAC890, .rodata, main/func_8006EA90]
       - [0xAC8C0, rodata]
       - [0xACAD0, rodata]
+      - [0xACBE0, .rodata, main/func_80071370]
+      - [0xACC48, rodata]
       - [0xACD00, rodata]
       - [0xAD3B0, .rodata, libmus/player]
       - [0xAD450, .rodata, libmus/player_commands]

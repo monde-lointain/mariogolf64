@@ -122,7 +122,81 @@ INCLUDE_ASM("asm/nonmatchings/main/func_80071370", func_80072A08);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80071370", func_800734F0);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80071370", func_800738BC);
+extern u8 D_800C4390[];
+
+/* Font-string pixel-width accumulator. Per glyph (remapping lowercase a-z into
+ * the 0xE1-0xFA custom range), width is added unless the glyph is a combining
+ * mark ([0x9E,0x9F] or [0xDE,0xDF]). a1==0xC selects the proportional path
+ * (fixed 0xC, or per-glyph D_800C4390[c] when flags&2 is set); otherwise a1 is
+ * the fixed per-glyph advance. The classification uses separate slti tests
+ * feeding one shared add block: a boolean `if` folds the 0xE0/0xDE pair into a
+ * range test (fold-const.c fold_range_test), and an else-if chain fails to
+ * cross-jump loop1's add into a single block, so goto-to-a-shared-label is the
+ * only structure that matches (reorg delay-slot-duplicates loop2's tiny add).
+ */
+s32 func_800738BC(u8* str, s32 a1, s32 flags) {
+  s32 width;
+  s32 c;
+
+  width = 0;
+  if (a1 == 0xC) {
+    flags &= 2;
+    if (*str != 0) {
+      do {
+        c = *str;
+        if ((u32)(c - 0x61) < 0x1A) {
+          c += 0x80;
+        }
+        if (c < 0x9E) {
+          goto add1;
+        }
+        if (c < 0xA0) {
+          goto next1;
+        }
+        if (c >= 0xE0) {
+          goto add1;
+        }
+        if (c >= 0xDE) {
+          goto next1;
+        }
+      add1:
+        if (flags != 0) {
+          width += D_800C4390[c];
+        } else {
+          width += 0xC;
+        }
+      next1:
+        str++;
+      } while (*str != 0);
+    }
+  } else {
+    if (*str != 0) {
+      do {
+        c = *str;
+        if ((u32)(c - 0x61) < 0x1A) {
+          c += 0x80;
+        }
+        if (c < 0x9E) {
+          goto add2;
+        }
+        if (c < 0xA0) {
+          goto next2;
+        }
+        if (c >= 0xE0) {
+          goto add2;
+        }
+        if (c >= 0xDE) {
+          goto next2;
+        }
+      add2:
+        width += a1;
+      next2:
+        str++;
+      } while (*str != 0);
+    }
+  }
+  return width;
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80071370", func_8007399C);
 
@@ -194,7 +268,26 @@ INCLUDE_ASM("asm/nonmatchings/main/func_80071370", func_8007580C);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80071370", func_80075E48);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80071370", func_800760CC);
+s32 func_800760CC(s32 arg0) {
+  u8 c = arg0 & 0xFF;
+
+  switch (c) {
+    case ':':
+      return 0xB0;
+    case '*':
+      return 0;
+    case '+':
+      return 0xC0;
+    case '-':
+      return 0xD0;
+    case '#':
+      return 0xE0;
+    case '!':
+      return 0xF0;
+    default:
+      return (c - 0x2F) << 4;
+  }
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80071370", func_80076138);
 
