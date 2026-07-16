@@ -3076,6 +3076,27 @@ fn; that adds `-DF3DEX_GBI_2` so the gDP macros expand to the F3DEX2 `0xE2..`/`0
 value under either ucode), so a raw-word seed needs no profile — only macro seeds do. `setup-permuter.sh
 --main` / `permuter_settings_main.toml` carry the same define for the permuter (S190).
 
+**A dynamic DL emitter needs the `gDP*(gfx++)` MACRO form, NOT raw `gfx[i].words` indexing (S239).**
+For a builder that emits N commands into a running cursor, `gDPXxx(gfx++, …)` per command makes GCC
+materialize N DISTINCT `Gfx*` pointers (each `gfx++` post-increment is a separate SSA value:
+`move a3,v0; addiu v0,8; move t0,v0; …` then `sw …,0(a3)`/`sw …,0(t0)`), which is what the ROM does.
+Writing the same commands as `gfx[i].words.w0 = …` (array index off one base) instead makes GCC keep a
+SINGLE base register + displacement (`sw …,0(v0)`/`sw …,8(v0)`/`sw …,0x14(v0)`) — a pervasive base-reg
+divergence that shifts the whole fn (and, being a length/layout change, cascades a full-ROM SHA break, not
+a localized near-miss). The parameterized-word case still works through the macro: fold a dynamic subfield
+into the macro's own arg (`gDPSetTile(gfx++, …, /*tmem=*/ 256 | ((pal & 0xF) << 4), …)` reproduces the
+ROM's `andi;sll;or 0xF5000100`; `gDPLoadTLUTCmd(gfx++, G_TX_LOADTILE, count)` sets the `count<<14` w1
+field). S239 banked `func_8006A4A0`/`func_8006A548` (6-cmd TLUT-load: SetTImg/TileSync/SetTile/LoadSync/
+LoadTLUT/PipeSync) once switched from the raw-index seed to the macro form.
+
+**Subagent `diff.py` CRACK ≠ bank until the orchestrator's full-make ROM-SHA-1 confirms (S239).** A
+fan-out subagent's per-fn `tools/asm-differ/diff.py` can read a STALE isolated object and report byte-clean
+while the real in-tree build diverges (S239 `func_8006A4A0`: subagent's raw-index body passed its diff.py,
+but the orchestrator full-make was a 22M-byte layout break). The full-make ROM SHA-1 is the sole oracle;
+when a multi-fn integration fails, isolate ONE fn at a time (revert all, re-add singly + full-make) rather
+than trusting the per-fn diffs. Kin to [#assembler-differences--byte-cmp-spot-check] (the per-fn signal is
+advisory; the ROM is authoritative).
+
 **Procedure (static dlists in rodata):** run `~/development/repos/n64-tools/src/gfxdis-rom/gfxdis`
 (build once with `make -C ~/development/repos/n64-tools`). `gfxdis` only handles static dlists.
 
@@ -6708,6 +6729,22 @@ li v0,CONST`) it is a genuine wall: **the whole enclosing structure can match** 
 ONLY the const-select case body diverging. Also `(x>0)?x:0` clamp: GCC always picks the `~x>>31` sign-
 trick (`nor/sra/and`), never the ROM's `slt/negu/and` — `func_8005F30C` byte-exact but for that idiom.
 Carry these; the permuter does not flip if-conversion (it permutes regs/scheduling, not branch-vs-arith).
+
+**Extends to a single-bit / sign deciding term — `(x & bit) ? 1 : 0` folds to `lhu;srl` (S239 wall,
+`func_8006C8CC`).** A predicate whose TERMINAL condition returns bool off a single-bit mask or a sign
+(`if (obj->flags & 0x8000) return 1; return 0;`) collapses (via jump-threading of `if(c)return 1;return 0`
+→ `return (c!=0)`) into GCC's `do_store_flag` single-bit shortcut: `lhu v0,off(a0); srl v0,v0,0xf` (1
+instr, value known narrow from the `lhu`). The ROM keeps the BRANCH form `andi v0,v0,0x8000; bnez
+v0,exit; li v0,1(delay); move v0,zero` (4 instrs, `do_jump` on BIT_AND_EXPR) — 3 instrs LONGER, so the
+build is SHORTER and cascades a flowing-bss / whole-file SHA shift (not a localized near-miss). Exhausted
+10 source forms (flat early-return / nested / accumulator / two-BB explicit-else / OR-chain `if(A||B||
+(C&&D))` / split `if(C&&D)` / `==0x8000` mask-eq / goto / direct-bool `return A||B||(C&&D)` / `s32<0`
+big-endian high-half sign) — ALL fold, because whenever the bit-test is the LAST term deciding a 0/1
+return, GCC value-ifies it (store_flag) instead of jumping. Only NON-terminal conditions (with more code
+after) stay branches. Source-invariant like the `(x==K)?const:const` case above; permuter denied (length
+deficit, not a reg permutation). ESCALATION = compiler-source dive (`expr.c do_store_flag` single-bit
+shortcut vs `jump.c do_jump` BIT_AND_EXPR path — find what keeps the ROM's build on the `do_jump` branch
+for a terminal single-bit test). `docs/wip/func_8006C8CC.near-match.md`.
 
 ## delay-slot-fill of a null-guard `beqz` (body-first insn safe-on-the-taken-path)
 

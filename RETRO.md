@@ -25,6 +25,17 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 239 — smallest-first classical bank slice over func_8006A2C0.c fresh leaves — 2026-07-16
+- Increment: 0 files banked / **+2 functions matched** (`func_8006A2C0.c` 25 stubs → 23; NOT md5-candidate).
+- Quality: 0 stuck-far / 0 permuter / **1 carried** (`func_8006C8CC`) / 0 re-opened.
+- Seed: committed 3pt; banked 0pt (per-file all-or-nothing, file partial); realized 5, residual +2 (+1 carry, +1 novel bank-gotcha); regime classical/mixed.
+- What helped: DL-emitter twins `func_8006A4A0`/`func_8006A548` banked via stock `gDP*(gfx++)` macros — a 6-cmd parameterized TLUT-load (SetTImg/TileSync/SetTile/LoadSync/LoadTLUT/PipeSync). The macro form makes GCC materialize N distinct `Gfx*` pointers (matching the ROM), where raw `gfx[i].words` indexing keeps a single base+displacement (diverges). Parameterized subfields fold into the macro arg (`gDPSetTile(…, 256 | ((pal&0xF)<<4), …)`; `gDPLoadTLUTCmd(…, count)`). Confirms the S226 low-FP-DL-vein-is-tractable lesson. S224's "prefer fresh pack" caution did NOT fire — these leaves were genuinely un-mined (S224 stopped at 1 bank + 3 wall-chars), not the bnel/base-reg wall tail.
+- Friction: (a) the 19i "trivial predicate" `func_8006C8CC` was the sprint's WALL, not the 42i DL fns — `(flag&0x8000)?1:0` folds to `lhu;srl` (do_store_flag single-bit) where the ROM keeps `andi;bnez`; 10 source forms exhausted, terminal, permuter-denied (extends the S231 const-select wall to a single-bit/sign deciding term). Small size ≠ tractable on a wall-sensitive pack. (b) Subagent dl_A4A0 reported byte-clean via per-fn diff.py, but that read a STALE object — the orchestrator full-make was a 22M-byte layout break; isolated one-fn-at-a-time to find the raw-index-vs-macro divergence, rewrote to the macro form.
+- Applied: 4 of 4 — #1 memory `subagent-diff-crack-not-a-bank` + hazards.md `#display-lists` note (per-fn diff.py CRACK not a bank until orchestrator full-make); #2 hazards.md `#display-lists` DL `gDP*(gfx++)` macro-vs-raw-index note; #3 memory `store-flag-single-bit-terminal-wall` + hazards.md `#value-select` single-bit/sign extension; #4 size≠tractable retro note (this line + BACKLOG).
+- Carry-over: `func_8006C8CC` (`docs/wip/func_8006C8CC.near-match.md`, store-flag-single-bit terminal wall). `func_8006A2C0.c` retains 23 stubs (the S224 wall-class mid-logic tail + the fresh leaves func_8006D164/A5E4/A84C not yet attempted).
+
+---
+
 ## Sprint 238 — crack/decomp fan-out over the func_80071370.c 748xx triplet — 2026-07-16
 - Increment: 0 files banked / **+3 functions matched** (`func_80071370.c` 26 stubs → 23; NOT md5-candidate).
 - Quality: 0 stuck-far / 0 permuter / 0 carried / 0 re-opened.

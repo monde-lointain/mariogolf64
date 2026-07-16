@@ -916,6 +916,22 @@ Three honest caveats:
   (S234-S238): crack-attempt/decomp slices banked 3+2+3+2+3 across 5 main-segment sprints. Retro applied
   3 of 3 (#1 new memory `sched-luid-order-inline-arg-subexpr`; #2 caller-of-banked-helper ranker
   follow-up → BACKLOG; #3 known-playbook-tail scorecard retro note).
+  S239: smallest-first classical bank slice over 3 fresh cheap leaves in `src/main/func_8006A2C0.c`
+  (S224 pack, 25 stubs) — NOT a crack fan-out; the leaves were un-mined (S224 stopped at 1 bank + 3
+  wall-chars). **2 cracks / 1 carry.** DL-emitter twins `func_8006A4A0`/`func_8006A548` banked (6-cmd
+  parameterized TLUT-load: SetTImg/TileSync/SetTile/LoadSync/LoadTLUT/PipeSync) via stock `gDP*(gfx++)`
+  macros. The 19i "trivial predicate" `func_8006C8CC` CARRIED = terminal store-flag-single-bit wall
+  (`(flag&0x8000)?1:0` folds `lhu;srl` where ROM keeps `andi;bnez`; 10 source forms exhausted; extends
+  S231 const-select). Banked **0pt** (`func_8006A2C0.c` 25→23 stubs, NOT md5-candidate), **+2 matched**,
+  quality **0 stuck / 0 permuter / 1 carried / 0 re-opened**. Seed committed **3** (classical
+  mixed-partial continuation); realized **5** (+1 carry, +1 novel bank-gotcha: subagent stale-diff.py
+  false-match forced one-fn-at-a-time integration + A4A0 raw→macro rewrite), residual **+2**. LESSON:
+  (a) small leaf size does NOT imply tractable on a wall-sensitive pack — the 19i predicate was the wall,
+  the 42i DL fns banked; (b) a subagent per-fn diff.py CRACK is not a bank until orchestrator full-make
+  confirms (A4A0 raw-index body passed diff.py, was a 22M-byte layout break). Rolling-5 (S235-S239):
+  main-segment slices banked 2+3+2+3+2. Retro applied 4 of 4 (#1 memory `subagent-diff-crack-not-a-bank`
+  + hazards #display-lists; #2 DL `gDP*(gfx++)` macro hazard; #3 memory `store-flag-single-bit-terminal-
+  wall` + hazards #value-select; #4 size≠tractable retro note).
 - **Regime:** `mirror` is a depleting minority (~22 % of ranked candidates: 56 mirror vs 194
   classical; 18 warm / 38 cold). The warm clean-singleton mirror pool is now **mined out** (S11
   plan gate: every top mirror candidate carries a blocking hazard), pushing the project onto the
