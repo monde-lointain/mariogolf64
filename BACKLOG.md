@@ -200,6 +200,16 @@ fan-out (4 documented walls → 2 cracked, 1 re-framed, 1 terminal):
    `D_` array access at 0-expected-bank — price it at ~0.5 (crack-attemptable, needs a fan-out/lever, not
    first-build) instead of the S234 wall verdict. Single-access members stay +1 (first-build). Net: the
    access-multiplicity tell predicts FIRST-BUILD vs NEEDS-LEVER, not BANK vs WALL.
+   - **4th confirmation (S236): crack-attempt over 3 carried walls in `func_80071370.c` = 3/3.** All
+     three (`func_800718C4` #local-alloc-qty-permutation, `func_8007512C` #base-vs-disp + value-imm,
+     `func_80071924` #base-vs-disp) banked FIRST-candidate via the byte-offset-cast / do-while-giv /
+     pre-temp-defer-rowadd levers. So the `crackable?` hint expected-bank for the `#base-vs-displacement`
+     and `#local-alloc-qty-permutation` anchors is HIGHER than ~0.5 (S232 3/3, S235 2/4 mixed, S236 3/3);
+     tune toward ~0.7 for those two anchors specifically. IMPORTANT caveat: `func_80071924`'s carried
+     `#base-vs-displacement %lo-fold` class was an outright MISDIAGNOSIS — the row-pointer form already
+     materialized the base + stored `0(reg)`; real residual = a single expr.c binop expand-ORDER swap.
+     So the anchor→crackable map is a HINT only; re-derive the actual residual from objdump before
+     trusting a carry's stated class (a wall verdict, even class-tagged, is a hypothesis).
 
 **Re-confirmed + reframed (S204, PO-accepted at retro, QUEUED to the off-cadence golden-gated
 `pick_target.py` branch):** `func_8003E004` (c-stub, priced 13) is another under-priced FP/6-callee-double

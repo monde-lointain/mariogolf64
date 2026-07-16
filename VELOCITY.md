@@ -859,6 +859,27 @@ Three honest caveats:
   lever + loop-crack recipe → hazards.md #base-register-vs-displacement; #2 cse.c:5589 fold_rtx terminal
   sub-class → same section; #3 carried-wall crack-attempt-slice pricing + access-multiplicity-deweight
   correction → BACKLOG; #4 subagent hand-off contract → agent-workflow.md fan-out recipe).
+
+  S236: CRACK-ATTEMPT compiler-source fan-out over 3 documented walls in `func_80071370.c`
+  (gcc-2.7.2 + binutils-2.6, one subagent each; PO chose it over the plateaued smallest-first
+  `func_8006A2C0.c` on the carried-wall crack-slice rationale). **3 of 3 prior "no-source-lever"
+  verdicts REFUTED** (S232 rate, beat the planned S233-sort hedge — this tail was all
+  init-loop/base-vs-disp = the S235-lever class). Banked **+3**, all FIRST-candidate: `func_800718C4`
+  (#local-alloc-qty-permutation 12-elem 0x2C init loop) + `func_8007512C` (#base-vs-disp + value-imm
+  300-elem 0x48 init loop) both cracked on the PURE byte-offset form under do-while (variable bound+val
+  + decl-order are the allocno flippers, no `*p++` ptr giv needed; `s8*` keeps `li -1` vs u8* `0xff`);
+  `func_80071924` (#base-vs-disp %lo-fold, an outright MISDIAGNOSIS — real cause expr.c binop expand
+  ORDER) via pre-temp-defer-rowadd + `u8*` base cast. Banked **0pt** (`func_80071370.c` 31→28 stubs,
+  NOT md5-candidate), **+3 matched**, quality **0 stuck / 0 permuter / 0 carried / 0 re-opened**. Seed
+  committed **5** (crack-attempt slice); realized **5** (no +1 trigger fired: all first-candidate, 0
+  permuter, 0 carry), residual **0**. LESSON (S232/S233/S235 4th confirmation): a class-tagged prior
+  wall verdict is a HYPOTHESIS — `func_80071924`'s "#base-vs-displacement %lo-fold" was flat WRONG;
+  re-derive the residual from objdump before trusting a carry's stated class. Rolling-5 (S232-S236):
+  cracked walls 3+1(+re-frames)+2+3 across 4 crack-attempt sprints — the fan-out-over-documented-walls
+  slice is now the default main-segment play once cheap-leaf veins are mined out. Retro applied 4 of 4
+  (#1 byte-offset-cast pure-form refine + variable bound/val flippers → memory
+  `byte-offset-cast-defeats-base-ptr-cse`; #2 verified subagent-written `pre-temp-defer-rowadd-lever.md`;
+  #3 s8*-vs-u8* value-imm lever → same memory; #4 carried-wall crack-slice 4th confirmation → BACKLOG).
 - **Regime:** `mirror` is a depleting minority (~22 % of ranked candidates: 56 mirror vs 194
   classical; 18 warm / 38 cold). The warm clean-singleton mirror pool is now **mined out** (S11
   plan gate: every top mirror candidate carries a blocking hazard), pushing the project onto the

@@ -25,6 +25,15 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 236 — crack-attempt fan-out over 3 documented walls in func_80071370.c — 2026-07-16
+- Increment: 0 files banked / **+3 functions matched** (`func_80071370.c` 31 stubs → 28; NOT md5-candidate).
+- Quality: 0 stuck-far / 0 permuter / 0 carried / 0 re-opened.
+- Seed: committed 5pt; banked 0pt (per-file all-or-nothing, file partial); realized 5, residual 0 (all first-candidate cracks, no +1 trigger); regime classical (crack-attempt slice).
+- What helped: crack-attempt fan-out (gcc-2.7.2 + binutils-2.6, 3 parallel subagents, isolated `decomp_loop --profile main`) = **3 of 3** prior "no-source-lever" verdicts REFUTED (S232 rate, beat the planned S233-sort hedge). `func_800718C4` (#local-alloc-qty-permutation) + `func_8007512C` (#base-vs-disp + value-imm) both cracked FIRST-candidate on the PURE byte-offset form under do-while — variable bound+val + decl-order are the allocno flippers (no `*p++` ptr giv needed). `func_8007512C` value-imm: `s8*` keeps `li -1` (u8* truncates to 0xff). `func_80071924` (#base-vs-disp %lo-fold) cracked via pre-temp-defer-rowadd + `u8*` base cast.
+- Friction: the 3 walls were all sub-tail of a plateaued c-stub file (had to override smallest-first `func_8006A2C0.c` on the crack-slice rationale). decomp_loop score=200/0.833 on both init-loop cracks was an isolation false-positive (unresolved %hi/%lo reloc rows); the in-tree full-make SHA-1 was the real oracle. A subagent left a stray `t.c.rtl` gcc dump + wrote a memory file mid-sprint (both reconciled at review).
+- Applied: 4 of 4 — #1 byte-offset-cast refine (pure form suffices for single-store init loops; variable bound+val flippers) → memory `byte-offset-cast-defeats-base-ptr-cse`; #2 verified + kept subagent-written `pre-temp-defer-rowadd-lever.md` (already cross-linked, in MEMORY.md); #3 s8*-vs-u8* value-imm lever → same memory + MEMORY.md; #4 carried-wall crack-slice 4th confirmation (3/3; tune the `#base-vs-disp`/`#local-alloc-qty-perm` anchors to ~0.7, but re-derive residual from objdump — one carry's class was a misdiagnosis) → BACKLOG.
+- Carry-over: none new. `func_80071370.c` retains 28 stubs (mid-logic/DL tail). LESSON (S232/S233/S235 4th time): a class-tagged prior wall verdict is a HYPOTHESIS — `func_80071924`'s "#base-vs-displacement %lo-fold" was an outright MISDIAGNOSIS (real cause = expr.c binop expand order). Re-derive the residual before trusting the carry's stated class.
+
 ## Sprint 235 — crack-attempt compiler-source fan-out over 4 documented main-segment walls — 2026-07-16
 - Increment: 0 files banked / **+2 functions matched** (`func_8006F1A0.c` 10 stubs → 8; NOT md5-candidate) + 2 walls retired-with-citation.
 - Quality: 0 stuck-far / 2 permuter / 2 carried / 0 re-opened.
