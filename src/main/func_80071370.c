@@ -25,17 +25,23 @@ INCLUDE_ASM("asm/nonmatchings/main/func_80071370", func_80071608);
 
 extern s32 D_8012F524;
 
-/* func_800718C4: inits field 0x14 (D_8012F524) of all 12 elements of the
- * 0x2C-stride struct array at D_8012F510 to -1. Structure fully solved:
- *   for (i = 0; i != 12; i++) *(s32*)((u8*)&D_8012F524 + i * 0x2C) = -1;
- * Carried INCLUDE_ASM: #local-alloc-qty-permutation. The counter and the
- * strength-reduced byte-offset giv allocate to v0/v1 OPPOSITE the ROM (ROM
- * counter=v1/off=v0; build counter=v0/off=v1) and the giv-init `move ,zero`
- * schedules before the hoisted `li -1`/`li 0xc` invariants instead of after.
- * 3 source forms (dual-IV explicit off, for(off=0) split, single-IV i*0x2C)
- * all yield the identical v0/v1 swap; no source lever flips local-alloc's
- * allocno order. Documented no-lever class (permuter 0 cracks). */
-INCLUDE_ASM("asm/nonmatchings/main/func_80071370", func_800718C4);
+/* Inits field 0x14 (D_8012F524) of all 12 elements of the 0x2C-stride struct
+ * array at D_8012F510 to -1. The variable bound/val + do-while + in-loop
+ * byte-offset giv are load-bearing for the v0/v1 allocno order (S236). */
+void func_800718C4(void) {
+  s32 i;
+  s32 bound;
+  s32 val;
+
+  i = 0;
+  val = -1;
+  bound = 12;
+  do {
+    s32 off = i * 0x2C;
+    *(s32*)((u8*)&D_8012F524 + off) = val;
+    i++;
+  } while (i != bound);
+}
 
 extern u8 D_8010CFA8;
 extern u8 D_8010CFA9;
@@ -47,16 +53,18 @@ void func_800718F4(u8 r, u8 g, u8 b, s32 idx) {
   (&D_8010CFAA)[idx * 3] = b;
 }
 
-/* func_80071924: 2D setter D_8012F52C[idx][j] = val (field 0x1C of the 0x2C
- * struct array at D_8012F510, viewed as s32[][11]). Structure fully solved:
- *   *(s32*)((u8*)&D_8012F52C + idx * 0x2C + j * 4) = val;
- * Carried INCLUDE_ASM: #base-register-vs-displacement. ROM materializes the
- * base (lui + addiu = full &D_8012F52C) into a reg and stores 0(reg); gcc-2.7.2
- * always FOLDS the constant %lo into the sw displacement (sw val,-0xad4(at)),
- * one instr shorter. 3 source forms (flat ptr+2 index, s32[][11] 2D array,
- * explicit row-pointer intermediate) all fold identically; no source lever
- * blocks the %lo fold. Permuter does not flip this class. */
-INCLUDE_ASM("asm/nonmatchings/main/func_80071370", func_80071924);
+extern s32 D_8012F52C;
+
+/* 2D setter D_8012F52C[idx][j] = val (field 0x1C of the 0x2C struct array at
+ * D_8012F510, viewed as s32[][11]). Pre-computing the row byte-offset and the
+ * u8* base into separate temps slips j*4 ahead of the pointer-forming add
+ * (expr.c binop expands op0 fully first), and the u8* cast forces the full base
+ * materialize instead of the %lo fold (S236). */
+void func_80071924(s32 val, s32 idx, s32 j) {
+  s32 io = idx * 0x2C;
+  u8* b = (u8*)&D_8012F52C;
+  *(s32*)(b + io + j * 4) = val;
+}
 
 extern u8 D_801321B0;
 extern u8 D_801321C3;
@@ -167,17 +175,16 @@ INCLUDE_ASM("asm/nonmatchings/main/func_80071370", func_80075010);
 
 extern u8 D_800FF573;
 
-/* func_8007512C: inits byte field 0x?? (D_800FF573) of all 300 elements of a
- * 0x48-stride array to -1. Structure fully solved:
- *   for (i = 0; i != 300; i++) *(s8*)((u8*)&D_800FF573 + i * 0x48) = -1;
- * Carried INCLUDE_ASM: #base-register-vs-displacement + a value-immediate diff.
- * (1) ROM re-materializes lui %hi(D_800FF573) INSIDE the loop each iter with a
- * running byte-offset and folds %lo into the sb; gcc-2.7.2 strength-reduces to
- * a hoisted running pointer (base materialized once above the loop). (2) ROM
- * `li a1,-1` for the stored byte; gcc emits `li a1,0xff` (truncates the -1
- * constant to the byte value at compile time) regardless of s8/u8 pointer type.
- * Both are no-source-lever gcc codegen choices; permuter does not flip them. */
-INCLUDE_ASM("asm/nonmatchings/main/func_80071370", func_8007512C);
+/* Inits byte field (D_800FF573) of all 300 elements of a 0x48-stride array to
+ * -1. The s8* store keeps the QImode const at -1 (li a1,-1); the in-loop
+ * byte-offset giv under do-while rematerializes %hi each iter (S236). */
+void func_8007512C(void) {
+  s32 i = 0;
+  do {
+    s32 off = i * 0x48;
+    *(s8*)((u8*)&D_800FF573 + off) = -1;
+  } while (++i != 300);
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80071370", func_8007515C);
 
