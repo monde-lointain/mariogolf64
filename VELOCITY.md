@@ -837,6 +837,28 @@ Three honest caveats:
   Retro applied 3 of 3 (#1 access-multiplicity ranker deweight → BACKLOG; #2 single-use-addr-vs-
   multi-use-value lever → hazards.md #base-register-vs-displacement; #3 llcvt false-positive 5th
   confirmation + func_8006F1A0/func_80080220 non-lib-callee deweight → BACKLOG).
+  S235: CRACK-ATTEMPT compiler-source fan-out over 4 documented main-segment near-match walls
+  (gcc-2.7.2 + binutils-2.6, one subagent each; PO chose it over a fresh DL/FP pack since the segment's
+  cheap-leaf veins are mined out). **3 of 4 prior "no-source-lever" verdicts REFUTED.** Banked **+2**:
+  `func_8006F1A0` (S234 base-vs-disp RMW, score 220→0 via the `(u8*)`+byte-offset cast defeating the
+  address-CSE) + `func_8006F24C` (S234 loop-SR, in-tree byte-0 via byte-offset shared giv + bare-base
+  DEST_REG ptr giv + do-while; the isolated 400 was a `j`-reloc placement artifact). 2 walls
+  retired-with-citation: `func_8003E004` (S204 move_movables DFmode-hoist SOLVED by 3 levers, 17500→5380;
+  residual = global.c:587 live-length RA tie, permuter-stubborn 158k iters/0 breaks — NOT a compiler
+  wall) + `func_8005E380` (TERMINAL, cse.c:5589-5666 `fold_rtx` from_plus unconditional canonicalization,
+  no faithful-C/`-f` escape, gas exonerated). Banked **0pt** (`func_8006F1A0.c` 10→8 stubs, NOT
+  md5-candidate), **+2 matched**, quality **0 stuck / 2 permuter / 2 carried / 0 re-opened**. Seed
+  committed **3** (crack-attempt slice); realized ~**5** (seed 3 +1 permuter/fan-out escalation +1 two
+  carries), residual **+2**. LESSON (S232/S233 3rd confirmation): **a prior in-file wall verdict — even
+  one with a `file:line` pass citation — is a HYPOTHESIS, not terminal.** F1A0 ("S210-class, permuter
+  base 220 no crack") and F24C ("indexed-vs-pointer, no source lever") BOTH cracked; E004's
+  "not-blind-retryable move_movables wall" was mis-classed (the hoist WAS source-solvable, the residual
+  is a different pass). Only 5E380's unconditional cse.c fold was genuinely terminal. So when a segment's
+  cheap-leaf veins are mined out, a crack-attempt fan-out over the accumulated documented walls is a
+  BANK slice (2/4 here, 3/3 S232), not just characterization. Retro applied 4 of 4 (#1 byte-offset-cast
+  lever + loop-crack recipe → hazards.md #base-register-vs-displacement; #2 cse.c:5589 fold_rtx terminal
+  sub-class → same section; #3 carried-wall crack-attempt-slice pricing + access-multiplicity-deweight
+  correction → BACKLOG; #4 subagent hand-off contract → agent-workflow.md fan-out recipe).
 - **Regime:** `mirror` is a depleting minority (~22 % of ranked candidates: 56 mirror vs 194
   classical; 18 warm / 38 cold). The warm clean-singleton mirror pool is now **mined out** (S11
   plan gate: every top mirror candidate carries a blocking hazard), pushing the project onto the

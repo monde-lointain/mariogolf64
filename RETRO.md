@@ -25,6 +25,15 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 235 — crack-attempt compiler-source fan-out over 4 documented main-segment walls — 2026-07-16
+- Increment: 0 files banked / **+2 functions matched** (`func_8006F1A0.c` 10 stubs → 8; NOT md5-candidate) + 2 walls retired-with-citation.
+- Quality: 0 stuck-far / 2 permuter / 2 carried / 0 re-opened.
+- Seed: committed 3pt; banked 0pt (per-file all-or-nothing, no md5-candidate); realized ~5, residual +2; regime classical/mixed (crack-attempt slice).
+- What helped: the crack-attempt fan-out (gcc-2.7.2 + binutils-2.6, 4 parallel subagents, isolated `make nonmatching-func MAIN=1`) — 3 of 4 prior "no-source-lever" verdicts REFUTED. Byte-offset-cast lever (`*(s32*)((u8*)SYM+off)`) cracked `func_8006F1A0` (base-vs-disp RMW, 220→0); byte-offset shared giv + bare-base DEST_REG ptr giv + do-while cracked `func_8006F24C` (in-tree byte-0). E004's S204 move_movables hoist SOLVED by 3 deterministic levers (dual-set pseudo blocks the hoist, call-order, prologue-share). 5E380 root-caused to a precise terminal citation (cse.c:5589 fold_rtx from_plus).
+- Friction: 3 of 4 subagents went idle without sending their final verdict (only an idle_notification), costing ~3 orchestrator re-pings each; F24C sent a duplicate final after already integrated. E004's residual (global.c:587 live-length RA tie) is permuter-stubborn (158k iters, 0 breaks). The 400-isolated-score `j`-reloc artifact needed the in-tree gate to confirm byte-0.
+- Applied: 4 of 4 — #1 byte-offset-cast lever + stride-array loop-crack recipe → `hazards.md#base-register-vs-displacement`; #2 cse.c:5589-5666 fold_rtx from_plus terminal sub-class → same section; #3 carried-wall crack-attempt-slice pricing + the S234 access-multiplicity "0-expected-bank → ~0.5 needs-lever" correction → BACKLOG; #4 subagent hand-off contract (send final verdict before idle) → agent-workflow.md fan-out recipe.
+- Carry-over: `func_8003E004` (global.c:587 RA live-length tie, re-attempt with wider/longer permuter + seed diversity), `func_8005E380` (terminal cse.c:5589 fold, not re-grindable), + the 6 un-attempted `func_8006F1A0.c` tail stubs (jal-dispatch/regalloc-heavy). LESSON (S232/S233 3rd time): a pass-cited prior wall verdict is a HYPOTHESIS; when cheap-leaf veins are mined out, a crack-attempt fan-out over documented walls is a BANK slice, not just characterization.
+
 ## Sprint 234 — open fresh func_8006F1A0.c (main stat/score pack); access-multiplicity sorts the cheap-leaf vein — 2026-07-14
 - Increment: 0 files banked / **+7 functions matched** (`func_8006F1A0.c` 17 stubs → 10; NOT md5-candidate).
 - Quality: 0 stuck-far / 0 permuter / 2 carried / 0 re-opened

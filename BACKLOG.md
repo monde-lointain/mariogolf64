@@ -180,6 +180,27 @@ llcvt mirror route via the non-lib-`func_`-callee tell (they call `nuCont*`/`os*
 reinforces the tracked non-lib-callee coddog-deweight follow-up (kin to S229 contquery / S230
 nucontgbpakmgr / S231 llcvt structural false-positives).
 
+**Carried-wall route = a crack-attempt BANK slice, and the S234 access-multiplicity deweight is
+REFUTED (S235).** Two corrections to the two follow-ups above, from the S235 compiler-source crack-attempt
+fan-out (4 documented walls → 2 cracked, 1 re-framed, 1 terminal):
+1. **The `carried-wall:<fn>` tag (S232, above) must offer a labeled crack-attempt-slice pick, not just
+   deweight.** When a segment's cheap-leaf veins are mined out and the smallest remaining leaves are all
+   carried near-match walls, the plan gate should route them into a compiler-source fan-out (one gcc-2.7.2
+   + binutils-2.6 subagent per wall) as the increment. S235 banked 2 of 4 that way; S232 banked 3/3. So
+   `carried-wall:<fn>` should carry a `crackable?` hint: a `#base-register-vs-displacement` fixed-array-slot
+   or `#local-alloc-qty-permutation`/`global.c`-ref-count wall is crack-ATTEMPTABLE (price as a
+   crack-slice, ~0.5 expected-bank each), whereas a `sub=&param->sub` cse.c:5589 fold or a block-LOCAL
+   scheduler-coin (S233) is terminal (price 0). The ranker still cannot READ the wall class from the
+   in-file comment cheaply — a lightweight tell: grep the near-match comment for the hazard anchor it
+   cites and map anchor→crackable.
+2. **The S234 "REPEATED/LOOPED access → 0-expected-bank" access-multiplicity deweight is WRONG.**
+   `func_8006F1A0` (3× same-slot RMW) and `func_8006F24C` (4-iter loop fill) BOTH banked byte-exact in
+   S235 via the byte-offset-cast lever (`*(s32*)((u8*)SYM+off)`) + the stride-array loop-crack recipe
+   (see `docs/hazards.md#base-register-vs-displacement`). So do NOT price repeated/looped fixed-stride
+   `D_` array access at 0-expected-bank — price it at ~0.5 (crack-attemptable, needs a fan-out/lever, not
+   first-build) instead of the S234 wall verdict. Single-access members stay +1 (first-build). Net: the
+   access-multiplicity tell predicts FIRST-BUILD vs NEEDS-LEVER, not BANK vs WALL.
+
 **Re-confirmed + reframed (S204, PO-accepted at retro, QUEUED to the off-cadence golden-gated
 `pick_target.py` branch):** `func_8003E004` (c-stub, priced 13) is another under-priced FP/6-callee-double
 regalloc wall — spec for the detector: on a `none`/c-stub fn, count FP ops + callee-saved-double pressure
@@ -189,6 +210,13 @@ min-instruction floor** — suppress a `coddog-mirror:<file>@<pct>` tag on a fn 
 fns fingerprint-collide; S204 `func_800772B0` writes ZERO to two globals but tagged `settime.c@99.99`
 because osSetTime is also a 2-store leaf). Both are golden-gated (`make test-tools`, then
 `REGEN_GOLDEN=1` for the intended re-price), NOT hand-edited inline at retro.
+**S235 re-frame of `func_8003E004`:** the S204 "move_movables DFmode-hoist wall / not blind-retryable"
+is REFUTED. The hoist + prologue are SOLVED by 3 deterministic C levers (17500→5380, structurally 100%);
+the residual is a `global.c:587 allocno_compare` live-length RA tie (i↔a in $s1/$s2), permuter-reachable
+but empirically stubborn (158k iters, 0 breaks). So the detector should price it as a regalloc-RA-tie
+wall (permuter-territory, needs a materially different permuter strategy), NOT an FP-hoist wall — the FP
+side is now source-controllable. Still carried; re-attempt only with wider/longer permuter + seed
+diversity. In-file comment updated (`src/main/func_8003DFD0.c`).
 **Data point (S206, same off-cadence branch):** `src/main/func_800772B0.c` is a 6-fn all-FP one-tu
 pack (spline/interpolation over vec3f arrays) whose 2 trivial glue fns banked free, 1 FP fn fell
 (`func_800779A8`, a precise local-alloc coloring lever), and 3 FP-math fns are S158 regalloc walls
@@ -3455,23 +3483,33 @@ by `/sprint-plan`:
   `NU_CONT_THREAD_ID=6` vs MG64's 5), and that surfaces only at first build unless reconciled here.
   A near-free retry missing any of these is a half-scoped spike — finish the scope before deferring.
 
-- **(S234 MIXED-PARTIAL — carried; 7 of 17 banked this sprint, file NOT md5-candidate)**
+- **(S234+S235 MIXED-PARTIAL — carried; 9 of 17 banked, file NOT md5-candidate)**
   `src/main/func_8006F1A0.c` (main-segment `[0x4A5A0]`, game stat/score pack over a fixed-stride array
-  + rumble/GBPak glue). Flipped to `c` at the S234 gate. **7 fns C** (all byte-exact first build,
-  asm-first): `func_8006F1F0`/`func_8006F2F4` (`D_` getters), `func_8006F2E8` (setter),
-  `func_8006F1FC` (`D_800FF1E8[i*140]==1` predicate), `func_8006F4F0`/`func_8006F50C`
-  (`nuContRmbForceStop`+`osSyncPrintf` wrappers), `func_8006F228` (`&D_800FF1E9[i*140]` address-return).
-  **2 DOCUMENTED near-match carries (in-file, no-source-lever, do NOT re-grind):** `func_8006F1A0`
-  (`#base-register-vs-displacement` — RMW accumulate+clamp `D_800FF210[i*35]`, 3× same slot → GCC CSEs
-  the base into one pointer, ROM re-materializes `%hi`+index+`%lo`-disp per store) + `func_8006F24C`
-  (`#indexed-vs-pointer-loop-strength-reduction` — 4-iter stride-0x8C init fill → GCC walks 3 base
-  pointers, ROM keeps indexed addressing). Both on the SAME stride-0x8C array family (`D_800FF1E8`/
-  `F210`/`F21C`/`F220`); access-multiplicity is the bank/carry line (single-access banks, repeated/
-  looped walls). **8 stubs remain, un-attempted — the jal-dispatch + stride-array-loop tail** (S224
-  wall-class, expect walls): `func_8006F300` (nuContGBPak init dispatcher, 5 jal + s0-s3 +
+  + rumble/GBPak glue). Flipped to `c` at the S234 gate. **9 fns C:** S234 banked 7 first-build
+  (`func_8006F1F0`/`func_8006F2F4` getters, `func_8006F2E8` setter, `func_8006F1FC` predicate,
+  `func_8006F4F0`/`func_8006F50C` rumble+printf wrappers, `func_8006F228` address-return); **S235 cracked
+  the 2 S234 carries via compiler-source fan-out:** `func_8006F1A0` (`#base-register-vs-displacement`
+  RMW, score 220→0 via the `(u8*)`+byte-offset cast defeating the address-CSE) + `func_8006F24C`
+  (`#indexed-vs-pointer-loop-strength-reduction` REFUTED — in-tree byte-0 via byte-offset shared giv +
+  bare-base DEST_REG ptr giv + do-while; see `docs/hazards.md#base-register-vs-displacement`). **8 stubs
+  remain, un-attempted — the jal-dispatch + stride-array-loop tail** (S224 wall-class, expect walls, but
+  now byte-offset-cast-attemptable): `func_8006F300` (nuContGBPak init dispatcher, 5 jal + s0-s3 +
   switch-cascade + printf), `func_8006F404` (59i jal4), `func_8006F534` (43i jal9), `func_8006F5E0`
   (85i jal6), `func_8006F734`, `func_8006FE88`, `func_800708B4` (198i), `func_80070BCC`. `coddog-mirror:
   llcvt.c` = STRUCTURAL false-positive (game code, not `__ll_*`). ROM green off extracted asm.
+
+- **(S235 TERMINAL/RE-FRAMED carries — 2 single-fn main-segment walls, do NOT re-grind blindly)**
+  `func_8003E004` (`src/main/func_8003DFD0.c`, wind-vertex generator): S204 move_movables DFmode-hoist
+  wall REFUTED — hoist + prologue SOLVED by 3 deterministic levers (17500→5380, structurally 100%);
+  residual = `global.c:587` allocno_compare live-length RA tie (i↔a in $s1/$s2), permuter-reachable but
+  STUBBORN (158k iters, 0 breaks). Re-attempt ONLY with a materially different permuter strategy
+  (wider/longer run, seed diversity to escape the 1255 floor, or a hand-perturbed seed shifting
+  i's/a's live-length); seed at `nonmatchings/func_8003E004/base.c`. NOT an FP-hoist wall anymore.
+  `func_8005E380` (`src/main/func_8005E380.c`, fault-context dump printer): TERMINAL — `cse.c:5589-5666
+  fold_rtx` from_plus unconditionally canonicalizes the `sub=&thread->context` param-base access onto
+  the base param reg + folds the const into the displacement; no faithful-C or `-f` escape, gas
+  exonerated, permuter-unreachable. Wall retired-with-citation; do NOT re-open (in-file comment carries
+  the full verdict).
 
 - **(S233 MIXED-PARTIAL — carried; 2 of 13 banked this sprint, file NOT md5-candidate)**
   `src/main/raycast_terrain.c` (main-segment `[0x142B0]`, collision/geometry/raycast pack). Flipped

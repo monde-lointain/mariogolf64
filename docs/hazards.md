@@ -6485,8 +6485,12 @@ where the constant lives.
   `n+p` vs `p+n`) and from [#struct-array-of-bss-direct-index-vs-base-pointer-var] (a bss RMW base-reg
   choice). Here the base is a full symbol/pointer materialization vs a `%hi`+`%lo`-displacement split.
 
-**Status.** Open near-match class; no reliable source lever found in S210. Escalation is a dedicated
-compiler-source dive (mips.c `print_operand_address` / `simple_memory_operand` + reload's address
+**Status.** Partially cracked. For the **fixed-stride `D_` array slot** shape (S210/S234), the
+byte-offset-cast lever DID land in S235 (see "byte-offset-cast CRACKS…" below) — try it first. The
+`sub=&param->substruct` param-base fold is genuinely terminal (cse.c:5589, below). The original S210
+targets (`func_8005DE88`/`func_8005AF80`/`func_8005CEE0`, MMIO/struct chains) predate the lever and
+should be re-attempted with the byte-offset-cast form before any corpus-mining. Escalation for a residual
+is a compiler-source dive (mips.c `print_operand_address` / `simple_memory_operand` + reload's address
 legitimization) or [#cross-project-matched-corpus-mining]. Related base-register cases where a lever DID
 land: [#mem-in-struct-scheduling-lever], [#offset-0-symbol-re-materialization].
 
@@ -6506,7 +6510,45 @@ touches the array, NOT its size or FP content:
   makes GCC strength-reduce to walking base pointers + an `slti` counter where the ROM keeps indexed
   `%hi`+index+`%lo` addressing + a `bne` counter ([#indexed-vs-pointer-loop-strength-reduction]).
   Both are the no-source-lever wall above; array-access and `s32 *p=`/struct-array intermediates all
-  give the same base CSE. Carry.
+  give the same base CSE. (S234 carried both; **S235 CRACKED both — see below.**)
+
+### byte-offset-cast CRACKS the fixed-array-slot base-CSE (S235, refutes the S234 "Carry" verdict)
+
+**The S234 "no-source-lever" verdict on the multi-use/looped fixed-array shapes is REFUTED.** Both
+`func_8006F1A0` and `func_8006F24C` banked byte-exact in S235 via a compiler-source fan-out. The lever:
+index the array with a BYTE offset and cast per access, `*(s32*)((u8*)SYM + off)` with a shared
+`s32 off = idx*stride` (stride in bytes), NOT element-typed `SYM[idx]`. The char*-byte-offset keeps the
+byte index in a reg and keeps the symbol `%hi/%lo` FOLDED into each mem op (`lui;addu;%lo(sym)(reg)`),
+so GCC re-materializes `%hi/%lo` per access exactly like the ROM; element-typed `SYM[idx]` lets CSE hoist
+`&SYM[idx]` into one full base pointer (`0(reg)`, the near-match). The `(u8*)` cast preserves the existing
+`extern s32 SYM[]` decl (no shared file-scope change). Root: mips.h `GO_IF_LEGITIMATE_ADDRESS`
+(config/mips/mips.h:2318-2349) accepts `reg + symbol` as legit ("CSE is not as effective"); the byte-offset
+form blocks the base hoist. `func_8006F1A0` (3× same-slot RMW+clamp): score 220-perm-wall → 0.
+
+- **Stride-array init LOOP crack (`func_8006F24C`, in-tree byte-0).** The `#indexed-vs-pointer-loop-
+  strength-reduction` framing was ALSO wrong (loop-SR was never the barrier). Recipe: byte-offset shared
+  giv (above) + `i != N` loop cond (→ `bne` counter, not `slti`) + a bare-base running pointer
+  `s32 *p = base + K; *p++ = v` (→ ROM's separate `addiu p,base,K` DEST_REG pointer giv, loop.c:3918-3921
+  DEST_ADDR-vs-DEST_REG choice) + a `do{}while(i!=N)` wrapper (flips regalloc to ROM's + fills the
+  branch-delay slot with the counter reset) + declare `i` and the const temps BEFORE `p` in that order
+  (KMC pre-reload schedule). NB the isolated `decomp_loop` score parks at ~400 for a fn containing an
+  absolute intra-fn `j` (the `R_MIPS_26` addend encodes the isolated `.text+0x0` placement, not the
+  in-tree `+0xAC`) — the in-tree full-make SHA-1 is the oracle, not the isolated score.
+
+**Genuinely TERMINAL sub-class: `sub = &param->substruct` param-base fold (cse.c:5589-5666, S205
+`func_8005E380`).** DISTINCT from the crackable fixed-ARRAY-slot shape above. When a fn takes
+`sub = &param->substruct` at a FIXED CONST offset then reads many `sub->field`, gcc-2.7.2 cse.c:5589-5666
+`fold_rtx` from_plus (the associative constant-combination) UNCONDITIONALLY canonicalizes every access
+onto the base param reg and folds the const into the displacement, eliminating the `sub` intermediate
+(cse.c:5584-5587; `lookup_as_function` cse.c:1224 resolves the inner PLUS). No faithful-C or `-f` escape —
+the only guards are the pre/post-inc power-of-2 and shift-size exceptions, both inapplicable when the
+folded offset stays a valid 16-bit displacement (≤0x1AC). A deterministic algebraic fold, NOT an
+addressing/reload cost tie, so it is genuinely permuter-UNREACHABLE. This is the terminal root of
+[#cse-derived-pointer-base-canonicalization]; gas is exonerated (gcc's own `.s` already emits
+`move s0,a0` + folded `0x11c(s0)`). Any faithful C computes `ctx=thread+const` so CSE always folds; the
+target's opposite choice (keep `thread+0x20` as base `s1`, let `a0` die after the id read) is unreachable
+from faithful C. **So: try the byte-offset-cast lever FIRST on a base-vs-disp near-match; it is terminal
+only when the divergence is the `sub=&param->sub` param-base fold, not a fixed-array-slot access.**
 
 ### Phantom -N in-place addend on a 2D-strength-reduced array ref (S216 `get_tile_attribute`)
 

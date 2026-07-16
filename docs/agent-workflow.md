@@ -72,6 +72,15 @@ resume surface when the middle spans context windows.
     walls (2 `#local-alloc-qty-permutation`, 1 `$v0`-arg ABI on `func_80041E8C`) in one pass. The
     permuter stays post-root-cause; for a `#local-alloc-qty-permutation` verdict it is skipped outright
     (project history = 0 cracks), and corpus-mining is the escalation.
+    - **Subagent hand-off contract (S235): end every crack-subagent prompt with an explicit "send your
+      FINAL verdict to `main` via SendMessage BEFORE going idle — an `idle_notification` is NOT a
+      deliverable."** In S235, 3 of 4 fan-out subagents went idle without sending their result, costing
+      ~3 orchestrator re-pings to extract each verdict. Also tell each subagent that a permuter it
+      launches in the background must have its result reported when it exits (the subagent may go idle
+      while the permuter runs, then must wake and SendMessage the final byte-match/exhausted outcome, not
+      just idle). The orchestrator holds ALL integration (src edit + full-make ROM-SHA-1 gate) until
+      every subagent AND its permuter has reported, so a full-make never races the shared `build/` while
+      an isolated subagent compile or permuter build is in flight.
   - **A mined fresh-pack's mid-logic tail is a wall-class cluster, not a smallest-first vein (S224).**
     Once a fresh `none` pack's cheap leaves (getters/setters/predicates/dispatch) are banked, the
     residual mid-logic fns (the loops+struct-base+`bnel` tells) concentrate on a small set of documented
