@@ -267,7 +267,35 @@ INCLUDE_ASM("asm/nonmatchings/main/func_80071370", func_80074D0C);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80071370", func_80074E5C);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80071370", func_80074EFC);
+void func_80074EFC(Gfx** dl, s16 x, s16 y, u8* str) {
+  Gfx* gfx = *dl;
+  s32 count;
+  u8* p;
+  u8 c;
+
+  gDPPipeSync(gfx++);
+  count = 0;
+  if (*str != 0) {
+    p = str;
+    do {
+      p++;
+      count++;
+    } while (*p != 0);
+  }
+  c = *str;
+  x -= count * 3;
+  if (c != 0) {
+    do {
+      gSPTextureRectangle(gfx++, x << 2, y << 2, (x + 7) << 2, (y + 8) << 2, 0,
+                          (c - 0x27) << 8, 0x300, 1 << 10, 1 << 10);
+      str++;
+      c = *str;
+      x += 6;
+    } while (c != 0);
+  }
+  gDPPipeSync(gfx++);
+  *dl = gfx;
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80071370", func_80075010);
 
