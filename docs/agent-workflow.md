@@ -247,6 +247,15 @@ Ghidra MCP is used inline at seed time. For each target function:
      every access). **Disambiguate with the in-tree `tools/asm-differ/diff.py <func>`** (diffs the real
      build against the ROM via the mapfile): if it too diverges, it is a genuine near-miss/wall — do
      NOT apply the isolation-caveat shortcut, root-cause the pervasive diff instead.
+     - **The incremental `diff.py` verdict is STALE-prone; gate crack/bank decisions on the full-make
+       ROM-SHA-1, not on `diff.py` (S242, recurred ~6x).** After `make build/<obj>.o` + `diff.py <fn>`,
+       diff.py reads the object + `build/*.map` which an incremental per-object build does NOT fully
+       refresh vs the linked ROM, so it lies in BOTH directions: S242 `func_80075010` showed 5 diff rows
+       yet was byte-exact, and `func_80076138` showed 0 rows yet the ROM mismatched. Bare `diff.py <fn>`
+       with no fresh build also spills the whole segment (~1024 "rows"). Treat `diff.py` as an iteration
+       hint only; confirm every score-0/bank with `tools/verify-rom.sh` (full-make ROM-SHA-1), and
+       `find build -name '<obj>.o*' -delete` before a single-fn diff you actually trust. See the memory
+       `subagent-diff-crack-not-a-bank` (now covers the orchestrator's own diff.py, not just subagents').
    - **Finalize** (only if the spot-check passes): inline the body into `src/<seg>.c`, drop the
      `INCLUDE_ASM` line, `clang-format-22 -i` (now applies to every tree, including `src/libultra/`,
      `src/libkmc/`, `src/libnusys/`, and `src/mgu/`), then `make` until `build/mariogolf64.z64: OK`

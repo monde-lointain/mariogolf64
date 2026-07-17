@@ -4708,6 +4708,20 @@ by `/sprint-plan`:
   src/overlay_10/func_ovl10_801F4A40.c, skip). File md5-candidate only when all 39 bank. S237 lesson:
   a plateaued/wall-sensitive tail (S224) is still a BANK slice for its known-playbook leaves (jtbl,
   glyph-classify) — fan-out sorts crack-vs-terminal-carry rather than pure characterization.
+  **S242 UPDATE: banked `func_80074EFC` + `func_80075010` + `func_80074D0C` (glyph/text DL-emitter family,
+  `gSPTextureRectangle` per char; 23 → 20 stubs).** The tail is a glyph-emitter family: `func_80074EFC`
+  cracked on a char loop-var reuse (2 iters); `func_80075010` cracked via a compiler-source fan-out
+  (raw-div-precompute + inline-shift/mask; loop.c hoist-order + sched.c LUID + combine const-fold), recipe
+  transferred to `func_80074D0C` first-try. Memory `mg64-glyph-emitter-dl-family`; hazards `#display-lists`.
+  **New carry `func_80076138`** (276i global-gated sprite loop, 10-arg call into the undecompiled
+  `func_8006A2C0` wall) = TERMINAL `str<->i` biv allocno swap (`global.c allocno_compare:587-607`,
+  param-entry-copy inflates str's live_length; ~96%, below the 0.97 gate, NOT permuter-attempted;
+  `docs/wip/func_80076138.near-match.md`, memory `global-allocno-compare-livelength-biv-order`). The ranker
+  now sub-tags `func_80074E5C`+`func_80076138` as `carried-wall:...(regalloc-coin)` so the gate skips a
+  fresh re-price AND a wasted permuter. **Next tractable vein:** the still-stubbed glyph siblings
+  `func_80073F24`/`func_80074230`/`func_80074500` (the `func_800747B0`/`func_80074840`/`func_800748D0`
+  wrappers call them) are the likely-next banks via the family recipe. File md5-candidate only when all
+  remaining bank.
 - **Open (S225→S226, in-progress mixed-partial, NOT a spike):** `src/main/func_80078910.c` (37-fn
   main-seg `none` pack, subseg 0x53D10 flipped `c` at the S225 gate; rumble/shadow/effects + heap
   alloc/free system). **10 banked** (S225 heap alloc/free/dispatch cluster + rumble twins +

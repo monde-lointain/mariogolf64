@@ -964,6 +964,22 @@ Three honest caveats:
   `pick_target`; #3 hazards scalar-global-CSE-share third-terminal-sub-case + mips.h citation; #4 CE88
   cross-call base-allocation levers → hazards). NB: 3 pre-existing `test_pick_target.py` failures (stale
   goldens/thresholds from repo drift) are unrelated to S241, deferred to a tooling pass.
+  S242: CONTINUATION of `src/main/func_80071370.c` (fresh integer leaves, 23→20 stubs) — **+3 banked / 1
+  carried.** The leaves were a glyph/text DL-emitter family (`gSPTextureRectangle` per char). `func_80074EFC`
+  banked on a char loop-var reuse (2 iters); `func_80075010` cracked via a **compiler-source fan-out** (4
+  subagents, gcc-2.7.2 + binutils-2.6: raw-div precompute + inline shifts/mask = loop.c hoist-order +
+  sched.c LUID + combine const-fold at once), recipe transferred to `func_80074D0C` first-try — the fan-out
+  drove 2 of 3 banks. Carry `func_80076138` = terminal `str<->i` biv allocno swap (global.c
+  allocno_compare param-entry-copy; ~96%, below gate, not permuter-attempted). Banked **0pt** (file 20
+  stubs, NOT md5-candidate), **+3 matched**, quality **0 stuck / 0 permuter / 1 carried / 0 re-opened**.
+  Seed committed **5** (classical); realized **7** (+1 carry, +1 fan-out escalation, +1 diff.py-stale
+  gotcha), residual **+2**. LESSON: the orchestrator's OWN incremental `diff.py` is stale-prone (false
+  BOTH ways this sprint) — gate on full-make ROM-SHA-1. Rolling-5 (S238-S242): main-segment slices banked
+  3+2+1+0+3. Retro applied 4 of 4 (#1 diff.py-stale gate → agent-workflow + memory; #2 glyph-family recipe
+  → hazards#display-lists + memory; #3 gcc-2.7.2 loop.c/global.c/combine levers → memories; #4
+  `regalloc-coin:<fn>` ranker sub-tag → `pick_target`, advisory, 0 new test failures). NB: the pre-existing
+  tooling-test failures are now 8 (golden drift from cumulative hazards/repo edits, S241's 3 + more),
+  still deferred to a dedicated tooling pass.
 - **Regime:** `mirror` is a depleting minority (~22 % of ranked candidates: 56 mirror vs 194
   classical; 18 warm / 38 cold). The warm clean-singleton mirror pool is now **mined out** (S11
   plan gate: every top mirror candidate carries a blocking hazard), pushing the project onto the

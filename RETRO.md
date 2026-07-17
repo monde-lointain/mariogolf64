@@ -25,6 +25,16 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 242 — bank fresh integer leaves in func_80071370.c — 2026-07-17
+- Increment: 0 files banked (file partial) / **+3 functions matched** (`func_80071370.c` 23 → 20 stubs; NOT md5-candidate).
+- Quality: 0 stuck-far / 0 permuter (carry `func_80076138` ~96%, below the 0.97 gate) / **1 carried** (`func_80076138`) / 0 re-opened.
+- Seed: committed 5pt; realized 7pt (residual +3: +1 carry, +1 compiler-source-fan-out escalation, +1 diff.py-stale gotcha); regime classical.
+- What helped: the leaves were a **glyph/text DL-emitter family** (`gSPTextureRectangle` per char). `func_80074EFC` cracked on a char loop-var reuse (2 iters). `func_80075010` cracked via a **compiler-source fan-out** (4 subagents over gcc-2.7.2 + binutils-2.6): raw-division precompute + inline shifts/mask satisfies loop.c hoist-order + sched.c LUID + combine const-fold simultaneously; the recipe transferred to `func_80074D0C` first-try. The fan-out drove 2 of 3 banks — high EV on a well-scoped codegen wall.
+- Friction: the orchestrator's own incremental `diff.py` read STALE ~6x (false-clean AND false-diff, both directions) — burned iterations until switching to full-make ROM-SHA-1 as the gate. `func_80076138` is a terminal `str<->i` biv allocno swap (global.c allocno_compare, param-entry-copy) with no semantics-preserving flip.
+- Applied: 4 of 4 — #1 diff.py-stale gate note → `agent-workflow.md` + extended `subagent-diff-crack-not-a-bank` memory; #2 glyph-emitter family recipe → `hazards.md#display-lists` + new `mg64-glyph-emitter-dl-family` memory; #3 three gcc-2.7.2 levers → memories (`loop-invariant-hoist-order-preheader-regalloc`, `global-allocno-compare-livelength-biv-order`, combine const-fold folded into the glyph memory); #4 `regalloc-coin:<fn>` ranker sub-tag → `pick_target.py` (carried-wall wip-content probe; flags `func_80074E5C`+`func_80076138`, advisory, 0 new test failures).
+- Carry-over: `func_80076138` (biv allocno coin, `docs/wip/`); `func_80071370.c` continuation (20 stubs; the 73F24/74230/74500 glyph siblings are the likely-next tractable vein per the family recipe).
+- NB: `make test-tools` shows 8 pre-existing failures (golden drift from repo/hazards edits, not S242 code) — unchanged by the #4 ranker edit; deferred to a tooling pass.
+
 ## Sprint 241 — escalation crack-attempt fan-out over the S224 wall cluster in func_8006A2C0.c — 2026-07-16
 - Increment: 0 files banked / **0 functions matched** (`func_8006A2C0.c` stays 22 stubs; NOT md5-candidate). Delta 0.
 - Quality: 0 stuck-far / 0 permuter (all 3 stayed below 0.97, none run) / **3 carried** (`func_8006D38C`, `func_8006D214`, `func_8006CE88`) / 0 re-opened.

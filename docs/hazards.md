@@ -3268,6 +3268,21 @@ the asm anchored on:
   sub-macros only write `*(Gfx*)pkt`), so a builder that advances the cursor by 5 slots is written as
   FIVE individual advancing calls (`gSPNumLights(gdl++, NUMLIGHTS_3)` + 4× `gSPLight(gdl++, …, n)` with
   F3DEX2 offset `(n)*24+24`), not one `gSPSetLights3` call. **Provenance:** S222 `func_80095C10`.
+- **Text/glyph string emitter family (S242, `func_80071370.c`).** A per-char `gSPTextureRectangle`
+  string renderer: `Gfx *gfx = *dl; gDPPipeSync(gfx++);` then a `while(c)` per-char loop, then a trailing
+  `gDPPipeSync(gfx++); *dl = gfx;`. Two levers. (a) Load `u8 c = *str;` ONCE at the loop top and reuse
+  `c` for the glyph; the build else RELOADS `*str` mid-body (the macro's stores between the guard and the
+  use block CSE). (b) For a variable atlas s/t computed via a signed `%N`//`/N` (magic e.g. 0x84210843
+  for /31), the byte-exact form is raw-division precompute `s32 quot=idx/31; s32 rem=idx%31;` (quot BEFORE
+  rem) with the shifts+mask left INLINE in the macro args: `gSPTextureRectangle(..., rem<<8,
+  (quot<<8)&0xff00, ...)`. The raw precompute hoists the div-magic const first in the preheader (matching
+  regalloc); the inline shifts keep the sched LUID order; and the explicit `& 0xff00` is required because
+  gcc-2.7.2 combine will not natural-narrow `(quot<<8)&0xffff` across separate insns. Folding the shifts
+  into temps breaks the shift order; rem-before-quot adds a div-chain insn. S242 banked `func_80074EFC`,
+  `func_80075010`, `func_80074D0C` (the last a first-try recipe transfer); memory
+  `mg64-glyph-emitter-dl-family`. Sibling `func_80076138` (a global-gated draw loop) carried on a
+  terminal `str<->i` biv allocno swap (below-gate, not permuter-attempted; `docs/wip/`, memory
+  `global-allocno-compare-livelength-biv-order`).
 
 ---
 

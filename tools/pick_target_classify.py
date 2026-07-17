@@ -1516,6 +1516,15 @@ def _wip_near_match_path(fn):
     """Path to a function's carried-wall characterization doc (docs/wip/<fn>.near-match.md)."""
     return os.path.join(ROOT, "docs", "wip", f"{fn}.near-match.md")
 
+def _wip_is_regalloc_coin(fn):
+    """True when a fn's wip doc marks a terminal below-gate regalloc/allocno coin (not
+    permuter-attempted, S242). Cheap substring probe of the characterization text."""
+    try:
+        text = open(_wip_near_match_path(fn)).read().lower()
+    except OSError:
+        return False
+    return "regalloc coin" in text or "allocno_compare" in text
+
 def classify_subseg(off, typ, path, size, upstream_index):
     """Classify one subseg into (kind, fns, hazards), or None to skip it.
 
@@ -1578,7 +1587,11 @@ def classify_subseg(off, typ, path, size, upstream_index):
         # wip-file existence (a BACKLOG-carry cross-ref is the fuller follow-up). Advisory only.
         walled = [fn for fn in fns if os.path.exists(_wip_near_match_path(fn))]
         if walled:
-            hz.append(Hazard.carried_wall(walled))
+            # A below-gate regalloc/allocno coin (terminal, NOT permuter-attempted) is sub-tagged so the
+            # gate skips both a fresh-leaf re-price and a wasted permuter run (S242 func_80076138). Detect
+            # via a marker in the wip doc (case-insensitive "regalloc coin" or "allocno_compare").
+            coin = [fn for fn in walled if _wip_is_regalloc_coin(fn)]
+            hz.append(Hazard.carried_wall(walled, coin))
         return "c-stub", fns, hz
     return None
 

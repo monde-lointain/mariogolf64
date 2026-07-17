@@ -456,11 +456,16 @@ class Hazard:
         return cls(HAZARD_REMAINING, str(n))
 
     @classmethod
-    def carried_wall(cls, fns) -> "Hazard":
+    def carried_wall(cls, fns, coin_fns=()) -> "Hazard":
         """`<fn>[,<fn>...]` remaining leaves already wip-characterized as walls; `;characterization-only`
-        appended when >=2 (the mid-logic tail is a wall-retirement slice, not a bank slice)."""
+        appended when >=2 (the mid-logic tail is a wall-retirement slice, not a bank slice).
+
+        A fn in `coin_fns` (its wip marks a terminal below-gate regalloc/allocno swap, NOT
+        permuter-attempted per the CE88/S224/func_80076138 precedent) renders as `<fn>(regalloc-coin)`
+        so the plan gate does not re-price it as a fresh leaf OR queue the permuter on it (S242)."""
+        coin = set(coin_fns)
         fns = sorted(fns)
-        detail = ",".join(fns)
+        detail = ",".join(f"{fn}(regalloc-coin)" if fn in coin else fn for fn in fns)
         if len(fns) >= 2:
             detail += ";characterization-only"
         return cls(HAZARD_CARRIED_WALL, detail)
