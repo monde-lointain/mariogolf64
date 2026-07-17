@@ -297,7 +297,27 @@ void func_80074EFC(Gfx** dl, s16 x, s16 y, u8* str) {
   *dl = gfx;
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80071370", func_80075010);
+void func_80075010(Gfx** dl, s16 x, s16 y, u8* str) {
+  Gfx* gfx = *dl;
+  u8 c;
+
+  gDPPipeSync(gfx++);
+  c = *str;
+  if (c != 0) {
+    do {
+      s32 idx = c - 0x20;
+      s32 quot = idx / 31;
+      s32 rem = idx % 31;
+      gSPTextureRectangle(gfx++, x << 2, y << 2, (x + 8) << 2, (y + 8) << 2, 0,
+                          rem << 8, (quot << 8) & 0xff00, 1 << 10, 1 << 10);
+      str++;
+      c = *str;
+      x += 7;
+    } while (c != 0);
+  }
+  gDPPipeSync(gfx++);
+  *dl = gfx;
+}
 
 extern u8 D_800FF573;
 
