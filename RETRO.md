@@ -25,6 +25,33 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 243 — bank glyph-emitter siblings 73F24/74230/74500 in func_80071370.c — 2026-07-18
+- Increment: 0 files banked (file partial, 20 stubs, NOT md5-candidate) / **+0 functions matched** — 3 fully
+  RE'd + root-caused CARRIES. 2nd straight 0-bank characterization sprint on this emitter tail (S241 = 0/3).
+- Quality: 0 stuck-far / **1 family permuter-attempted** (PO gate-override, non-converged) / **3 carried**
+  (`func_80074500`/`func_80074230`/`func_80073F24`) / 0 re-opened.
+- Seed: committed **5**pt (classical bank slice); banked **0**pt (per-file all-or-nothing); realized **8**
+  (+1 carry cluster, +1 permuter override, +1 escalation fan-out+dive), residual **+3**; regime classical.
+- What helped: the fan-out (3 crack subagents + 1 compiler-source dive) SORTED the tail {crack, terminal}.
+  crack-74230's per-command post-increment idiom `{ Gfx* g = gfx++; g->words.w0=W0; g->words.w1=W1; }`
+  SOLVED the store-giv wall (`#indexed-vs-pointer-loop-strength-reduction`, previously 0-precedent). The
+  dive pass-cited the residual to a gcc-2.7.2 sched.c SCHEDULE-ORDER coin (`rank_for_schedule:2428`
+  class-then-LUID) + found 2 transferable levers (c/code fresh-inside-loop split, beql via plain-if).
+- Friction: the siblings were MIS-PRICED as the S242 clean-macro family; they are a harder raw-DL-word
+  sub-family, all walled on the shared sched coin (0 banks vs the plan's 2-3). asm-differ `percent` reads
+  NEGATIVE on a schedule-displacement near-match (metric artifact), so the 0.97 gate can't fire on a
+  >90%-correct body — needed the PO override. `setup-permuter.sh` silently aborts once the body is inlined
+  (`mg_resolve_c_asm` greps the `INCLUDE_ASM` marker); direct `import.py --settings` is the fallback.
+- Applied: 5 of 5 — #1 raw-DL post-inc-idiom giv crack → `hazards#indexed-vs-pointer` + memory
+  `mg64-glyph-emitter-dl-family`; #2 `sched-order-coin:<fn>` ranker sub-tag → `pick_target` (advisory, 0
+  new test failures) + new memory `sched-class-tiebreak-order-coin`; #3 negative-percent gate mis-read →
+  `hazards#permuter-setup`; #4 CORRECTED `setup-permuter.sh` inlined-body silent-abort root cause (NOT the
+  S189 array guard) → `hazards#permuter-setup` (direct-import fallback); #5 same-family-is-a-hypothesis
+  planning lesson + `raw-dl-emitter:<fn>` ranker follow-up → BACKLOG + memory.
+- Carry-over: `src/main/func_80071370.c` (20 stubs) — 3 new raw-DL glyph carries (sched-order-coin) join
+  `func_80074E5C`/`func_80076138` (regalloc-coin); a longer permuter run or a hand-finish (post-inc +
+  reassociation + c/code-split + beql) MIGHT close the raw-DL family (a flip transfers to all 3).
+
 ## Sprint 242 — bank fresh integer leaves in func_80071370.c — 2026-07-17
 - Increment: 0 files banked (file partial) / **+3 functions matched** (`func_80071370.c` 23 → 20 stubs; NOT md5-candidate).
 - Quality: 0 stuck-far / 0 permuter (carry `func_80076138` ~96%, below the 0.97 gate) / **1 carried** (`func_80076138`) / 0 re-opened.

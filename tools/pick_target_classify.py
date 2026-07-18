@@ -1525,6 +1525,18 @@ def _wip_is_regalloc_coin(fn):
         return False
     return "regalloc coin" in text or "allocno_compare" in text
 
+def _wip_is_sched_coin(fn):
+    """True when a fn's wip doc marks a terminal below-gate gcc-2.7.2 sched.c SCHEDULE-ORDER coin
+    (S243: rank_for_schedule class-then-LUID defers a class-1 compute behind class-3 stores). Distinct
+    from the regalloc coin: it IS permuter-responsive but only partially (a PO gate-override permutes it
+    for a partial descent, not a guaranteed close), so the gate labels it a crack-attempt, not a fresh
+    leaf. Cheap substring probe of the characterization text."""
+    try:
+        text = open(_wip_near_match_path(fn)).read().lower()
+    except OSError:
+        return False
+    return "schedule-order coin" in text or "sched-order coin" in text or "rank_for_schedule" in text
+
 def classify_subseg(off, typ, path, size, upstream_index):
     """Classify one subseg into (kind, fns, hazards), or None to skip it.
 
@@ -1591,7 +1603,8 @@ def classify_subseg(off, typ, path, size, upstream_index):
             # gate skips both a fresh-leaf re-price and a wasted permuter run (S242 func_80076138). Detect
             # via a marker in the wip doc (case-insensitive "regalloc coin" or "allocno_compare").
             coin = [fn for fn in walled if _wip_is_regalloc_coin(fn)]
-            hz.append(Hazard.carried_wall(walled, coin))
+            sched_coin = [fn for fn in walled if _wip_is_sched_coin(fn)]
+            hz.append(Hazard.carried_wall(walled, coin, sched_coin))
         return "c-stub", fns, hz
     return None
 

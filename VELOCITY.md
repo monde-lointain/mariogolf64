@@ -980,6 +980,27 @@ Three honest caveats:
   `regalloc-coin:<fn>` ranker sub-tag → `pick_target`, advisory, 0 new test failures). NB: the pre-existing
   tooling-test failures are now 8 (golden drift from cumulative hazards/repo edits, S241's 3 + more),
   still deferred to a dedicated tooling pass.
+  S243: CONTINUATION of `src/main/func_80071370.c` (the predicted glyph siblings 73F24/74230/74500) —
+  **0 banked / 3 carried.** They were NOT the S242 clean-macro family but a DISTINCT, harder **raw-DL-word**
+  sub-family (hand-rolled ~11-cmd per-glyph DL block). 2nd straight 0-bank characterization sprint on this
+  tail (S241 was also 0/3). WINS despite 0 banks: the store-giv wall
+  (`#indexed-vs-pointer-loop-strength-reduction`, 0-precedent) SOLVED via the per-command post-increment
+  idiom; the shared residual root-caused (compiler-source dive) to a gcc-2.7.2 sched.c SCHEDULE-ORDER coin
+  (`rank_for_schedule:2428` class-then-LUID); permuter (PO gate-override, justified by the negative-percent
+  metric artifact + schedule-coin class) descended 74230 base 4560→1845 over 2 rounds but NOT byte-exact.
+  Banked **0pt** (file 20 stubs, NOT md5-candidate), **+0 matched**, quality **0 stuck / 1 family permuter
+  (non-converged) / 3 carried / 0 re-opened**. Seed committed **5** (classical bank slice); realized **8**
+  (+1 carry cluster, +1 permuter override, +1 escalation fan-out+dive), residual **+3**. Fan-out (3 crack
+  subagents + 1 compiler-source dive) earned its keep as SORT + partial-crack (solved the giv wall,
+  pass-cited the sched coin). Rolling-5 (S239-S243): main-segment slices banked 1+1+0+3+0 (the emitter tail
+  is banking out; the raw-DL sub-family is a terminal sched-coin cluster). Retro applied 5 of 5 (#1 raw-DL
+  post-inc-idiom giv crack → hazards#indexed-vs-pointer + memory; #2 `sched-order-coin:<fn>` ranker sub-tag
+  → `pick_target`, 0 new test failures + new memory `sched-class-tiebreak-order-coin`; #3 negative-percent
+  gate mis-read → hazards#permuter-setup; #4 CORRECTED `setup-permuter.sh` inlined-body silent-abort root
+  cause → hazards#permuter-setup (direct-import fallback; NOT the S189 array-guard bug as first thought);
+  #5 same-family-is-a-hypothesis planning lesson + `raw-dl-emitter:<fn>` ranker follow-up → BACKLOG +
+  memory). NB: tooling-test failures hold at 8 (pre-existing golden drift, my ranker edit added 0), still
+  deferred to a dedicated tooling pass.
 - **Regime:** `mirror` is a depleting minority (~22 % of ranked candidates: 56 mirror vs 194
   classical; 18 warm / 38 cold). The warm clean-singleton mirror pool is now **mined out** (S11
   plan gate: every top mirror candidate carries a blocking hazard), pushing the project onto the

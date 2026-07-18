@@ -456,16 +456,31 @@ class Hazard:
         return cls(HAZARD_REMAINING, str(n))
 
     @classmethod
-    def carried_wall(cls, fns, coin_fns=()) -> "Hazard":
+    def carried_wall(cls, fns, coin_fns=(), sched_coin_fns=()) -> "Hazard":
         """`<fn>[,<fn>...]` remaining leaves already wip-characterized as walls; `;characterization-only`
         appended when >=2 (the mid-logic tail is a wall-retirement slice, not a bank slice).
 
         A fn in `coin_fns` (its wip marks a terminal below-gate regalloc/allocno swap, NOT
         permuter-attempted per the CE88/S224/func_80076138 precedent) renders as `<fn>(regalloc-coin)`
-        so the plan gate does not re-price it as a fresh leaf OR queue the permuter on it (S242)."""
+        so the plan gate does not re-price it as a fresh leaf OR queue the permuter on it (S242).
+
+        A fn in `sched_coin_fns` (its wip marks a terminal gcc-2.7.2 sched.c SCHEDULE-ORDER coin,
+        S243 func_8007{4500,4230,73F24}) renders as `<fn>(sched-order-coin)`: source-invariant AND only
+        partially permuter-responsive (a PO gate-override yields a partial descent, not a guaranteed
+        close), so the gate labels it a crack-attempt, not a fresh leaf, and does not auto-queue a
+        (low-EV) permuter re-run. Precedence: regalloc-coin wins if a fn is (implausibly) in both."""
         coin = set(coin_fns)
+        sched_coin = set(sched_coin_fns)
         fns = sorted(fns)
-        detail = ",".join(f"{fn}(regalloc-coin)" if fn in coin else fn for fn in fns)
+
+        def _render(fn):
+            if fn in coin:
+                return f"{fn}(regalloc-coin)"
+            if fn in sched_coin:
+                return f"{fn}(sched-order-coin)"
+            return fn
+
+        detail = ",".join(_render(fn) for fn in fns)
         if len(fns) >= 2:
             detail += ";characterization-only"
         return cls(HAZARD_CARRIED_WALL, detail)

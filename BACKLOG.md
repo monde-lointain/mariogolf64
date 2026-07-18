@@ -4718,10 +4718,25 @@ by `/sprint-plan`:
   param-entry-copy inflates str's live_length; ~96%, below the 0.97 gate, NOT permuter-attempted;
   `docs/wip/func_80076138.near-match.md`, memory `global-allocno-compare-livelength-biv-order`). The ranker
   now sub-tags `func_80074E5C`+`func_80076138` as `carried-wall:...(regalloc-coin)` so the gate skips a
-  fresh re-price AND a wasted permuter. **Next tractable vein:** the still-stubbed glyph siblings
-  `func_80073F24`/`func_80074230`/`func_80074500` (the `func_800747B0`/`func_80074840`/`func_800748D0`
-  wrappers call them) are the likely-next banks via the family recipe. File md5-candidate only when all
-  remaining bank.
+  fresh re-price AND a wasted permuter.
+  **S243 UPDATE: 0 banked / 3 carried** — the predicted "likely-next banks" `func_80073F24`/`func_80074230`/
+  `func_80074500` are a DISTINCT, HARDER **raw-DL-word** glyph sub-family (hand-rolled ~11-cmd per-glyph DL
+  block; NOT the S242 clean-macro `gSPTextureRectangle` family — the "same family" guess was WRONG). All 3
+  fully RE'd, all CARRIED (`docs/wip/func_8007{4500,4230,73F24}.near-match.md`, now `carried-wall:...
+  (sched-order-coin)`). WINS: the store-giv wall (`#indexed-vs-pointer-loop-strength-reduction`,
+  0-precedent) is SOLVED via the per-command post-increment idiom `{ Gfx* g = gfx++; g->words.w0=W0;
+  g->words.w1=W1; }`. The irreducible residual is a shared gcc-2.7.2 sched.c SCHEDULE-ORDER coin
+  (`rank_for_schedule:2428` class-then-LUID defers the class-1 atlas compute behind class-3 stores; memory
+  `sched-class-tiebreak-order-coin`) — TERMINAL for hand-source, permuter-RESPONSIVE (PO gate-override:
+  74230 descended 4560→1845 over 2 rounds) but NOT byte-exact. **Future:** a longer permuter run or a
+  hand-finish combining the reassociation + the c/code-split + beql levers MIGHT close the family (a flip
+  transfers to all 3). **LESSON (#5):** a "same-family sibling" prediction from banked leaves is a
+  HYPOTHESIS; the raw-vs-clean-macro DL shape (read the `.s`: raw command-word `sw` stores vs a
+  `gSPTextureRectangle` macro expansion) is the discriminator — a homogeneous-sibling BANK slice can turn
+  characterization-only when the siblings share a terminal coin (S224 plateau, re-confirmed; 2nd straight
+  0-bank characterization sprint on this tail after S241). **Ranker follow-up:** a `raw-dl-emitter:<fn>`
+  tell (many raw command-word `sw` + no clean-macro fingerprint) to pre-flag the harder sub-family.
+  File md5-candidate only when all remaining bank.
 - **Open (S225→S226, in-progress mixed-partial, NOT a spike):** `src/main/func_80078910.c` (37-fn
   main-seg `none` pack, subseg 0x53D10 flipped `c` at the S225 gate; rumble/shadow/effects + heap
   alloc/free system). **10 banked** (S225 heap alloc/free/dispatch cluster + rumble twins +

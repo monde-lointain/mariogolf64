@@ -3745,11 +3745,37 @@ setup feeds, see `#pervasive-regalloc-classical-main`.
   asm at `asm/nonmatchings/**/<fn>/<fn>.s`; kin to the S170/S168 `find_segment` follow-ups. Until then,
   the direct-import recipe applies by hand.)
 
+**`setup-permuter.sh` fails once the near-match body is INLINED into `src/` (S243, corrected root
+cause).** `setup-permuter.sh` (both plain and `--main`) resolves the C file via `mg_resolve_c_asm`,
+which greps `INCLUDE_ASM(.*, <fn>);` in `src/` to locate the parent `.c`. But `import.py` needs the C
+BODY present in `src/` to permute — so the moment you inline the near-match body (removing the
+`INCLUDE_ASM` marker), the grep returns empty and `set -e` aborts the wrapper SILENTLY (exit 1, no
+output). This is NOT the S189 `set -u` array-guard bug (that path is already guarded). **Fix: call
+`import.py` directly with explicit paths**, e.g.
+`./tools/decomp-permuter/import.py --settings permuter_settings_main.toml src/main/<parent>.c
+asm/nonmatchings/<seg>/<parent>/<fn>.s` (this is the S182 direct-import bypass; it takes C_FILE +
+ASM_FILE explicitly so it does not need the marker). Note: import.py of a family fn whose sibling
+wrapper forward-declares it with a DIFFERENT pointer type (`s32*` vs `Gfx**`) emits a conflicting-types
+WARNING — tolerated by the modern-GAS permuter build, but a HARD error in the strict KMC `-c`
+`decomp_loop` build, so reconcile the signature before scoring a permuter output back through
+`decomp_loop`.
+
+**Negative asm-differ `percent` on a schedule-displacement near-match — the 0.97 gate mis-reads (S243).**
+When a small contiguous instruction block (e.g. ~7 insns) is DISPLACED by ~its-own-length rows (a
+`sched.c` schedule-order coin, memory `sched-class-tiebreak-order-coin`), asm-differ aligns it as
+N-insert + N-delete pairs whose penalty exceeds `max_score`, so `percent` goes NEGATIVE on a body that is
+actually >90% row-correct. The standing `percent >= 0.97` permuter gate then cannot fire on a genuinely
+close near-match. **Gauge closeness by `match_count/total_rows`, NOT `percent`, for a
+schedule-displacement near-match; a PO gate-override to permute is warranted when the residual is a
+schedule-order coin (permuter-RESPONSIVE — S243 descended 4560→1845) rather than a regalloc allocno coin
+(permuter-DENIED). Expect a partial descent, not a guaranteed byte-exact close.**
+
 **Provenance:** S121 (contRmbControl: the three KMC-toolchain fixes); S151 (generalized to the game
 -O2 main-profile + the coord-width permuter lever); S157 (KMC-gcc tuning: `perm_sameline` no-op,
 `--best-only` plateaus); S158 (committed `permuter_settings_main.toml` + `kmc_main_prelude.inc`);
 S169 (`do{}while(0)` schedule lever + the venv/inlined-fn import path); S176 (the b64literal inline-asm
-base.c fix); S182 (direct-import bypass for an already-inlined multi-fn-file near-match).
+base.c fix); S182 (direct-import bypass for an already-inlined multi-fn-file near-match);
+S243 (the inlined-body `mg_resolve_c_asm` silent-abort + the negative-percent gate mis-read).
 
 ## NU_DEBUG-stock-not-custom (carried perf fn triage)
 
@@ -4345,6 +4371,19 @@ scheduling/regalloc is wrong" miss in the KMC gcc 2.7.2 source at `~/development
 S157 param-reuse fix for the s0/s1/s2 rotation); loop-invariant hoist vs induction-var init ordering
 is `loop.c` `move_movables`/`strength_reduce` (above); delay-slot fill is `reorg.c`
 `fill_slots_from_thread`; loop inversion is `stmt.c` `expand_end_loop` and `loop.c` `check_dbra_loop`.
+
+**Post-increment-idiom crack for a raw-DL-word store loop (S243).** A raw display-list emitter that
+writes an N-command per-iteration block of computed command words (e.g. the `func_80071370.c` raw-DL
+glyph sub-family, memory `mg64-glyph-emitter-dl-family`) hits this wall in its STORE giv: the ROM emits
+a WALKING store cursor hoisted to the loop preheader (w1-anchored: `sw w0,-4(t); sw w1,0(t); addiu t,+8`
+per command) running parallel to a value pointer bumped once per iteration. Writing the block as indexed
+`gfx[k].words.w0/w1` + a single `gfx += N` gives BATCHED direct-offset stores (`sw ,K(gfx)`), losing the
+giv shape (and reading SHORTER than the ROM). The crack: write EVERY command as the per-command
+post-increment idiom `{ Gfx* g = gfx++; g->words.w0 = W0; g->words.w1 = W1; }` (the gbi-macro
+expansion) — this reproduces the ROM's walking two-pointer giv exactly. This SOLVES the giv form; a
+residual `sched.c` SCHEDULE-ORDER coin can remain (see `#local-alloc qty-permutation` cross-ref +
+memory `sched-class-tiebreak-order-coin`), but the previously-0-precedent giv wall itself falls to the
+post-inc idiom.
 
 ## call-arg delay-slot fill + field-alias addend-0 (S214 scenery levers)
 
