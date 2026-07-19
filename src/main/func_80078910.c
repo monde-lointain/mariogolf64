@@ -1,11 +1,20 @@
 #include "common.h"
 
 typedef struct {
-  u8 pad_00[0x28];
+  f32 unk_00;
+  f32 unk_04;
+  f32 unk_08;
+  s32 unk_0C;
+  f32 unk_10;
+  s32 unk_14;
+  u8 pad_18[0x10];
   f32 unk_28;
-  u8 pad_2C[0xE];
+  f32 unk_2C;
+  f32 unk_30;
+  f32 unk_34;
+  s16 unk_38;
   s8 unk_3A;
-  u8 pad_3B[0x1];
+  s8 unk_3B;
   s8 unk_3C;
   u8 pad_3D[0x3];
 } Particle; /* size 0x40 */
@@ -101,7 +110,33 @@ INCLUDE_ASM("asm/nonmatchings/main/func_80078910", func_8007955C);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80078910", func_800796F8);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80078910", func_80079940);
+void func_80079940(s32* arg0) {
+  s32 i = 0;
+
+  do {
+    Particle* p = &particle_array[i];
+
+    if (p->unk_3A == -1) {
+      f32 z;
+
+      p->unk_00 = arg0[0] * (1.0f / 1024.0f);
+      p->unk_04 = arg0[1] * (1.0f / 1024.0f);
+      z = arg0[2] * (1.0f / 1024.0f);
+      p->unk_0C = 0;
+      p->unk_10 = 0.002558593638241291f;
+      p->unk_14 = 0;
+      p->unk_38 = 0;
+      p->unk_28 = 255.0f;
+      p->unk_2C = -4.0f;
+      p->unk_30 = 24.0f;
+      p->unk_34 = -0.2f;
+      p->unk_3A = 8;
+      p->unk_3B = 0;
+      p->unk_08 = z;
+      break;
+    }
+  } while (++i != 40);
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80078910", func_80079A08);
 
