@@ -106,6 +106,9 @@ INCLUDE_ASM("asm/nonmatchings/main/func_80078910", func_80078FA8);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80078910", func_80079358);
 
+/* func_8007955C: particle-spawn + RTS-matrix builder. Fully RE'd near-match
+ * carried on a gcc-2.7.2 sched.c schedule-order coin (~85%, < 0.97). See
+ * docs/wip/func_8007955C.near-match.md. */
 INCLUDE_ASM("asm/nonmatchings/main/func_80078910", func_8007955C);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80078910", func_800796F8);
