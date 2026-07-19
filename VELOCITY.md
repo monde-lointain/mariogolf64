@@ -1001,6 +1001,22 @@ Three honest caveats:
   #5 same-family-is-a-hypothesis planning lesson + `raw-dl-emitter:<fn>` ranker follow-up → BACKLOG +
   memory). NB: tooling-test failures hold at 8 (pre-existing golden drift, my ranker edit added 0), still
   deferred to a dedicated tooling pass.
+  S244: NEW continuation slice of `src/main/func_80078910.c` (the S226-deferred "79xxx fp fns
+  regalloc-nemesis" leaves) — **2 banked / 1 carried.** REFUTED the bulk wall-prediction: 2 of 3 smallest
+  banked clean, the 3rd is a SCHEDULER coin (not regalloc). `func_80079940` (50i, S184 `&ARR[i]` recompute
+  cracked a `combine_givs` DUAL-BASE split), `func_80079A08` (53i, `s32 one=1` fold-defeat + `f64 grav=D`
+  preheader-hoist FP-reg flip + sentinel/stmt-order delay-slot control). Carry `func_8007955C` (103i
+  RTS-matrix builder, fully RE'd, gcc-2.7.2 sched.c SCHEDULE-ORDER coin ~85% < 0.97; `docs/wip/`). Banked
+  **0pt** (file 25 stubs, NOT md5-candidate), **+2 matched**, quality **0 stuck / 0 permuter / 1 carried /
+  0 re-opened**. Seed committed **5** (classical); realized **7** (+1 carry, +1 novel-crack cluster),
+  residual **+2**. LESSON: 2nd verify-by-seed data point (S240) — a bulk regalloc tag over a size/fp-count
+  band is a HYPOTHESIS; seed the smallest un-attempted leaves before the plateau-prefer-fresh-pack rule.
+  Rolling-5 (S240-S244): main-segment slices banked 1+0+3+0+2. Retro applied 5 of 5 (#1 S184 dual-base
+  extension → hazards#indexed-vs-pointer + memory; #2 FP-const spawn levers → new memory
+  `fp-const-init-spawn-loop-levers`; #3 no-tag-un-attempted-leaves + #5 sched-order-coin coverage →
+  BACKLOG ranker follow-ups; #4 objdump-fresh-object oracle for the asm-first path → agent-workflow). NB:
+  tooling-test failures hold at 8 (doc/BACKLOG edits only this sprint, 0 new); dedicated tooling pass still
+  deferred.
 - **Regime:** `mirror` is a depleting minority (~22 % of ranked candidates: 56 mirror vs 194
   classical; 18 warm / 38 cold). The warm clean-singleton mirror pool is now **mined out** (S11
   plan gate: every top mirror candidate carries a blocking hazard), pushing the project onto the

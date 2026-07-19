@@ -4328,6 +4328,15 @@ keeps the biv at the element base (positive offsets = the ROM). Cracked `func_80
 `D_800BB258[i]` copy loop, s0 biased +0x30) and `func_80043C64`'s per-club dump loop (s0 biased +0x1C) in
 S184; both matched after `cs = &D_800BB258[club];` inside the loop. (Kin to the S168/S171 pointer-variable
 levers above, but the tell is the base *bias immediate*, not a base *reload*.)
+  - **Extends to a DUAL-BASE split, not just the max-offset bias (S244).** The same carried-`p++` giv
+    can split into TWO base registers instead of biasing one: when a store loop touches offset 0 AND a
+    higher cluster, `combine_givs` may keep the primary biv `p` alive ONLY for the `0(p)` store and
+    derive a SECOND giv `p+K` (init `addiu v1,p,K`) for the rest — both incremented per iter (`addiu
+    v1,0x40` AND `addiu p,0x40`), +2 insns vs the ROM's single base. The SAME `T *p = &ARR[i];`
+    recompute-inside-loop fix collapses it to one carried base at the element start. S244
+    `func_80079940` (particle spawn, `swc1 f0,0(a1)` kept `a1`=p while `v1`=p+8 served 0x04..0x3B)
+    matched byte-exact after `Particle *p = &particle_array[i];`. So the S184 fix covers BOTH the
+    max-offset bias AND the dual-base split.
 
 **Sub-lever — fixed-trip multi-offset compare: INDEX form, not pointer-increment (S215).** A
 FIXED-trip loop (not sentinel-terminated) that reads several FIXED offsets off two pointers and

@@ -4739,18 +4739,34 @@ by `/sprint-plan`:
   File md5-candidate only when all remaining bank.
 - **Open (S225→S226, in-progress mixed-partial, NOT a spike):** `src/main/func_80078910.c` (37-fn
   main-seg `none` pack, subseg 0x53D10 flipped `c` at the S225 gate; rumble/shadow/effects + heap
-  alloc/free system). **10 banked** (S225 heap alloc/free/dispatch cluster + rumble twins +
+  alloc/free system). **12 banked** (S225 heap alloc/free/dispatch cluster + rumble twins +
   particle-init; S226 DL-emitter vein `func_8007DE9C`/`func_8007DFD0` billboard twins +
-  `func_8007CF10` offscreen-indicator), 27 stubs remain. Quality 0/0/0/0, **no carries.** The cheap
-  non-FP + low-FP-DL veins are now MINED (S226 stopped at cap; the tail is wall-class). **Deferred
-  (wall-class):** the 187-208i pure-logic tier `func_8007D19C`/`func_8007DB08` (jal0) + `func_8007FEAC`
-  (jal8) mid-logic base-register walls; the FP cluster `func_8007B054`/`func_8007A6C8`/`func_8007E980`
-  + the 79xxx fp fns (regalloc-nemesis); `draw_character_shadow` (DL/shadow builder); `func_8007B994`
-  (785i state machine); `func_8007FE44` = caller-evict (skip). File md5-candidate only when all 37
-  bank. **S225 levers (landed in hazards.md):** `#counter-up-pointer-giv-fill-loop` and
+  `func_8007CF10` offscreen-indicator; **+2 S244** particle-spawn twins `func_80079940`/`func_80079A08`),
+  **25 stubs remain.** Quality 0/0/0/**1 carry** (S244 `func_8007955C`).
+  **S244 UPDATE — REFUTED the S226 "79xxx regalloc-nemesis" bulk wall-prediction:** 2 of the 3 smallest
+  "79xxx fp" leaves BANKED clean, the 3rd is a SCHEDULER coin (not regalloc). `func_80079940` (50i,
+  `combine_givs` DUAL-BASE split cracked by the S184 `&particle_array[i]` recompute de-bias, now in
+  hazards `#indexed-vs-pointer` S184 sub-lever); `func_80079A08` (53i, double-const spawn — `s32 one=1`
+  defeats the `(f64)1*D->D` fold + `f64 grav=D` preheader-hoist FP-reg flip + explicit sentinel/stmt-order
+  delay-slot control). **New carry `func_8007955C`** (103i particle-spawn RTS-matrix builder,
+  `mtx_from_rts`+`convert_and_pack_floats_to_fixed`, frame_counter signed `%40`): FULLY RE'd, residual =
+  gcc-2.7.2 **sched.c SCHEDULE-ORDER coin** (~85%, < 0.97; const materialization fills the
+  `mul.s`->`swc1` load-latency gap in an order source store-order can't force; kin to
+  `sched-class-tiebreak-order-coin`). `docs/wip/func_8007955C.near-match.md`.
+  **LESSON (2nd verify-by-seed data point, S240):** a BULK "regalloc-nemesis" tag over a size/fp-count
+  band (no per-fn attempt, no wip doc) is a HYPOTHESIS, not a wall — seed it. **Ranker follow-ups
+  (tracked, S244):** (a) do NOT emit a `carried-wall`/regalloc sub-tag for UN-attempted leaves (no wip
+  doc, no BACKLOG carry) — only for characterized ones, so the DoR doesn't mis-skip tractable leaves
+  (companion to the `carried-wall:<fn>` BACKLOG-cross-ref follow-up); (b) `sched-order-coin:<fn>` sub-tag
+  now also covers `func_8007955C` (per the S243 follow-up).
+  **Remaining deferred (re-price, NOT confirmed walls):** `func_8007D19C`/`func_8007DB08` (jal0) +
+  `func_8007FEAC` (jal8) mid-logic; FP cluster `func_8007B054`/`func_8007A6C8`/`func_8007E980`;
+  `draw_character_shadow` (DL/shadow); `func_8007B994` (785i state machine); `func_8007E7B8` +
+  `func_8007FE44` = caller-evict (skip). File md5-candidate only when all 37 bank.
+  **S225 levers (landed in hazards.md):** `#counter-up-pointer-giv-fill-loop` and
   `#callee-prototype-is-load-bearing`. **S226 lesson:** a low-FP DL-emitter vein is TRACTABLE via stock
-  gbi macros (not wall-class). Per the S224 plateau lesson, prefer a fresh pack / escalation over
-  another smallest-first continuation of this mined pack.
+  gbi macros (not wall-class). **S244:** the FP particle-spawn vein is ALSO tractable (2 banked) — the
+  smallest un-attempted leaves are worth seeding before the plateau-prefer-fresh-pack rule fires.
 - **Open (S223→S224→S239→S240→S241, in-progress mixed-partial, NOT a spike):** `src/main/func_8006A2C0.c` (45-fn main-seg
   `none` pack, subseg 0x456C0 flipped `c` at the S223 gate; mode/asset state + DL + sfx system). **23
   banked** (19 S223 tiny/getter/setter/mode-state + asset-load/free `func_8003E400.c` twins; +1 S224

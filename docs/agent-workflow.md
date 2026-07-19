@@ -219,6 +219,16 @@ Ghidra MCP is used inline at seed time. For each target function:
        isolated Iterate loop below. Use this when Ghidra MCP is unavailable (`list_instances` empty)
        or the fn is small enough that the decompile adds no shape/type value. The fast-path banked a
        2-fn 176B pack this way, first build, MCP down (S148).
+       - **Per-fn oracle for the fast-path = `objdump -d` of the FRESH object, NOT `diff.py` (S244).**
+         With no base.c/decomp_loop, iterate on register/scheduling diffs by rebuilding just the one
+         object and disassembling it: `find build -name '<obj>.o' -delete && make build/<path>/<obj>.o
+         && mips-linux-gnu-objdump -d build/<path>/<obj>.o | awk '/<fn>:/,/<next>:/'`. The object's
+         `%hi/%lo` show as `0x0` (unresolved) but the register allocation, instruction order, and
+         immediates are the ground truth. `diff.py` reads `build/*.map` which an incremental per-object
+         build does NOT refresh, so it lies (S244 `func_80079940`: diff.py showed byte-clean while the
+         fresh object was dual-base-split). Use `diff.py` only right after a full `make` (map + objects
+         consistent) for the reloc-resolved view; gate every bank on `tools/verify-rom.sh`. See the
+         memory [[subagent-diff-crack-not-a-bank]].
    - **Iterate** at most 25 times: `venv/bin/python3 tools/decomp_loop.py --func <placeholder>`, then
      parse the JSON. `score == 0` is a candidate; 5 consecutive `compile_ok == False` means a broken
      seed, so stop; otherwise read the top mismatches, edit `base.c`, and re-run. Run the permuter

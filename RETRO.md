@@ -25,6 +25,29 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 244 — bank the particle-spawn family in func_80078910.c — 2026-07-19
+- Increment: 0 files banked (file partial, 25 stubs, NOT md5-candidate) / **+2 functions matched**
+  (`func_80079940`, `func_80079A08`) + 1 fully-RE'd carry (`func_8007955C`). File 27 → 25 stubs.
+- Quality: 0 stuck-far / 0 permuter / 1 carried / 0 re-opened this sprint.
+- Seed: committed 5pt; banked 0pt (file partial, per-file all-or-nothing); realized 7 (+1 carry, +1
+  novel-crack cluster), residual +2; regime classical.
+- What helped: S184 `&particle_array[i]` recompute de-biased a `combine_givs` DUAL-BASE split (79940);
+  `s32 one=1` variable defeated gcc's `(f64)1*D→D` identity fold + `f64 grav=D` preheader-hoist flipped
+  the loop-var/invariant FP-reg coin + explicit sentinel & statement order nailed the delay-slot fill
+  (79A08); objdump of the FRESH object was the true per-fn oracle (diff.py stale, S242 recurred).
+- Friction: diff.py lied byte-clean while the object was dual-base-split; `func_8007955C`'s schedule-order
+  coin didn't yield to source store-order reshuffles (15↔19 rows, no convergence).
+- REFUTED the S226 "79xxx regalloc-nemesis" bulk wall-prediction (2 of 3 banked; the 3rd is a scheduler
+  coin, not regalloc) — 2nd verify-by-seed data point (S240): a bulk regalloc tag over a size/fp-count
+  band with no per-fn attempt is a HYPOTHESIS.
+- Applied: 5 of 5 — #1 S184 dual-base extension → hazards#indexed-vs-pointer + memory
+  `fp-const-init-spawn-loop-levers`; #2 FP-const spawn levers → same new memory; #3 no-tag-un-attempted-
+  leaves (ranker follow-up) → BACKLOG; #4 objdump-fresh-object oracle → agent-workflow asm-first fast-path;
+  #5 `sched-order-coin:<fn>` coverage of func_8007955C → BACKLOG. (0 new tooling-test failures; doc/BACKLOG
+  edits only.)
+- Carry-over: `func_8007955C` (particle-spawn RTS-matrix builder, sched.c schedule-order coin ~85%,
+  `docs/wip/func_8007955C.near-match.md`). File `func_80078910.c` continues (25 stubs).
+
 ## Sprint 243 — bank glyph-emitter siblings 73F24/74230/74500 in func_80071370.c — 2026-07-18
 - Increment: 0 files banked (file partial, 20 stubs, NOT md5-candidate) / **+0 functions matched** — 3 fully
   RE'd + root-caused CARRIES. 2nd straight 0-bank characterization sprint on this emitter tail (S241 = 0/3).
