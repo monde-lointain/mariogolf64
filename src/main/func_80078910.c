@@ -138,7 +138,50 @@ void func_80079940(s32* arg0) {
   } while (++i != 40);
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80078910", func_80079A08);
+extern s32 func_8005483C(s32 arg0, s32 arg1, f32* out);
+extern f64 D_800D1988;
+
+void func_80079A08(s32 arg0, s32 arg1) {
+  s32 sp10[28]; /* reserved stack (unaccessed in this fn) */
+  f32 sp80[4];
+  s32 i;
+  s32 one;
+  s32 free_slot;
+
+  if (func_8005483C(arg0, arg1, sp80) == 0) {
+    f64 grav;
+
+    i = 0;
+    free_slot = -1;
+    one = 1;
+    grav = D_800D1988;
+    do {
+      Particle* p = &particle_array[i];
+
+      if (p->unk_3A == free_slot) {
+        f32 w;
+        f32 z;
+
+        p->unk_00 = sp80[0];
+        p->unk_04 = sp80[1];
+        z = sp80[2];
+        w = (f32)((f64)one * grav);
+        p->unk_0C = 0;
+        p->unk_14 = 0;
+        p->unk_38 = 0;
+        p->unk_28 = 230.0f;
+        p->unk_2C = -2.0f;
+        p->unk_30 = 2.0f;
+        p->unk_34 = 0.02f;
+        p->unk_3A = 14;
+        p->unk_3B = 0;
+        p->unk_08 = z;
+        p->unk_10 = w;
+        break;
+      }
+    } while (++i != 40);
+  }
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80078910", spawn_terrain_effect);
 
