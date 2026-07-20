@@ -2,6 +2,8 @@
 
 extern u32 sky_panel_cycle_mode_sel;
 extern s32 D_800C5EE4;
+extern s32 D_800C7304;
+extern s32 D_800C730C;
 
 INCLUDE_ASM("asm/nonmatchings/main/func_8008D100", func_8008D100);
 
@@ -36,7 +38,17 @@ INCLUDE_ASM("asm/nonmatchings/main/func_8008D100", func_80092E10);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_8008D100", func_80092F18);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_8008D100", func_800934CC);
+void func_800934CC(s32 arg0) {
+    if (arg0 == -1) {
+        D_800C7304 = 0;
+    } else if (arg0 == 3) {
+        D_800C730C = arg0;
+        D_800C7304 = 2;
+    } else {
+        D_800C7304 = 1;
+        D_800C730C = arg0;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_8008D100", func_8009351C);
 
