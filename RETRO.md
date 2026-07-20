@@ -25,6 +25,31 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 247 — open fresh func_8008D100.c (26-fn sky/skybox render pack) — 2026-07-20
+- Increment: 0 files banked (file partial, 22 stubs, NOT md5-candidate) / **+4 functions matched**
+  (`func_80092324` scaffold-empty, `func_8008FF14`→set_sky_panel_cycle_mode_sel, `func_800959F8`,
+  `func_800934CC`) / **2 carried** (delta: ROM SHA-1 green throughout; matched-count is the value).
+- Quality: 0/0/2/0 (stuck-far/permuter/carried/re-opened). Carries: `func_8008E164` (FP lerp, body
+  byte-exact, dead-frame+dead-store coin), `func_8009226C` (jtbl partial-merge+block-reorder wall).
+- Seed: committed 5pt; banked 0pt (file partial); regime classical/mixed. Realized ~7 (+2 carries);
+  residual +2.
+- What helped: plateau-rule pivot off mined-out func_80071370.c to a FRESH pack was correct — 3 clean
+  small leaves (setter/predicate/mode-setter) banked first-build. Per-object `objdump` fast-path (S244
+  oracle) proved func_8008E164's FP body byte-exact and isolated the residual to a dead frame in one
+  build, no permuter needed to characterize.
+- Friction: (1) vram-gap leaf sizing at the plan gate was WRONG (named fns interleave the pack) — the
+  committed named leaves turned out large; real tiny leaves were different fns; re-sorted from `.s`
+  headers at execution. (2) Curated rename of func_800959F8 broke the link (called from committed C
+  siblings by auto name) — 2 failed builds before keeping the auto name.
+- Applied: 3 of 3 — #1 size-leaves-from-`.s`-not-vram-gaps (→ workflow DoR), #2
+  grep-committed-C-callers-before-rename (→ workflow Bank-4a + memory), #3 keep-auto-name when backing
+  global has diverse-subsystem callers (→ memory). 2 new memories written.
+- Carry-over: `src/main/func_8008D100.c` (partial, 22 stubs) — `func_8008E164` (dead-frame coin, wip
+  doc), `func_8009226C` (jtbl partial-merge switch, semantics RE'd). Remaining pack tail is DL/FP-heavy
+  (emit_sky_*_dl, update_sky_panel_verts) = S243/S158 wall risk.
+
+---
+
 ## Sprint 246 — bank fresh dispatcher leaves in func_80071370.c (glyph/HUD DL family) — 2026-07-20
 - Increment: 0 files banked (file partial, 18 stubs, NOT md5-candidate) / **+2 functions matched**
   (`func_80071370`→load_hud_glyph_assets, `func_80071B34`→emit_hud_table_prim_dl) / **1 carried**

@@ -1042,6 +1042,19 @@ Three honest caveats:
   `sched-coin-loop-preheader-order-lever`). Retro applied 3 of 3 (#1 sched-coin retire, #2 DL-macro/gfx++
   idiom, #3 decomp_loop/permuter-score-disagrees-ROM). Tooling-test failures hold at 8 (0 new; doc/memory
   edits only).
+  S247: OPENED fresh `src/main/func_8008D100.c` (26-fn sky/skybox render pack; asm-flip → c;
+  plateau-rule pivot off the mined-out func_80071370.c). **3 banked / 2 carried** (+1 scaffold-empty
+  `func_80092324` = 4 matched, 25→22 stubs). Banks (all first-build): `func_8008FF14`→
+  set_sky_panel_cycle_mode_sel (u32 setter), `func_800959F8` (`D_800C5EE4<1` predicate, auto name),
+  `func_800934CC` (3-way mode setter). Carried: `func_8008E164` (integer lerp `(s32)(a0*(1-t)+a1*t)`,
+  t in $a2 o32-GPR; FP body BYTE-EXACT, residual = dead 8-byte frame + `sw v0` dead store, a
+  DCE-leftover/frame coin) + `func_8009226C` (11-entry jtbl_800D1E08 switch, semantics fully RE'd,
+  block-reorder + partial tail-merge exact-repro wall). Seed 5 (classical/mixed); banked 0pt (file
+  partial, walls remain); realized ~7 (+2 carries); residual +2. Rolling-5 (S243-S247): main-segment
+  slices banked 0+2+3+2+3. Retro applied 3 of 3 (#1 size-leaves-from-.s-not-vram-gaps → workflow DoR,
+  #2 grep-committed-C-callers-before-rename → workflow Bank-4a + memory, #3
+  keep-auto-name-diverse-global → memory). 2 new memories. Tooling-test failures hold at 8 (0 new;
+  doc/memory edits only). Push: local only.
 - **Regime:** `mirror` is a depleting minority (~22 % of ranked candidates: 56 mirror vs 194
   classical; 18 warm / 38 cold). The warm clean-singleton mirror pool is now **mined out** (S11
   plan gate: every top mirror candidate carries a blocking hazard), pushing the project onto the

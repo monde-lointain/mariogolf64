@@ -272,7 +272,14 @@ Ghidra MCP is used inline at seed time. For each target function:
      and SHA-1 == baserom.
 
 4. **Bank** the function (only at score 0 plus spot-check plus full-`make` SHA match):
-   a. Give it its curated Ghidra name: add to `symbol_addrs.txt`, rename in the body, re-`make`.
+   a. Give it its curated Ghidra name: add to `symbol_addrs.txt`, rename in the body, re-`make`
+      (`make extract && make` when the rename must reach still-asm callers). **Before renaming, grep
+      already-committed C callers: `grep -rn '\bfunc_<addr>\b' src` (S247).** The `make extract` regen
+      only rewrites STILL-ASM refs via `undefined_syms_auto`; a fn called from a committed C TU by its
+      auto `func_<addr>` name will `undefined reference`-fail the link after the rename. If any C
+      caller exists, either sed those files to the new name in the same commit or KEEP the auto name
+      (a getter/predicate over a generic global read across unrelated subsystems is usually best left
+      auto-named — a domain-guess is likely wrong; S247 kept `func_800959F8`).
    b. On `git commit`, stage the `make extract`-regenerated artifacts too (`undefined_syms_auto.txt`
       and `mariogolf64.ld`): they change on a subseg flip or `symbol_addrs.txt` add and must travel
       with the commit, or the regen bleeds into the next sprint's dirty tree (a `D_`-to-named
@@ -332,6 +339,14 @@ dashboard). Target selection is `tools/pick_target.py`, not a stored roadmap.
 - **Definition of Ready.**
   - Subseg flippable (not `hasm`); coarse size known; upstream-mirror availability noted; hazards
     flagged.
+  - **Size FRESH-pack leaves from the extracted `.s` headers, NOT vram gaps (S247).** In a
+    multi-fn asm-flip pack, curated-named fns interleave the `func_<vram>` ones, so a leaf's size
+    computed from adjacent-vram deltas is wrong (S247 mis-sized `func_8009232C`/`per_hole_...`/
+    `func_8009351C` as tiny when they were 0x4CC-0xAE4, and missed the real tiny leaves
+    `func_8008FF14`/`func_800959F8`/`func_800934CC`). Either (a) commit the backlog as "N smallest-first
+    leaves TBD at extract" and re-sort by `head -1 asm/nonmatchings/<seg>/<f>/<f>.s` (`nonmatching <f>,
+    0x<size>`) once the flip is done, or (b) if you must name leaves at the gate, flip+extract FIRST
+    then size from the `.s`. (Fold into the `carried-wall`/sizing ranker follow-ups in `BACKLOG.md`.)
   - **For a c-stub CONTINUATION (an already-`c` file), grep the target `src/<file>.c` for pre-existing
     near-match / carry comments on each candidate leaf BEFORE committing it (S232).** `pick_target.py`'s
     smallest-first sort and any FP/jal tell-filter do NOT see the in-file wall comments a prior sprint
