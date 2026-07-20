@@ -669,3 +669,4 @@ reload_scene_assets = 0x80078BDC; // type:func
 load_hud_glyph_assets = 0x80071370; // type:func
 emit_hud_table_prim_dl = 0x80071B34; // type:func
 set_sky_panel_cycle_mode_sel = 0x8008FF14; // type:func
+lerp_s32 = 0x8008E164; // type:func
