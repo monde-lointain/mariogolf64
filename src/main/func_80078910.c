@@ -97,7 +97,85 @@ void func_800789C8(void) {
   }
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80078910", func_80078BDC);
+typedef struct {
+  /* 0x00 */ u32 id;
+} TerrainAttrEntry;
+
+extern s32 D_800FBE64;
+extern u32 target_z;
+extern s32 D_800FBE70;
+extern s32 D_800C52B0;
+extern s32 D_800FC8B8;
+extern TerrainAttrEntry* get_table_entry(u32 idx);
+extern void func_80216B10(void);
+extern s32 get_interpolated_terrain_height_wrapper(s32 x, s32 z);
+
+void reload_scene_assets(s8* arg0) {
+  u8 sp10[0x20];
+  s32 i;
+
+  func_8005062C(0x6B5, sp10);
+  func_800506D4(D_800E1DB4, sp10);
+  func_8005062C(0x6B8, sp10);
+  func_800506D4(D_800E1DB8, sp10);
+  func_8005062C(0x6B0, sp10);
+  func_800506D4(D_800E1DA0, sp10);
+  func_8005062C(0x6B2, sp10);
+  func_800506D4(D_800E1DA8, sp10);
+  func_8005062C(0x6C0, sp10);
+  func_800506D4(D_800E1DAC, sp10);
+
+  i = 0;
+  do {
+    (particle_array + i)->unk_3A = -1;
+  } while (++i != 40);
+
+  D_800FC8B8 =
+      (s32)(f32)get_interpolated_terrain_height_wrapper(D_800FBE64, target_z);
+
+  if (arg0[0xA3] == 23) {
+    D_800C52B0 = 1;
+    func_8005062C(0x6B6, sp10);
+    func_800506D4(D_800E1DBC, sp10);
+  } else {
+    switch (get_table_entry(D_800FBE70)->id) {
+      case 0:
+      case 1:
+      case 2:
+      case 15:
+      case 17:
+        D_800C52B0 = 2;
+        func_8005062C(0x6B6, sp10);
+        func_800506D4(D_800E1DBC, sp10);
+        break;
+      case 3:
+      case 4:
+      case 5:
+      case 19:
+        D_800C52B0 = 4;
+        func_8005062C(0x6B8, sp10);
+        func_800506D4(D_800E1DBC, sp10);
+        break;
+      case 6:
+      case 18:
+        D_800C52B0 = 3;
+        func_8005062C(0x6B5, sp10);
+        func_800506D4(D_800E1DBC, sp10);
+        break;
+      case 7:
+      case 8:
+      case 9:
+        D_800C52B0 = 6;
+        func_8005062C(0x6B5, sp10);
+        func_800506D4(D_800E1DBC, sp10);
+        break;
+      default:
+        D_800C52B0 = 0;
+        break;
+    }
+  }
+  func_80216B10();
+}
 
 void func_80078D94(void) {
   s32 i = 0;
@@ -393,7 +471,6 @@ typedef struct {
 } TerrainScatterPoint;
 
 extern s32 rand(void);
-extern s32 get_interpolated_terrain_height_wrapper(s32 x, s32 z);
 
 void randomize_terrain_scatter_point(TerrainScatterPoint* p) {
   p->unk_00 =

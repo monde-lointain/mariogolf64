@@ -735,14 +735,15 @@ SECTIONS
         build/src/main/func_80076640.o(.rodata);
         build/src/main/func_800772B0.o(.rodata);
         build/src/main/func_80077BF0.o(.rodata);
+        build/asm/data/ACC48.rodata.o(.rodata);
+        build/asm/data/ACD00.rodata.o(.rodata);
         build/src/main/func_80078910.o(.rodata);
         build/asm/5B620.o(.rodata);
         build/asm/68500.o(.rodata);
         build/src/main/func_80095A10.o(.rodata);
         build/src/main/func_80099490.o(.rodata);
         build/src/libnusys/nuboot.o(.rodata);
-        build/asm/data/ACC48.rodata.o(.rodata);
-        build/asm/data/ACD00.rodata.o(.rodata);
+        build/asm/data/ACD60.rodata.o(.rodata);
         build/src/libmus/player.o(.rodata);
         build/src/libmus/player_commands.o(.rodata);
         build/asm/78330.o(.rodata);
