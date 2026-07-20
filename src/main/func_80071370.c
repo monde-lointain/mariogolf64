@@ -142,7 +142,49 @@ void func_80071954(u8* src) {
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80071370", func_800719A0);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80071370", func_80071B34);
+extern void func_80071608(Gfx** dl);
+extern void func_80072A08(Gfx** dl, s32 i);
+extern void func_80071CE4(Gfx** dl, s32 i);
+extern s32 D_8012F518;
+extern s32 D_8012F520;
+extern u8 D_8012F528;
+extern u8 D_8012F529;
+extern u8 D_8012F52A;
+extern u8 D_8012F52B;
+
+/* Emits a per-entry gDPSetPrimColor (opcode 0xFA) + sub-emitter DL for the
+ * 12-element 0x2C-stride table at D_8012F510, skipping entries whose unk_14==-1
+ * or unk_10&0x20. dl is post-incremented (dl++) into the ROM's store-giv.
+ * Computing the row byte-offset as `i * 0x2C` inside the loop (rather than a
+ * separate off biv) is load-bearing: it orders the hoisted-invariant vs
+ * biv-init emission so the prologue register init/save block schedules to match
+ * (same i*0x2C idiom as func_800718C4). */
+void emit_hud_table_prim_dl(Gfx** cursor) {
+  Gfx* dl;
+  s32 i;
+  s32 off;
+
+  dl = *cursor;
+  func_80071608(&dl);
+  for (i = 0; i != 12; i++) {
+    off = i * 0x2C;
+    if (*(s32*)((u8*)&D_8012F524 + off) == -1) {
+      continue;
+    }
+    if (*(s32*)((u8*)&D_8012F520 + off) & 0x20) {
+      continue;
+    }
+    gDPSetPrimColor(dl++, 0, 0, *((u8*)&D_8012F528 + off),
+                    *((u8*)&D_8012F529 + off), *((u8*)&D_8012F52A + off),
+                    *((u8*)&D_8012F52B + off));
+    if (*(s32*)((u8*)&D_8012F518 + off) == 0xA) {
+      func_80072A08(&dl, i);
+    } else {
+      func_80071CE4(&dl, i);
+    }
+  }
+  *cursor = dl;
+}
 
 extern s32 D_8012F51C;
 

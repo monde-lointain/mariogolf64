@@ -667,3 +667,4 @@ project_delta_to_radius_150 = 0x8007E30C; // type:func
 randomize_terrain_scatter_point = 0x8007E664; // type:func
 reload_scene_assets = 0x80078BDC; // type:func
 load_hud_glyph_assets = 0x80071370; // type:func
+emit_hud_table_prim_dl = 0x80071B34; // type:func
