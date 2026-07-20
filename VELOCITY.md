@@ -1031,6 +1031,17 @@ Three honest caveats:
   memory `fixed-global-vector-fn-crack-combo`; #3 jtbl-carve zero-prior-rodata + cross-jump → memory
   `jtbl-carve-both-edge-8align`; #4 DoR fresh-tail note → BACKLOG). NB: tooling-test failures hold at 8
   (doc/BACKLOG/memory edits only, 0 new); dedicated tooling pass still deferred.
+  S246: SLICE of `src/main/func_80071370.c` (glyph/HUD DL family) — **2 banked / 1 carried**.
+  `func_80071370`→load_hud_glyph_assets (asset-loader init; global.c s0/s1 coin, permuter `size2=`
+  accumulator-reuse lever), `func_80071B34`→emit_hud_table_prim_dl (12-entry HUD-table DL emitter, GBI
+  macros+gfx++; prologue sched-order coin RETIRED to a clean `off=i*0x2C` giv via a gcc-2.7.2 dive).
+  Carried `func_8007624C` (2-pass drop-shadow raw-DL wall, fully RE'd). Seed 5 (classical/mixed); banked
+  0pt (file partial 20→18 stubs); realized ~7 (+1 carry, +1 permuter-work); residual +2. Rolling-5
+  (S242-S246): main-segment slices banked 3+0+2+3+2. **Key: retired the S243 "sched-order coin is
+  terminal" verdict to a loop.c preheader-order source lever** (new memory
+  `sched-coin-loop-preheader-order-lever`). Retro applied 3 of 3 (#1 sched-coin retire, #2 DL-macro/gfx++
+  idiom, #3 decomp_loop/permuter-score-disagrees-ROM). Tooling-test failures hold at 8 (0 new; doc/memory
+  edits only).
 - **Regime:** `mirror` is a depleting minority (~22 % of ranked candidates: 56 mirror vs 194
   classical; 18 warm / 38 cold). The warm clean-singleton mirror pool is now **mined out** (S11
   plan gate: every top mirror candidate carries a blocking hazard), pushing the project onto the

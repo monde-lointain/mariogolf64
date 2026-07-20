@@ -25,6 +25,32 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 246 — bank fresh dispatcher leaves in func_80071370.c (glyph/HUD DL family) — 2026-07-20
+- Increment: 0 files banked (file partial, 18 stubs, NOT md5-candidate) / **+2 functions matched**
+  (`func_80071370`→load_hud_glyph_assets, `func_80071B34`→emit_hud_table_prim_dl) / **1 carried**
+  (`func_8007624C`). File 20 → 18 stubs.
+- Quality: 0 stuck-far / 2 permuter (BOTH retired: 71370 kept the `size2=` lever; 71B34 retired to a
+  clean `off=i*0x2C` idiom) / 1 carried / 0 re-opened.
+- Seed: committed 5pt (classical/mixed); banked 0pt (file partial); realized ~7 (+1 carry, +1 permuter-
+  work); residual +2; regime classical/mixed.
+- What helped: (71370) global.c s0/s1 base-vs-accumulator coin cracked via `heap3_alloc(size2 = w*h+8)`
+  accumulator-reuse (pins both accumulators to one pseudo). (71B34) body byte-perfect first build; only
+  the prologue sched-order coin (S243 "terminal" class) diverged — PO-directed gcc-2.7.2 dive + `-S`
+  oracle + peer subagent ROOT-CAUSED it to loop.c preheader placement (`do{}while(0)` NOTE_INSN_LOOP_BEG
+  artifact) and RETIRED it to the clean `off = i * STRIDE` giv idiom (same as func_800718C4). GBI macros
+  (gDPSetPrimColor + gfx++) per PO directive.
+- Friction: mis-priced the slice as "call-glue dispatchers" from jal-count — 71370 is an asset-loader,
+  71B34/7624C are DL emitters. 7624C is a genuine 2-pass drop-shadow raw-DL wall (fully RE'd; residual =
+  fixed-base-write + incrementing-localGfx dead-store split + x/y biv placement; quantized packing can't
+  use GBI macros). decomp_loop scored the 71B34 permuter-crack 800 yet full-make ROM SHA-1 matched.
+- Applied: 3 of 3 — #1 sched-coin retire lever → new memory `sched-coin-loop-preheader-order-lever` +
+  updated `mg64-glyph-emitter-dl-family` (S243 verdict = hypothesis, re-attempt the 73F24/74230/74500
+  tails with `off=i*STRIDE`); #2 DL-macro/gfx++ idiom → `mg64-glyph-emitter-dl-family` (+ raw-packing
+  exception for quantized colors); #3 decomp_loop/permuter score-disagrees-ROM → `subagent-diff-crack-
+  not-a-bank`. (0 new tooling-test failures; doc/memory edits only.)
+- Carry-over: `func_8007624C` (raw-DL wall, `docs/wip/func_8007624C.near-match.md`). File
+  `func_80071370.c` continues (18 stubs).
+
 ## Sprint 245 — bank the 3 smallest fresh leaves in func_80078910.c — 2026-07-20
 - Increment: 0 files banked (file partial, 22 stubs, NOT md5-candidate) / **+3 functions matched**
   (`func_8007E30C`→project_delta_to_radius_150, `func_8007E664`→randomize_terrain_scatter_point,

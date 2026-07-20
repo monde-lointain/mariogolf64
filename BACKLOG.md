@@ -4737,6 +4737,17 @@ by `/sprint-plan`:
   0-bank characterization sprint on this tail after S241). **Ranker follow-up:** a `raw-dl-emitter:<fn>`
   tell (many raw command-word `sw` + no clean-macro fingerprint) to pre-flag the harder sub-family.
   File md5-candidate only when all remaining bank.
+  **S246 UPDATE: 2 banked / 1 carried (20 → 18 stubs).** Banked `func_80071370`→`load_hud_glyph_assets`
+  (asset-loader init, NOT DL; global.c s0/s1 base-vs-accumulator coin, permuter-cracked via
+  `heap3_alloc(size2 = w*h+8)` accumulator-reuse) + `func_80071B34`→`emit_hud_table_prim_dl` (12-entry
+  HUD-table DL emitter, GBI macros + gfx++). **KEY: the S243 "sched-order coin is TERMINAL" verdict is
+  RETIRED for the PROLOGUE init/save-order flavour** — a PO-directed gcc-2.7.2 dive root-caused it to
+  loop.c preheader PLACEMENT (the `do{}while(0)` NOTE_INSN_LOOP_BEG artifact the permuter left) and
+  cracked it CLEAN via the `off = i * STRIDE` giv idiom (memory `sched-coin-loop-preheader-order-lever`).
+  **Re-attempt the 73F24/74230/74500 raw-DL tails with the `off=i*STRIDE` lever before re-asserting
+  terminal.** Carried `func_8007624C` (2-pass drop-shadow raw-DL glyph emitter, fully RE'd;
+  `docs/wip/func_8007624C.near-match.md`) = fixed-base-write + incrementing-localGfx dead-store split +
+  x/y biv placement (its `>>2`-quantized packing needs RAW `(b>>2)<<shift|0xFF`, not the GBI color macros).
 - **Open (S225→S226, in-progress mixed-partial, NOT a spike):** `src/main/func_80078910.c` (37-fn
   main-seg `none` pack, subseg 0x53D10 flipped `c` at the S225 gate; rumble/shadow/effects + heap
   alloc/free system). **12 banked** (S225 heap alloc/free/dispatch cluster + rumble twins +
