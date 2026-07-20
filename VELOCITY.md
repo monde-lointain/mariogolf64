@@ -1017,6 +1017,20 @@ Three honest caveats:
   BACKLOG ranker follow-ups; #4 objdump-fresh-object oracle for the asm-first path → agent-workflow). NB:
   tooling-test failures hold at 8 (doc/BACKLOG edits only this sprint, 0 new); dedicated tooling pass still
   deferred.
+  S245: CONTINUATION of `src/main/func_80078910.c` (3 smallest fresh leaves) — **3 banked / 0 carried**,
+  all first-pass. `func_8007E30C`→project_delta_to_radius_150 (75i, 3-lever fixed-global vector crack +
+  per-file -ffast-math for bare `sqrt.s`), `func_8007E664`→randomize_terrain_scatter_point (85i,
+  first-build under the -ffast-math profile), `func_80078BDC`→reload_scene_assets (110i, 20-case
+  switch-jtbl carved from a ZERO-prior-rodata object + cross-jump-tail-merge + missing-prototype hoist).
+  Banked **0pt** (file 22 stubs, NOT md5-candidate), **+3 matched**, quality **0 stuck / 0 permuter /
+  0 carried / 0 re-opened** (cleanest sprint of the run). Seed committed **5** (classical); realized **5**
+  (+0 residual, all first-pass). LESSON: func_80078910.c is a HEALTHY fresh-tail (S244 +2, S245 +3, 1
+  wall) — the "plateaued mid-logic tail → prefer fresh pack" default does NOT apply here; ~22 fresh leaves
+  remain, continue the pack. Rolling-5 (S241-S245): main-segment slices banked 0+3+0+2+3. Retro applied
+  4 of 4 (#1 -ffast-math siblings-invariant → hazards#double-sqrt-fast-math; #2 vector-crack combo → new
+  memory `fixed-global-vector-fn-crack-combo`; #3 jtbl-carve zero-prior-rodata + cross-jump → memory
+  `jtbl-carve-both-edge-8align`; #4 DoR fresh-tail note → BACKLOG). NB: tooling-test failures hold at 8
+  (doc/BACKLOG/memory edits only, 0 new); dedicated tooling pass still deferred.
 - **Regime:** `mirror` is a depleting minority (~22 % of ranked candidates: 56 mirror vs 194
   classical; 18 warm / 38 cold). The warm clean-singleton mirror pool is now **mined out** (S11
   plan gate: every top mirror candidate carries a blocking hazard), pushing the project onto the

@@ -4762,11 +4762,19 @@ by `/sprint-plan`:
   **Remaining deferred (re-price, NOT confirmed walls):** `func_8007D19C`/`func_8007DB08` (jal0) +
   `func_8007FEAC` (jal8) mid-logic; FP cluster `func_8007B054`/`func_8007A6C8`/`func_8007E980`;
   `draw_character_shadow` (DL/shadow); `func_8007B994` (785i state machine); `func_8007E7B8` +
-  `func_8007FE44` = caller-evict (skip). File md5-candidate only when all 37 bank.
+  `func_8007FE44` = caller-evict (skip). Still ~22 stubs; file md5-candidate only when all bank.
   **S225 levers (landed in hazards.md):** `#counter-up-pointer-giv-fill-loop` and
   `#callee-prototype-is-load-bearing`. **S226 lesson:** a low-FP DL-emitter vein is TRACTABLE via stock
   gbi macros (not wall-class). **S244:** the FP particle-spawn vein is ALSO tractable (2 banked) — the
   smallest un-attempted leaves are worth seeding before the plateau-prefer-fresh-pack rule fires.
+  **S245 (+3 banked: `func_8007E30C`/`func_8007E664`/`func_80078BDC`; ranker follow-up #4):** this file
+  is now a CONFIRMED HEALTHY fresh-tail continuation (S244 +2, S245 +3, only `func_8007955C` a documented
+  wall among 25 stubs). The "plateaued mid-logic tail → prefer a fresh pack" DoR default (S224) does NOT
+  fire here: the pack keeps yielding first-pass classical banks. Continue func_80078910.c next sprint
+  (smallest fresh leaves: `func_8007E30C`✓ done; next ~`func_8007E438`/`func_800796F8`/`func_80078DC0`)
+  before treating it as plateaued. Enabler landed: `mk/main.mk` per-file `-ffast-math` for
+  `func_80078910.o` (whole-TU flag, siblings-invariant). New crack memory
+  `fixed-global-vector-fn-crack-combo`.
 - **Open (S223→S224→S239→S240→S241, in-progress mixed-partial, NOT a spike):** `src/main/func_8006A2C0.c` (45-fn main-seg
   `none` pack, subseg 0x456C0 flipped `c` at the S223 gate; mode/asset state + DL + sfx system). **23
   banked** (19 S223 tiny/getter/setter/mode-state + asset-load/free `func_8003E400.c` twins; +1 S224

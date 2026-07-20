@@ -25,6 +25,31 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 245 — bank the 3 smallest fresh leaves in func_80078910.c — 2026-07-20
+- Increment: 0 files banked (file partial, 22 stubs, NOT md5-candidate) / **+3 functions matched**
+  (`func_8007E30C`→project_delta_to_radius_150, `func_8007E664`→randomize_terrain_scatter_point,
+  `func_80078BDC`→reload_scene_assets). File 25 → 22 stubs. All first-pass, 0 carries.
+- Quality: 0 stuck-far / 0 permuter / 0 carried / 0 re-opened this sprint.
+- Seed: committed 5pt; banked 0pt (file partial, per-file all-or-nothing); realized 5 (+0 residual, all
+  first-pass no permuter/carry); regime classical.
+- What helped: per-file `-ffast-math` TU override (bare `sqrt.s` in E30C) with the "siblings-held-
+  invariant" reasoning (whole TU was fast-math in ROM → banked FP siblings match by construction);
+  3-lever fixed-global vector crack (invert zero-guard if → bc1t+a0/a1; `s32* p` RMW → shared base-reg;
+  one dist/scale var → sqrt coalesced into div reg); jtbl-carve from a ZERO-prior-rodata object (switch
+  jtbl = sole `.rodata`, clean 8-aligned-both-edges 3-way yaml split) + cross-jump-tail-merge (full call
+  body per case, not shared post-switch call, fixed a 4-instr short); objdump-fresh-object oracle again.
+- Friction: 78BDC missing-prototype (get_interpolated_terrain_height_wrapper implicit-int from a LATER
+  E664 decl) flipped codegen until hoisted; the shared-call-keyed-by-var switch form ran 4 instrs short
+  before switching to per-case bodies.
+- CONFIRMED func_80078910.c is a HEALTHY fresh-tail continuation (S244 +2, S245 +3, 1 wall), counter to
+  the "plateaued mid-logic tail → prefer fresh pack" default; ~22 fresh leaves remain.
+- Applied: 4 of 4 — #1 -ffast-math siblings-invariant note → hazards#double-sqrt-fast-math; #2 fixed-
+  global vector crack combo → new memory `fixed-global-vector-fn-crack-combo`; #3 jtbl-carve zero-prior-
+  rodata + cross-jump companion → memory `jtbl-carve-both-edge-8align`; #4 DoR fresh-tail note → BACKLOG.
+  (0 new tooling-test failures; doc/BACKLOG/memory edits only.)
+- Carry-over: none new. File `func_80078910.c` continues (22 stubs; `func_8007955C` still the lone
+  documented wall).
+
 ## Sprint 244 — bank the particle-spawn family in func_80078910.c — 2026-07-19
 - Increment: 0 files banked (file partial, 25 stubs, NOT md5-candidate) / **+2 functions matched**
   (`func_80079940`, `func_80079A08`) + 1 fully-RE'd carry (`func_8007955C`). File 27 → 25 stubs.

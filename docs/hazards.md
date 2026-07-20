@@ -4072,8 +4072,18 @@ exist in 2.7.2). The `#pragma intrinsic(sqrtf)` in `include/libultra/PR/gu.h` is
 on KMC) and irrelevant; the hand-written `src/libultra/gu/sqrtf.s` leaf is only the `-O0`/non-inlined
 fallback, not the intrinsic path — do not reach for a "sqrtf-intrinsic path" for single precision.
 
+**Mid-file leaf, whole-TU flag is safe (S245).** When a mid-file leaf (not the first fn) needs
+`-ffast-math`, the override applies to the WHOLE `.o`, but this is SAFE, not a sibling-break risk:
+compile flags are per-TU, so the ROM built this TU with `-ffast-math` in the first place — every fn in
+it, including any already-banked FP siblings, was a fast-math build. Those siblings currently match the
+ROM, so they are fast-math-INVARIANT by construction (matching the fast-math ROM) and stay matched once
+you add the flag. Add the override the moment the first sqrt-leaf needs it; do not defer it out of fear
+for the banked siblings, and do not re-verify each sibling by hand — the full-make ROM-SHA-1 confirms
+all at once. S245 added `func_80078910.o` (bare `sqrt.s` in `func_8007E30C`) mid-file with 2 FP
+siblings already banked; both held first rebuild.
+
 **Provenance:** S152 (double `vector_magnitude_safe` / `calculate_hypotenuse_safe`, the range-scaling
-fns); S153 (single `hypotf_2d`).
+fns); S153 (single `hypotf_2d`); S245 (`func_80078910.o`, mid-file leaf, siblings-held).
 
 ---
 
