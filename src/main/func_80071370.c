@@ -1,15 +1,67 @@
 #include "common.h"
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80071370", func_80071370);
-
+extern u32 func_8005062C(u16 index, void* out);
+extern void* heap3_alloc(u32 need);
+extern void func_800506D4(void* dst, void* desc);
+extern void nuPiReadRom(u32 rom_addr, void* buf_ptr, u32 size);
 extern void heap3_free(void** payload_ptr);
+extern void func_800718C4(void);
+extern void func_8007512C(void);
+extern u8 D_151CD40[];
+extern u8 D_151CD50[];
 extern void* D_8012F4E0;
 extern void* D_800E1C30;
 extern void* D_800E1C34;
 extern void* D_800E1C38;
+extern void* D_800E1C3C;
+extern void* D_800E1C40;
 extern void* D_800E1C4C;
 extern void* D_800E1C44;
 extern u16* D_800E1C48;
+extern u32 D_80104FD0;
+
+/* Allocates + loads the HUD/glyph asset set: 7 tagged assets via
+ * func_8005062C size-lookup + heap3_alloc + func_800506D4 load, then two
+ * raw-ROM images (D_151CD40 w*h+8, D_151CD50 size-prefixed) via nuPiReadRom. */
+void load_hud_glyph_assets(void) {
+  u8 spvar[0x20];
+  void* headerBuf;
+  s32 width;
+  s32 height;
+  s32 size2;
+
+  D_8012F4E0 = heap3_alloc(func_8005062C(0x4B2, spvar));
+  func_800506D4(D_8012F4E0, spvar);
+  D_800E1C30 = heap3_alloc(func_8005062C(0x4B3, spvar));
+  func_800506D4(D_800E1C30, spvar);
+  D_800E1C34 = heap3_alloc(func_8005062C(0x4B5, spvar));
+  func_800506D4(D_800E1C34, spvar);
+  D_800E1C38 = heap3_alloc(func_8005062C(0x4B6, spvar));
+  func_800506D4(D_800E1C38, spvar);
+  D_800E1C4C = heap3_alloc(func_8005062C(0x4B0, spvar));
+  func_800506D4(D_800E1C4C, spvar);
+  D_800E1C3C = heap3_alloc(func_8005062C(0x4B9, spvar));
+  func_800506D4(D_800E1C3C, spvar);
+  D_800E1C40 = heap3_alloc(func_8005062C(0x4B8, spvar));
+  func_800506D4(D_800E1C40, spvar);
+
+  headerBuf = heap3_alloc(8);
+  nuPiReadRom((u32)D_151CD40, headerBuf, 8);
+  width = (((u8*)headerBuf)[2] << 8) | ((u8*)headerBuf)[3];
+  height = (((u8*)headerBuf)[4] << 8) | ((u8*)headerBuf)[5];
+  D_800E1C44 = heap3_alloc(size2 = width * height + 8);
+  nuPiReadRom((u32)D_151CD40, D_800E1C44, width * height + 8);
+
+  nuPiReadRom((u32)D_151CD50, headerBuf, 8);
+  size2 = (((u8*)headerBuf)[0] << 8) | ((u8*)headerBuf)[1];
+  heap3_free(&headerBuf);
+  D_800E1C48 = heap3_alloc(size2);
+  nuPiReadRom((u32)D_151CD50, D_800E1C48, size2);
+
+  D_80104FD0 = (D_800E1C48[1] << 1) + 2;
+  func_800718C4();
+  func_8007512C();
+}
 
 void func_800715A0(void) {
   heap3_free(&D_8012F4E0);

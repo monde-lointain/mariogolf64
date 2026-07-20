@@ -666,3 +666,4 @@ lerp_grid_vertices = 0x80041160; // type:func
 project_delta_to_radius_150 = 0x8007E30C; // type:func
 randomize_terrain_scatter_point = 0x8007E664; // type:func
 reload_scene_assets = 0x80078BDC; // type:func
+load_hud_glyph_assets = 0x80071370; // type:func
