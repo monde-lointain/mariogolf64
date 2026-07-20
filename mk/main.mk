@@ -15,3 +15,10 @@ $(BUILD_DIR)/$(SRC_DIR)/main/%.o: C_PROFILE_CFLAGS = $(MAIN_CFLAGS)
 # bare opcode. Per-file override (sibling main/ files stay on the plain -O2 profile;
 # mgu/mtxutil's float math matched without it).
 $(BUILD_DIR)/$(SRC_DIR)/main/func_8006A000.o: C_PROFILE_CFLAGS := $(MAIN_CFLAGS) -ffast-math
+
+# func_80078910.c (effects/particle TU). func_8007E30C computes a 2D magnitude via
+# sqrtf() -> bare `sqrt.s` in the ROM, so the whole TU was compiled -ffast-math.
+# Same BUILT_IN_FSQRT guard-drop as func_8006A000; per-file override. The already
+# banked FP siblings match the (-ffast-math) ROM, so they are fast-math-invariant
+# and stay matched under the flag.
+$(BUILD_DIR)/$(SRC_DIR)/main/func_80078910.o: C_PROFILE_CFLAGS := $(MAIN_CFLAGS) -ffast-math

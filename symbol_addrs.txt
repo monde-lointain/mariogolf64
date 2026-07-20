@@ -663,3 +663,4 @@ mark_scenery_collision_cells = 0x80042738; // type:func
 init_grid_vertex = 0x800413C0; // type:func
 average_grid_vertices = 0x8004107C; // type:func
 lerp_grid_vertices = 0x80041160; // type:func
+project_delta_to_radius_150 = 0x8007E30C; // type:func

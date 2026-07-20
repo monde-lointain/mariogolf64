@@ -38,6 +38,13 @@ extern void* D_800E1DC0;
 extern void* D_800E1DC4;
 extern void* D_800E1DC8;
 extern void* D_800E1DCC;
+extern f32 per_view_camera_state;
+extern f32 D_801B54F4;
+extern f32 D_801B54F8;
+extern f32 D_801B5500;
+extern s32 D_800FF418;
+extern s32 D_800FF41C;
+extern char D_800D1A78[];
 
 void func_80078910(void) {
   if (D_800C53B8 != 0) {
@@ -355,7 +362,25 @@ void func_8007E2B0(void) {
   D_800C5448 = -1;
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80078910", func_8007E30C);
+void project_delta_to_radius_150(void) {
+  s32 dx = (s32)(D_801B54F8 - per_view_camera_state);
+  s32 dy = (s32)(D_801B5500 - D_801B54F4);
+  f32 scale = sqrtf((f32)(dx * dx + dy * dy));
+
+  D_800FF418 = dx;
+  D_800FF41C = dy;
+  if ((f32)(s32)scale != 0.0f) {
+    scale = 150.0f / scale;
+  } else {
+    osSyncPrintf(D_800D1A78);
+    scale = 0.0f;
+  }
+  {
+    s32* p = &D_800FF418;
+    *p = (s32)((f32)*p * scale + per_view_camera_state);
+  }
+  D_800FF41C = (s32)((f32)D_800FF41C * scale + D_801B54F4);
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80078910", func_8007E438);
 
