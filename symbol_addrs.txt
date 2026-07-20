@@ -664,3 +664,4 @@ init_grid_vertex = 0x800413C0; // type:func
 average_grid_vertices = 0x8004107C; // type:func
 lerp_grid_vertices = 0x80041160; // type:func
 project_delta_to_radius_150 = 0x8007E30C; // type:func
+randomize_terrain_scatter_point = 0x8007E664; // type:func

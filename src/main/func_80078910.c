@@ -384,7 +384,27 @@ void project_delta_to_radius_150(void) {
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80078910", func_8007E438);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80078910", func_8007E664);
+typedef struct {
+  f32 unk_00; /* world x */
+  f32 unk_04; /* world y (terrain height) */
+  f32 unk_08; /* world z */
+  u8 pad_0C[0xC];
+  s8 unk_18;
+} TerrainScatterPoint;
+
+extern s32 rand(void);
+extern s32 get_interpolated_terrain_height_wrapper(s32 x, s32 z);
+
+void randomize_terrain_scatter_point(TerrainScatterPoint* p) {
+  p->unk_00 =
+      (f32)((rand() % 500 - 250) * 1536) * (1.0f / 1024.0f) + (f32)D_800FF418;
+  p->unk_08 =
+      (f32)((rand() % 500 - 250) * 1536) * (1.0f / 1024.0f) + (f32)D_800FF41C;
+  p->unk_04 = (f32)get_interpolated_terrain_height_wrapper(
+                  (s32)(p->unk_00 * 1024.0f), (s32)(p->unk_08 * 1024.0f)) *
+              (1.0f / 1024.0f);
+  p->unk_18 = 0;
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80078910", func_8007E7B8);
 
