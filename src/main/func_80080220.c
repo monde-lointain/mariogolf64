@@ -222,7 +222,67 @@ INCLUDE_ASM("asm/nonmatchings/main/func_80080220", func_8008156C);
  */
 INCLUDE_ASM("asm/nonmatchings/main/func_80080220", func_80081C90);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80080220", func_80081D4C);
+typedef struct {
+  /* 0x0 */ u32 id;
+} TerrainAttrEntry;
+
+extern TerrainAttrEntry* get_table_entry(u32 idx);
+extern void func_8007515C(s32, s32, s32, s32, s32, s32);
+extern void func_8020FFEC(s32);
+extern void func_800326FC(s32, s32, s32, s32);
+extern void func_8004C510(s32);
+extern s32 D_800C5A10;
+extern s32 D_800C5A14;
+extern s8 D_80104B6B;
+extern s32 D_801B7F70;
+extern s32 D_801B7F78;
+extern s32 D_801B7F7C;
+extern char D_800D1AD0[];
+
+void func_80081D4C(s32 arg) {
+  s32 state;
+
+  D_800C5A14 = 0;
+  if (arg == -1) {
+    D_800C5A10 = arg;
+    func_8007515C(0, -1, 0, 0, 0, 0);
+    func_8007515C(1, -1, 0, 0, 0, 0);
+    func_8020FFEC(-1);
+    return;
+  }
+  state = D_800C5A10;
+  if (state != -1) {
+    return;
+  }
+  D_800C5A10 = arg;
+  switch (get_table_entry(D_80104B6B)->id) {
+    case 0xD:
+      D_801B7F70 = 1;
+      D_801B7F78 = 0x4D;
+      D_800C5A10 = state;
+      D_801B7F7C = 0x65;
+      func_800326FC(0xA0, 0x80, 0x80, 0x80);
+      func_8004C510(0x3C);
+      func_8020FFEC(0);
+      osSyncPrintf(D_800D1AD0);
+      break;
+    case 0xA:
+    case 0x15:
+      D_800C5A10 = 2;
+      func_8004C510(0x3C);
+      break;
+    case 0xB:
+      func_8004C510(0x28);
+      break;
+    default:
+      D_801B7F70 = 1;
+      D_801B7F78 = 0x4D;
+      D_801B7F7C = 0x4D;
+      func_8004C510(0x28);
+      func_800326FC(0xA0, 0xA0, 0x40, 0x38);
+      break;
+  }
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80080220", func_80081EF8);
 
