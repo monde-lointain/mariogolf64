@@ -25,6 +25,24 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 256 — continue func_80080220 pack: fresh leaves (PO chose continuation over spriteex2 pivot) — 2026-07-21
+- Increment: 3 fns banked / 1 carried / 1 deferred in `src/main/func_80080220.c` (27→24 stubs; file still partial, not md5-candidate)
+- Quality: 0/0/1/0 (stuck-far/permuter/carried/re-opened)
+- Seed: committed 5pt; banked 0pt (file partial); realized 7 / residual +2; regime classical
+- Banks: `load_course_scenery_assets` (0x2CC), `func_8008085C` (0x3F0, first-build), `func_8008658C` (0x210, DL emitter)
+- What helped:
+  - **Per-region CSE slot-base lever** ([[per-region-cse-slot-base-lever]]): pass the `slot` array DIRECTLY, not a cached `ls` pointer — gcc-2.7.2 then CSEs `&slot` per-region + re-materializes `addiu s0,sp,K` under mid-body register pressure, matching ROM. The cached pointer over-globalized the live range into one continuous s-reg = 2 instrs short = flowing-bss −0x10 shift. Cracked `load_course_scenery_assets`.
+  - **DL-emitter reconstruction via gfxdis + gDP macros** ([[gfxdis-dl-emitter-reconstruction-crack]]): collect the DL command-word immediates from the `.s` → `gfxdis.f3dex2 -f` → rewrite as `gDPXxx(glistp++)` (banked precedent func_800328E0.c) → reconcile physical-addr matrix ptrs (`&D_E2050` = phys of `D_800E2050`). Softens the [[mg64-glyph-emitter-dl-family]] "raw-DL = terminal" verdict for the straight-line glistp++ macro subtype. Banked `func_8008658C`.
+  - **Callee real arg count is load-bearing**: `func_80085F98` reads `a0`, so `func_80085F98(0)` supplied the 1 missing `move a0,zero` (a 1-instr-short DL emitter reads as a flowing-bss −0x10 shift, not a sched wall). Check the callee's own `.s` before calling a near-match a sched wall.
+  - **`-1` in a callee-saved reg** (`func_8008085C`): the two D_800C59D8/DC = −1 stores forced −1 into s0, which forced the per-call slot-base recompute — matched first-build.
+- Walls: `init_sky_pool_and_world_state` (0x284 grid-builder biv-regalloc + loop-bound-hoist, 93 rows, S241 analog carried; body 100% RE'd, docs/wip). `func_80088890` (0x200 branchless-clamp raw-DL G_TEXRECT) deferred, not build-attempted — needs a gSPTextureRectangle + saturation-codegen crack slice.
+- Applied: #1 case-insensitive DL tell-scan (BACKLOG gate-hygiene), #2 per-region-CSE lever (memory), #3 gfxdis DL-crack + callee-arg-check (docs/hazards.md#display-lists + memory), #4 tell-class sort in pack (BACKLOG ranker follow-up). 4 of 4 PO-accepted.
+- Ranker: the c-stub-continuation gap (S253-255 recurred 3×) APPEARS RESOLVED — S256 gate surfaced the pack as `c-stub remaining:27`; confirm at S257 before closing.
+- Estimate note: seed 5 AGAIN above the seed-3 anchor for mined-leaf continuations (recurred 4th time). But S256's banks were more substantive than pure mined leaves (a per-region-CSE crack + a full DL reconstruction), so the realized 7 is defensible; the seed-vs-anchor gap is a pricing artifact, not an execution miss.
+- Push: local.
+
+---
+
 ## Sprint 255 — continue func_80080220 pack: lead + 3 smallest-first leaves — 2026-07-21
 - Increment: 0 files banked (file partial, 30→27 stubs, NOT md5-candidate) / **+3 functions matched**:
   `init_sky_panels` (func_80080220 pack LEAD, curated) / `func_80080C4C` / `func_80081D4C` (both auto).

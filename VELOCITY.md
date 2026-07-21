@@ -1173,6 +1173,27 @@ Three honest caveats:
   (3 clean banks, 2 carries). Rolling-5 (S251-S255): 4+3+3+3+3. Retro applied 2 of 2 (#1 ranker c-stub-gap
   RECURRED 3rd time; #2 DIRECTION-note must re-sort ALL stubs incl. the pack lead). Tooling-test failures
   hold at 8 (0 new; doc/memory edits only). Push: local.
+  S256: CONTINUE `src/main/func_80080220.c` smallest-first (PO approved continuation over the spriteex2
+  pivot). **3 banked / 1 carried / 1 deferred** (27→24 stubs). Banks: `load_course_scenery_assets` (0x2CC
+  course-scenery resource loader; CRACK = pass the `slot` array directly, NOT a cached `ls` pointer, so
+  gcc CSEs the base per-region + re-materializes `addiu s0,sp,0x20` under mid-body pressure + copies
+  s0→s6 → matches ROM; the over-globalized ptr was 2 instrs short = flowing-bss −0x10 shift;
+  [[per-region-cse-slot-base-lever]]), `func_8008085C` (0x3F0 scene-asset init, 6 subsystem inits + ~24
+  RomLoadSlot loads into the D_800E21xx free-list; FIRST-BUILD byte-exact; −1 in s0 forces per-call slot
+  recompute; auto), `func_8008658C` (0x210 sky-panel RTS-matrix + 13-command projection DL emitter; DL
+  reconstructed via gfxdis.f3dex2 + gDP macros — banked precedent func_800328E0.c; CRACK = func_80085F98
+  takes an arg, called with 0 = the 1 missing `move a0,zero` that was flowing-bss −0x10 short;
+  [[gfxdis-dl-emitter-reconstruction-crack]]; auto). Carry: `init_sky_pool_and_world_state` (0x284
+  grid-builder Vtx-grid wall, body 100% RE'd — biv-regalloc + loop-bound-hoist, 93 rows, S241 analog;
+  docs/wip). Deferred (not build-attempted): `func_80088890` (0x200 branchless-clamp raw-DL G_TEXRECT,
+  gate mis-scanned as clean; needs a gSPTextureRectangle crack slice). Seed 5 (classical; AGAIN above the
+  S251-253 seed-3 anchor for mined-leaf continuations — recurred 4th time); banked 0pt (file partial);
+  realized 7 / residual +2 (3 clean banks incl. 1 verbatim first-build, 1 carry). Rolling-5 (S252-S256):
+  3+3+3+3+3. Quality 0/0/1/0. Retro applied 4 of 4 (#1 case-insensitive DL tell-scan, #2 per-region-CSE
+  lever memory, #3 gfxdis DL-crack + callee-arg-check → hazards#display-lists, #4 tell-class sort in
+  pack). NEW: DL-emitter reconstruction via gfxdis + gDP macros WORKS → the raw-DL-word wall class is
+  partly tractable (softens the mg64-glyph-emitter-dl-family "terminal" verdict for the glistp++ macro
+  subtype). Tooling-test failures hold at 8 (0 new; doc/memory edits only). Push: local.
 - **Regime:** `mirror` is a depleting minority (~22 % of ranked candidates: 56 mirror vs 194
   classical; 18 warm / 38 cold). The warm clean-singleton mirror pool is now **mined out** (S11
   plan gate: every top mirror candidate carries a blocking hazard), pushing the project onto the

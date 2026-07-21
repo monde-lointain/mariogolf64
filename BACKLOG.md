@@ -4839,12 +4839,52 @@ by `/sprint-plan`:
     (0x1D4). **Given the plateau, STRONGLY weigh a FRESH-PIVOT** to the `func_8002A640` 24-fn spriteex2
     pack (needs a sprite.c header-vendoring enabler) over another smallest-first continuation — per the
     S224 plateaued-pack-mid-logic-tail rule, the continuation now yields wall-characterizations, not banks.
-  - **RANKER FOLLOW-UP (S253+S254+S255 RECURRED 3rd time — APPLIED to backlog):** `pick_target.py
-    --segment main` STILL does not surface this ACTIVE partial-bank pack (27 stubs) as a `c-stub
-    remaining:N` continuation — it lists only 4 packs (2 other c-stubs + 2 asm-flips), so the gate again
-    fell back to this DIRECTION note + manual `.s`-header sizing. A partial-banked already-`c` file with
-    remaining `INCLUDE_ASM` stubs must rank as a c-stub continuation. Fold into the
-    `carried-wall`/continuation ranker follow-ups above (off-cadence golden-gated).
+  - **S256: banked `load_course_scenery_assets` (0x2CC — course-scenery resource loader, 5 fixed
+    RomLoadSlot loads + framebuffer alloc + dual-array zero loop + per-object loop; CRACK = pass the
+    `slot` array directly, NOT a cached `ls` pointer, so gcc CSEs the base per-region + re-materializes
+    `addiu s0,sp,0x20` under mid-body pressure + copies s0->s6, matching ROM; [[per-region-cse-slot-base-lever]]),
+    `func_8008085C` (0x3F0 — scene-asset init, 6 subsystem inits + ~24 RomLoadSlot loads into the
+    D_800E21xx free-list; FIRST-BUILD; -1 in s0 forces per-call slot recompute), `func_8008658C` (0x210 —
+    sky-panel RTS-matrix + 13-command projection DL emitter; DL reconstructed via gfxdis.f3dex2 + gDP
+    macros; CRACK = func_80085F98 takes an arg, called with 0 = the 1 missing `move a0,zero`;
+    [[gfxdis-dl-emitter-reconstruction-crack]]). 27->24.**
+  - **CARRY `func_80088890` (0x200, S256 — do NOT re-price as a clean leaf):** self-contained
+    raw-DL-word `G_TEXRECT` emitter (holder `u32**`, post-inc `dl`) with BRANCHLESS-CLAMP tile-coord
+    saturation ((v0<<18)>>16 sign + ~x>>31 mask + 0xFFC). Gate mis-scanned it as clean (case-sensitive
+    DL tell miss). Needs a dedicated gSPTextureRectangle + saturation-codegen reconstruction slice
+    (harder than func_8008658C's straight-line macro DL). `docs/hazards.md#display-lists`.
+  - **CARRY `init_sky_pool_and_world_state` (0x284, S256 — grid-builder wall, body 100% RE'd):**
+    sky-dome Vtx-grid builder (4x5x6 + block-2/3 s-texcoord overwrite) + tint fill + guOrtho/2x
+    guPerspective + 14 world-state zeros. TERMINAL = grid-builder biv-regalloc + loop-bound-hoist (93
+    asm-differ rows; ROM re-materializes `li v0,5`/`li v0,4` inline, my build hoists bounds into
+    callee-saved regs). `#grid-builder` wall class (S241 analog carried).
+    `docs/wip/init_sky_pool_and_world_state.near-match.md`; [[grid-builder-CE88-regalloc-levers]].
+  - **S257 DIRECTION: continue smallest-first here** (24 non-carry leaves remain; the DL-emitter
+    reconstruction path (gfxdis + gDP macros) now WORKS, so the raw-DL wall class is partly tractable —
+    NOT blanket-terminal). Re-sort remaining stubs by tell-CLASS, not pure smallest-first (see S256
+    ranker follow-up #4): the cheap pure-logic vein is the LARGER call-glue leaves (func_8008085C 0x3F0
+    banked first-build), while the sub-0x210 "smallest" leaves are all DL/FP reconstruct-or-wall. Next
+    candidates: the no-DL/no-FP leaves first (`func_80088BDC` 0x4b8 5-DL/0-FP/8-jal,
+    `func_80087CB0` 0x3f0 5-DL/0-FP/0-jal), then a func_80088890 gSPTextureRectangle crack slice, then
+    the glistp++ DL emitters via gfxdis (`func_80085F98` 0x5f4 12-DL, `func_8008156C` 0x724 24-DL).
+    Excluded carries: func_800824E4, func_80081C90, func_80088A90, func_800842C0, func_80080688,
+    func_80088890, init_sky_pool_and_world_state.
+  - **RANKER FOLLOW-UP (S253-S255 RECURRED 3rd time; S256 APPEARS RESOLVED — verify):** at the S256 gate
+    `pick_target.py --segment main` DID surface the pack as `init_sky_pool_and_world_state … c-stub …
+    remaining:27` (the c-stub-continuation row the prior 3 sprints lacked). Looks fixed; CONFIRM at the
+    S257 gate that a partial-banked already-`c` file reliably ranks as a `c-stub remaining:N` continuation
+    before closing this follow-up.
+  - **RANKER FOLLOW-UP #4 (S256 NEW — tell-class sort within a pack):** smallest-first mis-prioritizes a
+    partial-bank pack once the cheap pure-logic leaves are mined: S256's two SMALLEST fresh leaves
+    (func_80088890 0x200, func_8008658C 0x210) were both DL emitters, while the tractable first-build
+    bank was the LARGER func_8008085C (0x3F0, 74-jal call-glue). Ranker/DoR should sort a pack's leaves by
+    tell-CLASS (no-DL/no-FP pure-logic first, then FP, then DL-reconstruct, then walls), not pure byte
+    size. Cheap tells: `grep -ciE '0x(e7|e2|e3|fc|fa|e4|e1|f1|d[89a-f])[0-9a-f]{6}'` (DL, case-INSENSITIVE
+    — see #1) and `grep -cE '\b(mtc1|cvt|swc1|c\.lt)\b'` (FP) on the leaf's `.s`.
+  - **GATE-HYGIENE #1 (S256 NEW — case-insensitive DL tell-scan):** the DL tell-scan MUST be
+    `grep -ciE` (the `.s` renders command-word immediates UPPERCASE, `0xE7…`/`0xE2…`). S256's gate scanned
+    lowercase-only and mis-classified func_80088890/func_8008658C as "clean no-DL leaves." Cosmetic
+    gate-hygiene, folds into #4's tell-scan.
   - **DIRECTION-NOTE HYGIENE (S255 retro #2 — APPLIED):** a continuation DIRECTION note must re-sort ALL
     remaining `INCLUDE_ASM` stubs INCLUDING the pack-name lead `func_<seg>`, not just the mid-body fns.
     S255's DIRECTION note listed candidates starting at 0x180 and OVERLOOKED the pack lead func_80080220

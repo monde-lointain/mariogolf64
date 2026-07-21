@@ -3120,6 +3120,32 @@ ROM's `andi;sll;or 0xF5000100`; `gDPLoadTLUTCmd(gfx++, G_TX_LOADTILE, count)` se
 field). S239 banked `func_8006A4A0`/`func_8006A548` (6-cmd TLUT-load: SetTImg/TileSync/SetTile/LoadSync/
 LoadTLUT/PipeSync) once switched from the raw-index seed to the macro form.
 
+**Reconstruct a raw-DL-word emitter to byte-exact via gfxdis + gDP macros (S256).** A DL emitter that
+stores hand-rolled command-word immediates (the `lui/ori` const pairs into `v0[+0,+8,+0x10,…]`) BANKS
+by reconstructing the macros, not by matching word stores: (1) collect the command-word immediates from
+the `.s`; (2) `~/development/repos/n64-tools/src/gfxdis/gfxdis.f3dex2 -f <bin>` emits the `gsDPXxx(…)`
+macros ([[gfxdis-display-list-tool]]); (3) rewrite as `gDPXxx(glistp++, …)` (banked precedent
+`src/main/func_800328E0.c`; the `-DF3DEX_GBI_2` profile makes gbi.h's F3DEX2 branch macros live, incl.
+`gSPLoadGeometryMode` = `gSPGeometryMode(pkt,-1,word)` and the `D9` combined GeometryMode);
+(4) reconcile **physical-address matrix pointers** — `gSPMatrix(glistp++, &D_E2050, …)` where `D_E2050`
+(0xE2050 in `undefined_syms_auto`) is the physical alias of the virtual `D_800E2050` (`0xE2050 =
+0x800E2050 & 0x1FFFFFFF`); reference the physical symbol directly (the macro stores the raw pointer, no
+K0 mask at runtime), and pass runtime args (e.g. a `u16* perspNorm`) live. This SOFTENS the
+[[mg64-glyph-emitter-dl-family]] "raw-DL-word = terminal sched coin" verdict: it holds for the S243
+hand-inlined **per-char loop** subtype, but a **straight-line `glistp++` macro sequence** reconstructs
+byte-clean. S256 banked `func_8008658C` (sky-panel RTS-matrix + 13-command projection DL) this way.
+
+**Callee real arg count is load-bearing for a 1-instr-short DL emitter (S256).** Before calling a
+DL-emitter near-match a scheduling wall, check the callee's OWN `.s`: a callee that reads `a0`
+(`addu $fp,$a0,$zero` in its prologue) TAKES an argument, so the source is `f(0)` not `f()`. The
+missing `move a0,zero` reads as exactly 1 instruction short -> the flowing-`bss` `-0x10` address-shift
+symptom on every data ref ([[flowing-bss-plus-n-address-diff]]). S256's `func_8008658C` was 131/132
+instrs until `func_80085F98(0)` supplied the arg. This is the DL-emitter analog of
+`#callee-prototype-is-load-bearing-missing-prototype--implicit-int`. The branchless-clamp `G_TEXRECT`
+coordinate subtype (runtime-computed saturated ULx/LRx via `(v0<<18)>>16` sign + `~x>>31` mask + `0xFFC`,
+e.g. `func_80088890`) is a harder reconstruct: it needs `gSPTextureRectangle` with the exact saturation
+codegen, a dedicated crack slice.
+
 **Subagent `diff.py` CRACK ≠ bank until the orchestrator's full-make ROM-SHA-1 confirms (S239).** A
 fan-out subagent's per-fn `tools/asm-differ/diff.py` can read a STALE isolated object and report byte-clean
 while the real in-tree build diverges (S239 `func_8006A4A0`: subagent's raw-index body passed its diff.py,
