@@ -109,12 +109,13 @@ check_init:
   }
 }
 
-/* func_80080688: CARRY (S255 stretch, near-match — body fully RE'd, NOT banked).
- * Club/shot setup glue: func_8007E2B0/func_8007E234(2); if putter_mode_flag==1
- * play_sound_effect(0,9,0x64)+D_80106190=100.0f else update_object_group_by_id(9);
- * func_8002646C; func_80051FCC; idx=func_800520DC();
- * func_8005062C(D_800C54CC[idx]+idx, buf); func_800506D4(D_800E21C0,&buf);
- * func_80052070; idx=func_80051FCC(); terrain=D_800C1434[idx*210]; switch(terrain)
+/* func_80080688: CARRY (S255 stretch, near-match — body fully RE'd, NOT
+ * banked). Club/shot setup glue: func_8007E2B0/func_8007E234(2); if
+ * putter_mode_flag==1 play_sound_effect(0,9,0x64)+D_80106190=100.0f else
+ * update_object_group_by_id(9); func_8002646C; func_80051FCC;
+ * idx=func_800520DC(); func_8005062C(D_800C54CC[idx]+idx, buf);
+ * func_800506D4(D_800E21C0,&buf); func_80052070; idx=func_80051FCC();
+ * terrain=D_800C1434[idx*210]; switch(terrain)
  * {3->func_8005062C(0x565,buf);4->0x566;5->0x567} shared &buf; func_800506D4(
  * D_800E2180,&buf); if(D_800C59E0==2)func_80080C4C(); then D_801B608C dispatch
  * (==9/==3 set D_800C59E4=1 + func_802418B8(0/1) once; else func_8008C520()).
@@ -122,12 +123,14 @@ check_init:
  * ADD-only two-chain (idx*10 + idx*200, idx held in both s0 and v0); gcc-2.7.2
  * synth_mult here emits the SHORTER subtract-based form (`sll v0,3; subu; subu;
  * sll`) in EVERY source spelling (idx*210, idx*10+idx*200, byte-offset cast) —
- * it folds/re-synthesizes to the subu form, 5 instrs shorter, cascading the tail
+ * it folds/re-synthesizes to the subu form, 5 instrs shorter, cascading the
+ * tail
  * + a few delay-slot fills. Compiler-internal multiply synthesis, not source-
- * leverable; percent below the 0.97 permuter gate and instruction-count-changing
- * (permuter cannot add the missing words). Escalation = gcc-2.7.2 synth_mult
- * source dive (why the ROM avoided the subtract for *210 — likely an rtx_cost /
- * config difference) OR corpus-mine a matched *210 struct-stride sibling.
+ * leverable; percent below the 0.97 permuter gate and
+ * instruction-count-changing (permuter cannot add the missing words).
+ * Escalation = gcc-2.7.2 synth_mult source dive (why the ROM avoided the
+ * subtract for *210 — likely an rtx_cost / config difference) OR corpus-mine a
+ * matched *210 struct-stride sibling.
  */
 INCLUDE_ASM("asm/nonmatchings/main/func_80080220", func_80080688);
 
@@ -220,7 +223,90 @@ void func_80080E14(void) {
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80080220", func_80080E7C);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80080220", load_course_scenery_assets);
+extern void* course_panorama_ptr;
+extern void* sky_cloud_texture_ptr;
+extern void* D_800FBE0C;
+extern void* D_800E21C0;
+extern void* D_800E2180;
+extern void* D_800E2160;
+extern void* D_800FE3D4;
+extern void* D_800FC89C;
+extern void* D_80132CEC;
+extern u16 D_800C54CC;
+extern s16 D_801B7F30;
+extern s16 D_801B7F32;
+extern s16 D_801B7F34;
+extern s16 D_801B7F36;
+extern s32 D_800E21BC;
+extern void func_8004C860(void* buf, s32 w, s32 h, s32 fmt);
+extern void func_8006ACD8(void);
+extern void func_8003E400(void);
+extern void func_80078D94(void);
+
+void load_course_scenery_assets(void) {
+  RomLoadSlot slot_b;
+  RomLoadSlot slot[2];
+  u32 size;
+  s32 i;
+
+  size = func_8005062C(0x4BA, slot);
+  course_panorama_ptr = heap3_alloc(size);
+  func_800506D4(course_panorama_ptr, slot);
+
+  size = func_8005062C(0x4D4, slot);
+  D_800FBE0C = heap3_alloc(size);
+  func_800506D4(D_800FBE0C, slot);
+
+  size = func_8005062C(D_800C54CC, slot);
+  D_800E21C0 = heap3_alloc(size);
+  func_800506D4(D_800E21C0, slot);
+
+  size = func_8005062C(0x567, slot);
+  D_800E2180 = heap3_alloc(size);
+  func_800506D4(D_800E2180, slot);
+
+  size = func_8005062C(0x722, slot);
+  D_800E2160 = heap3_alloc(size);
+  func_800506D4(D_800E2160, slot);
+
+  D_800FE3D4 = heap3_alloc(0x1000);
+  func_8004C860(D_800FE3D4, 0x40, 0x40, 0x3E);
+
+  for (i = 0; i != 5; i++) {
+    D_800E2190[i] = 0;
+    D_800E21A8[i] = 0;
+  }
+
+  D_801B7F30 = 8;
+  D_801B7F32 = 8;
+  D_801B7F34 = 0x138;
+  D_800E21BC = 0;
+  D_801B7F36 = 0xE8;
+
+  sky_cloud_texture_ptr = heap3_alloc(0x1000);
+
+  size = func_8005062C(0x4D7, slot);
+  D_800FC89C = heap3_alloc(size);
+  func_800506D4(D_800FC89C, slot);
+
+  size = func_8005062C(0x4D9, slot);
+  D_80132CEC = heap3_alloc(size);
+  func_800506D4(D_80132CEC, slot);
+
+  for (i = 0; i != 4; i++) {
+    size = func_8005062C(D_800C547C[i] + 9, slot);
+    D_801B55E0[i] = heap3_alloc(size);
+    func_800506D4(D_801B55E0[i], slot);
+    func_800504E8(D_800C54A0[i], &slot_b);
+    size = func_80050598(&slot_b);
+    D_801321C8[i] = heap3_alloc(size);
+    func_800505A0(D_801321C8[i], size, &slot_b);
+  }
+
+  func_8006ACD8();
+  func_8003E400();
+  func_80078D94();
+}
 
 void func_80081550(void) { func_8003E4B4(); }
 
@@ -335,8 +421,8 @@ INCLUDE_ASM("asm/nonmatchings/main/func_80080220", func_80083AC8);
  * `addiu $v0,$sp,0x10` sets chain=&(glistp local at sp+0x10), maintains the
  * glistp there, reloads it after each `jal func_800842C0` (:611). Real out-of-
  * line jal (not inlined), so NOT an orphan -> no volatile byte-repro. Bank only
- * by writing it nested inside the decompiled func_80084468 (2644B FP DL builder,
- * its own slice). docs/wip/func_800842C0.near-match.md;
+ * by writing it nested inside the decompiled func_80084468 (2644B FP DL
+ * builder, its own slice). docs/wip/func_800842C0.near-match.md;
  * docs/hazards.md#nested-function-static-chain-spill;
  * memory [[nested-function-static-chain-spill]].
  */
