@@ -672,3 +672,4 @@ set_sky_panel_cycle_mode_sel = 0x8008FF14; // type:func
 lerp_s32 = 0x8008E164; // type:func
 init_scenario_state = 0x8008D100; // type:func
 emit_fullscreen_scissor_dl = 0x800958D8; // type:func
+toggle_sky_panel_bank_index = 0x8008D0DC; // type:func
