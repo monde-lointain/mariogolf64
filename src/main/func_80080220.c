@@ -109,6 +109,26 @@ check_init:
   }
 }
 
+/* func_80080688: CARRY (S255 stretch, near-match — body fully RE'd, NOT banked).
+ * Club/shot setup glue: func_8007E2B0/func_8007E234(2); if putter_mode_flag==1
+ * play_sound_effect(0,9,0x64)+D_80106190=100.0f else update_object_group_by_id(9);
+ * func_8002646C; func_80051FCC; idx=func_800520DC();
+ * func_8005062C(D_800C54CC[idx]+idx, buf); func_800506D4(D_800E21C0,&buf);
+ * func_80052070; idx=func_80051FCC(); terrain=D_800C1434[idx*210]; switch(terrain)
+ * {3->func_8005062C(0x565,buf);4->0x566;5->0x567} shared &buf; func_800506D4(
+ * D_800E2180,&buf); if(D_800C59E0==2)func_80080C4C(); then D_801B608C dispatch
+ * (==9/==3 set D_800C59E4=1 + func_802418B8(0/1) once; else func_8008C520()).
+ * TERMINAL RESIDUAL: the `idx*210` index multiply. ROM synthesizes it as an
+ * ADD-only two-chain (idx*10 + idx*200, idx held in both s0 and v0); gcc-2.7.2
+ * synth_mult here emits the SHORTER subtract-based form (`sll v0,3; subu; subu;
+ * sll`) in EVERY source spelling (idx*210, idx*10+idx*200, byte-offset cast) —
+ * it folds/re-synthesizes to the subu form, 5 instrs shorter, cascading the tail
+ * + a few delay-slot fills. Compiler-internal multiply synthesis, not source-
+ * leverable; percent below the 0.97 permuter gate and instruction-count-changing
+ * (permuter cannot add the missing words). Escalation = gcc-2.7.2 synth_mult
+ * source dive (why the ROM avoided the subtract for *210 — likely an rtx_cost /
+ * config difference) OR corpus-mine a matched *210 struct-stride sibling.
+ */
 INCLUDE_ASM("asm/nonmatchings/main/func_80080220", func_80080688);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80080220", func_8008085C);
@@ -305,6 +325,21 @@ void func_80083A48(void) {
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80080220", func_80083AC8);
 
+/* func_800842C0: CARRY (S255) chain-USED GCC nested function, NOT a raw-DL-word
+ * regalloc wall. A texrect glyph-string emitter (col,row,char* str): classifies
+ * each char (space skip / 'm' special / digits) and emits a G_TEXRECT +
+ * RDPHALF1/2 + 0x04000400 DL block per glyph. The glist pointer is a LOCAL of
+ * the caller func_80084468, reached through the GCC static chain ($v0): child
+ * spills incoming $v0 (`sw v0,0(sp)`), keeps it in t0, and does `lw a1,0(t0)` =
+ * *(chain) = parent glistp, advancing it in place. Parent func_80084468:582
+ * `addiu $v0,$sp,0x10` sets chain=&(glistp local at sp+0x10), maintains the
+ * glistp there, reloads it after each `jal func_800842C0` (:611). Real out-of-
+ * line jal (not inlined), so NOT an orphan -> no volatile byte-repro. Bank only
+ * by writing it nested inside the decompiled func_80084468 (2644B FP DL builder,
+ * its own slice). docs/wip/func_800842C0.near-match.md;
+ * docs/hazards.md#nested-function-static-chain-spill;
+ * memory [[nested-function-static-chain-spill]].
+ */
 INCLUDE_ASM("asm/nonmatchings/main/func_80080220", func_800842C0);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80080220", func_80084468);
