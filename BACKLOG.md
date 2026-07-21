@@ -4685,19 +4685,31 @@ by `/sprint-plan`:
   jal-light NON-FP leaves highly. **Committed-seed convention (S231 retro):** a fresh mixed-partial `none`
   pack commits seed **3** (per-fn override), NOT the ranker's pts13 — the plan gate must apply the S215-S230
   override at commit time (S231 SPRINT.md mistakenly wrote 13; realigned at retro).
-- **Open (S247, in-progress mixed-partial, NOT a spike):** `src/main/func_8008D100.c` (26-fn main-seg
+- **Open (S248, in-progress mixed-partial, NOT a spike):** `src/main/func_8008D100.c` (26-fn main-seg
   `none` sky/skybox render pack, subseg 0x68500 flipped `c` at the S247 gate; asset-load + DL emit +
-  vertex/FP + mode-state). **4 matched** (`func_80092324` scaffold-empty, `func_8008FF14`→
+  vertex/FP + mode-state). **6 matched** (`func_80092324` scaffold-empty, `func_8008FF14`→
   set_sky_panel_cycle_mode_sel u32 setter, `func_800959F8` `D_800C5EE4<1` predicate [auto name kept —
-  diverse cross-TU callers], `func_800934CC` 3-way mode setter), 22 stubs remain. Quality 0/0/2/0.
-  **2 carries (characterized):** `func_8008E164` (integer lerp `(s32)(a0*(1-t)+a1*t)`, t in $a2 o32
-  GPR; FP body BYTE-EXACT, residual = dead 8-byte frame + `sw v0` dead store, DCE-leftover/frame coin;
-  `docs/wip/func_8008E164.near-match.md`); `func_8009226C` (11-entry `jtbl_800D1E08` switch, semantics
-  fully RE'd in S247 standup, wall = block-reorder + partial tail-merge exact-repro — cases 1&9 merged
-  but 0xFF splits 3 blocks; jtbl-carve class). Remaining pack tail is DL/FP-heavy (`emit_sky_bg_panel_dl`,
-  `emit_sky_panorama_strips_dl`, `update_sky_panel_verts`, `per_hole_skybox_palette_load`) = S243 raw-DL
-  / S158 FP wall risk; a compiler-source crack-attempt fan-out (S232/S233 precedent) is the escalation
-  once the cheap leaves are mined. **Ranker follow-up:** the plan-gate leaf-sizing must read `.s`
+  diverse cross-TU callers], `func_800934CC` 3-way mode setter, `func_8008E164`→`lerp_s32` [S248],
+  `func_8008D100`→`init_scenario_state` [S248]), 20 stubs remain. Quality S248 0/0/3/0.
+  **Banked S248:** `lerp_s32` (0x8008E164) cracked via the PO-directed compiler-source fan-out
+  (was the S247 carry) — the dead 8-byte frame + `sw v0` is NOT a DCE/frame coin: it is the GCC
+  NESTED-FUNCTION prologue homing the incoming static chain (`STATIC_CHAIN_REGNUM=$2=$v0`,
+  mips.h:1310), verified byte-for-byte against a clean nested child; orphaned (parent inlined the
+  call, zero ROM xrefs), banked with a standalone `volatile` stand-in
+  (`docs/wip/func_8008E164.nested.md`). `init_scenario_state` (0x8008D100) fresh, m2c+Ghidra seed,
+  first build.
+  **3 carries (characterized):** `func_8009226C` (11-entry `jtbl_800D1E08` switch, semantics fully
+  RE'd, wall = block-reorder + partial tail-merge exact-repro — cases 1&9 merged but 0xFF splits 3
+  blocks; jtbl-carve class); `func_800957F0` (jtbl_800D1E58 switch on D_800C5EE8 [6 case-blocks] +
+  raw glistp++ DL emit — TWO wall classes, #switch-jtbl-dispatch + #display-lists); `func_800958D8`
+  (near-match 0.833, gsDPPipeSync+gsDPSetScissor emitter — #base-register-vs-displacement + a
+  store→load fold barrier; 5 forms tried, `docs/wip/func_800958D8.near-match.md`). **Re-priced:**
+  `func_80092E10` (previously read as the `$v0`-arg-convention wall) is a chain-USED GCC nested
+  function of the parent spanning `0x800930xx..0x80093470` (callers set `addiu $v0,$sp,0x10` = the
+  static chain before `jal`); NOT a terminal wall — crackable once that parent is decompiled and it
+  is written nested. Remaining pack tail is DL/FP-heavy (`emit_sky_bg_panel_dl`,
+  `emit_sky_panorama_strips_dl`, `update_sky_panel_verts`, `per_hole_skybox_palette_load`) = S243
+  raw-DL / S158 FP wall risk. **Ranker follow-up:** the plan-gate leaf-sizing must read `.s`
   headers not vram gaps (S247 mis-sized this pack's leaves; now in workflow DoR).
 - **Open (S227, in-progress mixed-partial, NOT a spike):** `src/main/func_80071370.c` (39-fn main-seg
   `none` pack, subseg 0x4C770 flipped `c` at the S227 gate; string/struct-array/heap/DL glue). **8

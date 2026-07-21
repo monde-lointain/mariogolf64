@@ -5971,6 +5971,31 @@ cluster A's `0x295E0` split over-reached by one fn — the child was carried.) `
 a `static-chain-callee` (a fn whose caller does `addiu v0,sp,K` before its `jal`) is a tracked
 follow-up.
 
+**Chain-UNUSED orphan variant + standalone byte-repro (S248).** When the child reads no parent
+variable, the chain is homed (`sw $v0,0(sp)`) but never reloaded — a pure dead spill. If the parent
+also **inlined** its call(s) to the child, GCC still emits the out-of-line body, but **zero** `jal`/
+function-pointer references to the child survive anywhere in the ROM (scan the raw binary for the
+`jal` word AND the address word to confirm). This is an **orphaned** nested child with no recoverable
+parent — you cannot write it nested. Bank it standalone with a `volatile s32 x = <uninitialized
+local>;` stand-in that reproduces the exact bytes: the volatile addressable local forces the 8-byte
+frame (a schedulable `subu $sp` RTL floats it mid-body, mips.md:6029) and homes the uninitialized
+local to `$v0` (default ascending local-alloc order, local-alloc.c:2163 → lowest free GPR `$2`), while
+the volatile store survives DCE (flow.c:1726 `!MEM_VOLATILE_P`). Verify a clean nested child
+(`int f(int a,int b,float t){return a*(1-t)+b*t;}`, NO volatile/uninit) emits the identical `.text`
+to prove the nested origin. S248 `func_8008E164`/`lerp_s32` is such an orphan (banked with the stand-in;
+`docs/wip/func_8008E164.nested.md`); the memory `dead-frame-dead-v0-store-crack` carries the lever set.
+
+**Chain-USED variant masquerades as a `$v0`-arg wall (S248).** When the child DOES read a parent
+variable, it reloads the chain and dereferences it — the body opens `move a0,v0` / `lw x,K($v0)`,
+looking exactly like the `#func-80041e8c-v0-arg-convention-wall` (arg in `$v0`). The discriminator is
+the same caller tell: a `addiu $v0,$sp,K` (address of a parent local = the static chain) persisting
+into the `jal`'s live range. If present, it is a chain-USED nested function, NOT a terminal `$v0`-arg
+wall — it is crackable once the parent's TU is decompiled and the child is written nested (accessing
+`sp+K` as the parent local). S248 re-priced `func_80092E10` (parent spans `0x800930xx..0x80093470`,
+callers set `addiu $v0,$sp,0x10`) from "$v0-arg wall" to this crackable class. So BEFORE declaring a
+`$v0`-first-access leaf a `#func-80041e8c-v0-arg-convention-wall`, read its callers for the
+`addiu $v0,$sp,K` static-chain setup.
+
 **Callee-side tell + pre-classify the whole pack at seed time (S191).** You do not need the caller to
 spot a nested child: the child's OWN entry carries the tell. Two forms, both read straight off the
 child's `.s`: (a) **dead-spill leaf** — `addiu sp,-8; sw v0,0(sp)` with `$v0` never reloaded (a nested

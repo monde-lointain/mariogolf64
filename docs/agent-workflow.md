@@ -244,6 +244,20 @@ Ghidra MCP is used inline at seed time. For each target function:
      regalloc/scheduling (a base-materialize hoist across a `jal`) and reads as a scheduling wall —
      declare every callee with its real signature before reaching for the permuter
      (`docs/hazards.md#callee-prototype-is-load-bearing-missing-prototype--implicit-int`, S225).
+     And rule out a **GCC nested function** BEFORE calling a leaf a `$v0`-arg wall or a dead-frame
+     coin: a leaf that spills the INCOMING `$v0` with no reload (`addiu sp,-8; sw $v0,0(sp)` never
+     reloaded) is the nested-function prologue homing the static chain (`STATIC_CHAIN_REGNUM =
+     GP_REG_FIRST+2 = $2 = $v0`, mips.h:1310) — the chain is homed even when the child reads no
+     parent variable (unused -> dead store; a chain-USING child instead RELOADS `$v0` and reads its
+     arg/data through it). The tell on the CALLER side is `addiu $v0,$sp,K` (address of a parent
+     local = the chain) persisting to the `jal`. A clean nested child reproduces the exact bytes with
+     no `volatile`/uninitialized contrivance; bank it inside its parent's TU as a nested function, or
+     (if the parent inlined the call and left an orphaned out-of-line body with zero ROM `jal`/fn-ptr
+     xrefs) carry the orphan with a standalone `volatile s32 x = <uninit>;` byte-repro stand-in. S248
+     proved `func_8008E164`/`lerp_s32` is an orphaned nested child and re-priced the `func_80092E10`
+     "$v0-arg wall" carry to a chain-USED nested child (crackable once its parent is decompiled);
+     see `docs/hazards.md#nested-function-static-chain-spill` and the memory
+     `dead-frame-dead-v0-store-crack`.
    - **Spot-check** (only at score 0): byte-level `cmp` of the in-tree compiled `.text` against the
      isolated one. The `cmp` is the truth, not the mnemonic diff (see
      `docs/hazards.md#assembler-differences--byte-cmp-spot-check`). A non-zero score with empty
@@ -780,6 +794,7 @@ When `pick_target.py` flags a hazard (or a match shows its symptom), read the ma
 | structural-complete regalloc miss where a call-crossing PARAM/local grabs `$s0` and rotates the loop vars off `s0/s1/s2` (local-alloc pre-empts before global priority); fix = mutate the param IN PLACE (`p=f(p)`) to make it a global qty; diagnose with the `-dg`/`-dl` allocno dumps | #loop-weight-and-live-length-regalloc-steering |
 | tempted to structure/clean a matched goto-loop fn's loops; zero-goto rewrite attempt | #loop-weight-and-live-length-regalloc-steering |
 | leaf fn opens `addiu sp,-8`+`sw $v0,0(sp)` never reloaded (dead spill of incoming `$v0`) AND its caller sets `$v0=&sp[K]` before each `jal` = GCC nested function (static chain in `$v0`); bank as a nested fn in the parent's TU, or carry the orphaned child | #nested-function-static-chain-spill |
+| leaf reads its arg/data via incoming `$v0` (`move a0,v0`/`lw x,K(v0)`) with a caller `addiu $v0,$sp,K` before the `jal` = chain-USED GCC nested function (NOT a `$v0`-arg-convention wall); crack once its parent's TU is decompiled by writing it nested | #nested-function-static-chain-spill |
 | permuter base.c with `__asm__ __volatile__(...)` aborts pycparser (`before: __volatile__`); b64literal-wrap that line by hand | #permuter-setup-for-kmc-toolchain-mirrors |
 | permuter "best" on a goto-loop fn beats the hand-derived structural floor by a suspicious margin | #permuter-goto-backedge-liveness-unsound |
 | classical fn structure/scheduling/hoisting fully matched, only residual = target reserves a DEAD stack frame (`addiu sp,-N`/`+N`, zero `sp)` access) + the reg permutation it drives; no source trigger (address-taken forces real sp loads) | #dead-frame-reload-artifact-regalloc-wall |

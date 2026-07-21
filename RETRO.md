@@ -25,6 +25,36 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 248 — continue func_8008D100.c: mine small leaves + compiler-source dive — 2026-07-21
+- Increment: 0 files banked (file partial, 20 stubs, NOT md5-candidate) / **+2 functions matched**
+  (22→20 stubs; 6 of 26 matched). ROM SHA-1 green e2c4e7a9…, tree clean.
+- Quality: 0 stuck-far / 0 permuter / 3 carried / 0 re-opened this sprint.
+- Seed: committed 5pt; banked 0pt (per-file all-or-nothing, file partial); regime mixed/classical.
+  Realized ~6, residual +1.
+- What helped: (1) PO-directed **compiler-source fan-out** (4 subagents over gcc-2.7.2 + binutils-2.6,
+  systematic-debugging) cracked the S247 `func_8008E164` carry — `volatile s32 unused = r;` (write-only
+  volatile of an uninitialized local) reproduces the dead frame + `sw v0`; gas ruled out. (2) A
+  **follow-up nested-function dive** then proved the TRUE origin: `lerp_s32` is a GCC nested function
+  (the `sw $v0` is the static-chain home, STATIC_CHAIN_REGNUM=$2, mips.h:1310), byte-for-byte identical
+  to a clean nested child; orphaned (parent inlined the call, zero ROM xrefs). (3) m2c+Ghidra seed
+  banked `init_scenario_state` first build. (4) The struct-member mem-in-struct lever took the scissor
+  emitter `func_800958D8` to 0.833.
+- Friction: 3 of the 4 small leaves are wall-class (jtbl+DL, nested-fn, base-vs-displacement) — the
+  pack has plateaued for tractable small work; the remaining tail is large DL/FP.
+- Applied: 2 of 2 (both emergent from the nested-fn finding, 0 pre-buffered): #1 nested-fn DoR check →
+  `docs/agent-workflow.md` §3 pre-permuter list + 2 hazard-index rows + `docs/hazards.md`
+  #nested-function-static-chain-spill (chain-unused orphan + chain-used masquerade variants); #2 fix
+  the S247 "DCE/frame coin" framing → BACKLOG + VELOCITY + memory `dead-frame-dead-v0-store-crack`
+  reframed to the nested-fn root cause.
+- Carry-over: `func_8008D100.c` stays open. Carries: `func_8009226C` (jtbl partial-merge),
+  `func_800957F0` (jtbl+DL), `func_800958D8` (0.833 base-vs-disp). **Re-priced** `func_80092E10` from
+  a `$v0`-arg wall to a chain-USED nested fn (crackable once its parent 0x800930xx..0x80093470 is
+  decompiled). DL/FP tail deprioritized (emit_sky_*, update_sky_panel_verts, palette_load).
+- Cross-repo: 2 new curated names to propagate to the Ghidra workspace (`lerp_s32`,
+  `init_scenario_state`).
+
+---
+
 ## Sprint 247 — open fresh func_8008D100.c (26-fn sky/skybox render pack) — 2026-07-20
 - Increment: 0 files banked (file partial, 22 stubs, NOT md5-candidate) / **+4 functions matched**
   (`func_80092324` scaffold-empty, `func_8008FF14`→set_sky_panel_cycle_mode_sel, `func_800959F8`,

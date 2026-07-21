@@ -1055,6 +1055,23 @@ Three honest caveats:
   #2 grep-committed-C-callers-before-rename → workflow Bank-4a + memory, #3
   keep-auto-name-diverse-global → memory). 2 new memories. Tooling-test failures hold at 8 (0 new;
   doc/memory edits only). Push: local only.
+  S248: CONTINUED `src/main/func_8008D100.c` (PO-approved: mine untried small leaves over a fresh
+  overlay pivot). **2 banked / 3 carried** (22→20 stubs, 6 matched). Banks: `func_8008E164`→
+  `lerp_s32` (the S247 carry, cracked via the PO-directed compiler-source fan-out — 4 subagents over
+  gcc-2.7.2 + binutils-2.6, then a follow-up dive PROVED it is a **GCC nested function**, not a
+  DCE/frame coin: the dead frame + `sw v0` is the static-chain home, byte-for-byte identical to a
+  clean nested child; orphaned, banked with a `volatile` stand-in); `func_8008D100`→
+  `init_scenario_state` (fresh, m2c+Ghidra seed, first build). Carries: `func_800957F0` (jtbl+DL, two
+  walls), `func_800958D8` (0.833 gsDPSetScissor emitter, #base-register-vs-displacement + fold
+  barrier), and `func_80092E10` **RE-PRICED** from "$v0-arg wall" to a chain-USED nested function
+  (crackable once its parent 0x800930xx..0x80093470 is decompiled). Seed 5 (classical/mixed); banked
+  0pt (file partial, walls remain); realized ~6 (+3 carries, −1 for the first-build init_scenario);
+  residual +1. Rolling-5 (S244-S248): main-segment slices banked 0+2+3+2+2. **Key: retired the S247
+  "DCE/frame coin" verdict on func_8008E164 to a GCC-nested-function identification** (memory
+  `dead-frame-dead-v0-store-crack` reframed; new workflow DoR + hazards.md variants). Retro applied
+  2 of 2 (#1 nested-fn DoR check → workflow §3 + hazard-index rows + hazards.md; #2 fix S247 carry
+  framing → BACKLOG + this line). 0 pre-buffered suggestions (both emerged from the finding).
+  Tooling-test failures hold at 8 (0 new; doc/memory edits only). Push: local only.
 - **Regime:** `mirror` is a depleting minority (~22 % of ranked candidates: 56 mirror vs 194
   classical; 18 warm / 38 cold). The warm clean-singleton mirror pool is now **mined out** (S11
   plan gate: every top mirror candidate carries a blocking hazard), pushing the project onto the
