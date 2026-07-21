@@ -1117,6 +1117,17 @@ Three honest caveats:
   + hazard-index + new memory `pure-dead-frame-clean-crack`; #2 fresh-pivot datapoint → RETRO; #3
   indexed-biv confirmation → RETRO). 1 new memory. Tooling-test failures hold at 8 (0 new; doc/memory
   edits only). Push: local only.
+  S252: CONTINUE `src/main/func_80080220.c` smallest-first (PO approved; pack not yet plateaued).
+  **3 banked / 1 carried** (39→36 stubs). Banks (all auto): `func_8008C658` (bitfield double-free +
+  flag clear, first-build), `func_80080E14` (guarded teardown of the func_80080DCC lazy-init,
+  first-build; all callees prototyped up front), `func_8008060C` (state dispatch; `goto`-to-shared-label
+  defeated the `||` fold_range_test → kept ROM `beq`/`bne` short-circuit). Carry: `func_800824E4`
+  (RGBA-pack; terminal delay-slot-fill coin — `b` pinned to `$a2` by no-`move` negative-path `b=arg2`,
+  filler never puts the highest-of-pair reg in the `bnez` shadow; 2-insn transposition, percent 0.79 <
+  0.97). Seed 3 (classical); banked 0pt (file partial); realized 4 / residual +1 (2 first-build, 1
+  one-fix, 1 carry). Rolling-5 (S248-S252): main-segment slices banked 2+0+1+4+3. Retro applied 0 of 0
+  (no buffered suggestions; PO declined the optional delay-slot-coin note as a narrow instance of the
+  existing sched-tiebreak family). Tooling-test failures hold at 8 (0 new; doc edits only). Push: local.
 - **Regime:** `mirror` is a depleting minority (~22 % of ranked candidates: 56 mirror vs 194
   classical; 18 warm / 38 cold). The warm clean-singleton mirror pool is now **mined out** (S11
   plan gate: every top mirror candidate carries a blocking hazard), pushing the project onto the

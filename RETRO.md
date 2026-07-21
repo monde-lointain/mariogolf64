@@ -25,6 +25,31 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 252 — continue func_80080220 pack: 3 smallest-first leaves — 2026-07-21
+- Increment: 0 files banked (file partial, 39→36 stubs, NOT md5-candidate) / **+3 functions matched**:
+  `func_8008C658` / `func_80080E14` / `func_8008060C` (all auto). Commit 837d8be. ROM SHA-1 green
+  e2c4e7a9…, tree clean.
+- Quality: 0 stuck-far / 0 permuter / **1 carried** / 0 re-opened (`func_800824E4`).
+- Seed: committed 3pt; banked 0pt (per-file all-or-nothing, file partial); regime classical.
+  Realized 4 / residual +1 (2 first-build, 1 one-fix goto, 1 carry). Value signal = +3 matched.
+- What helped: (1) Fresh-pivot pack still yielding cheap smallest-first leaves (S251 direction holds) —
+  bitfield-free + guarded-teardown + state-dispatch all fell fast. (2) `goto`-to-shared-label defeated
+  the gcc-2.7.2 `||` fold_range_test on `func_8008060C` (`x==9||x==3` folds to branchless
+  `xori/sltiu/or`; ROM keeps short-circuit `beq`/`bne`) — [[gcc272-fold-range-test-slti-merge]], matched
+  first goto attempt. (3) Declared all callees with real prototypes up front (missing-prototype hazard),
+  no implicit-int scheduling flip.
+- Friction: `func_800824E4` (RGBA-pack) is a terminal delay-slot-fill coin — `b` pinned to `$a2` by the
+  negative-path `b=arg2` (no `move`), and the toolchain's delay-slot filler never selects the highest
+  reg of the delay-candidate pair, so ROM's `$a2`-in-`bnez`-shadow is source-unreachable (5 orderings
+  tested). percent 0.79 (reg-swap scoring; structurally a 2-insn transposition), below the 0.97 gate.
+  Characterized in `docs/wip/func_800824E4.near-match.md`; carried.
+- Applied: 0 of 0 (no buffered suggestions recorded — clean sprint, documented levers only; PO declined
+  the optional delay-slot-coin hazard note as a narrow instance of the existing sched-tiebreak family).
+- Carry-over: `func_800824E4` (delay-slot-fill coin, terminal). `func_80080220.c` continues (34 asm
+  leaves; next smallest `func_80083A48` 128B, `func_800852A8` 164B).
+
+---
+
 ## Sprint 251 — fresh-pivot: open func_80080220 pack, bank 4 smallest-first leaves — 2026-07-21
 - Increment: 0 files banked (file partial, 43→39 stubs, NOT md5-candidate) / **+4 functions matched**:
   `func_8008D0DC`→`toggle_sky_panel_bank_index` (curated), `func_80081550` / `func_80087BAC` /

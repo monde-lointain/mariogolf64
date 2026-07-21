@@ -4756,18 +4756,30 @@ by `/sprint-plan`:
   {artifact, wall} without a manual link. Would have banked func_800958D8 at S248 (2 sprints earlier).
   The manual recipe is documented now in `#isolated-compile-caveat` (S250 case); only the automation is
   deferred to a tested branch (kin to the S158/S177/S183/S189 golden-gated tooling rows).
-- **Open (S251, in-progress, NOT a spike):** `src/main/func_80080220.c` (43-fn main-seg render/course
-  pack, subseg 0x5B620 flipped `c` at the S251 gate; llcvt coddog@99.99 is a CONFIRMED structural
-  false-positive per BACKLOG:178 / 8vs43 non-lib-callee tell → classical track, no mirror). **4 banked
-  (S251, 0 carried), 43→39 stubs:** `func_8008D0DC`→`toggle_sky_panel_bank_index` (curated toggle of
-  `sky_panel_bank_index`), `func_80081550` (thin wrapper→func_8003E4B4, auto), `func_80087BAC`
+- **Open (S251+S252, in-progress, NOT a spike):** `src/main/func_80080220.c` (43-fn main-seg
+  render/course pack, subseg 0x5B620 flipped `c` at the S251 gate; llcvt coddog@99.99 is a CONFIRMED
+  structural false-positive per BACKLOG:178 / 8vs43 non-lib-callee tell → classical track, no mirror).
+  **S251: 4 banked / 0 carried (43→39):** `func_8008D0DC`→`toggle_sky_panel_bank_index` (curated toggle
+  of `sky_panel_bank_index`), `func_80081550` (thin wrapper→func_8003E4B4, auto), `func_80087BAC`
   (dual-array zero-init loop, INDEXED-form biv fix, auto), `func_80080DCC` (lazy one-time-init, auto,
   caller-evict src/main/func_80025D30.c; PURE-DEAD-FRAME cracked via `s32 unused[8]` = 0x20 frame delta,
   see `#dead-frame-reload-artifact-regalloc-wall` S251 pure-variant + memory `pure-dead-frame-clean-crack`).
-  Quality S251 0/0/0/0. **S252 DIRECTION: continue smallest-first here** (~35 untouched leaves; next
-  `func_800824E4` 80B, `func_8008C658` 88B, `func_80080E14` 104B) until the cheap-leaf vein plateaus into
-  the wall class, then fresh-pivot again (the `func_8002A640` 24-fn spriteex2 pack — needs a sprite.c
-  header-vendoring enabler — remains the standby alternative).
+  **S252: 3 banked / 1 carried (39→36):** `func_8008C658` (bitfield double-free + flag clear, auto,
+  first-build), `func_80080E14` (guarded teardown of the func_80080DCC lazy-init, auto, first-build),
+  `func_8008060C` (state dispatch, auto; `goto`-to-shared-label defeated the `||` fold_range_test to keep
+  ROM's `beq`/`bne` short-circuit, [[gcc272-fold-range-test-slti-merge]]). Quality S251 0/0/0/0, S252
+  0/0/1/0.
+  - **CARRY `func_800824E4` (0x50, S252 TERMINAL delay-slot-fill coin — do NOT re-grind as a fresh
+    leaf):** RGBA byte-packer. Only diff = a 2-insn transposition: ROM puts `$a2` (packed-blue byte) in
+    the entry-`bnez` delay slot; `b` is MANDATORY-pinned to `$a2` by the negative-path `b=arg2` (no
+    `move`), and the toolchain's delay-slot filler / scheduler tiebreak never selects the highest reg of
+    the delay-candidate pair (5 source orderings tested). percent 0.79 (reg-swap scoring; structurally
+    22/23 rows), below the 0.97 permuter gate. Full RE + pass-analysis in
+    `docs/wip/func_800824E4.near-match.md`.
+  - **S253 DIRECTION: continue smallest-first here** (~33 untouched leaves; next `func_80083A48` 128B,
+    `func_800852A8` 164B, `func_80080564` 168B) until the cheap-leaf vein plateaus into the wall class,
+    then fresh-pivot again (the `func_8002A640` 24-fn spriteex2 pack — needs a sprite.c header-vendoring
+    enabler — remains the standby alternative).
 - **Open (S227, in-progress mixed-partial, NOT a spike):** `src/main/func_80071370.c` (39-fn main-seg
   `none` pack, subseg 0x4C770 flipped `c` at the S227 gate; string/struct-array/heap/DL glue). **8
   banked** (`func_80074960` empty, `func_80073BF0` strlen, `func_80071C74` single-index struct-array
