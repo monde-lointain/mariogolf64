@@ -1101,6 +1101,22 @@ Three honest caveats:
   tracked `tools/link_both_cmp.py` follow-up; #2 S235 verbatim-clause re-validated → agent-workflow.md;
   #3 S251 fresh-pivot direction → BACKLOG). Tooling-test failures hold at 8 (0 new; doc edits only).
   Push: local only.
+  S251: FRESH-PIVOT — OPENED `src/main/func_80080220.c` (43-fn main-seg render/course pack; asm-flip →
+  c; PO chose over the sprite.c pack, per S250 retro to abandon the mined-out func_8008D100.c wall
+  tail). **4 banked / 0 carried** (43→39 stubs). llcvt coddog tag confirmed a structural false-positive
+  (BACKLOG:178) → classical track. Banks: `func_8008D0DC`→`toggle_sky_panel_bank_index`
+  (`sky_panel_bank_index ^= 1`, curated; sibling `set_sky_panel_cycle_mode_sel` domain), `func_80081550`
+  (thin wrapper, auto), `func_80087BAC` (dual-array zero-init loop; INDEXED form fixed the a0/v0 biv
+  regalloc), `func_80080DCC` (lazy one-time-init; auto, caller-evict). Seed 5 (classical); banked 0pt
+  (file partial); realized 5 / residual 0 (2 first-build, 2 one-fix, NO walls, NO carries — cleanest
+  main-seg sprint since the wall-cluster grind began). Rolling-5 (S247-S251): main-segment slices banked
+  2+2+0+1+4. **Key: fresh-pivot off a mined-out wall tail restored velocity exactly as S250 retro
+  predicted (4 vs S250's 1); and the PURE-DEAD-FRAME variant (frame-only diff, no reg permutation) is a
+  CLEAN crack via a sized `unused[N]` local — distinct from the divide-driven dead-frame carry-class.**
+  Retro applied 3 of 3 (#1 pure-dead-frame subsection → hazards.md#dead-frame-reload-artifact-regalloc-wall
+  + hazard-index + new memory `pure-dead-frame-clean-crack`; #2 fresh-pivot datapoint → RETRO; #3
+  indexed-biv confirmation → RETRO). 1 new memory. Tooling-test failures hold at 8 (0 new; doc/memory
+  edits only). Push: local only.
 - **Regime:** `mirror` is a depleting minority (~22 % of ranked candidates: 56 mirror vs 194
   classical; 18 warm / 38 cold). The warm clean-singleton mirror pool is now **mined out** (S11
   plan gate: every top mirror candidate carries a blocking hazard), pushing the project onto the

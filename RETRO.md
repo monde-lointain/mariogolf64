@@ -25,6 +25,36 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 251 — fresh-pivot: open func_80080220 pack, bank 4 smallest-first leaves — 2026-07-21
+- Increment: 0 files banked (file partial, 43→39 stubs, NOT md5-candidate) / **+4 functions matched**:
+  `func_8008D0DC`→`toggle_sky_panel_bank_index` (curated), `func_80081550` / `func_80087BAC` /
+  `func_80080DCC` (auto). Commit 99c9050. ROM SHA-1 green e2c4e7a9…, tree clean.
+- Quality: 0 stuck-far / 0 permuter / 0 carried / 0 re-opened — cleanest main-seg sprint since the
+  wall-cluster grind began.
+- Seed: committed 5pt; banked 0pt (per-file all-or-nothing, file partial); regime classical.
+  Realized 5, residual 0 (2 first-build, 2 one-fix, no walls). Value signal = +4 matched.
+- What helped: (1) FRESH-PIVOT off the mined-out func_8008D100.c wall tail (S250 retro direction) restored
+  cheap smallest-first velocity — a fresh 43-fn main-seg pack yields getter/wrapper/init-loop/lazy-init
+  leaves again (4 banks vs S250's 1-bank/2-terminal on the same-file crack grind). (2) The llcvt coddog
+  tag was pre-known a structural false-positive (BACKLOG:178, non-lib-callee tell) → went straight to the
+  classical track, no wasted mirror attempt. (3) Sized leaves from the `.s` headers post-flip (S247 DoR),
+  not vram gaps.
+- Friction: two one-fix leaves. `func_80087BAC` (dual-array zero-init): an explicit `s32* p/q`
+  pointer-walk mis-allocated the biv (counter→v0); the INDEXED `ARR[i]=0` form let gcc's LSR assign
+  counter→a0 + last-referenced-ptr→v0, matching. `func_80080DCC` (lazy-init): ROM reserved a 0x38 frame
+  vs build 0x18 — a PURE dead frame (ONLY the frame immediate + ra-slot offset differ; NO reg
+  permutation, NO divide), cracked byte-exact with `s32 unused[8]` (0x20 = delta). This is a CLEAN-crack
+  variant distinct from the divide-driven `#dead-frame-reload-artifact-regalloc-wall` carry-class.
+- Applied: 3 of 3 (#1 pure-dead-frame subsection → `docs/hazards.md#dead-frame-reload-artifact-regalloc-wall`
+  + hazard-index row + new memory `pure-dead-frame-clean-crack`; #2 fresh-pivot-restores-velocity
+  datapoint → this RETRO; #3 indexed-vs-pointer biv confirmation → this RETRO, no doc change).
+- Carry-over: none. `func_80080220.c` stays open (39 stubs, ~35 untouched leaves); S252 continues
+  smallest-first here (next: `func_800824E4` 80B, `func_8008C658` 88B, `func_80080E14` 104B) until it
+  plateaus, then fresh-pivot again. Cross-repo: propagate `toggle_sky_panel_bank_index` →
+  `sync_decomp_names.py --import-from-decomp`.
+
+---
+
 ## Sprint 250 — compiler-source fan-out crack slice on the func_8008D100.c documented walls — 2026-07-21
 - Increment: 0 files banked (file partial, 20→19 stubs, NOT md5-candidate) / **+1 function matched**
   (6→7 of 26): `func_800958D8`→`emit_fullscreen_scissor_dl` (0x800958D8), commit 82cbc39. ROM SHA-1

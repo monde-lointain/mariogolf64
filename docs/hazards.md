@@ -5872,6 +5872,24 @@ deep compiler-source dive above; improved seed + full analysis in `docs/wip/func
 re-carry** after the cross-project + coalescing correction above (retired the "irreducible/unrecoverable"
 framing) — see `#signed-divide-const-v0v1-quotient-destination`.
 
+**S251 — the PURE-DEAD-FRAME variant is a CLEAN CRACK, NOT this carry-class.** Everything above assumes
+the dead frame is COUPLED to a register permutation (the `v0`/`v1` divide-swap) — that coupling is what
+makes it a carry. But a dead frame can appear ALONE: a fn whose body is **byte-identical** to the ROM
+and whose ONLY residual is the prologue/epilogue `addiu sp` immediate (+ the `sw/lw ra` slot offset that
+moves with it), with **NO register permutation, NO signed-divide, NO reg-swap anywhere**. That is a
+`reload`-eliminated **local aggregate**, not an eliminated spill-of-a-divide-pseudo, and it is
+**reconstructable**: declare an unused local array sized to the frame delta and gcc reserves the slot
+with zero `sp)` access (an UNUSED aggregate is NOT address-taken, so it does NOT force the "live frame
+with real `sp` loads" the caveat above warns about — that caveat is about address-TAKING, a different
+trigger). **Recipe:** frame delta = `ROM_frame − your_frame`; the base non-leaf frame is `0x18` (0x10
+outgoing-arg + 0x8 ra/pad), so the eliminated local is `delta` bytes → `s32 unused[delta/4]`. S251
+`func_80080DCC` (lazy one-time-init): ROM `-0x38`/ra@0x30 vs build `-0x18`/ra@0x10, delta `0x20` →
+`s32 unused[8]` → byte-exact, no other change. **Disambiguation from the carry-class:** grep the
+near-match diff — if the ONLY differing tokens are the two `addiu sp` immediates + the `ra` slot offset
+(body instruction sequence + every other reg identical), it is the pure variant → CRACK with the sized
+unused aggregate; if the frame diff drags a `v0`/`v1` (or other) reg permutation with it, it is the
+divide-driven carry-class above. Memory: [[pure-dead-frame-clean-crack]].
+
 ## signed-divide-const v0/v1 quotient-destination
 
 **Companion positive lever (S228): emit `%`/`/` directly; do NOT hand-write the divide guards.**
