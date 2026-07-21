@@ -134,7 +134,142 @@ check_init:
  */
 INCLUDE_ASM("asm/nonmatchings/main/func_80080220", func_80080688);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80080220", func_8008085C);
+extern void func_801FD624(void);
+extern void func_800789C8(void);
+extern void func_8020D6F0(void);
+extern void func_80216EDC(void);
+extern void func_8020E740(void);
+extern void func_8021E5F4(void);
+extern s32 func_80051FCC(void);
+extern void func_80077C18(s32 arg0);
+extern s32 D_800C59D8;
+extern s32 D_800C59DC;
+extern void* D_801B55DC;
+extern void* D_800E2188;
+extern void* D_80132360;
+extern void* D_800FED0C;
+extern void* D_800FF4F0;
+extern void* D_8012D428;
+extern void* D_801B7EE0;
+extern void* D_800E2140;
+extern void* D_800E2144[];
+extern void* D_800E2138;
+extern void* D_800E2158;
+extern void* D_800E214C[];
+extern void* D_800E2184;
+extern void* D_800E2164;
+extern void* D_800E2168;
+extern void* D_800E216C;
+extern void* D_800E2170;
+extern void* D_800E2174;
+extern void* D_800E217C;
+extern void* D_800E2178;
+extern void* D_80105214;
+
+void func_8008085C(void) {
+  RomLoadSlot slot[2];
+  u32 size;
+
+  D_800C59E0 = 2;
+  func_801FD624();
+  func_800789C8();
+  func_8020D6F0();
+  func_80216EDC();
+  func_8020E740();
+  func_8021E5F4();
+
+  size = func_8005062C(0x541, slot);
+  D_801B55DC = heap3_alloc(size);
+  func_800506D4(D_801B55DC, slot);
+
+  size = func_8005062C(0x5A4, slot);
+  D_800E2188 = heap3_alloc(size);
+  func_800506D4(D_800E2188, slot);
+
+  size = func_8005062C(0x5E3, slot);
+  D_80132360 = heap3_alloc(size);
+  func_800506D4(D_80132360, slot);
+
+  size = func_8005062C(0x972, slot);
+  D_800FED0C = heap3_alloc(size);
+  func_800506D4(D_800FED0C, slot);
+
+  size = func_8005062C(0x93C, slot);
+  D_800FF4F0 = heap3_alloc(size);
+  func_800506D4(D_800FF4F0, slot);
+
+  size = func_8005062C(0x4DB, slot);
+  D_8012D428 = heap3_alloc(size);
+  func_800506D4(D_8012D428, slot);
+
+  size = func_8005062C(0x4C3, slot);
+  D_801B7EE0 = heap3_alloc(size);
+  func_800506D4(D_801B7EE0, slot);
+
+  D_800C59D8 = -1;
+  size = func_8005062C(0x4E3, slot);
+  D_800E2140 = heap3_alloc(size);
+  func_800506D4(D_800E2140, slot);
+
+  D_800E2144[0] = heap3_alloc(0x128);
+  D_800E2144[1] = heap3_alloc(0x128);
+  D_800C59DC = -1;
+  D_800E2138 = heap3_alloc(0x1208);
+
+  size = func_8005062C(0x648, slot);
+  D_800E2158 = heap3_alloc(size);
+  func_800506D4(D_800E2158, slot);
+
+  size = func_8005062C(0x563, slot);
+  D_800E214C[0] = heap3_alloc(size);
+  func_800506D4(D_800E214C[0], slot);
+
+  size = func_8005062C(0x564, slot);
+  D_800E214C[1] = heap3_alloc(size);
+  func_800506D4(D_800E214C[1], slot);
+
+  size = func_8005062C(0x562, slot);
+  D_800E214C[2] = heap3_alloc(size);
+  func_800506D4(D_800E214C[2], slot);
+
+  size = func_8005062C(0x57C, slot);
+  D_800E2184 = heap3_alloc(size);
+  func_800506D4(D_800E2184, slot);
+
+  size = func_8005062C(0x97B, slot);
+  D_800E2164 = heap3_alloc(size);
+  func_800506D4(D_800E2164, slot);
+
+  size = func_8005062C(0x725, slot);
+  D_800E2168 = heap3_alloc(size);
+  func_800506D4(D_800E2168, slot);
+
+  size = func_8005062C(0x568, slot);
+  D_800E216C = heap3_alloc(size);
+  func_800506D4(D_800E216C, slot);
+
+  size = func_8005062C(0x56B, slot);
+  D_800E2170 = heap3_alloc(size);
+  func_800506D4(D_800E2170, slot);
+
+  size = func_8005062C(0x56A, slot);
+  D_800E2174 = heap3_alloc(size);
+  func_800506D4(D_800E2174, slot);
+
+  size = func_8005062C(0x569, slot);
+  D_800E217C = heap3_alloc(size);
+  func_800506D4(D_800E217C, slot);
+
+  size = func_8005062C(0x723, slot);
+  D_800E2178 = heap3_alloc(size);
+  func_800506D4(D_800E2178, slot);
+
+  size = func_8005062C(0x724, slot);
+  D_80105214 = heap3_alloc(size);
+  func_800506D4(D_80105214, slot);
+
+  func_80077C18(func_80051FCC());
+}
 
 extern void func_80078910(void);
 extern void func_8020D784(void);
