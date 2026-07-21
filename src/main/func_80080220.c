@@ -228,7 +228,24 @@ void func_80087BAC(void) {
   }
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80080220", func_80087BE4);
+extern f32 sqrtf(f32);
+
+void func_80087BE4(s32 x, s32 y) {
+  f32 dist;
+
+  if (x == 0 && y == 0) {
+    dist = sqrtf((f32)(x * x + y * y));
+  } else {
+    dist = 0.0f;
+  }
+  if (56.0f < dist) {
+    f32 scale = 56.0f / dist;
+    x = (s32)(x * scale);
+    y = (s32)(y * scale);
+  }
+  D_800E2190[0] = x / 4;
+  D_800E21A8[0] = -y / 4;
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80080220", func_80087CB0);
 

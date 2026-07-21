@@ -22,3 +22,9 @@ $(BUILD_DIR)/$(SRC_DIR)/main/func_8006A000.o: C_PROFILE_CFLAGS := $(MAIN_CFLAGS)
 # banked FP siblings match the (-ffast-math) ROM, so they are fast-math-invariant
 # and stay matched under the flag.
 $(BUILD_DIR)/$(SRC_DIR)/main/func_80078910.o: C_PROFILE_CFLAGS := $(MAIN_CFLAGS) -ffast-math
+
+# func_80080220.c: func_80087BE4 normalizes a 2D vector to length 56 via sqrtf()
+# -> bare `sqrt.s` in the ROM, so the whole TU compiles -ffast-math. Same
+# BUILT_IN_FSQRT guard-drop as above; the already-banked FP siblings (the single
+# int*const particle-scale multiplies) are fast-math-invariant and stay matched.
+$(BUILD_DIR)/$(SRC_DIR)/main/func_80080220.o: C_PROFILE_CFLAGS := $(MAIN_CFLAGS) -ffast-math
