@@ -52,11 +52,22 @@ INCLUDE_ASM("asm/nonmatchings/main/func_8008D100", func_8008D3F4);
 INCLUDE_ASM("asm/nonmatchings/main/func_8008D100", func_8008DDDC);
 
 /* Integer lerp, truncated: a0*(1-t) + a1*t, t in $a2 (o32 GPR).
- * The dead `volatile s32` local (seeded from an uninitialized local) reproduces
- * the ROM's dead 8-byte frame + `sw $v0` store of the incoming (uninit) return
- * register: the volatile addressed local forces the frame (compute_frame_size,
- * mips.c:4444) and its store survives DCE (flow.c volatile exemption), while
- * the uninitialized source emits no load, storing $v0 as-is. */
+ *
+ * TRUE ORIGIN: this is a GCC nested function (an orphaned out-of-line child).
+ * The dead 8-byte frame + `sw $v0,0(sp)` (never reloaded) is the
+ * nested-function prologue homing the incoming STATIC CHAIN ($v0 ==
+ * STATIC_CHAIN_REGNUM = GP_REG_FIRST+2, mips.h:1310); this child never reads a
+ * parent variable so the chain is homed but unused. A clean nested child `int
+ * f(int a,int b,float t){ return a*(1-t)+b*t; }` inside a parent emits these
+ * exact 20 words (verified byte-for-byte). The parent inlined its call, so no
+ * jal / fn-pointer to 0x8008E164 survives anywhere in the ROM (orphaned dead
+ * body).
+ *
+ * The `volatile s32` local below is a standalone stand-in that reproduces the
+ * same bytes (it cannot be written as a real nested fn without its parent,
+ * which is undecompiled and would not re-emit this symbol). Move it inside the
+ * parent as a nested function if that parent is ever recovered. See the memory
+ * dead-frame-dead-v0-store-crack and docs/wip/func_8008E164.nested.md. */
 s32 lerp_s32(s32 a0, s32 a1, f32 t) {
   s32 r;
   volatile s32 unused = r;
