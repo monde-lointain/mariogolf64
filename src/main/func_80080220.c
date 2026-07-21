@@ -587,7 +587,51 @@ INCLUDE_ASM("asm/nonmatchings/main/func_80080220", func_8008534C);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80080220", func_80085F98);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80080220", func_8008658C);
+extern Gfx* glistp;
+extern u16 sky_panel_persp_norm;
+extern Mtx D_800E2050;
+extern Mtx D_E2050;
+extern Mtx D_FE2F0;
+extern void mtx_from_rts(f32 mf[4][4], f32 rotate[3], f32 translate[3],
+                         f32 scale[3]);
+extern void convert_and_pack_floats_to_fixed(f32 mf[4][4], Mtx* m);
+extern void func_80085F98(s32 arg0);
+
+void func_8008658C(void) {
+  f32 translate[3];
+  f32 scale[3];
+  f32 rotate[3];
+  f32 mf[4][4];
+
+  translate[0] = -240.0f;
+  translate[1] = 180.0f;
+  translate[2] = -500.0f;
+  scale[0] = 0.1f;
+  scale[1] = 0.1f;
+  scale[2] = 0.1f;
+  rotate[0] = 0.0f;
+  rotate[1] = 0.0f;
+  rotate[2] = 0.0f;
+  mtx_from_rts(mf, rotate, translate, scale);
+  convert_and_pack_floats_to_fixed(mf, &D_800E2050);
+
+  gDPPipeSync(glistp++);
+  gDPPipeSync(glistp++);
+  gDPSetCycleType(glistp++, G_CYC_1CYCLE);
+  gSPLoadGeometryMode(glistp++, 0);
+  gSPSetGeometryMode(glistp++, G_SHADE | G_CULL_BACK | G_SHADING_SMOOTH);
+  gDPPipeSync(glistp++);
+  gDPSetRenderMode(glistp++, G_RM_AA_OPA_SURF, G_RM_AA_OPA_SURF2);
+  gSPPerspNormalize(glistp++, sky_panel_persp_norm);
+  gDPPipeSync(glistp++);
+  gDPSetTexturePersp(glistp++, G_TP_PERSP);
+  gSPMatrix(glistp++, &D_FE2F0, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+  gSPMatrix(glistp++, &D_E2050, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+
+  func_80085F98(0);
+
+  gDPPipeSync(glistp++);
+}
 
 extern f32 D_800C5DF0;
 extern s32 D_800C5DF4;
