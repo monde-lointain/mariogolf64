@@ -23,6 +23,17 @@ extern void func_80069FBC(void);
 extern void func_80069F38(void);
 extern void cfb_set_num(u32);
 
+extern Gfx* glistp;
+
+typedef struct {
+  s16 ulx;
+  s16 uly;
+  s16 lrx;
+  s16 lry;
+} ScissorRect;
+
+extern ScissorRect D_801B7F30;
+
 /* Game/session init: zero the 0x44-byte state block, seed mode/wind globals
  * (wind magnitude = (rand() & 0x3F) * 6000, wind angle from a second rand),
  * then run the sub-init calls and select framebuffer 2. */
@@ -123,6 +134,17 @@ INCLUDE_ASM("asm/nonmatchings/main/func_8008D100", func_8009548C);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_8008D100", func_800957F0);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_8008D100", func_800958D8);
+/* gsDPPipeSync + gsDPSetScissor emitter for the full 320x240 (0x140 x 0xF0)
+ * screen. Coords come from a persistent 4x s16 rect at D_801B7F30; the scissor
+ * macro does the *4.0f 10.2 fixed-point conversion. */
+void emit_fullscreen_scissor_dl(void) {
+  D_801B7F30.ulx = 0;
+  D_801B7F30.lrx = 0x140;
+  D_801B7F30.lry = 0xF0;
+  D_801B7F30.uly = 0;
+  gDPPipeSync(glistp++);
+  gDPSetScissor(glistp++, G_SC_NON_INTERLACE, D_801B7F30.ulx, D_801B7F30.uly,
+                D_801B7F30.lrx, D_801B7F30.lry);
+}
 
 s32 func_800959F8(void) { return D_800C5EE4 < 1; }

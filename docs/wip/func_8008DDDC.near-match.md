@@ -38,3 +38,65 @@ row + `func_80051FCC()<<8` frame, the second +0x20), and blends them by `progres
   target (this fn is the most tractable of the S249 pair at 0.610).
 - Kin to memory [[loop-invariant-hoist-order-preheader-regalloc]] and
   [[cross-call-live-range-callee-saved-lever]].
+
+## S250 compiler-source crack attempt — TERMINAL verdict (pass-cited, no-lever)
+Reproduced baseline 8900 / 0.610 isolated. Root-caused the residual to a SINGLE coupled
+7-callee-saved-register allocation equilibrium; both builds spend exactly 7 saved regs
+(s0-s6) at near-identical instr count (ref 212 vs cur 211), but on a different split:
+  - REF (7): s0=&D_800C6014(tbl), **s1=&putter_mode_flag addr (kept across both calls)**,
+    s2=kfA, s3=b3, s4=b4, s5=grp, s6=mfhi-tmp. const-3 (inner-loop bound) is
+    **rematerialized** `li v0,3` inside the inner loop (no saved reg).
+  - CUR (7): s0=tbl, s1=kfA, s2=b2, s3=b1, s4=grp, **s5=const-3 (loop.c-hoisted)**,
+    s6=mfhi-tmp. `&putter_mode_flag` is **rematerialized** (`lw $3,putter` macro, address
+    folded by the assembler) at both loads — no address pseudo exists.
+The entire 23-diff cascade (grp s4<->s5, kfA s1<->s2, kfB t6<->t7, lane-base and inner-counter
+reg permutation) is downstream of this ONE difference: which saved reg goes to putter's
+address vs the hoisted const-3.
+
+### Diverging passes (file:line)
+1. **Address-materialization** — `config/mips/mips.c:1023` (`ret = "lw\t%0,%1"`). For a direct
+   `(mem (symbol_ref))` the MIPS backend emits the assembler *macro* `lw reg,sym`, which the
+   assembler folds to `lui reg,%hi; lw reg,%lo(reg)` — address NOT kept. Keeping `&putter` in
+   s1 (`la $17,putter; ... lw $v,0($17)`) requires a separate address pseudo
+   `(set p (symbol_ref))` that only CSE/reload-inheritance creates. Post-CSE flow dump
+   (`t.c.flow`) confirms BOTH putter and D_800C5EEC remain inline `(mem (symbol_ref))` with
+   **no** address pseudo in my compilation — cse.c did not pull either out. The reference kept
+   putter's (a marginal reload-inheritance / cse address-cost coin, reload1.c
+   `choose_reload_regs`), NOT D_800C5EEC's, despite the two symbols being source-identical
+   (both read twice, one jal between; addrs 0x800BA9F8 vs 0x800C5EEC, non-adjacent -> no
+   shared-base struct explanation).
+2. **const-3 double-hoist** — `loop.c:1631` move_movables
+   (`(threshold * savings * m->lifetime) >= insn_count`, threshold = 2*(1+n_non_fixed_regs)
+   @ loop.c:532). The inner-loop bound `3` is invariant to both nested loops, hoisted to the
+   OUTER preheader -> lives across the outer loop -> callee-saved s5. The reference does not
+   hoist it because its outer-preheader pressure (putter addr in s1) makes the hoist
+   unprofitable. Purely a function of `n_non_fixed_regs` (reg-availability estimate), coupled
+   to decision #1.
+
+### Why no source lever
+- `s32 *pp = &putter_mode_flag; *pp` DOES create the address pseudo (-> s5 kept across both
+  calls, correct in isolation) but gcc hoists its constant init to the PROLOGUE (materialized
+  `lui s5;addiu s5` at fn entry, live range from entry, not ref's after-1st-jal window) AND
+  loop.c still hoists const-3 to a SEPARATE reg -> 8 saved regs, frame 0x30->0x38, score
+  8900->13160. No faithful C controls the address-pseudo PLACEMENT (constant addr always
+  hoists maximally early) or prevents the independent const-3 hoist.
+- const-3 un-hoist is defeated by constant propagation: per-outer-iteration `s32 nn=3;` bound
+  is const-propagated and hoisted identically (8900, no change). Only `volatile`/a runtime
+  value blocks it — both unfaithful (extra load / changed semantics).
+- Operand swap (`eec + putter*4`) and descending lane-base init (b4-first) tested: 0 or
+  negative (9040) delta. Ascending lane init remains best.
+- The two decisions are a coupled zero-sum: fixing putter's address (pp) without
+  simultaneously un-hoisting const-3 (unreachable) can only grow the reg count, never reach
+  ref's 7-reg split. No lever moves both together.
+
+### Assembler ruled OUT
+binutils 2.6 faithfully expands the `lw reg,sym` macro and does not reorder/CSE addresses; the
+divergence is entirely in gcc RTL (presence/placement of the address pseudo), not the
+assembler.
+
+### Verdict
+TERMINAL — not source-leverable. Diverging pass: reload1.c `choose_reload_regs` /
+address-pseudo creation feeding `config/mips/mips.c:1023`, coupled with `loop.c:1631`
+const-hoist. Best percent reached: **0.610** (baseline; all variants tied or worse), far below
+the 0.97 permuter gate, so the permuter was not run. Recommend retaining the S249 carry as a
+pass-cited wall (S233 doctrine).
