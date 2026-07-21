@@ -113,7 +113,69 @@ INCLUDE_ASM("asm/nonmatchings/main/func_80080220", func_80080688);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80080220", func_8008085C);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80080220", func_80080C4C);
+extern void func_80078910(void);
+extern void func_8020D784(void);
+extern void func_80216F8C(void);
+extern void func_8020E78C(void);
+extern void func_8021E6B8(void);
+extern void func_80077DEC(void);
+extern void* D_801B55DC;
+extern void* D_800E2188;
+extern void* D_80132360;
+extern void* D_800FED0C;
+extern void* D_800FF4F0;
+extern void* D_8012D428;
+extern void* D_801B7EE0;
+extern void* D_800E2140;
+extern void* D_800E2144[];
+extern void* D_800E2138;
+extern void* D_800E2158;
+extern void* D_800E214C[];
+extern void* D_800E2184;
+extern void* D_800E2164;
+extern void* D_800E2168;
+extern void* D_800E216C;
+extern void* D_800E2170;
+extern void* D_800E2174;
+extern void* D_800E217C;
+extern void* D_800E2178;
+extern void* D_80105214;
+
+void func_80080C4C(void) {
+  if (D_800C59E0 == 2) {
+    D_800C59E0 = 1;
+    func_80078910();
+    func_8020D784();
+    func_80216F8C();
+    func_8020E78C();
+    func_8021E6B8();
+    heap3_free(&D_801B55DC);
+    heap3_free(&D_800E2188);
+    heap3_free(&D_80132360);
+    heap3_free(&D_800FED0C);
+    heap3_free(&D_800FF4F0);
+    heap3_free(&D_8012D428);
+    heap3_free(&D_801B7EE0);
+    heap3_free(&D_800E2140);
+    heap3_free(&D_800E2144[0]);
+    heap3_free(&D_800E2144[1]);
+    heap3_free(&D_800E2138);
+    heap3_free(&D_800E2158);
+    heap3_free(&D_800E214C[0]);
+    heap3_free(&D_800E214C[1]);
+    heap3_free(&D_800E214C[2]);
+    heap3_free(&D_800E2184);
+    heap3_free(&D_800E2164);
+    heap3_free(&D_800E2168);
+    heap3_free(&D_800E216C);
+    heap3_free(&D_800E2170);
+    heap3_free(&D_800E2174);
+    heap3_free(&D_800E217C);
+    heap3_free(&D_800E2178);
+    heap3_free(&D_80105214);
+    func_80077DEC();
+  }
+}
 
 void func_80080DCC(void) {
   s32 unused[8];
