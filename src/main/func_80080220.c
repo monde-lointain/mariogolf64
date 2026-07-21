@@ -259,7 +259,52 @@ INCLUDE_ASM("asm/nonmatchings/main/func_80080220", func_80088BDC);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80080220", func_80089094);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80080220", func_8008C520);
+extern s32 scenario_mode_id;
+extern s32 D_801B6098;
+extern s8 D_801B60BA;
+extern s8 D_801B60BB;
+extern s32 D_801B60A0;
+extern s32 func_80052100(s32 mode, s32 arg1);
+extern s32 func_80052168(s32 mode, s32 arg1);
+extern s32 func_8005244C(s32 arg0, s32 arg1);
+
+void func_8008C520(void) {
+  RomLoadSlot slot[2];
+  u32 size;
+  s32 id;
+
+  D_800C5ED8 = 0;
+  if (D_801B60BA != -1 && func_80052100(scenario_mode_id, D_801B6098) != 0) {
+    id = 0x554;
+    goto alloc1;
+  }
+  if (D_801B60BB != -1 && func_80052168(scenario_mode_id, D_801B6098) != 0) {
+    id = 0x555;
+    goto alloc1;
+  }
+  goto slot2;
+alloc1:
+  size = func_8005062C(id, slot);
+  D_800E3970 = heap3_alloc(size);
+  func_800506D4(D_800E3970, slot);
+  D_800C5ED8 |= 1;
+slot2:
+  if ((D_801B608C == 2) | (D_801B608C == 4)) {
+    if (D_801B60A0 != 0) {
+      id = 0x8FF;
+    } else {
+      s32 status = func_8005244C(0, 1);
+      if ((u32)(status - 1) >= 2) {
+        return;
+      }
+      id = 0x8FC;
+    }
+    size = func_8005062C(id, slot);
+    D_800E3974 = heap3_alloc(size);
+    func_800506D4(D_800E3974, slot);
+    D_800C5ED8 |= 2;
+  }
+}
 
 void func_8008C658(void) {
   if (D_800C5ED8 & 1) {
