@@ -1143,6 +1143,21 @@ Three honest caveats:
   banked 0+1+4+3+3. Retro applied 2 of 2 (#1 ranker-gap partial-bank-pack-not-surfaced → BACKLOG ranker
   follow-ups; #2 SR-walking-pointer terminal loop sub-case → memory byte-offset-cast-defeats-base-ptr-cse).
   Tooling-test failures hold at 8 (0 new; doc/memory edits only). Push: local.
+  S254: CONTINUE `src/main/func_80080220.c` smallest-first (PO approved; pack not yet plateaued).
+  **3 banked / 1 carried** (33→30 stubs). Banks (all auto): `func_8008679C` (200B shot-record sound-cue
+  setter — arg -1 writes D_800C5DF0=-1.0f, arg 0 queries func_80213C78(&ShotRecord[D_8010623F]) + calls
+  func_80050DA0, sets D_800C5DF4; `0.0f→sw zero` + odd `if(x==0&&y==0)` branch-sense both literal,
+  first-build), `func_80087BE4` (204B 2D-vector clamp-to-56 + `/4` store to D_800E2190/D_800E21A8 — TU
+  `-ffast-math` mk override for bare `sqrt.s`, banked FP siblings fast-math-invariant), `func_8008C520`
+  (312B two-slot resource loader — frame crack: `RomLoadSlot[2]` out-buffer gives the 0x38 frame, same
+  sibling-typedef tell as S253 func_80080564). Carry: `func_80088A90` (0x14C S243 raw-DL-word glyph-emitter
+  TERMINAL — structurally complete, char-mask regalloc split + reorg branch-likely toward handlers,
+  permuter-class; the cheap-leaf→wall plateau the DIRECTION note forecast). Seed 5 (classical; ABOVE the
+  S251-253 seed-3 anchor — plan-gate over-estimate, future mined-leaf-tier continuations should seed 3);
+  banked 0pt (file partial); realized 6 / residual +1 (3 clean banks, 1 carry). Rolling-5 (S250-S254):
+  main-segment slices banked 1+4+3+3+3. Retro applied 1 of 1 (#1 ranker-gap RECURRED — partial-bank pack
+  not surfaced as c-stub continuation → BACKLOG ranker follow-up). Tooling-test failures hold at 8 (0 new;
+  doc/memory edits only). Push: local.
 - **Regime:** `mirror` is a depleting minority (~22 % of ranked candidates: 56 mirror vs 194
   classical; 18 warm / 38 cold). The warm clean-singleton mirror pool is now **mined out** (S11
   plan gate: every top mirror candidate carries a blocking hazard), pushing the project onto the

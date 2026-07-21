@@ -4790,16 +4790,32 @@ by `/sprint-plan`:
     giv; this one uses none). Permuter-unreachable. Full RE + levers in
     `docs/wip/func_80081C90.near-match.md`; memory `[[byte-offset-cast-defeats-base-ptr-cse]]` extended
     with this terminal loop sub-class.
-  - **S254 DIRECTION: continue smallest-first here** (~29 untouched non-carry leaves; next by `.s` size:
-    `func_80083A48`-tier is mined, re-sort the remaining stubs by `head -1 asm/nonmatchings/main/
-    func_80080220/<f>.s` — smallest fresh non-carry are `func_8008679C` 200B, `func_80087BE4` 204B,
-    `func_8008C520` 312B) until the cheap-leaf vein plateaus into the wall class, then fresh-pivot again
-    (the `func_8002A640` 24-fn spriteex2 pack — needs a sprite.c header-vendoring enabler — remains the
-    standby alternative). Exclude the carries `func_800824E4` (0x50) and `func_80081C90` (0xBC).
-  - **RANKER FOLLOW-UP (S253):** `pick_target.py --segment main` did NOT surface this ACTIVE partial-bank
-    pack (33 stubs) as a `c-stub remaining:N` continuation — it listed only 4 packs (2 other c-stubs +
-    2 asm-flips), so the gate fell back to this DIRECTION note + manual `.s`-header sizing to pick leaves.
-    A partial-banked already-`c` file with remaining `INCLUDE_ASM` stubs should rank as a c-stub
+  - **S254: banked `func_8008679C` (200B, shot-record sound-cue setter, first-build), `func_80087BE4`
+    (204B, 2D-vector clamp-to-56 + `/4` store; needed TU-wide `-ffast-math` for the bare `sqrt.s` —
+    added `mk/main.mk` override, all banked FP siblings fast-math-invariant), `func_8008C520` (312B,
+    two-slot resource loader; out-buffer is `RomLoadSlot[2]` like sibling `func_80080564`, giving the
+    0x38 frame). 33->30.**
+  - **CARRY `func_80088A90` (0x14C, S254 TERMINAL S243 raw-DL-word glyph-emitter wall — do NOT re-grind
+    as a fresh leaf):** units/numeric-string DL emitter (digits + `f`/`m`/`y` unit glyphs + `.`/space)
+    into a hand-rolled 6-word `G_TEXRECT` block. Body structurally COMPLETE (emit block byte-identical in
+    isolation). Terminal = pervasive regalloc + reorg branch-likely: (1) ROM keeps the char MASKED in a
+    separate reg (`andi v1,t0,0xFF` on the already-lbu'd byte) while the raw load stays in t0 for the
+    `bnez` loop test — collapsing them cascades the whole allocation (ROM dl=t1/cursor=a2/word_lo=t3 vs
+    mine dl=t2/cursor=t1/word_lo=a2); (2) ROM classifies with `beq`/`beql` branch-likely TOWARD later
+    handler labels (space-skip/`m`/`.` set advance in the annulled delay slot, reorg.c optimize_skip).
+    Kin to func_80071370.c's 73F24/74230/74500 (all carried). Permuter-class. Full RE + near-match C in
+    `docs/wip/func_80088A90.near-match.md`; memory `[[mg64-glyph-emitter-dl-family]]`.
+  - **S255 DIRECTION: continue smallest-first here** (~26 untouched non-carry leaves; the cheap-leaf vein
+    is starting to plateau into the DL/wall class — S254 hit `func_80088A90` after 3 clean banks). Re-sort
+    the remaining stubs by `head -1 asm/nonmatchings/main/func_80080220/<f>.s`; next fresh non-carry are
+    `func_80080C4C` (0x180, caller-evict but NOT a wall), `func_800842C0` (0x1A8), `func_80081D4C` (0x1AC),
+    `func_80080688` (0x1D4). Exclude the carries `func_800824E4` (0x50), `func_80081C90` (0xBC),
+    `func_80088A90` (0x14C). Once the leaf vein plateaus, fresh-pivot to the `func_8002A640` 24-fn
+    spriteex2 pack (needs a sprite.c header-vendoring enabler) — the standby alternative.
+  - **RANKER FOLLOW-UP (S253+S254 RECURRED):** `pick_target.py --segment main` STILL did not surface this
+    ACTIVE partial-bank pack (30 stubs) as a `c-stub remaining:N` continuation — it lists only 4 packs (2
+    other c-stubs + 2 asm-flips), so the gate again fell back to this DIRECTION note + manual `.s`-header
+    sizing. A partial-banked already-`c` file with remaining `INCLUDE_ASM` stubs should rank as a c-stub
     continuation. Fold into the `carried-wall`/continuation ranker follow-ups above.
 - **Open (S227, in-progress mixed-partial, NOT a spike):** `src/main/func_80071370.c` (39-fn main-seg
   `none` pack, subseg 0x4C770 flipped `c` at the S227 gate; string/struct-array/heap/DL glue). **8

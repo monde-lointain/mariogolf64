@@ -25,6 +25,38 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 254 — continue func_80080220 pack: 4 smallest-first leaves — 2026-07-21
+- Increment: 0 files banked (file partial, 33→30 stubs, NOT md5-candidate) / **+3 functions matched**:
+  `func_8008679C` / `func_80087BE4` / `func_8008C520` (all auto). Commits 808e8f0..4af69f6. ROM SHA-1
+  green e2c4e7a9…, tree clean.
+- Quality: 0 stuck-far / 0 permuter / **1 carried** / 0 re-opened (`func_80088A90`).
+- Seed: committed 5pt; banked 0pt (per-file all-or-nothing, file partial); regime classical.
+  Realized 6 / residual +1 (3 clean banks + 1 carry). Value signal = +3 matched. Note: seed 5 ran
+  ABOVE the S251-253 seed-3 anchor for this pack's leaf-tier — a plan-gate over-estimate; future
+  continuations of a mined leaf-tier pack should seed 3, not 5.
+- What helped: (1) `func_8008679C` (shot-record sound-cue setter) byte-exact first-build; the odd
+  `if(x==0&&y==0)` branch-sense and the `0.0f -> sw zero` (integer-zero store of a float global) both
+  reproduced from the literal C. (2) `func_8008C520` (two-slot resource loader) frame crack: the
+  in-tree build was byte-identical BODY but 0x10 short on the frame; the `out` buffer is a
+  `RomLoadSlot[2]` (0x20), not one slot — same sibling-typedef tell as S253's `func_80080564`. (3)
+  `func_80087BE4` (2D clamp-to-56) needed the bare `sqrt.s` → a TU-wide `-ffast-math` `mk/main.mk`
+  override (like func_8006A000 / func_80078910); adding it to an ALREADY-partial-banked TU risked the
+  banked FP siblings, but the full-make stayed green (their single `int*const` multiplies are
+  fast-math-invariant).
+- Friction: `func_80088A90` (glyph/units-string DL emitter) is a TERMINAL S243 raw-DL-word wall. Body
+  structurally complete (emit block byte-identical in isolation), but two pervasive compiler artifacts
+  block it: (1) the char is kept MASKED in a separate reg (`andi v1,t0,0xFF` on the already-lbu'd byte)
+  while the raw load stays in t0 for the `bnez` loop test — collapsing them cascades the whole
+  allocation; (2) the classifier uses `beq`/`beql` branch-likely TOWARD later handler labels (advance
+  set in the annulled delay slot, reorg.c optimize_skip), unreproducible from structured if-else. Kin to
+  func_80071370.c's 73F24/74230/74500 (all carried). This is the cheap-leaf→wall plateau the S254
+  DIRECTION note forecast. Characterized in `docs/wip/func_80088A90.near-match.md`; carried.
+- Applied: 1 of 1 (#1 ranker-gap RECURRED — `pick_target --segment main` again did not surface the
+  active 30-stub partial-bank pack as a `c-stub remaining:N` continuation; folded into the BACKLOG
+  `carried-wall`/continuation ranker follow-up).
+- Carry-over: `src/main/func_80080220.c` (30 stubs; next fresh leaves func_80080C4C/func_800842C0/
+  func_80081D4C/func_80080688). Terminal carries: func_800824E4, func_80081C90, func_80088A90.
+
 ## Sprint 253 — continue func_80080220 pack: 4 smallest-first leaves — 2026-07-21
 - Increment: 0 files banked (file partial, 36→33 stubs, NOT md5-candidate) / **+3 functions matched**:
   `func_80083A48` / `func_800852A8` / `func_80080564` (all auto). Commits 6255c83 + 119850f. ROM SHA-1
