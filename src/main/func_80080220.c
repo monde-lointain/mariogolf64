@@ -50,7 +50,27 @@ extern u16 D_800C547C[];
 extern s16 D_800C54A0[];
 extern void* D_801B55E0[];
 extern void* D_801321C8[];
-INCLUDE_ASM("asm/nonmatchings/main/func_80080220", func_80080220);
+extern s16 D_800C54EA[];
+extern s16 D_800C54F2[];
+extern s16 D_800C56AA[];
+extern s16 D_800C56B2[];
+extern void func_8003E004(void);
+extern void per_hole_skybox_palette_load(void);
+
+void init_sky_panels(void) {
+  s32 i;
+
+  sky_panel_bank_index = 0;
+  for (i = 0; i != 14; i++) {
+    s32 off = i * 0x10;
+    *(s16*)((u8*)D_800C54F2 + off) =
+        (*(s16*)((u8*)D_800C54EA + off) / 10 + 0x10) << 5;
+    *(s16*)((u8*)D_800C56B2 + off) =
+        (*(s16*)((u8*)D_800C56AA + off) / 10 + 0x10) << 5;
+  }
+  func_8003E004();
+  per_hole_skybox_palette_load();
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80080220",
             init_sky_pool_and_world_state);

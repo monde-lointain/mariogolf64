@@ -50,7 +50,7 @@ extern s32 camera_position_z;
 extern s32 get_interpolated_terrain_height_wrapper(s32, s32);
 extern s32 flag_is_set(s32);
 extern void func_8005F964(void);
-extern void func_80080220(void);
+extern void init_sky_panels(void);
 extern void func_8005F1C8(void);
 extern void func_80032E88(void);
 extern const char D_800D139C[];
@@ -139,7 +139,7 @@ void func_80069BCC(void) {
   func_8005F964();
   D_800FBE70 = 0;
   osSyncPrintf(D_800D139C);
-  func_80080220();
+  init_sky_panels();
   osSyncPrintf(D_800D13A8);
   func_8005F1C8();
   osSyncPrintf(D_800D13B4);

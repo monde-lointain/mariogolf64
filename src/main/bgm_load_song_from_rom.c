@@ -14,7 +14,7 @@ extern void func_8005F4AC(void);
 extern void func_80060210(void* arg0);
 extern void func_80052384(void);
 extern void init_per_player_state(void);
-extern void func_80080220(void);
+extern void init_sky_panels(void);
 extern void func_80054E20(void);
 void setup_terrain_detail_default(void);
 
@@ -191,7 +191,7 @@ void func_8005F838(s32 arg0) {
   }
   setup_terrain_detail_default();
   if (arg0 != 3) {
-    func_80080220();
+    init_sky_panels();
   }
   func_80054E20();
   osSyncPrintf(D_800D1240);
