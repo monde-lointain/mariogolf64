@@ -124,15 +124,18 @@ void func_80081550(void) { func_8003E4B4(); }
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80080220", func_8008156C);
 
-/* func_80081C90: CARRY (S253) #base-register-vs-displacement / #indexed-vs-pointer terminal loop
- * variant. Two 14-iter RMW loops over the fixed global array D_800C54F2 (u16 field, 0x10 stride,
- * bank base = sky_panel_bank_index*448): loop1 adds wind_magnitude/8192 to each; if the bank's first
- * field (signed) >= 0x4001, loop2 subtracts 0x2000 from each. ROM keeps INDEXED addressing
- * (v1 = pure byte offset, re-materializes %hi(D_800C54F2)+v1 with a %lo displacement per access, TWICE
- * per iteration for the load+store); gcc-2.7.2 loop.c strength-reduction folds base+offset into ONE
- * walking pointer (0(v1)) in every source spelling (byte-offset cast, array-index, counter-index,
- * do-while, for). No pointer-giv (S235 func_8006F24C DEST_REG) recipe applies because this ROM uses
- * no pointer giv at all. Permuter-unreachable (addressing-mode + strength-reduction decision).
+/* func_80081C90: CARRY (S253) #base-register-vs-displacement /
+ * #indexed-vs-pointer terminal loop variant. Two 14-iter RMW loops over the
+ * fixed global array D_800C54F2 (u16 field, 0x10 stride, bank base =
+ * sky_panel_bank_index*448): loop1 adds wind_magnitude/8192 to each; if the
+ * bank's first field (signed) >= 0x4001, loop2 subtracts 0x2000 from each. ROM
+ * keeps INDEXED addressing (v1 = pure byte offset, re-materializes
+ * %hi(D_800C54F2)+v1 with a %lo displacement per access, TWICE per iteration
+ * for the load+store); gcc-2.7.2 loop.c strength-reduction folds base+offset
+ * into ONE walking pointer (0(v1)) in every source spelling (byte-offset cast,
+ * array-index, counter-index, do-while, for). No pointer-giv (S235
+ * func_8006F24C DEST_REG) recipe applies because this ROM uses no pointer giv
+ * at all. Permuter-unreachable (addressing-mode + strength-reduction decision).
  * docs/wip/func_80081C90.near-match.md.
  */
 INCLUDE_ASM("asm/nonmatchings/main/func_80080220", func_80081C90);
@@ -188,7 +191,29 @@ INCLUDE_ASM("asm/nonmatchings/main/func_80080220", func_80085F98);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80080220", func_8008658C);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80080220", func_8008679C);
+extern f32 D_800C5DF0;
+extern s32 D_800C5DF4;
+extern s8 D_8010623F;
+extern char D_801B71D0[];
+extern s32 func_80213C78(char* record);
+extern void func_80050DA0(s32, s32, s32, s32, s32);
+
+void func_8008679C(s32 arg) {
+  if (arg == -1) {
+    D_800C5DF0 = -1.0f;
+    return;
+  }
+  if (arg == 0) {
+    s32 result = func_80213C78(&D_801B71D0[D_8010623F * 0xB8]);
+    if ((result != 0xA) & (result != 2)) {
+      func_80050DA0(0x70, 0xE, 0x40, 0x1E, 0x7F);
+    } else {
+      func_80050DA0(0x71, 0xE, 0x60, 0x1E, 0x7F);
+    }
+  }
+  D_800C5DF4 = arg;
+  D_800C5DF0 = 0.0f;
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80080220",
             emit_ball_offscreen_indicator);
