@@ -22,13 +22,50 @@ extern s32 D_800C59E4;
 extern void func_80241CE8(void);
 extern void func_8008085C(void);
 extern void func_8008C658(void);
+extern s32 effect_spawn_pos[];
+extern s32 D_800C5AA8;
+extern f32 D_800E3370;
+extern f32 D_800E3374;
+extern f32 D_800E3378;
+extern s32 flag_is_set(s32 flag);
+extern void check_and_print_grid(char* str, s32 col, s32 row);
+extern u16 debug_menu_pad_buttons_c;
+extern s32 D_800C5AD0;
+extern char D_80105118[];
+extern char D_800D1B70[];
 
+typedef struct {
+  /* 0x0 */ u32 start;
+  /* 0x4 */ u32 size;
+  /* 0x8 */ u32 pos;
+  /* 0xC */ u32 end;
+} RomLoadSlot; /* 0x10 */
+
+extern u32 func_8005062C(u16 index, void* out);
+extern void func_800506D4(void* data, RomLoadSlot* slot);
+extern void func_800504E8(s32 index, RomLoadSlot* slot);
+extern u32 func_80050598(RomLoadSlot* slot);
+extern void func_800505A0(void* dst, u32 size, RomLoadSlot* slot);
+extern u16 D_800C547C[];
+extern s16 D_800C54A0[];
+extern void* D_801B55E0[];
+extern void* D_801321C8[];
 INCLUDE_ASM("asm/nonmatchings/main/func_80080220", func_80080220);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80080220",
             init_sky_pool_and_world_state);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80080220", func_80080564);
+void func_80080564(s32 arg0, s32 arg1, s32 arg2) {
+  RomLoadSlot buf_a[2];
+  RomLoadSlot buf_b;
+  u32 size;
+
+  func_8005062C(D_800C547C[arg1] + 9, buf_a);
+  func_800506D4(D_801B55E0[arg0], &buf_a[0]);
+  func_800504E8(D_800C54A0[arg1] + arg2, &buf_b);
+  size = func_80050598(&buf_b);
+  func_800505A0(D_801321C8[arg0], size, &buf_b);
+}
 
 void func_8008060C(void) {
   s32 state = D_801B608C;
@@ -87,6 +124,17 @@ void func_80081550(void) { func_8003E4B4(); }
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80080220", func_8008156C);
 
+/* func_80081C90: CARRY (S253) #base-register-vs-displacement / #indexed-vs-pointer terminal loop
+ * variant. Two 14-iter RMW loops over the fixed global array D_800C54F2 (u16 field, 0x10 stride,
+ * bank base = sky_panel_bank_index*448): loop1 adds wind_magnitude/8192 to each; if the bank's first
+ * field (signed) >= 0x4001, loop2 subtracts 0x2000 from each. ROM keeps INDEXED addressing
+ * (v1 = pure byte offset, re-materializes %hi(D_800C54F2)+v1 with a %lo displacement per access, TWICE
+ * per iteration for the load+store); gcc-2.7.2 loop.c strength-reduction folds base+offset into ONE
+ * walking pointer (0(v1)) in every source spelling (byte-offset cast, array-index, counter-index,
+ * do-while, for). No pointer-giv (S235 func_8006F24C DEST_REG) recipe applies because this ROM uses
+ * no pointer giv at all. Permuter-unreachable (addressing-mode + strength-reduction decision).
+ * docs/wip/func_80081C90.near-match.md.
+ */
 INCLUDE_ASM("asm/nonmatchings/main/func_80080220", func_80081C90);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80080220", func_80081D4C);
@@ -97,7 +145,18 @@ INCLUDE_ASM("asm/nonmatchings/main/func_80080220", func_800824E4);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80080220", draw_terrain_aim_grid);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80080220", func_80083A48);
+void func_80083A48(void) {
+  s32 i;
+  s32 off;
+
+  D_800C5AA8 = 0;
+  for (i = 0; i != 128; i++) {
+    off = i * 0xC;
+    *(f32*)((u8*)&D_800E3370 + off) = effect_spawn_pos[0] * (1.0f / 1024.0f);
+    *(f32*)((u8*)&D_800E3374 + off) = effect_spawn_pos[1] * (1.0f / 1024.0f);
+    *(f32*)((u8*)&D_800E3378 + off) = effect_spawn_pos[2] * (1.0f / 1024.0f);
+  }
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80080220", func_80083AC8);
 
@@ -107,7 +166,21 @@ INCLUDE_ASM("asm/nonmatchings/main/func_80080220", func_80084468);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80080220", func_80084EBC);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80080220", func_800852A8);
+void func_800852A8(void) {
+  u16 buttons;
+
+  if (flag_is_set(0x6E)) {
+    buttons = debug_menu_pad_buttons_c;
+    if (buttons & 0x8) {
+      D_800C5AD0 -= 1;
+    }
+    if (buttons & 0x4) {
+      D_800C5AD0 += 1;
+    }
+    sprintf(D_80105118, D_800D1B70, D_800C5AD0);
+    check_and_print_grid(D_80105118, 0x14, 0x6);
+  }
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80080220", func_8008534C);
 
