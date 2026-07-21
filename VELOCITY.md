@@ -1158,6 +1158,21 @@ Three honest caveats:
   main-segment slices banked 1+4+3+3+3. Retro applied 1 of 1 (#1 ranker-gap RECURRED — partial-bank pack
   not surfaced as c-stub continuation → BACKLOG ranker follow-up). Tooling-test failures hold at 8 (0 new;
   doc/memory edits only). Push: local.
+  S255: CONTINUE `src/main/func_80080220.c` smallest-first (PO approved). **3 banked / 2 carried**
+  (30→27 stubs). Banks: `init_sky_panels` (func_80080220 pack LEAD, 0xC0 — skybox init; 14-iter signed-/10
+  dual-store; loop.c preheader invariant-hoist coin cracked via `off=i*0x10` giv + `i != 14` keeping the
+  `bne a1,t0` test & `mfhi t2` reg; curated, 2 C callers sed'd), `func_80080C4C` (0x180 scene-resource
+  teardown, D_800E2144[2]/D_800E214C[3] arrays for shared-s0-base CSE, auto), `func_80081D4C` (0x1AC
+  terrain-event state dispatcher — only miss was case-BODY layout = SOURCE order; reordered cases to ROM
+  body order 0xD/{0xA,0x15}/0xB/default → byte-exact; auto). Carries: `func_800842C0` (0x1A8 — NOT a
+  raw-DL-word wall, a chain-USED GCC nested function; glist ptr is parent func_80084468's local via static
+  chain in $v0; banks only nested inside decompiled parent), `func_80080688` (0x1D4 stretch, body 100%
+  RE'd — terminal idx*210 synth_mult coin: ROM add-chain vs gcc subu form, not source-leverable +
+  count-changing/permuter-unreachable). Seed 5 (classical; AGAIN above the S251-253 seed-3 anchor for
+  mined-leaf continuations — recurred over-estimate); banked 0pt (file partial); realized 7 / residual +2
+  (3 clean banks, 2 carries). Rolling-5 (S251-S255): 4+3+3+3+3. Retro applied 2 of 2 (#1 ranker c-stub-gap
+  RECURRED 3rd time; #2 DIRECTION-note must re-sort ALL stubs incl. the pack lead). Tooling-test failures
+  hold at 8 (0 new; doc/memory edits only). Push: local.
 - **Regime:** `mirror` is a depleting minority (~22 % of ranked candidates: 56 mirror vs 194
   classical; 18 warm / 38 cold). The warm clean-singleton mirror pool is now **mined out** (S11
   plan gate: every top mirror candidate carries a blocking hazard), pushing the project onto the

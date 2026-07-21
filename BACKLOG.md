@@ -4805,18 +4805,51 @@ by `/sprint-plan`:
     handler labels (space-skip/`m`/`.` set advance in the annulled delay slot, reorg.c optimize_skip).
     Kin to func_80071370.c's 73F24/74230/74500 (all carried). Permuter-class. Full RE + near-match C in
     `docs/wip/func_80088A90.near-match.md`; memory `[[mg64-glyph-emitter-dl-family]]`.
-  - **S255 DIRECTION: continue smallest-first here** (~26 untouched non-carry leaves; the cheap-leaf vein
-    is starting to plateau into the DL/wall class — S254 hit `func_80088A90` after 3 clean banks). Re-sort
-    the remaining stubs by `head -1 asm/nonmatchings/main/func_80080220/<f>.s`; next fresh non-carry are
-    `func_80080C4C` (0x180, caller-evict but NOT a wall), `func_800842C0` (0x1A8), `func_80081D4C` (0x1AC),
-    `func_80080688` (0x1D4). Exclude the carries `func_800824E4` (0x50), `func_80081C90` (0xBC),
-    `func_80088A90` (0x14C). Once the leaf vein plateaus, fresh-pivot to the `func_8002A640` 24-fn
-    spriteex2 pack (needs a sprite.c header-vendoring enabler) — the standby alternative.
-  - **RANKER FOLLOW-UP (S253+S254 RECURRED):** `pick_target.py --segment main` STILL did not surface this
-    ACTIVE partial-bank pack (30 stubs) as a `c-stub remaining:N` continuation — it lists only 4 packs (2
-    other c-stubs + 2 asm-flips), so the gate again fell back to this DIRECTION note + manual `.s`-header
-    sizing. A partial-banked already-`c` file with remaining `INCLUDE_ASM` stubs should rank as a c-stub
-    continuation. Fold into the `carried-wall`/continuation ranker follow-ups above.
+  - **S255: banked `init_sky_panels` (func_80080220, 0xC0, pack LEAD — skybox init; 14-iter signed-/10
+    dual-store from D_800C54EA/D_800C56AA into panel arrays D_800C54F2/D_800C56B2 (0x10 stride) + reset
+    sky_panel_bank_index + per_hole_skybox_palette_load; loop.c preheader invariant-hoist coin cracked via
+    `off=i*0x10` giv + `i != 14` keeping the `bne a1,t0` test; curated, 2 C callers sed'd), `func_80080C4C`
+    (0x180, scene-resource teardown guarded D_800C59E0==2, ~24 heap3_free, auto), `func_80081D4C` (0x1AC,
+    terrain-event state dispatcher — case bodies emit in SOURCE order, reordered to ROM body order
+    0xD/{0xA,0x15}/0xB/default, auto). 30→27.**
+  - **CARRY `func_800842C0` (0x1A8, S255 — chain-USED GCC NESTED FUNCTION, do NOT re-grind as a raw-DL
+    leaf):** texrect glyph-string emitter whose glist pointer is a LOCAL of the parent `func_80084468`,
+    reached through the GCC static chain in `$v0` (parent sets `addiu $v0,$sp,0x10` before the `jal`, keeps
+    the glistp at 0x10(sp), reloads after). NOT a raw-DL-word regalloc wall — the block is the nested-fn
+    calling convention. Banks ONLY by writing it nested inside the decompiled `func_80084468` (2644B
+    FP-heavy DL builder, its own slice). Real out-of-line `jal` (not inlined) so NO volatile byte-repro.
+    docs/wip/func_800842C0.near-match.md; `docs/hazards.md#nested-function-static-chain-spill`; memory
+    `[[nested-function-static-chain-spill]]`.
+  - **CARRY `func_80080688` (0x1D4, S255 stretch — near-match, body 100% RE'd, do NOT re-grind as fresh):**
+    club/shot setup glue (init calls → putter_mode_flag branch → func_800520DC index into D_800C54CC →
+    func_8005062C/func_800506D4 ROM-load pair → terrain switch D_800C1434[idx*210] cases 3/4/5 → second
+    load pair → D_800C59E0/D_801B608C state dispatch). TERMINAL residual = the `idx*210` index multiply:
+    ROM synthesizes an ADD-only two-chain (idx*10 + idx*200, idx in both s0 and v0); gcc-2.7.2 synth_mult
+    emits the SHORTER subtract form (`sll v0,3; subu; subu; sll`) in EVERY spelling (idx*210,
+    idx*10+idx*200, byte-offset cast), 5 instrs short + delay-slot cascade. Compiler-internal multiply
+    synthesis, not source-leverable; below 0.97 + instruction-count-changing (permuter cannot add the
+    missing words). Escalation = gcc-2.7.2 synth_mult source dive (why the ROM avoided the subtract for
+    *210) OR corpus-mine a matched *210 struct-stride sibling. Full RE in the in-file comment.
+  - **S256 DIRECTION: continue smallest-first here** (~24 untouched non-carry leaves, but the cheap-leaf
+    vein has PLATEAUED into the DL/nested-fn/multiply-synth wall class — S255 hit 2 walls of 5 attempts,
+    S254 hit 1). Re-sort ALL remaining stubs (INCLUDING the pack-name lead — S255 nearly missed
+    func_80080220 0xC0 this way) by `head -1 asm/nonmatchings/main/func_80080220/<f>.s`; next fresh
+    non-carry are `func_80088890` (0x200), `func_8008658C` (0x210). Exclude the carries `func_800824E4`
+    (0x50), `func_80081C90` (0xBC), `func_80088A90` (0x14C), `func_800842C0` (0x1A8), `func_80080688`
+    (0x1D4). **Given the plateau, STRONGLY weigh a FRESH-PIVOT** to the `func_8002A640` 24-fn spriteex2
+    pack (needs a sprite.c header-vendoring enabler) over another smallest-first continuation — per the
+    S224 plateaued-pack-mid-logic-tail rule, the continuation now yields wall-characterizations, not banks.
+  - **RANKER FOLLOW-UP (S253+S254+S255 RECURRED 3rd time — APPLIED to backlog):** `pick_target.py
+    --segment main` STILL does not surface this ACTIVE partial-bank pack (27 stubs) as a `c-stub
+    remaining:N` continuation — it lists only 4 packs (2 other c-stubs + 2 asm-flips), so the gate again
+    fell back to this DIRECTION note + manual `.s`-header sizing. A partial-banked already-`c` file with
+    remaining `INCLUDE_ASM` stubs must rank as a c-stub continuation. Fold into the
+    `carried-wall`/continuation ranker follow-ups above (off-cadence golden-gated).
+  - **DIRECTION-NOTE HYGIENE (S255 retro #2 — APPLIED):** a continuation DIRECTION note must re-sort ALL
+    remaining `INCLUDE_ASM` stubs INCLUDING the pack-name lead `func_<seg>`, not just the mid-body fns.
+    S255's DIRECTION note listed candidates starting at 0x180 and OVERLOOKED the pack lead func_80080220
+    (0xC0), which was the smallest fresh leaf and banked clean. The gate caught it only by an independent
+    `.s`-header re-sort. Fold the lead into the smallest-first list when authoring the note.
 - **Open (S227, in-progress mixed-partial, NOT a spike):** `src/main/func_80071370.c` (39-fn main-seg
   `none` pack, subseg 0x4C770 flipped `c` at the S227 gate; string/struct-array/heap/DL glue). **8
   banked** (`func_80074960` empty, `func_80073BF0` strlen, `func_80071C74` single-index struct-array

@@ -25,6 +25,29 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 255 — continue func_80080220 pack: lead + 3 smallest-first leaves — 2026-07-21
+- Increment: 0 files banked (file partial, 30→27 stubs, NOT md5-candidate) / **+3 functions matched**:
+  `init_sky_panels` (func_80080220 pack LEAD, curated) / `func_80080C4C` / `func_80081D4C` (both auto).
+  Commits 65f3867..b1e355a. ROM SHA-1 e2c4e7a green at every commit.
+- Quality: 0/0/2/0 this sprint
+- Seed: committed 5pt; banked 0pt (file partial); realized 7 / residual +2; regime classical
+- What helped: (1) the loop.c preheader invariant-hoist coin on init_sky_panels cracked via the
+  `off=i*STRIDE` giv PLUS the `i != N` (not `i < N`) condition, which preserved the ROM's `bne rX,rBound`
+  test + hoisted `li rBound` and restored the shifted `mfhi` reg (memory
+  [[sched-coin-loop-preheader-order-lever]] extended). (2) func_80081D4C's only miss was case-BODY
+  layout = SOURCE order — reordering the switch cases to the ROM body order `0xD/{0xA,0x15}/0xB/default`
+  gave byte-exact (dispatch tree was already identical). (3) func_80080C4C's shared-`s0`-base free groups
+  matched by expressing D_800E2144[2]/D_800E214C[3] as arrays (CSE) vs scalars for the rest.
+- Friction: (1) DIRECTION note (S255) OVERLOOKED the pack lead func_80080220 (0xC0) — smaller than every
+  listed candidate; caught by re-sorting all stubs at the gate. (2) func_800842C0 first read as a
+  raw-DL-word wall, actually a chain-USED nested function (the $v0-spill tell) — needed the parent
+  call-site read to confirm. (3) func_80080688 stretch: body 100% RE'd but the idx*210 synth_mult coin
+  (subu-form vs ROM add-chain) is not source-leverable and permuter-unreachable.
+- Applied: 2 of 2: #1 ranker c-stub-continuation gap (RECURRED 3rd time → BACKLOG ranker follow-up);
+  #2 DIRECTION-note must re-sort ALL remaining stubs incl. the pack-name lead → BACKLOG note.
+- Carry-over: `func_800842C0` (nested-fn, blocked on parent func_80084468), `func_80080688` (synth_mult
+  near-match); the func_80080220.c 27-stub partial-bank pack continues.
+
 ## Sprint 254 — continue func_80080220 pack: 4 smallest-first leaves — 2026-07-21
 - Increment: 0 files banked (file partial, 33→30 stubs, NOT md5-candidate) / **+3 functions matched**:
   `func_8008679C` / `func_80087BE4` / `func_8008C520` (all auto). Commits 808e8f0..4af69f6. ROM SHA-1
