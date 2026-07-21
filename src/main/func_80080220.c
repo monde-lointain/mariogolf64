@@ -72,9 +72,18 @@ void init_sky_panels(void) {
   per_hole_skybox_palette_load();
 }
 
+/* init_sky_pool_and_world_state: CARRY (S256, near-match, body 100% RE'd).
+ * Sky-dome Vtx-grid builder (4x5x6 + block-2/3 s-texcoord overwrite) + tint
+ * fill
+ * + guOrtho/2x guPerspective + 14 world-state zeros. TERMINAL = grid-builder
+ * biv-regalloc + loop-bound-hoist (ROM re-materializes `li v0,5`/`li v0,4`
+ * inline; my build hoists the bounds; 93 asm-differ rows). Grid-builder wall
+ * class (S241 analog carried).
+ * docs/wip/init_sky_pool_and_world_state.near-match.md;
+ * [[grid-builder-CE88-regalloc-levers]].
+ */
 INCLUDE_ASM("asm/nonmatchings/main/func_80080220",
             init_sky_pool_and_world_state);
-
 void func_80080564(s32 arg0, s32 arg1, s32 arg2) {
   RomLoadSlot buf_a[2];
   RomLoadSlot buf_b;
