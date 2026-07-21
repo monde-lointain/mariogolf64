@@ -253,6 +253,26 @@ INCLUDE_ASM("asm/nonmatchings/main/func_80080220", func_800880A0);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80080220", func_80088890);
 
+/* func_80088A90: CARRY (S254) glyph/units-string DL emitter, S243 raw-DL-word
+ * wall class. Renders a numeric string (digits + 'f'/'m'/'y' unit glyphs, '.'
+ * decimal, ' ' skip) into a hand-rolled 6-word-per-char G_TEXRECT block
+ * (0xE4/0xE1/0xF1 command words), advancing x by a per-glyph width and mapping
+ * each char to a font tile offset ('f'->0x60 w0x10, '.'->0x70 w4, 'm'->0x50
+ * w8, 'y'->0x58 w8, digit->(c-0x30)*8 w8). Body is structurally COMPLETE: the
+ * per-char emit block (sll/andi/sll12/or/sw pairs, dl+=0x18, cursor+=8) is
+ * byte-identical in isolation. TERMINAL divergence is pervasive regalloc +
+ * reorg branch-likely: (1) ROM keeps the char MASKED in a separate reg
+ * (`andi v1,t0,0xFF` redundant on the already-lbu'd byte) while the raw load
+ * stays in t0 for the `bnez` loop test; my build collapses both into one reg,
+ * cascading the whole allocation (ROM dl=t1/cursor=a2/word_lo=t3; mine
+ * dl=t2/cursor=t1/word_lo=a2). (2) ROM classifies with `beq`/`beql`
+ * branch-likely TOWARD physically-later handler labels (space-skip + 'm'/'.'
+ * set their width/advance in the annulled delay slot, reorg.c optimize_skip); a
+ * structured if-else emits `bne`-past + nop, unreproducible from faithful C.
+ * Kin to func_80071370.c's 73F24/74230/74500 (all carried). Permuter-class
+ * (regalloc + reorg coin). Near-match C in
+ * docs/wip/func_80088A90.near-match.md.
+ */
 INCLUDE_ASM("asm/nonmatchings/main/func_80080220", func_80088A90);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80080220", func_80088BDC);
