@@ -1128,6 +1128,21 @@ Three honest caveats:
   one-fix, 1 carry). Rolling-5 (S248-S252): main-segment slices banked 2+0+1+4+3. Retro applied 0 of 0
   (no buffered suggestions; PO declined the optional delay-slot-coin note as a narrow instance of the
   existing sched-tiebreak family). Tooling-test failures hold at 8 (0 new; doc edits only). Push: local.
+  S253: CONTINUE `src/main/func_80080220.c` smallest-first (PO approved; pack not yet plateaued).
+  **3 banked / 1 carried** (36→33 stubs). Banks (all auto): `func_80083A48` (FP init loop — zeroes a
+  flag then scales `effect_spawn_pos[0..2]*(1/1024)` into the 0xC-stride float-triple array
+  D_800E3370/74/78; giv `off=i*0xC` cracked the loop.c preheader init-ORDER coin, [[sched-coin-loop-
+  preheader-order-lever]]), `func_800852A8` (debug-menu pad-button counter + sprintf + check_and_print_grid,
+  first-build), `func_80080564` (5-call ROM-load glue, reused the sibling `func_800505A0.c` RomLoadSlot
+  typedef, first-build byte-exact incl. both stack-buffer frame offsets). Carry: `func_80081C90`
+  (#base-register-vs-displacement / #indexed-vs-pointer TERMINAL loop — two 14-iter RMW loops over fixed
+  array D_800C54F2; ROM keeps INDEXED %hi+offset re-materialization per access with NO pointer giv,
+  gcc-2.7.2 loop.c always strength-reduces to a walking pointer in every spelling; DISTINCT from the S235
+  DEST_REG crack, permuter-unreachable). Seed 3 (classical); banked 0pt (file partial); realized 4 /
+  residual +1 (2 first-build, 1 one-fix giv-lever, 1 carry). Rolling-5 (S249-S253): main-segment slices
+  banked 0+1+4+3+3. Retro applied 2 of 2 (#1 ranker-gap partial-bank-pack-not-surfaced → BACKLOG ranker
+  follow-ups; #2 SR-walking-pointer terminal loop sub-case → memory byte-offset-cast-defeats-base-ptr-cse).
+  Tooling-test failures hold at 8 (0 new; doc/memory edits only). Push: local.
 - **Regime:** `mirror` is a depleting minority (~22 % of ranked candidates: 56 mirror vs 194
   classical; 18 warm / 38 cold). The warm clean-singleton mirror pool is now **mined out** (S11
   plan gate: every top mirror candidate carries a blocking hazard), pushing the project onto the

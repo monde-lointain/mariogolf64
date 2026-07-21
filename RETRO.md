@@ -25,6 +25,38 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 253 — continue func_80080220 pack: 4 smallest-first leaves — 2026-07-21
+- Increment: 0 files banked (file partial, 36→33 stubs, NOT md5-candidate) / **+3 functions matched**:
+  `func_80083A48` / `func_800852A8` / `func_80080564` (all auto). Commits 6255c83 + 119850f. ROM SHA-1
+  green e2c4e7a9…, tree clean.
+- Quality: 0 stuck-far / 0 permuter / **1 carried** / 0 re-opened (`func_80081C90`).
+- Seed: committed 3pt; banked 0pt (per-file all-or-nothing, file partial); regime classical.
+  Realized 4 / residual +1 (2 first-build, 1 one-fix giv-lever, 1 carry). Value signal = +3 matched.
+- What helped: (1) `func_80083A48` FP init loop was byte-exact in the loop BODY first-build; the only
+  diff was prologue init ORDER (ROM inits the i counter first, the byte-offset var last), cracked clean
+  by expressing the offset as a giv `off = i*0xC` (not a running `off += 0xC`) → loop.c preheader
+  placement matched ([[sched-coin-loop-preheader-order-lever]]). (2) `func_80080564` (5-call ROM-load
+  glue) reused the sibling `func_800505A0.c` RomLoadSlot typedef + callee signatures — first-build
+  byte-exact incl. both stack-buffer frame offsets (sp+0x10 as the 0x20 `out` struct, sp+0x30 as the
+  RomLoadSlot). (3) `func_800852A8`: u16 for the `lhu` pad-button load + two independent-if masks
+  (natural `v0=v1&4` recompute) → first-build.
+- Friction: `func_80081C90` (sky-panel wind updater, two 14-iter RMW loops over fixed array D_800C54F2)
+  is a TERMINAL #base-register-vs-displacement / #indexed-vs-pointer loop. Structure byte-exact; only the
+  per-iter addressing diverges: ROM keeps INDEXED `%hi(D_800C54F2)+offset` re-materialization per access
+  (v1 = pure byte offset, 2x/iter for the RMW load+store, NO pointer giv), gcc-2.7.2 loop.c
+  strength-reduction folds base+off into ONE walking pointer in EVERY spelling (byte-offset cast,
+  array-index, counter-index, for/do-while). DISTINCT from the S235 func_8006F24C DEST_REG pointer-giv
+  crack (that ROM used a pointer giv; this one uses none), so no source lever applies. Permuter-
+  unreachable. Characterized in `docs/wip/func_80081C90.near-match.md`; carried.
+- Applied: 2 of 2 (#1 ranker-gap — `pick_target --segment main` did not surface the active partial-bank
+  pack as a c-stub continuation → folded into the BACKLOG `carried-wall`/continuation ranker follow-ups;
+  #2 SR-walking-pointer terminal loop sub-case → extended memory `byte-offset-cast-defeats-base-ptr-cse`).
+- Carry-over: `func_80081C90` (base-vs-displacement/indexed-vs-pointer, terminal) + `func_800824E4`
+  (S252 delay-slot coin). `func_80080220.c` continues (33 asm leaves; next fresh non-carry by `.s` size
+  `func_8008679C` 200B, `func_80087BE4` 204B).
+
+---
+
 ## Sprint 252 — continue func_80080220 pack: 3 smallest-first leaves — 2026-07-21
 - Increment: 0 files banked (file partial, 39→36 stubs, NOT md5-candidate) / **+3 functions matched**:
   `func_8008C658` / `func_80080E14` / `func_8008060C` (all auto). Commit 837d8be. ROM SHA-1 green

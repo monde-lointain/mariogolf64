@@ -4776,10 +4776,31 @@ by `/sprint-plan`:
     the delay-candidate pair (5 source orderings tested). percent 0.79 (reg-swap scoring; structurally
     22/23 rows), below the 0.97 permuter gate. Full RE + pass-analysis in
     `docs/wip/func_800824E4.near-match.md`.
-  - **S253 DIRECTION: continue smallest-first here** (~33 untouched leaves; next `func_80083A48` 128B,
-    `func_800852A8` 164B, `func_80080564` 168B) until the cheap-leaf vein plateaus into the wall class,
-    then fresh-pivot again (the `func_8002A640` 24-fn spriteex2 pack — needs a sprite.c header-vendoring
-    enabler — remains the standby alternative).
+  - **S253: banked `func_80083A48` (128B, FP init loop; giv `off=i*0xC` cracked the loop.c preheader
+    init-order coin), `func_800852A8` (164B, debug-menu pad counter + sprintf, first-build),
+    `func_80080564` (168B, 5-call ROM-load glue reusing the sibling RomLoadSlot, first-build). 36->33.**
+  - **CARRY `func_80081C90` (0xBC, S253 TERMINAL #base-register-vs-displacement / #indexed-vs-pointer
+    loop variant — do NOT re-grind as a fresh leaf):** two 14-iter RMW loops over the fixed global array
+    `D_800C54F2` (u16 field, 0x10 stride, bank base `sky_panel_bank_index*448`): loop1 += `wind_magnitude/
+    8192`, loop2 (if bank field signed >= 0x4001) -= 0x2000. Structure byte-exact; ONLY diff = per-iter
+    addressing. ROM keeps INDEXED `%hi(D_800C54F2)+offset` re-materialization per access (v1 = pure byte
+    offset, 2x/iter for load+store, NO pointer giv); gcc-2.7.2 loop.c strength-reduction folds base+off
+    into ONE walking pointer in EVERY spelling (byte-offset cast, array-index, counter-index, for/
+    do-while). Distinct from the S235 func_8006F24C DEST_REG pointer-giv crack (that ROM used a pointer
+    giv; this one uses none). Permuter-unreachable. Full RE + levers in
+    `docs/wip/func_80081C90.near-match.md`; memory `[[byte-offset-cast-defeats-base-ptr-cse]]` extended
+    with this terminal loop sub-class.
+  - **S254 DIRECTION: continue smallest-first here** (~29 untouched non-carry leaves; next by `.s` size:
+    `func_80083A48`-tier is mined, re-sort the remaining stubs by `head -1 asm/nonmatchings/main/
+    func_80080220/<f>.s` — smallest fresh non-carry are `func_8008679C` 200B, `func_80087BE4` 204B,
+    `func_8008C520` 312B) until the cheap-leaf vein plateaus into the wall class, then fresh-pivot again
+    (the `func_8002A640` 24-fn spriteex2 pack — needs a sprite.c header-vendoring enabler — remains the
+    standby alternative). Exclude the carries `func_800824E4` (0x50) and `func_80081C90` (0xBC).
+  - **RANKER FOLLOW-UP (S253):** `pick_target.py --segment main` did NOT surface this ACTIVE partial-bank
+    pack (33 stubs) as a `c-stub remaining:N` continuation — it listed only 4 packs (2 other c-stubs +
+    2 asm-flips), so the gate fell back to this DIRECTION note + manual `.s`-header sizing to pick leaves.
+    A partial-banked already-`c` file with remaining `INCLUDE_ASM` stubs should rank as a c-stub
+    continuation. Fold into the `carried-wall`/continuation ranker follow-ups above.
 - **Open (S227, in-progress mixed-partial, NOT a spike):** `src/main/func_80071370.c` (39-fn main-seg
   `none` pack, subseg 0x4C770 flipped `c` at the S227 gate; string/struct-array/heap/DL glue). **8
   banked** (`func_80074960` empty, `func_80073BF0` strlen, `func_80071C74` single-index struct-array
