@@ -4711,6 +4711,25 @@ by `/sprint-plan`:
   `emit_sky_panorama_strips_dl`, `update_sky_panel_verts`, `per_hole_skybox_palette_load`) = S243
   raw-DL / S158 FP wall risk. **Ranker follow-up:** the plan-gate leaf-sizing must read `.s`
   headers not vram gaps (S247 mis-sized this pack's leaves; now in workflow DoR).
+  **S249 (0 banks, 2 new carries):** mined the 2 untried tractable-looking integer mid-leaves S248's
+  "plateaued" verdict missed (they are 0x33C/0x388, above the <0x200 tier S248 examined). BOTH walled
+  on regalloc, confirming S224: `func_80095150` (0x33C framebuffer transition-effect processor: mode
+  dispatch + 4-deep nested blit loops + a vertex/coord grid init) — structural-complete near-match
+  **0.279**, residual = pervasive regalloc across 5+ induction vars + loop-bound-const hoist placement;
+  levers cache-ptrs-in-locals (22200→19660) + `c0=cbase` snapshot (→15140); `docs/wip/func_80095150.near-match.md`.
+  `func_8008DDDC` (0x388 fog/color preset interp, signed div-1000 magic 0x10624DD3, 5 color lanes + fog
+  rgb/z, 2× `func_80051FCC`) — near-match **0.610** (closest of the pair), residual = `&putter_mode_flag`
+  keep-vs-rematerialize allocno coin (ptr-cache BACKFIRED 8900→13160) + magic/const placement; levers
+  lane-bases-after-2nd-call kill the `s7` spill (11420→9340) + shared advancing `tbl` ptr (→9040) +
+  ascending lane order (→8900); `docs/wip/func_8008DDDC.near-match.md`. Quality S249 2/0/2/0. Pack now
+  GENUINELY plateaued (cheap leaves banked S247/S248, 2 tractable mid-leaves walled S249, tail is
+  DL/FP/jtbl/nested-in-DL). **S250 direction (PO-accepted):** per S232 doctrine, elevate a
+  compiler-source fan-out crack slice ABOVE a fresh pivot at the S250 plan gate — `func_8008DDDC` @0.610
+  is the best target (single well-named residual: the `&putter_mode_flag` keep-vs-remat decision;
+  gcc-2.7.2 global.c/local-alloc.c). **Ranker follow-up (S249):** flag a `mid-logic-wall-risk` tell =
+  (nested-loop depth ≥2) AND (≥K distinct fixed-global refs) AND jal-light, so `pick_target.py` stops
+  pricing these as tractable leaves (no-jal/no-FP/no-DL is necessary but NOT sufficient — S249 proved
+  both such leaves were regalloc walls). Fold into the `carried-wall`/plateaued-pack ranker follow-ups.
 - **Open (S227, in-progress mixed-partial, NOT a spike):** `src/main/func_80071370.c` (39-fn main-seg
   `none` pack, subseg 0x4C770 flipped `c` at the S227 gate; string/struct-array/heap/DL glue). **8
   banked** (`func_80074960` empty, `func_80073BF0` strlen, `func_80071C74` single-index struct-array

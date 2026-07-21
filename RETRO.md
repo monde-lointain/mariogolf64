@@ -25,6 +25,34 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 249 — continue func_8008D100.c: mine the 2 untried tractable mid-leaves — 2026-07-21
+- Increment: 0 files banked (file partial, 20 stubs unchanged, NOT md5-candidate) / **+0 functions
+  matched** (still 6 of 26). ROM SHA-1 green e2c4e7a9…, tree clean.
+- Quality: 2 stuck-far / 0 permuter / 2 carried / 0 re-opened this sprint.
+- Seed: committed 5pt; banked 0pt (per-file all-or-nothing, file partial); regime mixed/classical.
+  Realized ~7 (seed +2 carries), residual +2.
+- What helped: (1) Sizing remaining stubs from real `.s` headers surfaced 2 untried integer mid-leaves
+  (0x33C/0x388) that S248's "plateaued" verdict missed (it mined only <0x200). (2) m2c seeds were
+  structurally faithful on both (dispatch decoded via delay-slot register truth). (3) Concrete regalloc
+  levers landed and moved score materially: `func_80095150` cache-global-ptrs-in-locals to stop
+  store-alias reloads (22200→19660) + `c0=cbase` invariant snapshot (→15140); `func_8008DDDC`
+  compute-lane-bases-after-2nd-call to keep 3 in temps not callee-saved (frame 0x38→0x30, 11420→9340)
+  + shared advancing `tbl` ptr = the ref's mutated `s0` base (→9040).
+- Friction: BOTH untried leaves — despite passing the cheap tractability filter (jal-light/no-FP/no-DL/
+  no-jtbl) — walled on pervasive regalloc + constant/address materialization, not source-leverable.
+  `func_8008DDDC` @0.610 (23 opcode diffs), `func_80095150` @0.279 (4-deep nested-loop regalloc).
+  The `&putter_mode_flag` keep-vs-remat ptr-cache BACKFIRED (8900→13160). This EMPIRICALLY closed the
+  S248 continue-vs-pivot question: the pack's mid-logic tail is a wall-class cluster (S224), no banks.
+- Applied: 2 of 2 (#1 ranker `mid-logic-wall-risk` tell = nested-depth≥2 AND ≥K fixed-global refs AND
+  jal-light → BACKLOG ranker follow-up; #2 S250 fan-out direction — elevate a compiler-source fan-out
+  crack slice above a fresh pivot, `func_8008DDDC`@0.610 best target → BACKLOG + this digest).
+- Carry-over: `func_8008D100.c` stays open, now GENUINELY plateaued. +2 characterized carries
+  (`func_80095150` 0.279, `func_8008DDDC` 0.610; wip docs + reproducer C committed 9494da4). S250:
+  compiler-source fan-out on the documented walls (esp. `func_8008DDDC`), not another smallest-first
+  continuation.
+
+---
+
 ## Sprint 248 — continue func_8008D100.c: mine small leaves + compiler-source dive — 2026-07-21
 - Increment: 0 files banked (file partial, 20 stubs, NOT md5-candidate) / **+2 functions matched**
   (22→20 stubs; 6 of 26 matched). ROM SHA-1 green e2c4e7a9…, tree clean.

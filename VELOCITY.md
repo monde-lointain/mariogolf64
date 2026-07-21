@@ -1072,6 +1072,19 @@ Three honest caveats:
   2 of 2 (#1 nested-fn DoR check → workflow §3 + hazard-index rows + hazards.md; #2 fix S247 carry
   framing → BACKLOG + this line). 0 pre-buffered suggestions (both emerged from the finding).
   Tooling-test failures hold at 8 (0 new; doc/memory edits only). Push: local only.
+  S249: CONTINUED `src/main/func_8008D100.c` (PO-approved: mine the 2 untried tractable mid-leaves over
+  a fresh pivot). **0 banked / 2 carried** (20 stubs unchanged, 6 matched). Both untried integer
+  mid-leaves — 0x33C/0x388, above the <0x200 tier S248 mined — walled on regalloc despite passing the
+  cheap tractability filter (jal-light/no-FP/no-DL/no-jtbl): `func_80095150` (framebuffer transition
+  blit, 4-deep nested loops) structural-complete near-match **0.279**; `func_8008DDDC` (fog/color
+  preset interp, div-1000 magic) near-match **0.610** (closest; `&putter_mode_flag` keep-vs-remat coin
+  is the single residual, ptr-cache BACKFIRED 8900→13160). Seed 5 (classical/mixed); banked 0pt (file
+  partial); realized ~7 (+2 carries); residual +2. Rolling-5 (S245-S249): main-segment slices banked
+  3+2+2+2+0. **Key: EMPIRICALLY closed the S248 continue-vs-pivot question — the pack's mid-logic tail
+  is a wall-class cluster (S224), no banks; no-jal/no-FP/no-DL is necessary but NOT sufficient for a
+  tractable leaf.** Retro applied 2 of 2 (#1 ranker `mid-logic-wall-risk` tell → BACKLOG ranker
+  follow-up; #2 S250 compiler-source-fan-out direction → BACKLOG + RETRO). Tooling-test failures hold
+  at 8 (0 new; doc edits only). Push: local only.
 - **Regime:** `mirror` is a depleting minority (~22 % of ranked candidates: 56 mirror vs 194
   classical; 18 warm / 38 cold). The warm clean-singleton mirror pool is now **mined out** (S11
   plan gate: every top mirror candidate carries a blocking hazard), pushing the project onto the
