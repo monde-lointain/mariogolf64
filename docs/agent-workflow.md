@@ -80,7 +80,10 @@ resume surface when the middle spans context windows.
       while the permuter runs, then must wake and SendMessage the final byte-match/exhausted outcome, not
       just idle). The orchestrator holds ALL integration (src edit + full-make ROM-SHA-1 gate) until
       every subagent AND its permuter has reported, so a full-make never races the shared `build/` while
-      an isolated subagent compile or permuter build is in flight.
+      an isolated subagent compile or permuter build is in flight. **S250 re-validated the contract: all
+      3 fan-out subagents sent FINAL verdicts via SendMessage with ZERO orchestrator re-pings (vs S235's
+      3-of-4 silent-idle) — the explicit "an `idle_notification` is NOT a deliverable" clause is
+      load-bearing; keep it verbatim in every fan-out prompt.**
   - **A mined fresh-pack's mid-logic tail is a wall-class cluster, not a smallest-first vein (S224).**
     Once a fresh `none` pack's cheap leaves (getters/setters/predicates/dispatch) are banked, the
     residual mid-logic fns (the loops+struct-base+`bnel` tells) concentrate on a small set of documented
@@ -805,6 +808,7 @@ When `pick_target.py` flags a hazard (or a match shows its symptom), read the ma
 | `nonmatching-func`/`decomp_loop` isolated object diverges from the in-tree build of the same 1-BB fn | #local-alloc-qty-permutation |
 | large straight-line dump fn (one `T* p` param, `sub=&p->big_substruct` at fixed offset, many `sub->field` accesses): ROM materializes `p+C` as base (`addiu sN,a0,C`), build keeps the PARAM base + folds `+C` into every displacement; pervasive base-reg + uniform-offset diff, `match_count==total_rows`+empty `top_mismatches` at LOW percent | #cse-derived-pointer-base-canonicalization |
 | clean fn byte-exact except N `r` rows on ONE data-access chain: ROM materializes a full base addr into a reg + `0(reg)` deref, build keeps `%hi`+index + folds `%lo`/const into the load/store DISPLACEMENT; struct-array or `T* row=` intermediates BACKFIRE (pervasive regalloc shift), permuter does not flip it | #base-register-vs-displacement |
+| near-match at MID percent (not high, not near-zero) where EVERY residual row is a `sym+K`-vs-sibling reloc-addend on contiguous globals (struct/array base+addend form vs ROM separate per-field symbols); link-both-and-cmp with real addresses proves byte-exact -> isolation artifact, NOT a base-vs-disp wall | #isolated-compile-caveat |
 | new C references a `D_<addr>` global whose `build/*.map` addr != its name (shifted `.NON_MATCHING` carve, e.g. name+0x10); referencing it corrupts the whole region incl. banked siblings | #base-register-vs-displacement (data-carve subsection) / #defines-data |
 | `p ? field : sentinel` accessor (call returns ptr, return a field-or-default): build emits short branch-likely `beqzl` vs ROM `bnez/nop/j/li`; ternary + early-return both collapse; whole-file ±1 `cmp` cascade from the 2-insn deficit | #value-select-if-else-vs-branch-likely |
 | null-guard `if(p){…}` byte-exact except the guard `beqz` delay slot (ROM `nop`, build steals the block's first insn); fires when body-first is pointer-INDEPENDENT (`li`/`sll`), matches free when body-first DEREFS the guarded ptr | #delay-slot-fill-of-a-null-guard-beqz |

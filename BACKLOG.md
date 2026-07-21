@@ -4730,6 +4730,32 @@ by `/sprint-plan`:
   (nested-loop depth ≥2) AND (≥K distinct fixed-global refs) AND jal-light, so `pick_target.py` stops
   pricing these as tractable leaves (no-jal/no-FP/no-DL is necessary but NOT sufficient — S249 proved
   both such leaves were regalloc walls). Fold into the `carried-wall`/plateaued-pack ranker follow-ups.
+  **S250 (1 bank / 2 terminal verdicts):** the PO-accepted compiler-source fan-out (3 gcc-2.7.2 +
+  binutils-2.6 subagents over the 3 documented walls) SORTED the tail per S233. **Banked**
+  `func_800958D8`→`emit_fullscreen_scissor_dl` (0x800958D8, commit 82cbc39): the S248 0.833 "base-vs-disp
+  wall" was an ASM-DIFFER ISOLATION ARTIFACT, not a wall — the struct-form reloc addends
+  (`%lo(D_801B7F30+2/+4/+6)`) resolve identically to the ROM's separate siblings `D_801B7F32/34/36`
+  (same page), so the 6 scored rows are reloc-token noise and the linked bytes are byte-exact
+  (proved via link-both-and-cmp; see `#isolated-compile-caveat` S250 case + hazard-index row). Matched
+  6→7, stubs 20→19. **2 TERMINAL walls retired (pass-cited, S233):** `func_8008DDDC` @0.610 — coupled
+  zero-sum 7-saved-reg equilibrium, `config/mips/mips.c:1023` direct-mem `symbol_ref` folding macro (no
+  addr pseudo) + `loop.c:1631` move_movables const-3 hoist; reproduced the ptr-cache backfire; NOT
+  source-leverable (`docs/wip/func_8008DDDC.near-match.md` S250 section). `func_80095150` @0.279 —
+  `global.c:594` allocno_compare pervasive 13-IV permutation + const-hoist de-opt; NOT source-leverable
+  (`docs/wip/func_80095150.near-match.md` S250 section). binutils 2.6 ruled out on both (pure gcc RTL).
+  Quality S250 2/0/2/0 (re-opened=3, 1→bank). **Pack is now genuinely mined:** 1 md5-blocking artifact
+  removed, remaining 19 stubs are DL/FP/jtbl/nested-in-DL + 2 pass-cited terminal regalloc walls (no
+  source lever, permuter ~0). **S251 DIRECTION (PO-accepted): FRESH-PIVOT off this file** — no more
+  crack slices on func_8008D100.c; candidates `func_80080220` (43-fn asm-flip pack, coddog llcvt@99.99
+  is a structural false-positive / 8vs43, so fresh `none` game-pack with cheap-leaf bank potential +
+  possible real libc intrinsic mirrors) or `func_8002A640` (24-fn spriteex2@99.99, needs sprite.c
+  header vendoring enabler, mixed bank-stock-carry-custom). **Tooling follow-up (S250, off-cadence
+  golden-gated):** add `tools/link_both_cmp.py` automating the link-both-and-cmp recipe (nm -u current.o
+  → real addresses from build/mariogolf64.map → identical `--defsym` link of both objects → objcopy
+  binary → cmp fn range), so a mid-percent `sym+K`-vs-sibling reloc-addend residual auto-resolves to
+  {artifact, wall} without a manual link. Would have banked func_800958D8 at S248 (2 sprints earlier).
+  The manual recipe is documented now in `#isolated-compile-caveat` (S250 case); only the automation is
+  deferred to a tested branch (kin to the S158/S177/S183/S189 golden-gated tooling rows).
 - **Open (S227, in-progress mixed-partial, NOT a spike):** `src/main/func_80071370.c` (39-fn main-seg
   `none` pack, subseg 0x4C770 flipped `c` at the S227 gate; string/struct-array/heap/DL glue). **8
   banked** (`func_80074960` empty, `func_80073BF0` strlen, `func_80071C74` single-index struct-array

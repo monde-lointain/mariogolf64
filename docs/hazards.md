@@ -2041,6 +2041,37 @@ score reads 0. This is a positioning fix only; the body was already correct. Kin
 reference case above — both are "the isolated path can't see the real TU layout," resolved by the
 full-make ROM SHA-1 either way.
 
+**Separate-symbol-vs-base+addend case (S250): a MID-percent score (not high, not near-zero) can be a
+FULL byte-exact match miscounted as a `#base-register-vs-displacement` wall.** When a fn accesses
+several sibling globals laid out contiguously (e.g. a 4×`s16` rect `D_801B7F30/32/34/36`), a struct/
+array source form emits ONE base symbol with instruction-immediate reloc ADDENDS (`%lo(D_801B7F30+2)`,
+`+4`, `+6`), while the ROM's asm references each as a SEPARATE symbol at addend 0 (`%lo(D_801B7F34)`).
+For MIPS these resolve IDENTICALLY once linked — same page `%hi`, `%lo(base+4) == %lo(sibling)` — so
+the bytes are equal, but asm-differ compares the `(symbol, addend)` reloc TOKENS UNRESOLVED and scores
+one row per access (S250 `func_800958D8` = `emit_fullscreen_scissor_dl`: 6 rows = 3 stores + 3 reads,
+score 1200, percent **0.833**, 72/72 rows, empty `top_mismatches`). It carried TWO sprints (S248/S249)
+mis-labeled a base-vs-displacement wall before the link-both test proved it byte-exact. **The score is
+MID (not the high-percent/empty-`top_mismatches` signal above, nor the near-zero bss-multi-symbol
+collapse), so it does not trip the usual artifact recognizer — the tell is that EVERY residual row is a
+reloc-addend token diff of the form `sym+K` vs `sym_next` on contiguous siblings.**
+
+**Link-both-and-cmp recipe (the dispositive test, S250).** Before characterizing a residual whose
+diff rows are PURELY `sym+K`-vs-sibling reloc addends as a base-vs-displacement wall, prove it by
+linking both objects with identical real addresses and byte-comparing:
+1. `nm -u nonmatchings/<func>/current.o` -> the undefined symbols (few, since it is one fn).
+2. Pull each symbol's real linked address from `build/mariogolf64.map` (`grep ' <sym>$'`), and the
+   fn's own vram from `symbol_addrs.txt` / the map.
+3. `ld -e 0 -Ttext=<fnvram> --defsym <sym>=<addr> ... current.o -o /tmp/cur.elf`, then the same
+   `--defsym` set for the reference (slice the reference fn bytes from the linked `build/mariogolf64.z64`
+   at the fn's ROM offset, OR link the reference object the same way). `objcopy -O binary` each and
+   `cmp` the fn byte range.
+4. Equal bytes -> ISOLATION ARTIFACT: integrate the source form as-is and gate on the full-make ROM
+   SHA-1 (it will match). Unequal -> a genuine near-miss/wall; root-cause the real divergence.
+Because the addend arithmetic only resolves to the sibling's address when the defsyms use the REAL
+layout, this test is exact. (A generic `tools/link_both_cmp.py` that automates steps 1-4 is a tracked
+tooling follow-up in `BACKLOG.md`; until it lands, run the recipe by hand — it is what banked
+`func_800958D8` after 2 sprints of mischaracterization.) See `#base-register-vs-displacement`.
+
 ---
 
 ## Decompile-vs-asm authority

@@ -25,6 +25,39 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 250 — compiler-source fan-out crack slice on the func_8008D100.c documented walls — 2026-07-21
+- Increment: 0 files banked (file partial, 20→19 stubs, NOT md5-candidate) / **+1 function matched**
+  (6→7 of 26): `func_800958D8`→`emit_fullscreen_scissor_dl` (0x800958D8), commit 82cbc39. ROM SHA-1
+  green e2c4e7a9…, tree clean.
+- Quality: 2 stuck-far / 0 permuter / 2 carried / 3 re-opened this sprint (re-opens intentional per
+  S232 crack-attempt; 1 resolved to a bank).
+- Seed: committed 3pt; banked 0pt (per-file all-or-nothing, file partial); regime classical.
+  Realized ~5 (seed +2 carries +1 novel isolation-artifact gotcha), residual +2. Value signal =
+  +1 matched + 2 pass-cited retired walls.
+- What helped: (1) The S232 fan-out (3 gcc-2.7.2 + binutils-2.6 subagents, isolated builds, orchestrator
+  held all integration) sorted the tail exactly per S233 into {1 bank, 2 terminal-verdicts}. (2) The
+  crack subagent's LINK-BOTH-AND-CMP test (link current.o + reference with identical real addresses,
+  byte-cmp) proved `func_800958D8` byte-exact — the 0.833 score was pure reloc-token addend noise
+  (struct base+2/+4/+6 == the ROM's separate siblings D_801B7F32/34/36, same page), a base-vs-disp
+  MISCHARACTERIZATION that carried 2 sprints. (3) The S235 hand-off contract worked clean: all 3
+  subagents sent FINAL verdicts via SendMessage, ZERO orchestrator re-pings (vs S235's 3-of-4 silent).
+- Friction: `func_800958D8` sat mislabeled a base-vs-displacement wall for 2 sprints (S248 doc, S249
+  SPRINT) when it was byte-exact all along — the mid-percent (0.833) reloc-addend artifact does not trip
+  the usual high-percent/empty-`top_mismatches` recognizer. The two genuine walls were correctly
+  predicted terminal at the plan gate (less-steerable class, permuter ~0): `func_8008DDDC` @0.610
+  (mips.c:1023 folding macro + loop.c:1631 hoist, coupled 7-saved-reg equilibrium) and `func_80095150`
+  @0.279 (global.c:594 pervasive 13-IV permutation).
+- Applied: 3 of 3 (#1 link-both-and-cmp technique → `docs/hazards.md#isolated-compile-caveat` S250 case
+  + hazard-index row, + a tracked `tools/link_both_cmp.py` automation follow-up in BACKLOG; #2 keep the
+  S235 "idle_notification is NOT a deliverable" clause verbatim → agent-workflow.md S235-contract note
+  re-validated; #3 S251 fresh-pivot direction → BACKLOG).
+- Carry-over: `func_8008D100.c` stays open but GENUINELY MINED (1 md5-blocking artifact removed;
+  remaining 19 stubs = DL/FP/jtbl/nested-in-DL + 2 pass-cited terminal regalloc walls). S251 FRESH-PIVOTS
+  off this file: `func_80080220` (43-fn pack) or `func_8002A640` (24-fn spriteex2, sprite.c enabler).
+  Cross-repo: propagate `emit_fullscreen_scissor_dl` → `sync_decomp_names.py --import-from-decomp`.
+
+---
+
 ## Sprint 249 — continue func_8008D100.c: mine the 2 untried tractable mid-leaves — 2026-07-21
 - Increment: 0 files banked (file partial, 20 stubs unchanged, NOT md5-candidate) / **+0 functions
   matched** (still 6 of 26). ROM SHA-1 green e2c4e7a9…, tree clean.

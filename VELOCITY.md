@@ -1085,6 +1085,22 @@ Three honest caveats:
   tractable leaf.** Retro applied 2 of 2 (#1 ranker `mid-logic-wall-risk` tell → BACKLOG ranker
   follow-up; #2 S250 compiler-source-fan-out direction → BACKLOG + RETRO). Tooling-test failures hold
   at 8 (0 new; doc edits only). Push: local only.
+  S250: COMPILER-SOURCE FAN-OUT crack slice on the `func_8008D100.c` documented walls (PO chose over a
+  fresh pivot). **1 banked / 2 pass-cited terminal verdicts** (20→19 stubs, 6→7 matched). The fan-out
+  (3 gcc-2.7.2 + binutils-2.6 subagents) sorted the tail per S233: `func_800958D8`→
+  `emit_fullscreen_scissor_dl` was a MIS-SCORED asm-differ isolation artifact (0.833 = reloc-addend
+  noise; struct base+2/4/6 == ROM siblings D_801B7F32/34/36, linked bytes byte-exact), not a base-vs-disp
+  wall — the LINK-BOTH-AND-CMP test banked a 2-sprint carry. Two genuine walls retired terminal:
+  `func_8008DDDC` @0.610 (mips.c:1023 folding macro + loop.c:1631 hoist, coupled 7-saved-reg
+  equilibrium) and `func_80095150` @0.279 (global.c:594 pervasive 13-IV permutation). binutils ruled
+  out on both. Seed 3 (classical crack slice); banked 0pt (file partial); realized ~5 (+2 carries, +1
+  isolation-artifact gotcha); residual +2. Rolling-5 (S246-S250): main-segment slices banked 2+2+2+0+1.
+  **Key: a MID-percent (not high, not near-zero) all-reloc-addend residual is a byte-exact-artifact
+  class the usual recognizer misses; the S235 hand-off contract worked clean (3/3 verdicts, 0 re-pings).**
+  Retro applied 3 of 3 (#1 link-both-cmp technique → hazards.md#isolated-compile-caveat + hazard-index +
+  tracked `tools/link_both_cmp.py` follow-up; #2 S235 verbatim-clause re-validated → agent-workflow.md;
+  #3 S251 fresh-pivot direction → BACKLOG). Tooling-test failures hold at 8 (0 new; doc edits only).
+  Push: local only.
 - **Regime:** `mirror` is a depleting minority (~22 % of ranked candidates: 56 mirror vs 194
   classical; 18 warm / 38 cold). The warm clean-singleton mirror pool is now **mined out** (S11
   plan gate: every top mirror candidate carries a blocking hazard), pushing the project onto the
