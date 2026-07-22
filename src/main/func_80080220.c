@@ -72,15 +72,33 @@ void init_sky_panels(void) {
   per_hole_skybox_palette_load();
 }
 
-/* init_sky_pool_and_world_state: CARRY (S256, near-match, body 100% RE'd).
- * Sky-dome Vtx-grid builder (4x5x6 + block-2/3 s-texcoord overwrite) + tint
- * fill
- * + guOrtho/2x guPerspective + 14 world-state zeros. TERMINAL = grid-builder
- * biv-regalloc + loop-bound-hoist (ROM re-materializes `li v0,5`/`li v0,4`
- * inline; my build hoists the bounds; 93 asm-differ rows). Grid-builder wall
- * class (S241 analog carried).
- * docs/wip/init_sky_pool_and_world_state.near-match.md;
- * [[grid-builder-CE88-regalloc-levers]].
+/* init_sky_pool_and_world_state: CARRY (S256, rebuilt S258 to the EXACT
+ * instruction count). Sky-dome Vtx-grid builder (4x5x6, then a block-2/3
+ * s-texcoord overwrite) + tint fill + guOrtho/2x guPerspective + 14 world-state
+ * zeros.
+ *
+ * S256 carried it at 93 asm-differ rows; it now builds at 161/161 instrs with
+ * the instruction shapes aligned 1:1. The rebuild is about WHICH loops
+ * gcc-2.7.2 is allowed to discover: loop.c only processes loops that emit
+ * NOTE_INSN_LOOP_BEG, which for/while/do-while do and a goto loop does not.
+ *  - the two OUTER grid loops must be GOTO loops: the ROM re-materialises
+ *    `li v0,5` / `li v0,4` inline at the exit tests and does not
+ * strength-reduce the block base (any structured spelling hoists both and folds
+ * the base into a walking pointer, the S256 failure);
+ *  - the INNER col loop must be STRUCTURED: the ROM has the two pointer givs
+ *    (`a3` and `a3+0xF`) that only loop.c's SR produces (a goto here is 4
+ * short);
+ *  - every constant the ROM keeps in a register across a goto loop must be a
+ *    local variable (0xB7 / 6 / 0xC00 / 0x1E / the pool base), one per loop and
+ *    assigned where the ROM materialises it, since a goto loop de-hoists
+ * literals;
+ *  - `(Vtx*)(block_off + (u32)pool)` puts the integer operand first, matching
+ * the ROM's `addu a3,t6,s0`. RESIDUAL: a systematic local-alloc register
+ * permutation of the grid-1 locals (same register set, same quantity order,
+ * different priority ranking) plus one 2-instruction swap where loop.c places
+ * the giv init after the s/x inits. Permuter plateaued 615 -> 545 in 60k
+ * iterations. Full reconstruction + the register mapping table in
+ * docs/wip/init_sky_pool_and_world_state.near-match.md.
  */
 INCLUDE_ASM("asm/nonmatchings/main/func_80080220",
             init_sky_pool_and_world_state);
