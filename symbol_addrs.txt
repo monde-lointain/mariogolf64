@@ -674,3 +674,4 @@ init_scenario_state = 0x8008D100; // type:func
 emit_fullscreen_scissor_dl = 0x800958D8; // type:func
 toggle_sky_panel_bank_index = 0x8008D0DC; // type:func
 init_sky_panels = 0x80080220; // type:func
+draw_letterbox_bars = 0x80088890; // type:func

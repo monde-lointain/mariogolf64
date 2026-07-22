@@ -745,7 +745,43 @@ INCLUDE_ASM("asm/nonmatchings/main/func_80080220", func_80087CB0);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80080220", func_800880A0);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80080220", func_80088890);
+extern s8 D_801061BD;
+extern s32 D_800C308C;
+
+s32 draw_letterbox_bars(Gfx** dl_ptr, s32 y) {
+  Gfx* dl = *dl_ptr;
+
+  if (D_801061BD != 0) {
+    if (D_800C308C != 0 && D_800C308C != 5) {
+      gDPPipeSync(dl++);
+      gDPPipeSync(dl++);
+      /* The ROM's rendermode word is 0x00504A40 = RM_XLU_SURF with ZMODE_XLU;
+       * every SDK gbi.h on hand defines RM_XLU_SURF with ZMODE_OPA, so the
+       * zmode is spelled out here. */
+      gDPSetRenderMode(dl++, G_RM_XLU_SURF | ZMODE_XLU,
+                       G_RM_XLU_SURF2 | ZMODE_XLU);
+      gDPSetCombineMode(dl++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
+      gDPSetPrimColor(dl++, 0, 0, 0, 0, 0, 255);
+      gDPPipeSync(dl++);
+      if (y > 0) {
+        gSPScisTextureRectangle(dl++, 8 << 2, 8 << 2, 312 << 2, (y + 8) << 2,
+                                G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10);
+        gSPScisTextureRectangle(dl++, 8 << 2, (232 - y) << 2, 312 << 2,
+                                232 << 2, G_TX_RENDERTILE, 0, 0, 1 << 10,
+                                1 << 10);
+      }
+      gDPPipeSync(dl++);
+      y += 2;
+      if (y > 16) {
+        y = 16;
+      }
+    } else {
+      y = 0;
+    }
+  }
+  *dl_ptr = dl;
+  return y;
+}
 
 /* func_80088A90: CARRY (S254) glyph/units-string DL emitter, S243 raw-DL-word
  * wall class. Renders a numeric string (digits + 'f'/'m'/'y' unit glyphs, '.'
