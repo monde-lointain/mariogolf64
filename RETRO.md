@@ -25,6 +25,30 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 257 — continue func_80080220 pack, TELL-CLASS sorted (PO approved continuation) — 2026-07-22
+- Increment: 2 fns banked / 1 carried in `src/main/func_80080220.c` (24→22 stubs; file still partial, not md5-candidate). md5-candidate files 230/263, delta 0.
+- Quality: 0/0/1/0 (stuck-far/permuter/carried/re-opened). Zero permuter runs all sprint.
+- Seed: committed 5pt; banked 0pt (file partial); realized 6 / residual +1; regime classical
+- Banks: `func_8008CD30` (0x3AC debug HUD overlay), `func_80088BDC` (0x4B8 debug RGB color-editor, FIRST-BUILD byte-exact)
+- What helped:
+  - **The SDK composite-macro grep — the sprint's real finding** ([[sdk-composite-macro-before-dl-reconstruction]]). `func_80087CB0`'s branchless corner clamp plus its ASYMMETRIC s/t clip (`bgezl` on the s16 x, `bgez` on the s32 y) is the verbatim expansion of `gSPScisTextureRectangle` ("like gSPTextureRectangle but accepts negative position arguments"), not hand-written clipping. Four iterations of ternary/bit-twiddle clamp forms were pinned at one score before the macro was found; then 8 iterations took it 15680→1580. Two more composites (`gDPLoadTLUT_pal16`, `gDPLoadTextureBlock_4b`) collapsed 13 commands to 2 source lines — and `gfxdis` had NAMED both in its own output all along. Generalized tell: a clamp whose MASK derives from a narrower view than the value being masked is a macro tell.
+  - **mem-in-struct extends to an INDEX global, as a COUNT lever** ([[mem-in-struct-index-global-cse]]): `extern s32 G;` → `extern s32 G[];` + `G[0]` defeats `cse.c` forwarding of the load AND of everything derived from it (`G<<2`), so `TBLA[G]`/`TBLB[G]` re-read per access. Worth 6 of `func_8008CD30`'s 7 missing instructions. Previously documented only as a load/store SCHEDULE lever.
+  - **divmod statement order** ([[divmod-order-quotient-coalescing]]): `t % K` before `t / K` keeps the quotient in its own pseudo and emits the ROM's non-coalesced `move`; div-first, or an explicit `quot` temp, coalesces it. The last instruction of `func_8008CD30`.
+  - **if/else, not a ternary** ([[ifelse-not-ternary-cse-reset]]), when the ROM re-loads a global both arms store: the two stores cross-jump tail-merge and the multi-predecessor join resets cse's table, re-loading every live memory value. One edit reproduced both the `lw glistp` and the `lw D_800E2134` in `func_80087CB0` — ~0x20 of its length gap.
+  - **Type narrowing is free structure** (`func_80088BDC`, first-build): `s32` color channels feed the gDP macros as `lbu` at byte +3 (gcc narrows `(x & 0xFF) << 24` on a big-endian word load), and `s16` params on a callee make `s32` globals emit `lh` at +2.
+  - **Tell-class sort over smallest-first is now 2-for-2** (S256 follow-up #4, applied manually at the gate): both no-DL/no-FP glue leaves it picked banked; pure smallest-first would have committed 5 documented walls.
+- Friction:
+  - **`diff.py` went stale across FOUR consecutive single-file rebuilds**, reporting an identical score for four materially different sources. `find build -name '<obj>.o' -delete` did NOT clear it; only a full relink did. Cost ~4 wasted iterations before `objdump -d` on the object (plus an instruction count against the `.s` header) exposed that the code had in fact changed and was already 252/252 instructions.
+  - **A scripted whole-region splice deleted 3 `INCLUDE_ASM` stubs and their carry comments** between its anchors; surfaced only as an `undefined reference` at link. Self-inflicted, one failed build.
+  - The `gSPScisTextureRectangle` search itself: the right move (grep the SDK header for a composite) was available from iteration 1 and was not taken until iteration 5.
+- Walls: `func_80087CB0` carried at ONE instruction (253 vs 252, score 1580, body 100% RE'd) — gcc-2.7.2 `fold` reassociates `(GLOBAL + C) + load` to `(GLOBAL + load) + C`, so the ROM's shared `D_800C54C8 + 0x108` pseudo is emitted twice; hoisting it to a local creates the shared pseudo but also CSEs away the `D_800E2190[0]` re-load (247 instrs). docs/wip + in-file verdict.
+- Stretch refused (correctly): `func_80080E7C` (0x408) needs a rodata-jtbl carve at `jtbl_800D1AA0`, which is interleaved with the extern-referenced format strings — the documented [[jtbl-carve-both-edge-8align]] blocker. Re-priced as an enabler slice in BACKLOG, not a leaf.
+- Applied: 6 of 6 PO-accepted — #3 SDK composite-macro grep (hazards#display-lists + memory), #1/#2/#4 codegen levers (hazards#mem-in-struct-scheduling-lever / #register-reuse-nudge / #cross-jump-tail-merge + 3 memories), #5 diff.py stale-detector (workflow execution loop + [[subagent-diff-crack-not-a-bank]]), #6 scripted-splice guard (workflow conventions).
+- Ranker: the c-stub-continuation gap **REGRESSED (4th recurrence)** — S256 surfaced the pack as `c-stub remaining:27`, S257 did not surface it at all despite 24 stubs, while two other c-stub packs ranked fine. Follow-up REOPENED in BACKLOG with a concrete hypothesis (carried-wall de-rank applied at pack instead of leaf granularity).
+- Carry-over: `src/main/func_80080220.c` (22 stubs). New carry `func_80087CB0`; existing `init_sky_pool_and_world_state`, `func_80088890`, `func_800842C0`, `func_80088A90`, `func_80080688`, `func_800824E4`, `func_80081C90`. **Cheapest S258 opener: re-check `func_80088890` / `func_800842C0` / `func_80088A90` against `gSPScisTextureRectangle` — three carries that may be one macro away.**
+
+---
+
 ## Sprint 256 — continue func_80080220 pack: fresh leaves (PO chose continuation over spriteex2 pivot) — 2026-07-21
 - Increment: 3 fns banked / 1 carried / 1 deferred in `src/main/func_80080220.c` (27→24 stubs; file still partial, not md5-candidate)
 - Quality: 0/0/1/0 (stuck-far/permuter/carried/re-opened)

@@ -1194,6 +1194,41 @@ Three honest caveats:
   pack). NEW: DL-emitter reconstruction via gfxdis + gDP macros WORKS → the raw-DL-word wall class is
   partly tractable (softens the mg64-glyph-emitter-dl-family "terminal" verdict for the glistp++ macro
   subtype). Tooling-test failures hold at 8 (0 new; doc/memory edits only). Push: local.
+  S257: CONTINUE `src/main/func_80080220.c`, TELL-CLASS sorted rather than smallest-first (PO approved
+  continuation over a glue-only slice, a DL-only slice, and the spriteex2 pivot). **2 banked / 1 carried**
+  (24→22 stubs). Banks: `func_8008CD30` (0x3AC debug HUD overlay — mode dispatch + frame-counter →
+  mm:ss.cc + prim/env color + sprintf/func_8007624C readout; first build was structurally 100% correct
+  but 7 instrs short; TWO CRACKS = retype `scenario_mode_id` to `extern s32[]` and read
+  `scenario_mode_id[0]` so MEM_IN_STRUCT_P forces the ROM's per-access re-read of the index AND of
+  `sm<<2` [[mem-in-struct-index-global-cse]] (6 instrs), plus `secs = t % 60` BEFORE `mins = t / 60` to
+  keep the divmod quotient in its own pseudo and emit the ROM's non-coalesced `move`
+  [[divmod-order-quotient-coalescing]] (1 instr); auto name), `func_80088BDC` (0x4B8 debug RGB
+  color-editor overlay — FIRST-BUILD byte-exact; `s32` color channels feed the gDP macros as `lbu` at
+  byte +3, `s16` params on func_800747B0 make the `s32` globals emit `lh` at +2; the mixed CSE of the
+  button word falls out for free because the varying-index store purges cse's memory table while the
+  fixed-symbol stores do not; auto). Carry: `func_80087CB0` (0x3F0 aim-cursor sprite emitter, ONE
+  instruction long — 253 vs 252, score 1580, body 100% RE'd). **The sprint's real deliverable is that
+  carry's IDENTIFICATION:** its branchless corner clamp + ASYMMETRIC s/t clip (`bgezl` on the s16 x,
+  `bgez` on the s32 y) is the verbatim expansion of the SDK macro `gSPScisTextureRectangle`, not
+  hand-written clipping — 4 iterations of hand clamp forms were pinned at one score before the macro was
+  found, then 8 more took it 15680→1580 [[sdk-composite-macro-before-dl-reconstruction]]. Two other
+  composites (`gDPLoadTLUT_pal16`, `gDPLoadTextureBlock_4b`) collapsed 13 commands to 2 source lines, and
+  gfxdis had NAMED both in its own output all along. Third lever: if/else NOT ternary when the ROM
+  re-loads a global both arms store (cross-jump tail-merge + cse-table reset at the multi-pred join)
+  [[ifelse-not-ternary-cse-reset]] — worth ~0x20 of that function's length gap. Stretch
+  `func_80080E7C` (0x408) correctly REFUSED: its `switch` jtbl at 0x800D1AA0 is interleaved with the
+  extern-referenced format strings, the documented [[jtbl-carve-both-edge-8align]] blocker; re-priced as
+  an enabler slice. Seed 5 (classical; the seed-5 mined-leaf-continuation over-price recurred a 5th
+  time — S251-253 anchor is 3); banked 0pt (file partial); realized 6 / residual +1 (+1 carry, +1 novel
+  gotcha cluster [stale diff.py + the macro hunt], −1 for one first-build byte-exact bank). Rolling-5
+  (S253-S257): 3+3+3+3+2. Quality 0/0/1/0, ZERO permuter runs. Retro applied 6 of 6 (#3 SDK
+  composite-macro grep → hazards#display-lists + memory; #1/#2/#4 codegen levers → hazards + 3 memories;
+  #5 diff.py stale-detector → workflow + memory; #6 scripted-splice guard → workflow conventions).
+  Tooling-test failures 8→**9** (+1 `pick_target` live-state golden drift from this sprint's banking —
+  the documented S184 fixture follow-up, not a regression). RANKER: the c-stub-continuation row
+  **REGRESSED, 4th recurrence** — S256 surfaced the pack, S257 did not surface it at all despite 24
+  stubs while two other c-stub packs ranked fine; follow-up REOPENED with a pack-vs-leaf de-rank
+  granularity hypothesis. Push: local.
 - **Regime:** `mirror` is a depleting minority (~22 % of ranked candidates: 56 mirror vs 194
   classical; 18 warm / 38 cold). The warm clean-singleton mirror pool is now **mined out** (S11
   plan gate: every top mirror candidate carries a blocking hazard), pushing the project onto the

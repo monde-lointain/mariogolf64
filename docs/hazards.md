@@ -1847,6 +1847,20 @@ pressure.
 
 **Trigger:** asm-differ shows e.g. `srl a0,…` in the target vs `srl v1,…` in yours, same value.
 
+**Sub-case: div/mod statement ORDER controls quotient-temp coalescing (S257).** When a near-match is
+exactly ONE non-coalesced register copy short inside a `/` + `%` pair on the same dividend (ROM
+`subu s2,v0,v1; move s0,s2; sll v0,s0,4 …`, build `subu s0,s0,v0; sll v0,s0,4 …`), the lever is the
+order of the two statements, not a temp:
+
+- `mins = t / 60;` then `secs = t % 60;` — the `/` expands into `mins`'s pseudo directly and the `%`
+  CSEs the quotient to it. **No copy.**
+- `secs = t % 60;` then `mins = t / 60;` — the `%` expansion creates its OWN quotient pseudo, and the
+  later `/` CSEs to it, emitting `move mins, quot`. **Copy, matching the ROM.**
+
+An explicit `quot = t / 60; mins = quot;` does NOT work (regalloc coalesces the pair away), and neither
+does splitting the dividend into a second variable — only the mod-first order does it. Check this
+before calling a 1-copy deficit a `#local-alloc-qty-permutation` wall.
+
 **Procedure:** `bit = (status>>8)&1;` (compiler used temp `v1`) → `bit = status>>8; bit &= 1;`
 (reused `a0`).
 
@@ -3107,6 +3121,31 @@ fn; that adds `-DF3DEX_GBI_2` so the gDP macros expand to the F3DEX2 `0xE2..`/`0
 value under either ucode), so a raw-word seed needs no profile — only macro seeds do. `setup-permuter.sh
 --main` / `permuter_settings_main.toml` carry the same define for the permuter (S190).
 
+**Grep the SDK `gbi.h` for a COMPOSITE macro before hand-reconstructing any DL command sequence
+(S257).** `gfxdis.f3dex2` names the composite in its own output (it printed
+`gsDPLoadTextureBlock_4b(...)` for eight consecutive command words), and a composite is one source
+line where the hand form is 7-13. Two composites collapsed 13 of `func_80087CB0`'s commands to 2
+lines: `gDPLoadTLUT_pal16(pkt, pal, dram)` (SetTextureImage + TileSync + SetTile + LoadSync +
+LoadTLUTCmd + PipeSync) and `gDPLoadTextureBlock_4b(pkt, timg, fmt, w, h, pal, cms, cmt, masks,
+maskt, shifts, shiftt)` (SetTextureImage + SetTile + LoadSync + LoadBlock + PipeSync + SetTile +
+SetTileSize). Each sub-macro takes `pkt` once, so `glistp++` as `pkt` yields exactly N increments.
+
+- **The decisive case is `gSPScisTextureRectangle` (gbi.h, "like `gSPTextureRectangle` but accepts
+  negative position arguments").** Its TELL in the asm is a branchless corner clamp
+  (`sll 18; sra 16; nor; sra 31; and; andi 0xffc`) plus an ASYMMETRIC s/t clip: the x arm tests the
+  `s16`-narrowed value (`bgezl`) while the y arm tests the raw `s32` (`bgez`), each followed by
+  `slti 1; negu; and; negu`. That asymmetry is not a codegen coin — it is literally in the macro
+  body (`MAX((s16)(xh),0)` for the corners, and for s
+  `(s) - (((s16)(xl) < 0) ? (((s16)(dsdx) < 0) ? MAX(…) : MIN((((s16)(xl)*(s16)(dsdx))>>7),0)) : 0)`
+  versus a t arm that tests the UNCAST `((yl) < 0)`). With `dsdx = dtdy = 1<<10` the `>>7` is the
+  ROM's `*8`. S257 burned 4 iterations on ternary and bit-twiddle clamp reconstructions, all pinned
+  at the same asm-differ score, before finding it. **Re-check every carried MG64 texrect emitter
+  against this macro before re-pricing it as a wall** — `func_80088890` (S256 "branchless-clamp
+  raw-DL" deferral), `func_800842C0` (S255), `func_80088A90` (S254).
+- Corollary: a coordinate clamp whose mask derives from a NARROWER view of the value than the value
+  being masked (`mask` from `(s16)x`, `and` applied to the raw `x`) is a strong macro tell — faithful
+  hand C keeps the two the same width.
+
 **A dynamic DL emitter needs the `gDP*(gfx++)` MACRO form, NOT raw `gfx[i].words` indexing (S239).**
 For a builder that emits N commands into a running cursor, `gDPXxx(gfx++, …)` per command makes GCC
 materialize N DISTINCT `Gfx*` pointers (each `gfx++` post-increment is a separate SSA value:
@@ -3501,6 +3540,24 @@ with collateral `-0x10`-style address shifts on every symbol after the short fun
 matches; only referenced addresses shifted).
 
 **Rule:**
+
+**Use it deliberately: an if/else (NOT a ternary) reproduces a ROM that RE-LOADS a global both arms
+store (S257).** `G = cond ? A : B;` and `if (cond) { G = A; } else { G = B; }` emit the SAME final
+instructions — `find_cross_jump` merges the two arms' identical `lui at; sw v0,%lo(G)(at)` tails into
+one store after the join — but they differ in what survives the join:
+
+- **Ternary:** one store, value already in a pseudo, and the pseudo lives across the join. Any later
+  read of `G` CSE-forwards to it, and (critically) any OTHER pseudo live across the diamond also
+  survives — so a preceding `glistp`-style DL base register stays alive and the NEXT block's stores
+  fold onto it as displacements instead of re-loading the global.
+- **if/else:** the two stores start in separate basic blocks, so `cse.c` never records `G = pseudo` in
+  a single extended block; the table resets at the multi-predecessor join label and EVERY memory value
+  live across it is re-emitted as a fresh load.
+
+In `func_80087CB0` this one change reproduced both the `lw glistp` at the head of the second DL block
+and the `lw D_800E2134` immediately after its own store, worth ~0x20 of the length gap. So when the
+ROM re-reads a global it just wrote, or re-loads a DL cursor across a diamond, reach for the if/else
+form before suspecting `volatile` ([#volatile-view-cse-reload](#volatile-view-cse-reload)).
 
 **Rule out a game-modified body first.** This symptom is not proof
 of a compiler cross-jump merge; it is far more often a **body-semantics divergence** the literal
@@ -5249,6 +5306,25 @@ at a varying address and the other is non-`MEM_IN_STRUCT` at a fixed address (th
 non-struct + fixed. So the scheduler judges `store-via-pointer` and `load-of-scalar-global`
 non-conflicting and freely reorders/hoists. `memrefs_conflict_p(symbol, reg)` itself returns 1
 (may-conflict), so the MEM_IN_STRUCT terms are the sole discriminator.
+
+**The lever also flips instruction COUNT via `cse.c`, not just the schedule — apply it to an INDEX
+global (S257).** Same one-line change (`extern s32 G;` → `extern s32 G[];`, read as `G[0]`), different
+pass: a MEM_IN_STRUCT load is invalidated by any intervening store `cse.c` cannot disambiguate, so it
+is RE-LOADED per use — and every value DERIVED from it (`G<<2`, an address chain) dies with it and is
+re-materialized too. Two shapes seen:
+
+- **Index re-read.** ROM emits `lui/lw G; sll v0,v0,2` twice for `TBLA[G]` and `TBLB[G]` at one call
+  site (an outgoing stack-arg store lands between them); the plain scalar decl CSE-forwards both the
+  load and the shift, leaving the build 3 instrs short PER site. `func_8008CD30` was 6 instrs short
+  (2 sites) until `scenario_mode_id` was retyped to an array and read as `scenario_mode_id[0]`.
+  A `(&G)[0]` cast does NOT work — the DECL must have array type for `MEM_IN_STRUCT_P` to be set.
+- **Flag load pinned below varying-address stores.** `func_80087CB0`'s `if (D_80106240[0] & 8)` test
+  sat below a block of `glistp++` DL stores in the ROM; as a plain `u8` scalar the load hoisted ~30
+  instructions above them (sched1, the `true_dependence` rule above). Array decl → may-alias → pinned.
+
+Retyping a file-scope extern from scalar to array is **codegen-neutral at a single plain use**, so a
+sibling already-banked fn in the same TU that reads `G` (rewritten `G[0]`) keeps its bytes — verify
+with the full-make SHA-1, but expect it to hold (S257 did).
 
 **Fix:** make the fixed global a struct/array member so its load becomes MEM_IN_STRUCT → the term
 flips → the pair conflicts → the scheduler serializes (strict pairs) or cannot hoist (late load).

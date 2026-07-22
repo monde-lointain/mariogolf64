@@ -283,6 +283,16 @@ Ghidra MCP is used inline at seed time. For each target function:
        hint only; confirm every score-0/bank with `tools/verify-rom.sh` (full-make ROM-SHA-1), and
        `find build -name '<obj>.o*' -delete` before a single-fn diff you actually trust. See the memory
        `subagent-diff-crack-not-a-bank` (now covers the orchestrator's own diff.py, not just subagents').
+       - **Stale-detector (S257): the SAME `diff.py` score twice in a row after a real source edit means
+         STALE, not "the edit had no effect."** S257 got an identical score across FOUR materially
+         different sources (a ternary vs an if/else vs two different clamp idioms); `find build -name
+         '<obj>.o' -delete` did NOT clear it — only a full relink (`tools/verify-rom.sh` / `make` to the
+         ELF) refreshed the mapfile diff.py reads. The escape that always works mid-iteration is
+         `mips-linux-gnu-objdump -d build/src/<tree>/<obj>.o` plus an instruction-count check against the
+         `.s` header (`head -1 asm/nonmatchings/<seg>/<f>/<f>.s` gives `0x<size>`; instrs = size/4). An
+         instruction count that already matches the ROM turns a "which register" question into a pure
+         permutation question, and one that does not tells you the length gap directly — both are more
+         actionable than a score. Do NOT spend more than one iteration on an unchanged score.
    - **Finalize** (only if the spot-check passes): inline the body into `src/<seg>.c`, drop the
      `INCLUDE_ASM` line, `clang-format-22 -i` (now applies to every tree, including `src/libultra/`,
      `src/libkmc/`, `src/libnusys/`, and `src/mgu/`), then `make` until `build/mariogolf64.z64: OK`
@@ -551,6 +561,12 @@ These apply regardless of hazard. Hazard-specific procedures are in `docs/hazard
 below).
 
 - **One function at a time.** `pick_target.py` ranks (smallest-first); you pick the target.
+- **Never rewrite a partial-bank `src/<seg>.c` with a scripted whole-region splice (S257).** A
+  `s[:a] + new + s[b:]` python replacement between two anchors silently deleted three `INCLUDE_ASM`
+  stubs and their multi-line carry comments that lived between the anchors, and surfaced only as an
+  `undefined reference` at link. Use `Edit` with an exact `old_string`; if a script is genuinely needed,
+  gate it on `grep -c 'INCLUDE_ASM' src/<seg>.c` before and after (the count must change by exactly the
+  number of functions you are promoting, and by 0 for an in-place body edit).
 - **Scratch dir** `nonmatchings/<func>/` (gitignored, shared with the permuter).
 - **Python tools run via the venv:** `venv/bin/python3 tools/X.py` (system python lacks asm-differ
   deps and is PEP-668-locked).

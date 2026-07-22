@@ -4869,11 +4869,56 @@ by `/sprint-plan`:
     the glistp++ DL emitters via gfxdis (`func_80085F98` 0x5f4 12-DL, `func_8008156C` 0x724 24-DL).
     Excluded carries: func_800824E4, func_80081C90, func_80088A90, func_800842C0, func_80080688,
     func_80088890, init_sky_pool_and_world_state.
-  - **RANKER FOLLOW-UP (S253-S255 RECURRED 3rd time; S256 APPEARS RESOLVED — verify):** at the S256 gate
-    `pick_target.py --segment main` DID surface the pack as `init_sky_pool_and_world_state … c-stub …
-    remaining:27` (the c-stub-continuation row the prior 3 sprints lacked). Looks fixed; CONFIRM at the
-    S257 gate that a partial-banked already-`c` file reliably ranks as a `c-stub remaining:N` continuation
-    before closing this follow-up.
+  - **S257: banked `func_8008CD30` (0x3AC — debug HUD overlay: mode dispatch + frame-counter -> mm:ss.cc
+    + prim/env color + sprintf/func_8007624C readout; TWO CRACKS = `scenario_mode_id` retyped
+    `extern s32[]` and read `scenario_mode_id[0]` so MEM_IN_STRUCT_P forces the ROM's per-access re-read
+    of the index AND of `sm<<2` [[mem-in-struct-index-global-cse]], plus `secs = t % 60` BEFORE
+    `mins = t / 60` to keep the divmod quotient in its own pseudo [[divmod-order-quotient-coalescing]])
+    and `func_80088BDC` (0x4B8 — debug RGB color-editor overlay, FIRST-BUILD byte-exact; `s32` color
+    channels feed the gDP macros as `lbu` at +3, `s16` params on func_800747B0 make the `s32` globals
+    emit `lh` at +2). 24->22. Zero permuter.**
+  - **CARRY `func_80087CB0` (0x3F0, S257 — 1 INSTRUCTION long, 253 vs 252, score 1580, body 100%
+    RE'd):** aim-cursor sprite emitter on the global `glistp`. **The reusable win here is the
+    IDENTIFICATION, not the carry:** the branchless corner clamp + the ASYMMETRIC s/t clip (`bgezl` on
+    the s16 x, `bgez` on the s32 y) is the verbatim expansion of the SDK macro
+    `gSPScisTextureRectangle` (gbi.h, "like gSPTextureRectangle but accepts negative position
+    arguments") — NOT hand-written clipping. 4 iterations of ternary/bit-twiddle clamp forms all pinned
+    at one score before the macro was found; then 8 iterations took it to 1580.
+    [[sdk-composite-macro-before-dl-reconstruction]]. **RE-CHECK the other carried texrect emitters
+    against this macro before re-pricing them as walls: `func_80088890` (S256), `func_800842C0` (S255),
+    `func_80088A90` (S254).** Residual = gcc-2.7.2 `fold` reassociates `(GLOBAL + C) + load` to
+    `(GLOBAL + load) + C`, so the ROM's shared `D_800C54C8 + 0x108` pseudo is emitted twice; hoisting it
+    into a local creates the shared pseudo but also CSEs away the `D_800E2190[0]` re-load (247 instrs,
+    6 short). docs/wip/func_80087CB0.near-match.md + in-file verdict.
+  - **NEW ENABLER ITEM (S257) — `func_80080E7C` (0x408) rodata-jtbl carve.** Body reads cleanly
+    (camera-delta FP scaling into D_801061D4/D8/DC + three 3-way sign classifiers into
+    D_801061D0/D1/D2, func_8003DFD0 distance, get_table_entry x3 + a hole-asset reload) but its
+    12-case `switch (D_801B608C)` dispatches through the compiler jump table `jtbl_800D1AA0`, which
+    sits INSIDE the pack's shared rodata blob immediately adjacent to the format strings
+    (D_800D1B70/1BB8/1BC8/1BCC/1BDC) that the already-banked siblings reference `extern`. Per
+    [[jtbl-carve-both-edge-8align]] a partial jtbl carve needs the table 8-aligned on BOTH edges AND no
+    still-asm rodata interleaved — the interleaved string blob is exactly the documented blocker.
+    Writing the dispatch as an if/else chain drops the `jr $v0` and cannot match. Price this as a
+    scoped rodata-carve ENABLER slice at a future gate, NOT as a smallest-first leaf.
+  - **S258 DIRECTION: continue here, tell-class sorted** (22 stubs; the tell-class sort is now
+    2-for-2 — S257 banked both no-DL/no-FP glue leaves it picked, and the one DL leaf carried at 1
+    instruction). Next no-DL/no-FP candidates by the same scan, then the gfxdis/composite-macro DL
+    slice (`func_80085F98` 0x5F4, `func_8008156C` 0x724, `func_8008C6B0` 0x680 39-DL) now that
+    `gSPScisTextureRectangle` is known. A cheap high-value first move is a RE-CHECK pass over
+    `func_80088890` / `func_800842C0` / `func_80088A90` against the Scis macro — three carries that
+    may be one macro away. Excluded carries: func_800824E4, func_80081C90, func_80088A90,
+    func_800842C0, func_80080688, func_80088890, init_sky_pool_and_world_state, func_80087CB0.
+  - **RANKER FOLLOW-UP (S253-S255 recurred 3x; S256 looked resolved; S257 REGRESSED — 4th recurrence,
+    do NOT close):** at the S256 gate `pick_target.py --segment main` DID surface the pack as
+    `init_sky_pool_and_world_state … c-stub … remaining:27`. At the **S257** gate it did NOT: the
+    `--segment main` run emitted only 4 rows (`render_pin_assembly_with_wind_hud`, `func_80071608`
+    c-stub remaining:18, `func_8002A640`, `func_8008D1DC` c-stub remaining:19) and `func_80080220.c`
+    was absent entirely despite 24 stubs. Two OTHER c-stub continuations ranked fine, so the emission
+    rule is inconsistent for this pack specifically. Hypothesis to test: the row is keyed on the pack
+    LEAD fn, and `init_sky_pool_and_world_state` moving into a documented-carry state de-ranked the
+    whole pack (i.e. the carried-wall de-rank is applied at pack granularity instead of leaf
+    granularity). Root-cause the c-stub row emission in `tools/pick_target.py`; off-cadence,
+    golden-gated.
   - **RANKER FOLLOW-UP #4 (S256 NEW — tell-class sort within a pack):** smallest-first mis-prioritizes a
     partial-bank pack once the cheap pure-logic leaves are mined: S256's two SMALLEST fresh leaves
     (func_80088890 0x200, func_8008658C 0x210) were both DL emitters, while the tractable first-build
