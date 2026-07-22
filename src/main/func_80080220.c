@@ -536,7 +536,33 @@ void func_80081D4C(s32 arg) {
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80080220", func_80081EF8);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80080220", func_800824E4);
+u32 pack_shade_ramp_rgba(s32 shade, s32 alpha) {
+  s32 r;
+  s32 g;
+  s32 b;
+
+  b = 0xFF;
+  if (shade == 0) {
+    g = 0xFF;
+    r = 0xFF;
+  } else if (shade > 0) {
+    /* The subtrahend must pass through `b`: with `b = r - shade` written
+     * directly, cse sees `r` and `b` holding the same 0xFF and canonicalises
+     * the minuend to `b`'s register (`subu a2,a2,a0`), where the ROM re-reads
+     * `r`
+     * (`subu a2,v0,a0`). Staging `shade` in `b` first clears that equivalence.
+     */
+    r = 0xFF;
+    b = shade;
+    b = r - b;
+    g = b;
+  } else {
+    g = shade + 0xFF;
+    r = g;
+  }
+
+  return (r << 24) | (g << 16) | (b << 8) | (alpha & 0xFF);
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80080220", draw_terrain_aim_grid);
 
