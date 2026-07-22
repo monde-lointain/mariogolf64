@@ -730,7 +730,7 @@ INCLUDE_ASM("asm/nonmatchings/main/func_80080220", func_80088BDC);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80080220", func_80089094);
 
-extern s32 scenario_mode_id;
+extern s32 scenario_mode_id[];
 extern s32 D_801B6098;
 extern s8 D_801B60BA;
 extern s8 D_801B60BB;
@@ -745,11 +745,11 @@ void func_8008C520(void) {
   s32 id;
 
   D_800C5ED8 = 0;
-  if (D_801B60BA != -1 && func_80052100(scenario_mode_id, D_801B6098) != 0) {
+  if (D_801B60BA != -1 && func_80052100(scenario_mode_id[0], D_801B6098) != 0) {
     id = 0x554;
     goto alloc1;
   }
-  if (D_801B60BB != -1 && func_80052168(scenario_mode_id, D_801B6098) != 0) {
+  if (D_801B60BB != -1 && func_80052168(scenario_mode_id[0], D_801B6098) != 0) {
     id = 0x555;
     goto alloc1;
   }
@@ -789,6 +789,72 @@ void func_8008C658(void) {
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80080220", func_8008C6B0);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80080220", func_8008CD30);
+extern s8 D_801061CE;
+extern s8 D_800FC872;
+extern s8 D_800FC86D;
+extern s8 rumble_disable_flag;
+extern s32 D_801B60B0;
+extern char D_800D1C84[];
+extern char D_800D1CD0[];
+extern char D_800D1CD4[];
+extern char D_800C1420[];
+extern s32 D_800C2AD8[];
+extern s32 D_800C2B00[];
+extern s32 func_80242418(void);
+extern void func_80242424(Gfx** chain);
+extern void func_80242D40(Gfx** chain);
+extern void func_800734F0(Gfx** chain, s32 arg1);
+extern void func_8007624C(Gfx** chain, s32 x, s32 y, char* str, u32 fg, u32 bg,
+                          s32 arg6);
+
+void func_8008CD30(Gfx** chain) {
+  Gfx* dl = *chain;
+  s32 mode;
+  s32 total_secs;
+  s32 secs;
+  s32 mins;
+  s32 centi;
+
+  if (D_801061CE == 1) {
+    mode = D_801B608C;
+    if (mode == 0xB) {
+      if (D_800FC872 != 0 && func_80242418() != 0) {
+        func_80242424(&dl);
+      }
+    } else if (mode != 9) {
+      if (mode == 3) {
+        if (D_800FC86D != 0) {
+          func_80242D40(&dl);
+        }
+      } else if (mode == 7 && rumble_disable_flag == 0) {
+        total_secs = D_801B60B0 / 30;
+        centi = (s32)(D_801B60B0 * 3.3333334f) % 100;
+        secs = total_secs % 60;
+        mins = total_secs / 60;
+        func_800734F0(&dl, 0);
+        sprintf(D_80105118, D_800D1C84, mins, secs, centi);
+        func_8007624C(&dl, 0xA8, 0xB0, D_80105118, 0xFFFF0000, 0x30FF0000,
+                      0x80);
+      } else {
+        func_800734F0(&dl, 0);
+        gDPSetPrimColor(dl++, 0, 0, 255, 0, 0, 255);
+        gDPSetEnvColor(dl++, 255, 255, 0, 255);
+        sprintf(D_80105118, D_800D1CD0, &D_800C1420[func_80051FCC() * 0xC8]);
+        sprintf(D_80105118, D_800D1CD0, &D_800C1420[func_80051FCC() * 0xC8]);
+        func_8007624C(&dl, 0xA0, 0x20, D_80105118,
+                      D_800C2AD8[scenario_mode_id[0]],
+                      D_800C2B00[scenario_mode_id[0]], 0x10);
+        sprintf(D_80105118, D_800D1CD4, D_801B6098 + 1);
+        func_8007624C(&dl, 0xA0, 0x30, D_80105118,
+                      D_800C2AD8[scenario_mode_id[0]],
+                      D_800C2B00[scenario_mode_id[0]], 0x10);
+        gDPPipeSync(dl++);
+        gDPPipeSync(dl++);
+        gDPSetCycleType(dl++, G_CYC_1CYCLE);
+      }
+    }
+  }
+  *chain = dl;
+}
 
 void toggle_sky_panel_bank_index(void) { sky_panel_bank_index ^= 1; }
