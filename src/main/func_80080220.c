@@ -698,6 +698,49 @@ void func_80087BE4(s32 x, s32 y) {
   D_800E21A8[0] = -y / 4;
 }
 
+/* func_80087CB0: CARRY (S257, near-match, body 100% RE'd, 1 instruction long:
+ * 253 vs 252). Aim-cursor sprite emitter on the global `glistp`:
+ * gDPPipeSync + gDPLoadTLUT_pal16(0, (D_800E2184+8)&~7), then the animation
+ * frame `D_800C5E24 = (D_800C5E24 + 1) % 11` and
+ * `D_800E2134 = (D_80106240[0] & 8) ? D_800C5E24 << 7 : 0x580`, then
+ * gDPLoadTextureBlock_4b((D_800E2134+0x28+D_800E2184)&~7, G_IM_FMT_CI, 16, 16)
+ * + gDPPipeSync + a gSPScisTextureRectangle.
+ *
+ * KEY IDENTIFICATION (S257): the branchless coordinate clamp
+ * (`sll 18; sra 16; nor; sra 31; and; andi 0xffc`) and the asymmetric s/t
+ * clip math (`bgezl` on the s16 x but `bgez` on the s32 y, then
+ * `slti 1; negu; and; negu`) are NOT hand-written clamps -- they are the
+ * verbatim expansion of the SDK macro `gSPScisTextureRectangle`
+ * (gbi.h:4498, "like gSPTextureRectangle but accepts negative position
+ * arguments"): MAX((s16)xh,0) for the corners and
+ * `(s) - ((s16)xl < 0 ? MIN(((s16)xl*(s16)dsdx)>>7, 0) : 0)` for s, with the
+ * y branch testing the UNCAST `(yl) < 0`. dsdx = dtdy = 1<<10 gives the
+ * `>>7` == `*8`. Reconstructing the clamps by hand never converges; use the
+ * macro.
+ *
+ * Three other levers landed here and are reusable:
+ *  - the `D_800E2134` assignment must be an if/else, NOT a ternary: two
+ *    stores cross-jump-merge into one after the join, which resets cse's
+ *    table so both `glistp` and `D_800E2134` are RE-LOADED for the second DL
+ *    block (a ternary keeps the value in a pseudo and folds block2's stores
+ *    onto block1's base register).
+ *  - `D_80106240` must be read as an ARRAY element (`extern u8 D_80106240[]`
+ *    + `D_80106240[0]`): MEM_IN_STRUCT_P makes the load may-alias the
+ *    varying-address DL stores so sched1 cannot hoist it above them.
+ *  - the DL-block address wants `(D_800E2134 + 0x28 + (u32)D_800E2184)`
+ *    grouping, and the rect coords want `(GLOBAL + CONST) + ARRAY[0]`.
+ *
+ * RESIDUAL (1 instr): the ROM CSEs the subexpression `D_800C54C8 + 0x108`
+ * (and `D_800C54C4 + 0xAE`) into a pseudo shared by the w1 coordinate and
+ * the s/t clip -- it re-materializes it with a destructive
+ * `addiu t0,t0,0x108`. gcc-2.7.2's fold reassociates `(GLOBAL + C) + load`
+ * to `(GLOBAL + load) + C` in every inline spelling, so the constant rides
+ * the re-loaded array element and is emitted twice. Hoisting the
+ * subexpression into a local DOES create the shared pseudo but then gcc also
+ * CSEs the `D_800E2190[0]` re-load away (247 instrs, 6 short) -- the ROM
+ * wants the base+const shared AND the array element re-loaded. asm-differ
+ * score 1580. Full reconstruction in docs/wip/func_80087CB0.near-match.md.
+ */
 INCLUDE_ASM("asm/nonmatchings/main/func_80080220", func_80087CB0);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80080220", func_800880A0);
