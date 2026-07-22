@@ -456,21 +456,48 @@ void func_80081550(void) { func_8003E4B4(); }
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80080220", func_8008156C);
 
-/* func_80081C90: CARRY (S253) #base-register-vs-displacement /
- * #indexed-vs-pointer terminal loop variant. Two 14-iter RMW loops over the
- * fixed global array D_800C54F2 (u16 field, 0x10 stride, bank base =
- * sky_panel_bank_index*448): loop1 adds wind_magnitude/8192 to each; if the
- * bank's first field (signed) >= 0x4001, loop2 subtracts 0x2000 from each. ROM
- * keeps INDEXED addressing (v1 = pure byte offset, re-materializes
- * %hi(D_800C54F2)+v1 with a %lo displacement per access, TWICE per iteration
- * for the load+store); gcc-2.7.2 loop.c strength-reduction folds base+offset
- * into ONE walking pointer (0(v1)) in every source spelling (byte-offset cast,
- * array-index, counter-index, do-while, for). No pointer-giv (S235
- * func_8006F24C DEST_REG) recipe applies because this ROM uses no pointer giv
- * at all. Permuter-unreachable (addressing-mode + strength-reduction decision).
- * docs/wip/func_80081C90.near-match.md.
- */
-INCLUDE_ASM("asm/nonmatchings/main/func_80080220", func_80081C90);
+extern s32 wind_magnitude;
+
+/* Scrolls all 14 sky panels of the active bank by the wind, then wraps.
+ * The goto loops are load-bearing: gcc-2.7.2's loop.c only strength-reduces
+ * loops it discovers through NOTE_INSN_LOOP_BEG, which a structured for/while
+ * emits and a goto loop does not. Every structured spelling folds the two
+ * `%hi(D_800C54F2)+off` re-materialisations per iteration into one walking
+ * pointer, which is 4 instrs/iteration SHORT of the ROM. The two separate
+ * `countN` bound variables are load-bearing too: one shared bound spans both
+ * loops, which raises its allocno priority and swaps it with `delta`. */
+void scroll_sky_panels_by_wind(void) {
+  s32 delta = wind_magnitude / 8192;
+  s32 count1;
+  s32 count2;
+  s32 off;
+  s32 i;
+
+  off = sky_panel_bank_index * 448;
+  i = 0;
+  count1 = 14;
+loop1:
+  *(u16*)((u8*)D_800C54F2 + off) += delta;
+  i++;
+  off += 0x10;
+  if (i != count1) {
+    goto loop1;
+  }
+
+  off = sky_panel_bank_index * 448;
+  if (*(s16*)((u8*)D_800C54F2 + off) < 0x4001) {
+    return;
+  }
+  i = 0;
+  count2 = 14;
+loop2:
+  *(u16*)((u8*)D_800C54F2 + off) -= 0x2000;
+  i++;
+  off += 0x10;
+  if (i != count2) {
+    goto loop2;
+  }
+}
 
 typedef struct {
   /* 0x0 */ u32 id;

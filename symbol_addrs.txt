@@ -676,3 +676,4 @@ toggle_sky_panel_bank_index = 0x8008D0DC; // type:func
 init_sky_panels = 0x80080220; // type:func
 draw_letterbox_bars = 0x80088890; // type:func
 pack_shade_ramp_rgba = 0x800824E4; // type:func
+scroll_sky_panels_by_wind = 0x80081C90; // type:func
