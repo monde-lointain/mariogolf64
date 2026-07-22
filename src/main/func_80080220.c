@@ -726,7 +726,89 @@ INCLUDE_ASM("asm/nonmatchings/main/func_80080220", func_80088890);
  */
 INCLUDE_ASM("asm/nonmatchings/main/func_80080220", func_80088A90);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80080220", func_80088BDC);
+extern s32 D_800C5E6C[2][3];
+extern s32 D_800C5E84;
+extern s32 D_800C5E88;
+extern s32 D_800C5E8C;
+extern s32 D_800C5E90;
+extern s32 D_800C5E94;
+extern u16 D_800FBDCE;
+extern u16 D_800FBDD6;
+extern char D_800D1BB8[];
+extern char D_800D1BC8[];
+extern char D_800D1BCC[];
+extern char D_800D1BDC[];
+extern void func_800734F0(Gfx** chain, s32 arg1);
+extern void func_800747B0(Gfx** chain, s16 x, s16 y, char* str);
+
+void func_80088BDC(Gfx** chain) {
+  Gfx* dl = *chain;
+
+  func_800734F0(&dl, D_800C5E94);
+  gDPSetPrimColor(dl++, 0, 0, D_800C5E6C[0][0], D_800C5E6C[0][1],
+                  D_800C5E6C[0][2], 255);
+  gDPSetEnvColor(dl++, D_800C5E6C[1][0], D_800C5E6C[1][1], D_800C5E6C[1][2],
+                 255);
+  gDPPipeSync(dl++);
+  func_800747B0(&dl, D_800C5E84, D_800C5E88, D_800D1BB8);
+  gDPPipeSync(dl++);
+  check_and_print_grid(D_800D1BC8, D_800C5E8C * 5 + 0x13, D_800C5E90 + 5);
+
+  if (D_800FBDD6 & 8) {
+    D_800C5E90 ^= 1;
+  }
+  if (D_800FBDD6 & 4) {
+    D_800C5E90 ^= 1;
+  }
+  if (D_800FBDD6 & 2) {
+    D_800C5E8C = (D_800C5E8C + 2) % 3;
+  }
+  if (D_800FBDD6 & 1) {
+    D_800C5E8C = (D_800C5E8C + 1) % 3;
+  }
+
+  if (D_800FBDCE & 0x8000) {
+    D_800C5E6C[D_800C5E90][D_800C5E8C] += 4;
+  }
+  if (D_800FBDCE & 0x4000) {
+    D_800C5E6C[D_800C5E90][D_800C5E8C] -= 4;
+  }
+  if (debug_menu_pad_buttons_c & 0x10) {
+    D_800C5E94 ^= 1;
+  }
+  if (D_800FBDCE & 0x800) {
+    D_800C5E88 -= 4;
+  }
+  if (D_800FBDCE & 0x400) {
+    D_800C5E88 += 4;
+  }
+  if (D_800FBDCE & 0x200) {
+    D_800C5E84 -= 4;
+  }
+  if (D_800FBDCE & 0x100) {
+    D_800C5E84 += 4;
+  }
+
+  if (D_800C5E6C[D_800C5E90][D_800C5E8C] > 0xFF) {
+    D_800C5E6C[D_800C5E90][D_800C5E8C] = 0xFF;
+  }
+  if (D_800C5E6C[D_800C5E90][D_800C5E8C] < 0) {
+    D_800C5E6C[D_800C5E90][D_800C5E8C] = 0;
+  }
+
+  sprintf(D_80105118, D_800D1BCC, D_800C5E6C[0][0], D_800C5E6C[0][1],
+          D_800C5E6C[0][2]);
+  check_and_print_grid(D_80105118, 0x14, 5);
+  sprintf(D_80105118, D_800D1BCC, D_800C5E6C[1][0], D_800C5E6C[1][1],
+          D_800C5E6C[1][2]);
+  check_and_print_grid(D_80105118, 0x14, 6);
+  check_and_print_grid(D_800D1BDC, D_800C5E8C * 5 + 0x13, D_800C5E90 + 5);
+
+  gDPPipeSync(dl++);
+  gDPPipeSync(dl++);
+  gDPSetCycleType(dl++, G_CYC_1CYCLE);
+  *chain = dl;
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80080220", func_80089094);
 
