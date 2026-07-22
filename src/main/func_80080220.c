@@ -798,25 +798,33 @@ s32 draw_letterbox_bars(Gfx** dl_ptr, s32 y) {
   return y;
 }
 
-/* func_80088A90: CARRY (S254) glyph/units-string DL emitter, S243 raw-DL-word
- * wall class. Renders a numeric string (digits + 'f'/'m'/'y' unit glyphs, '.'
- * decimal, ' ' skip) into a hand-rolled 6-word-per-char G_TEXRECT block
- * (0xE4/0xE1/0xF1 command words), advancing x by a per-glyph width and mapping
- * each char to a font tile offset ('f'->0x60 w0x10, '.'->0x70 w4, 'm'->0x50
- * w8, 'y'->0x58 w8, digit->(c-0x30)*8 w8). Body is structurally COMPLETE: the
- * per-char emit block (sll/andi/sll12/or/sw pairs, dl+=0x18, cursor+=8) is
- * byte-identical in isolation. TERMINAL divergence is pervasive regalloc +
- * reorg branch-likely: (1) ROM keeps the char MASKED in a separate reg
- * (`andi v1,t0,0xFF` redundant on the already-lbu'd byte) while the raw load
- * stays in t0 for the `bnez` loop test; my build collapses both into one reg,
- * cascading the whole allocation (ROM dl=t1/cursor=a2/word_lo=t3; mine
- * dl=t2/cursor=t1/word_lo=a2). (2) ROM classifies with `beq`/`beql`
- * branch-likely TOWARD physically-later handler labels (space-skip + 'm'/'.'
- * set their width/advance in the annulled delay slot, reorg.c optimize_skip); a
- * structured if-else emits `bne`-past + nop, unreproducible from faithful C.
- * Kin to func_80071370.c's 73F24/74230/74500 (all carried). Permuter-class
- * (regalloc + reorg coin). Near-match C in
- * docs/wip/func_80088A90.near-match.md.
+/* func_80088A90: CARRY (S254, re-cracked S258 to the EXACT instruction count).
+ * Glyph/units-string DL emitter: renders a measurement string as one
+ * gSPTextureRectangle per glyph ('f'->s 0x60 w0x10, '.'->0x70 w4, 'm'->0x50 w8,
+ * 'y'->0x58 w8, digit->(c-0x30)<<3 w8, ' '-> advance only), rect x..x+w by
+ * row..row+0xC in quarter-pixels, on a caller-supplied Gfx** cursor.
+ *
+ * The S254 "terminal, not source-leverable" verdict is REFUTED. Writing the
+ * 6-word block as gSPTextureRectangle(dl++, ...) instead of raw u32 stores
+ * makes the emit block byte-identical (including the -4(a2)/0(a2) store pair
+ * and the loop.c preheader hoist of word_hi/word_lo, the 3 constant command
+ * words, and the 5 character literals -- the constant hoist is the only reason
+ * this leaf has a frame at all). The two features S254 called unreachable both
+ * fall out:
+ *  - the redundant `andi v1,t0,0xFF` needs the char SPLIT into a `u8` for the
+ *    `!= 0` loop test and an `s32` for the compares (`ch = c;` at the loop
+ * top): the zero-extend then sits in a different BB from the `lbu` so combine
+ *    cannot fold it, and the s32 keeps the range test signed (`slti`; a plain
+ *    `u8 ch` gives `sltiu` and 86 instrs).
+ *  - the `beql`+annulled `str++` on the space case needs the space handler
+ *    OUT OF LINE (`goto skip_char;` with the label down among the glyph stubs);
+ *    as an inline if-body gcc emits `bne`+`nop`+`j`+`addiu` instead.
+ * RESIDUAL: one extra callee-saved reg. ROM keeps the 5 hoisted char constants
+ * in s1/s0/t9/t8/t7 and REUSES the dead raw-char reg t0 for the glyph value;
+ * my build gives the glyph its own t1, so a constant spills to s2 (3 saved
+ * regs, bigger frame) and the whole loop renames. #local-alloc-qty-permutation,
+ * no longer a reorg/branch-likely wall. asm-differ 913 at 83/83 instrs. Full
+ * reconstruction + measured variants in docs/wip/func_80088A90.near-match.md.
  */
 INCLUDE_ASM("asm/nonmatchings/main/func_80080220", func_80088A90);
 
