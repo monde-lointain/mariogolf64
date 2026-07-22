@@ -730,17 +730,32 @@ void func_80087BE4(s32 x, s32 y) {
  *  - the DL-block address wants `(D_800E2134 + 0x28 + (u32)D_800E2184)`
  *    grouping, and the rect coords want `(GLOBAL + CONST) + ARRAY[0]`.
  *
- * RESIDUAL (1 instr): the ROM CSEs the subexpression `D_800C54C8 + 0x108`
- * (and `D_800C54C4 + 0xAE`) into a pseudo shared by the w1 coordinate and
- * the s/t clip -- it re-materializes it with a destructive
- * `addiu t0,t0,0x108`. gcc-2.7.2's fold reassociates `(GLOBAL + C) + load`
- * to `(GLOBAL + load) + C` in every inline spelling, so the constant rides
- * the re-loaded array element and is emitted twice. Hoisting the
- * subexpression into a local DOES create the shared pseudo but then gcc also
- * CSEs the `D_800E2190[0]` re-load away (247 instrs, 6 short) -- the ROM
- * wants the base+const shared AND the array element re-loaded. asm-differ
- * score 1580. Full reconstruction in docs/wip/func_80087CB0.near-match.md.
+ * S258 UPDATE: the fold reassociation is now SOLVED and the build is at the
+ * EXACT instruction count (252), asm-differ 1580 -> 345. gcc-2.7.2's
+ * `fold-const.c:3685 associate` decides which operand of a 3-term sum carries
+ * the constant by WHICH SIDE it is parenthesised on: the arg0 split (:3722)
+ * rewrites `(GLOBAL + C) + elem` to `GLOBAL + (elem + C)` (wrong), while the
+ * arg1 split (:3759) rewrites `GLOBAL + (elem + C)` to `(GLOBAL + C) + elem`
+ * (the ROM form). So the y coords are spelled
+ * `D_800C54C4 + (D_800E21A8[0] + 0xAE) + D_800C5AD0`, and the x coords use a
+ * local base temp (`s32 xl = D_800C54C8[0] + 0x108;` then `elem + xl`), which
+ * is immune to reassociation AND yields the ROM's shared destructive
+ * `addiu t0,t0,0x108`. A temp for the Y base is WRONG: the ROM re-loads the
+ * three y globals in the post-`bgezl` t-clip block, so a y temp comes out 3
+ * instrs short (249).
+ * RESIDUAL: pure register permutation (`D_800C54C4` in a0 vs the ROM's a2,
+ * with the clamp scratch swapped) plus one sched1 LUID tie -- the ROM loads
+ * `D_800E2190[0]` BEFORE `D_800C54C8`, but the temp initialiser must precede
+ * the macro call so my build emits them the other way round. Permuter run at
+ * S258. Full reconstruction + measured variants in
+ * docs/wip/func_80087CB0.near-match.md.
  */
+extern s32 D_800C5E24;
+extern u8 D_80106240[];
+extern s32 D_800E2134;
+extern s32 D_800C54C4;
+extern s32 D_800C54C8[];
+
 INCLUDE_ASM("asm/nonmatchings/main/func_80080220", func_80087CB0);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80080220", func_800880A0);
