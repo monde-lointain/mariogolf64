@@ -25,6 +25,17 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 264 — fresh smallest-first c-continuation of func_80059BA0.c — 2026-07-23
+- Increment: 0 files / +2 functions matched (func_80059BA0.c 26→24 stubs, partial pack, not md5-candidate)
+- Quality: 0 stuck-far / 0 permuter / 1 carried / 0 re-opened
+- Seed: committed 5pt; banked ~5pt; realized ~6 / residual +1; regime classical (c-continuation)
+- What helped: asm-first fast-path (MCP-independent) on both banks; the S263 lesson pivot OFF the mined-out func_800453E0.c to the under-mined func_80059BA0.c integer-accessor pack (33/59 already banked) surfaced clean fresh leaves; `tools/cmpfn.sh` object-oracle iteration; the jtbl-carve recipe (docs/hazards.md#switch-jtbl-dispatch) held first try for the FIRST carved compiler-switch table to BANK in src/main (func_8005DAFC, jtbl_800D0A90, 3-way rodata split, 8-align both edges); two-def `lo` (`=b` then `&=0xF`) + up-count pointer-walk + delay-slot pointer levers on the D0D8 near-match.
+- Friction: `pick_target.py` blind to c-continuation fresh leaves (11th ranker recurrence) — `--segment main` returned 1 blocked asm-flip pack while 33 partial `c` files hold the actual fresh smallest-first work; whole backlog hand-mined. func_8005D0D8 carried on a genuine combine/reorg pass-ordering coin (ROM keeps a provably-dead `lo<0` signed check because its `&0xF` mask lands in the branch delay slot post-combine; no source form separates mask from compare by a BB boundary without changing the asm) + xor-hoist + base-reg allocno.
+- Applied: 2 selected, 1 of 2 applied now: #2 jtbl-switch 3-way-mid-blob carve recipe + link-error tell → docs/hazards.md#switch-jtbl-dispatch; (#1 `--c-stubs`/continuation ranker mode → BACKLOG ranker follow-up, off-cadence golden-gated, not a mid-review apply).
+- Carry-over: func_8005D0D8 (func_80059BA0.c, near-match coin, docs/wip/func_8005D0D8.near-match.md). func_80059BA0.c remains 24-stub partial (22 other fresh/wall leaves + func_8005D334 S210 carry).
+
+---
+
 ## Sprint 263 — next fresh non-FP leaves of func_800453E0.c (characterization: pack mined out) — 2026-07-23
 - Increment: 0 fns banked / 3 fresh leaves RE'd to byte-exact structure and CARRIED as walls. md5-candidate files 230/263, delta 0. `func_800453E0.c` unchanged at 24 stubs.
 - Quality: 0/0/3/0 (stuck-far / permuter runs / carried / re-opened).

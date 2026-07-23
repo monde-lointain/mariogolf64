@@ -5166,6 +5166,21 @@ carry list automatically alongside the FP/heavy-callee skips.
    flanked by unrelated strings → `[0xA8030, .rodata, main/func_80051E90]` + `[0xA8050, rodata]`
    tail). This is the first carve of a compiler switch table (prior carves were FP-literal /
    const-array rodata); the mechanics are identical (attribute + split at 16/word-aligned bounds).
+   - **The table can sit in the MIDDLE of a shared rodata blob -> a THREE-way split, not a tail
+     split (S264).** `func_8005DAFC` (`func_80059BA0.c`, 12-entry `jtbl_800D0A90` mode-state switch)
+     had its table at rom 0xABE90, flanked by unrelated jtbls (`jtbl_800D0A60` before,
+     `D_800D0AC0` after) inside `[0xA8050, rodata]`. Carve = split the generic subseg in three:
+     `[0xA8050, rodata]` (head, unchanged) + `[0xABE90, .rodata, main/func_80059BA0]` (the table) +
+     `[0xABEC0, rodata]` (tail). Both edges must be 8-aligned; here the table is exactly 12×4 = 0x30
+     and both 0xABE90/0xABEC0 are 8-aligned, so it carves cleanly. **The tell that the carve is
+     REQUIRED (not optional): once the `switch` body is C, the OLD asm jtbl in the shared blob
+     references the now-deleted per-case `.L<vram>` labels, so the link fails with `undefined
+     reference to '.L<vram>'` from `<blob>.rodata.o` — that error means "carve the table out", not a
+     source bug.** First carved compiler-`switch` table to actually BANK in `src/main` (the
+     `func_800453E0.c` jtbl comments were carried near-matches, never banked). Recipe held first try:
+     `.text` matched 85/85 pre-carve (cmpfn normalises the `%hi/%lo` jtbl reloc), then the yaml
+     3-way split + `make extract` + full-make went green. Case-body source order = ROM address order
+     (5,0,2,10,{3,4,6,7,9},11 here), and cross-jump merges the `D_801B5634` tail stores automatically.
 
 4. **The switch value's SIGNEDNESS picks `sltiu` vs `slti` for the bound-check (a one-instr lever).**
    The dispatch bound-check is `sltiu x,N+1` when the switch value is UNSIGNED and `slti x,N+1` when

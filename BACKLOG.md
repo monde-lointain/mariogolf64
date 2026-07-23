@@ -133,6 +133,18 @@ this is about in-tree carry provenance on a c-stub continuation. NOTE the S232 c
 carried-wall is NOT terminal — the plan gate should still be ABLE to pick it as a labeled crack-attempt
 slice (S232 cracked 3/3 via compiler-source fan-out), so the tag deweights but does not blacklist.
 
+**C-continuation fresh-leaf ranker mode (S264, off-cadence golden-gated; 11th recurrence of ranker
+blindness).** `pick_target.py --segment main` returns exactly ONE row (the blocked `func_8002A640`
+asm-flip pack) while 33 already-`c` `src/main/*.c` files hold ~200 fresh `INCLUDE_ASM` leaves — the
+ranker only surfaces whole still-asm subseg FLIP packs, not the residual stubs in partially-banked `c`
+files, so every recent `main` sprint hand-builds its backlog. S264 mined `func_80059BA0.c` by hand and
+banked 2 clean fresh leaves the ranker never proposed. Follow-up: a `--c-stubs` (or `--continuation`)
+mode that enumerates `INCLUDE_ASM` stubs in already-`c` files, sizes each from
+`asm/nonmatchings/**/<fn>.s` (NOT vram gaps, per the S247 sizing rule), tags `carried-wall:<fn>` (above)
+and FP/DL/jtbl class, and ranks the residual FRESH (no-wip-doc, no-BACKLOG-carry) leaves smallest-first.
+This is the c-continuation dual of the flip-pack ranker; without it the plan gate cannot see the
+smallest-first work that actually banks in the classical endgame.
+
 **Extend the detector to DL EMITTERS, not just FP (S190):** `src/main/func_8004E5A0.c` was a 3-fn
 one-tu the ranker surfaced smallest-first as a "+2 tractable" pick because 2 of 3 fns are 0-jal/0-FP —
 but they are `glistp++` **display-list emitters**, which are their OWN scheduling-wall class (the
@@ -3747,9 +3759,15 @@ by `/sprint-plan`:
     cluster (5 fns, permuter-proof) + an FP-dispatcher sprint (NOT more smallest-first). All banked S213
     names are already `func_`/curated; the curated names → cross-repo Ghidra sync.
 
-- **(S210 MIXED-PARTIAL — carried; 33 of 59 banked)** `src/main/func_80059BA0.c` (main-segment
-  `[0x34FA0]` integer-glue/accessor pack). 33 banked (S208 +23 asm-first; S209 +9 compiler-source dive;
-  S210 +1 `func_8005C510`), **26 stubs remain**, ROM green off extracted asm. **S210 +1:** `func_8005C510`
+- **(S210/S264 MIXED-PARTIAL — carried; 35 of 59 banked)** `src/main/func_80059BA0.c` (main-segment
+  `[0x34FA0]` integer-glue/accessor pack). 35 banked (S208 +23 asm-first; S209 +9 compiler-source dive;
+  S210 +1 `func_8005C510`; **S264 +2** `func_8005D9A0` game-state reset + `func_8005DAFC` mode-state
+  switch [first carved compiler-switch jtbl to BANK in `src/main`, `jtbl_800D0A90` 3-way rodata split]),
+  **24 stubs remain**, ROM green off extracted asm. **S264 correction to the "easy vein mined out"
+  note below: the pack still yields clean fresh leaves via smallest-first — S264 banked 2 undocumented
+  fresh leaves (77i/85i) first-build; the mined-out claim held only for the SPECIFIC S210 residual-tail
+  fns, not the whole pack. New S264 carry: `func_8005D0D8` (0x10C, 61/67 near-match; bit7 `lo<0`
+  range-elim combine/reorg coin + xor-hoist + base-reg allocno; `docs/wip/func_8005D0D8.near-match.md`).** **S210 +1:** `func_8005C510`
   (6×6 grid-counter, C458 family + a NEW `count`→code DISPATCH-TAIL variant — `if(count==4)return
   1;…;return (count==20)?5:0;`), banked first-build reusing the S209 grid-counter levers.
   **S210 hit the file's HARD RESIDUAL TAIL — a wall CLUSTER that source levers AND the permuter (3 runs,
@@ -3774,9 +3792,11 @@ by `/sprint-plan`:
   ~19 larger/FP fns still unprofiled (59BC0/59FAC/5A2AC/5D3B8 FP = S158-class; 5A580 478-instr/99-jal
   dispatcher; deferred). See hazards `#grid-counter-double-loop` (dispatch-tail), `#base-register-vs-
   displacement` (+ the `family-of` ranker follow-up + the .NON_MATCHING data-carve blocker),
-  `#local-alloc-qty-permutation`, memory `kmc-cc1-no-instruction-scheduler`. **Next slice:** a
-  permuter/`#cross-project-matched-corpus-mining` OR data-carve spike on these carries, OR the FP sprint —
-  NOT more smallest-first (the easy vein is mined out).
+  `#local-alloc-qty-permutation`, memory `kmc-cc1-no-instruction-scheduler`. **Next slice (updated
+  S264):** MORE smallest-first fresh leaves ARE viable here (S264 banked 2 clean; ~20 fresh leaves
+  remain, sized 0x134–0xAE4 from the `.s` headers) — take the next smallest fresh (no-wip-doc)
+  non-FP leaves; OR a permuter/`#cross-project-matched-corpus-mining`/data-carve spike on the S210
+  residual-tail carries; OR the FP sprint (59BC0/59FAC/5A2AC/5D3B8 = S158-class).
 
 - **(S206 MIXED-PARTIAL — carried; 3 of 6 banked)** `src/main/func_800772B0.c` (main-segment
   `[0x526B0]` float spline/curve-interpolation pack; NOT a settime.c mirror — false coddog collision).

@@ -1359,6 +1359,27 @@ Three honest caveats:
   tiny glue, the remaining 100-274i fp=0 leaves are nested-loop/recursive register-pressure walls.
   `fp=0`+no-jtbl is NOT sufficient to predict a clean bank at 100+ instr. Next `main` slice = a FRESH
   pack, not this one. Push: local.
+  S264: FRESH smallest-first c-continuation of `src/main/func_80059BA0.c` (PO approved as proposed;
+  the S263 lesson pivot OFF the mined-out `func_800453E0.c` to the under-mined integer-accessor pack,
+  33/59 banked; inline serial, asm-first fast-path). **2 banked / 1 carried** (26→24 stubs). Banks:
+  `func_8005D9A0` (0x134, 77i, game-state reset — globals + memset + s8-index byte loop, first-build
+  byte-match, auto name kept per S247), `func_8005DAFC` (0x154, 85i, mode-state `switch` over 12-entry
+  `jtbl_800D0A90` — **first carved compiler-switch table to BANK in `src/main`**; `.text` matched 85/85
+  pre-carve, then a 3-way rodata split `[0xABE90, .rodata, main/func_80059BA0]` 8-aligned both edges,
+  make-extract + full-make green first try). Carry: `func_8005D0D8` (0x10C, 61/67 structural
+  near-match; bit7 `lo<0` range-elim coin [ROM keeps signed `slti`+`bltzl`, mine folds `sltiu` — the
+  `& 0xF` mask lands in the beqz delay slot post-combine so ROM's compare saw sign-ambiguous bits, any
+  source that masks pre-compare gives combine local `nonzero_bits=0xF`] + xor-hoist coin + base-reg
+  allocno; `docs/wip/func_8005D0D8.near-match.md`). Levers that landed: up-count pointer-walk defeats
+  loop.c biv reversal; two-def `lo` (`=b` then `&=0xF`) forces `lb`+delay-slot andi; `p=base+off`
+  outside the if fills the `bne` delay. md5-candidate **0 delta** (partial pack, 24 stubs), matched-fn
+  **+2**. Seed 5 (classical c-continuation); banked ~5pt; realized ~6 / residual +1 (2 banks + 1 deep
+  coin dive + a novel jtbl carve; on-seed, hedge 1-3 banks HELD). Rolling-5 (S260-S264): 3+0+3+0+2.
+  Quality **0 / 0 permuter / 1 carried / 0 re-opened**. Retro applied 1 of 2 (#2 jtbl-switch 3-way
+  carve recipe → hazards#switch-jtbl-dispatch; #1 `--c-stubs` continuation ranker → BACKLOG, the 11th
+  ranker-blindness recurrence: `--segment main` = 1 blocked row while 33 `c` files hold fresh leaves).
+  RANKER: **11th recurrence** — c-continuation fresh leaves invisible; whole backlog hand-built. Push:
+  local.
   rodata-jtbl enabler, and a fresh-pack pivot; inline serial, no fan-out). **3 banked / 3 carries
   deepened to the EXACT instruction count** (22→19 stubs). Banks: `func_80088890` =
   `draw_letterbox_bars` (0x200, an S256 deferred carry, ONE-immediate near-match on the first build —
