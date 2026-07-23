@@ -114,9 +114,18 @@ extern s32 D_800BE664;
  * last term of an && CHAIN (a standalone store-flag takes do_store_flag's
  * pow2 path -> srl+andi, where the ROM has andi+sltu), and `bound` is REUSED
  * for the 0x4AFFF limit so the anti-dependency emits the `li` BEFORE the
- * D_800BE63C load (matching the ROM's delay-slot lui). Residual is a pure
- * global-alloc permutation: ret spans basic blocks so local-alloc takes v0 for
- * scratch first. */
+ * D_800BE63C load (matching the ROM's delay-slot lui).
+ *
+ * Residual root-caused (S260): `ret` spans basic blocks, so it is a GLOBAL
+ * allocno while every guard temp is a single-block LOCAL one. local-alloc runs
+ * first, and MIPS defines no REG_ALLOC_ORDER, so find_free_reg
+ * (local-alloc.c:2156) scans regno-ascending and hands $2 to the first temp.
+ * global.c then masks the return copy's own preference for $2
+ * (AND_COMPL_HARD_REG_SET (hard_reg_preferences[allocno], used), global.c:1037)
+ * and `ret` lands on the first register above the live-in argument regs, a2.
+ * Bisect: the same && chain with only TWO terms DOES keep the return value in
+ * v0, so the ROM's build had fewer competing local quantities here, not a
+ * different lever. Permuter: 934k iterations, base 170, best 150, no crack. */
 INCLUDE_ASM("asm/nonmatchings/main/func_800453E0", func_8004683C);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_800453E0", func_80046898);
