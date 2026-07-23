@@ -152,7 +152,30 @@ INCLUDE_ASM("asm/nonmatchings/main/func_800453E0", func_80047E9C);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_800453E0", func_800484F8);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_800453E0", func_80048690);
+extern s32 D_800BE694;
+extern s32 D_801B7F70;
+extern s32 putting_meter_level;
+extern s32 D_801B557C;
+extern s32 D_801B5534;
+extern s32 D_801B5584;
+extern f32 D_801B5530;
+extern void func_800326FC(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
+extern void func_8004887C(void);
+
+void func_80048690(void) {
+  D_800BE694 = 0;
+  D_801061CE = 0;
+  D_801B7F70 = 0;
+  putting_meter_level = 0;
+  D_801B557C = 0;
+  D_801B5534 = 1;
+  D_801B5584 = 1;
+  D_801B5530 = 80.0f;
+  func_800719A0(0, 0, -1, 1, 0, 0, 0, 0, 0, 0);
+  func_800719A0(0, 0, -1, 1, 1, 0, 0, 0, 0, 0);
+  func_800326FC(0xA0, 0x70, 0x80, 0x80);
+  func_8004887C();
+}
 
 void func_8004876C(void) {
   D_801061CE = 0;
