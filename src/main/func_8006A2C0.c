@@ -278,6 +278,16 @@ s32 func_8006D1FC(void) { return D_800C4144; }
 
 void func_8006D208(s32 arg0) { D_800C4144 = arg0; }
 
+/* func_8006D214: CARRY (S241 terminal #base-register-vs-displacement, DEEPENED
+ * S259). Same shape as func_8006D38C (see its comment for the derivation) plus
+ * an FP scale on the compared value. Builds at 94/94 instructions: the
+ * func_8006D38C model transferred verbatim, fixing the same two of three access
+ * shapes and leaving the same one open — the ROM reaches the count by NEGATIVE
+ * DISPLACEMENT off the held flag base (`lw t0,-0x2A(v1)`). Replacing the
+ * array-form guard with a plain scalar read lets everything CSE and comes out
+ * 87/94, so the array form is load-bearing.
+ * Full reconstruction in docs/wip/func_8006D214.near-match.md.
+ */
 INCLUDE_ASM("asm/nonmatchings/main/func_8006A2C0", func_8006D214);
 
 /* func_8006D38C: CARRY (S241 terminal #base-register-vs-displacement, DEEPENED
