@@ -706,6 +706,7 @@ SECTIONS
         build/src/main/func_80052250.o(.rodata);
         build/src/main/func_80052FE0.o(.rodata);
         build/src/main/func_80054900.o(.rodata);
+        build/asm/data/A8050.rodata.o(.rodata);
         build/src/main/func_80059BA0.o(.rodata);
         build/src/main/func_8005E2C0.o(.rodata);
         build/src/main/func_8005E380.o(.rodata);
@@ -718,7 +719,7 @@ SECTIONS
         build/src/main/func_80067D40.o(.rodata);
         build/src/main/lz_decompress_simple.o(.rodata);
         build/src/main/lz_compress_extended_dma.o(.rodata);
-        build/asm/data/A8050.rodata.o(.rodata);
+        build/asm/data/ABEC0.rodata.o(.rodata);
         build/asm/data/AC760.rodata.o(.rodata);
         build/asm/data/AC770.rodata.o(.rodata);
         build/src/main/func_8006A000.o(.rodata);
