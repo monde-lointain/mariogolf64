@@ -4908,8 +4908,53 @@ by `/sprint-plan`:
     `func_80088890` / `func_800842C0` / `func_80088A90` against the Scis macro — three carries that
     may be one macro away. Excluded carries: func_800824E4, func_80081C90, func_80088A90,
     func_800842C0, func_80080688, func_80088890, init_sky_pool_and_world_state, func_80087CB0.
-  - **RANKER FOLLOW-UP (S253-S255 recurred 3x; S256 looked resolved; S257 REGRESSED — 4th recurrence,
-    do NOT close):** at the S256 gate `pick_target.py --segment main` DID surface the pack as
+  - **S258 (3 banked, 22->19 stubs; ALL THREE were carried "terminal" walls, not fresh leaves):**
+    `func_80088890` = `draw_letterbox_bars` (0x200 — the S256 deferred carry; a ONE-immediate
+    near-match on the first build once written with `gSPScisTextureRectangle`, the residual being a
+    rendermode word the SDK headers cannot spell: ROM 0x00504A40 = `RM_XLU_SURF` with **ZMODE_XLU**
+    where every gbi.h on hand, including the ultralib pin, uses ZMODE_OPA and no pair of `G_RM_*`
+    macros ORs to it), `func_800824E4` = `pack_shade_ramp_rgba` (0x50 — the S252 carry, whose doc had
+    the SEMANTICS wrong: `$a2` is written in the entry delay slot before any read so there is no third
+    argument, and `b = 0xFF` is a shared pre-branch statement; corrected it was 20/20 instrs with ONE
+    differing operand and the permuter cracked it in 72 iterations), `func_80081C90` =
+    `scroll_sky_panels_by_wind` (0xBC — the S253 "terminal #base-register-vs-displacement,
+    permuter-unreachable" carry, banked by the goto-loop lever below).
+  - **NEW LEVER, HIGH VALUE (S258) — the goto loop defeats loop.c entirely.** `loop.c` only processes
+    loops it discovers via `NOTE_INSN_LOOP_BEG`, which `for`/`while`/`do-while` emit and a goto loop
+    does not. So a ROM that re-materializes `%hi(SYM)+idx` per access (no walking pointer) or keeps a
+    bound inline at the exit test wants a GOTO loop — all four S253 spellings that "proved"
+    `func_80081C90` terminal were structured. Follow-ons: put the bound in a local variable (the goto
+    de-hoists literals) and use ONE bound variable PER loop. `docs/hazards.md#goto-loop--loopc-never-runs`;
+    [[goto-loop-defeats-loop-strength-reduction]]. **This retires no wall by itself but re-opens a
+    CLASS: every `#base-register-vs-displacement` / `#indexed-vs-pointer-loop-strength-reduction`
+    carry in the tree was characterized with structured loops only.** Highest-value re-checks:
+    `func_80071924` and `func_8007512C` (S227/S236, `func_80071370.c`) and the S241 grid-builder.
+  - **CARRIES DEEPENED (S258) — all three now build at the EXACT instruction count**, so each is a
+    register-permutation residual rather than a structural one, and each has a full reconstruction
+    plus a measured-variant table in `docs/wip/`:
+    `func_80087CB0` 1580 -> **345** at 252/252 (the fold-associate lever: `GLOBAL + (elem + CONST)`
+    reproduces the ROM's `addiu rX,globreg,C`; residual = a0/a2 permutation + one sched1 LUID tie);
+    `func_80088A90` at **83/83** with a byte-identical emit block (**the S254 raw-DL-word "terminal
+    regalloc + reorg" verdict is REFUTED** — one `gSPTextureRectangle(dl++, ...)` replaces the
+    hand-rolled 6-word block and brings loop.c's constant hoist; residual = one extra callee-saved
+    register); `init_sky_pool_and_world_state` from 93 rows to **161/161 with shapes 1:1** (outer grid
+    loops goto, inner column loop structured because the ROM has the two pointer givs only strength
+    reduction produces; residual = a systematic 55-instruction register permutation).
+  - **S259 DIRECTION.** The pack's remaining 19 stubs are: 6 characterized carries (`func_80087CB0`,
+    `func_80088A90`, `init_sky_pool_and_world_state`, `func_800842C0` [nested-fn, blocked on its
+    parent `func_80084468`], `func_80080688` [multiply-synth], `func_80080E7C` [rodata-jtbl enabler])
+    and 13 unattempted leaves, the smallest of which is now 0x3EC. So the cheap vein here is GONE:
+    prefer (a) the goto-loop re-check slice over the tree-wide strength-reduction carries above, or
+    (b) a FRESH pack, or (c) `func_80085F98` (0x5F4, 0-jal, 0-FP, 80 glistp refs) as a dedicated
+    DL-emitter sprint — it is a 3-nested-loop mesh emitter with computed vertex/triangle indices,
+    correctly refused as an S258 stretch.
+  - **RANKER FOLLOW-UP (S253-S255 recurred 3x; S256 looked resolved; S257 REGRESSED; S258 WORSE —
+    5th recurrence, now BLOCKING gate automation, do NOT close):** at the **S258** gate
+    `pick_target.py --segment main` emitted exactly ONE row (`func_8002A640`) — the three c-stub
+    continuation rows S257 still saw (`func_80071608` remaining:18, `func_8008D1DC` remaining:19,
+    `render_pin_assembly_with_wind_hud`) are now gone too, so the collapse is segment-wide rather
+    than specific to this pack, and the S258 gate backlog was built ENTIRELY by hand (in-file
+    `INCLUDE_ASM` grep + `.s` header sizes + BACKLOG/in-file carry greps). Earlier history: at the S256 gate `pick_target.py --segment main` DID surface the pack as
     `init_sky_pool_and_world_state … c-stub … remaining:27`. At the **S257** gate it did NOT: the
     `--segment main` run emitted only 4 rows (`render_pin_assembly_with_wind_hud`, `func_80071608`
     c-stub remaining:18, `func_8002A640`, `func_8008D1DC` c-stub remaining:19) and `func_80080220.c`

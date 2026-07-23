@@ -1229,6 +1229,48 @@ Three honest caveats:
   **REGRESSED, 4th recurrence** — S256 surfaced the pack, S257 did not surface it at all despite 24
   stubs while two other c-stub packs ranked fine; follow-up REOPENED with a pack-vs-leaf de-rank
   granularity hypothesis. Push: local.
+  S258: CRACK-ATTEMPT slice on `src/main/func_80080220.c` (PO chose it over fresh mid-leaves, a
+  rodata-jtbl enabler, and a fresh-pack pivot; inline serial, no fan-out). **3 banked / 3 carries
+  deepened to the EXACT instruction count** (22→19 stubs). Banks: `func_80088890` =
+  `draw_letterbox_bars` (0x200, an S256 deferred carry, ONE-immediate near-match on the first build —
+  the S257 `gSPScisTextureRectangle` identification removed the whole clamp problem and gfxdis named
+  the constant header commands; the lone residual was a rendermode word, ROM 0x00504A40 =
+  `RM_XLU_SURF` with **ZMODE_XLU** where the vendored gbi.h, the ultralib pin and all 19 gbi.h copies
+  on the machine use ZMODE_OPA and NO pair of `G_RM_*` macros ORs to it), `func_800824E4` =
+  `pack_shade_ramp_rgba` (0x50, an S252 "terminal delay-slot coin" carry whose recorded SEMANTICS were
+  wrong — `$a2` is written in the entry delay slot before any read, so there is no third argument and
+  `b = 0xFF` is a shared pre-branch statement; corrected it was 20/20 instrs with ONE differing
+  operand and **the permuter cracked it in 72 iterations** via `b = shade; b = r - b;` to stop a cse
+  equivalence class forming), `func_80081C90` = `scroll_sky_panels_by_wind` (0xBC, an S253 "terminal
+  #base-register-vs-displacement, permuter-unreachable" carry). **The sprint's real deliverable is the
+  goto-loop lever** that banked the last one and rebuilt `init_sky`: gcc-2.7.2's loop.c only processes
+  loops that emit `NOTE_INSN_LOOP_BEG`, which for/while/do-while do and a goto loop does NOT — so when
+  the ROM re-materializes `%hi(SYM)+idx` per access or keeps a bound inline at the exit test, a goto
+  loop is the fix (all four failed S253 spellings were structured); follow-ons: put the bound in a
+  local variable (the goto de-hoists literals) and use ONE bound variable PER loop (a shared one
+  raises its allocno priority and swaps registers with a neighbour)
+  [[goto-loop-defeats-loop-strength-reduction]]. Carries all now at exact instruction count:
+  `func_80087CB0` 1580→**345** at 252/252 (fold's `associate` picks which operand carries a constant
+  by which side it is parenthesised on — `GLOBAL + (elem + CONST)` reproduces the ROM
+  [[fold-associate-constant-side]]; a base temp is right only where the ROM keeps the base live),
+  `func_80088A90` at **83/83** with a byte-identical emit block (the S254 raw-DL-word "terminal
+  regalloc + reorg" verdict REFUTED — one `gSPTextureRectangle(dl++, ...)` replaces the hand-rolled
+  6-word block and brings loop.c's constant hoist; plus [[u8-s32-char-split-zero-extend]] and
+  [[out-of-line-handler-block-branch-likely]]), `init_sky_pool_and_world_state` from 93 rows to
+  **161/161** with shapes 1:1 (outer grid loops goto, inner column loop structured because the ROM has
+  the two pointer givs only SR produces). Stretch `func_80085F98` (0x5F4) correctly NOT attempted: a
+  381-instr 3-nested-loop computed-index mesh emitter is a sprint, not a stretch. Seed 5 (classical);
+  banked 0pt (file partial); realized 9 / residual +4 (+1 permuter, +1 carry-or-reopen, +1 novel
+  gotcha [wrong-semantics carry doc], +1 re-attempt cluster; the three banks were all re-opened walls,
+  not fresh leaves). Rolling-5 (S254-S258): 3+3+3+2+3. Quality **0 / 4 permuter runs (1 crack) / 3
+  carried / 3 deliberately re-opened**. Retro applied 8 of 8 (#1 goto-loop lever → hazards + memory;
+  #2 fold-associate → hazards + memory; #3/#4 char-split + out-of-line handler → hazards + 2 memories;
+  #5 retire the raw-DL-word wall class → hazards#display-lists + mg64-glyph-emitter-dl-family; #6
+  near-match docs can have wrong SEMANTICS → workflow DoR + memory; #7 permuter at
+  exact-count-plus-one-operand → workflow permuter rule + memory; #8 `tools/cmpfn.sh` promoted).
+  RANKER: **5th recurrence and now WORSE** — `--segment main` emits exactly ONE row
+  (`func_8002A640`), the three c-stub continuation rows S257 still saw are gone too, so the gate
+  backlog was built entirely by hand. Push: local.
 - **Regime:** `mirror` is a depleting minority (~22 % of ranked candidates: 56 mirror vs 194
   classical; 18 warm / 38 cold). The warm clean-singleton mirror pool is now **mined out** (S11
   plan gate: every top mirror candidate carries a blocking hazard), pushing the project onto the

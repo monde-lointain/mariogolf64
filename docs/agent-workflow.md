@@ -392,6 +392,19 @@ dashboard). Target selection is `tools/pick_target.py`, not a stored roadmap.
       carry, either skip it or label the commit a crack-attempt/deepen slice (not a fresh leaf). Write new
       wall characterizations to `docs/wip/<fn>.near-match.md` AT DISCOVERY (not only in the retro digest),
       so the next sprint's DoR finds them. Fold into the `carried-wall:<fn>` ranker follow-up.
+  - **A carried wall's near-match doc can be wrong about the function's SEMANTICS, not just its
+    verdict — re-derive behaviour from the `.s` before accepting a stated residual (S258).** S252
+    recorded `func_800824E4` as a THREE-argument packer with `b = arg2` on the negative path and
+    built a terminal delay-slot-coin verdict on top of that reading; `$a2` is written in the entry
+    branch's DELAY SLOT before any read, so there is no third argument and `b = 0xFF` is an ordinary
+    shared statement before the if-chain (which is precisely why it fills the delay slot). Corrected,
+    the function was 20/20 instructions with one differing operand and banked the same day. S254's
+    `func_80088A90` verdict likewise named two "unreachable from faithful C" features that both fell
+    out of source once the emit block used the SDK macro. So at the start of a crack-attempt slice,
+    read the target's `.s` end to end and re-derive the signature and dataflow FIRST, then read the
+    doc's residual. A register written in a branch delay slot before its first read is a shared
+    pre-branch statement, not an argument. Extends the memory `revalidate-old-carries-stale-wall`
+    from stale builds to stale RE.
   - Enablers (subseg flip plus `make extract`, multi-file split, `symbol_addrs.txt` additions) are
     performed by the agent at the plan gate after the PO approves the goal/scope, and validated
     there: `make extract && make` must still produce the green baserom ROM with the new stubs. This
@@ -570,6 +583,14 @@ below).
 - **Scratch dir** `nonmatchings/<func>/` (gitignored, shared with the permuter).
 - **Python tools run via the venv:** `venv/bin/python3 tools/X.py` (system python lacks asm-differ
   deps and is PEP-668-locked).
+- **Per-function iteration oracle: `tools/cmpfn.sh <func> [<object>]` (S258).** Diffs the extracted
+  `asm/nonmatchings/**/<func>.s` against a freshly built object, normalising register prefixes,
+  `%hi/%lo`, immediates, the splat `(0xX >> 16)` spellings, `move`/`li` aliases, the SDK FP register
+  names (`fv0`/`fs1` vs `f0`/`f22`) and branch targets, so only real differences show. Its first line
+  is the instruction COUNT of each side — the most actionable number when a body is structurally
+  right but the wrong length. Unlike `diff.py` it reads the object directly, so it never goes stale
+  after an incremental `make build/src/<tree>/<obj>.o`. It is an ITERATION oracle only: every bank
+  still gates on `tools/verify-rom.sh`.
 - **Shared tool helpers** live in `tools/decomp_common.py` (venv re-exec, path constants, asm/symbol
   regexes, `emit`/`log`, `find_segment`, SDK-path config) and `tools/lib.sh` (shell wrappers).
   `make test-tools` runs the `tests/tooling/` characterization suite (pytest); refactor tooling under
@@ -629,6 +650,21 @@ below).
   assembler by tree (KMC for `src/libultra/` and `src/libkmc/`, modern GAS for the rest).
 - **Permuter** (`./run-permuter.sh`) runs only when asm-differ's `percent` is at least 0.97. Below
   that, iterate on C or reconsider whether the subseg should be `hasm`.
+  - **But an EXACT instruction count plus a one-operand residual is a permuter target regardless of
+    what `percent` reads (S258).** The 0.97 gate exists to keep the permuter off structurally-wrong
+    bodies; once the instruction count matches the ROM and only a register or operand CHOICE
+    differs, it is the right tool even at a lower percent. S258 ran four: `func_800824E4` (20/20
+    instrs, ONE differing operand) hit **score 0 in 72 iterations** with a spelling no hand-iteration
+    produces (`b = shade; b = r - b;`, breaking a cse equivalence class between two registers holding
+    the same constant), while the three larger permutations all plateaued (`func_80087CB0` 480->265
+    in 60k, `func_80088A90` 870->520 in 31k, `init_sky_pool_and_world_state` 615->545 in 91k). So the
+    payoff shape is exact-count-plus-one-operand; a multi-register permutation is not.
+  - **`setup-permuter.sh` resolves the C file by grepping for an `INCLUDE_ASM` stub, so it fails
+    silently (exit 0, no output) once the body is inlined as C.** Call
+    `venv/bin/python3 ./tools/decomp-permuter/import.py --settings permuter_settings_main.toml
+    <c-file> <asm-file>` directly instead. The import COPIES the source into `nonmatchings/<fn>/`, so
+    the tree can be reverted to `INCLUDE_ASM` (keeping the ROM green) immediately while the permuter
+    runs in the background.
 - **Decomp is authoritative for names** (per the Ghidra-workspace
   `docs/re/coordination/decomp_coordination.md`).
 - **Match finalization is three steps:** inline the body into `src/<seg>.c`, `clang-format-22 -i`
@@ -787,6 +823,10 @@ When `pick_target.py` flags a hazard (or a match shows its symptom), read the ma
 | ROM reads `$ra` (reg 31) as a printf/log arg; `__builtin_return_address(0)` emits a stack-slot `lw` | #capturing-ra-return-address-as-a-call-argument |
 | sentinel (`!=-1`) array walk matches except a 1-instr preheader swap (`move base` vs `li` const in the entry-`beq` delay slot, or a `-1` hoisted to an outer loop) | #indexed-vs-pointer-loop-strength-reduction |
 | copy/scan loop re-indexes `arr[off]` each iter (insn count SHORT vs ROM's pointer+offset dual-IV), or a running ptr-add groups base-before-index (`base+i*s+c` vs the ROM's `&base[i*s+c]`) | #indexed-vs-pointer-loop-strength-reduction |
+| ROM re-materializes `%hi(SYM)+idx` per access (no walking pointer) or keeps a loop bound inline at the exit test, and every structured spelling comes out SHORT | #goto-loop--loopc-never-runs-defeating-strength-reduction-and-bound-hoisting |
+| build emits `addiu rX,<elemreg>,C; addu rX,<globreg>,rX` where the ROM emits `addiu rX,<globreg>,C` (same count, swapped operands + downstream reg permutation) | #fold-associate-which-operand-of-a-3-term-sum-carries-the-constant |
+| string loop: ROM has a redundant `andi rX,rY,0xFF` after an `lbu`, or a `beql` whose annulled slot holds a one-instruction handler | #string-classify-loop-the-redundant-char-andi-and-the-branch-likely-handler |
+| hand-rolled raw-DL-word block (per-glyph/per-sprite `u32` stores through a manual cursor) called a terminal regalloc/reorg wall | #display-lists (S258: find the gbi.h macro first) |
 | classical fn structurally correct (rows align) but locks high on a pervasive hard-reg permutation (`i:s4↔s5`) + spill-slot order + scheduling | #pervasive-regalloc-classical-main |
 | `void` classical fn mis-allocates at loop-entry/delay-slot, resists every body lever | #return-type-is-load-bearing |
 | struct-array fn byte-matches with per-field base symbols but not the combined struct (link-identical) | #struct-access-folding-changes-scheduling |

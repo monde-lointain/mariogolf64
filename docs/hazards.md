@@ -3106,6 +3106,30 @@ cosmetic mismatch, optional follow-up rename).
 
 ## Display lists
 
+**S258, FIRST: find the SDK macro. The "hand-rolled raw-DL-word block is a terminal wall" verdict is
+retired for the texrect subtype.** A per-glyph or per-sprite block of raw `u32` command-word stores
+through a hand-managed cursor is almost always ONE gbi.h macro. Writing it as the macro is not a
+cosmetic choice — it changes codegen in three ways the raw form cannot reach:
+
+1. the macro's textual re-use of `pkt` gives the ROM's walking-pointer store shape (and, for
+   `gSPTextureRectangle`/`gSPScisTextureRectangle`, the second base register at `+0xF` with negative
+   displacements that only loop.c's strength reduction produces);
+2. the macro's constant sub-expressions become loop invariants, so loop.c hoists the command words
+   AND the surrounding literals into the preheader — often the only reason the ROM's leaf has a
+   stack frame at all;
+3. `_SHIFTL` masks fold with the source's own shifts (`glyph << 5` feeding `_SHIFTL(s,16,16)` emits
+   the ROM's single `sll v0,t0,21`).
+
+S254 carried `func_80088A90` as "terminal regalloc + reorg branch-likely, unreachable from faithful
+C" with a raw-word reconstruction; re-written as one `gSPTextureRectangle(dl++, ...)` its emit block
+is BYTE-IDENTICAL and its instruction count exact (83/83), leaving only a local-alloc register
+permutation. S258 banked `func_80088890` (`draw_letterbox_bars`) the same way via the composite
+`gSPScisTextureRectangle`. So grep gbi.h for a composite macro BEFORE reconstructing any command
+sequence by hand (see also `#gfxdis` and the memories `sdk-composite-macro-before-dl-reconstruction`
+/ `mg64-glyph-emitter-dl-family`). The raw-word form survives only where a CUSTOM packing genuinely
+has no macro — e.g. `func_8007624C`'s `>>2`-quantized colour, where the macro's `_SHIFTL` masks emit
+`andi`s the ROM lacks.
+
 **Rule:** MG64 uses **F3DEX2** microcode (gspF3DEX2.fifo 2.08). Include `<PR/gbi.h>` when the target
 manipulates `Gfx*`. **A `src/main/` (or `src/overlay_*/`) game TU that builds display lists needs the
 F3DEX2 build profile** (`mk/main.mk`: `MAIN_CFLAGS = $(CFLAGS) -DF3DEX_GBI_2`) — `-DF3DEX_GBI_2`
@@ -4386,6 +4410,46 @@ stack-slot `lw`.
 `expr.c:7199`, since `RETURN_ADDR_RTX` is undefined for MIPS in `config/mips/`), NOT the ROM's
 `addu s5,ra,0`. The `__asm__ __volatile__("addu %0, $31, $0" : "=r"(ra))` form is required; gcc parks
 `ra` in a callee-saved reg (here `$s5`) because it is live across the intervening `jal`s.
+
+## goto loop = loop.c never runs (defeating strength reduction and bound hoisting)
+
+**Rule (S258).** gcc-2.7.2's `loop.c` only processes loops it discovers through
+`NOTE_INSN_LOOP_BEG`, which the front end emits for `for` / `while` / `do-while` and NEVER for a
+loop built from `goto`. Loop discovery is therefore a per-loop SOURCE-LEVEL SWITCH, and the ROM
+often wants a different answer at each nest level:
+
+- **ROM re-materializes `%hi(SYM)+idx` per access (no walking pointer), or keeps the loop bound
+  inline at the exit test (`li v0,N; bne i,v0`)** -> write the loop with `goto`. Every structured
+  spelling gets strength-reduced and invariant-hoisted, and comes out SHORT.
+- **ROM has pointer givs** (a walking pointer, or two: `p` and `p+K` used with negative
+  displacements) -> the loop must stay STRUCTURED; a goto loop collapses them onto one pointer.
+
+Two follow-on rules once a loop is a goto loop:
+
+1. It de-hoists literal bounds too, so put the bound in a LOCAL VARIABLE wherever the ROM holds it
+   in a register across the loop. Same for any constant the ROM keeps in a register (a fill colour,
+   a start value), assigned where the ROM materializes it.
+2. One bound variable shared by two loops raises its allocno priority and swaps it with a
+   neighbouring quantity. Use ONE VARIABLE PER LOOP.
+
+**Tell:** the build is a fixed number of instructions SHORT per iteration and the missing
+instructions are exactly the ROM's per-access `lui`/`addu` base re-materialization, or the ROM's
+`li` of a bound sits at the exit test where the build has it in a callee-saved register.
+
+**Evidence.** S253 carried `func_80081C90` as a terminal `#base-register-vs-displacement` /
+`#indexed-vs-pointer-loop-strength-reduction` wall, "permuter-unreachable", after four failed
+spellings (byte-offset cast, `do`-`while`, real array, counter-indexed symbol) — all four were
+STRUCTURED loops. Both of its 14-iteration loops written with `goto` reproduced the ROM's indexed
+addressing exactly and it banked S258 as `scroll_sky_panels_by_wind`. The same sprint rebuilt
+`init_sky_pool_and_world_state` from 93 asm-differ rows to its exact 161-instruction count by
+MIXING: the two outer grid loops as gotos (ROM keeps `li v0,5`/`li v0,4` inline, no SR on the block
+base), the inner column loop structured (ROM has the two pointer givs only SR produces).
+
+This is the inverse reading of `#top-tested-loop-goto-local-hoist` and of the memory
+`goto-loop-vs-structured-loop-codegen`, which record only that a goto loop LOSES loop.c's
+optimizations. Losing them is sometimes the goal, so it does not conflict with "goto is a last
+resort": try structured first, and when the ROM's addressing shows no strength reduction, the goto
+IS the fix rather than a workaround.
 
 ## indexed-vs-pointer loop (strength-reduction preheader ordering)
 
@@ -6215,6 +6279,58 @@ accepts a documented pseudo-fakematch. `#capturing-ra` (which also reads a fixed
 `func_8004E1E0`); mechanism dumped from `mips-gcc-2.7.2` (`mips.h` STATIC_CHAIN_REGNUM, `function.c`
 expand_function_start, `calls.c` static_chain pass). Two subagents converged: one on the nested-fn
 structure, one on the standalone UB reproduction; PO chose to carry for the real nested form.
+
+## fold associate: which operand of a 3-term sum carries the constant
+
+**Rule (S258).** gcc-2.7.2 `fold-const.c:3685 associate` rewrites a 3-term sum by WHICH SIDE the
+constant is parenthesised on:
+
+- `split_tree(arg0)` (`fold-const.c:3722-3736`) turns `(VAR + CON) + ARG1` into `VAR + (ARG1 + CON)`
+  — the constant moves OFF the first operand;
+- `split_tree(arg1)` (`fold-const.c:3759`) turns `ARG0 + (CON + VAR)` into `(ARG0 + CON) + VAR` —
+  the constant moves ONTO `arg0`.
+
+**Tell:** the build emits `addiu rX,<elemreg>,C; addu rX,<globreg>,rX` where the ROM emits
+`addiu rX,<globreg>,C; addu rY,<elemreg>,rX` — same instruction count, different operands, and a
+register permutation downstream. To get the ROM's form write `GLOBAL + (elem + CONST)`, NOT the
+natural `GLOBAL + CONST + elem`.
+
+A local temp holding `GLOBAL + CONST` is also immune (no constant is left to reassociate) and gives
+the ROM's shared/destructive `addiu` when the base has several uses — **but only where the ROM keeps
+the base LIVE**. Where the ROM re-loads the base in a later basic block (past a branch, where cse's
+table resets), a temp comes out SHORT. S258 `func_80087CB0` needed a temp for the x base (live into
+the s-clip, same BB) and the inline arg1-split spelling for the y base (re-loaded in the post-`bgezl`
+t-clip block); either choice applied to both sides was off by 1 or 3 instructions (1580 -> 345).
+
+## String-classify loop: the redundant char `andi` and the branch-likely handler
+
+Two shapes that recur in every MG64 text/glyph emitter loop and that prior sprints called
+"unreachable from faithful C" (S254 `func_80088A90`); both are source-reachable.
+
+**1. ROM keeps the raw `lbu` byte in one register for the `bnez` loop test AND a redundant
+`andi vN,tN,0xFF` copy in another for the comparisons.** Split the character into two variables: a
+`u8` read by the `!= 0` loop test and a separate `s32` assigned from it INSIDE the loop.
+
+```c
+u8 c; s32 ch;
+c = *str;
+if (c == 0) goto end;
+do { ch = c; /* compares read ch */ ... next: c = *str; } while (c != 0);
+```
+
+The QImode->SImode extend then lands in a different basic block from the `lbu`, where combine (which
+is per-BB) cannot fold it, and the `s32` keeps the range test SIGNED (`slti`). The single-variable
+spellings both fail: `s32 ch = *str & 0xFF` folds the mask away entirely, and a plain `u8 ch` emits
+`sltiu` plus an extra copy.
+
+**2. ROM classifies with a branch-likely whose annulled delay slot holds the handler's one
+instruction** (`beql v1,s0,.L; addiu a3,a3,1`). reorg's `optimize_skip` only does this when the
+target block is one instruction long and laid out AFTER the branch. An inline `if (c == K) { stmt;
+goto next; }` is laid out fall-through and emits `bne`-away + `nop` + `j` + stmt; move the block out
+of line (`goto handler;` with `handler:` placed down among the other handler stubs) and reorg folds
+it into the annulled slot and deletes the block. Since gcc-2.7.2 does no basic-block reordering,
+SOURCE order is layout order — the same mechanism that puts the ROM's per-case `j emit; li tile`
+stubs after the classification chain.
 
 ## local-alloc qty-permutation (1-basic-block reg swap, permuter-appropriate)
 
