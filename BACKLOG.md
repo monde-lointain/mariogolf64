@@ -4948,8 +4948,38 @@ by `/sprint-plan`:
     (b) a FRESH pack, or (c) `func_80085F98` (0x5F4, 0-jal, 0-FP, 80 glistp refs) as a dedicated
     DL-emitter sprint — it is a 3-nested-loop mesh emitter with computed vertex/triangle indices,
     correctly refused as an S258 stretch.
+  - **S259 (4 banked across TWO packs; every bank was a documented TERMINAL wall).**
+    `src/main/func_800453E0.c` 29->27: `func_80045AD4` + `func_80045B14` = **`next_shuffled_index`**,
+    banked TOGETHER by writing the child as a GCC nested function (the S22x "caller sets no static
+    chain, so it is a spurious dead frame" premise was false — the caller's `addiu $v0,$sp,0x10`
+    persists to the `jal`; gcc emits the nested child BEFORE the parent, matching the ROM layout, and
+    the parent then came out 59/59 first build). `src/main/func_8006A2C0.c` 22->20: `func_8006D058`
+    (S224 "loop-strength-reduction x2" — 67/67 FIRST BUILD, the whole residual was three loads
+    reordered by ONE variable holding two successive values) and `func_8006CE88` (S224/S241, carried
+    at isolated score 5360 / pct 0.55 with an explicit "NOT permuter-eligible here").
+  - **NEW LEVER, HIGH VALUE (S259) — the array-element form for a MULTI-LEVEL bound re-read.**
+    Where a ROM re-reads a count/bound global at more than one nesting level, declare it
+    `extern s32 G[];` and read `G[0]`; MEM_IN_STRUCT_P forces the re-read. The cached
+    `s32* cnt = &G` that earlier near-match docs RECOMMENDED keeps one pseudo and comes out short.
+    Decisive on three functions in one sprint. `docs/hazards.md#multi-level-bound-re-read...`;
+    [[array-element-form-for-multilevel-bound]]. **Re-check every remaining carry whose write-up
+    recommends a cached pointer for a re-read global.**
+  - **`#base-register-vs-displacement` RE-PRICED (S259): it is ONE shape now, not three.** A pointer
+    local reproduces "full `&SYM` materialized + `lb 0(reg)`", and the array-element form reproduces
+    "holds `&SYM` across a loop and re-reads". Both were recorded as unreachable from faithful C.
+    `func_8006D38C` (84/84) and `func_8006D214` (94/94) now build at the exact ROM instruction count
+    with a register-permutation residual; the only unreached shape is the ROM reaching a neighbouring
+    global by NEGATIVE DISPLACEMENT off a held base (`lw t0,-0x2B(a0)`). Any carry citing this class
+    deserves a re-check before it is re-asserted.
+  - **RANKER FOLLOW-UP #5 (S259 NEW — sort carries by SUPERSEDED LEVER, not size).** Every target in
+    S259 was picked by asking "has the lever this carry's verdict cites been superseded since it was
+    written?", and all six advanced (four banked). That is the sort the `carried-wall:<fn>` detector
+    should emit: record WHICH lever/pass a carry's verdict cites, and flag it when a later sprint adds
+    a lever in that class. Corollary: a retro's own "next sprint should re-check X" list needs a
+    banked-check before the next gate trusts it — two of S258's suggested targets
+    (`func_80071924`, `func_8007512C`) had already been banked in S236.
   - **RANKER FOLLOW-UP (S253-S255 recurred 3x; S256 looked resolved; S257 REGRESSED; S258 WORSE —
-    5th recurrence, now BLOCKING gate automation, do NOT close):** at the **S258** gate
+    5th recurrence; S259 UNCHANGED — 6th, still BLOCKING gate automation, do NOT close):** at the **S258** and **S259** gates
     `pick_target.py --segment main` emitted exactly ONE row (`func_8002A640`) — the three c-stub
     continuation rows S257 still saw (`func_80071608` remaining:18, `func_8008D1DC` remaining:19,
     `render_pin_assembly_with_wind_hud`) are now gone too, so the collapse is segment-wide rather

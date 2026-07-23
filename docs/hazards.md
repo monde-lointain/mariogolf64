@@ -6280,6 +6280,35 @@ accepts a documented pseudo-fakematch. `#capturing-ra` (which also reads a fixed
 expand_function_start, `calls.c` static_chain pass). Two subagents converged: one on the nested-fn
 structure, one on the standalone UB reproduction; PO chose to carry for the real nested form.
 
+## Multi-level bound re-read: array-element form, not a cached pointer (S259)
+
+**Rule.** When the ROM re-reads a count/bound global — especially at MORE THAN ONE nesting level —
+declare it `extern s32 G[];` and read it as `G[0]`. `MEM_IN_STRUCT_P` makes the load may-alias, so
+gcc-2.7.2 re-reads it at every access instead of CSE-ing all the reads into one pseudo.
+
+**This supersedes the "block-scoped pointer" recipe** (`{ s32 *cnt = &G; ... i != *cnt ... }`) that
+earlier near-match write-ups recommended for the same symptom: the pointer keeps ONE pseudo for all
+the reads, so the build comes out SHORT (2 instructions on `func_8006CE88`, whose doc had attributed
+the deficit to "gcc's two-level loop.c invariant motion ... not cleanly source-reproducible").
+
+**Tell:** the build is a small fixed number of instructions short, and the ROM materializes `&G` at
+two different nesting levels (e.g. one register for an outer-guard read, another re-read per outer
+iteration), or holds `&G` across an inner loop and re-reads `lw 0(reg)`.
+
+Same mechanism as `#mem-in-struct-scheduling-lever` / the memory `mem-in-struct-index-global-cse`,
+but applied to a loop BOUND rather than an array INDEX. Two co-factors travel with it:
+
+1. **The guarded loop usually has to be a `do`-`while`.** The ROM typically has ONE zero-guard (the
+   `if`), so a top-tested `for` emits a second `beqz`, and a `for` over a cached `count` variable
+   lets CSE fold the bound back into the guard's load.
+2. **If the ROM materializes an array base inside the loop PREHEADER (after the entry guard), write
+   the loop INDEX-form** (`arr[i] = 0`) so loop.c hoists the base there; an explicit `T* p = arr;`
+   initialiser is emitted BEFORE the guard instead.
+
+S259 evidence: decisive on three functions in one sprint — `func_8006CE88` (114/116 instrs and 152
+differing rows -> 116/116 and 28, then BANKED), and `func_8006D38C` / `func_8006D214`, where it
+reproduced one of the three access shapes S241 had recorded as unreachable from faithful C.
+
 ## fold associate: which operand of a 3-term sum carries the constant
 
 **Rule (S258).** gcc-2.7.2 `fold-const.c:3685 associate` rewrites a 3-term sum by WHICH SIDE the
@@ -6878,6 +6907,22 @@ shorter — as this terminal "latency-coin" sub-case and carry it WITHOUT a perm
 and [#value-select-if-else-vs-branch-likely].
 
 ## base-register-vs-displacement (full symbol/base materialized vs %lo-in-displacement)
+
+**S259: two of the three access shapes this wall was built on ARE source-reachable.** The S241
+verdict on `func_8006D38C` / `func_8006D214` listed three shapes as unreachable from faithful C,
+rooted in `config/mips/mips.h GO_IF_LEGITIMATE_ADDRESS:2318-2349`. Two of them have source levers:
+
+| ROM shape | lever |
+| --------- | ----- |
+| `lui a0;addiu a0,%lo(SYM); lb 0(a0)` (full `&SYM` materialized, `0` displacement) | hold the address in a POINTER LOCAL (`s8* p = &SYM;`) and read `*p`, rather than reading the symbol directly |
+| holds `&SYM` across a loop and RE-READS it (`lw 0(a3)`) | read it as an ARRAY element (`extern s32 SYM[]` + `SYM[0]`) — see `#multi-level-bound-re-read-array-element-form-not-a-cached-pointer` |
+
+Both functions now build at the exact ROM instruction count (84/84 and 94/94) with a
+register-permutation residual. The shape STILL unreached is the third one: the ROM reaching a
+neighbouring global by NEGATIVE DISPLACEMENT off a held base (`lw t0,-0x2B(a0)` where
+`a0 = &D_801B60BB`). Spelling that `*(s32*)(p - 0x2B)` gets CSE'd against the array-form read (2
+instrs short); keeping the two spellings distinct restores the count but not the addressing. So the
+wall is now ONE shape, not three — re-check any carry citing this class before re-asserting it.
 
 **Symptom (S210; `func_8005DE88` / `func_8005AF80` / `func_8005CEE0`).** A classical fn is byte-exact
 except a run of N register-only (`r`) diff rows all on ONE data-access chain: the ROM materializes a

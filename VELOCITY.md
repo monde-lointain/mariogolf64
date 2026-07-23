@@ -1230,6 +1230,40 @@ Three honest caveats:
   stubs while two other c-stub packs ranked fine; follow-up REOPENED with a pack-vs-leaf de-rank
   granularity hypothesis. Push: local.
   S258: CRACK-ATTEMPT slice on `src/main/func_80080220.c` (PO chose it over fresh mid-leaves, a
+  S259: CROSS-PACK CARRY-CRACK SWEEP, targets chosen by "whose cited lever has been SUPERSEDED"
+  rather than by size (PO picked it over a pack-local slice, a dedicated DL sprint, and a fresh pack;
+  inline serial). **4 fns banked / 3 carries brought to the EXACT instruction count**
+  (`func_800453E0.c` 29->27, `func_8006A2C0.c` 22->20). ALL FOUR banks were prior sprints' documented
+  TERMINAL walls; none was a fresh leaf, because the cheap fresh-leaf vein is now gone segment-wide
+  (every `main` leaf under 0x180 in the three biggest partial packs is already a carry). Banks:
+  `func_80045AD4`+`func_80045B14` = **`next_shuffled_index`, two functions from one PO directive** —
+  the S22x note said "caller sets no static chain, so it is a spurious dead frame, not a nested fn",
+  but the caller's `addiu $v0,$sp,0x10` persists to the `jal`; written NESTED the child is byte-exact
+  at 16/16 including the frame and the dead store, gcc emits the child BEFORE the parent (matching the
+  ROM layout), and the parent then fell out 59/59 FIRST BUILD
+  [[nested-function-banks-the-parent-too]]; `func_8006D058` (0x10C, S224 "loop-strength-reduction x2,
+  structurally longer" — the loops were never the problem, it was 67/67 first build and the whole
+  residual was three loads reordered because ONE variable held two successive conditional values
+  [[one-variable-reuse-reorders-loads]]); **STRETCH `func_8006CE88`** (0x1D0, carried at isolated
+  score 5360 / pct 0.55 with an explicit "NOT permuter-eligible here"). **The sprint's real
+  deliverable is the array-element bound lever** [[array-element-form-for-multilevel-bound]]: where a
+  ROM re-reads a count global at more than one nesting level, `extern s32 G[]` + `G[0]` forces the
+  re-read, while the previously-recommended cached `s32* cnt = &G` keeps ONE pseudo and comes out
+  short. It was decisive on THREE functions — it took func_8006CE88 from 114/116 instrs and 152
+  differing rows to 116/116 and 28 (permuter base score then **55**, and it banked), and it fixed one
+  of the three access shapes S241 had called unreachable on `func_8006D38C` (now 84/84) and
+  `func_8006D214` (now 94/94). That wall is now ONE shape, not three (the ROM's negative-displacement
+  neighbour read). `func_8004683C` carried at 23/23 (the permuter's temps fixed the count; residual is
+  the return register). Seed 5 (classical, crack-attempt slice); banked 0pt (files partial); realized
+  8 / residual +3 (+1 permuter, +1 carry-or-reopen, +1 novel gotcha cluster [nested-fn breaks the
+  permuter for the whole TU; the S257 splice hazard RECURRED and cost one failed link], -1 for two
+  first-build banks). Rolling-5 (S255-S259): 3+3+2+3+4. Quality **0 / 3 permuter runs / 3 carried /
+  6 deliberately re-opened**. Retro applied 8 of 8 (#1/#2/#7 codegen levers -> 3 memories + 2 new
+  hazards sections; #3 base-vs-disp re-priced from 3 shapes to 1; #4 nested-fn-breaks-permuter +
+  #8 re-measure-percent -> workflow permuter rules + memory; #5 superseded-lever sort -> BACKLOG
+  ranker follow-up; #6 splice guard -> workflow conventions, now with a mechanical check).
+  RANKER: 6th recurrence, unchanged — `--segment main` still emits ONE row, gate backlog hand-built.
+  Push: local.
   rodata-jtbl enabler, and a fresh-pack pivot; inline serial, no fan-out). **3 banked / 3 carries
   deepened to the EXACT instruction count** (22→19 stubs). Banks: `func_80088890` =
   `draw_letterbox_bars` (0x200, an S256 deferred carry, ONE-immediate near-match on the first build —

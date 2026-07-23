@@ -574,12 +574,17 @@ These apply regardless of hazard. Hazard-specific procedures are in `docs/hazard
 below).
 
 - **One function at a time.** `pick_target.py` ranks (smallest-first); you pick the target.
-- **Never rewrite a partial-bank `src/<seg>.c` with a scripted whole-region splice (S257).** A
-  `s[:a] + new + s[b:]` python replacement between two anchors silently deleted three `INCLUDE_ASM`
-  stubs and their multi-line carry comments that lived between the anchors, and surfaced only as an
-  `undefined reference` at link. Use `Edit` with an exact `old_string`; if a script is genuinely needed,
-  gate it on `grep -c 'INCLUDE_ASM' src/<seg>.c` before and after (the count must change by exactly the
-  number of functions you are promoting, and by 0 for an in-place body edit).
+- **Never rewrite a partial-bank `src/<seg>.c` with a scripted whole-region splice (S257; RECURRED
+  S259).** The rule below was already written and was still violated — reverting ONE function to
+  `INCLUDE_ASM` with an `s[:i] + new + s[j:]` splice deleted two banked one-line siblings
+  (`func_8006D1FC`, `func_8006D208`) that happened to sit between the anchors, surfacing only as an
+  `undefined reference` at link. What was missing is a MECHANICAL guard, so: **use `Edit` with an
+  exact `old_string`. If a script is genuinely needed, assert BOTH counts across the rewrite** —
+  `grep -c 'INCLUDE_ASM'` (must change by exactly the number of functions promoted, 0 for an in-place
+  body edit) AND the file's function list, diffed before and after. The original S257 occurrence was
+  the same mechanism in the other direction: a splice between two anchors silently deleted three
+  `INCLUDE_ASM` stubs and their multi-line carry comments. Both times the anchors looked adjacent in
+  the author's head and were not adjacent in the file.
 - **Scratch dir** `nonmatchings/<func>/` (gitignored, shared with the permuter).
 - **Python tools run via the venv:** `venv/bin/python3 tools/X.py` (system python lacks asm-differ
   deps and is PEP-668-locked).
@@ -659,6 +664,18 @@ below).
     the same constant), while the three larger permutations all plateaued (`func_80087CB0` 480->265
     in 60k, `func_80088A90` 870->520 in 31k, `init_sky_pool_and_world_state` 615->545 in 91k). So the
     payoff shape is exact-count-plus-one-operand; a multi-register permutation is not.
+  - **A recorded "below the 0.97 gate, not permuter-eligible" verdict belongs to the BODY that was
+    measured, not to the function (S259).** `func_8006CE88` carried "isolated score 5360 (pct 0.553)
+    ... NOT permuter-eligible here"; that percent was measured on a body with a 2-instruction
+    structural deficit. Fixing the deficit took it to an exact instruction count, after which the
+    permuter's base score was **55** and it banked the same session. Re-measure after every structural
+    fix — count reaching exact, a loop shape corrected, an addressing form matched — before quoting
+    an old percent to rule the permuter out.
+  - **Banking a GCC nested function makes the permuter unavailable for the WHOLE TU.** `import.py`
+    runs pycparser, which aborts on a nested function definition (`Syntax error in base.c ... before:
+    {`), so no other function in that file can be imported either. Workaround: copy the TU with the
+    nested-function parent deleted, place the copy INSIDE the repo (import.py rejects a path outside
+    the project root — "Can't find root dir of project!"), and import from that.
   - **`setup-permuter.sh` resolves the C file by grepping for an `INCLUDE_ASM` stub, so it fails
     silently (exit 0, no output) once the body is inlined as C.** Call
     `venv/bin/python3 ./tools/decomp-permuter/import.py --settings permuter_settings_main.toml
@@ -824,6 +841,9 @@ When `pick_target.py` flags a hazard (or a match shows its symptom), read the ma
 | sentinel (`!=-1`) array walk matches except a 1-instr preheader swap (`move base` vs `li` const in the entry-`beq` delay slot, or a `-1` hoisted to an outer loop) | #indexed-vs-pointer-loop-strength-reduction |
 | copy/scan loop re-indexes `arr[off]` each iter (insn count SHORT vs ROM's pointer+offset dual-IV), or a running ptr-add groups base-before-index (`base+i*s+c` vs the ROM's `&base[i*s+c]`) | #indexed-vs-pointer-loop-strength-reduction |
 | ROM re-materializes `%hi(SYM)+idx` per access (no walking pointer) or keeps a loop bound inline at the exit test, and every structured spelling comes out SHORT | #goto-loop--loopc-never-runs-defeating-strength-reduction-and-bound-hoisting |
+| ROM re-reads a count/bound global at MORE THAN ONE nesting level; build caches it in one pseudo and comes out a few instrs short | #multi-level-bound-re-read-array-element-form-not-a-cached-pointer |
+| leaf spills the incoming `$v0` and never reloads it, and a near-match doc calls it a "spurious dead frame, not a nested fn" | #nested-function-static-chain-spill (check the CALLER for `addiu $v0,$sp,K`; writing it nested banks the parent too) |
+| body byte-exact except 2-3 independent loads emitted in the wrong ORDER, register-to-value mapping already correct | one local reused for two successive values — split it (memory `one-variable-reuse-reorders-loads`) |
 | build emits `addiu rX,<elemreg>,C; addu rX,<globreg>,rX` where the ROM emits `addiu rX,<globreg>,C` (same count, swapped operands + downstream reg permutation) | #fold-associate-which-operand-of-a-3-term-sum-carries-the-constant |
 | string loop: ROM has a redundant `andi rX,rY,0xFF` after an `lbu`, or a `beql` whose annulled slot holds a one-instruction handler | #string-classify-loop-the-redundant-char-andi-and-the-branch-likely-handler |
 | hand-rolled raw-DL-word block (per-glyph/per-sprite `u32` stores through a manual cursor) called a terminal regalloc/reorg wall | #display-lists (S258: find the gbi.h macro first) |
