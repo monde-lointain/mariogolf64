@@ -217,6 +217,21 @@ fan-out (4 documented walls → 2 cracked, 1 re-framed, 1 terminal):
      "Next natural slice" + "vein mined out" lines) so the fresh-pack sort DEWEIGHTS them and surfaces the
      next mined-but-not-exhausted non-FP pack, instead of re-offering a pack whose cheap vein is gone.
      Same source as the `carried-wall`/`lever-tried` tags (retro-digest-derived). See the S262 RETRO.
+     - **S263 CONFIRMATION + a size bound: `func_800453E0.c` is now `mined-out-pack` for CLEAN banks.**
+       S262 banked its 38-56i tiny glue; S263 took the NEXT tier of the SAME `fp=0`/no-jtbl filter
+       (func_8004CDA0 234i, func_8004C958 274i, func_800484F8 102i) and all 3 WALLED. So the mined-out
+       tag needs a SIZE dimension: a pack can be mined-out for clean banks ABOVE a per-leaf size even
+       while tiny glue below it still banks. The `mined-out-pack:<file>` tag should record the size band
+       exhausted (`func_800453E0.c: fp=0 leaves <=~60i banked, >=~100i walled`). Next `main` slice =
+       FRESH pack, not this one.
+     - **S263 DoR TELL: `fp=0`+no-jtbl is NOT sufficient to predict a clean bank at 100+ instr.** All 3
+       S263 leaves passed that filter yet walled on register PRESSURE (nested-loop or recursion). Add a
+       `nested-loop-depth` / `s-reg-count` tell to the fresh-leaf sort: a large multi-loop (>=2 nested)
+       or recursive (self-`jal`) integer fn, or one whose `.s` saves >=3 `s`-registers, concentrates on
+       the register-pressure/spill wall class (func_8004CDA0/C958 `#local-alloc-qty-permutation` — mine
+       more optimal than the ROM), distinct from tiny straight-line glue. Price these as SPIKES
+       (characterization), not clean leaves. Cheap `.s`-derived signal: `grep -c 'sw.*s[0-7],' <fn>.s`
+       and count nested loop back-edges. Same retro-digest source as the tags above.
 2. **The S234 "REPEATED/LOOPED access → 0-expected-bank" access-multiplicity deweight is WRONG.**
    `func_8006F1A0` (3× same-slot RMW) and `func_8006F24C` (4-iter loop fill) BOTH banked byte-exact in
    S235 via the byte-offset-cast lever (`*(s32*)((u8*)SYM+off)`) + the stride-array loop-crack recipe
@@ -3620,7 +3635,13 @@ by `/sprint-plan`:
   (`next_shuffled_index` = `func_80045B14` + its nested child `func_80045AD4`). **S262 +3 FRESH
   smallest-first asm-first banks**: `func_800487E4` (flag/wind dispatch), `func_80048690` (HUD reset +
   spawn glue), `func_80045C00` (match-init + debug block) — all first-build byte-exact. **24 stubs
-  remain**, ROM green off extracted asm, NOT md5-candidate. **S262 CORRECTION: the S228/S259 "cheap vein
+  remain**, ROM green off extracted asm, NOT md5-candidate. **S263 VERDICT: pack now MINED OUT for clean
+  banks.** S262's "clean non-FP leaves remain" held for that ONE sprint (the 38-56i tiny glue); S263
+  took the NEXT tier of fp=0 leaves (100-274i) and all 3 walled (func_8004CDA0/func_8004C958 register-
+  pressure walls, func_800484F8 value-select). `fp=0`+no-jtbl is NOT sufficient to predict a clean bank
+  at 100+ instr here. **Next `main` slice = a FRESH pack (func_8002A640 needs-header, or a different
+  segment), NOT another continuation of this pack.** (Prior S262 note retained below for history.)
+  **S262 CORRECTION: the S228/S259 "cheap vein
   mined out, NOT a smallest-first continuation" verdict was WRONG** — this pack still had untouched clean
   non-FP integer leaves (fp=0 glue/dispatch) that bank first-build; the tail's FP `calc_slope_*` +
   mid-logic walls are interleaved, not the whole remainder. Re-derive per-leaf (FP-tell + carry-grep),
@@ -3646,16 +3667,38 @@ by `/sprint-plan`:
     id arms. Permuter blind to internal branch-target/annul bits. `lever-tried: {read-after-call,
     flat-&&, ternary, switch, shared-label-goto}`. Escalation = compiler-source dive (ifcvt/reorg
     branch-likely fill + `expand_cond`/`store_flag` const-select) or corpus-mining.
+  - `func_8004CDA0` — **S263 CARRY, 227/234, structure exact, tail byte-EXACT** (`docs/wip/
+    func_8004CDA0.near-match.md`). Cloud-buffer blend driver (double-buffered `s16 D_801062C0[2][64][64]`,
+    calls func_8004C958 x3). Residual = `#local-alloc-qty-permutation`: register naming (`i`:t0/a3,
+    base:a1/t0) + 7 ROM register-preserving `move` copies my build collapses. `lever-tried:
+    {row-pointer-hoist, explicit-held-base, dst-next-before-store, s8/u8-signedness}`. Not
+    permuter-eligible (7-instr count deficit + local-alloc-qty class).
+  - `func_8004C958` — **S263 CARRY, ~248/274** (`docs/wip/func_8004C958.near-match.md`). Recursive
+    diamond-square/plasma midpoint-displacement (self-calls 4x). Residual = ROM spills step (sh/lhu
+    sp+0x1E) + 3 corner values to stack + reloads under the recursion's s-reg pressure; faithful-C keeps
+    them in registers so mine is ~26 instr SHORTER (mine MORE optimal = terminal). `lever-tried:
+    {u16-step, inline-recompute}`.
+  - `func_800484F8` — **S263 CARRY, 99/102** (`docs/wip/func_800484F8.near-match.md`). "Start BGM for
+    game state" switch(D_801B608C) over a 12-entry jtbl. Structure + dispatch + all cases match. Residual
+    = default block's `x==D_801B6098 && D_801B6090!=1` -> gcc branch-likely (bnel) vs ROM plain
+    beq+nop+j+li (`#value-select-if-else-vs-branch-likely`, goto-PROOF, 3 spellings) + `bgm` a2 vs ROM
+    a0-per-case (`#call-result-a0-vs-v0`). Working reconstruction levers (banked in the doc for the jtbl
+    class): case bodies emit in SOURCE order (order by ascending target addr); `case 0`/`case 1` folded
+    to default forces min=0 (0-based 12-entry table, no `x-2`); ternary/post-call bgm assign removes a
+    spurious s0 save; flip `if(rumble!=0){}else{switch}` for the ROM's beqz polarity. Banking also needs
+    the jtbl_800CC818 rodata carved from the shared A7990 blob. `lever-tried: {flat-&&, negated-||,
+    explicit-goto-elseblk}`.
   - `func_80045AD4` — **BANKED S259 as a NESTED function inside `next_shuffled_index`** (the S228
     "spurious dead frame, NOT a nested fn" verdict was wrong: the caller's `addiu $v0,$sp,0x10` persists
     to the `jal`; the dead `$v0` spill IS the nested prologue, and gcc emits the child before the parent).
   **Tail (~26 unprofiled):** mid-logic loops+struct-base fns (`func_80045B14`/`C00`/`CE0`/`46604`/`46898`/
   `469EC`/`479C0`/…), the `calc_slope_*` FP pitch fns, and the lead `func_800453E0` (213i, caller-evict
-  into func_80054900.c). **Next slice (S262-updated):** CONTINUE smallest-first here — the S262 sweep
-  proved clean non-FP integer leaves remain (func_800487E4-family: dispatch/init glue, fp=0). Sort the
-  24 stubs by `.s` size AND a per-leaf FP-tell (`grep -cE 'c1|cvt|\.s,'`) + carry-grep; the fp=0 leaves
-  bank first-build asm-first, the fp-heavy `calc_slope_*`/`func_8004B474`(fp=116)/`func_80048D7C`(fp=662)
-  are the S158 walls to defer. Only pivot to a fresh pack once the fp=0 leaves are exhausted.
+  into func_80054900.c). **Next slice (S263-updated): DO NOT continue this pack — MINED OUT for clean
+  banks.** 6 documented walls now (func_80046604, func_8004683C, func_80048CF8, func_8004CDA0,
+  func_8004C958, func_800484F8); the remaining fp=0 leaves at 100+ instr wall on register-pressure /
+  value-select, and the rest are FP-heavy (`calc_slope_*`, `func_8004B474` fp=116, `func_80048D7C`
+  fp=662) or sqrt-based (func_8004C860). Next `main` slice opens a FRESH pack (func_8002A640
+  needs-header, or a different segment).
 
 - **(S214 MIXED-PARTIAL — carried; 5 of 8 banked)** `src/main/func_80026400.c` (main-segment scenery
   render pack, subseg `[0x1800, c, main/func_80026400]` already flipped). S214 banked `func_80026400`

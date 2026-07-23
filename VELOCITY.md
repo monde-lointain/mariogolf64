@@ -1337,6 +1337,28 @@ Three honest caveats:
   row, hand-sorted. LESSON: `main`'s cheap smallest-first veins are largely mined; the fresh-pack pick
   is a partially-worked NON-FP pack with untouched integer leaves (func_800453E0.c), found by
   per-pack FP/carry survey, not the ranker. Push: local.
+  S263: NEXT fresh non-FP leaves of `src/main/func_800453E0.c` (continuation per the S262 retro; PO
+  approved as proposed; inline serial, MCP+m2c seed). **0 banked / 3 fresh leaves RE'd to byte-exact
+  structure and CARRIED as walls** (24 stubs unchanged). CHARACTERIZATION sprint (PO accepted; below
+  the ~2-bank hedge = a target-selection miss, the committed leaves were a wall cluster not fresh
+  veins). Walls: `func_8004CDA0` (234i, 227/234, cloud-buffer blend driver, tail byte-EXACT;
+  `#local-alloc-qty-permutation` register naming + 7 ROM preserving-copies collapsed), `func_8004C958`
+  (274i, ~248/274, recursive diamond-square; ROM spills step+corners to stack under recursion s-reg
+  pressure, mine ~26i SHORTER = more optimal, terminal), `func_800484F8` (102i, 99/102, "start BGM"
+  switch over 12-entry jtbl; default `&&`-guard -> branch-likely vs ROM plain beq+j
+  ([[value-select-branch-likely-on-switch-default]], goto-PROOF 3 spellings) + a0/a2 regalloc). Each
+  has a `docs/wip/<fn>.near-match.md` + in-file carry. WORKING jtbl levers recorded despite the wall
+  (case 0/1->default = 0-based table no x-2, case-body order = source order, post-call assign removes
+  s0 save, beqz polarity). md5-candidate **0 delta** (230/263), matched-fn **+0**. Seed 5 (classical);
+  banked 0pt; realized ~8 / residual +3. Rolling-5 (S259-S263): 4+3+0+3+0. Quality **0 / 0 permuter /
+  3 carried / 0 re-opened**. Retro applied 3 of 3 (#1 `func_800453E0.c` = mined-out-pack for clean
+  banks + size-band refinement -> BACKLOG; #2 nested-loop/s-reg-count DoR tell -> BACKLOG; #3
+  value-select-on-jtbl-dispatch + jtbl reconstruction levers -> hazards + memory). Tooling-test suite
+  STILL RED at baseline (9 golden-drift, unchanged). RANKER: **10th recurrence, unchanged.** LESSON:
+  `func_800453E0.c`'s fresh non-FP integer veins are MINED OUT for clean banks -- S262 took the 38-56i
+  tiny glue, the remaining 100-274i fp=0 leaves are nested-loop/recursive register-pressure walls.
+  `fp=0`+no-jtbl is NOT sufficient to predict a clean bank at 100+ instr. Next `main` slice = a FRESH
+  pack, not this one. Push: local.
   rodata-jtbl enabler, and a fresh-pack pivot; inline serial, no fan-out). **3 banked / 3 carries
   deepened to the EXACT instruction count** (22→19 stubs). Banks: `func_80088890` =
   `draw_letterbox_bars` (0x200, an S256 deferred carry, ONE-immediate near-match on the first build —

@@ -5214,10 +5214,33 @@ carry list automatically alongside the FP/heavy-callee skips.
    where the ROM puts it. Levers (b)+(f) are load-scheduling, (d)+(e) are regalloc/block-layout, (a)+(c)
    are addressing/width.
 
+7. **Table BASE = 0 (no `x-2` normalisation) needs a low `case`; case-body ADDRESS order = source order
+   (S263 `func_800484F8`).** GCC-2.7.2 builds the jump table spanning `[min_case, max_case]` and emits
+   `index - min_case` before the `sltiu` bound-check unless `min_case == 0`. So if the ROM's dispatch is
+   a bare `sltiu x,N` (no subtract) over a table whose low indices fall through to `default` (e.g. the
+   12-entry `jtbl_800CC818`, indices 0/1/6/8 → default), the source must include an explicit `case 0:`
+   (fold it into `default:`) to force `min_case = 0`; middle holes (6, 8) become table entries pointing
+   at the default body automatically. And the case BODIES emit in **source order**, so their addresses —
+   which the jtbl `.word .L…` entries reference — follow the order you write the cases in: order the
+   cases by **ascending target address** in the ROM (read the jtbl targets from the `.rodata.s`), with
+   `default` LAST. A `x-2`-normalised 10-entry table in your build vs the ROM's 0-based 12-entry table is
+   this lever, not a control-flow bug.
+
+**A shared-tail `switch` whose `default` (or a case) SELECTS a const via an `&&`/`||` guard is the
+value-select branch-likely wall, NOT a jtbl issue (S263 `func_800484F8`, CARRIED 99/102).** When the
+dispatch + table + every case body is byte-exact but ONE arm's `if (A && B) v = K1; else v = …` comes
+out `bnel …,tail; li v,K1(annulled)` where the ROM keeps plain `beq …,else; nop; j tail; li a0,K1`,
+that is [#value-select-if-else-vs-branch-likely](#value-select-if-else-vs-branch-likely), goto-PROOF
+(confirmed 3 spellings: flat `&&`, negated `||`, explicit `goto elseblk`), coupled to a
+`#call-result-a0-vs-v0` register choice (the cross-case value in `a2` + a tail `move a0,a2` vs the ROM's
+per-case `a0`). Not permuter-eligible (a count/branch-target residual). See
+`docs/wip/func_800484F8.near-match.md`.
+
 **Provenance:** S159 `func_80051E90` (2/2 fns, no permuter; all three levers + the operand-order and
 branch-likely nudges in [#register-reuse-nudge-classical-regalloc](#register-reuse-nudge-classical-regalloc));
 S186 `func_8006955C` (lever 4, sltiu/slti signedness); S219 `ci8_to_rgba5551` (levers 5 carve-feasibility
-+ 6 the switch-bit-pack playbook, banked byte-exact; 3 sibling jtbl fns atomicity-walled per lever 5).
++ 6 the switch-bit-pack playbook, banked byte-exact; 3 sibling jtbl fns atomicity-walled per lever 5);
+S263 `func_800484F8` (lever 7 table-base/source-order + the value-select-on-default wall, CARRIED 99/102).
 
 ## offset-0-symbol re-materialization (fixed-global field RMW)
 

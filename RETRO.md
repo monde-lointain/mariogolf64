@@ -25,6 +25,29 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 263 — next fresh non-FP leaves of func_800453E0.c (characterization: pack mined out) — 2026-07-23
+- Increment: 0 fns banked / 3 fresh leaves RE'd to byte-exact structure and CARRIED as walls. md5-candidate files 230/263, delta 0. `func_800453E0.c` unchanged at 24 stubs.
+- Quality: 0/0/3/0 (stuck-far / permuter runs / carried / re-opened).
+- Seed: committed 5pt; banked 0pt; realized ~8 / residual +3; regime classical. BELOW the ~2-bank hedge — a target-selection miss (the committed leaves were a wall cluster, not fresh veins), accepted as characterization.
+- Scope: PO accepted as a CHARACTERIZATION sprint. The 3 committed fresh non-FP leaves all resolved to terminal/near-terminal walls; 0 banks is the correct outcome given the pack state, not a reachable-bank miss. Value = 3 pass-cited wall verdicts + the mined-out root finding.
+- Seeded via MCP+m2c (PO directed the m2c seed mid-sprint; the initial `/list_instances` 404 was a wrong endpoint — MCP was up on 8089).
+- Walls characterized (all `docs/wip/<fn>.near-match.md` + in-file carry comment):
+  - `func_8004CDA0` (234i) 227/234 — cloud-buffer blend driver (double-buffered `s16 D_801062C0[2][64][64]`, calls func_8004C958 x3). Tail byte-EXACT. Residual = `#local-alloc-qty-permutation`: register naming (`i`:t0/a3, base:a1/t0) + 7 ROM register-preserving `move` copies my build collapses. Levers tried and failed: row-pointer hoist, explicit-held base, compute-dst-next-before-store, s8/u8 signedness.
+  - `func_8004C958` (274i) ~248/274 — recursive diamond-square/plasma midpoint-displacement (self-calls 4x). Residual = ROM spills step (sh/lhu sp+0x1E) + 3 corner values to stack + reloads under the recursion's s-reg pressure; faithful-C keeps them in registers, so mine is ~26 instr SHORTER (mine MORE optimal = terminal). `u16 step` + inline-recompute did not force the spills.
+  - `func_800484F8` (102i) 99/102 — "start BGM for game state" switch(D_801B608C) over a 12-entry jtbl. Structure + dispatch + all cases match. Residual = default block's `x==D_801B6098 && D_801B6090!=1` -> gcc branch-likely (bnel) vs ROM plain beq+nop+j+li (`#value-select-if-else-vs-branch-likely`, goto-PROOF, confirmed 3 spellings) + `bgm` in a2 vs ROM a0-per-case (`#call-result-a0-vs-v0`).
+- What helped:
+  - **Working levers on func_800484F8 (recorded even though it walled):** case bodies emit in SOURCE order, so order them by ascending target address; `case 0`/`case 1` folded into `default` forces gcc's min case = 0 (the ROM's 0-based 12-entry table, no `x-2` normalisation); ternary/post-call bgm assignment removes a spurious `s0` save (assign the switch-result ONLY after each case's call); flip `if(rumble!=0){..}else{switch}` to match the ROM's `beqz` branch polarity.
+  - **Root finding: func_800453E0.c's fresh non-FP integer veins are MINED OUT for clean banks.** S262 banked the tiny glue (38-56i); the remaining 100-274i leaves are dense nested-loop/recursive image-synthesis (cloud/plasma) + a value-select switch — all register-pressure / value-select walls. The remaining smaller leaves are FP-heavy or sqrt-based. The S262 pick was right for ONE sprint (3 tiny-glue banks); the tail is now a wall cluster.
+- Friction:
+  - `fp=0` + no-jtbl was NOT sufficient to predict a clean bank at 100+ instr — all 3 leaves passed that filter yet walled. Need a nested-loop/s-reg-count DoR tell (BACKLOG #2).
+  - `pick_target.py --segment main` one-row recurrence (10th) — hand-survey again.
+  - Tooling-test suite RED at baseline (9 golden-drift failures, pre-existing) — standing carry.
+- Applied: 3 of 3 accepted (PO: keep local) — #1 `mined-out-pack` tag for func_800453E0.c + next-main-slice = FRESH pack (BACKLOG note + mined-out-pack ranker follow-up), #2 DoR nested-loop/s-reg-count tell (BACKLOG DoR sizing + ranker follow-up), #3 value-select-branch-likely-on-jtbl-dispatch + jtbl-reconstruction levers (hazards `#value-select-if-else-vs-branch-likely` + `#switch-jtbl-dispatch` + memory `value-select-branch-likely-on-switch-default`).
+- Ranker: **10th recurrence, unchanged.** `pick_target.py --segment main` still emits one blk row.
+- Carry-over: `src/main/func_800453E0.c` (24 stubs; NOW 6 documented walls: func_80046604, func_8004683C, func_80048CF8, func_8004CDA0, func_8004C958, func_800484F8). **MINED OUT for clean banks — next `main` slice opens a FRESH pack (func_8002A640 needs-header, or a different segment), NOT this pack.**
+
+---
+
 ## Sprint 262 — fresh smallest-first slice of func_800453E0.c (pivot off the exhausted main carry tail) — 2026-07-23
 - Increment: 3 fns banked byte-exact FIRST-BUILD (`func_800487E4` 0x98, `func_80048690` 0xDC, `func_80045C00` 0xE0) / 1 stretch carried (`func_80046604` 0x1D8, 119/118). `func_800453E0.c` 27->24 stubs. md5-candidate files 230/263, delta 0 (pack still partial); matched-fn +3.
 - Quality: 0/0/1/0 (stuck-far / permuter runs / carried / re-opened).
