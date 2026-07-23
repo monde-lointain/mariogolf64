@@ -49,3 +49,42 @@ The two loads must differ AFTER register allocation. A permuter run is the natur
 instruction count is exact and the residual is one branch offset), or a compiler-source dive into
 which `jump_optimize` pass redirects a conditional back edge over an insn identical to the one
 preceding it.
+
+## S261 — ROOT-CAUSED to a gcc first-load PEEL; permuter-BLIND; terminal for source
+
+The residual is NOT an assembler artifact and NOT permuter-reachable. Three findings:
+
+1. **It is a gcc first-load peel, visible in `gcc -S`.** gcc places the loop label `.L14:` AFTER the
+   top `lh $2,0($3)` (the `v = q->val` load), so the back edge `bne $2,$6,.L14` re-enters at the
+   `bnel` and never re-executes the top load. On iterations 2+, gcc reuses the value the BOTTOM load
+   (`.L13: lh $2,0($3)`, the `w = q->val` sentinel read) left in `$2` — the two reads are the same
+   field `q->val` at offset 0 with `q` unchanged across the back edge, so gcc treats the top load as
+   redundant and peels it to the first iteration. Both assemblers (KMC `tools/cc/as` and modern GAS)
+   assemble this faithfully to `fff2`; the peel is entirely in gcc's output. The ROM's gcc did the
+   opposite (label before the top load, `fff1`, re-loads each iteration) — a pass-ordering coin, same
+   source either way.
+
+2. **Why find_keyframe_offset_by_tag matched and this does not.** find_keyframe's loop tests
+   `e->tag` (offset 2) at the top and `e->val` (offset 0) at the bottom — DIFFERENT fields, so there
+   is no redundant load to peel. collect_keyframe inherently tests `q->val` at BOTH the match-test
+   (top, `== want`) and the end-sentinel-test (bottom, `== -1`); both are `val`, so the field-split
+   that saved find_keyframe is unavailable here without changing semantics.
+
+3. **The permuter cannot see this residual — asm-differ is blind to internal branch TARGETS.**
+   Importing the exact 54/54 base.c and running the permuter reports `base score = 0` and "Found zero
+   score!", yet the real object (`objdump`) is `fff2` and the ROM is `fff1`. The permuter's target.o
+   IS correct (`fff1`); asm-differ normalises a branch to a local label and does not distinguish
+   `bne …,<label@0x7c>` from `bne …,<label@0x80>`, so it scores the one differing bit as matched.
+   This is the SAME blind spot S260 fixed in `cmpfn.sh` (branch-target normalisation). So the
+   permuter is not just "unlikely" here, it is structurally incapable of scoring the defect, and any
+   permuter "0" on a pure-internal-branch-target residual is a false positive — gate on
+   `tools/verify-rom.sh`/`objdump`, never on the permuter score.
+
+Source levers tried and rejected (extends the S260 list): `volatile s16` top load — DEFEATS the peel
+(the back edge re-enters at the top load, `fff1`) but forces the top read to `lhu` (the ROM has `lh`)
+and grows the loop by disturbing scheduling. The peek-before-increment (`q[1].val`) still costs the
+annulled delay slots (S260). No source form yields {top load kept as a plain `lh` + q++ as the single
+foldable advance + label before the top load} together.
+
+**Verdict: TERMINAL for source (a gcc first-load-peel coin), and permuter-unreachable (asm-differ
+blind to the internal branch target).** Carry the 54/54 body.
