@@ -78,7 +78,47 @@ draw:
   return val;
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_800453E0", func_80045C00);
+extern s32 D_800BE698;
+extern s32 D_800BE69C;
+extern s32 D_800BE660;
+extern s32 D_800C5AAC;
+extern f32 D_801B5530;
+extern s32 D_801B7F70;
+extern s32 putting_meter_level;
+extern s32 D_801B557C;
+extern s32 D_80132CF0;
+extern s32 D_80250AEC;
+extern s8 D_80250B61;
+extern s32 active_player_idx;
+extern char D_800CC790[];
+extern char D_800CC7A0[];
+extern void func_8009226C(s32 arg0);
+extern void func_800510EC(s32 arg0, s32 arg1);
+extern void func_80216B74(s32 arg0);
+extern void func_80205AE4(s32 arg0, s32 arg1);
+
+void func_80045C00(void) {
+  D_800BE698 = 1;
+  D_800BE69C = 0;
+  D_800BE660 = 0;
+  D_800C5AAC = 0;
+  D_801B5530 = 45.0f;
+  func_8009226C(-1);
+  D_801B7F70 = 0;
+  putting_meter_level = 0;
+  D_801B557C = 0;
+  func_800510EC(0xB, 0x78);
+  func_800510EC(0xF, 0x78);
+  func_80216B74(0);
+  D_800BE62C = -1;
+  if (D_80132CF0 == D_80250AEC) {
+    osSyncPrintf(D_800CC790);
+    if (D_80250B61 != 0) {
+      osSyncPrintf(D_800CC7A0);
+      func_80205AE4(active_player_idx, 0xB);
+    }
+  }
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_800453E0", func_80045CE0);
 
