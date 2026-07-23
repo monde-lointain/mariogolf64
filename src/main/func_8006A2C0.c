@@ -215,7 +215,86 @@ INCLUDE_ASM("asm/nonmatchings/main/func_8006A2C0", func_8006C918);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_8006A2C0", func_8006CD50);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_8006A2C0", func_8006CE88);
+extern s32 D_801B6090[];
+extern u16 D_80106230[];
+extern s8 D_801B71F6[];
+extern s8 D_801B71FB[];
+extern s8 D_801050BC[];
+extern s8 D_801050BD;
+extern s8 D_801050BE;
+extern char D_80105118[];
+extern char D_800D1450[];
+
+extern s32 func_800521C0(void);
+extern int sprintf(char* s, const char* fmt, ...);
+extern void check_and_print_grid(char* str, s32 col, s32 row);
+
+/* Builds and prints the debug flag grid. Three variable choices are
+ * load-bearing for register allocation, not style: the clear loop counts in
+ * `col` (with `i` it colours one register lower), the row index is copied
+ * through `hasZero` (dead since the scan) before indexing D_80106230, and the
+ * count is read as `D_801B6090[0]` so MEM_IN_STRUCT_P forces the ROM's re-read
+ * at both nesting levels of the column loop -- a cached `s32*` pointer to it
+ * keeps ONE pseudo and comes out 2 instructions short. The clear must also be
+ * INDEX-form
+ * (`D_80106230[col] = 0`): loop.c then hoists the base into the preheader,
+ * which sits AFTER the entry guard as the ROM has it, where an explicit `u16*
+ * p` initialiser is emitted before the guard. */
+void func_8006CE88(s32 arg0) {
+  s32 i;
+  s32 hasZero;
+  s32 col;
+  s32 last;
+  s32 counter;
+
+  for (col = 0; col != D_801B6090[0]; col++) {
+    D_80106230[col] = 0;
+  }
+
+  hasZero = 0;
+  for (i = 0; i != D_801B6090[0]; i++) {
+    s32 off = i * 0xB8;
+    if (*(s8*)((u8*)D_801B71F6 + off) == 0) {
+      hasZero = 1;
+    }
+  }
+  arg0 += (hasZero == 0);
+
+  D_801050BC[0] = -1;
+  D_801050BD = 0;
+  D_801050BE = 0;
+
+  counter = 1;
+  col = func_800521C0();
+  {
+    for (; col < arg0; col++) {
+      last = -1;
+      for (i = 0; i != D_801B6090[0]; i++) {
+        s32 off = col * 2 + i * 0xB8;
+        if (*(s8*)((u8*)D_801B71FB + off) != 0) {
+          last = i;
+          *(s8*)((u8*)D_801B71FB + off) = counter;
+        }
+      }
+      if (col == arg0 - 1) {
+        D_801050BC[0] = counter - 1;
+        D_801050BC[1] = counter;
+      }
+      if (last == -1) {
+        counter++;
+        D_801050BC[2] = counter - 1;
+      } else {
+        hasZero = last;
+        D_80106230[hasZero] += counter;
+        counter = 1;
+        D_801050BC[2] = 0;
+      }
+    }
+  }
+
+  sprintf(D_80105118, D_800D1450, D_801050BC[0], D_801050BD);
+  check_and_print_grid(D_80105118, 0x11, 5);
+}
 
 extern u16 D_8012D3C8[4][7];
 extern u16 D_801B725E[];
