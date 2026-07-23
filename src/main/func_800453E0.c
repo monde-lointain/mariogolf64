@@ -160,7 +160,34 @@ void func_8004876C(void) {
   func_800719A0(0, 0, -1, 1, 1, 0, 0, 0, 0, 0);
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_800453E0", func_800487E4);
+extern s32 D_801B608C;
+extern s32 D_800BE694;
+extern s32 D_801B7F70;
+extern s32 putting_meter_level;
+extern s32 D_801B557C;
+extern s8 g_terrain_vtx_xform_mode;
+extern s32 wind_magnitude;
+extern s32 flag_is_set(s32 flag);
+extern void func_80216130(s32 arg0);
+
+void func_800487E4(void) {
+  D_800BE694 = -1;
+  D_801B7F70 = 0;
+  putting_meter_level = 0;
+  D_801B557C = 0;
+  if (D_801B608C == 7) {
+    return;
+  }
+  if (g_terrain_vtx_xform_mode != 0) {
+    return;
+  }
+  if (!flag_is_set(0x48)) {
+    if (wind_magnitude / 0x10000 < 6) {
+      return;
+    }
+  }
+  func_80216130(1);
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_800453E0", func_8004887C);
 
