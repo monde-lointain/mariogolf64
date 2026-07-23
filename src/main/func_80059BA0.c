@@ -34,6 +34,29 @@ extern s8 D_800C1FF6;
 extern s8 D_800C1FF7;
 extern s32 D_800C2B3C;
 
+extern s32 D_800C2BD0;
+extern s32 D_80105B68;
+extern u32 player_context_offset;
+extern s32 D_8012F480;
+extern s32 D_8012F484;
+extern s32 D_8012F488;
+extern s32 D_8012F48C;
+extern u8 D_801B70F0;
+extern u8 D_801B70F1;
+extern u8 D_801B70F2;
+extern u8 D_801B70F3;
+extern s16 D_800FBD40;
+extern s16 D_801B71CC;
+extern s16 D_800FBE2C;
+extern u8 D_800FBDB9;
+extern s16 D_800FE33C;
+extern u8 D_800FF4C0;
+extern u8 D_80105268;
+extern u8 D_800FBE08[];
+extern u8 D_801323B8;
+extern s32 D_801B60AC;
+extern u8 D_801323D0;
+
 u8* func_8005AF74(void);
 void func_8005DF54(u8*, s32);
 s32 func_80099490(void);
@@ -282,7 +305,40 @@ INCLUDE_ASM("asm/nonmatchings/main/func_80059BA0", func_8005D334);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80059BA0", func_8005D3B8);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80059BA0", func_8005D9A0);
+void func_8005D9A0(void) {
+  s8 i;
+
+  D_800C2BD0 = 6;
+  D_800FE334 = 0;
+  current_game_mode = 0;
+  D_80105B68 = 0;
+  player_context_offset = 0;
+  D_8012F480 = -1;
+  D_8012F484 = -1;
+  D_8012F488 = -1;
+  D_8012F48C = -1;
+  D_801B70F0 = 0;
+  D_801B70F1 = 0;
+  D_801B70F2 = 0;
+  D_801B70F3 = 0;
+  memset(D_801323A0, 0, 0x49);
+  D_800FBD40 = 0;
+  D_801B71CC = 0;
+  D_800FBE2C = 0;
+  D_800FBDB9 = 0;
+  D_800FE33C = 0;
+  D_800FF4C0 = 0;
+  D_80105268 = 0;
+  i = 0;
+  do {
+    D_800FBE08[i] = 0;
+  } while (++i != 4);
+  D_801323B8 = 3;
+  D_801B60AC = 0;
+  D_801323D0 = 6;
+  D_801052E8 = 0;
+  D_800C2BD4 = 0;
+}
 
 void func_8005DAD4(void) {
   D_800FE334 = 0;
