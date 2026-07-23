@@ -78,8 +78,6 @@ void func_80054E4C(s32 arg0, s32 arg1) {
   }
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80054900", collect_keyframe_events_at);
-
 /* One keyframe of an animation track: a signed offset value plus the tag that
  * selects it. Entries are packed 4 bytes apart and the list ends at val == -1.
  */
@@ -88,6 +86,34 @@ typedef struct {
   u8 tag;
   u8 pad;
 } KfEntry;
+
+/* collect_keyframe_events_at: CARRIED at 54/54, ONE BIT off (S260). The whole
+ * body is byte-identical to the ROM -- same registers, same annulled `bnel` and
+ * `beql`, same frame -- except the loop's back edge: the ROM branches to the
+ * loop-top `lh v0,0(v1)` (offset 0xfff1) and the build branches PAST it to the
+ * `bnel` (0xfff2), because the bottom sentinel load leaves the same value in
+ * the same register and gcc redirects the edge over the redundant re-load.
+ * Reproduce with (KfEntry as below, same shape as find_keyframe_offset_by_tag):
+ *
+ *   u8* cs = get_character_state(id); s32 count; KfEntry *e, *q; s32 off,
+ *   sentinel, v, w; u8 *tracks, *p;
+ *   count = 0;                       // AFTER the call: crossing it makes it
+ * callee-saved if (cs == NULL) goto done; if (track >= *(s32*)(cs + 0x1C)) goto
+ * done; tracks = *(u8**)(*(u8**)cs + 0x14); off = track * 12; e =
+ * *(KfEntry**)(off + (u32)tracks); if (e == NULL) goto done; if (e->val == -1)
+ * goto done;     // literal here, local `sentinel` in the loop sentinel = -1; q
+ * = e; p = out;   // q = e keeps the ROM's `move v1,a0` loop: v = q->val; // v
+ * and w must be SEPARATE locals if (v != want) goto advance; if (count >= 0x10)
+ * goto advance; p[0] = q->tag; p[1] = q->pad; count++; p += 2; advance: q++; w
+ * = q->val; if (w != sentinel) goto loop; done: return count;
+ *
+ * Tried for the back edge: raw `*(s16*)q` on either side (MEM_IN_STRUCT_P is
+ * not part of the identity test), separate v/w locals, and reading the sentinel
+ * as `q[1].val` BEFORE the increment -- the last one does fix the edge but
+ * costs both annulled delay slots (the advance handler stops being one
+ * instruction). The two loads have to differ AFTER register allocation, which
+ * no source spelling reached. */
+INCLUDE_ASM("asm/nonmatchings/main/func_80054900", collect_keyframe_events_at);
 
 /* Search track `track` of character `id` for the first keyframe tagged `tag`
  * and return its offset relative to the track's base offset, or -1.
