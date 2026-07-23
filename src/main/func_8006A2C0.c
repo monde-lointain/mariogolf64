@@ -306,9 +306,9 @@ extern s32 D_800C4130;
 extern s32 D_800C4134;
 extern s32 D_800C4138;
 extern s32 D_800C413C;
-extern u16 D_801B60C6;
-extern u16 D_801B60C8;
-extern u16 D_801B60CA;
+extern s16 D_801B60C6;
+extern s16 D_801B60C8;
+extern s16 D_801B60CA;
 
 void func_8006D058(void) {
   s32 i;
@@ -351,7 +351,36 @@ void func_8006D058(void) {
   D_801B60CA = D_800C4138;
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_8006A2C0", func_8006D164);
+/* Snapshot 4 rows of 7 u16 out of the 0xB8-stride record array into the
+ * scoreboard grid, then reset the readout state. The outer loop is a goto loop
+ * on purpose: loop.c never sees it, so the `4` bound stays re-materialized
+ * inside the loop the way the ROM has it. */
+void func_8006D164(void) {
+  s32 i = 0;
+  s32 j;
+  s32 n = 7;
+  u16* src = D_801B725E;
+  u16* dst = D_8012D3C8[0];
+
+outer:
+  j = 0;
+  do {
+    dst[j] = src[j];
+    j++;
+  } while (j != n);
+  src += 0x5C;
+  i++;
+  dst += 7;
+  if (i != 4) {
+    goto outer;
+  }
+
+  D_800C413C = 0;
+  D_800C4144 = -1;
+  D_800C4130 = D_801B60C6;
+  D_800C4134 = D_801B60C8;
+  D_800C4138 = D_801B60CA;
+}
 
 s32 func_8006D1FC(void) { return D_800C4144; }
 
