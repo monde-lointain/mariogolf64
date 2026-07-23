@@ -7278,6 +7278,21 @@ deficit, not a reg permutation). ESCALATION = compiler-source dive (`expr.c do_s
 shortcut vs `jump.c do_jump` BIT_AND_EXPR path — find what keeps the ROM's build on the `do_jump` branch
 for a terminal single-bit test). `docs/wip/func_8006C8CC.near-match.md`.
 
+**A shared-label `goto` does NOT escape the const-select merge, and the `&&` guard-chain pairs with it
+(S262 wall, `func_80046604`).** A terminal `id==8 ? 0x56 : 0x54` const-select (two immediates 2 apart)
+if-converts to `xori/sltiu/negu/andi/ori` EVEN when written as an explicit branch with a shared join
+label — `if (id != 8) { a = 0x54; goto snd; } a = 0x56; snd: use(a);` — because jump-optimization rejoins
+the two arms into one 2-way select post-lowering. So the "single-return-temp / two-BB explicit-else"
+escape (which works for `p->field` vs sentinel) is unavailable here for the same reason S231/S239 give:
+both arms are cheap immediates with no side-effect anchor, and a `goto` provides none. In the SAME
+function the `&&` guard chain (`a=2; if(A && B && c<K) a=1;`) is the branch-likely complement: the ROM
+fills the plain `beqz/bnez` delay slots with the `li a0,1`/`li a0,2` (a non-annulled guard chain that
+also SHARES one `a0` constant set once in an early delay slot across several arms), while every source
+form emits `beqzl/bnezl` (annulled). Both coins + the const-select tail are one wall class; the permuter
+is blind to internal branch-target/annul bits ([#value-select-if-else-vs-branch-likely] references
+`collect_keyframe_events_at`), so a permuter 0 there is a false positive — gate on `verify-rom.sh`.
+`docs/wip/func_80046604.near-match.md`.
+
 ## delay-slot-fill of a null-guard `beqz` (body-first insn safe-on-the-taken-path)
 
 **Symptom (S211; `func_800564F0` `if(cs) cs[0x189]=1` / `func_80055738` `if(cs){p=cs+i*8; …}`).** A

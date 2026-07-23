@@ -1314,6 +1314,29 @@ Three honest caveats:
   no tooling edit this sprint). RANKER: **8th recurrence, unchanged** -- one row, hand-sorted. LESSON:
   a crack-slice on a lever-EXHAUSTED tail is a different bet than one with a fresh lever -- price it
   toward 0-bank. Push: local.
+
+  S262: FRESH smallest-first slice of `src/main/func_800453E0.c` (S228 slope/dispatch pack; PO approved
+  as proposed; inline serial, asm-first fast-path). Pivot off the S261-exhausted `main` carry tail to a
+  FRESH non-FP vein -- required a hand-survey of every `main` partial pack (ranker one-row, 9th
+  recurrence). **3 banked byte-exact FIRST-BUILD + 1 stretch carried** (27->24 stubs). Banks:
+  `func_800487E4` (0x98, flag/wind dispatch; shared-tail single call + `wind_magnitude/0x10000` signed
+  div + delay-slot store order), `func_80048690` (0xDC, HUD reset + two `func_800719A0` spawn calls +
+  `func_800326FC`; `D_801B5530=80.0f` lui/mtc1 const), `func_80045C00` (0xE0, match-init + conditional
+  `osSyncPrintf` debug block; rodata strings kept as `extern char D_[]` refs, no carve). Stretch CARRY:
+  `func_80046604` (0x1D8, 119/118, club/sound dispatch, logic fully RE'd) -- head byte-exact via
+  read-callee-return-AFTER-next-call one-callee-saved-reg lever ([[cross-call-live-range-callee-saved-lever]]
+  inverse); residual = 3 branch-scheduling coins one wall class (`&&`-chain branch-likely, terminal
+  const-select branchless goto-PROOF, `a0=0x54` delay-slot share) ([[store-flag-single-bit-terminal-wall]],
+  `docs/wip/func_80046604.near-match.md` at discovery). md5-candidate **0 delta** (230/263, pack still
+  partial), matched-fn **+3**. Seed 5 (classical, fresh smallest-first); banked ~3pt; realized 5 /
+  residual 0 (beat the ~2-bank hedge: 3 clean + 1 characterized carry). Rolling-5 (S258-S262):
+  3+4+3+0+3. Quality **0 / 0 permuter / 1 carried / 0 re-opened**. Retro applied 3 of 3 (#1
+  `mined-out-pack:<file>` ranker signal -> BACKLOG follow-up; #2 goto-proof const-select wall ->
+  hazards + memory; #3 read-after-call callee-saved lever -> memory). Tooling-test suite STILL RED at
+  baseline (9 golden-drift, unchanged; no tooling edit). RANKER: **9th recurrence, unchanged** -- one
+  row, hand-sorted. LESSON: `main`'s cheap smallest-first veins are largely mined; the fresh-pack pick
+  is a partially-worked NON-FP pack with untouched integer leaves (func_800453E0.c), found by
+  per-pack FP/carry survey, not the ranker. Push: local.
   rodata-jtbl enabler, and a fresh-pack pivot; inline serial, no fan-out). **3 banked / 3 carries
   deepened to the EXACT instruction count** (22→19 stubs). Banks: `func_80088890` =
   `draw_letterbox_bars` (0x200, an S256 deferred carry, ONE-immediate near-match on the first build —

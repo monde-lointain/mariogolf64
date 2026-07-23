@@ -25,6 +25,29 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 262 — fresh smallest-first slice of func_800453E0.c (pivot off the exhausted main carry tail) — 2026-07-23
+- Increment: 3 fns banked byte-exact FIRST-BUILD (`func_800487E4` 0x98, `func_80048690` 0xDC, `func_80045C00` 0xE0) / 1 stretch carried (`func_80046604` 0x1D8, 119/118). `func_800453E0.c` 27->24 stubs. md5-candidate files 230/263, delta 0 (pack still partial); matched-fn +3.
+- Quality: 0/0/1/0 (stuck-far / permuter runs / carried / re-opened).
+- Seed: committed 5pt; banked ~3pt; realized 5 / residual 0; regime classical. Beat the ~2-bank hedge (3 clean first-build + 1 characterized carry).
+- Scope: PO signed off 3 banks + 1 carry. Full committed scope met (3/3 first-build), stretch attempted-and-carried as a documented wall. DoD green at every commit.
+- Banks (all asm-first fast-path, first build, auto names kept — no ghidra names, no C callers):
+  - `func_800487E4` — flag/wind dispatch. Levers: shared-tail single `func_80216130(1)` call (nested `if(!flag_is_set){if(wind/0x10000<6)return;}`, not two calls), `wind_magnitude / 0x10000` signed div-by-2^16 (bgez/ori-0xFFFF/addu/sra), store order with the last store in the beq delay slot.
+  - `func_80048690` — HUD/state reset + two `func_800719A0(0,0,-1,1,{0,1},...)` spawn calls (same arg pattern as sibling `func_8004876C`) + `func_800326FC` + `func_8004887C`. `D_801B5530=80.0f` (lui/mtc1 const, low16=0).
+  - `func_80045C00` — match-init: 5 globals + `D_801B5530=45.0f`, `func_8009226C(-1)`, 3 zero-stores, two `func_800510EC`, `func_80216B74(0)`, `D_800BE62C=-1` (delay slot), then a conditional `osSyncPrintf` debug block. Rodata strings kept as `extern char D_[]` refs (no carve, partial one-tu).
+- Stretch carry — `func_80046604` (club/terrain sound dispatch, logic fully RE'd, 119 vs 118):
+  - Head byte-exact via the [[cross-call-live-range-callee-saved-lever]] INVERSE: read `kind` from the `get_club_param` return AFTER the `get_table_entry` call so the club pointer alone spans the call in ONE callee-saved reg ($s0 reuses to entry). Reading before cost a 2nd saved reg ($s1) + flipped lh->lhu.
+  - Residual = 3 branch-scheduling coins, one wall class (`#value-select-if-else-vs-branch-likely`): (1) `&&` guard chain -> annulled `beqzl/bnezl` where the ROM fills plain `beqz/bnez` delays with `li a0,K`; (2) terminal `id==8 ? 0x56 : 0x54` if-converts branchless even with a shared-label `goto` (jump-opt rejoins the arms — a goto is NOT an escape); (3) the ROM shares one `a0=0x54` set once in the id<2 delay slot across id<2/id==2/default. `docs/wip/func_80046604.near-match.md` written at discovery.
+- What helped:
+  - **`main`'s cheap smallest-first veins are largely mined; the fresh-pack pick is a partially-worked NON-FP pack.** The right S262 pick was `func_800453E0.c` (S228 slope/dispatch pack) whose smallest UNTOUCHED leaves are clean integer game-glue (fp=0), NOT the documented carries or FP that dominate the smallest leaves of the more-worked packs (`func_80059BA0.c` "vein mined out", `func_80095A10.c` fp 44-76). Found by a per-pack FP/carry survey, not the ranker.
+  - **asm-first fast-path + fresh-object objdump is the right oracle for tiny integer leaves.** All 3 banks were hand-translated straight from the `.s`, gated per-fn on `objdump -d` of the freshly-built object (not diff.py) and each bank on `tools/verify-rom.sh` — 3 first-build byte-matches, zero iteration.
+  - **read-callee-return-AFTER-the-next-call is a one-callee-saved-reg lever** (func_80046604 head): the inverse trigger of the decl-before-call lever — delay the field read, not the decl.
+- Friction:
+  - `pick_target.py --segment main` one-row recurrence (9th) forced a full hand-survey of every `main` partial pack to find a fresh non-FP vein. New follow-up: a `mined-out-pack:<file>` retro-derived tag so the sort skips exhausted/FP packs (BACKLOG #1).
+  - The stretch's const-select tail is goto-PROOF — a shared-label goto did not stop gcc's branchless if-conversion. Confirms the const-select wall has no source escape.
+  - Tooling-test suite remains RED at baseline (9 golden-drift failures, pre-existing) — standing carry.
+- Applied: 3 of 3 accepted (PO: keep local) — #1 `mined-out-pack:<file>` ranker signal (BACKLOG carried-wall follow-up), #2 goto-proof const-select wall (hazards `#value-select-if-else-vs-branch-likely` + memory `store-flag-single-bit-terminal-wall`), #3 read-after-call one-callee-saved-reg lever (memory `cross-call-live-range-callee-saved-lever` inverse trigger).
+- Carry-over: `func_80046604` (branch-scheduling wall) stays carried in `func_800453E0.c` (now 24 stubs). Next slice: continue `func_800453E0.c`'s fresh non-FP integer leaves (func_800487E4-family), OR another fresh non-FP main pack.
+
 ## Sprint 261 — carry-crack sweep on the exact-count carries (lever-exhausted tail) — 2026-07-23
 - Increment: 0 fns banked / 4 carries re-affirmed TERMINAL with sharper verdicts. md5-candidate files 230/263, delta 0. Packs unchanged (`func_8006A2C0.c` 18, `func_800453E0.c` 27, `func_80054900.c` 19).
 - Quality: 0/1/4/4 (stuck-far / permuter runs / carried / deliberately re-opened).

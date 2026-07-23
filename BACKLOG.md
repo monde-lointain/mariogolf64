@@ -205,6 +205,18 @@ fan-out (4 documented walls → 2 cracked, 1 re-framed, 1 terminal):
      `lever-tried:<lever>` field to the carry record (written at the crack attempt) so the DoR sort
      puts fresh-lever carries ahead of exhausted-lever ones, and a slice does not re-grind a tail the
      last lever already mined out. See [[same-field-sentinel-loop-peels-top-load]] and the S261 RETRO.
+   - **S262 refinement: the ranker needs a `mined-out-pack:<file>` / `fp-dominated:<file>` tag from the
+     RETRO digest so the FRESH-vein sort skips exhausted packs.** S262 pivoted off the S261-exhausted
+     `main` carry tail to a fresh leaf slice and had to HAND-survey every `main` partial pack (INCLUDE_ASM
+     greps + `.s` sizes + a per-leaf FP/jal tell scan + BACKLOG/`docs/wip` carry greps), because (a)
+     `pick_target.py --segment main` still emits one blk row (9th recurrence) and (b) the SMALLEST leaves
+     in the worked packs are documented carries or FP: `func_80059BA0.c` (retro: "easy vein mined out"),
+     `func_80095A10.c` (FP-heavy, fp 44-76/leaf), the S186-S189 render/FP packs. The right pick was
+     `func_800453E0.c` (S228 pack, still-fresh non-FP small integer leaves) — 3 clean first-build banks.
+     Record in the ranker which packs a prior retro tagged mined-out / FP-dominated (parse the RETRO
+     "Next natural slice" + "vein mined out" lines) so the fresh-pack sort DEWEIGHTS them and surfaces the
+     next mined-but-not-exhausted non-FP pack, instead of re-offering a pack whose cheap vein is gone.
+     Same source as the `carried-wall`/`lever-tried` tags (retro-digest-derived). See the S262 RETRO.
 2. **The S234 "REPEATED/LOOPED access → 0-expected-bank" access-multiplicity deweight is WRONG.**
    `func_8006F1A0` (3× same-slot RMW) and `func_8006F24C` (4-iter loop fill) BOTH banked byte-exact in
    S235 via the byte-offset-cast lever (`*(s32*)((u8*)SYM+off)`) + the stride-array loop-crack recipe
@@ -3601,12 +3613,18 @@ by `/sprint-plan`:
   nucontgbpakmgr mirrors), and the `alSynNew=synthesizer` upstream tags were NAME-only false-matches
   (stub bodies) — treat the whole pack CLASSICAL/mixed on retry.
 
-- **(S228 MIXED-PARTIAL — carried; 11 of 40 banked)** `src/main/func_800453E0.c` (main-segment
-  `[0x207E0]` golf-physics/slope pack). Subseg `[0x207E0, c, main/func_800453E0]` flipped; **11 fns C**
+- **(S228 MIXED-PARTIAL — carried; 16 of 40 banked)** `src/main/func_800453E0.c` (main-segment
+  `[0x207E0]` golf-physics/slope pack). Subseg `[0x207E0, c, main/func_800453E0]` flipped; **16 fns C**
   (S228 +8 hand-matched: `func_800469E0`/`func_8004C510`/`func_80045AC0`/`func_80045A9C`/`func_800467DC`/
   `func_8004D148`/`func_8004876C`/`func_80047D68`, plus 3 free empty-leaf auto-C). **S259 +2**
-  (`next_shuffled_index` = `func_80045B14` + its nested child `func_80045AD4`). **27 stubs remain**,
-  ROM green off extracted asm, NOT md5-candidate. **Carries:**
+  (`next_shuffled_index` = `func_80045B14` + its nested child `func_80045AD4`). **S262 +3 FRESH
+  smallest-first asm-first banks**: `func_800487E4` (flag/wind dispatch), `func_80048690` (HUD reset +
+  spawn glue), `func_80045C00` (match-init + debug block) — all first-build byte-exact. **24 stubs
+  remain**, ROM green off extracted asm, NOT md5-candidate. **S262 CORRECTION: the S228/S259 "cheap vein
+  mined out, NOT a smallest-first continuation" verdict was WRONG** — this pack still had untouched clean
+  non-FP integer leaves (fp=0 glue/dispatch) that bank first-build; the tail's FP `calc_slope_*` +
+  mid-logic walls are interleaved, not the whole remainder. Re-derive per-leaf (FP-tell + carry-grep),
+  do not write off the pack. **Carries:**
   - `func_8004683C` — **S261: 23/23 EXACT, re-affirmed TERMINAL `#local-alloc-qty-permutation`** (in-file
     note). The `&&`-chain tail fixes the `andi`+`sltu`, reusing the `bound` local fixes the
     `li`-before-load order; the sole residual is the register cascade. Confirmed mechanism: the ROM
@@ -3620,13 +3638,24 @@ by `/sprint-plan`:
   - `func_80048CF8` — `#pervasive-regalloc-classical-main` (S158 FP class): ROM homes the FP temps in
     `$f12/$f2/$f4` + eager-schedules the 2nd sub into the 1st `bnez` delay slot; gcc allocs `$f0/$f2` +
     reorders the load block. Logic RE'd in-file (`||`-guarded `D_800BE654 = D_800CC860 - func_80059FAC()`).
+  - `func_80046604` — **S262 CARRY, 119/118, logic fully RE'd** (`docs/wip/func_80046604.near-match.md`).
+    Club/terrain sound dispatch; head byte-exact (index math + both callee scheduling + the
+    read-kind-after-call one-callee-saved-reg lever + the kind==0 arm). Residual = 3 branch-scheduling
+    coins one wall class `#value-select-if-else-vs-branch-likely`: `&&`-chain branch-likely fill,
+    terminal `id==8?0x56:0x54` const-select (branchless, goto-PROOF), `a0=0x54` delay-slot share across
+    id arms. Permuter blind to internal branch-target/annul bits. `lever-tried: {read-after-call,
+    flat-&&, ternary, switch, shared-label-goto}`. Escalation = compiler-source dive (ifcvt/reorg
+    branch-likely fill + `expand_cond`/`store_flag` const-select) or corpus-mining.
   - `func_80045AD4` — **BANKED S259 as a NESTED function inside `next_shuffled_index`** (the S228
     "spurious dead frame, NOT a nested fn" verdict was wrong: the caller's `addiu $v0,$sp,0x10` persists
     to the `jal`; the dead `$v0` spill IS the nested prologue, and gcc emits the child before the parent).
   **Tail (~26 unprofiled):** mid-logic loops+struct-base fns (`func_80045B14`/`C00`/`CE0`/`46604`/`46898`/
   `469EC`/`479C0`/…), the `calc_slope_*` FP pitch fns, and the lead `func_800453E0` (213i, caller-evict
-  into func_80054900.c). **Next slice:** a fresh pack / escalation, NOT a smallest-first continuation —
-  the cheap vein is mined out and the tail is S224 wall-class.
+  into func_80054900.c). **Next slice (S262-updated):** CONTINUE smallest-first here — the S262 sweep
+  proved clean non-FP integer leaves remain (func_800487E4-family: dispatch/init glue, fp=0). Sort the
+  24 stubs by `.s` size AND a per-leaf FP-tell (`grep -cE 'c1|cvt|\.s,'`) + carry-grep; the fp=0 leaves
+  bank first-build asm-first, the fp-heavy `calc_slope_*`/`func_8004B474`(fp=116)/`func_80048D7C`(fp=662)
+  are the S158 walls to defer. Only pivot to a fresh pack once the fp=0 leaves are exhausted.
 
 - **(S214 MIXED-PARTIAL — carried; 5 of 8 banked)** `src/main/func_80026400.c` (main-segment scenery
   render pack, subseg `[0x1800, c, main/func_80026400]` already flipped). S214 banked `func_80026400`
