@@ -14,8 +14,17 @@
 # Both sides are normalised so that only real differences show: `$` register prefixes, `%hi/%lo`
 # relocations, immediates, `(0xX >> 16)` / `(0xX & 0xFFFF)` splat spellings, `addu rX,rY,zero` vs
 # `move`, `addiu rX,zero,N` vs `li`, the SDK FP register aliases (`fv0`/`fs1` vs `f0`/`f22`), and
-# branch/jal targets. The first output line is the instruction COUNT of each side, which is the most
-# actionable number when a body is structurally right but the wrong length.
+# EXTERNAL branch/jal targets. The first output line is the instruction COUNT of each side, which is
+# the most actionable number when a body is structurally right but the wrong length.
+#
+# INTERNAL branch targets are NOT collapsed to a placeholder (S260). A `.L<vram>` (asm side) or a
+# `<fn+0xNN>` (object side) target is rewritten to a POSITION-RELATIVE delta `@Dp<n>`/`@Dm<n>` (the
+# signed distance in instructions from the branch to its target). This makes a redirected back edge
+# VISIBLE: S260 `collect_keyframe_events_at` was byte-clean under the old placeholder normalisation
+# (both sides read `T`) while the ROM branch went to the loop-top `lh` and the build's went one insn
+# later to the `bnel`; that single-instruction redirect broke the full-make ROM and only
+# `tools/verify-rom.sh` caught it. With the delta form the two edges now differ (`@Dm52` vs `@Dm51`).
+# This remains an ITERATION oracle only — every bank still gates on `tools/verify-rom.sh`.
 #
 # The object is auto-resolved from the function's segment when not given. Rebuild it first:
 #   find build -name '<obj>.o' -delete && make build/src/<tree>/<obj>.o
@@ -48,6 +57,82 @@ if [ ! -f "$OBJ" ]; then
     exit 1
 fi
 
+# --- Extract each side as one instruction per line, INTERNAL branch targets rewritten to a
+#     signed position-relative delta (@Dp<n> / @Dm<n>). External targets are left as names so norm
+#     collapses them to `T`. ---
+
+# ROM side: two-pass awk over the .s (mawk-compatible: no 3-arg match / strtonum). Instruction lines
+# are `/* off vram word */ mnem operands`; with default FS the vram is field 3. Internal targets are
+# `.L<vram>` (vram embedded in the label). Pass 1 maps each instruction's vram string -> index; pass 2
+# rewrites `.L<vram>` to a signed position delta and drops the comment.
+rom_stream() {
+    awk '
+        FNR == NR {
+            if ($1 == "/*" && $5 == "*/") { idx++; vram2idx[tolower($3)] = idx }
+            next
+        }
+        {
+            if ($1 != "/*" || $5 != "*/") next
+            NR2++
+            sub(/^.*\*\/[ \t]+/, "")
+            if (match($0, /\.L[0-9A-Fa-f]+/)) {
+                lab = substr($0, RSTART, RLENGTH)
+                vr = tolower(substr(lab, 3))
+                if (vr in vram2idx) {
+                    d = vram2idx[vr] - NR2
+                    tok = (d < 0) ? "@Dm" (-d) : "@Dp" d
+                    $0 = substr($0, 1, RSTART - 1) tok substr($0, RSTART + RLENGTH)
+                }
+            }
+            print
+        }
+    ' "$1" "$1"
+}
+
+# Object side: two-pass awk over the objdump slice (mawk-compatible). Instruction lines are
+# `<hex>:  <word>  mnem operands [<addr> <sym>]`. Pass 1 maps each instruction's absolute hex address
+# string -> index. Pass 2 strips the addr+word prefix; a trailing `<addr> <fn...>` referencing THIS
+# function is rewritten to the same position delta (so an internal branch is position-relative), and
+# any other trailing `<addr> <sym>` (an external call/tail-jump) is collapsed to `T` to match norm.
+obj_stream() {
+    local slice
+    slice=$(mktemp)
+    mips-linux-gnu-objdump -d "$OBJ" | awk "/<${FUNC}>:/,/^\$/" > "$slice"
+    awk -v fn="$FUNC" '
+        FNR == NR {
+            if (match($0, /^[ \t]+[0-9a-f]+:/)) {
+                s = substr($0, RSTART, RLENGTH)
+                gsub(/[ \t:]/, "", s)
+                idx++; addr2idx[tolower(s)] = idx
+            }
+            next
+        }
+        {
+            if (!match($0, /^[ \t]+[0-9a-f]+:/)) next
+            NR2++
+            line = $0
+            sub(/^[ \t]+[0-9a-f]+:[ \t]+[0-9a-f]+[ \t]+/, "", line)
+            # trailing "<targetaddr> <sym>"
+            if (match(line, /[0-9a-f]+ <[^>]*>[ \t]*$/)) {
+                tail = substr(line, RSTART, RLENGTH)
+                head = substr(line, 1, RSTART - 1)
+                # target address = leading hex of the tail
+                ta = tail; sub(/ .*$/, "", ta); ta = tolower(ta)
+                internal = (index(tail, "<" fn ">") > 0) || (index(tail, "<" fn "+") > 0)
+                if (internal && (ta in addr2idx)) {
+                    d = addr2idx[ta] - NR2
+                    tok = (d < 0) ? "@Dm" (-d) : "@Dp" d
+                    line = head tok
+                } else {
+                    line = head "T"
+                }
+            }
+            print line
+        }
+    ' "$slice" "$slice"
+    rm -f "$slice"
+}
+
 norm() {
     sed -E '
         s/\$//g
@@ -63,6 +148,10 @@ norm() {
         s/ $//
         s/\b(addu|or) ([a-z0-9]+),([a-z0-9]+),zero/move \2,\3/
         s/\baddiu ([a-z0-9]+),zero,/li \1,/
+        s/\bbeq ([a-z0-9]+),zero,/beqz \1,/
+        s/\bbne ([a-z0-9]+),zero,/bnez \1,/
+        s/\bbeql ([a-z0-9]+),zero,/beqzl \1,/
+        s/\bbnel ([a-z0-9]+),zero,/bnezl \1,/
         s/\b(jal|j|b[a-z]*) [.A-Za-z_][A-Za-z0-9_.]*$/\1 T/
         s/\b(fv0|fv1|fs0|fs1|fs2)\b/fN/g
         s/\bf(0|2|20|22|24)\b/fN/g
@@ -74,12 +163,8 @@ ROM_N=$(mktemp)
 MINE_N=$(mktemp)
 trap 'rm -f "$ROM_N" "$MINE_N"' EXIT
 
-grep -oP '^\s+/\*.*?\*/\s+\K.*' "$ASM_FILE" | norm > "$ROM_N"
-mips-linux-gnu-objdump -d "$OBJ" \
-    | awk "/<${FUNC}>:/,/^\$/" \
-    | grep -E '^\s+[0-9a-f]+:' \
-    | sed -E 's/^\s+[0-9a-f]+:\s+[0-9a-f]{8}\s+//' \
-    | norm > "$MINE_N"
+rom_stream "$ASM_FILE" | norm > "$ROM_N"
+obj_stream | norm > "$MINE_N"
 
 echo "rom=$(wc -l < "$ROM_N") mine=$(wc -l < "$MINE_N")  ($OBJ)"
 diff <(cat -n "$ROM_N") <(cat -n "$MINE_N") || true

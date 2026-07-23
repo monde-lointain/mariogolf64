@@ -1264,6 +1264,34 @@ Three honest caveats:
   ranker follow-up; #6 splice guard -> workflow conventions, now with a mechanical check).
   RANKER: 6th recurrence, unchanged — `--segment main` still emits ONE row, gate backlog hand-built.
   Push: local.
+  S260: CARRY-CRACK SWEEP continuation of S259's superseded-lever sort (PO approved as proposed over
+  a fresh pack; inline serial, no fan-out). **3 fns banked / 3 carries advanced**; all three banks
+  were prior sprints' documented TERMINAL walls, none a fresh leaf. Banks: `func_8006DF84` (0x6C,
+  S240 "cross-jump blocks the annul, not permuter-reachable" -- the ROM also merges the two stores,
+  then reorg STEALS the merged single store into the annulled `bnel`; the out-of-line handler lever
+  [[out-of-line-handler-block-branch-likely]] restores the single-instruction merged block),
+  `func_8006D164` (0x98, S240 "LICM/regalloc coin, likely terminal" -- a goto OUTER loop keeps loop.c
+  out so `li 4` stays re-materialized in-loop, one build [[goto-loop-defeats-loop-strength-reduction]]),
+  `find_keyframe_offset_by_tag` (0xC4, the S213 `loop.c:505-545`-cited "PROVEN WALL" -- a goto loop
+  kills the PEEL the whole verdict rested on; + single-exit `goto done`, out-of-line advance, named
+  `tracks` local). Carries advanced: `func_8004683C` at **23/23**, residual root-caused to a
+  local-vs-global alloc phase ordering (no MIPS `REG_ALLOC_ORDER`; permuter 934k iters, base 170 best
+  150); `collect_keyframe_events_at` at **54/54, one branch-offset bit** (whole body byte-identical,
+  back edge redirected over a redundant re-load -- and `cmpfn.sh` reported it clean because it
+  normalized branch targets, caught only by full-make); `func_8006D38C` reached its THIRD (last)
+  access shape via a struct view over the existing symbol (82/84, residual now a single cse-forward
+  question [[negative-displacement-neighbour-needs-one-symbol]]). md5-candidate **0 delta** this
+  sprint (all three packs still partial). Seed 5 (classical, crack-attempt slice); banked 0pt (files
+  partial); realized 9 / residual +4 (+1 permuter, +1 carry-or-reopen, +1 novel gotcha [cmpfn
+  branch-target blind spot exposed a byte-clean-but-broken function], +1 re-attempt cluster; all
+  banks were re-opened walls). Rolling-5 (S256-S260): 3+2+3+4+3. Quality **0 / 1 permuter run / 3
+  carried / 6 deliberately re-opened**. Retro applied 4 of 4 groups (#1 cmpfn branch-target delta fix
+  + convention caveat -> `tools/cmpfn.sh` rewritten mawk-compatible + workflow; #2/#3/#4
+  goto-loop-PEEL / single-exit / init-after-call -> 3 memories + hazards goto-loop section; #5 re-open
+  source-dive walls FIRST -> workflow DoR; #6 one-symbol negative-displacement -> new memory + hazards
+  base-vs-disp section). Tooling-test suite RED at baseline (9 pre-existing golden-drift failures at
+  e9c21f0; cmpfn is shell, untested by the suite, so unaffected). RANKER: **7th recurrence,
+  unchanged** -- `--segment main` emits ONE row, gate backlog hand-built. Push: local.
   rodata-jtbl enabler, and a fresh-pack pivot; inline serial, no fan-out). **3 banked / 3 carries
   deepened to the EXACT instruction count** (22→19 stubs). Banks: `func_80088890` =
   `draw_letterbox_bars` (0x200, an S256 deferred carry, ONE-immediate near-match on the first build —

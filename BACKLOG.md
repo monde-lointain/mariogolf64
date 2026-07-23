@@ -3592,18 +3592,20 @@ by `/sprint-plan`:
 - **(S228 MIXED-PARTIAL — carried; 11 of 40 banked)** `src/main/func_800453E0.c` (main-segment
   `[0x207E0]` golf-physics/slope pack). Subseg `[0x207E0, c, main/func_800453E0]` flipped; **11 fns C**
   (S228 +8 hand-matched: `func_800469E0`/`func_8004C510`/`func_80045AC0`/`func_80045A9C`/`func_800467DC`/
-  `func_8004D148`/`func_8004876C`/`func_80047D68`, plus 3 free empty-leaf auto-C). **29 stubs remain**,
-  ROM green off extracted asm, NOT md5-candidate. **3 PROVEN-WALL carries (S228, in-file notes, do NOT
-  re-attempt, permuter-proof):**
-  - `func_8004683C` — `#local-alloc-qty-permutation`: ROM dedicates `v0=0` for the return + uses `v1`/`a0`
-    as guard scratch; gcc-2.7.2 allocates `v0` as scratch (3 source forms permute identically), plus the
-    final `(x&2)!=0` canonicalizes to `srl`+`andi` vs ROM `andi`+`sltu`. Logic RE'd in-file.
+  `func_8004D148`/`func_8004876C`/`func_80047D68`, plus 3 free empty-leaf auto-C). **S259 +2**
+  (`next_shuffled_index` = `func_80045B14` + its nested child `func_80045AD4`). **27 stubs remain**,
+  ROM green off extracted asm, NOT md5-candidate. **Carries:**
+  - `func_8004683C` — **S260: 23/23 EXACT, one register left** (in-file note). The `&&`-chain tail
+    fixes the `andi`+`sltu`, and reusing the `bound` local fixes the `li`-before-load order; the last
+    register is a local-vs-global allocation phase ordering (no MIPS `REG_ALLOC_ORDER`, so local-alloc
+    takes `v0` first and global.c masks the return copy's preference). Permuter parked at 150 over 934k
+    iters — exact-count-plus-one-register, re-runnable but not yet 0.
   - `func_80048CF8` — `#pervasive-regalloc-classical-main` (S158 FP class): ROM homes the FP temps in
     `$f12/$f2/$f4` + eager-schedules the 2nd sub into the 1st `bnez` delay slot; gcc allocs `$f0/$f2` +
     reorders the load block. Logic RE'd in-file (`||`-guarded `D_800BE654 = D_800CC860 - func_80059FAC()`).
-  - `func_80045AD4` — `#dead-frame-reload-artifact-regalloc-wall`: ROM opens `addiu sp,-8`+`sw $v0,0(sp)`
-    (dead spill, never reloaded) with no address-taken trigger; caller `func_80045B14` sets no static
-    chain, so it is a spurious dead frame, NOT a nested fn. Logic RE'd (D_800DAEE0[] byte-swap).
+  - `func_80045AD4` — **BANKED S259 as a NESTED function inside `next_shuffled_index`** (the S228
+    "spurious dead frame, NOT a nested fn" verdict was wrong: the caller's `addiu $v0,$sp,0x10` persists
+    to the `jal`; the dead `$v0` spill IS the nested prologue, and gcc emits the child before the parent).
   **Tail (~26 unprofiled):** mid-logic loops+struct-base fns (`func_80045B14`/`C00`/`CE0`/`46604`/`46898`/
   `469EC`/`479C0`/…), the `calc_slope_*` FP pitch fns, and the lead `func_800453E0` (213i, caller-evict
   into func_80054900.c). **Next slice:** a fresh pack / escalation, NOT a smallest-first continuation —
@@ -3625,17 +3627,19 @@ by `/sprint-plan`:
   byte-exact (S211 +20; S212 +5; **S213 +3 via a compiler-source dive**: `lookup_animation_by_id`
   terminator-condition loop framing, `activate_texture_anim_slot` const-first delay-fill, `func_800577DC`
   polychara init — the last two via 6 offset-0 `polychara_*` symbol_addrs aliases fixing a
-  `.NON_MATCHING` bss-flow). **20 stubs remain**, ROM green off extracted asm. Tiny-accessor,
-  small-loop, mid-size non-FP-logic, straight-line-FP, AND the tractable search-loop veins are now MINED
-  OUT. **5 PROVEN-WALL carries (S213 gcc-2.7.2 source dives — permuter-proof, do NOT re-attempt):**
+  `.NON_MATCHING` bss-flow). **S260 +1** (`find_keyframe_offset_by_tag`). **19 stubs remain**, ROM
+  green off extracted asm. **4 carries (was 5; the S213 base-vs-displacement "PROVEN WALL" is retired):**
   - `func_80056060` — `docs/wip/func_80056060.near-match.md`. PROVEN WALL (`global.c` allocno_compare):
     cs has forced max n_refs=4 + min live-span so it ALWAYS colors s0 first; target cs→s1 is unreachable
     for this instruction stream in a standalone TU. Needs a different RTL context, not a source rewrite.
-  - `find_keyframe_offset_by_tag` + `collect_keyframe_events_at` —
-    `docs/wip/find_keyframe_offset_by_tag.near-match.md`. PROVEN WALL ([#base-register-vs-displacement]):
-    `loop.c` peel/CSE (loop.c:505-545) caches the re-derivable base in a caller-saved temp, blocking the
-    3rd callee-saved promotion; collect adds a `loop.c:3214` strength-reduction IV split that defeats
-    reorg `optimize_skip` annul. No source form suppresses the peel while keeping re-derivation.
+  - `collect_keyframe_events_at` — **S260: 54/54, ONE BRANCH-OFFSET BIT** (`docs/wip/collect_keyframe_events_at.near-match.md`).
+    The S213 `#base-register-vs-displacement` peel/strength-reduction verdict is RETIRED: the goto loop
+    keeps loop.c out entirely, and the whole body reproduces byte-for-byte (every register, both
+    annulled skips, the frame). The only diff is the loop back edge, redirected over a redundant
+    loop-top re-load. Permuter-eligible (exact count, one branch offset); or a compiler-source dive into
+    which `jump_optimize` pass redirects a conditional back edge. **`find_keyframe_offset_by_tag` BANKED
+    S260** (same goto-loop lever, single-exit, out-of-line advance) — the S213 `loop.c:505-545` peel
+    verdict named the right pass but a goto loop is never entered into loop.c's list.
   - `func_800564F0` + `func_80055738` — `docs/wip/func_800564F0-func_80055738.delay-slot-wall.md`.
     PROVEN WALL ([#delay-slot-fill-of-a-null-guard-beqz]): void single-pred const-store null-guard;
     reorg.c:3374 `fill_slots_from_thread` ALWAYS fills the beqz delay with the const-materializing first
@@ -5115,7 +5119,9 @@ by `/sprint-plan`:
   `none` pack, subseg 0x456C0 flipped `c` at the S223 gate; mode/asset state + DL + sfx system). **23
   banked** (19 S223 tiny/getter/setter/mode-state + asset-load/free `func_8003E400.c` twins; +1 S224
   `func_8006ADF8` mode-gated club dispatch; +2 S239 DL-emitter twins `func_8006A4A0`/`func_8006A548`
-  6-cmd parameterized TLUT-load via stock `gDP*(gfx++)` macros; **+1 S240** `func_8006AD1C`), 22 stubs remain
+  6-cmd parameterized TLUT-load via stock `gDP*(gfx++)` macros; **+1 S240** `func_8006AD1C`;
+  **+2 S259** `func_8006D058` + `func_8006CE88`; **+2 S260** `func_8006DF84` + `func_8006D164`),
+  **18 stubs remain**
   (**S241 banked 0** — an escalation crack-attempt fan-out over the mid-logic wall cluster, all 3 targets
   carried; see below). The ranker re-surfaces it as a
   c-stub `remaining:N` continuation smallest-first, but the tractable vein is now MINED (see the S224
@@ -5136,12 +5142,12 @@ by `/sprint-plan`:
   `(u16 & 0x8000)?1:0` collapses to `lhu;srl 0xf` vs ROM `andi;bnez;li 1;move 0`; source-INVARIANT across
   10 forms, permuter-denied length deficit; extends the S231 const-select wall to a single-bit/sign
   deciding term; `docs/wip/func_8006C8CC.near-match.md`; escalation = `do_store_flag` vs `do_jump`
-  BIT_AND_EXPR compiler-source dive); `func_8006D164` (S223, DEEPENED S240 — strided u16 4×7 double-loop,
+  BIT_AND_EXPR compiler-source dive); `func_8006D164` (**BANKED S260** via the goto-loop lever — the S240 "LICM/regalloc coin, likely terminal" verdict fell in one build; DEEPENED-note kept for history: strided u16 4×7 double-loop,
   body byte-exact; residual = ROM rematerializes the outer-limit `li 4` inside the loop (reuses the
   set-in-loop data reg -> LICM can't hoist) but build hoists 4 to a fresh reg -> 3-reg rotation on the
   pointer bases; `#top-tested-loop-goto-local-hoist` selective-hoist + live-length. S240 tried `!=`
   bounds (fixed inner `bne`), n-variable/decl-swap/do-while, + a 4-min --main permuter — NO crack;
-  `docs/wip/func_8006D164.near-match.md`); `func_8006DF84` (S224, REFINED S240 — body byte-exact; the S224
+  `docs/wip/func_8006D164.near-match.md`); `func_8006DF84` (**BANKED S260** — the S240 base-reg factor + the out-of-line handler lever (the ROM merges the two tails, then reorg STEALS the merged single store into the annulled `bnel`; a forward `goto` to a handler after the chain restores the steal-able single-instruction block; [[out-of-line-handler-block-branch-likely]]). Body byte-exact; the S224
   "`&D_800FF4D0[const]` address-fold" was actually a solvable base-reg factor: `s32* base` declared BEFORE
   the `get_shot_data()` call crosses the jal -> callee-saved `s0` (Axis 7 cross-call live-range lever,
   `#loop-weight-and-live-length-regalloc-steering`). TERMINAL factor = cross-jump-tail-merge: the two
@@ -5150,17 +5156,15 @@ by `/sprint-plan`:
   `docs/wip/func_8006DF84.near-match.md`, `#cross-jump-tail-merge` + `#reorg-optimize_skip-annulled-bnel`); `func_8006DEB4` (S224 — `#base-register-vs-displacement` on the
   D_801B7270 chain: scalar folds w/ p=a1, pointer gets base-reg but swaps p→a2+caches, target wants
   base-reg+reload+p=a1; all levers else landed via `#nested-guard-range-unfold--comparison-operand-order`);
-  `func_8006D058` (S224 — D164 loop-strength-reduction x2, iterated 6180→4040→2960 but stays
-  structurally longer, not permuter-eligible);
-  `func_8006D38C` + `func_8006D214` (**S241 — TERMINAL `#base-register-vs-displacement`, S224 tag
-  CONFIRMED**; 84i/94i min/max-search over the 0xB8-stride D_801B725x array + *14 u16-table redistribute.
+  `func_8006D058` (**BANKED S259** — the S224 "loop-strength-reduction x2, structurally longer" verdict was wrong; 67/67 first build, residual = three `s8` loads reordered by ONE reused variable [[one-variable-reuse-reorders-loads]]);
+  `func_8006D38C` + `func_8006D214` (**S260 — all three access shapes now REACHED; carry at 82/84 (D214 model-transfer pending the same cse-forward fix)**; 84i/94i min/max-search over the 0xB8-stride D_801B725x array + *14 u16-table redistribute.
   Byte-offset-cast lever CRACKED the array walk byte-exact (D214's FP scale 0x3895508E also byte-exact),
   isolating the residual to a NEW third terminal sub-case: nearby-SCALAR-global `%hi`-base CSE-share — ROM
   materializes `&D_801B60BB` full + reaches count via `lw t0,-0x2B(reg)` + holds it callee-saved; gcc-2.7.2
   folds `%lo` per access w/ fresh `lui %hi`, cascading loop coloring. Root `mips.h GO_IF_LEGITIMATE_ADDRESS`
-  config/mips/mips.h:2318-2349; 3 source forms all park ~10620/10900; permuter-UNREACHABLE.
+  S259 cracked two shapes; S260 reached the third (`lw t0,-0x2B(a0)`) via a struct view over the existing symbol (the neighbour read needs both globals to be ONE source symbol, cse `use_related_value`). Residual is now a single cse-forward question, not addressing (with both reads on one symbol cse forwards the guard load to the preheader; a constant-address store can't invalidate it, `cse.c:7564`). Next: a varying-address store the ROM also has, or a multi-pred preheader join.
   `docs/wip/func_8006D38C.near-match.md` + `.../func_8006D214.near-match.md`, `docs/hazards.md#base-register-vs-displacement`);
-  `func_8006CE88` (**S241 — permuter-only regalloc floor**; 116i grid clear/scan + sprintf builder. Body
+  `func_8006CE88` (**BANKED S259** — the "NOT permuter-eligible (pct 0.553)" verdict was measured on a body with a 2-instr deficit; the array-element bound lever took it to 116/116, permuter base 55, banked. History: 116i grid clear/scan + sprintf builder. Body
   CRACKED 13000→5360/0.553: loop1 pointer-walk reload+`bne` (`sched.c:834`), block-scoped count-address
   ptr, byte-offset flag-array re-materialize, and the `arg0`/state $s1/$s2 swap fixed via ARRAY-INDEX
   `D_801050BC[k]` not an explicit `s8*` ptr (`global.c:594-601` ref-count steals $s1). Residual = 3

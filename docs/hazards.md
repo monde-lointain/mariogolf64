@@ -4445,6 +4445,20 @@ addressing exactly and it banked S258 as `scroll_sky_panels_by_wind`. The same s
 MIXING: the two outer grid loops as gotos (ROM keeps `li v0,5`/`li v0,4` inline, no SR on the block
 base), the inner column loop structured (ROM has the two pointer givs only SR produces).
 
+**A goto loop defeats EVERY loop.c pass, not only strength reduction and bound hoisting (S260).**
+That includes the first-iteration PEEL. S260 banked `find_keyframe_offset_by_tag`, which S213 had
+root-caused with a `file:line` citation to a "PROVEN WALL": loop.c peels the first iteration
+(`loop.c:505-545`), which exposes a re-derivable `base+off` invariant to CSE inside the peeled
+extended block, caches the base in a caller-saved temp, and blocks the result variable from a
+callee-saved register — and S213 concluded no source form could avoid it. A goto loop is never
+entered into loop.c's loop list, so there is no peel to fight and the whole body reproduces. So when
+a wall doc names ANY loop.c transform as the mechanism (peel, unroll, SR, LICM), try the goto loop
+first regardless of the verdict's wording. Two more levers stacked on the same function: a SINGLE
+`goto done` exit across all guards (reorg then replicates the shared `move v0,<reg>` return copy into
+each guard's delay slot, where per-guard `return CONST` materializes the constant separately), and a
+named local for the pointer-derivation chain so it splits across `v0`/`v1` instead of collapsing;
+see the memories `out-of-line-handler-block-branch-likely` and `goto-loop-defeats-loop-strength-reduction`.
+
 This is the inverse reading of `#top-tested-loop-goto-local-hoist` and of the memory
 `goto-loop-vs-structured-loop-codegen`, which record only that a goto loop LOSES loop.c's
 optimizations. Losing them is sometimes the goal, so it does not conflict with "goto is a last
@@ -6918,11 +6932,34 @@ rooted in `config/mips/mips.h GO_IF_LEGITIMATE_ADDRESS:2318-2349`. Two of them h
 | holds `&SYM` across a loop and RE-READS it (`lw 0(a3)`) | read it as an ARRAY element (`extern s32 SYM[]` + `SYM[0]`) — see `#multi-level-bound-re-read-array-element-form-not-a-cached-pointer` |
 
 Both functions now build at the exact ROM instruction count (84/84 and 94/94) with a
-register-permutation residual. The shape STILL unreached is the third one: the ROM reaching a
-neighbouring global by NEGATIVE DISPLACEMENT off a held base (`lw t0,-0x2B(a0)` where
-`a0 = &D_801B60BB`). Spelling that `*(s32*)(p - 0x2B)` gets CSE'd against the array-form read (2
-instrs short); keeping the two spellings distinct restores the count but not the addressing. So the
-wall is now ONE shape, not three — re-check any carry citing this class before re-asserting it.
+register-permutation residual.
+
+**S260: the THIRD shape is reachable too.** The ROM reaching a neighbouring global by NEGATIVE
+DISPLACEMENT off a held base (`lw t0,-0x2B(a0)` where `a0 = &D_801B60BB`, so the read is
+`D_801B6090` = `D_801B60BB - 0x2B`) is UNREACHABLE from any source that keeps the two globals as two
+distinct `D_` symbols: cse's `use_related_value` only relates addresses WITHIN one symbol's value
+class, so it never forms a displacement between two separate symbols. The lever is to make them ONE
+object — model the contiguous region as a struct (or array) and view it through whichever member
+already has a placed symbol, with no shared-file change:
+
+```c
+typedef struct { s32 count; u8 pad[0x27]; s8 flag; } RoundState;
+#define ROUND (*(RoundState*)D_801B6090)   /* D_801B6090 = the placed symbol */
+s8* flag = &ROUND.flag;   /* la a0,D_801B60BB ; lb 0(a0)  */
+... ROUND.count ...       /* addiu t0,a0,-0x2B ; lw 0(t0) */
+```
+
+That produces the ROM's addressing exactly (S260 `func_8006D38C` reached all three shapes). What
+remains is a pure cse-forwarding question, not an addressing one: with both reads on one symbol, cse
+forwards the entry-guard's load to the loop preheader and the second load disappears (82/84, 2
+short). A store between them only breaks the forward if its ADDRESS VARIES — `note_mem_written`
+(`cse.c:7564`) sets `nonscalar` only for a varying store address, and `invalidate_memory`
+(`cse.c:7715`) purges `in_struct` entries only for a nonscalar write, so a constant-address store
+(`D_800C4144 = -1`) cannot help. Next attempts: a genuinely varying-address store the ROM also has
+between the two reads, or a second predecessor for the preheader block (`#value-select-if-else-vs-branch-likely`
+/ the memory `ifelse-not-ternary-cse-reset` resets cse's table at a multi-pred join). See the memory
+`negative-displacement-neighbour-needs-one-symbol`. So the wall is now ONE cse question, not three
+addressing mysteries — re-check any carry citing this class before re-asserting it.
 
 **Symptom (S210; `func_8005DE88` / `func_8005AF80` / `func_8005CEE0`).** A classical fn is byte-exact
 except a run of N register-only (`r`) diff rows all on ONE data-access chain: the ROM materializes a

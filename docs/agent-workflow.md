@@ -111,6 +111,17 @@ resume surface when the middle spans context windows.
       tail carries fully-RE'd near-match comments; fall back to a fresh pack only if the fan-out returns
       genuine walls. See `docs/hazards.md` (the three sections above) and the memory
       `revalidate-old-carries-stale-wall`.
+      - **S260 sharpened the trigger: a `file:line`-cited "PROVEN WALL" is the HIGHEST-priority
+        re-open target when a new structural lever lands, not a reason to skip it.** S260 banked
+        `find_keyframe_offset_by_tag`, whose S213 doc was the strongest terminal verdict in the tree
+        (a compiler-source dive citing `loop.c:505-545`'s first-iteration peel + the CSE cascade it
+        drives, "no source form yields {no-peel + re-derive + reload + result-in-s1}"). The citation
+        was correct and the "no source form exists" conclusion drawn from it was not: the goto loop
+        removes loop.c from the picture entirely, peel included. So when a sprint gains a new
+        structural lever (a goto loop, a struct-view for a neighbour read, an out-of-line handler),
+        the DoR sort should put the carries whose cited pass that lever DISABLES at the FRONT, however
+        strongly worded their verdict — the more source-dive backing a verdict has, the more precisely
+        it names the pass a structural lever can now sidestep.
       - **But not every wall is steerable — the fan-out ALSO earns its keep by returning terminal
         no-lever VERDICTS (S233).** S233 fanned 3 gcc-2.7.2 + binutils-2.6 subagents over a fresh
         `raycast_terrain.c` FP/collision pack's near-match tail: 1 genuine CRACK+bank
@@ -590,12 +601,21 @@ below).
   deps and is PEP-668-locked).
 - **Per-function iteration oracle: `tools/cmpfn.sh <func> [<object>]` (S258).** Diffs the extracted
   `asm/nonmatchings/**/<func>.s` against a freshly built object, normalising register prefixes,
-  `%hi/%lo`, immediates, the splat `(0xX >> 16)` spellings, `move`/`li` aliases, the SDK FP register
-  names (`fv0`/`fs1` vs `f0`/`f22`) and branch targets, so only real differences show. Its first line
-  is the instruction COUNT of each side — the most actionable number when a body is structurally
-  right but the wrong length. Unlike `diff.py` it reads the object directly, so it never goes stale
-  after an incremental `make build/src/<tree>/<obj>.o`. It is an ITERATION oracle only: every bank
-  still gates on `tools/verify-rom.sh`.
+  `%hi/%lo`, immediates, the splat `(0xX >> 16)` spellings, `move`/`li` aliases (including
+  `beqz`/`bnez` and their branch-likely forms), the SDK FP register names (`fv0`/`fs1` vs `f0`/`f22`),
+  and EXTERNAL branch/jal targets, so only real differences show. Its first line is the instruction
+  COUNT of each side — the most actionable number when a body is structurally right but the wrong
+  length. Unlike `diff.py` it reads the object directly, so it never goes stale after an incremental
+  `make build/src/<tree>/<obj>.o`. It is an ITERATION oracle only: every bank still gates on
+  `tools/verify-rom.sh`.
+  - **INTERNAL branch targets are position-relative deltas, NOT a placeholder (S260 fix).** Before
+    S260 the tool collapsed every branch target to `T`, so it could not see a redirected back edge and
+    reported such a function byte-clean: S260 `collect_keyframe_events_at` was a `cmpfn`-clean 54/54
+    whose loop back edge went one instruction too far and broke the full-make ROM. It now rewrites a
+    `.L<vram>` (asm side) or `<fn+0xNN>` (object side) target to a signed `@Dp<n>`/`@Dm<n>` distance in
+    instructions, so a redirected edge shows as a real diff (`@Dm14` vs `@Dm13`) while a correct
+    internal branch cancels cleanly. Even so, `cmpfn` is an ITERATION oracle: a `cmpfn`-clean function
+    is not a bank until `tools/verify-rom.sh` (full-make ROM SHA-1) says so.
 - **Shared tool helpers** live in `tools/decomp_common.py` (venv re-exec, path constants, asm/symbol
   regexes, `emit`/`log`, `find_segment`, SDK-path config) and `tools/lib.sh` (shell wrappers).
   `make test-tools` runs the `tests/tooling/` characterization suite (pytest); refactor tooling under
