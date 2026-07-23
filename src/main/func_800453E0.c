@@ -27,16 +27,56 @@ void* func_80045A9C(s32* arg0) { return func_80040E3C(arg0[4], arg0[6]); }
 
 s32 func_80045AC0(void) { return D_800BE62C == 4; }
 
-/* func_80045AD4: CARRIED (near-match). Logic RE'd: byte-swap of a D_800DAEE0[]
- *   element pair (u8 t = D_800DAEE0[arg1]; D_800DAEE0[arg1] = D_800DAEE0[arg0];
- *   D_800DAEE0[arg0] = t;). Wall = #dead-frame-reload-artifact-regalloc-wall: ROM
- *   opens addiu sp,-8 + sw $v0,0(sp) (dead spill of incoming $v0, never reloaded)
- *   with no address-taken trigger; caller func_80045B14 sets no static chain, so
- *   it is a spurious dead frame, not a nested fn. No faithful-C source form emits
- *   the frame. */
-INCLUDE_ASM("asm/nonmatchings/main/func_800453E0", func_80045AD4);
+extern s8 D_800DAEE0[];
+extern s32 D_800BE6A0;
+extern s32 rand(void);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_800453E0", func_80045B14);
+/* Shuffle-bag draw. arg0 == 0 reshuffles: fill 0..9 then 5 random swaps, return
+ * -1. Otherwise draw the next entry, and reshuffle once the bag runs out.
+ * func_80045AD4 is a GCC NESTED function: it homes the static chain in $v0
+ * (`addiu sp,-8; sw $v0,0(sp)`) without ever reading it, and the caller sets
+ * the chain with `addiu $v0,$sp,0x10` before the jal. */
+s32 next_shuffled_index(s32 arg0) {
+  void swap_entries(s32 i, s32 j) {
+    u8 t = D_800DAEE0[j];
+    s32 u = D_800DAEE0[i];
+
+    D_800DAEE0[i] = t;
+    D_800DAEE0[j] = u;
+  }
+  s32 i;
+  s32 count;
+  s32 val;
+
+  if (arg0 != 0) {
+    goto draw;
+  }
+
+  D_800BE6A0 = 0;
+  i = 0;
+  count = 10;
+init_loop:
+  D_800DAEE0[i] = i;
+  i++;
+  if (i != count) {
+    goto init_loop;
+  }
+
+  i = 0;
+  do {
+    swap_entries(i, rand() % 10);
+    i++;
+  } while (i != 5);
+  return -1;
+
+draw:
+  val = D_800DAEE0[D_800BE6A0];
+  D_800BE6A0++;
+  if (D_800BE6A0 == 10) {
+    next_shuffled_index(0);
+  }
+  return val;
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_800453E0", func_80045C00);
 
