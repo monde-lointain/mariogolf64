@@ -280,6 +280,26 @@ void func_8006D208(s32 arg0) { D_800C4144 = arg0; }
 
 INCLUDE_ASM("asm/nonmatchings/main/func_8006A2C0", func_8006D214);
 
+/* func_8006D38C: CARRY (S241 terminal #base-register-vs-displacement, DEEPENED
+ * S259). Min-search over the 0xB8-stride record array + a weighted u16-table
+ * redistribute. Builds at 84/84 instructions; residual is a register
+ * permutation.
+ *
+ * TWO of the three access shapes S241 called unreachable ARE source-reachable:
+ *  - "ROM materializes &D_801B60BB in full and does `lb 0(a0)`" -> hold the
+ *    address in a POINTER LOCAL (`s8* flag = &D_801B60BB;`) and read `*flag`;
+ *  - "ROM holds &D_801B6090 across the inner loop and re-reads `lw 0(a3)`" ->
+ *    read it as an ARRAY element (`extern s32 D_801B6090[]` + `D_801B6090[0]`),
+ *    whose MEM_IN_STRUCT_P may-alias defeats the CSE that folded it to one
+ * load. The inner loop must also be a `do`-`while`: the ROM has only ONE
+ * zero-guard (the `if`), so a top-tested `for` adds a second `beqz` and a `for`
+ * over a cached count CSEs the bound away. STILL UNREACHED: the third shape,
+ * `lw t0,-0x2B(a0)` — the ROM reaches D_801B6090 by NEGATIVE DISPLACEMENT off
+ * the held &D_801B60BB base. Spelling it
+ * `*(s32*)(flag - 0x2B)` gets CSE'd against the array read (2 instrs short);
+ * keeping both distinct spellings restores the count but not the addressing.
+ * Full reconstruction in docs/wip/func_8006D38C.near-match.md.
+ */
 INCLUDE_ASM("asm/nonmatchings/main/func_8006A2C0", func_8006D38C);
 
 void func_8006D4DC(void) { D_800C4144 = -1; }
