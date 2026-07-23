@@ -399,11 +399,10 @@ void func_8006D208(s32 arg0) { D_800C4144 = arg0; }
 INCLUDE_ASM("asm/nonmatchings/main/func_8006A2C0", func_8006D214);
 
 /* func_8006D38C: CARRY (S241 terminal #base-register-vs-displacement, DEEPENED
- * S259). Min-search over the 0xB8-stride record array + a weighted u16-table
- * redistribute. Builds at 84/84 instructions; residual is a register
- * permutation.
+ * S259 to 84/84, THIRD ACCESS SHAPE REACHED S260). Min-search over the
+ * 0xB8-stride record array + a weighted u16-table redistribute.
  *
- * TWO of the three access shapes S241 called unreachable ARE source-reachable:
+ * TWO of the three access shapes S241 called unreachable were solved in S259:
  *  - "ROM materializes &D_801B60BB in full and does `lb 0(a0)`" -> hold the
  *    address in a POINTER LOCAL (`s8* flag = &D_801B60BB;`) and read `*flag`;
  *  - "ROM holds &D_801B6090 across the inner loop and re-reads `lw 0(a3)`" ->
@@ -411,15 +410,32 @@ INCLUDE_ASM("asm/nonmatchings/main/func_8006A2C0", func_8006D214);
  *    whose MEM_IN_STRUCT_P may-alias defeats the CSE that folded it to one
  * load. The inner loop must also be a `do`-`while`: the ROM has only ONE
  * zero-guard (the `if`), so a top-tested `for` adds a second `beqz` and a `for`
- * over a cached count CSEs the bound away. STILL UNREACHED: the third shape,
- * `lw t0,-0x2B(a0)` — the ROM reaches D_801B6090 by NEGATIVE DISPLACEMENT off
- * the held &D_801B60BB base. Spelling it
- * `*(s32*)(flag - 0x2B)` gets CSE'd against the array read (2 instrs short);
- * keeping both distinct spellings restores the count but not the addressing.
- * Full reconstruction in docs/wip/func_8006D38C.near-match.md.
+ * over a cached count CSEs the bound away.
+ *
+ * S260 REACHED THE THIRD SHAPE, `lw t0,-0x2B(a0)`. It needs the count and the
+ * flag to be the SAME SYMBOL, because cse's use_related_value only relates
+ * offsets within one symbol -- two distinct `D_` symbols can never produce a
+ * negative displacement off each other. Model the region as a struct and view
+ * it through the existing array symbol:
+ *
+ *   typedef struct { s32 count; u8 pad[0x27]; s8 flag; } RoundState;
+ *   #define ROUND (*(RoundState*)D_801B6090)
+ *   s8* flag = &ROUND.flag;           // la a0,D_801B60BB + lb 0(a0)
+ *   ... ROUND.count ...               // addiu t0,a0,-0x2B / lw 0(t0)
+ *
+ * REMAINING (2 instructions short, 82/84): with both reads on one symbol, cse
+ * merges the loop-bound read into the entry guard's read, so the preheader
+ * `lw t0,-0x2B(a0)` disappears. The ROM keeps both loads with only a
+ * constant-address store (`D_800C4144 = -1`) between them, which cannot
+ * invalidate the first (cse.c note_mem_written:7564 sets `nonscalar` only for a
+ * VARYING store address, and invalidate_memory:7715 purges `in_struct` entries
+ * only then). Tried and rejected: array guard + struct bound (same address,
+ * still merged), caching the bound in a preheader local (merges into a `move`),
+ * and routing the D_800C4144 store through a pointer local to make its address
+ * vary (expand still folds it to the symbol before cse records the write). Full
+ * reconstruction in docs/wip/func_8006D38C.near-match.md.
  */
 INCLUDE_ASM("asm/nonmatchings/main/func_8006A2C0", func_8006D38C);
-
 void func_8006D4DC(void) { D_800C4144 = -1; }
 
 INCLUDE_ASM("asm/nonmatchings/main/func_8006A2C0", func_8006D4EC);
