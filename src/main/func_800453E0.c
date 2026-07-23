@@ -122,6 +122,40 @@ void func_80045C00(void) {
 
 INCLUDE_ASM("asm/nonmatchings/main/func_800453E0", func_80045CE0);
 
+/* func_80046604: CARRIED (S262 near-match, logic fully RE'd, 119 vs 118 instr,
+ * one over). Club/terrain sound-effect dispatch:
+ *
+ *   club  = get_club_param(*(s16*)(D_801B7222 + D_80250B54*0xB8 +
+ * D_80250B40*2)); entry = get_table_entry(D_800FBE70);   // club held in $s0
+ * across this call, kind  = *(s16*)((u8*)club + 0x24);     // read AFTER so $s0
+ * reuses to entry if (kind == 0) { if (D_80250B58 == 0 && D_80250B34 != 0) {
+ * play_sound_effect(0x50,2,0x7F); func_80213D70(0); } else { id = *(s32*)entry;
+ * func_80213D70(2); play_sound_effect(id == 0x16 ? 0x50 : 0x52, 2, 0x7F); }
+ *     func_80216CAC();
+ *   } else if ((u16)(kind - 1) < 2) {          // kind in {1,2}
+ *     a = 2; if (D_80250B58==0 && D_80250B34!=0 && active_club_id<6) a = 1;
+ *     func_80213D70(a);
+ *     id = *(s32*)entry;                        // -> 0x53/0x54/0x56 by id
+ *     switch(id){0x16:0x53; {0,1,2}:0x54; {6,7,8}:0x56; default:0x54}
+ *     play_sound_effect(a, 2, 0x7F);
+ *   } else { play_sound_effect(0x57,2,0x7F);
+ *            if (D_800BE62C != 0x13) func_80213D70(3); }
+ *
+ * The head (index math, both callee scheduling, kind read, kind==0 arm) is
+ * byte-exact. Residual = three branch-scheduling coins in the kind-in-{1,2} arm
+ * that no source form flips together (#value-select-if-else-vs-branch-likely):
+ *   1. the `&&` guard chain: ROM fills the plain `beqz/bnez` delay slots with
+ *      a0=1/a0=2; every source form emits branch-likely (`beqzl/bnezl`,
+ * annulled) instead.
+ *   2. the terminal `id==8 ? 0x56 : 0x54`: gcc if-converts to a branchless
+ *      xori/sltiu/negu/andi/ori select; the ROM keeps `bne v1,8` + two `li a0`.
+ *      A goto to a shared label does NOT stop the merge (jump-opt rejoins it).
+ *   3. the ROM shares one `a0=0x54` (set in the id<2 delay slot) across the
+ *      id<2, id==2 and default arms via fall/branch-through; an if-chain or
+ *      switch each re-materialises 0x54, and a switch lowers 6 instr SHORTER.
+ * All three are the same const-select / branch-likely wall class; permuter is
+ * blind to internal branch-target/annul bits (see collect_keyframe_events_at).
+ */
 INCLUDE_ASM("asm/nonmatchings/main/func_800453E0", func_80046604);
 
 s32 func_800467DC(s32 arg0) {
