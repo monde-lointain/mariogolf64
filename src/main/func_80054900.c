@@ -1,7 +1,7 @@
 #include "common.h"
 
 extern s32 flag_is_set(s32 flag);
-extern s32 find_keyframe_offset_by_tag(void* base, s32 tag, s32 arg2);
+extern s32 find_keyframe_offset_by_tag(s32 id, s32 track, s32 tag);
 extern void func_80054BC0(void);
 extern u8* get_character_state(s32 id);
 extern void* func_80056060(s32 id);
@@ -80,11 +80,67 @@ void func_80054E4C(s32 arg0, s32 arg1) {
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80054900", collect_keyframe_events_at);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80054900", find_keyframe_offset_by_tag);
+/* One keyframe of an animation track: a signed offset value plus the tag that
+ * selects it. Entries are packed 4 bytes apart and the list ends at val == -1.
+ */
+typedef struct {
+  s16 val;
+  u8 tag;
+  u8 pad;
+} KfEntry;
 
-s32 func_800550B8(void* arg0) {
-  return find_keyframe_offset_by_tag(arg0, 2, 6);
+/* Search track `track` of character `id` for the first keyframe tagged `tag`
+ * and return its offset relative to the track's base offset, or -1.
+ *
+ * The walk is a goto loop and the exits are a single `goto done`, both
+ * load-bearing: loop.c never sees a goto loop, so it cannot peel the first
+ * iteration and let CSE cache `(cs->0)->0x14` in a caller-saved register (that
+ * cache is what blocked `result` from a callee-saved register, S213), and a
+ * single `return result` lets reorg replicate the return copy into each guard's
+ * delay slot instead of materialising -1 per exit. The advance is written as an
+ * out-of-line handler so reorg folds `e++` into the annulled `bnel`, and the
+ * loop's own -1 needs its own local because a goto loop de-hoists a literal. */
+s32 find_keyframe_offset_by_tag(s32 id, s32 track, s32 tag) {
+  s32 result = -1;
+  u8* cs = get_character_state(id);
+  KfEntry* e;
+  s32 off;
+  s32 sentinel;
+  u8* tracks;
+
+  if (cs == NULL) {
+    goto done;
+  }
+  if (track >= *(s32*)(cs + 0x1C)) {
+    goto done;
+  }
+  tracks = *(u8**)(*(u8**)cs + 0x14);
+  off = track * 12;
+  e = *(KfEntry**)(off + (u32)tracks);
+  if (e == NULL) {
+    goto done;
+  }
+  if (e->val == result) {
+    goto done;
+  }
+  sentinel = -1;
+
+loop:
+  if (e->tag != tag) {
+    goto advance;
+  }
+  result = e->val - *(s16*)(off + (u32) * (u8**)(*(u8**)cs + 0x14) + 4);
+  goto done;
+advance:
+  e++;
+  if (e->val != sentinel) {
+    goto loop;
+  }
+done:
+  return result;
 }
+
+s32 func_800550B8(s32 arg0) { return find_keyframe_offset_by_tag(arg0, 2, 6); }
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80054900",
             update_vertex_texture_coords);
