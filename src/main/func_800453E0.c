@@ -91,14 +91,32 @@ s32 func_800467DC(s32 arg0) {
   return (guRandom() >> 2) % arg0;
 }
 
-/* func_8004683C: CARRIED (near-match). Logic fully RE'd:
- *   if (arg0 < 0x1E00 && (camera_position_y - 0x1A400) < arg1 && D_800BE63C <=
- * 0x4AFFF) return (D_800BE664 & 2) != 0; return 0; Wall =
- * #local-alloc-qty-permutation: ROM dedicates v0=0 for the return and uses
- * v1/a0 as guard scratch; gcc-2.7.2 allocates v0 as scratch (3 source forms:
- * sequential-return / ret-var / direct-return all permute v0<->v1 identically),
- * plus the final (x&2)!=0 canonicalizes to srl+andi vs ROM andi+sltu. No source
- * lever. */
+extern s32 camera_position_y;
+extern s32 D_800BE63C;
+extern s32 D_800BE664;
+
+/* func_8004683C: CARRIED at 23/23 EXACT (S260). Body below is byte-exact apart
+ * from ONE register decision -- ROM {ret=v0, scratch=v1/a0}, build
+ * {ret=a2, scratch=v1/v0}, which also costs ROM's `nop` in the third guard's
+ * delay slot (a2 lets the build sink the D_800BE664 lui there):
+ *
+ *   s32 ret = 0; s32 bound;
+ *   if (arg0 < 0x1E00) {
+ *     bound = camera_position_y - 0x1A400;
+ *     if (bound < arg1) {
+ *       bound = 0x4AFFF;
+ *       ret = bound >= D_800BE63C && (D_800BE664 & 2) != 0;
+ *     }
+ *   }
+ *   return ret;
+ *
+ * Two S259/S260 levers already applied: the trailing `(x & 2) != 0` must be the
+ * last term of an && CHAIN (a standalone store-flag takes do_store_flag's
+ * pow2 path -> srl+andi, where the ROM has andi+sltu), and `bound` is REUSED
+ * for the 0x4AFFF limit so the anti-dependency emits the `li` BEFORE the
+ * D_800BE63C load (matching the ROM's delay-slot lui). Residual is a pure
+ * global-alloc permutation: ret spans basic blocks so local-alloc takes v0 for
+ * scratch first. */
 INCLUDE_ASM("asm/nonmatchings/main/func_800453E0", func_8004683C);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_800453E0", func_80046898);

@@ -426,7 +426,32 @@ void func_8006DE44(void) {
 
 INCLUDE_ASM("asm/nonmatchings/main/func_8006A2C0", func_8006DEB4);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_8006A2C0", func_8006DF84);
+extern s32 D_801B7250;
+extern s32 D_801B7270;
+extern void* get_shot_data(void);
+
+s32 func_8006DF84(void) {
+  s32* base = &D_800FF4D0;
+  s32 pending;
+  s16 field;
+  void* shot;
+
+  shot = get_shot_data();
+  pending = D_801B7250;
+  D_801B7270 = pending;
+  field = *(s16*)((u8*)shot + 0x16);
+  if (field != 0) {
+    goto clear;
+  }
+  if (pending > 0) {
+    D_800FF4E8 = 1;
+    goto done;
+  }
+clear:
+  base[6] = 0;
+done:
+  return D_801B7270 > base[3];
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_8006A2C0", func_8006DFF0);
 
