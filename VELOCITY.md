@@ -1292,6 +1292,28 @@ Three honest caveats:
   base-vs-disp section). Tooling-test suite RED at baseline (9 pre-existing golden-drift failures at
   e9c21f0; cmpfn is shell, untested by the suite, so unaffected). RANKER: **7th recurrence,
   unchanged** -- `--segment main` emits ONE row, gate backlog hand-built. Push: local.
+  S261: CARRY-CRACK SWEEP on the EXACT-COUNT carries (PO approved as proposed; inline serial). This
+  tail was the RESIDUAL after S259+S260's goto-loop lever banked the crackable carries, so **0 banks /
+  4 carries re-affirmed TERMINAL** with sharper verdicts (PO signed off as a characterization slice,
+  not a bank miss). `func_8006D38C` (84/84) + `func_8006D214` (94/94 transfer): the base-vs-disp last
+  shape is a MUTUAL EXCLUSION -- a0-relative addressing (mem-in-struct -> re-read or cse-merge) vs a
+  held value (plain read -> fresh `lui`); no source form gives both ([[negative-displacement-neighbour-needs-one-symbol]]).
+  `collect_keyframe_events_at` (54/54): root-caused the one back-edge bit to a gcc first-load PEEL (top
+  and bottom both read `q->val`, same field, so gcc peels the redundant top load; find_keyframe escaped
+  via a tag/val field-split) ([[same-field-sentinel-loop-peels-top-load]]); the permuter reported base
+  0 on this because asm-differ is BLIND to internal branch targets ([[permuter-blind-to-internal-branch-target]]),
+  caught only by full-make. `func_8004683C` (23/23): confirmed `#local-alloc-qty-permutation` (ROM
+  reuses dead arg0 as scratch -> ret in v0; local-alloc grabs v0 first -> ret to a2); 934k
+  permuter-parked. md5-candidate **0 delta** (packs unchanged 18/27/19). Seed 5 (classical,
+  crack-attempt slice); banked 0pt; realized 5 / residual 0 (a 0-bank characterization slice: no
+  first-build, no crack, 4 terminal verdicts). Rolling-5 (S257-S261): 3+3+4+3+0. Quality **0 / 1
+  permuter run / 4 carried / 4 deliberately re-opened**. Retro applied 4 of 4 (#1 permuter-branch-blind
+  -> workflow permuter rule + new memory; #2 D38C mutual-exclusion -> hazards + memory; #3
+  same-field-peel -> hazards goto-loop section + new memory; #4 `lever-tried:<lever>` carry record ->
+  BACKLOG follow-up #1). Tooling-test suite STILL RED at baseline (9 golden-drift failures, unchanged;
+  no tooling edit this sprint). RANKER: **8th recurrence, unchanged** -- one row, hand-sorted. LESSON:
+  a crack-slice on a lever-EXHAUSTED tail is a different bet than one with a fresh lever -- price it
+  toward 0-bank. Push: local.
   rodata-jtbl enabler, and a fresh-pack pivot; inline serial, no fan-out). **3 banked / 3 carries
   deepened to the EXACT instruction count** (22→19 stubs). Banks: `func_80088890` =
   `draw_letterbox_bars` (0x200, an S256 deferred carry, ONE-immediate near-match on the first build —

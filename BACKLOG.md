@@ -193,6 +193,18 @@ fan-out (4 documented walls → 2 cracked, 1 re-framed, 1 terminal):
    scheduler-coin (S233) is terminal (price 0). The ranker still cannot READ the wall class from the
    in-file comment cheaply — a lightweight tell: grep the near-match comment for the hazard anchor it
    cites and map anchor→crackable.
+   - **S261 refinement: `carried-wall:<fn>` must also record whether the cited LEVER was already
+     APPLIED-AND-FAILED, not just which class it is.** S259+S260 banked 7 carries because the goto-loop
+     lever was NEW to those walls; S261 re-picked the RESIDUAL (four carries whose goto-loop/struct-view
+     levers had ALREADY been applied) and all four re-affirmed terminal (0 banks): `func_8006D38C`/
+     `func_8006D214` (base-vs-disp mutual-exclusion — addressing vs value-holding, terminal),
+     `collect_keyframe_events_at` (same-field top-load peel, terminal + permuter-blind),
+     `func_8004683C` (local-alloc-qty, 934k permuter-parked). So a carry whose last-applied lever
+     already failed is a HARDER re-pick than a carry with a still-pending lever — the crack-slice
+     expected-bank should drop toward 0 once a wall's cited lever has been tried. Add a
+     `lever-tried:<lever>` field to the carry record (written at the crack attempt) so the DoR sort
+     puts fresh-lever carries ahead of exhausted-lever ones, and a slice does not re-grind a tail the
+     last lever already mined out. See [[same-field-sentinel-loop-peels-top-load]] and the S261 RETRO.
 2. **The S234 "REPEATED/LOOPED access → 0-expected-bank" access-multiplicity deweight is WRONG.**
    `func_8006F1A0` (3× same-slot RMW) and `func_8006F24C` (4-iter loop fill) BOTH banked byte-exact in
    S235 via the byte-offset-cast lever (`*(s32*)((u8*)SYM+off)`) + the stride-array loop-crack recipe
@@ -3595,11 +3607,16 @@ by `/sprint-plan`:
   `func_8004D148`/`func_8004876C`/`func_80047D68`, plus 3 free empty-leaf auto-C). **S259 +2**
   (`next_shuffled_index` = `func_80045B14` + its nested child `func_80045AD4`). **27 stubs remain**,
   ROM green off extracted asm, NOT md5-candidate. **Carries:**
-  - `func_8004683C` — **S260: 23/23 EXACT, one register left** (in-file note). The `&&`-chain tail
-    fixes the `andi`+`sltu`, and reusing the `bound` local fixes the `li`-before-load order; the last
-    register is a local-vs-global allocation phase ordering (no MIPS `REG_ALLOC_ORDER`, so local-alloc
-    takes `v0` first and global.c masks the return copy's preference). Permuter parked at 150 over 934k
-    iters — exact-count-plus-one-register, re-runnable but not yet 0.
+  - `func_8004683C` — **S261: 23/23 EXACT, re-affirmed TERMINAL `#local-alloc-qty-permutation`** (in-file
+    note). The `&&`-chain tail fixes the `andi`+`sltu`, reusing the `bound` local fixes the
+    `li`-before-load order; the sole residual is the register cascade. Confirmed mechanism: the ROM
+    reuses the DEAD arg0 register (a0) as the second scratch (the `-0x1A400` const + the two global
+    loads), which frees v0 for `ret`; my build's local-alloc scans regno-ascending (v0=2 before a0=4)
+    and claims v0 before global assigns ret, so ret lands in a2 and the ROM's final `nop` becomes
+    `move v0,a2`. No source form reaches the a0-reuse (it needs v0 reserved for ret before local-alloc,
+    which no faithful C triggers); nested-if regresses to 24 instrs. Permuter 934k-parked (base 170,
+    best 150), 0 project cracks for this class — a multi-register cascade, NOT the
+    exact-count-one-operand permuter shape. `lever-tried: {&&-chain, bound-reuse, nested-if, permuter}`.
   - `func_80048CF8` — `#pervasive-regalloc-classical-main` (S158 FP class): ROM homes the FP temps in
     `$f12/$f2/$f4` + eager-schedules the 2nd sub into the 1st `bnez` delay slot; gcc allocs `$f0/$f2` +
     reorders the load block. Logic RE'd in-file (`||`-guarded `D_800BE654 = D_800CC860 - func_80059FAC()`).
@@ -3632,14 +3649,19 @@ by `/sprint-plan`:
   - `func_80056060` — `docs/wip/func_80056060.near-match.md`. PROVEN WALL (`global.c` allocno_compare):
     cs has forced max n_refs=4 + min live-span so it ALWAYS colors s0 first; target cs→s1 is unreachable
     for this instruction stream in a standalone TU. Needs a different RTL context, not a source rewrite.
-  - `collect_keyframe_events_at` — **S260: 54/54, ONE BRANCH-OFFSET BIT** (`docs/wip/collect_keyframe_events_at.near-match.md`).
-    The S213 `#base-register-vs-displacement` peel/strength-reduction verdict is RETIRED: the goto loop
-    keeps loop.c out entirely, and the whole body reproduces byte-for-byte (every register, both
-    annulled skips, the frame). The only diff is the loop back edge, redirected over a redundant
-    loop-top re-load. Permuter-eligible (exact count, one branch offset); or a compiler-source dive into
-    which `jump_optimize` pass redirects a conditional back edge. **`find_keyframe_offset_by_tag` BANKED
-    S260** (same goto-loop lever, single-exit, out-of-line advance) — the S213 `loop.c:505-545` peel
-    verdict named the right pass but a goto loop is never entered into loop.c's list.
+  - `collect_keyframe_events_at` — **S261: 54/54, re-affirmed TERMINAL** (`docs/wip/collect_keyframe_events_at.near-match.md`).
+    The S260 "one branch-offset bit, permuter-eligible" was WRONG on two counts. (1) The bit is a gcc
+    first-load PEEL: the top match-test and the bottom sentinel-test BOTH read `q->val` (same field), so
+    gcc peels the redundant top load (places the loop label after it); `find_keyframe_offset_by_tag`
+    escaped only via a tag(top)/val(bottom) field-split, unavailable here. The ROM's gcc kept the label
+    before it — a pass-ordering coin. (2) NOT permuter-eligible: the residual is a pure internal
+    branch-TARGET bit and asm-differ is BLIND to those, so the permuter reported `base=0` on the exact
+    54/54 body while the real object was `fff2` vs ROM `fff1` (caught only by full-make). Levers that
+    fail: `volatile` top read (flips `lh`->`lhu`, grows the loop), peek-before-increment (costs the
+    annulled delay slots). Do NOT re-pick without a new lever. See
+    [[same-field-sentinel-loop-peels-top-load]] + [[permuter-blind-to-internal-branch-target]].
+    **`find_keyframe_offset_by_tag` BANKED S260** (same goto-loop lever) — the S213 `loop.c:505-545`
+    peel verdict named the right pass but a goto loop is never entered into loop.c's list.
   - `func_800564F0` + `func_80055738` — `docs/wip/func_800564F0-func_80055738.delay-slot-wall.md`.
     PROVEN WALL ([#delay-slot-fill-of-a-null-guard-beqz]): void single-pred const-store null-guard;
     reorg.c:3374 `fill_slots_from_thread` ALWAYS fills the beqz delay with the const-materializing first
@@ -5120,7 +5142,12 @@ by `/sprint-plan`:
   banked** (19 S223 tiny/getter/setter/mode-state + asset-load/free `func_8003E400.c` twins; +1 S224
   `func_8006ADF8` mode-gated club dispatch; +2 S239 DL-emitter twins `func_8006A4A0`/`func_8006A548`
   6-cmd parameterized TLUT-load via stock `gDP*(gfx++)` macros; **+1 S240** `func_8006AD1C`;
-  **+2 S259** `func_8006D058` + `func_8006CE88`; **+2 S260** `func_8006DF84` + `func_8006D164`),
+  **+2 S259** `func_8006D058` + `func_8006CE88`; **+2 S260** `func_8006DF84` + `func_8006D164`;
+  **+0 S261** — `func_8006D38C` (84/84) + `func_8006D214` (94/94) re-affirmed TERMINAL: the
+  base-vs-displacement last shape is a MUTUAL EXCLUSION between a0-relative addressing (mem-in-struct
+  -> re-read/cse-merge) and a held value (plain read -> fresh `lui`), no source form gives both;
+  D214 transfers D38C verbatim. Do NOT re-pick either without a genuinely new lever
+  ([[negative-displacement-neighbour-needs-one-symbol]] S261 update; `docs/wip/func_8006D38C.near-match.md`)),
   **18 stubs remain**
   (**S241 banked 0** — an escalation crack-attempt fan-out over the mid-logic wall cluster, all 3 targets
   carried; see below). The ranker re-surfaces it as a

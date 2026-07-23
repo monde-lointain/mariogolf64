@@ -684,6 +684,18 @@ below).
     the same constant), while the three larger permutations all plateaued (`func_80087CB0` 480->265
     in 60k, `func_80088A90` 870->520 in 31k, `init_sky_pool_and_world_state` 615->545 in 91k). So the
     payoff shape is exact-count-plus-one-operand; a multi-register permutation is not.
+  - **The permuter (asm-differ) is BLIND to internal branch TARGETS — a permuter score of 0 on a
+    pure-branch-target residual is a FALSE POSITIVE (S261).** asm-differ normalises a branch to a
+    local label and does not distinguish `bne …,<label@0x7c>` from `bne …,<label@0x80>`, the same
+    blind spot S260 fixed in `tools/cmpfn.sh`. S261 imported the exact 54/54
+    `collect_keyframe_events_at` body; the permuter reported `base score = 0` / "Found zero score!"
+    while the real object was `fff2` and the ROM `fff1` (its own target.o was correctly `fff1`). So
+    when the SOLE residual is an internal back-edge/branch TARGET (not an instruction or a register
+    choice), the permuter cannot score it — do not trust a permuter 0/low there; gate on `objdump` or
+    `tools/verify-rom.sh`. (This is a distinct failure mode from the stale-object one in
+    [[subagent-diff-crack-not-a-bank]]: here the permuter's oracle is correct but its scorer is
+    blind.) A back-edge-target residual is a gcc first-load-peel coin (see the same-field-peel entry in
+    `docs/hazards.md`), not a permutation.
   - **A recorded "below the 0.97 gate, not permuter-eligible" verdict belongs to the BODY that was
     measured, not to the function (S259).** `func_8006CE88` carried "isolated score 5360 (pct 0.553)
     ... NOT permuter-eligible here"; that percent was measured on a body with a 2-instruction

@@ -4465,6 +4465,24 @@ optimizations. Losing them is sometimes the goal, so it does not conflict with "
 resort": try structured first, and when the ROM's addressing shows no strength reduction, the goto
 IS the fix rather than a workaround.
 
+**But a goto loop does NOT help when the top and bottom loads read the SAME field — gcc peels the
+redundant top load (S261 `collect_keyframe_events_at`, TERMINAL).** A two-condition sentinel/collect
+loop that tests one struct field at BOTH the match-test (top) and the end-sentinel-test (bottom)
+loads that field twice with the pointer unchanged across the back edge. gcc recognises the top load
+as redundant with the bottom load and PEELS it: it places the loop label AFTER the peeled top load
+(visible in `gcc -S` as `.L14:` sitting after the top `lh`), so the back edge re-enters at the
+compare and reuses the value the bottom load left in the register. The ROM's gcc kept the label
+BEFORE the top load (re-loads each iteration) — a pure pass-ordering coin, same source either way.
+`find_keyframe_offset_by_tag` escaped this only because it tests DIFFERENT fields at top and bottom
+(`e->tag` offset 2 vs `e->val` offset 0), so there is no redundant load to peel; a loop that tests
+the same field at both ends has no such field-split. Levers that fail: `volatile` on the top read
+defeats the peel but flips `lh`→`lhu` and grows the loop; peeking `q[1].val` before the increment
+also fixes the edge but costs the annulled `bnel`/`beql` delay slots (the advance handler stops being
+the single foldable `q++`). The residual is a PURE internal back-edge TARGET bit, so the permuter
+cannot score it (asm-differ is blind to internal branch targets — see the permuter rules in
+`docs/agent-workflow.md`); gate on `objdump`/ROM-SHA-1, never the permuter. See the memory
+`same-field-sentinel-loop-peels-top-load`.
+
 ## indexed-vs-pointer loop (strength-reduction preheader ordering)
 
 **Rule:** for a sentinel-terminated (`!= -1`) array walk, the ROM's scheduling around the loop
@@ -6960,6 +6978,27 @@ between the two reads, or a second predecessor for the preheader block (`#value-
 / the memory `ifelse-not-ternary-cse-reset` resets cse's table at a multi-pred join). See the memory
 `negative-displacement-neighbour-needs-one-symbol`. So the wall is now ONE cse question, not three
 addressing mysteries — re-check any carry citing this class before re-asserting it.
+
+**S261 — that ONE cse question is a MUTUAL EXCLUSION, and it is terminal for source (`func_8006D38C`).**
+The ROM's preheader `lw t0,-0x2B(a0)` needs BOTH the a0-relative addressing AND the value HELD across
+the loop, and the two source mechanisms that each deliver one property disable the other. Three forms,
+measured:
+- `while (i != ROUND.count)` (struct-view, read in the loop test) → a0-relative addressing
+  (`addiu t0,t1,-0x2B`) ✓ but mem-in-struct may-alias blocks loop-invariant motion, so the value is
+  re-read every iteration ✗ (84).
+- `count = *(s32*)((u8*)flag - 0x2B)` (pointer arith, hoisted) → value held ✓ but `flag-0x2B`
+  constant-folds to a fresh `lui %hi(D_801B60BB); lw` ✗ (84).
+- `count = ROUND.count` (struct-view, hoisted local) → cse folds `plus(flag,-0x2B)` to the symbol
+  (it knows `flag == &D_801B60BB` is constant) and forwards the guard's load → merge, preheader load
+  gone ✗ (82).
+The invariants: `{a0-relative addressing}` ⟹ struct/related-value ⟹ `MEM_IN_STRUCT_P` ⟹
+`{re-read OR cse-merge}`; `{held value}` ⟹ plain-symbol read ⟹ `{fresh lui}`. No source form yields
+`{a0-relative AND held AND unmerged}` together. This is stronger than the "keep cse from forwarding"
+framing: even a form that does NOT forward (the re-read form) fails, because the same may-alias
+property that stops the forward also stops the hoist. Permuter-ineligible (an addressing-mode +
+load-placement choice, not a register permutation; the 84-forms are exact-count but diverge on
+placement, the 82-form is short). `func_8006D214` transfers this model verbatim (both terminal). See
+the memory `negative-displacement-neighbour-needs-one-symbol`.
 
 **Symptom (S210; `func_8005DE88` / `func_8005AF80` / `func_8005CEE0`).** A classical fn is byte-exact
 except a run of N register-only (`r`) diff rows all on ONE data-access chain: the ROM materializes a

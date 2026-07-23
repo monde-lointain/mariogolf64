@@ -25,6 +25,28 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 261 — carry-crack sweep on the exact-count carries (lever-exhausted tail) — 2026-07-23
+- Increment: 0 fns banked / 4 carries re-affirmed TERMINAL with sharper verdicts. md5-candidate files 230/263, delta 0. Packs unchanged (`func_8006A2C0.c` 18, `func_800453E0.c` 27, `func_80054900.c` 19).
+- Quality: 0/1/4/4 (stuck-far / permuter runs / carried / deliberately re-opened).
+- Seed: committed 5pt; banked 0pt (no fn matched); realized 5 / residual 0; regime classical.
+- Scope: PO signed off as a **characterization slice**. The four targets were the RESIDUAL after S259+S260's goto-loop lever banked the crackable carries; all four are genuine terminal walls, so 0 banks was the correct outcome, not a miss of a reachable bank. Value delivered = 4 sharpened terminal verdicts (DoR/hazards) + one tooling finding.
+- Re-affirmed walls (all sharpened from "open question" to terminal):
+  - `func_8006D38C` (84/84) / `func_8006D214` (94/94, transfers verbatim) — the base-vs-displacement last shape is a MUTUAL EXCLUSION, not a lone cse-forward question. The ROM's `lw t0,-0x2B(a0)` needs a0-relative addressing (only the struct/related-value form gives it → MEM_IN_STRUCT_P → re-read OR, if hoisted, cse-merge) AND a held value (only a plain read gcc can prove no-alias → but that folds to a fresh `lui`). `{a0-relative}`⟹mem-in-struct⟹`{re-read OR merge}`; `{held}`⟹plain⟹`{fresh lui}`. No source form gives all three. Measured 3-form table in the wip doc.
+  - `collect_keyframe_events_at` (54/54) — root-caused the one back-edge bit to a gcc first-load PEEL: both tests read `q->val` (same field), so gcc peels the redundant top load (label placed after it in `gcc -S`). find_keyframe escaped via a tag/val field-split, unavailable here. `volatile` defeats the peel but flips `lh`→`lhu`; the peek-before-increment costs the annulled delay slots.
+  - `func_8004683C` (23/23) — confirmed `#local-alloc-qty-permutation`: ROM reuses the dead arg0 register (a0) as the second scratch, freeing v0 for `ret`; local-alloc scans regno-ascending (v0<a0) and claims v0 before global assigns ret, pushing ret to a2 (and the ROM's final `nop` becomes `move v0,a2`). 934k permuter-parked, 0 project cracks. The && form is optimal 23/23; nested-if regresses to 24.
+- What helped:
+  - **A crack-attempt slice on a LEVER-EXHAUSTED tail is a different bet than one with a fresh lever.** S259/S260 banked because the goto-loop lever was new to those carries; S261's tail was the carries whose goto-loop/struct-view levers had already been applied-and-failed, so it correctly sorted to all-terminal. The `carried-wall:<fn>` ranker follow-up now also records `lever-tried:<lever>` so the DoR sort puts fresh-lever carries ahead of exhausted-lever ones (BACKLOG follow-up #1 refinement).
+  - **The permuter (asm-differ) is BLIND to internal branch TARGETS** ([[permuter-blind-to-internal-branch-target]]). The exact 54/54 collect_keyframe body scored `base = 0` while the real object was `fff2` vs ROM `fff1` — asm-differ normalises a branch to a local label. Same blind spot S260 fixed in `cmpfn`. Any permuter 0 on a pure-branch-target residual is a false positive; gate on `objdump`/verify-rom (workflow permuter rule updated).
+- Friction:
+  - The permuter's false-0 nearly banked a non-matching body — caught only by the full-make ROM-SHA-1 (the DoD held). Reinforces "gate every bank on `tools/verify-rom.sh`, never a permuter/diff/cmpfn score."
+  - The tooling-test suite remains RED at baseline (9 golden-drift failures, pre-existing) — a standing carry.
+- Walls / carries: all four above stay carried in their partial packs.
+- Applied: 4 of 4 accepted (PO: keep local) — #1 permuter-branch-blind (workflow permuter rule + new memory `permuter-blind-to-internal-branch-target`), #2 D38C mutual-exclusion (hazards#base-register-vs-displacement + memory `negative-displacement-neighbour-needs-one-symbol`), #3 same-field-peel wall class (hazards goto-loop section + new memory `same-field-sentinel-loop-peels-top-load`), #4 ranker `lever-tried:<lever>` record (BACKLOG follow-up #1 refinement).
+- Ranker: **8th recurrence, unchanged.** `pick_target.py --segment main` still emits one row; the gate backlog was hand-sorted again.
+- Carry-over: `src/main/func_8006A2C0.c` (18 stubs; `func_8006D38C`/`func_8006D214` terminal mutual-exclusion), `src/main/func_80054900.c` (19 stubs; `collect_keyframe_events_at` terminal same-field-peel), `src/main/func_800453E0.c` (27 stubs; `func_8004683C` terminal local-alloc-qty). **All four now hold pass-cited TERMINAL verdicts — do NOT re-pick them without a genuinely new lever. Cheapest S262 opener: a FRESH `main` pack (open `func_8002A640`'s needs-header blocker, or find an un-mined c-stub continuation), not another carry re-pick of this tail.**
+
+---
+
 ## Sprint 260 — carry-crack sweep, continuation of the superseded-lever sort — 2026-07-23
 - Increment: 3 fns banked / 3 carries advanced (`func_8006A2C0.c` 20→18, `func_80054900.c` 20→19; `func_800453E0.c` 27→27 — carry sharpened only). md5-candidate files 230/263, delta 0.
 - Quality: 0/1/3/6 (stuck-far / permuter runs / carried / deliberately re-opened).
