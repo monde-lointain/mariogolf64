@@ -1025,33 +1025,43 @@ def main():
         "--loose-stubs",
         metavar="SEG",
         help="Enumerate still-INCLUDE_ASM stubs inside ALREADY-`c` files of src/SEG/, smallest-first, "
-        "each tagged fresh / CARRIED-WALL / NESTED-CHILD. Surfaces fresh individual leaves the "
-        "whole-subseg pack ranker misses (S273). Default hides carried+nested; --all shows every stub.",
+        "each tagged fresh / CARRIED-WALL / NESTED-CHILD / INTRINSIC-HASM. Surfaces fresh individual "
+        "leaves the whole-subseg pack ranker misses (S273). Default hides carried+nested+intrinsic; "
+        "--all shows every stub.",
     )
     ap.add_argument(
         "--all",
         action="store_true",
-        help="with --loose-stubs, list every stub (incl. carried-wall/nested), not just fresh ones.",
+        help="with --loose-stubs, list every stub (incl. carried-wall/nested/intrinsic-hasm), not just fresh ones.",
     )
     args = ap.parse_args()
 
     if args.loose_stubs:
         stubs = loose_stubs(args.loose_stubs)
-        shown = stubs if args.all else [s for s in stubs if not s["carried"] and not s["nested"]]
+
+        def _is_fresh(s):
+            return not s["carried"] and not s["nested"] and not s.get("intrinsic")
+
+        shown = stubs if args.all else [s for s in stubs if _is_fresh(s)]
         print(f"{'size':>6} {'status':13} {'func':28} file")
         for s in shown:
             status = (
                 "CARRIED-WALL"
                 if s["carried"]
-                else "NESTED-CHILD" if s["nested"] else "fresh"
+                else (
+                    "NESTED-CHILD"
+                    if s["nested"]
+                    else "INTRINSIC-HASM" if s.get("intrinsic") else "fresh"
+                )
             )
             sz = "?" if s["size"] is None else str(s["size"])
             print(f"{sz:>6} {status:13} {s['fn']:28} {s['file']}")
-        n_fresh = sum(1 for s in stubs if not s["carried"] and not s["nested"])
+        n_fresh = sum(1 for s in stubs if _is_fresh(s))
         print(
             f"# {len(stubs)} stubs in src/{args.loose_stubs}/: {n_fresh} fresh, "
             f"{sum(s['carried'] for s in stubs)} carried-wall, "
-            f"{sum(s['nested'] for s in stubs)} nested-child"
+            f"{sum(s['nested'] for s in stubs)} nested-child, "
+            f"{sum(bool(s.get('intrinsic')) for s in stubs)} intrinsic-hasm"
         )
         raise SystemExit(0 if n_fresh else 1)
 

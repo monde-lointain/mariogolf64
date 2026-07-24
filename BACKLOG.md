@@ -306,6 +306,17 @@ fan-out (4 documented walls → 2 cracked, 1 re-framed, 1 terminal):
        or fresh-lever AND non-exact-count. See `docs/hazards.md#pervasive-regalloc-classical-main`
        (exact-count-first sub-lever) and the memory `remeasure-percent-after-structural-fix`. Cheap
        signal: the near-match doc's `rom=`/`mine=` line, or `tools/cmpfn.sh <fn>` first line.
+     - **S274 addition: a small-main `--loose-stubs` leaf-`.s` FP/value-select tell should DE-PRIORITIZE
+       (not hide) the leaf.** `--loose-stubs` now filters carried-wall / nested-child / intrinsic-hasm
+       (S274 added intrinsic), but a leaf whose `.s` carries the FP-scheduler / value-select-branch-likely
+       / register-permutation tells (`bnel`/`bnezl` value-selects, dense `mtc1`/`cvt.s.w`/`mul.s` const-FP
+       blocks with no jal, or a struct-base index loop) reads as `fresh` yet is a likely no-source-lever
+       wall once a segment's clean small leaves are mined (S273 3/3 clean → S274 2/4, the 2 walls both
+       FP/value-select). Follow-up: a `.s`-tell column on the `--loose-stubs` rows (e.g. `fp-heavy`,
+       `value-select`) that SORTS such leaves below the plain-integer-glue leaves, so smallest-first still
+       finds the tractable ones first. Kin to the S224 plateaued-pack tell. NOT a hide (unlike
+       intrinsic-hasm) — these can still bank via a lever; they just aren't first-build. See
+       `docs/agent-workflow.md ## Workflow at a glance` (the S274 loose-stub wall-cluster note).
 2. **The S234 "REPEATED/LOOPED access → 0-expected-bank" access-multiplicity deweight is WRONG.**
    `func_8006F1A0` (3× same-slot RMW) and `func_8006F24C` (4-iter loop fill) BOTH banked byte-exact in
    S235 via the byte-offset-cast lever (`*(s32*)((u8*)SYM+off)`) + the stride-array loop-crack recipe

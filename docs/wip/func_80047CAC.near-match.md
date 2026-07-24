@@ -35,8 +35,13 @@ reorder did not move the D_800DAF34 load. This is a block-local FP scheduler/reg
 global.c ref-count steerable.
 
 ## Next action
-PERMUTER (FP schedule reorder is its domain) — BLOCKED on the same `import.py` main-include gap as
-[[get_terrain_vertex_pointer]] (`<PR/ultratypes.h>` not on import.py's hardcoded `-I include`).
-Isolated base.c compiled clean via `decomp_loop` (score 6240, 47/50 rows, isolation-noisy negative
-percent). Fix the constant first, then permuter the schedule once import.py learns the main
-includes.
+Fix the constant (`19.6500015f`) first. Then PERMUTER — but LOW-EV. Correction to the S274 record:
+the permuter was NEVER blocked. Documented main command (with the C inlined):
+`venv/bin/python3 ./tools/decomp-permuter/import.py --settings permuter_settings_main.toml
+src/main/func_800453E0.c asm/nonmatchings/main/func_800453E0/func_80047CAC.s`, then revert src to
+INCLUDE_ASM and `run-permuter.sh func_80047CAC`. S274 wrongly ran BARE `import.py` (no `--settings`)
+and mis-read the KMC-mirror include failure as "blocked" — see [[get_terrain_vertex_pointer]].
+CAVEAT: mine is 1 instr SHORTER (S233 class) — the schedule coin needs the ROM's constant-register
+reuse, which the permuter reaches only by luck. FP-schedule reorder is a NON-payoff shape (not
+exact-count-plus-one-operand); expect a plateau. Likely a genuine terminal FP-scheduler carry.
+Isolated base.c compiled clean via `decomp_loop` (score 6240, 47/50 rows).

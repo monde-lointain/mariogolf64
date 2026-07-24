@@ -5,7 +5,7 @@ import dataclasses
 import os
 import re
 
-from decomp_asm import subseg_vram
+from decomp_asm import PRIVILEGED_OPS, subseg_vram
 from pick_target_classify import (
     _FUNC_TOKEN_RE,
     _is_static_func_proto,
@@ -272,6 +272,31 @@ def nested_child_tell(fn):
     return bool(_V0_SPILL_RE.search(prologue) and _V0_COPY_RE.search(prologue))
 
 
+_INSN_MNEMONIC_RE = re.compile(r"([a-z][a-z0-9.]*)")
+
+
+def intrinsic_stub_tell(fn):
+    """DoR check: is <fn>'s body a coprocessor / privileged-op intrinsic that GCC 2.7.2 has NO
+    plain-C form for (FCSR/CP0 control moves: cfc1/ctc1/mfc0/mtc0/dmfc0/dmtc0/tlb*/cache/eret)?
+
+    Such a leaf (e.g. an FCSR read-modify-write via cfc1/ctc1 $31) is NOT classically bankable: any
+    C body needs inline asm, which is a `hasm` decision, not a match. Without this tell it reads as a
+    fresh tiny loose-stub leaf and re-surfaces every sprint (S273 declined func_80029C00, but the skip
+    lived only in ephemeral SPRINT.md, so S274 re-committed it). Reuses decomp_asm.PRIVILEGED_OPS (the
+    same set `privileged_asm` uses for asm-mirror detection). Reads only <fn>'s own `.s` (cheap).
+
+    Returns True on the tell. See the retired-wall note docs/wip/func_80029C00.near-match.md."""
+    path = _find_asm_s(fn)
+    if not path:
+        return False
+    with open(path) as f:
+        for insn in _ASM_INSN_RE.findall(f.read()):
+            m = _INSN_MNEMONIC_RE.match(insn)
+            if m and m.group(1) in PRIVILEGED_OPS:
+                return True
+    return False
+
+
 _STUB_FN_RE = re.compile(r'INCLUDE_ASM\("[^"]+",\s*([A-Za-z0-9_]+)\)')
 _STUB_SIZE_RE = re.compile(r"0x([0-9A-Fa-f]+)")
 
@@ -326,6 +351,7 @@ def loose_stubs(seg):
                     "file": rel,
                     "carried": fn in walls,
                     "nested": nested_child_tell(fn),
+                    "intrinsic": intrinsic_stub_tell(fn),
                 }
             )
     out.sort(key=lambda r: (r["size"] if r["size"] is not None else 1 << 30, r["fn"]))

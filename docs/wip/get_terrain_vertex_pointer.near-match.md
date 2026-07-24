@@ -42,14 +42,18 @@ This C is CORRECT in behavior and reaches exact count.
 Class: value-select-if-else-vs-branch-likely + local/global-alloc register permutation. Not
 source-steerable by the levers tried (decl-order reshuffles did not move colHi into $v0).
 
-## Next action = PERMUTER (exact-count residual, ideal input), BLOCKED on tooling
-`tools/decomp-permuter/import.py` fails to preprocess a `main`-segment src file: its hardcoded
-cpp step uses only `-I include` and cannot find `<PR/ultratypes.h>` (lives at
-`include/libultra/PR/`). `nonmatching-func`/`decomp_loop` DO compile the isolated base.c (score
-3060, 44/46 rows, isolation-inflated percent 0.30 — the reloc addends dominate; real residual is
-just the ~4 tail rows above). Retry once import.py learns the main include set (add
-`-I include/libultra/PR` to its preprocess + generated compile command), or hand-build the
-permuter workdir. Isolated base.c is preserved inline above.
+## Next action = PERMUTER — LOW-EV (multi-register permutation, not the payoff shape)
+Correction to the S274 record: the permuter was NEVER blocked. The documented main-segment command
+(agent-workflow.md ## Execution loop, permuter bullet) is, with the candidate C above inlined:
+`venv/bin/python3 ./tools/decomp-permuter/import.py --settings permuter_settings_main.toml
+src/main/get_tile_attribute.c asm/nonmatchings/main/get_tile_attribute/get_terrain_vertex_pointer.s`
+then revert the src to INCLUDE_ASM (import copies into nonmatchings/) and `run-permuter.sh
+get_terrain_vertex_pointer`. S274 wrongly ran BARE `import.py` (no `--settings`), which defaulted to
+the KMC-mirror `permuter_settings.toml` (`-I include`, no `<PR/*.h>`) and mis-read as "blocked".
+`setup-permuter.sh --main` also silently no-ops here (it greps for an INCLUDE_ASM stub — use the
+direct import.py call above).
 
-Retro suggestion filed: teach import.py the MAIN include dirs (`include/libultra/PR`, etc.) so
-main-segment exact-count residuals become permuter-reachable.
+CAVEAT: this residual is a MULTI-register tail permutation + a branch-annul coin, which is the
+NON-payoff permuter shape (agent-workflow.md: exact-count-plus-ONE-operand pays; multi-register
+permutations plateau — S258 3-of-4 plateaued). So this is a LOW-EV attempt, not a likely bank.
+40/40 exact-count; base.c compiled clean via decomp_loop (score 3060, 44/46 rows).

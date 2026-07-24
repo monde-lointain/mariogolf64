@@ -97,6 +97,20 @@ resume surface when the middle spans context windows.
     over another smallest-first continuation of the mined pack — the continuation yields
     wall-characterizations (RETRO value), not banks. `pick_target.py` pricing this "plateaued-pack
     mid-logic-tail" tell is a tracked follow-up (see `BACKLOG.md` ranker follow-ups).
+    - **The same plateau hits `--loose-stubs <seg>` once a segment's clean small leaves are mined
+      (S274).** `pick_target.py --loose-stubs main` filters carried-wall / nested-child / intrinsic-hasm
+      (the last added S274), but it CANNOT pre-detect an FP-scheduler / value-select-branch-likely /
+      register-permutation wall — those read as `fresh` until attempted. S273 banked 3/3 clean small main
+      leaves; S274 (the next tier down) banked only 2/4, the other two fully-RE'd exact-count walls
+      (`get_terrain_vertex_pointer` multi-reg-perm, `func_80047CAC` FP-scheduler-coin). So the genuinely
+      clean small main leaves are now largely mined; what a fresh `--loose-stubs main` surfaces skews to
+      these walls. When the main loose-stub bank-rate drops (track banked/attempted across sprints),
+      prefer a FRESH non-main pack or a targeted `--main` permuter slice on a fully-RE'd exact-count carry
+      over another smallest-first main-stub continuation. NB per the permuter payoff rule (## Execution
+      loop): a multi-register permutation / FP-schedule coin is the NON-payoff shape, so a `--main`
+      permuter slice on those is LOW-EV — reserve it for exact-count-plus-ONE-operand carries. A
+      `pick_target.py` FP/value-select `.s`-tell de-prioritizer for small main stubs is a tracked ranker
+      follow-up (see `BACKLOG.md`).
     - **But the compiler-source fan-out on such a tail is often a BANK slice, not just characterization
       (S232).** When the plateaued tail's smallest fns are already fully-RE'd DOCUMENTED near-match walls
       (in-file near-match comments, even ones carrying a prior `file:line` compiler-source verdict),

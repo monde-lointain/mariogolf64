@@ -1445,6 +1445,25 @@ Three honest caveats:
   4 (#1 sched-select memory; #3 (s32)base lever → commutative memory; #2/#4 DoR grep-BACKLOG-miss #3 +
   8x plateaued-tail → BACKLOG ranker follow-up; #5 grid-reset combo memory). RANKER: **14th recurrence**
   + the DoR carry-block-read miss. Push: local.
+- **Sprint 274** — next-tier fresh stub-level leaf slice on `main` via `--loose-stubs` (PO approved 4
+  smallest fresh leaves). No gate enabler (stubs in already-`c` files). **2 banked / 2 carried**
+  (`vec3f_normalize.c` 10→9, `get_tile_attribute.c` 22→21; both partial/NOT md5-candidate). Banks:
+  `func_80029B58` (3-buffer size setup + osSyncPrintf, first-build 40/40) and `get_lowest_height_at_position`
+  (raycast min-height, first-try but for a 1-instr fix: `+ -3072000.0f` = `add.s` neg-const, NOT
+  `- 3072000.0f`; reconstructed find_collision_triangle's 8-arg sig + 0xD0 stack-buffer frame from the call
+  site). Carries: `get_terrain_vertex_pointer` (40/40 exact-count, multi-reg tail permutation +
+  `bne`/`bnel` annul coin) and `func_80047CAC` (pure-FP 3x lerp, mine 1-instr SHORTER = S233 FP-scheduler
+  coin + a 1-ULP const `19.65f`→need `19.6500015f`). Retired `func_80029C00` (FCSR `cfc1`/`ctc1` intrinsic)
+  at the gate. Key insight: the small "fresh" main loose-stubs are now a WALL CLUSTER (S224-analog) — S273
+  banked the last clean 3/3; S274's next tier is 2/4, the residual concentrating FP-scheduler /
+  value-select-branch-likely / register-permutation walls that read fresh until attempted. Seed 8 (4 tiny
+  leaves); banked 0pt (files partial); realized ≈4 (2 clean leaves, 2 carried), residual −4 vs seed (seed
+  over-priced the walled leaves); value = +2 matched. Rolling-5 (S270-S274): 2+0+2+0+0(pt). Quality
+  **0 stuck-far / 0 permuter (2 eligible but LOW-EV multi-reg/schedule shapes, not run) / 2 carried / 0
+  re-opened**. Retro applied 3 of 3 (#1 `--loose-stubs` `intrinsic-hasm` tell for cfc1/ctc1/CP0 leaves;
+  #2 CORRECTED — the permuter was never "blocked", S274 ran bare `import.py` without
+  `--settings permuter_settings_main.toml`; the `--main` flow was already documented, no tooling change
+  needed; #3 loose-stub wall-cluster doc note + prefer-fresh-non-main-pack guidance). Push: local.
 - **Sprint 273** — fresh stub-level integer-leaf slice on "mined-out" `main` (PO approved 2 clean + bnel
   hedge over another crack-slice). No gate enabler (stubs in already-`c` files). **3 banked / 0 carried**
   (`vec3f_normalize.c` 12→10 stubs, `func_8002A640.c` 15→14 stubs, both partial/NOT md5-candidate). Key
