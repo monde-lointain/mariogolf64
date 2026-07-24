@@ -684,3 +684,4 @@ flag_set = 0x80029A30; // type:func
 flag_clear = 0x80029A6C; // type:func
 flag_toggle = 0x80029AA8; // type:func
 flag_clear_all = 0x80029AE4; // type:func
+emit_glyph_string_dl = 0x80076138; // type:func

@@ -487,6 +487,47 @@ s32 func_800760CC(s32 arg0) {
   }
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80071370", func_80076138);
+extern void func_8006A2C0(Gfx** gfxp, s32, s32, s32, s32, s32, s32, s32, s32,
+                          s32);
+extern u8 D_80105118[];
+
+/* Emits a bitmap-font glyph-string display list at (y, x): a leading + trailing
+ * gDPPipeSync (0xE7000000), and per character a func_800760CC glyph-code lookup
+ * feeding a func_8006A2C0 texture-rect emitter (advancing y by 0xE per glyph).
+ * The loop runs while D_80105118[i] != 0. A preheader-local `p = str` defers the
+ * str param's callee-saved copy into the loop preheader, shortening its
+ * live_length below i's so str allocates to $s2 and i to $s3 (matching the ROM
+ * allocno order WITHOUT a 9th callee-saved reg); the explicit xr/k invariant
+ * temps order the preheader hoists ahead of that copy, and the fresh w temp
+ * schedules the trailing cursor increment before the final sync stores (S272,
+ * cracks the S242 terminal biv-swap wall). */
+void emit_glyph_string_dl(Gfx** gfxp, s32 y, s32 x, u8* str) {
+  Gfx* g;
+  Gfx* w;
+  Gfx* c = *gfxp;
+  s32 i;
+
+  c->words.w0 = 0xE7000000;
+  c->words.w1 = 0;
+  g = c + 1;
+  i = 0;
+  if (D_80105118[0] != 0) {
+    s32 xr = (x + 0x10) << 2;
+    s32 k = 0x400;
+    u8* p = str;
+    do {
+      s32 ret = func_800760CC(*p++);
+      i++;
+      func_8006A2C0(&g, y << 2, x << 2, (y << 2) + 0x40, xr, 0, 0, ret << 5, k,
+                    k);
+      y += 0xE;
+    } while (D_80105118[i] != 0);
+  }
+  w = g;
+  g++;
+  w->words.w0 = 0xE7000000;
+  w->words.w1 = 0;
+  *gfxp = g;
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80071370", func_8007624C);
