@@ -3795,11 +3795,17 @@ by `/sprint-plan`:
     the counter as a 3rd IV; up-pointer `p!=end`; `n=12` var; `do/while(++i!=4)`); residual = reload
     keeps the hoisted exit-const `4` in a reg vs ROM rematerializing (+1-pressure/allocno decision,
     root-caused to mips.c:1996 force_reg + loop.c:1630 hoist). Escalation = corpus-mining, not the permuter.
-  - `func_8005B0B4` (nibble-switch→code) — **S267 improved to 37/39.** Fixed #char-signedness
-    (`s32 val=((s8*)p)[0x2C]` → `lb`, not s8-local lbu+sll/sra) + single-exit `v1` accumulator
-    (43→41→37). Residual = S263 [[value-select-branch-likely-on-switch-default]]: ROM emits the const
-    early-returns as `beql sel,K,end` + annulled `li v1,CONST` (ROM 2 LONGER); gcc-from-C branches away
-    + `j;li`. Terminal/permuter-denied. `docs/wip/func_8005B0B4.near-match.md`; base.c warm.
+  - `func_8005B0B4` (nibble-switch→code) — **S268 re-classed TERMINAL (global.c 3-reg allocno
+    permutation).** The S263/S267 "37/39 value-select-branch-likely" framing was under-counted: the
+    warm base.c had the accumulator in `a1` (ROM `v1`) + wrong delay-slot fill. S268's S260
+    [[out-of-line-handler-block-branch-likely]] lever + `s32 sel = flags&0xF;` BEFORE the guard branch
+    FIXED accumulator role (a1→v1), the delay-slot fill, and the c3 `beql` fold (4965→4165, ~90%
+    structural). Irreducible residual = a `global.c` 3-register allocno permutation (flags/val/sel
+    across a0/a1/a2, source-invariant — load-order swap leaves it identical) + a reorg sel==1
+    jump-to-jump threading coin; asm-differ 0.008 from the reg cascade. See
+    [#multi-register-allocno-permutation](#multi-register-allocno-permutation),
+    [[global-allocno-compare-livelength-biv-order]]. Permuter plateaus on the multi-reg permute.
+    `docs/wip/func_8005B0B4.near-match.md`; S260-improved base.c warm. Corpus-sibling-only; do NOT re-grind.
   - `func_8005AF80` (memset + 6×3 `-1` grid-init, `s8` counters, magic 0x12345678) — **BANKED S267
     (47/47), no longer a carry.** The S210 permuter-failed wall (~9500 iters, base 220) CRACKED by
     hand with 3 source levers: `s8` counters + `do{}while(i!=N)`; explicit hoisted `s32* row` (0xDC0
@@ -3812,11 +3818,15 @@ by `/sprint-plan`:
     override (sched.c:2615/2656, MAX_BLOCKAGE>1 at 3733) front-loading the `mfc1` and hoisting the
     independent `li` above it. Source-invariant, permuter-blind. Memory
     [[sched-select-potential-hazard-coin]]; `docs/wip/func_80059BA0.near-match.md`. Do NOT re-grind.
-  - `func_8005CEE0` (nested table lookup + u16 sign-bit) — **S267 improved to EXACT 38/38.** The
-    D_800C28E4 base-vs-disp ([#base-register-vs-displacement](#base-register-vs-displacement)) closed
-    via an explicit `u8* base = D_800C28E4;` + guard restructure (`-1` block between the two guards, 2nd
-    branches toward `ok`). Residual = within-block load-order + a0/v1 regalloc role swap + a*14/b*2
-    multiply emission order. Permuter dry (400s). `docs/wip/func_8005CEE0.near-match.md`; base.c warm.
+  - `func_8005CEE0` (nested table lookup + u16 sign-bit) — **S268 re-classed TERMINAL, doc CORRECTED.**
+    EXACT 38/38 (S267). The S266 note's "a0/v1 regalloc role swap" was WRONG — the roles already match
+    ROM (a→a0, base→a1, b→v1, idx→v0). Sole residual = a fold-canonical load-order coin (b-table 29B8
+    loads before a-table 29BA; addresses ascending) COUPLED to the idx*4 index-reg coloring. S268 tried
+    6 source forms (ptr-temp / base-RMW / `+=` / base-inline / dead-idx-reuse / operand-group-flip):
+    every statement-split that fixes the load order recolors idx*4 off v0; the inline fold keeps idx*4=v0
+    but forces b-first. No form yields both. [[commutative-operand-order-statement-split]] +
+    [[one-variable-reuse-reorders-loads]] levers dry. Permuter dry (400s). Corpus-sibling-only.
+    `docs/wip/func_8005CEE0.near-match.md`; base.c warm.
   - `func_8005DE88` (flag pack/unpack) — **BLOCKED, logic fully decoded**: globals D_801323E5/D_800C1FFC
     live in a shifted `.NON_MATCHING` carve; C-referencing them corrupts the region (even banked
     func_8005AF74). Needs a data carve first — the enabler for this fn.

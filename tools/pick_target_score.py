@@ -15,6 +15,7 @@ from pick_target_classify import (
 )
 from pick_target_config import (
     BACKLOG,
+    ROOT,
     BAND_WARM_BONUS,
     BIG_FN_BYTES,
     CARRYOVER_PENALTY,
@@ -189,6 +190,35 @@ def carry_over_names():
         if tok in placed or _FUNC_TOKEN_RE.fullmatch(tok):
             names.add(tok)
     return names
+
+_WIP_DIR = os.path.join(ROOT, "docs", "wip")
+_WIP_FUNC_RE = re.compile(r"func_[0-9A-Fa-f]{8}")
+
+
+def carried_wall_names():
+    """Union of the BACKLOG ## Carry-overs parked names (carry_over_names) AND every function
+    that owns a `docs/wip/<fn>.*.md` near-match / wall note.
+
+    The DoR "is this leaf a documented wall?" check. Recurred 8x through S268: a hand-mined leaf
+    from an already-`c` PARTIAL pack reads "fresh" (the ranker is c-continuation-blind and only
+    emits `blk`/asm-flip rows for such a segment) yet is a carried wall recorded ONLY in a wip
+    doc or the BACKLOG carry block. `carry_over_names()` alone misses the wip-doc-only walls (a
+    wall characterized at discovery into `docs/wip/` but never parked into BACKLOG). This union
+    is the authoritative "already-characterized" set; surface it at the plan gate via
+    `pick_target.py --carried-check <fn>...`. See docs/agent-workflow.md ## Definition of Ready."""
+    names = set(carry_over_names())
+    if os.path.isdir(_WIP_DIR):
+        for fname in os.listdir(_WIP_DIR):
+            if not fname.endswith(".md"):
+                continue
+            stem = fname.split(".", 1)[0]  # func_<vram>[-func_<vram>] before the first dot
+            funcs = _WIP_FUNC_RE.findall(stem)  # a paired doc names >1 member
+            if funcs:
+                names.update(funcs)
+            else:
+                names.add(stem)  # curated-name wip doc (no func_<vram> in the stem)
+    return names
+
 
 def _file_scope_static_count(cpath):
     """Number of file-scope static *variable* declarations (the uninitialized .bss family

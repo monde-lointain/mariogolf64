@@ -360,6 +360,7 @@ from pick_target_score import (  # noqa: F401  (re-export: pt.<name> contract)
     _append_caller_evict,
     _append_coddog_aux,
     _file_scope_static_count,
+    carried_wall_names,
     carry_over_names,
     drop_static_mirror_hazard,
     score_row,
@@ -1003,7 +1004,23 @@ def main():
         "--include-stuck", action="store_true", help="include BACKLOG carry-overs"
     )
     ap.add_argument("--json", action="store_true")
+    ap.add_argument(
+        "--carried-check",
+        nargs="+",
+        metavar="FUNC",
+        help="DoR gate: for each FUNC report CARRIED-WALL (owns a docs/wip note or a BACKLOG "
+        "carry-over entry) vs fresh. Use before committing a hand-mined partial-pack leaf.",
+    )
     args = ap.parse_args()
+
+    if args.carried_check:
+        walls = carried_wall_names()
+        any_wall = False
+        for fn in args.carried_check:
+            hit = fn in walls
+            any_wall = any_wall or hit
+            print(f"{'CARRIED-WALL' if hit else 'fresh':13} {fn}")
+        raise SystemExit(1 if any_wall else 0)
 
     rows = build_rows(args, Indexes.build(), carry_over_names())
     if args.json:

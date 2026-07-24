@@ -1445,6 +1445,27 @@ Three honest caveats:
   4 (#1 sched-select memory; #3 (s32)base lever → commutative memory; #2/#4 DoR grep-BACKLOG-miss #3 +
   8x plateaued-tail → BACKLOG ranker follow-up; #5 grid-reset combo memory). RANKER: **14th recurrence**
   + the DoR carry-block-read miss. Push: local.
+- **Sprint 268** — crack-attempt slice on the 2 documented near-match walls in
+  `src/main/func_80059BA0.c` (`func_8005B0B4`, `func_8005CEE0`; PO approved as proposed, no gate
+  enabler, inline serial). Main asm-flip mined out (`--segment main` = 1 `blk` row needing `sprite.c`),
+  so the pack tail is documented walls. **0 banked / 2 crack-attempts → 2 TERMINAL verdicts** (pack
+  stays 21-stub partial). `func_8005CEE0` (38/38): CORRECTED the S266 doc (no a0<->v1 role swap; roles
+  already matched) — real residual is a fold-canonical load-order coin COUPLED to the idx*4 index-reg
+  coloring; 6 source forms tried (ptr-temp / base-RMW / `+=` / base-inline / dead-idx-reuse /
+  operand-group-flip), every split that fixes the load order recolors idx*4 off v0 and the inline fold
+  keeps v0 but forces b-first — no form yields both; [[commutative-operand-order-statement-split]] +
+  reuse-dead-var levers dry. `func_8005B0B4`: the S260 [[out-of-line-handler-block-branch-likely]]
+  lever + computing `sel` before the guard branch FIXED 3 sub-issues (accumulator role a1→v1,
+  delay-slot fill, c3 `beql` fold; score 4965→4165, ~90% structural) — the S263 "2-off" framing was a
+  scoring artifact — leaving an irreducible `global.c` 3-register allocno permutation
+  (flags/val/sel across a0/a1/a2, source-invariant, permuter-plateau; new hazard
+  #multi-register-allocno-permutation). Seed 5 (classical crack slice); banked 0pt; realized ~6 /
+  residual +2 (both re-opens produced pass-cited TERMINAL verdicts [S233-class] + corrected 2 wrong
+  doc residual-classes). Rolling-5 (S264-S268): 2+1+1+1+0. Quality **0 stuck-far / 0 permuter (both
+  plateau-by-class, not run) / 2 carried / 2 re-opened**. Retro applied 3 of 3 (#1 `--carried-check`
+  DoR detector in `pick_target.py` [wip docs ∪ BACKLOG carries]; #2 residual-CLASS-is-a-hypothesis DoR
+  note; #3 `#multi-register-allocno-permutation` hazard). RANKER: **15th recurrence** of c-continuation
+  blindness (backlog hand-mined). DoR fresh-leaf miss now has a tool. Push: local.
   rodata-jtbl enabler, and a fresh-pack pivot; inline serial, no fan-out). **3 banked / 3 carries
   deepened to the EXACT instruction count** (22→19 stubs). Banks: `func_80088890` =
   `draw_letterbox_bars` (0x200, an S256 deferred carry, ONE-immediate near-match on the first build —

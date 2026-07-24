@@ -410,7 +410,15 @@ dashboard). Target selection is `tools/pick_target.py`, not a stored roadmap.
       At the plan gate, `grep -n '<candidate_fn>' BACKLOG.md` for EACH committed leaf; if it is a listed
       carry, either skip it or label the commit a crack-attempt/deepen slice (not a fresh leaf). Write new
       wall characterizations to `docs/wip/<fn>.near-match.md` AT DISCOVERY (not only in the retro digest),
-      so the next sprint's DoR finds them. Fold into the `carried-wall:<fn>` ranker follow-up.
+      so the next sprint's DoR finds them.
+      - **Tool (S268): `venv/bin/python3 tools/pick_target.py --carried-check <fn>...`** does this
+        check in one command — it prints `CARRIED-WALL`/`fresh` per fn against the UNION of the
+        `BACKLOG.md ## Carry-overs` parked names AND every `docs/wip/<fn>.*.md` note (catching the
+        wip-doc-ONLY walls a BACKLOG grep misses), and exits non-zero if any is a wall. Run it on
+        every hand-mined leaf at the plan gate. S268's two smallest `.s`-sized "fresh" leaves
+        (`func_8005DE88`, `func_8005B150`) were BACKLOG-only carries this flags. (8th recurrence of
+        the fresh-leaf miss; the `carried-wall:<fn>` in-row ranker tag remains a follow-up — the
+        detector is a gate command, not yet a ranked-row column.)
   - **A carried wall's near-match doc can be wrong about the function's SEMANTICS, not just its
     verdict — re-derive behaviour from the `.s` before accepting a stated residual (S258).** S252
     recorded `func_800824E4` as a THREE-argument packer with `b = arg2` on the negative path and
@@ -424,6 +432,17 @@ dashboard). Target selection is `tools/pick_target.py`, not a stored roadmap.
     doc's residual. A register written in a branch delay slot before its first read is a shared
     pre-branch statement, not an argument. Extends the memory `revalidate-old-carries-stale-wall`
     from stale builds to stale RE.
+    - **The doc's stated residual CLASS is itself a hypothesis, not just its verdict (S268).**
+      Beyond semantics: re-derive the residual from a FRESH `mips-linux-gnu-objdump -d` of the
+      current-build object diffed against the `.s`, before trusting the doc's named divergence
+      class. S268 re-opened two carries and BOTH had a mis-stated residual: `func_8005CEE0`'s doc
+      claimed an "a0<->v1 register-role swap" that was NOT present (the roles already matched; the
+      real residual was a fold-canonical load-order coin coupled to the idx-index coloring), and
+      `func_8005B0B4`'s doc framed the divergence as "branch-direction BB-layout" when the dominant
+      issue was an accumulator-role + delay-slot-fill divergence a structural lever fixed, leaving a
+      3-register allocno permutation. A mis-stated class sends the crack attempt at the wrong lever.
+      Spend the first iteration re-deriving {instruction-count match?, which registers differ, which
+      ordering differs} from the object, then map THAT to a lever — do not inherit the doc's class.
   - Enablers (subseg flip plus `make extract`, multi-file split, `symbol_addrs.txt` additions) are
     performed by the agent at the plan gate after the PO approves the goal/scope, and validated
     there: `make extract && make` must still produce the green baserom ROM with the new stubs. This

@@ -25,6 +25,17 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 268 — crack-attempt slice on 2 documented func_80059BA0.c walls — 2026-07-24
+- Increment: 0 files / +0 functions matched (func_80059BA0.c stays 21-stub partial pack, not md5-candidate)
+- Quality: 0 stuck-far / 0 permuter (both walls permuter-plateau by class, not run) / 2 carried / 2 re-opened
+- Seed: committed 5pt; banked 0pt (no bank); realized ~6 / residual +2 (both re-opens → pass-cited TERMINAL verdicts [S233-class] + 2 corrected doc residual-classes); regime classical (crack slice)
+- What helped: **func_8005B0B4 — the S260 [[out-of-line-handler-block-branch-likely]] lever DID crack 3 sub-issues** (the S263 doc under-counted the divergence): computing `s32 sel = flags & 0xF;` right before the guard branch makes reorg fill the `beqz` delay slot with `andi sel` (not `move acc,zero`), freeing `v1=0` to emit EARLY → accumulator lands in `v1` (was `a1`); out-of-line value handlers + single `end:` exit fold the sel==3 arm into an annulled `beql`. score 4965→4165, ~90% structural. The "2-off / 37-39" framing was a scoring artifact — asm-differ scores the residual REGISTER cascade at 0.008. **func_8005CEE0 doc CORRECTED**: the S266 "a0<->v1 role swap" was not present (roles already matched); real residual = a fold-canonical load-order coin. Re-deriving each residual from a fresh objdump-vs-`.s` (not the doc's stated class) was the load-bearing move.
+- Friction: BOTH walls terminal. func_8005CEE0 = a load-order coin COUPLED to the idx*4 index-reg coloring — 6 source forms (ptr-temp/base-RMW/`+=`/base-inline/dead-idx-reuse/operand-group-flip) each fix one and break the other; no form yields {a-first load AND idx*4=v0}. func_8005B0B4 residual = an irreducible `global.c` 3-register allocno permutation (flags/val/sel across a0/a1/a2), source-invariant (load-order swap leaves it identical) + a reorg sel==1 jump-to-jump threading coin; permuter plateaus on the multi-reg permute. **DoR fresh-leaf miss RECURRED (8th)**: the two smallest `.s`-sized "fresh" leaves (func_8005DE88, func_8005B150) were BACKLOG-only carries — caught this sprint only by the per-leaf `grep -n` + read. Ranker c-continuation blindness = 15th recurrence.
+- Applied: 3 of 3: #1 `pick_target.py --carried-check <fn>...` DoR detector (wip docs ∪ BACKLOG carry region; flags DE88/B150) → tools + workflow DoR; #2 residual-CLASS-is-a-hypothesis (re-derive from fresh objdump before trusting the doc's named class) → workflow DoR + extends [[near-match-doc-semantics-suspect]]; #3 `docs/hazards.md#multi-register-allocno-permutation` new terminal class.
+- Carry-over: func_8005CEE0 (38/38, load-order⟂idx-coloring coupled coin, TERMINAL S268, docs/wip/func_8005CEE0.near-match.md, warm base.c), func_8005B0B4 (global.c 3-reg allocno permutation, TERMINAL S268, S260-improved base.c ~90%, docs/wip/func_8005B0B4.near-match.md). func_80059BA0.c remains 21-stub partial.
+
+---
+
 ## Sprint 267 — smallest-first func_80059BA0.c c-continuation (was a crack slice on 4 S210 carries) — 2026-07-24
 - Increment: 0 files / +1 function matched (func_8005AF80; func_80059BA0.c 22→21 stubs, partial pack, not md5-candidate)
 - Quality: 0 stuck-far / 2 permuter (0 crack: 80059BA0 280s, CEE0 400s) / 3 carried / 1 re-opened-and-cracked (func_8005AF80)

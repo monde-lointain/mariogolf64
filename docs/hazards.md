@@ -7421,3 +7421,41 @@ this, not a body bug. General to any default-then-conditionally-overwrite return
 and byte-matched the prologue/setup; the residual loop shape was a separate
 [#top-tested-loop-goto-local-hoist] wall, SOLVED and BANKED S213 via the terminator-condition loop
 framing — see that section.)
+
+## multi-register-allocno-permutation (a fixed permutation of N caller-saved regs, TERMINAL)
+
+**Symptom (S268; `func_8005B0B4`, `func_8005CEE0`).** A structurally-COMPLETE body (right
+instruction shapes, right values, right control flow) scores a very LOW asm-differ percent
+(S268 `func_8005B0B4` = 0.008) because the ROM and my build assign the SAME set of values to a
+PERMUTED set of caller-saved registers. `func_8005B0B4`: flags/val/sel land in ROM's `a2`/`a0`/`a1`
+but my build's `a1`/`a2`/`a0`. A wrong register in instruction N mis-scores every downstream
+instruction that reads it, so asm-differ collapses to near-zero even though ~90% of the body is
+byte-identical — the low percent is a SCORING artifact, not a measure of how far the body is.
+
+**Tell.** Diff a FRESH `mips-linux-gnu-objdump -d` of the object against the `.s`: the instruction
+COUNT matches (or is within 1), the opcodes/immediates/branch targets match, and the ONLY column
+that differs is the register operand — and it differs by a consistent PERMUTATION (reg X↔Y↔Z), not a
+one-off. Distinguish from [#base-register-vs-displacement] (an addressing-mode divergence, extra
+`addu`) and from a genuine near-miss (differing opcodes/counts).
+
+**Root cause.** `global.c`'s allocno assignment picks which free caller-saved hard reg (a0/a1/a2/…)
+each value claims; the seed (which reg the FIRST load claims) then cascades. The choice is a
+free-register-list order driven by allocno priority (live-length / ref-count), NOT by source
+spelling. See [[global-allocno-compare-livelength-biv-order]].
+
+**Verdict: TERMINAL / corpus-sibling-only.**
+- NOT source-steerable: S268 confirmed swapping the source load order (val-first vs flags-first)
+  leaves the permutation identical — gcc re-canonicalizes the load order and the seed is unchanged.
+  Reordering declarations, splitting temps, and reuse-dead-var all failed to move the seed.
+- NOT permuter-reachable: the permuter perturbs source structure, which plateaus on a multi-register
+  permutation (it does not directly permute hard regs); see [[permuter-at-exact-count-residual]].
+- The ONLY known lever is a matched-corpus sibling whose live-lengths pin the a0/a1/a2 seed the same
+  way — i.e. change the surrounding function's register pressure, not this function's source.
+
+**Note the distinction from a 1-register role fix.** A SINGLE wrong register (e.g. a default-return
+sentinel in `s1` vs `a1`) is often a real source lever ([#default-return-var-must-init-after-the-call],
+[[cross-call-live-range-callee-saved-lever]]). It is a *permutation of 3+ caller-saved regs with the
+count already matched* that is terminal. Before ruling terminal, first apply the ordinary role levers
+(accumulator-early via delay-slot steering, out-of-line handler, callee-saved init-after-call); S268
+`func_8005B0B4` shed an accumulator-role AND a delay-slot-fill divergence to those levers, leaving
+only the irreducible 3-register permutation.
