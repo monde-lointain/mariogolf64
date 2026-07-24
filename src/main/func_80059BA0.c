@@ -63,7 +63,7 @@ extern u8 D_800C2BD5;
 u8* func_8005AF74(void);
 void func_8005DF54(u8*, s32);
 s32 func_80099490(void);
-void func_80029A6C(s32);
+void flag_clear(s32);
 void func_8005D9A0(void);
 
 /* func_80059BA0: fabsf(arg0) via union bit-clear of the sign bit (0x7FFFFFFF).
@@ -585,7 +585,7 @@ void func_8005DDAC(void) {
   D_800C2BD4 = 0;
   D_801B9410 = 1;
   rumble_disable_flag = 0;
-  func_80029A6C(0x1E);
+  flag_clear(0x1E);
   current_game_mode = 0xC;
 }
 

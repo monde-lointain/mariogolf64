@@ -18,7 +18,7 @@ extern s16 g_scenery_wind_angle_b;
 extern s16 g_scenery_wind_angle_a;
 extern s32 D_801B6090;
 
-extern void func_80029A30(s32);
+extern void flag_set(s32);
 extern void func_80069FBC(void);
 extern void func_80069F38(void);
 extern void cfb_set_num(u32);
@@ -49,7 +49,7 @@ void init_scenario_state(void) {
   D_800BA9FC = 6;
   g_scenery_wind_angle_b = 0x1000;
   g_scenery_wind_angle_a = 0x6000;
-  func_80029A30(7);
+  flag_set(7);
   D_801B6090 = 1;
   func_80069FBC();
   func_80069F38();

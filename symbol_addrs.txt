@@ -680,3 +680,7 @@ draw_letterbox_bars = 0x80088890; // type:func
 pack_shade_ramp_rgba = 0x800824E4; // type:func
 scroll_sky_panels_by_wind = 0x80081C90; // type:func
 next_shuffled_index = 0x80045B14; // type:func
+flag_set = 0x80029A30; // type:func
+flag_clear = 0x80029A6C; // type:func
+flag_toggle = 0x80029AA8; // type:func
+flag_clear_all = 0x80029AE4; // type:func

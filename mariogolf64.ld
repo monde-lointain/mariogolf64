@@ -76,7 +76,7 @@ SECTIONS
         build/src/main/func_80029250.o(.text);
         build/src/libnusys/nugfxtaskmgr.o(.text);
         build/src/libultra/debug/assert.o(.text);
-        build/asm/4D00.o(.text);
+        build/src/main/vec3f_normalize.o(.text);
         build/src/main/func_8002A640.o(.text);
         build/src/main/func_800328E0.o(.text);
         build/src/main/get_table_entry.o(.text);
@@ -367,7 +367,7 @@ SECTIONS
         build/src/main/func_80029250.o(.data);
         build/src/libnusys/nugfxtaskmgr.o(.data);
         build/src/libultra/debug/assert.o(.data);
-        build/asm/4D00.o(.data);
+        build/src/main/vec3f_normalize.o(.data);
         build/src/main/func_8002A640.o(.data);
         build/src/main/func_800328E0.o(.data);
         build/src/main/get_table_entry.o(.data);
@@ -673,7 +673,7 @@ SECTIONS
         build/src/main/func_80029250.o(.rodata);
         build/src/libnusys/nugfxtaskmgr.o(.rodata);
         build/src/libultra/debug/assert.o(.rodata);
-        build/asm/4D00.o(.rodata);
+        build/src/main/vec3f_normalize.o(.rodata);
         build/src/main/func_8002A640.o(.rodata);
         build/src/main/func_800328E0.o(.rodata);
         build/src/main/get_table_entry.o(.rodata);
@@ -987,7 +987,7 @@ SECTIONS
         build/src/main/func_80029250.o(.bss);
         build/src/libnusys/nugfxtaskmgr.o(.bss);
         build/src/libultra/debug/assert.o(.bss);
-        build/asm/4D00.o(.bss);
+        build/src/main/vec3f_normalize.o(.bss);
         build/src/main/func_8002A640.o(.bss);
         build/src/main/func_800328E0.o(.bss);
         build/src/main/get_table_entry.o(.bss);

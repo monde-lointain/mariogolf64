@@ -94,7 +94,7 @@ segments:
       - [0x4650, c, main/func_80029250]
       - [0x4840, c, libnusys/nugfxtaskmgr]
       - [0x4CE0, c, libultra/debug/assert]
-      - [0x4D00, asm]
+      - [0x4D00, c, main/vec3f_normalize]
       - [0x5A40, c, main/func_8002A640]
       - [0xDCE0, c, main/func_800328E0]
       - [0xE260, c, main/get_table_entry]
