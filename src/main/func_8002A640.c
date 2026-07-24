@@ -12,6 +12,12 @@ extern s32 D_801B552C;
 extern s32 D_801B608C;
 extern s32 D_800BB038;
 
+extern Gfx *glistp;
+
+void init_rdp_and_draw_sky_background(Gfx **gfxp, s32 arg1);
+void func_8002A9C4(Gfx **gfxp, s32 arg1);
+void emit_sky_horizon_compositor_dl(Gfx **gfxp);
+
 INCLUDE_ASM("asm/nonmatchings/main/func_8002A640", func_8002A640);
 
 void func_8002A90C(Mtx *arg0, f32 arg1, f32 arg2, f32 arg3) {
@@ -45,10 +51,31 @@ INCLUDE_ASM("asm/nonmatchings/main/func_8002A640", emit_sky_horizon_compositor_d
 
 INCLUDE_ASM("asm/nonmatchings/main/func_8002A640", init_rdp_and_draw_sky_background);
 
-void func_8002BD9C(void) {
+void func_8002BD9C(Gfx **gfxp) {
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_8002A640", setup_view_by_camera_mode);
+void setup_view_by_camera_mode(u8 *arg0, s32 arg1) {
+    if (D_800B680C == 0) {
+        init_rdp_and_draw_sky_background(&glistp, arg1);
+    } else {
+        if (D_800B680C == 2) {
+            func_8002A9C4(&glistp, arg1);
+            return;
+        }
+        if (D_800B680C != 1) {
+            goto check3;
+        }
+        func_8002BD9C(&glistp);
+    }
+    gSPPopMatrix(glistp++, G_MTX_MODELVIEW);
+    gSPMatrix(glistp++, (Mtx *)(arg0 + 0x1C0),
+              G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
+    return;
+check3:
+    if (D_800B680C == 3) {
+        emit_sky_horizon_compositor_dl(&glistp);
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_8002A640", func_8002BE78);
 
