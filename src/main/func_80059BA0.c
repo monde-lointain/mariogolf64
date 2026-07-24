@@ -474,4 +474,45 @@ INCLUDE_ASM("asm/nonmatchings/main/func_80059BA0", func_8005DF54);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80059BA0", func_8005DFE8);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80059BA0", func_8005E180);
+extern u8 D_801B5588[];
+extern u32 D_800C2BE0;
+extern u32 D_800C2BE4;
+extern u32 D_800C2BE8;
+extern u32 D_800C2BEC;
+extern s32 func_80028110(u32 addr, s32 len);
+
+s32 func_8005E180(u8* buf, s32 save_flag) {
+  u8 raw[0xC0];
+  u16* stat = (u16*)(((u32)raw + 0xF) & ~0xF);
+  s32 i;
+  s32 j;
+  s32 flag;
+  u16 crc;
+  s32 off;
+
+  for (j = 0; j < 0x20; j++) {
+    u8* dst = buf + j;
+    dst[8] = ~D_801B5588[j];
+  }
+  crc = crc16_ccitt(buf, 0x2A78);
+  i = 0;
+  flag = save_flag & 0xFF;
+  off = 0;
+  do {
+    s32 r = rand();
+    stat[0] = r;
+    stat[1] = r;
+    stat[1] = stat[1] ^ crc;
+    if (flag == 0) {
+      if (func_80028110(*(u32*)((u8*)&D_800C2BE0 + off), 0x2A78) == 0) {
+        func_80028110(*(u32*)((u8*)&D_800C2BE4 + off), 4);
+      }
+    } else {
+      nuPiReadWriteSram(*(u32*)((u8*)&D_800C2BE8 + off), buf, 0x2A78, 1);
+      nuPiReadWriteSram(*(u32*)((u8*)&D_800C2BEC + off), stat, 4, 1);
+    }
+    i++;
+    off += 0x10;
+  } while (i < 2);
+  return 1;
+}
