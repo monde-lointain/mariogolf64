@@ -56,7 +56,19 @@ INCLUDE_ASM("asm/nonmatchings/main/vec3f_normalize", func_80029C00);
 
 INCLUDE_ASM("asm/nonmatchings/main/vec3f_normalize", mainproc);
 
-INCLUDE_ASM("asm/nonmatchings/main/vec3f_normalize", func_80029EEC);
+s32 func_80029EEC(s32 arg0, s32 arg1, u32 arg2, u32 arg3) {
+  u32 mag = (arg0 <= -1) ? (-arg0) : (arg0);
+  if (mag <= arg3) {
+    return 0;
+  }
+  if (mag < arg2) {
+    arg0 = arg1;
+  }
+  if (arg0 != 0) {
+    return (arg0 >> 31) | 1;
+  }
+  return 0;
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/vec3f_normalize", func_80029F28);
 
