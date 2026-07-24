@@ -66,6 +66,15 @@ s32 func_80099490(void);
 void func_80029A6C(s32);
 void func_8005D9A0(void);
 
+/* func_80059BA0: fabsf(arg0) via union bit-clear of the sign bit (0x7FFFFFFF).
+ * NEAR-MATCH, CARRIED (terminal sched2 coin). The faithful body
+ *   union{f32 f;s32 i;}x; x.f=arg0; x.i&=0x7FFFFFFF; arg0=x.f; return arg0;
+ * yields the exact 8 insns + identical regalloc, but gcc's post-reload
+ * scheduler (schedule_select, sched.c:2650) front-loads the independent `li`
+ * ahead of `mfc1` to fill the mov.s->mfc1 FP-load-coproc hazard slot:
+ *   mine: mov.s $f0,$f12; li; mfc1; ori; and; mtc1
+ *   ROM : mov.s $f0,$f12; mfc1; li; ori; and; mtc1
+ * See docs/wip/func_80059BA0.near-match.md. */
 INCLUDE_ASM("asm/nonmatchings/main/func_80059BA0", func_80059BA0);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80059BA0", func_80059BC0);
