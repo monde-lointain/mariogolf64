@@ -220,6 +220,49 @@ def carried_wall_names():
     return names
 
 
+_ASM_ROOT = os.path.join(ROOT, "asm")
+_PROLOGUE_WINDOW = 8  # instructions to scan for the $v0-spill tell
+_V0_SPILL_RE = re.compile(r"\bsw\b\s+\$v0,\s*0x[0-9A-Fa-f]+\(\$sp\)")
+_V0_COPY_RE = re.compile(r"\baddu\b\s+\$\w+,\s*\$v0,\s*\$zero")
+_ASM_INSN_RE = re.compile(r"/\*[^*]*\*/\s+(\S.*)")
+
+
+def _find_asm_s(fn):
+    import glob
+
+    # the .s lives under its PACK dir (asm/nonmatchings/<seg>/<pack>/<fn>.s), not a per-fn dir,
+    # so match the file anywhere under the asm root, not a dir named <fn>.
+    hits = glob.glob(os.path.join(_ASM_ROOT, "**", fn + ".s"), recursive=True)
+    return hits[0] if hits else None
+
+
+def nested_child_tell(fn):
+    """Heuristic DoR check: does <fn> look like a GCC nested function whose argument is homed via
+    the static chain in $v0 (STATIC_CHAIN_REGNUM = $2), rather than a standalone leaf?
+
+    A standalone leaf receives its first arg in $a0 and never reads an incoming $v0 (v0 is
+    caller-saved / the return register, not an argument slot). A nested child's prologue instead
+    spills the incoming static chain and copies it to a working register:
+        sw   $v0, K($sp)            (dead spill of the chain — even a chain that goes unused)
+        addu $<reg>, $v0, $zero     (copy the incoming chain into a saved/arg reg)
+    Both appear within the first few prologue instructions. Such a leaf is NOT standalone-bankable:
+    it banks as a nested function inside its (often still-asm) parent, so the plan gate must price
+    it coupled-to-parent (a carry), not as a fresh smallest-first leaf.
+
+    Returns True on the tell. Reads only <fn>'s own `.s` (cheap). The confirming caller tell
+    (`addiu $v0,$sp,K` in the jal delay slot = address of a parent local) is left to a manual
+    disasm. See docs/hazards.md#nested-function-static-chain-spill and the memories
+    nested-function-banks-the-parent-too / func-80041e8c-v0-arg-convention-wall (S269 flagged
+    func_8002BE78 -> draw_ground_shadow_decals and func_8002DAC0 -> render_frame)."""
+    path = _find_asm_s(fn)
+    if not path:
+        return False
+    with open(path) as f:
+        insns = _ASM_INSN_RE.findall(f.read())[:_PROLOGUE_WINDOW]
+    prologue = "\n".join(insns)
+    return bool(_V0_SPILL_RE.search(prologue) and _V0_COPY_RE.search(prologue))
+
+
 def _file_scope_static_count(cpath):
     """Number of file-scope static *variable* declarations (the uninitialized .bss family
     FILE_STATIC_RE matches; static function protos excluded). One matching line == one .bss symbol,

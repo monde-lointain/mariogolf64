@@ -419,6 +419,17 @@ dashboard). Target selection is `tools/pick_target.py`, not a stored roadmap.
         (`func_8005DE88`, `func_8005B150`) were BACKLOG-only carries this flags. (8th recurrence of
         the fresh-leaf miss; the `carried-wall:<fn>` in-row ranker tag remains a follow-up — the
         detector is a gate command, not yet a ranked-row column.)
+      - **Companion tool (S269): `venv/bin/python3 tools/pick_target.py --nested-check <fn>...`**
+        flags a GCC nested function among a fresh pack's smallest leaves — its `.s` prologue spills an
+        incoming `$v0` static chain (`sw $v0,K($sp)` + `addu $reg,$v0,$zero`) instead of taking its
+        arg in `$a0`. Such a leaf is NOT standalone-bankable: it banks inside its (often still-asm)
+        parent, so price it coupled-to-parent (a carry), not a fresh smallest-first leaf. Exits
+        non-zero if any is nested. S269's two smallest post-getter leaves (`func_8002BE78` ->
+        `draw_ground_shadow_decals`, `func_8002DAC0` -> `render_frame`) were both nested children this
+        flags; each otherwise cost a caller-disasm to classify. Run it with `--carried-check` on every
+        hand-mined leaf. See `#nested-function-static-chain-spill` and the memory
+        [[nested-function-banks-the-parent-too]]. (The in-row `nested-child:<parent>` ranker tag is a
+        follow-up, same as `carried-wall`.)
   - **A carried wall's near-match doc can be wrong about the function's SEMANTICS, not just its
     verdict — re-derive behaviour from the `.s` before accepting a stated residual (S258).** S252
     recorded `func_800824E4` as a THREE-argument packer with `b = arg2` on the negative path and

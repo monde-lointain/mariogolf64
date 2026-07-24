@@ -363,6 +363,7 @@ from pick_target_score import (  # noqa: F401  (re-export: pt.<name> contract)
     carried_wall_names,
     carry_over_names,
     drop_static_mirror_hazard,
+    nested_child_tell,
     score_row,
     seed_points,
     snap_fib,
@@ -1011,6 +1012,14 @@ def main():
         help="DoR gate: for each FUNC report CARRIED-WALL (owns a docs/wip note or a BACKLOG "
         "carry-over entry) vs fresh. Use before committing a hand-mined partial-pack leaf.",
     )
+    ap.add_argument(
+        "--nested-check",
+        nargs="+",
+        metavar="FUNC",
+        help="DoR gate: for each FUNC report NESTED-CHILD (its .s prologue spills an incoming $v0 "
+        "static chain = a GCC nested function, banks with its parent, not standalone) vs standalone. "
+        "Use on the smallest leaves of a fresh classical pack before committing them.",
+    )
     args = ap.parse_args()
 
     if args.carried_check:
@@ -1021,6 +1030,14 @@ def main():
             any_wall = any_wall or hit
             print(f"{'CARRIED-WALL' if hit else 'fresh':13} {fn}")
         raise SystemExit(1 if any_wall else 0)
+
+    if args.nested_check:
+        any_nested = False
+        for fn in args.nested_check:
+            hit = nested_child_tell(fn)
+            any_nested = any_nested or hit
+            print(f"{'NESTED-CHILD' if hit else 'standalone':13} {fn}")
+        raise SystemExit(1 if any_nested else 0)
 
     rows = build_rows(args, Indexes.build(), carry_over_names())
     if args.json:

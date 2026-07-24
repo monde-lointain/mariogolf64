@@ -159,6 +159,20 @@ CRACKED func_8005AF80 (the S210 permuter-failed wall, ~9500 iters) by hand with 
 (→ 37/39, S263 identified), and root-caused func_80059BA0 to a terminal sched2 coin. So a carried-wall
 slice is a legitimate BANK slice (kin to the S232 3/3 crack), reinforcing "deweight, not blacklist."
 
+**S269 — the last `blk` main row is now OPENED (`func_8002A640` flipped `asm->c`).** With every
+already-`c` main leaf proven a documented wall/carry by `pick_target.py --carried-check` (fake control
+returns fresh), the honest move was to flip the sole remaining `blk` asm-flip pack rather than grind
+another wall slice. `func_8002A640.c` is now a 23→15-stub PARTIAL pack (8 banked S269: the tiny
+getters/setters + `setup_view_by_camera_mode` DL dispatcher + `func_80032520` overlay manager). The
+`needs-header:sprite.c` flag was NOT a gate blocker — INCLUDE_ASM stubs build green without it; only a
+decompiled body that references sprite structs needs it (none of the S269 leaves did). Remaining 15
+stubs = `render_frame` (0x3840), `func_8002A9C4` and other DL emitters, and the
+`rodata-jtbl:0x800CA268/0x800CA2E8` + `data-static` carve fns — a future `main` slice. **New DoR tool
+`pick_target.py --nested-check <fn>...`** flags a GCC nested function among a fresh pack's smallest
+leaves (its `.s` prologue spills an incoming `$v0` static chain) so the gate prices it
+coupled-to-parent (a carry), not a fresh leaf — S269 hit 2 (see the carry block below). Run it with
+`--carried-check` on every hand-mined leaf.
+
 **Extend the detector to DL EMITTERS, not just FP (S190):** `src/main/func_8004E5A0.c` was a 3-fn
 one-tu the ranker surfaced smallest-first as a "+2 tractable" pick because 2 of 3 fns are 0-jal/0-FP —
 but they are `glistp++` **display-list emitters**, which are their OWN scheduling-wall class (the
@@ -3856,6 +3870,23 @@ by `/sprint-plan`:
   FP sprint (59BC0/59FAC/5A2AC/5D3B8 = S158-class); OR pivot to a fresher pack (func_80095A10.c is NOT
   fresh — S220-S222 mixed-partial FP-heavy walls; func_80054900.c small leaves are nested-function
   static-chain, need the parent TU first).
+
+- **(S269 PARTIAL — 8 banked; the last `blk` main pack opened)** `src/main/func_8002A640.c`
+  (main-segment render pack, flipped `asm->c` S269, 23→15 stubs). Coddog-mirror `spriteex2.c`@99.99 is
+  a structural fingerprint only — the fns are game render code (sky/camera/shadow/`render_frame`),
+  body-divergence-suspect. S269 banked the tiny getters/setters + `setup_view_by_camera_mode` +
+  `func_80032520`. Two carries, both **GCC nested functions** (NOT walls — bank with their parents when
+  those decompile; flagged by `pick_target.py --nested-check`):
+  - `func_8002BE78` (0xA4) — nested child of `draw_ground_shadow_decals` (still asm). Arg in `$v0`
+    static chain; caller sets `addiu $v0,$sp,0x10` in the jal delay slot. Reads/writes parent locals
+    f0/f4/f8/fC (a /7-magic clamp). `docs/wip/func_8002BE78.near-match.md`.
+  - `func_8002DAC0` (0x150) — nested child of `render_frame` (still asm, 0x3840). Arg in `$v0` static
+    chain; builds a translate*view matrix through the chain (guTranslateF/guMtxCatF/func_80065D5C).
+    `docs/wip/func_8002DAC0.near-match.md`.
+  Remaining 15 stubs = `render_frame` (0x3840, huge), `func_8002A9C4` + other DL emitters, and the
+  `rodata-jtbl:0x800CA268/0x800CA2E8` + `data-static` carve fns. Next `main` slice: more smallest-first
+  standalone leaves here (run `--nested-check` first to skip the nested children), or decompile
+  `render_frame`/`draw_ground_shadow_decals` to unlock their nested children.
 
 - **(S206 MIXED-PARTIAL — carried; 3 of 6 banked)** `src/main/func_800772B0.c` (main-segment
   `[0x526B0]` float spline/curve-interpolation pack; NOT a settime.c mirror — false coddog collision).

@@ -3432,6 +3432,35 @@ One condition-inversion flipped S222 `func_80095C10` from a top-of-fn near-miss 
 two `*out = cursor;` stores DISTINCT (do not hoist to a single post-merge store) when the ROM has one per
 path. Related: `#cross-jump-tail-merge` (when the ROM instead SHARES a tail across the paths).
 
+**Goto-to-tail variant (multi-arm mode dispatch; S269 `setup_view_by_camera_mode`).** The same
+BB-order-is-load-bearing rule bites a mode dispatch `switch`/if-chain where ONE arm falls through to a
+shared tail (a common DL-emit block) and the others early-return. The ROM tests the fall-through case
+with a `bne mode,K,.Lother` (fall-through = that arm, placed INLINE right before the common tail) and
+puts the early-return arm out-of-line at the very end. Every STRUCTURED spelling — nested `if/else`, an
+`else if` chain in ROM test order, merging the return arms into one `else` — canonicalized to the MIRROR
+(GCC made the returning arm the inline fall-through and pushed the fall-into-tail arm out-of-line via a
+`beq mode,K,.Lblock`). Unlike the S222 guard case, no condition inversion reaches it (the tests are
+distinct equality compares, not one negatable guard). The lever that lands it is an explicit
+`goto tail_label` for the early-return arm, which forces the fall-through arm inline and the goto'd arm
+to the physical tail:
+
+```c
+if (mode == 0) { A(); }
+else {
+    if (mode == 2) { B(); return; }
+    if (mode != 1) { goto other; }   /* -> ROM's `bne mode,1,.Lother`, fall-through = mode 1 */
+    D();                             /* mode 1: inline, falls into the common tail */
+}
+common_tail();                       /* modes 0 and 1 */
+return;
+other:                               /* physical tail: the early-return arm */
+if (mode == 3) { C(); }
+```
+
+Per `#goto-is-last-resort` this is justified only after the structured forms provably fail (S269 tried
+three). Memory: [[out-of-line-handler-block-branch-likely]] (that one folded a one-instr return-copy
+handler into an annulled `beql`; this is the mode-dispatch fall-through-to-common cousin).
+
 ---
 
 ## data-rodata-carve

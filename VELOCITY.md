@@ -1445,6 +1445,25 @@ Three honest caveats:
   4 (#1 sched-select memory; #3 (s32)base lever → commutative memory; #2/#4 DoR grep-BACKLOG-miss #3 +
   8x plateaued-tail → BACKLOG ranker follow-up; #5 grid-reset combo memory). RANKER: **14th recurrence**
   + the DoR carry-block-read miss. Push: local.
+- **Sprint 269** — open `main`'s last fresh vein: flip the blocked `func_8002A640` render pack
+  (was 1 `blk` asm-flip row needing `sprite.c`; every other main stub is a documented wall/carry per
+  `--carried-check`). Gate enabler = yaml flip `0x5A40 asm->c` (green, 23 stubs). Matched-fn **+8**,
+  file partial (23→15 stubs, not md5-candidate). Banks (6 first-build, 2 one-lever, 0 permuter, 0
+  stuck): `func_80032658` (0x10 global-zero predicate), `func_800326FC` (0x24 4-global setter,
+  ROM-store-order=source-order, caller-evict kept-auto), `func_8002A90C`/`func_8002A944` (0x38 gu
+  translate/scale concat), `func_8002A97C` (0x48 setter+mode branch), `func_80032668` (0x5C sparse
+  switch — `u32` index for `sltiu`), `setup_view_by_camera_mode` (0xD4 sky/camera DL dispatcher —
+  `gSPPopMatrix`+`gSPMatrix` F3DEX2 push-XOR; **goto-to-tail lever** cracked the mode-1/mode-3
+  block-layout coin after 3 structured forms canonicalized to the mirror), `func_80032520` (0x138
+  dual-slot overlay manager — gcc `record_jump_equiv` reused the `==1` compare reg for the flag store,
+  no lever). Carries (2, GCC nested functions, bank-with-parent, NOT walls): `func_8002BE78`→
+  `draw_ground_shadow_decals`, `func_8002DAC0`→`render_frame` (both `$v0` static-chain,
+  `docs/wip/`). Seed 3 (classical, open-vein slice); banked 0pt (file partial); realized 4 / residual
+  0 (8 banks vs est 3-4, 0 walls survived; the two levers were quick source fixes). Rolling-5
+  (S265-S269): 1+1+1+0+8. Quality **0 stuck-far / 0 permuter / 2 carried / 0 re-opened**. Retro
+  applied 2 of 2 (#1 `pick_target.py --nested-check` `$v0`-static-chain prologue detector [verified vs
+  the 2 nested + 3 standalone leaves]; #2 `#guard-block-layout-inversion` goto-to-tail variant +
+  agent-workflow DoR note). Push: local.
 - **Sprint 268** — crack-attempt slice on the 2 documented near-match walls in
   `src/main/func_80059BA0.c` (`func_8005B0B4`, `func_8005CEE0`; PO approved as proposed, no gate
   enabler, inline serial). Main asm-flip mined out (`--segment main` = 1 `blk` row needing `sprite.c`),
