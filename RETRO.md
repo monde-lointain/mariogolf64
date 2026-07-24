@@ -25,6 +25,17 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 265 — 3 smallest fresh non-FP leaves of func_80059BA0.c — 2026-07-23
+- Increment: 0 files / +1 function matched (func_8005E180; func_80059BA0.c 24→23 stubs, partial pack, not md5-candidate)
+- Quality: 0 stuck-far / 1 permuter (1 partial crack, the xor lever) / 2 carried / 0 re-opened
+- Seed: committed 5pt; banked 0pt (file partial); realized 8 / residual +3 (+1 permuter, +1 carry-or-reopen, +1 novel gotcha [jtbl-carve-is-bank-time]); regime classical (c-continuation)
+- What helped: func_8005E180 (SRAM save/verify, 0x13C/80i) cracked to exact-count-80 by 5 stacked levers — split-first-loop-counter into its own var (frees caller-saved `$a0` for the callless 0x20-loop), `if(flag==0){verify}else{write}` branch polarity, raw/masked flag split (`$s0` park across crc16 + `$s4` mask), the permuter's cse-class statement split `stat[1]=r; stat[1]^=crc` (flips the xor operand order, S258 class), and `u8* dst=buf+j; dst[8]=...` pointer temp (flips the `buf+j` addu operand order the permuter plateaued on); manual stack-buffer 16-align `(u32)(raw+0xF)&~0xF` reproduced the runtime `addiu sp,0x1F; and ~0xF`; `tools/cmpfn.sh` object-oracle iteration.
+- Friction: 2 of 3 committed "fresh" leaves were non-tractable despite a clean DoR carry-grep — func_8005DF54 a TERMINAL non-ABI `$s2`-arg wall (reads incoming `$s2` with no prologue `move`, callers set only a0/a1; kin to func_80041E8C), func_8005CF78 too-large (88i jtbl-dispatch 3-level loop). The "3 fresh tractable leaves" premise was optimistic; S210's "easy vein mined out" confirmed. Ranker c-continuation blindness recurred a 12th time (backlog hand-mined again). The jtbl carve cannot be gate-flipped: carving jtbl_800D0A60 while CF78 is still asm broke the link (undefined ref) — a bank-time-only action.
+- Applied: 3 of 3: #1 jtbl-carve-is-bank-time-not-a-gate-enabler → docs/hazards.md#switch-jtbl-dispatch + workflow DoR; #2 commutative-operand-order statement-split lever → memory [[commutative-operand-order-statement-split]] + MEMORY.md; #3 ranker continuation-blindness priority raised → BACKLOG (12th recurrence, now flagged biggest gate-friction item).
+- Carry-over: func_8005DF54 (terminal non-ABI $s2-arg wall, docs/wip/func_8005DF54.near-match.md), func_8005CF78 (deferred jtbl-dispatch, full structure+jtbl-map+carve-recipe in docs/wip/func_8005CF78.near-match.md). func_80059BA0.c remains 23-stub partial.
+
+---
+
 ## Sprint 264 — fresh smallest-first c-continuation of func_80059BA0.c — 2026-07-23
 - Increment: 0 files / +2 functions matched (func_80059BA0.c 26→24 stubs, partial pack, not md5-candidate)
 - Quality: 0 stuck-far / 0 permuter / 1 carried / 0 re-opened

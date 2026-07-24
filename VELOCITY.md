@@ -1380,6 +1380,27 @@ Three honest caveats:
   ranker-blindness recurrence: `--segment main` = 1 blocked row while 33 `c` files hold fresh leaves).
   RANKER: **11th recurrence** — c-continuation fresh leaves invisible; whole backlog hand-built. Push:
   local.
+- **Sprint 265** — 3 smallest fresh non-FP leaves of `src/main/func_80059BA0.c` (PO approved as
+  proposed; continuation of the S264 pack, inline serial, asm-first fast-path). **1 banked / 2 carried**
+  (24→23 stubs). Bank: `func_8005E180` (0x13C, 80i, SRAM save/verify — NOT-copy a 0x20 table into
+  buf+8, `crc16_ccitt`, 2-bank loop over D_800C2BE0/BE4/BE8/BEC verify-or-write, 16-aligned stack DMA
+  buffer). Cracked to exact-count-80 by 5 stacked levers: split the callless first-loop counter into its
+  own var (frees caller-saved `$a0`), `if(flag==0){verify}else{write}` branch polarity, raw/masked flag
+  split (`$s0` park across crc16 + `$s4` mask), the permuter's cse-class split `stat[1]=r; stat[1]^=crc`
+  (flips the xor operand order, S258 class), and `u8* dst=buf+j; dst[8]=...` pointer temp (flips the
+  `buf+j` addu operand order the permuter plateaued on at score 10); manual `(u32)(raw+0xF)&~0xF`
+  reproduced the runtime stack 16-align. Carries: `func_8005DF54` (0x94, TERMINAL non-ABI `$s2`-arg
+  wall — reads incoming `$s2` with no prologue `move`, callers set only a0/a1; kin to func_80041E8C;
+  `docs/wip/func_8005DF54.near-match.md`), `func_8005CF78` (0x160, 88i jtbl-dispatch 3-level loop,
+  too-large for the slice, deferred with full structure+jtbl-map+carve doc). md5-candidate **0 delta**
+  (partial pack, 23 stubs), matched-fn **+1**. Seed 5 (classical c-continuation); banked 0pt (file
+  partial); realized 8 / residual +3 (+1 permuter, +1 carry-or-reopen, +1 novel gotcha
+  [jtbl-carve-is-bank-time]). Rolling-5 (S261-S265): 0+3+0+2+1. Quality **0 / 1 permuter (1 partial
+  crack) / 2 carried / 0 re-opened**. Retro applied 3 of 3 (#1 jtbl-carve-is-bank-time-not-a-gate-enabler
+  → hazards#switch-jtbl-dispatch + workflow DoR; #2 commutative-operand-order statement-split lever →
+  memory; #3 ranker continuation-blindness priority raised → BACKLOG). RANKER: **12th recurrence** —
+  `--segment main` = 1 blocked row, backlog hand-mined again, now flagged the biggest gate-friction
+  item. Push: local.
   rodata-jtbl enabler, and a fresh-pack pivot; inline serial, no fan-out). **3 banked / 3 carries
   deepened to the EXACT instruction count** (22→19 stubs). Banks: `func_80088890` =
   `draw_letterbox_bars` (0x200, an S256 deferred carry, ONE-immediate near-match on the first build —

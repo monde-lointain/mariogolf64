@@ -394,6 +394,14 @@ dashboard). Target selection is `tools/pick_target.py`, not a stored roadmap.
     it is fine IF the goal is a crack-attempt slice (compiler-source fan-out, S232 cracked 3/3) — but
     label it as such, do not price it as a clean leaf. (A `pick_target.py` `carried-wall:<fn>` detector
     that reads the in-file comment is a tracked ranker follow-up; see `BACKLOG.md`.)
+    - **A compiler-jtbl leaf is an ALL-OR-NOTHING single slice, not a gate-flip-then-iterate (S265).**
+      A leaf whose `.s` carries `jtbl_<vram>`/`jr $v0`/`.word .L` dispatches through a compiler jump
+      table whose `.rodata` carve is a BANK-TIME action: the jtbl only exists as a symbol once the C
+      `switch` regenerates it, so carving it while the fn is still `INCLUDE_ASM` breaks the still-asm
+      reference (`undefined reference to jtbl_<vram>`). You cannot probe the body against a still-asm
+      baseline first — the carve + the full C reconstruction commit together. Price such a leaf as a
+      full vertical slice (not a quick getter), and do NOT pre-carve it at the plan gate. See
+      `docs/hazards.md#switch-jtbl-dispatch` (S265 func_8005CF78).
     - **ALSO grep the `BACKLOG.md` carry list by fn name (S239+S240 DoR miss, RECURRED).** A wall
       characterized in a PRIOR sprint often lives ONLY in the `BACKLOG.md ## Carry-overs` entry (or a
       `docs/wip/<fn>.near-match.md`), NOT as an in-file comment above the stub — so the in-file grep above

@@ -5138,6 +5138,17 @@ asm siblings (see [#rodata-sibling-yaml-pattern]). S216 `func_800402F4` scanned 
 quick getter vein. **Add `jtbl_`/`jr $v0`/`.word .L` to the per-fn triage grep** so jtbl fns route to the
 carry list automatically alongside the FP/heavy-callee skips.
 
+**The rodata carve is a BANK-TIME action, NOT a plan-gate enabler (S265).** A normal subseg flip can
+be performed and validated at the plan gate (the ROM stays green with the new asm stub). A compiler-jtbl
+carve CANNOT: `jtbl_<vram>` only exists as a linkable symbol when the C `switch` regenerates it, so
+carving `[…, .rodata, main/<file>]` back over the table while the function is still `INCLUDE_ASM` yields
+`undefined reference to jtbl_<vram>` at link (S265 proved this extending `[0xABE90,…]` back to `0xABE60`
+for func_8005CF78's jtbl_800D0A60 with the body still asm). So a jtbl-dispatch leaf is **all-or-nothing**:
+the yaml carve + the full C body land together in ONE commit, and you cannot probe/measure the body
+incrementally against a still-asm baseline first (unlike a plain classical leaf). S264's func_8005DAFC
+carve worked precisely BECAUSE its C body landed with it. Plan a jtbl leaf as a single vertical slice,
+not a gate-flip-then-iterate; do not pre-carve at the gate.
+
 **Three levers for a byte-exact match:**
 
 1. **`switch` for the jtbl dispatch only; `if`-chains for sparse inner cases.** A `switch` on the
