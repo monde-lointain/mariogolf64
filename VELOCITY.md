@@ -1445,6 +1445,23 @@ Three honest caveats:
   4 (#1 sched-select memory; #3 (s32)base lever → commutative memory; #2/#4 DoR grep-BACKLOG-miss #3 +
   8x plateaued-tail → BACKLOG ranker follow-up; #5 grid-reset combo memory). RANKER: **14th recurrence**
   + the DoR carry-block-read miss. Push: local.
+- **Sprint 272** — crack-attempt slice on mined-out `main` walls (PO approved over widening to a fresh
+  overlay pack; `--segment main` = 0 fresh, all smallest leaves `--carried-check` CARRIED-WALL). No gate
+  enabler (c-stub continuations). Serial inline crack, no fan-out. **2 banked / 1 carried**
+  (`func_80071370.c` 18→17 stubs, `func_800772B0.c` 3→2 stubs, both partial/NOT md5-candidate). Banks —
+  BOTH cracked a prior-sprint "terminal" wall via the same STEP-0 lever (reach exact instruction count by
+  reproducing the ROM's hoist, then the register permutation resolves with it): `emit_glyph_string_dl`
+  (0x80076138, cracks the S242 "biv-swap needs a 9th reg" verdict — preheader-local `p=str` defers the
+  param copy, str→$s2/i→$s3, after register-cursor + fresh post-loop temp + explicit invariant temps hit
+  69/69) and `interp_cubic_finite_diff` (0x80077AD4, cracks the S206 "pervasive FP-regalloc, unreachable
+  from faithful C" verdict — explicit `ia0_3=ia0*3` temp reproduces the ROM's early hoist, 65/65 +
+  ia0/ia1/d0/d1→$a2/$a0/$a1/$a3 coloring in one edit). Carry: `func_8005D0D8` (S264 3-coin cluster
+  re-confirmed terminal via fresh-objdump re-derive). Seed 2 (crack-slice); realized ≈4 (2 novel
+  wall-cracks, +1 each), residual +2; banked 0pt (files partial, all-or-nothing); value = +2 matched.
+  Rolling-5 (S268-S272): 0+8+2+0+2(pt). Quality **0 stuck-far / 0 permuter / 1 carried / 2 re-opened**
+  (both re-opens = successful cracks). Retro applied 2 of 2 (#1 exact-count-first re-open STEP-0 in the
+  DoR + `carried-wall:exact-count?:no` ranker follow-up; #2 the exact-count-first / FP-hoist sub-lever in
+  `#pervasive-regalloc-classical-main`). Push: local.
 - **Sprint 271** — open `main`'s last fresh vein: flip the never-flipped subseg 0x4D00 (asm since
   ~S61) → `src/main/vec3f_normalize.c`, bank the `D_801052F8` bit-flag module (PO approved over
   completing the FP/DL `func_80077BF0.c` or re-opening the terminal D4B8 wall). Gate enabler = one yaml

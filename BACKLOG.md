@@ -272,6 +272,20 @@ fan-out (4 documented walls → 2 cracked, 1 re-framed, 1 terminal):
        more optimal than the ROM), distinct from tiny straight-line glue. Price these as SPIKES
        (characterization), not clean leaves. Cheap `.s`-derived signal: `grep -c 'sw.*s[0-7],' <fn>.s`
        and count nested loop back-edges. Same retro-digest source as the tags above.
+     - **S272 refinement: `carried-wall:<fn>` needs an `exact-count?:no` sub-tag — an allocno/biv/
+       FP-regalloc wall whose MEASURED body was never at the ROM's exact instruction count is a
+       HIGHER-EV re-open, not a settled terminal.** S272 cracked BOTH `func_80076138` (S242 "biv-swap
+       needs a 9th reg") and `func_80077AD4` (S206 "pervasive FP-regalloc, unreachable from faithful C")
+       by first reaching exact instruction count (reproducing the ROM's hoisted product / deferring the
+       param copy), after which the "irreducible" register permutation resolved WITH the count. Both
+       prior verdicts had been drawn from non-exact-count bodies. So the ranker/DoR should read the
+       `docs/wip/<fn>.near-match.md` residual line for an instruction-count match (`N/N` vs `mine!=rom`);
+       a wall doc that quotes a live_length / reg-pressure / "needs Nth reg" argument WITHOUT the body
+       being exact-count is provisional (`exact-count?:no` → surface it ahead of exact-count-confirmed
+       walls). Distinct from `lever-tried:<lever>` (S261): a wall can be exhausted-lever AND exact-count,
+       or fresh-lever AND non-exact-count. See `docs/hazards.md#pervasive-regalloc-classical-main`
+       (exact-count-first sub-lever) and the memory `remeasure-percent-after-structural-fix`. Cheap
+       signal: the near-match doc's `rom=`/`mine=` line, or `tools/cmpfn.sh <fn>` first line.
 2. **The S234 "REPEATED/LOOPED access → 0-expected-bank" access-multiplicity deweight is WRONG.**
    `func_8006F1A0` (3× same-slot RMW) and `func_8006F24C` (4-iter loop fill) BOTH banked byte-exact in
    S235 via the byte-offset-cast lever (`*(s32*)((u8*)SYM+off)`) + the stride-array loop-crack recipe
@@ -3838,7 +3852,7 @@ by `/sprint-plan`:
   note below: the pack still yields clean fresh leaves via smallest-first — S264 banked 2 undocumented
   fresh leaves (77i/85i) first-build; the mined-out claim held only for the SPECIFIC S210 residual-tail
   fns, not the whole pack. New S264 carry: `func_8005D0D8` (0x10C, 61/67 near-match; bit7 `lo<0`
-  range-elim combine/reorg coin + xor-hoist + base-reg allocno; `docs/wip/func_8005D0D8.near-match.md`).** **S210 +1:** `func_8005C510`
+  range-elim combine/reorg coin + xor-hoist + base-reg allocno; `docs/wip/func_8005D0D8.near-match.md`). S272 RE-CONFIRMED TERMINAL: fresh-objdump re-derive (S268) verified all 3 coins correctly stated; the combine `nonzero_bits` narrowing coin is robust across 3 source forms (all fold `slti`+dead `bltzl`→one `sltiu`); all 3 must fall together, no source lever. A gcc-2.7.2 combine `simplify_comparison` dive is the only remaining path. This carry IS exact-count-confirmable-adjacent but the residual is combine-timing, not a regalloc permutation, so the S272 exact-count-first lever does NOT apply to it.** **S210 +1:** `func_8005C510`
   (6×6 grid-counter, C458 family + a NEW `count`→code DISPATCH-TAIL variant — `if(count==4)return
   1;…;return (count==20)?5:0;`), banked first-build reusing the S209 grid-counter levers.
   **S210 hit the file's HARD RESIDUAL TAIL — a wall CLUSTER that source levers AND the permuter (3 runs,

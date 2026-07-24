@@ -4779,6 +4779,32 @@ collapsed) and matched first build in row order (`0x800`→`a0`, `-0x100`→`v1`
 byte-exact structure, only the *register/immediate* holding a reused constant differs, and the two
 reuses of that constant are adjacent in your seed. Cheap to try before any deeper lever.
 
+**Exact-count-first re-open sub-lever (S272) — reproduce what the ROM HOISTS, then the permutation
+resolves with the count.** Before quoting a live-length / register-pressure / "needs an Nth callee-saved
+reg" argument to call a permutation terminal, get the body to the ROM's **exact instruction count**, and
+achieve it by materializing every value the ROM **hoists or reorders** as an explicit source temp — a
+product (`ia0*3`), a forward difference, a loop-invariant, or a deferred param copy. Two S272 banks that
+each carried a strongly-worded terminal verdict fell to this one move:
+- **Integer biv/allocno (cracks the S242 "needs a 9th reg" verdict, `func_80076138`/`emit_glyph_string_dl`).**
+  A preheader-local `u8* p = str;` inside the guard block defers the `str` param's callee-saved copy from
+  function entry to the loop **preheader** (`move s2,a3` after the guard), shortening str's live_length
+  below `i`'s so the allocno order flips to str→`$s2` / i→`$s3` — with **no** 9th reg (gcc keeps the arg in
+  `$a3` until the preheader; the extra pseudo coalesces with the arg home). It only landed cleanly AFTER a
+  register-cursor + a fresh post-loop temp + explicit invariant temps got the body to exact count 69/69
+  first; the "9th reg" claim had been drawn from a non-exact body (double-store + wrong post-loop schedule).
+- **FP-regalloc 4-temp permutation (cracks the S206 "unreachable from faithful C" verdict,
+  `func_80077AD4`/`interp_cubic_finite_diff`).** An explicit `s32 ia0_3 = ia0 * 3;` temp reproduces the
+  ROM's early hoist of that product (`sll;addu` right after the ia0/ia1 truncations), which reaches exact
+  count 65/65 (was 63) AND collapses the ia0/ia1/d0/d1 → `$a2/$a0/$a1/$a3` coloring in one edit, because
+  the extra pseudo changes the truncation-temps' birth order / live ranges. The S206 doc had tried
+  "reorder the decl/compute order" (regressed to 0.50) but NOT materializing the **arithmetic** the ROM
+  hoists as its own temp. This is stronger than the S233 "FP walls are block-local scheduler coins, not
+  steerable" framing: a HOIST-driven FP permutation IS steerable; only the genuinely-terminal
+  load-latency constant-hide coin (S233) is not.
+So step 0 of any biv/allocno/FP-regalloc re-open is "reach exact instruction count by reproducing the
+ROM's hoists," and a non-exact body's pressure claim is provisional (memory
+`remeasure-percent-after-structural-fix`).
+
 **The playbook (in order):**
 
 1. **Build an exact-symbol isolated base.** Use **per-field** structs so each accessed field is its **own**

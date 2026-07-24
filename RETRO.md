@@ -25,6 +25,17 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 272 — crack-attempt slice on mined-out main walls (2 "terminal" walls cracked) — 2026-07-24
+- Increment: 0 files / +2 functions matched (`src/main/func_80071370.c` 18→17 stubs, `src/main/func_800772B0.c` 3→2 stubs; both partial, NOT md5-candidate)
+- Quality: 0 stuck-far / 0 permuter / 1 carried / 2 re-opened (both re-opens = successful cracks of prior-sprint "terminal" verdicts)
+- Seed: committed 2pt (crack-slice of documented walls, not a size-priced pack); banked 0pt (files partial, all-or-nothing); realized ≈4 (2 novel wall-cracks, +1 each), residual +2; regime classical. Value signal = +2 matched.
+- What helped: `main` confirmed fully mined (`pick_target --segment main` = 0 fresh; all 14 smallest remaining leaves `--carried-check` CARRIED-WALL). PO chose a crack-slice over widening to a fresh overlay pack. **BOTH banks fell to ONE meta-lever: reach the ROM's EXACT instruction count by reproducing what the ROM HOISTS, and the "irreducible" register permutation resolves WITH the count.** `emit_glyph_string_dl` (0x80076138, cracks S242 "biv-swap needs a 9th reg") — a preheader-local `u8* p = str;` defers the str param's callee-saved copy to the loop preheader (str→$s2, i→$s3, NO 9th reg), landing cleanly only after a register-cursor + fresh post-loop temp + explicit invariant temps got the body to exact count 69/69. `interp_cubic_finite_diff` (0x80077AD4, cracks S206 "pervasive FP-regalloc, unreachable from faithful C") — an explicit `s32 ia0_3 = ia0*3;` temp reproduces the ROM's early hoist, reaching 65/65 AND collapsing the ia0/ia1/d0/d1→$a2/$a0/$a1/$a3 coloring in one edit. Both prior verdicts had been drawn from NON-exact-count bodies. Fresh-objdump re-derive (S268) per wall first.
+- Friction: none material. `func_8005D0D8` (S264 3-coin cluster) re-confirmed terminal after 3 source forms all narrowed the `slti`+`bltzl` to one `sltiu` (combine `nonzero_bits` timing coin); reverted clean, doc updated. Curated renames reached still-asm callers → force-deleted `src/main/*.o` + `make extract` (S271 gate rule, applied smoothly).
+- Applied: 2 of 2: #1 `docs/agent-workflow.md` DoR re-open STEP-0 "reach exact instruction count first" for allocno/biv/FP-regalloc walls (extends S260/S268) + `carried-wall:exact-count?:no` ranker follow-up to BACKLOG; #2 `docs/hazards.md#pervasive-regalloc-classical-main` exact-count-first / FP-hoist sub-lever (sharpens the S233 "FP walls not steerable" framing — a HOIST-driven FP permutation IS steerable). Memory `remeasure-percent-after-structural-fix` updated with the dual-crack re-open playbook.
+- Carry-over: `func_8005D0D8` (terminal 3-coin cluster, gcc-2.7.2 combine dive is the only path). Remaining `main` = documented walls + FP/DL/nusys tails; next slice is another crack-attempt or a fresh overlay pack.
+
+---
+
 ## Sprint 271 — open main's last fresh vein: flip subseg 0x4D00, bank the D_801052F8 bit-flag module — 2026-07-24
 - Increment: 0 files / +6 functions matched (`src/main/vec3f_normalize.c` new, 18→12 stubs; partial pack, NOT md5-candidate — mainproc=nuboot / vec3f_normalize FP / big fns carry)
 - Quality: 0 stuck-far / 0 permuter / 0 carried / 0 re-opened (all 6 fresh first-build; but see Friction — one self-inflicted process incident, fully recovered)

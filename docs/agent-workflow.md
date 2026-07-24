@@ -122,6 +122,22 @@ resume surface when the middle spans context windows.
         the DoR sort should put the carries whose cited pass that lever DISABLES at the FRONT, however
         strongly worded their verdict — the more source-dive backing a verdict has, the more precisely
         it names the pass a structural lever can now sidestep.
+        - **S272 sharpened this into a re-open STEP-0 for allocno/biv/FP-regalloc walls: reach EXACT
+          instruction count first, and a "terminal" register permutation frequently resolves WITH the
+          count.** Two S272 crack-slice banks each carried a strongly-worded terminal verdict drawn from
+          a NON-exact-count body: `func_80076138` (S242 "biv-swap needs a 9th reg" — a preheader-local
+          `p=str` flipped str→$s2/i→$s3 with no 9th reg once a register-cursor + fresh post-loop temp +
+          explicit invariant temps hit exact count 69/69) and `func_80077AD4` (S206 "pervasive
+          FP-regalloc, unreachable from faithful C" — an explicit `ia0_3=ia0*3` temp reproduced the ROM's
+          early hoist, reaching 65/65 AND collapsing the 4-temp coloring in one edit). So when re-opening
+          any allocno/biv/FP-regalloc carry, STEP 0 is "get to exact instruction count by materializing
+          every value the ROM HOISTS/reorders as a source temp (a product, a difference, a loop-invariant,
+          a deferred param copy)"; only quote a live_length / reg-pressure / "needs Nth reg" argument
+          AFTER the body is exact-count — a non-exact body's pressure claim is provisional and usually
+          wrong. See `docs/hazards.md#pervasive-regalloc-classical-main` (the exact-count-first sub-lever)
+          and the memory `remeasure-percent-after-structural-fix`. A `pick_target.py` `carried-wall`
+          sub-tag `exact-count?:no` (flag allocno walls whose measured body was never exact-count as
+          higher-EV re-open targets) is a tracked ranker follow-up (see `BACKLOG.md`).
       - **But not every wall is steerable — the fan-out ALSO earns its keep by returning terminal
         no-lever VERDICTS (S233).** S233 fanned 3 gcc-2.7.2 + binutils-2.6 subagents over a fresh
         `raycast_terrain.c` FP/collision pack's near-match tail: 1 genuine CRACK+bank
