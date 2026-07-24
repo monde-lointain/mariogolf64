@@ -407,5 +407,18 @@ s32 get_interpolated_terrain_height_wrapper(s32 x, s32 z) {
   return get_interpolated_terrain_height(x, z);
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/get_tile_attribute",
-            get_lowest_height_at_position);
+extern s32 find_collision_triangle(s32 x0, s32 y0, s32 z0, s32 x1, s32 y1,
+                                   s32 z1, void* outA, void* outHit);
+
+s32 get_lowest_height_at_position(s32 x, s32 z) {
+  s32 a[6];
+  f32 hit[0x22];
+  s32 height = get_interpolated_terrain_height(x, z);
+  if (find_collision_triangle(x, -3072000, z, x, 3072000, z, a, hit)) {
+    s32 h = (s32)(hit[0] * 6144000.0f + -3072000.0f);
+    if (h < height) {
+      height = h;
+    }
+  }
+  return height;
+}
