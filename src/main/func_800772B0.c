@@ -55,6 +55,36 @@ f32 func_800779A8(f32 x, f32* arg1, f32* arg2, f32* arg3) {
          q0;
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_800772B0", func_80077AD4);
+/* Cubic finite-difference interpolation of the float table arg0 at the
+ * fractional index arg1: samples v[0..2] = arg0[idx..idx+2] (idx = trunc arg1),
+ * truncates them to integers ia0/ia1 and the forward differences d0/d1, and
+ * evaluates a non-Horner cubic in frac = arg1 - idx. Computing ia0*3 as an
+ * explicit temp reproduces the ROM's early hoist of that product, which reaches
+ * exact instruction count AND steers local-alloc to the ROM's ia0/ia1/d0/d1 ->
+ * $a2/$a0/$a1/$a3 coloring (S272, cracks the S206 FP-regalloc wall). */
+f32 interp_cubic_finite_diff(f32* arg0, f32 arg1) {
+  f32 v[3];
+  s32 idx;
+  f32 frac;
+  s32 ia0;
+  s32 ia1;
+  s32 d0;
+  s32 d1;
+  s32 ia0_3;
+
+  idx = (s32)arg1;
+  v[0] = arg0[idx];
+  v[1] = arg0[idx + 1];
+  v[2] = arg0[idx + 2];
+  frac = arg1 - (f32)idx;
+  ia0 = (s32)v[0];
+  ia1 = (s32)v[1];
+  ia0_3 = ia0 * 3;
+  d0 = (s32)(v[1] - v[0]);
+  d1 = (s32)(v[2] - v[1]);
+  return ((f32)(((ia0 - ia1) * 2) + d0 + d1) * frac * frac * frac) +
+         ((f32)(((ia1 * 3) - ia0_3 - (d0 * 2)) - d1) * frac * frac) +
+         ((f32)d0 * frac) + (f32)ia0;
+}
 
 s32 func_80077BD8(s32* arg0) { return *arg0 = *arg0; }
