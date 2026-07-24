@@ -5,6 +5,10 @@ extern s32 D_800B7770;
 extern s32 D_800B7774;
 extern s32 D_800B7778;
 extern s32 D_800B777C;
+extern s32 D_800B680C;
+extern s32 D_800B6810;
+extern s32 D_800B6818;
+extern s32 D_801B552C;
 
 INCLUDE_ASM("asm/nonmatchings/main/func_8002A640", func_8002A640);
 
@@ -20,7 +24,16 @@ void func_8002A944(Mtx *arg0, f32 arg1, f32 arg2, f32 arg3) {
     guMtxCatL(arg0, &sp10, arg0);
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_8002A640", func_8002A97C);
+void func_8002A97C(s32 arg0, s32 arg1) {
+    D_800B680C = arg0;
+    D_800B6810 = arg1;
+    if (arg0 == 4) {
+        D_801B552C = 1;
+        D_800B6818 = -0x280;
+    } else {
+        D_801B552C = 3;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_8002A640", func_8002A9C4);
 
