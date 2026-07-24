@@ -9,6 +9,8 @@ extern s32 D_800B680C;
 extern s32 D_800B6810;
 extern s32 D_800B6818;
 extern s32 D_801B552C;
+extern s32 D_801B608C;
+extern s32 D_800BB038;
 
 INCLUDE_ASM("asm/nonmatchings/main/func_8002A640", func_8002A640);
 
@@ -70,7 +72,25 @@ s32 func_80032658(void) {
     return D_800BB03C == 0;
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_8002A640", func_80032668);
+void func_80032668(void) {
+    u32 v = D_801B608C;
+    s32 r;
+
+    D_800BB03C = 1;
+    switch (v) {
+    case 3:
+    case 9:
+        r = 0x15;
+        break;
+    case 11:
+        r = 0x1A;
+        break;
+    default:
+        r = 5;
+        break;
+    }
+    D_800BB038 = r;
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_8002A640", func_800326C4);
 
