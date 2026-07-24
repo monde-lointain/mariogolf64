@@ -1401,6 +1401,29 @@ Three honest caveats:
   memory; #3 ranker continuation-blindness priority raised → BACKLOG). RANKER: **12th recurrence** —
   `--segment main` = 1 blocked row, backlog hand-mined again, now flagged the biggest gate-friction
   item. Push: local.
+- **Sprint 266** — dedicated `func_8005CF78` jtbl crack + `func_8005DFE8` filler (PO approved as
+  proposed; `src/main/func_80059BA0.c` c-continuation, no gate enabler). **1 banked / 1 carried
+  deepened to 102/102 instr** (23→22 stubs, partial pack). Bank: `func_8005CF78` (0x160/88i,
+  jtbl-dispatch 3-loop section-validator) — the S265-DEFERRED leaf, landed EXACTLY as teed up. Carve
+  jtbl_800D0A60 (0xABE60, 12 words) atomic w/ the C body; cracked via the new 5-lever
+  [[jtbl-dispatch-loop-crack-playbook]]: switch default-set regen; [[fold-associate-constant-side]]
+  constant-first two-iv split (base-vs-disp); `do{}while(k!=3)` all loops → bne+reg-bound+frame-0x28
+  (the new [[do-while-not-equal-loop-exit-form]] lever); `rows[i]` array-index anchors the inner giv at
+  the row base; assign the row invariant INSIDE the while → preheader-hoist post-guard so the guard
+  delay = `move a0,zero`. Re-derived the 2nd loop `if(arr[k]==1)clear` from `.s` (S265 doc inverted it
+  to `!=1`). Carry: `func_8005DFE8` (0x198/102i SRAM load/verify, counterpart to S265 func_8005E180
+  SAVE) — 102/102 instr + EXACT stack (s6=0xE0/frame 0x110), 4 levers cracked (size-var-compare-only +
+  literal-args → 0x2A78 in fp; size-before-flag decl → s7/s8; raw[0xD0] → stack; two `==` not `<2` →
+  count 98→102); RESIDUAL ~10 rows = s1/s2 allocno role ([[global-allocno-compare-livelength-biv-order]],
+  decl-order-invariant) + 4th-check bnel/beq + prologue/tail reorg coins; permuter-blind (isolated 0.1,
+  D_ reloc noise); doc + warm-start base.c. md5-candidate **0 delta**, matched-fn **+1**. Seed 5
+  (classical c-continuation); banked 0pt (file partial); realized ~6 / residual +2 (+1 carry-or-reopen,
+  +1 novel gotcha [do-while-`!=` exit-form + associativity two-iv split]). Rolling-5 (S262-S266):
+  3+0+2+1+1. Quality **0 / 0 permuter / 1 carried / 0 re-opened**. Retro applied 4 of 4 (#1 jtbl-crack
+  playbook memory; #2 do-while-`!=` exit-form memory; #3 size-compare-only lever → cross-call memory;
+  #4 ranker continuation-blindness 13th recurrence → BACKLOG). RANKER: **13th recurrence** — backlog
+  hand-mined from func_80059BA0.c a THIRD straight sprint. Mid-sprint gotcha: an unscoped `raw[...]` sed
+  clobbered banked func_8005E180's buffer (0xC0→0xD0); caught + restored before the carry. Push: dev.
   rodata-jtbl enabler, and a fresh-pack pivot; inline serial, no fan-out). **3 banked / 3 carries
   deepened to the EXACT instruction count** (22→19 stubs). Banks: `func_80088890` =
   `draw_letterbox_bars` (0x200, an S256 deferred carry, ONE-immediate near-match on the first build —

@@ -133,9 +133,10 @@ this is about in-tree carry provenance on a c-stub continuation. NOTE the S232 c
 carried-wall is NOT terminal — the plan gate should still be ABLE to pick it as a labeled crack-attempt
 slice (S232 cracked 3/3 via compiler-source fan-out), so the tag deweights but does not blacklist.
 
-**C-continuation fresh-leaf ranker mode (S264, off-cadence golden-gated; 12th recurrence of ranker
-blindness — S265 hand-mined `func_80059BA0.c` AGAIN, banked func_8005E180; RAISE PRIORITY, this is now
-the single biggest gate-friction item).** `pick_target.py --segment main` returns exactly ONE row (the blocked `func_8002A640`
+**C-continuation fresh-leaf ranker mode (S264, off-cadence golden-gated; 13th+ recurrence of ranker
+blindness — S265 AND S266 both hand-mined `func_80059BA0.c` AGAIN, banking func_8005E180 then
+func_8005CF78; RAISE PRIORITY — the single biggest gate-friction item, unaddressed for a 13th sprint).**
+`pick_target.py --segment main` returns exactly ONE row (the blocked `func_8002A640`
 asm-flip pack) while 33 already-`c` `src/main/*.c` files hold ~200 fresh `INCLUDE_ASM` leaves — the
 ranker only surfaces whole still-asm subseg FLIP packs, not the residual stubs in partially-banked `c`
 files, so every recent `main` sprint hand-builds its backlog. S264 mined `func_80059BA0.c` by hand and
@@ -3795,26 +3796,27 @@ by `/sprint-plan`:
     `move s2,a2`; `jal flag_is_set` clobbers `$a2` and callers (func_80070FD0/710C4/ovl8_801F55A0) set
     only a0/a1 — a hand-rolled convention passing context through `$s2`, unreproducible by gcc-2.7.2 o32
     (kin to [[func-80041e8c-v0-arg-convention-wall]]). Do NOT re-grind; not permuter-reachable.
-  - `func_8005CF78` (S265; **DEFERRED, not a wall** — full structure+jtbl-map+carve-recipe in
-    `docs/wip/func_8005CF78.near-match.md`) — 0x160 (88i) jtbl-dispatch 3-level loop (section walk over
-    base+k*0xA0, switch on jtbl_800D0A60, ~8 `beql`-annulled conditional stores, inner row loop stride
-    0xB8). ALL-OR-NOTHING: the jtbl_800D0A60 rodata carve (extend `[0xABE90,…]` back to `0xABE60`,
-    8-aligned) is BANK-TIME only — carving it while the fn is still asm breaks the link
-    (`undefined reference to jtbl_800D0A60`; see hazards#switch-jtbl-dispatch). Tractable but a full
-    vertical slice; route to a dedicated crack sprint, not a smallest-first leaf.
+  - `func_8005CF78` (S265 deferred → **BANKED S266**, jtbl-dispatch 3-loop section-validator; carve
+    jtbl_800D0A60 landed atomically w/ the C body; cracked via the 5-lever
+    [[jtbl-dispatch-loop-crack-playbook]]). No longer a carry.
+  - `func_8005DFE8` (S266; **CARRIED near-match**, `docs/wip/func_8005DFE8.near-match.md`) — 0x198 (102i)
+    SRAM load/verify (counterpart to banked func_8005E180 SAVE). Driven to 102/102 instr + EXACT stack;
+    4 levers cracked (size-var-compare-only+literal-args, size-before-flag decl, raw[0xD0], two-`==`-not-`<2`).
+    RESIDUAL ~10 rows = s1/s2 allocno role ([[global-allocno-compare-livelength-biv-order]], decl-order-invariant)
+    + 4th-check bnel/beq + prologue/tail reorg coins. Permuter-blind (isolated 0.1, D_ reloc noise).
+    base.c is a warm start; route to an allocno-crack slice, NOT a fresh leaf.
   ~19 larger/FP fns still unprofiled (59BC0/59FAC/5A2AC/5D3B8 FP = S158-class; 5A580 478-instr/99-jal
   dispatcher; deferred). See hazards `#grid-counter-double-loop` (dispatch-tail), `#base-register-vs-
   displacement` (+ the `family-of` ranker follow-up + the .NON_MATCHING data-carve blocker),
   `#local-alloc-qty-permutation`, memory `kmc-cc1-no-instruction-scheduler`. **Next slice (updated
-  S265):** S264 banked 2 clean, S265 banked 1 (func_8005E180) but hit 2 non-tractable of 3 committed
-  (DF54 terminal wall, CF78 too-large) — the pack's fresh-leaf vein is now thinning toward wall-class /
-  large-slice. Remaining fresh non-FP leaves (no-wip-doc, no-carry): func_8005CF78 (deferred above),
-  func_8005DFE8/func_8005C038/func_8005BC10/func_8005C674/func_8005B7BC/func_8005CA48/func_8005B314
-  (0x198–0x4A8, jal 2–12) — bigger mid-logic fns with S224-class wall risk. Prefer CF78 as a dedicated
-  jtbl slice, or a permuter/`#cross-project-matched-corpus-mining`/data-carve spike on the S210
-  residual-tail carries; OR the FP sprint (59BC0/59FAC/5A2AC/5D3B8 = S158-class); OR pivot to a fresher
-  pack (func_80095A10.c 22 stubs, func_80054900.c note: its small leaves func_80054900/54B7C are
-  nested-function static-chain, need the parent TU first).
+  S266):** S264 banked 2, S265 banked 1, S266 banked 1 (func_8005CF78, the S265-deferred jtbl slice —
+  landed exactly as teed up). The pack's fresh-leaf vein is thinning to wall-class / large-slice: the
+  smallest remaining non-doc leaves (func_8005C038/BC10/C674/B7BC/CA48/B314, 0x408–0x4A8, jal 2–12) are
+  all bigger mid-logic fns with S224-class wall risk, and func_8005ACF8 (0x258, jal=32) is a heavy
+  dispatch. Options: an allocno-crack slice on func_8005DFE8 (102/102 warm-start, base.c ready); OR the
+  FP sprint (59BC0/59FAC/5A2AC/5D3B8 = S158-class); OR pivot to a fresher pack (func_80095A10.c is NOT
+  fresh — S220-S222 mixed-partial FP-heavy walls; func_80054900.c small leaves are nested-function
+  static-chain, need the parent TU first).
 
 - **(S206 MIXED-PARTIAL — carried; 3 of 6 banked)** `src/main/func_800772B0.c` (main-segment
   `[0x526B0]` float spline/curve-interpolation pack; NOT a settime.c mirror — false coddog collision).

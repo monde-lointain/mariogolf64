@@ -25,6 +25,17 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 266 — dedicated func_8005CF78 jtbl crack + func_8005DFE8 filler — 2026-07-24
+- Increment: 0 files / +1 function matched (func_8005CF78; func_80059BA0.c 23→22 stubs, partial pack, not md5-candidate)
+- Quality: 0 stuck-far / 0 permuter / 1 carried (func_8005DFE8) / 0 re-opened
+- Seed: committed 5pt; banked 0pt (file partial); realized ~6 / residual +2 (+1 carry-or-reopen, +1 novel gotcha [do-while-`!=` exit-form + fold-associate two-iv split]); regime classical (c-continuation)
+- What helped: **func_8005CF78 (the S265-DEFERRED jtbl leaf) banked EXACTLY as the BACKLOG teed it up** — a documented-tractable target cracked to 88/88 via a repeatable 5-lever jtbl-dispatch playbook (switch default-set regen the 12-word jtbl; fold-associate `base+CONST+k*stride` constant-first for a two-iv base-vs-disp split; `do{}while(k!=3)` on ALL loops → `bne`+reg-bound+frame-0x28; `rows[i]` array-index anchors the inner giv at the row base not row+maxfield; assign the loop invariant INSIDE the while → gcc hoists it to the POST-GUARD preheader so the guard delay-slot fills with `move a0,zero`). jtbl_800D0A60 carve landed atomically with the C body (bank-time action, never a gate enabler). func_8005DFE8 driven to 102/102 + exact stack by 4 levers (size-var-for-compare-only+literal-args puts 0x2A78 in fp; size-before-flag decl → s7/s8; raw[0xD0] → s6=0xE0/frame 0x110; two `==` tests not `<2` → count 98→102). Re-derived CF78's 2nd loop as `if(arr[k]==1)clear` from the `.s` (S265 doc had it inverted, per the S258 DoR).
+- Friction: func_8005DFE8 residual is a genuine S224-class allocno coin — s1/s2 role (off vs tries) is [[global-allocno-compare-livelength-biv-order]] priority-driven and declaration-order-INVARIANT (both orders = 24 rows), plus 4th-check bnel/beq + prologue/tail reorg coins; permuter-blind because the isolated compile scores 0.1 (D_800C2BE0..EC + callee %hi/%lo reloc noise pervade), so only in-tree diff.py is truth. Ranker continuation-blindness recurred a 13th time (3rd straight hand-mined func_80059BA0.c sprint). Self-inflicted: an unscoped `sed` for the raw-buffer size sweep clobbered banked func_8005E180's `raw[0xC0]`→`0xD0` (SHA break); caught via git-diff + restored before the carry — lesson: scope in-place seds to the target function.
+- Applied: 4 of 4: #1 jtbl-dispatch-loop-crack-playbook → memory [[jtbl-dispatch-loop-crack-playbook]] + MEMORY.md; #2 do-while-`!=` loop-exit-form → memory [[do-while-not-equal-loop-exit-form]] + MEMORY.md; #3 constant-in-callee-saved-for-compare + literal-args → folded into [[cross-call-live-range-callee-saved-lever]]; #4 ranker continuation-blindness 13th recurrence → BACKLOG (priority already at "biggest gate-friction item").
+- Carry-over: func_8005DFE8 (SRAM load/verify, 102/102 near-match, s1/s2 allocno + reorg residual, docs/wip/func_8005DFE8.near-match.md, warm-start base.c). func_80059BA0.c remains 22-stub partial (func_8005D0D8 S264 coin + func_8005D334 S210 + the FP/DF54/DE88/5CEE0 walls + ~6 bigger mid-logic leaves).
+
+---
+
 ## Sprint 265 — 3 smallest fresh non-FP leaves of func_80059BA0.c — 2026-07-23
 - Increment: 0 files / +1 function matched (func_8005E180; func_80059BA0.c 24→23 stubs, partial pack, not md5-candidate)
 - Quality: 0 stuck-far / 1 permuter (1 partial crack, the xor lever) / 2 carried / 0 re-opened
