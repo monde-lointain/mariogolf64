@@ -8,9 +8,17 @@ extern s32 D_800B777C;
 
 INCLUDE_ASM("asm/nonmatchings/main/func_8002A640", func_8002A640);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_8002A640", func_8002A90C);
+void func_8002A90C(Mtx *arg0, f32 arg1, f32 arg2, f32 arg3) {
+    Mtx sp10;
+    guTranslate(&sp10, arg1, arg2, arg3);
+    guMtxCatL(arg0, &sp10, arg0);
+}
 
-INCLUDE_ASM("asm/nonmatchings/main/func_8002A640", func_8002A944);
+void func_8002A944(Mtx *arg0, f32 arg1, f32 arg2, f32 arg3) {
+    Mtx sp10;
+    guScale(&sp10, arg1, arg2, arg3);
+    guMtxCatL(arg0, &sp10, arg0);
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_8002A640", func_8002A97C);
 
