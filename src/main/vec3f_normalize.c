@@ -45,7 +45,18 @@ void flag_clear_all(void) {
 
 INCLUDE_ASM("asm/nonmatchings/main/vec3f_normalize", func_80029B08);
 
-INCLUDE_ASM("asm/nonmatchings/main/vec3f_normalize", func_80029B58);
+extern s32 func_800577D0(void);
+extern void func_800577DC(s32 index, void* arg1);
+extern u8 g_terrain_tile_cache[];
+extern char D_800CA1C4[];
+
+void func_80029B58(void) {
+  s32 size = func_800577D0();
+  func_800577DC(1, &g_terrain_tile_cache[0]);
+  func_800577DC(3, &g_terrain_tile_cache[size]);
+  func_800577DC(2, &g_terrain_tile_cache[size * 2]);
+  osSyncPrintf(D_800CA1C4, 0x827E0 - size * 3);
+}
 
 void pause_audio(void) {
   func_8006F4F0();
