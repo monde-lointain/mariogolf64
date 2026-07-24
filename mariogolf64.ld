@@ -77,7 +77,7 @@ SECTIONS
         build/src/libnusys/nugfxtaskmgr.o(.text);
         build/src/libultra/debug/assert.o(.text);
         build/asm/4D00.o(.text);
-        build/asm/5A40.o(.text);
+        build/src/main/func_8002A640.o(.text);
         build/src/main/func_800328E0.o(.text);
         build/src/main/get_table_entry.o(.text);
         build/src/main/raycast_terrain.o(.text);
@@ -368,7 +368,7 @@ SECTIONS
         build/src/libnusys/nugfxtaskmgr.o(.data);
         build/src/libultra/debug/assert.o(.data);
         build/asm/4D00.o(.data);
-        build/asm/5A40.o(.data);
+        build/src/main/func_8002A640.o(.data);
         build/src/main/func_800328E0.o(.data);
         build/src/main/get_table_entry.o(.data);
         build/src/main/raycast_terrain.o(.data);
@@ -674,7 +674,7 @@ SECTIONS
         build/src/libnusys/nugfxtaskmgr.o(.rodata);
         build/src/libultra/debug/assert.o(.rodata);
         build/asm/4D00.o(.rodata);
-        build/asm/5A40.o(.rodata);
+        build/src/main/func_8002A640.o(.rodata);
         build/src/main/func_800328E0.o(.rodata);
         build/src/main/get_table_entry.o(.rodata);
         build/src/main/raycast_terrain.o(.rodata);
@@ -988,7 +988,7 @@ SECTIONS
         build/src/libnusys/nugfxtaskmgr.o(.bss);
         build/src/libultra/debug/assert.o(.bss);
         build/asm/4D00.o(.bss);
-        build/asm/5A40.o(.bss);
+        build/src/main/func_8002A640.o(.bss);
         build/src/main/func_800328E0.o(.bss);
         build/src/main/get_table_entry.o(.bss);
         build/src/main/raycast_terrain.o(.bss);
