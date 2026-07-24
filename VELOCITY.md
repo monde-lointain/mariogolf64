@@ -1424,6 +1424,27 @@ Three honest caveats:
   #4 ranker continuation-blindness 13th recurrence → BACKLOG). RANKER: **13th recurrence** — backlog
   hand-mined from func_80059BA0.c a THIRD straight sprint. Mid-sprint gotcha: an unscoped `raw[...]` sed
   clobbered banked func_8005E180's buffer (0xC0→0xD0); caught + restored before the carry. Push: dev.
+- **Sprint 267** — smallest-first `src/main/func_80059BA0.c` c-continuation, no gate enabler (PO
+  approved as proposed). **1 banked / 3 carried** (22→21 stubs). The 4 committed leaves were framed at
+  the gate as "fresh" but ALL FOUR were documented S210 carries (the DoR grep-BACKLOG miss, S239/S240
+  #3 — a count-grep missed the deep multi-fn carry block). So the sprint was effectively a crack-attempt
+  slice on 4 S210 walls, and it paid: BANK `func_8005AF80` (0xBC/47i grid-reset init, the S210
+  permuter-FAILED wall ~9500 iters) cracked by hand exact-47 via [[grid-reset-init-crack-combo]] — s8
+  `do{}while(i!=N)` counters, an explicit hoisted `s32* row` (0xDC0 in the ptr not the store disp), and
+  the `(s32)base` REG_POINTER-drop operand-order flip ([[commutative-operand-order-statement-split]]).
+  Carries all deepened: `func_80059BA0` (fabsf sign-mask) root-caused end-to-end (3 gcc/gas subagents)
+  to a TERMINAL post-reload `schedule_select` potential-hazard coin ([[sched-select-potential-hazard-coin]],
+  sched.c:2615/3733) — the S210 "target-less-optimal artifact" reading corrected (the reassign restores
+  the `mov.s`, exact 8i); `func_8005CEE0` improved 4-rows → EXACT 38/38 (explicit `u8* base` closes the
+  base-vs-disp; residual = load-order/regalloc coin, permuter dry 400s); `func_8005B0B4` improved → 37/39
+  (#char-signedness `lb` fix + single-exit v1; residual = S263 value-select-branch-likely). md5-candidate
+  **0 delta**, matched-fn **+1**. Seed 5 (classical c-continuation); banked 0pt (file partial); realized
+  ~7 / residual +2 (+1 permuter [2 dry runs], +1 carry-cluster; +1 novel gotcha the (s32)base lever,
+  offset by the crack being a re-opened wall not a fresh leaf). Rolling-5 (S263-S267): 0+2+1+1+1. Quality
+  **0 stuck-far / 2 permuter (0 crack) / 3 carried / 1 re-opened-and-cracked (AF80)**. Retro applied 4 of
+  4 (#1 sched-select memory; #3 (s32)base lever → commutative memory; #2/#4 DoR grep-BACKLOG-miss #3 +
+  8x plateaued-tail → BACKLOG ranker follow-up; #5 grid-reset combo memory). RANKER: **14th recurrence**
+  + the DoR carry-block-read miss. Push: local.
   rodata-jtbl enabler, and a fresh-pack pivot; inline serial, no fan-out). **3 banked / 3 carries
   deepened to the EXACT instruction count** (22→19 stubs). Banks: `func_80088890` =
   `draw_letterbox_bars` (0x200, an S256 deferred carry, ONE-immediate near-match on the first build —

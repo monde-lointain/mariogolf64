@@ -147,6 +147,18 @@ and FP/DL/jtbl class, and ranks the residual FRESH (no-wip-doc, no-BACKLOG-carry
 This is the c-continuation dual of the flip-pack ranker; without it the plan gate cannot see the
 smallest-first work that actually banks in the classical endgame.
 
+**S267 — the DoR grep-BACKLOG miss RECURRED (S239/S240 #3), AND the crackable-carry payoff.** S267
+hand-mined `func_80059BA0.c` (14th recurrence) and committed 4 leaves framed as "fresh" — but ALL FOUR
+(func_8005AF80/func_80059BA0/func_8005CEE0/func_8005B0B4) were already-documented S210 carries in the
+tail-cluster block below. The gate-time `grep -c '<fn>' BACKLOG.md` returned 1/1/1/6 and was misread as
+"pack-listing, not carries," because the carry entries live in a DEEP multi-fn `## Carry-overs` block a
+count-grep does not reveal. FIX (until the ranker lands): the DoR must `grep -n '<fn>' BACKLOG.md` AND
+READ the surrounding carry block, not just count hits. UPSIDE: the mis-framed slice still paid — S267
+CRACKED func_8005AF80 (the S210 permuter-failed wall, ~9500 iters) by hand with 3 source levers
+([[grid-reset-init-crack-combo]]), and improved func_8005CEE0 (4-rows → exact 38/38) and func_8005B0B4
+(→ 37/39, S263 identified), and root-caused func_80059BA0 to a terminal sched2 coin. So a carried-wall
+slice is a legitimate BANK slice (kin to the S232 3/3 crack), reinforcing "deweight, not blacklist."
+
 **Extend the detector to DL EMITTERS, not just FP (S190):** `src/main/func_8004E5A0.c` was a 3-fn
 one-tu the ranker surfaced smallest-first as a "+2 tractable" pick because 2 of 3 fns are 0-jal/0-FP —
 but they are `glistp++` **display-list emitters**, which are their OWN scheduling-wall class (the
@@ -3761,11 +3773,15 @@ by `/sprint-plan`:
     cluster (5 fns, permuter-proof) + an FP-dispatcher sprint (NOT more smallest-first). All banked S213
     names are already `func_`/curated; the curated names → cross-repo Ghidra sync.
 
-- **(S210/S264 MIXED-PARTIAL — carried; 35 of 59 banked)** `src/main/func_80059BA0.c` (main-segment
-  `[0x34FA0]` integer-glue/accessor pack). 35 banked (S208 +23 asm-first; S209 +9 compiler-source dive;
+- **(S210/S267 MIXED-PARTIAL — carried; 38 of 59 banked)** `src/main/func_80059BA0.c` (main-segment
+  `[0x34FA0]` integer-glue/accessor pack). 38 banked (S208 +23 asm-first; S209 +9 compiler-source dive;
   S210 +1 `func_8005C510`; **S264 +2** `func_8005D9A0` game-state reset + `func_8005DAFC` mode-state
-  switch [first carved compiler-switch jtbl to BANK in `src/main`, `jtbl_800D0A90` 3-way rodata split]),
-  **24 stubs remain**, ROM green off extracted asm. **S264 correction to the "easy vein mined out"
+  switch [first carved compiler-switch jtbl to BANK in `src/main`, `jtbl_800D0A90` 3-way rodata split];
+  S265 +1 `func_8005E180`; S266 +1 `func_8005CF78`; **S267 +1** `func_8005AF80` [cracked the S210
+  permuter-failed grid-init wall, see below]), **21 stubs remain**, ROM green off extracted asm.
+  **S267 was a CRACK-ATTEMPT slice on 4 S210 carries (mis-framed at the gate as "fresh leaves" — the
+  DoR grep-BACKLOG miss, S239/S240 recurrence #3): banked func_8005AF80, deepened/improved the other
+  three (see the tail-cluster entries).** **S264 correction to the "easy vein mined out"
   note below: the pack still yields clean fresh leaves via smallest-first — S264 banked 2 undocumented
   fresh leaves (77i/85i) first-build; the mined-out claim held only for the SPECIFIC S210 residual-tail
   fns, not the whole pack. New S264 carry: `func_8005D0D8` (0x10C, 61/67 near-match; bit7 `lo<0`
@@ -3779,15 +3795,28 @@ by `/sprint-plan`:
     the counter as a 3rd IV; up-pointer `p!=end`; `n=12` var; `do/while(++i!=4)`); residual = reload
     keeps the hoisted exit-const `4` in a reg vs ROM rematerializing (+1-pressure/allocno decision,
     root-caused to mips.c:1996 force_reg + loop.c:1630 hoist). Escalation = corpus-mining, not the permuter.
-  - `func_8005B0B4` (nibble-switch→code) — nested-if fixes lb+structure; residual = pervasive ret/nibble
-    `v1↔a1` allocno swap + a reorg delay-slot/block-order diff. Permuter 1990→1625, no crack.
-  - `func_8005AF80` (memset + 6×3 `-1` grid-init, `s8` counters, magic 0x12345678) — down to 3 `r` rows
-    (row/j allocno swap resolved via inline arith, but base `+0xDC0` hoist vs recompute). Permuter ~9500
-    iters base 220, no crack.
-  - `func_80059BA0` (fabsf via `&0x7FFFFFFF` sign-mask) — ROM keeps a redundant `mov.s $f0,$f12`; every
-    register-kept union-pun copy-propagates it away (15+ oracle variants). "target less-optimal" artifact.
-  - `func_8005CEE0` (nested table lookup + u16 sign-bit) — 4 `r` rows on the D_800C28E4 access
-    ([#base-register-vs-displacement](#base-register-vs-displacement)); struct/intermediate backfire to 9.
+  - `func_8005B0B4` (nibble-switch→code) — **S267 improved to 37/39.** Fixed #char-signedness
+    (`s32 val=((s8*)p)[0x2C]` → `lb`, not s8-local lbu+sll/sra) + single-exit `v1` accumulator
+    (43→41→37). Residual = S263 [[value-select-branch-likely-on-switch-default]]: ROM emits the const
+    early-returns as `beql sel,K,end` + annulled `li v1,CONST` (ROM 2 LONGER); gcc-from-C branches away
+    + `j;li`. Terminal/permuter-denied. `docs/wip/func_8005B0B4.near-match.md`; base.c warm.
+  - `func_8005AF80` (memset + 6×3 `-1` grid-init, `s8` counters, magic 0x12345678) — **BANKED S267
+    (47/47), no longer a carry.** The S210 permuter-failed wall (~9500 iters, base 220) CRACKED by
+    hand with 3 source levers: `s8` counters + `do{}while(i!=N)`; explicit hoisted `s32* row` (0xDC0
+    folds into the row ptr, not the inner store disp); `(s32)base` cast drops REG_POINTER to flip the
+    addu operand order. Memory [[grid-reset-init-crack-combo]]. Kept auto name.
+  - `func_80059BA0` (fabsf via `&0x7FFFFFFF` sign-mask) — **S267 deepened, TERMINAL.** The S210
+    "target-less-optimal artifact" reading was incomplete: the reassign `arg0=x.f; return arg0;`
+    RESTORES the `mov.s` (exact 8i + identical regalloc, not copy-propagated away). Root-caused
+    end-to-end (3 gcc/gas subagents): sole residual = a post-reload `schedule_select` potential-hazard
+    override (sched.c:2615/2656, MAX_BLOCKAGE>1 at 3733) front-loading the `mfc1` and hoisting the
+    independent `li` above it. Source-invariant, permuter-blind. Memory
+    [[sched-select-potential-hazard-coin]]; `docs/wip/func_80059BA0.near-match.md`. Do NOT re-grind.
+  - `func_8005CEE0` (nested table lookup + u16 sign-bit) — **S267 improved to EXACT 38/38.** The
+    D_800C28E4 base-vs-disp ([#base-register-vs-displacement](#base-register-vs-displacement)) closed
+    via an explicit `u8* base = D_800C28E4;` + guard restructure (`-1` block between the two guards, 2nd
+    branches toward `ok`). Residual = within-block load-order + a0/v1 regalloc role swap + a*14/b*2
+    multiply emission order. Permuter dry (400s). `docs/wip/func_8005CEE0.near-match.md`; base.c warm.
   - `func_8005DE88` (flag pack/unpack) — **BLOCKED, logic fully decoded**: globals D_801323E5/D_800C1FFC
     live in a shifted `.NON_MATCHING` carve; C-referencing them corrupts the region (even banked
     func_8005AF74). Needs a data carve first — the enabler for this fn.
