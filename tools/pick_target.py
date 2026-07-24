@@ -363,6 +363,7 @@ from pick_target_score import (  # noqa: F401  (re-export: pt.<name> contract)
     carried_wall_names,
     carry_over_names,
     drop_static_mirror_hazard,
+    loose_stubs,
     nested_child_tell,
     score_row,
     seed_points,
@@ -1020,7 +1021,39 @@ def main():
         "static chain = a GCC nested function, banks with its parent, not standalone) vs standalone. "
         "Use on the smallest leaves of a fresh classical pack before committing them.",
     )
+    ap.add_argument(
+        "--loose-stubs",
+        metavar="SEG",
+        help="Enumerate still-INCLUDE_ASM stubs inside ALREADY-`c` files of src/SEG/, smallest-first, "
+        "each tagged fresh / CARRIED-WALL / NESTED-CHILD. Surfaces fresh individual leaves the "
+        "whole-subseg pack ranker misses (S273). Default hides carried+nested; --all shows every stub.",
+    )
+    ap.add_argument(
+        "--all",
+        action="store_true",
+        help="with --loose-stubs, list every stub (incl. carried-wall/nested), not just fresh ones.",
+    )
     args = ap.parse_args()
+
+    if args.loose_stubs:
+        stubs = loose_stubs(args.loose_stubs)
+        shown = stubs if args.all else [s for s in stubs if not s["carried"] and not s["nested"]]
+        print(f"{'size':>6} {'status':13} {'func':28} file")
+        for s in shown:
+            status = (
+                "CARRIED-WALL"
+                if s["carried"]
+                else "NESTED-CHILD" if s["nested"] else "fresh"
+            )
+            sz = "?" if s["size"] is None else str(s["size"])
+            print(f"{sz:>6} {status:13} {s['fn']:28} {s['file']}")
+        n_fresh = sum(1 for s in stubs if not s["carried"] and not s["nested"])
+        print(
+            f"# {len(stubs)} stubs in src/{args.loose_stubs}/: {n_fresh} fresh, "
+            f"{sum(s['carried'] for s in stubs)} carried-wall, "
+            f"{sum(s['nested'] for s in stubs)} nested-child"
+        )
+        raise SystemExit(0 if n_fresh else 1)
 
     if args.carried_check:
         walls = carried_wall_names()

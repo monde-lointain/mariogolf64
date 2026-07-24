@@ -24,6 +24,26 @@ runs seed-only). v2 classical realized tier scored at review (since S11). Seed a
 (MCP-independent; see the Seed fast-path in `docs/agent-workflow.md`). Path convention `overlay_<N>/<stem>` or
 `main/<stem>`, default -O2 game profile (no mk edit). Note: `pick_target.py`'s size-pts over-prices
 tiny none-upstream packs (S148 priced a 176B trivial pack at 13) — a calibration follow-up (below).
+**`main` is NOT mined out at stub-level — `--loose-stubs` landed (S273).** S269-S272 repeatedly called
+`main` "mined out" because `pick_target --segment main` reported no candidates — but that ranker prices
+only whole asm-flip subseg PACKS, so fresh standalone leaves persisting as individual `INCLUDE_ASM` stubs
+inside already-`c` files were invisible. S273 hand-mined 3 such leaves (all banked: `pause_audio`,
+`unload_active_overlay`, `func_80029EEC`) and landed the DoR tool `pick_target --loose-stubs SEG`
+(+`--all`): it enumerates the still-`INCLUDE_ASM` stubs in src/SEG/*.c smallest-first, tagged
+fresh/CARRIED-WALL/NESTED-CHILD. As of S273 `--loose-stubs main` = **96 fresh / 238 carried-wall / 8
+nested-child**, so the fresh vein is deep — future `main` slices should run `--loose-stubs main` at the
+plan gate, not conclude "mined out" from the pack ranker's empty output. (The in-row integration — surface
+loose fresh stubs directly in the ranked table instead of a separate subcommand — remains a golden-gated
+follow-up, kin to the S264 c-continuation fresh-leaf mode.)
+
+**Test-tools stale-golden refresh (S273, deferred, needs `REGEN_GOLDEN=1`).** `make test-tools` carries
+9 PRE-EXISTING failures — the `pick_target` live-state json/table goldens (`test_pick_target_*_golden`,
+`test_pick_target_ranked_by_descending_score`, `test_coddog_suppresses_maybe_upstream`) drift every
+sprint a ranked function banks (S273 diff: banked `render_pin_assembly_with_wind_hud` no longer ranks).
+Confirmed identical on clean HEAD (unrelated to the S273 `--loose-stubs` edit). Refresh with
+`REGEN_GOLDEN=1 make test-tools` at a review, and (per the S184 row below) prefer making these goldens
+FIXTURE-based so they stop drifting on every bank.
+
 **pts follow-up — regalloc-heavy dimension (S158):** the S155 rubric prices a one-tu classical pack by
 size/nfns, but S158's seed-13 5-fn one-tu was MASSIVELY under-priced (realized 18) because all 3
 non-trivial fns needed the full pervasive-regalloc playbook + a 3-round multi-agent fan-out + permuter.

@@ -1867,6 +1867,15 @@ before calling a 1-copy deficit a `#local-alloc-qty-permutation` wall.
 
 **Provenance:** S11 (flipped score 400→0 in one iteration).
 
+**Sub-case: abs compare-form steers a single-register allocno (S273).** An abs `mag = (x < 0) ? -x :
+x` and `mag = (x <= -1) ? -x : x` are semantically identical (both `bltz`/`bgez`) but canonicalize
+differently in gcc-2.7.2 RTL and land `mag` in a different scratch register. S273 `func_80029EEC` was
+exact-count 15/15 with the sole residual `mag` in `$v0` (build) vs `$v1` (ROM); respelling the abs
+`(x <= -1) ? -x : x` moved it to `$v1` and byte-matched. Try this before the permuter on any
+single-register mag/abs allocno residual. (The permuter also found it, emitting a red-herring
+`(x>>9)>>22` for `x>>31` that `combine` folds back to one `sra` — the minimal lever was the compare
+form alone.) Kin to `#value-select-if-else-vs-branch-likely` for the block-order half of the same fn.
+
 **Variant — masks-into-temps forces a base pointer to REUSE a freed arg register.** When a fn's only
 diff is that the ROM materializes a symbol base into a just-freed ARG register (reusing it after that
 arg's last use) while your build loads it into a fresh scratch (or too early), split the arg's final uses

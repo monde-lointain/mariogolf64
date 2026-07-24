@@ -272,6 +272,66 @@ def nested_child_tell(fn):
     return bool(_V0_SPILL_RE.search(prologue) and _V0_COPY_RE.search(prologue))
 
 
+_STUB_FN_RE = re.compile(r'INCLUDE_ASM\("[^"]+",\s*([A-Za-z0-9_]+)\)')
+_STUB_SIZE_RE = re.compile(r"0x([0-9A-Fa-f]+)")
+
+
+def _stub_size(fn):
+    """Instruction-blob byte size of <fn> from its `.s` header (`nonmatching <fn>, 0x<size>`), or
+    None if the `.s` is missing. Cheap: reads only the first line."""
+    path = _find_asm_s(fn)
+    if not path:
+        return None
+    try:
+        with open(path) as f:
+            first = f.readline()
+    except OSError:
+        return None
+    m = _STUB_SIZE_RE.search(first)
+    return int(m.group(1), 16) if m else None
+
+
+def loose_stubs(seg):
+    """Enumerate the still-`INCLUDE_ASM` stubs sitting inside ALREADY-`c` files of a segment's src
+    tree, smallest-first, each tagged carried-wall / nested-child.
+
+    Why this is not build_rows: the whole-subseg ranker prices only asm-flip PACKS, so a fresh leaf
+    that persists as one stub inside a partial `c` file is invisible to it — `--segment main` can
+    read "no candidates" while genuinely fresh standalone leaves remain (S273 mined
+    pause_audio/unload_active_overlay/func_80029EEC this way, all after the pack ranker went empty).
+    This walks src/<seg>/*.c for INCLUDE_ASM fn names, sizes each from its `.s`, and applies the same
+    DoR tells as --carried-check (carried_wall_names) and --nested-check (nested_child_tell), so the
+    gate sees the actionable fresh+standalone leaves without a hand-grep.
+
+    Returns a list of dicts {fn, size, file, carried, nested} sorted by (size, fn). A stub whose `.s`
+    is missing sorts last (size None -> a large sentinel) so it never masquerades as tiny.
+    """
+    import glob
+
+    tree = os.path.join(ROOT, "src", seg)
+    walls = carried_wall_names()
+    out = []
+    for cpath in sorted(glob.glob(os.path.join(tree, "*.c"))):
+        try:
+            with open(cpath) as f:
+                text = f.read()
+        except OSError:
+            continue
+        rel = os.path.relpath(cpath, ROOT)
+        for fn in _STUB_FN_RE.findall(text):
+            out.append(
+                {
+                    "fn": fn,
+                    "size": _stub_size(fn),
+                    "file": rel,
+                    "carried": fn in walls,
+                    "nested": nested_child_tell(fn),
+                }
+            )
+    out.sort(key=lambda r: (r["size"] if r["size"] is not None else 1 << 30, r["fn"]))
+    return out
+
+
 def _file_scope_static_count(cpath):
     """Number of file-scope static *variable* declarations (the uninitialized .bss family
     FILE_STATIC_RE matches; static function protos excluded). One matching line == one .bss symbol,

@@ -1445,6 +1445,21 @@ Three honest caveats:
   4 (#1 sched-select memory; #3 (s32)base lever → commutative memory; #2/#4 DoR grep-BACKLOG-miss #3 +
   8x plateaued-tail → BACKLOG ranker follow-up; #5 grid-reset combo memory). RANKER: **14th recurrence**
   + the DoR carry-block-read miss. Push: local.
+- **Sprint 273** — fresh stub-level integer-leaf slice on "mined-out" `main` (PO approved 2 clean + bnel
+  hedge over another crack-slice). No gate enabler (stubs in already-`c` files). **3 banked / 0 carried**
+  (`vec3f_normalize.c` 12→10 stubs, `func_8002A640.c` 15→14 stubs, both partial/NOT md5-candidate). Key
+  insight: S272's "main mined out" was PACK-level; `pick_target --segment main` prices only whole asm-flip
+  subsegs, so fresh standalone leaves persisting as individual `INCLUDE_ASM` stubs inside already-`c` files
+  were invisible. Hand-mined smallest-first + `--carried-check`/`--nested-check`: `pause_audio`
+  (0x80029BD8) and `unload_active_overlay` (0x800326C4) byte-matched first build; hedged bnel predicate
+  `func_80029EEC` cracked via early-return block-order fix + permuter (score 35→0, 657 iters), lever = abs
+  `(x <= -1) ? -x : x` steering the mag allocno $v0→$v1. Seed 4 (3 tiny leaves + hedge); realized ≈5
+  (permuter +1), residual +1; banked 0pt (files partial, all-or-nothing); value = +3 matched.
+  Rolling-5 (S269-S273): 8+2+0+2+0(pt). Quality **0 stuck-far / 1 permuter / 0 carried / 0 re-opened**.
+  Retro applied 3 of 3 (#1 `pick_target --loose-stubs SEG` stub-level fresh-leaf enumerator; #2 cross-file
+  stale-`.o` reconfirm note; #3 `#register-reuse-nudge-classical-regalloc` abs-compare-form sub-lever).
+  Push: local.
+
 - **Sprint 272** — crack-attempt slice on mined-out `main` walls (PO approved over widening to a fresh
   overlay pack; `--segment main` = 0 fresh, all smallest leaves `--carried-check` CARRIED-WALL). No gate
   enabler (c-stub continuations). Serial inline crack, no fan-out. **2 banked / 1 carried**
