@@ -85,7 +85,93 @@ INCLUDE_ASM("asm/nonmatchings/main/func_80059BA0", func_8005A2AC);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80059BA0", func_8005A580);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80059BA0", func_8005ACF8);
+extern void heap3_free(void** payload_ptr);
+extern s8 D_800C1FF0;
+extern void* D_801F4A20;
+extern void* D_8012D3AC;
+extern void* D_801049A0[];
+extern void* D_8012F4B0[];
+extern void* D_801052C4[];
+extern void* D_800FF420[];
+extern void* D_801B60D0;
+extern void* D_8012D420[];
+extern void* D_801B5CD0[];
+extern void* D_801052BC[];
+extern void* D_800FBDFC[];
+extern void* D_800FF4C4[];
+extern void* D_800FBE38[];
+extern void* D_801B93E0[];
+extern void* D_8010526C[];
+extern void* D_800FF180[];
+extern void* D_80106100;
+extern void* D_800FC898;
+extern void* tile_palette_table[];
+extern void* tile_texture_table[];
+extern void* D_800FBE30[];
+extern void* D_800FC6A0;
+extern void* D_801B69EC;
+
+void func_8005ACF8(void) {
+  s32 i;
+
+  D_800C1FF0 = -1;
+  heap3_free(&D_801F4A20);
+  heap3_free(&D_8012D3AC);
+  i = 0;
+  do {
+    heap3_free(&D_801049A0[i]);
+    heap3_free(&D_8012F4B0[i]);
+    i++;
+  } while (i != 7);
+  heap3_free(&D_801052C4[0]);
+  heap3_free(&D_801052C4[1]);
+  heap3_free(&D_800FF420[0]);
+  heap3_free(&D_800FF420[1]);
+  heap3_free(&D_801B60D0);
+  heap3_free(&D_8012D420[0]);
+  heap3_free(&D_801B5CD0[0]);
+  heap3_free(&D_8012D420[1]);
+  heap3_free(&D_801B5CD0[1]);
+  heap3_free(&D_801052BC[0]);
+  heap3_free(&D_801052BC[1]);
+  heap3_free(&D_800FBDFC[0]);
+  heap3_free(&D_800FBDFC[1]);
+  i = 0;
+  do {
+    heap3_free(&D_800FF4C4[i]);
+    i++;
+  } while (i != 2);
+  i = 0;
+  do {
+    heap3_free(&D_800FBE38[i]);
+    i++;
+  } while (i != 3);
+  i = 0;
+  do {
+    heap3_free(&D_801B93E0[i]);
+    i++;
+  } while (i != 5);
+  heap3_free(&D_8010526C[0]);
+  heap3_free(&D_8010526C[1]);
+  heap3_free(&D_800FF180[0]);
+  heap3_free(&D_800FF180[1]);
+  heap3_free(&D_80106100);
+  heap3_free(&D_800FC898);
+  i = 0;
+  do {
+    heap3_free(&tile_palette_table[i]);
+    i++;
+  } while (i != 18);
+  i = 0;
+  do {
+    heap3_free(&tile_texture_table[i]);
+    i++;
+  } while (i != 18);
+  heap3_free(&D_800FBE30[0]);
+  heap3_free(&D_800FBE30[1]);
+  heap3_free(&D_800FC6A0);
+  heap3_free(&D_801B69EC);
+}
 
 u8* func_8005AF50(void) {
   func_8005AF74();
