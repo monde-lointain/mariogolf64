@@ -43,7 +43,36 @@ Register roles (a0<->v1) and the two-multiply emission order are swapped. Permut
 post-load scheduling/regalloc coin on an otherwise byte-exact body (kin to
 [[base-register-vs-displacement]] / the S224 within-block scheduling walls).
 
+## S268 re-open — COUPLED, terminal (order-fix ⟂ index-coloring)
+Correction to the S266 note: register roles are NOT swapped in the warm base.c. With
+`u8* base = D_800C28E4;` explicit + `base + a*14 + b*2` the roles ALREADY match ROM
+(a→a0, base→a1, b→v1, idx→v0). The sole residual is a LOAD-ORDER coin:
+- ROM loads the a-table (29BA) BEFORE the b-table (29B8), base materialized between;
+  emits `a*14` then `b*2`.
+- Mine loads the b-table (29B8) FIRST (addresses ascending: 29B8<29BA), emits `b*2`
+  early. This ordering is **fold-canonical**: `b*2 + (base + a*14)`, explicit parens,
+  every operand-spelling variant folds to the identical RTL, so the order is
+  spelling-invariant (score stays 640 / 0.84).
+
+The ONLY way to reorder the two independent loads is a statement-split (pointer/accum
+temp) that evaluates `base + a*14` first. But every split perturbs the idx*4 index
+register coloring:
+- `u8* p = base + a*14; p + b*2` (block or top-decl): perfect order + roles, but
+  idx*4 recolors v0→v1 (1800-1860).
+- `base = base + a*14` / `base += a*14` (RMW, no new pseudo): swaps a↔base roles
+  (a→a1, base→a0) (3320 / 0.17).
+- reuse dead `idx` as accumulator (`idx = (s32)(base+a*14); idx + b*2`): keeps idx→v0
+  but recolors idx*4 into a0 (1800).
+
+So load-order and idx*4-coloring are COUPLED through local-alloc: the inline fold keeps
+idx*4 in v0 but forces b-first; any split that forces a-first adds/moves a pseudo that
+recolors idx*4. No source form yields {a-first load order AND idx*4 in v0}. The S265
+[[commutative-operand-order-statement-split]] and [[one-variable-reuse-reorders-loads]]
+(incl. the reuse-dead-var inverse) were the new levers — both tried, neither cracks it.
+
 ## Verdict
-CARRIED — exact-count regalloc/schedule coin. Re-open with a register-role lever
-(force a into a0 / base materialized between the two field loads) or a matched-corpus
-sibling. Do NOT re-grind as a fresh leaf.
+CARRIED — TERMINAL (S268). Exact-count local-alloc coloring coin coupled to a
+fold-canonical load order; not source-steerable by any statement-split (each recolors
+the idx*4 index reg). Not permuter-reachable (dry 400s). Re-open only via a
+matched-corpus sibling that fixes the pack's local-alloc pressure, not a source lever.
+Do NOT re-grind.
