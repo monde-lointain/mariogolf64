@@ -235,7 +235,93 @@ INCLUDE_ASM("asm/nonmatchings/main/func_80059BA0", func_8005CA48);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80059BA0", func_8005CEE0);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80059BA0", func_8005CF78);
+typedef struct {
+  /* 0x00 */ s32 active;
+  /* 0x04 */ s8 pad04[0x3C - 0x04];
+  /* 0x3C */ s32 unk_3C;
+  /* 0x40 */ s32 sel;
+  /* 0x44 */ s32 count;
+  /* 0x48 */ s32 unk_48;
+  /* 0x4C */ s32 unk_4C;
+  /* 0x50 */ s8 pad50[0x76 - 0x50];
+  /* 0x76 */ s8 f76;
+  /* 0x77 */ s8 pad77[0xA0 - 0x77];
+} Cf78Section;
+
+typedef struct {
+  /* 0x00 */ s8 pad00[0x1D];
+  /* 0x1D */ u8 f1D;
+  /* 0x1E */ s8 pad1E[0x7B - 0x1E];
+  /* 0x7B */ u8 f7B;
+  /* 0x7C */ s8 pad7C[0xB8 - 0x7C];
+} Cf78Row;
+
+void func_8005CF78(void) {
+  u8* base = func_8005AF50();
+  s32 flags[3];
+  s32 k;
+
+  k = 0;
+  do {
+    flags[k] = 0;
+    k++;
+  } while (k != 3);
+
+  k = 0;
+  do {
+    if (*(s32*)(base + k * 0xA0 + 0x1FF8) != 0) {
+      Cf78Section* sect = (Cf78Section*)(base + 0x1FF8 + k * 0xA0);
+      s32* a3 = &sect->unk_3C;
+
+      if (sect->f76 == 0) {
+        switch (sect->sel) {
+          case 0:
+          case 2:
+          case 4:
+          case 5:
+          case 10:
+          case 11:
+            break;
+          default:
+            flags[k] = 1;
+            break;
+        }
+      }
+      if ((u32)(a3[2] - 1) >= 4U) {
+        flags[k] = 1;
+      }
+      if ((u32)a3[3] >= 0xCU) {
+        flags[k] = 1;
+      }
+      if ((u32)a3[4] >= 0x12U) {
+        flags[k] = 1;
+      }
+      {
+        s32 i = 0;
+        Cf78Row* rows;
+        while (i != a3[2]) {
+          rows = (Cf78Row*)(base + 0x21D8 + k * 0x2E0);
+          if (rows[i].f1D >= 0x12) {
+            flags[k] = 1;
+          }
+          if (rows[i].f7B >= 0x4) {
+            flags[k] = 1;
+          }
+          i++;
+        }
+      }
+    }
+    k++;
+  } while (k != 3);
+
+  k = 0;
+  do {
+    if (flags[k] == 1) {
+      *(s32*)(base + k * 0xA0 + 0x1FF8) = 0;
+    }
+    k++;
+  } while (k != 3);
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80059BA0", func_8005D0D8);
 
