@@ -165,4 +165,52 @@ void func_800326FC(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
   D_800B7774 = arg1;
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_8002A640", func_80032720);
+extern s32 putting_meter_level;
+extern s32 D_800C0E60;
+extern s32 D_801B7F70;
+extern s32 D_801B557C;
+extern s32 D_801B5558;
+extern s32 D_801B5560;
+extern s32 D_801B5564;
+extern s32 D_801B555C;
+extern f32 D_801B5578;
+extern void func_80050DA0(s32, s32, s32, s32, s32);
+
+void update_putting_meter(void) {
+  s32* mode = &D_801B7F70;
+  s32 state = *mode;
+  s32 x;
+  s32 y;
+  s32 x8;
+
+  if (state == 1) {
+    if (putting_meter_level == state) {
+      func_80050DA0(0x64, D_800C0E60, 0x3F, 0x1E, 0x7F);
+    }
+    D_801B557C = state;
+    putting_meter_level = putting_meter_level + 1;
+    if (putting_meter_level >= 8) {
+      putting_meter_level = 8;
+      *mode = 0;
+    }
+  } else if (state == 2) {
+    if (putting_meter_level == 7) {
+      func_80050DA0(0x65, D_800C0E60, 0x3F, 0x1E, 0x7F);
+    }
+    putting_meter_level = putting_meter_level - 1;
+    if (putting_meter_level <= 0) {
+      putting_meter_level = 0;
+      *mode = 0;
+      D_801B557C = 0;
+    }
+  }
+
+  x = putting_meter_level * D_800B7778;
+  x8 = x / 8;
+  y = putting_meter_level * D_800B777C;
+  D_801B5560 = x8;
+  D_801B5564 = y / 8;
+  D_801B5558 = D_800B7770 - x / 16;
+  D_801B555C = D_800B7774 - y / 16;
+  D_801B5578 = 0.9f;
+}
