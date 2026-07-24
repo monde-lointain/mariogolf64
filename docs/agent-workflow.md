@@ -318,6 +318,14 @@ Ghidra MCP is used inline at seed time. For each target function:
       caller exists, either sed those files to the new name in the same commit or KEEP the auto name
       (a getter/predicate over a generic global read across unrelated subsystems is usually best left
       auto-named — a domain-guess is likely wrong; S247 kept `func_800959F8`).
+      **Stale-object gotcha (S270): after a rename that reaches a STILL-ASM caller inside a LARGE parent
+      file, force-delete that caller's parent object before the gate make.** `make extract && make`
+      regenerates the still-asm `.s` correctly (the `jal` uses the new name), but the incremental build
+      can LINK a STALE parent `.o` compiled against the OLD auto name (`undefined reference to
+      func_<addr>`). Fix: `find build -name '<parent>.o' -delete && make`. S270 renamed `func_8004D7B8`
+      -> `render_text_grid`; its still-asm caller `render_frame` lives in the 14400B
+      `func_8002A640.c`, whose `.o` link-failed on the old name until force-deleted. Kin to the S244
+      stale-object / S257 stale-mapfile notes; applies at the bank gate, not just per-fn iteration.
    b. On `git commit`, stage the `make extract`-regenerated artifacts too (`undefined_syms_auto.txt`
       and `mariogolf64.ld`): they change on a subseg flip or `symbol_addrs.txt` add and must travel
       with the commit, or the regen bleeds into the next sprint's dirty tree (a `D_`-to-named

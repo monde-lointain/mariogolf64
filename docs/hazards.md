@@ -6166,6 +6166,23 @@ near-match diff — if the ONLY differing tokens are the two `addiu sp` immediat
 unused aggregate; if the frame diff drags a `v0`/`v1` (or other) reg permutation with it, it is the
 divide-driven carry-class above. Memory: [[pure-dead-frame-clean-crack]].
 
+**Third variant — live-index block-pressure dead frame, for a SMALL (<0x18) frame WITH a reg-perm
+(S270).** A phantom dead frame smaller than the `0x18` base (e.g. an `addiu sp,-8`/`+8` leaf with ZERO
+`sp)` body access) that ALSO drags a register permutation is NEITHER the `unused[]` aggregate (that
+needs `delta>=0` off a `0x18` base and has NO reg-perm) NOR reliably the divide-carry class. It is a
+`local-alloc.c` block-pressure artifact: local-alloc spills one pseudo in the hottest block, global-alloc
+rescues it to a free reg, and the reserved-but-unused slot stays as a dead frame while the spill event
+reorders the register assignment. **Reproduce it by raising local-alloc block pressure with a LIVE-INDEX
+loop form:** index the base as `arr[i]` (keeping BOTH the base pointer and the index `i` live across the
+loop) instead of `arr++`/`*p++`. Combine with explicit named temps for the reused sub-values (`s32
+idx2=i*2; s32 base=b;`) to steer local-alloc qty birth-order (qty_compare priority
+`floor_log2(nref)*nref*size/livelen`, local-alloc.c:~1750) and put the loop-counter's `=0` init FIRST.
+S270 `func_8004D4B8`: `str[row]` (not `str++`) reproduced the dead 8B frame AND matched all 6 registers
+(the S182 4-reg-perm wall), residual reduced to a 2-word scheduler-slot coin. This is a source-reachable
+CRACK of the frame+regs (`volatile` is WRONG here — it stores to `sp`; a truly-dead frame has zero `sp`
+access). Profile-probe is NEGATIVE for these (no `-f` flag reaches gcc-2.7.2 local-alloc/global.c).
+Memory: [[dead-frame-live-index-pressure-lever]].
+
 ## signed-divide-const v0/v1 quotient-destination
 
 **Companion positive lever (S228): emit `%`/`/` directly; do NOT hand-write the divide guards.**

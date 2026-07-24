@@ -3598,6 +3598,23 @@ by `/sprint-plan`:
   `NU_CONT_THREAD_ID=6` vs MG64's 5), and that surfaces only at first build unless reconciled here.
   A near-free retry missing any of these is a half-scoped spike — finish the scope before deferring.
 
+- **(S270 RE-OPEN — 2 of 4 remaining banked; file NOT md5-candidate; 2 carried walls)**
+  `src/main/func_8004D190.c` (main-segment text-grid render pack; already-`c`). S270 re-opened the 4
+  documented S182 carries and banked the 2 DL emitters (`emit_text_glyph_dl_preamble` = func_8004D190,
+  `render_text_grid` = func_8004D7B8) via a DL-reconstruction subagent + gbi pointer macros. **2 stubs
+  remain, both regalloc walls (gcc-2.7.2 fan-out done, do NOT re-grind blindly):**
+  - `func_8004D4B8` (0xC8) — ADVANCED near-crack, NOT terminal. S182 dead-frame + 4-reg-perm SOLVED
+    (`str[row]` live-index pressure reproduces the phantom 8B frame; explicit idx2/base temps + t2=0-first
+    match all 6 regs). Residual = exactly 2 scheduler-slot MOVE words, one provably terminal (`move
+    t2,zero` scheduled mid-atomic-`c/32`-division-BB), permuter-exhausted ~27k iters/3 seeds @base 270.
+    New base.c + full analysis in `docs/wip/func_8004D4B8.near-match.c.txt`. Re-attempt ONLY with a
+    materially different scheduler-ORDER mechanism for the 2 words; the frame+regs are done.
+  - `func_8004D5F0` (0x1A4) — TERMINAL, retired-with-citation. global.c:790-823 `set_preferences`
+    copy-coalesce + cse.c sign-extend CSE; ROM keeps 2 non-coalesced copies of `c` (6 s-regs) that any
+    faithful C coalesces (5 s-regs, strictly more optimal). Not source-reachable, not flag-gated
+    (profile-probe NEGATIVE), permuter-plateaued. `docs/wip/func_8004D5F0.near-match.c.txt`. Do NOT
+    re-open. ROM green off extracted asm. `--carried-check` flags both.
+
 - **(S234+S235 MIXED-PARTIAL — carried; 9 of 17 banked, file NOT md5-candidate)**
   `src/main/func_8006F1A0.c` (main-segment `[0x4A5A0]`, game stat/score pack over a fixed-stride array
   + rumble/GBPak glue). Flipped to `c` at the S234 gate. **9 fns C:** S234 banked 7 first-build

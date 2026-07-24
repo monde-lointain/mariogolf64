@@ -1445,6 +1445,27 @@ Three honest caveats:
   4 (#1 sched-select memory; #3 (s32)base lever → commutative memory; #2/#4 DoR grep-BACKLOG-miss #3 +
   8x plateaued-tail → BACKLOG ranker follow-up; #5 grid-reset combo memory). RANKER: **14th recurrence**
   + the DoR carry-block-read miss. Push: local.
+- **Sprint 270** — file-complete re-open of `src/main/func_8004D190.c` (PO approved as proposed; main
+  fully mined out of fresh leaves per `--carried-check`, so a re-open crack slice of 4 documented S182
+  carries: 2 DL emitters deferred for a #display-lists sprint + 2 regalloc walls). No gate enabler
+  (c-stub continuation). **2 banked / 2 carried** (file 4→2 stubs, NOT md5-candidate). Banks (DL-recon
+  subagent, byte-exact isolation → orchestrator serial full-make gate): `emit_text_glyph_dl_preamble`
+  (0x8004D190, 26-cmd render/texture-load DL preamble via raw `EMIT(g++)` ≡ gbi pointer macros;
+  `0x075FF080` = gsDPLoadBlock w1, not a standalone cmd; 5 gfxdis words re-derived from the `.s`),
+  `render_text_grid` (0x8004D7B8, 30x40 grid `gSPTextureRectangle`; 3 source levers, no permuter —
+  callee-saved-lever init-before-calls + `prevhi`-not-`hi` test + decl/init order). Carries (gcc-2.7.2
+  compiler-source fan-out, profile-probe NEGATIVE): `func_8004D4B8` ADVANCED near-crack (S182
+  dead-frame + 4-reg-perm SOLVED via `str[row]` live-index pressure + idx2/base temps; residual = 2
+  scheduler-slot words, one mid-atomic-`c/32`-BB, permuter ~27k/3-seed exhausted), `func_8004D5F0`
+  TERMINAL retired-with-citation (global.c:790-823 set_preferences copy-coalesce; ROM strictly less
+  optimal than any faithful C). Seed 13 (ranker c-stub pts); banked 0pt (file partial); realized ~9 /
+  residual +4 (2 DL banks on-plan + 1 advanced-wall-reopen w/ new lever + 1 terminal verdict + 1
+  permuter + 1 novel gotcha; TU-profile-probe hypothesis falsified — real negative). Rolling-5
+  (S266-S270): 1+1+0+8+2. Quality **0 stuck-far / 1 permuter / 2 carried / 4 re-opened** (all 4 stubs
+  were S182 carries; 2 re-opened→banked). Retro applied 2 of 2 (#1
+  `#dead-frame-reload-artifact-regalloc-wall` third-variant live-index-block-pressure dead frame +
+  memory [[dead-frame-live-index-pressure-lever]]; #2 bank step 4a rename stale-object force-delete
+  gotcha). Push: local.
 - **Sprint 269** — open `main`'s last fresh vein: flip the blocked `func_8002A640` render pack
   (was 1 `blk` asm-flip row needing `sprite.c`; every other main stub is a documented wall/carry per
   `--carried-check`). Gate enabler = yaml flip `0x5A40 asm->c` (green, 23 stubs). Matched-fn **+8**,
