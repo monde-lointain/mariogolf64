@@ -1,5 +1,21 @@
-// func_8004D5F0 (0x8004D5F0, src/main/func_8004D190.c) — S182 CARRY
+// func_8004D5F0 (0x8004D5F0, src/main/func_8004D190.c) — S182 CARRY / S270 TERMINAL
 // #dead-frame-reload-artifact-regalloc-wall family (register-COALESCING artifact)
+//
+// S270 TERMINAL VERDICT (gcc-2.7.2 compiler-source fan-out, wallcrack) — RETIRE, do NOT re-grind:
+//   The non-coalesced 2-copies-of-c is a global.c copy-coalesce artifact with NO semantic driver.
+//   gcc-2.7.2 global.c set_preferences (global.c:790-823) records a hard_reg_copy_preferences link
+//   between the c-holder and the clamped allocno for the `clamped=c` copy whenever they do NOT
+//   conflict (CONFLICTP false, lines 799-802), merging them to one callee-saved reg (5 s-regs,
+//   frame 0x28). The ROM's 6-reg/frame-0x30 keeps them as a CONFLICT (both live across the two
+//   framebuffer calls). Every faithful-C form collapses that conflict: two-copy / if-else-phi /
+//   clamp-before-calls all coalesce to 5 s-regs; reading original `c` in BOTH clamp compares makes
+//   cse.c CSE the (s8)c sign-extend into one reg and clamp in place -> still 5 s-regs. The ONLY way
+//   to force 6 regs is a genuine 2nd use of original-c, which makes the following read use
+//   original-c's register (ROM's 2nd compare reads the CLAMPED reg) -> breaks the byte match. So the
+//   ROM allocation is strictly LESS optimal than any gcc-2.7.2 output reachable from equivalent C;
+//   the branch-plain-vs-likely cascade follows from it. Profile-probe NEGATIVE (no flag reaches it).
+//   Permuter-confirmed plateau (base 2055 -> ~1190). CITE: global.c:790-823 set_preferences +
+//   cse.c sign-extend CSE. NOT a compiler-flag artifact; NOT source-reachable.
 //
 // Framebuffer glyph renderer: renders one 8x8 glyph (char c) to BOTH the current and next
 // VI framebuffers (double-buffered, uncached K1) at grid cell (x,y). Nibble-per-pixel from

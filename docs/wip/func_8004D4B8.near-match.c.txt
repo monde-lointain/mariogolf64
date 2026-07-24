@@ -1,78 +1,72 @@
-// func_8004D4B8 (0x8004D4B8, src/main/func_8004D190.c) — S182 CARRY
-// #dead-frame-reload-artifact-regalloc-wall
+// func_8004D4B8 (0x8004D4B8, src/main/func_8004D190.c) — S270 ADVANCED near-crack
+// #dead-frame-reload-artifact-regalloc-wall  ->  now a 2-WORD SCHEDULER-SLOT COIN
 //
 // String -> glyph-tile blit: for each char of str (up to `count` rows), copy an
 // 8-row x 2-halfword glyph tile from the D_800BE6E0 glyph LUT into the `out` tilemap,
 // indexing by a bitfield ((idx&0x1F)<<1)|((idx/32)<<9), idx = clamped(char)-0x20.
 //
-// STATUS: STRUCTURALLY BYTE-EXACT except (a) the target reserves a DEAD 8-byte frame
-// (addiu sp,-8 / addiu sp,+8, ZERO ($sp) body access), and (b) the register permutation
-// that frame drives: target {bitfield=t1, iVar8-counter=t2, iVar6*2=t4, bitfield-copy=t3},
-// mine {bitfield=t2, counter=t1, iVar6*2=t3, copy=t4} (t1<->t2, t3<->t4 swap).
-// All 48 non-frame instructions match in ORDER and OPCODE; only the {t1,t2}/{t3,t4}
-// register names + the dead frame differ.
+// S270 PROGRESS (gcc-2.7.2 compiler-source fan-out, wallcrack):
+//   The S182 "irreproducible dead frame + 4-register permutation" wall is SOLVED.
+//   - The dead 8-byte frame IS reproducible: it is a register-pressure artifact, not a
+//     source-unreachable coin. Indexing the string as str[row] (keeping row AND str both
+//     live) instead of str++ forces local-alloc to reserve the phantom 8B slot.
+//   - ALL 6 registers now match the ROM (t0=rowcopy, t1=bitfield, t2=counter, t3=basecopy,
+//     t4=idx2). Levers: str[row] indexing + explicit `s32 idx2=t0*2; s32 base=t1;` (controls
+//     local-alloc qty birth-order, qty_compare priority = floor_log2(nref)*nref*size/livelen,
+//     local-alloc.c:~1750) + `t2=0` as the FIRST init.
+//   Profile-probe: NEGATIVE. Swept -g/-O1/-fno-omit-frame-pointer/-fno-schedule-insns[2]/
+//   -fno-delayed-branch/-fno-strength-reduce/-fno-expensive-optimizations/-fno-*cse*/... ;
+//   only -fno-omit-frame-pointer made an 8B frame but with `sw s8,0(sp);move s8,sp` fp-setup
+//   the ROM lacks. So NOT a compiler-flag artifact.
 //
-// ROOT CAUSE (systematic-debugging, mips.c compute_frame_size:4444 confirmed):
-//   var_size = MIPS_STACK_ALIGN(get_frame_size()); the target's local-alloc reserved a
-//   stack slot for one pseudo (get_frame_size()>0 => 8B frame) even though t7/t8/t9 are
-//   FREE — the local-alloc block-local greedy spill-then-global-rescue leaves a reserved
-//   but unused slot. This is the classic dead-frame artifact: not reachable from faithful C
-//   (address-taken forces REAL sp loads, not a dead frame). The reg permutation is the
-//   allocation-order shift the reserved frame induces.
+// RESIDUAL (2 instructions, permuter-confirmed unreachable ~27k iters/3 seeds, min@base 270):
+//   1. `move t2,zero` (counter init): ROM schedules it at .L8004D500 = the JOIN block of the
+//      signed-`c/32` bgez sign-bias (between `addiu v1,0x1F` and `sra v0,v1,5`). My build emits
+//      it in the pre-division block. This slot is INTERIOR to the atomic `c/32` sub-expression;
+//      no C statement boundary can target it (hi-split of the division = worse; comma-operator
+//      injection = no effect, the independent move floats to its LUID slot). TERMINAL CORE.
+//   2. `move a3,zero` (inner-loop init): ROM emits before idx2/base; mine after. Coupled to the
+//      regalloc (every reorder that moves it flips a register).
 //
-// LEVERS TRIED (S182), none produced the frame:
-//   - `c -= 0x20` in-place (vs separate idx): FIXED the char->v1 alloc + removed an extra
-//     `move v1,v0` + made the /32 correction in-place `addiu v1,v1,0x1F`. KEEP THIS.
-//   - clean `for(a3=0;a3<2;a3++) out[t0*2+a3]=LUT[t1+a3]` (vs Ghidra's while(TRUE)+break):
-//     FIXED the inner loop to the target's branch-LIKELY (bnel) shape. KEEP THIS.
-//   - explicit `base=t1` invariant copy: added the t3=t1 copy instruction the target has,
-//     but still NO frame/spill (48 insns, reg-perm remains).
+// VERDICT: near-crack, NOT byte-exact. Materially past S182 (frame + all registers solved);
+//   residual is a 2-word scheduler-slot coin, one provably a mid-atomic-expression-BB placement.
+//   Retry only with a materially different scheduler-order mechanism; the permuter is exhausted.
 //
-// RETRY: only a genuinely-new mechanism that makes local-alloc spill one pseudo in the
-// inner block (a pressure state reproducing the reserved-slot), OR the permuter (likely
-// futile per func_8004DC44 S172-S175 dead-frame saga — the permuter mutates source shape,
-// not the reload spill state). Do NOT re-run the in-place/for-loop/base-copy levers.
-//
-// Best near-match source (base-copy version, structurally identical minus frame+reg-perm):
+// Best near-match source (S270; frame + all 6 registers exact, 2-word scheduler residual):
 
 extern u16 D_800BE6E0[];
 
 void func_8004D4B8(char* str, s32 count, u16* out) {
-    s32 row = 0;
+    s32 row;
 
-    if (count > 0) {
+    for (row = 0; row < count; row++) {
+        s32 c = str[row];
+        s32 t0, t1, t2;
+
+        if (c == 0) {
+            return;
+        }
+        if (c < 0x20) {
+            c = 0x20;
+        }
+        if (c > 0x7A) {
+            c = 0x20;
+        }
+        c -= 0x20;
+        t2 = 0;
+        t1 = ((c & 0x1F) << 1) | ((c / 32) << 9);
+        t0 = row;
         do {
-            s32 c = *str;
-            s32 t1;
-            s32 t0;
-            s32 t2;
+            s32 idx2 = t0 * 2;
+            s32 base = t1;
+            s32 a3;
 
-            if (c == 0) {
-                return;
+            for (a3 = 0; a3 < 2; a3++) {
+                out[idx2 + a3] = D_800BE6E0[base + a3];
             }
-            if (c < 0x20) {
-                c = 0x20;
-            }
-            if (c > 0x7A) {
-                c = 0x20;
-            }
-            c -= 0x20;
-            t1 = ((c & 0x1F) << 1) | ((c / 32) << 9);
-            t2 = 0;
-            t0 = row;
-            do {
-                s32 base = t1;
-                s32 a3;
-
-                for (a3 = 0; a3 < 2; a3++) {
-                    out[t0 * 2 + a3] = D_800BE6E0[base + a3];
-                }
-                t1 += 0x40;
-                t2++;
-                t0 += count;
-            } while (t2 < 8);
-            row++;
-            str++;
-        } while (row < count);
+            t1 += 0x40;
+            t2++;
+            t0 += count;
+        } while (t2 < 8);
     }
 }
