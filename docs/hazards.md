@@ -41,6 +41,7 @@ The hazard families below group the sections that follow. Each links to its exis
 - [make sync-names eviction recovery](#make-sync-names-eviction-recovery)
 - [stale top-level asm label sync](#stale-top-level-asm-label-sync)
 - [stale parent asm relic (find_segment mis-resolution after a decompose-split)](#stale-parent-asm-relic-find_segment-mis-resolution-after-a-decompose-split)
+- [stale-persistent nonmatchings relic recovery](#stale-persistent-nonmatchings-relic-recovery)
 - [caller-evict](#caller-evict)
 
 **Vendored headers & preprocessor defines**
@@ -3101,6 +3102,42 @@ cosmetic mismatch, optional follow-up rename).
 
 **Provenance:** the `caller-evict` flag + the banked-C worked example: S77 (`func_800AB600.c`,
 `__osSpGetStatus`); both companion cases (still-asm caller, recover-callee): S106.
+
+---
+
+## stale-persistent nonmatchings relic recovery
+
+**Symptom:** a still-asm function's `asm/nonmatchings/<tree>/<stem>/<fn>.s` stub is missing (or you
+deleted it), the parent object fails to assemble (`Can't open ...<fn>.s`) or fails to link, and
+`make extract` does NOT recreate it — a fresh full `make extract` (even after `rm`-ing the whole
+subseg dir) leaves that `.s` absent.
+
+**Root cause (S271):** splat's `c`-mode split leaves DISASSEMBLY GAPS. For certain functions in a
+flipped `c` subseg — curated-named terrain/DL functions and some decompose-split leaves — splat does
+not emit a per-function nonmatchings `.s` at all (its c-mode disassembly of the subseg skips those
+address ranges), even though the linker script maps the whole `.o(.text)`. The `.s` that the build
+uses were generated once, under an earlier splat state, and PERSIST only because `asm/nonmatchings/`
+is gitignored and `make extract` never deletes existing `.s`. They are stale-persistent relics: a
+fresh checkout could not reproduce them, and deleting one is unrecoverable via `git`. S271 confirmed
+this for 6 `bgm_load_song_from_rom` functions (`init_per_player_state`, `gen_terrain_detail_texture`,
+`init_terrain_vertex_texcoords`, `emit_per_phase_fog_state`, `emit_terrain_state_prefix_block`,
+`emit_course_terrain_dl`) and `func_8005DDAC`@`func_80059BA0`. Neither the string/data guesser levels,
+`find_file_boundaries`, nor removing the curated name changes it — the gap is address-range, not name.
+
+**Prevention:** never `rm -rf` a `nonmatchings/<stem>/` dir or bulk-delete its `.s` to force a regen
+(see `docs/agent-workflow.md ## Conventions`, the HARD RULE). Refresh a stub by `Edit` or by deleting
+ONLY the single `.s` you will immediately re-verify.
+
+**Recovery:** `tools/recover_stub.sh <0xSUBSEG_OFFSET> <fn> [<fn>...]`. It flips the subseg `c`->`asm`
+in `mariogolf64.yaml`, `make extract`s (an `asm` subseg disassembles the ENTIRE range — every
+function, all relocs resolved to symbol names — and each per-function block is BYTE-IDENTICAL to the
+nonmatchings stub format: `nonmatching <fn>, 0x<sz>` + `glabel` + `/* off vram bytes */ instr` +
+`endlabel`), `awk`-carves each requested function's block into its `c`-mode `.s` path, then restores
+the `c` subseg (a full-file yaml backup + `trap` guarantees the flip is reverted even on error). The
+manual form is `sed` the subseg to `[0x<off>, asm]`, `make extract`, then
+`awk '/^nonmatching <fn>,/{g=1}g;/^endlabel <fn>$/{g=0}' asm/<off>.s > <dst>/<fn>.s`, then restore.
+Confirm with `make extract && tools/verify-rom.sh`. This is the general recovery for ANY lost or
+corrupt nonmatchings stub, not just this gap class.
 
 ---
 

@@ -186,6 +186,15 @@ def carry_over_names():
     if archive:
         region = region[: archive.start()]
     placed = placed_symbols()  # guard (2): real symbols only (names file ∪ func_<vram>)
+    # NOTE (S271): this scan deliberately OVER-scoops toward false-POSITIVE. A `func_<vram>` named
+    # only as a mid-prose callee of another wall ("... via `func_X`/`func_Y` ...") de-ranks even
+    # though it is not itself parked (S271 func_80029A30/func_80029A6C were flagged CARRIED-WALL this
+    # way, yet were trivial fresh glue). That is the SAFE direction: a false-positive costs one asm
+    # read to clear, while a false-negative re-surfaces a known wall as a fresh leaf (the 8x-recurring
+    # miss this tool exists to prevent). Do NOT tighten with a lead-line/subject heuristic — it un-parks
+    # genuine carries documented only on continuation/prose lines (func_8003E004, func_80050710) and,
+    # for a carry with no wip doc, turns --carried-check into a false-negative. Clear a suspected
+    # false-positive by reading the .s, per the DoR.
     for tok in re.findall(r"`([A-Za-z_]\w+)`", region):
         if tok in placed or _FUNC_TOKEN_RE.fullmatch(tok):
             names.add(tok)

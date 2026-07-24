@@ -3598,6 +3598,28 @@ by `/sprint-plan`:
   `NU_CONT_THREAD_ID=6` vs MG64's 5), and that surfaces only at first build unless reconciled here.
   A near-free retry missing any of these is a half-scoped spike — finish the scope before deferring.
 
+- **(S271 OPEN — 6 of 18 banked; file NOT md5-candidate; 12-stub partial pack)**
+  `src/main/vec3f_normalize.c` (main-segment subseg `[0x4D00]`, flipped `c` at the S271 gate — the last
+  never-flipped fresh main vein, asm since ~S61). S271 banked the `D_801052F8` bit-flag module +
+  cfb wrapper: `flag_is_set`, `flag_set`, `flag_clear`, `flag_toggle`, `flag_clear_all`, `func_800299D0`
+  (all asm-first fast-path, no permuter). **12 CARRIED** (ROM green off the 6 banked, shared TU rodata
+  extern, no carve): the pack tail — `mainproc` (=nuboot, ~188i game main-loop; **consider the
+  `libnusys/` path-qualifier per the nusys-template convention when attempted**), `vec3f_normalize`
+  (S158 FP class, the guNormalize-substitute game fn), `game_draw_callback`, and the big fns
+  `func_80029F6C`/`func_8002A144`/`func_8002A310` (~130-188i) + the smaller `func_80029B08`/`B58`/`BD8`/
+  `C00`/`EEC`/`F28`. **Retry:** a later FP/DL/nusys-path sprint; NOT a smallest-first clean-leaf vein
+  (mixed nuboot-template + FP + game logic). `func_80029A30`/`func_80029A6C` were `--carried-check`
+  false-positives (caller-evict cross-ref in another wall's prose, not real walls) — banked clean.
+- **(S271 TOOLING DEBT — pre-existing, surfaced not introduced)** `tests/tooling` has accumulated
+  failures independent of S271's work: the `pick_target` goldens (`pick_target_table.txt`,
+  `pick_target.json`, `pick_target_coddog.json`, `libultra_match.txt`) are STALE since S241 (~30
+  sprints of repo drift), `test_pick_target_ranked_by_descending_score` reports a real
+  descending-`score` INVARIANT violation in the current ranker output, and `test_hazard_anchors` has 2
+  pre-existing broken links (`delay-slot-fill` ambiguous between two sections; `cse-make-regs-eqv-branch-fold-…`
+  unresolved in the playbook index). A dedicated off-cadence tooling-maintenance task: regen the
+  goldens, root-cause the descending-score violation (a real ranker bug or a stale golden?), and fix
+  the 2 anchor links. Do NOT bundle into a match sprint's retro (S271 kept its retro to the 4 accepted
+  suggestions and left this parked to avoid masking the invariant failure with a blind golden regen).
 - **(S270 RE-OPEN — 2 of 4 remaining banked; file NOT md5-candidate; 2 carried walls)**
   `src/main/func_8004D190.c` (main-segment text-grid render pack; already-`c`). S270 re-opened the 4
   documented S182 carries and banked the 2 DL emitters (`emit_text_glyph_dl_preamble` = func_8004D190,

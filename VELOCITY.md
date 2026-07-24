@@ -1445,6 +1445,23 @@ Three honest caveats:
   4 (#1 sched-select memory; #3 (s32)base lever → commutative memory; #2/#4 DoR grep-BACKLOG-miss #3 +
   8x plateaued-tail → BACKLOG ranker follow-up; #5 grid-reset combo memory). RANKER: **14th recurrence**
   + the DoR carry-block-read miss. Push: local.
+- **Sprint 271** — open `main`'s last fresh vein: flip the never-flipped subseg 0x4D00 (asm since
+  ~S61) → `src/main/vec3f_normalize.c`, bank the `D_801052F8` bit-flag module (PO approved over
+  completing the FP/DL `func_80077BF0.c` or re-opening the terminal D4B8 wall). Gate enabler = one yaml
+  flip + `symbol_addrs` 4 curated names. **6 banked / 0 carried** (18→12 stubs, partial pack, NOT
+  md5-candidate; mainproc=nuboot / vec3f_normalize FP / big fns carry). All via the asm-first fast-path
+  (no m2c/base.c, no permuter): `flag_is_set` (early-return guard for the fall-through-`beqz`),
+  `flag_set`/`flag_clear`/`flag_toggle` (curated), `flag_clear_all` (for-init comma births counter reg
+  first), `func_800299D0` cfb wrapper (auto-kept). Seed 13 (18-fn one-tu pack); banked 0pt (file
+  partial, all-or-nothing); value = +6 matched. Rolling-5 (S267-S271): 1+0+8+2+0(pt). Quality **0
+  stuck-far / 0 permuter / 0 carried / 0 re-opened** — but a self-inflicted process incident dominated
+  the sprint: an `rm -rf` of a `nonmatchings/<stem>/` dir (chasing a stale-`.o` rename link error)
+  destroyed 6 stale-persistent relic stubs splat won't regenerate; recovered via a c→asm subseg flip +
+  awk-carve (new `tools/recover_stub.sh`). Retro applied 4 of 4 (#1 HARD RULE never `rm -rf` a
+  nonmatchings dir + memory [[nonmatchings-relic-no-rmrf]]; #2 `#stale-persistent-nonmatchings-relic-recovery`
+  + recover_stub.sh; #3 rename-gate whole-tree `.o` delete; #4 carry_over_names doc-note, code tighten
+  reverted as a false-negative risk). Pre-existing tooling-test debt surfaced (goldens stale since
+  S241 + descending-score invariant + 2 hazard-anchor links) → BACKLOG. Push: local.
 - **Sprint 270** — file-complete re-open of `src/main/func_8004D190.c` (PO approved as proposed; main
   fully mined out of fresh leaves per `--carried-check`, so a re-open crack slice of 4 documented S182
   carries: 2 DL emitters deferred for a #display-lists sprint + 2 regalloc walls). No gate enabler

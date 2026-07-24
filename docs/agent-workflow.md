@@ -642,6 +642,27 @@ below).
   the same mechanism in the other direction: a splice between two anchors silently deleted three
   `INCLUDE_ASM` stubs and their multi-line carry comments. Both times the anchors looked adjacent in
   the author's head and were not adjacent in the file.
+- **Never `rm -rf` an `asm/nonmatchings/<seg>/<stem>/` directory (or bulk-delete its `.s`) to "force
+  a regen" (S271, HARD RULE).** splat's `c`-mode `make extract` does NOT reproduce every still-asm
+  stub: it leaves DISASSEMBLY GAPS at some curated / decompose-split function addresses, so those
+  `.s` are STALE-PERSISTENT RELICS the build depends on — and `asm/nonmatchings/` is gitignored, so a
+  deleted relic is NOT recoverable with `git`. S271 `rm -rf`'d `bgm_load_song_from_rom/` chasing a
+  stale-`.o` link error and destroyed 6 curated stubs (`init_per_player_state`,
+  `gen_terrain_detail_texture`, `init_terrain_vertex_texcoords`, `emit_per_phase_fog_state`,
+  `emit_terrain_state_prefix_block`, `emit_course_terrain_dl`) + `func_8005DDAC` that `make extract`
+  would not regenerate. This is the `#stale-parent-asm-relic` / `#stale-top-level-asm-label-sync`
+  hazard class made FATAL. To refresh a stub, `Edit` it or delete ONLY the single `.s` you will then
+  re-verify — never a directory. If a relic is already lost, recover it with
+  `tools/recover_stub.sh <0xsubseg-off> <fn>...` (flips the subseg `c`->`asm` so splat disassembles
+  the full range, carves the byte-identical per-fn block back, flips to `c`); see
+  `docs/hazards.md#stale-persistent-nonmatchings-relic-recovery`.
+- **A curated rename that reaches a still-asm caller: force-delete the WHOLE tree's objects before the
+  gate make (S271 generalizes S270).** `make extract` regenerates the caller `.s` with the new name,
+  but the incremental build LINKS stale `.o` still carrying the old auto name (`undefined reference`).
+  S270 deleted the ONE large parent `.o`; S271 hit MULTIPLE stale parents (`lz_compress_extended_dma`
+  + others) from a single flag rename. Safe rule: after any curated rename reaching a still-asm
+  caller, `find build -path '*/src/<tree>/*.o' -delete` (whole tree, e.g. `src/main`) before the gate
+  make, not per-parent guesswork.
 - **Scratch dir** `nonmatchings/<func>/` (gitignored, shared with the permuter).
 - **Python tools run via the venv:** `venv/bin/python3 tools/X.py` (system python lacks asm-differ
   deps and is PEP-668-locked).
