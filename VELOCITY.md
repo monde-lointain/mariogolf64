@@ -1445,6 +1445,26 @@ Three honest caveats:
   4 (#1 sched-select memory; #3 (s32)base lever → commutative memory; #2/#4 DoR grep-BACKLOG-miss #3 +
   8x plateaued-tail → BACKLOG ranker follow-up; #5 grid-reset combo memory). RANKER: **14th recurrence**
   + the DoR carry-block-read miss. Push: local.
+- **Sprint 275** — clean low-FP `main` leaf slice via `--loose-stubs` (PO approved 4 `fp=0/bl=0`
+  leaves). No gate enabler (stubs in already-`c` files). **1 SALVAGED bank / 4-for-4 wall cluster.**
+  All four committed leaves walled — classes the size+FP sort cannot see and the carried/nested DoR
+  checks passed clean (first-encounter walls): `func_800985B4` (jtbl trailing-4-align carve wall),
+  `func_80042318` (reorg delay-slot coin, fully RE'd **171/172**, register/structure/signedness-exact
+  — giv `i+5` fixed the biv/giv reg-perm, `u32`→`sltiu`, `u16*` base-cache, `switch` for beq-target
+  dispatch; residual = 2 gcc reorg delay-slot fills, permuter plateaus base 300), `func_800318A8` +
+  `func_80075E48` (raw-DL-word store-giv emitters). Salvaged with a SUBSTITUTE: `update_putting_meter`
+  (func_80032720, a putting-meter charge/release SM one file over) **cracked by the permuter**
+  (`--settings permuter_settings_main.toml`, base **790→0**): temp `x8 = x/8` BEFORE the `y` mult
+  separates the mults, restoring the ROM's `mflo`-latency nops + `a0` pml→y reg reuse. Seed ~8
+  (classical); banked 0pt (file partial); realized ≈11 / residual +3 (+1 carry-cluster, +1 permuter,
+  +1 cmpfn near-loss gotcha; +mid-sprint substitution). Value = +1 matched. Rolling-5 (S271-S275):
+  0+0+2+2+1(pt-ish → matched-fn: 6+4+3+2+1). Quality **0 stuck-far / 2 permuter (1 crack) / 4 carried
+  / 0 re-opened**. Retro applied 4 of 4 (#1 `cmpfn.sh` -dz elided-nop fix — nearly abandoned a BYTE-EXACT
+  match read as 5-short by objdump's `...` collapse [[cmpfn-nop-elision-undercount]]; #2
+  `wall_class_tell` → `--loose-stubs` tags JTBL-DISPATCH + RAW-DL-EMITTER, reclassified ~103 of ~147
+  main "fresh" stubs to 44 genuinely fresh; #3 permuter mflo-latency-nop-tractable; #4 DoR first-encounter-wall
+  note). RANKER: 9 pre-existing pick_target golden tests still fail (unrelated tree/golden drift,
+  S274-flagged) — a maintenance follow-up, untouched. Push: local.
 - **Sprint 274** — next-tier fresh stub-level leaf slice on `main` via `--loose-stubs` (PO approved 4
   smallest fresh leaves). No gate enabler (stubs in already-`c` files). **2 banked / 2 carried**
   (`vec3f_normalize.c` 10→9, `get_tile_attribute.c` 22→21; both partial/NOT md5-candidate). Banks:

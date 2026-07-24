@@ -111,6 +111,22 @@ resume surface when the middle spans context windows.
       permuter slice on those is LOW-EV — reserve it for exact-count-plus-ONE-operand carries. A
       `pick_target.py` FP/value-select `.s`-tell de-prioritizer for small main stubs is a tracked ranker
       follow-up (see `BACKLOG.md`).
+      - **S275 confirmed the plateau HARD and shipped two of the tells: `--loose-stubs` now flags
+        `jtbl-dispatch` and `raw-dl-emitter` classes.** All FOUR S275 committed low-FP (`fp=0/bl=0`)
+        leaves were walls the size+FP sort could not see: a jtbl-dispatch carve-align wall
+        (`func_800985B4`), a reorg delay-slot coin (`func_80042318`, 171/172 fully RE'd), and two
+        raw-DL-word store-giv emitters (`func_800318A8`, `func_80075E48`). `pick_target.py`'s
+        `loose_stubs` now runs `wall_class_tell(fn)` (in `pick_target_score.py`): a `.s` referencing
+        `jtbl_<vram>` -> `JTBL-DISPATCH`; a `.s` with >= 6 raw display-list command words
+        (`lui $reg,(0xHHHHHHHH >> 16)`, top byte 0xC8..0xFF) -> `RAW-DL-EMITTER`. Both drop out of the
+        `fresh` count (like carried/nested/intrinsic). On `main` this reclassified ~103 of the ~147
+        "fresh"-looking stubs (33 jtbl + 70 raw-dl), leaving 44 genuinely fresh. STILL a gap: the
+        FP-scheduler / value-select-branch-likely / register-permutation walls remain `fresh` (not
+        reliably `.s`-detectable), so `--loose-stubs main` fresh is a CEILING, not a clean pool. A bank
+        one file over (`update_putting_meter`, a putting-meter SM, cracked by the permuter) proves
+        tractable main work still exists behind the wall classes — but the smallest sizes are dominated
+        by them, so prefer a FRESH non-main pack once the flagged-fresh bank-rate drops. See the S275
+        retro and the memory [[cmpfn-nop-elision-undercount]].
     - **But the compiler-source fan-out on such a tail is often a BANK slice, not just characterization
       (S232).** When the plateaued tail's smallest fns are already fully-RE'd DOCUMENTED near-match walls
       (in-file near-match comments, even ones carrying a prior `file:line` compiler-source verdict),
@@ -468,6 +484,18 @@ dashboard). Target selection is `tools/pick_target.py`, not a stored roadmap.
         hand-mined leaf. See `#nested-function-static-chain-spill` and the memory
         [[nested-function-banks-the-parent-too]]. (The in-row `nested-child:<parent>` ranker tag is a
         follow-up, same as `carried-wall`.)
+      - **A leaf that is `fresh` + `standalone` + no-prior-doc can STILL be an at-attempt WALL of a
+        class the size+FP sort cannot see (S275).** All four S275 committed low-FP leaves passed
+        `--carried-check`/`--nested-check` clean yet every one walled (jtbl-carve-align,
+        reorg-delay-slot-coin, two raw-DL-word store-giv emitters). The carried/nested checks catch
+        only RE-surfaced or nested walls, not first-encounter ones. `--loose-stubs <seg>` now also
+        runs `wall_class_tell` and tags `JTBL-DISPATCH` (a `jtbl_<vram>` ref -> bank-time rodata carve,
+        walls unless 8-aligned both edges) and `RAW-DL-EMITTER` (>= 6 raw DL command words -> store-giv
+        carry class); both drop out of `fresh`. So at the gate: `--loose-stubs main` fresh is a CEILING,
+        not a clean pool — the FP-scheduler / value-select-branch-likely / register-permutation walls
+        are still `.s`-undetectable and read `fresh`. Read a candidate's `.s` (jtbl/`bnel`/`mflo`/
+        heavy-FP tells) before pricing it a clean smallest-first leaf. See the S275 retro and
+        [[cmpfn-nop-elision-undercount]].
   - **A carried wall's near-match doc can be wrong about the function's SEMANTICS, not just its
     verdict — re-derive behaviour from the `.s` before accepting a stated residual (S258).** S252
     recorded `func_800824E4` as a THREE-argument packer with `b = arg2` on the negative path and

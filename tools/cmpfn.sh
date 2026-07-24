@@ -97,7 +97,11 @@ rom_stream() {
 obj_stream() {
     local slice
     slice=$(mktemp)
-    mips-linux-gnu-objdump -d "$OBJ" | awk "/<${FUNC}>:/,/^\$/" > "$slice"
+    # -z / --disassemble-zeroes: without it objdump COLLAPSES runs of identical zero words
+    # (consecutive `nop`s) into a single `...` line, so cmpfn undercounts the instruction total and
+    # reports a byte-EXACT function as short (S275: update_putting_meter read 107/112 with 2 mflo-latency
+    # nops hidden as `...`, nearly abandoned as a sched-coin carry). -z forces every nop to disassemble.
+    mips-linux-gnu-objdump -dz "$OBJ" | awk "/<${FUNC}>:/,/^\$/" > "$slice"
     awk -v fn="$FUNC" '
         FNR == NR {
             if (match($0, /^[ \t]+[0-9a-f]+:/)) {

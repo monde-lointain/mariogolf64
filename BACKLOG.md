@@ -30,11 +30,15 @@ only whole asm-flip subseg PACKS, so fresh standalone leaves persisting as indiv
 inside already-`c` files were invisible. S273 hand-mined 3 such leaves (all banked: `pause_audio`,
 `unload_active_overlay`, `func_80029EEC`) and landed the DoR tool `pick_target --loose-stubs SEG`
 (+`--all`): it enumerates the still-`INCLUDE_ASM` stubs in src/SEG/*.c smallest-first, tagged
-fresh/CARRIED-WALL/NESTED-CHILD. As of S273 `--loose-stubs main` = **96 fresh / 238 carried-wall / 8
-nested-child**, so the fresh vein is deep — future `main` slices should run `--loose-stubs main` at the
-plan gate, not conclude "mined out" from the pack ranker's empty output. (The in-row integration — surface
-loose fresh stubs directly in the ranked table instead of a separate subcommand — remains a golden-gated
-follow-up, kin to the S264 c-continuation fresh-leaf mode.)
+fresh/CARRIED-WALL/NESTED-CHILD/INTRINSIC-HASM (S274) and, since **S275**, JTBL-DISPATCH +
+RAW-DL-EMITTER (`wall_class_tell`). As of S275 `--loose-stubs main` = **44 fresh / 245 carried-wall /
+8 nested-child / 1 intrinsic-hasm / 33 jtbl-dispatch / 70 raw-dl-emitter** — the wall-class tags
+reclassified ~103 stubs that S273-S274 counted as "fresh." So the ACTIONABLE fresh vein is ~44, much
+of it still FP-scheduler / value-select-branch-likely / register-permutation walls that are NOT
+`.s`-detectable (S275 all 4 committed fresh leaves walled). Future `main` slices: run `--loose-stubs
+main` at the gate AND read each candidate's `.s` before pricing it clean; treat the fresh count as a
+CEILING. (The in-row integration — surface loose fresh stubs directly in the ranked table instead of a
+separate subcommand — remains a golden-gated follow-up, kin to the S264 c-continuation fresh-leaf mode.)
 
 **Test-tools stale-golden refresh (S273, deferred, needs `REGEN_GOLDEN=1`).** `make test-tools` carries
 9 PRE-EXISTING failures — the `pick_target` live-state json/table goldens (`test_pick_target_*_golden`,
@@ -317,6 +321,14 @@ fan-out (4 documented walls → 2 cracked, 1 re-framed, 1 terminal):
        finds the tractable ones first. Kin to the S224 plateaued-pack tell. NOT a hide (unlike
        intrinsic-hasm) — these can still bank via a lever; they just aren't first-build. See
        `docs/agent-workflow.md ## Workflow at a glance` (the S274 loose-stub wall-cluster note).
+       - **S275 SHIPPED TWO of the tells: `wall_class_tell` (`pick_target_score.py`) now tags
+         `JTBL-DISPATCH` (a `jtbl_<vram>` ref) and `RAW-DL-EMITTER` (>= 6 raw DL command words) and
+         drops both from `fresh`.** S275's 4-for-4 wall cluster forced it: 2 of the 4 were jtbl / raw-DL.
+         STILL OPEN (the harder half): the FP-scheduler / value-select-`bnel` / register-permutation
+         tells remain `.s`-undetectable and read `fresh` (the other 2 S275 walls were these classes —
+         `func_800985B4`'s jtbl WAS caught, but `func_80042318`'s reorg-coin was not). These are a
+         de-PRIORITIZE (sort-below), not a hide, exactly as above; the jtbl/raw-dl tags are currently a
+         hide-from-fresh (they never bank first-build). Remaining follow-up = the FP/value-select sort-key.
 2. **The S234 "REPEATED/LOOPED access → 0-expected-bank" access-multiplicity deweight is WRONG.**
    `func_8006F1A0` (3× same-slot RMW) and `func_8006F24C` (4-iter loop fill) BOTH banked byte-exact in
    S235 via the byte-offset-cast lever (`*(s32*)((u8*)SYM+off)`) + the stride-array loop-crack recipe

@@ -1040,28 +1040,37 @@ def main():
         stubs = loose_stubs(args.loose_stubs)
 
         def _is_fresh(s):
-            return not s["carried"] and not s["nested"] and not s.get("intrinsic")
+            return (
+                not s["carried"]
+                and not s["nested"]
+                and not s.get("intrinsic")
+                and not s.get("wall_class")
+            )
 
         shown = stubs if args.all else [s for s in stubs if _is_fresh(s)]
-        print(f"{'size':>6} {'status':13} {'func':28} file")
+        print(f"{'size':>6} {'status':14} {'func':28} file")
         for s in shown:
-            status = (
-                "CARRIED-WALL"
-                if s["carried"]
-                else (
-                    "NESTED-CHILD"
-                    if s["nested"]
-                    else "INTRINSIC-HASM" if s.get("intrinsic") else "fresh"
-                )
-            )
+            if s["carried"]:
+                status = "CARRIED-WALL"
+            elif s["nested"]:
+                status = "NESTED-CHILD"
+            elif s.get("intrinsic"):
+                status = "INTRINSIC-HASM"
+            elif s.get("wall_class"):
+                # jtbl-dispatch / raw-dl-emitter: fresh-looking but an at-attempt wall class (S275)
+                status = s["wall_class"].upper()
+            else:
+                status = "fresh"
             sz = "?" if s["size"] is None else str(s["size"])
-            print(f"{sz:>6} {status:13} {s['fn']:28} {s['file']}")
+            print(f"{sz:>6} {status:14} {s['fn']:28} {s['file']}")
         n_fresh = sum(1 for s in stubs if _is_fresh(s))
         print(
             f"# {len(stubs)} stubs in src/{args.loose_stubs}/: {n_fresh} fresh, "
             f"{sum(s['carried'] for s in stubs)} carried-wall, "
             f"{sum(s['nested'] for s in stubs)} nested-child, "
-            f"{sum(bool(s.get('intrinsic')) for s in stubs)} intrinsic-hasm"
+            f"{sum(bool(s.get('intrinsic')) for s in stubs)} intrinsic-hasm, "
+            f"{sum(s.get('wall_class') == 'jtbl-dispatch' for s in stubs)} jtbl-dispatch, "
+            f"{sum(s.get('wall_class') == 'raw-dl-emitter' for s in stubs)} raw-dl-emitter"
         )
         raise SystemExit(0 if n_fresh else 1)
 

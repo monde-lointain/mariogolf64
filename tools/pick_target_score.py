@@ -297,6 +297,48 @@ def intrinsic_stub_tell(fn):
     return False
 
 
+_JTBL_RE = re.compile(r"\bjtbl_[0-9A-Fa-f]+\b")
+# a raw display-list command word materialised as the FULL-32-bit-word form
+# `lui $reg, (0xHHHHHHHH >> 16)` (splat's spelling for a lui+ori that rebuilds a known 32-bit
+# constant); the top byte HH is an RDP/RSP command opcode (G_SETOTHERMODE_H=0xE3, G_SETSCISSOR=0xED,
+# G_SETCOMBINE=0xFC, G_RDPPIPESYNC=0xE7, G_TEXRECT=0xE4, G_RDPHALF_1/2=0xE1/0xF1, G_SETCIMG=0xFF, ...
+# span 0xC8..0xFF). Requiring the full 8-digit `>> 16` form excludes a bare 16-bit `lui $reg,0xFFFF`
+# negative-constant HI, which would otherwise false-positive on the top byte alone.
+_DL_CMD_LUI_RE = re.compile(r"\blui\b\s+\$\w+,\s*\(0x([0-9A-Fa-f]{2})[0-9A-Fa-f]{6}\s*>>\s*16\)")
+_DL_CMD_MIN = 6  # >= this many DL-command-word luis => a raw-DL-word emitter (S275 wall class)
+
+
+def wall_class_tell(fn):
+    """DoR check: does <fn>'s body carry an S275 wall-class `.s` tell the size+FP sort cannot see?
+
+    Returns a short class string, or "" for none:
+      - "jtbl-dispatch": the `.s` references a compiler jump table (`jtbl_<vram>`). Its `.rodata` carve
+        is a BANK-TIME action that only banks when the table is 8-aligned on BOTH edges with no
+        interleaved still-asm sibling rodata; a 4-aligned trailing edge walls it (S275 func_800985B4,
+        [[jtbl-carve-both-edge-8align]]).
+      - "raw-dl-emitter": >= _DL_CMD_MIN raw display-list command words materialised as `lui`
+        immediates (0xE7/0xED/0xFC/0xE3/... top bytes). These glistp++ / unrolled per-entry emitters
+        are the store-giv + sched/reg-permutation CARRY class (S243/S275 func_800318A8, func_80075E48;
+        [[mg64-glyph-emitter-dl-family]]).
+
+    Such a leaf reads `fresh` + `standalone` + no-prior-doc yet walls at attempt, so a smallest-first
+    main slice should de-prioritise it. Reads only <fn>'s own `.s` (cheap). See the S275 retro."""
+    path = _find_asm_s(fn)
+    if not path:
+        return ""
+    try:
+        with open(path) as f:
+            body = f.read()
+    except OSError:
+        return ""
+    if _JTBL_RE.search(body):
+        return "jtbl-dispatch"
+    n_cmd = sum(1 for hh in _DL_CMD_LUI_RE.findall(body) if int(hh, 16) >= 0xC8)
+    if n_cmd >= _DL_CMD_MIN:
+        return "raw-dl-emitter"
+    return ""
+
+
 _STUB_FN_RE = re.compile(r'INCLUDE_ASM\("[^"]+",\s*([A-Za-z0-9_]+)\)')
 _STUB_SIZE_RE = re.compile(r"0x([0-9A-Fa-f]+)")
 
@@ -352,6 +394,7 @@ def loose_stubs(seg):
                     "carried": fn in walls,
                     "nested": nested_child_tell(fn),
                     "intrinsic": intrinsic_stub_tell(fn),
+                    "wall_class": wall_class_tell(fn),
                 }
             )
     out.sort(key=lambda r: (r["size"] if r["size"] is not None else 1 << 30, r["fn"]))
