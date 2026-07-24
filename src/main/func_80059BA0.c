@@ -94,7 +94,29 @@ u8* func_8005AF50(void) {
 
 u8* func_8005AF74(void) { return D_801323A0; }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80059BA0", func_8005AF80);
+void* memset(void*, s32, u32);
+
+void func_8005AF80(void) {
+  u8* base = func_8005AF50();
+  s8 i;
+  s8 j;
+  memset(base, 0, 0x2A78);
+  *(s32*)base = 0x12345678;
+  i = 0;
+  do {
+    s32* row;
+    j = 0;
+    /* (s32)base drops REG_POINTER so the addu keeps i*12 as rs (addu v0,v0,s0),
+     * matching the ROM's commutative operand order. */
+    row = (s32*)(i * 12 + (s32)base + 0xDC0);
+    do {
+      row[j] = -1;
+      j++;
+    } while (j != 3);
+    i++;
+  } while (i != 6);
+  func_8005DF54(base, 1);
+}
 
 void func_8005B03C(void) {
   u8* temp = func_8005AF50();
@@ -117,6 +139,12 @@ s32 func_8005B070(s32 arg0) {
 
 s32 func_8005B0A0(s32 arg0) { return D_800C2B28[arg0]; }
 
+/* func_8005B0B4: selector (flags&0xF) dispatch -> strength value. NEAR-MATCH
+ * 37/39 (faithful body in nonmatchings/func_8005B0B4/base.c). Residual = S263
+ * value-select-branch-likely: ROM emits the const early-returns as `beql
+ * sel,K,end` with the value in the annulled delay slot; gcc-from-C branches
+ * away + `j;li`. Terminal / permuter-denied. See
+ * docs/wip/func_8005B0B4.near-match.md. */
 INCLUDE_ASM("asm/nonmatchings/main/func_80059BA0", func_8005B0B4);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80059BA0", func_8005B150);
@@ -242,6 +270,12 @@ INCLUDE_ASM("asm/nonmatchings/main/func_80059BA0", func_8005C674);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80059BA0", func_8005CA48);
 
+/* func_8005CEE0: bounds-check(0..14) + triple-table sign predicate.
+ * NEAR-MATCH 38/38 (permuter dry, 400s). Faithful body in
+ * nonmatchings/func_8005CEE0/base.c: exact instr count, sole residual =
+ * field-load order + a0/v1 regalloc role swap + the a*14 vs b*2 multiply
+ * emission order (base-vs-disp fixed via explicit `u8* base`).
+ * See docs/wip/func_8005CEE0.near-match.md. */
 INCLUDE_ASM("asm/nonmatchings/main/func_80059BA0", func_8005CEE0);
 
 typedef struct {
