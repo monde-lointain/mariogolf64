@@ -3,6 +3,8 @@
 extern u8 D_801052F8[];
 extern u32 D_800B67D8;
 extern void cfb_setup(void* framebuf, s32 num);
+extern void func_8006F4F0(void);
+extern u8 g_mus_audio_paused;
 
 INCLUDE_ASM("asm/nonmatchings/main/vec3f_normalize", vec3f_normalize);
 
@@ -45,7 +47,10 @@ INCLUDE_ASM("asm/nonmatchings/main/vec3f_normalize", func_80029B08);
 
 INCLUDE_ASM("asm/nonmatchings/main/vec3f_normalize", func_80029B58);
 
-INCLUDE_ASM("asm/nonmatchings/main/vec3f_normalize", func_80029BD8);
+void pause_audio(void) {
+  func_8006F4F0();
+  g_mus_audio_paused = 1;
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/vec3f_normalize", func_80029C00);
 

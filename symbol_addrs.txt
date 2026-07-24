@@ -686,3 +686,4 @@ flag_toggle = 0x80029AA8; // type:func
 flag_clear_all = 0x80029AE4; // type:func
 emit_glyph_string_dl = 0x80076138; // type:func
 interp_cubic_finite_diff = 0x80077AD4; // type:func
+pause_audio = 0x80029BD8; // type:func
