@@ -16,12 +16,170 @@ extern void* func_80040E3C(s32 x, s32 z);
 extern void func_8004CDA0(void);
 extern void func_800719A0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4,
                           s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9);
+extern s32 D_800DAEF8;
+extern s32 D_800DAF00;
+extern s32 D_80132CF0;
+extern s32 D_80250AEC;
+
+/* Terrain attribute lookup table entry (mirrors src/main/get_table_entry.c). */
+typedef struct {
+  /* 0x00 */ u32 id;
+  /* 0x04 */ char* name_ptr;
+  /* 0x08 */ u8 traction_drag;
+  /* 0x09 */ u8 traction_grip;
+  /* 0x0A */ u8 slope_roughness;
+  /* 0x0B */ u8 pad_0b;
+  /* 0x0C */ s16 bounce_a;
+  /* 0x0E */ s16 bounce_b;
+  /* 0x10 */ u32 param;
+  /* 0x14 */ u8 flag_a;
+  /* 0x15 */ u8 flag_b;
+  /* 0x16 */ u8 flag_c;
+  /* 0x17 */ u8 penalty_class;
+  /* 0x18 */ u32 sound_id;
+} TerrainAttrEntry;
+
+/* Lie probe record: the ball's world position plus the terrain index and the
+ * mirror flag the slope samplers below use. func_80045A9C reads the same
+ * 0x10/0x18 pair through its s32* view. */
+typedef struct {
+  /* 0x00 */ u8 unk_00[0x10];
+  /* 0x10 */ s32 x;
+  /* 0x14 */ s32 y;
+  /* 0x18 */ s32 z;
+  /* 0x1C */ s8 terrain_idx;
+  /* 0x1D */ u8 unk_1D[5];
+  /* 0x22 */ s8 mirror;
+} SlopeProbe;
+
+extern f32 sinf(f32);
+extern f32 cosf(f32);
+extern f64 sin(f64);
+extern f64 cos(f64);
+extern f64 atan2(f64 y, f64 x);
+extern TerrainAttrEntry* get_table_entry(u32 idx);
+extern s32 get_interpolated_terrain_height_wrapper(s32 x, s32 z);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_800453E0", func_800453E0);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_800453E0", calc_slope_side_pitch);
+/* Cross-slope of the lie: samples the terrain 0x3C00 units to one side of the
+ * ball along `heading` rotated a quarter turn (a half turn more when the probe
+ * is mirrored), clamps the sample to +/-0x3C00 around the ball's own height,
+ * and returns atan2(dh, 0x3C00) as a 16-bit binary angle. A sample on terrain
+ * 0x16 is pulled down 307.2 units first. Slopes past +/-0x3C00 collapse to
+ * +/-0x1E00 rather than saturating at the bound.
+ *
+ * `s32 t` in the mirrored arm is load-bearing. Spelled inline as
+ * `(f32)(u16)(ang + 0x8000)` the C front end SHORTENS the addition into HImode
+ * (`(subreg:HI ang) + -32768`), and cse.c then substitutes ang's own value to
+ * reach `aim + -16384`, collapsing the ROM's `ori/addu` pair into one `addiu`
+ * -- one instruction short. Assigning through an s32 first keeps the add in
+ * SImode with the constant positive, where cse's rtx_cost sees no win
+ * (`aim + 0xC000` still needs li+addu) and leaves the ROM's form alone. */
+s16 calc_slope_side_pitch(SlopeProbe* p, u16* heading) {
+  s32 span = 0x3C00;
+  s16 aim = *heading;
+  TerrainAttrEntry* entry = get_table_entry(p->terrain_idx);
+  s32 ang = aim + 0x4000;
+  f32 rad;
+  s32 h;
+  s32 y;
+  s32 lo;
+  s32 hi;
+  s32 d;
 
-INCLUDE_ASM("asm/nonmatchings/main/func_800453E0", calc_slope_uphill_pitch);
+  if (p->mirror != 0) {
+    s32 t = ang + 0x8000;
+
+    rad = (f32)(u16)t * 0.000095873799f;
+  } else {
+    rad = (f32)(u16)ang * 0.000095873799f;
+  }
+
+  h = get_interpolated_terrain_height_wrapper((s32)(cos(rad) * span) + p->x,
+                                              (s32)(sin(rad) * span) + p->z);
+  if (entry->id == 0x16) {
+    h = (s32)((f32)h - 307.2f);
+  }
+
+  y = p->y;
+  lo = y - span;
+  if (h < lo) {
+    h = lo;
+  }
+  hi = y + span;
+  if (hi < h) {
+    h = hi;
+  }
+
+  d = h - y;
+  if (p->mirror != 0) {
+    d = -d;
+  }
+
+  if (d > 0x3C00) {
+    d = 0x1E00;
+  } else if (d < -0x3C00) {
+    d = -0x1E00;
+  }
+
+  return (s16)(atan2((f64)d, (f64)span) * 10430.37806021874);
+}
+
+/* Uphill pitch of the lie: samples the terrain a half step ahead of the ball
+ * along `heading` and a full step behind it (6144 units per step, so the two
+ * samples are 9216 apart), clamps each sample to +/-0x1800 around the ball's
+ * own height, and returns atan2(dh, 9216) as a 16-bit binary angle.
+ *
+ * `f32 step[2]` must be a stack ARRAY: the ROM re-loads and re-truncates both
+ * offsets after the first call, which only happens when the values live in
+ * memory (cse.c invalidates MEM across a call). Two plain f32 locals let cse
+ * keep one trunc.w.s per axis in a callee-saved register and the body comes out
+ * three instructions short. The six clamp temps must likewise be DISTINCT
+ * variables: one shared bound temp is a single allocno and lands in one
+ * register for all four bounds, where the ROM uses v1/v1 then a1/a0, and
+ * gcc-2.7.2 has no live-range splitting to give one pseudo three registers. */
+s16 calc_slope_uphill_pitch(SlopeProbe* p, u16* heading) {
+  f32 step[2];
+  s32 front;
+  s32 back;
+  s32 ground_f;
+  s32 lo_f;
+  s32 hi_f;
+  s32 ground_b;
+  s32 lo_b;
+  s32 hi_b;
+  f32 rad = *heading * 0.000095873799f;
+
+  step[0] = cosf(rad) * 6144.0f;
+  step[1] = sinf(rad) * 6144.0f;
+
+  front = get_interpolated_terrain_height_wrapper((s32)step[0] / 2 + p->x,
+                                                  (s32)step[1] / 2 + p->z);
+  ground_f = p->y;
+  lo_f = ground_f - 0x1800;
+  if (front < lo_f) {
+    front = lo_f;
+  }
+  hi_f = ground_f + 0x1800;
+  if (hi_f < front) {
+    front = hi_f;
+  }
+
+  back = get_interpolated_terrain_height_wrapper(p->x - (s32)step[0],
+                                                 p->z - (s32)step[1]);
+  ground_b = p->y;
+  lo_b = ground_b - 0x1800;
+  if (back < lo_b) {
+    back = lo_b;
+  }
+  hi_b = ground_b + 0x1800;
+  if (hi_b < back) {
+    back = hi_b;
+  }
+
+  return (s16)(atan2((f64)(front - back), 9216.0) * 10430.37806021874);
+}
 
 void* func_80045A9C(s32* arg0) { return func_80040E3C(arg0[4], arg0[6]); }
 
@@ -272,9 +430,58 @@ s32 func_800469E0(void) { return D_800BE688; }
 
 INCLUDE_ASM("asm/nonmatchings/main/func_800453E0", func_800469EC);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_800453E0", func_800479C0);
+/* Camera/wind-target smoothing tick. Early-outs (does nothing) while the round
+ * is within its last 10 units (D_80250AEC < D_80132CF0 + 10) AND both wind
+ * targets are within +/-0x1E00 of their current values; otherwise lerps the
+ * three 1/1024-scaled wind components toward their integer targets at
+ * 0.2/0.5/0.2. One reused `f32 t` for the three products is load-bearing: it
+ * anti-dep-serializes the three mul.s into the ROM's single reused $f14, which
+ * pulls each global load into its ROM slot. */
+void func_800479C0(void) {
+  f32* p;
+  f32 t;
 
-INCLUDE_ASM("asm/nonmatchings/main/func_800453E0", func_80047B34);
+  if (D_80250AEC < D_80132CF0 + 10) {
+    if (((f32)D_800DAEF8 < (f32)(D_800DAEEC + 0x1E00)) &&
+        ((f32)(D_800DAEEC - 0x1E00) < (f32)D_800DAEF8) &&
+        ((f32)D_800DAF00 < (f32)(D_800DAEF4 + 0x1E00)) &&
+        ((f32)(D_800DAEF4 - 0x1E00) < (f32)D_800DAF00)) {
+      return;
+    }
+  }
+  p = &D_800DAF30;
+  t = D_800DAEEC * (1.0f / 1024.0f);
+  *p += (t - *p) * 0.2f;
+  t = D_800DAEF0 * (1.0f / 1024.0f);
+  D_800DAF34 += (t - D_800DAF34) * 0.5f;
+  t = D_800DAEF4 * (1.0f / 1024.0f);
+  D_800DAF38 += (t - D_800DAF38) * 0.2f;
+}
+
+/* Twin of func_800479C0 with an f32 height-offset arg (caller passes 4608.0f):
+ * the second target lerps toward (D_800DAEF0 - arg0) instead. The inner block
+ * after the early return is load-bearing -- hoisting the `p`/`t` decls to the
+ * top materializes &D_800DAF30 in the prologue and re-colours the body. */
+void func_80047B34(f32 arg0) {
+  if (D_80250AEC < D_80132CF0 + 10 &&
+      (f32)D_800DAEF8 < (f32)(D_800DAEEC + 0x1E00) &&
+      (f32)(D_800DAEEC - 0x1E00) < (f32)D_800DAEF8 &&
+      (f32)D_800DAF00 < (f32)(D_800DAEF4 + 0x1E00) &&
+      (f32)(D_800DAEF4 - 0x1E00) < (f32)D_800DAF00) {
+    return;
+  }
+  {
+    f32* p = &D_800DAF30;
+    f32 t;
+
+    t = D_800DAEEC * (1.0f / 1024.0f);
+    *p += (t - *p) * 0.2f;
+    t = ((f32)D_800DAEF0 - arg0) * (1.0f / 1024.0f);
+    D_800DAF34 += (t - D_800DAF34) * 0.5f;
+    t = D_800DAEF4 * (1.0f / 1024.0f);
+    D_800DAF38 += (t - D_800DAF38) * 0.2f;
+  }
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_800453E0", func_80047CAC);
 

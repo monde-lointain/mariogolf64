@@ -688,6 +688,7 @@ SECTIONS
         build/asm/data/A5D58.rodata.o(.rodata);
         build/asm/data/A5FD0.rodata.o(.rodata);
         build/src/main/func_80043C20.o(.rodata);
+        build/asm/data/A7990.rodata.o(.rodata);
         build/src/main/func_800453E0.o(.rodata);
         build/src/main/func_8004D190.o(.rodata);
         build/src/main/print_string_at_grid.o(.rodata);
@@ -699,7 +700,7 @@ SECTIONS
         build/src/main/func_800505A0.o(.rodata);
         build/src/main/func_80050710.o(.rodata);
         build/src/main/play_sound_effect.o(.rodata);
-        build/asm/data/A7990.rodata.o(.rodata);
+        build/asm/data/A7B90.rodata.o(.rodata);
         build/src/main/func_80051E90.o(.rodata);
         build/src/main/func_80052070.o(.rodata);
         build/src/main/func_800521C0.o(.rodata);
