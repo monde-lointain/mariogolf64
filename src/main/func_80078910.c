@@ -107,6 +107,7 @@ extern s32 D_800FBE70;
 extern s32 D_800C52B0;
 extern s32 D_800FC8B8;
 extern TerrainAttrEntry* get_table_entry(u32 idx);
+extern s32 func_8005483C(s32 arg0, s32 arg1, f32* out);
 extern void func_80216B10(void);
 extern s32 get_interpolated_terrain_height_wrapper(s32 x, s32 z);
 
@@ -189,7 +190,41 @@ INCLUDE_ASM("asm/nonmatchings/main/func_80078910", func_80078DC0);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80078910", func_80078FA8);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80078910", func_80079358);
+void func_80079358(s32 arg0, s32 arg1) {
+  s32 sp10[28]; /* reserved stack (unaccessed in this fn) */
+  f32 sp80[4];
+  s32 i;
+
+  if (func_8005483C(arg0, arg1, sp80) == 0) {
+    D_800FC8B8 = (s32)(f32)get_interpolated_terrain_height_wrapper(
+        (s32)(sp80[0] * 1024.0f), (s32)(sp80[2] * 1024.0f));
+
+    i = 0;
+    do {
+      Particle* p = &particle_array[i];
+
+      if (p->unk_3A == -1) {
+        f32 z;
+
+        p->unk_00 = sp80[0] + (guRandom() % 3072 - 1536) * (1.0f / 1024.0f);
+        p->unk_04 = sp80[1] + (guRandom() % 3072 - 1536) * (1.0f / 1024.0f);
+        z = sp80[2] + (guRandom() % 3072 - 1536) * (1.0f / 1024.0f);
+        p->unk_0C = 0;
+        p->unk_14 = 0;
+        p->unk_38 = 0;
+        p->unk_3B = 0;
+        p->unk_10 = 0.002558593638241291f;
+        p->unk_28 = 255.0f;
+        p->unk_2C = -4.0f;
+        p->unk_30 = 6.0f;
+        p->unk_34 = -0.2f;
+        p->unk_3A = 8;
+        p->unk_08 = z;
+        break;
+      }
+    } while (++i != 40);
+  }
+}
 
 /* func_8007955C: particle-spawn + RTS-matrix builder. Fully RE'd near-match
  * carried on a gcc-2.7.2 sched.c schedule-order coin (~85%, < 0.97). See
@@ -226,7 +261,6 @@ void func_80079940(s32* arg0) {
   } while (++i != 40);
 }
 
-extern s32 func_8005483C(s32 arg0, s32 arg1, f32* out);
 extern f64 D_800D1988;
 
 void func_80079A08(s32 arg0, s32 arg1) {
@@ -273,8 +307,28 @@ void func_80079A08(s32 arg0, s32 arg1) {
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80078910", spawn_terrain_effect);
 
+/* func_80079EBC: particle-spawn (3 particles at D_800FBE64 with per-axis
+ * jitter). Fully RE'd BYTE-EXACT body (S279 gccB, 148/148 in isolation), but
+ * BLOCKED in this partial bank: it needs the TU's shared FP literal pool (0.04
+ * at D_800D19E0, alongside 0.2/0.049 + jtbl_800D1990) which is still owned by
+ * still-asm siblings in asm/53D10.s. Emitting the 0.04 as a C literal
+ * duplicates the pool (+0x10 flowing-rodata shift); referencing it extern
+ * avoids the shift but perturbs a source-invariant count++ sched.c coin
+ * (CONST_DOUBLE vs MEM cost: with the extern MEM the addiu $s2 hoists one slot
+ * ahead of the ldc1). Banks once the pool-owning siblings are also C. See
+ * docs/wip/func_80079EBC.near-match.md. */
 INCLUDE_ASM("asm/nonmatchings/main/func_80078910", func_80079EBC);
 
+/* func_8007A10C + func_8007A40C: GCC NESTED functions defined inside
+ * func_8007A6C8 (static chain in $v0 = STATIC_CHAIN_REGNUM, mips.h:1310).
+ * Both child bodies are fully RE'd BYTE-EXACT in isolation (S279 fan-out;
+ * func_8007A40C 175/175, dual-confirmed nested by gcc + binutils subagents),
+ * but a nested fn banks ONLY inside its parent's C body -> this is one
+ * indivisible 3-fn carve unit (child A10C < child A40C < parent A6C8, gcc
+ * emits children first). Struct correction pending at bundle-bank: Particle
+ * unk_0C/unk_14 are f32 (ROM swc1), currently s32 (kept s32 so the sibling
+ * ordinary fns' `= 0` stores stay `sw $zero`). See
+ * docs/wip/func_8007A40C.near-match.md. */
 INCLUDE_ASM("asm/nonmatchings/main/func_80078910", func_8007A10C);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80078910", func_8007A40C);
