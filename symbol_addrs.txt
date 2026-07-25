@@ -689,3 +689,5 @@ interp_cubic_finite_diff = 0x80077AD4; // type:func
 pause_audio = 0x80029BD8; // type:func
 unload_active_overlay = 0x800326C4; // type:func
 update_putting_meter = 0x80032720; // type:func
+get_shot_strength_tier = 0x80046898; // type:func
+build_radial_falloff_texture = 0x8004C860; // type:func

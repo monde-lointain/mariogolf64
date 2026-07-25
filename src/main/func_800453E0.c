@@ -202,7 +202,71 @@ extern s32 D_800BE664;
  * different lever. Permuter: 934k iterations, base 170, best 150, no crack. */
 INCLUDE_ASM("asm/nonmatchings/main/func_800453E0", func_8004683C);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_800453E0", func_80046898);
+extern s32* D_800DAF4C;
+extern s32 D_800BE640;
+extern s32 D_800BE644;
+extern s32 D_800BE648;
+extern s32 D_80250B34;
+extern s32 D_80250B20;
+extern s32 D_80250B58;
+extern s32 get_shot_param(void);
+
+/* Shot-strength tier: 0 when the shot is unavailable or already at full power,
+ * 1 below 80% of the meter extent, 2 below 60%.
+ *
+ * The power test is spelled INVERTED (`if (!(a < b)) {...} else return 1;`) on
+ * purpose. Written naturally (`if (a < b) return 1;`) gcc leaves
+ * `bc1f Lnext / li v0,1 / j Lret`: jump.c's "conditional jump jumping over an
+ * unconditional jump" (jump.c:1737) requires
+ * `prev_active_insn (reallabelprev) == insn`, and the `li v0,1` sits between
+ * the two jumps, so the inversion never fires (reorg.c:3821 is blocked for the
+ * same reason -- its `other` must be the immediately preceding condjump).
+ * Moving `return 1` into the ELSE arm makes it an own-thread block that reorg's
+ * fill_slots_from_thread consumes into the branch delay slot, giving the ROM's
+ * `bc1t Lret / li v0,1`. The `else` form is also what keeps the branch
+ * UNannulled -- the `if (...) { ...; return 0; } return 1;` variant emits
+ * `bc1tl`. The trailing `return 0` must stay the LAST block so jump.c's
+ * cross_jump merges every guard's `v0=0; j Lret` tail onto it; that is what
+ * lets each guard branch straight to the shared `move v0,zero` with its own
+ * `v0=0` in the delay slot. The second `if` needs no such help: its then/else
+ * arms are both single sets of $v0, so jump.c hoists `li v0,2` above the
+ * branch by itself. */
+s32 get_shot_strength_tier(void) {
+  s32 state = D_800DAF4C[0];
+
+  if (state == 0x15) {
+    return 0;
+  }
+  if (state == 0xD) {
+    return 0;
+  }
+  if (state == 0xA) {
+    return 0;
+  }
+  if (D_800BE644 < D_800BE63C) {
+    return 0;
+  }
+  if (D_800BE648 == 1) {
+    return 0;
+  }
+  if (D_80250B34 == 0) {
+    return 0;
+  }
+  if (D_80250B20 != 0) {
+    return 0;
+  }
+  if (D_80250B58 == 2) {
+    return 0;
+  }
+  if (!(((f32)get_shot_param() * 0.8f) < ((f32)D_800BE640 * 0.00007119878f))) {
+    if (((f32)get_shot_param() * 0.6f) < ((f32)D_800BE640 * 0.00007119878f)) {
+      return 2;
+    }
+  } else {
+    return 1;
+  }
+  return 0;
+}
 
 s32 func_800469E0(void) { return D_800BE688; }
 
@@ -220,6 +284,30 @@ void func_80047D68(void) {
   D_800DAF38 = D_800DAEF4 * (1.0f / 1024.0f);
 }
 
+/* CARRY (terminal sched.c wall). Body is CONFIRMED CORRECT -- byte-exact under
+ * `-fno-schedule-insns -fno-schedule-insns2`, off by exactly one gas nop under
+ * the real profile:
+ *   void func_80047DBC(f32* arg0) {
+ *     f32* p = &D_800DAF24; f32 d;
+ *     d = arg0[0] - *p;        if (fabsf(d) > 1.0f) *p += d * 0.2f;
+ *     d = arg0[1] - D_800DAF28; if (fabsf(d) > 1.0f) D_800DAF28 += d * 0.2f;
+ *     d = arg0[2] - D_800DAF2C; if (fabsf(d) > 1.0f) D_800DAF2C += d * 0.2f;
+ *   }
+ * The `f32* p` (pointer for the FIRST global, direct names for 2/3) reproduces
+ * the ROM's held-$v0 base for block 0 vs inline %hi/%lo for blocks 1/2 exactly.
+ * The ONLY divergence: gcc's sched.c places the 1.0f `li.s` BEFORE the `abs.s`
+ * that feeds the same compare, so gas fills the mtc1->c.lt.s hazard slot with
+ * abs.s and emits no nop -- the ROM keeps the nop (abs.s scheduled first).
+ * Root cause (invariant): insn_cost (sched.c:1362) gives the 1.0f load
+ * (movsf_internal1 alt3, type "load", mips.md:153) ready-delay 3 vs abssf2
+ * (type "fabs", mips.md:226) ready-delay 2, so the const is always ready one
+ * clock later and emitted one slot earlier; LUID/source-order is only a
+ * same-clock tiebreak, never reached. Verified source-invariant (6 spellings,
+ * -ffast-math) and cpu-invariant (9 -mcpu/-mips builds). NOT permuter-eligible
+ * (1 instr short, no priority tie). The identical lerp triple recurs in
+ * func_80048D7C @0x8004A144 (0.5f/0.1f) with the same order -- a crack banks
+ * both. Only untried mechanism: a C shape putting the 1.0f in a different basic
+ * block from the compare. See docs/wip/func_80047DBC.near-match.md. */
 INCLUDE_ASM("asm/nonmatchings/main/func_800453E0", func_80047DBC);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_800453E0", func_80047E9C);
@@ -245,12 +333,13 @@ extern f32 D_801B5530;
 
 /* func_800484F8: CARRIED (S263 near-match, 99/102). "Start BGM for game state":
  * sets HUD/flag globals + 45.0f consts, then switch(D_801B608C) over a 12-entry
- * jump table (jtbl_800CC818, indices 0/1/6/8->default) picking a bgm id, tail-calls
- * play_bgm_by_id. Structure/dispatch/cases all match; residual = (1) the default
- * block's `x==D_801B6098 && D_801B6090!=1` -> gcc branch-likely (bnel) where the ROM
- * keeps plain beq+nop+j+li (#value-select-if-else-vs-branch-likely, goto-PROOF,
- * confirmed 3 spellings) + (2) bgm held in a2 (move a0,a2 at the tail) vs the ROM's
- * a0-per-case (#call-result-a0-vs-v0 regalloc). 3-instr count deficit from (1); not
+ * jump table (jtbl_800CC818, indices 0/1/6/8->default) picking a bgm id,
+ * tail-calls play_bgm_by_id. Structure/dispatch/cases all match; residual = (1)
+ * the default block's `x==D_801B6098 && D_801B6090!=1` -> gcc branch-likely
+ * (bnel) where the ROM keeps plain beq+nop+j+li
+ * (#value-select-if-else-vs-branch-likely, goto-PROOF, confirmed 3 spellings) +
+ * (2) bgm held in a2 (move a0,a2 at the tail) vs the ROM's a0-per-case
+ * (#call-result-a0-vs-v0 regalloc). 3-instr count deficit from (1); not
  * permuter-eligible (goto-proof branch-target/count residual). See
  * docs/wip/func_800484F8.near-match.md. Jtbl would also need a rodata carve. */
 INCLUDE_ASM("asm/nonmatchings/main/func_800453E0", func_800484F8);
@@ -344,35 +433,70 @@ void func_8004C6B8(void) {}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_800453E0", func_8004C6C0);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_800453E0", func_8004C860);
+extern f32 sqrtf(f32);
+
+/* Fills a w*h byte grid with a radial intensity ramp measured from the corner
+ * (w, h): dead zone under 5, a linear ramp 10..255 over 5..54, a short 255..39
+ * falloff over 55..61, and 0 beyond 62. The only caller builds the 0x40 x 0x40
+ * (0x1000-byte) buffer D_800FE3D4. arg3 is passed (0x3E) but never read. The TU
+ * is -ffast-math so sqrtf() lowers to a bare `sqrt.s` (see mk/main.mk). */
+void build_radial_falloff_texture(u8* buf, s32 w, s32 h, s32 arg3) {
+  s32 i;
+  s32 j;
+  s32 k;
+  s32 d;
+  s32 v;
+  f32 s;
+
+  k = 0;
+  for (i = 0; i != h; i++) {
+    for (j = 0; j != w; j++) {
+      s = sqrtf((f32)((i - h) * (i - h) + (j - w) * (j - w)));
+      d = (s32)s;
+      if (d < 5) {
+        v = 0;
+      } else if (d < 55) {
+        v = (s32)(s - 5.0f) * 5 + 10;
+      } else if (d < 62) {
+        v = 255 - (s32)(s - 55.0f) * 36;
+      } else {
+        v = 0;
+      }
+      buf[k] = v;
+      k++;
+    }
+  }
+}
 
 extern s16 D_800BE6C0[];
-extern s16 *D_801B56F0;
+extern s16* D_801B56F0;
 extern s32 rand(void);
 /* func_8004C958: CARRIED (S263 near-match, ~248/274). Recursive diamond-square
  * cloud/plasma midpoint-displacement (self-calls 4x into quadrants). Residual =
- * ROM spills step (sh/lhu sp+0x1E) + 3 corner values (tr/br/bl) to stack and reloads
- * with sign-extension in each of the 5 midpoint blocks, under the recursion's s-reg
- * pressure; my faithful-C build keeps them in registers (26 instr shorter). Not
- * reproducible from source (mine is MORE optimal); #local-alloc-qty-permutation /
- * register-pressure spill class. See docs/wip/func_8004C958.near-match.md. */
+ * ROM spills step (sh/lhu sp+0x1E) + 3 corner values (tr/br/bl) to stack and
+ * reloads with sign-extension in each of the 5 midpoint blocks, under the
+ * recursion's s-reg pressure; my faithful-C build keeps them in registers (26
+ * instr shorter). Not reproducible from source (mine is MORE optimal);
+ * #local-alloc-qty-permutation / register-pressure spill class. See
+ * docs/wip/func_8004C958.near-match.md. */
 INCLUDE_ASM("asm/nonmatchings/main/func_800453E0", func_8004C958);
 
 extern s32 D_800BE6D4;
 extern s8 D_800BE6D9;
 extern s16 D_800BE6D0;
 extern s16 D_801062C0[2][64][64];
-extern s16 *D_801B56F0;
-extern u8 *sky_cloud_texture_ptr;
+extern s16* D_801B56F0;
+extern u8* sky_cloud_texture_ptr;
 extern s32 flag_is_set(s32 flag);
 extern void func_8004C958(s32 level, s32 x, s32 y);
 
 /* func_8004CDA0: CARRIED (S263 near-match, 227/234, structure exact, tail byte-
  * identical). Cloud-buffer blend driver (calls func_8004C958 diamond-square).
- * Residual = #local-alloc-qty-permutation: register naming (i:t0/a3, base:a1/t0)
- * + ROM extra preserving-copies (buf move a0,v0 x2; abs move a1,v0; dst move v0,t0).
- * Not permuter-eligible (7-instr count deficit, 0 local-alloc-qty cracks).
- * See docs/wip/func_8004CDA0.near-match.md. */
+ * Residual = #local-alloc-qty-permutation: register naming (i:t0/a3,
+ * base:a1/t0)
+ * + ROM extra preserving-copies (buf move a0,v0 x2; abs move a1,v0; dst move
+ * v0,t0). Not permuter-eligible (7-instr count deficit, 0 local-alloc-qty
+ * cracks). See docs/wip/func_8004CDA0.near-match.md. */
 INCLUDE_ASM("asm/nonmatchings/main/func_800453E0", func_8004CDA0);
 
 void func_8004D148(void) {

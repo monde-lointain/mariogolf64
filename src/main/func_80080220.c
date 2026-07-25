@@ -400,7 +400,7 @@ extern s16 D_801B7F32;
 extern s16 D_801B7F34;
 extern s16 D_801B7F36;
 extern s32 D_800E21BC;
-extern void func_8004C860(void* buf, s32 w, s32 h, s32 fmt);
+extern void build_radial_falloff_texture(void* buf, s32 w, s32 h, s32 fmt);
 extern void func_8006ACD8(void);
 extern void func_8003E400(void);
 extern void func_80078D94(void);
@@ -432,7 +432,7 @@ void load_course_scenery_assets(void) {
   func_800506D4(D_800E2160, slot);
 
   D_800FE3D4 = heap3_alloc(0x1000);
-  func_8004C860(D_800FE3D4, 0x40, 0x40, 0x3E);
+  build_radial_falloff_texture(D_800FE3D4, 0x40, 0x40, 0x3E);
 
   for (i = 0; i != 5; i++) {
     D_800E2190[i] = 0;

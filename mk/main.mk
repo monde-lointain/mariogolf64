@@ -28,3 +28,10 @@ $(BUILD_DIR)/$(SRC_DIR)/main/func_80078910.o: C_PROFILE_CFLAGS := $(MAIN_CFLAGS)
 # BUILT_IN_FSQRT guard-drop as above; the already-banked FP siblings (the single
 # int*const particle-scale multiplies) are fast-math-invariant and stay matched.
 $(BUILD_DIR)/$(SRC_DIR)/main/func_80080220.o: C_PROFILE_CFLAGS := $(MAIN_CFLAGS) -ffast-math
+
+# func_800453E0.c: func_8004C860 builds a radial-falloff texture via sqrtf() ->
+# bare `sqrt.s` in the ROM, so the whole TU compiles -ffast-math. Same
+# BUILT_IN_FSQRT guard-drop as above; verified codegen-neutral for every already
+# banked body in this TU (the with/without-flag .s are byte-identical bar the
+# banner comment), so the flag is fast-math-invariant here.
+$(BUILD_DIR)/$(SRC_DIR)/main/func_800453E0.o: C_PROFILE_CFLAGS := $(MAIN_CFLAGS) -ffast-math
