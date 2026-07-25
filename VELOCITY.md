@@ -1445,6 +1445,24 @@ Three honest caveats:
   4 (#1 sched-select memory; #3 (s32)base lever → commutative memory; #2/#4 DoR grep-BACKLOG-miss #3 +
   8x plateaued-tail → BACKLOG ranker follow-up; #5 grid-reset combo memory). RANKER: **14th recurrence**
   + the DoR carry-block-read miss. Push: local.
+- **Sprint 279** — `main` FP crack-slice in a FRESH file `func_80078910.c` (particle/effects) via
+  gcc/binutils fan-out (PO approved the 3 smallest fresh FP leaves). **+1 banked, 2 carried, 0 permuter,
+  0 re-open.** Zero gate enablers (file already `c`). Fan-out (3 gcc + 1 binutils rule-out) SORTED the
+  tail {clean-crack, pool-blocked-crack, nested-discovery}; binutils independently confirmed the nested
+  finding. BANKED `func_80079358` (particle-spawn, twin of func_80079A08; auto-named, no rodata, first
+  build). CARRIED both byte-exact: `func_80079EBC` (shared-literal-pool partial-bank blocker — literal
+  dups the pool +0x10, extern flips a source-invariant count++ sched coin) and `func_8007A40C`+twin
+  `func_8007A10C` (GCC nested fns inside func_8007A6C8, 3-fn bundle). Seed 5 (classical); banked 0pt
+  (file partial); realized ≈7 (1 bank + 2 structural-blocker carries, +1 each for a blocker the
+  size+FP+carried+nested pre-checks could not see), residual +2; value = +1 matched. Rolling-5
+  (S275-S279) matched-fn: 1+4... (S275 varies)→ recent: 1+1+2+4+1. Quality **0 stuck-far / 0 permuter /
+  2 carried / 0 re-open**. Retro applied 4 of 4 (#1 CODED --nested-check widened-prologue-scan fix; #2
+  NEW [[shared-literal-pool-partial-bank-blocker]] memory; #3 hazards#rodata-sibling shared-with-still-asm
+  sub-case + BACKLOG ranker follow-up (documented); #4 fan-out + full-make-is-oracle process note).
+  RANKER: --nested-check MISS coded-fixed; the shared-pool `.s`-tell needs a cross-file precompute
+  (documented follow-up). **DATA POINT: main fresh bank-rate 1/3 — reinforces the S274/S275 plateau**
+  (main fresh leaves skew to FP-sched / value-select / nested / shared-pool walls the size sort can't
+  pre-see); prefer a FRESH non-main pack OR the pool-unlock slice next. Push: local.
 - **Sprint 278** — `main` FP crack-slice CONTINUATION in `func_800453E0.c` via gcc/binutils fan-out (PO
   approved the 3 smallest fresh FP leaves; same S276/S277 recipe). **+4 banked, 0 carries, 0 permuter,
   0 re-open** — the cleanest FP slice yet, refuting the S263 "func_800453E0.c MINED OUT" verdict. Zero

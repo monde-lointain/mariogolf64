@@ -230,10 +230,17 @@ def carried_wall_names():
 
 
 _ASM_ROOT = os.path.join(ROOT, "asm")
-_PROLOGUE_WINDOW = 8  # instructions to scan for the $v0-spill tell
+# Scan the WHOLE prologue for the $v0-chain-home tell, not a fixed 8-insn window: the static-chain
+# spill/copy is emitted AFTER the callee-saved register saves (sw ra/s0-s8, sdc1 f20-f30), so for a
+# fn with many saved regs it lands 15-20 instructions in (S279 func_8007A40C: `addu $s1,$v0,$zero` +
+# `sw $v0,0x10($sp)` at instruction ~15, past the old 8-insn window -> a MISS that re-priced two
+# nested children as fresh). The home ALWAYS precedes real work, so scan up to the first `jal`,
+# capped at _PROLOGUE_CAP as a backstop against a $v0-reusing body false-positive.
+_PROLOGUE_CAP = 32
 _V0_SPILL_RE = re.compile(r"\bsw\b\s+\$v0,\s*0x[0-9A-Fa-f]+\(\$sp\)")
 _V0_COPY_RE = re.compile(r"\baddu\b\s+\$\w+,\s*\$v0,\s*\$zero")
 _ASM_INSN_RE = re.compile(r"/\*[^*]*\*/\s+(\S.*)")
+_JAL_RE = re.compile(r"\bjal\b")
 
 
 def _find_asm_s(fn):
@@ -262,13 +269,20 @@ def nested_child_tell(fn):
     (`addiu $v0,$sp,K` in the jal delay slot = address of a parent local) is left to a manual
     disasm. See docs/hazards.md#nested-function-static-chain-spill and the memories
     nested-function-banks-the-parent-too / func-80041e8c-v0-arg-convention-wall (S269 flagged
-    func_8002BE78 -> draw_ground_shadow_decals and func_8002DAC0 -> render_frame)."""
+    func_8002BE78 -> draw_ground_shadow_decals and func_8002DAC0 -> render_frame; S279 widened the
+    scan window after it MISSED func_8007A40C / func_8007A10C, whose chain-home sits ~15 insns in)."""
     path = _find_asm_s(fn)
     if not path:
         return False
     with open(path) as f:
-        insns = _ASM_INSN_RE.findall(f.read())[:_PROLOGUE_WINDOW]
-    prologue = "\n".join(insns)
+        insns = _ASM_INSN_RE.findall(f.read())
+    # Prologue = everything up to (and including the delay slot of) the first `jal`, capped.
+    end = _PROLOGUE_CAP
+    for i, insn in enumerate(insns[:_PROLOGUE_CAP]):
+        if _JAL_RE.search(insn):
+            end = i + 2  # include the branch delay slot
+            break
+    prologue = "\n".join(insns[:end])
     return bool(_V0_SPILL_RE.search(prologue) and _V0_COPY_RE.search(prologue))
 
 

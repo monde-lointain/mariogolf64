@@ -5450,6 +5450,37 @@ by `/sprint-plan`:
   `#callee-prototype-is-load-bearing`. **S226 lesson:** a low-FP DL-emitter vein is TRACTABLE via stock
   gbi macros (not wall-class). **S244:** the FP particle-spawn vein is ALSO tractable (2 banked) — the
   smallest un-attempted leaves are worth seeding before the plateau-prefer-fresh-pack rule fires.
+  **S279 UPDATE (+1 bank, +2 carries; now 13 banked / 21 stubs):** FP crack-slice via the fan-out
+  (3 gcc-2.7.2 + 1 binutils-2.6). BANKED `func_80079358` (particle-spawn, twin of `func_80079A08`:
+  dead-frame free-slot scan + signed `guRandom` jitter + terrain-height side effect; no rodata, first
+  build, auto-named). **Two NEW carries, both byte-exact bodies blocked STRUCTURALLY (not compiler
+  walls):**
+  - `func_80079EBC` — 148/148 isolation, **SHARED-LITERAL-POOL partial-bank blocker**: its tail `0.04`
+    is a gcc pool double (`D_800D19E0`) sharing a pool with still-asm siblings (`D_800D19E8`=0.2,
+    `D_800D19F0`, `jtbl_800D1990` all `%hi`-ref'd from asm/53D10.s). Literal form dups the pool (+0x10
+    flowing shift); extern form flips a source-invariant `count++` sched.c coin (CONST_DOUBLE vs MEM
+    cost). Banks only when the pool-owning siblings also go C. `docs/wip/func_80079EBC.near-match.md`,
+    memory [[shared-literal-pool-partial-bank-blocker]], `docs/hazards.md#rodata-sibling-yaml-pattern`
+    (S279 sub-case). **Unlock slice = the jtbl_800D1990 owner + 0.2/0.049 users (still-asm siblings).**
+  - `func_8007A40C` (+ twin `func_8007A10C`) — **GCC NESTED functions inside `func_8007A6C8`** (0x98C),
+    dual-confirmed by gcc + binutils subagents ($v0 = STATIC_CHAIN_REGNUM; caller `addiu $v0,$sp,0x10`
+    before each jal). Child body byte-exact 175/175 but banks ONLY as a 3-fn parent bundle (child A10C
+    < child A40C < parent A6C8; Particle unk_0C/unk_14 flip to f32 at bundle-bank).
+    `docs/wip/func_8007A40C.near-match.md`. (This supersedes the S226 deferred-list framing of
+    `func_8007A6C8`/`func_8007B054` as a plain "FP cluster" — A6C8 is a nested-fn PARENT.)
+  **Ranker follow-ups (S279, tracked):** (a) `--nested-check` was CODED-fixed at the S279 review (it
+  MISSED both nested children — scanned only the first 8 insns, but the chain-home sits ~15 in past the
+  reg-saves; now scans the whole prologue up to the first `jal`, `_PROLOGUE_CAP=32`). (b) EXTEND the
+  S278 `rodata-coupled:<pool-owner>` tell to a SHARED-with-still-asm variant: a fresh FP leaf whose
+  `ldc1/lwc1 %hi(D_x)` pool double is `%hi`-ref'd from the still-asm segment blob is partial-bank-BLOCKED
+  (distinct from the co-C-able carve-coupled case) — needs a cross-file precompute of still-asm pool
+  refs, so documented not yet coded (same status as the S278 `rodata-coupled` follow-up).
+  **PROCESS (S279):** the fan-out SORTED cleanly {clean-crack, pool-blocked-crack, nested-discovery},
+  0 false walls, and binutils INDEPENDENTLY confirmed the nested finding (2 subagents, 2 methods). Both
+  blockers were INTEGRATION-TIME discoveries the isolated per-fn cmpfn could not surface (gccB's isolate
+  was "byte-exact" yet the full-make flowed +0x10; gccC's isolated child needs the parent) — re-confirms
+  ONLY the orchestrator full-make ROM-SHA-1 is the oracle, and heed a subagent's "carve may be needed"
+  pre-flag as a likely partial-bank blocker.
   **S245 (+3 banked: `func_8007E30C`/`func_8007E664`/`func_80078BDC`; ranker follow-up #4):** this file
   is now a CONFIRMED HEALTHY fresh-tail continuation (S244 +2, S245 +3, only `func_8007955C` a documented
   wall among 25 stubs). The "plateaued mid-logic tail → prefer a fresh pack" DoR default (S224) does NOT

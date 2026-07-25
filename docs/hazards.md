@@ -1491,6 +1491,31 @@ tell (a fresh FP leaf with an `ldc1 %hi(...)` pool ref -> name the earlier-defin
 is a tracked ranker follow-up (see `BACKLOG.md`). Extends the S169 partial-one-tu rule: a leaf emitting
 f64 LITERALS forces the carve and atomicity, whereas extern-referenced shared rodata does not — but an
 `li.d` pool cannot be extern-referenced, so this coupling is unavoidable.
+
+**SHARED-with-still-asm literal pool: neither carve NOR extern banks a partial-file leaf (S279).** The
+S278 note above assumes the pool-contributing siblings can all go C in ONE increment (the pool then
+carves atomically). When they CANNOT — the pool doubles are SHARED with STILL-ASM siblings (e.g.
+`D_800D19E8`=0.2 / `D_800D19F0` + a `jtbl_` still `%hi`-referenced from `asm/<seg>.s`) — a byte-exact FP
+leaf using ONE double from that pool is BLOCKED both ways:
+- **Literal** (`+ 0.04`): gcc appends a NEW pool word to the leaf's `.o` .rodata while the extracted
+  `D_` still exists -> DUPLICATE -> the whole following .rodata/.data/.bss flows +0x10 (16-aligned
+  double). Full-make ROM-SHA-1 miss on every later DATA symbol (a `+0x10` on unrelated globals; see
+  `#short-text-shifts-flowing-bss`). Caught ONLY by the orchestrator full-make gate — the isolated
+  per-fn cmpfn reports the leaf byte-exact (it does not link the shared segment).
+- **Extern** (`+ D_sym`, plain OR `const`): no duplicate, no shift, .text otherwise byte-identical, BUT
+  a SOURCE-INVARIANT `sched.c` coin flips. A `CONST_DOUBLE` pool ref is unchanging + cheap so it
+  schedules early, keeping a cheap ready `addiu` (a `count++`) behind it; an extern `MEM` carries a
+  load cost so it schedules later and the ready `addiu` fills the slot AHEAD of the `ldc1`. `extern
+  const f64` does NOT restore the CONST_DOUBLE flag in gcc-2.7.2; `++count` preinc / statement reorder
+  do not move it. The permuter is the NON-payoff shape (a 1-insn schedule coin).
+
+So a leaf like this banks ONLY when the pool-owning still-asm siblings are ALSO decompiled in the same
+increment (then the literal form reproduces the ROM schedule without duplicating). Until then CARRY it
+with the byte-exact body documented (`docs/wip/<fn>.near-match.md`). S279 `func_80079EBC` (148/148
+isolation, 0.04 = `D_800D19E0`). The ranker follow-up extends the `rodata-coupled` tell above: also flag
+a fresh FP leaf whose `ldc1/lwc1 %hi(D_x)` pool double is `%hi`-referenced from the still-asm segment
+blob (shared, not co-C-able) as partial-bank-BLOCKED, distinct from the co-C-able carve-coupled case.
+See the memory `shared-literal-pool-partial-bank-blocker`.
 **Generic-subseg-bound carve = exact extent, no split.** When a carve start or end coincides
 with an existing generic `[off, (ro)data]` subseg boundary, that generic subseg's opposite boundary
 is the exact carve extent: the linker already split the section there, so the carve is a 1-line
