@@ -5470,7 +5470,11 @@ by `/sprint-plan`:
     `func_8007A6C8`/`func_8007B054` as a plain "FP cluster" — A6C8 is a nested-fn PARENT.)
   **Ranker follow-ups (S279, tracked):** (a) `--nested-check` was CODED-fixed at the S279 review (it
   MISSED both nested children — scanned only the first 8 insns, but the chain-home sits ~15 in past the
-  reg-saves; now scans the whole prologue up to the first `jal`, `_PROLOGUE_CAP=32`). (b) EXTEND the
+  reg-saves; now scans the whole prologue up to the first `jal`, `_PROLOGUE_CAP=32`). **S280 EXTENDED
+  it to the nested-PARENT tell** (`nested_parent_tell`): a fn that CONTAINS nested inline helpers homes
+  its params via an arg pointer `addiu $sN,$sp,+framesize` (== the entry frame alloc) — `--nested-check`
+  now prints NESTED-PARENT and `loose_stubs` counts it under `nested`. It had returned `standalone` for
+  `detect_terrain_collision` (a nested-fn that read as a register-pressure/spill wall). (b) EXTEND the
   S278 `rodata-coupled:<pool-owner>` tell to a SHARED-with-still-asm variant: a fresh FP leaf whose
   `ldc1/lwc1 %hi(D_x)` pool double is `%hi`-ref'd from the still-asm segment blob is partial-bank-BLOCKED
   (distinct from the co-C-able carve-coupled case) — needs a cross-file precompute of still-asm pool

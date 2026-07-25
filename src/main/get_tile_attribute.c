@@ -382,6 +382,14 @@ extern char D_800CAB9C[];
 extern s16* get_terrain_vertex_pointer(s32 col, s32 row);
 extern void check_and_print_grid(char* str, s32 col, s32 row);
 
+/* detect_terrain_collision: 4x4-cell quad->2-triangle point location; fills the
+ * s16 tri[11] buffer get_interpolated_terrain_height reads. Uses the GNU
+ * NESTED-FUNCTION extension (S280): the nested inline fetch()/hit() helpers
+ * reference x/z/out as free variables, which is what homes the params + emits
+ * the arg pointer the ROM has (an earlier "register-pressure/spill wall"
+ * mis-read). `vunused` is a byte-exact dead 0x14 stack slot the ROM reserves.
+ * CAVEAT: a nested function makes import.py/pycparser (the permuter)
+ * unavailable for the WHOLE get_tile_attribute.c TU. */
 s32 detect_terrain_collision(s32 x, s32 z, s16* out) {
   s32 col_base, row_base, col_frac, row_frac;
   s32 ri, ci, col, row;

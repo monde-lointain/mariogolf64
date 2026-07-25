@@ -205,6 +205,29 @@ resume surface when the middle spans context windows.
         invisible (a "reg-perm-only" mis-read caught only by the binutils cross-check; cmpfn now
         surfaces `[frame rom=.. mine=..]`), and a reused walking-pointer across loops read as an
         allocno wall when it was a coloring trap.
+      - **A plain-classical REGISTER-ALLOCATION carry (coloring OR "pressure/spill") is a HIGH-YIELD
+        fan-out target, not terminal — and the "pressure/spill" reading is often a mis-diagnosed
+        NESTED FUNCTION (S280).** S280's two "clean terrain" leaves each walled the UNAIDED
+        smallest-first pass (0/2 banked) on the classical local-alloc layer, NOT the FP-scheduler /
+        value-select classes the plan gate feared: `get_interpolated_terrain_height` = an exact-count
+        scattered scratch-register COLORING permutation (permuter plateaued 170), and
+        `detect_terrain_collision` = an apparent register-PRESSURE/spill wall (31 instrs short, ROM
+        spilled params to an arg pointer). A PO-directed 2-gcc + 1-binutils fan-out cracked BOTH
+        byte-exact. Two lessons: (1) the coloring wall fell to a `sched.c:2385` bottom-up load-SPLIT
+        (`s32 tmp` straddling a statement) + a `local-alloc.c:1598` live-length block-MOVE — a
+        two-edit combination the permuter never produces, so a SCATTERED (not single-operand) register
+        permutation at exact count is a fan-out target, not a permuter target; (2) the "pressure/spill"
+        wall was NOT pressure — it was a GCC nested function: nested `inline` helpers referencing the
+        params as free vars force `put_var_into_stack` + the arg-pointer (`$sN=$sp+framesize`,
+        `ARG_POINTER_REGNUM==$zero` on MIPS), which reads EXACTLY like a spill. So when a fully-RE'd
+        exact-count / structural carry reads as a register-alloc wall, ELEVATE a compiler-source
+        fan-out ABOVE "prefer a fresh pack" (as for the S232/S260/S272 documented walls); and BEFORE
+        pricing an arg-pointer + params-from-home-slots body a pressure/spill wall, rule out a nested
+        function (`pick_target.py --nested-check` now flags the containing-parent tell too, not just
+        the `$v0`-static-chain child). The plateau guidance (`--loose-stubs main` advisory) stands for
+        UNAIDED smallest-first; a fan-out slice on a characterized carry out-yields another
+        smallest-first main continuation. See the memories `sched-bottomup-loadsplit-livelength-blockmove`
+        and `argpointer-params-home-slots-nested-function-tell`.
 
 </workflow_overview>
 

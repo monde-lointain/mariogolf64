@@ -286,6 +286,59 @@ def nested_child_tell(fn):
     return bool(_V0_SPILL_RE.search(prologue) and _V0_COPY_RE.search(prologue))
 
 
+_FRAME_ALLOC_RE = re.compile(r"\baddiu\b\s+\$sp,\s*\$sp,\s*-(0x[0-9A-Fa-f]+)")
+_ARGP_RE = re.compile(r"\baddiu\b\s+\$(s[0-7]|fp),\s*\$sp,\s*(0x[0-9A-Fa-f]+)")
+
+
+def nested_parent_tell(fn):
+    """Heuristic DoR check: does <fn> CONTAIN GCC nested inline helpers (the S280 tell), the inverse
+    of nested_child_tell?
+
+    A nested helper that references the outer function's params/locals as FREE VARIABLES forces those
+    variables put_var_into_stack (address-taken), and on MIPS gcc-2.7.2 (ARG_POINTER_REGNUM == $zero,
+    fixed) the outer prologue materialises an ARG POINTER = frame top into a saved reg and re-reads its
+    own incoming params from their home slots through it:
+        addiu $sp, $sp, -K          (allocate frame K)
+        addiu $<sreg>, $sp, K       (arg pointer = sp + framesize; a plain fn NEVER computes sp+K)
+        sw    $<sreg>, M($sp)        (home the arg pointer)
+        ... later ...  lw $aN, 0(<sreg>) / 4(<sreg>)   (re-read own params x/z/out as MEMs)
+    Such a leaf is NOT a plain standalone body: it must be reconstructed WITH the nested `inline`
+    helpers, and banking it uses the GNU nested-function extension (which also disables import.py /
+    the permuter for the whole TU). So the plan gate must price it as a nested-function slice, not a
+    fresh smallest-first leaf, and must NOT mis-read it as a register-pressure / spill wall.
+
+    Returns True on the tell (frame K allocated AND an `addiu $sreg,$sp,K` arg-pointer for the same K).
+    Reads only <fn>'s own `.s` (cheap). S280 flagged detect_terrain_collision, which --nested-check
+    (child-only) had returned `standalone` for. See docs/hazards.md#nested-function-static-chain-spill
+    and the memory argpointer-params-home-slots-nested-function-tell."""
+    path = _find_asm_s(fn)
+    if not path:
+        return False
+    with open(path) as f:
+        insns = _ASM_INSN_RE.findall(f.read())
+    frame = None
+    for insn in insns:
+        m = _FRAME_ALLOC_RE.search(insn)
+        if m:
+            frame = m.group(1).lower()
+            break
+    if frame is None:
+        return False
+    frame_val = int(frame, 16)
+    for insn in insns:
+        m = _ARGP_RE.search(insn)
+        if m and int(m.group(2), 16) == frame_val:
+            return True
+    return False
+
+
+def nested_tell(fn):
+    """True if <fn> is EITHER a nested child (static-chain $v0 home) or a nested parent (contains
+    nested helpers => arg-pointer home). Both are coupled/non-plain-standalone slices the plan gate
+    must not price as a fresh smallest-first leaf."""
+    return nested_child_tell(fn) or nested_parent_tell(fn)
+
+
 _INSN_MNEMONIC_RE = re.compile(r"([a-z][a-z0-9.]*)")
 
 
@@ -406,7 +459,7 @@ def loose_stubs(seg):
                     "size": _stub_size(fn),
                     "file": rel,
                     "carried": fn in walls,
-                    "nested": nested_child_tell(fn),
+                    "nested": nested_tell(fn),
                     "intrinsic": intrinsic_stub_tell(fn),
                     "wall_class": wall_class_tell(fn),
                 }

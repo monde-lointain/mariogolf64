@@ -1445,6 +1445,27 @@ Three honest caveats:
   4 (#1 sched-select memory; #3 (s32)base lever → commutative memory; #2/#4 DoR grep-BACKLOG-miss #3 +
   8x plateaued-tail → BACKLOG ranker follow-up; #5 grid-reset combo memory). RANKER: **14th recurrence**
   + the DoR carry-block-read miss. Push: local.
+- **Sprint 280** — `main` clean terrain slice in `get_tile_attribute.c` (PO approved 2 low-FP terrain
+  leaves to dodge the FP-scheduler plateau). **+2 banked, 0 carried-final, 1 permuter (plateau), 0
+  re-open.** Zero gate enablers (file already `c`; both fns already curated-named). TWO-PHASE: the
+  UNAIDED smallest-first pass was **0-banked / 2-carried** (both fully-RE'd register-alloc walls — item1
+  an exact-count scattered COLORING permutation, item2 an apparent PRESSURE/spill deficit); the
+  PO-directed compiler-source fan-out (2 gcc + 1 binutils) then CRACKED BOTH byte-exact. `get_interpolated_terrain_height`
+  cracked via a `sched.c:2385` bottom-up load-SPLIT + a `local-alloc.c:1598` live-length block-MOVE (a
+  2-edit combo the permuter's 220-iter/plateau-170 run never produces). `detect_terrain_collision`
+  re-diagnosed from "pressure/spill" to a GCC NESTED FUNCTION (nested inline helpers home the params via
+  the arg pointer). binutils EXONERATED the KMC as on both. Seed 4 (classical); banked 0pt (file
+  partial); realized ≈8 (both walls cracked only via the fan-out, 2 cited-pass root-causes incl. a
+  nested-fn-mis-read correction), residual +2 (novel gotcha: arg-pointer "pressure" == nested fn; +permuter-plateau
+  confirmation); value = +2 matched. Rolling-5 (S276-S280) matched-fn: 1+2+4+1+2. Quality **0 stuck-far /
+  1 permuter (plateau, superseded) / 0 carried-final / 0 re-open**. Retro applied 4 of 4 (#1 CODED
+  `--nested-check` nested-PARENT tell [arg-pointer/params-from-home-slots]; #2 `--loose-stubs main`
+  plateau advisory; #3 workflow_overview "register-alloc carry = high-yield fan-out target, rule out
+  nested-fn before pressure/spill" bullet; #4 in-file nested-fn+permuter-caveat comment +
+  [[kmc-as-noreorder-not-global-nop-oracle]] refinement). 2 crack-lever memories saved. RANKER: the main
+  plateau advisory + nested-parent tell are the two coded fixes; the FP-scheduler / value-select /
+  register-coloring walls remain `.s`-undetectable (read `fresh`). KEY: fan-out flipped 0→2; "prefer
+  fresh non-main" holds for UNAIDED smallest-first only. Push: local.
 - **Sprint 279** — `main` FP crack-slice in a FRESH file `func_80078910.c` (particle/effects) via
   gcc/binutils fan-out (PO approved the 3 smallest fresh FP leaves). **+1 banked, 2 carried, 0 permuter,
   0 re-open.** Zero gate enablers (file already `c`). Fan-out (3 gcc + 1 binutils rule-out) SORTED the

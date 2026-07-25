@@ -365,6 +365,8 @@ from pick_target_score import (  # noqa: F401  (re-export: pt.<name> contract)
     drop_static_mirror_hazard,
     loose_stubs,
     nested_child_tell,
+    nested_parent_tell,
+    nested_tell,
     score_row,
     seed_points,
     snap_fib,
@@ -1053,7 +1055,7 @@ def main():
             if s["carried"]:
                 status = "CARRIED-WALL"
             elif s["nested"]:
-                status = "NESTED-CHILD"
+                status = "NESTED"
             elif s.get("intrinsic"):
                 status = "INTRINSIC-HASM"
             elif s.get("wall_class"):
@@ -1067,11 +1069,27 @@ def main():
         print(
             f"# {len(stubs)} stubs in src/{args.loose_stubs}/: {n_fresh} fresh, "
             f"{sum(s['carried'] for s in stubs)} carried-wall, "
-            f"{sum(s['nested'] for s in stubs)} nested-child, "
+            f"{sum(s['nested'] for s in stubs)} nested, "
             f"{sum(bool(s.get('intrinsic')) for s in stubs)} intrinsic-hasm, "
             f"{sum(s.get('wall_class') == 'jtbl-dispatch' for s in stubs)} jtbl-dispatch, "
             f"{sum(s.get('wall_class') == 'raw-dl-emitter' for s in stubs)} raw-dl-emitter"
         )
+        if args.loose_stubs == "main":
+            # S280 plateau advisory: `fresh` here is a CEILING, not a clean pool -- the
+            # FP-scheduler / value-select-branch-likely / register-allocation (coloring OR the
+            # nested-fn arg-pointer "pressure") walls are NOT .s-detectable and read `fresh`, then
+            # wall at attempt. Measured flagged-fresh bank-rate: S273 3/3, S274 2/4, S279 1/3,
+            # S280 0/2 (unaided). NB the S280 walls were NOT terminal: a PO-directed compiler-source
+            # fan-out cracked both fully-RE'd exact-count carries. So for UNAIDED smallest-first,
+            # prefer a FRESH non-main pack; for a fully-RE'd exact-count / structural carry, a
+            # gcc-2.7.2 fan-out slice out-yields another smallest-first main continuation.
+            print(
+                "# ADVISORY (main plateau, S280): `fresh` is a CEILING not a clean pool "
+                "(FP-sched / value-select / register-alloc walls read fresh). Unaided main "
+                "bank-rate is low (S273 3/3 -> S280 0/2); prefer a FRESH non-main pack for "
+                "smallest-first, OR a compiler-source fan-out on a fully-RE'd exact-count carry "
+                "(cracked both S280 carries)."
+            )
         raise SystemExit(0 if n_fresh else 1)
 
     if args.carried_check:
@@ -1086,9 +1104,15 @@ def main():
     if args.nested_check:
         any_nested = False
         for fn in args.nested_check:
-            hit = nested_child_tell(fn)
-            any_nested = any_nested or hit
-            print(f"{'NESTED-CHILD' if hit else 'standalone':13} {fn}")
+            child = nested_child_tell(fn)
+            parent = nested_parent_tell(fn)
+            any_nested = any_nested or child or parent
+            label = (
+                "NESTED-CHILD"
+                if child
+                else "NESTED-PARENT" if parent else "standalone"
+            )
+            print(f"{label:13} {fn}")
         raise SystemExit(1 if any_nested else 0)
 
     rows = build_rows(args, Indexes.build(), carry_over_names())
