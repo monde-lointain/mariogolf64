@@ -3802,7 +3802,29 @@ by `/sprint-plan`:
   mined out, NOT a smallest-first continuation" verdict was WRONG** — this pack still had untouched clean
   non-FP integer leaves (fp=0 glue/dispatch) that bank first-build; the tail's FP `calc_slope_*` +
   mid-logic walls are interleaved, not the whole remainder. Re-derive per-leaf (FP-tell + carry-grep),
-  do not write off the pack. **Carries:**
+  do not write off the pack.
+  **S277+S278 SUPERSEDE the S263 "MINED OUT / DO NOT continue" verdict — the FP tail is TRACTABLE via
+  the compiler-source fan-out (S218/S276 recipe), not walled.** S277 banked +2 FP leaves
+  (`func_8004C860` -> `build_radial_falloff_texture` sqrtf radial ramp; `func_80046898` ->
+  `get_shot_strength_tier`) and carried 1 terminal FP-sched coin (`func_80047DBC`, twin @0x8004A144).
+  **S278 banked +4** (`func_800479C0` + `func_80047B34` wind/view smoothing twins, auto-named;
+  `calc_slope_side_pitch` + `calc_slope_uphill_pitch` as ONE rodata-coupled bank unit). **Now 18 stubs
+  remain** (was 24 post-S262). The S263 "fp=0 100+ instr walls on register-pressure/value-select" note
+  still holds for the fp=0 tier (6 documented walls below), but the FP-heavy leaves (`calc_slope_*`,
+  the `func_800479C0`/`func_80047B34` twins) BANK via the fan-out + FP levers, contra the S263 "rest are
+  FP-heavy -> intractable" framing. Enabler in place: `mk/main.mk` per-file `-ffast-math` for
+  `func_800453E0.o` (whole-TU, banked-body-invariant). **Next slice = continue the smallest fresh FP/low-FP
+  leaves via the fan-out** (S278 tail: `func_800479C0`✓/`func_80047B34`✓ done; next `func_8004C51C`/
+  `func_8004C6C0`/`func_800479C0`-region + the `func_80047DBC` twin `func_80048D7C @0x8004A144` FP-sched
+  re-open); the S263 "prefer a FRESH pack" default does NOT fire while the fan-out keeps yielding banks.
+  **Ranker follow-up (S278, tracked):** a fresh FP leaf emitting an `f64 li.d` pool is RODATA-COUPLED to
+  its earlier-defined pool-owner sibling (KMC-as 16-aligned pool; a mid-pool leaf can't bank alone) —
+  a `pick_target.py` `rodata-coupled:<pool-owner>` tell (an `ldc1 %hi(...)` pool ref -> name the
+  earlier-defined sibling in the same TU) would price the atomic bank unit at the gate; see
+  `docs/hazards.md#rodata-sibling-yaml-pattern` (S278 sub-case). New memories:
+  [[fp-slope-sampler-regalloc-levers]], [[himode-shortening-cse-neg-imm-addiu]],
+  [[one-variable-reuse-reorders-loads]] (MERGE direction), [[kmc-as-noreorder-not-global-nop-oracle]]
+  (adjacent-mul.s nop + refined oracle). **Carries:**
   - `func_8004683C` — **S261: 23/23 EXACT, re-affirmed TERMINAL `#local-alloc-qty-permutation`** (in-file
     note). The `&&`-chain tail fixes the `andi`+`sltu`, reusing the `bound` local fixes the
     `li`-before-load order; the sole residual is the register cascade. Confirmed mechanism: the ROM

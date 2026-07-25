@@ -1471,6 +1471,26 @@ case); the finalize carve is still `.o`-sized, but the gate now sees the planned
 holds a banked sibling with a proven `.data`/`.rodata` ld-section carve, `pick_target.py` flags
 `twin-of:<file>` naming that sibling, so the matching carve is expected here and priced at the gate.
 Routes to this section or #defines-data per which section the sibling carved.
+**CLASSICAL FP `li.d`-pool coupling: a mid-pool leaf cannot bank alone (S278).** A CLASSICAL (non-mirror)
+main-TU function that emits its own `f64` constants compiles them through KMC `as`'s `li.d` literal
+pool, and KMC `as` gives that pool section `2**4` alignment and PADS it to a multiple of 16 (an 8-byte
+`static const f64` still yields a 0x10-byte section; a `static const` source spelling does NOT help —
+gcc const-propagates into `li.d` AND emits the unused static). So the pool only PLACES at its ROM vram
+when it is 16-aligned at BOTH edges, which requires EVERY function contributing to that pool to be C in
+the same increment, defined in SOURCE ORDER (the pool entries are emitted in definition order, so the
+first-defined function owns the pool HEAD). A leaf whose pool entry is NOT at the head produces a short
+(e.g. 0x10-byte) section that `ld` refuses to place at the 16-aligned target — it is coupled to the
+pool-head-owning sibling and must bank atomically with it. S278 `calc_slope_uphill_pitch` (pool
+9216.0 + 10430.378) could not bank without `calc_slope_side_pitch` (pool head 10430.378 @0x800CC770,
+defined first): the legal carve is one `[off, .rodata, main/<file>]` block spanning the whole
+16-aligned pool (0x800CC770..0x800CC78F = [side 10430.378][uphill 9216][uphill 10430.378][8B as-pad]),
+with `side` defined before `uphill` or the two entries swap addresses. The 8-byte `as`-padding
+explains a pre-existing unaccounted `.double 0` tail in the extracted `.rodata`. This is the
+classical-track analog of the mirror `rodata-literal` pre-flag; a `pick_target.py` `rodata-coupled:<pool-owner>`
+tell (a fresh FP leaf with an `ldc1 %hi(...)` pool ref -> name the earlier-defined pool-owner sibling)
+is a tracked ranker follow-up (see `BACKLOG.md`). Extends the S169 partial-one-tu rule: a leaf emitting
+f64 LITERALS forces the carve and atomicity, whereas extern-referenced shared rodata does not — but an
+`li.d` pool cannot be extern-referenced, so this coupling is unavoidable.
 **Generic-subseg-bound carve = exact extent, no split.** When a carve start or end coincides
 with an existing generic `[off, (ro)data]` subseg boundary, that generic subseg's opposite boundary
 is the exact carve extent: the linker already split the section there, so the carve is a 1-line

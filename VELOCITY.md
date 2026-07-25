@@ -1445,6 +1445,31 @@ Three honest caveats:
   4 (#1 sched-select memory; #3 (s32)base lever → commutative memory; #2/#4 DoR grep-BACKLOG-miss #3 +
   8x plateaued-tail → BACKLOG ranker follow-up; #5 grid-reset combo memory). RANKER: **14th recurrence**
   + the DoR carry-block-read miss. Push: local.
+- **Sprint 278** — `main` FP crack-slice CONTINUATION in `func_800453E0.c` via gcc/binutils fan-out (PO
+  approved the 3 smallest fresh FP leaves; same S276/S277 recipe). **+4 banked, 0 carries, 0 permuter,
+  0 re-open** — the cleanest FP slice yet, refuting the S263 "func_800453E0.c MINED OUT" verdict. Zero
+  gate enablers (file already `c`; `-ffast-math` override committed S277). Fan-out (3 gcc + 1 binutils
+  rule-out) sorted the tail {crack, crack, crack+auto-discovered-coupled-crack}: `func_800479C0` +
+  `func_80047B34` (wind/view smoothing twins, kept AUTO names — domain unresolved, sibling func_80047D68
+  also auto, no C callers; [[keep-auto-name-diverse-global-callers]]) via the MERGE direction of
+  [[one-variable-reuse-reorders-loads]] (one reused `f32 t` serializes 3 hoisted `mul.s` into the ROM's
+  reused $f14) + held-$v0 first-global base + inner-block-after-early-return. The fan-out UNCOVERED a
+  rodata-carve COUPLING: `calc_slope_uphill_pitch`'s `f64 li.d` pool (KMC-as 16-aligned/padded) only
+  places at 0x800CC770 with `calc_slope_side_pitch` (pool head, defined first) ALSO C — handled inline by
+  extending gccC to side_pitch as ONE atomic bank unit (+1 over the committed 3; 0x20B `.rodata` carve
+  [0xA7B70]). side_pitch crack: [[himode-shortening-cse-neg-imm-addiu]] (`s32 t=ang+0x8000` defeats
+  HImode-shortening+cse fold, ori/addu vs one addiu); uphill: [[fp-slope-sampler-regalloc-levers]] (f32
+  step[2] stack-array + 6 distinct clamp temps). binutils 3/3 assembler-EXONERATED + NEW finding: KMC-as
+  inserts 1 nop between adjacent mul.s/mul.d ([[kmc-as-noreorder-not-global-nop-oracle]]). Seed ~5
+  (classical); banked 0pt (file partial, 22->18 stubs); realized ≈6 (+1 mid-sprint rodata coupling
+  discovery), residual +1; value = +4 matched. Rolling-5 (S274-S278) matched-fn: 2+1+1+2+4; pt
+  0+0+0+0+0 (main partial-file slices). Quality **0 stuck-far / 0 permuter / 0 carried / 0 re-opened**.
+  Retro applied 6 of 6 (#1 [[one-variable-reuse-reorders-loads]] MERGE direction; #2
+  [[himode-shortening-cse-neg-imm-addiu]]; #3 [[kmc-as-noreorder-not-global-nop-oracle]] mul.s-nop +
+  refined oracle; #4 [[fp-slope-sampler-regalloc-levers]]; #5 rodata-coupled ranker follow-up +
+  hazards#rodata-sibling S278 sub-case; #6 fan-out process-win note). RANKER: the `rodata-coupled:<pool-owner>`
+  tell is the tracked follow-up; main FP tail bank-rate now 6/7 across S277-S278 (was framed intractable).
+  Push: local.
 - **Sprint 277** — `main` FP crack-slice via gcc/binutils fan-out (PO approved scope=main FP crack-slice
   + directed a gcc-2.7.2 + binutils-2.6 subagent fan-out to root-cause the targets before the permuter).
   Slice = the 3 smallest fresh FP leaves in `src/main/func_800453E0.c` (`--carried-check`/`--nested-check`
