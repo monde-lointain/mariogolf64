@@ -376,8 +376,100 @@ s32 func_80042E40(s32 ax, s32 ay, s32 bx, s32 by, s32 cx, s32 cy) {
   return (bx - ax) * (cy - ay) - (by - ay) * (cx - ax);
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/get_tile_attribute",
-            detect_terrain_collision);
+extern s8 g_terrain_vtx_xform_mode;
+extern s8 D_800BB0EC[];
+extern char D_800CAB9C[];
+extern s16* get_terrain_vertex_pointer(s32 col, s32 row);
+extern void check_and_print_grid(char* str, s32 col, s32 row);
+
+s32 detect_terrain_collision(s32 x, s32 z, s16* out) {
+  s32 col_base, row_base, col_frac, row_frac;
+  s32 ri, ci, col, row;
+  s16* vunused;
+  s16 *va, *vb, *vc, *vd;
+
+  inline void fetch(s16 * *p, s32 c, s32 r) {
+    *p = get_terrain_vertex_pointer(c, r);
+  }
+
+  inline s32 hit(s16 * a, s16 * b, s16 * c) {
+    if ((b[0] - a[0]) * (z - (a[2] << 10)) -
+                (b[2] - a[2]) * (x - (a[0] << 10)) <
+            0 ||
+        (c[0] - b[0]) * (z - (b[2] << 10)) -
+                (c[2] - b[2]) * (x - (b[0] << 10)) <
+            0 ||
+        (a[0] - c[0]) * (z - (c[2] << 10)) -
+                (a[2] - c[2]) * (x - (c[0] << 10)) <
+            0) {
+      return 0;
+    }
+    out[2] = a[0];
+    out[3] = b[0];
+    out[4] = c[0];
+    out[5] = a[1];
+    out[6] = b[1];
+    out[7] = c[1];
+    out[8] = a[2];
+    out[9] = b[2];
+    out[10] = c[2];
+    return 1;
+  }
+
+  (void)&vunused;
+
+  if (g_terrain_vtx_xform_mode != 0) {
+    if ((u32)x > 0xFFFFF) {
+      return -1;
+    }
+    if ((u32)z > 0xFFFFF) {
+      return -1;
+    }
+  } else {
+    if ((u32)x > 0x3FFFFF) {
+      return -1;
+    }
+    if ((u32)z > 0x7FFFFF) {
+      return -1;
+    }
+  }
+
+  if (g_terrain_vtx_xform_mode != 0) {
+    col_base = x >> 17;
+    row_base = z >> 16;
+    col_base <<= 2;
+    row_base <<= 2;
+    col_frac = (x >> 15) & 3;
+    row_frac = (z >> 14) & 3;
+  } else {
+    col_base = x >> 19;
+    row_base = z >> 19;
+    col_base <<= 2;
+    row_base <<= 2;
+    col_frac = (x >> 17) & 3;
+    row_frac = (z >> 17) & 3;
+  }
+
+  for (ri = 0; ri < 4; ri++) {
+    row = row_base + ((row_frac + D_800BB0EC[ri]) & 3);
+    for (ci = 0; ci < 4; ci++) {
+      col = col_base + ((col_frac + D_800BB0EC[ci]) & 3);
+      fetch(&va, col, row);
+      fetch(&vb, col + 1, row);
+      fetch(&vc, col, row + 1);
+      if (hit(va, vb, vc)) {
+        return 0;
+      }
+      fetch(&vd, col + 1, row + 1);
+      if (hit(vb, vd, vc)) {
+        return 0;
+      }
+    }
+  }
+
+  check_and_print_grid(D_800CAB9C, 0xA, 0xB);
+  return -1;
+}
 
 s32 func_800432E4(s16* a, s16* b) {
   s32 i;
@@ -400,8 +492,72 @@ INCLUDE_ASM("asm/nonmatchings/main/get_tile_attribute", func_8004333C);
 
 INCLUDE_ASM("asm/nonmatchings/main/get_tile_attribute", compute_triangle_plane);
 
-INCLUDE_ASM("asm/nonmatchings/main/get_tile_attribute",
-            get_interpolated_terrain_height);
+s32 get_interpolated_terrain_height(s32 x, s32 z) {
+  s16 tri[11];
+  s32 e1x, e1y, e1z, e2x, e2y, e2z;
+  s32 x0s, y0s, z0s, dx, dz;
+  s32 y1;
+  f32 fnx, fny, fnz;
+
+  if (g_terrain_vtx_xform_mode != 0) {
+    if ((u32)x > 0xFFFFF) {
+      if (x < 0) {
+        x = 0;
+      } else {
+        x = 0xFFFFF;
+      }
+    }
+    if ((u32)z > 0xFFFFF) {
+      if (z < 0) {
+        z = 0;
+      } else {
+        z = 0xFFFFF;
+      }
+    }
+  } else {
+    if ((u32)x > 0x3FFFFF) {
+      if (x < 0) {
+        x = 0;
+      } else {
+        x = 0x3FFFFF;
+      }
+    }
+    if ((u32)z > 0x7FFFFF) {
+      if (z < 0) {
+        z = 0;
+      } else {
+        z = 0x7FFFFF;
+      }
+    }
+  }
+
+  if (detect_terrain_collision(x, z, tri) < 0) {
+    return -300;
+  }
+
+  y1 = tri[6];
+  e2z = tri[10] - tri[8];
+  e1y = y1 - tri[5];
+  e1z = tri[9] - tri[8];
+  e2y = tri[7] - tri[5];
+  e1x = tri[3] - tri[2];
+  e2x = tri[4] - tri[2];
+
+  y0s = tri[5] << 10;
+  x0s = tri[2] << 10;
+  z0s = tri[8] << 10;
+  dx = x - x0s;
+  dz = z - z0s;
+
+  fnx = (f32)(e1y * e2z + e2y * -e1z);
+  fny = (f32)(e1x * -e2z + e2x * e1z);
+  fnz = (f32)(e1y * -e2x + e2y * e1x);
+
+  if ((s32)fny != 0) {
+    return y0s + (s32)((-fnx * (f32)dx - fnz * (f32)dz) / fny);
+  }
+  return 0;
+}
 
 s32 get_interpolated_terrain_height_wrapper(s32 x, s32 z) {
   return get_interpolated_terrain_height(x, z);
