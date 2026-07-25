@@ -1445,6 +1445,27 @@ Three honest caveats:
   4 (#1 sched-select memory; #3 (s32)base lever → commutative memory; #2/#4 DoR grep-BACKLOG-miss #3 +
   8x plateaued-tail → BACKLOG ranker follow-up; #5 grid-reset combo memory). RANKER: **14th recurrence**
   + the DoR carry-block-read miss. Push: local.
+- **Sprint 277** — `main` FP crack-slice via gcc/binutils fan-out (PO approved scope=main FP crack-slice
+  + directed a gcc-2.7.2 + binutils-2.6 subagent fan-out to root-cause the targets before the permuter).
+  Slice = the 3 smallest fresh FP leaves in `src/main/func_800453E0.c` (`--carried-check`/`--nested-check`
+  clean). One build enabler (not a flip): `mk/main.mk` per-file `-ffast-math` for `func_800453E0.o`
+  (BUILT_IN_FSQRT guard-drop, sibling precedent, codegen-neutral). **2 banked byte-exact / 1 terminal
+  carry** — the fan-out (3 gcc crack + 1 binutils rule-out) SORTED the tail {crack, crack, terminal}, the
+  S233/S276 expectation. `build_radial_falloff_texture` (func_8004C860, radial ramp texture): do-while(!=)
+  + flat `buf[k]` + one reused `f32 s` + single `v` across 4 arms. `get_shot_strength_tier` (func_80046898,
+  shot power tier 0/1/2): NEW LEVER [[else-arm-return-vs-then-arm]] (far conditional early return in the
+  ELSE arm -> plain `bc1t` not `bc1tl`; jump.c:1737). `func_80047DBC` CARRIED terminal: sched.c insn_cost
+  load(3)>fabs(2) always schedules the 1.0f const before the abs.s feeding the compare, source+cpu-invariant,
+  1-short so permuter-ineligible; twin @0x8004A144. binutils rule-out INVERTED the .s nop premise (noreorder
+  not global; nops as-inserted; 1-vs-2 nop = branch-slot-fill oracle). Seed ~5 (classical); banked 0pt (file
+  partial); realized ≈6 (2 clean fan-out banks + 1 fully-RE'd terminal carry), residual +1; value = +2
+  matched. Rolling-5 (S273-S277): 2+0+1+0+0(pt → matched-fn: 3+2+1+1+2). Quality **0 stuck-far / 0 permuter /
+  1 carried (terminal, pass-cited) / 0 re-opened**. Retro applied 4 of 4 (#1 [[fp-const-load-before-fabs]];
+  #2 [[else-arm-return-vs-then-arm]]; #3 [[kmc-as-noreorder-not-global-nop-oracle]]; #4 BACKLOG ranker
+  follow-up: FP-SCHED? de-prioritizer + track main FP-leaf bank-rate 2/3). RANKER: main flagged-fresh
+  remains a wall-mixed pool the size+FP sort can't pre-triage; the gcc/binutils fan-out cracked 2/3 of the
+  small FP-leaf tail — a viable main play (cheaper than sequential permuter setups) when the PO wants main.
+  Push: local.
 - **Sprint 276** — curated low-risk `main` slice + a PO-requested compiler-source fan-out (PO approved
   scope=main despite the S274/S275 wall-cluster finding: the DoR `.s`-tell scan reconfirmed the smallest
   fresh main leaves are invisible FP-scheduler walls). No gate enabler (stubs in already-`c` files).

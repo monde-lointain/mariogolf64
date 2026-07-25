@@ -48,6 +48,19 @@ see `docs/wip/func_800990D0.near-match.md` (`--carried-check` flags it). Backup 
 (294-instr wall-prone debug handler, its own slice). STANDING GUIDANCE: prefer a FRESH non-main pack
 next unless a specific main leaf is pre-vetted `.s`-clean.**
 
+**S277 REFINES the FP-wall verdict: the small heavy-FP main leaves are NOT all terminal — a targeted
+gcc-2.7.2 + binutils-2.6 fan-out cracked 2 of the 3 smallest FP leaves in `func_800453E0.c`
+(`build_radial_falloff_texture` func_8004C860, `get_shot_strength_tier` func_80046898), carrying only
+`func_80047DBC` (terminal sched.c const-load-vs-fabs coin, `insn_cost` load(3)>fabs(2), 1-short so
+permuter-ineligible; twin block in func_80048D7C @0x8004A144; `docs/wip/func_80047DBC.near-match.md`,
+`--carried-check` flags it). So when the PO wants main, a 3-4 leaf FP-tail fan-out (one gcc crack
+subagent per leaf + one binutils rule-out) is a viable play that banks ~2/3, cheaper than sequential
+permuter setups — NOT every FP-scheduler tell is a wall. RANKER FOLLOW-UP (S277 #4): the `.s` heavy-FP
+tell (fp>=15 on a <=60-instr leaf) correlates with the sched-coin wall class but does NOT distinguish
+crack from wall; consider a `pick_target.py` `FP-SCHED?` de-prioritizer tag for small heavy-FP main
+stubs (same spirit as the S275 jtbl/raw-dl tells, but ADVISORY not a hard drop since 2/3 crack), and
+track main FP-leaf bank-rate across sprints (S277: 2/3).**
+
 **Test-tools stale-golden refresh (S273, deferred, needs `REGEN_GOLDEN=1`).** `make test-tools` carries
 9 PRE-EXISTING failures — the `pick_target` live-state json/table goldens (`test_pick_target_*_golden`,
 `test_pick_target_ranked_by_descending_score`, `test_coddog_suppresses_maybe_upstream`) drift every
