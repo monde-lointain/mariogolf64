@@ -165,10 +165,31 @@ norm() {
 
 ROM_N=$(mktemp)
 MINE_N=$(mktemp)
-trap 'rm -f "$ROM_N" "$MINE_N"' EXIT
+ROM_RAW=$(mktemp)
+MINE_RAW=$(mktemp)
+trap 'rm -f "$ROM_N" "$MINE_N" "$ROM_RAW" "$MINE_RAW"' EXIT
 
-rom_stream "$ASM_FILE" | norm > "$ROM_N"
-obj_stream | norm > "$MINE_N"
+rom_stream "$ASM_FILE" > "$ROM_RAW"
+obj_stream > "$MINE_RAW"
+norm < "$ROM_RAW" > "$ROM_N"
+norm < "$MINE_RAW" > "$MINE_N"
 
-echo "rom=$(wc -l < "$ROM_N") mine=$(wc -l < "$MINE_N")  ($OBJ)"
+# Prologue stack-frame immediate. norm() masks every immediate (0xNN -> N), so a frame-size
+# mismatch (e.g. a dead-frame reserve the ROM keeps) is otherwise INVISIBLE in the diff and a
+# genuine near-miss reads as "register-permutation only" (S276 func_800990D0: 0x48 mine vs 0x50
+# ROM, caught only by binutils cross-check). Surface both sides, canonicalised to hex, and flag a
+# mismatch in the summary line.
+frame_imm() {
+    local raw neg=''
+    raw=$(grep -oiE 'addiu[[:space:]]+\$?sp,[[:space:]]*\$?sp,[[:space:]]*-?(0x)?[0-9a-f]+' "$1" \
+          | head -1 | grep -oiE '\-?(0x)?[0-9a-f]+$')
+    [ -z "$raw" ] && { printf '?'; return; }
+    case "$raw" in -*) neg='-'; raw=${raw#-};; esac
+    printf '%s0x%x' "$neg" "$((raw))"
+}
+RF=$(frame_imm "$ROM_RAW"); MF=$(frame_imm "$MINE_RAW")
+FRAME="frame rom=$RF mine=$MF"
+[ "$RF" != "$MF" ] && FRAME="$FRAME <-- FRAME MISMATCH"
+
+echo "rom=$(wc -l < "$ROM_N") mine=$(wc -l < "$MINE_N")  ($OBJ)  [$FRAME]"
 diff <(cat -n "$ROM_N") <(cat -n "$MINE_N") || true

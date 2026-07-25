@@ -39,6 +39,14 @@ of it still FP-scheduler / value-select-branch-likely / register-permutation wal
 main` at the gate AND read each candidate's `.s` before pricing it clean; treat the fresh count as a
 CEILING. (The in-row integration — surface loose fresh stubs directly in the ranked table instead of a
 separate subcommand — remains a golden-gated follow-up, kin to the S264 c-continuation fresh-leaf mode.)
+**S276 reconfirmed the ceiling AGAIN: of the 44 flagged-fresh, the smallest (`func_800453E0.c` cluster)
+are all invisible FP slope-math walls (fp=10-40); the one clean bank was call-glue (`func_8005ACF8`,
+fp=0/bl=0, ~40 `heap3_free`, do-while(i!=N) loop-form crack). The crack-attempt leaf `func_800990D0`
+(base-28 code generator) CARRIED after a full gcc-2.7.2+binutils-2.6 fan-out: exact-count 225/225 +
+frame 0x50 + all bodies clean, terminal preheader magic-hoist scheduling coin (permuter plateau 1455);
+see `docs/wip/func_800990D0.near-match.md` (`--carried-check` flags it). Backup `func_8005B314` deferred
+(294-instr wall-prone debug handler, its own slice). STANDING GUIDANCE: prefer a FRESH non-main pack
+next unless a specific main leaf is pre-vetted `.s`-clean.**
 
 **Test-tools stale-golden refresh (S273, deferred, needs `REGEN_GOLDEN=1`).** `make test-tools` carries
 9 PRE-EXISTING failures — the `pick_target` live-state json/table goldens (`test_pick_target_*_golden`,

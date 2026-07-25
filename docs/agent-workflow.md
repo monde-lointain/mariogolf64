@@ -185,6 +185,26 @@ resume surface when the middle spans context windows.
         `docs/wip/<fn>.near-match.md` + the hazard entry). Do NOT expect a fresh-pack tail to crack
         at the S232 3/3 rate: S232's tail was `global.c` walls; a fan-out's job is to SORT the tail
         into {crack, terminal-verdict}, not to crack everything.
+      - **The fan-out ALSO sorts a SINGLE hard fn's coupled residuals — crack the sub-residuals, keep
+        the terminal one (S276).** When one function reproduces to a near-match with SEVERAL coupled
+        divergences (a register permutation + a frame-size delta + a scheduling coin), fan out
+        gcc-source subagents from distinct angles (one on the instruction-count deficit, one on the
+        register roles) plus a binutils rule-out. S276 `func_800990D0` (a base-28 code generator)
+        started rom=225/mine=223 + pervasive reg-perm and the fan-out CRACKED the sub-residuals one by
+        one — exact count via an `&rec`-callee-save pointer + a post-`rand` counter move; the register
+        permutation via per-loop pointer splits ([[reuse-one-pointer-across-loops-coloring-trap]]); a
+        frame-size delta via `s32 unused[2]` ([[pure-dead-frame-clean-crack]] extension); the checksum
+        bodies via a mod-inline — leaving ONLY a terminal preheader magic-hoist scheduling coin
+        (loop.c `move_movables` + sched.c LUID, permuter plateau 1455). binutils ruled the KMC
+        assembler out (noreorder active, 0 as-inserted nops). So the fan-out's yield on a hard leaf is
+        the sorted set: {each sub-residual cracked with a cited source lever} + {one file:line-cited
+        terminal coin}, which is a far stronger carry doc than a single "reg-perm wall" verdict — and
+        it repeatedly REFUTES the first-glance "pervasive reg-perm" reading (the exact-count-first
+        discipline, S272, held: only the cross-BB preheader ORDER resisted). Two cmpfn/verdict traps it
+        exposed, both now fixed/noted: cmpfn NORMALIZED the frame immediate so the frame-size delta was
+        invisible (a "reg-perm-only" mis-read caught only by the binutils cross-check; cmpfn now
+        surfaces `[frame rom=.. mine=..]`), and a reused walking-pointer across loops read as an
+        allocno wall when it was a coloring trap.
 
 </workflow_overview>
 

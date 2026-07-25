@@ -1445,6 +1445,28 @@ Three honest caveats:
   4 (#1 sched-select memory; #3 (s32)base lever → commutative memory; #2/#4 DoR grep-BACKLOG-miss #3 +
   8x plateaued-tail → BACKLOG ranker follow-up; #5 grid-reset combo memory). RANKER: **14th recurrence**
   + the DoR carry-block-read miss. Push: local.
+- **Sprint 276** — curated low-risk `main` slice + a PO-requested compiler-source fan-out (PO approved
+  scope=main despite the S274/S275 wall-cluster finding: the DoR `.s`-tell scan reconfirmed the smallest
+  fresh main leaves are invisible FP-scheduler walls). No gate enabler (stubs in already-`c` files).
+  **1 banked / 1 carried** (`func_80059BA0.c` 21→20; `func_80095A10.c` unchanged — carry stayed asm; both
+  partial/NOT md5-candidate). Bank: `func_8005ACF8` (heap-teardown, ~40 `heap3_free`; first-build 2-short =
+  slti-vs-bne loop form → rewrote 5 counted loops as `do{}while(i!=N)`, byte-exact). Carry:
+  `func_800990D0` (20-byte base-28 code generator) — the fan-out target: 3 subagents (2 gcc-2.7.2 worktree
+  + 1 binutils-2.6) reproduced it to EXACT count 225/225 + frame 0x50 + all bodies/clamps/epilogue clean,
+  CRACKING the sub-residuals (r-pointer callee-save + post-`rand` counter for the 2 missing instrs; per-loop
+  digit pointers for the coloring; `s32 unused[2]` dead-frame; checksum-mod inline) and leaving ONLY a
+  terminal preheader magic-hoist scheduling coin (loop.c move_movables + sched.c LUID; permuter plateau
+  1455). binutils ruled the KMC assembler OUT. Backup `func_8005B314` assessed + deferred (294-instr
+  wall-prone debug handler). Seed ~5 (1 call-glue leaf + 1 crack-attempt); banked 0pt (files partial);
+  realized ≈7 (func_8005ACF8 ~2 clean-w/-loop-form-fix; func_800990D0 ~5: +1 carry +1 permuter-escalated),
+  residual +2; value = +1 matched. Rolling-5 (S272-S276): 0+0+2+0+0(pt). Quality **0 stuck-far / 1 permuter
+  (plateau) / 1 carried / 0 re-opened**. Retro applied 4 of 4 (#1 `cmpfn.sh` now surfaces the frame
+  immediate `[frame rom=.. mine=..]` — norm() had masked a frame-size mismatch, near-causing a reg-perm-only
+  mis-verdict; #2 [[reuse-one-pointer-across-loops-coloring-trap]] memory; #3 preheader-sched-coin plateau
+  note in [[permuter-at-exact-count-residual]]; #4 workflow fan-out-sorts-coupled-residuals note +
+  [[pure-dead-frame-clean-crack]] within-larger-residual extension). RANKER: 9 pre-existing pick_target/
+  hazard-anchor golden failures untouched (S216/S274 tracked debt; banking adds live-state drift to the
+  ranker snapshots, deferred to the off-cadence golden fix). Push: local.
 - **Sprint 275** — clean low-FP `main` leaf slice via `--loose-stubs` (PO approved 4 `fp=0/bl=0`
   leaves). No gate enabler (stubs in already-`c` files). **1 SALVAGED bank / 4-for-4 wall cluster.**
   All four committed leaves walled — classes the size+FP sort cannot see and the carried/nested DoR
