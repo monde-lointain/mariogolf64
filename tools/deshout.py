@@ -146,27 +146,52 @@ def fold_text(text, counter=None, gates=None):
     return "".join(out)
 
 
-def classify_bold(text):
-    """Pass B triage. Template labels and short line-start lead-ins are structure
-    and stay; bolded paragraphs and mid-sentence bolds are word-level shouting in
-    another costume and go."""
-    labels = {"Rule.", "Rule:", "Trigger.", "Trigger:", "Procedure.", "Procedure:",
-              "Provenance.", "Caveats.", "Sub-cases."}
+# The hazard-entry template labels, with or without trailing punctuation: the doc's
+# own header paragraph writes them bare ("**Rule** (the invariant), **Trigger** ...").
+TEMPLATE_LABELS = {"Rule", "Trigger", "Procedure", "Provenance", "Caveats",
+                   "Sub-cases", "Sub-cases / variants"}
+
+
+def classify_bold(text, detail=None):
+    """Pass B triage. Template labels, index group headers and short line-start
+    lead-ins are structure and stay; bolded paragraphs and mid-sentence word
+    emphasis are shouting in another costume.
+
+    Precision matters more than recall here, because the output drives an edit.
+    A first cut keyed only on punctuated labels put `**Rule**` and the playbook
+    index's bolded family headers in the unbold buckets; auto-applying that would
+    have flattened the template and the index. Anything not confidently classified
+    lands in `review` and is left alone."""
     counts = collections.Counter()
+    in_index = False
     for line in text.split("\n"):
-        for m in re.finditer(r"\*\*(.+?)\*\*", line):
-            span, at_start = m.group(1), not line[: m.start()].strip("-*  ")
+        if line.startswith("## "):
+            in_index = line.strip() == "## Playbook index"
+        # `[^*]` rather than `.` so a span cannot run across an adjacent `**`
+        # pair; the greedy form matched the prose BETWEEN two bolds and reported
+        # it as a bolded paragraph.
+        for m in re.finditer(r"\*\*([^*]+)\*\*", line):
+            span = m.group(1)
+            # A numbered step (`1. **Resolve** ...`) is at the start of its item,
+            # not mid-sentence: the execution loop names its four steps that way.
+            at_start = not re.sub(r"^[\s\-*>]*(?:\d+\.)?[\s]*", "", line[: m.start()])
             words = len(span.split())
-            if span in labels:
-                counts["keep: template label"] += 1
+            bare = span.rstrip(".:")
+            if bare in TEMPLATE_LABELS:
+                key = "keep: template label"
+            elif in_index and at_start:
+                key = "keep: index group header"
             elif at_start and span.rstrip().endswith(".") and words <= 12:
-                counts["keep: sub-case lead-in"] += 1
+                key = "keep: sub-case lead-in"
             elif words > 20 or re.search(r"[.!?]\s+\S", span):
-                counts["unbold: bolded paragraph"] += 1
+                key = "unbold: bolded paragraph"
             elif not at_start and words < 4:
-                counts["unbold: mid-sentence bold"] += 1
+                key = "unbold: mid-sentence bold"
             else:
-                counts["review: other"] += 1
+                key = "review: other"
+            counts[key] += 1
+            if detail is not None:
+                detail.setdefault(key, []).append(span)
     return counts
 
 
