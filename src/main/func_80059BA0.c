@@ -77,7 +77,102 @@ void func_8005D9A0(void);
  * See docs/wip/func_80059BA0.near-match.md. */
 INCLUDE_ASM("asm/nonmatchings/main/func_80059BA0", func_80059BA0);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80059BA0", func_80059BC0);
+/* fdlibm single-precision acos. It reduces to the same rational approximation
+ * asin(x) = x + x*x^2*R(x^2), R = P/Q, that fdlibm's asinf uses, which is why
+ * the PS0-PS5 / QS1-QS4 coefficients below are asin's. Every coefficient is a
+ * source literal, since this compiler materializes an SFmode constant inline
+ * with lui/ori/mtc1 rather than from a rodata pool. Two constants arrive
+ * pre-folded: pi + 2*pio2_lo = 3.14159274f (the acos(-1) return) and pio2_hi +
+ * pio2_lo = 1.57079637f (the |x| < 2^-57 return).
+ *
+ * This variant returns 0.0f for |x| > 1 where stock fdlibm returns the NaN
+ * (x-x)/(x-x); the two 0.0f returns cross-jump into one block.
+ *
+ * sqrtf() is GCC's BUILT_IN_FSQRT, so the TU carries the -ffast-math override
+ * in mk/main.mk that drops the NaN guard around the bare sqrt.s. */
+#define PIO2_HI 1.57079625f /* 0x3FC90FDA */
+#define PIO2_LO 7.54978942e-08f
+/* 0x40490FDA, truncated down; pio2_lo carries the rest */
+#define PI 3.1415925f
+#define PS0 0.166666672f
+#define PS1 -0.325565815f
+#define PS2 0.201212525f
+#define PS3 -0.0400555357f
+#define PS4 0.000791535014f
+#define PS5 3.47933092e-05f
+#define QS1 -2.40339494f
+#define QS2 2.02094579f
+#define QS3 -0.68828398f
+#define QS4 0.077038154f
+
+extern f32 sqrtf(f32);
+
+f32 acosf(f32 x) {
+  f32 z, p, q, r, w, s, c, df;
+  s32 hx, ix, idf;
+
+  do {
+    union {
+      f32 f;
+      s32 i;
+    } gf_u;
+    gf_u.f = x;
+    hx = gf_u.i;
+  } while (0);
+  ix = hx & 0x7FFFFFFF;
+  if (ix == 0x3F800000) { /* |x| == 1 */
+    if (hx > 0) {
+      return 0.0f; /* acos(1) = 0 */
+    }
+    return 3.14159274f; /* acos(-1) = pi */
+  } else if (ix > 0x3F800000) {
+    return 0.0f; /* |x| > 1 */
+  }
+  if (ix < 0x3F000000) { /* |x| < 0.5 */
+    if (ix <= 0x23000000) {
+      return 1.57079637f; /* |x| < 2^-57 */
+    }
+    z = x * x;
+    p = z * (PS0 + z * (PS1 + z * (PS2 + z * (PS3 + z * (PS4 + z * PS5)))));
+    q = 1.0f + z * (QS1 + z * (QS2 + z * (QS3 + z * QS4)));
+    r = p / q;
+    return PIO2_HI - (x - (PIO2_LO - x * r));
+  } else if (hx < 0) { /* x < -0.5 */
+    z = (1.0f + x) * 0.5f;
+    p = z * (PS0 + z * (PS1 + z * (PS2 + z * (PS3 + z * (PS4 + z * PS5)))));
+    q = 1.0f + z * (QS1 + z * (QS2 + z * (QS3 + z * QS4)));
+    s = sqrtf(z);
+    r = p / q;
+    w = r * s - PIO2_LO;
+    return PI - 2.0f * (s + w);
+  } else { /* x > 0.5 */
+    z = (1.0f - x) * 0.5f;
+    s = sqrtf(z);
+    df = s;
+    do {
+      union {
+        f32 f;
+        s32 i;
+      } gf_u;
+      gf_u.f = df;
+      idf = gf_u.i;
+    } while (0);
+    do {
+      union {
+        f32 f;
+        s32 i;
+      } gf_u;
+      gf_u.i = idf & 0xFFFFF000;
+      df = gf_u.f;
+    } while (0);
+    c = (z - df * df) / (s + df);
+    p = z * (PS0 + z * (PS1 + z * (PS2 + z * (PS3 + z * (PS4 + z * PS5)))));
+    q = 1.0f + z * (QS1 + z * (QS2 + z * (QS3 + z * QS4)));
+    r = p / q;
+    w = r * s + c;
+    return 2.0f * (df + w);
+  }
+}
 
 f32 atanf(f32);
 f32 func_80059BA0(f32); /* fabsf */

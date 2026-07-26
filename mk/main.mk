@@ -35,3 +35,10 @@ $(BUILD_DIR)/$(SRC_DIR)/main/func_80080220.o: C_PROFILE_CFLAGS := $(MAIN_CFLAGS)
 # banked body in this TU (the with/without-flag .s are byte-identical bar the
 # banner comment), so the flag is fast-math-invariant here.
 $(BUILD_DIR)/$(SRC_DIR)/main/func_800453E0.o: C_PROFILE_CFLAGS := $(MAIN_CFLAGS) -ffast-math
+
+# func_80059BA0.c is the game's embedded fdlibm (fabsf/atanf/atan2f/acosf).
+# acosf takes sqrtf() of its half-angle argument and the ROM has the bare
+# `sqrt.s` inline, so the whole TU compiles -ffast-math. Same BUILT_IN_FSQRT
+# guard-drop as above; the already banked FP siblings (atanf, atan2f) are
+# fast-math-invariant and stay matched under the flag.
+$(BUILD_DIR)/$(SRC_DIR)/main/func_80059BA0.o: C_PROFILE_CFLAGS := $(MAIN_CFLAGS) -ffast-math
