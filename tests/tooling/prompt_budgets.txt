@@ -12,7 +12,12 @@ AGENTS.md 2048
 docs/agent-workflow.md 118784
 docs/hazards.md 684032
 docs/coding-style.md 18432
-docs/prompt-style.md 8192
+# Raised 8192 -> 16384 in S283 Phase 3, deliberately. The style guide gained four
+# sections it had been silent on (verification calibration, subagent control,
+# effort, narration) plus the harness deltas. This is the guide the rest of the
+# surfaces conform to, so growth here buys shrinkage there; it is the one budget
+# that should be argued up rather than defended down.
+docs/prompt-style.md 16384
 .claude/commands/sprint-plan.md 2048
 .claude/commands/sprint-review.md 2048
 .agents/skills/mg64-decomp-loop/SKILL.md 2048

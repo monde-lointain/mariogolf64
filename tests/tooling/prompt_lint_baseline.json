@@ -35,7 +35,7 @@
     "provenance": 0
   },
   "AGENTS.md": {
-    "bytes": 1506,
+    "bytes": 1484,
     "caps": 0,
     "lines": 24,
     "max_nesting": 1,
@@ -70,9 +70,9 @@
     "provenance": 75
   },
   "docs/prompt-style.md": {
-    "bytes": 6965,
+    "bytes": 13863,
     "caps": 0,
-    "lines": 125,
+    "lines": 231,
     "max_nesting": 1,
     "provenance": 0
   }
