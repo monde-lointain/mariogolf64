@@ -54,6 +54,13 @@ typedef struct {
 extern s32 D_800BB020;
 extern s32 D_801B60A0;
 
+/* Two adjacent literal-pool doubles, both 1.57079632679489656 (pi/2), one per
+ * using function. They stay extern refs into the shared main rodata blob rather
+ * than source literals: spelling them out would emit a fresh pool entry into
+ * this TU and force a rodata carve the still-asm siblings share. */
+extern f64 D_800D1EC8;
+extern f64 D_800D1ED0;
+
 extern s32 func_80056494(s32 arg0, s32 arg1);
 extern u8* get_character_state(s32 id);
 extern s32 flag_is_set(s32 flag);
@@ -65,6 +72,8 @@ extern void func_8005483C(s32 player, s32 arg1, Vec3f* out);
 extern void play_sound_effect(s32 sfx, s32 arg1, s32 arg2);
 extern s32 get_interpolated_terrain_height_wrapper(s32 x, s32 z);
 extern u32 calculate_hypotenuse_safe(s32 x, s32 y);
+extern f32 func_80059FAC(f32 dz, f32 dx);
+extern void func_80078FA8(s32 player, s32 arg1, f32 angle);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80095A10", func_80095A10);
 
@@ -121,7 +130,66 @@ INCLUDE_ASM("asm/nonmatchings/main/func_80095A10", func_800967F4);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80095A10", func_80096C04);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80095A10", func_80096F44);
+/* The overhead-follow variant of the same shot-view builder: the eye sits level
+ * with the ball (no height offset) and, once the shot is well under way in mode
+ * 15, the camera hands the horizontal aim it has drifted to back to the player
+ * heading, alternating the two call flavours on the frame parity. */
+void func_80096F44(s32 player, GolfCamera* cam) {
+  Vec3f pos;
+  f32 unused[16];
+  u8* cs;
+  f32 follow_dist;
+  f32 ground;
+  f32 aim;
+  f32 dx;
+  f32 dz;
+
+  cs = get_character_state(player);
+  follow_dist = func_80095A10(61440.0f, 30720.0f, D_800C73A0 * 0.0125f);
+
+  func_8005483C(player, 1, &pos);
+  ground = (get_interpolated_terrain_height_wrapper((s32)(pos.x * 1024.0f),
+                                                    (s32)(pos.z * 1024.0f)) -
+            0x2400) *
+           (1.0f / 1024.0f);
+  if (ground < pos.y) {
+    pos.y = ground;
+  }
+
+  cam->at.x = pos.x;
+  cam->at.y = pos.y;
+  cam->at.z = pos.z;
+  cam->eye.x = pos.x + cosf(-*(f32*)(cs + 0x48) - 1.57079637f) * follow_dist *
+                           (1.0f / 1024.0f);
+  cam->eye.y = pos.y;
+  cam->eye.z = pos.z + sinf(-*(f32*)(cs + 0x48) - 1.57079637f) * follow_dist *
+                           (1.0f / 1024.0f);
+  func_8009676C(cam);
+  func_80095A68(cam, &cam->at, 0.1f, 3);
+
+  if (D_800E4C54 == 15 && D_800C73A0 >= 44) {
+    /* Both deltas are computed before the test, not short-circuited inside it:
+     * the ROM loads all four coordinates up front and lets the z subtraction
+     * fill the first branch's delay slot. */
+    dx = cam->at.x - cam->eye.x;
+    dz = cam->at.z - cam->eye.z;
+    if ((s32)dx != 0 || (s32)dz != 0) {
+      aim = func_80059FAC(dz, dx);
+    } else {
+      aim = 0.0f;
+    }
+    if ((D_800C73A0 & 1) == 0) {
+      func_80078FA8(player, 3, (f32)(aim + D_800D1EC8));
+    } else {
+      func_80078FA8(player, 4, (f32)(aim - D_800D1ED0));
+    }
+  }
+
+  if (flag_is_set(0x7F) || (D_800BB020 != 30 && D_801B60A0 == 1)) {
+    cam->at.y -= 4.5f;
+    cam->eye.y += 4.5f;
+  }
+}
 
 /* A third shot-view camera builder, sharing the eye/at construction with
  * func_8009806C and func_80098310. What is specific to this one: the eye rides
