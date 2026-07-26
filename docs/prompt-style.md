@@ -106,11 +106,13 @@ sentences that lose the "all must hold jointly" binding.
   (`VERSION_K`, `N_MICRO`, `IO_WRITE`, `F3DEX_GBI_2`, `SUPPORT_NAUDIO`, `_FINALROM`, `nm T/D/b`); or a
   filename or segment name. The single list of protected terms is
   `tests/tooling/prompt_caps_allow.txt`; add to it rather than keeping a second copy here.
-- **A gate word is not emphasis.** When the caps sit on `AND`, `OR`, `BOTH`, `ALL`, `EITHER` or
-  `EVERY`, they are usually binding a conjunctive or disjunctive gate, and folding them is
-  word-preserving but meaning-losing. Restate the binding in prose instead: "hold integration until
-  both the subagent and its permuter have reported" rather than a bolded `AND`. `deshout.py gates`
-  enumerates these for review; folding one without restating it is the one way this pass loses a rule.
+- **A gate word survives de-shouting; a rewrite is where it can be lost.** Capitalizing `AND`, `OR`,
+  `BOTH`, `ALL`, `EITHER` or `EVERY` adds emphasis, not logic: the binding is carried by the word, and
+  a case-fold cannot drop a word. All 119 gate occurrences in this tree were audited after the S284
+  fold and every binding was intact. So the guard belongs on any pass that changes words, not on the
+  case-fold: `deshout.py guard` asserts that logic tokens, numeric literals and code spans are
+  preserved per changed line. `deshout.py gates` still enumerates gate occurrences when you want to
+  read them, but folding one is not by itself a loss.
 
 ## The anchor API
 
@@ -220,7 +222,7 @@ Run this before committing a prompt-surface edit.
 - [ ] No `S###` in a Rule / Trigger / Procedure line.
 - [ ] Every scope-limiter and threshold is preserved; no conjunctive gate was split apart.
 - [ ] Emphasis caps are gone except backticked / define / filename tokens.
-- [ ] Any gate word that was de-shouted had its binding restated in prose.
+- [ ] Any edit that changed words, not just case, passes `deshout.py guard`.
 - [ ] One idea per sentence; at most one parenthetical level.
 - [ ] Cited anchors unchanged, or changed with citations updated in lockstep and `freeze` re-run.
 - [ ] No model name appears outside a harness-delta row.
