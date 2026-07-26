@@ -34,7 +34,31 @@ typedef struct {
 
 extern CollisionCyl collision_cylinders[];
 
+typedef struct {
+  /* 0x00 */ f32 x;
+  /* 0x04 */ f32 y;
+  /* 0x08 */ f32 z;
+} Vec3f; /* 0x0C */
+
+/* The camera record the shot-view builders fill in: the eye position followed
+ * by the point it looks at. func_80095A68 takes both, so the two vectors are
+ * one record rather than two globals. */
+typedef struct {
+  /* 0x00 */ Vec3f eye;
+  /* 0x0C */ Vec3f at;
+} GolfCamera; /* 0x18 */
+
+extern s32 D_800BB020;
+extern s32 D_801B60A0;
+
 extern s32 func_80056494(s32 arg0, s32 arg1);
+extern u8* get_character_state(s32 id);
+extern s32 flag_is_set(s32 flag);
+extern f32 func_80095A10(f32 near, f32 far, f32 t);
+extern void func_80095A68(GolfCamera* cam, Vec3f* at, f32 arg2, s32 arg3);
+extern void func_8009676C(GolfCamera* cam);
+extern void func_80079358(s32 player, s32 arg1);
+extern void func_8005483C(s32 player, s32 arg1, Vec3f* out);
 extern void play_sound_effect(s32 sfx, s32 arg1, s32 arg2);
 extern s32 get_interpolated_terrain_height_wrapper(s32 x, s32 z);
 extern u32 calculate_hypotenuse_safe(s32 x, s32 y);
@@ -108,7 +132,48 @@ INCLUDE_ASM("asm/nonmatchings/main/func_80095A10", func_80097C18);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80095A10", func_80097E30);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80095A10", func_8009806C);
+void func_8009806C(s32 player, GolfCamera* cam) {
+  Vec3f pos;
+  f32 unused[16];
+  u8* cs;
+  f32 follow_dist;
+  f32 ground;
+
+  cs = get_character_state(player);
+  follow_dist = func_80095A10(76800.0f, 46080.0f, D_800C73A0 * 0.025f);
+
+  if (D_800E4C54 == 12) {
+    if (D_800C73A0 >= 15 && D_800C73A0 <= 51) {
+      func_80079358(player, D_800C73A0 % 3 + 3);
+      func_80079358(player, D_800C73A0 % 3 + 6);
+    }
+  }
+
+  func_8005483C(player, 1, &pos);
+  ground = (get_interpolated_terrain_height_wrapper((s32)(pos.x * 1024.0f),
+                                                    (s32)(pos.z * 1024.0f)) -
+            0x1E00) *
+           (1.0f / 1024.0f);
+  if (ground < pos.y) {
+    pos.y = ground;
+  }
+
+  cam->at.x = pos.x;
+  cam->at.y = pos.y;
+  cam->at.z = pos.z;
+  cam->eye.x = pos.x + cosf(-*(f32*)(cs + 0x48) - 1.57079637f) * follow_dist *
+                           (1.0f / 1024.0f);
+  cam->eye.y = pos.y + 1.5f;
+  cam->eye.z = pos.z + sinf(-*(f32*)(cs + 0x48) - 1.57079637f) * follow_dist *
+                           (1.0f / 1024.0f);
+  func_8009676C(cam);
+  func_80095A68(cam, &cam->at, 0.1f, 3);
+
+  if (flag_is_set(0x7F) || (D_800BB020 != 30 && D_801B60A0 == 1)) {
+    cam->at.y -= 4.5f;
+    cam->eye.y += 3.0f;
+  }
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80095A10", func_80098310);
 
