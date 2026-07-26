@@ -271,9 +271,124 @@ void set_direct_grid_vertex(s32 col, s32 row, GridVertex* src) {
 INCLUDE_ASM("asm/nonmatchings/main/get_tile_attribute",
             get_terrain_vertex_pointer);
 
-INCLUDE_ASM("asm/nonmatchings/main/get_tile_attribute", func_800415C4);
+typedef struct {
+  s8 pad0[2];
+  s16 attr; /* 0x2 */
+  s8 pad4[8];
+  s8 c; /* 0xC */
+  s8 d; /* 0xD */
+  s8 e; /* 0xE */
+  s8 f; /* 0xF */
+} TileEntry;
 
-INCLUDE_ASM("asm/nonmatchings/main/get_tile_attribute", func_80041878);
+typedef struct {
+  TileEntry sub[16];
+} Tile;
+
+extern s32 g_terrain_tile_lod_selector[];
+extern Tile D_80185220[];
+extern u8 D_800BA9B0[][8];
+extern u8 D_800BA9D0[];
+extern u8 D_800BA9B4[];
+
+#define PUT_LOD(tile, k)                             \
+  {                                                  \
+    sel = g_terrain_tile_lod_selector[(tile) * 640]; \
+    if (sel >= 0) {                                  \
+      tb = (u8*)D_80185220 + (sel << 8);             \
+      dst = (GridVertex*)(tb + ((k) << 4));          \
+      *dst = *src;                                   \
+    }                                                \
+  }
+
+s32 set_lod_grid_vertex(s32 col, s32 row, GridVertex* src) {
+  s32 tile;
+  s32 sel;
+  u8* tb;
+  GridVertex* dst;
+
+  if ((col | row) & 1) {
+    if (row < 0x40 && col < 0x20) {
+      tile = (row / 4) * 8 + col / 4;
+      PUT_LOD(tile, D_800BA9B0[row & 3][col & 3]);
+    }
+    if (col & 1) {
+      if ((row & 3) == 0) {
+        s32 rt = row / 4;
+        if (rt > 0) {
+          tile = (rt - 1) * 8 + col / 4;
+          PUT_LOD(tile, D_800BA9D0[col & 3]);
+        }
+      }
+    }
+    if (row & 1) {
+      if ((col & 3) == 0) {
+        s32 ct = col / 4;
+        if (ct > 0) {
+          s32 base = (row / 4) * 8 - 1;
+          tile = base + ct;
+          PUT_LOD(tile, D_800BA9B4[(row & 3) * 8]);
+        }
+      }
+    }
+  } else {
+    set_direct_grid_vertex(col / 2, row / 2, src);
+  }
+}
+
+#undef PUT_LOD
+
+s32 set_lod_tile_attribute(s32 x, s32 z, s32 attr, s32 val) {
+  s32 row;
+  s32 sel;
+  TileEntry* p;
+
+  if ((x | z) & 1) {
+    if ((z < 0x40) & (x < 0x20)) {
+      row = (z / 4) * 8 + x / 4;
+      sel = g_terrain_tile_lod_selector[row * 640];
+      if (sel >= 0) {
+        Tile* t = &D_80185220[sel];
+        p = &t->sub[D_800BA9B0[z & 3][x & 3]];
+        p->attr = attr;
+        p->c = p->d = p->e = val;
+      }
+    }
+    if (x & 1) {
+      if ((z & 3) == 0) {
+        s32 zt = z / 4;
+        if (zt > 0) {
+          row = (zt - 1) * 8 + x / 4;
+          sel = g_terrain_tile_lod_selector[row * 640];
+          if (sel >= 0) {
+            Tile* t = &D_80185220[sel];
+            p = &t->sub[D_800BA9D0[x & 3]];
+            p->attr = attr;
+            p->c = p->d = p->e = val;
+          }
+        }
+      }
+    }
+    if (z & 1) {
+      if ((x & 3) == 0) {
+        s32 xt = x / 4;
+        if (xt > 0) {
+          s32 base = (z / 4) * 8 - 1;
+          row = base + xt;
+          sel = g_terrain_tile_lod_selector[row * 640];
+          if (sel >= 0) {
+            Tile* t = &D_80185220[sel];
+            p = &t->sub[D_800BA9B4[(z & 3) * 8]];
+            p->attr = attr;
+            p->c = p->d = p->e = val;
+          }
+        }
+      }
+    }
+  } else {
+    func_80041464(x / 2, z / 2, attr);
+  }
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/get_tile_attribute", func_80041AA8);
 
