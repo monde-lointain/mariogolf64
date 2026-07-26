@@ -1092,7 +1092,7 @@ When `pick_target.py` flags a hazard (or a match shows its symptom), read the ma
 | classical call result the ROM holds in `$a0` (`move a0,v0` / `move v0,a0` bookends) but build coalesces into `$v0` (shorter); distinct-var/extra-use levers fail | #call-result-a0-vs-v0-single-allocno |
 | pervasive classical BB-layout/regalloc/scheduling miss resists every idiom and the permuter plateaus | #compiler-source-fan-out-escalation-above-the-permuter |
 | source dive proves a regalloc/codegen artifact unreachable from faithful C; need the missing idiom OR a compiler-config/patchlevel confirmation (mine sibling KMC-2.7.2 decomps + a cross-compile probe) | #cross-project-matched-corpus-mining |
-| classical fn byte-exact except a 3-word branch-direction triple (bnez/beqz+delay) on a `cond?t\|K:t` store/print through a reused loaded-var arg | #cse-make-regs-eqv-branch-fold |
+| classical fn byte-exact except a 3-word branch-direction triple (bnez/beqz+delay) on a `cond?t\|K:t` store/print through a reused loaded-var arg | #cse-make_regs_eqv-branch-fold |
 | classical fn byte-exact except a 3-instr reg swap in `if(fabsf(x)<K)` (target `abs.s f2,f0`+const in `f0`; build `abs.s f0,f0` in-place+const in `f2`); permuter plateaus | #abs-coalescing-reg-swap |
 | structural-complete regalloc miss = which value wins an earlier caller-saved reg; before "irreducible" | #loop-weight-and-live-length-regalloc-steering |
 | structural-complete regalloc miss where a call-crossing PARAM/local grabs `$s0` and rotates the loop vars off `s0/s1/s2` (local-alloc pre-empts before global priority); fix = mutate the param IN PLACE (`p=f(p)`) to make it a global qty; diagnose with the `-dg`/`-dl` allocno dumps | #loop-weight-and-live-length-regalloc-steering |

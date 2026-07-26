@@ -12,10 +12,8 @@ reference (union):
 
 === symbol_addrs.txt worklist: unnamed libultra blocks (add-only, gate-applied) ===
 # review before applying; opcode-only match — confirm at the gate. min-insns=5
-spScissor = 0x800326FC; // type:func  (sp/sprite, was func_800326FC, 9i)   # AMBIG:spScissor|spX2Scissor|spXScissor
-__d_to_ll = 0x80081550; // type:func  (libc/ll, was func_80081550, 7i)   # AMBIG:__d_to_ll|__d_to_ull|__f_to_ll|__f_to_ull|__ll_div|__ll_rem|__ll_to_d|__ll_to_f|__ull_div|__ull_rem
 
-# 2 ready to add; 2 unnamed matches below min-insns (5) withheld; 745 overlay candidates excluded (libultra is never in an overlay).
+# 0 ready to add; 0 unnamed matches below min-insns (5) withheld; 745 overlay candidates excluded (libultra is never in an overlay).
 # AMBIG / common-skeleton flags mark short opcode-only matches that are not unique — verify those.
 # Leaf intrinsics under 20i are NOT a coddog blind spot here — this matcher includes them;
 # any still un-named are simply not opcode-unique enough to auto-name (raise --min-insns to trim).

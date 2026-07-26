@@ -63,6 +63,7 @@ The hazard families below group the sections that follow. Each links to its exis
 - [.rodata sibling-yaml pattern](#rodata-sibling-yaml-pattern)
 - [data-rodata-carve](#data-rodata-carve)
 - [decomposed-one-tu rodata alignment split (a counter-case to the 8-point decompose gate)](#decomposed-one-tu-rodata-alignment-split-a-counter-case-to-the-8-point-decompose-gate)
+- [Data-global in a shifted `.NON_MATCHING` carve (S210 `func_8005DE88` blocker)](#data-global-in-a-shifted-non_matching-carve-s210-func_8005de88-blocker)
 
 **Near-verbatim mirror byte-edits**
 - [Near-verbatim mirror (jal-count-mismatch)](#near-verbatim-mirror-jal-count-mismatch)
@@ -100,8 +101,16 @@ The hazard families below group the sections that follow. Each links to its exis
 - [compiler-source fan-out (escalation above the permuter)](#compiler-source-fan-out-escalation-above-the-permuter)
 - [cross-project matched-corpus mining (sibling-decomp byte-exact escalation above the source dive)](#cross-project-matched-corpus-mining)
 - [signed-divide-const v0/v1 quotient-destination](#signed-divide-const-v0v1-quotient-destination)
-- [cse make_regs_eqv branch-fold (reused-var canonical fold on a `?:`-with-flag store)](#cse-make-regs-eqv-branch-fold-reused-var-canonical-fold-on-a--with-flag-store)
+- [cse make_regs_eqv branch-fold (reused-var canonical fold on a `?:`-with-flag store)](#cse-make_regs_eqv-branch-fold-reused-var-canonical-fold-on-a--with-flag-store)
 - [abs-coalescing reg-swap (fabsf in-place vs fresh reg on a const compare)](#abs-coalescing-reg-swap)
+- [dead-frame reload-artifact regalloc-wall](#dead-frame-reload-artifact-regalloc-wall)
+- [multi-register-allocno-permutation (a fixed permutation of N caller-saved regs, TERMINAL)](#multi-register-allocno-permutation-a-fixed-permutation-of-n-caller-saved-regs-terminal)
+- [byte-offset-cast CRACKS the fixed-array-slot base-CSE (S235, refutes the S234 "Carry" verdict)](#byte-offset-cast-cracks-the-fixed-array-slot-base-cse-s235-refutes-the-s234-carry-verdict)
+- [fold associate: which operand of a 3-term sum carries the constant](#fold-associate-which-operand-of-a-3-term-sum-carries-the-constant)
+- [Multi-level bound re-read: array-element form, not a cached pointer (S259)](#multi-level-bound-re-read-array-element-form-not-a-cached-pointer-s259)
+- [Phantom -N in-place addend on a 2D-strength-reduced array ref (S216 `get_tile_attribute`)](#phantom--n-in-place-addend-on-a-2d-strength-reduced-array-ref-s216-get_tile_attribute)
+- [default-return-var must init AFTER the call (caller-saved sentinel frame lever)](#default-return-var-must-init-after-the-call-caller-saved-sentinel-frame-lever)
+- [grid-vertex builder vein (16B Vtx-layout init/average/lerp family)](#grid-vertex-builder-vein-16b-vtx-layout-initaveragelerp-family)
 
 **Classical control-flow & scheduling**
 - [struct-init-loop (dup-store / dual-induction-var)](#struct-init-loop-dup-store--dual-induction-var)
@@ -126,6 +135,14 @@ The hazard families below group the sections that follow. Each links to its exis
 - [switch tight merged-default (shared case-0/default label + case-1 last)](#switch-tight-merged-default)
 - [grid-counter double-loop (non-zero-cell counter idiom)](#grid-counter-double-loop)
 - [base-register-vs-displacement (full base materialized vs %lo-in-displacement; + family-of ranker follow-up + shifted .NON_MATCHING data-carve blocker)](#base-register-vs-displacement-full-symbolbase-materialized-vs-lo-in-displacement)
+- [Tracked ranker follow-up: `family-of:<banked-fn>` (S210)](#tracked-ranker-follow-up-family-ofbanked-fn-s210)
+- [goto loop = loop.c never runs (defeating strength reduction and bound hoisting)](#goto-loop--loopc-never-runs-defeating-strength-reduction-and-bound-hoisting)
+- [Landing an independent store in a `jal` delay slot — source order + defer-to-arg-eval (S212 `func_80058C58`)](#landing-an-independent-store-in-a-jal-delay-slot--source-order--defer-to-arg-eval-s212-func_80058c58)
+- [Temp-var store-order lever — pin an indexed/computed load between neighboring global zero-stores (S223 `func_8006A2C0.c`)](#temp-var-store-order-lever--pin-an-indexedcomputed-load-between-neighboring-global-zero-stores-s223-func_8006a2c0c)
+- [`(u16 & 0x8000)` tail-return test collapses to `srl` (S223 `func_8006C8CC`, NOTE — no fix found)](#u16--0x8000-tail-return-test-collapses-to-srl-s223-func_8006c8cc-note--no-fix-found)
+- [String-classify loop: the redundant char `andi` and the branch-likely handler](#string-classify-loop-the-redundant-char-andi-and-the-branch-likely-handler)
+- [value-select-if-else vs branch-likely (the `p ? field : sentinel` accessor idiom)](#value-select-if-else-vs-branch-likely-the-p--field--sentinel-accessor-idiom)
+- [delay-slot-fill of a null-guard `beqz` (body-first insn safe-on-the-taken-path)](#delay-slot-fill-of-a-null-guard-beqz-body-first-insn-safe-on-the-taken-path)
 
 **libnusys / audio-band specifics**
 - [libmus-bundled-n_audio duplicate (a SUPPORT_NAUDIO libmus archive links its OWN n_audio synth copy)](#libmus-bundled-n_audio-duplicate-a-support_naudio-libmus-archive-links-its-own-n_audio-synth-copy)
@@ -5937,7 +5954,7 @@ tbl[6][0x12]; ...}`), and modelling the accesses as `base->tbl[i][j]` (COMPONENT
 `+0xf4` explicit, `expr.c:4882`; MEM_IN_STRUCT scheduling) fixed **both** siblings byte-exact; the
 `func_8007117C` agent independently found the loop levers (`p[j]` index form -> biv-elimination
 synthesizes `end=start+N`, `loop.c:6165`; `s32`-load for `lb` not `lbu`, `mips.c:1029`). The third
-agent PROVED a fundamental wall (see `#cse-make-regs-eqv-branch-fold`), which is a valid, budget-saving
+agent PROVED a fundamental wall (see `#cse-make_regs_eqv-branch-fold`), which is a valid, budget-saving
 outcome -- carry fast on a proven-impossible, don't grind. Verify each lever with an isolated
 reloc-aware byte-cmp (`objcopy --only-section=.text <fn>.o` vs the ROM at the fn's rom offset), NOT the
 full-make SHA (which is all-or-nothing across the file).
@@ -6274,7 +6291,7 @@ correction above it is flippable-in-isolation but deterministically magic→`$v0
 structurally-settled near-match so the retry starts from ops-100%-match: for `func_8004DC44` the seed is
 **pre-declared base-pointer vars + structured inner `for` + goto outer** (`#top-tested-loop-goto-local-hoist`;
 the base-hoist the S172 seed lacked). Sibling to `#pervasive-regalloc-classical-main`,
-`#cse-make-regs-eqv-branch-fold`, and `#abs-coalescing-reg-swap`. A **dump-verified negative** (proven
+`#cse-make_regs_eqv-branch-fold`, and `#abs-coalescing-reg-swap`. A **dump-verified negative** (proven
 can't-be-source-fixed) is itself a valid, valuable outcome — it converts an open grind into a documented
 carry (`#compiler-source-fan-out-escalation-above-the-permuter`).
 

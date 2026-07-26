@@ -291,15 +291,22 @@ def test_pick_target_json_golden(golden_dir, regen, monkeypatch):
 
 
 def test_pick_target_deep_json_golden(golden_dir, regen, monkeypatch):
-    """Deeper-row companion to the -n 50 golden: pin ALL rows (the backlog is ~108), so the long
-    tail of hazard detectors that only fire on rows 51+ is byte-pinned, not just spot-asserted.
-    Coddog stays off here (base behavior); the coddog path is pinned by the coddog golden below."""
+    """Deeper-row companion to the -n 50 golden: pin ALL rows, so the long tail of hazard
+    detectors that only fire past the shallow cut is byte-pinned, not just spot-asserted.
+    Coddog stays off here (base behavior); the coddog path is pinned by the coddog golden below.
+
+    The guard is "this query is not truncated", not a row-count floor. The original floor
+    (`> 50`, written when the backlog was ~108) fails as the backlog is mined down -- it broke
+    when the pool reached 35, i.e. because the decomp is succeeding."""
     monkeypatch.setenv("CODDOG_MAP", "/nonexistent/coddog_map.tsv")
-    proc = run_tool("pick_target", "--json", "-n", "200")
+    deep_n = 200
+    proc = run_tool("pick_target", "--json", "-n", str(deep_n))
     assert proc.returncode == 0, proc.stderr
     rows = json.loads(proc.stdout)
-    assert isinstance(rows, list) and len(rows) > 50, (
-        "expected the full backlog, deeper than -n 50"
+    assert isinstance(rows, list) and rows, "expected a non-empty candidate list"
+    assert len(rows) < deep_n, (
+        f"-n {deep_n} returned {len(rows)} rows and may be truncated; "
+        "this golden must cover the whole backlog, so raise deep_n"
     )
 
     gpath = golden_dir / "pick_target_deep.json"
@@ -343,18 +350,45 @@ def test_pick_target_coddog_json_golden(golden_dir, regen, monkeypatch):
 
 
 def test_pick_target_ranked_by_descending_score(golden_dir, regen, monkeypatch):
-    """Lock the ranking contract: rows are ordered by `score`, highest first.
+    """Lock the ranking contract: de-ranked tiers sink, and within a tier `score`
+    runs highest-first.
 
     (`score` folds size + bonuses/penalties; the smallest-first intent lives
     inside the score, not in a raw size sort.)
+
+    The sort key is `(phantom, deferred, -score, size)`. Two tiers sink below the
+    clean candidates: a phantom (`maybe-upstream` / `coddog-source-banked`) and,
+    above it, a deferred `game-embedded` coddog-mirror. So `score` is descending
+    *within* a tier, not across the whole table -- asserting a global descending
+    order silently passes only while no de-ranked row reaches the top-N.
     """
+    pt = load_tool("pick_target")
+    phantom_tokens = (
+        pt.HAZARD_MAYBE_UPSTREAM + ":",
+        pt.HAZARD_CODDOG_SOURCE_BANKED + ":",
+    )
+    deferred_token = pt.HAZARD_GAME_EMBEDDED + ":"
+
+    def tier(row):
+        hz = row["hazards"]
+        phantom = 1 if any(tok in hz for tok in phantom_tokens) else 0
+        deferred = 1 if deferred_token in hz else 0
+        return (phantom, deferred)
+
     monkeypatch.setenv("CODDOG_MAP", "/nonexistent/coddog_map.tsv")
     proc = run_tool("pick_target", "--json", "-n", ROWS)
     rows = json.loads(proc.stdout)
-    scores = [r["score"] for r in rows]
-    assert scores == sorted(scores, reverse=True), (
-        "rows must be ranked by descending score"
+
+    tiers = [tier(r) for r in rows]
+    assert tiers == sorted(tiers), (
+        "de-ranked rows must sink: the (phantom, deferred) tier sequence is non-decreasing"
     )
+
+    for t in sorted(set(tiers)):
+        scores = [r["score"] for r in rows if tier(r) == t]
+        assert scores == sorted(scores, reverse=True), (
+            f"rows in tier {t} must be ranked by descending score"
+        )
 
 
 def test_coddog_mirror_repricing(tmp_path, monkeypatch):
@@ -498,46 +532,38 @@ def test_coddog_suppresses_maybe_upstream(tmp_path, monkeypatch):
     S132 EXTENDED the suppression to AUDIO hits: the libnaudio tree is stood up (S129), so an audio
     coddog @>=pct is a bankable identity, not a header-gated advisory. A SUB-threshold coddog hit
     stays advisory, so its guess is retained as a second opinion."""
-    # Baseline, map-free: func_80070FD0 is an un-named candidate carrying the IDF guess.
+    # Baseline, map-free: pick whichever un-named candidate currently carries the IDF guess.
+    # Naming one pins the test to live ranker state -- the original fixture (func_80070FD0)
+    # aged out of the candidate pool as the tree was mined, and the test failed on a KeyError
+    # that said nothing about the suppression rule it guards.
     monkeypatch.setenv("CODDOG_MAP", "/nonexistent/coddog_map.tsv")
-    base = {
-        r["func"]: r
-        for r in json.loads(run_tool("pick_target", "--json", "-n", "400").stdout)
-    }
-    assert "maybe-upstream" in base["func_80070FD0"]["hazards"], (
-        "baseline expects the IDF guess"
-    )
+    base_rows = json.loads(run_tool("pick_target", "--json", "-n", "400").stdout)
+    guessed = [r for r in base_rows if "maybe-upstream" in r["hazards"]]
+    if not guessed:
+        pytest.skip("no candidate currently carries a maybe-upstream IDF guess")
+    subject = guessed[0]["func"]
+
+    def hazards_for(map_line):
+        mapf = tmp_path / "coddog_map.tsv"
+        mapf.write_text(map_line)
+        monkeypatch.setenv("CODDOG_MAP", str(mapf))
+        rows = json.loads(run_tool("pick_target", "--json", "-n", "400").stdout)
+        return {r["func"]: r for r in rows}[subject]["hazards"]
 
     # Definitive non-audio coddog hit -> maybe-upstream suppressed; coddog-mirror stands alone.
-    mapf = tmp_path / "coddog_map.tsv"
-    mapf.write_text("func_80070FD0\t__osFakeMirror\tsrc/io/fake.c\t99.99\n")
-    monkeypatch.setenv("CODDOG_MAP", str(mapf))
-    hit = {
-        r["func"]: r
-        for r in json.loads(run_tool("pick_target", "--json", "-n", "400").stdout)
-    }["func_80070FD0"]
-    assert "coddog-mirror:src/io/fake.c@99.99" in hit["hazards"]
-    assert "maybe-upstream" not in hit["hazards"], hit["hazards"]
+    hit = hazards_for(f"{subject}\t__osFakeMirror\tsrc/io/fake.c\t99.99\n")
+    assert "coddog-mirror:src/io/fake.c@99.99" in hit
+    assert "maybe-upstream" not in hit, hit
 
     # S132: a definitive AUDIO coddog hit now ALSO suppresses the guess (libnaudio is stood up).
-    mapf.write_text("func_80070FD0\t__alFakeAudio\tsrc/audio/fake.c\t99.99\n")
-    monkeypatch.setenv("CODDOG_MAP", str(mapf))
-    aud = {
-        r["func"]: r
-        for r in json.loads(run_tool("pick_target", "--json", "-n", "400").stdout)
-    }["func_80070FD0"]
-    assert "coddog-mirror:src/audio/fake.c@99.99" in aud["hazards"]
-    assert "maybe-upstream" not in aud["hazards"], aud["hazards"]
+    aud = hazards_for(f"{subject}\t__alFakeAudio\tsrc/audio/fake.c\t99.99\n")
+    assert "coddog-mirror:src/audio/fake.c@99.99" in aud
+    assert "maybe-upstream" not in aud, aud
 
     # A SUB-threshold coddog hit (<CODDOG_MIRROR_PCT) is advisory only -> the guess is retained.
-    mapf.write_text("func_80070FD0\t__osWeakMirror\tsrc/io/fake.c\t98.00\n")
-    monkeypatch.setenv("CODDOG_MAP", str(mapf))
-    weak = {
-        r["func"]: r
-        for r in json.loads(run_tool("pick_target", "--json", "-n", "400").stdout)
-    }["func_80070FD0"]
-    assert "coddog-mirror:src/io/fake.c@98.00" in weak["hazards"]
-    assert "maybe-upstream" in weak["hazards"], weak["hazards"]
+    weak = hazards_for(f"{subject}\t__osWeakMirror\tsrc/io/fake.c\t98.00\n")
+    assert "coddog-mirror:src/io/fake.c@98.00" in weak
+    assert "maybe-upstream" in weak, weak
 
 
 def test_caller_evict_flag(tmp_path, monkeypatch):

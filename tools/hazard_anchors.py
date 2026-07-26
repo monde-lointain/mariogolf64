@@ -55,6 +55,13 @@ NON_ANCHOR_TOKENS = frozenset(
 # Files/trees to scan for citations. Prose + tooling + state docs; skips vendored
 # trees, build output, asm, and the venv.
 CITATION_GLOBS = ("*.md", "*.py", "*.txt", "*.yaml", "*.toml")
+# Append-only logs, excluded per docs/prompt-style.md ("their headings are frozen
+# anchors, but their historical entry prose is out of scope"). A digest written when
+# a shorthand was unique is a historical record, not a live pointer: once a sibling
+# section lands, that shorthand reads as ambiguous and the only repair would be
+# rewriting history. SPRINT.md is also gitignored, so scanning it makes the result
+# depend on whether a sprint happens to be open.
+SKIP_FILES = frozenset({"RETRO.md", "BACKLOG.md", "VELOCITY.md", "SPRINT.md"})
 SKIP_DIRS = frozenset(
     {".git", "venv", "build", "asm", "nonmatchings", "assets", "expected",
      "__pycache__", ".mypy_cache", ".pytest_cache"}
@@ -134,6 +141,8 @@ def _scan_files(root):
         for path in root.rglob(glob):
             parts = set(path.relative_to(root).parts)
             if parts & SKIP_DIRS or parts & SKIP_PATH_PARTS:
+                continue
+            if path.name in SKIP_FILES:
                 continue
             yield path
 
