@@ -273,15 +273,15 @@ long`/`volatile unsigned long`.
 
 `tools/libultra_match.py` opcode-matches asm blocks against the libultra archive. An *exact* match
 is the library function: keep its name. A *near* match (the matcher's calibration "different-length"
-bucket, or a conflict row) is a function the game edited from a library routine; name it by **region**:
+bucket, or a conflict row) is a function the game edited from a library routine; name it by region:
 
 - **Inside the libultra code region** (clustered among confirmed libultra functions in the static
   segment, e.g. `guAlignF`@0x800A7780, `guLookAtHilite`@0x800A8380, `guMtxF2L`@0x80067CB4): a `gu*`
-  math routine the game devs hand-tuned in place. **Keep the original libultra name** and finalize it
+  math routine the game devs hand-tuned in place. Keep the original libultra name and finalize it
   under `src/libultra/` like any mirror: it is still semantically the library function.
 - **Outside it, in game code space** (sitting among game TUs, e.g. `vec3f_normalize`@0x80029900,
   which is *not* `guNormalize`, proven by byte-compare in S61): a custom game function that merely
-  resembles a library routine. Name it per the **non-library conventions above** (`lower_case`,
+  resembles a library routine. Name it per the non-library conventions above (`lower_case`,
   descriptive), never the libultra name, and finalize it under its game `src/<seg>.c`.
 
 The discriminator is address locality (does it sit within the libultra cluster?), not the opcode

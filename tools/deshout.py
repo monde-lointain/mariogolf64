@@ -152,6 +152,30 @@ TEMPLATE_LABELS = {"Rule", "Trigger", "Procedure", "Provenance", "Caveats",
                    "Sub-cases", "Sub-cases / variants"}
 
 
+def _classify_one(span, line, start, in_index):
+    """Classify one bold span. Shared by the report and the edit so they can never
+    disagree about what gets stripped."""
+    head = line[:start]
+    numbered = bool(re.match(r"^[\s\-*>]*\d+\.\s*$", head))
+    at_start = not re.sub(r"^[\s\-*>]*(?:\d+\.)?[\s]*", "", head)
+    words = len(span.split())
+    bare = span.rstrip(".:")
+    if bare in TEMPLATE_LABELS:
+        return "keep: template label"
+    if in_index and at_start:
+        return "keep: index group header"
+    if at_start and words <= 14 and (span.rstrip().endswith((".", ":")) or numbered):
+        # A lead-in: a sub-case headline, or a bolded step name inside a Procedure.
+        # Both are structure. The `:` and numbered-item forms were the bulk of what
+        # a first cut dumped into `review`.
+        return "keep: lead-in"
+    if words > 20 or re.search(r"[.!?]\s+\S", span):
+        return "unbold: bolded paragraph"
+    if not at_start and words < 6:
+        return "unbold: mid-sentence emphasis"
+    return "review: other"
+
+
 def classify_bold(text, detail=None):
     """Pass B triage. Template labels, index group headers and short line-start
     lead-ins are structure and stay; bolded paragraphs and mid-sentence word
@@ -168,30 +192,12 @@ def classify_bold(text, detail=None):
         if line.startswith("## "):
             in_index = line.strip() == "## Playbook index"
         # `[^*]` rather than `.` so a span cannot run across an adjacent `**`
-        # pair; the greedy form matched the prose BETWEEN two bolds and reported
-        # it as a bolded paragraph.
+        # pair; the greedy form matched the prose BETWEEN two bolds.
         for m in re.finditer(r"\*\*([^*]+)\*\*", line):
-            span = m.group(1)
-            # A numbered step (`1. **Resolve** ...`) is at the start of its item,
-            # not mid-sentence: the execution loop names its four steps that way.
-            at_start = not re.sub(r"^[\s\-*>]*(?:\d+\.)?[\s]*", "", line[: m.start()])
-            words = len(span.split())
-            bare = span.rstrip(".:")
-            if bare in TEMPLATE_LABELS:
-                key = "keep: template label"
-            elif in_index and at_start:
-                key = "keep: index group header"
-            elif at_start and span.rstrip().endswith(".") and words <= 12:
-                key = "keep: sub-case lead-in"
-            elif words > 20 or re.search(r"[.!?]\s+\S", span):
-                key = "unbold: bolded paragraph"
-            elif not at_start and words < 4:
-                key = "unbold: mid-sentence bold"
-            else:
-                key = "review: other"
+            key = _classify_one(m.group(1), line, m.start(), in_index)
             counts[key] += 1
             if detail is not None:
-                detail.setdefault(key, []).append(span)
+                detail.setdefault(key, []).append(m.group(1))
     return counts
 
 
@@ -308,6 +314,52 @@ def _main(argv):
                 print(f"  {b}", file=sys.stderr)
             return 1
         print(f"OK: logic tokens, numbers and code spans preserved vs {ref}.")
+        return 0
+
+    if cmd == "unbold":
+        # Strip only the spans the classifier is confident are word emphasis.
+        # Anything in `review` is left alone: precision over recall, because the
+        # output drives an edit. The invariant is the analogue of Pass A's --
+        # with every `**` removed, before and after are identical, so no word was
+        # touched and only bold markers changed.
+        total = 0
+        for p in _targets(args):
+            before = p.read_text()
+            # Code spans and fences are off-limits, exactly as for the case-fold.
+            # `**` inside backticks is content, not markup: hazards.md has `2**4`
+            # (exponentiation) and prompt-style.md documents the bold syntax as
+            # `**bold lead-in.**`. Stripping either corrupts the text.
+            skip = protected_regions(before)
+
+            def in_code(pos):
+                return any(a <= pos < b for a, b in skip)
+
+            out, last, in_index = [], 0, False
+            for m in re.finditer(r"\*\*([^*\n]+)\*\*", before):
+                if in_code(m.start()) or in_code(m.end() - 1):
+                    continue
+                ls = before.rfind("\n", 0, m.start()) + 1
+                le = before.find("\n", m.end())
+                line = before[ls: le if le > 0 else None]
+                if line.startswith("## "):
+                    in_index = line.strip() == "## Playbook index"
+                key = _classify_one(m.group(1), line, m.start() - ls, in_index)
+                if not key.startswith("unbold:"):
+                    continue
+                out.append(before[last:m.start()])
+                out.append(m.group(1))
+                last = m.end()
+                total += 1
+            out.append(before[last:])
+            after = "".join(out)
+            if after == before:
+                continue
+            assert before.replace("**", "") == after.replace("**", ""), (
+                f"{pl.rel(p)}: unbold changed more than bold markers; refusing to write"
+            )
+            p.write_text(after)
+            print(f"unbolded {pl.rel(p)}")
+        print(f"{total} span(s) unbolded; invariant strip_bold(before)==strip_bold(after) held.")
         return 0
 
     if cmd == "bold":

@@ -29,8 +29,8 @@ This file names no model. The project runs on more than one harness and the surf
 rule tied to one vendor's model rots on the other and reads as authority it does not have. Where two
 harnesses genuinely differ, say so in the harness deltas at the end.
 
-Separate three things that tend to fuse together: the **rule** (what to do now), the **rationale**
-(why), and the **provenance** (which sprint, `S###`). State the rule first and plainly; put rationale
+Separate three things that tend to fuse together: the rule (what to do now), the rationale
+(why), and the provenance (which sprint, `S###`). State the rule first and plainly; put rationale
 second; quarantine provenance to its own slot. If a section's rule lives only in its title or a
 trailing parenthetical, lift it into a real sentence.
 
@@ -120,7 +120,7 @@ Heading text in `docs/hazards.md` generates GitHub `#anchors` that the rest of t
 grep-keys. A citation resolves when it equals an anchor exactly or is the leading slug of exactly one
 heading.
 
-- Treat the **slug** as the frozen API, not the heading's bytes. `hazard_anchors.py` lowercases before
+- Treat the slug as the frozen API, not the heading's bytes. `hazard_anchors.py` lowercases before
   slugging, so a case-only heading edit is anchor-neutral by construction. Any change to a heading's
   words or punctuation is a deliberate anchor edit: update every citation in lockstep and re-run
   `freeze`.

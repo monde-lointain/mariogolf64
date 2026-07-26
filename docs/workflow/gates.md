@@ -186,7 +186,7 @@ dashboard). Target selection is `tools/pick_target.py`, not a stored roadmap.
   - Per-sprint: every fn in the file inlined (0 stubs), ROM SHA-1 matches, committed.
   - The ROM SHA-1 is green at every commit (un-decompiled parts fill from extracted asm), so at
     review the `make` + SHA-1 paste is a regression guard; the value delta is the matched-count /
-    md5-candidate-files number. **Never commit a non-matching fn.**
+    md5-candidate-files number. Never commit a non-matching fn.
 - **Spike + carry-over.** A function that blocks its file's DoD (stuck-far below 0.97, needs permuter,
   BSS-layout-conflict, subseg-alignment) is a spike: note it, carry its file or cluster to the next
   sprint, and count credit at the function level. Hold the Definition of Done firm; a spike is
@@ -263,7 +263,7 @@ the summary.
     2 or more distinct upstream files decomposes at the file boundary as usual).
     - **Sub-100 coddog hedge.** A `single-file-pack` with a sub-100 coddog score
       (e.g. `@99.99`, the same near-verbatim tell that flags block-reorders) still qualifies for the
-      exemption, but budget a **body-divergence diagnosis pass**: the "banks atomically or is a quick
+      exemption, but budget a body-divergence diagnosis pass: the "banks atomically or is a quick
       spike" assumption can be violated by a per-fn divergence (block-reorder, or a **game-modified
       body** — an extra branch/store the literal upstream lacks) that turns the "quick spike" into a
       partial bank (S121 `nucontrmbmgr.c`: 8/9 banked C, 1 carried as `INCLUDE_ASM`). Hedge the estimate
@@ -275,10 +275,10 @@ the summary.
     - **coddog 99.99 == structure, not bytes; the exemption-guard.** A `coddog-mirror:<f>@99.99`
       can mask a heavily game-customized file where most bodies diverge, not just a block-reorder
       (S123 `nusched.c`: a game scheduler that shares only the nusys skeleton). The verbatim-mirror
-      exemption does not apply when the pack carries a **customization tell**: a `jal` to a non-lib
+      exemption does not apply when the pack carries a customization tell: a `jal` to a non-lib
       `func_<vram>` game callee (a callee that is not `os*`/`nuSc*`/`al*`/lib), or a large
       `jal-count-mismatch` not explained by a known macro/version artifact. Those signal pervasive
-      per-fn divergence -> route to the classical track with the **mixed bank-stock-carry-custom**
+      per-fn divergence -> route to the classical track with the mixed bank-stock-carry-custom
       plan (next bullet), not a seed-only atomic mirror. Verify bodies before trusting a 99.99 row:
       diff the asm against the upstream for the heavy functions, and run the nusys/libultra version
       triage (`docs/hazards.md#upstream-mirror-pattern`) before concluding the divergence is custom.
@@ -297,7 +297,7 @@ the summary.
       above — not a blanket-full-by-lib reset.
     - **Mixed mirror+INCLUDE_ASM partial bank is first-class** (S121 generalized to S123). A
       `coddog-mirror` file can be partially stock: some fns byte-match the upstream, others are
-      game-customized. The right play is **bank-stock-carry-custom** — write the stock fns as C and
+      game-customized. The right play is bank-stock-carry-custom — write the stock fns as C and
       keep the customized fns as `INCLUDE_ASM` in the same `src/<seg>.c` (the ROM stays green; the
       file is partial / not md5-candidate until the customized fns are classically decompiled). Plan
       such a file as a `regime: mixed` increment, not a seed-only mirror: per-file all-or-nothing

@@ -271,7 +271,7 @@ return refd by both cosf and sinf as an anonymous `D_<addr>`): a recover-extern 
 flag misses when the fn is a hidden pack member (see #recover-extern).
 
 **Perf/debug struct version drift (S125).** A vendored header struct that is referenced only by
-carried / `INCLUDE_ASM` fns is **unvalidated** — it was copied from the upstream version verbatim and
+carried / `INCLUDE_ASM` fns is unvalidated — it was copied from the upstream version verbatim and
 never checked against the asm. When the first consumer is finally decompiled, the layout can be a
 different library rev: MG64's `nusys.h` `NUDebTaskPerf` carried the 2.07 `markerTime[10]` field
 (a 1999/05/30 feature) that MG64's pre-1999 rev lacks, so `auTaskCnt` was at 0x59 / `auTaskTime` at
@@ -292,7 +292,7 @@ is a single-immediate SHA-miss the same class as a wrong struct offset.
 (S145).** Generalizes the perf-struct rule to the build-config axis: a vendored header struct whose
 size depends on a `#ifndef _FINALROM` / `#ifdef _DEBUG` block can drift between the ROM's library and
 the in-tree `-D_FINALROM` profile, with no body change. MG64's game/libultra is `-D_FINALROM` (base
-Cflags), but the 3rd-party Software Creations **libmus** library object was built **non-finalrom**, so
+Cflags), but the 3rd-party Software Creations libmus library object was built non-finalrom, so
 `OSScTask` (`sched.h`) carries its `#ifndef _FINALROM` trailing `startTime`+`totalTime` (2× `OSTime` =
 0x10) that the finalrom build drops. `aud_sched.c`'s `__OsSchedDoTask` declares an `OSScTask` on the
 stack, so the 16 B size delta surfaced as a 5-byte SHA-miss. Fix: per-library profile undef in
@@ -390,7 +390,7 @@ falls back to plain `hasm`.
    `.text` size equals the subseg size (`mips-linux-gnu-size -A build/src/libultra/<dir>/<stem>.o`).
 
 **Caveats:**
-- The `.ld` does **not** `ALIGN` between subsegs (only segment-level `ALIGN(__romPos,16)`), so the
+- The `.ld` does not `ALIGN` between subsegs (only segment-level `ALIGN(__romPos,16)`), so the
   pad must live in the object; there is no linker fallback. This is why step 3's KMC padding is
   mandatory, not cosmetic.
 - Per-TU version-match is unproven beyond the S56 reg shims (S57 added 4 cache/TLB primitives, all
@@ -411,18 +411,18 @@ falls back to plain `hasm`.
 
 **Sub-cases / variants:**
 - **Vendored `.s` carrying a non-`.text` section (`.rodata`/`.data`/`.bss`) → vendor `.text` only.**
-  splat auto-links a `hasm` `.o`'s `.data`/`.rodata`/`.bss` at the **end** of each output
+  splat auto-links a `hasm` `.o`'s `.data`/`.rodata`/`.bss` at the end of each output
   section, not in address order. See the generated `mariogolf64.ld`: the
   `build/src/libultra/os/invaldcache.o(.rodata)` / `writebackdcache.o(.rodata)` lines sit at the
   `.rodata` section tail, after the address-ordered C/data-file
   siblings. For a TU whose data section is empty this is a harmless 0-byte line; for a TU with a real
   data section (S84 `setintmask.s`'s `.rdata __osRcpImTable`, a 0x80-byte / 64-`.half` LUT) the bytes
-  would be emitted a **second** time at the wrong offset → every following rodata byte shifts → SHA-1
-  break. **Fix:** copy the `.s` but **strip the data block** (the `.rdata`/`.data` directive through
+  would be emitted a second time at the wrong offset → every following rodata byte shifts → SHA-1
+  break. Fix: copy the `.s` but strip the data block (the `.rdata`/`.data` directive through
   EOF), vendoring only `.text`; keep that data as the existing splat-extracted generic blob
   (`asm/data/<rom>.rodata.s`), renamed to the upstream symbol via a `symbol_addrs.txt` add
   (`__osRcpImTable = 0x800D2200; // size:0x80`). splat then renames `D_<vram>` → the symbol in both
-  the generic blob (which now *defines* it) and every referencer, **including cross-TU ones** (S84:
+  the generic blob (which now *defines* it) and every referencer, including cross-TU ones (S84:
   the exception dispatcher `asm/8AF90.s` also loads `__osRcpImTable`), and the vendored `.text`'s
   `%hi/%lo(<sym>)` resolves to it. It is a `D_<vram>` rename across asm, so it needs a clean rebuild
   (`make clean && make extract && make`; see `#defines-data`). The vendored `.s` keeps its
@@ -496,8 +496,8 @@ falls back to plain `hasm`.
 
 **KMC-as sub-lane (libkmc soft-float / 64-bit math TUs).** libkmc's hand-asm TUs (`mmuldi3.s`
 `__muldi3`; `mcvtld.s` `__fixdfdi`/`__fixunsdfdi`+`__floatdidf`) are not ultralib `LEAF`/`XLEAF` TUs
-and do not assemble under `LIBULTRA_ASFLAGS`. They use **KMC register conventions** (`move dst,zero`
-→ `addu` encoding) and must be assembled with the **KMC assembler** `$(KMC_AS)`, the same toolchain
+and do not assemble under `LIBULTRA_ASFLAGS`. They use KMC register conventions (`move dst,zero`
+→ `addu` encoding) and must be assembled with the KMC assembler `$(KMC_AS)`, the same toolchain
 the in-tree disassembly-reassembly path uses. `mk/libkmc.mk` carries these under a **path-based pattern
 rule** `build/src/libkmc/%.o: src/libkmc/%.s` (separate from the ultralib `src/libultra/%.o` rule,
 which hard-codes the `LIBULTRA_ASFLAGS` profile): `$(KMC_AS) -EB -mips2 -I src/libkmc -o $@.tmp $<;
@@ -516,7 +516,7 @@ KMC-as specifics:
   `li reg,0xffffffff` to a 2-insn `lui+ori`; the ROM uses the 1-insn `addiu reg,$0,-1`
   (`2403ffff`/`2407ffff`). Each extra word shifts the rest of the TU down → SHA-1 break (the
   `.align`/trailing-nop pad absorbs the size so the function boundaries hold, but the bytes diverge).
-  Rewrite each such `li` to the explicit `addiu`, the **only** allowed edit to the vendored libkmc
+  Rewrite each such `li` to the explicit `addiu`, the only allowed edit to the vendored libkmc
   `.s`, touching no real `.text` semantics. Same divergence already applied to the vendored
   `mmuldi3.s` (six `li $9,0xffffffff`); S109 applied two in `mcvtld.s`. Diagnose by `cmp`-ing the
   assembled `.o`'s `.text` against the baserom bytes (Python byte-slice; `dd` is hook-blocked): a
@@ -545,7 +545,7 @@ sub-case above; `pimgr` C member carried, `epirawdma` C member banked same sprin
 pre-flag gated to the active build; the symbolic-pointer-table label-export first listed as an untried
 option, then mis-framed a spike). S107 (`exceptasm` label-export asm-mirror: the symbolic
 `.word <label>` jtbl re-export procedure, 8-fn OS exception/dispatch TU). S109 (`mcvtld.s`
-`__fixunsdfdi`+`__floatdidf`: first documented **KMC-as sub-lane** TU: the libkmc `$(KMC_AS)`
+`__fixunsdfdi`+`__floatdidf`: first documented KMC-as sub-lane TU: the libkmc `$(KMC_AS)`
 explicit-rule path + `.include "mips_as.h"` via `-I src/libkmc` + the `li 0xffffffff`→`addiu` encoding
 edit + the multi-subseg merge-to-one-`hasm`; the `intrinsic-likely:<tu>.s(kmc-as)` flag).
 
@@ -605,7 +605,7 @@ vrams (pimgr's block sat immediately below the prior io file's `piAccessBuf`), s
 the gap arithmetic yields every `symbol_addrs` size:-extern at once, with no per-symbol re-disassembly.
 **Stack-top-equals-named-adjacent-symbol tell.** A thread-stack `static T Stack[N]` passes its
 *top* (`Stack + N`, stacks grow down) as the `osCreateThread` sp arg, so its asm `%hi/%lo` resolves to
-`Stack`'s **end**, not its base. When that end lands exactly on an already-placed symbol from a
+`Stack`'s end, not its base. When that end lands exactly on an already-placed symbol from a
 different TU, the asm shows `%lo(<NamedSymbol>)` (a real name, not a `D_<addr>` auto-label): that named
 symbol's addr is the stack's exact end, so `base = <NamedSymbol> addr - STACK_SIZE` with zero gap
 arithmetic. (S115 `nugfxthread.c` `GfxStack`: sp arg `%lo(PiMesgQ)`=0x800F74A0, `PiMesgQ` placed
@@ -614,7 +614,7 @@ there means the next symbol is itself still un-named — fall back to `base = to
 
 **Unindexed-upstream mirror → no auto refs-unplaced.** A mirror candidate whose `upstream`
 column is `none` (a coddog-match, a de-ranked carry-over, or any source not in the upstream index)
-gets **no** refs-unplaced scan at all; the hazard is computed only for a candidate with an indexed
+gets no refs-unplaced scan at all; the hazard is computed only for a candidate with an indexed
 upstream `.c`. So an inline `extern <type> <name>[];` data dep declared in the upstream body (not a
 header) won't be auto-flagged; recover it manually at the gate from the asm `%hi/%lo` and place it
 add-only before the flip. Nb the *detection* is not the gap: `EXTERN_DATA_DECL_RE` +
@@ -645,7 +645,7 @@ bind, so the mirror link-fails once the body calls it by name.
 call ∩ one `func_<addr>` jal). The gate build-check cannot catch this: the `INCLUDE_ASM` scaffold
 resolves the jal directly, so the missing symbol only bites in the execution middle.
 
-**Procedure:** The callee's vram **is** its jal target. Add `<fn> = 0x<ADDR>; // type:func` to
+**Procedure:** The callee's vram is its jal target. Add `<fn> = 0x<ADDR>; // type:func` to
 `symbol_addrs.txt` (add-only) at the gate, before the flip. Reconcile the full callee list (data
 and functions) against the name files in the same disassemble pass that confirms a recover-extern
 vram (the asm jal list is already in hand).
@@ -655,10 +655,10 @@ vram (the asm jal list is already in hand).
 **Renamed-vs-substituted callee, body-compare before editing.** When the upstream calls
 `fooBar` but the jal target is already named *something else* (`calls-unplaced:fooBar` flagged, yet
 the asm `jal`s a placed symbol with a different name), there are two cases needing opposite
-fixes. **(1) renamed:** same function, decomp gave it a different name, so the mirror is still
+fixes. (1) renamed: same function, decomp gave it a different name, so the mirror is still
 verbatim; just confirm the name and leave the body (no edit; the placed name binds the jal).
 **(2) substituted:** this ROM calls a *genuinely different* function for that slot, so edit the C body
-to call the placed name (a known-edit near-verbatim mirror). **Do not assume (1).** Disassemble the
+to call the placed name (a known-edit near-verbatim mirror). Do not assume (1). Disassemble the
 target and body-compare it against the upstream callee's prebuilt `.o`
 (`mips-linux-gnu-objdump -d ~/development/repos/ultralib/build/J/.../<callee>.o`): stack frame, error
 paths, sqrt/branch handling. A fast first discriminator is the address: a libultra callee lives in
@@ -736,10 +736,10 @@ the gate by disassembling and comparing the jal list against the upstream call l
   line-drops if the SHA-1 doesn't match. (S35: `osStartThread` `9vs7` = three identical
   `__osEnqueueThread(&__osRunQueue, t)` sites merged.) **Do not hand-fold an early-return to force
   the count.** When the upstream has two *identical* tail blocks (an early-return
-  `if (cond) { f(); return X; }` plus the same `f(); return X;` at the end), -O3 **cross-jumps**
-  them into one shared tail itself, which **is** the `jal N-1`. Copy verbatim and let the compiler do
+  `if (cond) { f(); return X; }` plus the same `f(); return X;` at the end), -O3 cross-jumps
+  them into one shared tail itself, which is the `jal N-1`. Copy verbatim and let the compiler do
   it; rewriting to `if (!cond) { body }` changes register allocation and can emit a *different-sized*
-  function. **Wrong-size diagnostic:** if a verbatim/near-verbatim mirror's built function differs
+  function. Wrong-size diagnostic: if a verbatim/near-verbatim mirror's built function differs
   from the baserom in *instruction count* (not just a local field), the cause is regalloc /
   tail-merge, not a logic bug, and every downstream function then shifts and the whole ROM mismatches
   (a far worse symptom than a one-row diff). Restore the verbatim structure before chasing it. (S47:
@@ -766,11 +766,11 @@ the gate by disassembling and comparing the jal list against the upstream call l
   n64sdkmod nusys-2.07 tree); the version is not uniform. The
   concrete recurring delta in the `cont`/rmb family: nusys-2.05 wrapped the function body in an
   `osSetIntMask(OS_IM_NONE)` ... `osSetIntMask(mask)` pair (a `OSIntMask mask;` decl + the two
-  calls), kept through 2.07; the pre-2.05 (2.00/1.x) source omits it. **Tell:** MG64's asm is a
+  calls), kept through 2.07; the pre-2.05 (2.00/1.x) source omits it. Tell: MG64's asm is a
   **leaf** (no `addiu $sp,-N` / `sw $ra`, 0 jals) but the 2.05+ upstream wraps the body in two
   `osSetIntMask` jals → a `jal-count-mismatch:2vs0`-style flag whose surplus is exactly the wrapper.
   **Confirmed clean drop:** stays a mirror — copy the 2.07-sdk file verbatim, drop the 3-line
-  int-mask wrapper (keep the English comments), which **is** the 2.00 leaf code; ROM SHA-1 is the proof.
+  int-mask wrapper (keep the English comments), which is the 2.00 leaf code; ROM SHA-1 is the proof.
   A sibling whose code is version-identical (comments-only diff) copies straight from 2.07-sdk.
   Diagnose the version with the per-revision source set under `~/development/repos/nusys/src/<ver>/`
   (`grep -c osSetIntMask <ver>/nusys/<file>.c`). `pick_target.py` now annotates this case
@@ -780,15 +780,15 @@ the gate by disassembling and comparing the jal list against the upstream call l
 - **nusys per-file version block reorder (no count signal; "no coddog" is the tell).** A per-file
   version divergence need not change the call/instruction count — it can be pure block order. MG64's
   per-file nusys revision can order two top-level blocks differently from every archived rev, and no
-  available source reproduces it. **Nothing count-based fires:** the jal count agrees with the asm and
+  available source reproduces it. Nothing count-based fires: the jal count agrees with the asm and
   the instruction count is identical; the only standing tell is the absence of a `coddog-mirror:`
   match (a reorder breaks coddog's structural fingerprint, so "no coddog" on a jal-flagged libnusys
   target is a divergence signal, not noise — `pick_target.py` now prices a jal-mismatch-without-coddog
-  target one above the mirror floor). **Symptom:** the verbatim cp builds + links clean but
+  target one above the mirror floor). Symptom: the verbatim cp builds + links clean but
   the ROM SHA-1 misses; an in-tree-`.o` vs baserom-asm objdump diff shows the same instruction count,
   same ops, reordered (with cascading regalloc differences). **Procedure:** read the asm's jal/block
   order (which call/block executes first), reconstruct the true source order — a C compiler does not
-  reorder across an early-return-gated side-effecting call, so the asm order **is** the source order —
+  reorder across an early-return-gated side-effecting call, so the asm order is the source order —
   hand-swap the blocks in the closest English rev (2.07), and verify insn-identical (`objdump -d`
   diff of the in-tree `.o` vs `build/asm/<rom>.o`) plus full-make ROM SHA-1. (S119 `nuContGBPakFread`:
   the RAM-enable block — `bzero` / `data[31]=…` / `nuContGBPakWrite` — runs before
@@ -850,9 +850,9 @@ Late-surfacing analogues: jal-count-mismatch S18, wrong-lib-header S40.
 reconstruction adds a float comparison or clamp against a literal (`if (x < -32768.0)`), a **bare
 floating literal is `double`**: KMC GCC promotes the `f32` operand (`cvt.d.s`), compares as double
 (`c.lt.d`), and **loads the double constant from `.rodata`** (`lui at,0; ldc1`). The ROM, built from
-a `float`-literal source, compares **single** (`c.lt.s`) with the constant **inline** (`lui/mtc1`, no
+a `float`-literal source, compares single (`c.lt.s`) with the constant inline (`lui/mtc1`, no
 rodata). Symptom: insn count matches but the compares are `.d`, plus a spurious `.rodata` double the
-mirror would need to carve. **Fix:** suffix every FP literal in a compare/clamp/assignment with `f`
+mirror would need to carve. Fix: suffix every FP literal in a compare/clamp/assignment with `f`
 (`-32768.0f`, `32766.0f`) so it stays single-precision and inline. Provenance: S103 (`guMtxF2L`'s
 Monegi clamp, `if (mf[i][j*2] < -32768.0f) … > 32766.0f`, consts `0xc7000000`/`0x46fffc00`; bare
 doubles first compiled `c.lt.d`+`cvt.d.s`+a rodata pair before the `f` suffix fixed it in one
@@ -885,27 +885,27 @@ missed. Known gap: an *initialized*
 static (`static T x[] = {...};`) carries `=` and is invisible to the regex, so it is not flagged
 (caught at the gate / link if a sub-fn of a decompose pack is later mirrored).
 
-**Procedure:** Fall to the classical loop with the `static` **dropped** in the C body. The linker
+**Procedure:** Fall to the classical loop with the `static` dropped in the C body. The linker
 then resolves to the splat-side global at the correct vram.
 
 **Sub-cases / variants:**
 
 **Uninitialized file-static is a drop-to-extern mirror, not a carve/classical spike.** Be
 precise about what "BSS-layout-conflict" costs. An *uninitialized* file-scope static (`static T x;`,
-no `=`) is **pure `.bss`**: it occupies no ROM bytes (`.bss` is zero-filled at runtime, absent from
+no `=`) is pure `.bss`: it occupies no ROM bytes (`.bss` is zero-filled at runtime, absent from
 the image), so it cannot shift the ROM. The only requirement is that the `.text` `%hi/%lo` relocs
-into it resolve to the right addresses, which a **drop-to-`extern`** delivers: drop each `static T x;`
+into it resolve to the right addresses, which a drop-to-`extern` delivers: drop each `static T x;`
 to a sized `extern T x;` (size `viThreadStack`-style arrays via the same macro so `sizeof`/`STACK_START`
 still compute), then place each at its `main_bss` vram (`x = 0x<vram>; // size:0x<n>`, recovered from
-the fn's `lui/%lo` like any recover-extern). The compiled object then emits **no `.bss`** and the body
+the fn's `lui/%lo` like any recover-extern). The compiled object then emits no `.bss` and the body
 is byte-identical → it banks atomically on the full-make SHA, exactly like an S81 drop-def. This is the
 **S81 `siacs.c` pattern generalized** (drop-to-extern, no carve, no classical seed loop), *not* the
 `rand` carve. The tell is initialized-vs-uninitialized: `FILE_STATIC_RE` only matches the
 uninitialized form (an `=`-bearing static is invisible to it), so a flagged `file-static` is already
-the pure-`.bss` kind. A **func-local** uninitialized `static` (S87 `vimgr` `retrace`) is the same:
+the pure-`.bss` kind. A func-local uninitialized `static` (S87 `vimgr` `retrace`) is the same:
 hoist it to a file-scope `extern` + place it (it would otherwise emit a local `.bss` symbol the linker
-places at the wrong address). Escalate to a `.data` **carve** (the `rand`/S61 playbook) only when a
-static carries a **nonzero** initializer (real `.data` bytes that do shift the image); `={0}` is still
+places at the wrong address). Escalate to a `.data` carve (the `rand`/S61 playbook) only when a
+static carries a nonzero initializer (real `.data` bytes that do shift the image); `={0}` is still
 `.bss`. (S87 `io/vimgr.c`: 6 file-statics + 2 globals + 1 func-local static, all dropped to externs,
 0 carve, first-build SHA match; the carry-over's "heavy `.bss` carve" framing was the false-flag this
 retires.)
@@ -914,9 +914,9 @@ retires.)
 above has two naming sub-cases, set by whether the placed `.bss` symbol is already named: (a)
 **unnamed** (only a splat `D_<vram>`, in neither name file) ⇒ drop to `extern <T> <upstream_name>;`
 and add `<upstream_name> = 0x<vram>; // size:0x<n>` to `symbol_addrs.txt` (S81 `siacs.c`; S141
-lib_memory `audio_heap`). (b) **pre-curated** (the vram already carries a curated data name in
+lib_memory `audio_heap`). (b) pre-curated (the vram already carries a curated data name in
 `ghidra_symbols.txt`) ⇒ drop to `extern <T> <ghidra_name>;` and rename the active-branch body
-references to that name, with **no `symbol_addrs` add** (a same-vram add would dup-clash the existing
+references to that name, with no `symbol_addrs` add (a same-vram add would dup-clash the existing
 ghidra entry, the disjoint-files rule). The rename is the forced verbatim divergence the `.text`
 relocs require: the body's `lui/%lo` must resolve to the placed vram, so the C must spell the symbol
 exactly as splat names it. S142 `aud_samples.c`: `frame_samples{,_min,_max}`/`extra_samples` were
@@ -929,7 +929,7 @@ names a `D_<vram>` that `make extract` re-labels everywhere except `hasm` files 
 vendored asm), which are never re-extracted. If a `hasm` referenced the old `D_<vram>`, naming the
 symbol orphans that reference (`undefined reference to D_<vram>` at link). S117: naming
 `nuContNum`=0x8010C2D0 broke `src/entry/entry.s`, which loads that address as the `_start` initial
-`$sp` (the boot stack top **is** `&nuContNum`, the highest BSS global, so the boot stack grows down through
+`$sp` (the boot stack top is `&nuContNum`, the highest BSS global, so the boot stack grows down through
 the lower BSS and abandons it before `nucontmgr` runs). Fix: a byte-neutral `D_<vram>`->`<name>` edit in
 the `hasm` (same address => identical `%hi/%lo`, ROM SHA-1 unchanged). Anticipate it at the gate: grep
 `src/**/*.s` for the `D_<vram>` of each to-be-named drop-def/recover-extern symbol before the build, so
@@ -937,7 +937,7 @@ the sync is planned, not a mid-build link error. (A [`caller-evict`](#caller-evi
 symbols.)
 
 **The `drop-static-mirror:<n>bss` re-frame tag.** When a `coddog-mirror:<file>@≥99` (non-audio)
-is on the row, a `file-static` is present, and there is **no** carve signal (`rodata-literal` /
+is on the row, a `file-static` is present, and there is no carve signal (`rodata-literal` /
 `data-static` / `rodata-jtbl`), `pick_target.py` appends `drop-static-mirror:<n>bss`: the leading
 verdict that the co-listed `file-static` + `defines-data` + `refs-unplaced` flags are **one
 drop-to-extern enabler** (the pure-`.bss` case above), not the scary 4-flag carve cluster they read as.
@@ -951,7 +951,7 @@ The gate's per-symbol `refs-unplaced` recovery still places it, so the tally und
 (use the union of `drop-static-mirror` + `defines-data` + `refs-unplaced` as the recover set, not the
 `<n>` alone). The cluster
 flags stay (the gate's per-symbol recovery + `seed_points` read them); the tag tells the gate to price
-a **seed-only N-symbol mirror**. A nonzero-initialized global that slips the gate degrades gracefully
+a seed-only N-symbol mirror. A nonzero-initialized global that slips the gate degrades gracefully
 to the carve playbook on the SHA miss, never a silent wrong bank.
 
 **Batch-adding a pack's recovered statics transiently reds the build (data-symbol caller-evict).**
@@ -986,7 +986,7 @@ from `refs-unplaced`, where a merely *referenced* extern is safe to place.)
 
 **Dual-section carve.** A verbatim coddog mirror can need both a `.data` carve (here) and a
 `.rodata` carve ([`.rodata sibling-yaml pattern`](#rodata-sibling-yaml-pattern)) in the same
-increment when the upstream file has file-scope `static` *initialized* arrays **and** a `switch` /
+increment when the upstream file has file-scope `static` *initialized* arrays and a `switch` /
 pooled FP constants. drvrnew.c (the al synth driver) had both: six `static s32 *_PARAMS[]` arrays
 + a `switch(fxType)` jtbl + scale/convert/2³² f64 consts. Size each carve from the `%hi(D_<vram>)`
 address band: a `0x800Cxxxx`-range ref is `.data` (carved out of `main_data` with a 3-way
@@ -1016,7 +1016,7 @@ global is *shared*, referenced by other still-asm subsegs via the splat `D_<vram
 unresolved; bridging them with a `symbol_addrs` entry then creates an absolute-symbol-vs-`.data`
 double-definition. Drop is clean: one splat-side def (the `make extract` rename names the existing
 `.data` dlabel), and every referrer (the mirror's `extern` + all sibling asm) resolves to it. Carve
-only when this file is the **sole referrer** (a file-private initialized array/const with content the
+only when this file is the sole referrer (a file-private initialized array/const with content the
 compiler must emit, like drvrnew.c's `static s32 *_PARAMS[]`). Tell them apart by grepping the `D_<vram>`
 referrers across `asm/` + `src/`: >1 distinct subseg ⇒ shared ⇒ drop. S97 `sl.c` `alGlobals`
 (`D_800C8180`, refd by env @804D0 + fx @815C0 + sl @82160) dropped to the `libaudio.h` extern +
@@ -1037,7 +1037,7 @@ carves. S142 `aud_samples.c`: `only_one_flag` (a `__MusIntSamplesCurrent` local)
 **Shared at a field, and undroppable ⇒ carve + canonical-addend.** Two refinements to the
 S97 share-check. (1) Sweep the whole object range `base..base+size`, not just the base `D_<vram>`: a
 sibling that reads a *field* references `D_<base+N>` (a different label), so a base-only grep misses
-it and wrongly reads "sole-referrer." (2) "Shared ⇒ drop" needs an **"and droppable"** qualifier — a
+it and wrongly reads "sole-referrer." (2) "Shared ⇒ drop" needs an "and droppable" qualifier — a
 shared global whose initializer chains to file-private `static`s cannot be dropped (dropping the def
 orphans the statics → the compiler can dead-strip them → `.text` mismatch), so the **carve is forced
 even though it is shared**. Resolve the sibling's field reference by naming the carved global
@@ -1057,7 +1057,7 @@ base) so the share-status is priced at the gate.
 **Carve extent = the `.o` `.data` section size (16-aligned), not the symbol-content sum.** The
 compiler pads `.data` up to the section's 16-byte alignment, so the carve runs to the next 16 boundary,
 past the last placed symbol. `nucontmgr.c`'s `.data` content is 0x24 (`nuContReadFunc` 0x4 + `funcList`
-0x14 + `nuContCallBack` 0xC) but the `.o` `.data` section is **0x30** (0xC of end padding); carving 0x24
+0x14 + `nuContCallBack` 0xC) but the `.o` `.data` section is 0x30 (0xC of end padding); carving 0x24
 left the next subseg 0xC inside the section, so the link placed the 0x30 section over it and shifted the
 data segment. Always size the carve from `mips-linux-gnu-objdump -h build/.../<file>.o` `.data`, never the
 sum of `symbol_addrs` sizes; the ROM zero-padding at `carve_end..section_end` is the mirror's, owned by the
@@ -1090,7 +1090,7 @@ regression surface, not a quick edit).
 **Procedure:** Classical loop, drop the definition; the linker resolves to the splat-side global.
 
 **Verbatim-body fast path.** When the *only* edit from upstream is dropping the file-scope
-definitions (the function body is otherwise verbatim), this is a known-edit **mirror**, not a true
+definitions (the function body is otherwise verbatim), this is a known-edit mirror, not a true
 classical target: prove it by full-make ROM SHA-1 like any mirror, skip the seed / `decomp_loop` /
 spot-check cycle. The dropped def changes only the `.data`/`.bss` allocation (moved splat-side); the
 `.text` is byte-identical once the externs land at their placed vrams, so the body matches on the
@@ -1106,7 +1106,7 @@ object's `.data` and not in a `.rodata` sibling. `pick_target.py` won't flag it 
 invisible to the refs-unplaced extern grep, and the asm names it `D_<vram>` which resolves from
 `main_data`, so no link break); it surfaces only as a full-make SHA miss whose `.o`-diff shows a
 nonzero `.data` section in the compiled object (the compiler emitted a *second* copy that shifts the
-data segment). Fix exactly as for a file-scope global: drop the `static` def → a **sized** `extern`
+data segment). Fix exactly as for a file-scope global: drop the `static` def → a sized `extern`
 (`extern u8 nintendo[48];`, sized so `sizeof`/`ARRLEN` still compiles; an incomplete `[]` errors
 on `sizeof applied to an incomplete type`), then add the symbol add-only at its real vram so
 `make extract` renames the `main_data` dlabel. No `.data` is emitted, no segment shift, and the
@@ -1119,7 +1119,7 @@ a `.NON_MATCHING`-suffixed map address is an alias, not the storage. (S45 `osGbp
 of the S45 array case: the mirror re-emits its initialized bytes into the data segment, shifting it
 → full-make SHA miss. Unlike the array case it *is* visible in asm (the fn loads it via
 `lwc1/ldc1 %lo(D_<addr>)`), so `pick_target.py` pre-flags it `data-static:0x<vram>`. Crucially this
-is **distinct from `rodata-literal`**: pick_target classifies the `%lo(D_)` address by segment
+is distinct from `rodata-literal`: pick_target classifies the `%lo(D_)` address by segment
 (vram − the fn's code-segment delta → ROM offset; in a `rodata` subseg ⇒ rodata-literal sibling
 split, else ⇒ `data-static`). The two enablers differ: `data-static` is the S49 fast path here (drop
 the fn-local `static` → a file-scope `extern <type> <name>;` + add the symbol add-only at its real
@@ -1129,21 +1129,21 @@ the same gu data band holds `guRotateF`@0x800C81D0, `guAlignF`@0x800C81A0.)
 
 **The drop-extern *hoist* vs. the verbatim-static *carve*.** Be precise about scope: this is a
 **function-local** `static` (declared inside the fn, persists across calls, *internal linkage*), not
-a file-scope `static`. Compiled verbatim, the compiler emits it as a **local** symbol (`dtor.2` in the
-`.o`'s symbol table), so two siblings' identically-named function-local statics **never collide**:
+a file-scope `static`. Compiled verbatim, the compiler emits it as a local symbol (`dtor.2` in the
+`.o`'s symbol table), so two siblings' identically-named function-local statics never collide:
 they are distinct locals in distinct objects (`guRotateF`'s `dtor`@0x800C81D0 and `guRotateRPYF`'s
 `dtor`@0x800C81E0 coexist fine as verbatim locals). The S52 drop-extern fast path *hoists* the
 function-local static up into a file-scope `extern <type> <name>;` (giving it external linkage); that
-is what introduces a name, and a second sibling can't hoist to the **same** file-scope name
+is what introduces a name, and a second sibling can't hoist to the same file-scope name
 (`guRotateRPYF` already hoisted `dtor` + claimed its `symbol_addrs` entry, so a second `extern float
 dtor;` is a duplicate symbol / binds the wrong vram). So two ways place a function-local FP static:
 **(a) hoist** under a *unique* file-scope name (curated `<fn>_dtor`, or the raw `D_<vram>` dlabel) +
-symbol add, no `.data` emitted; **(b) keep it verbatim** (preserving the function-local semantics)
+symbol add, no `.data` emitted; (b) keep it verbatim (preserving the function-local semantics)
 and carve a `.data` subseg for the file: `[<rom>, .data, lib<...>/<file>]` + a continuation
 `[<rom+ext>, data]`. The carve is the more verbatim option (no source edit, no hoist). **If you carve,
 size the extent from the compiled object, not the static's byte size:**
 `mips-linux-gnu-objdump -s -j .data build/.../<file>.o` (the section is alignment-padded: `dtor` is
-4B but `rotate.o(.data)` is **16B** = 4B + 12B pad), cross-checked against the baserom bytes to the
+4B but `rotate.o(.data)` is 16B = 4B + 12B pad), cross-checked against the baserom bytes to the
 next data symbol. A short carve double-counts (the compiled `.data` injects its full padded extent
 while the un-carved tail still emits the original bytes) → the ROM grows and the whole data segment
 reflows (S61: a 4B carve grew the ROM +16B; the misleading `cmp` first-diff was at 0x1008, an
@@ -1155,7 +1155,7 @@ entirely unreferenced: file-scope / function-local `static`s that no function re
 2.7.2 still emits (an explicitly-`=0`-initialized static lands in `.data` not `.bss`, and an unused
 initialized static is not elided at `-O3`). Then there is no `%hi/%lo(D_<vram>)` in any body: the
 S61/S96 "size from the address band" step has nothing to read, and `pick_target`'s `defines-data`
-flag names the symbols but can't bind a vram. **Locate it by byte-search:**
+flag names the symbols but can't bind a vram. Locate it by byte-search:
 `mips-linux-gnu-objdump -s -j .data build/.../<file>.o` for the compiled bytes, then search the
 baserom for that exact pattern (`xxd baserom.z64 | grep '<hex words>'`) → the ROM offset is the carve
 start. The link order does not place it immediately after the previous mirror's carve; other files'
@@ -1170,21 +1170,21 @@ the gate to byte-search rather than asm-recover.
 carved from the C compile cannot land at the `/sprint-plan` gate: the gate validates the *stub*
 state, where an `INCLUDE_ASM` `.text`-only object emits no `.data`, so the sibling carves an empty
 range and shifts every following data byte → the gate green-ROM SHA check fails. The gate flips
-**text only**; add the ld-section split during execution, **together with the verbatim body** (which
+**text only**; add the ld-section split during execution, together with the verbatim body (which
 makes the `.o` emit the real `.data`). The stub's `%lo(D_<vram>)` resolves from the existing generic
 `data` subseg in the meantime. (S68 `gu/align.c`: deferred the `[0xA35A0, .data, libultra/gu/align]`
 carve from gate to the body step; the verbatim twin of S61's carve, first-build match.)
 
 **Symbol-add vs. section-carve: the gate-safe drop-def sub-case.** The S68 "execution, never
-the gate" rule is specifically about an **ld-section sibling carve** (a `[<rom>, .data, …]` /
+the gate" rule is specifically about an ld-section sibling carve (a `[<rom>, .data, …]` /
 `.bss` / `.rodata` yaml subseg), which carves an empty range against the `.text`-only stub and shifts
-every following data byte → gate SHA break. It does **not** cover a plain `symbol_addrs.txt` data
+every following data byte → gate SHA break. It does not cover a plain `symbol_addrs.txt` data
 entry that merely **names an existing auto `D_<vram>` label** (the global already lives in a generic
 `data`/`bss` subseg; the add only renames the dlabel, emits no new section). That symbol-add is
 **SHA-neutral at the stub stage** and so may be performed at the plan gate alongside the function
 symbol, saving the mid-execution second `make extract` the recover-extern otherwise forces. The tell
 that a drop-def is the gate-safe symbol-add kind (not a carve): the dropped globals' vrams are already
-visible as `%lo(D_<vram>)` in the **scaffold `.s`** (so they resolve from an existing region, no new
+visible as `%lo(D_<vram>)` in the scaffold `.s` (so they resolve from an existing region, no new
 section needed). When in doubt, the gate `make extract && make` green-ROM SHA is the proof: naming a
 pre-existing `D_` label is inert, a section carve is not. (S81 `io/siacs.c`: the 3 SI globals
 `__osSiAccessQueueEnabled`@0x800C8210 / `__osSiAccessQueue`@0x801EFFB0 / `siAccessBuf`@0x800FAA00 were
@@ -1192,7 +1192,7 @@ all visible as `D_<vram>` in the scaffold asm; placing them at the gate would ha
 extract. Contrast the gu carves S61/S68/S73, which inject real `.data` and must stay at execution.)
 
 **Validate a `D_<vram>` rename with a clean rebuild, not an incremental `make`.** The symbol-add
-is SHA-neutral, but `make` does **not** track the INCLUDE_ASM `.s` dependency of the stub object. After
+is SHA-neutral, but `make` does not track the INCLUDE_ASM `.s` dependency of the stub object. After
 the gate `make extract` renames `D_<vram>`→`<name>` in the scaffold `.s`, an *incremental* `make` does
 not recompile the stub `.o` (its `.c` is unchanged) → the stale object still references the now-removed
 `D_<vram>` auto-symbol → `undefined reference to D_<vram>` link failure, masked by a stale-`.z64`
@@ -1203,15 +1203,15 @@ rebuild. (S82 `io/controller.c`: gate-placing `__osEepromTimerMsg`@0x8012F4DC et
 incremental link with `undefined reference to D_8012F4DC`; `make clean` produced the green ROM.)
 
 **Source-side detector: the coddog-band backstop.** The S52 `data-static`/`rodata-literal`
-pre-flag is **asm-side** (it classifies the fn's `lwc1/ldc1 %lo(D_<addr>)`), and it does **not** fire
-on an un-named **coddog** candidate: `gu/position.c` (`func_800A9C60`, a 99.99 coddog mirror) ranked
+pre-flag is asm-side (it classifies the fn's `lwc1/ldc1 %lo(D_<addr>)`), and it does not fire
+on an un-named coddog candidate: `gu/position.c` (`func_800A9C60`, a 99.99 coddog mirror) ranked
 a clean pts-3 with *no* data-static/defines-data flag, hiding its `dtor` carve, even though guPositionF
-loads `%lo(D_800C81B0)`. So `pick_target.py` now also reads the resolved **upstream source**:
+loads `%lo(D_800C81B0)`. So `pick_target.py` now also reads the resolved upstream source:
 `defines_local_static_data()` greps function-body `static <type> <name> = <init>;` and merges the
-names into the `defines-data:<name>` hazard on **both** the named-upstream and the coddog re-scan paths
+names into the `defines-data:<name>` hazard on both the named-upstream and the coddog re-scan paths
 (the S72 coddog trap re-scan ran only `defines_data_globals`, which skips `static` and scans only
 brace-depth 0, doubly blind to a fn-local static). This is the source-side backstop the coddog band
-needed. Sizing is unchanged from S61: a single `static float` → a **16B** `.data` carve (4B + 12B pad).
+needed. Sizing is unchanged from S61: a single `static float` → a 16B `.data` carve (4B + 12B pad).
 (S73 `gu/position.c`: 16B carve `[0xA35B0, .data, libultra/gu/position]`→`[0xA35C0, data]` for
 random's `xseed` remainder; align/rotate are the identical 16B precedents; first-build SHA match.)
 
@@ -1241,7 +1241,7 @@ so a dead-`_DEBUG` include can over-flag, so confirm against the upstream).
 is copyable from upstream: a public companion under an `UPSTREAM_INC_ROOTS` include dir (copy into
 an `-I` dir) or a source-private header found by basename under an `UPSTREAM_SRC_ROOTS` source tree
 (`ultralib/src/**`, copy source-relative next to the mirror, e.g. `xstdio.h`, `guint.h`). A vendorable
-header is a one-time header-vendor *enabler* (pts `needs-copy` +1), **not** a `blk` DoR reject; only
+header is a one-time header-vendor *enabler* (pts `needs-copy` +1), not a `blk` DoR reject; only
 a *bare* (untagged) header sets `blocked` → `blk`: one present in-tree but unreachable (deferred `-I`),
 or absent everywhere (a system header). This closed the recurring "blk that's actually a 1pt cp"
 gate-time re-diagnosis (S49 guint.h, S53 PR-band, S54 sprintf's `xstdio.h`/`string.h`).
@@ -1274,7 +1274,7 @@ statements (`n_aInterleave(ptr++); n_aSaveBuffer(...);`), not a TU. Three rules:
   it no longer false-flags `blk`. Before that the detector scanned only `.h` basenames and missed the
   whole inc set; that masked it as a DoR reject when it was a 1pt cp.
 - **Not a standalone TU.** The build's source discovery is `find $(SRC_DIR) -name '*.c'`, so vendor
-  the local copy with the **`.inc` extension** (not `.c`/`.inc.c`): `find -name '*.c'` then never
+  the local copy with the `.inc` extension (not `.c`/`.inc.c`): `find -name '*.c'` then never
   sweeps it in as a standalone object (it is a few bare statements, `parse error before '++'` if
   compiled alone). Update the host `.c`'s `#include` to the `.inc` name to match. The `.inc` extension
   also keeps clang-tidy's `bugprone-suspicious-include` quiet — a `.c` include trips it. (The `.inc`
@@ -1311,7 +1311,7 @@ types: a resolvable-but-wrong-library include passes the grep and the gate build
 **Procedure:** Fix in the build system, never by adding the type to the libkmc header (that pollutes
 a verbatim libkmc mirror). Vendor the libultra std header verbatim from
 `ultralib/include/compiler/gcc/` (KMC GCC 2.7.2 → the `gcc` variant) to
-`include/libultra/compiler/gcc/`, and **prepend** `-I include/libultra/compiler/gcc` to
+`include/libultra/compiler/gcc/`, and prepend `-I include/libultra/compiler/gcc` to
 `LIBULTRA_CFLAGS` only. Verify per-file with `tools/cc/gcc -M -nostdinc <profile -I set> src/…`: the
 libultra source must resolve to `include/libultra/compiler/gcc/stdlib.h`, the libkmc source still to
 `include/libkmc/stdlib.h`.
@@ -1329,7 +1329,7 @@ same compiler at the wrong level produces a byte mismatch.
   the two `addiu` ops; at `-O2` it moves to the end.
   - **Cordic `double↔long long` cvt helper.** The libkmc math mirrors (`atan.c`, `sin.c`)
     convert `XLONG = (double)expr * MBIT` where the source double can be negative, yet KMC GCC at `-O`
-    emits **`__fixunsdfdi`** (the unsigned `double→u64` helper, @0x800B3C20), never `__fixdfdi`. So a
+    emits `__fixunsdfdi` (the unsigned `double→u64` helper, @0x800B3C20), never `__fixdfdi`. So a
     libkmc cordic C-mirror needs only `__fixunsdfdi` + `__floatdidf` (@0x800B3D40) placed; there is no
     signed-cvt-helper enabler to recover. Confirmed identical in both atan.c and sin.c (verify at the
     gate by reading the subseg's jal list, never by assuming `__fixdfdi` from the C signedness). The
@@ -1360,7 +1360,7 @@ band default).
 
 ## char-signedness (libultra is -fsigned-char)
 
-**Rule:** This ROM's libultra was compiled with **signed `char`** (`-fsigned-char`), a ROM-proven
+**Rule:** This ROM's libultra was compiled with signed `char` (`-fsigned-char`), a ROM-proven
 deviation from ultralib's documented VERSION_J profile (gcc.mk adds `-funsigned-char` for D–J). The
 band default `LIBULTRA_CFLAGS` therefore carries `-fsigned-char`. Most libultra C is
 char-signedness-*ambiguous* (matches under either flag), so this only ever surfaces on a file whose
@@ -1369,7 +1369,7 @@ codegen actually depends on `char` signedness.
 **Symptom (the discriminator):** a verbatim C mirror SHA-misses, and the only diff is byte-load
 signedness: the ROM loads `lb` + `sll/sra` sign-extend (and may emit a phantom empty stack frame),
 while the wrong flag gives `lbu` + `andi 0xff`. The exposing pattern is a `char` lvalue compared
-against a **non-zero** value (e.g. `strchr`'s `*s != ch`); a comparison against literal `0` is
+against a non-zero value (e.g. `strchr`'s `*s != ch`); a comparison against literal `0` is
 signedness-invariant (`strlen`/`memcpy` matched under both: `memcpy` fully, `strlen`'s `lb` is the
 compiler's free choice for a `!= 0` test).
 
@@ -1384,7 +1384,7 @@ compiler's free choice for a `!= 0` test).
    flag flipped and compare the ROM SHA-1: the authoritative test (a clean rebuild under
    `-fsigned-char` reproduced the baserom exactly, proving the global default, not a per-file patch).
 
-**Distinct from** the per-field **cast-divergence** hazard (a 2.0L-vs-J `(type)` widening on one
+**Distinct from** the per-field cast-divergence hazard (a 2.0L-vs-J `(type)` widening on one
 struct field's high word): that is a source/version difference; this is a whole-TU compiler flag.
 
 **Provenance:** S65 (string.c `strchr`/`strlen` exposed it; the per-file override was the initial
@@ -1408,11 +1408,11 @@ steers codegen, and you pick the type by matching the ROM's instruction, not by 
 
 ## assert-strip (bare upstream assert vs ndebug)
 
-**Rule:** This build defines **neither `NDEBUG` nor `_DEBUG`** (only `_FINALROM`). The in-tree
+**Rule:** This build defines neither `NDEBUG` nor `_DEBUG` (only `_FINALROM`). The in-tree
 `assert.h` keys solely off `NDEBUG`: undefined → `assert(EX)` expands to
 `((EX)?(void)0:__assert(...))`, which **emits a branch + `jal __assert`** (plus the `__FILE__` /
 line / stringized-expr args). The ROM's libultra was a release build with asserts stripped, so a
-verbatim mirror of a file whose upstream calls `assert()` **outside** any `#ifdef _DEBUG` compiles in
+verbatim mirror of a file whose upstream calls `assert()` outside any `#ifdef _DEBUG` compiles in
 assert code the ROM does not have → SHA-miss.
 
 **Symptom:** a clean verbatim io/cont/pfs/vi/si mirror SHA-misses (or the isolated `.text` is
@@ -1693,7 +1693,7 @@ whole `.o(.rodata)` extent.** When a partial-banked classical TU (a `src/<seg>.c
 the ROM — e.g. `[jtblA @X][a 0x170 data table @Y][jtblB @Z]`, not the two jtbls adjacent — you cannot
 carve each fn's rodata as its own dot-prefix subseg (splat places a `.c`'s whole `.o(.rodata)` at one
 vram; two subsegs with the same `.c` name double-place it). Instead exploit that GCC emits the whole
-TU's `.o(.rodata)` **grouped per-function in source order** (a fn's own const pool + its jump table,
+TU's `.o(.rodata)` grouped per-function in source order (a fn's own const pool + its jump table,
 before the next fn's), then carve the one `.o(.rodata)` block over its full extent. The trick is making
 each interleaved item TU-owned as the C form that reproduces the ROM's layout and its `.text`:
 - **A compiler jump table** comes for free from writing the `switch` (see #switch-jtbl-dispatch).
@@ -1923,9 +1923,9 @@ exactly one non-coalesced register copy short inside a `/` + `%` pair on the sam
 order of the two statements, not a temp:
 
 - `mins = t / 60;` then `secs = t % 60;` — the `/` expands into `mins`'s pseudo directly and the `%`
-  CSEs the quotient to it. **No copy.**
+  CSEs the quotient to it. No copy.
 - `secs = t % 60;` then `mins = t / 60;` — the `%` expansion creates its own quotient pseudo, and the
-  later `/` CSEs to it, emitting `move mins, quot`. **Copy, matching the ROM.**
+  later `/` CSEs to it, emitting `move mins, quot`. Copy, matching the ROM.
 
 An explicit `quot = t / 60; mins = quot;` does not work (regalloc coalesces the pair away), and neither
 does splitting the dividend into a second variable — only the mod-first order does it. Check this
@@ -2026,7 +2026,7 @@ classify and carry, do not permuter.** A 2-instruction schedule swap where the R
 interlock (`lbu v0; addiu ...,v0` back-to-back, reusing the dying load reg) and your build hoists an
 independent load into the load-shadow (`lbu v0; lh v1,<indep>; addiu v0,...`) — flipping which of
 `v0`/`v1` holds each value and the downstream `mult`/op operand order, everything else byte-identical —
-is a deterministic KMC gcc 2.7.2 sched+regalloc **fixed point**, not a source-reachable near-miss.
+is a deterministic KMC gcc 2.7.2 sched+regalloc fixed point, not a source-reachable near-miss.
 Root cause (source-proven, S185 sched.c fan-out): the load result-latency is 3 (`config/mips/mips.md`
 `define_function_unit "memory"`), so the bottom-up list scheduler (`sched.c` queue-by-latency) pulls the
 independent load ≥3 slots ahead of the `mult`, into the earlier load's shadow; that hoist lengthens the
@@ -2086,8 +2086,8 @@ diff is a register permutation (the same instructions, same order, one value in 
 asm-differ's row-matcher normalizes register numbers, so both the wrong and the right allocation align
 every row and net the same reloc-noise score. S191 `func_80037E50` scored an identical 3320 / 0.1487
 (39/39 rows, empty `top_mismatches`) with `quality` in `$a0` (wrong) and in `$v1` (byte-exact) — the
-decomp_loop score could not distinguish them. **Recipe:** for an extern-ref fn whose residual is a
-register choice, iterate on the **in-tree `.o` objdump register operands** (ignore the `lui`/`addiu`/
+decomp_loop score could not distinguish them. Recipe: for an extern-ref fn whose residual is a
+register choice, iterate on the in-tree `.o` objdump register operands (ignore the `lui`/`addiu`/
 `jal` reloc-immediate slots, which read `0x0` unresolved), not the decomp_loop score; a nudge that
 flips the score by zero can still be the one that lands the match. Pair this with the
 `#loop-weight-and-live-length-regalloc-steering` `.greg`-dump method to see which hard reg the target
@@ -2099,7 +2099,7 @@ var needs free.
 a fn cannot be permuted.** A fn that stores to several distinct auto-`D_` `.bss` symbols (each a
 separate HI/LO16 reloc, more so with the [#offset-0-symbol-re-materialization](#offset-0-symbol-re-materialization-fixed-global-field-rmw)
 form) accumulates so much reloc/addend divergence in the isolated `build/asm/<seg>.o` reference that
-`decomp_loop.py` reports a near-zero percent (S219 `func_800425C8`: **0.04%** isolated vs a clean
+`decomp_loop.py` reports a near-zero percent (S219 `func_800425C8`: 0.04% isolated vs a clean
 **~1615 in-tree** near-match — the 6 `D_8018D25x` bbox-output stores). The isolated harness is
 useless here in both directions: the score is not advisory, it is garbage, so `run-permuter.sh` (which
 optimizes against that reference) will chase noise. **Do not seed the permuter for a bss-multi-symbol
@@ -2142,7 +2142,7 @@ array source form emits one base symbol with instruction-immediate reloc addends
 For MIPS these resolve identically once linked — same page `%hi`, `%lo(base+4) == %lo(sibling)` — so
 the bytes are equal, but asm-differ compares the `(symbol, addend)` reloc tokens unresolved and scores
 one row per access (S250 `func_800958D8` = `emit_fullscreen_scissor_dl`: 6 rows = 3 stores + 3 reads,
-score 1200, percent **0.833**, 72/72 rows, empty `top_mismatches`). It carried two sprints (S248/S249)
+score 1200, percent 0.833, 72/72 rows, empty `top_mismatches`). It carried two sprints (S248/S249)
 mis-labeled a base-vs-displacement wall before the link-both test proved it byte-exact. **The score is
 Mid (not the high-percent/empty-`top_mismatches` signal above, nor the near-zero bss-multi-symbol
 collapse), so it does not trip the usual artifact recognizer — the tell is that every residual row is a
@@ -2422,12 +2422,12 @@ this sweep.
 
 **Nusys version divergence: MG64's libnusys is not uniformly nusys-2.07.** `build_nusys_ref.sh`
 compiles the pinned 2.07, so `coddog-mirror:mainlib/<file>.c@99.99` is a structural match, not a
-byte-exact source pin. Some files are an earlier revision: `nucontmgr.c` is **2.05** (the 2.06/2.07
+byte-exact source pin. Some files are an earlier revision: `nucontmgr.c` is 2.05 (the 2.06/2.07
 rewrite changed `nuContMgrInit`'s loop from `for(...;cnt++){ ...; bitmask<<=1; }` to the comma-operator
 `for(...; bitmask<<=1, cnt++)`, which the KMC compiler emits 2 instrs shorter, `-0x10` `.text`, so the
-`.ld`'s concatenated subsegs cascade a ROM-wide `-0x10` shift). **The tell:** a clean verbatim mirror
+`.ld`'s concatenated subsegs cascade a ROM-wide `-0x10` shift). The tell: a clean verbatim mirror
 whose compiled `.o` `.text`/`.data` section size differs from the subseg size despite the coddog hit
-(here `.text` 0x330 vs 0x340). **Recovery: version-hunt.** Compile every available nusys revision
+(here `.text` 0x330 vs 0x340). Recovery: version-hunt. Compile every available nusys revision
 (`~/development/repos/nusys/src/{1.10,1.20,2.00,2.05,2.06}` + the 2.07 pin) and pick the one whose
 `objdump -h` `.text`/`.data` sizes match the subseg; 2.00 and 2.05 are code-identical (only jp-Shift_JIS
 vs en comments), so prefer the English 2.05. Tooling follow-up: `build_nusys_ref` could sweep multiple
@@ -2454,7 +2454,7 @@ than a clean single-file mirror. Absent maps leave ranking byte-identical (addit
 Run via `make coddog-sweep-audio`.
 
 **Audio toolchain gotchas (resolved):** (1) the PC-distribution SDK headers/source (`~/n64sdk`,
-`~/development/sdks/n64-sdk`) have **CRLF** line terminators that IDO's IRIX `cfe` mishandles at
+`~/development/sdks/n64-sdk`) have CRLF line terminators that IDO's IRIX `cfe` mishandles at
 `\`-continued macros (`gbi.h` combiner macros → "Illegal macro parameter name"); the build stages
 CR-stripped copies for IDO cells (KMC/GNU cpp tolerates CR and uses the project headers directly).
 (2) IDO emits IRIX `.options` + `.gptab.*` sections GNU `ld -r` can't represent → stripped after
@@ -2498,10 +2498,10 @@ fingerprinted all three files. Two tooling refinements:
   `body-divergence-suspect@99.99` false → **9 consecutive false on n_audio_sc (S133-S139).**
 
 **Audio C-name-index mis-resolution de-blk (`_deblk_audio_variant_misresolve`).** The game's
-libnaudio C-name index can resolve a fn's `up_path` to the **non-sc** `libnaudio/src/<f>.c` variant,
+libnaudio C-name index can resolve a fn's `up_path` to the non-sc `libnaudio/src/<f>.c` variant,
 whose `#include "add/<f>_addNN.c"` body-fragments live in a tree the project does not mirror, so the
 named-upstream pass prices them non-vendorable and sets `blocked` → the row shows a false `blk`. The
-authoritative source is the coddog-confirmed **n_audio_sc** `<f>.c` with vendorable
+authoritative source is the coddog-confirmed n_audio_sc `<f>.c` with vendorable
 `inc/<f>_addNN.inc.c` fragments (the N_MICRO command-stream bodies). The bogus `add/*.c` block hid
 three pickable mirrors in a row (`n_save` S133, `n_resample` S134, `n_load` S135 — each a clean
 first-build atomic mirror once the false `blk` was seen through). `_resolve_audio` now lifts it: when
@@ -2518,23 +2518,23 @@ coddog source itself) stays `blk`, because the re-derive still finds a hard bloc
 
 **Flag:** `static-name-collision:<name>@<existing-addr>` (advisory, audio-scoped). Fires when a
 coddog-mirror's upstream `.c` defines a function whose verbatim name is already a curated symbol in
-`symbol_addrs.txt`/`ghidra_symbols.txt` placed at a **different** vram (the name is in `placed_symbols`
-but is **not** one of this subseg's member fns). The classic case is an N_MICRO file-static mirroring a
+`symbol_addrs.txt`/`ghidra_symbols.txt` placed at a different vram (the name is in `placed_symbols`
+but is not one of this subseg's member fns). The classic case is an N_MICRO file-static mirroring a
 non-micro twin that already holds the name: S135 `n_load.c`'s static `_decodeChunk` (this subseg's
 instance at `0x8009FA14`) versus the placed `_decodeChunk = 0x800A4E3C` (the non-micro audio decoder's
 static).
 
-**Why it matters:** a file-scope `static` is **file-local** — it emits no global symbol — so the verbatim
-mirror keeps the upstream name in the C body and needs **no** `symbol_addrs.txt` entry. Adding one would
+**Why it matters:** a file-scope `static` is file-local — it emits no global symbol — so the verbatim
+mirror keeps the upstream name in the C body and needs no `symbol_addrs.txt` entry. Adding one would
 be a duplicate global label (two `_decodeChunk` symbols at different vrams) and multiply-defines at the
 gate scaffold, breaking the green-ROM check. The flag tells the gate up-front: keep the static
-file-local, do not add a colliding `symbol_addrs` entry. Confirm the static has no **external** refs (a
+file-local, do not add a colliding `symbol_addrs` entry. Confirm the static has no external refs (a
 `jal func_<vram>` only from within its own subseg `.s`) — then the file-local static is correct and
 self-contained. S135 `n_load` carried `_decodeChunk` this way; `func_8009E4B0` (n_env/n_auxbus/
 n_drvrNew) shows the same on `_pullSubFrame`/`_getRate`/`_getVol`.
 
 **It is benign, not a problem to solve.** When the colliding names are the mirror file's own
-file-statics (the usual case), there is **no** real collision: the statics stay `static` C, emit no global
+file-statics (the usual case), there is no real collision: the statics stay `static` C, emit no global
 symbol, and the only action the flag implies is the no-op the verbatim track already takes (add
 nothing to `symbol_addrs`). The "collision" only bites if you try to globalize one of these statics (the
 S135 `_decodeChunk` multiply-define). So read the flag as "these N names stay file-local," not as a
@@ -2546,13 +2546,13 @@ collision (all three left `func_<vram>` in the scaffold, kept their upstream `st
 ## libmus-bundled-n_audio duplicate (a SUPPORT_NAUDIO libmus archive links its own n_audio synth copy)
 
 **Pattern (not yet auto-flagged; a `game-embedded:libmus` / `coddog-bundled-dup` pricing tell is a
-deferred follow-up).** The `-DSUPPORT_NAUDIO` libmus archive **statically links** its own copy of the
+deferred follow-up). The `-DSUPPORT_NAUDIO` libmus archive statically links** its own copy of the
 n_audio synth driver (the `alInit`/`alSyn*` family + the fx-change `Custom*` replacements from
-`player_fx.c`), a **duplicate** of the standalone n_audio_sc copies that already live in the libnaudio
+`player_fx.c`), a duplicate of the standalone n_audio_sc copies that already live in the libnaudio
 region (`n_al*`). In MG64 the bundled copy sits in the `[0x78330]` `al_init`/player_fx candidate
 (`coddog-fncount-mismatch:6vs13` = player_fx's 6 fns + ~7 bundled-synth fns). The two copies are the
 same source compiled into two archives; the original linker resolved each archive's calls to its own
-copy. Our flat decomp namespace cannot, so the copies need **distinct** decomp names.
+copy. Our flat decomp namespace cannot, so the copies need distinct decomp names.
 
 **The call resolves through two macro layers to the bundled copy, not the standalone one.** A libmus
 mirror's `alInit(...)` expands `alInit` -> (`n_libaudio_sn_sc.h`) `n_alInit` -> (`player_fx.h`, under
@@ -2619,8 +2619,8 @@ other consumers, clean-rebuild, banked seed-only first try). The `(already-vendo
 ## crlf-vendored-header (a copied SDK header breaks KMC cpp's `\` continuations)
 
 **Rule:** N64 SDK source ships with CRLF (dos) line endings. A vendored header copied verbatim keeps
-its CRLF, and KMC GCC 2.7.2's preprocessor treats a `\` at end-of-line as a line-continuation **only** when
-the `\` is immediately followed by the newline. With CRLF the `\` is followed by `\r`, so **every**
+its CRLF, and KMC GCC 2.7.2's preprocessor treats a `\` at end-of-line as a line-continuation only when
+the `\` is immediately followed by the newline. With CRLF the `\` is followed by `\r`, so every
 multi-line macro continuation breaks: the `#define` ends early, its body's following lines fall through
 to the C parser as code, and you get a silent cascade of `parse error` (reported at the macro-definition
 lines, not the call site) plus `stray '\' in program`. The `.c` mirror itself can be fine; the bad file
@@ -2677,10 +2677,10 @@ machinery already existed for ref/call scanning, reused here for the detector).
 
 **partial-twin subset (`coddog-partial:<m>of<n>fn`).** coddog matches per-function; when its
 corpus splits a combined source into per-fn files (`mtxidentf.c`, `mtxl2f.c`) and a multi-fn subseg's
-fns match **only** some of them, the bare `coddog-mirror`/`coddog-twin` flags over-promise a clean
-single-file mirror. `pick_target` flags `coddog-partial` when ≥2 **distinct** per-fn twin files matched
+fns match only some of them, the bare `coddog-mirror`/`coddog-twin` flags over-promise a clean
+single-file mirror. `pick_target` flags `coddog-partial` when ≥2 distinct per-fn twin files matched
 a pack covering fewer fns than it holds (`len(cod_members) < nfns`): the multi-twin companion to
-`coddog-fncount-mismatch` (which fires only at `len(distinct)==1`). The un-matched fns are **not**
+`coddog-fncount-mismatch` (which fires only at `len(distinct)==1`). The un-matched fns are not
 verified upstream → per-fn verify before mirroring. **Provenance:** S103 (`func_800660A0`:
 `mtxidentf.c`+`mtxl2f.c` @100 matched only `guMtxIdentF`/`guMtxL2F`; the combined `mtxutil.c`'s
 `guMtxF2L` (Monegi clamp variant) + `guMtxIdent` (-O2 non-inline) diverged from every available
@@ -2704,7 +2704,7 @@ caller fn balloons (e.g. `guMtxIdent` 240 B vs ROM 60 B) because -O3 inlined `gu
 Advisory (display-only).
 
 **Procedure:**
-- Mirror the file under a -O2 path, **not** `src/libultra/…`. The project convention is `src/mgu/`
+- Mirror the file under a -O2 path, not `src/libultra/…`. The project convention is `src/mgu/`
   for the game-embedded ultralib gu/mgu matrix source (the Monegi variant); a local `.clang-format`
   (`BasedOnStyle: Google` + `SortIncludes: Never`) formats it like the other library trees (see
   CLAUDE.md). Any non-`libultra/`,
@@ -2718,14 +2718,14 @@ Advisory (display-only).
 
 **`game-embedded` sub-case — not standalone-carvable.** A game-region mirror can be worse than
 "compile at -O2": the upstream file's functions are compiled into a larger game TU, tight-packed (no
-16-byte object padding) against game functions, so there is **no** object boundary to carve a standalone
+16-byte object padding) against game functions, so there is no object boundary to carve a standalone
 mirror at. The natural end of the matched block lands on a non-16 address with real game code (not
 nops) immediately after; a standalone `[..,c,..]` subseg there SHA-misses because KMC `as` 16-pads the
 `.o` `.text` and shifts the tail (#non16align — the gate-build canary: a correctly-named stub that
 SHA-misses is alignment, not a bad offset). `pick_target.py` flags this as `game-embedded:0x<vram>`
 (the synthesis of `game-region-mirror` + a coddog-subset signal — `coddog-fncount-mismatch` /
 `coddog-structural` / `coddog-partial` — i.e. only some of the subseg's fns match the upstream).
-- **Plan a mixed carve, not a seed-only mirror.** Carve `[A, B)` where **both** A and B are 16-aligned
+- **Plan a mixed carve, not a seed-only mirror.** Carve `[A, B)` where both A and B are 16-aligned
   function boundaries (a 16-aligned carve always matches byte-wise, no padding inserted, regardless of
   the true object boundary). The carve pulls in the adjacent game fns between the lib block and the next
   16-aligned boundary; write the lib fns as verbatim mirrors and the game fns classical (or carry them
@@ -2747,7 +2747,7 @@ S188's `convert_and_pack_floats_to_fixed` @0x80065DD8 is `gu/mtxutil.c guMtxF2L`
 VERSION_J build of `guMtxF2L` uses `<`/`slti` loop bounds and keeps the redundant `& 0xffff0000`,
 while the MG64 copy uses `!=` (held-const `bne`) and drops the redundant mask (the `sll 16` already
 zeroes the low half). So the match needed: upstream source + `!=` loop bounds + dropped-redundant-mask
-(3 game-divergence levers), not a verbatim `cp`. **Naming:** a second embedded copy of a gu fn keeps
+(3 game-divergence levers), not a verbatim `cp`. Naming: a second embedded copy of a gu fn keeps
 its descriptive Ghidra name (the canonical SDK name is already taken by the first copy: `guMtxF2L`
 lives at 0x80067B00, so 0x80065DD8 stays `convert_and_pack_floats_to_fixed`).
 
@@ -2767,7 +2767,7 @@ direct-immediate-offset form (base + k*rowsize + j*4). S188 cracked the in-place
 **Rule:** The build tracks no header dependencies: a `make` recompiles only the `.c` files whose
 objects are missing or older than the source, not the consumers of a header you edited. So when a
 mirror/enabler edits a *shared vendored header* (e.g. `include/libultra/PR/os_version.h`, included
-transitively by many libultra TUs), the post-edit verification **must** be a clean rebuild, or a stale
+transitively by many libultra TUs), the post-edit verification must be a clean rebuild, or a stale
 object can mask a divergence the header change introduced elsewhere.
 
 **Trigger:** the finalize/enabler step modifies a header under `include/` that more than one already-
@@ -2788,7 +2788,7 @@ SHA-safe across all os_version.h consumers).
 The same no-header-dep-tracking gap bites a different way when a bank renames a shared callee/global
 in `symbol_addrs.txt` (a recover-extern), not just edits a header. Renaming e.g. `func_800A1148` to
 `__n_allocParam` and re-running `make extract` regenerates every `.s` that references it to the new
-name, but `make` does **not** recompile the still-`INCLUDE_ASM` sibling `.c` files (their `.c` did not
+name, but `make` does not recompile the still-`INCLUDE_ASM` sibling `.c` files (their `.c` did not
 change, and the build tracks no dep on the `.s` the macro includes). So their stale `.o` still
 references the old `func_<vram>` name, and the link fails `undefined reference to func_<vram>` even
 though the regenerated `.s` is correct.
@@ -2797,7 +2797,7 @@ though the regenerated `.s` is correct.
 while the other members are still `INCLUDE_ASM` stubs; link error names the pre-rename `func_<vram>`/
 `D_<vram>`.
 
-**Procedure:** for a homogeneous sibling set sharing recovered externs, write **all** the sibling bodies
+**Procedure:** for a homogeneous sibling set sharing recovered externs, write all the sibling bodies
 before building — each becomes a fresh-compiled `.c` referencing the new name, so no stale stub `.o`
 survives. Otherwise `rm` (or `touch` the source of) the still-stub `.o` after the rename to force its
 recompile. The shared extern only needs recovering once (it serves the whole set).
@@ -2822,7 +2822,7 @@ define set, the leaf is not a clean flip: defer, or handle the define at the gat
 
 The n_audio_sc upstream Makefile builds the whole library with `-DN_MICRO=1` (the "micro" command
 stream). Files that branch on it (`n_save.c`, `n_resample.c`, `n_reverb.c`, `n_env.c`, `n_load.c`,
-`n_synthesizer.c`) emit the micro path; with **no** define they take the longer non-micro path and
+`n_synthesizer.c`) emit the micro path; with no define they take the longer non-micro path and
 SHA-miss. The fix is a library-wide pin: `-DN_MICRO=1` in `LIBNAUDIO_CFLAGS` (`mk/libnaudio.mk`), the
 same standing-pin pattern as `-DF3DEX_GBI_2`. The setter mirrors (`n_syn*.c`) have no N_MICRO branch,
 so the pin is byte-neutral for them. `pick_target` parses `LIBNAUDIO_CFLAGS` into the libnaudio
@@ -2849,7 +2849,7 @@ whose value is GBI-microcode-guarded, used inside an otherwise-verbatim body. `P
 ```
 
 ultralib builds `libgultra_rom` with a global default `GBIDEFINE := -DF3DEX_GBI`. MG64 runs the
-F3DEX2 microcode, so the project pins `-DF3DEX_GBI_2` in `LIBULTRA_CFLAGS` (`mk/libultra.mk`). With **no**
+F3DEX2 microcode, so the project pins `-DF3DEX_GBI_2` in `LIBULTRA_CFLAGS` (`mk/libultra.mk`). With no
 GBI define the macro silently takes the `#else` value. The standing pin resolves this for every
 libultra mirror; it is documented here because the failure mode is invisible to every gate check.
 
@@ -2874,7 +2874,7 @@ pin over the `#else` value).
 
 ### Version-rev `#define` value divergence
 
-The same link-clean / one-word-SHA-miss class as the S83 GBI sub-case, but the gating is **not** a build
+The same link-clean / one-word-SHA-miss class as the S83 GBI sub-case, but the gating is not a build
 flag: it is the vendored upstream version diverging from the game's library rev on a plain object-like
 `#define` value. A byte-verbatim drop-static `nusimgr.c` (libnusys) mirror SHA-missed by exactly
 one byte, vram 0x800A27E0 `li a1,6` (build) vs `5` (ROM) — the `osCreateThread` thread-id arg. Root
@@ -2883,7 +2883,7 @@ compacts the controller/SI thread to slot 5 (the IDs run idle=1/rmon=2/main=3/gf
 cont=6 in 2.07; MG64 drops the audio slot so cont=5).
 
 **The tell vs a reloc:** the lone differing word is a `li`/`addiu` whose immediate is a small literal
-(an enum/macro value), **not** a `lui`+`addiu`/`lw` hi/lo pair carrying a relocated address. An immediate
+(an enum/macro value), not a `lui`+`addiu`/`lw` hi/lo pair carrying a relocated address. An immediate
 mismatch is a `#define`/enum value; a hi/lo address mismatch is a symbol-placement problem. Localize
 with the S44 `.o`-diff byte form (venv-python region cmp of `baserom.z64` vs `build/mariogolf64.z64`
 at the ROM offset) → the single off-by-constant immediate → grep the macro back through the header.
@@ -2926,7 +2926,7 @@ propagates cleanly through the rest).
 
 **Fix:** change only that one gate `>= VERSION_K` → `>= VERSION_J` in the mirrored copy (a
 near-verbatim version-gate edit, same class as #char-signedness / #assert-strip; confirm the gated
-callee is a placed symbol). **Not** a blanket un-gate of every K-block.
+callee is a placed symbol). Not a blanket un-gate of every K-block.
 
 **Provenance:** S85 (`initialize.c`'s `__osSetWatchLo` K-gate un-gated to `>= VERSION_J`; the exact
 N×8B whole-instruction SHA-miss tell).
@@ -2956,7 +2956,7 @@ not a byte change). Same one-line fix as the `#undef nuGfxInit`.
 **Caveats:**
 
 **Not this hazard (the contrast case):** if the upstream does not define a function named
-`<curated_fn>` (the curated name is a macro alias for a **different** symbol the upstream defines,
+`<curated_fn>` (the curated name is a macro alias for a different symbol the upstream defines,
 namely the macro's rhs), then the body never contains the `<curated_fn>` token, no `#undef` is needed,
 and the real issue is a mislabeled ghidra name → see `#wrong-ghidra-name-override`. `pick_target.py`
 now suppresses `header-renames-symbol` in that case (`_upstream_defines_function` gate) and emits
@@ -2969,7 +2969,7 @@ S85 (`initialize.c`); the `_upstream_defines_function` contrast/suppression case
 
 ## wrong-ghidra-name-override (correct a mislabeled symbol without sync-names)
 
-**Rule:** `ghidra_symbols.txt` can name a function vram with the **wrong** symbol: a macro alias rather
+**Rule:** `ghidra_symbols.txt` can name a function vram with the wrong symbol: a macro alias rather
 than the real function. motor.c: ghidra labels 0x800AE380 `osMotorStop`, but os_motor.h
 `#define osMotorStop(x) __osMotorAccess((x), MOTOR_STOP)` makes that a *macro*; the function the
 VERSION_J build defines at 0x800AE380 is `__osMotorAccess` (verified in `build/J/libgultra_rom/motor.o`:
@@ -3245,15 +3245,15 @@ sequence by hand (see also `#gfxdis` and the memories `sdk-composite-macro-befor
 has no macro — e.g. `func_8007624C`'s `>>2`-quantized colour, where the macro's `_SHIFTL` masks emit
 `andi`s the ROM lacks.
 
-**Rule:** MG64 uses **F3DEX2** microcode (gspF3DEX2.fifo 2.08). Include `<PR/gbi.h>` when the target
+**Rule:** MG64 uses F3DEX2 microcode (gspF3DEX2.fifo 2.08). Include `<PR/gbi.h>` when the target
 manipulates `Gfx*`. **A `src/main/` (or `src/overlay_*/`) game TU that builds display lists needs the
 F3DEX2 build profile** (`mk/main.mk`: `MAIN_CFLAGS = $(CFLAGS) -DF3DEX_GBI_2`) — `-DF3DEX_GBI_2`
 selects the F3DEX2 GBI opcodes in `PR/gbi.h` (`G_RDPHALF_1=0xE1`/`G_RDPHALF_2=0xF1`, vs the F3DEX
 `0xB4`/`0xB3`). Without it the RSP-command opcodes are wrong; the RDP commands (PipeSync/SetCombine/
 SetOtherMode) are ucode-independent so they match either way. This updates the "main/ needs zero
-mk edits" convention: the F3DEX2 profile is a standing enabler for any main-segment DL TU. **Caveat:**
-`decomp_loop.py`'s default compile omits `-DF3DEX_GBI_2`, so a **macro-based** DL seed's isolated RSP
-opcodes read `0xB4`/`0xB3` (a false diff, looks like a body bug). Pass **`--profile main`** (the
+mk edits" convention: the F3DEX2 profile is a standing enabler for any main-segment DL TU. Caveat:
+`decomp_loop.py`'s default compile omits `-DF3DEX_GBI_2`, so a macro-based DL seed's isolated RSP
+opcodes read `0xB4`/`0xB3` (a false diff, looks like a body bug). Pass `--profile main` (the
 now-live main/F3DEX2 profile, alongside its libkmc/libultra detectors) for any macro-based main/ DL
 fn; that adds `-DF3DEX_GBI_2` so the gDP macros expand to the F3DEX2 `0xE2..`/`0xE1`/`0xF1` opcodes.
 **Raw-literal DL words are define-independent** (a `gfx->words.w0 = 0xE7000000` store is the same byte
@@ -3305,12 +3305,12 @@ the `.s`; (2) `~/development/repos/n64-tools/src/gfxdis/gfxdis.f3dex2 -f <bin>` 
 macros (`docs/levers.md` (gfxdis display list tool)); (3) rewrite as `gDPXxx(glistp++, …)` (banked precedent
 `src/main/func_800328E0.c`; the `-DF3DEX_GBI_2` profile makes gbi.h's F3DEX2 branch macros live, incl.
 `gSPLoadGeometryMode` = `gSPGeometryMode(pkt,-1,word)` and the `D9` combined GeometryMode);
-(4) reconcile **physical-address matrix pointers** — `gSPMatrix(glistp++, &D_E2050, …)` where `D_E2050`
+(4) reconcile physical-address matrix pointers — `gSPMatrix(glistp++, &D_E2050, …)` where `D_E2050`
 (0xE2050 in `undefined_syms_auto`) is the physical alias of the virtual `D_800E2050` (`0xE2050 =
 0x800E2050 & 0x1FFFFFFF`); reference the physical symbol directly (the macro stores the raw pointer, no
 K0 mask at runtime), and pass runtime args (e.g. a `u16* perspNorm`) live. This softens the
 `docs/levers.md` (mg64 glyph emitter dl family) "raw-DL-word = terminal sched coin" verdict: it holds for the S243
-hand-inlined **per-char loop** subtype, but a **straight-line `glistp++` macro sequence** reconstructs
+hand-inlined per-char loop subtype, but a straight-line `glistp++` macro sequence reconstructs
 byte-clean. S256 banked `func_8008658C` (sky-panel rts-matrix + 13-command projection DL) this way.
 
 **Callee real arg count is load-bearing for a 1-instr-short DL emitter (S256).** Before calling a
@@ -3353,9 +3353,9 @@ into a running `Gfx*` cursor. Decode + reconstruct, do not hand-transcribe:
   demo signature). The global DL cursor's idiomatic decomp name is `glistp` (a `Gfx*`).
 - **Mask-narrowing lesson (do not hand-inline a texrect on a mask-constant hunch).** A `andi 0xFFC` in
   the ROM where the stock `gSPTextureRectangle` macro masks `0xFFF` is not proof of a custom/inline
-  texrect. GBI texrect coords are **10.2 fixed (12-bit)**, and the macro packs each via
+  texrect. GBI texrect coords are 10.2 fixed (12-bit), and the macro packs each via
   `_SHIFTL(_, _, 12)` = `& 0xFFF`. When the caller passes a `<<2` (pixel→10.2) coord, GCC knows the low
-  2 bits are 0 and **narrows** the emitted mask: `((coord<<2) & 0xFFF) << 12` → `andi 0xFFC` on the
+  2 bits are 0 and narrows the emitted mask: `((coord<<2) & 0xFFF) << 12` → `andi 0xFFC` on the
   shifted x-fields, while `(coord<<2) & 0xFFF` (un-shifted y-fields) stays `andi 0xFFF` — both matching
   the ROM. Test the stock `gSPTextureRectangle` before concluding "custom": the first attempt wrongly
   hand-inlined the texrect, then the stock macro proved byte-identical (S151). Coord locals are
@@ -3364,7 +3364,7 @@ into a running `Gfx*` cursor. Decode + reconstruct, do not hand-transcribe:
   - **Test the scissored variant too (S226).** A texrect whose ROM adds a per-coord
     negative-clamp (`sll 18`/`sra 16`/`nor`/`sra 31`/`and` = `MAX((s16)coord,0)`) on top of the
     `0xFFC`-narrow, plus a `slti`/`negu`/`and`/`negu` min/max adjustment on the `RDPHALF_1` s/t word,
-    is the **stock `gSPScisTextureRectangle`** (the scissored variant), not a custom/inline texrect.
+    is the stock `gSPScisTextureRectangle` (the scissored variant), not a custom/inline texrect.
     The whole clamp + s/t-adjust sequence falls straight out of that macro's `MAX((s16)(x),0)` coord
     packing and its `((s)-(((s16)(xl)<0)?…MIN/MAX…:0))` `RDPHALF_1` computation. So before concluding
     "custom", test both `gSPTextureRectangle` and `gSPScisTextureRectangle`. S226 `func_8007CF10`
@@ -3427,8 +3427,8 @@ fill-clear pack (S179 DCE0 pack `func_800328E0`):
   mask lives in the source.
 - **Idiom split determines matchability:** a helper taking `Gfx **glistp` (`Gfx *gfx = *glistp; …
   gDPxxx(gfx++); *glistp = gfx;`) matches cleanly (func_800328E0/func_80032B78 — the `*glistp` deref is
-  a param-pointer, not a symbol-load). A fn using the **global `glistp++` directly** (13 stores of the
-  `%lo(glistp)` symbol, 1 load) whose fill color is computed from **global** vars is the
+  a param-pointer, not a symbol-load). A fn using the global `glistp++` directly (13 stores of the
+  `%lo(glistp)` symbol, 1 load) whose fill color is computed from global vars is the
   **scheduler-load-pair wall** (S179 carry `func_800329F4`): GCC 2.7.2's sched1 hoists the color
   global symbol-load into glistp's 2-cycle load-latency shadow, where the ROM defers the color load to
   its 6th-command slot — a full register cascade (77/97 words), structurally-complete otherwise.
@@ -3454,7 +3454,7 @@ fill-clear pack (S179 DCE0 pack `func_800328E0`):
     associativity / reorder form all still hoist while the colors are plain scalars (18-30/97) — the
     retype is the unique lever, so do not reach for the permuter first. Found by the two-agents-per-wall
     GCC-source fan-out (S180; both agents independently converged on the `mem/s` lever). Permuter only
-    as a last-resort fallback (and then **without `--best-only`**, the S160 plateau doctrine).
+    as a last-resort fallback (and then without `--best-only`, the S160 plateau doctrine).
 
 **Header constant-staging scheduling wall (a DL emitter can be irreducible, not just FP).** A
 `glistp++` DL builder with a long fixed-command header (many `gDPxxx(gfx++)` in a row) can plateau on
@@ -3468,7 +3468,7 @@ compute-all-then-store batch the equivalent C doesn't trigger; the words/ops are
 schedule differs. It is not the `#mem-in-struct-scheduling-lever` (no global load to retype) and the
 **permuter does not crack it** (S190 `func_8004E5A0` font-blitter: 225/233 rows, permuter
 `--best-only` plateaued 10065→6235 over 8000+ iters, no match). Treat such a header as a structural
-near-match **carry**, not a bank; a debug/HUD DL TU where the non-FP fns are all such emitters is
+near-match carry, not a bank; a debug/HUD DL TU where the non-FP fns are all such emitters is
 **partial-bank-expected-zero** (see `BACKLOG.md` for the pts-detector follow-up). Diagnose by the
 frame-size + instr-count gap (ROM larger) with rows structurally aligned, not by a body diff.
 
@@ -3488,11 +3488,11 @@ base register (e.g. all `gSPLight` addresses are `base`, `base+0x10`, `base+0x20
 single `lui/addiu %hi/%lo` of a light buffer). The match hinges on the C referencing the same symbol
 the asm anchored on:
 
-- If the asm anchors on the **light-array base** `D_<a>` (the ambient at `D_<a> - 8`, i.e. a negative
+- If the asm anchors on the light-array base `D_<a>` (the ambient at `D_<a> - 8`, i.e. a negative
   offset), model the buffer as `Light D_<a>[N]` and express the ambient as pointer arith off that base:
   `gSPLight(gdl++, (Light *)((u8 *)D_<a> - 8), 4)`. GCC then reuses the already-materialized base and
   emits `addiu $reg, $reg, -8` (1 instr), matching.
-- Do not use a `Lightsn`/`Lights3` **struct** at `D_<a-8>` (`.a` at 0, `.l[0]` at +8). GCC anchors the
+- Do not use a `Lightsn`/`Lights3` struct at `D_<a-8>` (`.a` at 0, `.l[0]` at +8). GCC anchors the
   struct symbol at `D_<a-8>` and accesses members as positive offsets (`+8`, `+0x18`, `+0x28`, `+0`) off
   it — a different base symbol + offset set than the asm's `D_<a>`-anchored `base-8`. Byte-mismatch even
   though the linked addresses are identical.
@@ -3590,7 +3590,7 @@ splitting the anonymous `[0xXXXX, data]` around its `[start, end)`.
 
 **Attribution oracle.** `make extract` (splat) prints `Rodata segment 'X' may belong to the text
 segment 'Y'` (splat `rodata.py`) for each anonymous rodata referenced by a single function; capture
-stderr. `.data` blocks get no such hint: attribute by grepping the **defining** upstream file in
+stderr. `.data` blocks get no such hint: attribute by grepping the defining upstream file in
 `~/development/repos/ultralib/src` for the symbol (`OSThread *__osRunQueue;`, not just an `extern`),
 then confirm placed-status in the yaml. `../drmario64/lib/ultralib/src` is the cross-ref for TUs MG64
 hasn't placed; a block drmario64 also leaves generic (`RO_<vram>`) is genuinely unattributable, so
@@ -3631,7 +3631,7 @@ leave it a blob.
   pointer value won't match).
 - **cross-TU-split data needs non-`static`.** Upstream keeps file data `static` because the function
   using it is in the same `.c`. When MG64 has split that function into its own TU (`io/viinit.c`'s
-  `__osViInit` does `extern __OSViContext vi[2]`), the data must be **global** (drop `static`) so the
+  `__osViInit` does `extern __OSViContext vi[2]`), the data must be global (drop `static`) so the
   split TU links. Bytes are identical; only visibility changes.
 - **verbatim mirror `needs-define`.** A verbatim data TU can use a header macro the project's vendored
   header lacks (`vitbl.c` → `VI_CTRL_ANTIALIAS_MODE_0`, absent from the MG64 `rcp.h` which had only
@@ -3649,15 +3649,15 @@ build **inlines a small static callee the ROM keeps as `jal`** (build longer tha
 body appears inline), or the reverse. The classic case is a per-frame/dispatch fn that calls a helper
 the ROM out-of-lines.
 
-**Rule.** GCC 2.7.2 `-O3` inlines a small static callee only when it is **visible** (defined, not just
-forward-declared) **within the same TU** at the call site. So an over-inline has two independent cures;
+**Rule.** GCC 2.7.2 `-O3` inlines a small static callee only when it is visible (defined, not just
+forward-declared) within the same TU at the call site. So an over-inline has two independent cures;
 pick by where the callee actually lives in the original:
 
 1. **Cross-TU split (callee is in a different `.o` than its caller).** Split the carve at the real
    `.o` boundary so caller and callee land in separate TUs → cross-TU `jal`. Boundaries must be
    **16-aligned** (`.text`/`.rodata` sections are `2**4`-aligned). Use the **rodata-gap diagnostic** to
-   decide if this is even possible: if two fns' `.rodata` constants are **< 16 bytes apart**, they are
-   in the **same `.o`** (two separate 16-aligned `.o` rodata sections can never be < 16 B apart), so
+   decide if this is even possible: if two fns' `.rodata` constants are < 16 bytes apart, they are
+   in the same `.o` (two separate 16-aligned `.o` rodata sections can never be < 16 B apart), so
    the split is impossible — go to cure 2. (S147: `mus_cmd_envelope`@D_800D1FB0 and
    `func_8009AB18`@D_800D1FB8 are 8 B apart ⇒ one `.o`; `func_8009BC58`/`allocate_object_slot` vs their
    command-handler callers were cross-`.o` ⇒ split at 0x8009C540 banked them.)
@@ -3675,12 +3675,12 @@ pick by where the callee actually lives in the original:
   stores at the end (the +15 insns vs a profiler-off reference). The `_mus_cpu_*` globals existing in
   `ghidra_symbols` is the tell; the matched reference games (PPL/drmario64) have it off.
 - **Cross-TU helper hand-inlined.** A helper the one-TU reference games just *call* (and GCC inlines,
-  e.g. `Fstop`) is **cross-TU** here, so GCC can't inline it — reproduce by **manually inlining its
-  field-clears** in the body. The ROM showing **no `jal` to the helper** + inline field stores is the
+  e.g. `Fstop`) is cross-TU here, so GCC can't inline it — reproduce by **manually inlining its
+  field-clears in the body. The ROM showing no `jal` to the helper** + inline field stores is the
   tell.
 
 **Signed-subtraction comparison tell.** When the ROM shows `subu rd,a,b; bgez/bltz` (not `slt`/`sltu`)
-for a frame/counter/index `<` compare, write it as **`(s32)(a - b) < 0`**, not `a < b`. `a < b` on
+for a frame/counter/index `<` compare, write it as `(s32)(a - b) < 0`, not `a < b`. `a < b` on
 unsigned fields → `sltu`; an `(s32)a < (s32)b` cast → `slt`; only the explicit difference-vs-0 form
 emits `subu + bgez`. (S147: `__MusIntMain`'s 4 `*_frame < channel_frame` tests, all on `unsigned long`
 fields, needed `(s32)(cp->X_frame - cp->channel_frame) < 0`.)
@@ -3703,7 +3703,7 @@ byte-exact `-O3` build.
 ## cross-jump-tail-merge
 
 **Trigger:** A verbatim/near-verbatim mirror builds + links clean but ROM SHA-misses, and the
-in-tree-vs-target objdump shows the build is **shorter than the target** (instruction count < target),
+in-tree-vs-target objdump shows the build is shorter than the target (instruction count < target),
 with collateral `-0x10`-style address shifts on every symbol after the short function (their code
 matches; only referenced addresses shifted).
 
@@ -3728,7 +3728,7 @@ ROM re-reads a global it just wrote, or re-loads a DL cursor across a diamond, r
 form before suspecting `volatile` ([#volatile-view-cse-reload](#volatile-view-cse-reload)).
 
 **Rule out a game-modified body first.** This symptom is not proof
-of a compiler cross-jump merge; it is far more often a **body-semantics divergence** the literal
+of a compiler cross-jump merge; it is far more often a body-semantics divergence the literal
 upstream lacks. `contRmbControl` was declared an "exhaustively-proven-unbankable cross-jump wall" and
 carried it 5 sprints (+ a 145k-iter permuter run), then banked it byte-exact (full ROM SHA-1) with a
 **one-branch body fix and no compiler change**. The real cause: MG64's forcestop case is game-modified
@@ -3743,12 +3743,12 @@ carried it 5 sprints (+ a 145k-iter permuter run), then banked it byte-exact (fu
   field) is the fix. Same class as `#struct-init-loop` (a dup-store body artifact, also "count-short").
 
 - **Tell from block-reorder (`#near-verbatim-mirror-jal-count-mismatch`).** cross-jump = build instr
-  count **< target** (a merge deleted instrs). block-reorder = **equal** count, same insns reordered.
+  count < target (a merge deleted instrs). block-reorder = equal count, same insns reordered.
   Measure the count first.
 - **The actual cross-jump pass (why a body fix moves it).** `jump.c:find_cross_jump` can merge two
   identical `j .L_ret; sh <reg>,<off>(<base>)` tails via the `minimum=1` "cross-jump to code before the
-  label" path (jump.c ~1978): **one** matching insn before the shared epilogue label suffices
-  (`--minimum` → `minimum <= 0` after a single match). So the merge is driven by basic-block **layout**
+  label" path (jump.c ~1978): one matching insn before the shared epilogue label suffices
+  (`--minimum` → `minimum <= 0` after a single match). So the merge is driven by basic-block layout
   — which store lands immediately before the epilogue label — and the layout is driven by the body.
   Change the body → change the layout → the "merge" moves or vanishes. The pass is always-on
   (`toplev.c:3142` `jump_optimize(insns, 1, 1, 0)`, gated only by `optimize > 0`; no disabling flag —
@@ -3793,9 +3793,9 @@ stock diff is possible.
 
 **Check the build-config / struct-size axis too — a `@99.99` miss is not always a body edit.** A
 `body-divergence-suspect:<file>@<pct>` miss has three non-body causes to clear before concluding the
-body diverges, distinguished by the offset pattern: (1) cross-jump = build instr count **< target**;
-(2) block-reorder (`#near-verbatim-mirror-jal-count-mismatch`) = **equal** count, insns reordered;
-(3) **build-config struct-size drift** (`_FINALROM` / `_DEBUG`; see the `_FINALROM` note under
+body diverges, distinguished by the offset pattern: (1) cross-jump = build instr count < target;
+(2) block-reorder (`#near-verbatim-mirror-jal-count-mismatch`) = equal count, insns reordered;
+(3) build-config struct-size drift (`_FINALROM` / `_DEBUG`; see the `_FINALROM` note under
 [`#upstream-mirror-pattern`](#upstream-mirror-pattern)) = equal count, but one function's stack-frame
 immediates (`addiu sp`, `sw/lw ra`, trailing-local `sp`-offsets) all shift by the same struct delta
 while field stores are unchanged. `aud_sched.c`'s `__OsSchedDoTask` was a `@99.99` flagged file whose
@@ -3839,18 +3839,18 @@ instr-count on first compile, isolating the lone short/reordered fn fast):
 (non-mirror) instance of the same "block a merge GCC performs" pattern, and the primary source lever
 for it. A guard-then-continue inside a top-tested loop — `while(1){ …; if (x < lo) { x++; continue; }
 if (x < hi) *x = v; x++; }` — has two identical `x++; j <loop-top>` tails (the `continue` one and the
-bottom one). GCC 2.7.2 **cross-jumps them into one block** (both paths reach a single `x++; j` = a
-double-jump), where the ROM keeps them separate: the `x < lo` branch is a **branch-likely** (`bnezl`/
-`beqzl`) whose **annulled delay slot** holds its own `x++`, and the bottom `x++` sits in the `j`'s
+bottom one). GCC 2.7.2 cross-jumps them into one block (both paths reach a single `x++; j` = a
+double-jump), where the ROM keeps them separate: the `x < lo` branch is a branch-likely (`bnezl`/
+`beqzl`) whose annulled delay slot holds its own `x++`, and the bottom `x++` sits in the `j`'s
 delay slot. Re-express the guard as a **nested `if/else` with a duplicated increment in each arm** —
 `if (x >= lo) { if (x < hi) *x = v; x++; } else { x++; }` — and GCC fills the `x < lo` branch's delay
 slot with the annulled `x++` (emitting the `bnezl`) instead of merging the tails. Banked
 `print_string_at_grid` S172 (the S171 `#pervasive-regalloc-classical-main` carry): 25/25 word-exact.
-This is the source lever to try **before** the permuter when a classical loop's only structural miss is
+This is the source lever to try before the permuter when a classical loop's only structural miss is
 a cross-jumped `{x++;continue;}` guard vs a ROM branch-likely.
 - **Companion reg-cycle lever — lazy global-base load (S172).** After the nested-if fixes the
-  structure, a residual **cyclic register permutation** (the target reuses a freed argument register for
-  a running pointer) closes by loading the array base **lazily**: reference the global directly
+  structure, a residual cyclic register permutation (the target reuses a freed argument register for
+  a running pointer) closes by loading the array base lazily: reference the global directly
   (`&G[idx]`, `&G[N]`, `x >= G`) instead of pinning it in a `T *base = G;` local. The local forces the
   base load early (before the offset), so the base gets a fresh register; the direct reference defers it
   **past** the offset computation, letting the offset's arg-register free up and be reused for the base
@@ -3866,7 +3866,7 @@ S146 (`aud_dma.c` per-fn ASM-verify + the false-tail-merge lever-set on `__MusIn
 
 ## struct-init-loop (dup-store / dual-induction-var)
 
-**Trigger:** A near-verbatim mirror's **array-of-struct init loop** (`for(i){ arr[i].next = &arr[i+1];
+**Trigger:** A near-verbatim mirror's array-of-struct init loop (`for(i){ arr[i].next = &arr[i+1];
 arr[i].f = …; }` over a large struct) builds + links clean but ROM SHA-misses, the build is **shorter
 than the target** (instr count < target, ~2 instrs short, with the usual `-0x10`-style collateral
 address shifts on everything after it), and the in-tree-vs-target objdump shows the target storing
@@ -3874,8 +3874,8 @@ address shifts on everything after it), and the in-tree-vs-target objdump shows 
 **running address pointer**, while your build stores it once via indexed `lui %hi(base); addu …,v1`.
 
 **Rule:** This is not a cross-jump wall (`#cross-jump-tail-merge`, which deletes instrs) and not
-permuter territory (the byte-match is far below 0.97) — it is a **source artifact**: the original loop
-body has a **duplicate field assignment** the literal upstream lacks.
+permuter territory (the byte-match is far below 0.97) — it is a source artifact: the original loop
+body has a duplicate field assignment the literal upstream lacks.
 
 **Procedure:**
 
@@ -3883,10 +3883,10 @@ body has a **duplicate field assignment** the literal upstream lacks.
   that to a running induction var (e.g. `a1 = &arr[i+1]`, stride = sizeof). A second assignment of a
   field whose address is a fixed offset below the next element (`arr[i].msgQ` at `next_elem - 8`) lets
   gcc derive a second running pointer (`a0 = a1 - 8`) and store that field via `0(a0)` at both the
-  head and tail of the body — the **double-store tell**. Your single-assignment source gives gcc one
+  head and tail of the body — the double-store tell. Your single-assignment source gives gcc one
   IV (it picks one field for the running pointer, indexes the rest), so it is 1–2 instrs short and the
   registers/addressing cascade-diverge.
-- **Fix.** Re-add the duplicate field assignment at the loop **tail** (the MG64 edit artifact:
+- **Fix.** Re-add the duplicate field assignment at the loop tail (the MG64 edit artifact:
   `nuGfxTaskMgrInit` has a trailing `nuGfxTask[cnt].msgQ = &nuGfxTaskMgrMesgQ;` after the field block).
   That single line reproduces gcc's dual-IV + double-store and lands the exact instr count → byte-match
   first build after. Match driver: the asm store order (`next, msgQ, …, msgQ`) — a field that appears
@@ -3911,7 +3911,7 @@ three fixes the generic setup misses.
 
 **Procedure:**
 
-- **(a) custom `--settings`.** The root `permuter_settings.toml` `compiler_command` is **generic** (`-I
+- **(a) custom `--settings`.** The root `permuter_settings.toml` `compiler_command` is generic (`-I
   include` only, no `-DUSE_EPI` / per-library include paths), so `import.py` preprocessing fails on
   `#include <nusys.h>`. Pass `--settings <custom>.toml` whose `compiler_command` carries the file's real
   Cflags (the per-library `-I include/libnusys …` + `-D` defines), piped through `tools/cc/gcc -S` to
@@ -4005,7 +4005,7 @@ setup feeds, see `#pervasive-regalloc-classical-main`.
 - **Inline-asm base.c fails pycparser — b64literal-wrap the line by hand (S176).** A `base.c`
   containing a `__asm__ __volatile__(...)` (e.g. the `#capturing-ra` `addu %0,$31,$0` read) makes
   `permuter.py` abort with `Syntax error in base.c … before: __volatile__`. import.py's
-  `-D__asm__(...)=_permuter_ignore_line __asm__(__VA_ARGS__)` macro does **not** fire here because
+  `-D__asm__(...)=_permuter_ignore_line __asm__(__VA_ARGS__)` macro does not fire here because
   `__volatile__` sits between `__asm__` and `(`, so the function-like macro never matches (and cpp
   won't re-scan after `-D__volatile__=` strips it). Manually convert that one line to the pragma
   import.py would have emitted (`import.py:481-484`): `#pragma _permuter b64literal <base64 of the
@@ -4017,8 +4017,8 @@ setup feeds, see `#pervasive-regalloc-classical-main`.
 
 - **Setup on a fn already inlined as C in a multi-fn file (S182).** `setup-permuter.sh` /
   `mg_resolve_c_asm` (tools/lib.sh) resolve the C file by grepping for `INCLUDE_ASM(.*, <fn>);` — which
-  is **gone** once the fn is a C body (a near-match you want to permute in place). The resolver then
-  sets `C_FILE=` empty and `set -e` aborts silently (no output). **Workaround:** bypass the resolver and
+  is gone once the fn is a C body (a near-match you want to permute in place). The resolver then
+  sets `C_FILE=` empty and `set -e` aborts silently (no output). Workaround: bypass the resolver and
   call `import.py` directly with the containing C file + the exact per-fn target `.s` (venv-run):
   `venv/bin/python3 tools/decomp-permuter/import.py --settings permuter_settings_main.toml
   src/<seg>.c asm/nonmatchings/<tree>/<file>/<fn>.s`. import.py picks the target fn by the `.s`
@@ -4073,7 +4073,7 @@ stock-NU_DEBUG mirror).
 
 **Procedure:**
 
-- **Triage before classical-RE.** Diff the carried fn's asm against the upstream's **NU_DEBUG** body
+- **Triage before classical-RE.** Diff the carried fn's asm against the upstream's NU_DEBUG body
   (not the non-debug body). If the calls line up, it is stock: bank it as a mirror.
 - **Fix recipe** (S125 nuScExecuteAudio, banked first build). (a) `#define NU_DEBUG` at the top of the
   `.c` before `#include <nusys.h>` (matches the MG64 TU compile); (b) validate the perf/debug struct
@@ -4091,34 +4091,34 @@ mirror class + the fix recipe).
 
 ## libnusys inline-div mflo-hazard nop
 
-**Trigger:** A `libnusys` fn with an **inline integer division** (`a / b` compiled to `divu` + `mflo`,
+**Trigger:** A `libnusys` fn with an inline integer division (`a / b` compiled to `divu` + `mflo`,
 not a `__udivdi3` call) can build + link clean and be **byte-perfect except for 2 missing `nop`s after
 `mflo`** (the VR4300 mflo→consumer hazard padding) — a `mflo; nop; nop; <use>` in the target vs
 `mflo; <use>` in your build. Net: the build is 2 instrs short with the usual collateral address shifts.
 
 **Procedure:**
 
-- **Root cause** (S125 nuScEventHandler). KMC gcc emits the GNU `div` **macro**; the assembler
+- **Root cause** (S125 nuScEventHandler). KMC gcc emits the GNU `div` macro; the assembler
   (`tools/cc/as`) expands it and inserts the hazard nops — but only when it can see the consumer is too
   close. When gcc -O2 schedules the mflo consumer **into a loop-back `j`'s delay slot** (`mflo; j;
   addiu` — consumer 2 slots after mflo across the branch), `as` does not pad, while the original build
   emitted `mflo; nop; nop; j; addiu` (consumer 3 slots after). A standalone `int d(int a,int b){return
-  a/b - 3;}` does get the 2 nops by default, so it is **not a blanket missing flag** — it is the
+  a/b - 3;}` does get the 2 nops by default, so it is not a blanket missing flag — it is the
   loop-back-delay-slot scheduling that suppresses the pad.
 - **Flags do not help.** KMC gcc/as reject `-mfix4300`, `-mcpu=vr4300`, `-mtune=vr4300`,
   `-mfix-vr4300`, `-Wa,-mfix-vr4300` (modern-gcc/binutils flags absent in the KMC 2.7.2 / binutils-2.6
   toolchain).
 - **Not a permuter wall.** This was earlier framed as a permuter candidate, then nuScEventHandler
-  banked with no permuter: the 2 nops appear **naturally** once the function's data + volatility
-  scaffold is complete — specifically `nuScRetraceCounter` as a proper **per-TU volatile** (see
+  banked with no permuter: the 2 nops appear naturally once the function's data + volatility
+  scaffold is complete — specifically `nuScRetraceCounter` as a proper per-TU volatile (see
   `#volatile-global tell`) and `nuDebTaskPerf` placed in `symbol_addrs`. The earlier "missing nops" was
-  a **scaffold artifact** (an incomplete/header-flipped attempt scheduled the consumer differently), not
+  a scaffold artifact (an incomplete/header-flipped attempt scheduled the consumer differently), not
   a KMC-as scheduling wall. **Lesson: complete the per-TU-volatile + data scaffold and re-diff before
   concluding a mflo-hazard near-miss needs the permuter.** Most "byte-perfect except 2 nops" libnusys
   near-misses are an unfinished scaffold, not an assembler interaction.
-- **Resolution ladder.** (a) **Finish the scaffold first** — per-TU volatile globals + every referenced
+- **Resolution ladder.** (a) Finish the scaffold first — per-TU volatile globals + every referenced
   data symbol placed, then re-diff; the nops usually resolve. (b) Only if a complete-scaffold build
-  still SHA-misses by exactly the 2 nops is it a genuine scheduler/assembler wall → **permuter** (a source
+  still SHA-misses by exactly the 2 nops is it a genuine scheduler/assembler wall → permuter (a source
   form that keeps the mflo consumer out of the `j` delay slot, so it lands ≥3 slots after mflo, lets `as`
   insert the nops; `#permuter-setup-for-kmc-toolchain-mirrors`). Do not treat the 2-nop gap as a "try
   harder C" iteration — it is a scheduler/assembler interaction, not a logic mismatch.
@@ -4135,11 +4135,11 @@ was complete; the 2-nop gap was a scaffold artifact, not an assembler wall).
 **Trigger:** A `libnusys`/game mirror global that the asm accesses with **a dead reload immediately
 after a store** (`lw t,X; addiu t,t,1; sw t,X; lw t,X` where the 4th load's value is discarded) and/or
 is **re-read fresh on every reference instead of CSE'd** (e.g. `a - b` recomputed at each `==` compare
-rather than computed once) is **`volatile`** in the original.
+rather than computed once) is `volatile` in the original.
 
 **Procedure:**
 
-- **Tells.** (1) The dead reload-after-store is the **`volatile x++`** signature (gcc 2.7.2 re-reads
+- **Tells.** (1) The dead reload-after-store is the `volatile x++` signature (gcc 2.7.2 re-reads
   the volatile lvalue). (2) The per-read recompute (no common-subexpression elimination of `a - b`)
   means both operands are volatile, so each read is a fresh load. S125 nuScEventHandler:
   `nuScRetraceCounter`, `D_801B68E0`, `D_800B678C`, `D_8012F4D4` are all volatile.
@@ -4152,7 +4152,7 @@ rather than computed once) is **`volatile`** in the original.
   scheduler reproduces the target load order (compute `frame` inside the `>=0x1F` block, before
   the non-volatile pointer test, so the volatile reloads precede the pointer load).
 - **Inverse lever, `const`-extern forces cross-call CSE into a callee-saved reg.** The mirror of the
-  volatile tell: a fixed rodata constant read from an **extern global** and used across a `jal`
+  volatile tell: a fixed rodata constant read from an extern global and used across a `jal`
   Reloads on each use (gcc assumes the call may write the global) unless the extern is declared
   `const`, which lets gcc keep it in one callee-saved reg (a single load, reused across the calls).
   S169 `func_80076640` read a rad-to-deg double (`D_800D1868` / `D_800D18F0`) across two `guRotateF`
@@ -4176,11 +4176,11 @@ rather than computed once) is **`volatile`** in the original.
   codegen: GCC computes `&g` once into a held register and accesses `0(reg)` (and burns an extra saved
   reg in the prologue), instead of the reference's per-access `lui %hi(g); lw lo(g)` absolute addressing.
   Use the redeclaration, not the cast.
-- **Diagnosis when a shared-header volatile flip SHA-misses.** A single-read **modulo/division**
+- **Diagnosis when a shared-header volatile flip SHA-misses.** A single-read modulo/division
   (`x % n`, `x / n`) is volatile-sensitive (it changes scheduling/CSE) — S126 `nucontrmbmgr.c`'s lone
   `nuScRetraceCounter % nuContRmbSearchTime` grew `.text` +0x10 under the flip, cascading
   `main_RODATA_END`/BSS by +0x10 into a ~21M-byte ROM diff; a plain reload-pair read is volatile-neutral
-  (S126 `nugfxtaskmgr.c`). To find the grower fast, **map-diff the per-object section sizes**:
+  (S126 `nugfxtaskmgr.c`). To find the grower fast, map-diff the per-object section sizes:
   `diff <(grep '\.text.*0x' base.map) <(grep '\.text.*0x' edits.map)` after a clean build of each — the
   one object whose `.text`/`.rodata` size changed is the volatile-sensitive consumer.
 
@@ -4192,14 +4192,14 @@ modulo/division volatile-sensitivity + map-diff locator).
 
 ## -O0 boot/SDK-glue file profile (a per-file opt-level exception)
 
-**Rule:** a few game/SDK-glue TUs shipped compiled at **-O0**, not the -O2 game profile (nor the -O3
+**Rule:** a few game/SDK-glue TUs shipped compiled at -O0, not the -O2 game profile (nor the -O3
 lib profile) the rest of the segment uses. The nusys boot file (`src/libnusys/nuboot.c` = `nuBoot` +
 `idle`, the cart entry) is the known case. -O0 codegen is unmistakable and is the tell:
 
-- the **frame pointer is kept** (`addu $fp, $sp, $zero`; objdump `move s8,sp`, and the epilogue
+- the frame pointer is kept (`addu $fp, $sp, $zero`; objdump `move s8,sp`, and the epilogue
   `addu $sp, $fp, $zero` / `move sp,s8`) — -O1+ omits it here;
-- address loads are **recomputed inline**, not CSE'd into a saved register across calls;
-- an **unused parameter is spilled** to its stack home (`sw $a0, 0xNN($fp)`);
+- address loads are recomputed inline, not CSE'd into a saved register across calls;
+- an unused parameter is spilled to its stack home (`sw $a0, 0xNN($fp)`);
 - delay slots are still filled — so it is -O0 *with* `-fdelayed-branch` (the KMC default), not raw -O0.
 
 **Trigger / symptom:** a clean-looking asm-first seed (the C logic is right) builds but the full-make
@@ -4210,7 +4210,7 @@ iterate the C or reach for the permuter. Pin the level with the profile-probe
 (only same-TU section-relative reloc reps may differ, e.g. `.text+0x6c` vs the `idle` symbol, which
 link identically).
 
-**Procedure:** add a **file-specific** mk override (a file target is more specific than the tree
+**Procedure:** add a file-specific mk override (a file target is more specific than the tree
 pattern, so it wins): `$(BUILD_DIR)/$(SRC_DIR)/<tree>/<file>.o: C_PROFILE_CFLAGS := $(subst
 -O2,-O0,$(CFLAGS))`, placed in the tree's `mk/<lib>.mk` (or a new fragment `include`d after
 `mk/src.mk`). Never a `<tree>/%.o` pattern — the sibling TUs in the same tree stay -O2/-O3. S149
@@ -4224,13 +4224,13 @@ that beats the tree pattern).
 
 ## profile-probe (pinning the flags of a SHA-missing build)
 
-**Use:** when a built `.o` SHA-misses and you suspect the **compile flags** (opt level, `-g`,
+**Use:** when a built `.o` SHA-misses and you suspect the compile flags (opt level, `-g`,
 `-fdelayed-branch`, frame pointer), not the C. `tools/profile_probe.py --seg <seg> --func <fn>`
 assembles the target subseg `.s` into a relocatable object and KMC-compiles the candidate
 `src/<seg>.c` at each of a set of flag combos, then diffs the normalized `objdump -dr` (instruction
 stream + reloc-symbol lines) per function — pinning the matching flags in seconds, no full make.
 
-**Gotchas baked into the tool:** assemble the target with **modern GAS**
+**Gotchas baked into the tool:** assemble the target with modern GAS
 (`mips-linux-gnu-as -I include`), not `cpp -P | as` (cpp silently empties `.text` and the pipe
 "succeeds") and not KMC `as` (rejects `.set gp=64`); the candidate uses the KMC `gcc -S` + KMC `as`
 pipeline (`mk/src.mk`). Both objdumped with `mips-linux-gnu-objdump`, so the unresolved relocs (zeroed
@@ -4245,7 +4245,7 @@ the first comparison match only reloc lines and read as false 0-diffs). Pairs wi
 banks its simple fns clean at `-O2` but two-or-more register-pressure-heavy fns each hit a distinct
 regalloc-*artifact* wall (a dead frame the source can't force, a non-coalesced register copy the `-O2`
 build coalesces away, a spill the build doesn't emit — the "mine is more optimal than the target"
-class), do not profile-probe-then-carry each fn in isolation. Run **one TU-wide profile-probe first**:
+class), do not profile-probe-then-carry each fn in isolation. Run one TU-wide profile-probe first:
 a single subtle flag/patchlevel that makes GCC coalesce-less or spill-more would flip multiple fns at
 once, so the whole-TU probe is cheaper than N per-fn dives and, if it hits, converts several carries to
 banks together. If the TU-wide probe finds nothing (the simple fns already pin the profile, and no flag
@@ -4287,7 +4287,7 @@ Distinct from `#static-name-collision`
 ## vendored-header inversion (a curated libultra header diverges from the ultralib pin)
 
 **Rule:** a vendored libultra header can ship a macro that is wrong vs the upstream pin — not merely
-reformatted but functionally **inverted**. `include/libultra/PR/os_host.h` had
+reformatted but functionally inverted. `include/libultra/PR/os_host.h` had
 `#define __osInitialize_common() osInitialize()`, the inverse of upstream's
 `#define osInitialize() __osInitialize_common()`. The real VERSION_J symbol is `__osInitialize_common`
 (Ghidra correct) and `osInitialize()` is the public macro over it; the inverted macro forced a
@@ -4343,7 +4343,7 @@ guarded form (extra frame + `c.eq`/`bc1t` + `jal` fallback) — e.g. `build/src/
 (libultra -O3, no -ffast-math) shows `sqrt.s` immediately followed by `c.eq.s`/`bc1t`, the reference
 guarded shape.
 
-**Procedure:** add a **file-specific** mk override (a file target beats the tree `%.o` pattern):
+**Procedure:** add a file-specific mk override (a file target beats the tree `%.o` pattern):
 `$(BUILD_DIR)/$(SRC_DIR)/main/<file>.o: C_PROFILE_CFLAGS := $(MAIN_CFLAGS) -ffast-math` in
 `mk/main.mk`. Declare the prototype in the TU (`double sqrt(double);` or `extern f32 sqrtf(f32);`); a
 matching redeclaration keeps the builtin, and no `#pragma intrinsic` is needed. Never a `main/%.o`
@@ -4374,10 +4374,10 @@ fns); S153 (single `hypotf_2d`); S245 (`func_80078910.o`, mid-file leaf, sibling
 **Rule:** GCC 2.7.2 `expand_end_loop` (stmt.c, the "roll the entry test to the end" reorder) inverts
 every structured top-tested loop at -O2 — a `while` / `for` / `for(;;)+break` whose test is at the top
 becomes a guard-`j` + body-first + bottom test, and the delay-slot filler then annuls the back-branch
-into a **branch-likely** (`beql`/`bnel`; `BRANCH_LIKELY_P() = mips_isa >= 2` in `config/mips/mips.h`,
-so any `-mips2`+ target may emit it). When the ROM loop is **top-tested with plain `beq`/`bne`** (falls
+into a branch-likely (`beql`/`bnel`; `BRANCH_LIKELY_P() = mips_isa >= 2` in `config/mips/mips.h`,
+so any `-mips2`+ target may emit it). When the ROM loop is top-tested with plain `beq`/`bne` (falls
 straight into the test, a `j` back-edge, delay slots filled from fall-through, no branch-likely), no
-structured loop reproduces it — reconstruct the control flow with explicit **`goto`s**. `loop.c` only
+structured loop reproduces it — reconstruct the control flow with explicit `goto`s. `loop.c` only
 optimizes loops marked with `NOTE_INSN_LOOP_BEG`/`_END` notes, which only the structured loop
 constructs emit (stmt.c `expand_start_loop`), so a goto-loop is invisible to `expand_end_loop` and is
 never inverted.
@@ -4385,7 +4385,7 @@ never inverted.
 **The hoist corollary:** because `loop.c` also ignores goto-loops, their loop-invariant constants are
 not hoisted — the goto-loop re-materializes them every iteration (its `j` back-edge targets the
 constant loads). To match a ROM that hoists them (constants in the preamble, `j` back-edge targets the
-*test*), declare each invariant as a **local variable** initialized before the loop (`s32 off =
+*test*), declare each invariant as a local variable initialized before the loop (`s32 off =
 0xE0000000; u32 bound = 0xBFFFFFFF;`): the register allocator keeps the local live across the loop = a
 manual hoist. The local-decl order also fixes the preamble load order (declare/use the one the ROM
 loads first, first). Write the compare in the ROM's operand form (e.g. `bound < (u32)(x + off)`
@@ -4400,7 +4400,7 @@ these (magics/literals in the preamble, `j` back-edge targets the test), the fix
 goto-loop: use a **structured `while(1){ … if(exit) break; … }`**, which carries the
 `NOTE_INSN_LOOP` markers so `loop.c` hoists the magic-constant loads — and when the loop's exit test
 reads memory (`c = *p++`), `expand_end_loop` does not rotate it (the non-fixed memory read blocks the
-roll-to-end, same predicate as `check_dbra_loop`), so the structured `while(1)` stays **top-tested**,
+roll-to-end, same predicate as `check_dbra_loop`), so the structured `while(1)` stays top-tested,
 giving both the hoist and the un-inverted shape. S171 `func_8004DAF4` (a scrollback console-puts with
 `/40` + `%4800` + a `' '`-fill loop): the goto-loop rematerialized `0x66666667`/`0x1B4E81B5`/`0x20`
 each iteration; swapping to `while(1){…break}` hoisted them to `t2`/`t0`/`t1` and matched byte-exact.
@@ -4413,7 +4413,7 @@ goto-loop.
 **pressure-limited partial hoist** — it hoists the loop-invariant *array bases* to held registers but
 **re-materializes a compiler-generated `%`/`/` magic** at the loop tail each iteration (loop.c ran out
 of hoisting registers after the bases and left the magic in the loop). A structured `do-while`/`while(1)`
-hoists **both** (bases and magic → too many held constants); a plain **goto** outer loop de-hoists
+hoists both (bases and magic → too many held constants); a plain goto outer loop de-hoists
 **both** (loop.c skips it → bases re-loaded too). The fix that gets both right (**S173 resolution of
 the S172 "partial fix"**): keep the outer loop `goto` (de-hoists the magic → re-materialized at the
 tail, matching the ROM), and **pre-declare each array base as a pointer variable initialized before the
@@ -4424,9 +4424,9 @@ it — a manual base-hoist that leaves the magic correctly de-hoisted. So the go
 here; base-pointer vars restore the base hoist. Declare the bases after the entry guard (`if(n<=0)
 return;`) so they land in the loop preheader (after the `blez`), like the ROM. S172/S173 `func_8004DC44`
 (a ring-buffer→grid blit with `%4800` wrap): do-while hoisted `0x1B4E81B5` to `t1`; the outer-goto +
-pre-declared base-pointer vars gives base-hoist + magic-remat with **operations 100% matching** — the
+pre-declared base-pointer vars gives base-hoist + magic-remat with operations 100% matching — the
 only residual is then a dead spill frame + register permutation, which routes to the permuter/carry
-(`#dead-frame-reload-artifact-regalloc-wall`). **Tell:** a structured-loop build is byte-close but a
+(`#dead-frame-reload-artifact-regalloc-wall`). Tell: a structured-loop build is byte-close but a
 compiler magic is held in a register across the loop where the ROM re-loads `lui/ori` at the tail, and
 the ROM still holds other invariants (bases) hoisted — use goto + base-pointer vars, not a structured loop.
 
@@ -4474,7 +4474,7 @@ the exact instruction set + registers (`i`=`v1`, `p`=`a1`, plain `bne` back-edge
 delay), but the ROM emits `li v1,5` before `la a1` while every right-regs source form emits `la` first;
 declaring `i` first put `li` first but swapped the regs (`i`→`a1`, `p`→`v1`). A 1-instruction schedule
 transposition with coupled regalloc = route to the permuter (it perturbs schedule and regalloc
-independently), do not keep spelling source. **Method that proved it (S208):** compile 3–4 candidate
+independently), do not keep spelling source. Method that proved it (S208): compile 3–4 candidate
 source spellings straight to `.s` with the project compiler — `COMPILER_PATH=tools/cc tools/cc/gcc -S
 -G 0 -mips3 -mgp32 -mfp32 -mno-abicalls -O2 -o t.s t.c` on a tiny standalone snippet (stub the callees,
 `extern` the globals) — and read the codegen side-by-side. It is a build-free, flowing-bss-immune
@@ -4508,8 +4508,8 @@ search-loop terminator-condition framing: S213 (`lookup_animation_by_id`, byte-e
 
 ## decomposed-one-tu rodata alignment split (a counter-case to the 8-point decompose gate)
 
-**Rule:** when the 8-point decompose gate splits a one-tu into N `.c`/`.o` files, the **last** piece's
-`.rodata` can be followed **in memory** by the **next** TU's higher-aligned constant (a `.double`, an
+**Rule:** when the 8-point decompose gate splits a one-tu into N `.c`/`.o` files, the last piece's
+`.rodata` can be followed in memory by the next TU's higher-aligned constant (a `.double`, an
 8-aligned jumptable). The build force-4-aligns every asm `.rodata` section (`OBJCOPY_ALIGN :=
 --set-section-alignment .rodata=4 ...` in `Makefile`, plus `ASFLAGS --no-pad-sections`), so the
 asm-sourced next-TU rodata cannot self-8-align at the `.o` boundary: it lands right after the split
@@ -4518,15 +4518,15 @@ The C `.o` recipe (`mk/src.mk`, KMC `as`) does not get that objcopy, so a C `.o`
 natural (higher) alignment.
 
 **Tell:** clean per-function match (isolated diff shows only relocations), full-make SHA-miss, and
-hundreds of **scattered** single-byte diffs across the whole text, each `built = base - 4` (or `- 8`)
+hundreds of scattered single-byte diffs across the whole text, each `built = base - 4` (or `- 8`)
 — the low byte of a `%lo(D_xxxx)` for every data symbol past the shifted boundary. `verify-rom.sh`
 fails while the `.o` is byte-perfect.
 
 **Fix:** do not decompose a one-tu whose tail rodata abuts a higher-aligned next-TU constant — keep
-the whole one-tu as **one** `.c` file. An internal higher-aligned constant (S154 func_8006A000's two
+the whole one-tu as one `.c` file. An internal higher-aligned constant (S154 func_8006A000's two
 `2^31` cast `double`s, 16-align) makes the combined section 16/8-aligned, and KMC `as` pads its tail
 to the boundary (S154 48B = 2 doubles + 2 string literals + pad, ending exactly at `0x800D1440` where
-the next TU's 8-aligned double sits). This also keeps format strings as **actual** C literals rather
+the next TU's 8-aligned double sits). This also keeps format strings as actual C literals rather
 than `extern D_xxxx[]` refs into the generic asm blob (see
 `docs/levers.md` (rodata strings as literals via tu combine)). Splat's per-subseg `align:` is segment-level only
 (gated by `ld_align_segment_vram_end: False`), so it cannot force an intra-section pad. Weigh
@@ -4631,10 +4631,10 @@ cannot score it (asm-differ is blind to internal branch targets — see the perm
 
 **Rule:** for a sentinel-terminated (`!= -1`) array walk, the ROM's scheduling around the loop
 (entry-branch delay-slot fill, and whether a loop-invariant constant is hoisted) depends on whether
-the source iterates by **index** (`for(i=0; a[i]!=X; i++){ v=a[i]; use(v); }`, a `u32` index + a
-value temp) or by **pointer** (`p=a; do{ use(*p); p++; }while(*p!=X)`). The two forms are
+the source iterates by index (`for(i=0; a[i]!=X; i++){ v=a[i]; use(v); }`, a `u32` index + a
+value temp) or by pointer (`p=a; do{ use(*p); p++; }while(*p!=X)`). The two forms are
 **byte-identical** in isolation (gcc strength-reduces `a[i]` to a pointer either way), so a small
-isolated compile hides the difference — but they **diverge** inside a full TU. **Tell:** a
+isolated compile hides the difference — but they diverge inside a full TU. Tell: a
 seg/segment/id-list walk (or any `-1`/sentinel-terminated array loop) that matches the whole
 function except a 1-instruction swap in the loop preheader — a `move reg,base` vs a `li` constant
 filling the entry `beq`/`bne` delay slot, or a loop-invariant `-1` hoisted to an outer loop's
@@ -4643,7 +4643,7 @@ preheader (an extra `li aN,-1` before the loop and a shifted scratch reg). When 
 `load_overlay`/`unload_overlay`/`func_80025F18` all matched only in the indexed form
 (`for(byte_index=0; seg[byte_index]!=-1; byte_index++){ byte = seg[byte_index]; ...}`), after the
 pointer form left a `move v1,s2`-in-the-delay-slot miss (load/unload) and a `-1`-hoisted-to-a3 miss
-(F18). Also fold multiple `if(cond) continue;` guards into **one** `if(a||b||c) continue;` when the
+(F18). Also fold multiple `if(cond) continue;` guards into one `if(a||b||c) continue;` when the
 ROM uses a single combined test (F18's three range guards).
 
 **Sub-lever — index a pointer variable, not the array symbol (S168).** Within the indexed form, the
@@ -4683,10 +4683,10 @@ struct-array store loop can byte-match the ROM in every way except the base regi
 the running pointer at the element start (init `addiu base,%lo(ARR)` addend 0, positive field stores
 `sw v0,0x18(base)`…`sb v0,0x30(base)`), but a carried `T *dst = ARR; …dst->f…; dst++;` build biases the
 base to the max accessed offset (init `addiu base,%lo(ARR)+0x30`, negative stores `sw v0,-0x18(base)`…
-`sb v0,0(base)`) — same instruction count, same structure, only the immediates differ. **Cause:** with a
+`sb v0,0(base)`) — same instruction count, same structure, only the immediates differ. Cause: with a
 carried pointer, GCC 2.7.2 `loop.c` `combine_givs` reduces the per-field store-address givs
 (`base+0x18`,`base+0x1C`,…,`base+0x30`) to one combined giv whose base = the first-in-list giv (the max
-offset), expressing the rest as negative deltas. **Fix:** compute the per-element pointer inside the loop
+offset), expressing the rest as negative deltas. Fix: compute the per-element pointer inside the loop
 as a strength-reduced giv of the counter — `T *dst = &ARR[i];` (not carried `dst++`). The recompute form
 keeps the biv at the element base (positive offsets = the ROM). Cracked `func_800444B8` (the
 `D_800BB258[i]` copy loop, s0 biased +0x30) and `func_80043C64`'s per-club dump loop (s0 biased +0x1C) in
@@ -4708,7 +4708,7 @@ advances both by one element per iteration (`func_800432E4`: 3 iters, compare `a
 4/0xA/0x10, `a++;b++;` each iter). The pointer-increment form
 `for(i=0;i<3;i++,a++,b++){ if(a[2]!=b[2])… }` makes `loop.c` strength-reduce the `a++`/`b++` biv into
 a base pre-incremented by the whole accessed span (`addiu a0,0x10` at the loop top) with negative
-displacements (`lh v1,-0xc(a0)`) — same structure, wrong immediates + an extra branch form. **Fix:**
+displacements (`lh v1,-0xc(a0)`) — same structure, wrong immediates + an extra branch form. Fix:
 the index form on non-incremented bases — `for(i=0;i<3;i++){ if(a[i+2]!=b[i+2])… }` — keeps the base
 fixed with the ROM's positive offsets (`lh v1,4(a0)`) and emits the `beql` last-check the target uses.
 S215 `func_800432E4` matched byte-exact on the index form after the `a++` form strength-reduced wrong.
@@ -4726,14 +4726,14 @@ by move_movables. Then:
 - **Pointer `p = a`:** `p` is a *basic* induction variable (biv); `move p,base` is original preheader
   code, sitting before the constants move_movables inserts. Order = `[move biv-ptr][li const]`.
 - The delay-slot filler (`reorg.c` `fill_slots_from_thread`) fills the entry-check `beq` delay with
-  the first preheader instruction → the **constant** (indexed, matches the ROM) vs the **move**
+  the first preheader instruction → the constant (indexed, matches the ROM) vs the move
   (pointer, miss). The same reordering keeps a nested-loop `-1` from being hoisted to the outer
   preheader.
 
 **Assembler note (binutils 2.6):** gcc wraps the branch + its delay slot in `.set noreorder` /
 `.set nomacro`, so the assembler does not touch the delay-slot fill (it is gcc's reorg). binutils
 only expands macros (`move`→`addu` `0x…21`, `li`→`addiu`/`lui+ori`) and schedules the `.set reorder`
-spans. **False lead retired:** KMC gcc 2.7.2 ignores source line numbers — same-line source produces
+spans. False lead retired: KMC gcc 2.7.2 ignores source line numbers — same-line source produces
 byte-identical codegen (verified empirically), unlike IDO. So the permuter's `perm_sameline` pass is
 a no-op for this toolchain; do not weight it (see `#permuter-setup-for-kmc-toolchain-mirrors`).
 
@@ -4761,7 +4761,7 @@ post-inc idiom.
 ## call-arg delay-slot fill + field-alias addend-0 (S214 scenery levers)
 
 Four levers from the `func_80026400.c` scenery pack (S214), all banked byte-exact via the
-compiler-source subagent fan-out with **zero permuter runs**. They compose with
+compiler-source subagent fan-out with zero permuter runs. They compose with
 `#top-tested-loop-goto-local-hoist` and `#indexed-vs-pointer-loop`.
 
 **0. Stale-wall retired (the meta-lesson).** `func_80026400` carried 7 sprints as an S207
@@ -4773,7 +4773,7 @@ only trustworthy when a rigorous dive cites the diverging pass+line (contrast th
 did). See the `revalidate-old-carries-stale-wall` memory.
 
 **1. Call-crossing arg → statement-order delay-slot lever (func_80026400).** An expression whose inputs
-are live across a call, but which is only *used* after the call, must be **written late in source**
+are live across a call, but which is only *used* after the call, must be written late in source
 (after the call, its result declared uninitialized). `void* end; osSyncPrintf(fmt); f(); end = block +
 size;` matches — `size` parks in a callee-saved reg across the printf (its arg-copy `move s0,a1` fills
 the printf's delay slot) and the `addu` lands after `f()`, filling `f()`'s delay slot. Writing `end`
@@ -4784,9 +4784,9 @@ only control.
 
 **2. Per-field 0x10-stride alias structs → reloc addend 0 (project_sort / update_transforms).** When a
 game record's fields each carry a *distinct* symbol (`collision_cylinders`, `D_800FBEA2/A4/A6/AA/AC/AE`
-at offsets 0/2/4/6/A/C/E of a 0x10 record), model each as its **own 1-field 0x10-stride array**
+at offsets 0/2/4/6/A/C/E of a 0x10 record), model each as its own 1-field 0x10-stride array
 (`typedef struct { s16 val; s8 pad[0xE]; } CylFieldS16; extern CylFieldS16 SYM[];`), not one struct-array
-over a single base. The shared loop index then re-materialises each symbol's `%hi/%lo` with **addend 0**,
+over a single base. The shared loop index then re-materialises each symbol's `%hi/%lo` with addend 0,
 matching the reference relocs. A single struct-array base would emit nonzero LO16 addends and miss. Kin
 to `#offset-0-symbol-re-materialization`.
 
@@ -4815,9 +4815,9 @@ wall and matched the FP stretch the plan expected to carry.
 permutation is the whole-function register-allocation wall; resolve it with the ordered playbook
 below.
 
-**Trigger:** a classical (usually `src/main/`, game-O2) function whose C is **structurally** correct
-(asm-differ rows all align, `match_count == total_rows`) but locks with a **high** score because the
-register allocation is **pervasively** wrong (a systematic hard-reg permutation like `i:s4↔s5`, plus
+**Trigger:** a classical (usually `src/main/`, game-O2) function whose C is structurally correct
+(asm-differ rows all align, `match_count == total_rows`) but locks with a high score because the
+register allocation is pervasively wrong (a systematic hard-reg permutation like `i:s4↔s5`, plus
 scratch-reg swaps, spill-slot ordering, and delay-slot scheduling). Not a 1-2 instruction near-miss.
 This is the hardest classical class.
 
@@ -4841,12 +4841,12 @@ fresh build of the faithful C was 40 (a redundant `andi` + a `move`); the exact-
 documented tie-break.
 
 **Triage tell — a pure-integer decoder/codec is this wall, not a "clean leaf".** At the plan
-gate, `0-jal + no-float + no-rodata/data + args-only` reads as a **low-risk** seed-5 leaf — but a tight
+gate, `0-jal + no-float + no-rodata/data + args-only` reads as a low-risk seed-5 leaf — but a tight
 decoder/codec (LZ/RLE, CRC, a bit-stream/ring-buffer walker: many back-to-back `sll`/`srl`, a
 software-pipelined load-store copy chain, a self-recursive or ring-buffer index, a control-word bit
-loop) is the **opposite**. The dense scheduling + a handful of long-lived pointers packed into `t0-t9`
-puts it squarely on **this** wall, and it will need the permuter/fan-out, not a first-build match. Price
-such a fn as a pervasive-regalloc unit (**seed 8+, expect permuter**), **not** seed-5. S164 mis-priced a
+loop) is the opposite. The dense scheduling + a handful of long-lived pointers packed into `t0-t9`
+puts it squarely on this wall, and it will need the permuter/fan-out, not a first-build match. Price
+such a fn as a pervasive-regalloc unit (seed 8+, expect permuter), not seed-5. S164 mis-priced a
 3-fn LZ trio (`lz_decompress_simple.c`) seed-5 and carried all 3 (`dma` matched only because its
 residual was reloc artifacts; `simple`/`extended` reached structural-complete but locked on the
 register permutation — `control` grabs `$v0` first via its short live range, target keeps it in `$a2`).
@@ -4856,19 +4856,19 @@ reading the fn's shape.
 **Resolution upgrade — this wall is source-steerable, not permuter-only.** The codec triage
 tell was re-confirmed (both LZ leaves hit it), but a codec/decoder is no longer only "structural-
 complete + carry": the loop-weight / live-length levers in `#loop-weight-and-live-length-regalloc-
-steering` can carry it to a full byte **match** (S166 cracked `lz_decompress_simple`, the project's
+steering` can carry it to a full byte match (S166 cracked `lz_decompress_simple`, the project's
 hardest wall, 8600→0). Price it seed-8+/expect-permuter still, but before concluding "irreducible,"
-run the loop-weight/live-length source levers **first** (they precede the permuter); the permuter closes
-only the residual allocno-number tiebreak, and on a goto-loop fn it must run **safe-passes-only** (see
+run the loop-weight/live-length source levers first (they precede the permuter); the permuter closes
+only the residual allocno-number tiebreak, and on a goto-loop fn it must run safe-passes-only (see
 `#permuter-goto-backedge-liveness-unsound`).
 
 **Seed-order sub-lever — a scalar/record init fn: seed in field/row order, not Ghidra's statement
 order (S189).** For a fn that is just a run of scalar global stores (a table/record initializer), the
-Ghidra decompile reconstructs the **compiler-scheduled** store order, which has already collapsed the
+Ghidra decompile reconstructs the compiler-scheduled store order, which has already collapsed the
 reused-constant live ranges (it groups the two `= 0x800` stores adjacent so one register serves both,
 etc.). Seeding in that order reproduces the *collapse*, not the ROM: GCC then packs the reused
 constant into a scratch reg (`v0`) instead of the ROM's front-loaded dedicated reg. Re-seed in the
-human **row/field order** (record[0].f0, .f1, .f2, record[1].f0, …): that spreads each reused
+human row/field order (record[0].f0, .f1, .f2, record[1].f0, …): that spreads each reused
 constant's first and last use apart so its live range crosses the intervening stores, forcing GCC to
 front-load it into its own register (`li a0,0x800` / `li v1,-0x100` up top) exactly as the ROM does.
 S189 `func_800676B0` (9 `s16` record-field stores + a `sw`) missed in Ghidra's order (`0x800`→`v0`,
@@ -4878,14 +4878,14 @@ reuses of that constant are adjacent in your seed. Cheap to try before any deepe
 
 **Exact-count-first re-open sub-lever (S272) — reproduce what the ROM hoists, then the permutation
 resolves with the count.** Before quoting a live-length / register-pressure / "needs an Nth callee-saved
-reg" argument to call a permutation terminal, get the body to the ROM's **exact instruction count**, and
-achieve it by materializing every value the ROM **hoists or reorders** as an explicit source temp — a
+reg" argument to call a permutation terminal, get the body to the ROM's exact instruction count, and
+achieve it by materializing every value the ROM hoists or reorders as an explicit source temp — a
 product (`ia0*3`), a forward difference, a loop-invariant, or a deferred param copy. Two S272 banks that
 each carried a strongly-worded terminal verdict fell to this one move:
 - **Integer biv/allocno (cracks the S242 "needs a 9th reg" verdict, `func_80076138`/`emit_glyph_string_dl`).**
   A preheader-local `u8* p = str;` inside the guard block defers the `str` param's callee-saved copy from
-  function entry to the loop **preheader** (`move s2,a3` after the guard), shortening str's live_length
-  below `i`'s so the allocno order flips to str→`$s2` / i→`$s3` — with **no** 9th reg (gcc keeps the arg in
+  function entry to the loop preheader (`move s2,a3` after the guard), shortening str's live_length
+  below `i`'s so the allocno order flips to str→`$s2` / i→`$s3` — with no 9th reg (gcc keeps the arg in
   `$a3` until the preheader; the extra pseudo coalesces with the arg home). It only landed cleanly after a
   register-cursor + a fresh post-loop temp + explicit invariant temps got the body to exact count 69/69
   first; the "9th reg" claim had been drawn from a non-exact body (double-store + wrong post-loop schedule).
@@ -4894,7 +4894,7 @@ each carried a strongly-worded terminal verdict fell to this one move:
   ROM's early hoist of that product (`sll;addu` right after the ia0/ia1 truncations), which reaches exact
   count 65/65 (was 63) and collapses the ia0/ia1/d0/d1 → `$a2/$a0/$a1/$a3` coloring in one edit, because
   the extra pseudo changes the truncation-temps' birth order / live ranges. The S206 doc had tried
-  "reorder the decl/compute order" (regressed to 0.50) but not materializing the **arithmetic** the ROM
+  "reorder the decl/compute order" (regressed to 0.50) but not materializing the arithmetic the ROM
   hoists as its own temp. This is stronger than the S233 "FP walls are block-local scheduler coins, not
   steerable" framing: a hoist-driven FP permutation is steerable; only the genuinely-terminal
   load-latency constant-hide coin (S233) is not.
@@ -4904,74 +4904,74 @@ ROM's hoists," and a non-exact body's pressure claim is provisional (memory
 
 **The playbook (in order):**
 
-1. **Build an exact-symbol isolated base.** Use **per-field** structs so each accessed field is its **own**
+1. **Build an exact-symbol isolated base.** Use per-field structs so each accessed field is its own
    base symbol at offset 0 (`Esc D_801B711A[]` for the score field, `Eho D_801B711C[]` for hole,
-   etc.), **not** one combined struct + folded offset (`D_801B7118[i].score` = base+`i*stride`+2). Two
+   etc.), not one combined struct + folded offset (`D_801B7118[i].score` = base+`i*stride`+2). Two
    reasons: (a) the decomp-permuter's scorer and asm-differ both count a reloc-symbol/addend mismatch
-   (`D_801B7118+2` vs the target's `D_801B711A`) as a permanent nonzero **floor** even though they **link** to
+   (`D_801B7118+2` vs the target's `D_801B711A`) as a permanent nonzero floor even though they link to
    identical bytes, so exact symbols are required for the permuter to reach 0; (b) the offset-folding
-   itself changes **scheduling** (see `#struct-access-folding-changes-scheduling`). The combined-struct
+   itself changes scheduling (see `#struct-access-folding-changes-scheduling`). The combined-struct
    form is fine for the final in-tree file (it links identically); use per-field only for the
    permuter/measurement base, then translate back.
 
 2. **Apply ref-count / live-range levers — decl order is inert.** KMC gcc 2.7.2 allocates by
-   `global.c` allocno priority (`floor_log2(n_refs)*n_refs/live_length`), **not** declaration order
+   `global.c` allocno priority (`floor_log2(n_refs)*n_refs/live_length`), not declaration order
    (verified S158: every decl permutation gave the identical object). So to flip which of two
-   variables gets the earlier hard register, change a **ref count** or a **live range**, not the decl order.
-   Levers that worked: **param/var-reuse** (clamp/compute into an existing arg in place instead of a
+   variables gets the earlier hard register, change a ref count or a live range, not the decl order.
+   Levers that worked: param/var-reuse (clamp/compute into an existing arg in place instead of a
    fresh local — `if (arg0 > 0x12) arg0 = 0x12;` drops a `base` local; use `i - 1` inline instead of a
-   `seq` counter — this is the S157 trick generalized); **init-early / compute-late** to lengthen or
-   shorten a live range by even one instruction (S158 func_80068308: computing `lo` as the **last**
+   `seq` counter — this is the S157 trick generalized); init-early / compute-late to lengthen or
+   shorten a live range by even one instruction (S158 func_80068308: computing `lo` as the last
    prologue statement dropped its live range 27→26 insns, enough to outrank `found` for s2);
    **struct alignment** (align-2 the copied entry struct so a 6-byte struct-copy emits word+halfword
-   `lwl/lwr`+`lh/sh` instead of word+`lb`/`sb`); **LICM-alias defeat** (store through a symbol-less
+   `lwl/lwr`+`lh/sh` instead of word+`lb`/`sb`); LICM-alias defeat (store through a symbol-less
    const-pointer base `T *rp = D_XXXX; rp[j].field = …` so GCC's `memrefs_conflict_p` can't prove
-   non-aliasing and does **not** hoist a loop-invariant load that the ROM recomputes — an indexed
-   `D_XXXX[j]` with a distinct symbol disambiguates and wrongly hoists); **loop form** (for vs
+   non-aliasing and does not hoist a loop-invariant load that the ROM recomputes — an indexed
+   `D_XXXX[j]` with a distinct symbol disambiguates and wrongly hoists); loop form (for vs
    do-while vs pointer-walk changes the strength-reduced giv-init placement in the preheader);
    **operand/eval order** (swap `a > b` operands, or cast pointer arith to integer to force
-   offset-first `addu`); and the **return type** (see `#return-type-is-load-bearing`).
+   offset-first `addu`); and the return type (see `#return-type-is-load-bearing`).
 
 3. **Then run the boosted-weight permuter** from the best structural base to close the residual
    spill-slot ordering + scheduling. Boost the stack-layout passes in `settings.toml`
    `[weight_overrides]`: `perm_reorder_decls`, `perm_pad_var_decl`, `perm_reorder_stmts`,
-   `perm_temp_for_expr`, `perm_commutative`, `perm_randomize_function_type`. Run **annealing** (drop
+   `perm_temp_for_expr`, `perm_commutative`, `perm_randomize_function_type`. Run annealing (drop
    `--best-only`, which stalls on plateaus). If it plateaus, seed `base.c` with the current best
    `output-<score>/source.c` and re-run. S158's fns closed at permuter iterations in the hundreds to
-   low-thousands **once** the structural base was right; from a wrong base they plateaued indefinitely
+   low-thousands once the structural base was right; from a wrong base they plateaued indefinitely
    (the permuter cannot invent the param-reuse / align / LICM levers — do those by hand first).
    **On a goto-loop fn, restrict `[weight_overrides]` to safe passes only** (`perm_reorder_decls`,
    `perm_pad_var_decl`, `perm_randomize_function_type`) and zero the var-reuse passes: the reuse
    passes produce semantically-invalid sub-floor minima that also poison the resume seed (S166, two
    instances; see `#permuter-goto-backedge-liveness-unsound`). Apply the source-side loop-weight /
-   live-length levers (`#loop-weight-and-live-length-regalloc-steering`) **before** this step — they can
+   live-length levers (`#loop-weight-and-live-length-regalloc-steering`) before this step — they can
    carry the match on their own, leaving the permuter only the allocno-number tiebreak.
 
 **Metric caveat (do not trust the score for "matched"):** the permuter's own score and asm-differ's
-`current_score` weight **very** differently (S158: permuter 895 == asm-differ 6620 == 66 diff rows), and
+`current_score` weight very differently (S158: permuter 895 == asm-differ 6620 == 66 diff rows), and
 **both** count link-identical reloc artifacts as false diffs — the per-field/combined addend
 (`D_801B711A` vs `D_801B7118+2`) and the intra-file `jal` shown as a `.text`-relative reloc (isolated
-target.o) vs a named-symbol reloc (in-tree). **Verify** a match by a **raw-instruction** diff of the **linked**
+target.o) vs a named-symbol reloc (in-tree). Verify a match by a raw-instruction diff of the linked
 bytes (`objdump -d … | awk '{$1=""}'` both sides) or the full-make ROM SHA-1 — not the score, which
 floors above 0 on these artifacts.
 
 **Process — multi-agent fan-out is the tool for this wall.** Solo attempts + a solo permuter plateau;
-S158 cracked it with a worktree fan-out (`isolation: worktree`): each agent **symlinks** the gitignored
+S158 cracked it with a worktree fan-out (`isolation: worktree`): each agent symlinks the gitignored
 toolchain (`tools/cc`, `venv`, `tools/decomp-permuter`) from the main repo into its worktree, `cp`s
 the isolated base + builds the reference object, then sweeps logic-preserving structural variants
-(measuring each) and runs a boosted permuter. The **systematic** order-sweep agent (many variants, each
+(measuring each) and runs a boosted permuter. The systematic order-sweep agent (many variants, each
 measured) is what discovered the param-reuse / align / return-type levers the permuter alone could
 not. Run one agent per remaining function.
 
-**Fan-out robustness.** A shared-account **session-usage limit** can kill every agent mid-run with
+**Fan-out robustness.** A shared-account session-usage limit can kill every agent mid-run with
 no partial-result handoff (S164: all 3 agents died at once on the reset boundary). Harden the fan-out:
-(a) each agent `cp`s its best `base.c` to a durable path (e.g. `scratchpad/best_<fn>.c`) on **every** new
+(a) each agent `cp`s its best `base.c` to a durable path (e.g. `scratchpad/best_<fn>.c`) on every new
 best score, so a mid-run kill leaves the best state, not whatever was last written; (b) stagger/cap
 the concurrent permuter agents (`-j 4` each, not `nproc-1`) to bound the account-usage burn; (c) the
-usage window **resets** on a clock (the kill message names the reset time) — a killed fan-out can be
+usage window resets on a clock (the kill message names the reset time) — a killed fan-out can be
 **re-launched** verbatim after the reset (resume from the on-disk `base.c`), so a limit-kill is a pause,
 not a dead end. Agents that only touch their own `nonmatchings/<fn>/` + isolated `decomp_loop.py` +
-their own permuter dir do **not** need worktrees (no `src/`/`make`/yaml writes → no shared-tree race);
+their own permuter dir do not need worktrees (no `src/`/`make`/yaml writes → no shared-tree race);
 skip the `isolation: worktree` cost when the work is measurement-only.
 
 **Provenance.** whole-function regalloc wall established on all three non-trivial fns of a 5-fn one-tu
@@ -4984,9 +4984,9 @@ pervasive FP-regalloc/scheduling wall class, the FP analogue of the S183 integer
 The recurring irreducible tell: the ROM hoists all of a fn's products before any store (high
 simultaneous FP liveness) and parks one product in a 6th callee-saved FP reg (`$f30`/`fs5`, frame
 grows -0x48 → -0x50), while faithful C lets GCC interleave compute-and-store → 5 callee-saved regs +
-a callee-saved permutation of the sin/cos values. This is **priority-driven** allocation: `config/mips/mips.h`
+a callee-saved permutation of the sin/cos values. This is priority-driven allocation: `config/mips/mips.h`
 defines no `REG_ALLOC_ORDER` (default ascending), so the assignment comes purely from live-range
-priority, and it is **not forceable from source** — neither inline expressions nor explicit product
+priority, and it is not forceable from source — neither inline expressions nor explicit product
 temps make GCC reserve the 6th reg (nothing crosses a call after the sin/cos, so the value doesn't
 *need* callee-saved; GCC just prices it there). Confirm-don't-thrash: read the ultralib gu source for
 the shape (e.g. `guRotateRPYF` for an rpy builder), verify the values/product-order match, then carry.
@@ -5000,82 +5000,82 @@ FP-regalloc walls (`func_80065A1C` compiler-source-confirmed irreducible).
 loop-weight (the numerator) and live-length (the denominator); apply these source-side levers to a
 structurally-complete pervasive-regalloc fn before concluding it is irreducible.
 
-**Trigger:** a `#pervasive-regalloc-classical-main` fn that is **structurally** complete but locks on a
-hard-register permutation the permuter alone plateaus on — specifically, the miss is **which** of two
+**Trigger:** a `#pervasive-regalloc-classical-main` fn that is structurally complete but locks on a
+hard-register permutation the permuter alone plateaus on — specifically, the miss is which of two
 values wins an earlier caller-saved reg. Before concluding "irreducible," the KMC gcc 2.7.2 allocno
-priority `floor_log2(n_refs)*n_refs / live_length` (global.c:594-601) is **steerable** from C source along
+priority `floor_log2(n_refs)*n_refs / live_length` (global.c:594-601) is steerable from C source along
 two independent axes.
 
-**Axis 1 — loop-weight (the numerator).** `reg_n_refs` is **loop-depth-weighted**: flow.c:2067
+**Axis 1 — loop-weight (the numerator).** `reg_n_refs` is loop-depth-weighted: flow.c:2067
 `reg_n_refs[regno] += loop_depth` (also :2315/:2501/:2711). `loop_depth` starts 1 (flow.c:434) and
-increments +1 **only** at a `NOTE_INSN_LOOP_BEG` (flow.c:441), which `expand_start_loop` emits for **every**
-structured `for`/`while`/`do` (stmt.c:2171) and which a `goto`-loop **never** emits (expand_goto ends in a
-bare `emit_jump`, stmt.c:833). So a value referenced inside a **structured** loop gets its refs ×(depth); a
-goto-loop body stays ×1. You can only **raise** priority via nesting (weight floor 1), never lower it.
-  - **Asymmetric nesting decouples two registers.** Structure **only** the loop holding the value you want
+increments +1 only at a `NOTE_INSN_LOOP_BEG` (flow.c:441), which `expand_start_loop` emits for every
+structured `for`/`while`/`do` (stmt.c:2171) and which a `goto`-loop never emits (expand_goto ends in a
+bare `emit_jump`, stmt.c:833). So a value referenced inside a structured loop gets its refs ×(depth); a
+goto-loop body stays ×1. You can only raise priority via nesting (weight floor 1), never lower it.
+  - **Asymmetric nesting decouples two registers.** Structure only the loop holding the value you want
     **higher** one level deeper; keep the competitor's loop a goto (shallower). A symmetric structure moves
-    **both** together (verified: wrapping the whole outer dispatch in `for(;;)` weights control **and** the
-    copy pointer equally, ratio preserved, no match). S166 seated `control`→$a2 by structuring **only** the
+    **both** together (verified: wrapping the whole outer dispatch in `for(;;)` weights control and the
+    copy pointer equally, ratio preserved, no match). S166 seated `control`→$a2 by structuring only the
     inner decode-dispatch as `do { <inner literal while>; if(…) goto loop_top; … } while(1)` so
-    control's decode refs weight ×2 while the 16-store raw-copy block (in the **outer** goto-loop) stayed
+    control's decode refs weight ×2 while the 16-store raw-copy block (in the outer goto-loop) stayed
     ×1 — control overtakes the copy pointer for $a2. Exact flow.c:2067 differential.
 
-**Axis 2 — live-length (the denominator).** priority = numerator / L, so **lengthening** a value's live
-range **drops** its priority (counterintuitive; caching/shortening L **raises** it). Reference the value at a
-later program point to lengthen L. But L can be **pinned**: `lz_decompress_extended`'s param is a binary
+**Axis 2 — live-length (the denominator).** priority = numerator / L, so lengthening a value's live
+range drops its priority (counterintuitive; caching/shortening L raises it). Reference the value at a
+later program point to lengthen L. But L can be pinned: `lz_decompress_extended`'s param is a binary
 t1↔t8 switch (rc-alias present→t8, absent→t1, target t6 unreachable in between) because its 5 exit
 stores are reachable only after the decode loop iterates, so param is irreducibly live across the whole
-loop — a live-length **conflict** that is a genuine floor (carried raw-185).
+loop — a live-length conflict that is a genuine floor (carried raw-185).
 
-**Numerator hygiene — web-split avoidance.** Write `x <<= k; x |= K;` (in-place self-assign = **one** web,
-full n_refs) **not** `x = (x<<k)|K` (a nested subexpr spawns a temp → local-alloc splits the read-web from
-the build-web → halves the value's n_refs). Same for pointer init: `p = base; p += n;` **not**
+**Numerator hygiene — web-split avoidance.** Write `x <<= k; x |= K;` (in-place self-assign = one web,
+full n_refs) not `x = (x<<k)|K` (a nested subexpr spawns a temp → local-alloc splits the read-web from
+the build-web → halves the value's n_refs). Same for pointer init: `p = base; p += n;` not
 `p = (T*)(base+n)`. S166 needed the self-assign form on both the control-word build and the entry
 pointer bump to keep control's refs high enough to clear the copy pointer.
 
 **Zero-goto is impossible on a matched goto-heavy fn.** A goto-loop and a
-structured loop are **not** interchangeable, for three independent, source-cited reasons — so an
+structured loop are not interchangeable, for three independent, source-cited reasons — so an
 all-structured rewrite of a matched goto fn generally cannot byte-match (S166, 3-agent source proof):
   1. **Loop-weight (above):** any structured loop emits the LOOP_BEG note → +1 depth → repermutes the
      outer body's hard regs (flow.c:2067 → global.c:594-601; MIPS defines no REG_ALLOC_ORDER, so
      find_reg takes the lowest free reg and a priority flip changes who claims it).
   2. **Loop optimizer:** loop.c only sees note-delimited loops (loop.c:349-361), so a goto-loop escapes
-     invariant motion + IV strength reduction; a structured loop **always** runs `strength_reduce`
+     invariant motion + IV strength reduction; a structured loop always runs `strength_reduce`
      (loop.c:975), adding preheader IV setup + shifting load/store displacements (~5 extra instrs).
   3. **No BB reorder:** gcc 2.7.2 `rest_of_compilation` (toplev.c:2647) has no basic-block-reorder pass;
-     final.c emits in RTL-chain (source) order, so only a goto+label can place a block **off** the
+     final.c emits in RTL-chain (source) order, so only a goto+label can place a block off the
      fall-through path (an out-of-line return, a two-branch dispatch join). Inlining such a block
      inverts the branch polarity (jump.c reverses the now-fall-through jump). Also: two separate
      `if(c) goto L;` emit two short-circuit branches; merging to `if(a||b)` / `if(!a&&b)` computes a
-     combined boolean (xori/and) instead — **not** equivalent.
-  Corollary: variable **renames** + **comments** are 100% codegen-neutral (verified via isolated `.s` diff +
-  full-make ROM SHA-1), so the **cleanest matching** version keeps the compiler-forced control flow and
+     combined boolean (xori/and) instead — not equivalent.
+  Corollary: variable renames + comments are 100% codegen-neutral (verified via isolated `.s` diff +
+  full-make ROM SHA-1), so the cleanest matching version keeps the compiler-forced control flow and
   improves only names/labels/comments (S166 reworked `lz_decompress_simple` this way, byte-exact). Do
   **not** "clean up" a matched goto fn by structuring its loops.
 
 **Axis 3 — local-alloc pre-emption (make a call-crossing param a global quantity, S176).** A
 **parameter** (or any local) that is born in the entry block, dies early there, yet must survive an
-intervening `jal` is a **call-crossing local quantity**: `local-alloc.c` `find_free_reg` picks
-`call_used_reg_set`-avoiding regs (~:2103-2106) then scans hard regs **ascending** (~:2158-2182; MIPS
-defines no `REG_ALLOC_ORDER`), so it parks the value in the **lowest free callee-saved reg, `$s0`** —
+intervening `jal` is a call-crossing local quantity: `local-alloc.c` `find_free_reg` picks
+`call_used_reg_set`-avoiding regs (~:2103-2106) then scans hard regs ascending (~:2158-2182; MIPS
+defines no `REG_ALLOC_ORDER`), so it parks the value in the lowest free callee-saved reg, `$s0` —
 *before* global alloc runs. That pre-occupancy makes the true loop-heavy vars (`best_rem`, `best`)
 conflict with `$s0` in `global.c global_conflicts`, so `find_reg`'s lowest-free-reg pass gives them
-`$s1`/`$s2` and the param grabs `$s0` — a 3-way rotation vs the target. **Fix:** make the param a
+`$s1`/`$s2` and the param grabs `$s0` — a 3-way rotation vs the target. Fix: make the param a
 **global** quantity so local-alloc skips it entirely: reference it in both the entry block and the
-loop body by **mutating it in place** — `p = f(p);` (self-assign), not a fresh `q = f(p);`. Now
+loop body by mutating it in place — `p = f(p);` (self-assign), not a fresh `q = f(p);`. Now
 global alloc assigns all three purely by `allocno_compare` priority (`best_rem` > `best` > param),
 and the lowest-free-reg pass hands out `$s0=best_rem, $s1=best, $s2=param` — the target. S176
 `heap_alloc`: renaming param `size`→`need` and writing `need = (need + 0x17) & ~7;` in place flipped
 `{need,best_rem,best}` off `s0/s1/s2` to the target `best_rem/best/need`, 119/119. The permuter alone
 plateaued (1595→605); the source lever cracked it. Verify with the `.lreg` dump: the fixed version
-shows **no** pseudo assigned to hard reg 16/17/18 in local-alloc (the param is now global). This axis
+shows no pseudo assigned to hard reg 16/17/18 in local-alloc (the param is now global). This axis
 is complementary to Axes 1–2: those steer *global* priority; Axis 3 removes a *local-alloc*
 pre-emption that pins the ordering before priority is even consulted.
 
 **Diagnostic — the `-dg`/`-dl` allocno dumps.** Compile a candidate with `-dg` (global) / `-dl`
 (local): `COMPILER_PATH=tools/cc tools/cc/gcc -S -G0 -mips3 -mgp32 -mfp32 -mno-abicalls -O2 -I include
 -dg -o out.s cand.c` writes `cand.c.greg` (and `.lreg`). Read the header: `;; N regs to allocate: …`
-is the **priority order** (highest first), `;; K conflicts: …` lists conflicting pseudos/hard-regs
+is the priority order (highest first), `;; K conflicts: …` lists conflicting pseudos/hard-regs
 (a bare number < FIRST_PSEUDO_REGISTER is a hard reg — `16`=`$s0`), `;; K preferences: …` is the
 copy-preference, and `;; Register dispositions:` / `Register K in HH` is the final assignment. This
 turns "which value wins `$s0`" from guesswork into a read: find the pseudo pinned to 16 in `.lreg`
@@ -5087,21 +5087,21 @@ When the miss is "my var landed in `$a0`, the ROM keeps it in `$v1`", read `.gre
 `;; N conflicts:` line shows the var's global allocno conflicting with the wanted hard reg, and the
 `;; Register dispositions` line shows where it went. S191 `func_80037E50`: `quality`(allocno 76)
 conflicted with both `$v0`(2) and `$v1`(3) → forced to `$a0`(4), because the return expression
-`quality*K + base + arg3*K2` (with `base` a **symbol address**, i.e. a loop-invariant constant) was
+`quality*K + base + arg3*K2` (with `base` a symbol address, i.e. a loop-invariant constant) was
 **reassociated** by GCC to group the constant base with the variable term — `quality*K + (arg3*K2 +
-base)` — which uses `$v1` as a **second accumulator** during `quality`'s live range. The **faithful**
-fix is to write the pointer arithmetic **stepwise** so the eval order is pinned to a single
+base)` — which uses `$v1` as a second accumulator during `quality`'s live range. The faithful
+fix is to write the pointer arithmetic stepwise so the eval order is pinned to a single
 accumulator: `p = base + quality*K; return p + arg3*K2;` forces `(base + quality*K)` first
 (complex operand `quality*K` evaluated first, then `+base`), freeing the other temp reg for the var
 (→ `$v1`), then `+ arg3*K2`. A flat `A + base + C` expression lets GCC reassociate; stepwise
 statements defeat it. This is byte-exact and permuter-free; it also removes the block-reorder step
 (write the branch that falls through to the common tail last: `if (cond) return general; return
-edge;`). Run it **before** the permuter on any extern-symbol-base pointer-return regalloc permutation.
+edge;`). Run it before the permuter on any extern-symbol-base pointer-return regalloc permutation.
 
-**Process.** The lever set was **derived** by a compiler-source fan-out: 3 read-only mechanism-RE agents
+**Process.** The lever set was derived by a compiler-source fan-out: 3 read-only mechanism-RE agents
 over gcc-2.7.2 (flow/global/local-alloc/reload/sched/reorg/stmt/jump/loop/toplev) + N measurement
 agents iterating from the isolated base — it turned a 3×-"irreducible" verdict into a byte match. See
-`#compiler-source-fan-out-escalation-above-the-permuter`. This is the **source-side** precursor to
+`#compiler-source-fan-out-escalation-above-the-permuter`. This is the source-side precursor to
 `#pervasive-regalloc-classical-main` step 3 (the boosted permuter): apply loop-weight/live-length
 **first**; the permuter (safe passes only on a goto-loop) closes only the residual allocno-number tiebreak.
 
@@ -5153,7 +5153,7 @@ residual anyway (what a `#pervasive-regalloc-classical-main` tail usually is). S
 **Axis-4: caller-saved competitor count (a constant loop-invariant is a competitor a variable one is
 not; S177 `func_8004E2DC` = wall).** When a call-crossing loop-invariant (e.g. a heap `head`) is a
 **variable** address (`&arr[i]`), it lives in a callee-saved reg (it crosses the `osSetIntMask` call →
-`$s3`), so it is not a caller-saved competitor for the loop's temps. The same value as a **constant**
+`$s3`), so it is not a caller-saved competitor for the loop's temps. The same value as a constant
 (`&arr[3]`) is re-materializable, so GCC keeps it caller-saved — an extra competitor in the loop. That
 one extra competitor flips a call-argument copy-preference: with N competitors an interrupt-`mask`
 (live whole-fn, copy-prefers `$a0` from `osSetIntMask(mask)`) loses/wins `$a0` differently. The
@@ -5161,7 +5161,7 @@ variable-index `heap_alloc` matched (5 caller-saved competitors, `mask`→`$a0`)
 `heap_alloc` has 6, and the ROM's 6-value allocation needs `mask`→`$t1` / `bsize`→`$a0`. **S177 declared
 this a wall ("no clean lever; carry"). S178 refuted it — the clean lever is Axis-5 below.** The S177
 error was fixating on `bsize`'s missing `$a0` copy-pref and testing only "force head callee-saved" (the
-wrong polarity); the real steer is head's define point relative to the call. **Diagnosis:** count the
+wrong polarity); the real steer is head's define point relative to the call. Diagnosis: count the
 caller-saved values live across the loop; a constant that "should" be a base pointer but is caller-saved
 is the tell.
 
@@ -5332,7 +5332,7 @@ be performed and validated at the plan gate (the ROM stays green with the new as
 carve cannot: `jtbl_<vram>` only exists as a linkable symbol when the C `switch` regenerates it, so
 carving `[…, .rodata, main/<file>]` back over the table while the function is still `INCLUDE_ASM` yields
 `undefined reference to jtbl_<vram>` at link (S265 proved this extending `[0xABE90,…]` back to `0xABE60`
-for func_8005CF78's jtbl_800D0A60 with the body still asm). So a jtbl-dispatch leaf is **all-or-nothing**:
+for func_8005CF78's jtbl_800D0A60 with the body still asm). So a jtbl-dispatch leaf is all-or-nothing:
 the yaml carve + the full C body land together in one commit, and you cannot probe/measure the body
 incrementally against a still-asm baseline first (unlike a plain classical leaf). S264's func_8005DAFC
 carve worked precisely because its C body landed with it. Plan a jtbl leaf as a single vertical slice,
@@ -5393,10 +5393,10 @@ not a gate-flip-then-iterate; do not pre-carve at the gate.
 
 5. **The carve is only feasible when the table is 8-aligned on both edges and no still-asm fn's
    rodata is interleaved before the next banked jtbl (S219).** A partial mixed file's `src/<seg>.c`
-   compiles to one object whose `.rodata` the linker places **contiguously**. GCC 2.7.2 emits a MIPS
+   compiles to one object whose `.rodata` the linker places contiguously. GCC 2.7.2 emits a MIPS
    jump table `.align 3` (8-aligned start) and pads the section's trailing edge to 8. So if the table's
    End is only 4-aligned (an odd word count, e.g. an 11-entry `jtbl` = 0x2C from an 8-aligned start ends
-   4-aligned), the object pads +4 and **shoves the next generic-blob item** (typically a string owned by
+   4-aligned), the object pads +4 and shoves the next generic-blob item (typically a string owned by
    a still-asm sibling) N bytes late → SHA miss. You cannot fill the pad by C-emitting that trailing
    string when a still-asm fn owns it (its `INCLUDE_ASM` `.s` already defines the symbol → duplicate-symbol
    link error). Net precondition for a standalone single-jtbl carve: the table must be 8-aligned on both
@@ -5421,7 +5421,7 @@ not a gate-flip-then-iterate; do not pre-carve at the gate.
    shift-pair form); (c) return `s32`, not `u16`/`u8`, or GCC appends an `andi 0xffff` mask the ROM lacks;
    (d) merge the switch result and its `<<`/index into one in-place variable (`idx <<= 2;`) so it lands in
    a single register (often an arg reg like `a1`) matching the ROM, not a fresh `v1`; (e) write the `case`
-   bodies in **output-value-ascending** source order and drop the explicit `default:` (pre-init the result
+   bodies in output-value-ascending source order and drop the explicit `default:` (pre-init the result
    var before the switch instead) — this blocks GCC cross-jumping the `case 0`(=0) body into the `default`
    body (both leave the var 0), which would drop `case 0`'s own jtbl block and reorder the layout; with no
    shared-tail `default`, the blocks emit value-ascending like the ROM; (f) load the last packed field
@@ -5435,9 +5435,9 @@ not a gate-flip-then-iterate; do not pre-carve at the gate.
    a bare `sltiu x,N` (no subtract) over a table whose low indices fall through to `default` (e.g. the
    12-entry `jtbl_800CC818`, indices 0/1/6/8 → default), the source must include an explicit `case 0:`
    (fold it into `default:`) to force `min_case = 0`; middle holes (6, 8) become table entries pointing
-   at the default body automatically. And the case bodies emit in **source order**, so their addresses —
+   at the default body automatically. And the case bodies emit in source order, so their addresses —
    which the jtbl `.word .L…` entries reference — follow the order you write the cases in: order the
-   cases by **ascending target address** in the ROM (read the jtbl targets from the `.rodata.s`), with
+   cases by ascending target address in the ROM (read the jtbl targets from the `.rodata.s`), with
    `default` last. A `x-2`-normalised 10-entry table in your build vs the ROM's 0-based 12-entry table is
    this lever, not a control-flow bug.
 
@@ -5460,7 +5460,7 @@ S263 `func_800484F8` (lever 7 table-base/source-order + the value-select-on-defa
 ## offset-0-symbol re-materialization (fixed-global field RMW)
 
 **Trigger:** a clean classical/mirror fn is byte-exact except a read-modify-write on a **fixed global
-struct/array field** at a non-zero offset. The ROM **re-materializes** the address (`lui r,%hi(SYM);
+struct/array field at a non-zero offset. The ROM re-materializes** the address (`lui r,%hi(SYM);
 lw r,%lo(SYM)(r)` … `lui at,%hi(SYM); sw v0,%lo(SYM)(at)`), but the build folds it into a shared
 **base register** (`la $t, ARR+off; lw 0($t); …; sw 0($t)`), and that base reg reuse cascades a
 register permutation through the rest of the fn.
@@ -5677,7 +5677,7 @@ reason: plain-scalar color loads no-alias the `mem/s` `*glistp` stores → free 
 `LAUNCH_PRIORITY` birthing-boost floats them to the shadow. Retype the color scalars as one
 `Color {s32 r,g,b;}` struct (or `s32[3]`) → the loads become `mem/s`, may-alias the `*glistp` writes,
 and are pinned after the stores = the ROM's deferred schedule (S180 `func_800329F4`, byte-exact, no
-permuter). The mechanical **tell it is one struct**: a sibling setter writes the N globals as N
+permuter). The mechanical tell it is one struct: a sibling setter writes the N globals as N
 consecutive words (`func_800329D8` writes `D_800B7840/44/48` from `a0/a1/a2`). Second required
 ingredient for a DL fill: the color compute must land after the fill-color w0 store (inline the pack
 in the `gDPSetFillColor` arg — the demo `gfxClearCfb` idiom — or use a temp computed after w0). See
@@ -5690,16 +5690,16 @@ store to it, the ROM RE-loads the global (2 `lw`s) but the build CSE-forwards it
 value reused — 1 load short, and the reg it was kept in cascades). This is `cse.c`, not `sched.c`:
 `note_mem_written` (~7538) grades a varying-address store into `{sp,var,nonscalar,all}` — an
 `int_array[var]=0` lowers (expr.c ARRAY_REF→INDIRECT_REF, ~4620) to a `(mem/s (plus reg const))` and
-is graded **`nonscalar`** (MEM_IN_STRUCT + non-QImode, so not `all`). `invalidate_memory` (~1700)
+is graded `nonscalar` (MEM_IN_STRUCT + non-QImode, so not `all`). `invalidate_memory` (~1700)
 then purges a cached load `p` only when `all || (nonscalar && p->in_struct) || cse_rtx_addr_varies_p`.
 A bare-scalar `extern s32 G;` load has `in_struct=0` → the `nonscalar` store does not purge it → CSE
-forwards (build, 1 load). Read the global as an **array element** (`extern s32 G[]; … G[0]`) → its
+forwards (build, 1 load). Read the global as an array element (`extern s32 G[]; … G[0]`) → its
 load gets `MEM_IN_STRUCT_P` → `nonscalar && in_struct` is true → purged → the second read reloads
 (ROM, 2 loads). **`volatile` is the wrong lever here** — it hoists the reload above the store into a
 preserved reg (does not match the ROM's load-after-store). The offset-0 array form (`G[0]`) is the
 byte-safe minimal fix (identical `%hi/%lo(G)` reloc). Local to the reloading TU: sibling files that
 read `G` as a bare scalar still match (no intervening nonscalar store between two reads), but every
-read of `G` **in the same TU** must switch to `G[0]` (byte-neutral for a single read — same `lw`).
+read of `G` in the same TU must switch to `G[0]` (byte-neutral for a single read — same `lw`).
 S186 `func_80069BCC`: `D_80105B20[D_801B6098[0]] = 0; if (D_801B6098[0] == 0)`, full-fn byte-exact,
 no permuter (root-caused by a `~/development/repos/mips-gcc-2.7.2/cse.c` subagent fan-out).
 
@@ -5719,14 +5719,14 @@ class).
 **Inverse lever — pin a floated store by giving a competing global load a varying address (S233
 `clamp_min_distance_from_target`, gcc-source fan-out crack 505→0).** A fn ends `target->x = f(...,
 camera_position_x); target->z = g(..., camera_position_z);` (two struct-field stores, each fed by a
-distinct global). The ROM computes+truncs+**stores** `target->x` (0x18) before it touches `z`; my build
+distinct global). The ROM computes+truncs+stores `target->x` (0x18) before it touches `z`; my build
 floated the x-store to the very end (both stores became dep-leaves) and swapped `$f0`↔`$f4` on the x
-product. Root cause `sched.c`:834-839 `true_dependence`: a **fixed `symbol_ref`** load
+product. Root cause `sched.c`:834-839 `true_dependence`: a fixed `symbol_ref` load
 (`camera_position_z`, non-`MEM_IN_STRUCT`, non-varying) is proved to not alias the varying in-struct
 store, so no memory edge pins the x-store before the z-load and the scheduler reorders freely. Fix:
 load the z-global through a varying (reg-based) address so the alias test can't prove them distinct.
 Here `camera_position_z == camera_position_x + 8`, so with `s32 *cam = &camera_position_x;` already in
-scope, change the z-store's `(f32)camera_position_z` to **`(f32)cam[2]`** — a `reg+8` address vs the
+scope, change the z-store's `(f32)camera_position_z` to `(f32)cam[2]` — a `reg+8` address vs the
 store's `reg+24` → `memrefs_conflict_p` can't disambiguate → a memory dependency pins the x-store early,
 which also fixes the downstream `$f0/$f4` allocation (reload follows the corrected schedule). Note: this
 is the mirror of the retype-a-fixed-global-as-a-struct lever above — there you make a global look like a
@@ -5738,7 +5738,7 @@ verified). Applicable whenever the ROM pins a struct-field store the build float
 
 ## short-text shifts flowing-bss (a length miss surfaces as a sibling's wrong data addr)
 
-**Trigger:** a classical fn compiles cleanly but full-make ROM SHA-1 misses, and a **sibling** fn in
+**Trigger:** a classical fn compiles cleanly but full-make ROM SHA-1 misses, and a sibling fn in
 the same file reads the wrong data address — its `%lo(D_xxx)` resolves off by a fixed delta, with the
 `.bss` symbol map showing a whole `0x8010xxxx` region shifted by that delta. Easy to misdiagnose as a
 data-placement / symbol bug in the sibling.
@@ -5754,7 +5754,7 @@ yaml `[start..next]` extent). Built `.text` 0x130 vs reserved 0x140 → `func_80
 the `0x8010xxxx` `.bss` shifted -0x10 → `func_80076500`'s `%lo(D_80105B6C)` read `0x80105B5C` (S162).
 The `build/mariogolf64.map` shows the shifted region re-syncing at the next fixed-address symbol.
 
-**Fix:** correct the **short** fn's length (its codegen), not the sibling's reloc — the sibling is a
+**Fix:** correct the short fn's length (its codegen), not the sibling's reloc — the sibling is a
 symptom. Guard: when a same-file sibling's length is still wrong, do not trust an isolated per-fn
 `objdump`'s resolved addresses; gate on the full-make ROM SHA-1 with all fns at their correct length.
 `func_80076500` looked "wrong" (bytes `c4205b5c`) purely because `func_80076558` was 0x10 short (S162);
@@ -5776,13 +5776,13 @@ gitignored hides it from `git status`. The 2-instr overflow itself was a `&D_arr
 re-derived instead of reusing the live pointer; see the
 [struct-array-of-BSS direct-index lever](#struct-array-of-bss-direct-index-vs-base-pointer-var) below.
 **Self-ref variant — the same fn's own data ref reads `+N` (S208).** The most self-misleading form:
-a wrong-length fn's shift surfaces on **its own** `%lo(D_xxx)`, not a sibling's, so it reads like the
+a wrong-length fn's shift surfaces on its own `%lo(D_xxx)`, not a sibling's, so it reads like the
 symbol itself is mis-mapped. S208 (partial-bank `func_80059BA0.c`): two over-long switch bodies
 (`func_8005D218`+`func_8005D2E4`, +2 instrs each = +0x10 total) shifted the flowing `.bss`, so
 `func_8005D218`'s own `%lo(D_80105DC1)` resolved `0x80105DD1` (+0x10) and the `map` showed
 `D_80105DC1` at `0x80105dd1` with a `.NON_MATCHING` suffix — a convincing "nonmatching-bss wall"
 mirage. It is not a wall: a matched sibling reading the same region at exact length
-(`func_8005B0A0`/`D_800C2B28`) proves the region resolves fine. **Confirm by reverting** the
+(`func_8005B0A0`/`D_800C2B28`) proves the region resolves fine. Confirm by reverting the
 suspect body to `INCLUDE_ASM` and rebuilding — if the symbol snaps back to its named address
 (`D_80105DC1` → `0x80105dc1`), the `+N` was the symptom of your instr-count miss, and the fix is the
 codegen length (match instruction count exactly), never the symbol ref. Diagnose with `objdump -h`
@@ -5797,13 +5797,13 @@ symbols are `.NON_MATCHING`-region placeholders with no fixed placement, so when
 references them they resolve as common-like and **float to region-base + consecutive addresses** (all 6
 landed at `0x8018d228`, `0x8018d22a`, … instead of their true `0x8018d258+`), corrupting the whole region
 including banked siblings. The build links (no undefined ref) — the tell is the `map`: `D_8018D258`
-resolving to `0x8018d228`. **Fix options:** (a) add offset-0 absolute aliases to `symbol_addrs.txt`
+resolving to `0x8018d228`. Fix options: (a) add offset-0 absolute aliases to `symbol_addrs.txt`
 (`D_8018D258 = 0x8018D258; // size:0x2`, add-only) so each pins to its true address (the S213 polychara
 recipe); or, better, (b) define the underlying struct (here `collision_triangles` at `0x8018D220`:
 `verts[3]` + `s16 bbox[6]`) and reference `groups[i].field` so GCC re-materializes each field off one
 placed base symbol instead of 6 floating auto-`D_`s. Prefer (b) when the fn also needs a struct model for
 codegen (S217 `func_800425C8` also spills 6 `s32` min/max to stack from 2 held constant-regs — a
-struct-array bbox reconciles both). **Ranker follow-up (tracked, BACKLOG):** `pick_target.py`'s
+struct-array bbox reconciles both). Ranker follow-up (tracked, BACKLOG): `pick_target.py`'s
 tractability scan should flag a fn that writes ≥2 distinct auto-`D_` symbols in one carved data region as
 `needs-struct-model` / `needs-symbol-aliases`, not price it as plain low-jal tractable — the S217 stretch
 carry was mis-scoped as tractable by the jal/fp-only scan.
@@ -5818,12 +5818,12 @@ full-make SHA). A `--target-s <path>` arg for `decomp_loop` is a tracked tooling
 **Permuter workaround for a flipped-subseg fn (S171).** The same post-flip gap breaks
 `setup-permuter.sh` two ways: `mg_resolve_c_asm` can't find an `INCLUDE_ASM(…, <fn>)` line once the fn
 is inlined C, and `import.py`'s default preprocess set is bare `-I include` (misses
-`include/libultra`, so `PR/ultratypes.h` fails). **Hand-build the scaffold** in
+`include/libultra`, so `PR/ultratypes.h` fails). Hand-build the scaffold in
 `nonmatchings/<fn>/`: (1) copy an existing main-seg `compile.sh` (e.g. `nonmatchings/func_80076640/`)
 and `sed` the func name — it carries the full profile `-mips3 -G 0 -O2 -I include -I include/libultra
 -I include/libultra/internal -I include/lib{kmc,nusys,mus,nualstl,naudio} -DF3DEX_GBI_2 -D_FINALROM`;
 (2) write `settings.toml` (`func_name`, `compiler_type = "gcc"`); (3) `cpp -P -undef base.c.raw … <same
--I set> -DPERMUTER …` to a **self-contained** `base.c` (the permuter's own preprocess is bare, so it
+-I set> -DPERMUTER …` to a self-contained `base.c` (the permuter's own preprocess is bare, so it
 must be pre-expanded); (4) `cp build/src/<seg>/<file>.o nonmatchings/<fn>/target.o` — the current
 INCLUDE_ASM build object holds the real target bytes for that fn. Then `./run-permuter.sh <fn>`
 (`mg_find_permuter_dir` globs `nonmatchings/<fn>*`, so it finds the hand-built dir). This is how S171
@@ -5848,7 +5848,7 @@ by the effective symbol) — one reloc per field, matching the ROM. The original
 used direct `arr[i].field` indexing; the reloc addend resolving to a different `D_<vram>` name than the
 base is the [isolated-compile caveat](#isolated-compile-caveat), harmless under the full-make link.
 
-**Fix:** default to **direct `D_arr[i].field` indexing**, not a `Type *s = &D_arr[i]` base-pointer var.
+**Fix:** default to direct `D_arr[i].field` indexing, not a `Type *s = &D_arr[i]` base-pointer var.
 Reach for a pointer variable only for the specific store the ROM expresses as `base+offset` off a live
 `&D_arr[i]` — typically a self-referential init like `arr[i].prev = &arr[i]`: writing `s->prev = s`
 (pointer form) emits `sw v1,0xC(v1)` (1 instr, reusing the self-ptr `v1` as base), while the direct
@@ -5881,8 +5881,8 @@ load (`lh`) is `dslot=yes` (`mips.md:79-82`) and can never ride the slot. Stock 
 
 **Fix:** write the dispatch as `if (selector == K) goto L_k;` per case, `goto end;` for the default,
 then the bodies out of line after the tests, each `v = CONST; goto end;`, and a single `end: return v;`.
-Order the body labels so any load-valued case is declared **last** (it becomes a plain `beq` to a tail
-block that falls through into the shared return). **Gotoless is provably impossible** here (the lone
+Order the body labels so any load-valued case is declared last (it becomes a plain `beq` to a tail
+block that falls through into the shared return). Gotoless is provably impossible here (the lone
 `if (x==K) v=CONST` always branchless-if-converts). This is the Code Complete ch17 documented-goto case
 (emulating a structured dispatch, forward-only, all labels used) -- keep the explanatory comment so it
 is not "simplified" back to a switch/if-else. The permuter plateaus on it (extent 700; it cannot invent
@@ -5891,13 +5891,13 @@ the polarity flip); crack it via the fan-out compiler-source dive + isolated-sco
 
 **Dispatch lever ladder — try `switch` first for a dense selector with a shared post-store (S168).**
 The per-case documented-goto above is the fix for the *constant-return-through-a-shared-var* shape
-(S163). A different but adjacent shape -- a **dense** `1..N` selector where each case sets a
-pointer/field plus a flag, then a **shared** post-dispatch `if(flag) *dst=…` -- matches as a plain
-`switch(sel){ case K: …; break; … }`, and the ladder is: `if/else-if` branches **away**
-(`bne sel,K,skip`, wrong polarity); the per-case **goto** form branches toward but GCC **tail-merges**
+(S163). A different but adjacent shape -- a dense `1..N` selector where each case sets a
+pointer/field plus a flag, then a shared post-dispatch `if(flag) *dst=…` -- matches as a plain
+`switch(sel){ case K: …; break; … }`, and the ladder is: `if/else-if` branches away
+(`bne sel,K,skip`, wrong polarity); the per-case goto form branches toward but GCC tail-merges
 the identical `flag=1; goto store` tails across cases (collapsing the ROM's separate per-case
-`li flag,1`); only `switch` branches toward **and** keeps each case's tail distinct (a per-case `break`
-into the shared store). So for a dense-selector-with-shared-store, try `switch` **first**; reserve the
+`li flag,1`); only `switch` branches toward and keeps each case's tail distinct (a per-case `break`
+into the shared store). So for a dense-selector-with-shared-store, try `switch` first; reserve the
 per-case-goto fix for the S163 constant-return shape where the switch is a jump table
 (`#switch-jtbl-dispatch`) or the lone case branchless-if-converts. S168 `func_80071220`'s 4-way
 `sel` dispatch (1/2/3 + default, each picking a `rec` field ptr + a set flag, then a shared
@@ -5920,7 +5920,7 @@ for `$v0` (`global.c:1005-1034`); `find_reg` scans hard regs ascending (`REG_ALL
 `$2`/`$v0` first) and `$v0` is free across the value's live range, so the preference wins and the pseudo
 coalesces into `$v0`. Bumping ref-count / live-length does not help: it still copy-prefers a free `$v0`.
 
-**Fix:** make the value **one** reused variable assigned in **both** arms of an `if/else`, each arm the
+**Fix:** make the value one reused variable assigned in both arms of an `if/else`, each arm the
 full expression. That makes it a single global allocno whose live range now conflicts with `$v0` (the
 preference no longer wins a free reg), so `find_reg`'s ascending scan lands on `$a0`. gcc cross-jumps /
 tail-merges the two arms back into one select + one op, so the source stays clean (no object
@@ -5951,14 +5951,14 @@ tier cracked two permuter-plateau fns in S163 that would otherwise have carried.
 
 **Per-function fan-out for a sibling set (S167).** When a decompose head holds several sibling fns
 that share a divergence class (e.g. all access one call-return game-state struct), fan out **one
-subagent per function** in parallel, not one per RTL pass. Give each a strict **input contract**: the
+subagent per function in parallel, not one per RTL pass. Give each a strict input contract**: the
 exact instruction-level divergence you have already isolated (mine-vs-target, register by register),
 the paths to read (the target `asm/nonmatchings/.../<fn>.s` + your own `objdump`/`M_<fn>.txt` + the C
 source lines), the specific mechanism question, and the two repo roots -- so the agent derives the
-lever instead of rediscovering the diff. The payoff is a **unifying model**: S167's `func_800710C4`
-agent found the `func_8005AF50()` return is a game-save **struct** (`SaveBlock{u8 pad[0xF4]; s8
+lever instead of rediscovering the diff. The payoff is a unifying model: S167's `func_800710C4`
+agent found the `func_8005AF50()` return is a game-save struct (`SaveBlock{u8 pad[0xF4]; s8
 tbl[6][0x12]; ...}`), and modelling the accesses as `base->tbl[i][j]` (COMPONENT_REF bitpos keeps
-`+0xf4` explicit, `expr.c:4882`; MEM_IN_STRUCT scheduling) fixed **both** siblings byte-exact; the
+`+0xf4` explicit, `expr.c:4882`; MEM_IN_STRUCT scheduling) fixed both siblings byte-exact; the
 `func_8007117C` agent independently found the loop levers (`p[j]` index form -> biv-elimination
 synthesizes `end=start+N`, `loop.c:6165`; `s32`-load for `lb` not `lbu`, `mips.c:1029`). The third
 agent proved a fundamental wall (see `#cse-make_regs_eqv-branch-fold`), which is a valid, budget-saving
@@ -5972,7 +5972,7 @@ mechanism**: `config/mips/mips.c` (frame-size / `MIPS_STACK_ALIGN` / prologue em
 `global.c` + `local-alloc.c` (spill slot commit + `allocno_compare` / `qty_compare_1` priority +
 `find_free_reg`), `loop.c` (LICM / `NOTE_INSN_LOOP` goto-invisibility / strength reduction), and
 `expmed.c` + `optabs.c` (divide/multiply-by-constant operand + pseudo creation order). Give each the
-isolated `objdump -dr` diff vs `target.o` and have them **verify with gcc RTL dumps** (`-dr` rtl, `-dl`
+isolated `objdump -dr` diff vs `target.o` and have them verify with gcc RTL dumps (`-dr` rtl, `-dl`
 lreg, `-dg` greg, `-dS` sched) on a scratch compile, not just source-read. The payoff is often a
 **dump-verified negative**: S173 `func_8004DC44` characterized the residual `v0`/`v1` swap as a
 life-length-dominated `local-alloc.c` priority (magic scores 6666 vs the dividend's 1666 → grabs `$v0`).
@@ -5981,7 +5981,7 @@ unrecoverable"; S174 showed that was wrong — `return g/40` reproduces the ROM'
 swap is flippable-in-isolation via a reg-2 set → the suggestion pass; see
 `#signed-divide-const-v0v1-quotient-destination`). The correct negative is narrower: dividend→`$v0` is
 unreachable *in a void/callless/returnless loop-fed leaf*, not universally. Lesson: state a regalloc
-negative with its **exact enabling context**, and before declaring "unflippable" run the
+negative with its exact enabling context, and before declaring "unflippable" run the
 cross-project sweep below — a single-function dive can miss a lever another codebase exhibits.
 
 **Cross-project matched-corpus mining (S174).** For a reg-alloc / scheduling wall, the highest-value
@@ -5999,10 +5999,10 @@ deliverable when the answer is "carry"; save the near-match seed (`docs/wip/`) s
 artifact away.
 
 **Permuter-reseed from the best candidate, not the clean seed (S175).** When re-running the permuter on
-a same-fn regalloc carry, seed it from the **best prior candidate** (`nonmatchings/<fn>/output-<score>-*/
+a same-fn regalloc carry, seed it from the best prior candidate (`nonmatchings/<fn>/output-<score>-*/
 source.c`), not the hand-written clean seed, and **reseed again from each new best**. The permuter's
 randomizer explores a neighborhood around its base; a frame-bearing / structurally-closer candidate opens
-a different neighborhood than the clean seed. S175 `func_8004DC44` broke a **3-sprint-stuck floor** this
+a different neighborhood than the clean seed. S175 `func_8004DC44` broke a 3-sprint-stuck floor this
 way: vA-seeded runs never beat 14450 in ~430k cumulative iters (S173+S174), but reseeding from the
 frame-bearing 14450 candidate reached 13530, then reseeding from 13530 reached 13235 (frame + schedule +
 all operations matching the ROM; only the divide-register cascade remaining). The lower score does not
@@ -6031,10 +6031,10 @@ from the compiler source; S178 ran the fan-out again with **two agents per wall 
 adversarial one attacking from orthogonal angles (volatile / aliasing / scheduling / liveness)** — and
 the adversarial agent cracked both, byte-exact. A source-cited "unreachable" is a hypothesis, not a
 proof: the primary agent proved only that its candidate class forwards/allocates a certain way, not
-that no faithful C reaches the ROM. The levers it missed: (c) a per-access **volatile view** of the
+that no faithful C reaches the ROM. The levers it missed: (c) a per-access volatile view of the
 reloaded field ([#volatile-view-cse-reload](#volatile-view-cse-reload)) — the primary tried
 volatile-on-one-field-only and saw it float, without also volatiling the fields that must schedule
-ahead; (d) the **define-after-call** caller-saved placement plus an **inline sentinel** (no `head`
+ahead; (d) the define-after-call caller-saved placement plus an inline sentinel (no `head`
 local) so CSE derives it from the load base and copies it to the loop reg — the primary tested only
 "force head callee-saved" (the wrong polarity). **Doctrine: require a second, adversarial agent before
 accepting any "unreachable" verdict; each finds what the other's candidate set structurally cannot.**
@@ -6045,22 +6045,22 @@ second-agent fan-out was that mechanism.
 scheduler-load-pair wall (`func_800329F4`, a `docs/hazards.md`-documented "escalate to the permuter"
 carry) by fanning out **a scheduler/priority agent and a memory-model/alias agent** (plus an
 assembler rule-out). The priority agent's track — hunt a faithful source reorder that lowers the
-color load's schedule priority — was a **proven dead end** (every color-expr / associativity / reorder
+color load's schedule priority — was a proven dead end (every color-expr / associativity / reorder
 form stalled at 18-30/97, because the load carries a sticky `LAUNCH_PRIORITY` boost that dominates,
 not a tie-break). The alias agent's track — could a faithful type change add a memory dependence that
 pins the loads? — found the `mem/s` color-struct lever ([#mem-in-struct-scheduling-lever](#mem-in-struct-scheduling-lever)),
 byte-exact. **Both agents independently converged on the same `mem/s` lever = strong corroboration**,
 but the alias lens reached it directly while the priority lens could only prove its own class
-couldn't. Lesson: when assigning the two agents, give them **structurally different lenses** (here:
+couldn't. Lesson: when assigning the two agents, give them structurally different lenses (here:
 list-scheduler priority vs. the `true_dependence` memory-alias model), so one covers what the other's
 candidate set cannot. The assembler rule-out (gas `.set reorder` is a faithful 1:1 transcriber under
 `-mips2`) correctly scoped the wall to GCC before the lever hunt.
 
 **A walled permuter is a dive target, not an automatic carry (S209).** The escalation is not only for a
-*slow* permuter — it beats a fully **plateaued** one. `func_8005C458` (a 6×6 non-zero-cell grid counter)
-walled the permuter at **~1.27M iters / score 55** — a pure-regalloc allocno permutation (the row base
+*slow* permuter — it beats a fully plateaued one. `func_8005C458` (a 6×6 non-zero-cell grid counter)
+walled the permuter at ~1.27M iters / score 55 — a pure-regalloc allocno permutation (the row base
 and the loop counter swapped, plus one commutative `addu` operand order) — yet the compiler-source dive
-cracked it **byte-exact with zero permuter iterations**. Why the permuter cannot: both winning levers are
+cracked it byte-exact with zero permuter iterations. Why the permuter cannot: both winning levers are
 Source restructures outside its neighborhood — (a) introduce an intermediate call-result copy
 (`u8 *ret = func_8005AF50(); …; s8 *base = ret;`) to defer `base`'s materialization and shorten its
 live-length ([#local-alloc-qty-permutation](#local-alloc-qty-permutation), the global.c live-length
@@ -6096,11 +6096,11 @@ a1,v0; op a1,v0,K` (or the mirror). The value being stored/passed is `cond ? (t|
 matches. S167 `func_80070FD0` (a com-win byte: `t=count|(old&0x80); nv=(D_801B60C5==0)?t|0x80:t`).
 
 **Root cause (`cse.c make_regs_eqv`:840-862):** the default arm's plain copy `old = t` merges the two
-into one quantity, and `old` becomes the **canonical** register because it **outlives `t` and its
+into one quantity, and `old` becomes the canonical register because it **outlives `t` and its
 last use (the store/printf) crosses the post-branch EBB boundary** (the merge label has 2 preds). cse
 then rewrites the *other* arm's `t|K` -> `old|K`, so `t` dies single-use and global.c coalesces it
 onto `$a1` -- the fold (1 instr short, but the correct `bnez` polarity). The only form that keeps `t`
-separate makes the **default** arm a non-copy (`old = t|K; if(!cond) old = t`), which gives `beqz`
+separate makes the default arm a non-copy (`old = t|K; if(!cond) old = t`), which gives `beqz`
 polarity instead. **Branch-direction and the fold are locked:** `(cond?t|K:t)` has exactly two C
 shapes and each pins one of {right-polarity+fold, separate-t+wrong-polarity}.
 
@@ -6117,7 +6117,7 @@ macro). Recognize the symptom, bank the file's other fns (`#cross-jump-tail-merg
 
 ## abs-coalescing reg-swap
 
-**Symptom:** a byte-exact-structure classical fn locks at a **small (3-instr) register swap** in an
+**Symptom:** a byte-exact-structure classical fn locks at a small (3-instr) register swap in an
 `if(fabsf(x) < K)` unary-op-then-const-compare: the target computes `abs.s f2,f0` (abs into a fresh
 reg, keeping the operand's reg `f0`) then loads the const into `f0`; mine emits `abs.s f0,f0`
 (in-place, coalescing operand->result) and loads the const into `f2`, so the `abs`/`mtc1`/`c.lt.s`
@@ -6138,7 +6138,7 @@ abs result being global-allocated (`global.c`), which needs a cross-block use of
 state a block-local abs-of-a-dying-hard-reg deterministically cannot reach at this profile.
 
 **The fresh-reg unary-float law (cross-project, byte-cmp-proven on the identical KMC GCC 2.7.2).**
-Fresh-reg `abs.s`/`neg.s` (D != S) is emitted **iff** the result is reused (>=2 uses / lives across a
+Fresh-reg `abs.s`/`neg.s` (D != S) is emitted iff the result is reused (>=2 uses / lives across a
 call) or the operand is kept live past the op or the operand is a non-hard-reg (memory/struct-field)
 value. A **single-use result with a dying hard-reg operand always coalesces in-place.** Verified across
 5 same-compiler byte-matched corpora (Mario Party 1/2/3, Dr. Mario 64, Snowboard Kids 2; Harvest Moon
@@ -6150,7 +6150,7 @@ Use this law to classify any FP unary-op reg-swap on sight: single-use + dying h
 **Verdict, carry (all faithful/flag levers exhausted; not do-not-retry).** S181 closed every avenue
 with source-grounded rigor: 4 GCC-source lenses + an 8-project cross-project mining sweep
 (`#cross-project-matched-corpus-mining`) + a 12-flag profile-probe (O1/O2/O3/-ffast-math/-g/
--fno-schedule-insns/-fno-delayed-branch/... All in-place) + a direct **2.8.1 cross-compile** (in-place
+-fno-schedule-insns/-fno-delayed-branch/... All in-place) + a direct 2.8.1 cross-compile (in-place
 And 80 insns, strictly worse; and the same-TU sibling `func_80076778` is matched at 2.7.2, so the TU
 is provably 2.7.2 — not a wrong-version pin). MG64's exact signature (dying + hard-reg + single-use +
 single-precision -> fresh) appears in no project at either compiler version, so the ROM's form is a
@@ -6168,7 +6168,7 @@ the source dive / permuter / flag probe / 2.8.1 cross-compile (S181 exhausted al
 ## cross-project matched-corpus mining
 
 **When:** a structural-complete classical fn locks on a codegen/regalloc artifact that the
-`#compiler-source-fan-out-escalation-above-the-permuter` dive has proven **unreachable from faithful C**
+`#compiler-source-fan-out-escalation-above-the-permuter` dive has proven unreachable from faithful C
 at our profile, and you need either (a) the missing source idiom, or (b) confirmation the ROM's form is
 a compiler-config/patchlevel origin (not a source shape). This is the escalation above the source dive
 and the permuter -- it reads other games' matched decomps as a byte-exact corpus of "what the real
@@ -6178,7 +6178,7 @@ compiler actually emits" for the exact pattern. First flagged as the last untrie
 
 **The sibling-project compiler map (relevance gate).** Only a project on the same compiler is
 authoritative; a different compiler is at most mechanism-informative. As of S181, the local N64 decomps
-that share MG64's **KMC GCC 2.7.2** are: `marioparty` (MP1), `marioparty2`, `marioparty3`, `drmario64`
+that share MG64's KMC GCC 2.7.2 are: `marioparty` (MP1), `marioparty2`, `marioparty3`, `drmario64`
 (us/gw), `snowboardkids2-decomp`, `hm64-decomp`, `puzzleleague64` -- all `-mips3 -mgp32 -mfp32`, game
 code at `-O1` (MP1/MP2/MP3) or `-O2` (drmario64/sbk2/MG64); the discriminator for a regalloc tie holds
 within a single `-O` level, so the O1-vs-O2 default is not a confound. `papermario` game code is **gcc
@@ -6201,7 +6201,7 @@ rule in `#abs-coalescing-reg-swap`) from 5 same-compiler corpora, and -- with a 
 cross-compile -- proved MG64's exact signature is produced by no project at either compiler version,
 converting an open "untried lever" carry into a definitively-closed one. A NULL result (no corpus has
 your signature) is itself the answer: the ROM's form is a build artifact, carry it. Pair the sweep with
-a **compile-with-the-other-compiler probe** when a version origin is suspected (fetch the sibling
+a compile-with-the-other-compiler probe when a version origin is suspected (fetch the sibling
 project's gcc binary, e.g. `papermario/tools/build/cc/gcc/gcc` = 2.8.1, and compile your isolated TU
 with it): if the other version reproduces the ROM form, you have a wrong-pin; if it does not (S181:
 2.8.1 gave in-place + 80 insns, worse) and a same-TU sibling already matches at your pinned version,
@@ -6227,7 +6227,7 @@ ascending). Permuter is weak here (allocno-tiebreak class); carry with the citat
 ## dead-frame reload-artifact regalloc-wall
 
 **Symptom:** a classical fn whose structure, scheduling, loop-hoisting, and instruction sequence are
-**fully matched** to the ROM, and the only residual is that the target **reserves a dead stack frame**
+**fully matched** to the ROM, and the only residual is that the target reserves a dead stack frame
 — `addiu sp,sp,-N` in the prologue + `addiu sp,sp,+N` in the epilogue with **zero `sp`-relative
 load/store between them** — that your build (a leaf fn with no spill) does not, plus the pervasive
 **register permutation the frame drives** (a first-load `v0`/`v1` swap that cascades, `mfhi t3` vs `t4`,
@@ -6236,7 +6236,7 @@ two locals swapped like `dst`/`row` = `a3`↔`t0`). Confirm the dead frame by gr
 `func_8004DC44` (ring-buffer→grid blit, target reserves a dead 8-byte frame; structure otherwise
 byte-identical after the `#top-tested-loop-goto-local-hoist` selective-hoist fix).
 
-**Root cause:** GCC 2.7.2 `reload` assigned a **spill slot** to a pseudo (counted into `frame_size` via
+**Root cause:** GCC 2.7.2 `reload` assigned a spill slot to a pseudo (counted into `frame_size` via
 `get_frame_size()`; `mips.c` `MIPS_STACK_ALIGN` rounds one 4-byte slot up to 8; the `addiu sp` emits only
 when `get_frame_size()>0` post-reload, and is gcc-emitted, not assembler-injected — S173 dump-verified),
 then eliminated the actual spill store/load because the value was available in a register at the spill
@@ -6247,80 +6247,80 @@ internal artifact.
 
 **S173 deep dive (4 GCC-2.7.2/binutils-2.6 subagents, ~35 variants, 275k permuter iters — dump-verified).**
 Two refinements to the S172 framing, both important:
-1. **The dead frame is reachable** (retract "no source trigger for the frame"). A **structured** outer loop
+1. **The dead frame is reachable** (retract "no source trigger for the frame"). A structured outer loop
    produces the spill (its LICM hoists an extra invariant into a held reg, raising pressure), and the
    **permuter hit a frame-bearing 75-insn candidate** from the improved seed (frame at the exact ROM
-   position). The frame and the goto-vs-structured control-flow choice are **orthogonal** — by reload time
+   position). The frame and the goto-vs-structured control-flow choice are orthogonal — by reload time
    the loop history is gone (just basic blocks + a conflict graph).
 2. **The true, un-source-reachable wall is the coupled register permutation, rooted in a `v0`/`v1` swap in
    a signed-divide-by-constant.** For `x / 40`: `expmed.c` `force_reg`'s the dividend first, then
-   `expand_mult_highpart`/`optabs.c copy_to_mode_reg` creates the magic (`0x66666667`) as a **later** pseudo;
-   `local-alloc.c`'s **life-length-dominated** priority (`floor_log2(refs)*refs*size/life`, deliberately
-   matched to `global.c allocno_compare`) scores the tiny-live-range magic **6666 vs the dividend's 1666**,
+   `expand_mult_highpart`/`optabs.c copy_to_mode_reg` creates the magic (`0x66666667`) as a later pseudo;
+   `local-alloc.c`'s life-length-dominated priority (`floor_log2(refs)*refs*size/life`, deliberately
+   matched to `global.c allocno_compare`) scores the tiny-live-range magic 6666 vs the dividend's 1666,
    so the magic is allocated first and `find_free_reg` (ascending scan, no `REG_ALLOC_ORDER` on MIPS) hands
-   it `$v0`. The ROM assigns dividend→`$v0`, magic→`$v1` with an **outwardly identical instruction sequence**;
+   it `$v0`. The ROM assigns dividend→`$v0`, magic→`$v1` with an outwardly identical instruction sequence;
    the model above predicts the opposite and reproduces every build — the ROM's assignment is a mechanism
-   the model does not capture, so its divide source-shape is **unrecoverable from asm**. Not flippable by
+   the model does not capture, so its divide source-shape is unrecoverable from asm. Not flippable by
    reorder, extra dividend refs (life grows in lockstep), explicit reciprocal-multiply (`(s64)x*magic>>32`,
    real `mult`, moves the dividend reg but magic stays `$v0`), interleave, or tie-break temps.
 
 **S174 correction — the divide-swap is flippable-in-isolation, not "irreducible"; retract "unrecoverable
 from asm."** An 8-project cross-decomp sweep (all KMC gcc 2.7.2: marioparty1/2/3, snowboardkids2,
 drmario64, hm64, puzzleleague64) + ~12 compiler-source subagents + RTL pass dumps (`-dl`/`-dg`/`-ds`)
-pinned the real mechanism, and it is a **quotient-destination / register-coalescing** effect, not an
+pinned the real mechanism, and it is a quotient-destination / register-coalescing effect, not an
 unrepeatable artifact. See the dedicated playbook `#signed-divide-const-v0v1-quotient-destination`. In
 one line: **dividend→`$v0` requires a physical reg-2 set (a `(set $v0 …)`/`(set … $v0)` copy) adjacent
 to the divide chain**, which lands the chain in local-alloc's **suggestion pass** (`local-alloc.c`
 1466-1477 + `combine_regs` 1798-1838) *before* the life-priority general pass. `return g/40` supplies
 it (the return copy coalesces back through the in-place `sra`/`subu` chain to the dividend) and
-reproduces the ROM's `/40` bytes **exactly**. The reason `func_8004DC44` still can't be matched: it is a
+reproduces the ROM's `/40` bytes exactly. The reason `func_8004DC44` still can't be matched: it is a
 **void, callless, returnless leaf whose quotient feeds arithmetic then a loop-carried store** — it emits
 **no reg-2 mention anywhere**, so the chain falls to the general pass where the 2-insn magic (shortest
 life) deterministically wins `$v0`. Every faithful lever fails *in that context*: 24 control-flow × src
 combos, multi-term dividends, all associativity, and the sched1 lifetime lever (`life_magic >
 ⅔·life_dividend`; the loop-setup pressure sinks the magic to life ~3 in every form) — all magic→`$v0`.
-A `register asm("$2")` binding forces the dividend (28 diffs, down from 38) but is unfaithful **and**
+A `register asm("$2")` binding forces the dividend (28 diffs, down from 38) but is unfaithful and
 incomplete (leaves the quotient intermediate in `v1` where the ROM uses `a3`, and the frame absent).
 So the corrected framing is **"flippable-in-isolation; a void-loop-fed leaf is deterministically
 magic→`$v0` by local-alloc"** — the ROM's coordinated dividend-`$v0` + quotient-`a3` + dead-frame is a
 sched1/pressure state this toolchain does not produce from any source-equivalent void-leaf input (sa-A
-`local-alloc` + sa-B `sched.c`/`reload1.c`, both source-grounded). The dead frame is a **co-symptom** of
+`local-alloc` + sa-B `sched.c`/`reload1.c`, both source-grounded). The dead frame is a co-symptom of
 the same 3-live-value pressure peak, not a cause: reload never reassigns an already-allocated pseudo's
 hard reg (only spills to memory), so "add a frame to force `$v0`" is false.
 
 **Verdict — permuter or carry; the frame is reachable but the divide-swap is not (in a void loop-fed leaf).** Once structure +
 scheduling + hoisting are settled and the residual is the dead frame + its driven permutation, route to
 the permuter (it can reach the frame; it must also flip the divide-swap in the same candidate — low odds)
-or **carry**. Do not grind source levers for the frame (address-taking a local forces a **live** frame with
-real `sp` loads the ROM lacks) and do not grind the divide-swap in a **void loop-fed leaf** (per the S174
+or carry. Do not grind source levers for the frame (address-taking a local forces a live frame with
+real `sp` loads the ROM lacks) and do not grind the divide-swap in a void loop-fed leaf (per the S174
 correction above it is flippable-in-isolation but deterministically magic→`$v0` here — see
 `#signed-divide-const-v0v1-quotient-destination`). Save the
 structurally-settled near-match so the retry starts from ops-100%-match: for `func_8004DC44` the seed is
 **pre-declared base-pointer vars + structured inner `for` + goto outer** (`#top-tested-loop-goto-local-hoist`;
 the base-hoist the S172 seed lacked). Sibling to `#pervasive-regalloc-classical-main`,
-`#cse-make_regs_eqv-branch-fold`, and `#abs-coalescing-reg-swap`. A **dump-verified negative** (proven
+`#cse-make_regs_eqv-branch-fold`, and `#abs-coalescing-reg-swap`. A dump-verified negative (proven
 can't-be-source-fixed) is itself a valid, valuable outcome — it converts an open grind into a documented
 carry (`#compiler-source-fan-out-escalation-above-the-permuter`).
 
 **Provenance:** S172 `func_8004DC44` (the S171 `print_string_at_grid.c` regalloc-wall carry; its sibling
-`print_string_at_grid` banked S172 via `#cross-jump-tail-merge` nested-if). **S173 re-carry** after the
+`print_string_at_grid` banked S172 via `#cross-jump-tail-merge` nested-if). S173 re-carry after the
 deep compiler-source dive above; improved seed + full analysis in `docs/wip/func_8004DC44.wip.md`. **S174
 re-carry** after the cross-project + coalescing correction above (retired the "irreducible/unrecoverable"
 framing) — see `#signed-divide-const-v0v1-quotient-destination`.
 
 **S251 — the pure-dead-frame variant is a clean crack, not this carry-class.** Everything above assumes
 the dead frame is coupled to a register permutation (the `v0`/`v1` divide-swap) — that coupling is what
-makes it a carry. But a dead frame can appear alone: a fn whose body is **byte-identical** to the ROM
+makes it a carry. But a dead frame can appear alone: a fn whose body is byte-identical to the ROM
 and whose only residual is the prologue/epilogue `addiu sp` immediate (+ the `sw/lw ra` slot offset that
 moves with it), with **no register permutation, no signed-divide, no reg-swap anywhere**. That is a
-`reload`-eliminated **local aggregate**, not an eliminated spill-of-a-divide-pseudo, and it is
+`reload`-eliminated local aggregate, not an eliminated spill-of-a-divide-pseudo, and it is
 **reconstructable**: declare an unused local array sized to the frame delta and gcc reserves the slot
 with zero `sp)` access (an unused aggregate is not address-taken, so it does not force the "live frame
 with real `sp` loads" the caveat above warns about — that caveat is about address-taking, a different
-trigger). **Recipe:** frame delta = `ROM_frame − your_frame`; the base non-leaf frame is `0x18` (0x10
+trigger). Recipe: frame delta = `ROM_frame − your_frame`; the base non-leaf frame is `0x18` (0x10
 outgoing-arg + 0x8 ra/pad), so the eliminated local is `delta` bytes → `s32 unused[delta/4]`. S251
 `func_80080DCC` (lazy one-time-init): ROM `-0x38`/ra@0x30 vs build `-0x18`/ra@0x10, delta `0x20` →
-`s32 unused[8]` → byte-exact, no other change. **Disambiguation from the carry-class:** grep the
+`s32 unused[8]` → byte-exact, no other change. Disambiguation from the carry-class: grep the
 near-match diff — if the only differing tokens are the two `addiu sp` immediates + the `ra` slot offset
 (body instruction sequence + every other reg identical), it is the pure variant → crack with the sized
 unused aggregate; if the frame diff drags a `v0`/`v1` (or other) reg permutation with it, it is the
@@ -6368,17 +6368,17 @@ just the magic, to pin the divisor.
 
 **Root cause (RTL-dump + `local-alloc.c`/`sched.c` grounded, S174).** Neither operand carries a hard-reg
 suggestion by default (a `li` of the magic and a `lw`/compute of the dividend, tied to no hard reg), so
-both fall to local-alloc's **general (life-priority) pass**: `qty_compare` priority `=
+both fall to local-alloc's general (life-priority) pass: `qty_compare` priority `=
 floor_log2(refs)*refs*size / (death-birth)`, higher wins, and `find_free_reg` scans hard regs ascending
-(MIPS has **no `REG_ALLOC_ORDER`**), so the earlier-ordered qty takes the lower reg. The magic's
-2-insn life makes `pri_magic` (~6666) ≫ `pri_dividend` (~1666), so **magic→`$v0` is the default** for a
+(MIPS has no `REG_ALLOC_ORDER`), so the earlier-ordered qty takes the lower reg. The magic's
+2-insn life makes `pri_magic` (~6666) ≫ `pri_dividend` (~1666), so magic→`$v0` is the default for a
 plain dividend. **The dividend wins `$v0` only when it out-lives-or-out-suggests the magic**, via one of
 these levers (empirically confirmed across 8 KMC gcc 2.7.2 decomps):
 
 1. **Quotient reaches `$v0` directly (a reg-2 set → the suggestion pass).** `return x/40;`, or `y=x/40;
-   return y;` — the return copy `(set $v0 quotient)` records a `$v0` **copy-suggestion** (`combine_regs`,
+   return y;` — the return copy `(set $v0 quotient)` records a `$v0` copy-suggestion (`combine_regs`,
    `local-alloc.c` 1824-1838) on the divide chain's qty (dividend/sign/quotient share one qty via the
-   in-place `sra`/`subu` union, 1840-1885), and the **suggestion pass** (1466-1477) pins it to `$v0`
+   in-place `sra`/`subu` union, 1840-1885), and the suggestion pass (1466-1477) pins it to `$v0`
    *before* the general pass runs. **any arithmetic on the quotient before it reaches `$v0` breaks this**
    (`-(x/40)`, `x/40+K`, a store, a call-arg all give magic→`$v0`). This is the cleanest lever, and the
    only one available to a fn that returns the quotient.
@@ -6393,13 +6393,13 @@ these levers (empirically confirmed across 8 KMC gcc 2.7.2 decomps):
 5. **Indexed struct/array-member or call-return dividend** (`base[i].f/K`, `f()/K`): the dividend is
    freshly materialized into `$v0` at the divide (pressure-dependent, not deterministic).
 
-**The blocker (why a void loop-fed leaf can't flip):** a **void, callless, returnless** leaf whose
-quotient feeds arithmetic then a **loop-carried store** emits **no reg-2 mention anywhere** → no
+**The blocker (why a void loop-fed leaf can't flip):** a void, callless, returnless leaf whose
+quotient feeds arithmetic then a loop-carried store emits no reg-2 mention anywhere → no
 suggestion (lever 1 unavailable), the loop-carried `src` is a multi-block pseudo (global.c, not unioned
-with the local divide chain), and the loop-setup register pressure sinks the magic to life ~3 in **every**
+with the local divide chain), and the loop-setup register pressure sinks the magic to life ~3 in every
 control-flow structure / associativity / schedule (so `life_magic > ⅔·life_dividend` is unreachable).
 `func_8004DC44` is exactly this. The `register asm("$2")` binding creates a synthetic reg-2 set and does
-force the dividend to `$v0`, but it is non-idiomatic (shows as `asm` in the decompile) **and** does not
+force the dividend to `$v0`, but it is non-idiomatic (shows as `asm` in the decompile) and does not
 reproduce the ROM's coordinated allocation (quotient→`a3`, dead frame) — not a faithful match (S175:
 applied to the frame-correct base it is *worse*, 51 diffs — the forced dividend leaves the quotient in
 `$v1` where the ROM uses a fresh `$a3`, proving the ROM state is a *coordinated* `{dividend→$v0,
@@ -6409,7 +6409,7 @@ quotient→$a3-fresh, dead-frame}` coloring, not a single-reg pin).
 no-op at -O2** (S175, controlled A/B: `s32 seed` vs `register s32 seed` at identical structure →
 `.text` byte-identical; both keep the swap). Source-proven three ways on `mips-gcc-2.7.2`: (a) at -O2
 `obey_regdecls==0`, so `DECL_REGISTER` is ignored (`stmt.c:3364`), and a plain local also gets
-`REG_USERVAR_P` (`stmt.c:3390`) → register-vs-plain RTL is identical; (b) `REG_USERVAR_P` has **0 hits**
+`REG_USERVAR_P` (`stmt.c:3390`) → register-vs-plain RTL is identical; (b) `REG_USERVAR_P` has 0 hits
 in `local-alloc.c` and `global.c` — it is absent from the `qty_compare` priority, the `find_free_reg`
 scan, and the suggestion machinery, so it cannot reorder the dividend-vs-magic allocno; (c) the flag
 *does* survive into the multiply's dividend operand (`force_reg` passes a reg through, `explow.c:638`;
@@ -6423,7 +6423,7 @@ matched the ROM, leaving only a 2-instr scheduler swap). So `asm("$N")` is a val
 residual), so a clean source lever must reproduce the same allocation (S178 did it via the
 [define-after-call caller-saved placement](#loop-weight-and-live-length-regalloc-steering) + inline sentinel).
 
-**Escalation.** For a same-toolchain reg-alloc wall, mine the other N64 decomps for a **matched** analog
+**Escalation.** For a same-toolchain reg-alloc wall, mine the other N64 decomps for a matched analog
 of the exact pattern (see `#compiler-source-fan-out-escalation-above-the-permuter` for the cross-project
 + RTL-dump methodology); if none exists (as here — no matched plain-global single-magic dividend wins
 `$v0` in a real fn across 8 projects), the ROM's assignment is a scheduling/pressure state the toolchain
@@ -6437,23 +6437,23 @@ indexed, hm64 `(a+b+c)/3` multi-term, marioparty3 `x/10%10` CSE). Corrects the S
 
 ## nested-function static-chain spill
 
-**Rule.** A **leaf** function that opens with `addiu sp,sp,-8` + a `sw $v0,0(sp)` that is **never
+**Rule.** A leaf function that opens with `addiu sp,sp,-8` + a `sw $v0,0(sp)` that is **never
 reloaded** — a dead spill of the *incoming* `$v0` — and whose single caller sets `$v0 = &sp[N]` (a
-pointer into the caller's own frame) right before **each** `jal` to it, is a **GCC nested function**.
-The dead store is GCC saving the incoming **static chain**: MIPS o32 passes the static chain in
+pointer into the caller's own frame) right before each `jal` to it, is a GCC nested function.
+The dead store is GCC saving the incoming static chain: MIPS o32 passes the static chain in
 `$v0` (`config/mips/mips.h` `#define STATIC_CHAIN_REGNUM (GP_REG_FIRST + 2)` = `$2`). For any
 lexically-nested function, `function.c` `expand_function_start` (~:5011-5023) grabs the first stack
 slot (offset 0) and `emit_move_insn(last_ptr, static_chain_incoming_rtx)` → `sw v0,0(sp)`; the body
 never reads the chain, so it is a dead spill. The caller side is `calls.c:293`
 `emit_move_insn(static_chain_rtx, static_chain_value)` → the parent loads `$v0 = &<its frame>` before
-the call. This is **not** a `#dead-frame-reload-artifact-regalloc-wall` (that has no source trigger;
+the call. This is not a `#dead-frame-reload-artifact-regalloc-wall` (that has no source trigger;
 this one does — the nesting).
 
 **Tell (the discriminator).** Distinguish from a random dead-frame artifact by reading the caller:
-if the caller materializes `$v0 = &sp[K]` (an `addiu v0,sp,K`) into the `jal`'s live range for **each**
+if the caller materializes `$v0 = &sp[K]` (an `addiu v0,sp,K`) into the `jal`'s live range for each
 call site, it is the static chain, and the callee is nested inside that caller.
 
-**Real bank.** Write the function as a C **nested function** inside its caller/parent (same TU):
+**Real bank.** Write the function as a C nested function inside its caller/parent (same TU):
 ```c
 void parent(void) { /* = the caller */
   void child(u32 a, u32 b) { ... }   /* the nested fn; GCC mangles the symbol to child.N */
@@ -6461,12 +6461,12 @@ void parent(void) { /* = the caller */
 }
 ```
 The mangled `child.N` symbol is irrelevant to the ROM-byte oracle (splat names by address). The
-parent and child are **one compilation unit** — they cannot be split into separate `.c` files.
+parent and child are one compilation unit — they cannot be split into separate `.c` files.
 
-**Decompose-gate corollary (orphaned nested child).** A subseg decompose can **orphan** a nested
+**Decompose-gate corollary (orphaned nested child).** A subseg decompose can orphan a nested
 child from its parent: the child's `.text` sits *before* the parent's (GCC emits the nested fn
 ahead), so the true TU boundary is the child's address (often non-16-aligned), not the parent's. When
-a pack member's caller passes a static chain, keep the parent + child in **one** increment, or carry
+a pack member's caller passes a static chain, keep the parent + child in one increment, or carry
 the child to the parent's sprint. Do not bank the child alone. (S176: `func_8004E184` at `0x8004E184`
 is nested in `func_8004E1E0` at `0x8004E1E0`; the true TU boundary `0x8004E184` is non-16-aligned, so
 cluster A's `0x295E0` split over-reached by one fn — the child was carried.) `pick_target.py` flagging
@@ -6475,9 +6475,9 @@ follow-up.
 
 **Chain-unused orphan variant + standalone byte-repro (S248).** When the child reads no parent
 variable, the chain is homed (`sw $v0,0(sp)`) but never reloaded — a pure dead spill. If the parent
-also **inlined** its call(s) to the child, GCC still emits the out-of-line body, but **zero** `jal`/
+also inlined its call(s) to the child, GCC still emits the out-of-line body, but zero `jal`/
 function-pointer references to the child survive anywhere in the ROM (scan the raw binary for the
-`jal` word and the address word to confirm). This is an **orphaned** nested child with no recoverable
+`jal` word and the address word to confirm). This is an orphaned nested child with no recoverable
 parent — you cannot write it nested. Bank it standalone with a `volatile s32 x = <uninitialized
 local>;` stand-in that reproduces the exact bytes: the volatile addressable local forces the 8-byte
 frame (a schedulable `subu $sp` RTL floats it mid-body, mips.md:6029) and homes the uninitialized
@@ -6500,9 +6500,9 @@ callers set `addiu $v0,$sp,0x10`) from "$v0-arg wall" to this crackable class. S
 
 **Callee-side tell + pre-classify the whole pack at seed time (S191).** You do not need the caller to
 spot a nested child: the child's own entry carries the tell. Two forms, both read straight off the
-child's `.s`: (a) **dead-spill leaf** — `addiu sp,-8; sw v0,0(sp)` with `$v0` never reloaded (a nested
+child's `.s`: (a) dead-spill leaf — `addiu sp,-8; sw v0,0(sp)` with `$v0` never reloaded (a nested
 fn that does not use its static chain; GCC still frames it, "pure-leaf still framed when nested"); and
-(b) **chain-using** — `sw v0,X(sp); lw v0,OFF(v0)` (or `move sN,v0` then `lw ...,OFF(sN)`), the child
+(b) chain-using — `sw v0,X(sp); lw v0,OFF(v0)` (or `move sN,v0` then `lw ...,OFF(sN)`), the child
 dereferencing the parent's frame through the incoming `$v0`. Either way `$v0` is meaningful on entry,
 which is impossible for a standalone o32 fn (`$v0` is not an incoming arg). **Because GCC emits nested
 children immediately before their parent, a run of such fns sitting just ahead of a big FP/complex fn
@@ -6525,12 +6525,12 @@ whole 9-fn pack; `func_8004E184` then compiled to `0x8004E184` as `func_8004E184
 
 **CSE-reload wall on the parent (S177 carry, subagent-verified).** The child can bank perfectly and
 the parent still be a wall. `func_8004E1E0`'s init does `D_800DC6E0[3].next = D_800DC6E0[3].prev`,
-which the ROM emits as a **reload** of the just-stored field (`lui v1,%hi(D_800DC734); lw
+which the ROM emits as a reload of the just-stored field (`lui v1,%hi(D_800DC734); lw
 v1,%lo(...)`), but KMC GCC 2.7.2 -O2 value-forwards it (reuses the register) for any faithful C. The
-reload is a CSE **varying-address invalidation** (cse.c `note_mem_written` sets `nonscalar` only for a
+reload is a CSE varying-address invalidation (cse.c `note_mem_written` sets `nonscalar` only for a
 `(plus reg off)` runtime base/index, purging the in-struct cache → reload); the ROM's field stores are
 pure absolute (`(symbol+off)`, non-varying → precise invalidate → forward). Absolute stores + a reload
-are **mutually exclusive** under this profile (the reload-triggering register is the same one that
+are mutually exclusive under this profile (the reload-triggering register is the same one that
 blocks the absolute fold), and register pressure does not trigger it (pressure-tested negative). So the
 init is unreachable from faithful C and the permuter is blocked (pycparser rejects the nested fn) — a
 genuine carry, well-characterized like [#signed-divide-const-v0v1-quotient-destination](#signed-divide-const-v0v1-quotient-destination)
@@ -6540,7 +6540,7 @@ and [#dead-frame-reload-artifact-regalloc-wall](#dead-frame-reload-artifact-rega
 in `src/main/func_80043C20.c`: `func_80044470` ⊂ `func_800444B8` (divide-by-14 table lookup) and
 `func_80043C20` ⊂ `func_80043C64` (a `for(;;){c=*s++; if(!c)break; if(pos<end)*pos++=c;}` string-appender
 that reaches the parent's `buf_pos`/`buf_end` at static-chain `+0x100`/`+0x104`). Three confirmations:
-(1) **Child-emits-before-parent lands the child.** GCC outputs the nested child immediately before the
+(1) Child-emits-before-parent lands the child. GCC outputs the nested child immediately before the
 parent, so writing the parent's C at the source position where the child's lead-vram stub sat places the
 child at that lead vram — `func_80043C20` is the pack lead (0x80043C20) and banked by defining
 `func_80043C64` first with the child nested inside it (child → local `func_80043C20.2` at offset 0).
@@ -6558,7 +6558,7 @@ carries together (the child cannot bank without the parent's `.text`).
 **uninitialized** pointer local (which local-alloc parks in `$v0`, the first allocable GPR since MIPS
 has no `REG_ALLOC_ORDER`), the `volatile` store survives DSE (`flow.c` `insn_dead_p && !INSN_VOLATILE`)
 and reserves the 8-byte frame, then the same reg is reused for the real value → `sw v0,0(sp)`. This is
-UB and is **not** the original source; use only if the parent is genuinely unavailable and the PO
+UB and is not the original source; use only if the parent is genuinely unavailable and the PO
 accepts a documented pseudo-fakematch. `#capturing-ra` (which also reads a fixed reg) and
 `#dead-frame-reload-artifact-regalloc-wall` are the sibling reg/frame hazards.
 
@@ -6651,7 +6651,7 @@ stubs after the classification chain.
 ## local-alloc qty-permutation (1-basic-block reg swap, permuter-appropriate)
 
 **Symptom (S204 `func_80050428`).** A straight-line classical fn (no branches) byte-matches the ROM in
-mnemonic sequence but locks on an s-register **permutation** (e.g. target `off→s4, slot→s3, base→s2`;
+mnemonic sequence but locks on an s-register permutation (e.g. target `off→s4, slot→s3, base→s2`;
 build `off→s1, slot→s4, base→s3`) plus one independent-store schedule move. Not structural, not FP.
 
 **Root cause (gcc-2.7.2 codegen dive).** A fn with one basic block is register-allocated by
@@ -6683,7 +6683,7 @@ ruled out is the residual a genuine qty-priority permutation for the permuter be
 
 **Do not hand-iterate the source for a genuine qty permutation.** GCC's pre-alloc scheduler normalizes qty
 births, so decl-order, expression-association, and pointer-hoist rewrites mostly don't move a real
-permutation (S204: 5 source levers, zero movement). This is exactly the local-allocation space the **decomp-permuter** explores —
+permutation (S204: 5 source levers, zero movement). This is exactly the local-allocation space the decomp-permuter explores —
 run it (`setup-permuter.sh --main`, then `run-permuter.sh <fn> --stop-on-zero`). S204 found score 0 at
 iteration ~14250. Two winning shapes the permuter surfaces here recur:
 - **Reference a global inline, not via a pointer local** (`(u32)(D_E473F0 + x)`, not `u8* base =
@@ -6710,7 +6710,7 @@ at 0.91: store order byte-matched the ROM but the entry-block compute cluster (`
 `row<<10`) was register-permuted, and source levers (direct writes, temp-hoist) folded to the same
 emission (confirming the "source levers mostly don't move it" note holds above 1-BB). The permuter found
 score 0 at iter 618; the winning form reordered `vtx[4]` (col-texcoord) before `vtx[5]` (row-texcoord) so
-GCC computes `col<<10` first — and that reorder held byte-exact **without** the permuter's incidental
+GCC computes `col<<10` first — and that reorder held byte-exact without the permuter's incidental
 `long long v=10; x<<v` shift-var artifact. Lesson: after the permuter wins, try the reorder alone (drop
 the permuter's type/shift noise) — the clean reorder usually reproduces the match and reads as normal
 source. So "permuter-appropriate below 0.97" extends to a small multi-BB fn with a byte-exact store order
@@ -6727,18 +6727,18 @@ asm/nonmatchings/<seg>/<fn>/<fn>.s` (seed `base.c` first with a minimal compilab
 `./tools/decomp-permuter/permuter.py nonmatchings/<fn>-N -j <threads> --best-only --stop-on-zero`.
 
 **Multi-BB analog — `global.c`, not `local-alloc.c` (S209 `func_8005C458`).** A fn with a nested loop
-has multiple basic blocks, so its cross-BB pseudos are allocated by **`global.c` (allocnos)**, the
+has multiple basic blocks, so its cross-BB pseudos are allocated by `global.c` (allocnos), the
 global analog of the qty rule above (confirm with the `.greg` dump vs `.lreg`). `allocno_compare` orders
-allocnos by priority `floor_log2(n_refs)·n_refs·size / live_length` (**`global.c`:594-601**), higher
-first, tie-broken by lower allocno number; `find_reg` scans hard regs **ascending** (no `REG_ALLOC_ORDER`
+allocnos by priority `floor_log2(n_refs)·n_refs·size / live_length` (`global.c`:594-601), higher
+first, tie-broken by lower allocno number; `find_reg` scans hard regs ascending (no `REG_ALLOC_ORDER`
 in `mips.h`), so the register number a value gets is just its rank in the priority order. When two
-competitors have equal `n_refs`, **live_length decides** — the shorter-lived one wins the lower reg.
+competitors have equal `n_refs`, live_length decides — the shorter-lived one wins the lower reg.
 
 **Allocno live-length steer (the S209 C458 lever).** To flip which of two equal-ref values takes the
 lower caller-saved reg, change one's live length at the source. `s8 *base = (s8*)func_8005AF50()`
 coalesces `base` with the `$v0` return, so its defining `move` materializes first (right after the call)
 → long live range; the row counter `i` (a later `li`) then out-prioritizes it and grabs the lower reg
-(direct: base live_length 14 > i 12 → i wins `$a2`, base `$a3`). An **intermediate copy** —
+(direct: base live_length 14 > i 12 → i wins `$a2`, base `$a3`). An intermediate copy —
 `u8 *ret = func_8005AF50(); s32 count=0,i=0,n=6; s8 *base = ret;` — gives `base` a separate pseudo whose
 `move $a2,$v0` is deferred to after the const inits → short live range (base live_length drops to 11 <
 i's 13) → base out-prioritizes `i` and takes `$a2` (and count lands `$a1`, end `$a0`). This is the exact
@@ -6796,7 +6796,7 @@ spot-check.** The full-`make` ROM SHA-1 is not fooled (it relinks), but a per-fn
 **Multi-BB arg-reg swap is source-leverable via store count (S232 `func_800542A0`, corrects the
 "permuter-only" default).** A short multi-BB fn (guard + `||` accumulate) locked on an `$a0`↔`$a1` swap:
 ROM holds the scaled array offset in `$a0` (reused for two loads) and the 0/1 accumulator in `$a1`; the
-build swapped them. Because it has branches it is allocated by **`global.c`, not local-alloc**, and the
+build swapped them. Because it has branches it is allocated by `global.c`, not local-alloc, and the
 tie is the allocno-priority formula `floor_log2(n_refs)·n_refs/live_length` (`global.c:587-607`,
 `allocno_compare`), with `find_reg` scanning hard regs ascending (`global.c:961-984`; MIPS has no
 `REG_ALLOC_ORDER`) so the first-ranked allocno grabs the lower reg (`$a0`=4 before `$a1`=5). **The
@@ -6884,10 +6884,10 @@ permute; here CSE changed the shape upstream, and a source type-narrowing fixes 
 **Symptom (S205 `func_8005E380`).** A large straight-line fn takes one pointer parameter `T* p`,
 derives a fixed-offset sub-object pointer `sub = &p->big_substruct` (constant offset, e.g. `OSThread*
 thread` → `ctx = &thread->context` at +0x20), and does many `sub->field` accesses. Every build keeps
-the **parameter** in a callee reg (`move $16,$4`) and folds the sub-offset into each displacement
+the parameter in a callee reg (`move $16,$4`) and folds the sub-offset into each displacement
 (`0x11C($16)` for `ctx->pc`); the ROM instead materializes the sub-pointer as the base
 (`addiu $17,$4,0x20`, then `0xFC($17)`) with the buffer/other pointer in the other callee reg. Result:
-a **pervasive** base-register + uniform-displacement-offset diff on every field access. The isolated
+a pervasive base-register + uniform-displacement-offset diff on every field access. The isolated
 `decomp_loop` shows `match_count == total_rows`, `top_mismatches == []`, yet a low percent (S205: 0.48)
 — looks like the `#io_write/io_read`/isolated-compile artifact, but the in-tree `diff.py` confirms it
 is a real pervasive near-miss (see the isolation-caveat note in
@@ -6895,7 +6895,7 @@ is a real pervasive near-miss (see the isolation-caveat note in
 
 **Root cause (gcc-2.7.2, confirmed by exhaustive bisect).** CSE (`cse.c` `fold_rtx` /
 `simplify_plus_minus` address canonicalization) always canonicalizes `(plus (plus param C) off)` to
-`(plus param (C+off))` — it prefers the **base parameter** as the single canonical base and eliminates
+`(plus param (C+off))` — it prefers the base parameter as the single canonical base and eliminates
 the `param+C` intermediate, extending the parameter's live range across the calls (hence the
 `move $16,$4` preservation). It will not keep the derived `param+C` as the base even when the ROM does.
 The choice of which of {param, sub, buf} keeps a callee reg is then a local-alloc tie, but the
@@ -6903,19 +6903,19 @@ canonicalization itself is upstream and deterministic.
 
 **Levers that do not work (all proven inert, S205 — do not re-try):**
 - Source (8): `register` kw, `(T*)((u8*)p + C)` char\* cast, an eager `sub`+`id` temp block, decl
-  order, and reading a pre-substruct field via `sub[-k]` (GCC **re-folds** `ctx[-3]` back to
+  order, and reading a pre-substruct field via `sub[-k]` (GCC re-folds `ctx[-3]` back to
   `thread+0x14`). None move the score off the base fold.
 - Flags/opt (19): `-O0/-O1/-O2/-O3`, `-g`, `-funroll-loops`,
   `-fno-{gcse,cse-follow-jumps,cse-skip-blocks,rerun-cse-after-loop,expensive-optimizations,defer-pop,strength-reduce,schedule-insns,schedule-insns2,...}`. Every one folds.
 - Permuter (`--main`, best-only, ~45k iters): valid-floor only ~1200 permuter-score (base ~27760 /
-  0.48 decomp_loop); anything lower is **semantically invalid** (drops a print call, or uses `sub`
+  0.48 decomp_loop); anything lower is semantically invalid (drops a print call, or uses `sub`
   uninitialized) — the same UB-drift failure mode as the `func_8003E004` permuter runs.
 
 **Verdict.** This is a compiler wall distinct from `#local-alloc-qty-permutation` (that keeps the
 right base, permutes only s-regs — permuter-crackable) and from `#move_movables` FP-hoist
 (`func_8003E004`). It is not blind-retryable: it needs a from-scratch permuter seeded past the base
 fold, or a source form that forces the `param+C` materialization (none found across 8 forms). RE the
-body fully (it is 100% structural), commit a gold in-file root-cause note, and **carry** — do not burn
+body fully (it is 100% structural), commit a gold in-file root-cause note, and carry — do not burn
 sprints re-attempting the same levers. Detector signal for `pick_target.py` (queued, off-cadence
 golden-gated): single pointer param + large sub-struct-base dump access pattern + FP-reg reads →
 price permuter/carry-expected (kin to the S158/S177/S183/S203/S204 regalloc-heavy pts follow-up).
@@ -6927,7 +6927,7 @@ two register operands are swapped vs the ROM: ROM `addu $a0,$t1,$v1` (n-first), 
 `addu $a0,$v1,$t1` (p-first). The swapped value is a pointer+int sum (`end = p + n`).
 
 **Root cause (gcc-2.7.2 C front end).** For `pointer + integer`, `c-typeck.c` `pointer_int_sum` always
-builds the tree with the **pointer as operand 0**, so the RTL `plus` is `(plus p n)` → `addu d,p,n`
+builds the tree with the pointer as operand 0, so the RTL `plus` is `(plus p n)` → `addu d,p,n`
 regardless of source spelling (writing `n + p` folds straight back to `p + n`). The commutative
 canonicalization is upstream and deterministic; no decl-order / `register` / re-association source lever
 moves it while the sum stays pointer arithmetic (all verified inert, S209).
@@ -6999,7 +6999,7 @@ assembled object has a `nop` in the slot and the `addu` after it. A "the delay i
 1 insn short of the ROM's nop" verdict taken off the `.s` is a misread.
 
 **Root cause (binutils-2.6 gas).** Under `.set reorder`, gas fills a branch delay slot by swapping the
-branch with the **preceding** instruction only (never the following one), and inserts a `nop` when that
+branch with the preceding instruction only (never the following one), and inserts a `nop` when that
 swap is unsafe — e.g. the preceding insn writes a register the branch reads (`tc-mips.c` ~L1525-1660).
 For B070 the preceding `slt` writes `$v0` and the `beq` reads `$v0`, so the swap is blocked → `nop`; the
 textual next insn is just the fall-through, emitted after the slot.
@@ -7061,7 +7061,7 @@ on the opposite (fall-through/return) thread (`reorg.c:3374-3376`, `opposite_nee
 `mark_target_live_regs` :3293/:2440). A `void` return leaves `$v0` dead at the epilogue → fill accepted
 (the miss). An `s32` return marks `$v0` live at function exit (`end_of_function_needs`, folded in at
 reorg.c:2458/2660) → `$v0 ∈ opposite_needed` → fill rejected → the ROM's NOP. So the NOP is a
-compiler-faithful **return-register-liveness** decision, fully source-leverable via the declared return
+compiler-faithful return-register-liveness decision, fully source-leverable via the declared return
 type, no permuter. The "no-call sibling matches, so the call is the cause" framing was a red herring (the
 sibling returns a pointer = `$v0` live for a different reason). **Before carrying a "call-perturbs-the-
 delay-slot" near-match, check whether a candidate fill writes `$v0` and the fn is declared `void`: retype
@@ -7090,7 +7090,7 @@ Reusable for any FPU zero-fill where the ROM keeps `swc1` and a specific store o
 
 **(a) Range-check un-fold.** A contiguous bounded range `if (x > 0 && x < 4)` (or `x >= 1 && x <= 3`)
 folds to a single `(u32)(x-1) < 3` `sltiu` (one `addiu` + one `sltiu`), but the ROM wants two separate
-signed compares (`blez x, exit; slti v0,x,4; beqz v0, exit`). **Lever:** nest the two bounds —
+signed compares (`blez x, exit; slti v0,x,4; beqz v0, exit`). Lever: nest the two bounds —
 `if (x > 0) { if (x < 4) { … } }` — so GCC emits the two short-circuit branches instead of the combined
 `sltiu`. (Mirror of the mode==1 arm which legitimately wants the fold: write that as `(u32)(x-2) < 2`.)
 S224 ADF8 banked with the nested form; the flat `&&` form was the only diff.
@@ -7193,8 +7193,8 @@ extractable-reorder + permuter-plumbing notes).
 terminal (S233 `get_surface_type` 450 / `func_8003DE80` 350, gcc-source fan-out).** A pair of sibling
 tile-grid fns (`(int)(coord*16)` clamp → `col=D_800B7DB0+(D_800BA6B0[tile&0x3F]<<8)` → `15-cz` index)
 each locked on a single divergence: the ROM materializes the `15` of `15-cz` early (`li v1,0xf` before
-the table `andi`/`lbu`), my build late (`li v0,0xf` after) — my build is **1 instruction shorter**. Root
-cause traced end-to-end: the R4000 `load` function-unit has ready-delay **3** (`config/mips/mips.md`
+the table `andi`/`lbu`), my build late (`li v0,0xf` after) — my build is 1 instruction shorter. Root
+cause traced end-to-end: the R4000 `load` function-unit has ready-delay 3 (`config/mips/mips.md`
 :153-155), so the pre-reload scheduler front-loads the `lbu D_800BA6B0[...]` to hide that latency and
 fills the load-delay window with the independent `li 15`/`subu` chain → `li 15` lands after the load.
 `rank_for_schedule` (`sched.c`:2385-2430) gives the `andi` and the `li 15` equal priority, so the tie
@@ -7284,17 +7284,17 @@ a fixed struct offset like `0xDC0`) into the load/store displacement (`lhu …,%
 where the constant lives.
 
 **What fails / backfires (do not reach for these first):**
-- **Struct-array access** (`D_800C28E4[b].field[c]`) and **explicit intermediate pointers**
+- **Struct-array access** (`D_800C28E4[b].field[c]`) and explicit intermediate pointers
   (`T *row = base + i*S; row[c]`) both perturb the whole function's register allocation — S210 CEE0 went
   from 4 `r` rows (raw inline pointer arith) to 9 `r` rows (pervasive shift) with either. The least-
   divergent form is raw inline pointer arithmetic (`*(u16*)((u8*)SYM + b*14 + c*2)`), so start there.
-- The **permuter does not flip it** (S210: AF80 ~9500 iters base 220, B0B4 ~9500 base 1990 — no crack):
+- The permuter does not flip it (S210: AF80 ~9500 iters base 220, B0B4 ~9500 base 1990 — no crack):
   it is an addressing-mode + allocno-coloring decision, not a source-reachable permutation.
 - This is distinct from [#integer-arith-commutative-operand-order] (which fixes operand order, e.g.
   `n+p` vs `p+n`) and from [#struct-array-of-bss-direct-index-vs-base-pointer-var] (a bss RMW base-reg
   choice). Here the base is a full symbol/pointer materialization vs a `%hi`+`%lo`-displacement split.
 
-**Status.** Partially cracked. For the **fixed-stride `D_` array slot** shape (S210/S234), the
+**Status.** Partially cracked. For the fixed-stride `D_` array slot shape (S210/S234), the
 byte-offset-cast lever did land in S235 (see "byte-offset-cast cracks…" below) — try it first. The
 `sub=&param->substruct` param-base fold is genuinely terminal (cse.c:5589, below). The original S210
 targets (`func_8005DE88`/`func_8005AF80`/`func_8005CEE0`, MMIO/struct chains) predate the lever and
@@ -7514,7 +7514,7 @@ lays out the tested arm as the fall-through with a `j` over the other (`beqz gua
 end; else: <B>; end:`), but the guard-clause form `if(c) return A; return B;` inverted it — the
 build emitted `bnez guard,then` with the call-bearing arm as the out-of-line branch target and the
 cheap arm as fall-through (and, in `get_direct_grid_vertex`, mis-folded the fall-back base pointer
-+0x10). **Fix:** the single-return-temp form
++0x10). Fix: the single-return-temp form
 `{ T r; if(c){r=A;} else {r=B;} return r; }` restores the ROM's source-order layout (then-block
 fall-through, `j join` over the else). Same mechanism as the annul lever above (two definitions of a
 named local in separate basic blocks), but the tell is the branch polarity / which block is inline,
@@ -7594,10 +7594,10 @@ patchlevel probe; carry otherwise.
 **Refined mechanism + proven-wall verdict (S213 compiler-source dive, gcc-2.7.2 `reorg.c`).** The fill
 is done by `fill_slots_from_thread` (reorg.c:3374), not `fill_simple_delay_slots` (which gates on
 `target==0` at reorg.c:3056 and so never fills a labelled condjump). The slot stays `nop` iff the
-block's first insn hits one of: **(a)** its dest reg is live at the branch target/join (e.g. it is the
-function's return value — a non-void return), **(b)** `may_trap_p` (a load/deref/trapping op — the old
+block's first insn hits one of: (a) its dest reg is live at the branch target/join (e.g. it is the
+function's return value — a non-void return), (b) `may_trap_p` (a load/deref/trapping op — the old
 "derefs the guarded pointer" rule is just this special case, and it is any trap, not specifically the
-guard pointer), or **(c)** `own_fallthrough==0` (a `CODE_LABEL` heads the block: a second predecessor).
+guard pointer), or (c) `own_fallthrough==0` (a `CODE_LABEL` heads the block: a second predecessor).
 Otherwise reorg steals the first insn (slot filled, block shortens by one, branch offset −1). A **void,
 single-predecessor** guard block whose first emitted insn **materializes a constant** (`li`/`sll` into a
 scratch reg dead at the void return) is therefore a hard wall: `func_800564F0` (`cs[0x189]=1`) and
@@ -7620,7 +7620,7 @@ delay (S231 `func_8006280C`, banked).** Two sequential range guards `if(A)return
 compare operand is an independent computation (`ty = (u32)arg1>>19`): the ROM fills the first guard's
 `beqz` delay with B's `srl` (compute-ty), then B's guard delay is `nop`. Writing `tx=…; if(txbad)return;
 ty=…; if(tybad)return;` (ty computed after the tx guard) leaves the tx-guard delay a `nop` and puts the
-`srl` after — **+1 nop = +4 bytes**, which for a mid-subseg fn overflows into the flowing `.bss` and
+`srl` after — +1 nop = +4 bytes, which for a mid-subseg fn overflows into the flowing `.bss` and
 shows as a diff at a far-earlier rom offset ([#short-text-shifts-flowing-bss], not a local near-miss).
 Fix: compute both guard operands up front (`tx=…; ty=…; if(txbad)return; if(tybad)return;`) so reorg has
 ty's `srl` available to steal into the tx-guard's delay slot. Verify the fn's assembled size equals the

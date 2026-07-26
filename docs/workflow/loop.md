@@ -114,12 +114,12 @@ Ghidra MCP is used inline at seed time. For each target function:
      load) is often the `docs/hazards.md#mem-in-struct-scheduling-lever` (retype the fixed global as a
      struct/array member); and a full-make SHA-miss where a same-file sibling reads a wrong data
      address is `docs/hazards.md#short-text-shifts-flowing-bss` (a length miss shifts the flowing
-     `.bss`, so fix the short fn, not the sibling). And rule out a **missing callee prototype**: a
+     `.bss`, so fix the short fn, not the sibling). And rule out a missing callee prototype: a
      callee with no `extern` prototype in scope makes gcc assume implicit-int, which flips
      regalloc/scheduling (a base-materialize hoist across a `jal`) and reads as a scheduling wall —
      declare every callee with its real signature before reaching for the permuter
      (`docs/hazards.md#callee-prototype-is-load-bearing-missing-prototype--implicit-int`, S225).
-     And rule out a **GCC nested function** before calling a leaf a `$v0`-arg wall or a dead-frame
+     And rule out a GCC nested function before calling a leaf a `$v0`-arg wall or a dead-frame
      coin: a leaf that spills the incoming `$v0` with no reload (`addiu sp,-8; sw $v0,0(sp)` never
      reloaded) is the nested-function prologue homing the static chain (`STATIC_CHAIN_REGNUM =
      GP_REG_FIRST+2 = $2 = $v0`, mips.h:1310) — the chain is homed even when the child reads no
@@ -337,7 +337,7 @@ below).
   overlay code under `overlay_<N>/<stem>` (e.g. `[0x1508E0, c, overlay_10/func_ovl10_801F4A40]` ->
   `src/overlay_10/func_ovl10_801F4A40.c`), `<stem>` being the lead-fn placeholder (`func_<vram>`) (S148).
   No per-tree `mk/*.mk` fragment is needed: the generic `mk/src.mk` rule (`%` spans slashes) builds
-  any `src/<tree>/%.c` with the default **-O2 game profile** (`C_PROFILE_CFLAGS = $(CFLAGS)`; the
+  any `src/<tree>/%.c` with the default -O2 game profile (`C_PROFILE_CFLAGS = $(CFLAGS)`; the
   `mk/lib*.mk` overrides are more-specific and win only for their own `src/lib*/` trees). So a brand-
   new `src/overlay_<N>/` tree builds with zero mk edits for plain game code (but a DL TU needs the
   F3DEX2 profile, and a boot/SDK-glue TU an -O0 override — the two mk exceptions below). Overlay vram
@@ -378,7 +378,7 @@ below).
     what `percent` reads (S258).** The 0.97 gate exists to keep the permuter off structurally-wrong
     bodies; once the instruction count matches the ROM and only a register or operand choice
     differs, it is the right tool even at a lower percent. S258 ran four: `func_800824E4` (20/20
-    instrs, one differing operand) hit **score 0 in 72 iterations** with a spelling no hand-iteration
+    instrs, one differing operand) hit score 0 in 72 iterations with a spelling no hand-iteration
     produces (`b = shade; b = r - b;`, breaking a cse equivalence class between two registers holding
     the same constant), while the three larger permutations all plateaued (`func_80087CB0` 480->265
     in 60k, `func_80088A90` 870->520 in 31k, `init_sky_pool_and_world_state` 615->545 in 91k). So the
@@ -399,7 +399,7 @@ below).
     measured, not to the function (S259).** `func_8006CE88` carried "isolated score 5360 (pct 0.553)
     ... Not permuter-eligible here"; that percent was measured on a body with a 2-instruction
     structural deficit. Fixing the deficit took it to an exact instruction count, after which the
-    permuter's base score was **55** and it banked the same session. Re-measure after every structural
+    permuter's base score was 55 and it banked the same session. Re-measure after every structural
     fix — count reaching exact, a loop shape corrected, an addressing form matched — before quoting
     an old percent to rule the permuter out.
   - **Banking a GCC nested function makes the permuter unavailable for the whole TU.** `import.py`
@@ -443,8 +443,8 @@ below).
   Monegi variant, compiled at the game `-O2` profile, not the libultra `-O3` band; see
   `docs/hazards.md#game-region-mirror--o2-profile`).
 - **Vendored-header placement (PO directive, S129).** When a mirror needs headers vendored, split them
-  by the SDK's own public/internal layout: a **public** header (the SDK's `include/` side, what a
-  consumer `#include`s) goes to `include/<lib>/`; a **source-private/internal** header (the SDK's
+  by the SDK's own public/internal layout: a public header (the SDK's `include/` side, what a
+  consumer `#include`s) goes to `include/<lib>/`; a source-private/internal header (the SDK's
   `src/` side) goes to `src/<lib>/` mirroring the include sub-structure. Both the `include/<lib>/`
   and `src/<lib>/` audio trees carry a local `.clang-format` = `BasedOnStyle: Google` +
   `SortIncludes: Never` and are `clang-format-22` formatted (the audio-lib include trees

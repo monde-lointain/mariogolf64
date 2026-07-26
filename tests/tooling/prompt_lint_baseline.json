@@ -63,7 +63,7 @@
     "provenance": 0
   },
   "docs/coding-style.md": {
-    "bytes": 16739,
+    "bytes": 16727,
     "caps": 0,
     "lines": 311,
     "max_nesting": 1,
@@ -84,7 +84,7 @@
     "provenance": 0
   },
   "docs/hazards.md": {
-    "bytes": 622202,
+    "bytes": 620386,
     "caps": 0,
     "lines": 7686,
     "max_nesting": 4,
@@ -98,7 +98,7 @@
     "provenance": 0
   },
   "docs/prompt-style.md": {
-    "bytes": 14030,
+    "bytes": 14014,
     "caps": 0,
     "lines": 233,
     "max_nesting": 1,
@@ -112,14 +112,14 @@
     "provenance": 0
   },
   "docs/workflow/gates.md": {
-    "bytes": 28828,
+    "bytes": 28808,
     "caps": 0,
     "lines": 337,
     "max_nesting": 4,
     "provenance": 6
   },
   "docs/workflow/loop.md": {
-    "bytes": 44008,
+    "bytes": 43980,
     "caps": 0,
     "lines": 479,
     "max_nesting": 5,
