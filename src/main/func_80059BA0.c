@@ -524,7 +524,108 @@ void func_8005B28C(s32 idx, Struct80131510* src) {
   func_8005DF54(func_8005AF50(), 1);
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80059BA0", func_8005B314);
+/* D_80130CF0 is the four-category leaderboard, 4 blocks of 5 Struct80131510
+ * records; the block base comes from the low nibble of the record's flag byte
+ * at 0x3A, whose high bit gates the whole insert. D_80131510 is the record
+ * immediately past it. func_8005B150 ranks `scores` into the index permutation
+ * `order`. Byte 0x3A is read twice, once signed for the high-bit test and once
+ * unsigned for the nibble, which is what the ROM's `lb`/`lbu` pair shows. */
+extern Struct80131510 D_80130CF0[];
+extern char D_800D0904[]; /* "Checking SuperShot" */
+extern char D_800D0918[]; /* "1:prior=%d:" */
+extern char D_800D0924[]; /* "2" */
+extern char D_800D0928[]; /* "\n" */
+extern void osSyncPrintf(const char*, ...);
+s32 func_8005B0B4(Struct80131510*);
+void func_8005B150(s32* scores, s32* order, s32 count);
+
+void insert_supershot_record(Struct80131510* entry) {
+  s32 scores[20];
+  s32 order[20];
+  Struct80131510 records[20];
+  s32 base;
+  s32 best;
+  s32 min;
+  s32 first;
+  /* `count` is initialized here rather than next to the loops so that loop.c
+   * cannot see the initial value: that is what keeps the first loop's entry
+   * guard and gives the frame its ROM size. `n` then carries the bound, which
+   * moves its live range to the second osSyncPrintf and gets it the ROM's $s3
+   * (with one variable, global.c's live-length priority rotates it against
+   * `first` and `best`). The copy folds away, so it costs nothing. */
+  s32 count = 5;
+  s32 i;
+  s32 n;
+  Struct80131510* board;
+
+  osSyncPrintf(D_800D0904);
+  if (*(s8*)((u8*)entry + 0x3A) & 0x80) {
+    base = func_8005B0B4(entry);
+    board = D_80130CF0;
+    min = 0x40000000;
+    best = 0;
+    /* Cases are listed in descending order: that is what makes emit_case_nodes
+     * give the `case 3` / default leaf the ROM's `bne`, with the default value
+     * in the delay slot. Ascending order emits the same four instructions with
+     * the two arms swapped. */
+    switch (*(u8*)((u8*)entry + 0x3A) & 0xF) {
+      default:
+        first = 15;
+        break;
+      case 3:
+        first = 0;
+        break;
+      case 2:
+        first = 5;
+        break;
+      case 1:
+        first = 15;
+        break;
+      case 0:
+        first = 10;
+        break;
+    }
+    n = count;
+    osSyncPrintf(D_800D0918, base);
+    /* Empty statement, but not dead: it ends the call's basic block, so reorg
+     * fills the jal's delay slot with the bound's `li` instead of reaching past
+     * the call for the loop's `i = 0` and then having to annul the guard. */
+    do {
+    } while (0);
+    for (i = 0; i < n; i++) {
+      scores[i] = func_8005B0B4(&board[first + i]);
+    }
+    for (i = 0; i < n; i++) {
+      if (!(min < scores[i])) {
+        best = i;
+        min = scores[i];
+      }
+    }
+    if (!(base < min)) {
+      osSyncPrintf(D_800D0924);
+      scores[best] = 0;
+      func_8005B150(scores, order, n);
+      for (i = 0; i < n; i++) {
+        records[i] = board[first + i];
+      }
+      for (i = 0; i < n - 1; i++) {
+        board[first + i + 1] = records[order[i]];
+        scores[i + 1] = func_8005B0B4(&board[first + i + 1]);
+      }
+      scores[0] = base;
+      board[first] = *entry;
+      func_8005B150(scores, order, n);
+      for (i = 0; i < n; i++) {
+        records[i] = board[first + i];
+      }
+      for (i = 0; i < n; i++) {
+        board[first + i] = records[order[i]];
+      }
+      func_8005DF54(func_8005AF50(), 1);
+    }
+  }
+  osSyncPrintf(D_800D0928);
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80059BA0", func_8005B7BC);
 

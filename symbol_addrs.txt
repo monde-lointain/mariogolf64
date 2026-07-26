@@ -696,4 +696,5 @@ build_radial_falloff_texture = 0x8004C860; // type:func
 atanf = 0x8005A2AC; // type:func
 atan2f = 0x80059FAC; // type:func
 acosf = 0x80059BC0; // type:func
+insert_supershot_record = 0x8005B314; // type:func
 build_roster_grid = 0x8005C674; // type:func
