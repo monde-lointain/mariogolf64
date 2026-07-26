@@ -74,6 +74,7 @@ extern s32 get_interpolated_terrain_height_wrapper(s32 x, s32 z);
 extern u32 calculate_hypotenuse_safe(s32 x, s32 y);
 extern f32 func_80059FAC(f32 dz, f32 dx);
 extern void func_80078FA8(s32 player, s32 arg1, f32 angle);
+extern void func_80078DC0(s32 arg0, s32 arg1);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80095A10", func_80095A10);
 
@@ -246,7 +247,77 @@ void func_80097218(s32 player, GolfCamera* cam) {
   }
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80095A10", func_800974D8);
+/* The replay-style variant: the eye height and the follow smoothing both depend
+ * on the camera mode, and mode 13 runs the aim step twice -- once at full
+ * weight, then again through the shared 0.1 pass every mode takes. */
+void func_800974D8(s32 player, GolfCamera* cam) {
+  Vec3f pos;
+  f32 unused[16];
+  u8* cs;
+  f32 follow_dist;
+  f32 ground;
+
+  cs = get_character_state(player);
+  follow_dist = func_80095A10(107520.0f, 30720.0f, D_800C73A0 * 0.025f);
+
+  if (D_800E4C54 == 15) {
+    if (D_800C73A0 == 10 || D_800C73A0 == 24 || D_800C73A0 == 33) {
+      func_80078DC0(0, 3);
+    }
+  }
+
+  func_8005483C(player, 1, &pos);
+  ground = (get_interpolated_terrain_height_wrapper((s32)(pos.x * 1024.0f),
+                                                    (s32)(pos.z * 1024.0f)) -
+            0x1E00) *
+           (1.0f / 1024.0f);
+  if (ground < pos.y) {
+    pos.y = ground;
+  }
+
+  cam->at.x = pos.x;
+  cam->at.y = pos.y;
+  cam->at.z = pos.z;
+  cam->eye.x = pos.x + cosf(-*(f32*)(cs + 0x48) - 1.57079637f) * follow_dist *
+                           (1.0f / 1024.0f);
+  cam->eye.z = pos.z + sinf(-*(f32*)(cs + 0x48) - 1.57079637f) * follow_dist *
+                           (1.0f / 1024.0f);
+
+  /* The 0.1 aim pass is spelled out in both the mode-12 arm and the default arm
+   * rather than written once after the switch. That is codegen-load-bearing:
+   * with the calls inside each arm, the eye.y store sits in the same block as
+   * the add that feeds it, so the scheduler covers the latency with the call's
+   * own argument setup, and gcc then cross-jumps the two identical tails into
+   * one -- which is why the ROM's merge point is the argument move rather than
+   * the store. */
+  switch (D_800E4C54) {
+    case 12:
+      cam->eye.y = pos.y + -15.0f;
+      func_8009676C(cam);
+      func_80095A68(cam, &cam->at, 0.1f, 3);
+      break;
+    case 13:
+      cam->eye.y = pos.y + 1.5f;
+      func_8009676C(cam);
+      func_80095A68(cam, &cam->at, 1.0f, 3);
+      /* fallthrough */
+    default:
+      cam->eye.y = pos.y + 1.5f;
+      func_8009676C(cam);
+      func_80095A68(cam, &cam->at, 0.1f, 3);
+      break;
+  }
+
+  if (flag_is_set(0x7F) || (D_800BB020 != 30 && D_801B60A0 == 1)) {
+    if (D_800E4C54 == 12) {
+      cam->at.y -= 7.5f;
+      cam->eye.y += 9.0f;
+    } else {
+      cam->at.y -= 3.0f;
+      cam->eye.y += 3.0f;
+    }
+  }
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80095A10", func_800977E0);
 
