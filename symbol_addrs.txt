@@ -694,3 +694,4 @@ update_putting_meter = 0x80032720; // type:func
 get_shot_strength_tier = 0x80046898; // type:func
 build_radial_falloff_texture = 0x8004C860; // type:func
 atanf = 0x8005A2AC; // type:func
+atan2f = 0x80059FAC; // type:func

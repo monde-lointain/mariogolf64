@@ -79,9 +79,120 @@ INCLUDE_ASM("asm/nonmatchings/main/func_80059BA0", func_80059BA0);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80059BA0", func_80059BC0);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80059BA0", func_80059FAC);
-
+f32 atanf(f32);
 f32 func_80059BA0(f32); /* fabsf */
+extern f32 D_800D089C;  /* -0.0f, the `-zero` return of case 1 */
+
+/* fdlibm single-precision atan2. Every other constant folds into an immediate:
+ * pi_o_2 = 1.57079637f, pi_o_4 = 0.785398185f, 3*pi_o_4 = 2.3561945f,
+ * pi = 3.1415925f and pi_lo = 1.50995788e-07f (this variant truncates pi down
+ * and carries the remainder in pi_lo), tiny = 1.0e-30f which folds away. */
+f32 atan2f(f32 y, f32 x) {
+  f32 z;
+  s32 k, m, hx, hy, ix, iy;
+
+  do {
+    union {
+      f32 f;
+      s32 i;
+    } gf_u;
+    gf_u.f = x;
+    hx = gf_u.i;
+  } while (0);
+  ix = hx & 0x7FFFFFFF;
+  do {
+    union {
+      f32 f;
+      s32 i;
+    } gf_u;
+    gf_u.f = y;
+    hy = gf_u.i;
+  } while (0);
+  iy = hy & 0x7FFFFFFF;
+  if ((ix > 0x7F800000) || (iy > 0x7F800000)) {
+    return x + y; /* x or y is NaN */
+  }
+  if (hx == 0x3F800000) {
+    return atanf(y); /* x = 1.0 */
+  }
+  m = ((hy >> 31) & 1) | ((hx >> 30) & 2); /* 2*sign(x) + sign(y) */
+
+  /* when y = 0 */
+  if (iy == 0) {
+    switch (m) {
+      case 0:
+      case 1:
+        return y; /* atan(+-0, +anything) = +-0 */
+      case 2:
+        return 3.1415925f; /* atan(+0, -anything) = pi */
+      case 3:
+        return -3.1415925f; /* atan(-0, -anything) = -pi */
+    }
+  }
+  /* when x = 0 */
+  if (ix == 0) {
+    return (hy < 0) ? -1.57079637f : 1.57079637f;
+  }
+  /* when x is INF */
+  if (ix == 0x7F800000) {
+    if (iy == 0x7F800000) {
+      switch (m) {
+        case 0:
+          return 0.785398185f; /* atan(+INF, +INF) */
+        case 1:
+          return -0.785398185f; /* atan(-INF, +INF) */
+        case 2:
+          return 2.3561945f; /* atan(+INF, -INF) */
+        case 3:
+          return -2.3561945f; /* atan(-INF, -INF) */
+      }
+    } else {
+      switch (m) {
+        case 0:
+          return 0.0f; /* atan(+..., +INF) */
+        case 1:
+          return D_800D089C; /* atan(-..., +INF) */
+        case 2:
+          return 3.1415925f; /* atan(+..., -INF) */
+        case 3:
+          return -3.1415925f; /* atan(-..., -INF) */
+      }
+    }
+  }
+  /* when y is INF */
+  if (iy == 0x7F800000) {
+    return (hy < 0) ? -1.57079637f : 1.57079637f;
+  }
+
+  /* compute y/x */
+  k = (iy - ix) >> 23;
+  if (k > 60) {
+    z = 1.57079649f; /* |y/x| > 2**60, pi_o_2 + 0.5f*pi_lo */
+  } else if ((hx < 0) && (k < -60)) {
+    z = 0.0f; /* |y|/x < -2**60 */
+  } else {
+    z = atanf(func_80059BA0(y / x)); /* safe to do y/x */
+  }
+  switch (m) {
+    case 0:
+      return z; /* atan(+, +) */
+    case 1:
+      do {
+        union {
+          f32 f;
+          s32 i;
+        } gf_u;
+        gf_u.f = z;
+        gf_u.i ^= 0x80000000;
+        z = gf_u.f;
+      } while (0);
+      return z; /* atan(-, +) */
+    case 2:
+      return 3.1415925f - (z - 1.50995788e-07f); /* atan(+, -) */
+    default:                                     /* case 3 */
+      return (z - 1.50995788e-07f) - 3.1415925f; /* atan(-, -) */
+  }
+}
 
 /* fdlibm single-precision atan. D_800D08A0 = atanhi[4], D_800D08B0 = atanlo[4],
  * D_800D08C0 = aT[11], all in the shared main rodata blob (extern, not carved).

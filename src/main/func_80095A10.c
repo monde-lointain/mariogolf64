@@ -72,7 +72,7 @@ extern void func_8005483C(s32 player, s32 arg1, Vec3f* out);
 extern void play_sound_effect(s32 sfx, s32 arg1, s32 arg2);
 extern s32 get_interpolated_terrain_height_wrapper(s32 x, s32 z);
 extern u32 calculate_hypotenuse_safe(s32 x, s32 y);
-extern f32 func_80059FAC(f32 dz, f32 dx);
+extern f32 atan2f(f32 dz, f32 dx);
 extern void func_80078FA8(s32 player, s32 arg1, f32 angle);
 extern void func_80078DC0(s32 arg0, s32 arg1);
 
@@ -175,7 +175,7 @@ void func_80096F44(s32 player, GolfCamera* cam) {
     dx = cam->at.x - cam->eye.x;
     dz = cam->at.z - cam->eye.z;
     if ((s32)dx != 0 || (s32)dz != 0) {
-      aim = func_80059FAC(dz, dx);
+      aim = atan2f(dz, dx);
     } else {
       aim = 0.0f;
     }
