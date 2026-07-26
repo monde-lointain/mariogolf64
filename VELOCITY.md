@@ -1466,6 +1466,26 @@ Three honest caveats:
   plateau advisory + nested-parent tell are the two coded fixes; the FP-scheduler / value-select /
   register-coloring walls remain `.s`-undetectable (read `fresh`). KEY: fan-out flipped 0→2; "prefer
   fresh non-main" holds for UNAIDED smallest-first only. Push: local.
+- **Sprint 281** — `main` compiler-source fan-out CRACK slice on the `get_tile_attribute.c` div-by-4
+  register-permutation SIBLING pair (PO approved the S280-advised high-EV re-open play, not another
+  smallest-first fresh pick). **+2 banked, 0 carried, 0 permuter, 2 re-open.** Zero gate enablers (file
+  already `c`; both `INCLUDE_ASM` stubs). The two S218 `#local-alloc-qty-permutation` "permuter-proof,
+  ~20 forms" walls were BOTH cracked byte-exact by a 2-gcc fan-out — the verdict REFUTED as 3 STRUCTURAL
+  bugs: (1) non-void `s32` return (reorg.c:3375 blocks the fall-through epilogue-branch delay-slot steal,
+  seed was 1 short); (2) function-scope vs block-local index temp (local-alloc.c:1841 combine_regs
+  no-ties a multi-block dest); (3) plain `{ }` vs `do{}while(0)` store macro (loop notes double
+  REG_N_REFS -> local-alloc.c:1587 qty tier flip). `func_80041878` -> `set_lod_tile_attribute` (140/140),
+  `func_800415C4` -> `set_lod_grid_vertex` (173/173). Bank friction: rename reached still-asm callers in
+  bgm/lz `c` parents whose per-fn `.s` are gitignored splat gap-relics (do NOT rm; recovered via
+  `recover_stub.sh`). Seed 3 (classical crack slice); banked 0pt (file partial); realized ≈3 (+2 re-open
+  crack, −1 clean 2/2 fan-out no-permuter), residual ≈0; value = +2 matched. Rolling-5 (S277-S281)
+  matched-fn: 2+4+1+2+2. Quality **0 stuck-far / 0 permuter / 0 carried / 2 re-open (both cracked)**.
+  Retro applied 4 of 4 (#1 3 crack-lever memories incl. new do-while-doubles-reg-n-refs-qty-tier; #2
+  bank-checklist step-4a gap-relic/recover_stub note; #3 BACKLOG ranker follow-up = exact-count
+  local-alloc carried-wall as high-EV fan-out re-open sub-tag; #4 hazards#local-alloc-qty-permutation
+  STRUCTURAL-pretender refutation precedent). KEY: fan-out-on-exact-count-carry now 2/2 (S281) after
+  S280 2/2 + S232 3/3 — a `#local-alloc-qty-permutation` verdict is a HYPOTHESIS, re-open before
+  permuter-skip. Push: local.
 - **Sprint 279** — `main` FP crack-slice in a FRESH file `func_80078910.c` (particle/effects) via
   gcc/binutils fan-out (PO approved the 3 smallest fresh FP leaves). **+1 banked, 2 carried, 0 permuter,
   0 re-open.** Zero gate enablers (file already `c`). Fan-out (3 gcc + 1 binutils rule-out) SORTED the

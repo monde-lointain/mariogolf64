@@ -415,6 +415,15 @@ Ghidra MCP is used inline at seed time. For each target function:
       -> `render_text_grid`; its still-asm caller `render_frame` lives in the 14400B
       `func_8002A640.c`, whose `.o` link-failed on the old name until force-deleted. Kin to the S244
       stale-object / S257 stale-mapfile notes; applies at the bank gate, not just per-fn iteration.
+      **Gap-relic gotcha (S281): if the still-asm caller's per-fn `.s` does NOT regenerate the new name
+      on `make extract`, it is a gitignored splat DISASSEMBLY GAP relic — do NOT `rm` it (it will not
+      regen and there is no `git restore`; see [[nonmatchings-relic-no-rmrf]]).** splat leaves gaps at
+      curated / decompose-split addrs, so a rename that a still-asm caller in a `c` parent references by
+      the OLD name leaves that caller's `.s` stale-persistent. Recover with `tools/recover_stub.sh
+      0x<parent_subseg_off> <caller_fn>` (asm-mode carve resolves the NEW curated name), THEN `make
+      extract && make`. S281 renamed `func_800415C4` -> `set_lod_grid_vertex`; its still-asm callers
+      `init_terrain_vertex_texcoords` (bgm, 0x3A490) + `func_80069124` (lz, 0x440A0) needed recover_stub,
+      not rm+extract. `.ld`/`undefined_syms_auto` needed NO regen (no prior auto entry for the addr).
    b. On `git commit`, stage the `make extract`-regenerated artifacts too (`undefined_syms_auto.txt`
       and `mariogolf64.ld`): they change on a subseg flip or `symbol_addrs.txt` add and must travel
       with the commit, or the regen bleeds into the next sprint's dirty tree (a `D_`-to-named

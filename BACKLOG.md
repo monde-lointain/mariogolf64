@@ -5613,11 +5613,18 @@ by `/sprint-plan`:
   `a1` vs ROM `a0` (`#indexed-vs-pointer-loop-strength-reduction`, move_movables class). Structurally solved
   (stack-spill via `s32 mn[3]`/`mx[3]` arrays; branch-likely stores; 6-symbol re-mat all match). PERMUTER
   BLOCKED: bss-multi-symbol isolation artifact (0.04% isolated vs 1615 in-tree, see `#isolated-compile-caveat`).
-  **S218 NEW carries (all fully root-caused, `docs/wip/<fn>.near-match.md` each; compiler-source fan-out):**
-  `func_80041878` (LOD sub-tile attr setter, score 5420) + `func_800415C4` (16B-copy sibling, score
-  10565) — both `#local-alloc-qty-permutation` WALLS in the signed div-by-4 idiom `(z/4)*8 + x/4`
-  (allocno-creation-order coupled to emit-order; ~20 forms tried; permuter-proof per project note,
-  corpus-mining escalation). `func_80041EC0` (17-jal HUD/dispatch glue, 99.08%) — walled by the
+  **S218 carries — BOTH CRACKED + BANKED S281 (compiler-source fan-out, 2/2):** `func_80041878` ->
+  `set_lod_tile_attribute` (140/140) + `func_800415C4` -> `set_lod_grid_vertex` (173/173). The
+  `#local-alloc-qty-permutation` "permuter-proof, ~20 forms" verdict was REFUTED: 3 STRUCTURAL bugs, not
+  a permutation — non-void `s32` return (reorg.c:3375 delay-slot), function-scope-vs-block-local index
+  temp (local-alloc.c:1841 combine_regs), plain `{ }` vs `do{}while(0)` macro (REG_N_REFS doubling,
+  local-alloc.c:1587 qty tier). Docs superseded; memories nonvoid-return-blocks-fallthrough-delay-steal /
+  local-alloc-combine-regs-block-local-temp / do-while-doubles-reg-n-refs-qty-tier. **RANKER FOLLOW-UP
+  (S281):** the `carried-wall` detector should sub-tag exact-count `#local-alloc-qty-permutation` carries
+  (esp. whose measured body was NEVER exact-count, or whose class predates the S272/S280 lever era) as
+  HIGH-EV compiler-source-fan-out RE-OPEN targets, NOT permuter-skip — distinct from block-LOCAL
+  scheduler-coin walls (S233 terminal, local-alloc not global.c-steerable). Fan-out-on-exact-count-carry
+  is now 2/2 (S281) + 2/2 (S280) + 3/3 (S232). `func_80041EC0` (17-jal HUD/dispatch glue, 99.08%) — walled by the
   `func_80041E8C` `$v0`-arg callee (2 residual instrs only). S218 recovered the `Tile`/`TileEntry`
   0x10/0x100 type model @D_80185220 + `g_terrain_tile_lod_selector[]` 0x801336A4 (stride 640) +
   `D_800BA9B0[][8]`/`D_800BA9D0`/`D_800BA9B4` (own symbols) — reusable for the whole setter family.

@@ -6620,9 +6620,27 @@ allocation orders QTYs by priority `floor_log2(n_refs)·n_refs·size / (death−
 minus regs already live in its range. When two competitors' priorities are close (e.g. a 2-ref
 short-life index vs a 3-ref long-life pointer) they swap, rotating the whole assignment by one.
 
-**Do NOT hand-iterate the source.** GCC's pre-alloc scheduler normalizes QTY births, so decl-order,
-expression-association, and pointer-hoist rewrites mostly DON'T move the permutation (S204: 5 source
-levers, zero movement). This is exactly the local-allocation space the **decomp-permuter** explores —
+**FIRST rule out the STRUCTURAL pretenders (S281 refutation precedent).** A `#local-alloc-qty-permutation`
+verdict — even one worded "permuter-proof, 20+ forms tried" (S218 `func_80041878`/`func_800415C4`) — is a
+HYPOTHESIS. S281 cracked BOTH byte-exact with source levers the permuter never produces, refuting the
+verdict: the "permutation" was three STRUCTURAL bugs. Before accepting the class, check, in order:
+- **Instruction count.** If the build is ONE short and the missing insn is a `nop` in a branch-to-epilogue
+  delay slot, the ROM fn is NON-VOID — declare `s32 f(...)` (no `return`), which keeps `$v0` live so
+  reorg.c:3375 cannot steal the fall-through into the slot ([[nonvoid-return-blocks-fallthrough-delay-steal]]).
+  A non-exact-count body's permutation claim is provisional (S272 exact-count-first).
+- **A computed temp tied to a dying operand's register** where the ROM keeps them apart: hoist the temp to
+  FUNCTION scope (assigned in N blocks) to defeat `combine_regs` tying (it bails on a multi-block dest);
+  or the inverse, a block-local temp to force the tie ([[local-alloc-combine-regs-block-local-temp]]).
+- **A 2-register swap confined inside a `do{}while(0)` macro.** Its loop notes DOUBLE `REG_N_REFS`
+  inside, re-tiering `qty_compare` (`floor_log2` is a step fn) — replace with a plain `{ }` block
+  ([[do-while-doubles-reg-n-refs-qty-tier]]). Check the `-dl` dump for a spurious 2x ref count.
+These are permuter-PROOF (structure, not a permutation) yet cheap source cracks; a compiler-source fan-out
+on a fully-RE'd exact-count carry cracked 2/2 (S281), matching S280 2/2 + S232 3/3. Only after these are
+ruled out is the residual a genuine QTY-priority permutation for the permuter below.
+
+**Do NOT hand-iterate the source for a GENUINE qty permutation.** GCC's pre-alloc scheduler normalizes QTY
+births, so decl-order, expression-association, and pointer-hoist rewrites mostly DON'T move a real
+permutation (S204: 5 source levers, zero movement). This is exactly the local-allocation space the **decomp-permuter** explores —
 run it (`setup-permuter.sh --main`, then `run-permuter.sh <fn> --stop-on-zero`). S204 found score 0 at
 iteration ~14250. Two winning shapes the permuter surfaces here recur:
 - **Reference a global INLINE, not via a pointer local** (`(u32)(D_E473F0 + x)`, not `u8* base =
