@@ -1,7 +1,8 @@
 # Hazard playbooks (on-demand reference)
 
-This is the detail layer for the MG64 execution loop. `CLAUDE.md` holds the always-loaded core
-and a hazard index; read the matching section here when `tools/pick_target.py` flags a hazard or a
+This is the detail layer for the MG64 execution loop. `CLAUDE.md` holds the always-loaded core and
+`docs/agent-workflow.md ## Hazard index` maps each flag to a section; read the matching section
+here when `tools/pick_target.py` flags a hazard or a
 match behaves as one of the symptoms below. Each entry follows the same shape where it fits:
 **Rule** (the invariant), **Trigger** (the flag or symptom that sends you here), **Procedure** (the
 steps to a green ROM SHA-1), then optional **Sub-cases / variants** and **Caveats**, and
@@ -16,7 +17,7 @@ exactly rather than re-deriving them.
 ## Playbook index
 
 The hazard families below group the sections that follow. Each links to its existing anchor;
-`CLAUDE.md`'s hazard index maps every `pick_target.py` flag to the same anchors.
+`docs/agent-workflow.md ## Hazard index` maps every `pick_target.py` flag to the same anchors.
 
 **Upstream verbatim mirror & build profile**
 - [Upstream-mirror pattern](#upstream-mirror-pattern)

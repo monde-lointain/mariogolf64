@@ -11,7 +11,7 @@ Read `docs/agent-workflow.md` before acting. Follow `## Slash commands`, `## Scr
 
 1. Reject arguments; this gate takes none.
 2. Read `SPRINT.md`; abort if no sprint is open.
-3. Verify DoD with `make` and `sha1sum build/mariogolf64.z64`; require `build/mariogolf64.z64: OK` and SHA-1 `e2c4e7a905b29529b49a1619a401fe699224829b`.
+3. Verify the DoD with `tools/verify-rom.sh`; require exit 0. A hand-rolled `make; sha1sum` is what this gate must not do: a failed `make` leaves the previous ROM in place, so the hash reads green off a stale build.
 4. For each file claimed md5-candidate, run `grep -c 'INCLUDE_ASM' src/<seg>.c` and require `0`.
 5. Report progress delta, descriptive count, quality counter-metric, story points, and scope vs goal.
 6. Ask the Product Owner for scope sign-off, accepted buffered suggestions, and push/PR decision. Use `request_user_input` when available; otherwise ask directly.

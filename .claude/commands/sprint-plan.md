@@ -20,6 +20,6 @@ Read `docs/agent-workflow.md` before acting. Follow `## Slash commands`, `## Scr
 - Gather read-only context in parallel when useful. Keep build, MCP, yaml, and edit steps serial.
 - Ask the Product Owner to approve the proposed goal, committed backlog, enablers, snapshot, and story-point estimate before performing gate enablers.
 - Gate enablers are limited to `mariogolf64.yaml` subseg flip/split/path-qualifier lines, `symbol_addrs.txt` add-only, and optional `make sync-names`.
-- Validate with `make extract && make`; require `build/mariogolf64.z64: OK` and SHA-1 `e2c4e7a905b29529b49a1619a401fe699224829b`.
+- Validate with `tools/verify-rom.sh --extract`; require exit 0. It derives the expected SHA-1 from `mariogolf64.yaml` and asserts the `build/mariogolf64.z64: OK` line before trusting `sha1sum`.
 - Write `SPRINT.md` only after the validation is green.
 - Hand off to the inline execution loop in `docs/agent-workflow.md ## Execution loop`; do not stop for per-function PO approval.

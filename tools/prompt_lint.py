@@ -81,9 +81,9 @@ SURFACE_GLOBS = (
 SPRINT_FILE = ROOT / "SPRINT.md"
 SPRINT_INSTRUCTION_SECTIONS = ("Method", "Definition of Done", "Scope")
 
-# Checks that fail the build. The rest report and ratchet. `sha1` joins once the
-# four wrapper literals are replaced; `preamble` once the surfaces carry <role>.
-HARD_CHECKS = {"xref", "budget", "mirror"}
+# Checks that fail the build. The rest report and ratchet. `section-budget` joins
+# once the split satisfies it; `preamble` once the surfaces carry <role>.
+HARD_CHECKS = {"xref", "budget", "mirror", "sha1"}
 
 SECTION_BUDGET_BYTES = 24576  # ~6K tokens: one section should fit a single read.
 PREAMBLE_MIN_LINES = 100

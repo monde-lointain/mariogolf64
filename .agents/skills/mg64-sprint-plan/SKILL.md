@@ -14,7 +14,7 @@ Read `docs/agent-workflow.md` before acting. Follow `## Slash commands`, `## Scr
 3. Pick the smallest coherent increment, honoring carry-overs, hazards, the 8-point gate, and DoR rules in `docs/agent-workflow.md`.
 4. Present the goal, committed backlog, gate enablers, snapshot, and story-point estimate to the Product Owner. Use `request_user_input` when available; otherwise ask directly.
 5. After approval, perform only gate enablers: `mariogolf64.yaml` subseg flip/split/path-qualifier lines, `symbol_addrs.txt` add-only, and optional `make sync-names`.
-6. Validate with `make extract && make`; require `build/mariogolf64.z64: OK` and SHA-1 `e2c4e7a905b29529b49a1619a401fe699224829b`.
+6. Validate with `tools/verify-rom.sh --extract`; require exit 0. It derives the expected SHA-1 from `mariogolf64.yaml` and asserts the `build/mariogolf64.z64: OK` line before trusting `sha1sum`.
 7. Write `SPRINT.md`. If the committed regime is classical or mixed, make the seed-freeze commit as documented.
 8. Hand off explicitly: tell the user to invoke `$mg64-decomp-loop` for execution. Do not assume automatic skill chaining.
 
