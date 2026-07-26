@@ -2,10 +2,9 @@
 # tools/prompt_lint.py (check -> budget). A surface over budget fails
 # make test-tools, the same hard gate a broken anchor already trips.
 #
-# Seeded at +10% of the S283 Phase-0 size, rounded up to the next KB, and
-# tightened to +5% once the rework lands. Budgets only ever go DOWN: the
-# review gate proposes a retirement when a surface is within 10% of its cap.
-# There is also a per-##-section ceiling of 24576 B in the tool itself.
+# Tightened to +5% of the S284 size now that the rework has landed. Budgets only
+# ever go DOWN: the review gate proposes a retirement when a surface is within 10%
+# of its cap. There is also a per-##-section ceiling of 24576 B in the tool itself.
 
 CLAUDE.md 3072
 # Raised 2048 -> 3072 in S284 Phase 4, matching CLAUDE.md. Both always-loaded
@@ -13,17 +12,24 @@ CLAUDE.md 3072
 # which is what takes a gate from ~27K tokens to ~7K. The table is the point of
 # these two files, so it is what their budget should accommodate.
 AGENTS.md 3072
-docs/agent-workflow.md 118784
-docs/hazards.md 684032
+docs/agent-workflow.md 4096
+docs/workflow/fan-out.md 8192
+docs/workflow/gates.md 30720
+docs/workflow/loop.md 47104
+docs/hazard-index.md 22528
+docs/hazards.md 654336
 docs/coding-style.md 18432
 # Raised 8192 -> 16384 in S283 Phase 3, deliberately. The style guide gained four
 # sections it had been silent on (verification calibration, subagent control,
 # effort, narration) plus the harness deltas. This is the guide the rest of the
 # surfaces conform to, so growth here buys shrinkage there; it is the one budget
 # that should be argued up rather than defended down.
-docs/prompt-style.md 16384
+docs/prompt-style.md 15360
+docs/fanout-prompt.md 4096
+docs/levers.md 10240
+.claude/commands/decomp-loop.md 2048
 .claude/commands/sprint-plan.md 2048
 .claude/commands/sprint-review.md 2048
 .agents/skills/mg64-decomp-loop/SKILL.md 2048
-.agents/skills/mg64-sprint-plan/SKILL.md 2048
-.agents/skills/mg64-sprint-review/SKILL.md 2048
+.agents/skills/mg64-sprint-plan/SKILL.md 1024
+.agents/skills/mg64-sprint-review/SKILL.md 1024

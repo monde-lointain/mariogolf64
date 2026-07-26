@@ -6,7 +6,8 @@ conventions that hold regardless of hazard. Read this while banking functions. T
 `docs/workflow/gates.md`; fan-out decisions are `docs/workflow/fan-out.md`.
 </role>
 
-<context>
+## Toolchain
+
 This project decompiles Mario Golf 64 (N64) one function at a time. Tooling: splat (file splitting),
 KMC GCC 2.7.2 (`tools/cc/gcc`), m2c (`tools/m2c`; the seed-body generator, driven with a Ghidra-typed
 struct context), asm-differ (library mode), decomp-permuter (escalation), the Ghidra MCP bridge (live
@@ -14,16 +15,12 @@ decompile + struct/symbol lookup, port 8089; every call passes `program="baserom
 ultralib VERSION_J to reveal an un-named `func_`'s upstream source; see
 `docs/hazards.md#coddog-cross-ref`).
 
-This file is the shared workflow source: the workflow model, the Scrum cadence, and the every-sprint
-rules. The concise always-loaded wrappers are `AGENTS.md` and `CLAUDE.md`. Detail lives in two
-on-demand references:
-
-- `docs/hazards.md`: the hazard playbooks (what to do when `pick_target.py` flags a hazard). The
-  hazard index below maps each flag to its section.
-- `docs/coding-style.md`: the C quality bar and naming conventions for code promoted into the tree.
+The always-loaded wrappers are `CLAUDE.md` and `AGENTS.md`, and their routing table names the file for
+each phase. Detail lives in on-demand references: `docs/hazard-index.md` maps each
+`pick_target.py` flag to its `docs/hazards.md` playbook, `docs/coding-style.md` holds the C quality bar
+for code promoted into the tree, and `docs/levers.md` indexes the named source levers.
 
 Prompt authoring for this workflow follows the project style in `docs/prompt-style.md`.
-</context>
 
 ## Execution loop (inline)
 
@@ -182,23 +179,10 @@ Ghidra MCP is used inline at seed time. For each target function:
       caller exists, either sed those files to the new name in the same commit or keep the auto name
       (a getter/predicate over a generic global read across unrelated subsystems is usually best left
       auto-named — a domain-guess is likely wrong; S247 kept `func_800959F8`).
-      **Stale-object gotcha (S270): after a rename that reaches a still-ASM caller inside a large parent
-      file, force-delete that caller's parent object before the gate make.** `make extract && make`
-      regenerates the still-asm `.s` correctly (the `jal` uses the new name), but the incremental build
-      can link a stale parent `.o` compiled against the old auto name (`undefined reference to
-      func_<addr>`). Fix: `find build -name '<parent>.o' -delete && make`. S270 renamed `func_8004D7B8`
-      -> `render_text_grid`; its still-asm caller `render_frame` lives in the 14400B
-      `func_8002A640.c`, whose `.o` link-failed on the old name until force-deleted. Kin to the S244
-      stale-object / S257 stale-mapfile notes; applies at the bank gate, not just per-fn iteration.
-      **Gap-relic gotcha (S281): if the still-asm caller's per-fn `.s` does not regenerate the new name
-      on `make extract`, it is a gitignored splat disassembly gap relic — do not `rm` it (it will not
-      regen and there is no `git restore`; see `docs/levers.md` (nonmatchings relic no rmrf)).** splat leaves gaps at
-      curated / decompose-split addrs, so a rename that a still-asm caller in a `c` parent references by
-      the old name leaves that caller's `.s` stale-persistent. Recover with `tools/recover_stub.sh
-      0x<parent_subseg_off> <caller_fn>` (asm-mode carve resolves the new curated name), then `make
-      extract && make`. S281 renamed `func_800415C4` -> `set_lod_grid_vertex`; its still-asm callers
-      `init_terrain_vertex_texcoords` (bgm, 0x3A490) + `func_80069124` (lz, 0x440A0) needed recover_stub,
-      not rm+extract. `.ld`/`undefined_syms_auto` needed no regen (no prior auto entry for the addr).
+      A rename reaching a still-asm caller has two failure modes at the gate make, both handled in
+      `docs/workflow/loop.md ## Conventions` under the curated-rename bullet: a stale parent `.o`
+      linking against the old
+      name, and a splat gap relic whose `.s` will not regenerate at all.
    b. On `git commit`, stage the `make extract`-regenerated artifacts too (`undefined_syms_auto.txt`
       and `mariogolf64.ld`): they change on a subseg flip or `symbol_addrs.txt` add and must travel
       with the commit, or the regen bleeds into the next sprint's dirty tree (a `D_`-to-named
@@ -301,12 +285,16 @@ below).
   the full range, carves the byte-identical per-fn block back, flips to `c`); see
   `docs/hazards.md#stale-persistent-nonmatchings-relic-recovery`.
 - **A curated rename that reaches a still-asm caller: force-delete the whole tree's objects before the
-  gate make (S271 generalizes S270).** `make extract` regenerates the caller `.s` with the new name,
-  but the incremental build links stale `.o` still carrying the old auto name (`undefined reference`).
-  S270 deleted the one large parent `.o`; S271 hit multiple stale parents (`lz_compress_extended_dma`
-  + others) from a single flag rename. Safe rule: after any curated rename reaching a still-asm
-  caller, `find build -path '*/src/<tree>/*.o' -delete` (whole tree, e.g. `src/main`) before the gate
-  make, not per-parent guesswork.
+  gate make.** `make extract` regenerates the caller `.s` with the new name, but the incremental build
+  links a stale `.o` still carrying the old auto name (`undefined reference`). Run
+  `find build -path '*/src/<tree>/*.o' -delete` for the whole tree, e.g. `src/main`, rather than
+  guessing at parents: a single flag rename has hit several stale parents at once.
+  - If a still-asm caller's `.s` does not pick up the new name on `make extract` at all, it is a splat
+    disassembly gap relic, not a stale object. Recover it with
+    `tools/recover_stub.sh 0x<parent_subseg_off> <caller_fn>`, then `make extract && make`. Do not
+    `rm` it: `asm/nonmatchings/` is gitignored, so a deleted relic has no `git restore`.
+  - Provenance: S270 the single-parent case; S271 generalized it to the whole tree; S281 the
+    gap-relic variant.
 - **Scratch dir** `nonmatchings/<func>/` (gitignored, shared with the permuter).
 - **Python tools run via the venv:** `venv/bin/python3 tools/X.py` (system python lacks asm-differ
   deps and is PEP-668-locked).

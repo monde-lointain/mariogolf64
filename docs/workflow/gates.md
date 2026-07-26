@@ -189,7 +189,9 @@ dashboard). Target selection is `tools/pick_target.py`, not a stored roadmap.
     md5-candidate-files number. **Never commit a non-matching fn.**
 - **Spike + carry-over.** A function that blocks its file's DoD (stuck-far below 0.97, needs permuter,
   BSS-layout-conflict, subseg-alignment) is a spike: note it, carry its file or cluster to the next
-  sprint, and count credit at the function level. Hold the DoD firm; a spike is carried, not banked.
+  sprint, and count credit at the function level. Hold the Definition of Done firm; a spike is
+  carried, not banked. The loop's own carry action is in
+  `docs/workflow/loop.md ## Execution loop`.
 - **Quality counter-metric.** Track stuck-far + permuter-escalated + carried + re-opened per sprint,
   reported next to the match count so the count cannot be gamed by premature spiking.
 - **Process changes are retro-gated.** The "Suggested workflow improvements" the execution loop emits
@@ -202,8 +204,8 @@ dashboard). Target selection is `tools/pick_target.py`, not a stored roadmap.
   single apply-point for tooling edits).
 - **Resume protocol.** On a fresh mid-sprint session: read `SPRINT.md`, reconcile banked work via
   `git log` since the snapshot, and verify Ghidra MCP connectivity (`list_instances`, port 8089)
-  before resuming. The context window auto-compacts, so continue from `SPRINT.md` rather than wrapping
-  up early.
+  before resuming. `docs/workflow/loop.md ## Execution loop` states the persistence rule that makes
+  this work.
 
 ## Story points
 

@@ -1,5 +1,11 @@
 # Hazard playbooks (on-demand reference)
 
+<role>
+The on-demand hazard playbooks: what to do when `tools/pick_target.py` flags a hazard, or when a
+match shows one of the symptoms below. Reached by anchor from `docs/hazard-index.md`; read the one
+section you were routed to, never the whole file.
+</role>
+
 This is the detail layer for the MG64 execution loop. `CLAUDE.md` holds the always-loaded core and
 `docs/agent-workflow.md ## Hazard index` maps each flag to a section; read the matching section
 here when `tools/pick_target.py` flags a hazard or a
@@ -3475,7 +3481,7 @@ color-struct `#mem-in-struct-scheduling-lever` — the n64demos `gfxClearCfb` gl
 the faithful reference, confirmed by `~/development/n64/n64demos/nusys/nu2/src/main/graphic.c`); S190
 (the header constant-staging scheduling wall — a permuter-resistant DL-emitter carry class).
 
-### DL-builder symbol anchor (match the asm's chosen base symbol)
+## DL-builder symbol anchor (match the asm's chosen base symbol)
 
 A hand-unrolled light/matrix DL builder derives every command's `w1` pointer from one materialized
 base register (e.g. all `gSPLight` addresses are `base`, `base+0x10`, `base+0x20`, `base-8` off a

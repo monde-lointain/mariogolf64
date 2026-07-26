@@ -81,9 +81,11 @@ SURFACE_GLOBS = (
 SPRINT_FILE = ROOT / "SPRINT.md"
 SPRINT_INSTRUCTION_SECTIONS = ("Method", "Definition of Done", "Scope")
 
-# Checks that fail the build. The rest report and ratchet. `section-budget` joins
-# once the split satisfies it; `preamble` once the surfaces carry <role>.
-HARD_CHECKS = {"xref", "budget", "mirror", "sha1"}
+# Checks that fail the build. The rest report and ratchet. Every check that was
+# advisory during the rework is now hard: the split satisfies `section-budget` and
+# every surface carries a <role>. Only `baseline` stays advisory, because it is a
+# ratchet rather than a rule.
+HARD_CHECKS = {"xref", "budget", "mirror", "sha1", "section-budget", "preamble"}
 
 SECTION_BUDGET_BYTES = 24576  # ~6K tokens: one section should fit a single read.
 PREAMBLE_MIN_LINES = 100
