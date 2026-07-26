@@ -109,6 +109,24 @@ def test_fold_skips_code_fences():
     assert "not here" in out
 
 
+def test_fold_protects_a_code_span_that_wraps_a_line():
+    """These docs wrap at ~100 columns, so a backticked command routinely straddles
+    a line break -- 134 such spans across the surfaces. A line-scoped code-span
+    regex cannot see them, and the first apply folded the make variable in
+    `make nonmatching-func\\n FUNC=<f>` down to `func=<f>`. Protected regions are
+    computed over the whole document for exactly this reason."""
+    src = "Use `make nonmatching-func\n    FUNC=<f>` and it is NOT optional.\n"
+    out = ds.fold_text(src)
+    assert "FUNC=<f>" in out, "a wrapped code span must survive the fold"
+    assert "not optional" in out, "prose outside the span should still fold"
+
+
+def test_fold_keeps_contractions_whole():
+    """`DON'T` must not tokenize as `DON` plus a protected single-char `T`, which
+    would emit `don'T`."""
+    assert ds.fold_text("DON'T do it.\n").startswith("Don't")
+
+
 def test_gate_tokens_are_routed_to_review():
     """AND / OR / BOTH bind a conjunctive or disjunctive gate, so folding them is
     word-preserving and meaning-losing. They must surface in the review queue."""

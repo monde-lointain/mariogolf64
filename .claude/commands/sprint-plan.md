@@ -9,7 +9,7 @@ allowed-tools: Bash, Read, Write, Edit, AskUserQuestion
 
 # /sprint-plan, the plan gate
 
-SCOPE = `$ARGUMENTS`
+`SCOPE` = `$ARGUMENTS`
 
 Read `docs/agent-workflow.md` before acting. Follow `## Slash commands`, `## Scrum operating model`,
 `## Story points`, and the `sprint-plan` procedure.

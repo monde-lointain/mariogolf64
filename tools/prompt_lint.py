@@ -95,7 +95,8 @@ SHA1_RE = re.compile(r"\b[0-9a-f]{40}\b")
 STAG_RE = re.compile(r"\bS\d{1,3}\b")
 FUNC_RE = re.compile(r"\bfunc_[0-9a-fA-F]{8}\b")
 ROLE_RE = re.compile(r"^<role>\s*$", re.M)
-CAPS_TOKEN_RE = re.compile(r"\b[A-Z][A-Z0-9]{1,}\b")
+# Keeps a contraction whole so `DON'T` counts once rather than as `DON` + `T`.
+CAPS_TOKEN_RE = re.compile(r"\b[A-Z][A-Z0-9]{1,}(?:'[A-Z]+)?\b")
 PROVENANCE_LABEL_RE = re.compile(r"^\s*[-*]?\s*\*\*(Rule|Trigger|Procedure)[.:]\*\*")
 # A bold sub-case lead-in that carries its sprint tag inline: `**... (S282).**`.
 PROVENANCE_LEADIN_RE = re.compile(r"^\s*[-*]?\s*\*\*[^*]*\(S\d{1,3}[^)]*\)[.:]?\*\*")
@@ -111,9 +112,13 @@ MD_PATH_RE = re.compile(r"`([A-Za-z0-9_./-]+\.md)`")
 
 def _strip_code(text):
     """Remove fenced blocks and inline code spans. Those carry literal tokens
-    (defines, filenames, register names) that are never emphasis."""
+    (defines, filenames, make variables, register names) that are never emphasis.
+
+    The inline pattern deliberately allows a newline: these docs wrap at ~100
+    columns, so a backticked command often straddles a line break, and a
+    `[^`\\n]*` pattern would leave its contents to be counted as shouting."""
     text = re.sub(r"```.*?```", "", text, flags=re.S)
-    text = re.sub(r"`[^`\n]*`", "", text)
+    text = re.sub(r"`[^`]*`", "", text)
     return text
 
 
@@ -135,13 +140,15 @@ def rel(path):
 
 
 def load_caps_allow():
+    """One token per line; `#` starts a comment, whole-line or trailing."""
     if not CAPS_ALLOW_FILE.exists():
         return set()
-    return {
-        line.strip()
-        for line in CAPS_ALLOW_FILE.read_text().splitlines()
-        if line.strip() and not line.startswith("#")
-    }
+    out = set()
+    for line in CAPS_ALLOW_FILE.read_text().splitlines():
+        tok = line.split("#", 1)[0].strip()
+        if tok:
+            out.add(tok)
+    return out
 
 
 def load_budgets():

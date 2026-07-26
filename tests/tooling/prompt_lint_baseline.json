@@ -21,8 +21,8 @@
     "provenance": 0
   },
   ".claude/commands/sprint-plan.md": {
-    "bytes": 1509,
-    "caps": 1,
+    "bytes": 1511,
+    "caps": 0,
     "lines": 25,
     "max_nesting": 2,
     "provenance": 0
@@ -36,7 +36,7 @@
   },
   "AGENTS.md": {
     "bytes": 1506,
-    "caps": 1,
+    "caps": 0,
     "lines": 24,
     "max_nesting": 1,
     "provenance": 0
@@ -50,28 +50,28 @@
   },
   "docs/agent-workflow.md": {
     "bytes": 107905,
-    "caps": 285,
+    "caps": 0,
     "lines": 1157,
     "max_nesting": 5,
     "provenance": 16
   },
   "docs/coding-style.md": {
     "bytes": 16739,
-    "caps": 4,
+    "caps": 0,
     "lines": 311,
     "max_nesting": 1,
     "provenance": 0
   },
   "docs/hazards.md": {
     "bytes": 621672,
-    "caps": 1427,
+    "caps": 0,
     "lines": 7680,
     "max_nesting": 4,
     "provenance": 75
   },
   "docs/prompt-style.md": {
     "bytes": 6965,
-    "caps": 6,
+    "caps": 0,
     "lines": 125,
     "max_nesting": 1,
     "provenance": 0

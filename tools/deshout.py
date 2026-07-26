@@ -53,7 +53,9 @@ import prompt_lint as pl  # noqa: E402  (path set above)
 ROOT = pl.ROOT
 ALLOW_FILE = pl.CAPS_ALLOW_FILE
 
-CAPS_TOKEN_RE = re.compile(r"\b[A-Z][A-Z0-9]{1,}\b")
+# The trailing group keeps a contraction whole: without it `DON'T` tokenizes as
+# `DON` plus a protected single-char `T`, and the fold emits `don'T`.
+CAPS_TOKEN_RE = re.compile(r"\b[A-Z][A-Z0-9]{1,}(?:'[A-Z]+)?\b")
 CODE_FENCE_RE = re.compile(r"^\s*```")
 INLINE_CODE_RE = re.compile(r"`[^`\n]*`")
 STAG_RE = re.compile(r"^S\d{1,3}$")
@@ -87,52 +89,61 @@ def _protected(tok):
     return tok in load_allow()
 
 
-def _spans_to_skip(line):
-    """Character ranges of inline code spans, which are never folded."""
-    return [m.span() for m in INLINE_CODE_RE.finditer(line)]
+def protected_regions(text):
+    """Character ranges that must never be folded: fenced blocks and inline code
+    spans.
+
+    Computed over the WHOLE document, not per line. These docs wrap at ~100
+    columns, so a backticked command routinely straddles a line break -- there are
+    134 such spans across the surfaces. A line-scoped regex cannot see them, and
+    the first apply proved the cost: it folded the make variable in
+    `make nonmatching-func\\n    FUNC=<f>` to `func=<f>`.
+
+    An unmatched backtick swallows the rest of the document, which folds less
+    rather than more. That is the safe direction to fail."""
+    spans = []
+    for m in re.finditer(r"^\s*```.*?^\s*```", text, flags=re.S | re.M):
+        spans.append(m.span())
+
+    def fenced(pos):
+        return any(a <= pos < b for a, b in spans)
+
+    for m in re.finditer(r"`[^`]*`", text):
+        if not fenced(m.start()):
+            spans.append(m.span())
+    return spans
 
 
-def fold_line(line, prev_ended_sentence, counter=None, gates=None):
-    """Fold the emphasis-caps in one line. Returns (new_line, ends_sentence)."""
-    skip = _spans_to_skip(line)
+def fold_text(text, counter=None, gates=None):
+    """Pass A over a whole document. Returns the folded text."""
+    skip = protected_regions(text)
 
     def in_code(pos):
         return any(a <= pos < b for a, b in skip)
 
+    # A token starts a sentence when only whitespace or list/emphasis punctuation
+    # separates it from the previous sentence terminator or line start.
     out, last = [], 0
-    for m in CAPS_TOKEN_RE.finditer(line):
+    for m in CAPS_TOKEN_RE.finditer(text):
         tok = m.group(0)
         if in_code(m.start()) or _protected(tok):
             continue
         if tok in GATE_TOKENS and gates is not None:
-            gates.append((tok, line.strip()))
-        # Title-case at the start of a sentence, lowercase elsewhere.
-        head = line[:m.start()]
-        starts = prev_ended_sentence and not head.strip()
-        new = tok.capitalize() if starts else tok.lower()
-        out.append(line[last:m.start()])
-        out.append(new)
+            line_start = text.rfind("\n", 0, m.start()) + 1
+            line_end = text.find("\n", m.end())
+            gates.append((tok, text[line_start:line_end if line_end > 0 else None].strip()))
+        head = text[:m.start()]
+        prefix = head[head.rfind("\n") + 1:]
+        starts = not prefix.strip(" \t-*>#.|") or bool(
+            re.search(r"[.!?:]\s+$", prefix)
+        )
+        out.append(text[last:m.start()])
+        out.append(tok.capitalize() if starts else tok.lower())
         last = m.end()
         if counter is not None:
             counter[tok] += 1
-    out.append(line[last:])
-    new_line = "".join(out)
-    return new_line, bool(SENTENCE_END_RE.search(line))
-
-
-def fold_text(text, counter=None, gates=None):
-    lines, out, in_fence, ends = text.split("\n"), [], False, True
-    for line in lines:
-        if CODE_FENCE_RE.match(line):
-            in_fence = not in_fence
-            out.append(line)
-            continue
-        if in_fence:
-            out.append(line)
-            continue
-        new, ends = fold_line(line, ends, counter, gates)
-        out.append(new)
-    return "\n".join(out)
+    out.append(text[last:])
+    return "".join(out)
 
 
 def classify_bold(text):
@@ -246,23 +257,24 @@ def _main(argv):
             new = p.read_text()
             if old == new:
                 continue
-            o_low, n_low = old.lower(), new.lower()
-            for name, pat in (
-                ("logic token", None),
-                ("number", NUMBER_RE),
-                ("code span", INLINE_CODE_RE),
+            # Code spans are extracted with the same document-wide pairing the
+            # fold uses. A line-scoped regex mis-pairs backticks around a span
+            # that wraps, and then reports the GAPS between spans as spans.
+            def spans(t):
+                return collections.Counter(t[a:b] for a, b in protected_regions(t))
+
+            def logic(t):
+                low = t.lower()
+                return collections.Counter(
+                    w for w in re.findall(r"[a-z]+", low) if w in LOGIC_TOKENS
+                )
+
+            for name, extract in (
+                ("logic token", logic),
+                ("number", lambda t: collections.Counter(NUMBER_RE.findall(t))),
+                ("code span", spans),
             ):
-                if pat is None:
-                    o_set = collections.Counter(
-                        w for w in re.findall(r"[a-z]+", o_low) if w in LOGIC_TOKENS
-                    )
-                    n_set = collections.Counter(
-                        w for w in re.findall(r"[a-z]+", n_low) if w in LOGIC_TOKENS
-                    )
-                else:
-                    o_set = collections.Counter(pat.findall(old))
-                    n_set = collections.Counter(pat.findall(new))
-                lost = o_set - n_set
+                lost = extract(old) - extract(new)
                 if lost:
                     bad.append(f"{r}: {name}(s) dropped: {dict(list(lost.items())[:6])}")
         if bad:

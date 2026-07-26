@@ -205,11 +205,11 @@ if (account_type == ACCOUNT_NEW)   /* if establishing a new account  (intent) */
 - One statement per line; one declaration per line; no multiple side effects per line.
 - Brace single-statement bodies so layout and logic can't diverge.
 - `clang-format-22` formats every tree. The root `.clang-format` is `BasedOnStyle: Google`, which
-  SORTS `#include`s; the library trees (`src/libultra/`, `src/libkmc/`, `src/libnusys/`,
+  Sorts `#include`s; the library trees (`src/libultra/`, `src/libkmc/`, `src/libnusys/`,
   `src/libnaudio/`, `src/libmus/`, `src/mgu/`, `src/main/`, and the audio-lib include trees
   `include/libnaudio/`, `include/libnualstl/`, `include/libmus/`) carry a local `.clang-format` adding
   `SortIncludes: Never`. When a file has an
-  order-DEPENDENT include chain (e.g. `nusys.h` must precede `nualstl.h`; `common.h`/`ultra64.h` must
+  order-dependent include chain (e.g. `nusys.h` must precede `nualstl.h`; `common.h`/`ultra64.h` must
   come first), formatting under a sorting config reorders them and breaks the build. Fix it at the tree
   level: give the directory its own `.clang-format` with `SortIncludes: Never` (mirror the lib trees) —
   not a per-file `// clang-format off` guard. S128 added `src/main/.clang-format` for exactly this.
@@ -273,7 +273,7 @@ long`/`volatile unsigned long`.
 
 `tools/libultra_match.py` opcode-matches asm blocks against the libultra archive. An *exact* match
 is the library function: keep its name. A *near* match (the matcher's calibration "different-length"
-bucket, or a CONFLICT row) is a function the game edited from a library routine; name it by **region**:
+bucket, or a conflict row) is a function the game edited from a library routine; name it by **region**:
 
 - **Inside the libultra code region** (clustered among confirmed libultra functions in the static
   segment, e.g. `guAlignF`@0x800A7780, `guLookAtHilite`@0x800A8380, `guMtxF2L`@0x80067CB4): a `gu*`

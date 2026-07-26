@@ -15,7 +15,7 @@ headings are frozen anchors, but their historical entry prose is out of scope.
 
 ## Prime directive: outcome first, gates explicit
 
-GPT-5.5 works best when prompts define the target outcome, success criteria, constraints, available
+Gpt-5.5 works best when prompts define the target outcome, success criteria, constraints, available
 evidence, validation, and stop conditions. State what good looks like before detailed procedure.
 Keep process instructions only when order matters for the ROM oracle, MCP/build safety, or Scrum gate.
 
@@ -40,7 +40,7 @@ that apply.
 - **Provenance.** The `S###` tags, semicolon-separated, each with a 2-to-4-word gloss of what that
   sprint contributed.
 
-## GPT-5.5 prompt rules
+## Gpt-5.5 prompt rules
 
 - Prefer concise, outcome-first prompts over process-heavy stacks.
 - Use absolute rules only for true invariants: safety, file mutation limits, required output fields,
@@ -85,7 +85,7 @@ sentences that lose the "all must hold jointly" binding.
 ## Emphasis
 
 - Prefer structure to shouting. Bold a lead-in, or split a clause into its own sentence, instead of
-  ALL-CAPS.
+  All-caps.
 - De-shout words used only for emphasis: `NOT`, `ONLY`, `NEVER`, `ALWAYS`, `MUST`, `DUPLICATE`,
   `DEAD`, `ZERO`, `ONE`, `TWO`, `BUNDLED`, `STATICALLY`, `PERVASIVELY`, `EXACT`.
 - Never touch caps that carry meaning: a token inside backticks; a define, macro, type, or `nm` class
@@ -118,7 +118,7 @@ Run this before committing a prompt-surface edit.
 - [ ] Every rule reads standalone; no rule lives only in a title or trailing parenthetical.
 - [ ] No `S###` in a Rule / Trigger / Procedure line.
 - [ ] Every scope-limiter and threshold is preserved; no conjunctive gate was split apart.
-- [ ] ALL-CAPS is gone except backticked / define / filename tokens.
+- [ ] all-caps is gone except backticked / define / filename tokens.
 - [ ] One idea per sentence; at most one parenthetical level.
 - [ ] Cited anchors unchanged, or changed with citations updated in lockstep and `freeze` re-run.
 - [ ] `make test-tools` passes (`tools/hazard_anchors.py check` green).

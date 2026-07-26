@@ -1,0 +1,148 @@
+# Conjunctive / disjunctive gate review queue -- Pass C input for S284.
+#
+# Pass A folded these tokens along with everything else. Its invariant
+# (lower(before) == lower(after)) proves no WORD changed, but in this corpus the
+# caps on AND / OR / BOTH / ALL / EITHER / EVERY were binding a gate, and
+# docs/prompt-style.md requires a gate that must all hold stay one joined gate.
+# So the fold is word-preserving and meaning-losing here, and each line below
+# needs its binding restated explicitly in prose rather than left to emphasis.
+#
+# Example repair:
+#   before  the orchestrator holds ALL integration until every subagent AND its
+#           permuter has reported
+#   after   the orchestrator holds every integration step until both the subagent
+#           and its permuter have reported
+#
+# Captured from the pre-fold tree (S283 Phase 2); regenerating after the fold
+# would return an empty queue.
+
+docs/agent-workflow.md: [OR] pass then returns a definitive verdict per fn (byte-match OR a `docs/wip/<fn>.near-match.md`-grade
+docs/agent-workflow.md: [ALL] just idle). The orchestrator holds ALL integration (src edit + full-make ROM-SHA-1 gate) until
+docs/agent-workflow.md: [AND] every subagent AND its permuter has reported, so a full-make never races the shared `build/` while
+docs/agent-workflow.md: [BOTH] doc's stated COUNT and residual CLASS are BOTH hypotheses; the helper rebuilds the isolated object
+docs/agent-workflow.md: [ALL] re-characterize. S232 fanned 3 over the `func_80052FE0.c` tail and cracked ALL THREE — a documented
+docs/agent-workflow.md: [AND] early hoist, reaching 65/65 AND collapsing the 4-temp coloring in one edit). So when re-opening
+docs/agent-workflow.md: [BOTH] `||`-ref-count lever does not reach `local-alloc`). So the fan-out's deliverable is BOTH
+docs/agent-workflow.md: [AND] cracks AND pass-cited terminal verdicts: a no-lever verdict with a `file:line` citation is a
+docs/agent-workflow.md: [OR] - **A plain-classical REGISTER-ALLOCATION carry (coloring OR "pressure/spill") is a HIGH-YIELD
+docs/agent-workflow.md: [BOTH] spilled params to an arg pointer). A PO-directed 2-gcc + 1-binutils fan-out cracked BOTH
+docs/agent-workflow.md: [BOTH] refresh vs the linked ROM, so it lies in BOTH directions: S242 `func_80075010` showed 5 diff rows
+docs/agent-workflow.md: [ALL] - **A compiler-jtbl leaf is an ALL-OR-NOTHING single slice, not a gate-flip-then-iterate (S265).**
+docs/agent-workflow.md: [OR] - **A compiler-jtbl leaf is an ALL-OR-NOTHING single slice, not a gate-flip-then-iterate (S265).**
+docs/agent-workflow.md: [AND] `BACKLOG.md ## Carry-overs` parked names AND every `docs/wip/<fn>.*.md` note (catching the
+docs/agent-workflow.md: [BOTH] class. S268 re-opened two carries and BOTH had a mis-stated residual: `func_8005CEE0`'s doc
+docs/agent-workflow.md: [BOTH] exact `old_string`. If a script is genuinely needed, assert BOTH counts across the rewrite** —
+docs/agent-workflow.md: [AND] body edit) AND the file's function list, diffed before and after. The original S257 occurrence was
+docs/agent-workflow.md: [ALL] | classical fn full-make SHA-miss where a too-LONG fn overflows its decomposed subseg and the auto-`.bss` `D_<vram>` sym
+docs/agent-workflow.md: [OR] | source dive proves a regalloc/codegen artifact unreachable from faithful C; need the missing idiom OR a compiler-confi
+docs/agent-workflow.md: [AND] | leaf fn opens `addiu sp,-8`+`sw $v0,0(sp)` never reloaded (dead spill of incoming `$v0`) AND its caller sets `$v0=&sp[
+docs/agent-workflow.md: [EVERY] | near-match at MID percent (not high, not near-zero) where EVERY residual row is a `sym+K`-vs-sibling reloc-addend on c
+docs/hazards.md: [AND] 4. **Flip the subseg `asm` to `hasm` AND add the `<dir>/<stem>` name qualifier** in `mariogolf64.yaml`
+docs/hazards.md: [AND] gcc const-propagates into `li.d` AND emits the unused static). So the pool only PLACES at its ROM vram
+docs/hazards.md: [BOTH] when it is 16-aligned at BOTH edges, which requires EVERY function contributing to that pool to be C in
+docs/hazards.md: [EVERY] when it is 16-aligned at BOTH edges, which requires EVERY function contributing to that pool to be C in
+docs/hazards.md: [OR] - **Extern** (`+ D_sym`, plain OR `const`): no duplicate, no shift, .text otherwise byte-identical, BUT
+docs/hazards.md: [AND] each interleaved item TU-OWNED as the C form that reproduces the ROM's layout AND its `.text`:
+docs/hazards.md: [AND] Individual `static const` reproduces both the independent per-row `%hi/%lo` loads AND (emitted in
+docs/hazards.md: [EVERY] **objdump `-dz` is MANDATORY when word-diffing the assembled `.o`, and keep EVERY line (S183).** Plain
+docs/hazards.md: [EVERY] `mips-linux-gnu-objdump -dz` (disassemble zeroes, no `...` collapse) and word-diff EVERY line (do not
+docs/hazards.md: [AND] unchanged score is NOT "no progress."** When a fn has extern refs (reloc noise) AND its only real
+docs/hazards.md: [BOTH] useless here in BOTH directions: the score is not advisory, it is garbage, so `run-permuter.sh` (which
+docs/hazards.md: [EVERY] collapse), so it does not trip the usual artifact recognizer — the tell is that EVERY residual row is a
+docs/hazards.md: [OR] at the fn's ROM offset, OR link the reference object the same way). `objcopy -O binary` each and
+docs/hazards.md: [ALL] `.c` for the ALL-CAPS helper macros it invokes (`SELECT_BANK(`, `SET_ACTIVEBANK_TO_ZERO(`, `ERRCK(`,
+docs/hazards.md: [AND] AND the correct child `asm/<B>.s` then declare `glabel <child_fn>`, and `dc.find_segment` globs `asm/*.s`
+docs/hazards.md: [EVERY] it). This recurs on EVERY classical-endgame decompose-split; the tooling fix (prefer the
+docs/hazards.md: [AND] `[0x<A>, c, <tree>/<file>]` (no split) leaves the pre-flip `asm/<A>.s` relic AND any older enclosing
+docs/hazards.md: [BOTH] relic (S186: BOTH `asm/440A0.s` and `asm/43810.s` — the latter a stale wider-range relic from the S166
+docs/hazards.md: [ALL] does not fit AT ALL (there is no correct child `asm/<B>.s` to resolve to). Two options: (1) move every
+docs/hazards.md: [AND] AND the surrounding literals into the preheader — often the only reason the ROM's leaf has a
+docs/hazards.md: [BOTH] "custom", test BOTH `gSPTextureRectangle` AND `gSPScisTextureRectangle`. S226 `func_8007CF10`
+docs/hazards.md: [AND] "custom", test BOTH `gSPTextureRectangle` AND `gSPScisTextureRectangle`. S226 `func_8007CF10`
+docs/hazards.md: [OR] w1) OR a temp `c` computed after the w0 assignment; a leading `c = …;` statement caps at 61/97.
+docs/hazards.md: [ALL] associativity / reorder form ALL still hoist while the colors are plain scalars (18-30/97) — the
+docs/hazards.md: [ALL] (reusing one scratch reg: `lui s7;ori s7;sw s7,STACK` repeated) **and precomputes ALL command
+docs/hazards.md: [EVERY] a single extended block; the table resets at the multi-predecessor join label and EVERY memory value
+docs/hazards.md: [BOTH] giving BOTH the hoist and the un-inverted shape. S171 `func_8004DAF4` (a scrollback console-puts with
+docs/hazards.md: [BOTH] **both** (loop.c skips it → bases re-loaded too). The fix that gets BOTH right (**S173 resolution of
+docs/hazards.md: [AND] tail, matching the ROM), AND **pre-declare each array base as a pointer variable initialized before the
+docs/hazards.md: [AND] compiler magic is held in a register across the loop where the ROM re-loads `lui/ori` at the tail, AND
+docs/hazards.md: [BOTH] v-reg vs a base pointer in an arg reg), flipping the decl order flips BOTH the schedule AND the
+docs/hazards.md: [AND] v-reg vs a base pointer in an arg reg), flipping the decl order flips BOTH the schedule AND the
+docs/hazards.md: [AND] conditional branch-likely (`bnel`) inline found-compare, AND a conditional `bnez` back-edge. Neither a
+docs/hazards.md: [EVERY] **A goto loop defeats EVERY loop.c pass, not only strength reduction and bound hoisting (S260).**
+docs/hazards.md: [BOTH] loop that tests one struct field at BOTH the match-test (top) and the end-sentinel-test (bottom)
+docs/hazards.md: [BOTH] **Sub-lever — dual-IV needs BOTH an explicit pointer AND the running offset (S171).** When a copy/scan
+docs/hazards.md: [AND] **Sub-lever — dual-IV needs BOTH an explicit pointer AND the running offset (S171).** When a copy/scan
+docs/hazards.md: [AND] strength-reduced pointer (giv) for the load/store AND the offset (biv) for the recompute/wrap.
+docs/hazards.md: [BOTH] fewer setup insns but wrong shape); declare BOTH — `u8 *p = &arr[off]; … *p = …; off++; p++;` — to get
+docs/hazards.md: [AND] can split into TWO base registers instead of biasing one: when a store loop touches offset 0 AND a
+docs/hazards.md: [AND] v1,0x40` AND `addiu p,0x40`), +2 insns vs the ROM's single base. The SAME `T *p = &ARR[i];`
+docs/hazards.md: [BOTH] matched byte-exact after `Particle *p = &particle_array[i];`. So the S184 fix covers BOTH the
+docs/hazards.md: [AND] max-offset bias AND the dual-base split.
+docs/hazards.md: [EVERY] giv shape (and reading SHORTER than the ROM). The crack: write EVERY command as the per-command
+docs/hazards.md: [BOTH] carried-wall doc's stated COUNT and residual CLASS are BOTH hypotheses. Run
+docs/hazards.md: [AND] count 65/65 (was 63) AND collapses the ia0/ia1/d0/d1 → `$a2/$a0/$a1/$a3` coloring in one edit, because
+docs/hazards.md: [ALL] The recurring irreducible tell: the ROM hoists ALL of a fn's products before any store (high
+docs/hazards.md: [BOTH] **global** quantity so local-alloc skips it entirely: reference it in BOTH the entry block AND the
+docs/hazards.md: [AND] **global** quantity so local-alloc skips it entirely: reference it in BOTH the entry block AND the
+docs/hazards.md: [BOTH] conflicted with BOTH `$v0`(2) and `$v1`(3) → forced to `$a0`(4), because the return expression
+docs/hazards.md: [OR] loop reg (`move t0,v1`) exactly as the ROM does (a precomputed `head` local, OR a `&arr[K]-off` anchor,
+docs/hazards.md: [EVERY] **Fix / checklist:** before declaring any scheduling/regalloc near-match a wall, verify EVERY callee
+docs/hazards.md: [BOTH] `(&D_801B60A0)[-2]` (= `D_801B6098`). This BOTH compiles (resolves through the placed `D_801B60A0`) AND
+docs/hazards.md: [AND] `(&D_801B60A0)[-2]` (= `D_801B6098`). This BOTH compiles (resolves through the placed `D_801B60A0`) AND
+docs/hazards.md: [BOTH] 5. **The carve is only feasible when the table is 8-aligned on BOTH edges AND no still-asm fn's
+docs/hazards.md: [AND] 5. **The carve is only feasible when the table is 8-aligned on BOTH edges AND no still-asm fn's
+docs/hazards.md: [AND] bodies in **output-value-ascending** source order AND drop the explicit `default:` (pre-init the result
+docs/hazards.md: [AND] (S177 `heap3_free`: the offset-0 `D_800DC738` for `total +=` re-materialized AND pushed `block->prev`
+docs/hazards.md: [AND] the absolute stores AND reloads: forcing the reload by un-aliasing the read (separate symbol) makes the
+docs/hazards.md: [AND] load survives as the reload, AND (unlike the separate-symbol trick) it keeps the true store→read
+docs/hazards.md: [BOTH] the call makes BOTH `trunc.w.s`/`mfc1` emit at the arg eval (a0 then a1), adjacent, right before the
+docs/hazards.md: [AND] verified). Applicable whenever the ROM pins a struct-field store the build floats AND an adjacent global
+docs/hazards.md: [ALL] splat-generated `asm/data/<seg>.bss.s`, placed by cumulative `.main_bss` object order) ALL move to
+docs/hazards.md: [ALL] `.NON_MATCHING` region floats ALL of them (S217 `func_800425C8`).** Distinct from the length-shift cases
+docs/hazards.md: [OR] **Fan out BEFORE declaring a wall OR reaching for a synthetic-no-op permuter match (S177).** On a
+docs/hazards.md: [BOTH] the adversarial agent cracked BOTH, byte-exact. A source-cited "unreachable" is a HYPOTHESIS, not a
+docs/hazards.md: [AND] `func_800577DC`) AND returned 5 mechanism-backed WALL verdicts (`func_80056060` global.c allocno;
+docs/hazards.md: [AND] `t = f(loaded)` and the **same variable holds the loaded value AND the final result** (so the load is
+docs/hazards.md: [OR] call) OR the OPERAND is kept live past the op OR the operand is a non-hard-reg (memory/struct-field)
+docs/hazards.md: [OR] call) OR the OPERAND is kept live past the op OR the operand is a non-hard-reg (memory/struct-field)
+docs/hazards.md: [ALL] -fno-schedule-insns/-fno-delayed-branch/... ALL in-place) + a direct **2.8.1 cross-compile** (in-place
+docs/hazards.md: [AND] AND 80 insns, strictly worse; and the same-TU sibling `func_80076778` is matched at 2.7.2, so the TU
+docs/hazards.md: [EITHER] single-precision -> fresh) appears in NO project at EITHER compiler version, so the ROM's form is a
+docs/hazards.md: [AND] (2) grep `src/` for the idiom AND scan the byte-exact ROM asm -- an `INCLUDE_ASM` stub is byte-exact
+docs/hazards.md: [EITHER] cross-compile -- proved MG64's exact signature is produced by NO project at EITHER compiler version,
+docs/hazards.md: [AND] need `argN` live across `pos`'s allocation (so the coalescer can't fold `pos`/`argN`) AND `argN`
+docs/hazards.md: [NEITHER] `sp)` body access) that ALSO drags a register permutation is NEITHER the `unused[]` aggregate (that
+docs/hazards.md: [BOTH] loop form:** index the base as `arr[i]` (keeping BOTH the base pointer and the index `i` live across the
+docs/hazards.md: [AND] S270 `func_8004D4B8`: `str[row]` (not `str++`) reproduced the dead 8B frame AND matched all 6 registers
+docs/hazards.md: [AND] `jal` word AND the address word to confirm). This is an **orphaned** nested child with no recoverable
+docs/hazards.md: [AND] init is unreachable from faithful C AND the permuter is blocked (pycparser rejects the nested fn) — a
+docs/hazards.md: [AND] **1. ROM keeps the raw `lbu` byte in one register for the `bnez` loop test AND a redundant
+docs/hazards.md: [BOTH] HYPOTHESIS. S281 cracked BOTH byte-exact with source levers the permuter never produces, refuting the
+docs/hazards.md: [OR] `move` of the temp into the accumulator's own register plus a `beqz`-fallthrough conditional OR (14
+docs/hazards.md: [EVERY] a **pervasive** base-register + uniform-displacement-offset diff on EVERY field access. The isolated
+docs/hazards.md: [BOTH] BOTH as pre-base variables: `s32 n = 18, lim = 6;` (before `s8 *base = ret;`), and test
+docs/hazards.md: [AND] A `u8`-param `src` (byte-aligned) instead forces the `lwl`/`lwr` dual path AND (observed) mis-addresses
+docs/hazards.md: [BOTH] inner aligned block-move (0xB0 word-loop + 2-word tail, bases += 0xB8). Declare BOTH arrays as the same
+docs/hazards.md: [AND] skips exactly ONE insn AND the delay slot is still empty after backward fill. A ternary / if-else-if
+docs/hazards.md: [AND] Diagnose by checking whether an otherwise-identical no-call sibling in the same pack matches, AND whether
+docs/hazards.md: [AND] statements preserve SOURCE store order — so it matches both the FPR path AND the ROM's `8,4,0` order.
+docs/hazards.md: [BOTH] **(b) Comparison operand order pins BOTH load order AND branch polarity.** For `if (A <cmp> B) THEN;
+docs/hazards.md: [AND] **(b) Comparison operand order pins BOTH load order AND branch polarity.** For `if (A <cmp> B) THEN;
+docs/hazards.md: [BOTH] **Lever B — a single `(a+b)/N` source matches BOTH signed-s16 and unsigned-byte fields.** For the s16
+docs/hazards.md: [AND] whose ONLY diff is a constant/temp materialized one slot later than the ROM AND your build is 1 instr
+docs/hazards.md: [BOTH] The ROM's preheader `lw t0,-0x2B(a0)` needs BOTH the a0-relative addressing AND the value HELD across
+docs/hazards.md: [AND] The ROM's preheader `lw t0,-0x2B(a0)` needs BOTH the a0-relative addressing AND the value HELD across
+docs/hazards.md: [BOTH] The form that gets BOTH (base-first order AND pointer-in-the-index-reg) is a **two-statement array-of-row
+docs/hazards.md: [AND] The form that gets BOTH (base-first order AND pointer-in-the-index-reg) is a **two-statement array-of-row
+docs/hazards.md: [AND] AND keep the scale as an array subscript on that base.
+docs/hazards.md: [AND] (5 insns). The natural early-return `if (p == NULL) return SENT; return p->field;` AND the ternary
+docs/hazards.md: [BOTH] `return p ? p->field : SENT;` BOTH collapse to the SHORTER branch-likely form
+docs/hazards.md: [BOTH] single-return-temp fix, different symptom: a two-arm select where BOTH arms `return` and one arm bears
+docs/hazards.md: [OR] 10 source forms (flat early-return / nested / accumulator / two-BB explicit-else / OR-chain `if(A||B||
+docs/hazards.md: [ALL] big-endian high-half sign) — ALL fold, because whenever the bit-test is the LAST term deciding a 0/1
+docs/hazards.md: [BOTH] Fix: compute BOTH guard operands up front (`tx=…; ty=…; if(txbad)return; if(tybad)return;`) so reorg has
+docs/hazards.md: [AND] `func_8005B0B4` shed an accumulator-role AND a delay-slot-fill divergence to those levers, leaving
+docs/prompt-style.md: [ALL] ALL-CAPS.
+docs/prompt-style.md: [ALL] - [ ] ALL-CAPS is gone except backticked / define / filename tokens.

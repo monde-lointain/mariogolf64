@@ -109,3 +109,48 @@ CRLF
 LZ
 RLE
 IO
+UTF
+JIS
+EOF
+LF
+CR
+NUL
+NULL
+
+# Added after reviewing the full 645-token fold list before the first apply.
+# Each of these reads as shouted English at a glance but is a real term here;
+# checked in context rather than assumed.
+ANSI
+POSIX
+GNU
+IRIX
+SGI
+ECOFF
+EGCS
+PEP
+ADT
+UB
+SSA          # static single assignment
+DSE          # dead store elimination
+WAR          # write-after-read dependence
+WAW          # write-after-write dependence
+ULP          # units in the last place
+RNG
+OOM
+TBD
+TODO
+OS
+SR           # MIPS status register
+SC           # n_audio_sc scheduler
+SI           # N64 serial interface
+EB           # MIPSEB, big endian
+RAM
+VRAM
+RCP          # N64 Reality Coprocessor
+CFB          # color frame buffer
+RGB
+LUT
+TLUT         # texture lookup table
+GPACK        # the double-GPACK display-list fill idiom
+HUD
+IDF          # the pick_target inverse-document-frequency upstream guess
