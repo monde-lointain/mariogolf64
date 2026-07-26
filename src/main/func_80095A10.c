@@ -16,8 +16,28 @@ extern s32 D_800C73E0;
 extern u8* D_800C73F0[];
 extern Light D_800C73B0[3];
 
+extern s32 D_800E4CA4;
+
+/* One scenery collision cylinder record. The sibling decomp in
+ * src/main/func_80026400.c models these as parallel per-field arrays so each
+ * field materialises its own symbol; here a single walking record is the right
+ * view, because the ROM keeps one base register and reaches every field by
+ * displacement. */
+typedef struct {
+  /* 0x00 */ s16 x;
+  /* 0x02 */ s16 unk_02;
+  /* 0x04 */ s16 z;
+  /* 0x06 */ s8 unk_06[6];
+  /* 0x0C */ u16 radius;
+  /* 0x0E */ s8 unk_0E[2];
+} CollisionCyl; /* 0x10 */
+
+extern CollisionCyl collision_cylinders[];
+
 extern s32 func_80056494(s32 arg0, s32 arg1);
 extern void play_sound_effect(s32 sfx, s32 arg1, s32 arg2);
+extern s32 get_interpolated_terrain_height_wrapper(s32 x, s32 z);
+extern u32 calculate_hypotenuse_safe(s32 x, s32 y);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80095A10", func_80095A10);
 
