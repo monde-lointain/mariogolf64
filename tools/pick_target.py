@@ -1098,6 +1098,17 @@ def main():
     )
     args = ap.parse_args()
 
+    # `--lib` is a substring filter, so a segment name passed to it does not error: it silently
+    # matches whatever coddog path or member name happens to contain the word and returns unrelated
+    # packs. Reject the one case we can name for certain.
+    if args.lib and args.lib in SEGMENT_RANGES:
+        ap.error(
+            f"--lib {args.lib} is a segment, not a library. --lib is a substring filter over the "
+            f"subseg path, coddog source, up_lib and member names, so it would silently return "
+            f"unrelated packs. Use --segment {args.lib}, or --loose-stubs {args.lib} for the "
+            f"individual stubs inside already-`c` files."
+        )
+
     if args.loose_stubs:
         stubs = loose_stubs(args.loose_stubs)
 

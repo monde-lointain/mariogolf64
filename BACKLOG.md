@@ -77,6 +77,22 @@ sched coin at exact count, expect a terminal verdict, not a bank. Running tally:
 fan-out-on-exact-count-carry banked = S280 2/2, S281 2/2, S282 0/2. Both S282 carries have rewritten
 `docs/wip/*.near-match.md` and are flagged by `--carried-check`.
 
+**S285 adds the cheap half of that play: re-derive a carry YOURSELF before pricing a fan-out.** S285
+carried `func_80098758` at 158/155 with a confidently-argued 7-vs-6 callee-saved coloring verdict and
+a recommendation to escalate to a compiler-source fan-out; a same-session re-attempt banked it at
+155/155 with four ordinary source levers, no fan-out and no permuter. All three residuals behind the
+"coloring" reading were structural (a split induction variable, a wrong return type, and an aliasing
+exemption that let three loads clump). So the running tally above is about carries whose STRUCTURE is
+already exhausted. Before booking a fan-out slice, re-derive the residual from a fresh object and
+check the cheap structural set first, because the register count is itself a structural symptom: an
+extra induction variable, a `true_dependence` exemption or a wrong return type each show up first as
+a surplus callee-saved register. The rule now lives in `docs/workflow/loop.md` next to the
+residual-classification note.
+
+**`make test-tools` is GREEN as of S285 (135 passed, 1 skipped).** The stale-golden note below is
+kept for its FIXTURE-based recommendation, but its "9 pre-existing failures" figure no longer holds --
+do not treat a test-tools failure as pre-existing without re-running it.
+
 **Test-tools stale-golden refresh (S273, deferred, needs `REGEN_GOLDEN=1`).** `make test-tools` carries
 9 PRE-EXISTING failures — the `pick_target` live-state json/table goldens (`test_pick_target_*_golden`,
 `test_pick_target_ranked_by_descending_score`, `test_coddog_suppresses_maybe_upstream`) drift every
@@ -5583,10 +5599,17 @@ by `/sprint-plan`:
   the getter/setter/dispatch leaves are banked, the residual concentrates on base-register /
   loop-strength-reduction / branch-likely no-source-lever classes → route to a fresh pack or an
   escalation slice (compiler-source fan-out / corpus-mining), not another smallest-first continuation.
-- **Open (S220→S222, in-progress mixed-partial, NOT a spike):** `src/main/func_80095A10.c` (31-fn main-seg
-  `none` pack, subseg 0x70E10; float-clamp/state system). 9 banked (7 S220 + 1 S221 `func_80098D70` + 1
-  S222 `func_80095C10` DL builder), 22 stubs remain. The ranker re-surfaces it as a c-stub continuation
-  smallest-first.
+- **Open (S220→S285, in-progress mixed-partial, NOT a spike):** `src/main/func_80095A10.c` (31-fn main-seg
+  `none` pack, subseg 0x70E10; float-clamp/state system). 12 banked (7 S220 + 1 S221 `func_80098D70` + 1
+  S222 `func_80095C10` DL builder + 3 S285: `func_8009806C` / `func_80098310` sibling shot-view camera
+  builders and `func_80098758` the terrain-flatness position scorer), 19 stubs remain. The ranker
+  re-surfaces it as a c-stub continuation smallest-first. **S285 evidence for the next continuation:**
+  the two camera builders came out of the asm-first fast path with one lever each, so the FP-heavy
+  reputation of this file is not uniform. `func_80097A08` (0x210), `func_80097C18` (0x218) and
+  `func_80097E30` (0x23C) each call three of the same family callees
+  (`get_character_state` / `func_8009676C` / `func_80095A68`) that the two banked builders do, so they
+  are the same shape and the cheapest remaining vein here; `func_800985B4` (0x198) is a lighter
+  variant with one such call.
   **Remaining tail (carries):** `func_80098C6C` (S222 near-match, `fabsf(D_800E4C7C)==0.0f` 13-instr leaf)
   — `#local-alloc-qty-permutation` + scheduler tie-break on the 4 FP-setup instrs, source-invariant (5
   shapes tried), below 0.97 = permuter N/A; `docs/wip/func_80098C6C.near-match.md`. `func_80098CD8` (the

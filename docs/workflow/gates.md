@@ -20,8 +20,12 @@ harness-neutral -- where Claude Code and Codex genuinely differ, the step says s
 ## Sprint-plan procedure
 
 1. Validate the optional scope argument against `^[a-z][a-z0-9_-]*$`; abort on mismatch.
-2. Read `BACKLOG.md`, run `venv/bin/python3 tools/pick_target.py -n 12`, and add `--lib <scope>` when
-   a valid scope is supplied.
+2. Read `BACKLOG.md` and run `venv/bin/python3 tools/pick_target.py -n 12`. Filter by the kind of
+   scope: `--lib <name>` for a library band, `--segment <name>` or `--loose-stubs <name>` for a
+   segment such as `main`. Passing a segment to `--lib` returns unrelated overlay and libnusys rows
+   instead of erroring. Run `--loose-stubs <seg>` for a segment scope even when another subcommand
+   already gave you the ranking: it is the only place the plateau advisory prints, and that advisory
+   is what tells you `fresh` is a ceiling rather than a clean pool.
 3. Pick the smallest coherent increment, honoring carry-overs, hazards, the 8-point gate, and the
    Definition of Ready below. Run `--carried-check` and `--nested-check` on every hand-mined leaf.
 4. Present the goal, committed backlog, gate enablers, snapshot, and story-point estimate to the

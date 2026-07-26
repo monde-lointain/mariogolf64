@@ -75,6 +75,12 @@ These have a `docs/hazards.md` section; read it rather than the line here.
   scheduling region; the operand form also lengthens a live range for regalloc.
 - **loop-invariant-hoist-order-preheader-regalloc** -- `loop.c` hoists invariants in loop-body emission
   order, so precomputing a division early changes preheader allocation.
+- **aggregate-store-pins-pointer-load** -- a store to a scalar global does not constrain a later load
+  through a pointer parameter (`true_dependence`, `sched.c:817`); typing the destination globals as
+  one array restores the dependence and the ROM's load/store interleave.
+- **two-argument-call-temp-split** -- when both arguments of a call each cross another call, compute
+  them into temps first; as one call expression gcc evaluates argument 0 fully, `trunc.w.s` included,
+  and holds it across the second call.
 
 ## Control flow and branch shape
 
@@ -129,3 +135,6 @@ These have a `docs/hazards.md` section; read it rather than the line here.
   only when A and B are one symbol.
 - **same-field-sentinel-loop-peels-top-load** -- a loop testing one field at the top with a bottom
   sentinel makes gcc peel the top load; the back edge is then a terminal coin.
+- **block-scoped-record-pointer-single-giv** -- for three or more fields of `ARR[i]`, a block-scoped
+  `T *p = &ARR[i];` gives one base register plus displacements; `p++` splits into two induction
+  variables, and a bare `ARR[i].field` gives a byte-offset one with a per-access `%hi`.

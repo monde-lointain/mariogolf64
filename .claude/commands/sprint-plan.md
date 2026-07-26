@@ -22,4 +22,4 @@ Read `docs/workflow/gates.md` before acting. Follow `## Sprint-plan procedure`,
 - Gate enablers are limited to `mariogolf64.yaml` subseg flip/split/path-qualifier lines, `symbol_addrs.txt` add-only, and optional `make sync-names`.
 - Validate with `tools/verify-rom.sh --extract`; require exit 0. It derives the expected SHA-1 from `mariogolf64.yaml` and asserts the `build/mariogolf64.z64: OK` line before trusting `sha1sum`.
 - Write `SPRINT.md` only after the validation is green.
-- Hand off to the inline execution loop in `docs/agent-workflow.md ## Execution loop`; do not stop for per-function PO approval.
+- Hand off to the inline execution loop in `docs/workflow/loop.md ## Execution loop`; do not stop for per-function PO approval.

@@ -17,6 +17,18 @@
 # EXTERNAL branch/jal targets. The first output line is the instruction COUNT of each side, which is
 # the most actionable number when a body is structurally right but the wrong length.
 #
+# The FP alias table is a full SDK-name-to-number MAP, not a collapse to one placeholder. It covers
+# every `fv*`/`ft*`/`fa*`/`fs*` name, so an `fa0` line no longer reads as a difference against the
+# same instruction spelled `f12` (S285: a byte-exact function showed 12 phantom rows that way). It
+# also keeps a genuine FP register permutation VISIBLE, which the old five-name collapse to `fN` hid
+# among `f0`/`f2`/`f20`/`f22`/`f24`.
+#
+# One known FALSE row remains, deliberately. splat prints `ori rX,zero,N` where objdump prints
+# `li rX,N` for the identical encoding, so a matching 16-bit unsigned load-immediate shows as a
+# difference. It is not normalised because objdump renders the `ori` and `addiu` forms both as `li`,
+# so folding the asm side too would blind the tool to a real encoding difference. Check the raw
+# bytes when this row is the only one left.
+#
 # INTERNAL branch targets are NOT collapsed to a placeholder (S260). A `.L<vram>` (asm side) or a
 # `<fn+0xNN>` (object side) target is rewritten to a POSITION-RELATIVE delta `@Dp<n>`/`@Dm<n>` (the
 # signed distance in instructions from the branch to its target). This makes a redirected back edge
@@ -157,8 +169,22 @@ norm() {
         s/\bbeql ([a-z0-9]+),zero,/beqzl \1,/
         s/\bbnel ([a-z0-9]+),zero,/bnezl \1,/
         s/\b(jal|j|b[a-z]*) [.A-Za-z_][A-Za-z0-9_.]*$/\1 T/
-        s/\b(fv0|fv1|fs0|fs1|fs2)\b/fN/g
-        s/\bf(0|2|20|22|24)\b/fN/g
+        s/\bfv0\b/f0/g
+        s/\bfv1\b/f2/g
+        s/\bft0\b/f4/g
+        s/\bft1\b/f6/g
+        s/\bft2\b/f8/g
+        s/\bft3\b/f10/g
+        s/\bfa0\b/f12/g
+        s/\bfa1\b/f14/g
+        s/\bft4\b/f16/g
+        s/\bft5\b/f18/g
+        s/\bfs0\b/f20/g
+        s/\bfs1\b/f22/g
+        s/\bfs2\b/f24/g
+        s/\bfs3\b/f26/g
+        s/\bfs4\b/f28/g
+        s/\bfs5\b/f30/g
         s/(b[a-z]+ [a-z0-9,]*),[.A-Za-z0-9_]+$/\1,T/
     '
 }

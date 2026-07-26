@@ -85,7 +85,7 @@ Ghidra MCP is used inline at seed time. For each target function:
        `TerrainAttrEntry` + a synthesized 0xB8 `ShotInitRecord` + game externs; all 3 standalone fns
        banked, and both levers above surfaced there).
      - **asm-first seed fast-path (MCP-independent, for small fns ~<40 instrs).** The splat
-       `.s` under `asm/nonmatchings/<seg>/<func>/<func>.s` is the same ground truth as
+       `.s` is the same ground truth as
        `disassemble_function`, so a small classical fn does not need MCP: hand-translate straight from
        the `.s` (resolve callee/global names + types from the name files / call-site arg setup),
        write the body directly into `src/<seg>.c` (declare each `extern`; auto `func_`/`D_` symbols
@@ -94,6 +94,10 @@ Ghidra MCP is used inline at seed time. For each target function:
        isolated Iterate loop below. Use this when Ghidra MCP is unavailable (`list_instances` empty)
        or the fn is small enough that the decompile adds no shape/type value. The fast-path banked a
        2-fn 176B pack this way, first build, MCP down (S148).
+       - **The `.s` sits under the host subseg's directory, not the function's own.** The path is
+         `asm/nonmatchings/<seg>/<subseg-stem>/<func>.s`, where `<subseg-stem>` is the lead-fn
+         placeholder that names the whole subseg. For a loose stub inside an already-`c` file, which
+         is now the main-segment default, a per-function directory does not exist at all.
        - **Per-fn oracle for the fast-path = `objdump -d` of the fresh object, not `diff.py` (S244).**
          With no base.c/decomp_loop, iterate on register/scheduling diffs by rebuilding just the one
          object and disassembling it: `find build -name '<obj>.o' -delete && make build/<path>/<obj>.o
@@ -146,25 +150,10 @@ Ghidra MCP is used inline at seed time. For each target function:
      every access). **Disambiguate with the in-tree `tools/asm-differ/diff.py <func>`** (diffs the real
      build against the ROM via the mapfile): if it too diverges, it is a genuine near-miss/wall — do
      Not apply the isolation-caveat shortcut, root-cause the pervasive diff instead.
-     - **The incremental `diff.py` verdict is stale-prone; gate crack/bank decisions on the full-make
-       ROM-SHA-1, not on `diff.py` (S242, recurred ~6x).** After `make build/<obj>.o` + `diff.py <fn>`,
-       diff.py reads the object + `build/*.map` which an incremental per-object build does not fully
-       refresh vs the linked ROM, so it lies in both directions: S242 `func_80075010` showed 5 diff rows
-       yet was byte-exact, and `func_80076138` showed 0 rows yet the ROM mismatched. Bare `diff.py <fn>`
-       with no fresh build also spills the whole segment (~1024 "rows"). Treat `diff.py` as an iteration
-       hint only; confirm every score-0/bank with `tools/verify-rom.sh` (full-make ROM-SHA-1), and
-       `find build -name '<obj>.o*' -delete` before a single-fn diff you actually trust. See the memory
-       `subagent-diff-crack-not-a-bank` (now covers the orchestrator's own diff.py, not just subagents').
-       - **Stale-detector (S257): the same `diff.py` score twice in a row after a real source edit means
-         Stale, not "the edit had no effect."** S257 got an identical score across four materially
-         different sources (a ternary vs an if/else vs two different clamp idioms); `find build -name
-         '<obj>.o' -delete` did not clear it — only a full relink (`tools/verify-rom.sh` / `make` to the
-         ELF) refreshed the mapfile diff.py reads. The escape that always works mid-iteration is
-         `mips-linux-gnu-objdump -d build/src/<tree>/<obj>.o` plus an instruction-count check against the
-         `.s` header (`head -1 asm/nonmatchings/<seg>/<f>/<f>.s` gives `0x<size>`; instrs = size/4). An
-         instruction count that already matches the ROM turns a "which register" question into a pure
-         permutation question, and one that does not tells you the length gap directly — both are more
-         actionable than a score. Do not spend more than one iteration on an unchanged score.
+     - **`diff.py` is an iteration hint, never a crack or bank verdict.** Its two staleness failure
+       directions and the same-score-twice detector are stated once in
+       `docs/workflow/loop.md ## Oracles`; the escape when it goes stale mid-iteration is the
+       `objdump -dz` and `.s`-header rows of that same table.
    - **Finalize** (only if the spot-check passes): inline the body into `src/<seg>.c`, drop the
      `INCLUDE_ASM` line, `clang-format-22 -i` (now applies to every tree, including `src/libultra/`,
      `src/libkmc/`, `src/libnusys/`, and `src/mgu/`), then `make` until `build/mariogolf64.z64: OK`
@@ -244,7 +233,10 @@ deficit, so fix that before anything else; an exact count with differing registe
 `local-alloc` question; an exact count with differing order is a scheduler question. Do not argue
 register pressure, live length or "needs an Nth register" from a body that is not at exact instruction
 count -- two strongly-worded terminal verdicts were refuted that way once their bodies reached exact
-count.
+count. The register count is itself a structural symptom, so "my build uses one more callee-saved
+register than the ROM" is never on its own evidence of a coloring problem: an extra induction
+variable, an aliasing exemption that lets loads clump, or a wrong return type each show up first as a
+surplus register. Fix the structure, then re-count.
 
 **A `docs/wip/<fn>.near-match.md` records a hypothesis, not a measurement.** Its stated instruction
 count, its residual class, and even its reading of the function's signature have each been wrong.

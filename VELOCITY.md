@@ -1445,6 +1445,35 @@ Three honest caveats:
   4 (#1 sched-select memory; #3 (s32)base lever → commutative memory; #2/#4 DoR grep-BACKLOG-miss #3 +
   8x plateaued-tail → BACKLOG ranker follow-up; #5 grid-reset combo memory). RANKER: **14th recurrence**
   + the DoR carry-block-read miss. Push: local.
+- **Sprint 285** — the 3 smallest fresh loose stubs in `src/main/func_80095A10.c`, doubling as the
+  acceptance test for the S283/S284 prompt-surface rework. **+3 banked, 0 carried, 0 permuter, 1
+  re-open (self, mid-sprint).** Zero gate enablers (file already `c`; all three loose `INCLUDE_ASM`
+  stubs). `func_8009806C` + `func_80098310` are sibling shot-view camera builders (169/169 each,
+  asm-first fast path, no MCP); each had a 0x40 pure dead frame closed by `f32 unused[16]`
+  [[pure-dead-frame-clean-crack]]. `func_80098758` was CARRIED mid-sprint at 158/155 with a
+  confidently-argued 7-vs-6 callee-saved coloring verdict, then re-opened and BANKED at 155/155 the
+  same session with FOUR structural levers and no permuter and no fan-out: (1) block-scoped
+  `CollisionCyl* cyl = &collision_cylinders[i];` — a `cyl++` walk makes loop.c split 3 field accesses
+  into 2 IVs, a bare `ARR[i].f` gives a byte-offset IV with per-access `%hi`
+  [[block-scoped-record-pointer-single-giv]]; (2) non-void `s32` return with valueless `return;`s,
+  the S281 `reorg.c:3375` lever again but in its OTHER direction — here MY build was 1 SHORT because
+  it stole the fall-through slot [[nonvoid-return-blocks-fallthrough-delay-steal]]; (3) the 3
+  destination globals are ONE `s32 D_800E4C98[3]` — `true_dependence` (sched.c:817) exempts a
+  varying-address in-struct load from a fixed-address non-struct store, so the scalar decl let all 3
+  `lw` clump above their stores and burn a 3rd register [[aggregate-store-pins-pointer-load]]; (4)
+  the ring divisor and the `0x12BFF` threshold as literals INSIDE their loops so loop.c hoists each
+  into its own preheader in the ROM's order. Plus `D_800E4CC8` is `s8` (`lb`, not `lbu`).
+  md5-candidate **0 delta**, matched-fn **+3** (file 22→19 stubs, still partial). Seed 5 (classical);
+  banked 0pt (file partial); realized 7 / residual +2 (+1 carry-then-reopen, +1 novel bank-gotcha
+  [the aggregate-store dependence exemption]). Rolling-5 (S279-S285, S283/S284 excluded as
+  prompt-surface enabler sprints): 1+2+2+0+3. Quality **0 stuck-far / 0 permuter / 0 carried-final /
+  1 re-opened**. Retro applied 9 of 9 plus 1 retirement (A: 3 citation/path fixes; B: cmpfn.sh full
+  SDK-FP alias map + `--lib <segment>` rejection + plateau-advisory surfacing; C: 3 levers.md
+  entries; D: the register-count-is-structural rule; retirement: the duplicated diff.py stale prose
+  in loop.md folded into its Oracles row, −18 lines). KEY: a surplus callee-saved register is a
+  STRUCTURAL symptom, not evidence of a coloring problem — S285 makes 4 of the last 6 carry verdicts
+  refuted, and this one was refuted by the same agent that wrote it, hours later, with no new tool.
+  Push: local.
 - **Sprint 280** — `main` clean terrain slice in `get_tile_attribute.c` (PO approved 2 low-FP terrain
   leaves to dodge the FP-scheduler plateau). **+2 banked, 0 carried-final, 1 permuter (plateau), 0
   re-open.** Zero gate enablers (file already `c`; both fns already curated-named). TWO-PHASE: the
