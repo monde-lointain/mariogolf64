@@ -111,6 +111,7 @@ When `pick_target.py` flags a hazard (or a match shows its symptom), read the ma
 | struct-array fn byte-matches with per-field base symbols but not the combined struct (link-identical) | #struct-access-folding-changes-scheduling |
 | classical `switch(x)` dispatch via a compiler jump table (`jtbl_<vram>`, `sltiu`+`jr $v0`), esp. w/ sparse inner cases or `a==K1\|\|K2` | #switch-jtbl-dispatch |
 | clean per-fn match, full-make SHA-miss, lone `slti`<->`sltiu` at a switch/range bound-check (global signedness) | #switch-jtbl-dispatch |
+| no-`jtbl` mode dispatch: tests branch forward to each case body, default arm last and reached by an explicit `j`, one case running into the default; the if/else form inverts the first test and reads 1 short | #switch-compare-chain-layout |
 | clean fn byte-exact except a fixed-global re-load after a nonscalar `arr[idx]=0` store (build CSE-forwards, 1 load short); read the global as `G[0]` array-elem for MEM_IN_STRUCT_P | #mem-in-struct-scheduling-lever |
 | ROM cond-branch is plain `beqz`+`li v0,CONST`+`move v0,<scratch>` but build emits branch-likely `beqzl` skipping the lone `li v0,CONST` (return-var coalesced to v0) | #register-reuse-nudge-classical-regalloc |
 | classical fn's global load/store schedules differently (build pipelines indep load-stores the ROM keeps strict-`$f0`-pairs, or hoists a `& K` flag load past a pointer store the ROM keeps late+`nop`) | #mem-in-struct-scheduling-lever |

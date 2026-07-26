@@ -1474,6 +1474,38 @@ Three honest caveats:
   STRUCTURAL symptom, not evidence of a coloring problem — S285 makes 4 of the last 6 carry verdicts
   refuted, and this one was refuted by the same agent that wrote it, hours later, with no new tool.
   Push: local.
+- **Sprint 286** — the next 3 smallest fresh loose stubs in the same `src/main/func_80095A10.c`
+  camera-builder vein. **+3 banked, 0 carried, 0 permuter, 0 re-open, 0 stuck-far.** Zero gate
+  enablers. `func_80097218` (176/176) landed FIRST BUILD as a near-twin of the S285-banked
+  `func_8009806C`. `func_80096F44` (181/181) took 3 iterations and produced the sprint's key finding:
+  its final residual read as a 3-register FP permutation (`f14`/`f12` vs `f2`/`f4`) and was
+  SEMANTIC — `f12`/`f14` are the FP ARGUMENT registers, so the deltas were arguments and
+  `func_80059FAC` is an atan2-shaped `f32 (f32 dz, f32 dx)` that had been declared `(void)`
+  [[fp-arg-registers-are-a-signature]]. Also needed both coordinate deltas computed BEFORE the test
+  (a short-circuited `||` defers the second load pair) and the parity test inverted to `(x & 1) == 0`
+  so the even arm is the fall-through, which hoists the shared `cvt.d.s` into the branch delay slot.
+  Its two literal-pool doubles stay `extern f64` refs into the shared main rodata blob (source
+  literals would emit a fresh pool entry and force a carve the still-asm siblings share)
+  [[shared-literal-pool-partial-bank-blocker]]. `func_800974D8` (194/194) took 3 iterations for two
+  structural reasons: the mode dispatch is a compare-chain `switch` WITH a case falling into the
+  default, which an if/else cannot express (the if/else form inverted the first test and read 1
+  short) → new `docs/hazards.md#switch-compare-chain-layout`; and the trailing aim pass must be
+  written out in EVERY arm, because with the calls inside the arm the store shares a block with the
+  add that feeds it, the scheduler covers that latency with the call's own argument setup, and gcc
+  then cross-jumps the identical tails — which is why the ROM's merge point is the argument move
+  rather than the store [[cross-jump-merge-point-before-store]]. md5-candidate **0 delta**, matched-fn
+  **+3** (file 19→16 stubs, still partial; repo-wide stubs 321→318, all in `src/main`). Seed 5
+  (classical); banked 0pt (file partial); realized 7 / residual +2 (+1 re-attempt, +1 novel
+  bank-gotcha). Rolling-5 (S279-S286, S283/S284 excluded as prompt-surface enabler sprints):
+  2+2+0+3+3. Quality **0 stuck-far / 0 permuter / 0 carried / 0 re-opened** — the first all-clean
+  counter-metric since S270. Retro applied 4 of 4 plus 1 retirement (2 levers.md entries, 1 hazards
+  section + index row, 1 plateau-advisory family-locality clause; retirement: the two array-element
+  CSE levers merged into one, and my own 3 additions compressed to land levers.md at 10230/10240).
+  Net prompt-surface delta **+417 B** across levers/hazards/hazard-index. `make test-tools` 135
+  passed (the S271 golden debt has since cleared), `prompt_lint check` green. KEY: two consecutive
+  3-of-3 sprints in one file say the main plateau is measured over UNRELATED fresh leaves — a
+  structural sibling of an already-banked function is not plateau-bound, now coded into the ranker's
+  advisory. Push: local.
 - **Sprint 280** — `main` clean terrain slice in `get_tile_attribute.c` (PO approved 2 low-FP terrain
   leaves to dodge the FP-scheduler plateau). **+2 banked, 0 carried-final, 1 permuter (plateau), 0
   re-open.** Zero gate enablers (file already `c`; both fns already curated-named). TWO-PHASE: the

@@ -28,6 +28,7 @@ These have a `docs/hazards.md` section; read it rather than the line here.
 - loop weight and live length regalloc steering -- `docs/hazards.md#loop-weight-and-live-length-regalloc-steering`
 - nested-function static chain spill -- `docs/hazards.md#nested-function-static-chain-spill`
 - signed-divide const quotient destination -- `docs/hazards.md#signed-divide-const-v0v1-quotient-destination`
+- switch compare-chain layout -- `docs/hazards.md#switch-compare-chain-layout`
 - top-tested loop goto local hoist -- `docs/hazards.md#top-tested-loop-goto-local-hoist`
 
 ## Register allocation and coloring
@@ -55,6 +56,8 @@ These have a `docs/hazards.md` section; read it rather than the line here.
   base per region.
 - **copy-coalesce-cse-signext-terminal** -- `global.c:790-823` merges equal copies; forcing six
   registers reroutes a later read and the residual goes terminal.
+- **fp-arg-registers-are-a-signature** -- ROM values in `$f12`/`$f14` where the build uses `$f0`/`$f2`
+  are the FP argument registers: the callee takes FP args the `extern` omits (S286).
 
 ## Scheduling
 
@@ -100,6 +103,9 @@ These have a `docs/hazards.md` section; read it rather than the line here.
   returns `s32` (`reorg.c:3375/4274`).
 - **value-select-branch-likely-on-switch-default** -- a constant-select branch-likely extends to a
   switch arm, and is goto-proof.
+- **cross-jump-merge-point-before-store** -- the delay-slot filler names the pre-reorg order; a merge
+  point at the argument move, not the store, means each arm held its own copy of the trailing calls --
+  duplicate them per arm (S286).
 - **store-flag-single-bit-terminal-wall** -- a terminal `(x & bit) ? 1 : 0` folds to `lhu; srl` where the
   ROM keeps `andi; bnez`. Permuter-denied.
 - **gcc272-fold-range-test-slti-merge** -- adjacent `slti` tests fold to `(u32)(x-lo) < span`; a per-test
@@ -113,10 +119,9 @@ These have a `docs/hazards.md` section; read it rather than the line here.
   natural spelling reassociates onto the element instead.
 - **byte-offset-cast-defeats-base-ptr-cse** -- `*(s32 *)((u8 *)SYM + off)` forces a per-access
   `%hi`/`%lo`. Terminal only for a param-base fold.
-- **mem-in-struct-index-global-cse** -- `extern s32 G[]` plus `G[0]` defeats CSE of both the load and
-  the `G << 2`, forcing a per-access re-read.
-- **array-element-form-for-multilevel-bound** -- the same form forces a re-read at every nesting level;
-  a cached `s32 *cnt = &G` comes out short.
+- **mem-in-struct-index-global-cse** -- `extern s32 G[]` plus `G[0]` defeats CSE of the load and the
+  `G << 2`, forcing a per-access re-read at every loop-nesting level; a cached `s32 *cnt = &G` is
+  short.
 - **himode-shortening-cse-neg-imm-addiu** -- `(f32)(u16)(x + 0x8000)` shortens to HImode and CSE folds it
   to one negative-immediate `addiu`; a separate `s32 t =` keeps SImode.
 - **u8-s32-char-split-zero-extend** -- `u8` for the `!= 0` test plus `s32` for compares puts the

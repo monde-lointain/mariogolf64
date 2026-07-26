@@ -140,6 +140,7 @@ The hazard families below group the sections that follow. Each links to its exis
 - [FPR float-zero store-order (mtc1+swc1 vs folded sw zero, and store-order control)](#fpr-float-zero-store-order-mtc1swc1-vs-folded-sw-zero-and-store-order-control)
 - [nested-guard range-unfold + comparison-operand-order (blez/slti + branch polarity)](#nested-guard-range-unfold--comparison-operand-order-blezslti--branch-polarity)
 - [switch tight merged-default (shared case-0/default label + case-1 last)](#switch-tight-merged-default)
+- [switch-compare-chain-layout (out-of-line cases + a case falling into the default)](#switch-compare-chain-layout)
 - [grid-counter double-loop (non-zero-cell counter idiom)](#grid-counter-double-loop)
 - [base-register-vs-displacement (full base materialized vs %lo-in-displacement; + family-of ranker follow-up + shifted .NON_MATCHING data-carve blocker)](#base-register-vs-displacement-full-symbolbase-materialized-vs-lo-in-displacement)
 - [Tracked ranker follow-up: `family-of:<banked-fn>` (S210)](#tracked-ranker-follow-up-family-ofbanked-fn-s210)
@@ -7129,6 +7130,29 @@ stays `beq`, the `j default` is deleted as a fall-through, and reorg fills the `
 tight merged-default.
 
 **Provenance.** S209 D218 (`(x==1)?7:0`) / D2E4 (`(x==1)?157:158`), both banked, no permuter.
+
+## switch-compare-chain-layout (out-of-line cases + a case falling into the default)
+
+**Symptom (S286 `func_800974D8`).** A 2-value mode dispatch with no `jtbl`: the ROM tests each value in
+turn, branches *to* each case body, and reaches the default arm by an explicit `j`. The case bodies sit
+in source order between the tests and the default arm, and one case body runs off its end into the
+default arm. Written as an if/else chain the body reads one instruction short and inverts the first
+test (`bne` where the ROM has `beq`), because an if/else puts its then-arm on the fall-through path.
+
+**Root cause.** This is the compare-chain form of a `switch` -- too few, too sparse cases for a jump
+table -- so [#switch-jtbl-dispatch](#switch-jtbl-dispatch) does not apply and there is no `.rodata`
+carve. gcc emits the dispatch tests first, then each case body in source order, then the default arm,
+which is exactly the layout above. A C `if/else` cannot express the case-13-falls-into-default edge at
+all, and that missing fall-through is the instruction the naive form loses.
+
+**Lever.** Spell it as the `switch` it is, fall-through included:
+`switch (m) { case 12: A; break; case 13: B; /* fallthrough */ default: C; break; }`. Read the layout
+before choosing the form: case bodies reached by forward branches with the default last and jumped to
+is a `switch`; a then-arm on the fall-through path is an `if/else`.
+
+**Provenance.** S286 `func_800974D8` (194/194, banked, no permuter). The delay-slot half of the same
+function is [#cross-jump-tail-merge](#cross-jump-tail-merge) (duplicate the trailing calls into each
+arm; the merge point lands at the argument move rather than the store).
 
 ## grid-counter double-loop (non-zero-cell counter idiom)
 

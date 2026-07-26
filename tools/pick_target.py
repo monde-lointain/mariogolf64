@@ -1154,12 +1154,18 @@ def main():
             # fan-out cracked both fully-RE'd exact-count carries. So for UNAIDED smallest-first,
             # prefer a FRESH non-main pack; for a fully-RE'd exact-count / structural carry, a
             # gcc-2.7.2 fan-out slice out-yields another smallest-first main continuation.
+            # S286 family-locality clause: the plateau is measured over UNRELATED fresh leaves. A
+            # fresh leaf that is a structural sibling of an already-banked fn in the same file is
+            # not plateau-bound -- the banked sibling supplies the types, externs, frame shape and
+            # most of the body. S285 3/3 and S286 3/3, both the func_80095A10.c camera family.
             print(
                 "# ADVISORY (main plateau, S280): `fresh` is a CEILING not a clean pool "
                 "(FP-sched / value-select / register-alloc walls read fresh). Unaided main "
                 "bank-rate is low (S273 3/3 -> S280 0/2); prefer a FRESH non-main pack for "
                 "smallest-first, OR a compiler-source fan-out on a fully-RE'd exact-count carry "
-                "(cracked both S280 carries)."
+                "(cracked both S280 carries). EXCEPTION (S286): a fresh leaf that is a structural "
+                "sibling of an already-banked fn in the SAME file is not plateau-bound "
+                "(S285 3/3, S286 3/3, both func_80095A10.c)."
             )
         raise SystemExit(0 if n_fresh else 1)
 

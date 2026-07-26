@@ -3708,6 +3708,23 @@ by `/sprint-plan`:
   `NU_CONT_THREAD_ID=6` vs MG64's 5), and that surfaces only at first build unless reconciled here.
   A near-free retry missing any of these is a half-scoped spike — finish the scope before deferring.
 
+- **(S286 NEAR-FREE RETRY — not blocked; deferred only by the 3-to-4 sprint cap)**
+  `src/main/func_80095A10.c` camera-builder family. S285 and S286 each banked 3 of 3 here, so the
+  vein is open and the next slice is mechanical. **(1)** No flip, no split, no `symbol_addrs.txt`
+  add: these are loose `INCLUDE_ASM` stubs in an already-`c` file, so gate enablers are zero.
+  **(2)** Next two by size, both `--carried-check` fresh / `--nested-check` standalone as of S286:
+  `func_80096C04` (0x340, 208 instrs, 10 `jal`) and `func_800967F4` (0x410, 260 instrs, 13 `jal`).
+  **(3)** Everything they need is already in the file: `Vec3f`/`GolfCamera`, the `CollisionCyl`
+  record, the `D_800C73A0`/`D_800E4C54`/`D_800BB020`/`D_801B60A0` externs, `get_character_state`,
+  `func_80095A10`, `func_80095A68`, `func_8009676C`, `func_8005483C`,
+  `get_interpolated_terrain_height_wrapper`, plus `func_80059FAC(f32 dz, f32 dx)` and the two
+  `extern f64` pi/2 pool doubles S286 added. **(4)** Recurring shape: `f32 unused[16]` for the dead
+  frame, `(1.0f/1024.0f)` for the terrain scale, `pos.y + -C` for a ROM `add.s` with a negative
+  constant, and a mode dispatch that is usually a compare-chain `switch`
+  (`docs/hazards.md#switch-compare-chain-layout`). **(5)** Not a plateau candidate: the ranker's
+  advisory now carries the S286 family-locality exception. **(6)** The file also holds 2 S282
+  terminal carries (`func_80098CD8`, `func_80098C6C`) — do not re-open them as part of this slice.
+
 - **(S271 OPEN — 6 of 18 banked; file NOT md5-candidate; 12-stub partial pack)**
   `src/main/vec3f_normalize.c` (main-segment subseg `[0x4D00]`, flipped `c` at the S271 gate — the last
   never-flipped fresh main vein, asm since ~S61). S271 banked the `D_801052F8` bit-flag module +
