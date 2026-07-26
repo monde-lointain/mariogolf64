@@ -41,7 +41,7 @@ Sole diff (lines 18-30) is a within-block scheduling/regalloc permutation:
 Register roles (a0<->v1) and the two-multiply emission order are swapped. Permuter
 (400s, seed 777, -j8) found NO zero — it perturbs source structure but this is a
 post-load scheduling/regalloc coin on an otherwise byte-exact body (kin to
-[[base-register-vs-displacement]] / the S224 within-block scheduling walls).
+`docs/hazards.md#base-register-vs-displacement` / the S224 within-block scheduling walls).
 
 ## S268 re-open — COUPLED, terminal (order-fix ⟂ index-coloring)
 Correction to the S266 note: register roles are NOT swapped in the warm base.c. With
@@ -67,7 +67,7 @@ register coloring:
 So load-order and idx*4-coloring are COUPLED through local-alloc: the inline fold keeps
 idx*4 in v0 but forces b-first; any split that forces a-first adds/moves a pseudo that
 recolors idx*4. No source form yields {a-first load order AND idx*4 in v0}. The S265
-[[commutative-operand-order-statement-split]] and [[one-variable-reuse-reorders-loads]]
+`docs/levers.md` (commutative operand order statement split) and `docs/levers.md` (one variable reuse reorders loads)
 (incl. the reuse-dead-var inverse) were the new levers — both tried, neither cracks it.
 
 ## Verdict

@@ -8,7 +8,11 @@
 # There is also a per-##-section ceiling of 24576 B in the tool itself.
 
 CLAUDE.md 3072
-AGENTS.md 2048
+# Raised 2048 -> 3072 in S284 Phase 4, matching CLAUDE.md. Both always-loaded
+# wrappers gained the routing table that replaced "read the whole workflow doc",
+# which is what takes a gate from ~27K tokens to ~7K. The table is the point of
+# these two files, so it is what their budget should accommodate.
+AGENTS.md 3072
 docs/agent-workflow.md 118784
 docs/hazards.md 684032
 docs/coding-style.md 18432

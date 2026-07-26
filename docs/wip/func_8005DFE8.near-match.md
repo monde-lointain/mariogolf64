@@ -48,12 +48,12 @@ s32 func_8005DFE8(u8* buf, s32 flag_arg) {
 - **`raw[0xD0]`** (not 0xC0): places status6 at sp+0xE0 and frame at 0x110, matching the ROM stack
   exactly (linear: raw 0xC8->s6 0xD8/frame 0x108; 0xD0->0xE0/0x110; 0xE0->0xF0/0x120).
 - **Two separate `if(tries==0)return 1; if(tries==1)return 1;`** (NOT `if(tries==0||tries==1)`): defeats
-  the [[gcc272-fold-range-test-slti-merge]] `<2` fold; the ROM keeps two equality tests. This also
+  the `docs/levers.md` (gcc272 fold range test slti merge) `<2` fold; the ROM keeps two equality tests. This also
   brought the instruction count from 98 to 102 (exact).
 
 ## Residual (why carried) — ~10 rows, S224-class, NOT source-steerable here
 1. **s1<->s2 allocno role.** ROM: off=s1, tries=s2. base.c: off=s2, tries=s1. The
-   [[global-allocno-compare-livelength-biv-order]] priority (floor_log2(nref)*nref/live_length) puts
+   `docs/levers.md` (global allocno compare livelength biv order) priority (floor_log2(nref)*nref/live_length) puts
    `tries` (more refs, longer live to the tail) at higher priority -> s1. Declaration-order swaps
    (off-first, tries-first) do NOT flip it (verified both = 24 rows). Would need an nref/live-length
    nudge that has no faithful source form.
@@ -65,9 +65,9 @@ s32 func_8005DFE8(u8* buf, s32 flag_arg) {
 
 Permuter is BLIND here: the isolated compile scores 0.1 (the `D_800C2BE0..EC` + callee %hi/%lo relocs
 pervade), so asm-differ can't see the ~10-row in-tree near-match through the reloc noise (kin to
-[[permuter-blind-to-internal-branch-target]] / the CF78 jtbl isolation). In-tree `diff.py` is the only
+`docs/levers.md` (permuter blind to internal branch target) / the CF78 jtbl isolation). In-tree `diff.py` is the only
 truth; ~10 rows, all register-role/reorg coins at exact instruction count.
 
-Route: a dedicated allocno-crack slice (try the [[global-allocno-compare-livelength-biv-order]] 8th-ref
+Route: a dedicated allocno-crack slice (try the `docs/levers.md` (global allocno compare livelength biv order) 8th-ref
 / live-length nudge on off vs tries) OR corpus-mining. NOT a fresh smallest-first leaf. base.c is the
 warm start (only s1/s2 + 3 reorg coins from byte-exact).

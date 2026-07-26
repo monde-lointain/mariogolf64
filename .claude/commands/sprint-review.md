@@ -5,10 +5,10 @@ allowed-tools: Bash, Read, Write, Edit, AskUserQuestion
 
 # /sprint-review, the review gate
 
-Read `docs/agent-workflow.md` before acting. Follow `## Slash commands`, `## Scrum operating model`,
-`## Story points`, and the `sprint-review` procedure.
+Read `docs/workflow/gates.md` before acting. Follow `## Sprint-review procedure`,
+`## Scrum operating model`, and `## Story points`.
 
-## Critical command rules
+## Command rules
 
 - Reject arguments; `/sprint-review` takes none.
 - Abort if `SPRINT.md` is absent.

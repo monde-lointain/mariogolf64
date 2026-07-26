@@ -1,7 +1,7 @@
 # func_8002DAC0 - GCC nested function of render_frame (carry, not a wall)
 
 **Verdict: CARRY, coupled.** Banks as a nested function INSIDE its decompiled parent `render_frame`
-(still asm, 14400B, the pack's largest fn). Per [[nested-function-banks-the-parent-too]] /
+(still asm, 14400B, the pack's largest fn). Per `docs/levers.md` (nested function banks the parent too) /
 `docs/hazards.md#nested-function-static-chain-spill`. Same class as [[func_8002BE78]] (this pack's
 other nested child, parent draw_ground_shadow_decals).
 

@@ -3296,14 +3296,14 @@ LoadTLUT/PipeSync) once switched from the raw-index seed to the macro form.
 stores hand-rolled command-word immediates (the `lui/ori` const pairs into `v0[+0,+8,+0x10,…]`) banks
 by reconstructing the macros, not by matching word stores: (1) collect the command-word immediates from
 the `.s`; (2) `~/development/repos/n64-tools/src/gfxdis/gfxdis.f3dex2 -f <bin>` emits the `gsDPXxx(…)`
-macros ([[gfxdis-display-list-tool]]); (3) rewrite as `gDPXxx(glistp++, …)` (banked precedent
+macros (`docs/levers.md` (gfxdis display list tool)); (3) rewrite as `gDPXxx(glistp++, …)` (banked precedent
 `src/main/func_800328E0.c`; the `-DF3DEX_GBI_2` profile makes gbi.h's F3DEX2 branch macros live, incl.
 `gSPLoadGeometryMode` = `gSPGeometryMode(pkt,-1,word)` and the `D9` combined GeometryMode);
 (4) reconcile **physical-address matrix pointers** — `gSPMatrix(glistp++, &D_E2050, …)` where `D_E2050`
 (0xE2050 in `undefined_syms_auto`) is the physical alias of the virtual `D_800E2050` (`0xE2050 =
 0x800E2050 & 0x1FFFFFFF`); reference the physical symbol directly (the macro stores the raw pointer, no
 K0 mask at runtime), and pass runtime args (e.g. a `u16* perspNorm`) live. This softens the
-[[mg64-glyph-emitter-dl-family]] "raw-DL-word = terminal sched coin" verdict: it holds for the S243
+`docs/levers.md` (mg64 glyph emitter dl family) "raw-DL-word = terminal sched coin" verdict: it holds for the S243
 hand-inlined **per-char loop** subtype, but a **straight-line `glistp++` macro sequence** reconstructs
 byte-clean. S256 banked `func_8008658C` (sky-panel rts-matrix + 13-command projection DL) this way.
 
@@ -3311,7 +3311,7 @@ byte-clean. S256 banked `func_8008658C` (sky-panel rts-matrix + 13-command proje
 DL-emitter near-match a scheduling wall, check the callee's own `.s`: a callee that reads `a0`
 (`addu $fp,$a0,$zero` in its prologue) takes an argument, so the source is `f(0)` not `f()`. The
 missing `move a0,zero` reads as exactly 1 instruction short -> the flowing-`bss` `-0x10` address-shift
-symptom on every data ref ([[flowing-bss-plus-n-address-diff]]). S256's `func_8008658C` was 131/132
+symptom on every data ref (`docs/levers.md` (flowing bss plus n address diff)). S256's `func_8008658C` was 131/132
 instrs until `func_80085F98(0)` supplied the arg. This is the DL-emitter analog of
 `#callee-prototype-is-load-bearing-missing-prototype--implicit-int`. The branchless-clamp `G_TEXRECT`
 coordinate subtype (runtime-computed saturated ULx/LRx via `(v0<<18)>>16` sign + `~x>>31` mask + `0xFFC`,
@@ -3567,7 +3567,7 @@ if (mode == 3) { C(); }
 ```
 
 Per `#goto-is-last-resort` this is justified only after the structured forms provably fail (S269 tried
-three). Memory: [[out-of-line-handler-block-branch-likely]] (that one folded a one-instr return-copy
+three). Memory: `docs/levers.md` (out of line handler block branch likely) (that one folded a one-instr return-copy
 handler into an annulled `beql`; this is the mode-dispatch fall-through-to-common cousin).
 
 ---
@@ -3768,7 +3768,7 @@ merge (9 forms tried, all merged). **Lever: route some error paths through a sha
 single tail `neg: return -1;`) while leaving one path an inline `return -1;`.** That makes the inline
 tail no longer a mergeable twin of the shared block, so the layout matches the ROM's {null,loop-exit}
 merged / {post-loop} separate split. This is a legitimate last-resort `goto` (natural forms provably all
-merge; cf. [[goto-is-last-resort]]) and it is source-leverable, not a permuter/hard wall — refutes a
+merge; cf. `docs/levers.md` (goto is last resort)) and it is source-leverable, not a permuter/hard wall — refutes a
 prior "permuter-candidate / not a hard wall but carried" verdict on such a fn.
 
 **Sibling rule — rule out stock-plus-insert before treating a carry as from-scratch custom.**
@@ -4522,7 +4522,7 @@ the whole one-tu as **one** `.c` file. An internal higher-aligned constant (S154
 to the boundary (S154 48B = 2 doubles + 2 string literals + pad, ending exactly at `0x800D1440` where
 the next TU's 8-aligned double sits). This also keeps format strings as **actual** C literals rather
 than `extern D_xxxx[]` refs into the generic asm blob (see
-[[rodata-strings-as-literals-via-tu-combine]]). Splat's per-subseg `align:` is segment-level only
+`docs/levers.md` (rodata strings as literals via tu combine)). Splat's per-subseg `align:` is segment-level only
 (gated by `ld_align_segment_vram_end: False`), so it cannot force an intra-section pad. Weigh
 rodata-alignment adjacency before decomposing a one-tu at the plan gate.
 
@@ -5563,7 +5563,7 @@ the primary cse-only agent tried volatile-on-prev-only, saw it float, and wrongl
 
 KMC cc1's pre-reload scheduler is inert for a dependent chain (it reorders only independent ops; see
 the foundational note under [#local-alloc-qty-permutation](#local-alloc-qty-permutation) and the S220
-correction in [[kmc-cc1-no-instruction-scheduler]]): for the dependent setup here emit order == source
+correction in `docs/levers.md` (kmc cc1 no instruction scheduler)): for the dependent setup here emit order == source
 order, and reorg's delay-slot fill only pulls the immediately-preceding independent insn down into a
 `jal` delay slot. So to reproduce a ROM that fills a call's delay with an independent store
 (`swc1 f0,OFF(base)` after `jal`), that store must be the last statement before the call in source. Two
@@ -6213,7 +6213,7 @@ structure that keeps `argN` live long enough misplaces the pre-loop extraction (
 form emits the ROM's `move a0,a1` but drops `base` +2 instrs). This is a terminal `global.c:587`
 `allocno_compare` copy-pref wall (no `REG_ALLOC_ORDER` in mips.h -> `find_reg` tries hardregs
 ascending). Permuter is weak here (allocno-tiebreak class); carry with the citation. See
-[[loop-weight-and-live-length-regalloc-steering]] memory note and the carry doc
+`docs/hazards.md#loop-weight-and-live-length-regalloc-steering` memory note and the carry doc
 `docs/wip/func_80074E5C.near-match.md`.
 
 ---
@@ -6318,7 +6318,7 @@ outgoing-arg + 0x8 ra/pad), so the eliminated local is `delta` bytes → `s32 un
 near-match diff — if the only differing tokens are the two `addiu sp` immediates + the `ra` slot offset
 (body instruction sequence + every other reg identical), it is the pure variant → crack with the sized
 unused aggregate; if the frame diff drags a `v0`/`v1` (or other) reg permutation with it, it is the
-divide-driven carry-class above. Memory: [[pure-dead-frame-clean-crack]].
+divide-driven carry-class above. Memory: `docs/levers.md` (pure dead frame clean crack).
 
 **Third variant — live-index block-pressure dead frame, for a small (<0x18) frame with a reg-perm
 (S270).** A phantom dead frame smaller than the `0x18` base (e.g. an `addiu sp,-8`/`+8` leaf with zero
@@ -6335,7 +6335,7 @@ S270 `func_8004D4B8`: `str[row]` (not `str++`) reproduced the dead 8B frame and 
 (the S182 4-reg-perm wall), residual reduced to a 2-word scheduler-slot coin. This is a source-reachable
 Crack of the frame+regs (`volatile` is wrong here — it stores to `sp`; a truly-dead frame has zero `sp`
 access). Profile-probe is negative for these (no `-f` flag reaches gcc-2.7.2 local-alloc/global.c).
-Memory: [[dead-frame-live-index-pressure-lever]].
+Memory: `docs/levers.md` (dead frame live index pressure lever).
 
 ## signed-divide-const v0/v1 quotient-destination
 
@@ -6663,14 +6663,14 @@ Hypothesis. S281 cracked both byte-exact with source levers the permuter never p
 verdict: the "permutation" was three structural bugs. Before accepting the class, check, in order:
 - **Instruction count.** If the build is one short and the missing insn is a `nop` in a branch-to-epilogue
   delay slot, the ROM fn is non-void — declare `s32 f(...)` (no `return`), which keeps `$v0` live so
-  reorg.c:3375 cannot steal the fall-through into the slot ([[nonvoid-return-blocks-fallthrough-delay-steal]]).
+  reorg.c:3375 cannot steal the fall-through into the slot (`docs/levers.md` (nonvoid return blocks fallthrough delay steal)).
   A non-exact-count body's permutation claim is provisional (S272 exact-count-first).
 - **A computed temp tied to a dying operand's register** where the ROM keeps them apart: hoist the temp to
   Function scope (assigned in N blocks) to defeat `combine_regs` tying (it bails on a multi-block dest);
-  or the inverse, a block-local temp to force the tie ([[local-alloc-combine-regs-block-local-temp]]).
+  or the inverse, a block-local temp to force the tie (`docs/levers.md` (local alloc combine regs block local temp)).
 - **A 2-register swap confined inside a `do{}while(0)` macro.** Its loop notes double `REG_N_REFS`
   inside, re-tiering `qty_compare` (`floor_log2` is a step fn) — replace with a plain `{ }` block
-  ([[do-while-doubles-reg-n-refs-qty-tier]]). Check the `-dl` dump for a spurious 2x ref count.
+  (`docs/levers.md` (do while doubles reg n refs qty tier)). Check the `-dl` dump for a spurious 2x ref count.
 These are permuter-proof (structure, not a permutation) yet cheap source cracks; a compiler-source fan-out
 on a fully-RE'd exact-count carry cracked 2/2 (S281), matching S280 2/2 + S232 3/3. Only after these are
 ruled out is the residual a genuine qty-priority permutation for the permuter below.
@@ -6755,7 +6755,7 @@ register anti/output deps already pin the order — which is the common case, so
 scheduling barrier" is still the right first move for a dependent chain. But for independent ops the
 scheduler is a real second lever: see [#scheduler-load-hoist-serial-store-lever](#scheduler-load-hoist-serial-store-lever).
 (`loop.c` via `NOTE_INSN_LOOP_BEG` remains a separate reorderer; see the goto-loop-vs-structured-loop
-codegen memory. Cross-ref [[kmc-cc1-no-instruction-scheduler]], now the S220-corrected memory.)
+codegen memory. Cross-ref `docs/levers.md` (kmc cc1 no instruction scheduler), now the S220-corrected memory.)
 
 **When the permuter does not crack it — residual-class triage (S221 clean A/B).** The
 "permuter-appropriate" verdict above is not universal for every reg-permutation near-match. S221 ran two
@@ -7607,7 +7607,7 @@ must be emitted before the address. Materialize the value as its own statement f
 `u8 val = 4; u8 *p = cs + slot*8; *(u8*)(p+0x8c) = val;` — GCC then emits `li v1,4` before `sll v0,s1,3`
 and reorg steals the `li` into the delay, matching the ROM (the natural `*(u8*)(cs+slot*8+0x8c)=4`
 emits the address `sll` first and steals that instead). Emit-order is the only lever
-([[kmc-cc1-no-instruction-scheduler]]).
+(`docs/levers.md` (kmc cc1 no instruction scheduler)).
 
 **Corollary fill lever #2 — hoist a later guard's independent operand to fill an earlier guard's branch
 delay (S231 `func_8006280C`, banked).** Two sequential range guards `if(A)return; if(B)return;` where B's
@@ -7660,20 +7660,20 @@ one-off. Distinguish from [#base-register-vs-displacement] (an addressing-mode d
 **Root cause.** `global.c`'s allocno assignment picks which free caller-saved hard reg (a0/a1/a2/…)
 each value claims; the seed (which reg the first load claims) then cascades. The choice is a
 free-register-list order driven by allocno priority (live-length / ref-count), not by source
-spelling. See [[global-allocno-compare-livelength-biv-order]].
+spelling. See `docs/levers.md` (global allocno compare livelength biv order).
 
 **Verdict: Terminal / corpus-sibling-only.**
 - Not source-steerable: S268 confirmed swapping the source load order (val-first vs flags-first)
   leaves the permutation identical — gcc re-canonicalizes the load order and the seed is unchanged.
   Reordering declarations, splitting temps, and reuse-dead-var all failed to move the seed.
 - Not permuter-reachable: the permuter perturbs source structure, which plateaus on a multi-register
-  permutation (it does not directly permute hard regs); see [[permuter-at-exact-count-residual]].
+  permutation (it does not directly permute hard regs); see `docs/levers.md` (permuter at exact count residual).
 - The only known lever is a matched-corpus sibling whose live-lengths pin the a0/a1/a2 seed the same
   way — i.e. change the surrounding function's register pressure, not this function's source.
 
 **Note the distinction from a 1-register role fix.** A single wrong register (e.g. a default-return
 sentinel in `s1` vs `a1`) is often a real source lever ([#default-return-var-must-init-after-the-call],
-[[cross-call-live-range-callee-saved-lever]]). It is a *permutation of 3+ caller-saved regs with the
+`docs/levers.md` (cross call live range callee saved lever)). It is a *permutation of 3+ caller-saved regs with the
 count already matched* that is terminal. Before ruling terminal, first apply the ordinary role levers
 (accumulator-early via delay-slot steering, out-of-line handler, callee-saved init-after-call); S268
 `func_8005B0B4` shed an accumulator-role and a delay-slot-fill divergence to those levers, leaving

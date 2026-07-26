@@ -5,17 +5,11 @@ description: Review gate for the Mario Golf 64 decomp workflow. Use when the use
 
 # MG64 Sprint Review
 
-Read `docs/agent-workflow.md` before acting. Follow `## Slash commands`, `## Scrum operating model`, `## Story points`, and the review-gate procedure.
+Read `docs/workflow/gates.md` before acting. Follow `## Sprint-review procedure`,
+`## Scrum operating model`, and `## Story points`.
 
-## Workflow
+Outcome: a verified Definition of Done, scope sign-off, the accepted process edits applied, and the
+`RETRO.md` / `VELOCITY.md` / `BACKLOG.md` updates written. Stop if the ROM verify fails or if no
+sprint is open. This gate takes no arguments.
 
-1. Reject arguments; this gate takes none.
-2. Read `SPRINT.md`; abort if no sprint is open.
-3. Verify the DoD with `tools/verify-rom.sh`; require exit 0. A hand-rolled `make; sha1sum` is what this gate must not do: a failed `make` leaves the previous ROM in place, so the hash reads green off a stale build.
-4. For each file claimed md5-candidate, run `grep -c 'INCLUDE_ASM' src/<seg>.c` and require `0`.
-5. Report progress delta, descriptive count, quality counter-metric, story points, and scope vs goal.
-6. Ask the Product Owner for scope sign-off, accepted buffered suggestions, and push/PR decision. Use `request_user_input` when available; otherwise ask directly.
-7. Apply only accepted process/tooling edits, then update `VELOCITY.md`, prepend `RETRO.md`, and update `BACKLOG.md` carry-overs/active phase.
-8. Perform outward push/PR only if approved.
-
-Claim nothing that the verification output does not show.
+Claim nothing the verification output does not show.

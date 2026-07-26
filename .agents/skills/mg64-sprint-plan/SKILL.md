@@ -5,17 +5,14 @@ description: Plan gate for the Mario Golf 64 decomp workflow. Use when the user 
 
 # MG64 Sprint Plan
 
-Read `docs/agent-workflow.md` before acting. Follow `## Slash commands`, `## Scrum operating model`, `## Story points`, and the plan-gate procedure.
+Read `docs/workflow/gates.md` before acting. Follow `## Sprint-plan procedure`,
+`## Scrum operating model`, and `## Story points`.
 
-## Workflow
+Outcome: an approved goal, a small committed backlog, a green validated flip, and a written
+`SPRINT.md`. Stop if the Product Owner does not approve. Never perform a gate enabler before
+approval, and never validate with a hand-rolled `make; sha1sum` -- `tools/verify-rom.sh` is the gate.
 
-1. Validate the optional scope argument against `^[a-z][a-z0-9_-]*$`; abort on mismatch.
-2. Read `BACKLOG.md`, run `venv/bin/python3 tools/pick_target.py -n 12`, and add `--lib <scope>` when a valid scope is supplied.
-3. Pick the smallest coherent increment, honoring carry-overs, hazards, the 8-point gate, and DoR rules in `docs/agent-workflow.md`.
-4. Present the goal, committed backlog, gate enablers, snapshot, and story-point estimate to the Product Owner. Use `request_user_input` when available; otherwise ask directly.
-5. After approval, perform only gate enablers: `mariogolf64.yaml` subseg flip/split/path-qualifier lines, `symbol_addrs.txt` add-only, and optional `make sync-names`.
-6. Validate with `tools/verify-rom.sh --extract`; require exit 0. It derives the expected SHA-1 from `mariogolf64.yaml` and asserts the `build/mariogolf64.z64: OK` line before trusting `sha1sum`.
-7. Write `SPRINT.md`. If the committed regime is classical or mixed, make the seed-freeze commit as documented.
-8. Hand off explicitly: tell the user to invoke `$mg64-decomp-loop` for execution. Do not assume automatic skill chaining.
+Validate the optional scope argument against `^[a-z][a-z0-9_-]*$` and abort on mismatch.
 
-Keep this gate cheap. Use medium reasoning unless the candidate selection itself becomes ambiguous.
+Hand off explicitly when the gate closes: tell the user to invoke `$mg64-decomp-loop`. Skills do not
+chain automatically.

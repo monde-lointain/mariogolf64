@@ -7,53 +7,60 @@
     "provenance": 0
   },
   ".agents/skills/mg64-sprint-plan/SKILL.md": {
-    "bytes": 1707,
+    "bytes": 949,
     "caps": 0,
-    "lines": 21,
+    "lines": 18,
     "max_nesting": 0,
     "provenance": 0
   },
   ".agents/skills/mg64-sprint-review/SKILL.md": {
-    "bytes": 1416,
+    "bytes": 765,
     "caps": 0,
-    "lines": 21,
+    "lines": 15,
     "max_nesting": 0,
     "provenance": 0
   },
+  ".claude/commands/decomp-loop.md": {
+    "bytes": 1739,
+    "caps": 0,
+    "lines": 36,
+    "max_nesting": 1,
+    "provenance": 0
+  },
   ".claude/commands/sprint-plan.md": {
-    "bytes": 1511,
+    "bytes": 1486,
     "caps": 0,
     "lines": 25,
     "max_nesting": 2,
     "provenance": 0
   },
   ".claude/commands/sprint-review.md": {
-    "bytes": 1217,
+    "bytes": 1186,
     "caps": 0,
     "lines": 20,
     "max_nesting": 1,
     "provenance": 0
   },
   "AGENTS.md": {
-    "bytes": 1484,
+    "bytes": 2196,
     "caps": 0,
-    "lines": 24,
+    "lines": 47,
     "max_nesting": 1,
     "provenance": 0
   },
   "CLAUDE.md": {
-    "bytes": 2016,
+    "bytes": 1965,
     "caps": 0,
-    "lines": 73,
+    "lines": 41,
     "max_nesting": 1,
     "provenance": 0
   },
   "docs/agent-workflow.md": {
-    "bytes": 107905,
+    "bytes": 2930,
     "caps": 0,
-    "lines": 1157,
-    "max_nesting": 5,
-    "provenance": 16
+    "lines": 70,
+    "max_nesting": 1,
+    "provenance": 0
   },
   "docs/coding-style.md": {
     "bytes": 16739,
@@ -62,12 +69,33 @@
     "max_nesting": 1,
     "provenance": 0
   },
+  "docs/fanout-prompt.md": {
+    "bytes": 3596,
+    "caps": 0,
+    "lines": 67,
+    "max_nesting": 1,
+    "provenance": 0
+  },
+  "docs/hazard-index.md": {
+    "bytes": 20982,
+    "caps": 0,
+    "lines": 151,
+    "max_nesting": 0,
+    "provenance": 0
+  },
   "docs/hazards.md": {
-    "bytes": 621672,
+    "bytes": 621941,
     "caps": 0,
     "lines": 7680,
     "max_nesting": 4,
     "provenance": 75
+  },
+  "docs/levers.md": {
+    "bytes": 9011,
+    "caps": 0,
+    "lines": 131,
+    "max_nesting": 1,
+    "provenance": 0
   },
   "docs/prompt-style.md": {
     "bytes": 13863,
@@ -75,5 +103,26 @@
     "lines": 231,
     "max_nesting": 1,
     "provenance": 0
+  },
+  "docs/workflow/fan-out.md": {
+    "bytes": 7051,
+    "caps": 0,
+    "lines": 97,
+    "max_nesting": 0,
+    "provenance": 0
+  },
+  "docs/workflow/gates.md": {
+    "bytes": 28734,
+    "caps": 0,
+    "lines": 335,
+    "max_nesting": 4,
+    "provenance": 6
+  },
+  "docs/workflow/loop.md": {
+    "bytes": 45241,
+    "caps": 0,
+    "lines": 491,
+    "max_nesting": 5,
+    "provenance": 4
   }
 }

@@ -4,17 +4,17 @@ args:
   - name: scope
     description: Optional subsystem filter (e.g. `audio`, `libkmc`, `rsp`). Matches `^[a-z][a-z0-9_-]*$`. No arg means the whole active phase.
     required: false
-allowed-tools: Bash, Read, Write, Edit, AskUserQuestion
+allowed-tools: Bash, Read, Write, Edit, AskUserQuestion, Task
 ---
 
 # /sprint-plan, the plan gate
 
 `SCOPE` = `$ARGUMENTS`
 
-Read `docs/agent-workflow.md` before acting. Follow `## Slash commands`, `## Scrum operating model`,
-`## Story points`, and the `sprint-plan` procedure.
+Read `docs/workflow/gates.md` before acting. Follow `## Sprint-plan procedure`,
+`## Scrum operating model`, and `## Story points`.
 
-## Critical command rules
+## Command rules
 
 - Validate non-empty `SCOPE` against `^[a-z][a-z0-9_-]*$`; abort on mismatch.
 - Gather read-only context in parallel when useful. Keep build, MCP, yaml, and edit steps serial.

@@ -36,8 +36,8 @@ row + `func_80051FCC()<<8` frame, the second +0x20), and blends them by `progres
 - Compiler-source fan-out (gcc-2.7.2 global.c allocno-order + local-alloc.c) to name the
   keep-vs-rematerialize decision on `&putter_mode_flag` across the call — the closest lever
   target (this fn is the most tractable of the S249 pair at 0.610).
-- Kin to memory [[loop-invariant-hoist-order-preheader-regalloc]] and
-  [[cross-call-live-range-callee-saved-lever]].
+- Kin to memory `docs/levers.md` (loop invariant hoist order preheader regalloc) and
+  `docs/levers.md` (cross call live range callee saved lever).
 
 ## S250 compiler-source crack attempt — TERMINAL verdict (pass-cited, no-lever)
 Reproduced baseline 8900 / 0.610 isolated. Root-caused the residual to a SINGLE coupled
