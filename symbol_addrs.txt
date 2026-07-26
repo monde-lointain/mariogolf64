@@ -695,3 +695,4 @@ get_shot_strength_tier = 0x80046898; // type:func
 build_radial_falloff_texture = 0x8004C860; // type:func
 atanf = 0x8005A2AC; // type:func
 atan2f = 0x80059FAC; // type:func
+build_roster_grid = 0x8005C674; // type:func

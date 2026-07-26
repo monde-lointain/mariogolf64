@@ -541,7 +541,153 @@ s32 func_8005C614(void) {
   return count == 108;
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80059BA0", func_8005C674);
+typedef struct {
+  /* 0x0 */ u32 start;
+  /* 0x4 */ u32 size;
+  /* 0x8 */ u32 pos;
+  /* 0xC */ u32 end;
+} RomLoadSlot; /* 0x10 */
+
+extern s16 D_800C28E4[3][7];
+extern s16 D_800C298C[3][7];
+extern s16 D_800C2910[3][7];
+extern s16 D_800C293C[3][7];
+extern s16 g_abRosterUnlockOrder[];
+extern s16 g_abRosterUnlockFlags[];
+extern s16 D_800C29B8[10][2];
+extern u16 D_800C2650[];
+extern s16 D_800C2590[];
+extern s16 D_800FE3D8[];
+extern void* D_8012D468[];
+extern void* D_80105BB0[];
+extern s32 flag_is_set(s32 flag);
+extern void func_8005CA48(void);
+extern s32 func_8005C4B4(void);
+extern s32 func_8005C5B4(void);
+extern s32 func_8005C614(void);
+extern u32 func_8005062C(u16 index, void* out);
+extern void func_800506D4(void* data, RomLoadSlot* slot);
+extern void func_800504E8(s32 index, RomLoadSlot* slot);
+extern u32 func_80050598(RomLoadSlot* slot);
+extern void func_800505A0(void* dst, u32 size, RomLoadSlot* slot);
+
+/* Builds the character-select roster grid D_800C28E4[3][7] from its template
+ * tables, patches it against the unlock state, then loads the four selected
+ * characters' assets through the standard five-call RomLoadSlot block.
+ *
+ * The variable reuse below is deliberate and load-bearing: the ROM keeps arg0,
+ * the unlock-scan counter and the asset index in one register, and reads the
+ * unlock flag into the same register as the scan counter. Giving any of them
+ * its own local permutes the whole allocation. */
+void build_roster_grid(s32 arg0, u8 arg1) {
+  RomLoadSlot buf_a[2];
+  RomLoadSlot buf_b;
+  u8* stats;
+  s32 row;
+  s32 col;
+  s32 i;
+  s32 k;
+  u32 size;
+  s32 off;
+  s32 wide;
+  s32 narrow;
+
+  stats = func_8005AF50();
+  row = 0;
+  do {
+    col = 0;
+    do {
+      D_800C28E4[row][col] = D_800C298C[row][col];
+      col++;
+    } while (col != 7);
+    row++;
+  } while (row != 3);
+  if (flag_is_set(0x54)) {
+    row = 0;
+    do {
+      col = 0;
+      do {
+        D_800C28E4[row][col] = D_800C2910[row][col];
+        col++;
+      } while (col != 7);
+      row++;
+    } while (row != 2);
+    func_8005CA48();
+    return;
+  }
+  if (arg0 >= 2) {
+    row = 0;
+    do {
+      col = 0;
+      do {
+        D_800C28E4[row][col] = D_800C2910[row][col];
+        col++;
+      } while (col != 5);
+      row++;
+    } while (row != 2);
+  }
+  i = 0;
+  do {
+    k = 0;
+    arg0 = 0;
+    for (; k != 18; k++) {
+      s32 slot = k * 0x24 + i * 2;
+      if ((*(stats + slot + 0xAF1) & 0x7F) != 0) {
+        arg0++;
+        break;
+      }
+    }
+    if (arg0 > 0) {
+      for (row = 0; row != 2; row++) {
+        for (col = 0; col != 7; col++) {
+          if (D_800C293C[row][col] == i) {
+            D_800C28E4[row][col] = g_abRosterUnlockOrder[i];
+          }
+        }
+      }
+    }
+    i++;
+  } while (i != 13);
+  if (func_8005C5B4()) {
+    D_800C28E4[0][5] = 10;
+  }
+  if (func_8005C4B4()) {
+    D_800C28E4[1][5] = 11;
+  }
+  if (func_8005C614()) {
+    D_800C28E4[1][6] = 13;
+  }
+  func_8005CA48();
+  for (i = 0; i != 10; i++) {
+    row = D_800C29B8[i][1];
+    if (D_800C28E4[row][D_800C29B8[i][0]] < 0) {
+      D_800C28E4[row][D_800C29B8[i][0]] = i - 0x32;
+      break;
+    }
+  }
+  if (i == 10) {
+    if (D_800C28E4[0][6] != 12) {
+      D_800C28E4[0][6] = -0x26;
+    }
+  }
+  if (arg1 == 1) {
+    return;
+  }
+  for (i = 0; i != 4; i++) {
+    k = g_abRosterUnlockFlags[i];
+    if (k >= 0) {
+      off = i * 0x16;
+      arg0 = *(s16*)((u8*)D_800FE3D8 + off);
+      wide = arg0 * 16;
+      func_8005062C(*(u16*)((u8*)D_800C2650 + wide), buf_a);
+      func_800506D4(D_8012D468[i], &buf_a[0]);
+      narrow = arg0 * 8;
+      func_800504E8(*(s16*)((u8*)D_800C2590 + narrow), &buf_b);
+      size = func_80050598(&buf_b);
+      func_800505A0(D_80105BB0[i], size, &buf_b);
+    }
+  }
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80059BA0", func_8005CA48);
 
