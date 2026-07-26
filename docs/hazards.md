@@ -6883,7 +6883,8 @@ the **parameter** in a callee reg (`move $16,$4`) and folds the sub-offset into 
 a **pervasive** base-register + uniform-displacement-offset diff on EVERY field access. The isolated
 `decomp_loop` shows `match_count == total_rows`, `top_mismatches == []`, yet a LOW percent (S205: 0.48)
 — looks like the `#io_write/io_read`/isolated-compile artifact, but the in-tree `diff.py` confirms it
-is a REAL pervasive near-miss (see the isolation-caveat note in `## Execution loop`).
+is a REAL pervasive near-miss (see the isolation-caveat note in
+`docs/agent-workflow.md ## Execution loop`).
 
 **Root cause (gcc-2.7.2, confirmed by exhaustive bisect).** CSE (`cse.c` `fold_rtx` /
 `simplify_plus_minus` address canonicalization) always canonicalizes `(plus (plus param C) off)` to

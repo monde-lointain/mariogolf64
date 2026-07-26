@@ -158,6 +158,13 @@ extract:
 test-tools:
 	./venv/bin/python3 -m pytest tests/tooling
 
+# Prompt-surface style + drift gate (docs/prompt-style.md, mechanized). The hard
+# checks already run inside test-tools; this target adds the readable report the
+# review gate uses to decide what to retire.
+prompt-lint:
+	./venv/bin/python3 tools/prompt_lint.py check
+	./venv/bin/python3 tools/prompt_lint.py report
+
 check: test-tools
 
 # --- Python static analysis (config in pyproject.toml) -----------------------
@@ -224,6 +231,7 @@ help:
 	@echo '  distclean        also remove extracted asm/assets + generated scaffold'
 	@echo '  setup            create venv + download the KMC toolchain'
 	@echo '  test-tools/check run the tooling characterization suite'
+	@echo '  prompt-lint      prompt-surface style/drift report (hard checks are in test-tools)'
 	@echo '  coddog-sweep     fingerprint vs ultralib VERSION_J'
 	@echo '  coddog-sweep-nusys  build the nusys-2.07 reference + fingerprint vs it'
 	@echo '  coddog-sweep-audio  build the libmus/libnaudio/nuaulstl matrix + fingerprint + pin'
@@ -257,4 +265,4 @@ spotcheck-build:
 clean-nonmatchings:
 	rm -rf nonmatchings/*/
 
-.PHONY: all clean distclean setup setup-dev extract test-tools check check-all format format-check lint typecheck deadcode coddog-sweep coddog-sweep-nusys coddog-sweep-audio sync-names help nonmatching-func spotcheck-build clean-nonmatchings
+.PHONY: all clean distclean setup setup-dev extract test-tools prompt-lint check check-all format format-check lint typecheck deadcode coddog-sweep coddog-sweep-nusys coddog-sweep-audio sync-names help nonmatching-func spotcheck-build clean-nonmatchings

@@ -1,0 +1,20 @@
+# Per-file byte budgets for the agent prompt surfaces, enforced by
+# tools/prompt_lint.py (check -> budget). A surface over budget fails
+# make test-tools, the same hard gate a broken anchor already trips.
+#
+# Seeded at +10% of the S283 Phase-0 size, rounded up to the next KB, and
+# tightened to +5% once the rework lands. Budgets only ever go DOWN: the
+# review gate proposes a retirement when a surface is within 10% of its cap.
+# There is also a per-##-section ceiling of 24576 B in the tool itself.
+
+CLAUDE.md 3072
+AGENTS.md 2048
+docs/agent-workflow.md 118784
+docs/hazards.md 684032
+docs/coding-style.md 18432
+docs/prompt-style.md 8192
+.claude/commands/sprint-plan.md 2048
+.claude/commands/sprint-review.md 2048
+.agents/skills/mg64-decomp-loop/SKILL.md 2048
+.agents/skills/mg64-sprint-plan/SKILL.md 2048
+.agents/skills/mg64-sprint-review/SKILL.md 2048

@@ -1,0 +1,111 @@
+# Caps tokens that carry meaning, so prompt_lint's `caps` check does not count them
+# as emphasis. Derived from this corpus, not from a general acronym list: every entry
+# below actually occurs in a prompt surface.
+#
+# Not needed here (already skipped by the checker): any token containing `_` or a
+# digit (VERSION_J, F3DEX_GBI_2, O2, LO16, R4000), a single character (the `nm T/D/b`
+# classes), and S### sprint tags.
+#
+# Deliberately NOT allowlisted, because in this corpus they are shouted English
+# rather than acronyms: AND, OR, NOT, ALL, ONE, NO, IS, BOTH, ONLY, EVERY, BEFORE,
+# AFTER, FIRST, SAME. The AND/OR/BOTH/ALL family is the conjunctive-gate review
+# queue -- see tools/deshout.py --gates; de-shouting them without restating the gate
+# would drop a binding docs/prompt-style.md requires be preserved.
+#
+# Adding a token is a one-line diff the PO sees at review. Prefer leaving a word
+# counted over allowlisting it wrongly: the count is a ratchet baseline, so
+# over-counting is harmless and under-counting hides real shouting.
+
+# Project / platform
+ROM
+MG64
+N64
+SDK
+KMC
+IDO
+PPL
+SM64
+
+# Toolchain and compiler internals
+GCC
+GAS
+ELF
+ASM
+RTL
+CSE
+DCE
+LICM
+CFG
+DAG
+EBB
+BB
+TU
+LUID
+
+# Architecture
+MIPS
+CPU
+FPU
+GPR
+FPR
+ABI
+HI
+LO
+PC
+RA
+SP
+GP
+NOP
+RSP
+RDP
+VI
+DMA
+MMIO
+TLB
+IV
+BIV
+GIV
+RMW
+BSS
+LSB
+MSB
+
+# Graphics / audio
+DL
+GBI
+FP
+
+# Process / project vocabulary
+PO
+DoD
+DoR
+RE
+EV
+SHA
+MD5
+CRC
+MCP
+API
+CLI
+CI
+PR
+TOC
+JSON
+YAML
+TSV
+OK
+
+# Files and dirs referenced bare
+BACKLOG
+RETRO
+VELOCITY
+SPRINT
+CLAUDE
+AGENTS
+SKILL
+
+# Encoding / misc
+CRLF
+LZ
+RLE
+IO
