@@ -81,7 +81,85 @@ INCLUDE_ASM("asm/nonmatchings/main/func_80059BA0", func_80059BC0);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80059BA0", func_80059FAC);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80059BA0", func_8005A2AC);
+f32 func_80059BA0(f32); /* fabsf */
+
+/* fdlibm single-precision atan. D_800D08A0 = atanhi[4], D_800D08B0 = atanlo[4],
+ * D_800D08C0 = aT[11], all in the shared main rodata blob (extern, not carved).
+ */
+extern f32 D_800D08A0[];
+extern f32 D_800D08B0[];
+extern f32 D_800D08C0[];
+
+f32 atanf(f32 x) {
+  f32 w, s1, s2, z;
+  s32 ix, hx, id;
+
+  do {
+    union {
+      f32 f;
+      s32 i;
+    } gf_u;
+    gf_u.f = x;
+    hx = gf_u.i;
+  } while (0);
+  ix = hx & 0x7FFFFFFF;
+  if (ix >= 0x50800000) { /* |x| >= 2^33 */
+    if (ix > 0x7F800000) {
+      return x + x; /* NaN */
+    }
+    if (hx > 0) {
+      return D_800D08A0[3] + D_800D08B0[3];
+    } else {
+      return -D_800D08A0[3] - D_800D08B0[3];
+    }
+  }
+  if (ix < 0x3EE00000) {   /* |x| < 0.4375 */
+    if (ix < 0x31000000) { /* |x| < 2^-29 */
+      if (1.0e30f + x > 1.0f) {
+        return x; /* raise inexact */
+      }
+    }
+    id = -1;
+  } else {
+    x = func_80059BA0(x);
+    if (ix < 0x3F980000) {   /* |x| < 1.1875 */
+      if (ix < 0x3F300000) { /* 7/16 <= |x| < 11/16 */
+        id = 0;
+        x = (2.0f * x - 1.0f) / (2.0f + x);
+      } else { /* 11/16 <= |x| < 19/16 */
+        id = 1;
+        x = (x - 1.0f) / (x + 1.0f);
+      }
+    } else {
+      if (ix < 0x401C0000) { /* |x| < 2.4375 */
+        id = 2;
+        x = (x - 1.5f) / (1.0f + 1.5f * x);
+      } else { /* 2.4375 <= |x| < 2^33 */
+        id = 3;
+        x = -1.0f / x;
+      }
+    }
+  }
+
+  /* Break the sum from i=0 to 10 of aT[i]*z**(i+1) into odd and even polys. */
+  z = x * x;
+  w = z * z;
+  s1 = z * (D_800D08C0[0] +
+            w * (D_800D08C0[2] +
+                 w * (D_800D08C0[4] +
+                      w * (D_800D08C0[6] +
+                           w * (D_800D08C0[8] + w * D_800D08C0[10])))));
+  s2 =
+      w * (D_800D08C0[1] +
+           w * (D_800D08C0[3] +
+                w * (D_800D08C0[5] + w * (D_800D08C0[7] + w * D_800D08C0[9]))));
+  if (id < 0) {
+    return x - x * (s1 + s2);
+  } else {
+    z = D_800D08A0[id] - ((x * (s1 + s2) - D_800D08B0[id]) - x);
+    return (hx < 0) ? -z : z;
+  }
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80059BA0", func_8005A580);
 
