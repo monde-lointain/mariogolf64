@@ -61,6 +61,22 @@ crack from wall; consider a `pick_target.py` `FP-SCHED?` de-prioritizer tag for 
 stubs (same spirit as the S275 jtbl/raw-dl tells, but ADVISORY not a hard drop since 2/3 crack), and
 track main FP-leaf bank-rate across sprints (S277: 2/3).**
 
+**S282 BOUNDS the fan-out-on-exact-count-carry play: it is NOT a guaranteed crack (0/2 this sprint).**
+S280 2/2 + S281 2/2 made "re-open a `#local-alloc-qty-permutation` exact-count carry with a compiler-source
+fan-out" look near-automatic; S282 re-opened the `func_80095A10.c` sibling pair (`func_80098CD8` +
+`func_80098C6C`, an S281 analog) and banked 0. Both are GENUINE terminal coins, not S281-style structural
+pretenders: `func_80098CD8` = a uniform +1 register rotation at exact-count 38/38 (ROM skips `$a3`; 3-arg;
+no `REG_ALLOC_ORDER` override -> `$a3` forced; permuter-proof, S221 366k plateau), and `func_80098C6C` = a
+`schedule_select` potential_hazard coin (sched.c:2615) matchable ONLY via empty `__asm__ __volatile__("")`
+barriers, which the **PO declined to bank** (no in-tree precedent; policy now in
+`docs/hazards.md#pervasive-regalloc-classical-main` + memory `empty-asm-volatile-sched-barrier`). So the
+fan-out's guaranteed deliverable is {crack OR pass-cited terminal verdict}, not a bank — price a re-open
+slice by that. The S281 win came from the docs HIDING structural bugs; when a fresh
+`--refresh-residual` re-derive (new S282 tool) confirms a pure uniform reg-rotation or a barrier-only
+sched coin at exact count, expect a terminal verdict, not a bank. Running tally:
+fan-out-on-exact-count-carry banked = S280 2/2, S281 2/2, S282 0/2. Both S282 carries have rewritten
+`docs/wip/*.near-match.md` and are flagged by `--carried-check`.
+
 **Test-tools stale-golden refresh (S273, deferred, needs `REGEN_GOLDEN=1`).** `make test-tools` carries
 9 PRE-EXISTING failures — the `pick_target` live-state json/table goldens (`test_pick_target_*_golden`,
 `test_pick_target_ranked_by_descending_score`, `test_coddog_suppresses_maybe_upstream`) drift every

@@ -4797,6 +4797,25 @@ register allocation is **pervasively** wrong (a systematic hard-reg permutation 
 scratch-reg swaps, spill-slot ordering, and delay-slot scheduling). Not a 1-2 instruction near-miss.
 This is the hardest classical class.
 
+**PO POLICY — empty `__asm__ __volatile__("")` scheduling barriers are NOT sanctioned for banking
+(S282).** An empty volatile asm emits zero bytes but ends a scheduling region and (operand form)
+lengthens a live range, so it can force a `schedule_select` / local-alloc coin to match
+(see the memory `empty-asm-volatile-sched-barrier`). It is a genuine byte-match by the ROM oracle, but
+the PO declined it: it steers codegen rather than expressing what the original C was, and no in-tree
+inline asm is empty (all existing uses emit real instructions, e.g. the `#capturing-ra` `addu %0,$31,$0`).
+So a crack subagent may USE an empty barrier to CHARACTERIZE a wall (prove it's a pure sched/qty coin and
+name the pass), but must report it as a terminal characterization, NOT a bank candidate. S282
+`func_80098C6C` was byte-exact 13/13 only with two such barriers and was carried as pure C (terminal).
+Re-ask the PO if a future match hinges on one; do not bank it silently.
+
+**STEP 0 — re-derive the residual from a FRESH build before trusting a carry doc (S282/S268).** A
+carried-wall doc's stated COUNT and residual CLASS are BOTH hypotheses. Run
+`venv/bin/python3 tools/pick_target.py --refresh-residual <fn>` (rebuilds the isolated object + cmpfn's
+it) as the first action of any re-open. S282 `func_80098CD8` carried "exact 38/38 pure scheduler" but a
+fresh build of the faithful C was 40 (a redundant `andi` + a `move`); the exact-38 form needed a specific
+`u32 b=src[i]` + `(s32)b` spelling, after which the residual was a uniform reg rotation, not the
+documented tie-break.
+
 **Triage tell — a pure-integer decoder/codec is this wall, not a "clean leaf".** At the plan
 gate, `0-jal + no-float + no-rodata/data + args-only` reads as a **low-risk** seed-5 leaf — but a tight
 decoder/codec (LZ/RLE, CRC, a bit-stream/ring-buffer walker: many back-to-back `sll`/`srl`, a

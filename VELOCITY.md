@@ -1466,6 +1466,27 @@ Three honest caveats:
   plateau advisory + nested-parent tell are the two coded fixes; the FP-scheduler / value-select /
   register-coloring walls remain `.s`-undetectable (read `fresh`). KEY: fan-out flipped 0→2; "prefer
   fresh non-main" holds for UNAIDED smallest-first only. Push: local.
+- **Sprint 282** — `main` compiler-source fan-out CRACK slice on the `func_80095A10.c`
+  `#local-alloc-qty-permutation` SIBLING pair (PO approved the S280-advised re-open play, an S281 analog).
+  **0 banked, 2 carried, 0 permuter, 2 re-open.** Zero gate enablers (file already `c`; both `INCLUDE_ASM`
+  stubs). UNLIKE S281, the shape did NOT crack: both are genuine terminal coins, not structural pretenders.
+  `func_80098CD8` reached EXACT 38/38 (corrects S221's stale doc; `u32 b=src[i]`+`(s32)b` kills a phantom
+  `andi`+`move`) but the residual is a uniform +1 reg rotation (ROM skips `$a3`; fn is 3-arg; no
+  REG_ALLOC_ORDER override so `$a3` is forced) — terminal, permuter-proof (S221 366k plateau). `func_80098C6C`
+  is byte-exact 13/13 ONLY via two empty `__asm__ __volatile__("")` sched barriers (schedule_select
+  potential_hazard coin sched.c:2615 + local-alloc qty local-alloc.c:1579); pure C = 12 (1 short). **PO
+  DECLINED banking with empty barriers** (no in-tree precedent) -> carried as pure C. binutils rule-out
+  proved 100% gcc codegen for both (byte-exact KMC-as reconstruction). Seed 3 (classical crack slice);
+  banked 0pt (file partial); realized ≈5 (+1 gccA subagent process-death → inline takeover, +1 both
+  carried/re-open no bank), residual +2; value = 0 matched (+2 walls corrected/retired). Rolling-5
+  (S278-S282) matched-fn: 4+1+2+2+0. Quality **0 stuck-far / 0 permuter / 2 carried / 2 re-open**.
+  Retro applied 3 of 3 (#1 `pick_target.py --refresh-residual` crack-slice STEP-0 helper + doc refs; #2
+  empty-barrier no-bank PO policy in hazards + memory; #3 dead-subagent `nonmatchings/<fn>/STATUS`
+  checkpoint clause in the S235 fan-out contract). KEY: fan-out-on-exact-count-carry is now 2/2/2/... i.e.
+  S280 2/2 + S281 2/2 + S282 0/2 — the S281-analog shape is NOT a guaranteed crack; a
+  `#local-alloc-qty-permutation` is a HYPOTHESIS worth a fan-out, but the deliverable is {crack OR
+  pass-cited terminal verdict}, and a uniform reg-rotation / empty-barrier-only coin lands on the terminal
+  side. Push: local.
 - **Sprint 281** — `main` compiler-source fan-out CRACK slice on the `get_tile_attribute.c` div-by-4
   register-permutation SIBLING pair (PO approved the S280-advised high-EV re-open play, not another
   smallest-first fresh pick). **+2 banked, 0 carried, 0 permuter, 2 re-open.** Zero gate enablers (file

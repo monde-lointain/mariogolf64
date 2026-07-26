@@ -84,6 +84,22 @@ resume surface when the middle spans context windows.
       3 fan-out subagents sent FINAL verdicts via SendMessage with ZERO orchestrator re-pings (vs S235's
       3-of-4 silent-idle) — the explicit "an `idle_notification` is NOT a deliverable" clause is
       load-bearing; keep it verbatim in every fan-out prompt.**
+      - **Progress-checkpoint clause (S282): a subagent can DIE (process death, not just idle) and leave
+        `base.c` in a disproven mid-experiment state, so the S235 SendMessage contract alone does not make
+        its work recoverable.** In S282 `gccA-CD8` died and left `nonmatchings/func_80098CD8/base.c` in the
+        already-disproven 4th-param `key` form; the orchestrator had to revert to the faithful C and
+        re-derive from scratch. So ALSO tell each crack subagent to append its BEST byte-count form + a
+        one-line status to `nonmatchings/<fn>/STATUS` after each material iteration (e.g. `38/38 count,
+        residual=uniform reg rotation, form=u32 b=src[i]`), and to keep `base.c` at its best-so-far form,
+        never a broken/disproven probe. On a dead subagent the orchestrator recovers from `STATUS` + the
+        last-good `base.c` instead of restarting at the seed.
+      - **STEP 0 of every crack re-open = `pick_target.py --refresh-residual <fn>` (S282/S268).** A carry
+        doc's stated COUNT and residual CLASS are BOTH hypotheses; the helper rebuilds the isolated object
+        + cmpfn's it in one command so the fresh instruction-count + diff shape is re-derived before the
+        doc is trusted. S282 `func_80098CD8` carried "exact 38/38 pure scheduler" but a fresh build was 40
+        (redundant `andi`+`move`); the exact form needed a specific spelling and the real residual was a
+        uniform reg rotation, not the documented tie-break. Put `--refresh-residual` in every crack-slice
+        subagent prompt as its first step. See `docs/hazards.md#pervasive-regalloc-classical-main`.
   - **A mined fresh-pack's mid-logic tail is a wall-class cluster, not a smallest-first vein (S224).**
     Once a fresh `none` pack's cheap leaves (getters/setters/predicates/dispatch) are banked, the
     residual mid-logic fns (the loops+struct-base+`bnel` tells) concentrate on a small set of documented

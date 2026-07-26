@@ -29,6 +29,7 @@ gate calls, mirroring marioparty7's pick_target.py.
 import argparse
 import dataclasses
 import json
+import os
 
 # BUILD_VERSION config + version-conditional stripping (shared by the C-side and asm-TU scanners),
 # extracted to a leaf. _build_version_ord / _strip_inactive_version_branches plus the 3 PP/version
@@ -357,6 +358,7 @@ from pick_target_classify import (  # noqa: F401  (re-export: pt.<name> contract
 from pick_target_score import (  # noqa: F401  (re-export: pt.<name> contract)
     Candidate,
     _SEED_ENABLER_GROUPS,
+    _STUB_FN_RE,
     _append_caller_evict,
     _append_coddog_aux,
     _file_scope_static_count,
@@ -952,6 +954,54 @@ def _build_row(off, typ, path, size, args, idx, carried, _libultra_band_start):
     return score_row(cand, st.hazards, carried)
 
 
+def _refresh_residual(fns):
+    """Crack-slice STEP 0 helper (S282): rebuild each FUNC's isolated object and cmpfn it, printing
+    the FRESH instruction count + diff-row count so a carry's stale doc (count AND residual class are
+    both hypotheses, S268) is re-derived before it is trusted. Requires an existing base.c seed."""
+    import glob
+    import subprocess
+
+    src = os.path.join(ROOT, "src")
+    tree_flag = {"main": "MAIN=1", "libultra": "LIBULTRA=1", "libkmc": "LIBKMC=1"}
+    rc = 0
+    for fn in fns:
+        cfile = None
+        for cpath in glob.glob(os.path.join(src, "*", "*.c")):
+            try:
+                with open(cpath) as f:
+                    if fn in _STUB_FN_RE.findall(f.read()):
+                        cfile = cpath
+                        break
+            except OSError:
+                continue
+        if cfile is None:
+            print(f"?? {fn}: no INCLUDE_ASM stub in src/*/*.c")
+            rc = 1
+            continue
+        tree = os.path.relpath(cfile, src).split(os.sep)[0]
+        flag = tree_flag.get(tree, "")
+        seed = os.path.join(ROOT, "nonmatchings", fn, "base.c")
+        if not os.path.exists(seed):
+            print(f"!! {fn} [{tree}]: no nonmatchings/{fn}/base.c seed — seed it first")
+            rc = 1
+            continue
+        cmd = ["make", "nonmatching-func", f"FUNC={fn}"] + ([flag] if flag else [])
+        b = subprocess.run(cmd, cwd=ROOT, capture_output=True, text=True)
+        if b.returncode != 0:
+            print(f"!! {fn} [{tree}]: build failed:\n{b.stderr.strip()[-400:]}")
+            rc = 1
+            continue
+        obj = os.path.join("nonmatchings", fn, "current.o")
+        c = subprocess.run(
+            ["tools/cmpfn.sh", fn, obj], cwd=ROOT, capture_output=True, text=True
+        )
+        lines = c.stdout.splitlines()
+        head = lines[0] if lines else "(cmpfn: no output)"
+        ndiff = sum(1 for line in lines if line[:1] in "<>")
+        print(f"{fn} [{tree}]: {head}  diffs={ndiff}")
+    return rc
+
+
 def build_rows(args, idx, carried):
     subs = parse_subsegs()
     # The lowest-rom `libultra/` subseg = the start of the libultra code band. A libultra-source
@@ -1024,6 +1074,16 @@ def main():
         "Use on the smallest leaves of a fresh classical pack before committing them.",
     )
     ap.add_argument(
+        "--refresh-residual",
+        nargs="+",
+        metavar="FUNC",
+        help="Crack-slice STEP 0 (S282/S268): for each FUNC rebuild its nonmatchings/FUNC/base.c "
+        "(make nonmatching-func, tree-derived MAIN/LIBULTRA/LIBKMC flag) and run tools/cmpfn.sh, "
+        "printing the FRESH instruction count (rom vs mine) + diff-row count. A carried-wall doc's "
+        "stated COUNT and residual CLASS are BOTH hypotheses; re-derive from a fresh build before "
+        "trusting the doc. Requires an existing base.c seed.",
+    )
+    ap.add_argument(
         "--loose-stubs",
         metavar="SEG",
         help="Enumerate still-INCLUDE_ASM stubs inside ALREADY-`c` files of src/SEG/, smallest-first, "
@@ -1091,6 +1151,9 @@ def main():
                 "(cracked both S280 carries)."
             )
         raise SystemExit(0 if n_fresh else 1)
+
+    if args.refresh_residual:
+        raise SystemExit(_refresh_residual(args.refresh_residual))
 
     if args.carried_check:
         walls = carried_wall_names()
