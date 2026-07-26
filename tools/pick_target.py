@@ -1165,7 +1165,11 @@ def main():
                 "smallest-first, OR a compiler-source fan-out on a fully-RE'd exact-count carry "
                 "(cracked both S280 carries). EXCEPTION (S286): a fresh leaf that is a structural "
                 "sibling of an already-banked fn in the SAME file is not plateau-bound "
-                "(S285 3/3, S286 3/3, both func_80095A10.c)."
+                "(S285 3/3, S286 3/3, both func_80095A10.c; S287 3/3 in func_80059BA0.c). "
+                "EXCEPTION (S287): a heavy-FP leaf whose rodata constants match fdlibm is a "
+                "TRANSCRIPTION, not a wall -- func_80059BA0.c is the game's embedded libm "
+                "(fabsf/atanf/atan2f banked; func_80059BC0 = acosf by its pS0-pS5/qS1-qS4 "
+                "coefficients). Check the constants before pricing a heavy-FP main leaf."
             )
         raise SystemExit(0 if n_fresh else 1)
 

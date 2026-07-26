@@ -77,6 +77,23 @@ sched coin at exact count, expect a terminal verdict, not a bank. Running tally:
 fan-out-on-exact-count-carry banked = S280 2/2, S281 2/2, S282 0/2. Both S282 carries have rewritten
 `docs/wip/*.near-match.md` and are flagged by `--carried-check`.
 
+**S287: `src/main/func_80059BA0.c` is the game's embedded fdlibm — check a heavy-FP leaf's rodata
+before pricing it a wall.** The plateau advisory treats a heavy-FP main leaf as an invisible
+FP-scheduler wall (S276/S277). That is right for game math, and wrong for a vendored libm: S287
+identified `func_80059BA0` = `fabsf` (a pre-existing carry), `func_8005A2AC` = `atanf` and
+`func_80059FAC` = `atan2f` from their rodata constants alone (fdlibm's `atanhi[4]`/`atanlo[4]`/
+`aT[11]` at `D_800D08A0`/`B0`/`C0`), and both unbanked ones banked the same day — 181/181 in two
+iterations and 192/192 in one. `func_80059BC0` (0x3EC, 251 instr, 0 jal, 126 FP lines) is already
+identified as `acosf` by its `pS0-pS5`/`qS1-qS4` coefficients plus `pio2_hi`/`pio2_lo`/`pi`; its zero
+`jal` count is an inlined `sqrt.s`, not a leaf-with-no-calls. `func_8005A580` (0x778) is the other
+likely sibling. **Procedure:** dump the floats a heavy-FP leaf references (`grep -oE '%hi\(D_[0-9A-F]+'`
+on its `.s`, then read `asm/data/*.rodata.s`) and search fdlibm for the polynomial coefficients before
+booking it as a wall or a fan-out. Two rules that held for both banks: keep the coefficient tables as
+`extern f32` refs into the shared rodata blob (source literals emit a fresh pool entry and force a
+carve the still-asm siblings share), and keep every scalar constant as a source literal (this compiler
+materializes SFmode constants inline with `lui`/`ori`/`mtc1`). The advisory in
+`tools/pick_target.py --loose-stubs` now carries this exception.
+
 **S285 adds the cheap half of that play: re-derive a carry YOURSELF before pricing a fan-out.** S285
 carried `func_80098758` at 158/155 with a confidently-argued 7-vs-6 callee-saved coloring verdict and
 a recommendation to escalate to a compiler-source fan-out; a same-session re-attempt banked it at
@@ -3707,6 +3724,20 @@ by `/sprint-plan`:
   vendored upstream version can diverge from the game's rev on a single immediate (S122 nusys-2.07
   `NU_CONT_THREAD_ID=6` vs MG64's 5), and that surfaces only at first build unless reconciled here.
   A near-free retry missing any of these is a half-scoped spike — finish the scope before deferring.
+
+- **(S287 NEAR-FREE RETRY — not blocked; deferred only by the 3-to-4 sprint cap)**
+  `src/main/func_80059BA0.c`, the embedded-fdlibm file. S287 banked 3 of 3 here. **(1)** Gate
+  enablers zero: loose `INCLUDE_ASM` stubs in an already-`c` file, no flip, no split. **(2)** The
+  next slice is `func_80059BC0` (0x3EC, 251 instrs, 0 `jal`) — already identified as fdlibm `acosf`
+  from its `pS0-pS5`/`qS1-qS4` coefficients, `pio2_hi` 0x3FC90FDA, `pio2_lo` 0x33A22168 and `pi`
+  0x40490FDA; the zero `jal` count is an inlined `sqrt.s`. `func_8005A580` (0x778) is the other
+  likely libm sibling, un-identified. **(3)** Transcribe from fdlibm's float sources: keep coefficient
+  tables as `extern f32` refs into the shared rodata blob (no carve), keep scalar constants as source
+  literals (this compiler builds SFmode constants with `lui`/`ori`/`mtc1`), and write every
+  float-to-int bit copy as fdlibm's own `do { union ... } while (0)` macro shape, which is
+  load-bearing as a scheduling barrier. **(4)** `func_80059BA0` = `fabsf` remains this file's one
+  characterized terminal carry (post-reload sched coin); do not re-open it as part of this slice.
+  **(5)** The 13 remaining stubs beyond those two are game code, not libm — price them normally.
 
 - **(S286 NEAR-FREE RETRY — not blocked; deferred only by the 3-to-4 sprint cap)**
   `src/main/func_80095A10.c` camera-builder family. S285 and S286 each banked 3 of 3 here, so the

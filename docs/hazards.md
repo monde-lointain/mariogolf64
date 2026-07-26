@@ -5248,6 +5248,15 @@ arity from the call-site arg setup (`a0..a3`/`f12..` loads) and return-type from
 `#return-type-is-load-bearing`. Get the ultra64 types right too (`u32`=`unsigned long`, `s32`=`long`;
 see the `ultra64-types-only` convention).
 
+**Third wrong state: the prototype exists but sits below its caller.** In a long partially
+banked `src/<seg>.c` the declaration is added next to whichever function needed it, and these files
+are filled in over many sprints in no particular order, so a later-banked caller *above* it silently
+gets implicit-int. Provenance S287: `atan2f` declared `f32 func_80059BA0(f32)` immediately above `atanf`, which
+was still below `atan2f`; the fabsf call then came back as `cvt.d.s`/`cvt.s.w` conversions, +3
+instructions. gcc warns (`type mismatch with previous implicit declaration`), so read the build
+warnings for the file before treating a count deficit as structural. Put every callee prototype above
+the *first* user in the file, not next to the most recent one.
+
 ## counter-up pointer-giv fill loop (check_dbra_loop reversal)
 
 **Trigger:** a small array-init/fill loop (set one struct field over N elements) won't match: the ROM

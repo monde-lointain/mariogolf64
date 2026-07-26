@@ -1474,6 +1474,38 @@ Three honest caveats:
   STRUCTURAL symptom, not evidence of a coloring problem — S285 makes 4 of the last 6 carry verdicts
   refuted, and this one was refuted by the same agent that wrote it, hours later, with no new tool.
   Push: local.
+- **Sprint 287** — the 3 committed fresh loose stubs in `src/main/func_80059BA0.c`, a file that
+  turned out to be the game's embedded fdlibm. **+3 banked, 0 carried, 1 permuter (plateaued but
+  useful), 0 re-open, 0 stuck-far.** Zero gate enablers. `func_8005A2AC` (181/181, 2 iterations) is
+  fdlibm `atanf`, identified from its rodata alone — `atanhi[4]`/`atanlo[4]`/`aT[11]` at
+  `D_800D08A0`/`B0`/`C0`, all kept as `extern f32` refs so no carve is forced. Its one crack: the bare
+  `union` bit copy let sched hoist two `li`s over the `mfc1` and fill the hazard slot (1 short);
+  fdlibm's own `do {} while (0)` `GET_FLOAT_WORD` shape restored the ROM exactly, so the macro's loop
+  notes are a scheduling barrier and not only the `REG_N_REFS` lever already recorded
+  [[do-while-doubles-reg-n-refs-qty-tier]]. `func_80059FAC` (192/192, one real build) is `atan2f`,
+  confirming the S286 `f32 (f32 dz, f32 dx)` signature guess; its constant set truncates `pi` to
+  0x40490FDA and carries the remainder in a POSITIVE `pi_lo`, which is why `pi-(z-pi_lo)` emits two
+  `sub.s`. Its only iteration was a prototype that existed but sat BELOW its caller in this
+  1200-line partially banked file → implicit-int → +3 conversion instructions. `func_8005C674`
+  (245/245) is `build_roster_grid`, a 9-loop roster table builder; loop-exit form had to be chosen
+  per loop (3 do-while, 6 structured — all-do-while cost a peel plus its strength reduction) and
+  explicit offset temps were needed to stop gcc hoisting a full `la` per array. It then
+  hand-plateaued at 14 differing operands, and the KEY methodological result is that the permuter
+  never scored 0 (515 → 70 in 130k iterations) yet its best candidate's SOURCE diff was the lever:
+  assign a subscript into an existing local before the test. Four such variable reuses, applied one
+  per differing register, closed it [[variable-reuse-is-a-per-register-lever]]. md5-candidate **0
+  delta** (230), matched-fn **+3** (file 20→17 stubs, still partial; repo-wide stubs 318→315, all in
+  `src/main`), descriptive count **+3** (`atanf`, `atan2f`, `build_roster_grid` — first non-zero
+  since S284). Seed 5 (classical); banked 0pt (file partial); realized 7 / residual +2 (+1 permuter,
+  +1 re-attempt). Rolling-5 (S279-S287, S283/S284 excluded as prompt-surface enabler sprints):
+  0+3+3+3. Quality **0 stuck-far / 1 permuter / 0 carried / 0 re-opened**. Retro applied 7 of 7 plus
+  1 retirement (4 levers.md edits, 1 hazards.md sub-case, 1 loop.md permuter bullet, 1
+  plateau-advisory fdlibm exception; retirement: the three dead-frame entries merged into one, plus
+  four compression passes on my own wording to land levers.md at 10223/10240). Net prompt-surface
+  delta **+1850 B**. `make test-tools` 135 passed, `prompt_lint check` green on 18 surfaces. KEY: a
+  heavy-FP main leaf whose rodata matches fdlibm is a TRANSCRIPTION, not a wall — the plateau
+  advisory now says to check the constants first, and `func_80059BC0` is already identified as
+  `acosf` by its `pS0-pS5`/`qS1-qS4` coefficients. Push: local.
 - **Sprint 286** — the next 3 smallest fresh loose stubs in the same `src/main/func_80095A10.c`
   camera-builder vein. **+3 banked, 0 carried, 0 permuter, 0 re-open, 0 stuck-far.** Zero gate
   enablers. `func_80097218` (176/176) landed FIRST BUILD as a near-twin of the S285-banked

@@ -40,18 +40,16 @@ These have a `docs/hazards.md` section; read it rather than the line here.
 - **local-alloc-combine-regs-block-local-temp** -- hoist a block-local temp to function scope to
   defeat the `combine_regs` tie (`local-alloc.c:472/1290/1587`).
 - **do-while-doubles-reg-n-refs-qty-tier** -- a `do {} while(0)` macro loop doubles `REG_N_REFS` and
-  flips the qty tier; a plain block fixes the resulting 2-register permutation.
-- **one-variable-reuse-reorders-loads** -- reusing one variable for two values pulls a load forward via
-  anti-dependency; split it. The inverse: reuse a dead variable to recolour.
-- **reuse-one-pointer-across-loops-coloring-trap** -- one walking pointer spanning two loops permutes
-  the earlier loop's registers; split it per loop.
+  flips the qty tier; a plain block fixes the resulting 2-register permutation. Loop notes also bar
+  the sched hoist (fdlibm `GET_FLOAT_WORD`, S287).
+- **variable-reuse-is-a-per-register-lever** -- reuse pulls a load forward by anti-dependency, and a
+  pointer spanning two loops permutes the earlier one: split those. The inverse recolours, and is the
+  main tool for a callee-saved permutation, one register at a time (S287: four reuses, one each).
 - **abs-compare-form-steers-allocno** -- `(x <= -1) ? -x : x` versus `(x < 0)` flips a single magnitude
   allocno; a cheap lever to try before the permuter.
-- **dead-frame-live-index-pressure-lever** -- an `str[row]` rewrite keeps base and index live and
-  reproduces a small truly-dead reserved frame.
-- **pure-dead-frame-clean-crack** -- a frame-only diff cracks via `s32 unused[(ROM_frame-0x18)/4]`.
-- **dead-frame-dead-v0-store-crack** -- an uninitialized local plus `volatile s32 s = g;` reproduces a
-  reload frame and a dead `sw $v0`; `volatile` defeats DCE.
+- **dead-frame-levers** -- for a frame-only diff: `s32 unused[(ROM_frame-0x18)/4]` (pure dead frame),
+  `str[row]` (keeps base and index live), or an uninit local plus `volatile s32 s = g;` (reload frame,
+  dead `sw $v0`; `volatile` defeats DCE).
 - **per-region-cse-slot-base-lever** -- pass the array directly, with no cached pointer, so gcc CSEs the
   base per region.
 - **copy-coalesce-cse-signext-terminal** -- `global.c:790-823` merges equal copies; forcing six
@@ -95,6 +93,7 @@ These have a `docs/hazards.md` section; read it rather than the line here.
   structured loop provably cannot match.
 - **do-while-not-equal-loop-exit-form** -- rewrite a bounded `for (i < N)` as `do {} while (i != N)` for
   a `bne` with a register bound and a tight frame. The symptom is `slti` where the ROM has `bne`.
+  Choose per loop (S287: 3 do-while, 6 structured).
 - **out-of-line-handler-block-branch-likely** -- a one-instruction `goto` handler folds into an
   annulled `beql`; a single `goto done` replicates the return copy.
 - **else-arm-return-vs-then-arm** -- for a far early return the else-arm form yields a plain `bc1t`
@@ -115,6 +114,7 @@ These have a `docs/hazards.md` section; read it rather than the line here.
 
 - **commutative-operand-order-statement-split** -- flip `addu`/`xor` operand order via `x = a; x ^= b;`
   or `T *p = base + i; p[C] = ...`. RTL-canonical: change structure, not spelling.
+  `*(p+off+C)` gives `addu rd,base,off`; `p[off+C]` reverses it.
 - **fold-associate-constant-side** -- `GLOBAL + (elem + CONST)` reproduces `addiu rX, globreg, C`; the
   natural spelling reassociates onto the element instead.
 - **byte-offset-cast-defeats-base-ptr-cse** -- `*(s32 *)((u8 *)SYM + off)` forces a per-access
