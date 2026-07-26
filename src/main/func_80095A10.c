@@ -123,7 +123,60 @@ INCLUDE_ASM("asm/nonmatchings/main/func_80095A10", func_80096C04);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80095A10", func_80096F44);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80095A10", func_80097218);
+/* A third shot-view camera builder, sharing the eye/at construction with
+ * func_8009806C and func_80098310. What is specific to this one: the eye rides
+ * 15 units below the ball outside mode 15, and the mode-15 fixup lifts the eye
+ * by 3 while every other mode drops the look-at and lifts the eye by 7.5. */
+void func_80097218(s32 player, GolfCamera* cam) {
+  Vec3f pos;
+  f32 unused[16];
+  u8* cs;
+  f32 follow_dist;
+  f32 ground;
+
+  cs = get_character_state(player);
+  follow_dist = func_80095A10(107520.0f, 30720.0f, D_800C73A0 * 0.025f);
+
+  if (D_800E4C54 == 12) {
+    if (D_800C73A0 % 3 == 0) {
+      func_80079358(player, 3);
+    }
+  }
+
+  func_8005483C(player, 1, &pos);
+  ground = (get_interpolated_terrain_height_wrapper((s32)(pos.x * 1024.0f),
+                                                    (s32)(pos.z * 1024.0f)) -
+            0x1E00) *
+           (1.0f / 1024.0f);
+  if (ground < pos.y) {
+    pos.y = ground;
+  }
+
+  cam->at.x = pos.x;
+  cam->at.y = pos.y;
+  cam->at.z = pos.z;
+  cam->eye.x = pos.x + cosf(-*(f32*)(cs + 0x48) - 1.57079637f) * follow_dist *
+                           (1.0f / 1024.0f);
+  if (D_800E4C54 == 15) {
+    cam->eye.y = pos.y;
+  } else {
+    cam->eye.y = pos.y + -15.0f;
+  }
+  cam->eye.z = pos.z + sinf(-*(f32*)(cs + 0x48) - 1.57079637f) * follow_dist *
+                           (1.0f / 1024.0f);
+  func_8009676C(cam);
+  func_80095A68(cam, &cam->at, 0.1f, 3);
+
+  if (flag_is_set(0x7F) || (D_800BB020 != 30 && D_801B60A0 == 1)) {
+    if (D_800E4C54 == 15) {
+      cam->at.y -= 4.5f;
+      cam->eye.y += 3.0f;
+    } else {
+      cam->at.y -= 7.5f;
+      cam->eye.y += 7.5f;
+    }
+  }
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80095A10", func_800974D8);
 
