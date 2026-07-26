@@ -5,17 +5,21 @@ description: Execution loop for Mario Golf 64 decompilation. Use when working a 
 
 # MG64 Decomp Loop
 
-Read `docs/agent-workflow.md` before acting. Follow `## Execution loop`, `## Conventions`, `## Cross-repo sync`, and any hazard sections cited by the target row.
+Read `docs/workflow/loop.md` before acting. Follow `## Execution loop`, `## Oracles`,
+`## Conventions`, and `## Cross-repo sync`.
 
-## Workflow
+Route any flagged hazard through `docs/hazard-index.md` to its playbook section.
 
-1. Read `SPRINT.md`; abort if no committed backlog exists.
-2. Work backlog items smallest-first, one function at a time, with no per-function PO stop.
-3. Keep MCP, build, yaml, and source edits serial. Use parallel work only for read-only context gathering or explicitly safe isolated subagent fan-out.
-4. For mirror targets, copy upstream C/headers as documented, format only the allowed trees, reconcile refs/calls, and prove the match with full `make` ROM SHA-1.
-5. For classical targets, seed from asm + m2c + Ghidra typed context, iterate with asm-differ, spot-check bytes, inline only score-0 matches, and run full `make`.
-6. Escalate to decomp-permuter or high reasoning only when the target reaches the documented threshold or hazard path. High reasoning is recommended guidance, not repo config.
-7. When a function banks, append the standup line and suggestion buffer to `SPRINT.md`, commit the green match, and continue.
-8. When a function blocks its file DoD, record it as stuck-far/permuter/carry as documented and continue only when the sprint rules allow.
+For a crack slice or any fan-out decision, read `docs/workflow/fan-out.md`, and dispatch each agent
+with `docs/fanout-prompt.md` filled in.
 
-Never commit a non-matching function. The ROM SHA-1 oracle is binding.
+Outcome: every item on the committed `SPRINT.md` backlog is banked or carried with a characterized
+verdict, and the ROM SHA-1 is green at every commit. Abort if no committed backlog exists.
+
+A function banks only when `tools/verify-rom.sh` exits 0; every other signal is an iteration hint.
+Never commit a non-matching function. Work smallest-first with no per-function approval stop -- the
+committed backlog carries standing approval. Keep MCP, build, yaml, and source edits serial; only
+read-only context gathering runs in parallel.
+
+Append the standup line and the suggestion buffer to `SPRINT.md` as each function banks. Those
+suggestions apply at the review gate only, never mid-sprint.
