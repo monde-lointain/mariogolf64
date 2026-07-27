@@ -394,10 +394,16 @@ def wall_class_tell(fn):
         is a BANK-TIME action that only banks when the table is 8-aligned on BOTH edges with no
         interleaved still-asm sibling rodata; a 4-aligned trailing edge walls it (S275 func_800985B4,
         [[jtbl-carve-both-edge-8align]]).
-      - "raw-dl-emitter": >= _DL_CMD_MIN raw display-list command words materialised as `lui`
-        immediates (0xE7/0xED/0xFC/0xE3/... top bytes). These glistp++ / unrolled per-entry emitters
-        are the store-giv + sched/reg-permutation CARRY class (S243/S275 func_800318A8, func_80075E48;
-        [[mg64-glyph-emitter-dl-family]]).
+      - "raw-dl-emitter": >= _DL_CMD_MIN display-list command words materialised as `lui`
+        immediates (0xE7/0xED/0xFC/0xE3/... top bytes). ADVISORY since S293 -- the caller counts
+        these as `fresh`. The tag prices the leaf (it needs the DL reconstruction recipe: find the
+        gbi.h composite first, re-derive every word from the `.s` store trace) but does NOT predict
+        a wall. S258 retired the raw-DL-word wall verdict and S293 banked the three smallest members
+        of the class 3/3 with no permuter, two of them single-composite one-liners. The genuine
+        store-giv CARRY subtype is a custom packing with no macro (func_8007624C's >>2-quantized
+        colour, whose _SHIFTL masks emit `andi`s the ROM lacks); the `.s` tell cannot separate the
+        two, which is why this is advisory rather than excluding.
+        See [[mg64-glyph-emitter-dl-family]], [[sdk-composite-macro-before-dl-reconstruction]].
 
     Such a leaf reads `fresh` + `standalone` + no-prior-doc yet walls at attempt, so a smallest-first
     main slice should de-prioritise it. Reads only <fn>'s own `.s` (cheap). See the S275 retro."""

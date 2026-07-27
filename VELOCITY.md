@@ -1474,6 +1474,26 @@ Three honest caveats:
   STRUCTURAL symptom, not evidence of a coloring problem — S285 makes 4 of the last 6 carry verdicts
   refuted, and this one was refuted by the same agent that wrote it, hours later, with no new tool.
   Push: local.
+- **Sprint 293** — opened the `RAW-DL-EMITTER` vein. **+3 banked, 0 carried, 0 permuter, 0 re-open,
+  0 stuck-far** — the first all-zero quality row since S291, and the first 3-of-3 on `main` since
+  S287. Zero gate enablers. `func_8006A5E4` -> `load_texture_block_4b` (154/154, one
+  `gDPLoadTextureBlock_4b` composite, first build), `update_vertex_texture_coords` (164/164,
+  `gDPLoadTextureBlock` + a bottom-rotated NULL-terminated face walk, first build) and
+  `func_80073C14` -> `emit_glyph_string_12px` (196/196, twelve macro commands per glyph, 3
+  iterations). The gate finding is the sprint: `--loose-stubs main` read **0 fresh**, but 70 of its
+  303 stubs were excluded by a tag whose wall verdict S258 had retired three sprints earlier, and the
+  three smallest members of that class all passed `--carried-check`/`--nested-check` clean. So a
+  plateau reading is only as current as its exclusion tags — the tag is advisory as of this sprint and
+  `main` now reads 29 fresh. One lever, on the third leaf: at 195/196 the missing instruction was a
+  copy `global.c:790-823 expand_preferences` had deleted (both pseudos preferred `$v1`), and eight
+  spellings of the copy failed before naming the two atlas offsets as explicit temps ended the
+  source value's live range and restored it — the same edit also fixed a 17-instruction scheduling
+  displacement. Seed 5 (classical); banked 0pt (all three hosts partial); realized **4 / residual
+  −1** (no escalation fired; two of three were verbatim first-build with zero fix-iterations).
+  Retro applied 3 of 3 plus 1 retirement (`local-alloc-combine-regs-block-local-temp` +
+  `copy-coalesce-cse-signext-terminal` merged into `temp-scope-and-live-range-steer-a-copy`,
+  levers.md 10238 -> **10229/10240**, net −9 B, and the merged entry drops a terminal verdict this
+  sprint disproved in one direction). Push: local.
 - **Sprint 292** — the first crack slice run entirely on measured allocno arithmetic (`main` fresh
   pool = 0). **+1 banked, 2 carried, 2 permuter runs (no zero, both yielded a knob), 3 re-opens, 0
   stuck-far.** Zero gate enablers. `func_8005D334` -> `clear_player_slots` (33/33) banked on two

@@ -43,8 +43,11 @@ These have a `docs/hazards.md` section; read it rather than the line here.
   bound copy `n = bound;` (S288), or a `do {} while (0)` note round a subset, reweighting only those
   refs (S292; also bars the sched hoist, S287). Priority orders within a class; `find_reg` picks
   callee-saved first.
-- **local-alloc-combine-regs-block-local-temp** -- hoist a block-local temp to function scope to
-  defeat the `combine_regs` tie (`local-alloc.c:472/1290/1587`).
+- **temp-scope-and-live-range-steer-a-copy** -- a missing ROM `move` was deleted by `global.c:790-823`
+  (equal copies merged when both pseudos prefer one register) or tied by `combine_regs`
+  (`local-alloc.c:472/1290/1587`). Knobs: a named temp ending the value's live range early rather than
+  inlining it (S293), or a block-local temp hoisted to function scope. Terminal only when six forced
+  registers reroute a read.
 - **variable-reuse-is-a-per-register-lever** -- reuse pulls a load forward by anti-dependency, and a
   pointer spanning two loops permutes the earlier one: split those. The inverse recolours, and is the
   main tool for a callee-saved permutation, one register at a time (S287: four reuses, one each).
@@ -54,11 +57,8 @@ These have a `docs/hazards.md` section; read it rather than the line here.
   `str[row]` (keeps base and index live), or an uninit local plus `volatile s32 s = g;` (reload frame,
   dead `sw $v0`; `volatile` defeats DCE).
 - **per-region-cse-slot-base-lever** -- pass the array directly, with no cached pointer, so gcc CSEs the
-  base per region. Across parallel arrays the count of pointer *locals* per pass is the pressure knob:
-  each is a `loop.c` induction pointer costing a callee-saved register, an offset expression off a
-  shared row pointer is not (S289: 214-277 instructions, frame `-0x30` to `-0x60`).
-- **copy-coalesce-cse-signext-terminal** -- `global.c:790-823` merges equal copies; forcing six
-  registers reroutes a later read and the residual goes terminal.
+  base per region. The count of pointer *locals* is the pressure knob: each is a `loop.c` induction
+  pointer costing a callee-saved register, an offset off a shared row pointer is not (S289).
 - **fp-arg-registers-are-a-signature** -- ROM values in `$f12`/`$f14` where the build uses `$f0`/`$f2`
   are the FP argument registers: the callee takes FP args the `extern` omits (S286).
 
@@ -82,9 +82,9 @@ These have a `docs/hazards.md` section; read it rather than the line here.
 - **do-while-zero-block-break** -- an empty `do {} while (0);` emits nothing but ends the preceding
   block, so `reorg` stops reaching past a call for a later insn and annulling the next branch to
   compensate (S288). Preferred over an empty `asm volatile`, the other zero-byte region-ender (S282).
-- **aggregate-store-pins-pointer-load** -- a store to a scalar global does not constrain a later load
-  through a pointer parameter (`true_dependence`, `sched.c:817`); typing the destination globals as
-  one array restores the dependence and the ROM's load/store interleave.
+- **aggregate-store-pins-pointer-load** -- a scalar-global store does not constrain a later load
+  through a pointer parameter (`true_dependence`, `sched.c:817`); typing those globals as one array
+  restores the dependence and the ROM's load/store interleave.
 - **two-argument-call-temp-split** -- when both arguments of a call each cross another call, compute
   them into temps first; as one call expression gcc evaluates argument 0 fully, `trunc.w.s` included,
   and holds it across the second call.

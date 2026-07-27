@@ -145,14 +145,15 @@ dashboard). Target selection is `tools/pick_target.py`, not a stored roadmap.
         class the size+FP sort cannot see (S275).** All four S275 committed low-FP leaves passed
         `--carried-check`/`--nested-check` clean yet every one walled (jtbl-carve-align,
         reorg-delay-slot-coin, two raw-DL-word store-giv emitters). The carried/nested checks catch
-        only RE-surfaced or nested walls, not first-encounter ones. `--loose-stubs <seg>` now also
-        runs `wall_class_tell` and tags `JTBL-DISPATCH` (a `jtbl_<vram>` ref -> bank-time rodata carve,
-        walls unless 8-aligned both edges) and `RAW-DL-EMITTER` (>= 6 raw DL command words -> store-giv
-        carry class); both drop out of `fresh`. So at the gate: `--loose-stubs main` fresh is a ceiling,
-        not a clean pool — the FP-scheduler / value-select-branch-likely / register-permutation walls
-        are still `.s`-undetectable and read `fresh`. Read a candidate's `.s` (jtbl/`bnel`/`mflo`/
-        heavy-FP tells) before pricing it a clean smallest-first leaf. See the S275 retro and
-        `docs/levers.md` (cmpfn nop elision undercount).
+        only RE-surfaced or nested walls, not first-encounter ones. `--loose-stubs <seg>` runs
+        `wall_class_tell` and tags `JTBL-DISPATCH` (a `jtbl_<vram>` ref -> bank-time rodata carve,
+        walls unless 8-aligned both edges), which drops out of `fresh`, and `RAW-DL-EMITTER` (>= 6 DL
+        command words), which is advisory and counted in `fresh` since S293 — S258 retired that wall
+        verdict and S293 banked the class's three smallest members 3/3, no permuter. **So a `0 fresh`
+        count is not proof of a crack-slice-only pool: re-check each excluding tag's own verdict at a
+        plateau gate.** Even so, fresh is a ceiling — the FP-scheduler / value-select-branch-likely /
+        register-permutation walls are `.s`-undetectable and read `fresh`. Read a candidate's `.s`
+        (jtbl/`bnel`/`mflo`/heavy-FP tells) before pricing it a clean leaf. See the S275/S293 retros.
       - **A `.s`-tell rejection is a guess; record it, and stop repeating it unattempted (S289).**
         `func_8005C038` was gate-rejected by S287 and again by S288 on the same tell (10
         branch-likely instructions -> value-select class). Attempted in S289, every `beql` reproduced

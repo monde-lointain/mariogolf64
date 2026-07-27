@@ -1113,11 +1113,19 @@ def main():
         stubs = loose_stubs(args.loose_stubs)
 
         def _is_fresh(s):
+            # `raw-dl-emitter` is ADVISORY since S293 and still counts as fresh. Its S275 wall
+            # verdict had already been retired by S258 (find the gbi.h composite first), and S293
+            # banked the three smallest members of the class 3/3 with no permuter and no
+            # compiler-source dive -- two of them single-composite one-liners. The tag stays in the
+            # row because it still prices the leaf (an emitter needs the DL reconstruction recipe),
+            # but excluding it from `fresh` hid 70 main rows behind a stale verdict.
+            # `jtbl-dispatch` stays excluded: its wall is mechanical, not a codegen verdict (the
+            # bank-time .rodata carve needs 8-alignment on both edges), so S275 still holds there.
             return (
                 not s["carried"]
                 and not s["nested"]
                 and not s.get("intrinsic")
-                and not s.get("wall_class")
+                and s.get("wall_class") in (None, "", "raw-dl-emitter")
             )
 
         shown = stubs if args.all else [s for s in stubs if _is_fresh(s)]
@@ -1130,7 +1138,8 @@ def main():
             elif s.get("intrinsic"):
                 status = "INTRINSIC-HASM"
             elif s.get("wall_class"):
-                # jtbl-dispatch / raw-dl-emitter: fresh-looking but an at-attempt wall class (S275)
+                # jtbl-dispatch: fresh-looking but a mechanical at-attempt wall (S275).
+                # raw-dl-emitter: advisory since S293 -- counts as fresh, tagged for pricing only.
                 status = s["wall_class"].upper()
             else:
                 status = "fresh"
@@ -1143,7 +1152,8 @@ def main():
             f"{sum(s['nested'] for s in stubs)} nested, "
             f"{sum(bool(s.get('intrinsic')) for s in stubs)} intrinsic-hasm, "
             f"{sum(s.get('wall_class') == 'jtbl-dispatch' for s in stubs)} jtbl-dispatch, "
-            f"{sum(s.get('wall_class') == 'raw-dl-emitter' for s in stubs)} raw-dl-emitter"
+            f"{sum(s.get('wall_class') == 'raw-dl-emitter' for s in stubs)} raw-dl-emitter "
+            f"(advisory, counted in fresh since S293)"
         )
         if args.loose_stubs == "main":
             # S280 plateau advisory: `fresh` here is a CEILING, not a clean pool -- the

@@ -3800,7 +3800,26 @@ by `/sprint-plan`:
   rescue it. Parked here so `--carried-check` flags it and it stops reading as `fresh`; re-open only
   behind a lever for that class, not on size order.
 
-- **(S292 STATE OF THE `main` POOL — supersedes the S291 note below)** After S292,
+- **(S293 STATE OF THE `main` POOL — supersedes the S292 note below)** After S293,
+  `--loose-stubs main` reports **300 stubs and 29 fresh**: 259 carried-wall, 33 jtbl-dispatch, 67
+  raw-dl-emitter (advisory, counted in fresh), 11 nested, 1 intrinsic-hasm. **The S292 "smallest-first
+  `main` is over" verdict was wrong, and wrong for a checkable reason:** the 0-fresh reading came from
+  `RAW-DL-EMITTER` excluding 70 rows on a wall verdict S258 had already retired. S293 banked the three
+  smallest members of that class 3/3 — two single-composite one-liners and one 12-command glyph
+  emitter — with no permuter, no `allocno_report.py` and no compiler-source dive. The tag is advisory
+  as of S293, so the 29 fresh rows are real work, not a re-labelling of walls.
+  **The vein, smallest-first from here:** `func_80074968` (832 B, 23 `lui` / 14 `ori`),
+  `func_8009548C` (868 B, 44 `lui`), `func_800734F0` (972 B),
+  `update_vertex_texture_coords_per_frame` (976 B), `func_80084EBC` (1004 B). Price these as
+  DL-reconstruction slices, not as clean leaves: the recipe is find the `gbi.h` composite first,
+  re-derive every command word from the `.s` store trace, `gDPXxx(glistp++, ...)` never array
+  indexing, and build under the F3DEX2 profile. Expect the genuine store-giv carry subtype
+  (`func_8007624C`'s custom `>>2`-quantized colour, whose `_SHIFTL` masks emit `andi`s the ROM lacks)
+  somewhere in the tail — the `.s` tell cannot separate it from the composite-mappable subtype, which
+  is exactly why the tag is advisory rather than excluding.
+  Running tally of re-open-on-carry stays S280 2/2, S281 2/2, S282 0/2, S292 1/3; S293 ran no carries.
+
+- **(S292 STATE OF THE `main` POOL — superseded by S293 above)** After S292,
   `--loose-stubs main` reports **303 stubs and 0 fresh**: 259 carried-wall, 33 jtbl-dispatch, 70
   raw-dl-emitter, 11 nested, 1 intrinsic-hasm. Smallest-first `main` is over, so a `main` sprint is
   now a crack slice by construction. S292 ran the first one on measured allocno arithmetic and banked
