@@ -211,7 +211,138 @@ void capture_frame_snapshot(Gfx** gfxp) {
   *gfxp = gfx;
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_8008D100", func_800939E8);
+/* Asset block for the mode-3 scrolling pattern: 16-entry TLUT at +8, the
+ * 64x64 4-bit CI texels at +0x28. */
+extern void* D_800FF4F0;
+/* Low byte of D_800C7310: the effect-2 grey level. */
+extern u8 D_800C7313;
+extern s32 D_800C7314;
+
+/**
+ * Emits the screen-transition overlay for the current effect id (D_800C730C).
+ *
+ * The shared preamble puts the RDP in 1-cycle MODULATEI_PRIM, so every variant
+ * below tints its texture with the primitive colour it sets. The fade level in
+ * D_800C7310 is stepped down 0x20 per call until it reaches 0x80.
+ *
+ * Effect 3 tiles a 64x64 4-bit CI pattern over the play area, scrolling it 32
+ * texels per call off the D_800C7314 tick, then puts the cycle type and TLUT
+ * back. Effects 0 and 2 replay the captured frame at D_800C5EE0 as RGBA16 --
+ * white for 0, grey (D_800C7313) for 2. Any other effect replays the same
+ * buffer read as IA16 under an orange primitive colour.
+ *
+ * The replay loops copy 6 scanlines per texture rectangle over 38 strips, the
+ * last one being the 224-line remainder. `lines` is declared inside the loop
+ * body on purpose: at function scope the two loops share one pseudo whose live
+ * range spans both, which makes it a global allocno and costs an extra
+ * callee-saved register; block scope keeps it a short local quantity in $v0.
+ * D_800C5EE0 is read inside the loop because the display-list stores may alias
+ * it, so the load cannot be hoisted.
+ */
+void emit_screen_transition_overlay(Gfx** gfxp) {
+  Gfx* gfx = *gfxp;
+  s32 i;
+  s32 scroll;
+  u32 asset;
+
+  if (D_800C7310 > 0x80) {
+    D_800C7310 -= 0x20;
+  }
+
+  gDPPipeSync(gfx++);
+  gDPPipeSync(gfx++);
+  gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+  gDPPipeSync(gfx++);
+  gDPSetCombineMode(gfx++, G_CC_MODULATEI_PRIM, G_CC_MODULATEI_PRIM);
+
+  if (D_800C730C == 3) {
+    scroll = D_800C7314 + 1;
+    D_800C7314 = scroll;
+    scroll *= 32;
+    asset = (u32)D_800FF4F0;
+
+    gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
+    gDPPipeSync(gfx++);
+    gDPLoadTextureBlock_4b(gfx++, (asset + 0x28) & ~7, G_IM_FMT_CI, 64, 64, 0,
+                           0, 0, 6, 6, G_TX_NOLOD, G_TX_NOLOD);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+    gDPLoadTLUT_pal16(gfx++, 0, (asset + 8) & ~7);
+    gDPPipeSync(gfx++);
+    gSPTextureRectangle(gfx++, 8 << G_TEXTURE_IMAGE_FRAC,
+                        8 << G_TEXTURE_IMAGE_FRAC, 312 << G_TEXTURE_IMAGE_FRAC,
+                        232 << G_TEXTURE_IMAGE_FRAC, G_TX_RENDERTILE, scroll,
+                        scroll, 1 << 10, 1 << 10);
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_NONE);
+    gDPPipeSync(gfx++);
+  } else if (D_800C730C == 0 || D_800C730C == 2) {
+    if (D_800C730C == 0) {
+      gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
+    } else {
+      gDPSetPrimColor(gfx++, 0, 0, D_800C7313, D_800C7313, D_800C7313, 255);
+    }
+
+    for (i = 0; i != 38; i++) {
+      s32 lines = (i != 37) ? 6 : 2;
+
+      gDPSetTextureImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 320,
+                         ((u32)D_800C5EE0 + i * (320 * 2 * 6)) & ~7);
+      gDPSetTile(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 76, 0, G_TX_LOADTILE, 0, 0,
+                 0, 0, 0, 0, 0);
+      gDPLoadSync(gfx++);
+      gDPLoadTile(gfx++, G_TX_LOADTILE, 8 << G_TEXTURE_IMAGE_FRAC,
+                  8 << G_TEXTURE_IMAGE_FRAC, 311 << G_TEXTURE_IMAGE_FRAC,
+                  (8 + lines - 1) << G_TEXTURE_IMAGE_FRAC);
+      gDPPipeSync(gfx++);
+      gDPSetTile(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 76, 0, G_TX_RENDERTILE, 0,
+                 0, 0, 0, 0, 0, 0);
+      gDPSetTileSize(gfx++, G_TX_RENDERTILE, 8 << G_TEXTURE_IMAGE_FRAC,
+                     8 << G_TEXTURE_IMAGE_FRAC, 311 << G_TEXTURE_IMAGE_FRAC,
+                     (8 + lines - 1) << G_TEXTURE_IMAGE_FRAC);
+      gDPPipeSync(gfx++);
+      gSPScisTextureRectangle(
+          gfx++, 8 << G_TEXTURE_IMAGE_FRAC, (8 + i * 6) << G_TEXTURE_IMAGE_FRAC,
+          312 << G_TEXTURE_IMAGE_FRAC,
+          (8 + i * 6 + lines) << G_TEXTURE_IMAGE_FRAC, G_TX_RENDERTILE, 8 << 5,
+          8 << 5, 1 << 10, 1 << 10);
+      gDPPipeSync(gfx++);
+    }
+  } else {
+    gDPSetPrimColor(gfx++, 0, 0, 0x90, 0x68, 0x20, 255);
+
+    for (i = 0; i != 38; i++) {
+      s32 lines = (i != 37) ? 6 : 2;
+
+      gDPSetTextureImage(gfx++, G_IM_FMT_IA, G_IM_SIZ_16b, 320,
+                         ((u32)D_800C5EE0 + i * (320 * 2 * 6)) & ~7);
+      gDPSetTile(gfx++, G_IM_FMT_IA, G_IM_SIZ_16b, 76, 0, G_TX_LOADTILE, 0, 0,
+                 0, 0, 0, 0, 0);
+      gDPLoadSync(gfx++);
+      gDPLoadTile(gfx++, G_TX_LOADTILE, 8 << G_TEXTURE_IMAGE_FRAC,
+                  8 << G_TEXTURE_IMAGE_FRAC, 311 << G_TEXTURE_IMAGE_FRAC,
+                  (8 + lines - 1) << G_TEXTURE_IMAGE_FRAC);
+      gDPPipeSync(gfx++);
+      gDPSetTile(gfx++, G_IM_FMT_IA, G_IM_SIZ_16b, 76, 0, G_TX_RENDERTILE, 0, 0,
+                 0, 0, 0, 0, 0);
+      gDPSetTileSize(gfx++, G_TX_RENDERTILE, 8 << G_TEXTURE_IMAGE_FRAC,
+                     8 << G_TEXTURE_IMAGE_FRAC, 311 << G_TEXTURE_IMAGE_FRAC,
+                     (8 + lines - 1) << G_TEXTURE_IMAGE_FRAC);
+      gDPPipeSync(gfx++);
+      gSPScisTextureRectangle(
+          gfx++, 8 << G_TEXTURE_IMAGE_FRAC, (8 + i * 6) << G_TEXTURE_IMAGE_FRAC,
+          312 << G_TEXTURE_IMAGE_FRAC,
+          (8 + i * 6 + lines) << G_TEXTURE_IMAGE_FRAC, G_TX_RENDERTILE, 8 << 5,
+          8 << 5, 1 << 10, 1 << 10);
+      gDPPipeSync(gfx++);
+    }
+  }
+
+  *gfxp = gfx;
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_8008D100", func_80094228);
 
