@@ -113,23 +113,16 @@ dashboard). Target selection is `tools/pick_target.py`, not a stored roadmap.
       baseline first — the carve + the full C reconstruction commit together. Price such a leaf as a
       full vertical slice (not a quick getter), and do not pre-carve it at the plan gate. See
       `docs/hazards.md#switch-jtbl-dispatch` (S265 func_8005CF78).
-    - **Also grep the `BACKLOG.md` carry list by fn name (S239+S240 DoR miss, recurred).** A wall
-      characterized in a prior sprint often lives only in the `BACKLOG.md ## Carry-overs` entry (or a
-      `docs/wip/<fn>.near-match.md`), not as an in-file comment above the stub — so the in-file grep above
-      misses it and the leaf re-surfaces as "fresh." S239 (`func_8006C8CC`) and S240
-      (`func_8006D164`/`func_8006DF84`) both re-committed already-characterized BACKLOG carries this way.
-      At the plan gate, `grep -n '<candidate_fn>' BACKLOG.md` for each committed leaf; if it is a listed
-      carry, either skip it or label the commit a crack-attempt/deepen slice (not a fresh leaf). Write new
-      wall characterizations to `docs/wip/<fn>.near-match.md` at discovery (not only in the retro digest),
-      so the next sprint's DoR finds them.
-      - **Tool (S268): `venv/bin/python3 tools/pick_target.py --carried-check <fn>...`** does this
-        check in one command — it prints `CARRIED-WALL`/`fresh` per fn against the union of the
-        `BACKLOG.md ## Carry-overs` parked names and every `docs/wip/<fn>.*.md` note (catching the
-        wip-doc-only walls a BACKLOG grep misses), and exits non-zero if any is a wall. Run it on
-        every hand-mined leaf at the plan gate. S268's two smallest `.s`-sized "fresh" leaves
-        (`func_8005DE88`, `func_8005B150`) were BACKLOG-only carries this flags. (8th recurrence of
-        the fresh-leaf miss; the `carried-wall:<fn>` in-row ranker tag remains a follow-up — the
-        detector is a gate command, not yet a ranked-row column.)
+    - **A prior sprint's wall often lives only in `BACKLOG.md ## Carry-overs` or a
+      `docs/wip/<fn>.*.md` note, not as an in-file comment, so the in-file grep above misses it and
+      the leaf re-surfaces as "fresh" (S239, S240, S268; 8 recurrences).
+      `venv/bin/python3 tools/pick_target.py --carried-check <fn>...` is the check: it prints
+      `CARRIED-WALL`/`fresh` per fn against the union of both sources and exits non-zero if any is a
+      wall. Run it on every hand-mined leaf at the plan gate.** A flagged leaf is either skipped or
+      labelled a crack-attempt/deepen slice, never priced as a fresh leaf. Write new wall
+      characterizations to `docs/wip/<fn>.near-match.md` at discovery, not only into the retro digest,
+      so the next sprint's DoR finds them. (The `carried-wall:<fn>` in-row ranker tag remains a
+      follow-up; the detector is a gate command, not yet a ranked-row column.)
       - **Companion tool (S269): `venv/bin/python3 tools/pick_target.py --nested-check <fn>...`**
         flags a GCC nested function among a fresh pack's smallest leaves — its `.s` prologue spills an
         incoming `$v0` static chain (`sw $v0,K($sp)` + `addu $reg,$v0,$zero`) instead of taking its

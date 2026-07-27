@@ -475,6 +475,66 @@ def dl_twin_pairs(stubs):
     return stubs
 
 
+_FP_ANY_RE = re.compile(
+    r"\b(lwc1|swc1|mtc1|mfc1|cvt\.[sdw]\.[sdw]|trunc\.[wl]\.[sd]|bc1[tf]l?"
+    r"|c\.[a-z]+\.[sd]|(?:add|sub|mul|div|neg|abs|sqrt|mov)\.[sd])\b"
+)
+_FP_TOINT_RE = re.compile(r"\b(trunc\.[wl]\.[sd]|cvt\.[wl]\.[sd])\b")
+_FP_ARITH_RE = re.compile(r"\b(?:add|sub|mul|div|neg|abs|sqrt)\.[sd]\b")
+_FP_SWC1_RE = re.compile(r"\bswc1\b")
+_FP_MFC1_RE = re.compile(r"\bmfc1\b")
+_FP_MIN = 8  # below this many FP mnemonics the body is not FP-shaped enough to classify
+_FP_SCHED_SWC1_MIN = 8  # float stores at/above this, with no to-int conversion, = a stored-FP body
+
+
+def fp_class_tell(fn):
+    """DoR check: <fn>'s FP mnemonics classified by what CONSUMES them. Returns "" / "fp-coord" /
+    "fp-sched" / "fp-mixed".
+
+    S290 fixed how to MEASURE FP here (count mnemonics, never `grep '$f[0-9]'`, which returns 0 on a
+    heavily-FP function). S295 is why the count alone is not the class. Its gate read `fp=31` on
+    func_800880A0 as a risk tell and designated it the pack's first drop; every one of those 31
+    mnemonics was rectangle-corner conversion inside a textbook composite emitter, and it banked
+    byte-exact on the first build with zero iterations. What the floats FEED is the class:
+
+      - "fp-coord": floats exist only to become integers. `trunc.w.s`/`cvt.w.s` present, `mfc1`
+        present (the result crosses to a GPR to become a DL word or an integer argument), few float
+        stores, and no more float arithmetic than conversions. Cheap -- the FP is 10.2 fixed-point
+        coordinate conversion, not a compute body. S295 func_800880A0: 31 total, toint=6, mfc1=6,
+        swc1=2, arith=6.
+      - "fp-sched": floats are computed and STORED -- no to-int conversion at all and >= 8 `swc1`.
+        This is the S276/S277/S290 FP-scheduler class (a walked float table). S290 func_8005D3B8:
+        161 total, toint=0, swc1=36, cvt.s.w=22, arith=37, dropped at the gate on exactly this shape.
+      - "fp-mixed": real float arithmetic that is neither purely converted out nor purely stored.
+        Unclassified, so price it as risk. S295 rejected func_8006AEA4 (arith=14 > toint=8) and
+        func_80083AC8 (arith=13 > toint=3) land here.
+
+    ADVISORY ONLY, and deliberately so: it does not feed `_is_fresh`. It is a first-sprint heuristic
+    calibrated on six functions, two of them with a known outcome, which is thin -- and the S275 tag
+    is the standing lesson about what over-trusting a fresh `.s` heuristic costs. Read it as a
+    pricing hint at the plan gate, then read the `.s`. Reads only <fn>'s own `.s` (cheap)."""
+    path = _find_asm_s(fn)
+    if not path:
+        return ""
+    try:
+        with open(path) as f:
+            body = f.read()
+    except OSError:
+        return ""
+    total = len(_FP_ANY_RE.findall(body))
+    if total < _FP_MIN:
+        return ""
+    toint = len(_FP_TOINT_RE.findall(body))
+    swc1 = len(_FP_SWC1_RE.findall(body))
+    mfc1 = len(_FP_MFC1_RE.findall(body))
+    arith = len(_FP_ARITH_RE.findall(body))
+    if toint and mfc1 and swc1 <= toint and arith <= toint:
+        return "fp-coord"
+    if not toint and swc1 >= _FP_SCHED_SWC1_MIN:
+        return "fp-sched"
+    return "fp-mixed"
+
+
 _STUB_FN_RE = re.compile(r'INCLUDE_ASM\("[^"]+",\s*([A-Za-z0-9_]+)\)')
 _STUB_SIZE_RE = re.compile(r"0x([0-9A-Fa-f]+)")
 
@@ -531,6 +591,7 @@ def loose_stubs(seg):
                     "nested": nested_tell(fn),
                     "intrinsic": intrinsic_stub_tell(fn),
                     "wall_class": wall_class_tell(fn),
+                    "fp_class": fp_class_tell(fn),
                 }
             )
     out.sort(key=lambda r: (r["size"] if r["size"] is not None else 1 << 30, r["fn"]))

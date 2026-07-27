@@ -1474,6 +1474,35 @@ Three honest caveats:
   STRUCTURAL symptom, not evidence of a coloring problem — S285 makes 4 of the last 6 carry verdicts
   refuted, and this one was refuted by the same agent that wrote it, hours later, with no new tool.
   Push: local.
+- **Sprint 295** — the `dl-emitter` vein at 425-528 instructions. **+3 banked, 0 carried, 0 permuter,
+  0 re-open, 0 stuck-far** — a third consecutive all-zero quality row. Zero gate enablers.
+  `func_800880A0` -> `draw_animated_status_icon` (508/508, first build, zero iterations),
+  `emit_sky_horizon_compositor_dl` (425/425, 5 iterations), `func_800939E8` ->
+  `emit_screen_transition_overlay` (528/528). All three hosts stay partial, so **banked 0pt**;
+  md5-candidate files unchanged at 230 of 265, `--loose-stubs main` 296 -> 293. Seed 8 (classical);
+  realized **8 / residual 0** (−1 for the first-build leaf, +1 for a novel bank-gotcha; the mid-sprint
+  `SPRINT.md` proposal of 7/−1 was scored before that gotcha surfaced and the PO took 8/0).
+  Rolling-5 (S291-S295): 0+0+0+0+0 pt banked, all partial-file sprints; value = 2+1+3+4+3 matched.
+  Quality **0 / 0 / 0 / 0**.
+  The class now stands at **10 of 10 across S293-S295, 154 to 528 instructions**, still with zero
+  permuter runs and zero compiler-source dives; the composite recipe's size ceiling is not yet found.
+  KEY, and it is a gate lesson: **an FP mnemonic COUNT does not price a leaf; what the floats feed
+  does.** The gate read `fp=31` on `func_800880A0`, called it the pack's designated drop, and it
+  banked byte-exact on the first build with zero iterations — all 31 mnemonics were 10.2
+  coordinate conversion inside four SDK composites. Generalised: the tells filter *classes*, not
+  difficulty within a class, since both leaves that cost iterations read clean on every tell the
+  ranker has. Second result: **split only the value whose live range must die between two loops** —
+  at function scope `i` and `lines` share one range spanning both loops, which hoists the `(i != 37)`
+  chain per loop into its own register (205 differing instructions); block-scoping *both* still
+  misses at 131 because the ROM keeps `i` in `$t8` in both loops, so it is one pseudo. Two subagents
+  on two functions in two files reached that split independently.
+  Retro applied 4 of 5 (#5, bounding what the tells buy, was not selected) plus 2 retirements
+  (gates.md: the manual `BACKLOG.md`-grep DoR procedure, fully superseded by `--carried-check`,
+  30680 -> **29984**, net **−696 B**; levers.md: `temp-scope-and-live-range-steer-a-copy` +
+  `variable-reuse-is-a-per-register-lever` merged into `scope-and-live-range-steer-allocation`,
+  10451 -> **10182/10240**, net **−269 B**). A per-surface budget needed a second PO decision
+  mid-gate for the third sprint running. `make test-tools` 135 passed, 1 skipped; prompt-lint
+  baseline re-frozen. Push: local.
 - **Sprint 294** — the `RAW-DL-EMITTER` vein at 1.5-2x the size. **+4 banked, 0 carried, 0 permuter,
   0 re-open, 0 stuck-far** — a second consecutive all-zero quality row, and the first 4-bank sprint on
   `main`. Zero gate enablers. `func_8006A84C` -> `load_texture_block` (291/291, first build, zero

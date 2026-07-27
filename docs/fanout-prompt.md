@@ -58,10 +58,16 @@ needs. Or a terminal verdict with a `file:line` citation into the compiler or as
 written to `docs/wip/{{FN}}.near-match.md`. Both are real results: a cited no-lever verdict retires
 the wall so no later sprint re-grinds it.
 
-**Reporting.** On a mesh harness, send your final verdict to `main` before going idle; an idle
-notification is not a deliverable, and if you launch a background permuter you must wake when it exits
-and report its final outcome. On a Task-tool harness your return value is the verdict and this clause
-does not apply.
+**Report your extern collisions.** Your isolated build cannot see the host file, so a declaration it
+already carries for one of your `extern`s at a different type is invisible to you and surfaces at
+integration. `grep -n '<sym>' <host .c>` for every `extern` you need and list the ones that exist,
+with their spelling (S295 `D_800E2158`: scalar `void*` in the host, indexed in the new body, correct
+on both sides).
+
+**Reporting.** `nonmatchings/{{FN}}/STATUS` plus a best-so-far `base.c` is the contract; the
+orchestrator recovers from that pair whether or not you return cleanly. State the count (mine/ROM),
+the residual, the winning form, the null results, and the collision list. Return the same as your
+return value when the harness has one, and wake a background permuter's result rather than leaving it.
 
 **Standing policy.** An empty `__asm__ __volatile__("")` scheduling barrier may be used to
 characterize a wall. It is never a bank candidate.

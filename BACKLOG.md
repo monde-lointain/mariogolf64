@@ -3800,7 +3800,39 @@ by `/sprint-plan`:
   rescue it. Parked here so `--carried-check` flags it and it stops reading as `fresh`; re-open only
   behind a lever for that class, not on size order.
 
-- **(S294 STATE OF THE `main` POOL — supersedes the S293 note below)** After S294,
+- **(S295 STATE OF THE `main` POOL — supersedes the S294 note below)** After S295,
+  `--loose-stubs main` reports **293 stubs and 12 fresh**: 269 carried-wall, 33 jtbl-dispatch, 60
+  `dl-emitter` (a pricing tag, counted in fresh), 11 nested, 1 intrinsic-hasm. **The class now stands
+  at 10 of 10 across S293-S295, 154 to 528 instructions**, still with zero permuter runs and zero
+  compiler-source dives. The recipe's size ceiling has not been found; per-leaf cost by sprint is
+  S293 ~1 build at ~175 instructions, S294 ~2 at ~285, S295 ~2.7 at ~487.
+  **New ranker column: `fp-coord` / `fp-sched` / `fp-mixed` (`fp_class_tell`, S295).** An FP mnemonic
+  *count* does not price a leaf; what the floats feed does. S295's gate read `fp=31` on
+  `func_800880A0`, called it the pack's designated drop, and it banked byte-exact on the first build
+  with zero iterations — every mnemonic was 10.2 coordinate conversion. `fp-coord` means converted out
+  to integers (cheap), `fp-sched` means computed and stored (the S276/S277/S290 class), `fp-mixed`
+  means real float arithmetic, price as risk. **Advisory only**: it does not feed `_is_fresh`, and it
+  is calibrated on six functions with two known outcomes, which is thin — read it as a pricing hint,
+  then read the `.s`. The durable half is the generalisation: **the tells filter classes, not
+  difficulty within a class.** Both S295 leaves that cost iterations read clean on every tell.
+  **The vein, smallest-first from here** (with the new column): `func_8006AEA4` (1704 B, `fp-mixed`),
+  `func_8006BC80` (1896 B, `fp-mixed`, jal=12), `func_800880A0`'s siblings `func_80083AC8` (2040 B,
+  `fp-mixed`) and `func_8008534C` (3148 B, `fp-mixed`), `func_8007C5D8` (2360 B, `fp-coord` but 6
+  branch-likely — a separate tell), `func_800947A8` (2472 B, `fp-mixed`), `func_8008D3F4` (2536 B,
+  `fp-mixed`), and the two fp=0 rows `func_8009232C` (2788 B) and `func_8002CDA8` (3352 B), which are
+  the cleanest by every column. `emit_ball_offscreen_indicator` (3188 B) reads `fp-sched`; treat it as
+  the risk row. `emit_sky_dome_dl`, which S294 named the cleanest next leaf, now reads `CARRIED-WALL`
+  under `--carried-check` and is a re-open candidate, not a fresh leaf.
+  Everything in the S294 note below still holds: do not re-attempt the composite-vs-custom-packing
+  split; order `dl-twin` pairs adjacently; an uncallable composite is still the composite.
+  **Second S295 lever: split only the value whose live range must die between two loops** — one the
+  ROM keeps in a single register across both is one pseudo and stays at function scope. Found
+  independently by two subagents on two functions; folded into
+  `docs/levers.md scope-and-live-range-steer-allocation`.
+  Running tally of re-open-on-carry stays S280 2/2, S281 2/2, S282 0/2, S292 1/3; S293, S294 and S295
+  ran no carries.
+
+- **(S294 STATE OF THE `main` POOL — superseded by S295 above)** After S294,
   `--loose-stubs main` reports **296 stubs and 20 fresh**: 264 carried-wall, 33 jtbl-dispatch, 63
   `dl-emitter` (a pricing tag, counted in fresh), 11 nested, 1 intrinsic-hasm. **The class question
   is closed: S293+S294 banked its seven smallest members 7/7** at 154-307 instructions, zero permuter
@@ -3832,7 +3864,7 @@ by `/sprint-plan`:
   Running tally of re-open-on-carry stays S280 2/2, S281 2/2, S282 0/2, S292 1/3; S293 and S294 ran
   no carries.
 
-- **(S293 STATE OF THE `main` POOL — superseded by S294 above)** After S293,
+- **(S293 STATE OF THE `main` POOL — superseded by S295 above)** After S293,
   `--loose-stubs main` reports **300 stubs and 29 fresh**: 259 carried-wall, 33 jtbl-dispatch, 67
   raw-dl-emitter (advisory, counted in fresh), 11 nested, 1 intrinsic-hasm. **The S292 "smallest-first
   `main` is over" verdict was wrong, and wrong for a checkable reason:** the 0-fresh reading came from

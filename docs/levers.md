@@ -38,15 +38,15 @@ These have a `docs/hazards.md` section; read it rather than the line here.
   bound copy `n = bound;` (S288), or a `do {} while (0)` note round a subset, reweighting only those
   refs (S292; also bars the sched hoist, S287). Priority orders within a class; `find_reg` picks
   callee-saved first.
-- **temp-scope-and-live-range-steer-a-copy** -- a missing ROM `move` was deleted by `global.c:790-823`
-  (equal copies merged when both pseudos prefer one register) or tied by `combine_regs`
-  (`local-alloc.c:472/1290/1587`). Knobs: a named temp ending the value's live range early rather than
-  inlining it (S293), or a block-local temp hoisted to function scope. Both ways: not naming a
-  subexpression leaves `loop.c` to birth givs in body order (S294). Terminal only when six forced
-  registers reroute a read.
-- **variable-reuse-is-a-per-register-lever** -- reuse pulls a load forward by anti-dependency, and a
-  pointer spanning two loops permutes the earlier one: split those. The inverse recolours, and is the
-  main tool for a callee-saved permutation, one register at a time (S287: four reuses, one each).
+- **scope-and-live-range-steer-allocation** -- a value's scope and live range pick its register and
+  decide whether its copy survives: equal copies merge when both pseudos prefer one register
+  (`global.c:790-823`), `combine_regs` ties others (`local-alloc.c:472/1290/1587`), and reuse pulls a
+  load forward by anti-dependency. Knobs: name a temp to end a live range early rather than inlining
+  it (S293); hoist a block-local temp to function scope; split a value spanning two loops, but only
+  what must die between them -- one the ROM keeps in a single register across both is one pseudo, and
+  a range spanning both becomes a global allocno that hoists the invariant chain per loop into its own
+  register (S295, twice). The inverse recolours, one register at a time (S287). Terminal only when six
+  forced registers reroute a read.
 - **abs-compare-form-steers-allocno** -- `(x <= -1) ? -x : x` versus `(x < 0)` flips a single magnitude
   allocno; a cheap lever to try before the permuter.
 - **dead-frame-levers** -- for a frame-only diff: `s32 unused[(ROM_frame-0x18)/4]` (pure dead frame),

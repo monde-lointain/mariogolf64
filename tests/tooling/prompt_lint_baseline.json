@@ -70,9 +70,9 @@
     "provenance": 0
   },
   "docs/fanout-prompt.md": {
-    "bytes": 3596,
+    "bytes": 4090,
     "caps": 0,
-    "lines": 67,
+    "lines": 73,
     "max_nesting": 1,
     "provenance": 0
   },
@@ -91,7 +91,7 @@
     "provenance": 80
   },
   "docs/levers.md": {
-    "bytes": 10159,
+    "bytes": 10182,
     "caps": 0,
     "lines": 140,
     "max_nesting": 1,
@@ -112,14 +112,14 @@
     "provenance": 0
   },
   "docs/workflow/gates.md": {
-    "bytes": 30680,
+    "bytes": 29984,
     "caps": 0,
-    "lines": 356,
+    "lines": 349,
     "max_nesting": 4,
-    "provenance": 8
+    "provenance": 6
   },
   "docs/workflow/loop.md": {
-    "bytes": 45918,
+    "bytes": 45917,
     "caps": 0,
     "lines": 501,
     "max_nesting": 5,

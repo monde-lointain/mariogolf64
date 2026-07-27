@@ -386,7 +386,7 @@ below).
     the permuter never scored 0 (base 515, best 70 in 130k iterations, 60 on a re-import), but its
     best candidate differed from `base.c` by one line -- it had assigned a subscript into an existing
     local before the test. Applying that reuse by hand cut the residual to 6 operands, and
-    generalizing it (`docs/levers.md` variable-reuse-is-a-per-register-lever) closed the function in
+    generalizing it (`docs/levers.md` scope-and-live-range-steer-allocation) closed the function in
     three more builds. So run it, then
     `diff nonmatchings/<fn>/base.c nonmatchings/<fn>/output-<best>-1/source.c` and generalize what it
     did, discarding its `volatile`-on-a-prototype style hacks. This is the actionable half of the

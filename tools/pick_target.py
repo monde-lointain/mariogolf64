@@ -1146,7 +1146,11 @@ def main():
             # the same body shape, so banking either one makes the other a near-mechanical replay
             # (S294 func_80031450 / func_8009351C). Order twins adjacently in the committed backlog.
             twin = f"  dl-twin:{s['dl_twin']}" if s.get("dl_twin") else ""
-            print(f"{sz:>6} {status:14} {s['fn']:28} {s['file']}{twin}")
+            # An FP mnemonic COUNT does not price a leaf; what the floats feed does (S295). fp-coord
+            # = converted out to integers (cheap), fp-sched = computed and stored (the S276/S277/S290
+            # class), fp-mixed = real float arithmetic, price as risk. Advisory: not in `fresh`.
+            fpc = f"  {s['fp_class']}" if s.get("fp_class") else ""
+            print(f"{sz:>6} {status:14} {s['fn']:28} {s['file']}{twin}{fpc}")
         n_fresh = sum(1 for s in stubs if _is_fresh(s))
         print(
             f"# {len(stubs)} stubs in src/{args.loose_stubs}/: {n_fresh} fresh, "
@@ -1156,7 +1160,11 @@ def main():
             f"{sum(s.get('wall_class') == 'jtbl-dispatch' for s in stubs)} jtbl-dispatch, "
             f"{sum(s.get('wall_class') == 'dl-emitter' for s in stubs)} dl-emitter "
             f"(pricing tag, counted in fresh; wall framing retired S294 after 7/7 banked), "
-            f"{sum(bool(s.get('dl_twin')) for s in stubs)} in dl-twin groups"
+            f"{sum(bool(s.get('dl_twin')) for s in stubs)} in dl-twin groups, "
+            f"FP by consumer: {sum(s.get('fp_class') == 'fp-coord' for s in stubs)} fp-coord "
+            f"(converted out, cheap), "
+            f"{sum(s.get('fp_class') == 'fp-sched' for s in stubs)} fp-sched, "
+            f"{sum(s.get('fp_class') == 'fp-mixed' for s in stubs)} fp-mixed (advisory, S295)"
         )
         if args.loose_stubs == "main":
             # S280 plateau advisory: `fresh` here is a CEILING, not a clean pool -- the
@@ -1188,7 +1196,13 @@ def main():
                 "`grep '$f[0-9]'` -- the register grep returns 0 on a heavily-FP function here and "
                 "prices it as a clean integer leaf, the opposite of its class. "
                 "S290 dropped func_8005D3B8 on that corrected count (36 swc1 / 31 lwc1 / "
-                "22 cvt.s.w over two game float tables, not an fdlibm pool)."
+                "22 cvt.s.w over two game float tables, not an fdlibm pool). "
+                "But the COUNT is not the class (S295): read the `fp-coord`/`fp-sched`/`fp-mixed` "
+                "column, which classifies by what consumes the floats. S295 priced func_800880A0 "
+                "(fp=31) as its designated drop and it banked byte-exact on the first build -- all "
+                "31 mnemonics were 10.2 coordinate conversion in a composite emitter. More "
+                "generally, the tells filter CLASSES, not difficulty within a class: both leaves "
+                "that cost iterations that sprint read clean on every tell the ranker has."
             )
         raise SystemExit(0 if n_fresh else 1)
 
