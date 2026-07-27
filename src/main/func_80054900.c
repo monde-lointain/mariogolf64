@@ -177,13 +177,24 @@ typedef struct {
   u8 pad06[2];
 } TextureDesc;
 
+/* One binding of a model face to an animation slot. `slot` selects the entry of
+ * the character's slot table that drives it; the keyframe list is what the
+ * per-frame path steps through, and is unused on the reset path. */
+typedef struct {
+  s16 keyframeCount;
+  s16 slot;
+  void* keyframes;
+} FaceTexAnim;
+
 /* A model face whose texture is animated: the segmented addresses of its three
- * vertices and of its own display list, the index of the texture to bind, and
- * the s/t pair to write into each of the three vertices. */
+ * vertices and of its own display list, the slots that drive it, the index of
+ * the texture to bind, and the s/t pair to write into each of the three
+ * vertices. */
 typedef struct {
   u32 verts;
   u32 dl;
-  u8 pad08[6];
+  FaceTexAnim* anims;
+  s16 animCount;
   s16 textureIndex;
   u16 texS[3];
   u16 texT[3];
@@ -274,7 +285,55 @@ void activate_texture_anim_slot(s32 id, s32 slot) {
   }
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80054900", func_80055828);
+/* Rebinds every face driven by animation slot `slot` back to that face's own
+ * default texture and s/t pair, undoing whatever keyframe the per-frame walk
+ * last wrote. Shares the seven-command patch at `dl + 0x10` and the segmented
+ * address resolve with `update_vertex_texture_coords`. */
+void reset_face_textures_for_anim_slot(s32 id, s32 slot) {
+  f32 unused[16];
+  u8* cs;
+  TexturedFace* face;
+  TextureDesc* texture;
+  Gfx* gfx;
+  s32 faceIndex;
+  s32 animIndex;
+  s32 vertexIndex;
+
+  faceIndex = 0;
+  (void)&cs;
+  cs = get_character_state(id);
+  if (cs == NULL) {
+    return;
+  }
+  func_8005342C(0, 0, 0x20, 0x2000000, osVirtualToPhysical(*(void**)(cs + 4)));
+
+  while ((face = (*(TexturedFace***)(*(u8**)cs + 0x24))[faceIndex]) != NULL) {
+    texture = *(TextureDesc**)(*(u8**)cs + 0x28) + face->textureIndex;
+
+    for (animIndex = 0; animIndex < face->animCount; animIndex++) {
+      FaceTexAnim* anim = face->anims + animIndex;
+      if (anim->slot != slot) {
+        continue;
+      }
+
+      gfx = (Gfx*)(((face->dl + 0x10) & SEGMENT_OFFSET_MASK) +
+                   ((u32*)(cs + 0x20))[*(s32*)(cs + 0x30)]);
+      gDPLoadTextureBlock(gfx++, (u32)texture->image & ~7, G_IM_FMT_RGBA,
+                          G_IM_SIZ_16b, texture->width, texture->height, 0,
+                          G_TX_CLAMP, G_TX_CLAMP, FACE_TEXTURE_MASK,
+                          FACE_TEXTURE_MASK, G_TX_NOLOD, G_TX_NOLOD);
+
+      for (vertexIndex = 0; vertexIndex < FACE_VERTEX_COUNT; vertexIndex++) {
+        Vtx* vertex = (Vtx*)(((vertexIndex * sizeof(Vtx) + face->verts) &
+                              SEGMENT_OFFSET_MASK) +
+                             ((u32*)(cs + 0x20))[*(s32*)(cs + 0x30)]);
+        vertex->v.tc[0] = face->texS[vertexIndex];
+        vertex->v.tc[1] = face->texT[vertexIndex];
+      }
+    }
+    faceIndex++;
+  }
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80054900", load_character_model);
 
