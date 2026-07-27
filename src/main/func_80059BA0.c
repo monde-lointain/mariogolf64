@@ -1249,7 +1249,48 @@ s32 func_8005D308(void) {
   return r;
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80059BA0", func_8005D334);
+/* Zeroes all four active-player slots: the four s16 fields, the 12-byte name,
+ * and the trailing flag of each 0x16-stride record at D_800FE3D8.
+ *
+ * Two shapes here are codegen levers, not style. The outer loop is a goto loop
+ * because a structured one lets loop.c hoist the `!= 4` bound into its own
+ * register, where the ROM rematerializes it inline each iteration. The
+ * do {} while (0) is a loop note that reweights the refs inside it, which is
+ * what colours `end` below `row` and above the counter ($a1/$a2 as the ROM has
+ * them); without it the counter outranks `end` and the two swap. */
+void clear_player_slots(void) {
+  s32 i;
+  s32 n;
+  s32 off;
+  u8* row;
+  u8* p;
+  u8* end;
+
+  i = 0;
+  do {
+    n = 12;
+    off = 0;
+    row = (u8*)D_800FE3D8 + 8;
+  loop:
+    p = row;
+    end = (u8*)(n + (s32)row);
+    *(s16*)((u8*)D_800FE3D8 + off) = 0;
+    *(s16*)((u8*)D_800FE3D8 + off + 2) = 0;
+    *(s16*)((u8*)D_800FE3D8 + off + 4) = 0;
+    *(s16*)((u8*)D_800FE3D8 + off + 6) = 0;
+    do {
+      *p = 0;
+      p++;
+    } while (p != end);
+  } while (0);
+  *((u8*)D_800FE3D8 + off + 0x14) = 0;
+  off += 0x16;
+  i++;
+  row += 0x16;
+  if (i != 4) {
+    goto loop;
+  }
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80059BA0", func_8005D3B8);
 
