@@ -87,7 +87,57 @@ void load_texture_block_4b(Gfx** pgfx, u32 timg, s32 fmt, s32 width, s32 height,
   *pgfx = gfx;
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_8006A2C0", func_8006A84C);
+/**
+ * Loads one 8-bit (CI8) or 16-bit (RGBA16) texture block into TMEM through the
+ * caller's display-list cursor.
+ *
+ * gDPLoadTextureBlock cannot be used directly here: it token-pastes its `siz`
+ * argument to reach the per-size load-block constants, so `siz` has to be a
+ * literal. The block size is a run-time parameter, so the macro body is spelled
+ * out once per supported size and only the load-block sizing constants differ
+ * between the two arms. The render-tile gDPSetTile still takes the run-time
+ * `siz`, which is why its size field is computed rather than folded.
+ *
+ * The image address is masked to an 8-byte boundary, matching the sibling
+ * loaders above.
+ */
+void load_texture_block(Gfx** pgfx, u32 timg, s32 fmt, s32 siz, s32 width,
+                        s32 height, s32 pal, s32 cms, s32 cmt, s32 masks,
+                        s32 maskt, s32 shifts, s32 shiftt) {
+  Gfx* gfx = *pgfx;
+
+  if (siz == G_IM_SIZ_8b) {
+    gDPSetTextureImage(gfx++, fmt, G_IM_SIZ_8b_LOAD_BLOCK, 1, timg & ~7);
+    gDPSetTile(gfx++, fmt, G_IM_SIZ_8b_LOAD_BLOCK, 0, 0, G_TX_LOADTILE, 0, cmt,
+               maskt, shiftt, cms, masks, shifts);
+    gDPLoadSync(gfx++);
+    gDPLoadBlock(gfx++, G_TX_LOADTILE, 0, 0,
+                 ((width * height + G_IM_SIZ_8b_INCR) >> G_IM_SIZ_8b_SHIFT) - 1,
+                 CALC_DXT(width, G_IM_SIZ_8b_BYTES));
+    gDPPipeSync(gfx++);
+    gDPSetTile(gfx++, fmt, siz, ((width * G_IM_SIZ_8b_LINE_BYTES) + 7) >> 3, 0,
+               G_TX_RENDERTILE, pal, cmt, maskt, shiftt, cms, masks, shifts);
+    gDPSetTileSize(gfx++, G_TX_RENDERTILE, 0, 0,
+                   (width - 1) << G_TEXTURE_IMAGE_FRAC,
+                   (height - 1) << G_TEXTURE_IMAGE_FRAC);
+  } else {
+    gDPSetTextureImage(gfx++, fmt, G_IM_SIZ_16b_LOAD_BLOCK, 1, timg & ~7);
+    gDPSetTile(gfx++, fmt, G_IM_SIZ_16b_LOAD_BLOCK, 0, 0, G_TX_LOADTILE, 0, cmt,
+               maskt, shiftt, cms, masks, shifts);
+    gDPLoadSync(gfx++);
+    gDPLoadBlock(
+        gfx++, G_TX_LOADTILE, 0, 0,
+        ((width * height + G_IM_SIZ_16b_INCR) >> G_IM_SIZ_16b_SHIFT) - 1,
+        CALC_DXT(width, G_IM_SIZ_16b_BYTES));
+    gDPPipeSync(gfx++);
+    gDPSetTile(gfx++, fmt, siz, ((width * G_IM_SIZ_16b_LINE_BYTES) + 7) >> 3, 0,
+               G_TX_RENDERTILE, pal, cmt, maskt, shiftt, cms, masks, shifts);
+    gDPSetTileSize(gfx++, G_TX_RENDERTILE, 0, 0,
+                   (width - 1) << G_TEXTURE_IMAGE_FRAC,
+                   (height - 1) << G_TEXTURE_IMAGE_FRAC);
+  }
+  *pgfx = gfx;
+}
 
 void func_8006ACD8(void) {
   u8 sp10[0x20];
