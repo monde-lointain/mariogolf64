@@ -13,9 +13,13 @@
 #
 # Both sides are normalised so that only real differences show: `$` register prefixes, `%hi/%lo`
 # relocations, immediates, `(0xX >> 16)` / `(0xX & 0xFFFF)` splat spellings, `addu rX,rY,zero` vs
-# `move`, `addiu rX,zero,N` vs `li`, the SDK FP register aliases (`fv0`/`fs1` vs `f0`/`f22`), and
-# EXTERNAL branch/jal targets. The first output line is the instruction COUNT of each side, which is
-# the most actionable number when a body is structurally right but the wrong length.
+# `move`, `addiu rX,zero,N` vs `li`, the SDK FP register aliases (`fv0`/`fs1` vs `f0`/`f22`), `fp` vs
+# `s8`, and EXTERNAL branch/jal targets. The first output line is the instruction COUNT of each side,
+# which is the most actionable number when a body is structurally right but the wrong length.
+#
+# `fp` and `s8` are the SAME register (`$30`): splat prints `fp`, objdump prints `s8`. Every function
+# that uses the frame pointer as a general callee-saved register showed a false row per reference
+# until S288, where 5 of the 7 remaining rows on an already byte-exact `func_8005B314` were this.
 #
 # The FP alias table is a full SDK-name-to-number MAP, not a collapse to one placeholder. It covers
 # every `fv*`/`ft*`/`fa*`/`fs*` name, so an `fa0` line no longer reads as a difference against the
@@ -169,6 +173,7 @@ norm() {
         s/\bbeql ([a-z0-9]+),zero,/beqzl \1,/
         s/\bbnel ([a-z0-9]+),zero,/bnezl \1,/
         s/\b(jal|j|b[a-z]*) [.A-Za-z_][A-Za-z0-9_.]*$/\1 T/
+        s/\bfp\b/s8/g
         s/\bfv0\b/f0/g
         s/\bfv1\b/f2/g
         s/\bft0\b/f4/g

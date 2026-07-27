@@ -1474,6 +1474,42 @@ Three honest caveats:
   STRUCTURAL symptom, not evidence of a coloring problem — S285 makes 4 of the last 6 carry verdicts
   refuted, and this one was refuted by the same agent that wrote it, hours later, with no new tool.
   Push: local.
+- **Sprint 288** — the last identified fdlibm leaf plus two non-FP siblings in
+  `src/main/func_80059BA0.c`. **+2 banked, 1 carried, 1 permuter (plateaued but twice useful), 0
+  re-open, 0 stuck-far.** Zero gate enablers; one per-file `mk/main.mk` `-ffast-math` override, the
+  fifth in the main tree, so `sqrtf()` emits the bare `sqrt.s` (`atanf`/`atan2f` verified
+  fast-math-invariant by the full-make SHA-1). `func_80059BC0` (251/251, FIRST BUILD) is
+  `acosf`, transcribed from fdlibm `e_acosf.c` off the `.s` constants alone; two ROM deviations, both
+  visible before writing a line — the `|x| > 1` arm returns `0.0f` where stock fdlibm returns
+  `(x-x)/(x-x)`, cross-jumping with the `acos(1) = 0` return, and `pi + 2*pio2_lo` / `pio2_hi +
+  pio2_lo` arrive pre-folded as single literals. `func_8005B314` (298/298) is
+  `insert_supershot_record`, a leaderboard insert over a 4x5 block array of 0x68 records, and is the
+  sprint's methodological result: FIVE levers, two of them read out of permuter candidates that never
+  scored near zero (base 620, best 320 over three runs). In order — an explicit
+  `Struct80131510* board` for the ROM's hoisted `$s6` (7 instructions of re-materialized `%hi`);
+  `s32 count = 5;` as a *declaration initializer*, since an assignment adjacent to the loops lets
+  `loop.c` see the initial value, delete the first loop's entry guard AND shrink the frame from the
+  ROM's `-0x930` to `-0x928` (six other placements all miss); a `n = count;` copy at the second
+  `osSyncPrintf`, which folds away yet moves the bound's live range and undoes a three-register
+  allocno rotation [[bound-copy-for-live-range-placement]]; an empty `do {} while (0);` after that
+  call, which ends the basic block so `reorg` stops reaching past the call for the loop's `i = 0` and
+  annulling the guard [[do-while-zero-block-break]]; and descending `switch` case order for the
+  `case 3`/default arm polarity. `func_8005CA48` CARRIED at 296/294 with a correct frame and register
+  roles, residual a `loop.c` placement pair (a symbol hoist the ROM does per access, an `s16` bound
+  hoist the ROM re-derives); below exact count so permuter-ineligible, `docs/wip/` written.
+  md5-candidate **0 delta** (230), matched-fn **+2** (file 17→15 stubs, still partial; repo-wide
+  316→314), descriptive count **+2** (`acosf`, `insert_supershot_record`). Seed 5 (classical); banked
+  0pt (file partial); realized 8 / residual +3 (+1 permuter, +1 carry, +1 novel bank-gotcha).
+  Rolling-5 (S280-S288, S283/S284 excluded as prompt-surface enabler sprints): 3+3+3+2. Quality **0
+  stuck-far / 1 permuter / 1 carried / 0 re-opened**. Retro applied 4 of 4 plus 1 retirement +1
+  PO-approved second cut (A: `cmpfn.sh` `fp`/`s8` normalization; B: a `--carried-check` NEAR-FREE-RETRY
+  guard; C: 2 levers.md entries; D: the loop.md re-read-the-candidates rule; retirement: the three
+  goto-loop bullets folded into one playbook link, plus the levers.md wiki-link history sentence and
+  five compression passes on my own wording to land it at 10232/10240, a net **−1 B** on that
+  surface). Net prompt-surface delta **+542 B**. `make test-tools` 135 passed, `prompt_lint check`
+  green on 18 surfaces. KEY: the plateaued permuter is a lever source to re-read after EVERY hand fix,
+  not once — the two levers that closed `func_8005B314` came from two separate imports, and the second
+  only became visible once the first had taken the body to exact count. Push: local.
 - **Sprint 287** — the 3 committed fresh loose stubs in `src/main/func_80059BA0.c`, a file that
   turned out to be the game's embedded fdlibm. **+3 banked, 0 carried, 1 permuter (plateaued but
   useful), 0 re-open, 0 stuck-far.** Zero gate enablers. `func_8005A2AC` (181/181, 2 iterations) is

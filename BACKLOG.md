@@ -77,6 +77,25 @@ sched coin at exact count, expect a terminal verdict, not a bank. Running tally:
 fan-out-on-exact-count-carry banked = S280 2/2, S281 2/2, S282 0/2. Both S282 carries have rewritten
 `docs/wip/*.near-match.md` and are flagged by `--carried-check`.
 
+**S288 CLOSES the fdlibm vein and sharpens the permuter-as-lever play.** `func_80059BC0` = `acosf`
+banked FIRST BUILD off the S287 constant-check procedure (one enabler: a per-file `-ffast-math`
+override so `sqrtf()` emits the bare `sqrt.s`; the already-banked FP siblings are fast-math-invariant
+under it, proven by the full-make SHA-1). The vein is now mined out, and the S287 note's guess that
+`func_8005A580` is the other libm sibling is WRONG — 99 `jal`s, zero FP instructions, game glue. The
+durable result is methodological: **re-read the plateaued permuter's best candidate after EVERY hand
+fix, not once.** `func_8005B314` took two levers from two separate imports, and the second only became
+visible once the first had brought the body to exact count; neither run scored near zero (base 620,
+best 320 over three runs). Both are now named levers: `bound-copy-for-live-range-placement` (a copy
+that folds away yet moves a loop bound's live range, undoing a three-register `global.c:587`
+rotation) and `do-while-zero-block-break` (an empty `do {} while (0);` ends a basic block so `reorg`
+stops reaching past a call and annulling the next branch — the in-source counterpart to the empty
+`asm volatile` the PO declined in S282, and the preferred first try for that class). Two smaller
+findings worth carrying: a declaration initializer versus an adjacent assignment changes not only
+whether `loop.c` deletes a loop's entry guard but also the FRAME SIZE, so a frame miss can be a
+loop-guard symptom rather than a dead-locals one; and `switch` case order in the source flips the
+branch polarity `emit_case_nodes` picks for the last arm. Running tally of fan-out-free
+permuter-as-lever: S287 1/1, S288 2/2 candidates yielded a lever, 0/3 runs a zero.
+
 **S287: `src/main/func_80059BA0.c` is the game's embedded fdlibm — check a heavy-FP leaf's rodata
 before pricing it a wall.** The plateau advisory treats a heavy-FP main leaf as an invisible
 FP-scheduler wall (S276/S277). That is right for game math, and wrong for a vendored libm: S287
@@ -3725,19 +3744,17 @@ by `/sprint-plan`:
   `NU_CONT_THREAD_ID=6` vs MG64's 5), and that surfaces only at first build unless reconciled here.
   A near-free retry missing any of these is a half-scoped spike — finish the scope before deferring.
 
-- **(S287 NEAR-FREE RETRY — not blocked; deferred only by the 3-to-4 sprint cap)**
-  `src/main/func_80059BA0.c`, the embedded-fdlibm file. S287 banked 3 of 3 here. **(1)** Gate
+- **(S288 NEAR-FREE RETRY — not blocked; deferred only by the 3-to-4 sprint cap)**
+  `src/main/func_80059BA0.c`. S287 banked 3 of 3 and S288 2 of 3 here; 15 stubs remain. **(1)** Gate
   enablers zero: loose `INCLUDE_ASM` stubs in an already-`c` file, no flip, no split. **(2)** The
-  next slice is `func_80059BC0` (0x3EC, 251 instrs, 0 `jal`) — already identified as fdlibm `acosf`
-  from its `pS0-pS5`/`qS1-qS4` coefficients, `pio2_hi` 0x3FC90FDA, `pio2_lo` 0x33A22168 and `pi`
-  0x40490FDA; the zero `jal` count is an inlined `sqrt.s`. `func_8005A580` (0x778) is the other
-  likely libm sibling, un-identified. **(3)** Transcribe from fdlibm's float sources: keep coefficient
-  tables as `extern f32` refs into the shared rodata blob (no carve), keep scalar constants as source
-  literals (this compiler builds SFmode constants with `lui`/`ori`/`mtc1`), and write every
-  float-to-int bit copy as fdlibm's own `do { union ... } while (0)` macro shape, which is
-  load-bearing as a scheduling barrier. **(4)** `func_80059BA0` = `fabsf` remains this file's one
-  characterized terminal carry (post-reload sched coin); do not re-open it as part of this slice.
-  **(5)** The 13 remaining stubs beyond those two are game code, not libm — price them normally.
+  libm vein is MINED OUT — S288 banked `acosf` and the S287 note's guess that `func_8005A580` (0x778)
+  was the other libm sibling is WRONG: 99 `jal`s and zero FP instructions, it is game glue. Every
+  remaining stub here is game code; price it normally, and note the file's own
+  `-ffast-math` override (S288, for `acosf`'s inlined `sqrt.s`) applies to anything added to it.
+  **(3)** `func_80059BA0` = `fabsf` remains this file's one characterized terminal carry (post-reload
+  sched coin); do not re-open it as part of a fresh slice. **(4)** The two S288 levers are the ones
+  most likely to recur in this file's remaining call-glue: a bound-copy for live-range placement and
+  an empty `do {} while (0);` as a `reorg` block break (`docs/levers.md`).
 
 - **(S286 NEAR-FREE RETRY — not blocked; deferred only by the 3-to-4 sprint cap)**
   `src/main/func_80095A10.c` camera-builder family. S285 and S286 each banked 3 of 3 here, so the
@@ -4005,6 +4022,23 @@ by `/sprint-plan`:
     **Next slice:** the tractable smallest-first vein is EXHAUSTED — remaining tail is the proven wall
     cluster (5 fns, permuter-proof) + an FP-dispatcher sprint (NOT more smallest-first). All banked S213
     names are already `func_`/curated; the curated names → cross-repo Ghidra sync.
+
+- **(S288 CARRY — `func_8005CA48`, exact-count-adjacent, `loop.c` placement pair)**
+  `src/main/func_80059BA0.c`. 296/294 with the ROM's frame `-0x30` and every register role matching;
+  fully RE'd (symbol map + body in `docs/wip/func_8005CA48.near-match.md`, attempted C in
+  `nonmatchings/func_8005CA48/attempt.diff`). It resets the four active-player slots
+  (`D_800FE3D8`, stride 0x16) and repopulates them from the saved profiles (`D_800FF1E8`, stride 140)
+  or the flag-0x54 fallback tables. Four source levers landed the shape: one shared counter across the
+  first three loops, that counter zeroed at the HEAD of each outer body (so `reorg` steals the reset
+  into the outer back-edge delay slot instead of duplicating the row shift), `off`/`record` computed
+  inside each arm of the second `flag_is_set` rather than before it, and one reused temp for the three
+  record-field loads (the anti-dependency keeps each load beside its store). Residual, both `loop.c`
+  placement: the profile-array symbol hoists where the ROM addresses it per access (+1), and the `s16`
+  loop bound hoists where the ROM re-derives it each iteration (+2, with −1 back in the loop body) —
+  and the two are coupled, since with the bound hoisted the remaining callee-saved registers go to a
+  different pair of symbols than the ROM's. Below exact count, so NOT permuter-eligible; the next step
+  is a `gcc-2.7.2` `loop.c` `move_movables`/`scan_loop` fan-out, not more source rewriting. Note that
+  fixing the preheader alone reaches 294, since the tally `+1` and the loop-body `−1` already cancel.
 
 - **(S210/S267 MIXED-PARTIAL — carried; 38 of 59 banked)** `src/main/func_80059BA0.c` (main-segment
   `[0x34FA0]` integer-glue/accessor pack). 38 banked (S208 +23 asm-first; S209 +9 compiler-source dive;

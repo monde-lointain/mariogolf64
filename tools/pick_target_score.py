@@ -185,6 +185,17 @@ def carry_over_names():
     )  # guard (1): bound the live region
     if archive:
         region = region[: archive.start()]
+    # Guard (3, S288): excise any bullet whose lead line carries the explicit `NEAR-FREE RETRY`
+    # label. Such an entry parks a READY next slice ("not blocked"), so the functions it names are
+    # recommendations, not walls -- S287 parked `func_80059BC0` that way, having just IDENTIFIED it
+    # as fdlibm acosf, and S288 banked it first-build while `--carried-check` still read CARRIED-WALL.
+    # This is not the lead-line/subject heuristic the S271 note below bars: it keys on an
+    # author-supplied marker, not on inferring a bullet's subject from its prose. A genuine wall named
+    # inside such a bullet is unaffected, because a characterized wall owns a `docs/wip/<fn>.*.md`
+    # note and `carried_wall_names()` unions that in.
+    region = re.sub(
+        r"(?ms)^- \*\*\([^)]*NEAR-FREE RETRY.*?(?=^- \*\*|\Z)", "", region
+    )
     placed = placed_symbols()  # guard (2): real symbols only (names file ∪ func_<vram>)
     # NOTE (S271): this scan deliberately OVER-scoops toward false-POSITIVE. A `func_<vram>` named
     # only as a mid-prose callee of another wall ("... via `func_X`/`func_Y` ...") de-ranks even

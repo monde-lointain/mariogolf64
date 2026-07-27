@@ -386,6 +386,12 @@ below).
     `diff nonmatchings/<fn>/base.c nonmatchings/<fn>/output-<best>-1/source.c` and generalize what it
     did, discarding its `volatile`-on-a-prototype style hacks. This is the actionable half of the
     S282 bound that the guaranteed deliverable is {crack or pass-cited verdict}.
+    - **Re-read the candidates after each hand fix, not once (S288).** `func_8005B314` took two levers
+      from two separate imports: a `n = count;` bound copy that undid a three-register rotation, then,
+      once that body was at exact count, an empty `do {} while (0);` that fixed the last delay slot.
+      Neither run scored near zero (base 620, best 320 across three runs), so a plateau is not the
+      signal to stop reading. Running tally of the play: S287 1/1, S288 2/2 candidates yielded a lever,
+      0/3 runs a zero.
   - **The permuter (asm-differ) is blind to internal branch targets — a permuter score of 0 on a
     pure-branch-target residual is a false positive (S261).** asm-differ normalises a branch to a
     local label and does not distinguish `bne …,<label@0x7c>` from `bne …,<label@0x80>`, the same

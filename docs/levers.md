@@ -8,10 +8,8 @@ and when a residual class suggests a family of fixes.
 
 <scope>
 An index, deliberately not a transcription. These levers were discovered sprint by sprint and their
-full derivations live in the sprint retros and, where one exists, a `docs/hazards.md` section. This
-file exists because the names were previously cited as double-bracketed wiki links into a store only
-one harness can read: a Codex session or a dispatched subagent could resolve none of them. A name plus
-a line of what it does is enough to act on or to look up.
+full derivations live in the sprint retros and, where one exists, a `docs/hazards.md` section. A name
+plus a line of what it does is enough to act on or to look up.
 
 When a lever here has no `docs/hazards.md` section and its line is too thin to act on, that is a
 signal the lever should get a section -- write it the next time a sprint actually uses the lever, as
@@ -25,6 +23,8 @@ These have a `docs/hazards.md` section; read it rather than the line here.
 
 - base register vs displacement -- `docs/hazards.md#base-register-vs-displacement`
 - cross-jump tail merge -- `docs/hazards.md#cross-jump-tail-merge`
+- goto loop (last resort; defeats every `loop.c` pass) --
+  `docs/hazards.md#goto-loop--loopc-never-runs-defeating-strength-reduction-and-bound-hoisting`
 - loop weight and live length regalloc steering -- `docs/hazards.md#loop-weight-and-live-length-regalloc-steering`
 - nested-function static chain spill -- `docs/hazards.md#nested-function-static-chain-spill`
 - signed-divide const quotient destination -- `docs/hazards.md#signed-divide-const-v0v1-quotient-destination`
@@ -36,7 +36,12 @@ These have a `docs/hazards.md` section; read it rather than the line here.
 - **cross-call-live-range-callee-saved-lever** -- declare a post-call value *before* the call to force
   a callee-saved register; initializing it after is the inverse.
 - **global-allocno-compare-livelength-biv-order** -- s-register order follows
-  `floor_log2(nref)*nref/live_length` (`global.c:587`); flip it by adding an eighth reference.
+  `floor_log2(nref)*nref/live_length` (`global.c:587`); flip it with an eighth reference, or with the
+  bound-copy below.
+- **bound-copy-for-live-range-placement** -- when a loop bound must be initialized early (a
+  declaration initializer keeps `loop.c` from folding the entry guard), add `n = bound;` where the
+  ROM's live range starts and loop on `n`. gcc folds the copy, so it is free, and the priority above
+  then ranks it as the ROM does (S288).
 - **local-alloc-combine-regs-block-local-temp** -- hoist a block-local temp to function scope to
   defeat the `combine_regs` tie (`local-alloc.c:472/1290/1587`).
 - **do-while-doubles-reg-n-refs-qty-tier** -- a `do {} while(0)` macro loop doubles `REG_N_REFS` and
@@ -72,8 +77,10 @@ These have a `docs/hazards.md` section; read it rather than the line here.
   qty's live length. Permuter-proof.
 - **fp-const-load-before-fabs** -- an FP constant load schedules before a `fabs` feeding the same
   compare (load 3 outranks fabs 2); an mtc1-zero ties via potential-hazard.
-- **empty-asm-volatile-sched-barrier** -- an empty `asm volatile` is the only zero-byte way to end a
-  scheduling region; the operand form also lengthens a live range for regalloc.
+- **do-while-zero-block-break** -- an empty `do {} while (0);` emits nothing but ends the preceding
+  block, so `reorg` stops reaching past a call for a later insn and annulling the next branch to
+  compensate (S288). Prefer it to an empty `asm volatile`, the other zero-byte region-ender, which
+  also lengthens a live range in its operand form but which the PO declined to bank (S282).
 - **loop-invariant-hoist-order-preheader-regalloc** -- `loop.c` hoists invariants in loop-body emission
   order, so precomputing a division early changes preheader allocation.
 - **aggregate-store-pins-pointer-load** -- a store to a scalar global does not constrain a later load
@@ -85,12 +92,6 @@ These have a `docs/hazards.md` section; read it rather than the line here.
 
 ## Control flow and branch shape
 
-- **goto-loop-defeats-loop-strength-reduction** -- a goto loop defeats every `loop.c` pass including
-  the first-iteration peel; keep the bound in a variable, one per loop.
-- **goto-loop-vs-structured-loop-codegen** -- a structured loop emits `NOTE_INSN_LOOP_BEG`, adding
-  register weight and enabling `loop.c` induction-variable work; a forward goto fixes placement.
-- **goto-is-last-resort** -- try a natural `for`/`while`/`do-while` first; reach for `goto` only when a
-  structured loop provably cannot match.
 - **do-while-not-equal-loop-exit-form** -- rewrite a bounded `for (i < N)` as `do {} while (i != N)` for
   a `bne` with a register bound and a tight frame. The symptom is `slti` where the ROM has `bne`.
   Choose per loop (S287: 3 do-while, 6 structured).
