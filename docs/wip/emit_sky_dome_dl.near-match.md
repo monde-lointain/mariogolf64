@@ -94,12 +94,21 @@ constants the ROM keeps in place appear in the build as exactly this pattern. Th
 did **not** get unified show as `move-insn savings 1 not desirable` and stay in the loop, which is
 what all three do in the ROM.
 
-So the lever is `combine_movables`, not the `threshold -= 3` decay at loop.c:1719/1904: the decay
-cannot plausibly be the mechanism here, since blocking a `savings 1, lifetime 23` move needs the
-threshold under 10 and it starts near 120 and only reaches ~86 after the build's twelve moves. What
-must change is whether the duplicate constant loads in the arms and at the join are recognised as the
-same movable at all. Look for a source form that keeps each command word's load private to its basic
-block.
+**Correction, from a sibling crack in the same sprint: the `threshold -= 3` decay IS a live lever
+here.** An earlier revision of this doc ruled it out arithmetically — "blocking a `savings 1,
+lifetime 23` move needs the threshold under 10, and it starts near 120" — but those savings and
+lifetime figures were assumed, not read out of the dump. `func_8009548C` (S297, `f1d149d`) was cracked
+by exactly this decay: its inner loop hoists twelve display-list constants, the ROM moves **9**, and
+landing on 9 rather than 12 needed exactly **one** invariant insn ahead of the constants at an
+inner-loop `insn_count` of 93 — achieved by splitting `col * 4` into its own statement, since the
+natural two-insn `col * 5` prefix costs three more threshold and strands one more constant. Getting
+the count wrong also spilled a local for three further instructions.
+
+So there are two candidate levers, and the dump distinguishes them: change how many invariant insns
+precede the constants (the decay), or change whether the duplicate loads in the arms and at the join
+are recognised as the same movable at all (`combine_movables`, the `done move-insn matches` lines).
+Read `savings` and `lifetime` per movable off the dump and compute loop.c:1631 rather than estimating
+it — that is what the earlier revision got wrong.
 
 The remaining `-2` is in the prologue (48 against 46) and has not been characterised.
 
