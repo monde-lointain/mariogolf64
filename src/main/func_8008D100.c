@@ -120,7 +120,96 @@ void func_800934CC(s32 arg0) {
   }
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_8008D100", func_8009351C);
+extern u16* nuGfxCfb_ptr;
+extern s32 D_800C7310;
+extern u16* D_800C5EE0;
+/* Source framebuffer for the snapshot copy below. */
+extern u32 D_800FED10;
+
+/**
+ * Copies the previous frame into the snapshot buffer once, the first time the
+ * capture flag asks for it.
+ *
+ * The copy-cycle preamble is emitted unconditionally; the copy itself runs only
+ * on the D_800C7304 == 1 edge, which then advances the flag to 2 so later
+ * frames emit the preamble alone. The 304x224 region at (8, 8) is copied six
+ * scanlines per texrect over 38 strips, the last one being the 224-line
+ * remainder, after which the colour image is pointed back at the live cfb.
+ *
+ * `src` holds the source framebuffer address in a local rather than re-reading
+ * the global: the display-list stores alias it, so the read cannot be hoisted
+ * out of the loop otherwise, and the copy is what lets loop.c strength-reduce
+ * the row address to a single stepped induction variable.
+ */
+void capture_frame_snapshot(Gfx** gfxp) {
+  Gfx* gfx = *gfxp;
+  s32 i;
+  s32 lines;
+
+  gDPPipeSync(gfx++);
+  gDPPipeSync(gfx++);
+  gDPSetRenderMode(gfx++, 0, 0);
+  gDPSetCombineMode(gfx++, G_CC_DECALRGB, G_CC_DECALRGB);
+  gDPPipeSync(gfx++);
+  gDPPipeSync(gfx++);
+  gDPSetCycleType(gfx++, G_CYC_COPY);
+  gDPPipeSync(gfx++);
+  gDPPipeSync(gfx++);
+  gDPSetColorDither(gfx++, G_CD_DISABLE);
+  gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+  gDPPipeSync(gfx++);
+  gDPSetTexturePersp(gfx++, G_TP_NONE);
+  gDPPipeSync(gfx++);
+  gDPSetTextureFilter(gfx++, G_TF_BILERP);
+  gDPPipeSync(gfx++);
+  gDPSetAlphaCompare(gfx++, G_AC_NONE);
+  gDPPipeSync(gfx++);
+  gDPSetTextureLUT(gfx++, G_TT_NONE);
+
+  if (D_800C7304 == 1) {
+    u32 src = D_800FED10;
+
+    D_800C7304 = 2;
+    D_800C7310 = 0xFF;
+
+    gDPPipeSync(gfx++);
+    gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 320,
+                     OS_K0_TO_PHYSICAL(D_800C5EE0) & ~7);
+    gDPPipeSync(gfx++);
+
+    for (i = 0; i != 38; i++) {
+      lines = (i != 37) ? 6 : 2;
+
+      gDPSetTextureImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 320,
+                         (src + i * (320 * 2 * 6)) & ~7);
+      gDPSetTile(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 76, 0, G_TX_LOADTILE, 0, 0,
+                 0, 0, 0, 0, 0);
+      gDPLoadSync(gfx++);
+      gDPLoadTile(gfx++, G_TX_LOADTILE, 8 << G_TEXTURE_IMAGE_FRAC,
+                  8 << G_TEXTURE_IMAGE_FRAC, 311 << G_TEXTURE_IMAGE_FRAC,
+                  (8 + lines - 1) << G_TEXTURE_IMAGE_FRAC);
+      gDPPipeSync(gfx++);
+      gDPSetTile(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 76, 0, G_TX_RENDERTILE, 0,
+                 0, 0, 0, 0, 0, 0);
+      gDPSetTileSize(gfx++, G_TX_RENDERTILE, 8 << G_TEXTURE_IMAGE_FRAC,
+                     8 << G_TEXTURE_IMAGE_FRAC, 311 << G_TEXTURE_IMAGE_FRAC,
+                     (8 + lines - 1) << G_TEXTURE_IMAGE_FRAC);
+      gDPPipeSync(gfx++);
+      gSPScisTextureRectangle(
+          gfx++, 8 << G_TEXTURE_IMAGE_FRAC, (8 + i * 6) << G_TEXTURE_IMAGE_FRAC,
+          311 << G_TEXTURE_IMAGE_FRAC,
+          (8 + i * 6 + lines - 1) << G_TEXTURE_IMAGE_FRAC, G_TX_RENDERTILE,
+          8 << 5, 8 << 5, 4 << 10, 1 << 10);
+      gDPPipeSync(gfx++);
+    }
+
+    gDPPipeSync(gfx++);
+    gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 320,
+                     OS_K0_TO_PHYSICAL(nuGfxCfb_ptr) & ~7);
+  }
+
+  *gfxp = gfx;
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_8008D100", func_800939E8);
 
