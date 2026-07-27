@@ -129,7 +129,72 @@ INCLUDE_ASM("asm/nonmatchings/main/func_80095A10", func_8009676C);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80095A10", func_800967F4);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80095A10", func_80096C04);
+/* The mode-zoomed variant of the shot-view builder: the near/far pair the
+ * follow distance interpolates between is chosen per camera mode, the ball
+ * position is dropped 15 units before the terrain clamp, and the eye rides
+ * below the look-at by an amount that is again mode-specific. */
+void func_80096C04(s32 player, GolfCamera* cam) {
+  Vec3f pos;
+  f32 unused[16];
+  u8* cs;
+  f32 follow_dist;
+  f32 ground;
+
+  cs = get_character_state(player);
+  if (D_800E4C54 == 12) {
+    follow_dist = func_80095A10(107520.0f, 46080.0f, D_800C73A0 * 0.025f);
+  } else if (D_800E4C54 == 13) {
+    follow_dist = func_80095A10(107520.0f, 23040.0f, D_800C73A0 * 0.025f);
+  } else {
+    follow_dist = func_80095A10(92160.0f, 38400.0f, D_800C73A0 * 0.025f);
+  }
+
+  if (D_800E4C54 == 12) {
+    if (D_800C73A0 >= 20) {
+      func_80079358(player, 3);
+    }
+  }
+
+  func_8005483C(player, 2, &pos);
+  pos.y -= 15.0f;
+  if (D_800E4C54 == 13) {
+    pos.y += 1.5f;
+  }
+
+  ground = (get_interpolated_terrain_height_wrapper((s32)(pos.x * 1024.0f),
+                                                    (s32)(pos.z * 1024.0f)) -
+            0x1E00) *
+           (1.0f / 1024.0f);
+  if (ground < pos.y) {
+    pos.y = ground;
+  }
+
+  cam->at.x = pos.x;
+  cam->at.y = pos.y;
+  cam->at.z = pos.z;
+  cam->eye.x = pos.x + cosf(-*(f32*)(cs + 0x48) - 1.57079637f) * follow_dist *
+                           (1.0f / 1024.0f);
+  cam->eye.z = pos.z + sinf(-*(f32*)(cs + 0x48) - 1.57079637f) * follow_dist *
+                           (1.0f / 1024.0f);
+  switch (D_800E4C54) {
+    case 12:
+      cam->eye.y = pos.y;
+      break;
+    case 13:
+      cam->eye.y = pos.y + -9.0f;
+      break;
+    default:
+      cam->eye.y = pos.y + -4.5f;
+      break;
+  }
+  func_8009676C(cam);
+  func_80095A68(cam, &cam->at, 0.1f, 3);
+
+  if (flag_is_set(0x7F) || (D_800BB020 != 30 && D_801B60A0 == 1)) {
+    cam->at.y -= 4.5f;
+    cam->eye.y += 4.5f;
+  }
+}
 
 /* The overhead-follow variant of the same shot-view builder: the eye sits level
  * with the ball (no height offset) and, once the shot is well under way in mode
