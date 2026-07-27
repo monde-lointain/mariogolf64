@@ -559,7 +559,196 @@ void func_8006D4DC(void) { D_800C4144 = -1; }
 
 INCLUDE_ASM("asm/nonmatchings/main/func_8006A2C0", func_8006D4EC);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_8006A2C0", func_8006D6D0);
+extern s8 D_801B71ED[];
+extern s8 D_801B71FC[];
+extern s8 D_800C1420[];
+extern s32 func_8006CD50(s32 arg0, s32 arg1);
+extern void func_8005DE60(void);
+
+/**
+ * Folds the finished round into the running per-mode statistics record
+ * (`base + scenario_mode_id * 116 + 0xE98`, zero-initialised on first use).
+ *
+ * The record keeps a sample counter that saturates at 9999; once saturated
+ * every running total is scaled by 9999/10000 each round, so the record decays
+ * into a moving average instead of overflowing. Fields: 0x00 sample count,
+ * 0x04 best value (clamped at -54), 0x08 and 0x1C per-hole totals, 0x0C a
+ * high-water mark, 0x10/0x14 a weighted average and its sample count, 0x18 and
+ * 0x28/0x2C saturating totals, 0x20/0x24 hole tallies against the course table,
+ * 0x3C[18] per-hole bests and 0x60[18] per-hole played flags.
+ *
+ * Four spellings are load-bearing for codegen, not style. The loops count in
+ * `i` and derive `off`/`p` from it so loop.c creates them as induction
+ * variables, whose initialisers it then emits after the hoisted constants as
+ * the ROM has them (an explicit `off += 2` IV inverts that order). The
+ * `(s8) * (u8*)` and `(s16) * (u16*)` casts reproduce the ROM's unsigned load
+ * plus sign-extend pair where a plain signed load would be one instruction
+ * shorter. `D_801B71ED[0]` is re-read at each use because the intervening
+ * stores invalidate it, and the flag store spells its address
+ * `rec + D_801B71ED[0] + 0x60` so the record base stays the first addend.
+ */
+void accumulate_mode_stats(void) {
+  u8* rec;
+  s32* g;
+  s8* cfg;
+  s8* p;
+  s32 sat;
+  s64 v;
+  s64 sum;
+  s32 hole;
+  s32 off;
+  s32 i;
+  s32 n;
+  s32 x;
+
+  rec = func_8005AF50() + (scenario_mode_id * 116 + 0xE98);
+  g = &D_800FF4D0;
+  cfg = &D_800C1420[scenario_mode_id * 200];
+
+  if (*(s32*)(rec + 0x00) <= 0) {
+    *(s32*)(rec + 0x00) = 0;
+    *(s32*)(rec + 0x04) = 0x7FFFFFFF;
+    *(s32*)(rec + 0x08) = 0;
+    *(s32*)(rec + 0x0C) = 0;
+    *(s32*)(rec + 0x10) = 0;
+    *(s32*)(rec + 0x14) = 0;
+    *(s32*)(rec + 0x18) = 0;
+    *(s32*)(rec + 0x1C) = 0;
+    *(s32*)(rec + 0x20) = 0;
+    *(s32*)(rec + 0x24) = 0;
+    *(s32*)(rec + 0x28) = 0;
+    *(s32*)(rec + 0x2C) = 0;
+  }
+  if (*(s32*)(rec + 0x00) < 9999) {
+    sat = 0;
+    *(s32*)(rec + 0x00) = *(s32*)(rec + 0x00) + 1;
+  } else {
+    sat = 1;
+  }
+
+  D_801B71F6[0] = 0;
+  v = func_8006CD50(0x12, 0);
+  if (v < *(s32*)(rec + 0x04)) {
+    *(s32*)(rec + 0x04) = v;
+  }
+  if (*(s32*)(rec + 0x04) < -0x36) {
+    *(s32*)(rec + 0x04) = -0x36;
+  }
+  hole = D_801B71ED[0];
+  if (v < (s16) * (u16*)(rec + 0x3C + hole * 2)) {
+    *(s16*)(rec + 0x3C + hole * 2) = v;
+    *(u8*)(rec + D_801B71ED[0] + 0x60) = 1;
+    hole = D_801B71ED[0];
+    if (*(s16*)(rec + 0x3C + hole * 2) < -0x36) {
+      *(s16*)(rec + 0x3C + hole * 2) = -0x36;
+    }
+  }
+
+  sum = 0;
+  for (off = 0; off != 0x24; off += 2) {
+    sum += (s8) * (u8*)((u8*)D_801B71FB + off);
+  }
+  sum += *(s32*)(rec + 0x08);
+  if (sat == 1) {
+    sum = sum * 9999 / 10000;
+  }
+  if (sum > 0x7FFFFFFF) {
+    sum = 0x7FFFFFFF;
+  }
+  *(s32*)(rec + 0x08) = sum;
+  if (*(s32*)(rec + 0x0C) < g[3]) {
+    *(s32*)(rec + 0x0C) = g[3];
+  }
+
+  n = *(s32*)(rec + 0x14);
+  if (n == 0) {
+    if (g[5] == 0) {
+      *(s32*)(rec + 0x10) = 0;
+    } else if (g[5] > 0) {
+      *(s32*)(rec + 0x10) = g[4] / g[5];
+      *(s32*)(rec + 0x14) = 1;
+    } else {
+      *(s32*)(rec + 0x10) = 0;
+    }
+  } else if (g[5] > 0) {
+    *(s32*)(rec + 0x10) = (*(s32*)(rec + 0x10) * n + g[4]) / (n + g[5]);
+    *(s32*)(rec + 0x14) = *(s32*)(rec + 0x14) + g[5];
+  }
+
+  x = *(s32*)(rec + 0x18) + g[2];
+  if (x > 0x7FFFFFFF) {
+    *(s32*)(rec + 0x18) = 0x7FFFFFFF;
+  } else {
+    *(s32*)(rec + 0x18) = x;
+  }
+  if (sat == 1) {
+    *(s32*)(rec + 0x18) = *(s32*)(rec + 0x18) * 9999 / 10000;
+  }
+
+  sum = 0;
+  for (i = 0; i != 0x12; i++) {
+    s32 b;
+
+    off = i * 2;
+    b = (s8) * (u8*)((u8*)D_801B71FC + off);
+    if (b != -1) {
+      sum += b;
+    }
+  }
+  sum += *(s32*)(rec + 0x1C);
+  if (sat == 1) {
+    sum = sum * 9999 / 10000;
+  }
+  if (sum > 0x7FFFFFFF) {
+    sum = 0x7FFFFFFF;
+  }
+  *(s32*)(rec + 0x1C) = sum;
+
+  for (i = 0; i != 0x12; i++) {
+    off = i * 2;
+    p = &cfg[i * 10];
+    if (*(s8*)((u8*)D_801B71FB + off) <= p[0x14]) {
+      x = *(s32*)(rec + 0x20);
+      if (x <= 0x7FFFFFFE) {
+        *(s32*)(rec + 0x20) = x + 1;
+      }
+      if (sat == 1) {
+        *(s32*)(rec + 0x20) = *(s32*)(rec + 0x20) * 9999 / 10000;
+      }
+    }
+  }
+
+  for (i = 0; i != 0x12; i++) {
+    s32 d;
+
+    off = i * 2;
+    p = &cfg[i * 10];
+    d = *(s8*)((u8*)D_801B71FB + off) - *(s8*)((u8*)D_801B71FC + off);
+    if (p[0x14] - d >= 2) {
+      x = *(s32*)(rec + 0x24);
+      if (x <= 0x7FFFFFFE) {
+        *(s32*)(rec + 0x24) = x + 1;
+      }
+      if (sat == 1) {
+        *(s32*)(rec + 0x24) = *(s32*)(rec + 0x24) * 9999 / 10000;
+      }
+    }
+  }
+
+  x = *(s32*)(rec + 0x28) + g[0];
+  if (x > 0x7FFFFFFF) {
+    *(s32*)(rec + 0x28) = 0x7FFFFFFF;
+  } else {
+    *(s32*)(rec + 0x28) = x;
+  }
+  x = *(s32*)(rec + 0x2C) + g[1];
+  if (x > 0x7FFFFFFF) {
+    *(s32*)(rec + 0x2C) = 0x7FFFFFFF;
+  } else {
+    *(s32*)(rec + 0x2C) = x;
+  }
+  func_8005DE60();
+}
 
 void func_8006DDCC(void) {
   u8* p = func_8005AF50();
