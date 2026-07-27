@@ -367,7 +367,12 @@ f32 atanf(f32 x) {
   }
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80059BA0", func_8005A580);
+typedef struct {
+  /* 0x0 */ u32 start;
+  /* 0x4 */ u32 size;
+  /* 0x8 */ u32 pos;
+  /* 0xC */ u32 end;
+} RomLoadSlot; /* 0x10 */
 
 extern void heap3_free(void** payload_ptr);
 extern s8 D_800C1FF0;
@@ -394,6 +399,198 @@ extern void* tile_texture_table[];
 extern void* D_800FBE30[];
 extern void* D_800FC6A0;
 extern void* D_801B69EC;
+
+extern void* heap3_alloc(u32 need);
+extern u32 func_8005062C(u16 index, void* out);
+extern void func_800506D4(void* data, RomLoadSlot* slot);
+extern void func_800504E8(s32 index, RomLoadSlot* slot);
+extern u32 func_80050598(RomLoadSlot* slot);
+extern void func_800505A0(void* dst, u32 size, RomLoadSlot* slot);
+extern u8* func_8005AF50(void);
+extern void func_8002A97C(s32 arg0, s32 arg1);
+extern void cfb_set_num(u32 num);
+extern void play_bgm_by_id(s32 id, s32 flag);
+
+extern char D_800D08F0[];
+extern u16 D_800C2014;
+extern u16 D_800C2016;
+extern u16 D_800C2028;
+extern u16 D_800C2064[];
+extern u16 D_800C20E0[][12];
+extern s16 D_800C20D4[];
+extern u16 D_800C21B8;
+extern s16 D_800C2278[];
+extern u16 D_800C2650[];
+extern s16 D_800C2590[];
+extern u16 D_800C28B0;
+
+/* Allocates and loads every ROM asset the course scene needs, in one pass.
+ *
+ * Two asset APIs alternate throughout. The three-call block
+ * (func_8005062C / heap3_alloc / func_800506D4) sizes an asset by id, takes a
+ * heap block for it and reads it in; the five-call block
+ * (func_800504E8 / func_80050598 / heap3_alloc / func_800505A0) does the same
+ * through a pre-opened RomLoadSlot. func_8005ACF8 below releases these in the
+ * same order.
+ *
+ * Several func_8005062C results are deliberately discarded: those buffers have
+ * a fixed size (0x70A8, 0xFA0, 0x125C) and the call only opens the slot. */
+void load_course_assets(void) {
+  RomLoadSlot slot_a[2];
+  RomLoadSlot slot_b[2];
+  u8* save;
+  /* Four separate pointers, not one reused local: each id global is read twice
+   * across intervening calls, and a per-site pointer keeps that address in the
+   * ROM's $s0. One shared pointer spans the whole function, which drops its
+   * global.c priority below the array bases and permutes $s0/$s1 throughout. */
+  u16* asset_id_a;
+  u16* asset_id_b;
+  u16* asset_id_c;
+  u16* asset_id_d;
+  s32 i;
+  s32 off;
+  u32 size;
+
+  save = func_8005AF50();
+  if (D_800C1FF0 != -1) {
+    osSyncPrintf(D_800D08F0);
+    return;
+  }
+
+  D_801F4A20 = heap3_alloc(func_8005062C(0x51E, slot_a));
+  func_800506D4(D_801F4A20, slot_a);
+  D_8012D3AC = heap3_alloc(func_8005062C(0x721, slot_a));
+  func_800506D4(D_8012D3AC, slot_a);
+  D_800FF420[0] = heap3_alloc(func_8005062C(0x520, slot_a));
+  func_800506D4(D_800FF420[0], slot_a);
+  D_800FF420[1] = heap3_alloc(func_8005062C(0x520, slot_a));
+  func_800506D4(D_800FF420[1], slot_a);
+  D_801B60D0 = heap3_alloc(func_8005062C(0x521, slot_a));
+  func_800506D4(D_801B60D0, slot_a);
+
+  D_8012D420[0] = heap3_alloc(0x70A8);
+  D_801B5CD0[0] = heap3_alloc(0x70A8);
+  D_8012D420[1] = heap3_alloc(0x70A8);
+  D_801B5CD0[1] = heap3_alloc(0x70A8);
+  asset_id_a = &D_800C2014;
+  func_8005062C(*asset_id_a, slot_a);
+  func_800506D4(D_8012D420[0], slot_a);
+  func_8005062C(*asset_id_a, slot_a);
+  func_800506D4(D_8012D420[1], slot_a);
+  if (current_game_mode == 5) {
+    func_8005062C(0x528, slot_a);
+    func_800506D4(D_801B5CD0[0], slot_a);
+    func_8005062C(0x528, slot_a);
+    func_800506D4(D_801B5CD0[1], slot_a);
+  } else {
+    func_8005062C(D_800C2016, slot_a);
+    func_800506D4(D_801B5CD0[0], slot_a);
+    func_8005062C(D_800C2016, slot_a);
+    func_800506D4(D_801B5CD0[1], slot_a);
+  }
+
+  asset_id_b = &D_800C2028;
+  D_801052BC[0] = heap3_alloc(func_8005062C(*asset_id_b, slot_a));
+  func_800506D4(D_801052BC[0], slot_a);
+  D_801052BC[1] = heap3_alloc(func_8005062C(*asset_id_b, slot_a));
+  func_800506D4(D_801052BC[1], slot_a);
+
+  off = 0;
+  for (i = 0; i != 7; i++) {
+    if (current_game_mode == 5) {
+      u8* row = (u8*)D_800C20E0[D_80105B68];
+      size = func_8005062C(*(u16*)(i * 2 + row), slot_a);
+    } else {
+      size = func_8005062C(D_800C2064[i], slot_a);
+    }
+    D_801049A0[i] = heap3_alloc(size);
+    func_800506D4(D_801049A0[i], slot_a);
+    if (current_game_mode == 5) {
+      u8* row = (u8*)D_800C20E0[D_80105B68];
+      size = func_8005062C(*(u16*)(i * 2 + row), slot_a);
+    } else {
+      size = func_8005062C(D_800C2064[i], slot_a);
+    }
+    D_8012F4B0[i] = heap3_alloc(size);
+    func_800506D4(D_8012F4B0[i], slot_a);
+  }
+
+  for (i = 0; i != 2; i++) {
+    func_800504E8(D_800C20D4[i], slot_b);
+    size = func_80050598(slot_b);
+    D_801052C4[i] = heap3_alloc(size);
+    func_800505A0(D_801052C4[i], size, slot_b);
+  }
+
+  asset_id_c = &D_800C21B8;
+  func_8005062C(*asset_id_c, slot_a);
+  D_800FBDFC[0] = heap3_alloc(0xFA0);
+  func_800506D4(D_800FBDFC[0], slot_a);
+  func_8005062C(*asset_id_c, slot_a);
+  D_800FBDFC[1] = heap3_alloc(0xFA0);
+  func_800506D4(D_800FBDFC[1], slot_a);
+
+  for (i = 0; i != 2; i++) {
+    func_8005062C(D_800C21B8, slot_a);
+    D_800FF4C4[i] = heap3_alloc(0x125C);
+    func_800506D4(D_800FF4C4[i], slot_a);
+  }
+
+  for (i = 0; i != 5; i++) {
+    D_801B93E0[i] = heap3_alloc(func_8005062C(0x720, slot_a));
+    func_800506D4(D_801B93E0[i], slot_a);
+  }
+
+  size = func_8005062C(0x623, slot_a);
+  D_8010526C[0] = heap3_alloc(size);
+  D_8010526C[1] = heap3_alloc(size);
+  D_800FF180[0] = heap3_alloc(size);
+  D_800FF180[1] = heap3_alloc(size);
+  func_800506D4(D_8010526C[0], slot_a);
+  D_80106100 = heap3_alloc(func_8005062C(0x65D, slot_a));
+  func_800506D4(D_80106100, slot_a);
+  D_800FC898 = heap3_alloc(func_8005062C(0x663, slot_a));
+  func_800506D4(D_800FC898, slot_a);
+
+  for (i = 0; i != 18; i++) {
+    off = i * 16;
+    tile_palette_table[i] =
+        heap3_alloc(func_8005062C(*(u16*)((u8*)D_800C2650 + off), slot_a));
+    func_800506D4(tile_palette_table[i], slot_a);
+  }
+
+  for (i = 0; i != 18; i++) {
+    off = i * 8;
+    func_800504E8(*(s16*)((u8*)D_800C2590 + off), slot_b);
+    size = func_80050598(slot_b);
+    tile_texture_table[i] = heap3_alloc(size);
+    func_800505A0(tile_texture_table[i], size, slot_b);
+  }
+
+  for (i = 0; i != 3; i++) {
+    func_800504E8(D_800C2278[i], slot_b);
+    size = func_80050598(slot_b);
+    D_800FBE38[i] = heap3_alloc(size);
+    func_800505A0(D_800FBE38[i], size, slot_b);
+  }
+
+  asset_id_d = &D_800C28B0;
+  D_800FBE30[0] = heap3_alloc(func_8005062C(*asset_id_d, slot_a) * 2);
+  func_800506D4(D_800FBE30[0], slot_a);
+  D_800FBE30[1] = heap3_alloc(func_8005062C(*asset_id_d, slot_a) * 2);
+  func_800506D4(D_800FBE30[1], slot_a);
+  D_800FC6A0 = heap3_alloc(func_8005062C(0x6F7, slot_a) * 2);
+  func_800506D4(D_800FC6A0, slot_a);
+  D_801B69EC = heap3_alloc(func_8005062C(0x709, slot_a));
+  func_800506D4(D_801B69EC, slot_a);
+
+  play_bgm_by_id(0x27, 0);
+  cfb_set_num(3);
+  func_8002A97C(4, 0);
+  D_801323D0 = 6;
+  func_80099490();
+  func_8005DF54(save, 0);
+}
 
 void func_8005ACF8(void) {
   s32 i;
@@ -745,13 +942,6 @@ s32 func_8005C614(void) {
   } while (i != lim);
   return count == 108;
 }
-
-typedef struct {
-  /* 0x0 */ u32 start;
-  /* 0x4 */ u32 size;
-  /* 0x8 */ u32 pos;
-  /* 0xC */ u32 end;
-} RomLoadSlot; /* 0x10 */
 
 extern s16 D_800C28E4[3][7];
 extern s16 D_800C298C[3][7];
