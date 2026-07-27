@@ -25,6 +25,11 @@ scope, not its priority, is the knob (Axis 8).
 
 Usage:
   venv/bin/python3 tools/allocno_report.py src/main/func_8006A2C0.c [func_8006C484]
+  venv/bin/python3 tools/allocno_report.py nonmatchings/func_8005DFE8/base.c [func_8005DFE8]
+
+The second form reads a crack slice's own seed: any directory holding a `compile.sh` (a permuter
+import or a decomp_loop scratch dir) works, so the table can be read without first inlining the body
+into `src/` (S292).
 
 Dumps are written in a scratch copy, never next to the source. Nothing is rebuilt: the real object is
 left alone, so this is safe to run mid-iteration.
@@ -59,8 +64,24 @@ def reg_name(num):
     return REG_NAMES.get(num, f"r{num}")
 
 
+def compile_command_from_sh(sh, src):
+    """The gcc half of a permuter `compile.sh` (`gcc -S ... -o /dev/stdout "$INPUT" | as ...`)."""
+    for line in sh.read_text().splitlines():
+        if "tools/cc/gcc" in line and " -S " in line:
+            gcc = line.split("|", 1)[0].strip()
+            return gcc.replace('"$INPUT"', str(src)).replace("$INPUT", str(src))
+    return None
+
+
 def compile_command(src):
-    """The build's own gcc line for this source, from `make -n`."""
+    """The build's own gcc line for this source, from `make -n`.
+
+    Falls back to the seed's own `compile.sh` when the source is not a build source. A crack
+    slice iterates on `nonmatchings/<fn>/base.c`, which `make -n` has no recipe for, so before
+    S292 the table could only be read by first inlining the body into `src/` -- the one thing the
+    isolated loop exists to avoid. The permuter/decomp_loop seed dir already carries the exact
+    compile line, so use it.
+    """
     obj = Path("build") / src.with_suffix(".o")
     out = subprocess.run(
         ["make", "-B", "-n", str(obj)],
@@ -71,7 +92,15 @@ def compile_command(src):
     for line in out.stdout.splitlines():
         if "tools/cc/gcc" in line and " -S " in line:
             return line.strip()
-    sys.exit(f"no gcc recipe for {obj} in `make -n` output (is the path a build source?)")
+    sh = (ROOT / src).parent / "compile.sh"
+    if sh.is_file():
+        cmd = compile_command_from_sh(sh, src)
+        if cmd:
+            return cmd
+    sys.exit(
+        f"no gcc recipe for {obj} in `make -n` output, and no usable {sh} "
+        "(is the path a build source or a seed dir?)"
+    )
 
 
 def rewrite_for_dumps(cmd, src, workdir):

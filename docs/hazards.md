@@ -4651,6 +4651,16 @@ often wants a different answer at each nest level:
 - **ROM has pointer givs** (a walking pointer, or two: `p` and `p+K` used with negative
   displacements) -> the loop must stay structured; a goto loop collapses them onto one pointer.
 
+**The de-hoisted constant is not only a loop bound (S292).** Any constant `gen_int_relational`
+force-regs for an `==`/`!=` compare becomes a hoistable movable, so a *compare* constant the ROM
+materializes inside the loop is the same tell as an inline bound. S292 `func_8005D334` read as a
+"register-pressure tie" for two sprints because its `li $v0,4` sits at the exit test; the goto loop
+put it back inside the loop and fixed the preheader order, two register roles and the loop-tail order
+in one change. Its sibling `func_8005DFE8` shows the failure mode of the inverse: with a structured
+loop, gcc hoists whichever of two compare constants it reaches first, and the loser is
+rematerialized -- so which constant keeps a callee-saved register is decided by hoist order, which is
+loop-body order.
+
 Two follow-on rules once a loop is a goto loop:
 
 1. It de-hoists literal bounds too, so put the bound in a local variable wherever the ROM holds it

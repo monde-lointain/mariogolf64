@@ -1474,6 +1474,27 @@ Three honest caveats:
   STRUCTURAL symptom, not evidence of a coloring problem — S285 makes 4 of the last 6 carry verdicts
   refuted, and this one was refuted by the same agent that wrote it, hours later, with no new tool.
   Push: local.
+- **Sprint 292** — the first crack slice run entirely on measured allocno arithmetic (`main` fresh
+  pool = 0). **+1 banked, 2 carried, 2 permuter runs (no zero, both yielded a knob), 3 re-opens, 0
+  stuck-far.** Zero gate enablers. `func_8005D334` -> `clear_player_slots` (33/33) banked on two
+  levers: a goto outer loop (so `loop.c` cannot hoist the `!= 4` bound, which the ROM rematerialises
+  inline) and a `do {} while (0)` note that reweights only the refs inside it, moving the counter and
+  `end` from 4210/3750 to 3750/3636 in `allocno_compare` terms. The window was computed from
+  `tools/allocno_report.py` BEFORE editing (`end` had to land in 4210-6250), which is the reusable
+  part. Carried `func_8005DFE8` at 102/102 (76 -> 36 rows) and `func_80056060` at 39/39 (28 -> 20).
+  Seed 5 (classical); banked 0pt (both hosts partial); realized 9 / residual +4 (+1 permuter,
+  +1 re-attempt, +1 carry-or-reopen, +1 novel bank-gotcha). Rolling-5 (S288-S292): 0+0+0+0+0 pt
+  banked, all partial-file sprints; value = 2+2+2+2+1 matched. Quality **0 / 2 / 2 / 3**. Retro
+  applied 5 of 5 plus 1 retirement (`do-while-doubles-reg-n-refs-qty-tier` merged into
+  `global-allocno-compare-livelength-biv-order`; levers.md 10222 -> 10238/10240, net **+16 B** —
+  flat, not negative, because the merged entry absorbs the S292 procedure). `make test-tools` 135
+  passed, 1 skipped; prompt-lint baseline re-frozen for the S292 citations. KEY, and it is a
+  methodology result rather than a bank: **two "proven wall" verdicts from compiler-source dives were
+  disproved this sprint** (S210/S213 on both `func_8005D334` and `func_80056060`), and the third
+  target's recorded residual class was a source-structure error, not the colouring it named. A dive's
+  pass citation survives; its "no source form reaches the other side" conclusion does not.
+  Second methodology result: `cmpfn.sh` was counting trailing padding nops, so both leaves read long
+  and one was misdiagnosed as a structural deficit — now trimmed and reported. Push: local.
 - **Sprint 291** — the last two non-FP fresh leaves of `main`. **+2 banked, 0 carried, 0 permuter, 0
   re-open, 0 stuck-far.** Zero gate enablers; one mid-sprint `mariogolf64.yaml` rodata carve (a
   three-way subseg split). `func_8005A580` -> `load_course_assets` (0x778, 478/478) and

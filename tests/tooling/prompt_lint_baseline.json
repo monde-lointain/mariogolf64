@@ -84,14 +84,14 @@
     "provenance": 0
   },
   "docs/hazards.md": {
-    "bytes": 630695,
+    "bytes": 631493,
     "caps": 0,
-    "lines": 7832,
+    "lines": 7842,
     "max_nesting": 4,
-    "provenance": 78
+    "provenance": 79
   },
   "docs/levers.md": {
-    "bytes": 10222,
+    "bytes": 10238,
     "caps": 0,
     "lines": 143,
     "max_nesting": 1,
@@ -112,11 +112,11 @@
     "provenance": 0
   },
   "docs/workflow/gates.md": {
-    "bytes": 29909,
+    "bytes": 30538,
     "caps": 0,
-    "lines": 348,
+    "lines": 355,
     "max_nesting": 4,
-    "provenance": 7
+    "provenance": 8
   },
   "docs/workflow/loop.md": {
     "bytes": 45918,

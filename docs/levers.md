@@ -36,15 +36,15 @@ These have a `docs/hazards.md` section; read it rather than the line here.
 
 - **cross-call-live-range-callee-saved-lever** -- declare a post-call value *before* the call to force
   a callee-saved register; initializing it after is the inverse.
-- **global-allocno-compare-livelength-biv-order** -- s-register order follows
-  `floor_log2(nref)*nref/live_length` (`global.c:587`); flip it with an eighth reference, or a free
-  bound copy `n = bound;` where the ROM's live range starts (S288). The same formula spills a
-  long-lived, few-reference parameter to its home slot (S289).
+- **global-allocno-compare-livelength-biv-order** -- register order follows
+  `floor_log2(nref)*nref/live_length` (`global.c:587`), which also tiers `local-alloc` quantities and
+  spills a long-lived few-reference parameter (S289). Read it with `tools/allocno_report.py`, compute
+  the window the ROM's register implies, then pick the knob landing in it: an eighth reference, a free
+  bound copy `n = bound;` (S288), or a `do {} while (0)` note round a subset, reweighting only those
+  refs (S292; also bars the sched hoist, S287). Priority orders within a class; `find_reg` picks
+  callee-saved first.
 - **local-alloc-combine-regs-block-local-temp** -- hoist a block-local temp to function scope to
   defeat the `combine_regs` tie (`local-alloc.c:472/1290/1587`).
-- **do-while-doubles-reg-n-refs-qty-tier** -- a `do {} while(0)` macro loop doubles `REG_N_REFS` and
-  flips the qty tier; a plain block fixes the resulting 2-register permutation. Loop notes also bar
-  the sched hoist (fdlibm `GET_FLOAT_WORD`, S287).
 - **variable-reuse-is-a-per-register-lever** -- reuse pulls a load forward by anti-dependency, and a
   pointer spanning two loops permutes the earlier one: split those. The inverse recolours, and is the
   main tool for a callee-saved permutation, one register at a time (S287: four reuses, one each).

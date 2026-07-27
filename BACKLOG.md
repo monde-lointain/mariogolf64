@@ -3800,6 +3800,44 @@ by `/sprint-plan`:
   rescue it. Parked here so `--carried-check` flags it and it stops reading as `fresh`; re-open only
   behind a lever for that class, not on size order.
 
+- **(S292 STATE OF THE `main` POOL — supersedes the S291 note below)** After S292,
+  `--loose-stubs main` reports **303 stubs and 0 fresh**: 259 carried-wall, 33 jtbl-dispatch, 70
+  raw-dl-emitter, 11 nested, 1 intrinsic-hasm. Smallest-first `main` is over, so a `main` sprint is
+  now a crack slice by construction. S292 ran the first one on measured allocno arithmetic and banked
+  1 of 3, which is the honest rate to plan against: the guaranteed deliverable stays {crack OR
+  pass-cited verdict} (S282), and the S280/S281 2/2 runs are not the baseline. Running tally of
+  re-open-on-carry: S280 2/2, S281 2/2, S282 0/2, S292 1/3.
+  **Two "proven wall" verdicts fell this sprint**, so re-derive before inheriting one: S210/S213
+  called `func_8005D334` a register-pressure tie (banked S292) and said `func_80056060`'s `cs`
+  "always colours `$s0`" (moved by one `do {} while (0)`). The DoR rule is now in
+  `docs/workflow/gates.md`; the tool that makes it cheap is `tools/allocno_report.py`, which since
+  S292 reads a `nonmatchings/<fn>/base.c` seed directly.
+
+- **(S292 SPIKE — carried at 102/102 with a rewritten verdict)** `func_8005DFE8` (0x198, 102 instrs)
+  in `src/main/func_80059BA0.c`, the SRAM load/verify counterpart to `func_8005E180`. 36 diff rows,
+  down from 76; semantics corrected (it returns **2** for bank 1, not 1 — the `beq` delay slot
+  carries the return value), and the S266 "s1<->s2 allocno" residual was really a source-structure
+  error: the ROM has ONE `tries++` at a `fail:` label that `reorg` copies into four annulled `bnel`
+  slots. **Blocker:** two clusters, both named with their gcc pass — which of the two hoisted compare
+  constants keeps `$fp` (340 vs 333, and hoist order is loop-body order, so the earlier-used constant
+  always loses), and the placement of `off = 0` (the ROM's is a `loop.c` induction-variable init
+  emitted after the hoists, which a source statement cannot be). **Untried:** whether
+  `D_800C2BE0`/`BE4`/`BE8`/`BEC` are one 0x10-strided array indexable as `arr[bank]` — the one shape
+  that would make gcc build the giv the ROM has. Body and measurements in
+  `docs/wip/func_8005DFE8.near-match.md`.
+
+- **(S292 SPIKE — carried at 39/39 with a rewritten verdict)** `func_80056060` (0x9C, 39 instrs) in
+  `src/main/func_80054900.c`. 20 diff rows, down from ~28; the `do {} while (0)` reweight colours
+  `cs` to the ROM's `$s1`, retiring the S213 "always `$s0`" claim. **Blocker:** the ROM's callee-saved
+  order is target > cs > id, the inverse of the ref-count order, and `target` is a pass-through
+  parameter with two references over the same live range as `id`'s three — every note that lifts
+  `target` lifts `id` at least as much, since their only weighted refs are the two arguments of the
+  same call, and copy splits are propagated away by cse. **Untried, and the reason this is not
+  terminal:** priority-descending does not map to ascending register number for call-crossing pseudos
+  (the banked sibling `lookup_animation_by_id` allocates `$v1, $a0, $v0, $a1, $s0`), so `find_reg`'s
+  caller/callee-saved preference path decides class membership before priority orders within it.
+  Attack that path, not `allocno_compare`. Body in `docs/wip/func_80056060.near-match.md`.
+
 - **(S291 STATE OF THE `main` POOL — read this before planning another `main` smallest-first sprint)**
   After S291, `--loose-stubs main` reports **304 stubs, 7 fresh, and every one of the 7 is heavy-FP**
   (`func_8004887C` fp=129, `func_800874D8` fp=119, `func_80047E9C` fp=141, plus `func_80045CE0`,

@@ -168,6 +168,37 @@ obj_stream() {
     rm -f "$slice"
 }
 
+# Trailing PADDING nops on the object side are not part of the function (S292). The linker pads a
+# function up to its alignment boundary, and `-dz` faithfully disassembles that padding, so the
+# object stream runs long: `func_8005D334` read 36 against the ROM's 33 (3 pad nops) and
+# `func_8005DFE8` 104 against 102 (2). That is worse than a cosmetic miscount, because
+# `docs/workflow/loop.md ## Oracles` routes a differing count to "structural deficit, fix that
+# first" -- so a body already at exact count sends the whole diagnosis at a deficit that does not
+# exist. This is the mirror of the `-dz` UNDERcount above: same stream, opposite direction.
+#
+# The trim is deliberately conservative, because the nop in a `jr $ra` delay slot IS part of the
+# function and must survive. Only nops beyond that delay slot are dropped, and only when every one
+# of them is a nop; anything else keeps the stream whole rather than masking real instructions. The
+# .s side never needs this -- splat carves it at the function's exact size.
+trim_trailing_pad() {
+    awk '
+        { line[NR] = $0 }
+        END {
+            last_jr = 0
+            for (i = 1; i <= NR; i++)
+                if (line[i] ~ /^[ \t]*jr[ \t]+\$?ra[ \t]*$/) last_jr = i
+            keep = NR
+            if (last_jr > 0 && NR > last_jr + 1) {
+                pad_only = 1
+                for (i = last_jr + 2; i <= NR; i++)
+                    if (line[i] !~ /^[ \t]*nop[ \t]*$/) pad_only = 0
+                if (pad_only) keep = last_jr + 1
+            }
+            for (i = 1; i <= keep; i++) print line[i]
+        }
+    '
+}
+
 norm() {
     sed -E '
         s/\$//g
@@ -216,7 +247,11 @@ MINE_RAW=$(mktemp)
 trap 'rm -f "$ROM_N" "$MINE_N" "$ROM_RAW" "$MINE_RAW"' EXIT
 
 rom_stream "$ASM_FILE" > "$ROM_RAW"
-obj_stream > "$MINE_RAW"
+MINE_UNTRIMMED=$(mktemp)
+obj_stream > "$MINE_UNTRIMMED"
+trim_trailing_pad < "$MINE_UNTRIMMED" > "$MINE_RAW"
+PAD=$(( $(wc -l < "$MINE_UNTRIMMED") - $(wc -l < "$MINE_RAW") ))
+rm -f "$MINE_UNTRIMMED"
 norm < "$ROM_RAW" > "$ROM_N"
 norm < "$MINE_RAW" > "$MINE_N"
 
@@ -237,7 +272,9 @@ RF=$(frame_imm "$ROM_RAW"); MF=$(frame_imm "$MINE_RAW")
 FRAME="frame rom=$RF mine=$MF"
 [ "$RF" != "$MF" ] && FRAME="$FRAME <-- FRAME MISMATCH"
 
-echo "rom=$(wc -l < "$ROM_N") mine=$(wc -l < "$MINE_N")  ($OBJ)  [$FRAME]"
+PADNOTE=''
+[ "$PAD" -gt 0 ] && PADNOTE="  [+$PAD pad nop(s) trimmed]"
+echo "rom=$(wc -l < "$ROM_N") mine=$(wc -l < "$MINE_N")  ($OBJ)  [$FRAME]$PADNOTE"
 
 if [ "$MNEMONICS" = 1 ]; then
     # Opcode stream only. norm() has already folded the alias spellings (move/li/beqz/bnezl), so both

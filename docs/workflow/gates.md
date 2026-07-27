@@ -160,6 +160,13 @@ dashboard). Target selection is `tools/pick_target.py`, not a stored roadmap.
         equilibrium. Name the tell beside the rejected leaf in `SPRINT.md ## Committed backlog`, and
         read "rejected twice, never attempted" as the tell being unproven, not confirmed: at the
         third encounter either attempt the leaf or drop it, rather than re-rejecting it.
+  - **A compiler-source dive's "proven wall" conclusion is a hypothesis too (S292).** A dive's pass
+    citation is usually right; its closing claim that *no source form reaches the other side* is a
+    negative claim over a space the dive could not measure before `tools/allocno_report.py` existed.
+    Two of S292's three targets had exactly that claim disproved: S210/S213 called `func_8005D334` a
+    register-pressure tie (it banked) and said `func_80056060`'s `cs` "always colours `$s0`" (one
+    `do {} while (0)` moved it). Re-derive the numbers before inheriting the verdict; keep the
+    citation, drop the conclusion.
   - **A carried wall's near-match doc can be wrong about the function's semantics, not just its
     verdict — re-derive behaviour from the `.s` before accepting a stated residual (S258).** S252
     recorded `func_800824E4` as a three-argument packer with `b = arg2` on the negative path and
