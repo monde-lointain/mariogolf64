@@ -350,7 +350,97 @@ INCLUDE_ASM("asm/nonmatchings/main/func_8008D100", func_800947A8);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_8008D100", func_80095150);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_8008D100", func_8009548C);
+extern void play_sound_effect(s32 sfx, s32 arg1, s32 arg2);
+
+/**
+ * Replays the captured frame at `D_800C5EE0` as a grid of 80x15 RGBA16 tiles,
+ * one more band of eight tiles per step as `D_800C5EE4` counts down from 0x40,
+ * so the snapshot fills the screen a band at a time.
+ *
+ * Each outer step emits one 80-pixel column of a 120-pixel band: `col` walks
+ * 0..3 across the 320-pixel screen and `row` advances a band every fourth step,
+ * so the eight inner tiles stack 15 scanlines apart. `idx` is the running RGBA16
+ * offset into the snapshot, 600 words (80 * 15 texels) per tile. A sound effect
+ * fires on every eighth step.
+ *
+ * Three spellings below are load-bearing for the loop.c invariant-hoist split
+ * (the `threshold -= 3` decay at loop.c:1719 gating loop.c:1631), which decides
+ * which of the twelve display-list constants leave the inner loop. The ROM moves
+ * exactly nine, leaving `0xF2000000`, `0x0013C038` and `0x04000400` behind:
+ *   - `col4` is a separate statement so exactly one invariant insn precedes the
+ *     display-list constants; a two-insn `col * 5` prefix costs three more
+ *     threshold and strands `gDPSetTile`'s `0xF5102800` in the inner loop.
+ *   - the two x coordinates each re-shift `(col4 + col)` instead of sharing a
+ *     `col * 320` temp, which is what makes combine emit the ROM's two separate
+ *     `sll ..., 6` instructions.
+ *   - `row` is a plain counter scaled by 120 at use, not a stepped `ybase`
+ *     accumulator: that makes the band base a loop.c induction variable, so its
+ *     zero-init is emitted into the loop preheader after the hoisted constants
+ *     rather than ahead of them.
+ */
+void emit_snapshot_tile_wipe_dl(void) {
+  s32 n;
+  s32 rem;
+  s32 count;
+  s32 i;
+  s32 j;
+  s32 col;
+  s32 idx;
+  s32 row;
+
+  n = D_800C5EE4;
+  if (n <= 0) {
+    return;
+  }
+
+  gDPPipeSync(glistp++);
+  gDPPipeSync(glistp++);
+  gDPSetCycleType(glistp++, G_CYC_1CYCLE);
+  gDPPipeSync(glistp++);
+  gDPPipeSync(glistp++);
+  gDPSetTexturePersp(glistp++, G_TP_NONE);
+  gDPSetCombineMode(glistp++, G_CC_MODULATEI_PRIM, G_CC_MODULATEI_PRIM);
+  gDPPipeSync(glistp++);
+
+  col = 0;
+  idx = 0;
+
+  rem = 0x40 - n;
+  count = rem / 8 + 1;
+  if ((rem & 7) == 0) {
+    play_sound_effect(0x45, 0xD, 0x7F);
+  }
+
+  row = 0;
+  for (i = 0; i != count; i++) {
+    s32 ybase = row * 120;
+
+    for (j = 0; j != 8; j++) {
+      s32 col4 = col * 4;
+      s32 y = ybase + j * 15;
+
+      gDPLoadTextureBlock(glistp++, ((u32)D_800C5EE0 + idx * 4) & ~7,
+                          G_IM_FMT_RGBA, G_IM_SIZ_16b, 80, 15, 0, 0, 0, 0, 0, 0,
+                          0);
+      gDPPipeSync(glistp++);
+      gSPTextureRectangle(glistp++, ((col4 + col) << 4) << G_TEXTURE_IMAGE_FRAC,
+                          y << G_TEXTURE_IMAGE_FRAC,
+                          (((col4 + col) << 4) + 80) << G_TEXTURE_IMAGE_FRAC,
+                          (y + 15) << G_TEXTURE_IMAGE_FRAC, G_TX_RENDERTILE, 0,
+                          0, 1 << 10, 1 << 10);
+      gDPPipeSync(glistp++);
+      idx += 600;
+    }
+
+    col++;
+    if (col == 4) {
+      col = 0;
+      row++;
+    }
+  }
+
+  D_800C5EE4--;
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_8008D100", func_800957F0);
 

@@ -714,3 +714,4 @@ emit_screen_transition_overlay = 0x800939E8; // type:func
 reset_face_textures_for_anim_slot = 0x80055828; // type:func
 emit_glyph_sheet_preamble_dl = 0x800734F0; // type:func
 emit_hud_glyph_dl_preamble = 0x80074968; // type:func
+emit_snapshot_tile_wipe_dl = 0x8009548C; // type:func
