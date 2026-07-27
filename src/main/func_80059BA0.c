@@ -638,6 +638,15 @@ void func_8005C018(u32 arg0) {
   }
 }
 
+/* func_8005C038: insert one entry into a category's three-slot record table
+ * (four parallel s32[6][3] arrays at 0xD78/0xDC0/0xE08/0xE50 off the save
+ * block, sorted ascending by score with the key as tie-break). NEAR-MATCH
+ * 268/264, frame -0x60 exact, every control-flow edge and both value-select
+ * `beql` clamps reproduced. Residual: my build spills `score` and the fifth
+ * argument to their home slots while the ROM keeps them in $s6/$fp and pays to
+ * re-materialise `category * 12 + base` instead -- a callee-saved colouring
+ * equilibrium, not a spelling. Full RE, the ten measured variants and the
+ * attempt body are in docs/wip/func_8005C038.near-match.md. */
 INCLUDE_ASM("asm/nonmatchings/main/func_80059BA0", func_8005C038);
 
 s32 func_8005C458(void) {
