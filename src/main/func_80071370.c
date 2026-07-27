@@ -476,7 +476,49 @@ void func_800748D0(s32* arg0, s32 arg1, s32 arg2, u8* str) {
 
 void func_80074960(void) {}
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80071370", func_80074968);
+/**
+ * Emits the fixed 27-command render-mode and texture-load preamble for the HUD
+ * glyph sheet into a caller-supplied glist. The texture is the asset
+ * `load_hud_glyph_assets` stashes in `D_8012F4E0` (tag 0x4B2), skipped past its
+ * 8-byte header and 8-aligned: IA 4-bit, 256x32.
+ *
+ * Near-twin of `emit_text_glyph_dl_preamble` (`src/main/func_8004D190.c`): the
+ * same command sequence, plus a `gSPLoadGeometryMode(0)` in slot 2, and a 256x32
+ * tile where that one loads 256x24.
+ */
+void emit_hud_glyph_dl_preamble(Gfx** dlp) {
+  Gfx* g = *dlp;
+
+  gDPPipeSync(g++);
+  gSPLoadGeometryMode(g++, 0);
+  gDPPipeSync(g++);
+  gDPSetCycleType(g++, G_CYC_1CYCLE);
+  gDPPipeSync(g++);
+  gDPSetRenderMode(
+      g++,
+      IM_RD | CLR_ON_CVG | CVG_X_ALPHA |
+          GBL_c1(G_BL_CLR_IN, G_BL_A_IN, G_BL_CLR_MEM, G_BL_A_MEM),
+      IM_RD | CLR_ON_CVG | CVG_X_ALPHA |
+          GBL_c2(G_BL_CLR_IN, G_BL_A_IN, G_BL_CLR_MEM, G_BL_A_MEM));
+  gDPSetCombineMode(g++, G_CC_MODULATEIDECALA_PRIM, G_CC_MODULATEIDECALA_PRIM);
+  gSPTexture(g++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+  gDPPipeSync(g++);
+  gDPSetAlphaCompare(g++, G_AC_NONE);
+  gDPPipeSync(g++);
+  gDPSetTexturePersp(g++, G_TP_NONE);
+  gDPPipeSync(g++);
+  gDPSetTextureFilter(g++, G_TF_POINT);
+  gDPPipeSync(g++);
+  gDPSetAlphaDither(g++, G_AD_DISABLE);
+  gDPPipeSync(g++);
+  gDPSetTextureLUT(g++, G_TT_NONE);
+  gDPPipeSync(g++);
+  gDPLoadTextureBlock_4b(g++, ((u32)D_8012F4E0 + 8) & ~7, G_IM_FMT_IA, 256, 32,
+                         0, 0, 0, 0, 0, 0, 0);
+  gDPPipeSync(g++);
+
+  *dlp = g;
+}
 
 void func_80074CA8(Gfx** pgfx, s32 r, s32 g, s32 b) {
   Gfx* gfx = *pgfx;
