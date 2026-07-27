@@ -28,7 +28,7 @@
     "provenance": 0
   },
   ".claude/commands/sprint-plan.md": {
-    "bytes": 1486,
+    "bytes": 1485,
     "caps": 0,
     "lines": 25,
     "max_nesting": 2,
@@ -77,23 +77,23 @@
     "provenance": 0
   },
   "docs/hazard-index.md": {
-    "bytes": 20982,
+    "bytes": 21224,
     "caps": 0,
-    "lines": 151,
+    "lines": 152,
     "max_nesting": 0,
     "provenance": 0
   },
   "docs/hazards.md": {
-    "bytes": 620386,
+    "bytes": 625609,
     "caps": 0,
-    "lines": 7686,
+    "lines": 7750,
     "max_nesting": 4,
-    "provenance": 75
+    "provenance": 77
   },
   "docs/levers.md": {
-    "bytes": 9011,
+    "bytes": 10236,
     "caps": 0,
-    "lines": 131,
+    "lines": 144,
     "max_nesting": 1,
     "provenance": 0
   },
@@ -112,17 +112,17 @@
     "provenance": 0
   },
   "docs/workflow/gates.md": {
-    "bytes": 28808,
+    "bytes": 29909,
     "caps": 0,
-    "lines": 337,
+    "lines": 348,
     "max_nesting": 4,
-    "provenance": 6
+    "provenance": 7
   },
   "docs/workflow/loop.md": {
-    "bytes": 43980,
+    "bytes": 45918,
     "caps": 0,
-    "lines": 479,
+    "lines": 501,
     "max_nesting": 5,
-    "provenance": 4
+    "provenance": 6
   }
 }

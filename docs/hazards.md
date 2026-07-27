@@ -111,7 +111,7 @@ The hazard families below group the sections that follow. Each links to its exis
 - [cse make_regs_eqv branch-fold (reused-var canonical fold on a `?:`-with-flag store)](#cse-make_regs_eqv-branch-fold-reused-var-canonical-fold-on-a--with-flag-store)
 - [abs-coalescing reg-swap (fabsf in-place vs fresh reg on a const compare)](#abs-coalescing-reg-swap)
 - [dead-frame reload-artifact regalloc-wall](#dead-frame-reload-artifact-regalloc-wall)
-- [multi-register-allocno-permutation (a fixed permutation of N caller-saved regs, terminal)](#multi-register-allocno-permutation-a-fixed-permutation-of-n-caller-saved-regs-terminal)
+- [multi-register-allocno-permutation (a fixed permutation of N caller-saved regs)](#multi-register-allocno-permutation-a-fixed-permutation-of-n-caller-saved-regs)
 - [byte-offset-cast cracks the fixed-array-slot base-CSE (S235, refutes the S234 "Carry" verdict)](#byte-offset-cast-cracks-the-fixed-array-slot-base-cse-s235-refutes-the-s234-carry-verdict)
 - [fold associate: which operand of a 3-term sum carries the constant](#fold-associate-which-operand-of-a-3-term-sum-carries-the-constant)
 - [Multi-level bound re-read: array-element form, not a cached pointer (S259)](#multi-level-bound-re-read-array-element-form-not-a-cached-pointer-s259)
@@ -5127,6 +5127,33 @@ define-point after a call to make it caller-saved / drop a saved reg); Axis 7 is
 the define-point before the call to make it callee-saved. (Cracks the base-reg factor; a second factor
 like a `#cross-jump-tail-merge` can still wall the fn — S240 DF84 stayed carried on the annul.)
 
+**Axis 8 — measure the priorities instead of permuting the source (S290 `stamp_circle_ring_alpha`).**
+`venv/bin/python3 tools/allocno_report.py <file.c> <fn>` compiles the file with `-dg -dl` and prints
+every allocno with its `n_refs`, `live_length`, the computed
+`floor_log2(nref)*nref/live_length*10000` and the hard reg it got, in `global.c allocno_compare`
+order. Read the formula from the source, not from memory: the `allocno_size` factor **multiplies**
+(`global.c allocno_compare`), so a DImode `s64` pseudo outranks an otherwise identical word-sized one
+-- if a printed table is not in descending priority, the formula or the parse is wrong, which is how
+the tool's own self-check caught it. That turns a permutation into arithmetic: `func_8006C484` sat at
+exact count with an identical
+instruction sequence and five t-regs permuted, and one table named the fixes where ~15 blind source
+permutations had failed (it needed `cj > ci > mask` and had `mask 12790 > ci 12903 > cj 12500`).
+Three rules the table exposes:
+  - **Equalise a live length to reach the tie-break.** Two symmetric temps whose live ranges differ by
+    2 insns are not tied, so declaration order does not decide them. Initialising them in the opposite
+    order in the body's second half equalised both to 126, after which the tie broke on declaration
+    order as intended.
+  - **Re-weight refs over a subset of statements.** Axis 1 raises every ref in the loop; an empty
+    `do {} while (0)` wrapped round *only* the clamp statements raised those refs to depth 3 and left
+    the rival allocno (a hoisted `and` mask, referenced from the store statements) at depth 2, which
+    is what lifted the clamp temps and `i` past it. Wrap the smallest statement set holding the refs
+    you want to move.
+  - **A call-free function has no local-alloc priority at all.** `qty_compare_1` scales every term by
+    `qty_n_calls_crossed`, which is 0 for every local quantity there, so the order collapses to qty
+    number = birth order = pseudo numbering. Scope is then the knob: declaring a temp *inside* the
+    loop body rather than at function scope shifted the numbering and flipped which of two symmetric
+    address temps took `a0` vs `v1` — the last register in that function.
+
 ## permuter goto-backedge liveness unsound (var-reuse passes corrupt live-across-backedge values)
 
 **Trigger:** on a goto-loop function, a decomp-permuter "best" that beats your hand-derived structural
@@ -7680,7 +7707,7 @@ and byte-matched the prologue/setup; the residual loop shape was a separate
 [#top-tested-loop-goto-local-hoist] wall, solved and banked S213 via the terminator-condition loop
 framing — see that section.)
 
-## multi-register-allocno-permutation (a fixed permutation of N caller-saved regs, terminal)
+## multi-register-allocno-permutation (a fixed permutation of N caller-saved regs)
 
 **Symptom (S268; `func_8005B0B4`, `func_8005CEE0`).** A structurally-complete body (right
 instruction shapes, right values, right control flow) scores a very low asm-differ percent
@@ -7701,14 +7728,18 @@ each value claims; the seed (which reg the first load claims) then cascades. The
 free-register-list order driven by allocno priority (live-length / ref-count), not by source
 spelling. See `docs/levers.md` (global allocno compare livelength biv order).
 
-**Verdict: Terminal / corpus-sibling-only.**
-- Not source-steerable: S268 confirmed swapping the source load order (val-first vs flags-first)
-  leaves the permutation identical — gcc re-canonicalizes the load order and the seed is unchanged.
-  Reordering declarations, splitting temps, and reuse-dead-var all failed to move the seed.
-- Not permuter-reachable: the permuter perturbs source structure, which plateaus on a multi-register
-  permutation (it does not directly permute hard regs); see `docs/levers.md` (permuter at exact count residual).
-- The only known lever is a matched-corpus sibling whose live-lengths pin the a0/a1/a2 seed the same
-  way — i.e. change the surrounding function's register pressure, not this function's source.
+**Verdict: source-steerable, but only once you measure it (S290 retires the terminal verdict).**
+S268 read this class as terminal because every *guessed* source change left the permutation
+identical: reordering declarations, splitting temps and reuse-dead-var all failed to move the seed.
+That is a statement about guessing, not about the class. S290 cracked a five-register permutation
+(a 3-cycle plus a swap, at exact count with an identical instruction sequence) by reading the
+priorities instead — see `#loop-weight-and-live-length-regalloc-steering` Axis 8. The order in which
+allocnos claim registers is `floor_log2(nref)*nref/live_length` with ties on allocno number, so the
+seed moves when you change a ref count or a live length, and both are source-reachable (subset
+`do {} while (0)` re-weighting, live-length equalisation, declaration order, and a local's scope in a
+call-free function). Still true from S268: the permuter alone plateaus here, because it perturbs
+source structure and does not permute hard registers; see `docs/levers.md` (permuter at exact count
+residual). A matched-corpus sibling that pins the seed remains a fallback, not the only lever.
 
 **Note the distinction from a 1-register role fix.** A single wrong register (e.g. a default-return
 sentinel in `s1` vs `a1`) is often a real source lever ([#default-return-var-must-init-after-the-call],

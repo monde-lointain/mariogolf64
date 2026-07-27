@@ -67,8 +67,10 @@ These have a `docs/hazards.md` section; read it rather than the line here.
   pre-call compute statement into the call argument to reorder register setup.
 - **sched-class-tiebreak-order-coin** -- `rank_for_schedule` (`sched.c:2428`) sorts class then LUID, so
   a class-1 compute defers behind class-3 stores.
-- **sched-coin-loop-preheader-order-lever** -- a prologue init or save-order coin is a `loop.c`
-  preheader *placement* effect; crack it with an `off = i*STRIDE` giv.
+- **sched-coin-loop-preheader-order-lever** -- a prologue init or save-order coin is `loop.c`
+  placement: invariants hoist in loop-body emission order, then `strength_reduce` adds giv inits.
+  Crack it with `off = i*STRIDE` as a **statement** -- inlined in the address, gcc folds the symbol
+  into a walking pointer giv, losing the ROM's `%hi`/`addu`/`%lo` (S290).
 - **sched-select-potential-hazard-coin** -- `schedule_select` (`sched.c:2615`) front-loads a transfer
   over a constant load; the `fabsf` sign-mask is the canonical case.
 - **sched-bottomup-loadsplit-livelength-blockmove** -- at exact instruction count, a `s32 tmp`
@@ -79,8 +81,6 @@ These have a `docs/hazards.md` section; read it rather than the line here.
 - **do-while-zero-block-break** -- an empty `do {} while (0);` emits nothing but ends the preceding
   block, so `reorg` stops reaching past a call for a later insn and annulling the next branch to
   compensate (S288). Preferred over an empty `asm volatile`, the other zero-byte region-ender (S282).
-- **loop-invariant-hoist-order-preheader-regalloc** -- `loop.c` hoists invariants in loop-body emission
-  order, so precomputing a division early changes preheader allocation.
 - **aggregate-store-pins-pointer-load** -- a store to a scalar global does not constrain a later load
   through a pointer parameter (`true_dependence`, `sched.c:817`); typing the destination globals as
   one array restores the dependence and the ROM's load/store interleave.

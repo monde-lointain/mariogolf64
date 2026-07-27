@@ -397,6 +397,14 @@ below).
       Neither run scored near zero (base 620, best 320 across three runs), so a plateau is not the
       signal to stop reading. Running tally of the play: S287 1/1, S288 2/2 candidates yielded a lever,
       0/3 runs a zero.
+    - **Read a candidate for the knob it exposes, not the diff to apply (S290).** A candidate can be
+      semantically wrong and still name the mechanism. `func_8006C484`'s best (base 970, then 440 after
+      the hand fixes, best 200, never 0) retyped one local to `unsigned short`, which changed the
+      arithmetic and cost 2 instructions -- but it landed the three permuted registers on the ROM's,
+      which proved the residual was sensitive to *any* extra insn in that region and pointed at the
+      zero-cost version of the same knob (declaring the local inside the loop body). So ask what the
+      candidate perturbed, then find the legitimate way to perturb it; `tools/allocno_report.py`
+      answers that directly for a register permutation. Tally: S290 1/1 candidates yielded a knob.
   - **The permuter (asm-differ) is blind to internal branch targets — a permuter score of 0 on a
     pure-branch-target residual is a false positive (S261).** asm-differ normalises a branch to a
     local label and does not distinguish `bne …,<label@0x7c>` from `bne …,<label@0x80>`, the same

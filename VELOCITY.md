@@ -1474,6 +1474,43 @@ Three honest caveats:
   STRUCTURAL symptom, not evidence of a coloring problem — S285 makes 4 of the last 6 carry verdicts
   refuted, and this one was refuted by the same agent that wrote it, hours later, with no new tool.
   Push: local.
+- **Sprint 290** — the two remaining zero-FP fresh leaves of `src/main/func_8006A2C0.c`. **+2 banked,
+  0 carried, 1 permuter (2 imports, no zero), 0 re-open, 0 stuck-far.** Zero gate enablers. Both
+  landed at exact instruction count with an identical instruction sequence early, and both were then
+  decided purely by register allocation, which is the sprint's result: `func_8006C484` ->
+  `stamp_circle_ring_alpha` (274/274) had **five** t-registers permuted, and ~15 blind source
+  permutations failed before reading gcc's own numbers out of the `-dg`/`-dl` dumps turned it into
+  arithmetic (it needed `cj > ci > mask`; it had `mask 12790 > ci 12903 > cj 12500`). Four levers
+  followed from the table: all-inline `grid[]` indexing so each address chain accumulates in one
+  pseudo (16 registers down to the ROM's 14), both clamp temps initialised before both tests (which
+  lets the back edge steal `cj = j` and forces the annulled `beql`), the second block initialising
+  `ci` first so the two temps' live lengths equalise at 126 and the tie falls to declaration order,
+  and an empty `do {} while (0)` round *only* the clamps to re-weight their refs past the hoisted
+  mask; the last register came from declaring `t` inside the loop body, since a call-free function has
+  no local-alloc priority at all (`qty_compare_1` scales by `qty_n_calls_crossed` = 0, so the order is
+  birth order). `func_8006D6D0` -> `accumulate_mode_stats` (447/447, seven iterations) is the per-mode
+  statistics fold; its `__divdi3` calls and `0x68DB8BAD` multiplies are one `x * 9999 / 10000` decay
+  expression in `s64` and `s32` form, armed once a 9999-sample counter saturates. Two findings there:
+  the per-hole flag store and clamp sit **inside** the min branch (as sequential statements every
+  branch polarity in that block is wrong), and preheader init order is an induction-variable question
+  — `off = i * 2` as its own statement makes `loop.c` emit the init after the hoisted constants, where
+  inlining `i * 2` in the address makes gcc absorb the symbol into a walking pointer giv; that one
+  distinction closed 24 of the last 32 mismatches. md5-candidate **0 delta** (230), matched-fn **+2**
+  (file 18→16 stubs, still partial; repo-wide 311→309), main fresh leaves 12→10, descriptive count
+  **+2** (both names mechanism-grounded, not guessed). Seed 5 (classical); banked 0pt (file partial);
+  realized 7 / residual +2 (+1 permuter, +1 novel bank-gotcha [first bank to require the allocno
+  dumps]). Rolling-5 (S286-S290): 0+0+0+0+0 pt banked, all partial-file sprints; value = 3+3+2+2+2
+  matched. Quality **0 stuck-far / 1 permuter / 0 carried / 0 re-opened** — the first zero-carry sprint
+  since S287. Retro applied 5 of 5 plus 1 retirement (A: `tools/allocno_report.py` + hazards Axis 8,
+  which also retires the S268 "terminal" verdict on `#multi-register-allocno-permutation`; B: the giv
+  statement-vs-inline rule; C: the loop.md read-the-knob-not-the-diff rule; D: the BACKLOG drop record
+  for `func_8005D3B8`, which `--carried-check` now flags; E: the plateau advisory's FP-mnemonic
+  counting rule; retirement: `loop-invariant-hoist-order-preheader-regalloc` merged into
+  `sched-coin-loop-preheader-order-lever`, two halves of one `loop.c` placement mechanism, landing
+  levers.md at 10236/10240). The prompt-lint baseline was **re-frozen**: its ratchet test was already
+  red at HEAD from S289's un-frozen provenance warnings, and this sprint's `S290` citations added to
+  it; caps were de-shouted instead. `make test-tools` 135 passed, 1 skipped. KEY: a multi-register
+  permutation is not terminal — it is arithmetic nobody had measured. Push: local.
 - **Sprint 289** — the last two fresh leaves of the `src/main/func_80095A10.c` camera-builder family
   plus the twice-deferred `func_8005C038`. **+2 banked, 1 carried, 1 permuter (2 imports, no zero), 0
   re-open, 0 stuck-far.** Zero gate enablers; one per-file `mk/main.mk` `-ffast-math` override, the

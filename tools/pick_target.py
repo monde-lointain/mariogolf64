@@ -1169,7 +1169,13 @@ def main():
                 "EXCEPTION (S287): a heavy-FP leaf whose rodata constants match fdlibm is a "
                 "TRANSCRIPTION, not a wall -- func_80059BA0.c is the game's embedded libm "
                 "(fabsf/atanf/atan2f banked; func_80059BC0 = acosf by its pS0-pS5/qS1-qS4 "
-                "coefficients). Check the constants before pricing a heavy-FP main leaf."
+                "coefficients). Check the constants before pricing a heavy-FP main leaf. "
+                "MEASURE FP the right way (S290): count FP MNEMONICS "
+                "(lwc1|swc1|mtc1|mfc1|<op>.s|<op>.d|cvt.|c.<cc>.s|bc1) in the `.s`, never "
+                "`grep '$f[0-9]'` -- the register grep returns 0 on a heavily-FP function here and "
+                "prices it as a clean integer leaf, the opposite of its class. "
+                "S290 dropped func_8005D3B8 on that corrected count (36 swc1 / 31 lwc1 / "
+                "22 cvt.s.w over two game float tables, not an fdlibm pool)."
             )
         raise SystemExit(0 if n_fresh else 1)
 

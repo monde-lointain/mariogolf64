@@ -77,6 +77,30 @@ sched coin at exact count, expect a terminal verdict, not a bank. Running tally:
 fan-out-on-exact-count-carry banked = S280 2/2, S281 2/2, S282 0/2. Both S282 carries have rewritten
 `docs/wip/*.near-match.md` and are flagged by `--carried-check`.
 
+**S290 RETIRES the "multi-register permutation is terminal" verdict, and the retirement is a tool.**
+Both S290 leaves in `src/main/func_8006A2C0.c` banked (`stamp_circle_ring_alpha` 274/274,
+`accumulate_mode_stats` 447/447, 0 carried), but the durable result is *how* the first one banked. It
+sat at exact instruction count with an identical instruction sequence and **five** t-registers
+permuted — the shape `docs/hazards.md#multi-register-allocno-permutation` called
+"Terminal / corpus-sibling-only" since S268 — and about fifteen blind source permutations moved
+nothing. Reading gcc's own allocation numbers cracked it: `venv/bin/python3 tools/allocno_report.py
+<src.c> <fn>` prints every allocno in `global.c allocno_compare` order with its `n_refs`,
+`live_length`, size, the computed `floor_log2(refs)*refs / live_length * 10000 * size` and the
+register it got, so a permutation becomes arithmetic instead of guesswork. S268's evidence was that
+every *guessed* change failed, which is a statement about guessing, not about the class. The four
+knobs, all source-reachable: live-length equalisation to reach the declaration-order tie-break, an
+empty `do {} while (0)` round a *subset* of statements to re-weight only those refs, all-inline
+indexing so an address chain accumulates in one pseudo, and — for a **call-free** function, where
+`local-alloc` has no priority at all (`qty_compare_1` scales by `qty_n_calls_crossed` = 0, so the
+order is birth order) — the *scope* of a local. Full playbook: `#loop-weight-and-live-length-regalloc-steering`
+Axis 8. **So a documented register-permutation carry is now a candidate slice again**, not a parked
+wall: prefer one of those over a size-ordered fresh leaf while `main`'s fresh pool is down to 10 (the
+smallest four being the `func_800453E0.c` FP-slope family and `func_80078FA8`). Second S290 rule, for
+any loop-bearing leaf: preheader init order is an induction-variable question — `off = i * STRIDE` and
+`p = &base[i * STRIDE]` as their own **statements** make `loop.c` emit their inits after the hoisted
+constants (a source `off += 2` IV inverts that), while inlining `i * STRIDE` in the address makes gcc
+absorb the symbol into a walking pointer giv and lose the ROM's per-access `%hi`/`addu`/`%lo`.
+
 **S288 CLOSES the fdlibm vein and sharpens the permuter-as-lever play.** `func_80059BC0` = `acosf`
 banked FIRST BUILD off the S287 constant-check procedure (one enabler: a per-file `-ffast-math`
 override so `sqrtf()` emits the bare `sqrt.s`; the already-banked FP siblings are fast-math-invariant
@@ -3756,6 +3780,16 @@ by `/sprint-plan`:
   sched coin); do not re-open it as part of a fresh slice. **(4)** The two S288 levers are the ones
   most likely to recur in this file's remaining call-glue: a bound-copy for live-range placement and
   an empty `do {} while (0);` as a `reorg` block break (`docs/levers.md`).
+
+- **(S290 DROPPED BY PO — not a spike; do not re-price it as a fresh leaf)** `func_8005D3B8` (0x5E8,
+  `src/main/func_80059BA0.c`). Gate-rejected on the same heavy-FP tell at S288 and S289 and, at the
+  S290 gate, dropped rather than deferred a fourth time (the S289 third-encounter rule says decide,
+  not re-weigh). The tell is now measured, not guessed: 36 `swc1` / 31 `lwc1` / 22 `cvt.s.w` /
+  19 `mul.s` / 9 `add.s` / 6 `c.lt.s` over two contiguous game float tables, so it is the
+  S276/S277 FP-scheduler class and the S287 fdlibm exception does not rescue it (no coefficient pool).
+  Parked here so `--carried-check` flags it and it stops reading as `fresh`; re-open only behind a
+  lever for that class, not on size order. A distinct `DROPPED` ranker tag (as opposed to reusing the
+  carry list) stays a golden-gated follow-up.
 
 - **(S289 SPIKE — carried at 268/264 with a characterized verdict)** `func_8005C038` (0x420, 264
   instrs) in `src/main/func_80059BA0.c`. Insert into a category's three-slot record table over four
