@@ -77,15 +77,35 @@ expression in the `pass == 2` arm with the comma form kept in the else arm reads
 `-0x60` (`pass * 512`) or 297 with frame `-0x58` (a literal `2 * 512`), because a hoistable then-arm
 re-introduces the `base + frameOff` invariant that the else arm then reuses.
 
-So the next attempt has two separable jobs: get the `pass == 2` arm hoisted **without** lengthening
-the else arm's giv lifetime (the two are currently coupled through the shared invariant), and find the
-5 instructions the strip body is short. Both sides carry the same seven induction variables (band
-words `+0x3C0`, band bytes `+0xF00`, three doubled-vertex-index givs `+4`, `strip +1`, `pass +1`), and
-the ROM emits the two band increments in the loop epilogue where the build hoists them earlier, so
-look at the `Gfx*` bookkeeping first: the ROM keeps two pointers, `$t1` (the store base, used at `-4`
-and `0` displacements) and `$t2` (the `gfx` value written back through `gfxp`), and merges `$t2`'s
-bumps as `0x8/0x8/0x18/0x10/0x8/0x68`. Every DL command word is confirmed correct; this is not a
-missing command.
+**The `+5` and the `-5` are the same five instructions, and they are constants hoisted out of the
+strip loop.** A mnemonic histogram of the strip-loop body alone (ROM 217, build 212, splitting at
+`.L8002AF1C` and at the build's matching back-edge target) isolates them exactly: after normalising
+`li`/`move` to `addiu`/`addu`, the build is short 3 `addiu rX,$zero,-8` and 2 standalone `lui`
+command-word loads, and nothing else — every `lui+lw`, `lui+ori`, `addu`, and branch count matches. So
+the ROM re-materialises the `& ~7` mask at each of the three band sites and two DL command words at
+each of their sites, while the build loads each once in the strip loop's preheader. Nothing is
+missing; five instructions sit one region too high.
+
+`-dL` names the pass. In the build's dump, the strip loop is `Loop from 141 to 752: 225 real insns`,
+and `move_movables` unifies duplicate constant loads before hoisting them — the dump prints the
+duplicates as `done move-insn matches <first insn>` against a first occurrence that was
+`moved to <insn>` with `savings 2` or `3` (the savings count is the number of unified uses). The
+constants the ROM keeps in place appear in the build as exactly this pattern. The two `-8` loads that
+did **not** get unified show as `move-insn savings 1 not desirable` and stay in the loop, which is
+what all three do in the ROM.
+
+So the lever is `combine_movables`, not the `threshold -= 3` decay at loop.c:1719/1904: the decay
+cannot plausibly be the mechanism here, since blocking a `savings 1, lifetime 23` move needs the
+threshold under 10 and it starts near 120 and only reaches ~86 after the build's twelve moves. What
+must change is whether the duplicate constant loads in the arms and at the join are recognised as the
+same movable at all. Look for a source form that keeps each command word's load private to its basic
+block.
+
+The remaining `-2` is in the prologue (48 against 46) and has not been characterised.
+
+Both sides carry the same seven induction variables (band words `+0x3C0`, band bytes `+0xF00`, three
+doubled-vertex-index givs `+4`, `strip +1`, `pass +1`). Every DL command word is confirmed correct;
+this is not a missing command.
 
 ## Constants already decoded (do not re-derive)
 
