@@ -207,7 +207,126 @@ void func_8006C450(void) {
   D_800C4010 = 0;
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_8006A2C0", func_8006C484);
+/**
+ * Stamps one 8-way-symmetric Bresenham circle of radius r into a 16-bit image,
+ * flipping only the alpha bit of each pixel (0x0001 per halfword, so 0x00010001
+ * per u32 pixel pair). D_800C4014 selects clear (hide) or set (show); the
+ * caller walks r downward to sweep a filled iris.
+ *
+ * cx counts u32 pixel pairs and cy counts rows of 152 pairs; every stamp also
+ * repeats one row down, so the visible step is a 2x2 pixel block.
+ *
+ * The empty do/while and the loop-scoped t are codegen shaping, not logic: they
+ * set the register-allocation order this function's asm depends on.
+ */
+void stamp_circle_ring_alpha(u32* grid, s32 cx, s32 cy, s32 r) {
+  s32 i;
+  s32 j;
+  s32 d;
+  s32 cj;
+  s32 ci;
+
+  i = 0;
+  j = r;
+  d = r;
+  if (D_800C4014 == 0) {
+    while (i <= j) {
+      s32 t;
+
+      do {
+        cj = j;
+        ci = i;
+        if (cj > 0x4B) {
+          cj = 0x4B;
+        }
+        if (ci > 0x6F) {
+          ci = 0x6F;
+        }
+      } while (0);
+      grid[(cy + ci) * 152 + (cx + cj)] &= ~0x10001;
+      grid[(cy - ci) * 152 + (cx + cj)] &= ~0x10001;
+      grid[(cy + ci) * 152 + (cx + cj) + 152] &= ~0x10001;
+      grid[(cy - ci) * 152 + (cx + cj) + 152] &= ~0x10001;
+      grid[(cy + ci) * 152 + (cx - cj)] &= ~0x10001;
+      grid[(cy - ci) * 152 + (cx - cj)] &= ~0x10001;
+      grid[(cy + ci) * 152 + (cx - cj) + 152] &= ~0x10001;
+      grid[(cy - ci) * 152 + (cx - cj) + 152] &= ~0x10001;
+
+      ci = i;
+      cj = j;
+      if (cj > 0x6E) {
+        cj = 0x6E;
+      }
+      if (ci > 0x4B) {
+        ci = 0x4B;
+      }
+      grid[(cy + cj) * 152 + (cx + ci)] &= ~0x10001;
+      grid[(cy - cj) * 152 + (cx + ci)] &= ~0x10001;
+      grid[(cy + cj) * 152 + (cx + ci) + 152] &= ~0x10001;
+      grid[(cy - cj) * 152 + (cx + ci) + 152] &= ~0x10001;
+      grid[(cy + cj) * 152 + (cx - ci)] &= ~0x10001;
+      grid[(cy - cj) * 152 + (cx - ci)] &= ~0x10001;
+      grid[(cy + cj) * 152 + (cx - ci) + 152] &= ~0x10001;
+      grid[(cy - cj) * 152 + (cx - ci) + 152] &= ~0x10001;
+
+      t = d - 1;
+      d = t - i * 2;
+      if (d < 0) {
+        d += (j - 1) * 2;
+        j--;
+      }
+      i++;
+    }
+  } else {
+    while (i <= j) {
+      s32 t;
+
+      do {
+        cj = j;
+        ci = i;
+        if (cj > 0x4B) {
+          cj = 0x4B;
+        }
+        if (ci > 0x6F) {
+          ci = 0x6F;
+        }
+      } while (0);
+      grid[(cy + ci) * 152 + (cx + cj)] |= 0x10001;
+      grid[(cy - ci) * 152 + (cx + cj)] |= 0x10001;
+      grid[(cy + ci) * 152 + (cx + cj) + 152] |= 0x10001;
+      grid[(cy - ci) * 152 + (cx + cj) + 152] |= 0x10001;
+      grid[(cy + ci) * 152 + (cx - cj)] |= 0x10001;
+      grid[(cy - ci) * 152 + (cx - cj)] |= 0x10001;
+      grid[(cy + ci) * 152 + (cx - cj) + 152] |= 0x10001;
+      grid[(cy - ci) * 152 + (cx - cj) + 152] |= 0x10001;
+
+      ci = i;
+      cj = j;
+      if (cj > 0x6E) {
+        cj = 0x6E;
+      }
+      if (ci > 0x4B) {
+        ci = 0x4B;
+      }
+      grid[(cy + cj) * 152 + (cx + ci)] |= 0x10001;
+      grid[(cy - cj) * 152 + (cx + ci)] |= 0x10001;
+      grid[(cy + cj) * 152 + (cx + ci) + 152] |= 0x10001;
+      grid[(cy - cj) * 152 + (cx + ci) + 152] |= 0x10001;
+      grid[(cy + cj) * 152 + (cx - ci)] |= 0x10001;
+      grid[(cy - cj) * 152 + (cx - ci)] |= 0x10001;
+      grid[(cy + cj) * 152 + (cx - ci) + 152] |= 0x10001;
+      grid[(cy - cj) * 152 + (cx - ci) + 152] |= 0x10001;
+
+      t = d - 1;
+      d = t - i * 2;
+      if (d < 0) {
+        d += (j - 1) * 2;
+        j--;
+      }
+      i++;
+    }
+  }
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_8006A2C0", func_8006C8CC);
 

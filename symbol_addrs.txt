@@ -698,3 +698,4 @@ atan2f = 0x80059FAC; // type:func
 acosf = 0x80059BC0; // type:func
 insert_supershot_record = 0x8005B314; // type:func
 build_roster_grid = 0x8005C674; // type:func
+stamp_circle_ring_alpha = 0x8006C484; // type:func
