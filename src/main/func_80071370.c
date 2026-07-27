@@ -306,7 +306,90 @@ s32 func_80073BF0(u8* str) {
   return len;
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80071370", func_80073C14);
+/**
+ * Emits one string of 12x12 glyphs from the I4 font atlas at D_800E1C38 (192
+ * texels wide, 16 glyphs per row), advancing the caller's display-list cursor.
+ *
+ * Per glyph: a 4-bit texture-tile load, a second tile-size declaration for tile
+ * 1, a pipe sync and a texture rectangle. Lowercase is folded into the 0x80
+ * page; the punctuation arms nudge the quad and shrink the advance.
+ *
+ * The goto chain is the same idiom the banked func_800738BC above uses, and for
+ * the same reason. uls/ult are named temps rather than inlined macro arguments:
+ * ending `code`'s live range at the div/mod is what emits the ROM's glyph-index
+ * copy and hoists both atlas offsets to the top of the emit block.
+ */
+void emit_glyph_string_12px(Gfx** dl, s16 x, s16 y, u8* str) {
+  Gfx* gfx = *dl;
+  u8 c;
+
+  gDPPipeSync(gfx++);
+  c = *str;
+  if (c != 0) {
+    do {
+      s32 code;
+      s32 xpos;
+      s32 ypos;
+      s32 uls;
+      s32 ult;
+
+      if (c == 0x20) {
+        str++;
+        x += 12;
+        continue;
+      }
+      xpos = x;
+      ypos = y;
+      code = c;
+      if ((u32)(code - 0x61) < 0x1A) {
+        code += 0x80;
+      }
+      if (code >= 0xA0) {
+        goto hi;
+      }
+      if (code >= 0x9E) {
+        goto mark;
+      }
+      if (code == 0x2E) {
+        goto period;
+      }
+      goto draw;
+    hi:
+      if (code >= 0xE0) {
+        goto draw;
+      }
+      if (code < 0xDE) {
+        goto draw;
+      }
+    mark:
+      xpos -= 6;
+      ypos -= 4;
+      x -= 12;
+      goto draw;
+    period:
+      xpos -= 6;
+      x -= 9;
+    draw:
+      uls = (code % 16) * 12;
+      ult = (code / 16) * 12;
+      gDPLoadTextureTile_4b(gfx++, ((u32)D_800E1C38 + 8) & ~7, G_IM_FMT_I, 192,
+                            12, uls, ult, uls + 15, ult + 11, 0, 0, 0, 0, 0, 0,
+                            0);
+      gDPSetTileSize(gfx++, 1, uls << G_TEXTURE_IMAGE_FRAC,
+                     ult << G_TEXTURE_IMAGE_FRAC,
+                     (uls + 16) << G_TEXTURE_IMAGE_FRAC,
+                     (ult + 12) << G_TEXTURE_IMAGE_FRAC);
+      gDPPipeSync(gfx++);
+      gSPTextureRectangle(gfx++, xpos << 2, ypos << 2, (xpos + 12) << 2,
+                          (ypos + 12) << 2, G_TX_RENDERTILE, uls << 5, ult << 5,
+                          1 << 10, 1 << 10);
+      x += 12;
+      str++;
+    } while ((c = *str) != 0);
+  }
+  gDPPipeSync(gfx++);
+  *dl = gfx;
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80071370", func_80073F24);
 
@@ -494,8 +577,8 @@ extern u8 D_80105118[];
 /* Emits a bitmap-font glyph-string display list at (y, x): a leading + trailing
  * gDPPipeSync (0xE7000000), and per character a func_800760CC glyph-code lookup
  * feeding a func_8006A2C0 texture-rect emitter (advancing y by 0xE per glyph).
- * The loop runs while D_80105118[i] != 0. A preheader-local `p = str` defers the
- * str param's callee-saved copy into the loop preheader, shortening its
+ * The loop runs while D_80105118[i] != 0. A preheader-local `p = str` defers
+ * the str param's callee-saved copy into the loop preheader, shortening its
  * live_length below i's so str allocates to $s2 and i to $s3 (matching the ROM
  * allocno order WITHOUT a 9th callee-saved reg); the explicit xr/k invariant
  * temps order the preheader hoists ahead of that copy, and the fresh w temp
