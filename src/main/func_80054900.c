@@ -177,14 +177,39 @@ typedef struct {
   u8 pad06[2];
 } TextureDesc;
 
+/* One step of a face's texture animation: the frame count at which it becomes
+ * current, plus the texture and the s/t triple to bind from there on. The walk
+ * takes the last keyframe whose threshold the slot's frame counter has reached,
+ * so the list is scanned in full rather than stopped at the first hit. */
+typedef struct {
+  s16 threshold;
+  s16 textureIndex;
+  u16 texS[3];
+  u16 texT[3];
+} TexKeyframe;
+
 /* One binding of a model face to an animation slot. `slot` selects the entry of
  * the character's slot table that drives it; the keyframe list is what the
  * per-frame path steps through, and is unused on the reset path. */
 typedef struct {
   s16 keyframeCount;
   s16 slot;
-  void* keyframes;
+  TexKeyframe* keyframes;
 } FaceTexAnim;
+
+/* One entry of the character's animation play order: which slot to advance and
+ * how many frames it runs for. A negative slot ends the list. */
+typedef struct {
+  s16 slot;
+  s16 length;
+} AnimTexOrder;
+
+/* The 0x20 animation slots live at `cs + 0x88`, 8 bytes apart, each holding a
+ * frame counter at +0x88 and a state byte at +0x8C off the slot's own base --
+ * the same spelling `activate_texture_anim_slot` uses. */
+#define ANIM_SLOT_FRAME 0x88
+#define ANIM_SLOT_STATE 0x8C
+#define ANIM_SLOT_COUNT 0x20
 
 /* A model face whose texture is animated: the segmented addresses of its three
  * vertices and of its own display list, the slots that drive it, the index of
@@ -217,7 +242,7 @@ void update_vertex_texture_coords(s32 id) {
   TextureDesc* texture;
   Gfx* gfx;
   s32 faceIndex;
-  s32 vertexIndex;
+  s32 stepIndex;
 
   faceIndex = 0;
   /* `cs` has to live in the frame. The walk re-reads the character state at its
@@ -245,19 +270,130 @@ void update_vertex_texture_coords(s32 id) {
                         G_TX_CLAMP, G_TX_CLAMP, FACE_TEXTURE_MASK,
                         FACE_TEXTURE_MASK, G_TX_NOLOD, G_TX_NOLOD);
 
-    for (vertexIndex = 0; vertexIndex < FACE_VERTEX_COUNT; vertexIndex++) {
-      Vtx* vertex = (Vtx*)(((vertexIndex * sizeof(Vtx) + face->verts) &
+    for (stepIndex = 0; stepIndex < FACE_VERTEX_COUNT; stepIndex++) {
+      Vtx* vertex = (Vtx*)(((stepIndex * sizeof(Vtx) + face->verts) &
                             SEGMENT_OFFSET_MASK) +
                            ((u32*)(cs + 0x20))[*(s32*)(cs + 0x30)]);
-      vertex->v.tc[0] = face->texS[vertexIndex];
-      vertex->v.tc[1] = face->texT[vertexIndex];
+      vertex->v.tc[0] = face->texS[stepIndex];
+      vertex->v.tc[1] = face->texT[stepIndex];
     }
     faceIndex++;
   }
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80054900",
-            update_vertex_texture_coords_per_frame);
+/* Advances every animated texture on character `id` by one frame. Each face
+ * binding names a slot; the slot's frame counter selects the keyframe whose
+ * texture and s/t triple get patched into the face's own display list at
+ * `dl + 0x10`, the same seven-command block `update_vertex_texture_coords`
+ * writes. The tail pass then steps each running slot's counter and retires it
+ * to state 3 once it reaches the length its play-order entry declares. */
+void update_vertex_texture_coords_per_frame(s32 id) {
+  f32 unused[16];
+  u8* cs;
+  TexturedFace* face;
+  TextureDesc* texture;
+  FaceTexAnim* anim;
+  u8* slot;
+  Gfx* gfx;
+  s32 faceIndex;
+  s32 animIndex;
+  s32 keyframeIndex;
+  /* One counter serves the vertex loop and the slot-advance loop: their live
+   * ranges do not overlap, and keeping them one pseudo is what lets the tail
+   * loop's init stay in the join block instead of being duplicated onto the
+   * entry guard's skip path. */
+  s32 stepIndex;
+  s32 frame;
+  /* Separate from `frame`: this one lives only across the slot-advance loop,
+   * carrying the counter on the running path and the state on the winding-down
+   * one. Folding the two together lifts `frame` above the segment mask in
+   * global.c's priority order and rotates five registers. */
+  s32 counter;
+  /* A byte-wide copy of the state: read unsigned so gcc cannot prove it equal
+   * to the signed `state`, which keeps both live and lets the copy fill the
+   * dispatch's delay slot instead of dying at the compare. */
+  u8 hold;
+  s32 slotIndex;
+  s32 state;
+
+  faceIndex = 0;
+  (void)&cs;
+  cs = get_character_state(id);
+  if (cs == NULL) {
+    return;
+  }
+  {
+    f32 unused2[31];
+    (void)unused2;
+  }
+  func_8005342C(0, 0, 0x20, 0x2000000, osVirtualToPhysical(*(void**)(cs + 4)));
+
+  while ((face = (*(TexturedFace***)(*(u8**)cs + 0x24))[faceIndex]) != NULL) {
+    for (animIndex = 0; animIndex < face->animCount; animIndex++) {
+      u8* bound;
+      anim = face->anims + animIndex;
+      bound = cs + anim->slot * 8;
+      if (*(s8*)(bound + ANIM_SLOT_STATE) == 0) {
+        continue;
+      }
+      frame = *(s32*)(bound + ANIM_SLOT_FRAME);
+
+      for (keyframeIndex = 0; keyframeIndex < anim->keyframeCount;
+           keyframeIndex++) {
+        TexKeyframe* keyframe = anim->keyframes + keyframeIndex;
+        if (frame < keyframe->threshold) {
+          continue;
+        }
+
+        gfx = (Gfx*)(((face->dl + 0x10) & SEGMENT_OFFSET_MASK) +
+                     ((u32*)(cs + 0x20))[*(s32*)(cs + 0x30)]);
+        texture = *(TextureDesc**)(*(u8**)cs + 0x28) + keyframe->textureIndex;
+        gDPLoadTextureBlock(gfx++, (u32)texture->image & ~7, G_IM_FMT_RGBA,
+                            G_IM_SIZ_16b, texture->width, texture->height, 0,
+                            G_TX_CLAMP, G_TX_CLAMP, FACE_TEXTURE_MASK,
+                            FACE_TEXTURE_MASK, G_TX_NOLOD, G_TX_NOLOD);
+
+        for (stepIndex = 0; stepIndex < FACE_VERTEX_COUNT; stepIndex++) {
+          Vtx* vertex = (Vtx*)(((stepIndex * sizeof(Vtx) + face->verts) &
+                                SEGMENT_OFFSET_MASK) +
+                               ((u32*)(cs + 0x20))[*(s32*)(cs + 0x30)]);
+          vertex->v.tc[0] = keyframe->texS[stepIndex];
+          vertex->v.tc[1] = keyframe->texT[stepIndex];
+        }
+      }
+    }
+    faceIndex++;
+  }
+  for (stepIndex = 0; stepIndex < ANIM_SLOT_COUNT; stepIndex++) {
+    slotIndex = (*(AnimTexOrder**)(*(u8**)cs + 0x20))[stepIndex].slot;
+    if (slotIndex < 0) {
+      break;
+    }
+    slot = cs + slotIndex * 8;
+    state = *(s8*)(slot + ANIM_SLOT_STATE);
+    hold = slot[ANIM_SLOT_STATE];
+    if (state >= 4) {
+      counter = *(s32*)(slot + ANIM_SLOT_FRAME) + 1;
+      *(s32*)(slot + ANIM_SLOT_FRAME) = counter;
+      if (counter < (*(AnimTexOrder**)(*(u8**)cs + 0x20))[stepIndex].length) {
+        continue;
+      }
+      *(s8*)(slot + ANIM_SLOT_STATE) = 3;
+      /* The state store above aliases the frame-resident `cs`, so both arms
+       * re-read it; spelling the base out re-derives it rather than reusing the
+       * pointer the loop head already built. */
+      if (slotIndex == 0) {
+        *(s32*)(cs + ANIM_SLOT_FRAME) = 0;
+      } else {
+        u8* reslot = cs + slotIndex * 8;
+        *(s32*)(reslot + ANIM_SLOT_FRAME) =
+            (*(AnimTexOrder**)(*(u8**)cs + 0x20))[stepIndex].length;
+      }
+    } else if (state != 0) {
+      *(s8*)(slot + ANIM_SLOT_STATE) = hold - 1;
+    }
+  }
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80054900", func_80055738);
 
@@ -297,7 +433,7 @@ void reset_face_textures_for_anim_slot(s32 id, s32 slot) {
   Gfx* gfx;
   s32 faceIndex;
   s32 animIndex;
-  s32 vertexIndex;
+  s32 stepIndex;
 
   faceIndex = 0;
   (void)&cs;
@@ -323,12 +459,12 @@ void reset_face_textures_for_anim_slot(s32 id, s32 slot) {
                           G_TX_CLAMP, G_TX_CLAMP, FACE_TEXTURE_MASK,
                           FACE_TEXTURE_MASK, G_TX_NOLOD, G_TX_NOLOD);
 
-      for (vertexIndex = 0; vertexIndex < FACE_VERTEX_COUNT; vertexIndex++) {
-        Vtx* vertex = (Vtx*)(((vertexIndex * sizeof(Vtx) + face->verts) &
+      for (stepIndex = 0; stepIndex < FACE_VERTEX_COUNT; stepIndex++) {
+        Vtx* vertex = (Vtx*)(((stepIndex * sizeof(Vtx) + face->verts) &
                               SEGMENT_OFFSET_MASK) +
                              ((u32*)(cs + 0x20))[*(s32*)(cs + 0x30)]);
-        vertex->v.tc[0] = face->texS[vertexIndex];
-        vertex->v.tc[1] = face->texT[vertexIndex];
+        vertex->v.tc[0] = face->texS[stepIndex];
+        vertex->v.tc[1] = face->texT[stepIndex];
       }
     }
     faceIndex++;
