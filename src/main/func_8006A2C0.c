@@ -68,7 +68,24 @@ void func_8006A548(Gfx** pgfx, u32 arg1) {
   *pgfx = gfx;
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_8006A2C0", func_8006A5E4);
+/**
+ * Loads one 4-bit (CI4) texture block into TMEM through the caller's
+ * display-list cursor. The whole body is a single gDPLoadTextureBlock_4b
+ * expansion: SetTextureImage, SetTile, LoadSync, LoadBlock, PipeSync, SetTile,
+ * SetTileSize.
+ *
+ * The image address is masked to an 8-byte boundary, matching the sibling TLUT
+ * loaders above.
+ */
+void load_texture_block_4b(Gfx** pgfx, u32 timg, s32 fmt, s32 width, s32 height,
+                           s32 pal, s32 cms, s32 cmt, s32 masks, s32 maskt,
+                           s32 shifts, s32 shiftt) {
+  Gfx* gfx = *pgfx;
+
+  gDPLoadTextureBlock_4b(gfx++, timg & ~7, fmt, width, height, pal, cms, cmt,
+                         masks, maskt, shifts, shiftt);
+  *pgfx = gfx;
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_8006A2C0", func_8006A84C);
 

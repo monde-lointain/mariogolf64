@@ -703,3 +703,4 @@ accumulate_mode_stats = 0x8006D6D0; // type:func
 load_course_assets = 0x8005A580; // type:func
 build_scenery_light_sets = 0x80057914; // type:func
 clear_player_slots = 0x8005D334; // type:func
+load_texture_block_4b = 0x8006A5E4; // type:func
