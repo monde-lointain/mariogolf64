@@ -75,6 +75,8 @@ extern u32 calculate_hypotenuse_safe(s32 x, s32 y);
 extern f32 atan2f(f32 dz, f32 dx);
 extern void func_80078FA8(s32 player, s32 arg1, f32 angle);
 extern void func_80078DC0(s32 arg0, s32 arg1);
+extern void set_anim_flag_82(s32 id, u8 value);
+extern f32 sqrtf(f32 x);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80095A10", func_80095A10);
 
@@ -127,7 +129,88 @@ INCLUDE_ASM("asm/nonmatchings/main/func_80095A10", func_80095DE0);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80095A10", func_8009676C);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80095A10", func_800967F4);
+/* The shot-view builder that also re-aims the scene's third light: in mode 12,
+ * once the shot is 10 frames in, it takes the vector between two sampled points
+ * of player 0, normalises it to the 127 range a Light direction wants, and
+ * writes it into D_800C73B0[2] along with a fixed colour pair. */
+void func_800967F4(s32 player, GolfCamera* cam) {
+  Vec3f pos;
+  f32 unused[16];
+  Vec3f dir;
+  Vec3f base;
+  u8* cs;
+  f32 follow_dist;
+  f32 ground;
+  f32 len;
+  f32 scale;
+
+  cs = get_character_state(player);
+  if (D_800E4C54 == 14) {
+    follow_dist = func_80095A10(107520.0f, 30720.0f, D_800C73A0 * 0.025f);
+  } else {
+    follow_dist = func_80095A10(107520.0f, 38400.0f, D_800C73A0 * 0.025f);
+  }
+
+  if (D_800E4C54 == 12) {
+    if (D_800C73A0 >= 10) {
+      func_80079358(player, 3);
+      func_8005483C(0, 3, &dir);
+      func_8005483C(0, 1, &base);
+      dir.x = dir.x - base.x;
+      dir.y = dir.y - base.y;
+      dir.z = dir.z - base.z;
+      len = sqrtf(dir.x * dir.x + dir.y * dir.y + dir.z * dir.z);
+      if (len > 1.0f) {
+        scale = 127.0f / len;
+        dir.x = dir.x * scale;
+        dir.y = dir.y * scale;
+        dir.z = dir.z * scale;
+        D_800E4C5C = 1;
+        set_anim_flag_82(player, 2);
+        D_800C73B0[2].l.col[0] = 0xFF;
+        D_800C73B0[2].l.col[1] = 0xFF;
+        D_800C73B0[2].l.col[2] = 0x7F;
+        D_800C73B0[2].l.colc[0] = 0xFF;
+        D_800C73B0[2].l.colc[1] = 0xFF;
+        D_800C73B0[2].l.colc[2] = 0x7F;
+        D_800C73B0[2].l.dir[0] = dir.x;
+        D_800C73B0[2].l.dir[1] = dir.y;
+        D_800C73B0[2].l.dir[2] = dir.z;
+      }
+    }
+  }
+
+  func_8005483C(player, 1, &pos);
+  ground = (get_interpolated_terrain_height_wrapper((s32)(pos.x * 1024.0f),
+                                                    (s32)(pos.z * 1024.0f)) -
+            0x1E00) *
+           (1.0f / 1024.0f);
+  if (ground < pos.y) {
+    pos.y = ground;
+  }
+  if (D_800E4C54 == 12) {
+    pos.y -= 4.5f;
+  }
+
+  cam->at.x = pos.x;
+  cam->at.y = pos.y;
+  cam->at.z = pos.z;
+  cam->eye.x = pos.x + cosf(-*(f32*)(cs + 0x48) - 1.57079637f) * follow_dist *
+                           (1.0f / 1024.0f);
+  cam->eye.y = pos.y + -1.5f;
+  if (D_800E4C54 == 14) {
+    cam->eye.y = pos.y + -7.5f;
+  }
+  cam->eye.z = pos.z + sinf(-*(f32*)(cs + 0x48) - 1.57079637f) * follow_dist *
+                           (1.0f / 1024.0f);
+  func_8009676C(cam);
+  func_80095A68(cam, &cam->at, 0.1f, 3);
+
+  if (flag_is_set(0x7F) || (D_800BB020 != 30 && D_801B60A0 == 1)) {
+    cam->at.y -= 4.5f;
+    cam->eye.y += 4.5f;
+  }
+}
 
 /* The mode-zoomed variant of the shot-view builder: the near/far pair the
  * follow distance interpolates between is chosen per camera mode, the ball

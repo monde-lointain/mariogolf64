@@ -42,3 +42,9 @@ $(BUILD_DIR)/$(SRC_DIR)/main/func_800453E0.o: C_PROFILE_CFLAGS := $(MAIN_CFLAGS)
 # guard-drop as above; the already banked FP siblings (atanf, atan2f) are
 # fast-math-invariant and stay matched under the flag.
 $(BUILD_DIR)/$(SRC_DIR)/main/func_80059BA0.o: C_PROFILE_CFLAGS := $(MAIN_CFLAGS) -ffast-math
+
+# func_80095A10.c is the shot-view camera family. func_800967F4 normalises a
+# light direction with sqrtf() and the ROM has the bare `sqrt.s`, so the whole
+# TU compiles -ffast-math. Same BUILT_IN_FSQRT guard-drop as above; the six
+# already banked camera builders are fast-math-invariant and stay matched.
+$(BUILD_DIR)/$(SRC_DIR)/main/func_80095A10.o: C_PROFILE_CFLAGS := $(MAIN_CFLAGS) -ffast-math
