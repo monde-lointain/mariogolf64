@@ -26,6 +26,14 @@ extern s32 load_overlay(s32);
 extern void unload_overlay(s32);
 
 extern Gfx* glistp;
+extern u16* nuGfxCfb_ptr;
+
+/* Source framebuffer for the re-blit below: seeded from the VI on the first
+ * call, then re-pointed each frame at the buffer the previous call drew into.
+ */
+extern u32 D_800B7750;
+/* The cfb the current call is drawing into, saved for the next call to read. */
+extern u32 D_800B7754;
 
 void init_rdp_and_draw_sky_background(Gfx** gfxp, s32 arg1);
 void func_8002A9C4(Gfx** gfxp, s32 arg1);
@@ -101,7 +109,75 @@ INCLUDE_ASM("asm/nonmatchings/main/func_8002A640", func_8002DAC0);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_8002A640", render_frame);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_8002A640", func_80031450);
+/**
+ * Re-blits the previous frame into the current colour buffer: the 304x224
+ * region at (8, 8) is copied in copy-cycle mode, six scanlines per texrect.
+ */
+void copy_previous_frame_to_cfb(Gfx** gfxp) {
+  Gfx* gfx = *gfxp;
+  s32 i;
+  s32 lines;
+
+  if (D_800B7750 == 0) {
+    D_800B7750 = (u32)osViGetNextFramebuffer();
+  } else {
+    D_800B7750 = D_800B7754;
+  }
+
+  gDPPipeSync(gfx++);
+  gDPPipeSync(gfx++);
+  gDPSetRenderMode(gfx++, 0, 0);
+  gDPSetCombineMode(gfx++, G_CC_DECALRGB, G_CC_DECALRGB);
+  gDPPipeSync(gfx++);
+  gDPPipeSync(gfx++);
+  gDPSetCycleType(gfx++, G_CYC_COPY);
+  gDPPipeSync(gfx++);
+  gDPPipeSync(gfx++);
+  gDPSetTextureFilter(gfx++, G_TF_BILERP);
+  gDPPipeSync(gfx++);
+  gDPSetTexturePersp(gfx++, G_TP_NONE);
+  gDPPipeSync(gfx++);
+  gDPPipeSync(gfx++);
+  gDPSetColorDither(gfx++, G_CD_DISABLE);
+  D_800B7754 = (u32)nuGfxCfb_ptr;
+  gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 320,
+                   osVirtualToPhysical(nuGfxCfb_ptr) & ~7);
+  gDPPipeSync(gfx++);
+
+  for (i = 0; i != 38; i++) {
+    /* The last strip is the 224-line remainder: 37 * 6 + 2. */
+    lines = (i != 37) ? 6 : 2;
+
+    gDPSetTextureImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 320,
+                       (D_800B7750 + i * (320 * 2 * 6)) & ~7);
+    gDPSetTile(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 76, 0, G_TX_LOADTILE, 0, 0,
+               0, 0, 0, 0, 0);
+    gDPLoadSync(gfx++);
+    gDPLoadTile(gfx++, G_TX_LOADTILE, 8 << G_TEXTURE_IMAGE_FRAC,
+                8 << G_TEXTURE_IMAGE_FRAC, 311 << G_TEXTURE_IMAGE_FRAC,
+                (8 + lines - 1) << G_TEXTURE_IMAGE_FRAC);
+    gDPPipeSync(gfx++);
+    gDPSetTile(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 76, 0, G_TX_RENDERTILE, 0, 0,
+               0, 0, 0, 0, 0);
+    gDPSetTileSize(gfx++, G_TX_RENDERTILE, 8 << G_TEXTURE_IMAGE_FRAC,
+                   8 << G_TEXTURE_IMAGE_FRAC, 311 << G_TEXTURE_IMAGE_FRAC,
+                   (8 + lines - 1) << G_TEXTURE_IMAGE_FRAC);
+    gDPPipeSync(gfx++);
+    gSPScisTextureRectangle(gfx++, 8 << G_TEXTURE_IMAGE_FRAC,
+                            (8 + i * 6) << G_TEXTURE_IMAGE_FRAC,
+                            311 << G_TEXTURE_IMAGE_FRAC,
+                            (8 + i * 6 + lines - 1) << G_TEXTURE_IMAGE_FRAC,
+                            G_TX_RENDERTILE, 8 << 5, 8 << 5, 4 << 10, 1 << 10);
+    gDPPipeSync(gfx++);
+  }
+
+  gDPPipeSync(gfx++);
+  gDPPipeSync(gfx++);
+  gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+  gDPPipeSync(gfx++);
+
+  *gfxp = gfx;
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_8002A640", func_800318A8);
 
