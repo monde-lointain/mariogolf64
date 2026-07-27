@@ -168,8 +168,82 @@ done:
 
 s32 func_800550B8(s32 arg0) { return find_keyframe_offset_by_tag(arg0, 2, 6); }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80054900",
-            update_vertex_texture_coords);
+/* One entry of a character model's texture table: an RGBA16 image plus the
+ * texel dimensions the tile has to be re-declared with each frame. */
+typedef struct {
+  void* image;
+  u8 width;
+  u8 height;
+  u8 pad06[2];
+} TextureDesc;
+
+/* A model face whose texture is animated: the segmented addresses of its three
+ * vertices and of its own display list, the index of the texture to bind, and
+ * the s/t pair to write into each of the three vertices. */
+typedef struct {
+  u32 verts;
+  u32 dl;
+  u8 pad08[6];
+  s16 textureIndex;
+  u16 texS[3];
+  u16 texT[3];
+} TexturedFace;
+
+#define FACE_VERTEX_COUNT 3
+#define SEGMENT_OFFSET_MASK 0xFFFFFF
+/* Both tiles clamp with a 64-texel wrap mask in s and t. */
+#define FACE_TEXTURE_MASK 6
+
+/* Re-binds the animated texture of every face of character `id` and rewrites
+ * that face's vertex texture coordinates. Each face owns a display list whose
+ * first two commands are a fixed preamble, so the seven-command texture load is
+ * patched in at `dl + 0x10`; both the list and the vertices are segmented
+ * addresses resolved against the character's current segment table entry. */
+void update_vertex_texture_coords(s32 id) {
+  f32 unused[16];
+  u8* cs;
+  TexturedFace* face;
+  TextureDesc* texture;
+  Gfx* gfx;
+  s32 faceIndex;
+  s32 vertexIndex;
+
+  faceIndex = 0;
+  /* `cs` has to live in the frame. The walk re-reads the character state at its
+   * bottom, and only a stack-resident pointer keeps loop.c from hoisting that
+   * re-read out past the display-list stores. */
+  (void)&cs;
+  cs = get_character_state(id);
+  if (cs == NULL) {
+    return;
+  }
+  func_8005342C(0, 0, 0x20, 0x2000000, osVirtualToPhysical(*(void**)(cs + 4)));
+
+  /* The face list is NULL-terminated, so the fetch belongs in the condition: it
+   * is then the loop test that gcc rotates to the bottom of the body, which is
+   * what keeps the character-state re-read inside the walk. */
+  while ((face = (*(TexturedFace***)(*(u8**)cs + 0x24))[faceIndex]) != NULL) {
+    texture = *(TextureDesc**)(*(u8**)cs + 0x28);
+    if (face->textureIndex >= 0) {
+      texture += face->textureIndex;
+    }
+    gfx = (Gfx*)(((face->dl + 0x10) & SEGMENT_OFFSET_MASK) +
+                 ((u32*)(cs + 0x20))[*(s32*)(cs + 0x30)]);
+    gDPLoadTextureBlock(gfx++, (u32)texture->image & ~7, G_IM_FMT_RGBA,
+                        G_IM_SIZ_16b, texture->width, texture->height, 0,
+                        G_TX_CLAMP, G_TX_CLAMP, FACE_TEXTURE_MASK,
+                        FACE_TEXTURE_MASK, G_TX_NOLOD, G_TX_NOLOD);
+
+    for (vertexIndex = 0; vertexIndex < FACE_VERTEX_COUNT; vertexIndex++) {
+      Vtx* vertex = (Vtx*)(((vertexIndex * sizeof(Vtx) + face->verts) &
+                            SEGMENT_OFFSET_MASK) +
+                           ((u32*)(cs + 0x20))[*(s32*)(cs + 0x30)]);
+      vertex->v.tc[0] = face->texS[vertexIndex];
+      vertex->v.tc[1] = face->texT[vertexIndex];
+    }
+    faceIndex++;
+  }
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80054900",
             update_vertex_texture_coords_per_frame);
