@@ -707,3 +707,4 @@ load_texture_block_4b = 0x8006A5E4; // type:func
 load_texture_block = 0x8006A84C; // type:func
 copy_previous_frame_to_cfb = 0x80031450; // type:func
 emit_glyph_string_12px = 0x80073C14; // type:func
+update_and_draw_iris_wipe = 0x8006C918; // type:func

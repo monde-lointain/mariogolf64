@@ -397,7 +397,111 @@ void stamp_circle_ring_alpha(u32* grid, s32 cx, s32 cy, s32 r) {
 
 INCLUDE_ASM("asm/nonmatchings/main/func_8006A2C0", func_8006C8CC);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_8006A2C0", func_8006C918);
+extern Gfx D_800C3FC0[];
+extern s8 D_800B67C0;
+extern char D_80105118[];
+extern char D_800D1448[];
+
+extern int sprintf(char* s, const char* fmt, ...);
+extern void check_and_print_grid(char* str, s32 col, s32 row);
+extern void func_8006A2C0(Gfx** pgfx, s32 ulx, s32 uly, s32 lrx, s32 lry,
+                          s32 tile, s32 s, s32 t, s32 dsdx, s32 dtdy);
+
+/**
+ * Advances the iris wipe over the hole view and emits its masked overlay.
+ *
+ * The wipe radius lives in D_800C4018 and is stepped by the phase in
+ * D_800C4014: closing shrinks it 8 rings per frame until it passes -0x95, and
+ * opening grows it 12 rings per frame until it reaches 0x90, each phase firing
+ * one sound cue as it crosses its threshold. The mask itself is then blitted as
+ * 38 six-scanline strips, the last one being the 224-line remainder.
+ *
+ * Two variable choices below are load-bearing for register allocation, not
+ * style: `lry` holds `h + 8` as its own statement so fold.c's associate_trees
+ * cannot pull the constant onto the row induction variable, and the row origin
+ * stays spelled `i * 6` inline rather than as a named variable so loop.c
+ * creates the three induction variables in body order.
+ */
+void update_and_draw_iris_wipe(Gfx** pgfx) {
+  Gfx* gfx = *pgfx;
+  s32 i;
+  s32 h;
+  s32 lry;
+
+  if (D_800C4010 == 0) {
+    return;
+  }
+
+  if (D_800C4014 == 0) {
+    if (D_800C4018 > 0) {
+      i = 0;
+      do {
+        stamp_circle_ring_alpha((u32*)((u8*)D_800E1C00 + 8), 0x4C, 0x70,
+                                D_800C4018);
+        D_800C4018--;
+        i++;
+      } while (i != 8);
+      if (D_800C4018 == 0x60) {
+        func_80050DA0(0x65, 2, 0x28, 0x14, 0x7F);
+      }
+    } else if (D_800C4018 >= -0x95) {
+      D_800C4018--;
+    } else {
+      D_800C4014 = 1;
+    }
+  }
+
+  if (D_800C4014 == 2) {
+    if (D_800C4018 < 0) {
+      D_800C4018++;
+    } else if (D_800C4018 < 0x90) {
+      i = 0;
+      do {
+        stamp_circle_ring_alpha((u32*)((u8*)D_800E1C00 + 8), 0x4C, 0x70,
+                                D_800C4018);
+        D_800C4018++;
+        i++;
+      } while (i != 12);
+      if (D_800C4018 == 0x30) {
+        func_80050DA0(0x64, 2, 0x28, 0x14, 0x7F);
+      }
+    } else {
+      D_800C4014 = 3;
+      D_800C4010 = 2;
+      func_8006C450();
+      return;
+    }
+  }
+
+  if (D_800B67C0 != 0) {
+    sprintf(D_80105118, D_800D1448, D_800C4018);
+    check_and_print_grid(D_80105118, 0x14, 5);
+  }
+
+  gSPDisplayList(gfx++, D_800C3FC0);
+  gDPPipeSync(gfx++);
+  gDPSetTextureLUT(gfx++, G_TT_NONE);
+  gDPPipeSync(gfx++);
+  gDPSetTextureFilter(gfx++, G_TF_POINT);
+  gDPSetCombineLERP(gfx++, 0, 0, 0, TEXEL0, 0, 1, TEXEL0, 1, 0, 0, 0, TEXEL0, 0,
+                    1, TEXEL0, 1);
+  gDPPipeSync(gfx++);
+  gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
+
+  i = 0;
+  do {
+    h = (i == 0x25) ? 2 : 6;
+    lry = h + 8;
+    gDPLoadTextureTile(gfx++, ((u32)D_800E1C00 + 8 + i * 0xE40) & ~7,
+                       G_IM_FMT_RGBA, G_IM_SIZ_16b, 304, 0, 0, 0, 303, h - 1, 0,
+                       0, 0, 0, 0, 0, 0);
+    func_8006A2C0(&gfx, 8 << 2, (i * 6 + 8) << 2, 312 << 2, (i * 6 + lry) << 2,
+                  0, 0, 0, 0x400, 0x400);
+    i++;
+  } while (i != 0x26);
+
+  *pgfx = gfx;
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_8006A2C0", func_8006CD50);
 
@@ -408,12 +512,9 @@ extern s8 D_801B71FB[];
 extern s8 D_801050BC[];
 extern s8 D_801050BD;
 extern s8 D_801050BE;
-extern char D_80105118[];
 extern char D_800D1450[];
 
 extern s32 func_800521C0(void);
-extern int sprintf(char* s, const char* fmt, ...);
-extern void check_and_print_grid(char* str, s32 col, s32 row);
 
 /* Builds and prints the debug flag grid. Three variable choices are
  * load-bearing for register allocation, not style: the clear loop counts in
