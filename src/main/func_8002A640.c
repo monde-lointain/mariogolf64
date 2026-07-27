@@ -68,8 +68,117 @@ INCLUDE_ASM("asm/nonmatchings/main/func_8002A640", func_8002A9C4);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_8002A640", emit_sky_dome_dl);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_8002A640",
-            emit_sky_horizon_compositor_dl);
+extern u16* nuGfxZBuffer;
+/* Sky layer, blitted into the z-buffer scratch surface. */
+extern u32 D_800B6814;
+/* Horizon layer, blitted over the sky into the current colour buffer. */
+extern u16* D_800B67A0;
+
+/**
+ * Composites the two sky layers in copy-cycle mode. Each pass re-blits the
+ * 304x224 region at (8, 8), six scanlines per texrect: the first into the
+ * z-buffer used as a scratch surface, the second into the current cfb.
+ */
+void emit_sky_horizon_compositor_dl(Gfx** gfxp) {
+  Gfx* gfx = *gfxp;
+  s32 i;
+
+  D_800B6810 = 1;
+
+  gDPPipeSync(gfx++);
+  gDPPipeSync(gfx++);
+  gDPSetRenderMode(gfx++, 0, 0);
+  gDPSetCombineMode(gfx++, G_CC_DECALRGB, G_CC_DECALRGB);
+  gDPPipeSync(gfx++);
+  gDPPipeSync(gfx++);
+  gDPSetCycleType(gfx++, G_CYC_COPY);
+  gDPPipeSync(gfx++);
+  gDPPipeSync(gfx++);
+  gDPSetTextureFilter(gfx++, G_TF_BILERP);
+  gDPPipeSync(gfx++);
+  gDPSetTexturePersp(gfx++, G_TP_NONE);
+  gDPPipeSync(gfx++);
+  gDPPipeSync(gfx++);
+  gDPSetColorDither(gfx++, G_CD_DISABLE);
+  gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 320,
+                   (u32)nuGfxZBuffer & ~7);
+  gDPPipeSync(gfx++);
+
+  /* `i` stays at function scope because the ROM keeps it in $t8 across both
+   * loops (one pseudo); `lines` is re-declared per loop so its live range dies
+   * between them. Splitting both, or neither, permutes the register set. */
+  {
+    s32 lines;
+
+    for (i = 0; i != 38; i++) {
+      /* The last strip is the 224-line remainder: 37 * 6 + 2. */
+      lines = (i != 37) ? 6 : 2;
+
+      gDPSetTextureImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 320,
+                         (D_800B6814 + i * (320 * 2 * 6)) & ~7);
+      gDPSetTile(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 76, 0, G_TX_LOADTILE, 0, 0,
+                 0, 0, 0, 0, 0);
+      gDPLoadSync(gfx++);
+      gDPLoadTile(gfx++, G_TX_LOADTILE, 8 << G_TEXTURE_IMAGE_FRAC,
+                  8 << G_TEXTURE_IMAGE_FRAC, 311 << G_TEXTURE_IMAGE_FRAC,
+                  (8 + lines - 1) << G_TEXTURE_IMAGE_FRAC);
+      gDPPipeSync(gfx++);
+      gDPSetTile(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 76, 0, G_TX_RENDERTILE, 0,
+                 0, 0, 0, 0, 0, 0);
+      gDPSetTileSize(gfx++, G_TX_RENDERTILE, 8 << G_TEXTURE_IMAGE_FRAC,
+                     8 << G_TEXTURE_IMAGE_FRAC, 311 << G_TEXTURE_IMAGE_FRAC,
+                     (8 + lines - 1) << G_TEXTURE_IMAGE_FRAC);
+      gDPPipeSync(gfx++);
+      gSPScisTextureRectangle(
+          gfx++, 8 << G_TEXTURE_IMAGE_FRAC, (8 + i * 6) << G_TEXTURE_IMAGE_FRAC,
+          311 << G_TEXTURE_IMAGE_FRAC,
+          (8 + i * 6 + lines - 1) << G_TEXTURE_IMAGE_FRAC, G_TX_RENDERTILE,
+          8 << 5, 8 << 5, 4 << 10, 1 << 10);
+      gDPPipeSync(gfx++);
+    }
+  }
+
+  gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 320,
+                   osVirtualToPhysical(nuGfxCfb_ptr) & ~7);
+  gDPPipeSync(gfx++);
+
+  {
+    s32 lines;
+
+    for (i = 0; i != 38; i++) {
+      lines = (i != 37) ? 6 : 2;
+
+      gDPSetTextureImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 320,
+                         ((u32)D_800B67A0 + i * (320 * 2 * 6)) & ~7);
+      gDPSetTile(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 76, 0, G_TX_LOADTILE, 0, 0,
+                 0, 0, 0, 0, 0);
+      gDPLoadSync(gfx++);
+      gDPLoadTile(gfx++, G_TX_LOADTILE, 8 << G_TEXTURE_IMAGE_FRAC,
+                  8 << G_TEXTURE_IMAGE_FRAC, 311 << G_TEXTURE_IMAGE_FRAC,
+                  (8 + lines - 1) << G_TEXTURE_IMAGE_FRAC);
+      gDPPipeSync(gfx++);
+      gDPSetTile(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 76, 0, G_TX_RENDERTILE, 0,
+                 0, 0, 0, 0, 0, 0);
+      gDPSetTileSize(gfx++, G_TX_RENDERTILE, 8 << G_TEXTURE_IMAGE_FRAC,
+                     8 << G_TEXTURE_IMAGE_FRAC, 311 << G_TEXTURE_IMAGE_FRAC,
+                     (8 + lines - 1) << G_TEXTURE_IMAGE_FRAC);
+      gDPPipeSync(gfx++);
+      gSPScisTextureRectangle(
+          gfx++, 8 << G_TEXTURE_IMAGE_FRAC, (8 + i * 6) << G_TEXTURE_IMAGE_FRAC,
+          311 << G_TEXTURE_IMAGE_FRAC,
+          (8 + i * 6 + lines - 1) << G_TEXTURE_IMAGE_FRAC, G_TX_RENDERTILE,
+          8 << 5, 8 << 5, 4 << 10, 1 << 10);
+      gDPPipeSync(gfx++);
+    }
+  }
+
+  gDPPipeSync(gfx++);
+  gDPPipeSync(gfx++);
+  gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+  gDPPipeSync(gfx++);
+
+  *gfxp = gfx;
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_8002A640",
             init_rdp_and_draw_sky_background);
