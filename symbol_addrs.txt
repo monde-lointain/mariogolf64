@@ -712,3 +712,4 @@ capture_frame_snapshot = 0x8009351C; // type:func
 draw_animated_status_icon = 0x800880A0; // type:func
 emit_screen_transition_overlay = 0x800939E8; // type:func
 reset_face_textures_for_anim_slot = 0x80055828; // type:func
+emit_glyph_sheet_preamble_dl = 0x800734F0; // type:func

@@ -991,13 +991,13 @@ extern char D_800D1BB8[];
 extern char D_800D1BC8[];
 extern char D_800D1BCC[];
 extern char D_800D1BDC[];
-extern void func_800734F0(Gfx** chain, s32 arg1);
+extern void emit_glyph_sheet_preamble_dl(Gfx** chain, s32 arg1);
 extern void func_800747B0(Gfx** chain, s16 x, s16 y, char* str);
 
 void func_80088BDC(Gfx** chain) {
   Gfx* dl = *chain;
 
-  func_800734F0(&dl, D_800C5E94);
+  emit_glyph_sheet_preamble_dl(&dl, D_800C5E94);
   gDPSetPrimColor(dl++, 0, 0, D_800C5E6C[0][0], D_800C5E6C[0][1],
                   D_800C5E6C[0][2], 255);
   gDPSetEnvColor(dl++, D_800C5E6C[1][0], D_800C5E6C[1][1], D_800C5E6C[1][2],
@@ -1138,7 +1138,7 @@ extern s32 D_800C2B00[];
 extern s32 func_80242418(void);
 extern void func_80242424(Gfx** chain);
 extern void func_80242D40(Gfx** chain);
-extern void func_800734F0(Gfx** chain, s32 arg1);
+extern void emit_glyph_sheet_preamble_dl(Gfx** chain, s32 arg1);
 extern void func_8007624C(Gfx** chain, s32 x, s32 y, char* str, u32 fg, u32 bg,
                           s32 arg6);
 
@@ -1166,12 +1166,12 @@ void func_8008CD30(Gfx** chain) {
         centi = (s32)(D_801B60B0 * 3.3333334f) % 100;
         secs = total_secs % 60;
         mins = total_secs / 60;
-        func_800734F0(&dl, 0);
+        emit_glyph_sheet_preamble_dl(&dl, 0);
         sprintf(D_80105118, D_800D1C84, mins, secs, centi);
         func_8007624C(&dl, 0xA8, 0xB0, D_80105118, 0xFFFF0000, 0x30FF0000,
                       0x80);
       } else {
-        func_800734F0(&dl, 0);
+        emit_glyph_sheet_preamble_dl(&dl, 0);
         gDPSetPrimColor(dl++, 0, 0, 255, 0, 0, 255);
         gDPSetEnvColor(dl++, 255, 255, 0, 255);
         sprintf(D_80105118, D_800D1CD0, &D_800C1420[func_80051FCC() * 0xC8]);

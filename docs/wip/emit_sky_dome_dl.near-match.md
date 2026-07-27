@@ -1,71 +1,81 @@
-# emit_sky_dome_dl — S296 carry (272/299, unfinished reconstruction)
+# emit_sky_dome_dl — S297 carry (297/299, was 272/299 at S296)
 
-**This is not a wall.** No compiler-source dive was run and no permuter was imported. The leaf was
-committed third in S296, the first two took the sprint, and this one got one build. It reached
-272/299 with the structure matching in three of the four diff hunks on that build. Re-open it on
-size order like any fresh leaf; do not price it as a documented wall.
+**Still not a wall.** No permuter import, no terminal verdict. S297 took it from 272 to 297 with four
+source fixes, three of them semantic or structural rather than compiler-coin. The residual is 2
+instructions in the loop epilogue region. Re-open it on size order.
 
-`src/main/func_8002A640.c`. Host has two already-banked emitters as shape references:
-`copy_previous_frame_to_cfb` (S294) and `emit_sky_horizon_compositor_dl` (S295), so the S286
-same-file-sibling exception applies.
+`src/main/func_8002A640.c`. The body is committed in the tree as C (the function is banked as source,
+not as `INCLUDE_ASM`) only if the ROM is green; if it is carried, the stub is restored. Attempt source
+kept at `nonmatchings/emit_sky_dome_dl/attempt.c`; the S297 297/299 form is the one in git history for
+this doc's commit.
 
-Attempt source: `nonmatchings/emit_sky_dome_dl/attempt.c` (the S296 first build, verbatim).
+## What S296's reading got wrong, and it was a body bug, not a compiler wall
 
-## What it draws
+The band a strip samples is **not** recomputed per pass. The ROM's `$s3` is initialised once at
+function entry to `0x500` and incremented by `0x3C0` inside the strip loop, never reset at a pass
+boundary, so the bands run continuously 8, 14, 20 … across all 38 strips of all three passes. The S296
+attempt recomputed the band from `strip` alone, which draws passes 1 and 2 from the wrong texel rows.
+That was worth 9 instructions and, more importantly, it was wrong output.
 
-Three passes of horizontal strips forming the sky dome. Each strip is a quad textured from the
-matching band of `D_800B67A0` — the same image `emit_sky_horizon_compositor_dl` composites, at the
-same `320 * 2 * 6` stride, but starting at texel row 8 rather than 0.
+Three further findings, each measured:
 
-Preamble is two matrices: the shared projection `D_800FE2F0`
-(`G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH`) and the per-frame modelview
-`D_800DABB0[D_800B7780]` (`G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_PUSH`).
+1. **The band counter is in 32-bit words, not texel rows.** `$s3` init `0x500` = 1280 and step
+   `0x3C0` = 960, with the strip-loop preheader deriving the byte offset as the single instruction
+   `sll $t5, $s3, 2`. A row-unit counter (init 8, step 6) forces a three-instruction
+   `sll/addu/sll` preheader instead. `SKY_DOME_FIRST_WORD` = `320 * 8 / 2`, `SKY_DOME_BAND_WORDS` =
+   `320 * 6 / 2`, band address = `((u32)D_800B67A0 + word * 4) & ~7`. Worth 2.
+2. **The band address and the row count are re-evaluated at the if/else join, not cached.** The ROM
+   computes the `(last ? 2 : 6)` chain twice — once before `bnez $s5` (the `tiled` test, feeding both
+   arms and the `gDPLoadTile` `lrt`) and again at the join, where its only consumer is the `rows * 32`
+   of the four `gSPModifyVertex` ST words. Likewise `D_800B67A0` is loaded three times: once per arm
+   and once at the join. This is the cse-table-reset-at-a-multi-predecessor-join shape
+   (`docs/hazards.md`, and the memory `ifelse-not-ternary-cse-reset`). Reproduced by a
+   `SKY_DOME_BAND(word)` macro at each use site plus a second `last`/`rows` assignment placed
+   **after** `gDPSetTileSize` and before the first `gSPModifyVertex` — placing it earlier splits
+   `(rows - 1)` into two computations and costs 3. Worth 12.
+3. **`loop.c:3823` decides the vertex-bank address, and a comma expression wins it.** The vertex bank
+   address `&D_800DABA0[pass * 512] + frameOff` is a giv of the `pass` biv. The ROM does **not**
+   strength-reduce it: it recomputes `sll $v0, $t9, 9` plus a fresh `lui/addiu` of `D_800DABA0` inside
+   the else arm, and its outer back edge is therefore a `bnel` with `addiu $v0, $zero, 2` in the delay
+   slot rather than a `+512` giv increment. `strength_reduce` ignores a giv when
+   `v->lifetime * threshold * benefit < insn_count` (loop.c:3823), and `v->lifetime` is measured from
+   the giv insn to the dest register's last use. Writing the address as a separate statement
+   (`u8* bank = &D_800DABA0[pass * 512];` then `bank + frameOff`) puts the def *before* the macro's w0
+   `lui/ori/sw`, which lengthens the lifetime past the threshold and the giv is reduced. Writing it as
+   a comma expression **inside** the argument —
+   `gSPVertex(gfx++, (bank = &D_800DABA0[pass * 512], bank + frameOff), 32, 0)` — evaluates the def
+   after the w0 store, shortens the lifetime, and the giv is ignored. That single change also fixed
+   the frame size (`-0x58` to the ROM's `-0x50`). Both arms need the comma form; a plain expression in
+   the `pass == 2` arm re-introduces a hoisted `base + frameOff` invariant that the else arm then
+   reuses, which is 3 instructions short of the ROM's inline `lui/addiu`.
 
-Each pass opens with `gSPVertex` from `D_800DABA0 + pass * 512 + D_800B7780 * 16`, 18 vertices on
-pass 2 and 32 otherwise. The address expression is identical in both arms and only the count differs,
-which is why gcc hoists the pass-2 form out of the outer loop (its `pass * 512` folds to `0x400`).
+**The gcc loop dump is the oracle for this class.** Compile the file with `-dL` added to the normal
+flags and read `<file>.c.loop`: it prints `Loop from A to B: N real insns`, every `Biv N initialized
+at insn M: initial value V`, and, for each giv, either `giv at N reduced to (reg:SI R)` or
+`giv of insn N not worth while, X vs Y` with the two sides of the loop.c:3823 comparison. The band
+biv's `initial value 1280` and the vertex-bank giv's reduce/ignore decision both read straight off it.
+This is to `loop.c` what `tools/allocno_report.py` is to `global.c`.
 
-## Per strip
+## The residual, 2 instructions
 
-`rows = ((pass == 2) && (strip == 7)) ? 2 : 6`, emitted branchlessly
-(`sltiu`/`negu`/`andi 6`/`ori 2`).
-
-A flag (`s5`, `tiled` in the attempt) makes the **very first strip of the whole dome** emit the full
-seven-command `gDPLoadTextureBlock`, and every later strip emit only the four that re-point and
-re-fetch: `gDPSetTextureImage` width 1, `gDPLoadSync`, `gDPLoadBlock`, `gDPPipeSync`. The tile
-descriptors are declared once for the dome, not per strip.
-
-Then a **second** bind of the same band as a 320-wide tile: `gDPSetTextureImage` 320,
-`gDPSetTile` line 76 `G_TX_LOADTILE`, `gDPLoadSync`, `gDPLoadTile` (`uls = 8 << 2`, `ult = 0`,
-`lrs = 311 << 2`, `lrt = (rows - 1) << 2`), `gDPPipeSync`, `gDPSetTile` `G_TX_RENDERTILE`,
-`gDPSetTileSize` (same rect).
-
-Geometry: four `gSPModifyVertex` writing `G_MWO_POINT_ST` for vertices `2s`, `2s+1`, `2s+2`, `2s+3`
-with ST `(8,0) (312,0) (8,rows) (312,rows)` — as the words `0x01000000`, `0x27000000`,
-`rows * 32 + 0x01000000`, `rows * 32 + 0x27000000`. Then one
-`gSP2Triangles(2s, 2s+2, 2s+1, 0, 2s+1, 2s+2, 2s+3, 0)` and a closing `gDPPipeSync`, after which the
-pass-2 strip-7 case breaks out of the strip loop.
+Every `cmpfn` hunk is 1:1 in size except the last, where the ROM has 15 instructions and the build 13.
+The region is the strip-loop epilogue. Both sides carry the same seven induction-variable increments
+(band words `+0x3C0`, band bytes `+0xF00`, the three doubled-vertex-index givs `+4`, `strip +1`,
+`pass +1`); the ROM emits the two band increments in the epilogue while the build hoists them earlier
+in the block, so the two counts diverge around the `Gfx*` bookkeeping bumps rather than around a
+missing command. The ROM keeps two pointers, `$t1` (the store base, at `-4`/`0` displacements) and
+`$t2` (the `gfx` value stored back through `gfxp`), and merges their bumps differently
+(`0x8/0x8/0x18/0x10/0x8/0x68`). Start by aligning that bookkeeping, not by re-deriving any command
+word: every DL word is confirmed correct.
 
 ## Constants already decoded (do not re-derive)
 
 - `0x0700001A` in the `gDPLoadBlock` word is `tile 7 | dxt 0x1A`, and `0x1A` is
   `CALC_DXT(320, G_IM_SIZ_16b_BYTES)`.
 - The `slti 0x800` / `0x7FF` clamp in the `.s` is **not** source. It is
-  `MIN(lrs, G_TX_LDBLK_MAX_TXL)` inside `gDPLoadBlock` itself — the same clamp both S296 banks
-  reproduced for free.
+  `MIN(lrs, G_TX_LDBLK_MAX_TXL)` inside `gDPLoadBlock` itself.
 - `D_800DABB0 == D_800DABA0 + 0x10`; both are referenced with their own `%hi`/`%lo`, so they stay two
   externs, not one symbol.
-
-## Where the 27 instructions are missing
-
-Entirely in the last hunk: ROM rows 246-299 are 54 instructions, the build's are 27. That is the
-`gSPModifyVertex` / `gSP2Triangles` word-building block. The ROM keeps the doubled vertex indices as
-three separate induction variables (`t6 = 2 + 4s`, `t7 = 4 + 4s`, `t8 = 6 + 4s`) and masks each with
-`andi ..., 0xFFFF` per command; the build folds them into the strip counter instead. Start there.
-
-Two smaller tells for the retry, both in the same region:
-
-- The ROM's outer back edge is a branch-**likely** (`bnel t9, 3` with the next comparison constant in
-  its delay slot) where the build emits a plain `bne`.
-- The ROM spills two loop constants to the stack (`sw t0, N(sp)`, reloaded per use) where the build
-  hoists them into callee-saved registers. The build sets up noticeably more `lui` in the prologue.
+- `$s2` = `0x02140000` is the `gSPModifyVertex` header with `G_MWO_POINT_ST` = `0x14`.
+- The second bind's two `gDPSetTile`s share one w0 (`0xF5109800`, line 76) and differ only in w1
+  (`0x07000000` for `G_TX_LOADTILE`, `0` for `G_TX_RENDERTILE`).

@@ -214,7 +214,54 @@ INCLUDE_ASM("asm/nonmatchings/main/func_80071370", func_80071CE4);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80071370", func_80072A08);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80071370", func_800734F0);
+/**
+ * Emits the fixed 22-command preamble for the small glyph sheet: 2-cycle
+ * XLU_SURF state (point filter, no perspective, no LUT, alpha dither off, env
+ * and blend colour) followed by a 16x12 4-bit I-format load into TMEM 0x100 on
+ * tile 1.
+ *
+ * `sel & 1` picks between the two sheets `load_hud_glyph_assets` allocates
+ * (asset 0x4B9 in `D_800E1C3C`, asset 0x4B8 in `D_800E1C40`, adjacent, so the
+ * selector indexes off the first). The `+ 8` skips the asset header and the
+ * `& ~7` re-aligns the pixel base for the RDP fetch.
+ *
+ * The load block is the stock `gDPLoadMultiBlock_4b` composite driven by
+ * `gfx++`: the macro re-evaluates its packet argument once per sub-command,
+ * which is what produces the ROM's per-command address temps and its 0x108
+ * frame. Passing a non-incrementing `gfx` and adding 7 afterwards is 22
+ * instructions short.
+ */
+void emit_glyph_sheet_preamble_dl(Gfx** cursor, s32 sel) {
+  Gfx* gfx = *cursor;
+
+  gDPPipeSync(gfx++);
+  gDPPipeSync(gfx++);
+  gDPSetCycleType(gfx++, G_CYC_2CYCLE);
+  gSPLoadGeometryMode(gfx++, 0);
+  gDPPipeSync(gfx++);
+  gDPSetRenderMode(gfx++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
+  gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+  gDPPipeSync(gfx++);
+  gDPSetAlphaCompare(gfx++, G_AC_NONE);
+  gDPPipeSync(gfx++);
+  gDPSetTexturePersp(gfx++, G_TP_NONE);
+  gDPPipeSync(gfx++);
+  gDPSetTextureFilter(gfx++, G_TF_POINT);
+  gDPPipeSync(gfx++);
+  gDPSetAlphaDither(gfx++, G_AD_DISABLE);
+  gDPSetCombineLERP(gfx++, ENVIRONMENT, PRIMITIVE, TEXEL1, PRIMITIVE, 0, 0, 0,
+                    TEXEL0, 0, 0, 0, COMBINED, 0, 0, 0, COMBINED);
+  gDPSetEnvColor(gfx++, 0x80, 0x80, 0xFF, 0xFF);
+  gDPSetBlendColor(gfx++, 0, 0, 0, 1);
+  gDPPipeSync(gfx++);
+  gDPSetTextureLUT(gfx++, G_TT_NONE);
+  gDPPipeSync(gfx++);
+  gDPLoadMultiBlock_4b(gfx++, (((u32)(&D_800E1C3C)[sel & 1]) + 8) & ~7, 0x100, 1,
+                       G_IM_FMT_I, 16, 12, 0, G_TX_CLAMP, G_TX_WRAP, 0, 4, 0, 0);
+  gDPPipeSync(gfx++);
+
+  *cursor = gfx;
+}
 
 extern u8 D_800C4390[];
 
