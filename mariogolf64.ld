@@ -706,8 +706,10 @@ SECTIONS
         build/src/main/func_800521C0.o(.rodata);
         build/src/main/func_80052250.o(.rodata);
         build/src/main/func_80052FE0.o(.rodata);
-        build/src/main/func_80054900.o(.rodata);
         build/asm/data/A8050.rodata.o(.rodata);
+        build/src/main/func_80054900.o(.rodata);
+        build/asm/data/ABC3C.rodata.o(.rodata);
+        build/asm/data/ABC40.rodata.o(.rodata);
         build/src/main/func_80059BA0.o(.rodata);
         build/src/main/func_8005E2C0.o(.rodata);
         build/src/main/func_8005E380.o(.rodata);

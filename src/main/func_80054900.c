@@ -401,7 +401,73 @@ void func_800578AC(void) {
   }
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80054900", func_80057914);
+extern u32 D_800BA9FC;
+extern s32 D_800B7780;
+extern u16 g_scenery_wind_angle_a;
+extern u16 g_scenery_wind_angle_b;
+extern s32 D_800C1F90;
+extern s32 D_800C1F94;
+extern s32 D_800C1F98;
+extern Lights2 D_800C1E50[];
+extern Lights2 D_800C1EA0[];
+extern f32 sinf(f32);
+extern f32 cosf(f32);
+
+/* Rebuilds the two scenery light sets for the current course from the wind
+ * angles. Both angles are u16 binary angles, so 2*pi/65536 converts them to
+ * radians; the direction vector is the unit vector of (yaw, pitch) scaled to
+ * the s8 range. D_800C1EA0 takes the course-tinted set and D_800C1E50 a fixed
+ * one, both indexed by D_800B7780. */
+void build_scenery_light_sets(void) {
+  u8 amb[3];
+  u8 col[3];
+  s8 dir[3];
+  f32 pitch;
+  f32 yaw;
+
+  /* Two separate range tests, not `9 <= x && x < 11`: fold_range_test merges
+   * the adjacent sltis into one `(u32)(x - 9) < 2`, where the ROM keeps both.
+   */
+  if (D_800BA9FC < 11) {
+    if (D_800BA9FC < 9) {
+      goto dull;
+    }
+    amb[0] = 0x78;
+    amb[1] = 0x78;
+    amb[2] = 0x78;
+    col[0] = 0xC8;
+    col[1] = 0x50;
+    col[2] = 0x0A;
+  } else {
+  dull:
+    /* amb[2] is set between amb[0] and amb[1] so both constants are live
+     * before the first store; grouping the 0x82s together defers the 0x78
+     * `li` past them and costs a reload. */
+    amb[0] = 0x82;
+    amb[2] = 0x78;
+    amb[1] = 0x82;
+    col[0] = 0x82;
+    col[1] = 0x78;
+    col[2] = 0x6E;
+  }
+
+  pitch = g_scenery_wind_angle_b * 9.58737992e-05f;
+  yaw = g_scenery_wind_angle_a * 9.58737992e-05f;
+  dir[0] = -sinf(pitch) * cosf(yaw) * 127.0f;
+  dir[1] = -cosf(pitch) * 127.0f;
+  dir[2] = -sinf(pitch) * sinf(yaw) * 127.0f;
+
+  /* Cast-to-struct, not a named `Lights2` local: with a local, gcc builds the
+   * constructor into a temporary and then block-moves it into the local, so
+   * each set costs one extra 40-byte copy and 0x28 of frame. Assigning the
+   * constructor straight to the array element leaves the ROM's single copy. */
+  D_800C1EA0[D_800B7780] = (Lights2)gdSPDefLights2(
+      amb[0], amb[1], amb[2], col[0], col[1], col[2], dir[0], dir[1], dir[2],
+      col[0], col[1], col[2], D_800C1F90, D_800C1F94, D_800C1F98);
+  D_800C1E50[D_800B7780] = (Lights2)gdSPDefLights2(
+      100, 100, 100, 0x9B, 0x78, 0x78, dir[0], dir[1], dir[2], 0x96, 0x96, 0x96,
+      D_800C1F90, D_800C1F94, D_800C1F98);
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80054900", func_80057FFC);
 

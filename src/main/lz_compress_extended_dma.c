@@ -41,7 +41,7 @@ extern u32 D_800BA9FC;
 extern s32 D_800BB0E8;
 extern void func_80253234(s32);
 extern void func_80253270(void);
-extern void func_80057914(void);
+extern void build_scenery_light_sets(void);
 
 /* func_80069BCC deps (camera + terrain-array reset). */
 extern s32 camera_position_x;
@@ -121,7 +121,7 @@ void func_8006955C(void) {
   }
   D_800BB0E8 = 0;
   func_80253270();
-  func_80057914();
+  build_scenery_light_sets();
   func_80069124();
 }
 
