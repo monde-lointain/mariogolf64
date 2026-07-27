@@ -77,23 +77,23 @@
     "provenance": 0
   },
   "docs/hazard-index.md": {
-    "bytes": 21224,
+    "bytes": 21666,
     "caps": 0,
-    "lines": 152,
+    "lines": 156,
     "max_nesting": 0,
     "provenance": 0
   },
   "docs/hazards.md": {
-    "bytes": 625609,
+    "bytes": 630695,
     "caps": 0,
-    "lines": 7750,
+    "lines": 7832,
     "max_nesting": 4,
-    "provenance": 77
+    "provenance": 78
   },
   "docs/levers.md": {
-    "bytes": 10236,
+    "bytes": 10222,
     "caps": 0,
-    "lines": 144,
+    "lines": 143,
     "max_nesting": 1,
     "provenance": 0
   },

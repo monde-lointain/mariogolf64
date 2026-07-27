@@ -3791,6 +3791,23 @@ by `/sprint-plan`:
   lever for that class, not on size order. A distinct `DROPPED` ranker tag (as opposed to reusing the
   carry list) stays a golden-gated follow-up.
 
+- **(S291 DROPPED BY PO — not a spike; do not re-price it as a fresh leaf)** `func_80078FA8` (0x3B0,
+  236 instrs, `src/main/func_80078910.c`). S289 deferred it on locality and S290 gate-rejected it on
+  the FP tell; at the S291 gate the PO decided rather than deferring a fourth time, per the S289
+  third-encounter rule. The tell is measured, not guessed: **fp=79 mnemonics plus 12 div/mul**, with
+  callees `6x guRandom` / `sinf` / `cosf` / `get_interpolated_terrain_height_wrapper` in a
+  non-fdlibm host, so it is the S276/S277 FP-scheduler class and the S287 fdlibm exception does not
+  rescue it. Parked here so `--carried-check` flags it and it stops reading as `fresh`; re-open only
+  behind a lever for that class, not on size order.
+
+- **(S291 STATE OF THE `main` POOL — read this before planning another `main` smallest-first sprint)**
+  After S291, `--loose-stubs main` reports **304 stubs, 7 fresh, and every one of the 7 is heavy-FP**
+  (`func_8004887C` fp=129, `func_800874D8` fp=119, `func_80047E9C` fp=141, plus `func_80045CE0`,
+  `func_80031AF4`, `func_800469EC` by size, and the `func_800453E0.c` FP-slope family). The two
+  non-FP leaves that remained at the S291 gate are now banked. There is no smallest-first `main`
+  slice left: the next `main` sprint is either an FP-scheduler lever slice, a carried-wall crack
+  slice (253 rows are `carried-wall`), a jtbl-carve slice (33 rows), or a scope change off `main`.
+
 - **(S289 SPIKE — carried at 268/264 with a characterized verdict)** `func_8005C038` (0x420, 264
   instrs) in `src/main/func_80059BA0.c`. Insert into a category's three-slot record table over four
   parallel `s32[6][3]` arrays at `0xD78`/`0xDC0`/`0xE08`/`0xE50` off the `func_8005AF50()` save block.

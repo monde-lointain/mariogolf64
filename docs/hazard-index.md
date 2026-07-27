@@ -65,6 +65,10 @@ When `pick_target.py` flags a hazard (or a match shows its symptom), read the ma
 | compiler rodata wrong offset / `rodata-literal:<addr>` | #rodata-sibling-yaml-pattern |
 | `rodata-jtbl:<addr>` | #rodata-sibling-yaml-pattern |
 | `…;owner-per-member` on a `rodata-jtbl`/`rodata-literal` | #rodata-sibling-yaml-pattern |
+| carve done, next `.double` pool 4 bytes off in either direction | #rodata-sibling-yaml-pattern |
+| N block-move loops too many, frame over by exactly `sizeof(T)` | #named-aggregate-local-extra-block-move |
+| big stack frame of `sb` triples + `pad` zero stores + `lwl`/`swl` pairs | #grep-gbih-before-modelling-a-large-stack-struct |
+| allocator leaf priced on "N globals to type" | #read-the-freeing-twin-before-pricing-an-allocator-leaf |
 | MMIO fn, flat score, empty top_mismatches | #io_writeio_read-isolation-artifact |
 | warm band, no hazard | #open-band-fast-path |
 | `undefined reference` after mid-sprint sync-names | #make-sync-names-eviction-recovery |

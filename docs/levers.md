@@ -26,6 +26,7 @@ These have a `docs/hazards.md` section; read it rather than the line here.
 - goto loop (last resort; defeats every `loop.c` pass) --
   `docs/hazards.md#goto-loop--loopc-never-runs-defeating-strength-reduction-and-bound-hoisting`
 - loop weight and live length regalloc steering -- `docs/hazards.md#loop-weight-and-live-length-regalloc-steering`
+- named aggregate local block move -- `docs/hazards.md#named-aggregate-local-extra-block-move`
 - nested-function static chain spill -- `docs/hazards.md#nested-function-static-chain-spill`
 - signed-divide const quotient destination -- `docs/hazards.md#signed-divide-const-v0v1-quotient-destination`
 - switch compare-chain layout -- `docs/hazards.md#switch-compare-chain-layout`
@@ -116,11 +117,9 @@ These have a `docs/hazards.md` section; read it rather than the line here.
   `*(p+off+C)` gives `addu rd,base,off`; `p[off+C]` reverses it.
 - **fold-associate-constant-side** -- `GLOBAL + (elem + CONST)` reproduces `addiu rX, globreg, C`; the
   natural spelling reassociates onto the element instead.
-- **byte-offset-cast-defeats-base-ptr-cse** -- `*(s32 *)((u8 *)SYM + off)` forces a per-access
-  `%hi`/`%lo`. Terminal only for a param-base fold.
-- **mem-in-struct-index-global-cse** -- `extern s32 G[]` plus `G[0]` defeats CSE of the load and the
-  `G << 2`, forcing a per-access re-read at every loop-nesting level; a cached `s32 *cnt = &G` is
-  short.
+- **defeat-global-base-cse** -- force a per-access re-read: `*(s32 *)((u8 *)SYM + off)` on the
+  address (param-base fold aside, terminal), `extern s32 G[]` plus `G[0]` on the value. Inverse: a
+  per-site `T *p = &SYM;`, never one reused (S291).
 - **himode-shortening-cse-neg-imm-addiu** -- `(f32)(u16)(x + 0x8000)` shortens to HImode and CSE folds it
   to one negative-immediate `addiu`; a separate `s32 t =` keeps SImode.
 - **u8-s32-char-split-zero-extend** -- `u8` for the `!= 0` test plus `s32` for compares puts the

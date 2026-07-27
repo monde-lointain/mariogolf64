@@ -71,6 +71,9 @@ The hazard families below group the sections that follow. Each links to its exis
 - [data-rodata-carve](#data-rodata-carve)
 - [decomposed-one-tu rodata alignment split (a counter-case to the 8-point decompose gate)](#decomposed-one-tu-rodata-alignment-split-a-counter-case-to-the-8-point-decompose-gate)
 - [Data-global in a shifted `.NON_MATCHING` carve (S210 `func_8005DE88` blocker)](#data-global-in-a-shifted-non_matching-carve-s210-func_8005de88-blocker)
+- [Named aggregate local extra block move](#named-aggregate-local-extra-block-move)
+- [Grep gbi.h before modelling a large stack struct](#grep-gbih-before-modelling-a-large-stack-struct)
+- [Read the freeing twin before pricing an allocator leaf](#read-the-freeing-twin-before-pricing-an-allocator-leaf)
 
 **Near-verbatim mirror byte-edits**
 - [Near-verbatim mirror (jal-count-mismatch)](#near-verbatim-mirror-jal-count-mismatch)
@@ -1711,6 +1714,85 @@ each interleaved item TU-owned as the C form that reproduces the ROM's layout an
   ROM's sizes; then extend the single `[X, .rodata, <path>]` subseg to cover `X..(X+.o(.rodata)size)`.
   S185 `resolve_shot_quality_table` (jtbl_800CC530 + 23× `static const char q[16]` + jtbl_800CC700 =
   0x230 at 0xA7930; a 2D array was 10 insns short, `extern` was a 0x30 whole-ROM shift).
+
+**A partial carve can need a three-way split, not two (S291).** The recorded rule is "8-align both
+edges". When the carve's own bytes end at a non-8-aligned address and the *next* asm blob opens with
+a `.double` pool, neither two-way split works and they fail in opposite directions:
+
+- Cut at the end of the C constants (`[X, .rodata, <path>]` then `[X+size, rodata]`): the asm blob
+  now starts 4-mod-8, so GAS's own 8-alignment of the pool's first `.double` lands it **4 bytes
+  late** inside that section, and the whole ROM shifts.
+- Cut at the pool instead (`[X+size+gap, rodata]`): `ld` places the asm blob immediately after the
+  C section and does **not** pad a 16-byte section up to the next 8-boundary, so the pool lands
+  **4 bytes early**.
+
+Give the intervening bytes their own `rodata` subseg: `[X, .rodata, <path>]`, `[X+size, rodata]`
+(the gap alone), `[pool, rodata]`. The middle subseg ends exactly on the 8-boundary, so the pool's
+section starts aligned and needs no padding from either side. Generalised: **when the gap between
+the carve's end and the next 8-aligned pool is non-zero, that gap is its own subseg.** S291
+`main/func_80054900` carved 16 bytes of `gdSPDefLights2` constants at `0xABC2C` with the lone 4-byte
+`D_800D083C` word as the middle subseg and the `0xABC40` `.double` pool after it.
+
+---
+
+## Named aggregate local extra block move
+
+**Symptom:** the body is otherwise right, but it runs N block-move loops too many and the frame is
+larger than the ROM's by exactly `sizeof(T)` per aggregate. S291 `func_80057914` was 478 instructions
+against the ROM's 442 with frame `-0x150` against `-0x128`, two extra 40-byte copies for two
+`Lights2` sets.
+
+**Cause:** gcc-2.7.2 expands a brace-initialized aggregate whose operands are memory into a
+temporary, then block-moves the temporary into the declared local, then block-moves the local to its
+destination -- three moves where the ROM has two. The block scope of the local is irrelevant: an
+inner block, the outermost block and a compound-literal assignment to a pre-declared local all cost
+the same extra move (all three measured).
+
+**Fix:** assign the constructor straight to its destination with the GNU cast-to-struct form, with no
+named local at all:
+
+```c
+D_800C1EA0[idx] = (Lights2)gdSPDefLights2(ar, ag, ab, r, g, b, x, y, z, ...);
+```
+
+The constructor's own temporary becomes the single copy source, matching the ROM. This applies to any
+nested-union SDK aggregate macro -- `gdSPDefLights*`, matrix and viewport literals -- not just
+lights.
+
+**Related:** the constant sub-initializers of a partly-constant macro become compiler `.rodata`
+(a fully-constant `Ambient` as one 8-byte blob, each `{r,g,b}` as a 3-byte char array), so a bank
+usually pairs this fix with a carve -- see [.rodata sibling-yaml pattern](#rodata-sibling-yaml-pattern).
+
+---
+
+## Grep gbi.h before modelling a large stack struct
+
+**Rule:** before pricing a function that fills a big stack frame with byte and word stores as "model
+this struct", grep `include/libultra/PR/gbi.h` for an SDK macro whose expansion matches the staging
+pattern. The tell of a nested-union aggregate macro is: three-byte groups stored then read back
+(`sb` x3, `lb` x3, `sb` x3) with a zero written to the fourth byte (the `pad` members), followed by
+`lwl`/`lwr` + `swl`/`swr` pairs (the alignment-1 `*_t` struct copied into its alignment-8 union).
+
+**Why it matters:** S291's plan gate read `func_80057914`'s 16 `lwl`/`swl` pairs as a byte-aligned
+record array being shifted down a slot and priced modelling that `0x128` stack struct as the slice.
+They were `gdSPDefLights2` expanding twice. Recognising the macro turned the slice into a six-build
+transcription. This is [`SDK composite macro before hand reconstruction`](#display-lists) applied to
+lights and matrices rather than display lists.
+
+---
+
+## Read the freeing twin before pricing an allocator leaf
+
+**Rule:** when a candidate is an allocator (many `heap3_alloc` calls storing into distinct `D_`
+globals), find the sibling that releases the same set through `heap3_free` and read it first. The
+teardown function frees in allocation order and takes `&ARR[i]`, so it declares the array shape of
+every destination -- which `D_` symbols are scalars, which are arrays, and how long each array is.
+
+**Why it matters:** S291 priced `func_8005A580` on "43 distinct `D_` globals to type" as its dominant
+cost. Its twin `func_8005ACF8`, three functions below it in the same already-`c` file and already
+banked, resolved all 24 destinations with no Ghidra lookup at all, including every adjacent pair the
+gate had flagged as "one record" (`D_800FF424` = `D_800FF420[1]`, `D_8012D424` = `D_8012D420[1]`,
+and five more). The real cost was zero and the leaf banked with an exact-count first build.
 
 ---
 

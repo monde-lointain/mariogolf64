@@ -1474,6 +1474,24 @@ Three honest caveats:
   STRUCTURAL symptom, not evidence of a coloring problem — S285 makes 4 of the last 6 carry verdicts
   refuted, and this one was refuted by the same agent that wrote it, hours later, with no new tool.
   Push: local.
+- **Sprint 291** — the last two non-FP fresh leaves of `main`. **+2 banked, 0 carried, 0 permuter, 0
+  re-open, 0 stuck-far.** Zero gate enablers; one mid-sprint `mariogolf64.yaml` rodata carve (a
+  three-way subseg split). `func_8005A580` -> `load_course_assets` (0x778, 478/478) and
+  `func_80057914` -> `build_scenery_light_sets` (0x6E8, 442/442), both asm-first off the `.s`, no MCP,
+  no m2c, no permuter. Both reached exact instruction count and exact frame early, so both were
+  decided by one structural question each: for the first, which value claimed which callee-saved
+  register (`tools/allocno_report.py` named it — the counter at priority 10294 taking `$s0` where the
+  ROM has `$s2`); for the second, that a named `Lights2` local costs an extra whole-struct block move
+  the ROM does not have. Seed 5 (classical); banked 0pt (both files partial); realized 7 / residual
+  +2 (+1 mid-sprint split, +1 novel bank-gotcha). Rolling-5 (S287-S291): 0+0+0+0+0 pt banked, all
+  partial-file sprints; value = 3+2+2+2+2 matched. Quality **0 / 0 / 0 / 0** — the first sprint since
+  S285 with no permuter run at all, and the second consecutive zero-carry sprint. Retro applied 4 of
+  4 plus 1 retirement (`byte-offset-cast-defeats-base-ptr-cse` + `mem-in-struct-index-global-cse`
+  merged into `defeat-global-base-cse`, levers.md 10236 -> 10222/10240, net **-14 B**, with the new
+  material in hazards.md as three sections). One buffered suggestion (restating the plateau
+  advisory's terminal condition) was **not put to the PO** and carries to S292. `make test-tools` 135
+  passed, 1 skipped; prompt-lint baseline re-frozen for the S291 citation. KEY: **`main`
+  smallest-first is exhausted** — 7 fresh leaves remain and all are heavy-FP. Push: local.
 - **Sprint 290** — the two remaining zero-FP fresh leaves of `src/main/func_8006A2C0.c`. **+2 banked,
   0 carried, 1 permuter (2 imports, no zero), 0 re-open, 0 stuck-far.** Zero gate enablers. Both
   landed at exact instruction count with an identical instruction sequence early, and both were then
