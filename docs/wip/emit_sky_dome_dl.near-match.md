@@ -56,17 +56,36 @@ at insn M: initial value V`, and, for each giv, either `giv at N reduced to (reg
 biv's `initial value 1280` and the vertex-bank giv's reduce/ignore decision both read straight off it.
 This is to `loop.c` what `tools/allocno_report.py` is to `global.c`.
 
-## The residual, 2 instructions
+## The residual: net 2, but it is two effects of 5, not one of 2
 
-Every `cmpfn` hunk is 1:1 in size except the last, where the ROM has 15 instructions and the build 13.
-The region is the strip-loop epilogue. Both sides carry the same seven induction-variable increments
-(band words `+0x3C0`, band bytes `+0xF00`, the three doubled-vertex-index givs `+4`, `strip +1`,
-`pass +1`); the ROM emits the two band increments in the epilogue while the build hoists them earlier
-in the block, so the two counts diverge around the `Gfx*` bookkeeping bumps rather than around a
-missing command. The ROM keeps two pointers, `$t1` (the store base, at `-4`/`0` displacements) and
-`$t2` (the `gfx` value stored back through `gfxp`), and merges their bumps differently
-(`0x8/0x8/0x18/0x10/0x8/0x68`). Start by aligning that bookkeeping, not by re-deriving any command
-word: every DL word is confirmed correct.
+Do not read the net -2 as a single small divergence, and do not trust `cmpfn`'s hunk alignment here
+(its hunks read 1:1 in size, which is an artifact of the whole-body register permutation). Count by
+region instead, splitting at the two loop heads — the ROM's are `.L8002AE94` (pass) and `.L8002AF1C`
+(strip):
+
+| region | ROM | build | delta |
+| --- | --- | --- | --- |
+| entry to pass-loop head | 48 | 46 | **-2** |
+| pass-loop head to strip-loop head (the vertex if/else and the per-pass constants) | 34 | 39 | **+5** |
+| strip-loop body plus function epilogue | 217 | 212 | **-5** |
+
+The `+5` is a known cost of the loop.c:3823 fix and is understood: the ROM hoists the whole `pass == 2`
+vertex address to the prologue and reloads it with one `lw $t0, 0x14($sp)`, but the comma expression
+that shortens the giv's lifetime is an assignment, so gcc cannot hoist that arm and the build
+recomputes `lui/addiu/addiu/lw/addu` in place. Measured alternatives, all worse overall: a plain
+expression in the `pass == 2` arm with the comma form kept in the else arm reads 300 with frame
+`-0x60` (`pass * 512`) or 297 with frame `-0x58` (a literal `2 * 512`), because a hoistable then-arm
+re-introduces the `base + frameOff` invariant that the else arm then reuses.
+
+So the next attempt has two separable jobs: get the `pass == 2` arm hoisted **without** lengthening
+the else arm's giv lifetime (the two are currently coupled through the shared invariant), and find the
+5 instructions the strip body is short. Both sides carry the same seven induction variables (band
+words `+0x3C0`, band bytes `+0xF00`, three doubled-vertex-index givs `+4`, `strip +1`, `pass +1`), and
+the ROM emits the two band increments in the loop epilogue where the build hoists them earlier, so
+look at the `Gfx*` bookkeeping first: the ROM keeps two pointers, `$t1` (the store base, used at `-4`
+and `0` displacements) and `$t2` (the `gfx` value written back through `gfxp`), and merges `$t2`'s
+bumps as `0x8/0x8/0x18/0x10/0x8/0x68`. Every DL command word is confirmed correct; this is not a
+missing command.
 
 ## Constants already decoded (do not re-derive)
 
