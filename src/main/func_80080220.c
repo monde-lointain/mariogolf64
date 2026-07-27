@@ -181,7 +181,7 @@ extern void* D_801B7EE0;
 extern void* D_800E2140;
 extern void* D_800E2144[];
 extern void* D_800E2138;
-extern void* D_800E2158;
+extern void* D_800E2158[];
 extern void* D_800E214C[];
 extern void* D_800E2184;
 extern void* D_800E2164;
@@ -244,8 +244,8 @@ void func_8008085C(void) {
   D_800E2138 = heap3_alloc(0x1208);
 
   size = func_8005062C(0x648, slot);
-  D_800E2158 = heap3_alloc(size);
-  func_800506D4(D_800E2158, slot);
+  D_800E2158[0] = heap3_alloc(size);
+  func_800506D4(D_800E2158[0], slot);
 
   size = func_8005062C(0x563, slot);
   D_800E214C[0] = heap3_alloc(size);
@@ -314,7 +314,7 @@ extern void* D_801B7EE0;
 extern void* D_800E2140;
 extern void* D_800E2144[];
 extern void* D_800E2138;
-extern void* D_800E2158;
+extern void* D_800E2158[];
 extern void* D_800E214C[];
 extern void* D_800E2184;
 extern void* D_800E2164;
@@ -345,7 +345,7 @@ void func_80080C4C(void) {
     heap3_free(&D_800E2144[0]);
     heap3_free(&D_800E2144[1]);
     heap3_free(&D_800E2138);
-    heap3_free(&D_800E2158);
+    heap3_free(&D_800E2158[0]);
     heap3_free(&D_800E214C[0]);
     heap3_free(&D_800E214C[1]);
     heap3_free(&D_800E214C[2]);
@@ -829,10 +829,90 @@ extern s32 D_800C54C8[];
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80080220", func_80087CB0);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80080220", func_800880A0);
+extern s32 D_800C308C;
+extern s32 D_800C5E48;
+extern s32 D_800C5E4C;
+extern s32 D_800C5E60;
+extern f32 D_800C5E64;
+extern f32 D_800C5E68;
+/* Backing table is an s32[8] of resource ids at 0x800C5E28
+ * ({0x648, 0x649, 0x64A, 0x64B, 0x64C, 0x64B, 0x64A, 0x649}, a ping-ponged
+ * 5-frame loop). Only the low halfword of each entry is read, and the split
+ * data label starts at the +2 offset, so it is spelled as a u16 array with a
+ * doubled index. */
+extern u16 D_800C5E2A[];
+
+/**
+ * Slides an animated status icon in toward (96, 24) and emits it, plus a
+ * mode-dependent caption strip, through the caller's display-list cursor.
+ *
+ * The position pair eases 20% of the remaining distance per call, or snaps to
+ * the top-left corner when the caller passes mode 2. A 4-call tick advances an
+ * 8-step animation cursor; on each advance the next frame's resource is fetched
+ * and unpacked into the icon buffer.
+ *
+ * Two sprites are drawn from the eased position: a 32x32 CI8 icon with its own
+ * 256-entry palette, and a 64x16 CI4 caption strip (three variants selected by
+ * the game mode) with a 16-entry palette, offset 24 pixels to the right so it
+ * overlaps the icon's tail.
+ */
+void draw_animated_status_icon(Gfx** gfxp, s32 mode) {
+  RomLoadSlot slot[2];
+  Gfx* gfx = *gfxp;
+  s32 caption;
+
+  if (D_800C59E0 == 2) {
+    if (mode == 2) {
+      D_800C5E64 = 0.0f;
+      D_800C5E68 = 0.0f;
+    } else {
+      D_800C5E64 += (96.0f - D_800C5E64) * 0.2f;
+      D_800C5E68 += (24.0f - D_800C5E68) * 0.2f;
+    }
+
+    D_800C5E48++;
+    if (D_800C5E48 == 4) {
+      D_800C5E48 = 0;
+      D_800C5E4C = (D_800C5E4C + 1) % 8;
+      func_8005062C(D_800C5E2A[D_800C5E4C * 2], slot);
+      func_800506D4(D_800E2158[D_800C5E60], slot);
+    }
+
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+    gDPLoadTLUT_pal256(gfx++, ((u32)D_800E2158[D_800C5E60] + 8) & ~7);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
+    gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+    gDPLoadTextureBlock(gfx++, ((u32)D_800E2158[D_800C5E60] + 0x208) & ~7,
+                        G_IM_FMT_CI, G_IM_SIZ_8b, 32, 32, 0, 0, 0, 0, 0, 0, 0);
+    gDPPipeSync(gfx++);
+    gSPScisTextureRectangle(gfx++, (s32)D_800C5E64 * 4, (s32)D_800C5E68 * 4,
+                            ((s32)D_800C5E64 + 0x20) * 4,
+                            ((s32)D_800C5E68 + 0x20) * 4, G_TX_RENDERTILE, 0, 0,
+                            1 << 10, 1 << 10);
+    gDPPipeSync(gfx++);
+
+    if (D_800C308C == 1) {
+      caption = 1;
+    } else {
+      caption = (D_800C308C != 2) ? 2 : 0;
+    }
+
+    gDPLoadTLUT_pal16(gfx++, 0, ((u32)D_800E214C[caption] + 8) & ~7);
+    gDPLoadTextureBlock_4b(gfx++, ((u32)D_800E214C[caption] + 0x28) & ~7,
+                           G_IM_FMT_CI, 64, 16, 0, 0, 0, 0, 0, 0, 0);
+    gDPPipeSync(gfx++);
+    gSPScisTextureRectangle(gfx++, ((s32)D_800C5E64 + 0x18) * 4,
+                            (s32)D_800C5E68 * 4, ((s32)D_800C5E64 + 0x58) * 4,
+                            ((s32)D_800C5E68 + 0x10) * 4, G_TX_RENDERTILE, 0, 0,
+                            1 << 10, 1 << 10);
+
+    *gfxp = gfx;
+  }
+}
 
 extern s8 D_801061BD;
-extern s32 D_800C308C;
 
 s32 draw_letterbox_bars(Gfx** dl_ptr, s32 y) {
   Gfx* dl = *dl_ptr;
