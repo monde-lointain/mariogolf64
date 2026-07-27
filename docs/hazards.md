@@ -3352,6 +3352,20 @@ LoadTLUTCmd + PipeSync) and `gDPLoadTextureBlock_4b(pkt, timg, fmt, w, h, pal, c
 maskt, shifts, shiftt)` (SetTextureImage + SetTile + LoadSync + LoadBlock + PipeSync + SetTile +
 SetTileSize). Each sub-macro takes `pkt` once, so `glistp++` as `pkt` yields exactly N increments.
 
+- **An uncallable composite is still the answer: expand it by hand, once per arm (S294).** A
+  composite that token-pastes one of its arguments cannot be called when the ROM computes that
+  argument at run time. `gDPLoadTextureBlock` pastes `siz` to reach `G_IM_SIZ_##siz##_LOAD_BLOCK` /
+  `_INCR` / `_SHIFT` / `_BYTES` / `_LINE_BYTES`, so `siz` has to be a literal — but S294's
+  `load_texture_block` (`func_8006A84C`, 291 instrs) takes `siz` as a parameter and its render-tile
+  `gDPSetTile` computes the size field from it (`andi $v0,$a3,3; sll 19`). The ROM's body is
+  nonetheless exactly that composite expanded twice, an 8b arm and a 16b arm under `if (siz ==
+  G_IM_SIZ_8b)`, with gcc tail-merging the arms' shared `gDPSetTileSize` into the join. It banked
+  byte-identical on the first build with zero iterations. So the recipe holds even when the grep's
+  answer is "the macro cannot be called here": the macro still names the exact constant set and the
+  command order, and only the size-dependent constants differ between arms. The failure mode this
+  guards is reading an uncallable macro as proof of a hand-rolled custom packing, which is the
+  store-giv carry class and a much worse price.
+
 - **The decisive case is `gSPScisTextureRectangle` (gbi.h, "like `gSPTextureRectangle` but accepts
   negative position arguments").** Its tell in the asm is a branchless corner clamp
   (`sll 18; sra 16; nor; sra 31; and; andi 0xffc`) plus an asymmetric s/t clip: the x arm tests the

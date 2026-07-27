@@ -394,15 +394,21 @@ def wall_class_tell(fn):
         is a BANK-TIME action that only banks when the table is 8-aligned on BOTH edges with no
         interleaved still-asm sibling rodata; a 4-aligned trailing edge walls it (S275 func_800985B4,
         [[jtbl-carve-both-edge-8align]]).
-      - "raw-dl-emitter": >= _DL_CMD_MIN display-list command words materialised as `lui`
-        immediates (0xE7/0xED/0xFC/0xE3/... top bytes). ADVISORY since S293 -- the caller counts
-        these as `fresh`. The tag prices the leaf (it needs the DL reconstruction recipe: find the
-        gbi.h composite first, re-derive every word from the `.s` store trace) but does NOT predict
-        a wall. S258 retired the raw-DL-word wall verdict and S293 banked the three smallest members
-        of the class 3/3 with no permuter, two of them single-composite one-liners. The genuine
-        store-giv CARRY subtype is a custom packing with no macro (func_8007624C's >>2-quantized
-        colour, whose _SHIFTL masks emit `andi`s the ROM lacks); the `.s` tell cannot separate the
-        two, which is why this is advisory rather than excluding.
+      - "dl-emitter": >= _DL_CMD_MIN display-list command words materialised as `lui`
+        immediates (0xE7/0xED/0xFC/0xE3/... top bytes). A PRICING tag, not a wall class: the caller
+        counts these as `fresh`. It says the leaf needs the DL reconstruction recipe (find the gbi.h
+        composite first, re-derive every word from the `.s` store trace), nothing more.
+        The wall framing this tag carried as `raw-dl-emitter` from S275 is RETIRED (S294): S258 had
+        already retired the underlying verdict, and S293+S294 banked the seven smallest members of
+        the class 7/7 with zero permuter runs and zero compiler-source dives, at 154-307
+        instructions.
+        The S294 gate tried to SPLIT the tag into composite-mappable (a one-to-three-build leaf) and
+        custom-packing (the genuine store-giv carry, func_8007624C's >>2-quantized colour). There is
+        no `.s` tell that separates them: measured over the seven banked composites plus
+        func_8007624C, the bitfield-assembly counts overlap completely (a composite expanding
+        run-time arguments emits MORE `andi`/`sll`/`or` than the custom packing does -- func_8006A84C
+        banked with andi=43/sll=38 against func_8007624C's andi=4/sll=23). Do not re-attempt the
+        split on those counts. The separating signal that DOES exist is `dl_twin_pairs` below.
         See [[mg64-glyph-emitter-dl-family]], [[sdk-composite-macro-before-dl-reconstruction]].
 
     Such a leaf reads `fresh` + `standalone` + no-prior-doc yet walls at attempt, so a smallest-first
@@ -419,8 +425,54 @@ def wall_class_tell(fn):
         return "jtbl-dispatch"
     n_cmd = sum(1 for hh in _DL_CMD_LUI_RE.findall(body) if int(hh, 16) >= 0xC8)
     if n_cmd >= _DL_CMD_MIN:
-        return "raw-dl-emitter"
+        return "dl-emitter"
     return ""
+
+
+# Full 32-bit form of the same command-word `lui`, for the twin signature below.
+_DL_CMD_WORD_RE = re.compile(r"\blui\b\s+\$\w+,\s*\(0x([0-9A-Fa-f]{8})\s*>>\s*16\)")
+
+
+def dl_word_signature(fn):
+    """Sorted multiset of <fn>'s display-list command words, as a tuple, or () if it has fewer than
+    _DL_CMD_MIN of them.
+
+    Two emitters with an EQUAL signature emit the same DL commands with the same constant operands,
+    which in practice means the same body shape with different globals and guards. Banking one makes
+    the other a near-mechanical replay, so the pair is worth ordering adjacently at the plan gate.
+
+    S294 provenance: func_80031450 (0x458) and func_8009351C (0x4CC) sit in different files and have
+    an equal signature. The first took 2 iterations from scratch; the second took 2 iterations for
+    307 instructions with its whole structure already written, and its only real residual was one
+    aliased global read. The size sort alone put 5 unrelated leaves between them."""
+    path = _find_asm_s(fn)
+    if not path:
+        return ()
+    try:
+        with open(path) as f:
+            body = f.read()
+    except OSError:
+        return ()
+    words = [w.upper() for w in _DL_CMD_WORD_RE.findall(body) if int(w[:2], 16) >= 0xC8]
+    return tuple(sorted(words)) if len(words) >= _DL_CMD_MIN else ()
+
+
+def dl_twin_pairs(stubs):
+    """Annotate each row of `stubs` with `dl_twin`: another row's fn emitting an equal
+    `dl_word_signature`, or "". Mutates and returns `stubs`."""
+    by_sig = {}
+    for s in stubs:
+        sig = dl_word_signature(s["fn"])
+        s["dl_twin"] = ""
+        if sig:
+            by_sig.setdefault(sig, []).append(s)
+    for group in by_sig.values():
+        if len(group) < 2:
+            continue
+        names = [g["fn"] for g in group]
+        for g in group:
+            g["dl_twin"] = ",".join(n for n in names if n != g["fn"])
+    return stubs
 
 
 _STUB_FN_RE = re.compile(r'INCLUDE_ASM\("[^"]+",\s*([A-Za-z0-9_]+)\)')
@@ -482,6 +534,7 @@ def loose_stubs(seg):
                 }
             )
     out.sort(key=lambda r: (r["size"] if r["size"] is not None else 1 << 30, r["fn"]))
+    dl_twin_pairs(out)
     return out
 
 

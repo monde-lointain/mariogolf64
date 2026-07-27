@@ -3800,7 +3800,39 @@ by `/sprint-plan`:
   rescue it. Parked here so `--carried-check` flags it and it stops reading as `fresh`; re-open only
   behind a lever for that class, not on size order.
 
-- **(S293 STATE OF THE `main` POOL — supersedes the S292 note below)** After S293,
+- **(S294 STATE OF THE `main` POOL — supersedes the S293 note below)** After S294,
+  `--loose-stubs main` reports **296 stubs and 20 fresh**: 264 carried-wall, 33 jtbl-dispatch, 63
+  `dl-emitter` (a pricing tag, counted in fresh), 11 nested, 1 intrinsic-hasm. **The class question
+  is closed: S293+S294 banked its seven smallest members 7/7** at 154-307 instructions, zero permuter
+  runs, zero `allocno_report.py` runs, zero compiler-source dives. The tag is renamed from
+  `RAW-DL-EMITTER` and its wall framing is retired; it now means only "this leaf needs the DL
+  reconstruction recipe".
+  **Do not re-attempt the composite-vs-custom-packing split.** S294 tried it and measured that no
+  `.s` tell separates the two: across the seven banked composites plus `func_8007624C`, the
+  bitfield-assembly counts overlap and run the wrong way (a composite expanding run-time arguments
+  emits more `andi`/`sll`/`or` than the hand-packed one — `func_8006A84C` banked at andi=43/sll=38
+  against `func_8007624C`'s andi=4/sll=23). The negative result is in `wall_class_tell`'s docstring.
+  **What the ranker gained instead is `dl-twin:<fn>`** (S294): an equal DL command-word multiset
+  means the same body shape with different globals and guards, so banking either makes the other a
+  near-mechanical replay. `func_80031450` / `func_8009351C` proved it (2 iterations for 307
+  instructions, the whole structure transferred, the only real residual one aliased global read). The
+  detector's first run found one further pair, `func_80055828` /
+  `update_vertex_texture_coords_per_frame`, both currently carried-wall — so that pair is a re-open
+  candidate, not a fresh leaf. **Order twins adjacently in a committed backlog.**
+  **The vein, smallest-first from here:** `init_rdp_and_draw_sky_background` (1144 B, but fp=50
+  mnemonics — S276/S277 FP-scheduler class, gate-rejected at S294, decide-or-drop at its third
+  encounter per the S289 rule), `emit_sky_dome_dl` (1196 B, jal=0, fp=0, two texture-block loads —
+  the cleanest next leaf), `func_80094228` (1408 B, fp=27), `func_80092F18` (1460 B, fp=0),
+  `func_80081EF8` (1516 B). Price these as DL-reconstruction slices: find the `gbi.h` composite
+  first — **including when the composite turns out to be uncallable, since the body is then that same
+  macro expanded once per arm (S294 `load_texture_block`)** — re-derive every command word from the
+  `.s` store trace, `gDPXxx(glistp++, ...)` never array indexing, and build under the F3DEX2 profile.
+  Per-leaf cost rose with size across the two sprints: S293 averaged ~1 build per leaf at ~175
+  instructions, S294 ~2 at ~285.
+  Running tally of re-open-on-carry stays S280 2/2, S281 2/2, S282 0/2, S292 1/3; S293 and S294 ran
+  no carries.
+
+- **(S293 STATE OF THE `main` POOL — superseded by S294 above)** After S293,
   `--loose-stubs main` reports **300 stubs and 29 fresh**: 259 carried-wall, 33 jtbl-dispatch, 67
   raw-dl-emitter (advisory, counted in fresh), 11 nested, 1 intrinsic-hasm. **The S292 "smallest-first
   `main` is over" verdict was wrong, and wrong for a checkable reason:** the 0-fresh reading came from

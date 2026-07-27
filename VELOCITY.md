@@ -1474,6 +1474,33 @@ Three honest caveats:
   STRUCTURAL symptom, not evidence of a coloring problem — S285 makes 4 of the last 6 carry verdicts
   refuted, and this one was refuted by the same agent that wrote it, hours later, with no new tool.
   Push: local.
+- **Sprint 294** — the `RAW-DL-EMITTER` vein at 1.5-2x the size. **+4 banked, 0 carried, 0 permuter,
+  0 re-open, 0 stuck-far** — a second consecutive all-zero quality row, and the first 4-bank sprint on
+  `main`. Zero gate enablers. `func_8006A84C` -> `load_texture_block` (291/291, first build, zero
+  iterations), `func_80031450` -> `copy_previous_frame_to_cfb` (278/278, 2 iterations),
+  `func_8006C918` -> `update_and_draw_iris_wipe` (270/270, 3 iterations), and the PO-added 4th
+  `func_8009351C` -> `capture_frame_snapshot` (307/307, 2 iterations). Seed 8 (classical); banked 0pt
+  (all three hosts partial); realized **7 / residual −1** (no escalation fired; one leaf was a
+  first-build zero-iteration bank). Rolling-5 (S290-S294): 0+0+0+0+0 pt banked, all partial-file
+  sprints; value = 2+2+1+3+4 matched. Quality **0 / 0 / 0 / 0**.
+  Two results worth carrying. **The class verdict is settled**: S293+S294 banked its seven smallest
+  members 7/7 at 154-307 instructions with zero permuter runs and zero compiler-source dives, so the
+  wall framing is retired and the tag is renamed `dl-emitter`, a pricing tag only. The gate also
+  TRIED the accepted split (composite-mappable vs custom-packing) and measured that no `.s` tell
+  separates them — a composite expanding run-time arguments emits *more* bitfield assembly than the
+  custom packing does (`func_8006A84C` banked at andi=43/sll=38 against `func_8007624C`'s
+  andi=4/sll=23) — so the negative result is recorded in the tool to stop a third attempt.
+  **The signal that does exist is the twin**: `func_80031450` and `func_8009351C` sit in different
+  files with an equal DL command-word multiset, and the second took 2 iterations for 307 instructions
+  because its whole structure was already written; its only real residual was one aliased global read
+  (a global read inside a loop that stores through a `Gfx*` is not loop-invariant to gcc, so the
+  reload forced a second IV). The new `dl-twin:<fn>` tag found a further pair on its first run
+  (`func_80055828` / `update_vertex_texture_coords_per_frame`, both currently carried).
+  Retro applied 4 of 4 plus 1 retirement (`sched-luid-order-inline-arg-subexpr` +
+  `sched-coin-loop-preheader-order-lever` merged into `emission-order-placement-lever`, and the PO
+  cut the `<scope>` maintenance paragraph; levers.md 10229 -> **10159/10240**, net **−70 B**).
+  `make test-tools` 135 passed, 1 skipped; prompt-lint baseline re-frozen for the S294 citations.
+  Push: local.
 - **Sprint 293** — opened the `RAW-DL-EMITTER` vein. **+3 banked, 0 carried, 0 permuter, 0 re-open,
   0 stuck-far** — the first all-zero quality row since S291, and the first 3-of-3 on `main` since
   S287. Zero gate enablers. `func_8006A5E4` -> `load_texture_block_4b` (154/154, one

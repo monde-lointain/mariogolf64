@@ -1113,19 +1113,17 @@ def main():
         stubs = loose_stubs(args.loose_stubs)
 
         def _is_fresh(s):
-            # `raw-dl-emitter` is ADVISORY since S293 and still counts as fresh. Its S275 wall
-            # verdict had already been retired by S258 (find the gbi.h composite first), and S293
-            # banked the three smallest members of the class 3/3 with no permuter and no
-            # compiler-source dive -- two of them single-composite one-liners. The tag stays in the
-            # row because it still prices the leaf (an emitter needs the DL reconstruction recipe),
-            # but excluding it from `fresh` hid 70 main rows behind a stale verdict.
+            # `dl-emitter` (S275's `raw-dl-emitter`, renamed S294) is a PRICING tag and counts as
+            # fresh: the leaf needs the DL reconstruction recipe, which is not a wall. S258 retired
+            # the underlying verdict; S293+S294 then banked the seven smallest members of the class
+            # 7/7 at 154-307 instructions, zero permuter runs, zero compiler-source dives.
             # `jtbl-dispatch` stays excluded: its wall is mechanical, not a codegen verdict (the
             # bank-time .rodata carve needs 8-alignment on both edges), so S275 still holds there.
             return (
                 not s["carried"]
                 and not s["nested"]
                 and not s.get("intrinsic")
-                and s.get("wall_class") in (None, "", "raw-dl-emitter")
+                and s.get("wall_class") in (None, "", "dl-emitter")
             )
 
         shown = stubs if args.all else [s for s in stubs if _is_fresh(s)]
@@ -1139,12 +1137,16 @@ def main():
                 status = "INTRINSIC-HASM"
             elif s.get("wall_class"):
                 # jtbl-dispatch: fresh-looking but a mechanical at-attempt wall (S275).
-                # raw-dl-emitter: advisory since S293 -- counts as fresh, tagged for pricing only.
+                # dl-emitter: counts as fresh, tagged for pricing only (S294).
                 status = s["wall_class"].upper()
             else:
                 status = "fresh"
             sz = "?" if s["size"] is None else str(s["size"])
-            print(f"{sz:>6} {status:14} {s['fn']:28} {s['file']}")
+            # A dl-twin is a bank-order signal, not a wall: an equal DL command-word multiset means
+            # the same body shape, so banking either one makes the other a near-mechanical replay
+            # (S294 func_80031450 / func_8009351C). Order twins adjacently in the committed backlog.
+            twin = f"  dl-twin:{s['dl_twin']}" if s.get("dl_twin") else ""
+            print(f"{sz:>6} {status:14} {s['fn']:28} {s['file']}{twin}")
         n_fresh = sum(1 for s in stubs if _is_fresh(s))
         print(
             f"# {len(stubs)} stubs in src/{args.loose_stubs}/: {n_fresh} fresh, "
@@ -1152,8 +1154,9 @@ def main():
             f"{sum(s['nested'] for s in stubs)} nested, "
             f"{sum(bool(s.get('intrinsic')) for s in stubs)} intrinsic-hasm, "
             f"{sum(s.get('wall_class') == 'jtbl-dispatch' for s in stubs)} jtbl-dispatch, "
-            f"{sum(s.get('wall_class') == 'raw-dl-emitter' for s in stubs)} raw-dl-emitter "
-            f"(advisory, counted in fresh since S293)"
+            f"{sum(s.get('wall_class') == 'dl-emitter' for s in stubs)} dl-emitter "
+            f"(pricing tag, counted in fresh; wall framing retired S294 after 7/7 banked), "
+            f"{sum(bool(s.get('dl_twin')) for s in stubs)} in dl-twin groups"
         )
         if args.loose_stubs == "main":
             # S280 plateau advisory: `fresh` here is a CEILING, not a clean pool -- the

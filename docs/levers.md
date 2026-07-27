@@ -10,11 +10,6 @@ and when a residual class suggests a family of fixes.
 An index, deliberately not a transcription. These levers were discovered sprint by sprint and their
 full derivations live in the sprint retros and, where one exists, a `docs/hazards.md` section. A name
 plus a line of what it does is enough to act on or to look up.
-
-When a lever here has no `docs/hazards.md` section and its line is too thin to act on, that is a
-signal the lever should get a section -- write it the next time a sprint actually uses the lever, as
-the execution loop already requires for a wall characterization. Levers nobody uses never need
-writing up.
 </scope>
 
 ## Levers with a full playbook
@@ -46,7 +41,8 @@ These have a `docs/hazards.md` section; read it rather than the line here.
 - **temp-scope-and-live-range-steer-a-copy** -- a missing ROM `move` was deleted by `global.c:790-823`
   (equal copies merged when both pseudos prefer one register) or tied by `combine_regs`
   (`local-alloc.c:472/1290/1587`). Knobs: a named temp ending the value's live range early rather than
-  inlining it (S293), or a block-local temp hoisted to function scope. Terminal only when six forced
+  inlining it (S293), or a block-local temp hoisted to function scope. Both ways: not naming a
+  subexpression leaves `loop.c` to birth givs in body order (S294). Terminal only when six forced
   registers reroute a read.
 - **variable-reuse-is-a-per-register-lever** -- reuse pulls a load forward by anti-dependency, and a
   pointer spanning two loops permutes the earlier one: split those. The inverse recolours, and is the
@@ -64,14 +60,13 @@ These have a `docs/hazards.md` section; read it rather than the line here.
 
 ## Scheduling
 
-- **sched-luid-order-inline-arg-subexpr** -- LUID is emission order in latency-1 blocks; fold a
-  pre-call compute statement into the call argument to reorder register setup.
+- **emission-order-placement-lever** -- placement follows source emission order: LUID in latency-1
+  blocks (`sched.c`), and `loop.c` hoists invariants in loop-body order before `strength_reduce` adds
+  giv inits. Knobs: fold a pre-call compute into the call argument; `off = i*STRIDE` as its own
+  statement (inlined, gcc folds the symbol into a walking-pointer giv, losing `%hi`/`addu`/`%lo`,
+  S290); leave a row origin inline (`i * 6`) when the ROM births givs in body order (S294).
 - **sched-class-tiebreak-order-coin** -- `rank_for_schedule` (`sched.c:2428`) sorts class then LUID, so
   a class-1 compute defers behind class-3 stores.
-- **sched-coin-loop-preheader-order-lever** -- a prologue init or save-order coin is `loop.c`
-  placement: invariants hoist in loop-body emission order, then `strength_reduce` adds giv inits.
-  Crack it with `off = i*STRIDE` as a **statement** -- inlined in the address, gcc folds the symbol
-  into a walking pointer giv, losing the ROM's `%hi`/`addu`/`%lo` (S290).
 - **sched-select-potential-hazard-coin** -- `schedule_select` (`sched.c:2615`) front-loads a transfer
   over a constant load; the `fabsf` sign-mask is the canonical case.
 - **sched-bottomup-loadsplit-livelength-blockmove** -- at exact instruction count, a `s32 tmp`
@@ -84,7 +79,9 @@ These have a `docs/hazards.md` section; read it rather than the line here.
   compensate (S288). Preferred over an empty `asm volatile`, the other zero-byte region-ender (S282).
 - **aggregate-store-pins-pointer-load** -- a scalar-global store does not constrain a later load
   through a pointer parameter (`true_dependence`, `sched.c:817`); typing those globals as one array
-  restores the dependence and the ROM's load/store interleave.
+  restores the dependence and the ROM's load/store interleave. Inverse, and the standing DL-emitter
+  shape: a global read in a loop that stores through a pointer is not loop-invariant, so the reload
+  forces a second IV -- copy it to a preheader local (S294).
 - **two-argument-call-temp-split** -- when both arguments of a call each cross another call, compute
   them into temps first; as one call expression gcc evaluates argument 0 fully, `trunc.w.s` included,
   and holds it across the second call.
