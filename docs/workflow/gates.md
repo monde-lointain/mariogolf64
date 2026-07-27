@@ -153,6 +153,13 @@ dashboard). Target selection is `tools/pick_target.py`, not a stored roadmap.
         are still `.s`-undetectable and read `fresh`. Read a candidate's `.s` (jtbl/`bnel`/`mflo`/
         heavy-FP tells) before pricing it a clean smallest-first leaf. See the S275 retro and
         `docs/levers.md` (cmpfn nop elision undercount).
+      - **A `.s`-tell rejection is a guess; record it, and stop repeating it unattempted (S289).**
+        `func_8005C038` was gate-rejected by S287 and again by S288 on the same tell (10
+        branch-likely instructions -> value-select class). Attempted in S289, every `beql` reproduced
+        from ordinary C on the first build and the real residual was a callee-saved colouring
+        equilibrium. Name the tell beside the rejected leaf in `SPRINT.md ## Committed backlog`, and
+        read "rejected twice, never attempted" as the tell being unproven, not confirmed: at the
+        third encounter either attempt the leaf or drop it, rather than re-rejecting it.
   - **A carried wall's near-match doc can be wrong about the function's semantics, not just its
     verdict — re-derive behaviour from the `.s` before accepting a stated residual (S258).** S252
     recorded `func_800824E4` as a three-argument packer with `b = arg2` on the negative path and

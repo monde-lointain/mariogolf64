@@ -1,9 +1,18 @@
 #!/usr/bin/env bash
 # Per-function instruction-stream comparator: the extracted .s vs a freshly built object.
 #
-# Usage: tools/cmpfn.sh <func> [<object>]
+# Usage: tools/cmpfn.sh [--mnemonics] <func> [<object>]
 #   tools/cmpfn.sh func_80088890
 #   tools/cmpfn.sh func_80088890 build/src/main/func_80080220.o
+#   tools/cmpfn.sh --mnemonics func_8005C038
+#
+# `--mnemonics` diffs the OPCODE stream only, dropping every operand. Use it when the counts differ
+# and the normal diff reports one huge replaced block: a register that plays a different role on the
+# two sides makes every line differ, which hides WHERE the extra instructions are. With operands
+# gone the alignment survives, and the surviving hunks localise the count mismatch to a few
+# insertions and deletions (S289 `func_8005C038`: "+13, cause unknown" became "these two parameters
+# are spilled and reloaded" in one command). It is strictly a localiser: a body that is clean here
+# can still differ in every operand, so read the normal diff before believing anything.
 #
 # Why this exists (S258): `tools/asm-differ/diff.py` reads `build/*.map`, which an incremental
 # per-object build does not refresh, so mid-iteration it goes STALE in BOTH directions (see
@@ -48,8 +57,14 @@
 set -euo pipefail
 source "$(dirname "$0")/lib.sh"
 
+MNEMONICS=0
+if [ "${1:-}" = "--mnemonics" ]; then
+    MNEMONICS=1
+    shift
+fi
+
 if [ $# -lt 1 ]; then
-    echo "Usage: $0 <func> [<object>]" >&2
+    echo "Usage: $0 [--mnemonics] <func> [<object>]" >&2
     exit 1
 fi
 
@@ -223,4 +238,14 @@ FRAME="frame rom=$RF mine=$MF"
 [ "$RF" != "$MF" ] && FRAME="$FRAME <-- FRAME MISMATCH"
 
 echo "rom=$(wc -l < "$ROM_N") mine=$(wc -l < "$MINE_N")  ($OBJ)  [$FRAME]"
+
+if [ "$MNEMONICS" = 1 ]; then
+    # Opcode stream only. norm() has already folded the alias spellings (move/li/beqz/bnezl), so both
+    # sides name the same instruction the same way and the alignment is meaningful.
+    echo "--- opcode stream only (localiser; operands dropped) ---"
+    diff -u <(cut -d' ' -f1 "$ROM_N") <(cut -d' ' -f1 "$MINE_N") \
+        | tail -n +3 | grep -vE '^ ' || true
+    exit 0
+fi
+
 diff <(cat -n "$ROM_N") <(cat -n "$MINE_N") || true

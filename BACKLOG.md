@@ -3744,7 +3744,8 @@ by `/sprint-plan`:
   `NU_CONT_THREAD_ID=6` vs MG64's 5), and that surfaces only at first build unless reconciled here.
   A near-free retry missing any of these is a half-scoped spike — finish the scope before deferring.
 
-- **(S288 NEAR-FREE RETRY — not blocked; deferred only by the 3-to-4 sprint cap)**
+- **(S288 NEAR-FREE RETRY — not blocked; deferred only by the 3-to-4 sprint cap; still 15 stubs
+  after S289, which touched this file only for the `func_8005C038` spike above)**
   `src/main/func_80059BA0.c`. S287 banked 3 of 3 and S288 2 of 3 here; 15 stubs remain. **(1)** Gate
   enablers zero: loose `INCLUDE_ASM` stubs in an already-`c` file, no flip, no split. **(2)** The
   libm vein is MINED OUT — S288 banked `acosf` and the S287 note's guess that `func_8005A580` (0x778)
@@ -3756,22 +3757,33 @@ by `/sprint-plan`:
   most likely to recur in this file's remaining call-glue: a bound-copy for live-range placement and
   an empty `do {} while (0);` as a `reorg` block break (`docs/levers.md`).
 
-- **(S286 NEAR-FREE RETRY — not blocked; deferred only by the 3-to-4 sprint cap)**
-  `src/main/func_80095A10.c` camera-builder family. S285 and S286 each banked 3 of 3 here, so the
-  vein is open and the next slice is mechanical. **(1)** No flip, no split, no `symbol_addrs.txt`
-  add: these are loose `INCLUDE_ASM` stubs in an already-`c` file, so gate enablers are zero.
-  **(2)** Next two by size, both `--carried-check` fresh / `--nested-check` standalone as of S286:
-  `func_80096C04` (0x340, 208 instrs, 10 `jal`) and `func_800967F4` (0x410, 260 instrs, 13 `jal`).
-  **(3)** Everything they need is already in the file: `Vec3f`/`GolfCamera`, the `CollisionCyl`
-  record, the `D_800C73A0`/`D_800E4C54`/`D_800BB020`/`D_801B60A0` externs, `get_character_state`,
-  `func_80095A10`, `func_80095A68`, `func_8009676C`, `func_8005483C`,
-  `get_interpolated_terrain_height_wrapper`, plus `func_80059FAC(f32 dz, f32 dx)` and the two
-  `extern f64` pi/2 pool doubles S286 added. **(4)** Recurring shape: `f32 unused[16]` for the dead
-  frame, `(1.0f/1024.0f)` for the terrain scale, `pos.y + -C` for a ROM `add.s` with a negative
-  constant, and a mode dispatch that is usually a compare-chain `switch`
-  (`docs/hazards.md#switch-compare-chain-layout`). **(5)** Not a plateau candidate: the ranker's
-  advisory now carries the S286 family-locality exception. **(6)** The file also holds 2 S282
-  terminal carries (`func_80098CD8`, `func_80098C6C`) — do not re-open them as part of this slice.
+- **(S289 SPIKE — carried at 268/264 with a characterized verdict)** `func_8005C038` (0x420, 264
+  instrs) in `src/main/func_80059BA0.c`. Insert into a category's three-slot record table over four
+  parallel `s32[6][3]` arrays at `0xD78`/`0xDC0`/`0xE08`/`0xE50` off the `func_8005AF50()` save block.
+  Fully RE'd, exact `-0x60` frame, every control-flow edge and both value-select `beql` clamps
+  reproduced; full write-up, ten measured source variants and the attempt body in
+  `docs/wip/func_8005C038.near-match.md`. **Blocker:** a callee-saved colouring equilibrium — the
+  build spills `score` and the fifth argument to their home slots and keeps the row pointers live,
+  where the ROM does the opposite and pays to re-materialise `category * 12 + base` in two regions.
+  The knob is how many of the four array bases are pointer locals per pass, and it over/under-shoots
+  by 14 to 50 instructions either side of the ROM's split. **Untried, in order:** a `global.c`
+  `allocno_compare` / `move_movables` compiler-source fan-out (the S280 play) on which pass gives up
+  a base pointer; a fifth-argument spelling that shortens its live range. Not permuter-eligible on
+  the count rule; two imports were run anyway and both best candidates proposed the lever already
+  found by hand. **Do not re-price it on its branch-likely tell** — S287 and S288 both gate-rejected
+  it on that tell and S289 disproved it.
+
+- **(S289 NEAR-FREE RETRY — the camera vein is CLOSED; this entry supersedes the S286 one)**
+  `src/main/func_80095A10.c`. S285, S286 and S289 banked 3+3+2 here; **14 stubs remain and none is
+  fresh** — every one is `CARRIED-WALL`, `JTBL-DISPATCH` (`func_80095DE0`, 0x98C), or one of the 2
+  S282 terminal carries (`func_80098CD8`, `func_80098C6C`). Do not plan this file as a
+  smallest-first slice again: the next work here is a jtbl-carve slice or a wall re-open, priced
+  accordingly. **Carry the family knowledge, which is durable:** `Vec3f`/`GolfCamera`, the
+  `CollisionCyl` record, the `f32 unused[16]` dead frame, `(1.0f/1024.0f)` terrain scale,
+  `pos.y + -C` for a ROM `add.s` with a negative constant, `D_800C73B0[2]` as the aimed third
+  `Light`, per-dispatch branch-layout choice (compare-chain vs `switch`, both appear in one function
+  — S289 `func_80096C04`), and the TU's `-ffast-math` override in `mk/main.mk` (S289), which applies
+  to anything added to the file and under which all 15 banked functions are verified invariant.
 
 - **(S271 OPEN — 6 of 18 banked; file NOT md5-candidate; 12-stub partial pack)**
   `src/main/vec3f_normalize.c` (main-segment subseg `[0x4D00]`, flipped `c` at the S271 gate — the last

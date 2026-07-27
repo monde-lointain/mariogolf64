@@ -36,12 +36,9 @@ These have a `docs/hazards.md` section; read it rather than the line here.
 - **cross-call-live-range-callee-saved-lever** -- declare a post-call value *before* the call to force
   a callee-saved register; initializing it after is the inverse.
 - **global-allocno-compare-livelength-biv-order** -- s-register order follows
-  `floor_log2(nref)*nref/live_length` (`global.c:587`); flip it with an eighth reference, or with the
-  bound-copy below.
-- **bound-copy-for-live-range-placement** -- when a loop bound must be initialized early (a
-  declaration initializer keeps `loop.c` from folding the entry guard), add `n = bound;` where the
-  ROM's live range starts and loop on `n`. gcc folds the copy, so it is free, and the priority above
-  then ranks it as the ROM does (S288).
+  `floor_log2(nref)*nref/live_length` (`global.c:587`); flip it with an eighth reference, or a free
+  bound copy `n = bound;` where the ROM's live range starts (S288). The same formula spills a
+  long-lived, few-reference parameter to its home slot (S289).
 - **local-alloc-combine-regs-block-local-temp** -- hoist a block-local temp to function scope to
   defeat the `combine_regs` tie (`local-alloc.c:472/1290/1587`).
 - **do-while-doubles-reg-n-refs-qty-tier** -- a `do {} while(0)` macro loop doubles `REG_N_REFS` and
@@ -56,7 +53,9 @@ These have a `docs/hazards.md` section; read it rather than the line here.
   `str[row]` (keeps base and index live), or an uninit local plus `volatile s32 s = g;` (reload frame,
   dead `sw $v0`; `volatile` defeats DCE).
 - **per-region-cse-slot-base-lever** -- pass the array directly, with no cached pointer, so gcc CSEs the
-  base per region.
+  base per region. Across parallel arrays the count of pointer *locals* per pass is the pressure knob:
+  each is a `loop.c` induction pointer costing a callee-saved register, an offset expression off a
+  shared row pointer is not (S289: 214-277 instructions, frame `-0x30` to `-0x60`).
 - **copy-coalesce-cse-signext-terminal** -- `global.c:790-823` merges equal copies; forcing six
   registers reroutes a later read and the residual goes terminal.
 - **fp-arg-registers-are-a-signature** -- ROM values in `$f12`/`$f14` where the build uses `$f0`/`$f2`
@@ -79,8 +78,7 @@ These have a `docs/hazards.md` section; read it rather than the line here.
   compare (load 3 outranks fabs 2); an mtc1-zero ties via potential-hazard.
 - **do-while-zero-block-break** -- an empty `do {} while (0);` emits nothing but ends the preceding
   block, so `reorg` stops reaching past a call for a later insn and annulling the next branch to
-  compensate (S288). Prefer it to an empty `asm volatile`, the other zero-byte region-ender, which
-  also lengthens a live range in its operand form but which the PO declined to bank (S282).
+  compensate (S288). Preferred over an empty `asm volatile`, the other zero-byte region-ender (S282).
 - **loop-invariant-hoist-order-preheader-regalloc** -- `loop.c` hoists invariants in loop-body emission
   order, so precomputing a division early changes preheader allocation.
 - **aggregate-store-pins-pointer-load** -- a store to a scalar global does not constrain a later load

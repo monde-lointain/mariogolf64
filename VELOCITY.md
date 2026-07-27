@@ -1474,6 +1474,45 @@ Three honest caveats:
   STRUCTURAL symptom, not evidence of a coloring problem — S285 makes 4 of the last 6 carry verdicts
   refuted, and this one was refuted by the same agent that wrote it, hours later, with no new tool.
   Push: local.
+- **Sprint 289** — the last two fresh leaves of the `src/main/func_80095A10.c` camera-builder family
+  plus the twice-deferred `func_8005C038`. **+2 banked, 1 carried, 1 permuter (2 imports, no zero), 0
+  re-open, 0 stuck-far.** Zero gate enablers; one per-file `mk/main.mk` `-ffast-math` override, the
+  sixth in the main tree, so `sqrtf()` emits the ROM's bare `sqrt.s` — all 15 already-banked functions
+  in that TU verified fast-math-invariant with `cmpfn` before the flag was kept. `func_80096C04`
+  (208/208, two builds) and `func_800967F4` (260/260, two builds) are template clones of the six
+  banked camera builders in the same file; both came off the `.s` with no MCP, no m2c and no
+  permuter. Two results worth keeping: a function can carry **two mode dispatches with opposite
+  layouts** — `func_80096C04`'s follow-distance dispatch is an if/else-if compare chain (arm bodies
+  inline, tails cross-jumped into the shared call) while its `eye.y` dispatch is a `switch` (tests up
+  front, arms out of line), and spelling either the other way costs 2 instructions
+  [[switch-compare-chain-layout]]; and the `D_800C73D0`/`D4`/`D8` byte runs the gate flagged as nine
+  scalars are `col`/`colc`/`dir` of `D_800C73B0[2]`, i.e. `D_800C73B0 + 2*sizeof(Light)`, which is
+  what let the light-aiming branch be written as three field stores. The `-ffast-math` gotcha was
+  bigger than S288's: the `BUILT_IN_FSQRT` guard costs 9 instructions, not 5, because its `jal` also
+  clobbers the FP registers and forces a reload of the three deltas the ROM keeps live across the
+  compare. `func_8005C038` CARRIED at 268/264 with an exact `-0x60` frame, every control-flow edge and
+  both value-select `beql` clamps reproduced; the residual is a callee-saved **colouring
+  equilibrium** — the build spills `score` and the fifth argument to their home slots and keeps the
+  row pointers live, where the ROM does the opposite and pays to re-materialise `category * 12 +
+  base`. Ten source variants measured (`docs/wip/func_8005C038.near-match.md`); the knob is how many
+  of four parallel-array bases are pointer locals per pass, and it over/under-shoots by 14 to 50
+  instructions either side of the ROM's split [[per-region-cse-slot-base-lever]]. md5-candidate **0
+  delta** (230), matched-fn **+2** (file 16→14 stubs, still partial; repo-wide 313→311), descriptive
+  count **+0** (both kept auto `func_` names, following the six banked siblings — a domain guess on a
+  camera-mode variant is invention). Seed 5 (classical); banked 0pt (file partial); realized 7 /
+  residual +2 (+1 permuter, +1 carry). Rolling-5 (S285-S289): 0+0+0+0+0 pt banked, all partial-file
+  sprints; value = 3+3+3+2+2 matched. Quality **0 stuck-far / 1 permuter / 1 carried / 0 re-opened**.
+  Retro applied 4 of 4 plus 1 retirement (A: the pointer-local pressure knob folded into
+  `per-region-cse-slot-base-lever`; B: `cmpfn.sh --mnemonics`, an opcode-only localiser for when a
+  global register-role difference makes the normal diff one huge replaced block; C: the gates.md
+  repeat-rejection rule; D: the loop.md `pkill` note; retirement: `bound-copy-for-live-range-placement`
+  merged into `global-allocno-compare-livelength-biv-order`, one rule with two applications, plus a
+  trim of the S282 aside and two compression passes on the new wording to land levers.md at
+  10213/10240, a net **−19 B** on that surface). Net prompt-surface delta **+1109 B**.
+  `make test-tools` 135 passed, `prompt_lint check` OK (2 provenance warnings on gates/loop). KEY: a
+  `.s`-tell rejection is a hypothesis — this leaf was rejected twice on a branch-likely tell that
+  reproduced from ordinary C on the first build, and its real wall was somewhere else entirely.
+  Push: local.
 - **Sprint 288** — the last identified fdlibm leaf plus two non-FP siblings in
   `src/main/func_80059BA0.c`. **+2 banked, 1 carried, 1 permuter (plateaued but twice useful), 0
   re-open, 0 stuck-far.** Zero gate enablers; one per-file `mk/main.mk` `-ffast-math` override, the

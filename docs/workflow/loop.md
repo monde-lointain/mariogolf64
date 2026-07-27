@@ -288,6 +288,11 @@ below).
   - Provenance: S270 the single-parent case; S271 generalized it to the whole tree; S281 the
     gap-relic variant.
 - **Scratch dir** `nonmatchings/<func>/` (gitignored, shared with the permuter).
+- **Stop a background command with the harness, never `pkill -f '<script> <arg>'` (S289).** The
+  pattern also matches the tool call's own shell wrapper, whose command line contains the string, so
+  the kill takes out the calling shell and every later step in that same call silently does not run —
+  S289 lost the `cp` that was saving the file it then restored from. Use the harness's stop action,
+  or match a pattern that cannot appear in the wrapper.
 - **Python tools run via the venv:** `venv/bin/python3 tools/X.py` (system python lacks asm-differ
   deps and is PEP-668-locked).
 - **Per-function iteration oracle: `tools/cmpfn.sh <func> [<object>]` (S258).** Diffs the extracted
