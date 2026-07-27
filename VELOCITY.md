@@ -1474,6 +1474,45 @@ Three honest caveats:
   STRUCTURAL symptom, not evidence of a coloring problem — S285 makes 4 of the last 6 carry verdicts
   refuted, and this one was refuted by the same agent that wrote it, hours later, with no new tool.
   Push: local.
+- **Sprint 296** — spend the `dl_twin` pair. **+2 banked, 1 carried, 2 permuter runs (0 zeros),
+  0 re-open, 0 stuck-far** — ends the three-sprint all-zero row. Zero gate enablers.
+  `func_80055828` -> `reset_face_textures_for_anim_slot` (179/179, 2 builds) and its twin
+  `update_vertex_texture_coords_per_frame` (244/244, 14 builds); `emit_sky_dome_dl` carried at
+  272/299 first build with a full `.s` decode recorded. Both hosts stay partial, so **banked 0pt**;
+  `--loose-stubs main` 293 -> 291, and the `dl-twin` group is now empty (2 -> 0, both members banked).
+  Seed 5 (classical); realized **7 / residual +2** (+1 carry, +1 permuter).
+  Rolling-5 (S292-S296): 0+0+0+0+0 pt banked, all partial-file sprints; value = 1+3+4+3+2 matched.
+  Quality **0 / 2 / 1 / 0**.
+  The twin bet paid: the `dl_twin` equality was real (identical DL word multiset *and* identical `jal`
+  set), and both twins turned out to be variants of `update_vertex_texture_coords`, already banked in
+  the same file — the S286 same-file-sibling exception at full strength, with the sibling's four
+  documented levers transferring verbatim to leaf 1 in two builds.
+  KEY, and it is a tooling lesson: **`--carried-check` was marking each sprint's own recommendations
+  as walls.** `carry_over_names()` scoops every backticked name under `BACKLOG.md ## Carry-overs`, and
+  S293/S294/S295 each wrote a "the vein, smallest-first from here" next-target paragraph there, so all
+  15 names they list read `CARRIED-WALL` with no wip doc, no attempt and no wall prose. The gate saw
+  **2 fresh** where ~15 were actionable, and the bug had already cost S295 a leaf: it declined
+  `emit_sky_dome_dl` citing `--carried-check`, which was echoing S294's own recommendation of that
+  leaf back at it. Guard (4) excises the paragraph on its author-supplied marker, the same shape as
+  the S288 `NEAR-FREE RETRY` guard; pool went 2 -> **21 fresh** and all nine spot-checked genuine
+  walls still flag.
+  Second result: **`tools/allocno_report.py` is a routine step, not a terminal-class last resort.**
+  Three uses on an ordinary leaf, decisive each time — a priority *gap* (`frame` at 5833 against the
+  segment mask's 1875 rotated five registers; splitting a merged counter dropped it to 1068 and landed
+  all five) and a priority *tie* (`keyframe`/`keyframeIndex` both 6666, fixed by block-scoping one, not
+  by reweighting). Third: **both permuter runs plateaued and both paid as levers** (395->230, 220->100),
+  extending the S288/S290 play to 4/4 candidates-yield-a-lever, 0/5 runs-a-zero. The second candidate
+  retyped `counter` to `unsigned char` — wrong applied literally, since it also carries the frame
+  counter, but right as a mechanism: a byte copy needs a byte-wide destination or it emits `andi`
+  instead of `move`.
+  Retro applied 4 of 4 plus 1 retirement (#1 `carry_over_names` guard (4); #2 `allocno_report` promoted
+  into loop.md's residual-classification note with the gap-vs-tie split; #3 `cmpfn.sh` compares
+  `N(sp)` displacements literally as `@F<dec>(sp)`, both sides folded to decimal — it had read the
+  twin byte-clean at exact count and matching frame size while the ROM failed on a local at `0xd8(sp)`
+  vs `0x58(sp)`; #4 the frame-reserve *split point* as a `dead-frame-levers` clause; retirement:
+  levers.md `abs-compare-form-steers-allocno`, whose mechanism already lives in
+  `docs/hazards.md#register-reuse-nudge-classical-regalloc`, −157 B, levers.md 10182 -> **10233/10240**
+  net +51). `make test-tools` 135 passed, 1 skipped; prompt-lint baseline re-frozen. Push: local.
 - **Sprint 295** — the `dl-emitter` vein at 425-528 instructions. **+3 banked, 0 carried, 0 permuter,
   0 re-open, 0 stuck-far** — a third consecutive all-zero quality row. Zero gate enablers.
   `func_800880A0` -> `draw_animated_status_icon` (508/508, first build, zero iterations),

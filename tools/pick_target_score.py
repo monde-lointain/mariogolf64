@@ -196,6 +196,19 @@ def carry_over_names():
     region = re.sub(
         r"(?ms)^- \*\*\([^)]*NEAR-FREE RETRY.*?(?=^- \*\*|\Z)", "", region
     )
+    # Guard (4, S296): excise the `**The vein, smallest-first from here**` paragraph of a
+    # state-of-the-pool bullet. That paragraph is the sprint's list of what to attempt NEXT, so every
+    # name in it is a recommendation; scooping it made each sprint mark its own next targets as walls.
+    # S293/S294/S295 each wrote one, and by this gate all 15 names they list read CARRIED-WALL with no
+    # `docs/wip/<fn>.*.md`, no attempt, and no prose claiming a wall -- `--loose-stubs main` reported 2
+    # fresh where ~15 were actionable. It had already cost S295 a leaf: it declined `emit_sky_dome_dl`
+    # citing `--carried-check`, which was echoing S294's own recommendation of that leaf back at it.
+    # Same shape as guard (3): keys on an author-supplied marker, not on inferring a bullet's subject,
+    # so the S271 note below still holds. A genuine wall named only inside such a paragraph is
+    # unaffected -- a characterized wall owns a wip doc, which `carried_wall_names()` unions in.
+    region = re.sub(
+        r"(?ms)\*\*The vein, smallest-first.*?(?=^\s*\*\*|^- \*\*|\Z)", "", region
+    )
     placed = placed_symbols()  # guard (2): real symbols only (names file ∪ func_<vram>)
     # NOTE (S271): this scan deliberately OVER-scoops toward false-POSITIVE. A `func_<vram>` named
     # only as a mid-prose callee of another wall ("... via `func_X`/`func_Y` ...") de-ranks even

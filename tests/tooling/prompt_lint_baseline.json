@@ -91,7 +91,7 @@
     "provenance": 80
   },
   "docs/levers.md": {
-    "bytes": 10182,
+    "bytes": 10233,
     "caps": 0,
     "lines": 140,
     "max_nesting": 1,
@@ -119,9 +119,9 @@
     "provenance": 6
   },
   "docs/workflow/loop.md": {
-    "bytes": 45917,
+    "bytes": 47046,
     "caps": 0,
-    "lines": 501,
+    "lines": 512,
     "max_nesting": 5,
     "provenance": 6
   }

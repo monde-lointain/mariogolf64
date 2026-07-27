@@ -101,6 +101,18 @@ any loop-bearing leaf: preheader init order is an induction-variable question �
 constants (a source `off += 2` IV inverts that), while inlining `i * STRIDE` in the address makes gcc
 absorb the symbol into a walking pointer giv and lose the ROM's per-access `%hi`/`addu`/`%lo`.
 
+**S296: the `main` fresh count you read at a gate is only as good as `--carried-check`, and it was
+wrong for three sprints.** The DoR detector scoops every backticked name under
+`BACKLOG.md ## Carry-overs`, and S293/S294/S295 each closed their state-of-the-pool bullet with a
+"the vein, smallest-first from here" list of what to attempt NEXT — so every leaf a sprint
+recommended was a wall by the next sprint's gate. `--loose-stubs main` read **2 fresh** where ~20 were
+actionable, and S295 had already declined a leaf on that basis (`emit_sky_dome_dl`, rejected by
+`--carried-check` echoing S294's own recommendation of it). Guard (4) in `pick_target_score.py` now
+excises that paragraph on its marker phrase, the same author-supplied-marker shape as the S288
+`NEAR-FREE RETRY` guard; keep the marker verbatim when writing such a list. **Standing correction to
+the S280 plateau advisory: `main`'s fresh pool is ~20, not the single digits the last three gates
+reported.** The `dl-emitter` class is 12 of 12 across S293-S296.
+
 **S288 CLOSES the fdlibm vein and sharpens the permuter-as-lever play.** `func_80059BC0` = `acosf`
 banked FIRST BUILD off the S287 constant-check procedure (one enabler: a per-file `-ffast-math`
 override so `sqrtf()` emits the bare `sqrt.s`; the already-banked FP siblings are fast-math-invariant
@@ -3800,7 +3812,49 @@ by `/sprint-plan`:
   rescue it. Parked here so `--carried-check` flags it and it stops reading as `fresh`; re-open only
   behind a lever for that class, not on size order.
 
-- **(S295 STATE OF THE `main` POOL — supersedes the S294 note below)** After S295,
+- **(S296 CARRY — `emit_sky_dome_dl`, an UNFINISHED RECONSTRUCTION, not a wall)**
+  `src/main/func_8002A640.c`. 272/299 on its one build, structure matching in three of four hunks.
+  It was the sprint's third committed leaf and the first two consumed the sprint. Full decode,
+  decoded constants, and the located 27-instruction deficit are in
+  `docs/wip/emit_sky_dome_dl.near-match.md`; the attempt source is
+  `nonmatchings/emit_sky_dome_dl/attempt.c`. Re-open it on size order like a fresh leaf — the wip
+  doc exists so `--carried-check` does not lose it, not because a wall was proven.
+
+- **(S296 STATE OF THE `main` POOL — supersedes the S295 note below)** After S296,
+  `--loose-stubs main` reports **291 stubs and 20 fresh**: 259 carried-wall, 33 jtbl-dispatch, 58
+  `dl-emitter` (a pricing tag, counted in fresh), 11 nested, 1 intrinsic-hasm. The `dl-twin` group is
+  **empty** — S296 spent the detector's only pair and both members banked. The class now stands at
+  **12 of 12 across S293-S296**.
+  **The fresh count jumped 2 -> 21 (20 once this carry's own wip doc landed) because
+  `--carried-check` was broken, not because the pool grew.**
+  `carry_over_names()` scoops every backticked name under this heading, and the S293/S294/S295
+  state-of-the-pool bullets each ended with a *next-target* paragraph, so every leaf a sprint
+  recommended read `CARRIED-WALL` at the next gate. It had already cost S295 a leaf (it declined
+  `emit_sky_dome_dl` citing `--carried-check`, which was echoing S294's own recommendation). S296
+  added guard (4) in `pick_target_score.py`, which excises a paragraph led by the marker below. **So
+  when writing a next-target list here, keep that exact marker phrase** — it is what the scanner skips.
+  All nine spot-checked genuine walls still flag.
+  **The vein, smallest-first from here** (all re-verified `fresh` after the fix):
+  `init_rdp_and_draw_sky_background` (1144 B, fp=50 — gate-rejected at S294 and S296, so per the S289
+  rule its next encounter must attempt or drop it, not re-reject), `emit_sky_dome_dl` (1196 B, the
+  carry above), `func_80094228` (1408 B, fp=27), `func_80092F18` (1460 B, fp=0, jal=2 — cleanest by
+  every column), `func_80081EF8` (1516 B, fp=42, jal=17), `func_8006AEA4` (1704 B, fp=71),
+  `func_8006BC80` (1896 B, jal=12), `func_80083AC8` (2040 B), `func_8007C5D8` (2360 B, `fp-coord` but
+  6 branch-likely), `func_800947A8` (2472 B), `func_8008D3F4` (2536 B), `func_8009232C` (2788 B,
+  fp=0), `func_8002CDA8` (3352 B, fp=0).
+  **Two S296 levers, both about how to stop guessing at registers.** (a) `tools/allocno_report.py` is
+  a routine step once the count is exact, not a terminal-class last resort: read the ROM's register
+  order off the `.s`, find where the two orders diverge, and the arithmetic says whether it is a
+  priority *gap* (change refs or live length) or a *tie* (change allocno order, e.g. block-scope one of
+  the pair). Now in `docs/workflow/loop.md`'s residual-classification note. (b) A dead frame reserve's
+  **split point** is a second knob beside its size — gcc slots arrays at `expand_decl` but a
+  `(void)&x` local only at `put_var_into_stack`, so top-level arrays always land below the pinned
+  local; declare part of the reserve in a block opened after the `(void)&x` to place it at the ROM's
+  offset. Folded into `docs/levers.md dead-frame-levers`.
+  Running tally of fan-out-on-exact-count-carry stays S280 2/2, S281 2/2, S282 0/2, S292 1/3; S293-S296
+  ran no carries. Permuter-as-lever is now **4/4 candidates yielded a lever, 0/5 runs a zero**.
+
+- **(S295 STATE OF THE `main` POOL — superseded by S296 above)** After S295,
   `--loose-stubs main` reports **293 stubs and 12 fresh**: 269 carried-wall, 33 jtbl-dispatch, 60
   `dl-emitter` (a pricing tag, counted in fresh), 11 nested, 1 intrinsic-hasm. **The class now stands
   at 10 of 10 across S293-S295, 154 to 528 instructions**, still with zero permuter runs and zero

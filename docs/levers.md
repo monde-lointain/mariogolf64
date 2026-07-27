@@ -47,11 +47,11 @@ These have a `docs/hazards.md` section; read it rather than the line here.
   a range spanning both becomes a global allocno that hoists the invariant chain per loop into its own
   register (S295, twice). The inverse recolours, one register at a time (S287). Terminal only when six
   forced registers reroute a read.
-- **abs-compare-form-steers-allocno** -- `(x <= -1) ? -x : x` versus `(x < 0)` flips a single magnitude
-  allocno; a cheap lever to try before the permuter.
 - **dead-frame-levers** -- for a frame-only diff: `s32 unused[(ROM_frame-0x18)/4]` (pure dead frame),
   `str[row]` (keeps base and index live), or an uninit local plus `volatile s32 s = g;` (reload frame,
-  dead `sw $v0`; `volatile` defeats DCE).
+  dead `sw $v0`; `volatile` defeats DCE). Split point is the second knob: arrays slot at
+  `expand_decl` but a `(void)&x` local only at `put_var_into_stack`, so reserve part in a block opened
+  after it to land that local on the ROM's offset (S296).
 - **per-region-cse-slot-base-lever** -- pass the array directly, with no cached pointer, so gcc CSEs the
   base per region. The count of pointer *locals* is the pressure knob: each is a `loop.c` induction
   pointer costing a callee-saved register, an offset off a shared row pointer is not (S289).

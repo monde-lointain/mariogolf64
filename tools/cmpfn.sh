@@ -200,6 +200,40 @@ trim_trailing_pad() {
 }
 
 norm() {
+    # Stack-slot displacements survive the immediate mask (S296). A frame-slot offset is a real
+    # difference, unlike a reloc immediate: S296 `update_vertex_texture_coords_per_frame` read
+    # byte-clean here at 244/244 with a MATCHING frame size while the ROM build failed, because the
+    # frame-pinned local sat at 0xd8(sp) against the ROM's 0x58(sp). `diff.py` after a full make
+    # found it in one line. This is the third normalisation to need surfacing (S260 branch targets,
+    # S276 frame size), and stack offsets are the one immediate class known to be meaningful.
+    # Both sides fold to decimal: splat prints `0x58($sp)`, objdump prints `88(sp)` for that slot.
+    # The marker is glued to letters (`@F88`) so the later `\b[0-9]+\b` mask cannot reach the digits.
+    awk '
+        function h2d(s,   i, c, v, neg, digits) {
+            neg = 0
+            if (substr(s, 1, 1) == "-") { neg = 1; s = substr(s, 2) }
+            if (tolower(substr(s, 1, 2)) == "0x") {
+                s = substr(s, 3); v = 0; digits = "0123456789abcdef"
+                for (i = 1; i <= length(s); i++) {
+                    c = tolower(substr(s, i, 1))
+                    v = v * 16 + (index(digits, c) - 1)
+                }
+            } else {
+                v = s + 0
+            }
+            return neg ? -v : v
+        }
+        {
+            out = ""
+            while (match($0, /(0x[0-9a-fA-F]+|-?[0-9]+)\(\$?sp\)/)) {
+                tok = substr($0, RSTART, RLENGTH)
+                sub(/\(\$?sp\)/, "", tok)
+                out = out substr($0, 1, RSTART - 1) "@F" h2d(tok) "(sp)"
+                $0 = substr($0, RSTART + RLENGTH)
+            }
+            print out $0
+        }
+    ' |
     sed -E '
         s/\$//g
         s/%[a-z]+\([^)]*\)/N/g
