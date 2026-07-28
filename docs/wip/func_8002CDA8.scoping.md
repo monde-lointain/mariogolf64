@@ -108,14 +108,165 @@ Coordinate clamps in the body are the standard `MAX(x, 0)` idiom
 `(0x20 - i) * 4` and `(0x1F - i) * 4`; the two `bgez` branches near `8002D234` / `8002D25C` select
 between `$t0` / `$t6` and a `subu`-corrected value for the RDPHALF_1 `s` and `t`.
 
-## What is left to do
+## Reconstruction result (S303): 838/838 on the first build, frame `+0x18`
 
-1. Decode the second half's sprite draws (offsets `+256` to `+804` of the DL stream, all constant
-   words already dumped and in this note's method output) into macros -- mechanical.
-2. Pin the rectangle arithmetic (`$t0`/`$t6` bases and the two `bgez` arms) to a source expression.
-3. Write the C, then iterate with `tools/cmpfn.sh func_8002CDA8 build/src/main/func_8002A640.o`.
+The whole body was written from the decoded stream and compiled to **838 instructions against the
+ROM's 838 on the first build**, every display-list word verified against `gbi.h` through the
+harness. The residual is **entirely allocation**: frame `-0x1E0` against the ROM's `-0x1C8` and a
+1478-row register permutation. `cmpfn` reports no structural deficit anywhere.
 
-Host risk to check before integrating (S300): `src/main/func_8002A640.c` is a partial file, so any
-`.rodata` this body would emit must be checked against the host's carve first. This body has zero FP
-constants and no strings, so the expected emission is empty `.rodata`, but confirm with
-`objdump -s -j .rodata` on the object.
+The frame delta is exactly three spill slots. Both sides use the same 50-entry, 8-stride constant
+spill area at `20..412(sp)`; this build adds three more at `420`, `428`, `436` before the
+callee-saved block, and they hold display-list *pointers* (`sw s8,436(sp)`) and two packet constants
+(`FD10013F`, `07000000`) that the ROM keeps in registers. So the gap is three simultaneously-live
+values in the straight-line sections, not a body difference.
+
+Levers measured this sprint (instruction count / frame / cmpfn rows):
+
+| form | result |
+| --- | --- |
+| one shared `n = D_800B7730;` temp, re-assigned before each of the two animated `gDPSetTileSize` sites | **838 / -0x1E0 / 1478** (best) |
+| both sites reading `D_800B7730` directly | 835 / -0x1C0 / 1497 |
+| two distinct temps `n`, `m` | 835 / -0x1C0 / 1497 |
+| one temp + one direct, either way round | 835 / -0x1C0 |
+| `D_800B7730++` moved above the preamble | 840 / -0x1E8 |
+| `src = osVirtualToPhysical(nuGfxCfb_ptr) & ~7` moved down to just before the grid loop | 836 / -0x1D8 |
+| explicit `uls`/`ult`/`lrs`/`lrt` block-scoped temps in the loops | identical to the inline form (838 / -0x1E0 / 1478) -- gcc folds them |
+
+So the count is a knife edge on how `D_800B7730` is spelled: one variable re-assigned at both sites
+is the only form that reaches 838, which is the `one-variable-reuse-reorders-loads` lever in its
+*wanted* direction.
+
+## Next actions
+
+1. The residual is a pure allocation gap at exact instruction count: run the priority-window
+   procedure (`tools/allocno_report.py src/main/func_8002A640.c func_8002CDA8`) and find where this
+   build's `global.c allocno_compare` order diverges from the ROM's register assignment. The
+   boundary here sits near priority 900-1000, with two allocnos already unallocated above it.
+2. Three long-lived tail values are the concrete suspects: the `E4080080` / `04000400` pair shared by
+   the three identical `gSPTextureRectangle` calls, and the `01020020` word shared by the two
+   identical `gDPSetTileSize(gfx++, 1, 0, 0, 32, 32)` calls. Spelling one of each differently (for
+   example `8 << 2` for `32`) shortens those live ranges; that was not tried.
+3. Do not re-derive the display list: it is verified. Start from the body below.
+
+Host risk when integrating (S300): `src/main/func_8002A640.c` is a partial file. This body emits no
+FP constants and no strings, so its `.rodata` should be empty -- confirm with
+`objdump -s -j .rodata` on the object before claiming a bank.
+
+## Working body (838/838, frame -0x1E0, cmpfn 1478 rows)
+
+```c
+extern s32 D_800B7730;
+extern u8 D_800B6B28[];
+extern u8 D_800B6F28[];
+extern u8* D_800FC89C;
+extern u8* D_80132CEC;
+extern u16 D_80105320[];
+extern u16 D_801B8BC0[];
+extern u16 D_801B60E0[];
+
+void func_8002CDA8(Gfx** gfxp) {
+  Gfx* gfx = *gfxp;
+  u32 src = osVirtualToPhysical(nuGfxCfb_ptr) & ~7;
+  s32 i;
+  s32 j;
+  s32 n;
+
+  gDPPipeSync(gfx++);
+  gDPPipeSync(gfx++);
+  gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+  gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+  gDPPipeSync(gfx++);
+  gDPSetColorDither(gfx++, G_CD_DISABLE);
+  gDPPipeSync(gfx++);
+  gDPSetTexturePersp(gfx++, G_TP_NONE);
+  gDPPipeSync(gfx++);
+  gDPSetTextureFilter(gfx++, G_TF_BILERP);
+  gDPPipeSync(gfx++);
+  gDPSetAlphaCompare(gfx++, G_AC_NONE);
+  gDPPipeSync(gfx++);
+  gDPSetTextureLUT(gfx++, G_TT_NONE);
+  gDPPipeSync(gfx++);
+  gDPSetRenderMode(gfx++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
+  gDPSetCombineLERP(gfx++, TEXEL0, PRIMITIVE, PRIMITIVE_ALPHA, PRIMITIVE, 0, 0,
+                    0, PRIM_LOD_FRAC, TEXEL0, PRIMITIVE, PRIMITIVE_ALPHA,
+                    PRIMITIVE, 0, 0, 0, PRIM_LOD_FRAC);
+  gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 200);
+  gDPPipeSync(gfx++);
+  gDPSetScissor(gfx++, G_SC_NON_INTERLACE, 0, 0, 320, 240);
+  gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 32,
+                   osVirtualToPhysical(D_80105320) & ~7);
+  gDPPipeSync(gfx++);
+
+  D_800B7730 = D_800B7730 + 1;
+
+  for (i = 0; i != 32; i++) {
+    for (j = 0; j != 4; j++) {
+      gDPLoadTextureTile(gfx++, src, G_IM_FMT_RGBA, G_IM_SIZ_16b, 320, 0,
+                         34 + j * 76, 48 + i * 3, 41 + j * 76, 51 + i * 3, 0,
+                         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
+                         G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+      gSPScisTextureRectangle(gfx++, j << 5, (31 - i) << 2, (j + 1) << 5,
+                              (32 - i) << 2, G_TX_RENDERTILE, (34 + j * 76) << 5,
+                              (48 + i * 3) << 5, 1 << 10, 1 << 10);
+    }
+  }
+
+  gDPLoadTextureBlock(gfx++, (u32)D_800B6B28 & ~7, G_IM_FMT_I, G_IM_SIZ_8b, 32,
+                      32, 0, G_TX_NOMIRROR | G_TX_WRAP,
+                      G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK,
+                      G_TX_NOLOD, G_TX_NOLOD);
+  gDPPipeSync(gfx++);
+  gDPSetRenderMode(gfx++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
+  gDPSetCombineLERP(gfx++, 0, 0, 0, TEXEL0, 0, 0, 0, PRIMITIVE, 0, 0, 0, TEXEL0,
+                    0, 0, 0, PRIMITIVE);
+  gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 159);
+  gSPTextureRectangle(gfx++, 0, 0, 32 << 2, 32 << 2, G_TX_RENDERTILE, 0, 0,
+                      1 << 10, 1 << 10);
+  gDPPipeSync(gfx++);
+  gDPSetCycleType(gfx++, G_CYC_2CYCLE);
+  gDPPipeSync(gfx++);
+  gDPSetRenderMode(gfx++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
+  gDPSetCombineLERP(gfx++, TEXEL0, TEXEL1, PRIMITIVE_ALPHA, TEXEL1, 0, 0, 0,
+                    PRIMITIVE, PRIMITIVE, 0, COMBINED, COMBINED_ALPHA, 0, 0, 0,
+                    COMBINED);
+  gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 32,
+                   osVirtualToPhysical(D_801B8BC0) & ~7);
+  gDPLoadTextureBlock(gfx++, (u32)D_800B6B28 & ~7, G_IM_FMT_I, G_IM_SIZ_8b, 32,
+                      32, 0, G_TX_NOMIRROR | G_TX_WRAP,
+                      G_TX_NOMIRROR | G_TX_WRAP, 5, 5, G_TX_NOLOD, G_TX_NOLOD);
+  gDPLoadMultiBlock(gfx++, (u32)D_800B6F28 & ~7, 256, 1, G_IM_FMT_RGBA,
+                    G_IM_SIZ_16b, 32, 32, 0, G_TX_NOMIRROR | G_TX_WRAP,
+                    G_TX_NOMIRROR | G_TX_WRAP, 5, 5, G_TX_NOLOD, G_TX_NOLOD);
+  gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 48);
+  n = D_800B7730;
+  gDPSetTileSize(gfx++, 0, 0, n, 32, n + 32);
+  gDPSetTileSize(gfx++, 1, 0, 0, 32, 32);
+  gSPTextureRectangle(gfx++, 0, 0, 32 << 2, 32 << 2, G_TX_RENDERTILE, 0, 0,
+                      1 << 10, 1 << 10);
+  gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 32,
+                   osVirtualToPhysical(D_801B60E0) & ~7);
+  gDPLoadTextureBlock(gfx++, ((u32)D_800FC89C + 8) & ~7, G_IM_FMT_RGBA,
+                      G_IM_SIZ_16b, 32, 32, 0, G_TX_NOMIRROR | G_TX_WRAP,
+                      G_TX_NOMIRROR | G_TX_WRAP, 5, 5, G_TX_NOLOD, G_TX_NOLOD);
+  gDPLoadMultiBlock(gfx++, ((u32)D_80132CEC + 8) & ~7, 256, 1, G_IM_FMT_RGBA,
+                    G_IM_SIZ_16b, 32, 32, 0, G_TX_NOMIRROR | G_TX_WRAP,
+                    G_TX_NOMIRROR | G_TX_WRAP, 5, 5, G_TX_NOLOD, G_TX_NOLOD);
+  gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 127);
+  n = D_800B7730;
+  gDPSetTileSize(gfx++, 0, n, n, n + 32, n + 32);
+  gDPSetTileSize(gfx++, 1, 0, 0, 32, 32);
+  gSPTextureRectangle(gfx++, 0, 0, 32 << 2, 32 << 2, G_TX_RENDERTILE, 0, 0,
+                      1 << 10, 1 << 10);
+  gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 320,
+                   osVirtualToPhysical(nuGfxCfb_ptr) & ~7);
+  gDPPipeSync(gfx++);
+  gDPSetScissor(gfx++, G_SC_NON_INTERLACE, 8, 8, 312, 232);
+  gDPPipeSync(gfx++);
+  gDPSetColorDither(gfx++, G_CD_MAGICSQ);
+  gDPPipeSync(gfx++);
+  gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+  gDPPipeSync(gfx++);
+  *gfxp = gfx;
+}
+```
