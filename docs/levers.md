@@ -13,18 +13,13 @@ An index, not a transcription: full derivations live in the sprint retros and, w
 
 ## Levers with a full playbook
 
-These have a `docs/hazards.md` section; read it rather than the line here.
-
-- base register vs displacement -- `docs/hazards.md#base-register-vs-displacement`
-- cross-jump tail merge -- `docs/hazards.md#cross-jump-tail-merge`
-- goto loop (last resort; defeats every `loop.c` pass) --
-  `docs/hazards.md#goto-loop--loopc-never-runs-defeating-strength-reduction-and-bound-hoisting`
-- loop weight and live length regalloc steering -- `docs/hazards.md#loop-weight-and-live-length-regalloc-steering`
-- named aggregate local block move -- `docs/hazards.md#named-aggregate-local-extra-block-move`
-- nested-function static chain spill -- `docs/hazards.md#nested-function-static-chain-spill`
-- signed-divide const quotient destination -- `docs/hazards.md#signed-divide-const-v0v1-quotient-destination`
-- switch compare-chain layout -- `docs/hazards.md#switch-compare-chain-layout`
-- top-tested loop goto local hoist -- `docs/hazards.md#top-tested-loop-goto-local-hoist`
+These have a `docs/hazards.md` section; read it rather than a line here. Anchors:
+`#base-register-vs-displacement`, `#cross-jump-tail-merge`,
+`#goto-loop--loopc-never-runs-defeating-strength-reduction-and-bound-hoisting` (last resort; defeats
+every `loop.c` pass), `#loop-weight-and-live-length-regalloc-steering`,
+`#named-aggregate-local-extra-block-move`, `#nested-function-static-chain-spill`,
+`#signed-divide-const-v0v1-quotient-destination`, `#switch-compare-chain-layout`,
+`#top-tested-loop-goto-local-hoist`.
 
 ## Register allocation and coloring
 
@@ -69,15 +64,14 @@ These have a `docs/hazards.md` section; read it rather than the line here.
   inline (`i * 6`) when the ROM births givs in body order (S294).
 - **sched-tiebreak-coins** -- `rank_for_schedule` (`sched.c:2428`) sorts class then LUID (a class-1
   compute defers behind class-3 stores); `schedule_select` (`sched.c:2615`) front-loads a transfer over
-  a constant load (`fabsf` sign-mask).
+  a constant load (`fabsf` sign-mask). Same rule, FP case: a constant load
+  outranks a `fabs` feeding the same compare (3 vs 2); `mtc1`-zero ties via potential-hazard. Source
+  order is not always the knob: S305 moved a `div` three ways for a byte-identical object.
 - **sched-bottomup-loadsplit-livelength-blockmove** -- at exact instruction count, a `s32 tmp`
   statement split forces a load interleave (sched is bottom-up); moving a statement earlier shortens a
   qty's live length. Permuter-proof.
-- **fp-const-load-before-fabs** -- an FP constant load schedules before a `fabs` feeding the same
-  compare (load 3 outranks fabs 2); an mtc1-zero ties via potential-hazard.
 - **do-while-zero-block-break** -- an empty `do {} while (0);` emits nothing but ends the preceding
-  block, so `reorg` stops reaching past a call for a later insn and annulling the next branch to
-  compensate (S288).
+  block, so `reorg` stops reaching past a call and annulling the next branch (S288).
 - **aggregate-store-pins-pointer-load** -- a scalar-global store does not constrain a later load
   through a pointer parameter (`true_dependence`, `sched.c:817`); typing those globals as one array
   restores the dependence and the ROM's load/store interleave. Same on the `loop.c` side: as scalars
@@ -85,9 +79,8 @@ These have a `docs/hazards.md` section; read it rather than the line here.
   `$f20`/`$f22`; `G[]` + `[0]` restores the reload (S301). Inverse: a global read in a loop storing
   through a pointer is not invariant, so the reload forces a second IV -- copy it to a preheader
   local (S294).
-- **two-argument-call-temp-split** -- when both arguments of a call each cross another call, compute
-  them into temps first; as one expression gcc evaluates argument 0 fully and holds it across the
-  second call.
+- **two-argument-call-temp-split** -- when both arguments of a call cross another call, compute them
+  into temps first; as one expression gcc evaluates argument 0 fully and holds it across the call.
 
 ## Control flow and branch shape
 
@@ -95,47 +88,51 @@ These have a `docs/hazards.md` section; read it rather than the line here.
   a `bne` with a register bound and a tight frame. The symptom is `slti` where the ROM has `bne`.
   Choose per loop (S287: 3 do-while, 6 structured).
 - **out-of-line-handler-block-branch-likely** -- a one-instruction `goto` handler folds into an
-  annulled `beql`; a single `goto done` replicates the return copy.
+  annulled `beql`; one `goto done` replicates the return copy.
 - **else-arm-return-vs-then-arm** -- for a far early return the else-arm form yields a plain `bc1t`
   (`jump.c:1737` cannot invert across a set-retval); keep the final `return 0` last.
 - **nonvoid-return-blocks-fallthrough-delay-steal** -- a lone epilogue-branch nop means the ROM function
   returns `s32` (`reorg.c:3375/4274`).
+- **and-equals-zero-not-negated-and** -- `if (!(a & b))` De Morgans into a branch per operand plus
+  `or`; `(a & b) == 0` keeps the value-selects and the `and`. ROM `bc1t`+`and`+`bnez` is the latter.
 - **value-select-branch-likely-on-switch-default** -- a constant-select branch-likely extends to a
   switch arm, and is goto-proof.
 - **cross-jump-merge-point-before-store** -- the delay-slot filler names the pre-reorg order; a merge
   point at the argument move, not the store, means each arm held its own copy of the trailing calls --
   duplicate them per arm (S286).
-- **store-flag-single-bit-terminal-wall** -- a terminal `(x & bit) ? 1 : 0` folds to `lhu; srl` where the
-  ROM keeps `andi; bnez`. Permuter-denied.
-- **gcc272-fold-range-test-slti-merge** -- adjacent `slti` tests fold to `(u32)(x-lo) < span`; a per-test
-  goto defeats the merge when the ROM keeps both.
+- **store-flag-single-bit-terminal-wall** -- `(x & bit) ? 1 : 0` folds to `lhu; srl` where the ROM
+  keeps `andi; bnez`. Permuter-denied.
+- **gcc272-fold-range-test-slti-merge** -- adjacent `slti` tests fold to `(u32)(x-lo) < span`; a
+  per-test goto defeats the merge when the ROM keeps both.
 
 ## Addressing, types and expression shape
 
-- **commutative-operand-order-statement-split** -- flip `addu`/`xor` operand order via `x = a; x ^= b;`
-  or `T *p = base + i; p[C] = ...`. RTL-canonical: change structure, not spelling.
-  `*(p+off+C)` gives `addu rd,base,off`; `p[off+C]` reverses it.
+- **operand-order-statement-split** -- which operand is computed first is structural, not spelling:
+  flip `addu`/`xor` via `x = a; x ^= b;` or `T *p = base + i; p[C] = ...` (`*(p+off+C)` gives
+  `addu rd,base,off`, `p[off+C]` reverses it), and precompute an index offset and a `u8 *` base into
+  separate temps to defer a row add (`expr.c:6457`, operand 0 before operand 1).
+- **one-divide-per-basic-block** -- no cross-block CSE of a division, so an inline `K / x` in a macro
+  that branches (`gSPScisTextureRectangle`) emits one `div` per using block (+38 insns, S305); one ROM
+  `div` means a variable. Tell: `div`, `break`, `bne`, `mflo` all scale together.
 - **fold-associate-constant-side** -- `GLOBAL + (elem + CONST)` reproduces `addiu rX, globreg, C`; the
   natural spelling reassociates onto the element instead.
 - **defeat-global-base-cse** -- per-access re-read: `*(s32 *)((u8 *)SYM + off)` on the address
   (param-base fold aside, terminal), `extern s32 G[]` + `G[0]` on the value. Inverse: per-site
   `T *p = &SYM;`, never reused (S291).
-- **himode-shortening-cse-neg-imm-addiu** -- `(f32)(u16)(x + 0x8000)` shortens to HImode and CSE folds it
-  to one negative-immediate `addiu`; a separate `s32 t =` keeps SImode.
+- **himode-shortening-cse-neg-imm-addiu** -- `(f32)(u16)(x + 0x8000)` shortens to HImode and CSE
+  folds it to one negative-immediate `addiu`; a separate `s32 t =` keeps SImode.
 - **u8-s32-char-split-zero-extend** -- `u8` for the `!= 0` test plus `s32` for compares puts the
   zero-extend in another basic block and keeps `slti` signed.
-- **divmod-order-quotient-coalescing** -- `x % K` before `x / K` emits the ROM's non-coalesced `move`;
-  division first coalesces.
+- **divmod-order-quotient-coalescing** -- `x % K` before `x / K` emits the ROM's non-coalesced
+  `move`; division first coalesces.
 - **ifelse-not-ternary-cse-reset** -- a multi-predecessor join resets CSE's table and re-loads live
   memory; inverted, a temp holding the arm result keeps the ROM's single load (S299).
 - **add-s-negative-const-lever** -- for a ROM `add.s` with a negative FP constant, spell it `x + -C`;
   subtraction emits `sub.s` with a positive constant.
-- **pre-temp-defer-rowadd-lever** -- precompute the index offset and the `u8 *` base into separate temps
-  (`expr.c:6457`, operand 0 before operand 1).
-- **negative-displacement-neighbour-needs-one-symbol** -- `lw t0, -0x2B(a0)` reads global B off A's base
-  only when A and B are one symbol.
+- **negative-displacement-neighbour-needs-one-symbol** -- `lw t0,-0x2B(a0)` reads global B off A's
+  base only when A and B are one symbol.
 - **same-field-sentinel-loop-peels-top-load** -- a loop testing one field at the top with a bottom
-  sentinel makes gcc peel the top load; the back edge is then a terminal coin.
+  sentinel peels the top load; the back edge is then a terminal coin.
 - **block-scoped-record-pointer-single-giv** -- for three or more fields of `ARR[i]`, a block-scoped
   `T *p = &ARR[i];` gives one base register plus displacements; `p++` splits into two induction
   variables, and a bare `ARR[i].field` gives a byte-offset one with a per-access `%hi`.

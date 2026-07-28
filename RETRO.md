@@ -25,6 +25,51 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 305 — the fresh `dl-emitter` tail in `main`, sibling-seeded (1 banked, 1 carried) — 2026-07-28
+- Increment: 0 files / **1 function matched** (`emit_ball_offscreen_indicator`, 797 instructions,
+  byte-exact). `src/main/func_80080220.c` 14 -> 13 stubs; `--loose-stubs main` 278 -> 277, fresh
+  3 -> **1**. md5-candidate unchanged at 230 of 265, so the file point banks 0 as priced.
+- Quality: 0 stuck-far / 0 permuter-escalated / 1 carried / 1 re-opened (a bounded probe, negative).
+- Seed: committed 10pt (5 + 5) at `f6b74ec`; banked **0**pt; realized **11**, residual **+1**;
+  regime classical.
+- What helped: **the mnemonic histogram, now three sprints running, and a new segment-split
+  localiser.** On the banked leaf the histogram named every fix in turn (`slti`+`bnez` vs `bne` ->
+  do-while loop form; `bc1t`/`and` vs `bc1f`/`or` -> a De Morgan inversion). On the carried leaf the
+  893-row `cmpfn` diff said nothing and splitting both streams at rare anchor mnemonics
+  (`jal`, `div`, `sqrt.s`, `bc1tl`, `trunc.w.s`) put the whole 6-instruction residual on one line:
+  `61 vs 50` before a `div`, `92 vs 101` after it. Also: `gSPScisTextureRectangle` is the macro
+  behind the `nor`/`sra 31`/`and`/`andi 0xFFF` corner clamps plus the two-level MIN/MAX s/t
+  adjustment — recognising it turned ~60 instructions of apparent hand-rolled clipping into one
+  call, and the SDK-composite-macro-first rule paid for the second sprint in a row.
+- Friction: **one scheduler placement cost more than the other three fixes combined.** The carried
+  leaf's residual is a `div` scheduled 11 instructions earlier than the ROM's, and source order does
+  not move it: a temp before the macro, a full hand-expansion of the macro, and a hand-expansion with
+  the temps in the ROM's exact order all produce a **byte-identical object**. That negative is worth
+  more than the attempt — it rules out the whole emission-order lever family for this residual and
+  says the next probe has to be the dependence graph or a `sched.c` dive.
+- Second friction, self-inflicted: the first draft passed `0x8000 / size` inline into
+  `gSPScisTextureRectangle` and paid +38 instructions, because gcc 2.7.2 emits one `div` per basic
+  block that uses the value and the macro branches twice. The ROM's single `div` per call site was
+  visible in the histogram from the first build and was read as "extra work somewhere" for one
+  iteration before the `div`/`break`/`bne`/`mflo` group was recognised as one cause.
+- Applied: 4 of 4 plus 1 retirement — #1 the histogram folded into `tools/cmpfn.sh` (computed off
+  the NORMALISED streams, which is what kills the `li`-for-both-`addiu`-and-`ori` false delta a
+  hand-rolled version reports); #2 `tools/seg_diff.py`; #3 `tools/gbi_match.py` (brute-forces every
+  `G_RM_*` pair and every 8-argument `G_CC_*` pair against a `w0/w1`, and prints the
+  `gDPSetCombineLERP` form when no stock pair exists); #4+#5 two `docs/levers.md` entries
+  (`one-divide-per-basic-block`, `and-equals-zero-not-negated-and`) and #6 the `--loose-stubs main`
+  advisory refreshed with the spent-pool state. Retirements paying for them, all in `docs/levers.md`:
+  `fp-const-load-before-fabs` merged into `sched-tiebreak-coins` (same `rank_for_schedule` rule),
+  `pre-temp-defer-rowadd-lever` merged into `operand-order-statement-split`, and the playbook index
+  compressed to one anchor list. Net `docs/levers.md` delta **-5 B** (10236 -> 10231), so the
+  surface is inside budget with two new levers on it.
+- Carry-over: `func_8007EF0C` in `src/main/func_80078910.c`, at 968/974 with the ROM's exact frame
+  and a single named cause; body and the three refuted source forms in
+  `docs/wip/func_8007EF0C.near-match.md`. `func_8002CDA8` stands unchanged, with
+  `gDPLoadMultiTile` now ruled out (byte-identical object, not merely a wrong frame), which spends
+  the last natural construct its carry-over named.
+- Push: local.
+
 ## Sprint 304 — allocation-first on the `dl-emitter` tail; a three-agent compiler-source fan-out (1 banked, 1 carried) — 2026-07-28
 - Increment: 0 files / **1 function matched** (`func_8008534C`, 787 instructions, byte-exact).
   `src/main/func_80080220.c` 15 -> 14 stubs; `--loose-stubs main` 279 -> 278, fresh 4 -> 3. No file

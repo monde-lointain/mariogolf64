@@ -323,6 +323,21 @@ PADNOTE=''
 [ "$PAD" -gt 0 ] && PADNOTE="  [+$PAD pad nop(s) trimmed]"
 echo "rom=$(wc -l < "$ROM_N") mine=$(wc -l < "$MINE_N")  ($OBJ)  [$FRAME]$PADNOTE"
 
+# Mnemonic histogram delta. A multiset comparison says whether the residual is STRUCTURAL and of
+# what kind before any hunk is read: `slti`+`bnez` against `bne` names a loop-exit form, a `div` /
+# `break` / `mflo` group naming a duplicated division, `bc1t`+`and` against `bc1f`+`or` naming a
+# De Morgan inversion (S305, all three). It is computed off the NORMALISED streams, so the alias
+# spellings splat and objdump disagree on (`li` for both `addiu rX,zero,N` and `ori rX,zero,N`,
+# `move`/`addu`) are already folded — a hand-rolled histogram over the raw text reports those as
+# false deltas. Printed only when the multisets differ; it says nothing about WHERE.
+hist() { cut -d' ' -f1 "$1" | sort | uniq -c | awk '{ print $2, $1 }' | sort; }
+HDELTA=$(join -a1 -a2 -e0 -o '0,1.2,2.2' <(hist "$ROM_N") <(hist "$MINE_N") \
+         | awk '$2 != $3 { printf "  %-10s rom=%s mine=%s\n", $1, $2, $3 }')
+if [ -n "$HDELTA" ]; then
+    echo "--- mnemonic delta ---"
+    printf '%s\n' "$HDELTA"
+fi
+
 if [ "$MNEMONICS" = 1 ]; then
     # Opcode stream only. norm() has already folded the alias spellings (move/li/beqz/bnezl), so both
     # sides name the same instruction the same way and the alignment is meaningful.

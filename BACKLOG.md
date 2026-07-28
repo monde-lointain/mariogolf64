@@ -48,6 +48,13 @@ see `docs/wip/func_800990D0.near-match.md` (`--carried-check` flags it). Backup 
 (294-instr wall-prone debug handler, its own slice). STANDING GUIDANCE: prefer a FRESH non-main pack
 next unless a specific main leaf is pre-vetted `.s`-clean.**
 
+**S305 CLOSES the `main` fresh vein.** `--loose-stubs main` is at 277 stubs / **1 fresh**
+(`draw_terrain_aim_grid`, 0x1514, the biggest row in the `dl-emitter` class). Since S293 the class
+has banked 25 of 33 attempted; the smallest-first choice inside `main` is now gone, so the next main
+slice is a deliberate pick between that one big row, a characterised carry (`func_8007EF0C` is the
+closest at 968/974 with an exact frame), or a fresh non-main pack. The advisory printed by
+`--loose-stubs` carries this state.
+
 **S277 REFINES the FP-wall verdict: the small heavy-FP main leaves are NOT all terminal — a targeted
 gcc-2.7.2 + binutils-2.6 fan-out cracked 2 of the 3 smallest FP leaves in `func_800453E0.c`
 (`build_radial_falloff_texture` func_8004C860, `get_shot_strength_tier` func_80046898), carrying only
@@ -3932,6 +3939,18 @@ by `/sprint-plan`:
   `NU_CONT_THREAD_ID=6` vs MG64's 5), and that surfaces only at first build unless reconciled here.
   A near-free retry missing any of these is a half-scoped spike — finish the scope before deferring.
 
+- **(S305 SPIKE — one scheduler placement, everything else exact; re-open with a `sched.c` dive, not
+  a lever search)** `func_8007EF0C`, `src/main/func_80078910.c`. 968 of 974 instructions with the
+  ROM's exact `-0x160` frame, all four passes reconstructed (project, `gSPModifyVertex` ribbon, two
+  `gSPScisTextureRectangle` loops). The residual is the `0x8000 / size` divide scheduled 11
+  instructions earlier than the ROM's, twice: the ROM runs `(sprite / 2) << 9` and
+  `(s16)(sx - size)` first, and its `mflo` then has nothing to fill two hazard slots with, which is
+  4 of the 6 missing instructions (the other 2 are one spill pair). **Source order provably does not
+  move it** — a temp before the macro, a full hand-expansion, and a hand-expansion with the temps in
+  the ROM's order all give a byte-identical object, so the emission-order lever family is spent.
+  Inline `0x8000 / size` is not the answer either (one `div` per using basic block: 4 of them, +38
+  instructions). Body, the fixed set and the refuted set in `docs/wip/func_8007EF0C.near-match.md`.
+
 - **(S304 NAMING DEBT — near-free retry, not a spike)** `func_8008534C` in
   `src/main/func_80080220.c` is BANKED and byte-exact but still carries its auto name. The curated
   rename was deliberately not run because it needs `symbol_addrs.txt` plus `make extract && make`
@@ -3968,9 +3987,12 @@ by `/sprint-plan`:
     (the shared `ult & 0xFFF` half is already CSEd in both builds). The form that reaches the chain is
     a `do {} while (0)` ref-weight probe around a hand-expanded w0 store — a mechanism proof, **not a
     shippable body**. `HW_VERSION_1` is ruled out (it calls `guDPLoadTextureTile`; the ROM's five
-    `jal`s are all `osVirtualToPhysical`); **`gDPLoadMultiTile` is the one untried natural construct.**
+    `jal`s are all `osVirtualToPhysical`); `gDPLoadMultiTile` is ruled out (S305, below).
     Full record in `docs/wip/func_8002CDA8.scoping.md`; do not re-derive the display list.
-    `--carried-check` flags this leaf, and that flag means *scoped*, not *walled*.
+    `--carried-check` flags this leaf, and that flag means *scoped*, not *walled*. **S305 spent the
+    last named construct:** `gDPLoadMultiTile` emits byte-identical words AND a byte-identical
+    object (838/838, frame `-0x1D8`, same four-delta histogram), so it does not change allocno 189's
+    ref weight. Both natural constructs are now ruled out; a re-open starts from `global.c`.
 
 - **(S298 SPIKE — terminal from the caller's source; one named lead, do not re-open on size order)**
   `init_rdp_and_draw_sky_background`, `src/main/func_8002A640.c`. 286/286 with the ROM's `-0xA0`

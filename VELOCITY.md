@@ -1515,6 +1515,17 @@ Three honest caveats:
   permutation. Realized-tier note: the banked leaf kept its auto name, so the descriptive-name
   counter did not move this sprint (165 descriptive against 555 `func_`-named in `src/main`) — an
   unpaid quality debt, tracked in `BACKLOG.md`. Push: local.
+- **Sprint 305 (realized)** — the fresh `dl-emitter` tail in `main`, sibling-seeded.
+  **+1 banked, 1 carried, 0 permuter, 0 stuck-far.** Seed 10pt (5 + 5); banked **0**pt (both hosts
+  partial, as priced); **realized 11**, residual **+1** (the carried leaf takes the carry +1, the
+  banked leaf neither bonus nor penalty at four fix iterations). Regime classical.
+  `emit_ball_offscreen_indicator` banked 797/797 with the ROM's frame from a first build of 798/797;
+  `func_8007EF0C` (974 instructions, the largest body attempted in this class) reached 968/974 with
+  the ROM's exact `-0x160` frame and carried on a single scheduler placement. The gate's risk
+  ranking half-fired: risk 1 (FP tags) did not — neither leaf's residual was FP — while risk 2 did,
+  and `main`'s fresh vein is now one row. Tooling: three of the sprint's four accepted suggestions
+  were tools this sprint had to hand-roll (`cmpfn.sh` histogram, `tools/seg_diff.py`,
+  `tools/gbi_match.py`).
 - **Sprint 305** — plan-time seed freeze (classical track, v2 two-pass): seed **10**, regime
   **classical**, split 5 + 5. Two fresh `dl-emitter` leaves, both sibling-seeded:
   `emit_ball_offscreen_indicator` (0xC74, 797 instr, 52 FP / 12 jal, host `src/main/func_80080220.c`,

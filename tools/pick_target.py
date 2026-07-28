@@ -1210,7 +1210,14 @@ def main():
                 "(fp=31) as its designated drop and it banked byte-exact on the first build -- all "
                 "31 mnemonics were 10.2 coordinate conversion in a composite emitter. More "
                 "generally, the tells filter CLASSES, not difficulty within a class: both leaves "
-                "that cost iterations that sprint read clean on every tell the ranker has."
+                "that cost iterations that sprint read clean on every tell the ranker has. "
+                "POOL STATE (S305): main's fresh vein is spent -- one row remains "
+                "(draw_terrain_aim_grid, 0x1514, the largest in the dl-emitter class). The "
+                "smallest-first choice inside this segment is gone, so the next main slice is a "
+                "deliberate pick between that one big row and a characterised carry, and the "
+                "sibling-locality exception above is the only thing that still prices a main leaf "
+                "cheaply. S305 itself: the two fresh rows it took banked 1/2, the miss reaching "
+                "968/974 with the ROM's frame on a scheduler placement."
             )
         raise SystemExit(0 if n_fresh else 1)
 
