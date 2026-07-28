@@ -351,7 +351,165 @@ void func_8006BA24(s32 arg0) {
 
 INCLUDE_ASM("asm/nonmatchings/main/func_8006A2C0", func_8006BA94);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_8006A2C0", func_8006BC80);
+extern f32 D_800C412C;
+extern const f64 D_800D1440; /* 20 degrees in radians */
+
+extern void func_8007399C(s32 arg0, s32 arg1, void* out0, void* out1, s32 arg4);
+extern void func_8006A2C0(Gfx** pgfx, s32 ulx, s32 uly, s32 lrx, s32 lry,
+                          s32 tile, s32 s, s32 t, s32 dsdx, s32 dtdy);
+
+/* The loop-top `yc = 0;` is a PLACEHOLDER for an unknown source statement, not
+ * RE'd truth: the ROM's loop body carries one more RTL insn than the natural
+ * spelling, and it dies in flow after loop, so it produces no instruction. Any
+ * single dead assignment at the loop top reproduces the ROM exactly; which one
+ * the original source wrote is not recoverable from the asm. See
+ * docs/wip/func_8006BC80.near-match.md Finding 1. */
+void emit_hole_banner_dl(Gfx** pgfx) {
+  Gfx* gfx;
+  Gfx** gp;
+  u8* entry;
+  s32 sp38;
+  s32 sp3C;
+  s32 span;
+  s32 i;
+  s32 off;
+  s32 halfw;
+  s32 hgt;
+  s32 ulx;
+  s32 yc;
+  s32 ulx2;
+  s32 uly2;
+  s32 yc2;
+  s32 yc3;
+  s32 lrx2;
+  s32 lry2;
+  s32 dsdx2;
+  s32 dtdy2;
+  s32 y;
+
+  gfx = *pgfx;
+  entry = D_800C406C + D_800C411C * 16;
+  if (D_800C4124 == -1) {
+    return;
+  }
+
+  func_8007399C(*(s32*)entry, 0xC, &sp38, &sp3C, 0);
+  span = sp3C + 0x18;
+  if (span < 0x30) {
+    span = 0x30;
+  }
+
+  if (D_800C4124 == 0) {
+    D_800C4120++;
+    if (D_800C4120 == 4) {
+      D_800C4124 = 1;
+    }
+  } else if (D_800C4124 == 3) {
+    D_800C4120--;
+    if (D_800C4120 == 0) {
+      D_800C4124 = 4;
+      return;
+    }
+  }
+
+  gDPPipeSync(gfx++);
+  gDPPipeSync(gfx++);
+  gDPSetTextureLUT(gfx++, G_TT_NONE);
+  gDPPipeSync(gfx++);
+  gDPSetTextureFilter(gfx++, G_TF_BILERP);
+  gDPPipeSync(gfx++);
+  gDPSetTexturePersp(gfx++, G_TP_NONE);
+  gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
+  gDPSetEnvColor(gfx++, 191, 191, 191, 255);
+  gDPPipeSync(gfx++);
+  gDPSetRenderMode(gfx++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
+  gDPSetCombineMode(gfx++, G_CC_BLENDPEDECALA, G_CC_BLENDPEDECALA);
+
+  i = 0;
+  gp = &gfx;
+  off = 8;
+  do {
+    yc = 0;
+    if (D_800C4124 == 1) {
+      hgt = span;
+      halfw = 0x88;
+    } else {
+      s32 step = D_800C4120;
+
+      halfw = step * 34;
+      hgt = span * step / 4;
+    }
+
+    load_texture_block_4b(gp, (u32)D_800E1C08 + off, G_IM_FMT_I, 256, 32, 0, 0,
+                          0, 0, 0, 0, 0);
+
+    y = i * hgt + 0x74;
+    func_8006A2C0(gp, (0xA0 - halfw) << 2, (y - hgt) << 2, (halfw + 0xA0) << 2,
+                  y << 2, 0, 0, 0, 0x20000 / halfw, 0x8000 / hgt);
+    off += 0x1000;
+    i++;
+  } while (i != 2);
+
+  if (D_800C4124 == 1) {
+    s32 unused[2];
+
+    D_800C412C = D_800C412C + D_800D1440;
+
+    if (D_800C4128 == 0) {
+      f32 wobble;
+
+      halfw = sinf(D_800C412C) * 6.0f + 32.0f;
+      wobble = sinf(D_800C412C);
+      hgt = wobble + wobble + 12.0f;
+    } else {
+      halfw = 0x18;
+      hgt = 8;
+    }
+
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
+    gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+
+    func_8006A548(&gfx, (u32)D_800E1C0C + 8);
+    load_texture_block(&gfx, (u32)D_800E1C0C + 0x208, G_IM_FMT_CI, G_IM_SIZ_8b,
+                       0x48, 0x18, 0, 0, 0, 0, 0, 0, 0);
+
+    ulx = (0x80 - halfw) << 2;
+    yc = span / 4 + 0x86;
+    func_8006A2C0(&gfx, ulx, (yc - hgt) << 2, (halfw + 0x80) << 2,
+                  (hgt + yc) << 2, 0, 0, 0, 0x9000 / halfw, 0x3000 / hgt);
+
+    if (D_800C4128 == 1) {
+      f32 wobble;
+
+      halfw = sinf(D_800C412C) * 6.0f + 32.0f;
+      wobble = sinf(D_800C412C);
+      hgt = wobble + wobble + 12.0f;
+    } else {
+      halfw = 0x18;
+      hgt = 8;
+    }
+
+    load_texture_block(&gfx, (u32)D_800E1C0C + 0x8C8, G_IM_FMT_CI, G_IM_SIZ_8b,
+                       0x48, 0x18, 0, 0, 0, 0, 0, 0, 0);
+
+    ulx2 = (0xC0 - halfw) << 2;
+    yc2 = span / 4 + 0x86;
+    do {
+      uly2 = (yc2 - hgt) << 2;
+    } while (0);
+    lrx2 = (halfw + 0xC0) << 2;
+    yc3 = span / 4 + 0x86;
+    lry2 = (hgt + yc3) << 2;
+    dsdx2 = 0x9000 / halfw;
+    dtdy2 = 0x3000 / hgt;
+    func_8006A2C0(&gfx, ulx2, uly2, lrx2, lry2, 0, 0, 0, dsdx2, dtdy2);
+  }
+
+  *pgfx = gfx;
+}
 
 void func_8006C3E8(void) {
   u8 sp10[0x20];

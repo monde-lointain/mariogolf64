@@ -758,7 +758,247 @@ void func_80083A48(void) {
   }
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80080220", func_80083AC8);
+/* Trail mode: 0 off, 1 record-and-draw, anything else draw-only. */
+extern s32 D_800C5AAC;
+/* Master enable for the effect. */
+extern s8 D_801061CF;
+/* Suppresses the whole draw when it reads 1. */
+extern s32 D_800BE69C;
+/* View scale: biases the sampled height and the projected depth. */
+extern s32 D_800BA700;
+/* 128 * {s32 x, s32 y, s32 z} of projected screen positions. The three fields
+ * are spelled as three symbols, not one array: with one symbol loop.c combines
+ * the (i+1) accesses into one address giv, where the ROM keeps a %hi/%lo per
+ * field. See the header comment. */
+extern s32 D_800E2D70;
+extern s32 D_800E2D74;
+extern s32 D_800E2D78;
+/* The 4-vertex quad the trail re-points per segment. */
+extern Vtx D_800C5A60[];
+/* The identity matrix this emitter installs, and its segment-0 alias. */
+extern Mtx D_800E1E90[];
+extern Mtx D_E1E90[];
+extern s32 project_point_to_screen(f32, f32, f32, s32*);
+extern f32 sqrtf(f32);
+
+/**
+ * Emits the ball trail: a fading white ribbon through the last 128 recorded
+ * ball positions.
+ *
+ * In mode 1 the current ball position is first appended to a 128-entry ring of
+ * world-space samples (the raw position scaled by 1/1024, with the height
+ * pulled down by 0.27 * the view scale). Every sample is then projected to
+ * screen space, walking BACKWARDS from the newest so that segment 0 is the
+ * freshest; a sample the projector rejects is marked with -1 and skipped.
+ *
+ * Each surviving pair of adjacent samples becomes one quad, two triangles wide,
+ * built by re-pointing the same four vertices through gSPModifyVertex rather
+ * than by uploading new geometry: G_MWO_POINT_RGBA sets a white colour whose
+ * alpha fades from 0x40 down by one step every four segments, and
+ * G_MWO_POINT_XYSCREEN offsets the two endpoints by +-4 screen units along the
+ * segment normal. Depth comes from G_ZS_PRIM plus a per-segment
+ * gDPSetPrimDepth, so the ribbon z-sorts against the world without geometry.
+ *
+ * `proj` is the caller's matrix bank; the emitter restores the caller's
+ * projection from `proj[7]` and pops its own modelview on the way out.
+ *
+ * Notes on the shape of this body:
+ * - The first two loop guards repeat the five increments instead of jumping to
+ *   the shared tail. That is not style: it gives the `off2` biv three increment
+ *   insns, and loop.c:3804 subtracts `add_cost * bl->biv_count` from each giv's
+ *   benefit, which drives the three combined (i+1) address givs to benefit <= 0
+ *   and leaves all seven accesses as the ROM's %hi/addu/%lo. With one increment
+ *   site they reduce to pointers and the body is 12 insns short. The third
+ *   guard must NOT repeat them, or its tail fails to cross-jump.
+ * - The RGBA word is spelled inline in each gSPModifyVertex argument. gcc
+ *   evaluates the macro's `val` after the w0 store, so the `i / 4` division's
+ *   bgez lands BETWEEN the first command's two stores; that is what forces the
+ *   ROM to hold the first slot's address in its own register.
+ * - `dx`/`dy` are reused for the scaled deltas rather than given new temps, so
+ *   the two `mul.s` write in place, and the truncations stay inline in the
+ *   XYSCREEN arguments where the ROM computes them.
+ * - `i = 0;` runs BEFORE the three pointer inits. Both are 21-ref allocnos and
+ *   global.c:587 ranks them by live length; the ROM order needs `py` to be the
+ *   shorter of the pair.
+ * - `none` and the hoisted `h` exist to place the -1 constant and the
+ *   D_800BA700 load at the ROM's scheduling positions.
+ * - `slot2` is the last four bytes of the function. The 12 preamble commands
+ *   outrun the register file, so reload spills three of the gbi macros' `_g`
+ *   temporaries, and reload1.c:657 hands out stack slots in ASCENDING pseudo
+ *   number. Expansion order numbers the second pipesync's `_g` below the cycle
+ *   type's, which puts them at 0x3C/0x44; the ROM has them the other way round.
+ *   Naming the third command's packet as a declared local gives it a low
+ *   (pre-macro) pseudo number, so it takes 0x3C and the pipesync takes 0x44.
+ *   Nothing else in the body changes.
+ */
+void emit_ball_trail_dl(Gfx** gfxp, Mtx* proj) {
+  s32 screen[6];
+  Gfx* gfx = *gfxp;
+  /* See the header comment: this exists for its pseudo number. */
+  Gfx* slot2;
+  s32 mode = D_800C5AAC;
+  /* Loop 2 (project): z-field cursor, source/destination byte offsets. */
+  s32* zp;
+  /* Main loop (emit): the three field cursors for sample i. */
+  s32* px;
+  s32* py;
+  s32* pz;
+  s32 off;
+  s32 srcoff;
+  s32 dstoff;
+  /* Byte offset of sample i + 1. Deliberately NOT strength-reduced. */
+  s32 off2;
+  s32 none;
+  s32 h;
+  s32 idx;
+  s32 i;
+  f32 dy;
+  f32 dx;
+  f32 scale;
+
+  if (mode == 0) {
+    return;
+  }
+  if (D_801061CF == 0) {
+    return;
+  }
+
+  if (mode == 1) {
+    D_800C5AA8++;
+    if (D_800C5AA8 == 0x80) {
+      D_800C5AA8 = 0;
+    }
+    off = D_800C5AA8 * 0xC;
+    *(f32*)((u8*)&D_800E3370 + off) = effect_spawn_pos[0] * (1.0f / 1024.0f);
+    *(f32*)((u8*)&D_800E3374 + off) =
+        effect_spawn_pos[1] * (1.0f / 1024.0f) - D_800BA700 * 0.27f;
+    *(f32*)((u8*)&D_800E3378 + off) = effect_spawn_pos[2] * (1.0f / 1024.0f);
+  }
+
+  if (D_800BE69C == 1) {
+    return;
+  }
+
+  none = -1;
+  idx = D_800C5AA8;
+  zp = &D_800E2D78;
+  dstoff = 0;
+  srcoff = idx * 0xC;
+  do {
+    if (idx == none) {
+      srcoff = 0x5F4;
+      idx = 0x7F;
+    }
+    if (project_point_to_screen(*(f32*)((u8*)&D_800E3370 + srcoff),
+                                *(f32*)((u8*)&D_800E3374 + srcoff),
+                                *(f32*)((u8*)&D_800E3378 + srcoff),
+                                screen) < 0) {
+      *(s32*)((u8*)&D_800E2D70 + dstoff) = screen[0] << 2;
+      h = D_800BA700;
+      *(s32*)((u8*)&D_800E2D74 + dstoff) = screen[1] << 2;
+      *zp = (s32)((f32)screen[2] - *(f32*)&screen[5] * (f32)(h * 7));
+    } else {
+      *zp = none;
+    }
+    zp += 3;
+    dstoff += 0xC;
+    srcoff -= 0xC;
+    idx--;
+  } while (zp != &D_800E2D78 + 0x180);
+
+  guMtxIdent(D_800E1E90);
+
+  gDPPipeSync(gfx++);
+  gDPPipeSync(gfx++);
+  slot2 = gfx++;
+  gDPSetCycleType(slot2, G_CYC_1CYCLE);
+  gSPLoadGeometryMode(gfx++, 0);
+  gSPSetGeometryMode(gfx++,
+                     G_ZBUFFER | G_SHADE | G_CULL_BACK | G_SHADING_SMOOTH);
+  gDPPipeSync(gfx++);
+  gDPSetTexturePersp(gfx++, G_TP_PERSP);
+  gDPPipeSync(gfx++);
+  gDPSetTextureFilter(gfx++, G_TF_BILERP);
+  gDPSetCombineMode(gfx++, G_CC_SHADE, G_CC_SHADE);
+  gDPPipeSync(gfx++);
+  gDPSetDepthSource(gfx++, G_ZS_PRIM);
+  gDPPipeSync(gfx++);
+  gDPSetAlphaCompare(gfx++, G_AC_NONE);
+  gDPPipeSync(gfx++);
+  gDPSetRenderMode(gfx++, G_RM_AA_ZB_XLU_SURF, G_RM_AA_ZB_XLU_SURF2);
+  gDPPipeSync(gfx++);
+  gSPMatrix(gfx++, D_1B5638, G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
+  gSPMatrix(gfx++, D_E1E90, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_PUSH);
+  gSPVertex(gfx++, D_800C5A60, 4, 0);
+
+  i = 0;
+  py = &D_800E2D74;
+  px = py - 1;
+  pz = py + 1;
+  off2 = 0xC;
+  while (i != 0x7F) {
+    if (*pz == -1) {
+      goto next;
+    }
+    if (*(s32*)((u8*)&D_800E2D78 + off2) == -1) {
+      py += 3;
+      px += 3;
+      pz += 3;
+      off2 += 0xC;
+      i++;
+      continue;
+    }
+    dx = (f32)(*px - *(s32*)((u8*)&D_800E2D70 + off2));
+    dy = (f32)(*py - *(s32*)((u8*)&D_800E2D74 + off2));
+    if ((dx == 0.0f) & (dy == 0.0f)) {
+      py += 3;
+      px += 3;
+      pz += 3;
+      off2 += 0xC;
+      i++;
+      continue;
+    }
+    scale = 4.0f / sqrtf(dx * dx + dy * dy);
+    dx = dx * scale;
+    dy = dy * scale;
+
+    gDPPipeSync(gfx++);
+    gDPSetPrimDepth(gfx++, *pz, 0);
+    gDPPipeSync(gfx++);
+
+    gSPModifyVertex(gfx++, 0, G_MWO_POINT_RGBA, (0x40 - i / 4) | 0xFFFFFF00);
+    gSPModifyVertex(gfx++, 1, G_MWO_POINT_RGBA, (0x40 - i / 4) | 0xFFFFFF00);
+    gSPModifyVertex(gfx++, 2, G_MWO_POINT_RGBA, (0x40 - i / 4) | 0xFFFFFF00);
+    gSPModifyVertex(gfx++, 3, G_MWO_POINT_RGBA, (0x40 - i / 4) | 0xFFFFFF00);
+    gSPModifyVertex(gfx++, 0, G_MWO_POINT_XYSCREEN,
+                    ((*px + (s32)dy) << 16) + (*py - (s32)dx));
+    gSPModifyVertex(gfx++, 1, G_MWO_POINT_XYSCREEN,
+                    ((*px - (s32)dy) << 16) + (*py + (s32)dx));
+    gSPModifyVertex(gfx++, 2, G_MWO_POINT_XYSCREEN,
+                    ((*(s32*)((u8*)&D_800E2D70 + off2) + (s32)dy) << 16) +
+                        (*(s32*)((u8*)&D_800E2D74 + off2) - (s32)dx));
+    gSPModifyVertex(gfx++, 3, G_MWO_POINT_XYSCREEN,
+                    ((*(s32*)((u8*)&D_800E2D70 + off2) - (s32)dy) << 16) +
+                        (*(s32*)((u8*)&D_800E2D74 + off2) + (s32)dx));
+    gSP2Triangles(gfx++, 1, 0, 2, 0, 1, 2, 3, 0);
+  next:
+    py += 3;
+    px += 3;
+    pz += 3;
+    off2 += 0xC;
+    i++;
+  }
+
+  gDPPipeSync(gfx++);
+  gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&proj[7]),
+            G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
+  gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
+  gDPPipeSync(gfx++);
+  gDPSetDepthSource(gfx++, G_ZS_PIXEL);
+  gDPPipeSync(gfx++);
+
+  *gfxp = gfx;
+}
 
 /* func_800842C0: CARRY (S255) chain-USED GCC nested function, NOT a raw-DL-word
  * regalloc wall. A texrect glyph-string emitter (col,row,char* str): classifies

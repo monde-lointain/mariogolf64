@@ -720,3 +720,5 @@ emit_wind_indicator_dl = 0x80084EBC; // type:func
 emit_screen_fade_overlay_dl = 0x8006AEA4; // type:func
 emit_rest_distance_panel_dl = 0x80081EF8; // type:func
 emit_snapshot_panel_grid_dl = 0x80094228; // type:func
+emit_ball_trail_dl = 0x80083AC8; // type:func
+emit_hole_banner_dl = 0x8006BC80; // type:func
