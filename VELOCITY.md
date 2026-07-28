@@ -1515,6 +1515,15 @@ Three honest caveats:
   permutation. Realized-tier note: the banked leaf kept its auto name, so the descriptive-name
   counter did not move this sprint (165 descriptive against 555 `func_`-named in `src/main`) — an
   unpaid quality debt, tracked in `BACKLOG.md`. Push: local.
+- **Sprint 305** — plan-time seed freeze (classical track, v2 two-pass): seed **10**, regime
+  **classical**, split 5 + 5. Two fresh `dl-emitter` leaves, both sibling-seeded:
+  `emit_ball_offscreen_indicator` (0xC74, 797 instr, 52 FP / 12 jal, host `src/main/func_80080220.c`,
+  the host that banked `func_8008534C` in S304) and `func_8007EF0C` (0xF38, 974 instr, 55 FP / 5 jal,
+  host `src/main/func_80078910.c`, 8 banked C bodies). Unpointed stretch: a one-construct
+  `gDPLoadMultiTile` probe on the `func_8002CDA8` carry. Zero gate enablers; the S304 curated rename
+  was declined by the PO and stays a carry-over. Baseline `7b9a10b`. Realized tier and residual are
+  scored at review in a second commit; this line is committed before any `src/` edit and must not be
+  revised.
 - **Sprint 304** — plan-time seed freeze (classical track, v2 two-pass): seed **8**, regime
   **classical**, split 3 + 5. One `dl-emitter` carry re-open (`func_8002CDA8`, 838/838 exact count,
   frame `-0x1E0` vs `-0x1C8` = 3 spill slots, host `src/main/func_8002A640.c`) plus the smallest
