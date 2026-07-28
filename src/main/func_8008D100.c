@@ -59,8 +59,15 @@ void init_scenario_state(void) {
 
 INCLUDE_ASM("asm/nonmatchings/main/func_8008D100", func_8008D1DC);
 
+/* Sun / lens-flare emitter over a Gfx** parameter. S301 carry: reconstructed to
+ * 634/634 instructions with an exact -0x110 frame and only 12 differing
+ * instructions -- one four-instruction scheduling rotation in the address
+ * setup, and four reload1.c spill-slot pair swaps. Every DL command word was
+ * verified against gbi.h. Full body, resolved macro arguments and the measured
+ * lever table (the decisive one: subscripting D_800C5F24/D_800C5F2C so the
+ * loads conflict with the Gfx stores) are in
+ * docs/wip/func_8008D3F4.near-match.md. */
 INCLUDE_ASM("asm/nonmatchings/main/func_8008D100", func_8008D3F4);
-
 INCLUDE_ASM("asm/nonmatchings/main/func_8008D100", func_8008DDDC);
 
 /* Integer lerp, truncated: a0*(1-t) + a1*t, t in $a2 (o32 GPR).
