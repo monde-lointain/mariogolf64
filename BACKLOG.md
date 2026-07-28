@@ -144,6 +144,24 @@ both subagents read the raw-`objdump` deltas as relocation slots). Both are now 
 direction and sharper in detail: price a `dl-emitter` leaf cheap to reconstruct, budget the
 integration, and do not expect to guess which integration defect it will be.**
 
+**S302: a carry doc's LEVER TABLE is as conditional as its verdict, and re-running a rejected row is
+what banks the leaf.** `--loose-stubs main` reads 279 stubs / **5 fresh**, all `dl-emitter`; the
+class is **23 of 27 across S293-S302** with three carries. **1 banked, 1 carried, 0 permuter runs.**
+`func_8008D3F4` -> `emit_lens_flare_dl` closed S301's 12-instruction residual with two levers, one
+of which (`tod` and `n << 8` as their own statements) S301 had MEASURED AT 30 DIFF LINES AND
+REJECTED -- it works only once the four `reload1.c` spill-slot pairs it was competing with are
+fixed, which the other lever did (a `Gfx *` declared in a block that opens one statement early is
+numbered ahead of the macro temps it precedes, and `reload1.c` assigns slots in ascending pseudo
+number). So at a re-open, re-run the rejected rows after every structural fix rather than reading
+them as closed; the rule is now in `docs/workflow/loop.md` beside the near-match-is-a-hypothesis
+paragraph. Second S302 result, and a correction to how the S301 tool is read: **a `loop.c` moved
+verdict is not a register cost.** `func_8009232C`'s loop-B scan moves nine invariants and the built
+object holds one, so "my build hoists four more than the ROM" was chasing a number that was not the
+pressure; `tools/loop_window.py` now prints a `sites` column (`li` + `ori` halves paired back into
+one word) so the moved-and-allocated subset is readable. Third: the fresh reconstruction was again
+cheap and the integration again was not -- `func_8009232C` was 698 against 697 with an exact frame
+on its first build, and carried anyway on a single allocation decision.
+
 **S301: the vein's size tail is where the hoisting coins live, and the coin is now computable.**
 `--loose-stubs main` reads 280 stubs / **6 fresh**, all `dl-emitter`; the class is **22 of 26 across
 S293-S301** with four carries. **0 banked, 2 carried at exact instruction count.** Both leaves came
@@ -6209,20 +6227,22 @@ by `/sprint-plan`:
   follow-up). The 5 live-state pick_target/libultra goldens are regenerated each banking review
   (`REGEN_GOLDEN=1`).
 
-- **Carry-over (S301, `src/main/func_8008D100.c`, two leaves, both at exact instruction count).**
-  `func_800947A8` (0x9A8, 618/618, frame `-0x98` exact, six of seven global registers correct) is
-  blocked by one `loop.c:1631` window slot: the constant `4` sits behind the `gDPSetTile` word
-  `0xF5100000` in the movable list and misses the third life-1 slot by 2 units (threshold 113 against
-  an `insn_count` of 115). Order, `savings` and `lifetime` are each measured and closed in
-  `docs/wip/func_800947A8.near-match.md`, which also carries the full 14-lever table and the working
-  body; the one untested branch of the model is getting the inner loop's RTL `insn_count` to <= 113 at
-  the same emitted count. `func_8008D3F4` (0x9E8, 634/634, frame `-0x110` exact) is **12 instructions
-  out**: a four-instruction scheduling rotation in the address setup plus four `reload1.c` spill-slot
-  pair swaps, with the full macro-argument table and lever measurements in
-  `docs/wip/func_8008D3F4.near-match.md`. A permuter run from that base plateaued at 385 over 4100
-  iterations, so neither residual is permuter-reachable from this shape. Both flag `CARRIED-WALL`.
-  **The vein, smallest-first from here** (re-verified `fresh` at the S301 review): `func_8009232C`
-  (2788 B, jal=0, fp=0 -- cleanest tells left, and the S301 stretch that was never attempted),
-  `func_8008534C` (3148 B, fp-mixed), `emit_ball_offscreen_indicator` (3188 B, fp-sched),
-  `func_8002CDA8` (3352 B, fp=0), `func_8007EF0C` (3896 B, fp-mixed), `draw_terrain_aim_grid`
-  (5396 B, fp-mixed).
+- **Carry-over (S302, `src/main/func_8008D100.c`, two leaves; the third, `func_8008D3F4`, banked as
+  `emit_lens_flare_dl`).** `func_800947A8` (0x9A8, 618/618, frame `-0x98` exact) is blocked by one
+  `loop.c:1631` window slot, and **S302 corrected the arithmetic**: the inner loop is 117 RTL insns,
+  not 115, the `4` is reached at threshold 113, and lowering `insn_count` is the wrong direction --
+  every slot a smaller loop opens is consumed by a movable scanned ahead of the `4`, so it does not
+  pass until `insn_count <= 107`, by which point three constants the ROM keeps in-body are hoisted
+  too. The requirement is `savings * lifetime >= 2` on the `4`, which the ROM gets by sharing ONE
+  pseudo between the inner `j == 4` test and the outer `i != 4` bound; `s32 last = 4;` does it at
+  source level but cprop re-materialises both. Full table in
+  `docs/wip/func_800947A8.near-match.md`. `func_8009232C` (0xAE4, 698 against 697, frame `-0x38`
+  exact, every DL word resolved) is blocked by one hoist coupled to one spill: loop B hoists
+  `0xF3000000` where the ROM materialises it in-body, which costs the callee-saved scratch the ROM
+  spends spilling `src` to `0xC($sp)`, and `allocno_report.py` puts that `src` allocno at priority
+  230 against the loop constants at 220-228 -- it wins its register by about 7 units of live length.
+  Seven levers measured, two regressions, in `docs/wip/func_8009232C.near-match.md`. Both flag
+  `CARRIED-WALL`.
+  **The vein, smallest-first from here** (re-verified `fresh` at the S302 review): `func_8008534C`
+  (3148 B, fp-mixed), `emit_ball_offscreen_indicator` (3188 B, fp-sched), `func_8002CDA8` (3352 B,
+  fp=0), `func_8007EF0C` (3896 B, fp-mixed), `draw_terrain_aim_grid` (5396 B, fp-mixed).

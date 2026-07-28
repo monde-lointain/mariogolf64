@@ -7,9 +7,8 @@ and when a residual class suggests a family of fixes.
 </role>
 
 <scope>
-An index, deliberately not a transcription. These levers were discovered sprint by sprint and their
-full derivations live in the sprint retros and, where one exists, a `docs/hazards.md` section. A name
-plus a line of what it does is enough to act on or to look up.
+An index, not a transcription: full derivations live in the sprint retros and, where one exists, a
+`docs/hazards.md` section.
 </scope>
 
 ## Levers with a full playbook
@@ -50,7 +49,9 @@ These have a `docs/hazards.md` section; read it rather than the line here.
   `str[row]` (keeps base and index live), or an uninit local plus `volatile s32 s = g;` (reload frame,
   dead `sw $v0`; `volatile` defeats DCE). Split point is the second knob: arrays slot at
   `expand_decl`, a `(void)&x` local only at `put_var_into_stack`, so reserve part in a block opened
-  after it to land it on the ROM's offset (S296).
+  after it to land it on the ROM's offset (S296). Slot *order* is the third: `reload1.c` assigns
+  slots in ascending pseudo number, so an `@F<dec>(sp)`-only residual is a numbering question --
+  declaring a temp in a block that opens one statement early creates its pseudo there (S302).
 - **per-region-cse-slot-base-lever** -- pass the array directly, no cached pointer, so gcc CSEs the
   base per region. The count of pointer *locals* is the pressure knob: each is a `loop.c` induction
   pointer costing a callee-saved register, an offset off a shared row pointer is not (S289).
@@ -75,17 +76,17 @@ These have a `docs/hazards.md` section; read it rather than the line here.
   compare (load 3 outranks fabs 2); an mtc1-zero ties via potential-hazard.
 - **do-while-zero-block-break** -- an empty `do {} while (0);` emits nothing but ends the preceding
   block, so `reorg` stops reaching past a call for a later insn and annulling the next branch to
-  compensate (S288). Preferred over an empty `asm volatile`, the other zero-byte region-ender (S282).
+  compensate (S288).
 - **aggregate-store-pins-pointer-load** -- a scalar-global store does not constrain a later load
   through a pointer parameter (`true_dependence`, `sched.c:817`); typing those globals as one array
   restores the dependence and the ROM's load/store interleave. Same on the `loop.c` side: as scalars
   they read loop-invariant against `Gfx *` stores, so the load and its expressions hoist into
-  `$f20`/`$f22`; `G[]` + `[0]` restores the reload (S301). Inverse, and the standing DL-emitter shape: a global read in a loop
-  that stores through a pointer is not loop-invariant, so the reload forces a second IV -- copy it to
-  a preheader local (S294).
+  `$f20`/`$f22`; `G[]` + `[0]` restores the reload (S301). Inverse: a global read in a loop storing
+  through a pointer is not invariant, so the reload forces a second IV -- copy it to a preheader
+  local (S294).
 - **two-argument-call-temp-split** -- when both arguments of a call each cross another call, compute
-  them into temps first; as one call expression gcc evaluates argument 0 fully, `trunc.w.s` included,
-  and holds it across the second call.
+  them into temps first; as one expression gcc evaluates argument 0 fully and holds it across the
+  second call.
 
 ## Control flow and branch shape
 

@@ -30,6 +30,19 @@ first N life-1 movables in scan order get in.
 The movable list below is in `loop.c` scan order (the trailing low-numbered entry is the scan's
 wrap-around, not a sort artifact), with each constant decoded from the post-pass RTL so a DL command
 word is readable as a word rather than a signed decimal.
+
+The `sites` column is the pressure signal, and it answers a different question from the verdict
+(S302). `loop.c` moving an invariant to the preheader does not mean it keeps a register there:
+reload re-materialises a constant at its uses instead and gives the register to something else.
+`func_8009232C`'s loop-B scan moved nine invariants, and the built object held exactly one of them
+(`0xF3000000`, in `$s8`) while the rest came back as in-body `li`. So a moved verdict is not by
+itself a register cost, and comparing the moved list against the ROM's preheader over-counts.
+
+`sites` is how many times gcc's own `-S` output materialises that constant anywhere in the function,
+with `li` + `ori` halves paired back into one word. Read a moved row with a low count as a hoist
+that is really holding a register, and a high count as one that was moved and then re-materialised.
+The count is function-wide, not per loop, so a constant a sibling loop also uses inflates it; when
+two loops share a shape, compare the rows against each other rather than against 1.
 """
 
 from __future__ import annotations
@@ -60,6 +73,8 @@ MOVABLE_RE = re.compile(
     r"^Insn (\d+): regno (\d+) \(life (\d+)\), (?:move-insn )?savings (\d+)\s*(.*)$"
 )
 SETCONST_RE = re.compile(r"\(insn \d+ \d+ \d+ \(set \(reg[^\)]*:\w+ (\d+)\)\s*$")
+LI_RE = re.compile(r"^\s*li\s+\$(\w+),\s*(-?(?:0x)?[0-9A-Fa-f]+)\b")
+ORI_RE = re.compile(r"^\s*ori\s+\$(\w+),\$(\w+),\s*((?:0x)?[0-9A-Fa-f]+)\b")
 
 # threshold = (loop_has_call ? 1 : 2) * (1 + n_non_fixed_regs); n_non_fixed_regs is 60 for this
 # target, which the S301 dumps confirm on two loops. A loop containing a call halves it.
@@ -78,6 +93,43 @@ def const_map(dump: str) -> dict[int, int]:
         c = re.match(r"\(const_int (-?\d+)\)", lines[i + 1].strip())
         if c:
             out[int(m.group(1))] = int(c.group(1))
+    return out
+
+
+def li_sites(asm: str, func: str) -> dict[int, int]:
+    """constant -> how many times gcc's -S materialises it in `func`.
+
+    gcc splits a two-part constant into `li $r,<hi<<16>` plus `ori $r,$r,<lo>`, so a bare `li` scan
+    counts the halves rather than the word. Pairing them keeps a DL command word countable.
+    """
+    out: dict[int, int] = {}
+    parts = asm.split(f"\t.ent\t{func}\n", 1)
+    if len(parts) != 2:
+        return out
+    body = re.split(rf"^\t\.end\t{re.escape(func)}\b", parts[1], maxsplit=1, flags=re.M)[0]
+
+    def bump(value: int, by: int) -> None:
+        key = value & 0xFFFFFFFF
+        out[key] = out.get(key, 0) + by
+        if out[key] <= 0:
+            del out[key]
+
+    pending: dict[str, int] = {}
+    for line in body.splitlines():
+        m = LI_RE.match(line)
+        if m:
+            text = m.group(2)
+            value = int(text, 16) if text.lower().lstrip("-").startswith("0x") else int(text, 10)
+            bump(value, 1)
+            pending[m.group(1)] = value
+            continue
+        m = ORI_RE.match(line)
+        if m and m.group(1) == m.group(2) and m.group(1) in pending:
+            half = pending.pop(m.group(1))
+            imm = m.group(3)
+            low = int(imm, 16) if imm.lower().startswith("0x") else int(imm, 10)
+            bump(half, -1)
+            bump(half | low, 1)
     return out
 
 
@@ -104,6 +156,7 @@ def main() -> int:
         if proc.returncode != 0:
             print(proc.stderr[-2000:], file=sys.stderr)
             return 1
+        asm = (Path(tmp) / "lw.s").read_text()
         # gcc writes <basename>.loop next to the CWD, not next to the output.
         dump_path = ROOT_DIR / "lw.c.loop"
         dump = dump_path.read_text()
@@ -117,6 +170,7 @@ def main() -> int:
     body = re.split(r"^;; Function ", body, maxsplit=1, flags=re.M)[0]
 
     consts = const_map(body)
+    sites = li_sites(asm, func)
 
     loop = None
     for line in body.splitlines():
@@ -130,14 +184,17 @@ def main() -> int:
                   f"   [thresholds {', '.join(str(THRESHOLD_NOCALL - 3 * k) for k in range(window + 1))}]")
             print(f"  life-1 window (call in loop):    "
                   f"{max(0, (THRESHOLD_CALL - insn_count) // 3 + 1)} moves")
-            print(f"  {'insn':>6} {'regno':>6} {'life':>5} {'save':>5}  {'verdict':<16} const")
+            print(f"  {'insn':>6} {'regno':>6} {'life':>5} {'save':>5}  {'verdict':<16} "
+                  f"{'sites':>5}  const")
             continue
         m = MOVABLE_RE.match(line)
         if m and loop is not None:
             insn, regno, life, savings, tail = m.groups()
             verdict = "not desirable" if "not desirable" in tail else tail.strip() or "moved"
+            value = consts.get(int(regno))
+            n = sites.get(value & 0xFFFFFFFF) if value is not None else None
             print(f"  {insn:>6} {regno:>6} {life:>5} {savings:>5}  {verdict:<16} "
-                  f"{fmt_const(consts.get(int(regno)))}")
+                  f"{'-' if n is None else n:>5}  {fmt_const(value)}")
     if loop is None:
         print("loop_window: no loops in this function")
     return 0

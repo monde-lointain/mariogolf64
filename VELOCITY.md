@@ -1474,6 +1474,29 @@ Three honest caveats:
   STRUCTURAL symptom, not evidence of a coloring problem — S285 makes 4 of the last 6 carry verdicts
   refuted, and this one was refuted by the same agent that wrote it, hours later, with no new tool.
   Push: local.
+- **Sprint 302 (realized)** — the `dl-emitter` vein's last fresh `main` row plus the closest S301
+  carry, both in one host. **+1 banked, 1 carried at near-exact count, 0 permuter runs, 2 re-opened
+  (1 banked), 0 stuck-far.** Zero gate enablers. `func_8008D3F4` -> **`emit_lens_flare_dl`**
+  (634/634, frame `-0x110`); `func_8009232C` reconstructed to 698 against 697 with an exact `-0x38`
+  frame and carried; stretch `func_800947A8` re-derived and its verdict corrected. Host stays
+  partial (13 -> 12 stubs), so **banked 0pt**; `--loose-stubs main` 280 -> 279, fresh 6 -> 5;
+  md5-candidate unchanged at 230 of 265. Seed **8** (classical, committed at the gate in `SPRINT.md ## Estimate`; no
+  separate freeze commit, the tree was clean at `8e0be6b` with zero enablers); realized
+  **11 / residual +3** (+1 carry, +1 re-open banked, +1 re-open still carried; no permuter). The
+  class stands at **23 of 27** across S293-S302. Rolling-5 (S298-S302): 0+0+0+0+0 pt banked; value =
+  2+0+0+0+1 matched. Quality **0 / 0 / 1 / 2**.
+  KEY: **a carry doc's lever table is as conditional as its verdict.** The lever that banked
+  `func_8008D3F4` (`tod` and `n << 8` as their own statements) is one S301 measured at 30 diff lines
+  and rejected; it only works once the four `reload1.c` spill-slot pairs it was competing with are
+  fixed. Those came from a second new lever: a `Gfx *` declared in a block that opens one statement
+  early is numbered ahead of the macro temps it precedes, and `reload1.c` hands out slots in
+  ascending pseudo number. Second result: **a `loop.c` moved verdict is not a register cost.**
+  `func_8009232C`'s loop moved nine invariants and the object held one; `tools/loop_window.py` now
+  prints a `sites` column so the moved-and-allocated subset is readable. Third: the S301
+  `func_800947A8` next-action was arithmetically dead — every life-1 slot a smaller loop opens is
+  taken by a movable scanned ahead of the `4`, so the ROM's lifetime must come from sharing one
+  pseudo with the outer bound, not from shrinking the loop.
+  Push: local.
 - **Sprint 301** — plan-time seed freeze (classical track, v2 two-pass): seed **8**, regime
   **classical**, two committed fresh `dl-emitter` leaves at 618-634 instructions (`func_800947A8`,
   `func_8008D3F4`) plus one stretch (`func_8009232C`, 697), all three in the single host

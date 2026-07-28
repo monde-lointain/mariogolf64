@@ -249,7 +249,11 @@ permutation class it was introduced for -- it is how you stop guessing on any le
 count, its residual class, and even its reading of the function's signature have each been wrong.
 Re-derive with `venv/bin/python3 tools/pick_target.py --refresh-residual <fn>` before acting on one. A
 register written in a branch delay slot before its first read is a shared pre-branch statement, not an
-argument.
+argument. **Its lever table is conditional too: every row was measured against one shape, so a
+rejected lever is rejected only for that shape.** Record the base each row was measured from, and at
+a re-open re-run the rejected rows once the residual has moved, rather than reading them as closed
+(S302 banked `func_8008D3F4` on a lever S301 had measured and rejected: it works only after the
+spill-slot cluster it was competing with is fixed).
 
 
 ## Conventions (every-sprint)
