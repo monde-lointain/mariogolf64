@@ -1167,7 +1167,226 @@ void func_800852A8(void) {
   }
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80080220", func_8008534C);
+/* Club/wind head-up overlay: the projection reset, the two wind arrows, the
+ * club-face swatch and the two-panel power meter, all in one chain.
+ */
+extern s8 D_800FC86C;
+extern s8 D_800FC871;
+extern s8 D_801061BF;
+extern s8 D_801061C1;
+extern s8 D_801061C2;
+extern u16 D_80106238;
+extern u16 D_8010623A;
+extern u8 D_80106241;
+extern u8 D_80106243;
+extern u16 D_800C5AD4[];
+extern u8 D_80106240[];
+extern s32 D_800C54C8[];
+extern s32 D_800C5474;
+extern u32 D_800FBE70;
+extern s16 D_801B7222[][92];
+extern s32 active_player_idx;
+extern s32 active_club_id;
+extern f32 D_8022D67C;
+extern f32 D_8022D680;
+extern f32 D_8022D684;
+extern f32 D_8022D688;
+/* The two quads the meter is drawn on, and their fixed-point model matrices in
+ * both CPU and segmented form. */
+extern Vtx D_800C5868[];
+extern Vtx D_800C58A8[];
+extern Mtx D_800E1F50[];
+extern Mtx D_800E1FD0[];
+extern Mtx D_E1F50[];
+extern Mtx D_E1FD0[];
+extern const f64 D_800D1B78; /* pi */
+extern const f64 D_800D1B80; /* 2 * pi */
+extern const f64 D_800D1B88; /* pi, the second arrow's own entry */
+extern const f64 D_800D1B90; /* 2 * pi, likewise */
+
+/* Only the asset id at 0x2E is read out of the club record here. */
+typedef struct {
+  /* 0x00 */ u8 pad00[0x2E];
+  /* 0x2E */ u16 asset_id;
+} ClubAsset;
+
+extern ClubAsset* get_club_param(u32 id);
+extern void convert_and_pack_floats_to_fixed(f32 mf[4][4], Mtx* m);
+extern void func_802199EC(Gfx** gfxp, s32 x, s32 y, s32 arg3);
+extern void func_8021FC20(Gfx** gfxp);
+
+void func_8008534C(Gfx** gfxp) {
+  f32 rot[3];
+  f32 pos[3];
+  f32 unusedA[4];
+  f32 model[4][4];
+  f32 unusedB[18];
+  Gfx* gfx;
+  ClubAsset* club;
+
+  gfx = *gfxp;
+
+  gSPMatrix(gfx++, D_1B5638, G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
+  gDPPipeSync(gfx++);
+  gDPPipeSync(gfx++);
+  gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+  gDPPipeSync(gfx++);
+  gDPSetTexturePersp(gfx++, G_TP_PERSP);
+  gDPPipeSync(gfx++);
+  gDPSetTextureFilter(gfx++, G_TF_BILERP);
+  gSPLoadGeometryMode(gfx++, 0);
+  gSPSetGeometryMode(gfx++, G_SHADE | G_CULL_BACK);
+
+  /* `D_80106240[2]`, not a scalar `D_80106242`: MEM_IN_STRUCT_P makes this
+   * `lbu` may-alias the ten preamble packets above (sched.c:817 true_dependence
+   * disambiguates a non-struct fixed-address read from a struct varying-address
+   * store), which is what sinks the ten dead `gfx` writebacks below the twenty
+   * packet words.  Same idiom, same reason, as `draw_animated_status_icon`.
+   */
+  if (D_80106240[2] == 1 || D_80106243 == 1) {
+    if (D_800FC86C != 0) {
+      f32* arrow = &D_8022D684;
+
+      emit_wind_indicator_dl(&gfx, *arrow, D_8022D688);
+      if (D_80106243 == 1) {
+        func_802199EC(&gfx, (s32)(*arrow + 160.0f), (s32)(120.0f - D_8022D688),
+                      0x40);
+      }
+    }
+  } else if (wind_magnitude != 0 && D_801061BF != 0) {
+    if (get_table_entry(D_800FBE70)->id != 11 && D_800BE69C == 0) {
+      emit_wind_indicator_dl(&gfx, (f32)D_800C54C8[0] + 100.0f, 76.0f);
+    }
+  }
+
+  gSPMatrix(gfx++, D_1B5638, G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
+  gDPPipeSync(gfx++);
+  gSPLoadGeometryMode(gfx++, 0);
+  gSPSetGeometryMode(gfx++, G_SHADE | G_CULL_BACK | G_SHADING_SMOOTH);
+
+  if (D_800BE69C == 0 && D_800FC871 != 0) {
+    func_8021FC20(&gfx);
+  }
+
+  if (D_801061C2 != 0 && D_800BE69C == 0) {
+    RomLoadSlot buf[2];
+    f32 angle;
+
+    club = get_club_param(D_801B7222[active_player_idx][active_club_id]);
+    if (club->asset_id != D_800C59D8) {
+      D_800C59D8 = club->asset_id;
+      func_8005062C(club->asset_id, buf);
+      func_800506D4(D_800E2140, buf);
+      D_800C5474 ^= 1;
+      func_8005062C(D_800C5AD4[active_club_id], buf);
+      func_800506D4(D_800E2144[D_800C5474], buf);
+    }
+
+    angle = D_80106238 * 9.58738019e-05f;
+    if (angle > D_800D1B78) {
+      angle = angle - D_800D1B80;
+    }
+
+    rot[0] = 0.0f;
+    rot[1] = 0.0f;
+    rot[2] = -angle * 0.5f;
+    pos[0] = -128.0f - (f32)D_800C54C8[0];
+    pos[1] = -76.0f - (f32)D_800C5AD0;
+    pos[2] = -300.0f;
+    func_80065A1C(model, rot, pos);
+    convert_and_pack_floats_to_fixed(model, &D_800E1F50[sky_panel_bank_index]);
+
+    gDPPipeSync(gfx++);
+    gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+    gDPPipeSync(gfx++);
+    gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_NONE);
+    gDPSetCombineMode(gfx++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
+
+    if (D_80106240[0] & 2) {
+      gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
+    } else {
+      gDPSetPrimColor(gfx++, 0, 0, 191, 191, 191, 255);
+    }
+
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_AA_TEX_EDGE, G_RM_AA_TEX_EDGE2);
+    gDPLoadTextureBlock(gfx++, ((u32)D_800E2140 + 8) & ~7, G_IM_FMT_RGBA,
+                        G_IM_SIZ_16b, 32, 32, 0, G_TX_NOMIRROR | G_TX_WRAP,
+                        G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK,
+                        G_TX_NOLOD, G_TX_NOLOD);
+    gDPPipeSync(gfx++);
+    gSPMatrix(gfx++, &D_E1F50[sky_panel_bank_index],
+              G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
+    gSPVertex(gfx++, D_800C5868, 4, 0);
+    gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
+    gDPPipeSync(gfx++);
+  }
+
+  if ((D_801061C1 != 0 || D_80106241 != 0) && D_800BE69C == 0) {
+    f32 angle;
+
+    angle = D_8010623A * 9.58738019e-05f;
+    if (angle > D_800D1B88) {
+      angle = angle - D_800D1B90;
+    }
+
+    rot[0] = 0.0f;
+    rot[1] = 0.0f;
+    rot[2] = angle * 0.5f;
+
+    if (D_801061C1 != 0) {
+      pos[0] = (f32)(D_800C54C8[0] + 112);
+      pos[1] = -70.0f - (f32)D_800C5AD0;
+      pos[2] = -300.0f;
+    } else if (D_800FC86C != 0) {
+      pos[0] = D_8022D67C;
+      pos[1] = D_8022D680;
+      pos[2] = -300.0f;
+      func_802199EC(&gfx, (s32)(D_8022D67C + 160.0f),
+                    (s32)(120.0f - D_8022D680), 0x40);
+    }
+
+    func_80065A1C(model, rot, pos);
+    convert_and_pack_floats_to_fixed(model, &D_800E1FD0[sky_panel_bank_index]);
+
+    if (D_80106240[0] & 8) {
+      gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
+    } else {
+      gDPSetPrimColor(gfx++, 0, 0, 191, 191, 191, 255);
+    }
+
+    gDPPipeSync(gfx++);
+    gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+    gDPPipeSync(gfx++);
+    gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+    gDPLoadTLUT_pal16(gfx++, 0, ((u32)D_800E2138 + 8) & ~7);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_NONE);
+    gDPSetCombineMode(gfx++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_AA_TEX_EDGE, G_RM_AA_TEX_EDGE2);
+    gSPMatrix(gfx++, &D_E1FD0[sky_panel_bank_index],
+              G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
+    gSPVertex(gfx++, D_800C58A8, 8, 0);
+    gDPLoadTextureBlock(gfx++, ((u32)D_800E2138 + 8) & ~7, G_IM_FMT_RGBA,
+                        G_IM_SIZ_16b, 48, 24, 0, G_TX_NOMIRROR | G_TX_WRAP,
+                        G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK,
+                        G_TX_NOLOD, G_TX_NOLOD);
+    gDPPipeSync(gfx++);
+    gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
+    gDPLoadTextureBlock(gfx++, ((u32)D_800E2138 + 0x908) & ~7, G_IM_FMT_RGBA,
+                        G_IM_SIZ_16b, 48, 24, 0, G_TX_NOMIRROR | G_TX_WRAP,
+                        G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK,
+                        G_TX_NOLOD, G_TX_NOLOD);
+    gDPPipeSync(gfx++);
+    gSP2Triangles(gfx++, 4, 5, 6, 0, 4, 6, 7, 0);
+    gDPPipeSync(gfx++);
+  }
+
+  *gfxp = gfx;
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80080220", func_80085F98);
 
