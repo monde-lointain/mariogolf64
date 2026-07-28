@@ -1526,6 +1526,16 @@ Three honest caveats:
   and `main`'s fresh vein is now one row. Tooling: three of the sprint's four accepted suggestions
   were tools this sprint had to hand-roll (`cmpfn.sh` histogram, `tools/seg_diff.py`,
   `tools/gbi_match.py`).
+- **Sprint 306** — plan-time seed freeze (classical track, v2 two-pass): seed **13**, regime
+  **classical**, split 5 + 8. One `dl-emitter` carry re-open as a crack-attempt slice
+  (`func_8007EF0C`, 968/974 with the ROM's exact frame `-0x160`, residual = one scheduler placement
+  repeated in two loops, host `src/main/func_80078910.c`) plus the segment's last fresh row
+  (`draw_terrain_aim_grid`, 0x1514, ~1349 instr, 256 FP / 16 jal, host `src/main/func_80080220.c`,
+  the host that banked `emit_ball_offscreen_indicator` in S305). The 8-point gate fires on the fresh
+  row and is overridden seed-only: it is a single `INCLUDE_ASM` stub in an already-`c` file, so the
+  decompose path is mechanically blocked. Zero gate enablers. Baseline `499e19f`. Realized tier and
+  residual are scored at review in a second commit; this line is committed before any `src/` edit and
+  must not be revised.
 - **Sprint 305** — plan-time seed freeze (classical track, v2 two-pass): seed **10**, regime
   **classical**, split 5 + 5. Two fresh `dl-emitter` leaves, both sibling-seeded:
   `emit_ball_offscreen_indicator` (0xC74, 797 instr, 52 FP / 12 jal, host `src/main/func_80080220.c`,
