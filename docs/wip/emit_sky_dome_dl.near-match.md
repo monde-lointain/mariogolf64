@@ -9,10 +9,26 @@
 > (lengthening allocno 142; uniform `refs` reweighting) and the 25-of-25 occupancy argument are
 > written out with their arithmetic precisely so the next attempt does not spend on them again.
 
-**Still not a wall.** No permuter import, no terminal verdict. S297 took it from 272 to 297 to
-**299/299 with the ROM's -0x50 frame and all three region counts exact**. The residual is now a
-whole-body register permutation with one identified root cause (see "The register residual" below).
-Re-open it on size order.
+**This is a wall with a named gate, not an unfinished reconstruction.** That is the opposite of what
+the S296 revision of this doc said about the same function, and the distinction is the point:
+everything above the register allocator is *settled* — semantics, all 299 instructions, the `-0x50`
+frame, all three region counts (48/34/217). What remains is a single `combine_movables` question
+whose every reachable gate is enumerated and refuted below. **Do not re-open this on size order and
+do not spend iterations on it.** If a future sprint gains a lever that reaches any of those gates,
+it banks immediately; short of that, it does not.
+
+S297 took it from 272 to 297 to 299/299, with a permuter import (base 7575 -> best 4870, no zero,
+workspace at `nonmatchings/emit_sky_dome_dl-2`).
+
+**The generalising finding — read this even if you never touch this function.** Reload's spill victim
+is chosen from two tiers (reload1.c:3681-3711): tier 1 is hard regs with `uses == 0`, tier 2 is the
+rest sorted ascending by `uses` = Σ`reg_n_refs` (reload1.c:3628-3638). `local_alloc` runs *before*
+`global_alloc` and only ever uses the call-clobbered `v0`, `v1`, `a0`-`a3` for its local quantities.
+So **freeing a caller-saved register achieves nothing — local-alloc re-absorbs it — while freeing a
+t- or s-register opens tier 1, because local-alloc never reaches those.** Measured here: deleting a
+convenience local freed `$a3`, locals took it, and reload's victim merely moved `$a2` -> `$a3`. Any
+crack that needs reload to stop stealing a register must free a *callee-saved or temporary* register
+specifically; counting allocnos is not enough.
 
 > **Read the second half of this doc first.** The section "The residual: net 2, but it is two
 > effects of 5" describes the 297/299 state and is kept for its mechanism write-up, but its
