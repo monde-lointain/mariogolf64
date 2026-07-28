@@ -519,6 +519,7 @@ loop2:
 
 typedef struct {
   /* 0x0 */ u32 id;
+  /* 0x4 */ char* name_ptr;
 } TerrainAttrEntry;
 
 extern TerrainAttrEntry* get_table_entry(u32 idx);
@@ -579,7 +580,140 @@ void func_80081D4C(s32 arg) {
   }
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80080220", func_80081EF8);
+extern s32 camera_position_x;
+extern s32 camera_position_z;
+extern s8 g_terrain_vtx_xform_mode;
+extern s32 D_80104AE8[];
+extern Vtx D_800C5A18[];
+extern char D_800D1AE0[];
+extern char D_800D1AF0[];
+extern const f64 D_800D1B00; /* pi / 180 */
+extern const f64 D_800D1B08; /* 2 * pi */
+extern Mtx D_800E1DD0[];
+/* Same matrix bank as D_800E1DD0, addressed through segment 0 for the RSP. */
+extern Mtx D_E1DD0[];
+/* The scene's projection matrix, referenced through segment 0. */
+extern Mtx D_1B5638[];
+
+extern s32 func_80052250(void);
+extern s32 func_8003DFD0(s32 x, s32 z);
+extern void func_80071608(Gfx** chain);
+extern void func_8007580C(Gfx** chain, s32 pass);
+extern void func_80075E48(Gfx** chain);
+extern void func_80074840(s32* chain, s32 x, s32 y, u8* str);
+extern void mtx_from_rts(f32 mf[4][4], f32 rotate[3], f32 translate[3],
+                         f32 scale[3]);
+extern void convert_and_pack_floats_to_fixed(f32 mf[4][4], Mtx* m);
+extern void func_800747B0(Gfx** chain, s16 x, s16 y, char* str);
+
+/**
+ * Emits the rest-distance panel: the readout of how far the ball still lies
+ * from the hole, over a quad that spins and scales into place.
+ *
+ * The distance is formatted in metres or in yards depending on the unit mode,
+ * with the terrain name drawn beside it once the panel has finished animating.
+ * Its opening frames show the aiming overlays instead, which the panel then
+ * replaces. The animation timer drives both the quad's rotation and its scale,
+ * and it stops advancing at 30, leaving the panel at rest.
+ */
+void emit_rest_distance_panel_dl(Gfx** gfxp) {
+  f32 scale[3];
+  f32 pos[3];
+  f32 rot[3];
+  f32 model[4][4];
+  f32 view[4][4];
+  Gfx* gfx = *gfxp;
+  TerrainAttrEntry* ent;
+  s32 dist;
+  f32 ang;
+  f32 alpha;
+
+  if (D_800C5A10 != -1) {
+    ent = get_table_entry(D_80104B6B);
+    if (D_800C5A14 == 1) {
+      func_8007515C(0, 0xC, 0, 0, 8, (s32)ent->name_ptr);
+    }
+    if (D_800C5A10 == 1 && func_80052250() == 0) {
+      dist = func_8003DFD0(effect_spawn_pos[0] - camera_position_x,
+                           D_80104AE8[0] - camera_position_z);
+      if (g_terrain_vtx_xform_mode != 0 || ent->id == 0xB) {
+        s32 metres = (s32)((f32)(dist * 300) * 7.119878e-05f);
+
+        sprintf(D_80105118, D_800D1AE0, metres / 100, metres % 100, 0xFB);
+      } else {
+        s32 yards = (s32)((f32)(dist * 100) * 7.119878e-05f);
+
+        sprintf(D_80105118, D_800D1AF0, yards / 100, yards % 100, 0xF9);
+      }
+      if (D_800C5A14 == 1) {
+        func_8007515C(1, 0xA, 0, 0, -8, (s32)D_80105118);
+      }
+    }
+
+    if (D_800C5A14 < 30) {
+      D_800C5A14++;
+    }
+
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+    gSPLoadGeometryMode(gfx++, 0);
+    gSPSetGeometryMode(gfx++, G_SHADE | G_SHADING_SMOOTH);
+    gDPPipeSync(gfx++);
+    gDPSetTexturePersp(gfx++, G_TP_PERSP);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_AA_XLU_SURF, G_RM_AA_XLU_SURF2);
+    gDPSetCombineMode(gfx++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
+    gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, 0x9F);
+    gDPPipeSync(gfx++);
+
+    ang = ((f32)D_800C5A14 * 18.0f + 180.0f) * D_800D1B00;
+    if (ang > D_800D1B08) {
+      ang = 6.2831855f;
+    }
+    alpha = (f32)D_800C5A14 * 0.1f;
+    if (alpha > 1.0f) {
+      alpha = 1.0f;
+    }
+
+    rot[0] = 0.0f;
+    rot[1] = 0.0f;
+    rot[2] = -ang;
+    pos[0] = -72.0f;
+    pos[1] = 32.0f;
+    pos[2] = -100.0f;
+    scale[0] = alpha;
+    scale[1] = alpha;
+    scale[2] = alpha;
+    mtx_from_rts(model, rot, pos, scale);
+    guTranslateF(view, 72.0f, -20.0f, 0.0f);
+    guMtxCatF(view, model, model);
+    convert_and_pack_floats_to_fixed(model, &D_800E1DD0[sky_panel_bank_index]);
+
+    gSPMatrix(gfx++, D_1B5638, G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
+    gSPMatrix(gfx++, &D_E1DD0[sky_panel_bank_index],
+              G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
+    gSPVertex(gfx++, D_800C5A18, 4, 0);
+    gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
+
+    if (D_800C5A14 < 10) {
+      func_80075E48(&gfx);
+      func_8007580C(&gfx, 0);
+      if (D_800C5A10 == 1) {
+        func_8007580C(&gfx, 1);
+      }
+    } else {
+      func_80071608(&gfx);
+      gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
+      func_800747B0(&gfx, 0xA0, 0x60, ent->name_ptr);
+      if (D_800C5A10 == 1 && func_80052250() == 0) {
+        func_80074840((s32*)&gfx, 0xA0, 0x70, (u8*)D_80105118);
+      }
+    }
+  }
+
+  *gfxp = gfx;
+}
 
 u32 pack_shade_ramp_rgba(s32 shade, s32 alpha) {
   s32 r;

@@ -717,3 +717,6 @@ emit_hud_glyph_dl_preamble = 0x80074968; // type:func
 emit_snapshot_tile_wipe_dl = 0x8009548C; // type:func
 emit_snapshot_spiral_wipe_dl = 0x80092F18; // type:func
 emit_wind_indicator_dl = 0x80084EBC; // type:func
+emit_screen_fade_overlay_dl = 0x8006AEA4; // type:func
+emit_rest_distance_panel_dl = 0x80081EF8; // type:func
+emit_snapshot_panel_grid_dl = 0x80094228; // type:func

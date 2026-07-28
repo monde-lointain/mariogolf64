@@ -488,7 +488,129 @@ void emit_screen_transition_overlay(Gfx** gfxp) {
   *gfxp = gfx;
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_8008D100", func_80094228);
+/* M_PI/2 and (M_PI/2)/255: the panel tilt sweeps a quarter turn as the
+ * D_800C5EE4 countdown runs from 255 down to 0. */
+extern const f64 D_800D1E38;
+extern const f64 D_800D1E40;
+
+extern u32 sky_panel_bank_index;
+extern u16 sky_panel_persp_norm;
+
+/* Projection matrix, and the double-buffered bank of 35 per-panel modelview
+ * matrices (bank stride 35 * sizeof(Mtx) == 2240). */
+extern Mtx D_800FE2F0;
+extern Mtx D_800E3A50[];
+
+/* Two unit quads: D_800C7358 is the wider one used by the rightmost column. */
+extern Vtx D_800C7318[];
+extern Vtx D_800C7358[];
+
+extern void func_80065A1C(f32* mf, f32* angles, f32* pos);
+extern void convert_and_pack_floats_to_fixed(f32* mf, Mtx* mtx);
+
+/**
+ * Replays the captured frame at `D_800C5EE0` as a 7x5 grid of 64x32 RGBA16
+ * panels floating in 3D, each with its own modelview matrix, so the snapshot
+ * peels away from the camera as `D_800C5EE4` counts down by ten per call.
+ *
+ * The 35 panels tile the 320x224 capture exactly (35 * 64 * 32 * 2 bytes), and
+ * `idx` walks it 0x400 texels (one panel) at a time. Panel (i, j) sits at
+ * x = (d + 0x40) * (j - 2) + 8, y = -(d + 0x20) * (i - 3), z = -290 - 2 * d,
+ * where `d = 255 - D_800C5EE4` grows as the effect runs: the grid both spreads
+ * apart and recedes. All 35 panels share one tilt built from `angles`.
+ *
+ * The `sinf`/`cosf` pair is dead -- the results are discarded -- but the calls
+ * are what force `D_800C5EE4` to be re-read for `angles[1]`.
+ *
+ * Three spellings below are load-bearing:
+ *   - `mfp` holds `mf` in a callee-saved register across both calls; using the
+ *     array name directly rematerialises `sp + 0x30` at each call site.
+ *   - `bank_off` is a statement of its own so the bank load and its multiply
+ *     are emitted before the `&D_800E3A50[...]` address, which is what lets the
+ *     two share one scratch register.
+ *   - `idx += 0x400` sits between the texture load and the triangle pair; at
+ *     the end of the body the gSP2Triangles command word schedules ahead of the
+ *     `idx * 4` shift instead of behind it.
+ */
+void emit_snapshot_panel_grid_dl(void) {
+  f32 angles[3];
+  f32 pos[3];
+  f32 mf[16];
+  f32* mfp;
+  Mtx* m;
+  u32 bank_off;
+  s32 n;
+  s32 i;
+  s32 j;
+  s32 d;
+  s32 idx;
+  f32 ang;
+
+  n = D_800C5EE4;
+  if (n <= 0) {
+    return;
+  }
+
+  ang = (f32)(D_800D1E40 - n * D_800D1E38) + 0.2f;
+  sinf(ang);
+  cosf(ang);
+
+  gDPPipeSync(glistp++);
+  gDPPipeSync(glistp++);
+  gDPSetCycleType(glistp++, G_CYC_1CYCLE);
+  gDPPipeSync(glistp++);
+  gSPClearGeometryMode(glistp++, 0xFFFFFF);
+  gSPSetGeometryMode(glistp++, G_SHADE | G_CULL_BACK | G_SHADING_SMOOTH);
+  gDPPipeSync(glistp++);
+  gDPSetRenderMode(glistp++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
+  gSPPerspNormalize(glistp++, sky_panel_persp_norm);
+  gDPPipeSync(glistp++);
+  gDPSetTexturePersp(glistp++, G_TP_PERSP);
+  gDPSetCombineMode(glistp++, G_CC_DECALRGB, G_CC_DECALRGB);
+  gDPPipeSync(glistp++);
+  gDPSetTextureFilter(glistp++, G_TF_BILERP);
+  gSPMatrix(glistp++, OS_K0_TO_PHYSICAL(&D_800FE2F0),
+            G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
+  gDPPipeSync(glistp++);
+
+  angles[0] = 0.0f;
+  angles[1] = (f32)(D_800D1E40 - D_800C5EE4 * D_800D1E38);
+  angles[2] = angles[1];
+
+  idx = 0;
+  for (i = 0; i != 7; i++) {
+    mfp = mf;
+    for (j = 0; j != 5; j++) {
+      d = 0xFF - D_800C5EE4;
+      pos[0] = (f32)((d + 0x40) * (j - 2) + 8);
+      pos[1] = (f32)(-(d + 0x20) * (i - 3));
+      pos[2] = -290.0f - (f32)(d * 2);
+      func_80065A1C(mfp, angles, pos);
+
+      bank_off = sky_panel_bank_index * 2240;
+      m = &D_800E3A50[i * 5 + j];
+      convert_and_pack_floats_to_fixed(mfp, (Mtx*)(bank_off + (u32)m));
+      gSPMatrix(glistp++,
+                OS_K0_TO_PHYSICAL(sky_panel_bank_index * 2240 + (u32)m),
+                G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
+      if (j == 4) {
+        gSPVertex(glistp++, D_800C7358, 4, 0);
+      } else {
+        gSPVertex(glistp++, D_800C7318, 4, 0);
+      }
+      gDPLoadTextureBlock(glistp++, ((u32)D_800C5EE0 + idx * 4) & ~7,
+                          G_IM_FMT_RGBA, G_IM_SIZ_16b, 64, 32, 0, 0, 0, 0, 0, 0,
+                          0);
+      idx += 0x400;
+      gDPPipeSync(glistp++);
+      gSP2Triangles(glistp++, 0, 1, 2, 0, 0, 2, 3, 0);
+      gDPPipeSync(glistp++);
+    }
+  }
+
+  gDPPipeSync(glistp++);
+  D_800C5EE4 -= 10;
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_8008D100", func_800947A8);
 

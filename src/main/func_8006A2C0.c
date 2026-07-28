@@ -192,7 +192,105 @@ void func_8006ADF8(s32 arg) {
   }
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_8006A2C0", func_8006AEA4);
+/**
+ * Emits the full-screen fade overlay.
+ *
+ * The overlay is a flat black primitive whose alpha ramps out over the second
+ * half of the phase counter, masked by a scrolling 4-bit intensity texture so
+ * the fade dissolves rather than dips uniformly. Mode 1 winds the phase back
+ * down, modes 2 and 3 wind it up at one and two steps per frame; mode 0 emits
+ * nothing. The phase reaching its ceiling clears the mode, ending the effect.
+ *
+ * Below two mask rows there is nothing to scroll, so that case degenerates to
+ * a plain unmasked rectangle.
+ */
+void emit_screen_fade_overlay_dl(Gfx** pgfx) {
+  Gfx* gfx = *pgfx;
+  s32 mode = D_800C4020;
+  s32 rows;
+  s32 offset;
+  s32 alpha;
+  s32 scroll;
+  f32 phase;
+
+  if (mode == 0) {
+    return;
+  }
+
+  if (mode == 1) {
+    D_800C401C -= 1.0f;
+    if (D_800C401C < 0.0f) {
+      D_800C401C = 0.0f;
+    }
+  } else if (mode == 2 || mode == 3) {
+    f32 v;
+
+    if (mode == 3) {
+      v = D_800C401C + 2.0f;
+    } else {
+      v = D_800C401C + 1.0f;
+    }
+    D_800C401C = v;
+    if (v > 20.0f) {
+      D_800C401C = 20.0f;
+      D_800C4020 = 0;
+    }
+  }
+
+  phase = D_800C401C;
+  rows = phase * 38.0f;
+  offset = (8.0f - phase) * 0.125f * -152.0f;
+  if (phase < 10.0f) {
+    alpha = 255;
+  } else {
+    alpha = (20.0f - phase) * 25.4f;
+  }
+
+  gDPPipeSync(gfx++);
+  gDPPipeSync(gfx++);
+  gDPSetRenderMode(gfx++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
+  gDPPipeSync(gfx++);
+  gDPSetTexturePersp(gfx++, G_TP_NONE);
+  gDPPipeSync(gfx++);
+  gDPSetTextureFilter(gfx++, G_TF_BILERP);
+  gDPPipeSync(gfx++);
+  gDPSetTextureLUT(gfx++, G_TT_NONE);
+  gDPPipeSync(gfx++);
+  gDPSetAlphaCompare(gfx++, G_AC_THRESHOLD);
+  gDPSetBlendColor(gfx++, 255, 255, 255, 1);
+  gDPPipeSync(gfx++);
+  gDPSetAlphaDither(gfx++, G_AD_DISABLE);
+  gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, alpha);
+  gDPPipeSync(gfx++);
+  gDPSetCombineLERP(gfx++, 0, 0, 0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0, 0, 0, 0,
+                    PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0);
+
+  if (rows < 2) {
+    gDPPipeSync(gfx++);
+    gDPSetCombineMode(gfx++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
+    gSPTextureRectangle(gfx++, 32, 32, 1248, 928, 0, 0, 0, 1 << 10, 1 << 10);
+    gDPPipeSync(gfx++);
+  } else {
+    gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+    gDPSetTextureImage(gfx++, G_IM_FMT_I, G_IM_SIZ_16b, 1,
+                       ((u32)D_800E1C04 + 8) & ~7);
+    gDPSetTile(gfx++, G_IM_FMT_I, G_IM_SIZ_16b, 0, 0, G_TX_LOADTILE, 0,
+               G_TX_CLAMP, 0, 0, G_TX_CLAMP, 0, 0);
+    gDPLoadSync(gfx++);
+    gDPLoadBlock(gfx++, G_TX_LOADTILE, 0, 0, 1023, 512);
+    gDPPipeSync(gfx++);
+    gDPSetTile(gfx++, G_IM_FMT_I, G_IM_SIZ_4b, 4, 0, G_TX_RENDERTILE, 0,
+               G_TX_CLAMP, 0, 0, G_TX_CLAMP, 0, 0);
+    gDPSetTileSize(gfx++, G_TX_RENDERTILE, 0, 0, 252, 252);
+    gDPPipeSync(gfx++);
+    scroll = (offset << 11) / rows;
+    gSPScisTextureRectangle(gfx++, 32, -128, 1248, 1088, 0, scroll, scroll,
+                            65536.0f / (f32)rows, 65536.0f / (f32)rows);
+    gDPPipeSync(gfx++);
+  }
+
+  *pgfx = gfx;
+}
 
 void func_8006B54C(void) { D_800C4068 = -1; }
 
