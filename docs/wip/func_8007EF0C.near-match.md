@@ -1,6 +1,7 @@
-# func_8007EF0C — near-match (S305)
+# func_8007EF0C — near-match (S305, re-opened S306)
 
-`src/main/func_80078910.c`, 0xF38 / **974 instructions**. Reconstructed from scratch this sprint.
+`src/main/func_80078910.c`, 0xF38 / **974 instructions**. Reconstructed from scratch in S305; re-opened in S306, which measured the residual's root cause and
+re-carried it.
 
 ## State
 
@@ -47,15 +48,56 @@ loop that this build fills** (4 total), plus one extra spill `lw`/`sw` pair. 968
 5. The trailing matrix argument is `OS_K0_TO_PHYSICAL(&proj[7])` (`arg1 + 0x800001C0`), same as
    `emit_ball_trail_dl`.
 
-## Next lever to try
+## Root cause (S306, measured from gcc's own `-dS` dump)
 
-The class is the `sched-class-tiebreak-order-coin` (`rank_for_schedule`, class-then-LUID). Since
-source order provably does not move it, the next probe is the dependence graph: give the divide's
-divisor a longer producer chain, or change what `size` is (it arrives from a `bc1tl`-annulled
-`addiu`), so the divide is not ready when the scheduler first looks for it. A compiler-source
-fan-out on `sched.c`'s ready-list order for a `div` with no in-block consumer is the honest next
-step — every in-block consumer of the divide lives in a LATER block, so its priority should be 0,
-the same as the two chains it is racing.
+Not a `rank_for_schedule` tie-break. It is a **priority** difference in `sched.c priority()`, and
+the numbers are in the dump, not inferred:
+
+    COMPILER_PATH=tools/cc tools/cc/gcc -S -G 0 -mips3 -mgp32 -mfp32 -mno-abicalls -O2 \
+      <the file's real flags> -dS -o /tmp/f.s src/main/func_80078910.c
+    # writes ./func_80078910.c.sched, ~5000 ';;' verbose lines
+
+For the first texture-rectangle block (one basic block, from the clamp's fall-through label to the
+`bgez` that tests `(s16)(xl) < 0`):
+
+| insn | what | priority |
+| --- | --- | --- |
+| 1312 | `(set (reg 404) (const_int 32768))` | 1 |
+| 1315 | `divmodsi4`, the divide | **1** |
+| 1318-1340 | the `lbu`/`lhu` chains — `(sprite/2)<<9` and `(s16)(sx-size)` | **5 and 7** |
+
+`priority()` (sched.c) is `max over LOG_LINKS producers of (priority(prod) + insn_cost(prod) - 1)`,
+i.e. depth from the *start* of the block, and `schedule_block` walks **bottom-up** (the dump's
+`ready list at T-1, T-2, ...`). Highest priority is chosen first and lands last in the block. The
+divide's only in-block producer is the `0x8000` constant load, so its priority is 1; it loses every
+comparison, is chosen last, and is emitted **first**. The dump shows insn 1315 sitting in the ready
+list at every one of T-2 .. T-13 and never being picked. The chains start at a load (`insn_cost` 3),
+so they reach 5 and 7 and are emitted after the divide — filling the two `mflo` hazard slots that
+the ROM leaves as `nop`s.
+
+This is why source order provably does not matter: the priority is derived from the dependency DAG,
+not from `INSN_LUID`. A fourth source form was measured this sprint and confirms it — the macro
+hand-expanded with `step = 0x8000 / size;` written **between the `G_RDPHALF_1` header word store and
+its data word store**, which is the divide's exact ROM position, gives a byte-identical object
+(968, same histogram).
+
+For the ROM's schedule the divide needs priority > 7, which means a longer in-block producer chain:
+its dividend is a constant and its divisor `size` is defined in the previous block (the
+`bc1tl`-annulled `addiu $t0,$zero,0x10`), so neither contributes. No source form found so far
+reaches that without adding an instruction.
+
+### Rejected, with the cost measured
+
+- **Anti-dependence on the quotient pseudo** (`size2 = size; size = 0x8000 / size;`, later uses of
+  the original taking `size2`). 968 -> 971: it *did* add the two `nop`s in the first loop, but the
+  divide did not move — and it costs one extra `move` (`move t1,a3` hoisted to the block top), so
+  `move` goes 60 -> 61. Net wrong in a different way.
+- Hoisting the chains' loads to the previous block would drop their priority to 1 and hand the
+  decision back to LUID, but it moves the loads out of the block, which the ROM has in-block.
+
+The honest next step is a `sched.c` fan-out on whether any legal RTL shape gives a `divmodsi4` whose
+only producer is a constant a priority above its block's load chains — or a decision that this class
+is terminal for a constant-dividend divide in a load-heavy block.
 
 ## The body
 
