@@ -1,5 +1,14 @@
 # emit_sky_dome_dl — S297 carry (299/299 count, register permutation; was 297/299, 272/299 at S296)
 
+> **Verdict in one line.** Instruction count, frame and all three region counts are exact. The whole
+> residual is one register: `tiled` loses the 9th callee-saved register, and every lever that wins it
+> at global-alloc loses it again at reload. The chain is fully traced and terminates on a single
+> unsolved question — *three block-local `(set (reg) (const_int -8))` pseudos that
+> `combine_movables` does not unify, without a function-scope variable* — with every reachable gate
+> enumerated below and shown unreachable from source. **Do not re-derive:** the two predicted nulls
+> (lengthening allocno 142; uniform `refs` reweighting) and the 25-of-25 occupancy argument are
+> written out with their arithmetic precisely so the next attempt does not spend on them again.
+
 **Still not a wall.** No permuter import, no terminal verdict. S297 took it from 272 to 297 to
 **299/299 with the ROM's -0x50 frame and all three region counts exact**. The residual is now a
 whole-body register permutation with one identified root cause (see "The register residual" below).
@@ -253,3 +262,220 @@ propagating `pass == 2` into the arm — but that spelling loses the hoist, read
 
 `base.c` is kept as the deliverable because it holds the exact count; `alt_298_bodyexact.c` is where
 the next pass should start if the count gate is allowed to move.
+
+## The reweight direction is arithmetically dead; `.greg` names the reload victim
+
+**`refs` cannot reach the window, and this is a property of the formula, not a tuning failure.**
+Priority is `floor_log2(refs) * refs * 10000 / len` (global.c:587) and `floor_log2` is a step
+function, so 7 -> 8 crosses `floor_log2` 2 -> 3 and multiplies the weight by `24/14` = **1.71x**. The
+ROM's window (621, 815) against `tiled`'s 566 needs between **1.10x and 1.44x**. There is no `refs`
+value that lands inside:
+
+| `tiled` refs | priority at len 247 | vs window (621, 815) |
+| --- | --- | --- |
+| 7 (now) | 566 | below |
+| 8 | 971 | **over** |
+| 9 | 1093 | **over** |
+
+Both `do {} while (0)` wraps were measured anyway. Around `tiled = 0;`: refs 8, priority 1030,
+`tiled` ranks *above* `0xE7000000` (874) at position four, 296/299 with frame `-0x48`. Around the
+whole `if/else`: `tiled` refs 9 -> 1093, but `0x0700001A` also goes to refs 9 -> 1120 and still wins,
+because the two have identical ref structure (`1 + 3 + 3`) and a uniform wrap scales both. Only `len`
+has fine enough resolution, and that lever is the already-known `tiled = 1` at the arm end (len 205,
+priority 682).
+
+**`-dg` states the reload decision outright, and it is the same need in both variants:**
+
+```
+;; Need 1 reg of class GR_REGS (for insn 10).
+;; Need 1 reg of class ALL_REGS (for insn 10).
+```
+
+`insn 10` is `(set (reg/v:SI 73) (mem:SI (reg/v:SI 72)))` — `Gfx* gfx = *gfxp;`, the first statement.
+Only the victim differs. `base.c` prints `Spilling reg 6` (`$a2`) with pseudos 88 and 208 going to
+the stack, and never touches `tiled`, which had already lost at global-alloc. `alt_298` prints
+`Spilling reg 21` (`$s5`) and `Register 78 now on stack` — global-alloc *does* give `tiled` a
+register once its priority is in the window, and reload takes it straight back.
+
+The selection rule is reload1.c:3681-3711: `potential_reload_regs` is built in two tiers — tier 1 is
+hard regs with `uses == 0` in `REG_ALLOC_ORDER`, tier 2 is the rest sorted ascending by `uses`, where
+`uses` is the sum of `reg_n_refs` over the pseudos allocated to that hard reg (reload1.c:3628-3638).
+`reg_n_refs` is the same loop-depth-weighted count the allocno table uses, so a register holding only
+`tiled` scores 7 and is the cheapest thing in the function to steal. Defending it by weight needs
+`refs >= 9`, and `refs 9` inside the global window needs `270000 / len` in (621, 815), i.e.
+`len` in (331, 435) against `tiled`'s actual 205-252 — the two constraints are incompatible.
+
+**So the remaining route is to make some register tier 1** (`uses == 0`), so reload never enters tier
+2 at all. The ROM's `$t0` looks exactly like that: it holds no allocated pseudo, only rematerialised
+constants and the two `0x0700001A` reloads. This build carries one global allocno the ROM does not —
+`align` (refs 18, len 43, `$t1`), or, without it, the hoisted `-8` (refs 10). Eliminating that one
+allocno *without* re-hoisting the masks is the open problem, and it is the same `combine_movables`
+question, now with a concrete payoff attached.
+
+## Permuter: a mechanism, not a zero, and the mechanism does not transfer
+
+Imported at `nonmatchings/emit_sky_dome_dl-2`. Base score 7575, best **4870** after ~6300 iterations
+at `-j 15 --best-only`; no zero, consistent with the 0-of-5 standing tally. The workspace is left in
+place. Note that the seed dir now carries its own `compile.sh` for `allocno_report.py`, so
+`mg_find_permuter_dir` matches the *seed* dir first — invoke `permuter.py` with the explicit
+`nonmatchings/emit_sky_dome_dl-2` path.
+
+All four top candidates (4870, 4995, 5575, 5745) name one mechanism: split a sub-term of a
+`gSPModifyVertex` / `gSP2Triangles` word into a temporary computed **before** the store, or share one
+sub-term temp across several words. That points straight at the largest remaining LCS chunk (ROM
+198-232). **Tested and null:** the direct reading — `s32 st = rows * 32;` as its own statement after
+the second `rows` assignment, with the ST words spelled `st + 0x01000000` / `st + 0x27000000` — is
+**byte-identical** to `base.c`. gcc already holds one pseudo for `rows * 32`; the divergence is where
+that `sll` is *scheduled* (ROM index 228, immediately after the `gDPSetTileSize` store; build index
+251, at first use), not how the expression is spelled. The permuter's edit is a scheduling
+perturbation, not a source form to adopt.
+
+## Verdict on the register residual: two constraints, jointly unsatisfiable for `tiled`
+
+The reload threshold is now bracketed from both sides by measurement rather than inferred:
+
+| variant | `tiled` refs | global-alloc | reload (`-dg`) |
+| --- | --- | --- | --- |
+| `alt_298` | 7 | gets `$s5` | `Spilling reg 21` / `Register 78 now on stack` — **steals it** |
+| do-while(0) around the `if/else` | 9 | gets `$s3` | `Spilling reg 6` (`$a2`, pseudos 88 + 208) — **leaves it** |
+
+So Σ`reg_n_refs` over `$a2`'s occupants is strictly between 7 and 9, i.e. **exactly 8**, and `tiled`
+survives reload iff its `refs >= 9` (reload1.c:3628-3638 computes `uses`; reload1.c:3681-3711 orders
+tier 2 ascending by it). Against the global-alloc window (621, 815) from global.c:587:
+
+| `tiled` refs | `len` required by the window | measured `len` range |
+| --- | --- | --- |
+| 8 | 295..386 (and 8 only *ties* `$a2`) | 205..252 |
+| 9 | 332..434 | 205..252 |
+| 10 | 369..483 | 205..252 |
+
+No reachable pair satisfies both. Every variant either loses at global-alloc, or wins it at refs 7
+and is stolen by reload, or survives reload at refs 8-9 and overshoots the window. **Terminal for any
+lever acting on allocno 78.**
+
+`len` is `REG_LIVE_LENGTH`, the def-to-last-use span, and `tiled`'s last use is the
+`if (tiled == 0)` test at the *top* of the strip body — which is why it caps at ~252 while constants
+consumed late in the body sit at 386-486, exactly the band refs 9 would need. But the ROM has only
+three references to `$s5` (`addu s5,zero,zero`, `bnez s5`, `addiu s5,zero,1`), so the ROM's `tiled`
+has the same shape as this build's. **The ROM does not win this by reweighting `tiled` at all.**
+
+**It wins by having a cheaper spill victim.** Tier 1 (`uses == 0`) is *empty* here: every GPR
+`v0`..`t9`, `s0`..`s7`, `fp` holds at least one pseudo (24 global allocnos plus 98 local quantities
+spread over `v0`, `v1`, `a0`, `a1`, `a2`, `a3`). `$a2` is the only GPR occupied *solely* by local
+quantities — 88 and 208, refs totalling 8 — which is why `Spilling reg 6` is what the good build
+picks. The ROM's `$t0` holds **no allocated pseudo at all**: only rematerialised constants
+(`0xFD100000`, `0x07000000`, `0xF3000000`, `0x004DC000`) and the two `0x0700001A` reloads. That is a
+tier-1 register, so the ROM never enters tier 2, spills nothing, and `tiled` keeps `$s5`.
+
+The single allocno this build carries that the ROM does not is `align` (86, refs 18, len 43), alone
+in `$t1`. Remove it *without* re-hoisting the masks and `$t1` becomes `uses == 0`, reload takes it
+from tier 1 for free, and the whole chain resolves. So the entire remaining residual reduces to one
+question, unchanged since the `combine_movables` fix: **three block-local
+`(set (reg) (const_int -8))` pseudos that loop.c does not unify, without a function-scope variable.**
+Every reachable gate in `combine_movables` (loop.c:1245-1287) and why it fails from source:
+
+- `n_times_used == 1` — a copy of `n_times_set` (loop.c:597); breaking it needs one variable set at
+  all three sites, which *is* `align`, and that is what costs the allocno.
+- `!m1->global` — needs each mask pseudo live outside the strip loop; not expressible in source.
+- mode compatibility — SI vs DI separates at most **one** of the three; an increasing bit-size chain
+  needs a third integer mode wider than DI, which MIPS o32 does not have.
+- `rtx_equal_for_loop_p` on `set_src` — two `(const_int -8)` always compare equal.
+- `m->dependencies` — 0 for every const load; only libcall blocks differ.
+
+Partial forms keep the masks in place but still cost the allocno: two sites through `align`
+(`n_times_set` 2, so not a movable) plus one plain `& ~7` temp (`savings 1, lifetime 1`, not
+desirable). The two `align` sites are in different basic blocks, so `align` stays global. For it to
+be a *local* quantity its sites would have to share one basic block, and the three mask sites are in
+three — the untiled arm, the tiled arm, and the join.
+
+**Predicted null, not built: lengthening allocno 142.** Its priority 580 falls below 78's 566 only at
+`len >= 248`, and its length is fixed by its def position among the re-hoisted constants — it is 5th
+of 6 with 4 insns ahead, so moving it to the front gains at most 4 (241 -> 245). Even if it were
+reached, `tiled` would then hold a register at refs 7, `uses` 7 < 8, and reload would steal it
+exactly as in `alt_298`. The lever is sound in principle and dead in arithmetic for the same reason
+as the rest: refs 7 sits below the reload threshold.
+
+## The local audit: `last` was the convenience local, and freeing it still does not reach tier 1
+
+`Spilling reg N` in the `-dg` dump is a binary tier-1 indicator — present means tier 1 was empty and
+reload had to enter tier 2. Auditing every local against it (all rows 299/299, frame `-0x50`):
+
+| variant | allocnos | reload victim | verdict |
+| --- | --- | --- | --- |
+| baseline | 31 | `reg 6` (`$a2`) | — |
+| inline `lastPass` | 31 | `reg 6` | **null** — byte-identical, not an allocno |
+| inline `frameOff` | 31 | `reg 6` | **null** — byte-identical, not an allocno |
+| inline both | 31 | `reg 6` | null |
+| inline `last` | **30** | `reg 7` (`$a3`) | **frees one allocno** |
+| no `align` (masks re-hoist) | 31 | `reg 6` | 297/299, no gain |
+
+`lastPass` and `frameOff` are not holding registers — cse rebuilds the same pseudo without the
+variable, so they are free either way and stay for readability. The convenience local that *was*
+costing an allocno is **`last`**. Inlining it at both sites drops 31 → 30 allocnos, keeps 299/299 and
+`-0x50`, keeps the mnemonic-order score at 196, improves the LCS mnemonic diff **71 → 65**, and moves
+the store cursor from `$a3` to `$t0` and gfx from `$t0` to `$t1` — one step closer to the ROM's `$t1`
+cursor and `$t2` gfx. This is now `base.c`.
+
+**But freeing an allocno does not create a tier-1 register, and the reason is structural.**
+`local_alloc` runs *before* `global_alloc` and fills `v0`, `v1`, `a0`, `a1`, `a2`, `a3` with local
+quantities regardless; the global allocnos then take what is left. Occupancy is 25 of 25 GPRs either
+way:
+
+```
+31 allocnos: globals on 23 distinct regs + locals hold v0, a2       = 25
+30 allocnos: globals on 22 distinct regs + locals hold v0, a2, a3   = 25
+```
+
+Freeing a global allocno simply hands that register back to local-alloc, which is why reload's victim
+moved from `$a2` to `$a3` rather than disappearing. So "delete a local to free a tier-1 register" does
+not work on this function at any allocno count — the locals expand to fill.
+
+The reload threshold is likewise confirmed independent of the allocno count: `nolast` plus
+`tiled = 1` at the arm end gives 30 allocnos, `tiled` at priority 682 (inside the window), assigned
+`$s5` — and reload still takes it (`Spilling reg 21`). That form reads 298/299 with mnemonic-order
+mismatches **159** and LCS **66**, the best structural score of anything built, and is kept as
+`alt_298_bodyexact.c`. While `tiled` holds a register at refs 7 it is the cheapest tier-2 entry in the
+function and reload takes it; clearing that threshold needs refs ≥ 9, which overshoots the
+global-alloc window. Both constraints are measured, and they do not intersect.
+
+## Value reuse (time-boxed), and the exact shape of what would work
+
+**Deliberate reuse of a disjoint local — null.** The permuter named this mechanism itself: its two
+best candidates (4870, 5575) both reuse the *existing* `band` local as the donor for a
+`gSPModifyVertex`/`gSP2Triangles` word sub-term rather than adding a temp. Applied correctly with the
+one local whose range is genuinely disjoint there — `align` is dead from the join's band computation
+until the next iteration, and the ModifyVertex block sits between — as `align = rows * 32;` with the
+ST words spelled `align + 0x01000000` / `align + 0x27000000`: 299/299, frame `-0x50`, allocnos **30
+(unchanged)**, LCS **65 (unchanged)**, still `Spilling reg 7`. Assigning a value to an existing local
+only renames the pseudo; `rows * 32` has two uses so gcc needs a pseudo for it either way. **Reuse
+does not reduce demand when the donated value itself needs a register.**
+
+**Permuter harvest for pseudo count — no signal.** Re-read all four best candidates specifically for
+merge / delete / re-scope of a temporary: one reuse signal (above, tested and null); the others *add*
+a temp (`int new_var`, `volatile unsigned short new_var2`). No candidate deletes or re-scopes a local.
+
+**What would actually work, stated so it is not re-derived.** `local_alloc` runs first and only ever
+uses the call-clobbered `v0`, `v1`, `a0`, `a1`, `a2`, `a3` for its ~98 local quantities; the global
+allocnos then occupy `t0`-`t9`, `s0`-`s7`, `fp`. So a freed *caller-saved* register is immediately
+re-absorbed by local-alloc — that is exactly what happened when `last` went, `$a3` freed, locals took
+it, and reload's victim merely moved from `$a2` to `$a3` — but a freed **t- or s-register would stay
+free**, because locals never reach them. It would be `uses == 0`, i.e. tier 1, and reload would take
+it at reload1.c:3682-3688 without spilling anything.
+
+In the current 30-allocno build the t-registers hold: `t0` cursor, `t1` gfx, `t2` **`align`**, `t3`/`t4`
+loop values, `t5`-`t8` the four loop.c givs, `t9` pass. The only one not required by the computation
+is `align`, the mask variable. Deleting it frees a t-register, opens tier 1, stops the spill, and lets
+`tiled` keep its register. The full chain:
+
+```
+three block-local (set (reg) (const_int -8)) pseudos that combine_movables does not unify,
+without a function-scope variable
+  -> no `align` allocno
+  -> a t-register with uses == 0
+  -> reload takes it from tier 1 (reload1.c:3682-3688) not tier 2 (3708-3710)
+  -> nothing is spilled
+  -> `tiled` keeps its hard register, as in the ROM
+```
+
+Every reachable gate of `combine_movables` (loop.c:1245-1287) is enumerated above with why it cannot
+be reached from source. **That is the wall.**
