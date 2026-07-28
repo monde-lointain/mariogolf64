@@ -1502,6 +1502,13 @@ Three honest caveats:
   delta this sprint: **+308 B** (`gates.md` 29984 -> 29479 after the retirement, `loop.md`
   46145 -> 46958 for the decoder row).
   Push: local.
+- **Sprint 304** — plan-time seed freeze (classical track, v2 two-pass): seed **8**, regime
+  **classical**, split 3 + 5. One `dl-emitter` carry re-open (`func_8002CDA8`, 838/838 exact count,
+  frame `-0x1E0` vs `-0x1C8` = 3 spill slots, host `src/main/func_8002A640.c`) plus the smallest
+  fresh row (`func_8008534C`, 0xC4C, 76 FP / 15 jal, host `src/main/func_80080220.c`). First run of
+  S303's allocation-first procedure (`tools/allocno_report.py` before any lever search). Zero gate
+  enablers, baseline `076496b`. Realized tier and residual are scored at review in a second commit;
+  this line is committed before any `src/` edit and must not be revised.
 - **Sprint 303** — plan-time seed freeze (classical track, v2 two-pass): seed **8**, regime
   **classical**, two `dl-emitter` carry re-opens in `src/main/func_8008D100.c` (`func_800947A8`
   618/618 exact frame, `func_8009232C` 698 vs 697 exact frame) plus one fresh stretch
