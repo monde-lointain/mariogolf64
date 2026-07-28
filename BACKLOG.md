@@ -144,6 +144,30 @@ both subagents read the raw-`objdump` deltas as relocation slots). Both are now 
 direction and sharper in detail: price a `dl-emitter` leaf cheap to reconstruct, budget the
 integration, and do not expect to guess which integration defect it will be.**
 
+**S301: the vein's size tail is where the hoisting coins live, and the coin is now computable.**
+`--loose-stubs main` reads 280 stubs / **6 fresh**, all `dl-emitter`; the class is **22 of 26 across
+S293-S301** with four carries. **0 banked, 2 carried at exact instruction count.** Both leaves came
+up fast and correct -- the class is still cheap to reconstruct -- and both were stopped by a single
+compiler decision each: `func_800947A8` at 618/618 with an exact frame and six of seven global
+registers right, `func_8008D3F4` at 634/634 with an exact frame and 12 instructions out. The durable
+result is that the first of those is arithmetic rather than a coin. `move_movables` (`loop.c:1631`)
+moves an invariant when `threshold * savings * lifetime >= insn_count`; `threshold` starts at
+`(loop_has_call ? 1 : 2) * (1 + n_non_fixed_regs)` = 122 here (`loop.c:532`) and drops 3 per move
+(`:1719`, `:1904`), and `savings` copies `n_times_set` (`:597`, `:793`), so for the life-1 constants
+that dominate a DL body the window is just **`moves = floor((122 - insn_count) / 3) + 1`** -- verified
+against `-dL` on two loops of one function (115 real insns -> 3 moves, 117 -> 2).
+`venv/bin/python3 tools/loop_window.py <src.c> <fn>` prints it per loop with the movable list in scan
+order and every constant decoded. **So when the ROM hoists a different constant than your build does,
+compare the ORDER of the movable list, not the constants: the window is fixed by the loop's size.**
+Second S301 result, and the one that moved the most: the `mem-in-struct` array-subscript lever has a
+`loop.c` face. As plain scalars, two float globals do not conflict with the `MEM_IN_STRUCT_P` stores
+through a `Gfx *`, so `loop.c` hoists the loads *and* every expression over them out of the DL loop
+and takes `$f20`/`$f22` -- the tell is an `sdc1` pair in the prologue and a frame 0x20 too large.
+`extern f32 G[]` + `G[0]` took `func_8008D3F4` from 654 instructions with a wrong frame to 634/634
+with an exact frame in one edit. **Price a leaf in this size band as reconstruction-cheap and
+integration-expensive, and expect the integration cost to be a hoisting or spill-slot decision, not a
+body error.**
+
 **S300: the vein hits its first structural ceiling, and it is not a codegen wall.** `--loose-stubs
 main` reads 280 stubs / **8 fresh**, all `dl-emitter`; the class is **22 of 24 across S293-S300**.
 **+2 banked, 1 carried byte-exact.** `func_8007C5D8` reached 590/590 with an exact frame and cannot
@@ -6184,3 +6208,21 @@ by `/sprint-plan`:
   make them fixture-based so they stop drifting each banking sprint (extends the S184 golden-fixture
   follow-up). The 5 live-state pick_target/libultra goldens are regenerated each banking review
   (`REGEN_GOLDEN=1`).
+
+- **Carry-over (S301, `src/main/func_8008D100.c`, two leaves, both at exact instruction count).**
+  `func_800947A8` (0x9A8, 618/618, frame `-0x98` exact, six of seven global registers correct) is
+  blocked by one `loop.c:1631` window slot: the constant `4` sits behind the `gDPSetTile` word
+  `0xF5100000` in the movable list and misses the third life-1 slot by 2 units (threshold 113 against
+  an `insn_count` of 115). Order, `savings` and `lifetime` are each measured and closed in
+  `docs/wip/func_800947A8.near-match.md`, which also carries the full 14-lever table and the working
+  body; the one untested branch of the model is getting the inner loop's RTL `insn_count` to <= 113 at
+  the same emitted count. `func_8008D3F4` (0x9E8, 634/634, frame `-0x110` exact) is **12 instructions
+  out**: a four-instruction scheduling rotation in the address setup plus four `reload1.c` spill-slot
+  pair swaps, with the full macro-argument table and lever measurements in
+  `docs/wip/func_8008D3F4.near-match.md`. A permuter run from that base plateaued at 385 over 4100
+  iterations, so neither residual is permuter-reachable from this shape. Both flag `CARRIED-WALL`.
+  **The vein, smallest-first from here** (re-verified `fresh` at the S301 review): `func_8009232C`
+  (2788 B, jal=0, fp=0 -- cleanest tells left, and the S301 stretch that was never attempted),
+  `func_8008534C` (3148 B, fp-mixed), `emit_ball_offscreen_indicator` (3188 B, fp-sched),
+  `func_8002CDA8` (3352 B, fp=0), `func_8007EF0C` (3896 B, fp-mixed), `draw_terrain_aim_grid`
+  (5396 B, fp-mixed).

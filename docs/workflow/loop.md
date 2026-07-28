@@ -295,30 +295,15 @@ below).
   - Provenance: S270 the single-parent case; S271 generalized it to the whole tree; S281 the
     gap-relic variant.
 - **Scratch dir** `nonmatchings/<func>/` (gitignored, shared with the permuter).
-- **Stop a background command with the harness, never `pkill -f '<script> <arg>'` (S289).** The
-  pattern also matches the tool call's own shell wrapper, whose command line contains the string, so
-  the kill takes out the calling shell and every later step in that same call silently does not run —
-  S289 lost the `cp` that was saving the file it then restored from. Use the harness's stop action,
-  or match a pattern that cannot appear in the wrapper.
+- **Stop a background command with the harness. Never `pkill -f` on any pattern that appears in the
+  command you are running (S289, recurred S301).** The pattern also matches the tool call's own shell
+  wrapper, whose command line contains the string, so the kill takes out the calling shell and every
+  later step in that same call silently does not run — S289 lost the `cp` that was saving the file it
+  then restored from, and S301 repeated it with the bare tool name `pkill -f 'decomp-permuter'`, so
+  the script-plus-argument form the rule used to name was never the boundary. Use the harness's stop
+  action, or match a pattern that cannot appear in the wrapper.
 - **Python tools run via the venv:** `venv/bin/python3 tools/X.py` (system python lacks asm-differ
   deps and is PEP-668-locked).
-- **Per-function iteration oracle: `tools/cmpfn.sh <func> [<object>]` (S258).** Diffs the extracted
-  `asm/nonmatchings/**/<func>.s` against a freshly built object, normalising register prefixes,
-  `%hi/%lo`, immediates, the splat `(0xX >> 16)` spellings, `move`/`li` aliases (including
-  `beqz`/`bnez` and their branch-likely forms), the SDK FP register names (`fv0`/`fs1` vs `f0`/`f22`),
-  and external branch/jal targets, so only real differences show. Its first line is the instruction
-  Count of each side — the most actionable number when a body is structurally right but the wrong
-  length. Unlike `diff.py` it reads the object directly, so it never goes stale after an incremental
-  `make build/src/<tree>/<obj>.o`. It is an iteration oracle only: every bank still gates on
-  `tools/verify-rom.sh`.
-  - **Internal branch targets are position-relative deltas, not a placeholder (S260 fix).** Before
-    S260 the tool collapsed every branch target to `T`, so it could not see a redirected back edge and
-    reported such a function byte-clean: S260 `collect_keyframe_events_at` was a `cmpfn`-clean 54/54
-    whose loop back edge went one instruction too far and broke the full-make ROM. It now rewrites a
-    `.L<vram>` (asm side) or `<fn+0xNN>` (object side) target to a signed `@Dp<n>`/`@Dm<n>` distance in
-    instructions, so a redirected edge shows as a real diff (`@Dm14` vs `@Dm13`) while a correct
-    internal branch cancels cleanly. Even so, `cmpfn` is an iteration oracle: a `cmpfn`-clean function
-    is not a bank until `tools/verify-rom.sh` (full-make ROM SHA-1) says so.
 - **Shared tool helpers** live in `tools/decomp_common.py` (venv re-exec, path constants, asm/symbol
   regexes, `emit`/`log`, `find_segment`, SDK-path config) and `tools/lib.sh` (shell wrappers).
   `make test-tools` runs the `tests/tooling/` characterization suite (pytest); refactor tooling under

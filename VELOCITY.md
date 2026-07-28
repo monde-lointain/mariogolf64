@@ -1480,6 +1480,27 @@ Three honest caveats:
   `src/main/func_8008D100.c`, zero gate enablers, baseline `cb47408`. Realized tier and residual are
   scored at review in a second commit; this line is committed before any `src/` edit and must not be
   revised.
+- **Sprint 301 (realized)** — the `dl-emitter` vein at 618-634 instructions, both leaves in one host.
+  **0 banked, 2 carried at exact instruction count, 2 permuter runs (0 zeros, 1 lever), 0 re-opened,
+  0 stuck-far.** Zero gate enablers. `func_800947A8` 618/618 with an exact `-0x98` frame and six of
+  seven global registers right; `func_8008D3F4` 634/634 with an exact `-0x110` frame and 12
+  instructions out (98.1%). Stretch `func_8009232C` untouched. Host stays partial, so **banked 0pt**;
+  `--loose-stubs main` 280 -> 280, fresh 8 -> 6; md5-candidate unchanged. Seed **8** (classical,
+  frozen at `d6a28a9`); realized **10 / residual +2** (+1 permuter escalation, +1 carry; both leaves
+  are one file, so one per-file score). Rolling-5 (S297-S301): 0+0+0+0+0 pt banked; value =
+  3+3+2+0+0 matched. Quality **0 / 1 / 2 / 0**.
+  KEY: **the hoisting coin is arithmetic, and now it is a tool.** `func_800947A8`'s residual reduced
+  to `moves = floor((122 - insn_count) / 3) + 1` for life-1 invariants, derived from `loop.c:1631`
+  with `threshold` from `:532` stepping `-3` at `:1719`/`:1904` and `savings = n_times_set` from
+  `:597`/`:793`; verified against `-dL` on two loops of the same function (115 -> 3 moves, 117 -> 2).
+  The constant `4` misses the third slot by 2 units and all three escapes (order, savings, lifetime)
+  are measured and closed. `tools/loop_window.py` now prints the window and the decoded movable list.
+  Second result: the `mem-in-struct` array-subscript lever has a `loop.c` face — as plain scalars two
+  float globals read loop-invariant against `Gfx *` stores, so the loads and the expressions over
+  them hoist and take `$f20`/`$f22`; subscripting took `func_8008D3F4` from 654-with-a-wrong-frame to
+  634/634 in one change. Third: the permuter again paid in a lever rather than a zero — base 1025,
+  best 460, and its entire source diff was a `do { } while (0)` around one `_g->words.w1 = 0;`.
+  Push: local.
 - **Sprint 300** — the `dl-emitter` vein at 474-590 instructions, all-fresh.
   **+2 banked, 1 carried byte-exact, 3 permuter runs (0 zeros, 2 levers), 0 re-opened, 0 stuck-far.**
   Zero gate enablers. `func_80083AC8` -> `emit_ball_trail_dl` (510/510), `func_8006BC80` ->
