@@ -614,9 +614,11 @@ void emit_snapshot_panel_grid_dl(void) {
 
 /* Sky-panel snapshot emitter, sibling of emit_snapshot_panel_grid_dl above.
  * S301 carry: reconstructed to 618/618 instructions with an exact -0x98 frame
- * and six of seven global registers matching; the seventh is a loop.c
- * movable-selection coin (the ROM hoists the constant 4, this build hoists the
- * gDPSetTile word 0xF5100000). Full body + measured lever table in
+ * and six of seven global registers matching. The seventh is a quantified
+ * loop.c:1631 movable-selection coin: threshold 122 stepping down by 3 against
+ * an inner-loop insn_count of 115 admits exactly three life-1 invariants, and
+ * the constant 4 sits behind the gDPSetTile word 0xF5100000 in the movable
+ * list. Full arithmetic, dump table and working body in
  * docs/wip/func_800947A8.near-match.md. */
 INCLUDE_ASM("asm/nonmatchings/main/func_8008D100", func_800947A8);
 INCLUDE_ASM("asm/nonmatchings/main/func_8008D100", func_80095150);
