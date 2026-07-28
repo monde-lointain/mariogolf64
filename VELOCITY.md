@@ -1474,6 +1474,12 @@ Three honest caveats:
   STRUCTURAL symptom, not evidence of a coloring problem — S285 makes 4 of the last 6 carry verdicts
   refuted, and this one was refuted by the same agent that wrote it, hours later, with no new tool.
   Push: local.
+- **Sprint 303** — plan-time seed freeze (classical track, v2 two-pass): seed **8**, regime
+  **classical**, two `dl-emitter` carry re-opens in `src/main/func_8008D100.c` (`func_800947A8`
+  618/618 exact frame, `func_8009232C` 698 vs 697 exact frame) plus one fresh stretch
+  (`func_8002CDA8`, 0xD18, 0 FP, host `src/main/func_8002A640.c`), zero gate enablers, baseline
+  `6434110`. Realized tier and residual are scored at review in a second commit; this line is
+  committed before any `src/` edit and must not be revised.
 - **Sprint 302 (realized)** — the `dl-emitter` vein's last fresh `main` row plus the closest S301
   carry, both in one host. **+1 banked, 1 carried at near-exact count, 0 permuter runs, 2 re-opened
   (1 banked), 0 stuck-far.** Zero gate enablers. `func_8008D3F4` -> **`emit_lens_flare_dl`**
