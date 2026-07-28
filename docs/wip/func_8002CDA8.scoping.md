@@ -625,3 +625,19 @@ measurement that proves the residual is `REG_N_REFS` weight on allocno 189 and n
 kept in `base.c` because it is the best-measured form (mnemonic deltas 4 -> 2, grid-loop allocation
 and branch form both matching the ROM), **not** because it is a bank candidate. Anyone resuming
 must find the natural construct that reaches the same ref weight, or treat this as terminal.
+
+## S305 probe: `gDPLoadMultiTile` is ruled out
+
+One-construct probe, as scoped. `gDPLoadMultiTile(gfx++, src, 0, G_TX_RENDERTILE, G_IM_FMT_RGBA,
+G_IM_SIZ_16b, 320, 0, ...)` emits **byte-identical words** to the `gDPLoadTextureTile` call it
+replaces (checked packet-by-packet on a host `gbi.h` harness, all seven `w0`/`w1` pairs equal), and
+it produces a **byte-identical object**: 838/838, frame `-0x1D8`, 1400 `cmpfn` rows, and the same
+four-delta mnemonic histogram (`addu` +1, `bgez` -1, `bgezl` +1, `j` -1) as the plain
+`gDPLoadTextureTile` body measured in the same session. So the two macros are indistinguishable to
+`global.c`: allocno 189 keeps its low ref weight either way, and the grid-loop clamp block still
+takes the annulled `bgezl` instead of the ROM's `bgez` + `j`.
+
+Both natural constructs are now spent: `HW_VERSION_1` (S304, emits a `jal`) and `gDPLoadMultiTile`
+(here). The only measured form that reaches the ROM's allocation chain remains the `do {} while (0)`
+ref-weight probe, which is a mechanism proof rather than a shippable body. Re-opening this leaf
+should start from `sched`/`global.c` source, not from another macro substitution.
