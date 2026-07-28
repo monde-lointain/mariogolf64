@@ -128,7 +128,32 @@ twice needs two distinct extern symbols. `docs/fanout-prompt.md` now requires an
 `objdump -s -j .rodata` check on the subagent's own object. **So price a `dl-emitter` leaf as cheap
 to reconstruct and budget the integration**, the inverse of how the last five gates priced risk.
 
-**RANKER FOLLOW-UP (S298 #3): `--nested-check` detects nested CHILDREN, not nested PARENTS.** It
+**S299: the vein's first clean sweep, and the integration cost moved again.** `--loose-stubs main`
+reads 282 stubs / **11 fresh**, still all `dl-emitter`; the class is **20 of 21 across S293-S299**,
+same two carries. **+3 banked, 0 carried, 0 permuter runs** — every residual fell to a named lever,
+and two of the three ran *opposite* to their documented direction (`ifelse-not-ternary-cse-reset`
+inverted; `local-alloc combine_regs` wanting the block-local form, not the function-scope hoist).
+Both `docs/levers.md` entries are now marked bidirectional. The S298 pricing rule held — reconstruction
+was cheap for all three — but the *specific* predicted failure was wrong for the second sprint
+running: `func_80081EF8` was priced highest-risk for its `sprintf` literals and 17 `jal`, and came
+back with empty `.rodata` and every callee signature already correct. The cost was two RED gate
+builds instead: a stale `.o` after a curated rename, and **4 wrong bytes behind three byte-exact
+bodies** (`lui $at` float-constant halves, invisible because `cmpfn` normalises immediates *and*
+both subagents read the raw-`objdump` deltas as relocation slots). Both are now rules in
+`docs/workflow/loop.md` + `docs/fanout-prompt.md`. **So the standing guidance is unchanged in
+direction and sharper in detail: price a `dl-emitter` leaf cheap to reconstruct, budget the
+integration, and do not expect to guess which integration defect it will be.**
+
+**RANKER FOLLOW-UP (S299): measure a retirement, do not estimate it.** The S299 review proposed a
+`docs/levers.md` retirement on a ~200 B saving that was actually *negative* (the rewrite ran longer
+than the line it replaced), which cost the PO a second decision mid-gate. `prompt_lint report` gives
+the real number in one call; run it before naming a saving. Kin to the surface-budget checks already
+in the gate.
+
+**RANKER FOLLOW-UP (S298 #3): `--nested-check` detects nested CHILDREN, not nested PARENTS.**
+S299 ran the parent-side tell by hand on `func_80065A1C` and it returned **negative** (plain 3-arg,
+no `$v0` static chain), correctly pricing the leaf at +1 rather than +2 for ~2 minutes of `.s`
+reading. Tally so far: S298 1 hit, S299 1 miss — cheap either way, still worth the in-row tag. It
 cleared `func_80092F18` as `standalone`, which was true and the less useful half of the answer: that
 leaf was the *parent* of `func_80092E10`, so banking it removed two stubs and closed the separately
 tracked S248 `func_80092E10` "`$v0`-arg wall" carry at no extra cost. The parent-side tell is cheap —

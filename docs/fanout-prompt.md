@@ -59,11 +59,12 @@ defects surface only at the gate.
 - *Extern collisions.* `grep -n '<sym>' <host .c>` for every `extern` you need and list those that
   exist, with their spelling: the host may declare one at a different type (S295 `D_800E2158`,
   scalar `void*` in the host and indexed in the new body, correct on both sides).
+- *A false relocation.* A delta is one only if `objdump -r` says so; `lui $at` carries `%hi` and
+  float-constant halves alike (S299).
 - *A duplicate literal pool.* Run `mips-linux-gnu-objdump -s -j .rodata` on your object. Any
   emitted `.rodata` reddens the gate build behind a byte-exact instruction stream; fix it per
   `docs/hazards.md#duplicate-literal-pool-shared-rodata` and report what you referenced.
 
 **Standing policy.** An empty `__asm__ __volatile__("")` barrier may characterize a wall; it is
-never a bank candidate. A byte-exact body of raw command words is a result to challenge, not
-integrate: decode each word against the SDK header and re-verify. "No macro produces this" reads as
-custom packing, the expensive misread (S297: 27 of 27 were reachable).
+never a bank candidate. A body of raw command words is a result to challenge: decode each word
+against the SDK header and re-verify (S297).

@@ -1474,6 +1474,23 @@ Three honest caveats:
   STRUCTURAL symptom, not evidence of a coloring problem — S285 makes 4 of the last 6 carry verdicts
   refuted, and this one was refuted by the same agent that wrote it, hours later, with no new tool.
   Push: local.
+- **Sprint 299** — the `dl-emitter` vein at 352-426 instructions, all-fresh, no carry committed.
+  **+3 banked, 0 carried, 0 permuter runs, 0 re-opened, 0 stuck-far.** Zero gate enablers.
+  `func_8006AEA4` -> `emit_screen_fade_overlay_dl` (426/426), `func_80081EF8` ->
+  `emit_rest_distance_panel_dl` (379/379), `func_80094228` -> `emit_snapshot_panel_grid_dl`
+  (352/352), all all-SDK-macro. All three hosts stay partial, so **banked 0pt**; `--loose-stubs main`
+  285 -> 282, fresh 14 -> 11, dl-emitter 53 -> 50; md5-candidate unchanged at 230 of 265. Seed 8
+  (classical); realized **9 / residual +1** (+1 novel bank-gotcha; no −1, the gate went red twice).
+  Rolling-5 (S295-S299): 0+0+0+0+0 pt banked, all partial-file sprints; value = 3+2+3+3+3 matched.
+  Quality **0 / 0 / 0 / 0** — the vein's first clean sweep.
+  KEY: **the documented workaround for a normalisation blind spot can itself miss.** Four wrong bytes
+  survived three byte-exact bodies: `cmpfn` normalises immediates, and the raw `objdump -dz` pass that
+  `docs/fanout-prompt.md` mandates *ran on two of the leaves and still missed*, because both subagents
+  read the deltas as relocation slots. They were `lui $at` float-constant high halves — `$at` is the
+  register `%hi` and every float load share, which is why the two are confusable. A delta is a
+  relocation only when `objdump -r` says so. Second result: every residual fell to a named lever with
+  no permuter, and two of the three ran *opposite* to their own documented direction, so both entries
+  are now marked bidirectional. Push: local.
 - **Sprint 298** — the `dl-emitter` vein at 251-365 instructions, all-fresh, no carry committed.
   **+3 banked, 1 carried, 1 permuter run (0 zeros, 0 levers), 0 re-opened, 0 stuck-far.** Zero gate
   enablers. `func_80084EBC` -> `emit_wind_indicator_dl` (251/251) and `func_80092F18` ->

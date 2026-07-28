@@ -42,11 +42,12 @@ These have a `docs/hazards.md` section; read it rather than the line here.
   decide whether its copy survives: equal copies merge when both pseudos prefer one register
   (`global.c:790-823`), `combine_regs` ties others (`local-alloc.c:472/1290/1587`), and reuse pulls a
   load forward by anti-dependency. Knobs: name a temp to end a live range early rather than inlining
-  it (S293); hoist a block-local temp to function scope; split a value spanning two loops, but only
-  what must die between them -- one the ROM keeps in a single register across both is one pseudo, and
-  a range spanning both becomes a global allocno that hoists the invariant chain per loop into its own
-  register (S295, twice). The inverse recolours, one register at a time (S287). Terminal only when six
-  forced registers reroute a read.
+  it (S293); hoist a block-local temp to function scope, or the reverse when a function-scope value
+  set in two arms turns into a global allocno that misses `combine_regs` (S299); split a value
+  spanning two loops, but only what must die between them -- one the ROM keeps in a single register
+  across both is one pseudo, and a range spanning both becomes a global allocno hoisting the
+  invariant chain per loop into its own register (S295). The inverse recolours one register at a
+  time (S287). Terminal only when six forced registers reroute a read.
 - **dead-frame-levers** -- for a frame-only diff: `s32 unused[(ROM_frame-0x18)/4]` (pure dead frame),
   `str[row]` (keeps base and index live), or an uninit local plus `volatile s32 s = g;` (reload frame,
   dead `sw $v0`; `volatile` defeats DCE). Split point is the second knob: arrays slot at
@@ -123,14 +124,12 @@ These have a `docs/hazards.md` section; read it rather than the line here.
   zero-extend in another basic block and keeps `slti` signed.
 - **divmod-order-quotient-coalescing** -- `x % K` before `x / K` emits the ROM's non-coalesced `move`;
   division first coalesces.
-- **ifelse-not-ternary-cse-reset** -- cross-jump tail merge plus a multi-predecessor join resets CSE's
-  table and re-loads live memory.
+- **ifelse-not-ternary-cse-reset** -- a multi-predecessor join resets CSE's table and re-loads live
+  memory; inverted, a temp holding the arm result keeps the ROM's single load (S299).
 - **add-s-negative-const-lever** -- for a ROM `add.s` with a negative FP constant, spell it `x + -C`;
   subtraction emits `sub.s` with a positive constant.
 - **pre-temp-defer-rowadd-lever** -- precompute the index offset and the `u8 *` base into separate temps
   (`expr.c:6457`, operand 0 before operand 1).
-- **rodata-strings-as-literals-via-tu-combine** -- prefer string literals over `extern D_` symbols;
-  recombine a split one-tu at `OBJCOPY_ALIGN` 4-alignment.
 - **negative-displacement-neighbour-needs-one-symbol** -- `lw t0, -0x2B(a0)` reads global B off A's base
   only when A and B are one symbol.
 - **same-field-sentinel-loop-peels-top-load** -- a loop testing one field at the top with a bottom
