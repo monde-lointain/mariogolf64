@@ -114,6 +114,29 @@ the S280 plateau advisory: `main`'s fresh pool is ~20, not the single digits the
 reported.** The `dl-emitter` class is **15 of 15 banked across S293-S297**, plus one carry (`emit_sky_dome_dl`, a
 named-gate wall as of S297).
 
+**S298: the fresh pool is now ALL `dl-emitter`, and the class's cost is in INTEGRATION, not
+reconstruction.** `--loose-stubs main` reads 285 stubs / **14 fresh**, and every fresh row carries
+the `dl-emitter` tag — there is no non-DL fresh vein left in `main`. The class stands at **17 of 18
+banked across S293-S298**, with two carries (`emit_sky_dome_dl`, `init_rdp_and_draw_sky_background`).
+Both S298 banks were byte-exact in isolation on the first or second build; the sprint's cost was two
+RED gate builds, both on defects an isolated build structurally cannot see, and both now documented
+as `docs/hazards.md#duplicate-literal-pool-shared-rodata` (source-literal FP constants build a second
+`.rodata` pool beside the TU's blob and shift every following data symbol behind a byte-exact
+instruction stream; `cmpfn` reads `.text`, so no per-function oracle sees it) plus its second half,
+that **gcc 2.7.2 emits one pool entry per textual occurrence and so did the ROM**, so a constant used
+twice needs two distinct extern symbols. `docs/fanout-prompt.md` now requires an
+`objdump -s -j .rodata` check on the subagent's own object. **So price a `dl-emitter` leaf as cheap
+to reconstruct and budget the integration**, the inverse of how the last five gates priced risk.
+
+**RANKER FOLLOW-UP (S298 #3): `--nested-check` detects nested CHILDREN, not nested PARENTS.** It
+cleared `func_80092F18` as `standalone`, which was true and the less useful half of the answer: that
+leaf was the *parent* of `func_80092E10`, so banking it removed two stubs and closed the separately
+tracked S248 `func_80092E10` "`$v0`-arg wall" carry at no extra cost. The parent-side tell is cheap —
+a `jal` to a callee whose own `.s` homes an incoming `$v0` (`sw $v0,K($sp)` never reloaded) — and it
+would have priced the leaf at +2 functions at the gate rather than +1. Same shape as the existing
+`carried-wall` / `nested-child` in-row tags. Until it lands, a `dl-emitter` leaf with a `jal` to a
+low-vram neighbour is worth one `.s` read at the gate.
+
 **S288 CLOSES the fdlibm vein and sharpens the permuter-as-lever play.** `func_80059BC0` = `acosf`
 banked FIRST BUILD off the S287 constant-check procedure (one enabler: a per-file `-ffast-math`
 override so `sqrtf()` emits the bare `sqrt.s`; the already-banked FP siblings are fast-math-invariant
@@ -3780,6 +3803,22 @@ by `/sprint-plan`:
   vendored upstream version can diverge from the game's rev on a single immediate (S122 nusys-2.07
   `NU_CONT_THREAD_ID=6` vs MG64's 5), and that surfaces only at first build unless reconciled here.
   A near-free retry missing any of these is a half-scoped spike — finish the scope before deferring.
+
+- **(S298 SPIKE — terminal from the caller's source; one named lead, do not re-open on size order)**
+  `init_rdp_and_draw_sky_background`, `src/main/func_8002A640.c`. 286/286 with the ROM's `-0xA0`
+  frame and an instruction multiset identical to the ROM including every register and immediate; the
+  whole residual is the order of one window. Not a scheduler coin — it survives
+  `-fno-schedule-insns2`, and the `-dR` dump shows the window tied at one `INSN_PRIORITY` so
+  `rank_for_schedule` never leaves its `INSN_LUID` fallback (sched.c:2425). The gate is inside the
+  macro: `gDPSetScissor` opens with `Gfx *_g = (Gfx *)pkt;`, so `gfx++` and its write-back emit ahead
+  of the coordinate expressions and the ROM needs the reverse; the compute *is* the macro argument,
+  so it cannot be folded into the call. Measured trap: hoisting the bump out gets the ROM's order and
+  costs 2 instructions, because DSE then deletes exactly the `addiu`+`sw` that needed moving
+  (284/286). Permuter plateaued at 1505, no zero. New class
+  `docs/hazards.md#macro-internal-emission-order`; full write-up in
+  `docs/wip/init_rdp_and_draw_sky_background.near-match.md`. **The one lead:** if a sibling host is
+  found emitting scissors through a game-local wrapper that computes both words before touching the
+  pointer, this banks immediately. Check for that before re-opening; short of it, do not.
 
 - **(S288 NEAR-FREE RETRY — not blocked; deferred only by the 3-to-4 sprint cap; still 15 stubs
   after S289, which touched this file only for the `func_8005C038` spike above)**

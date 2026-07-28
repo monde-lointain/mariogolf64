@@ -1474,6 +1474,30 @@ Three honest caveats:
   STRUCTURAL symptom, not evidence of a coloring problem — S285 makes 4 of the last 6 carry verdicts
   refuted, and this one was refuted by the same agent that wrote it, hours later, with no new tool.
   Push: local.
+- **Sprint 298** — the `dl-emitter` vein at 251-365 instructions, all-fresh, no carry committed.
+  **+3 banked, 1 carried, 1 permuter run (0 zeros, 0 levers), 0 re-opened, 0 stuck-far.** Zero gate
+  enablers. `func_80084EBC` -> `emit_wind_indicator_dl` (251/251) and `func_80092F18` ->
+  `emit_snapshot_spiral_wipe_dl` (365/365) **plus its GCC nested child `func_80092E10`** (66/66) as
+  the in-body `spiral_step` — the only two `jal func_80092E10` sites in the ROM are inside the
+  parent, so the pair banks together and this closes the separately tracked S248 `func_80092E10`
+  "`$v0`-arg wall" carry. `init_rdp_and_draw_sky_background` carried at **286/286** with the ROM's
+  `-0xA0` frame and an instruction multiset identical including every register and immediate. Both
+  hosts stay partial, so **banked 0pt**; `--loose-stubs main` 288 -> 285, fresh 17 -> 14, dl-emitter
+  55 -> 53, nested-child 11 -> 10; md5-candidate unchanged at 230 of 265. Seed 8 (classical);
+  realized **11 / residual +3** (+1 carry, +1 permuter, +1 novel bank-gotcha; no −1 taken, the
+  isolated builds earned it but the gate build went red twice). Rolling-5 (S294-S298): 0+0+0+0+0 pt
+  banked, all partial-file sprints; value = 4+3+2+3+3 matched. Quality **0 / 1 / 1 / 0**.
+  KEY: **a byte-exact instruction stream can still redden the gate, and no per-function oracle sees
+  it.** Both red builds were `emit_wind_indicator_dl`: source-literal doubles made gcc emit a second
+  0x40-byte `.rodata` pool beside the TU's existing one, shifting every following data symbol while
+  the instruction stream stayed identical — `cmpfn` normalises `%hi`/`%lo` and reads `.text`, so it
+  cannot see this by construction, and the subagent's object never links. Then, after the
+  `extern const` fix, two rows still differed because **gcc 2.7.2 emits one pool entry per textual
+  occurrence and so did the ROM**: the second wind window needed its own `D_800D1B60`/`D_800D1B68`,
+  byte-identical duplicates of the first window's pair. Second result, on the gate's risk ranking:
+  after four sprints of inversion the ranking was finally *right* (the fp=0 anchor was cleanest, the
+  two `fp-mixed` leaves split one bank / one carry) — but the cost had moved. Reconstruction was
+  cheap for all three; integration was the whole sprint. Push: local.
 - **Sprint 297** — the `dl-emitter` vein at 208-299 instructions, plus the S296 carry. **+3 banked,
   1 carried, 1 permuter run (0 zeros, and 0 levers), 1 re-open, 0 stuck-far.** Zero gate enablers.
   `func_800734F0` -> `emit_glyph_sheet_preamble_dl` (243/243), `func_80074968` ->

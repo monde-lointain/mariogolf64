@@ -115,6 +115,8 @@ The hazard families below group the sections that follow. Each links to its exis
 - [abs-coalescing reg-swap (fabsf in-place vs fresh reg on a const compare)](#abs-coalescing-reg-swap)
 - [dead-frame reload-artifact regalloc-wall](#dead-frame-reload-artifact-regalloc-wall)
 - [multi-register-allocno-permutation (a fixed permutation of N caller-saved regs)](#multi-register-allocno-permutation-a-fixed-permutation-of-n-caller-saved-regs)
+- [duplicate-literal-pool-shared-rodata (a byte-exact body that still reddens the gate)](#duplicate-literal-pool-shared-rodata-a-byte-exact-body-that-still-reddens-the-gate)
+- [macro-internal-emission-order (a residual no source spelling can reorder)](#macro-internal-emission-order-a-residual-no-source-spelling-can-reorder)
 - [byte-offset-cast cracks the fixed-array-slot base-CSE (S235, refutes the S234 "Carry" verdict)](#byte-offset-cast-cracks-the-fixed-array-slot-base-cse-s235-refutes-the-s234-carry-verdict)
 - [fold associate: which operand of a 3-term sum carries the constant](#fold-associate-which-operand-of-a-3-term-sum-carries-the-constant)
 - [Multi-level bound re-read: array-element form, not a cached pointer (S259)](#multi-level-bound-re-read-array-element-form-not-a-cached-pointer-s259)
@@ -7854,3 +7856,72 @@ count already matched* that is terminal. Before ruling terminal, first apply the
 (accumulator-early via delay-slot steering, out-of-line handler, callee-saved init-after-call); S268
 `func_8005B0B4` shed an accumulator-role and a delay-slot-fill divergence to those levers, leaving
 only the irreducible 3-register permutation.
+
+## duplicate-literal-pool-shared-rodata (a byte-exact body that still reddens the gate)
+
+A body can be byte-exact in `.text` and still break the ROM, because the per-function oracles read
+`.text` and the isolated object never links. `tools/cmpfn.sh` normalizes `%hi`/`%lo`, so a constant
+loaded from *the wrong pool* reads identical to one loaded from the right pool.
+
+**Symptom.** The isolated build is byte-exact and `tools/verify-rom.sh` fails anyway. In
+`build/mariogolf64.map`, every `D_<addr>` symbol past some point is placed at `addr + N` for one
+fixed `N` — the flowing-data shift of `#short-text-shifts-flowing-bss`, but sourced from `.rodata`
+rather than a short function. The culprit line is the object's own contribution:
+`build/src/<tree>/<file>.o(.rodata)  0x<addr>  0x<N>`.
+
+**Cause.** The TU's FP constants already exist in the extracted rodata blob, referenced by the
+still-asm siblings. Spelling them as source literals makes gcc emit a *second* pool beside the first,
+so the blob is intact, the instruction stream is right, and everything after the insertion point
+moves by the new pool's size.
+
+**Fix.** Reference the blob entries instead of spelling literals: find the constants in
+`asm/data/*.rodata.s` and declare them `extern const f64` / `extern const f32`. Keep `const` — a
+non-const global cannot be CSE'd across an intervening call, where a pool entry (`RTX_UNCHANGING_P`)
+can, so dropping it changes the load count. Scalar constants that materialize inline (`lui`/`ori`/
+`mtc1` for SFmode, and small integers) are not pool entries and stay literals.
+
+**gcc 2.7.2 emits one pool entry per textual occurrence, and so did the ROM.** The same constant
+used in two places is two entries at two addresses, so it needs *two distinct extern symbols*. Do not
+collapse them onto one: S298 `emit_wind_indicator_dl` compares against pi/2 and 3pi/2 in two separate
+wind windows, and the ROM's pool holds `D_800D1B50`/`D_800D1B58` for the first and byte-identical
+duplicates `D_800D1B60`/`D_800D1B68` for the second. Pointing both windows at the first pair left
+exactly two differing rows.
+
+Provenance: S298 (`emit_wind_indicator_dl`, a +0x40 shift behind a 251/251 byte-exact body; two red
+gate builds, one per half of this section). Related: `#rodata-sibling-yaml-pattern` for when the
+constants must instead be carved, and the memory `shared-literal-pool-partial-bank-blocker` for the
+case where the pool cannot be shared at all.
+
+## macro-internal-emission-order (a residual no source spelling can reorder)
+
+The rarest structural outcome: an exact instruction count, an instruction multiset identical to the
+ROM including every register and immediate, and a residual that is purely the *order* of one window —
+where the offending order is fixed inside an SDK macro expansion rather than in the caller's source.
+
+**Recognizing it.** Three measurements, in this order.
+1. The displacement survives `-fno-schedule-insns2`. That removes the scheduler from the picture, so
+   this is not `#sched-class-tiebreak-order-coin` or the `schedule_select` hazard coin, and no
+   scheduler lever (`aggregate-store-pins-pointer-load`, the load-split/live-length block move)
+   can reach it.
+2. The `-dR` dump shows the window tied at one `INSN_PRIORITY`, so `rank_for_schedule` never gets
+   past its `INSN_LUID` fallback (`sched.c:2425`). LUID is emission order.
+3. The emission order traces into a macro. `gDPSetScissor` and its kin open with
+   `Gfx *_g = (Gfx *)pkt;`, so a `gfx++` argument and its write-back are emitted *before* the
+   coordinate expressions. When the ROM needs the reverse, the compute cannot be folded into the call
+   argument (the standard `emission-order-placement-lever`) because the compute **is** the macro's
+   argument.
+
+**The trap.** Hoisting the bump out (`gDPSetScissor(gfx, ...); gfx++;`) does produce the ROM's LUID
+order and costs two instructions: with the bump after the word stores, the next macro's read of `gfx`
+cse-folds to a known `$a1+K`, leaving the frame slot with no reader, and DSE deletes exactly the
+`addiu`+`sw` that needed moving. The one spelling that fixes the order is the one that removes the
+instruction.
+
+**Verdict and the one lead.** Terminal from the caller's source. It is *not* terminal if the game
+emits that command through its own wrapper that computes both words before touching the pointer — a
+sibling host doing so makes the function bank immediately. Check for one before re-opening; short of
+that, do not re-open on size order.
+
+Provenance: S298 `init_rdp_and_draw_sky_background` (286/286, frame `-0xA0` exact, permuter plateaued
+at 1505 with no zero, as expected for a residual needing two statements reordered inside a macro
+expansion). Full write-up in `docs/wip/init_rdp_and_draw_sky_background.near-match.md`.

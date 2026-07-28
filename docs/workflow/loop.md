@@ -209,7 +209,7 @@ asserted, only measured, and re-check layers stacked on top of it buy nothing.
 | Tool | Authoritative for | Known failure mode | Trusted when |
 | --- | --- | --- | --- |
 | `tools/verify-rom.sh [--extract]` | Whether a function or increment is banked. Full `make` plus SHA-1 against the `sha1:` key in `mariogolf64.yaml`. | None. It exists because a failed `make` leaves the previous `build/mariogolf64.z64` in place, so a bare `sha1sum` reads a stale green ROM. S111 burned a whole review that way, reporting a match across three commits that never built. | Always. The only bank gate. Never a hand-rolled `make ...; sha1sum`. |
-| `tools/cmpfn.sh <fn> [<obj>]` | The per-iteration instruction stream and the instruction count of each side. Reads the object directly, so it never goes stale after an incremental `make build/src/<tree>/<obj>.o`. | Normalizes register prefixes, `%hi`/`%lo`, immediates, splat `(0xX >> 16)` spellings, `move`/`li` aliases, SDK FP register names and external branch/jal targets, so a difference in any of those is invisible. It collapsed internal branch targets until S260, where a back edge one instruction too far read byte-clean; it normalized the frame immediate until S276, where a frame-size delta read as reg-perm-only; and it normalized stack-slot displacements until S296, where a frame-pinned local at the wrong offset read byte-clean at exact count and matching frame size. All three are surfaced now, as `@Dp<n>`/`@Dm<n>`, `[frame rom=.. mine=..]`, and `@F<dec>(sp)` (both sides folded to decimal). | As an iteration oracle, on a rebuilt object. A cmpfn-clean function is not a bank. |
+| `tools/cmpfn.sh <fn> [<obj>]` | The per-iteration instruction stream and the instruction count of each side. Reads the object directly, so it never goes stale after an incremental `make build/src/<tree>/<obj>.o`. | Normalizes register prefixes, `%hi`/`%lo`, immediates, splat `(0xX >> 16)` spellings, `move`/`li` aliases, SDK FP register names and external branch/jal targets, so a difference in any of those is invisible. It collapsed internal branch targets until S260, where a back edge one instruction too far read byte-clean; it normalized the frame immediate until S276, where a frame-size delta read as reg-perm-only; and it normalized stack-slot displacements until S296, where a frame-pinned local at the wrong offset read byte-clean at exact count and matching frame size. All three are surfaced now, as `@Dp<n>`/`@Dm<n>`, `[frame rom=.. mine=..]`, and `@F<dec>(sp)` (both sides folded to decimal). Its remaining blind spot is not a bug but a scope limit: it reads `.text`, so a body whose instruction stream is byte-exact can still emit a duplicate `.rodata` literal pool, which shifts every following data symbol and reddens the gate build (S298, +0x40). Check `objdump -s -j .rodata` separately. | As an iteration oracle, on a rebuilt object. A cmpfn-clean function is not a bank. |
 | `mips-linux-gnu-objdump -dz` | Assembled ground truth: register allocation, instruction order, immediates, nop placement. | `-d` without `z` collapses runs of identical zero words to one `...` line, so a nop run under-counts. In an unlinked object `%hi`/`%lo` read `0x0`. | Any time, on a freshly built object. Always `-dz`; keep every line. |
 | `tools/asm-differ/diff.py <fn>` | The reloc-resolved view of the linked build against the ROM. | Reads `build/*.map`, which an incremental per-object build does not refresh, so it fails in both directions: byte-clean on a dual-base-split object, and five diff rows on a byte-exact function while a mismatching one showed zero. The same score twice after a real source edit means stale, not "no effect" -- deleting the `.o` does not clear it, only a relink does. With no fresh build it spills the whole segment. | Immediately after a full `make`, for the reloc-resolved view only. Never as a crack or bank verdict. |
 | `tools/decomp_loop.py --func` (`score`, `percent`) | The isolated per-function compile signal during Iterate. `score == 0` is a candidate. | A non-zero score with empty `top_mismatches` and `match_count == total_rows` is an isolation artifact at high percent, but a real pervasive near-miss at low percent. Five consecutive `compile_ok == False` means a broken seed. | During Iterate. Disambiguate the empty-`top_mismatches` case with `diff.py` right after a full `make`; if that diverges too, it is a genuine wall. |
@@ -387,31 +387,19 @@ below).
     the same constant), while the three larger permutations all plateaued (`func_80087CB0` 480->265
     in 60k, `func_80088A90` 870->520 in 31k, `init_sky_pool_and_world_state` 615->545 in 91k). So the
     payoff shape is exact-count-plus-one-operand; a multi-register permutation is not.
-  - **On a register permutation the permuter's deliverable is a lever, not a zero.** Do not
-    wait for score 0 and do not read a plateau as terminal: read the best candidate's *source* diff.
-    S287 `func_8005C674` was hand-plateaued at 245/245 with 14 differing operands in three clusters;
-    the permuter never scored 0 (base 515, best 70 in 130k iterations, 60 on a re-import), but its
-    best candidate differed from `base.c` by one line -- it had assigned a subscript into an existing
-    local before the test. Applying that reuse by hand cut the residual to 6 operands, and
-    generalizing it (`docs/levers.md` scope-and-live-range-steer-allocation) closed the function in
-    three more builds. So run it, then
-    `diff nonmatchings/<fn>/base.c nonmatchings/<fn>/output-<best>-1/source.c` and generalize what it
-    did, discarding its `volatile`-on-a-prototype style hacks. This is the actionable half of the
-    S282 bound that the guaranteed deliverable is {crack or pass-cited verdict}.
-    - **Re-read the candidates after each hand fix, not once (S288).** `func_8005B314` took two levers
-      from two separate imports: a `n = count;` bound copy that undid a three-register rotation, then,
-      once that body was at exact count, an empty `do {} while (0);` that fixed the last delay slot.
-      Neither run scored near zero (base 620, best 320 across three runs), so a plateau is not the
-      signal to stop reading. Running tally of the play: S287 1/1, S288 2/2 candidates yielded a lever,
-      0/3 runs a zero.
-    - **Read a candidate for the knob it exposes, not the diff to apply (S290).** A candidate can be
-      semantically wrong and still name the mechanism. `func_8006C484`'s best (base 970, then 440 after
-      the hand fixes, best 200, never 0) retyped one local to `unsigned short`, which changed the
-      arithmetic and cost 2 instructions -- but it landed the three permuted registers on the ROM's,
-      which proved the residual was sensitive to *any* extra insn in that region and pointed at the
-      zero-cost version of the same knob (declaring the local inside the loop body). So ask what the
-      candidate perturbed, then find the legitimate way to perturb it; `tools/allocno_report.py`
-      answers that directly for a register permutation. Tally: S290 1/1 candidates yielded a knob.
+  - **On a register permutation the permuter's deliverable is a lever, not a zero.** Never wait for
+    score 0, never read a plateau as terminal, and re-read the best candidate's *source* diff after
+    **every** hand fix rather than once: `diff nonmatchings/<fn>/base.c
+    nonmatchings/<fn>/output-<best>-1/source.c`. Read it for the knob it exposes, not the diff to
+    apply -- a candidate can be semantically wrong, or cost instructions, and still name the
+    mechanism; `tools/allocno_report.py` then says which legitimate perturbation reaches it. Discard
+    its `volatile`-on-a-prototype hacks. This is the actionable half of the S282 bound that the
+    guaranteed deliverable is {crack or pass-cited verdict}. Case law, all with plateaued runs that
+    still paid: S287 `func_8005C674` (one line, a subscript assigned into an existing local before
+    the test), S288 `func_8005B314` (two levers from two separate imports, the second only visible
+    once the first reached exact count), S290 `func_8006C484` (a wrong retype that nonetheless landed
+    the three permuted registers, pointing at the zero-cost knob). Tally: 4/5 candidates yield a
+    lever, 0/6 runs a zero (S297 yielded neither).
   - **The permuter (asm-differ) is blind to internal branch targets — a permuter score of 0 on a
     pure-branch-target residual is a false positive (S261).** asm-differ normalises a branch to a
     local label and does not distinguish `bne …,<label@0x7c>` from `bne …,<label@0x80>`, the same
