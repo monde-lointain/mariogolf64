@@ -7887,8 +7887,26 @@ wind windows, and the ROM's pool holds `D_800D1B50`/`D_800D1B58` for the first a
 duplicates `D_800D1B60`/`D_800D1B68` for the second. Pointing both windows at the first pair left
 exactly two differing rows.
 
+**A local array initializer has no extern escape, and that variant is now detected.** The fixes above
+work because a *constant* can be referenced rather than spelled. A local array initializer cannot:
+gcc block-moves it from a compiler-generated rodata template, so a faithful body necessarily emits
+its own copy of that template. If the ROM's copy sits in a generic uncarved blob rather than in the
+host file's own `.rodata` carve, the leaf simply cannot bank in a partial file, because one object's
+`.rodata` is contiguous and the carve cannot reach across the intervening still-asm siblings'
+constants. S300 `func_8007C5D8` was byte-exact 590/590 with an exact frame and shifted 22,110,362 bytes of ROM
+when integrated. Both escapes were measured and both fail: referencing the template `extern` drops
+the stack copy (575/590, frame `-0x48` vs `-0x68`), and hand-writing the copy element by element
+overshoots (598/590) because it does not reduce to gcc's batched block move. A text split that would
+give the leaf its own carve needs a 16-aligned subseg boundary, which the function start rarely is.
+`pick_target.py --loose-stubs` now tags such a stub `POOL-BLOCKED` and excludes it from `fresh`
+(`pool_blocked_tell`, `tools/pick_target_score.py`): a `%hi(D_<addr>)` into an `asm/data/*.rodata.s`
+blob followed by three or more `lw`/`sw` pairs to `sp`. The tag's scope limit is deliberate and worth
+knowing: it catches the block-move shape only, so the FP-literal variant (S279 `func_80079EBC` in the
+same host, where referencing the constant extern instead perturbs a sched coin) still reads clean.
+
 Provenance: S298 (`emit_wind_indicator_dl`, a +0x40 shift behind a 251/251 byte-exact body; two red
-gate builds, one per half of this section). Related: `#rodata-sibling-yaml-pattern` for when the
+gate builds, one per half of this section), S300 (`func_8007C5D8`, the array-initializer variant and
+the ranker tag). Related: `#rodata-sibling-yaml-pattern` for when the
 constants must instead be carved, and the memory `shared-literal-pool-partial-bank-blocker` for the
 case where the pool cannot be shared at all.
 

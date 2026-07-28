@@ -60,6 +60,15 @@ entirely, peel included. The more source-dive backing a verdict has, the more pr
 pass a new structural lever can now sidestep. So when a sprint gains a new structural lever, sort the
 carries whose cited pass that lever disables to the front, however strongly worded their verdict.
 
+**A verdict returned mid-sprint gets one orchestrator read for the unmeasured side of its own claim,
+before it is accepted.** The rule above covers inherited verdicts; this one covers the agent
+still running. S300's `func_8006BC80` came back at 2/474 words with correct citations
+(`loop.c:1706` hoist placement, a `sched.c rank_for_schedule` LUID tie, the giv escape closed at
+`loop.c:3805`) and twelve alternatives measured -- but it had only proved that the *other* insn
+cannot move after the hoist, never that the hoist could be removed. It could: one source statement
+took the leaf to 0. Ask what the verdict did not measure; it costs one message against three rounds
+of the agent's work.
+
 **Reach exact instruction count before arguing pressure.** A register permutation called terminal on a
 body that was never at exact count is usually not terminal. Materialize every value the ROM hoists or
 reorders as a source temp -- a product, a difference, a loop-invariant, a deferred param copy -- and

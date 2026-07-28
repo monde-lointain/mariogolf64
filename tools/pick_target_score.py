@@ -442,6 +442,75 @@ def wall_class_tell(fn):
     return ""
 
 
+_TEMPLATE_ADDR_RE = re.compile(r"%hi\((D_[0-9A-Fa-f]{8})\)")
+_TEMPLATE_MIN_PAIRS = 3  # >= this many lw/sw pairs after the address => a block move, not a read
+
+
+def pool_blocked_tell(fn):
+    """DoR check: would <fn>'s C body have to EMIT a `.rodata` template that the ROM keeps in a pool
+    shared with still-asm siblings? Returns "pool-blocked" or "".
+
+    The blocked shape is a local array initializer: gcc block-moves it from a compiler-generated
+    rodata template, so the C body necessarily emits its own copy, and one object's `.rodata` is
+    contiguous. If the ROM's copy of that template sits in a generic (uncarved) rodata blob rather
+    than in the host file's own `.rodata` carve, the emitted copy lands at the wrong address and
+    shifts every following data symbol -- a byte-exact body that reddens the gate build. It banks
+    only once the pool-owning siblings are also C. S300 `func_8007C5D8` (byte-exact 590/590,
+    22.1 MB of ROM shift when integrated); S279 `func_80079EBC` is the same class.
+
+    The tell: a `%hi(D_<addr>)` whose symbol is defined in an `asm/data/*.rodata.s` generic blob,
+    followed within a short window by >= _TEMPLATE_MIN_PAIRS `lw`/`sw` pairs targeting `sp`. Reads
+    only <fn>'s own `.s` plus the data blobs (cheap).
+
+    SCOPE LIMIT, deliberate. This catches the block-move case only. A leaf blocked because an FP
+    literal it must spell would duplicate a pool double (S279 `func_80079EBC`, where referencing the
+    constant extern instead perturbs a sched coin) has no `.s` tell at all: the ROM's instruction
+    stream is identical either way. So a clean result here is not proof the pool is safe -- check the
+    host's `.rodata` carve against the constants the body will emit before pricing a partial-bank
+    leaf as clean."""
+    path = _find_asm_s(fn)
+    if not path:
+        return ""
+    try:
+        with open(path) as f:
+            lines = f.readlines()
+    except OSError:
+        return ""
+    for i, line in enumerate(lines):
+        m = _TEMPLATE_ADDR_RE.search(line)
+        if not m:
+            continue
+        window = "".join(lines[i : i + 24])
+        n_lw = len(re.findall(r"\blw\b\s+\$\w+,\s*0x[0-9A-Fa-f]+\(\$\w+\)", window))
+        n_sw = len(re.findall(r"\bsw\b\s+\$\w+,\s*0x[0-9A-Fa-f]+\(\$sp\)", window))
+        if min(n_lw, n_sw) < _TEMPLATE_MIN_PAIRS:
+            continue
+        if _sym_in_generic_rodata_blob(m.group(1)):
+            return "pool-blocked"
+    return ""
+
+
+def _sym_in_generic_rodata_blob(sym):
+    """Is <sym> defined in an `asm/data/*.rodata.s` blob? Those blobs are the rodata splat did NOT
+    attribute to a C file, so a C body emitting its own copy of that data duplicates it."""
+    data_dir = os.path.join(ROOT, "asm", "data")
+    try:
+        names = os.listdir(data_dir)
+    except OSError:
+        return False
+    needle = "dlabel " + sym
+    for name in names:
+        if not name.endswith(".rodata.s"):
+            continue
+        try:
+            with open(os.path.join(data_dir, name)) as f:
+                if needle in f.read():
+                    return True
+        except OSError:
+            continue
+    return False
+
+
 # Full 32-bit form of the same command-word `lui`, for the twin signature below.
 _DL_CMD_WORD_RE = re.compile(r"\blui\b\s+\$\w+,\s*\(0x([0-9A-Fa-f]{8})\s*>>\s*16\)")
 
@@ -604,6 +673,7 @@ def loose_stubs(seg):
                     "nested": nested_tell(fn),
                     "intrinsic": intrinsic_stub_tell(fn),
                     "wall_class": wall_class_tell(fn),
+                    "pool_blocked": pool_blocked_tell(fn),
                     "fp_class": fp_class_tell(fn),
                 }
             )

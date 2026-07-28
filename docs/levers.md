@@ -63,13 +63,12 @@ These have a `docs/hazards.md` section; read it rather than the line here.
 
 - **emission-order-placement-lever** -- placement follows source emission order: LUID in latency-1
   blocks (`sched.c`), and `loop.c` hoists invariants in loop-body order before `strength_reduce` adds
-  giv inits. Knobs: fold a pre-call compute into the call argument; `off = i*STRIDE` as its own
+  giv inits. Remove a hoist by spelling the invariant as its own statement first (S300). Knobs: fold a pre-call compute into the call argument; `off = i*STRIDE` as its own
   statement (inlined, gcc folds the symbol into a walking-pointer giv, losing `%hi`/`addu`/`%lo`,
   S290); leave a row origin inline (`i * 6`) when the ROM births givs in body order (S294).
-- **sched-class-tiebreak-order-coin** -- `rank_for_schedule` (`sched.c:2428`) sorts class then LUID, so
-  a class-1 compute defers behind class-3 stores.
-- **sched-select-potential-hazard-coin** -- `schedule_select` (`sched.c:2615`) front-loads a transfer
-  over a constant load; the `fabsf` sign-mask is the canonical case.
+- **sched-tiebreak-coins** -- `rank_for_schedule` (`sched.c:2428`) sorts class then LUID (a class-1
+  compute defers behind class-3 stores); `schedule_select` (`sched.c:2615`) front-loads a transfer over
+  a constant load (`fabsf` sign-mask).
 - **sched-bottomup-loadsplit-livelength-blockmove** -- at exact instruction count, a `s32 tmp`
   statement split forces a load interleave (sched is bottom-up); moving a statement earlier shortens a
   qty's live length. Permuter-proof.

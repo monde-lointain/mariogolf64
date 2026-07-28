@@ -36,11 +36,11 @@
 # also keeps a genuine FP register permutation VISIBLE, which the old five-name collapse to `fN` hid
 # among `f0`/`f2`/`f20`/`f22`/`f24`.
 #
-# One known FALSE row remains, deliberately. splat prints `ori rX,zero,N` where objdump prints
-# `li rX,N` for the identical encoding, so a matching 16-bit unsigned load-immediate shows as a
-# difference. It is not normalised because objdump renders the `ori` and `addiu` forms both as `li`,
-# so folding the asm side too would blind the tool to a real encoding difference. Check the raw
-# bytes when this row is the only one left.
+# The splat-`ori` / objdump-`li` false row is FIXED (S300): the object side is disassembled with
+# `-M no-aliases`, so both sides carry the real mnemonic and a matching unsigned load-immediate
+# cancels, while a genuine `addiu`-vs-`ori` encoding difference stays visible. Folding the asm side
+# instead, the shortcut this comment used to justify skipping, would have hidden that difference.
+# Three such rows sat in func_8006BC80's residual and were counted as real.
 #
 # INTERNAL branch targets are NOT collapsed to a placeholder (S260). A `.L<vram>` (asm side) or a
 # `<fn+0xNN>` (object side) target is rewritten to a POSITION-RELATIVE delta `@Dp<n>`/`@Dm<n>` (the
@@ -132,7 +132,14 @@ obj_stream() {
     # (consecutive `nop`s) into a single `...` line, so cmpfn undercounts the instruction total and
     # reports a byte-EXACT function as short (S275: update_putting_meter read 107/112 with 2 mflo-latency
     # nops hidden as `...`, nearly abandoned as a sched-coin carry). -z forces every nop to disassemble.
-    mips-linux-gnu-objdump -dz "$OBJ" | awk "/<${FUNC}>:/,/^\$/" > "$slice"
+    # -M no-aliases: objdump renders BOTH `addiu rX,zero,N` and `ori rX,zero,N` as `li rX,N`, while
+    # splat prints the real mnemonic, so a matching unsigned load-immediate used to show as a
+    # permanent false row (S300, three of them in func_8006BC80's residual). Asking for the real
+    # mnemonics makes both sides agree AND keeps a genuine addiu-vs-ori encoding difference visible,
+    # which the old fold-the-asm-side-too shortcut would have hidden. The object-side alias table in
+    # norm() folds what no-aliases spells differently from splat (`sll zero,zero,0` -> nop,
+    # `beq zero,zero` -> b, `subu rd,zero,rs` -> negu).
+    mips-linux-gnu-objdump -dz -M no-aliases "$OBJ" | awk "/<${FUNC}>:/,/^\$/" > "$slice"
     awk -v fn="$FUNC" '
         FNR == NR {
             if (match($0, /^[ \t]+[0-9a-f]+:/)) {
@@ -191,7 +198,10 @@ trim_trailing_pad() {
             if (last_jr > 0 && NR > last_jr + 1) {
                 pad_only = 1
                 for (i = last_jr + 2; i <= NR; i++)
-                    if (line[i] !~ /^[ \t]*nop[ \t]*$/) pad_only = 0
+                    # `-M no-aliases` spells a nop as `sll zero,zero,0x0` (S300), and this trim runs
+                    # before norm() folds it back, so match both spellings.
+                    if (line[i] !~ /^[ \t]*nop[ \t]*$/ &&
+                        line[i] !~ /^[ \t]*sll[ \t]+zero,zero,0x0[ \t]*$/) pad_only = 0
                 if (pad_only) keep = last_jr + 1
             }
             for (i = 1; i <= keep; i++) print line[i]
@@ -247,6 +257,9 @@ norm() {
         s/^ //
         s/ $//
         s/\b(addu|or) ([a-z0-9]+),([a-z0-9]+),zero/move \2,\3/
+        s/\bsll zero,zero,N$/nop/
+        s/\bbeq zero,zero,/b /
+        s/\bsubu ([a-z0-9]+),zero,/negu \1,/
         s/\baddiu ([a-z0-9]+),zero,/li \1,/
         s/\bbeq ([a-z0-9]+),zero,/beqz \1,/
         s/\bbne ([a-z0-9]+),zero,/bnez \1,/

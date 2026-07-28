@@ -1124,6 +1124,10 @@ def main():
                 and not s["nested"]
                 and not s.get("intrinsic")
                 and s.get("wall_class") in (None, "", "dl-emitter")
+                # pool-blocked: the body would emit a `.rodata` template the ROM keeps in a pool
+                # shared with still-asm siblings, so it cannot bank until they are C -- a bank-time
+                # blocker like jtbl-dispatch, not a codegen verdict (S300).
+                and not s.get("pool_blocked")
             )
 
         shown = stubs if args.all else [s for s in stubs if _is_fresh(s)]
@@ -1135,6 +1139,8 @@ def main():
                 status = "NESTED"
             elif s.get("intrinsic"):
                 status = "INTRINSIC-HASM"
+            elif s.get("pool_blocked"):
+                status = "POOL-BLOCKED"
             elif s.get("wall_class"):
                 # jtbl-dispatch: fresh-looking but a mechanical at-attempt wall (S275).
                 # dl-emitter: counts as fresh, tagged for pricing only (S294).
@@ -1157,6 +1163,8 @@ def main():
             f"{sum(s['carried'] for s in stubs)} carried-wall, "
             f"{sum(s['nested'] for s in stubs)} nested, "
             f"{sum(bool(s.get('intrinsic')) for s in stubs)} intrinsic-hasm, "
+            f"{sum(bool(s.get('pool_blocked')) for s in stubs)} pool-blocked "
+            f"(block-move template in an uncarved pool; banks when the pool-owning siblings do, S300), "
             f"{sum(s.get('wall_class') == 'jtbl-dispatch' for s in stubs)} jtbl-dispatch, "
             f"{sum(s.get('wall_class') == 'dl-emitter' for s in stubs)} dl-emitter "
             f"(pricing tag, counted in fresh; wall framing retired S294 after 7/7 banked), "

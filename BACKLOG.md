@@ -144,6 +144,31 @@ both subagents read the raw-`objdump` deltas as relocation slots). Both are now 
 direction and sharper in detail: price a `dl-emitter` leaf cheap to reconstruct, budget the
 integration, and do not expect to guess which integration defect it will be.**
 
+**S300: the vein hits its first structural ceiling, and it is not a codegen wall.** `--loose-stubs
+main` reads 280 stubs / **8 fresh**, all `dl-emitter`; the class is **22 of 24 across S293-S300**.
+**+2 banked, 1 carried byte-exact.** `func_8007C5D8` reached 590/590 with an exact frame and cannot
+bank in a partial file: its local array initializer forces the object to emit a rodata template the
+ROM keeps in an uncarved pool, so integrating it shifts 22,110,362 bytes of ROM. That is the second such body
+in `src/main/func_80078910.c` (with S279 `func_80079EBC`), and both read `fresh`/`standalone` on
+every tell the ranker had. `--loose-stubs` now tags the block-move variant `POOL-BLOCKED` and drops
+it from `fresh` (7 hits in `main`); the FP-literal variant still has no tell, so **check a
+partial-bank host's `.rodata` carve against the constants a body will emit before pricing it clean.**
+The two banked leaves cost real iteration, both below the source level: `loop.c:3804`'s
+`benefit -= add_cost * bl->biv_count` (the only knob on `combine_givs_p` once it has combined three
+identical DEST_ADDR givs) and `reload1.c:657`'s ascending-pseudo-number spill-slot assignment, which
+no permuter can express. **The standing guidance gains one clause: price a `dl-emitter` leaf cheap to
+reconstruct, budget the integration — and check the host's pool before committing a leaf whose body
+will emit any rodata of its own.**
+
+**ORCHESTRATOR RULE (S300): a verdict returned mid-sprint gets one read for the side it did not
+measure.** `func_8006BC80`'s agent returned a fully cited terminal verdict at 2/474 words
+(`loop.c:1706`, a `sched.c` LUID tie, the giv escape closed at `loop.c:3805`, twelve alternatives
+measured) — every citation correct, and every one about whether `off = 8` could move *after* the
+hoist. Removing the hoist instead banked the leaf. Now a rule in `docs/workflow/fan-out.md`; it is
+the S292 inherited-verdict rule applied one level earlier. Related: the same agent's earlier "46
+words" was three emission-order clusters plus three `ori`-vs-`li` rows that were never diffs — that
+`cmpfn` false row is now fixed with `-M no-aliases`.
+
 **RANKER FOLLOW-UP (S299): measure a retirement, do not estimate it.** The S299 review proposed a
 `docs/levers.md` retirement on a ~200 B saving that was actually *negative* (the rewrite ran longer
 than the line it replaced), which cost the PO a second decision mid-gate. `prompt_lint report` gives
@@ -5929,6 +5954,21 @@ by `/sprint-plan`:
     cost). Banks only when the pool-owning siblings also go C. `docs/wip/func_80079EBC.near-match.md`,
     memory [[shared-literal-pool-partial-bank-blocker]], `docs/hazards.md#rodata-sibling-yaml-pattern`
     (S279 sub-case). **Unlock slice = the jtbl_800D1990 owner + 0.2/0.049 users (still-asm siblings).**
+  - `func_8007C5D8` (S300) — 590/590 isolation, frame exact, all-SDK-macro — the **SAME pool blocker,
+    second instance in this host**, and a different mechanism: not an FP literal but a local array
+    initializer (`s32 tbl[7] = {2,1,0,0,1,1,2}`), which gcc block-moves from a rodata template at
+    `D_800D1A40` (0xACE40, in the generic `[0xACD60, rodata]` blob). A faithful body must emit that
+    template; the host's carve is `[0xACD10, .rodata, main/func_80078910]` at 0x50 and one object's
+    `.rodata` is contiguous, so it would land at 0xACD60 over the doubles + `jtbl_800D1990` the
+    still-asm siblings own. **Measured, not inferred:** the proto/struct edits alone keep the ROM
+    green, the body on top shifts 22,110,362 bytes from 0x1008. Both escapes measured and rejected
+    (extern reference drops the stack copy, 575/590 at frame -0x48; hand element copy 598/590). Text
+    split blocked: the boundary is 0x579D8, 8-aligned not 16. Body preserved at
+    `nonmatchings/func_8007C5D8/base.c`, verdict `docs/wip/func_8007C5D8.near-match.md`. Now tagged
+    `POOL-BLOCKED` by `pick_target.py --loose-stubs`. **Same unlock slice as `func_80079EBC`: bank the
+    pool-owning still-asm siblings of this host.** At bank time it also needs
+    `project_point_to_screen` prototyped `(f32, f32, f32, s32*)` and `ScreenMarker.unk_08` retyped
+    `f32` — both verified free (ROM green with them applied and the stub still in place).
   - `func_8007A40C` (+ twin `func_8007A10C`) — **GCC NESTED functions inside `func_8007A6C8`** (0x98C),
     dual-confirmed by gcc + binutils subagents ($v0 = STATIC_CHAIN_REGNUM; caller `addiu $v0,$sp,0x10`
     before each jal). Child body byte-exact 175/175 but banks ONLY as a 3-fn parent bundle (child A10C
