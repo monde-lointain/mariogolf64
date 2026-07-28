@@ -1,0 +1,5 @@
+F5100400/07000000  ->  gDPSetTile(fmt=RGBA siz=16b line=2 tmem=0 tile=7 pal=0 cmT=0 maskT=0 shiftT=0 cmS=0 maskS=0 shiftS=0)
+F40880C0/070A40CC  ->  gDPLoadTile(tile=7 uls=34.00 ult=48.00 lrs=41.00 lrt=51.00)
+F3000000/071FF200  ->  gDPLoadBlock(tile=7 uls=0 ult=0 lrs=511 dxt=512)
+E4020080/0000007C  ->  gSPTextureRectangle(xl=0.00 yl=31.00 xh=8.00 yh=32.00 tile=0)
+FF10001F/00000000  ->  gDPSetColorImage(fmt=RGBA siz=16b width=32 addr=0x00000000)

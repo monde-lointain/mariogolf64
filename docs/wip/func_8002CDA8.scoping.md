@@ -1,10 +1,11 @@
 # `func_8002CDA8` reconstruction scoping (S303)
 
-**This is not a wall note.** The leaf was never attempted: it is `fresh` / `standalone` on every
-ranker tell and this file only records what its `.s` decodes to, so the next attempt starts from a
-resolved display list instead of 838 raw instructions. Deliberately *not* named
-`.near-match.md`, because `pick_target.py --carried-check` reads that suffix and would report a wall
-that does not exist.
+**This is not a wall note.** The body is reconstructed and sits at the ROM's exact instruction
+count; only the register allocation differs. `pick_target.py --carried-check` nonetheless reports
+`CARRIED-WALL` for this leaf: `carried_wall_names()` unions the BACKLOG carry names with every
+`docs/wip/<fn>.*.md` **by stem**, so the `.scoping.md` suffix changes nothing (the review gate
+corrected an earlier claim here that it would). Read this file before pricing the leaf; a
+wall-vs-scoped state in the detector is a tracked ranker follow-up.
 
 `src/main/func_8002A640.c`, `0xD18` / **838 instructions**, 5 `jal` (all `osVirtualToPhysical`), **0
 FP**, frame `-0x1C8`, 271 stores, 6 branches.
@@ -27,25 +28,25 @@ loads `*gfxp` into the walking pointer, and the final packet chain writes the ad
 
 ## Method (reusable)
 
-Three scratch decoders were written this sprint and are kept beside this note:
+Three decoders were written this sprint and promoted to `tools/` at the S303 review:
 
-- `docs/wip/dl_order_decode.py <fn.s>` -- walks the `.s`, constant-propagates registers **and**
+- `venv/bin/python3 tools/dl_decode.py <fn.s>` -- walks the `.s`, constant-propagates registers **and**
   `$sp` spill slots, models the DL write pointer symbolically (`DL+n`), and prints the store stream
   **re-sorted into display-list order**. Without the re-sort the stream is unreadable: this emitter
   precomputes ~40 packet pointers into registers and stack slots, so program order and DL order
   diverge by up to 40 packets.
-- `docs/wip/rdp_word_decode.py <w0>/<w1> ...` -- decodes SetTile / SetTileSize / LoadTile /
+- `venv/bin/python3 tools/rdp_word.py <w0>/<w1> ...` -- decodes SetTile / SetTileSize / LoadTile /
   LoadBlock / SetTextureImage / SetColorImage / TextureRectangle / RDPHALF / SetScissor /
   SetPrimColor words into their fields.
-- `docs/wip/combine_word_decode.py <w0>/<w1> ...` -- decodes a SETCOMBINE pair into
+- `venv/bin/python3 tools/combine_word.py <w0>/<w1> ...` -- decodes a SETCOMBINE pair into
   `gDPSetCombineLERP` arguments (reads the `G_CCMUX_*` / `G_ACMUX_*` tables straight out of
   `include/libultra/PR/gbi.h`).
 
 A fourth artefact, a host harness that emits candidate macros and prints their words
 (`gcc -m32 -DF3DEX_GBI_2 -D_LANGUAGE_C -I include -I include/libultra -I include/libultra/PR`, with
 local `_SHIFTL`/`_SHIFTR` definitions and `G_ON`/`G_OFF` from `mbi.h`), resolved the
-`gDPSetOtherMode_H` family by brute force. Promoting these three scripts to `tools/` is a recorded
-suggestion for the review gate.
+`gDPSetOtherMode_H` family by brute force; the recipe and its three gotchas are now the
+`tools/dl_decode.py` row of `docs/workflow/loop.md ## Oracles`.
 
 ## Resolved preamble (22 packets, DL order)
 

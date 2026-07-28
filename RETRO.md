@@ -25,6 +25,36 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 303 — both `func_8008D100.c` carries re-opened plus the simplest fresh row (0 banked, 3 carried) — 2026-07-28
+- Increment: 0 files / **0 functions matched**, 3 carried with rewritten characterisations.
+  `func_800947A8` reproduced at 618/618 with an exact `-0x98` frame; `func_8009232C` at 698 against
+  697 with an exact `-0x38` frame; the stretch `func_8002CDA8` (0xD18, 838 instructions) was
+  reconstructed from scratch to **838/838 on its first build**, frame `-0x1E0` against `-0x1C8`.
+  Hosts unchanged: `func_8008D100.c` 12 stubs, `func_8002A640.c` 11. `--loose-stubs main` 279 stubs,
+  fresh 5 -> 4; md5-candidate unchanged at 230 of 265. ROM SHA-1 green at every commit; tree clean at
+  `48f7c5f`.
+- Quality: 0 stuck-far / **0 permuter-escalated** / 3 carried / 2 re-opened (0 banked).
+- Seed: committed 8pt at `53ccda2`; banked **0**pt (both hosts partial); realized 11 / residual +3;
+  regime classical.
+- What helped: `tools/dl_decode.py`, written this sprint and promoted at review — a big emitter's
+  `.s` is not readable as a display list until the packet stores are re-sorted by write-pointer
+  offset (they diverged by up to 40 packets on `func_8002CDA8`). With the list decoded, plus a host
+  `gbi.h` harness to confirm each composite macro, a 101-packet body reached exact instruction count
+  on the first build. `tools/loop_window.py` and `tools/allocno_report.py` turned both carries'
+  residuals into numbers rather than lever guesses.
+- Friction: all three residuals are `global.c` allocation, which no lever list addresses directly —
+  a three-slot frame delta on the stretch, a spilled-versus-register global on `func_8009232C`, and a
+  movable-selection window on `func_800947A8` that needs two conditions at once (`insn_count`
+  117-119 **and** `savings * lifetime >= 2`). Two documented residuals were also wrong: 9232C's
+  "one hoist" is four conditional-arm movables, and 947A8's grid-3 half was never mentioned.
+- Applied: 4 of 4 plus 1 retirement (#1 three decoders to `tools/` with a `tests/tooling` golden;
+  #2 host-harness recipe as a `loop.md ## Oracles` row, including the `p++`-not-`p` trap; #3 the
+  `--carried-check` stem-glob correction into the gates DoR; #4 allocation as the `dl-emitter`
+  class's third cost centre into `BACKLOG.md`; retirement: `gates.md`'s spent
+  `New-audio-sub-lib band-open` bullet, -1041 B).
+- Carry-over: `func_800947A8`, `func_8009232C` (`src/main/func_8008D100.c`), `func_8002CDA8`
+  (`src/main/func_8002A640.c`) — all three characterised, none a fresh leaf.
+
 ## Sprint 302 — the last fresh `dl-emitter` row in `main` plus the closest S301 carry (1 banked, 1 carried) — 2026-07-28
 - Increment: 0 files / **+1 function matched**: `func_8008D3F4` -> **`emit_lens_flare_dl`** (0x9E8, 634/634, frame `-0x110`), the S301 carry re-opened and closed. `func_8009232C` (0xAE4, 697) reconstructed to **698 instructions with an exact `-0x38` frame** on the day it was opened and **carried**. Stretch `func_800947A8` re-derived at 618/618 and its S301 verdict corrected, still carried. `src/main/func_8008D100.c` 13 -> **12** stubs, so no file claimed md5-candidate and the per-file `grep -c INCLUDE_ASM == 0` check applied to nothing. `--loose-stubs main` 280 -> **279**, fresh 6 -> **5**; md5-candidate unchanged at **230 of 265**. ROM SHA-1 green at every commit; tree clean at `279567a`. Descriptive count **+1 banked, +1 characterised, +1 verdict corrected**. Class now **23 of 27 across S293-S302**.
 - Quality: 0 stuck-far / **0 permuter-escalated** / 1 carried / 2 re-opened (1 banked).

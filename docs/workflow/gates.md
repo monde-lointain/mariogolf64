@@ -123,6 +123,12 @@ dashboard). Target selection is `tools/pick_target.py`, not a stored roadmap.
       characterizations to `docs/wip/<fn>.near-match.md` at discovery, not only into the retro digest,
       so the next sprint's DoR finds them. (The `carried-wall:<fn>` in-row ranker tag remains a
       follow-up; the detector is a gate command, not yet a ranked-row column.)
+      - **`--carried-check` unions the BACKLOG names with every `docs/wip/<fn>.*.md` by stem, so a
+        scoping note reads as a wall (S303).** The suffix does not matter: a reconstruction-in-progress
+        note flags carried-wall exactly like a terminal one, and S303's `func_8002CDA8` is at the
+        ROM's exact instruction count with its display list verified, not a wall. Read the doc the
+        flag names before pricing the leaf. (A wall-vs-scoped state in the detector is a ranker
+        follow-up; see `BACKLOG.md`.)
       - **Companion tool (S269): `venv/bin/python3 tools/pick_target.py --nested-check <fn>...`**
         flags a GCC nested function among a fresh pack's smallest leaves — its `.s` prologue spills an
         incoming `$v0` static chain (`sw $v0,K($sp)` + `addu $reg,$v0,$zero`) instead of taking its
@@ -296,17 +302,6 @@ the summary.
       triage (`docs/hazards.md#upstream-mirror-pattern`) before concluding the divergence is custom.
       (pick_target.py automation to price the non-lib-`func_`-callee tell is a tracked follow-up;
       until then the gate applies this guard by reading the pack's asm callees.)
-    - **New-audio-sub-lib band-open is a small incremental enabler when the n_audio_sc header DAG is
-      shared.** An earlier hedge said "libmus needs a full header-vendoring sprint first + reset
-      body-divergence to full"; in practice libnaudio had pre-paid the shared audio header base
-      (libmus.h, n_libaudio_sc.h, libaudio.h, the SC internal hdrs + the base `-I include/libmus
-      include/libnaudio`), so opening libmus was ~3 small headers + a 2-line `mk/libmus.mk` profile +
-      a mechanical `pick_target.py` add, and the `@100.00` leaf `lib_memory.c` banked first-build
-      seed-only (S140 hedge, S141 reality). Reframe a sibling audio lib that shares the n_audio_sc
-      header DAG as a cheap incremental enabler (each `.c` vendors only its own private `aud_*.h` at
-      bank time), not a full header sprint. Keep the body-divergence hedge per-coddog-score — `@100.00`
-      = byte-identical, trust the verbatim mirror; `@99.99` = the diagnosis-pass / exemption-guard
-      above — not a blanket-full-by-lib reset.
     - **Mixed mirror+INCLUDE_ASM partial bank is first-class** (S121 generalized to S123). A
       `coddog-mirror` file can be partially stock: some fns byte-match the upstream, others are
       game-customized. The right play is bank-stock-carry-custom — write the stock fns as C and

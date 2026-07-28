@@ -1,0 +1,7 @@
+=== display-list order ===
++0     (8000001C) 0xE7000000
++4     (80000020) 0x00000000
++8     (8000002C) 0xFD10013F
+
+=== other events, program order ===
+-------- glabel func_80000000

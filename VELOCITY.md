@@ -1474,6 +1474,34 @@ Three honest caveats:
   STRUCTURAL symptom, not evidence of a coloring problem — S285 makes 4 of the last 6 carry verdicts
   refuted, and this one was refuted by the same agent that wrote it, hours later, with no new tool.
   Push: local.
+- **Sprint 303 (realized)** — the two `func_8008D100.c` `dl-emitter` carries re-opened plus the
+  simplest fresh row as a stretch. **0 banked, 3 carried, 0 permuter runs, 2 re-opened, 0
+  stuck-far.** Zero gate enablers. All three items now sit at or within one instruction of the ROM:
+  `func_800947A8` 618/618 (frame exact), `func_8009232C` 698 against 697 (frame exact), and the
+  stretch `func_8002CDA8` **838/838 on its first build** with every display-list word verified and a
+  three-slot frame delta as its whole residual. Hosts unchanged (12 and 11 stubs), so **banked 0pt**;
+  `--loose-stubs main` 279 stubs, fresh 5 -> **4** (the stretch's wip note flags it);
+  md5-candidate unchanged at 230 of 265. Seed **8** (classical, frozen at `53ccda2`); realized
+  **11 / residual +3** (+1 per carry; no permuter, no stuck-far). Rolling-5 (S299-S303): 0+0+0+0+0 pt
+  banked; value = 3+2+0+1+0 matched. Quality **0 / 0 / 3 / 2**.
+  KEY: **for this class the third cost centre is allocation, and it is now the only one left.**
+  Reconstruction was cheap again (838 instructions, exact count, first build, off a decoded display
+  list) and integration never got a chance to bill: every item's residual is `global.c` allocation —
+  a three-slot frame on the stretch, a spilled-versus-register global on `func_8009232C`, a
+  movable-selection window on `func_800947A8`. Second result: **the `.s` of a big emitter is not a
+  display list until it is re-sorted.** `tools/dl_decode.py` (promoted this review) constant-
+  propagates registers and `$sp` slots and re-orders the packet stores; program order and list order
+  diverged by up to 40 packets on `func_8002CDA8`, and with the list in hand the 101-packet body fell
+  out in one pass. Third, a correction the gate itself produced: `--carried-check` unions the BACKLOG
+  names with every `docs/wip/<fn>.*.md` **by stem**, so a scoping note reads as a wall regardless of
+  suffix.
+  Retro applied 4 of 4 plus 1 retirement (#1 three decoders -> `tools/` + `tests/tooling` golden;
+  #2 harness recipe -> `loop.md ## Oracles` row; #3 carried-check state -> gates DoR + ranker
+  follow-up; #4 allocation as the class's third cost centre -> `BACKLOG.md`; retirement: the spent
+  `New-audio-sub-lib band-open` bullet in `gates.md ## Story points`, **-1041 B**). Net prompt-surface
+  delta this sprint: **+308 B** (`gates.md` 29984 -> 29479 after the retirement, `loop.md`
+  46145 -> 46958 for the decoder row).
+  Push: local.
 - **Sprint 303** — plan-time seed freeze (classical track, v2 two-pass): seed **8**, regime
   **classical**, two `dl-emitter` carry re-opens in `src/main/func_8008D100.c` (`func_800947A8`
   618/618 exact frame, `func_8009232C` 698 vs 697 exact frame) plus one fresh stretch

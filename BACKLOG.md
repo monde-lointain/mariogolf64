@@ -144,6 +144,22 @@ both subagents read the raw-`objdump` deltas as relocation slots). Both are now 
 direction and sharper in detail: price a `dl-emitter` leaf cheap to reconstruct, budget the
 integration, and do not expect to guess which integration defect it will be.**
 
+**S303: the class's third cost centre is allocation, and it is the only one left.**
+`--loose-stubs main` reads 279 stubs / **4 fresh** (5 before this sprint's scoping note), all
+`dl-emitter`; the class stands at **23 of 30 across S293-S303** with six carries. **0 banked, 3
+carried, 0 permuter runs.** The S298 pricing rule ("cheap to reconstruct, budget the integration")
+held on its first half and never got to bill the second: `func_8002CDA8` — the largest body the class
+has attempted at 838 instructions — reached the ROM's **exact instruction count on its first build**
+off a decoded display list, and every one of the sprint's three residuals is a `global.c` allocation
+decision (a three-slot frame delta, a spilled-versus-register global, a movable-selection window).
+So price a `dl-emitter` leaf as reconstruction-cheap, integration-budgeted, and
+**allocation-bound**, and open the third phase with `tools/allocno_report.py` rather than a lever
+search. Two tool results: `tools/dl_decode.py` (new this sprint) re-sorts an emitter's packet stores
+into display-list order — program order and list order diverged by up to 40 packets — and
+`--carried-check` unions the BACKLOG names with every `docs/wip/<fn>.*.md` **by stem**, so a scoping
+note reads as a wall regardless of suffix (a wall-vs-scoped state in the detector is the ranker
+follow-up).
+
 **S302: a carry doc's LEVER TABLE is as conditional as its verdict, and re-running a rejected row is
 what banks the leaf.** `--loose-stubs main` reads 279 stubs / **5 fresh**, all `dl-emitter`; the
 class is **23 of 27 across S293-S302** with three carries. **1 banked, 1 carried, 0 permuter runs.**
@@ -3895,6 +3911,25 @@ by `/sprint-plan`:
   vendored upstream version can diverge from the game's rev on a single immediate (S122 nusys-2.07
   `NU_CONT_THREAD_ID=6` vs MG64's 5), and that surfaces only at first build unless reconciled here.
   A near-free retry missing any of these is a half-scoped spike — finish the scope before deferring.
+
+- **(S303 SPIKE x3 — all `dl-emitter`, all at or within one instruction of the ROM; the residual is
+  `global.c` allocation in every case, so re-open with `tools/allocno_report.py`, not a lever search)**
+  `func_800947A8` and `func_8009232C` in `src/main/func_8008D100.c`, `func_8002CDA8` in
+  `src/main/func_8002A640.c`.
+  - `func_800947A8`: 618/618, frame `-0x98`, 398 `cmpfn` rows. Needs two conditions at once in grid
+    1 — an inner-loop `insn_count` of 117-119 (so `0xF5100000` fails at threshold 116) **and**
+    `savings * lifetime >= 2` on the constant `4`; the shared `$s6` is a `cse2` consequence of the
+    move, not its cause. Grid 3 is a second, previously unstated gap: the ROM hoists five life-1
+    movables there (needs `insn_count <= 110`) against this build's 117.
+  - `func_8009232C`: 698 against 697, frame `-0x38`. Body ruled out — both sides emit exactly 156
+    `sw`. The hoist divergence is four movables, not one, and they are exactly the constants written
+    inside the `first == 0` / `else` arms. `u32 src[1]` does not force the ROM's memory home (a
+    one-element array is not address-taken, so `cse` deletes the store); the ROM's `src` is a spilled
+    allocno at `refs 3, live_length 130, priority 230` against an allocation cut at 223/222.
+  - `func_8002CDA8`: **838/838 on the first build**, every display-list word verified, frame `-0x1E0`
+    against `-0x1C8` — exactly three extra spill slots holding DL pointers. Reconstruction is done and
+    recorded in `docs/wip/func_8002CDA8.scoping.md` with the working body; do not re-derive the list.
+    Note `--carried-check` flags this leaf, and that flag means *scoped*, not *walled*.
 
 - **(S298 SPIKE — terminal from the caller's source; one named lead, do not re-open on size order)**
   `init_rdp_and_draw_sky_background`, `src/main/func_8002A640.c`. 286/286 with the ROM's `-0xA0`
