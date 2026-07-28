@@ -331,3 +331,297 @@ void func_8002CDA8(Gfx** gfxp) {
   *gfxp = gfx;
 }
 ```
+
+## S304 crack agent: the residual is a one-register slide, not a live-length tie
+
+The S304 re-open above models the residual as `allocno_compare` mis-ordering pseudos 352 and 356,
+with 352 spilled by `global.c`. **That model is wrong**, and the `-dg` dump says so directly. Read
+this section before spending another sprint on live lengths.
+
+### What the dumps actually show
+
+Compile the seed with `-dg -dl` (`nonmatchings/func_8002CDA8/compile.sh` is now present, so
+`venv/bin/python3 tools/allocno_report.py nonmatchings/func_8002CDA8/base.c func_8002CDA8` works
+without inlining into `src/`). Three facts:
+
+1. **The three competing pseudos have identical conflict sets.** From `<file>.c.greg`:
+
+   ```
+   ;; 313 conflicts: 72 73 74 78 79 81 169 189 190 207 208 254 255 289 297 298 303 313 316 323 352 356 ... 2 3 4 5 29
+   ;; 352 conflicts: <byte-identical>
+   ;; 356 conflicts: <byte-identical>
+   ```
+
+   Same allocno conflicts, same hard-reg conflicts (`{v0, v1, a0, a1, sp}`). Any priority order over
+   these three is therefore reachable -- but by the same token, priority order cannot by itself
+   produce an asymmetric outcome between them.
+
+2. **`global.c` gives all three a hard register.** In allocation order the seed's
+   `Register dispositions` are
+
+   | allocno | expression | this build | ROM |
+   | --- | --- | --- | --- |
+   | 207 | -- | `$s0` | `$s0` |
+   | 637 | LoadTile `ult` | `$s2` | `$s2` |
+   | 635 | LoadTile `lrt` | `$s3` | `$s3` |
+   | 356 | `t & 0xFFFF` | **`$s1`** | **`$s4`** |
+   | 352 | `yl << 10` | `$s4` | `$s5` |
+   | 313 | `MAX(yl,0) & 0xFFC` | `$s5` | `$s6` |
+   | 297 | -- | `$s6` | `$s7` |
+   | 254 | -- | `$s7` | `$t8` |
+   | 208 | -- | `$t8` | spilled |
+
+   The ROM's chain is **this chain slid down exactly one register**. Nothing is reordered.
+
+3. **The spill is `reload`'s, not `global`'s.** The `.greg` dump prints
+
+   ```
+   Spilling reg 20.
+    Register 88 now on stack.
+    Register 352 now on stack.
+    Register 378 now on stack.
+   ```
+
+   `reload1.c:2232` (`new_spill_reg`) commandeers hard reg 20 = `$s4` as a reload register and
+   `reload1.c:3503` evicts every pseudo `global.c` had parked there. Both builds spill `$s4`; because
+   of the one-register slide, the ROM's evicted pseudo is **356** and ours is **352**.
+
+Everything else in the residual is downstream of that single fact: with 356 in a register the
+`yl >= 0` arm is one `or`, `reorg` folds it into an annulled `bgezl`, and the ROM's `bgez` + `j`
+pair plus the compensating `move` disappear.
+
+### So the question is: why is `$s1` free here and taken in the ROM?
+
+Note that 637 and 635 (both ranked *above* 356) skip `$s1` and take `$s2`/`$s3`; `find_reg`'s pass 0
+(`global.c:951-953`) excludes `regs_someone_prefers[allocno]`, and some later allocno prefers reg 17.
+356 then takes `$s1` in pass 0 because that exclusion does not apply to it. In the ROM, reg 17 is
+genuinely unavailable to 356. **The lever is therefore one unit of register pressure or one copy
+preference in the i-loop preheader region, not a live length anywhere.**
+
+### Proved not to move it
+
+- `allocno_compare` (`global.c:587-604`) arithmetic is *correct as documented* -- refs 5/5,
+  live lengths 108/107, priorities 925/934 -- but it is not the deciding pass, so equalising the
+  lengths is not the fix. The lengths differ by one only because `move_movables`
+  (`loop.c:1551`, `loop.c:1854`) emits the two hoisted invariants adjacently, in loop-body order.
+- **The block order is not source-controllable.** `gSPScisTextureRectangle`'s
+  `((yl) < 0) ? MIN(...) : 0` puts the `yl << 10` arm on the fall-through and the `t & 0xFFFF` arm
+  behind the branch, which fixes the movables order. Expanding the macro locally with **both**
+  ternaries inverted to `((yl) >= 0) ? 0 : MIN(...)` produces a **byte-identical object**:
+  `fold`/`invert_truthvalue` canonicalises `c ? 0 : X` straight back. The ROM's compiler saw the same
+  canonical form, which is consistent with the ROM's def order (`sll ...,10` before
+  `andi ...,0xFFFF` in its preheader at `8002D100` / `8002D108`) being identical to ours.
+- Loop-body respellings, all 838/838 and byte-identical to the seed: `s32 xl = j << 5` with
+  `xh = xl + 32`; an `s32 yh` i-loop temp; every shift respelled as a multiply
+  (`j * 32`, `(32 - i) * 4`, `1024`). Worse: `yh = yl + 4` (835, 1640 rows);
+  `yl = 124 - i*4` with `yh = 128 - i*4` (840, frame `-0x1E8`).
+- Goto-loops (the `goto-loop-defeats-loop-strength-reduction` lever) kill the hoist and therefore do
+  reproduce the ROM branch trio exactly (`bgez` 2, `bgezl` 0, `j` 2) with the i-loop as a goto-loop,
+  but at 868 instructions. j-loop only: 858. Both: 849. This is the clean proof that the branch form
+  is a *consequence* of 356's allocation and carries no independent information.
+
+### One further structural divergence, unexplained and probably related
+
+The ROM keeps `lui $v1, 0xE4000000` **inside** the j-loop (`8002D1E0`) and computes
+`or $v1,$s7,$v1` / `or $v0,$v0,$v1` there; this build hoists the whole `0xE4000000 | yhfield` into
+the i-loop head (`or s6,v1,t9` with `lui t9,0xe400`), which costs one extra register (`$t9`) live
+across the loop while saving two in-loop instructions -- static count unchanged, pressure +1 in
+exactly the region that decides `$s1`. That hoist is gated by `loop.c:1631`,
+`(threshold * savings * m->lifetime) >= insn_count`, with `threshold = 2 * (1 + n_non_fixed_regs)`
+(`loop.c:532`) decaying by 3 per movable actually moved (`loop.c:1719`, `loop.c:1904`). Defeating
+that one hoist -- without adding instructions -- is the most concrete remaining lead, and it is a
+`move_movables` ordering/threshold question, not a spelling question.
+
+### Verdict
+
+Not terminal, but the S304 target was mis-named. Any further attempt must aim at
+**hard-register availability at allocno 356's turn** (`global.c` `find_reg` pass 0 /
+`regs_someone_prefers`, and the `loop.c:1631` hoist that inflates preheader pressure), and must be
+measured with the `-dg` `Register dispositions` block, not with `allocno_report.py`'s priority
+column alone -- the priority column is accurate and irrelevant here.
+
+### `MEM_IN_STRUCT_P` / array-element spelling: clean negative (S304)
+
+Tested after `func_8008534C` banked on that lever. Neither hoisted invariant reads memory --
+`yl << 10` and `t & 0xFFFF` are pure functions of the loop index -- so `true_dependence`
+(`sched.c:817`) and `loop.c`'s `invariant_p` have no aliasing surface in the grid loop; the only
+memory traffic there is the `Gfx *` store stream and one spill reload of `src`. Measured anyway:
+
+| form | result |
+| --- | --- |
+| `extern s32 D_800B7730[]` + `D_800B7730[0]` at all four sites | 826 / `-0x1A0` / 1619 rows |
+| `extern u16* nuGfxCfb_ptr[]` + `nuGfxCfb_ptr[0]` | 837 / `-0x1D8` / 1600 rows |
+| both | 824 / `-0x198` / 1617 rows |
+
+The branch trio is unchanged in all three, confirming the lever does not reach the two competing
+pseudos. The `D_800B7730` array form is a large *pressure reduction* (`lw` 92 vs 101, frame 0x38
+smaller) -- the opposite of what this residual needs, which is **one more** unit of pressure so that
+`$s1` is unavailable to allocno 356.
+
+### The deciding allocno is 189, not 80 (S304)
+
+Two measurements from the `-dg` conflict dump settle it.
+
+**Allocno 80 cannot be the lever, for two independent reasons.**
+
+1. *It does not conflict with 356.* `356 in conflicts(80)` is false and `80 in conflicts(356)` is
+   false. Giving 80 a hard register cannot make any register unavailable to 356, so no slide is
+   possible from that direction.
+2. *It is structurally unallocatable.* `hard_reg_conflicts[80]` is
+   `{2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,29}` -- `$v0,$v1,$a0-$a3,
+   $t0-$t9,$s0-$s7,$sp`, i.e. **every allocatable GP register**. `find_reg` ORs that straight into
+   `used1` (`global.c:936`) before either pass runs (`global.c:951-985`), so no candidate survives
+   and the spill is unconditional. For contrast, 356's and 352's hard-reg block set is only
+   `{$v0,$v1,$a0,$a1,$sp}`.
+
+   Pseudo 80 is `n`, the shared `D_800B7730` temp: `(reg/v:SI 80)` with two defs (insns 1349, 1670)
+   and uses under `and`(0xFFF) / `plus`(32) -- the four animated `gDPSetTileSize` arguments. Its two
+   short ranges are merged into one 118-insn allocno spanning the densest part of the tail, where
+   `local-alloc` has already claimed every register. Splitting it into two temps is the 835-instruction
+   form already recorded above, so this is not source-reachable either.
+
+**The register that actually differs is `$s1`, and the ROM holds a value in it that this build
+spills.** An earlier `grep '\$s1[,)]'` missed it because the operand is line-final; a proper live-in
+scan of the ROM's j-loop body (`.L8002D128` .. `bne $a3,$v0` at `8002D2C8`) reports
+`read-before-write = s0 s1 s5 s6 s7 t6 t7 t9`. The `$s1` use is `or $v0,$a0,$s1` at `8002D18C`,
+and its def is `or $s1,$v0,$s4` at `8002D0A0`, three insns into the i-loop head:
+
+```
+.L8002D094:                       |  mine (2a48):
+  addu $a3,$zero,$zero            |    move a3,zero
+  andi $v0,$s2,0xFFF              |    andi v0,s2,0xfff
+  lui  $s4,(0xF4000000>>16)       |    lui  t9,0xf400
+  or   $s1,$v0,$s4    <-- $s1     |    or   t9,v0,t9      <-- caller-saved, then spilled
+...                               |  ...
+  or   $v0,$a0,$s1    (8002D18C)  |    lw   t9,420(sp)    <-- reload from the extra slot
+                                  |    or   v0,a0,t9
+```
+
+That value is **allocno 189** = `(ior (reg 188) (reg 190))` (insn 1937), the j-loop-invariant
+`_SHIFTL(G_LOADTILE,24,8) | _SHIFTL(ult,0,12)` half of the `gDPLoadTile` packet inside
+`gDPLoadTextureTile`. Its hard-reg block set is `{$v0,$v1,$a0,$a1,$sp}` -- the same as 356's, so
+`$s1` **is** available to it -- and it conflicts with 356, 352, 313, 297, 254, 208, 637, 635 and 207.
+It is simply ranked too low and never gets its turn before 356:
+
+| allocno | expression | refs | len | priority | this build | ROM |
+| --- | --- | --- | --- | --- | --- | --- |
+| 189 | `G_LOADTILE_cmd \| ult` | 5 | 130 | **769** | spilled (reload slot `420`) | `$s1` |
+| 356 | `t & 0xFFFF` | 5 | 107 | 934 | `$s1` | `$s4` (evicted by reload) |
+
+Insert 189 above 356 and the ROM's entire chain falls out with no other change:
+`207→s0, 637→s2, 635→s3, 189→s1, 356→s4, 352→s5, 313→s6, 297→s7, 254→t8, 208→spilled`.
+
+**The exact arithmetic target.** `allocno_compare` (`global.c:587-604`) needs
+`priority(189) > 934`. With `refs = 5` (`floor_log2(5)*5 = 10`) that means
+`live_length(189) <= 107`, i.e. **23 insns shorter than the current 130**; alternatively
+`refs >= 7` at the current length (`floor_log2(7)*7 = 14`, giving 1076). Raising the loop depth of
+the *use* does not work: 189 and 356 are both used in the j-loop, so any `do {} while (0)` or extra
+nesting scales both refs together and preserves the order.
+
+189's 130 comes from where `move_movables` places its def: it is discovered at packet 4 of the
+`gDPLoadTextureTile` expansion, so it is emitted near the **front** of the j-loop preheader, while
+352/356 come from packet 8 (the texture rectangle) and land at the **back** (insns 1969/1970). The
+~23-insn gap is exactly the preheader between them. The ROM's def sits at the same early position
+(`8002D0A0`, three insns after the i-loop label), so the ROM's 189 is long-lived too -- which means
+the ROM's advantage is *not* a shorter live range for 189, and the remaining unknown is narrow and
+well-posed: what gives 189 a higher `allocno_compare` priority, or `$s1` specifically, in the ROM's
+build. That is the one question a follow-up should answer.
+
+**Verdict:** not terminal, and now reduced to a single named allocno with a numeric target.
+`docs/hazard-index.md` should route this class to "one allocno's priority, not a register coin";
+the working model is the one-register slide above, and the measurement is the `-dg`
+`Register dispositions` block plus the `;; N conflicts:` lines, never `allocno_report.py`'s priority
+column read in isolation.
+
+### The refs axis is the lever, and it lands the ROM's allocation chain (S304)
+
+The lead's arithmetic on the *product* was right and my "gap 23 or refs>=7" framing understated it.
+`floor_log2` makes refs the cheap axis: at len 130, refs 7 gives `2*7/130*10000 = 1076`, clear of
+356's 934, with the live range untouched. And refs are reachable, because `flow.c` accumulates
+`REG_N_REFS (regno) += loop_depth` -- so a `do {} while (0)` placed around **one statement** raises
+the ref weight of only the pseudos used in that statement.
+
+**First: the CSE question is a non-issue.** 189 = `(ior (reg 188) (reg 190))` where 188 =
+`(and (reg 637) 4095)` = `ult & 0xFFF` and 190 = the `0xF4000000` constant. 188 is *already* shared
+with the `gDPSetTileSize` half in both builds -- the ROM shows the same single `andi $v0,$s2,0xFFF`
+feeding both `or $s1,$v0,$s4` (LoadTile, `F4......`) and `or $s4,$v0,$s4` (SetTileSize, `F2......`).
+Nothing to gain there. Explicit `s32 uls/ult/lrs/lrt` temps referenced from both call sites produce a
+**byte-identical object and a byte-identical allocno table** (every refs / len / priority / reg equal,
+only the pseudo numbering shifts) -- gcc folds them. That axis is closed.
+
+**The depth probes, in order.** Each row is `do {} while (0)` nesting around a progressively smaller
+piece, with the resulting 189 row and the s-register chain:
+
+| form | 189 | chain | count |
+| --- | --- | --- | --- |
+| seed | refs 5, len 130, **769** | 207 s0, 637 s2, 635 s3, **356 s1**, 352 s4(evicted), 313 s5 | 838 |
+| x1 round the whole `gDPLoadTextureTile` | refs 6, 923 | 254 s1, 208 s4, 356 s5 -- slides **two** | 836 |
+| x2 round the whole call | refs 7, 1076 | 254 s1, 208 s2, 189 s3, 356 s5 | 836 |
+| x1 round `gDPLoadTile` only | refs 6, 923 | 208 s1, **356 spilled**, 189 s5 | **838** |
+| **x2 round the LoadTile `w0` store only** | **refs 7, 1076** | **207 s0, 189 s1, s2, s3, 356 out, 352 s5, 313 s6, s7, 254 t8** | **838** |
+
+The last row is the ROM's chain exactly, as predicted. Wrapping the whole `gDPLoadTextureTile` always
+lifts 254 and 208 with 189 (they are the other invariant halves of the same packets) and oversteps;
+hand-expanding `gDPLoadTextureTile` and then `gDPLoadTileGeneric`, and wrapping **only the `w0`
+assignment**, isolates 189 -- 208 stays at refs 5 / 781 and drops out of the chain onto `$t8`.
+
+**Result: the grid loop's clamp block is now instruction-for-instruction and register-for-register
+identical to the ROM**, including `sra $v0,$s5,7` (352 in `$s5`), the `lw` + `or` spilled arm for 356,
+and `bgez` + `j` in place of the annulled `bgezl`:
+
+```
+        ROM  8002D25C                       mine  2c10
+        bgez  $t7, .L8002D280               bgez  t7, 2c34
+         sra  $v0, $s5, 7                    sra  v0, s5, 0x7
+        ...  andi $v0,$v0,0xFFFF            ...  andi v0,v0,0xffff
+        j    .L8002D288                     j    2c3c
+         or   $v0, $a0, $v0                  or   v0, a0, v0
+  .L8002D280:                          2c34:
+        lw   $t8, 0x194($sp)                lw   t9, 428(sp)
+        or   $v0, $a0, $t8                  or   v0, a0, t9
+```
+
+Mnemonic histogram against the ROM went from 4 deltas (`move` +1, `bgez` -1, `bgezl` +1, `j` -1) to
+**2** (`lw` 100/101, `move` 80/79), at the same 838 instructions. Frame is still `-0x1D8`; the two
+extra reload slots (`420`, `428`) and the preamble scheduling hunks are untouched and are what remain.
+
+**A caveat on the source form.** `do { do { ... } while (0); } while (0);` round a hand-expanded
+`w0` store is a *mechanism probe*, not a plausible original. It proves the residual is a ref-weight
+question and names the pseudo, but the real source almost certainly reached the same weight through a
+genuine construct. The obvious candidate to try next is the `HW_VERSION_1` arm of
+`gDPLoadTextureTile` (`gbi.h:3908`), which wraps the whole expansion in a real
+`for (_loadtile_i = 0; _loadtile_i < _loadtile_nw; _loadtile_i++) pkt;` -- a true loop, and therefore
+a true `loop_depth` increment -- or `gDPLoadMultiTile`. Either would give the ref weight without the
+probe's ugliness, if their emitted words match.
+
+**Still open, and now the whole residual:** `lw` -1 / `move` +1 and the two extra reload slots. The
+seed form is preserved at `/tmp` and reproduced by reverting the loop body to the plain
+`gDPLoadTextureTile` call.
+
+### Orchestrator addendum (S304): the `HW_VERSION_1` follow-up is ruled out
+
+The crack agent's closing suggestion — reach allocno 189's ref weight naturally through the
+`HW_VERSION_1` arm of `gDPLoadTextureTile` (`include/libultra/PR/gbi.h:3908`), whose expansion
+wraps the packet advance in a real `for (_loadtile_i = 0; _loadtile_i < _loadtile_nw;
+_loadtile_i++) pkt;` and would therefore give a genuine `loop_depth` increment — **does not apply
+here.** That arm does not expand the packets inline at all; it calls the library function
+`guDPLoadTextureTile(...)`, so any body using it emits a `jal`. The ROM's `func_8002CDA8` contains
+exactly **5 `jal`s and every one of them is `osVirtualToPhysical`**:
+
+```
+$ grep -oE 'jal +[A-Za-z_0-9]+' asm/nonmatchings/main/func_8002A640/func_8002CDA8.s | sort | uniq -c
+      5 jal        osVirtualToPhysical
+```
+
+So the ROM was built against the non-`HW_VERSION_1` (inline-expanding) `gDPLoadTextureTile`, and the
+natural-construct search has to look elsewhere. `gDPLoadMultiTile` (`gbi.h`, same file) remains
+untried: it expands inline to the same seven packets with `tmem` and `rtile` parameters, so at
+`tmem = 0` / `rtile = G_TX_RENDERTILE` it should emit identical words — but it is a different macro
+text and worth one `allocno_report` read to see whether 189's refs differ.
+
+**Status of the winning form.** The `do { do { ... } while (0); } while (0);` wrapper around a
+hand-expanded `gDPLoadTile` `w0` store is a *mechanism probe*, not a shippable body: it is the
+measurement that proves the residual is `REG_N_REFS` weight on allocno 189 and nothing else. It is
+kept in `base.c` because it is the best-measured form (mnemonic deltas 4 -> 2, grid-loop allocation
+and branch form both matching the ROM), **not** because it is a bank candidate. Anyone resuming
+must find the natural construct that reaches the same ref weight, or treat this as terminal.
