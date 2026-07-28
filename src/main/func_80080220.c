@@ -1460,8 +1460,212 @@ void func_8008679C(s32 arg) {
   D_800C5DF0 = 0.0f;
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80080220",
-            emit_ball_offscreen_indicator);
+/* The rotate / translate / scale triples the indicator's matrix is built from.
+ * Spelled as nine symbols, not three arrays: the ROM materializes a %hi/%lo per
+ * field. */
+extern f32 D_800E2110;
+extern f32 D_800E2114;
+extern f32 D_800E2118;
+extern f32 D_800E211C;
+extern f32 D_800E2120;
+extern f32 D_800E2124;
+extern f32 D_800E2128;
+extern f32 D_800E212C;
+extern f32 D_800E2130;
+extern Mtx D_800E2090[];
+extern Mtx D_E2090[];
+/* The 32-vertex arrow strip and the 16-vertex textured quad pair. */
+extern Vtx D_800C5AF0[];
+extern Vtx D_800C5BF0[];
+/* Frame counter, sound-slot cursor, and the double-buffer toggle of the
+ * streamed texture. */
+extern s32 D_800C5E10;
+extern s32 D_800C5E14;
+extern s32 D_800C5E18;
+extern u16 D_800C5DFA[];
+/* Base of the streamed texture heap. */
+extern u8* D_8012D3C0;
+extern const f64 D_800D1B98; /* pi */
+extern const f64 D_800D1BA0; /* pi / 180 */
+extern f32 sinf(f32);
+
+/**
+ * Emits the off-screen ball indicator: a marker drawn at the projected ball
+ * position once the ball has left the view.
+ *
+ * `D_800C5DF0` is the effect's phase, advanced 0.2 per call and retired by
+ * setting it to -1 once it passes pi; a negative phase means the effect is off.
+ * The ball's world position is projected, and only a rejected projection (a
+ * negative return, i.e. off screen) draws anything.
+ *
+ * The course record's classifier (`func_80213C78`) picks between the two
+ * appearances. Kinds other than 10 and 2 get the untextured arrow strip: a
+ * shade-only combine, a phase-driven z rotation, and 32 vertices walked as four
+ * groups of three two-triangle commands. Kinds 10 and 2 get the textured pair
+ * instead, with a random rotation, a per-frame streamed 48x128 4-bit texture
+ * pulled from the rom every fourth call, and a prim colour that is random for
+ * kind 10 and fixed otherwise.
+ */
+void emit_ball_offscreen_indicator(Gfx** gfxp) {
+  f32 mf[4][4];
+  s32 screen[6];
+  RomLoadSlot buf[2];
+  Gfx* gfx;
+  f32* rot;
+  f32* pos;
+  f32* sc;
+  s32 kind;
+  s32 i;
+  f32 scale;
+
+  gfx = *gfxp;
+
+  if (D_800C5DF0 < 0.0f) {
+    return;
+  }
+  D_800C5DF0 = D_800C5DF0 + 0.2f;
+  if (D_800C5DF0 > D_800D1B98) {
+    D_800C5DF0 = -1.0f;
+    return;
+  }
+
+  if (project_point_to_screen(effect_spawn_pos[0] * (1.0f / 1024.0f),
+                              effect_spawn_pos[1] * (1.0f / 1024.0f),
+                              effect_spawn_pos[2] * (1.0f / 1024.0f),
+                              screen) >= 0) {
+    return;
+  }
+
+  kind = func_80213C78(&D_801B71D0[D_8010623F * 0xB8]);
+  if ((kind != 0xA) & (kind != 2)) {
+    scale = sinf(D_800C5DF0) * 0.5f;
+    D_800E2128 = 0.0f;
+    D_800E212C = 0.0f;
+    D_800E2130 = (D_800C5DF0 + 0.7f) * 0.5f;
+  } else {
+    scale = sinf(D_800C5DF0) * 0.4f;
+    D_800E2128 = 0.0f;
+    D_800E212C = 0.0f;
+    D_800E2130 = (f32)((f64)(guRandom() % 360) * D_800D1BA0);
+  }
+
+  rot = &D_800E2128;
+  pos = &D_800E2110;
+  sc = &D_800E211C;
+  sc[0] = scale;
+  D_800E2120 = scale;
+  D_800E2124 = scale;
+  pos[0] = (f32)(screen[0] - 0xA0);
+  D_800E2114 = (f32)(-screen[1] + 0x78);
+  D_800E2118 = -100.0f;
+  mtx_from_rts(mf, rot, pos, sc);
+  convert_and_pack_floats_to_fixed(mf, &D_800E2090[sky_panel_bank_index]);
+
+  gDPPipeSync(gfx++);
+  gDPPipeSync(gfx++);
+  gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+  gSPLoadGeometryMode(gfx++, 0);
+  gSPSetGeometryMode(gfx++, G_SHADE | G_SHADING_SMOOTH);
+  gDPPipeSync(gfx++);
+  gDPSetTextureLUT(gfx++, G_TT_NONE);
+  gDPPipeSync(gfx++);
+  gDPSetAlphaDither(gfx++, G_AD_DISABLE);
+  gDPPipeSync(gfx++);
+  gDPSetTexturePersp(gfx++, G_TP_PERSP);
+  gDPPipeSync(gfx++);
+  gDPSetAlphaCompare(gfx++, G_AC_NONE);
+  gDPSetBlendColor(gfx++, 255, 255, 255, 1);
+
+  if ((kind != 0xA) & (kind != 2)) {
+    gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_OFF);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_BILERP);
+    gDPSetPrimColor(gfx++, 0, 0, 0, 0, 255, 255);
+    gDPSetCombineMode(gfx++, G_CC_SHADE, G_CC_SHADE);
+    if (D_800C5DF4 == 0) {
+      gDPPipeSync(gfx++);
+      gDPSetRenderMode(gfx++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
+    } else {
+      gDPPipeSync(gfx++);
+      gDPSetRenderMode(gfx++, G_RM_AA_XLU_SURF, G_RM_AA_XLU_SURF2);
+    }
+    gDPPipeSync(gfx++);
+    gSPMatrix(gfx++, D_1B5638, G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
+    gSPMatrix(gfx++, &D_E2090[sky_panel_bank_index],
+              G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
+    gSPVertex(gfx++, D_800C5BF0, 32, 0);
+    i = 0;
+    do {
+      gSP2Triangles(gfx++, i * 8, i * 8 + 1, i * 8 + 2, 0, i * 8, i * 8 + 2,
+                    i * 8 + 3, 0);
+      gSP2Triangles(gfx++, i * 8 + 1, i * 8 + 4, i * 8 + 5, 0, i * 8 + 1,
+                    i * 8 + 5, i * 8 + 2, 0);
+      gSP2Triangles(gfx++, i * 8 + 4, i * 8 + 6, i * 8 + 7, 0, i * 8 + 4,
+                    i * 8 + 7, i * 8 + 5, 0);
+      i++;
+    } while (i != 4);
+  } else {
+    D_800C5E14++;
+    if (D_800C5E14 == 4) {
+      D_800C5E10 = (D_800C5E10 + 1) % 6;
+      D_800C5E14 = 0;
+      func_8005062C(D_800C5DFA[D_800C5E10 * 2], buf);
+      func_800506D4(D_8012D3C0 + (D_800C5E18 * 0xC08 + 0x970), buf);
+      D_800C5E18 ^= 1;
+    }
+
+    gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_POINT);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
+
+    if (kind == 0xA) {
+      gDPSetEnvColor(gfx++, 255, 255, 127, 255);
+      gDPSetPrimColor(gfx++, 0, 0, guRandom() % 255, guRandom() % 255,
+                      guRandom() % 255, 191);
+    } else {
+      gDPSetPrimColor(gfx++, 0, 0, 191, 0, 191, 191);
+      gDPSetEnvColor(gfx++, 255, 255, 255, 255);
+    }
+
+    gDPSetCombineLERP(gfx++, ENVIRONMENT, PRIMITIVE, TEXEL0, PRIMITIVE,
+                      PRIMITIVE, 0, TEXEL0, 0, ENVIRONMENT, PRIMITIVE, TEXEL0,
+                      PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0);
+    gSPMatrix(gfx++, D_1B5638, G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
+    gSPMatrix(gfx++, &D_E2090[sky_panel_bank_index],
+              G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
+    gSPVertex(gfx++, D_800C5AF0, 16, 0);
+    gDPLoadTextureBlock_4b(gfx++, ((u32)D_8012D3C0 + 0x978) & ~7, G_IM_FMT_I,
+                           48, 128, 0, G_TX_NOMIRROR | G_TX_WRAP,
+                           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK,
+                           G_TX_NOLOD, G_TX_NOLOD);
+    gDPPipeSync(gfx++);
+    i = 0;
+    do {
+      gSP2Triangles(gfx++, i * 4, i * 4 + 1, i * 4 + 2, 0, i * 4, i * 4 + 2,
+                    i * 4 + 3, 0);
+      i++;
+    } while (i != 2);
+
+    gDPPipeSync(gfx++);
+    gDPLoadTextureBlock_4b(gfx++, ((u32)D_8012D3C0 + 0x1580) & ~7, G_IM_FMT_I,
+                           48, 128, 0, G_TX_NOMIRROR | G_TX_WRAP,
+                           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK,
+                           G_TX_NOLOD, G_TX_NOLOD);
+    gDPPipeSync(gfx++);
+    i = 0;
+    do {
+      gSP2Triangles(gfx++, i * 4, i * 4 + 1, i * 4 + 2, 0, i * 4, i * 4 + 2,
+                    i * 4 + 3, 0);
+      i++;
+    } while (i != 2);
+    gDPPipeSync(gfx++);
+  }
+
+  gDPPipeSync(gfx++);
+  *gfxp = gfx;
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80080220", func_800874D8);
 
