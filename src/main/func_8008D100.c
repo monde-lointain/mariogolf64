@@ -110,6 +110,14 @@ INCLUDE_ASM("asm/nonmatchings/main/func_8008D100", func_8009226C);
 
 void func_80092324(void) {}
 
+/* Snapshot-replay display-list emitter over a Gfx** parameter, dispatching on
+ * D_800C5EE8. S302 carry: reconstructed to 698 instructions against the ROM's
+ * 697 with an exact -0x38 frame, every DL command word verified against gbi.h.
+ * The residual is one register-allocation decision -- loop B hoists 0xF3000000
+ * where the ROM materialises it in-body, which costs the callee-saved scratch
+ * the ROM spends on spilling `src` to 0xC($sp) -- and it permutes the whole
+ * body. Full body, the resolved macro table and the measured lever table are in
+ * docs/wip/func_8009232C.near-match.md. */
 INCLUDE_ASM("asm/nonmatchings/main/func_8008D100", func_8009232C);
 
 /**
