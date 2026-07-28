@@ -619,7 +619,6 @@ void emit_snapshot_panel_grid_dl(void) {
  * gDPSetTile word 0xF5100000). Full body + measured lever table in
  * docs/wip/func_800947A8.near-match.md. */
 INCLUDE_ASM("asm/nonmatchings/main/func_8008D100", func_800947A8);
-
 INCLUDE_ASM("asm/nonmatchings/main/func_8008D100", func_80095150);
 
 extern void play_sound_effect(s32 sfx, s32 arg1, s32 arg2);
