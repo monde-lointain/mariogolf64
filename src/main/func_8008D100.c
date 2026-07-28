@@ -59,15 +59,195 @@ void init_scenario_state(void) {
 
 INCLUDE_ASM("asm/nonmatchings/main/func_8008D100", func_8008D1DC);
 
-/* Sun / lens-flare emitter over a Gfx** parameter. S301 carry: reconstructed to
- * 634/634 instructions with an exact -0x110 frame and only 12 differing
- * instructions -- one four-instruction scheduling rotation in the address
- * setup, and four reload1.c spill-slot pair swaps. Every DL command word was
- * verified against gbi.h. Full body, resolved macro arguments and the measured
- * lever table (the decisive one: subscripting D_800C5F24/D_800C5F2C so the
- * loads conflict with the Gfx stores) are in
- * docs/wip/func_8008D3F4.near-match.md. */
-INCLUDE_ASM("asm/nonmatchings/main/func_8008D100", func_8008D3F4);
+/**
+ * Emits the sun's lens flare: eight sprites strung along the line from the sun
+ * at (D_800C5F24, D_800C5F2C) through the screen centre, each with its own
+ * primitive and environment colour and its own radius, all sharing one 64x64
+ * 8-bit intensity texture under a (PRIM - ENV) * TEXEL0 + ENV combine.
+ *
+ * Nothing is emitted unless the sun is on screen (the nine early returns) and
+ * the fade term `s`, which falls off with the sun's distance from the centre
+ * and is capped by the per-scenario limit at `e->field_0x14->field_0x18`, is at
+ * least 8. `s` doubles as the primitive alpha and scales every sprite's radius.
+ *
+ * Three spellings below are load-bearing:
+ *   - `D_800C5F24` / `D_800C5F2C` are subscripted arrays, not scalars, so their
+ *     loads conflict with the MEM_IN_STRUCT_P stores through `Gfx *` and stay
+ *     inside the sprite loop. As plain scalars loop.c hoists them and the
+ *     160.0f/96.0f terms with them, which costs $f20/$f22 and 0x20 of frame.
+ *   - `pa` and `pb` are declared in blocks that open one packet early, so their
+ *     pseudos are numbered ahead of the pipe-sync packets that precede them.
+ *     reload1.c hands out spill slots in ascending pseudo number, and the ROM's
+ *     Gfx* slots run 0x2C, 0x3C, 0x34, 0x54, 0x4C -- each pair inverted.
+ *   - `tod` and `n << 8` are statements of their own, in that order, ahead of
+ *     the `q` address. That fixes the emission order of the three independent
+ *     computations feeding the entry address: the scheduler front-loads the
+ *     `tod` load, and the two shifts then follow in source order.
+ */
+extern s32 sky_time_of_day_idx;
+extern f32 D_800C5F24[];
+extern f32 D_800C5F2C[];
+extern f32 D_800C691C;
+extern u8 D_800C6014[];
+extern u32 D_800FE3D4;
+extern s32 D_801B557C;
+extern s32 func_80051FCC(void);
+
+typedef struct {
+  u8 prim_r;
+  u8 prim_g;
+  u8 prim_b;
+  u8 env_r;
+  u8 env_g;
+  u8 env_b;
+  u8 unk_06[2];
+  s32 radius;
+  u8 unk_0C[4];
+  f32 t;
+} FlarePoint;
+
+extern FlarePoint D_800C6920[];
+
+void emit_lens_flare_dl(Gfx** gfxp) {
+  Gfx* gfx;
+  u8* e;
+  u8* q;
+  f32 dx;
+  f32 dy;
+  f32 s;
+  f32 px;
+  f32 py;
+  s32 n;
+  s32 m;
+  s32 tod;
+  s32 i;
+  s32 w;
+  s32 d;
+
+  gfx = *gfxp;
+  n = func_80051FCC();
+  m = putter_mode_flag;
+
+  gDPPipeSync(gfx++);
+  gDPPipeSync(gfx++);
+  gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+  do {
+    gDPPipeSync(gfx++);
+  } while (0);
+
+  tod = sky_time_of_day_idx;
+  n = n << 8;
+  q = D_800C6014 + (((m << 2) + tod) << 5);
+  e = (u8*)(n + (u32)q);
+  if (e[0x11] == 0) {
+    return;
+  }
+
+  if (D_800C5F24[0] <= 16.0f) {
+    return;
+  }
+  if (304.0f <= D_800C5F24[0]) {
+    return;
+  }
+  if (D_800C5F2C[0] <= 16.0f) {
+    return;
+  }
+  if (224.0f <= D_800C5F2C[0]) {
+    return;
+  }
+  if (D_800C5F2C[0] < -64.0f) {
+    return;
+  }
+  if (360.0f < D_800C5F2C[0]) {
+    return;
+  }
+  if (D_800C5F24[0] < -120.0f) {
+    return;
+  }
+  if (440.0f < D_800C5F24[0]) {
+    return;
+  }
+  if (D_801B557C == 1) {
+    return;
+  }
+
+  dx = 320.0f - D_800C5F24[0];
+  if (160.0f < dx) {
+    dx = 320.0f - dx;
+  }
+  dy = 240.0f - D_800C5F2C[0];
+  if (96.0f < dy) {
+    dy = 240.0f - dy;
+  }
+  s = (dx + dy + 16.0f) * D_800C691C;
+  if (s < 8.0f) {
+    return;
+  }
+  if (*(f32*)(*(u32*)(e + 0x14) + 0x18) < s) {
+    s = *(f32*)(*(u32*)(e + 0x14) + 0x18);
+  }
+
+  gDPPipeSync(gfx++);
+  {
+    Gfx* pa;
+
+    gDPPipeSync(gfx++);
+    pa = gfx++;
+    gDPSetTexturePersp(pa, G_TP_NONE);
+  }
+  {
+    Gfx* pb;
+
+    gDPPipeSync(gfx++);
+    pb = gfx++;
+    gDPSetTextureLUT(pb, G_TT_NONE);
+  }
+  gDPPipeSync(gfx++);
+  gDPSetAlphaCompare(gfx++, G_AC_THRESHOLD);
+  gDPSetBlendColor(gfx++, 255, 255, 255, 1);
+  gDPPipeSync(gfx++);
+  gDPPipeSync(gfx++);
+  gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+  gDPPipeSync(gfx++);
+  gDPSetRenderMode(gfx++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
+  gDPSetCombineLERP(gfx++, PRIMITIVE, ENVIRONMENT, TEXEL0, ENVIRONMENT,
+                    PRIMITIVE, 0, TEXEL0, 0, PRIMITIVE, ENVIRONMENT, TEXEL0,
+                    ENVIRONMENT, PRIMITIVE, 0, TEXEL0, 0);
+  gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+  gDPPipeSync(gfx++);
+  gDPSetTextureFilter(gfx++, G_TF_BILERP);
+  gDPPipeSync(gfx++);
+  gDPSetAlphaDither(gfx++, G_AD_PATTERN);
+  gDPPipeSync(gfx++);
+  gDPSetColorDither(gfx++, G_CD_MAGICSQ);
+  gDPLoadTextureBlock(gfx++, D_800FE3D4 & ~7, G_IM_FMT_I, G_IM_SIZ_8b, 64, 64,
+                      0, G_TX_MIRROR, G_TX_MIRROR, 6, 6, G_TX_NOLOD,
+                      G_TX_NOLOD);
+
+  for (i = 0; i != 8; i++) {
+    px = D_800C5F24[0] + (160.0f - D_800C5F24[0]) * D_800C6920[i].t;
+    py = D_800C5F2C[0] + (96.0f - D_800C5F2C[0]) * D_800C6920[i].t;
+    gDPPipeSync(gfx++);
+    gDPSetPrimColor(gfx++, 0, 0, D_800C6920[i].prim_r, D_800C6920[i].prim_g,
+                    D_800C6920[i].prim_b, (u32)s);
+    gDPSetEnvColor(gfx++, D_800C6920[i].env_r, D_800C6920[i].env_g,
+                   D_800C6920[i].env_b, 255);
+    w = (s32)((f32)D_800C6920[i].radius * (s + 16.0f) * (1.0f / 128.0f));
+    d = 0x10000 / w;
+    gSPScisTextureRectangle(
+        gfx++, ((s32)(px - (f32)w)) << 2, ((s32)(py - (f32)w)) << 2,
+        ((s32)(px + (f32)w)) << 2, ((s32)(py + (f32)w)) << 2, G_TX_RENDERTILE,
+        0, 0, d, d);
+  }
+
+  gDPPipeSync(gfx++);
+  gDPSetAlphaDither(gfx++, G_AD_PATTERN);
+  gDPPipeSync(gfx++);
+  gDPSetColorDither(gfx++, G_CD_DISABLE);
+  gDPPipeSync(gfx++);
+  *gfxp = gfx;
+}
+
 INCLUDE_ASM("asm/nonmatchings/main/func_8008D100", func_8008DDDC);
 
 /* Integer lerp, truncated: a0*(1-t) + a1*t, t in $a2 (o32 GPR).

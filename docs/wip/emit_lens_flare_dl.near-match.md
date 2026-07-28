@@ -1,4 +1,4 @@
-# `func_8008D3F4` decode (S301)
+# `emit_lens_flare_dl` (`func_8008D3F4`) -- BANKED S302
 
 `src/main/func_8008D100.c`, 634 instructions, 0x9E8, frame -0x110. Sun / lens-flare emitter.
 `Gfx**` parameter (not `glistp`), so every `gfx++` is register-only and gcc's scheduler hoists all
@@ -146,7 +146,34 @@ level took 64 to 24. Note the permuter needed the nested-function workaround: `i
 `emit_snapshot_spiral_wipe_dl`, so the import was run against a copy of the TU with that function
 deleted (`nonmatchings/permsrc/perm.c`).
 
-## Residual (12 instructions, two clusters)
+## BANKED (S302)
+
+Re-opened from the S301 24-line residual and closed the same session with two levers, both found by
+re-deriving the residual from a fresh object rather than inheriting the doc's class:
+
+1. **The four `reload1.c` spill-slot pair swaps (8 of the 12 instructions) are a pseudo-numbering
+   question, and block-scoped declarations control it.** Wrapping each `PipeSync` +
+   `SetOtherMode` pair in a brace block that declares the SetOtherMode packet's `Gfx *` first
+   numbers that pseudo ahead of the pipe-sync's macro temp, which inverts the pair of slots exactly
+   as the ROM has them. Confirmed by first giving all five packets explicit function-scope locals:
+   that reproduced the ROM's *relative* slot pattern and shifted every slot, proving declaration
+   position is the knob. S301's "declaration-order changes do not move it" applied to the body's
+   scalar locals, not to per-packet `Gfx *` locals.
+2. **The four-instruction rotation is fixed by splitting `tod` and `n << 8` into their own
+   statements, in that order, ahead of the `q` address.** `tod = sky_time_of_day_idx; n = n << 8;`
+   gives the three independent computations LUIDs in the ROM's order; the scheduler then front-loads
+   the load and the two shifts follow. S301 had measured "tod in its own temp" at 30 lines and
+   rejected it -- from a base whose spill slots were still wrong. Re-measuring after the structural
+   fix is what made it work (`remeasure-percent-after-structural-fix`).
+
+Negative levers measured this sprint, from the 24-line base: `do {} while (0)` around the paired
+PipeSyncs (629 instructions, frame -0xF0), the same around the SetOtherMode calls (638, frame
+-0xE8), `sky_time_of_day_idx` first in the sum (20 lines), and folding `q` into a single cast-guarded
+expression (worse).
+
+Banked as `emit_lens_flare_dl` (`symbol_addrs.txt`), ROM SHA-1 green.
+
+## Residual as of S301 (12 instructions, two clusters), now closed
 
 1. **One scheduling rotation, 4 instructions.** ROM emits `[lui tod, lw tod, sll n<<8, sll m<<2]`;
    this build emits `[sll m<<2, lui tod, lw tod, sll n<<8]`. Tried and rejected: `tod` in its own
