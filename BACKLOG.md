@@ -144,6 +144,26 @@ both subagents read the raw-`objdump` deltas as relocation slots). Both are now 
 direction and sharper in detail: price a `dl-emitter` leaf cheap to reconstruct, budget the
 integration, and do not expect to guess which integration defect it will be.**
 
+**S304: the class's third cost centre is confirmed, and the sprint's real finding is about the
+lever index, not the compiler.** `--loose-stubs main` reads 278 stubs / **3 fresh**, all
+`dl-emitter`; the class stands at **24 of 32 across S293-S304** with six carries. **1 banked, 1
+carried, 1 permuter run (plateaued, no signal).** `func_8008534C` banked 787/787 byte-exact; its
+residual was NOT the `sched.c rank_for_schedule` tie it was briefed as, but a **memory-dependence**
+question — reading the branch condition as `D_80106240[2]` instead of a scalar sets
+`MEM_IN_STRUCT_P` on that `lbu`, so `sched.c:817 true_dependence` can no longer disambiguate it from
+the preamble packet stores through the `Gfx *`, and the resulting edge sinks the ten dead pointer
+writebacks below the twenty packet words. **That lever was already written down**
+(`docs/levers.md aggregate-store-pins-pointer-load`, with the `sched.c:817` citation), and neither
+the orchestrator nor the subagent reached for it before spending nine source forms and a
+370-iteration permuter run. Read `docs/levers.md` against the residual CLASS before opening a
+compiler dive, not after. Second S304 result: the **mnemonic histogram of the `.s` against a fresh
+object** re-classified both committed leaves in two `grep` calls and no build, catching a branch-form
+divergence and an address-CSE defect that `cmpfn` normalisation had hidden; it is now the first row
+of `docs/workflow/loop.md ## Oracles`. Third: the `gcc -S` assembler rule-out is now the front of the
+fan-out binutils row — it exonerated the assembler in one command, and the follow-up proved the ROM's
+block order assembles byte-exact with zero inserted nops, which converts "not the assembler" into
+"the target schedule is reachable".
+
 **S303: the class's third cost centre is allocation, and it is the only one left.**
 `--loose-stubs main` reads 279 stubs / **4 fresh** (5 before this sprint's scoping note), all
 `dl-emitter`; the class stands at **23 of 30 across S293-S303** with six carries. **0 banked, 3
@@ -3912,7 +3932,17 @@ by `/sprint-plan`:
   `NU_CONT_THREAD_ID=6` vs MG64's 5), and that surfaces only at first build unless reconciled here.
   A near-free retry missing any of these is a half-scoped spike — finish the scope before deferring.
 
-- **(S303 SPIKE x3 — all `dl-emitter`, all at or within one instruction of the ROM; the residual is
+- **(S304 NAMING DEBT — near-free retry, not a spike)** `func_8008534C` in
+  `src/main/func_80080220.c` is BANKED and byte-exact but still carries its auto name. The curated
+  rename was deliberately not run because it needs `symbol_addrs.txt` plus `make extract && make`
+  while a fan-out agent was live against `asm/nonmatchings/`. Completeness checklist: (1) add the
+  curated name to `symbol_addrs.txt`; (2) `grep -rn '\bfunc_8008534C\b' src` for committed C callers
+  before renaming (S247); (3) `find build -path '*/src/main/*.o' -delete` before the gate make (S271);
+  (4) `make extract && make`, then `tools/verify-rom.sh`. Proposed name, following the host file's
+  conventions (`emit_wind_indicator_dl`, `emit_rest_distance_panel_dl`, `emit_ball_trail_dl`):
+  `emit_club_and_power_hud_dl`.
+
+- **(S303/S304 SPIKE x3 — all `dl-emitter`, all at or within one instruction of the ROM; the residual is
   `global.c` allocation in every case, so re-open with `tools/allocno_report.py`, not a lever search)**
   `func_800947A8` and `func_8009232C` in `src/main/func_8008D100.c`, `func_8002CDA8` in
   `src/main/func_8002A640.c`.
@@ -3926,10 +3956,21 @@ by `/sprint-plan`:
     inside the `first == 0` / `else` arms. `u32 src[1]` does not force the ROM's memory home (a
     one-element array is not address-taken, so `cse` deletes the store); the ROM's `src` is a spilled
     allocno at `refs 3, live_length 130, priority 230` against an allocation cut at 223/222.
-  - `func_8002CDA8`: **838/838 on the first build**, every display-list word verified, frame `-0x1E0`
-    against `-0x1C8` — exactly three extra spill slots holding DL pointers. Reconstruction is done and
-    recorded in `docs/wip/func_8002CDA8.scoping.md` with the working body; do not re-derive the list.
-    Note `--carried-check` flags this leaf, and that flag means *scoped*, not *walled*.
+  - `func_8002CDA8`: **838/838**, frame `-0x1D8` against `-0x1C8`. S304 replaced the model twice, so
+    inherit the numbers and not the framing. It is a **one-register slide**: `global.c` gives 352, 356
+    and 313 an identical conflict set and all three a hard register, and `reload1.c:2232` then picks
+    hard reg 20 (`$s4`) as a *reload* register and evicts whoever is parked there. The deciding
+    allocno is **189**, the `gDPLoadTile` w0 half, at priority 769 against 356's 934
+    (`global.c:587-604`); raising its `REG_N_REFS` weight lands the ROM's chain exactly and makes the
+    grid-loop clamp block instruction- and register-identical, branch trio included (mnemonic deltas
+    4 -> 2). Refuted and not to be re-tried: the live-length tie between 352/356; allocno 80 (it does
+    not conflict with 356 and is unallocatable by construction, `global.c:936`); the CSE hypothesis
+    (the shared `ult & 0xFFF` half is already CSEd in both builds). The form that reaches the chain is
+    a `do {} while (0)` ref-weight probe around a hand-expanded w0 store — a mechanism proof, **not a
+    shippable body**. `HW_VERSION_1` is ruled out (it calls `guDPLoadTextureTile`; the ROM's five
+    `jal`s are all `osVirtualToPhysical`); **`gDPLoadMultiTile` is the one untried natural construct.**
+    Full record in `docs/wip/func_8002CDA8.scoping.md`; do not re-derive the display list.
+    `--carried-check` flags this leaf, and that flag means *scoped*, not *walled*.
 
 - **(S298 SPIKE — terminal from the caller's source; one named lead, do not re-open on size order)**
   `init_rdp_and_draw_sky_background`, `src/main/func_8002A640.c`. 286/286 with the ROM's `-0xA0`

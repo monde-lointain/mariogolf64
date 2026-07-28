@@ -1502,6 +1502,19 @@ Three honest caveats:
   delta this sprint: **+308 B** (`gates.md` 29984 -> 29479 after the retirement, `loop.md`
   46145 -> 46958 for the decoder row).
   Push: local.
+- **Sprint 304 (realized)** — allocation-first on the `dl-emitter` tail plus a three-agent
+  compiler-source fan-out. **+1 banked, 1 carried, 1 permuter run (plateaued), 1 re-opened,
+  0 stuck-far.** Seed 8pt (3 + 5); **realized 5pt** — the 5pt fresh leaf `func_8008534C` banked
+  787/787 byte-exact, the 3pt carry `func_8002CDA8` did not close. Zero gate enablers.
+  **The gate's risk ranking inverted.** Risk 3 priced `func_8008534C` as the dangerous item on 76 FP
+  mnemonics and risk 5 gave the carry two iterations before a verdict; the fresh leaf banked and the
+  carry consumed a fan-out. Both bodies hit exact instruction count on the first build off
+  `tools/dl_decode.py`, so the S298 pricing rule ("reconstruction-cheap, integration-budgeted") held
+  on both halves — what it does not predict is which of the two items the integration cost lands on.
+  Residual on the carry is now one named allocno (189) with a numeric target rather than a
+  permutation. Realized-tier note: the banked leaf kept its auto name, so the descriptive-name
+  counter did not move this sprint (165 descriptive against 555 `func_`-named in `src/main`) — an
+  unpaid quality debt, tracked in `BACKLOG.md`. Push: local.
 - **Sprint 304** — plan-time seed freeze (classical track, v2 two-pass): seed **8**, regime
   **classical**, split 3 + 5. One `dl-emitter` carry re-open (`func_8002CDA8`, 838/838 exact count,
   frame `-0x1E0` vs `-0x1C8` = 3 spill slots, host `src/main/func_8002A640.c`) plus the smallest

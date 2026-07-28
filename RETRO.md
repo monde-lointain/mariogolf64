@@ -25,6 +25,61 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 304 — allocation-first on the `dl-emitter` tail; a three-agent compiler-source fan-out (1 banked, 1 carried) — 2026-07-28
+- Increment: 0 files / **1 function matched** (`func_8008534C`, 787 instructions, byte-exact).
+  `src/main/func_80080220.c` 15 -> 14 stubs; `--loose-stubs main` 279 -> 278, fresh 4 -> 3. No file
+  reached md5-candidate, so the file point banks 0 as priced at the gate.
+- Quality: 0 stuck-far / 1 permuter run (plateaued, no signal) / 1 carried / 1 re-opened.
+- Seed: committed 8pt (3 + 5); banked **5pt**; regime classical.
+- What helped: **the mnemonic histogram of the `.s` against a fresh object.** It re-classified both
+  leaves in two `grep` calls and no build. On `func_8002CDA8` it showed `bgez 2/1, bgezl 0/1, j 2/1,
+  sw 271/272` — a branch-FORM divergence behind S303's "pure allocation, no structural deficit
+  anywhere" reading, which was `cmpfn` normalisation. On `func_8008534C` it reduced a 491-row diff to
+  one line (`lui` +1, `addiu` -1) that named an address-CSE defect. Also: `tools/dl_decode.py` put
+  both bodies at exact instruction count on the **first build**; and the fan-out's cheap half —
+  re-running the compile line with `-S` — exonerated the assembler in one command.
+- Friction, and the sprint's real lesson: **the lever that banked `func_8008534C` was already in
+  `docs/levers.md`.** `aggregate-store-pins-pointer-load` names `sched.c:817 true_dependence` and the
+  array-vs-scalar `MEM_IN_STRUCT_P` mechanism outright, and neither the orchestrator nor the subagent
+  reached for it. The residual was briefed as a `rank_for_schedule` tie and cost nine source forms
+  plus a 370-iteration permuter run before the agent found the documented answer. That is a lever-INDEX
+  navigation failure, not a missing lever, and it is why suggestion #1 was accepted at a lower weight
+  than it was buffered at. Second friction: three of the four hypotheses the orchestrator handed the
+  `func_8002CDA8` agent were refuted by it from the `-dg`/`-lreg` dumps — the live-length tie, allocno
+  80, and the CSE hypothesis. Cheap to refute, but all three were guesses dressed as briefs.
+- Fan-out result (3 agents): 1 crack, 1 assembler exoneration, 1 reduced-but-carried. The binutils
+  rule-out is the model to copy — it answered its question three ways (`tc-mips.c:1283`; the sole
+  byte-relocating `memcpy` at `:1680-1684` behind the branch-only guard at `:1530-1531`; the
+  divergence already present in gcc's `-S`) and then proved the ROM's block order assembles
+  byte-exact with **zero inserted nops**, converting "not the assembler" into "the target schedule is
+  reachable". It also narrowed a standing project claim: a nop-count delta is an emission-order
+  oracle only ADJACENT TO A BRANCH, never inside a straight-line block (`tc-mips.c:1568-1571`,
+  `:1596-1663`).
+- Applied: 4 of 5 — #1 mnemonic histogram into the `## Oracles` table; #2 the frame-slot ordering
+  rule folded into `dead-frame-levers`; #3 corrected rather than implemented (see below); #5 the
+  `gcc -S` rule-out promoted to the front of the fan-out binutils row. (#4 host-harness gotcha not
+  selected.) Retirement paying for them: the `## Spot-check` bullet in `docs/workflow/loop.md`
+  (1267 B) compressed to its rule plus a pointer to the `decomp_loop.py` Oracles row that already
+  carried the same failure mode, measured saving ~790 B.
+- **Correction, self-inflicted:** suggestion #3 claimed `setup-permuter.sh --main` "exits 0
+  silently" and asked for a wrapper fix. Reproduced under `bash -x` at the review gate: **the wrapper
+  works** — it activates the venv and drives `import.py` correctly. The real failure was calling
+  `tools/decomp-permuter/import.py` directly from a shell without the venv, which dies on
+  `ModuleNotFoundError: toml`. No code was changed; the wrong note in the permuter oracle row was
+  corrected instead. A folklore claim carried into a suggestion is still folklore.
+- Carry-over: `func_8002CDA8` in `src/main/func_8002A640.c`, no longer a vague permutation. The model
+  is a **one-register slide** and the deciding allocno is **189** (the `gDPLoadTile` w0 half of
+  `gDPLoadTextureTile`) at priority 769 against 356's 934 (`global.c:587-604`). Raising its
+  `REG_N_REFS` weight lands the ROM's chain exactly and makes the grid-loop clamp block
+  instruction- and register-identical, branch trio included; mnemonic deltas 4 -> 2. Frame still
+  `-0x1D8` vs `-0x1C8`, so not a bank, and the form that reaches it is a `do {} while (0)` ref-weight
+  probe around a hand-expanded w0 store — a mechanism proof, not a shippable body. `HW_VERSION_1` is
+  ruled out (it calls `guDPLoadTextureTile`; the ROM's five `jal`s are all `osVirtualToPhysical`);
+  `gDPLoadMultiTile` is the one untried natural construct. Also carried: the banked
+  `func_8008534C` still holds its auto name — the curated rename needs `make extract` and was not run
+  while a fan-out agent was live against `asm/nonmatchings/`.
+- Push: local.
+
 ## Sprint 303 — both `func_8008D100.c` carries re-opened plus the simplest fresh row (0 banked, 3 carried) — 2026-07-28
 - Increment: 0 files / **0 functions matched**, 3 carried with rewritten characterisations.
   `func_800947A8` reproduced at 618/618 with an exact `-0x98` frame; `func_8009232C` at 698 against
