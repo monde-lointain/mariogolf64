@@ -78,12 +78,8 @@ Ghidra MCP is used inline at seed time. For each target function:
        pointer return with a variable index wants stepwise pointer arith (`p = base + a*K; return p +
        b*K2;`), not a flat `a*K + base + b*K2` (GCC reassociates the flat form; see
        `docs/hazards.md#loop-weight-and-live-length-regalloc-steering` Axis 6).
-     - **Provenance.** S186 seeded the whole `lz_compress_extended_dma.c` terrain-loader pack this way
-       (context = common.h + the sibling `lz_decompress_simple.c`'s `LzDecompressState` + game
-       externs); the call-glue seeds were byte-faithful first-build. S191 confirmed the recipe on a
-       classical main logic pack (`get_table_entry.c`: context = common.h + the Ghidra-db
-       `TerrainAttrEntry` + a synthesized 0xB8 `ShotInitRecord` + game externs; all 3 standalone fns
-       banked, and both levers above surfaced there).
+     - **Provenance.** The recipe's context is `common.h` plus the RE'd struct plus game externs,
+       whether the struct comes from a sibling decomp or the Ghidra db (S191 `get_table_entry.c`).
      - **asm-first seed fast-path (MCP-independent, for small fns ~<40 instrs).** The splat
        `.s` is the same ground truth as
        `disassemble_function`, so a small classical fn does not need MCP: hand-translate straight from
@@ -150,10 +146,6 @@ Ghidra MCP is used inline at seed time. For each target function:
      every access). **Disambiguate with the in-tree `tools/asm-differ/diff.py <func>`** (diffs the real
      build against the ROM via the mapfile): if it too diverges, it is a genuine near-miss/wall — do
      Not apply the isolation-caveat shortcut, root-cause the pervasive diff instead.
-     - **`diff.py` is an iteration hint, never a crack or bank verdict.** Its two staleness failure
-       directions and the same-score-twice detector are stated once in
-       `docs/workflow/loop.md ## Oracles`; the escape when it goes stale mid-iteration is the
-       `objdump -dz` and `.s`-header rows of that same table.
    - **Finalize** (only if the spot-check passes): inline the body into `src/<seg>.c`, drop the
      `INCLUDE_ASM` line, `clang-format-22 -i` (now applies to every tree, including `src/libultra/`,
      `src/libkmc/`, `src/libnusys/`, and `src/mgu/`), then `make` until `build/mariogolf64.z64: OK`
@@ -223,12 +215,16 @@ asserted, only measured, and re-check layers stacked on top of it buy nothing.
 | `tools/decomp_loop.py --func` (`score`, `percent`) | The isolated per-function compile signal during Iterate. `score == 0` is a candidate. | A non-zero score with empty `top_mismatches` and `match_count == total_rows` is an isolation artifact at high percent, but a real pervasive near-miss at low percent. Five consecutive `compile_ok == False` means a broken seed. | During Iterate. Disambiguate the empty-`top_mismatches` case with `diff.py` right after a full `make`; if that diverges too, it is a genuine wall. |
 | byte-`cmp` of raw `.text` | The spot-check at score 0: in-tree object against the isolated one. | A mnemonic diff false-positives because KMC `as` and modern `as` encode `move dst,zero` differently while objdump renders both as `move`. Inline LO16 struct-field addends differ in the object and resolve identically at link. | At score 0 only, on raw `.text` bytes. An addend-only difference goes straight to the full make. |
 | decomp-permuter score | Nothing on its own. It searches; it does not decide. | Blind to internal branch targets: asm-differ normalizes a branch to a local label, so a pure back-edge residual scores zero falsely. `import.py` aborts on a nested function definition, disabling the permuter for that whole TU. `setup-permuter.sh` exits 0 with no output once the body is inlined as C -- call `import.py` directly with `--settings permuter_settings_main.toml`. | At `percent >= 0.97`, or at exact instruction count with a one-operand residual regardless of percent. Not on a multi-register permutation or an FP-schedule coin: those plateau, but a plateaued run's best candidate is still a lever (S287, see the escalation bullet). A permuter zero is confirmed by `verify-rom.sh`, never by itself. |
+| gcc `-dL` (append to the file's real flags; writes `<file>.c.loop`) | Every `loop.c` decision: per-loop insn count, each biv's init value, per-movable `savings S (life L)` moved / not-desirable / `matches`, per-giv reduced or `not worth while, X vs Y`. | Whole-file; filter. Reports decisions, not a match. | Any hoisted-constant, biv or strength-reduced-address residual. Read `savings` and `lifetime` off it and compute loop.c:1631 or :3823; S297 estimated and was wrong twice. |
 | Ghidra MCP decompile | Shape and type reference at seed time. | Not authoritative; the `.s` is. Overlay vram repeats above `0x801F4A30`, so seed overlay functions by ROM offset or the splat `.s`, not by vram. | As a shape and type hint. `disassemble_function` equals the splat `.s`, so a small function does not need MCP at all. |
 | `head -1 asm/nonmatchings/<seg>/<f>/<f>.s` | The ROM-side byte size (`nonmatching <f>, 0x<size>`); instructions = size/4. | Sizing a leaf from adjacent-vram deltas is wrong in a multi-function pack, because curated-named functions interleave the `func_<vram>` ones. | Always, for both the instruction-count target and plan-gate sizing. |
 
 Two notes that are two-tool interactions rather than properties of any one tool.
 
-**Residual classification routes the lever.** From a fresh object: a differing count is a structural
+**Residual classification routes the lever.** Count by region first, splitting at the loop-head
+labels, and histogram mnemonics per region: on a permutation `cmpfn`'s hunk alignment is
+meaningless, and a `+5` against an adjacent `-5` is one displacement, not five missing insns (S297).
+Then, from a fresh object: a differing count is a structural
 deficit, so fix that before anything else; an exact count with differing registers is a coloring or
 `local-alloc` question; an exact count with differing order is a scheduler question. Do not argue
 register pressure, live length or "needs an Nth register" from a body that is not at exact instruction

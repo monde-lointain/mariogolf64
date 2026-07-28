@@ -70,9 +70,9 @@
     "provenance": 0
   },
   "docs/fanout-prompt.md": {
-    "bytes": 4090,
+    "bytes": 4053,
     "caps": 0,
-    "lines": 73,
+    "lines": 71,
     "max_nesting": 1,
     "provenance": 0
   },
@@ -119,10 +119,10 @@
     "provenance": 6
   },
   "docs/workflow/loop.md": {
-    "bytes": 47046,
+    "bytes": 47103,
     "caps": 0,
-    "lines": 512,
-    "max_nesting": 5,
+    "lines": 508,
+    "max_nesting": 4,
     "provenance": 6
   }
 }

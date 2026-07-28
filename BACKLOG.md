@@ -111,7 +111,8 @@ actionable, and S295 had already declined a leaf on that basis (`emit_sky_dome_d
 excises that paragraph on its marker phrase, the same author-supplied-marker shape as the S288
 `NEAR-FREE RETRY` guard; keep the marker verbatim when writing such a list. **Standing correction to
 the S280 plateau advisory: `main`'s fresh pool is ~20, not the single digits the last three gates
-reported.** The `dl-emitter` class is 12 of 12 across S293-S296.
+reported.** The `dl-emitter` class is **15 of 15 banked across S293-S297**, plus one carry (`emit_sky_dome_dl`, a
+named-gate wall as of S297).
 
 **S288 CLOSES the fdlibm vein and sharpens the permuter-as-lever play.** `func_80059BC0` = `acosf`
 banked FIRST BUILD off the S287 constant-check procedure (one enabler: a per-file `-ffast-math`
@@ -3812,7 +3813,57 @@ by `/sprint-plan`:
   rescue it. Parked here so `--carried-check` flags it and it stops reading as `fresh`; re-open only
   behind a lever for that class, not on size order.
 
-- **(S296 CARRY — `emit_sky_dome_dl`, an UNFINISHED RECONSTRUCTION, not a wall)**
+- **(S297 CARRY — `emit_sky_dome_dl`, now a WALL WITH A NAMED GATE — supersedes the S296 carry note
+  below, which said the opposite about the same function)** `src/main/func_8002A640.c`. **299/299**
+  with the ROM's `-0x50` frame and all three region counts exact (48/34/217), from the 272/299 it was
+  inherited at. Everything above the register allocator is settled: semantics, every instruction, the
+  frame, the regions. The single open question is that three block-local
+  `(set (reg) (const_int -8))` band masks are unified by `combine_movables` (loop.c:1245-1287) and
+  hoisted, which creates an `align` allocno on a t-register, which leaves reload's tier 1 empty, which
+  makes it steal `tiled` at reload1.c:3708-3710 where the ROM keeps it in `$s5`. Every reachable
+  combine gate is enumerated with why source cannot reach it, and three predicted nulls are recorded
+  with their arithmetic (uniform `refs` reweighting overshoots the priority window because
+  `floor_log2` is a step function; lengthening the competing allocno reaches 4 of the 7 needed and
+  loses at reload anyway; the permuter named no demand reduction). **Do not re-open on size order.**
+  Re-open only if a sprint gains a lever that reaches one of the cited gates, in which case it banks
+  immediately. Full write-up in `docs/wip/emit_sky_dome_dl.near-match.md`; the 299/299 body is
+  `nonmatchings/emit_sky_dome_dl/base.c` and a structurally-cleaner 298/299 variant with an exact
+  strip-body histogram is `alt_298_bodyexact.c`.
+
+- **(S297 STATE OF THE `main` POOL — supersedes the S296 note below)** After S297,
+  `--loose-stubs main` reports **288 stubs and 17 fresh**: 259 carried-wall, 33 jtbl-dispatch, 55
+  `dl-emitter` (a pricing tag, counted in fresh), 11 nested, 1 intrinsic-hasm. The `dl-emitter` class
+  is **15 of 15 banked across S293-S297**, with one carry.
+  **The vein, smallest-first from here** (all `fresh`, `--nested-check` clean):
+  `init_rdp_and_draw_sky_background` (1144 B, fp=50 — gate-rejected at S294, S296 and S297, so the
+  S289 third-encounter rule is now overdue: attempt it or drop it, do not re-reject),
+  `func_80094228` (1408 B, fp=27), `func_80092F18` (1460 B, fp=0, jal=2 — cleanest by every column
+  and the obvious next pick), `func_80081EF8` (1516 B, fp=42, jal=17), `func_8006AEA4` (1704 B,
+  fp=71), `func_8006BC80` (1896 B, jal=12), `func_80083AC8` (2040 B), `func_8007C5D8` (2360 B,
+  `fp-coord` but 6 branch-likely), `func_800947A8` (2472 B), `func_8008D3F4` (2536 B),
+  `func_8009232C` (2788 B, fp=0), `func_8002CDA8` (3352 B, fp=0).
+  **Price a documented near-match ABOVE a fresh leaf, not below it.** Four consecutive sprints
+  (S294-S297) have had the plan gate's ordering inverted, and S297 is the sharpest case: three leaves
+  priced as the sprint's work banked in about one build each, while the carry priced as a cheap finish
+  ("not a wall, one build, three of four hunks matching") consumed the sprint and still did not bank.
+  A near-match that is 90% there is 90% through the *reconstruction*, which is the cheap part; what
+  remains is the allocator, which is not.
+  **Three S297 levers, all read out of the gcc `-dL` loop dump rather than guessed.** (a) The dump is
+  to `loop.c` what `allocno_report.py` is to `global.c` — per-loop insn counts, biv initial values,
+  per-movable `savings`/`lifetime` with moved-or-not, per-giv reduced-or-not with both sides of the
+  comparison; now an `Oracles` row in `docs/workflow/loop.md`. (b) Decay versus combine is
+  per-function: `func_8009548C` cracked on the `threshold -= 3` decay (one invariant insn ahead of the
+  constants, a `col * 4` statement split), while `emit_sky_dome_dl` cannot because `combine_movables`
+  had already multiplied the same test's left side by 9. Read `savings` and `lifetime` before choosing;
+  the S297 orchestrator asserted the wrong one twice by estimating them. (c) Freeing a caller-saved
+  register is worthless — `local-alloc` runs first and re-absorbs it — while freeing a t- or s-register
+  stays `uses == 0` and opens reload's tier 1 (reload1.c:3682-3688 vs 3708-3710).
+  Running tally of fan-out-on-exact-count-carry stays S280 2/2, S281 2/2, S282 0/2, S292 1/3.
+  Permuter-as-lever is now **4/5 candidates yielded a lever, 0/6 runs a zero** — S297's run gave
+  neither.
+
+- **(S296 CARRY — `emit_sky_dome_dl`, an UNFINISHED RECONSTRUCTION, not a wall — SUPERSEDED by the
+  S297 carry note above; its verdict was correct at the time and is now closed)**
   `src/main/func_8002A640.c`. 272/299 on its one build, structure matching in three of four hunks.
   It was the sprint's third committed leaf and the first two consumed the sprint. Full decode,
   decoded constants, and the located 27-instruction deficit are in
@@ -3820,7 +3871,7 @@ by `/sprint-plan`:
   `nonmatchings/emit_sky_dome_dl/attempt.c`. Re-open it on size order like a fresh leaf — the wip
   doc exists so `--carried-check` does not lose it, not because a wall was proven.
 
-- **(S296 STATE OF THE `main` POOL — supersedes the S295 note below)** After S296,
+- **(S296 STATE OF THE `main` POOL — superseded by S297 above)** After S296,
   `--loose-stubs main` reports **291 stubs and 20 fresh**: 259 carried-wall, 33 jtbl-dispatch, 58
   `dl-emitter` (a pricing tag, counted in fresh), 11 nested, 1 intrinsic-hasm. The `dl-twin` group is
   **empty** — S296 spent the detector's only pair and both members banked. The class now stands at

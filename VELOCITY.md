@@ -1474,6 +1474,44 @@ Three honest caveats:
   STRUCTURAL symptom, not evidence of a coloring problem — S285 makes 4 of the last 6 carry verdicts
   refuted, and this one was refuted by the same agent that wrote it, hours later, with no new tool.
   Push: local.
+- **Sprint 297** — the `dl-emitter` vein at 208-299 instructions, plus the S296 carry. **+3 banked,
+  1 carried, 1 permuter run (0 zeros, and 0 levers), 1 re-open, 0 stuck-far.** Zero gate enablers.
+  `func_800734F0` -> `emit_glyph_sheet_preamble_dl` (243/243), `func_80074968` ->
+  `emit_hud_glyph_dl_preamble` (208/208), `func_8009548C` -> `emit_snapshot_tile_wipe_dl` (217/217),
+  each one build or close to it. `emit_sky_dome_dl` carried at **299/299** with the ROM frame and all
+  three region counts exact, inherited at 272/299. All three hosts stay partial, so **banked 0pt**;
+  `--loose-stubs main` 291 -> 288, fresh 20 -> 17, dl-emitter 58 -> 55; md5-candidate unchanged at
+  230 of 265. Seed 8 (classical); realized **9 / residual +1** (+1 carry, +1 permuter, −1 for three
+  first-or-second-build banks). Rolling-5 (S293-S297): 0+0+0+0+0 pt banked, all partial-file sprints;
+  value = 3+4+3+2+3 matched. Quality **0 / 1 / 1 / 1**.
+  KEY: **the gcc `-dL` loop dump is to `loop.c` what `allocno_report.py` is to `global.c`**, and this
+  sprint proves it by the errors it would have prevented. It prints per-loop insn counts, each biv's
+  initial value, every movable's `savings`/`lifetime` with moved-or-not, and every giv's
+  reduced-or-not-worth-while with both sides of the comparison. Three residuals fell to it: a giv the
+  ROM does not strength-reduce (loop.c:3823 — won by a comma expression inside the macro argument,
+  which shortens the giv's lifetime past the threshold), and two constant-hoist splits on
+  loop.c:1631.
+  Second result, and it is the durable one: **decay versus combine is per-function, and you must read
+  `savings` and `lifetime` before choosing.** `func_8009548C` cracked on the `threshold -= 3` decay
+  (loop.c:1719/1904) — the ROM moves 9 of 12 constants, and landing on 9 needed exactly one invariant
+  insn ahead of them, a `col * 4` statement split. `emit_sky_dome_dl` cannot, by a factor of 3,
+  *because* `combine_movables` had already multiplied the test's left side by 9 (savings 3 x lifetime
+  3) where the other leaf's stranded constants were `savings 1`. The orchestrator asserted the wrong
+  one of these twice, both times by estimating the two terms instead of reading them.
+  Third: **freeing a caller-saved register is worthless; freeing a t- or s-register opens reload's
+  tier 1.** `local-alloc` runs first and only ever uses `v0, v1, a0-a3` for its local quantities, so a
+  freed caller-saved register is re-absorbed immediately (measured: removing a local freed `$a3`,
+  locals took it, and reload's victim merely moved from `$a2` to `$a3`), while a freed t-/s-register
+  stays `uses == 0` and reload takes it at reload1.c:3682-3688 instead of stealing at 3708-3710. That
+  inverts the usual instinct on any "reload keeps stealing my register" residual.
+  Retro applied 4 of 4 plus 2 retirements (#1 the `-dL` Oracles row; #2 count-by-region before
+  trusting `cmpfn` hunk alignment; #3 a raw-word DL body is a result to challenge, not integrate —
+  the sprint's own leaf came back raw-word byte-exact with all 27 words macro-reachable; #4 the
+  verdict-return contract replaced by a parseable `RESULT:` line after five sprints of bare idle
+  notifications. Retirements: the Seed provenance case law compressed to its rule plus one citation,
+  and the `diff.py` cross-reference bullet that only pointed at the Oracles table). Net **+20 B**
+  across the two surfaces; loop.md 47046 -> **47103/47104**, fanout-prompt.md 4090 -> **4053/4096**.
+  `make test-tools` 135 passed, 1 skipped; prompt-lint baseline re-frozen. Push: local.
 - **Sprint 296** — spend the `dl_twin` pair. **+2 banked, 1 carried, 2 permuter runs (0 zeros),
   0 re-open, 0 stuck-far** — ends the three-sprint all-zero row. Zero gate enablers.
   `func_80055828` -> `reset_face_textures_for_anim_slot` (179/179, 2 builds) and its twin

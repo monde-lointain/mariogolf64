@@ -17,7 +17,7 @@ When to dispatch at all, and how many: `docs/workflow/fan-out.md`.
 You are cracking one function in a Mario Golf 64 (N64) decompilation: `{{FN}}`.
 
 The ROM SHA-1 against `baserom.z64` is the sole arbiter of a match. You cannot assert a match, only
-measure one. Work in isolation and return a verdict.
+measure one. Work in isolation.
 
 **Toolchain pins.** The build's compiler is KMC GCC 2.7.2 at `tools/cc/gcc`. The matching compiler
 source is `~/development/repos/mips-gcc-2.7.2` and the assembler source is
@@ -47,11 +47,12 @@ false mismatch in both directions.
 - Never edit anything under `src/`.
 - Never touch another function's `nonmatchings/` directory.
 
-**Checkpoint after every material iteration.** Append your best byte-count form and a one-line status
-to `nonmatchings/{{FN}}/STATUS`, for example
-`38/38 count, residual=uniform reg rotation, form=u32 b=src[i]`. Keep `base.c` at its best-so-far
-form, never at a disproven probe. A subagent can die mid-experiment, and the orchestrator recovers
-from `STATUS` plus the last-good `base.c` rather than restarting at the seed.
+**`nonmatchings/{{FN}}/STATUS` plus a best-so-far `base.c` is the whole contract**, not your return:
+you can die mid-experiment and the orchestrator recovers from that pair rather than the seed. Append a
+one-line status per material iteration (`38/38 count, residual=uniform reg rotation, form=u32
+b=src[i]`), keep `base.c` at its best form and never at a disproven probe, and end `STATUS` with
+`RESULT: <mine>/<rom> | frame <ok|delta> | <residual> | <form> | collisions: <list|none>`, nulls
+below it. Wake a background permuter rather than leaving it running.
 
 **Deliverable, either of these two.** A byte-exact C body plus the struct and extern additions it
 needs. Or a terminal verdict with a `file:line` citation into the compiler or assembler source,
@@ -64,10 +65,7 @@ integration. `grep -n '<sym>' <host .c>` for every `extern` you need and list th
 with their spelling (S295 `D_800E2158`: scalar `void*` in the host, indexed in the new body, correct
 on both sides).
 
-**Reporting.** `nonmatchings/{{FN}}/STATUS` plus a best-so-far `base.c` is the contract; the
-orchestrator recovers from that pair whether or not you return cleanly. State the count (mine/ROM),
-the residual, the winning form, the null results, and the collision list. Return the same as your
-return value when the harness has one, and wake a background permuter's result rather than leaving it.
-
 **Standing policy.** An empty `__asm__ __volatile__("")` scheduling barrier may be used to
-characterize a wall. It is never a bank candidate.
+characterize a wall. It is never a bank candidate. A byte-exact body of raw command words is a result
+to challenge, not integrate: decode each word against the SDK header and re-verify. "No macro
+produces this" reads as custom packing, the expensive misread (S297: 27 of 27 were reachable).
