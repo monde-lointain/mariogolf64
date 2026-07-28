@@ -1,4 +1,4 @@
-# `func_8002CDA8` reconstruction scoping (S303)
+# `func_8002CDA8` reconstruction scoping (S303, re-opened S304)
 
 **This is not a wall note.** The body is reconstructed and sits at the ROM's exact instruction
 count; only the register allocation differs. `pick_target.py --carried-check` nonetheless reports
@@ -138,23 +138,82 @@ So the count is a knife edge on how `D_800B7730` is spelled: one variable re-ass
 is the only form that reaches 838, which is the `one-variable-reuse-reorders-loads` lever in its
 *wanted* direction.
 
-## Next actions
+## S304 re-open: the residual is one two-pseudo allocation swap, and it is named
 
-1. The residual is a pure allocation gap at exact instruction count: run the priority-window
-   procedure (`tools/allocno_report.py src/main/func_8002A640.c func_8002CDA8`) and find where this
-   build's `global.c allocno_compare` order diverges from the ROM's register assignment. The
-   boundary here sits near priority 900-1000, with two allocnos already unallocated above it.
-2. Three long-lived tail values are the concrete suspects: the `E4080080` / `04000400` pair shared by
-   the three identical `gSPTextureRectangle` calls, and the `01020020` word shared by the two
-   identical `gDPSetTileSize(gfx++, 1, 0, 0, 32, 32)` calls. Spelling one of each differently (for
-   example `8 << 2` for `32`) shortens those live ranges; that was not tried.
-3. Do not re-derive the display list: it is verified. Start from the body below.
+S303's suspects (item 2 below, the tail texrect constants) were wrong, and its "no structural
+deficit anywhere" reading was `cmpfn` normalisation. The mnemonic histogram of a fresh object
+against the `.s` is the measurement that finds it:
+
+```
+grep -oE '  [a-z0-9.]+ ' <fn>.s | tr -d ' ' | sed 's/^addu$/move/' | sort | uniq -c   # ROM
+grep -oE $'\t[a-z0-9.]+\t' mine.txt | tr -d $'\t' | sed 's/^li$/addiu/' | sort | uniq -c
+```
+
+On the S303 body that prints `bgez 2/1, bgezl 0/1, j 2/1, sw 271/272` -- a branch-FORM divergence
+in the grid loop that `cmpfn` never showed, not a pure permutation.
+
+**Two levers moved it, both retained in the body below.**
+
+| lever | result |
+| --- | --- |
+| S303 body (increment after the last preamble `gDPPipeSync`) | 838 / `-0x1E0` / 1557 rows / `sw` +1 |
+| **P3**: `D_800B7730 = D_800B7730 + 1;` moved up to just after `gDPSetPrimColor(..., 200)` | 838 / `-0x1D8` / 1576 / `sw`,`lw` exact |
+| **Q3**: `yl` as an `s32` assigned at the i-loop head, passed as the texrect's `yl` | **838 / `-0x1D8` / 1541 / only `move` +1 + the branch trio** |
+
+Placement of the increment is a real axis, not a coin: P1/P2 (anywhere above `gDPSetRenderMode`)
+give 840 / `-0x1E8`; P3 and P4 (`gDPSetPrimColor` or `gDPSetScissor`) both give the `-0x1D8` frame
+and exact `sw`/`lw`. The ROM loads `D_800B7730` at instruction 57 and stores it at 147, ~90 apart,
+so the load is scheduled far ahead of the add; only a mid-preamble source position reproduces that.
+
+**The remaining residual is a single pair of hoisted pseudos.** With the body below,
+`tools/allocno_report.py` prints them adjacent and 9 apart:
+
+| pseudo | expression | refs | live_length | priority | this build | ROM |
+| --- | --- | --- | --- | --- | --- | --- |
+| 356 | `t & 0xFFFF`, i.e. `_SHIFTL((48 + i*3) << 5, 0, 16)` | 5 | 107 | 934 | `$s1` | spilled to `0x194($sp)` |
+| 352 | `yl << 10`, i.e. `(s16)yl * (s16)dtdy` | 5 | 108 | 925 | spilled | `$s5` |
+
+Both are `gSPScisTextureRectangle` internals hoisted to the i-loop preheader by `loop.c`, and their
+defs are adjacent (`insn 1969`, `insn 1970` in the `.lreg` dump), which is exactly why the lengths
+differ by one. That one swap explains **all three** remaining deltas at once: with `t & 0xFFFF`
+spilled, the `yl >= 0` arm becomes `lw` + `or` (two instructions) instead of the single
+`or $v0,$a0,$s1`, so `reorg` can no longer fold it into an annulled `bgezl` and the ROM's
+`bgez` + `j` pair returns (+1 insn), and the surplus `move` goes with it.
+
+The arithmetic says the fix is small: `priority = floor_log2(refs)*refs/live_length*10000`, so
+equalising the two live lengths is enough (a tie falls through to the pseudo number, and 352 < 356).
+Everything tried failed to move that one unit:
+
+- `yl` spellings: `(31-i)<<2`, `(31-i)*4`, `124-i*4`, `31-i` with the shift at the call site,
+  block-scoped, assigned in the j-loop instead of the i-loop -- all 838 / `-0x1D8` / 1541, identical.
+- `t` spellings: hoisted to the i-loop head (835), assigned in the j-loop (838/1569), `1536+i*96`
+  (1541), pre-masked `((48+i*3)<<5) & 0xFFFF` (840, adds an `andi`).
+- explicit `yh`, explicit `ult`, `s` as a j-loop temp: no change or worse.
+- `dtdy` as a variable: catastrophic (862, `mult`/`mflo` appear -- the `(s16)` cast stops folding).
+- loop forms: i-loop and j-loop each as `do {} while`, `do {} while (0)` round the `yl` assignment
+  or round the `gDPLoadTextureTile` call: no change or worse.
+- `do {} while (0)` round the **`gSPScisTextureRectangle` call** does fix the branch (`bgez`/`j`
+  match exactly, the `do-while-zero-block-break` lever) -- but it costs a duplicate
+  `sw $v1,4($a1)` immediately before the real `sw $v0,4($a1)`, i.e. `lw` 99/101 and `sw` 273/271.
+  Net worse, so it is not in the body below. It does confirm the branch is a block-boundary effect.
+
+**Next action:** this is a `global.c` live-length question with a one-unit target, so the next
+attempt is a compiler-source fan-out on `loop.c`'s preheader emission order (what fixes the order
+of the two adjacent invariant defs at `insn 1969`/`1970`) rather than another source-spelling sweep;
+that axis is exhausted. Reproduce the base first: the body below, `tools/allocno_report.py`, and the
+histogram command above.
+
+Superseded S303 leads, kept for the record: the tail `E4080080`/`04000400` and `01020020` constants
+are **not** the residual, and the frame delta is not three tail spill slots -- at P3 it is two
+reload spill slots (`420`, `428`) carrying grid-loop traffic.
+
+Do not re-derive the display list: it is verified.
 
 Host risk when integrating (S300): `src/main/func_8002A640.c` is a partial file. This body emits no
 FP constants and no strings, so its `.rodata` should be empty -- confirm with
 `objdump -s -j .rodata` on the object before claiming a bank.
 
-## Working body (838/838, frame -0x1E0, cmpfn 1478 rows)
+## Working body (S304 best: 838/838, frame -0x1D8 against -0x1C8, cmpfn 1541 rows)
 
 ```c
 extern s32 D_800B7730;
@@ -172,6 +231,7 @@ void func_8002CDA8(Gfx** gfxp) {
   s32 i;
   s32 j;
   s32 n;
+  s32 yl;
 
   gDPPipeSync(gfx++);
   gDPPipeSync(gfx++);
@@ -193,21 +253,21 @@ void func_8002CDA8(Gfx** gfxp) {
                     0, PRIM_LOD_FRAC, TEXEL0, PRIMITIVE, PRIMITIVE_ALPHA,
                     PRIMITIVE, 0, 0, 0, PRIM_LOD_FRAC);
   gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 200);
+  D_800B7730 = D_800B7730 + 1;
   gDPPipeSync(gfx++);
   gDPSetScissor(gfx++, G_SC_NON_INTERLACE, 0, 0, 320, 240);
   gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 32,
                    osVirtualToPhysical(D_80105320) & ~7);
   gDPPipeSync(gfx++);
 
-  D_800B7730 = D_800B7730 + 1;
-
   for (i = 0; i != 32; i++) {
+    yl = (31 - i) << 2;
     for (j = 0; j != 4; j++) {
       gDPLoadTextureTile(gfx++, src, G_IM_FMT_RGBA, G_IM_SIZ_16b, 320, 0,
                          34 + j * 76, 48 + i * 3, 41 + j * 76, 51 + i * 3, 0,
                          G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
                          G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-      gSPScisTextureRectangle(gfx++, j << 5, (31 - i) << 2, (j + 1) << 5,
+      gSPScisTextureRectangle(gfx++, j << 5, yl, (j + 1) << 5,
                               (32 - i) << 2, G_TX_RENDERTILE, (34 + j * 76) << 5,
                               (48 + i * 3) << 5, 1 << 10, 1 << 10);
     }
