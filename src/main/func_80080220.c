@@ -645,7 +645,137 @@ INCLUDE_ASM("asm/nonmatchings/main/func_80080220", func_800842C0);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80080220", func_80084468);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80080220", func_80084EBC);
+extern f32 per_view_camera_state;
+extern f32 D_801B54F0;
+extern f32 D_801B54F4;
+extern f32 D_801B54F8;
+extern f32 D_801B54FC;
+extern f32 D_801B5500;
+extern f32 wind_dir_angle_rad;
+extern Mtx D_800E1ED0[];
+/* Same matrix bank as D_800E1ED0, addressed through segment 0 for the RSP. */
+extern Mtx D_E1ED0[];
+/* The single light this emitter installs. Its ambient half sits eight bytes
+ * below, in the tail of the adjacent data label, which is why the ambient is
+ * spelled as a negative displacement off this symbol; see the header comment.
+ */
+extern Light D_800C5AC0;
+/* Spelled as arrays so the MEMs carry MEM_IN_STRUCT_P; see the header comment.
+ */
+extern s8 D_800FC861[];
+extern s32 D_800B67F0;
+extern s32 D_8012CFE4[];
+extern Gfx D_80222400[];
+/* This TU's double pool, shared with the still-asm siblings. Referenced rather
+ * than spelled as literals; see the header comment. */
+extern const f64 D_800D1B30; /* pi */
+extern const f64 D_800D1B38; /* 0.3f widened */
+extern const f64 D_800D1B40; /* 1 / (2 * pi) */
+extern const f64 D_800D1B48; /* 180.0 */
+extern const f64 D_800D1B50; /* pi / 2 */
+extern const f64 D_800D1B58; /* 3 * pi / 2 */
+extern const f64 D_800D1B60; /* pi / 2, the second window's own entry */
+extern const f64 D_800D1B68; /* 3 * pi / 2, likewise */
+
+extern f32 sqrtf(f32);
+extern double atan2(double, double);
+extern void func_80065A1C(f32 mf[4][4], f32* rot, f32* pos);
+extern void func_80084468(Gfx** gfxp, f32 x, f32 y);
+
+/**
+ * Emits the 3D wind indicator: a mesh yawed to face the camera, counter-rotated
+ * by the current wind heading, drawn 300 units in front of the viewer.
+ *
+ * The model yaw is the camera's own heading, taken as atan2 of the
+ * eye-to-target delta (vertical delta over the horizontal distance), plus pi +
+ * 0.3 rad. That matrix is concatenated with a heading of (180 degrees - the
+ * wind direction in degrees) and scaled by -0.07, then packed into the
+ * double-buffered sky matrix bank at sky_panel_bank_index and referenced from
+ * the display list through the segment-0 alias of the same bank.
+ *
+ * func_80084468 draws the companion readout at (x, y). It is emitted BEFORE the
+ * mesh while the wind points into the near half of the circle (heading outside
+ * pi/2..3pi/2) and AFTER it otherwise: a two-bucket painter's-order sort so the
+ * readout never disappears behind the mesh.
+ *
+ * Four notes on the shape of this body:
+ * - `wind` exists so the address of wind_dir_angle_rad is formed in a pseudo;
+ *   cse then parks it in $s2 across the five matrix calls. Reading the global
+ *   directly for all three uses costs the callee-saved register and shrinks the
+ *   frame by 8.
+ * - D_800FC861 and D_8012CFE4 are spelled as arrays. As plain scalar globals
+ *   their MEMs have MEM_IN_STRUCT_P == 0 with a non-varying address, which
+ *   satisfies the "not in a struct and does not vary" arm of sched.c:834
+ *   true_dependence and lets the scheduler hoist the `lb` above the light
+ *   stores and sink the D_8012CFE4 store past the two G_DL words. The array
+ *   spelling sets MEM_IN_STRUCT_P, restores the dependence, and pins both.
+ * - The first wind window is written as two negated tests rather than
+ *   `<= || >=`, because the ROM compares with c.lt.d in both windows; the
+ *   `<=` spelling emits c.le.d.
+ * - The light block is the three sub-macros of gSPSetLights1 rather than the
+ *   composite. The composite needs a Lights1 symbol at 0x800C5AB8, whose
+ *   ambient half lies inside the preceding data label and whose light half is
+ *   D_800C5AC0, so declaring it would split one data label and overlap another.
+ *   Both spellings were measured byte-exact; this one adds no symbol.
+ */
+void emit_wind_indicator_dl(Gfx** gfxp, f32 x, f32 y) {
+  f32 look[3];
+  f32 rot[3];
+  f32 pos[3];
+  f32 unused[3];
+  f32 model[4][4];
+  f32 spin[4][4];
+  Gfx* gfx = *gfxp;
+  f32* wind = &wind_dir_angle_rad;
+
+  look[0] = D_801B54F8 - per_view_camera_state;
+  look[1] = D_801B54FC - D_801B54F0;
+  look[2] = D_801B5500 - D_801B54F4;
+
+  rot[0] = atan2(look[1], sqrtf(look[0] * look[0] + look[2] * look[2])) +
+           D_800D1B30 + D_800D1B38;
+  rot[1] = 0.0f;
+  rot[2] = 0.0f;
+  pos[0] = x;
+  pos[1] = y;
+  pos[2] = -300.0f;
+  func_80065A1C(model, rot, pos);
+
+  guRotateRPYF(spin, 0.0f, D_800D1B48 - *wind * 360.0f * D_800D1B40, 0.0f);
+  guMtxCatF(spin, model, model);
+  guScaleF(spin, -0.07f, -0.07f, -0.07f);
+  guMtxCatF(spin, model, model);
+  guMtxF2L(model, &D_800E1ED0[sky_panel_bank_index]);
+
+  if (!(*wind > D_800D1B50) || !(*wind < D_800D1B58)) {
+    func_80084468(&gfx, x, y);
+  }
+
+  gDPPipeSync(gfx++);
+  gDPSetRenderMode(gfx++, G_RM_AA_OPA_SURF, G_RM_AA_OPA_SURF2);
+  gDPPipeSync(gfx++);
+  gDPSetTextureLUT(gfx++, G_TT_NONE);
+  gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+  gDPPipeSync(gfx++);
+  gDPSetTexturePersp(gfx++, G_TP_PERSP);
+  gDPPipeSync(gfx++);
+  gSPMatrix(gfx++, &D_E1ED0[sky_panel_bank_index],
+            G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
+  gSPNumLights(gfx++, NUMLIGHTS_1);
+  gSPLight(gfx++, &D_800C5AC0, 1);
+  gSPLight(gfx++, (u8*)&D_800C5AC0 - 8, 2);
+
+  if (D_800FC861[0] != 0) {
+    D_8012CFE4[0] = D_800B67F0;
+    gSPDisplayList(gfx++, D_80222400);
+  }
+
+  if (wind_dir_angle_rad > D_800D1B60 && wind_dir_angle_rad < D_800D1B68) {
+    func_80084468(&gfx, x, y);
+  }
+
+  *gfxp = gfx;
+}
 
 void func_800852A8(void) {
   u16 buttons;

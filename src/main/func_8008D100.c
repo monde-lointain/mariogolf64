@@ -2,6 +2,7 @@
 
 extern u32 sky_panel_cycle_mode_sel;
 extern s32 D_800C5EE4;
+extern u16* D_800C5EE0;
 extern s32 D_800C7304;
 extern s32 D_800C730C;
 
@@ -104,9 +105,152 @@ void func_80092324(void) {}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_8008D100", func_8009232C);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_8008D100", func_80092E10);
+/**
+ * Replays the captured frame at `D_800C5EE0` as an 8x8 grid of 38x28 RGBA16
+ * tiles peeled off in a clockwise spiral, `D_800C5EE4` tiles at a time.
+ *
+ * The snapshot is treated as a 304x224 image, so tile (x, y) loads the region
+ * at (x * 38, y * 28) and draws it at (+8, +8) -- the same 8-pixel border the
+ * capture wrote it under. `D_800C5EE4` counts down by four per call, so each
+ * call emits four fewer tiles than the last and the frozen frame retreats along
+ * the spiral. The first `count - 4` tiles are opaque DECALRGB; the trailing
+ * four are the fading edge, re-emitted under G_RM_CLD_SURF with a TEXEL0 *
+ * PRIMITIVE alpha combine and a primitive alpha stepping 204, 153, 102, 51.
+ *
+ * TRUE ORIGIN of `func_80092E10`: `spiral_step` below is a GCC nested function.
+ * The ROM child homes its incoming static chain ($v0 == STATIC_CHAIN_REGNUM =
+ * GP_REG_FIRST + 2, mips.h:1310) into an 8-byte frame and reaches the seven
+ * parent counters through it, which is also why the parent re-loads `x` and `y`
+ * from the frame on every iteration instead of keeping them in registers. gcc
+ * emits the child ahead of the parent, which is why 0x80092E10 sits below
+ * 0x80092F18, and why no standalone symbol for it survives here.
+ *
+ * The seven counters are declared in frame order (`x` .. `x_min` at sp+0x10 ..
+ * sp+0x28) and seeded largest-offset-first so the two `7` stores share one
+ * register ahead of the zero stores, matching the ROM's store order.
+ */
+void emit_snapshot_spiral_wipe_dl(Gfx** gfxp) {
+  s32 x;
+  s32 x_max;
+  s32 y_min;
+  s32 leg;
+  s32 y;
+  s32 y_max;
+  s32 x_min;
+  Gfx* gfx;
+  s32 n;
+  s32 count;
+  s32 i;
+  s32 alpha;
+  u32 src;
 
-INCLUDE_ASM("asm/nonmatchings/main/func_8008D100", func_80092F18);
+  void spiral_step(void) {
+    switch (leg) {
+      case 0:
+        if (++x == x_max) {
+          y_min++;
+          leg++;
+        }
+        break;
+      case 1:
+        if (++y == y_max) {
+          x_max--;
+          leg++;
+        }
+        break;
+      case 2:
+        if (--x == x_min) {
+          y_max--;
+          leg++;
+        }
+        break;
+      case 3:
+        if (--y == y_min) {
+          leg = 0;
+          x_min++;
+        }
+        break;
+    }
+  }
+
+  gfx = *gfxp;
+  n = D_800C5EE4;
+  src = (u32)D_800C5EE0;
+
+  if (n > 0) {
+    count = n - 4;
+    alpha = 255;
+    y_max = 7;
+    x_max = 7;
+    y_min = 0;
+    x_min = 0;
+    leg = 0;
+    x = 0;
+    y = 0;
+
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetAlphaCompare(gfx++, G_AC_NONE);
+    gDPPipeSync(gfx++);
+    gDPSetTexturePersp(gfx++, G_TP_NONE);
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
+    gDPSetCombineMode(gfx++, G_CC_DECALRGB, G_CC_DECALRGB);
+
+    if (count > 64) {
+      count = 64;
+    }
+
+    for (i = 0; i != count; i++) {
+      gDPLoadTextureTile(gfx++, src & ~7, G_IM_FMT_RGBA, G_IM_SIZ_16b, 304, 224,
+                         x * 38, y * 28, x * 38 + 37, y * 28 + 27, 0, 0, 0, 0,
+                         0, 0, 0);
+      gDPPipeSync(gfx++);
+      gSPTextureRectangle(gfx++, (x * 38 + 8) << G_TEXTURE_IMAGE_FRAC,
+                          (y * 28 + 8) << G_TEXTURE_IMAGE_FRAC,
+                          (x * 38 + 46) << G_TEXTURE_IMAGE_FRAC,
+                          (y * 28 + 36) << G_TEXTURE_IMAGE_FRAC,
+                          G_TX_RENDERTILE, (x * 38) << 5, (y * 28) << 5,
+                          1 << 10, 1 << 10);
+      gDPPipeSync(gfx++);
+      spiral_step();
+    }
+
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
+    gDPSetCombineLERP(gfx++, 0, 0, 0, TEXEL0, 0, 0, 0, PRIMITIVE, 0, 0, 0,
+                      TEXEL0, 0, 0, 0, PRIMITIVE);
+
+    count += 4;
+    if (count > 64) {
+      count = 64;
+    }
+
+    for (; i != count; i++) {
+      alpha -= 51;
+      gDPLoadTextureTile(gfx++, src & ~7, G_IM_FMT_RGBA, G_IM_SIZ_16b, 304, 224,
+                         x * 38, y * 28, x * 38 + 37, y * 28 + 27, 0, 0, 0, 0,
+                         0, 0, 0);
+      gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, alpha);
+      gDPPipeSync(gfx++);
+      gSPTextureRectangle(gfx++, (x * 38 + 8) << G_TEXTURE_IMAGE_FRAC,
+                          (y * 28 + 8) << G_TEXTURE_IMAGE_FRAC,
+                          (x * 38 + 46) << G_TEXTURE_IMAGE_FRAC,
+                          (y * 28 + 36) << G_TEXTURE_IMAGE_FRAC,
+                          G_TX_RENDERTILE, (x * 38) << 5, (y * 28) << 5,
+                          1 << 10, 1 << 10);
+      gDPPipeSync(gfx++);
+      spiral_step();
+    }
+
+    D_800C5EE4 -= 4;
+  }
+
+  *gfxp = gfx;
+}
 
 void func_800934CC(s32 arg0) {
   if (arg0 == -1) {
@@ -359,14 +503,15 @@ extern void play_sound_effect(s32 sfx, s32 arg1, s32 arg2);
  *
  * Each outer step emits one 80-pixel column of a 120-pixel band: `col` walks
  * 0..3 across the 320-pixel screen and `row` advances a band every fourth step,
- * so the eight inner tiles stack 15 scanlines apart. `idx` is the running RGBA16
- * offset into the snapshot, 600 words (80 * 15 texels) per tile. A sound effect
- * fires on every eighth step.
+ * so the eight inner tiles stack 15 scanlines apart. `idx` is the running
+ * RGBA16 offset into the snapshot, 600 words (80 * 15 texels) per tile. A sound
+ * effect fires on every eighth step.
  *
  * Three spellings below are load-bearing for the loop.c invariant-hoist split
  * (the `threshold -= 3` decay at loop.c:1719 gating loop.c:1631), which decides
- * which of the twelve display-list constants leave the inner loop. The ROM moves
- * exactly nine, leaving `0xF2000000`, `0x0013C038` and `0x04000400` behind:
+ * which of the twelve display-list constants leave the inner loop. The ROM
+ * moves exactly nine, leaving `0xF2000000`, `0x0013C038` and `0x04000400`
+ * behind:
  *   - `col4` is a separate statement so exactly one invariant insn precedes the
  *     display-list constants; a two-insn `col * 5` prefix costs three more
  *     threshold and strands `gDPSetTile`'s `0xF5102800` in the inner loop.
