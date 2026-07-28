@@ -1474,6 +1474,12 @@ Three honest caveats:
   STRUCTURAL symptom, not evidence of a coloring problem — S285 makes 4 of the last 6 carry verdicts
   refuted, and this one was refuted by the same agent that wrote it, hours later, with no new tool.
   Push: local.
+- **Sprint 301** — plan-time seed freeze (classical track, v2 two-pass): seed **8**, regime
+  **classical**, two committed fresh `dl-emitter` leaves at 618-634 instructions (`func_800947A8`,
+  `func_8008D3F4`) plus one stretch (`func_8009232C`, 697), all three in the single host
+  `src/main/func_8008D100.c`, zero gate enablers, baseline `cb47408`. Realized tier and residual are
+  scored at review in a second commit; this line is committed before any `src/` edit and must not be
+  revised.
 - **Sprint 300** — the `dl-emitter` vein at 474-590 instructions, all-fresh.
   **+2 banked, 1 carried byte-exact, 3 permuter runs (0 zeros, 2 levers), 0 re-opened, 0 stuck-far.**
   Zero gate enablers. `func_80083AC8` -> `emit_ball_trail_dl` (510/510), `func_8006BC80` ->
