@@ -25,6 +25,46 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 306 — the nearest `dl-emitter` carry plus `main`'s last fresh row (0 banked, 2 carried) — 2026-07-30
+- Increment: 0 files / **0 functions matched**. `src/main/func_80078910.c` 21 stubs and
+  `src/main/func_80080220.c` 13 stubs, both unchanged; md5-candidate unchanged at 230 of 265;
+  `--loose-stubs main` 277 stubs, **fresh 1 -> 0**. Descriptive names unchanged at 168 / 555.
+- Quality: 0/1/2/1 this sprint
+- Seed: committed 13pt; banked 0pt; realized 16, residual +3; regime classical
+- What helped: **gcc's own dumps, twice.** `-dS` printed the scheduler's ready lists and priorities
+  and settled `func_8007EF0C` in one command — the `divmodsi4` insn scores `INSN_PRIORITY` 1 because
+  its only in-block producer is a constant load, against 5 and 7 for the two load chains it races,
+  and `schedule_block` is bottom-up, so it is chosen last and emitted first no matter how the source
+  is spelled. That is a measurement where the carry doc had asserted a `rank_for_schedule` tie.
+  On `draw_terrain_aim_grid` the **goto-loop form was worth +39 instructions** across six loops:
+  `loop.c` had been reducing `&scr[k]`, `&scr[k-1]` and `&shade[k]` to givs updated at the loop head
+  where the ROM recomputes `sll k,4` inside each block. Wrapping each goto loop in `if (n != 0)` put
+  back the entry test the goto form drops, another +10. Eight levers in all took that body from 1273
+  to an exact 1349.
+- Friction: **the two carries are the same shape as the sprint's own plan risk and it still cost the
+  whole sprint.** Risk 3 said a 0/2 leaves the next gate with no smallest-first option in `main`, and
+  that is now the state: 0 fresh rows. Second, `tools/seg_diff.py` and `tools/gbi_match.py` were both
+  hand-rolled again this sprint though S305 landed them a week ago — the S304 "read the index before
+  opening a dive" lesson recurring one level up, at the tooling layer. Third, the permuter was run on
+  a compile the build never performs: `permuter_settings_main.toml` has no `-ffast-math`, but six
+  `src/main` TUs are per-file `-ffast-math` overrides in `mk/main.mk`, and on an FP-heavy TU that flag
+  decides whether `x * C1 / C2` folds to a single `mul.s`.
+- Applied: 4 of 4 accepted: #1 `setup-permuter.sh` now patches the generated `compile.sh` when the
+  target TU carries a per-file `-ffast-math` override; #2 `docs/levers.md` division bullet gains the
+  fast-math folding rule; #3 the goto-loop anchor gains its +39 scale and the `if (n != 0)` guard;
+  #4 `docs/workflow/loop.md ## Oracles` names `seg_diff.py` and `gbi_match.py`. Retirement: the
+  verbatim-mirror exemption in `docs/workflow/gates.md ## Story points` compressed to its rule plus
+  one citation line (the mirror regime has been mined out since S148), and the stale
+  `Current phase regime: mirror` corrected to `classical`. Net line delta **-4106 bytes** on
+  `gates.md`, and `levers.md` paid for its own additions by merging `defeat-global-base-cse` into
+  `aggregate-store-pins-pointer-load` as `global-reread-vs-cse` and the two narrow-type spellings
+  into `narrow-type-spelling`.
+- Carry-over: `func_8007EF0C` (`src/main/func_80078910.c`) at 968/974 with the ROM's exact frame,
+  terminal-looking on a `sched.c priority()` value; `draw_terrain_aim_grid`
+  (`src/main/func_80080220.c`) at 1349/1349 exact count with a frame 0x10 too large, residual is a
+  whole-function FP-versus-GPR allocation equilibrium. Both have rewritten `docs/wip/*.near-match.md`
+  with the body and the measured numbers, and `--carried-check` flags both.
+
 ## Sprint 305 — the fresh `dl-emitter` tail in `main`, sibling-seeded (1 banked, 1 carried) — 2026-07-28
 - Increment: 0 files / **1 function matched** (`emit_ball_offscreen_indicator`, 797 instructions,
   byte-exact). `src/main/func_80080220.c` 14 -> 13 stubs; `--loose-stubs main` 278 -> 277, fresh

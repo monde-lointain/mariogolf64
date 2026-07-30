@@ -228,7 +228,8 @@ dashboard). Target selection is `tools/pick_target.py`, not a stored roadmap.
 ## Story points
 
 Lightweight estimation over the Scrum cadence. Scale: Fibonacci 1, 2, 3, 5, 8, 13. Current phase
-`regime: mirror`. `VELOCITY.md` is the committed dashboard with the full rules and anchors; this is
+`regime: classical` (the mirror band is mined out; Epic 1 closed S148). `VELOCITY.md` is the
+committed dashboard with the full rules and anchors; this is
 the summary.
 
 - **Deterministic seed (v1).** `pick_target.py`'s `pts` column is the a-priori seed (a pure function
@@ -255,72 +256,27 @@ the summary.
     re-anchor). S148 `overlay_10/func_ovl10_801F4A40` (2fn, 176B, one-tu) and S150 `main/func_80029250`
     (`cfb_setup`+`cfb_set_num`, 2fn, 496B, one-tu, 0-jal) both banked seed-only; both now seed 3/5 (not
     13) automatically.
-  - **Verbatim-mirror exemption.** A seed-8/13 increment may run as a normal
-    1-increment sprint when all of these hold:
-    - (a) `regime: mirror` plus a verbatim copy of a single upstream file. A drop-def mirror
-      qualifies: the function bodies are byte-verbatim, and only the file-scope data defs become
-      `extern` decls, which emit nothing, so it banks atomically exactly like a pure `cp` (S86
-      `os/timerintr.c`, pts-8 single-file-pack, banked first-try seed-only). A `.data`-carve mirror
-      qualifies even more directly: the data defs stay defined and the `.data` is carved to its placed
-      vram, so it is a pure verbatim `cp` of the whole file (S116 `nucontgbpakmgr.c`, pts-8
-      single-file-pack, banked first-try seed-only, the first libnusys `.data` carve).
-    - (b) The decompose path is mechanically blocked: the increment is a `single-file-pack` (every
-      member fn comes from one upstream `.c`), so there is no inter-file boundary to split at and an
-      intra-file split cannot be independently mirrored. This holds regardless of inner-boundary
-      16-alignment: S64 `lookathil`'s inner boundary was `non16align`, S69 `lookat`'s was 16-aligned,
-      and both were decompose-blocked (you cannot mirror half a source file). `pick_target.py`'s
-      `single-file-pack:<n>fn[…]` tag is the signal (S67); the old `non16align`-on-the-inner-boundary
-      test was one mechanical case of it, not the rule.
-    - (c) Every callee is placed and all names are curated (the "no residual variance" condition).
-
-    The gate's all-or-nothing concern guards classical iteration stalls; a verbatim single-file mirror
-    banks atomically (or is a quick spike), so a size-only 8/13 is a false fire, the same false-flag
-    class the hazard detectors keep retiring. Document the exemption in `SPRINT.md ## Estimate`; the
-    increment stays seed-only (S64 `gu/lookathil.c` + S69 `gu/lookat.c`, both pts-13, banked
-    first-try). The exemption never covers classical or multi-file packs (a `pack` or `c-combined` of
-    2 or more distinct upstream files decomposes at the file boundary as usual).
-    - **Sub-100 coddog hedge.** A `single-file-pack` with a sub-100 coddog score
-      (e.g. `@99.99`, the same near-verbatim tell that flags block-reorders) still qualifies for the
-      exemption, but budget a body-divergence diagnosis pass: the "banks atomically or is a quick
-      spike" assumption can be violated by a per-fn divergence (block-reorder, or a **game-modified
-      body** — an extra branch/store the literal upstream lacks) that turns the "quick spike" into a
-      partial bank (S121 `nucontrmbmgr.c`: 8/9 banked C, 1 carried as `INCLUDE_ASM`). Hedge the estimate
-      "<=1 re-attempt" and expect a per-file score of 0 pt if the file ends partial (the matched-fn
-      count is the value signal, not the file point). **Prove the body emits the target's exact
-      stores + values before concluding "compiler wall":** the S121 carry was misframed as an
-      unbankable `#cross-jump-tail-merge` for 5 sprints, then banked S127 with a one-branch force-stop
-      fix (`state = STOPPED` on `osMotorInit` error). See `#cross-jump-tail-merge`.
-    - **coddog 99.99 == structure, not bytes; the exemption-guard.** A `coddog-mirror:<f>@99.99`
-      can mask a heavily game-customized file where most bodies diverge, not just a block-reorder
-      (S123 `nusched.c`: a game scheduler that shares only the nusys skeleton). The verbatim-mirror
-      exemption does not apply when the pack carries a customization tell: a `jal` to a non-lib
-      `func_<vram>` game callee (a callee that is not `os*`/`nuSc*`/`al*`/lib), or a large
-      `jal-count-mismatch` not explained by a known macro/version artifact. Those signal pervasive
-      per-fn divergence -> route to the classical track with the mixed bank-stock-carry-custom
-      plan (next bullet), not a seed-only atomic mirror. Verify bodies before trusting a 99.99 row:
-      diff the asm against the upstream for the heavy functions, and run the nusys/libultra version
-      triage (`docs/hazards.md#upstream-mirror-pattern`) before concluding the divergence is custom.
-      (pick_target.py automation to price the non-lib-`func_`-callee tell is a tracked follow-up;
-      until then the gate applies this guard by reading the pack's asm callees.)
-    - **Mixed mirror+INCLUDE_ASM partial bank is first-class** (S121 generalized to S123). A
-      `coddog-mirror` file can be partially stock: some fns byte-match the upstream, others are
-      game-customized. The right play is bank-stock-carry-custom — write the stock fns as C and
-      keep the customized fns as `INCLUDE_ASM` in the same `src/<seg>.c` (the ROM stays green; the
-      file is partial / not md5-candidate until the customized fns are classically decompiled). Plan
-      such a file as a `regime: mixed` increment, not a seed-only mirror: per-file all-or-nothing
-      means the partial file banks 0 pt, and the matched-fn count is the value signal (S123 nusched.c:
-      10/14 banked C, 4 carried, 0 pt, +10 matched).
-      - **Extends to a classical one-tu with shared rodata (S169).** A one-tu classical pack can
-        partial-bank too: write the matched fns as C and keep the unmatched fns as `INCLUDE_ASM` in the
-        same `src/<seg>.c`, **as long as the TU's shared rodata (strings, FP-double pool constants)
-        stays in the extracted blob and every fn references it `extern`** (no `.rodata` carve). The ROM
-        stays green off the matched fns. So a hard FP fn does not block banking its tractable siblings,
-        and the one-tu is not strictly atomic-or-nothing when the rodata is referenced extern rather
-        than emitted as literals. S169 `func_80076640.c` banked `func_80076778` (+1) as C while
-        `func_80076640` (score-25 reg-swap) and `func_8007680C` (S158-class FP) stayed `INCLUDE_ASM`,
-        all referencing the shared `ACAD0` rodata blob. (Emitting the rodata as source literals would
-        force the carve and re-impose atomicity, so prefer extern refs for a partial one-tu; see
-        `docs/hazards.md#rodata-sibling-yaml-pattern`.)
+  - **Verbatim-mirror exemption (retired to its rule, S306).** The mirror regime has been mined out
+    since S148, so this fires on nothing the ranker now produces. The rule, kept for the day a new
+    vendored band appears: a seed-8/13 increment runs as a normal 1-increment sprint when it is a
+    `single-file-pack` verbatim copy of one upstream file with every callee placed and named, because
+    the decompose path is then mechanically blocked and the increment banks atomically or is a quick
+    spike. Drop-def and `.data`-carve mirrors both qualify. Document it in `SPRINT.md ## Estimate`;
+    the increment stays seed-only. It never covers classical or multi-file packs. A sub-100 coddog
+    score (`@99.99`) is structure, not bytes: it can mask a game-customized file, so the exemption
+    lapses on a customization tell (a `jal` to a non-lib `func_<vram>`, or an unexplained
+    `jal-count-mismatch`) and the pack routes to the mixed plan below. Full case law: S64/S69
+    (pts-13, banked first-try), S86, S116, S121, S123, and `docs/hazards.md#upstream-mirror-pattern`.
+  - **Mixed partial bank is first-class.** A file can be partially stock: write the matching fns as C
+    and keep the rest as `INCLUDE_ASM` in the same `src/<seg>.c`. The ROM stays green off the matched
+    fns; the file is partial, so it banks 0 pt and the matched-fn count is the value signal (S123
+    `nusched.c`: 10/14 banked, 4 carried). **This extends to a classical one-tu (S169), as long as the
+    TU's shared rodata stays in the extracted blob and every fn references it `extern`** -- no
+    `.rodata` carve. So a hard FP fn does not block banking its tractable siblings, and a one-tu is
+    not atomic-or-nothing when its rodata is referenced rather than emitted as literals (S169
+    `func_80076640.c` banked 1 of 3 against the shared `ACAD0` blob; emitting the rodata as source
+    literals would force the carve and re-impose atomicity, see
+    `docs/hazards.md#rodata-sibling-yaml-pattern`).
 - **Per-file all-or-nothing banking.** Points bank per file: a spiked/carried file scores 0 pt, a
   banked sibling still counts. This is a separate ledger from the function-level quality
   counter-metric.

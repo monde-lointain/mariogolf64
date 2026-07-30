@@ -39,3 +39,20 @@ echo "Running import.py${SETTINGS_ARGS:+ (${SETTINGS_ARGS[*]})}..."
 # Guard the array expansion: under `set -u`, "${SETTINGS_ARGS[@]}" errors on an EMPTY array (bash
 # < 4.4), which aborted the wrapper silently while a direct import.py call worked (S189).
 ./tools/decomp-permuter/import.py ${SETTINGS_ARGS[@]+"${SETTINGS_ARGS[@]}"} "$C_FILE" "$ASM_FILE" "$@"
+
+# Per-file -ffast-math: six src/main TUs carry a `C_PROFILE_CFLAGS := $(MAIN_CFLAGS) -ffast-math`
+# override in mk/main.mk, and neither permuter settings file's compiler_command has the flag. Left
+# alone, the permuter scores a compile the build never performs -- on an FP-heavy TU that changes
+# constant folding (`x * C1 / C2` collapses to one `mul.s`), so every candidate is measured against
+# the wrong codegen (S306). Patch the generated compile.sh to match the real per-file profile.
+OBJ_REL="${C_FILE#src/}"
+OBJ_REL="${OBJ_REL%.c}.o"
+COMPILE_SH="nonmatchings/$FUNC_NAME/compile.sh"
+if [ -f "$COMPILE_SH" ] && grep -qE "/${OBJ_REL}:.*-ffast-math" mk/*.mk 2>/dev/null; then
+    if grep -q -- '-ffast-math' "$COMPILE_SH"; then
+        echo "compile.sh already carries -ffast-math"
+    else
+        sed -i 's/ -O2 / -O2 -ffast-math /' "$COMPILE_SH"
+        echo "Patched $COMPILE_SH with -ffast-math (per-file override in mk/main.mk)"
+    fi
+fi

@@ -1526,6 +1526,25 @@ Three honest caveats:
   and `main`'s fresh vein is now one row. Tooling: three of the sprint's four accepted suggestions
   were tools this sprint had to hand-roll (`cmpfn.sh` histogram, `tools/seg_diff.py`,
   `tools/gbi_match.py`).
+- **Sprint 306 (realized)** — the nearest `dl-emitter` carry re-opened plus the segment's last
+  fresh row. **0 banked, 2 carried, 1 permuter run (plateaued), 1 re-opened, 0 stuck-far.** Seed 13pt
+  (5 + 8); banked **0**pt (both hosts partial, as priced); **realized 16**, residual **+3** (+1 per
+  carry, +1 for the permuter run). Regime classical. Progress delta 0 matched; md5-candidate unchanged
+  at 230 of 265; descriptive names unchanged at 168 against 555 `func_`-named in `src/main`.
+  What the sprint bought instead of banks is two measured verdicts. `func_8007EF0C`'s residual is a
+  `sched.c priority()` value read off `gcc -dS` — the `divmodsi4` insn scores 1 against the 5 and 7 of
+  the load chains it races, and `schedule_block` is bottom-up, so no source order can move it — not
+  the `rank_for_schedule` tie its doc had asserted. `draw_terrain_aim_grid` went 1273 to **1349/1349
+  exact count** in one sprint at 1.4x the largest body the class had attempted, on eight individually
+  measured levers, the largest being the goto-loop form on six loops (+39). Its residual is an
+  allocation equilibrium: the ROM spends two of its floats in general registers and one on the stack
+  because eight are live across four `sinf`/`cosf` calls against six callee-saved FP registers.
+  The gate's risk ranking fired on 2 (size/integration) and 3 (`main` fresh vein now empty at 0 rows);
+  risk 1 (FP-sched tags) did not — neither residual was an FP-scheduler coin. Tooling finding, the
+  second sprint running: `tools/seg_diff.py` and `tools/gbi_match.py` were both hand-rolled again
+  despite S305 having landed them, and `permuter_settings_main.toml` was found to omit the per-file
+  `-ffast-math` six `src/main` TUs build with, so a permuter run on any of them scored a compile the
+  build never performs.
 - **Sprint 306** — plan-time seed freeze (classical track, v2 two-pass): seed **13**, regime
   **classical**, split 5 + 8. One `dl-emitter` carry re-open as a crack-attempt slice
   (`func_8007EF0C`, 968/974 with the ROM's exact frame `-0x160`, residual = one scheduler placement

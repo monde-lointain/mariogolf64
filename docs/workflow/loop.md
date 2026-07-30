@@ -192,11 +192,11 @@ from it.
 
 ## Oracles
 
-**A function is banked only when `tools/verify-rom.sh` exits 0. Every other tool below is an
+**A function is banked only when `tools/verify-rom.sh` exits 0; every other tool below is an
 iteration signal.**
 
-Each row states what a tool is authoritative for and how it fails, once. Do not restate a failure
-mode as an imperative at each use site: the ROM SHA-1 is an external oracle, so a match cannot be
+Each row states what a tool is authoritative for and how it fails, once. Do not restate a failure mode
+as an imperative at each use site: the ROM SHA-1 is an external oracle, so a match cannot be
 asserted, only measured, and re-check layers stacked on top of it buy nothing.
 
 | Tool | Authoritative for | Known failure mode | Trusted when |
@@ -214,18 +214,21 @@ asserted, only measured, and re-check layers stacked on top of it buy nothing.
 | mnemonic histogram, `.s` against a fresh object (`grep -oE '  [a-z0-9.]+ '` piped to `sort \| uniq -c`, and its `objdump -dz` twin) | Whether a residual is structural or a permutation, in two calls and no build. | A multiset: says nothing about *where*. Normalise the alias pairs (`addu`/`move`, `li`/`addiu`) or it reports false deltas. | Before reading any `cmpfn` hunk. It found both S304 classes `cmpfn` normalisation hid: a branch-form divergence read as "pure allocation", and a `lui` +1 / `addiu` -1 naming an address-CSE defect behind a 491-row diff. |
 | `head -1 asm/nonmatchings/<seg>/<f>/<f>.s` | The ROM-side byte size (`nonmatching <f>, 0x<size>`); instructions = size/4. | Sizing a leaf from adjacent-vram deltas is wrong in a multi-function pack, because curated-named functions interleave the `func_<vram>` ones. | Always, for both the instruction-count target and plan-gate sizing. |
 
+Check `tools/` before hand-rolling a comparison: `seg_diff.py` localises a residual by region,
+`gbi_match.py` resolves a DL word to its macro; both were re-invented in S306.
+
 Two notes that are two-tool interactions rather than properties of any one tool.
 
 **Residual classification routes the lever.** Count by region first, splitting at the loop-head
-labels, and histogram mnemonics per region: on a permutation `cmpfn`'s hunk alignment is
-meaningless, and a `+5` against an adjacent `-5` is one displacement, not five missing insns (S297).
-Then, from a fresh object: a differing count is a structural
-deficit, so fix that before anything else; an exact count with differing registers is a coloring or
-`local-alloc` question; an exact count with differing order is a scheduler question. Do not argue
+labels, and histogram mnemonics per region; on a permutation `cmpfn`'s hunk alignment is
+meaningless, and `+5` against an adjacent `-5` is one displacement, not five missing insns (S297).
+Then, from a fresh object: a differing count is a structural deficit,
+so fix that first; an exact count with differing registers is a coloring or `local-alloc` question;
+an exact count with differing order is a scheduler question. Do not argue
 register pressure, live length or "needs an Nth register" from a body that is not at exact instruction
 count -- two strongly-worded terminal verdicts were refuted that way once their bodies reached exact
-count. The register count is itself a structural symptom, so "my build uses one more callee-saved
-register than the ROM" is never on its own evidence of a coloring problem: an extra induction
+count. The register count is itself a structural symptom, so "one more callee-saved register than the ROM"
+is never on its own evidence of a coloring problem: an extra induction
 variable, an aliasing exemption that lets loads clump, or a wrong return type each show up first as a
 surplus register. Fix the structure, then re-count.
 

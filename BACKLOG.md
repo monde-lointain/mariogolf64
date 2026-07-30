@@ -48,6 +48,13 @@ see `docs/wip/func_800990D0.near-match.md` (`--carried-check` flags it). Backup 
 (294-instr wall-prone debug handler, its own slice). STANDING GUIDANCE: prefer a FRESH non-main pack
 next unless a specific main leaf is pre-vetted `.s`-clean.**
 
+**S306 EMPTIES it: `--loose-stubs main` now reports 277 stubs / 0 fresh.** The next `main` slice has
+no smallest-first option at all — it is a re-open of a characterised carry or nothing, and the two
+S306 carries are the best-characterised in the segment (`draw_terrain_aim_grid` at an exact 1349,
+`func_8007EF0C` at 968/974 with the ROM's frame, both with the residual's *pass* named rather than
+guessed). The alternative the plateau advisory has recommended since S280 stands: a FRESH non-main
+pack. `pick_target.py -n 12` with no filter still ranks overlay packs from 896 B upward.
+
 **S305 CLOSES the `main` fresh vein.** `--loose-stubs main` is at 277 stubs / **1 fresh**
 (`draw_terrain_aim_grid`, 0x1514, the biggest row in the `dl-emitter` class). Since S293 the class
 has banked 25 of 33 attempted; the smallest-first choice inside `main` is now gone, so the next main
@@ -3939,8 +3946,23 @@ by `/sprint-plan`:
   `NU_CONT_THREAD_ID=6` vs MG64's 5), and that surfaces only at first build unless reconciled here.
   A near-free retry missing any of these is a half-scoped spike — finish the scope before deferring.
 
-- **(S305 SPIKE — one scheduler placement, everything else exact; re-open with a `sched.c` dive, not
-  a lever search)** `func_8007EF0C`, `src/main/func_80078910.c`. 968 of 974 instructions with the
+- **(S306 SPIKE — exact instruction count, residual is a whole-function FP-versus-GPR allocation
+  equilibrium; re-open with `tools/allocno_report.py`, not a lever search)**
+  `draw_terrain_aim_grid`, `src/main/func_80080220.c`. 1349 of 1349 instructions, frame `-0x2D08`
+  against the ROM's `-0x2CF8`. Every structural feature reproduced; the histogram at that identical
+  total reads `mtc1` +8, `nop` +5, `li` -4, `move` -4, `sw` -3, because the ROM holds `lead` and
+  `colX` in general registers as raw SFmode bit patterns and `baseX` on the stack, converting with
+  `mtc1` at each use — eight floats are live across the four `sinf`/`cosf` calls against six
+  callee-saved FP registers. The question to answer from the allocno report is which allocno should
+  lose its FP register so `lead` (four defs, one use, and that use a `sub.s`) falls back to its
+  alternate class. The permuter is not the tool here: base 36925 over ~600 iterations, best 36315.
+  Body, the eight measured levers and the refuted set in
+  `docs/wip/draw_terrain_aim_grid.near-match.md`. Note the `f32 fzero` lever there is worth +5 of the
+  1349 and 2 of those are `mtc1` rematerialisations — the cleaner structural base is the 1344 form.
+
+- **(S305/S306 SPIKE — one scheduler placement, everything else exact; the pass and the number are now
+  measured, so treat a further re-open as a search for a legal RTL shape, not for a lever)**
+  `func_8007EF0C`, `src/main/func_80078910.c`. 968 of 974 instructions with the
   ROM's exact `-0x160` frame, all four passes reconstructed (project, `gSPModifyVertex` ribbon, two
   `gSPScisTextureRectangle` loops). The residual is the `0x8000 / size` divide scheduled 11
   instructions earlier than the ROM's, twice: the ROM runs `(sprite / 2) << 9` and
@@ -3949,7 +3971,13 @@ by `/sprint-plan`:
   move it** — a temp before the macro, a full hand-expansion, and a hand-expansion with the temps in
   the ROM's order all give a byte-identical object, so the emission-order lever family is spent.
   Inline `0x8000 / size` is not the answer either (one `div` per using basic block: 4 of them, +38
-  instructions). Body, the fixed set and the refuted set in `docs/wip/func_8007EF0C.near-match.md`.
+  instructions). **S306 named the pass from `gcc -dS`:** `sched.c priority()` gives the `divmodsi4`
+  insn 1, because its only in-block producer is the `0x8000` constant load, against 5 and 7 for the
+  two load chains; `schedule_block` walks bottom-up, so the divide is chosen last and emitted first,
+  and no source order can change a DAG-derived priority. A fourth source form (the divide between the
+  `G_RDPHALF_1` header and data word stores) is byte-identical, and an anti-dependence probe on the
+  quotient added the two `nop`s but cost a `move` and left the divide in place. Body, the fixed set
+  and the refuted set in `docs/wip/func_8007EF0C.near-match.md`.
 
 - **(S304 NAMING DEBT — near-free retry, not a spike)** `func_8008534C` in
   `src/main/func_80080220.c` is BANKED and byte-exact but still carries its auto name. The curated
