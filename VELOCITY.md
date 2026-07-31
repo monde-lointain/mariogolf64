@@ -1562,6 +1562,16 @@ Three honest caveats:
   despite S305 having landed them, and `permuter_settings_main.toml` was found to omit the per-file
   `-ffast-math` six `src/main` TUs build with, so a permuter run on any of them scored a compile the
   build never performs.
+- **Sprint 308** — plan-time seed freeze (classical track, v2 two-pass): seed **13**, regime
+  **classical**, split 5 + 5 + 3. The S307 pool-carve cohort in `src/main/func_80071370.c`, executed
+  as one atomic slice: `func_8007399C` (0x254, the S307 carry at 149/149, replay from
+  `docs/wip/func_8007399C.near-match.md`) + `func_800754BC` (0x350, 212 instr, its direct caller) +
+  `func_8007580C` (0x63C, 399 instr, **jal-free**, so its big-band 8 deweights to 3). The 8-point
+  gate fires on the sum and is overridden seed-only: an object has one contiguous `.rodata`, so the
+  three bodies and the `[0xACBE0]` -> `[0xACAD0]` carve (size 0x178) commit together or not at all —
+  decomposing is the exact failure S307 measured. Zero gate enablers; the carve is a bank-time action
+  and cannot be pre-performed (S265). Baseline `cf88168`. Realized tier and residual are scored at
+  review in a second commit; this line is committed before any `src/` edit and must not be revised.
 - **Sprint 306** — plan-time seed freeze (classical track, v2 two-pass): seed **13**, regime
   **classical**, split 5 + 8. One `dl-emitter` carry re-open as a crack-attempt slice
   (`func_8007EF0C`, 968/974 with the ROM's exact frame `-0x160`, residual = one scheduler placement
