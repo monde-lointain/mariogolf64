@@ -125,7 +125,350 @@ void func_80095D70(s32 arg0, s32 arg1) {
   }
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80095A10", func_80095DE0);
+/* Cue the scripted sound effects for the current cutscene beat: the outer
+ * switch selects the scene (D_800E4C50), the inner one the camera/shot variant
+ * (D_800E4C54), and each arm queues one or more (frame, sound_id) pairs.
+ *
+ * The s32 return type is load-bearing and the value is never produced: a
+ * non-void return blocks reorg.c's fall-through delay-slot steal, which is what
+ * leaves the switch range-check branch's slot empty here. Declared void, gcc
+ * fills that slot with the following sll and the body comes out one nop short.
+ */
+s32 update_cutscene_sound_cues(void) {
+  if (D_800BB020 == 0x1E) {
+    return;
+  }
+
+  switch (D_800E4C50) {
+    case 0:
+      switch (D_800E4C54) {
+        case 0xC:
+          func_80095D70(0x8, 0x1AC);
+          func_80095D70(0x3E, 0x3B);
+          break;
+        case 0xD:
+          func_80095D70(0x20, 0x1B9);
+          break;
+        case 0xE:
+          func_80095D70(0x1E, 0x1A3);
+          break;
+        case 0xF:
+          func_80095D70(0x19, 0x1B7);
+          break;
+      }
+      break;
+
+    case 1:
+      switch (D_800E4C54) {
+        case 0xC:
+          func_80095D70(0x0, 0xCC);
+          break;
+        case 0xD:
+          func_80095D70(0x0, 0xE1);
+          func_80095D70(0xA, 0x3F);
+          break;
+        case 0xE:
+          func_80095D70(0xA, 0xD6);
+          break;
+        case 0xF:
+          func_80095D70(0x22, 0xE0);
+          break;
+      }
+      break;
+
+    case 2:
+      switch (D_800E4C54) {
+        case 0xC:
+          func_80095D70(0x2C, 0x15D);
+          func_80095D70(0x5C, 0x3D);
+          break;
+        case 0xD:
+          func_80095D70(0xC, 0x168);
+          break;
+        case 0xE:
+          func_80095D70(0xC, 0x169);
+          break;
+        case 0xF:
+          func_80095D70(0x8, 0x159);
+          break;
+      }
+      break;
+
+    case 3:
+      switch (D_800E4C54) {
+        case 0xC:
+          func_80095D70(0xF, 0xC6);
+          break;
+        case 0xD:
+          func_80095D70(0x9, 0xC9);
+          func_80095D70(0x39, 0xCA);
+          break;
+        case 0xE:
+          func_80095D70(0x20, 0xC9);
+          break;
+        case 0xF:
+          func_80095D70(0x28, 0xCB);
+          break;
+      }
+      break;
+
+    case 4:
+      switch (D_800E4C54) {
+        case 0xC:
+          func_80095D70(0x2, 0x150);
+          break;
+        case 0xD:
+          func_80095D70(0x0, 0x13F);
+          break;
+        case 0xE:
+          func_80095D70(0x12, 0x14E);
+          break;
+        case 0xF:
+          func_80095D70(0x7, 0x140);
+          break;
+      }
+      break;
+
+    case 5:
+      switch (D_800E4C54) {
+        case 0xC:
+          func_80095D70(0x0, 0x1A0);
+          func_80095D70(0x38, 0x3B);
+          break;
+        case 0xD:
+          func_80095D70(0x6, 0x194);
+          func_80095D70(0x6, 0x3C);
+          break;
+        case 0xE:
+          func_80095D70(0xC, 0x18E);
+          func_80095D70(0x2A, 0x3B);
+          break;
+        case 0xF:
+          func_80095D70(0x10, 0x19F);
+          break;
+      }
+      break;
+
+    case 6:
+      switch (D_800E4C54) {
+        case 0xC:
+          func_80095D70(0xE, 0x1C4);
+          break;
+        case 0xD:
+          func_80095D70(0x2, 0x1D0);
+          break;
+        case 0xE:
+          func_80095D70(0x7, 0x1D1);
+          break;
+        case 0xF:
+          func_80095D70(0x0, 0x1C1);
+          break;
+      }
+      break;
+
+    case 7:
+      switch (D_800E4C54) {
+        case 0xC:
+          func_80095D70(0x0, 0x1FF);
+          func_80095D70(0x15, 0x3C);
+          func_80095D70(0x58, 0x3B);
+          break;
+        case 0xD:
+          func_80095D70(0x0, 0x1F2);
+          break;
+        case 0xE:
+          func_80095D70(0x11, 0x1F3);
+          break;
+        case 0xF:
+          func_80095D70(0x0, 0x1EE);
+          func_80095D70(0x1C, 0x39);
+          break;
+      }
+      break;
+
+    case 8:
+      switch (D_800E4C54) {
+        case 0xC:
+          func_80095D70(0x14, 0x105);
+          func_80095D70(0x37, 0x3B);
+          break;
+        case 0xD:
+          func_80095D70(0x1B, 0xFF);
+          break;
+        case 0xE:
+          func_80095D70(0x18, 0x103);
+          break;
+        case 0xF:
+          func_80095D70(0x5, 0xF5);
+          break;
+      }
+      break;
+
+    case 9:
+    case 13:
+      switch (D_800E4C54) {
+        case 0xC:
+          func_80095D70(0x0, 0x180);
+          func_80095D70(0x0, 0x3C);
+          func_80095D70(0x44, 0x38);
+          break;
+        case 0xD:
+          func_80095D70(0x0, 0x173);
+          break;
+        case 0xE:
+          func_80095D70(0xD, 0x182);
+          break;
+        case 0xF:
+          func_80095D70(0x1A, 0x17F);
+          break;
+      }
+      break;
+
+    case 10:
+      switch (D_800E4C54) {
+        case 0xC:
+          func_80095D70(0x42, 0x200);
+          func_80095D70(0x26, 0x3E);
+          func_80095D70(0x26, 0x35);
+          func_80095D70(0x3, 0x4F);
+          func_80095D70(0xB, 0x4F);
+          func_80095D70(0x12, 0x4F);
+          func_80095D70(0x19, 0x4F);
+          func_80095D70(0x20, 0x4F);
+          break;
+        case 0xD:
+          func_80095D70(0x28, 0x208);
+          func_80095D70(0x14, 0x4F);
+          func_80095D70(0x26, 0x4F);
+          break;
+        case 0xE:
+          func_80095D70(0x1C, 0x209);
+          break;
+        case 0xF:
+          func_80095D70(0x0, 0x206);
+          break;
+      }
+      break;
+
+    case 11:
+      switch (D_800E4C54) {
+        case 0xC:
+          func_80095D70(0x7, 0x42);
+          func_80095D70(0x1E, 0xE2);
+          func_80095D70(0x23, 0x41);
+          func_80095D70(0x28, 0x41);
+          func_80095D70(0x2D, 0x41);
+          func_80095D70(0x32, 0x41);
+          func_80095D70(0x37, 0x41);
+          func_80095D70(0x3C, 0x41);
+          func_80095D70(0x46, 0xEA);
+          break;
+        case 0xD:
+          func_80095D70(0x23, 0xEA);
+          func_80095D70(0x16, 0x41);
+          break;
+        case 0xE:
+          func_80095D70(0x23, 0xEA);
+          func_80095D70(0x11, 0x41);
+          func_80095D70(0x1F, 0x41);
+          break;
+        case 0xF:
+          func_80095D70(0x0, 0xE8);
+          break;
+      }
+      break;
+
+    case 12:
+      switch (D_800E4C54) {
+        case 0xC:
+          func_80095D70(0x1D, 0x12F);
+          break;
+        case 0xD:
+          func_80095D70(0x2A, 0x136);
+          break;
+        case 0xE:
+          func_80095D70(0x0, 0x138);
+          break;
+        case 0xF:
+          func_80095D70(0x0, 0x135);
+          func_80095D70(0xA, 0x3A);
+          func_80095D70(0x18, 0x3A);
+          func_80095D70(0x21, 0x3A);
+          break;
+      }
+      break;
+
+    case 14:
+      switch (D_800E4C54) {
+        case 0xC:
+          func_80095D70(0x0, 0x123);
+          func_80095D70(0x42, 0x12E);
+          break;
+        case 0xD:
+          func_80095D70(0x0, 0x12E);
+          break;
+        case 0xE:
+          func_80095D70(0x20, 0x11E);
+          break;
+        case 0xF:
+          func_80095D70(0x19, 0x120);
+          break;
+      }
+      break;
+
+    case 15:
+      switch (D_800E4C54) {
+        case 0xC:
+          func_80095D70(0x0, 0x1DE);
+          func_80095D70(0x6, 0x3C);
+          break;
+        case 0xD:
+          func_80095D70(0x14, 0x1D7);
+          break;
+        case 0xE:
+          func_80095D70(0x0, 0x1D4);
+          break;
+        case 0xF:
+          func_80095D70(0x18, 0x1E8);
+          break;
+      }
+      break;
+
+    case 16:
+      switch (D_800E4C54) {
+        case 0xC:
+          func_80095D70(0x19, 0xA7);
+          break;
+        case 0xD:
+          func_80095D70(0x5, 0xB2);
+          break;
+        case 0xE:
+          func_80095D70(0x26, 0xAE);
+          break;
+        case 0xF:
+          func_80095D70(0x0, 0xB1);
+          break;
+      }
+      break;
+
+    case 17:
+      switch (D_800E4C54) {
+        case 0xC:
+          func_80095D70(0xF, 0x11B);
+          break;
+        case 0xD:
+          func_80095D70(0x6, 0x11A);
+          break;
+        case 0xE:
+          func_80095D70(0x0, 0x109);
+          break;
+        case 0xF:
+          func_80095D70(0x0, 0x10C);
+          break;
+      }
+      break;
+  }
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80095A10", func_8009676C);
 

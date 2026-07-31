@@ -745,10 +745,11 @@ SECTIONS
         build/src/main/func_80078910.o(.rodata);
         build/src/main/func_80080220.o(.rodata);
         build/src/main/func_8008D100.o(.rodata);
+        build/asm/data/ACD60.rodata.o(.rodata);
         build/src/main/func_80095A10.o(.rodata);
         build/src/main/func_80099490.o(.rodata);
         build/src/libnusys/nuboot.o(.rodata);
-        build/asm/data/ACD60.rodata.o(.rodata);
+        build/asm/data/AD2C8.rodata.o(.rodata);
         build/src/libmus/player.o(.rodata);
         build/src/libmus/player_commands.o(.rodata);
         build/asm/78330.o(.rodata);
