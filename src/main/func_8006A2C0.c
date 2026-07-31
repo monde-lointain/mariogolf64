@@ -1230,6 +1230,16 @@ done:
   return D_801B7270 > base[3];
 }
 
+/* func_8006E210 + func_8006DFF0: CARRY (S310). Both reach the ROM's exact
+ * instruction count and exact frame; the residual is three register/placement
+ * clusters (~20 of 679 instructions). func_8006DFF0 is a GCC NESTED FUNCTION of
+ * func_8006E210 -- it takes the static chain in $v0 and shares the parent's
+ * `i`/`j` through it -- so the two bank as one slice and the permuter is
+ * unavailable for the TU. The full reconstruction, the nine levers that closed
+ * 526 of 543 instructions, and the jump.c store-flag analysis are in
+ * docs/wip/func_8006E210.near-match.md; the bank-time carve is
+ * `- [0xAC860, .rodata, main/func_8006A2C0]`.
+ */
 INCLUDE_ASM("asm/nonmatchings/main/func_8006A2C0", func_8006DFF0);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_8006A2C0", func_8006E210);
