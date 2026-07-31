@@ -17,7 +17,7 @@ extern void* D_800E1C3C;
 extern void* D_800E1C40;
 extern void* D_800E1C4C;
 extern void* D_800E1C44;
-extern u16* D_800E1C48;
+extern u16* D_800E1C48[];
 extern u32 D_80104FD0;
 
 /* Allocates + loads the HUD/glyph asset set: 7 tagged assets via
@@ -55,10 +55,10 @@ void load_hud_glyph_assets(void) {
   nuPiReadRom((u32)D_151CD50, headerBuf, 8);
   size2 = (((u8*)headerBuf)[0] << 8) | ((u8*)headerBuf)[1];
   heap3_free(&headerBuf);
-  D_800E1C48 = heap3_alloc(size2);
-  nuPiReadRom((u32)D_151CD50, D_800E1C48, size2);
+  D_800E1C48[0] = heap3_alloc(size2);
+  nuPiReadRom((u32)D_151CD50, D_800E1C48[0], size2);
 
-  D_80104FD0 = (D_800E1C48[1] << 1) + 2;
+  D_80104FD0 = (D_800E1C48[0][1] << 1) + 2;
   func_800718C4();
   func_8007512C();
 }
@@ -70,7 +70,7 @@ void func_800715A0(void) {
   heap3_free(&D_800E1C38);
   heap3_free(&D_800E1C4C);
   heap3_free(&D_800E1C44);
-  heap3_free((void**)&D_800E1C48);
+  heap3_free((void**)D_800E1C48);
 }
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80071370", func_80071608);
@@ -199,12 +199,12 @@ typedef struct {
 } Elem2F510; /* stride 0x2C */
 
 extern Elem2F510 D_8012F510[];
-extern u16* D_800E1C48;
+extern u16* D_800E1C48[];
 
 s32 func_80071C9C(s32 idx) {
   Elem2F510* e = &D_8012F510[idx];
   s32 t = e->unk_14;
-  u16* base = D_800E1C48;
+  u16* base = D_800E1C48[0];
   s32 v = e->unk_0C;
 
   return v >= (s32)base[t * 2 + 3];
@@ -256,8 +256,9 @@ void emit_glyph_sheet_preamble_dl(Gfx** cursor, s32 sel) {
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_NONE);
   gDPPipeSync(gfx++);
-  gDPLoadMultiBlock_4b(gfx++, (((u32)(&D_800E1C3C)[sel & 1]) + 8) & ~7, 0x100, 1,
-                       G_IM_FMT_I, 16, 12, 0, G_TX_CLAMP, G_TX_WRAP, 0, 4, 0, 0);
+  gDPLoadMultiBlock_4b(gfx++, (((u32)(&D_800E1C3C)[sel & 1]) + 8) & ~7, 0x100,
+                       1, G_IM_FMT_I, 16, 12, 0, G_TX_CLAMP, G_TX_WRAP, 0, 4, 0,
+                       0);
   gDPPipeSync(gfx++);
 
   *cursor = gfx;
@@ -483,8 +484,8 @@ void func_80074960(void) {}
  * 8-byte header and 8-aligned: IA 4-bit, 256x32.
  *
  * Near-twin of `emit_text_glyph_dl_preamble` (`src/main/func_8004D190.c`): the
- * same command sequence, plus a `gSPLoadGeometryMode(0)` in slot 2, and a 256x32
- * tile where that one loads 256x24.
+ * same command sequence, plus a `gSPLoadGeometryMode(0)` in slot 2, and a
+ * 256x32 tile where that one loads 256x24.
  */
 void emit_hud_glyph_dl_preamble(Gfx** dlp) {
   Gfx* g = *dlp;
@@ -632,9 +633,298 @@ void func_8007512C(void) {
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80071370", func_8007515C);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80071370", func_800754BC);
+extern void func_8007399C(s32 id, s32 size, s32* out_width, s32* out_height,
+                          s32 player);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80071370", func_8007580C);
+typedef struct {
+  Mtx mtx;     /* 0x00 */
+  u16 glyph;   /* 0x40 */
+  u8 size;     /* 0x42 */
+  s8 tag;      /* 0x43 */
+  u8 flags;    /* 0x44 */
+  u8 pad[3];   /* 0x45 */
+} GlyphSprite; /* 0x48 */
+
+extern GlyphSprite D_800FF530[];
+extern u8 D_800FBE18[];
+
+/* Lays out the glyph run `runId` as up-to-`count` translated sprite records
+ * owned by `tag`, centred on (x, y): each free record (tag == -1) gets a
+ * guTranslate matrix at the running pen position, the glyph code and the
+ * owner tag. `size == -1` instead releases every record this tag owns.
+ * Returns the run's half-extents packed as (width << 16) | height. */
+s32 place_glyph_sprite_run(s32 tag, s32 size, s32 x, s32 y, s32 runId) {
+  s32 w;
+  s32 h;
+  s32 start;
+  s32 count;
+  s32 i;
+  s32 j;
+  s32 pen;
+  s32 c;
+
+  if (size == -1) {
+    s32 bound;
+    s32 val;
+
+    j = 0;
+    val = -1;
+    bound = 300;
+    do {
+      if (D_800FF530[j].tag == tag) {
+        D_800FF530[j].tag = val;
+      }
+      j++;
+    } while (j != bound);
+    return;
+  }
+
+  start = D_800E1C48[0][runId * 2 + 2];
+  count = D_800E1C48[0][runId * 2 + 3];
+  func_8007399C(runId, size, &w, &h, 0);
+  w = w / 2;
+  h = h / 2;
+  y += h;
+  D_800FBE18[tag] = count;
+  {
+    s32 bound2;
+    s32 val2;
+
+    j = 0;
+    val2 = -1;
+    bound2 = 300;
+    do {
+      if (D_800FF530[j].tag == tag) {
+        D_800FF530[j].tag = val2;
+      }
+      j++;
+    } while (j != bound2);
+  }
+
+  i = 0;
+  pen = 0;
+  if (count != 0) {
+    s32 j = 0;
+
+    do {
+      if (D_800FF530[j].tag == -1) {
+        c = D_800E1C48[0][D_80104FD0 + start + i];
+        if (c < 0x100) {
+          if ((u32)(c - 0xDE) < 2) {
+            guTranslate(&D_800FF530[j].mtx, (f32)(pen - w + x) - 6.0f,
+                        (f32)y + 4.0f, 0.0f);
+          } else {
+            guTranslate(&D_800FF530[j].mtx, (f32)(pen - w + x), (f32)y, 0.0f);
+            pen += D_800C4390[c];
+          }
+          D_800FF530[j].glyph = c;
+          D_800FF530[j].size = size;
+          D_800FF530[j].tag = tag;
+        } else if (c > 0x7FFF) {
+          switch ((s32)(c - 0x8000)) {
+            case 25: {
+              s32 t = y - 6;
+
+              pen = 0;
+              y = t - size;
+              break;
+            }
+            case 0:
+            case 1:
+            case 2:
+            case 3:
+            case 4:
+            case 5:
+            case 6:
+            case 7:
+            case 8:
+            case 9:
+            case 10:
+            case 12:
+            case 13:
+            case 14:
+              guTranslate(&D_800FF530[j].mtx, (f32)(pen - w + x), (f32)y, 0.0f);
+              pen += size;
+              D_800FF530[j].glyph = c;
+              D_800FF530[j].size = size;
+              D_800FF530[j].tag = tag;
+              break;
+          }
+        }
+        i++;
+      }
+      j++;
+    } while (i != count);
+  }
+  return (w << 16) | h;
+}
+
+extern void* D_800E1C30;
+extern void* D_800E1C34;
+extern void* D_800E1C38;
+extern void* D_800E1C4C;
+extern Vtx D_800C4490[];
+extern Vtx D_800C44D0[];
+extern Vtx D_800C4510[];
+extern Vtx D_800C4550[];
+extern Vtx D_800C4590[];
+
+/* Emits the sprite display list for every glyph record owned by `tag`: a
+ * push/pop matrix pair around a 4-vertex quad whose ST coordinates select the
+ * glyph cell. Codes below 0x100 come from the three fixed-pitch I8 sheets
+ * (12/10/other), codes above 0x7FFF from the paletted IA8 icon sheet, which
+ * needs its TLUT loaded once (`lutLoaded`). */
+void emit_glyph_sprite_dl(Gfx** dl, s32 tag) {
+  Gfx* gfx = *dl;
+  s32 i;
+  s32 lutLoaded;
+  s32 u;
+  s32 v;
+  s32 iconOff;
+  s32 s0;
+  s32 t0;
+  s32 t1;
+
+  lutLoaded = 0;
+  gDPPipeSync(gfx++);
+  for (i = 0; i != 300; i++) {
+    u32 c;
+    s32 size;
+
+    if (D_800FF530[i].tag != tag) {
+      continue;
+    }
+    iconOff = -1;
+    if (lutLoaded == 1) {
+      gDPSetCombineLERP(gfx++, K5, K5, 0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0,
+                        K5, K5, 0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0);
+      gDPPipeSync(gfx++);
+      gDPSetTextureLUT(gfx++, G_TT_NONE);
+      lutLoaded = 0;
+    }
+    c = D_800FF530[i].glyph;
+    if (c < 0x100) {
+      s32 cell = D_800FF530[i].size;
+
+      u = (c & 0xF) * cell;
+      v = (c >> 4) * cell;
+      gDPPipeSync(gfx++);
+      {
+        s32 sz = D_800FF530[i].size;
+
+        if (sz == 0xC) {
+          gDPSetTextureImage(gfx++, G_IM_FMT_I, G_IM_SIZ_8b, 96,
+                             (void*)(((u32)D_800E1C38 + 8) & ~7));
+        } else if (sz == 0xA) {
+          gDPSetTextureImage(gfx++, G_IM_FMT_I, G_IM_SIZ_8b, 80,
+                             (void*)(((u32)D_800E1C34 + 8) & ~7));
+        } else {
+          gDPSetTextureImage(gfx++, G_IM_FMT_I, G_IM_SIZ_8b, 64,
+                             (void*)(((u32)D_800E1C30 + 8) & ~7));
+        }
+      }
+      gDPSetTile(gfx++, G_IM_FMT_I, G_IM_SIZ_8b, 1, 0, G_TX_LOADTILE, 0, 0, 0,
+                 0, 0, 0, 0);
+      gDPLoadSync(gfx++);
+      gDPLoadTile(gfx++, G_TX_LOADTILE, u * 2, v * 4, (u + 15) * 2,
+                  (v + 11) * 4);
+      gDPPipeSync(gfx++);
+      gDPSetTile(gfx++, G_IM_FMT_I, G_IM_SIZ_4b, 1, 0, G_TX_RENDERTILE, 0, 0, 0,
+                 0, 0, 0, 0);
+      gDPSetTileSize(gfx++, G_TX_RENDERTILE, u * 4, v * 4, (u + 15) * 4,
+                     (v + 15) * 4);
+    } else if (c > 0x7FFF) {
+      switch ((s32)(c - 0x8000)) {
+        case 0:
+          iconOff = 0;
+          break;
+        case 1:
+          iconOff = 0x90;
+          break;
+        case 2:
+        case 3:
+        case 4:
+        case 5:
+        case 6:
+          iconOff = 0x1B0;
+          break;
+        case 7:
+          iconOff = 0x360;
+          break;
+        case 8:
+          iconOff = 0x3F0;
+          break;
+        case 9:
+          iconOff = 0x480;
+          break;
+        case 10:
+          iconOff = 0x510;
+          break;
+        case 12:
+          iconOff = 0x120;
+          break;
+        case 13:
+          iconOff = 0x240;
+          break;
+        case 14:
+          iconOff = 0x2D0;
+          break;
+      }
+      if (lutLoaded == 0) {
+        gDPPipeSync(gfx++);
+        gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+        gDPLoadTLUT_pal256(gfx++, (void*)(((u32)D_800E1C4C + 8) & ~7));
+        gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+        lutLoaded = 1;
+      }
+      {
+        s32 off = iconOff + 0x208;
+
+        gDPLoadTextureTile(gfx++, (void*)(((u32)D_800E1C4C + off) & ~7),
+                           G_IM_FMT_CI, G_IM_SIZ_8b, 12, 12, 0, 0, 11, 11, 0, 0,
+                           0, 0, 0, 0, 0);
+      }
+      u = 0;
+      v = 0;
+    }
+    gDPPipeSync(gfx++);
+    gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&D_800FF530[i].mtx),
+              G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_PUSH);
+    size = D_800FF530[i].size;
+    t0 = 0;
+    s0 = 0;
+    t1 = size;
+    if (size == 0xC) {
+      if (D_800FF530[i].flags & 1) {
+        gSPVertex(gfx++, D_800C44D0, 4, 0);
+        t1 = 7;
+      } else if (D_800FF530[i].flags & 2) {
+        gSPVertex(gfx++, D_800C4510, 4, 0);
+        t1 = D_800FF530[i].size;
+        t0 = 7;
+      } else {
+        gSPVertex(gfx++, D_800C4490, 4, 0);
+      }
+    } else if (size == 0xA) {
+      gSPVertex(gfx++, D_800C4550, 4, 0);
+    } else {
+      gSPVertex(gfx++, D_800C4590, 4, 0);
+    }
+    gSPModifyVertex(gfx++, 0, G_MWO_POINT_ST,
+                    ((s0 + u) << 21) | ((t0 + v) << 5));
+    gSPModifyVertex(gfx++, 1, G_MWO_POINT_ST,
+                    ((s0 + u) << 21) | ((t1 + v) << 5));
+    gSPModifyVertex(gfx++, 2, G_MWO_POINT_ST,
+                    ((size + u) << 21) | ((t1 + v) << 5));
+    gSPModifyVertex(gfx++, 3, G_MWO_POINT_ST,
+                    ((size + u) << 21) | ((t0 + v) << 5));
+    gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
+    gDPPipeSync(gfx++);
+    gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
+  }
+  gDPPipeSync(gfx++);
+  *dl = gfx;
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80071370", func_80075E48);
 

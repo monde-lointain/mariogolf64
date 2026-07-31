@@ -725,3 +725,5 @@ emit_hole_banner_dl = 0x8006BC80; // type:func
 emit_lens_flare_dl = 0x8008D3F4; // type:func
 emit_club_and_power_hud_dl = 0x8008534C; // type:func
 kSetMultiTLB = 0x8005342C; // type:func
+place_glyph_sprite_run = 0x800754BC; // type:func
+emit_glyph_sprite_dl = 0x8007580C; // type:func
