@@ -368,6 +368,7 @@ from pick_target_score import (  # noqa: F401  (re-export: pt.<name> contract)
     loose_stubs,
     nested_child_tell,
     nested_parent_tell,
+    nested_parents_of,
     nested_tell,
     score_row,
     seed_points,
@@ -1121,8 +1122,10 @@ def main():
             # wall. S307 split that verdict per leaf (jtbl_carve_tell): a `jtbl-carveable` table is
             # 8-aligned on both edges AND has no foreign rodata between it and the host's existing
             # carve, so its bank-time carve is a single subseg line -- S307's kSetMultiTLB was that
-            # shape and banked on the first build. `jtbl-carve-blocked` (alignment) and
-            # `pool-cohort:` (needs its sibling banked in the same commit) stay excluded.
+            # shape and banked on the first build. `jtbl-carve-blocked` (alignment),
+            # `pool-cohort:` (needs its sibling banked in the same commit) and
+            # `carve-pool-blocked:` (S310: the host's carve PRECEDES the table and asm-owned rodata
+            # sits in the gap, so it cannot be extended forward to reach it) stay excluded.
             return (
                 not s["carried"]
                 and not s["nested"]
@@ -1184,7 +1187,10 @@ def main():
             f"in fresh, {sum(s.get('jtbl_carve') == 'jtbl-carve-blocked' for s in stubs)} "
             f"alignment-blocked, "
             f"{sum(str(s.get('jtbl_carve', '')).startswith('pool-cohort') for s in stubs)} "
-            f"pool-cohort, S307), "
+            f"pool-cohort, "
+            f"{sum(str(s.get('jtbl_carve', '')).startswith('carve-pool-blocked') for s in stubs)} "
+            f"carve-pool-blocked (host carve precedes the table with asm-owned rodata in the gap; "
+            f"banks when those owners are C, S310), S307), "
             f"{sum(s.get('wall_class') == 'dl-emitter' for s in stubs)} dl-emitter "
             f"(pricing tag, counted in fresh; wall framing retired S294 after 7/7 banked), "
             f"{sum(bool(s.get('dl_twin')) for s in stubs)} in dl-twin groups, "
@@ -1263,7 +1269,15 @@ def main():
                 if child
                 else "NESTED-PARENT" if parent else "standalone"
             )
-            print(f"{label:13} {fn}")
+            # A child banks INSIDE its parent, so the verdict is only a price once the parent is
+            # named (S310). The scan is over `asm/nonmatchings/**`, so a relic `.s` for an
+            # already-banked caller can appear -- check it is still `INCLUDE_ASM` before pricing.
+            note = ""
+            if child:
+                parents = nested_parents_of(fn)
+                if parents:
+                    note = "  nested-parent:" + ",".join(parents)
+            print(f"{label:13} {fn}{note}")
         raise SystemExit(1 if any_nested else 0)
 
     rows = build_rows(args, Indexes.build(), carry_over_names())

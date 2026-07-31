@@ -48,6 +48,24 @@ see `docs/wip/func_800990D0.near-match.md` (`--carried-check` flags it). Backup 
 (294-instr wall-prone debug handler, its own slice). STANDING GUIDANCE: prefer a FRESH non-main pack
 next unless a specific main leaf is pre-vetted `.s`-clean.**
 
+**S310 CORRECTS THE VEIN'S SIZE AND FINDS THE PAIR TRAP.** `--loose-stubs main` now reads 272 stubs
+/ **3 fresh** — not because anything banked, but because two ranker fixes landed at the S310 retro.
+`jtbl_carve_tell` gained a **`carve-pool-blocked:<sym>`** verdict for the case S310 hit at its gate:
+the host object's `.rodata` carve PRECEDES the table and asm-owned rodata sits in the gap, so the
+existing row cannot be extended forward to reach it (both edges 8-aligned is necessary, not
+sufficient). That reclassified **8** rows out of `fresh`, `spawn_terrain_effect` among them — it
+banks only once the two still-asm heavy-FP siblings owning `D_800D1960`..`D_800D1988` are C.
+`nested_parent_tell` gained the **chain-setup tell** (`addiu $v0,$sp,K` before a `jal` = gcc handing
+`STATIC_CHAIN_REGNUM` to a nested child), which flags **9** more `main` rows NESTED, and
+`--nested-check` now names a flagged child's parent. Both counts are corrections of over-optimistic
+pricing, so read the smaller `fresh` as more honest, not as depletion.
+**The remaining vein, smallest-first:** `func_80095DE0` (2444 B, 39 jal, host `func_80095A10.c`, the
+S285/S286 sibling-locality file), `func_8008E82C` (2784 B, `fp-coord`, two tables), `func_80089094`
+(13452 B). **A nested PARENT is a fine target — it is just twice the size it looks**: S310's
+`func_8006E210` reconstructed to the ROM's exact count and frame on both halves, and what stopped it
+was register allocation with the permuter structurally unavailable (pycparser aborts on a nested
+definition). Price such a row as the pair, and expect to hand-lever the residual.
+
 **S309 CONFIRMS THE JTBL VEIN, at 3 for 3.** `--loose-stubs main` now reads 272 stubs / **5 fresh**.
 Both banks came out of `func_80059BA0.c` — `transfer_continue_slot` (ex-`func_8005BC10`, 258 instr)
 and, as a stretch, its `pool-cohort` sibling `transfer_mode_continue_slot` (ex-`func_8005B7BC`, 277)
@@ -3960,6 +3978,19 @@ by `/sprint-plan`:
   coalesces rather than `cse`. Body, levers and the `-dS` check are in
   `docs/wip/func_8007399C.near-match.md`. Carve unblocked: the one-line `[0xACB38]` -> `[0xACAD0]`
   move.
+
+- **`func_8006E210` + `func_8006DFF0`** (`src/main/func_8006A2C0.c`, S310) — ONE slice, not two
+  leaves: `func_8006DFF0` is a GCC nested function of `func_8006E210`, taking the static chain in
+  `$v0` and sharing the parent's `i`/`j` through it. Both halves are at the ROM's exact instruction
+  count and exact frame (543/543 at `-0x60`, 136/136 at `-0x40`); ~20 of 679 instructions differ in
+  three clusters, each with its pass named: jump.c's store-flag conversion forcing `col = 5` into an
+  earlier block, a `local-alloc` 2-register permutation in the tail copy loop, and the child's
+  lvalue-address placement. **The permuter is unavailable for this TU** — `import.py`'s pycparser
+  aborts on a nested function definition and the documented workaround cannot apply when the parent
+  is the target — so a re-open is a hand-lever or compiler-source slice, not an escalation. The
+  replayable body, the nine levers and the re-open checklist are in
+  `docs/wip/func_8006E210.near-match.md`; the carve is the one-line
+  `- [0xAC860, .rodata, main/func_8006A2C0]`, already verified to link.
 
 - **Spike** — a function that BLOCKED its file's DoD (locked < 0.97 percent, needs permuter,
   BSS-layout / subseg-alignment conflict). The note records the blocker so the retry resolves it first.

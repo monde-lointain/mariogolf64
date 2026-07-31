@@ -25,6 +25,45 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 310 — the JTBL-CARVEABLE row that was a nested pair (0 banked, 1 carried) — 2026-07-31
+- Increment: 0 files / **0 functions matched**. `func_8006E210` and its nested child
+  `func_8006DFF0` both reach the ROM's exact instruction count and exact frame (543/543 at `-0x60`,
+  136/136 at `-0x40`); ~20 of 679 instructions differ. `main` stubs unchanged at 272,
+  md5-candidate unchanged, descriptive names unchanged. ROM SHA-1 green at every commit.
+- Quality: 0 stuck-far / 0 permuter (structurally unavailable) / 1 carried (a pair) / 0 re-opened.
+- Seed: committed 8pt; banked 0pt; realized 10, residual +2; regime classical.
+- What helped: nine named levers, five of them re-usable. The two that moved the most ground were
+  **`s32 off = <full byte offset>;` then `SYM[off]`** — the only spelling that keeps the symbol
+  inside the `MEM` instead of letting loop.c hoist `la sN,SYM` into the preheader — and **reading a
+  neighbour global as an array element of its predecessor** (`D_801B6090[2]` for `D_801B6098`), whose
+  `MEM_IN_STRUCT_P` may-alias stops the same hoist. Giving the case-2 arm and the team-bet block
+  their own locals instead of reusing function-wide ones moved `col` from `$s1` to the ROM's `$s0`
+  and removed 40 diff lines in one edit.
+- Friction: three things, in order of cost. (1) **The leaf was mis-scoped**: `func_8006DFF0` is a
+  GCC nested function of the target, sharing the parent's `i`/`j` through the `$v0` static chain, so
+  the slice was 679 instructions and the permuter was unavailable (`import.py`'s pycparser aborts on
+  a nested definition, and the documented workaround cannot apply when the parent IS the target).
+  Discovered only after the parent's C was written. (2) **`cmpfn` counted the ROM's inter-function
+  padding nop**, so an exact 543-instruction body read `rom=544 mine=543` — an hour chasing a
+  phantom deficit, and the third recurrence of the `cmpfn-trailing-padding-overcount` memory. (3)
+  jump.c's store-flag conversion (`jump.c:1139-1250`, case 3) turns every spelling of a two-constant
+  select branchless and re-fires in each pre-reload pass; the only escape is a `CODE_LABEL` between
+  the assignment and the test, which moves where the value is born.
+- Applied: 4 of 4 — #1 `jtbl_carve_tell` gains a `carve-pool-blocked:<sym>` verdict when the host's
+  `.rodata` carve precedes the table with asm-owned rodata in the gap (8 `main` rows reclassified
+  out of `fresh`); #2 `nested_parent_tell` gains the chain-setup tell (`addiu $v0,$sp,K` before a
+  `jal`, 9 more `main` rows now NESTED) and `--nested-check` names the parent of a flagged child;
+  #3 `cmpfn.sh` stops its ROM stream at `endlabel` and reports the ignored pad; #4+#5 the two new
+  levers into `docs/levers.md`. Retirement: `store-flag-single-bit-terminal-wall` merged with the
+  new jump.c finding into one `jump-c-store-flag-conversions` row, plus four over-long rows
+  compressed to rule-plus-citation; `docs/levers.md` ends at 10239 B against its 10240 B budget.
+  Unplanned fix: `prompt_lint`'s xref checker resolved citations against the gitignored `SPRINT.md`,
+  so `make test-tools` failed or passed by accident of which sprint was open — now exempt.
+- Carry-over: `func_8006E210` + `func_8006DFF0` as one slice, `docs/wip/func_8006E210.near-match.md`
+  (replayable body, three residual clusters with their pass named, the carve line to re-apply).
+
+---
+
 ## Sprint 309 — first probe of the JTBL-CARVEABLE vein (2 banked, 1 carried) — 2026-07-31
 - Increment: 0 files / **2 functions matched** — `transfer_continue_slot` (ex-`func_8005BC10`, 258
   instructions) and `transfer_mode_continue_slot` (ex-`func_8005B7BC`, 277), both byte-exact in

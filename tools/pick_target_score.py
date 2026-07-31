@@ -313,6 +313,8 @@ def nested_child_tell(fn):
 
 _FRAME_ALLOC_RE = re.compile(r"\baddiu\b\s+\$sp,\s*\$sp,\s*-(0x[0-9A-Fa-f]+)")
 _ARGP_RE = re.compile(r"\baddiu\b\s+\$(s[0-7]|fp),\s*\$sp,\s*(0x[0-9A-Fa-f]+)")
+# `addiu $v0,$sp,K` = STATIC_CHAIN_REGNUM loaded with the address of a caller local (S310).
+_CHAIN_SETUP_RE = re.compile(r"\baddiu\b\s+\$v0,\s*\$sp,\s*(?:0x)?[0-9A-Fa-f]+")
 
 
 def nested_parent_tell(fn):
@@ -354,7 +356,56 @@ def nested_parent_tell(fn):
         m = _ARGP_RE.search(insn)
         if m and int(m.group(2), 16) == frame_val:
             return True
+    # Second tell (S310): the function SETS UP a static chain for a callee. A plain function never
+    # computes `addiu $v0,$sp,K` before a `jal` -- $v0 is the return register, not an argument slot
+    # -- so that pair is gcc handing STATIC_CHAIN_REGNUM ($2) to a nested child, and the caller is
+    # therefore the nested PARENT. The S280 arg-pointer tell above misses this shape entirely: it
+    # keys on `addiu $sreg,$sp,<framesize>`, which only appears when the child reads the parent's
+    # own incoming PARAMETERS, and `func_8006E210` takes none (its chain is `addiu $v0,$sp,0x10`,
+    # the frame origin, so the child can reach the two shared loop counters). S310 wrote the whole
+    # parent body before discovering the coupling; this tell is one grep over the leaf's own `.s`.
+    for i, insn in enumerate(insns):
+        if not _CHAIN_SETUP_RE.search(insn):
+            continue
+        # The chain must still be live at the call: gcc emits it within a few insns of the `jal`,
+        # usually in its delay slot or just before it.
+        for follow in insns[i + 1 : i + 4]:
+            if _JAL_RE.search(follow):
+                return True
     return False
+
+
+def nested_parents_of(fn):
+    """Names of the still-asm functions that pass <fn> a static chain: every `.s` with a `jal <fn>`
+    within a few instructions of an `addiu $v0,$sp,K`. Sorted, may be empty.
+
+    A nested child banks INSIDE its parent, so knowing the parent is what turns a `NESTED` verdict
+    into a price. Scans `asm/nonmatchings/**` (a relic `.s` for an already-banked caller can show up
+    here; check the caller is still `INCLUDE_ASM` before pricing)."""
+    import glob
+
+    hits = []
+    root = os.path.join(_ASM_ROOT, "nonmatchings")
+    jal_re = re.compile(r"\bjal\b\s+" + re.escape(fn) + r"\b")
+    for path in glob.glob(os.path.join(root, "**", "*.s"), recursive=True):
+        name = os.path.splitext(os.path.basename(path))[0]
+        if name == fn:
+            continue
+        try:
+            with open(path) as f:
+                text = f.read()
+        except OSError:
+            continue
+        if not jal_re.search(text):
+            continue
+        insns = _ASM_INSN_RE.findall(text)
+        for i, insn in enumerate(insns):
+            if not _CHAIN_SETUP_RE.search(insn):
+                continue
+            if any(jal_re.search(x) for x in insns[i + 1 : i + 4]):
+                hits.append(name)
+                break
+    return sorted(set(hits))
 
 
 def nested_tell(fn):
@@ -569,6 +620,7 @@ def _jtbl_syms(fn):
 # Widening the shared regex would change what the rodata-range helpers see, which is a behaviour
 # change for the mirror-path carve advice and belongs in its own change, not in this tell.
 _DOT_RODATA_RE = re.compile(r"^\s*-\s*\[\s*0x([0-9A-Fa-f]+)\s*,\s*\.rodata\s*,\s*([^\]]+?)\s*\]")
+_ANY_ROW_RE = re.compile(r"^\s*-\s*\[\s*0x([0-9A-Fa-f]+)\s*,")
 
 
 @functools.lru_cache(maxsize=1)
@@ -595,6 +647,42 @@ def _host_rodata_carve_rom(cfile):
     if stem.startswith("src/"):
         stem = stem[len("src/") :]
     return _dot_rodata_carves().get(stem)
+
+
+def _rodata_row_ends():
+    """{rom_offset: next_row_rom_offset} over every rodata-ish yaml row, in file order.
+
+    A carve's END is the next row's start, and `_dot_rodata_carves` records only starts. Needed to
+    tell whether a jump table sits immediately after a host's existing carve (extendable) or behind
+    foreign rodata (not)."""
+    from pick_target_yaml import YAML
+
+    offs = []
+    try:
+        with open(YAML) as f:
+            for line in f:
+                m = _ANY_ROW_RE.match(line)
+                if m:
+                    offs.append(int(m.group(1), 16))
+    except OSError:
+        return {}
+    return {a: b for a, b in zip(offs, offs[1:])}
+
+
+def _blob_syms_between(lo, hi):
+    """Names of uncarved-blob rodata symbols whose ROM offset lies in [lo, hi), sorted by offset.
+
+    Every symbol in `asm/data/*.rodata.s` is data no C body emits, so one lying in a gap a carve
+    would have to span makes that carve impossible: splat stops emitting the bytes and no object
+    supplies them."""
+    if hi <= lo:
+        return []
+    hits = []
+    for sym, entry in _rodata_blob_index().items():
+        rom = entry.get("rom")
+        if rom is not None and lo <= rom < hi:
+            hits.append((rom, sym))
+    return [sym for _, sym in sorted(hits)]
 
 
 def _jtbl_owner(sym):
@@ -631,7 +719,14 @@ def jtbl_carve_tell(fn, cfile):
         `func_8007399C`: `jtbl_800D16D0` at 0xACAD0 is 8-aligned both edges, but the host already
         carves 0xACBE0 (`func_800760CC`'s table) and `jtbl_800D1738` (still-asm `func_800754BC`)
         sits between them, so the two leaves bank as one cohort at `[0xACAD0, ...]`, size 0x178.
-      - "jtbl-carveable": both conditions pass, so the bank-time carve is a single subseg line. S307
+      - "carve-pool-blocked:<sym>,...": the host object's `.rodata` carve PRECEDES the table and
+        uncarved-blob rodata sits in the gap. One object emits one contiguous `.rodata`, so
+        extending the existing carve forward to reach the table would also stop splat emitting
+        those bytes, and no C body supplies them (S310 `spawn_terrain_effect`: host carve
+        [0xACD10, 0xACD60), `jtbl_800D1990` at 0xACD90, and `D_800D1960`..`D_800D1988` --
+        constants of two still-asm heavy-FP siblings -- in between). The leaf banks only once the
+        constants' owners are C. Both edges 8-aligned is necessary, not sufficient.
+      - "jtbl-carveable": every condition passes, so the bank-time carve is a single subseg line. S307
         `kSetMultiTLB` was this shape and banked on the first build — the first `jtbl-dispatch` bank
         in `main` since the class was excluded at S265 — which is why the caller counts this verdict
         as `fresh`.
@@ -655,9 +750,20 @@ def jtbl_carve_tell(fn, cfile):
         if carve_rom is None:
             continue
         rom_end = entry["rom"] + 4 * entry["words"]
-        if carve_rom <= entry["rom"] or carve_rom == rom_end:
-            # The host's carve is contiguous with this table (or precedes it and can simply be
-            # extended): no foreign rodata to absorb.
+        if carve_rom <= entry["rom"]:
+            # The host's carve PRECEDES the table. It can be extended forward only if nothing
+            # foreign sits in the gap; a blob symbol there is data no C body emits, so extending
+            # over it removes bytes nobody supplies (S310, `spawn_terrain_effect`: host carve
+            # [0xACD10, 0xACD60), table at 0xACD90, six doubles owned by two still-asm siblings in
+            # between). Both edges being 8-aligned is necessary and not sufficient.
+            carve_end = _rodata_row_ends().get(carve_rom)
+            if carve_end is not None:
+                blockers = _blob_syms_between(carve_end, entry["rom"])
+                if blockers:
+                    return "carve-pool-blocked:" + ",".join(blockers[:3])
+            continue
+        if carve_rom == rom_end:
+            # The host's carve starts exactly where this table ends: contiguous, nothing to absorb.
             continue
         for other, oentry in index.items():
             if other == sym or not other.startswith("jtbl_") or oentry["rom"] is None:

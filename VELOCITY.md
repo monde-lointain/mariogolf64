@@ -1526,6 +1526,30 @@ Three honest caveats:
   and `main`'s fresh vein is now one row. Tooling: three of the sprint's four accepted suggestions
   were tools this sprint had to hand-roll (`cmpfn.sh` histogram, `tools/seg_diff.py`,
   `tools/gbi_match.py`).
+- **Sprint 310 (realized)** — the next `JTBL-CARVEABLE` row, which turned out to be a nested
+  function PAIR. **0 banked, 1 carried (two functions), 0 permuter runs (unavailable, not skipped),
+  0 stuck-far, 0 re-opened.** Seed 8pt, frozen at `a215473` before any `src/` edit; banked **0**pt;
+  **realized 10**, residual **+2** — `func_8006E210` seed 8 **+1** (carry) **+1** (novel
+  bank-gotcha: the leaf is the parent of a nested child, so the slice is 679 instructions, not 543,
+  and the permuter is structurally unavailable for the TU). Regime classical. Progress **0** matched;
+  `main` stubs unchanged at 272; md5-candidate unchanged; descriptive names unchanged.
+  **Both halves reach the ROM's exact instruction count and exact frame** (543/543 at `-0x60`,
+  136/136 at `-0x40`); ~20 of 679 instructions differ, in three register/placement clusters
+  characterised with their pass in `docs/wip/func_8006E210.near-match.md`, which also carries the
+  replayable body and the nine levers that closed the other 659.
+  **The mis-scope is the lesson, not the wall.** `func_8006DFF0` takes the static chain in `$v0` and
+  shares the parent's `i`/`j` through it, which is also why every `i`/`j` access in the parent is a
+  stack load; `--nested-check` read the parent `standalone` because it only inspects the leaf's own
+  prologue. The retro's ranker change makes the caller-side tell (`addiu $v0,$sp,K` before a `jal`)
+  a NESTED-PARENT verdict, which reclassified 9 more `main` rows. The jtbl work itself held: the
+  reconstruction was right on the first build and the carve linked, so the class stays 3/3 on its
+  own terms — what walled is ordinary main-segment register allocation on a row every tell read
+  clean, which is exactly what the S280 plateau advisory says `fresh` cannot see.
+  **Two measurement defects cost real time and are now fixed**: `cmpfn` counted the ROM's
+  inter-function padding nop, so an exact 543-instruction body reported `rom=544 mine=543`; and
+  `jtbl_carve_tell` called a table carveable whenever the host's existing `.rodata` row preceded it,
+  without checking for asm-owned constants in the gap (8 `main` rows were mis-tagged).
+
 - **Sprint 309 (realized)** — first real probe of the `JTBL-CARVEABLE` vein, plus the S308 carry.
   **+2 banked, 1 carried, 1 permuter run (score 0 at iteration 2426), 0 stuck-far, 1 re-opened.**
   Seed 13pt (8 + 5), frozen at `4405554` before any `src/` edit, plus an 8pt stretch pulled on

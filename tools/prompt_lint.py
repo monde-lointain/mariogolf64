@@ -285,7 +285,17 @@ def xref_failures():
     return bad
 
 
+# `SPRINT.md` is the gitignored, per-sprint board: a fresh clone has none, and a live one carries
+# whatever sections the current sprint needs. Resolving a citation against it makes the suite fail or
+# pass by accident of which sprint is open -- S310 hit exactly that, with `docs/prompt-style.md`
+# citing `SPRINT.md ## Definition of Done` while the open sprint had no such heading. The scope note
+# in `docs/prompt-style.md` already states the file never gates the suite; this makes that true.
+_XREF_EPHEMERAL = {"SPRINT.md"}
+
+
 def _resolve_xref(src, target, heading):
+    if target in _XREF_EPHEMERAL:
+        return []
     tpath = (ROOT / target).resolve()
     if not tpath.exists():
         return [f"{rel(src)}: `{target} ## {heading}` -> no such file"]

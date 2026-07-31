@@ -138,13 +138,25 @@ fi
 # are `/* off vram word */ mnem operands`; with default FS the vram is field 3. Internal targets are
 # `.L<vram>` (vram embedded in the label). Pass 1 maps each instruction's vram string -> index; pass 2
 # rewrites `.L<vram>` to a signed position delta and drops the comment.
+#
+# The stream STOPS at `endlabel` (S310). splat carves the `.s` at the function's exact size, but it
+# emits the inter-function alignment padding after `endlabel <fn>` as ordinary instruction lines, so
+# reading the whole file counts padding that is not part of the function: `func_8006E210` is 0x87C =
+# 543 instructions and read `rom=544` against a byte-exact 543-instruction body. That is the same
+# class of mis-read as the object-side pad below and worse in effect, because it makes an EXACT body
+# report a one-instruction deficit and sends the diagnosis to "structural, fix that first"
+# (`docs/workflow/loop.md ## Oracles`). A `.s` with no `endlabel` is unaffected -- the stop never
+# fires and the whole file is read as before.
 rom_stream() {
     awk '
         FNR == NR {
-            if ($1 == "/*" && $5 == "*/") { idx++; vram2idx[tolower($3)] = idx }
+            if ($1 == "endlabel") p1done = 1
+            if (!p1done && $1 == "/*" && $5 == "*/") { idx++; vram2idx[tolower($3)] = idx }
             next
         }
         {
+            if ($1 == "endlabel") p2done = 1
+            if (p2done) next
             if ($1 != "/*" || $5 != "*/") next
             NR2++
             sub(/^.*\*\/[ \t]+/, "")
@@ -363,6 +375,9 @@ FRAME="frame rom=$RF mine=$MF"
 
 PADNOTE=''
 [ "$PAD" -gt 0 ] && PADNOTE="  [+$PAD pad nop(s) trimmed]"
+# Same note for the .s side, so a reader can tell an exact body from a one-short one (S310).
+ROMPAD=$(awk '$1 == "endlabel" { seen = 1; next } seen && $1 == "/*" && $5 == "*/" { n++ } END { print n + 0 }' "$ASM_FILE")
+[ "$ROMPAD" -gt 0 ] && PADNOTE="$PADNOTE  [+$ROMPAD rom pad after endlabel ignored]"
 echo "rom=$(wc -l < "$ROM_N") mine=$(wc -l < "$MINE_N")  ($OBJ)  [$FRAME]$PADNOTE"
 
 # Mnemonic histogram delta. A multiset comparison says whether the residual is STRUCTURAL and of
