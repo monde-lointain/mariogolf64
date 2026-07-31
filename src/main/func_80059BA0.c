@@ -826,7 +826,129 @@ void insert_supershot_record(Struct80131510* entry) {
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80059BA0", func_8005B7BC);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80059BA0", func_8005BC10);
+typedef struct {
+  u32 data[0xD];
+} Rec34;
+typedef struct {
+  u32 data[0x11];
+} Rec44;
+typedef struct {
+  u32 data[0x7];
+} Rec1C;
+typedef struct {
+  u32 data[0x2E];
+} RecB8;
+
+/* One continue slot: the saved copy of the global match state. `state` mirrors
+ * the 0x44 block at D_801B6088 (whose word 2 is the player count), `camera`
+ * the 0x34 block at camera_position_x and `misc` the 0x1C block at
+ * D_800FF4D0. The per-player records live in the sibling array below. */
+typedef struct {
+  s32 valid;    /* 0x00 */
+  s32 unk_04;   /* 0x04 */
+  Rec34 camera; /* 0x08 */
+  Rec44 state;  /* 0x3C */
+  Rec1C misc;   /* 0x80 */
+  u8 pad9C[4];
+} ContinueSlot; /* 0xA0 */
+
+extern RecB8 D_801318F8[][4];
+extern RecB8 D_8012D0C8[];
+extern RecB8 D_801B71D0[];
+extern u32 D_801B55F0;
+extern s32 D_801B6088;
+extern s32 D_801B6090;
+extern s8 D_801B60B8;
+extern u32 D_800FF4D0;
+extern s32 camera_position_x;
+extern void flag_set(s32 flag);
+extern void func_8005DF54(u8* save, s32 arg1);
+extern const char D_800D0944[];
+extern const char D_800D0958[];
+extern const char D_800D0970[];
+
+/* Saves the live match state into continue slot `id` (restore == 0), or
+ * restores that slot back over the live state. The three continue slots sit
+ * immediately before the per-slot record sets, so both bases come off the one
+ * D_801318F8 symbol and the slot base is reached by a negative displacement. A
+ * record whose state code is not one of the resumable ones is reported and
+ * fails the save. Only the restore side announces itself. Returns -1 on
+ * failure, 0 otherwise.
+ *
+ * `mode` is set twice in the restore arm, and the second set belongs AFTER the
+ * inner if, not at the end of its body: that is what colours it $v0 rather than
+ * $a0 (S309, found by the permuter at exact instruction count). */
+s32 transfer_continue_slot(s32 id, s32 restore) {
+  RecB8* recs = D_801318F8[id];
+  ContinueSlot* slot = &((ContinueSlot*)((u8*)D_801318F8 - 0x1E0))[id];
+  s32 count = 4;
+  s32 bad;
+  s32 mode;
+  s32 i;
+
+  if (restore == 0) {
+    if (count < D_801B6090) {
+      osSyncPrintf(D_800D0944);
+      return -1;
+    }
+    bad = 0;
+    count = D_801B6090;
+    slot->valid = 0;
+    for (i = restore; i < count; i++) {
+      recs[i] = D_8012D0C8[i];
+      switch (recs[i].data[3]) {
+        case 0:
+        case 2:
+        case 3:
+        case 21:
+          recs[i].data[3] = 0;
+          break;
+        case 17:
+        case 20:
+          break;
+        default:
+          osSyncPrintf(D_800D0958);
+          bad = 1;
+          break;
+      }
+    }
+    slot->state = *(Rec44*)&D_801B55F0;
+    if (((s8*)slot)[0x79] < 0x63) {
+      ((s8*)slot)[0x79]++;
+    }
+    slot->camera = *(Rec34*)&camera_position_x;
+    slot->misc = *(Rec1C*)&D_800FF4D0;
+    if (bad != 0) {
+      return -1;
+    }
+    mode = 1;
+    slot->valid = mode;
+  } else {
+    mode = 2;
+    if (slot->valid == 1) {
+      if (count < (s32)slot->state.data[2]) {
+        osSyncPrintf(D_800D0944);
+        return -1;
+      }
+      count = slot->state.data[2];
+      for (i = 0; i < count; i++) {
+        D_801B71D0[i] = recs[i];
+      }
+      *(Rec44*)&D_801B6088 = slot->state;
+      D_801B6088 = 1;
+      flag_set(0x1E);
+      *(Rec34*)&camera_position_x = slot->camera;
+      *(Rec1C*)&D_800FF4D0 = slot->misc;
+    }
+    mode = 2;
+    D_801B60B8 = mode;
+    osSyncPrintf(D_800D0970);
+  }
+  if (restore == 0) {
+    func_8005DF54(func_8005AF50(), 1);
+  }
+  return 0;
+}
 
 void func_8005C018(u32 arg0) {
   u32* p = &D_8012F724;
