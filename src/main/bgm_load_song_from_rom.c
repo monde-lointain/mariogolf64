@@ -6,7 +6,7 @@ extern musHandle try_spawn_global_object(int number);
 extern void gen_terrain_detail_texture(s32 arg0, s32 arg1);
 extern void func_80407D64(void);
 
-extern void func_8005B7BC(s32 arg0);
+extern void transfer_mode_continue_slot(s32 restore);
 extern void func_80216B74(s32 arg0);
 extern s32 flag_is_set(s32 flag);
 extern void func_8005F360(void);
@@ -256,7 +256,7 @@ void func_8006034C(u8 arg0) { D_800C30A4 = arg0; }
 
 void func_80060358(void) {
   D_800C306C = 0;
-  func_8005B7BC(0);
+  transfer_mode_continue_slot(0);
   func_80216B74(0);
   D_801B6088 = 7;
   D_800C30A8 = 3;

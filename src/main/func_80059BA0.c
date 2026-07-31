@@ -824,8 +824,6 @@ void insert_supershot_record(Struct80131510* entry) {
   osSyncPrintf(D_800D0928);
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80059BA0", func_8005B7BC);
-
 typedef struct {
   u32 data[0xD];
 } Rec34;
@@ -836,13 +834,16 @@ typedef struct {
   u32 data[0x7];
 } Rec1C;
 typedef struct {
+  u32 data[0x1A];
+} Rec68;
+typedef struct {
   u32 data[0x2E];
 } RecB8;
 
 /* One continue slot: the saved copy of the global match state. `state` mirrors
  * the 0x44 block at D_801B6088 (whose word 2 is the player count), `camera`
  * the 0x34 block at camera_position_x and `misc` the 0x1C block at
- * D_800FF4D0. The per-player records live in the sibling array below. */
+ * D_800FF4D0. The per-player records live in a sibling array. */
 typedef struct {
   s32 valid;    /* 0x00 */
   s32 unk_04;   /* 0x04 */
@@ -852,20 +853,124 @@ typedef struct {
   u8 pad9C[4];
 } ContinueSlot; /* 0xA0 */
 
-extern RecB8 D_801318F8[][4];
-extern RecB8 D_8012D0C8[];
 extern RecB8 D_801B71D0[];
-extern u32 D_801B55F0;
+extern Rec68 D_800FEDD8[];
+extern RecB8 D_8012FB60[];
+extern RecB8 D_8012FAA8[];
+extern RecB8 D_8012F938[];
 extern s32 D_801B6088;
 extern s32 D_801B6090;
 extern s8 D_801B60B8;
-extern u32 D_800FF4D0;
 extern s32 camera_position_x;
 extern void flag_set(s32 flag);
 extern void func_8005DF54(u8* save, s32 arg1);
+extern const char D_800D092C[];
 extern const char D_800D0944[];
 extern const char D_800D0958[];
 extern const char D_800D0970[];
+
+/* Per-game-mode twin of transfer_continue_slot: saves the live match state
+ * into the continue block that D_801B608C selects (restore == 0), or restores
+ * that block back. Each mode owns one contiguous region, so its record array,
+ * its 0x68-stride mode records and the continue slot 0x2C8 / 0x2B0 / 0x1E0
+ * bytes before it all come off the one base symbol. Modes with no continue
+ * block fall through with a zero count. Returns -1 on failure, 0 otherwise. */
+s32 transfer_mode_continue_slot(s32 restore) {
+  RecB8* recs;
+  Rec68* modes;
+  ContinueSlot* slot;
+  s32 count = 0;
+  s32 bad;
+  s32 mode;
+  s32 i;
+
+  switch (D_801B608C) {
+    case 0:
+    case 6:
+    case 10:
+      recs = D_8012FB60;
+      modes = (Rec68*)((u8*)D_8012FB60 + 0x3B0);
+      slot = (ContinueSlot*)((u8*)D_8012FB60 - 0x2C8);
+      count = 4;
+      break;
+    case 5:
+      recs = D_8012FAA8;
+      modes = (Rec68*)((u8*)D_8012FAA8 + 0x400);
+      slot = (ContinueSlot*)((u8*)D_8012FAA8 - 0x2B0);
+      osSyncPrintf(D_800D092C);
+      count = 1;
+      break;
+    case 4:
+      recs = D_8012F938;
+      modes = (Rec68*)((u8*)D_8012F938 + 0x508);
+      slot = (ContinueSlot*)((u8*)D_8012F938 - 0x1E0);
+      count = 2;
+      break;
+  }
+
+  if (restore == 0) {
+    if (count < D_801B6090) {
+      osSyncPrintf(D_800D0944);
+      return -1;
+    }
+    bad = 0;
+    count = D_801B6090;
+    slot->valid = 0;
+    for (i = 0; i < count; i++) {
+      recs[i] = D_801B71D0[i];
+      switch (recs[i].data[3]) {
+        case 0:
+        case 2:
+        case 3:
+        case 21:
+          recs[i].data[3] = 0;
+          break;
+        case 17:
+        case 20:
+          break;
+        default:
+          osSyncPrintf(D_800D0958);
+          bad = 1;
+          break;
+      }
+      modes[i] = D_800FEDD8[i];
+    }
+    slot->state = *(Rec44*)&D_801B6088;
+    slot->camera = *(Rec34*)&camera_position_x;
+    if (bad == 0) {
+      mode = 1;
+      slot->valid = mode;
+    } else {
+      return -1;
+    }
+  } else {
+    mode = 2;
+    if (slot->valid == 1) {
+      if (count < (s32)slot->state.data[2]) {
+        osSyncPrintf(D_800D0944);
+        return -1;
+      }
+      count = slot->state.data[2];
+      for (i = 0; i < count; i++) {
+        D_801B71D0[i] = recs[i];
+        D_800FEDD8[i] = modes[i];
+      }
+      *(Rec44*)&D_801B6088 = slot->state;
+      D_801B6088 = 1;
+      flag_set(0x1E);
+      *(Rec34*)&camera_position_x = slot->camera;
+    }
+    mode = 2;
+    D_801B60B8 = mode;
+    osSyncPrintf(D_800D0970);
+  }
+  return 0;
+}
+
+extern RecB8 D_801318F8[][4];
+extern RecB8 D_8012D0C8[];
+extern u32 D_801B55F0;
+extern u32 D_800FF4D0;
 
 /* Saves the live match state into continue slot `id` (restore == 0), or
  * restores that slot back over the live state. The three continue slots sit

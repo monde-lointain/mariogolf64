@@ -434,7 +434,7 @@ segments:
       - [0xABC2C, .rodata, main/func_80054900]
       - [0xABC3C, rodata]
       - [0xABC40, rodata]
-      - [0xABE08, .rodata, main/func_80059BA0]
+      - [0xABD80, .rodata, main/func_80059BA0]
       - [0xABEC0, rodata]
       - [0xAC760, rodata]
       - [0xAC770, rodata]
