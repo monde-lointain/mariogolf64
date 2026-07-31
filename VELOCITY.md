@@ -1602,6 +1602,20 @@ Three honest caveats:
   despite S305 having landed them, and `permuter_settings_main.toml` was found to omit the per-file
   `-ffast-math` six `src/main` TUs build with, so a permuter run on any of them scored a compile the
   build never performs.
+- **Sprint 310** — plan-time seed freeze (classical track, v2 two-pass): seed **8**, regime
+  **classical**, one slice. `func_8006E210` (`src/main/func_8006A2C0.c`, 0x87C, 544 instr, `fp=0`,
+  `jal=16`, big band → 8), the next `JTBL-CARVEABLE` row whose carve is actually clean: it references
+  exactly one `.rodata` symbol (`jtbl_800D1460`, `[0xAC860, 0xAC890)`, both edges 8-aligned) and its
+  host object owns no `.rodata` row yet, so the new row is contiguous by construction. The 8-point
+  gate fires and is answered by the CANNOT-DECOMPOSE branch: one `INCLUDE_ASM` stub in an already-`c`
+  host has no subseg boundary to split and no independently compilable half, so it banks atomically
+  or it is a spike; no exemption is claimed. The smaller fresh row `spawn_terrain_effect` (992 B) was
+  gate-rejected on a MEASURED blocker, not a tell: its host object already owns
+  `.rodata [0xACD10, 0xACD60)` and its table sits at `0xACD90` behind six doubles owned by two
+  still-asm heavy-FP siblings, and one object path cannot take a second `.rodata` row. Zero gate
+  enablers; the carve is a bank-time action (S265). Baseline `656aafc`. Realized tier and residual
+  are scored at review in a second commit; this line is committed before any `src/` edit and must not
+  be revised.
 - **Sprint 309** — plan-time seed freeze (classical track, v2 two-pass): seed **13**, regime
   **classical**, split 8 + 5. Two INDEPENDENT slices, one commit each: `func_8005BC10`
   (`src/main/func_80059BA0.c`, 0x408, 258 instr, `fp=0`, `jal=6`, big band → 8) as the first real
