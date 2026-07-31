@@ -40,13 +40,14 @@ by wrapping in `if (n != 0)`, S306), `#loop-weight-and-live-length-regalloc-stee
   in two arms becomes a global allocno that misses `combine_regs` (S299); split a value spanning two
   loops, but only what must die between them (S295); give each region its own short-lived local when
   one variable stretches an allocno across both (S308). The inverse recolours one register at a time
-  (S287). Terminal only when six forced registers reroute a read.
+  (S287); a redundant second set moves its allocno by brace placement, *after* an inner `if` rather
+  than at its body's end, and deleting it costs an instruction (S309). Terminal only when six forced
+  registers reroute a read.
 - **dead-frame-levers** -- for a frame-only diff: `s32 unused[(ROM_frame-0x18)/4]`, `str[row]` (keeps
-  base and index live), or an uninit local plus `volatile s32 s = g;` (reload frame, dead `sw $v0`).
-  Split point: arrays slot at `expand_decl`, an address-taken scalar only at the first `&x` and after
-  every function-scope aggregate, so reserve part in a block opened after it (S296; a block-local
-  aggregate declared later lands above it, S304). Slot order is ascending pseudo number
-  (`reload1.c`), so an `@F<dec>(sp)`-only residual is a numbering question (S302).
+  base and index live), or an uninit local plus `volatile s32 s = g;`. Split point: arrays slot at
+  `expand_decl`, an address-taken scalar only at the first `&x` and after every function-scope
+  aggregate, so reserve part in a block opened after it (S296). Slot order is ascending pseudo number
+  (`reload1.c`).
 - **per-region-cse-slot-base-lever** -- pass the array directly, no cached pointer, so gcc CSEs the
   base per region. The count of pointer *locals* is the pressure knob: each is a `loop.c` induction
   pointer costing a callee-saved register; an offset off a shared row pointer is not (S289).
@@ -92,15 +93,15 @@ by wrapping in `if (n != 0)`, S306), `#loop-weight-and-live-length-regalloc-stee
   for a `bne` with a register bound and a tight frame; the symptom is `slti` where the ROM has `bne`.
   Choose per loop (S287: 3 do-while, 6 structured).
 - **out-of-line-handler-block-branch-likely** -- a one-instruction `goto` handler folds into an
-  annulled `beql`; one `goto done` replicates the return copy.
+  annulled `beql`; one `goto done` replicates the return copy. Same for a switch arm's constant
+  select, which is goto-proof (S275).
 - **else-arm-return-vs-then-arm** -- for a far early return the else-arm form yields a plain `bc1t`
-  (`jump.c:1737` cannot invert across a set-retval); keep the final `return 0` last.
+  (`jump.c:1737` cannot invert across a set-retval), and merges it into a *shared* error epilogue
+  (S309); keep the final `return 0` last.
 - **nonvoid-return-blocks-fallthrough-delay-steal** -- a lone epilogue-branch nop means the ROM fn
   returns `s32` (`reorg.c:3375/4274`).
 - **and-equals-zero-not-negated-and** -- `if (!(a & b))` De Morgans into a branch per operand plus
   `or`; `(a & b) == 0` keeps the value-selects and the `and`, which ROM `bc1t`+`and`+`bnez` means.
-- **value-select-branch-likely-on-switch-default** -- a constant-select branch-likely extends to a
-  switch arm, and it is goto-proof.
 - **cross-jump-merge-point-before-store** -- the delay-slot filler names the pre-reorg order; a merge
   point at the argument move, not the store, means each arm held its own copy of the trailing calls;
   duplicate them per arm (S286).

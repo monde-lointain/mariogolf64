@@ -25,6 +25,43 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 309 — first probe of the JTBL-CARVEABLE vein (2 banked, 1 carried) — 2026-07-31
+- Increment: 0 files / **2 functions matched** — `transfer_continue_slot` (ex-`func_8005BC10`, 258
+  instructions) and `transfer_mode_continue_slot` (ex-`func_8005B7BC`, 277), both byte-exact in
+  `src/main/func_80059BA0.c`, each committed with its own `.rodata` carve. The host goes 13 -> 11
+  stubs and stays a mixed partial bank, so it books 0 file points. `--loose-stubs main` 274 -> 272
+  stubs, fresh 6 -> 5. md5-candidate unchanged at 100 of 135. Descriptive names 172 -> 174.
+- Quality: **0 stuck-far / 1 permuter (found score 0) / 1 carried / 1 re-opened**
+- Seed: committed 13pt (8 + 5) frozen at `4405554`, plus an 8pt stretch pulled on success; banked
+  **0**pt; realized **23**, residual **+2**; regime classical
+- What helped: re-deriving each `.s` end to end before writing C — both leaves hit the ROM's exact
+  instruction count *and* exact frame on the first or second build. Then four levers: `s32 bad = 0;`
+  moved from the declaration into the branch **after** the count check (62 -> 12 diff lines, the ROM
+  fills the `bnez` delay slot with it); the permuter at exact count, which found in 2426 iterations
+  that the second `mode = 2;` belongs *after* the inner `if`, not at its body's end, colouring the
+  allocno `$v0` not `$a0`; the `slot = base - 0x2B0` assignment moved ahead of its arm's
+  `osSyncPrintf` so `reorg` can steal it for the `jal` delay slot; and `if (ok) {...} else { return
+  -1; }` rather than the then-arm form, which is what lets `jump.c` merge that return into the shared
+  error epilogue instead of emitting its own `li v0,-1; j` pair. The negative-displacement
+  one-symbol rule paid twice: every base in both functions comes off a single symbol.
+- Friction: the last two `cmpfn` lines on `func_8005BC10` were a real `j`-target delta, not
+  normalisation — the save path jumps *past* the status store and the print, so that tail belongs
+  inside the restore arm; reading it as noise would have cost a bank. `tools/cmpfn.sh` reported
+  `mine=0` plus a frame mismatch after the first curated rename, which reads exactly like a
+  catastrophic regression (fixed, suggestion #3). `func_8007399C` did not close for the second
+  sprint running: the requirement is now known to be **two** conditions, not the one S308 named, and
+  seven zero-cost source forms were measured and refuted.
+- Applied: **4 of 4** — #1 else-arm-return extended with the shared-epilogue consequence
+  (`docs/levers.md`); #2 the brace-placement colouring knob folded into
+  `scope-and-live-range-steer-allocation` rather than added as its own entry (`docs/levers.md`); #3
+  `tools/cmpfn.sh` resolves a curated rename in both directions via `symbol_addrs.txt` and otherwise
+  fails loudly (`make test-tools` 138 passed); #4 `pool-cohort:<fn>` recorded as a pricing floor and
+  the default stretch item (`docs/workflow/gates.md`). Retirements, both PO-selected: the two
+  branch-likely entries merged into one, and `dead-frame-levers` compressed to its rule plus one
+  citation. Net `docs/levers.md` delta **−5 B** (10237 -> 10232), back under its 10240 budget.
+- Carry-over: `func_8007399C` (`src/main/func_80071370.c`), 149/149 at the ROM's exact `-0x50` frame,
+  70 `cmpfn` lines, carve unblocked and one line away
+
 ## Sprint 308 — the S307 pool-carve cohort (2 banked, 1 carried) — 2026-07-31
 - Increment: 0 files / **2 functions matched** — `place_glyph_sprite_run` (ex-`func_800754BC`, 212
   instructions) and `emit_glyph_sprite_dl` (ex-`func_8007580C`, 399), both byte-exact, banked with

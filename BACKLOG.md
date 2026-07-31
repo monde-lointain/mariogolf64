@@ -48,6 +48,21 @@ see `docs/wip/func_800990D0.near-match.md` (`--carried-check` flags it). Backup 
 (294-instr wall-prone debug handler, its own slice). STANDING GUIDANCE: prefer a FRESH non-main pack
 next unless a specific main leaf is pre-vetted `.s`-clean.**
 
+**S309 CONFIRMS THE JTBL VEIN, at 3 for 3.** `--loose-stubs main` now reads 272 stubs / **5 fresh**.
+Both banks came out of `func_80059BA0.c` — `transfer_continue_slot` (ex-`func_8005BC10`, 258 instr)
+and, as a stretch, its `pool-cohort` sibling `transfer_mode_continue_slot` (ex-`func_8005B7BC`, 277)
+— and the host's carve walked back twice, `[0xABE60]` -> `[0xABE08]` -> `[0xABD80]` (0x140, four
+tables). Two rules come out of it. **The class is not a wall:** every `JTBL-CARVEABLE` leaf attempted
+so far reached the ROM's exact instruction count *and* exact frame on the first or second build
+straight from a `.s` re-derivation, so price the class as re-derivation plus carve care.
+**A `pool-cohort:<fn>` row is a pricing FLOOR, not a blocker** (now in `gates.md` DoR): once the pool
+owner banks, the sibling usually shares its host, types and skeleton — S309 took the 277-instruction
+one in two builds — so offer it as the default stretch whenever the committed leaf owns its pool.
+**The vein from here, smallest-first:** `spawn_terrain_effect` (992 B, `fp-sched`, and per S289 it is
+now twice-deferred on that tell — attempt it or drop it at the third encounter), `func_8006E210`
+(2172 B), `func_80095DE0` (2444 B, 39 jal), `func_8008E82C` (2784 B, `fp-coord`), `func_80089094`
+(13452 B).
+
 **S308 BANKS OUT OF THE JTBL POOL, and retires the cohort's atomic pricing.** `--loose-stubs main`
 reads 274 stubs / **6 fresh**, all `JTBL-CARVEABLE` and unchanged by this sprint: both banks
 (`place_glyph_sprite_run` 212 instr, `emit_glyph_sprite_dl` 399) came out of the `pool-cohort` rows,
@@ -3937,13 +3952,14 @@ by `/sprint-plan`:
   (`jtbl-carveable` / `jtbl-carve-blocked` / `pool-cohort:<fn>,...`); read the membership off it
   rather than by hand, since S307's hand derivation missed a member. Do not call such a leaf a
   spike: nothing about its codegen is stuck.
-- **`func_8007399C`** (`src/main/func_80071370.c`, S307 -> S308) — 149/149 at the ROM's exact
-  `-0x50` frame, 70 `cmpfn` lines, one cause: `sched.c:2469 birthing_insn_p` boosts the `out_height`
-  parameter copy (its pseudo has `reg_n_sets == 1`) to the bottom of block 0, so the incoming `$a3`
-  stays live across the 5th-argument load and `player` cannot colour `$a3`. Open question: a source
-  form giving that pseudo a second `SET` at zero instruction cost. Body, levers and the `-dS` check
-  are in `docs/wip/func_8007399C.near-match.md`. NOT cohort-blocked any more — its carve is the
-  one-line `[0xACB38]` -> `[0xACAD0]` move.
+- **`func_8007399C`** (`src/main/func_80071370.c`, S307 -> S309) — 149/149 at the ROM's exact
+  `-0x50` frame, 70 `cmpfn` lines. Two conditions, both measured off the `-dS` ready lists: the `$a3`
+  parameter copy unboosted (`birthing_insn_p` wants `reg_n_sets >= 2`, `sched.c:2469`) AND the
+  template copy ahead of `total = 0;` in source order (both priority 1; the tie breaks on descending
+  LUID). Seven zero-cost forms refuted; the untried class is a second set that `local-alloc`
+  coalesces rather than `cse`. Body, levers and the `-dS` check are in
+  `docs/wip/func_8007399C.near-match.md`. Carve unblocked: the one-line `[0xACB38]` -> `[0xACAD0]`
+  move.
 
 - **Spike** — a function that BLOCKED its file's DoD (locked < 0.97 percent, needs permuter,
   BSS-layout / subseg-alignment conflict). The note records the blocker so the retry resolves it first.
@@ -3980,18 +3996,20 @@ by `/sprint-plan`:
   `NU_CONT_THREAD_ID=6` vs MG64's 5), and that surfaces only at first build unless reconciled here.
   A near-free retry missing any of these is a half-scoped spike — finish the scope before deferring.
 
-- **(S307 COHORT-BLOCKED — body at exact count; it needs two siblings banked with it, not a lever
-  search)** `func_8007399C`, `src/main/func_80071370.c`. 149 of 149 instructions at the ROM's exact
-  `-0x50` frame, semantics fully re-derived and confirmed against its caller. It regenerates
-  `jtbl_800D16D0` (0xACAD0, 8-aligned both edges), but the host object already carves `0xACBE0`
-  (`func_800760CC`'s table) and two still-asm tables sit between: `jtbl_800D1738` (`func_800754BC`,
-  0x350) and `jtbl_800D17A0` (`func_8007580C`, 0x63C). The unlock is one commit banking all three
-  leaves plus replacing the carve with `[0xACAD0, .rodata, main/func_80071370]`, size 0x178. Body,
-  the measured lever table and the `gcc -dS` reading of the remaining 84-line residual (a `sched.c`
-  priority inversion that puts `player` in `t0` where the ROM has `a3`) in
-  `docs/wip/func_8007399C.near-match.md`. Cohort membership is now a ranker output
-  (`--loose-stubs` prints `pool-cohort:func_800754BC,func_8007580C`), so re-read it rather than
-  re-deriving: the hand derivation at discovery found only one of the two siblings.
+- **(S307 -> S309 SPIKE — exact count and exact frame; the requirement is measured, so a re-open is a
+  search for one legal source form, not for a lever)** `func_8007399C`,
+  `src/main/func_80071370.c`. 149 of 149 at the ROM's `-0x50` frame, 70 `cmpfn` lines, semantics
+  confirmed against its caller. Not cohort-blocked (S308 banked both siblings); its carve is the
+  one-line `[0xACB38]` -> `[0xACAD0]` move, size 0x178. **S309 restated the residual as two
+  conditions, not one:** the `$a3` parameter copy must be unboosted (`birthing_insn_p` wants
+  `reg_n_sets >= 2`, `sched.c:2469`) **and** the `w = D_800D16C0;` template copy must precede
+  `total = 0;` in source order, because both are priority 1 and `schedule_block`'s ready-list tie
+  breaks on descending LUID. The second is why S307's 12-permutation order sweep read as inert.
+  Seven zero-cost forms are measured and refuted in `docs/wip/func_8007399C.near-match.md` (the
+  address-taken parameter homes at `0x5C` not the ROM's `0x24`; the address-taken local kills the
+  boost but the store still loses every tie; three second-set placements cost 1 to 3 instructions;
+  reusing the `row` pseudo costs 1). The one untried class named there: a second set deleted by
+  `local-alloc` copy coalescing rather than by `cse`.
 
 - **(S307 FOLLOW-UP — placement, not a match)** `kSetMultiTLB` (`0x8005342C`) is banked byte-exact
   but lives in `src/main/func_80052FE0.c`, a game animation/character-state TU. It is KMC library

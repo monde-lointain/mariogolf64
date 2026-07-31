@@ -1526,6 +1526,29 @@ Three honest caveats:
   and `main`'s fresh vein is now one row. Tooling: three of the sprint's four accepted suggestions
   were tools this sprint had to hand-roll (`cmpfn.sh` histogram, `tools/seg_diff.py`,
   `tools/gbi_match.py`).
+- **Sprint 309 (realized)** — first real probe of the `JTBL-CARVEABLE` vein, plus the S308 carry.
+  **+2 banked, 1 carried, 1 permuter run (score 0 at iteration 2426), 0 stuck-far, 1 re-opened.**
+  Seed 13pt (8 + 5), frozen at `4405554` before any `src/` edit, plus an 8pt stretch pulled on
+  success, so 21 effective; banked **0**pt (both hosts partial, as priced); **realized 23**, residual
+  **+2** — `func_8005BC10` seed 8 **+1** (permuter run), `func_8005B7BC` seed 8 **−1** (277/277 at
+  the exact frame with one fix iteration), `func_8007399C` seed 5 **+2** (carry plus re-attempt).
+  Regime classical. Progress +2 matched (272 stubs from 274, `main` fresh 6 -> 5); md5-candidate
+  unchanged at 100 of 135 files; descriptive names 172 -> **174** (`transfer_continue_slot`,
+  `transfer_mode_continue_slot`).
+  **The class verdict is the product.** `JTBL-CARVEABLE` now has three data points and they agree:
+  both leaves reached the ROM's exact instruction count *and* exact frame on the first or second
+  build straight from a `.s` re-derivation, and everything after was one or two named levers. The
+  class's cost is re-derivation plus carve care, not codegen. Second result: a `pool-cohort` sibling
+  is a pricing floor, not a wall — banking the 258-instruction owner turned the 277-instruction
+  sibling into a two-build stretch item, because it inherited the owner's host, types and skeleton.
+  The gate's risk 2 (silent carve failure) is what the sprint spent its care on and it never fired;
+  risk 3 (a source-spelled string re-opening the carve to a 4-aligned boundary) was avoided by the
+  gate's own step 3. On the carry, the deliverable is a sharper residual, not a bank:
+  `func_8007399C` needs **two** conditions at once, not the one S308 named — the `$a3` copy insn
+  unboosted (`reg_n_sets >= 2`, `sched.c:2469`) **and** the template copy ahead of `total = 0` in
+  source order, since both are priority 1 and the ready-list tie breaks on descending LUID. That
+  second condition is why S307's 12-permutation order sweep read as inert. Seven zero-cost forms
+  measured and refuted.
 - **Sprint 308 (realized)** — the S307 pool-carve cohort. **+2 banked, 1 carried, 1 permuter
   (plateaued), 0 stuck-far, 1 re-opened.** Seed 13pt (5 + 5 + 3), frozen at `7cf56c0` before any
   `src/` edit; banked **0**pt (host partial, 12 stubs left, as priced); **realized 16**, residual

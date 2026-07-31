@@ -191,6 +191,11 @@ dashboard). Target selection is `tools/pick_target.py`, not a stored roadmap.
       3-register allocno permutation. A mis-stated class sends the crack attempt at the wrong lever.
       Spend the first iteration re-deriving {instruction-count match?, which registers differ, which
       ordering differs} from the object, then map that to a lever — do not inherit the doc's class.
+  - **A `pool-cohort:<fn>` tag is a pricing floor, not a wall (S309).** It says the leaf cannot bank
+    until its pool owner does. It does not say the leaf is expensive: once the owner banks, the
+    sibling usually shares the owner's host, types and skeleton, so it costs a fraction of its size
+    (S309 took a 277-instruction leaf in two builds right after its 258-instruction owner). Offer
+    such a sibling as the default **stretch** item whenever the committed leaf owns its pool.
   - Enablers (subseg flip plus `make extract`, multi-file split, `symbol_addrs.txt` additions) are
     performed by the agent at the plan gate after the PO approves the goal/scope, and validated
     there: `make extract && make` must still produce the green baserom ROM with the new stubs. This

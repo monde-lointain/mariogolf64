@@ -71,7 +71,32 @@ fi
 FUNC="$1"
 OBJ="${2:-}"
 
+# Name-file lookups, both directions (S309). A curated rename leaves the extracted `.s` under the
+# old auto `func_<vram>` name while the object carries the new one, so the two sides stop agreeing
+# on the symbol. Before this, `cmpfn.sh func_<vram>` after its own rename printed `mine=0` plus a
+# frame mismatch -- indistinguishable from a catastrophic regression on a function that was in fact
+# byte-exact and committed. Resolve across the rename and say so, or fail loudly; never report 0.
+addr_of() { # curated name -> 0xVRAM
+    grep -hE "^$1[[:space:]]*=[[:space:]]*0x[0-9A-Fa-f]+" symbol_addrs.txt ghidra_symbols.txt \
+        2>/dev/null | head -1 | grep -oiE '0x[0-9a-f]+'
+}
+name_at() { # 0xVRAM -> curated (non-`func_`) name
+    grep -hiE "^[A-Za-z_][A-Za-z0-9_]*[[:space:]]*=[[:space:]]*$1[[:space:]]*;" \
+        symbol_addrs.txt ghidra_symbols.txt 2>/dev/null \
+        | grep -viE '^func_' | head -1 | sed -E 's/[[:space:]]*=.*//'
+}
+obj_has() { mips-linux-gnu-objdump -t "$OBJ" 2>/dev/null | grep -qE "[[:space:]]$1\$"; }
+
 ASM_FILE=$(find asm/nonmatchings -name "${FUNC}.s" -print -quit)
+if [ -z "$ASM_FILE" ]; then
+    # Called by the curated name: the relic `.s` is still under `func_<vram>`.
+    ASM_VRAM=$(addr_of "$FUNC" || true)
+    if [ -n "$ASM_VRAM" ]; then
+        ASM_ALT="func_$(printf '%08X' "$ASM_VRAM")"
+        ASM_FILE=$(find asm/nonmatchings -name "${ASM_ALT}.s" -print -quit || true)
+        [ -n "$ASM_FILE" ] && echo "note: reading ${ASM_ALT}.s for ${FUNC} (${ASM_VRAM})" >&2
+    fi
+fi
 if [ -z "$ASM_FILE" ]; then
     echo "$0: no asm/nonmatchings/**/${FUNC}.s (is the function already banked?)" >&2
     exit 1
@@ -86,6 +111,23 @@ fi
 if [ ! -f "$OBJ" ]; then
     echo "$0: $OBJ not built" >&2
     exit 1
+fi
+
+# Which symbol the OBJECT calls this function. Falls back to the curated name at the same vram.
+OBJ_FUNC="$FUNC"
+if ! obj_has "$FUNC"; then
+    VRAM=$(addr_of "$FUNC" || true)
+    [ -z "$VRAM" ] && case "$FUNC" in func_[0-9A-Fa-f]*) VRAM="0x${FUNC#func_}";; esac
+    RENAMED=''
+    [ -n "$VRAM" ] && RENAMED=$(name_at "$VRAM" || true)
+    if [ -n "$RENAMED" ] && obj_has "$RENAMED"; then
+        echo "note: ${FUNC} is ${RENAMED} in ${OBJ} (curated rename at ${VRAM})" >&2
+        OBJ_FUNC="$RENAMED"
+    else
+        echo "$0: no symbol ${FUNC} in ${OBJ} -- renamed without a symbol_addrs.txt entry, or the" \
+             "object predates the body. Rebuild it, do not read this as a regression." >&2
+        exit 1
+    fi
 fi
 
 # --- Extract each side as one instruction per line, INTERNAL branch targets rewritten to a
@@ -139,8 +181,8 @@ obj_stream() {
     # which the old fold-the-asm-side-too shortcut would have hidden. The object-side alias table in
     # norm() folds what no-aliases spells differently from splat (`sll zero,zero,0` -> nop,
     # `beq zero,zero` -> b, `subu rd,zero,rs` -> negu).
-    mips-linux-gnu-objdump -dz -M no-aliases "$OBJ" | awk "/<${FUNC}>:/,/^\$/" > "$slice"
-    awk -v fn="$FUNC" '
+    mips-linux-gnu-objdump -dz -M no-aliases "$OBJ" | awk "/<${OBJ_FUNC}>:/,/^\$/" > "$slice"
+    awk -v fn="$OBJ_FUNC" '
         FNR == NR {
             if (match($0, /^[ \t]+[0-9a-f]+:/)) {
                 s = substr($0, RSTART, RLENGTH)
