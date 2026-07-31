@@ -19,7 +19,7 @@ extern void func_800453E0(void* a, void* b, void* c);
 extern s32 get_interpolated_terrain_height_wrapper(s32 x, s32 z);
 extern s32 func_800544B4(s32 arg0, s32 arg1);
 extern void func_800543DC(s32 arg0, s32 arg1);
-extern s32 func_8005342C(s32 a, s32 b, s32 c, s32 d, u32 phys);
+extern s32 kSetMultiTLB(s32 a, s32 b, s32 c, s32 d, u32 phys);
 extern s32 D_800C1DEC;
 extern void func_800989EC(void* a, void* b, void* c);
 extern f32 per_view_camera_state;
@@ -72,7 +72,7 @@ void func_80054E4C(s32 arg0, s32 arg1) {
         mode = -1;
         break;
     }
-    func_8005342C(0, 0, 0x20, 0x2000000,
+    kSetMultiTLB(0, 0, 0x20, 0x2000000,
                   osVirtualToPhysical(*(void**)(cs + 4)));
     func_800543DC(arg0, mode);
   }
@@ -253,7 +253,7 @@ void update_vertex_texture_coords(s32 id) {
   if (cs == NULL) {
     return;
   }
-  func_8005342C(0, 0, 0x20, 0x2000000, osVirtualToPhysical(*(void**)(cs + 4)));
+  kSetMultiTLB(0, 0, 0x20, 0x2000000, osVirtualToPhysical(*(void**)(cs + 4)));
 
   /* The face list is NULL-terminated, so the fetch belongs in the condition: it
    * is then the loop test that gcc rotates to the bottom of the body, which is
@@ -326,7 +326,7 @@ void update_vertex_texture_coords_per_frame(s32 id) {
     f32 unused2[31];
     (void)unused2;
   }
-  func_8005342C(0, 0, 0x20, 0x2000000, osVirtualToPhysical(*(void**)(cs + 4)));
+  kSetMultiTLB(0, 0, 0x20, 0x2000000, osVirtualToPhysical(*(void**)(cs + 4)));
 
   while ((face = (*(TexturedFace***)(*(u8**)cs + 0x24))[faceIndex]) != NULL) {
     for (animIndex = 0; animIndex < face->animCount; animIndex++) {
@@ -441,7 +441,7 @@ void reset_face_textures_for_anim_slot(s32 id, s32 slot) {
   if (cs == NULL) {
     return;
   }
-  func_8005342C(0, 0, 0x20, 0x2000000, osVirtualToPhysical(*(void**)(cs + 4)));
+  kSetMultiTLB(0, 0, 0x20, 0x2000000, osVirtualToPhysical(*(void**)(cs + 4)));
 
   while ((face = (*(TexturedFace***)(*(u8**)cs + 0x24))[faceIndex]) != NULL) {
     texture = *(TextureDesc**)(*(u8**)cs + 0x28) + face->textureIndex;

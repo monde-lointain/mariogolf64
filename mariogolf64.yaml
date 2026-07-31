@@ -429,6 +429,8 @@ segments:
       - [0xA7B90, rodata]
       - [0xA8030, .rodata, main/func_80051E90]
       - [0xA8050, rodata]
+      - [0xA80A8, .rodata, main/func_80052FE0]
+      - [0xA80C8, rodata]
       - [0xABC2C, .rodata, main/func_80054900]
       - [0xABC3C, rodata]
       - [0xABC40, rodata]

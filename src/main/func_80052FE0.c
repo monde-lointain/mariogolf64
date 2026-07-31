@@ -5,6 +5,8 @@ extern s32 func_800542A0(s32 index);
 extern s32 func_80054550(s32 id, s32 tag, s32 arg2);
 extern u8 polychara_state[];
 extern u8 D_800D0488[];
+extern u8 D_800CCC50[];
+extern u8 D_800CCC84[];
 extern u8 D_801F43F0[];
 extern u8 D_801F4424[];
 extern s32 D_800B67F0;
@@ -16,7 +18,82 @@ INCLUDE_ASM("asm/nonmatchings/main/func_80052FE0", func_80052FE0);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80052FE0", func_800530FC);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80052FE0", func_8005342C);
+/* kSetMultiTLB: maps `count` pages of size 0x1000 << page_mode from vaddr to
+ * paddr, two pages per TLB entry, starting at TLB index `index`; returns the
+ * next free index, or -1 on a misaligned address or a page_mode above 7 (both
+ * error strings name the function). An odd page_mode halves the page size and
+ * doubles the count so the entry's even/odd pair still covers the request; the
+ * odd cases fall through into the even case that sets the mask, which is what
+ * puts each `srl`/`sll` prologue directly above its shared arm in the table.
+ * The `s32 i = index;` copy is load-bearing and must be the FIRST statement:
+ * the three parameter copies are latency-1 ties in the entry block, so sched.c
+ * breaks them on LUID, and the ROM emits a0's copy after a2's and a3's. Making
+ * `index` a body-level copy moves it out of the assign_parms group; declaring
+ * it after the `size` computation overshoots (the copy then lands after the
+ * `sllv`). */
+s32 kSetMultiTLB(s32 index, s32 page_mode, u32 count, u32 vaddr, u32 paddr) {
+  s32 i = index;
+  u32 size = 0x1000 << page_mode;
+  u32 mask;
+
+  if ((vaddr | paddr) & (size - 1)) {
+    osSyncPrintf(D_800CCC50);
+    return -1;
+  }
+
+  switch (page_mode) {
+    case 1:
+      size >>= 1;
+      count <<= 1;
+    case 0:
+      mask = OS_PM_4K;
+      break;
+    case 3:
+      size >>= 1;
+      count <<= 1;
+    case 2:
+      mask = OS_PM_16K;
+      break;
+    case 5:
+      size >>= 1;
+      count <<= 1;
+    case 4:
+      mask = OS_PM_64K;
+      break;
+    case 7:
+      size >>= 1;
+      count <<= 1;
+    case 6:
+      mask = OS_PM_256K;
+      break;
+    default:
+      osSyncPrintf(D_800CCC84);
+      return -1;
+  }
+
+  if (vaddr & size) {
+    osUnmapTLB(i);
+    osMapTLB(i++, mask, (void*)vaddr, -1, paddr, -1);
+    vaddr += size;
+    paddr += size;
+    count--;
+  }
+
+  while (count >= 2) {
+    osUnmapTLB(i);
+    osMapTLB(i++, mask, (void*)vaddr, paddr, paddr + size, -1);
+    vaddr += size * 2;
+    paddr += size * 2;
+    count -= 2;
+  }
+
+  if (count != 0) {
+    osUnmapTLB(i);
+    osMapTLB(i++, mask, (void*)vaddr, paddr, -1, -1);
+  }
+
+  return i;
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80052FE0", calculate_bone_matrices);
 
