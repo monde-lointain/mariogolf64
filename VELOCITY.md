@@ -1579,6 +1579,18 @@ Three honest caveats:
   despite S305 having landed them, and `permuter_settings_main.toml` was found to omit the per-file
   `-ffast-math` six `src/main` TUs build with, so a permuter run on any of them scored a compile the
   build never performs.
+- **Sprint 309** — plan-time seed freeze (classical track, v2 two-pass): seed **13**, regime
+  **classical**, split 8 + 5. Two INDEPENDENT slices, one commit each: `func_8005BC10`
+  (`src/main/func_80059BA0.c`, 0x408, 258 instr, `fp=0`, `jal=6`, big band → 8) as the first real
+  probe of the `JTBL-CARVEABLE` vein S307 unlocked, plus the S308 carry `func_8007399C`
+  (`src/main/func_80071370.c`, 0x254, 149/149 at the ROM's exact `-0x50` frame, mid band → 5).
+  Stretch `func_8005B7BC` (0x454, +8) pulled only if the first banks. The 8-point gate fires on the
+  sum and is answered by DECOMPOSING, not by an exemption: S308 proved a pool `.rodata` carve splits
+  at any interior 8-aligned boundary, so each leaf carves and commits alone (`[0xABE60]` ->
+  `[0xABE08]`, and `[0xACB38]` -> `[0xACAD0]`) and there is no all-or-nothing stall. Zero gate
+  enablers; both carves are bank-time actions (S265). Baseline `ca817f6`. Realized tier and residual
+  are scored at review in a second commit; this line is committed before any `src/` edit and must not
+  be revised.
 - **Sprint 308** — plan-time seed freeze (classical track, v2 two-pass): seed **13**, regime
   **classical**, split 5 + 5 + 3. The S307 pool-carve cohort in `src/main/func_80071370.c`, executed
   as one atomic slice: `func_8007399C` (0x254, the S307 carry at 149/149, replay from
