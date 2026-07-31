@@ -25,6 +25,54 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 307 — first probe of `main`'s `jtbl-dispatch` vein (1 banked, 1 carried) — 2026-07-31
+- Increment: 0 files / **1 function matched** (`kSetMultiTLB`, ex-`func_8005342C`, 118 instructions,
+  byte-exact). `src/main/func_80052FE0.c` 6 -> 5 stubs; `--loose-stubs main` 277 -> 276;
+  `jtbl-dispatch` 33 -> 32. md5-candidate unchanged at 230 of 265, so the file point banks 0 as
+  priced. Descriptive names 168 -> **170** (`kSetMultiTLB` plus the S304 debt `func_8008534C` ->
+  `emit_club_and_power_hud_dl`, closed at the plan gate).
+- Quality: 0 stuck-far / 0 permuter / 1 carried / 0 re-opened.
+- Seed: committed 10pt at `823192e`; banked **0**pt; realized **11**, residual **+1**; regime
+  classical.
+- What helped: **the excluded-class re-check the S275 rule asks for, and the leaf's own strings.**
+  `jtbl-dispatch` had been out of `fresh` since S275 on one leaf's carve alignment; the two
+  conditions are per-leaf and mechanical, and the first row taken banked on the first build with no
+  permuter and no dive. Its two `osSyncPrintf` strings named the routine outright (`kSetMultiTLB :
+  Invalid Page Mode`), which gave the signature, the page-mode table and the whole error path before
+  a single build — a KMC library routine with no copy in `~/development/repos/libkmc` to coddog
+  against. On the residual, one lever closed it: the three parameter copies are latency-1 ties whose
+  order `sched.c` breaks on LUID, and `s32 i = index;` as the FIRST statement moves `a0`'s copy out
+  of the `assign_parms` group to exactly where the ROM has it (after the `size` computation it
+  overshoots past the `sllv`).
+- Friction: **the carve rule had a second condition nobody had written down, and the hand
+  derivation of it was wrong.** `func_8007399C` passed the S265 both-edge-8-align test and still
+  cannot bank: the host object already carves `0xACBE0`, and one object emits one contiguous
+  `.rodata`, so everything between must come from the same object. Worse, the hand reading mis-sized
+  `jtbl_800D1738` as 42 words and concluded a two-leaf cohort; the ranker check written at this
+  review counts the blocks and reports three (`func_800754BC` **and** `func_8007580C`). Second
+  friction: `pick_target_yaml.parse_subsegs`'s type group is `[a-z]+`, so it silently drops every
+  leading-dot `.rodata`/`.data` carve line — the new tell had to parse the yaml itself, and the
+  shared helpers that consume that parse have been running without those lines for an unknown
+  number of sprints.
+- Applied: 5 of 5 accepted. #1+#4 `jtbl_carve_tell` in `tools/pick_target_score.py`: per-leaf
+  `jtbl-carveable` / `jtbl-carve-blocked` / `pool-cohort:<fn>,...`, with carveable now counted in
+  `fresh` (24 of 32 rows) and the cohort members named in the row; #2 `string_refs`, printing the
+  `.asciz` literals a stub references beside its row; #5 a third carry-over kind,
+  **cohort-blocked**, in `BACKLOG.md` (a byte-exact body that needs siblings, not a lever search,
+  and is priced as the sum of the cohort); #3 the `kSetMultiTLB` -> `src/libkmc/` placement recorded
+  as a follow-up with its blocker (the splat subseg's rodata is not contiguous, so it needs a
+  16-aligned text split first). Retirement: `docs/workflow/loop.md`'s two curated-rename
+  stale-object rules (the Bank-step bullet and the Conventions bullet) merged into one at the
+  Conventions site, keeping all four citations and the gap-relic sub-case; **-451 B**, and the Bank
+  step already pointed at Conventions for it.
+- Carry-over: `func_8007399C` (`src/main/func_80071370.c`) at 149/149 with the ROM's exact frame,
+  **cohort-blocked** on `func_800754BC` + `func_8007580C` and one carve line
+  (`[0xACAD0, .rodata, main/func_80071370]`, size 0x178). Its remaining 84-line residual is one
+  cause, read off `gcc -dS`: the priority-1 template copy loses to the priority-3 global load in a
+  bottom-up `schedule_block`, which puts `player` in `t0` where the ROM has `a3`. Body, lever table
+  and refuted set in `docs/wip/func_8007399C.near-match.md`.
+- Push: local.
+
 ## Sprint 306 — the nearest `dl-emitter` carry plus `main`'s last fresh row (0 banked, 2 carried) — 2026-07-30
 - Increment: 0 files / **0 functions matched**. `src/main/func_80078910.c` 21 stubs and
   `src/main/func_80080220.c` 13 stubs, both unchanged; md5-candidate unchanged at 230 of 265;

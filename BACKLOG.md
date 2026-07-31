@@ -3909,8 +3909,18 @@ these were USER actions performed by the PO.)
 
 ## Carry-overs (files/clusters awaiting the next sprint)
 
-Two kinds, both de-ranked by `tools/pick_target.py` (so they stop resurfacing) and re-pulled first
+Three kinds, all de-ranked by `tools/pick_target.py` (so they stop resurfacing) and re-pulled first
 by `/sprint-plan`:
+- **Cohort-blocked (S307)** — NOT a wall. The body may be byte-exact and the leaf still cannot bank,
+  because its `.rodata` (a compiler jump table, a block-move template, a literal pool) cannot be
+  carved without the still-asm siblings whose rodata shares the region: one object emits one
+  contiguous `.rodata`. The note names the cohort and the single carve line that lands them
+  together, and the retry is a multi-leaf slice, not a lever search. Price it by the SUM of the
+  cohort's leaves, never as one leaf's re-attempt. `pick_target.py --loose-stubs` computes the
+  verdict (`jtbl-carveable` / `jtbl-carve-blocked` / `pool-cohort:<fn>,...`), so a gate can read the
+  cohort membership rather than deriving it by hand — and should, since S307's hand derivation
+  missed a third member the tool found. Do not describe such a leaf as a spike: nothing about its
+  codegen is stuck.
 - **Spike** — a function that BLOCKED its file's DoD (locked < 0.97 percent, needs permuter,
   BSS-layout / subseg-alignment conflict). The note records the blocker so the retry resolves it first.
   **For a defines-data spike, default the framing to drop-def** (extern the file's data globals; the
@@ -3946,6 +3956,28 @@ by `/sprint-plan`:
   `NU_CONT_THREAD_ID=6` vs MG64's 5), and that surfaces only at first build unless reconciled here.
   A near-free retry missing any of these is a half-scoped spike — finish the scope before deferring.
 
+- **(S307 COHORT-BLOCKED — body at exact count; it needs two siblings banked with it, not a lever
+  search)** `func_8007399C`, `src/main/func_80071370.c`. 149 of 149 instructions at the ROM's exact
+  `-0x50` frame, semantics fully re-derived and confirmed against its caller. It regenerates
+  `jtbl_800D16D0` (0xACAD0, 8-aligned both edges), but the host object already carves `0xACBE0`
+  (`func_800760CC`'s table) and two still-asm tables sit between: `jtbl_800D1738` (`func_800754BC`,
+  0x350) and `jtbl_800D17A0` (`func_8007580C`, 0x63C). The unlock is one commit banking all three
+  leaves plus replacing the carve with `[0xACAD0, .rodata, main/func_80071370]`, size 0x178. Body,
+  the measured lever table and the `gcc -dS` reading of the remaining 84-line residual (a `sched.c`
+  priority inversion that puts `player` in `t0` where the ROM has `a3`) in
+  `docs/wip/func_8007399C.near-match.md`. Cohort membership is now a ranker output
+  (`--loose-stubs` prints `pool-cohort:func_800754BC,func_8007580C`), so re-read it rather than
+  re-deriving: the hand derivation at discovery found only one of the two siblings.
+
+- **(S307 FOLLOW-UP — placement, not a match)** `kSetMultiTLB` (`0x8005342C`) is banked byte-exact
+  but lives in `src/main/func_80052FE0.c`, a game animation/character-state TU. It is KMC library
+  code (both `osSyncPrintf` strings name the routine; no copy exists in
+  `~/development/repos/libkmc`), so by the S149 precedent (`main/main` -> `libnusys/nuboot`) it
+  belongs under `src/libkmc/`. It is NOT a one-line path-qualifier carve: the splat subseg's rodata
+  is not contiguous (`D_800D0488` at `0x800D0488` versus this function's strings at `0x800CCC50`),
+  so the subseg boundary does not match the real TU. Needs a text split at a 16-aligned boundary
+  first; `0x8005342C` itself is only 4-aligned.
+
 - **(S306 SPIKE — exact instruction count, residual is a whole-function FP-versus-GPR allocation
   equilibrium; re-open with `tools/allocno_report.py`, not a lever search)**
   `draw_terrain_aim_grid`, `src/main/func_80080220.c`. 1349 of 1349 instructions, frame `-0x2D08`
@@ -3979,15 +4011,10 @@ by `/sprint-plan`:
   quotient added the two `nop`s but cost a `move` and left the divide in place. Body, the fixed set
   and the refuted set in `docs/wip/func_8007EF0C.near-match.md`.
 
-- **(S304 NAMING DEBT — near-free retry, not a spike)** `func_8008534C` in
-  `src/main/func_80080220.c` is BANKED and byte-exact but still carries its auto name. The curated
-  rename was deliberately not run because it needs `symbol_addrs.txt` plus `make extract && make`
-  while a fan-out agent was live against `asm/nonmatchings/`. Completeness checklist: (1) add the
-  curated name to `symbol_addrs.txt`; (2) `grep -rn '\bfunc_8008534C\b' src` for committed C callers
-  before renaming (S247); (3) `find build -path '*/src/main/*.o' -delete` before the gate make (S271);
-  (4) `make extract && make`, then `tools/verify-rom.sh`. Proposed name, following the host file's
-  conventions (`emit_wind_indicator_dl`, `emit_rest_distance_panel_dl`, `emit_ball_trail_dl`):
-  `emit_club_and_power_hud_dl`.
+- **(S304 NAMING DEBT — CLOSED at the S307 plan gate)** `func_8008534C` in
+  `src/main/func_80080220.c` is now `emit_club_and_power_hud_dl`: `symbol_addrs.txt` add-only, zero
+  committed C callers to sed (the S247 grep), whole-tree object delete, `tools/verify-rom.sh
+  --extract` exit 0.
 
 - **(S303/S304 SPIKE x3 — all `dl-emitter`, all at or within one instruction of the ROM; the residual is
   `global.c` allocation in every case, so re-open with `tools/allocno_report.py`, not a lever search)**

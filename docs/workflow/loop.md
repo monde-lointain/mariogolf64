@@ -285,17 +285,6 @@ below).
   `tools/recover_stub.sh <0xsubseg-off> <fn>...` (flips the subseg `c`->`asm` so splat disassembles
   the full range, carves the byte-identical per-fn block back, flips to `c`); see
   `docs/hazards.md#stale-persistent-nonmatchings-relic-recovery`.
-- **A curated rename that reaches a still-asm caller: force-delete the whole tree's objects before the
-  gate make.** `make extract` regenerates the caller `.s` with the new name, but the incremental build
-  links a stale `.o` still carrying the old auto name (`undefined reference`). Run
-  `find build -path '*/src/<tree>/*.o' -delete` for the whole tree, e.g. `src/main`, rather than
-  guessing at parents: a single flag rename has hit several stale parents at once.
-  - If a still-asm caller's `.s` does not pick up the new name on `make extract` at all, it is a splat
-    disassembly gap relic, not a stale object. Recover it with
-    `tools/recover_stub.sh 0x<parent_subseg_off> <caller_fn>`, then `make extract && make`. Do not
-    `rm` it: `asm/nonmatchings/` is gitignored, so a deleted relic has no `git restore`.
-  - Provenance: S270 the single-parent case; S271 generalized it to the whole tree; S281 the
-    gap-relic variant.
 - **Scratch dir** `nonmatchings/<func>/` (gitignored, shared with the permuter).
 - **Stop a background command with the harness. Never `pkill -f` on any pattern that appears in the
   command you are running (S289, recurred S301).** The pattern also matches the tool call's own shell
@@ -438,8 +427,14 @@ below).
   `INCLUDE_ASM` dep either, so `make extract` rewrites the `.s` of a still-asm caller with the new
   name while its stale `.o` keeps the old undefined reference. The tell is a link error naming the
   old symbol in a file you never edited, while `grep -rl` over `asm/` shows the new name in place:
-  the `.s` is fine, the object is stale. `find build -name '*.o' -delete` before the gate build
-  (S299, `func_8006AEA4` renamed, called from `render_frame`).
+  the `.s` is fine, the object is stale. Delete by tree, not by guessed parent -- one rename has hit
+  several stale parents at once: `find build -path '*/src/<tree>/*.o' -delete`, or
+  `find build -name '*.o' -delete` (S270 single parent, S271 whole tree, S299 `func_8006AEA4` called
+  from `render_frame`).
+  - If the caller's `.s` does not pick up the new name on `make extract` at all, it is a splat
+    disassembly gap relic, not a stale object: `tools/recover_stub.sh 0x<parent_subseg_off>
+    <caller_fn>`, then `make extract && make`. Never `rm` it -- `asm/nonmatchings/` is gitignored, so
+    a deleted relic has no `git restore` (S281).
 - **Library code under `src/libultra/`, `src/libkmc/`, `src/libnusys/`, `src/libnaudio/`,
   `src/libmus/`, and `src/mgu/` (plus the audio-lib include trees `include/libnaudio/`,
   `include/libnualstl/`, and `include/libmus/`) is clang-format-22 formatted** (stock Google with `SortIncludes: Never`; each dir carries a local

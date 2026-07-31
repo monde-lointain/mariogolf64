@@ -2,6 +2,7 @@
 """pick_target_score.py — extracted from pick_target.py."""
 
 import dataclasses
+import functools
 import os
 import re
 
@@ -490,6 +491,222 @@ def pool_blocked_tell(fn):
     return ""
 
 
+_JTBL_SYM_RE = re.compile(r"\b(jtbl_[0-9A-Fa-f]{8})\b")
+# `/* ACAD0 800D16D0 80073B74 */ .word .L80073B74` — the rom offset + vram splat writes on every
+# data line. The third column is the datum, absent on an `.asciz`, so it is not captured.
+_BLOB_LINE_RE = re.compile(r"/\*\s*([0-9A-Fa-f]+)\s+([0-9A-Fa-f]{8})\b")
+_ASCIZ_RE = re.compile(r'\.asciz\s+"((?:[^"\\]|\\.)*)"')
+
+
+@functools.lru_cache(maxsize=1)
+def _rodata_blob_index():
+    """{symbol: {rom, vram, words, asciz}} for every `dlabel` block in an `asm/data/*.rodata.s` blob.
+
+    These blobs are the rodata splat did NOT attribute to a C file, so every symbol here is data a
+    C body must either reference `extern` or carve. `words` is the block's `.word` count (its size in
+    words), `asciz` the first string literal in it, or None. Read once per process; the blobs only
+    change on `make extract`."""
+    index = {}
+    data_dir = os.path.join(ROOT, "asm", "data")
+    try:
+        names = sorted(os.listdir(data_dir))
+    except OSError:
+        return index
+    for name in names:
+        if not name.endswith(".rodata.s"):
+            continue
+        try:
+            with open(os.path.join(data_dir, name)) as f:
+                lines = f.readlines()
+        except OSError:
+            continue
+        sym = None
+        for line in lines:
+            stripped = line.strip()
+            if stripped.startswith("dlabel "):
+                sym = stripped.split()[1]
+                index[sym] = {"rom": None, "vram": None, "words": 0, "asciz": None}
+                continue
+            if stripped.startswith("enddlabel"):
+                sym = None
+                continue
+            if sym is None:
+                continue
+            entry = index[sym]
+            m = _BLOB_LINE_RE.search(line)
+            if m and entry["rom"] is None:
+                entry["rom"] = int(m.group(1), 16)
+                entry["vram"] = int(m.group(2), 16)
+            if ".word" in stripped:
+                entry["words"] += 1
+            if entry["asciz"] is None:
+                a = _ASCIZ_RE.search(stripped)
+                if a:
+                    entry["asciz"] = a.group(1)
+    return index
+
+
+def _jtbl_syms(fn):
+    """The `jtbl_<vram>` symbols <fn>'s `.s` dispatches through, in first-reference order."""
+    path = _find_asm_s(fn)
+    if not path:
+        return []
+    try:
+        with open(path) as f:
+            body = f.read()
+    except OSError:
+        return []
+    seen = []
+    for sym in _JTBL_SYM_RE.findall(body):
+        if sym not in seen:
+            seen.append(sym)
+    return seen
+
+
+# `- [0xACBE0, .rodata, main/func_80071370]`. Parsed here rather than through
+# pick_target_yaml.parse_subsegs, whose type group is `[a-z]+` and therefore never matches a
+# LEADING-DOT section name: every `.rodata`/`.data` carve line is silently dropped from that parse.
+# Widening the shared regex would change what the rodata-range helpers see, which is a behaviour
+# change for the mirror-path carve advice and belongs in its own change, not in this tell.
+_DOT_RODATA_RE = re.compile(r"^\s*-\s*\[\s*0x([0-9A-Fa-f]+)\s*,\s*\.rodata\s*,\s*([^\]]+?)\s*\]")
+
+
+@functools.lru_cache(maxsize=1)
+def _dot_rodata_carves():
+    """{path-qualifier: rom_offset} for every `.rodata, <path>` carve line in the yaml."""
+    from pick_target_yaml import YAML
+
+    carves = {}
+    try:
+        with open(YAML) as f:
+            for line in f:
+                m = _DOT_RODATA_RE.match(line)
+                if m:
+                    carves[m.group(2)] = int(m.group(1), 16)
+    except OSError:
+        pass
+    return carves
+
+
+def _host_rodata_carve_rom(cfile):
+    """ROM offset of the `.rodata, <path>` subseg already carved for the C file `cfile`
+    (`src/main/func_80071370.c` -> the `main/func_80071370` path qualifier), or None."""
+    stem = os.path.splitext(cfile)[0]
+    if stem.startswith("src/"):
+        stem = stem[len("src/") :]
+    return _dot_rodata_carves().get(stem)
+
+
+def _jtbl_owner(sym):
+    """The still-asm function whose `.s` dispatches through `sym`, or "". Names the cohort member a
+    pool-cohort verdict is blocked on."""
+    import glob
+
+    # nonmatchings only: the whole-subseg listings under asm/ (asm/4C770.s) reference every jtbl in
+    # their range, so globbing the asm root returns the subseg stem instead of the owning function.
+    root = os.path.join(_ASM_ROOT, "nonmatchings")
+    for path in glob.glob(os.path.join(root, "**", "*.s"), recursive=True):
+        try:
+            with open(path) as f:
+                if sym in f.read():
+                    return os.path.splitext(os.path.basename(path))[0]
+        except OSError:
+            continue
+    return ""
+
+
+def jtbl_carve_tell(fn, cfile):
+    """DoR check for a `jtbl-dispatch` leaf: can its jump table actually be carved on its own?
+
+    S265 recorded one condition and S307 measured a second. Returns "" when <fn> dispatches through
+    no jump table, else one of:
+
+      - "jtbl-carve-blocked": the table is not 8-aligned on BOTH edges, so the carve cannot be
+        expressed as a subseg boundary at all ([[jtbl-carve-both-edge-8align]]; `blend_terrain_color`
+        is the shape, 21 entries ending at 0x800CAA7C).
+      - "pool-cohort:<fn>,...": the table is carveable in isolation, but the HOST OBJECT ALREADY OWNS
+        a `.rodata` carve further along, with other rodata in between. One object emits one
+        contiguous `.rodata`, so the leaf can only bank together with whoever owns the rodata in the
+        gap, and the carve then moves to the earlier offset spanning all of it. S307
+        `func_8007399C`: `jtbl_800D16D0` at 0xACAD0 is 8-aligned both edges, but the host already
+        carves 0xACBE0 (`func_800760CC`'s table) and `jtbl_800D1738` (still-asm `func_800754BC`)
+        sits between them, so the two leaves bank as one cohort at `[0xACAD0, ...]`, size 0x178.
+      - "jtbl-carveable": both conditions pass, so the bank-time carve is a single subseg line. S307
+        `kSetMultiTLB` was this shape and banked on the first build — the first `jtbl-dispatch` bank
+        in `main` since the class was excluded at S265 — which is why the caller counts this verdict
+        as `fresh`.
+
+    Reads <fn>'s `.s`, the extracted rodata blobs and the yaml (all cheap, all cached)."""
+    syms = _jtbl_syms(fn)
+    if not syms:
+        return ""
+    index = _rodata_blob_index()
+    carve_rom = _host_rodata_carve_rom(cfile)
+    cohort = []
+    for sym in syms:
+        entry = index.get(sym)
+        if not entry or entry["rom"] is None or not entry["words"]:
+            # The table is already attributed to a C file's own carve, or the blob is unreadable:
+            # nothing to verify, and nothing to claim.
+            continue
+        start, end = entry["vram"], entry["vram"] + 4 * entry["words"]
+        if start % 8 or end % 8:
+            return "jtbl-carve-blocked"
+        if carve_rom is None:
+            continue
+        rom_end = entry["rom"] + 4 * entry["words"]
+        if carve_rom <= entry["rom"] or carve_rom == rom_end:
+            # The host's carve is contiguous with this table (or precedes it and can simply be
+            # extended): no foreign rodata to absorb.
+            continue
+        for other, oentry in index.items():
+            if other == sym or not other.startswith("jtbl_") or oentry["rom"] is None:
+                continue
+            if rom_end <= oentry["rom"] < carve_rom:
+                owner = _jtbl_owner(other)
+                if owner and owner != fn and owner not in cohort:
+                    cohort.append(owner)
+    if cohort:
+        return "pool-cohort:" + ",".join(cohort)
+    return "jtbl-carveable"
+
+
+_STRING_REF_RE = re.compile(r"%hi\((D_[0-9A-Fa-f]{8})\)")
+_STRING_MAX = 2
+_STRING_CHARS = 40
+
+
+def string_refs(fn):
+    """The `.asciz` literals <fn>'s `.s` references, up to _STRING_MAX, truncated.
+
+    A stub's own strings are the cheapest provenance signal there is and the ranker was not reading
+    them: S307's `func_8005342C` printed `kSetMultiTLB : Invalid Page Mode\\n`, which named the
+    function, its signature and its page-mode table before a single build, and no upstream copy of
+    that KMC routine exists to coddog against. Returns a list of strings (possibly empty)."""
+    path = _find_asm_s(fn)
+    if not path:
+        return []
+    try:
+        with open(path) as f:
+            body = f.read()
+    except OSError:
+        return []
+    index = _rodata_blob_index()
+    out = []
+    for sym in _STRING_REF_RE.findall(body):
+        entry = index.get(sym)
+        if not entry or not entry["asciz"]:
+            continue
+        text = entry["asciz"]
+        if len(text) > _STRING_CHARS:
+            text = text[:_STRING_CHARS] + "..."
+        if text not in out:
+            out.append(text)
+        if len(out) >= _STRING_MAX:
+            break
+    return out
+
+
 def _sym_in_generic_rodata_blob(sym):
     """Is <sym> defined in an `asm/data/*.rodata.s` blob? Those blobs are the rodata splat did NOT
     attribute to a C file, so a C body emitting its own copy of that data duplicates it."""
@@ -673,6 +890,8 @@ def loose_stubs(seg):
                     "nested": nested_tell(fn),
                     "intrinsic": intrinsic_stub_tell(fn),
                     "wall_class": wall_class_tell(fn),
+                    "jtbl_carve": jtbl_carve_tell(fn, rel),
+                    "strings": string_refs(fn),
                     "pool_blocked": pool_blocked_tell(fn),
                     "fp_class": fp_class_tell(fn),
                 }

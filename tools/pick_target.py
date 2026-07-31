@@ -1117,13 +1117,20 @@ def main():
             # fresh: the leaf needs the DL reconstruction recipe, which is not a wall. S258 retired
             # the underlying verdict; S293+S294 then banked the seven smallest members of the class
             # 7/7 at 154-307 instructions, zero permuter runs, zero compiler-source dives.
-            # `jtbl-dispatch` stays excluded: its wall is mechanical, not a codegen verdict (the
-            # bank-time .rodata carve needs 8-alignment on both edges), so S275 still holds there.
+            # `jtbl-dispatch` was excluded wholesale from S275 to S306 on one leaf's alignment
+            # wall. S307 split that verdict per leaf (jtbl_carve_tell): a `jtbl-carveable` table is
+            # 8-aligned on both edges AND has no foreign rodata between it and the host's existing
+            # carve, so its bank-time carve is a single subseg line -- S307's kSetMultiTLB was that
+            # shape and banked on the first build. `jtbl-carve-blocked` (alignment) and
+            # `pool-cohort:` (needs its sibling banked in the same commit) stay excluded.
             return (
                 not s["carried"]
                 and not s["nested"]
                 and not s.get("intrinsic")
-                and s.get("wall_class") in (None, "", "dl-emitter")
+                and (
+                    s.get("wall_class") in (None, "", "dl-emitter")
+                    or s.get("jtbl_carve") == "jtbl-carveable"
+                )
                 # pool-blocked: the body would emit a `.rodata` template the ROM keeps in a pool
                 # shared with still-asm siblings, so it cannot bank until they are C -- a bank-time
                 # blocker like jtbl-dispatch, not a codegen verdict (S300).
@@ -1131,7 +1138,7 @@ def main():
             )
 
         shown = stubs if args.all else [s for s in stubs if _is_fresh(s)]
-        print(f"{'size':>6} {'status':14} {'func':28} file")
+        print(f"{'size':>6} {'status':20} {'func':28} file")
         for s in shown:
             if s["carried"]:
                 status = "CARRIED-WALL"
@@ -1141,8 +1148,11 @@ def main():
                 status = "INTRINSIC-HASM"
             elif s.get("pool_blocked"):
                 status = "POOL-BLOCKED"
+            elif s.get("wall_class") == "jtbl-dispatch" and s.get("jtbl_carve"):
+                # The carve verdict, not the bare class: carveable counts in fresh, blocked is the
+                # alignment wall, pool-cohort names the sibling it must bank with (S307).
+                status = s["jtbl_carve"].upper()
             elif s.get("wall_class"):
-                # jtbl-dispatch: fresh-looking but a mechanical at-attempt wall (S275).
                 # dl-emitter: counts as fresh, tagged for pricing only (S294).
                 status = s["wall_class"].upper()
             else:
@@ -1156,7 +1166,11 @@ def main():
             # = converted out to integers (cheap), fp-sched = computed and stored (the S276/S277/S290
             # class), fp-mixed = real float arithmetic, price as risk. Advisory: not in `fresh`.
             fpc = f"  {s['fp_class']}" if s.get("fp_class") else ""
-            print(f"{sz:>6} {status:14} {s['fn']:28} {s['file']}{twin}{fpc}")
+            # A stub's own `.asciz` references are its cheapest provenance: S307's func_8005342C
+            # printed `kSetMultiTLB : ...`, which named the routine, its signature and its
+            # page-mode table before any build, with no upstream copy to coddog against.
+            strs = "".join(f'  "{t}"' for t in s.get("strings", []))
+            print(f"{sz:>6} {status:20} {s['fn']:28} {s['file']}{twin}{fpc}{strs}")
         n_fresh = sum(1 for s in stubs if _is_fresh(s))
         print(
             f"# {len(stubs)} stubs in src/{args.loose_stubs}/: {n_fresh} fresh, "
@@ -1165,7 +1179,12 @@ def main():
             f"{sum(bool(s.get('intrinsic')) for s in stubs)} intrinsic-hasm, "
             f"{sum(bool(s.get('pool_blocked')) for s in stubs)} pool-blocked "
             f"(block-move template in an uncarved pool; banks when the pool-owning siblings do, S300), "
-            f"{sum(s.get('wall_class') == 'jtbl-dispatch' for s in stubs)} jtbl-dispatch, "
+            f"{sum(s.get('wall_class') == 'jtbl-dispatch' for s in stubs)} jtbl-dispatch "
+            f"({sum(s.get('jtbl_carve') == 'jtbl-carveable' for s in stubs)} carveable and counted "
+            f"in fresh, {sum(s.get('jtbl_carve') == 'jtbl-carve-blocked' for s in stubs)} "
+            f"alignment-blocked, "
+            f"{sum(str(s.get('jtbl_carve', '')).startswith('pool-cohort') for s in stubs)} "
+            f"pool-cohort, S307), "
             f"{sum(s.get('wall_class') == 'dl-emitter' for s in stubs)} dl-emitter "
             f"(pricing tag, counted in fresh; wall framing retired S294 after 7/7 banked), "
             f"{sum(bool(s.get('dl_twin')) for s in stubs)} in dl-twin groups, "

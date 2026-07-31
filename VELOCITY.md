@@ -1526,6 +1526,23 @@ Three honest caveats:
   and `main`'s fresh vein is now one row. Tooling: three of the sprint's four accepted suggestions
   were tools this sprint had to hand-roll (`cmpfn.sh` histogram, `tools/seg_diff.py`,
   `tools/gbi_match.py`).
+- **Sprint 307 (realized)** — first probe of `main`'s `jtbl-dispatch` vein, plus the S304 naming
+  debt. **+1 banked, 1 carried, 0 permuter, 0 stuck-far, 0 re-opened.** Seed 10pt (5 + 5), frozen at
+  `823192e` before any `src/` edit (the freeze commit exists; this VELOCITY line was not written at
+  the plan gate, which is the process miss, not the freeze); banked **0**pt (both hosts partial, as
+  priced); **realized 11**, residual **+1** — `kSetMultiTLB` seed 5 **−1** (118/118 on the first
+  build, one lever iteration), `func_8007399C` seed 5 **+2** (carry, plus a novel bank-gotcha: a
+  cohort carve nobody had priced). Regime classical. Progress delta +1 matched (276 stubs from 277);
+  md5-candidate unchanged at 230 of 265; descriptive names 168 -> **170** (`kSetMultiTLB`,
+  `emit_club_and_power_hud_dl`), the counter moving for the first time since S303.
+  **The sprint's product is a class verdict.** `jtbl-dispatch` had been excluded from `fresh`
+  wholesale since S275 on one leaf's alignment wall; splitting that verdict per leaf makes 24 of the
+  32 rows carveable, and the first one taken banked on the first build with no permuter and no
+  compiler-source dive. The gate's risk ranking half-fired: risk 1 (all-or-nothing carve) is exactly
+  what stopped the second leaf, but for a reason the risk did not name — not alignment, which passed,
+  but the host object's pre-existing `.rodata` carve on the far side of two still-asm tables. Both
+  measurements are now ranker output (`jtbl_carve_tell`), which immediately paid: it found a third
+  cohort member the hand derivation had missed.
 - **Sprint 306 (realized)** — the nearest `dl-emitter` carry re-opened plus the segment's last
   fresh row. **0 banked, 2 carried, 1 permuter run (plateaued), 1 re-opened, 0 stuck-far.** Seed 13pt
   (5 + 8); banked **0**pt (both hosts partial, as priced); **realized 16**, residual **+3** (+1 per
