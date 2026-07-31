@@ -48,6 +48,23 @@ see `docs/wip/func_800990D0.near-match.md` (`--carried-check` flags it). Backup 
 (294-instr wall-prone debug handler, its own slice). STANDING GUIDANCE: prefer a FRESH non-main pack
 next unless a specific main leaf is pre-vetted `.s`-clean.**
 
+**S308 BANKS OUT OF THE JTBL POOL, and retires the cohort's atomic pricing.** `--loose-stubs main`
+reads 274 stubs / **6 fresh**, all `JTBL-CARVEABLE` and unchanged by this sprint: both banks
+(`place_glyph_sprite_run` 212 instr, `emit_glyph_sprite_dl` 399) came out of the `pool-cohort` rows,
+not the fresh vein, which is a second source of bankable work at this plateau. **The S307 verdict
+that a pool cohort is atomic is wrong:** one object's `.rodata` carve splits at any interior boundary
+8-aligned on both sides, so the members outward of that boundary bank now and the ones behind it stay
+in the extracted blob (`[0xACBE0]` -> `[0xACB38]`, 0x110). Price each bankable subset. Both fresh
+leaves reached exact instruction count and frame on the FIRST build and every iteration after was
+register allocation, so the S298 rule ("cheap to reconstruct, budget the integration") holds up to a
+399-instruction emitter. Its integration defect this time was one byte: `gSPMatrix` needs
+`OS_K0_TO_PHYSICAL`, invisible to `cmpfn`, found by byte-diffing the two ROMs.
+**The vein, smallest-first from here** (`--loose-stubs main`, all `JTBL-CARVEABLE`):
+`spawn_terrain_effect` (992 B, `fp-sched`), `func_8005BC10` (1032 B, fp=0, its strings name a
+PlayerState validator, host `func_80059BA0.c` is the S287 sibling-locality file — the S309 pick, but
+read the carve note in its S308 gate entry first), `func_8006E210` (2172 B), `func_80095DE0` (2444 B,
+39 jal), `func_8008E82C` (2784 B, `fp-coord`), `func_80089094` (13452 B).
+
 **S306 EMPTIES it: `--loose-stubs main` now reports 277 stubs / 0 fresh.** The next `main` slice has
 no smallest-first option at all — it is a re-open of a characterised carry or nothing, and the two
 S306 carries are the best-characterised in the segment (`draw_terrain_aim_grid` at an exact 1349,
@@ -3911,16 +3928,23 @@ these were USER actions performed by the PO.)
 
 Three kinds, all de-ranked by `tools/pick_target.py` (so they stop resurfacing) and re-pulled first
 by `/sprint-plan`:
-- **Cohort-blocked (S307)** — NOT a wall. The body may be byte-exact and the leaf still cannot bank,
-  because its `.rodata` (a compiler jump table, a block-move template, a literal pool) cannot be
-  carved without the still-asm siblings whose rodata shares the region: one object emits one
-  contiguous `.rodata`. The note names the cohort and the single carve line that lands them
-  together, and the retry is a multi-leaf slice, not a lever search. Price it by the SUM of the
-  cohort's leaves, never as one leaf's re-attempt. `pick_target.py --loose-stubs` computes the
-  verdict (`jtbl-carveable` / `jtbl-carve-blocked` / `pool-cohort:<fn>,...`), so a gate can read the
-  cohort membership rather than deriving it by hand — and should, since S307's hand derivation
-  missed a third member the tool found. Do not describe such a leaf as a spike: nothing about its
-  codegen is stuck.
+- **Cohort-blocked (S307, corrected S308)** — NOT a wall. The body may be byte-exact and the leaf
+  still cannot bank alone, because one object emits one contiguous `.rodata` and its jump table sits
+  behind a still-asm sibling's. **A pool cohort banks in SUBSETS, not atomically (S308):** the carve
+  splits at any interior boundary that is 8-aligned on both sides, so the members from that boundary
+  outward bank now and the ones behind it stay in the extracted blob. Price each bankable subset,
+  not the sum of the cohort. `pick_target.py --loose-stubs` prints the verdict
+  (`jtbl-carveable` / `jtbl-carve-blocked` / `pool-cohort:<fn>,...`); read the membership off it
+  rather than by hand, since S307's hand derivation missed a member. Do not call such a leaf a
+  spike: nothing about its codegen is stuck.
+- **`func_8007399C`** (`src/main/func_80071370.c`, S307 -> S308) — 149/149 at the ROM's exact
+  `-0x50` frame, 70 `cmpfn` lines, one cause: `sched.c:2469 birthing_insn_p` boosts the `out_height`
+  parameter copy (its pseudo has `reg_n_sets == 1`) to the bottom of block 0, so the incoming `$a3`
+  stays live across the 5th-argument load and `player` cannot colour `$a3`. Open question: a source
+  form giving that pseudo a second `SET` at zero instruction cost. Body, levers and the `-dS` check
+  are in `docs/wip/func_8007399C.near-match.md`. NOT cohort-blocked any more — its carve is the
+  one-line `[0xACB38]` -> `[0xACAD0]` move.
+
 - **Spike** — a function that BLOCKED its file's DoD (locked < 0.97 percent, needs permuter,
   BSS-layout / subseg-alignment conflict). The note records the blocker so the retry resolves it first.
   **For a defines-data spike, default the framing to drop-def** (extern the file's data globals; the

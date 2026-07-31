@@ -25,6 +25,48 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 308 — the S307 pool-carve cohort (2 banked, 1 carried) — 2026-07-31
+- Increment: 0 files / **2 functions matched** — `place_glyph_sprite_run` (ex-`func_800754BC`, 212
+  instructions) and `emit_glyph_sprite_dl` (ex-`func_8007580C`, 399), both byte-exact, banked with
+  the host `.rodata` carve moved from `[0xACBE0]` to `[0xACB38]`. `src/main/func_80071370.c` 14 -> 12
+  stubs; `--loose-stubs main` 276 -> **274**, 6 fresh unchanged (both banks came from the
+  `jtbl-dispatch` pool, not the fresh vein). md5-candidate unchanged at 100 of 135 files, so the file
+  point banks 0 as priced. Descriptive names 170 -> **172**.
+- Quality: 0 stuck-far / 1 permuter (plateaued 915 -> 340, no zero) / 1 carried / 1 re-opened.
+- Seed: committed 13pt at `7cf56c0`; banked **0**pt; realized **16**, residual **+3**; regime
+  classical.
+- What helped: **measuring the cohort instead of inheriting its price.** S307 recorded this pool as
+  atomic and the plan gate committed it that way, answering the 8-point decompose gate with the
+  atomic exemption. One object's `.rodata` carve in fact splits at any interior boundary 8-aligned on
+  both sides, so two of the three leaves banked while the third's table stayed in the extracted blob.
+  Two levers did most of the register work: one `gSPVertex` call per if-chain arm rather than one
+  shared call after it, which multiplies that constant's `loop.c` movable and flips which of two
+  constants the ROM hoists (290 diff lines -> 46); and a separate short-lived local per region
+  instead of one variable stretched across both (46 -> 0, and the same shape closed the other leaf).
+  `tools/dl_decode.py` plus `gbi_match.py` turned a 399-instruction emitter into a packet list, and
+  the composite macros fell out of it (`gDPLoadTLUT_pal256`, `gDPLoadTextureTile`).
+- Friction: **one RED gate build on one byte, behind three `cmpfn`-clean bodies.** `gSPMatrix` takes
+  a physical address (`OS_K0_TO_PHYSICAL`); `cmpfn` normalises `%hi`/`%lo` so no per-function oracle
+  could see it, and the `.s` reloc reads as splat's `D_FF530`. A byte-diff of the two ROMs localised
+  it in one command. Second: `setup-permuter.sh` died silently (rc=1, no message) on an
+  already-inlined function — `set -o pipefail` plus a no-match `grep` aborted the resolver before its
+  own emptiness check. Third: the carried leaf ate roughly half the sprint for 14 diff lines of
+  improvement; the stop rule should have fired at the second plateau, not the fourth.
+- Applied: **4 of 4**: #1 partial-carve verdict -> `BACKLOG.md ## Carry-overs` `Cohort-blocked` class
+  rewritten (retirement: the SUM-pricing and multi-leaf-slice clauses, refuted by this sprint's own
+  bank); #2 `loop.c:1631` hoist desirability -> `docs/levers.md emission-order-placement-lever`;
+  #3 `gSPMatrix` physical-address gotcha -> the `cmpfn` oracle row in `docs/workflow/loop.md`;
+  #4 both tooling fixes -> `tools/lib.sh` resolver `|| true` guards, `tools/dl_decode.py` `~` marker
+  for path-approximate offsets. `docs/levers.md` was over budget after #2, so `dead-frame-levers`,
+  `division-codegen` and `global-reread-vs-cse` were compressed to rule-plus-citation to pay for it.
+- Carry-over: `func_8007399C` (`src/main/func_80071370.c`) at 149/149 with the ROM's exact `-0x50`
+  frame and 70 `cmpfn` lines, all one cause: `sched.c:2469 birthing_insn_p` boosts the `out_height`
+  parameter copy because its pseudo has `reg_n_sets == 1`, scheduling it to the bottom of block 0 so
+  the incoming `$a3` stays live across the 5th-argument load and `player` cannot colour `$a3`. The
+  open question is a single one — a source form that gives that pseudo a second `SET` without costing
+  an instruction. Doc: `docs/wip/func_8007399C.near-match.md`. Its carve is now a one-line follow-up
+  (`[0xACB38]` -> `[0xACAD0]`), not a cohort commit.
+
 ## Sprint 307 — first probe of `main`'s `jtbl-dispatch` vein (1 banked, 1 carried) — 2026-07-31
 - Increment: 0 files / **1 function matched** (`kSetMultiTLB`, ex-`func_8005342C`, 118 instructions,
   byte-exact). `src/main/func_80052FE0.c` 6 -> 5 stubs; `--loose-stubs main` 277 -> 276;

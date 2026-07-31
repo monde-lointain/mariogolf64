@@ -1526,6 +1526,23 @@ Three honest caveats:
   and `main`'s fresh vein is now one row. Tooling: three of the sprint's four accepted suggestions
   were tools this sprint had to hand-roll (`cmpfn.sh` histogram, `tools/seg_diff.py`,
   `tools/gbi_match.py`).
+- **Sprint 308 (realized)** — the S307 pool-carve cohort. **+2 banked, 1 carried, 1 permuter
+  (plateaued), 0 stuck-far, 1 re-opened.** Seed 13pt (5 + 5 + 3), frozen at `7cf56c0` before any
+  `src/` edit; banked **0**pt (host partial, 12 stubs left, as priced); **realized 16**, residual
+  **+3** — `func_800754BC` seed 5 flat (212/212 on the first build, then ten lever iterations),
+  `func_8007580C` seed 3 **+1** novel bank-gotcha, `func_8007399C` seed 5 **+2** carry plus permuter.
+  Regime classical. Progress +2 matched (274 stubs from 276); md5-candidate unchanged at 100 of 135
+  files; descriptive names 170 -> **172** (`place_glyph_sprite_run`, `emit_glyph_sprite_dl`).
+  **The sprint's product is a retired verdict.** S307 priced the cohort as atomic — three leaves or
+  nothing — and the gate committed it that way. It is not: one object's `.rodata` carve splits at any
+  interior boundary that is 8-aligned on both sides, so moving the host's carve from `[0xACBE0]` to
+  `[0xACB38]` banked the two leaves whose tables sit outside the still-asm one. A pool cohort banks in
+  SUBSETS. The estimate was therefore conservative in the right direction: the atomic-exemption
+  argument that answered the 8-point gate was itself the thing measurement disproved.
+  Second result, on cost: both fresh leaves were reconstructed to exact instruction count and frame
+  on the FIRST build, and every iteration after that was register allocation — the S298 pricing rule
+  ("cheap to reconstruct, budget the integration") held for a 399-instruction emitter. Third: one RED
+  gate build, on one byte, behind three `cmpfn`-clean bodies (`gSPMatrix` needs a physical address).
 - **Sprint 307 (realized)** — first probe of `main`'s `jtbl-dispatch` vein, plus the S304 naming
   debt. **+1 banked, 1 carried, 0 permuter, 0 stuck-far, 0 re-opened.** Seed 10pt (5 + 5), frozen at
   `823192e` before any `src/` edit (the freeze commit exists; this VELOCITY line was not written at

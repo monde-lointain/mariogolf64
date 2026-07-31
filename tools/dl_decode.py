@@ -62,7 +62,7 @@ def fmt(value):
 def decode(path, dl_init=None):
     """Return (packets, others) for one `.s`.
 
-    packets is [(dl_offset, addr, value)] sorted by DL offset; others is
+    packets is [(dl_offset, addr, value, offset_is_approx)] sorted by DL offset; others is
     [(addr_or_None, text)] in program order.
     """
     reg = {"$zero": 0}
@@ -70,6 +70,10 @@ def decode(path, dl_init=None):
     packets = []
     others = []
     dl_found = dl_init is not None
+    # The scan is linear over the `.s`, so once it crosses a label or a branch the cursor it is
+    # tracking belongs to ONE path while the offsets keep accumulating across all of them. The
+    # ORDER stays right (that is what the tool is for); the number does not, so mark it (S308).
+    branched = False
 
     for line in open(path):
         text = line.strip()
@@ -77,6 +81,7 @@ def decode(path, dl_init=None):
         if not match:
             if text.startswith(".L") or text.startswith("glabel"):
                 others.append((None, text))
+                branched = branched or text.startswith(".L")
             continue
         addr = int(match.group(1), 16)
         op = match.group(3)
@@ -127,7 +132,9 @@ def decode(path, dl_init=None):
             through = REG_MEM.match(dest)
             base = reg.get(through.group(2)) if through else None
             if isinstance(base, DL):
-                packets.append((base.off + int(through.group(1), 0), addr, reg.get(source)))
+                packets.append(
+                    (base.off + int(through.group(1), 0), addr, reg.get(source), branched)
+                )
             else:
                 others.append((addr, "ST %s <- %s" % (dest, fmt(reg.get(source)))))
         elif op == "lw":
@@ -147,6 +154,7 @@ def decode(path, dl_init=None):
             others.append((addr, "JAL %s (a0=%s)" % (args[0], fmt(reg.get("$a0")))))
         elif op in BRANCHES:
             others.append((addr, "BR %s %s" % (op, " ".join(args))))
+            branched = True
         elif op in ("or", "and"):
             left = reg.get(args[1])
             right = reg.get(args[2]) if args[2].startswith("$") else _imm(args[2])
@@ -173,8 +181,8 @@ def main():
 
     packets, others = decode(args.asm, int(args.dl_init, 16) if args.dl_init else None)
     print("=== display-list order ===")
-    for offset, addr, value in packets:
-        print("+%-5d (%08X) %s" % (offset, addr, fmt(value)))
+    for offset, addr, value, approx in packets:
+        print("%s%-5d (%08X) %s" % ("~" if approx else "+", offset, addr, fmt(value)))
     print()
     print("=== other events, program order ===")
     for addr, text in others:
