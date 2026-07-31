@@ -723,3 +723,4 @@ emit_snapshot_panel_grid_dl = 0x80094228; // type:func
 emit_ball_trail_dl = 0x80083AC8; // type:func
 emit_hole_banner_dl = 0x8006BC80; // type:func
 emit_lens_flare_dl = 0x8008D3F4; // type:func
+emit_club_and_power_hud_dl = 0x8008534C; // type:func

@@ -1215,7 +1215,7 @@ extern void convert_and_pack_floats_to_fixed(f32 mf[4][4], Mtx* m);
 extern void func_802199EC(Gfx** gfxp, s32 x, s32 y, s32 arg3);
 extern void func_8021FC20(Gfx** gfxp);
 
-void func_8008534C(Gfx** gfxp) {
+void emit_club_and_power_hud_dl(Gfx** gfxp) {
   f32 rot[3];
   f32 pos[3];
   f32 unusedA[4];
