@@ -1526,6 +1526,29 @@ Three honest caveats:
   and `main`'s fresh vein is now one row. Tooling: three of the sprint's four accepted suggestions
   were tools this sprint had to hand-roll (`cmpfn.sh` histogram, `tools/seg_diff.py`,
   `tools/gbi_match.py`).
+- **Sprint 311 (realized)** — the largest `JTBL-CARVEABLE` row banked so far, at 611 instructions.
+  **+1 banked, 0 carried, 0 permuter runs, 0 stuck-far, 0 re-opened.** Seed 8pt, frozen at `8c905f8`
+  before any `src/` edit; banked **0**pt (host partial, as priced); **realized 7**, residual **−1** —
+  `func_80095DE0` seed 8 **−1** (first-try body, one fix iteration). Regime classical. Progress
+  **+1** matched; `main` stubs 272 → 271, fresh 3 → 2; `src/main/func_80095A10.c` 14 → 13 stubs, not
+  md5-candidate; descriptive names 373 → 374 (`update_cutscene_sound_cues`).
+  **The `.s` histogram priced the leaf, not its size.** Three greps before any C — `fp=0`,
+  `branch-likely=0`, and 39 `jal` *all to one target*, the already-`c` sibling `func_80095D70` with a
+  known two-argument signature — said a 2444-byte row was call glue: an 18-arm
+  `switch (D_800E4C50)` over `jtbl_800D1E80`, each arm an inner `switch (D_800E4C54)` on `0xC..0xF`,
+  106 logical calls of which gcc cross-jumps 68 trailing ones into a single tail. That observation is
+  now the ranker's `single-callee:<fn>` deweight.
+  **Build 1 was 610/611 on one nop, and the fix was one character.** gcc filled the `switch` range
+  check's delay slot with the following `sll`; the ROM leaves it empty. Declaring the function `s32`
+  instead of `void` blocks reorg.c's fall-through steal, and build 2 was `cmpfn`-clean at exact count
+  and exact frame. The `nonvoid-return-blocks-fallthrough-delay-steal` lever was written as an
+  *epilogue-branch* rule and so was not tried first; it now reads "any branch whose target is the
+  return block", with the diagnostic named.
+  **The carve needed no walk-back**, the first in this class not to: the object's `.rodata` was
+  verified to be exactly the 0x48-byte table (arms 9 and 13 sharing a target, as the ROM does) before
+  the yaml edit, so the blob row `[0xACD60, rodata]` split cleanly in three. `JTBL-CARVEABLE` is now
+  6 functions banked and 0 rows where the carve verdict itself was wrong.
+
 - **Sprint 310 (realized)** — the next `JTBL-CARVEABLE` row, which turned out to be a nested
   function PAIR. **0 banked, 1 carried (two functions), 0 permuter runs (unavailable, not skipped),
   0 stuck-far, 0 re-opened.** Seed 8pt, frozen at `a215473` before any `src/` edit; banked **0**pt;
@@ -1626,6 +1649,15 @@ Three honest caveats:
   despite S305 having landed them, and `permuter_settings_main.toml` was found to omit the per-file
   `-ffast-math` six `src/main` TUs build with, so a permuter run on any of them scored a compile the
   build never performs.
+- **Sprint 311** — plan-time seed freeze (classical track, v2 two-pass): seed **8**, regime
+  **classical**, one slice. `func_80095DE0` (`src/main/func_80095A10.c`, 0x98C, 611 instr, `fp=0`,
+  `bl=0`, `jal=39`, big band → 8), the smallest remaining fresh `JTBL-CARVEABLE` row. Carve verified
+  feasible at the gate: one `.rodata` symbol (`jtbl_800D1E80`, `[0xAD280, 0xAD2C8)`, 18 entries, both
+  edges 8-aligned), host object owns no `.rodata` row, so the generic blob `[0xACD60, rodata]` splits
+  in three. The 8-point gate fires and is answered by the CANNOT-DECOMPOSE branch, same shape as
+  S310. Host is the S285/S286 sibling-locality file, so the plateau advisory's exception applies; its
+  other 13 stubs are all `CARRIED-WALL`, so no stretch was offered. Zero gate enablers; the carve is
+  a bank-time action (S265). Baseline `0ab3521`. Realized tier and residual at review.
 - **Sprint 310** — plan-time seed freeze (classical track, v2 two-pass): seed **8**, regime
   **classical**, one slice. `func_8006E210` (`src/main/func_8006A2C0.c`, 0x87C, 544 instr, `fp=0`,
   `jal=16`, big band → 8), the next `JTBL-CARVEABLE` row whose carve is actually clean: it references

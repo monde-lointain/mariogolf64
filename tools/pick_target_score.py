@@ -494,6 +494,36 @@ def wall_class_tell(fn):
     return ""
 
 
+_JAL_TARGET_RE = re.compile(r"\bjal\b\s+([A-Za-z_][A-Za-z_0-9]*)")
+_SINGLE_CALLEE_MIN = 4  # below this a single target says nothing about the leaf's shape
+
+
+def single_callee_tell(fn):
+    """DoR DEWEIGHT: does ONE callee account for every `jal` in <fn>'s body? Returns the callee name
+    or "".
+
+    A high `jal` count reads as size-like risk in the ranker, but when every call goes to one target
+    the leaf is call glue over a single helper, which is the cheapest shape the segment has: the
+    helper's signature is already known (usually already `c`), so the whole body is a dispatch
+    skeleton with constant arguments and there is no per-call type derivation. S311's
+    `func_80095DE0` was 611 instructions with 39 `jal`, all to the already-`c` `func_80095D70`, and
+    banked on the second build; the one-line histogram said so before any C was written.
+
+    Requires >= _SINGLE_CALLEE_MIN calls: one or two calls to one target is the ordinary case and
+    carries no shape information. Reads only <fn>'s own `.s` (cheap)."""
+    path = _find_asm_s(fn)
+    if not path:
+        return ""
+    try:
+        with open(path) as f:
+            targets = _JAL_TARGET_RE.findall(f.read())
+    except OSError:
+        return ""
+    if len(targets) < _SINGLE_CALLEE_MIN or len(set(targets)) != 1:
+        return ""
+    return targets[0]
+
+
 _TEMPLATE_ADDR_RE = re.compile(r"%hi\((D_[0-9A-Fa-f]{8})\)")
 _TEMPLATE_MIN_PAIRS = 3  # >= this many lw/sw pairs after the address => a block move, not a read
 
@@ -1000,6 +1030,7 @@ def loose_stubs(seg):
                     "strings": string_refs(fn),
                     "pool_blocked": pool_blocked_tell(fn),
                     "fp_class": fp_class_tell(fn),
+                    "single_callee": single_callee_tell(fn),
                 }
             )
     out.sort(key=lambda r: (r["size"] if r["size"] is not None else 1 << 30, r["fn"]))

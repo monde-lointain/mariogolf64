@@ -54,13 +54,10 @@ by wrapping in `if (n != 0)`, S306), `#loop-weight-and-live-length-regalloc-stee
 
 - **emission-order-placement-lever** -- placement follows source emission order: LUID in latency-1
   blocks (`sched.c`), and `loop.c` hoists invariants in loop-body order before `strength_reduce` adds
-  giv inits. Knobs: spell an invariant as a statement to remove a hoist (S300); fold a pre-call
-  compute into the call argument; `off = i*stride` as its own statement (inlined, the symbol folds
-  into a walking-pointer giv and loses `%hi`/`addu`/`%lo`, S290); a row origin left inline when the
-  ROM births givs in body order (S294). Whether it hoists at all is the same lever (`loop.c:1631`,
-  `threshold*savings*lifetime >= insn_count`): one call per if-chain arm rather than one after it
-  flips which constant the ROM hoists (S308), and a use count of 2 rather than 1 is often the whole
-  difference (S310).
+  giv inits. Knob: move the statement, or split/inline it (`off = i*stride` as its own statement
+  keeps `%hi`/`addu`/`%lo`; inlined it folds into a walking-pointer giv). Whether it hoists at all is
+  the same lever (`loop.c:1631`, `threshold*savings*lifetime >= insn_count`), and a use count of 2
+  rather than 1 is often the whole difference (S290, S294, S300, S308, S310).
 - **sched-tiebreak-coins** -- `rank_for_schedule` (`sched.c:2428`) sorts class then LUID (a class-1
   compute defers behind class-3 stores); `schedule_select` (`sched.c:2615`) front-loads a transfer
   over a constant load (`fabsf` sign-mask, 3 vs 2; `mtc1`-zero ties via potential-hazard). Source
@@ -96,8 +93,10 @@ by wrapping in `if (n != 0)`, S306), `#loop-weight-and-live-length-regalloc-stee
 - **else-arm-return-vs-then-arm** -- for a far early return the else-arm form yields a plain `bc1t`
   (`jump.c:1737` cannot invert across a set-retval), and merges it into a *shared* error epilogue
   (S309); keep the final `return 0` last.
-- **nonvoid-return-blocks-fallthrough-delay-steal** -- a lone epilogue-branch nop means the ROM fn
-  returns `s32` (`reorg.c:3375/4274`).
+- **nonvoid-return-blocks-fallthrough-delay-steal** -- an unfilled delay slot on any branch whose
+  target is the function's return block means the ROM fn returns `s32` (`reorg.c:3375/4274`),
+  including a compiler-generated `switch` range check (S311). Diagnostic: `rom=N+1 mine=N` whose only
+  mnemonic delta is `nop`, every later row shifted by one.
 - **and-equals-zero-not-negated-and** -- `if (!(a & b))` De Morgans into a branch per operand plus
   `or`; `(a & b) == 0` keeps the value-selects and the `and`, which ROM `bc1t`+`and`+`bnez` means.
 - **cross-jump-merge-point-before-store** -- the delay-slot filler names the pre-reorg order; a merge

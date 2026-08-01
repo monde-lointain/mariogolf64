@@ -25,6 +25,36 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 311 — the 611-instruction JTBL-CARVEABLE row (1 banked) — 2026-07-31
+- Increment: 0 files / **1 function matched** — `func_80095DE0` → `update_cutscene_sound_cues`, 611
+  instructions, exact count and exact frame. `src/main/func_80095A10.c` 14 → 13 stubs (not
+  md5-candidate, so 0 file points); `--loose-stubs main` 272 → 271, fresh 3 → 2; descriptive names
+  373 → 374. ROM SHA-1 green at every commit.
+- Quality: 0 stuck-far / 0 permuter / 0 carried / 0 re-opened.
+- Seed: committed 8pt; banked 0pt; realized 7, residual −1; regime classical.
+- What helped: **the `.s` histogram, read before any C.** `fp=0`, `branch-likely=0`, and 39 `jal`
+  all to one already-`c` helper with a known signature said the row was call glue, not a
+  2444-byte wall — an 18-arm `switch` over the jump table, each arm an inner `switch` on `0xC..0xF`,
+  106 logical calls cross-jumped into one tail. Everything after that was transcription. The carve
+  was verified against `objdump -s -j .rodata` *before* the yaml edit and needed no walk-back, the
+  first in this class not to.
+- Friction: one thing, and it was a doc-shape problem rather than a codegen one. Build 1 came out
+  610/611 with `nop` as the only mnemonic delta: gcc stole the following `sll` into the `switch`
+  range check's delay slot where the ROM leaves it empty. The fix is `s32` instead of `void` — one
+  character — but `nonvoid-return-blocks-fallthrough-delay-steal` was written as a *lone
+  epilogue-branch* rule, so a range-check branch that merely *targets* the epilogue did not match it
+  and the lever was not tried first.
+- Applied: 3 of 3 — #1 the non-void-return lever widened to "an unfilled delay slot on any branch
+  whose target is the function's return block", with the diagnostic named (`rom=N+1 mine=N`, only
+  `nop` differs, every later row shifted by one); #2 the `JTBL-CARVEABLE` 6-banked datum recorded in
+  `BACKLOG.md` (no tool change); #3 `single_callee_tell` added to `pick_target_score.py` and printed
+  as `single-callee:<fn>` on `--loose-stubs` rows when one target accounts for every `jal` (≥ 4
+  calls), 9 `main` rows tagged, `make test-tools` 138 passed. Retirement: the longest
+  `docs/levers.md` row, `emission-order-placement-lever` (814 B), compressed to rule-plus-citation
+  with its four worked examples folded into one sprint list; `docs/levers.md` 10239 → 10217 B against
+  its 10240 B budget, so the sprint's net delta on that surface is −22.
+- Carry-over: none new. `func_8006E210` + `func_8006DFF0` (S310) still carried.
+
 ## Sprint 310 — the JTBL-CARVEABLE row that was a nested pair (0 banked, 1 carried) — 2026-07-31
 - Increment: 0 files / **0 functions matched**. `func_8006E210` and its nested child
   `func_8006DFF0` both reach the ROM's exact instruction count and exact frame (543/543 at `-0x60`,

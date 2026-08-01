@@ -1173,7 +1173,11 @@ def main():
             # printed `kSetMultiTLB : ...`, which named the routine, its signature and its
             # page-mode table before any build, with no upstream copy to coddog against.
             strs = "".join(f'  "{t}"' for t in s.get("strings", []))
-            print(f"{sz:>6} {status:20} {s['fn']:28} {s['file']}{twin}{fpc}{strs}")
+            # A DEWEIGHT, not a wall: one callee accounting for every `jal` means the leaf is call
+            # glue over a single (usually already-`c`) helper, so a high jal count is not size-like
+            # risk here (S311 func_80095DE0, 611 instr / 39 jal / one target, banked on build 2).
+            sc = f"  single-callee:{s['single_callee']}" if s.get("single_callee") else ""
+            print(f"{sz:>6} {status:20} {s['fn']:28} {s['file']}{twin}{fpc}{sc}{strs}")
         n_fresh = sum(1 for s in stubs if _is_fresh(s))
         print(
             f"# {len(stubs)} stubs in src/{args.loose_stubs}/: {n_fresh} fresh, "

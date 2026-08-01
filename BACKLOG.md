@@ -48,6 +48,21 @@ see `docs/wip/func_800990D0.near-match.md` (`--carried-check` flags it). Backup 
 (294-instr wall-prone debug handler, its own slice). STANDING GUIDANCE: prefer a FRESH non-main pack
 next unless a specific main leaf is pre-vetted `.s`-clean.**
 
+**S311 BANKS THE VEIN'S BIGGEST ROW, and the class's carve verdict is now 6-for-6.**
+`--loose-stubs main` reads 271 stubs / **2 fresh**. `func_80095DE0` -> `update_cutscene_sound_cues`
+(611 instructions, the largest `JTBL-CARVEABLE` member yet) banked on the second build, and its carve
+— splitting the generic blob `[0xACD60, rodata]` into `[0xACD60, rodata]` / `[0xAD280, .rodata,
+main/func_80095A10]` / `[0xAD2C8, rodata]` — needed no walk-back, the first in the class not to. The
+tag has now banked `func_8005CF78`, `place_glyph_sprite_run`, `emit_glyph_sprite_dl`,
+`transfer_continue_slot`, `transfer_mode_continue_slot` and this one; **no row it called carveable has
+had a wrong carve verdict**, and S310's miss was nested-pair pricing, which the chain-setup tell now
+catches. **The pricing lesson is a new ranker tag:** three greps on the `.s` (`fp=0`, `bl=0`, and 39
+`jal` all to ONE already-`c` helper) said this 2444-byte row was call glue over a known signature.
+`single-callee:<fn>` now prints on `--loose-stubs` rows where one target accounts for every `jal`
+(9 `main` rows carry it) and is a DEWEIGHT: read a high `jal` count with this tag as cheap, not risky.
+**The vein from here, smallest-first:** `func_8008E82C` (2784 B, `fp-coord`, two tables),
+`func_80089094` (13452 B). Plus the S310 carry pair as a crack-attempt slice.
+
 **S310 CORRECTS THE VEIN'S SIZE AND FINDS THE PAIR TRAP.** `--loose-stubs main` now reads 272 stubs
 / **3 fresh** — not because anything banked, but because two ranker fixes landed at the S310 retro.
 `jtbl_carve_tell` gained a **`carve-pool-blocked:<sym>`** verdict for the case S310 hit at its gate:
@@ -3970,6 +3985,14 @@ by `/sprint-plan`:
   (`jtbl-carveable` / `jtbl-carve-blocked` / `pool-cohort:<fn>,...`); read the membership off it
   rather than by hand, since S307's hand derivation missed a member. Do not call such a leaf a
   spike: nothing about its codegen is stuck.
+- **`func_8006E210` + `func_8006DFF0`** (`src/main/func_8006A2C0.c`, S310 ->) — a GCC nested PAIR,
+  one slice of 679 instructions. Both halves at the ROM's exact count and exact frame (543/543 at
+  `-0x60`, 136/136 at `-0x40`); ~20 instructions differ in three clusters (a jump.c store-flag
+  conversion on `col = 5`, a `local-alloc` 2-register tie in the tail copy loop, and a late `&sub[i]`
+  in the child). **The permuter is structurally unavailable** — `import.py`'s pycparser aborts on a
+  nested definition and the delete-the-parent workaround cannot apply when the parent is the target —
+  so this is a hand-lever or compiler-source slice. Replayable body, the nine levers that closed the
+  other 659, and the verbatim carve line are in `docs/wip/func_8006E210.near-match.md`.
 - **`func_8007399C`** (`src/main/func_80071370.c`, S307 -> S309) — 149/149 at the ROM's exact
   `-0x50` frame, 70 `cmpfn` lines. Two conditions, both measured off the `-dS` ready lists: the `$a3`
   parameter copy unboosted (`birthing_insn_p` wants `reg_n_sets >= 2`, `sched.c:2469`) AND the
