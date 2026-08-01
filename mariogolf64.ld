@@ -744,8 +744,9 @@ SECTIONS
         build/asm/data/ACD00.rodata.o(.rodata);
         build/src/main/func_80078910.o(.rodata);
         build/src/main/func_80080220.o(.rodata);
-        build/src/main/func_8008D100.o(.rodata);
         build/asm/data/ACD60.rodata.o(.rodata);
+        build/src/main/func_8008D100.o(.rodata);
+        build/asm/data/AD1C0.rodata.o(.rodata);
         build/src/main/func_80095A10.o(.rodata);
         build/src/main/func_80099490.o(.rodata);
         build/src/libnusys/nuboot.o(.rodata);

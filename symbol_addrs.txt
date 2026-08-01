@@ -730,3 +730,4 @@ emit_glyph_sprite_dl = 0x8007580C; // type:func
 transfer_continue_slot = 0x8005BC10; // type:func
 transfer_mode_continue_slot = 0x8005B7BC; // type:func
 update_cutscene_sound_cues = 0x80095DE0; // type:func
+run_fog_debug_editor = 0x8008E82C; // type:func

@@ -276,7 +276,310 @@ s32 lerp_s32(s32 a0, s32 a1, f32 t) {
 INCLUDE_ASM("asm/nonmatchings/main/func_8008D100",
             per_hole_skybox_palette_load);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_8008D100", func_8008E82C);
+/* One editable fog/light preset. The three-entry colour arrays are the page's
+ * three columns; `a` has a fourth entry because row 3 also edits the blend
+ * percentage at 0x10. */
+typedef struct {
+  /* 0x00 */ s32 cc;
+  /* 0x04 */ u8 r[3];
+  /* 0x07 */ u8 g[3];
+  /* 0x0A */ u8 b[3];
+  /* 0x0D */ u8 a[4];
+  /* 0x11 */ u8 unk11[0x0F];
+} FogPreset; /* 0x20 */
+
+/* [time-of-day set][putter mode * 4 + sky slot] */
+/* The preset table itself is `u8 D_800C6014[]` (declared above, and indexed the
+ * same way by the sibling emitter). */
+/* The preset the page currently edits; re-derived from the selectors below on
+ * every frame. */
+extern FogPreset* D_800E3980;
+extern s32 D_800C6CE4; /* cursor row: 0=R 1=G 2=B 3=A 4=fog preset B */
+extern s32 D_800C6CE8; /* cursor column within the row */
+/* Four copies of ten 16-byte light records; only each record's first three
+ * bytes (its RGB triple) are rebuilt here. */
+extern u8 D_800C69CC[4][10][0x10];
+extern u16 D_800C6C52[];
+/* One five-word record: R, G, B, z-min, z-max. ghidra_symbols.txt names each
+ * word separately, so the array carries the first word's name. */
+extern s32 g_fog_presetB_color_r[5];
+extern u16 D_800FBDCE;
+extern u16 debug_menu_pad_buttons_c;
+extern void* course_panorama_ptr;
+extern char D_80105118[];
+
+extern s32 flag_is_set(s32 flag);
+extern void check_and_print_grid(char* str, s32 col, s32 row);
+extern s32 func_80051FCC(void);
+extern u32 func_8005062C(u16 index, void* out);
+extern void func_800506D4(void* data, void* slot);
+extern void func_8002A97C(s32 arg0, s32 arg1);
+
+/* Debug fog/light editor page, one frame. Steps the row/column cursor from the
+ * pad, applies the held-direction edit to the selected channel, clamps every
+ * edited value, rebuilds the ten light-record RGB triples from the preset, and
+ * prints the five channel rows. Editing the alpha row also re-loads and
+ * re-blends the course panorama palette, which is why that arm raises
+ * `refresh`.
+ *
+ * Returns 1 when the page ran and 0 when its debug flag is clear; the caller
+ * skips the normal sky update on a 1. */
+s32 run_fog_debug_editor(void) {
+  u8 spvar[0x20];
+  u8* q;
+  s32 refresh;
+  s32 n;
+  s32 m;
+  s32 tod;
+  s32 i;
+  s32 j;
+  s32 half;
+  s32 quarter;
+  s32 red;
+  s32 green;
+  s32 blue;
+  s32 alpha;
+  s32 weight;
+  u16* pal;
+  u16 texel;
+  u16 sum;
+
+  refresh = 0;
+  if (!flag_is_set(0x2D)) {
+    return 0;
+  }
+
+  check_and_print_grid(" ", D_800C6CE4 * 4 + 14, D_800C6CE8 + 5);
+  /* Same three-statement spelling as the sibling emitter above: the `tod` load
+   * and the `n << 8` shift are statements of their own, ahead of `q`. */
+  n = func_80051FCC();
+  m = putter_mode_flag;
+  tod = sky_time_of_day_idx;
+  D_800E3980 = &((FogPreset(*)[8])D_800C6014)[n][(m << 2) + tod];
+
+  if (debug_menu_pad_buttons_c & 0x202) {
+    if (D_800C6CE4 > 0) {
+      D_800C6CE4--;
+    }
+  }
+  if (debug_menu_pad_buttons_c & 0x101) {
+    if (D_800C6CE4 < 4) {
+      D_800C6CE4++;
+    }
+  }
+  if (debug_menu_pad_buttons_c & 0x808) {
+    D_800C6CE8--;
+  }
+  if (debug_menu_pad_buttons_c & 0x404) {
+    D_800C6CE8++;
+  }
+  if (D_800C6CE8 < 0) {
+    D_800C6CE8 = 0;
+  }
+  /* Rows 3 and 4 are one and two columns wider than the colour rows, and their
+   * limit happens to equal the row index. */
+  if (D_800C6CE4 == 3) {
+    if (D_800C6CE8 >= 4) {
+      D_800C6CE8 = D_800C6CE4;
+    }
+  } else if (D_800C6CE4 == 4) {
+    if (D_800C6CE8 >= 5) {
+      D_800C6CE8 = D_800C6CE4;
+    }
+  } else if (D_800C6CE8 >= 3) {
+    D_800C6CE8 = 2;
+  }
+
+  if (D_800FBDCE & 0x8000) {
+    switch (D_800C6CE4) {
+      case 0:
+        D_800E3980->r[D_800C6CE8] += 4;
+        D_800E3980->r[D_800C6CE8] %= 0x100;
+        break;
+      case 1:
+        D_800E3980->g[D_800C6CE8] += 4;
+        D_800E3980->g[D_800C6CE8] %= 0x100;
+        break;
+      case 2:
+        D_800E3980->b[D_800C6CE8] += 4;
+        D_800E3980->b[D_800C6CE8] %= 0x100;
+        break;
+      case 3:
+        D_800E3980->a[D_800C6CE8] += 1;
+        refresh = 1;
+        if (D_800C6CE8 == 3) {
+          if (D_800E3980->a[3] == 0x65) {
+            D_800E3980->a[3] = 0;
+          }
+          if (D_800E3980->a[D_800C6CE8] >= 0x66) {
+            D_800E3980->a[D_800C6CE8] = 0x64;
+          }
+        } else {
+          D_800E3980->a[D_800C6CE8] &= 0x1F;
+        }
+        break;
+      case 4:
+        g_fog_presetB_color_r[D_800C6CE8] += 4;
+        break;
+    }
+  } else if (D_800FBDCE & 0x4000) {
+    switch (D_800C6CE4) {
+      case 0:
+        D_800E3980->r[D_800C6CE8] -= 4;
+        D_800E3980->r[D_800C6CE8] %= 0x100;
+        break;
+      case 1:
+        D_800E3980->g[D_800C6CE8] -= 4;
+        D_800E3980->g[D_800C6CE8] %= 0x100;
+        break;
+      case 2:
+        D_800E3980->b[D_800C6CE8] -= 4;
+        D_800E3980->b[D_800C6CE8] %= 0x100;
+        break;
+      case 3:
+        D_800E3980->a[D_800C6CE8] -= 1;
+        refresh = 1;
+        if (D_800C6CE8 == 3) {
+          if (D_800E3980->a[3] == 0x65) {
+            D_800E3980->a[3] = 0;
+          }
+          if (D_800E3980->a[D_800C6CE8] >= 0x66) {
+            D_800E3980->a[D_800C6CE8] = 0x64;
+          }
+        } else {
+          D_800E3980->a[D_800C6CE8] &= 0x1F;
+        }
+        break;
+      case 4:
+        g_fog_presetB_color_r[D_800C6CE8] -= 4;
+        break;
+    }
+  }
+
+  if (g_fog_presetB_color_r[0] > 0xFF) {
+    g_fog_presetB_color_r[0] = 0xFF;
+  }
+  if (g_fog_presetB_color_r[1] > 0xFF) {
+    g_fog_presetB_color_r[1] = 0xFF;
+  }
+  if (g_fog_presetB_color_r[2] > 0xFF) {
+    g_fog_presetB_color_r[2] = 0xFF;
+  }
+  if (g_fog_presetB_color_r[3] > 0x4B0) {
+    g_fog_presetB_color_r[3] = 0x4B0;
+  }
+  if (g_fog_presetB_color_r[4] > 0x4B0) {
+    g_fog_presetB_color_r[4] = 0x4B0;
+  }
+  if (g_fog_presetB_color_r[0] < 0) {
+    g_fog_presetB_color_r[0] = 0;
+  }
+  if (g_fog_presetB_color_r[1] < 0) {
+    g_fog_presetB_color_r[1] = 0;
+  }
+  if (g_fog_presetB_color_r[2] < 0) {
+    g_fog_presetB_color_r[2] = 0;
+  }
+  if (g_fog_presetB_color_r[3] < 0) {
+    g_fog_presetB_color_r[3] = 0;
+  }
+  if (g_fog_presetB_color_r[4] < 0) {
+    g_fog_presetB_color_r[4] = 0;
+  }
+
+  i = 0;
+  do {
+    j = 0;
+    do {
+      D_800C69CC[i][0][j] = D_800E3980->r[j];
+      D_800C69CC[i][1][j] = D_800E3980->g[j];
+      D_800C69CC[i][2][j] = D_800E3980->g[j];
+      D_800C69CC[i][3][j] = D_800E3980->r[j];
+      D_800C69CC[i][4][j] = D_800E3980->r[j];
+      sum = D_800E3980->r[j] + D_800E3980->g[j];
+      tod = (s32)((f32)sum * 0.5f);
+      half = (s32)((f32)(D_800E3980->r[j] + 63) * 0.5f);
+      quarter = (s32)((f32)(tod + 63) * 0.5f);
+      D_800C69CC[i][5][j] = half;
+      D_800C69CC[i][6][j] = quarter;
+      D_800C69CC[i][7][j] = quarter;
+      D_800C69CC[i][8][j] = half;
+      D_800C69CC[i][9][j] = half;
+      j++;
+    } while (j != 3);
+    i++;
+  } while (i != 4);
+
+  if (refresh) {
+    func_8005062C(D_800C6C52[func_80051FCC() * 2], spvar);
+    func_800506D4(course_panorama_ptr, spvar);
+
+    i = 0;
+    do {
+      texel = ((u16*)course_panorama_ptr)[i + 4];
+      red = texel >> 11;
+      green = (texel >> 6) & 0x1F;
+      blue = (texel >> 1) & 0x1F;
+      alpha = ((u16*)course_panorama_ptr)[i + 4] & 1;
+      if (alpha == 0) {
+        red = (D_800E3980->g[0] * 5 + D_800E3980->r[0]) / 48;
+        green = (D_800E3980->g[1] * 5 + D_800E3980->r[1]) / 48;
+        blue = (D_800E3980->g[2] * 5 + D_800E3980->r[2]) / 48;
+      } else {
+        weight = 100 - D_800E3980->a[3];
+        red = (red * weight + D_800E3980->a[0] * D_800E3980->a[3]) / 100;
+        green = (green * weight + D_800E3980->a[1] * D_800E3980->a[3]) / 100;
+        blue = (blue * weight + D_800E3980->a[2] * D_800E3980->a[3]) / 100;
+      }
+      if (red < 0) {
+        red = 0;
+      }
+      if (green < 0) {
+        green = 0;
+      }
+      if (blue < 0) {
+        blue = 0;
+      }
+      if (red >= 0x20) {
+        red = 0x1F;
+      }
+      if (green >= 0x20) {
+        green = 0x1F;
+      }
+      if (blue >= 0x20) {
+        blue = 0x1F;
+      }
+      ((u16*)course_panorama_ptr)[i + 4] =
+          (red << 11) | (green << 6) | (blue << 1) | alpha;
+      i++;
+    } while (i != 0x100);
+  }
+
+  check_and_print_grid("   T   B   C   BG  FOG", 13, 11);
+  sprintf(D_80105118, "R: %3d %3d %3d %3d %4d  ", D_800E3980->r[0],
+          D_800E3980->g[0], D_800E3980->b[0], D_800E3980->a[0],
+          g_fog_presetB_color_r[0]);
+  check_and_print_grid(D_80105118, 13, 12);
+  sprintf(D_80105118, "G: %3d %3d %3d %3d %4d  ", D_800E3980->r[1],
+          D_800E3980->g[1], D_800E3980->b[1], D_800E3980->a[1],
+          g_fog_presetB_color_r[1]);
+  check_and_print_grid(D_80105118, 13, 13);
+  sprintf(D_80105118, "B: %3d %3d %3d %3d %4d  ", D_800E3980->r[2],
+          D_800E3980->g[2], D_800E3980->b[2], D_800E3980->a[2],
+          g_fog_presetB_color_r[2]);
+  check_and_print_grid(D_80105118, 13, 14);
+  sprintf(D_80105118, "A:             %3d %4d  ", D_800E3980->a[3],
+          g_fog_presetB_color_r[3]);
+  check_and_print_grid(D_80105118, 13, 15);
+  sprintf(D_80105118, "CC:%d               %4d  ", D_800E3980->cc,
+          g_fog_presetB_color_r[4]);
+  check_and_print_grid(D_80105118, 13, 16);
+  quarter = D_800C6CE8 + 12;
+  check_and_print_grid(">", D_800C6CE4 * 4 + 15, quarter);
+  cfb_set_num(3);
+  func_8002A97C(4, 0);
+  return 1;
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_8008D100", update_sky_panel_verts);
 
