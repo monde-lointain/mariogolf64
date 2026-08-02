@@ -1,6 +1,7 @@
 #include "common.h"
 
 extern s32 scenario_mode_id;
+extern s32 D_801B6090[];
 extern s32 D_801B6098;
 extern s8 D_801B71F3;
 extern s8 D_801B71F6;
@@ -170,6 +171,86 @@ undecided:
   return 0;
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80052250", func_80052A68);
+s32 func_80052A68(s8* out) {
+  s8 marks[4];
+  s32 min;
+  s32 best;
+  s32 ties;
+  s32 cnt3;
+  s32 ok;
+  s32 i;
+
+  min = 0x40000000;
+  best = -1;
+  ok = 0;
+  ties = 0;
+  cnt3 = 0;
+
+  if (out == NULL) {
+    out = marks;
+  }
+
+  for (i = 0; i < D_801B6090[0]; i++) {
+    s32 row = i * 184;
+
+    if ((&D_801B71F6)[row] == 1) {
+      if (func_80052324(i) < min) {
+        min = func_80052324(i);
+        best = i;
+        ties = 0;
+      } else {
+        ties += (min == func_80052324(i));
+      }
+    } else {
+      cnt3 += ((&D_801B71F6)[row] == 3);
+    }
+  }
+
+  if (best == -1) {
+    for (i = 0; i < D_801B6090[0]; i++) {
+      out[i] = 0;
+    }
+    if (cnt3 == D_801B6090[0]) {
+      return 2;
+    }
+    return ok;
+  }
+
+  ok = 1;
+  for (i = 0; i < D_801B6090[0]; i++) {
+    s32 row = i * 184;
+
+    out[i] = 0;
+    if ((&D_801B71F6)[row] == 0) {
+      if (func_80052324(i) >= min) {
+        out[i] = 2;
+      } else if (func_80052324(i) < min - 1) {
+        ok = 0;
+      } else {
+        ok = ties ? ok : 0;
+      }
+    } else if (min < func_80052324(i)) {
+      out[i] = 2;
+    } else if ((&D_801B71F6)[row] >= 2) {
+      out[i] = 2;
+    }
+  }
+
+  if (ok == 0) {
+    return 0;
+  }
+  if (ties > 0) {
+    return 2;
+  }
+
+  for (i = 0; i < D_801B6090[0]; i++) {
+    s32 row = i * 184;
+
+    if ((&D_801B71F6)[row] == 1 && func_80052324(i) == min) {
+      out[i] = 1;
+    }
+  }
+  return 1;
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80052250", func_80052CF0);
