@@ -3,9 +3,11 @@
 extern s32 scenario_mode_id;
 extern s32 D_801B6098;
 extern s8 D_801B71F3;
+extern s8 D_801B71F6;
 extern s8 D_801B71F9;
 extern s8 D_801B71FB;
 extern s32 D_801B60A0;
+extern s32 func_8005244C(s32 arg0, s32 arg1);
 extern s32 func_800521C0(void);
 extern s32 func_800521DC(void);
 extern s8 D_800C1435[];
@@ -120,7 +122,53 @@ s32 func_800525C4(s32 arg0, s32 arg1) {
   return 0;
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80052250", func_80052834);
+s32 func_80052834(s32 arg0, s32 arg1) {
+  s32 rank;
+  s32 row;
+
+  row = arg0 * 184;
+  if ((&D_801B71F6)[row] == 0) {
+    row = arg1 * 184;
+    if ((&D_801B71F6)[row] == 0) {
+      goto undecided;
+    }
+  } else {
+    row = arg1 * 184;
+    if ((&D_801B71F6)[row] != 0) {
+      if (func_80052324(arg0) < func_80052324(arg1)) {
+        return 1;
+      }
+      return (func_80052324(arg1) >= func_80052324(arg0)) ? 3 : 2;
+    }
+    if (func_80052324(arg0) < func_80052324(arg1) + 1) {
+      return 1;
+    }
+  }
+
+  row = arg1 * 184;
+  if ((&D_801B71F6)[row] != 0 &&
+      func_80052324(arg1) < func_80052324(arg0) + 1) {
+    return 2;
+  }
+
+  rank = func_8005244C(arg0, arg1);
+  if (rank == 1) {
+    row = arg0 * 184;
+    if ((&D_801B71F6)[row] != 0 &&
+        func_80052324(arg0) <= func_80052324(arg1) + 1) {
+      return 3;
+    }
+  }
+  if (rank == 2) {
+    row = arg1 * 184;
+    if ((&D_801B71F6)[row] != 0 &&
+        func_80052324(arg1) <= func_80052324(arg0) + 1) {
+      return 3;
+    }
+  }
+undecided:
+  return 0;
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80052250", func_80052A68);
 
