@@ -1457,6 +1457,12 @@ void func_8005CF78(void) {
   } while (k != 3);
 }
 
+/* func_8005D0D8: validates the 5 game-state entries at base + 0x1DF0, stride
+ * 0x68, and toggles bit 7 of byte 0x36 on every entry that fails. CARRIED at
+ * 67/67 with the ROM's exact -0x38 frame; the residual is a three-register
+ * rotation (i, the flags giv, the entry pointer). Body in
+ * nonmatchings/func_8005D0D8/base.c, analysis in
+ * docs/wip/func_8005D0D8.near-match.md. */
 INCLUDE_ASM("asm/nonmatchings/main/func_80059BA0", func_8005D0D8);
 
 void func_8005D1E4(void) {
