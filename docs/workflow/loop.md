@@ -209,6 +209,7 @@ asserted, only measured, and re-check layers stacked on top of it buy nothing.
 | byte-`cmp` of raw `.text` | The spot-check at score 0: in-tree object against the isolated one. | A mnemonic diff false-positives because KMC `as` and modern `as` encode `move dst,zero` differently while objdump renders both as `move`. Inline LO16 struct-field addends differ in the object and resolve identically at link. | At score 0 only, on raw `.text` bytes. An addend-only difference goes straight to the full make. |
 | decomp-permuter score | Nothing on its own. It searches; it does not decide. | Blind to internal branch targets: asm-differ normalizes a branch to a local label, so a pure back-edge residual scores zero falsely. It also tolerates an extra instruction, so a 475/474 candidate can outscore a correct 474/474 (S300). `import.py` aborts on a nested function definition, disabling the permuter for that whole TU. Use `./setup-permuter.sh --main <fn>`; it activates the venv for you. Calling `tools/decomp-permuter/import.py` directly dies on `ModuleNotFoundError: toml` under system python, so prefix `venv/bin/python3` if you must (S304 corrects the older "the wrapper exits 0 silently" note -- the wrapper works). | At `percent >= 0.97`, or at exact instruction count with a one-operand residual regardless of percent. Not on a multi-register permutation or an FP-schedule coin: those plateau, but a plateaued run's best candidate is still a lever (S287, see the escalation bullet). |
 | gcc `-dL` (append to the file's real flags; writes `<file>.c.loop`) | Every `loop.c` decision: per-loop insn count, each biv's init value, per-movable `savings S (life L)` moved / not-desirable / `matches`, per-giv reduced or `not worth while, X vs Y`. | Whole-file; filter. Reports decisions, not a match. | Any hoisted-constant, biv or strength-reduced-address residual. Read `savings` and `lifetime` off it and compute loop.c:1631 or :3823; S297 estimated and was wrong twice. |
+| gcc `-dg` (`.greg`; `-dl` gives `.lreg`) | An allocno's hard-register conflicts and preferences, plus pseudo-to-hard-reg dispositions. | Whole-file; filter on `;; Function <name>`. Silent on priority order -- that is `allocno_report.py`. | When the priority order already favours the allocno that lost. S312: `n` conflicted with `$v0` and had no preference, so no rewrite reached the ROM's register. |
 | Ghidra MCP decompile | Shape and type reference at seed time. | Not authoritative; the `.s` is. Overlay vram repeats above `0x801F4A30`, so seed overlay functions by ROM offset or the splat `.s`, not by vram. | As a shape and type hint. `disassemble_function` equals the splat `.s`, so a small function does not need MCP at all. |
 | `tools/dl_decode.py <fn>.s` (+ `tools/rdp_word.py`, `tools/combine_word.py`) | A display-list emitter's packet stream, in list order. A big emitter precomputes one `Gfx *` per packet and spills most of them, so `.s` order and list order differ by up to 40 packets (S303 `func_8002CDA8`). The word decoders turn a `<w0>/<w1>` pair into RDP fields / `gDPSetCombineLERP` args. | Constant-propagation only: a word built from a runtime value prints symbolically, and it cannot say which composite macro produced a block. Settle both on the host: `gcc -m32 -DF3DEX_GBI_2 -D_LANGUAGE_C -I include -I include/libultra -I include/libultra/PR` with local `_SHIFTL`/`_SHIFTR` and `G_ON`/`G_OFF` -- and pass `p++`, not `p`, since a composite macro re-evaluates `pkt` once per packet. | Before writing C for a DL emitter. |
 | mnemonic histogram, `.s` against a fresh object (`grep -oE '  [a-z0-9.]+ '` piped to `sort \| uniq -c`, and its `objdump -dz` twin) | Whether a residual is structural or a permutation, in two calls and no build. | A multiset: says nothing about *where*. Normalise the alias pairs (`addu`/`move`, `li`/`addiu`) or it reports false deltas. | Before reading any `cmpfn` hunk. It found both S304 classes `cmpfn` normalisation hid: a branch-form divergence read as "pure allocation", and a `lui` +1 / `addiu` -1 naming an address-CSE defect behind a 491-row diff. |
@@ -260,8 +261,11 @@ These apply regardless of hazard. Hazard-specific procedures are in `docs/hazard
 below).
 
 - **One function at a time.** `pick_target.py` ranks (smallest-first); you pick the target.
-- **Never rewrite a partial-bank `src/<seg>.c` with a scripted whole-region splice (S257; recurred
-  S259).** The rule below was already written and was still violated — reverting one function to
+- **Never rewrite a partial-bank `src/<seg>.c` with a scripted whole-region splice, or a scripted
+  whole-file `replace` (S257; recurred S259; recurred as substitution S312, where a permuted line
+  also existed verbatim in a banked sibling and the gate build reddened on 3 bytes in a function the
+  sprint never touched). Guard: `git diff` after any scripted edit and confirm every hunk is inside
+  the target function.** The rule below was already written and was still violated — reverting one function to
   `INCLUDE_ASM` with an `s[:i] + new + s[j:]` splice deleted two banked one-line siblings
   (`func_8006D1FC`, `func_8006D208`) that happened to sit between the anchors, surfacing only as an
   `undefined reference` at link. What was missing is a mechanical guard, so: **use `Edit` with an
@@ -275,12 +279,9 @@ below).
   a regen" (S271, hard rule).** splat's `c`-mode `make extract` does not reproduce every still-asm
   stub: it leaves disassembly gaps at some curated / decompose-split function addresses, so those
   `.s` are stale-persistent relics the build depends on — and `asm/nonmatchings/` is gitignored, so a
-  deleted relic is not recoverable with `git`. S271 `rm -rf`'d `bgm_load_song_from_rom/` chasing a
-  stale-`.o` link error and destroyed 6 curated stubs (`init_per_player_state`,
-  `gen_terrain_detail_texture`, `init_terrain_vertex_texcoords`, `emit_per_phase_fog_state`,
-  `emit_terrain_state_prefix_block`, `emit_course_terrain_dl`) + `func_8005DDAC` that `make extract`
-  would not regenerate. This is the `#stale-parent-asm-relic` / `#stale-top-level-asm-label-sync`
-  hazard class made fatal. To refresh a stub, `Edit` it or delete only the single `.s` you will then
+  deleted relic is not recoverable with `git`. S271 `rm -rf`'d one directory chasing a stale-`.o`
+  link error and destroyed 7 stubs `make extract` would not regenerate. To refresh a stub, `Edit` it
+  or delete only the single `.s` you will then
   re-verify — never a directory. If a relic is already lost, recover it with
   `tools/recover_stub.sh <0xsubseg-off> <fn>...` (flips the subseg `c`->`asm` so splat disassembles
   the full range, carves the byte-identical per-fn block back, flips to `c`); see
@@ -288,11 +289,8 @@ below).
 - **Scratch dir** `nonmatchings/<func>/` (gitignored, shared with the permuter).
 - **Stop a background command with the harness. Never `pkill -f` on any pattern that appears in the
   command you are running (S289, recurred S301).** The pattern also matches the tool call's own shell
-  wrapper, whose command line contains the string, so the kill takes out the calling shell and every
-  later step in that same call silently does not run — S289 lost the `cp` that was saving the file it
-  then restored from, and S301 repeated it with the bare tool name `pkill -f 'decomp-permuter'`, so
-  the script-plus-argument form the rule used to name was never the boundary. Use the harness's stop
-  action, or match a pattern that cannot appear in the wrapper.
+  wrapper, so the kill takes out the calling shell and every later step in that call silently does
+  not run. No form of the pattern is safe, not even a bare tool name: use the harness's stop action.
 - **Python tools run via the venv:** `venv/bin/python3 tools/X.py` (system python lacks asm-differ
   deps and is PEP-668-locked).
 - **Shared tool helpers** live in `tools/decomp_common.py` (venv re-exec, path constants, asm/symbol

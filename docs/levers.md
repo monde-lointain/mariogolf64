@@ -37,8 +37,10 @@ by wrapping in `if (n != 0)`, S306), `#loop-weight-and-live-length-regalloc-stee
   load forward by anti-dependency. Knobs, in order of yield: give each region its own short-lived
   local when one variable stretches an allocno across both (S308; S310 moved `col` s1 -> s0 and 40
   diff lines); split a value spanning two loops, but only what must die between them; name a temp to
-  end a range early; hoist a block-local temp to function scope, or the reverse. Playbook and the
-  `.greg` method: `#loop-weight-and-live-length-regalloc-steering`.
+  end a range early; hoist a block-local temp to function scope, or the reverse. Merging is the
+  inverse and the only knob when live length cannot win: one variable shared across two disjoint
+  regions jumps `n_refs` a `floor_log2` tier, the tell being the ROM spending one register on both
+  (S312). Playbook and the `.greg` method: `#loop-weight-and-live-length-regalloc-steering`.
 - **dead-frame-levers** -- for a frame-only diff: `s32 unused[(ROM_frame-0x18)/4]`, `str[row]` (keeps
   base and index live), or an uninit local plus `volatile s32 s = g;`. Split point: arrays slot at
   `expand_decl`, an address-taken scalar only at the first `&x` and after every function-scope
@@ -57,7 +59,9 @@ by wrapping in `if (n != 0)`, S306), `#loop-weight-and-live-length-regalloc-stee
   giv inits. Knob: move the statement, or split/inline it (`off = i*stride` as its own statement
   keeps `%hi`/`addu`/`%lo`; inlined it folds into a walking-pointer giv). Whether it hoists at all is
   the same lever (`loop.c:1631`, `threshold*savings*lifetime >= insn_count`), and a use count of 2
-  rather than 1 is often the whole difference (S290, S294, S300, S308, S310).
+  rather than 1 is often the whole difference (S290, S294, S300, S308, S310). `threshold` is 122 here
+  less 3 per movable already moved (`loop.c:532/1719`), so movable K hoists iff
+  `122 - 3K >= insn_count`; the knob is `insn_count`, from `-dL` (S312).
 - **sched-tiebreak-coins** -- `rank_for_schedule` (`sched.c:2428`) sorts class then LUID (a class-1
   compute defers behind class-3 stores); `schedule_select` (`sched.c:2615`) front-loads a transfer
   over a constant load (`fabsf` sign-mask, 3 vs 2; `mtc1`-zero ties via potential-hazard). Source
@@ -68,13 +72,10 @@ by wrapping in `if (n != 0)`, S306), `#loop-weight-and-live-length-regalloc-stee
 - **do-while-zero-block-break** -- an empty `do {} while (0);` emits nothing but ends the preceding
   block, so `reorg` stops reaching past a call to annul the next branch (S288).
 - **global-reread-vs-cse**, absorbing defeat-global-base-cse -- a scalar-global store does not
-  constrain a later load through a pointer parameter (`true_dependence`, `sched.c:817`), and as
-  scalars those globals read invariant against `Gfx *` stores, so the load hoists into `$f20`/`$f22`.
-  Typing them `extern s32 G[]` and reading `G[0]` restores both, as does an array read of a
-  neighbour at a known displacement (`D_801B6090[2]` for `D_801B6098`, S301, S310); a `*(s32 *)` cast on a `u8 *` byte offset does it on the address, terminal where a
-  param-base folds. Inverses: a global read in a loop that stores through a pointer is not invariant,
-  so the reload forces a second IV -- copy it to a preheader local (S294); a per-site `T *p = &SYM;`,
-  never reused, suppresses the re-read (S291).
+  constrain a later load through a pointer parameter (`true_dependence`, `sched.c:817`), so the load
+  hoists. `extern s32 G[]` read as `G[0]`, a neighbour read at a known displacement, or a `*(s32 *)`
+  cast on a `u8 *` byte offset restores the re-read (the cast is terminal where a param-base folds);
+  the inverses are a preheader local, and a per-site `T *p = &SYM;` never reused (S301).
 - **dual-offset-temps-around-a-call** -- when the ROM recomputes an index chain on both sides of a
   `jal`, write `off1 = i*K; <call>; off2 = i*K;`: gcc cannot CSE across the call, so both are
   emitted, each keeping the form that holds the symbol in the `MEM` (S310).
@@ -103,10 +104,9 @@ by wrapping in `if (n != 0)`, S306), `#loop-weight-and-live-length-regalloc-stee
   point at the argument move, not the store, means each arm held its own copy of the trailing calls;
   duplicate them per arm (S286).
 - **jump-c-store-flag-conversions** -- jump.c:1139-1250 makes a two-value select branchless and
-  re-fires every pre-reload pass, so no spelling escapes: `(x & bit) ? 1 : 0` -> `lhu; srl` against
-  `andi; bnez` (terminal), and `x = A; if (c) x = B;` with nesting constant bits (4, 5) ->
-  `nor/sltiu/negu/andi/ori` against `beq` + two `li`. Only escape: a `CODE_LABEL` between assignment
-  and test, so the value is born a block earlier (S310).
+  re-fires every pre-reload pass, so no spelling escapes it and a ROM `andi; bnez` or `beq` plus two
+  `li` reads terminal. Only escape: a `CODE_LABEL` between assignment and test, so the value is born
+  a block earlier (S310).
 - **gcc272-fold-range-test-slti-merge** -- adjacent `slti` tests fold to `(u32)(x-lo) < span`; a
   per-test goto defeats the merge when the ROM keeps both.
 

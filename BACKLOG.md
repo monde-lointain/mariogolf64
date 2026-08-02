@@ -48,6 +48,26 @@ see `docs/wip/func_800990D0.near-match.md` (`--carried-check` flags it). Backup 
 (294-instr wall-prone debug handler, its own slice). STANDING GUIDANCE: prefer a FRESH non-main pack
 next unless a specific main leaf is pre-vetted `.s`-clean.**
 
+**S312 LEAVES ONE FRESH ROW IN `main`, and the carve verdict is 7-for-7.**
+`--loose-stubs main` reads 270 stubs / **1 fresh**: `func_80089094` (13452 B, `fp-mixed`), the
+largest row the segment has. `func_8008E82C` -> `run_fog_debug_editor` (696 instructions) banked
+with its `.rodata` split at `[0xAD0E0, .rodata, main/func_8008D100]` / `[0xAD1C0, rodata]`, verified
+against `objdump -s -j .rodata` before the yaml edit and needing no walk-back for the second sprint
+running. Note the carve moved **8 -> 10** rows into `carve-pool-blocked`: this row now precedes
+their tables, so they bank when this host's remaining siblings do.
+**The sprint's finding is about register allocation, and it changes how to read an N-register
+rotation.** Three of the four residual clusters were the ROM REUSING one source variable across two
+places — one counter for both loops (the tell: `$t8` holds both), `avg` == `tod`, `quarter` doubling
+as a grid column — and `tools/allocno_report.py` proved the first unwinnable any other way, since a
+counter born before its competing givs' preheader can never beat them on live length; only a
+`floor_log2` ref-count tier jump moves it. The fourth needed `gcc -dg`: `.greg` showed the allocno
+hard-conflicting with `$v0` with no preference, which no algebraic rewrite can fix, so the lever had
+to delete the competing pseudo (a two-dimensional array index in place of a base temp). Both are now
+in `docs/levers.md` / the `loop.md` Oracles table.
+**The vein from here:** `func_80089094` (13452 B) alone, plus the carries as crack-attempt slices —
+the S310 pair (`func_8006E210` + nested `func_8006DFF0`, exact count and frame, permuter
+unavailable) and `func_8007399C` (149/149 at the ROM's `-0x50` frame, carve unblocked).
+
 **S311 BANKS THE VEIN'S BIGGEST ROW, and the class's carve verdict is now 6-for-6.**
 `--loose-stubs main` reads 271 stubs / **2 fresh**. `func_80095DE0` -> `update_cutscene_sound_cues`
 (611 instructions, the largest `JTBL-CARVEABLE` member yet) banked on the second build, and its carve

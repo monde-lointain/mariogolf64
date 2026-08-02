@@ -1526,6 +1526,35 @@ Three honest caveats:
   and `main`'s fresh vein is now one row. Tooling: three of the sprint's four accepted suggestions
   were tools this sprint had to hand-roll (`cmpfn.sh` histogram, `tools/seg_diff.py`,
   `tools/gbi_match.py`).
+- **Sprint 312 (realized)** — a 696-instruction fresh row whose whole residual was register
+  allocation. **+1 banked, 0 carried, 5 permuter runs (0 zeros, 3 levers), 0 stuck-far, 0
+  re-opened.** Seed 8pt, frozen at `63d7bab` before any `src/` edit; banked **0**pt (host partial,
+  as priced); **realized 13**, residual **+5** — `func_8008E82C` seed 8 **+1** (permuter escalation)
+  **+1** (novel bank-gotcha: a scripted whole-file `replace` rewrote the same line in a banked
+  sibling and reddened the gate build on 3 bytes) = 10, Fibonacci-snapped to 13. The score does not
+  turn on the subjective half: the escalation alone gives 9, which snaps to 13 too. Regime
+  classical. Progress **+1** matched; repo `INCLUDE_ASM` 275 → 274; `main` stubs 271 → 270, fresh
+  **2 → 1**; `src/main/func_8008D100.c` 12 → 11 stubs, not md5-candidate; descriptive names 651 →
+  652 (`run_fog_debug_editor`).
+  **The body was cheap and the allocation was the sprint.** Build 1 came out 692/696 on three `sra`
+  (the `/48` divisions read as `/6` — the magic is shared, the `sra ,3` is the tell) plus three
+  `bne` loop-exit forms; from there every remaining diff was a register choice at exact count and
+  exact frame, and it took 42 → 30 → 16 → 14 → 10 → 0 `cmpfn` rows to close.
+  **Three of those clusters were variable reuse in the original source**, not compiler coins: one
+  counter shared by both loops (the ROM spends `$t8` on both), the light loop's `avg` being the
+  `tod` variable, and `quarter` also carrying the last grid column. `allocno_report.py` showed the
+  first was otherwise unwinnable — the counter is born before the preheader its five competing givs
+  are created in, so live length can never favour it, and only a `floor_log2` ref-count tier jump
+  moves it. That is now the merge direction in `scope-and-live-range-steer-allocation`.
+  **The last cluster needed `gcc -dg`, not another spelling.** `.greg` showed `n` hard-conflicting
+  with `$v0` and carrying no `$v0` preference while the competing `D_800C6014` base temp had
+  `preferences: 2`, so a dozen algebraic rewrites were structurally dead. Writing the entry address
+  as a two-dimensional index deleted the competing pseudo and the function went byte-exact. `-dg` is
+  now an Oracles row.
+  **The permuter paid, and paid as a lever three times over.** 5 runs, base 915 → 150 → 115 → 100 →
+  90, no zero. Its useful candidates were an operand-order rewrite that also retired a scheduling
+  barrier, and two *illegal-source* liveness hints whose real content was "this pseudo must live
+  longer" — read as variable reuse rather than applied literally.
 - **Sprint 311 (realized)** — the largest `JTBL-CARVEABLE` row banked so far, at 611 instructions.
   **+1 banked, 0 carried, 0 permuter runs, 0 stuck-far, 0 re-opened.** Seed 8pt, frozen at `8c905f8`
   before any `src/` edit; banked **0**pt (host partial, as priced); **realized 7**, residual **−1** —

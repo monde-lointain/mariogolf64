@@ -85,7 +85,13 @@ name_at() { # 0xVRAM -> curated (non-`func_`) name
         symbol_addrs.txt ghidra_symbols.txt 2>/dev/null \
         | grep -viE '^func_' | head -1 | sed -E 's/[[:space:]]*=.*//'
 }
-obj_has() { mips-linux-gnu-objdump -t "$OBJ" 2>/dev/null | grep -qE "[[:space:]]$1\$"; }
+# Retries once: the build rule writes `.o.tmp`, copies it, then strips, so a read that lands
+# mid-recipe sees an object without the symbol and reports a false regression (S312).
+obj_has() {
+    mips-linux-gnu-objdump -t "$OBJ" 2>/dev/null | grep -qE "[[:space:]]$1\$" && return 0
+    sleep 0.3
+    mips-linux-gnu-objdump -t "$OBJ" 2>/dev/null | grep -qE "[[:space:]]$1\$"
+}
 
 ASM_FILE=$(find asm/nonmatchings -name "${FUNC}.s" -print -quit)
 if [ -z "$ASM_FILE" ]; then

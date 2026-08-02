@@ -25,6 +25,51 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 312 — the register allocation was a source fact about variable reuse (1 banked) — 2026-08-01
+- Increment: 0 files / **1 function matched** — `func_8008E82C` → `run_fog_debug_editor`, 696
+  instructions, exact count and exact frame. `src/main/func_8008D100.c` 12 → 11 stubs (not
+  md5-candidate, so 0 file points); repo `INCLUDE_ASM` 275 → 274; `--loose-stubs main` 271 → 270,
+  fresh 2 → **1**; descriptive names 651 → 652. ROM SHA-1 green at every commit.
+- Quality: 0 stuck-far / **1 permuter-escalated (5 runs, 0 zeros)** / 0 carried / 0 re-opened. Plus
+  1 red gate build, self-inflicted (see Friction).
+- Seed: committed 8pt at `63d7bab`; banked 0pt; realized 13, residual +5; regime classical. Seed 8
+  **+1** permuter **+1** novel bank-gotcha = 10, Fibonacci-snapped to 13. Insensitive to the
+  subjective half: the escalation alone gives 9, which snaps to 13 as well.
+- What helped: **three separate places where the ROM's register allocation turned out to be a
+  source fact about variable reuse, not a compiler coin.** One counter shared by both loops (the
+  tell was the ROM spending `$t8` on both), the light loop's `avg` being the same variable as
+  `tod`, and `quarter` also carrying the last grid column. `tools/allocno_report.py` proved the
+  first was not winnable any other way: the counter scored `floor_log2(7)*7/88` against five giv
+  base pointers born after it, and no live-length edit can put a variable ahead of pseudos created
+  in the preheader it precedes. Merging took it across a `floor_log2` tier and all six registers
+  landed. Also: a 6-line probe file, compiled with the file's real flags, settled three codegen
+  idioms (`x % 0x100` on a `u8`, the annulled `bltzl` clamp, the branchless `nor/sra/and` clamp)
+  before a line of the body was written — cheaper than one wrong-body build.
+- Friction: two, and the second was mine. (a) The permuter plateaued at every re-base and produced
+  **no zero in 5 runs**, but 3 of its candidates were readable levers — and two of those were
+  *illegal source* (an assignment inside a call argument, an assignment to `tod` inside the loop)
+  whose real message was "this pseudo needs to live longer". Reading them as variable reuse is what
+  banked the function; applying them literally would not have. (b) A scripted `str.replace` over
+  the whole file rewrote the same address-arithmetic line inside the banked sibling
+  `emit_lens_flare_dl`, and the gate build reddened on 3 bytes in a function this sprint never
+  touched. The no-scripted-splice convention existed but was written for deletion.
+- Applied: 5 of 5 — #1 the merge direction folded into `docs/levers.md`
+  `scope-and-live-range-steer-allocation` (which named only the split direction); #2 a `gcc -dg`
+  row added to the `loop.md` Oracles table, authoritative for an allocno's hard-register conflicts
+  and preferences, which `allocno_report.py` cannot report; #3 the `loop.c` hoist arithmetic
+  (threshold 122 less 3 per movable moved, `loop.c:532/1719`, knob is `insn_count` from `-dL`)
+  folded into `emission-order-placement-lever`; #4 the no-scripted-splice convention widened from
+  splice to any scripted edit incl. `replace`, with the `git diff`-every-hunk guard; #5
+  `cmpfn.sh obj_has` retries once, since it was racing the build rule's `cp`+`strip` and reporting
+  a false "no symbol" several times this sprint. Retirement: `global-reread-vs-cse` compressed to
+  rule-plus-one-citation as proposed and accepted; the additions still overran, so on a second ask
+  the PO also accepted compressing `jump-c-store-flag-conversions` (levers) and the `pkill` +
+  `rm -rf` incident narratives (loop.md) to rule-plus-citation. Net: `docs/levers.md` 10217 → 10176
+  (**−41**), `docs/workflow/loop.md` 46928 → 47048 (**+120**); all 18 surfaces pass
+  `prompt_lint check`.
+- Carry-over: none new. `func_8006E210` + `func_8006DFF0` (S310) and `func_8007399C` (S307) still
+  carried.
+
 ## Sprint 311 — the 611-instruction JTBL-CARVEABLE row (1 banked) — 2026-07-31
 - Increment: 0 files / **1 function matched** — `func_80095DE0` → `update_cutscene_sound_cues`, 611
   instructions, exact count and exact frame. `src/main/func_80095A10.c` 14 → 13 stubs (not
