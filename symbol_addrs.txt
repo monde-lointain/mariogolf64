@@ -732,3 +732,4 @@ transfer_mode_continue_slot = 0x8005B7BC; // type:func
 update_cutscene_sound_cues = 0x80095DE0; // type:func
 run_fog_debug_editor = 0x8008E82C; // type:func
 rank_scores_descending = 0x8005B150; // type:func
+is_roster_entry_locked = 0x8005CEE0; // type:func

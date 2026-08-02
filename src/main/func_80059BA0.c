@@ -752,9 +752,10 @@ void func_8005B28C(s32 idx, Struct80131510* src) {
 /* D_80130CF0 is the four-category leaderboard, 4 blocks of 5 Struct80131510
  * records; the block base comes from the low nibble of the record's flag byte
  * at 0x3A, whose high bit gates the whole insert. D_80131510 is the record
- * immediately past it. rank_scores_descending ranks `scores` into the index permutation
- * `order`. Byte 0x3A is read twice, once signed for the high-bit test and once
- * unsigned for the nibble, which is what the ROM's `lb`/`lbu` pair shows. */
+ * immediately past it. rank_scores_descending ranks `scores` into the index
+ * permutation `order`. Byte 0x3A is read twice, once signed for the high-bit
+ * test and once unsigned for the nibble, which is what the ROM's `lb`/`lbu`
+ * pair shows. */
 extern Struct80131510 D_80130CF0[];
 extern char D_800D0904[]; /* "Checking SuperShot" */
 extern char D_800D0918[]; /* "1:prior=%d:" */
@@ -1341,13 +1342,32 @@ void build_roster_grid(s32 arg0, u8 arg1) {
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80059BA0", func_8005CA48);
 
-/* func_8005CEE0: bounds-check(0..14) + triple-table sign predicate.
- * NEAR-MATCH 38/38 (permuter dry, 400s). Faithful body in
- * nonmatchings/func_8005CEE0/base.c: exact instr count, sole residual =
- * field-load order + a0/v1 regalloc role swap + the a*14 vs b*2 multiply
- * emission order (base-vs-disp fixed via explicit `u8* base`).
- * See docs/wip/func_8005CEE0.near-match.md. */
-INCLUDE_ASM("asm/nonmatchings/main/func_80059BA0", func_8005CEE0);
+extern s16 D_800C2BB0[];
+
+/* Rebuilds the roster grid, then reports whether the grid cell that entry
+ * `arg0` maps to holds a negative value. D_800C2BB0 maps the entry to a row of
+ * the D_800C29B8 coordinate-pair table, whose second halfword is the grid row
+ * and whose first is the column. */
+s32 is_roster_entry_locked(s32 arg0) {
+  s32 idx;
+  s32 row;
+  s32 col;
+
+  if (arg0 < 0) {
+    goto out_of_range;
+  }
+  if (arg0 < 15) {
+    goto in_range;
+  }
+out_of_range:
+  return -1;
+in_range:
+  build_roster_grid(1, 1);
+  idx = D_800C2BB0[arg0];
+  row = D_800C29B8[idx][1];
+  col = D_800C29B8[idx][0];
+  return ((s32)((u16)D_800C28E4[row][col] << 16)) >> 31;
+}
 
 typedef struct {
   /* 0x00 */ s32 active;
