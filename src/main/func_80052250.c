@@ -1,6 +1,7 @@
 #include "common.h"
 
 extern s32 scenario_mode_id;
+extern u32 D_801B608C;
 extern s32 D_801B6090[];
 extern s32 D_801B6098;
 extern s8 D_801B71F3;
@@ -253,4 +254,85 @@ s32 func_80052A68(s8* out) {
   return 1;
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80052250", func_80052CF0);
+s32 func_80052CF0(s32 arg0) {
+  s32 result;
+  s32 opp;
+  s32 min;
+  s32 any;
+  s32 i;
+
+  result = 3;
+
+  switch (D_801B608C) {
+    case 2:
+    case 4:
+      opp = arg0 ^ 1;
+      if (func_80052324(arg0) == func_80052324(opp) - 1 &&
+          (&D_801B71F6)[opp * 184] != 0) {
+        result = 4;
+        if (func_8005244C(arg0, opp) == 1) {
+          result = 2;
+        }
+        break;
+      }
+      if (func_80052324(arg0) < func_80052324(opp)) {
+        result = (func_8005244C(arg0, opp) == 3) * 2;
+        break;
+      }
+      if (func_80052324(arg0) >= func_80052324(opp) + 1) {
+        break;
+      }
+      if ((&D_801B71F6)[opp * 184] == 1) {
+        break;
+      }
+      if (func_8005244C(arg0, opp) == 1) {
+        result = 2;
+      }
+      break;
+
+    case 10:
+    case 11:
+      any = 0;
+      min = 0x40000000;
+      result = 0;
+      for (i = 0; i < D_801B6090[0]; i++) {
+        s32 row = i * 184;
+
+        if ((&D_801B71F6)[row] == 1) {
+          any = 1;
+          if (func_80052324(i) < min) {
+            min = func_80052324(i);
+          }
+        }
+      }
+      for (i = 0; i < D_801B6090[0]; i++) {
+        s32 row = i * 184;
+
+        if (i != arg0 && (&D_801B71F6)[row] == 0) {
+          if (func_80052324(i) < func_80052324(arg0)) {
+            result = 3;
+            break;
+          }
+          if (func_80052324(i) == func_80052324(arg0)) {
+            result = 1;
+          }
+        }
+      }
+      if (result == 3) {
+        break;
+      }
+      if (any != 0) {
+        if (func_80052324(arg0) + 1 == min) {
+          result = 1;
+        }
+        if (func_80052324(arg0) + 1 >= min) {
+          return result;
+        }
+      }
+      if (result == 1) {
+        result = 3;
+      }
+      return result;
+  }
+  return result;
+}
