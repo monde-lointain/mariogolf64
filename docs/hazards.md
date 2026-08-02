@@ -7671,6 +7671,35 @@ both copiers this way after the flat/pointer-add forms each missed by one axis. 
 base+scaled-index needs a specific instruction order *and* reg, split the base into its own statement
 And keep the scale as an array subscript on that base.
 
+**The index expression decides whether the symbol reaches the memory operand at all (S314, twice in
+one function pair).** For a global array read at a computed index, expand builds the address from the
+base first: with the index written inline (`SYM[a * K + b]`), it emits `(set reg (symbol_ref))`, then
+the index, then `(plus (reg sum) (reg symbol))`, and the address never becomes a legal MIPS operand.
+The symbol is then a `loop.c` movable — it hoists out of the inner loop, merges with any sibling copy
+(`Insn 168 ... done matches 182` in `-dL`) and ends up in a callee-saved register for the whole
+function. Assigning the index to a temp first (`s32 k = a * K + b; SYM[k]`) gives
+`(mem (plus (symbol_ref) (reg)))`, which the assembler expands to the ROM's `lui $at` / `addu $at` /
+`sb %lo(SYM)($at)`. Tells, both measured: a surplus **callee-saved** base register plus a larger frame
+around a global array access (`func_80052384` +2 instructions and +8 frame; `func_800525C4` +8 and
++0x18), and `-dL` naming the symbol as a moved movable. The load side is the same lever: an index temp
+also makes the index a giv, so its initialisation is emitted with the other giv inits rather than
+ahead of them.
+
+Special case, unchanged from S310: when the ROM recomputes the same index chain on both sides of a
+`jal`, write it as two temps (`off1 = i * K; <call>; off2 = i * K;`) — gcc cannot CSE across the call,
+so both are emitted, each keeping the symbol in the `MEM`.
+
+**A residual register that the conflict set cannot explain is a missing argument, not a coloring
+problem (S314 `func_80052264`).** `gcc -dg` printed `;; 77 conflicts: 77 84 2 3 16 18 29 65 66` for
+the pseudo whose register was wrong: `$a0`-`$a3` do not conflict at all, and `global.c find_reg`
+scans ascending in both of its passes, so no weight or live-length edit could push the allocno past
+`$a0` to the ROM's `$t0`. What reaches it is a conflict, and the free one is an argument: the ROM's
+source passes the function's own `$a0` parameter on to a callee (`func_80051FCC(arg0)`), which emits
+nothing because the value is already in the argument register, and keeps `$a0` live across the
+residual. The callee need not read the argument — this one ignores it and reads globals — so its
+`.s` is not evidence against the reading. Check this before pricing a one-register residual as a
+coloring wall.
+
 ## value-select-if-else vs branch-likely (the `p ? field : sentinel` accessor idiom)
 
 **Symptom (S211; `func_80056464` / `func_80056494` / `func_8005642C`).** A tiny accessor calls a

@@ -37,7 +37,9 @@ by wrapping in `if (n != 0)`, S306), `#loop-weight-and-live-length-regalloc-stee
   block-local temp hoisted to function scope (S308). Merging is the inverse and the
   only knob when live length cannot win: one variable across two disjoint regions jumps `n_refs` a
   `floor_log2` tier, the tell being the ROM spending one register on both (S312). `find_reg` takes
-  callee-saved first. **Equal `refs` and `live_length` ends this family: birth order then decides,
+  callee-saved first, so a conflict set that cannot reach the ROM's register means the ROM passes a
+  parameter on to a call -- free from its argument register (S314). **Equal `refs` and `live_length`
+  ends this family: birth order then decides,
   so the lever is emission order** (S313). Playbook, `.greg` method and tie:
   `#loop-weight-and-live-length-regalloc-steering`.
 - **aggregate-copy-scratch-clobbers** -- a struct/array copy is one `movstrsi_internal` whose four
@@ -78,9 +80,6 @@ by wrapping in `if (n != 0)`, S306), `#loop-weight-and-live-length-regalloc-stee
   hoists. `extern s32 G[]` read as `G[0]`, a neighbour read at a known displacement, or a `*(s32 *)`
   cast on a `u8 *` byte offset restores the re-read (the cast is terminal where a param-base folds);
   the inverses are a preheader local, and a per-site `T *p = &SYM;` never reused (S301).
-- **dual-offset-temps-around-a-call** -- when the ROM recomputes an index chain on both sides of a
-  `jal`, write `off1 = i*K; <call>; off2 = i*K;`: gcc cannot CSE across the call, so both are
-  emitted, each keeping the form that holds the symbol in the `MEM` (S310).
 - **two-argument-call-temp-split** -- when both arguments of a call cross another call, compute them
   into temps first; as one expression gcc evaluates argument 0 fully and holds it across the call.
 

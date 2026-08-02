@@ -25,6 +25,44 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 314 — an inherited TU-wide wall verdict, refuted 3 for 3 — 2026-08-02
+- Increment: 0 files md5-candidate / **3 functions matched** (`func_80052264` 48/48,
+  `func_80052384` 50/50, `func_800525C4` 156/156, all in `src/main/func_80052250.c`, which goes 7 → 4
+  stubs). Repo `INCLUDE_ASM` 273 → 270. ROM SHA-1 green at every commit (`tools/verify-rom.sh` exit 0
+  at the gate, at each bank, and at review).
+- Quality: 0 stuck-far / **0 permuter runs** / 0 carried / **3 deliberately re-opened**.
+- Seed: committed 5+5pt at `104579e` (+8pt stretch); banked 0pt (host partial); realized 20, residual
+  +2; regime classical.
+- What helped: **reading the conflict set before reaching for a weight lever.** `gcc -dg` printed
+  `;; 77 conflicts: 77 84 2 3 16 18 29 65 66` for `func_80052264`'s wrong register — `$a0`-`$a3`
+  absent — and since `global.c find_reg` scans ascending in both passes, *no* allocno edit could
+  reach the ROM's `$t0`. The only free way to make `$a0` conflict is to pass the parameter on to the
+  call, which is what the ROM's source does (`func_80051FCC(arg0)`, zero instructions, callee ignores
+  it). A doc that had survived a 42k-iteration permuter plateau fell to one token. The same
+  discipline closed the other two: `-dL` named the hoisted symbol as a `loop.c` movable, and
+  `allocno_report.py` priced one shared block pointer at 14 refs / length 72 / 5833, where splitting
+  it per branch landed a four-register rotation in one build.
+- Friction: **an inherited verdict cost more than the functions did.** S183 generalised
+  `#pervasive-regalloc-classical-main` from three built diffs to all 8 non-trivial siblings, and the
+  three smallest were each a *structural* miss (two symbol hoists, one missing argument) — the word
+  "regalloc" sent every re-open at the wrong lever family for 130 sprints. Second friction:
+  `func_800525C4`'s doc pointed at "the S183 commits" for its near-miss C, which was never committed
+  (the carry commit touched only `docs/wip/`), so a 156-instruction body was re-derived from the
+  `.s`. A doc must carry its body or say it does not.
+- Applied: 4 of 5 — #1 (gates.md DoR: a TU-wide verdict is re-derived per function, and record which
+  sprint's tooling produced it), #2 (the index-temp lever, written into
+  `docs/hazards.md#base-register-vs-displacement`), #3 (the argument pass-through, folded into
+  `docs/levers.md`'s allocation row), #5 (`docs/wip/banked/`, which `--carried-check` no longer
+  scans — verified: the three now read `fresh`, the four remaining still read `CARRIED-WALL`).
+  #4 dropped as already covered by `scope-and-live-range-steer-allocation`'s split clause.
+  Retirement (PO-selected): `dual-offset-temps-around-a-call` retired from `docs/levers.md`, its
+  content absorbed into the generalized S314 hazards write-up — levers.md 10235 → 10114 B, a
+  **negative** net delta on the surface with 5 bytes of headroom. `gates.md` provenance rose 6 → 7.
+- Carry-over: `src/main/func_80052250.c` at 4 stubs (`func_8005244C` 376 B — never individually
+  characterised, `func_80052834` 564 B, `func_80052A68` 648 B, `func_80052CF0` 740 B — decoded but
+  never built). All four now carry *only* the retired generalisation, and four more banks would take
+  the file to md5-candidate.
+
 ## Sprint 313 — the residual was the block move's scratch registers (0 banked, 2 carries deepened) — 2026-08-02
 - Increment: 0 files / **0 functions matched**. Repo `INCLUDE_ASM` 273 → 273; `--loose-stubs main`
   270 → 270, fresh 1 → 1; curated `type:func` names 375 → 375. ROM SHA-1 green at every commit

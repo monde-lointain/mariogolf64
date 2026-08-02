@@ -1526,6 +1526,30 @@ Three honest caveats:
   and `main`'s fresh vein is now one row. Tooling: three of the sprint's four accepted suggestions
   were tools this sprint had to hand-roll (`cmpfn.sh` histogram, `tools/seg_diff.py`,
   `tools/gbi_match.py`).
+- **Sprint 314 (realized)** — three S183-era walls in one TU, all banked, none of them a register
+  problem. **+3 banked, 0 carried, 0 permuter runs, 0 stuck-far, 3 deliberately re-opened.** Seed
+  5+5pt committed (+8pt stretch), frozen at `104579e` before any `src/` edit; banked **0**pt (host
+  partial, 4 stubs left); **realized 20**, residual **+2** (+1 carry-or-reopen, +1 novel bank-gotcha
+  — the stretch's doc cited a near-miss C "committed to git history" that was never committed, so a
+  156-instruction body had to be re-derived from the `.s`). Regime classical. Progress **+3**
+  matched; repo `INCLUDE_ASM` 273 → 270; `main` stubs 270 → 267 by count but `--loose-stubs main`
+  fresh stays 1; descriptive names unchanged (all three keep `func_` names, domain not settled).
+  **The finding is about inherited verdicts, and it is the S292 rule one level up.** S183 built three
+  of `func_80052250.c`'s nine functions, measured 84/128/150-row diffs, and stamped
+  `#pervasive-regalloc-classical-main` on all 8 non-trivial siblings — including one it never built.
+  Three of those stamped functions banked byte-exact this sprint and not one was a coloring problem:
+  two were an inline array index forcing the symbol into a register that `loop.c` then hoists into a
+  callee-saved base (`docs/hazards.md#base-register-vs-displacement`, S314), and one was a parameter
+  the ROM passes on to a callee that ignores it — free, because the value is already in `$a0`.
+  **The `gcc -dg` read is what made the third one cheap.** `;; 77 conflicts: 77 84 2 3 16 18 29 65
+  66` shows `$a0`-`$a3` absent, and `global.c find_reg` scans ascending in both passes, so *no*
+  weight or live-length edit could reach the ROM's `$t0`. Reading the conflict set first turned a
+  documented permuter-plateaued wall into a one-token edit. The mirror-image tool use closed the
+  stretch: `allocno_report.py` showed one shared block pointer at 14 refs / length 72 / priority
+  5833 taking `$s4`, and splitting it into one pointer per branch dropped both copies below the loop
+  givs and landed the whole `$s4`-`$s7` rotation — the inverse of S312's variable-reuse lever.
+  **Zero permuter runs**, which is the first sprint in some time to close a multi-register
+  permutation without one.
 - **Sprint 313 (realized)** — the first sprint whose whole increment is characterisation: two
   measured carries re-opened, neither banked. **0 banked, 2 carried, 1 permuter run (0 zeros, 0
   levers), 0 stuck-far, 2 re-opened.** Seed 5pt committed (+8pt stretch), frozen at `5546684` before

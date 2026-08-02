@@ -48,6 +48,24 @@ see `docs/wip/func_800990D0.near-match.md` (`--carried-check` flags it). Backup 
 (294-instr wall-prone debug handler, its own slice). STANDING GUIDANCE: prefer a FRESH non-main pack
 next unless a specific main leaf is pre-vetted `.s`-clean.**
 
+**S314 RETIRES A TU-WIDE WALL VERDICT AND BANKS 3 OF 3 — re-derive an inherited stamp per function.**
+`src/main/func_80052250.c` was stamped `#pervasive-regalloc-classical-main` on all 8 non-trivial
+siblings at S183, generalised from three built diffs; S314 took its three smallest
+(`func_80052264` 48/48, `func_80052384` 50/50, `func_800525C4` 156/156, at `f1b37dc`, `8f9622b`,
+`3c8ea76`) and none was a coloring problem. Two were the same lever — an inline array index makes the
+address `(plus (reg sum) (reg symbol))`, so `loop.c` hoists the symbol into a callee-saved base; an
+index temp restores `(mem (plus (symbol_ref) (reg)))`
+(`docs/hazards.md#base-register-vs-displacement`, S314). The third was a parameter the ROM passes on
+to a callee that ignores it, free because the value is already in `$a0` — the tell was `gcc -dg`
+showing `$a0`-`$a3` absent from the allocno's conflict set, which no weight lever could have fixed.
+**Ordering guidance for S315:** `main`'s only fresh row is still `func_80089094` (13452 B, 3363
+instructions), but this TU's four remaining stubs (376-740 B) are now the cheapest honest `main` work
+— they hold no individual verdict beyond the retired stamp, and one of them was never built at all.
+Four more banks would also take the file to md5-candidate, the first file points `main` has offered
+in a long time. Second lesson, procedural: `func_800525C4`'s doc cited a near-miss C "committed to
+git history" that was never committed, so budget a re-derivation whenever a doc's body lives only in
+a commit reference.
+
 **S313 SPENT ITS SPRINT ON THE TWO `main` CARRIES AND BANKED NEITHER — price the next carry-crack
 slice at the band of its unknown, not of its remaining diff.** `--loose-stubs main` is unchanged at
 270 stubs / **1 fresh** (`func_80089094`, 13452 B). Both committed items reached the state their docs
@@ -5071,37 +5089,28 @@ by `/sprint-plan`:
   - Near-match seeds in `nonmatchings/<fn>/base.c`. **Retry:** the `resolve_shot_quality_table` near-free replay
     (carve done) OR a permuter/`#cross-project-matched-corpus-mining` increment (the 3 regalloc fns + the FP-pair
     parents). No cross-repo name sync.
-- **(S183 MIXED-PARTIAL — carried; 2 of 9 banked; DEFINITIVE pervasive-regalloc TU)**
-  `src/main/func_80052250.c` (main-segment `[0x2D650]` game-code pack). BANKED byte-exact C:
-  `func_80052250` (0x80052250, `scenario_mode_id==0xC`), `func_80052324` (0x80052324, scenario table
-  lookup). SEVEN `INCLUDE_ASM` stubs remain → NOT md5-candidate. **No flip/data/symbol enablers left**
-  (subseg `[0x2D650, c, main/func_80052250]`; refs all placed; NO rodata carve; auto `func_` names).
-  All 7 carries have a `docs/wip/<fn>.near-match.md` with FULL decoded logic + residual + retry ideas.
-  Two distinct carry classes:
-  - **`func_80052264` (0x80052264, ~48 insns — SPIKE, 1-scratch-register `REG_ALLOC_ORDER` wall,
-    permuter+source-CONFIRMED):** `-arg2/18 - (arg2%18 >= D_800C1435[func_80051FCC()*200 + arg1*10])`.
-    Byte-exact EXCEPT the divide-1 `mfhi` transient scratch (`t0`/$8 ROM vs `a0`/$4 mine) + its 1 `sra`
-    use. Table index matched via the `#register-reuse-nudge` array-index `+` operand-order lever (arg1*10
-    on the RIGHT). `mfhi→mult` hazard `nop`s CORRECT (KMC-`as` inserts, interlocks=0). Permuter (--main,
-    2 bases, 42k iters) plateaus at this exact register; TU `#profile-probe` -O2-best-no-flag. Retry:
-    `#cross-jump-tail-merge`… no — `#cross-project-matched-corpus-mining` for the idiom that makes the
-    post-jal `arg1*10` qty win `a0` before the `mfhi`-hi qty. `docs/wip/func_80052264.near-match.md`.
-  - **`func_80052384` (0x80052384, 50 insns — SPIKE, base-pointer-hoist wall):** `void(void)` 8-row
-    fill/sort(`func_8005B150`)/rank over `D_800C1435`. Inner1 load matches; inner2 store HOISTS
-    `&D_800C1435` into callee-saved `s3` (+8 frame) where ROM copies row `s0→a3` + re-materializes. 52 vs
-    50. Permuter 850→250. `docs/wip/func_80052384.near-match.md`.
-  - **`func_8005244C`/`func_800525C4`/`func_80052834`/`func_80052A68` — 4 large compare/dispatch fns,
-    BUILT as growing-diff `#pervasive-regalloc-classical-main` near-misses** (89v94/89-short;
-    156v156/84-diff struct-fold cascade via `(&D_801B60A0)[-3]`; 136v141 shared-block structure; 165v162
-    output-param 3-loop). Each `docs/wip/*.near-match.md`. Retry: permuter --main (big cascades) +
-    control-flow shaping; these are the TU's dominant wall class.
-  - **`func_80052CF0` (0x80052CF0, 188 insns — DECODED, not built).** `switch(D_801B608C)` game-mode
-    dispatcher; carried without a build given the 8/8 definitive wall pattern. Retry: write from m2c +
-    `#switch-jtbl-dispatch` + permuter, dedicated sprint. `docs/wip/func_80052CF0.near-match.md`.
-  - **Retry checklist (near-free):** (1) subseg flip DONE (`[0x2D650, c, main/func_80052250]`); (2) all
-    refs placed (`D_800C1435`, `D_801B71F6/F9/FB`, `D_801B6090/98`, `D_801B60A0`, `scenario_mode_id`,
-    `func_80051FCC`/`80052264`/`800521C0`/`800521DC`/`8005B150`), NO carve; (3) NO recover-externs;
-    (4) classical; (5) the 7 WIP near-match files above; (6) TU `#profile-probe` = -O2, no-flag-flip.
+- **(S183 MIXED-PARTIAL — carried; 5 of 9 banked; the "definitive pervasive-regalloc TU" verdict is
+  RETIRED, S314)** `src/main/func_80052250.c` (main-segment `[0x2D650]` game-code pack). Five
+  functions are banked byte-exact (two at S183, three at S314 — see the S314 note in
+  `## Active phase`). FOUR `INCLUDE_ASM` stubs remain → NOT md5-candidate. **No enablers left**
+  (subseg `[0x2D650, c, main/func_80052250]`; refs all placed; NO rodata carve; auto `func_` names
+  kept). **S314 banked 3 of 3 of this TU's smallest carries and not one was a register-allocation
+  problem, so the TU-wide stamp S183 generalised from three built diffs (84/128/150 rows) is not
+  evidence about the four below.** Each of the four still carries only that generalisation:
+  - **`func_8005244C`** (0x8005244C, 376 B) — 89 vs 94, 89-short. The only member with no individual
+    wip doc; never separately characterised. Read its structural deficit before pricing it.
+  - **`func_80052834`** (0x80052834, 564 B) — 136 vs 141, shared-convergence-block structure
+    (`L944` reached from two paths). A structure question, which is the class S314 cracked three times.
+  - **`func_80052A68`** (0x80052A68, 648 B) — 165 vs 162, output-param 3-loop,
+    `single-callee:func_80052324`.
+  - **`func_80052CF0`** (0x80052CF0, 740 B) — decoded, never built; `switch(D_801B608C)` game-mode
+    dispatcher, 17 jals. It was carried purely on the 8/8 pattern that has now failed three times, so
+    it is an unattempted leaf, not a wall. Check `#switch-jtbl-dispatch` before pricing.
+  **Retry checklist (near-free):** (1) subseg flip DONE; (2) all refs placed (`D_800C1435`,
+  `D_801B71F6/F9/FB`, `D_801B6090/98`, `D_801B60A0`, `scenario_mode_id`, plus the five banked
+  siblings' callees), NO carve; (3) NO recover-externs; (4) classical; (5) four wip docs remain in
+  `docs/wip/`, and the three the sprint banked moved to `docs/wip/banked/`; (6) TU `#profile-probe`
+  = -O2, no flag flip.
 
 - **(S182 MIXED-PARTIAL — carried; 3 of 7 banked)** `src/main/func_8004D190.c` (the VI/framebuffer +
   grid-print debug-display pack `[0x28590]`). BANKED byte-exact C: `clear_text_grid` (0x8004D794),

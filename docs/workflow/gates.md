@@ -173,6 +173,15 @@ dashboard). Target selection is `tools/pick_target.py`, not a stored roadmap.
     register-pressure tie (it banked) and said `func_80056060`'s `cs` "always colours `$s0`" (one
     `do {} while (0)` moved it). Re-derive the numbers before inheriting the verdict; keep the
     citation, drop the conclusion.
+    - **A verdict generalised across a TU is weaker still, and is re-derived per function (S314).**
+      S183 built three of `func_80052250.c`'s functions, measured 84/128/150-row diffs, stamped
+      `#pervasive-regalloc-classical-main` on all 8 non-trivial siblings and carried a ninth it never
+      built. S314 took the three smallest and banked 3 of 3 byte-exact, and not one was a register
+      problem: two were the symbol-hoist of `#base-register-vs-displacement` and one was a parameter
+      the ROM passes on to a callee. A TU-wide stamp is a pricing floor for the members that were
+      never built, never a wall verdict for them. Record which sprint's tooling produced a verdict,
+      the way S313 requires for a `cmpfn` row count: a "register cascade" read from before
+      `tools/allocno_report.py` and `gcc -dg` is a guess about the residual's class.
   - **A carried wall's near-match doc can be wrong about the function's semantics, not just its
     verdict — re-derive behaviour from the `.s` before accepting a stated residual (S258).** S252
     recorded `func_800824E4` as a three-argument packer with `b = arg2` on the negative path and
