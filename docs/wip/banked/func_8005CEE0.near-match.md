@@ -1,5 +1,8 @@
 # func_8005CEE0 — near-match (CARRIED, load-order + regalloc scheduling coin)
 
+**BANKED S315** (`fb12a92`). The S268 "TERMINAL / do not re-grind" verdict is retired. The load-order-vs-`idx*4`-colouring coupling below was real for the shape it was measured on — flat `u8` externs with hand-written `idx * 4` / `a * 14` / `b * 2` stride arithmetic. Typing the externs as the arrays they are (`extern s16 D_800C29B8[10][2];` and `extern s16 D_800C28E4[3][7];`, both already declared in the host file for `build_roster_grid`) and writing `D_800C29B8[idx][1]` / `D_800C29B8[idx][0]` / `D_800C28E4[row][col]` gives 38/38 byte-clean on the first build. The two pair loads then share one index register with a `%lo` displacement each, and the grid address is a two-term register sum so the symbol materialises into a register — which is the whole residual. Kept for the refuted-lever table.
+
+
 ## Function
 `s32 func_8005CEE0(s32 idx)` — range-check (0..14, else -1) + triple-table lookup
 returning a sign predicate. 0x98, 38 instrs, jal=1 (func_8005C674).
