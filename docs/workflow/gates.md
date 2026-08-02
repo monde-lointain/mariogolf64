@@ -182,6 +182,16 @@ dashboard). Target selection is `tools/pick_target.py`, not a stored roadmap.
       never built, never a wall verdict for them. Record which sprint's tooling produced a verdict,
       the way S313 requires for a `cmpfn` row count: a "register cascade" read from before
       `tools/allocno_report.py` and `gcc -dg` is a guess about the residual's class.
+    - **Re-derive the doc's declarations before its body: array shapes, element types and local
+      widths, against the host file's existing externs and the `.s` load widths.** Both of S315's
+      carries were unblocked there and neither needed a lever. `func_8005CEE0`'s doc
+      scaffolded two tables as flat `u8` externs with hand-written `idx * 4` / `a * 14` strides while
+      the host file already declared them `s16 D_800C29B8[10][2]` and `s16 D_800C28E4[3][7]` twenty
+      lines above the stub; typed, the load-order and base-vs-displacement residual its doc called
+      terminal does not exist, and it banked 38/38 on the first build. `func_8005D0D8` went 61/67 to
+      67/67 on `s8 lo` instead of `s32 lo` plus leaving its two pointers implicit as `loop.c` givs.
+      An `lb` where the doc wrote `u8`, or a stride that is an array's row, is a declaration bug, and
+      a body built on one produces residuals that belong to the scaffolding.
   - **A carried wall's near-match doc can be wrong about the function's semantics, not just its
     verdict — re-derive behaviour from the `.s` before accepting a stated residual (S258).** S252
     recorded `func_800824E4` as a three-argument packer with `b = arg2` on the negative path and

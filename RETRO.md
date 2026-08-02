@@ -25,6 +25,46 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 315 — both carries fell to declarations, not levers — 2026-08-02
+- Increment: 0 files md5-candidate / **2 functions matched** (`func_8005B150` 79/79 →
+  `rank_scores_descending`, `func_8005CEE0` 38/38 → `is_roster_entry_locked`, both in
+  `src/main/func_80059BA0.c`, which goes 11 → 9 stubs). Repo `INCLUDE_ASM` 270 → 268; `main` stubs
+  267 → 265; `--loose-stubs main` fresh **2 → 1**. Both banked byte-clean on the first build. ROM
+  SHA-1 green at every commit (`tools/verify-rom.sh` exit 0 at the gate, at each bank, at review).
+- Quality: 0 stuck-far / **1 permuter run** (dry, 11108 iterations, no candidate) / 1 carried /
+  2 re-opened.
+- Seed: committed 5+5pt at `8a00fa1` (+5pt stretch); banked 0pt (host partial); realized 8 committed
+  (residual **−2**, both first-try) and 7 stretch (residual +2); regime classical.
+- What helped: **re-deriving the declarations before the body.** `func_8005CEE0` carried an S268
+  "terminal / do not re-grind" verdict built on a `base.c` that declared two tables as flat `u8`
+  externs with hand-written `idx * 4` / `a * 14` / `b * 2` strides. They are one array and one grid,
+  `s16 D_800C29B8[10][2]` and `s16 D_800C28E4[3][7]`, both already declared in the same file twenty
+  lines above the stub for `build_roster_grid`. Typed, the pair loads share an index register with a
+  `%lo` displacement each and the grid address is a two-term register sum, so the load order and the
+  base-vs-displacement residual the doc called coupled and terminal simply do not arise. Same shape
+  on the stretch: `s8 lo` instead of `s32 lo` restored both the `move v1,v0` that `cse` was
+  propagating away and the 8 frame bytes, in one edit. Second thing that helped: the new-class fear
+  was unfounded — the `$fp` + computed `subu $sp` prologue is a plain VLA, `s32 keys[count];`, and
+  reproduced the whole prologue, probe and epilogue with no lever.
+- Friction: **two carry docs named a specific pass, and both named the wrong one.** S264 called
+  `func_8005D0D8`'s `slti`+`bltzl` a combine global-vs-local `nonzero_bits` choice and
+  "source-invariant"; it is `fold_range_test` merging `lo >= 5 || lo < 0` at tree level, and two
+  separate tests bring the ROM's pair straight back. S272 then re-derived that residual and
+  *confirmed* the wrong attribution, because it re-tested the same three variants rather than the
+  claim. Its second "not reproducible" coin needed an `s32` temp to keep the xor SImode. Third
+  friction, self-inflicted: a `sed -i` sweeping `s32 flags[N];` array sizes also rewrote a sibling
+  function's array in the same file, caught only by the gate build's md5 mismatch.
+- Applied: 4 of 4 — #1 (VLA hazard section + index row), #2 (DoR: re-derive declarations first), #3
+  (near-match docs split measured from attributed), #4 (scripted-substitution anchor guard).
+  Retirement: `loop.md`'s near-match-is-a-hypothesis paragraph compressed and #3 folded into it, and
+  two near-duplicate `&arr[K]` copy-preference rows in `hazard-index.md` merged; `loop.md` 47048 →
+  46912 B and `hazard-index.md` 22522 → 22504 B, both net negative while gaining content.
+- Carry-over: `func_8005D0D8` (`src/main/func_80059BA0.c`) at **67/67 and the ROM's exact `-0x38`
+  frame**, up from 61/67. All three S264/S272 residuals refuted; what remains is a three-register
+  rotation whose whole arithmetic is written down — the loop-B flags giv must drop below the counter,
+  needing `refs <= 15` or `live_length >= 50`, and every ref count is forced by the ROM's own six
+  stores.
+
 ## Sprint 314 — an inherited TU-wide wall verdict, refuted 3 for 3 — 2026-08-02
 - Increment: 0 files md5-candidate / **3 functions matched** (`func_80052264` 48/48,
   `func_80052384` 50/50, `func_800525C4` 156/156, all in `src/main/func_80052250.c`, which goes 7 → 4

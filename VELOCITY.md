@@ -1526,6 +1526,35 @@ Three honest caveats:
   and `main`'s fresh vein is now one row. Tooling: three of the sprint's four accepted suggestions
   were tools this sprint had to hand-roll (`cmpfn.sh` histogram, `tools/seg_diff.py`,
   `tools/gbi_match.py`).
+- **Sprint 315 (realized)** — the last fresh `main` leaf plus a re-derived carry, both byte-clean on
+  the first build. **+2 banked, 1 carried, 1 permuter run (dry), 0 stuck-far, 2 re-opened.** Seed
+  5+5pt committed (+5pt stretch), frozen at `8a00fa1` before any `src/` edit; banked **0**pt (host
+  partial, 9 stubs left); **realized 8** committed (each leaf seed 5 **−1** verbatim first-try with 0
+  fix iterations), residual **−2**; the stretch scores 7 (seed 5 **+1** carry **+1** permuter),
+  residual +2. Regime classical. Progress **+2** matched; repo `INCLUDE_ASM` 270 → 268; `main` stubs
+  267 → 265 and `--loose-stubs main` fresh **2 → 1**; descriptive names **+2**
+  (`rank_scores_descending`, `is_roster_entry_locked`).
+  **The finding is that a carry doc's scaffolding types are load-bearing, and both carries proved
+  it.** `func_8005CEE0`'s S268 "terminal, not source-steerable by any statement-split, do not
+  re-grind" verdict was measured entirely against a `base.c` that declared two tables as flat `u8`
+  externs with hand-written `idx * 4` / `a * 14` / `b * 2` strides. They are `s16 D_800C29B8[10][2]`
+  and `s16 D_800C28E4[3][7]`, both already declared in the host file for `build_roster_grid` twenty
+  lines above the stub; typed, the fold-canonical load order and the coupled `idx*4` colouring do not
+  exist and it banked 38/38 first build. The stretch went 61/67 to 67/67 at the ROM's exact frame on
+  the same kind of edit (`s8 lo` not `s32 lo`, and the two pointers left implicit as `loop.c` givs so
+  their inits land after the hoisted constants).
+  **Two "source-invariant" coins were misattributed passes, not hard walls.** S264 named combine's
+  `nonzero_bits` for `func_8005D0D8`'s `slti`+`bltzl`; it is `fold_range_test` merging
+  `lo >= 5 || lo < 0`, and writing the two tests separately restores the ROM's pair. Its xor-hoist
+  coin needed an `s32` temp to keep the xor SImode so `-0x80` cannot fit `xori`. S272 had re-derived
+  this residual and confirmed the wrong pass, because it re-tested the same three variants instead of
+  the claim — which is why #3 this sprint splits a near-match doc's *measured* half from its
+  *attributed* half.
+  **The one novel class was free.** `func_8005B150`'s `$fp` + `subu $sp,$sp,rX` + `lw 0($sp)`
+  prologue is a plain VLA; `s32 keys[count];` reproduced it exactly, first build. It was priced a
+  band above its size rubric purely for that uncertainty, which is the −1 on it.
+  **Permuter:** base 155, 11108 iterations at `-j6`, no improvement and no candidate written — the
+  multi-register-permutation plateau, consistent with the standing note.
 - **Sprint 314 (realized)** — three S183-era walls in one TU, all banked, none of them a register
   problem. **+3 banked, 0 carried, 0 permuter runs, 0 stuck-far, 3 deliberately re-opened.** Seed
   5+5pt committed (+8pt stretch), frozen at `104579e` before any `src/` edit; banked **0**pt (host

@@ -114,6 +114,7 @@ The hazard families below group the sections that follow. Each links to its exis
 - [cse make_regs_eqv branch-fold (reused-var canonical fold on a `?:`-with-flag store)](#cse-make_regs_eqv-branch-fold-reused-var-canonical-fold-on-a--with-flag-store)
 - [abs-coalescing reg-swap (fabsf in-place vs fresh reg on a const compare)](#abs-coalescing-reg-swap)
 - [dead-frame reload-artifact regalloc-wall](#dead-frame-reload-artifact-regalloc-wall)
+- [variable-length-array dynamic frame](#variable-length-array-dynamic-frame)
 - [multi-register-allocno-permutation (a fixed permutation of N caller-saved regs)](#multi-register-allocno-permutation-a-fixed-permutation-of-n-caller-saved-regs)
 - [duplicate-literal-pool-shared-rodata (a byte-exact body that still reddens the gate)](#duplicate-literal-pool-shared-rodata-a-byte-exact-body-that-still-reddens-the-gate)
 - [macro-internal-emission-order (a residual no source spelling can reorder)](#macro-internal-emission-order-a-residual-no-source-spelling-can-reorder)
@@ -6514,6 +6515,33 @@ S270 `func_8004D4B8`: `str[row]` (not `str++`) reproduced the dead 8B frame and 
 Crack of the frame+regs (`volatile` is wrong here — it stores to `sp`; a truly-dead frame has zero `sp`
 access). Profile-probe is negative for these (no `-f` flag reaches gcc-2.7.2 local-alloc/global.c).
 Memory: `docs/levers.md` (dead frame live index pressure lever).
+
+## variable-length-array dynamic frame
+
+**Rule: a frame-pointer prologue with a computed `subu $sp` is a plain C99/GNU variable-length
+array. Write `T a[n];` and stop there — do not model the frame by hand.** The recognition sequence,
+from S315 `func_8005B150` (banked byte-exact on the first build, the project's first of this class):
+
+```
+addiu $sp, $sp, -0x30
+sw    $fp, 0x28($sp)
+addu  $fp, $sp, $zero      # frame pointer, because $sp is about to move
+sll   $v0, $a2, 2          # n * sizeof(elem)
+addiu $v0, $v0, 0xE        # gcc's own round-up-to-8 arithmetic: ((n*4)+14)>>3<<3
+srl   $v0, $v0, 3
+sll   $v0, $v0, 3
+subu  $sp, $sp, $v0
+lw    $v0, 0x0($sp)        # the probe gcc emits with the allocation
+...
+addu  $sp, $fp, $zero      # epilogue restores from $fp, not an immediate
+```
+
+Every one of those instructions, including the `$fp` save and the probe, falls out of the
+declaration: the frame pointer is a *consequence* of the dynamic `$sp`, not a separate thing to
+force, and the `+0xE` is the compiler's alignment, not a game constant. The class reads exotic in
+the `.s` and costs nothing in source, so price such a leaf by its body, not by its prologue. Sibling
+frame hazards where the frame *is* the residual: `#dead-frame-reload-artifact-regalloc-wall` (a
+reserved frame with no `sp` access) and `#nested-function-static-chain-spill`.
 
 ## signed-divide-const v0/v1 quotient-destination
 

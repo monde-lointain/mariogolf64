@@ -58,6 +58,23 @@ index temp restores `(mem (plus (symbol_ref) (reg)))`
 (`docs/hazards.md#base-register-vs-displacement`, S314). The third was a parameter the ROM passes on
 to a callee that ignores it, free because the value is already in `$a0` — the tell was `gcc -dg`
 showing `$a0`-`$a3` absent from the allocno's conflict set, which no weight lever could have fixed.
+
+**S315 CLOSES THE `main` FRESH VEIN AND RETIRES A SECOND TERMINAL VERDICT — read a carry doc's
+declarations before its body.** `--loose-stubs main` fresh is now **1** (`func_80089094`, 13452 B,
+`JTBL-CARVEABLE`); `func_8005B150` (`rank_scores_descending`, `a070217`) was the last cheap one and
+banked byte-clean on the first build. Its `$fp` + `subu $sp,$sp,rX` + `lw 0($sp)` prologue is a plain
+VLA (`docs/hazards.md#variable-length-array-dynamic-frame`), not a class to fear. The sprint's two
+carry re-opens both turned on *types*, not levers: `func_8005CEE0` (`is_roster_entry_locked`,
+`fb12a92`, 38/38) carried an S268 "terminal / do not re-grind" verdict measured against a `base.c`
+that declared `s16 D_800C29B8[10][2]` and `s16 D_800C28E4[3][7]` as flat `u8` externs with
+hand-written strides — both were already declared correctly in the host file — and `func_8005D0D8`
+went 61/67 to 67/67 at the ROM's exact frame on `s8 lo` instead of `s32 lo` plus leaving its pointers
+implicit as `loop.c` givs. Two of that doc's three "source-invariant" coins were misattributed
+passes: the `slti`+`bltzl` pair is `fold_range_test` merging `lo >= 5 || lo < 0`, defeated by writing
+the tests separately. So for a `main` slice from here: the segment offers one big fresh row or a
+characterised carry, and the carries are cheaper than their docs read — but re-derive each doc's
+declarations and its named pass before pricing it (`docs/workflow/gates.md ## Sprint-plan procedure`,
+the S315 DoR line).
 **Ordering guidance for S315:** `main`'s only fresh row is still `func_80089094` (13452 B, 3363
 instructions), but this TU's four remaining stubs (376-740 B) are now the cheapest honest `main` work
 — they hold no individual verdict beyond the retired stamp, and one of them was never built at all.
@@ -4057,6 +4074,17 @@ by `/sprint-plan`:
   nested definition and the delete-the-parent workaround cannot apply when the parent is the target —
   so this is a hand-lever or compiler-source slice. Replayable body, the nine levers that closed the
   other 659, and the verbatim carve line are in `docs/wip/func_8006E210.near-match.md`.
+- **`func_8005D0D8`** (`src/main/func_80059BA0.c`, S264 -> S272 -> S315) — **67/67 at the ROM's exact
+  `-0x38` frame**, up from 61/67, with all three of the doc's residuals refuted (two of them had been
+  recorded as source-invariant and were misattributed passes). What remains is a three-register
+  rotation, and its arithmetic is written down rather than asserted: `allocno_report.py` gives the
+  loop-B flags giv 17 refs / len 35 / 19428, the entry pointer 12 / 26 / 13846 and the counter
+  21 / 61 / 13770, so the one thing to move is the giv below 13770 — `refs <= 15` (the `floor_log2`
+  step at 16) or `live_length >= 50`. Every one of those ref counts is forced by the ROM's own
+  instruction stream, which is why no reweighting edit exists at this shape and why the permuter went
+  11108 iterations without a candidate. Replayable body in `nonmatchings/func_8005D0D8/base.c`; the
+  four byte-confirmed levers and the re-open checklist are in `docs/wip/func_8005D0D8.near-match.md`.
+  Do not re-derive the levers.
 - **`func_8007399C`** (`src/main/func_80071370.c`, S307 -> S309) — 149/149 at the ROM's exact
   `-0x50` frame, 70 `cmpfn` lines. Two conditions, both measured off the `-dS` ready lists: the `$a3`
   parameter copy unboosted (`birthing_insn_p` wants `reg_n_sets >= 2`, `sched.c:2469`) AND the

@@ -244,15 +244,15 @@ refs and 5833 against the segment mask's 1875, rotating five registers; splittin
 (S296: `keyframe` and `keyframeIndex` both scored 6666). Not a last resort for the terminal
 permutation class it was introduced for -- it is how you stop guessing on any leaf.
 
-**A `docs/wip/<fn>.near-match.md` records a hypothesis, not a measurement.** Its stated instruction
-count, its residual class, and even its reading of the function's signature have each been wrong.
-Re-derive with `venv/bin/python3 tools/pick_target.py --refresh-residual <fn>` before acting on one. A
-register written in a branch delay slot before its first read is a shared pre-branch statement, not an
-argument. **Its lever table is conditional too: every row was measured against one shape, so a
-rejected lever is rejected only for that shape.** Record the base each row was measured from, and at
-a re-open re-run the rejected rows once the residual has moved, rather than reading them as closed
-(S302 banked `func_8008D3F4` on a lever S301 had measured and rejected: it works only after the
-spill-slot cluster it was competing with is fixed).
+**Write and read a `docs/wip/<fn>.near-match.md` in two halves: what was measured (counts, frame,
+which registers and which ordering differ, what was built) and what was attributed to it (which
+pass, why).** Only the first half is evidence. Re-derive with
+`venv/bin/python3 tools/pick_target.py --refresh-residual <fn>`, then re-derive the attribution
+before acting on it: S264's "combine `nonzero_bits`, source-invariant" coin was `fold_range_test`,
+and S272 re-confirmed the wrong pass by re-testing the same three variants instead of the claim
+(S315). Its lever rows are conditional the same way -- each was measured against one shape, so
+record that base and re-run the rejected rows once the residual has moved (S302 banked
+`func_8008D3F4` on a lever S301 had rejected).
 
 
 ## Conventions (every-sprint)
@@ -264,17 +264,17 @@ below).
 - **Never rewrite a partial-bank `src/<seg>.c` with a scripted whole-region splice, or a scripted
   whole-file `replace` (S257; recurred S259; recurred as substitution S312, where a permuted line
   also existed verbatim in a banked sibling and the gate build reddened on 3 bytes in a function the
-  sprint never touched). Guard: `git diff` after any scripted edit and confirm every hunk is inside
-  the target function.** The rule below was already written and was still violated — reverting one function to
-  `INCLUDE_ASM` with an `s[:i] + new + s[j:]` splice deleted two banked one-line siblings
-  (`func_8006D1FC`, `func_8006D208`) that happened to sit between the anchors, surfacing only as an
-  `undefined reference` at link. What was missing is a mechanical guard, so: **use `Edit` with an
-  exact `old_string`. If a script is genuinely needed, assert both counts across the rewrite** —
+  sprint never touched). Guard: anchor a scripted substitution on text carrying the function name,
+  and `git diff` afterwards to confirm every hunk is inside the target function.** An anchor unique
+  in one function is routinely not unique in its file (S315: a `sed -i` on `s32 flags[N];` also
+  rewrote a sibling's array size, surfacing only as an md5 mismatch). **Use `Edit` with an exact
+  `old_string`. If a script is genuinely needed, assert both counts across the rewrite** —
   `grep -c 'INCLUDE_ASM'` (must change by exactly the number of functions promoted, 0 for an in-place
-  body edit) and the file's function list, diffed before and after. The original S257 occurrence was
-  the same mechanism in the other direction: a splice between two anchors silently deleted three
-  `INCLUDE_ASM` stubs and their multi-line carry comments. Both times the anchors looked adjacent in
-  the author's head and were not adjacent in the file.
+  body edit) and the file's function list, diffed before and after. S257 and S259 were the same
+  mechanism in opposite directions, a splice between anchors that looked adjacent in the author's
+  head and were not adjacent in the file: three `INCLUDE_ASM` stubs with their carry comments (S257),
+  then two banked one-line siblings (S259 `func_8006D1FC`, `func_8006D208`), each surfacing only at
+  link.
 - **Never `rm -rf` an `asm/nonmatchings/<seg>/<stem>/` directory (or bulk-delete its `.s`) to "force
   a regen" (S271, hard rule).** splat's `c`-mode `make extract` does not reproduce every still-asm
   stub: it leaves disassembly gaps at some curated / decompose-split function addresses, so those
