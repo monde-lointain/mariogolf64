@@ -4747,6 +4747,25 @@ cannot score it (asm-differ is blind to internal branch targets — see the perm
 
 ## indexed-vs-pointer loop (strength-reduction preheader ordering)
 
+**Sub-lever — where a loop-invariant memory read is written decides whether gcc hoists it (S316).**
+Three spellings of the same read give three different results, and only one matches a ROM that
+hoists:
+
+| spelling | result |
+| --- | --- |
+| before the loop (`count = SYM[-2];` then `while (i < count)`) | straight-line read; cse folds it, and folds any held base with it |
+| in the bottom-of-loop test (`while (i < SYM[-2])`) | never hoisted |
+| **first statement of the loop body** (`count = SYM[-2];` at the top, test on `count`) | **hoisted into the preheader** |
+
+The rule is `scan_loop`'s movable test, `! ((maybe_never || call_passed) && may_trap_p (src))`
+(`loop.c:715`). `may_trap_p` is 1 for any `REG`-based address (`rtx_addr_can_trap_p`,
+`rtlanal.c:136`), and `maybe_never` is set by the first `JUMP_INSN` scanned inside the loop
+(`loop.c:930`) — so a body that branches at all makes every read below that branch unhoistable, and
+the bottom test is below every branch by construction. Reading it at the top of the body is scanned
+while `maybe_never` is still 0. S316 `func_8005244C` went 91 -> 93 of 94 on this, landing the ROM's
+own preheader `lw t0,-0x8(s4)`. The companion half — keeping the base register at all — is the
+array-element spelling in `#base-register-vs-displacement`.
+
 **Rule:** for a sentinel-terminated (`!= -1`) array walk, the ROM's scheduling around the loop
 (entry-branch delay-slot fill, and whether a loop-invariant constant is hoisted) depends on whether
 the source iterates by index (`for(i=0; a[i]!=X; i++){ v=a[i]; use(v); }`, a `u32` index + a
@@ -7482,26 +7501,18 @@ between the two reads, or a second predecessor for the preheader block (`#value-
 `negative-displacement-neighbour-needs-one-symbol`. So the wall is now one cse question, not three
 addressing mysteries — re-check any carry citing this class before re-asserting it.
 
-**S261 — that one cse question is a mutual exclusion, and it is terminal for source (`func_8006D38C`).**
-The ROM's preheader `lw t0,-0x2B(a0)` needs both the a0-relative addressing and the value held across
-the loop, and the two source mechanisms that each deliver one property disable the other. Three forms,
-measured:
-- `while (i != ROUND.count)` (struct-view, read in the loop test) → a0-relative addressing
-  (`addiu t0,t1,-0x2B`) ✓ but mem-in-struct may-alias blocks loop-invariant motion, so the value is
-  re-read every iteration ✗ (84).
-- `count = *(s32*)((u8*)flag - 0x2B)` (pointer arith, hoisted) → value held ✓ but `flag-0x2B`
-  constant-folds to a fresh `lui %hi(D_801B60BB); lw` ✗ (84).
-- `count = ROUND.count` (struct-view, hoisted local) → cse folds `plus(flag,-0x2B)` to the symbol
-  (it knows `flag == &D_801B60BB` is constant) and forwards the guard's load → merge, preheader load
-  gone ✗ (82).
-The invariants: `{a0-relative addressing}` ⟹ struct/related-value ⟹ `MEM_IN_STRUCT_P` ⟹
-`{re-read OR cse-merge}`; `{held value}` ⟹ plain-symbol read ⟹ `{fresh lui}`. No source form yields
-`{a0-relative AND held AND unmerged}` together. This is stronger than the "keep cse from forwarding"
-framing: even a form that does not forward (the re-read form) fails, because the same may-alias
-property that stops the forward also stops the hoist. Permuter-ineligible (an addressing-mode +
-load-placement choice, not a register permutation; the 84-forms are exact-count but diverge on
-placement, the 82-form is short). `func_8006D214` transfers this model verbatim (both terminal). See
-the memory `negative-displacement-neighbour-needs-one-symbol`.
+**S261 called this a mutual exclusion and terminal for source; S316 refuted it.** The three S261
+measurements on `func_8006D38C` stand (84 / 84 / 82: a struct-view read in the loop test re-reads
+every iteration, pointer arith folds to a fresh `lui`, a struct-view hoisted local merges with the
+guard's load). Its *conclusion* — that no source form yields `{base-relative AND held AND unmerged}`
+— was a negative claim over a space it had not measured, and both halves have a lever that compose:
+the **held base** comes from the array-element spelling (`extern s32 SYM[]` read as `SYM[0]` /
+`SYM[-2]`), never a pointer local, because cse knows a pointer local holds a constant address and
+rewrites `(mem (plus (reg) K))` back to the symbol; the **preheader placement** comes from reading
+the value at the top of the loop body (`#indexed-vs-pointer loop`). S316 `func_8005244C` reached 93
+of 94 that way with the ROM's `lw t0,-0x8(s4)` in the preheader. `func_8006D214` and `func_8006D38C`
+have not been re-tested against either lever. See the memory
+`negative-displacement-neighbour-needs-one-symbol`.
 
 **Symptom (S210; `func_8005DE88` / `func_8005AF80` / `func_8005CEE0`).** A classical fn is byte-exact
 except a run of N register-only (`r`) diff rows all on one data-access chain: the ROM materializes a

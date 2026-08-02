@@ -1526,6 +1526,45 @@ Three honest caveats:
   and `main`'s fresh vein is now one row. Tooling: three of the sprint's four accepted suggestions
   were tools this sprint had to hand-roll (`cmpfn.sh` histogram, `tools/seg_diff.py`,
   `tools/gbi_match.py`).
+- **Sprint 316 (realized)** — the last four members of the S183 `#pervasive-regalloc-classical-main`
+  stamp, taken per function. **+3 banked, 1 carried, 2 permuter runs (both dry), 0 stuck-far, 1
+  re-opened.** Zero gate enablers — all four were already-extracted loose stubs in an already-`c`
+  file, no flip, no split, no `.rodata` carve, no `symbol_addrs.txt` add. Seed 5+5+5pt committed
+  (+8pt stretch), frozen at `8023763` before any `src/` edit; banked **0**pt (host partial, 1 stub
+  left); **realized 18** committed (`func_80052834` 5, `func_80052A68` 5, `func_8005244C` seed 5 **+1**
+  carry **+1** permuter **+1** re-attempt = 8), residual **+3**; the stretch scores 9 (seed 8 **+1**
+  permuter), residual +1. Regime classical. Progress **+3** matched; repo `INCLUDE_ASM` 268 → 265;
+  `main` stubs 265 → 262 with `fresh` unchanged at 1; host file 4 → 1 stub; descriptive names **+0**
+  (all three return domain enums with only still-asm callers, auto `func_` names kept per S247).
+  Rolling-5 (S312-S316) matched-fn: 1+0+3+2+3.
+  **The finding is that a TU-wide wall stamp is not evidence about its unbuilt members, and this is
+  now the second sprint to prove it on the same file.** S183 measured three bodies at 84/128/150 rows
+  and stamped `#pervasive-regalloc-classical-main` on all eight non-trivial siblings; S314 banked
+  three and S316 three more, and **not one of the six was a register-allocation problem.** Every
+  residual was structural: an addressing form, a branch sense, an argument evaluation order, a
+  loop-init placement, a pointer reused across loops, a signed-vs-unsigned switch selector. The
+  per-function re-derivation cost 4-8 builds each and no compiler-source fan-out.
+  **Two levers generalise beyond this file.** First, *where* a loop-invariant memory read is written
+  decides whether gcc hoists it: `scan_loop` refuses to hoist a `REG`-addressed MEM once
+  `maybe_never` is set (`loop.c:715`), and the body's first `JUMP_INSN` sets it (`loop.c:930`), so a
+  bottom-of-loop test is unhoistable by construction and a pre-loop local is a straight-line read cse
+  folds — only a read at the top of the body lands in the preheader. That plus the array-element
+  spelling for the held base (`extern s32 SYM[]`, `SYM[0]` / `SYM[-2]`) took `func_8005244C` from 91
+  to 93 of 94 and **retired S261's "mutual exclusion, terminal for source" verdict** on
+  `#base-register-vs-displacement`. Second, an allocno web can be shortened *structurally*: `break`
+  routing a local `return var;` through a switch's shared `return` moved `func_80052CF0`'s result
+  from 21 refs / len 135 to 17 / 133 (priority 6222 → 5112, past two allocnos) and landed a
+  3-register rotation in one edit.
+  **Both permuter runs were dry, and one was actively misleading.** `func_8005244C`: 188k iterations,
+  base 735 → 380, no zero, candidates only re-spelling the same anchor. `func_80052CF0`: ~50k, base
+  205 → 135, its one candidate a `do {} while (0)` that raised two allocnos *together* — the opposite
+  of what the residual needed, and superseded by the `break`. Reweighting up is the wrong direction
+  when the fix is to shorten a web.
+  Retro applied 4 of 4 plus 1 retirement (the S261 terminal verdict compressed to its measurements +
+  the S316 correction). Net prompt-surface delta **+917 B** (`loop.md` 46912 → 47103 with three
+  paragraphs compressed in place to fit; `hazards.md` 646008 → 646734). Two process slips, both now
+  ruled: a `sed -i` that resized a banked sibling's array, and a scripted slice whose two `index()`
+  offsets reversed and truncated the file. Push: local.
 - **Sprint 315 (realized)** — the last fresh `main` leaf plus a re-derived carry, both byte-clean on
   the first build. **+2 banked, 1 carried, 1 permuter run (dry), 0 stuck-far, 2 re-opened.** Seed
   5+5pt committed (+5pt stretch), frozen at `8a00fa1` before any `src/` edit; banked **0**pt (host

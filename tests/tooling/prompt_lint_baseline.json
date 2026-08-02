@@ -70,30 +70,30 @@
     "provenance": 0
   },
   "docs/fanout-prompt.md": {
-    "bytes": 4053,
+    "bytes": 4094,
     "caps": 0,
-    "lines": 71,
+    "lines": 70,
     "max_nesting": 1,
     "provenance": 0
   },
   "docs/hazard-index.md": {
-    "bytes": 21666,
+    "bytes": 22504,
     "caps": 0,
-    "lines": 156,
+    "lines": 159,
     "max_nesting": 0,
     "provenance": 0
   },
   "docs/hazards.md": {
-    "bytes": 632701,
+    "bytes": 646734,
     "caps": 0,
-    "lines": 7856,
+    "lines": 8046,
     "max_nesting": 4,
-    "provenance": 80
+    "provenance": 81
   },
   "docs/levers.md": {
-    "bytes": 10233,
+    "bytes": 10114,
     "caps": 0,
-    "lines": 140,
+    "lines": 139,
     "max_nesting": 1,
     "provenance": 0
   },
@@ -105,24 +105,24 @@
     "provenance": 0
   },
   "docs/workflow/fan-out.md": {
-    "bytes": 7051,
+    "bytes": 7938,
     "caps": 0,
-    "lines": 97,
+    "lines": 106,
     "max_nesting": 0,
     "provenance": 0
   },
   "docs/workflow/gates.md": {
-    "bytes": 29984,
+    "bytes": 28220,
     "caps": 0,
-    "lines": 349,
+    "lines": 330,
     "max_nesting": 4,
-    "provenance": 6
+    "provenance": 7
   },
   "docs/workflow/loop.md": {
     "bytes": 47103,
     "caps": 0,
-    "lines": 508,
+    "lines": 483,
     "max_nesting": 4,
-    "provenance": 6
+    "provenance": 2
   }
 }

@@ -25,6 +25,55 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 316 — a TU-wide stamp is not evidence about its unbuilt members (3 of 4) — 2026-08-02
+- Increment: 0 files md5-candidate / **3 functions matched** (`func_80052834` 141/141 at `01ef9ce`,
+  `func_80052A68` 162/162 at `5518f82`, `func_80052CF0` 185/185 at `929a4c3` — the stretch), all in
+  `src/main/func_80052250.c`, which goes 4 → 1 stub. Repo `INCLUDE_ASM` 268 → 265; `main` stubs
+  265 → 262 with `--loose-stubs main` fresh unchanged at **1**. Every bank at the ROM's exact frame.
+  ROM SHA-1 green at the gate, at each of the four commits, and at review (`tools/verify-rom.sh`
+  exit 0). Descriptive names **+0**: all three return domain enums (0-3, 0-2 out-marks, 0-4) with
+  only still-asm callers, so the auto `func_` names were kept per the S247 rule.
+- Quality: 0 stuck-far / **2 permuter runs, both dry** / 1 carried / 1 re-opened.
+- Seed: committed 5+5+5pt at `8023763` (+8pt stretch); banked 0pt (host partial); realized 18
+  committed (residual **+3**) and 9 stretch (residual **+1**); regime classical.
+- What helped: **re-deriving an inherited TU-wide stamp per function.** S183 measured three bodies
+  at 84/128/150 rows and stamped `#pervasive-regalloc-classical-main` on all eight non-trivial
+  siblings. With S314's three, six members have now banked and **none was a register-allocation
+  problem** — the residuals were an addressing form (index temps keep `%lo` in the displacement, the
+  third confirmation of the S314 lever in this TU), a branch sense, an argument evaluation order
+  (`g(arg1) + 1 >= g(arg0)` lets gcc fuse the saved `move` into `addiu`; the bare call first does
+  not), four loop-init placements, one pointer reused across three loops, and a signed-vs-unsigned
+  switch selector. Two levers generalise: *where* a loop-invariant read is written decides whether
+  gcc hoists it (`loop.c:715` `may_trap_p` + `loop.c:930` `maybe_never` — only a read at the top of
+  the body reaches the preheader), which with the array-element base spelling **retired S261's
+  "mutual exclusion, terminal for source" verdict**; and an allocno web can be shortened
+  structurally, `break` through a shared `return` moving `func_80052CF0`'s result past two allocnos
+  in one edit.
+- Friction: **both permuter runs were dry and one pointed the wrong way.** 188k iterations on
+  `func_8005244C` (base 735 → 380) produced only re-spellings of the same anchor; `func_80052CF0`'s
+  best candidate was a `do {} while (0)` that raised two allocnos *together*, the opposite of what a
+  result-web-too-long residual needs, and the `break` that fixed it made the candidate unnecessary.
+  Second friction, self-inflicted and repeated: a `sed -i` anchored on `  s32 mag;` resized a banked
+  sibling's array, and a Python splice built from two `s.index()` calls reversed — the end marker was
+  defined earlier in the file than the start marker — silently truncating the file and duplicating a
+  function. Third: `pkill -f` was used to stop a background permuter, which the conventions forbid
+  precisely because the pattern also matches the calling shell; it killed the shell.
+- Applied: 4 of 4 — #1 (loop-invariant read-placement sub-lever in
+  `#indexed-vs-pointer loop`), #2 (shorten an allocno web structurally before reweighting), #3
+  (pointer/index spanning two loops is a structural symptom, split before reading priorities),
+  #4 (scripted-slice offset-ordering assert). Retirement: the S261 terminal verdict in
+  `#base-register-vs-displacement` compressed to its three measurements plus the S316 correction.
+  Net prompt-surface delta **+917 B** (`loop.md` 46912 → 47103, three paragraphs compressed in place
+  to fit under budget; `hazards.md` 646008 → 646734). Suggestion #5 (rewriting the S183 stamp
+  paragraph in `BACKLOG.md`) was offered as the alternative retirement and **not selected**; the
+  carry-over there was updated factually instead.
+- Carry-over: `func_8005244C` (`src/main/func_80052250.c`) at **93 of 94** with the ROM's exact
+  `-0x28` frame, every register matching, and the loop-bound load in the ROM's own preheader position
+  and `-0x8(s4)` form. Sole residual: one unfilled guard delay slot — reorg reaches past the
+  non-movable `lw` and steals the `sll` behind it. Untested hypothesis (branch prediction in
+  `fill_eager_delay_slots`, check with `-dd`) and the replayable body are in
+  `docs/wip/func_8005244C.near-match.md`; the permuter has **not** been re-run against this body.
+
 ## Sprint 315 — both carries fell to declarations, not levers — 2026-08-02
 - Increment: 0 files md5-candidate / **2 functions matched** (`func_8005B150` 79/79 →
   `rank_scores_descending`, `func_8005CEE0` 38/38 → `is_roster_entry_locked`, both in

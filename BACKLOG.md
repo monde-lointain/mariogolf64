@@ -48,6 +48,18 @@ see `docs/wip/func_800990D0.near-match.md` (`--carried-check` flags it). Backup 
 (294-instr wall-prone debug handler, its own slice). STANDING GUIDANCE: prefer a FRESH non-main pack
 next unless a specific main leaf is pre-vetted `.s`-clean.**
 
+**S316 CLOSES THAT FILE TO ONE STUB — the stamp is spent as evidence (6 members built, 0 register
+problems).** S316 took the remaining three plus the never-built stretch: `func_80052834` 141/141
+(`01ef9ce`), `func_80052A68` 162/162 (`5518f82`), `func_80052CF0` 185/185 (`929a4c3`), leaving only
+`func_8005244C` at 93/94. None was a coloring problem either. Two levers from it generalise and are
+now in `docs/hazards.md`/`docs/workflow/loop.md`: *where* a loop-invariant memory read is written
+decides whether gcc hoists it (`loop.c:715` `may_trap_p` + `loop.c:930` `maybe_never` — only a read
+at the top of a branching loop's body reaches the preheader), which together with the array-element
+base spelling **retired S261's "mutual exclusion, terminal for source" verdict** on
+`#base-register-vs-displacement`; and an allocno web can be shortened *structurally* — `break`
+routing a local `return var;` through a shared `return` moved a result allocno past two others in
+one edit, where the permuter's reweighting candidate raised both together and never zeroed.
+
 **S314 RETIRES A TU-WIDE WALL VERDICT AND BANKS 3 OF 3 — re-derive an inherited stamp per function.**
 `src/main/func_80052250.c` was stamped `#pervasive-regalloc-classical-main` on all 8 non-trivial
 siblings at S183, generalised from three built diffs; S314 took its three smallest
@@ -5117,27 +5129,31 @@ by `/sprint-plan`:
   - Near-match seeds in `nonmatchings/<fn>/base.c`. **Retry:** the `resolve_shot_quality_table` near-free replay
     (carve done) OR a permuter/`#cross-project-matched-corpus-mining` increment (the 3 regalloc fns + the FP-pair
     parents). No cross-repo name sync.
-- **(S183 MIXED-PARTIAL — carried; 5 of 9 banked; the "definitive pervasive-regalloc TU" verdict is
-  RETIRED, S314)** `src/main/func_80052250.c` (main-segment `[0x2D650]` game-code pack). Five
-  functions are banked byte-exact (two at S183, three at S314 — see the S314 note in
-  `## Active phase`). FOUR `INCLUDE_ASM` stubs remain → NOT md5-candidate. **No enablers left**
-  (subseg `[0x2D650, c, main/func_80052250]`; refs all placed; NO rodata carve; auto `func_` names
-  kept). **S314 banked 3 of 3 of this TU's smallest carries and not one was a register-allocation
-  problem, so the TU-wide stamp S183 generalised from three built diffs (84/128/150 rows) is not
-  evidence about the four below.** Each of the four still carries only that generalisation:
-  - **`func_8005244C`** (0x8005244C, 376 B) — 89 vs 94, 89-short. The only member with no individual
-    wip doc; never separately characterised. Read its structural deficit before pricing it.
-  - **`func_80052834`** (0x80052834, 564 B) — 136 vs 141, shared-convergence-block structure
-    (`L944` reached from two paths). A structure question, which is the class S314 cracked three times.
-  - **`func_80052A68`** (0x80052A68, 648 B) — 165 vs 162, output-param 3-loop,
-    `single-callee:func_80052324`.
-  - **`func_80052CF0`** (0x80052CF0, 740 B) — decoded, never built; `switch(D_801B608C)` game-mode
-    dispatcher, 17 jals. It was carried purely on the 8/8 pattern that has now failed three times, so
-    it is an unattempted leaf, not a wall. Check `#switch-jtbl-dispatch` before pricing.
+- **(S183 MIXED-PARTIAL — carried; 8 of 9 banked; the "definitive pervasive-regalloc TU" verdict is
+  RETIRED, S314 + S316)** `src/main/func_80052250.c` (main-segment `[0x2D650]` game-code pack).
+  Eight functions are banked byte-exact (two at S183, three at S314, three at S316). **ONE
+  `INCLUDE_ASM` stub remains → NOT md5-candidate, and it is the only thing between this file and
+  md5-candidate.** **No enablers left** (subseg `[0x2D650, c, main/func_80052250]`; refs all placed;
+  NO rodata carve; auto `func_` names kept — every banked member returns a domain enum whose callers
+  are all still-asm). **The S183 stamp is spent as evidence: six of its members have now been built
+  and banked across two sprints and not one was a register-allocation problem** — the residuals were
+  addressing forms, branch senses, an argument evaluation order, loop-init placements, a pointer
+  reused across three loops, and a signed-vs-unsigned switch selector.
+  - **`func_8005244C`** (0x8005244C, 376 B) — **93 of 94** at the ROM's exact `-0x28` frame, every
+    register matching, and the loop-bound load already in the ROM's own preheader position and
+    `-0x8(s4)` form. Sole residual: one unfilled guard delay slot (reorg reaches past the
+    non-movable `lw` and steals the `sll` behind it). **Not a coloring or an addressing question any
+    more** — S316 retired the S261 mutual-exclusion verdict here with two levers, both recorded: the
+    array-element base spelling (`extern s32 D_801B60A0[]`, read as `[0]` and `[-2]`) and reading the
+    bound at the TOP of the loop body so `maybe_never` is still 0 when `loop.c:715` sees it. The
+    replayable body, the eight refuted spellings with their instruction counts, and the one untested
+    hypothesis (branch prediction in `fill_eager_delay_slots`, check with `-dd`) are in
+    `docs/wip/func_8005244C.near-match.md`. The permuter has **not** been re-run against this body —
+    do that first.
   **Retry checklist (near-free):** (1) subseg flip DONE; (2) all refs placed (`D_800C1435`,
-  `D_801B71F6/F9/FB`, `D_801B6090/98`, `D_801B60A0`, `scenario_mode_id`, plus the five banked
-  siblings' callees), NO carve; (3) NO recover-externs; (4) classical; (5) four wip docs remain in
-  `docs/wip/`, and the three the sprint banked moved to `docs/wip/banked/`; (6) TU `#profile-probe`
+  `D_801B71F6/F9/FB`, `D_801B6090/98/8C`, `D_801B60A0`, `scenario_mode_id`, plus the eight banked
+  siblings' callees), NO carve; (3) NO recover-externs; (4) classical; (5) one wip doc remains in
+  `docs/wip/` (`func_8005244C`); the S316 banks retired theirs; (6) TU `#profile-probe`
   = -O2, no flag flip.
 
 - **(S182 MIXED-PARTIAL — carried; 3 of 7 banked)** `src/main/func_8004D190.c` (the VI/framebuffer +

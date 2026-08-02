@@ -223,15 +223,15 @@ Two notes that are two-tool interactions rather than properties of any one tool.
 **Residual classification routes the lever.** Count by region first, splitting at the loop-head
 labels, and histogram mnemonics per region; on a permutation `cmpfn`'s hunk alignment is
 meaningless, and `+5` against an adjacent `-5` is one displacement, not five missing insns (S297).
-Then, from a fresh object: a differing count is a structural deficit,
-so fix that first; an exact count with differing registers is a coloring or `local-alloc` question;
-an exact count with differing order is a scheduler question. Do not argue
-register pressure, live length or "needs an Nth register" from a body that is not at exact instruction
-count -- two strongly-worded terminal verdicts were refuted that way once their bodies reached exact
-count. The register count is itself a structural symptom, so "one more callee-saved register than the ROM"
-is never on its own evidence of a coloring problem: an extra induction
-variable, an aliasing exemption that lets loads clump, or a wrong return type each show up first as a
-surplus register. Fix the structure, then re-count.
+Then, from a fresh object: a differing count is a structural deficit, so fix that first; an exact
+count with differing registers is a coloring or `local-alloc` question; an exact count with differing
+order is a scheduler question. Do not argue register pressure or live length from a body not at exact
+count -- two terminal verdicts were refuted that way once their bodies reached it. The register count
+is itself a structural symptom, so "one more callee-saved register than the ROM" is never on its own
+evidence of a coloring problem: an extra induction variable, an aliasing exemption that lets loads
+clump, or a wrong return type each show up first as a surplus register. So does one pointer or index
+spanning two loops -- split it per loop before reading priorities (S316). Fix the structure, then
+re-count.
 
 Once the count is exact and the residual is registers, the next action is named:
 `venv/bin/python3 tools/allocno_report.py <src.c> <fn>` prints every allocno in
@@ -241,8 +241,10 @@ register order off the `.s` and find where the two orders diverge; the arithmeti
 applies. A priority gap wants refs or live length changed (S296: one merged counter gave `frame` 21
 refs and 5833 against the segment mask's 1875, rotating five registers; splitting it to 7 refs and
 1068 landed all five). A tie wants allocno order changed, which block-scoping one of the pair does
-(S296: `keyframe` and `keyframeIndex` both scored 6666). Not a last resort for the terminal
-permutation class it was introduced for -- it is how you stop guessing on any leaf.
+(S296: `keyframe` and `keyframeIndex` both scored 6666). Shorten the web structurally first:
+`break` routing a local `return var;` through a shared `return` moved `func_80052CF0`'s result past
+two allocnos where the permuter never zeroed (S316). Not a last resort for the terminal permutation
+class it was introduced for -- it is how you stop guessing.
 
 **Write and read a `docs/wip/<fn>.near-match.md` in two halves: what was measured (counts, frame,
 which registers and which ordering differ, what was built) and what was attributed to it (which
@@ -261,20 +263,19 @@ These apply regardless of hazard. Hazard-specific procedures are in `docs/hazard
 below).
 
 - **One function at a time.** `pick_target.py` ranks (smallest-first); you pick the target.
-- **Never rewrite a partial-bank `src/<seg>.c` with a scripted whole-region splice, or a scripted
-  whole-file `replace` (S257; recurred S259; recurred as substitution S312, where a permuted line
-  also existed verbatim in a banked sibling and the gate build reddened on 3 bytes in a function the
-  sprint never touched). Guard: anchor a scripted substitution on text carrying the function name,
-  and `git diff` afterwards to confirm every hunk is inside the target function.** An anchor unique
-  in one function is routinely not unique in its file (S315: a `sed -i` on `s32 flags[N];` also
-  rewrote a sibling's array size, surfacing only as an md5 mismatch). **Use `Edit` with an exact
-  `old_string`. If a script is genuinely needed, assert both counts across the rewrite** —
-  `grep -c 'INCLUDE_ASM'` (must change by exactly the number of functions promoted, 0 for an in-place
-  body edit) and the file's function list, diffed before and after. S257 and S259 were the same
-  mechanism in opposite directions, a splice between anchors that looked adjacent in the author's
-  head and were not adjacent in the file: three `INCLUDE_ASM` stubs with their carry comments (S257),
-  then two banked one-line siblings (S259 `func_8006D1FC`, `func_8006D208`), each surfacing only at
-  link.
+- **Never rewrite a partial-bank `src/<seg>.c` with a scripted whole-region splice or whole-file
+  `replace`. Guard: anchor a scripted substitution on text carrying the function name; for a
+  scripted slice, assert the two offsets are ordered; and `git diff` afterwards to confirm every
+  hunk is inside the target function.** An anchor unique in one function is routinely not unique in
+  its file, and a slice built from two `index()` calls silently reverses when the end marker is
+  defined earlier in the file than the start marker -- that one truncates the file and duplicates a
+  function, invisible until the compiler reports a duplicate definition (S316; both fired again that
+  sprint). **Use `Edit` with an exact `old_string`. If a script is genuinely needed, assert both
+  counts across the rewrite** — `grep -c 'INCLUDE_ASM'` (must change by exactly the number of
+  functions promoted, 0 for an in-place body edit) and the file's function list, diffed before and
+  after. Case law: S257/S259 spliced between anchors that looked adjacent and were not (three stubs
+  with their carry comments; two banked one-line siblings), S312 hit a line that also existed
+  verbatim in a banked sibling, S315 a `sed -i` on `s32 flags[N];` that resized a sibling's array.
 - **Never `rm -rf` an `asm/nonmatchings/<seg>/<stem>/` directory (or bulk-delete its `.s`) to "force
   a regen" (S271, hard rule).** splat's `c`-mode `make extract` does not reproduce every still-asm
   stub: it leaves disassembly gaps at some curated / decompose-split function addresses, so those
