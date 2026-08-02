@@ -25,6 +25,51 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 313 — the residual was the block move's scratch registers (0 banked, 2 carries deepened) — 2026-08-02
+- Increment: 0 files / **0 functions matched**. Repo `INCLUDE_ASM` 273 → 273; `--loose-stubs main`
+  270 → 270, fresh 1 → 1; curated `type:func` names 375 → 375. ROM SHA-1 green at every commit
+  (`tools/verify-rom.sh` exit 0 at the gate, after each revert, and at review).
+- Quality: 0 stuck-far / **1 permuter-escalated** (base 350 vs S309's 915, ~82k iterations, no zero,
+  no lever) / **2 carried** / **2 re-opened**.
+- Seed: committed 5pt at `5546684` (+8pt stretch); banked 0pt; realized 8 for the committed item
+  (residual +3), 13 for the stretch; regime classical.
+- What helped: **re-deriving the residual instead of inheriting it.** `func_8007399C`'s doc named
+  `sched.c`'s birthing boost, which is real but not what the schedule buys. Reading `-dS`, `-dR`,
+  `-dl`/`-dg` and the object end to end produced the actual chain: `w = <aggregate>` is one
+  `movstrsi_internal` whose four `match_scratch "=&d"` temps take the lowest free `d` registers at
+  that insn, so everything live across the copy conflicts with all four and a global allocno
+  allocated afterwards can lose the ROM's register to a scratch. The ROM's set is `v0,v1,a1,a2`
+  (readable with no build: the copy's `la` temp is the top of the set), which is what leaves `$a3`
+  for `player`. Getting that set required spelling `D_800D16C0` as the local aggregate initializer it
+  is — a 12-byte zero blob sitting immediately before `jtbl_800D16D0` is a constant pool, not an
+  extern. With a tenth block-0 insn added, the ROM's **first 25 instructions came out exactly**, at
+  +2 `move`. Best body 70 → 68 rows at exact count and frame.
+- Also closed: **the one class S309 left open.** A second `SET` on the out-pointer is either
+  unconditional (the first becomes dead and `flow` deletes it) or conditional (the loop drops out of
+  the variable's live range, its `allocno_compare` priority passes the other out-parameter's, and
+  which of the two spills flips — +3). Six placements measured. And on the stretch, R2 is an **exact
+  qty tie** (`2 refs / len 14` × 3), so `local-alloc` decides on birth order and the thirteen
+  weight-editing forms tried across S310 and S313 were the wrong family entirely.
+- Friction: two. (a) **A carry-crack slice was priced at the band of its remaining diff, not of its
+  unknown.** "One legal source form" read as 5 points; the requirement was met three different ways
+  and each moved the cost elsewhere. (b) Two scripted `python` edits to `src/` misfired again — one
+  duplicated a 17-line preamble, one asserted against a stale slice — on a file the convention
+  already covers. The guarded splice that *did* work asserted the `INCLUDE_ASM` count across the
+  rewrite, which is exactly what the convention prescribes.
+- Applied: 5 of 5 — #1 `aggregate-copy-scratch-clobbers` in `docs/levers.md` plus Axis 0b of
+  `#loop-weight-and-live-length-regalloc-steering`; #2 the initializer-pool tell in
+  `#rodata-sibling-yaml-pattern`; #3 `cmpfn` on a nested child prints `no symbol` permanently, in
+  `#nested-function-static-chain-spill`; #4 wip-doc row counts carry their `cmpfn` sprint, in
+  `gates.md`; #5 `tools/allocno_report.py` prints a `TIE` flag for equal `(refs, len)` plus Axis 0 of
+  the same playbook. Retirement (PO-selected): `global-allocno-compare-livelength-biv-order` merged
+  into `scope-and-live-range-steer-allocation`, keeping `global.c:587`, `global.c:790-823` and
+  `local-alloc.c:472/1290/1587`. Net: `docs/levers.md` 10176 → 10235 (**+59**, still under budget),
+  `docs/hazards.md` +2691, `docs/workflow/gates.md` +532; all 18 surfaces pass `prompt_lint check`,
+  `make test-tools` 138 passed.
+- Carry-over: both committed items. `func_8007399C` (`src/main/func_80071370.c`) and
+  `func_8006E210` + `func_8006DFF0` (`src/main/func_8006A2C0.c`), each with a re-open that is now a
+  named search rather than a lever hunt.
+
 ## Sprint 312 — the register allocation was a source fact about variable reuse (1 banked) — 2026-08-01
 - Increment: 0 files / **1 function matched** — `func_8008E82C` → `run_fog_debug_editor`, 696
   instructions, exact count and exact frame. `src/main/func_8008D100.c` 12 → 11 stubs (not

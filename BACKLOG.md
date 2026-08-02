@@ -48,6 +48,22 @@ see `docs/wip/func_800990D0.near-match.md` (`--carried-check` flags it). Backup 
 (294-instr wall-prone debug handler, its own slice). STANDING GUIDANCE: prefer a FRESH non-main pack
 next unless a specific main leaf is pre-vetted `.s`-clean.**
 
+**S313 SPENT ITS SPRINT ON THE TWO `main` CARRIES AND BANKED NEITHER — price the next carry-crack
+slice at the band of its unknown, not of its remaining diff.** `--loose-stubs main` is unchanged at
+270 stubs / **1 fresh** (`func_80089094`, 13452 B). Both committed items reached the state their docs
+promised on the first build (`func_8007399C` 149/149 at `-0x50`; `func_8006E210` 543/543 at `-0x60`)
+and both then cost their whole budget on one register. **The two mechanisms are now named, and both
+are re-usable across the segment:** an aggregate copy is one `movstrsi_internal` whose four
+`match_scratch` temps take the lowest free `d` registers, so what is live at the copy decides which
+register a later-allocated global allocno can hold (`aggregate-copy-scratch-clobbers`, Axis 0b of
+`#loop-weight-and-live-length-regalloc-steering`); and an exact `(refs, len)` tie in
+`allocno_report.py`'s local table means birth order decides, so weight edits cannot move it — the
+report now flags it `TIE`. **Ordering guidance for S314: do not re-open either carry as a headline
+item.** `func_8007399C` needs a free tenth block-0 insn (its `ow`-twice form is +2 `move`) and
+`func_8006E210` needs an emission-order change in the tail copy loop; both are open searches, not
+lever hunts. Prefer a fresh non-`main` pack, or `func_80089094` priced honestly as a multi-sprint
+vertical slice.
+
 **S312 LEAVES ONE FRESH ROW IN `main`, and the carve verdict is 7-for-7.**
 `--loose-stubs main` reads 270 stubs / **1 fresh**: `func_80089094` (13452 B, `fp-mixed`), the
 largest row the segment has. `func_8008E82C` -> `run_fog_debug_editor` (696 instructions) banked
@@ -4005,6 +4021,16 @@ by `/sprint-plan`:
   (`jtbl-carveable` / `jtbl-carve-blocked` / `pool-cohort:<fn>,...`); read the membership off it
   rather than by hand, since S307's hand derivation missed a member. Do not call such a leaf a
   spike: nothing about its codegen is stuck.
+- **`func_8006E210` + `func_8006DFF0`** (`src/main/func_8006A2C0.c`, S310 -> S313) — S313 replayed
+  the doc's body verbatim (543/543 at the exact `-0x60` frame, first build, carve links) and
+  re-measured both parent clusters. R1 re-confirmed: the natural in-block `col = 5` costs +2 and
+  gains an `andi`, the `jump.c` store-flag conversion, so S310's both-arms form stands. **R2 is an
+  exact qty tie, not a priority gap** — `allocno_report.py` prints the copy loop's three block-local
+  quantities at `2 refs / len 14` each, so `local-alloc` falls through to birth order and no
+  ref-count or live-length edit can move them; thirteen weight-editing forms are now refuted across
+  the two sprints. A re-open is an emission-order search (the ROM's order is sum, `j`, `j * 2`; the
+  build's is sum, `j * 2`, `j`). Note `cmpfn func_8006DFF0` prints `no symbol` permanently — a nested
+  child has none; read it out of the parent object. Below, the S310 framing:
 - **`func_8006E210` + `func_8006DFF0`** (`src/main/func_8006A2C0.c`, S310 ->) — a GCC nested PAIR,
   one slice of 679 instructions. Both halves at the ROM's exact count and exact frame (543/543 at
   `-0x60`, 136/136 at `-0x40`); ~20 instructions differ in three clusters (a jump.c store-flag
@@ -4070,8 +4096,18 @@ by `/sprint-plan`:
   `NU_CONT_THREAD_ID=6` vs MG64's 5), and that surfaces only at first build unless reconciled here.
   A near-free retry missing any of these is a half-scoped spike — finish the scope before deferring.
 
-- **(S307 -> S309 SPIKE — exact count and exact frame; the requirement is measured, so a re-open is a
-  search for one legal source form, not for a lever)** `func_8007399C`,
+- **(S307 -> S309 -> S313 SPIKE — the requirement is measured *and* the last named untried class is
+  now refuted; a re-open is an open search, so price it as one)** `func_8007399C`,
+  `src/main/func_80071370.c`. S313 replayed it exactly (149/149, `-0x50`, 70 rows), then re-derived
+  the residual: the gate on the `player` allocno reaching `$a3` is the block move's four
+  `match_scratch` registers, not the `sched.c` boost by itself, and the ROM's scratch set requires
+  the `D_800E1C48` row-table load to stay below the copy. Spelling `D_800D16C0` as the local
+  aggregate initializer it is (`LineWidths w = {0,0,0};`) plus a tenth block-0 insn reproduces **the
+  ROM's first 25 instructions exactly**, at +2 `move`; best body is now 68 rows. The re-open needs a
+  *free* tenth block-0 insn — a body copy whose source parameter is dead after it, which nothing
+  measured so far provides. Permuter base 350 (was 915), ~82k iterations, no zero, no lever. Full
+  chain, the seven-row state table and the six refuted second-`SET` placements are in
+  `docs/wip/func_8007399C.near-match.md`. Older framing, still true as far as it goes:
   `src/main/func_80071370.c`. 149 of 149 at the ROM's `-0x50` frame, 70 `cmpfn` lines, semantics
   confirmed against its caller. Not cohort-blocked (S308 banked both siblings); its carve is the
   one-line `[0xACB38]` -> `[0xACAD0]` move, size 0x178. **S309 restated the residual as two

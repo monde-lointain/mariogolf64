@@ -1526,6 +1526,35 @@ Three honest caveats:
   and `main`'s fresh vein is now one row. Tooling: three of the sprint's four accepted suggestions
   were tools this sprint had to hand-roll (`cmpfn.sh` histogram, `tools/seg_diff.py`,
   `tools/gbi_match.py`).
+- **Sprint 313 (realized)** — the first sprint whose whole increment is characterisation: two
+  measured carries re-opened, neither banked. **0 banked, 2 carried, 1 permuter run (0 zeros, 0
+  levers), 0 stuck-far, 2 re-opened.** Seed 5pt committed (+8pt stretch), frozen at `5546684` before
+  any `src/` edit; banked **0**pt; **realized 8** for the committed item (seed 5 **+1** permuter
+  escalation **+1** re-attempt **+1** carry), residual **+3**; the stretch scores 13 (seed 8 **+1**
+  re-open, snapped). Regime classical. Progress **0** matched; repo `INCLUDE_ASM` 273 → 273; `main`
+  stubs 270 → 270, fresh **1 → 1**; descriptive names unchanged.
+  **The pricing error is the lesson, and it is a gate error, not an execution one.** A carry whose
+  doc states an exact requirement ("one legal source form that gives this pseudo a second `SET`")
+  reads like a 5-point unit and is really a research unit: the requirement was met three separate
+  ways this sprint, and each one moved the cost somewhere else. Price a carry-crack slice at the
+  band of its *unknown*, not of its remaining diff.
+  **What the sprint bought instead.** `func_8007399C`'s residual moved from "the `sched.c` birthing
+  boost defers the parameter copy" to a four-step chain ending at the block move's scratch
+  registers: an aggregate copy is one `movstrsi_internal` whose four `match_scratch` temps take the
+  lowest free `d` registers, so what is live at the copy decides which register a *later-allocated*
+  global allocno can have. That is now `aggregate-copy-scratch-clobbers` plus Axis 0b of the
+  regalloc-steering playbook, and it reproduced the ROM's first 25 instructions exactly (at +2
+  `move`). Two side findings: a short zero blob in front of a jump table is a local aggregate
+  initializer's pool, not an extern; and the S309 "second `SET`" class is now closed in both
+  directions (unconditional → `flow` deletes the first; conditional → the loop leaves the live
+  range, flipping which out-parameter spills).
+  **`func_8006E210` R2 turned out to be un-steerable by weight.** `allocno_report.py` prints its
+  three copy-loop quantities at `2 refs / len 14` each — an exact tie, where `local-alloc` falls
+  through to birth order — so the ten forms S310 refuted and the three this sprint added were all
+  the wrong family. The report now prints a `TIE` flag for exactly this case.
+  **Permuter:** base **350** against S309's 915 on the same function, ~82k iterations, no zero, and
+  its best candidate was a semantically wrong `char` truncation rather than a lever. Consistent with
+  the standing plateau note for multi-register permutations.
 - **Sprint 312 (realized)** — a 696-instruction fresh row whose whole residual was register
   allocation. **+1 banked, 0 carried, 5 permuter runs (0 zeros, 3 levers), 0 stuck-far, 0
   re-opened.** Seed 8pt, frozen at `63d7bab` before any `src/` edit; banked **0**pt (host partial,

@@ -26,21 +26,23 @@ by wrapping in `if (n != 0)`, S306), `#loop-weight-and-live-length-regalloc-stee
 - **cross-call-live-range-callee-saved-lever** -- declare a post-call value *before* the call to force
   a callee-saved register; initializing it after is the inverse.
 
-- **global-allocno-compare-livelength-biv-order** -- register order follows
-  `floor_log2(nref)*nref/live_length` (`global.c:587`), which also tiers `local-alloc` quantities and
-  spills a long-lived few-reference parameter (S289). Read it with `tools/allocno_report.py`, compute
-  the window the ROM's register implies, then pick the knob landing in it: an eighth reference, a free
-  bound copy `n = bound;` (S288), or `do {} while (0)` round a subset, reweighting only those refs
-  (S292; also bars the sched hoist, S287). `find_reg` takes callee-saved first.
-- **scope-and-live-range-steer-allocation** -- scope and live range pick a value's register and
-  whether its copy survives (`global.c:790-823`, `local-alloc.c:472/1290/1587`); reuse also pulls a
-  load forward by anti-dependency. Knobs, in order of yield: give each region its own short-lived
-  local when one variable stretches an allocno across both (S308; S310 moved `col` s1 -> s0 and 40
-  diff lines); split a value spanning two loops, but only what must die between them; name a temp to
-  end a range early; hoist a block-local temp to function scope, or the reverse. Merging is the
-  inverse and the only knob when live length cannot win: one variable shared across two disjoint
-  regions jumps `n_refs` a `floor_log2` tier, the tell being the ROM spending one register on both
-  (S312). Playbook and the `.greg` method: `#loop-weight-and-live-length-regalloc-steering`.
+- **scope-and-live-range-steer-allocation** -- register order follows
+  `floor_log2(nref)*nref/live_length` (`global.c:587`), which also tiers `local-alloc` quantities,
+  spills a long-lived few-reference parameter (S289) and decides whether a copy survives
+  (`global.c:790-823`, `local-alloc.c:472/1290/1587`); reuse also pulls a load forward by
+  anti-dependency. Read the numbers with `tools/allocno_report.py`, compute the window the ROM's
+  register implies, then pick the knob landing in it: an eighth reference, a free bound copy
+  `n = bound;`, `do {} while (0)` round a subset (S292; also bars the sched hoist), a short-lived
+  local per region, a split of a value spanning two loops, a temp ending a range early, or a
+  block-local temp hoisted to function scope (S308). Merging is the inverse and the
+  only knob when live length cannot win: one variable across two disjoint regions jumps `n_refs` a
+  `floor_log2` tier, the tell being the ROM spending one register on both (S312). `find_reg` takes
+  callee-saved first. **Equal `refs` and `live_length` ends this family: birth order then decides,
+  so the lever is emission order** (S313). Playbook, `.greg` method and tie:
+  `#loop-weight-and-live-length-regalloc-steering`.
+- **aggregate-copy-scratch-clobbers** -- a struct/array copy is one `movstrsi_internal` whose four
+  `match_scratch` temps take the lowest free `d` registers there, so anything live across it
+  conflicts with all four; its `la` temp names the set's top (S313).
 - **dead-frame-levers** -- for a frame-only diff: `s32 unused[(ROM_frame-0x18)/4]`, `str[row]` (keeps
   base and index live), or an uninit local plus `volatile s32 s = g;`. Split point: arrays slot at
   `expand_decl`, an address-taken scalar only at the first `&x` and after every function-scope

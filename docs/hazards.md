@@ -1474,6 +1474,14 @@ correct VRAM. `should_self_split()` = False for dot-prefix types (no asm file ex
 initialized arrays, this `.rodata` carve pairs with a `.data` carve; see the
 [dual-section carve note](#defines-data).
 
+**A short zero blob immediately before a jump table, in the same object's pool, is a local aggregate
+initializer — not an extern (S313).** `D_800D16C0` (12 zero bytes, directly ahead of
+`jtbl_800D16D0`) is the constant pool of `LineWidths w = {0, 0, 0};`. Spelling such a symbol as an
+`extern` and copying from it reproduces the same block move but leaves the pool in the extracted
+blob, so the object's own `.rodata` does not contain what the carve boundary expects; spelling it as
+the initializer emits the pool into the object, in front of the function's own jump table. The pool's
+position relative to that table is the confirmation.
+
 **Trigger:** A libultra/libkmc/libnaudio file with a compiler-generated rodata constant at a different
 ROM offset than its text (e.g. a `2^32` double, or the `MAX_RATIO` 1.99996 double a resampler clamps
 against). `pick_target.py` pre-flags this as `rodata-literal:0x<vram>[,0x<vram>…]` on a mirror
@@ -5115,6 +5123,25 @@ values wins an earlier caller-saved reg. Before concluding "irreducible," the KM
 priority `floor_log2(n_refs)*n_refs / live_length` (global.c:594-601) is steerable from C source along
 two independent axes.
 
+**Axis 0 — read the report first, and stop if it prints a tie.** `venv/bin/python3
+tools/allocno_report.py <src.c> <fn>` prints both tables, and its local-quantity rows carry a `TIE`
+marker when two quantities match on **both** `refs` and `live_length`. A tie is not a narrow priority
+gap: `local-alloc` then falls through to birth order, so no axis below can move the assignment and
+the only lever is the emission order of the two computations. S313 spent three builds on
+weight-editing forms (a `do {} while (0)` wrapper, an index temp, a value temp) against
+`func_8006E210`'s tail copy loop before reading three quantities all at `2 refs / len 14`.
+
+**Axis 0b — an aggregate copy's scratch registers, before any axis below.** A struct or array
+assignment compiles to one `movstrsi_internal` (`mips.md:3587`) whose four temporaries are
+`match_scratch "=&d"`: `local-alloc` fills them from the lowest-numbered free `d` registers **at that
+insn**, so every pseudo live across the copy conflicts with all four, and a *global* allocno
+(allocated afterwards) can be pushed off the ROM's register by a scratch. Read the set with no build:
+the copy's `la`/`lui` address temp is the top of it (`lui a2` = `v0,v1,a1,a2`; `lui t0` = the set ran
+past `$a3`). The knob is what is live at the copy — typically the sched1 order of a neighbouring load
+against it — not any spelling of the copy itself. S313 `func_8007399C`: the 5th-argument allocno
+reaches the ROM's `$a3` only when the `D_800E1C48` row-table load stays *below* the copy, which frees
+`$v0` and stops the scratch set at `a2`.
+
 **Axis 1 — loop-weight (the numerator).** `reg_n_refs` is loop-depth-weighted: flow.c:2067
 `reg_n_refs[regno] += loop_depth` (also :2315/:2501/:2711). `loop_depth` starts 1 (flow.c:434) and
 increments +1 only at a `NOTE_INSN_LOOP_BEG` (flow.c:441), which `expand_start_loop` emits for every
@@ -6581,6 +6608,12 @@ indexed, hm64 `(a+b+c)/3` multi-term, marioparty3 `x/10%10` CSE). Corrects the S
 `#dead-frame-reload-artifact-regalloc-wall` "irreducible" framing.
 
 ## nested-function static-chain spill
+
+**Once the child is written as a nested function, `tools/cmpfn.sh <child>` prints
+`no symbol <fn> in <obj>` permanently (S313).** gcc emits a nested child without a symbol of that
+name, so the message's "rebuild it, do not read this as a regression" advice does not apply here and
+a rebuild loop never clears it: disassemble the parent object and read the child out of it
+(`mips-linux-gnu-objdump -dz` on the host `.o`). Only the parent is `cmpfn`-addressable.
 
 **Rule.** A leaf function that opens with `addiu sp,sp,-8` + a `sw $v0,0(sp)` that is **never
 reloaded** — a dead spill of the *incoming* `$v0` — and whose single caller sets `$v0 = &sp[N]` (a

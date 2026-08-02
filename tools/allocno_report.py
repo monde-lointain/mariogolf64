@@ -38,6 +38,7 @@ left alone, so this is safe to run mid-iteration.
 import argparse
 import math
 import re
+from collections import Counter
 import shutil
 import subprocess
 import sys
@@ -204,11 +205,21 @@ def report(order, info, disp, show_locals):
     if not locals_:
         return
     shown, cap = locals_[:LOCAL_ROWS], len(locals_)
+    # A quantity sharing both refs and live length with another has no priority
+    # gap left: local-alloc falls through to birth order, so no weight edit can
+    # move it and the lever is emission order. Mark those rows.
+    tied = {
+        key
+        for key, count in Counter(info.get(p, (0, 0)) for p in locals_).items()
+        if count > 1
+    }
     print("\nlocal quantities by live length (local-alloc; ties on birth order when call-free)")
-    print(f"{'pseudo':>8} {'refs':>5} {'len':>5}  reg")
+    print("  TIE = equal refs AND len, so birth order decides: the lever is emission order, not weight")
+    print(f"{'pseudo':>8} {'refs':>5} {'len':>5}  reg   flag")
     for pseudo in shown:
         refs, length = info.get(pseudo, (0, 0))
-        print(f"{pseudo:>8} {refs:>5} {length:>5}  {reg_name(disp[pseudo])}")
+        flag = "TIE" if (refs, length) in tied else ""
+        print(f"{pseudo:>8} {refs:>5} {length:>5}  {reg_name(disp[pseudo]):<4}  {flag}".rstrip())
     if cap > LOCAL_ROWS:
         print(f"  ({cap - LOCAL_ROWS} shorter-lived quantities not shown)")
 

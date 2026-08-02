@@ -160,6 +160,12 @@ dashboard). Target selection is `tools/pick_target.py`, not a stored roadmap.
         equilibrium. Name the tell beside the rejected leaf in `SPRINT.md ## Committed backlog`, and
         read "rejected twice, never attempted" as the tell being unproven, not confirmed: at the
         third encounter either attempt the leaf or drop it, rather than re-rejecting it.
+  - **A `cmpfn` row count in a `docs/wip/<fn>.near-match.md` is only comparable to the `cmpfn` that
+    produced it, so record the sprint alongside it (S313).** S310 wrote 17 rows for `func_8006E210`;
+    the same object reads 32 today because `cmpfn` gained frame, stack-slot and branch-target
+    surfacing after that sprint. At a re-open, treat a changed count as tooling until a rebuild says
+    otherwise — the instruction count and frame are the stable numbers to compare. Write new counts
+    as `rows (cmpfn as of S<N>)`.
   - **A compiler-source dive's "proven wall" conclusion is a hypothesis too (S292).** A dive's pass
     citation is usually right; its closing claim that *no source form reaches the other side* is a
     negative claim over a space the dive could not measure before `tools/allocno_report.py` existed.
