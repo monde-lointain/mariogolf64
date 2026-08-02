@@ -47,7 +47,7 @@ extern char D_801B71D0[];
 
 extern f64 sin(f64);
 extern s32 strcmp(const char*, const char*);
-extern void func_8005B150(s32* keys, s32* order, s32 count);
+extern void rank_scores_descending(s32* keys, s32* order, s32 count);
 
 s32 func_80067D4C(void);
 void func_80068308(void);
@@ -150,7 +150,7 @@ u8 func_800680FC(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
   for (i = 0; i < 30; i++) {
     keys[i] = -D_801B711A[i].score;
   }
-  func_8005B150(keys, order, 30);
+  rank_scores_descending(keys, order, 30);
   for (i = 0; i < 30; i++) {
     saved[i] = D_801B7118[i];
   }

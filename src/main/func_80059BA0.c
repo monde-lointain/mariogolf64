@@ -714,7 +714,35 @@ s32 func_8005B0A0(s32 arg0) { return D_800C2B28[arg0]; }
  * docs/wip/func_8005B0B4.near-match.md. */
 INCLUDE_ASM("asm/nonmatchings/main/func_80059BA0", func_8005B0B4);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80059BA0", func_8005B150);
+void rank_scores_descending(s32* scores, s32* order, s32 count) {
+  s32 keys[count];
+  s32 i;
+  s32 j;
+  s32 k;
+  s32 key;
+  s32 rank;
+
+  for (i = 0; i < count; i++) {
+    order[i] = i;
+  }
+  for (i = 0; i < count; i++) {
+    keys[i] = scores[i];
+  }
+  for (i = 0; i < count; i++) {
+    key = keys[i];
+    rank = order[i];
+    for (j = i - 1; j >= 0 && keys[j] < key; j--) {
+    }
+    if (j < i - 1) {
+      for (k = i; j + 1 < k; k--) {
+        keys[k] = keys[k - 1];
+        order[k] = order[k - 1];
+      }
+      keys[k] = key;
+      order[k] = rank;
+    }
+  }
+}
 
 void func_8005B28C(s32 idx, Struct80131510* src) {
   D_80131510[idx] = *src;
@@ -724,7 +752,7 @@ void func_8005B28C(s32 idx, Struct80131510* src) {
 /* D_80130CF0 is the four-category leaderboard, 4 blocks of 5 Struct80131510
  * records; the block base comes from the low nibble of the record's flag byte
  * at 0x3A, whose high bit gates the whole insert. D_80131510 is the record
- * immediately past it. func_8005B150 ranks `scores` into the index permutation
+ * immediately past it. rank_scores_descending ranks `scores` into the index permutation
  * `order`. Byte 0x3A is read twice, once signed for the high-bit test and once
  * unsigned for the nibble, which is what the ROM's `lb`/`lbu` pair shows. */
 extern Struct80131510 D_80130CF0[];
@@ -734,7 +762,7 @@ extern char D_800D0924[]; /* "2" */
 extern char D_800D0928[]; /* "\n" */
 extern void osSyncPrintf(const char*, ...);
 s32 func_8005B0B4(Struct80131510*);
-void func_8005B150(s32* scores, s32* order, s32 count);
+void rank_scores_descending(s32* scores, s32* order, s32 count);
 
 void insert_supershot_record(Struct80131510* entry) {
   s32 scores[20];
@@ -801,7 +829,7 @@ void insert_supershot_record(Struct80131510* entry) {
     if (!(base < min)) {
       osSyncPrintf(D_800D0924);
       scores[best] = 0;
-      func_8005B150(scores, order, n);
+      rank_scores_descending(scores, order, n);
       for (i = 0; i < n; i++) {
         records[i] = board[first + i];
       }
@@ -811,7 +839,7 @@ void insert_supershot_record(Struct80131510* entry) {
       }
       scores[0] = base;
       board[first] = *entry;
-      func_8005B150(scores, order, n);
+      rank_scores_descending(scores, order, n);
       for (i = 0; i < n; i++) {
         records[i] = board[first + i];
       }

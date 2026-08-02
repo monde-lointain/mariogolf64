@@ -10,7 +10,7 @@ extern s32 func_800521C0(void);
 extern s32 func_800521DC(void);
 extern s8 D_800C1435[];
 extern s32 func_80051FCC(s32 mode);
-extern void func_8005B150(s32* src, s32* dst, s32 count);
+extern void rank_scores_descending(s32* src, s32* dst, s32 count);
 extern s32 func_80052264(s32 arg0, s32 arg1, s32 arg2);
 
 s32 func_80052250(void) { return scenario_mode_id == 0xC; }
@@ -39,7 +39,7 @@ void func_80052384(void) {
       idx = base + i * 10;
       bufp[i] = D_800C1435[idx];
     }
-    func_8005B150(buf, &buf[18], 18);
+    rank_scores_descending(buf, &buf[18], 18);
     for (i = 0, idx = base; i < 18; i++) {
       s32 slot = bufp[18 + i] * 10 + idx;
       D_800C1435[slot] = count - i;
