@@ -8,7 +8,7 @@ extern s8 D_801B71F3;
 extern s8 D_801B71F6;
 extern s8 D_801B71F9;
 extern s8 D_801B71FB;
-extern s32 D_801B60A0;
+extern s32 D_801B60A0[];
 extern s32 func_8005244C(s32 arg0, s32 arg1);
 extern s32 func_800521C0(void);
 extern s32 func_800521DC(void);
@@ -51,7 +51,73 @@ void func_80052384(void) {
   }
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80052250", func_8005244C);
+s32 func_8005244C(s32 arg0, s32 arg1) {
+  s32 total;
+  s32 limit;
+  s32 diff;
+  s32 mag;
+  s32 span;
+  s32 first;
+  s32 val0;
+  s32 val1;
+  s32 i;
+
+  total = func_800521C0() + func_800521DC();
+  diff = 0;
+
+  if (D_801B60A0[0] != 0) {
+    return 3;
+  }
+
+  limit = total - D_801B6098 - 1;
+  i = func_800521C0();
+  if (i < D_801B6098) {
+    s32 count;
+
+    do {
+      s32 idx0 = arg0 * 184 + i * 2;
+      s32 idx1 = arg1 * 184 + i * 2;
+
+      count = D_801B60A0[-2];
+      val0 = (&D_801B71FB)[idx0];
+      val1 = (&D_801B71FB)[idx1];
+      if (val0 < val1) {
+        diff++;
+      } else {
+        diff -= (val1 < val0);
+      }
+      i++;
+    } while (i < count);
+  }
+
+  first = diff;
+  if (first < 0) {
+    first = -first;
+  }
+  if (first == limit + 1) {
+    if (diff < 0) {
+      return 2;
+    }
+    return 1;
+  }
+  span = diff;
+  if (span < 0) {
+    span = -span;
+  }
+  if (limit + 1 < span) {
+    return -1;
+  }
+  mag = diff;
+  if (mag < 0) {
+    mag = -mag;
+  }
+  if (mag == limit) {
+    if (limit == 0) {
+      return 3;
+    }
+  }
+  return 0;
+}
 
 s32 func_800525C4(s32 arg0, s32 arg1) {
   s32 total;
@@ -61,7 +127,7 @@ s32 func_800525C4(s32 arg0, s32 arg1) {
   s32 val0;
   s32 val1;
   s32 i;
-  s32* flag = &D_801B60A0;
+  s32* flag = D_801B60A0;
   s32* cfg;
   s32* cfg2;
 
