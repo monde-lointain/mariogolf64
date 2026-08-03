@@ -51,8 +51,8 @@ by wrapping in `if (n != 0)`, S306), `#loop-weight-and-live-length-regalloc-stee
   aggregate, so reserve part in a block opened after it (S296). Slot order is ascending pseudo number
   (`reload1.c`).
 - **per-region-cse-slot-base-lever** -- pass the array directly, no cached pointer, so gcc CSEs the
-  base per region. The count of pointer *locals* is the pressure knob: each is a `loop.c` induction
-  pointer costing a callee-saved register; an offset off a shared row pointer is not (S289).
+  base per region. Each pointer *local* is a `loop.c` induction pointer costing a callee-saved
+  register; an offset off a shared row pointer is not (S289).
 - **fp-arg-registers-are-a-signature** -- ROM values in `$f12`/`$f14` where the build uses `$f0`/`$f2`
   mean the callee takes FP args the `extern` omits (S286).
 
@@ -137,3 +137,5 @@ by wrapping in `if (n != 0)`, S306), `#loop-weight-and-live-length-regalloc-stee
 - **block-scoped-record-pointer-single-giv** -- for three or more fields of `ARR[i]`, a block-scoped
   `T *p = &ARR[i];` gives one base register plus displacements; `p++` splits it into two IVs, and a
   bare `ARR[i].field` gives a byte-offset one with a per-access `%hi`.
+- **shared-scratch-defeats-copy-fold** -- cse folded a copy `dst = t` and flipped a branch sense:
+  give `t` a later use, free as the other arm's scratch.

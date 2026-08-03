@@ -48,6 +48,23 @@ see `docs/wip/func_800990D0.near-match.md` (`--carried-check` flags it). Backup 
 (294-instr wall-prone debug handler, its own slice). STANDING GUIDANCE: prefer a FRESH non-main pack
 next unless a specific main leaf is pre-vetted `.s`-clean.**
 
+**S317 CLOSES TWO FILES AND CHANGES HOW A `main` LEAF IS PRICED — rank by the host's distance from
+zero stubs, not by leaf size.** `--loose-stubs main` still reports **1 fresh** row (`func_80089094`,
+13452 B), so smallest-first offers nothing; what it cannot see is that several files sit one stub from
+md5-candidate, and points bank per file. S317 took three such hosts and banked two — `func_8005244C`
+94/94 (`f297119`, closes `src/main/func_80052250.c`) and `func_80070FD0` 61/61 (`110320d`, closes
+`src/main/func_80070FD0.c`) — for **10 pt, the first non-zero since S313**. Both were carried walls
+whose docs named the right pass and the wrong conclusion: an empty ROM delay slot is `reorg.c` thread
+*availability* (`may_trap_p` / `own_thread_p` / `stop_search_p`), not `mostly_true_jump` prediction;
+and `cse.c make_regs_eqv` folds a copy only when the destination's last use is later, so a scratch
+shared with the other arm of an enclosing branch defeats it at zero cost (S167's 35 variants and 43k
+permuter iterations had only ever swapped default-versus-override spellings). **The ranker now prints
+this: `venv/bin/python3 tools/pick_target.py --file-close main` lists the hosts fewest-stubs-first**,
+and it reports **4** one-stub `main` hosts (`func_8003DFD0.c`, `func_8005E380.c`,
+`lz_decompress_simple.c`, `print_string_at_grid.c`) — one more than the gate's hand `grep -c` found,
+because a comment mentioning `INCLUDE_ASM` inflates that count. Use it at the next `main` gate before
+`--loose-stubs`.
+
 **S316 CLOSES THAT FILE TO ONE STUB — the stamp is spent as evidence (6 members built, 0 register
 problems).** S316 took the remaining three plus the never-built stretch: `func_80052834` 141/141
 (`01ef9ce`), `func_80052A68` 162/162 (`5518f82`), `func_80052CF0` 185/185 (`929a4c3`), leaving only
@@ -4068,6 +4085,26 @@ by `/sprint-plan`:
   (`jtbl-carveable` / `jtbl-carve-blocked` / `pool-cohort:<fn>,...`); read the membership off it
   rather than by hand, since S307's hand derivation missed a member. Do not call such a leaf a
   spike: nothing about its codegen is stuck.
+- **`func_8004DC44`** (`src/main/print_string_at_grid.c`, S172-S175 -> S317) — **75/75 at the ROM's
+  exact dead `-0x8` frame**, one edit from the S173 vA body: `s32 unused[2];` as the first local. That
+  **retires S174's "three-way structural conflict"** — the frame does not need a structured outer loop,
+  so legs (a) and (b) are not exclusive and only leg (c) stands. Residual is 20 rows, every one
+  cascading from the `/40` dividend-vs-magic `local-alloc` choice (the `row`/`dst` cluster is invariant
+  under four birth-order spellings, so it is not independent). New this sprint: a non-void return of
+  the quotient reproduces the ROM's `mult` operand order from faithful source, so S174's "only a call
+  supplies the reg-2 set" is too narrow — what no spelling has produced is that flip without paying
+  for the returned value's liveness. Host is one stub from md5-candidate. Measured/attributed split
+  and the three untried directions are in `docs/wip/func_8004DC44.wip.md`.
+- **`lz_decompress_extended`** (`src/main/lz_decompress_simple.c`, S166 -> S317) — replays from
+  `nonmatchings/lz_decompress_extended/base.c` at **282/282 with the ROM's exact `-0x18` frame on the
+  first build**, 194 `cmpfn` rows. **The S166 "greg-proven raw-185 register-permutation floor" cannot
+  be inherited yet:** the mnemonic multiset still differs (`andi` 23 vs 20, `lhu` 35 vs 37, `beqz`
+  11 vs 9, `bnez` 7 vs 8, one `beqzl`, `sw` 13 vs 14), which is structure, and that oracle did not
+  exist when the verdict was written. Close the multiset before reading any coloring verdict (S259).
+  The banked sibling `lz_decompress_simple` is the style and type reference and its
+  `LzDecompressState` covers this function's fields (`0x18` ring, `0x1C` u16 ring index, `0x1E` u16
+  run, `0x20` u16 history index, `0x24` history base). Host is one stub from md5-candidate. Re-open
+  checklist: `docs/wip/lz_decompress_extended.near-match.md`.
 - **`func_8006E210` + `func_8006DFF0`** (`src/main/func_8006A2C0.c`, S310 -> S313) — S313 replayed
   the doc's body verbatim (543/543 at the exact `-0x60` frame, first build, carve links) and
   re-measured both parent clusters. R1 re-confirmed: the natural in-block `col = 5` costs +2 and

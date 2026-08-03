@@ -25,6 +25,54 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 317 — two inherited verdicts retired, two files closed — 2026-08-03
+- Increment: **2 files md5-candidate** (230 → 232 of 265) / **2 functions matched**
+  (`func_8005244C` 94/94 at `f297119`, `func_80070FD0` 61/61 at `110320d`), each at the ROM's exact
+  frame and each closing its host. Repo `INCLUDE_ASM` 265 → 263; `main` stubs 262 → 260, with
+  `--loose-stubs main` fresh unchanged at **1**. Descriptive names **+0** (a domain enum with two
+  already-C callers, and a save-counter updater; auto names kept per S247). ROM SHA-1 green at the
+  gate, at each of the four commits, and at review (`tools/verify-rom.sh` exit 0).
+- Quality: 0 stuck-far / 1 permuter run (dry, stopped) / 2 carried / 3 re-opened.
+- Seed: committed 5+5+5pt at `75aabb3` (+8pt stretch); **banked 10pt** — the first non-zero since
+  S313, because points bank per file and both banks took their host to zero stubs; realized 19
+  committed (residual **+4**) and 9 stretch (residual **+1**); regime classical.
+- What helped: **the goal itself — rank by how close the host file is to zero stubs.** `main` has one
+  fresh row left (`func_80089094`, 13452 B), so smallest-first offers nothing; but five files sat one
+  stub from md5-candidate, where a single function is worth a whole file's points. Both banks were
+  then inherited-verdict retirements, each found by reading the named pass in the gcc source rather
+  than by search: S316's `func_8005244C` doc named `mostly_true_jump` branch prediction for an empty
+  delay slot, where the real predicates are `may_trap_p` (reorg walks past a hoisted `lw` and steals
+  the insn behind it), `own_thread_p` and `stop_search_p`; and S167's `func_80070FD0` "not reachable
+  from equivalent single-TU C" had the right pass (`cse.c make_regs_eqv`) and the wrong conclusion —
+  the destination of a copy becomes canonical only when its last use is later, so one `s32 t` scratch
+  shared with the *other* arm of the enclosing branch brings the ROM's triple back at zero cost. Both
+  carries also moved: `s32 unused[2];` gives `func_8004DC44` the ROM's dead `-0x8` frame **on the goto
+  loop**, refuting S174's three-way structural conflict, and the stretch's S166 "greg-proven
+  register-permutation floor" turns out to sit on a body whose mnemonic multiset still differs.
+- Friction: **the plan gate could not see its own thesis.** The five one-stub hosts came from a hand
+  `grep -c INCLUDE_ASM` loop, which also miscounted one file (a comment mentioning `INCLUDE_ASM`),
+  so the sprint was priced against 5 hosts when there were 6. Second: at 93/94 the S316 doc asserted
+  "no register differs", which was an artifact of `cmpfn`'s hunk alignment — three register roles
+  differed and only became visible at exact count. Third: `func_8004DC44`'s remaining `/40`
+  dividend/magic residual consumed the rest of its slot with no movement, and the stretch was opened
+  while it was still carried, against the sprint's own method item 6.
+- Applied: 4 of 5 — #1 (reorg thread-availability predicates → `docs/hazards.md` + a merged
+  `hazard-index.md` row), #3 (cse `make_regs_eqv` shared-scratch crack → the existing hazard section's
+  verdict rewritten + a `docs/levers.md` row), #4 (dead-frame lever is loop-shape-orthogonal, plus the
+  generalised "re-test a two-feature conflict when a lever lands for either" rule), #5
+  (`pick_target.py --file-close SEG`, which reports 4 one-stub `main` hosts and is the count the hand
+  grep got wrong). #2 (a `cmpfn` register verdict at N-1 instructions is not comparable) was offered
+  and **not selected**. Retirement: `docs/hazards.md ## dead-frame reload-artifact regalloc-wall`
+  compressed from 10775 B to 3775 B — the S173/S174/S175 probe logs reduced to the rule, its three
+  variants and one citation each, with the refuted conclusion removed. Net prompt-surface delta
+  **−4055 B** (`hazards.md` 646734 → 642555, `hazard-index.md` 22504 → 22509, `levers.md` 10114 → 10233), and the line
+  wraps re-flowed; `prompt_lint check` clean on all 18 surfaces, `make test-tools` 138 passed.
+- Carry-over: `func_8004DC44` (`src/main/print_string_at_grid.c`) at **75/75 with the ROM's exact
+  `-0x8` frame**, residual 20 rows all cascading from the `/40` dividend/magic local-alloc choice;
+  `lz_decompress_extended` (`src/main/lz_decompress_simple.c`) at **282/282 at the exact `-0x18`
+  frame** but with three `andi`, two `lhu` and a `beqzl` still structural, so its coloring verdict
+  cannot be inherited yet.
+
 ## Sprint 316 — a TU-wide stamp is not evidence about its unbuilt members (3 of 4) — 2026-08-02
 - Increment: 0 files md5-candidate / **3 functions matched** (`func_80052834` 141/141 at `01ef9ce`,
   `func_80052A68` 162/162 at `5518f82`, `func_80052CF0` 185/185 at `929a4c3` — the stretch), all in

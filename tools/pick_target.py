@@ -1097,6 +1097,14 @@ def main():
         action="store_true",
         help="with --loose-stubs, list every stub (incl. carried-wall/nested/intrinsic-hasm), not just fresh ones.",
     )
+    ap.add_argument(
+        "--file-close",
+        metavar="SEG",
+        help="Rank the still-INCLUDE_ASM stubs of src/SEG/ by how close their HOST FILE is to zero "
+        "stubs, so the gate can see which single function takes a file to md5-candidate. Points bank "
+        "per file, so in a mined-out segment a one-stub host is the only place one function is worth "
+        "a point (S317 closed two that way). Shows hosts with <= --n stubs, fewest first.",
+    )
     args = ap.parse_args()
 
     # `--lib` is a substring filter, so a segment name passed to it does not error: it silently
@@ -1109,6 +1117,45 @@ def main():
             f"unrelated packs. Use --segment {args.lib}, or --loose-stubs {args.lib} for the "
             f"individual stubs inside already-`c` files."
         )
+
+    if args.file_close:
+        # Points bank per FILE (gates.md ## Story points), so a leaf's value is not only its own
+        # size: the last stub in a host is worth the whole file's md5-candidate flip, and every
+        # other stub in that host is worth zero until it lands. --loose-stubs sorts by leaf size and
+        # cannot see this, which is why S317's goal ("close main's single-stub files") was found by
+        # a hand grep at the gate rather than by the ranker.
+        stubs = loose_stubs(args.file_close)
+        by_file = {}
+        for s_ in stubs:
+            by_file.setdefault(s_["file"], []).append(s_)
+        rows = sorted(by_file.items(), key=lambda kv: (len(kv[1]), kv[0]))
+        shown = 0
+        for rel, members in rows:
+            if len(members) > args.n:
+                break
+            shown += 1
+            print(f"{len(members)} stub(s)  {rel}")
+            for m in sorted(members, key=lambda x: (x["size"] is None, x["size"] or 0, x["fn"])):
+                sz = "?" if m["size"] is None else str(m["size"])
+                tags = []
+                if m["carried"]:
+                    tags.append("CARRIED-WALL")
+                if m["nested"]:
+                    tags.append("NESTED-CHILD")
+                if m.get("intrinsic"):
+                    tags.append("INTRINSIC-HASM")
+                if m.get("wall_class"):
+                    tags.append(m["wall_class"])
+                if m.get("fp_class"):
+                    tags.append(m["fp_class"])
+                print(f"    {sz:>6}  {m['fn']:28} {'  '.join(tags)}")
+        n_one = sum(1 for _, m in rows if len(m) == 1)
+        print(
+            f"# {len(rows)} src/{args.file_close}/ files still hold stubs; {n_one} are one stub from "
+            f"md5-candidate ({shown} host(s) shown at <= {args.n} stubs). A CARRIED-WALL tag on a "
+            f"one-stub host is a price, not a veto: it is the file's last function by construction."
+        )
+        return
 
     if args.loose_stubs:
         stubs = loose_stubs(args.loose_stubs)

@@ -1526,6 +1526,45 @@ Three honest caveats:
   and `main`'s fresh vein is now one row. Tooling: three of the sprint's four accepted suggestions
   were tools this sprint had to hand-roll (`cmpfn.sh` histogram, `tools/seg_diff.py`,
   `tools/gbi_match.py`).
+- **Sprint 317 (realized)** — close `main`'s single-stub files. **+2 banked, 2 carried, 1 permuter
+  run (dry, stopped), 0 stuck-far, 3 re-opened.** Zero gate enablers — all four targets were
+  already-extracted loose stubs in already-`c` files, no flip, no split, no `.rodata` carve, no
+  `symbol_addrs.txt` add. Seed 5+5+5pt committed (+8pt stretch), frozen at `75aabb3` before any
+  `src/` edit; **banked 10pt** — the first non-zero since S313, because points bank per file and both
+  banks took their host to zero stubs; **realized 19** committed (`func_8005244C` 5 **+1** re-open =
+  6, `func_80070FD0` 5 **+1** re-open = 6, `func_8004DC44` 5 **+1** carry **+1** permuter = 7),
+  residual **+4**; the stretch scores 9 (seed 8 **+1** carry), residual +1. Regime classical. Progress
+  **+2** matched, **+2 files md5-candidate** (230 → 232 of 265); repo `INCLUDE_ASM` 265 → 263; `main`
+  stubs 262 → 260 with `fresh` unchanged at 1; descriptive names **+0** (a domain enum with two
+  already-C callers, and a save-counter updater; auto names kept per S247).
+  Rolling-5 (S313-S317) matched-fn: 0+3+2+3+2.
+  **The finding is a pricing one: in a mined-out segment the value of a leaf is its host file's
+  distance from zero stubs, not its own size.** `--loose-stubs main` offers one fresh row
+  (`func_80089094`, 13452 B), so smallest-first has nothing left; but five files sat one stub from
+  md5-candidate, where a single function is worth a whole file's points. Both committed banks were
+  carried walls priced as such, and both fell to one structural edit each.
+  **Two inherited verdicts retired, both by reading the named pass rather than by search.** S316's
+  `func_8005244C` doc attributed its empty delay slot to `mostly_true_jump` branch prediction; the
+  real predicates are `may_trap_p` (reorg walks past a hoisted `lw` and steals the insn behind it),
+  `own_thread_p` and `stop_search_p`, and the slot came back for free once the tail rewrite removed
+  the stolen instruction from the thread. S167's `func_80070FD0` ("not reachable from equivalent
+  single-TU C", 35 hand variants + 43k permuter iterations) had the right pass — `cse.c
+  make_regs_eqv` makes a copy's destination canonical only when its last use is later — and the wrong
+  conclusion: one `s32 t` scratch shared with the *other* arm of the enclosing branch gives `t` that
+  later use at zero cost. Neither had ever been tried because both docs framed the choice as
+  default-versus-override spellings of the same statement.
+  **Both carries also moved, and both moves were verdict retirements.** `s32 unused[2];` gives
+  `func_8004DC44` the ROM's dead `-0x8` frame **on the goto-loop body**, which refutes S174's
+  "three-way structural conflict" (the frame was said to need a structured outer loop that would then
+  lose the `%4800` rematerialisation) and leaves the `/40` dividend/magic choice as the sole root.
+  The stretch `lz_decompress_extended` replays 282/282 at the exact `-0x18` frame, but its mnemonic
+  multiset still differs (`andi` 23 vs 20, `lhu` 35 vs 37, one `beqzl`), so the S166 "greg-proven
+  register-permutation floor" belongs to a body that is not yet structurally identical.
+  Retro applied 4 of 5 plus 1 retirement (the dead-frame section's S173/S174/S175 probe logs
+  compressed 10775 → 3775 B, refuted conclusion removed). Net prompt-surface delta **−4055 B**.
+  Ranker: `pick_target.py --file-close SEG` landed, and it immediately corrected the hand grep that
+  motivated it — 4 one-stub `main` hosts, not 3, since a comment mentioning `INCLUDE_ASM` inflates a
+  `grep -c`. Push: local.
 - **Sprint 316 (realized)** — the last four members of the S183 `#pervasive-regalloc-classical-main`
   stamp, taken per function. **+3 banked, 1 carried, 2 permuter runs (both dry), 0 stuck-far, 1
   re-opened.** Zero gate enablers — all four were already-extracted loose stubs in an already-`c`

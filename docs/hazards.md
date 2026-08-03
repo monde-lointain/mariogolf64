@@ -171,6 +171,7 @@ The hazard families below group the sections that follow. Each links to its exis
 **Toolchain oracles & spot-checks**
 - [IO_WRITE/IO_READ isolation artifact](#io_writeio_read-isolation-artifact)
 - [Assembler differences + byte-cmp spot-check](#assembler-differences--byte-cmp-spot-check)
+- [reorg thread availability (an empty ROM delay slot is not branch prediction)](#reorg-thread-availability-an-empty-rom-delay-slot-is-not-branch-prediction)
 - [gas .set-reorder delay-slot fill (textual layout != machine; disasm the .o)](#gas-set-reorder-delay-slot-fill)
 - [Decompile-vs-asm authority](#decompile-vs-asm-authority)
 - [Display lists](#display-lists)
@@ -6296,14 +6297,18 @@ separate makes the default arm a non-copy (`old = t|K; if(!cond) old = t`), whic
 polarity instead. **Branch-direction and the fold are locked:** `(cond?t|K:t)` has exactly two C
 shapes and each pins one of {right-polarity+fold, separate-t+wrong-polarity}.
 
-**Verdict -- carry fast, do not grind.** This is **not reachable from equivalent single-TU C**: the
-load-in-`$a1` requires reusing the loaded var as the arg, which forces the canonical fold. Proven at
-S167 by ~35 hand variants + 43k permuter iterations (the permuter only makes equivalent transforms,
-so it cannot escape it either) + a full cse/combine/greg RTL-dump trace. The target was compiled from
-a shape not recoverable from the byte behavior (a different flag/print data-flow, a helper, or a
-macro). Recognize the symptom, bank the file's other fns (`#cross-jump-tail-merge` mixed partial), and
-**carry this one for game-source insight** -- not another permuter run. Save the near-match
-(`beqz`-polarity, byte-exact minus the 3 words) so the retry starts one lever away.
+**The crack: give `t` a later use, and the shared scratch is free.** The rule above is one-directional:
+`make_regs_eqv` makes the copy's *destination* canonical only when its last use is later than the
+current canonical's, so the fold disappears the moment `t` is mentioned after the store/printf. A dead
+trailing `old = t;` proves it (61/61, zero rows) but the zero-cost spelling is to declare `t` at
+function scope and **reuse it as the scratch in the other arm of the enclosing branch** -- that
+assignment is later in the insn stream, `t` keeps the quantity, and the ROM's
+`bnez / move a1,v0 / op a1,v0,K` triple returns. S317 banked `func_80070FD0` this way after the S167
+carry; its else arm keeps its `u8` semantics as `if (99 < (u8)t)`, which is also the ROM's
+sb-then-andi-then-sltiu order. The S167 verdict ("not reachable from equivalent single-TU C", 35 hand
+variants + 43k permuter iterations) was measured over default-vs-override spellings only and never
+tried a cross-arm shared temp. General form: when a residual is a copy the compiler folded away,
+lengthen the *source's* last use rather than restructuring the arms.
 
 ---
 
@@ -6418,122 +6423,50 @@ ascending). Permuter is weak here (allocno-tiebreak class); carry with the citat
 
 ## dead-frame reload-artifact regalloc-wall
 
-**Symptom:** a classical fn whose structure, scheduling, loop-hoisting, and instruction sequence are
-**fully matched** to the ROM, and the only residual is that the target reserves a dead stack frame
-— `addiu sp,sp,-N` in the prologue + `addiu sp,sp,+N` in the epilogue with **zero `sp`-relative
-load/store between them** — that your build (a leaf fn with no spill) does not, plus the pervasive
-**register permutation the frame drives** (a first-load `v0`/`v1` swap that cascades, `mfhi t3` vs `t4`,
-two locals swapped like `dst`/`row` = `a3`↔`t0`). Confirm the dead frame by grepping the target for
-`sp)` inside the fn: none = the `-N`/`+N` is a pure reserved slot, not a real spill. S172
-`func_8004DC44` (ring-buffer→grid blit, target reserves a dead 8-byte frame; structure otherwise
-byte-identical after the `#top-tested-loop-goto-local-hoist` selective-hoist fix).
+**Symptom:** a classical fn whose structure, scheduling and instruction sequence match the ROM, and the
+only residual is that the target reserves a dead stack frame -- `addiu sp,sp,-N` / `+N` with **zero
+`sp`-relative access between them** -- that your build lacks. Confirm by grepping the target for `sp)`
+inside the fn: none = a reserved slot, not a spill.
 
-**Root cause:** GCC 2.7.2 `reload` assigned a spill slot to a pseudo (counted into `frame_size` via
-`get_frame_size()`; `mips.c` `MIPS_STACK_ALIGN` rounds one 4-byte slot up to 8; the `addiu sp` emits only
-when `get_frame_size()>0` post-reload, and is gcc-emitted, not assembler-injected — S173 dump-verified),
-then eliminated the actual spill store/load because the value was available in a register at the spill
-point — leaving the slot allocated but never accessed (a "dead frame"). No callee-saved regs are involved
-(no `s0-s7`, no `ra` save), so the whole frame is that one eliminated spill. Which pseudo spills, and the
-register permutation that follows, are set by the exact register-pressure/allocation-order at reload — an
-internal artifact.
+**Root cause:** `reload` assigned a spill slot to a pseudo (counted into `frame_size`; `MIPS_STACK_ALIGN`
+rounds 4 up to 8; the `addiu sp` emits only when `get_frame_size() > 0` post-reload, and is
+gcc-emitted, not assembler-injected -- S173 dump-verified), then deleted the spill store/load because the
+value was live in a register at the spill point, leaving the slot allocated and never accessed. No
+callee-saved regs are involved, so the whole frame is that one eliminated spill.
 
-**S173 deep dive (4 GCC-2.7.2/binutils-2.6 subagents, ~35 variants, 275k permuter iters — dump-verified).**
-Two refinements to the S172 framing, both important:
-1. **The dead frame is reachable** (retract "no source trigger for the frame"). A structured outer loop
-   produces the spill (its LICM hoists an extra invariant into a held reg, raising pressure), and the
-   **permuter hit a frame-bearing 75-insn candidate** from the improved seed (frame at the exact ROM
-   position). The frame and the goto-vs-structured control-flow choice are orthogonal — by reload time
-   the loop history is gone (just basic blocks + a conflict graph).
-2. **The true, un-source-reachable wall is the coupled register permutation, rooted in a `v0`/`v1` swap in
-   a signed-divide-by-constant.** For `x / 40`: `expmed.c` `force_reg`'s the dividend first, then
-   `expand_mult_highpart`/`optabs.c copy_to_mode_reg` creates the magic (`0x66666667`) as a later pseudo;
-   `local-alloc.c`'s life-length-dominated priority (`floor_log2(refs)*refs*size/life`, deliberately
-   matched to `global.c allocno_compare`) scores the tiny-live-range magic 6666 vs the dividend's 1666,
-   so the magic is allocated first and `find_free_reg` (ascending scan, no `REG_ALLOC_ORDER` on MIPS) hands
-   it `$v0`. The ROM assigns dividend→`$v0`, magic→`$v1` with an outwardly identical instruction sequence;
-   the model above predicts the opposite and reproduces every build — the ROM's assignment is a mechanism
-   the model does not capture, so its divide source-shape is unrecoverable from asm. Not flippable by
-   reorder, extra dividend refs (life grows in lockstep), explicit reciprocal-multiply (`(s64)x*magic>>32`,
-   real `mult`, moves the dividend reg but magic stays `$v0`), interleave, or tie-break temps.
+**Three variants, distinguished by what else differs.**
 
-**S174 correction — the divide-swap is flippable-in-isolation, not "irreducible"; retract "unrecoverable
-from asm."** An 8-project cross-decomp sweep (all KMC gcc 2.7.2: marioparty1/2/3, snowboardkids2,
-drmario64, hm64, puzzleleague64) + ~12 compiler-source subagents + RTL pass dumps (`-dl`/`-dg`/`-ds`)
-pinned the real mechanism, and it is a quotient-destination / register-coalescing effect, not an
-unrepeatable artifact. See the dedicated playbook `#signed-divide-const-v0v1-quotient-destination`. In
-one line: **dividend→`$v0` requires a physical reg-2 set (a `(set $v0 …)`/`(set … $v0)` copy) adjacent
-to the divide chain**, which lands the chain in local-alloc's **suggestion pass** (`local-alloc.c`
-1466-1477 + `combine_regs` 1798-1838) *before* the life-priority general pass. `return g/40` supplies
-it (the return copy coalesces back through the in-place `sra`/`subu` chain to the dividend) and
-reproduces the ROM's `/40` bytes exactly. The reason `func_8004DC44` still can't be matched: it is a
-**void, callless, returnless leaf whose quotient feeds arithmetic then a loop-carried store** — it emits
-**no reg-2 mention anywhere**, so the chain falls to the general pass where the 2-insn magic (shortest
-life) deterministically wins `$v0`. Every faithful lever fails *in that context*: 24 control-flow × src
-combos, multi-term dividends, all associativity, and the sched1 lifetime lever (`life_magic >
-⅔·life_dividend`; the loop-setup pressure sinks the magic to life ~3 in every form) — all magic→`$v0`.
-A `register asm("$2")` binding forces the dividend (28 diffs, down from 38) but is unfaithful and
-incomplete (leaves the quotient intermediate in `v1` where the ROM uses `a3`, and the frame absent).
-So the corrected framing is **"flippable-in-isolation; a void-loop-fed leaf is deterministically
-magic→`$v0` by local-alloc"** — the ROM's coordinated dividend-`$v0` + quotient-`a3` + dead-frame is a
-sched1/pressure state this toolchain does not produce from any source-equivalent void-leaf input (sa-A
-`local-alloc` + sa-B `sched.c`/`reload1.c`, both source-grounded). The dead frame is a co-symptom of
-the same 3-live-value pressure peak, not a cause: reload never reassigns an already-allocated pseudo's
-hard reg (only spills to memory), so "add a frame to force `$v0`" is false.
+1. **Pure dead frame (S251) -- a clean crack.** The only differing tokens are the two `addiu sp`
+   immediates plus the `ra` slot offset that moves with them; body sequence and every register match.
+   Declare an unused local array sized to the delta off the `0x18` base non-leaf frame
+   (`s32 unused[(ROM_frame - 0x18)/4]`); an unused aggregate is not address-taken, so it reserves the
+   slot with zero `sp)` access. S251 `func_80080DCC` (delta `0x20` -> `s32 unused[8]`, byte-exact, no
+   other change). `volatile` is wrong here -- it stores to `sp`.
+2. **Live-index block-pressure dead frame (S270) -- for a frame smaller than `0x18` that also drags a
+   register permutation.** `local-alloc` spills one pseudo in the hottest block and `global-alloc`
+   rescues it, so the slot stays reserved while the spill event reorders the assignment. Reproduce by
+   indexing (`str[row]`, keeping base and index live) instead of `str++`, plus explicit named temps to
+   steer qty birth order. S270 `func_8004D4B8`: reproduced the frame and all 6 registers.
+3. **Divide-coupled (S172-S175, `func_8004DC44`) -- the carry-class.** The frame comes with a `v0`/`v1`
+   swap in a signed-divide-by-constant that cascades through the function; the playbook for that half is
+   `#signed-divide-const-v0v1-quotient-destination` (in one line: dividend->`$v0` needs a physical reg-2
+   set adjacent to the divide chain, which a void callless leaf never emits).
 
-**Verdict — permuter or carry; the frame is reachable but the divide-swap is not (in a void loop-fed leaf).** Once structure +
-scheduling + hoisting are settled and the residual is the dead frame + its driven permutation, route to
-the permuter (it can reach the frame; it must also flip the divide-swap in the same candidate — low odds)
-or carry. Do not grind source levers for the frame (address-taking a local forces a live frame with
-real `sp` loads the ROM lacks) and do not grind the divide-swap in a void loop-fed leaf (per the S174
-correction above it is flippable-in-isolation but deterministically magic→`$v0` here — see
-`#signed-divide-const-v0v1-quotient-destination`). Save the
-structurally-settled near-match so the retry starts from ops-100%-match: for `func_8004DC44` the seed is
-**pre-declared base-pointer vars + structured inner `for` + goto outer** (`#top-tested-loop-goto-local-hoist`;
-the base-hoist the S172 seed lacked). Sibling to `#pervasive-regalloc-classical-main`,
-`#cse-make_regs_eqv-branch-fold`, and `#abs-coalescing-reg-swap`. A dump-verified negative (proven
-can't-be-source-fixed) is itself a valid, valuable outcome — it converts an open grind into a documented
-carry (`#compiler-source-fan-out-escalation-above-the-permuter`).
+**The frame lever is orthogonal to loop shape, which retires the S174 "three-way structural conflict".**
+S174 concluded `func_8004DC44` was unmatchable because the frame was reachable *only* through a
+structured outer loop, whose LICM would then hoist the `%4800` magic that the goto loop rematerialises --
+two features declared mutually exclusive. Variant 1's `s32 unused[2];` produces the frame with the goto
+outer loop intact: 75/75 instructions at the ROM's exact `-0x8` frame, residual reduced to the divide
+cascade alone. **Generalise the correction, not just the case:** a verdict that two features cannot hold
+together is a claim about the levers that existed when it was written, so re-test it whenever a new lever
+lands for either feature (the S107 rule, applied to conflicts rather than to single dead ends).
 
-**Provenance:** S172 `func_8004DC44` (the S171 `print_string_at_grid.c` regalloc-wall carry; its sibling
-`print_string_at_grid` banked S172 via `#cross-jump-tail-merge` nested-if). S173 re-carry after the
-deep compiler-source dive above; improved seed + full analysis in `docs/wip/func_8004DC44.wip.md`. **S174
-re-carry** after the cross-project + coalescing correction above (retired the "irreducible/unrecoverable"
-framing) — see `#signed-divide-const-v0v1-quotient-destination`.
-
-**S251 — the pure-dead-frame variant is a clean crack, not this carry-class.** Everything above assumes
-the dead frame is coupled to a register permutation (the `v0`/`v1` divide-swap) — that coupling is what
-makes it a carry. But a dead frame can appear alone: a fn whose body is byte-identical to the ROM
-and whose only residual is the prologue/epilogue `addiu sp` immediate (+ the `sw/lw ra` slot offset that
-moves with it), with **no register permutation, no signed-divide, no reg-swap anywhere**. That is a
-`reload`-eliminated local aggregate, not an eliminated spill-of-a-divide-pseudo, and it is
-**reconstructable**: declare an unused local array sized to the frame delta and gcc reserves the slot
-with zero `sp)` access (an unused aggregate is not address-taken, so it does not force the "live frame
-with real `sp` loads" the caveat above warns about — that caveat is about address-taking, a different
-trigger). Recipe: frame delta = `ROM_frame − your_frame`; the base non-leaf frame is `0x18` (0x10
-outgoing-arg + 0x8 ra/pad), so the eliminated local is `delta` bytes → `s32 unused[delta/4]`. S251
-`func_80080DCC` (lazy one-time-init): ROM `-0x38`/ra@0x30 vs build `-0x18`/ra@0x10, delta `0x20` →
-`s32 unused[8]` → byte-exact, no other change. Disambiguation from the carry-class: grep the
-near-match diff — if the only differing tokens are the two `addiu sp` immediates + the `ra` slot offset
-(body instruction sequence + every other reg identical), it is the pure variant → crack with the sized
-unused aggregate; if the frame diff drags a `v0`/`v1` (or other) reg permutation with it, it is the
-divide-driven carry-class above. Memory: `docs/levers.md` (pure dead frame clean crack).
-
-**Third variant — live-index block-pressure dead frame, for a small (<0x18) frame with a reg-perm
-(S270).** A phantom dead frame smaller than the `0x18` base (e.g. an `addiu sp,-8`/`+8` leaf with zero
-`sp)` body access) that also drags a register permutation is neither the `unused[]` aggregate (that
-needs `delta>=0` off a `0x18` base and has no reg-perm) nor reliably the divide-carry class. It is a
-`local-alloc.c` block-pressure artifact: local-alloc spills one pseudo in the hottest block, global-alloc
-rescues it to a free reg, and the reserved-but-unused slot stays as a dead frame while the spill event
-reorders the register assignment. **Reproduce it by raising local-alloc block pressure with a live-index
-loop form:** index the base as `arr[i]` (keeping both the base pointer and the index `i` live across the
-loop) instead of `arr++`/`*p++`. Combine with explicit named temps for the reused sub-values (`s32
-idx2=i*2; s32 base=b;`) to steer local-alloc qty birth-order (qty_compare priority
-`floor_log2(nref)*nref*size/livelen`, local-alloc.c:~1750) and put the loop-counter's `=0` init first.
-S270 `func_8004D4B8`: `str[row]` (not `str++`) reproduced the dead 8B frame and matched all 6 registers
-(the S182 4-reg-perm wall), residual reduced to a 2-word scheduler-slot coin. This is a source-reachable
-Crack of the frame+regs (`volatile` is wrong here — it stores to `sp`; a truly-dead frame has zero `sp`
-access). Profile-probe is negative for these (no `-f` flag reaches gcc-2.7.2 local-alloc/global.c).
-Memory: `docs/levers.md` (dead frame live index pressure lever).
+**Verdict.** Variants 1 and 2 are cracks -- do not carry them. Variant 3 carries on its divide half only;
+route it to `#signed-divide-const-v0v1-quotient-destination`, not to a frame grind. Never address-take a
+local to force the frame (that makes a live frame with real `sp` loads the ROM lacks). Sibling to
+`#pervasive-regalloc-classical-main` and `#cse-make_regs_eqv-branch-fold`. State and re-open checklist for
+the open carry: `docs/wip/func_8004DC44.wip.md`. Memories: `docs/levers.md` (pure dead frame clean crack;
+dead frame live index pressure lever).
 
 ## variable-length-array dynamic frame
 
@@ -7215,6 +7148,37 @@ byte-exact first build when the record type is word-aligned:
   word-aligned struct type and index `arr[i]` (do not hand-roll a pointer walk).
 Sizing: a byte count of `0xN` bytes is `u32 data[0xN/4]` (0x68→0x1A, 0x44→0x11, 0xB8→0x2E). S231 banked
 all three via word-aligned `struct { u32 data[K]; }`.
+
+## reorg thread availability (an empty ROM delay slot is not branch prediction)
+
+**Symptom:** your build is at the ROM's exact instruction count minus one, and the single differing row
+is a conditional branch whose slot the ROM leaves empty while your build fills it -- typically with an
+instruction taken from *two* positions after the branch, stepping over the one directly behind it. S316
+`func_8005244C`: ROM `beqz v1,<past the loop>; nop; lw t0,-0x8(s4); sll v0,s2,1`, build
+`beqz v1,<...>; sll v0,s2,1; lw t0,-0x8(s4)`.
+
+**Root cause -- four predicates in `reorg.c`, and prediction is not one of them.** The natural
+hypothesis is `mostly_true_jump` (`reorg.c` 1335): predict the branch taken, fill from the target
+thread, find nothing. It does not hold, because `fill_eager_delay_slots` retries the fall-through
+thread when the target yields nothing (`delay_list == 0 && own_fallthrough`), so the prediction alone
+never leaves the slot empty. What does:
+
+- `may_trap_p` (`fill_slots_from_thread`): a candidate that can trap -- **any load** -- is not a winner
+  unless it can be annulled, and MIPS has no `ANNUL_IFTRUE` slot for a fall-through thread. So a hoisted
+  `lw` at the head of a preheader is skipped and the scan **walks on** (the loop continues while
+  `own_thread`), stealing the next eligible insn.
+- `own_thread_p` (`allow_fallthrough = 1`): returns 0 if a `CODE_LABEL` sits between the branch and the
+  first active insn. With no owned fall-through thread and nothing at the target, the slot stays empty.
+- `stop_search_p`: halts the scan on a `CODE_LABEL` (for a fall-through thread), a `JUMP_INSN`, a
+  `BARRIER`, a `SEQUENCE`, or an **`asm`**.
+- the opposite thread's live set: a candidate that sets a register live at the branch target is rejected.
+
+**What to do.** Read which of the four applies before touching the source. An empty
+`asm volatile("")` is the zero-byte way to force the empty slot (it is an `ASM_INPUT`, so `stop_search_p`
+ends the scan) and is the right *probe*, not a bank: use it to confirm the class in one build, then find
+the structural edit. S317's `func_8005244C` needed none in the end -- the tail rewrite that fixed its
+three register roles also removed the stolen instruction from the thread, and the `asm` came back out
+before the commit. Related: `#nonvoid-return-blocks-fallthrough-delay-steal`, `#gas-set-reorder-delay-slot-fill`.
 
 ## gas .set-reorder delay-slot fill (textual layout != machine)
 
