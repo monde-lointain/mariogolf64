@@ -13,9 +13,9 @@ for the frame-local window, with six structural edits (below).
 - **The mnemonic multiset matches** (S317's 3 `andi` / 2 `lhu` / 3 branch-form deficit is closed).
 - **The instruction *order* matches**: normalising every register name to `R` makes the two streams
   diff-identical. The entire residual is register assignment.
-- **36 `cmpfn` rows (cmpfn as of S318)**, all register-name-only: 200 before the weight levers, 132
-  after them, 36 after the `local-alloc` levers below. Body:
-  `nonmatchings/lz_decompress_extended-8/s318-body-36rows.c`.
+- **20 `cmpfn` rows (cmpfn as of S318)**, all register-name-only: 200 before the weight levers, 132
+  after them, 20 after the `local-alloc` levers below. Body: `docs/wip/lz_decompress_extended.base.c`
+  (committed; the `nonmatchings/lz_decompress_extended-*/` copies are gitignored).
 - **Every global allocno now lands on the ROM's register** (`$t1` count, `$t2` bits, `$t3` src,
   `$t4` word, `$t5` ridx, `$t6` state, `$t7` end, `$t8` ring, `$t9` marker, `$s0` is_final). The
   whole remaining residual is `local-alloc` quantity assignment inside `$v0/$v1/$a0-$a2/$t0`.
@@ -62,7 +62,15 @@ Four edits, each verified by rebuilding one object:
    decrement and its test adjacent (76 -> 44, the single biggest step).
 4. **Add the ring offset in place** (`ro = ro + ring; *((u16*)ro) = ctrl;`) in both emit blocks, so
    the address `addu` overwrites the `sll` result the way the ROM's does (42 -> 36), plus a load
-   reorder in the else arm's prologue (`hist_base`, `hist_idx`, `run`) worth 44 -> 42.
+   reorder in the else arm's prologue (`hist_base`, `hist_idx`, `run`) worth 44 -> 42. Splitting the
+   back-reference block's multiply out as well (`ro = ro * 2; ro = ro + ring;`) is worth another
+   28 -> 24.
+5. **One variable per block wherever the ROM's quantity is block-local.** `out0` used for both the
+   continuation arm's `st.out` and the emit blocks' walking pointer makes it a cross-block pseudo,
+   which `global.c` places in `$a0` where the ROM has a `local-alloc` quantity in `$v0`; a dedicated
+   `init_out` for the arm is 30 -> 28. The same split of `run_left` for the *second* emit block is
+   24 -> 20. But the split is not free to over-apply: doing it for `hist_base` too costs 2 rows, and
+   splitting `ctrl`/`ho`/`tmp`/`out0`/`off`/`run`/`next_ridx`/`ro` per block is inert or worse.
 
 The permuter, run from the fixed-order body, found a fifth weight lever of the same kind
 (`off = ...; lz_expand(q, off, run);` inside each emit block's `if`), worth 168 -> 150 -> 132 rows
@@ -107,19 +115,21 @@ shift lands between the mask and the increment.
 
 ## Re-open checklist
 
-1. Restore the body from `nonmatchings/lz_decompress_extended-5/s318-body-132rows.c` and confirm
+1. Restore the body from `docs/wip/lz_decompress_extended.base.c` and confirm
    282/282 at `-0x18` with `tools/cmpfn.sh`, then confirm the register-normalised streams are still
    identical and `allocno_report.py` still gives the ROM's global order before touching anything.
-2. What remains is `local-alloc`, not `global.c`, in three clusters: (a) the continuation arm's
-   prologue, where the ROM loads `src_cur` first into `$t3` and adds 4 in place while the build
-   sinks that load to last and adds through `$v0`, and its two saved values take `$a0/$a1` instead
-   of `$v0/$v1`; (b) the else arm's `hist_idx`/`hist_base` load order; (c) the token block, where
+2. What remains is `local-alloc`, not `global.c`, in four clusters: (a) the continuation arm's
+   `hist_base`, which takes `$a1` where the ROM takes `$v1`; (b) the else arm's `hist_idx`/
+   `hist_base` load order; (c) the token block, where
    the ROM holds `token` in `$t4` and the zero-extended `word` in `$v0` until the `srl` writes
    `$t4`, and the build has the two swapped. Spent on (a): splitting the `+ 4` into its own
    statement, in three placements (80-114 rows). Spent on (c): a separate zero-extend variable
    (102 rows, and it also breaks the global order by dropping `word` below 12 refs), taking the
    shift from `token` instead of `word`, and reordering the `count` mask against the shift (both
-   inert at 36).
+   inert). Merging `token` and `word` into one `u16` variable does give the ROM's *shape* for (c),
+   but the merged pseudo has only 5 references at length 99 (1010) and no wrapper moves it past 6,
+   so it drops out of the global set entirely and the order breaks (92 rows). (d) the second emit
+   block's `run` load, `$a0` against the ROM's `$v0`.
 3. `qty_compare` is `global.c`'s formula plus `qty_size`, over `death - birth`, so the levers have
    the same shape — but a quantity is block-local, so a wrapper only moves what is inside its block.
 4. Enablers: none. Split already done, all callees placed, no rodata/data carve, name pre-curated.

@@ -1,5 +1,5 @@
 /* S318 carry body for lz_decompress_extended: 282/282 at the ROM's exact -0x18
- * frame, instruction order identical, 28 cmpfn rows of register naming left.
+ * frame, instruction order identical, 20 cmpfn rows of register naming left.
  * Paste over the INCLUDE_ASM stub in src/main/lz_decompress_simple.c; it also
  * needs that file's S318 LzDecompressState field names and the LzHistoryState
  * typedef. See lz_decompress_extended.near-match.md. */
@@ -44,6 +44,7 @@ s32 lz_decompress_extended(LzDecompressState* state) {
   u16* dst;
   u16 hist_idx;
   u16 run_left;
+  u16 run2;
   u16* save_out;
   u16 save_run;
   u16 save_hist_idx;
@@ -191,10 +192,11 @@ decode_top:
     next_ridx = ridx + 1;
     ridx = next_ridx & 0x7ff;
     ctrl = *((u16*)((((ro - word) & 0x7ff) * 2) + ring));
-    run_left = st.run;
-    ro = (ro * 2) + ring;
+    run2 = st.run;
+    ro = ro * 2;
+    ro = ro + ring;
     *((u16*)ro) = ctrl;
-    if (run_left == 0) {
+    if (run2 == 0) {
       run = (ctrl & 0xff) + 1;
       st.run = run;
       if ((ctrl & 0xff00) != marker) {
