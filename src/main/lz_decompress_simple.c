@@ -8,10 +8,11 @@ typedef struct {
   /* 0x10 */ u8* src_end;
   /* 0x14 */ u16 flags;
   /* 0x16 */ u16 unk16;
-  /* 0x18 */ s32 unk18;
-  /* 0x1C */ s32 unk1C;
-  /* 0x20 */ s32 unk20;
-  /* 0x24 */ s32 unk24;
+  /* 0x18 */ s32 ring; /* 2 KiB control ring, extended decoder only */
+  /* 0x1C */ u16 ring_idx;
+  /* 0x1E */ u16 run;
+  /* 0x20 */ u16 hist_idx;
+  /* 0x24 */ s32 hist_base; /* 256-entry halfword history window */
 } LzDecompressState;
 
 extern OSPiHandle* nuPiCartHandle;
@@ -178,6 +179,15 @@ decode:
   } while (1);
 }
 
+/* lz_decompress_extended: the ring-buffered decoder, the file's last stub.
+ * S318 carry at 282/282 instructions, the ROM's exact -0x18 frame, and an
+ * instruction order identical to the ROM's once register names are normalised;
+ * 28 cmpfn rows of register naming remain, all in local-alloc quantities.
+ * The body is docs/wip/lz_decompress_extended.base.c and the measured state,
+ * the six structural edits and the do{}while(0) allocation levers behind it are
+ * in docs/wip/lz_decompress_extended.near-match.md. Do not re-derive from
+ * scratch; do not inherit the S166 "raw-185 coloring floor" verdict, which was
+ * measured on a body with six structural defects. */
 INCLUDE_ASM("asm/nonmatchings/main/lz_decompress_simple",
             lz_decompress_extended);
 

@@ -16,39 +16,22 @@ s32 func_8003DFD0(s32 x, s32 z) {
 
 /* func_8003E004: wind-indicator vertex generator. Fills the 18-entry Vtx array
  * D_800BA888 (drawn by func_8003E314) with a fan of positions computed from the
- * scenery wind angle via sinf/cosf, projected onto terrain height. Structure
- * and math fully solved (see nonmatchings/func_8003E004/base.c); carried as
- * INCLUDE_ASM.
+ * scenery wind angle via sinf/cosf, projected onto terrain height.
  *
- * S204 "move_movables DFmode-hoist wall / not blind-retryable" is REFUTED (S235
- * gcc-2.7.2 source dive). The hoist + the prologue schedule are SOLVED by 3
- * deterministic C levers (17500 -> 5380 decomp_loop, structurally 100%, all 206
- * rows align, top_mismatches empty):
- *   1. HOIST fix (loop.c:1631): reuse ONE f64 for (f64)base then ang_hi -- a
- * pseudo SET TWICE in the loop is not a single-set invariant, so move_movables
- * cannot hoist the cvt.d.s. Frame 328->320, the mfc1/mtc1 GPR-pair spill and
- * the loop- bound rematerialization both vanish.
- *   2. CALL-ORDER: inline the angle assignment into the sinf() arg so the
- * conversion lands in the 2nd BB (calls are schedule barriers), matching the
- * ROM.
- *   3. PROLOGUE: share one pointer for the angle load and base_pos so sched2
- * groups all register saves first (ROM layout) instead of interleaving them.
- * RESIDUAL (permuter territory, NOT a compiler wall): a global.c live-length RA
- * tie. global.c:587 allocno_compare gives a-pointer (pseudo 233, n_refs 8)
- * strictly higher priority than loop counter i (pseudo 75, n_refs 6); priority
- * = floor_log2(refs)*refs/ live_length, so the ROM's ordering needs
- * live_length(a) >= 2*live_length(i), a ratio only reachable by a scheduling
- * shift -- explicit a/b pointers vs direct buf[i*2] indexing compile
- * BYTE-IDENTICAL (both 5380), so it is NOT faithful-C controllable. Cascades
- * ~12 insns ($s1/$s2) + a scratch-vs-callee double-const nit + one 2nd-loop
- * store addressing mode. gas EXONERATED (aligned rows byte-identical;
- * divergence is pre-gas RTL regalloc). Permuter-reachable in principle but
- * empirically STUBBORN: ~158k iters across two runs, 0 breaks, stuck at
- * permuter-floor 1255. Re-attempt only with a materially different strategy
- * (much longer/wider run, seed diversity to escape the 1255 minimum, or a
- * hand-perturbed seed that shifts i's/a's live-length). All rodata/data refs
- * (D_800CA8E0/E8/F0 pi/2 pool, D_800BA888, g_scenery_wind_angle_a) stay extern
- * in the shared blob. */
+ * S318 carry at 196/196 instructions and the ROM's exact -0x140 frame, 88 cmpfn
+ * rows. Body: docs/wip/func_8003E004.base.c; measured state, the two angle
+ * hoists that closed the 2-instruction deficit, and the residual's three
+ * clusters: docs/wip/func_8003E004.near-match.md.
+ *
+ * S204's move_movables DFmode-hoist wall stays REFUTED (S235). Two inherited
+ * claims do not: the body S235 called "structurally 100%" is 194 of 196 (two
+ * load-use nops after mtc1, gone once ang_lo/ang_hi are hoisted out of the
+ * sinf() arguments), and the 158k-iteration permuter floor was measured on that
+ * short body, so it belongs to it and not to the function (the S259 rule). The
+ * global.c:587 allocno tie is real and now has numbers: a is 15 refs at live
+ * length 80 (5625) against i's 11 at 88 (3750), so i needs 16 refs or a needs
+ * 9. All rodata/data refs (D_800CA8E0/E8/F0 pi/2 pool, D_800BA888,
+ * g_scenery_wind_angle_a) stay extern in the shared blob. */
 INCLUDE_ASM("asm/nonmatchings/main/func_8003DFD0", func_8003E004);
 
 extern Gfx* glistp;

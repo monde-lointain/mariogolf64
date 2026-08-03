@@ -1,50 +1,127 @@
-# lz_decompress_extended — near-match (S166 -> S317, CARRIED)
+# lz_decompress_extended — near-match (S166 -> S317 -> S318, CARRIED)
 
 `src/main/lz_decompress_simple.c`, 0x468 / 282 instructions, the file's last `INCLUDE_ASM` stub.
 Banking it takes the host to md5-candidate (`lz_decompress_dma` S165 `20ff76d`,
 `lz_decompress_simple` S166 `60ecb9a`).
 
-## Measured (rows as of S317)
+## Measured (rows as of S318)
 
-Replaying `nonmatchings/lz_decompress_extended/base.c` verbatim into the host (its `St` struct and
-`inline static expand` helper, return type corrected to `s32`) gives, on the first build:
+Body in tree: the S317 replay retyped onto the host's `LzDecompressState` plus a `LzHistoryState`
+for the frame-local window, with six structural edits (below).
 
-- **282 of 282 instructions at the ROM's exact `-0x18` frame.** No structural deficit in count.
-- **194 `cmpfn` rows** (S317 tooling), which is a whole-function register permutation: nearly every
-  row differs by register name only.
-- **The mnemonic multiset does NOT match**, and that is new information the S166 verdict did not
-  have: `andi` rom=23 mine=20, `lhu` rom=35 mine=37, `beqz` 11 vs 9, `bnez` 7 vs 8, `beqzl` 0 vs 1,
-  `sw` 13 vs 14. So three `andi` masks, two loads and three branch forms are *structural*, not
-  allocation. Located but not yet fixed: the missing `andi ...,0xFFFF` is in the second `expand`
-  loop's `q->run != 0` test, and the two `0x7FF` masks around `ro = ridx & 0xffff` /
-  `ridx = (ridx + 1) & 0x7ff` differ in operand source.
-- Deleting the `rc = (int) param_1;` copy (using `param_1` for every field access and returning the
-  expression directly) takes 194 -> 193 rows and is otherwise inert; the ROM's entry
-  `addu $t6,$a0,$zero` still does not appear first.
+- **282 of 282 instructions at the ROM's exact `-0x18` frame.**
+- **The mnemonic multiset matches** (S317's 3 `andi` / 2 `lhu` / 3 branch-form deficit is closed).
+- **The instruction *order* matches**: normalising every register name to `R` makes the two streams
+  diff-identical. The entire residual is register assignment.
+- **36 `cmpfn` rows (cmpfn as of S318)**, all register-name-only: 200 before the weight levers, 132
+  after them, 36 after the `local-alloc` levers below. Body:
+  `nonmatchings/lz_decompress_extended-8/s318-body-36rows.c`.
+- **Every global allocno now lands on the ROM's register** (`$t1` count, `$t2` bits, `$t3` src,
+  `$t4` word, `$t5` ridx, `$t6` state, `$t7` end, `$t8` ring, `$t9` marker, `$s0` is_final). The
+  whole remaining residual is `local-alloc` quantity assignment inside `$v0/$v1/$a0-$a2/$t0`.
+- Register-occurrence histograms differ in a way a pure relabelling cannot explain: ROM
+  `t6=21 t2=19 t3=16 t0=14 t7=10 t5=10 t1=6 t8=5 t4=5 s0=4 t9=3`, build
+  `t1=21 t3=19 t2=14 t6=10 t5=10 t0=8 t4=6 t8=5 t7=5 s0=4 t9=3` (totals equal at 483). The ROM
+  shares `$t0` across more local quantities (14 vs 8) and its `src` allocno covers 16 references
+  against the build's 14, so both `local-alloc` sharing and the `global.c` order differ.
+### How the global order was fixed: `do {} while (0)` as a per-region ref multiplier
+
+`gcc -dg` prints the allocation order directly (`;; N regs to allocate: ...` plus
+`;; Register dispositions`), and `global.c` hands out `$t1, $t2, ...` in exactly that order because
+every one of these allocnos conflicts with all the others. So matching the ROM's register names is
+matching the ROM's *priority order*, and priority is
+`floor_log2(n_refs) * n_refs / live_length` (`global.c allocno_compare`, the same formula
+`local-alloc.c qty_compare` uses for quantities).
+
+`n_refs` is ref count weighted by loop depth, so **wrapping a region in `do {} while (0)` multiplies
+the refs of everything inside it** without emitting an instruction. That makes the order editable
+region by region. The build's order started as `state > bits > src > ridx > count > end > ring`; the
+ROM's is `count > bits > src > word > ridx > state > end > ring`. Four wrappers reproduce it:
+
+1. the whole back-reference block (`count`/`word`/`ridx`) — takes `count` from 1400 to 4455 and
+   lands it on `$t1`, the ROM's register for it;
+2. the literal-emit `if` + its `do`-loop — moves `bits` to `$t2` and `state` down to `$t5`;
+3. `word = token; if (word == 0) goto done;` plus a **second, nested** wrapper around just the
+   `if` — `word` needs exactly 12 refs (3495) to sit between `ridx` (3485) and `src` (3589), an
+   11-unit window that 11 refs (3203) misses and 13 (3786) overshoots;
+4. the flush loop's *body* only — lifts `end` above `ring`. Wrapping the loop including its
+   `src < end` test instead also doubles `src`, which overtakes `bits` and breaks the order.
+
+### Then `local-alloc`, four levers, 132 -> 36 rows
+
+With the global order fixed, everything left was quantity assignment inside `$v0/$v1/$a0-$a2/$t0`.
+Four edits, each verified by rebuilding one object:
+
+1. **Give the flush epilogue its own temporaries.** Reusing `out0` / `run_left` / `hist_idx` for
+   both the epilogue saves and the emit blocks' walking pointer merges quantities that the ROM keeps
+   separate (132 -> 88).
+2. **Inline the `state->dst_alt` load into `st.out = ...`** in the else arm — the one place the
+   batching rule of edit 4 above does *not* apply (88 -> 76). The same inlining on the continuation
+   arm's `dst_start`, or on `hist_base`/`run`, is worse; test each one.
+3. **`q->out = q->out + 1;` before the run decrement** in the second `lz_expand` loop, keeping the
+   decrement and its test adjacent (76 -> 44, the single biggest step).
+4. **Add the ring offset in place** (`ro = ro + ring; *((u16*)ro) = ctrl;`) in both emit blocks, so
+   the address `addu` overwrites the `sll` result the way the ROM's does (42 -> 36), plus a load
+   reorder in the else arm's prologue (`hist_base`, `hist_idx`, `run`) worth 44 -> 42.
+
+The permuter, run from the fixed-order body, found a fifth weight lever of the same kind
+(`off = ...; lz_expand(q, off, run);` inside each emit block's `if`), worth 168 -> 150 -> 132 rows
+applied to both copies. Its deliverable here was the *mechanism*, exactly as the escalation note
+predicts.
+
+### The six structural edits that closed the multiset and the ordering
+
+Each was read off the `.s`, not searched for:
+
+1. **Flush epilogue loads first.** Read `st.out` / `st.run` / `st.hist_idx` into locals *before* the
+   five `state->` stores. The build otherwise starts that block with a store, which `reorg` steals
+   into an annulled `beqzl` (the S317 histogram's extra `beqzl` + extra `sw`); the ROM's block
+   starts with a load, which `may_trap_p` refuses to steal.
+2. **`done:` as an out-of-line block** placed physically between the `-1` return and `read_word:`,
+   reached by `goto done;`. Restores the ROM's `beqz` polarity (the inline `return` gave `bnez`).
+3. **`u16 token` / `u32 word` split at the token load.** `token = *src; word = token;` keeps the
+   redundant `andi ...,0xFFFF`: the `lhu` cannot fold into the zero-extend while `token` still has
+   its own use (`token & 0x1f`). A single `u32 word = *src` folds the mask away.
+4. **Prologue loads batched.** Both entry arms read all `state->` fields into locals first and
+   assign the `st` members afterwards; the interleaved form serialises load/store pairs onto one
+   register, because a store through `state` blocks the next load from hoisting.
+5. **`run_left = st.run;` hoisted above the ring store** in both emit blocks, which is where the ROM
+   loads it.
+6. **Second `lz_expand` loop decrements into a temp** (`next_run = q->run - 1; q->run = next_run;`
+   then `while (next_run != 0)`), so the test uses the register (one `andi`) instead of reloading
+   after the intervening `q->out` store.
+
+Three further one-instruction order coins fell to statement order: `ridx + 1` computed before the
+ring offset in the literal block, `ro = ridx & 0xffff` computed before `ridx + 1` in the
+back-reference block, and `count = token & 0x1f; word = word >> 5; count = count + 1;` split so the
+shift lands between the mask and the increment.
 
 ## Attributed
 
-- The S166 carry-over calls this a **greg-proven raw-185 register-permutation floor** — two coupled
-  near-tied 3-cycles, Cycle A `{ridx, src, dist}` and Cycle B `{param, end, ring}`. That verdict was
-  measured before the mnemonic-histogram oracle existed, and the histogram says the measured body
-  still carries structural differences. Per the S259 rule (a percent/score verdict belongs to the
-  body that was measured), the coloring conclusion cannot be inherited until the multiset matches.
-- The body is otherwise a faithful model of the ROM: the local `St st` at `sp+0x0..0xF` with the
-  frame at `-0x18`, `q = &st` materialised as `addu $a3,$sp,$zero` at the decode entry, the
-  `marker = 0x8000` in `$t9`, and the `lbu $v0,0x9($a3)` low-byte reload of `hidx & 0xff` are all
-  reproduced.
+- The S166 "greg-proven raw-185 register-permutation floor" (two coupled near-tied 3-cycles, Cycle A
+  `{ridx, src, dist}` and Cycle B `{param, end, ring}`) was measured on a body that still had six
+  structural defects. The class it named — register permutation — is now the *whole* residual for
+  the first time, but its specific cycles belong to that older body and are re-derivable, not
+  inheritable.
+- Permuter re-imported at exact count against this body (`nonmatchings/lz_decompress_extended-3`).
 
 ## Re-open checklist
 
-1. Replay the base (one edit: paste `base.c`'s `typedef`/`expand`/function over the stub, return
-   type `s32`). Confirm 282/282 at `-0x18`.
-2. Close the mnemonic multiset first — the three `andi`, two `lhu`, and the `beqzl` — before reading
-   any register verdict. Only then re-derive with `tools/allocno_report.py`.
-3. The host's banked sibling `lz_decompress_simple` is the style and type reference; its
-   `LzDecompressState` covers this function's fields too (`0x18` ring, `0x1C` u16 ring index, `0x1E`
-   u16 run, `0x20` u16 history index, `0x24` history base), so the rewrite should use it rather than
-   `int *param_1` indexing.
-4. Enablers: none. Split already done (`[0x43810, c, main/lz_decompress_simple]`), all callees
-   placed, no rodata/data carve, the name is pre-curated.
-5. Spent: the safe-passes permuter (S166, plateau 230 -> 208) and the S166 lever sweep. Do not
-   re-grind either before step 2.
+1. Restore the body from `nonmatchings/lz_decompress_extended-5/s318-body-132rows.c` and confirm
+   282/282 at `-0x18` with `tools/cmpfn.sh`, then confirm the register-normalised streams are still
+   identical and `allocno_report.py` still gives the ROM's global order before touching anything.
+2. What remains is `local-alloc`, not `global.c`, in three clusters: (a) the continuation arm's
+   prologue, where the ROM loads `src_cur` first into `$t3` and adds 4 in place while the build
+   sinks that load to last and adds through `$v0`, and its two saved values take `$a0/$a1` instead
+   of `$v0/$v1`; (b) the else arm's `hist_idx`/`hist_base` load order; (c) the token block, where
+   the ROM holds `token` in `$t4` and the zero-extended `word` in `$v0` until the `srl` writes
+   `$t4`, and the build has the two swapped. Spent on (a): splitting the `+ 4` into its own
+   statement, in three placements (80-114 rows). Spent on (c): a separate zero-extend variable
+   (102 rows, and it also breaks the global order by dropping `word` below 12 refs), taking the
+   shift from `token` instead of `word`, and reordering the `count` mask against the shift (both
+   inert at 36).
+3. `qty_compare` is `global.c`'s formula plus `qty_size`, over `death - birth`, so the levers have
+   the same shape — but a quantity is block-local, so a wrapper only moves what is inside its block.
+4. Enablers: none. Split already done, all callees placed, no rodata/data carve, name pre-curated.
+5. Spent: the S166 safe-passes permuter and lever sweep; the six structural edits above are landed,
+   not levers to retry.
