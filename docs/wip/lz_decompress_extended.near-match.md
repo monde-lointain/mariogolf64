@@ -135,3 +135,49 @@ shift lands between the mask and the increment.
 4. Enablers: none. Split already done, all callees placed, no rodata/data carve, name pre-curated.
 5. Spent: the S166 safe-passes permuter and lever sweep; the six structural edits above are landed,
    not levers to retry.
+
+## S319 re-open (carry held, restore path repaired)
+
+**The restore path was broken and is now fixed.** `docs/wip/lz_decompress_extended.base.c` as S318
+left it held only `lz_decompress_extended` (plus a stray copy of `lz_decompress_dma`): the
+`LzHistoryState` typedef and the `static inline lz_expand` helper both lived only in the S318
+working tree. Pasting it builds a **189-instruction function at `-0x50`** with an undefined
+`lz_expand`, which reads like a collapsed body rather than a missing helper. The base.c in this
+directory is now self-contained (typedef + helper + body) and reproduces **282/282 at `-0x18`,
+20 rows (cmpfn as of S319)** on the first build. The helper matters: the `-3` tree's copy of
+`lz_expand` (its second loop decrements before `q->out = q->out + 1`) gives **52 rows** with the
+same decoder body; the `-9` tree's copy (increment first, per structural edit 3) gives 20.
+
+**The two remaining clusters, re-derived from the object.**
+
+1. **The two entry arms' `hist_base` / `hist_idx` quantities** (rows 13-14, 22, 27, 29). In the
+   continuation arm the ROM holds `hist_base` in `$v1` and the build in `$a1` (the `sw ...,4($sp)`
+   follows the register). In the else arm the ROM's load order is `0x1C, 0x20, 0x1E, 0x24`
+   (ring_idx, hist_idx, run, hist_base) and the build's is `0x1C, 0x24, 0x1E, 0x20` — the same
+   multiset with `hist_base` and `hist_idx` exchanged. The ROM's load order equals its `st.` store
+   order; the build's does not.
+2. **The token block** (rows 171-176). The ROM loads the token into `$t4` (the `word` global's
+   register), zero-extends into `$v0`, tests `$v0`, masks `count` out of `$t4`, then writes
+   `word = $v0 >> 5` back into `$t4`. The build loads into `$v0` and zero-extends into `$t4`, so the
+   two quantities are exchanged for the whole block. The ROM's shape needs the zero-extend to be a
+   *third* pseudo, distinct from both `token` and `word`.
+
+**Spent this sprint (all re-measured against the 20-row body, none kept):**
+
+- A separate zero-extend temp (`word0 = token; if (word0 == 0) ...; word = word0 >> 5;`) — the
+  structurally correct shape for cluster 2 — costs the `word` global its references and breaks the
+  whole global order: **88 rows**. S318 measured the same lever at 102 rows on a different body, so
+  this is the second body on which it fails for the same reason.
+- Splitting the *shift result* instead (`dist = word >> 5;` used by the ring index) to move the
+  references onto the new pseudo rather than off `word`: also **88 rows**, and the order breaks at
+  the first `move t6,a0`.
+- All six permutations of the else arm's three prologue reads (`hist_base` / `hist_idx` /
+  `run_left`): three give 20 (no change), three give 22. The emitted load order does not follow the
+  source order here — the scheduler pins it — so cluster 1 is not a statement-order question.
+- Swapping the `u16 token` / `u32 word` declaration order (birth-order tie-break): inert.
+
+**So the next strategy is the allocno arithmetic, not another spelling.** Cluster 2 needs a source
+form that adds a third pseudo *without* moving references off `word` (12 refs is the floor that
+holds the global order), which means the do-while(0) ref multiplier has to be re-tuned in the same
+edit, not after it. `tools/allocno_report.py` on the 88-row body is the starting point: it shows
+which allocno the split displaced.
