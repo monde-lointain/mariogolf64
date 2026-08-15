@@ -15,8 +15,8 @@ An index, not a transcription: derivations live in the retros and, where one exi
 
 These have a `docs/hazards.md` section; read it, not a line here. Anchors:
 `#base-register-vs-displacement`, `#cross-jump-tail-merge`,
-`#goto-loop--loopc-never-runs-defeating-strength-reduction-and-bound-hoisting` (keep the entry test
-by wrapping in `if (n != 0)`, S306), `#loop-weight-and-live-length-regalloc-steering`,
+`#goto-loop--loopc-never-runs-defeating-strength-reduction-and-bound-hoisting` (keep the entry test,
+`if (n != 0)`, S306), `#loop-weight-and-live-length-regalloc-steering`,
 `#named-aggregate-local-extra-block-move`, `#nested-function-static-chain-spill`,
 `#signed-divide-const-v0v1-quotient-destination`, `#switch-compare-chain-layout`,
 `#top-tested-loop-goto-local-hoist`.
@@ -27,29 +27,26 @@ by wrapping in `if (n != 0)`, S306), `#loop-weight-and-live-length-regalloc-stee
   a callee-saved register; initializing it after is the inverse.
 
 - **scope-and-live-range-steer-allocation** -- register order follows
-  `floor_log2(nref)*nref/live_length` (`global.c:587`), which also tiers `local-alloc` quantities,
+  `floor_log2(nref)*nref/live_length` (`global.c:587`), which tiers `local-alloc` quantities,
   spills a long-lived few-reference parameter (S289) and decides whether a copy survives
   (`global.c:790-823`, `local-alloc.c:472/1290/1587`); reuse also pulls a load forward by
   anti-dependency. Read the numbers with `tools/allocno_report.py`, compute the window the ROM's
-  register implies, then pick the knob landing in it: an eighth reference, a free bound copy
-  `n = bound;`, `do {} while (0)` round a subset (S292; also bars the sched hoist), a short-lived
-  local per region, a split of a value spanning two loops, a temp ending a range early, or a
-  block-local temp hoisted to function scope (S308). Merging is the inverse and the
-  only knob when live length cannot win: one variable across two disjoint regions jumps `n_refs` a
-  `floor_log2` tier, the tell being the ROM spending one register on both (S312). `find_reg` takes
-  callee-saved first, so a conflict set that cannot reach the ROM's register means the ROM passes a
-  parameter on to a call -- free from its argument register (S314). **Equal `refs` and `live_length`
-  ends this family: birth order then decides,
-  so the lever is emission order** (S313). Playbook, `.greg` method and tie:
-  `#loop-weight-and-live-length-regalloc-steering`.
+  register implies, then pick a knob landing in it: an eighth reference, a free bound copy
+  `n = bound;`, a short-lived local per region, a split of a value over two loops, a temp ending a
+  range early, a function-scope temp (S308), or a `do {} while (0)` multiplier (below). Merging is the inverse and the only knob when live length cannot win: one
+  variable over two disjoint regions jumps `n_refs` a `floor_log2` tier, the tell being the ROM
+  spending one register on both (S312). `find_reg` takes callee-saved first, so a conflict set that
+  cannot reach the ROM's register means the ROM passes a parameter on to a call (S314). **Equal
+  `refs` and `live_length` ends this family: birth order decides, so the lever is emission order**
+  (S313). Playbook and `.greg` method: `#loop-weight-and-live-length-regalloc-steering`.
 - **aggregate-copy-scratch-clobbers** -- a struct/array copy is one `movstrsi_internal` whose four
   `match_scratch` temps take the lowest free `d` registers there, so anything live across it
   conflicts with all four; its `la` temp names the set's top (S313).
 - **dead-frame-levers** -- for a frame-only diff: `s32 unused[(ROM_frame-0x18)/4]`, `str[row]` (keeps
   base and index live), or an uninit local plus `volatile s32 s = g;`. Split point: arrays slot at
   `expand_decl`, an address-taken scalar only at the first `&x` and after every function-scope
-  aggregate, so reserve part in a block opened after it (S296). Slot order is ascending pseudo number
-  (`reload1.c`).
+  aggregate, so reserve part in a block opened after it (S296); slot order is ascending pseudo
+  number (`reload1.c`).
 - **per-region-cse-slot-base-lever** -- pass the array directly, no cached pointer, so gcc CSEs the
   base per region. Each pointer *local* is a `loop.c` induction pointer costing a callee-saved
   register; an offset off a shared row pointer is not (S289).
@@ -61,20 +58,22 @@ by wrapping in `if (n != 0)`, S306), `#loop-weight-and-live-length-regalloc-stee
 - **emission-order-placement-lever** -- placement follows source emission order: LUID in latency-1
   blocks (`sched.c`), and `loop.c` hoists invariants in loop-body order before `strength_reduce` adds
   giv inits. Knob: move the statement, or split/inline it (`off = i*stride` as its own statement
-  keeps `%hi`/`addu`/`%lo`; inlined it folds into a walking-pointer giv). Whether it hoists at all is
-  the same lever (`loop.c:1631`, `threshold*savings*lifetime >= insn_count`), and a use count of 2
-  rather than 1 is often the whole difference (S290, S294, S300, S308, S310). `threshold` is 122 here
-  less 3 per movable already moved (`loop.c:532/1719`), so movable K hoists iff
-  `122 - 3K >= insn_count`; the knob is `insn_count`, from `-dL` (S312).
-- **sched-tiebreak-coins** -- `rank_for_schedule` (`sched.c:2428`) sorts class then LUID (a class-1
-  compute defers behind class-3 stores); `schedule_select` (`sched.c:2615`) front-loads a transfer
-  over a constant load (`fabsf` sign-mask, 3 vs 2; `mtc1`-zero ties via potential-hazard). Source
-  order is not always the knob: S305 moved a `div` three ways for a byte-identical object.
-- **sched-bottomup-loadsplit-livelength-blockmove** -- at exact count a `s32 tmp` statement split
-  forces a load interleave (sched is bottom-up); moving a statement earlier shortens a qty's live
-  length. Permuter-proof.
-- **do-while-zero-block-break** -- an empty `do {} while (0);` emits nothing but ends the preceding
-  block, so `reorg` stops reaching past a call to annul the next branch (S288).
+  keeps `%hi`/`addu`/`%lo`; inlined it folds into a walking-pointer giv). Hoisting at all is the same
+  lever (`loop.c:1631`, `threshold*savings*lifetime >= insn_count`), and a use count of 2 rather than
+  1 is often the whole difference (S290-S310, five sprints). `threshold` is 122 less 3 per movable
+  already moved (`loop.c:532/1719`), so movable K hoists iff `122 - 3K >= insn_count`; the
+  knob is `insn_count`, from `-dL` (S312). A call is a block boundary: hoisting a computation out of
+  a call *argument* moves it a block earlier (S318).
+- **sched-order-levers** -- `rank_for_schedule` (`sched.c:2428`) sorts class then LUID (class-1
+  defers behind class-3 stores); `schedule_select` (`sched.c:2615`) front-loads a transfer over a
+  constant load (`fabsf` sign-mask 3 vs 2, `mtc1`-zero ties via potential-hazard). At exact count a
+  `s32 tmp` split forces a load interleave (sched is bottom-up) and moving a statement earlier
+  shortens a qty's live length; both permuter-proof. Source order is not always the knob
+  (S305: a `div` moved three ways, byte-identical object).
+- **do-while-zero-lever** -- emits nothing. Empty it ends the preceding block, so `reorg` stops
+  reaching past a call to annul the next branch (S288); round a region it multiplies only that
+  region's `n_refs`, moving one allocno per edit (S292/S318,
+  `#pervasive-regalloc-classical-main`).
 - **global-reread-vs-cse**, absorbing defeat-global-base-cse -- a scalar-global store does not
   constrain a later load through a pointer parameter (`true_dependence`, `sched.c:817`), so the load
   hoists. `extern s32 G[]` read as `G[0]`, a neighbour read at a known displacement, or a `*(s32 *)`

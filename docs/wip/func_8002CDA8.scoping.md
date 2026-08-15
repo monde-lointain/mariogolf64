@@ -193,7 +193,7 @@ Everything tried failed to move that one unit:
 - loop forms: i-loop and j-loop each as `do {} while`, `do {} while (0)` round the `yl` assignment
   or round the `gDPLoadTextureTile` call: no change or worse.
 - `do {} while (0)` round the **`gSPScisTextureRectangle` call** does fix the branch (`bgez`/`j`
-  match exactly, the `do-while-zero-block-break` lever) -- but it costs a duplicate
+  match exactly, the `do-while-zero-lever` lever) -- but it costs a duplicate
   `sw $v1,4($a1)` immediately before the real `sw $v0,4($a1)`, i.e. `lw` 99/101 and `sw` 273/271.
   Net worse, so it is not in the body below. It does confirm the branch is a block-boundary effect.
 

@@ -166,6 +166,12 @@ dashboard). Target selection is `tools/pick_target.py`, not a stored roadmap.
     surfacing after that sprint. At a re-open, treat a changed count as tooling until a rebuild says
     otherwise — the instruction count and frame are the stable numbers to compare. Write new counts
     as `rows (cmpfn as of S<N>)`.
+    - **And a doc's "structurally 100% / all N rows align" line is a percent, not an instruction
+      count (S318).** `func_8003E004`'s carry recorded 206 aligned rows and no structural deficit
+      from `decomp_loop`; `cmpfn` against the current build read 194 against the ROM's 196, and the
+      two missing instructions were load-use `nop`s that a scheduler was free to fill only because
+      an FP constant had landed in a different register. Take the count and frame from `cmpfn`'s
+      header (`rom=`/`mine=`/`rows=`/`[frame ...]`) at every re-open, whatever the doc claims.
   - **A compiler-source dive's "proven wall" conclusion is a hypothesis too (S292).** A dive's pass
     citation is usually right; its closing claim that *no source form reaches the other side* is a
     negative claim over a space the dive could not measure before `tools/allocno_report.py` existed.

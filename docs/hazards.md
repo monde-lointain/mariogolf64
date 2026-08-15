@@ -4984,12 +4984,9 @@ decoder/codec (LZ/RLE, CRC, a bit-stream/ring-buffer walker: many back-to-back `
 software-pipelined load-store copy chain, a self-recursive or ring-buffer index, a control-word bit
 loop) is the opposite. The dense scheduling + a handful of long-lived pointers packed into `t0-t9`
 puts it squarely on this wall, and it will need the permuter/fan-out, not a first-build match. Price
-such a fn as a pervasive-regalloc unit (seed 8+, expect permuter), not seed-5. S164 mis-priced a
-3-fn LZ trio (`lz_decompress_simple.c`) seed-5 and carried all 3 (`dma` matched only because its
-residual was reloc artifacts; `simple`/`extended` reached structural-complete but locked on the
-register permutation — `control` grabs `$v0` first via its short live range, target keeps it in `$a2`).
-`pick_target.py` has no codec signal yet (tracked follow-up); until then the gate applies this by
-reading the fn's shape.
+such a fn as a pervasive-regalloc unit (seed 8+, expect permuter), not seed-5 (S164, a 3-fn LZ trio
+in `lz_decompress_simple.c` priced seed-5 and carried whole). `pick_target.py` has no codec signal
+yet (tracked follow-up); until then the gate applies this by reading the fn's shape.
 
 **Resolution upgrade — this wall is source-steerable, not permuter-only.** The codec triage
 tell was re-confirmed (both LZ leaves hit it), but a codec/decoder is no longer only "structural-
@@ -4999,6 +4996,34 @@ hardest wall, 8600→0). Price it seed-8+/expect-permuter still, but before conc
 run the loop-weight/live-length source levers first (they precede the permuter); the permuter closes
 only the residual allocno-number tiebreak, and on a goto-loop fn it must run safe-passes-only (see
 `#permuter-goto-backedge-liveness-unsound`).
+
+**Ref-multiplier lever — `do {} while (0)` makes the priority order editable region by region
+(S318).** `n_refs` is reference count weighted by loop depth (`flow.c`), and both allocation passes
+rank by `floor_log2(n_refs) * n_refs / live_length` (`global.c allocno_compare`,
+`local-alloc.c qty_compare`, the latter with `qty_size` and `death - birth`). A bare
+`do { ... } while (0)` emits no instruction and multiplies the references of **exactly what it
+encloses**, so it is a selective weight knob: wrap the region whose allocno must rise, and nothing
+else moves. Procedure, once the body is at the ROM's exact count and instruction order:
+
+1. Read the ROM's register per value off the `.s`, and the build's from `gcc -dg`'s
+   `;; N regs to allocate` (the priority order) plus `;; Register dispositions`. When every allocno
+   conflicts with every other — the usual case in a tight loop nest — `global.c` hands out
+   `$t1, $t2, ...` in priority order, so matching the ROM's names *is* matching its order.
+2. Pick the wrapper region by which allocnos it contains, apply one, and re-read
+   `tools/allocno_report.py`. One allocno per edit.
+
+Two traps. **The window can be a few units wide**: S318's `word` needed exactly 12 refs (3495) to
+land between `ridx` (3485) and `src` (3589) — 11 refs (3203) missed low and 13 (3786) overshot. And
+**a wrapper that also covers an allocno you already placed undoes it**: wrapping a loop *including*
+its `src < end` test doubled `src` too and pushed it past `bits`; wrapping only the loop body did
+the intended job. The lever does not reach a tie whose two sides live in one statement — S318's
+`func_8004DC44` needs its `/40` dividend raised past the magic, and every wrapper that contains the
+dividend contains the magic (`docs/wip/func_8004DC44.wip.md`).
+
+S318 walked all ten of `lz_decompress_extended`'s global allocnos onto the ROM's registers this way
+(4 wrappers, 200 -> 132 `cmpfn` rows), and the permuter, re-seeded from the fixed-order body, then
+proposed a fifth of the same kind. Extends the memory `do-while-doubles-reg-n-refs-qty-tier`, which
+recorded it as a tie-break for one `local-alloc` quantity.
 
 **Seed-order sub-lever — a scalar/record init fn: seed in field/row order, not Ghidra's statement
 order (S189).** For a fn that is just a run of scalar global stores (a table/record initializer), the

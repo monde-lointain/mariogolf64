@@ -1526,6 +1526,46 @@ Three honest caveats:
   and `main`'s fresh vein is now one row. Tooling: three of the sprint's four accepted suggestions
   were tools this sprint had to hand-roll (`cmpfn.sh` histogram, `tools/seg_diff.py`,
   `tools/gbi_match.py`).
+- **Sprint 318 (realized)** — two more of `main`'s single-stub files, both inherited-verdict
+  re-opens. **0 banked, 3 carried, 2 permuter escalations (7 imports, 0 zeros), 0 stuck-far, 3
+  re-opened.** Zero gate enablers — all three targets were already-extracted loose stubs in
+  already-`c` files. Seed 5+5pt committed (+3pt stretch), frozen at `1f5314e` before any `src/`
+  edit; **banked 0pt** (both hosts still at 1 stub); **realized 16** committed
+  (`lz_decompress_extended` 5 **+1** re-open **+1** permuter = 7, `func_8003E004` 5 **+1** re-open
+  **+1** permuter = 7 — the pair also carried, but S318 scores the carry once per file with the
+  re-open, not twice), residual **+6**; the stretch scores 5 (seed 3 **+1** re-open **+1** carry),
+  residual +2. Regime classical. Progress **+0** matched, **+0 files md5-candidate** (232 of 265);
+  `main` stubs 260 → 260 (the repo `grep -c INCLUDE_ASM` reads 263 → 262 only because a carry
+  comment stopped quoting the macro name); descriptive names **+0**.
+  Rolling-5 (S314-S318) matched-fn: 3+2+3+2+0.
+  **A 0-bank sprint that still produced the sprint's most reusable lever.** `do {} while (0)` is a
+  per-region reference multiplier — `n_refs` is loop-depth-weighted, so a wrapper multiplies the
+  references of exactly what it encloses and nothing outside it, which makes the `global.c`
+  priority order editable region by region. Four wrappers walked all ten of
+  `lz_decompress_extended`'s global allocnos onto the ROM's registers; with nine `local-alloc`
+  levers behind them the diff went 200 → 20 `cmpfn` rows at the ROM's exact count, frame and
+  instruction order. The two traps are recorded with it: the landing window can be a few units wide
+  (one allocno needed exactly 12 references, 11 missed and 13 overshot), and a wrapper that also
+  covers an allocno already placed undoes it.
+  **Both committed items refuted part of the verdict they inherited.** S166's "raw-185 coloring
+  floor" was measured on a body with six structural defects — closing the mnemonic multiset and the
+  instruction order first left the coloring as the *whole* residual for the first time. S235's
+  "structurally 100%" for `func_8003E004` was 194 of 196: two load-use `nop`s the scheduler could
+  fill only because an FP pool constant had landed in a register the `mtc1` did not want, and
+  hoisting the angle out of the `sinf()` argument restored both. The stretch's named lever (2) is
+  now refuted rather than untried: the multiplier does lift its dividend past the magic, but one
+  statement holds both operands, so they scale together.
+  **Pricing lesson for the backlog:** two one-stub carries in one sprint was over-committed. Each
+  re-open consumed a full slot and neither closed, which is the S317 pattern (a carry re-open is a
+  crack slice, not a leaf) applied to a segment where every remaining leaf is a carry.
+  Retro applied 6 of 6 plus 2 consolidations (the S164 codec case law compressed in
+  `#pervasive-regalloc-classical-main`; `sched-tiebreak-coins` + `sched-bottomup-...` merged into
+  `sched-order-levers`, PO-selected when the accepted rows overran `levers.md`'s budget). Net
+  prompt-surface delta **+2512 B** (`hazards.md` +1934, `gates.md` +586, `levers.md` +3,
+  `hazard-index.md` −3, `loop.md` −8 — every surface inside budget, the three that were at their
+  ceiling only because the consolidations paid for the additions). Tooling: `cmpfn.sh` now prints
+  `rows=` in its header, because a `| grep -c '^[<>]'` pipeline prints `0` on a failed build and
+  that reads exactly like a byte match. Push: local.
 - **Sprint 317 (realized)** — close `main`'s single-stub files. **+2 banked, 2 carried, 1 permuter
   run (dry, stopped), 0 stuck-far, 3 re-opened.** Zero gate enablers — all four targets were
   already-extracted loose stubs in already-`c` files, no flip, no split, no `.rodata` carve, no

@@ -25,6 +25,45 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 318 — 0 banked; the ref-multiplier lever, and two verdicts refuted — 2026-08-14
+- Increment: **0 files md5-candidate** (232 of 265, unchanged) / **0 functions matched**. `main`
+  stubs 260 → 260; the repo `grep -c INCLUDE_ASM` reads 263 → 262 only because a rewritten carry
+  comment stopped quoting the macro name, not because a stub went away. Descriptive names **+0**.
+  ROM SHA-1 green at the gate and at all four commits (`tools/verify-rom.sh` exit 0).
+- Quality: 0 stuck-far / 2 permuter-escalated (7 imports, 0 zeros) / 3 carried / 3 re-opened.
+- Seed: committed 5+5pt at `1f5314e` (+3pt stretch); **banked 0pt**; realized 16 committed
+  (residual **+6**) and 5 stretch (+2); regime classical.
+- What helped: **`do {} while (0)` is a per-region reference multiplier, not just a tie-break.**
+  `n_refs` is loop-depth-weighted, so a wrapper multiplies the references of exactly what it
+  encloses; with `gcc -dg`'s `;; N regs to allocate` line giving the build's priority order and the
+  ROM's registers giving the target order, four wrappers walked all ten of
+  `lz_decompress_extended`'s global allocnos onto the ROM's registers. Nine `local-alloc` levers
+  (per-block temporaries, loads batched before stores, an in-place ring offset, decrement before
+  increment) took it from 132 to 20 `cmpfn` rows at the ROM's exact 282 instructions, `-0x18` frame
+  and identical instruction order. Also: reading the `.s` end to end before touching the body
+  produced all six structural edits that closed the S317 mnemonic deficit, none of them found by
+  search.
+- Friction: **two carry re-opens in one sprint over-committed the slot.** Each is a crack slice, not
+  a leaf, and neither closed its file, so the sprint banks 0 despite the largest residual reduction
+  the segment has seen. Second: `cmpfn ... | grep -c '^[<>]'` prints `0` when the object failed to
+  build, which reads exactly like a byte match (fixed — the header now carries `rows=`). Third: the
+  permuter's score and `cmpfn`'s row count disagreed on 4 of 8 candidates, so every hint had to be
+  re-measured rather than trusted.
+- Applied: 6 of 6 — #1 (the ref-multiplier procedure with both traps → `docs/hazards.md`
+  `#pervasive-regalloc-classical-main`, a `hazard-index.md` trigger row, a `levers.md` pointer), #2
+  (`gcc -dg` prints the allocation order, not only conflicts → `loop.md` oracle row), #3 (an
+  aligned-rows claim is a percent, not an instruction count → `gates.md` DoR), #4 (hoisting a
+  computation out of a call *argument* moves it a block earlier → `levers.md`), #5 (`cmpfn.sh`
+  prints `rows=`), #6 (re-measure permuter candidates with `cmpfn`; tally now 8/13 levers, 0/13
+  zeros → `loop.md`). Retirements: the S164 codec case law in `#pervasive-regalloc-classical-main`
+  compressed to its rule plus one citation (PO-selected), and `sched-tiebreak-coins` +
+  `sched-bottomup-loadsplit-livelength-blockmove` merged into `sched-order-levers` (PO-selected when
+  the accepted rows overran `levers.md`'s budget). Net prompt-surface delta **+2512 B**.
+- Carry-over: `lz_decompress_extended` (20 rows, four `local-alloc` clusters),
+  `func_8003E004` (88 rows: preheader constant order, the angle block's placement, the `i`/`a` tie),
+  `func_8004DC44` (75/75, the `/40` dividend-versus-magic tie, lever (2) now refuted). Bodies are
+  committed as `docs/wip/*.base.c`; measured/attributed splits in the two `.near-match.md` files.
+
 ## Sprint 317 — two inherited verdicts retired, two files closed — 2026-08-03
 - Increment: **2 files md5-candidate** (230 → 232 of 265) / **2 functions matched**
   (`func_8005244C` 94/94 at `f297119`, `func_80070FD0` 61/61 at `110320d`), each at the ROM's exact

@@ -48,6 +48,21 @@ see `docs/wip/func_800990D0.near-match.md` (`--carried-check` flags it). Backup 
 (294-instr wall-prone debug handler, its own slice). STANDING GUIDANCE: prefer a FRESH non-main pack
 next unless a specific main leaf is pre-vetted `.s`-clean.**
 
+**S318 PRICES THE ONE-STUB CARRIES: ONE PER SPRINT, NOT TWO — and lands a general allocation lever.**
+The four one-stub `main` hosts are all `CARRIED-WALL`, so each is a crack slice, not a leaf. S318
+committed two of them and banked neither, while producing the segment's largest residual reduction:
+`lz_decompress_extended` went 200 → **20 `cmpfn` rows** at 282/282, the ROM's `-0x18` frame and an
+identical instruction order, with every global allocno on the ROM's register, and `func_8003E004`
+reached **196/196** at `-0x140` (88 rows) after refuting the S235 "structurally 100%" claim. **Commit
+one one-stub carry per sprint and pair it with something bankable**, or accept a 0-pt sprint by
+design. The lever that did it generalises: `do {} while (0)` multiplies the references of exactly
+what it encloses (`n_refs` is loop-depth-weighted), so the `global.c allocno_compare` order is
+editable region by region — procedure and its two traps in
+`docs/hazards.md#pervasive-regalloc-classical-main`, and it is the first tool that reliably converts
+"register-name-only diff" into a sequence of single-allocno edits. Remaining one-stub hosts:
+`func_8005E380.c` (469 instr, 66 jal, S235 terminal-with-citation, never re-opened) and the three
+carries above.
+
 **S317 CLOSES TWO FILES AND CHANGES HOW A `main` LEAF IS PRICED — rank by the host's distance from
 zero stubs, not by leaf size.** `--loose-stubs main` still reports **1 fresh** row (`func_80089094`,
 13452 B), so smallest-first offers nothing; what it cannot see is that several files sit one stub from
@@ -4093,18 +4108,33 @@ by `/sprint-plan`:
   under four birth-order spellings, so it is not independent). New this sprint: a non-void return of
   the quotient reproduces the ROM's `mult` operand order from faithful source, so S174's "only a call
   supplies the reg-2 set" is too narrow — what no spelling has produced is that flip without paying
-  for the returned value's liveness. Host is one stub from md5-candidate. Measured/attributed split
-  and the three untried directions are in `docs/wip/func_8004DC44.wip.md`.
-- **`lz_decompress_extended`** (`src/main/lz_decompress_simple.c`, S166 -> S317) — replays from
-  `nonmatchings/lz_decompress_extended/base.c` at **282/282 with the ROM's exact `-0x18` frame on the
-  first build**, 194 `cmpfn` rows. **The S166 "greg-proven raw-185 register-permutation floor" cannot
-  be inherited yet:** the mnemonic multiset still differs (`andi` 23 vs 20, `lhu` 35 vs 37, `beqz`
-  11 vs 9, `bnez` 7 vs 8, one `beqzl`, `sw` 13 vs 14), which is structure, and that oracle did not
-  exist when the verdict was written. Close the multiset before reading any coloring verdict (S259).
-  The banked sibling `lz_decompress_simple` is the style and type reference and its
-  `LzDecompressState` covers this function's fields (`0x18` ring, `0x1C` u16 ring index, `0x1E` u16
-  run, `0x20` u16 history index, `0x24` history base). Host is one stub from md5-candidate. Re-open
-  checklist: `docs/wip/lz_decompress_extended.near-match.md`.
+  for the returned value's liveness. **S318 refutes untried lever (2)**: the `do {} while (0)` ref
+  multiplier does lift the dividend chain from 1666 to 7500, past the magic's 6666, but one statement
+  holds both operands so the magic scales with it (100 rows). Levers (1) — a source form whose
+  returned value is dead at the tail — and (3), a longer semantics-preserving permuter run, remain.
+  Host is one stub from md5-candidate. Measured/attributed split: `docs/wip/func_8004DC44.wip.md`.
+- **`lz_decompress_extended`** (`src/main/lz_decompress_simple.c`, S166 -> S317 -> S318) — **282/282
+  at the ROM's exact `-0x18` frame, matching mnemonic multiset, and an instruction order identical to
+  the ROM's** (normalise register names and the two streams diff-clean). **20 `cmpfn` rows left, all
+  register naming**, and **every global allocno already sits on the ROM's register** — S318 walked
+  the `global.c` priority order there with four `do {} while (0)` ref-multiplier wrappers, then took
+  132 → 20 with nine `local-alloc` levers. The S166 "greg-proven raw-185 coloring floor" is retired
+  as a verdict: it was measured on a body with six structural defects, and the coloring is only now
+  the whole residual. What remains is `local-alloc` in four clusters (the continuation arm's
+  `hist_base`, the else arm's `hist_idx`/`hist_base` load order, the token/word register pair, the
+  second emit block's `run` load). Host is one stub from md5-candidate. Body:
+  `docs/wip/lz_decompress_extended.base.c`; levers, spent variants and re-open checklist:
+  `docs/wip/lz_decompress_extended.near-match.md`.
+- **`func_8003E004`** (`src/main/func_8003DFD0.c`, S204 -> S235 -> S318) — **196/196 at the ROM's
+  exact `-0x140` frame**, 88 `cmpfn` rows. S235's "structurally 100%" is refuted: that body is 194 of
+  196, two load-use `nop`s short, and hoisting `ang_lo`/`ang_hi` out of the `sinf()` arguments
+  restores both (the FP pool constant then shares the `mtc1` scratch, and the anti-dependency blocks
+  the fill). Its 158k-iteration permuter floor therefore belongs to the short body, not the function
+  (S259). Residual: the preheader's constant order, the angle block's placement (it trades against
+  the two `nop`s), and the `global.c` tie — `a` is 15 refs at live length 80 (5625) against `i`'s 11
+  at 88 (3750), so `i` needs 16 references or `a` needs 9, and neither the ref multiplier nor the
+  pointer-versus-index spelling reaches it. Host is one stub from md5-candidate. Body:
+  `docs/wip/func_8003E004.base.c`; doc: `docs/wip/func_8003E004.near-match.md`.
 - **`func_8006E210` + `func_8006DFF0`** (`src/main/func_8006A2C0.c`, S310 -> S313) — S313 replayed
   the doc's body verbatim (543/543 at the exact `-0x60` frame, first build, carve links) and
   re-measured both parent clusters. R1 re-confirmed: the natural in-block `col = 5` costs +2 and

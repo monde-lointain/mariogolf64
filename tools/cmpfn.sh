@@ -384,7 +384,11 @@ PADNOTE=''
 # Same note for the .s side, so a reader can tell an exact body from a one-short one (S310).
 ROMPAD=$(awk '$1 == "endlabel" { seen = 1; next } seen && $1 == "/*" && $5 == "*/" { n++ } END { print n + 0 }' "$ASM_FILE")
 [ "$ROMPAD" -gt 0 ] && PADNOTE="$PADNOTE  [+$ROMPAD rom pad after endlabel ignored]"
-echo "rom=$(wc -l < "$ROM_N") mine=$(wc -l < "$MINE_N")  ($OBJ)  [$FRAME]$PADNOTE"
+# The differing-row count goes in the header, so no caller needs a `| grep -c '^[<>]'` pipeline:
+# such a pipeline prints 0 when the object failed to build, which reads exactly like a byte match
+# (the non-zero exit is real but easy to miss beside the printed 0) -- S318.
+DIFFROWS=$(diff <(cat -n "$ROM_N") <(cat -n "$MINE_N") | grep -c '^[<>]' || true)
+echo "rom=$(wc -l < "$ROM_N") mine=$(wc -l < "$MINE_N") rows=$DIFFROWS  ($OBJ)  [$FRAME]$PADNOTE"
 
 # Mnemonic histogram delta. A multiset comparison says whether the residual is STRUCTURAL and of
 # what kind before any hunk is read: `slti`+`bnez` against `bne` names a loop-exit form, a `div` /
