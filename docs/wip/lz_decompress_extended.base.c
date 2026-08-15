@@ -1,10 +1,10 @@
 /* S319 restore body for lz_decompress_extended: 282/282 at the ROM's exact
- * -0x18 frame, instruction order identical, 20 cmpfn rows (cmpfn as of S319)
- * of register naming left. SELF-CONTAINED: paste this whole file over the
- * INCLUDE_ASM stub in src/main/lz_decompress_simple.c. It carries the
- * LzHistoryState typedef and the static inline lz_expand helper, both of which
- * the S318 copy of this file omitted -- without them the paste builds a 189
- * instruction function at -0x50 (S319 spent a re-derivation finding that).
+ * -0x18 frame, instruction order identical, **10 cmpfn rows (cmpfn as of
+ * S319)** of register naming left, down from S318's 20. SELF-CONTAINED: paste
+ * this whole file over the INCLUDE_ASM stub in
+ * src/main/lz_decompress_simple.c. It carries the LzHistoryState typedef and
+ * the static inline lz_expand helper, both of which the S318 copy omitted --
+ * without them the paste builds a 189-instruction function at -0x50.
  * The host also needs its S318 LzDecompressState field names.
  * See lz_decompress_extended.near-match.md. */
 
@@ -256,6 +256,7 @@ s32 lz_decompress_extended(LzDecompressState* state) {
   u16 flags;
   u16 ctrl;
   u32 word;
+  u32 zx;
   u16 token;
   u32 count;
   s32 off;
@@ -395,21 +396,27 @@ decode_top:
   if (bits == 0) {
     goto dispatch;
   }
-  token = *src;
+  word = *src;
   src = src + 1;
   do {
-    word = token;
+    zx = (u16)word;
     do {
-      if (word == 0) {
+      if (zx == 0) {
         goto done;
       }
     } while (0);
   } while (0);
   /* Back-reference into the control ring: distance = word>>5 entries,
-   * length = (token&0x1f)+1. */
+   * length = (word&0x1f)+1. */
   do {
-  count = token & 0x1f;
-  word = word >> 5;
+  count = word & 0x1f;
+  do {
+  do {
+  do {
+  word = zx >> 5;
+  } while (0);
+  } while (0);
+  } while (0);
   count = count + 1;
   do {
     ro = ridx & 0xffff;

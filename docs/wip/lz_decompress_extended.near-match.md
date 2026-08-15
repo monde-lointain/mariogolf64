@@ -176,8 +176,36 @@ same decoder body; the `-9` tree's copy (increment first, per structural edit 3)
   source order here — the scheduler pins it — so cluster 1 is not a statement-order question.
 - Swapping the `u16 token` / `u32 word` declaration order (birth-order tie-break): inert.
 
-**So the next strategy is the allocno arithmetic, not another spelling.** Cluster 2 needs a source
-form that adds a third pseudo *without* moving references off `word` (12 refs is the floor that
-holds the global order), which means the do-while(0) ref multiplier has to be re-tuned in the same
-edit, not after it. `tools/allocno_report.py` on the 88-row body is the starting point: it shows
-which allocno the split displaced.
+**Then the allocno arithmetic closed cluster 2: 20 -> 10 rows (cmpfn as of S319).** The rule the
+sprint proved is that a structural split and its weight compensation are ONE edit, computed before
+building, not a split followed by a search:
+
+1. **The ROM's `$t4` is `word`, and the raw token shares it.** `$t4` appears exactly 5 times in the
+   ROM (`lhu` token, `andi 0xFFFF`, `andi 0x1F`, `srl`, `subu`). The zero-extend is a *third* pseudo
+   in `$v0`; the shift result goes back into `$t4`.
+2. **Spell it with ONE variable for the load and the distance plus one zero-extend temp**, not with
+   a token variable and a word variable:
+   `word = *src; zx = (u16)word; if (zx == 0) goto done; count = word & 0x1f; word = zx >> 5;`
+   `word` is `u32`, so the `lhu` lands directly in it, `(u16)word` is the `andi 0xFFFF`, and
+   `count` reads the raw value out of the same register the ROM does. The separate `u16 token` is
+   gone.
+3. **Compensate the reference loss in the same edit.** That spelling leaves `word` at refs 10,
+   live_length 105, priority 2857 -- below `ridx` at 3471, so the whole global order shifts and the
+   body reads 68 rows. `global.c allocno_compare` is `floor_log2(refs) * refs / live_length`, so the
+   requirement is `floor_log2(r) * r / 105 > 0.3471`, i.e. **r >= 13**. Three nested `do {} while (0)`
+   wrappers around `word = zx >> 5;` take refs 10 -> 13 (each wrapper adds one loop-depth-weighted
+   reference), priority 3714, `$t4`, and the body reads **10 rows**. Four wrappers overshoot (40
+   rows); the earlier token/word0 split needed seven wrappers to reach the same register and still
+   read 16.
+
+**What is left is 5 diff pairs, all in the two entry arms (cluster 1).** The continuation arm holds
+`hist_base` in `$a1` where the ROM has `$v1` (and loads it before `dst_start`, where the ROM loads
+`dst_start` first); the else arm has the ROM's registers already (`hist_idx` `$v1`, `run` `$a0`,
+`hist_base` `$a1`) but emits the `0x24` load before the `0x20` load. Re-measured and refuted against
+*this* body: all six permutations of the three prologue reads (10 or 12 rows -- the order is
+scheduler-pinned, not source-order), inlining each of `hist_idx` / `run` / `hist_base` into its `st.`
+store (16 / 32 / 30 rows), and a per-arm split of `hist_base` (14 rows -- it *fixes* the continuation
+arm's three rows and rotates the else arm's trio instead, which is the first evidence that the two
+arms want different quantities and that the split is right but needs its own weight compensation).
+`run`'s allocno sits at priority 97058 in `$v1`, so a pure priority edit cannot reorder the else
+arm's trio; the next attempt should compensate the split arm rather than re-weight the trio.
