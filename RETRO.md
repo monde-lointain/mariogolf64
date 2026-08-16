@@ -25,6 +25,52 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 319 — the overlay vein opens: 5 matched, 2 files closed — 2026-08-16
+- Increment: **2 files md5-candidate** (232 → 234 of 267) / **5 functions matched**
+  (`func_ovl8_801F55A0` 25/25 `5f6b42a`, `func_ovl8_801F56E4` 39/39 `6c2f358`, `func_ovl8_801F5604`
+  56/56 `653f917` closing `src/overlay_8/func_ovl8_801F55A0.c`; `func_ovl8_801F5780` 30/30 +
+  `func_ovl8_801F57F8` 74/74 `0d75e9a` closing `src/overlay_8/func_ovl8_801F5780.c`). Repo
+  `INCLUDE_ASM` 263 → 263: the gate flip added five stubs and all five banked. Descriptive names
+  **+0** (auto names kept deliberately). ROM SHA-1 green at all six commits (`verify-rom.sh` exit 0).
+- Quality: 0 stuck-far / **0 permuter-escalated** / 1 carried / 1 re-opened.
+- Seed: committed 5+3pt at `37c647a` (+5pt stretch); **banked 10pt**; realized 8 committed pack
+  (residual +3), 5 stretch (0), 5 carry (banked 0, residual +2); regime classical.
+- What helped: **the fresh overlay vein, which prices nothing like `main`.** `--file-close main`
+  reports every remaining `main` host as `CARRIED-WALL`, so the bankable half of S318's
+  "one carry plus something bankable" rule had to come from outside the segment; five overlay leaves
+  (`fresh` + `standalone` + `fp=0` + `jtbl=0`) banked with zero permuter runs. The 8-point gate fired
+  on the un-split 5-fn subseg (seed 13) and was answered by decomposing at a 16-aligned function
+  boundary, so the first half closed on its own. Levers: an empty
+  `__asm__ __volatile__("" : : "r"(x))` that both breaks a consecutive movable group (`loop.c:1631`
+  always moves an invariant group otherwise) and adds the allocno reference that orders two tied
+  globals; per-loop constant *variables* to keep a repeated `1`/count materialised once per loop;
+  a goto-form compare loop where the structured `do-while` + `break` rotates; an out-of-line
+  mismatch block after the success path's `return` with its own `i = 0` so `loop.c` folds the giv
+  base. On the carry, the arithmetic did the work: the token block's correct spelling costs `word`
+  its references (2857 against `ridx`'s 3471, 68 rows), and `floor_log2(r)*r/105 > 0.3471` gives
+  `r >= 13` = three `do {} while (0)` wrappers = 10 rows.
+- Friction: **a carry that could not be restored from its own record.** S318's
+  `docs/wip/lz_decompress_extended.base.c` omitted the `LzHistoryState` typedef and the
+  `static inline lz_expand` helper, so the documented paste built a 189-instruction body at `-0x50`;
+  the leftover `nonmatchings/lz_decompress_extended-N/` permuter trees held the missing pieces, and
+  the helper variant mattered by itself (two copies differing in one statement's placement give 52
+  against 20 rows). Second: both S318 and S319 made a structural split and only then discovered it
+  had wrecked the global allocno order, spending a build cycle each time. Third: five banks in a row
+  ended on a `cmpfn` diff that was nothing but branch-target rendering (`bne ...,T` against
+  `bne ...,@Dm6`), which survives a byte-exact match.
+- Applied: 4 of 4 — #1 self-contained carry body (`loop.md`), #2 record the helper variant (folded
+  into #1's block), #3 split + weight compensation are one edit
+  (`hazards.md#pervasive-regalloc-classical-main`), #4 `cmpfn` branch-target rows are display-only
+  (`loop.md` Oracles). Retired to pay for them: the S244 fast-path `diff.py` bullet compressed to its
+  rule + command + citation, and the `verify-rom.sh` half of the match-finalization bullet compressed
+  to a pointer at the Oracles row it duplicated (a second consolidation, PO-approved when the first
+  did not cover the additions). Net line delta: `loop.md` **-177 B** (47095 → 46918),
+  `hazards.md` +1133 B; `prompt_lint check` passes all 18 surfaces.
+- Carry-over: `src/main/lz_decompress_simple.c` — `lz_decompress_extended` at 282/282, ROM `-0x18`
+  frame, **10 `cmpfn` rows (cmpfn as of S319)**, residual entirely in the two entry arms. Next lead
+  is in the doc: the per-arm `hist_base` split fixes the continuation arm's three rows and rotates
+  the else arm's trio instead (14 rows), so the split is right and needs its own compensation.
+
 ## Sprint 318 — 0 banked; the ref-multiplier lever, and two verdicts refuted — 2026-08-14
 - Increment: **0 files md5-candidate** (232 of 265, unchanged) / **0 functions matched**. `main`
   stubs 260 → 260; the repo `grep -c INCLUDE_ASM` reads 263 → 262 only because a rewritten carry

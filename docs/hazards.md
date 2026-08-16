@@ -5025,6 +5025,19 @@ S318 walked all ten of `lz_decompress_extended`'s global allocnos onto the ROM's
 proposed a fifth of the same kind. Extends the memory `do-while-doubles-reg-n-refs-qty-tier`, which
 recorded it as a tie-break for one `local-alloc` quantity.
 
+**A structural split and its weight compensation are one edit, computed before building (S319).** A
+split that adds a pseudo also *moves references off* the allocno it split, and a global allocno that
+loses references loses its register — which shifts every allocno below it and turns a 10-row body
+into a 68-row one that reads like a wrong lever rather than an unpaid cost. So when the residual
+calls for a split, compute the new `floor_log2(r) * r / live_length` for the shortened allocno,
+compare it against the allocno immediately above it in the current `allocno_report`, and solve for
+the wrapper count in the same edit. S319's `lz_decompress_extended`: the correct spelling of the
+token block (one `u32 word` for both the `lhu` and the distance, plus a zero-extend temp) leaves
+`word` at 10 refs / length 105 = 2857, under `ridx`'s 3471; `floor_log2(r)*r/105 > 0.3471` gives
+`r >= 13`, three wrappers give exactly 13 (3714), and the body goes 68 -> 10 rows. Four overshoot
+(40 rows). S318 and S319 both split first and searched afterwards, each spending a build cycle on a
+wrecked order before reaching for the multiplier.
+
 **Seed-order sub-lever — a scalar/record init fn: seed in field/row order, not Ghidra's statement
 order (S189).** For a fn that is just a run of scalar global stores (a table/record initializer), the
 Ghidra decompile reconstructs the compiler-scheduled store order, which has already collapsed the

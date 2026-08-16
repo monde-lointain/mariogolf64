@@ -94,16 +94,10 @@ Ghidra MCP is used inline at seed time. For each target function:
          `asm/nonmatchings/<seg>/<subseg-stem>/<func>.s`, where `<subseg-stem>` is the lead-fn
          placeholder that names the whole subseg. For a loose stub inside an already-`c` file, which
          is now the main-segment default, a per-function directory does not exist at all.
-       - **Per-fn oracle for the fast-path = `objdump -d` of the fresh object, not `diff.py` (S244).**
-         With no base.c/decomp_loop, iterate on register/scheduling diffs by rebuilding just the one
-         object and disassembling it: `find build -name '<obj>.o' -delete && make build/<path>/<obj>.o
-         && mips-linux-gnu-objdump -d build/<path>/<obj>.o | awk '/<fn>:/,/<next>:/'`. The object's
-         `%hi/%lo` show as `0x0` (unresolved) but the register allocation, instruction order, and
-         immediates are the ground truth. `diff.py` reads `build/*.map` which an incremental per-object
-         build does not refresh, so it lies (S244 `func_80079940`: diff.py showed byte-clean while the
-         fresh object was dual-base-split). Use `diff.py` only right after a full `make` (map + objects
-         consistent) for the reloc-resolved view; gate every bank on `tools/verify-rom.sh`. See the
-         memory `docs/levers.md` (subagent diff crack not a bank).
+       - **Per-fn oracle for the fast-path = the fresh object, not `diff.py` (S244).** Rebuild the one
+         object and read it: `find build -name '<obj>.o' -delete && make build/<path>/<obj>.o &&
+         mips-linux-gnu-objdump -dz build/<path>/<obj>.o | awk '/<fn>:/,/<next>:/'`. Why, and when
+         `diff.py` is trusted instead, are the `diff.py` and `objdump` rows of the Oracles table.
    - **Iterate** at most 25 times: `venv/bin/python3 tools/decomp_loop.py --func <placeholder>`, then
      parse the JSON. `score == 0` is a candidate; 5 consecutive `compile_ok == False` means a broken
      seed, so stop; otherwise read the top mismatches, edit `base.c`, and re-run. Run the permuter
@@ -168,7 +162,13 @@ Ghidra MCP is used inline at seed time. For each target function:
 
 A function that locks below `0.97 percent`, needs the permuter, or hits a BSS-layout or alignment
 wall is a spike: note it, carry its file to `BACKLOG.md ## Carry-overs`, and move on. Hold the DoD
-firm; a spike is carried, not banked. **Before declaring a same-TU inline mismatch (a callee my build
+firm; a spike is carried, not banked. **A carry's `docs/wip/<fn>.base.c` is self-contained or it is
+not a carry (S319).** Every type and inlined helper the host does not declare travels with it, in the
+exact variant measured (two copies of S319's `lz_expand` differing by one statement's placement give
+52 against 20 rows under an identical caller), and it is verified before the sprint closes by pasting
+it into a clean tree and re-measuring `cmpfn`: S318's omitted a typedef and a `static inline`, so the
+restore built a 189-instruction body at the wrong frame, reading as a collapsed function rather than
+a missing declaration. Fallback: the `nonmatchings/<fn>-N/` permuter trees hold the original body. **Before declaring a same-TU inline mismatch (a callee my build
 inlines but the ROM `jal`s, or the reverse) a permanent carry, build the matched reference games and
 compare the source structure** (defn order, separate-helper vs hand-inline, config flags), not just the
 bodies: `__MusIntMain` was twice wrongly written off as a compiler/same-TU wall, and both times
@@ -202,7 +202,7 @@ asserted, only measured, and re-check layers stacked on top of it buy nothing.
 | Tool | Authoritative for | Known failure mode | Trusted when |
 | --- | --- | --- | --- |
 | `tools/verify-rom.sh [--extract]` | Whether a function or increment is banked. Full `make` plus SHA-1 against the `sha1:` key in `mariogolf64.yaml`. | None. It exists because a failed `make` leaves the previous `build/mariogolf64.z64` in place, so a bare `sha1sum` reads a stale green ROM. S111 burned a whole review that way, reporting a match across three commits that never built. | Always. The only bank gate. Never a hand-rolled `make ...; sha1sum`. |
-| `tools/cmpfn.sh <fn> [<obj>]` | The per-iteration instruction stream and the instruction count of each side. Reads the object directly, so it never goes stale after an incremental `make build/src/<tree>/<obj>.o`. | Normalizes register prefixes, `%hi`/`%lo`, immediates, splat `(0xX >> 16)` spellings, `move`/`li` aliases, SDK FP register names and external branch/jal targets, so a difference in any of those is invisible. Internal branch targets, the frame immediate and stack-slot displacements were normalised away until S260/S276/S296; all three are surfaced now, as `@Dp<n>`/`@Dm<n>`, `[frame rom=.. mine=..]` and `@F<dec>(sp)`. Its remaining blind spot is a scope limit, not a bug: it reads `.text`, so a byte-exact instruction stream can still ship a duplicate `.rodata` literal pool that shifts every following data symbol and reddens the gate build (S298, +0x40; check `objdump -s -j .rodata`), wrong float constants that its immediate normalisation hides (S299 -- a delta is a relocation only if `objdump -r` lists one, and `lui $at` carries both `%hi` and float halves), or a `%hi` that differs because an SDK macro took a physical address (S308 `gSPMatrix`/`OS_K0_TO_PHYSICAL`). Byte-diff the two ROMs to localise those. With no object it exits non-zero, but a `| grep -c '^[<>]'` pipeline prints `0` there, reading like a byte match; the header carries `rows=` instead (S318). | As an iteration oracle, on a rebuilt object. A cmpfn-clean function is not a bank. |
+| `tools/cmpfn.sh <fn> [<obj>]` | The per-iteration instruction stream and the instruction count of each side. Reads the object directly, so it never goes stale after an incremental `make build/src/<tree>/<obj>.o`. | Normalizes register prefixes, `%hi`/`%lo`, immediates, splat `(0xX >> 16)` spellings, `move`/`li` aliases, SDK FP register names and external branch/jal targets, so a difference in any of those is invisible. Internal branch targets, the frame immediate and stack-slot displacements were normalised away until S260/S276/S296; all three are surfaced now, as `@Dp<n>`/`@Dm<n>`, `[frame rom=.. mine=..]` and `@F<dec>(sp)`. Its remaining blind spot is a scope limit, not a bug: it reads `.text`, so a byte-exact instruction stream can still ship a duplicate `.rodata` literal pool that shifts every following data symbol and reddens the gate build (S298, +0x40; check `objdump -s -j .rodata`), wrong float constants that its immediate normalisation hides (S299 -- a delta is a relocation only if `objdump -r` lists one, and `lui $at` carries both `%hi` and float halves), or a `%hi` that differs because an SDK macro took a physical address (S308 `gSPMatrix`/`OS_K0_TO_PHYSICAL`). Byte-diff the two ROMs to localise those. With no object it exits non-zero, but a `| grep -c '^[<>]'` pipeline prints `0` there, reading like a byte match; the header carries `rows=` instead (S318). A `bne ...,T` against `bne ...,@Dm6` pair is display, not divergence -- label side versus offset side -- and survives a byte match (every S319 bank ended there). | As an iteration oracle, on a rebuilt object. A cmpfn-clean function is not a bank. |
 | `mips-linux-gnu-objdump -dz` | Assembled ground truth: register allocation, instruction order, immediates, nop placement. | `-d` without `z` collapses runs of identical zero words to one `...` line, so a nop run under-counts. In an unlinked object `%hi`/`%lo` read `0x0`. | Any time, on a freshly built object. Always `-dz`; keep every line. |
 | `tools/asm-differ/diff.py <fn>` | The reloc-resolved view of the linked build against the ROM. | Reads `build/*.map`, which an incremental per-object build does not refresh, so it fails in both directions: byte-clean on a dual-base-split object, and five diff rows on a byte-exact function while a mismatching one showed zero. The same score twice after a real source edit means stale, not "no effect" -- deleting the `.o` does not clear it, only a relink does. With no fresh build it spills the whole segment. | Immediately after a full `make`, for the reloc-resolved view only. Never as a crack or bank verdict. |
 | `tools/decomp_loop.py --func` (`score`, `percent`) | The isolated per-function compile signal during Iterate. `score == 0` is a candidate. | A non-zero score with empty `top_mismatches` and `match_count == total_rows` is an isolation artifact at high percent, but a real pervasive near-miss at low percent. Five consecutive `compile_ok == False` means a broken seed. | During Iterate. Disambiguate the empty-`top_mismatches` case with `diff.py` right after a full `make`; if that diverges too, it is a genuine wall. |
@@ -412,13 +412,9 @@ below).
 - **Match finalization is three steps:** inline the body into `src/<seg>.c`, `clang-format-22 -i`
   (now applies to every tree, including `src/libultra/`, `src/libkmc/`, `src/libnusys/`, and
   `src/mgu/`), then full `make` until ROM SHA-1 matches.
-  Spot-check passing is not ROM matching; the final `make` proves the match. Gate the `sha1sum` on
-  `make` succeeding (confirm the `build/mariogolf64.z64: OK` line first): a failed link leaves the
-  previous `.z64` in `build/`, so `sha1sum` on a stale ROM false-positives. **Verify every ROM with
-  `tools/verify-rom.sh [--extract]`, not a hand-rolled `make ... ; sha1sum`**: the helper asserts
-  the `OK` line before trusting the hash. S111 burned a whole review on a hand-rolled ungated
-  `sha1sum` that read a coincidentally-green stale ROM and reported match across 3 commits that never
-  built (a missing `VI_CTRL_ANTIALIAS_MODE_0` define plus 2 unresolved carve symbols).
+  Spot-check passing is not ROM matching; the final `make` proves it. **Verify every ROM with
+  `tools/verify-rom.sh [--extract]`, never a hand-rolled `make ... ; sha1sum`** -- the Oracles table's
+  `verify-rom.sh` row states why, and S111 is the case law.
 - **Clean-rebuild when an enabler edits a shared vendored header.** The build tracks no header deps,
   so an incremental `make` recompiles only the file you touched, not the other consumers of a header
   you changed. When a mirror or enabler edits a widely-included header (e.g.

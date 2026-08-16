@@ -48,6 +48,22 @@ see `docs/wip/func_800990D0.near-match.md` (`--carried-check` flags it). Backup 
 (294-instr wall-prone debug handler, its own slice). STANDING GUIDANCE: prefer a FRESH non-main pack
 next unless a specific main leaf is pre-vetted `.s`-clean.**
 
+**S319 OPENS THE OVERLAY VEIN, AND THAT IS WHERE THE NEXT SLICES SHOULD COME FROM.** With
+`--file-close main` reporting every remaining `main` host as `CARRIED-WALL`, the bankable half of
+S318's "one carry plus something bankable" rule cannot come from `main` at all. S319 took the
+`overlay_8` `0x14F5E0` asm subseg (5 fns, 896 B, seed 13), answered the 8-point gate by **splitting
+it at `0x14F7C0`** (vram `0x801F5780`, a real function boundary, 16-aligned on both edges) rather
+than exempting it, and banked **all five leaves across the two halves for 10 pt** — the first
+non-`main` slice since the mirror band closed, with **zero permuter runs**. Every leaf read `fresh` +
+`standalone` under `--carried-check`/`--nested-check` with `fp=0` and `jtbl=0`, and the tell held:
+none of the classes that walled the last ten `main` sprints appeared. `pick_target.py -n 12` still
+lists ~10 more overlay asm-flip packs of this shape (`func_ovl6_8024D800` 1 fn/1264 B,
+`func_ovl15_801FB400` 2 fn/1824 B, `func_ovl9_801F4A40` 4 fn/3376 B, and the larger `ovl0`/`ovl3`/
+`ovl11`/`ovl13` packs). **Standing guidance, replacing S276's:** take the committed increment from
+the overlay packs smallest-first, decompose a seed-13 pack at a 16-aligned function boundary instead
+of exempting it, and keep at most one `main` one-stub carry beside it. Note the sizing rule applies —
+size the leaves from the extracted `.s` headers after the flip, not from vram gaps.
+
 **S318 PRICES THE ONE-STUB CARRIES: ONE PER SPRINT, NOT TWO — and lands a general allocation lever.**
 The four one-stub `main` hosts are all `CARRIED-WALL`, so each is a crack slice, not a leaf. S318
 committed two of them and banked neither, while producing the segment's largest residual reduction:
@@ -4113,17 +4129,23 @@ by `/sprint-plan`:
   holds both operands so the magic scales with it (100 rows). Levers (1) — a source form whose
   returned value is dead at the tail — and (3), a longer semantics-preserving permuter run, remain.
   Host is one stub from md5-candidate. Measured/attributed split: `docs/wip/func_8004DC44.wip.md`.
-- **`lz_decompress_extended`** (`src/main/lz_decompress_simple.c`, S166 -> S317 -> S318) — **282/282
-  at the ROM's exact `-0x18` frame, matching mnemonic multiset, and an instruction order identical to
-  the ROM's** (normalise register names and the two streams diff-clean). **20 `cmpfn` rows left, all
-  register naming**, and **every global allocno already sits on the ROM's register** — S318 walked
-  the `global.c` priority order there with four `do {} while (0)` ref-multiplier wrappers, then took
-  132 → 20 with nine `local-alloc` levers. The S166 "greg-proven raw-185 coloring floor" is retired
-  as a verdict: it was measured on a body with six structural defects, and the coloring is only now
-  the whole residual. What remains is `local-alloc` in four clusters (the continuation arm's
-  `hist_base`, the else arm's `hist_idx`/`hist_base` load order, the token/word register pair, the
-  second emit block's `run` load). Host is one stub from md5-candidate. Body:
-  `docs/wip/lz_decompress_extended.base.c`; levers, spent variants and re-open checklist:
+- **`lz_decompress_extended`** (`src/main/lz_decompress_simple.c`, S166 -> S317 -> S318 -> S319) —
+  **282/282 at the ROM's exact `-0x18` frame, matching mnemonic multiset, and an instruction order
+  identical to the ROM's** (normalise register names and the two streams diff-clean). **10 `cmpfn`
+  rows left (cmpfn as of S319), all register naming**, down from S318's 20: S319 closed the
+  token-block cluster by spelling it with one `u32 word` for both the `lhu` and the distance plus a
+  zero-extend temp, and repaying the reference that costs in the same edit — three
+  `do {} while (0)` wrappers, the count solved from `floor_log2(r)*r/105 > 0.3471` rather than
+  searched. The S166 "greg-proven raw-185 coloring floor" stays retired as a verdict. **What remains
+  is 5 diff pairs, both entry arms**: the continuation arm holds `hist_base` in `$a1` where the ROM
+  has `$v1`, and the else arm has the ROM's registers but emits the `0x24` load before the `0x20`.
+  Next lead, measured: a per-arm `hist_base` split *fixes* the continuation arm and rotates the else
+  arm's trio instead (14 rows), so the split is right and needs its own weight compensation; the trio
+  cannot be reordered by priority alone (`run` sits at 97058). Refuted against this body: all six
+  prologue-read permutations, inlining each read into its `st.` store, and wrapper sweeps on both
+  `hist_base` forms. Host is one stub from md5-candidate. Body (self-contained since S319 — it now
+  carries the `LzHistoryState` typedef and the `static inline lz_expand` helper the S318 copy
+  omitted): `docs/wip/lz_decompress_extended.base.c`; levers, spent variants and re-open checklist:
   `docs/wip/lz_decompress_extended.near-match.md`.
 - **`func_8003E004`** (`src/main/func_8003DFD0.c`, S204 -> S235 -> S318) — **196/196 at the ROM's
   exact `-0x140` frame**, 88 `cmpfn` rows. S235's "structurally 100%" is refuted: that body is 194 of

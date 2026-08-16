@@ -1526,6 +1526,44 @@ Three honest caveats:
   and `main`'s fresh vein is now one row. Tooling: three of the sprint's four accepted suggestions
   were tools this sprint had to hand-roll (`cmpfn.sh` histogram, `tools/seg_diff.py`,
   `tools/gbi_match.py`).
+- **Sprint 319 (realized)** — the first fresh non-`main` slice since the mirror band closed, paired
+  with exactly one `main` carry. **+5 banked (2 files md5-candidate), 1 carried, 0 permuter
+  escalations, 0 stuck-far, 1 re-opened.** One gate enabler: the `overlay_8` `0x14F5E0` asm subseg
+  split at `0x14F7C0` (vram `0x801F5780`, 16-aligned both edges) and both halves flipped to `c`.
+  Seed 5+3pt committed (+5pt stretch), frozen at `37c647a` before any `src/` edit; **banked 10pt**
+  (both overlay hosts closed); **realized 8** for the committed pack (seed 5 **+1** novel
+  bank-gotcha), residual **+3**, **5** for the stretch (seed 5, no modifier), residual 0, and **5**
+  for the carry (seed 3 **+1** re-open **+1** carry), residual +2, banked 0. Regime classical.
+  Progress **+5** matched, **+2 files md5-candidate** (232 → 234; the denominator moves 265 → 267
+  because the gate split created the two files it then closed); repo `INCLUDE_ASM` 263 → 263, the
+  flip having added five stubs and banked all five; descriptive names **+0** (auto names kept
+  deliberately — overlay-8 save-reset/unlock routines whose domain guess would be speculative).
+  Rolling-5 (S315-S319) matched-fn: 2+3+2+0+5.
+  **The overlay vein prices differently from `main`, and that is the planning result.** Five leaves,
+  all `fresh` + `standalone` + `fp=0` + `jtbl=0`, banked in one sprint with zero permuter runs —
+  against a segment where `--file-close main` reports every remaining host as `CARRIED-WALL`. The
+  8-point gate fired on the un-split 5-fn subseg (seed 13) and was answered by decomposing rather
+  than exempting; the first half closed on its own, which is what made the 5pt bank possible before
+  the stretch was even opened.
+  **Three levers generalise.** An empty `__asm__ __volatile__("" : : "r"(x))` does two jobs at once
+  and emits nothing: it separates two sets of a pseudo so `loop.c` cannot take them as one
+  consecutive movable group (the `loop.c:1631` test is `threshold * savings * lifetime >=
+  insn_count` with `threshold = 2 * (1 + n_non_fixed_regs)`, so an invariant group otherwise always
+  moves), and its operand adds the allocno reference that reorders two tied globals. Per-loop
+  constant *variables* keep a repeated `1`/count materialised once per loop the way the ROM does —
+  one shared variable folds three `li` and two counts into single registers. And a mismatch handler
+  written as an out-of-line block after the success path's `return`, with its own `i = 0` at the
+  block head, gives both the ROM's block order and a folded giv base.
+  **The carry's real result is a rule, not a bank.** `lz_decompress_extended` went 20 → 10 `cmpfn`
+  rows at 282/282: the token block closed once the spelling used one `u32 word` for both the `lhu`
+  and the distance plus a zero-extend temp, and the reference loss that costs was repaid in the same
+  edit — `floor_log2(r)*r/105 > 0.3471` says `r >= 13`, which is exactly three `do {} while (0)`
+  wrappers (four overshoot). A structural split and its weight compensation are one edit; S318 and
+  S319 both split first and searched afterwards. Its restore path was also broken (the S318
+  `docs/wip` body omitted a typedef and a `static inline` helper, so the documented paste builds a
+  189-instruction body at `-0x50`) and is now self-contained.
+  **Pricing lesson for the backlog:** the S318 rule held exactly as written — one one-stub carry,
+  paired with something bankable, and the bankable half came from outside `main`. Push: local.
 - **Sprint 318 (realized)** — two more of `main`'s single-stub files, both inherited-verdict
   re-opens. **0 banked, 3 carried, 2 permuter escalations (7 imports, 0 zeros), 0 stuck-far, 3
   re-opened.** Zero gate enablers — all three targets were already-extracted loose stubs in
