@@ -1,3 +1,10 @@
+# lz_decompress_extended — BANKED S320 (872e322)
+
+**Resolved.** 282/282 at `-0x18`, 0 `cmpfn` rows, `verify-rom.sh` exit 0; closes
+`src/main/lz_decompress_simple.c`. The three edits that closed the last 10 rows are recorded in
+the S320 section at the end of this file and in the source's ALLOCATION NOTE. Everything above is
+the historical record of S166 -> S318.
+
 # lz_decompress_extended — near-match (S166 -> S317 -> S318, CARRIED)
 
 `src/main/lz_decompress_simple.c`, 0x468 / 282 instructions, the file's last `INCLUDE_ASM` stub.
@@ -209,3 +216,39 @@ arm's three rows and rotates the else arm's trio instead, which is the first evi
 arms want different quantities and that the split is right but needs its own weight compensation).
 `run`'s allocno sits at priority 97058 in `$v1`, so a pure priority edit cannot reorder the else
 arm's trio; the next attempt should compensate the split arm rather than re-weight the trio.
+
+
+## S320 close (10 -> 0 rows)
+
+The residual was cluster 1 (the two entry arms), and its class was *quantity locality*, not weight.
+
+1. **The per-arm `hist_base` split was right and needed two companions.** Splitting it fixed the
+   continuation arm (`$v1`) and rotated the else arm to 14 rows, exactly as S319 recorded. The
+   missing half: the else arm's `run` and the literal block's `run` and the back-reference block's
+   `run` are *three different pseudos in the ROM*, one per basic block. GCC 2.7.2 allocates a
+   single-block pseudo in `local-alloc` (first, taking the low scratch registers by
+   `qty_compare` priority) and a multi-block pseudo in `global-alloc` (after, working around the
+   local choices), so any variable shared across two of these blocks merges the quantities and
+   permutes both. Per-block temporaries for `run` / ring-slot / next-index put every one of the
+   ROM's registers in place. The same applies to the ring-slot chain: the back-reference block
+   needs `slot_off = pos * 2; slot = slot_off + ring;` as **two** variables, not one variable
+   assigned twice — the reused-variable form emits a fresh temp that conflicts with that block's
+   `run` load and pushes it off `$v0`.
+2. **The entry block's four quantities were then ordered by computed weight, not by search.**
+   With `refs` and `live_length` read off the block, `qty_compare` gives
+   `floor_log2(refs)*refs/live_length`: two `do {} while (0)` wrappers on `st.out = ...` (refs
+   1+3 = 4 at length 7 = 11428) and one each on `st.hist_idx` / `st.run` (3 refs at length 4 =
+   7500, ties broken by birth order) land `$v0/$v1/$a0/$a1` in the ROM's assignment. Wrap the
+   *store*, never the load: a wrapper around `x = state->field;` also multiplies the `state`
+   pointer's references and flips the `$t5`/`$t6` global pair (66 rows).
+3. **The last row pair was a scheduler placement, closed by an empty asm.** With every register
+   correct, the ROM loaded `dst_alt` ahead of the three window-state loads and the build sank it
+   three slots. `__asm__ __volatile__("")` after that load assembles to nothing and ends the
+   scheduling region: 8 rows -> 0.
+
+Refuted on the way, all re-measured against the split body: inlining `state->run` into its `st.`
+store (24 rows), a plain per-arm `run` split with no weight compensation (28), the same with the
+`do {} while (0)` on the load rather than the store (32), hoisting the `st.out` statement to the
+top of the arm without the wrapper (26), and reusing one `run` variable across the two emit blocks
+(16 — it fixes the literal block and breaks the back-reference block, since the ROM's two blocks
+hold their `run` in different registers).
