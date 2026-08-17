@@ -1866,20 +1866,23 @@ SECTIONS
         overlay_15_TEXT_START = .;
         build/asm/165BC0.o(.text);
         build/asm/165BD0.o(.text);
-        build/asm/16C590.o(.text);
+        build/src/overlay_15/func_ovl15_801FB400.o(.text);
+        build/src/overlay_15/func_ovl15_801FB510.o(.text);
         overlay_15_TEXT_END = .;
         overlay_15_TEXT_SIZE = ABSOLUTE(overlay_15_TEXT_END - overlay_15_TEXT_START);
         overlay_15_DATA_START = .;
         build/asm/165BC0.o(.data);
         build/asm/165BD0.o(.data);
-        build/asm/16C590.o(.data);
+        build/src/overlay_15/func_ovl15_801FB400.o(.data);
+        build/src/overlay_15/func_ovl15_801FB510.o(.data);
         build/asm/data/16CCB0.data.o(.data);
         overlay_15_DATA_END = .;
         overlay_15_DATA_SIZE = ABSOLUTE(overlay_15_DATA_END - overlay_15_DATA_START);
         overlay_15_RODATA_START = .;
         build/asm/165BC0.o(.rodata);
         build/asm/165BD0.o(.rodata);
-        build/asm/16C590.o(.rodata);
+        build/src/overlay_15/func_ovl15_801FB400.o(.rodata);
+        build/src/overlay_15/func_ovl15_801FB510.o(.rodata);
         overlay_15_RODATA_END = .;
         overlay_15_RODATA_SIZE = ABSOLUTE(overlay_15_RODATA_END - overlay_15_RODATA_START);
     }
@@ -1890,7 +1893,8 @@ SECTIONS
         overlay_15_BSS_START = .;
         build/asm/165BC0.o(.bss);
         build/asm/165BD0.o(.bss);
-        build/asm/16C590.o(.bss);
+        build/src/overlay_15/func_ovl15_801FB400.o(.bss);
+        build/src/overlay_15/func_ovl15_801FB510.o(.bss);
         build/asm/data/16D650.bss.o(.bss);
         overlay_15_BSS_END = .;
         overlay_15_BSS_SIZE = ABSOLUTE(overlay_15_BSS_END - overlay_15_BSS_START);

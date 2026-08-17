@@ -698,7 +698,8 @@ segments:
     subsegments:
       - [0x165BC0, asm]
       - [0x165BD0, asm]
-      - [0x16C590, asm]
+      - [0x16C590, c, overlay_15/func_ovl15_801FB400]
+      - [0x16C6A0, c, overlay_15/func_ovl15_801FB510]
       - [0x16CCB0, data]
       - { start: 0x16D650, type: bss, vram: 0x801FC4C0 }
 
