@@ -1,19 +1,6 @@
 [
   {
     "band": "-",
-    "func": "func_ovl8_801F55A0",
-    "hazards": "pack:5fn[func_ovl8_801F55A0=?,func_ovl8_801F5604=?,func_ovl8_801F56E4=?,func_ovl8_801F5780=?,func_ovl8_801F57F8=?]",
-    "kind": "asm-flip",
-    "nfns": 5,
-    "pts": 13,
-    "rom": "0x14F5E0",
-    "score": -896,
-    "size": 896,
-    "upstream": "none",
-    "vram": "0x801F55A0"
-  },
-  {
-    "band": "-",
     "func": "func_ovl6_8024D800",
     "hazards": "coddog-mirror:src/io/fake.c@99.99,body-divergence-suspect:src/io/fake.c@99.99",
     "kind": "asm-flip",

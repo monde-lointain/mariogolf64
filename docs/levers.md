@@ -25,20 +25,22 @@ These have a `docs/hazards.md` section; read it, not a line here. Anchors:
 
 - **cross-call-live-range-callee-saved-lever** -- declare a post-call value *before* the call to force
   a callee-saved register; initializing it after is the inverse.
-
-- **scope-and-live-range-steer-allocation** -- register order follows
-  `floor_log2(nref)*nref/live_length` (`global.c:587`), which tiers `local-alloc` quantities,
-  spills a long-lived few-reference parameter (S289) and decides whether a copy survives
-  (`global.c:790-823`, `local-alloc.c:472/1290/1587`); reuse also pulls a load forward by
-  anti-dependency. Read the numbers with `tools/allocno_report.py`, compute the window the ROM's
-  register implies, then pick a knob landing in it: an eighth reference, a free bound copy
-  `n = bound;`, a short-lived local per region, a split of a value over two loops, a temp ending a
-  range early, a function-scope temp (S308), or a `do {} while (0)` multiplier (below). Merging is the inverse and the only knob when live length cannot win: one
-  variable over two disjoint regions jumps `n_refs` a `floor_log2` tier, the tell being the ROM
-  spending one register on both (S312). `find_reg` takes callee-saved first, so a conflict set that
-  cannot reach the ROM's register means the ROM passes a parameter on to a call (S314). **Equal
-  `refs` and `live_length` ends this family: birth order decides, so the lever is emission order**
-  (S313). Playbook and `.greg` method: `#loop-weight-and-live-length-regalloc-steering`.
+- **locality-before-weight** -- one block per scratch value; `local-alloc` runs first
+  so sharing one across two blocks permutes both (S320).
+- **scope-and-live-range-steer-allocation** -- order follows `floor_log2(nref)*nref/live_length`
+  (`global.c:587`), which tiers `local-alloc` quantities, spills a long-lived few-reference
+  parameter (S289) and whether a copy survives (`global.c:790-823`,
+  `local-alloc.c:472/1290/1587`); reuse also pulls a load forward by anti-dependency. Read the
+  numbers with `tools/allocno_report.py` (the *quantity*, not the pseudo, S320), compute the window
+  the ROM's register implies, then pick a knob landing in it: an eighth reference, a free
+  bound copy `n = bound;`, a short-lived local per region, a split over two loops, a temp ending a
+  range early, a function-scope temp (S308), or a `do {} while (0)` multiplier (below). Merging is
+  the inverse and the only knob when live length cannot win: one variable over two disjoint regions
+  jumps `n_refs` a `floor_log2` tier, the tell being the ROM spending one register on both (S312).
+  `find_reg` takes callee-saved first, so a conflict set that cannot reach the ROM's register means
+  the ROM passes a parameter on to a call (S314). **Equal `refs` and `live_length` ends this family:
+  birth order decides, so the lever is emission order** (S313). Playbook and `.greg` method:
+  `#loop-weight-and-live-length-regalloc-steering`.
 - **aggregate-copy-scratch-clobbers** -- a struct/array copy is one `movstrsi_internal` whose four
   `match_scratch` temps take the lowest free `d` registers there, so anything live across it
   conflicts with all four; its `la` temp names the set's top (S313).
@@ -47,10 +49,7 @@ These have a `docs/hazards.md` section; read it, not a line here. Anchors:
   `expand_decl`, an address-taken scalar only at the first `&x` and after every function-scope
   aggregate, so reserve part in a block opened after it (S296); slot order is ascending pseudo
   number (`reload1.c`).
-- **per-region-cse-slot-base-lever** -- pass the array directly, no cached pointer, so gcc CSEs the
-  base per region. Each pointer *local* is a `loop.c` induction pointer costing a callee-saved
-  register; an offset off a shared row pointer is not (S289).
-- **fp-arg-registers-are-a-signature** -- ROM values in `$f12`/`$f14` where the build uses `$f0`/`$f2`
+- **fp-arg-registers-are-a-signature** -- ROM values in `$f12`/`$f14` where the build has `$f0`/`$f2`
   mean the callee takes FP args the `extern` omits (S286).
 
 ## Scheduling
@@ -71,17 +70,17 @@ These have a `docs/hazards.md` section; read it, not a line here. Anchors:
   shortens a qty's live length; both permuter-proof. Source order is not always the knob
   (S305: a `div` moved three ways, byte-identical object).
 - **do-while-zero-lever** -- emits nothing. Empty it ends the preceding block, so `reorg` stops
-  reaching past a call to annul the next branch (S288); round a region it multiplies only that
-  region's `n_refs`, moving one allocno per edit (S292/S318,
-  `#pervasive-regalloc-classical-main`).
-- **global-reread-vs-cse**, absorbing defeat-global-base-cse -- a scalar-global store does not
-  constrain a later load through a pointer parameter (`true_dependence`, `sched.c:817`), so the load
-  hoists. `extern s32 G[]` read as `G[0]`, a neighbour read at a known displacement, or a `*(s32 *)`
-  cast on a `u8 *` byte offset restores the re-read (the cast is terminal where a param-base folds);
-  the inverses are a preheader local, and a per-site `T *p = &SYM;` never reused (S301).
+  reaching past a call to annul the next branch (S288); round a region it multiplies that region's
+  `n_refs` only, one allocno per edit; step two after locality
+  (S292/S318/S320, `#pervasive-regalloc-classical-main`).
+- **global-reread-vs-cse**, absorbing defeat-global-base-cse and per-region-cse-slot-base -- a
+  scalar-global store does not constrain a later load through a pointer parameter
+  (`true_dependence`, `sched.c:817`), so the load hoists. `extern s32 G[]` read as `G[0]`, a
+  neighbour read at a known displacement, or a `*(s32 *)` cast on a `u8 *` byte offset restores the
+  re-read (the cast is terminal where a param-base folds); the inverses are a preheader local, and a
+  per-site `T *p = &SYM;` never reused (S289, S301).
 - **two-argument-call-temp-split** -- when both arguments of a call cross another call, compute them
   into temps first; as one expression gcc evaluates argument 0 fully and holds it across the call.
-
 
 ## Control flow and branch shape
 
@@ -115,7 +114,8 @@ These have a `docs/hazards.md` section; read it, not a line here. Anchors:
 - **operand-order-statement-split** -- which operand is computed first is structural, not spelling:
   flip `addu`/`xor` via `x = a; x ^= b;` or `T *p = base + i; p[C] = ...` (`*(p+off+C)` gives
   `addu rd,base,off`, `p[off+C]` reverses it), and precompute an index offset and a `u8 *` base into
-  temps to defer a row add (`expr.c:6457`, operand 0 before operand 1).
+  temps to defer a row add (`expr.c:6457`, operand 0 before operand 1); a two-step chain is the
+  same question (S320).
 - **division-codegen** -- no cross-block CSE, so an inline `K / x` in a branching macro emits one
   `div` per using block; one ROM `div` means a variable. `x % K` before `x / K` emits the ROM's
   non-coalesced `move`; division first coalesces. Under `-ffast-math` (`mk/main.mk`) `x * C1 / C2`

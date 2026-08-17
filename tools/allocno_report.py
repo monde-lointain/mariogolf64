@@ -153,16 +153,20 @@ def parse_dumps(greg, lreg, func):
         for pseudo, size in re.findall(r"(\d+)(?:\s+\((\d+)\))?", match.group(1)):
             order.append((int(pseudo), int(size) if size else 1))
 
-    info = {}
-    for m in re.finditer(r"Register (\d+) used (\d+) times across (\d+) insns", lsec):
+    info, blocks = {}, {}
+    for m in re.finditer(
+        r"Register (\d+) used (\d+) times across (\d+) insns(?: in block (\d+))?", lsec
+    ):
         info[int(m.group(1))] = (int(m.group(2)), int(m.group(3)))
+        if m.group(4) is not None:
+            blocks[int(m.group(1))] = int(m.group(4))
 
     disp = {}
     if "Register dispositions:" in sec:
         tail = sec.split("Register dispositions:", 1)[1]
         for pseudo, hard in re.findall(r"(\d+) in (\d+)", tail):
             disp[int(pseudo)] = int(hard)
-    return order, info, disp
+    return order, info, disp, blocks
 
 
 def priority(refs, length, size=1):
@@ -176,7 +180,7 @@ def priority(refs, length, size=1):
     return int(math.floor(math.log2(refs)) * refs / length * 10000 * size)
 
 
-def report(order, info, disp, show_locals):
+def report(order, info, disp, show_locals, blocks=None, block=None):
     print(f"{'allocno':>8} {'refs':>5} {'len':>5} {'size':>4} {'priority':>9}  reg")
     for pseudo, size in order:
         refs, length = info.get(pseudo, (0, 0))
@@ -198,6 +202,28 @@ def report(order, info, disp, show_locals):
     if not show_locals:
         return
     globals_ = {p for p, _ in order}
+    if block is not None:
+        # One block's quantities in local-alloc's own allocation order, which is what decides
+        # which of them takes $v0. The whole-function list below is sorted by live length and
+        # capped, so a short-lived quantity of the block under test is usually not in it (S320).
+        blocks = blocks or {}
+        rows = sorted(
+            (p for p in disp if p not in globals_ and blocks.get(p) == block),
+            key=lambda p: (-priority(*info.get(p, (0, 0))), p),
+        )
+        if not rows:
+            print(f"\n  (no local quantities recorded in block {block})")
+            return
+        print(f"\nblock {block} quantities in local-alloc allocation order (`qty_compare`)")
+        print("  ties fall through to birth order, which the pseudo number approximates")
+        print(f"{'pseudo':>8} {'refs':>5} {'len':>5} {'priority':>9}  reg")
+        for pseudo in rows:
+            refs, length = info.get(pseudo, (0, 0))
+            print(
+                f"{pseudo:>8} {refs:>5} {length:>5} {priority(refs, length):>9}  "
+                f"{reg_name(disp[pseudo])}"
+            )
+        return
     locals_ = sorted(
         (p for p in disp if p not in globals_),
         key=lambda p: -info.get(p, (0, 0))[1],
@@ -233,6 +259,12 @@ def main():
         action="store_true",
         help="global allocnos only (skip the local-alloc quantities)",
     )
+    ap.add_argument(
+        "--block",
+        type=int,
+        help="list one basic block's quantities in local-alloc allocation order "
+        "(the block number is the `in block N` tag in the .lreg dump)",
+    )
     args = ap.parse_args()
 
     src = Path(args.source)
@@ -265,8 +297,8 @@ def main():
         func = headers[0]
         print(f"# function: {func}")
 
-    order, info, disp = parse_dumps(greg, lreg, func)
-    report(order, info, disp, not args.no_locals)
+    order, info, disp, blocks = parse_dumps(greg, lreg, func)
+    report(order, info, disp, not args.no_locals, blocks, args.block)
 
 
 if __name__ == "__main__":

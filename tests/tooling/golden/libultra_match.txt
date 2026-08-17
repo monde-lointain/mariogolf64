@@ -13,7 +13,7 @@ reference (union):
 === symbol_addrs.txt worklist: unnamed libultra blocks (add-only, gate-applied) ===
 # review before applying; opcode-only match — confirm at the gate. min-insns=5
 
-# 0 ready to add; 0 unnamed matches below min-insns (5) withheld; 745 overlay candidates excluded (libultra is never in an overlay).
+# 0 ready to add; 0 unnamed matches below min-insns (5) withheld; 747 overlay candidates excluded (libultra is never in an overlay).
 # AMBIG / common-skeleton flags mark short opcode-only matches that are not unique — verify those.
 # Leaf intrinsics under 20i are NOT a coddog blind spot here — this matcher includes them;
 # any still un-named are simply not opcode-unique enough to auto-name (raise --min-insns to trim).

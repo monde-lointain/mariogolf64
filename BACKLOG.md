@@ -48,6 +48,30 @@ see `docs/wip/func_800990D0.near-match.md` (`--carried-check` flags it). Backup 
 (294-instr wall-prone debug handler, its own slice). STANDING GUIDANCE: prefer a FRESH non-main pack
 next unless a specific main leaf is pre-vetted `.s`-clean.**
 
+**S320 CLOSES THE LONGEST-RUNNING `main` CARRY, AND THE LEVER WAS LOCALITY, NOT WEIGHT.**
+`lz_decompress_extended` — open since S166, taken to 20 rows by S318 and 10 by S319 with
+`do {} while (0)` weight arithmetic — banked 282/282 with **zero permuter runs** once the residual
+was read as a *locality* question: `local-alloc` runs before `global-alloc` and takes the low
+scratch registers first, so a scratch variable shared across two basic blocks becomes one global
+allocno and permutes both, and no weight edit reaches the ROM's assignment until each block owns its
+temporaries. Weight is step two, and an empty `__asm__ __volatile__("")` closed the last placement
+pair. `--file-close main` now reports **three** one-stub hosts (`func_8003DFD0.c`,
+`func_8005E380.c`, `print_string_at_grid.c`); 235 of 267 files are md5-candidate.
+**Both committed carries got numbers rather than verdicts**, which is what a carry slice is for:
+`func_8004DC44`'s divide is `chain 5 refs / 22 units = 4545` against the magic's `6666` (every
+earlier sprint quoted the *pseudo*, 3/18/1666 — `qty_compare` sorts quantities and `combine_regs`
+sums the refs of every pseudo it unions), so the target is 8 refs or a life under 15, and both ways
+of buying them cost the frame; `func_8003E004`'s last untried checklist item is spent, the permuter
+does run from the frame-correct 196/196 body and every candidate it favours is 198 instructions.
+**Standing guidance, unchanged in direction and sharper on scope:** a `main`-only sprint should
+commit **one** carry, not two — S318 banked zero with two and S320 banked one file with two, against
+S319's five leaves from the overlay vein. Take the second item from the overlay packs
+(`func_ovl6_8024D800`, `func_ovl15_801FB400`, `func_ovl9_801F4A40`, then the larger `ovl0`/`ovl3`/
+`ovl11`/`ovl13` packs). The stalest `main` verdict is now `func_8005E380` (469 instr, S205
+CSE-base-canonicalization, never re-opened), and S317's `cse.c make_regs_eqv` finding — a copy folds
+only when the destination's last use is later, so a scratch shared with the other arm of an
+enclosing branch defeats it at zero cost — is a mechanism its 8 ruled-out source forms predate.
+
 **S319 OPENS THE OVERLAY VEIN, AND THAT IS WHERE THE NEXT SLICES SHOULD COME FROM.** With
 `--file-close main` reporting every remaining `main` host as `CARRIED-WALL`, the bankable half of
 S318's "one carry plus something bankable" rule cannot come from `main` at all. S319 took the
@@ -4128,25 +4152,16 @@ by `/sprint-plan`:
   multiplier does lift the dividend chain from 1666 to 7500, past the magic's 6666, but one statement
   holds both operands so the magic scales with it (100 rows). Levers (1) — a source form whose
   returned value is dead at the tail — and (3), a longer semantics-preserving permuter run, remain.
-  Host is one stub from md5-candidate. Measured/attributed split: `docs/wip/func_8004DC44.wip.md`.
-- **`lz_decompress_extended`** (`src/main/lz_decompress_simple.c`, S166 -> S317 -> S318 -> S319) —
-  **282/282 at the ROM's exact `-0x18` frame, matching mnemonic multiset, and an instruction order
-  identical to the ROM's** (normalise register names and the two streams diff-clean). **10 `cmpfn`
-  rows left (cmpfn as of S319), all register naming**, down from S318's 20: S319 closed the
-  token-block cluster by spelling it with one `u32 word` for both the `lhu` and the distance plus a
-  zero-extend temp, and repaying the reference that costs in the same edit — three
-  `do {} while (0)` wrappers, the count solved from `floor_log2(r)*r/105 > 0.3471` rather than
-  searched. The S166 "greg-proven raw-185 coloring floor" stays retired as a verdict. **What remains
-  is 5 diff pairs, both entry arms**: the continuation arm holds `hist_base` in `$a1` where the ROM
-  has `$v1`, and the else arm has the ROM's registers but emits the `0x24` load before the `0x20`.
-  Next lead, measured: a per-arm `hist_base` split *fixes* the continuation arm and rotates the else
-  arm's trio instead (14 rows), so the split is right and needs its own weight compensation; the trio
-  cannot be reordered by priority alone (`run` sits at 97058). Refuted against this body: all six
-  prologue-read permutations, inlining each read into its `st.` store, and wrapper sweeps on both
-  `hist_base` forms. Host is one stub from md5-candidate. Body (self-contained since S319 — it now
-  carries the `LzHistoryState` typedef and the `static inline lz_expand` helper the S318 copy
-  omitted): `docs/wip/lz_decompress_extended.base.c`; levers, spent variants and re-open checklist:
-  `docs/wip/lz_decompress_extended.near-match.md`.
+  **S320 makes the target a number and removes S318's blocker without profit.** `qty_compare` sorts
+  *quantities*, and `combine_regs` sums the refs of every pseudo it unions, so the dividend chain is
+  5 refs over 22 units = 4545 against the magic's 2/3 = 6666 (the 3/18/1666 every sprint quoted is
+  the pseudo): the target is 8 refs on the quantity, or a life under 15. Splitting the load into its
+  own statement does give a wrapper covering one operand and not the other, but both ref-adders —
+  the `do {} while (0)` and S319's zero-byte `__asm__ __volatile__("" : : "r")` — end a scheduling
+  region and float `addiu sp,sp,-8` to the head of the function, 62 rows each. Eight preamble
+  spellings inert at 40 rows; `row++` wrapped 1/2/3 deep reads 46/40/40, confirming `row`/`dst` is a
+  cascade of the divide. Host is one stub from md5-candidate. Measured/attributed split:
+  `docs/wip/func_8004DC44.wip.md`.
 - **`func_8003E004`** (`src/main/func_8003DFD0.c`, S204 -> S235 -> S318) — **196/196 at the ROM's
   exact `-0x140` frame**, 88 `cmpfn` rows. S235's "structurally 100%" is refuted: that body is 194 of
   196, two load-use `nop`s short, and hoisting `ang_lo`/`ang_hi` out of the `sinf()` arguments
@@ -4155,8 +4170,16 @@ by `/sprint-plan`:
   (S259). Residual: the preheader's constant order, the angle block's placement (it trades against
   the two `nop`s), and the `global.c` tie — `a` is 15 refs at live length 80 (5625) against `i`'s 11
   at 88 (3750), so `i` needs 16 references or `a` needs 9, and neither the ref multiplier nor the
-  pointer-versus-index spelling reaches it. Host is one stub from md5-candidate. Body:
-  `docs/wip/func_8003E004.base.c`; doc: `docs/wip/func_8003E004.near-match.md`.
+  pointer-versus-index spelling reaches it. **S320 re-classifies the preheader cluster and spends
+  the permuter lead.** The constant order is a *scheduling* order inside one basic block, not a
+  hoist order: `loop.c` inserts each movable immediately before `loop_start`, so nothing can put the
+  constants ahead of a `base_pos` the source computes before the loop; computing it in the loop body
+  costs an instruction (195/196, the address stops sharing the pre-loop `lui`) and an empty-asm
+  barrier reads 98 rows. And the run the re-open checklist asked for — from the frame-correct
+  196/196 body, never done before — is done: best 1505, no zero, and every candidate it favours is
+  **198 instructions at frame `-0x148`**, so the scorer is optimising a longer body. Host is one stub
+  from md5-candidate. Body: `nonmatchings/func_8003E004/s320-body-196-88rows.c` (and
+  `docs/wip/func_8003E004.base.c`); doc: `docs/wip/func_8003E004.near-match.md`.
 - **`func_8006E210` + `func_8006DFF0`** (`src/main/func_8006A2C0.c`, S310 -> S313) — S313 replayed
   the doc's body verbatim (543/543 at the exact `-0x60` frame, first build, carve links) and
   re-measured both parent clusters. R1 re-confirmed: the natural in-block `col = 5` costs +2 and

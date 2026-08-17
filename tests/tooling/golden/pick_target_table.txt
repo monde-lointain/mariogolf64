@@ -1,5 +1,4 @@
 func                               rom       vram  size nfn pts kind     upstream  band hazards
-func_ovl8_801F55A0            0x14F5E0 0x801F55A0   896   5  13 asm-flip none      -    pack:5fn[func_ovl8_801F55A0=?,func_ovl8_801F5604=?,func_ovl8_801F56E4=?,func_ovl8_801F5780=?,func_ovl8_801F57F8=?]
 func_ovl6_8024D800            0x136BA0 0x8024D800  1264   1   8 asm-flip none      -    -
 func_ovl15_801FB400           0x16C590 0x801FB400  1824   2  13 asm-flip none      -    pack:2fn[func_ovl15_801FB400=?,func_ovl15_801FB510=?]
 func_ovl8_801F4A40            0x14EA80 0x801F4A40  2912   9  13 asm-flip none      -    pack:9fn[func_ovl8_801F4A40=?,func_ovl8_801F4A5C=?,func_ovl8_801F4A6C=?,func_ovl8_801F4A90=?,func_ovl8_801F4ABC=?,func_ovl8_801F4C84=?,func_ovl8_801F4D48=?,func_ovl8_801F4D74=?,func_801F4F80=?]

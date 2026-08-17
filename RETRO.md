@@ -25,6 +25,47 @@ numbered suggestions the PO accepted.
 
 ---
 
+## Sprint 320 — a four-sprint carry banks on locality, not weight — 2026-08-16
+- Increment: **1 file md5-candidate** (234 → 235 of 267) / **1 function matched**
+  (`lz_decompress_extended` 282/282 `872e322`, closing `src/main/lz_decompress_simple.c`). Repo
+  `INCLUDE_ASM` 262 → 261. Descriptive names **+0** (the name was already curated). ROM SHA-1 green
+  at all six commits (`verify-rom.sh` exit 0).
+- Quality: 0 stuck-far / 1 permuter run (stretch, no zero) / **2 carried** / 3 re-opened.
+- Seed: committed 3+3pt at `fc97677` (+3pt stretch); **banked 3pt**; realized 5 banked carry
+  (residual +2), 5 `func_8004DC44` (banked 0, residual +2), 5 stretch (banked 0, residual +2);
+  regime classical.
+- What helped: **reading which pass colours a value before reading any weight.** The S166 carry had
+  been at 20 then 10 `cmpfn` rows for two sprints of `do {} while (0)` arithmetic, and the last ten
+  rows were not a weight problem at all: `local-alloc` runs before `global-alloc` and takes the low
+  scratch registers first, so a scratch shared across two basic blocks becomes one global allocno
+  and permutes *both*. Per-block temporaries for `run` / ring-slot / next-index put every ROM
+  register in place; the ring-slot chain needed two variables rather than one assigned twice (the
+  reused form emits a fresh temp that collides with the block's next load). Only then did weight
+  apply — two wrappers on `st.out`, one each on `st.hist_idx`/`st.run`, computed from `qty_compare`
+  before building, wrapping the *store* because wrapping the load also multiplies the `state`
+  pointer's references (66 rows). The last pair of rows was an empty `__asm__ __volatile__("")`
+  ending a scheduling region. Zero permuter runs on the bank.
+- Friction: **two carries in one `main`-scoped sprint, which is the shape S318 said banks zero.**
+  It banked one file rather than none, but `func_8004DC44` and `func_8003E004` between them consumed
+  more than half the sprint for two characterisations and no points. Second: `docs/levers.md` was at
+  10236 of 10240 bytes, so landing two one-line rules took four rounds of trimming inside the
+  entries they belong to — the index is full, and the next lever has no room at all. Third:
+  `make test-tools` was already red before this sprint (an S319 `docs/hazards.md` edit left the
+  prompt-lint baseline unfrozen) and the sprint's own bank reddened five `pick_target` goldens; the
+  `test_coddog_mirror_repricing` dynamic pick had also drifted onto a huge pack where the assertion
+  it makes cannot hold.
+- Applied: 3 of 3 (#1 locality-before-weight → `docs/levers.md` as its own entry plus the
+  cross-link from `do-while-zero-lever`; #2 the reused-variable chain trap → folded into
+  `operand-order-statement-split`; #3 `tools/allocno_report.py --block <N>`, one block's quantities
+  in `local-alloc` allocation order with the computed priority) + the PO-accepted consolidation
+  (`per-region-cse-slot-base-lever` merged into `global-reread-vs-cse`, keeping both mechanisms and
+  the S289/S301 citations), landing `docs/levers.md` at exactly 10240/10240. Unbuffered repairs
+  needed to get `make test-tools` green: re-froze the prompt-lint baseline (S319's drift),
+  regenerated the `pick_target` and `libultra_match` goldens the bank moved, and made
+  `test_coddog_mirror_repricing` assert its points drop only when size does not already seed 13.
+- Carry-over: `src/main/print_string_at_grid.c` (`func_8004DC44`, the divide's `$v0`),
+  `src/main/func_8003DFD0.c` (`func_8003E004`, preheader schedule + the `s1`/`s2` tie).
+
 ## Sprint 319 — the overlay vein opens: 5 matched, 2 files closed — 2026-08-16
 - Increment: **2 files md5-candidate** (232 → 234 of 267) / **5 functions matched**
   (`func_ovl8_801F55A0` 25/25 `5f6b42a`, `func_ovl8_801F56E4` 39/39 `6c2f358`, `func_ovl8_801F5604`

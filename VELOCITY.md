@@ -1526,6 +1526,36 @@ Three honest caveats:
   and `main`'s fresh vein is now one row. Tooling: three of the sprint's four accepted suggestions
   were tools this sprint had to hand-roll (`cmpfn.sh` histogram, `tools/seg_diff.py`,
   `tools/gbi_match.py`).
+- **Sprint 320 (realized)** — a `main`-scoped, two-carry sprint by PO choice, the shape S318 warned
+  can bank zero. **+1 banked (1 file md5-candidate), 2 carried, 1 permuter run (no zero), 0
+  stuck-far, 3 re-opened.** Zero gate enablers — all three targets were loose stubs in already-`c`
+  files. Seed 3+3pt committed (+3pt stretch), frozen at `fc97677` before any `src/` edit; **banked
+  3pt** (`lz_decompress_simple.c` closed); **realized 5** for the banked carry (seed 3 **+1**
+  re-open, residual +2), **5** for `func_8004DC44` (seed 3 **+1** re-open **+1** carry, residual
+  +2, banked 0) and **5** for the stretch `func_8003E004` (same, banked 0). Regime classical.
+  Progress **+1** matched, **+1 file md5-candidate** (234 → 235 of 267); repo `INCLUDE_ASM` 262 →
+  261; descriptive names **+0** (the name was already curated in `symbol_addrs.txt`).
+  Rolling-5 (S316-S320) matched-fn: 3+2+0+5+1.
+  **The result that changes planning is that a four-sprint carry fell to a rule the last three
+  sprints did not have.** `lz_decompress_extended` (open since S166, 200 → 20 → 10 rows across S318
+  and S319) banked at 282/282 with **no permuter run**, and the lever was not the weight arithmetic
+  those sprints had been refining: it was *locality*. `local-alloc` runs before `global-alloc` and
+  takes the low scratch registers first, so a scratch variable shared across two basic blocks
+  becomes one global allocno and permutes both blocks — no weight edit reaches the ROM's assignment
+  until each block owns its own temporaries. Weight came second (two `do {} while (0)` on the entry
+  block's `st.out` store, one each on `st.hist_idx`/`st.run`, all computed from `qty_compare` before
+  building), and one empty `__asm__ __volatile__("")` closed the last placement pair.
+  **The two carries got numbers, not verdicts.** `func_8004DC44`'s divide is now
+  `chain 5 refs / 22 units = 4545` against `magic 6666` — every prior sprint quoted the *pseudo*
+  (3/18/1666), but `qty_compare` sorts quantities and `combine_regs` sums the refs of every pseudo
+  it unions. S318's "no wrapper contains one operand and not the other" blocker is removable, and
+  both ways of spending it cost the frame (62 rows each). `func_8003E004`'s last untried checklist
+  item is spent: the permuter *does* run from the frame-correct 196/196 body, and every candidate it
+  favours is 198 instructions at `-0x148`.
+  **Pricing lesson for the backlog:** two carries in one sprint banked one file, which is better
+  than S318's two-carry zero but still half the committed points. The S318 rule (one carry, paired
+  with something bankable) is the better shape and it needs a non-`main` half, so a `main`-only
+  scope should commit one carry and take its second item from the overlay vein. Push: local.
 - **Sprint 319 (realized)** — the first fresh non-`main` slice since the mirror band closed, paired
   with exactly one `main` carry. **+5 banked (2 files md5-candidate), 1 carried, 0 permuter
   escalations, 0 stuck-far, 1 re-opened.** One gate enabler: the `overlay_8` `0x14F5E0` asm subseg
