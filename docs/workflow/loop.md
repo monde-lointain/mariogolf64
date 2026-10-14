@@ -13,8 +13,7 @@ select/iterate/bank/review workflow. Consult [fan-out guidance](fan-out.md) when
 </role>
 
 **Navigate:** [Toolchain](#toolchain) · [Execution loop](#execution-loop-inline) ·
-[Oracles](#oracles) · [Conventions](#conventions-every-sprint) ·
-[Cross-repo sync](#cross-repo-sync-ghidra-workspace-at-developmentreversingghidramariogolf64).
+[Oracles](#oracles) · [Conventions](#conventions-every-sprint).
 
 ## Toolchain
 
@@ -84,25 +83,11 @@ inline at seed time where it adds value. For each target function:
        `docs/hazards.md#loop-weight-and-live-length-regalloc-steering` Axis 6).
      - **Provenance.** The recipe's context is `common.h` plus the RE'd struct plus game externs,
        whether the struct comes from a sibling decomp or the Ghidra db (S191 `get_table_entry.c`).
-     - **asm-first seed fast-path (MCP-independent, for small fns ~<40 instrs).** The splat
-       `.s` is the same ground truth as
-       `disassemble_function`, so a small classical fn does not need MCP: hand-translate straight from
-       the `.s` (resolve callee/global names + types from the name files / call-site arg setup),
-       write the body directly into `src/<seg>.c` (declare each `extern`; auto `func_`/`D_` symbols
-       resolve from their home subseg), and gate with `tools/verify-rom.sh`. Skip
-       seed_c.py/base.c/decomp_loop entirely unless the first build misses, then drop into the
-       isolated Iterate loop below. Use this when Ghidra MCP is unavailable (`list_instances` empty)
-       or the fn is small enough that the decompile adds no shape/type value. The fast-path banked a
-       2-fn 176B pack this way, first build, MCP down (S148).
-       - **The `.s` sits under the host subseg's directory, not the function's own.** The path is
-         `asm/nonmatchings/<seg>/<subseg-stem>/<func>.s`, where `<subseg-stem>` is the lead-fn
-         placeholder that names the whole subseg. For a loose stub inside an already-`c` file, which
-         is now the main-segment default, a per-function directory does not exist at all.
-       - **Per-function oracle for the fast path is a fresh object, not `diff.py` (S244).** Build
-         through `uv run --locked python tools/rom_build.py build --object src/<tree>/<obj>.o`,
-         then inspect that object's function with
-         `<binary>/toolchain/bin/mips-linux-gnu-objdump -dz`. The `diff.py` and
-         `objdump` rows below describe their authority and limitations.
+     - **Asm-first seed fast-path.** For a small function whose `.s` supplies enough shape and type
+       evidence, hand-translate into `nonmatchings/<func>/base.c` and use the same isolated iteration
+       and bank steps below. Ghidra and m2c are optional inputs, not prerequisite ceremonies.
+       Find the stub under the host subsegment's directory, not a guessed per-function directory:
+       `<binary>/work/asm/nonmatchings/<tree>/<subseg-stem>/<func>.s`.
    - **Iterate** with `uv run --locked python tools/decomp_loop.py --func <placeholder>`, then
      parse the JSON. `score == 0` is a candidate; 5 consecutive `compile_ok == False` means a broken
      seed, so stop; otherwise read the top mismatches, edit `base.c`, and re-run. Run the permuter
@@ -146,10 +131,9 @@ inline at seed time where it adds value. For each target function:
       inspect committed C callers for `func_<addr>` (S247): extraction rewrites still-ASM references,
       not C calls. Migrate any C caller in the same change or keep the auto name when a domain guess
       is uncertain.
-   b. Let the supported extraction workflow regenerate artifacts such as `undefined_syms_auto.txt`
-      and `mariogolf64.ld`; stage those regenerated outputs with the subsegment or symbol change.
-      Never edit them by hand. The full-ROM verification catches link failures, including stale
-      callers and unrecoverable splat gap relics.
+   b. Let extraction regenerate link inputs in the binary tree; never hand-edit or stage generated
+      extraction artifacts. The full-ROM gate catches link failures, including stale callers and
+      unrecoverable Splat gaps.
    c. Keep task notes current enough to resume and distinguish banked work from measured carries.
 
 A function that locks below `0.97 percent`, needs the permuter, or hits a BSS-layout or alignment
@@ -251,25 +235,13 @@ record that base and re-run the rejected rows once the residual has moved (S302 
 These apply regardless of hazard. Hazard-specific procedures are in `docs/hazards.md` (see the index
 below).
 
-- **One function at a time.** `pick_target.py` ranks (smallest-first); you pick the target.
-- **Never rewrite a partial-bank `src/<seg>.c` with a scripted whole-region splice or whole-file
-  `replace`. Guard: anchor a scripted substitution on text carrying the function name; for a
-  scripted slice, assert the two offsets are ordered; and `git diff` afterwards to confirm every
-  hunk is inside the target function.** An anchor unique in one function is routinely not unique in
-  its file, and a slice built from two `index()` calls silently reverses when the end marker is
-  defined earlier in the file than the start marker -- that one truncates the file and duplicates a
-  function, invisible until the compiler reports a duplicate definition (S316; both fired again that
-  sprint). **Use `Edit` with an exact `old_string`. If a script is genuinely needed, assert both
-  counts across the rewrite** — `grep -c 'INCLUDE_ASM'` (must change by exactly the number of
-  functions promoted, 0 for an in-place body edit) and the file's function list, diffed before and
-  after. Case law: S257/S259 spliced between anchors that looked adjacent and were not (three stubs
-  with their carry comments; two banked one-line siblings), S312 hit a line that also existed
-  verbatim in a banked sibling, S315 a `sed -i` on `s32 flags[N];` that resized a sibling's array.
-- **Do not remove an `asm/nonmatchings/<seg>/<stem>/` directory or bulk-delete `.s` files to force
-  extraction.** Splat may not reproduce every still-asm stub: disassembly gaps at curated or split
-  function addresses leave relics required by the build. These files are gitignored and cannot be
-  restored from Git. If one relic is lost, recover it with `tools/recover_stub.sh`; follow the
-  supported CMake extraction flow rather than attempting a destructive directory reset.
+- **One function at a time.** `pick_target.py` ranks; choose a target from measured evidence.
+- **Source edits.** Use the active harness's anchored edit tool; scope each change to the target
+  function and preserve banked siblings. The parent owns integration and shared-resource operations;
+  see the [dispatch contract](fan-out.md#dispatch-contract).
+- **Extraction.** Use the CMake extraction flow, not bulk deletion of generated assembly.
+  `tools/extract_rom.py` recovers required missing stubs from full-range ROM disassembly without
+  modifying curated YAML. Keep candidate evidence under `nonmatchings/` separate from build outputs.
 - **Scratch dir** `nonmatchings/<func>/` (gitignored, shared with the permuter).
 - **Stop a background command with the harness. Never `pkill -f` on any pattern that appears in the
   command you are running (S289, recurred S301).** The pattern also matches the tool call's own shell
@@ -279,9 +251,8 @@ below).
   `uv run --locked python`.
 - **Shared tool helpers** live in `tools/decomp_common.py` (venv re-exec, path constants, asm/symbol
   regexes, `emit`/`log`, `find_segment`, SDK-path config) and `tools/lib.sh` (shell wrappers).
-- **File-level matching.** A source file matches only when every function in it matches. Promoting a
-  match replaces one `INCLUDE_ASM` stub with the C body. No md5 win until the last stub in a file is
-  gone.
+- **File-level completion.** Promoting a match replaces one `INCLUDE_ASM` stub with its C body.
+  A file is complete only after its last stub is gone.
 - **`symbol_addrs.txt` is add-only; never delete an entry.** The agent may add maintainer-override
   entries: a function is `name = 0x<vram>; // type:func`; a data extern is `name = 0x<vram>;
 - **Name-file ownership.** `reloc_addrs.txt` is never touched. `ghidra_symbols.txt` is generated by
@@ -404,4 +375,3 @@ below).
 Use the [C naming guide](../coding-style.md#c-naming-conventions) as the single convention.
 Rename m2c synthetics before promotion when matching permits; upstream mirrors retain their names.
 
-## Cross-repo sync (Ghidra workspace at `~/development/reversing/ghidra/mariogolf64/`)

@@ -20,7 +20,7 @@ okf_version: "0.2"
 
 - [C coding and matching style](coding-style.md) — Practical conventions for hand-authored C that maintain readability without overriding byte-exact decompilation requirements.
 - [Agent prompt style](prompt-style.md) — Authoring rules for concise, checkable project instructions.
-- [Crack-subagent prompt template](fanout-prompt.md) — Provides the isolated-work contract and deliverables for delegated function-cracking work.
+- [Subagent fan-out](workflow/fan-out.md) — Native task dispatch, serialized resource ownership, and evidence hand-off.
 - [Documentation structure and maintenance](documentation.md) — Defines the OKF bundle boundary, progressive reading routes, metadata, and documentation validation rules.
 
 # Evidence and updates

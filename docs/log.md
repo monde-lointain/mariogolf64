@@ -2,6 +2,28 @@
 
 ## 2026-10-14
 
+### Repository and native-agent cleanup
+
+- **Removed**: Obsolete local `tools/cc` binaries, legacy `venv`, and empty `mk/` directory
+  (about 66 MiB); the unused old-path `mariogolf64.md5` and `tools/.gitignore`.
+  Kept generated extraction artifacts, candidate experiments, pinned vendors, and technical history.
+- **Workflow**: Folded selection/review checkpoints into the native `mg64-decomp` skill and removed
+  `workflow/gates.md`. Replaced `fanout-prompt.md` with the native task dispatch contract in
+  `workflow/fan-out.md`; workers analyze, and the parent serializes edits, compiles, MCP, and banking.
+  Retained measured fan-out evidence and the historical workflow router.
+- **Tooling**: Removed the duplicate CMake `test-tools` runner; use `ctest --preset tooling` or
+  `uv run --locked pytest tests/tooling`. Removed four whole-backlog ranker snapshots and four
+  seed-layout snapshots with their unused fixtures. Made both coddog trap-rescan cases independent
+  of external SDK source state; preserved data/static-hazard assertions for primary and tail hits.
+- **Guidance**: Corrected stale Make/profile links, extraction-staging instructions, and harness
+  edit/dispatch syntax. Small asm-first candidates now use isolation rather than editing matching
+  source before measurement. Historical records retain their original file/tool names.
+- **Proof**: Tooling: 118 passed, two skipped; CTest tooling passed. `tools/verify-rom.sh` reported
+  SHA-1 match `e2c4e7a905b29529b49a1619a401fe699224829b`. Exercised ranking and file-closure CLIs,
+  checked all 115 frozen hazard anchors, and validated 105 documentation files' metadata and
+  104 active local links across 12 workflow surfaces. The installed harness loaded the skill and
+  dispatched `/decomp`; Python Eval ran with the approved session-only `.venv` interpreter.
+
 ### uv-managed Python tooling
 
 - **Dependencies**: Consolidated runtime, test, and analysis dependencies in `pyproject.toml`;

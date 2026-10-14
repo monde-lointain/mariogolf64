@@ -28,7 +28,7 @@ See [build prerequisites and commands](docs/build.md), including isolated nonmat
 
 - [Build and verify](docs/build.md) — source-built tools, uv setup, presets, and ROM gate.
 - [Dependency ownership](third_party/README.md) — immutable sources, Python lockfile, origins, and licenses.
-- [Agent workflow](docs/agent-workflow.md) — Oh My Pi `/decomp` and the native `mg64-decomp` skill.
+- [Native decomp skill](.omp/skills/mg64-decomp/SKILL.md) — Oh My Pi `/decomp` selects, iterates, banks, and reviews.
 - [Documentation index](docs/index.md) — on-demand matching hazards, code-generation levers, and evidence.
 - [Tool reference](docs/tooling.md) — candidate selection and isolated matching signals.
 - [Private CI container](docker/README.md) — maintainers only; it contains the copyrighted ROM.

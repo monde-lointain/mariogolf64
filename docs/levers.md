@@ -7,8 +7,8 @@ description: Evidence-backed source transformations and compiler behaviors for s
 # Source levers (index)
 
 <role>
-Select a source-level lever for an observed residual or `{{LEVERS}}` in the
-[dispatch prompt](fanout-prompt.md). Detailed derivations live in sprint evidence and playbooks.
+Select a source-level lever for an observed residual or a
+[delegated analysis](workflow/fan-out.md#dispatch-contract). Detailed derivations live in sprint evidence and playbooks.
 </role>
 
 ## Levers with a full playbook

@@ -6,44 +6,39 @@ description: Defines when to delegate decompilation work, how to isolate it, and
 
 # Subagent fan-out
 
-<role>
-Use the trigger table at planning or crack time to select compile-isolated units and expected
-deliverables. The [dispatch prompt](../fanout-prompt.md) supplies each agent's contract.
-</role>
+Work inline unless at least two independent analysis slices justify separate contexts. Read the
+selected functions and their carried evidence before dispatch; do not fan out routine selection,
+small leaves, or checks settled by the ROM verifier.
 
-**Navigate:** [Triggers](#when-to-fan-out) · [Isolation](#how-many) ·
+**Navigate:** [Dispatch contract](#dispatch-contract) ·
 [Expected-value guard](#what-a-fan-out-is-worth) · [Wall classes](#wall-classes-a-fan-out-commonly-returns).
 
-## When to fan out
+## Dispatch contract
 
-| Situation | Action | Heads | Expected yield |
-| --- | --- | --- | --- |
-| One tractable smallest-first leaf | Work inline | 0 | -- |
-| Context gathering: `BACKLOG.md`, `pick_target.py`, hazard sections, `.s` reads | Read in parallel, inline | 0 | -- |
-| Confirming a result | `tools/verify-rom.sh` | 0 | The ROM oracle is the verifier. Never delegate a check the oracle settles. |
-| A large classical pack's hard tail, cheap leaves already banked | Isolated per-function iterators | one per hard standalone, or per nested pair | matching C plus struct/extern additions per crack; a `docs/wip/<fn>.near-match.md` per carry |
-| An all-FP one-tu tail | Isolated iterators with the FP lever set | one per function | mostly characterization, occasionally an unexpected match |
-| A c-stub continuation whose next vein is suspected regalloc- or ABI-walled | gcc-source crackers, dispatched up front rather than iterate-then-permuter sequentially | one per target | a definitive per-function verdict: byte-match, or a wall with the diverging pass named at `file:line` |
-| A plateaued tail whose smallest functions carry fully-RE'd near-match comments or a `file:line` "proven wall" verdict, especially when a new structural lever landed this sprint or the carry reads as a register-allocation wall | gcc-source crackers, to crack. This outranks "prefer a fresh pack". | one per documented wall | a sorted tail: cracks with a cited lever, plus terminal verdicts with a cited pass |
-| One hard function with several coupled residuals (count deficit, register permutation, schedule coin, frame delta) | Crackers from distinct angles on the same function | one per residual angle, cap 2 | each sub-residual cracked with a cited lever, leaving at most one terminal coin |
-| Any fan-out whose residual could be assembler-side | Re-run the build's own compile line with `-S` into a scratch dir first: if the divergence is already in gcc's text, the assembler is out with no agent spent. Only if that is inconclusive, add exactly one binutils rule-out | 0 or 1 | the assembler exonerated or implicated; either answer redirects the gcc agents |
-| A plateaued mined pack whose smallest remaining functions carry wall-class tells but no prior documentation | Do not fan out. Prefer a fresh pack or an escalation slice. | 0 | another smallest-first continuation yields characterizations, not banks |
+Use the active native `task` schema. Put the shared goal, resource ownership, and interfaces in
+`context`; give each task its target files, non-goals, prior residual hypothesis, relevant source
+levers, and required evidence. `solutionSpace` describes the open reasoning, not workload size.
+Do not copy a fixed prompt or create project agents for roles the harness already provides.
 
-## How many
+The parent owns candidate/source edits, compiles, builds, Ghidra MCP, integration, and ROM
+verification. Workers analyze independent functions, coupled nested pairs, or distinct residual
+angles (at most two per function), and return proposed changes. They do not build, run checks,
+format, use MCP, or launch background permuters. The parent measures proposals serially with the
+function's ROM compiler profile and returns evidence when another analysis iteration is needed.
+Candidate artifacts stay under `nonmatchings/<fn>/`; never share scratch directories.
 
-Delegate one agent per independent analysis unit, plus at most one binutils rule-out when needed.
+Require a usable hand-off, not an iteration transcript:
 
-For distinct functions, isolate candidate files and outputs under each function's own
-`nonmatchings/<fn>/` directory. Preserve each function's ROM compiler profile. Never share a candidate
-scratch directory or assume an isolated compile proves a bank.
-
-The build tree and Ghidra MCP are shared resources. Serialize their use; do not overlap builds with
-isolated compiles or background permuters. The orchestrator owns source integration and the full-ROM
-verification. Never delegate ROM verification.
-
-Each agent costs a full context and serializes at integration. Delegate only independent analysis
-that cannot be folded into the current iteration. Return measured evidence and a function-specific
-verdict, not just a narrative.
+- Best candidate or proposed patch with every required type, extern, and helper; measured base,
+  instruction counts, frame, residual, and the command/object behind each measurement.
+- A crack or a carry hypothesis supported by measurements and compiler `file:line` citations where
+  available. Separate observations from attribution; the parent records unresolved evidence in
+  `docs/wip/<fn>.near-match.md`. Only `tools/verify-rom.sh` can authorize banking.
+- Integration hazards: conflicting host declarations, actual relocations (`objdump -r`, not
+  guessed from `lui`), emitted `.rodata` and duplicate pools, and nested-function coupling.
+- Source quality: no empty-asm barrier as a bank candidate; decode raw display-list words against
+  SDK macros before integration. See the [oracle table](loop.md#oracles) and
+  [source levers](../levers.md) for measurement limits and transformations.
 
 ## What a fan-out is worth
 
@@ -108,5 +103,5 @@ The reasoning above was derived sprint by sprint. Each sprint's digest is richer
 it, so the digests are the record rather than a retelling here.
 
 Case law: `RETRO.md`, sprints 184, 206, 218, 224, 232, 233, 235, 250, 260, 272, 274, 275, 276, 280,
-282. Read one with `grep -n "^## Sprint <N> " RETRO.md`, then `Read` at that offset with `limit: 40`.
-`RETRO.md` is prepend-only, so a low sprint number is deep in the file; do not read it whole.
+282. Locate the cited sprint heading and read only that excerpt; the prepend-only record is not
+an onboarding document.

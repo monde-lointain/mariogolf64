@@ -1082,11 +1082,9 @@ def main():
         "--refresh-residual",
         nargs="+",
         metavar="FUNC",
-        help="Crack-slice STEP 0 (S282/S268): for each FUNC rebuild its nonmatchings/FUNC/base.c "
-        "(make nonmatching-func, tree-derived MAIN/LIBULTRA/LIBKMC flag) and run tools/cmpfn.sh, "
-        "printing the FRESH instruction count (rom vs mine) + diff-row count. A carried-wall doc's "
-        "stated COUNT and residual CLASS are BOTH hypotheses; re-derive from a fresh build before "
-        "trusting the doc. Requires an existing base.c seed.",
+        help="Rebuild each nonmatchings/FUNC/base.c using its source-specific compiler profile "
+        "and run tools/cmpfn.sh to print fresh instruction and diff-row counts. "
+        "Requires an existing base.c; carried counts and residual classes are hypotheses.",
     )
     ap.add_argument(
         "--loose-stubs",
@@ -1123,7 +1121,7 @@ def main():
         )
 
     if args.file_close:
-        # Points bank per FILE (gates.md ## Story points), so a leaf's value is not only its own
+        # File closure depends on the last stub, so a leaf's value is not only its own
         # size: the last stub in a host is worth the whole file's md5-candidate flip, and every
         # other stub in that host is worth zero until it lands. --loose-stubs sorts by leaf size and
         # cannot see this, which is why S317's goal ("close main's single-stub files") was found by
