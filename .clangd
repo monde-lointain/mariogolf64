@@ -1,5 +1,5 @@
 # Base flags live in compile_flags.txt (repo root) so relative -I resolve against the root.
-# This file adds only the per-tree profile deltas (see CLAUDE.md build profiles).
+# This file adds only editor profile deltas; build truth is tools/build_profiles.json.
 If:
   PathMatch: src/libultra/.*
 CompileFlags:

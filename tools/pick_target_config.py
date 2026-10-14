@@ -182,52 +182,32 @@ FILE_STATIC_INIT_ARRAY_RE = re.compile(
     r"^static\s+(?!const\b)[^;{}=]*?\b([A-Za-z_]\w+)\s*\[[^\]]*\]\s*="
 )
 INCLUDE_RE = re.compile(r'^\s*#\s*include\s*[<"]([^>"]+)[>"]')
-# The project's quoted/angle include search dirs (Makefile CFLAGS `-I` set; -nostdinc removed — stdarg.h ships at include/stdarg.h for correct MIPS GCC 2.7.2 vararg ABI).
-INCLUDE_DIRS = [
-    os.path.join(ROOT, d)
-    for d in (
-        "include",
-        "include/libultra",
-        "include/libultra/internal",
-        "include/libkmc",
-        "include/libnusys",
-        "include/libnaudio",
-    )
-]
+from rom_build import profile_flags
+
+
+def _profile_include_dirs(profile):
+    flags = profile_flags("src/__profile_probe__.c", profile=profile)
+    dirs = []
+    i = 0
+    while i < len(flags):
+        flag = flags[i]
+        if flag == "-I" and i + 1 < len(flags):
+            dirs.append(flags[i + 1])
+            i += 2
+        elif flag.startswith("-I"):
+            dirs.append(flag[2:])
+            i += 1
+        else:
+            i += 1
+    return list(dict.fromkeys(dirs))
+
+
+INCLUDE_DIRS = _profile_include_dirs("main")
 PROJECT_INC = os.path.join(ROOT, "include")
-# Per-lib extra `-I` dirs the Makefile's profile CFLAGS add on top of the base INCLUDE_DIRS, so a
-# mirror's include resolution must match the profile it actually compiles under. LIBULTRA_CFLAGS
-# (Makefile) prepends `-I include/libultra/compiler/gcc` and appends `-I include/libultra/PR`, so a
-# libultra mirror resolves <libaudio.h>/<os_internal.h>/<ultraerror.h> and the rest of the PR/ band
-# through these — missing_includes must include them for a libultra candidate or it false-flags
-# needs-header → blk (it once hid the whole audio/PR mirror band this way).
-# libkmc/libnusys CFLAGS add no extra `-I`, so they map to the base set.
+# Effective profile-specific include paths are derived from the same resolved flags the compiler uses.
 LIB_EXTRA_INCLUDE_DIRS = {
-    "libultra": [
-        os.path.join(ROOT, "include/libultra/compiler/gcc"),
-        os.path.join(ROOT, "include/libultra/PR"),
-    ],
-    # LIBNAUDIO_CFLAGS (Makefile) prepends `-I src/libnaudio` (the n_audio_sc source-private internal
-    # headers n_synthInternals.h/synthInternals.h/n_abi.h) and appends `-I include/libultra/PR` (the
-    # bare <os_internal.h>/<ultraerror.h>/<libaudio.h> the n_syn*.c mirrors include), so a libnaudio
-    # mirror resolves its 3-header DAG through these. Without them the whole n_syn* band false-flags
-    # needs-header → blk (S129: the n_syn* family was hidden this way until the headers were vendored).
-    "libnaudio": [
-        os.path.join(ROOT, "src/libnaudio"),
-        os.path.join(ROOT, "include/libultra/PR"),
-    ],
-    # LIBMUS_CFLAGS (mk/libmus.mk) prepends `-I src/libmus` (the libmus source-private internal
-    # headers libmus_config.h/lib_memory.h/aud_*.h); the public libmus.h and bare
-    # <libaudio.h>/<n_libaudio_*.h> resolve through include/libmus + include/libultra/PR + the base
-    # include/libnaudio set. Without these a libmus mirror false-flags needs-header → blk (S141:
-    # lib_memory.c was hidden this way until libmus_config.h/lib_memory.h were vendored). Each libmus
-    # file vendors its own aud_*.h as it is banked, so a row still un-vendored stays blk on its own
-    # headers (expected — the band opens incrementally, like libnaudio's n_syn* did).
-    "libmus": [
-        os.path.join(ROOT, "src/libmus"),
-        os.path.join(ROOT, "include/libmus"),
-        os.path.join(ROOT, "include/libultra/PR"),
-    ],
+    profile: [directory for directory in _profile_include_dirs(profile) if directory not in INCLUDE_DIRS]
+    for profile in ("libultra", "libnaudio", "libmus")
 }
 # Upstream include trees a missing companion header can be *copied from* (the execution-middle
 # mirror, e.g. assert.h). A header absent here and absent from the project tree is a system

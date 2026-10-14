@@ -2,7 +2,7 @@
 """pscore.py -- score single decomp-permuter candidate(s) with the permuter's own Scorer.
 
 Usage:
-    venv/bin/python3 tools/pscore.py <scaffold_dir> <candidate.c> [candidate2.c ...]
+    build/us/venv/bin/python3 tools/pscore.py <scaffold_dir> <candidate.c> [candidate2.c ...]
 
 Prints one `<score>\t<candidate>` line per candidate (lower is closer; 0 is a byte-match).
 Handy for A/B-testing hand-written source variants against the ROM without launching a full

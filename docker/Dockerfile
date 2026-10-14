@@ -12,15 +12,15 @@ FROM ubuntu:24.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Build deps. Host cpp preprocesses extracted assembly; binutils-mips-linux-gnu
-# supplies as/ld/objcopy/strip; python3-venv
-# is needed by `make setup`'s `python3 -m venv`. wget+ca-certificates let
-# `make -C tools` download the KMC toolchain.
+# CMake builds the pinned MIPS toolchain from local sources. Host compilation,
+# Python, and GNU Make are bootstrap prerequisites, not target toolchains.
 RUN apt-get update && apt-get install -y --no-install-recommends \
-        make git build-essential wget ca-certificates \
-        python3 python3-venv python3-pip \
-        binutils-mips-linux-gnu cpp \
+        make git build-essential gcc-multilib bison flex texinfo ca-certificates \
+        python3 python3-venv python3-pip ninja-build \
     && rm -rf /var/lib/apt/lists/*
+RUN python3 -m venv /opt/cmake \
+    && /opt/cmake/bin/pip install --no-cache-dir cmake==3.30.9
+ENV PATH="/opt/cmake/bin:${PATH}"
 
 # Build context = repo root; baserom.z64 must be present there (gitignored).
 COPY baserom.z64 /orig/baserom.z64

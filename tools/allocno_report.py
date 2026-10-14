@@ -9,8 +9,8 @@ permutations to move that order is what makes the class read terminal; reading t
 into a calculation (S290 cracked a five-register permutation off one table after ~15 blind
 permutations failed).
 
-This compiles the file the way the real build does -- the recipe comes from `make -n`, so per-file
-overrides such as `-ffast-math` are picked up -- adds `-dg -dl`, and joins the two dumps:
+This compiles the file using the authoritative `rom_build.compile_command` profile (including
+per-file overrides) -- adds `-dg -dl`, and joins the two dumps:
 
   .lreg  "Register N used R times across L insns"   -> REG_N_REFS and REG_LIVE_LENGTH
   .greg  ";; N regs to allocate: <allocno order>"   -> allocno_compare's sorted order
@@ -24,8 +24,8 @@ move. Reminder for a call-free function: `local-alloc`'s `qty_compare_1` scales 
 scope, not its priority, is the knob (Axis 8).
 
 Usage:
-  venv/bin/python3 tools/allocno_report.py src/main/func_8006A2C0.c [func_8006C484]
-  venv/bin/python3 tools/allocno_report.py nonmatchings/func_8005DFE8/base.c [func_8005DFE8]
+  build/us/venv/bin/python3 tools/allocno_report.py src/main/func_8006A2C0.c [func_8006C484]
+  build/us/venv/bin/python3 tools/allocno_report.py nonmatchings/func_8005DFE8/base.c [func_8005DFE8]
 
 The second form reads a crack slice's own seed: any directory holding a `compile.sh` (a permuter
 import or a decomp_loop scratch dir) works, so the table can be read without first inlining the body
@@ -39,13 +39,13 @@ import argparse
 import math
 import re
 from collections import Counter
-import shutil
 import subprocess
 import sys
 import tempfile
 from pathlib import Path
 
 from decomp_common import PROJECT_ROOT
+from rom_build import compile_command, compiler_environment, work_dir
 
 ROOT = Path(PROJECT_ROOT)
 
@@ -65,70 +65,6 @@ def reg_name(num):
     return REG_NAMES.get(num, f"r{num}")
 
 
-def compile_command_from_sh(sh, src):
-    """The gcc half of a permuter `compile.sh` (`gcc -S ... -o /dev/stdout "$INPUT" | as ...`)."""
-    for line in sh.read_text().splitlines():
-        if "tools/cc/gcc" in line and " -S " in line:
-            gcc = line.split("|", 1)[0].strip()
-            return gcc.replace('"$INPUT"', str(src)).replace("$INPUT", str(src))
-    return None
-
-
-def compile_command(src):
-    """The build's own gcc line for this source, from `make -n`.
-
-    Falls back to the seed's own `compile.sh` when the source is not a build source. A crack
-    slice iterates on `nonmatchings/<fn>/base.c`, which `make -n` has no recipe for, so before
-    S292 the table could only be read by first inlining the body into `src/` -- the one thing the
-    isolated loop exists to avoid. The permuter/decomp_loop seed dir already carries the exact
-    compile line, so use it.
-    """
-    obj = Path("build") / src.with_suffix(".o")
-    out = subprocess.run(
-        ["make", "-B", "-n", str(obj)],
-        cwd=ROOT,
-        capture_output=True,
-        text=True,
-    )
-    for line in out.stdout.splitlines():
-        if "tools/cc/gcc" in line and " -S " in line:
-            return line.strip()
-    sh = (ROOT / src).parent / "compile.sh"
-    if sh.is_file():
-        cmd = compile_command_from_sh(sh, src)
-        if cmd:
-            return cmd
-    sys.exit(
-        f"no gcc recipe for {obj} in `make -n` output, and no usable {sh} "
-        "(is the path a build source or a seed dir?)"
-    )
-
-
-def rewrite_for_dumps(cmd, src, workdir):
-    """Absolutise the recipe's relative -I/compiler paths so it can run in a scratch dir."""
-    parts = cmd.split()
-    out = []
-    i = 0
-    while i < len(parts):
-        tok = parts[i]
-        if tok == "-I":
-            out += ["-I", str(ROOT / parts[i + 1])]
-            i += 2
-            continue
-        if tok == "-o":
-            out += ["-o", str(workdir / "dump.s")]
-            i += 2
-            continue
-        if tok.startswith("COMPILER_PATH="):
-            pass  # passed through env instead, since this runs without a shell
-        elif tok.endswith("tools/cc/gcc"):
-            out.append(str(ROOT / tok))
-        elif tok == str(src):
-            out.append(str(workdir / src.name))
-        else:
-            out.append(tok)
-        i += 1
-    return out + ["-dg", "-dl"]
 
 
 def function_section(text, func):
@@ -267,27 +203,38 @@ def main():
     )
     args = ap.parse_args()
 
-    src = Path(args.source)
-    if not (ROOT / src).is_file():
-        sys.exit(f"no such source: {src}")
+    src = (ROOT / args.source).resolve()
+    if not src.is_file():
+        sys.exit(f"no such source: {args.source}")
 
-    cmd = compile_command(src)
     with tempfile.TemporaryDirectory(prefix="allocno-") as tmp:
         workdir = Path(tmp)
-        shutil.copy(ROOT / src, workdir / src.name)
-        run = subprocess.run(
-            rewrite_for_dumps(cmd, src, workdir),
-            cwd=workdir,
-            capture_output=True,
-            text=True,
-            shell=False,
-            env={"PATH": "/usr/bin:/bin", "COMPILER_PATH": str(ROOT / "tools/cc")},
+        cmd = compile_command(
+            src,
+            workdir / "dump.s",
+            nonmatching=src.is_relative_to(ROOT / "nonmatchings"),
         )
-        greg_path = workdir / f"{src.name}.greg"
-        lreg_path = workdir / f"{src.name}.lreg"
-        if not greg_path.is_file() or not lreg_path.is_file():
-            sys.exit(f"gcc produced no dumps (exit {run.returncode}):\n{run.stderr.strip()}")
-        greg, lreg = greg_path.read_text(), lreg_path.read_text()
+        # Dump-only compilation uses an absolute source while keeping scratch
+        # outputs in work/. ROM compilation uses stable repo-relative .file names.
+        cmd[-1] = str(src)
+        cmd.extend(["-dg", "-dl"])
+        greg_path = work_dir() / f"{src.name}.greg"
+        lreg_path = work_dir() / f"{src.name}.lreg"
+        try:
+            run = subprocess.run(
+                cmd,
+                cwd=work_dir(),
+                capture_output=True,
+                text=True,
+                shell=False,
+                env=compiler_environment(),
+            )
+            if not greg_path.is_file() or not lreg_path.is_file():
+                sys.exit(f"gcc produced no dumps (exit {run.returncode}):\n{run.stderr.strip()}")
+            greg, lreg = greg_path.read_text(), lreg_path.read_text()
+        finally:
+            greg_path.unlink(missing_ok=True)
+            lreg_path.unlink(missing_ok=True)
 
     func = args.function
     if not func:

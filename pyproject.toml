@@ -22,11 +22,7 @@ extend-exclude = [
   "tools/asm-differ",
   "tools/decomp-permuter",
   "tools/coddog",
-  "tools/cc",
-  "venv",
   "build",
-  "asm",
-  "assets",
   "nonmatchings",
 ]
 
@@ -57,7 +53,7 @@ ignore = [
 [tool.basedpyright]
 pythonVersion = "3.12"
 typeCheckingMode = "basic"
-venvPath = "."
+venvPath = "build/us"
 venv = "venv"
 include = ["tools", "tests/tooling"]
 exclude = [
@@ -65,12 +61,8 @@ exclude = [
   "tools/asm-differ",
   "tools/decomp-permuter",
   "tools/coddog",
-  "tools/cc",
   "**/__pycache__",
-  "venv",
   "build",
-  "asm",
-  "assets",
   "nonmatchings",
 ]
 
@@ -84,7 +76,6 @@ exclude = [
   "tools/asm-differ",
   "tools/decomp-permuter",
   "tools/coddog",
-  "tools/cc",
 ]
 min_confidence = 80
 ignore_decorators = ["@pytest.fixture"]

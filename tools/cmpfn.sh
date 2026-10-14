@@ -56,7 +56,7 @@
 
 set -euo pipefail
 source "$(dirname "$0")/lib.sh"
-
+mg_build_dir
 MNEMONICS=0
 if [ "${1:-}" = "--mnemonics" ]; then
     MNEMONICS=1
@@ -85,21 +85,20 @@ name_at() { # 0xVRAM -> curated (non-`func_`) name
         symbol_addrs.txt ghidra_symbols.txt 2>/dev/null \
         | grep -viE '^func_' | head -1 | sed -E 's/[[:space:]]*=.*//'
 }
-# Retries once: the build rule writes `.o.tmp`, copies it, then strips, so a read that lands
-# mid-recipe sees an object without the symbol and reports a false regression (S312).
+# Retries once: the build rule writes `.o.tmp`, then copies it.
 obj_has() {
-    mips-linux-gnu-objdump -t "$OBJ" 2>/dev/null | grep -qE "[[:space:]]$1\$" && return 0
+    "$MG_BUILD_DIR/toolchain/bin/mips-linux-gnu-objdump" -t "$OBJ" 2>/dev/null | grep -qE "[[:space:]]$1\$" && return 0
     sleep 0.3
-    mips-linux-gnu-objdump -t "$OBJ" 2>/dev/null | grep -qE "[[:space:]]$1\$"
+    "$MG_BUILD_DIR/toolchain/bin/mips-linux-gnu-objdump" -t "$OBJ" 2>/dev/null | grep -qE "[[:space:]]$1\$"
 }
 
-ASM_FILE=$(find asm/nonmatchings -name "${FUNC}.s" -print -quit)
+ASM_FILE=$(find "$MG_BUILD_DIR/work/asm/nonmatchings" -name "${FUNC}.s" -print -quit)
 if [ -z "$ASM_FILE" ]; then
     # Called by the curated name: the relic `.s` is still under `func_<vram>`.
     ASM_VRAM=$(addr_of "$FUNC" || true)
     if [ -n "$ASM_VRAM" ]; then
         ASM_ALT="func_$(printf '%08X' "$ASM_VRAM")"
-        ASM_FILE=$(find asm/nonmatchings -name "${ASM_ALT}.s" -print -quit || true)
+        ASM_FILE=$(find "$MG_BUILD_DIR/work/asm/nonmatchings" -name "${ASM_ALT}.s" -print -quit || true)
         [ -n "$ASM_FILE" ] && echo "note: reading ${ASM_ALT}.s for ${FUNC} (${ASM_VRAM})" >&2
     fi
 fi
@@ -110,8 +109,9 @@ fi
 
 if [ -z "$OBJ" ]; then
     # asm/nonmatchings/<tree>/<stem>/<func>.s  ->  build/src/<tree>/<stem>.o
-    STEM=$(dirname "${ASM_FILE#asm/nonmatchings/}")
-    OBJ="build/src/${STEM}.o"
+    # work/asm/nonmatchings/<tree>/<stem>/<func>.s -> obj/src/<tree>/<stem>.o
+    STEM=$(dirname "${ASM_FILE#"$MG_BUILD_DIR/work/asm/nonmatchings/"}")
+    OBJ="$MG_BUILD_DIR/obj/src/${STEM}.o"
 fi
 
 if [ ! -f "$OBJ" ]; then
@@ -199,7 +199,7 @@ obj_stream() {
     # which the old fold-the-asm-side-too shortcut would have hidden. The object-side alias table in
     # norm() folds what no-aliases spells differently from splat (`sll zero,zero,0` -> nop,
     # `beq zero,zero` -> b, `subu rd,zero,rs` -> negu).
-    mips-linux-gnu-objdump -dz -M no-aliases "$OBJ" | awk "/<${OBJ_FUNC}>:/,/^\$/" > "$slice"
+    "$MG_BUILD_DIR/toolchain/bin/mips-linux-gnu-objdump" -dz -M no-aliases "$OBJ" | awk "/<${OBJ_FUNC}>:/,/^\$/" > "$slice"
     awk -v fn="$OBJ_FUNC" '
         FNR == NR {
             if (match($0, /^[ \t]+[0-9a-f]+:/)) {

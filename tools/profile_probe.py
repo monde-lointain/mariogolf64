@@ -20,8 +20,8 @@ Pipeline gotchas baked in (so they don't have to be re-learned):
     in the awk sense; here we use Python re but keep the lesson explicit).
 
 Usage:
-  venv/bin/python3 tools/profile_probe.py --seg libnusys/nuboot
-  venv/bin/python3 tools/profile_probe.py --seg main/main --flags "-O2,-O1,-O0,-g"
+  build/us/venv/bin/python3 tools/profile_probe.py --seg libnusys/nuboot
+  build/us/venv/bin/python3 tools/profile_probe.py --seg main/main --flags "-O2,-O1,-O0,-g"
 """
 from __future__ import annotations
 
@@ -33,25 +33,12 @@ import subprocess
 import sys
 import tempfile
 from pathlib import Path
+from rom_build import compile_source, tool_path, work_dir
 
 ROOT = Path(__file__).resolve().parent.parent
-KMC_PREFIX = ROOT / "tools" / "cc"
-KMC_GCC = KMC_PREFIX / "gcc"
-KMC_AS = KMC_PREFIX / "as"
-GAS = "mips-linux-gnu-as"
-OBJDUMP = "mips-linux-gnu-objdump"
-
-# Base compile flags (mirror Makefile CFLAGS, sans the -O level which the probe varies).
-BASE_FLAGS = (
-    "-G 0 -mips3 -mgp32 -mfp32 -mno-abicalls "
-    "-I include -I include/libultra -I include/libultra/internal -I include/libkmc "
-    "-I include/libnusys -I include/libmus -I include/libnualstl -I include/libnaudio "
-    "-DINCLUDE_ASM_USE_MACRO_INC -D_LANGUAGE_C -D_FINALROM -DNONMATCHING"
-).split()
-
-# GAS recipe for the splat asm (mk asm rule), and the synthetic header that the
-# per-function nonmatchings .s rely on the INCLUDE_ASM wrapper to provide.
-GAS_FLAGS = ["-march=vr4300", "-32", "-I", "include", "--no-pad-sections"]
+GAS = tool_path("as")
+OBJDUMP = tool_path("objdump")
+GAS_FLAGS = ["-march=vr4300", "-32", "-I", str(ROOT / "include"), "--no-pad-sections"]
 ASM_HEADER = '.include "macro.inc"\n.set noat\n.set noreorder\n.set gp=64\n.section .text, "ax"\n'
 
 DEFAULT_FLAG_SETS = [
@@ -69,8 +56,12 @@ def run(cmd, **kw):
 
 
 def find_target_asm(seg: str) -> list[Path]:
-    """Per-function splat .s files for the (flipped) subseg, in address order."""
-    d = ROOT / "asm" / "nonmatchings" / seg
+    from decomp_common import ASM_DIR
+
+    complete = ASM_DIR / f"{seg}.s"
+    if complete.is_file():
+        return [complete]
+    d = ASM_DIR / "nonmatchings" / seg
     if not d.is_dir():
         sys.exit(f"profile_probe: no asm/nonmatchings/{seg}/ (is the subseg flipped + extracted?)")
     return sorted(d.glob("*.s"))
@@ -84,7 +75,7 @@ def assemble_target(seg: str, workdir: Path) -> Path:
     src = workdir / "target.s"
     src.write_text(body)
     obj = workdir / "target.o"
-    r = run([GAS, *GAS_FLAGS, "-o", str(obj), str(src)], cwd=ROOT)
+    r = run([GAS, *GAS_FLAGS, "-o", str(obj), str(src)], cwd=work_dir())
     if r.returncode != 0 or not obj.exists():
         sys.exit(f"profile_probe: target GAS failed:\n{r.stderr}")
     return obj
@@ -94,15 +85,13 @@ def compile_candidate(seg: str, flags: list[str], workdir: Path) -> Path | None:
     cfile = ROOT / "src" / f"{seg}.c"
     if not cfile.exists():
         sys.exit(f"profile_probe: no src/{seg}.c")
-    asm = workdir / "cand.s"
     obj = workdir / "cand.o"
-    env = dict(os.environ, COMPILER_PATH=str(KMC_PREFIX))
-    r = run([str(KMC_GCC), "-S", *BASE_FLAGS, *flags, "-o", str(asm), str(cfile)], cwd=ROOT, env=env)
-    if r.returncode != 0:
-        print(f"  (gcc failed: {r.stderr.strip().splitlines()[-1:] }) ", file=sys.stderr)
-        return None
-    r = run([str(KMC_AS), "-EB", "-mips2", "-G", "0", "-I", "include", "-o", str(obj), str(asm)], cwd=ROOT, env=env)
-    if r.returncode != 0 or not obj.exists():
+    # The -g-only cells intentionally use GCC's unoptimized profile.
+    extra = flags if any(re.fullmatch(r"-O[0-3s]?", flag) for flag in flags) else ["-O0", *flags]
+    try:
+        compile_source(cfile, obj, extra_flags=extra)
+    except subprocess.CalledProcessError as error:
+        print(f"  (candidate compile failed: {error})", file=sys.stderr)
         return None
     return obj
 

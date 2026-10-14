@@ -13,7 +13,7 @@ Ranking key per cell: (#exact-100% matches, #>=99% matches, #total matches, mean
 count is the strongest version discriminator — a wrong version still shows structural ~99% twins but
 few byte-exact hits (the S117 size-discriminator idea, read off coddog's own per-fn pct).
 
-Usage:  venv/bin/python3 tools/audio_pin.py
+Usage:  build/us/venv/bin/python3 tools/audio_pin.py
 Env:    none (paths are repo-relative).
 """
 

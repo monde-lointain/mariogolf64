@@ -13,13 +13,14 @@ set -uo pipefail
 
 REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$REPO"
+source "$REPO/tools/lib.sh"
+mg_build_dir
 FILTER="${1:-}"
 CODDOG="${CODDOG:-$HOME/development/repos/coddog/target/release/coddog}"
 THRESH="${THRESH:-0.95}"
 
-MG_ELF="$REPO/build/mariogolf64.elf"
-REFROOT="$REPO/build/audio-ref"
-OUTDIR="$REPO/tools/coddog/audio"
+MG_ELF="$MG_BUILD_DIR/mariogolf64.elf"
+REFROOT="$MG_BUILD_DIR/audio-ref"
 
 for f in "$CODDOG" "$MG_ELF"; do
   [ -e "$f" ] || { echo "audio_sweep: missing $f (run the project build / build coddog first)" >&2; exit 1; }
@@ -36,9 +37,9 @@ versions:
     fullname: Mario Golf 64 JP
     paths:
       target: $REPO/baserom.z64
-      build_dir: $REPO/build
-      map: $REPO/build/mariogolf64.map
-      compiled_target: $REPO/build/mariogolf64.z64
+      build_dir: $MG_BUILD_DIR
+      map: $MG_BUILD_DIR/mariogolf64.map
+      compiled_target: $MG_BUILD_DIR/mariogolf64.z64
       elf: $MG_ELF
 EOF
 

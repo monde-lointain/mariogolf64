@@ -31,29 +31,17 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Must precede any `make`: the Makefile errors at parse time if baserom.z64
-      # is absent (and if mips-linux-gnu-cpp is missing, satisfied by the image).
+      # The ROM remains private; all build tools come from this checkout.
       - name: Provide baserom
         run: cp /orig/baserom.z64 baserom.z64
 
-      - name: Setup (venv + KMC toolchain)
-        run: make setup
+      - name: Configure CMake
+        run: cmake --preset us
 
-      - name: Extract (splat)
-        run: make extract
-
-      # verify-rom.sh runs `make`, gates on the `build/mariogolf64.z64: OK` line,
-      # then checks SHA-1 == baserom (the mandated stale-green guard).
       - name: Build + verify ROM SHA-1
         run: tools/verify-rom.sh
 
-  # Python static analysis for tools/ + tests/tooling/. ADVISORY for now: every
-  # step is continue-on-error, so this job never blocks merge (ROM SHA-1 in
-  # `build` stays the only hard gate). Flip the steps to required once the tree
-  # is clean. Runs on plain ubuntu (no ROM, no container/secrets, fork-safe) and
-  # invokes the tools directly, NOT via make: the Makefile errors at parse time
-  # without baserom.z64. basedpyright needs the runtime venv to resolve imports,
-  # so it stays local-only (`make typecheck`) until a deps-cached job is added.
+  # ROM-free advisory analysis is safe for fork PRs.
   lint:
     name: Python static analysis (advisory)
     runs-on: ubuntu-latest

@@ -67,7 +67,6 @@ from pick_target_index import (
     C_CALL_RE,
     _C_NONCALL,
     _IFDEF_OPEN_RE,
-    _MAKEFILE_DEFINE_RE,
     _iter_upstream_functions,
     _os_version_defined_tokens,
     _static_carve_siblings,
@@ -107,60 +106,27 @@ def stale_version_header(up_path, lib):
     return sorted(t for t in refs if t not in defined)
 
 @functools.cache
-def _parse_makefile_defines():
-    """Return {lib: frozenset(defines)} by parsing the project build files (cached:
-    one parse per process). The base CFLAGS live in the top Makefile; the per-library
-    profiles live in the included mk/*.mk fragments, so scan both.
-    'libkmc'/'libnusys'/'libultra'/'libnaudio' each inherit from the main CFLAGS set plus their own
-    profile additions. The libultra profile carries -DBUILD_VERSION + -DF3DEX_GBI_2
-    — without parsing LIBULTRA_CFLAGS the GBI microcode define is invisible, so a
-    GBI-value-guarded macro (OS_YIELD_DATA_SIZE) false-flags as needs-define on a build
-    that already defines it. The libnaudio profile carries -DN_MICRO=1 (the n_audio_sc
-    micro command-stream variant): without parsing LIBNAUDIO_CFLAGS an N_MICRO-guarded
-    function (n_save.c et al.) false-flags as needs-define on a build that already defines it."""
-    build_files = [os.path.join(ROOT, "Makefile")] + sorted(
-        glob.glob(os.path.join(ROOT, "mk", "*.mk"))
-    )
-    raw = {
-        "main": set(),
-        "libkmc": set(),
-        "libnusys": set(),
-        "libultra": set(),
-        "libnaudio": set(),
-        "libmus": set(),
-    }
-    for path in build_files:
-        try:
-            with open(path) as f:
-                for line in f:
-                    for var, key in [
-                        ("CFLAGS", "main"),
-                        ("LIBKMC_CFLAGS", "libkmc"),
-                        ("LIBNUSYS_CFLAGS", "libnusys"),
-                        ("LIBULTRA_CFLAGS", "libultra"),
-                        ("LIBNAUDIO_CFLAGS", "libnaudio"),
-                        ("LIBMUS_CFLAGS", "libmus"),
-                    ]:
-                        if re.match(rf"^\s*{var}\s*[:+]?=", line):
-                            raw[key].update(
-                                m.group(1) for m in _MAKEFILE_DEFINE_RE.finditer(line)
-                            )
-        except OSError:
-            continue
-    for k in ("libkmc", "libnusys", "libultra", "libnaudio", "libmus"):
-        raw[k] |= raw["main"]
-    return {k: frozenset(v) for k, v in raw.items()}
+def _parse_profile_defines():
+    """Return active preprocessor defines from the structured resolved profiles."""
+    from rom_build import profile_flags
+
+    names = ("main", "libkmc", "libnusys", "libultra", "libnaudio", "libmus")
+    result = {}
+    for profile in names:
+        active = set()
+        for flag in profile_flags("src/__profile_probe__.c", profile=profile):
+            if flag.startswith("-D") and len(flag) > 2:
+                name = flag[2:].split("=", 1)[0]
+                active.add(name)
+            elif flag.startswith("-U") and len(flag) > 2:
+                active.discard(flag[2:])
+        result[profile] = frozenset(active)
+    return result
+
 
 def _active_defines_for_lib(lib):
-    """Effective -D defines for an upstream library key (libultra, libkmc, libnusys, libnaudio, libmus)."""
-    key = {
-        "libkmc": "libkmc",
-        "libnusys": "libnusys",
-        "libultra": "libultra",
-        "libnaudio": "libnaudio",
-        "libmus": "libmus",
-    }.get(lib or "", "main")
-    return _parse_makefile_defines()[key]
+    """Effective preprocessor defines for an upstream library profile."""
+    return _parse_profile_defines().get(lib or "", _parse_profile_defines()["main"])
 
 def function_gating_define(up_cpath, primary):
     """If `primary`'s entire body is wrapped by a single top-level `#ifdef DEFINE`, return
@@ -664,7 +630,7 @@ def src_func_callers():
     Motivates the `caller-evict` gate flag: when the gate ADDS a curated symbol for an un-named
     `func_<vram>` member (so splat renames it), any already-banked C file that hard-codes the old
     `func_<vram>` name fails to link (undefined reference) until its call site is renamed too. This
-    is the stale-label-sync hazard reaching the gate via a symbol ADD rather than `make sync-names`.
+    is the stale-label-sync hazard reaching the gate via a symbol ADD rather than `sync-names`.
     Surfacing the caller here prices the one-line rename fixup at the gate instead of as a build-check
     link error."""
     callers: dict[str, set] = {}

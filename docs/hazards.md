@@ -22,12 +22,33 @@ established a rule; they are not claims about the current target.
 The deterministic-vram recovery and the byte-`cmp` rules are load-bearing: follow the procedures
 exactly rather than re-deriving them.
 
+## Current build contract
+
+The diagnostic evidence below retains historical paths, compiler-variable names, and Make-era
+command transcripts so its cited sections remain stable. Those transcripts are archival examples,
+not supported build entry points. Use the [CMake build guide](build.md) and
+[`tools/build_profiles.json`](../tools/build_profiles.json) for current commands and profile truth.
+
+All extracted `asm/` and `assets/` paths refer to `<binary>/work/`; objects are under
+`<binary>/obj/`. KMC binaries are under `<binary>/toolchain/kmc/`, modern MIPS binutils under
+`<binary>/toolchain/bin/`, and Python under `<binary>/venv/`. The default binary tree is `build/us`.
+Source and curated symbol paths remain repository-relative.
+
+The new graph tracks C headers, assembler includes, embedded binaries, and extraction inputs.
+Fresh staging regenerates required stubs and publishes only changed output; obsolete extracted
+files are pruned. Historical stale-Make-object and non-regenerating-stub failures explain the
+constraints, but their manual clean/flip/recovery recipes are retired. Use `tools/verify-rom.sh`
+for matching and `tools/rom_build.py` for isolated compilation.
+
+
 ---
 
 ## Playbook index
 
 The hazard families below group the sections that follow. Each links to its existing anchor;
 the [hazard index](hazard-index.md#flag-to-section) maps ranker flags to these playbooks.
+
+- [Current build contract](#current-build-contract)
 
 **Upstream verbatim mirror & build profile**
 - [Upstream-mirror pattern](#upstream-mirror-pattern)

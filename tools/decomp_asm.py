@@ -23,8 +23,8 @@ GLABEL_RE = dc.GLABEL_RE  # shared definition (decomp_common owns the glabel-lin
 
 
 def asm_path(rom_off):
-    """The asm listing for a subseg: `asm/<ROM>.s` (the file splat emits per ROM offset)."""
-    return os.path.join(ROOT, "asm", f"{rom_off:X}.s")
+    """The generated-work asm listing for a subseg."""
+    return str(dc.ASM_DIR / f"{rom_off:X}.s")
 
 
 def iter_function_body(rom_off, primary):

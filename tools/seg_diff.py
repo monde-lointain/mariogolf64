@@ -8,7 +8,7 @@ in it. Splitting BOTH streams at rare anchor mnemonics and comparing segment
 LENGTHS put the same residual on one line (`61 vs 50` before a `div`, `92 vs 101`
 after it), which named the divergence as one scheduling placement.
 
-    venv/bin/python3 tools/seg_diff.py <func> [<object>] [--anchors jal,div,...]
+    build/us/venv/bin/python3 tools/seg_diff.py <func> [<object>] [--anchors jal,div,...]
 
 The default anchors (`jal`, `div`, `divu`, `mult`, `sqrt.s`, `bc1tl`, `trunc.w.s`,
 `break`) are chosen because they are rare and their COUNTS usually match even when
@@ -33,11 +33,12 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from decomp_common import ASM_DIR, ROOT_DIR, reexec_into_venv  # noqa: E402
+from rom_build import build_dir, tool_path
 
 reexec_into_venv(__file__)
 
 DEFAULT_ANCHORS = "jal,div,divu,mult,sqrt.s,bc1tl,trunc.w.s,break"
-OBJDUMP = "mips-linux-gnu-objdump"
+OBJDUMP = tool_path("objdump")
 
 ASM_INSN_RE = re.compile(r"^\s*/\*[^*]*\*/\s+(\S+)")
 OBJ_INSN_RE = re.compile(r"^\s*[0-9a-f]+:\s+[0-9a-f]{8}\s+(\S+)")
@@ -116,8 +117,8 @@ def main() -> int:
     if args.obj:
         obj = Path(args.obj)
     else:
-        stem = asm_file.parent.relative_to(ASM_DIR / "nonmatchings")
-        obj = ROOT_DIR / "build" / "src" / f"{stem}.o"
+        stem = asm_file.parent.relative_to(ASM_DIR / "nonmatchings").as_posix()
+        obj = build_dir() / "obj" / "src" / f"{stem}.o"
     if not obj.is_file():
         sys.exit(f"seg_diff: {obj} not built")
 

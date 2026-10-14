@@ -22,12 +22,12 @@ instruction-type sequences but different register/immediate usage can false-matc
 reviewed at a `/sprint-plan` gate before any symbol is added.
 
 #7 guard: the prebuilt archive was built with a different gcc binary than the project's
-`tools/cc/gcc`. Before trusting matches, the tool calibrates against compiled-C libultra functions
+configured KMC GCC. Before trusting matches, the tool calibrates against compiled-C libultra functions
 that are still present as asm (e.g. osContInit) and confirms they opcode-match the archive. A low
 calibration rate means the reference gcc diverges — rebuild the archive from source with the
-project gcc + LIBULTRA_CFLAGS before trusting the worklist.
+project GCC and the `libultra` profile from `tools/build_profiles.json` before trusting the worklist.
 
-Read-only. Usage: venv/bin/python3 tools/libultra_match.py [--min-insns N] [--all]
+Read-only. Usage: build/us/venv/bin/python3 tools/libultra_match.py [--min-insns N] [--all]
 """
 
 import argparse
@@ -70,7 +70,9 @@ SRC_OBJ_TREE = next(
     ),
     str(_ULTRALIB_ROOT / "build" / "J" / "libgultra_rom" / "src"),
 )
-OBJDUMP = os.environ.get("MG_MIPS_OBJDUMP", "mips-linux-gnu-objdump")
+from decomp_common import ASM_DIR
+from rom_build import tool_path
+OBJDUMP = os.environ.get("MG_MIPS_OBJDUMP", tool_path("objdump"))
 
 # asm/<rom>.s instruction line: /* ROM VRAM WORD */  mnemonic ...
 _ASM_LINE = re.compile(r"/\*\s*[0-9A-Fa-f]+\s+([0-9A-Fa-f]+)\s+([0-9A-Fa-f]{8})\s*\*/")
@@ -150,7 +152,7 @@ def member_src(member):
 # --- candidate side: the project's asm/<rom>.s listings -------------------------------------
 def parse_asm_functions(rom_off):
     """[(name, vram, words)] for every glabel'd function in asm/<rom>.s."""
-    path = os.path.join(pt.ROOT, "asm", f"{rom_off:X}.s")
+    path = os.path.join(str(ASM_DIR), f"{rom_off:X}.s")
     if not os.path.exists(path):
         return []
     out, name, vram, words = [], None, None, []
@@ -255,7 +257,7 @@ def candidate_sig_freq(asm_funcs):
 def report_calibration(asm_funcs, upstream, by_name):
     """#7 calibration report (prints only): compiled-C libultra funcs still in asm vs the archive.
     Two failure buckets: same-length opcode swaps = compiler/flag divergence (a faithful rebuild
-    with tools/cc/gcc + LIBULTRA_CFLAGS would fix); different-length = a different source
+    with configured KMC GCC and the libultra profile would fix); different-length = a different source
     version/impl. Hand-asm (.s) funcs are excluded — no compiler, so they can't probe gcc fidelity."""
     cal_ok = cal_total = 0
     cal_flag, cal_impl = [], []
@@ -298,7 +300,7 @@ def report_calibration(asm_funcs, upstream, by_name):
             "  'not in this reference', not 'not libultra'. For a complete worklist, rebuild the"
         )
         print(
-            "  reference from ultralib source with tools/cc/gcc + LIBULTRA_CFLAGS (plan #7 fallback)."
+            "  reference from ultralib source with configured KMC GCC and the libultra build profile."
         )
 
 

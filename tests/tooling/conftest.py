@@ -17,6 +17,9 @@ import pytest
 
 ROOT = Path(__file__).resolve().parents[2]
 TOOLS = ROOT / "tools"
+if str(TOOLS) not in sys.path:
+    sys.path.insert(0, str(TOOLS))
+from rom_build import python_path
 GOLDEN = Path(__file__).resolve().parent / "golden"
 
 # Set REGEN_GOLDEN=1 to rewrite golden snapshots instead of asserting against them.
@@ -40,10 +43,9 @@ def load_tool(name: str):
 
 
 def run_tool(name: str, *args: str) -> subprocess.CompletedProcess:
-    """Run tools/<name>.py as a subprocess under the project venv, from ROOT."""
-    py = ROOT / "venv" / "bin" / "python3"
+    """Run tools/<name>.py under the configured binary-tree Python interpreter."""
     return subprocess.run(
-        [str(py), str(TOOLS / f"{name}.py"), *args],
+        [str(python_path()), str(TOOLS / f"{name}.py"), *args],
         cwd=ROOT,
         capture_output=True,
         text=True,

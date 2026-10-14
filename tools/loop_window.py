@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Print gcc 2.7.2's loop-invariant hoisting window for each loop in a function.
 
-Usage: venv/bin/python3 tools/loop_window.py <src.c> <func>
+Usage: build/us/venv/bin/python3 tools/loop_window.py <src.c> <func>
 
 Why this exists (S301). `func_800947A8` reached an exact 618/618 instruction count with six of its
 seven global registers matching the ROM, and the whole residual came from one hoisting decision:
@@ -56,17 +56,10 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from decomp_common import ROOT_DIR, reexec_into_venv  # noqa: E402
+from rom_build import compile_command, work_dir
 
 reexec_into_venv(__file__)
 
-# The game -O2 profile, mirroring mk/src.mk plus mk/main.mk's F3DEX2 define.
-CFLAGS = [
-    "-S", "-G", "0", "-mips3", "-mgp32", "-mfp32", "-mno-abicalls", "-O2", "-dL",
-    "-I", "include", "-I", "include/libultra", "-I", "include/libultra/internal",
-    "-I", "include/libkmc", "-I", "include/libnusys", "-I", "include/libmus",
-    "-I", "include/libnualstl", "-I", "include/libnaudio",
-    "-DINCLUDE_ASM_USE_MACRO_INC", "-D_LANGUAGE_C", "-D_FINALROM", "-DF3DEX_GBI_2",
-]
 
 LOOP_RE = re.compile(r"^Loop from (\d+) to (\d+): (\d+) real insns\.")
 MOVABLE_RE = re.compile(
@@ -146,22 +139,22 @@ def main() -> int:
     src, func = sys.argv[1], sys.argv[2]
 
     with tempfile.TemporaryDirectory() as tmp:
-        copy = Path(tmp) / "lw.c"
-        copy.write_text(Path(src).read_text())
-        cmd = ["tools/cc/gcc", *CFLAGS, "-o", str(Path(tmp) / "lw.s"), str(copy)]
+        asm_path = Path(tmp) / "lw.s"
+        cmd = compile_command(src, asm_path, profile="main")
+        cmd.append("-dL")
         proc = subprocess.run(
-            cmd, cwd=ROOT_DIR, env={"COMPILER_PATH": "tools/cc", "PATH": "/usr/bin:/bin"},
-            capture_output=True, text=True,
+            cmd,
+            cwd=work_dir(),
+            capture_output=True,
+            text=True,
         )
         if proc.returncode != 0:
             print(proc.stderr[-2000:], file=sys.stderr)
             return 1
-        asm = (Path(tmp) / "lw.s").read_text()
-        # gcc writes <basename>.loop next to the CWD, not next to the output.
-        dump_path = ROOT_DIR / "lw.c.loop"
+        asm = asm_path.read_text()
+        dump_path = work_dir() / f"{Path(src).name}.loop"
         dump = dump_path.read_text()
         dump_path.unlink()
-
     marker = f";; Function {func}\n"
     if marker not in dump:
         print(f"loop_window: no ;; Function {func} in the -dL dump", file=sys.stderr)

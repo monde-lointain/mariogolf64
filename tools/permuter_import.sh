@@ -23,6 +23,9 @@
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
+BUILD_DIR="${MG64_BUILD_DIR:-build/us}"
+if [[ "$BUILD_DIR" != /* ]]; then BUILD_DIR="$PWD/$BUILD_DIR"; fi
+PYTHON="$BUILD_DIR/venv/bin/python3"
 
 FUNC=${1:-}
 if [[ -z $FUNC ]]; then
@@ -39,7 +42,8 @@ if [[ -z $C_FILE || ! -f $C_FILE ]]; then
     exit 1
 fi
 
-ASM_FILE=$(find asm/nonmatchings -name "${FUNC}.s" | head -1 || true)
+ASM_ROOT="$BUILD_DIR/work/asm"
+ASM_FILE=$(find "$ASM_ROOT/nonmatchings" -name "${FUNC}.s" | head -1 || true)
 if [[ -z $ASM_FILE ]]; then
     echo "permuter_import: no asm/nonmatchings/**/${FUNC}.s" >&2
     exit 1
@@ -48,7 +52,11 @@ fi
 mkdir -p nonmatchings/permsrc
 STRIPPED=nonmatchings/permsrc/$(basename "$C_FILE")
 
-venv/bin/python3 - "$C_FILE" "$STRIPPED" "$FUNC" <<'PY'
+if [[ ! -x "$PYTHON" ]]; then
+    echo "permuter_import: configured Python is missing: $PYTHON" >&2
+    exit 1
+fi
+"$PYTHON" - "$C_FILE" "$STRIPPED" "$FUNC" <<'PY'
 import re
 import sys
 
@@ -90,5 +98,5 @@ if ! grep -qE "^[A-Za-z_][A-Za-z_0-9 \t*]*\\b${FUNC}\\(" "$STRIPPED"; then
     exit 1
 fi
 
-exec venv/bin/python3 ./tools/decomp-permuter/import.py \
-    --settings permuter_settings_main.toml "$STRIPPED" "$ASM_FILE"
+exec "$PYTHON" tools/rom_build.py import-permuter \
+    --source "$C_FILE" --input "$STRIPPED" --asm "$ASM_FILE"

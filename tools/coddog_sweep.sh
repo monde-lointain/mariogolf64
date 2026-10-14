@@ -16,19 +16,21 @@
 set -euo pipefail
 
 REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$REPO"
 # shellcheck source=tools/sweep_lib.sh
 source "$REPO/tools/sweep_lib.sh"
+source "$REPO/tools/lib.sh"
+mg_build_dir
 CODDOG="${CODDOG:-$HOME/development/repos/coddog/target/release/coddog}"
 ULTRALIB="${ULTRALIB:-$HOME/development/repos/ultralib}"
 ULVER="${ULVER:-J}"
 ULLIB="${ULLIB:-libgultra}"
-OBJCOPY="${OBJCOPY:-mips-linux-gnu-objcopy}"
-LD="${LD:-mips-linux-gnu-ld}"
+LD="${LD:-$(mg_tool_path ld)}"
 THRESH="${THRESH:-0.95}"
 
-MG_ELF="$REPO/build/mariogolf64.elf"
+MG_ELF="$MG_BUILD_DIR/mariogolf64.elf"
 UL_OBJDIR="$ULTRALIB/build/$ULVER/$ULLIB"
-WORK="$REPO/build/coddog"
+WORK="$MG_BUILD_DIR/coddog"
 UL_ELF="$WORK/ultralib_$ULVER.o"
 MAP="$REPO/tools/coddog/coddog_map.tsv"
 
@@ -66,9 +68,9 @@ versions:
     fullname: Mario Golf 64 JP
     paths:
       target: $REPO/baserom.z64
-      build_dir: $REPO/build
-      map: $REPO/build/mariogolf64.map
-      compiled_target: $REPO/build/mariogolf64.z64
+      build_dir: $MG_BUILD_DIR
+      map: $MG_BUILD_DIR/mariogolf64.map
+      compiled_target: $MG_BUILD_DIR/mariogolf64.z64
       elf: $MG_ELF
 EOF
 cat > "$WORK/ultralib.decomp.yaml" <<EOF

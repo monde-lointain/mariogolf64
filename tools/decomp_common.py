@@ -17,6 +17,7 @@ import os
 import re
 import sys
 from pathlib import Path
+from rom_build import build_dir, python_path, work_dir
 
 # --- project paths --------------------------------------------------------
 # tools/decomp_common.py -> tools/ -> project root
@@ -27,10 +28,13 @@ ROOT_DIR = SCRIPT_DIR.parent
 # lookup and change ranked rows. Distinct from ROOT_DIR above, which is internal to decomp_common
 # (ASM_DIR/SYMBOL_FILES); shared by the os.path-based tools that key paths off the literal root.
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-ASM_DIR = ROOT_DIR / "asm"
+BUILD_DIR = build_dir()
+WORK_DIR = work_dir()
+ASM_DIR = WORK_DIR / "asm"
 ASM_DATA_DIR = ASM_DIR / "data"
 NONMATCHINGS_DIR = ROOT_DIR / "nonmatchings"
-BUILD_ASM_DIR = ROOT_DIR / "build" / "asm"
+BUILD_OBJ_DIR = BUILD_DIR / "obj"
+BUILD_ASM_DIR = BUILD_OBJ_DIR / "asm"
 # The two disjoint symbol-name files (maintainer override + Ghidra-synced).
 SYMBOL_FILES = [ROOT_DIR / "symbol_addrs.txt", ROOT_DIR / "ghidra_symbols.txt"]
 
@@ -60,15 +64,10 @@ SYM_LINE_RE = re.compile(r"^\s*(\w+)\s*=\s*0x([0-9A-Fa-f]+)\s*;")
 
 # --- venv re-exec ---------------------------------------------------------
 def reexec_into_venv(script: str) -> None:
-    """Self-promote into ./venv if launched from another interpreter.
-
-    Project policy: all Python tooling runs out of ./venv (which carries the
-    asm-differ deps: watchdog, levenshtein, colorama). Call this at the very top
-    of a script, before importing heavier deps, passing ``__file__``.
-    """
-    venv_py = ROOT_DIR / "venv" / "bin" / "python3"
-    if venv_py.exists() and Path(sys.executable).resolve() != venv_py.resolve():
-        os.execv(str(venv_py), [str(venv_py), script, *sys.argv[1:]])
+    """Re-exec this tool using the configured binary-tree Python interpreter."""
+    python = python_path()
+    if python.exists() and Path(sys.prefix).resolve() != python.parent.parent.resolve():
+        os.execv(str(python), [str(python), script, *sys.argv[1:]])
 
 
 # --- io helpers -----------------------------------------------------------
@@ -107,16 +106,17 @@ def log(msg: str) -> None:
 
 # --- asm helpers ----------------------------------------------------------
 def find_segment(placeholder: str, asm_dir: Path = ASM_DIR) -> str | None:
-    """Return the segment stem (e.g. '1050') whose asm file declares
-    `glabel <placeholder>`, or None if no asm/*.s file declares it."""
-    for s_file in sorted(asm_dir.glob("*.s")):
+    """Return a logical assembly path for a function, including clean C references."""
+    files = sorted(path for path in asm_dir.rglob("*.s")
+                   if path.relative_to(asm_dir).parts[0] not in ("data", "matching", "nonmatchings"))
+    for s_file in files:
         try:
             for line in s_file.read_text(
                 encoding="utf-8", errors="replace"
             ).splitlines():
                 m = GLABEL_RE.match(line)
                 if m and m.group(1) == placeholder:
-                    return s_file.stem
+                    return s_file.relative_to(asm_dir).with_suffix("").as_posix()
         except OSError:
             continue
     return None

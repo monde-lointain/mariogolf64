@@ -26,11 +26,13 @@ asm/
 bin/
 assets/
 build/
+CMakeUserPresets.json
+_build/
 
 # Object files
 *.o
 
-# Make dependency files
+# Generated dependency files
 *.d
 
 # N64 ROM files
@@ -59,14 +61,9 @@ scratchpad/
 src/*.c.spotcheck
 build/src/*.spotcheck.o
 
-# Sprint board (ephemeral live board + resume surface, written by /sprint-plan)
+# Legacy session board, retained as local state only
 SPRINT.md
 
-# Makefile options
-.make_options
-
-# Claude local settings
-.claude/settings.local.json
 
 # Swap
 [._]*.s[a-v][a-z]

@@ -1,17 +1,10 @@
-"""Characterization tests for tools/decomp_loop.py.
-
-Two layers:
-  - score_diff: pure parsing of asm-differ's raw dict (synthetic fixtures).
-  - end-to-end: run the real loop on `rand` (a banked, score-0 leaf) and lock
-    the resulting score JSON as a golden snapshot.
-"""
+"""Behavioral parsing and bare-sqrt detection tests for decomp_loop.py."""
 
 from __future__ import annotations
 
-import json
 
 import pytest
-from conftest import ROOT, golden_dir, load_tool, regen, run_tool  # noqa: F401
+from conftest import load_tool
 
 dl = load_tool("decomp_loop")
 
@@ -98,87 +91,3 @@ def test_detect_needs_fastmath_negative_library_call(tmp_path, monkeypatch):
     assert dl.detect_needs_fastmath("func_80012345", "1050") is False
 
 
-def test_resolve_profile_main_explicit(monkeypatch):
-    monkeypatch.setattr(dl, "detect_needs_fastmath", lambda p, s: False)
-    prof = dl.resolve_profile("main", "func_80012345", "1050")
-    assert (prof.main, prof.libkmc, prof.libultra, prof.fastmath) == (
-        True,
-        False,
-        False,
-        False,
-    )
-
-
-def test_resolve_profile_main_with_fastmath(monkeypatch):
-    monkeypatch.setattr(dl, "detect_needs_fastmath", lambda p, s: True)
-    prof = dl.resolve_profile("main", "func_8006A100", "6A000")
-    assert prof.main is True and prof.fastmath is True
-
-
-def test_resolve_profile_lib_never_gets_fastmath(monkeypatch):
-    # A lib profile's CFLAGS are already ground truth — never add -ffast-math,
-    # even if the asm has a bare sqrt (detector short-circuited out).
-    monkeypatch.setattr(dl, "detect_needs_fastmath", lambda p, s: True)
-    prof = dl.resolve_profile("libultra", "func_x", "1050")
-    assert prof.libultra is True and prof.fastmath is False
-
-
-def test_resolve_profile_auto_never_forces_main(monkeypatch):
-    # auto must not guess `main` (the F3DEX define has no reliable asm tell).
-    monkeypatch.setattr(dl, "detect_libkmc_profile", lambda p: False)
-    monkeypatch.setattr(dl, "detect_libultra_profile", lambda p: False)
-    monkeypatch.setattr(dl, "detect_needs_fastmath", lambda p, s: False)
-    prof = dl.resolve_profile("auto", "func_80012345", "1050")
-    assert (prof.main, prof.libkmc, prof.libultra) == (False, False, False)
-
-
-# --- end-to-end golden ----------------------------------------------------
-
-GOLDEN_FN = "rand"
-STABLE_KEYS = (
-    "compile_ok",
-    "placeholder",
-    "segment",
-    "score",
-    "percent",
-    "total_rows",
-    "match_count",
-    "max_score",
-    "reference_path",
-    "current_path",
-)
-
-
-def test_decomp_loop_rand_scores_zero(golden_dir, regen):
-    # The loop needs TWO transient gitignored scratch inputs to coexist:
-    #   1. nonmatchings/<fn>/base.c (from seed_c), and
-    #   2. a top-level asm/<seg>.s declaring `glabel <fn>`, the reference the
-    #      loop diffs against (resolved by decomp_loop's own find_segment).
-    # `rand` is banked (subseg `c`), so splat never emits asm/<seg>.s for it on a
-    # clean tree -- input 2 only lingers as stale leftover from before banking.
-    # Both are gitignored: present during a refactor session (the vise), absent on
-    # a clean/re-extracted checkout, where this end-to-end check skips and the
-    # score_diff unit tests above carry the characterization load.
-    base_c = ROOT / "nonmatchings" / GOLDEN_FN / "base.c"
-    if not base_c.exists():
-        pytest.skip(
-            f"{base_c.relative_to(ROOT)} absent (gitignored scratch); run seed_c first"
-        )
-    if dl.dc.find_segment(GOLDEN_FN) is None:
-        pytest.skip(
-            f"no `glabel {GOLDEN_FN}` in any asm/*.s (banked fn; reference asm absent on a clean tree)"
-        )
-
-    proc = run_tool("decomp_loop", "--func", GOLDEN_FN, "--score-only")
-    assert proc.returncode == 0, proc.stderr
-    result = json.loads(proc.stdout)
-    assert result.get("compile_ok") is True, proc.stdout
-    assert result.get("score") == 0
-
-    snapshot = {k: result[k] for k in STABLE_KEYS if k in result}
-    gpath = golden_dir / "decomp_loop_rand.json"
-    if regen or not gpath.exists():
-        gpath.write_text(json.dumps(snapshot, indent=2, sort_keys=True) + "\n")
-        pytest.skip(f"golden regenerated: {gpath.name}")
-    expected = json.loads(gpath.read_text())
-    assert snapshot == expected

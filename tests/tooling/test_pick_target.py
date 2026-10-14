@@ -153,15 +153,12 @@ def test_append_coddog_aux_undercount_and_body_div(monkeypatch):
 
 
 def test_gbi_value_guard_needs_define(tmp_path, monkeypatch):
-    """S83 retro #1: a mirror candidate using a GBI-value-guarded macro (OS_YIELD_DATA_SIZE) is
-    flagged needs-define when NO guard microcode define is active, and clean when one is. Also
-    confirms LIBULTRA_CFLAGS's -DF3DEX_GBI_2 / -DBUILD_VERSION reach the libultra active-define set."""
+    """A GBI-value-guarded macro is classified using the effective structured profile defines."""
     pt = load_tool("pick_target")
     cg = _classify_globals(pt)
 
-    # Part A: the live Makefile's LIBULTRA_CFLAGS defines now reach the libultra active set
-    # (previously libultra fell through to the bare main CFLAGS, hiding the GBI define).
-    pt._parse_makefile_defines.cache_clear()
+    # The structured libultra profile carries its GBI and version defines.
+    pt._parse_profile_defines.cache_clear()
     libu = pt._active_defines_for_lib("libultra")
     assert "F3DEX_GBI_2" in libu and "BUILD_VERSION" in libu
 

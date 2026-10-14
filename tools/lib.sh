@@ -9,12 +9,32 @@
 # script itself — a `VAR=$(helper)` command-substitution form would run the
 # helper (and its exit) in a subshell and silently continue with an empty VAR.
 
-# Activate ./venv if present (carries the permuter/asm-differ deps).
-mg_activate_venv() {
-    if [ -f "venv/bin/activate" ]; then
-        # shellcheck disable=SC1091
-        source venv/bin/activate
+# Activate the configured binary-tree environment (carries permuter/asm-differ deps).
+# Resolve the configured binary tree once for all wrappers.
+mg_build_dir() {
+    MG_BUILD_DIR="${MG64_BUILD_DIR:-build/us}"
+    if [[ "$MG_BUILD_DIR" != /* ]]; then
+        MG_BUILD_DIR="$PWD/$MG_BUILD_DIR"
     fi
+}
+
+# Activate the configured binary-tree environment (carries permuter/asm-differ deps).
+mg_activate_venv() {
+    mg_build_dir
+    if [[ -f "$MG_BUILD_DIR/venv/bin/activate" ]]; then
+        # shellcheck disable=SC1091
+        source "$MG_BUILD_DIR/venv/bin/activate"
+    fi
+}
+
+mg_tool_path() {
+    local name="$1"
+    python3 - "$name" "$(dirname "${BASH_SOURCE[0]}")" <<'PY'
+import sys
+sys.path.insert(0, sys.argv[2])
+from rom_build import tool_path
+print(tool_path(sys.argv[1]))
+PY
 }
 
 # Resolve the nonmatchings/<func>* scratch dir into PERMUTER_DIR; abort if absent.
@@ -54,18 +74,15 @@ mg_resolve_c_asm() {
         # INCLUDE_ASM line format: INCLUDE_ASM("path", func_name);
         asm_line=$(grep "INCLUDE_ASM(.*, ${func});" "$C_FILE" | head -1)
         asm_dir=$(echo "$asm_line" | sed 's/.*INCLUDE_ASM("\([^"]*\)".*/\1/')
-        ASM_FILE="${asm_dir}/${func}.s"
+        ASM_FILE="$MG_BUILD_DIR/work/${asm_dir}/${func}.s"
     else
-        # Fallback (S187): the target is already a C BODY in a multi-fn file (a partial one-tu:
-        # some fns banked, this one carried), so it has NO INCLUDE_ASM stub. Resolve C_FILE from
-        # the DEFINITION line (return type at col 0, e.g. `void func_80077C18(...)`) and the
-        # ASM_FILE by unique `<func>.s` filename under asm/nonmatchings/.
+        # A carried partial one-TU may already contain the target's C body.
         C_FILE=$(grep -rlE "^[A-Za-z_][A-Za-z0-9_* ]*[ *]${func}\(" src/ 2>/dev/null | head -1 || true)
         if [ -z "$C_FILE" ]; then
             echo "Error: no INCLUDE_ASM stub AND no C definition found for ${func} in src/" >&2
             exit 1
         fi
-        ASM_FILE=$(find asm/nonmatchings -name "${func}.s" 2>/dev/null | head -1 || true)
+        ASM_FILE=$(find "$MG_BUILD_DIR/work/asm/nonmatchings" -name "${func}.s" 2>/dev/null | head -1 || true)
     fi
     if [ -z "$ASM_FILE" ] || [ ! -f "$ASM_FILE" ]; then
         echo "Error: Assembly file not found for ${func}: ${ASM_FILE:-<none>}" >&2

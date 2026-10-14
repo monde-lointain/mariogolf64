@@ -16,7 +16,7 @@ global or callee inlined only through an invoked library macro (EPI_SYNC →
 __osCurrentHandle) is flagged, not deferred to a mid-execution link failure.
 
 Usage:
-  venv/bin/python3 tools/pick_target.py [--lib SUBSTR] [--segment SEG] [-n N] [--include-stuck] [--json]
+  build/us/venv/bin/python3 tools/pick_target.py [--lib SUBSTR] [--segment SEG] [-n N] [--include-stuck] [--json]
 
 `--segment main` is a vram-RANGE filter (main-segment game code), distinct from the `--lib`
 SUBSTRING filter: `--lib main` matches only the coddog `mainlib/*` packs (the game-embedded 2nd
@@ -209,7 +209,7 @@ from pick_target_classify import (  # noqa: F401  (re-export: pt.<name> contract
     _macro_alias_target,
     _macro_single_real_call,
     _names_in_function_bodies,
-    _parse_makefile_defines,
+    _parse_profile_defines,
     _project_inc_index,
     _reconcile_calls_unplaced,
     _resolve_include,
@@ -956,14 +956,12 @@ def _build_row(off, typ, path, size, args, idx, carried, _libultra_band_start):
 
 
 def _refresh_residual(fns):
-    """Crack-slice STEP 0 helper (S282): rebuild each FUNC's isolated object and cmpfn it, printing
-    the FRESH instruction count + diff-row count so a carry's stale doc (count AND residual class are
-    both hypotheses, S268) is re-derived before it is trusted. Requires an existing base.c seed."""
+    """Rebuild each carried seed through rom_build, then re-derive its residual."""
     import glob
     import subprocess
 
+    from rom_build import compile_source, profile_flags
     src = os.path.join(ROOT, "src")
-    tree_flag = {"main": "MAIN=1", "libultra": "LIBULTRA=1", "libkmc": "LIBKMC=1"}
     rc = 0
     for fn in fns:
         cfile = None
@@ -980,19 +978,25 @@ def _refresh_residual(fns):
             rc = 1
             continue
         tree = os.path.relpath(cfile, src).split(os.sep)[0]
-        flag = tree_flag.get(tree, "")
+        profile = tree if tree in {"main", "libkmc", "libultra"} else "default"
         seed = os.path.join(ROOT, "nonmatchings", fn, "base.c")
         if not os.path.exists(seed):
             print(f"!! {fn} [{tree}]: no nonmatchings/{fn}/base.c seed — seed it first")
             rc = 1
             continue
-        cmd = ["make", "nonmatching-func", f"FUNC={fn}"] + ([flag] if flag else [])
-        b = subprocess.run(cmd, cwd=ROOT, capture_output=True, text=True)
-        if b.returncode != 0:
-            print(f"!! {fn} [{tree}]: build failed:\n{b.stderr.strip()[-400:]}")
+        obj = os.path.join(ROOT, "nonmatchings", fn, "current.o")
+        try:
+            compile_source(
+                seed,
+                obj,
+                profile=profile,
+                nonmatching=True,
+                fastmath="-ffast-math" in profile_flags(cfile, profile=profile),
+            )
+        except subprocess.CalledProcessError as exc:
+            print(f"!! {fn} [{tree}]: build failed:\n{str(exc)[-400:]}")
             rc = 1
             continue
-        obj = os.path.join("nonmatchings", fn, "current.o")
         c = subprocess.run(
             ["tools/cmpfn.sh", fn, obj], cwd=ROOT, capture_output=True, text=True
         )

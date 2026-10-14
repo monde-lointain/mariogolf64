@@ -7,7 +7,7 @@
 # tools/audio_sweep.sh then fingerprints MG64 against each. See docs/hazards.md#coddog-cross-ref.
 #
 # Compilers (all run natively, no qemu; all emit ELF MIPS so the KMC strip+ld -r pipeline is shared):
-#   kmc    project KMC gcc 2.7.2 (tools/cc/gcc + tools/cc/as) — the proven path (nusys @99.99%)
+#   kmc    configured KMC gcc 2.7.2 + KMC GAS — the proven path (nusys @99.99%)
 #   ido53  IDO 5.3 cc — the compiler the SDK Makefiles target (most authentic for vendor source)
 #   ido71  IDO 7.1 cc
 #
@@ -29,15 +29,21 @@ MANIFEST="${MANIFEST:-$REPO/tools/audio_ref_versions.tsv}"
 COMPILERS="${COMPILERS:-kmc ido53 ido71}"
 OPTS="${OPTS:-O1 O2 O3}"
 
-IDO53="${IDO53:-$HOME/development/repos/ido-static-recomp/build/5.3/out}"
-IDO71="${IDO71:-$HOME/development/repos/ido-static-recomp/build/7.1/out}"
-OBJCOPY="${OBJCOPY:-mips-linux-gnu-objcopy}"
-LD="${LD:-mips-linux-gnu-ld}"
-STRIP="${STRIP:-mips-linux-gnu-strip}"
-NM="${NM:-mips-linux-gnu-nm}"
+MG_BUILD_DIR="${MG64_BUILD_DIR:-build/us}"
+[[ "$MG_BUILD_DIR" = /* ]] || MG_BUILD_DIR="$REPO/$MG_BUILD_DIR"
+tool_path() { python3 - "$1" <<'PY'
+import sys
+sys.path.insert(0, "tools")
+from rom_build import tool_path
+print(tool_path(sys.argv[1]))
+PY
+}
+OBJCOPY="${OBJCOPY:-$(tool_path objcopy)}"
+LD="${LD:-$(tool_path ld)}"
+STRIP="${STRIP:-$(tool_path strip)}"
+NM="${NM:-$(tool_path nm)}"
 
-OUTROOT="$REPO/build/audio-ref"
-SUMMARY="$OUTROOT/SUMMARY.tsv"
+OUTROOT="$MG_BUILD_DIR/audio-ref"
 
 # Header set is compiler-aware. KMC uses the project headers (the proven path: same trick as
 # build_nusys_ref.sh, fingerprints line up byte-for-byte). IDO's strict C89 cfe rejects the project
@@ -52,7 +58,6 @@ KMC_ARCH=(-G 0 -mips3 -mgp32 -mfp32 -mno-abicalls)
 IDO_ARCH=(-G 0 -mips2 -non_shared -Xcpluscomm)
 
 [ -f "$MANIFEST" ] || { echo "build_audio_refs: missing manifest $MANIFEST" >&2; exit 1; }
-[ -x tools/cc/gcc ] || { echo "build_audio_refs: tools/cc/gcc missing (run make -C tools)" >&2; exit 1; }
 
 mkdir -p "$OUTROOT"
 # Fresh header on a full run; a filtered run appends so it doesn't clobber other cells' rows.
@@ -97,12 +102,21 @@ stage_ido_src() {
 compile_tu() {
   local compiler="$1" obj="$2" src="$3"; shift 3
   local cflags=("$@")   # opt + includes + defines
-  local s="${obj%.o}.s"
   case "$compiler" in
     kmc)
-      COMPILER_PATH=tools/cc tools/cc/gcc -S "${KMC_ARCH[@]}" "${cflags[@]}" -o "$s" "$src" 2>"$obj.err" \
-        && tools/cc/as -EB -mips2 -G 0 -o "$obj" "$s" 2>>"$obj.err"
-      local rc=$?; rm -f "$s"; return $rc ;;
+      local extra_flags=() flag i=0
+      while [ "$i" -lt "${#cflags[@]}" ]; do
+        flag="${cflags[$i]}"
+        if [ "$flag" = "-I" ]; then
+          i=$((i + 1))
+          extra_flags+=("--extra-flag=-I${cflags[$i]}")
+        else
+          extra_flags+=("--extra-flag=$flag")
+        fi
+        i=$((i + 1))
+      done
+      python3 tools/rom_build.py compile --source "$src" --output "$obj" --profile libnaudio "${extra_flags[@]}" 2>"$obj.err"
+      return $? ;;
     ido53|ido71)
       local cc; [ "$compiler" = ido53 ] && cc="$IDO53/cc" || cc="$IDO71/cc"
       "$cc" -c "${IDO_ARCH[@]}" "${cflags[@]}" -o "$obj" "$src" 2>"$obj.err"

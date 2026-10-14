@@ -14,9 +14,9 @@ classical**; coddog proved it a trivial **verbatim 2-fn mirror**.
 
 ## Run
 
-    make coddog-sweep        # or: tools/coddog_sweep.sh
+    cmake --build build/us --target coddog-sweep
 
-Needs a fresh `make` (the MG64 ELF), a built ultralib (`~/development/repos/ultralib/build/J`), and
+Needs a fresh MG64 ELF, a built ultralib (`~/development/repos/ultralib/build/J`), and
 the coddog binary. Env overrides: `CODDOG`, `ULTRALIB`, `ULVER`, `ULLIB`, `THRESH` (see the script
 header). Writes `coddog_map.tsv` here (gitignored — depends on local builds).
 
@@ -29,11 +29,11 @@ unchanged. Full recipe + the `ld -r` combined-ELF build is in `docs/hazards.md#c
 
 ## NuSystem variant
 
-    make coddog-sweep-nusys   # or: tools/build_nusys_ref.sh && tools/nusys_sweep.sh
+    cmake --build build/us --target coddog-sweep-nusys
 
-The libnusys analog. `build_nusys_ref.sh` compiles the nusys-2.07 `mainlib` with the project's KMC
-GCC + `LIBNUSYS_CFLAGS` (the in-tree mirror recipe) into `build/nusys-ref/` and merges it to one
-relocatable ELF (nusys has no prebuilt object tree at the project profile, unlike ultralib);
+The libnusys analog. `build_nusys_ref.sh` compiles the nusys-2.07 `mainlib` with the configured
+KMC tools and the `libnusys` profile into `<binary>/nusys-ref/`, then merges it to one relocatable
+ELF (nusys has no prebuilt object tree at this profile, unlike ultralib).
 `nusys_sweep.sh` runs `compare2` against it and writes `nusys_map.tsv` here (gitignored). `pick_target.py`
 (`build_coddog_nusys_index`) reads it as a separate additive pass that flags
 `coddog-mirror:mainlib/<file>.c@<pct>` and re-prices `upstream libnusys`; an absent `nusys_map.tsv`

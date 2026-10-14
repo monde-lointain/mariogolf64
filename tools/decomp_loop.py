@@ -18,10 +18,12 @@ import sys
 from pathlib import Path
 
 import decomp_common as dc
+from rom_build import PROFILES, compile_source, profile_flags, profile_name, tool_path
 
 dc.reexec_into_venv(__file__)
 
 import argparse
+import json
 import re
 import subprocess
 from dataclasses import dataclass
@@ -42,7 +44,7 @@ safe_read_text = dc.safe_read_text
 capture_stderr = dc.capture_stderr
 
 ASMDIFF_DIR = SCRIPT_DIR / "asm-differ"
-OBJDUMP = os.environ.get("OBJDUMP", "mips-linux-gnu-objdump")
+OBJDUMP = os.environ.get("OBJDUMP", tool_path("objdump"))
 
 
 def fail(error: str, code: int = 1, extra: dict | None = None) -> None:
@@ -93,25 +95,28 @@ def resolve_placeholder(name: str) -> str:
 
 
 def ensure_reference_object(seg_stem: str) -> Path:
-    """Build build/asm/<seg>.o if missing or stale. Returns its path."""
+    """Build the generated reference object if it is missing or stale."""
     target = BUILD_ASM_DIR / f"{seg_stem}.o"
     src = ASM_DIR / f"{seg_stem}.s"
     if not src.exists():
         fail(f"asm source file missing: {src}")
-    needs_build = (not target.exists()) or (
-        target.stat().st_mtime < src.stat().st_mtime
-    )
-    if needs_build:
-        log(f"[bootstrap] building {target.relative_to(ROOT_DIR)} ...")
+    if not target.exists() or target.stat().st_mtime < src.stat().st_mtime:
+        log(f"[bootstrap] building {target} ...")
         proc = subprocess.run(
-            ["make", str(target.relative_to(ROOT_DIR))],
+            [
+                sys.executable,
+                str(SCRIPT_DIR / "rom_build.py"),
+                "build",
+                "--object",
+                f"asm/{seg_stem}.s",
+            ],
             cwd=ROOT_DIR,
             capture_output=True,
             text=True,
         )
         if proc.returncode != 0 or not target.exists():
             fail(
-                f"`make {target.relative_to(ROOT_DIR)}` failed (rc={proc.returncode})",
+                f"building {target} failed (rc={proc.returncode})",
                 extra={"stderr": proc.stderr[-2000:]},
             )
     return target
@@ -146,22 +151,12 @@ def _detect_in_upstream(src_root: Path, placeholder: str, *, recursive: bool) ->
 
 
 def detect_libkmc_profile(placeholder: str) -> bool:
-    """True if <placeholder> appears as a function definition in libkmc upstream.
-
-    libkmc was built with `gcc -O` (not -O2); the project Makefile carves a
-    libkmc-only compile profile via LIBKMC_CFLAGS. The loop must mirror that
-    to produce ground-truth bytes — see CLAUDE.md "libkmc compile profile is `-O`".
-    """
+    """Fallback for an unplaced libkmc function in an optional upstream tree."""
     return _detect_in_upstream(LIBKMC_SRC, placeholder, recursive=False)
 
 
 def detect_libultra_profile(placeholder: str) -> bool:
-    """True if <placeholder> appears as a function definition in ultralib upstream.
-
-    libultra was built with -O3 -funsigned-char -DBUILD_VERSION=VERSION_J
-    (ultralib gcc.mk, VERSION_J libgultra_rom). The loop must mirror LIBULTRA_CFLAGS
-    to produce ground-truth bytes — affects inlining and delay-slot scheduling.
-    """
+    """Fallback for an unplaced libultra function in an optional upstream tree."""
     return _detect_in_upstream(LIBULTRA_SRC, placeholder, recursive=True)
 
 
@@ -218,43 +213,30 @@ def detect_needs_fastmath(placeholder: str, seg_stem: str) -> bool:
 
 @dataclass
 class CompileProfile:
-    """The resolved isolated-compile flags for `make nonmatching-func`.
+    """The resolved isolated-compile profile selection."""
 
-    Mirrors the per-tree CFLAGS the in-tree build uses so the candidate object is
-    ground-truth: libkmc -O, libultra -O3 -funsigned-char, main -DF3DEX_GBI_2, and
-    -ffast-math when the fn has a bare FPU sqrt. At most one of libkmc/libultra/main
-    is set; fastmath composes with main/default (never with a lib profile).
-    """
-
-    libkmc: bool = False
-    libultra: bool = False
-    main: bool = False
+    name: str = "default"
+    source: Path | None = None
     fastmath: bool = False
 
 
 def compile_candidate(
     placeholder: str, profile: CompileProfile
 ) -> tuple[bool, str, Path]:
-    """Run `make nonmatching-func FUNC=<placeholder> [LIBKMC=1|LIBULTRA=1|MAIN=1] [FASTMATH=1]`."""
+    """Compile an isolated seed through the authoritative ROM build pipeline."""
     current_o = NONMATCHINGS_DIR / placeholder / "current.o"
-    cmd = ["make", "nonmatching-func", f"FUNC={placeholder}"]
-    if profile.libkmc:
-        cmd.append("LIBKMC=1")
-    elif profile.libultra:
-        cmd.append("LIBULTRA=1")
-    elif profile.main:
-        cmd.append("MAIN=1")
-    if profile.fastmath:
-        cmd.append("FASTMATH=1")
-    proc = subprocess.run(
-        cmd,
-        cwd=ROOT_DIR,
-        capture_output=True,
-        text=True,
-    )
-    ok = (proc.returncode == 0) and current_o.exists()
-    combined_log = (proc.stdout or "") + (proc.stderr or "")
-    return ok, combined_log, current_o
+    try:
+        compile_source(
+            NONMATCHINGS_DIR / placeholder / "base.c",
+            current_o,
+            profile=profile.name,
+            nonmatching=True,
+            fastmath=profile.fastmath,
+            profile_source=profile.source,
+        )
+    except subprocess.CalledProcessError as exc:
+        return False, str(exc), current_o
+    return current_o.exists(), "", current_o
 
 
 def objdump_function(obj_path: Path, placeholder: str) -> str:
@@ -392,42 +374,39 @@ def score_diff(raw: dict, max_mismatches: int = 5) -> dict:
     }
 
 
-def resolve_profile(profile: str, placeholder: str, seg_stem: str) -> CompileProfile:
-    """Resolve the compile profile to the isolated-compile flags.
+def find_profile_source(placeholder: str, seg_stem: str) -> Path | None:
+    direct = ROOT_DIR / "src" / f"{seg_stem}.c"
+    if direct.is_file():
+        return direct
+    stub = re.compile(rf'INCLUDE_ASM\([^;]*,\s*{re.escape(placeholder)}\s*\)')
+    definition = re.compile(rf'^[A-Za-z_][\w* \t]*\b{re.escape(placeholder)}\s*\([^;]*?\)\s*\{{', re.MULTILINE)
+    for source in (ROOT_DIR / "src").rglob("*.c"):
+        text = source.read_text(errors="ignore")
+        if stub.search(text) or definition.search(text):
+            return source
+    return None
 
-    `auto` detects libkmc/libultra by upstream-src presence; the explicit choices
-    force a profile. `main` mirrors mk/main.mk's -DF3DEX_GBI_2 game profile for a
-    src/main/ DL fn. -ffast-math is auto-detected from the asm (a bare sqrt), for
-    the game/main profile ONLY — a lib profile's CFLAGS are already ground truth.
-    main is explicit-only under `auto` (the F3DEX define has no reliable asm tell);
-    pass --profile main for a DL fn (docs/hazards.md#display-lists).
-    """
-    libkmc = libultra = main = False
-    if profile == "libkmc":
-        libkmc = True
-    elif profile == "libultra":
-        libultra = True
-    elif profile == "main":
-        main = True
-    elif profile == "default":
-        pass
-    else:  # auto
-        libkmc = detect_libkmc_profile(placeholder)
-        libultra = (not libkmc) and detect_libultra_profile(placeholder)
-    fastmath = (not libkmc and not libultra) and detect_needs_fastmath(
-        placeholder, seg_stem
-    )
-    if libkmc:
-        log(f"[profile] libkmc (-O) — placeholder found in {LIBKMC_SRC}")
-    elif libultra:
-        log(
-            f"[profile] libultra (-O3 -funsigned-char) — placeholder found in {LIBULTRA_SRC}"
-        )
-    elif main:
-        log("[profile] main (-DF3DEX_GBI_2)")
+
+def resolve_profile(profile: str, placeholder: str, seg_stem: str) -> CompileProfile:
+    """Use the actual source TU and per-file overrides; upstream trees are optional."""
+    source = find_profile_source(placeholder, seg_stem)
+    if profile != "auto":
+        selected = profile
+    elif source is not None:
+        selected = profile_name(source)
+    elif detect_libkmc_profile(placeholder):
+        selected = "libkmc"
+    elif detect_libultra_profile(placeholder):
+        selected = "libultra"
+    else:
+        selected = "default"
+    fastmath = source is not None and "-ffast-math" in profile_flags(source, profile=selected)
+    if selected in ("main", "default"):
+        fastmath = fastmath or detect_needs_fastmath(placeholder, seg_stem)
+    log(f"[profile] {selected}" + (f" from {source.relative_to(ROOT_DIR)}" if source else ""))
     if fastmath:
-        log("[profile] +fast-math (bare sqrt.s/sqrt.d in target asm)")
-    return CompileProfile(libkmc=libkmc, libultra=libultra, main=main, fastmath=fastmath)
+        log("[profile] +fast-math")
+    return CompileProfile(name=selected, source=source, fastmath=fastmath)
 
 
 def main() -> None:
@@ -440,12 +419,9 @@ def main() -> None:
     )
     parser.add_argument(
         "--profile",
-        choices=["auto", "libkmc", "libultra", "main", "default"],
+        choices=["auto", *json.loads(PROFILES.read_text())["profiles"]],
         default="auto",
-        help="Compile profile. auto = detect by upstream-src presence "
-        "(+ -ffast-math on a bare-sqrt fn); libkmc = force -O; "
-        "libultra = force -O3 -funsigned-char; main = force -O2 -DF3DEX_GBI_2 (DL); "
-        "default = force -O2.",
+        help="auto uses the parent TU's configured library and per-file profile; explicit choices override the library.",
     )
     args = parser.parse_args()
 
@@ -458,7 +434,7 @@ def main() -> None:
     log(f"[resolve] {args.func} -> {placeholder} (segment {seg_stem})")
 
     reference_o = ensure_reference_object(seg_stem)
-    log(f"[reference] {reference_o.relative_to(ROOT_DIR)}")
+    log(f"[reference] {os.path.relpath(reference_o, ROOT_DIR)}")
 
     profile = resolve_profile(args.profile, placeholder, seg_stem)
 
@@ -488,7 +464,7 @@ def main() -> None:
             "compile_ok": True,
             "placeholder": placeholder,
             "segment": seg_stem,
-            "reference_path": str(reference_o.relative_to(ROOT_DIR)),
+            "reference_path": os.path.relpath(reference_o, ROOT_DIR),
             "current_path": str(current_o.relative_to(ROOT_DIR)),
             **scored,
         }

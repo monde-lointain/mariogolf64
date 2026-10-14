@@ -5,7 +5,7 @@ import dataclasses
 import functools
 import os
 import re
-
+from decomp_common import ASM_DATA_DIR, ASM_DIR
 from decomp_asm import PRIVILEGED_OPS, subseg_vram
 from pick_target_classify import (
     _FUNC_TOKEN_RE,
@@ -254,7 +254,7 @@ def carried_wall_names():
     return names
 
 
-_ASM_ROOT = os.path.join(ROOT, "asm")
+_ASM_ROOT = str(ASM_DIR)
 # Scan the WHOLE prologue for the $v0-chain-home tell, not a fixed 8-insn window: the static-chain
 # spill/copy is emitted AFTER the callee-saved register saves (sw ra/s0-s8, sdc1 f20-f30), so for a
 # fn with many saved regs it lands 15-20 instructions in (S279 func_8007A40C: `addu $s1,$v0,$zero` +
@@ -586,9 +586,9 @@ def _rodata_blob_index():
     These blobs are the rodata splat did NOT attribute to a C file, so every symbol here is data a
     C body must either reference `extern` or carve. `words` is the block's `.word` count (its size in
     words), `asciz` the first string literal in it, or None. Read once per process; the blobs only
-    change on `make extract`."""
+    change on the CMake extraction target."""
     index = {}
-    data_dir = os.path.join(ROOT, "asm", "data")
+    data_dir = str(ASM_DATA_DIR)
     try:
         names = sorted(os.listdir(data_dir))
     except OSError:
@@ -846,7 +846,7 @@ def string_refs(fn):
 def _sym_in_generic_rodata_blob(sym):
     """Is <sym> defined in an `asm/data/*.rodata.s` blob? Those blobs are the rodata splat did NOT
     attribute to a C file, so a C body emitting its own copy of that data duplicates it."""
-    data_dir = os.path.join(ROOT, "asm", "data")
+    data_dir = str(ASM_DATA_DIR)
     try:
         names = os.listdir(data_dir)
     except OSError:

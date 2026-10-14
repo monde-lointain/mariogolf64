@@ -1,0 +1,12 @@
+{
+  "archives": [
+    {"name": "KMC-compatible MIPS GCC", "version": "2.7.2", "revision": "43d1cdb67ed135879869b5266f01efaaada5e35a", "file": "dist/mips-gcc-2.7.2-43d1cdb.tar.gz", "url": "https://codeload.github.com/decompals/mips-gcc-2.7.2/tar.gz/43d1cdb67ed135879869b5266f01efaaada5e35a", "sha256": "dc783433b18121f92c84af3c3bcaaa7a0230613a83c401de88d3b3aa25226fb4", "license": "GPL-2.0-or-later; COPYING and COPYING.LIB in archive"},
+    {"name": "KMC MIPS binutils", "version": "2.6", "revision": "54514ded39ceb32165a125ddba04ca5b551773a2", "file": "dist/mips-binutils-2.6-54514de.tar.gz", "url": "https://codeload.github.com/decompals/mips-binutils-2.6/tar.gz/54514ded39ceb32165a125ddba04ca5b551773a2", "sha256": "edefc8c1d77c45f28b1220fa12cdba0fb396c4c5a255f09887e6042f928c53c3", "license": "GPL-2.0-or-later; COPYING and COPYING.LIB in archive"},
+    {"name": "GNU MIPS binutils", "version": "2.45.1", "file": "dist/binutils-2.45.1.tar.xz", "url": "https://ftp.gnu.org/gnu/binutils/binutils-2.45.1.tar.xz", "sha256": "5fe101e6fe9d18fdec95962d81ed670fdee5f37e3f48f0bef87bddf862513aa5", "license": "GPL-3.0-or-later and LGPL; upstream license files in archive"}
+  ],
+  "vendored_tools": [
+    {"path": "../tools/asm-differ", "url": "https://github.com/simonlindholm/asm-differ", "revision": "dd7f9f0c021063eadfbdff7f31097f7039c3a5a7", "license_file": "LICENSE"},
+    {"path": "../tools/decomp-permuter", "url": "https://github.com/simonlindholm/decomp-permuter", "revision": "8556c81d80d1c1af98a858c8f4dc951357f29139", "license_file": "LICENSE", "local_changes": {"import.py": "Recognize CMake project roots and GNU assembly section flags."}},
+    {"path": "../tools/m2c", "url": "https://github.com/matt-kempster/m2c", "revision": "94098d4de68c2fcc13fb8cf1096a1520eb171abe", "license_file": "LICENSE"}
+  ]
+}

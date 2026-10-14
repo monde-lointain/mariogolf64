@@ -19,24 +19,18 @@ cd "$REPO"
 # shellcheck source=tools/sweep_lib.sh
 source "$REPO/tools/sweep_lib.sh"
 
-NUSYS_SRC="${NUSYS_SRC:-$HOME/development/repos/n64sdkmod/packages/libnusys/usr/src/PR/libsrc/nusys-2.07/nusys/src/mainlib}"
-OBJCOPY="${OBJCOPY:-mips-linux-gnu-objcopy}"
-LD="${LD:-mips-linux-gnu-ld}"
-STRIP="${STRIP:-mips-linux-gnu-strip}"
-NM="${NM:-mips-linux-gnu-nm}"
+MG_BUILD_DIR="${MG64_BUILD_DIR:-build/us}"
+[[ "$MG_BUILD_DIR" = /* ]] || MG_BUILD_DIR="$REPO/$MG_BUILD_DIR"
+OBJCOPY="${OBJCOPY:-$(python3 -c 'import sys; sys.path.insert(0,"tools"); from rom_build import tool_path; print(tool_path("objcopy"))')}"
+LD="${LD:-$(python3 -c 'import sys; sys.path.insert(0,"tools"); from rom_build import tool_path; print(tool_path("ld"))')}"
+STRIP="${STRIP:-$(python3 -c 'import sys; sys.path.insert(0,"tools"); from rom_build import tool_path; print(tool_path("strip"))')}"
+NM="${NM:-$(python3 -c 'import sys; sys.path.insert(0,"tools"); from rom_build import tool_path; print(tool_path("nm"))')}"
 
-OUT="$REPO/build/nusys-ref"
+OUT="$MG_BUILD_DIR/nusys-ref"
 REF_ELF="$OUT/nusys.o"
 SYM2FILE="$OUT/sym2file.tsv"
 
-# LIBNUSYS_CFLAGS, replicated verbatim from the Makefile (CFLAGS) + mk/libnusys.mk (-DUSE_EPI). Keep
-# in sync if those change. The assemble step follows mk/src.mk's KMC `as` recipe (-EB -mips2 -G 0
-# -I include). This produces byte-identical .text to the in-tree mirror, so coddog's instruction
-# hashes match the ROM the same way the libultra reference does.
-CFLAGS="-G 0 -mips3 -mgp32 -mfp32 -mno-abicalls -O2 -I include -I include/libultra -I include/libultra/internal -I include/libkmc -I include/libnusys -DINCLUDE_ASM_USE_MACRO_INC -D_LANGUAGE_C -D_FINALROM -DUSE_EPI"
-
-[ -d "$NUSYS_SRC" ] || { echo "build_nusys_ref: missing source dir $NUSYS_SRC" >&2; exit 1; }
-[ -x tools/cc/gcc ] || { echo "build_nusys_ref: tools/cc/gcc missing (run make -C tools)" >&2; exit 1; }
+# Compiler flags and file-fed assembly come from the authoritative libnusys profile.
 
 rm -rf "$OUT"; mkdir -p "$OUT/mainlib"
 : > "$SYM2FILE"
@@ -46,9 +40,7 @@ ok=0; fail=0; failed=()
 for src in "$NUSYS_SRC"/*.c; do
   base="$(basename "${src%.c}")"
   obj="$OUT/mainlib/$base.o"
-  s="$OUT/mainlib/$base.s"
-  if COMPILER_PATH=tools/cc tools/cc/gcc -S $CFLAGS -o "$s" "$src" 2>"$obj.err" \
-     && tools/cc/as -EB -mips2 -G 0 -I include -o "$obj" "$s" 2>>"$obj.err"; then
+  if python3 tools/rom_build.py compile --source "$src" --output "$obj" --profile libnusys 2>"$obj.err"; then
     "$STRIP" "$obj" -N dummy-symbol-name 2>/dev/null || true
     # Strip the KMC-specific ECOFF/debug sections GNU ld rejects (same set as the ultralib sweep).
     "$OBJCOPY" "${MG_KMC_STRIP_SECTIONS[@]}" "$obj" "$obj" 2>/dev/null || true

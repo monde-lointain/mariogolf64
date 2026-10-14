@@ -59,13 +59,13 @@ Reproduce the workflow steps before pushing:
 ```sh
 docker build -f docker/Dockerfile -t mg64-ci-test .
 docker run --rm -v "$PWD":/repo -w /repo mg64-ci-test bash -c \
-  'cp /orig/baserom.z64 baserom.z64 && make setup && make extract && tools/verify-rom.sh'
-# expect: make OK + ROM SHA-1 MATCH ✓
+  'cp /orig/baserom.z64 baserom.z64 && cmake --preset us && tools/verify-rom.sh'
+# expect: CMake build OK + ROM SHA-1 MATCH
 ```
 
 ## Local checkout prerequisites
 
-Use the [local build guide](../docs/build.md) for host dependencies, submodules, setup, extraction,
-verification, and the uv alternative. That guide owns local setup; this page owns image publication.
-For missing generated assembly stubs, read the
-[persistent-stub recovery playbook](../docs/hazards.md#stale-persistent-nonmatchings-relic-recovery).
+Use the [local build guide](../docs/build.md) for bootstrap tools, offline dependency ownership,
+extraction, verification, and presets. Rebuild the private image for this CMake cutover before CI:
+the old image lacks CMake 3.30+ and the 32-bit host compilation prerequisites.
+Required missing assembly stubs are now recovered automatically during fresh extraction.

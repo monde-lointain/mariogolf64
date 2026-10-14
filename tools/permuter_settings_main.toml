@@ -1,8 +1,0 @@
-compiler_type = "gcc"
-# The candidate is assembled from a FILE, not a pipe (S300): KMC binutils-2.6 `as` inserts two
-# hazard nops from a file that it does not insert from a pipe, so the old
-# `gcc -S -o /dev/stdout | as` form built a 2-instruction-short object and an imported base scored
-# 508/510 on that artifact alone. The wrapper carries the flags; see tools/kmc_permuter_compile.sh.
-compiler_command = "tools/kmc_permuter_compile.sh"
-assembler_command = "tools/cc/as -EB -mips3 -G 0 -I include"
-asm_prelude_file = "tools/kmc_main_prelude.inc"

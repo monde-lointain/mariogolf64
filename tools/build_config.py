@@ -21,7 +21,7 @@ import os
 import re
 
 from decomp_common import PROJECT_ROOT as ROOT
-
+from rom_build import profile_flags
 # Shared with pick_target's staying preprocessor scanners (re-imported there); also used by
 # _strip_inactive_version_branches below.
 _PP_OPENING_DIRECTIVE_RE = re.compile(r"^\s*#\s*if(?:def|ndef)?\b")
@@ -45,21 +45,22 @@ _LIB_CFLAGS_VAR = {
 
 @functools.cache
 def _build_version_ord_by_var():
-    """{Makefile CFLAGS var: BUILD_VERSION ordinal} from `-DBUILD_VERSION=VERSION_X` (cached)."""
+    """Effective BUILD_VERSION ordinal for each structured compiler profile."""
+    profiles = {
+        "CFLAGS": "main",
+        "LIBKMC_CFLAGS": "libkmc",
+        "LIBNUSYS_CFLAGS": "libnusys",
+        "LIBULTRA_CFLAGS": "libultra",
+    }
     out = {}
-    try:
-        with open(os.path.join(ROOT, "Makefile")) as f:
-            for line in f:
-                m = re.match(
-                    r"^\s*(CFLAGS|LIBKMC_CFLAGS|LIBNUSYS_CFLAGS|LIBULTRA_CFLAGS)\s*[:+]?=",
-                    line,
-                )
-                if m:
-                    v = _BUILD_VERSION_VAL_RE.search(line)
-                    if v:
-                        out[m.group(1)] = _VERSION_ORD.get(v.group(1), 0)
-    except OSError:
-        pass
+    for var, profile in profiles.items():
+        flags = profile_flags("src/__profile_probe__.c", profile=profile)
+        for flag in flags:
+            match = _BUILD_VERSION_VAL_RE.fullmatch(flag)
+            if match:
+                out[var] = _VERSION_ORD.get(match.group(1), 0)
+            elif flag.startswith("-UBUILD_VERSION"):
+                out.pop(var, None)
     return out
 
 
