@@ -54,7 +54,6 @@ from .translate import (
     Arch,
     BinaryOp,
     CarryBit,
-    Cast,
     Condition,
     ErrorExpr,
     ExprStmt,
@@ -98,6 +97,7 @@ from .evaluate import (
     handle_sll,
     handle_sub,
     handle_sub_arm,
+    handle_xor,
     make_store,
     make_store_real,
     replace_bitand,
@@ -673,9 +673,9 @@ class ConditionalInstrPattern(AsmPattern):
                     AsmInstruction(b_mn, [AsmGlobalSymbol(label1)]),
                     *if_instrs,
                     AsmInstruction("b", [AsmGlobalSymbol(label2)]),
-                    Label([label1]),
+                    Label.new(label1),
                     *else_instrs,
-                    Label([label2]),
+                    Label.new(label2),
                     *after_instrs,
                 ],
                 i,
@@ -686,7 +686,7 @@ class ConditionalInstrPattern(AsmPattern):
                     *before_instrs,
                     AsmInstruction(b_mn, [AsmGlobalSymbol(label1)]),
                     *if_instrs,
-                    Label([label1]),
+                    Label.new(label1),
                     *after_instrs,
                 ],
                 i,
@@ -889,12 +889,22 @@ class ShiftedRegPattern(AsmPattern):
 class PopAndReturnPattern(SimpleAsmPattern):
     pattern = make_pattern(
         "pop {x}",
-        "add sp, sp, 0x10?",
+        "add $sp, $sp, N?",
         "bx $x",
     )
 
     def replace(self, m: AsmMatch) -> Replacement:
         return Replacement([AsmInstruction("bx", [Register("lr")])], len(m.body))
+
+
+class OldThumbBlxPattern(SimpleAsmPattern):
+    pattern = make_pattern(
+        "mov $lr, $pc",
+        "bx $x",
+    )
+
+    def replace(self, m: AsmMatch) -> Replacement:
+        return Replacement([AsmInstruction("blx", [m.regs["x"]])], len(m.body))
 
 
 class IndirectTailCallPattern(SimpleAsmPattern):
@@ -1011,7 +1021,7 @@ class MagicFuncPattern(SimpleAsmPattern):
         if target in MAGIC_FUNCTIONS:
             mn, arg_str = MAGIC_FUNCTIONS[target]
             args: List[Argument] = [Register("r" + x) for x in arg_str]
-            return Replacement([AsmInstruction(mn, args)], 1)
+            return Replacement([AsmInstruction(mn, args)], 1, clobbers=[])
         return None
 
 
@@ -1694,7 +1704,7 @@ class ArmArch(Arch):
             is_effectful = False
         else:
             # If the mnemonic is unsupported, guess if it is destination-first
-            if args and isinstance(args[0], Register):
+            if args and isinstance(args[0], Register) and base != "bx":
                 inputs = [r for r in args[1:] if isinstance(r, Register)]
                 outputs = [args[0]]
                 maybe_dest_first = True
@@ -1741,6 +1751,7 @@ class ArmArch(Arch):
         AddrModeWritebackPattern(),
         RegRegAddrModePattern(),
         PopAndReturnPattern(),
+        OldThumbBlxPattern(),
         IndirectTailCallPattern(),
         TailCallPattern(),
         BlBranchPattern(),
@@ -1862,7 +1873,7 @@ class ArmArch(Arch):
         "mvn": lambda a: handle_bitinv(a.reg_or_imm(1)),
         "and": lambda a: replace_bitand(BinaryOp.int(a.reg(1), "&", a.reg_or_imm(2))),
         "orr": lambda a: handle_or(a.reg(1), a.reg_or_imm(2), is_arm=True),
-        "eor": lambda a: BinaryOp.int(a.reg(1), "^", a.reg_or_imm(2)),
+        "eor": lambda a: handle_xor(a.reg(1), a.reg_or_imm(2)),
         "bic": lambda a: BinaryOp.int(a.reg(1), "&", UnaryOp.int("~", a.reg_or_imm(2))),
         "orn": lambda a: BinaryOp.int(a.reg(1), "|", UnaryOp.int("~", a.reg_or_imm(2))),
     }

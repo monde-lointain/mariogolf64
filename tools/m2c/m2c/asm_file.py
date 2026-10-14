@@ -48,20 +48,27 @@ class Label:
     # labels, and to deal with this we allow for consecutive labels to be
     # merged together. As a consequence, we allow a Label to have more than one
     # name. When we need a single name to refer to one, we use the first one.
-    names: List[str]
+    names: Tuple[str, ...]
+
+    @staticmethod
+    def new(name: str) -> Label:
+        return Label((name,))
 
     def __str__(self) -> str:
         return self.names[0]
 
 
+BodyPart = Union[Instruction, Label]
+
+
 @dataclass
 class Function:
     name: str
-    body: List[Union[Instruction, Label]] = field(default_factory=list)
+    body: List[BodyPart] = field(default_factory=list)
     reg_formatter: RegFormatter = field(default_factory=RegFormatter)
 
     def new_label(self, name: str) -> None:
-        label = Label([name])
+        label = Label.new(name)
         if self.body and self.body[-1] == label:
             # Skip repeated labels
             return
@@ -440,7 +447,9 @@ def eval_cpp_if(
             if value is None:
                 check_ifdef(tok, asm_state, warnings, directive)
                 return False
-            return bool(value)
+            if not isinstance(value, AsmLiteral):
+                raise DecompFailure(f"Unable to evaluate if condition: {value}")
+            return bool(value.value)
 
     def parse2() -> bool:
         nonlocal i
@@ -473,14 +482,13 @@ def parse_file(f: typing.TextIO, arch: ArchAsm, options: Options) -> AsmFile:
     curr_section = ".text"
     section_sizes: Dict[str, int] = defaultdict(int)
     warnings: List[str] = []
-    asm_state = AsmState(
-        defines={
-            # NULL is a non-standard but common asm macro that expands to 0
-            "NULL": 0,
-            **options.preproc_defines,
-        },
-        reg_formatter=reg_formatter,
-    )
+    preproc_defines: Dict[str, Optional[Argument]] = {
+        key: None if value is None else AsmLiteral(value)
+        for key, value in options.preproc_defines.items()
+    }
+    # NULL is a non-standard but common asm macro that expands to 0
+    preproc_defines["NULL"] = AsmLiteral(0)
+    asm_state = AsmState(defines=preproc_defines, reg_formatter=reg_formatter)
 
     # Each nested ifdef has an associated level which is 0 (active), 1 (inactive)
     # or 2 (inactive, but was active previously). Lines are only processed if the
@@ -491,19 +499,30 @@ def parse_file(f: typing.TextIO, arch: ArchAsm, options: Options) -> AsmFile:
     # https://stackoverflow.com/a/241506
     def re_comment_replacer(match: Match[str]) -> str:
         s = match.group(0)
-        if s[0] in "/#;@ \t":
-            return " "
-        else:
+        if s[0] == '"':
             return s
+        else:
+            return " "
 
     re_whitespace_or_string = re.compile(r'\s+|"(?:\\.|[^\\"])*"')
     re_local_glabel = re.compile("L(_.*_)?[0-9A-F]{7,8}")
+    # Keep these in sync with reLocalLabel and reLabel in browser/app.js.
     re_local_label = re.compile(
-        "loc_|locret_|def_|lbl_|LAB_|switchD_|jump_|_[0-9A-Fa-f]{7,8}(?:_.*)?$"
+        "loc_|locret_|def_|lbl_|LAB_|switchD_|jump_|LF?[0-9]+$|_[0-9A-Fa-f]{7,8}(?:_.*)?$"
     )
     re_label = re.compile(r'(?:([a-zA-Z0-9_.$]+)|"([a-zA-Z0-9_.$<>@,-]+)"):')
 
     T = TypeVar("T")
+    data_directives = {
+        ".word": arch.asm_word_size,
+        ".gpword": 4,
+        ".4byte": 4,
+        ".long": 4,
+        ".short": 2,
+        ".half": 2,
+        ".2byte": 2,
+        ".byte": 1,
+    }
 
     class LabelKind(Enum):
         GLOBAL = "global"
@@ -679,6 +698,7 @@ def parse_file(f: typing.TextIO, arch: ArchAsm, options: Options) -> AsmFile:
             elif directive == ".endm":
                 ifdef_level -= 1
             elif directive == ".fn":
+                # Also listed in functionStartDirectives in browser/app.js.
                 args = split_quotable_arg_list(args_str)
                 asm_file.new_function(args[0])
             elif ifdef_level == 0:
@@ -708,15 +728,15 @@ def parse_file(f: typing.TextIO, arch: ArchAsm, options: Options) -> AsmFile:
                         # ".set noreorder" or similar, just ignore
                         pass
                     elif len(args) == 2:
-                        asm_state.defines[args[0]] = parse_int(args[1])
+                        asm_state.defines[args[0]] = parse_arg(args[1], arch, asm_state)
                     else:
                         raise DecompFailure(f"Could not parse {directive}: {line}")
                 elif directive == "#define":
                     args = args_str.split(None, 1)
                     if len(args) == 2:
-                        asm_state.defines[args[0]] = parse_int(args[1])
+                        asm_state.defines[args[0]] = parse_arg(args[1], arch, asm_state)
                     else:
-                        asm_state.defines[args[0]] = 1
+                        asm_state.defines[args[0]] = AsmLiteral(1)
                 elif directive == ".syntax":
                     if args_str.strip() == "unified":
                         asm_state.is_unified = True
@@ -732,10 +752,11 @@ def parse_file(f: typing.TextIO, arch: ArchAsm, options: Options) -> AsmFile:
                     elif args_str.strip() == "32":
                         asm_state.is_thumb = False
                 elif curr_section in (".rodata", ".data", ".bss", ".text"):
-                    if directive in (".word", ".gpword", ".4byte"):
+                    if directive in data_directives:
+                        size = data_directives[directive]
                         args = split_arg_list(args_str)
                         for w in args:
-                            emit_word(w, 4)
+                            emit_word(w, size)
                     elif directive == ".rel":
                         # .rel is a common dtk disassembler macro used with jump tables.
                         # ".rel name, label" expands to ".4byte name + (label - name)"
@@ -750,14 +771,6 @@ def parse_file(f: typing.TextIO, arch: ArchAsm, options: Options) -> AsmFile:
                             LabelKind.LOCAL if args[1] == "local" else LabelKind.GLOBAL
                         )
                         process_label(args[0], kind=kind)
-                    elif directive in (".short", ".half", ".2byte"):
-                        args = split_arg_list(args_str)
-                        for w in args:
-                            emit_word(w, 2)
-                    elif directive == ".byte":
-                        args = split_arg_list(args_str)
-                        for w in args:
-                            emit_word(w, 1)
                     elif directive == ".float":
                         args = split_arg_list(args_str)
                         for w in args:
@@ -813,6 +826,7 @@ def parse_file(f: typing.TextIO, arch: ArchAsm, options: Options) -> AsmFile:
                     process_label(args[0], kind=LabelKind.JUMP_TARGET)
 
             elif directive in (
+                # Keep in sync with functionStartDirectives in browser/app.js.
                 "glabel",
                 "dlabel",
                 "arm_func_start",

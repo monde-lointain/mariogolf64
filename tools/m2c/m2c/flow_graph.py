@@ -19,11 +19,14 @@ from typing import (
 
 from .error import DecompFailure
 from .options import Formatter, Options, Target
-from .asm_file import AsmData, AsmSymbolicData, Function, Label
+from .asm_file import AsmData, AsmSymbolicData, BodyPart, Function, Label
 from .asm_instruction import (
+    Argument,
     AsmAddressMode,
     AsmGlobalSymbol,
     AsmInstruction,
+    AsmLiteral,
+    BinOp,
     JumpTarget,
     Macro,
     Register,
@@ -39,7 +42,12 @@ from .asm_pattern import simplify_patterns, AsmPattern
 class ArchFlowGraph(ArchAsm):
     asm_patterns: List[AsmPattern] = []
 
-    def simplify_ir(self, flow_graph: FlowGraph) -> None: ...
+    def process_flowgraph(self, asm_data: AsmData, flow_graph: FlowGraph) -> None:
+        pass
+
+    def simplify_ir(
+        self, asm_data: AsmData, flow_graph: FlowGraph, *, debug_patterns: bool
+    ) -> None: ...
 
 
 class Reference(abc.ABC):
@@ -85,7 +93,7 @@ class InstrRef(Reference):
         return ref
 
     def replace_instruction(self, new_asm: AsmInstruction, arch: ArchFlowGraph) -> None:
-        """Replace the existing instruciton with `new_asm`.
+        """Replace the existing instruction with `new_asm`.
         Previous outputs & clobbers are added to the new Instruction's clobbers list."""
         old_instr = self.instruction
         new_instr = arch.parse(new_asm.mnemonic, new_asm.args, old_instr.meta.derived())
@@ -250,7 +258,9 @@ def normalize_gcc_likely_branches(function: Function, arch: ArchFlowGraph) -> Fu
     return new_function
 
 
-def normalize_ido_likely_branches(function: Function, arch: ArchFlowGraph) -> Function:
+def normalize_ido_likely_branches(
+    function: Function, asm_data: AsmData, arch: ArchFlowGraph
+) -> Function:
     """Branch-likely instructions only evaluate their delay slots when they are
     taken, making control flow more complex. However, on the IDO compiler they
     only occur in a very specific pattern:
@@ -268,14 +278,18 @@ def normalize_ido_likely_branches(function: Function, arch: ArchFlowGraph) -> Fu
 
     Branch-likely instructions that do not appear in this pattern are kept.
 
-    We also do this for b instructions, which sometimes occur in the same pattern."""
+    We also do this for b instructions, which sometimes occur in the same
+    pattern. For SuperH we do it for all branches, but restricted to compare
+    instructions. This could possibly be extended to a more general pattern
+    that covers more than one instruction and is not restricted to compares."""
     seen_instrs: Set[Instruction] = set()
+    label_names: Dict[str, Set[str]] = {}
     label_prev_instr: Dict[str, Optional[Instruction]] = {}
     label_before_instr: Dict[Instruction, str] = {}
     instr_before_instr: Dict[Instruction, Instruction] = {}
     prev_instr: Optional[Instruction] = None
     prev_label: Optional[Label] = None
-    prev_item: Union[Instruction, Label, None] = None
+    prev_item: Optional[BodyPart] = None
     for item in function.body:
         if isinstance(item, Instruction):
             assert item not in seen_instrs
@@ -289,70 +303,120 @@ def normalize_ido_likely_branches(function: Function, arch: ArchFlowGraph) -> Fu
         elif isinstance(item, Label):
             for name in item.names:
                 label_prev_instr[name] = prev_instr
+                label_names[name] = set(item.names)
             prev_label = item
             prev_instr = None
         prev_item = item
 
-    insert_label_before: Dict[Instruction, str] = {}
-    new_body: List[Tuple[Union[Instruction, Label], Union[Instruction, Label]]] = []
+    untouched_targets = set()
 
-    body_iter: Iterator[Union[Instruction, Label]] = iter(function.body)
-    for item in body_iter:
-        orig_item = item
-        if isinstance(item, Instruction) and (
-            item.is_branch_likely or item.mnemonic == "b"
-        ):
+    def may_transform_branch(
+        item: Instruction,
+        next_item: Instruction,
+        before_target: Instruction,
+        pre: bool = False,
+    ) -> bool:
+        if not item.has_delay_slot:
+            return False
+        if before_target is next_item:
+            return False
+        if str(before_target) != str(next_item):
+            return False
+
+        next_mn = next_item.mnemonic
+        if not item.is_branch_likely and next_mn == "nop":
+            return False
+
+        if arch.arch == Target.ArchEnum.SH:
             assert isinstance(item.jump_target, JumpTarget)
-            old_label = item.jump_target.target
-            if old_label not in label_prev_instr:
-                raise DecompFailure(
-                    f"Unable to parse branch: label {old_label} does not exist in function {function.name}"
-                )
-            before_target = label_prev_instr[old_label]
-            before_before_target = (
-                instr_before_instr.get(before_target)
-                if before_target is not None
-                else None
-            )
-            next_item = next(body_iter)
-            orig_next_item = next_item
-            if (
-                item.mnemonic == "b"
-                and before_before_target is not None
-                and before_before_target.has_delay_slot
-            ):
-                # Don't treat 'b' instructions as branch likelies if doing so would
-                # introduce a label in a delay slot.
-                new_body.append((item, item))
-                new_body.append((next_item, next_item))
-            elif (
-                isinstance(next_item, Instruction)
-                and before_target is not None
-                and before_target is not next_item
-                and str(before_target) == str(next_item)
-                and (item.mnemonic != "b" or next_item.mnemonic != "nop")
-            ):
-                # Handle the IDO pattern.
-                if before_target not in label_before_instr:
-                    new_label = internal_label("before", old_label)
-                    label_before_instr[before_target] = new_label
-                    insert_label_before[before_target] = new_label
-                new_target = label_before_instr[before_target]
-                mn_unlikely = item.mnemonic[:-1] or "b"
-                item = arch.parse(
-                    mn_unlikely,
-                    item.args[:-1] + [AsmGlobalSymbol(new_target)],
-                    item.meta.derived(),
-                )
-                next_item = arch.parse("nop", [], item.meta.derived())
-                new_body.append((orig_item, item))
-                new_body.append((orig_next_item, next_item))
-            else:
-                # Fall back to not transforming the branch likely at all.
-                new_body.append((item, item))
-                new_body.append((next_item, next_item))
+            label = item.jump_target.target
+            if not (next_mn.startswith("cmp/") or next_mn == "tst"):
+                # Only do the transformation for compare instructions for now;
+                # other ones carry too much risk of being false positives.
+                # Also, since compare instructions are idempotent, it is fine
+                # to allow the transform even for conditional branches whose
+                # delay slots we cannot replace by nops.
+                return False
+            if label in untouched_targets and not pre:
+                # Don't change the branch target unless it would leave the old
+                # label untargetted.
+                return False
         else:
-            new_body.append((orig_item, item))
+            # MIPS
+            if not item.is_branch_likely and item.mnemonic != "b":
+                return False
+
+        if not item.is_conditional:
+            before_before_target = instr_before_instr.get(before_target)
+            if before_before_target is not None and before_before_target.has_delay_slot:
+                # Don't treat unconditional branch instructions as branch likelies if
+                # doing so would introduce a label in a delay slot.
+                return False
+        return True
+
+    if arch.arch == Target.ArchEnum.SH:
+        for label in asm_data.mentioned_labels:
+            untouched_targets |= label_names.get(label, set())
+        for item, next_item in zip(function.body, function.body[1:]):
+            if not isinstance(item, Instruction):
+                continue
+            if isinstance(item.jump_target, list):
+                for target in item.jump_target:
+                    untouched_targets |= label_names.get(target.target, set())
+            elif isinstance(item.jump_target, JumpTarget):
+                before_target = label_prev_instr.get(item.jump_target.target)
+                if (
+                    isinstance(next_item, Instruction)
+                    and before_target is not None
+                    and may_transform_branch(item, next_item, before_target, pre=True)
+                ):
+                    continue
+                untouched_targets |= label_names.get(item.jump_target.target, set())
+
+    insert_label_before: Dict[Instruction, str] = {}
+    new_body: List[Tuple[BodyPart, BodyPart]] = []
+
+    body_iter: Iterator[BodyPart] = iter(function.body)
+    for item in body_iter:
+        if not isinstance(item, Instruction) or not isinstance(
+            item.jump_target, JumpTarget
+        ):
+            new_body.append((item, item))
+            continue
+        next_item = next(body_iter)
+        before_target = label_prev_instr.get(item.jump_target.target)
+        if (
+            isinstance(next_item, Instruction)
+            and before_target is not None
+            and may_transform_branch(item, next_item, before_target)
+        ):
+            # Handle the IDO pattern.
+            if before_target not in label_before_instr:
+                label = item.jump_target.target
+                new_label = internal_label("before", item.jump_target.target)
+                label_before_instr[before_target] = new_label
+                insert_label_before[before_target] = new_label
+            new_target = label_before_instr[before_target]
+            mn = item.mnemonic
+            mn_unlikely = mn[:-1] if item.is_branch_likely else mn
+            new_item = arch.parse(
+                mn_unlikely,
+                item.args[:-1] + [AsmGlobalSymbol(new_target)],
+                item.meta.derived(),
+            )
+            if item.is_conditional and not item.is_branch_likely:
+                # For regular conditional branches (on SuperH) we cannot replace
+                # the delay slot by a nop, since it will execute in the branch-
+                # not-taken case. `may_transform_branch` ensures that the delay
+                # slot instruction is idempotent in this case.
+                new_next_item = next_item
+            else:
+                new_next_item = arch.parse("nop", [], new_item.meta.derived())
+            new_body.append((item, new_item))
+            new_body.append((next_item, new_next_item))
+        else:
+            new_body.append((item, item))
+            new_body.append((next_item, next_item))
 
     new_function = function.bodyless_copy()
     for orig_item, new_item in new_body:
@@ -385,11 +449,11 @@ def minimize_labels(function: Function, asm_data: AsmData) -> Function:
             cur_label.extend(name for name in item.names if name in labels_used)
         else:
             if cur_label:
-                new_function.body.append(Label(cur_label))
+                new_function.body.append(Label(tuple(cur_label)))
                 cur_label = []
             new_function.body.append(item)
     if cur_label:
-        new_function.body.append(Label(cur_label))
+        new_function.body.append(Label(tuple(cur_label)))
 
     return new_function
 
@@ -413,25 +477,28 @@ def build_blocks(
     fragment: bool,
     debug_patterns: bool,
 ) -> List[Block]:
-    if arch.arch == Target.ArchEnum.MIPS:
-        verify_no_trailing_delay_slot(function)
-        function = minimize_labels(function, asm_data)
-        function = normalize_gcc_likely_branches(function, arch)
-        function = normalize_ido_likely_branches(function, arch)
+    if not fragment:
+        if arch.has_delay_slots:
+            verify_no_trailing_delay_slot(function)
 
-    function = minimize_labels(function, asm_data)
-    function = simplify_standard_patterns(
-        function, asm_data, arch, debug_patterns=debug_patterns
-    )
-    function = minimize_labels(function, asm_data)
+            function = minimize_labels(function, asm_data)
+            if arch.arch == Target.ArchEnum.MIPS:
+                function = normalize_gcc_likely_branches(function, arch)
+            function = normalize_ido_likely_branches(function, asm_data, arch)
+
+        function = minimize_labels(function, asm_data)
+        function = simplify_standard_patterns(
+            function, asm_data, arch, debug_patterns=debug_patterns
+        )
+        function = minimize_labels(function, asm_data)
 
     block_builder = BlockBuilder()
 
-    body_iter: Iterator[Union[Instruction, Label]] = iter(function.body)
+    body_iter: Iterator[BodyPart] = iter(function.body)
     branch_likely_counts: CounterPy38[str] = Counter()
     cond_return_target: Optional[str] = None
 
-    def process_mips(item: Union[Instruction, Label]) -> None:
+    def process_delay_slots(item: BodyPart) -> None:
         if isinstance(item, Label):
             # Split blocks at labels.
             block_builder.new_block()
@@ -439,11 +506,10 @@ def build_blocks(
             return
 
         if not item.has_delay_slot:
-            block_builder.add_instruction(item)
-            assert not item.is_jump(), "all MIPS jumps have a delay slot"
+            process_no_delay_slots(item)
             return
 
-        process_after: List[Union[Instruction, Label]] = []
+        process_after: List[BodyPart] = []
         next_item = next(body_iter)
 
         if isinstance(next_item, Label):
@@ -506,7 +572,7 @@ def build_blocks(
                 )
                 block_builder.add_instruction(nop.clone())
                 block_builder.new_block()
-                block_builder.set_label(Label([temp_label]))
+                block_builder.set_label(Label.new(temp_label))
                 block_builder.add_instruction(
                     arch.parse("b", [AsmGlobalSymbol(target)], item.meta.derived())
                 )
@@ -543,12 +609,14 @@ def build_blocks(
             )
             block_builder.add_instruction(nop.clone())
             block_builder.new_block()
-            block_builder.set_label(Label([temp_label]))
+            block_builder.set_label(Label.new(temp_label))
             block_builder.add_instruction(nop.clone())
         elif item.function_target is not None:
             # Move the delay slot instruction to before the call so it
             # passes correct arguments.
-            if len(item.args) >= 2 and item.args[1] in next_item.outputs:
+            if len(item.args) >= 2 and (
+                item.args[1] in next_item.outputs or item.args[1] in next_item.clobbers
+            ):
                 raise DecompFailure(
                     f"Instruction after {item.mnemonic} clobbers its source\n"
                     "register, which is currently not supported.\n\n"
@@ -565,9 +633,9 @@ def build_blocks(
             block_builder.new_block()
 
         for item in process_after:
-            process_mips(item)
+            process_delay_slots(item)
 
-    def process_no_delay_slots(item: Union[Instruction, Label]) -> None:
+    def process_no_delay_slots(item: BodyPart) -> None:
         nonlocal cond_return_target
 
         if isinstance(item, Label):
@@ -603,10 +671,11 @@ def build_blocks(
         if item.is_jump():
             block_builder.new_block()
 
-    for item in body_iter:
-        if arch.arch == Target.ArchEnum.MIPS:
-            process_mips(item)
-        else:
+    if arch.has_delay_slots and not fragment:
+        for item in body_iter:
+            process_delay_slots(item)
+    else:
+        for item in body_iter:
             process_no_delay_slots(item)
 
     if block_builder.is_empty():
@@ -630,7 +699,7 @@ def build_blocks(
 
     if cond_return_target is not None:
         # Add an empty return block at the end of the function
-        block_builder.set_label(Label([cond_return_target]))
+        block_builder.set_label(Label.new(cond_return_target))
         for instr in arch.missing_return():
             block_builder.add_instruction(instr)
         block_builder.new_block()
@@ -812,6 +881,50 @@ class NaturalLoop:
     backedges: Set[Node] = field(default_factory=set)
 
 
+def get_literal_pool_symbolic_data(
+    arg: Argument, asm_data: AsmData
+) -> Optional[AsmSymbolicData]:
+    offset = 0
+    if isinstance(arg, BinOp) and arg.op == "+" and isinstance(arg.rhs, AsmLiteral):
+        offset = arg.rhs.value
+        arg = arg.lhs
+
+    if not isinstance(arg, AsmGlobalSymbol):
+        return None
+    ent = asm_data.values.get(arg.symbol_name)
+    if ent is None or not ent.is_text:
+        return None
+    data = ent.data_at_offset(offset, 4)
+    if not isinstance(data, AsmSymbolicData):
+        return None
+    return data
+
+
+def get_literal_pool_symbol(arg: Argument, asm_data: AsmData) -> Optional[str]:
+    data = get_literal_pool_symbolic_data(arg, asm_data)
+    if data is None:
+        return None
+    return data.as_symbol_without_addend()
+
+
+def arm_jtbl_for_ldr(arg: Argument, asm_data: AsmData) -> Optional[str]:
+    jtbl_name = get_literal_pool_symbol(arg, asm_data)
+    if jtbl_name is None:
+        return None
+
+    ent = asm_data.values.get(jtbl_name)
+    if (
+        ent is None
+        or not ent.is_text
+        or not ent.data
+        or not isinstance(ent.data[0], AsmSymbolicData)
+        or ent.data[0].as_symbol_without_addend() is None
+    ):
+        return None
+
+    return jtbl_name
+
+
 def build_graph_from_block(
     block: Block,
     blocks: List[Block],
@@ -885,30 +998,11 @@ def build_graph_from_block(
                             )
                         ):
                             jtbl_names.add(arg.argument.symbol_name)
-                        if (
-                            isinstance(arg, AsmGlobalSymbol)
-                            and ins.arch_mnemonic(arch) == "arm:ldr"
-                        ):
-                            sym_name = arg.symbol_name
-                            ent = asm_data.values.get(sym_name)
-                            if (
-                                ent is not None
-                                and ent.is_text
-                                and ent.data
-                                and isinstance(ent.data[0], AsmSymbolicData)
-                            ):
-                                jtbl_name = ent.data[0].as_symbol_without_addend()
-                                if jtbl_name is not None:
-                                    ent = asm_data.values.get(jtbl_name)
-                                    if (
-                                        ent is not None
-                                        and ent.is_text
-                                        and ent.data
-                                        and isinstance(ent.data[0], AsmSymbolicData)
-                                        and ent.data[0].as_symbol_without_addend()
-                                        is not None
-                                    ):
-                                        jtbl_names.add(jtbl_name)
+
+                        if ins.arch_mnemonic(arch) == "arm:ldr":
+                            jtbl_name = arm_jtbl_for_ldr(arg, asm_data)
+                            if jtbl_name is not None:
+                                jtbl_names.add(jtbl_name)
 
                 if jtbl_names:
                     break
@@ -1067,7 +1161,7 @@ def warn_on_safeguard_use(
         label = node.block.approx_label_name
         return_instrs = arch.missing_return()
         print(
-            f'Warning: missing "{return_instrs[0]}" in last block of {function.name} ({label}).\n'
+            f'/* Warning: missing "{return_instrs[0]}" in last block of {function.name} ({label}). */\n'
         )
 
 
@@ -1564,14 +1658,13 @@ def locs_clobbered_until_dominator(node: Node) -> Set[Location]:
     return clobbered
 
 
-def nodes_to_flowgraph(
-    nodes: List[Node],
+def compute_flowgraph_inputs_uses(
+    flow_graph: FlowGraph,
     function: Function,
     arch: ArchFlowGraph,
     *,
     print_warnings: bool = False,
-) -> FlowGraph:
-    flow_graph = FlowGraph(nodes)
+) -> None:
     missing_regs = []
 
     def process_node(node: Node, loc_srcs: LocationRefSetDict) -> None:
@@ -1646,10 +1739,8 @@ def nodes_to_flowgraph(
         print("/*")
         print(f"Warning: in {function.name}, regs were read before being written to:")
         for reg, ref in missing_regs:
-            print(f"   {reg} at {ref}: {ref.instruction}")
+            print(f"   {reg} {ref.instruction.meta.loc_str()}: {ref.instruction}")
         print("*/")
-
-    return flow_graph
 
 
 def build_flowgraph(
@@ -1680,10 +1771,13 @@ def build_flowgraph(
     if not fragment:
         terminate_infinite_loops(nodes)
 
-    flow_graph = nodes_to_flowgraph(
-        nodes, function, arch, print_warnings=print_warnings or fragment
+    flow_graph = FlowGraph(nodes)
+    if not fragment:
+        arch.process_flowgraph(asm_data, flow_graph)
+    compute_flowgraph_inputs_uses(
+        flow_graph, function, arch, print_warnings=print_warnings or fragment
     )
     if not fragment:
-        arch.simplify_ir(flow_graph)
+        arch.simplify_ir(asm_data, flow_graph, debug_patterns=debug_patterns)
 
     return flow_graph

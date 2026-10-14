@@ -32,6 +32,14 @@ typedef s64 M2C_UNK64;
 #define M2C_TRAP_IF(cond) (0)
 #define M2C_BREAK() (0)
 #define M2C_SYNC() (0)
+#define M2C_DCACHE_CLEAN(addr) (0)
+#define M2C_DCACHE_INVALIDATE(addr) (0)
+#define M2C_DCACHE_CLEAN_INVALIDATE(addr) (0)
+#define M2C_DCACHE_BLOCK_SETZERO(addr) (0)
+#define M2C_DCACHE_BLOCK_SETZERO_LOCKED(addr) (0)
+#define M2C_ICACHE_INVALIDATE(addr) (0)
+#define M2C_PREFETCH(addr) (0)
+#define M2C_PREFETCH_STORE(addr) (0)
 
 #define GLUE_F64(a, b) (0.0)
 #define MULT_HI(a, b) (0)
@@ -54,5 +62,16 @@ typedef s64 M2C_UNK64;
 #define M2C_MEMCPY_ALIGNED memcpy
 #define M2C_MEMCPY_UNALIGNED memcpy
 #define M2C_STRUCT_COPY memcpy
+
+/* Sh2 control register loads/stores */
+#define M2C_LOAD_SR() (0)
+#define M2C_LOAD_GBR() (0)
+#define M2C_LOAD_VBR() (0)
+#define M2C_STORE_SR(a)
+#define M2C_STORE_GBR(a)
+#define M2C_STORE_VBR(a)
+
+#define M2C_CMP_STR(a, b) (0)
+#define M2C_TAS_B(a) (0)
 
 #endif

@@ -139,7 +139,7 @@ class SwitchStatement:
         elif self.jump.num_cases is None:
             comments.append("unable to parse jump table")
         elif self.jump.jump_table is not None and body_is_empty:
-            comments.append(f"jump table: {self.jump.jump_table.symbol_name}")
+            comments.append(f"jump table: {self.jump.jump_table.c_symbol_name}")
         head = f"switch ({format_expr(self.jump.control_expr, fmt)})"
         if body_is_empty:
             lines.append(fmt.with_comments(f"{head};", comments))
@@ -1393,9 +1393,6 @@ def build_body(context: Context, options: Options) -> Body:
     terminal_node: Node = context.flow_graph.terminal_node()
     is_reducible = context.flow_graph.is_reducible()
 
-    if options.debug:
-        print("Here's the whole function!\n")
-
     body: Body
     if options.ifs and is_reducible:
         body = build_flowgraph_between(context, start_node, terminal_node)
@@ -1437,6 +1434,9 @@ def get_function_text(function_info: FunctionInfo, options: Options) -> str:
 
     function_lines: List[str] = []
 
+    if options.debug:
+        function_lines.append("Here's the whole function!\n")
+
     for warning in function_info.stack_info.warnings:
         line = fmt.with_comments("", [f"Warning: {warning}"])
         if line:
@@ -1447,7 +1447,7 @@ def get_function_text(function_info: FunctionInfo, options: Options) -> str:
         if line:
             function_lines.append(line)
 
-    fn_name = function_info.stack_info.function.name
+    fn_name = function_info.symbol.c_symbol_name
     arg_strs = []
     for i, arg in enumerate(function_info.stack_info.arguments):
         if i == 0 and function_info.stack_info.replace_first_arg is not None:

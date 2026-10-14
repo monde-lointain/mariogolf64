@@ -54,6 +54,7 @@ from .asm_instruction import (
     Macro,
     Register,
     RegisterList,
+    Writeback,
 )
 from .instruction import (
     Instruction,
@@ -114,13 +115,21 @@ class Arch(ArchFlowGraph, ArchC):
         ...
 
     def is_likely_partial_offset(self, addend: int) -> bool:
-        return addend < 0x1000000 and addend % 2**15 in (0, 2**15 - 1)
+        return 0 <= addend < 0x1000000 and addend % 2**15 in (0, 2**15 - 1)
 
     # These are defined here to avoid a circular import in flow_graph.py
     ir_patterns: List[IrPattern] = []
 
-    def simplify_ir(self, flow_graph: FlowGraph) -> None:
-        simplify_ir_patterns(self, flow_graph, self.ir_patterns)
+    def c_symbol_name(self, asm_name: str) -> str:
+        """Convert an assembler symbol name to its C spelling."""
+        return asm_name
+
+    def simplify_ir(
+        self, asm_data: AsmData, flow_graph: FlowGraph, *, debug_patterns: bool
+    ) -> None:
+        simplify_ir_patterns(
+            self, asm_data, flow_graph, self.ir_patterns, debug_patterns=debug_patterns
+        )
 
 
 ASSOCIATIVE_OPS: Set[str] = {"+", "&&", "||", "&", "|", "^", "*"}
@@ -188,6 +197,14 @@ def as_sintish(expr: Expression, *, silent: bool = False) -> Expression:
 
 def as_uintish(expr: Expression) -> Expression:
     return as_type(expr, Type.uintish(), False)
+
+
+def as_s16(expr: Expression) -> Expression:
+    return as_type(expr, Type.s16(), False)
+
+
+def as_u16(expr: Expression) -> Expression:
+    return as_type(expr, Type.u16(), False)
 
 
 def as_u32(expr: Expression) -> Expression:
@@ -431,12 +448,12 @@ class StackInfo:
     def saved_reg_symbol(self, reg_name: str) -> GlobalSymbol:
         sym_name = "saved_reg_" + reg_name
         type = self.unique_type_for("saved_reg", sym_name, Type.any_reg())
-        return GlobalSymbol(symbol_name=sym_name, type=type)
+        return GlobalSymbol(c_symbol_name=sym_name, type=type)
 
     def should_save(self, expr: Expression, offset: Optional[int]) -> bool:
         expr = early_unwrap(expr)
         if isinstance(expr, GlobalSymbol) and (
-            expr.symbol_name.startswith("saved_reg_") or expr.symbol_name == "sp"
+            expr.c_symbol_name.startswith("saved_reg_") or expr.c_symbol_name == "sp"
         ):
             return True
         if (
@@ -638,12 +655,13 @@ def get_stack_info(
                 if reg == Register("lr"):
                     info.is_leaf = False
         elif (
-            arch_mnemonic == "arm:sub"
+            arch_mnemonic in ("arm:sub", "arm:add")
             and inst.args[0] == arch.stack_pointer_reg
             and inst.args[1] == arch.stack_pointer_reg
             and isinstance(inst.args[2], AsmLiteral)
         ):
-            info.allocated_stack_size += inst.args[2].value
+            imm = inst.args[2].value * (-1 if arch_mnemonic == "arm:add" else 1)
+            info.allocated_stack_size += max(imm, 0)
         elif (
             arch_mnemonic in ("mips:move", "arm:mov", "ppc:mr")
             and isinstance(inst.args[0], Register)
@@ -653,6 +671,33 @@ def get_stack_info(
             # "move fp, sp" very likely means the code is compiled with frame
             # pointers enabled; thus fp should be treated the same as sp.
             info.frame_pointer_reg = inst.args[0]
+        elif (
+            arch_mnemonic == "sh:mov"
+            and inst.args[0] == arch.stack_pointer_reg
+            and isinstance(inst.args[1], Register)
+            and inst.args[1] in arch.frame_pointer_regs
+        ):
+            info.frame_pointer_reg = inst.args[1]
+        elif (
+            arch_mnemonic == "sh:add"
+            and isinstance(inst.args[0], AsmLiteral)
+            and inst.args[0].as_s8() < 0
+            and inst.args[1] == arch.stack_pointer_reg
+        ):
+            info.allocated_stack_size += -inst.args[0].as_s8()
+        elif (
+            arch_mnemonic in ("sh:mov.l", "sh:sts.l")
+            and isinstance(inst.args[0], Register)
+            and inst.args[0] in arch.saved_regs
+            and isinstance(inst.args[1], AsmAddressMode)
+            and inst.args[1].base == arch.stack_pointer_reg
+            and inst.args[1].writeback == Writeback.PRE
+        ):
+            info.allocated_stack_size += 4
+            info.callee_save_regs.add(inst.args[0])
+            callee_saved_offsets.append(-info.allocated_stack_size)
+            if inst.args[0] == arch.return_address_reg:
+                info.is_leaf = False
         elif (
             arch_mnemonic
             in [
@@ -712,9 +757,9 @@ def get_stack_info(
             assert isinstance(inst.args[2], AsmLiteral)
             temp_reg_values[inst.args[0]] |= inst.args[2].value
 
-    if arch.arch == Target.ArchEnum.ARM:
-        # On ARM we don't know the stack size up front, so callee_saved_offsets needs
-        # to be adjusted after scanning the full first block.
+    if arch.arch in (Target.ArchEnum.ARM, Target.ArchEnum.SH):
+        # On ARM and SH we don't know the stack size up front, so
+        # callee_saved_offsets needs to be adjusted after scanning the full first block.
         for i in range(len(callee_saved_offsets)):
             callee_saved_offsets[i] += info.allocated_stack_size
 
@@ -725,21 +770,26 @@ def get_stack_info(
         for node in flow_graph.nodes:
             for inst in node.block.instructions:
                 arch_mnemonic = inst.arch_mnemonic(arch)
-                # TODO: improve this check to cover all loads, not just of words
-                # Can we make use of StackLocation dependencies?
+                # TODO: it would be nice if we could scan inst.output for StackLocation
+                # dependencies here. However, that's not yet implemented for all
+                # architectures, and at the point where those are created, we don't
+                # know if we are using frame pointers... For now, assume that any
+                # AsmAddressMode we see in a load instruction is where we load from.
+                if inst.is_load:
+                    for arg in inst.args:
+                        if (
+                            isinstance(arg, AsmAddressMode)
+                            and info.is_stack_reg(arg.base)
+                            and isinstance(arg.addend, AsmLiteral)
+                        ):
+                            offset = arg.addend.value & ~3
+                            if offset >= arch.home_space_size:
+                                info.subroutine_arg_top = min(
+                                    info.subroutine_arg_top, offset
+                                )
+                # TODO: do this for sh2 too (more annoying since it involves two
+                # instructions: "mov sp, reg; add imm, reg")
                 if (
-                    (
-                        arch_mnemonic
-                        in ("mips:lw", "mips:lwc1", "mips:ldc1", "ppc:lwz")
-                        or arch_mnemonic.startswith("arm:ldr")
-                    )
-                    and isinstance(inst.args[1], AsmAddressMode)
-                    and info.is_stack_reg(inst.args[1].base)
-                ):
-                    offset = inst.args[1].addend_as_literal()
-                    if offset >= arch.home_space_size:
-                        info.subroutine_arg_top = min(info.subroutine_arg_top, offset)
-                elif (
                     arch_mnemonic in ("mips:addiu", "ppc:addi", "arm:add")
                     and isinstance(inst.args[1], Register)
                     and info.is_stack_reg(inst.args[1])
@@ -751,6 +801,14 @@ def get_stack_info(
                     info.subroutine_arg_top = min(
                         info.subroutine_arg_top, inst.args[2].value
                     )
+                if (
+                    arch_mnemonic == "arm:mov"
+                    and isinstance(inst.args[1], Register)
+                    and info.is_stack_reg(inst.args[1])
+                    and isinstance(inst.args[0], Register)
+                    and not info.is_stack_reg(inst.args[0])
+                ):
+                    info.subroutine_arg_top = 0
 
     # Compute the bounds of the callee-saved register region, including padding
     if callee_saved_offsets:
@@ -1080,6 +1138,18 @@ class BinaryOp(Condition):
     def uint(left: Expression, op: str, right: Expression) -> BinaryOp:
         return BinaryOp(
             left=as_uintish(left), op=op, right=as_uintish(right), type=Type.u32()
+        )
+
+    @staticmethod
+    def sshift(left: Expression, op: str, right: Expression) -> BinaryOp:
+        return BinaryOp(
+            left=as_sintish(left), op=op, right=as_intish(right), type=Type.s32()
+        )
+
+    @staticmethod
+    def ushift(left: Expression, op: str, right: Expression) -> BinaryOp:
+        return BinaryOp(
+            left=as_uintish(left), op=op, right=as_intish(right), type=Type.u32()
         )
 
     @staticmethod
@@ -1616,16 +1686,20 @@ class ArrayAccess(Expression):
 
 @dataclass(eq=False)
 class GlobalSymbol(Expression):
-    symbol_name: str
+    c_symbol_name: str
     type: Type
     asm_data_entry: Optional[AsmDataEntry] = None
     symbol_in_context: bool = False
     type_provided: bool = False
     initializer_in_typemap: bool = False
     demangled_str: Optional[str] = None
+    is_referenced: bool = False
 
     def dependencies(self) -> List[Expression]:
         return []
+
+    def use(self) -> None:
+        self.is_referenced = True
 
     def is_string_constant(self) -> bool:
         ent = self.asm_data_entry
@@ -1651,7 +1725,7 @@ class GlobalSymbol(Expression):
         return ret
 
     def format(self, fmt: Formatter) -> str:
-        return self.symbol_name
+        return self.c_symbol_name
 
     def potential_array_dim(self, element_size: int) -> Tuple[int, int]:
         """
@@ -2455,7 +2529,7 @@ def visualize_flowgraph(
         attr_text = f" [{', '.join(attr_strs)}]" if attr_strs else ""
         lines.append(f"  {quote(source)} -> {quote(target)}{attr_text};")
     lines.append("}")
-    return "\n".join(lines)
+    return "\n".join(lines) + "\n"
 
 
 def get_block_info_for_block(block: Block) -> BlockInfo:
@@ -2550,6 +2624,12 @@ class InstrArgs:
         ret = literal_expr(arg, self.stack_info)
         return ret
 
+    def s8_imm(self, index: int) -> Expression:
+        ret = self.full_imm(index)
+        if isinstance(ret, Literal):
+            return Literal(((ret.value + 0x80) & 0xFF) - 0x80)
+        return ret
+
     def s16_imm(self, index: int) -> Expression:
         ret = self.full_imm(index)
         if isinstance(ret, Literal):
@@ -2567,6 +2647,12 @@ class InstrArgs:
         if isinstance(arg, Register):
             return self.regs[arg]
         return self.full_imm(index)
+
+    def reg_or_s8_imm(self, index: int) -> Expression:
+        arg = self.raw_arg(index)
+        if isinstance(arg, Register):
+            return self.regs[arg]
+        return self.s8_imm(index)
 
     def hi_imm(self, index: int) -> RawSymbolRef:
         arg = self.raw_arg(index)
@@ -3715,6 +3801,12 @@ class NodeState:
         self.prevent_later_function_calls()
         self.write_statement(store)
 
+    def push_subroutine_arg(self, source: Expression) -> None:
+        self.subroutine_args = {
+            offset + 4: arg for offset, arg in self.subroutine_args.items()
+        }
+        self.subroutine_args[0] = source
+
     def _reg_probably_meant_as_function_argument(
         self, reg: Register, call_instr: InstrRef
     ) -> bool:
@@ -3739,6 +3831,7 @@ class NodeState:
         fn_sig = fn_target.type.get_function_pointer_signature()
         assert fn_sig is not None, "known function pointers must have a signature"
 
+        instr_inputs = self.stack_info.flow_graph.instr_inputs[call_instr]
         likely_regs: Dict[Register, bool] = {}
         for reg, data in self.regs.contents.items():
             # We use a much stricter filter for PPC than MIPS, because the same
@@ -3763,7 +3856,9 @@ class NodeState:
             # Implementation note: the `meta.function_return` bit is only accurate for
             # registers set within this basic block, because `propagate_register_meta`
             # has not yet been called. However, it's only in that case we read it.
-            if (
+            if reg not in arch.argument_regs:
+                likely_regs[reg] = False
+            elif (
                 arch.arch in (Target.ArchEnum.PPC, Target.ArchEnum.ARM)
                 and not fn_sig.is_variadic
                 and (
@@ -3774,11 +3869,10 @@ class NodeState:
                 and not self._reg_probably_meant_as_function_argument(reg, call_instr)
             ):
                 likely_regs[reg] = False
-            elif data.meta.in_pattern:
-                # Like `meta.function_return` mentioned above, `meta.in_pattern` will only be
-                # accurate for registers set within this basic block.
-                likely_regs[reg] = False
-            elif data.meta.initial:
+            elif all(
+                not isinstance(source, InstrRef) or source.instruction.in_pattern
+                for source in instr_inputs.get(reg)
+            ):
                 likely_regs[reg] = False
             else:
                 likely_regs[reg] = True
@@ -4202,6 +4296,7 @@ class GlobalInfo:
         if sym_name in self.global_symbol_map:
             sym = self.global_symbol_map[sym_name]
         else:
+            c_sym_name = self.arch.c_symbol_name(sym_name)
             demangled_symbol: Optional[CxxSymbol] = None
             demangled_str: Optional[str] = None
             if (
@@ -4216,7 +4311,7 @@ class GlobalInfo:
                     demangled_str = str(demangled_symbol)
 
             sym = self.global_symbol_map[sym_name] = GlobalSymbol(
-                symbol_name=sym_name,
+                c_symbol_name=c_sym_name,
                 type=Type.any(),
                 asm_data_entry=self.asm_data_value(sym_name),
                 demangled_str=demangled_str,
@@ -4231,24 +4326,24 @@ class GlobalInfo:
             ):
                 sym.type.unify(self.vtable_type(sym_name, sym.asm_data_entry))
 
-            fn = self.typemap.functions.get(sym_name)
+            fn = self.typemap.functions.get(c_sym_name)
             ctype: Optional[CType]
             if fn is not None:
                 ctype = fn.type
             else:
-                ctype = self.typemap.var_types.get(sym_name)
+                ctype = self.typemap.var_types.get(c_sym_name)
 
             if ctype is not None:
                 sym.symbol_in_context = True
                 sym.initializer_in_typemap = (
-                    sym_name in self.typemap.vars_with_initializers
+                    c_sym_name in self.typemap.vars_with_initializers
                 )
                 if self.typepool.unk_inference and is_unk_type(ctype, self.typemap):
                     type = Type.gsym_unk_ctype(ctype, self.typemap, self.typepool)
                 else:
                     type = Type.ctype(ctype, self.typemap, self.typepool)
                 sym.type.unify(type)
-                if sym_name not in self.typepool.unknown_decls:
+                if c_sym_name not in self.typepool.unknown_decls:
                     sym.type_provided = True
             elif sym_name in self.local_functions:
                 sym.type.unify(Type.function())
@@ -4321,7 +4416,7 @@ class GlobalInfo:
 
         def read_uint(n: int) -> int:
             """Read the next `n` bytes from `data` as an (long) integer"""
-            assert 0 < n <= 8
+            assert 0 < n <= 16
             if not data:
                 raise FailedToGenerateInitializer("not enough data")
             if not isinstance(data[0], bytes):
@@ -4354,7 +4449,9 @@ class GlobalInfo:
                 return None
 
             data.pop(0)
-            return self.address_of_gsym(label)
+            expr = self.address_of_gsym(label)
+            expr.use()
+            return expr
 
         def for_type(type: Type) -> str:
             """Return the initializer for a single element of type `type`"""
@@ -4447,7 +4544,9 @@ class GlobalInfo:
         lines = []
         processed_names: Set[str] = set()
         while True:
-            names: Set[str] = set(self.global_symbol_map.keys())
+            names: Set[str] = {
+                n for n, s in self.global_symbol_map.items() if s.is_referenced
+            }
             if decls == Options.GlobalDeclsEnum.ALL:
                 for name, ent in self.asm_data.values.items():
                     if not ent.is_text:

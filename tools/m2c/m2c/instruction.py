@@ -1,7 +1,7 @@
 from __future__ import annotations
 import abc
 from contextlib import contextmanager
-from dataclasses import dataclass, replace
+from dataclasses import dataclass, field, replace
 from typing import Callable, Dict, Iterator, List, Optional, Union
 
 from .error import DecompFailure
@@ -127,7 +127,7 @@ class Instruction:
     function_target: Optional[Argument] = None
     is_conditional: bool = False
     is_return: bool = False
-    is_load: bool = False  # only set for ARM at the moment
+    is_load: bool = False
     is_store: bool = False
     is_effectful: bool = True  # only set for ARM at the moment
 
@@ -163,6 +163,7 @@ class ArchAsm(ArchAsmParsing):
     arch: Target.ArchEnum
 
     re_comment: str
+    asm_word_size: int = 4
 
     stack_pointer_reg: Register
     frame_pointer_regs: List[Register]

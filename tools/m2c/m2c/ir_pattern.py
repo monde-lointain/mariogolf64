@@ -62,7 +62,7 @@ class IrPattern(abc.ABC):
 
     def compile(self, arch: ArchFlowGraph) -> CompiledIrPattern:
         missing_meta = InstructionMeta.missing()
-        asm_state = AsmState()
+        asm_state = AsmState(is_pattern=True)
         replacement_instr = parse_instruction(
             self.replacement, missing_meta, arch, asm_state
         )
@@ -118,9 +118,11 @@ class IrMatch:
     whereas other registers and symbols are matched literally.
     """
 
+    asm_data: AsmData
     symbolic_registers: Dict[str, Register] = field(default_factory=dict)
     symbolic_args: Dict[str, Argument] = field(default_factory=dict)
     ref_map: Dict[Reference, RefSet] = field(default_factory=dict)
+    body: List[InstrRef] = field(default_factory=list)
 
     @staticmethod
     def _is_symbolic_reg(arg: Register) -> bool:
@@ -163,8 +165,10 @@ class IrMatch:
             assert False, f"bad pattern expr: {pat}"
 
     def map_reg(self, key: Register) -> Register:
-        if self._is_symbolic_reg(key):
-            return self.symbolic_registers[key.register_name]
+        ret = self.symbolic_registers.get(key.register_name)
+        if ret is not None:
+            return ret
+        assert not self._is_symbolic_reg(key)
         return key
 
     def map_arg(self, key: Argument) -> Argument:
@@ -283,12 +287,19 @@ class TryIrMatch(IrMatch):
         return True
 
     def rename_reg(self, pat: Register, new_reg: Register) -> None:
-        assert pat.register_name in self.symbolic_registers, pat.register_name
+        # Note: this can introduce symbolic register mappings for registers
+        # that are not actually symbolic. These are used only for translating
+        # real registers into fictive ones for the replacement instruction.
         self.symbolic_registers[pat.register_name] = new_reg
 
 
 def simplify_ir_patterns(
-    arch: ArchFlowGraph, flow_graph: FlowGraph, patterns: List[IrPattern]
+    arch: ArchFlowGraph,
+    asm_data: AsmData,
+    flow_graph: FlowGraph,
+    patterns: List[IrPattern],
+    *,
+    debug_patterns: bool,
 ) -> None:
     # Precompute a RefSet for each mnemonic
     # NB: It's difficult to plainly iterate over all Instruction in the flow_graph
@@ -344,7 +355,7 @@ def simplify_ir_patterns(
 
         # Start matches with a mnemonic match for the last instruction in the pattern
         for cand_tail_ref in refs_by_mnemonic.get(tail_ref.instruction.mnemonic, []):
-            state = TryIrMatch()
+            state = TryIrMatch(asm_data=asm_data)
             if not state.match_refset(tail_ref, RefSet([cand_tail_ref])):
                 continue
 
@@ -364,8 +375,16 @@ def simplify_ir_patterns(
                     is_match = False
                     break
 
+            if not is_match:
+                continue
+
+            # At this point, all instructions in the patterns are guaranteed to map
+            # one source instruction. Create a list of those, for use by `check`.
+            for pat_ref in body_refs + [tail_ref]:
+                state.body.append(state.map_ref(pat_ref))
+
             # Perform any additional pattern-specific validation
-            if not is_match or not pattern.source.check(state, arch, flow_graph):
+            if not pattern.source.check(state, arch, flow_graph):
                 continue
 
             # Create temporary registers for the inputs to the replacement_instr.
@@ -412,6 +431,9 @@ def simplify_ir_patterns(
 
             # For the rest of the instructions in the pattern body, take any instructions
             # whose outputs aren't used later and replace them with nops.
+            # For most patterns this isn't needed, and we just need `in_pattern` to be
+            # set, but sometimes we need to get rid of effectful instructions like
+            # stack writes.
             for pat_ref in body_refs[::-1]:
                 cand_ref = state.map_ref(pat_ref)
 
@@ -421,10 +443,21 @@ def simplify_ir_patterns(
                     cand_ref.replace_instruction(nop_asm, arch)
                     flow_graph.clear_instruction_inputs(cand_ref)
                 elif not cand_ref.instruction.in_pattern:
-                    # It needs to be kept; but ensure the meta.in_pattern flag is set
+                    # It needs to be kept, but ensure the meta.in_pattern flag is set
                     cand_ref.instruction = replace(
                         cand_ref.instruction, in_pattern=True
                     )
+
+            if debug_patterns:
+                print(f"Rewrote asm using {type(pattern).__name__}:")
+                print()
+                for node in flow_graph.nodes:
+                    instrs = list(node.block.instructions)
+                    if instrs:
+                        print(f"{node.block.approx_label_name}:")
+                        for ins in node.block.instructions:
+                            print(ins)
+                print()
 
     # After all of the rewrites above, verify that the instruction dependency
     # data structures are still consistent

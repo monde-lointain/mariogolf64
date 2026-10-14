@@ -4,7 +4,7 @@ from collections import defaultdict
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Sequence, Set, Tuple, TypeVar, Union
 
-from .asm_file import AsmData, Label
+from .asm_file import AsmData, BodyPart, Label
 from .asm_instruction import (
     ARM_BARREL_SHIFTER_OPS,
     Argument,
@@ -28,7 +28,6 @@ from .instruction import (
 )
 
 
-BodyPart = Union[Instruction, Label]
 ReplacementPart = Union[AsmInstruction, Instruction, Label]
 PatternPart = Union[AsmInstruction, Label, None]
 Pattern = List[Tuple[PatternPart, bool]]
@@ -42,7 +41,7 @@ def make_pattern(*parts: str) -> Pattern:
         if part == "*":
             ret.append((None, optional))
         elif part.endswith(":"):
-            ret.append((Label([part[:-1]]), optional))
+            ret.append((Label.new(part[:-1]), optional))
         else:
             ins = parse_asm_instruction(part, NaiveParsingArch(), AsmState())
             ret.append((ins, optional))
@@ -63,6 +62,7 @@ class AsmMatch:
     regs: Dict[str, Register]
     literals: Dict[str, int]
     labels: Dict[str, Label]
+    asm_data: AsmData
 
 
 class AsmPattern(abc.ABC):
@@ -260,6 +260,7 @@ class AsmMatcher:
             state.symbolic_registers,
             state.symbolic_literals,
             state.symbolic_labels_def,
+            self.asm_data,
         )
 
     def derived_meta(self) -> InstructionMeta:

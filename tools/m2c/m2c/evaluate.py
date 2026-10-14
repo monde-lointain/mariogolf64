@@ -103,7 +103,8 @@ def deref(
         for base, addend in [(uw_var.left, uw_var.right), (uw_var.right, uw_var.left)]:
             arch = stack_info.global_info.arch
             if isinstance(addend, Literal) and (
-                arch.is_likely_partial_offset(addend.value) or offset == 0
+                arch.is_likely_partial_offset(addend.value)
+                or (offset == 0 and addend.value >= 0)
             ):
                 offset += addend.value
                 var = base
@@ -125,6 +126,12 @@ def deref(
     var.type.unify(Type.ptr())
     stack_info.record_struct_access(var, offset)
     type: Type = stack_info.unique_type_for("struct", (uw_var, offset), Type.any())
+
+    if offset >= 0x200000:
+        # Structs realistically aren't larger than 2 MB. The offset is more likely
+        # to be a raw memory address.
+        var = BinaryOp.int(Literal(offset), "+", var)
+        offset = 0
 
     # Struct access with type information.
     array_expr = array_access_from_add(
@@ -173,7 +180,7 @@ def fn_op(fn_name: str, args: List[Expression], type: Type) -> FuncCall:
         is_variadic=False,
     )
     return FuncCall(
-        function=GlobalSymbol(symbol_name=fn_name, type=Type.function(fn_sig)),
+        function=GlobalSymbol(c_symbol_name=fn_name, type=Type.function(fn_sig)),
         args=args,
         type=type,
     )
@@ -210,10 +217,11 @@ def handle_la(args: InstrArgs) -> Expression:
     stack_info = args.stack_info
     if isinstance(target, AddressMode):
         return handle_addi(
-            replace(
-                args,
-                raw_args=[output_reg, target.base, AsmLiteral(target.offset)],
-            )
+            output_reg,
+            target.base,
+            args.regs[target.base],
+            Literal(target.offset),
+            args,
         )
 
     sym = stack_info.global_info.address_of_gsym(target.sym.symbol_name)
@@ -302,9 +310,7 @@ def handle_sltiu(args: InstrArgs) -> Expression:
     return BinaryOp.ucmp(left, "<", right)
 
 
-def handle_xori(args: InstrArgs) -> Expression:
-    left = args.reg(1)
-    right = args.u16_imm(2)
+def handle_xor(left: Expression, right: Expression) -> Expression:
     if isinstance(right, Literal) and right.value == 1:
         uw_left = early_unwrap(left)
         if isinstance(uw_left, BinaryOp) and uw_left.is_comparison():
@@ -312,24 +318,37 @@ def handle_xori(args: InstrArgs) -> Expression:
     return BinaryOp.int(left=left, op="^", right=right)
 
 
-def handle_addi(args: InstrArgs, arm: bool = False) -> Expression:
+def handle_addi_mips(args: InstrArgs) -> Expression:
     output_reg = args.reg_ref(0)
     source_reg = args.reg_ref(1)
-
     ref = args.maybe_gprel_imm(2)
     if ref is not None and source_reg == Register("gp"):
         sym = args.stack_info.global_info.address_of_gsym(ref.sym.symbol_name)
         return add_imm(output_reg, sym, Literal(ref.offset), args)
 
-    source = args.reg(1)
-    imm = args.full_imm(2) if arm else args.s16_imm(2)
+    return handle_addi(
+        output_reg,
+        source_reg,
+        args.reg(1),
+        args.s16_imm(2),
+        args,
+    )
 
+
+def handle_addi(
+    output_reg: Register,
+    source_reg: Register,
+    source: Expression,
+    imm: Expression,
+    args: InstrArgs,
+) -> Expression:
     if imm == Literal(0):
         return source
 
     # `(x + 0xEDCC)` is emitted as `((x + 0x10000) - 0x1234)`,
     # i.e. as an `addis` followed by an `addi`
     # ARM is similar but with (x + 0x344) + 0x12000 or (x + 0x35) + 0x1200
+    arm = args.stack_info.global_info.arch.arch == Target.ArchEnum.ARM
     uw_source = early_unwrap(source)
     if (
         isinstance(uw_source, BinaryOp)
@@ -365,7 +384,7 @@ def handle_sub(lhs: Expression, rhs: Expression) -> Expression:
         return s32_literal(lhs.value - rhs.value)
     if rhs == Literal(0):
         return lhs
-    return BinaryOp.intptr(lhs, "-", rhs)
+    return fold_mul_chains(fold_divmod(BinaryOp.intptr(lhs, "-", rhs)))
 
 
 def handle_addis(args: InstrArgs) -> Expression:
@@ -468,14 +487,20 @@ def handle_load(args: InstrArgs, type: Type) -> Expression:
         if not isinstance(expr, StructAccess):
             return None
 
-        is_arm = args.stack_info.global_info.arch.arch == Target.ArchEnum.ARM
+        arch = args.stack_info.global_info.arch.arch
+        is_arm = arch == Target.ArchEnum.ARM
+        is_sh = arch == Target.ArchEnum.SH
         if is_arm and isinstance(args.raw_arg(1), AsmAddressMode):
             # For ARM, only allow constants loaded through `ldr pool`.
             # Do allow non-zero offsets: they occur in raw agbcc output which
             # we use for tests.
             return None
-        if not is_arm and (not type.is_likely_float() or expr.offset != 0):
-            # For non-ARM, only allow float constants and offset 0.
+        if (
+            not is_arm
+            and not is_sh
+            and (not type.is_likely_float() or expr.offset != 0)
+        ):
+            # Outside of ARM/SH, only allow float constants and offset 0.
             return None
 
         target = early_unwrap(expr.struct_var)
@@ -484,8 +509,7 @@ def handle_load(args: InstrArgs, type: Type) -> Expression:
         ):
             return None
 
-        sym_name = target.expr.symbol_name
-        ent = args.stack_info.global_info.asm_data_value(sym_name)
+        ent = target.expr.asm_data_entry
         if ent is None or not ent.is_readonly:
             return None
 
@@ -493,14 +517,16 @@ def handle_load(args: InstrArgs, type: Type) -> Expression:
         if data is None:
             return None
 
-        if isinstance(data, bytes) and size in (4, 8):
+        if isinstance(data, bytes) and size in (2, 4, 8):
             ent.used_as_literal = True
             endian = ">" if args.stack_info.global_info.target.is_big_endian() else "<"
-            fmt = "I" if size == 4 else "Q"
+            fmt = {2: "H", 4: "I", 8: "Q"}[size]
             val: int = struct.unpack(endian + fmt, data)[0]
+            if type.is_signed() and val & (1 << (size * 8 - 1)):
+                val -= 1 << (size * 8)
             return Literal(value=val, type=type)
 
-        if is_arm and ent.is_text and isinstance(data, AsmSymbolicData):
+        if (is_arm or is_sh) and ent.is_text and isinstance(data, AsmSymbolicData):
             sym = data.data
             addend = 0
             if (
@@ -684,11 +710,9 @@ def handle_shift_right(
                 mul = BinaryOp.int(expr.left, "*", Literal(value=rhs // pow2))
                 return as_type(mul, tp, silent=False)
     if signed:
-        return fold_divmod(
-            BinaryOp(as_sintish(lhs), ">>", as_intish(shift), type=Type.s32())
-        )
+        return fold_divmod(BinaryOp.sshift(lhs, ">>", shift))
     else:
-        return BinaryOp(as_uintish(lhs), ">>", as_intish(shift), type=Type.u32())
+        return BinaryOp.ushift(lhs, ">>", shift)
 
 
 def handle_sll(args: InstrArgs, *, arm: bool = False) -> Expression:
@@ -926,7 +950,7 @@ def fold_divmod(original_expr: BinaryOp) -> BinaryOp:
 def replace_clz_shift(expr: BinaryOp) -> BinaryOp:
     """
     Simplify an expression matching `CLZ(x) >> 5` into `x == 0`,
-    and further simplify `(a - b) == 0` into `a == b`.
+    and further simplify `(a - b) == 0` into `b == a`.
     """
     # Check that the outer expression is `>>`
     if expr.is_floating() or expr.op != ">>":
@@ -968,11 +992,12 @@ def replace_bitand(expr: BinaryOp) -> Expression:
     return expr
 
 
-def fold_mul_chains(expr: Expression) -> Expression:
+def fold_mul_chains(expr: Expression, *, allow_sll_chains: bool = False) -> Expression:
     """Simplify an expression involving +, -, * and << to a single multiplication,
     e.g. 4*x - x -> 3*x, or x<<2 -> x*4. This includes some logic for preventing
     folds of consecutive sll, and keeping multiplications by large powers of two
-    as bitshifts at the top layer."""
+    as bitshifts at the top layer. Set allow_sll_chains for architectures that
+    implement larger shifts as consecutive fixed-size shift instructions."""
 
     def fold(
         expr: Expression, toplevel: bool, allow_sll: bool
@@ -981,14 +1006,14 @@ def fold_mul_chains(expr: Expression) -> Expression:
             if expr.op in ("<<", "*") and isinstance(expr.right, Literal):
                 lbase, lnum = fold(expr.left, False, (expr.op != "<<"))
                 rhs = expr.right.value
-                if expr.op == "<<" and allow_sll:
+                if expr.op == "<<" and (allow_sll or allow_sll_chains):
                     # At top level, keep left shifts, unless they are by such
                     # small numbers that they are easier to understand as
                     # multiplications (they compile to the same thing).
                     if toplevel and lnum == 1 and not (1 <= rhs <= 4):
                         return (expr, 1)
                     return (lbase, lnum << rhs)
-                if expr.op == "*" and (allow_sll or rhs % 2 != 0):
+                if expr.op == "*" and (allow_sll or allow_sll_chains or rhs % 2 != 0):
                     # If we don't allow << to be expanded into multiplication
                     # because the outer layer is already <<'ing, don't allow
                     # multiplication by even numbers either, because the power
@@ -1017,7 +1042,27 @@ def fold_mul_chains(expr: Expression) -> Expression:
     base, num = fold(expr, True, True)
     if num == 1:
         return expr
+    if allow_sll_chains and num > 16 and num & (num - 1) == 0:
+        return BinaryOp.int(base, "<<", Literal(num.bit_length() - 1))
     return BinaryOp.int(left=base, op="*", right=Literal(num))
+
+
+def fold_shift_right(expr: Expression, shift: int, *, signed: bool) -> Expression:
+    inner = early_unwrap_ints(expr)
+    if (
+        isinstance(inner, BinaryOp)
+        and inner.op == ">>"
+        and inner.type.is_signed() == signed
+        and isinstance(inner.right, Literal)
+        and inner.right.value + shift < 32
+    ):
+        expr = inner.left
+        shift += inner.right.value
+    if signed:
+        ret = BinaryOp.sshift(expr, ">>", Literal(shift))
+    else:
+        ret = BinaryOp.ushift(expr, ">>", Literal(shift))
+    return fold_divmod(ret)
 
 
 def array_access_from_add(
@@ -1038,6 +1083,9 @@ def array_access_from_add(
     addend = expr.right
     if addend.type.is_pointer_or_array() and not base.type.is_pointer_or_array():
         base, addend = addend, base
+
+    if isinstance(addend, Literal):
+        return None
 
     uw_addend = early_unwrap(addend)
     if isinstance(uw_addend, BinaryOp) and uw_addend.op == "+":
@@ -1098,7 +1146,7 @@ def array_access_from_add(
             # Make up a struct with a tag name based on the symbol & struct size.
             # Although `scale = 8` could indicate an array of longs/doubles, it seems more
             # common to be an array of structs.
-            struct_name = f"_struct_{uw_base.expr.symbol_name}_0x{scale:X}"
+            struct_name = f"_struct_{uw_base.expr.c_symbol_name}_0x{scale:X}"
             struct = typepool.get_struct_by_tag_name(
                 struct_name, stack_info.global_info.typemap
             )
@@ -1188,7 +1236,13 @@ def handle_add_arm(args: InstrArgs) -> Expression:
     if isinstance(args.raw_arg(2), Register):
         return handle_add(args)
     else:
-        return handle_addi(args, arm=True)
+        return handle_addi(
+            args.reg_ref(0),
+            args.reg_ref(1),
+            args.reg(1),
+            args.full_imm(2),
+            args,
+        )
 
 
 def handle_add_real(

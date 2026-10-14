@@ -1,0 +1,45 @@
+#!/bin/sh
+set -eu
+
+image=${SHC_CC_IMAGE:-m2c-shc-compiler:v5.1r03}
+output=
+input=
+
+n=$#
+while [ "$n" -gt 0 ]; do
+    n=$((n - 1))
+    case "$1" in
+        -o)
+            test "$#" -ge 2 || { echo "-o requires a filename" >&2; exit 2; }
+            output=$2
+            shift 2
+            n=$((n - 1))
+            ;;
+        -*)
+            set -- "$@" "$1"
+            shift
+            ;;
+        *)
+            test -z "$input" || { echo "multiple input files are not supported" >&2; exit 2; }
+            input=$1
+            shift
+            ;;
+    esac
+done
+
+test -n "$input" || { echo "missing input file" >&2; exit 2; }
+test -n "$output" || { echo "missing -o output file" >&2; exit 2; }
+test -f "$input" || { echo "input file does not exist: $input" >&2; exit 2; }
+
+staging=$(mktemp -d "${TMPDIR:-/tmp}/m2c-shc.XXXXXX")
+trap 'rm -rf "$staging"' EXIT HUP INT TERM
+cp "$input" "$staging/input.c"
+
+docker run --rm \
+    --platform linux/amd64 \
+    --user "$(id -u):$(id -g)" \
+    --volume "$staging:/work" \
+    "$image" "$@"
+
+test -s "$staging/output.src" || { echo "SHC produced no assembly" >&2; exit 1; }
+cp "$staging/output.src" "$output"

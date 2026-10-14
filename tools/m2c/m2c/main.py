@@ -1,8 +1,11 @@
 from __future__ import annotations
 import argparse
+import contextlib
 from dataclasses import dataclass
 import gc
+import io
 import sys
+import tempfile
 import traceback
 from pathlib import Path
 from typing import Dict, List, Optional, Union
@@ -26,17 +29,49 @@ from .types import TypePool
 from .arch_arm import ArmArch, ArmGbaArch
 from .arch_mips import MipsArch, MipseeArch
 from .arch_ppc import PpcArch
+from .arch_sh import Sh2Arch, Sh4Arch
 
 
 @dataclass
 class DecompilationState:
     @dataclass
-    class Inner:
+    class Valid:
         flow_graph: FlowGraph
         info: Optional[FunctionInfo] = None
 
     function: Function
-    state: Union[Inner, Exception]
+    state: Union[Valid, Exception]
+
+
+@dataclass
+class BrowserResult:
+    returncode: int
+    output: str
+
+
+def decompile_for_browser(source: str, context: str, flags: List[str]) -> BrowserResult:
+    stdout = io.StringIO()
+    stderr = io.StringIO()
+
+    with tempfile.TemporaryDirectory(prefix="m2c-browser-") as tmpdir:
+        base_path = Path(tmpdir)
+        asm_path = base_path / "input.s"
+        asm_path.write_text(source, encoding="utf-8")
+
+        argv = flags + ["--no-cache", "--visualize-format=dot"]
+        context_path = base_path / "context.c"
+        context_path.write_text(context, encoding="utf-8")
+        argv.extend(["--context", str(context_path)])
+        argv.append(str(asm_path))
+
+        with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
+            options = parse_flags(argv)
+            returncode = run(options)
+
+    err = stderr.getvalue()
+    if err and (options.visualize_flowgraph is None or returncode != 0):
+        stdout.write(err)
+    return BrowserResult(returncode, stdout.getvalue())
 
 
 def print_exception(exc: Exception, sanitize: bool) -> None:
@@ -51,6 +86,7 @@ def print_exception(exc: Exception, sanitize: bool) -> None:
             tb = tb.__cause__
         for frame in tb.stack:
             frame.lineno = 0
+            frame.end_lineno = 0
             frame.filename = Path(frame.filename).name
         for line in tb.format(chain=False):
             print(line, end="")
@@ -98,6 +134,11 @@ def run(options: Options) -> int:
             arch = ArmGbaArch()
         else:
             arch = ArmArch()
+    elif options.target.arch == Target.ArchEnum.SH:
+        if options.target.platform == Target.PlatformEnum.SH4:
+            arch = Sh4Arch()
+        else:
+            arch = Sh2Arch()
     else:
         raise ValueError(f"Invalid target arch: {options.target.arch}")
 
@@ -127,6 +168,10 @@ def run(options: Options) -> int:
     if not options.function_indexes_or_names:
         functions = list(all_functions.values())
     else:
+        functions_by_c_name = {
+            arch.c_symbol_name(name): function
+            for name, function in all_functions.items()
+        }
         functions = []
         for index_or_name in options.function_indexes_or_names:
             if isinstance(index_or_name, int):
@@ -139,10 +184,13 @@ def run(options: Options) -> int:
                     return 1
                 functions.append(list(all_functions.values())[index_or_name])
             else:
-                if index_or_name not in all_functions:
+                function = all_functions.get(index_or_name)
+                if function is None:
+                    function = functions_by_c_name.get(index_or_name)
+                if function is None:
                     print(f"Function {index_or_name} not found.", file=sys.stderr)
                     return 1
-                functions.append(all_functions[index_or_name])
+                functions.append(function)
 
     fmt = options.formatter()
     function_names = set(all_functions.keys())
@@ -164,7 +212,7 @@ def run(options: Options) -> int:
 
     decompilations: List[DecompilationState] = []
     for function in functions:
-        state: Union[DecompilationState.Inner, Exception]
+        state: Union[DecompilationState.Valid, Exception]
         try:
             narrow_func_call_outputs(function, global_info)
             flow_graph = build_flowgraph(
@@ -175,7 +223,7 @@ def run(options: Options) -> int:
                 print_warnings=options.debug,
                 debug_patterns=options.debug_patterns,
             )
-            state = DecompilationState.Inner(flow_graph)
+            state = DecompilationState.Valid(flow_graph)
         except Exception as e:
             # Store the exception for later, to preserve the order in the output
             state = e
@@ -557,10 +605,13 @@ def parse_flags(flags: List[str]) -> Options:
         type=Target.parse,
         default="mips-ido-c",
         help="Target platform, compiler, and language triple. "
-        "Supported platforms: [mips, mipsel, mipsee, ppc, arm, gba]. "
-        "Supported compilers: [ido, gcc, mwcc]. "
+        "Only platform needs to be provided. "
+        "Supported platforms: [mips, mipsel, mipsee, ppc, arm, gba, sh2]. "
+        "Supported compilers: [ido, gcc, mwcc] "
         "Supported languages: [c, c++]. "
-        "Default is mips-ido-c, `ppc` is an alias for ppc-mwcc-c++, and `arm` for arm-gcc-c.",
+        "Defaults to mips-ido-c. "
+        "If compiler is not provided, it defaults to ido for mips, mwcc for ppc, otherwise gcc. "
+        "If language is not provided, it defaults to c++ for mwcc, otherwise c.",
     )
     group.add_argument(
         "--passes",

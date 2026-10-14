@@ -6,8 +6,10 @@ extern ? a3;
 extern ? buf;
 
 void test(void) {
-    memcpy(&unksp0, "abcdef", 7);
-    foo(&unksp0);
+    ? sp0;
+
+    memcpy(&sp0, "abcdef", 7);
+    foo(&sp0);
     a1.unk4 = (s32) a2.unk4;
     a3.unk0 = (s32) a1.unk0;
     a3.unk4 = (s32) a1.unk4;

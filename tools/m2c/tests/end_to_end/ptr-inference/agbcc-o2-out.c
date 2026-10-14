@@ -1,3 +1,6 @@
-void test(struct A *arg4) {
-    foo(&unksp0, &arg4);
+void test(void) {
+    s32 *sp0;
+    struct A *sp4;
+
+    foo(&sp0, &sp4);
 }

@@ -1,9 +1,12 @@
 ? foo(? *);                                         /* static */
 
-void test(? *arg4) {
-    unksp0 = &unksp0;
-    arg4 = &arg4;
+void test(void) {
+    ? *sp0;                                         /* compiler-managed */
+    ? *sp4;
+
+    sp0 = &sp0;
+    sp4 = &sp4;
     foo();
-    unksp0 = arg4;
-    foo((? *) arg4);
+    sp0 = &sp4;
+    foo(&sp4);
 }

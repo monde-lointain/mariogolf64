@@ -9,6 +9,7 @@ from typing import (
     Dict,
     Iterator,
     List,
+    Deque,
     Sequence,
     Match,
     NoReturn,
@@ -150,9 +151,17 @@ def main_early() -> None:
         "--file",
         dest="file",
         type=str,
-        help="""File path for a file being diffed. When used the map
+        help="""File path for the file being diffed. When used the map
         file isn't searched for the function given. Useful for dynamically
         linked libraries.""",
+    )
+    parser.add_argument(
+        "-F",
+        "--ref-file",
+        dest="ref_file",
+        type=str,
+        help="""File path for the file being diffed against. Defaults to
+        expected/<diffed file>; normally you should never need to override this.""",
     )
     parser.add_argument(
         "-e",
@@ -414,7 +423,7 @@ if __name__ == "__main__":
 # (We do imports late to optimize auto-complete performance.)
 
 import abc
-from collections import Counter, defaultdict
+from collections import Counter, defaultdict, deque
 from dataclasses import asdict, dataclass, field, replace
 import difflib
 import html
@@ -429,7 +438,6 @@ import subprocess
 import threading
 import time
 import traceback
-
 
 MISSING_PREREQUISITES = (
     "Missing prerequisite python module {}. "
@@ -478,6 +486,7 @@ class Config:
     # Build/objdump options
     diff_obj: bool
     file: Optional[str]
+    ref_file: Optional[str]
     make: bool
     source_old_binutils: bool
     diff_section: str
@@ -572,6 +581,7 @@ def create_config(args: argparse.Namespace, project: ProjectSettings) -> Config:
         # Build/objdump options
         diff_obj=args.diff_obj,
         file=args.file,
+        ref_file=args.ref_file,
         make=args.make,
         source_old_binutils=args.source_old_binutils
         or "llvm-" in project.objdump_executable,
@@ -1549,7 +1559,7 @@ def dump_objfile(
     if not os.path.isfile(objfile):
         fail(f"Not able to find .o file for function: {objfile} is not a file.")
 
-    refobjfile = os.path.join(project.expected_dir, objfile)
+    refobjfile = config.ref_file or os.path.join(project.expected_dir, objfile)
     if config.diff_mode != DiffMode.SINGLE and not os.path.isfile(refobjfile):
         fail(f'Please ensure an OK .o file exists at "{refobjfile}".')
 
@@ -1685,6 +1695,7 @@ class AsmProcessorMIPS(AsmProcessor):
 
     def is_end_of_function(self, mnemonic: str, args: str) -> bool:
         if self.seen_jr_ra:
+            self.seen_jr_ra = False
             return True
         if mnemonic == "jr" and args == "ra":
             self.seen_jr_ra = True
@@ -1866,15 +1877,27 @@ class AsmProcessorARM32(AsmProcessor):
             addr = int(addr_match.group(1), 16) if addr_match else -1
             entry_match = re.search(ARM32_JUMP_TABLE_ENTRY_PATTERN, line)
             if jump_table_entries > 0 and entry_match:
-                value = (
-                    entry_match.group(4)
-                    if is_hexstring(entry_match.group(4))
-                    else entry_match.group(2)
-                )
+                try:
+                    # Try parsing argument to .short/.word
+                    value = int(entry_match.group(4), 16)
+                except ValueError:
+                    # No luck; maybe it got disassembled to an instruction,
+                    # from which we need to read the instruction bytes instead.
+                    try:
+                        value = int(entry_match.group(2) or "", 16)
+                    except ValueError:
+                        # Something went wrong; avoid crashing. This has been
+                        # seen to happen in practice when we misparsed the asm
+                        # when searching for a cmp and ended up with the wrong
+                        # number of entries, after which we ran into a line with
+                        # a relocation rather than instruction bytes.
+                        jump_table_entries = 0
+                        break
+
                 table_entry = self.JumpTableEntry(
                     cur_addr=addr,
                     table_start_addr=table_start_addr,
-                    value=int(value, 16),
+                    value=value,
                     is_word=entry_match.group(3) == ".word",
                 )
                 jump_table_entries -= 2 if table_entry.is_word else 1
@@ -1896,7 +1919,10 @@ class AsmProcessorARM32(AsmProcessor):
         for i in reversed(range(line_no)):
             cmp_match = re.search(ARM32_COMPARE_IMM_PATTERN, raw_lines[i])
             if cmp_match:
-                value = immediate_to_int(cmp_match.group(2))
+                imm_match = re.match(r"#?(0x)?([0-9a-f]+)", cmp_match.group(2))
+                assert imm_match
+                base = 16 if imm_match.group(1) else 10
+                value = int(imm_match.group(2), base)
                 if value > 0:
                     return value + 1
         return 0
@@ -1913,7 +1939,7 @@ class AsmProcessorARM32(AsmProcessor):
             # related symbol, but this serves as a stop-gap.)
             if not prev.strip():
                 # More recent objdump doesn't seem to be emitting .word? Or maybe
-                # I'm just looking at ELFs without proper STT_OBJECT markers.
+                # I'm just looking at ELFs without proper $d symbol markers.
                 # In any case, this case seems safe enough to handle. The ELF
                 # I was looking at also uses RELA relocations, so we don't even
                 # need to parse the underlying bytes from the previous row.
@@ -1921,7 +1947,16 @@ class AsmProcessorARM32(AsmProcessor):
                 return ".word " + sym, sym
             return prev, None
         before, imm, after = parse_relocated_line(prev)
-        repl = row.split()[-1] + reloc_addend_from_imm(imm, before, self.config.arch)
+        # Ignore imm; ARM typically uses RELA relocations that ignore addends
+        # embedded in the code.
+        repl = row.split()[-1]
+        if "R_ARM_PC24" in row:
+            # The bl instruction encoding embeds an offset which is -8 compared
+            # to that of the asm representation (being relative to pc+8 instead
+            # of pc). Thus, we need to adjust the relocation by +8 to get it
+            # into asm representation form.
+            repl, addend = extract_reloc_addend(repl)
+            repl += format_reloc_addend(addend + 8)
         return before + repl + after, repl
 
     def _normalize_arch_specific(self, mnemonic: str, row: str) -> str:
@@ -1967,13 +2002,13 @@ class AsmProcessorARM32(AsmProcessor):
                 continue
 
             # Add data symbol and its address to the line.
-            line_original = lines_by_line_number[line.data_pool_addr].original
+            value = "?"
+            if line.data_pool_addr in lines_by_line_number:
+                data_parts = lines_by_line_number[line.data_pool_addr].original.split()
+                if len(data_parts) > 1:
+                    value = data_parts[1]
             addr = "{:x}".format(line.data_pool_addr)
-            if line_original.strip():
-                value = line_original.split()[1]
-                line.original = line.normalized_original + f"={value} ({addr})"
-            else:
-                line.original = line.normalized_original + f"=? ({addr})"
+            line.original = line.normalized_original + f"={value} ({addr})"
 
     def post_process(self, lines: List["Line"]) -> None:
         self._post_process_jump_tables(lines)
@@ -2195,29 +2230,28 @@ class AsmProcessorX86(AsmProcessor):
             else:
                 repl = f"{repl}+{of}"
 
-        return f"{mnemonic}\t{args[:start]+repl+args[end:]}", repl
+        return f"{mnemonic}\t{args[:start] + repl + args[end:]}", repl
 
     def is_end_of_function(self, mnemonic: str, args: str) -> bool:
         return mnemonic == "ret"
 
 
-# pc-relative mov instructions
+# pc-relative mov instructions, with or without the <label> targets
 # Examples:
 # "mov.l   150 <_bar+0x12>,r4     ! 154 <_main>"
 # "mov.w   266 <_main+0x112>,r4   ! bbaa"
 # "mova    190 <_main+0x3c>,r0"
-SH_POOL_PATTERN = (
-    r"(^.+mov\.?([lwa])\s+)([a-fA-F0-9]+)\s*<.+>(,r[0-9]+)(?:\s+!\s*([a-fA-F0-9]*))?"
-)
+# "mov.l   0x1234,r7"
+# "mov.l   0x4c,r1 ! 605c660"
+# "mova    0x5c,r0"
+SH_POOL_PATTERN = r"(^.+mov\.?([lwa])\s+)(?:0x)?([a-fA-F0-9]+)(\s*<.+>)?,(r[0-9]+)(?:\s+!\s*([a-fA-F0-9]*))?"
 
 # Normalized version of the normal pattern that uses pc-relative notation
 # Examples:
 # "mov.l   @(0x10,pc),r4 ! 150"
 # "mov.w   @(0x6e,pc),r4 ! 266"
 # "mova    @(0x22,pc),r0 ! 190"
-SH_POOL_PATTERN_NORM = (
-    r"(mov\.?[alw]\s+@\(0x[a-fA-F0-9]+,pc\).*,(r[0-9]|r1[0-5])+\s+!)\s+([a-fA-F0-9]+).*"
-)
+SH_POOL_PATTERN_NORM = r".*(mov\.?([alw])\s+@\(0x[a-fA-F0-9]+,pc\).*,(r[0-9]|r1[0-5])+\s+!)\s+([a-fA-F0-9]+).*"
 
 
 class AsmProcessorSH2(AsmProcessor):
@@ -2225,6 +2259,7 @@ class AsmProcessorSH2(AsmProcessor):
     class ImmEntry:
         value: int
         is_long: bool
+        left_side: str
         content: List[str] = field(default_factory=list)
 
     @dataclass
@@ -2242,33 +2277,25 @@ class AsmProcessorSH2(AsmProcessor):
         new_lines = []
         lines = objdump.splitlines()
 
-        # Detect endianess, as there's no special marker for what is data
-        # and what is code (like in ARM) getting the endian is needed to
-        # correct literal pool bytes read as instructions
-        is_be = self._test_endian(lines)
-
         # Collect jtbl, immediates and reloc
-        norm_lines = self._collect_and_normalize(lines, is_be)
+        norm_lines = self._collect_and_normalize(lines)
 
         # Finally, fix the wrongly decoded data
         for line in norm_lines:
-            addr_match = re.match(r"(^\s*([0-9a-f]+):\s+)", line)
-            addr = int(addr_match.group(2), 16) if addr_match else -1
+            addr_match = re.match(r"^\s*([0-9a-f]+):\s+", line)
+            addr = int(addr_match.group(1), 16) if addr_match else -1
 
             if addr in self._imms:
-                left = addr_match.group(1) if addr_match else ""
-                bytes_str = " ".join(self._imms[addr].content)
-                left += f"{bytes_str:<12}"
+                imm = self._imms[addr]
+                bytes_str = " ".join(imm.content)
+                left = f"{imm.left_side}{bytes_str:<12}"
 
-                if self._imms[addr].value == -1:
-                    if is_be:
-                        value = int("".join(self._imms[addr].content), 16)
-                    else:
-                        value = int("".join(self._imms[addr].content[::-1]), 16)
+                if imm.value == -1:
+                    value = self._bytelist_to_value(imm.content)
                 else:
-                    value = self._imms[addr].value
+                    value = imm.value
 
-                if self._imms[addr].is_long:
+                if imm.is_long:
                     right = f"\t.long 0x{value:08x}"
                 else:
                     right = f"\t.word 0x{value:04x}"
@@ -2292,7 +2319,14 @@ class AsmProcessorSH2(AsmProcessor):
     # Collects info on jtbls, imm loads and relocs so data mistakenly treated
     # as an instruction can be fixed, returns a new list of lines that should
     # make the fixup job a bit easier
-    def _collect_and_normalize(self, lines: List[str], is_be: bool) -> List[str]:
+    def _collect_and_normalize(self, lines: List[str]) -> List[str]:
+        ignored_rels = {
+            "R_SH_CODE",
+            "R_SH_DATA",
+            "R_SH_LABEL",
+            "R_SH_ALIGN",
+        }
+
         # Catalog all relocs, done first just because there might relocs without
         # mov reference, so we can check for these and join them
         for i, line in enumerate(lines):
@@ -2303,21 +2337,27 @@ class AsmProcessorSH2(AsmProcessor):
             mnemonic = addr_match.group(3) if addr_match else ""
 
             # Reloc line, add to dict
-            if "R_SH_" in mnemonic:
+            if "R_SH_" in mnemonic and mnemonic not in ignored_rels:
                 self._relocs[addr] = line
                 continue
 
         norm_lines = []
         jtbl_cnt = 0
+        curr_jtbl_addr = 0
+        jtbl_search: Deque[str] = deque(maxlen=20)
         skip_next = False
-        for i, line in enumerate(lines):
+
+        for line in lines:
             addr_match = re.match(
-                r"(^\s*([0-9a-f]+):\s+([a-fA-F0-9]+\s[a-fA-F0-9]+)?\s*?)([\w.\/]+)",
+                r"((^\s*([0-9a-f]+):\s+)([a-fA-F0-9]+\s[a-fA-F0-9]+)?\s*?)([\w.\/]+)",
                 line,
             )
-            addr = int(addr_match.group(2), 16) if addr_match else -1
-            mnemonic = addr_match.group(4) if addr_match else ""
-            inst_bytes = addr_match.group(3) if addr_match else ""
+
+            addr = int(addr_match.group(3), 16) if addr_match else -1
+            left_side = addr_match.group(2) if addr_match else ""
+            left_bytes = addr_match.group(1) if addr_match else ""
+            mnemonic = addr_match.group(5) if addr_match else ""
+            inst_bytes = addr_match.group(4) if addr_match else ""
 
             # Non-code line, leave alone
             if addr == -1:
@@ -2328,16 +2368,35 @@ class AsmProcessorSH2(AsmProcessor):
             if "R_SH_" in mnemonic:
                 continue
 
+            # Fixup BSR targets if they have a relocation, they can only
+            # have relocs into reachable labels so we can just take whatever
+            # displacement the relocation has as the target
+            if mnemonic == "bsr" and addr in self._relocs:
+                rel_line = self._relocs[addr]
+                symbol = rel_line.split("+")[0]
+                if symbol != ".text":
+                    if "+" in rel_line:
+                        target = int(rel_line.split("+")[-1], 16) + 4
+                    elif "-" in rel_line:
+                        target = -int(rel_line.split("-")[-1], 16) + 4
+                    else:
+                        target = addr + 4  # This should be impossible
+                    nline = line.split("\tbsr\t")[0]
+                    norm_lines.append(f"{nline}\tbsr\t{target:x}")
+                    continue
+
             # Address reloc has an entry but isn't from a mov reference, add it as one
             if addr in self._relocs and addr not in self._imms:
                 if "R_SH_DIR32" in self._relocs[addr]:
                     self._imms[addr] = self.ImmEntry(
                         value=-1,
+                        left_side=left_side,
                         is_long=True,
                     )
                 elif "R_SH_DIR16" in self._relocs[addr]:
                     self._imms[addr] = self.ImmEntry(
                         value=-1,
+                        left_side=left_side,
                         is_long=False,
                     )
 
@@ -2348,6 +2407,7 @@ class AsmProcessorSH2(AsmProcessor):
                     skip_next = False
                 else:
                     norm_lines.append(line)
+                    self._imms[addr].left_side = left_side
 
                     if self._imms[addr].is_long:
                         skip_next = True
@@ -2359,21 +2419,16 @@ class AsmProcessorSH2(AsmProcessor):
             # jtbl entry, format
             if addr in self._jtbls or jtbl_cnt > 0:
                 if jtbl_cnt == 0:
-                    _addr = addr
-                    jtbl_cnt = self._jtbls[_addr].count
+                    curr_jtbl_addr = addr
+                    jtbl_cnt = self._jtbls[curr_jtbl_addr].count
 
                 jtbl_cnt -= 1
 
-                base = self._jtbls[_addr].base
+                base = self._jtbls[curr_jtbl_addr].base
 
-                str_bytes = inst_bytes.split()
-                if is_be:
-                    item = int(str_bytes[0] + str_bytes[1], 16)
-                else:
-                    item = int(str_bytes[1] + str_bytes[0], 16)
+                item = self._bytelist_to_value(inst_bytes.split())
 
-                entry = addr_match.group(1) if addr_match else ""
-                entry += f".word 0x{item:04x} ! tgt 0x{base + item:x}"
+                entry = left_bytes + f".word 0x{item:04x} ! tgt {base + item:x}"
                 norm_lines.append(entry)
                 continue
 
@@ -2381,26 +2436,30 @@ class AsmProcessorSH2(AsmProcessor):
             mov_match = re.search(SH_POOL_PATTERN, line)
 
             if mov_match:
+                # Add to the jtbl search window
+                jtbl_search.append(line)
+
                 fix_line = mov_match.group(1)
                 mov_type = mov_match.group(2)
                 mov_tgt = int(mov_match.group(3), 16)
+                mov_reg = mov_match.group(5)
 
                 # If the line has a non-text relocation it means the data is elsewhere
                 if addr in self._relocs and ".text" not in self._relocs[addr]:
                     mov_label = self._relocs[addr].split()[-1]
                     mov_comm = ""
-                    pc_rel = f"@({mov_label},pc)"
-                    pc_rel += mov_match.group(4)
+                    pc_rel = f"@({mov_label},pc),{mov_reg}"
                 else:
                     mov_value = -1
 
                     # Can be None if direct values are used but the pool
                     # doesn't get included in the asm
-                    if mov_match.group(5) is not None:
-                        mov_value = int(mov_match.group(5), 16)
+                    if mov_match.group(6) is not None:
+                        mov_value = int(mov_match.group(6), 16)
 
                     self._imms[mov_tgt] = self.ImmEntry(
                         value=mov_value,
+                        left_side="",
                         # Having "mova" be a long type might be a mistake, but it's
                         # used for floats in SH4, so not sure...
                         is_long=mov_type in ("l", "a"),
@@ -2408,31 +2467,39 @@ class AsmProcessorSH2(AsmProcessor):
 
                     mov_comm = f" ! {mov_tgt:x}"
                     # Convert to pc-rel notation while we are at it
-                    pc_rel = f"@(0x{mov_tgt - addr:x},pc)"
-                    pc_rel += mov_match.group(4)
+                    pc_rel = f"@(0x{mov_tgt - addr:x},pc),{mov_reg}"
 
                 norm_lines.append(fix_line + pc_rel + mov_comm)
                 continue
 
-            # Check for jumptables
+            # Check for jumptables, braf is used by SHC and jmp by GCC
+            # unsure what MSVC or MWCC do
             if mnemonic == "braf" or mnemonic == "jmp":
-                # search mova up to 4 instructions before
-                mov_lines = lines[i - 1 : i - 5 : -1]
+                # search for a mova in the last 20 instructions seen
                 jtbl_match = None
                 is_mova = False
                 jtbl_addr = 0
+                base_reg = line.split()[-1].replace("@", "")
 
-                for mov_line in mov_lines:
+                search = list(jtbl_search)
+
+                while search:
+                    mov_line = search.pop()
+
                     jtbl_match = re.match(SH_POOL_PATTERN, mov_line)
                     if jtbl_match is not None:
                         is_mova = jtbl_match.group(2) == "a"
                         jtbl_addr = int(jtbl_match.group(3), 16)
-                        break
+                        reg = jtbl_match.group(5)
+
+                        # that the reg for the mova is also used
+                        # for the jmp/braf seems to hold for both compilers
+                        if is_mova and reg == base_reg:
+                            break
 
                 if is_mova and addr not in self._relocs:
-                    # Search up to 10 lines before
-                    end = min(i, 10)
-                    jtbl_count = self._test_jtbl(lines[i - 2 : i - end : -1])
+                    # Search the jtbl size cmp instruction in the remaining lines
+                    jtbl_count = self._test_jtbl(search)
 
                     if jtbl_count != -1:
                         # Remove from imm table if present
@@ -2442,66 +2509,43 @@ class AsmProcessorSH2(AsmProcessor):
                         self._jtbls[jtbl_addr] = self.JtblEntry(jtbl_count, addr + 4)
 
             # None of the above
+            jtbl_search.append(line)
             norm_lines.append(line)
         return norm_lines
 
     def _test_jtbl(self, lines: List[str]) -> int:
-        jtbl_count = -1
-        part_index = 0
         adjust = 0
-        for i, line in enumerate(lines):
+        cmp_reg = ""
+
+        while lines:
+            line = lines.pop()
             cmp_match = re.match(r".+cmp/(ge|gt|hs|hi)\s+(r[0-9]+),.+", line)
+
             if cmp_match:
                 cmp_reg = cmp_match.group(2)
-                part_index = i
                 if cmp_match.group(1) in ("gt", "hi"):
                     adjust = 1
+                break
 
-        if part_index > 0:
-            for line in lines[part_index:]:
-                # less than 128 cases
-                mov_match = re.match(r".+mov\s+#([0-9]+)," + cmp_reg, line)
-                if mov_match:
-                    jtbl_count = int(mov_match.group(1)) + adjust
-                    break
-                # more than 128 cases
-                pat = r"^.+mov.[lw].*<.+>,"
-                pat += cmp_reg + r"\s+!\s*([a-fA-F0-9]*)?"
-                mov_match = re.match(pat, line)
-                if mov_match:
-                    jtbl_count = int(mov_match.group(1), 16) + adjust
-                    break
+        for line in reversed(lines):
+            # less than 128 cases
+            mov_match = re.match(r".+mov\s+#([0-9]+)," + cmp_reg, line)
+            if mov_match:
+                return int(mov_match.group(1)) + adjust
 
-        return jtbl_count
+            # more than 128 cases
+            pat = r"^.+mov.[lw].*," + cmp_reg + r"\s+!\s*([a-fA-F0-9]*)?"
+            mov_match = re.match(pat, line)
+            if mov_match:
+                return int(mov_match.group(1), 16) + adjust
 
-    def _test_endian(self, lines: List[str]) -> bool:
-        # Endianess is only relevant when pc-relative movs are present
-        for line in lines:
-            m = re.match(
-                r"^.*([a-fA-F0-9]{2}\s[a-fA-F0-9]{2})\s+mov\.?([alw])\s+[a-fA-F0-9]+\s*<.+>,r([0-9]+).*",
-                line,
-            )
-            if not m:
-                continue
-            mov_bytes = int(m.group(1).replace(" ", ""), 16)
-            mov_kind = (mov_bytes >> 12) & 0xF
-            mov_reg = (mov_bytes >> 8) & 0xF
-            mov_type = m.group(2)
-            tgt_reg = int(m.group(3))
+        return -1
 
-            return self._detect_be(mov_kind, mov_reg, mov_type, tgt_reg)
-        return False
-
-    def _detect_be(
-        self, mov_kind: int, mov_reg: int, mov_type: str, tgt_reg: int
-    ) -> bool:
-        if mov_type == "l":
-            return mov_kind == 13 and mov_reg == tgt_reg
-        if mov_type == "a":
-            return mov_kind == 12 and mov_reg == 7
-        if mov_type == "w":
-            return mov_kind == 9 and mov_reg == tgt_reg
-        return False
+    def _bytelist_to_value(self, str_bytes: List[str]) -> int:
+        if self.config.arch.big_endian:
+            return int("".join(str_bytes), 16)
+        else:
+            return int("".join(str_bytes[::-1]), 16)
 
     def process_reloc(self, row: str, prev: str) -> Tuple[str, Optional[str]]:
         repl = row.split()[-1]
@@ -2518,7 +2562,7 @@ class AsmProcessorSH2(AsmProcessor):
             )
             return f"{before}{repl}{after}", repl
         elif "R_SH_IND12W" in row:
-            # bra <label>
+            # bra <label> or bsr <label>, the latter is handled during pre_process
             return prev, None
         elif "R_SH_DIR8WPL" in row:
             # pc-rel mov.l <label>
@@ -2552,13 +2596,14 @@ class AsmProcessorSH2(AsmProcessor):
 
     def _normalize_load(self, row: str) -> str:
         pool_match = re.search(SH_POOL_PATTERN_NORM, row)
-        return pool_match.group(1) if pool_match else row
+        return pool_match.group(2) if pool_match else row
 
     def _post_process_jump_tables(self, lines: List["Line"]) -> None:
         for line in lines:
             comm = line.comment
             if comm is not None and comm.startswith("! tgt "):
                 line.branch_target = int(comm[6:], 16)
+                line.original += f" ! ({comm[6:]})"
 
     def _post_process_data_pools(self, lines: List["Line"]) -> None:
         lines_by_line_number = {}
@@ -2570,6 +2615,7 @@ class AsmProcessorSH2(AsmProcessor):
                 continue
 
             if line.data_pool_addr not in lines_by_line_number:
+                line.original = line.normalized_original + " ! ?"
                 continue
 
             # Add data symbol and its address to the line.
@@ -2632,7 +2678,7 @@ class AsmProcessorM68k(AsmProcessor):
         else:
             assert False, f"unknown relocation type '{row}' for line '{prev}'"
 
-        return f"{mnemonic}\t{args[:start]+repl+args[end:]}", repl
+        return f"{mnemonic}\t{args[:start] + repl + args[end:]}", repl
 
     def is_end_of_function(self, mnemonic: str, args: str) -> bool:
         return mnemonic == "rts" or mnemonic == "rte" or mnemonic == "rtr"
@@ -2930,11 +2976,12 @@ ARM32_SETTINGS = ArchSettings(
     re_comment=re.compile(r"(<.*>|//.*$)"),
     # Includes:
     #   - General purpose registers: r0..13
+    #   - General purpose registers: sl (r10), fp (r11), ip (r12)
     #   - Frame pointer registers: lr (r14), pc (r15)
     #   - VFP/NEON registers: s0..31, d0..31, q0..15, fpscr, fpexc, fpsid
     # SP should not be in this list.
     re_reg=re.compile(
-        r"\$?\b([rq][0-9]|[rq]1[0-5]|pc|lr|[ds][12]?[0-9]|[ds]3[01]|fp(scr|exc|sid))\b"
+        r"\$?\b([rq][0-9]|[rq]1[0-5]|sl|fp|ip|pc|lr|[ds][12]?[0-9]|[ds]3[01]|fp(scr|exc|sid))\b"
     ),
     re_sprel=re.compile(r"sp, #-?(0x[0-9a-fA-F]+|[0-9]+)\b"),
     re_large_imm=re.compile(r"-?[1-9][0-9]{2,}|-?0x[0-9a-f]{3,}"),
@@ -3024,8 +3071,10 @@ I686_SETTINGS = replace(
 
 SH2_SETTINGS = ArchSettings(
     name="sh2",
-    # match -128-127 preceded by a '#' with a ',' after (8 bit immediates)
-    re_int=re.compile(r"(?<=#)(-?(?:1[01][0-9]|12[0-8]|[1-9][0-9]?|0))(?=,)"),
+    # match -128-127 or 0-255 preceded by a '#' with a ',' after (8 bit immediates)
+    re_int=re.compile(
+        r"(?<=#)(-?(?:12[0-8]|1[01][0-9]|[1-9][0-9]?|0)|(?:25[0-5]|2[0-4][0-9]|1[3-9][0-9]|12[8-9]))(?=,)"
+    ),
     # match <text>, match ! and after
     re_comment=re.compile(r"<.*?>|!.*"),
     #   - r0-r15 general purpose registers, r15 is stack pointer during exceptions
@@ -3050,13 +3099,15 @@ SH2_SETTINGS = ArchSettings(
     proc=AsmProcessorSH2,
 )
 
+SH2EL_SETTINGS = replace(SH2_SETTINGS, name="sh2el", big_endian=False)
+
 SH4_SETTINGS = replace(
     SH2_SETTINGS,
     name="sh4",
     #   - fr0-fr15, dr0-dr14, xd0-xd14, fv0-fv12 FP registers
     #     dr/xd registers can only be even-numbered, and fv registers can only be a multiple of 4
     re_reg=re.compile(
-        r"r1[0-5]|r[0-9]|fr1[0-5]|fr[0-9]|dr[02468]|dr1[024]|xd[02468]|xd1[024]|fv[048]|fv12"
+        r"r1[0-5]|r[0-9]|fr1[0-5]|fr[0-9]|dr[02468]|dr1[024]|(?<!0)xd[02468]|(?<!0)xd1[024]|fv[048]|fv12"
     ),
     arch_flags=["-m", "sh4"],
 )
@@ -3106,28 +3157,15 @@ ARCH_SETTINGS = [
 ]
 
 
-def immediate_to_int(immediate: str) -> int:
-    imm_match = re.match(r"#?(0x)?([0-9a-f]+)", immediate)
-    assert imm_match
-    base = 16 if imm_match.group(1) else 10
-    return int(imm_match.group(2), base)
-
-
-def is_hexstring(value: str) -> bool:
-    try:
-        int(value, 16)
-        return True
-    except ValueError:
-        return False
-
-
 def hexify_int(row: str, pat: Match[str], arch: ArchSettings) -> str:
     full = pat.group(0)
 
-    # sh2/sh4 only has 8-bit immediates, just convert them uniformly without
-    # any -hex stuff
+    # sh2/sh4 only has signed 8-bit immediates for some instructions
     if arch.name == "sh2" or arch.name == "sh4" or arch.name == "sh4el":
-        return hex(int(full) & 0xFF)
+        if "add" in row or "mov" in row or "cmp/eq" in row:
+            return hex(int(full))
+        else:
+            return hex(int(full) & 0xFF)
 
     if len(full) <= 1:
         # leave one-digit ints alone
@@ -3159,6 +3197,25 @@ def parse_relocated_line(line: str) -> Tuple[str, str, str]:
     return before, imm, after
 
 
+def format_reloc_addend(addend: int) -> str:
+    if addend == 0:
+        return ""
+    elif addend < 0:
+        return hex(addend)
+    else:
+        return "+" + hex(addend)
+
+
+def extract_reloc_addend(value: str) -> Tuple[str, int]:
+    parts = value.split("+")
+    if len(parts) == 2:
+        return parts[0], int(parts[1], 0)
+    parts = value.split("-")
+    if len(parts) == 2:
+        return parts[0], -int(parts[1], 0)
+    return value, 0
+
+
 def reloc_addend_from_imm(imm: str, before: str, arch: ArchSettings) -> str:
     """For architectures like MIPS where relocations have addends embedded in
     the code as immediates, convert such an immediate into an addition/
@@ -3173,12 +3230,7 @@ def reloc_addend_from_imm(imm: str, before: str, arch: ArchSettings) -> str:
         addend = int(imm, 16)
     else:
         addend = int(imm, 0)
-    if addend == 0:
-        return ""
-    elif addend < 0:
-        return hex(addend)
-    else:
-        return "+" + hex(addend)
+    return format_reloc_addend(addend)
 
 
 def pad_mnemonic(line: str) -> str:
@@ -3290,7 +3342,7 @@ def process(dump: str, config: Config) -> List[Line]:
                 offset = pool_match.group(3).split(" ")[0][1:]
                 data_pool_addr = int(offset, 16)
             elif pool_match_sh:
-                data_pool_addr = int(pool_match_sh.group(3), 16)
+                data_pool_addr = int(pool_match_sh.group(4), 16)
 
             m_comment = re.search(arch.re_comment, row)
             comment = m_comment[0] if m_comment else None
@@ -4228,7 +4280,7 @@ def debounced_fs_watch(
 
         def should_notify(self, path: str) -> bool:
             for target in self.file_targets:
-                if os.path.normpath(path) == target:
+                if os.path.abspath(path) == target:
                     return True
             if config.make and any(
                 path.endswith(suffix) for suffix in project.source_extensions
@@ -4250,7 +4302,7 @@ def debounced_fs_watch(
             if os.path.isdir(target):
                 observer.schedule(event_handler, target, recursive=True)  # type: ignore
             else:
-                file_targets.append(os.path.normpath(target))
+                file_targets.append(os.path.abspath(target))
                 target = os.path.dirname(target) or "."
                 if target not in observed:
                     observed.add(target)
