@@ -1,3 +1,9 @@
+---
+type: "Reconstruction Note"
+title: "func_80047DBC — near-match carry (terminal sched.c const-load-vs-fabs coin)"
+description: "Records reconstruction evidence and matching constraints for func_80047DBC."
+---
+
 # func_80047DBC — near-match carry (terminal sched.c const-load-vs-fabs coin)
 
 **Status:** CARRY. Body CONFIRMED CORRECT (byte-exact under `-fno-schedule-insns

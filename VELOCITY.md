@@ -1,3 +1,9 @@
+---
+type: Sprint History
+title: "Mario Golf 64 sprint velocity"
+description: Records regime-specific story-point history and the evolution of its estimation rubric.
+---
+
 # Mario Golf 64 decomp sprint velocity (story points)
 
 The story-point dashboard, activated 2026-06-11 by PO directive at the Sprint-5 review (the

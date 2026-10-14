@@ -1,3 +1,9 @@
+---
+type: Sprint History
+title: "Mario Golf 64 sprint retrospectives"
+description: Records newest-first sprint outcomes, measured friction, and accepted workflow improvements.
+---
+
 # Mario Golf 64 decomp sprint retros
 
 One short digest per sprint, newest first, written at the `sprint-review` gate. This is

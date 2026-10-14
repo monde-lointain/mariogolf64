@@ -1,3 +1,9 @@
+---
+type: "Reconstruction Note"
+title: "lookup_animation_by_id (0x80055FFC) — SOLVED / BANKED S213"
+description: "Records reconstruction evidence and matching constraints for lookup_animation_by_id."
+---
+
 # lookup_animation_by_id (0x80055FFC) — SOLVED / BANKED S213
 
 Banked (commit "Bank lookup_animation_by_id ... (S213)"). Root-caused via a

@@ -1,4 +1,6 @@
 ---
+type: Agent Skill
+title: "MG64 decomp-loop skill"
 name: mg64-decomp-loop
 description: Execution loop for Mario Golf 64 decompilation. Use when working a committed SPRINT.md backlog, matching functions, running classical decomp, using Ghidra/m2c/asm-differ/decomp-permuter, banking functions, spiking carry-overs, or continuing an open MG64 sprint.
 ---

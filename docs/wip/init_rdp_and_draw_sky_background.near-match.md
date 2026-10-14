@@ -1,3 +1,9 @@
+---
+type: "Reconstruction Note"
+title: "init_rdp_and_draw_sky_background — 286/286, exact instruction multiset, pure order residual"
+description: "Records reconstruction evidence and matching constraints for init_rdp_and_draw_sky_background."
+---
+
 # init_rdp_and_draw_sky_background — 286/286, exact instruction multiset, pure order residual
 
 > **Verdict in one line.** Every instruction, every register, every immediate and the `-0xA0` frame

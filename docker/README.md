@@ -1,17 +1,27 @@
+---
+type: Playbook
+title: Private CI build container
+description: Builds and publishes the private ROM-bearing image used by trusted CI build jobs.
+sources:
+  - resource: Dockerfile
+    title: Container dependencies and ROM location
+  - resource: ../.github/workflows/build.yml
+    title: CI permissions and job conditions
+---
+
 # CI build container
 
-The `Build` workflow (`.github/workflows/build.yml`) runs inside a **private**
-container that bakes the copyrighted baserom at `/orig/baserom.z64`, mirroring the
-drmario64 CI setup. The ROM is gitignored, so it cannot ship in the repo or live
-in CI; it is baked into this image instead, which is why the image must stay
-private.
+The [Build workflow](../.github/workflows/build.yml) uses a private container with the copyrighted
+ROM at `/orig/baserom.z64`. Keep the image private. Its build job runs only for same-repository
+pushes and PRs, not fork PRs: PR-controlled scripts could otherwise exfiltrate the ROM. The separate
+Python analysis job is ROM-free and advisory.
 
 ## One-time / on-dep-change: build and push the image
 
 Run from the **repo root** (the build context), with `baserom.z64` present there.
 
 ```sh
-# baserom.z64 must be SHA-1 e2c4e7a905b29529b49a1619a401fe699224829b (NMFE, rev 0):
+# Compare this input SHA-1 with the top-level sha1 in mariogolf64.yaml:
 sha1sum baserom.z64
 
 docker build -f docker/Dockerfile -t ghcr.io/monde-lointain/mariogolf64-build:main .
@@ -39,8 +49,8 @@ usually cannot be pulled with the default `GITHUB_TOKEN`, hence the PAT.)
 
 ## Sequencing
 
-Push the image and add the `GHCR_PAT` secret **before** merging the workflow,
-otherwise the first CI run fails at the container pull.
+Push the image and add the `GHCR_PAT` secret before enabling or updating the workflow's image
+reference; a missing image or credential fails at container pull, before checkout.
 
 ## Local end-to-end test (optional)
 
@@ -55,12 +65,7 @@ docker run --rm -v "$PWD":/repo -w /repo mg64-ci-test bash -c \
 
 ## Local checkout prerequisites
 
-Local builds use host `cpp` and system MIPS binutils for extracted assembly; C still uses
-KMC GCC 2.7.2 and KMC binutils 2.6. Install `binutils-mips-linux-gnu`, `cpp`, and `clang-format-23`,
-place the USA revision-0 ROM at `baserom.z64`, and initialize the recorded submodules.
-On uv-managed machines, create `venv` with `uv venv --seed venv`, install
-`tools/requirements.txt` with `uv pip install --python venv/bin/python3 -r tools/requirements.txt`,
-and download the legacy compiler with `make -C tools`.
-Run `make extract`, then `tools/verify-rom.sh`; stop on failure rather than trusting an old ROM.
-For missing generated assembly stubs, use
-`docs/hazards.md#stale-persistent-nonmatchings-relic-recovery`.
+Use the [local build guide](../docs/build.md) for host dependencies, submodules, setup, extraction,
+verification, and the uv alternative. That guide owns local setup; this page owns image publication.
+For missing generated assembly stubs, read the
+[persistent-stub recovery playbook](../docs/hazards.md#stale-persistent-nonmatchings-relic-recovery).

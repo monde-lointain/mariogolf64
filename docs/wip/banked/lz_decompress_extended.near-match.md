@@ -1,3 +1,9 @@
+---
+type: "Banked Evidence"
+title: "lz_decompress_extended — BANKED S320 (872e322)"
+description: "Records the matching resolution and prior reconstruction evidence for lz_decompress_extended."
+---
+
 # lz_decompress_extended — BANKED S320 (872e322)
 
 **Resolved.** 282/282 at `-0x18`, 0 `cmpfn` rows, `verify-rom.sh` exit 0; closes

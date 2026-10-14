@@ -1,3 +1,9 @@
+---
+type: "Reconstruction Note"
+title: "collect_keyframe_events_at near-match (S260) — 54/54, ONE BRANCH-OFFSET BIT"
+description: "Records reconstruction evidence and matching constraints for collect_keyframe_events_at."
+---
+
 # collect_keyframe_events_at near-match (S260) — 54/54, ONE BRANCH-OFFSET BIT
 
 `src/main/func_80054900.c`. The S213 verdict (`#base-register-vs-displacement` +

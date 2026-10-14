@@ -1,4 +1,6 @@
 ---
+type: Agent Command
+title: "Claude decomp-loop command"
 description: Execution loop. Work the committed SPRINT.md backlog autonomously, smallest-first, banking one matched function at a time. Also the mid-sprint resume entry point.
 allowed-tools: Bash, Read, Write, Edit, AskUserQuestion, Task
 ---

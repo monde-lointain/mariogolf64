@@ -1,3 +1,9 @@
+---
+type: "Reconstruction Note"
+title: "get_terrain_vertex_pointer — value-select + tail register-permutation (EXACT-COUNT near-match)"
+description: "Records reconstruction evidence and matching constraints for get_terrain_vertex_pointer."
+---
+
 # get_terrain_vertex_pointer — value-select + tail register-permutation (EXACT-COUNT near-match)
 
 **Status:** fully RE'd, 40/40 instruction count, byte-exact except a tail register permutation

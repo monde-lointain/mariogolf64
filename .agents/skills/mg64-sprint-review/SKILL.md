@@ -1,4 +1,6 @@
 ---
+type: Agent Skill
+title: "MG64 sprint-review skill"
 name: mg64-sprint-review
 description: Review gate for the Mario Golf 64 decomp workflow. Use when the user invokes $mg64-sprint-review, asks to close or review an MG64 sprint, verify ROM SHA-1 DoD, apply retro-gated suggestions, update RETRO/BACKLOG/VELOCITY, or decide push/PR after sprint completion.
 ---

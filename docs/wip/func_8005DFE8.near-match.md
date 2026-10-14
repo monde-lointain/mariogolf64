@@ -1,3 +1,9 @@
+---
+type: "Reconstruction Note"
+title: "func_8005DFE8 — SRAM load/verify, CARRIED (S292 re-open; 102/102, 36 diff rows)"
+description: "Records reconstruction evidence and matching constraints for func_8005DFE8."
+---
+
 # func_8005DFE8 — SRAM load/verify, CARRIED (S292 re-open; 102/102, 36 diff rows)
 
 `src/main/func_80059BA0.c`, 0x198 / 102 instructions, jal=6, fp=0. Counterpart to the S265-banked

@@ -1,4 +1,6 @@
 ---
+type: Agent Command
+title: "Claude sprint-plan command"
 description: Plan gate. Rank with pick_target.py, propose a sprint goal + small committed backlog, get PO approval, then perform + validate the flip, write SPRINT.md.
 args:
   - name: scope

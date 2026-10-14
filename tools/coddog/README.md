@@ -1,3 +1,9 @@
+---
+type: Reference
+title: "Coddog fingerprint sweeps"
+description: Describes local reference fingerprint maps and their effect on candidate classification.
+---
+
 # coddog cross-ref (S71)
 
 `coddog compare2` fingerprints MG64's functions against ultralib VERSION_J (reloc-masked

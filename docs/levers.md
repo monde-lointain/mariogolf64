@@ -1,25 +1,22 @@
+---
+type: Reference
+title: Source-level code-generation levers
+description: Evidence-backed source transformations and compiler behaviors for steering Mario Golf 64's generated MIPS toward the ROM.
+---
+
 # Source levers (index)
 
 <role>
-The named source-level levers a crack slice draws on, one line each, so a prompt can name one and an
-agent can act on it. Read when filling `{{LEVERS}}` in `docs/fanout-prompt.md` and when a residual
-class suggests a family of fixes.
+Select a source-level lever for an observed residual or `{{LEVERS}}` in the
+[dispatch prompt](fanout-prompt.md). Detailed derivations live in sprint evidence and playbooks.
 </role>
-
-<scope>
-An index, not a transcription: derivations live in the retros and, where one exists, a
-`docs/hazards.md` section.
-</scope>
 
 ## Levers with a full playbook
 
-These have a `docs/hazards.md` section; read it, not a line here. Anchors:
-`#base-register-vs-displacement`, `#cross-jump-tail-merge`,
-`#goto-loop--loopc-never-runs-defeating-strength-reduction-and-bound-hoisting` (keep the entry test,
-`if (n != 0)`, S306), `#loop-weight-and-live-length-regalloc-steering`,
-`#named-aggregate-local-extra-block-move`, `#nested-function-static-chain-spill`,
-`#signed-divide-const-v0v1-quotient-destination`, `#switch-compare-chain-layout`,
-`#top-tested-loop-goto-local-hoist`.
+Select the [flag](hazard-index.md) or [symptom](hazard-symptoms.md) route before applying terse notes.
+The [playbook family index](hazards.md#playbook-index) lists the complete procedures.
+A [goto loop](hazards.md#goto-loop--loopc-never-runs-defeating-strength-reduction-and-bound-hoisting)
+still needs its entry test, `if (n != 0)` (S306).
 
 ## Register allocation and coloring
 

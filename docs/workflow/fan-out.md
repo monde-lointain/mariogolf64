@@ -1,11 +1,18 @@
+---
+type: Workflow
+title: Subagent fan-out
+description: Defines when to delegate decompilation work, how to isolate it, and what outcomes justify a fan-out.
+---
+
 # Subagent fan-out
 
 <role>
-When to dispatch subagents over a decomp pack, how many, and what a fan-out is expected to return.
-Read this at the plan gate when choosing between another smallest-first continuation and an
-escalation slice, and in the execution loop when opening a crack slice. The prompt each dispatched
-agent receives is `docs/fanout-prompt.md`.
+Use the trigger table at planning or crack time to select compile-isolated units and expected
+deliverables. The [dispatch prompt](../fanout-prompt.md) supplies each agent's contract.
 </role>
+
+**Navigate:** [Triggers](#when-to-fan-out) · [Isolation](#how-many) ·
+[Expected-value guard](#what-a-fan-out-is-worth) · [Wall classes](#wall-classes-a-fan-out-commonly-returns).
 
 ## When to fan out
 

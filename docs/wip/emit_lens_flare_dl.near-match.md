@@ -1,3 +1,9 @@
+---
+type: "Reconstruction Note"
+title: "emit_lens_flare_dl (func_8008D3F4) -- BANKED S302"
+description: "Records reconstruction evidence and matching constraints for emit_lens_flare_dl."
+---
+
 # `emit_lens_flare_dl` (`func_8008D3F4`) -- BANKED S302
 
 `src/main/func_8008D100.c`, 634 instructions, 0x9E8, frame -0x110. Sun / lens-flare emitter.

@@ -1,3 +1,9 @@
+---
+type: Product Backlog
+title: "Mario Golf 64 product backlog"
+description: Records Product Owner ordering rationale, sprint enablers, and time-scoped carry-over evidence.
+---
+
 # Mario Golf 64 decomp product backlog
 
 The Product Owner (you) orders this. The live candidate list is **not** duplicated here;

@@ -1,3 +1,9 @@
+---
+type: "Reconstruction Note"
+title: "func_8004CDA0 — cloud-buffer blend driver (near-match, S263)"
+description: "Records reconstruction evidence and matching constraints for func_8004CDA0."
+---
+
 # func_8004CDA0 — cloud-buffer blend driver (near-match, S263)
 
 **Status:** CARRIED. 227/234 instr, structure 100% correct, tail byte-exact.

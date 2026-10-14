@@ -1,22 +1,23 @@
+---
+type: Prompt
+title: Crack-subagent prompt template
+description: Provides the required isolated-work contract and deliverables for a dispatched function-cracking agent.
+---
+
 # Crack-subagent prompt template
 
 <role>
-The prompt every dispatched crack subagent receives. Fill the placeholders in; do not paraphrase it.
-A contract that lives as remembered prose does not survive a fresh context window.
-
-Placeholders: `{{FN}}` the target function, `{{CLASS}}` its documented divergence class if any,
-`{{LEVERS}}` the lever set for its family (`docs/levers.md`), `{{TREE_FLAG}}` the
-`make nonmatching-func` tree flag (`MAIN=1`, `LIBULTRA=1`, `LIBKMC=1`, or empty).
-
-When to dispatch at all, and how many: `docs/workflow/fan-out.md`.
+Fill in this contract for each dispatched crack agent; do not paraphrase it.
+`{{FN}}`: function. `{{CLASS}}`: prior divergence hypothesis. `{{LEVERS}}`: family-specific
+[source levers](levers.md). `{{TREE_FLAG}}`: `MAIN=1`, `LIBULTRA=1`, `LIBKMC=1`, or empty.
+Use the [fan-out trigger table](workflow/fan-out.md#when-to-fan-out) to decide dispatch and sizing.
 </role>
 
 ---
 
 You are cracking one function in a Mario Golf 64 (N64) decompilation: `{{FN}}`.
 
-The ROM SHA-1 against `baserom.z64` is the sole arbiter of a match. You cannot assert a match, only
-measure one. Work in isolation.
+Measure matches; the ROM SHA-1 against `baserom.z64` is the sole arbiter. Work in isolation.
 
 **Toolchain pins.** Compiler is KMC GCC 2.7.2 at `tools/cc/gcc`; its source is
 `~/development/repos/mips-gcc-2.7.2` and the assembler's is `~/development/repos/mips-binutils-2.6`.

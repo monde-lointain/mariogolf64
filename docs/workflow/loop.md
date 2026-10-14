@@ -1,3 +1,9 @@
+---
+type: Workflow
+title: Decomp execution loop
+description: Specifies the function-matching loop, tool oracles, and conventions for executing an approved sprint.
+---
+
 # Execution loop and every-sprint conventions
 
 <role>
@@ -5,6 +11,10 @@ The inline execution loop that runs between the two sprint gates, the oracles it
 conventions that hold regardless of hazard. Read this while banking functions. The gates are
 `docs/workflow/gates.md`; fan-out decisions are `docs/workflow/fan-out.md`.
 </role>
+
+**Navigate:** [Toolchain](#toolchain) · [Execution loop](#execution-loop-inline) ·
+[Oracles](#oracles) · [Conventions](#conventions-every-sprint) ·
+[Cross-repo sync](#cross-repo-sync-ghidra-workspace-at-developmentreversingghidramariogolf64).
 
 ## Toolchain
 
@@ -15,12 +25,8 @@ decompile + struct/symbol lookup, port 8089; every call passes `program="baserom
 ultralib VERSION_J to reveal an un-named `func_`'s upstream source; see
 `docs/hazards.md#coddog-cross-ref`).
 
-The always-loaded wrappers are `CLAUDE.md` and `AGENTS.md`, and their routing table names the file for
-each phase. Detail lives in on-demand references: `docs/hazard-index.md` maps each
-`pick_target.py` flag to its `docs/hazards.md` playbook, `docs/coding-style.md` holds the C quality bar
-for code promoted into the tree, and `docs/levers.md` indexes the named source levers.
-
-Prompt authoring for this workflow follows the project style in `docs/prompt-style.md`.
+Use the [documentation index](../index.md) to select hazards, source levers, C style, or
+prompt-authoring guidance. `CLAUDE.md` and `AGENTS.md` are the always-loaded safety wrappers.
 
 ## Execution loop (inline)
 
@@ -35,9 +41,9 @@ Ghidra MCP is used inline at seed time. For each target function:
    b. Add any missing headers verbatim under `include/lib<name>/...`.
    c. `clang-format-23 -i` the copied files (these trees are now formatted; formatting does not
       change codegen).
-   d. `make`; the ROM SHA-1 must equal the baserom. The proof is the full-`make` SHA-1
-      (verbatim-then-formatted copy plus green ROM equals match); no byte-`cmp`. See
-      `docs/hazards.md#upstream-mirror-pattern`.
+   d. Run `tools/verify-rom.sh`; require exit 0. The full-ROM gate proves the
+      verbatim-then-formatted copy; mirror banking needs no byte-`cmp`.
+      See `docs/hazards.md#upstream-mirror-pattern`.
    e. Before declaring a clean mirror, reconcile the upstream's call and data-ref list (including one
       level of macro expansion) against the name files, and handle any flagged hazard via the index
       below.
@@ -85,7 +91,7 @@ Ghidra MCP is used inline at seed time. For each target function:
        `disassemble_function`, so a small classical fn does not need MCP: hand-translate straight from
        the `.s` (resolve callee/global names + types from the name files / call-site arg setup),
        write the body directly into `src/<seg>.c` (declare each `extern`; auto `func_`/`D_` symbols
-       resolve from their home subseg), and gate on the full-`make` ROM SHA-1. Skip
+       resolve from their home subseg), and gate with `tools/verify-rom.sh`. Skip
        seed_c.py/base.c/decomp_loop entirely unless the first build misses, then drop into the
        isolated Iterate loop below. Use this when Ghidra MCP is unavailable (`list_instances` empty)
        or the fn is small enough that the decompile adds no shape/type value. The fast-path banked a
@@ -134,17 +140,16 @@ Ghidra MCP is used inline at seed time. For each target function:
      iterating C or reaching for the permuter: whether that is an isolation artifact or a real
      near-miss turns on the percent, and that row states the test.
    - **Finalize** (only if the spot-check passes): inline the body into `src/<seg>.c`, drop the
-     `INCLUDE_ASM` line, `clang-format-23 -i` (now applies to every tree, including `src/libultra/`,
-     `src/libkmc/`, `src/libnusys/`, and `src/mgu/`), then `make` until `build/mariogolf64.z64: OK`
-     and SHA-1 == baserom.
+     `INCLUDE_ASM` line, run `clang-format-23 -i`, then `tools/verify-rom.sh`; require exit 0.
 
-4. **Bank** the function (only at score 0 plus spot-check plus full-`make` SHA match):
-   a. Give it its curated Ghidra name: add to `symbol_addrs.txt`, rename in the body, re-`make`
-      (`make extract && make` when the rename must reach still-asm callers). **Before renaming, grep
-      already-committed C callers: `grep -rn '\bfunc_<addr>\b' src` (S247).** The `make extract` regen
+4. **Bank** only after the full-ROM gate passes; classical candidates also require score 0 and
+   the byte spot-check above.
+   a. Give it its curated Ghidra name: add to `symbol_addrs.txt`, rename in the body, and run
+      `tools/verify-rom.sh` (`--extract` when the rename must reach still-asm callers).
+      **Before renaming, inspect committed C callers** for `func_<addr>` (S247). The extraction
       only rewrites still-ASM refs via `undefined_syms_auto`; a fn called from a committed C TU by its
       auto `func_<addr>` name will `undefined reference`-fail the link after the rename. If any C
-      caller exists, either sed those files to the new name in the same commit or keep the auto name
+      caller exists, migrate it to the new name in the same commit or keep the auto name
       (a getter/predicate over a generic global read across unrelated subsystems is usually best left
       auto-named — a domain-guess is likely wrong; S247 kept `func_800959F8`).
       A rename reaching a still-asm caller has two failure modes at the gate make, both handled in
@@ -409,12 +414,8 @@ below).
     runs in the background.
 - **Decomp is authoritative for names** (per the Ghidra-workspace
   `docs/re/coordination/decomp_coordination.md`).
-- **Match finalization is three steps:** inline the body into `src/<seg>.c`, `clang-format-23 -i`
-  (now applies to every tree, including `src/libultra/`, `src/libkmc/`, `src/libnusys/`, and
-  `src/mgu/`), then full `make` until ROM SHA-1 matches.
-  Spot-check passing is not ROM matching; the final `make` proves it. **Verify every ROM with
-  `tools/verify-rom.sh [--extract]`, never a hand-rolled `make ... ; sha1sum`** -- the Oracles table's
-  `verify-rom.sh` row states why, and S111 is the case law.
+- **Match finalization.** Follow the Finalize and Bank steps in the [execution loop](#execution-loop-inline).
+  The [oracle table](#oracles) distinguishes the byte spot-check from the full-ROM gate.
 - **Clean-rebuild when an enabler edits a shared vendored header.** The build tracks no header deps,
   so an incremental `make` recompiles only the file you touched, not the other consumers of a header
   you changed. When a mirror or enabler edits a widely-included header (e.g.
@@ -467,15 +468,7 @@ below).
 
 ### C naming (compact; full guide in `docs/coding-style.md`)
 
-| Identifier            | Convention   | Example                |
-| --------------------- | ------------ | ---------------------- |
-| Function / variable / parameter / member | `lower_case` | `frame_count` |
-| Struct / Enum (type)  | `CamelCase`  | `PacketHeader`         |
-| Enum constant / macro / global+static const | `UPPER_CASE` | `MAX_CONNECTIONS` |
-
-That table is the case convention. Naming quality (descriptive, problem-oriented, length-by-scope)
-follows `docs/coding-style.md`. The m2c seed body is compiled, so rename its `temp_*` / `local_*` /
-`arg_*` synthetics before promoting. This applies to classical / hand-authored C only; verbatim mirrors keep
-their upstream names unchanged.
+Use the [C naming guide](../coding-style.md#c-naming-conventions) as the single convention.
+Rename m2c synthetics before promotion when matching permits; upstream mirrors retain their names.
 
 ## Cross-repo sync (Ghidra workspace at `~/development/reversing/ghidra/mariogolf64/`)

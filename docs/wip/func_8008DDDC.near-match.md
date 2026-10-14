@@ -1,3 +1,9 @@
+---
+type: "Reconstruction Note"
+title: "func_8008DDDC (0x388/904B) — near-match carry (S249)"
+description: "Records reconstruction evidence and matching constraints for func_8008DDDC."
+---
+
 # func_8008DDDC (0x388/904B) — near-match carry (S249)
 
 Fog/material color-preset interpolation. Advances a progress counter (`D_800C5EF4`, clamped

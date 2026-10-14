@@ -1,3 +1,9 @@
+---
+type: "Reconstruction Note"
+title: "func_80079EBC — shared-literal-pool partial-bank carry (S279)"
+description: "Records reconstruction evidence and matching constraints for func_80079EBC."
+---
+
 # func_80079EBC — shared-literal-pool partial-bank carry (S279)
 
 ## Verdict

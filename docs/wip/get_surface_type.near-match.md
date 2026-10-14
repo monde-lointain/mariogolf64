@@ -1,3 +1,9 @@
+---
+type: "Reconstruction Note"
+title: "get_surface_type (0x80039F7C) — near-match carry (S233)"
+description: "Records reconstruction evidence and matching constraints for get_surface_type."
+---
+
 # get_surface_type (0x80039F7C) — near-match carry (S233)
 
 Pack: `src/main/raycast_terrain.c` (fresh 13-fn main collision pack).

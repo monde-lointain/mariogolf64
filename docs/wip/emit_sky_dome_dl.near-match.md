@@ -1,3 +1,9 @@
+---
+type: "Reconstruction Note"
+title: "emit_sky_dome_dl — S297 carry (299/299 count, register permutation; was 297/299, 272/299 at S296)"
+description: "Records reconstruction evidence and matching constraints for emit_sky_dome_dl."
+---
+
 # emit_sky_dome_dl — S297 carry (299/299 count, register permutation; was 297/299, 272/299 at S296)
 
 > **Verdict in one line.** Instruction count, frame and all three region counts are exact. The whole

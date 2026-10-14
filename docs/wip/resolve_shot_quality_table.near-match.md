@@ -1,3 +1,9 @@
+---
+type: "Reconstruction Note"
+title: "resolve_shot_quality_table — near-match (S185, structurally complete, 3-instr irreducible residual)"
+description: "Records reconstruction evidence and matching constraints for resolve_shot_quality_table."
+---
+
 # resolve_shot_quality_table — near-match (S185, structurally complete, 3-instr irreducible residual)
 
 `src/main/func_80043C20.c` @ 0x80044AC8 (109 insns, 0x1B4). **STRUCTURALLY COMPLETE (109/109 insns);

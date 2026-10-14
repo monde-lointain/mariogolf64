@@ -1,3 +1,9 @@
+---
+type: "Reconstruction Note"
+title: "init_sky_pool_and_world_state near-match (S256 carry, rebuilt S258)"
+description: "Records reconstruction evidence and matching constraints for init_sky_pool_and_world_state."
+---
+
 # init_sky_pool_and_world_state near-match (S256 carry, rebuilt S258)
 
 Main-segment sky-dome vertex-pool builder + world-state reset in

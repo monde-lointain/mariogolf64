@@ -1,3 +1,9 @@
+---
+type: "Reconstruction Note"
+title: "func_8002DAC0 - GCC nested function of render_frame (carry, not a wall)"
+description: "Records reconstruction evidence and matching constraints for func_8002DAC0."
+---
+
 # func_8002DAC0 - GCC nested function of render_frame (carry, not a wall)
 
 **Verdict: CARRY, coupled.** Banks as a nested function INSIDE its decompiled parent `render_frame`

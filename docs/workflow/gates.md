@@ -1,3 +1,9 @@
+---
+type: Workflow
+title: Sprint gates
+description: Defines the approval, planning, and review gates that bound each Mario Golf 64 decomp sprint.
+---
+
 # Sprint gates (plan and review)
 
 <role>
@@ -5,6 +11,10 @@ The two Scrum gates that bound every sprint, for both harnesses. Read this at th
 the review gate; the execution loop between them is `docs/workflow/loop.md`. Everything here is
 harness-neutral -- where Claude Code and Codex genuinely differ, the step says so.
 </role>
+
+**Navigate:** [Gate entry points](#gate-entry-points) · [Sprint-plan procedure](#sprint-plan-procedure) ·
+[Sprint-review procedure](#sprint-review-procedure) · [Scrum operating model](#scrum-operating-model) ·
+[Story points](#story-points).
 
 ## Gate entry points
 
@@ -21,11 +31,12 @@ harness-neutral -- where Claude Code and Codex genuinely differ, the step says s
 
 1. Validate the optional scope argument against `^[a-z][a-z0-9_-]*$`; abort on mismatch.
 2. Read `BACKLOG.md` and run `venv/bin/python3 tools/pick_target.py -n 12`. Filter by the kind of
-   scope: `--lib <name>` for a library band, `--segment <name>` or `--loose-stubs <name>` for a
-   segment such as `main`. Passing a segment to `--lib` returns unrelated overlay and libnusys rows
-   instead of erroring. Run `--loose-stubs <seg>` for a segment scope even when another subcommand
-   already gave you the ranking: it is the only place the plateau advisory prints, and that advisory
-   is what tells you `fresh` is a ceiling rather than a clean pool.
+   scope: `--lib <name>` for a library band, `--segment <name>` for a segment range, or
+   `--loose-stubs <seg>` for individual stubs in already-`c` files. A segment passed to `--lib`
+   is rejected; use `--segment` for ranking that segment. Run `--loose-stubs <seg>` for a segment
+   scope even when another subcommand already gave you the ranking: it is the only place the
+   plateau advisory prints, and that advisory is what tells you `fresh` is a ceiling rather than a
+   clean pool.
 3. Pick the smallest coherent increment, honoring carry-overs, hazards, the 8-point gate, and the
    Definition of Ready below. Run `--carried-check` and `--nested-check` on every hand-mined leaf.
 4. Present the goal, committed backlog, gate enablers, snapshot, and story-point estimate to the
@@ -235,11 +246,11 @@ dashboard). Target selection is `tools/pick_target.py`, not a stored roadmap.
   - Run `make sync-names` only at the gate; a mid-sprint rename breaks in-flight links until the next
     `make extract && make`.
 - **Definition of Done (binary; the oracle already exists).**
-  - Per-function: score 0, byte-`cmp` spot-check, inlined, clang-format, full `make` to
-    `build/mariogolf64.z64: OK`, SHA-1 == baserom, and committed.
+  - Classical per-function: score 0, byte-`cmp` spot-check, inlined, formatted,
+    `tools/verify-rom.sh` exit 0, and committed. Mirrors use their full-ROM gate directly.
   - Per-sprint: every fn in the file inlined (0 stubs), ROM SHA-1 matches, committed.
   - The ROM SHA-1 is green at every commit (un-decompiled parts fill from extracted asm), so at
-    review the `make` + SHA-1 paste is a regression guard; the value delta is the matched-count /
+    review the ROM-gate output is a regression guard; the value delta is the matched-count /
     md5-candidate-files number. Never commit a non-matching fn.
 - **Spike + carry-over.** A function that blocks its file's DoD (stuck-far below 0.97, needs permuter,
   BSS-layout-conflict, subseg-alignment) is a spike: note it, carry its file or cluster to the next

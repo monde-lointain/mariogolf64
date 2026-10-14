@@ -1,4 +1,6 @@
 ---
+type: Agent Skill
+title: "MG64 sprint-plan skill"
 name: mg64-sprint-plan
 description: Plan gate for the Mario Golf 64 decomp workflow. Use when the user invokes $mg64-sprint-plan, asks to plan the next MG64 sprint, rank decomp candidates, choose a sprint increment, perform gate enablers, validate the scaffold build, or write SPRINT.md.
 ---

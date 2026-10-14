@@ -1,3 +1,9 @@
+---
+type: "Reconstruction Note"
+title: "find_keyframe_offset_by_tag near-match (base-register caching + regalloc perm)"
+description: "Records reconstruction evidence and matching constraints for find_keyframe_offset_by_tag."
+---
+
 # find_keyframe_offset_by_tag near-match (base-register caching + regalloc perm)
 
 src/main/func_80054900.c. Keyframe-by-tag search. Logic 100% decoded; residual is

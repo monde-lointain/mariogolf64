@@ -1,3 +1,9 @@
+---
+type: "Reconstruction Note"
+title: "draw_terrain_aim_grid — near-match (S306)"
+description: "Records reconstruction evidence and matching constraints for draw_terrain_aim_grid."
+---
+
 # draw_terrain_aim_grid — near-match (S306)
 
 `src/main/func_80080220.c`, 0x1514 / **1349 instructions**. Reconstructed from scratch this sprint;

@@ -1,6 +1,12 @@
+---
+type: Agent Instructions
+title: "Claude Code project instructions"
+description: Defines the always-loaded safety invariants and task-specific documentation routes for Claude Code.
+---
+
 # Mario Golf 64 Decomp workflow
 
-Claude Code wrapper. The shared workflow source is `docs/workflow/`.
+Claude Code wrapper. The shared workflow source is [workflow phase index](docs/workflow/index.md).
 
 <!-- mg64:invariants:begin -->
 ## Invariants
@@ -26,16 +32,16 @@ Read the row for the phase you are in. Do not read `docs/workflow/` wholesale.
 
 | Phase you are in | Read exactly this |
 | --- | --- |
-| plan gate, review gate | `docs/workflow/gates.md` |
-| execution loop | `docs/workflow/loop.md` |
-| a `pick_target.py` hazard flag, or a residual to route | `docs/hazard-index.md`, then the one `docs/hazards.md` section it names |
-| a crack slice or fan-out decision | `docs/workflow/fan-out.md` |
-| dispatching a crack subagent | `docs/fanout-prompt.md`, filled in |
-| choosing a source lever | `docs/levers.md` |
-| writing or naming C | `docs/coding-style.md` |
-| editing any prompt surface | `docs/prompt-style.md` |
+| plan gate, review gate | [docs/workflow/gates.md](docs/workflow/gates.md) |
+| execution loop | [docs/workflow/loop.md](docs/workflow/loop.md) |
+| a `pick_target.py` hazard flag, or a residual to route | [docs/hazard-index.md](docs/hazard-index.md), then the one [docs/hazards.md](docs/hazards.md) section it names |
+| a crack slice or fan-out decision | [docs/workflow/fan-out.md](docs/workflow/fan-out.md) |
+| dispatching a crack subagent | [docs/fanout-prompt.md](docs/fanout-prompt.md), filled in |
+| choosing a source lever | [docs/levers.md](docs/levers.md) |
+| writing or naming C | [docs/coding-style.md](docs/coding-style.md) |
+| editing any prompt surface | [docs/prompt-style.md](docs/prompt-style.md) |
 
 ## Slash commands
 
 `/sprint-plan [scope]`, `/decomp-loop`, `/sprint-review`. Each wrapper names the procedure section it
-follows in `docs/workflow/gates.md`.
+follows in [docs/workflow/gates.md](docs/workflow/gates.md).

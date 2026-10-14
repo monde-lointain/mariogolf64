@@ -1,3 +1,9 @@
+---
+type: "Reconstruction Note"
+title: "func_8006C8CC near-match (CARRY, S239)"
+description: "Records reconstruction evidence and matching constraints for func_8006C8CC."
+---
+
 # func_8006C8CC near-match (CARRY, S239)
 
 **File:** `src/main/func_8006A2C0.c` (S224 pack). 19i predicate, jal0.

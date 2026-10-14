@@ -1,4 +1,6 @@
 ---
+type: Agent Command
+title: "Claude sprint-review command"
 description: Review gate. Verify the ROM-SHA-1 DoD on the increment, PO scope sign-off, apply buffered suggestions, write the RETRO.md digest.
 allowed-tools: Bash, Read, Write, Edit, AskUserQuestion
 ---

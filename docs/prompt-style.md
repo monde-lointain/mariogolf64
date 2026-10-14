@@ -1,10 +1,17 @@
+---
+type: Reference
+title: Agent prompt style
+description: Authoring rules for concise, checkable agent instructions across the project's shared prompt surfaces.
+---
+
 # Prompt style (on-demand reference)
 
 <role>
-The house style for this project's agent-facing prompt surfaces: `AGENTS.md`, `CLAUDE.md`,
-`docs/agent-workflow.md`, `docs/hazards.md`, `docs/coding-style.md`, this file,
-`.agents/skills/*/SKILL.md`, and `.claude/commands/*.md`. Read it when writing or editing any of
-them, and use the checklist at the end as the conformance gate.
+The house style for agent-facing prompt surfaces: `AGENTS.md`, `CLAUDE.md`,
+[`docs/agent-workflow.md`](agent-workflow.md), [`docs/hazards.md`](hazards.md),
+[`docs/coding-style.md`](coding-style.md), this file, `.agents/skills/*/SKILL.md`, and
+`.claude/commands/*.md`. Read it when writing or editing any of them, and use the checklist at the
+end as the conformance gate.
 </role>
 
 <scope>
@@ -18,6 +25,10 @@ this style, checked advisory-only by `prompt_lint.py check --sprint`. Its standu
 result, PO decisions and suggestion buffer are append-only log. The file is gitignored, so it never
 gates the suite: a fresh clone has none.
 </scope>
+
+Use [Agent workflow](agent-workflow.md) for shared execution rules, the
+[Hazard index](hazards.md) for evidence-backed pitfalls, and [C coding style](coding-style.md) for
+source conventions. This reference governs prompt wording; it does not replace those topic guides.
 
 ## Prime directive: outcome first, gates explicit
 
@@ -108,11 +119,12 @@ sentences that lose the "all must hold jointly" binding.
   `tests/tooling/prompt_caps_allow.txt`; add to it rather than keeping a second copy here.
 - **A gate word survives de-shouting; a rewrite is where it can be lost.** Capitalizing `AND`, `OR`,
   `BOTH`, `ALL`, `EITHER` or `EVERY` adds emphasis, not logic: the binding is carried by the word, and
-  a case-fold cannot drop a word. All 119 gate occurrences in this tree were audited after the S284
-  fold and every binding was intact. So the guard belongs on any pass that changes words, not on the
-  case-fold: `deshout.py guard` asserts that logic tokens, numeric literals and code spans are
-  preserved per changed line. `deshout.py gates` still enumerates gate occurrences when you want to
-  read them, but folding one is not by itself a loss.
+  a case-fold cannot drop a word. `deshout.py guard` compares document-wide counts of logic tokens,
+  numeric literals, and code spans against a Git ref; it does not inspect per-line binding or follow
+  a rule moved to another file. Run it for wording changes. For structural moves, consolidation, or
+  code-span-to-link conversion, review every reported loss against the retained destination or the
+  explicit reason the advice is obsolete. Unexplained constraint loss blocks delivery.
+  `deshout.py gates` enumerates gate occurrences; folding one is not by itself a loss.
 
 ## The anchor API
 
@@ -131,10 +143,10 @@ heading.
   with. The append-only logs are excluded from the harvest for exactly this reason: a digest written
   when a shorthand was unique is a historical record, not a live pointer, and repairing it would mean
   rewriting history.
-- Cross-document citations name their file and heading in one backticked span, so
-  `tools/prompt_lint.py` can resolve them. A reference written as prose ("`CLAUDE.md` holds the hazard
-  index") is unverifiable and rots silently; two such references did. Write a placeholder with angle
-  brackets rather than a plausible filename, or the checker resolves it and fails.
+- Use relative Markdown links with complete heading slugs for navigation; resolve their targets
+  separately. `tools/prompt_lint.py` checks backticked `<path>.md ## <Heading>` citations, not Markdown
+  destinations. Use that citation form when instruction text names a heading without a link.
+  Write unknown paths as angle-bracket placeholders rather than plausible filenames.
 
 ## Verification calibration
 
@@ -222,7 +234,7 @@ Run this before committing a prompt-surface edit.
 - [ ] No `S###` in a Rule / Trigger / Procedure line.
 - [ ] Every scope-limiter and threshold is preserved; no conjunctive gate was split apart.
 - [ ] Emphasis caps are gone except backticked / define / filename tokens.
-- [ ] Any edit that changed words, not just case, passes `deshout.py guard`.
+- [ ] Run `deshout.py guard`; wording-only edits pass, and structural losses have reviewed destinations or retirement reasons.
 - [ ] One idea per sentence; at most one parenthetical level.
 - [ ] Cited anchors unchanged, or changed with citations updated in lockstep and `freeze` re-run.
 - [ ] No model name appears outside a harness-delta row.

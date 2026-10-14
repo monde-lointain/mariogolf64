@@ -1,3 +1,9 @@
+---
+type: "Reconstruction Note"
+title: "func_8007EF0C — near-match (S305, re-opened S306)"
+description: "Records reconstruction evidence and matching constraints for func_8007EF0C."
+---
+
 # func_8007EF0C — near-match (S305, re-opened S306)
 
 `src/main/func_80078910.c`, 0xF38 / **974 instructions**. Reconstructed from scratch in S305; re-opened in S306, which measured the residual's root cause and

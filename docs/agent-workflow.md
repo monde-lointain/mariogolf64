@@ -1,70 +1,75 @@
+---
+type: Guide
+title: Mario Golf 64 decomp agent workflow
+description: Routes agents to the sprint gates, execution loop, hazards, fan-out rules, and coding guidance they need for each phase.
+---
+
 # Mario Golf 64 Decomp agent workflow
 
 <role>
-The routing stub for this project's workflow docs. It stays at this path because the append-only logs
-cite it ~35 times and those citations are history, not to be rewritten. Read the row for the phase you
-are in; do not read `docs/workflow/` wholesale.
+Start here to route into the project workflow. The append-only logs cite this path; its headings are
+frozen anchors. Read the phase reference you need rather than opening `docs/workflow/` wholesale.
 </role>
 
 Decompile Mario Golf 64 (N64) one function at a time toward a byte-exact ROM. The ROM SHA-1 against
-`baserom.z64` is the sole arbiter of a match, and `tools/verify-rom.sh` is the gate that reads it.
+`baserom.z64` is the sole arbiter of a match, and [`tools/verify-rom.sh`](../tools/verify-rom.sh)
+is the bank gate.
 
 ## Workflow at a glance
 
-Two gate workflows bound each sprint. Between them the agent runs the execution loop inline: one
-function at a time, no per-function stop, a single serial session. `SPRINT.md` is the resume surface
-when the middle spans context windows.
+Each sprint has a plan gate, an autonomous execution loop, and a review gate. `SPRINT.md` is the
+resume surface. The [gates](workflow/gates.md#scrum-operating-model) own the Scrum contract;
+the [loop](workflow/loop.md#execution-loop-inline) owns execution and oracle authority.
 
-- **Effort.** Run the gates as cheap triage; run classical decomp and the permuter at higher effort,
-  where the extra reasoning pays off.
-- **Parallelism.** Read-only context gathering may run in parallel: read `BACKLOG.md`, run
-  `pick_target.py`, and read the flagged hazard sections at once. Keep MCP, build, and edit steps
-  serial, since the session holds no MCP lock and the build is one shared tree.
-- **Delegation.** A subagent fan-out is a specific triggered move, not a default. The trigger table is
-  in `docs/workflow/fan-out.md`.
+- **Effort.** Run the gates as cheap triage; use higher effort for classical decomp and permuter work.
+- **Parallelism.** Read-only context gathering may run in parallel. Keep MCP, build, YAML, and source
+  edits serial because the session holds no MCP lock and the build is one shared tree.
+- **Delegation.** Follow the [trigger table](workflow/fan-out.md#when-to-fan-out), then fill in the
+  [dispatch contract](fanout-prompt.md). Fan-out is not the default.
 
 ## Where to read
 
-| Phase you are in | Read exactly this |
+| Phase or need | Read |
 | --- | --- |
-| plan gate, review gate | `docs/workflow/gates.md` |
-| execution loop | `docs/workflow/loop.md` |
-| a `pick_target.py` hazard flag, or a residual to route | `docs/hazard-index.md`, then the one `docs/hazards.md` section it names |
-| a crack slice or fan-out decision | `docs/workflow/fan-out.md` |
-| writing or naming C | `docs/coding-style.md` |
-| editing any prompt surface | `docs/prompt-style.md` |
+| Plan or review | [Plan](workflow/gates.md#sprint-plan-procedure) or [review](workflow/gates.md#sprint-review-procedure) |
+| Execution | [Function-matching loop](workflow/loop.md#execution-loop-inline) |
+| Candidate/build hazard | [Flag lookup](hazard-index.md#flag-to-section), then the selected playbook |
+| Matching residual | [Symptom lookup](hazard-symptoms.md#symptom-to-section), then the selected playbook |
+| Crack slice or fan-out | [Fan-out rules](workflow/fan-out.md) and [dispatch contract](fanout-prompt.md) |
+| Writing or naming C | [`docs/coding-style.md`](coding-style.md) |
+| Editing a prompt surface | [`docs/prompt-style.md`](prompt-style.md) |
 
 ## Slash commands
 
 - **Claude Code:** `/sprint-plan [scope]`, `/decomp-loop`, `/sprint-review`.
 - **Codex:** `$mg64-sprint-plan [scope]`, `$mg64-decomp-loop`, `$mg64-sprint-review`.
 
-Both sets are described in `docs/workflow/gates.md ## Gate entry points`.
+Invocation behavior is in the [gate entry points](workflow/gates.md#gate-entry-points).
 
 ## Scrum operating model
 
-Moved to `docs/workflow/gates.md ## Scrum operating model`: roles, the cycle, sprint sizing, the
-Definition of Ready and Done, spikes and carry-overs, retro-gating, and the resume protocol.
+The [Scrum contract](workflow/gates.md#scrum-operating-model) defines roles, sprint sizing,
+readiness, completion, spikes, carry-overs, retro-gating, and resume behavior.
 
 ## Story points
 
-Moved to `docs/workflow/gates.md ## Story points`: the deterministic seed, the 8-point decompose gate
-and its exemptions, per-file all-or-nothing banking, and the realized tier.
+The [estimation rubric](workflow/gates.md#story-points) defines the seed, 8-point decompose gate,
+exemptions, per-file banking, and realized tier.
 
 ## Execution loop
 
-Moved to `docs/workflow/loop.md ## Execution loop`, with the oracle table and the every-sprint
-conventions alongside it.
+Use the [loop procedure](workflow/loop.md#execution-loop-inline) and
+[oracle table](workflow/loop.md#oracles) for tool authority and failure modes.
 
 ## Conventions
 
-Moved to `docs/workflow/loop.md ## Conventions`.
+Use the [every-sprint conventions](workflow/loop.md#conventions-every-sprint) for cross-cutting rules.
 
 ## Hazard index
 
-Moved to `docs/hazard-index.md`, a sibling of `docs/hazards.md` because both gates and the loop
-consult it and its anchors are the input to `tools/hazard_anchors.py`.
+Use the [flag lookup](hazard-index.md) or [symptom lookup](hazard-symptoms.md) to select a
+[playbook](hazards.md#playbook-index).
 
 ## Cross-repo sync
 
-Moved to `docs/workflow/loop.md ## Cross-repo sync`.
+Use the [Ghidra synchronization procedure](workflow/loop.md#cross-repo-sync-ghidra-workspace-at-developmentreversingghidramariogolf64).

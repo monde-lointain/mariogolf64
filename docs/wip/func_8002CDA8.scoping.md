@@ -1,3 +1,9 @@
+---
+type: "Reconstruction Note"
+title: "func_8002CDA8 reconstruction scoping (S303, re-opened S304)"
+description: "Records reconstruction evidence and matching constraints for func_8002CDA8."
+---
+
 # `func_8002CDA8` reconstruction scoping (S303, re-opened S304)
 
 **This is not a wall note.** The body is reconstructed and sits at the ROM's exact instruction

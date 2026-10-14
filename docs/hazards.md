@@ -1,3 +1,9 @@
+---
+type: Playbook Reference
+title: Hazard playbooks
+description: Provides symptom-specific recovery and matching procedures with stable section anchors.
+---
+
 # Hazard playbooks (on-demand reference)
 
 <role>
@@ -6,14 +12,12 @@ match shows one of the symptoms below. Reached by anchor from `docs/hazard-index
 section you were routed to, never the whole file.
 </role>
 
-This is the detail layer for the MG64 execution loop. `CLAUDE.md` holds the always-loaded core and
-`docs/agent-workflow.md ## Hazard index` maps each flag to a section; read the matching section
-here when `tools/pick_target.py` flags a hazard or a
-match behaves as one of the symptoms below. Each entry follows the same shape where it fits:
-**Rule** (the invariant), **Trigger** (the flag or symptom that sends you here), **Procedure** (the
-steps to a green ROM SHA-1), then optional **Sub-cases / variants** and **Caveats**, and
-**Provenance**. Short principle/note sections carry only the labels that apply. The S-numbers are
-provenance tags pointing at the sprint that established the rule.
+This is the detail layer for the [execution loop](workflow/loop.md#execution-loop-inline).
+Use the [flag-to-playbook lookup](hazard-index.md#flag-to-section) when the ranker flags a hazard,
+or the [family index](#playbook-index) when diagnosing an assembly symptom. Read only the selected
+section. Each entry uses **Rule**, **Trigger**, **Procedure**, optional **Sub-cases / variants**
+and **Caveats**, and **Provenance** where applicable. Sprint tags identify the evidence that
+established a rule; they are not claims about the current target.
 
 The deterministic-vram recovery and the byte-`cmp` rules are load-bearing: follow the procedures
 exactly rather than re-deriving them.
@@ -23,7 +27,7 @@ exactly rather than re-deriving them.
 ## Playbook index
 
 The hazard families below group the sections that follow. Each links to its existing anchor;
-`docs/agent-workflow.md ## Hazard index` maps every `pick_target.py` flag to the same anchors.
+the [hazard index](hazard-index.md#flag-to-section) maps ranker flags to these playbooks.
 
 **Upstream verbatim mirror & build profile**
 - [Upstream-mirror pattern](#upstream-mirror-pattern)
@@ -103,7 +107,7 @@ The hazard families below group the sections that follow. Each links to its exis
 - [offset-0-symbol re-materialization (fixed-global field RMW)](#offset-0-symbol-re-materialization-fixed-global-field-rmw)
 - [call-arg delay-slot fill + field-alias addend-0 (S214 scenery levers)](#call-arg-delay-slot-fill--field-alias-addend-0-s214-scenery-levers)
 - [volatile-view CSE reload (force a just-stored global to reload)](#volatile-view-cse-reload-force-a-just-stored-global-to-reload)
-- [cse-ebb-barrier loop-reload (empty `if (1) {}` forces a loop-top memory reload past a guard-load CSE)](#cse-ebb-barrier-loop-reload)
+- [cse-ebb-barrier loop-reload (empty `if (1) {}` forces a loop-top memory reload past a guard-load CSE)](#cse-ebb-barrier-loop-reload-force-a-loop-top-memory-reload-past-a-guard-load-cse)
 - [mem-in-struct scheduling lever (model a fixed global as a struct/array member)](#mem-in-struct-scheduling-lever-model-a-fixed-global-as-a-structarray-member)
 - [scheduler-load-hoist serial-store lever (shared temp pins independent global copies)](#scheduler-load-hoist-serial-store-lever)
 - [cse-dest-preference copy-collapse (narrow-unsigned-temp lever)](#cse-dest-preference-copy-collapse-narrow-unsigned-temp-lever)
@@ -136,18 +140,18 @@ The hazard families below group the sections that follow. Each links to its exis
 - [struct-array-of-BSS direct-index vs base-pointer var](#struct-array-of-bss-direct-index-vs-base-pointer-var)
 - [goto-dispatch branch-toward vs branchless (constant dispatch through a shared return)](#goto-dispatch-branch-toward-vs-branchless-constant-dispatch-through-a-shared-return)
 - [nested-function static-chain spill (leaf dead `sw v0,0(sp)` + caller sets `v0=&frame` per-call)](#nested-function-static-chain-spill)
-- [local-alloc qty-permutation (1-basic-block reg swap, permuter-appropriate)](#local-alloc-qty-permutation)
+- [local-alloc qty-permutation (1-basic-block reg swap, permuter-appropriate)](#local-alloc-qty-permutation-1-basic-block-reg-swap-permuter-appropriate)
 - [cse-derived-pointer base-canonicalization (sub-struct dump fn keeps the param base, folds the offset)](#cse-derived-pointer-base-canonicalization)
-- [integer-arith commutative operand order (pointer_int_sum pins pointer-first; int math keeps source order)](#integer-arith-commutative-operand-order)
-- [setup-block instruction order (a pre-base loop-limit const must be a variable)](#setup-block-instruction-order)
-- [struct-copy block-move path (alignment picks lwl/lwr vs aligned word-loop)](#struct-copy-block-move-path)
-- [reorg optimize_skip annulled bnel (single-skipped-insn branch-likely)](#reorg-optimize_skip-annulled-bnel)
+- [integer-arith commutative operand order (pointer_int_sum pins pointer-first; int math keeps source order)](#integer-arith-commutative-operand-order-pointer_int_sum-pins-pointer-first)
+- [setup-block instruction order (a pre-base loop-limit const must be a variable)](#setup-block-instruction-order-a-pre-base-loop-limit-const-must-be-a-variable)
+- [struct-copy block-move path (alignment picks lwl/lwr vs aligned word-loop)](#struct-copy-block-move-path-alignment-picks-lwllwr-vs-word-loop)
+- [reorg optimize_skip annulled bnel (single-skipped-insn branch-likely)](#reorg-optimize_skip-annulled-bnel-single-skipped-insn-branch-likely)
 - [delay-slot-fill-across-call (printf-then-guarded-store keeps a nop the no-call sibling fills)](#delay-slot-fill-across-call-printf-then-guarded-store-keeps-a-nop-the-no-call-sibling-fills)
 - [FPR float-zero store-order (mtc1+swc1 vs folded sw zero, and store-order control)](#fpr-float-zero-store-order-mtc1swc1-vs-folded-sw-zero-and-store-order-control)
 - [nested-guard range-unfold + comparison-operand-order (blez/slti + branch polarity)](#nested-guard-range-unfold--comparison-operand-order-blezslti--branch-polarity)
-- [switch tight merged-default (shared case-0/default label + case-1 last)](#switch-tight-merged-default)
-- [switch-compare-chain-layout (out-of-line cases + a case falling into the default)](#switch-compare-chain-layout)
-- [grid-counter double-loop (non-zero-cell counter idiom)](#grid-counter-double-loop)
+- [switch tight merged-default (shared case-0/default label + case-1 last)](#switch-tight-merged-default-shared-case-0default-label--case-1-last)
+- [switch-compare-chain-layout (out-of-line cases + a case falling into the default)](#switch-compare-chain-layout-out-of-line-cases--a-case-falling-into-the-default)
+- [grid-counter double-loop (non-zero-cell counter idiom)](#grid-counter-double-loop-non-zero-cell-counter-idiom)
 - [base-register-vs-displacement (full base materialized vs %lo-in-displacement; + family-of ranker follow-up + shifted .NON_MATCHING data-carve blocker)](#base-register-vs-displacement-full-symbolbase-materialized-vs-lo-in-displacement)
 - [Tracked ranker follow-up: `family-of:<banked-fn>` (S210)](#tracked-ranker-follow-up-family-ofbanked-fn-s210)
 - [goto loop = loop.c never runs (defeating strength reduction and bound hoisting)](#goto-loop--loopc-never-runs-defeating-strength-reduction-and-bound-hoisting)
@@ -172,7 +176,7 @@ The hazard families below group the sections that follow. Each links to its exis
 - [IO_WRITE/IO_READ isolation artifact](#io_writeio_read-isolation-artifact)
 - [Assembler differences + byte-cmp spot-check](#assembler-differences--byte-cmp-spot-check)
 - [reorg thread availability (an empty ROM delay slot is not branch prediction)](#reorg-thread-availability-an-empty-rom-delay-slot-is-not-branch-prediction)
-- [gas .set-reorder delay-slot fill (textual layout != machine; disasm the .o)](#gas-set-reorder-delay-slot-fill)
+- [gas .set-reorder delay-slot fill (textual layout != machine; disasm the .o)](#gas-set-reorder-delay-slot-fill-textual-layout--machine)
 - [Decompile-vs-asm authority](#decompile-vs-asm-authority)
 - [Display lists](#display-lists)
 - [DL-builder symbol anchor (match the asm's chosen base symbol)](#dl-builder-symbol-anchor-match-the-asms-chosen-base-symbol)
@@ -225,10 +229,10 @@ recover-extern cost) as the band's first increment.
 3. Verbatim means verbatim: keep dead `#ifdef _DEBUG` blocks and their unconditional companion
    `#include`s (they compile out because `_DEBUG` is undefined). If such a block needs a header
    missing from the tree, copy that header rather than trimming the include.
-4. `clang-format-22 -i` the copied files under `src/libultra/` and `src/libkmc/` (both dirs carry a
+4. `clang-format-23 -i` the copied files under `src/libultra/` and `src/libkmc/` (both dirs carry a
    local `.clang-format` = `BasedOnStyle: Google` + `SortIncludes: Never`; formatting does not change
    codegen).
-5. `make`, and the ROM SHA-1 must equal the baserom.
+5. Run `tools/verify-rom.sh`; require exit 0.
 
 Before declaring a clean verbatim mirror, reconcile the upstream's full call + data-ref list
 (including one level of library-macro expansion) against the name files; see the recover-extern and
@@ -2853,7 +2857,7 @@ loose float globals + the `Mtx4f` typedef; the typedef is the lever. A 4x4-matri
 `void*`/`f32*` walking-pointer form triggers loop.c `combine_givs` base-bias (a biased base reg + neg
 offsets); rewriting with `f32 m[4][4]` params and 2D `a[i][k]`/`b[k][j]` indexing produces the ROM's
 direct-immediate-offset form (base + k*rowsize + j*4). S188 cracked the in-place matmul
-`func_80065D5C` this way (see also [#indexed-vs-pointer loop](#indexed-vs-pointer-loop-strength-reduction)).
+`func_80065D5C` this way (see also [#indexed-vs-pointer loop](#indexed-vs-pointer-loop-strength-reduction-preheader-ordering)).
 
 ---
 
@@ -3542,7 +3546,7 @@ fill-clear pack (S179 DCE0 pack `func_800328E0`):
   global symbol-load into glistp's 2-cycle load-latency shadow, where the ROM defers the color load to
   its 6th-command slot — a full register cascade (77/97 words), structurally-complete otherwise.
   - **This wall has a faithful fix — it is not permuter-class (S180 retired the S179 "escalate to the
-    permuter" verdict).** It is the [#mem-in-struct-scheduling-lever](#mem-in-struct-scheduling-lever):
+    permuter" verdict).** It is the [#mem-in-struct-scheduling-lever](#mem-in-struct-scheduling-lever-model-a-fixed-global-as-a-structarray-member):
     the color globals as plain `s32` no-alias the `mem/s` `*glistp` stores, so `true_dependence`
     (`sched.c:817`, guard 834-836) gives the load empty LOG_LINKS → it is a free root, and the sticky
     `LAUNCH_PRIORITY` (0x7f000001) "birthing-insn" boost (`sched.c:3902`/2543; `priority()` early-returns
@@ -3834,7 +3838,7 @@ one store after the join — but they differ in what survives the join:
 In `func_80087CB0` this one change reproduced both the `lw glistp` at the head of the second DL block
 and the `lw D_800E2134` immediately after its own store, worth ~0x20 of the length gap. So when the
 ROM re-reads a global it just wrote, or re-loads a DL cursor across a diamond, reach for the if/else
-form before suspecting `volatile` ([#volatile-view-cse-reload](#volatile-view-cse-reload)).
+form before suspecting `volatile` ([#volatile-view-cse-reload](#volatile-view-cse-reload-force-a-just-stored-global-to-reload)).
 
 **Rule out a game-modified body first.** This symptom is not proof
 of a compiler cross-jump merge; it is far more often a body-semantics divergence the literal
@@ -5676,7 +5680,7 @@ not a gate-flip-then-iterate; do not pre-carve at the gate.
 value-select branch-likely wall, not a jtbl issue (S263 `func_800484F8`, carried 99/102).** When the
 dispatch + table + every case body is byte-exact but one arm's `if (A && B) v = K1; else v = …` comes
 out `bnel …,tail; li v,K1(annulled)` where the ROM keeps plain `beq …,else; nop; j tail; li a0,K1`,
-that is [#value-select-if-else-vs-branch-likely](#value-select-if-else-vs-branch-likely), goto-proof
+that is [#value-select-if-else-vs-branch-likely](#value-select-if-else-vs-branch-likely-the-p--field--sentinel-accessor-idiom), goto-proof
 (confirmed 3 spellings: flat `&&`, negated `||`, explicit `goto elseblk`), coupled to a
 `#call-result-a0-vs-v0` register choice (the cross-case value in `a2` + a tail `move a0,a2` vs the ROM's
 per-case `a0`). Not permuter-eligible (a count/branch-target residual). See
@@ -5721,7 +5725,7 @@ re-materializes in the array form (`D_800DC6E0[3].unk_14 = max` emits `lui/sw %l
 access has no common sub-expression to fold — so leave those as the struct/array form and only switch
 the RMW (`+=`/`-=`) field. Multiple accesses to the same field across disjoint branches also
 re-materialize (no CSE across the branch). This is the inverse of
-[#mem-in-struct-scheduling-lever](#mem-in-struct-scheduling-lever) (which retypes a fixed global as a
+[#mem-in-struct-scheduling-lever](#mem-in-struct-scheduling-lever-model-a-fixed-global-as-a-structarray-member) (which retypes a fixed global as a
 struct member to change scheduling); here you split a struct field out to its own symbol to change the
 addressing form. Provenance: S177 `heap3_free`, found by a GCC-source subagent fan-out (see
 [#compiler-source-fan-out-escalation-above-the-permuter](#compiler-source-fan-out-escalation-above-the-permuter)).
@@ -5799,7 +5803,7 @@ the primary cse-only agent tried volatile-on-prev-only, saw it float, and wrongl
 ### Landing an independent store in a `jal` delay slot — source order + defer-to-arg-eval (S212 `func_80058C58`)
 
 KMC cc1's pre-reload scheduler is inert for a dependent chain (it reorders only independent ops; see
-the foundational note under [#local-alloc-qty-permutation](#local-alloc-qty-permutation) and the S220
+the foundational note under [#local-alloc-qty-permutation](#local-alloc-qty-permutation-1-basic-block-reg-swap-permuter-appropriate) and the S220
 correction in `docs/levers.md` (kmc cc1 no instruction scheduler)): for the dependent setup here emit order == source
 order, and reorg's delay-slot fill only pulls the immediately-preceding independent insn down into a
 `jal` delay slot. So to reproduce a ROM that fills a call's delay with an independent store
@@ -5842,7 +5846,7 @@ The direct `D_DC = *(s32*)(...)` folds the load down to `D_DC`'s textual slot, e
 `D_E0/E8` zero-stores before the multiply/load (target has them after). Same lever with a field read after
 a call: `t = e->field; D_x = 0; D_y = t;` pins the load before the `D_x=0` store. Matched
 `func_8006DDCC`/`func_8006DE44` (stride-116 table read) + `func_8006BA24` (post-call field read) in one
-sprint. Kin to [#mem-in-struct-scheduling-lever](#mem-in-struct-scheduling-lever) but for plain-global
+sprint. Kin to [#mem-in-struct-scheduling-lever](#mem-in-struct-scheduling-lever-model-a-fixed-global-as-a-structarray-member) but for plain-global
 store order, no retype needed.
 
 ### `(u16 & 0x8000)` tail-return test collapses to `srl` (S223 `func_8006C8CC`, note — no fix found)
@@ -5990,7 +5994,7 @@ symptom. Guard: when a same-file sibling's length is still wrong, do not trust a
 `objdump`'s resolved addresses; gate on the full-make ROM SHA-1 with all fns at their correct length.
 `func_80076500` looked "wrong" (bytes `c4205b5c`) purely because `func_80076558` was 0x10 short (S162);
 both matched the instant `func_80076558` reached its exact 0xE8 length (via the
-[mem-in-struct lever](#mem-in-struct-scheduling-lever) above).
+[mem-in-struct lever](#mem-in-struct-scheduling-lever-model-a-fixed-global-as-a-structarray-member) above).
 
 **Long-text variant — a decomposed-subseg overflow shifts the flowing `.bss` symbols themselves
 (S170).** The mirror image of the short case, and easier to misdiagnose: a classical fn N bytes *too
@@ -6263,7 +6267,7 @@ adversarial one attacking from orthogonal angles (volatile / aliasing / scheduli
 the adversarial agent cracked both, byte-exact. A source-cited "unreachable" is a hypothesis, not a
 proof: the primary agent proved only that its candidate class forwards/allocates a certain way, not
 that no faithful C reaches the ROM. The levers it missed: (c) a per-access volatile view of the
-reloaded field ([#volatile-view-cse-reload](#volatile-view-cse-reload)) — the primary tried
+reloaded field ([#volatile-view-cse-reload](#volatile-view-cse-reload-force-a-just-stored-global-to-reload)) — the primary tried
 volatile-on-one-field-only and saw it float, without also volatiling the fields that must schedule
 ahead; (d) the define-after-call caller-saved placement plus an inline sentinel (no `head`
 local) so CSE derives it from the load base and copies it to the loop reg — the primary tested only
@@ -6279,7 +6283,7 @@ assembler rule-out). The priority agent's track — hunt a faithful source reord
 color load's schedule priority — was a proven dead end (every color-expr / associativity / reorder
 form stalled at 18-30/97, because the load carries a sticky `LAUNCH_PRIORITY` boost that dominates,
 not a tie-break). The alias agent's track — could a faithful type change add a memory dependence that
-pins the loads? — found the `mem/s` color-struct lever ([#mem-in-struct-scheduling-lever](#mem-in-struct-scheduling-lever)),
+pins the loads? — found the `mem/s` color-struct lever ([#mem-in-struct-scheduling-lever](#mem-in-struct-scheduling-lever-model-a-fixed-global-as-a-structarray-member)),
 byte-exact. **Both agents independently converged on the same `mem/s` lever = strong corroboration**,
 but the alias lens reached it directly while the priority lens could only prove its own class
 couldn't. Lesson: when assigning the two agents, give them structurally different lenses (here:
@@ -6294,13 +6298,13 @@ and the loop counter swapped, plus one commutative `addu` operand order) — yet
 cracked it byte-exact with zero permuter iterations. Why the permuter cannot: both winning levers are
 Source restructures outside its neighborhood — (a) introduce an intermediate call-result copy
 (`u8 *ret = func_8005AF50(); …; s8 *base = ret;`) to defer `base`'s materialization and shorten its
-live-length ([#local-alloc-qty-permutation](#local-alloc-qty-permutation), the global.c live-length
+live-length ([#local-alloc-qty-permutation](#local-alloc-qty-permutation-1-basic-block-reg-swap-permuter-appropriate), the global.c live-length
 steer), and (b) convert pointer arithmetic to integer arithmetic to flip a commutative operand order
-([#integer-arith-commutative-operand-order](#integer-arith-commutative-operand-order)). The permuter
+([#integer-arith-commutative-operand-order](#integer-arith-commutative-operand-order-pointer_int_sum-pins-pointer-first)). The permuter
 reorders decls / splits-merges temps / hoists consts / wraps `do{}while(0)`; it never invents a semantic
 intermediate copy nor a pointer→int retype. **Doctrine: a pure-regalloc allocno/qty permutation that
 Walls the permuter routes here (compiler-source dive), not to an automatic carry.** The whole S209
-grid-counter family (C458/C4B4/C5B4/C614) banked this way, 0 permuter — see [#grid-counter-double-loop](#grid-counter-double-loop).
+grid-counter family (C458/C4B4/C5B4/C614) banked this way, 0 permuter — see [#grid-counter-double-loop](#grid-counter-double-loop-non-zero-cell-counter-idiom).
 
 **The dive also proves walls, not just cracks them (S213).** A 4-subagent fan-out over the
 `func_80054900.c` residual (gcc-2.7.2 `global.c`/`loop.c`/`reorg.c`/`cse.c` + binutils-2.6 `tc-mips.c`,
@@ -6967,7 +6971,7 @@ disambiguate it before budgeting permuter time:
 - **CSE-collapse / redundant-load / schedule-slot residual → the permuter cracks it.** `func_80098D70`'s
   loop CSE-merged an `if`-guard's `*p` load with the loop-body's first read (dropping the ROM's loop-top
   reload); the permuter found score 0 by inserting an empty `if (1) {}` basic-block barrier + an `i-K`
-  subexpr split (see [#cse-ebb-barrier-loop-reload](#cse-ebb-barrier-loop-reload)). These are reachable by
+  subexpr split (see [#cse-ebb-barrier-loop-reload](#cse-ebb-barrier-loop-reload-force-a-loop-top-memory-reload-past-a-guard-load-cse)). These are reachable by
   the permuter's ins-block / expr-split transforms.
 - **Whole-body register-coloring tie-break from a pre-reload scheduler placement → the permuter plateaus.**
   `func_80098CD8` (a byte-map loop with two pointer givs `src++`/`dst++`) has the ROM scheduling its
@@ -7027,7 +7031,7 @@ the body — the body reloads `*p` at the top each iteration, matching the ROM. 
 transform (S221: score 300 → 0), usually paired with a subexpression split of an unrelated store
 expression (`offset = i - K; dst[i] = (k - offset) % K`) that relieves the coupled register pressure. This
 is the CSE-class residual that the permuter cracks (contrast the scheduler tie-break wall in the sibling
-`func_80098CD8`, above). Related but distinct: [#volatile-view-cse-reload](#volatile-view-cse-reload)
+`func_80098CD8`, above). Related but distinct: [#volatile-view-cse-reload](#volatile-view-cse-reload-force-a-just-stored-global-to-reload)
 (retype a global as a struct member to force a just-stored reload) — the `if (1) {}` barrier is the
 loop-body-boundary form, no retype needed.
 
@@ -7072,7 +7076,7 @@ pseudo (two reads: the extend and the `ori`), recovering the real `move` + `beqz
 regalloc. `u16 temp;` cracked `func_80098CA0` to score 0. Constraints: the value must fit the narrow
 type exactly (temp max 0x1FE < 0x10000, so `u16` elides any truncation); `s16`/`short` fails (the
 sign-extend splits into two `sll`s and reverts to `bnezl`) — it must be unsigned. Distinct from
-[#local-alloc-qty-permutation](#local-alloc-qty-permutation): there the shape matches and only s-regs
+[#local-alloc-qty-permutation](#local-alloc-qty-permutation-1-basic-block-reg-swap-permuter-appropriate): there the shape matches and only s-regs
 permute; here CSE changed the shape upstream, and a source type-narrowing fixes it (no permuter).
 
 ## cse-derived-pointer base-canonicalization
@@ -7132,7 +7136,7 @@ moves it while the sum stays pointer arithmetic (all verified inert, S209).
 Source operand order: `u32 p = (u32)base + 0x1320; u32 end = n + p;` emits `addu end,n,p` (n-first).
 Dereference through a cast — `*(s8*)p` (use `s8*` for the signed `lb`, not the `u8*`→`lbu`). The
 `(u32)`/`(s8*)` casts are register no-ops (zero extra instructions). Pairs with the base-copy live-length
-lever; see [#grid-counter-double-loop](#grid-counter-double-loop).
+lever; see [#grid-counter-double-loop](#grid-counter-double-loop-non-zero-cell-counter-idiom).
 
 **Provenance.** S209 C458/C4B4/C5B4/C614 (all banked byte-exact, no permuter).
 
@@ -7143,7 +7147,7 @@ setup block: the ROM emits the loop-limit `li $t0,6` before the `move $a2,$v0` b
 emits it after. Everything else byte-exact.
 
 **Root cause.** With the scheduler inert on this dependent setup chain (see the foundational note in
-[#local-alloc-qty-permutation](#local-alloc-qty-permutation)), the setup block is emitted in pure source
+[#local-alloc-qty-permutation](#local-alloc-qty-permutation-1-basic-block-reg-swap-permuter-appropriate)), the setup block is emitted in pure source
 order. A loop limit written as a bare literal in the exit test (`while (i != 6)`) is materialized lazily
 at first use — after the base copy. Declaring it as a variable among the pre-base consts forces its `li`
 to emit with them, before the base capture.
@@ -7264,7 +7268,7 @@ branch-likely that annuls the lone `li r,DEFAULT`. Add an explicit `default: r =
 default sub-path re-materializes default and routes through the switch's common exit — the re-assignment
 is no longer a single skippable insn, so `optimize_skip` is gated out and the plain branch + `li` form
 returns. The club-kind switch (`case 0..3 -> 0..3`, else `-1`) matched only with the explicit
-`default: result = -1`. Sibling of [#switch-tight-merged-default](#switch-tight-merged-default): both turn
+`default: result = -1`. Sibling of [#switch-tight-merged-default](#switch-tight-merged-default-shared-case-0default-label--case-1-last): both turn
 on which store lands immediately before the shared exit label.
 
 ## delay-slot-fill-across-call (printf-then-guarded-store keeps a nop the no-call sibling fills)
@@ -7366,7 +7370,7 @@ default arm. Written as an if/else chain the body reads one instruction short an
 test (`bne` where the ROM has `beq`), because an if/else puts its then-arm on the fall-through path.
 
 **Root cause.** This is the compare-chain form of a `switch` -- too few, too sparse cases for a jump
-table -- so [#switch-jtbl-dispatch](#switch-jtbl-dispatch) does not apply and there is no `.rodata`
+table -- so [#switch-jtbl-dispatch](#switch-jtbl-dispatch-compiler-jump-table--sparse-inner-cases) does not apply and there is no `.rodata`
 carve. gcc emits the dispatch tests first, then each case body in source order, then the default arm,
 which is exactly the layout above. A C `if/else` cannot express the case-13-falls-into-default edge at
 all, and that missing fall-through is the instruction the naive form loses.
@@ -7392,12 +7396,12 @@ Walls (C458: ~1.27M iters / score 55).
 **Recipe (byte-exact, no permuter) — combine the S209 levers:**
 - **Base via an intermediate copy.** `u8 *ret = func_8005AF50(); s32 count=0,i=0,n=…; s8 *base = ret;`
   so `base` out-prioritizes the row counter for `$a2`
-  ([#local-alloc-qty-permutation](#local-alloc-qty-permutation), the allocno live-length steer).
+  ([#local-alloc-qty-permutation](#local-alloc-qty-permutation-1-basic-block-reg-swap-permuter-appropriate), the allocno live-length steer).
 - **Integer-domain end.** `u32 p=(u32)base+OFF; u32 end=n+p; do { count += (*(s8*)p != 0); p++; } while
-  (p != end);` for the n-first `addu` ([#integer-arith-commutative-operand-order](#integer-arith-commutative-operand-order)).
+  (p != end);` for the n-first `addu` ([#integer-arith-commutative-operand-order](#integer-arith-commutative-operand-order-pointer_int_sum-pins-pointer-first)).
 - **Shared vs unshared `n`.** Inner-extent == outer-limit (6×6, off 0x1320) → one `n` serves both;
   they differ (6×18, off 0xA84, row stride 0x12) → `n=18` for the inner end and a separate pre-base
-  **variable** `lim=6` for the outer test ([#setup-block-instruction-order](#setup-block-instruction-order)).
+  **variable** `lim=6` for the outer test ([#setup-block-instruction-order](#setup-block-instruction-order-a-pre-base-loop-limit-const-must-be-a-variable)).
 - **Row advance + predicate.** `base += stride; i++;` then the return predicate sets the final
   `slti`/`xori`/`sltiu` (`== 36` → `xori,0x24`+`sltiu,1`; `>= 50` → `slti,0x32`+`xori,1`; etc.).
 - **`count`→code dispatch-tail variant (S210 `func_8005C510`).** The same grid-counter body can end in a
@@ -7411,7 +7415,7 @@ Walls (C458: ~1.27M iters / score 55).
 0 permuter, via the compiler-source dive ([#compiler-source-fan-out-escalation-above-the-permuter](#compiler-source-fan-out-escalation-above-the-permuter)).
 S210 `func_8005C510` (6×6 grid, `count`→code dispatch tail) banked first-build reusing the same levers —
 the family is a reliable `family-of:func_8005C458` bank (see the tracked ranker follow-up in
-[#base-register-vs-displacement](#base-register-vs-displacement)).
+[#base-register-vs-displacement](#base-register-vs-displacement-full-symbolbase-materialized-vs-lo-in-displacement)).
 
 ## grid-vertex builder vein (16B Vtx-layout init/average/lerp family)
 
@@ -7425,7 +7429,7 @@ for the flag field is independent of the surrounding arithmetic, so GAS's `.set 
 neighboring load's delay slot. Write the fields in natural index order (`out[0..2]`, then `out[3]=0`,
 then `out[4..5]`): that lets the assembler fill the `ob[2]` (`out[2]`) load-delay slot with the flag
 store, matching the ROM. Writing `out[3]=0` earlier (right after `out[1]`) emits it one slot too early
-and misses by one instruction. (Cross-ref [#gas-set-reorder-delay-slot-fill](#gas-set-reorder-delay-slot-fill).)
+and misses by one instruction. (Cross-ref [#gas-set-reorder-delay-slot-fill](#gas-set-reorder-delay-slot-fill-textual-layout--machine).)
 
 **Lever B — a single `(a+b)/N` source matches both signed-s16 and unsigned-byte fields.** For the s16
 `ob`/`tc` fields, `(a[f]+b[f])/2` emits the full signed round-toward-zero sequence (`srl 31; addu; sra`).
@@ -7436,7 +7440,7 @@ uniform `/N` (or `/16` for the weighted lerp `(a*(16-t)+b*t)/16`) is correct for
 per-field automatically. The lerp's `16 - t` CSEs to one `subu` reused across all fields.
 
 **Note.** `init_grid_vertex` additionally needed the permuter for a 0.91 local-alloc reg-permutation on
-its texcoord compute cluster — see [#local-alloc-qty-permutation](#local-alloc-qty-permutation) (the
+its texcoord compute cluster — see [#local-alloc-qty-permutation](#local-alloc-qty-permutation-1-basic-block-reg-swap-permuter-appropriate) (the
 extractable-reorder + permuter-plumbing notes).
 
 **A block-local constant materialized to hide a load-latency = a build-better-than-ROM scheduler coin,
