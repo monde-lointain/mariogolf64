@@ -133,7 +133,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     selection = parser.add_mutually_exclusive_group()
     selection.add_argument(
-        "--segment", default="main", help="src/<segment> loose stubs"
+        "--segment", default="main", help="YAML code bank for loose-stub selection"
     )
     selection.add_argument(
         "--func", action="append", help="explicit exact labels; retain risk tags"

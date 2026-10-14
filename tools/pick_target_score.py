@@ -5,8 +5,11 @@ import dataclasses
 import functools
 import os
 import re
-from decomp_common import ASM_DATA_DIR, ASM_DIR
+
+import yaml
+from cpreprocess import _strip_comments
 from decomp_asm import PRIVILEGED_OPS, subseg_vram
+from decomp_common import ASM_DATA_DIR, ASM_DIR
 from pick_target_classify import (
     _FUNC_TOKEN_RE,
     _is_static_func_proto,
@@ -16,13 +19,13 @@ from pick_target_classify import (
 )
 from pick_target_config import (
     BACKLOG,
-    ROOT,
     BAND_WARM_BONUS,
     BIG_FN_BYTES,
     CARRYOVER_PENALTY,
     FILE_STATIC_RE,
     HUGE_FN_BYTES,
     PACK_DECOMPOSE_NFNS,
+    ROOT,
     SMALL_PACK_BYTES,
     UPSTREAM_BONUS,
     UpstreamSource,
@@ -43,6 +46,7 @@ from pick_target_hazards import (
     Hazard,
 )
 from pick_target_index import _coddog_source_banked
+
 
 def snap_fib(n):
     """Round a raw additive score up to the nearest Fibonacci ladder rung (1,2,3,5,8,13)."""
@@ -970,7 +974,7 @@ def fp_class_tell(fn):
     return "fp-mixed"
 
 
-_STUB_FN_RE = re.compile(r'INCLUDE_ASM\("[^"]+",\s*([A-Za-z0-9_]+)\)')
+_STUB_FN_RE = re.compile(r'\bINCLUDE_ASM\s*\(\s*"[^"]*"\s*,\s*([A-Za-z0-9_]+)\s*\)')
 _STUB_SIZE_RE = re.compile(r"0x([0-9A-Fa-f]+)")
 
 
@@ -990,33 +994,44 @@ def _stub_size(fn):
 
 
 def loose_stubs(seg):
-    """Enumerate the still-`INCLUDE_ASM` stubs sitting inside ALREADY-`c` files of a segment's src
-    tree, smallest-first, each tagged carried-wall / nested-child.
+    """List stubs in the requested YAML code bank's C hosts, including libraries."""
+    with open(os.path.join(ROOT, "mariogolf64.yaml")) as f:
+        segments = yaml.safe_load(f)["segments"]
+    bank = next(
+        (
+            segment
+            for segment in segments
+            if isinstance(segment, dict)
+            and segment.get("type") == "code"
+            and segment.get("name") == seg
+        ),
+        None,
+    )
+    if bank is None:
+        raise ValueError(f"unknown YAML code bank: {seg}")
 
-    Why this is not build_rows: the whole-subseg ranker prices only asm-flip PACKS, so a fresh leaf
-    that persists as one stub inside a partial `c` file is invisible to it — `--segment main` can
-    read "no candidates" while genuinely fresh standalone leaves remain (S273 mined
-    pause_audio/unload_active_overlay/func_80029EEC this way, all after the pack ranker went empty).
-    This walks src/<seg>/*.c for INCLUDE_ASM fn names, sizes each from its `.s`, and applies the same
-    DoR tells as --carried-check (carried_wall_names) and --nested-check (nested_child_tell), so the
-    gate sees the actionable fresh+standalone leaves without a hand-grep.
+    hosts = set()
+    for subsegment in bank.get("subsegments", []):
+        if isinstance(subsegment, list):
+            if len(subsegment) < 2 or subsegment[1] != "c":
+                continue
+            name = subsegment[2] if len(subsegment) > 2 else f"{subsegment[0]:X}"
+        elif isinstance(subsegment, dict) and subsegment.get("type") == "c":
+            name = subsegment.get("name") or f"{subsegment['start']:X}"
+        else:
+            continue
+        hosts.add(os.path.join(ROOT, "src", bank.get("dir", ""), name + ".c"))
 
-    Returns a list of dicts {fn, size, file, carried, nested} sorted by (size, fn). A stub whose `.s`
-    is missing sorts last (size None -> a large sentinel) so it never masquerades as tiny.
-    """
-    import glob
-
-    tree = os.path.join(ROOT, "src", seg)
     walls = carried_wall_names()
     out = []
-    for cpath in sorted(glob.glob(os.path.join(tree, "*.c"))):
+    for cpath in sorted(hosts):
         try:
             with open(cpath) as f:
                 text = f.read()
         except OSError:
             continue
         rel = os.path.relpath(cpath, ROOT)
-        for fn in _STUB_FN_RE.findall(text):
+        for fn in _STUB_FN_RE.findall(_strip_comments(text)):
             out.append(
                 {
                     "fn": fn,

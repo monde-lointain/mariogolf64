@@ -1,29 +1,13 @@
 #!/usr/bin/env python3
-"""pick_target.py — rank the next decomp target, smallest-first.
+"""Rank whole assembly packs and individual YAML-bank C-host stubs, smallest-first.
 
-Pure-static ranker (no Ghidra MCP — the agent seeds from MCP inline during the
-execution loop). Enumerates flippable `asm` subsegs and partially-matched `c`
-files from mariogolf64.yaml + asm/ + src/, flags upstream-mirror availability
-(libultra/libkmc), band warmth (a mirror dir with an already-banked sibling →
-an enabler-free flip), and hazards (file-scope static, file-scope data-global
-definition, refs-unplaced = a data extern referenced but absent from both name
-files, non-16-aligned subseg, multi-function pack, needs-header = an upstream
-include unresolved under the project -I set, jal-count-mismatch = the upstream
-.c's call count disagrees with the ROM fn's jal count = a build divergence =>
-near-verbatim mirror), and prints a smallest-first table for `/sprint-plan`.
-The refs-unplaced / calls-unplaced grep follows one level of macro expansion so a
-global or callee inlined only through an invoked library macro (EPI_SYNC →
-__osCurrentHandle) is flagged, not deferred to a mid-execution link failure.
+Selection is static; Ghidra is optional context during reconstruction, not a discovery
+prerequisite. Existing source, assembly, upstream references, and carry/coupling hazards
+inform the shortlist but do not prove tractability or bank completion.
 
-Usage:
-  uv run --locked python tools/pick_target.py [--lib SUBSTR] [--segment SEG] [-n N] [--include-stuck] [--json]
-
-`--segment main` is a vram-RANGE filter (main-segment game code), distinct from the `--lib`
-SUBSTRING filter: `--lib main` matches only the coddog `mainlib/*` packs (the game-embedded 2nd
-libnusys instance), NOT the classical main-segment `none` subsegs; the vram range does.
-
-Replaces the old `/decomp-lead` roadmap: target selection is now a tool the plan
-gate calls, mirroring marioparty7's pick_target.py.
+`--segment` filters whole-pack rows by VRAM range; `--lib` filters substrings.
+`--loose-stubs` and `--file-close` select C hosts by YAML code-bank membership,
+including linked libraries. These modes complement, rather than replace, pack discovery.
 """
 
 import argparse
@@ -1094,9 +1078,9 @@ def main():
     ap.add_argument(
         "--loose-stubs",
         metavar="SEG",
-        help="Enumerate still-INCLUDE_ASM stubs inside ALREADY-`c` files of src/SEG/, smallest-first, "
-        "each tagged fresh / CARRIED-WALL / NESTED-CHILD / INTRINSIC-HASM. Surfaces fresh individual "
-        "leaves the whole-subseg pack ranker misses. Default hides carried+nested+intrinsic; "
+        help="Enumerate INCLUDE_ASM stubs in all C hosts of the named YAML code bank, including "
+        "linked libraries, smallest-first. Each leaf retains carry/coupling/hazard tags. "
+        "Default hides carried+nested+intrinsic; "
         "--all includes those classes. -n bounds output; --json emits candidate records.",
     )
     ap.add_argument(
@@ -1107,10 +1091,8 @@ def main():
     ap.add_argument(
         "--file-close",
         metavar="SEG",
-        help="Rank the still-INCLUDE_ASM stubs of src/SEG/ by how close their HOST FILE is to zero "
-        "stubs, so the gate can see which single function takes a file to md5-candidate. Points bank "
-        "per file, so in a mined-out segment a one-stub host is the only place one function is worth "
-        "a point (S317 closed two that way). Shows hosts with <= --n stubs, fewest first.",
+        help="Rank C hosts in the named YAML code bank by remaining INCLUDE_ASM count, "
+        "including linked libraries. Shows hosts with <= -n stubs, fewest first.",
     )
     args = ap.parse_args()
 
@@ -1124,14 +1106,14 @@ def main():
             f"unrelated packs. Use --segment {args.lib}, or --loose-stubs {args.lib} for the "
             f"individual stubs inside already-`c` files."
         )
+    if args.file_close or args.loose_stubs:
+        try:
+            stubs = loose_stubs(args.file_close or args.loose_stubs)
+        except (OSError, ValueError) as error:
+            ap.error(str(error))
+
 
     if args.file_close:
-        # File closure depends on the last stub, so a leaf's value is not only its own
-        # size: the last stub in a host is worth the whole file's md5-candidate flip, and every
-        # other stub in that host is worth zero until it lands. --loose-stubs sorts by leaf size and
-        # cannot see this, which is why S317's goal ("close main's single-stub files") was found by
-        # a hand grep at the gate rather than by the ranker.
-        stubs = loose_stubs(args.file_close)
         by_file = {}
         for s_ in stubs:
             by_file.setdefault(s_["file"], []).append(s_)
@@ -1158,15 +1140,13 @@ def main():
                 print(f"    {sz:>6}  {m['fn']:28} {'  '.join(tags)}")
         n_one = sum(1 for _, m in rows if len(m) == 1)
         print(
-            f"# {len(rows)} src/{args.file_close}/ files still hold stubs; {n_one} are one stub from "
-            f"md5-candidate ({shown} host(s) shown at <= {args.n} stubs). A CARRIED-WALL tag on a "
-            f"one-stub host is a price, not a veto: it is the file's last function by construction."
+            f"# {len(rows)} C hosts in YAML bank {args.file_close} still hold stubs; "
+            f"{n_one} have one remaining ({shown} host(s) shown at <= {args.n} stubs). "
+            "Carry tags are advisory; source completion is not ROM verification."
         )
         return
 
     if args.loose_stubs:
-        stubs = loose_stubs(args.loose_stubs)
-
         def _is_fresh(s):
             # `dl-emitter` (S275's `raw-dl-emitter`, renamed S294) is a PRICING tag and counts as
             # fresh: the leaf needs the DL reconstruction recipe, which is not a wall. S258 retired
@@ -1238,7 +1218,7 @@ def main():
             sc = f"  single-callee:{s['single_callee']}" if s.get("single_callee") else ""
             print(f"{sz:>6} {status:20} {s['fn']:28} {s['file']}{twin}{fpc}{sc}{strs}")
         print(
-            f"# {len(shown)}/{len(eligible)} eligible shown; {len(stubs)} stubs in src/{args.loose_stubs}/: "
+            f"# {len(shown)}/{len(eligible)} eligible shown; {len(stubs)} stubs in YAML bank {args.loose_stubs}: "
             f"{n_fresh} fresh, {sum(s['carried'] for s in stubs)} carried-wall, "
             f"{sum(s['nested'] for s in stubs)} nested, "
             f"{sum(bool(s.get('intrinsic')) for s in stubs)} intrinsic-hasm, "
@@ -1291,7 +1271,7 @@ def main():
         print(json.dumps(rows, indent=1))
         return
     if not rows:
-        print("(no candidates — every asm subseg flipped and every c file at 0 stubs?)")
+        print("(no ranked candidates; inspect carried packs and YAML-bank loose stubs)")
         return
     print(
         f"{'func':28} {'rom':>9} {'vram':>10} {'size':>5} {'nfn':>3} {'pts':>3} {'kind':8} "

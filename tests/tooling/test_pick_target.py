@@ -67,6 +67,87 @@ def test_loose_stub_limit_applies_after_filtering(
     assert [row["fn"] for row in json.loads(capsys.readouterr().out)] == [expected]
 
 
+def test_loose_stubs_follow_yaml_bank_hosts(tmp_path, monkeypatch, capsys):
+    import sys
+
+    import yaml
+
+    score = load_tool("pick_target_score")
+    monkeypatch.setattr(score, "ROOT", str(tmp_path))
+    monkeypatch.setattr(score, "BACKLOG", str(tmp_path / "BACKLOG.md"))
+    monkeypatch.setattr(score, "_WIP_DIR", str(tmp_path / "docs/wip"))
+    monkeypatch.setattr(score, "_ASM_ROOT", str(tmp_path / "asm"))
+    (tmp_path / "mariogolf64.yaml").write_text(
+        yaml.safe_dump(
+            {
+                "segments": [
+                    {
+                        "name": "main",
+                        "type": "code",
+                        "start": 0x10,
+                        "vram": 0x80001000,
+                        "subsegments": [
+                            [0x10, "c", "main/game"],
+                            [0x20, "c", "libmus/nested/fx"],
+                            {"start": 0x30, "type": "c", "name": "libultra/sdk"},
+                            [0x40, "asm", "main/assembly"],
+                            {"start": 0x50, "type": "bss", "name": "main/storage"},
+                        ],
+                    },
+                    {
+                        "name": "overlay_0",
+                        "type": "code",
+                        "start": 0x100,
+                        "vram": 0x80001000,
+                        "subsegments": [[0x100, "c", "overlay_0/game"]],
+                    },
+                    [0x200],
+                ]
+            }
+        )
+    )
+    hosts = {
+        "main/game": ("game_leaf", 16),
+        "libmus/nested/fx": ("library_leaf", 8),
+        "libultra/sdk": ("sdk_leaf", 12),
+        "main/assembly": ("assembly_leaf", 4),
+        "main/storage": ("storage_leaf", 4),
+        "main/unlisted": ("unlisted_leaf", 4),
+        "overlay_0/game": ("overlay_leaf", 4),
+    }
+    for host, (name, size) in hosts.items():
+        source = tmp_path / "src" / (host + ".c")
+        source.parent.mkdir(parents=True, exist_ok=True)
+        source.write_text(
+            '// INCLUDE_ASM("ignored", comment_leaf);\n'
+            '/* INCLUDE_ASM("ignored", block_comment_leaf); */\n'
+            f'INCLUDE_ASM (\n  "asm/nonmatchings/{host}",\n  {name}\n);\n'
+        )
+        assembly = tmp_path / "asm/nonmatchings" / host / (name + ".s")
+        assembly.parent.mkdir(parents=True, exist_ok=True)
+        assembly.write_text(f"nonmatching {name}, 0x{size:X}\n\nglabel {name}\n")
+
+    stubs = score.loose_stubs("main")
+    assert [(stub["fn"], stub["size"], stub["file"]) for stub in stubs] == [
+        ("library_leaf", 8, "src/libmus/nested/fx.c"),
+        ("sdk_leaf", 12, "src/libultra/sdk.c"),
+        ("game_leaf", 16, "src/main/game.c"),
+    ]
+    assert [stub["fn"] for stub in score.loose_stubs("overlay_0")] == ["overlay_leaf"]
+    with pytest.raises(ValueError):
+        score.loose_stubs("unlisted")
+
+    pt = load_tool("pick_target")
+    monkeypatch.setattr(pt, "loose_stubs", score.loose_stubs)
+    monkeypatch.setattr(sys, "argv", ["pick_target.py", "--file-close", "main", "-n", "1"])
+    pt.main()
+    output = capsys.readouterr().out
+    for stub in stubs:
+        assert stub["file"] in output
+    assert "overlay_0/game.c" not in output
+    assert "main/unlisted.c" not in output
+
+
 def test_vendorable_tu_missing_defines(tmp_path, monkeypatch):
     """S57 retro #1: the asm-mirror needs-define pre-check (vendorable_tu_missing_defines).
 
