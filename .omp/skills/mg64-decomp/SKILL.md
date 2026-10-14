@@ -14,11 +14,31 @@ Use the configured Python interpreter `uv run --locked python`; the default bina
 1. Rank candidates with `uv run --locked python tools/pick_target.py -n 12`; use `--lib`, `--segment`, or `--loose-stubs` to scope. Read only the selected candidate's backlog/WIP evidence. Check carried walls and nested children before pricing hand-selected leaves (`--carried-check`, `--nested-check`). Inspect its assembly and source comments; ranker signals are not proof of tractability.
    `--lib` filters substrings, not segment ranges. Size leaves from their assembly headers, not adjacent VRAM deltas. Re-derive carried signatures, declarations, instruction counts, and residuals from current evidence; a prior compiler-pass verdict is a hypothesis.
    Bound discovery with `-n`; loose-stub mode also supports `--json`. Prefer a demonstrated sibling/upstream/source lever over a historical bank-rate forecast.
+   Use [reference discovery](../../../docs/tooling.md#references-and-native-campaigns) when a sibling
+   implementation could supply a source shape. Read its C and assembly, compare types/callees,
+   and recheck its hashes before reuse. Similarity and source presence do not establish a bank.
 2. Route hazards through [the hazard index](../../../docs/hazard-index.md), then read the selected playbook. Consult [C coding style](../../../docs/coding-style.md) for source conventions.
 3. Resolve the source subsegment in `mariogolf64.yaml`. Change only explicitly required subsegment flip/split/path lines; never edit generated extraction outputs by hand. Preserve `INCLUDE_ASM` for unbanked functions. Do not change C, headers, or YAML unless the task requires that source change.
    A compiler jump table couples source and rodata: carve it only when the C switch regenerates its symbol.
 4. Keep candidate experiments isolated under `nonmatchings/<func>/`; do not run concurrent builds. The build tree and Ghidra MCP are shared resources: serialize access to both.
    Work inline by default. Delegate only independent analysis that justifies separate contexts; the parent serializes candidate compiles, builds, MCP, and source integration. Use the native `task` contract and [fan-out guidance](../../../docs/workflow/fan-out.md), not a copied dispatch prompt.
+
+## Campaigns
+
+For a campaign request, prepare a bounded queue with the [campaign CLI](../../../docs/tooling.md#references-and-native-campaigns).
+Keep the native session as the integration owner; execute targets serially and use native `task`
+only for independent reasoning. Shards divide analysis queues, not permission to run shared builds.
+
+- Prefer upstream mirrors first. An opt-in m2c prepass can seed and measure untouched candidates
+  before spending agent effort; it never overwrites carries or edits matching source.
+- Treat each queue identity as ROM SHA-1 + bank + ROM offset. Revalidate the live stub and target
+  before starting; changed reference lists, names, or ranking are not completion.
+- Start the candidate's absolute deadline when it acquires execution ownership, not while queued.
+  Pass `MG64_DEADLINE_UNIX` to bounded commands and retain inspection time. Stop launching
+  expensive experiments when the reserve is exhausted; deadline expiry is not a source-wall verdict.
+- Review provisional zeroes using the ordinary integration and bank gates. If an attempt expires
+  or fails, retain its isolated artifacts and measured residual; never reset unrelated work or commit
+  automatically. Continue to the next independent target only after shared resources are released.
 
 ## Iterate
 
@@ -28,14 +48,9 @@ Use the configured Python interpreter `uv run --locked python`; the default bina
 - Fix compile diagnostics before retrying. Classify a fresh residual as structure/count, registers, or ordering; change a named [source lever](../../../docs/levers.md) and re-measure. Escalate to the permuter at `percent >= 0.97`, or exact instruction count with a single-operand residual. A wall verdict belongs to its measured base, not permanently to the function.
 - Score zero starts provisional integration: inline the body, remove its stub, format, build the host object, and spot-check the target function against the isolated object. Then run the full ROM verifier. Compare the same function, not whole multi-function `.text` sections; [oracle limits](../../../docs/workflow/loop.md#oracles) explain relocation and normalization caveats. If integration fails, restore the matching stub/source and keep the candidate isolated.
 - Preserve profile fidelity. Isolated compilation must use the same per-source profile and flags as the ROM build; use `tools/rom_build.py` and the authoritative `tools/build_profiles.json` rather than hand-assembled compiler commands. Never infer a matching result from an isolated compile alone.
-
-Bound expensive experiments using the [deadline guard](../../../docs/tooling.md#bounded-experiments).
-Start one absolute deadline per candidate, preserve inspection time, and retain isolated artifacts
-on expiry. A deadline is a resource limit, not a source-wall verdict.
-
-The loop retains content-addressed measurement/source pairs under each candidate's `measurements/`
-directory. Cite these from existing WIP notes rather than creating another ledger. Source, profile,
-header or context changes require fresh measurement; an isolated score remains unbanked evidence.
+  The loop retains content-addressed measurement/source pairs under the candidate's `measurements/`
+  directory. Cite these from existing WIP notes rather than transcribing scores or creating a second
+  ledger. Changes to source, profile, headers, or context require a fresh measurement.
 
 ## Bank
 

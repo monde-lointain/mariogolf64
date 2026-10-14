@@ -9,6 +9,10 @@ sources:
     title: Per-function compile and diff CLI
   - resource: ../tools/rom_build.py
     title: ROM build interface
+  - resource: ../tools/decomp_references.py
+    title: Advisory C-reference discovery
+  - resource: ../tools/decomp_campaign.py
+    title: Native campaign queues and serial m2c prepasses
   - resource: ../tools/decomp_budget.py
     title: Deadline and process-group enforcement
 ---
@@ -70,9 +74,41 @@ The authoritative object build interface is `uv run --locked python tools/rom_bu
 Compile profiles are defined by `tools/build_profiles.json`; use the same source-specific profile for
 isolated iteration as the ROM build.
 
-## Bounded experiments
+## References and native campaigns
 
-Bound an expensive command with the native deadline guard:
+| Need | Command |
+| --- | --- |
+| Similar C references for an exact label | `uv run --locked python tools/decomp_references.py --func <fn> -n 3` |
+| Include another checkout without merging it | Add `--reference-root <checkout>` (repeatable) |
+| Prepare a native `/decomp` queue | `uv run --locked python tools/decomp_campaign.py --segment main --pool-size 60 -n 12 --by-similarity` |
+| Select explicit targets, including carries | `decomp_campaign.py --func <fn> --func <other> -n 2` |
+| Partition an analysis queue | Add `--shard 1/4`; never run shared compiles/MCP/source edits concurrently |
+| Cheap isolated m2c prepass | Add `--prepass --seconds 1800`; seeds/compiles run serially and matching source stays untouched |
+| Bound a costly command and its descendants | `uv run --locked python tools/decomp_budget.py --seconds 600 --reserve 120 -- <command> <args>...` |
+
+References compare original-ROM assembly shape, opcode distribution, and shared callees, then
+point to C implementations without retained assembly stubs. Output includes source/target hashes,
+ROM/bank/offset identity, and coverage failures. No reference is `null`, not a measured zero.
+The scores are advisory, not matching percentages or difficulty estimates. Source discovery is
+conservative and unverified: inspect conditional compilation and remeasure any source you reuse.
+An ambiguous assembly label is rejected rather than resolved by the first file.
+
+Explicit reference roots must declare the same ROM SHA-1 and have extracted reference assembly
+under `build/us/work/asm`; the active checkout honors `MG64_BUILD_DIR`. Discovery reads fresh files
+on each invocation, so newly visible C can be used before a merge. Neither a declared checksum nor
+a source-present result proves that checkout passed the ROM gate. Recheck hashes before reuse.
+
+Queue preparation is read-only. `--pool-size` bounds the existing loose-stub ranker's eligible
+shortlist; similarity, sharding, and the final `-n` operate within that disclosed shortlist.
+Default selection preserves the ranker's carried/nested/intrinsic/pool exclusions. Explicit
+labels retain coupling tags; the prepass skips coupled/intrinsic targets, known library source
+trees, already-C functions, and any existing candidate directory. Choose upstream source first.
+`provisional-zero` still requires source review, integration, and the sole ROM verifier.
+
+The [native skill](../.omp/skills/mg64-decomp/SKILL.md#campaigns) owns campaign execution. Feed it
+the queue rather than starting another agent runner. Start one absolute deadline when a target
+gets execution ownership, then pass it to each expensive command. For example, in the persistent
+shell, set `MG64_DEADLINE_UNIX` once for a 30-minute candidate:
 
 ```sh
 export MG64_DEADLINE_UNIX=$(( $(date +%s) + 1800 ))
@@ -91,10 +127,9 @@ the direct command exits successfully. This is lifecycle containment, not a sand
 daemonizing commands. The cleanup grace can extend command return beyond the execution deadline.
 This is a resource budget, not an arbitrary retry cap or evidence of an impossible source match.
 
-The matching loop emits `measurement_path` for successful and failed compiles. Each immutable
-record retains its measured C source and identifies the target dump, effective profile and compiler.
-Compiler failures preserve real diagnostics and remove stale objects. Header/context inputs are not
-archived; regenerate and remeasure before reusing a result. Only the ROM verifier authorizes banking.
+The prepass lock excludes another prepass, not manual builds or Ghidra: the parent must still
+serialize every shared operation. There are no automatic source integrations, commits, hard
+resets, or multi-worktree build workers.
 
 ## Maintain tooling and docs
 

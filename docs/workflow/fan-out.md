@@ -34,6 +34,13 @@ advice to delegate investigation plus editing does not override this matching-re
 contract. The parent measures proposals serially with the ROM source profile and sends
 back only the diagnostic needed for the next analysis.
 
+Campaign sharding partitions reasoning queues by stable ROM/bank/offset identity. It does not
+change execution ownership or license concurrent worktree builds. Use
+[reference discovery](../tooling.md#references-and-native-campaigns) to read another checkout's
+new C without merging it; workers return the reference identity/hashes and a source hypothesis,
+not a claimed bank. The parent rechecks that evidence before measuring or integrating it.
+
+
 Use auto-delivered results and `agent://` messaging; inspect `history://` only when the
 result omits necessary evidence. Keep working after dispatch; wait only when blocked.
 Native `/handoff` compacts the current session, not a worker-result transport. Do not

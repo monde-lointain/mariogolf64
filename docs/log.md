@@ -2,6 +2,44 @@
 
 ## 2026-10-14
 
+### Reference-driven native campaigns and bounded experiments
+
+- **Research**: Parallel deep dives examined Snowboard Kids/Nigel's reference ranking, sharding,
+  deadlines and m2c prepass; REA's artifact/evidence contracts; The Ghidra Book and Eilam's
+  decompilation material; and legacy-code/testing/CMake notes. Adapted the useful mechanisms
+  without adding a provider stack, external agent runner, destructive resets or concurrent builds.
+- **Discovery**: Added fresh advisory C-reference search across explicitly supplied same-ROM
+  checkouts. Results carry source/assembly locations and hashes, disclose unavailable coverage,
+  reject ambiguous labels, and keep missing similarity distinct from a measured zero.
+- **Campaigns**: Added bounded native-session queues, optional similarity ordering and stable
+  ROM/bank/offset sharding. An opt-in serial m2c prepass preserves existing candidates, skips
+  coupled/intrinsic/library targets, and reports provisional results without integrating source.
+- **Execution**: Added inherited absolute deadlines and process-group cleanup. The permuter
+  wrapper now defaults to a configurable 600-second limit and reserves 120 seconds when a
+  candidate deadline is inherited. Expiry retains artifacts and never establishes a source wall.
+- **Evidence**: Isolated measurements retain immutable source/score pairs with target, effective
+  profile and compiler identities. Changed candidates invalidate attribution. Compiler failures
+  now retain actual diagnostics; existing compiler callers keep their default output behavior.
+  Header/context inputs remain explicitly unarchived and require fresh measurement on resume.
+- **Proof**: Tooling suite: 148 passed, two skipped. Reference discovery found 998 C references.
+  Native queue and shard commands ran; a real m2c prepass retained a compiler failure, and a
+  second invocation preserved its candidate hash. A real `rand` compile at the libkmc profile
+  scored zero across 13 rows; changing its delay-slot mask produced score five and a separate
+  archived source/measurement. A real permuter run stopped at three seconds with exit 124;
+  an expired deadline refused launch. The sole ROM verifier passed with SHA-1
+  `e2c4e7a905b29529b49a1619a401fe699224829b`.
+- **Review**: Fixed four boundary gaps found by independent reviewers: explicit-target pool tags,
+  ambiguous reference C/bank association, nested-guard cancellation, and background descendants
+  after a successful command. Regressions exercise actual pool assembly and process lifetimes;
+  cleanup includes observed descendant sessions before bounded hard escalation/reaping.
+- **Documentation**: Updated the native skill, command catalog, execution artifact contract and
+  fan-out guidance. Validated 101 concept metadata records, 60 local links/fragments across six
+  active surfaces, and all 115 frozen hazard anchors. New workflow tools and the loop passed
+  Ruff checks; `rom_build.py` retains unrelated existing I001/F401/E731 findings.
+- **Scope**: No matching C, header, YAML, protected symbol inputs, or vendor edits. No new
+  tools or ROM extraction from the supplied archive were needed. Calibration scaffolds were
+  removed; the real unbanked prepass candidate remains isolated under `nonmatchings/`.
+
 ### Streamlined agent decompilation workflow
 
 - **Research**: Parallel deep dives compared Oh My Pi's native task/skill/artifact lifecycle,
