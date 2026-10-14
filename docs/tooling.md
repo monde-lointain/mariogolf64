@@ -62,7 +62,7 @@ isolated iteration as the ROM build.
 
 ## Maintain tooling and docs
 
-- `cmake --build build/us --target test-tools` — ROM-free tooling tests.
+- `uv run --locked pytest tests/tooling` (or `ctest --preset tooling` after configure) — tooling tests.
 - `uv run --locked python tools/hazard_anchors.py check` — frozen hazard-anchor integrity.
 - [Fingerprint sweeps](../tools/coddog/README.md) — optional local reference builds; maps are
   gitignored and depend on local artifacts, not a fresh-checkout requirement.

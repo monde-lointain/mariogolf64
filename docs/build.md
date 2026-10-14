@@ -100,11 +100,11 @@ For another binary tree, configure it with `cmake -S . -B <binary> -G Ninja`, th
 ## Tooling checks
 
 `uv run --locked pytest tests/tooling` runs the existing behavioral suite without a ROM or CMake.
-`cmake --build build/us --target test-tools` runs it through the configured build graph.
+`ctest --preset tooling` runs the same suite in the configured binary tree.
 The ROM CTest preset selects only the authoritative ROM gate; tooling tests are a separate check.
 
-Historical ranker/coddog snapshots have documented baseline failures; do not regenerate goldens to
-conceal them. [Tool reference](tooling.md) separates optional external SDK/reference tools from the
+Tests check behavior rather than snapshotting the changing candidate backlog or generated seed
+comments. [Tool reference](tooling.md) separates optional external SDK/reference tools from the
 self-contained retail-ROM build.
 
 All scripts and analysis tools use the uv-managed `.venv`; do not install dependencies with pip,

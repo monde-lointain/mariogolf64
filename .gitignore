@@ -3,6 +3,10 @@ __pycache__/
 *.py[cod]
 *.py.class
 
+# Disposable tooling caches
+.pytest_cache/
+.ruff_cache/
+
 # Environments
 .env
 .venv

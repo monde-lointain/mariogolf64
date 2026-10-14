@@ -27,7 +27,7 @@ Use [Source levers](levers.md) for evidence-backed code-generation adjustments a
 
 The project compiles C with KMC GCC 2.7.2 and KMC binutils; the base profile uses `-O2`, `-mips3`,
 32-bit general-purpose and floating-point registers, and project-specific flags. Profiles vary by
-tree and translation unit. See the [compiler profile](../Makefile#L40) and [per-tree profiles](../mk/).
+tree and translation unit. See the [compiler profiles](../tools/build_profiles.json) and [build guide](build.md#compiler-profiles-and-incremental-work).
 Do not assume a modern compiler, C++ features, or a single flag set.
 
 Keep code understandable, but treat complexity guidance as a heuristic, not a reason to change a

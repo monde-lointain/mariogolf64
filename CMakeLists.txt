@@ -55,11 +55,6 @@ if(BUILD_TESTING)
     set_tests_properties(mg64.tooling PROPERTIES WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
         RESOURCE_LOCK mg64_rom_build LABELS tooling)
 endif()
-add_custom_target(test-tools
-    COMMAND "${CMAKE_COMMAND}" -E env "MG64_BUILD_DIR=${PROJECT_BINARY_DIR}"
-        "${MG64_PYTHON}" -m pytest "${PROJECT_SOURCE_DIR}/tests/tooling"
-    USES_TERMINAL VERBATIM)
-add_dependencies(test-tools mg64_python)
 
 set(MG64_GHIDRA_SYNC_SCRIPT "" CACHE FILEPATH "Optional Ghidra sync_decomp_names.py script")
 add_custom_target(sync-names

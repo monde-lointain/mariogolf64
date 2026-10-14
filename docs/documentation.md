@@ -18,7 +18,7 @@ before opening detailed procedure or historical evidence.
 
 Root project guides, native Oh My Pi skills and commands, sprint records, and container/fingerprint
 guides use compatible concept metadata but live outside this recursive bundle. Third-party tool
-submodules, local virtual environments, generated output, and dependency documentation are not part of it.
+directories, local virtual environments, generated output, and dependency documentation are not part of it.
 Links may leave the bundle to point at implementation or history.
 
 ## Concept metadata

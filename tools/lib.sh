@@ -9,7 +9,6 @@
 # script itself — a `VAR=$(helper)` command-substitution form would run the
 # helper (and its exit) in a subshell and silently continue with an empty VAR.
 
-# Activate the configured binary-tree environment (carries permuter/asm-differ deps).
 # Resolve the configured binary tree once for all wrappers.
 mg_build_dir() {
     MG_BUILD_DIR="${MG64_BUILD_DIR:-build/us}"
