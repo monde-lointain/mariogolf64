@@ -107,7 +107,7 @@ uses `-n` as its maximum stubs per host, not a candidate-row limit.
 | Fresh `objdump -drz` and `objdump -r` | Registers, ordering, nops, actual relocations. Keep `z`: collapsed zero runs undercount. Unlinked `%hi`/`%lo` values alone do not identify the relocated address. |
 | Linked asm-differ view | Relocation-resolved iteration evidence after a fresh full build. Object-only builds do not refresh link maps. |
 | Function-byte spot-check | Isolated versus integrated code-generation diagnostic at score zero. Compare the same function/range, not whole TUs; relocation addends and assembler encodings require interpretation. Full-ROM verification resolves link/layout effects. |
-| decomp-permuter | Search, not acceptance. Eligible at `percent >= 0.97` or exact instruction count with a one-operand residual. Multi-register/FP-schedule permutations are poor search targets. Internal branch targets can normalize to a false zero; inspect real branch encodings. |
+| decomp-permuter | Search, not acceptance. Apply [source/residual eligibility](#permuter-eligibility) before import. Internal branch targets can normalize to a false zero; inspect real encodings. |
 | GCC `-dL` (`.loop`) | Loop hoist, induction, strength-reduction decisions. Read measured savings/lifetime/counts rather than estimate them; filter the whole-file dump. |
 | GCC `-dg` (`.greg`), `-dl` (`.lreg`), `allocno_report.py` | Allocation order, conflicts, preferences, dispositions, and priority arithmetic. Interpret only after structural/count deficits are fixed. |
 | Ghidra pseudocode/types | Revisable shape/type hypotheses. Select the exact bank plus ROM provenance because overlay VRAM repeats; FP ABI and source-local partial types may be wrong. |
@@ -117,6 +117,22 @@ uses `-n` as its maximum stubs per host, not a candidate-row limit.
 A nonzero score with no displayed mismatch is not proof of a source wall: check whether
 `--score-only` suppressed detail, inspect fresh instruction counts and real operands,
 and distinguish isolation/relocation differences from code-generation differences.
+
+### Permuter eligibility
+
+Start from faithful, integration-eligible C under the parent TU's profile. Diagnostic-only
+asm barriers, explicit register bindings, undefined behavior, or omitted calls are not search
+bases, regardless of score. Remove diagnostic scaffolding and remeasure the clean source first.
+
+Then inspect the actual residual. `percent >= 0.97`, or exact instruction count with a
+single-operand residual, is a search-suitability signal—not an automatic launch instruction.
+Prefer a source lever for structural deficits or pervasive register/FP-schedule permutations.
+For displaced scheduling blocks, inspect raw instructions/counts rather than trusting normalized
+alignment or percent alone. A bounded search can narrow a residual; expiry cannot prove a wall.
+
+The run wrapper uses the permuter's normal exploration; pass `--best-only` explicitly when
+monotonic search is justified. Setup/run/score synchronize the locked environment once; compiler,
+assembler, and objdump callbacks reuse that interpreter without resolving dependencies per candidate.
 
 ## Residual diagnosis
 

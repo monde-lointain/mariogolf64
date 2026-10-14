@@ -164,7 +164,7 @@ the [hazard index](hazard-index.md#flag-to-section) maps ranker flags to these p
 - [switch-compare-chain-layout (out-of-line cases + a case falling into the default)](#switch-compare-chain-layout-out-of-line-cases--a-case-falling-into-the-default)
 - [grid-counter double-loop (non-zero-cell counter idiom)](#grid-counter-double-loop-non-zero-cell-counter-idiom)
 - [base-register-vs-displacement (full base materialized vs %lo-in-displacement; + family-of ranker follow-up + shifted .NON_MATCHING data-carve blocker)](#base-register-vs-displacement-full-symbolbase-materialized-vs-lo-in-displacement)
-- [Tracked ranker follow-up: `family-of:<banked-fn>` (S210)](#tracked-ranker-follow-up-family-of-s210)
+- [Tracked ranker follow-up: `family-of:<banked-fn>` (S210)](#tracked-ranker-follow-up-family-ofbanked-fn-s210)
 - [goto loop = loop.c never runs (defeating strength reduction and bound hoisting)](#goto-loop--loopc-never-runs-defeating-strength-reduction-and-bound-hoisting)
 - [Landing an independent store in a `jal` delay slot — source order + defer-to-arg-eval (S212 `func_80058C58`)](#landing-an-independent-store-in-a-jal-delay-slot--source-order--defer-to-arg-eval-s212-func_80058c58)
 - [Temp-var store-order lever — pin an indexed/computed load between neighboring global zero-stores (S223 `func_8006A2C0.c`)](#temp-var-store-order-lever--pin-an-indexedcomputed-load-between-neighboring-global-zero-stores-s223-func_8006a2c0c)
@@ -4030,70 +4030,31 @@ and the `yield_data_size = OS_YIELD_DATA_SIZE` 0xC00 vs 2.07 `NU_GFX_YIELD_BUF_S
 
 ## permuter setup for KMC-toolchain mirrors
 
-**Rule:** Running decomp-permuter on a `libnusys`/`libultra`/`libkmc` (KMC-toolchain) function needs
-three fixes the generic setup misses.
+**Current procedure:** use the profile-aware wrappers, not hand-written compiler commands or
+historical settings files.
 
-**Procedure:**
+1. Check [source and residual eligibility](workflow/loop.md#permuter-eligibility) before import.
+2. `./setup-permuter.sh <fn>` resolves the parent TU and uses `nonmatchings/<fn>/base.c` when
+   present. `rom_build.py` generates settings from the parent's current compiler profile.
+3. `./run-permuter.sh <fn> -j 4 --stop-on-zero` runs a bounded exploratory search; add
+   `--best-only` only for a deliberate monotonic search. `./score-permuter.sh <fn>` scores
+   without searching. The wrappers synchronize the locked environment once; compiler,
+   assembler, and objdump callbacks reuse it.
+4. Remeasure any proposed source with `decomp_loop.py`, then integrate and use the full ROM
+   verifier. Permuter zero is not a bank verdict.
 
-- **(a) custom `--settings`.** The root `permuter_settings.toml` `compiler_command` is generic (`-I
-  include` only, no `-DUSE_EPI` / per-library include paths), so `import.py` preprocessing fails on
-  `#include <nusys.h>`. Pass `--settings <custom>.toml` whose `compiler_command` carries the file's real
-  Cflags (the per-library `-I include/libnusys …` + `-D` defines), piped through `tools/cc/gcc -S` to
-  `tools/cc/as`.
-- **(b) KMC-safe `asm_prelude_file`.** decomp-permuter's default `prelude.inc` has `.set gp=64`, which
-  KMC binutils-2.6 `tools/cc/as` rejects (`Expected comma after name gp`). Supply an `asm_prelude_file`
-  that drops that line (harmless at `-G 0`).
-- **(c) body + extracted target.** `import.py` accepts a `c_file` with the function body plus a target
-  `.s` extracted from `asm/<seg>.s` (`glabel`..`endlabel`) — no `INCLUDE_ASM` / `mg_resolve_c_asm`
-  round-trip is needed.
+For an explicit import, `rom_build.py import-permuter --source <parent.c> --input <candidate.c>
+--asm <function.s>` preserves the same profile. Use assembler-ready extracted assembly, retaining
+`$` register prefixes and local labels; a normalized seed `target.s` is analysis evidence, not
+necessarily an assembler input. Do not inline an unbanked body into matching source to import it.
 
-**Generalizes to game -O2 (main-profile) code.** The same three fixes apply to a `src/main/`
-(or overlay) game fn, with the `compiler_command` mirroring `MAIN_CFLAGS` (`$(CFLAGS)` + all the base
-`-I` + `-DF3DEX_GBI_2` for a DL fn) piped `tools/cc/gcc -S | tools/cc/as -EB -mips2 -G 0 -I include`.
-Without `-DF3DEX_GBI_2` a DL fn never converges (wrong RSP opcodes). **S167 confirmed the full recipe
-end-to-end** for a `src/main/` fn: scratch settings with `gcc -S -nostdinc -G 0 -mips3 -mgp32 -mfp32
--mno-abicalls -O2` + the full base `-I` set + `-DINCLUDE_ASM_USE_MACRO_INC -D_LANGUAGE_C -D_FINALROM
--DF3DEX_GBI_2`, piped to `tools/cc/as -EB -mips2 -G 0 -I include`, and a one-line
-`sed -i '/^.set gp=64$/d' <dir>/target.s` after import (fix (b)) -- it built base+target and ran 43k
-iterations cleanly. **done (S179): `permuter_settings_main.toml` + `setup-permuter.sh --main <func>`
-now exist** — the flag passes `--settings permuter_settings_main.toml` to `import.py`, which bakes the
-game -O2/F3DEX2 `compiler_command` (full `-I`/`-D` set + `-mips3`) and a **modern-GAS
-`assembler_command`** (`mips-linux-gnu-as -march=vr4300 -32 -EB -I include --no-pad-sections`) that
-assembles the `.set gp=64` target `.s` directly (replacing the `sed`-strip fix (b); the target's
-explicit `addu`→0x1021 matches KMC-as `move`→0x1021, so the mixed assemblers stay byte-consistent). So
-a main/ DL fn is now a one-flag setup. **Reminder for a scheduler/regalloc plateau: run without
-`--best-only`** (the equal-score-plateau case above) — S179 `func_800329F4` stalled at 2765/5210 with
-`--best-only`, the classic symptom that the fix needs a same-score intermediate transform before a
-second move reaches 0. **Coord/local
-integer width
-(`u16`/`s16` vs `s32`) is a first-class permuter lever for frame/regalloc near-misses:** S151
-`func_800500E0` was a byte-perfect structure that locked ~185 on a register-allocation + a phantom
-`-16` stack frame (a reload spill-slot artifact reachable only through register pressure); the permuter
-cracked it by retyping the two texrect coords `u16 left; s16 right;` (which the kantan demo confirms is
-the idiomatic coord type), then a final commutative operand-order swap (`offset + (x0+half)`) closed
-the last instruction. When a classical match is a rows-aligned regalloc/frame near-miss with no
-externs (isolated == in-tree), run the permuter even below the 0.97 asm-differ gate (asm-differ
-normalizes registers, so its `percent` under-reports a pure-regalloc miss). **This extends to a pure
-prologue-scheduling swap** (S160 `func_8006EA90`): when `match_count == total_rows` and the register
-allocation is identical but `percent` sits ~0.90 because a handful of reordered early insns cascade the
-score, the structure is provably right — the miss is which of two equal-priority preheader insn groups
-the post-reload scheduler emits first (`sched.c` `rank_for_schedule` breaks priority ties by `INSN_LUID`
-= physical/hoist order; see the gcc-source cross-ref above). Run the permuter without `--best-only` (the
-equal-score plateau case: the fix needs an intermediate transform that keeps the same score before a
-second move reaches 0 — the winner was a `scale = 0.3f` in-loop assignment plus a pointer alias that
-reordered the FP-const load ahead of the base pointers). Structure levers that got it to score-0-modulo-
-rodata first: hoist the invariant base pointer inside the loop (fixes `off+base` addu operand order) and
-express the offset as a strength-reduced IV (`off = 0x40 + i*0x10`, moves its init late).
+The historical S121–S158 setup fixes established three constraints still enforced by the current
+pipeline: exact compiler flags and include/define order, a KMC-compatible prelude, and an intact
+function body/target. Missing F3DEX2 defines change DL words; missing local labels invalidate
+branches. `tools/build_profiles.json`, `tools/permuter.toml.in`, and `tools/kmc_main_prelude.inc`
+now supply those inputs; retired `tools/cc` and per-library/manual settings recipes are not
+supported entrypoints.
 
-**Committed main-profile setup.** `tools/permuter_settings_main.toml` (MAIN_CFLAGS:
-`-mips3 -mgp32 -mfp32 -mno-abicalls -O2` + all base `-I` + `-DF3DEX_GBI_2`, `tools/cc/gcc -S | tools/cc/as -EB -mips3 -G 0 -I include`, verified to reproduce the in-tree `.o`) and `tools/kmc_main_prelude.inc`
-(the decomp-permuter `prelude.inc` minus its `.set gp=64` line, which KMC binutils-2.6 `as` rejects
-with `Expected comma after name gp`) are checked in — pass `--settings tools/permuter_settings_main.toml`
-to `import.py`. Gotcha: the extracted target `.s` must keep the `.LXXXX:` local-label lines
-(`awk '/^glabel <fn>/{p=1}/^endlabel/{p=0}p'`, not a `grep` of only the `/* */` instruction rows) —
-dropping them leaves the intra-function branches referencing undefined labels and `as` fails with
-`Can not represent relocation in this object file format`. For the full whole-function playbook this
-setup feeds, see `#pervasive-regalloc-classical-main`.
 
 **Two KMC-gcc permuter tuning facts:**
 - **`perm_sameline` is a no-op for KMC gcc 2.7.2.** gcc 2.7.2 ignores source line numbers, so
@@ -4102,16 +4063,12 @@ setup feeds, see `#pervasive-regalloc-classical-main`.
   this project — it burns iterations for zero effect. The effective regalloc/scheduling passes here
   are `perm_temp_for_expr`, `perm_refer_to_var`, `perm_ins_block`, `perm_reorder_stmts` (default
   weights are fine; over-customizing can starve these).
-- **`--best-only` cannot cross equal-score plateaus.** A 1-instruction miss often needs an
-  intermediate transform that keeps the same score (e.g. a temp that just moves which instruction
-  pair is swapped) before a second transform reaches 0. `run-permuter.sh`'s default `--best-only`
-  (monotonic-improvement) gets stuck on such a plateau (250k+ iterations flat at score 60/50).
-  For a plateau case, drop `--best-only` (default simulated-annealing accepts equal/worse moves), or
-  seed `base.c` past the plateau by hand. (But first check whether the miss is a known structure
-  hazard — the stalls were all the indexed-vs-pointer loop form, see
-  `#indexed-vs-pointer-loop-strength-reduction`; a structural fix beats a permuter grind.)
+- **Monotonic search cannot cross equal-score plateaus.** S157/S179 searches stalled with
+  `--best-only`; the existing run wrapper now leaves exploration mode to the permuter and
+  forwards explicit `--best-only` when requested. First fix a known structural residual rather
+  than spending a search on it; see `#indexed-vs-pointer-loop-strength-reduction`.
 
-**Two more S169 facts:**
+**Other reconstruction evidence:**
 - **`do{ body }while(0)` is a hand-seedable schedule lever.** Wrapping an `if` (or a small block) in
   `do{ ... }while(0)` shifts the -O2 instruction schedule without changing the logic. S169
   `func_80076640`'s `if(fabsf(cosPitch)<0.1f)` gimbal test scheduled the const-load first (no stall,
@@ -4119,69 +4076,25 @@ setup feeds, see `#pervasive-regalloc-classical-main`.
   `cosPitch = cosf(pitch)` temp) which forces const-load-last and re-adds the `mtc1`->`c.lt.s` stall
   nop, fixing the count 77->78. Seed it by hand when a byte-exact-structure fn is one instr short/long
   around a branch. (It did not fix the residual register swap; see `#abs-coalescing-reg-swap`.)
-- **Venv gotcha: `import.py` needs `toml`.** Run the permuter tools through the venv
-  (`uv run --locked python ...`, or `mg_activate_venv` as `setup-permuter.sh` does); a bare
-  `./tools/decomp-permuter/import.py ...` fails `ModuleNotFoundError: No module named 'toml'` even
-  though the venv has it. And `mg_resolve_c_asm` needs an `INCLUDE_ASM` stub, so for an already-inlined
-  one-tu fn pass `import.py <src.c> <awk-sliced target.s> --settings tools/permuter_settings_main.toml`
-  directly (the src file is still in the build, so its main-profile compile command is extracted).
+- **Environment and signatures:** use the wrappers or the configured project Python, not an
+  arbitrary system interpreter. Setup supports retained stubs and existing C definitions; an
+  isolated candidate supplies the body while matching source stays unchanged. Reconcile conflicting
+  sibling prototypes before scoring—their argument/return types affect code generation.
+- **Historical S176 inline-asm parser limitation:** pycparser could not parse an asm statement
+  with `__volatile__` between `__asm__` and `(`. A literal-preservation pragma bypassed that parser
+  while holding the asm fixed; it did not establish source eligibility or solve register allocation.
+  The `heap_alloc` experiment's score improved from 1595 to 605 before a source lever closed it.
+  Do not use parser workarounds to turn diagnostic-only barriers into search or bank candidates.
 
-- **Inline-asm base.c fails pycparser — b64literal-wrap the line by hand (S176).** A `base.c`
-  containing a `__asm__ __volatile__(...)` (e.g. the `#capturing-ra` `addu %0,$31,$0` read) makes
-  `permuter.py` abort with `Syntax error in base.c … before: __volatile__`. import.py's
-  `-D__asm__(...)=_permuter_ignore_line __asm__(__VA_ARGS__)` macro does not fire here because
-  `__volatile__` sits between `__asm__` and `(`, so the function-like macro never matches (and cpp
-  won't re-scan after `-D__volatile__=` strips it). Manually convert that one line to the pragma
-  import.py would have emitted (`import.py:481-484`): `#pragma _permuter b64literal <base64 of the
-  original line>` (e.g. `uv run --locked python -c "import base64;print(base64.b64encode(open('L').read().strip().encode()).decode())"`).
-  pycparser parses the pragma (skipped by the randomizer, so the asm line is held fixed) and the
-  permuter decodes it back to the real `__asm__` for each candidate compile. This is how S176's
-  `heap_alloc` (ra-capture inline asm) was made permuter-loadable; the base scored 1595 and drove down
-  to 605 (the register lever, not the permuter, closed it — see `#loop-weight-and-live-length-regalloc-steering`).
+**Historical S243 negative percent on displaced scheduling blocks:** asm-differ aligned a small
+moved block as insert/delete pairs whose penalty exceeded `max_score`. Inspect actual instruction
+counts, operands, and block placement before judging closeness; normalized percent and row counts
+are both iteration signals. That search improved 4560 to 1845 without a guaranteed close.
+Use the current [eligibility rule](workflow/loop.md#permuter-eligibility), not the retired gate override.
 
-- **Setup on a fn already inlined as C in a multi-fn file (S182).** `setup-permuter.sh` /
-  `mg_resolve_c_asm` (tools/lib.sh) resolve the C file by grepping for `INCLUDE_ASM(.*, <fn>);` — which
-  is gone once the fn is a C body (a near-match you want to permute in place). The resolver then
-  sets `C_FILE=` empty and `set -e` aborts silently (no output). Workaround: bypass the resolver and
-  call `import.py` directly with the containing C file + the exact per-fn target `.s` (venv-run):
-  `uv run --locked python tools/decomp-permuter/import.py --settings permuter_settings_main.toml
-  src/<seg>.c asm/nonmatchings/<tree>/<file>/<fn>.s`. import.py picks the target fn by the `.s`
-  filename, so a multi-fn `src/<seg>.c` is fine. (Golden-gated tooling follow-up: teach
-  `mg_resolve_c_asm` to also resolve a fn defined as C — grep for the `<fn>(` definition + resolve the
-  asm at `asm/nonmatchings/**/<fn>/<fn>.s`; kin to the S170/S168 `find_segment` follow-ups. Until then,
-  the direct-import recipe applies by hand.)
-
-**`setup-permuter.sh` fails once the near-match body is inlined into `src/` (S243, corrected root
-cause).** `setup-permuter.sh` (both plain and `--main`) resolves the C file via `mg_resolve_c_asm`,
-which greps `INCLUDE_ASM(.*, <fn>);` in `src/` to locate the parent `.c`. But `import.py` needs the C
-Body present in `src/` to permute — so the moment you inline the near-match body (removing the
-`INCLUDE_ASM` marker), the grep returns empty and `set -e` aborts the wrapper silently (exit 1, no
-output). This is not the S189 `set -u` array-guard bug (that path is already guarded). **Fix: call
-`import.py` directly with explicit paths**, e.g.
-`./tools/decomp-permuter/import.py --settings permuter_settings_main.toml src/main/<parent>.c
-asm/nonmatchings/<seg>/<parent>/<fn>.s` (this is the S182 direct-import bypass; it takes C_FILE +
-ASM_FILE explicitly so it does not need the marker). Note: import.py of a family fn whose sibling
-wrapper forward-declares it with a different pointer type (`s32*` vs `Gfx**`) emits a conflicting-types
-Warning — tolerated by the modern-GAS permuter build, but a hard error in the strict KMC `-c`
-`decomp_loop` build, so reconcile the signature before scoring a permuter output back through
-`decomp_loop`.
-
-**Negative asm-differ `percent` on a schedule-displacement near-match — the 0.97 gate mis-reads (S243).**
-When a small contiguous instruction block (e.g. ~7 insns) is displaced by ~its-own-length rows (a
-`sched.c` schedule-order coin, memory `sched-class-tiebreak-order-coin`), asm-differ aligns it as
-N-insert + N-delete pairs whose penalty exceeds `max_score`, so `percent` goes negative on a body that is
-actually >90% row-correct. The standing `percent >= 0.97` permuter gate then cannot fire on a genuinely
-close near-match. **Gauge closeness by `match_count/total_rows`, not `percent`, for a
-schedule-displacement near-match; a PO gate-override to permute is warranted when the residual is a
-schedule-order coin (permuter-responsive — S243 descended 4560→1845) rather than a regalloc allocno coin
-(permuter-denied). Expect a partial descent, not a guaranteed byte-exact close.**
-
-**Provenance:** S121 (contRmbControl: the three KMC-toolchain fixes); S151 (generalized to the game
--O2 main-profile + the coord-width permuter lever); S157 (KMC-gcc tuning: `perm_sameline` no-op,
-`--best-only` plateaus); S158 (committed `permuter_settings_main.toml` + `kmc_main_prelude.inc`);
-S169 (`do{}while(0)` schedule lever + the venv/inlined-fn import path); S176 (the b64literal inline-asm
-base.c fix); S182 (direct-import bypass for an already-inlined multi-fn-file near-match);
-S243 (the inlined-body `mg_resolve_c_asm` silent-abort + the negative-percent gate mis-read).
+**Provenance:** S121/S151 (profile/prelude/target constraints); S157/S158 (search tuning and
+profile-faithful setup); S169 (`do{}while(0)` schedule lever); S176 (inline-asm parser evidence);
+S182/S243 (now-retired inlined-body resolver workarounds and negative-percent evidence).
 
 ## NU_DEBUG-stock-not-custom (carried perf fn triage)
 

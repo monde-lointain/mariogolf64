@@ -85,7 +85,7 @@ section padding affect matching.
 
 CMake tracks extraction byproducts and generated objects. Depfiles include C headers, assembler
 includes, and embedded binary inputs. The linker follows Splat's configured object order.
-`build-tools.json` publishes actual tool paths to ranker, diff, and permuter tools.
+`<build-dir>/build-tools.json` (normally `build/us/build-tools.json`) publishes actual tool paths.
 
 ```sh
 uv run --locked python tools/rom_build.py build --object src/main/vec3f_normalize.o

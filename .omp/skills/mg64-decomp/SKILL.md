@@ -31,15 +31,20 @@ with overlays. Once the gate passes, select overlay work using exact bank and RO
 
 ## Select
 
-1. Rank main candidates with `uv run --locked python tools/pick_target.py --segment main -n 12`; combine `--lib` with `--segment main` for library scope. Use `--loose-stubs main` and `--file-close main` for game-host leaves and closure, not a whole-bank inventory. Read only the selected candidate's backlog/WIP evidence. Check carried walls and nested children before pricing hand-selected leaves (`--carried-check`, `--nested-check`). Inspect its assembly and source comments; ranker signals are not proof of tractability.
-   `--lib` filters substrings, not segment ranges. Size leaves from their assembly headers, not adjacent VRAM deltas. Re-derive carried signatures, declarations, instruction counts, and residuals from current evidence; a prior compiler-pass verdict is a hypothesis.
-   Bound discovery with `-n`; loose-stub mode also supports `--json`. Prefer a demonstrated sibling/upstream/source lever over a historical bank-rate forecast.
-   If fresh work runs out, use `--segment main --include-stuck -n 12` and
-   `--loose-stubs main --all -n 12`, then inspect remaining YAML main hosts, including libraries.
-   `--loose-stubs main` and `--file-close main` scan `src/main/`, not every host in the main bank.
-   Use [reference discovery](../../../docs/tooling.md#references-and-native-campaigns) when a sibling
-   implementation could supply a source shape. Read its C and assembly, compare types/callees,
-   and recheck its hashes before reuse. Similarity and source presence do not establish a bank.
+1. Rank whole main packs with `uv run --locked python tools/pick_target.py --segment main -n 12`
+   and individual C-host leaves with `--loose-stubs main -n 12`. Loose-stub and `--file-close main`
+   discovery follow YAML bank membership, including linked libraries; neither inventories unflipped
+   assembly packs. `--lib` is a substring filter, not bank scope.
+   Inspect assembly and source comments before pricing. Size leaves from their assembly headers,
+   not adjacent VRAM deltas. Check individual carried/nested status before selecting pack members;
+   a carried leader does not classify every sibling (`--carried-check`, `--nested-check`).
+   Read only the selected target's WIP/backlog evidence. Reopen a carry for a named new source lever
+   or changed evidence, not its age or a file-closure reward; rederive its signature and residual.
+   If the fresh shortlist is empty, use `--segment main --include-stuck -n 12` and
+   `--loose-stubs main --all -n 12`. An empty shortlist is not completion.
+   Prefer demonstrated sibling/upstream leverage. Use [reference discovery](../../../docs/tooling.md#references-and-native-campaigns)
+   when it can supply a source shape; inspect C, assembly, types/callees, and hashes before reuse.
+   Similarity and source presence do not establish a bank.
 2. Route hazards through [the hazard index](../../../docs/hazard-index.md), then read the selected playbook. Consult [C coding style](../../../docs/coding-style.md) for source conventions.
 3. Resolve the source subsegment in `mariogolf64.yaml`. Change only explicitly required subsegment flip/split/path lines; never edit generated extraction outputs by hand. Preserve `INCLUDE_ASM` for unbanked functions. Do not change C, headers, or YAML unless the task requires that source change.
    A compiler jump table couples source and rodata: carve it only when the C switch regenerates its symbol.
@@ -54,7 +59,7 @@ only for independent reasoning. Shards divide analysis queues, not permission to
 
 Apply the [main-completion gate](#main-before-overlays) to every queue entry, including explicit
 `--func` labels and resumed queues. Validate YAML bank membership before execution; a campaign's
-default `--loose-stubs main` pool covers game-host leaves, not the complete main-bank backlog.
+default `--loose-stubs main` pool includes library C hosts but not unflipped assembly packs.
 
 - Prefer upstream mirrors first. An opt-in m2c prepass can seed and measure untouched candidates
   before spending agent effort; it never overwrites carries or edits matching source.
@@ -70,10 +75,18 @@ default `--loose-stubs main` pool covers game-host leaves, not the complete main
 ## Iterate
 
 - For an upstream mirror, copy the pinned upstream source and required headers, then validate with `tools/verify-rom.sh`. Check names, calls, data references, and routed hazards before treating it as a clean mirror.
-- For classical work, read the function's extracted assembly as ground truth. Use Ghidra decompilation and types only as shape/context evidence. Seed `nonmatchings/<func>/base.c` with `uv run --locked python tools/seed_c.py --func <func> --parent src/<seg>.c`, then iterate with `uv run --locked python tools/decomp_loop.py --func <func>`. Small asm-first leaves can be translated directly into the isolated candidate.
-  Read `target.s` and optional `ghidra.c` separately; the editable seed does not duplicate them. Check `body_source` and refine fallback bodies, prototypes, and types against assembly. Add `--ghidra` only when fresh [bank-aware context](../../../docs/ghidra.md#agent-access-and-context) resolves a question; omit `--parent` when its partial types conflict.
-- Fix compile diagnostics before retrying. Classify a fresh residual as structure/count, registers, or ordering; change a named [source lever](../../../docs/levers.md) and re-measure. Escalate to the permuter at `percent >= 0.97`, or exact instruction count with a single-operand residual. A wall verdict belongs to its measured base, not permanently to the function.
-- Score zero starts provisional integration: inline the body, remove its stub, format, build the host object, and spot-check the target function against the isolated object. Then run the full ROM verifier. Compare the same function, not whole multi-function `.text` sections; [oracle limits](../../../docs/workflow/loop.md#oracles) explain relocation and normalization caveats. If integration fails, restore the matching stub/source and keep the candidate isolated.
+- For classical work, read extracted assembly first. Translate a small clear leaf directly into
+  `nonmatchings/<func>/base.c`; do not generate a seed or request Ghidra merely to fill the directory.
+  When body/context recovery helps, use `uv run --locked python tools/seed_c.py --func <func> --parent src/<seg>.c`.
+  Read `target.s` and optional `ghidra.c` separately. Reconcile `body_source`, externs, prototypes,
+  and types with assembly; omit conflicting parent context. Add `--ghidra` only to resolve a specific
+  question with fresh [bank-aware context](../../../docs/ghidra.md#agent-access-and-context).
+  Measure with `uv run --locked python tools/decomp_loop.py --func <func>`.
+- Fix diagnostics before retrying. Classify the residual as structure/count, registers, or ordering;
+  change one named [source lever](../../../docs/levers.md) and remeasure. Use the
+  [permuter eligibility rule](../../../docs/workflow/loop.md#permuter-eligibility), not score alone.
+  A wall verdict belongs to its measured base, not permanently to the function.
+- Score zero starts provisional integration: inline the body, remove its stub, format with an available clang-format binary (versioned names are valid), build the host object, and spot-check the target function against the isolated object. Then run the full ROM verifier. Compare the same function, not whole multi-function `.text` sections; [oracle limits](../../../docs/workflow/loop.md#oracles) explain relocation and normalization caveats. If integration fails, restore the matching stub/source and keep the candidate isolated.
 - Preserve profile fidelity. Isolated compilation must use the same per-source profile and flags as the ROM build; use `tools/rom_build.py` and the authoritative `tools/build_profiles.json` rather than hand-assembled compiler commands. Never infer a matching result from an isolated compile alone.
   The loop retains content-addressed measurement/source pairs under the candidate's `measurements/`
   directory. Cite these from existing WIP notes rather than transcribing scores or creating a second

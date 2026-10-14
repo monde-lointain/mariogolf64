@@ -2,6 +2,35 @@
 
 ## 2026-10-14
 
+- **Workflow refinement**: Five parallel read-only deep dives compared the session's evidence with
+  REA readiness/tool-design contracts, Snowboard Kids selection/workspaces, native Oh My Pi task
+  delivery, Ghidra Book chapters 6/19/20, Eilam's decompilation discussion, and the local
+  refactoring/legacy-code notes. Kept native delegation and existing measurement artifacts;
+  added no orchestration layer, provider stack, or second evidence ledger.
+- **Discovery**: Existing loose-stub and file-closure modes now enumerate YAML code-bank C hosts,
+  including linked libraries and nested source paths, while excluding comments and unconfigured
+  sources. Campaign selection reuses that scanner. The real main shortlist exposes eight
+  previously hidden eligible library routines; all nine remaining bundled-synth stubs are visible.
+- **Execution**: Permuter compiler/assembler/objdump callbacks reuse the synchronized project
+  interpreter instead of resolving dependencies per candidate. The run wrapper no longer forces
+  monotonic `--best-only` search or advertises a thread count that caller arguments can override.
+  Profile-source flags, compiler errors, bounded execution, and parent resource ownership remain.
+- **Guidance and removal**: Consolidated search eligibility in the loop reference: faithful
+  integration-eligible source precedes score-based suitability. Made tiny-leaf seeding optional,
+  carry reopening contingent on new leverage, and reference-root coverage explicit in worker returns.
+  Removed duplicated native-task schema prose, obsolete manual permuter settings/toolchain recipes,
+  and retired inlined-body import workarounds. Preserved compiler evidence and hazard headings;
+  repaired the existing broken family-of navigation link without changing its heading.
+- **Proof**: Exercised real loose-stub, file-closure, campaign, and bounded permuter commands.
+  Callback objects were byte-identical before/after; a real search reached zero without repeated
+  resolver chatter, and regression coverage exercised profile flags and compiler-failure diagnostics.
+  Tooling suite: 150 passed, two skipped. Shell syntax and all 115 frozen hazard anchors passed.
+  Checked 102 concept frontmatters, native skill metadata, recursive indexes, and 621 local
+  links/fragments; the unchanged historical `BACKLOG.md` self-link remains the one navigation finding.
+  Language-server diagnostics retain unrelated optional-value errors in untouched ranker functions.
+  The full ROM verifier passed with SHA-1 `e2c4e7a905b29529b49a1619a401fe699224829b`.
+  Removed smoke-only inputs/objects/workspace; preserved the earlier four banked functions and carries.
+
 - **Main-first milestone**: Made completion of the YAML `main` bank, including linked libraries,
   a gate before overlay selection, queue execution, dispatch, or integration. The native skill
   owns the completion criteria; root instructions, campaign guidance, fan-out, and discovery

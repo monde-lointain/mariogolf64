@@ -22,19 +22,10 @@ and integration. Read-only overlay reference analysis may support a named main t
 
 ## Dispatch contract
 
-Use the active native `task` schema; do not copy its prompt, add role wrappers, or
-create project agents for bundled roles. Batch independent slices in one call:
-
-- `context`: common goal, resource ownership, shared interfaces, and evidence paths.
-- Each `task`: target/non-goals, current residual hypothesis, relevant source levers,
-  and the observable deliverable. Children do not inherit the parent's conversation.
-- `solutionSpace`: what reasoning remains open, not workload size.
-
-Pass paths and narrow ranges, not complete backlog/history/context dumps. Large shared
-payloads belong in `local://`; candidate evidence stays under `nonmatchings/<fn>/`.
-Use the most specific available agent; unknown-file exploratory research is read-only
-`scout` work. Existing functions, coupled nested pairs, and distinct residual hypotheses
-are useful slices; at most two analysis angles per function.
+Use the active native `task` schema and bundled agent roles, not copied prompts or project
+role wrappers. Batch independent reasoning slices; supply the exact bank/ROM target, parent
+resource ownership, narrow evidence paths, and one unresolved question per slice. At most two
+analysis angles per function. Workers do not inherit the parent conversation.
 
 **The parent owns candidate/source edits, compiles, builds, Ghidra MCP, YAML changes,
 integration, formatting, and ROM verification.** Workers return proposals. They do
@@ -50,23 +41,26 @@ merging it; workers return reference identity/hashes and a source hypothesis, no
 The parent rechecks that evidence before measuring or integrating it.
 
 
-Use auto-delivered results and `agent://` messaging; inspect `history://` only when the
-result omits necessary evidence. Keep working after dispatch; wait only when blocked.
-Native `/handoff` compacts the current session, not a worker-result transport. Do not
-create a handoff document per worker or promise agent revival across lost sessions.
+Use native result delivery; send messages only for new evidence or steering, not routine check-ins.
+Keep working after dispatch and wait only when blocked. Native task artifacts carry proposals;
+do not create a handoff/result ledger per worker.
 
 ### Return evidence
 
 Return the best proposed candidate/patch, required types/externs/helpers, and its next
 measurable prediction. Distinguish explicitly:
 
-- **Observed:** supplied or parent-measured baseline, command/profile/object, counts,
-  frame, registers/order/operand residual, and source/assembly locations.
-- **Hypothesis:** proposed source lever, expected effect, compiler `file:line` attribution
-  when available, and what would disprove it. Uncompiled proposals are unmeasured.
-- **Integration risks:** actual relocations, emitted rodata/pools, conflicting declarations,
-  nested coupling, and source quality. No empty-asm barrier as a bank candidate; decode
-  display-list words against SDK macros before integration.
+- **Observed:** exact target bank/ROM offset and source/assembly locations. Cite existing
+  measurement/context artifacts rather than copying their scores, flags, or full type context.
+  When used, name the relevant signature/type source and its uncertainty.
+- **Hypothesis:** one source lever, predicted instruction change, and what would disprove it.
+  Uncompiled proposals are unmeasured.
+- **Integration risks:** relocations, rodata/pool ownership, conflicting declarations, nested
+  coupling, and [source eligibility](loop.md#permuter-eligibility). Decode DL words against SDK macros.
+
+For reference research, report each explicitly requested root as inspected, unavailable, or not
+inspected; never silently substitute a similarly named checkout. Missing coverage is not evidence
+that a source or implementation does not exist.
 
 A worker cannot supply a fresh measurement while forbidden to compile. Do not require
 or accept fabricated scores to fill a return template. Only the parent's

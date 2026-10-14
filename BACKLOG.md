@@ -14,6 +14,33 @@ This file holds only the *ordering rationale*, *enabler items* (gate actions), a
 
 ## Active phase / epic
 
+### Current main-bank evidence — 2026-10-14
+
+- Banked `func_8009D7E8`, `func_8009D800`, `func_8009D820`, and `func_8009D864`
+  in `src/libmus/player_fx.c`: default/indexed preset selection and signed maximum
+  section-count/delay-length scans over the null-terminated preset table.
+  YAML ROM `0x78330` now has a C host using the existing `libmus` profile; nine
+  routines retain `INCLUDE_ASM`, and shared preset data remains in its original bank.
+  All four isolated comparisons scored zero; integrated disassembly preserved their
+  instructions, branch encodings, and relocations. `tools/verify-rom.sh` succeeded:
+  `e2c4e7a905b29529b49a1619a401fe699224829b`.
+- The linked-library backlog is not exhausted: the old Epic 1 completion label below
+  does not cover these nine remaining bundled-synth routines. Path-only loose-stub discovery
+  then reported 259 stubs and excluded this library host; the workflow refinement now follows
+  YAML membership instead. No overlay work was advanced.
+- Reopened `func_8005E380` under its current `main` profile. The clean typed candidate
+  remains isolated in `nonmatchings/func_8005E380/base.c`; its reproducible measurement is
+  `nonmatchings/func_8005E380/measurements/a8a5d1f5ae57ee5586288e10c2459e89ba40cc525e31b2326b470d2eef44f083.json`.
+  The residual is still derived-pointer CSE folding plus buffer/context register allocation.
+  `make_regs_eqv` lifetime steering acts on copies, not the known `thread + 0x20`
+  expression, so it supplied no pure-C escape. A tied empty-asm diagnostic suppressed
+  the address fold but remained nonmatching and is not a bank candidate; its measured
+  source is retained in `measurements/bbf100739f7a5aaa92f64c0e3cee60d20a2446e0daa62cfa061e2af4246c6fa5.c`
+  under the same candidate directory. Its bounded permuter search expired without a
+  zero; expiry is not a source-wall proof. The matching host keeps its original stub.
+
+The sprint ordering and completion claims below are historical evidence.
+
 **Epic 1 — complete the vendored-library function set — DONE (S148).** Every vendored-library band is
 banked: libultra (clean-mirror vein), libnusys, libkmc, libnaudio, libmus, libnualstl, mgu. `--lib`
 on any of these reports no candidates. The only rows still TAGGED libultra/libnusys are coddog

@@ -32,9 +32,9 @@ isolated objects are iteration signals, not banking gates.
 | Main-bank candidate ranking (current milestone) | `uv run --locked python tools/pick_target.py --segment main -n 12` |
 | Main-bank candidates including carries | `uv run --locked python tools/pick_target.py --segment main --include-stuck -n 12` |
 | Main-bank library/path/name substring | `uv run --locked python tools/pick_target.py --segment main --lib libultra -n 12` |
-| Leaves in already-C files | `uv run --locked python tools/pick_target.py --loose-stubs main` |
+| Leaves in all main-bank C hosts, including libraries | `uv run --locked python tools/pick_target.py --loose-stubs main` |
 | Include carried/nested/intrinsic leaves | `uv run --locked python tools/pick_target.py --loose-stubs main --all` |
-| Host-file closure ranking | `uv run --locked python tools/pick_target.py --file-close main` |
+| YAML-bank host-file closure ranking | `uv run --locked python tools/pick_target.py --file-close main` |
 | Prior reconstruction evidence | `uv run --locked python tools/pick_target.py --carried-check <fn>...` |
 | Nested-function coupling | `uv run --locked python tools/pick_target.py --nested-check <fn>...` |
 
@@ -48,13 +48,15 @@ Whole-subsegment ranking and loose-stub ranking answer different questions. A `f
 is a ceiling, not evidence that a leaf will match easily.
 
 Agent selection follows the [main-completion gate](../.omp/skills/mg64-decomp/SKILL.md#main-before-overlays).
-`--loose-stubs main` and `--file-close main` scan the `src/main/` path, not all YAML main-bank
-hosts. Check linked libraries and whole-assembly subsegments too; an empty shortlist does not
-authorize overlay work.
+`--loose-stubs main` and `--file-close main` enumerate the YAML bank's C hosts, including libraries
+and nested source directories, not arbitrary files under `src/main/`. They omit assembly packs;
+inspect those with whole-subsegment ranking. An empty shortlist does not authorize overlay work.
 
 `--carried-check` flags names from backlog carry-overs and WIP filenames, including scoping notes.
 Read the note before treating the classification as a terminal wall. `--nested-check` identifies
 parent-coupled leaves. Both commands exit nonzero when they find their respective risk.
+A carried pack leader does not classify its other members; inspect member assembly and run the
+individual checks before reopening a carry. Carry age and file closure are not new source leverage.
 
 ## Iterate a function
 
@@ -74,6 +76,9 @@ artifact paths, not duplicated inline assembly. Do not confuse candidates with t
 build tree. Use the [hazard lookup](hazard-index.md), [residual lookup](hazard-symptoms.md), and
 [source levers](levers.md) for the measured question. [WIP evidence](wip/index.md) records prior
 constraints and ruled-out hypotheses, conditional on their measured base.
+For a small clear asm-first leaf, write the isolated `base.c` directly and reuse existing types;
+seeding and Ghidra are optional context recovery, not prerequisites. Search eligibility is owned
+by the [loop reference](workflow/loop.md#permuter-eligibility).
 
 The authoritative object build interface is `uv run --locked python tools/rom_build.py build --object <object-path>`.
 Compile profiles are defined by `tools/build_profiles.json`; use the same source-specific profile for
