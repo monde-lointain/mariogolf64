@@ -16,6 +16,26 @@ This file holds only the *ordering rationale*, *enabler items* (gate actions), a
 
 ### Current main-bank evidence — 2026-10-14
 
+- Completed `src/libmus/player_fx.c`: banked its last four routines, `CustomInit`,
+  `func_8009D40C`, `func_8009D6EC`, and `func_8009D774` (1,092 bytes).
+  All 13 functions are now C; no `INCLUDE_ASM` stubs remain in this host.
+  Reference source was recovered beneath
+  `/mnt/data12/archive/software/ultra64-resources/extracted/nintendo/Nintendo_64_Sound_Tools_WIN95_v3.14/Nintendo_64_Sound_Tools_WIN95_v3.14/`:
+  `SGI/st314.tgz.unpacked/st314.tar.unpacked/usr/src/PR/libsrc/libsoundtoolssc/player_fx.c`
+  and `PC/data1.cab.unpacked/Sound Tools Libraries/N64Tools/lib/lib-src/player_fx.c`
+  are identical libmus 3.14 sources (SHA-256
+  `293d42fc3e5657022e9b860d86a8d23ddf5960df2ae8cf96a5b400af8154b9ba`).
+  `CustomInit` and the effect updater reuse that source with the existing symbol
+  names and n_audio casts; the preset getter/setter are game-specific additions,
+  reconstructed from assembly, absent from this reference.
+  The init/getter/setter isolated comparisons scored zero; the updater's score 30
+  is struct-field relocation naming only:
+  `nonmatchings/func_8009D40C/measurements/47a2390b74419c43896cf8fe98798c3238ec0a5220f383eb7525577c9012f844.json`.
+  Integrated function sizes and all non-relocation words agree with their isolated
+  objects. YAML ROM `0xAD490` now places this host's regenerated doubles and two
+  switch tables in its `.rodata` sibling. `tools/verify-rom.sh` succeeded:
+  `e2c4e7a905b29529b49a1619a401fe699224829b`. Main-bank stubs decreased from
+  263 to 259. No symbol-address or overlay source changes were needed.
 - Banked five more routines in `src/libmus/player_fx.c`: `func_8009CF98`,
   `func_8009D004`, `func_8009D274`, `func_8009D2C4`, and `ChangeCustomEffect`
   (1,232 bytes total). These cover indexed initialization, synth construction,
@@ -27,7 +47,7 @@ This file holds only the *ordering rationale*, *enabler items* (gate actions), a
   sizes and non-relocation instruction bytes agree with their isolated objects.
   `tools/verify-rom.sh` succeeded with ROM SHA-1
   `e2c4e7a905b29529b49a1619a401fe699224829b`, resolving the relocation differences.
-  Main-bank stubs decreased from 268 to 263; this host retains four:
+  Main-bank stubs decreased from 268 to 263; this host then retained four:
   `CustomInit`, `func_8009D40C`, `func_8009D6EC`, and `func_8009D774`.
   No YAML, symbol-address, or overlay source changes were needed.
 - Banked `func_8009D7E8`, `func_8009D800`, `func_8009D820`, and `func_8009D864`
@@ -38,10 +58,11 @@ This file holds only the *ordering rationale*, *enabler items* (gate actions), a
   All four isolated comparisons scored zero; integrated disassembly preserved their
   instructions, branch encodings, and relocations. `tools/verify-rom.sh` succeeded:
   `e2c4e7a905b29529b49a1619a401fe699224829b`.
-- The linked-library backlog is not exhausted: the old Epic 1 completion label below
-  does not cover the four remaining bundled-synth routines. Path-only loose-stub discovery
-  then reported 259 stubs and excluded this library host; the workflow refinement now follows
-  YAML membership instead. No overlay work was advanced.
+- The old Epic 1 completion label below did not cover the then-unbanked bundled-synth
+  routines. Path-only loose-stub discovery reported 259 stubs and excluded this library
+  host; the workflow refinement now follows YAML membership instead. The host is now
+  complete, but main is not: the current bank-aware inventory still contains 259 stubs.
+  No overlay work was advanced.
 - Reopened `func_8005E380` under its current `main` profile. The clean typed candidate
   remains isolated in `nonmatchings/func_8005E380/base.c`; its reproducible measurement is
   `nonmatchings/func_8005E380/measurements/a8a5d1f5ae57ee5586288e10c2459e89ba40cc525e31b2326b470d2eef44f083.json`.

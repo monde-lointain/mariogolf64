@@ -1,11 +1,9 @@
 /*
  * Bundled libmus custom-effect synthesizer. Preset tables remain in main data;
  * allocation and preset-switch paths reuse a single worst-case-sized effect.
- * The default initialization and effect-update routines still use assembly.
+ * Delay sections reuse the preallocated resampler and low-pass filter state.
  */
 #include "player_fx.h"
-
-#include "include_asm.h"
 
 extern s32 D_800C77E8[];
 extern s32* D_800C7A8C[];
@@ -17,11 +15,21 @@ void func_8009D004(ALSynConfig* config);
 ALFxRef func_8009D274(s16 bus, ALSynConfig* config, ALHeap* heap);
 void func_8009D2C4(ALFx** effect, ALSynConfig* config, ALHeap* heap);
 void func_8009D40C(s32* params);
+void func_8009D7E8(ALSynConfig* config);
 void func_8009D800(ALSynConfig* config, s32 index);
 s32 func_8009D820(void);
 s32 func_8009D864(void);
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player_fx", CustomInit);
+void CustomInit(ALGlobals* globals, ALSynConfig* config) {
+  if (!n_alGlobals) {
+    n_alGlobals = (N_ALGlobals*)globals;
+    if (!n_syn) {
+      func_8009D7E8(config);
+      n_syn = (N_ALSynth*)(D_801B74B0.synth = (ALSynth*)&n_alGlobals->drvr);
+      func_8009D004(config);
+    }
+  }
+}
 
 void func_8009CF98(N_ALGlobals* globals, ALSynConfig* config, s32 index) {
   if (n_alGlobals == NULL) {
@@ -105,11 +113,113 @@ void func_8009D2C4(ALFx** effect, ALSynConfig* config, ALHeap* heap) {
   func_8009D40C(config->params);
 }
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player_fx", func_8009D40C);
+/* Reprogram the reusable effect from the libmus 3.14 parameter-table layout. */
+#define RANGE 2.0
+#define CONVERT 173123.404906676
+#define LENGTH (d->output - d->input)
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player_fx", func_8009D6EC);
+void func_8009D40C(s32* param) {
+  u16 i, j;
+  ALFx* r = ((N_ALSynth*)D_801B74B0.synth)->auxBus->fx_array[0];
 
-INCLUDE_ASM("asm/nonmatchings/libmus/player_fx", func_8009D774);
+  j = 0;
+  r->section_count = param[j++];
+  r->length = param[j++];
+  r->delay = D_801B74B0.pDelay;
+  r->base = D_801B74B0.pBase;
+  r->input = r->base;
+
+  for (i = 0; i < r->length; i++) {
+    r->base[i] = 0;
+  }
+  for (i = 0; i < r->section_count; i++) {
+    ALDelay* d = &r->delay[i];
+    d->input = param[j++];
+    d->output = param[j++];
+    d->fbcoef = param[j++];
+    d->ffcoef = param[j++];
+    d->gain = param[j++];
+    if (param[j]) {
+      d->rsinc = ((((f32)param[j++]) / 1000) * RANGE) /
+                 ((N_ALSynth*)D_801B74B0.synth)->outputRate;
+      d->rsgain = (((f32)param[j++]) / CONVERT) * LENGTH;
+      d->rsval = 1.0;
+      d->rsdelta = 0.0;
+      d->rs = D_801B74B0.pResampler;
+      d->rs->state = D_801B74B0.pResampleState;
+      d->rs->delta = 0.0;
+      d->rs->first = 1;
+    } else {
+      d->rs = 0;
+      j++;
+      j++;
+    }
+    if (param[j]) {
+      d->lp = D_801B74B0.pLowPass;
+      d->lp->fstate = D_801B74B0.pLpfState;
+      d->lp->fc = param[j++];
+      _init_lpfilter(d->lp);
+    } else {
+      d->lp = 0;
+      j++;
+    }
+  }
+}
+
+/* Read a preset parameter, clamping indices as in the original routine. */
+s32 func_8009D6EC(s32 effect, s32 index) {
+  s32 count;
+
+  switch (effect) {
+    case 0:
+    case 7:
+      count = 26;
+      break;
+    case 1:
+    case 3:
+    case 8:
+      count = 32;
+      break;
+    default:
+      count = 10;
+      break;
+  }
+  if (index < 0) {
+    index = 0;
+  }
+  if (effect > D_800C7A88) {
+    effect = 0;
+  }
+  if (index > count - 1) {
+    index = count - 1;
+  }
+  return D_800C7A8C[effect][index];
+}
+
+/* Write a preset parameter; the caller supplies a valid effect index. */
+s32 func_8009D774(s32 effect, s32 index, s32 value) {
+  s32 count;
+
+  switch (effect) {
+    case 0:
+    case 7:
+      count = 26;
+      break;
+    case 1:
+    case 3:
+    case 8:
+      count = 32;
+      break;
+    default:
+      count = 10;
+      break;
+  }
+  if (index < 0 || index > count - 1) {
+    return 1;
+  }
+  D_800C7A8C[effect][index] = value;
+  return 0;
+}
 
 /* Select the default custom-effect parameter block. */
 void func_8009D7E8(ALSynConfig* config) {

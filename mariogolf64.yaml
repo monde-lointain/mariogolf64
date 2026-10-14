@@ -454,7 +454,7 @@ segments:
       - [0xAD2C8, rodata]
       - [0xAD3B0, .rodata, libmus/player]
       - [0xAD450, .rodata, libmus/player_commands]
-      - [0xAD490, rodata]
+      - [0xAD490, .rodata, libmus/player_fx]
       - [0xAD4F0, .rodata, libnaudio/n_drvrNew]
       - [0xAD520, .rodata, libnaudio/n_env]
       - [0xAD590, .rodata, libnaudio/n_resample]
