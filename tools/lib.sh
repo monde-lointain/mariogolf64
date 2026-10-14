@@ -28,8 +28,9 @@ mg_activate_venv() {
 }
 
 mg_tool_path() {
-    local name="$1"
-    python3 - "$name" "$(dirname "${BASH_SOURCE[0]}")" <<'PY'
+    local name="$1" root
+    root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+    "$root/.venv/bin/python3" - "$name" "$root/tools" <<'PY'
 import sys
 sys.path.insert(0, sys.argv[2])
 from rom_build import tool_path

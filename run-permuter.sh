@@ -25,7 +25,7 @@ if [ "$THREADS" -lt 1 ]; then
     THREADS=1
 fi
 
-echo "Running permuter on $PERMUTER_DIR with $THREADS threads (best-only mode)"
+echo "Running bounded permuter on $PERMUTER_DIR"
 
 python tools/decomp_budget.py --seconds "${MG64_PERMUTER_SECONDS:-600}" --reserve 120 -- \
-    ./tools/decomp-permuter/permuter.py "$PERMUTER_DIR" -j "$THREADS" --best-only "$@"
+    ./tools/decomp-permuter/permuter.py "$PERMUTER_DIR" -j "$THREADS" "$@"

@@ -19,6 +19,7 @@ EXTRA=()
 for flag in "${@:1:$#-3}"; do
     EXTRA+=("--extra-flag=$flag")
 done
-export UV_PROJECT_ENVIRONMENT="$(cd "$(dirname "$0")/.." && pwd)/.venv"
-exec uv run --locked --project "$(dirname "$0")/.." python tools/rom_build.py compile --source "$INPUT" --output "$OUTPUT" \
+# setup/run/score wrappers synchronize the locked environment once, not per candidate.
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+exec "$ROOT/.venv/bin/python3" "$ROOT/tools/rom_build.py" compile --source "$INPUT" --output "$OUTPUT" \
     --profile-source "$PARENT" --nonmatching "${EXTRA[@]}"

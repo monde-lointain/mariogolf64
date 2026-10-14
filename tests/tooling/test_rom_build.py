@@ -45,6 +45,36 @@ def test_libmus_undefines_finalrom_after_base_defines(tmp_path):
     assert result == [2]
 
 
+def test_permuter_callback_preserves_profile_flags_and_compile_errors(tmp_path):
+    if not Path(rb.tool_path("gcc")).is_file() or not Path(rb.tool_path("kmc_as")).is_file():
+        pytest.skip("build the vendored tools before running compiler behavior tests")
+    source = tmp_path / "callback.c"
+    output = tmp_path / "callback.o"
+    source.write_text(
+        "int selected_profile(void) {\n"
+        "#if defined(SUPPORT_NAUDIO) && !defined(_FINALROM)\n"
+        "return CALLBACK_RESULT;\n"
+        "#else\nreturn 1;\n#endif\n}\n"
+    )
+    command = [
+        str(rb.ROOT / "tools/kmc_permuter_compile.sh"),
+        "--profile-source", "src/libmus/aud_thread.c",
+        "-DCALLBACK_RESULT=73", str(source), "-o", str(output),
+    ]
+    subprocess.run(command, cwd=rb.ROOT, check=True, capture_output=True, text=True)
+    text = subprocess.check_output([
+        rb.tool_path("objcopy"), "-O", "binary", "-j", ".text", str(output), "/dev/stdout"
+    ])
+    words = struct.unpack(f">{len(text) // 4}I", text)
+    assert [word & 0xFFFF for word in words if word & 0xFFFF0000 == 0x24020000] == [73]
+
+    source.write_text("int selected_profile(void) { return ; invalid C }\n")
+    result = subprocess.run(command, cwd=rb.ROOT, capture_output=True, text=True)
+    assert result.returncode != 0
+    assert source.name in result.stderr
+    assert not output.exists()
+
+
 @pytest.mark.parametrize("section", ['.section .text, "ax"', '.section .text,"ax"'])
 def test_permuter_recognizes_text_section_with_flags(section):
     assembly = '.section .rodata,"a"\nglabel data_label\n.word 1234\n' + section + '\nglabel chosen\nnop\n'
