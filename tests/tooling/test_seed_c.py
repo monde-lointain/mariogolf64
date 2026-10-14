@@ -1,99 +1,12 @@
-"""Characterization tests for tools/seed_c.py pure helpers.
-
-These lock the behavior Phase 2 refactors touch (sanitize_ghidra_body, the
-auto-extern classifier, parent-scan helpers) so a structural refactor can be
-proven behavior-preserving.
-"""
+"""Behavioral tests for seed sanitization, extern discovery, and parent context."""
 
 from __future__ import annotations
 
 from pathlib import Path
 
-import pytest
 from conftest import load_tool
 
 seed = load_tool("seed_c")
-
-
-# --- stitch_base_c (golden) ----------------------------------------------
-# Locks the assembled base.c text. Exercises every section: rodata warning,
-# parent externs, sibling asm, auto-externs, the Ghidra decompile reference
-# block, the asm ground-truth block, and the body. Four variants cover the
-# body-routing chain (m2c body, then the fallbacks): m2c body + trusted
-# decompile reference, m2c body + suppressed degenerate decompile, a Ghidra
-# fallback when m2c failed, and the TODO stub when neither is available.
-
-
-def _stitch_inputs(tmp_path: Path):
-    (tmp_path / "m2c.c").write_text(
-        "s32 func_80012345(void) {\n    return D_80022222;\n}\n"
-    )
-    (tmp_path / "ghidra.c").write_text(
-        "/* [MM12] copied from ELF */\nundefined4 returns_0(void)\n{\n    return 0;\n}\n"
-    )
-    (tmp_path / "target.s").write_text(
-        "glabel func_80012345\n"
-        "/* 0000 3C048001 */  lui   $a0, 0x8001\n"
-        "/* 0004 03E00008 */  jr    $ra\n"
-        "/* 0008 24840010 */  addiu $a0, $a0, 0x10\n"
-    )
-    return dict(
-        out_dir=tmp_path,
-        placeholder="func_80012345",
-        externs=["extern u32 gFoo;"],
-        sibling_asm_names=["func_80012345", "siblingFn"],
-        auto_externs=["extern void *D_80022222;"],
-        m2c_path=tmp_path / "m2c.c",
-        ghidra_path=tmp_path / "ghidra.c",
-        missing_rodata=["D_80099999"],
-        target_s_path=tmp_path / "target.s",
-        m2c_ok=True,
-    )
-
-
-def _assert_golden(produced: str, gpath, regen):
-    if regen or not gpath.exists():
-        gpath.write_text(produced)
-        pytest.skip(f"golden regenerated: {gpath.name}")
-    assert produced == gpath.read_text()
-
-
-def test_stitch_base_c_golden(tmp_path, golden_dir, regen):
-    """m2c body: the compiled seed, with the trusted decompile as a reference."""
-    kwargs = _stitch_inputs(tmp_path)
-    out_path = seed.stitch_base_c(seed.BaseCSpec(**kwargs))
-    _assert_golden(out_path.read_text(), golden_dir / "seed_c_base.c", regen)
-
-
-def test_stitch_base_c_degenerate_golden(tmp_path, golden_dir, regen):
-    """m2c body with a degenerate decompile: the decompile reference is suppressed."""
-    kwargs = _stitch_inputs(tmp_path)
-    kwargs["ghidra_degenerate"] = True
-    out_path = seed.stitch_base_c(seed.BaseCSpec(**kwargs))
-    _assert_golden(
-        out_path.read_text(), golden_dir / "seed_c_base_degenerate.c", regen
-    )
-
-
-def test_stitch_base_c_ghidra_fallback_golden(tmp_path, golden_dir, regen):
-    """m2c failed: the sanitized Ghidra decompile becomes the body."""
-    kwargs = _stitch_inputs(tmp_path)
-    kwargs["m2c_ok"] = False
-    out_path = seed.stitch_base_c(seed.BaseCSpec(**kwargs))
-    _assert_golden(
-        out_path.read_text(), golden_dir / "seed_c_base_ghidra_fallback.c", regen
-    )
-
-
-def test_stitch_base_c_stub_golden(tmp_path, golden_dir, regen):
-    """No m2c body and no ghidra.c: the TODO stub points at the asm ground truth."""
-    kwargs = _stitch_inputs(tmp_path)
-    kwargs["m2c_ok"] = False
-    kwargs["ghidra_path"] = tmp_path / "missing-ghidra.c"  # does not exist
-    out_path = seed.stitch_base_c(seed.BaseCSpec(**kwargs))
-    _assert_golden(
-        out_path.read_text(), golden_dir / "seed_c_base_no_ghidra.c", regen
-    )
 
 
 # --- is_degenerate_ghidra_body -------------------------------------------

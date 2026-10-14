@@ -1,12 +1,7 @@
-"""Characterization golden for tools/pick_target.py.
+"""Behavioral tests for candidate ranking, hazard detection, and coddog evidence.
 
-pick_target is pure-static (a deterministic function of the repo's yaml + asm +
-symbol files), so its `--json` output is a stable snapshot. This is the crown-
-jewel golden: it exercises build_rows, the hazard detectors, signature_hint, and
-the scoring/sort in one shot. A diff after refactoring = a behavior regression.
-
-The golden is a *refactor-session* snapshot tied to current repo state; if the
-yaml/asm/symbols change for unrelated reasons, regenerate with REGEN_GOLDEN=1.
+Whole-repository snapshots are intentionally excluded: banking a function changes
+the candidate set without changing the ranker's contract.
 """
 
 from __future__ import annotations
@@ -14,7 +9,7 @@ from __future__ import annotations
 import json
 
 import pytest
-from conftest import golden_dir, load_tool, regen, run_tool  # noqa: F401
+from conftest import load_tool, run_tool
 
 ROWS = "50"
 
@@ -29,11 +24,7 @@ def _classify_globals(pt):
 
 @pytest.fixture(autouse=True)
 def _no_live_nusys_map(monkeypatch):
-    """Keep the live, gitignored, build-dependent coddog maps (tools/coddog/nusys_map.tsv +
-    the audio maps written by tools/audio_sweep.sh + tools/audio_pin.py) out of every test so the
-    goldens stay reproducible — the same reason each golden neutralizes CODDOG_MAP. A lib-specific
-    test can override the relevant var. The additive-pass invariant: with these absent, ranking is
-    byte-identical to the pre-audio behavior the committed goldens capture."""
+    """Keep optional local reference maps out of tests unless a case supplies one."""
     monkeypatch.setenv("NUSYS_CODDOG_MAP", "/nonexistent/nusys_map.tsv")
     monkeypatch.setenv("LIBMUS_CODDOG_MAP", "/nonexistent/libmus_map.tsv")
     monkeypatch.setenv("LIBNAUDIO_CODDOG_MAP", "/nonexistent/libnaudio_map.tsv")
@@ -268,85 +259,7 @@ def test_wrong_ghidra_name_override(tmp_path, monkeypatch):
     assert pt._macro_alias_target(str(cand), "osMotorInit") is None
 
 
-def test_pick_target_json_golden(golden_dir, regen, monkeypatch):
-    # The S71 coddog map (tools/coddog/coddog_map.tsv) is gitignored + build-dependent, so the
-    # committed golden is map-free; neutralize any local map for a reproducible snapshot.
-    monkeypatch.setenv("CODDOG_MAP", "/nonexistent/coddog_map.tsv")
-    proc = run_tool("pick_target", "--json", "-n", ROWS)
-    assert proc.returncode == 0, proc.stderr
-    rows = json.loads(proc.stdout)
-    assert isinstance(rows, list) and rows, (
-        "expected a non-empty list of candidate rows"
-    )
-
-    gpath = golden_dir / "pick_target.json"
-    if regen or not gpath.exists():
-        gpath.write_text(json.dumps(rows, indent=2, sort_keys=True) + "\n")
-        pytest.skip(f"golden regenerated: {gpath.name}")
-    expected = json.loads(gpath.read_text())
-    assert rows == expected
-
-
-def test_pick_target_deep_json_golden(golden_dir, regen, monkeypatch):
-    """Deeper-row companion to the -n 50 golden: pin ALL rows, so the long tail of hazard
-    detectors that only fire past the shallow cut is byte-pinned, not just spot-asserted.
-    Coddog stays off here (base behavior); the coddog path is pinned by the coddog golden below.
-
-    The guard is "this query is not truncated", not a row-count floor. The original floor
-    (`> 50`, written when the backlog was ~108) fails as the backlog is mined down -- it broke
-    when the pool reached 35, i.e. because the decomp is succeeding."""
-    monkeypatch.setenv("CODDOG_MAP", "/nonexistent/coddog_map.tsv")
-    deep_n = 200
-    proc = run_tool("pick_target", "--json", "-n", str(deep_n))
-    assert proc.returncode == 0, proc.stderr
-    rows = json.loads(proc.stdout)
-    assert isinstance(rows, list) and rows, "expected a non-empty candidate list"
-    assert len(rows) < deep_n, (
-        f"-n {deep_n} returned {len(rows)} rows and may be truncated; "
-        "this golden must cover the whole backlog, so raise deep_n"
-    )
-
-    gpath = golden_dir / "pick_target_deep.json"
-    if regen or not gpath.exists():
-        gpath.write_text(json.dumps(rows, indent=2, sort_keys=True) + "\n")
-        pytest.skip(f"golden regenerated: {gpath.name}")
-    assert rows == json.loads(gpath.read_text())
-
-
-def test_pick_target_coddog_json_golden(golden_dir, regen, monkeypatch):
-    """Coddog-ENABLED golden: the -n 50 / deep goldens run coddog OFF (the live map is gitignored +
-    build-dependent), so the coddog re-ranking path — coddog-mirror flagging, the non-audio
-    re-pricing, the audio advisory-only branch, and the `@`/`.split` detail parsing — was never
-    byte-pinned. Drive pick_target with a COMMITTED synthetic map (golden/coddog_map_fixture.tsv,
-    a stable overlay non-audio subject + a stable overlay audio subject) and snapshot, so the coddog
-    detail strings are a stable contract. BOTH subjects are OVERLAY funcs (non-audio
-    func_ovl6_8024D800, audio func_ovl9_801F4A40). NOTE: overlays are NO LONGER insulated — Epic 2
-    (since S148) banks overlay code, so a subject CAN get banked out from under the test (S131 banked
-    func_800A09E0; S132 func_800A0730; S148 banked func_ovl10_801F4A40, the prior audio subject → S149
-    repointed to func_ovl9_801F4A40). Pick LARGE overlay subjects (deep in the smallest-first queue) to
-    delay recurrence; making this test state-independent is a tracked follow-up. This is the gate for
-    Phase-A Hazard.coddog_* methods + the cluster-7 (coddog) extraction."""
-    fixture = golden_dir / "coddog_map_fixture.tsv"
-    monkeypatch.setenv("CODDOG_MAP", str(fixture))
-    proc = run_tool("pick_target", "--json", "-n", "200")
-    assert proc.returncode == 0, proc.stderr
-    rows = json.loads(proc.stdout)
-    # sanity: the fixture's non-audio hit re-prices to libultra, the audio hit stays none-but-flagged
-    by_func = {r["func"]: r for r in rows}
-    assert "coddog-mirror:src/io/fake.c@99.99" in by_func["func_ovl6_8024D800"]["hazards"]
-    assert (
-        "coddog-mirror:src/audio/fake.c@99.99"
-        in by_func["func_ovl9_801F4A40"]["hazards"]
-    )
-
-    gpath = golden_dir / "pick_target_coddog.json"
-    if regen or not gpath.exists():
-        gpath.write_text(json.dumps(rows, indent=2, sort_keys=True) + "\n")
-        pytest.skip(f"golden regenerated: {gpath.name}")
-    assert rows == json.loads(gpath.read_text())
-
-
-def test_pick_target_ranked_by_descending_score(golden_dir, regen, monkeypatch):
+def test_pick_target_ranked_by_descending_score(monkeypatch):
     """Lock the ranking contract: de-ranked tiers sink, and within a tier `score`
     runs highest-first.
 
@@ -393,7 +306,7 @@ def test_coddog_mirror_repricing(tmp_path, monkeypatch):
 
     A candidate pick_target sees as `upstream none` (un-named fns) but coddog matched ≥99% to a
     non-audio ultralib file is re-priced as a libultra mirror + flagged coddog-mirror:<file>@<pct>;
-    a <99% or audio hit stays advisory (flag only). Absent map → unchanged (covered by the golden)."""
+    a <99% or audio hit stays advisory (flag only)."""
     # Pick subjects dynamically from a neutralized baseline rather than hardcoding addresses a future
     # sprint banks out from under the test (S131 banked the original func_800A09E0). `pack` = a pts-13
     # none multi-fn pack (the re-pricing subject); `leaf` = any other none asm-flip row (the advisory
@@ -494,34 +407,6 @@ def test_lib_filter_surfaces_audio_coddog_mirror(tmp_path, monkeypatch):
         )
     }
     assert target not in none
-
-
-def test_coddog_trap_rescan(tmp_path, monkeypatch):
-    """S72: a coddog-matched upstream's trap detectors (defines-data / file-static / needs-header)
-    re-run on the resolved `.c`, so a verbatim-mirror candidate's hidden BSS/data trap is priced at
-    the gate, not discovered mid-sprint. Map a none-classified candidate to a REAL ultralib file
-    with the trap — src/io/piacs.c DEFINES `__osPiAccessQueueEnabled` + a `static OSMesg piAccessBuf`
-    — and assert both hazards surface (and the seed re-prices off the bare-coddog clean look)."""
-    mapf = tmp_path / "coddog_map.tsv"
-    # Subject is a stable OVERLAY func (mined last); S132 banked the prior func_800A0730 subject.
-    mapf.write_text(
-        "func_ovl6_8024D800\t__osPiCreateAccessQueue\tsrc/io/piacs.c\t99.99\n"
-    )
-    monkeypatch.setenv("CODDOG_MAP", str(mapf))
-    rows = {
-        r["func"]: r
-        for r in json.loads(run_tool("pick_target", "--json", "-n", "200").stdout)
-    }
-
-    hit = rows.get("func_ovl6_8024D800")
-    assert hit is not None, "mapped candidate missing from output"
-    assert "coddog-mirror:src/io/piacs.c@99.99" in hit["hazards"]
-    # The trap the bare coddog flag hid: piacs.c is NOT an atomic verbatim cp.
-    assert "file-static" in hit["hazards"], hit["hazards"]
-    assert "defines-data:" in hit["hazards"], hit["hazards"]
-    # Re-priced as a libultra mirror (≥99% non-audio) but the defines-data/file-static `drop`
-    # lifts the seed above a bare clean io mirror (so the gate sees the real cost).
-    assert hit["upstream"] == "libultra"
 
 
 def test_coddog_suppresses_maybe_upstream(tmp_path, monkeypatch):
@@ -869,14 +754,17 @@ def test_straddling_unattrib_inter_file_leaf():
     )
 
 
-def test_coddog_tail_trap_rescan(monkeypatch):
-    """S80 #3: a coddog identity carried by an UN-NAMED TAIL member (not the named leader) re-runs
-    the file-level trap battery on the resolved upstream, so its defines-data/file-static is priced.
-    initialize.c's coddog hit keys on the sibling `create_speed_param`, not leader
-    `__osInitialize_common`, so before this only the S78 bare coddog flag surfaced — its defines-data
-    `.data` carve went un-priced. Map the tail to the real trap file src/io/piacs.c and assert
-    defines-data + file-static appear via the tail path."""
+@pytest.mark.parametrize("identity_member", ["namedLeader", "func_1100"])
+def test_coddog_trap_rescan(tmp_path, monkeypatch, identity_member):
+    """Primary and tail identities must expose the matched source's data/static traps."""
     pt = load_tool("pick_target")
+    upstream = tmp_path / "trap.c"
+    upstream.write_text(
+        "int trapEnabled;\n"
+        "static int trapBuffer[1];\n"
+        "void target(void) { trapEnabled = trapBuffer[0]; }\n"
+    )
+    monkeypatch.setattr(pt, "_coddog_upstream_path", lambda cfile: str(upstream))
 
     class A:
         lib = None
@@ -917,9 +805,9 @@ def test_coddog_tail_trap_rescan(monkeypatch):
     rows = pt.build_rows(
         A(),
         pt.Indexes(
-            {"namedLeader": ("libultra", "/x/wrong.c")},
             {},
-            {"func_1100": ("src/io/piacs.c", 99.99)},
+            {},
+            {identity_member: ("src/io/trap.c", 99.99)},
             {},
             {},
             {},
@@ -927,9 +815,10 @@ def test_coddog_tail_trap_rescan(monkeypatch):
         set(),
     )
     hit = next(r for r in rows if r["func"] == "namedLeader")
-    assert "coddog-mirror:src/io/piacs.c@99.99" in hit["hazards"]
+    assert "coddog-mirror:src/io/trap.c@99.99" in hit["hazards"]
     assert "file-static" in hit["hazards"], hit["hazards"]
-    assert "defines-data:__osPiAccessQueueEnabled" in hit["hazards"], hit["hazards"]
+    assert "defines-data:trapEnabled" in hit["hazards"], hit["hazards"]
+    assert hit["upstream"] == "libultra"
 
 
 def _hazard_rows(pt, monkeypatch, *, subs, classify, ui, coddog):
@@ -1267,23 +1156,6 @@ def test_upstream_fncount_mismatch_and_data_carve(tmp_path):
 # These lock CURRENT behavior (captured live, not a spec) ahead of the pick_target.py refactor
 # so the seed-weight-table (Phase 1b), the Candidate parameter object (Phase 2), and the
 # module split are unit-guarded, not only golden-guarded. See the plan's Phase 0.
-
-
-def test_pick_target_table_golden(golden_dir, regen, monkeypatch):
-    """Lock the HUMAN TABLE output — the format /sprint-plan actually consumes
-    (`venv/bin/python3 tools/pick_target.py -n 12`, .claude/commands/sprint-plan.md:47),
-    which the --json golden does NOT cover. A diff after refactoring = a regression in the
-    gate's input. Map-free for reproducibility, like the json golden."""
-    monkeypatch.setenv("CODDOG_MAP", "/nonexistent/coddog_map.tsv")
-    proc = run_tool("pick_target", "-n", ROWS)
-    assert proc.returncode == 0, proc.stderr
-    table = proc.stdout
-    assert table.strip(), "expected a non-empty table"
-    gpath = golden_dir / "pick_target_table.txt"
-    if regen or not gpath.exists():
-        gpath.write_text(table)
-        pytest.skip(f"golden regenerated: {gpath.name}")
-    assert table == gpath.read_text()
 
 
 def test_seed_points_characterization():
