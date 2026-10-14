@@ -125,11 +125,13 @@ def _strip_code(text):
 
 
 def surfaces():
-    """Every in-scope surface that exists, in a stable order."""
+    """Existing instruction surfaces, excluding OKF directory indexes and update logs."""
     out = []
     for pat in SURFACE_GLOBS:
         if any(c in pat for c in "*?["):
-            out.extend(sorted(ROOT.glob(pat)))
+            out.extend(
+                sorted(p for p in ROOT.glob(pat) if p.name not in ("index.md", "log.md"))
+            )
         else:
             p = ROOT / pat
             if p.exists():
