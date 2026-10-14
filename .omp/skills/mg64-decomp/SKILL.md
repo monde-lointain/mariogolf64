@@ -29,6 +29,10 @@ Use the configured Python interpreter `uv run --locked python`; the default bina
 - Score zero starts provisional integration: inline the body, remove its stub, format, build the host object, and spot-check the target function against the isolated object. Then run the full ROM verifier. Compare the same function, not whole multi-function `.text` sections; [oracle limits](../../../docs/workflow/loop.md#oracles) explain relocation and normalization caveats. If integration fails, restore the matching stub/source and keep the candidate isolated.
 - Preserve profile fidelity. Isolated compilation must use the same per-source profile and flags as the ROM build; use `tools/rom_build.py` and the authoritative `tools/build_profiles.json` rather than hand-assembled compiler commands. Never infer a matching result from an isolated compile alone.
 
+Bound expensive experiments using the [deadline guard](../../../docs/tooling.md#bounded-experiments).
+Start one absolute deadline per candidate, preserve inspection time, and retain isolated artifacts
+on expiry. A deadline is a resource limit, not a source-wall verdict.
+
 ## Bank
 
 A function is banked only after `tools/verify-rom.sh` exits successfully. Do not substitute a direct hash, object comparison, or incremental diff for this full-ROM oracle. Before renaming a function, check committed C callers and update them with the rename. Stage source inputs only; generated extraction artifacts stay ignored in the binary tree. A file is complete only when all its `INCLUDE_ASM` stubs are gone. Keep unfinished work isolated and describe measured residuals in `docs/wip/<func>.near-match.md`.

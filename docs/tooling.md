@@ -9,6 +9,8 @@ sources:
     title: Per-function compile and diff CLI
   - resource: ../tools/rom_build.py
     title: ROM build interface
+  - resource: ../tools/decomp_budget.py
+    title: Deadline and process-group enforcement
 ---
 
 # Decomp tooling entrypoints
@@ -67,6 +69,27 @@ constraints and ruled-out hypotheses, conditional on their measured base.
 The authoritative object build interface is `uv run --locked python tools/rom_build.py build --object <object-path>`.
 Compile profiles are defined by `tools/build_profiles.json`; use the same source-specific profile for
 isolated iteration as the ROM build.
+
+## Bounded experiments
+
+Bound an expensive command with the native deadline guard:
+
+```sh
+export MG64_DEADLINE_UNIX=$(( $(date +%s) + 1800 ))
+uv run --locked python tools/decomp_budget.py --seconds 600 --reserve 120 -- \
+  uv run --locked python tools/decomp_loop.py --func <fn>
+```
+
+Unset or replace the deadline before the next target. A duration alone bounds one command;
+the inherited deadline prevents successive commands from extending the candidate budget.
+`run-permuter.sh` uses the same guard, defaults to 600 seconds, and accepts a numeric
+`MG64_PERMUTER_SECONDS` override. It reserves 120 seconds when a deadline is inherited.
+Expiry exits 124 and retains artifacts without a bank verdict. Cleanup uses a procps-compatible
+`ps` to include observed descendant sessions: nested guards get graceful termination followed
+by bounded hard escalation and reaping. Remaining owned descendants are stopped even when
+the direct command exits successfully. This is lifecycle containment, not a sandbox for hostile
+daemonizing commands. The cleanup grace can extend command return beyond the execution deadline.
+This is a resource budget, not an arbitrary retry cap or evidence of an impossible source match.
 
 ## Maintain tooling and docs
 

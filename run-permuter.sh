@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Run permuter on a function with (nproc - 1) threads, best-only
-# Usage: ./run-permuter.sh <func_name> [permuter.py args...]
+# Run a bounded permuter experiment; preserve output when its budget expires.
+# Usage: MG64_PERMUTER_SECONDS=600 ./run-permuter.sh <func_name> [permuter.py args...]
 # Example: ./run-permuter.sh ___udivmoddi4
 #          ./run-permuter.sh ___udivmoddi4 --stop-on-zero
 
@@ -27,4 +27,5 @@ fi
 
 echo "Running permuter on $PERMUTER_DIR with $THREADS threads (best-only mode)"
 
-./tools/decomp-permuter/permuter.py "$PERMUTER_DIR" -j "$THREADS" --best-only "$@"
+python tools/decomp_budget.py --seconds "${MG64_PERMUTER_SECONDS:-600}" --reserve 120 -- \
+    ./tools/decomp-permuter/permuter.py "$PERMUTER_DIR" -j "$THREADS" --best-only "$@"
