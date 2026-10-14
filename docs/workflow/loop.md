@@ -2,6 +2,13 @@
 type: Workflow
 title: Decomp execution details
 description: Defines evidence authority, residual diagnosis, and source-integration constraints without duplicating the native workflow.
+sources:
+  - resource: ../../tools/decomp_loop.py
+    title: Isolated compile and diff implementation
+  - resource: ../../tools/verify-rom.sh
+    title: ROM verification gate
+  - resource: ../../tools/rom_build.py
+    title: Profile-aware build implementation
 ---
 
 # Execution details and every-function conventions
@@ -59,9 +66,9 @@ are not overwritten; edits detected during measurement invalidate attribution. H
 inputs are not archived, so the record's limitations require regeneration and a fresh measurement
 on resume. Use it as evidence in the existing WIP note, not a second task ledger.
 
-For bounded queues, cross-checkout references, an isolated m2c prepass, and process-group deadlines,
-use the [campaign entrypoints](../tooling.md#references-and-native-campaigns). Their outputs remain
-iteration evidence. The native skill owns execution and the parent retains shared-resource ownership.
+For bounded queues, cross-checkout references, an isolated m2c prepass, and deadlines, use the
+[campaign guide](../campaigns.md). Its output remains iteration evidence; the native skill owns
+execution and the parent retains shared-resource ownership.
 
 
 ## Candidate pricing

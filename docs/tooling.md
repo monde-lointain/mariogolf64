@@ -76,60 +76,25 @@ isolated iteration as the ROM build.
 
 ## References and native campaigns
 
+For reference lookup, queue preparation, campaign scheduling, or deadlines, use the
+[campaign and reference guide](campaigns.md). The overview here preserves this discovery
+anchor for existing links; it does not own campaign execution policy.
+
 | Need | Command |
 | --- | --- |
-| Similar C references for an exact label | `uv run --locked python tools/decomp_references.py --func <fn> -n 3` |
-| Include another checkout without merging it | Add `--reference-root <checkout>` (repeatable) |
+| Advisory C references for a target | `uv run --locked python tools/decomp_references.py --func <fn> -n 3` |
+| Include another checkout | Add repeatable `--reference-root <checkout>` |
 | Prepare a native `/decomp` queue | `uv run --locked python tools/decomp_campaign.py --segment main --pool-size 60 -n 12 --by-similarity` |
-| Select explicit targets, including carries | `decomp_campaign.py --func <fn> --func <other> -n 2` |
-| Partition an analysis queue | Add `--shard 1/4`; never run shared compiles/MCP/source edits concurrently |
-| Cheap isolated m2c prepass | Add `--prepass --seconds 1800`; seeds/compiles run serially and matching source stays untouched |
-| Bound a costly command and its descendants | `uv run --locked python tools/decomp_budget.py --seconds 600 --reserve 120 -- <command> <args>...` |
+| Select exact labels | `decomp_campaign.py --func <fn> --func <other> -n 2` |
+| Partition an analysis queue | Add `--shard 1/4`; shared operations remain serialized |
+| Run an isolated m2c prepass | Add `--prepass --seconds 1800` |
+| Bound a command and descendants | `uv run --locked python tools/decomp_budget.py --seconds 600 --reserve 120 -- <command> <args>...` |
 
-References compare original-ROM assembly shape, opcode distribution, and shared callees, then
-point to C implementations without retained assembly stubs. Output includes source/target hashes,
-ROM/bank/offset identity, and coverage failures. No reference is `null`, not a measured zero.
-The scores are advisory, not matching percentages or difficulty estimates. Source discovery is
-conservative and unverified: inspect conditional compilation and remeasure any source you reuse.
-An ambiguous assembly label is rejected rather than resolved by the first file.
-
-Explicit reference roots must declare the same ROM SHA-1 and have extracted reference assembly
-under `build/us/work/asm`; the active checkout honors `MG64_BUILD_DIR`. Discovery reads fresh files
-on each invocation, so newly visible C can be used before a merge. Neither a declared checksum nor
-a source-present result proves that checkout passed the ROM gate. Recheck hashes before reuse.
-
-Queue preparation is read-only. `--pool-size` bounds the existing loose-stub ranker's eligible
-shortlist; similarity, sharding, and the final `-n` operate within that disclosed shortlist.
-Default selection preserves the ranker's carried/nested/intrinsic/pool exclusions. Explicit
-labels retain coupling tags; the prepass skips coupled/intrinsic targets, known library source
-trees, already-C functions, and any existing candidate directory. Choose upstream source first.
-`provisional-zero` still requires source review, integration, and the sole ROM verifier.
-
-The [native skill](../.omp/skills/mg64-decomp/SKILL.md#campaigns) owns campaign execution. Feed it
-the queue rather than starting another agent runner. Start one absolute deadline when a target
-gets execution ownership, then pass it to each expensive command. For example, in the persistent
-shell, set `MG64_DEADLINE_UNIX` once for a 30-minute candidate:
-
-```sh
-export MG64_DEADLINE_UNIX=$(( $(date +%s) + 1800 ))
-uv run --locked python tools/decomp_budget.py --seconds 600 --reserve 120 -- \
-  uv run --locked python tools/decomp_loop.py --func <fn>
-```
-
-Unset or replace the deadline before the next target. A duration alone bounds one command;
-the inherited deadline prevents successive commands from extending the candidate budget.
-`run-permuter.sh` uses the same guard, defaults to 600 seconds, and accepts a numeric
-`MG64_PERMUTER_SECONDS` override. It reserves 120 seconds when a deadline is inherited.
-Expiry exits 124 and retains artifacts without a bank verdict. Cleanup uses a procps-compatible
-`ps` to include observed descendant sessions: nested guards get graceful termination followed
-by bounded hard escalation and reaping. Remaining owned descendants are stopped even when
-the direct command exits successfully. This is lifecycle containment, not a sandbox for hostile
-daemonizing commands. The cleanup grace can extend command return beyond the execution deadline.
-This is a resource budget, not an arbitrary retry cap or evidence of an impossible source match.
-
-The prepass lock excludes another prepass, not manual builds or Ghidra: the parent must still
-serialize every shared operation. There are no automatic source integrations, commits, hard
-resets, or multi-worktree build workers.
+Reference scores and queue records are advisory; neither source presence nor a provisional
+zero banks code. The native [decomp skill](../.omp/skills/mg64-decomp/SKILL.md#campaigns)
+owns execution, and only the parent owns shared builds, MCP, and source integration. See
+[campaign guide](campaigns.md) for selection defaults, provenance, prepass exclusions,
+deadline semantics, and read-only examples.
 
 ## Maintain tooling and docs
 
@@ -138,10 +103,11 @@ resets, or multi-worktree build workers.
 - [Fingerprint sweeps](../tools/coddog/README.md) — optional local reference builds; maps are
   gitignored and depend on local artifacts, not a fresh-checkout requirement.
 
-Oh My Pi discovers BasedPyright and Ruff from the locked `.venv`; no project LSP wrapper is
-required. If the session predates environment installation, reload native LSP discovery.
+Oh My Pi discovers BasedPyright and Ruff from the locked `.venv`; no project LSP wrapper
+is required. If the session predates environment installation, reload native LSP discovery.
 Use references/definitions for Python tooling changes. Python type intelligence does not
 model KMC GCC's C extensions or prove target code generation.
 
 Keep MCP, builds, layout changes, and source edits serial. See
 [documentation conventions](documentation.md) before reorganizing an instruction surface.
+

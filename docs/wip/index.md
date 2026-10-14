@@ -1,10 +1,16 @@
-# Reconstruction evidence
+# Read evidence without changing candidate discovery
+
+- [How to interpret reconstruction notes](../history.md#function-evidence) — Recorded scores and wall/banked labels describe their measured base, not a fresh verification of today's source; filenames also affect candidate classification.
+
+# Named functions (C–F)
 
 - [collect_keyframe_events_at near-match (S260) — 54/54, ONE BRANCH-OFFSET BIT](collect_keyframe_events_at.near-match.md) — Records reconstruction evidence and matching constraints for collect_keyframe_events_at.
 - [draw_terrain_aim_grid — near-match (S306)](draw_terrain_aim_grid.near-match.md) — Records reconstruction evidence and matching constraints for draw_terrain_aim_grid.
-- [emit_lens_flare_dl (func_8008D3F4) -- BANKED S302](emit_lens_flare_dl.near-match.md) — Records reconstruction evidence and matching constraints for emit_lens_flare_dl.
 - [emit_sky_dome_dl — S297 carry (299/299 count, register permutation; was 297/299, 272/299 at S296)](emit_sky_dome_dl.near-match.md) — Records reconstruction evidence and matching constraints for emit_sky_dome_dl.
 - [find_keyframe_offset_by_tag near-match (base-register caching + regalloc perm)](find_keyframe_offset_by_tag.near-match.md) — Records reconstruction evidence and matching constraints for find_keyframe_offset_by_tag.
+
+# Functions at 0x8002–0x8004
+
 - [func_80029C00 — FCSR mask intrinsic (TERMINAL, hasm candidate)](func_80029C00.near-match.md) — Records reconstruction evidence and matching constraints for func_80029C00.
 - [func_8002BE78 - GCC nested function of draw_ground_shadow_decals (carry, not a wall)](func_8002BE78.near-match.md) — Records reconstruction evidence and matching constraints for func_8002BE78.
 - [func_8002CDA8 reconstruction scoping (S303, re-opened S304)](func_8002CDA8.scoping.md) — Records reconstruction evidence and matching constraints for func_8002CDA8.
@@ -23,6 +29,9 @@
 - [func_8004C958 — recursive diamond-square cloud generator (near-match, S263)](func_8004C958.near-match.md) — Records reconstruction evidence and matching constraints for func_8004C958.
 - [func_8004CDA0 — cloud-buffer blend driver (near-match, S263)](func_8004CDA0.near-match.md) — Records reconstruction evidence and matching constraints for func_8004CDA0.
 - [func_8004DC44 WIP — dead-frame reload-artifact regalloc wall (S173 compiler-source dive)](func_8004DC44.wip.md) — Records reconstruction evidence and matching constraints for func_8004DC44.
+
+# Functions at 0x8005
+
 - [func_8005244C — near-match (S316, CARRIED at 93/94)](func_8005244C.near-match.md) — Records reconstruction evidence and matching constraints for func_8005244C.
 - [func_80056060 — CARRIED (39/39, 20 diff rows; callee-saved priority inversion)](func_80056060.near-match.md) — Records reconstruction evidence and matching constraints for func_80056060.
 - [func_800564F0 + func_80055738 — PROVEN reorg delay-slot WALL (S213)](func_800564F0-func_80055738.delay-slot-wall.md) — Records reconstruction evidence and matching constraints for func_800564F0-func_80055738.
@@ -35,6 +44,9 @@
 - [func_8005D334 near-match (S210 compiler-source dive)](func_8005D334.near-match.md) — Records reconstruction evidence and matching constraints for func_8005D334.
 - [func_8005DF54 — non-ABI $s2-arg wall (TERMINAL)](func_8005DF54.near-match.md) — Records reconstruction evidence and matching constraints for func_8005DF54.
 - [func_8005DFE8 — SRAM load/verify, CARRIED (S292 re-open; 102/102, 36 diff rows)](func_8005DFE8.near-match.md) — Records reconstruction evidence and matching constraints for func_8005DFE8.
+
+# Functions at 0x8006
+
 - [func_8006BC80 — CRACKED (0/474 words, match candidate)](func_8006BC80.near-match.md) — Records reconstruction evidence and matching constraints for func_8006BC80.
 - [func_8006C8CC near-match (CARRY, S239)](func_8006C8CC.near-match.md) — Records reconstruction evidence and matching constraints for func_8006C8CC.
 - [func_8006D164 near-match (S240 carry)](func_8006D164.near-match.md) — Records reconstruction evidence and matching constraints for func_8006D164.
@@ -42,6 +54,9 @@
 - [func_8006D38C — near-match (base-register-vs-displacement wall)](func_8006D38C.near-match.md) — Records reconstruction evidence and matching constraints for func_8006D38C.
 - [func_8006DF84 near-match (S240 carry; S224-flagged wall CONFIRMED)](func_8006DF84.near-match.md) — Records reconstruction evidence and matching constraints for func_8006DF84.
 - [func_8006E210 + func_8006DFF0 (nested child) - NEAR MATCH (S310)](func_8006E210.near-match.md) — Records reconstruction evidence and matching constraints for func_8006E210.
+
+# Functions at 0x8007
+
 - [func_8007399C — near-match (S307, re-measured S308)](func_8007399C.near-match.md) — Records reconstruction evidence and matching constraints for func_8007399C.
 - [func_80073F24 near-match (S243)](func_80073F24.near-match.md) — Records reconstruction evidence and matching constraints for func_80073F24.
 - [func_80074230 near-match (S243)](func_80074230.near-match.md) — Records reconstruction evidence and matching constraints for func_80074230.
@@ -59,6 +74,9 @@
 - [func_8007A40C (+ func_8007A10C) — GCC nested-function carry (S279)](func_8007A40C.near-match.md) — Records reconstruction evidence and matching constraints for func_8007A40C.
 - [func_8007C5D8 — byte-exact body, blocked by the TU's shared literal pool](func_8007C5D8.near-match.md) — Records reconstruction evidence and matching constraints for func_8007C5D8.
 - [func_8007EF0C — near-match (S305, re-opened S306)](func_8007EF0C.near-match.md) — Records reconstruction evidence and matching constraints for func_8007EF0C.
+
+# Functions at 0x8008–0x8009
+
 - [func_800824E4 near-match — S252, RE-DERIVED S258](func_800824E4.near-match.md) — Records reconstruction evidence and matching constraints for func_800824E4.
 - [func_800842C0 — chain-USED GCC nested function (glistp via static chain in $v0)](func_800842C0.near-match.md) — Records reconstruction evidence and matching constraints for func_800842C0.
 - [func_80087CB0 near-match (S257, deepened S258) — aim-cursor sprite DL emitter](func_80087CB0.near-match.md) — Records reconstruction evidence and matching constraints for func_80087CB0.
@@ -73,13 +91,18 @@
 - [func_80098C6C near-match (TERMINAL sched.c coin; barrier-only crack, PO-declined)](func_80098C6C.near-match.md) — Records reconstruction evidence and matching constraints for func_80098C6C.
 - [func_80098CD8 near-match (TERMINAL uniform reg-rotation; exact-count 38/38)](func_80098CD8.near-match.md) — Records reconstruction evidence and matching constraints for func_80098CD8.
 - [func_800990D0 — near-match (CARRY)](func_800990D0.near-match.md) — Records reconstruction evidence and matching constraints for func_800990D0.
+
+# Named functions (G–R)
+
 - [get_surface_type (0x80039F7C) — near-match carry (S233)](get_surface_type.near-match.md) — Records reconstruction evidence and matching constraints for get_surface_type.
 - [get_terrain_vertex_pointer — value-select + tail register-permutation (EXACT-COUNT near-match)](get_terrain_vertex_pointer.near-match.md) — Records reconstruction evidence and matching constraints for get_terrain_vertex_pointer.
 - [init_rdp_and_draw_sky_background — 286/286, exact instruction multiset, pure order residual](init_rdp_and_draw_sky_background.near-match.md) — Records reconstruction evidence and matching constraints for init_rdp_and_draw_sky_background.
 - [init_sky_pool_and_world_state near-match (S256 carry, rebuilt S258)](init_sky_pool_and_world_state.near-match.md) — Records reconstruction evidence and matching constraints for init_sky_pool_and_world_state.
-- [lookup_animation_by_id (0x80055FFC) — SOLVED / BANKED S213](lookup_animation_by_id.near-match.md) — Records reconstruction evidence and matching constraints for lookup_animation_by_id.
 - [resolve_shot_quality_table — near-match (S185, structurally complete, 3-instr irreducible residual)](resolve_shot_quality_table.near-match.md) — Records reconstruction evidence and matching constraints for resolve_shot_quality_table.
 
 # Recorded resolutions
+
+- [emit_lens_flare_dl (func_8008D3F4) -- BANKED S302](emit_lens_flare_dl.near-match.md) — Records reconstruction evidence and matching constraints for emit_lens_flare_dl.
+- [lookup_animation_by_id (0x80055FFC) — SOLVED / BANKED S213](lookup_animation_by_id.near-match.md) — Records reconstruction evidence and matching constraints for lookup_animation_by_id.
 
 - [Banked evidence](banked/index.md) — Earlier reconstruction notes retained after their recorded matching resolution.

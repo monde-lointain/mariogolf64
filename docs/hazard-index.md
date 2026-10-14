@@ -2,20 +2,26 @@
 type: Navigation Reference
 title: Hazard flag lookup
 description: Routes ranker flags and assembly symptoms to the applicable hazard playbook.
+sources:
+  - resource: ../tools/pick_target_hazards.py
+    title: Ranker hazard kinds and rendering
+  - resource: hazards.md
+    title: Detailed playbooks and historical evidence
 ---
 
 # Hazard index (flag -> playbook)
 
-<role>
 Maps each `tools/pick_target.py` hazard flag, and each asm symptom, to the one `docs/hazards.md`
-section that handles it. A lookup table: read the row you need, then that section. Consulted from
-both the plan gate (pricing a candidate) and the execution loop (routing a residual).
-</role>
+section that handles it. Use this table to route from ranker output; for instruction, control-flow,
+register-allocation, scheduling, or data-layout residuals, use the dedicated [symptom lookup](hazard-symptoms.md#symptom-to-section).
+The detail behind each flag lives in that playbook section, not here. Consulted from both candidate
+pricing and execution.
 
 ## Flag to section
 
-When `pick_target.py` flags a hazard (or a match shows its symptom), read the matching
-`docs/hazards.md` section. The detail behind each flag lives in that section, not here.
+When `pick_target.py` flags a hazard, read the matching `docs/hazards.md` section. For a residual
+without a ranker flag, use the symptom lookup above. Playbooks preserve historical evidence; where
+old command transcripts conflict, the current build contract at the top of `hazards.md` controls.
 
 | pick_target.py flag / symptom | docs/hazards.md section |
 | ----------------------------- | ----------------------- |
@@ -42,6 +48,10 @@ When `pick_target.py` flags a hazard (or a match shows its symptom), read the ma
 | `header-renames-symbol:<fn>@<hdr>` | [header-renames-symbol](hazards.md#header-renames-symbol-vendored-header-rewrites-the-curated-symbol) |
 | `wrong-ghidra-name:<ghidra>-><correct>@<hdr>` | [wrong-ghidra-name-override](hazards.md#wrong-ghidra-name-override-correct-a-mislabeled-symbol-without-sync-names) |
 | mirror parse error / undefined ref on a helper macro | [vendored-header-incomplete](hazards.md#vendored-header-incomplete-a-reconstructed-header-is-already-vendored-yet-missing-a-macro) |
+| `rodata-straddle:<addr>` | [decomposed-one-tu rodata alignment split](hazards.md#decomposed-one-tu-rodata-alignment-split-a-counter-case-to-the-8-point-decompose-gate) |
+| `jal-free` | [upstream-mirror-pattern](hazards.md#upstream-mirror-pattern) |
+| `remaining:<n>` | [open-band fast-path](hazards.md#open-band-fast-path) |
+| `body-divergence-suspect:<file>@<pct>` / `coddog-source-banked:<file>` | [coddog cross-ref](hazards.md#coddog-cross-ref) |
 | parse-error cascade at macro-def lines / `stray '\'` after vendoring an SDK header | [crlf-vendored-header](hazards.md#crlf-vendored-header-a-copied-sdk-header-breaks-kmc-cpps--continuations) |
 | `pack:<n>fn[…]` | [multi-function-segment-splitting-pack](hazards.md#multi-function-segment-splitting-pack) |
 | `c-combined:<n>file[…]` | [multi-function-segment-splitting-pack](hazards.md#multi-function-segment-splitting-pack) |

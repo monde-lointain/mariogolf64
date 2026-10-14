@@ -2,6 +2,13 @@
 type: Reference
 title: Sprint history and reconstruction evidence
 description: Distinguishes current workflow authority from time-scoped sprint records and function reconstruction notes.
+sources:
+  - resource: ../tools/pick_target_score.py
+    title: Carry-over and WIP filename discovery
+  - resource: ../tools/pick_target_classify.py
+    title: Filename-specific carried-residual heuristics
+  - resource: ../.omp/skills/mg64-decomp/SKILL.md
+    title: Current workflow and durable evidence contract
 ---
 
 # Sprint history and reconstruction evidence
@@ -31,11 +38,20 @@ The current workflow and resume guidance are in the [native decomp skill](../.om
 - [Reconstruction notes](wip/index.md) — residuals, scoping work, source levers tried, and constraints.
 - [Banked evidence](wip/banked/index.md) — prior near-match notes kept after their recorded resolution.
 
-Filenames are part of candidate discovery: `--carried-check` uses WIP note stems, so moving an active
-note to change a classification changes implementation behavior. A scoping or nested-function note
-is not necessarily a terminal wall. Read the evidence and inspect the current source before deciding
-whether to reopen it. A recorded count or score is comparable only with the same measurement method;
-see the [oracle table](workflow/loop.md#oracles).
+Treat note titles, scores, `TERMINAL`/`CARRIED` labels, and recorded bank claims as evidence from
+their cited attempt, not a fresh report on the current source. Even the `banked/` directory is a
+recorded-resolution archive, not another acceptance gate. Inspect the current stub/source and
+reproduce a measurement before reusing its conclusions; only the ROM verifier authorizes banking.
+
+Filenames are executable discovery inputs, not just document organization. `carried_wall_names()`
+unions `BACKLOG.md` carry-overs with **immediate** `docs/wip/*.md` filename stems; it does not recurse
+into `banked/`. Separate residual heuristics read the exact `docs/wip/<fn>.near-match.md` path.
+Do not rename or relocate a note merely to improve navigation: regroup its index entry instead.
+A scoping or nested-function note is not necessarily a terminal wall.
+
+A recorded count or score is comparable only with the same measurement method and source/profile.
+See the [oracle table](workflow/loop.md#oracles). On resume, cite an existing measurement/source
+pair where available; do not transcribe a fresh score into historical prose or invent missing proof.
 
 Sprint tags in hazard playbooks point back to this evidence. Do not remove evidence merely because
 its former hypothesis was superseded; change the current rule and record the new result separately.

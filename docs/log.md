@@ -2,7 +2,24 @@
 
 ## 2026-10-14
 
-### Reference-driven native campaigns and bounded experiments
+- **Structure**: Refactored discovery against OKF v0.2: removed concept frontmatter from the nested
+  workflow index, grouped reconstruction notes by symbol/address, and made this update log a flat
+  date-grouped list. The repository entry guide now routes to canonical setup and workflow concepts.
+- **Discovery**: Split [reference discovery and campaign queues](campaigns.md) from the command
+  catalog. Clarified which surfaces own procedure, technical decisions, operational commands,
+  matching diagnosis, and historical evidence; reused concept descriptions in discovery indexes.
+- **Alignment**: Checked build, dependency, container, campaign, deadline, ranker, and Ghidra guidance
+  against implementation. Added provenance, missing hazard routes, and explicit WIP filename
+  semantics; removed redundant setup/upgrade guidance and non-Markdown role wrappers.
+- **Preservation**: Kept historical reconstruction bodies and paths, native skill/command contracts,
+  and all frozen hazard headings. Corrected a broken family-index fragment without renaming its target.
+- **Proof**: Parsed all 102 bundle concepts, checked recursive index coverage, reserved-file structure,
+  local links/exact fragments and provenance paths. The hazard checker passed all 115 frozen anchors.
+  Exercised CMake preset listing, verifier help, real C-reference discovery and read-only queue
+  preparation, plus a bounded child command. No ROM build, live Ghidra, container, or hosted CI run
+  was needed or claimed for this documentation-only refactor.
+
+- **Milestone**: Reference-driven native campaigns and bounded experiments.
 
 - **Research**: Parallel deep dives examined Snowboard Kids/Nigel's reference ranking, sharding,
   deadlines and m2c prepass; REA's artifact/evidence contracts; The Ghidra Book and Eilam's
@@ -40,7 +57,7 @@
   tools or ROM extraction from the supplied archive were needed. Calibration scaffolds were
   removed; the real unbanked prepass candidate remains isolated under `nonmatchings/`.
 
-### Streamlined agent decompilation workflow
+- **Milestone**: Streamlined agent decompilation workflow.
 
 - **Research**: Parallel deep dives compared Oh My Pi's native task/skill/artifact lifecycle,
   REA's bounded evidence contracts, The Ghidra Book chapters 8/13/19/20, Eilam's
@@ -72,7 +89,7 @@
 - **Scope**: No matching C, headers, YAML, pinned vendors, or historical reconstruction evidence
   changed. Live Ghidra export and permuter execution were unchanged and were not exercised here.
 
-### Persistent bank-aware Ghidra database
+- **Milestone**: Persistent bank-aware Ghidra database.
 
 - **Database**: Created private `private/ghidra/mariogolf64.gpr` with 17 programs: resident
   entry/main plus one resident-backed program per code overlay. YAML supplies byte maps and BSS;
@@ -94,7 +111,7 @@
   Ruff checks passed. `tools/verify-rom.sh` reported SHA-1 match
   `e2c4e7a905b29529b49a1619a401fe699224829b`.
 
-### Repository and native-agent cleanup
+- **Milestone**: Repository and native-agent cleanup.
 
 - **Removed**: Obsolete local `tools/cc` binaries, legacy `venv`, and empty `mk/` directory
   (about 66 MiB); the unused old-path `mariogolf64.md5` and `tools/.gitignore`.
@@ -116,7 +133,7 @@
   104 active local links across 12 workflow surfaces. The installed harness loaded the skill and
   dispatched `/decomp`; Python Eval ran with the approved session-only `.venv` interpreter.
 
-### uv-managed Python tooling
+- **Milestone**: uv-managed Python tooling.
 
 - **Dependencies**: Consolidated runtime, test, and analysis dependencies in `pyproject.toml`;
   resolved current stable compatible releases into `uv.lock`. Removed requirements files and the
@@ -139,7 +156,7 @@
 - **Limits**: Hosted CI and the private Docker image have not been executed here. Rebuild the image
   before publishing this workflow's container changes.
 
-### Monorepo and CMake modernization
+- **Milestone**: Monorepo and CMake modernization.
 
 - **Ownership**: Imported asm-differ, decomp-permuter, and m2c as ordinary Git source; removed
   submodule configuration. Added pinned compiler/binutils source archives and the complete
@@ -166,7 +183,7 @@
 - **Limits**: Docker and hosted CI configuration were updated but not executed. The private CI image
   must be rebuilt. No full-suite-green claim replaces the historical tooling limitations below.
 
-### Earlier documentation restructuring
+- **Milestone**: Earlier documentation restructuring.
 
 - **Structure**: Established the OKF v0.2 [bundle index](index.md), workflow and reconstruction
   indexes, typed concept metadata, and explicit separation of current guidance from historical evidence.

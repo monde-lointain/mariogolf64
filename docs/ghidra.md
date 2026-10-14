@@ -54,10 +54,11 @@ Common options precede the subcommand:
 
 ## Banks and source fidelity
 
-The project has one `main` program and one program per YAML code overlay: currently 17 programs.
-Each overlay includes a copy of resident entry/main code, symbols, and types, plus exactly one bank.
-Use `main`, `overlay_3`, `overlay_8`, or another exact manifest program name; never `baserom.z64`
-or a fuzzy program selector. `mg64_programs` returns the catalog.
+The importer creates one `main` program and one program per YAML code overlay (currently 17
+programs). Each overlay program contains resident entry/main mappings as well as its own overlay
+bank; those resident addresses therefore recur across programs. Select an exact manifest program
+name such as `main` or `overlay_8`, never a fuzzy selector or `baserom.z64`. `mg64_programs`
+returns the catalog. An address alone is not a bank identity.
 
 - ROM intervals and VRAM come from YAML; BSS and hardware/vector memory are uninitialized, not
   fabricated ROM bytes. Hardware pages are volatile. RSP microcode blobs are not CPU-executable.
@@ -122,14 +123,17 @@ uv run --locked python tools/ghidra.py context --func 0x801F4A40 --rom 0x14EA80
 uv run --locked python tools/seed_c.py --func <source-name> --ghidra
 ```
 
-`context` writes `ghidra.c`, standalone `ghidra_ctx.c`, and provenance/confidence `ghidra.json`
-under `nonmatchings/<imported-name>/`, or `--output <directory>`. Reused addresses require a bank
-or ROM qualifier. `seed_c.py --ghidra` derives ROM/VRAM from the selected source assembly and exports
-into the source-name candidate directory before running m2c. It does not require `--parent`; parent
-contexts remain optional and may conflict with live types. Uncommitted inferred prototypes are not
-emitted as false `(void)` declarations, so m2c can still infer register arguments. Unknown globals
-are reported rather than given guessed scalar declarations. Reconcile generated seeds against
-assembly and source; none of these files are bankable evidence by themselves.
+`context` writes `ghidra.c`, standalone `ghidra_ctx.c`, and `ghidra.json` under
+`nonmatchings/<imported-name>/`, or `--output <directory>`. The JSON records the exact selected
+program, segment, function address, ROM offset, and ROM SHA-1 in its `origin`; the live export also
+identifies program/manifest/ROM and whether a prototype is known. Reused VRAM addresses require a
+bank (`--segment`) or ROM qualifier (`--rom`) to select the intended instance. `seed_c.py --ghidra`
+derives ROM/VRAM from the selected source assembly and exports into that source-name candidate
+directory before running m2c. It does not require `--parent`; parent contexts remain optional and may
+conflict with live types. Uncommitted inferred prototypes are not emitted as false `(void)`
+declarations, so m2c can still infer register arguments. Unknown globals are reported rather than
+given guessed scalar declarations. Reconcile generated seeds against assembly and source; none of
+these files are bankable evidence by themselves.
 
 ## Maintenance, names, and backups
 

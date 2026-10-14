@@ -2,6 +2,9 @@
 type: Workflow
 title: Subagent fan-out
 description: Defines independent analysis slices, serialized measurement ownership, and compact evidence returns using native Oh My Pi tasks.
+sources:
+  - resource: ../../RETRO.md
+    title: Historical sprint evidence cited as case law
 ---
 
 # Subagent fan-out
@@ -36,9 +39,9 @@ back only the diagnostic needed for the next analysis.
 
 Campaign sharding partitions reasoning queues by stable ROM/bank/offset identity. It does not
 change execution ownership or license concurrent worktree builds. Use
-[reference discovery](../tooling.md#references-and-native-campaigns) to read another checkout's
-new C without merging it; workers return the reference identity/hashes and a source hypothesis,
-not a claimed bank. The parent rechecks that evidence before measuring or integrating it.
+[reference discovery and campaigns](../campaigns.md) to inspect another checkout's new C without
+merging it; workers return reference identity/hashes and a source hypothesis, not a claimed bank.
+The parent rechecks that evidence before measuring or integrating it.
 
 
 Use auto-delivered results and `agent://` messaging; inspect `history://` only when the

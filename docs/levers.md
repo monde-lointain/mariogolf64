@@ -6,12 +6,9 @@ description: Evidence-backed source transformations and compiler behaviors for s
 
 # Source levers (index)
 
-<role>
-Select a source-level lever for an observed residual or a
-[delegated analysis](workflow/fan-out.md#dispatch-contract). Detailed derivations live in sprint evidence and playbooks.
-</role>
-
-## Levers with a full playbook
+Use these evidence-backed source transformations only for the residual they address; matching output,
+not a generic style preference, decides whether a lever applies. Playbook procedures take precedence
+over terse lever notes.
 
 Select the [flag](hazard-index.md) or [symptom](hazard-symptoms.md) route before applying terse notes.
 The [playbook family index](hazards.md#playbook-index) lists the complete procedures.

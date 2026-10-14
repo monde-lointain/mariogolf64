@@ -16,6 +16,13 @@ ROM at `/orig/baserom.z64`. Keep the image private. Its build job runs only for 
 pushes and PRs, not fork PRs: PR-controlled scripts could otherwise exfiltrate the ROM. The separate
 Python analysis job is ROM-free and advisory.
 
+## Choose a task
+
+- [Build and publish the private image](#one-time--on-dep-change-build-and-push-the-image)
+- [Configure CI access](#one-time-repo-secret-for-ci-pull)
+- [Test locally](#local-end-to-end-test-optional)
+- [Set up a local build](../docs/build.md)
+
 ## One-time / on-dep-change: build and push the image
 
 Run from the **repo root** (the build context), with `baserom.z64` present there.
@@ -63,9 +70,3 @@ docker run --rm -v "$PWD":/repo -w /repo mg64-ci-test bash -c \
 # expect: CMake build OK + ROM SHA-1 MATCH
 ```
 
-## Local checkout prerequisites
-
-Use the [local build guide](../docs/build.md) for bootstrap tools, locked Python dependencies,
-extraction, verification, and presets. Rebuild the private image for this uv cutover before CI:
-it now provides uv, managed CPython 3.14, current CMake, and 32-bit host compilation prerequisites.
-Required missing assembly stubs are now recovered automatically during fresh extraction.

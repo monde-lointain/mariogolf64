@@ -6,12 +6,6 @@ description: Practical conventions for hand-authored C that maintain readability
 
 # Coding guidelines (on-demand reference)
 
-<role>
-Use this reference for classical matching, struct authoring, and new helpers. It supplements the
-project's naming convention in [C naming conventions](#c-naming-conventions). When clean style
-conflicts with matching, the measured ROM output and compiler conventions win.
-</role>
-
 These rules govern classical / hand-authored C. For upstream mirrors under `src/libultra/`,
 `src/libkmc/`, `src/libnusys/`, `src/libnaudio/`, `src/libmus/`, and `src/mgu/`, preserve upstream
 logic and names. Apply only the formatting required by the mirror workflow; never refactor it.
@@ -23,11 +17,12 @@ decompilation, source structure, types, declarations, and control flow can chang
 when behavior is equivalent. Preserve the ROM's instruction order, register allocation, delay slots,
 frame, and bytes; prefer the source form demonstrated by a measured match over generic style rules.
 Use [Source levers](levers.md) for evidence-backed code-generation adjustments and
-[Hazard index](hazards.md) for procedures with a playbook.
+[Hazard index](hazard-index.md) for procedures with a playbook.
 
-The project compiles C with KMC GCC 2.7.2 and KMC binutils; the base profile uses `-O2`, `-mips3`,
-32-bit general-purpose and floating-point registers, and project-specific flags. Profiles vary by
-tree and translation unit. See the [compiler profiles](../tools/build_profiles.json) and [build guide](build.md#compiler-profiles-and-incremental-work).
+The project uses KMC GCC 2.7.2 and KMC binutils. The base flags include `-O2` and `-mips3`,
+but effective flags vary by library, tree, and translation unit. Treat
+[`tools/build_profiles.json`](../tools/build_profiles.json) as the compiler-profile authority; use
+the [build guide](build.md#compiler-profiles-and-incremental-work) for current build commands.
 Do not assume a modern compiler, C++ features, or a single flag set.
 
 Keep code understandable, but treat complexity guidance as a heuristic, not a reason to change a

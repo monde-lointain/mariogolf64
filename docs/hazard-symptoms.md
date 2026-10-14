@@ -5,11 +5,9 @@ description: Routes observed instruction, register, scheduling, and data-layout 
 ---
 
 # Matching residual lookup
-
-<role>
 Use this lookup when a candidate compiles but differs from the ROM, or when a loose-stub tell
-identifies a matching risk. Read the selected playbook, not every symptom row.
-</role>
+identifies a matching risk. Read the selected playbook, not every symptom row. Historical evidence in
+the playbooks is time-scoped; current build/profile authority is stated at the top of `hazards.md`.
 
 For upstream, header, symbol-placement, and extraction problems, start with the
 [candidate and build hazard lookup](hazard-index.md#flag-to-section). The

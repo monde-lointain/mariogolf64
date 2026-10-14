@@ -6,21 +6,11 @@ description: Provides symptom-specific recovery and matching procedures with sta
 
 # Hazard playbooks (on-demand reference)
 
-<role>
-The on-demand hazard playbooks: what to do when `tools/pick_target.py` flags a hazard, or when a
-match shows one of the symptoms below. Reached by anchor from `docs/hazard-index.md`; read the one
-section you were routed to, never the whole file.
-</role>
-
-This is the detail layer for the [execution loop](workflow/loop.md#execution-loop-inline).
-Use the [flag-to-playbook lookup](hazard-index.md#flag-to-section) when the ranker flags a hazard,
-or the [family index](#playbook-index) when diagnosing an assembly symptom. Read only the selected
-section. Each entry uses **Rule**, **Trigger**, **Procedure**, optional **Sub-cases / variants**
-and **Caveats**, and **Provenance** where applicable. Sprint tags identify the evidence that
-established a rule; they are not claims about the current target.
-
-The deterministic-vram recovery and the byte-`cmp` rules are load-bearing: follow the procedures
-exactly rather than re-deriving them.
+This is the detail layer for the [execution loop](workflow/loop.md#execution-loop-inline). Start at the
+[flag-to-playbook lookup](hazard-index.md#flag-to-section) for a ranker flag, or the
+[playbook family index](#playbook-index) for topic-first browsing; use the
+[symptom lookup](hazard-symptoms.md#symptom-to-section) for an observed matching residual. Read only
+the selected section. Sprint tags identify time-scoped evidence, not current target claims.
 
 ## Current build contract
 
@@ -174,7 +164,7 @@ the [hazard index](hazard-index.md#flag-to-section) maps ranker flags to these p
 - [switch-compare-chain-layout (out-of-line cases + a case falling into the default)](#switch-compare-chain-layout-out-of-line-cases--a-case-falling-into-the-default)
 - [grid-counter double-loop (non-zero-cell counter idiom)](#grid-counter-double-loop-non-zero-cell-counter-idiom)
 - [base-register-vs-displacement (full base materialized vs %lo-in-displacement; + family-of ranker follow-up + shifted .NON_MATCHING data-carve blocker)](#base-register-vs-displacement-full-symbolbase-materialized-vs-lo-in-displacement)
-- [Tracked ranker follow-up: `family-of:<banked-fn>` (S210)](#tracked-ranker-follow-up-family-ofbanked-fn-s210)
+- [Tracked ranker follow-up: `family-of:<banked-fn>` (S210)](#tracked-ranker-follow-up-family-of-s210)
 - [goto loop = loop.c never runs (defeating strength reduction and bound hoisting)](#goto-loop--loopc-never-runs-defeating-strength-reduction-and-bound-hoisting)
 - [Landing an independent store in a `jal` delay slot — source order + defer-to-arg-eval (S212 `func_80058C58`)](#landing-an-independent-store-in-a-jal-delay-slot--source-order--defer-to-arg-eval-s212-func_80058c58)
 - [Temp-var store-order lever — pin an indexed/computed load between neighboring global zero-stores (S223 `func_8006A2C0.c`)](#temp-var-store-order-lever--pin-an-indexedcomputed-load-between-neighboring-global-zero-stores-s223-func_8006a2c0c)
