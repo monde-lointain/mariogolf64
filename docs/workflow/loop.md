@@ -33,7 +33,7 @@ Ghidra MCP is used inline at seed time. For each target function:
 2. **Mirror branch** (the `upstream` column is a lib, not `none`):
    a. Copy the upstream `.c` verbatim to its mirrored `src/lib<name>/...` path.
    b. Add any missing headers verbatim under `include/lib<name>/...`.
-   c. `clang-format-22 -i` the copied files (these trees are now formatted; formatting does not
+   c. `clang-format-23 -i` the copied files (these trees are now formatted; formatting does not
       change codegen).
    d. `make`; the ROM SHA-1 must equal the baserom. The proof is the full-`make` SHA-1
       (verbatim-then-formatted copy plus green ROM equals match); no byte-`cmp`. See
@@ -134,7 +134,7 @@ Ghidra MCP is used inline at seed time. For each target function:
      iterating C or reaching for the permuter: whether that is an isolation artifact or a real
      near-miss turns on the percent, and that row states the test.
    - **Finalize** (only if the spot-check passes): inline the body into `src/<seg>.c`, drop the
-     `INCLUDE_ASM` line, `clang-format-22 -i` (now applies to every tree, including `src/libultra/`,
+     `INCLUDE_ASM` line, `clang-format-23 -i` (now applies to every tree, including `src/libultra/`,
      `src/libkmc/`, `src/libnusys/`, and `src/mgu/`), then `make` until `build/mariogolf64.z64: OK`
      and SHA-1 == baserom.
 
@@ -409,7 +409,7 @@ below).
     runs in the background.
 - **Decomp is authoritative for names** (per the Ghidra-workspace
   `docs/re/coordination/decomp_coordination.md`).
-- **Match finalization is three steps:** inline the body into `src/<seg>.c`, `clang-format-22 -i`
+- **Match finalization is three steps:** inline the body into `src/<seg>.c`, `clang-format-23 -i`
   (now applies to every tree, including `src/libultra/`, `src/libkmc/`, `src/libnusys/`, and
   `src/mgu/`), then full `make` until ROM SHA-1 matches.
   Spot-check passing is not ROM matching; the final `make` proves it. **Verify every ROM with
@@ -440,7 +440,7 @@ below).
   layout + comment style and deliberately diverge from the upstream source formatting, so they no
   longer line up line-for-line against the vendor `.c` for visual cross-referencing; the ROM stays
   byte-identical (comments/whitespace do not affect codegen, and coddog's fingerprint is asm-based,
-  not source-text). Format any new or edited file in these trees with `clang-format-22 -i`, like the
+  not source-text). Format any new or edited file in these trees with `clang-format-23 -i`, like the
   rest of the tree. `src/mgu/` (S103) holds the game-embedded ultralib gu/mgu matrix source (the
   Monegi variant, compiled at the game `-O2` profile, not the libultra `-O3` band; see
   `docs/hazards.md#game-region-mirror--o2-profile`).

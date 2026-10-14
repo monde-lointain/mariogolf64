@@ -204,7 +204,7 @@ if (account_type == ACCOUNT_NEW)   /* if establishing a new account  (intent) */
 - Indent subordinate code (2–4 spaces). Separate "paragraphs" of related statements with blank lines.
 - One statement per line; one declaration per line; no multiple side effects per line.
 - Brace single-statement bodies so layout and logic can't diverge.
-- `clang-format-22` formats every tree. The root `.clang-format` is `BasedOnStyle: Google`, which
+- `clang-format-23` formats every tree. The root `.clang-format` is `BasedOnStyle: Google`, which
   Sorts `#include`s; the library trees (`src/libultra/`, `src/libkmc/`, `src/libnusys/`,
   `src/libnaudio/`, `src/libmus/`, `src/mgu/`, `src/main/`, and the audio-lib include trees
   `include/libnaudio/`, `include/libnualstl/`, `include/libmus/`) carry a local `.clang-format` adding
