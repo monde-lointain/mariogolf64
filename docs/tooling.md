@@ -91,6 +91,11 @@ the direct command exits successfully. This is lifecycle containment, not a sand
 daemonizing commands. The cleanup grace can extend command return beyond the execution deadline.
 This is a resource budget, not an arbitrary retry cap or evidence of an impossible source match.
 
+The matching loop emits `measurement_path` for successful and failed compiles. Each immutable
+record retains its measured C source and identifies the target dump, effective profile and compiler.
+Compiler failures preserve real diagnostics and remove stale objects. Header/context inputs are not
+archived; regenerate and remeasure before reusing a result. Only the ROM verifier authorizes banking.
+
 ## Maintain tooling and docs
 
 - `uv run --locked pytest tests/tooling` (or `ctest --preset tooling` after configure) — tooling tests.

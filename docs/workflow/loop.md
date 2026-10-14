@@ -34,6 +34,7 @@ Follow the [skill](../../.omp/skills/mg64-decomp/SKILL.md#iterate), using the
 | `m2c.c`, `ctx.c`, `ctx_ghidra.c` | Generated seed/context inputs; regenerate rather than hand-edit. |
 | `ghidra.c`, `ghidra_ctx.c`, `ghidra.json` | Optional pseudocode, transitive types, and ROM/bank provenance. |
 | `current.o` | Fresh isolated compile; iteration evidence only. |
+| `measurements/<hash>.json`, `measurements/<hash>.c` | Immutable observed score/diagnostic paired with its measured source; includes target-dump, profile and toolchain identities. Unbanked. |
 
 `seed_c.py` reports `body_source`: `m2c`, `ghidra`, or `stub`. A fallback body needs
 assembly translation, not confidence from successful compilation. Refine synthetic
@@ -52,6 +53,11 @@ At score zero, integrate provisionally, build the host object, and spot-check th
 function against the isolated candidate before the full-ROM gate; the in-tree candidate
 cannot be compared before it has been integrated. Do not compare an entire multi-function
 TU's `.text` with a one-function seed. Failed integration remains unbanked.
+
+The loop emits `measurement_path` for successful and failed compiles. Old source/score pairs
+are not overwritten; edits detected during measurement invalidate attribution. Header/context
+inputs are not archived, so the record's limitations require regeneration and a fresh measurement
+on resume. Use it as evidence in the existing WIP note, not a second task ledger.
 
 ## Candidate pricing
 

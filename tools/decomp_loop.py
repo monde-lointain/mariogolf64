@@ -17,6 +17,7 @@ from pathlib import Path
 from typing import NoReturn
 
 import decomp_common as dc
+from decomp_evidence import file_hash, measurement_context, retain_measurement
 from rom_build import PROFILES, compile_source, profile_flags, profile_name, tool_path
 
 dc.reexec_into_venv(__file__)
@@ -227,9 +228,11 @@ def compile_candidate(
             nonmatching=True,
             fastmath=profile.fastmath,
             profile_source=profile.source,
+            capture_output=True,
         )
     except subprocess.CalledProcessError as exc:
-        return False, str(exc), current_o
+        diagnostics = "\n".join(part for part in (exc.stdout, exc.stderr) if part)
+        return False, diagnostics or str(exc), current_o
     return current_o.exists(), "", current_o
 
 
@@ -408,20 +411,33 @@ def main() -> None:
 
     profile = resolve_profile(args.profile, placeholder, seg_stem)
 
+    source = NONMATCHINGS_DIR / placeholder / "base.c"
+    try:
+        source_bytes = source.read_bytes()
+    except OSError as error:
+        fail(str(error))
+    base_dump = objdump_function(reference_o, placeholder)
+    context = measurement_context(
+        source, source_bytes, profile.name, profile.source, profile.fastmath, base_dump
+    )
     ok, compile_log, current_o = compile_candidate(placeholder, profile)
     if not ok:
-        emit(
-            {
-                "compile_ok": False,
-                "placeholder": placeholder,
-                "segment": seg_stem,
-                "compile_log": compile_log[-4000:],
-            }
-        )
+        outcome = {
+            "compile_ok": False,
+            "placeholder": placeholder,
+            "segment": seg_stem,
+            "compile_log": compile_log[-4000:],
+        }
+        try:
+            outcome["measurement_path"] = retain_measurement(
+                source, source_bytes, context, outcome
+            )
+        except ValueError as error:
+            fail(str(error))
+        emit(outcome)
         sys.exit(0)
     log(f"[compile] {current_o.relative_to(ROOT_DIR)}")
 
-    base_dump = objdump_function(reference_o, placeholder)
     my_dump = objdump_function(current_o, placeholder)
     log("[objdump] both objects disassembled")
 
@@ -429,16 +445,22 @@ def main() -> None:
     scored = score_diff(raw, max_mismatches=0 if args.score_only else 5)
     log(f"[diff] score={scored['score']} percent={scored['percent']:.4f}")
 
-    emit(
-        {
-            "compile_ok": True,
-            "placeholder": placeholder,
-            "segment": seg_stem,
-            "reference_path": os.path.relpath(reference_o, ROOT_DIR),
-            "current_path": str(current_o.relative_to(ROOT_DIR)),
-            **scored,
-        }
-    )
+    outcome = {
+        "compile_ok": True,
+        "placeholder": placeholder,
+        "segment": seg_stem,
+        "reference_path": os.path.relpath(reference_o, ROOT_DIR),
+        "current_path": str(current_o.relative_to(ROOT_DIR)),
+        "current_object_sha256": file_hash(current_o),
+        **scored,
+    }
+    try:
+        outcome["measurement_path"] = retain_measurement(
+            source, source_bytes, context, outcome
+        )
+    except ValueError as error:
+        fail(str(error))
+    emit(outcome)
 
 
 if __name__ == "__main__":

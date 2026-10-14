@@ -1,6 +1,7 @@
-"""Deadline and process-lifetime boundary coverage."""
+"""Deadline, process-lifetime and measurement boundary coverage."""
 from __future__ import annotations
 
+import json
 import subprocess
 import sys
 import time
@@ -10,6 +11,7 @@ import pytest
 from conftest import load_tool
 
 budget = load_tool("decomp_budget")
+evidence = load_tool("decomp_evidence")
 
 
 def test_budget_intersection_and_expired_reserve():
@@ -72,4 +74,50 @@ def test_nested_budget_cancellation_kills_separate_worker_group(tmp_path):
     assert ready.read_text() == "ready"
     time.sleep(1)
     assert not marker.exists()
+
+
+
+def test_measurements_keep_previous_bases_and_reject_mid_compile_edits(
+    tmp_path, monkeypatch
+):
+    monkeypatch.setattr(evidence, "ROOT", tmp_path)
+    source = tmp_path / "base.c"
+    first = b"int target(void) { return 7; }\n"
+    second = b"int target(void) { return 8; }\n"
+    source.write_bytes(first)
+    context = {"candidate_sha256": evidence.sha256(first), "profile": "main"}
+    first_path = evidence.retain_measurement(source, first, context, {"score": 0})
+    source.write_bytes(second)
+    with pytest.raises(ValueError, match="changed during measurement"):
+        evidence.retain_measurement(source, first, context, {"score": 0})
+    second_path = evidence.retain_measurement(
+        source, second, {"profile": "main"}, {"score": 5}
+    )
+    assert first_path != second_path
+    assert (tmp_path / first_path).with_suffix(".c").read_bytes() == first
+    assert (tmp_path / second_path).with_suffix(".c").read_bytes() == second
+    assert json.loads((tmp_path / first_path).read_text())["authority"] == "unbanked"
+
+
+
+def test_real_compile_failure_retains_diagnostic_and_removes_stale_object(
+    tmp_path, monkeypatch
+):
+    import decomp_loop as loop
+    from rom_build import tool_path
+
+    if not Path(tool_path("gcc")).is_file():
+        pytest.skip("build the vendored compiler before running diagnostic tests")
+    monkeypatch.setattr(loop, "NONMATCHINGS_DIR", tmp_path)
+    directory = tmp_path / "invalid"
+    directory.mkdir()
+    (directory / "base.c").write_text(
+        "int invalid(void) { return definitely_missing; }\n"
+    )
+    stale = directory / "current.o"
+    stale.write_bytes(b"old object must not survive")
+    ok, diagnostic, output = loop.compile_candidate("invalid", loop.CompileProfile())
+    assert ok is False
+    assert "definitely_missing" in diagnostic
+    assert not output.exists()
 

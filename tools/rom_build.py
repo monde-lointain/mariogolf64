@@ -154,7 +154,8 @@ def write_depfile(depfile: Path, output: Path, source: Path,
 def compile_source(source: str | Path, output: str | Path, profile: str | None = None,
                    nonmatching: bool = False, fastmath: bool = False,
                    assembly_only: bool = False, extra_flags=(), depfile: str | Path | None = None,
-                   profile_source: str | Path | None = None) -> None:
+                   profile_source: str | Path | None = None, *,
+                   capture_output: bool = False) -> None:
     source, output = source_path(source), Path(output).resolve()
     output.parent.mkdir(parents=True, exist_ok=True)
     work_dir().mkdir(parents=True, exist_ok=True)
@@ -162,12 +163,14 @@ def compile_source(source: str | Path, output: str | Path, profile: str | None =
     temporary = output.with_suffix(output.suffix + ".tmp")
     command = compile_command(source, assembly, profile, nonmatching, fastmath, profile_source)
     command[-3:-3] = list(extra_flags)
+    diagnostics = {"capture_output": True, "text": True} if capture_output else {}
     try:
-        run(command)
+        run(command, **diagnostics)
         if not assembly_only:
             run([tool_path("kmc_as"), "-EB", "-mips2", "-G", "0", "-I", str(ROOT / "include"),
-                 "-I", str(ROOT), "-I", str(work_dir()), "-o", str(temporary), str(assembly)])
-            run([tool_path("strip"), str(temporary), "-N", "dummy-symbol-name"])
+                 "-I", str(ROOT), "-I", str(work_dir()), "-o", str(temporary), str(assembly)],
+                **diagnostics)
+            run([tool_path("strip"), str(temporary), "-N", "dummy-symbol-name"], **diagnostics)
         if depfile:
             write_depfile(Path(depfile), output, source,
                           profile_flags(profile_source or source, profile, nonmatching, fastmath) + list(extra_flags), assembly)

@@ -33,6 +33,10 @@ Bound expensive experiments using the [deadline guard](../../../docs/tooling.md#
 Start one absolute deadline per candidate, preserve inspection time, and retain isolated artifacts
 on expiry. A deadline is a resource limit, not a source-wall verdict.
 
+The loop retains content-addressed measurement/source pairs under each candidate's `measurements/`
+directory. Cite these from existing WIP notes rather than creating another ledger. Source, profile,
+header or context changes require fresh measurement; an isolated score remains unbanked evidence.
+
 ## Bank
 
 A function is banked only after `tools/verify-rom.sh` exits successfully. Do not substitute a direct hash, object comparison, or incremental diff for this full-ROM oracle. Before renaming a function, check committed C callers and update them with the rename. Stage source inputs only; generated extraction artifacts stay ignored in the binary tree. A file is complete only when all its `INCLUDE_ASM` stubs are gone. Keep unfinished work isolated and describe measured residuals in `docs/wip/<func>.near-match.md`.
