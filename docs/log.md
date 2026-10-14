@@ -2,6 +2,29 @@
 
 ## 2026-10-14
 
+### uv-managed Python tooling
+
+- **Dependencies**: Consolidated runtime, test, and analysis dependencies in `pyproject.toml`;
+  resolved current stable compatible releases into `uv.lock`. Removed requirements files and the
+  obsolete vendored Python wheelhouse/source distributions. Initial installation now uses PyPI.
+- **Environment**: Required uv 0.13.1+ and one root `.venv`; migrated CMake, shell wrappers, CI,
+  container bootstrap, active command examples, and analysis configuration away from build-tree
+  environments. Ordinary setup uses `uv sync --locked`; upgrades use `uv lock --upgrade`.
+- **Tools**: Updated Splat to 0.50.1, spimdisasm to 1.42.4, rabbitizer to 1.16.2, Ruff to 0.17.0,
+  basedpyright to 1.40.2, and coverage to 7.16.2. Imported current asm-differ and m2c upstream
+  revisions; permuter was already current and retains its local import adaptations.
+- **Compatibility**: Kept target compiler profiles and native versions unchanged. Adapted extraction
+  to preserve encoded absolute J targets when current disassembly emits undefined local labels;
+  retained colon and macro-defined local labels and their relocations.
+- **CMake**: Applied Professional CMake's lifecycle and dependency guidance: uv discovery with
+  `find_program`, locked configure-time manifest generation, explicit target ordering, and a
+  content-stable lockfile byproduct so unchanged environments do not force extraction.
+- **Proof**: The full-ROM verifier passed with SHA-1 `e2c4e7a905b29529b49a1619a401fe699224829b`.
+  Nine targeted compiler/permuter/jump cases passed. The final full tooling run reported 120 passed,
+  two skipped, and the six documented ranker/coddog failures; no goldens were regenerated.
+- **Limits**: Hosted CI and the private Docker image have not been executed here. Rebuild the image
+  before publishing this workflow's container changes.
+
 ### Monorepo and CMake modernization
 
 - **Ownership**: Imported asm-differ, decomp-permuter, and m2c as ordinary Git source; removed

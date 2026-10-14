@@ -64,10 +64,23 @@ SYM_LINE_RE = re.compile(r"^\s*(\w+)\s*=\s*0x([0-9A-Fa-f]+)\s*;")
 
 # --- venv re-exec ---------------------------------------------------------
 def reexec_into_venv(script: str) -> None:
-    """Re-exec this tool using the configured binary-tree Python interpreter."""
+    """Re-exec this tool through uv unless already in the project environment."""
     python = python_path()
-    if python.exists() and Path(sys.prefix).resolve() != python.parent.parent.resolve():
-        os.execv(str(python), [str(python), script, *sys.argv[1:]])
+    if Path(sys.prefix).resolve() != python.parent.parent.resolve():
+        os.environ["UV_PROJECT_ENVIRONMENT"] = str(ROOT_DIR / ".venv")
+        os.execvp(
+            "uv",
+            [
+                "uv",
+                "run",
+                "--locked",
+                "--project",
+                str(ROOT_DIR),
+                "python",
+                script,
+                *sys.argv[1:],
+            ],
+        )
 
 
 # --- io helpers -----------------------------------------------------------

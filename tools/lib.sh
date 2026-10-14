@@ -18,13 +18,14 @@ mg_build_dir() {
     fi
 }
 
-# Activate the configured binary-tree environment (carries permuter/asm-differ deps).
+# Synchronize and activate the uv-managed project environment.
 mg_activate_venv() {
     mg_build_dir
-    if [[ -f "$MG_BUILD_DIR/venv/bin/activate" ]]; then
-        # shellcheck disable=SC1091
-        source "$MG_BUILD_DIR/venv/bin/activate"
-    fi
+    local root
+    root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+    UV_PROJECT_ENVIRONMENT="$root/.venv" uv sync --locked --project "$root" || exit $?
+    # shellcheck disable=SC1091
+    source "$root/.venv/bin/activate"
 }
 
 mg_tool_path() {

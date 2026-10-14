@@ -8,7 +8,7 @@ in it. Splitting BOTH streams at rare anchor mnemonics and comparing segment
 LENGTHS put the same residual on one line (`61 vs 50` before a `div`, `92 vs 101`
 after it), which named the divergence as one scheduling placement.
 
-    build/us/venv/bin/python3 tools/seg_diff.py <func> [<object>] [--anchors jal,div,...]
+    uv run --locked python tools/seg_diff.py <func> [<object>] [--anchors jal,div,...]
 
 The default anchors (`jal`, `div`, `divu`, `mult`, `sqrt.s`, `bc1tl`, `trunc.w.s`,
 `break`) are chosen because they are rare and their COUNTS usually match even when

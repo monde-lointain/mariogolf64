@@ -15,7 +15,7 @@ set -euo pipefail
 REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$REPO"
 source "$REPO/tools/lib.sh"
-mg_build_dir
+mg_activate_venv
 CODDOG="${CODDOG:-$HOME/development/repos/coddog/target/release/coddog}"
 THRESH="${THRESH:-0.95}"
 

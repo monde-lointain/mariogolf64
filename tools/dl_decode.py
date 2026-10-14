@@ -11,7 +11,7 @@ tracks the DL write pointer symbolically (`DL+n`), and re-sorts the packet store
 by their DL offset. Non-DL events (calls, branches, stores through an unresolved
 base) follow in program order.
 
-    build/us/venv/bin/python3 tools/dl_decode.py build/us/work/asm/nonmatchings/<seg>/<pack>/<fn>.s
+    uv run --locked python tools/dl_decode.py build/us/work/asm/nonmatchings/<seg>/<pack>/<fn>.s
 
 The DL base is the `lw` that loads `*gfxp` into the walking pointer, auto-detected
 as the first `lw <reg>, 0x0(<non-sp base>)`. Pass `--dl-init 0x<addr>` to name that

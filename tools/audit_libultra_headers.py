@@ -13,7 +13,7 @@ branch is textually last -- hand-check each flagged macro against the upstream
 (whitespace, `(1<<0)` vs `1`, defensive parens) or version-conditional; the S149 run
 found exactly two real issues (os_host.h inversion, rcp.h VI_CTRL_PIXEL_ADV_MASK).
 
-Usage: build/us/venv/bin/python3 tools/audit_libultra_headers.py [--ultralib <path>]
+Usage: uv run --locked python tools/audit_libultra_headers.py [--ultralib <path>]
 """
 from __future__ import annotations
 

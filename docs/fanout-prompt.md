@@ -25,14 +25,14 @@ compiler. Root-cause residuals to a diverging compiler pass with a `file:line` c
 evidence is available.
 
 **Step 0, before trusting any prior document.** Run
-`<binary>/venv/bin/python3 tools/pick_target.py --refresh-residual {{FN}}`. A carry doc's instruction
+`uv run --locked python tools/pick_target.py --refresh-residual {{FN}}`. A carry doc's instruction
 count, residual class, and semantics are hypotheses; re-derive from a fresh object. A register written
 in a branch delay slot before its first read is a shared pre-branch statement, not an argument.
 
 Documented class, to be confirmed or refuted rather than assumed: `{{CLASS}}`.
 
 **Isolation.** Iterate with
-`<binary>/venv/bin/python3 tools/decomp_loop.py --func {{FN}} --profile {{PROFILE}}`. This compiles
+`uv run --locked python tools/decomp_loop.py --func {{FN}} --profile {{PROFILE}}`. This compiles
 the function in its isolated candidate directory using the selected profile. Read the generated
 current object with `<binary>/toolchain/bin/mips-linux-gnu-objdump -dz`; do not use a linked-build diff
 as a fresh-object oracle.

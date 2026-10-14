@@ -51,7 +51,7 @@ source-steerable by the levers tried (decl-order reshuffles did not move colHi i
 ## Next action = PERMUTER — LOW-EV (multi-register permutation, not the payoff shape)
 Correction to the S274 record: the permuter was NEVER blocked. The documented main-segment command
 (agent-workflow.md ## Execution loop, permuter bullet) is, with the candidate C above inlined:
-`venv/bin/python3 ./tools/decomp-permuter/import.py --settings permuter_settings_main.toml
+`uv run --locked python ./tools/decomp-permuter/import.py --settings permuter_settings_main.toml
 src/main/get_tile_attribute.c asm/nonmatchings/main/get_tile_attribute/get_terrain_vertex_pointer.s`
 then revert the src to INCLUDE_ASM (import copies into nonmatchings/) and `run-permuter.sh
 get_terrain_vertex_pointer`. S274 wrongly ran BARE `import.py` (no `--settings`), which defaulted to

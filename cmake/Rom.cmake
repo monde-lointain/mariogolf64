@@ -1,10 +1,11 @@
 set(MG64_WORK "${PROJECT_BINARY_DIR}/work")
 set(MG64_HELPER "${PROJECT_SOURCE_DIR}/tools/rom_build.py")
-set(MG64_RUN "${CMAKE_COMMAND}" -E env "MG64_BUILD_DIR=${PROJECT_BINARY_DIR}" "${Python3_EXECUTABLE}")
+set(MG64_RUN "${CMAKE_COMMAND}" -E env "MG64_BUILD_DIR=${PROJECT_BINARY_DIR}" "${MG64_PYTHON}")
 set(MG64_BASE_ROM "${PROJECT_SOURCE_DIR}/baserom.z64" CACHE FILEPATH "Private US retail NMFE revision 0 ROM")
 option(MG64_NONMATCHING "Compile nonmatching C; never eligible for ROM verification" OFF)
 
-execute_process(COMMAND "${Python3_EXECUTABLE}" "${PROJECT_SOURCE_DIR}/tools/rom_manifest.py"
+execute_process(COMMAND "${CMAKE_COMMAND}" -E env "UV_PROJECT_ENVIRONMENT=${PROJECT_SOURCE_DIR}/.venv"
+    "${MG64_UV}" run --locked --project "${PROJECT_SOURCE_DIR}" python "${PROJECT_SOURCE_DIR}/tools/rom_manifest.py"
     --output "${PROJECT_BINARY_DIR}/rom-sources.json"
     COMMAND_ERROR_IS_FATAL ANY)
 file(READ "${PROJECT_BINARY_DIR}/rom-sources.json" manifest)

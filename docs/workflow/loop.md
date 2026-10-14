@@ -66,7 +66,7 @@ inline at seed time where it adds value. For each target function:
      RE'd struct defs plus signatures. Write the context to `nonmatchings/<func>/ghidra_ctx.c` as
      `#include "common.h"` (OS structs + `os*`/nusys externs), the RE'd struct defs, and best-guess
      `extern`s for the pack's game callees and globals. Then run
-     `<binary>/venv/bin/python3 tools/seed_c.py --func <placeholder> --parent src/<seg>.c`, which
+     `uv run --locked python tools/seed_c.py --func <placeholder> --parent src/<seg>.c`, which
      drives vendored `tools/m2c` (`mips-gcc-c`) with the Ghidra struct context and parent types.
      Ghidra often has not named a game-specific control struct; check sibling decompilations as well
      as the Ghidra database. m2c preserves rodata strings as `extern D_<addr>` references, ideal for
@@ -99,11 +99,11 @@ inline at seed time where it adds value. For each target function:
          placeholder that names the whole subseg. For a loose stub inside an already-`c` file, which
          is now the main-segment default, a per-function directory does not exist at all.
        - **Per-function oracle for the fast path is a fresh object, not `diff.py` (S244).** Build
-         through `<binary>/venv/bin/python3 tools/rom_build.py build --object src/<tree>/<obj>.o`,
+         through `uv run --locked python tools/rom_build.py build --object src/<tree>/<obj>.o`,
          then inspect that object's function with
          `<binary>/toolchain/bin/mips-linux-gnu-objdump -dz`. The `diff.py` and
          `objdump` rows below describe their authority and limitations.
-   - **Iterate** with `<binary>/venv/bin/python3 tools/decomp_loop.py --func <placeholder>`, then
+   - **Iterate** with `uv run --locked python tools/decomp_loop.py --func <placeholder>`, then
      parse the JSON. `score == 0` is a candidate; 5 consecutive `compile_ok == False` means a broken
      seed, so stop; otherwise read the top mismatches, edit `base.c`, and re-run. Run the permuter
      (`./run-permuter.sh`) only at `percent >= 0.97`. For a near-miss whose only diff is which scratch
@@ -196,7 +196,7 @@ asserted, only measured, and re-check layers stacked on top of it buy nothing.
 | `tools/asm-differ/diff.py <fn>` | Reloc-resolved view of a linked build against the ROM. | Reads link maps, which object-only builds do not refresh; stale maps may misrepresent residuals. | After a fresh full build, for reloc-resolved iteration evidence only. |
 | `tools/decomp_loop.py --func` (`score`, `percent`) | Isolated per-function compile signal. `score == 0` is a candidate. | Empty mismatch output can be an isolation artifact at high percent; repeated compile failures signal a broken seed. | During iteration, never as a bank verdict. |
 | byte-`cmp` of raw `.text` | Spot-check at score zero: in-tree object against isolated object. | Mnemonic diffs may disagree because assemblers encode equivalent instructions differently; relocation addends may resolve identically at link. | At score zero, before integration. |
-| decomp-permuter score | Nothing on its own. It searches; it does not decide. | Blind to internal branch targets: asm-differ normalizes a branch to a local label, so a pure back-edge residual can score zero falsely. It also tolerates an extra instruction. Use `./setup-permuter.sh <fn>` to import the isolated seed with the parent TU's configured flags; the wrapper selects the binary-tree Python and needs no Makefile or hand-patched compiler script. Nested GCC functions require `tools/permuter_import.sh` to remove unrelated nested-function parents. | At `percent >= 0.97`, or exact instruction count with a one-operand residual. Not a multi-register permutation or FP-schedule coin. |
+| decomp-permuter score | Nothing on its own. It searches; it does not decide. | Blind to internal branch targets: asm-differ normalizes a branch to a local label, so a pure back-edge residual can score zero falsely. It also tolerates an extra instruction. Use `./setup-permuter.sh <fn>` to import the isolated seed with the parent TU's configured flags; the wrapper selects the uv-managed project Python and needs no Makefile or hand-patched compiler script. Nested GCC functions require `tools/permuter_import.sh` to remove unrelated nested-function parents. | At `percent >= 0.97`, or exact instruction count with a one-operand residual. Not a multi-register permutation or FP-schedule coin. |
 | gcc `-dL` (append to the file's real flags; writes `<file>.c.loop`) | Every `loop.c` decision: per-loop insn count, each biv's init value, per-movable `savings S (life L)` moved / not-desirable / `matches`, per-giv reduced or `not worth while, X vs Y`. | Whole-file; filter. Reports decisions, not a match. | Any hoisted-constant, biv or strength-reduced-address residual. Read `savings` and `lifetime` off it and compute loop.c:1631 or :3823; S297 estimated and was wrong twice. |
 | gcc `-dg` (`.greg`; `-dl` gives `.lreg`) | An allocno's hard-register conflicts and preferences, the `;; N regs to allocate` priority order, and the `;; Register dispositions` pseudo-to-hard-reg map. | Whole-file; filter on `;; Function <name>`. Gives the order, not the arithmetic behind it -- that is `allocno_report.py`. | Whenever a residual is register names only: the order plus the map turns it into a priority-order diff (S318). Also when the order already favours the allocno that lost (S312: `n` conflicted with `$v0`, no preference, so no rewrite reached the ROM's register). |
 | Ghidra MCP decompile | Shape and type reference at seed time. | Not authoritative; the `.s` is. Overlay vram repeats above `0x801F4A30`, so seed overlay functions by ROM offset or the splat `.s`, not by vram. | As a shape and type hint. `disassemble_function` equals the splat `.s`, so a small function does not need MCP at all. |
@@ -223,7 +223,7 @@ spanning two loops -- split it per loop before reading priorities (S316). Fix th
 re-count.
 
 Once the count is exact and the residual is registers, the next action is named:
-`<binary>/venv/bin/python3 tools/allocno_report.py <src.c> <fn>` prints every allocno in
+`uv run --locked python tools/allocno_report.py <src.c> <fn>` prints every allocno in
 `global.c allocno_compare` order with its `n_refs`, `live_length` and the computed
 `floor_log2(refs)*refs/live_length`, plus the `local-alloc` quantities by live length. Read the ROM's
 register order off the `.s` and find where the two orders diverge; the arithmetic then says which fix
@@ -238,7 +238,7 @@ class it was introduced for -- it is how you stop guessing.
 **Write and read a `docs/wip/<fn>.near-match.md` in two halves: what was measured (counts, frame,
 which registers and which ordering differ, what was built) and what was attributed to it (which
 pass, why).** Only the first half is evidence. Re-derive with
-`<binary>/venv/bin/python3 tools/pick_target.py --refresh-residual <fn>`, then re-derive the attribution
+`uv run --locked python tools/pick_target.py --refresh-residual <fn>`, then re-derive the attribution
 before acting on it: S264's "combine `nonzero_bits`, source-invariant" coin was `fold_range_test`,
 and S272 re-confirmed the wrong pass by re-testing the same three variants instead of the claim
 (S315). Its lever rows are conditional the same way -- each was measured against one shape, so
@@ -275,8 +275,8 @@ below).
   command you are running (S289, recurred S301).** The pattern also matches the tool call's own shell
   wrapper, so the kill takes out the calling shell and every later step in that call silently does
   not run. No form of the pattern is safe, not even a bare tool name: use the harness's stop action.
-- **Python tools** use the build's Python environment when dependencies are required:
-  `<binary>/venv/bin/python3`.
+- **Python tools** use the shared uv-managed project environment:
+  `uv run --locked python`.
 - **Shared tool helpers** live in `tools/decomp_common.py` (venv re-exec, path constants, asm/symbol
   regexes, `emit`/`log`, `find_segment`, SDK-path config) and `tools/lib.sh` (shell wrappers).
 - **File-level matching.** A source file matches only when every function in it matches. Promoting a

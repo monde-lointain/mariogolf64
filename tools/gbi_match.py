@@ -7,8 +7,8 @@ and the two that never decode by inspection are the render mode (an OR of two
 pair exists at all). Both were brute-forced by hand-built harnesses twice in S305;
 this is that harness as a tool.
 
-    build/us/venv/bin/python3 tools/gbi_match.py 0xE200001C/0x00504340
-    build/us/venv/bin/python3 tools/gbi_match.py 0xFCFFFFFF/0xFFFE793C 0xFC50B2A1/0x3365FEFF
+    uv run --locked python tools/gbi_match.py 0xE200001C/0x00504340
+    uv run --locked python tools/gbi_match.py 0xFCFFFFFF/0xFFFE793C 0xFC50B2A1/0x3365FEFF
 
 It compiles a generated host program against the project's own `include/libultra/PR`
 with `-DF3DEX_GBI_2`, so the answer is the game's gbi.h, not a remembered one. For a

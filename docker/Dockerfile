@@ -9,18 +9,18 @@
 # REQUIRED baserom SHA-1: e2c4e7a905b29529b49a1619a401fe699224829b (NMFE, rev 0).
 # A wrong region/rev extracts to different asm and the build will not match.
 FROM ubuntu:24.04
+COPY --from=ghcr.io/astral-sh/uv:0.13.1 /uv /uvx /usr/local/bin/
 
 ENV DEBIAN_FRONTEND=noninteractive
 
 # CMake builds the pinned MIPS toolchain from local sources. Host compilation,
-# Python, and GNU Make are bootstrap prerequisites, not target toolchains.
+# uv and GNU Make are bootstrap prerequisites, not target toolchains.
 RUN apt-get update && apt-get install -y --no-install-recommends \
         make git build-essential gcc-multilib bison flex texinfo ca-certificates \
-        python3 python3-venv python3-pip ninja-build \
+        ninja-build \
     && rm -rf /var/lib/apt/lists/*
-RUN python3 -m venv /opt/cmake \
-    && /opt/cmake/bin/pip install --no-cache-dir cmake==3.30.9
-ENV PATH="/opt/cmake/bin:${PATH}"
+ENV UV_TOOL_BIN_DIR="/usr/local/bin"
+RUN uv python install 3.14 && uv tool install "cmake>=4.4.4"
 
 # Build context = repo root; baserom.z64 must be present there (gitignored).
 COPY baserom.z64 /orig/baserom.z64

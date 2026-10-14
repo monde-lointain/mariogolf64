@@ -17,5 +17,5 @@ if [[ -f "nonmatchings/$FUNC_NAME/base.c" ]]; then
 fi
 echo "C file: $C_FILE"
 echo "ASM file: $ASM_FILE"
-exec "$MG_BUILD_DIR/venv/bin/python3" tools/rom_build.py import-permuter \
+exec python3 tools/rom_build.py import-permuter \
     --source "$C_FILE" --asm "$ASM_FILE" "${INPUT_ARGS[@]}" -- "$@"

@@ -16,7 +16,7 @@ global or callee inlined only through an invoked library macro (EPI_SYNC →
 __osCurrentHandle) is flagged, not deferred to a mid-execution link failure.
 
 Usage:
-  build/us/venv/bin/python3 tools/pick_target.py [--lib SUBSTR] [--segment SEG] [-n N] [--include-stuck] [--json]
+  uv run --locked python tools/pick_target.py [--lib SUBSTR] [--segment SEG] [-n N] [--include-stuck] [--json]
 
 `--segment main` is a vram-RANGE filter (main-segment game code), distinct from the `--lib`
 SUBSTRING filter: `--lib main` matches only the coddog `mainlib/*` packs (the game-embedded 2nd

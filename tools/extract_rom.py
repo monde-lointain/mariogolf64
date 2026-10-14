@@ -17,6 +17,35 @@ import yaml
 from rom_build import ROOT, build_dir, work_dir
 
 INCLUDES = re.compile(r'INCLUDE_(ASM|RODATA)\s*\(\s*"([^"]+)"\s*,\s*(\w+)\s*\)')
+JUMP = re.compile(
+    r"(?P<prefix>/\* [0-9A-F]+ (?P<pc>[0-9A-F]+) (?P<word>[0-9A-F]+) \*/\s+j\s+)"
+    r"(?P<label>\.L\w+)"
+)
+
+
+def resolve_external_jumps(text: str) -> str:
+    """Keep absolute J operands when the disassembler emits an undefined local label."""
+    labels = {
+        colon or macro
+        for colon, macro in re.findall(
+            r"^\s*(?:(\.L\w+):|(?:glabel|jlabel|alabel)\s+(\.L\w+))",
+            text,
+            re.MULTILINE,
+        )
+    }
+
+    def replace(match: re.Match) -> str:
+        if match["label"] in labels:
+            return match.group()
+        word = int(match["word"], 16)
+        if word >> 26 != 2:
+            raise ValueError(
+                f"J instruction has an inconsistent opcode: {match.group()}"
+            )
+        target = ((int(match["pc"], 16) + 4) & 0xF0000000) | ((word & 0x03FFFFFF) << 2)
+        return f"{match['prefix']}0x{target:08X}"
+
+    return JUMP.sub(replace, text)
 
 
 def split(config: dict, path: Path, *, recovery: bool = False) -> None:
@@ -108,7 +137,7 @@ def main() -> None:
         # together with the binary assets when publishing the staging tree.
         for assembly in (staging / "asm").rglob("*.s"):
             text = assembly.read_text()
-            relocated = text.replace(str(staging), str(work))
+            relocated = resolve_external_jumps(text).replace(str(staging), str(work))
             if relocated != text:
                 assembly.write_text(relocated)
         # Leave a usable diagnostic configuration, not references to staging.

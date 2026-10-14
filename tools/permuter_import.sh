@@ -25,7 +25,9 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 BUILD_DIR="${MG64_BUILD_DIR:-build/us}"
 if [[ "$BUILD_DIR" != /* ]]; then BUILD_DIR="$PWD/$BUILD_DIR"; fi
-PYTHON="$BUILD_DIR/venv/bin/python3"
+source tools/lib.sh
+mg_activate_venv
+PYTHON="$PWD/.venv/bin/python3"
 
 FUNC=${1:-}
 if [[ -z $FUNC ]]; then

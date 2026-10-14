@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Print gcc 2.7.2's loop-invariant hoisting window for each loop in a function.
 
-Usage: build/us/venv/bin/python3 tools/loop_window.py <src.c> <func>
+Usage: uv run --locked python tools/loop_window.py <src.c> <func>
 
 Why this exists (S301). `func_800947A8` reached an exact 618/618 instruction count with six of its
 seven global registers matching the ROM, and the whole residual came from one hoisting decision:

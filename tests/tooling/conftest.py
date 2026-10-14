@@ -1,8 +1,8 @@
 """Shared fixtures for the decomp-tooling characterization suite.
 
 Tool scripts under tools/ are not a package, so we load them by file path. The
-suite runs under ./venv (via `make test-tools`), so the scripts' venv re-exec
-guard is a no-op here.
+suite runs under the uv-managed .venv (via `uv run --locked pytest`), so the
+scripts' venv re-exec guard is a no-op here.
 """
 
 from __future__ import annotations
@@ -43,7 +43,7 @@ def load_tool(name: str):
 
 
 def run_tool(name: str, *args: str) -> subprocess.CompletedProcess:
-    """Run tools/<name>.py under the configured binary-tree Python interpreter."""
+    """Run tools/<name>.py under the uv-managed project Python interpreter."""
     return subprocess.run(
         [str(python_path()), str(TOOLS / f"{name}.py"), *args],
         cwd=ROOT,

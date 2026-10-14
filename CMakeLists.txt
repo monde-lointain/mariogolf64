@@ -7,10 +7,7 @@ endif()
 if(NOT CMAKE_HOST_SYSTEM_NAME STREQUAL "Linux" OR NOT CMAKE_HOST_SYSTEM_PROCESSOR MATCHES "^(x86_64|amd64|AMD64)$")
     message(FATAL_ERROR "The pinned host toolchain supports Linux x86_64 (including WSL).")
 endif()
-find_package(Python3 3.12 REQUIRED COMPONENTS Interpreter)
-if(Python3_VERSION VERSION_GREATER_EQUAL 3.15)
-    message(FATAL_ERROR "The offline wheelhouse supports CPython 3.12–3.14.")
-endif()
+find_program(MG64_UV NAMES uv REQUIRED)
 include(CheckCSourceCompiles)
 include(CMakePushCheckState)
 cmake_push_check_state(RESET)
@@ -52,19 +49,24 @@ if(BUILD_TESTING)
     add_test(NAME mg64.rom COMMAND "${PROJECT_SOURCE_DIR}/tools/verify-rom.sh" --build-dir "${PROJECT_BINARY_DIR}")
     set_tests_properties(mg64.rom PROPERTIES RESOURCE_LOCK mg64_rom_build TIMEOUT 1200 LABELS rom)
     add_test(NAME mg64.tooling COMMAND "${CMAKE_COMMAND}" -E env "MG64_BUILD_DIR=${PROJECT_BINARY_DIR}"
-        "${MG64_PYTHON}" -m pytest "${PROJECT_SOURCE_DIR}/tests/tooling")
-    set_tests_properties(mg64.tooling PROPERTIES WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}" LABELS tooling)
+        "UV_PROJECT_ENVIRONMENT=${PROJECT_SOURCE_DIR}/.venv"
+        "${MG64_UV}" run --locked --project "${PROJECT_SOURCE_DIR}"
+        python -m pytest "${PROJECT_SOURCE_DIR}/tests/tooling")
+    set_tests_properties(mg64.tooling PROPERTIES WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
+        RESOURCE_LOCK mg64_rom_build LABELS tooling)
 endif()
 add_custom_target(test-tools
     COMMAND "${CMAKE_COMMAND}" -E env "MG64_BUILD_DIR=${PROJECT_BINARY_DIR}"
         "${MG64_PYTHON}" -m pytest "${PROJECT_SOURCE_DIR}/tests/tooling"
-    DEPENDS mg64_python USES_TERMINAL VERBATIM)
+    USES_TERMINAL VERBATIM)
+add_dependencies(test-tools mg64_python)
 
 set(MG64_GHIDRA_SYNC_SCRIPT "" CACHE FILEPATH "Optional Ghidra sync_decomp_names.py script")
 add_custom_target(sync-names
     COMMAND "${MG64_PYTHON}" "${MG64_GHIDRA_SYNC_SCRIPT}" --export-to-decomp
         --decomp-root "${PROJECT_SOURCE_DIR}" --write-in-place
-    DEPENDS mg64_python USES_TERMINAL VERBATIM)
+    USES_TERMINAL VERBATIM)
+add_dependencies(sync-names mg64_python)
 foreach(sweep IN ITEMS coddog-sweep coddog-sweep-nusys coddog-sweep-audio)
     set(sweep_env "${CMAKE_COMMAND}" -E env "MG64_BUILD_DIR=${PROJECT_BINARY_DIR}")
     if(sweep STREQUAL "coddog-sweep")
@@ -77,6 +79,7 @@ foreach(sweep IN ITEMS coddog-sweep coddog-sweep-nusys coddog-sweep-audio)
                      COMMAND ${sweep_env} "${PROJECT_SOURCE_DIR}/tools/audio_sweep.sh"
                      COMMAND ${sweep_env} "${MG64_PYTHON}" "${PROJECT_SOURCE_DIR}/tools/audio_pin.py")
     endif()
-    add_custom_target(${sweep} ${commands} DEPENDS rom
+    add_custom_target(${sweep} ${commands}
         WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}" USES_TERMINAL VERBATIM)
+    add_dependencies(${sweep} rom)
 endforeach()

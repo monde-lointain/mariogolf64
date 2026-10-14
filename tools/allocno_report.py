@@ -24,8 +24,8 @@ move. Reminder for a call-free function: `local-alloc`'s `qty_compare_1` scales 
 scope, not its priority, is the knob (Axis 8).
 
 Usage:
-  build/us/venv/bin/python3 tools/allocno_report.py src/main/func_8006A2C0.c [func_8006C484]
-  build/us/venv/bin/python3 tools/allocno_report.py nonmatchings/func_8005DFE8/base.c [func_8005DFE8]
+  uv run --locked python tools/allocno_report.py src/main/func_8006A2C0.c [func_8006C484]
+  uv run --locked python tools/allocno_report.py nonmatchings/func_8005DFE8/base.c [func_8005DFE8]
 
 The second form reads a crack slice's own seed: any directory holding a `compile.sh` (a permuter
 import or a decomp_loop scratch dir) works, so the table can be read without first inlining the body

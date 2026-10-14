@@ -65,7 +65,7 @@ docker run --rm -v "$PWD":/repo -w /repo mg64-ci-test bash -c \
 
 ## Local checkout prerequisites
 
-Use the [local build guide](../docs/build.md) for bootstrap tools, offline dependency ownership,
-extraction, verification, and presets. Rebuild the private image for this CMake cutover before CI:
-the old image lacks CMake 3.30+ and the 32-bit host compilation prerequisites.
+Use the [local build guide](../docs/build.md) for bootstrap tools, locked Python dependencies,
+extraction, verification, and presets. Rebuild the private image for this uv cutover before CI:
+it now provides uv, managed CPython 3.14, current CMake, and 32-bit host compilation prerequisites.
 Required missing assembly stubs are now recovered automatically during fresh extraction.

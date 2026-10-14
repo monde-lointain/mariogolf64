@@ -4,13 +4,10 @@ from pathlib import Path
 import argparse
 import json
 import re
-import sys
+
+import yaml
 
 ROOT = Path(__file__).resolve().parent.parent
-# Configure needs only PyYAML's pure Python code. zipimport cannot load the native
-# extension, so this also works before the isolated Python environment is built.
-sys.path.insert(0, str(next((ROOT / "third_party/python/wheels").glob("pyyaml-*.whl"))))
-import yaml
 
 
 def manifest(config: dict) -> dict:

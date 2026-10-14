@@ -27,7 +27,7 @@ that are still present as asm (e.g. osContInit) and confirms they opcode-match t
 calibration rate means the reference gcc diverges — rebuild the archive from source with the
 project GCC and the `libultra` profile from `tools/build_profiles.json` before trusting the worklist.
 
-Read-only. Usage: build/us/venv/bin/python3 tools/libultra_match.py [--min-insns N] [--all]
+Read-only. Usage: uv run --locked python tools/libultra_match.py [--min-insns N] [--all]
 """
 
 import argparse

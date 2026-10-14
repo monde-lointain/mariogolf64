@@ -57,3 +57,55 @@ def test_permuter_recognizes_text_section_with_flags(section):
         sys.executable, "-c", program, str(rb.ROOT / "tools/decomp-permuter"), assembly
     ], text=True)
     assert result.strip() == '"chosen"'
+
+
+@pytest.mark.parametrize("pc", [0x80452250, 0xA0452250])
+@pytest.mark.parametrize("label", [".Llocal:", "jlabel .Llocal"])
+def test_extracted_external_and_local_jumps_preserve_machine_code(tmp_path, pc, label):
+    if not Path(rb.tool_path("as")).is_file() or not Path(rb.tool_path("ld")).is_file():
+        pytest.skip("build the vendored tools before running assembler behavior tests")
+    extract = load_tool("extract_rom")
+    external_word = 0x08100303
+    local_word = 0x08000000 | (((pc + 16) & 0x0FFFFFFF) >> 2)
+    assembly = (
+        ".macro jlabel name\n\\name:\n.endm\n"
+        ".set noreorder\n.text\n.globl start\nstart:\n"
+        f"/* 11C250 {pc:08X} {external_word:08X} */ j .L80400C0C\nnop\n"
+        f"/* 11C258 {pc + 8:08X} {local_word:08X} */ j .Llocal\nnop\n"
+        f"{label}\nnop\n"
+    )
+    source = tmp_path / "jumps.s"
+    obj = tmp_path / "jumps.o"
+    elf = tmp_path / "jumps.elf"
+    source.write_text(extract.resolve_external_jumps(assembly))
+    subprocess.run(
+        [rb.tool_path("as"), "-EB", "-mips2", "-o", str(obj), str(source)], check=True
+    )
+    relocated_pc = pc + 0x1000
+    subprocess.run(
+        [
+            rb.tool_path("ld"),
+            f"-Ttext=0x{relocated_pc:X}",
+            "-e",
+            "start",
+            "-o",
+            str(elf),
+            str(obj),
+        ],
+        check=True,
+    )
+    machine_code = subprocess.check_output(
+        [
+            rb.tool_path("objcopy"),
+            "-O",
+            "binary",
+            "-j",
+            ".text",
+            str(elf),
+            "/dev/stdout",
+        ]
+    )
+    relocated_local_word = 0x08000000 | (((relocated_pc + 16) & 0x0FFFFFFF) >> 2)
+    assert machine_code[:16] == struct.pack(
+        ">4I", external_word, 0, relocated_local_word, 0
+    )

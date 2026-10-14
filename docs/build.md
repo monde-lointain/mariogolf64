@@ -1,7 +1,7 @@
 ---
 type: Guide
 title: Build and verify the US retail ROM
-description: Reproducible offline CMake setup, source-built MIPS tools, extraction, and the ROM acceptance gate.
+description: Reproducible CMake and uv setup, source-built MIPS tools, extraction, and the ROM acceptance gate.
 ---
 
 # Build and verify the US retail ROM
@@ -12,32 +12,38 @@ The supported input is US revision 0 (`NMFE`) in big-endian `.z64` format. Suppl
 
 ## Bootstrap prerequisites
 
-Linux x86_64, glibc 2.28 or newer, CPython 3.12–3.14 with `venv`, CMake 3.30+, Ninja,
-a host C compiler with 32-bit libc support, GNU Make, and host `cpp`. GNU Make is used only
+Linux x86_64, glibc 2.28 or newer, uv 0.13.1+, CMake 3.30+, Ninja,
+a host C compiler with 32-bit libc support, GNU Make, and host `cpp`. uv selects or downloads
+CPython 3.12–3.14 and creates the repository's `.venv`. GNU Make is used only
 inside the historical upstream tool builds; it is not the repository build interface.
 
 On Ubuntu, host compilation prerequisites include `build-essential`, `gcc-multilib`,
-`python3-venv`, `ninja-build`, `bison`, `flex`, and `texinfo`. Ubuntu 24.04's packaged CMake is
-older than the project minimum; install a newer CMake, for example with
-`uv tool install cmake==3.30.9`. The [private container](../docker/README.md) includes these
+`ninja-build`, `bison`, `flex`, and `texinfo`. Install or update uv using its
+[official installation instructions](https://docs.astral.sh/uv/getting-started/installation/).
+Ubuntu 24.04's packaged CMake is older than the project minimum; install the current release with
+`uv tool install --upgrade cmake`. The [private container](../docker/README.md) includes these
 bootstrap tools. Native Windows and macOS are not supported by this pinned toolchain; use WSL
 for Windows.
 
-No cross compiler, target binutils package, submodule initialization, network download, or
-source-tree Python environment is required. The checkout owns the compiler sources and the
-complete locked extraction/runtime Python closure; see [dependency ownership](../third_party/README.md).
+No cross compiler, target binutils package, or submodule initialization is required.
+Native compiler sources remain local. Python dependencies are declared in `pyproject.toml` and
+hash-locked in `uv.lock`; initial setup and dependency upgrades require network access.
+Once populated, uv's cache supports `uv sync --locked --offline`. See
+[dependency ownership](../third_party/README.md).
 
 ## Configure, build, and verify
 
 ```sh
+uv sync --locked
 cmake --preset us
 tools/verify-rom.sh
 ```
 
 The first build compiles KMC-compatible GCC 2.7.2, KMC binutils 2.6, and GNU MIPS binutils 2.45.1
-from local source archives. It creates an isolated Python environment from the hash-locked local
-wheelhouse, checks the input ROM, extracts it, compiles the configured objects, links, and produces
-`build/us/mariogolf64.z64`. All generated files stay in the binary tree. A failed build returns
+from local source archives. uv synchronizes the shared `.venv` against `uv.lock`;
+the build checks the input ROM, extracts it, compiles the configured objects, links, and produces
+`build/us/mariogolf64.z64`. ROM build outputs stay in the binary tree; `.venv` is the only
+source-tree environment. A failed build returns
 nonzero before the verifier reads any ROM hash, so an older matching ROM cannot pass.
 
 `cmake --workflow --preset verify` provides configure → build → CTest ROM gate. The verifier itself
@@ -66,8 +72,8 @@ assembler includes, and embedded binary inputs. The linker consumes Splat's conf
 The generated `build-tools.json` publishes actual tool paths to the ranker, diff, and permuter.
 
 ```sh
-python3 tools/rom_build.py build --object src/main/vec3f_normalize.o
-python3 tools/rom_build.py compile --source nonmatchings/<func>/base.c \
+uv run --locked python tools/rom_build.py build --object src/main/vec3f_normalize.o
+uv run --locked python tools/rom_build.py compile --source nonmatchings/<func>/base.c \
   --output nonmatchings/<func>/current.o --profile main --nonmatching
 cmake --build build/us --target clean
 ```
@@ -93,10 +99,32 @@ For another binary tree, configure it with `cmake -S . -B <binary> -G Ninja`, th
 
 ## Tooling checks
 
-`cmake --build build/us --target test-tools` runs the existing behavioral suite using the configured
-Python environment. It does not require a ROM to configure or create that environment. The ROM
-CTest preset selects only the authoritative ROM gate; tooling tests are a separate check.
+`uv run --locked pytest tests/tooling` runs the existing behavioral suite without a ROM or CMake.
+`cmake --build build/us --target test-tools` runs it through the configured build graph.
+The ROM CTest preset selects only the authoritative ROM gate; tooling tests are a separate check.
 
 Historical ranker/coddog snapshots have documented baseline failures; do not regenerate goldens to
 conceal them. [Tool reference](tooling.md) separates optional external SDK/reference tools from the
 self-contained retail-ROM build.
+
+All scripts and analysis tools use the uv-managed `.venv`; do not install dependencies with pip,
+create environments with `python -m venv`, or maintain requirements files. `uv sync --locked`
+includes the `dev` dependency group (pytest, Ruff, basedpyright, Vulture, and coverage).
+Use `uv run --locked ruff check tools tests/tooling`, `uv run --locked basedpyright`, and
+`uv run --locked vulture` for advisory analysis.
+
+For an existing checkout, run `deactivate` if a legacy environment is active before invoking uv.
+Old root or binary-tree `venv` directories are no longer selected; uv ignores an unrelated
+`VIRTUAL_ENV` and warns about it. Existing local environments are not deleted by the migration.
+
+To pull the newest stable compatible Python releases, run `uv lock --upgrade` followed by
+`uv sync --locked`, run tooling checks and `tools/verify-rom.sh`, and commit the updated lockfile.
+Ordinary setup uses `--locked` rather than silently changing tool versions. Upstream dependency
+constraints remain enforced, including Splat's pins on support libraries such as intervaltree and tqdm.
+Historical KMC compiler/binutils versions remain fixed because their output defines matching.
+
+Current Splat/spimdisasm can emit undefined `.L` operands for absolute jumps outside a disassembled
+section. `tools/extract_rom.py` resolves those operands from the original J instruction encoding,
+while retaining locally defined labels (including `jlabel` macros) and their relocations.
+The assembler regression cases and full-ROM gate cover this adaptation.
+

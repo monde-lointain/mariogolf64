@@ -61,19 +61,19 @@ ExternalProject_Add(mg64_binutils
     INSTALL_BYPRODUCTS ${MG64_MODERN_TOOLS}
     LOG_CONFIGURE TRUE LOG_BUILD TRUE LOG_INSTALL TRUE LOG_OUTPUT_ON_FAILURE TRUE)
 
-set(MG64_PYTHON "${PROJECT_BINARY_DIR}/venv/bin/python3")
-file(GLOB python_wheels CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/python/wheels/*.whl")
-add_custom_command(OUTPUT "${PROJECT_BINARY_DIR}/python-ready.stamp"
-    COMMAND "${Python3_EXECUTABLE}" -m venv --clear "${PROJECT_BINARY_DIR}/venv"
-    COMMAND "${MG64_PYTHON}" -m pip install --disable-pip-version-check --no-index
-        --find-links "${CMAKE_CURRENT_SOURCE_DIR}/python/wheels" --require-hashes
-        --requirement "${CMAKE_CURRENT_SOURCE_DIR}/python/requirements.lock"
-    COMMAND "${CMAKE_COMMAND}" -E touch "${PROJECT_BINARY_DIR}/python-ready.stamp"
-    DEPENDS ${python_wheels} python/requirements.lock
-    BYPRODUCTS "${MG64_PYTHON}"
+set(MG64_PYTHON "${PROJECT_SOURCE_DIR}/.venv/bin/python3")
+add_custom_target(mg64_python
+    COMMAND "${CMAKE_COMMAND}" -E env "UV_PROJECT_ENVIRONMENT=${PROJECT_SOURCE_DIR}/.venv"
+        "${MG64_UV}" sync --locked --project "${PROJECT_SOURCE_DIR}"
+    COMMAND "${CMAKE_COMMAND}" -E copy_if_different
+        "${PROJECT_SOURCE_DIR}/uv.lock" "${PROJECT_BINARY_DIR}/python-ready.stamp"
+    DEPENDS "${PROJECT_SOURCE_DIR}/pyproject.toml" "${PROJECT_SOURCE_DIR}/uv.lock"
+        "${MG64_UV}"
+    BYPRODUCTS "${PROJECT_BINARY_DIR}/python-ready.stamp"
+    COMMENT "Synchronizing the uv-managed Python environment"
     VERBATIM)
-add_custom_target(mg64_python DEPENDS "${PROJECT_BINARY_DIR}/python-ready.stamp")
-add_custom_target(tools DEPENDS mg64_python mg64_kmc_gcc mg64_kmc_binutils mg64_binutils)
+add_custom_target(tools)
+add_dependencies(tools mg64_python mg64_kmc_gcc mg64_kmc_binutils mg64_binutils)
 
 foreach(tool IN ITEMS gcc kmc_as cpp as ld objcopy strip objdump nm)
     add_executable(mg64_tool_${tool} IMPORTED GLOBAL)

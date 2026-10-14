@@ -79,7 +79,7 @@ form if the next attempt wants the cleanest structural base.
 
 ## Next lever to try
 
-Read the allocation, do not guess: `venv/bin/python3 tools/allocno_report.py src/main/func_80080220.c
+Read the allocation, do not guess: `uv run --locked python tools/allocno_report.py src/main/func_80080220.c
 draw_terrain_aim_grid` runs and prints ~90 allocnos. The question to answer from it is which allocno
 should lose its FP register so `lead` (four defs, one use, only use is a `sub.s`) falls back to its
 alternate class, a general register — that single change is worth the +3 `mtc1 $at` and probably the

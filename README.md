@@ -7,24 +7,27 @@ description: Byte-exact US retail reconstruction with an owned toolchain, CMake 
 # Mario Golf 64 decompilation
 
 Reconstructs the US revision-0 Nintendo 64 game as C and assembly that rebuild to the original ROM.
-This Git monorepo contains the pinned MIPS compiler/binutils sources, extraction dependencies,
-and decompilation tools. CMake 3.30+ owns the build; no submodules or target-tool downloads are needed.
+This Git monorepo contains the pinned MIPS compiler/binutils sources and vendored decompilation
+tools. CMake 3.30+ owns the build; uv 0.13.1+ owns Python dependencies and the root `.venv`.
+No submodules or target-tool downloads are needed; initial Python setup downloads from PyPI.
 
 Supply your own big-endian `baserom.z64`, then:
 
 ```sh
+uv sync --locked
 cmake --preset us
 tools/verify-rom.sh
 ```
 
 The verifier requires a successful matching build before reading the authoritative ROM SHA-1.
-All generated tools, extraction outputs, objects, and the ROM live under `build/us/`.
+Generated native tools, extraction outputs, objects, and the ROM live under `build/us/`.
+The uv-managed Python environment lives at `.venv/` and is shared by all binary trees.
 See [build prerequisites and commands](docs/build.md), including isolated nonmatching builds.
 
 ## Start here
 
-- [Build and verify](docs/build.md) — source-built tools, offline Python environment, presets, and ROM gate.
-- [Dependency ownership](third_party/README.md) — immutable sources, wheel hashes, origins, and licenses.
+- [Build and verify](docs/build.md) — source-built tools, uv setup, presets, and ROM gate.
+- [Dependency ownership](third_party/README.md) — immutable sources, Python lockfile, origins, and licenses.
 - [Agent workflow](docs/agent-workflow.md) — Oh My Pi `/decomp` and the native `mg64-decomp` skill.
 - [Documentation index](docs/index.md) — on-demand matching hazards, code-generation levers, and evidence.
 - [Tool reference](docs/tooling.md) — candidate selection and isolated matching signals.
@@ -37,7 +40,7 @@ See [build prerequisites and commands](docs/build.md), including isolated nonmat
 | `src/`, `include/` | Reconstructed game and library source/header inputs. |
 | `mariogolf64.yaml`, `symbol_addrs.txt` | Segment layout and curated symbol placement. |
 | `CMakeLists.txt`, `CMakePresets.json`, `cmake/` | Build graph and reproducible configure/build/test workflows. |
-| `third_party/` | Pinned source archives, offline Python distributions, and provenance. |
+| `third_party/` | Pinned native source archives and vendored-tool provenance. |
 | `tools/`, `tests/tooling/` | Ordinary vendored decomp tools, first-party helpers, and behavioral tests. |
 | `.omp/` | Native skill and thin user command; root `AGENTS.md` holds safety context. |
 | `build/us/work/`, `build/us/obj/` | Generated extraction/source shadow and objects; never source inputs. |

@@ -36,15 +36,15 @@ loads `*gfxp` into the walking pointer, and the final packet chain writes the ad
 
 Three decoders were written this sprint and promoted to `tools/` at the S303 review:
 
-- `venv/bin/python3 tools/dl_decode.py <fn.s>` -- walks the `.s`, constant-propagates registers **and**
+- `uv run --locked python tools/dl_decode.py <fn.s>` -- walks the `.s`, constant-propagates registers **and**
   `$sp` spill slots, models the DL write pointer symbolically (`DL+n`), and prints the store stream
   **re-sorted into display-list order**. Without the re-sort the stream is unreadable: this emitter
   precomputes ~40 packet pointers into registers and stack slots, so program order and DL order
   diverge by up to 40 packets.
-- `venv/bin/python3 tools/rdp_word.py <w0>/<w1> ...` -- decodes SetTile / SetTileSize / LoadTile /
+- `uv run --locked python tools/rdp_word.py <w0>/<w1> ...` -- decodes SetTile / SetTileSize / LoadTile /
   LoadBlock / SetTextureImage / SetColorImage / TextureRectangle / RDPHALF / SetScissor /
   SetPrimColor words into their fields.
-- `venv/bin/python3 tools/combine_word.py <w0>/<w1> ...` -- decodes a SETCOMBINE pair into
+- `uv run --locked python tools/combine_word.py <w0>/<w1> ...` -- decodes a SETCOMBINE pair into
   `gDPSetCombineLERP` arguments (reads the `G_CCMUX_*` / `G_ACMUX_*` tables straight out of
   `include/libultra/PR/gbi.h`).
 
@@ -347,7 +347,7 @@ this section before spending another sprint on live lengths.
 ### What the dumps actually show
 
 Compile the seed with `-dg -dl` (`nonmatchings/func_8002CDA8/compile.sh` is now present, so
-`venv/bin/python3 tools/allocno_report.py nonmatchings/func_8002CDA8/base.c func_8002CDA8` works
+`uv run --locked python tools/allocno_report.py nonmatchings/func_8002CDA8/base.c func_8002CDA8` works
 without inlining into `src/`). Three facts:
 
 1. **The three competing pseudos have identical conflict sets.** From `<file>.c.greg`:

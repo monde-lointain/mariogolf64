@@ -63,7 +63,7 @@ CITATION_GLOBS = ("*.md", "*.py", "*.txt", "*.yaml", "*.toml")
 # depend on whether a sprint happens to be open.
 SKIP_FILES = frozenset({"RETRO.md", "BACKLOG.md", "VELOCITY.md", "SPRINT.md"})
 SKIP_DIRS = frozenset(
-    {".git", "venv", "build", "asm", "nonmatchings", "assets", "expected",
+    {".git", ".venv", "venv", "build", "asm", "nonmatchings", "assets", "expected",
      "__pycache__", ".mypy_cache", ".pytest_cache"}
 )
 # tools/m2c is a vendored third-party tool; its "template" files are unrelated.

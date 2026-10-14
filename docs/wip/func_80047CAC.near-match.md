@@ -43,7 +43,7 @@ global.c ref-count steerable.
 ## Next action
 Fix the constant (`19.6500015f`) first. Then PERMUTER — but LOW-EV. Correction to the S274 record:
 the permuter was NEVER blocked. Documented main command (with the C inlined):
-`venv/bin/python3 ./tools/decomp-permuter/import.py --settings permuter_settings_main.toml
+`uv run --locked python ./tools/decomp-permuter/import.py --settings permuter_settings_main.toml
 src/main/func_800453E0.c asm/nonmatchings/main/func_800453E0/func_80047CAC.s`, then revert src to
 INCLUDE_ASM and `run-permuter.sh func_80047CAC`. S274 wrongly ran BARE `import.py` (no `--settings`)
 and mis-read the KMC-mirror include failure as "blocked" — see [[get_terrain_vertex_pointer]].

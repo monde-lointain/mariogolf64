@@ -31,7 +31,7 @@ def build_tools() -> dict:
         return json.loads(path.read_text())
     base = build_dir()
     config = {"root": str(ROOT), "build_dir": str(base), "work_dir": str(base / "work"),
-              "python": str(base / "venv/bin/python3"), "nonmatching": False}
+              "python": str(ROOT / ".venv/bin/python3"), "nonmatching": False}
     config.update({name: str(base / "toolchain/bin" / f"mips-linux-gnu-{name}")
                    for name in ("as", "ld", "objcopy", "strip", "objdump", "nm")})
     config.update({"gcc": str(base / "toolchain/kmc/gcc"),
@@ -44,7 +44,7 @@ def tool_path(name: str) -> str:
 
 
 def python_path() -> Path:
-    return Path(tool_path("python"))
+    return ROOT / ".venv/bin/python3"
 
 
 def source_path(source: str | Path) -> Path:

@@ -20,8 +20,8 @@ Pipeline gotchas baked in (so they don't have to be re-learned):
     in the awk sense; here we use Python re but keep the lesson explicit).
 
 Usage:
-  build/us/venv/bin/python3 tools/profile_probe.py --seg libnusys/nuboot
-  build/us/venv/bin/python3 tools/profile_probe.py --seg main/main --flags "-O2,-O1,-O0,-g"
+  uv run --locked python tools/profile_probe.py --seg libnusys/nuboot
+  uv run --locked python tools/profile_probe.py --seg main/main --flags "-O2,-O1,-O0,-g"
 """
 from __future__ import annotations
 

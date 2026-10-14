@@ -19,5 +19,6 @@ EXTRA=()
 for flag in "${@:1:$#-3}"; do
     EXTRA+=("--extra-flag=$flag")
 done
-exec python3 tools/rom_build.py compile --source "$INPUT" --output "$OUTPUT" \
+export UV_PROJECT_ENVIRONMENT="$(cd "$(dirname "$0")/.." && pwd)/.venv"
+exec uv run --locked --project "$(dirname "$0")/.." python tools/rom_build.py compile --source "$INPUT" --output "$OUTPUT" \
     --profile-source "$PARENT" --nonmatching "${EXTRA[@]}"

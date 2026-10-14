@@ -31,7 +31,7 @@ not supported build entry points. Use the [CMake build guide](build.md) and
 
 All extracted `asm/` and `assets/` paths refer to `<binary>/work/`; objects are under
 `<binary>/obj/`. KMC binaries are under `<binary>/toolchain/kmc/`, modern MIPS binutils under
-`<binary>/toolchain/bin/`, and Python under `<binary>/venv/`. The default binary tree is `build/us`.
+`<binary>/toolchain/bin/`, and Python in the uv-managed `.venv/`. The default binary tree is `build/us`.
 Source and curated symbol paths remain repository-relative.
 
 The new graph tracks C headers, assembler includes, embedded binaries, and extraction inputs.
@@ -4130,7 +4130,7 @@ setup feeds, see `#pervasive-regalloc-classical-main`.
   nop, fixing the count 77->78. Seed it by hand when a byte-exact-structure fn is one instr short/long
   around a branch. (It did not fix the residual register swap; see `#abs-coalescing-reg-swap`.)
 - **Venv gotcha: `import.py` needs `toml`.** Run the permuter tools through the venv
-  (`venv/bin/python3 ...`, or `mg_activate_venv` as `setup-permuter.sh` does); a bare
+  (`uv run --locked python ...`, or `mg_activate_venv` as `setup-permuter.sh` does); a bare
   `./tools/decomp-permuter/import.py ...` fails `ModuleNotFoundError: No module named 'toml'` even
   though the venv has it. And `mg_resolve_c_asm` needs an `INCLUDE_ASM` stub, so for an already-inlined
   one-tu fn pass `import.py <src.c> <awk-sliced target.s> --settings tools/permuter_settings_main.toml`
@@ -4143,7 +4143,7 @@ setup feeds, see `#pervasive-regalloc-classical-main`.
   `__volatile__` sits between `__asm__` and `(`, so the function-like macro never matches (and cpp
   won't re-scan after `-D__volatile__=` strips it). Manually convert that one line to the pragma
   import.py would have emitted (`import.py:481-484`): `#pragma _permuter b64literal <base64 of the
-  original line>` (e.g. `venv/bin/python3 -c "import base64;print(base64.b64encode(open('L').read().strip().encode()).decode())"`).
+  original line>` (e.g. `uv run --locked python -c "import base64;print(base64.b64encode(open('L').read().strip().encode()).decode())"`).
   pycparser parses the pragma (skipped by the randomizer, so the asm line is held fixed) and the
   permuter decodes it back to the real `__asm__` for each candidate compile. This is how S176's
   `heap_alloc` (ra-capture inline asm) was made permuter-loadable; the base scored 1595 and drove down
@@ -4154,7 +4154,7 @@ setup feeds, see `#pervasive-regalloc-classical-main`.
   is gone once the fn is a C body (a near-match you want to permute in place). The resolver then
   sets `C_FILE=` empty and `set -e` aborts silently (no output). Workaround: bypass the resolver and
   call `import.py` directly with the containing C file + the exact per-fn target `.s` (venv-run):
-  `venv/bin/python3 tools/decomp-permuter/import.py --settings permuter_settings_main.toml
+  `uv run --locked python tools/decomp-permuter/import.py --settings permuter_settings_main.toml
   src/<seg>.c asm/nonmatchings/<tree>/<file>/<fn>.s`. import.py picks the target fn by the `.s`
   filename, so a multi-fn `src/<seg>.c` is fine. (Golden-gated tooling follow-up: teach
   `mg_resolve_c_asm` to also resolve a fn defined as C — grep for the `<fn>(` definition + resolve the
@@ -4997,7 +4997,7 @@ Re-ask the PO if a future match hinges on one; do not bank it silently.
 
 **Step 0 — re-derive the residual from a fresh build before trusting a carry doc (S282/S268).** A
 carried-wall doc's stated count and residual class are both hypotheses. Run
-`venv/bin/python3 tools/pick_target.py --refresh-residual <fn>` (rebuilds the isolated object + cmpfn's
+`uv run --locked python tools/pick_target.py --refresh-residual <fn>` (rebuilds the isolated object + cmpfn's
 it) as the first action of any re-open. S282 `func_80098CD8` carried "exact 38/38 pure scheduler" but a
 fresh build of the faithful C was 40 (a redundant `andi` + a `move`); the exact-38 form needed a specific
 `u32 b=src[i]` + `(s32)b` spelling, after which the residual was a uniform reg rotation, not the
@@ -5207,7 +5207,7 @@ values wins an earlier caller-saved reg. Before concluding "irreducible," the KM
 priority `floor_log2(n_refs)*n_refs / live_length` (global.c:594-601) is steerable from C source along
 two independent axes.
 
-**Axis 0 — read the report first, and stop if it prints a tie.** `venv/bin/python3
+**Axis 0 — read the report first, and stop if it prints a tie.** `uv run --locked python
 tools/allocno_report.py <src.c> <fn>` prints both tables, and its local-quantity rows carry a `TIE`
 marker when two quantities match on **both** `refs` and `live_length`. A tie is not a narrow priority
 gap: `local-alloc` then falls through to birth order, so no axis below can move the assignment and
@@ -5347,7 +5347,7 @@ the define-point before the call to make it callee-saved. (Cracks the base-reg f
 like a `#cross-jump-tail-merge` can still wall the fn — S240 DF84 stayed carried on the annul.)
 
 **Axis 8 — measure the priorities instead of permuting the source (S290 `stamp_circle_ring_alpha`).**
-`venv/bin/python3 tools/allocno_report.py <file.c> <fn>` compiles the file with `-dg -dl` and prints
+`uv run --locked python tools/allocno_report.py <file.c> <fn>` compiles the file with `-dg -dl` and prints
 every allocno with its `n_refs`, `live_length`, the computed
 `floor_log2(nref)*nref/live_length*10000` and the hard reg it got, in `global.c allocno_compare`
 order. Read the formula from the source, not from memory: the `allocno_size` factor **multiplies**
