@@ -31,20 +31,19 @@ deliverables. The [dispatch prompt](../fanout-prompt.md) supplies each agent's c
 
 ## How many
 
-One agent per independently-compilable unit of work, plus at most one binutils rule-out.
+Delegate one agent per independent analysis unit, plus at most one binutils rule-out when needed.
 
-For distinct functions the unit is the function: `make nonmatching-func FUNC=<f>` compiles a
-per-function `nonmatchings/<f>/base.c` to its own `nonmatchings/<f>/current.o` and reads the shared
-`build/asm/<seg>.o` reference read-only, so `tools/decomp_loop.py` on distinct functions is
-parallel-safe. For a single hard function the unit is the residual angle, capped at two.
+For distinct functions, isolate candidate files and outputs under each function's own
+`nonmatchings/<fn>/` directory. Preserve each function's ROM compiler profile. Never share a candidate
+scratch directory or assume an isolated compile proves a bank.
 
-Never put two agents on one `nonmatchings/<fn>/` directory: it is the permuter's scratch dir and is
-not shareable. Never spawn an agent to verify.
+The build tree and Ghidra MCP are shared resources. Serialize their use; do not overlap builds with
+isolated compiles or background permuters. The orchestrator owns source integration and the full-ROM
+verification. Never delegate ROM verification.
 
-Each agent costs a full context and serializes at integration: the orchestrator holds every `src/`
-edit and every full `make`, and never runs a full `make` while an isolated compile or a background
-permuter is in flight, because that races the shared `build/`. Spawn only for a compile-isolated unit
-you cannot fold into the current iteration.
+Each agent costs a full context and serializes at integration. Delegate only independent analysis
+that cannot be folded into the current iteration. Return measured evidence and a function-specific
+verdict, not just a narrative.
 
 ## What a fan-out is worth
 

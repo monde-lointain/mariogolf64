@@ -1,53 +1,36 @@
 ---
 type: Agent Instructions
-title: "Codex project instructions"
-description: Defines the always-loaded safety invariants and task-specific documentation routes for Codex.
+title: "Mario Golf 64 project instructions"
+description: Defines the always-loaded source-edit, matching, and shared-resource invariants.
 ---
 
-# Mario Golf 64 Decomp workflow
+# Mario Golf 64 project instructions
 
-Codex project instructions. Kept short so it stays inside Codex project-doc loading limits. The
-shared workflow source is [workflow phase index](docs/workflow/index.md).
+This is the sole always-loaded project context. Invoke `/decomp` or the `mg64-decomp` skill for the
+decompilation workflow; consult [documentation navigation](docs/index.md) for on-demand references.
 
-<!-- mg64:invariants:begin -->
 ## Invariants
 
-- The ROM SHA-1 against `baserom.z64` is the sole match oracle, and `tools/verify-rom.sh` is the gate
-  that reads it. A hand-rolled `make; sha1sum` reads a stale ROM when the build fails.
-- Never commit a non-matching function.
-- Keep Ghidra MCP, build, yaml, and source edits serial. Read-only context gathering may run in
-  parallel.
-- Process/tooling edits are retro-gated: record suggestions in `SPRINT.md`; apply them at review
-  unless the PO directly requests out-of-band rework.
-- Forbidden direct edits: `ghidra_symbols.txt` except via `make sync-names`, `mariogolf64.ld`,
+- `tools/verify-rom.sh` is the sole bank authority. Never treat an isolated compile, object diff, or
+  direct hash as a bank verdict.
+- Never commit a non-matching function. Keep unfinished candidates isolated under `nonmatchings/`.
+- Serialize builds, Ghidra MCP, YAML changes, and source edits; the build tree and MCP are shared.
+- Preserve compiler-profile fidelity between isolated candidate builds and the ROM build.
+- Never hand-edit generated extraction artifacts, including `mariogolf64.ld`,
   `undefined_syms_auto.txt`, `undefined_funcs_auto.txt`, `mariogolf64.d`, `ctx.c`, `ctx.c.m2c`,
-  `undefined_funcs.txt`, `undefined_syms.txt`, `checksum.sha1`, `symbol_addrs_manual.txt`,
-  `re_tracking/*.yml`, `reloc_addrs.txt`.
-- Agent-editable low-level project files: `mariogolf64.yaml` subseg flip/split/path-qualifier lines
-  only, and `symbol_addrs.txt` add-only.
-<!-- mg64:invariants:end -->
+  `undefined_funcs.txt`, or `undefined_syms.txt`.
+- Edit `mariogolf64.yaml` only for required subsegment flip/split/path-qualifier changes; additions
+  to `symbol_addrs.txt` are add-only. Do not directly edit `ghidra_symbols.txt` except through the
+  supported name-sync workflow, or edit `checksum.sha1`, `symbol_addrs_manual.txt`,
+  `re_tracking/*.yml`, or `reloc_addrs.txt`.
 
-## Where to read
+## On-demand references
 
-Read the row for the phase you are in. Do not read `docs/workflow/` wholesale.
+- Select candidates, iterate, bank, or review: [native decomp skill](.omp/skills/mg64-decomp/SKILL.md).
+- Candidate flags or residual symptoms: [hazard routing](docs/index.md), then only the selected
+  [hazard playbook](docs/hazards.md).
+- Source lever: [docs/levers.md](docs/levers.md); C naming and style:
+  [docs/coding-style.md](docs/coding-style.md).
+- Delegation: [docs/workflow/fan-out.md](docs/workflow/fan-out.md).
+- Prompt authoring: [docs/prompt-style.md](docs/prompt-style.md).
 
-| Phase you are in | Read exactly this |
-| --- | --- |
-| plan gate, review gate | [docs/workflow/gates.md](docs/workflow/gates.md) |
-| execution loop | [docs/workflow/loop.md](docs/workflow/loop.md) |
-| a `pick_target.py` hazard flag, or a residual to route | [docs/hazard-index.md](docs/hazard-index.md), then the one [docs/hazards.md](docs/hazards.md) section it names |
-| a crack slice or fan-out decision | [docs/workflow/fan-out.md](docs/workflow/fan-out.md) |
-| dispatching a crack subagent | [docs/fanout-prompt.md](docs/fanout-prompt.md), filled in |
-| choosing a source lever | [docs/levers.md](docs/levers.md) |
-| writing or naming C | [docs/coding-style.md](docs/coding-style.md) |
-| editing any prompt surface | [docs/prompt-style.md](docs/prompt-style.md) |
-
-## Skills
-
-`$mg64-sprint-plan [scope]`, `$mg64-decomp-loop`, `$mg64-sprint-review`. Skills do not chain
-automatically; invoke the next one explicitly.
-
-## Prompt style
-
-Prompt-surface edits follow the project checklist in `docs/prompt-style.md`: outcome-first, concise,
-explicit validation, and clear stop conditions.

@@ -16,16 +16,17 @@ sources:
 [wip/banked/index.md](wip/banked/index.md) disclose narrower scopes. A reader selects a task or concept
 before opening detailed procedure or historical evidence.
 
-Root project guides, sprint records, harness wrappers, and the container/fingerprint guides use
-compatible concept metadata but live outside this recursive bundle. Third-party tool submodules,
-local virtual environments, generated output, and dependency documentation are not part of it.
+Root project guides, native Oh My Pi skills and commands, sprint records, and container/fingerprint
+guides use compatible concept metadata but live outside this recursive bundle. Third-party tool
+submodules, local virtual environments, generated output, and dependency documentation are not part of it.
 Links may leave the bundle to point at implementation or history.
 
 ## Concept metadata
 
 Each non-reserved `.md` file in the bundle begins with parseable YAML frontmatter containing a
 nonempty `type`. Use a descriptive `title` and a one-sentence `description` that the directory index
-can reuse. Preserve harness-specific keys in skills and command wrappers.
+can reuse. Skill frontmatter follows the native Oh My Pi skill contract; do not maintain
+harness-specific wrapper copies.
 
 ```yaml
 ---
@@ -63,18 +64,18 @@ concepts, not OKF `log.md` files.
 
 ## Changes and validation
 
-For instruction edits, follow [prompt style](prompt-style.md#conformance-checklist). Keep existing
-heading slugs stable; intentional anchor changes require migrating live citations and updating the
-anchor manifest together. Use relative Markdown links with the target's complete generated slug,
-not an abbreviated slug that only the custom checker understands.
+For instruction edits, follow [prompt style](prompt-style.md). Keep existing hazard-heading slugs
+stable; intentional anchor changes require migrating live citations and updating the anchor manifest
+together. Use relative Markdown links with the target's complete generated slug.
 
 Before delivering a documentation change:
 
 1. Parse frontmatter for every bundle concept and require a nonempty `type`.
 2. Check that directory indexes expose their child concepts and directories.
 3. Resolve local Markdown links and full heading fragments; ignore example links inside code fences.
-4. Run `make test-tools` for the existing prompt-contract and hazard-anchor gates.
+4. Follow verification ownership and report only checks actually run.
 5. Exercise any changed command against its actual CLI or implementation; do not claim a ROM match
    from documentation checks.
 
-Record bundle changes in [log.md](log.md). Do not rewrite sprint history to normalize obsolete prose.
+Update [log.md](log.md) only after the parent's smoke proof. Do not rewrite sprint history to normalize
+obsolete prose.

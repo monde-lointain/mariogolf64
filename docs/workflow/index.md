@@ -1,5 +1,12 @@
-# Sprint workflow
+---
+type: Workflow
+title: Decomp workflow
+description: Selects the concise workflow entry point and on-demand technical references.
+---
 
-- [Sprint gates](gates.md) — Defines the approval, planning, and review gates that bound each Mario Golf 64 decomp sprint.
-- [Decomp execution loop](loop.md) — Specifies the function-matching loop, tool oracles, and conventions for executing an approved sprint.
-- [Subagent fan-out](fan-out.md) — Defines when to delegate decompilation work, how to isolate it, and what outcomes justify a fan-out.
+# Decomp workflow
+
+- [Native decomp skill](../../.omp/skills/mg64-decomp/SKILL.md) — Select candidates, iterate, bank
+  verified work, and review.
+- [Execution details](loop.md) — Matching loop, tool authority, source and build constraints.
+- [Fan-out](fan-out.md) — Candidate isolation and delegation guidance.

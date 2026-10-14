@@ -8,27 +8,23 @@ description: Distinguishes current workflow authority from time-scoped sprint re
 
 ## Current rules versus recorded evidence
 
-The [sprint gates](workflow/gates.md) own approval, readiness, scope, and story-point rules;
-the [execution loop](workflow/loop.md) owns matching and banking. Use those guides for current action.
-Historical records may retain old compiler assumptions, counts, process rules, or citations to a
-workflow section that has since moved. A historical instruction is not a second current policy.
+The native [decomp skill](../.omp/skills/mg64-decomp/SKILL.md) owns current selection, iteration,
+banking, and review guidance. Historical records may retain old compiler assumptions, counts, process
+rules, or citations to workflow sections that have since moved. Historical instructions are not
+current policy.
 
-## Sprint records
+## Project records
 
-- [BACKLOG.md](../BACKLOG.md) — Product Owner ordering rationale, enablers, and carry-overs; its
-  dated figures describe their recorded sprint, not a live candidate census.
-- [RETRO.md](../RETRO.md) — newest-first sprint digests, measured results, and accepted improvements.
-- [VELOCITY.md](../VELOCITY.md) — seed/realized points and regime-specific history; do not compare
-  velocities across regimes or treat early introductory wording as the current phase.
+- [BACKLOG.md](../BACKLOG.md) — Current ordering context and carry-overs, alongside historical entries.
+- [RETRO.md](../RETRO.md) — Newest-first sprint digests and measured results; retained as historical evidence.
+- [VELOCITY.md](../VELOCITY.md) — Historical velocity measurements; retain the original record.
 
 These root artifacts retain their existing filenames and heading anchors. Adding concept metadata
 does not rewrite historical entry prose. They are not renamed to `log.md`: their existing structure
 and citations carry project-specific meaning.
 
-`SPRINT.md` is the gitignored active board and resume surface, not a distributed bundle concept.
-Absence in a fresh checkout is normal. Its instruction sections follow
-[prompt style](prompt-style.md); the resume procedure is in the
-[execution loop](workflow/loop.md#execution-loop-inline).
+`SPRINT.md` may be used as a task-specific resume note. Its absence in a fresh checkout is normal.
+The current workflow and resume guidance are in the [native decomp skill](../.omp/skills/mg64-decomp/SKILL.md).
 
 ## Function evidence
 

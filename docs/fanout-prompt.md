@@ -8,8 +8,8 @@ description: Provides the required isolated-work contract and deliverables for a
 
 <role>
 Fill in this contract for each dispatched crack agent; do not paraphrase it.
-`{{FN}}`: function. `{{CLASS}}`: prior divergence hypothesis. `{{LEVERS}}`: family-specific
-[source levers](levers.md). `{{TREE_FLAG}}`: `MAIN=1`, `LIBULTRA=1`, `LIBKMC=1`, or empty.
+`{{FN}}`: function. `{{CLASS}}`: prior divergence hypothesis. `{{PROFILE}}`: source-specific compiler
+profile from `tools/build_profiles.json`. `{{LEVERS}}`: family-specific [source levers](levers.md).
 Use the [fan-out trigger table](workflow/fan-out.md#when-to-fan-out) to decide dispatch and sizing.
 </role>
 
@@ -19,41 +19,38 @@ You are cracking one function in a Mario Golf 64 (N64) decompilation: `{{FN}}`.
 
 Measure matches; the ROM SHA-1 against `baserom.z64` is the sole arbiter. Work in isolation.
 
-**Toolchain pins.** Compiler is KMC GCC 2.7.2 at `tools/cc/gcc`; its source is
-`~/development/repos/mips-gcc-2.7.2` and the assembler's is `~/development/repos/mips-binutils-2.6`.
-Root-cause any residual to a diverging pass with a `file:line` citation into those trees.
+**Toolchain profile.** Use the configured build toolchain and the same source profile as the ROM build.
+The available KMC compiler and binutils are under `<binary>/toolchain`; do not substitute a host
+compiler. Root-cause residuals to a diverging compiler pass with a `file:line` citation when source
+evidence is available.
 
 **Step 0, before trusting any prior document.** Run
-`venv/bin/python3 tools/pick_target.py --refresh-residual {{FN}}`. A carry doc's instruction count,
-its residual class and its reading of the semantics are all hypotheses, and each has been wrong:
-re-derive from a fresh object. A register written in a branch delay slot before its first read is a
-shared pre-branch statement, not an argument.
+`<binary>/venv/bin/python3 tools/pick_target.py --refresh-residual {{FN}}`. A carry doc's instruction
+count, residual class, and semantics are hypotheses; re-derive from a fresh object. A register written
+in a branch delay slot before its first read is a shared pre-branch statement, not an argument.
 
 Documented class, to be confirmed or refuted rather than assumed: `{{CLASS}}`.
 
-**Isolation.** Build with `make nonmatching-func FUNC={{FN}} {{TREE_FLAG}}`. Your per-function oracle
-is `tools/cmpfn.sh {{FN}} nonmatchings/{{FN}}/current.o` plus
-`mips-linux-gnu-objdump -dz` on the freshly built object. Do not use `diff.py`: it reads
-`build/*.map`, which an incremental per-object build does not refresh, so it reports false clean and
-false mismatch in both directions.
+**Isolation.** Iterate with
+`<binary>/venv/bin/python3 tools/decomp_loop.py --func {{FN}} --profile {{PROFILE}}`. This compiles
+the function in its isolated candidate directory using the selected profile. Read the generated
+current object with `<binary>/toolchain/bin/mips-linux-gnu-objdump -dz`; do not use a linked-build diff
+as a fresh-object oracle.
 
 **Levers to try.** `{{LEVERS}}`
 
-**Boundaries.** Never run a full `make` (the orchestrator owns integration and the ROM gate; a full
-`make` here races the shared `build/`), never edit anything under `src/`, never touch another
-function's `nonmatchings/` directory.
+**Boundaries.** Never use the shared build tree or Ghidra MCP concurrently with another worker. Never
+edit anything under `src/` or another function's `nonmatchings/` directory.
 
-**`nonmatchings/{{FN}}/STATUS` plus a best-so-far `base.c` is the whole contract**, not your return:
-you can die mid-experiment and the orchestrator recovers from that pair. Append one line per material
-iteration (`38/38 count, residual=uniform reg rotation, form=u32 b=src[i]`), keep `base.c` at its best
-form and never at a disproven probe, and end `STATUS` with
+**`nonmatchings/{{FN}}/STATUS` plus a best-so-far `base.c` is the hand-off contract.** Append one line
+per material iteration (`38/38 count, residual=uniform reg rotation, form=u32 b=src[i]`), keep
+`base.c` at its best form and never at a disproven probe, and end `STATUS` with
 `RESULT: <mine>/<rom> | frame <ok|delta> | <residual> | <form> | collisions: <list|none>`, nulls
-below it. Wake a background permuter rather than leaving it running.
+below it. Do not leave a background permuter running.
 
 **Deliverable, either of these two.** A byte-exact C body plus the struct and extern additions it
-needs. Or a terminal verdict with a `file:line` citation into the compiler or assembler source,
-written to `docs/wip/{{FN}}.near-match.md`. Both are real: a cited verdict retires the wall so no
-later sprint re-grinds it.
+needs. Or a terminal verdict with a `file:line` citation into the compiler source, written to
+`docs/wip/{{FN}}.near-match.md`. A cited verdict preserves the evidence for future work.
 
 **What isolation hides; report both.** Your build never sees the host file and never links, so two
 defects surface only at the gate.

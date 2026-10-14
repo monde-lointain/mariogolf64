@@ -1,15 +1,15 @@
 ---
 type: Workflow
-title: Decomp execution loop
-description: Specifies the function-matching loop, tool oracles, and conventions for executing an approved sprint.
+title: Decomp execution details
+description: Records matching procedure, tool authority, and technical conventions for decompilation.
 ---
 
-# Execution loop and every-sprint conventions
+# Execution details and every-function conventions
 
 <role>
-The inline execution loop that runs between the two sprint gates, the oracles it trusts, and the
-conventions that hold regardless of hazard. Read this while banking functions. The gates are
-`docs/workflow/gates.md`; fan-out decisions are `docs/workflow/fan-out.md`.
+This reference preserves technical matching procedure and tool authority. The native
+[`mg64-decomp` skill](../../.omp/skills/mg64-decomp/SKILL.md) owns candidate selection and the
+select/iterate/bank/review workflow. Consult [fan-out guidance](fan-out.md) when delegation is useful.
 </role>
 
 **Navigate:** [Toolchain](#toolchain) · [Execution loop](#execution-loop-inline) ·
@@ -18,23 +18,22 @@ conventions that hold regardless of hazard. Read this while banking functions. T
 
 ## Toolchain
 
-This project decompiles Mario Golf 64 (N64) one function at a time. Tooling: splat (file splitting),
-KMC GCC 2.7.2 (`tools/cc/gcc`), m2c (`tools/m2c`; the seed-body generator, driven with a Ghidra-typed
-struct context), asm-differ (library mode), decomp-permuter (escalation), the Ghidra MCP bridge (live
-decompile + struct/symbol lookup, port 8089; every call passes `program="baserom.z64"`), and coddog (`make coddog-sweep`: fingerprints MG64 fns against
-ultralib VERSION_J to reveal an un-named `func_`'s upstream source; see
+This project decompiles Mario Golf 64 (N64) one function at a time. Tooling includes splat (file
+splitting), KMC GCC 2.7.2 (configured by the build system), m2c (seed-body generation), asm-differ
+(library mode), decomp-permuter (escalation), the Ghidra MCP bridge (decompile and struct/symbol
+lookup; every call passes `program="baserom.z64"`), and coddog (see
 `docs/hazards.md#coddog-cross-ref`).
 
 Use the [documentation index](../index.md) to select hazards, source levers, C style, or
-prompt-authoring guidance. `CLAUDE.md` and `AGENTS.md` are the always-loaded safety wrappers.
+prompt-authoring guidance. [AGENTS.md](../../AGENTS.md) is the sole always-loaded project context.
 
 ## Execution loop (inline)
 
-After `sprint-plan` writes `SPRINT.md`, work the committed backlog autonomously, smallest-first.
-Ghidra MCP is used inline at seed time. For each target function:
+Read the tracked backlog and select an increment using the native decomp workflow. Use Ghidra MCP
+inline at seed time where it adds value. For each target function:
 
-1. **Resolve** the function's subseg in `mariogolf64.yaml`. `hasm` means permanent asm: skip it. The
-   subseg was already flipped to `c` at the gate.
+1. **Resolve** the function's subsegment in `mariogolf64.yaml`. `hasm` means permanent asm: skip it.
+   Flip an `asm` subsegment to `c` only when required for the selected source work.
 
 2. **Mirror branch** (the `upstream` column is a lib, not `none`):
    a. Copy the upstream `.c` verbatim to its mirrored `src/lib<name>/...` path.
@@ -51,12 +50,12 @@ Ghidra MCP is used inline at seed time. For each target function:
      KMC-N64 profile, `-DBUILD_VERSION=VERSION_J`); use it, not `libultra_modern` (deprecated 2.0L,
      casts diverge; it is an `additional working dir` but is not the source). This pin holds for both
      the C mirror and the hand-asm `intrinsic-likely:<tu>.s` asm-mirror
-     (`docs/hazards.md#asm-mirror-vendoring`): the project mirrors ultralib's `gcc.mk` profile
-     (`LIBULTRA_CFLAGS` for C, `LIBULTRA_ASFLAGS` for vendored asm TUs, both in `mk/libultra.mk`).
-     libkmc is `~/development/repos/libkmc`; libnusys is the n64sdkmod nusys tree. The vendored
-     `include/libultra/**` headers can diverge from this pin (an inverted/wrong-value macro):
-     `tools/audit_libultra_headers.py` macro-diffs them vs ultralib (see
-     `docs/hazards.md#vendored-header-inversion`).
+     (`docs/hazards.md#asm-mirror-vendoring`): preserve the profile in
+     `tools/build_profiles.json`. libkmc is `~/development/repos/libkmc`; libnusys is the n64sdkmod
+     nusys tree.
+     `include/libultra/**` headers can diverge from this pin through an inverted or wrong-value macro;
+     `tools/audit_libultra_headers.py` compares them with ultralib
+     (`docs/hazards.md#vendored-header-inversion`).
 
 3. **Classical branch** (no upstream, or a hazard routes here): seed, iterate, spot-check, finalize.
    - **Seed** `nonmatchings/<func>/base.c` with the combined m2c-body + Ghidra-typed-context seed.
@@ -64,16 +63,15 @@ Ghidra MCP is used inline at seed time. For each target function:
      Ghidra decompile drops to a shape/type reference and the asm stays the sole authority (see
      `docs/hazards.md#decompile-vs-asm-authority`). Fetch three things from Ghidra MCP: the asm
      (`disassemble_function`), the decompile (write it to `nonmatchings/<func>/ghidra.c`), and the
-     RE'd struct defs plus signatures. Write the struct context to `nonmatchings/<func>/ghidra_ctx.c`
-     = `#include "common.h"` (OS structs + `os*`/nusys externs) + the RE'd struct defs + best-guess
-     `extern`s for the pack's game callees and globals. Then run `venv/bin/python3 tools/seed_c.py
-     --func <placeholder> --parent src/<seg>.c`, which drives the vendored `tools/m2c` (target
-     `mips-gcc-c`) with the Ghidra struct context and the parent types, and emits m2c's output as the
-     body. Ghidra often has not named a game-specific control struct (it shows loose stack vars +
-     stock OS structs), so the RE'd struct may live in a sibling decomp, not the Ghidra db — check
-     both. m2c keeps a rodata string as an `extern D_<addr>` data ref (ideal for a partial one-tu: no
-     carve). Rename m2c's `temp_*`/`local_*`/`arg_*` synthetics and reconcile its extern preamble
-     against the concrete externs during Iterate.
+     RE'd struct defs plus signatures. Write the context to `nonmatchings/<func>/ghidra_ctx.c` as
+     `#include "common.h"` (OS structs + `os*`/nusys externs), the RE'd struct defs, and best-guess
+     `extern`s for the pack's game callees and globals. Then run
+     `<binary>/venv/bin/python3 tools/seed_c.py --func <placeholder> --parent src/<seg>.c`, which
+     drives vendored `tools/m2c` (`mips-gcc-c`) with the Ghidra struct context and parent types.
+     Ghidra often has not named a game-specific control struct; check sibling decompilations as well
+     as the Ghidra database. m2c preserves rodata strings as `extern D_<addr>` references, ideal for
+     a partial one-TU without a carve. Rename m2c synthetics and reconcile its extern preamble with
+     concrete declarations during iteration.
      - **When the seed body is not m2c.** seed_c.py's JSON reports `body_source`. If m2c fails
        (`body_source: "ghidra"` or `"stub"`), the body falls back to the sanitized decompile or a TODO
        stub; translate from the inlined asm block. A large auto-generated parent context can exceed
@@ -100,11 +98,12 @@ Ghidra MCP is used inline at seed time. For each target function:
          `asm/nonmatchings/<seg>/<subseg-stem>/<func>.s`, where `<subseg-stem>` is the lead-fn
          placeholder that names the whole subseg. For a loose stub inside an already-`c` file, which
          is now the main-segment default, a per-function directory does not exist at all.
-       - **Per-fn oracle for the fast-path = the fresh object, not `diff.py` (S244).** Rebuild the one
-         object and read it: `find build -name '<obj>.o' -delete && make build/<path>/<obj>.o &&
-         mips-linux-gnu-objdump -dz build/<path>/<obj>.o | awk '/<fn>:/,/<next>:/'`. Why, and when
-         `diff.py` is trusted instead, are the `diff.py` and `objdump` rows of the Oracles table.
-   - **Iterate** at most 25 times: `venv/bin/python3 tools/decomp_loop.py --func <placeholder>`, then
+       - **Per-function oracle for the fast path is a fresh object, not `diff.py` (S244).** Build
+         through `<binary>/venv/bin/python3 tools/rom_build.py build --object src/<tree>/<obj>.o`,
+         then inspect that object's function with
+         `<binary>/toolchain/bin/mips-linux-gnu-objdump -dz`. The `diff.py` and
+         `objdump` rows below describe their authority and limitations.
+   - **Iterate** with `<binary>/venv/bin/python3 tools/decomp_loop.py --func <placeholder>`, then
      parse the JSON. `score == 0` is a candidate; 5 consecutive `compile_ok == False` means a broken
      seed, so stop; otherwise read the top mismatches, edit `base.c`, and re-run. Run the permuter
      (`./run-permuter.sh`) only at `percent >= 0.97`. For a near-miss whose only diff is which scratch
@@ -112,14 +111,12 @@ Ghidra MCP is used inline at seed time. For each target function:
      Before the permuter, rule out two source-typing fixes that both close without it (S162): a
      scheduling miss on a global load/store (pipelined vs strict-`$f0`-pairs, or a hoisted `& K` flag
      load) is often the `docs/hazards.md#mem-in-struct-scheduling-lever` (retype the fixed global as a
-     struct/array member); and a full-make SHA-miss where a same-file sibling reads a wrong data
+     struct/array member); and a full-build SHA-miss where a same-file sibling reads a wrong data
      address is `docs/hazards.md#short-text-shifts-flowing-bss` (a length miss shifts the flowing
-     `.bss`, so fix the short fn, not the sibling). And rule out a missing callee prototype: a
-     callee with no `extern` prototype in scope makes gcc assume implicit-int, which flips
-     regalloc/scheduling (a base-materialize hoist across a `jal`) and reads as a scheduling wall —
-     declare every callee with its real signature before reaching for the permuter
+     `.bss`, so fix the short fn, not the sibling). Rule out a missing callee prototype too: without
+     an `extern` prototype, GCC assumes implicit-int, which changes register allocation and scheduling
      (`docs/hazards.md#callee-prototype-is-load-bearing-missing-prototype--implicit-int`, S225).
-     And rule out a GCC nested function before calling a leaf a `$v0`-arg wall or a dead-frame
+     Rule out a GCC nested function before calling a leaf a `$v0`-arg wall or a dead-frame coin.
      coin: a leaf that spills the incoming `$v0` with no reload (`addiu sp,-8; sw $v0,0(sp)` never
      reloaded) is the nested-function prologue homing the static chain (`STATIC_CHAIN_REGNUM =
      GP_REG_FIRST+2 = $2 = $v0`, mips.h:1310) — the chain is homed even when the child reads no
@@ -144,26 +141,16 @@ Ghidra MCP is used inline at seed time. For each target function:
 
 4. **Bank** only after the full-ROM gate passes; classical candidates also require score 0 and
    the byte spot-check above.
-   a. Give it its curated Ghidra name: add to `symbol_addrs.txt`, rename in the body, and run
-      `tools/verify-rom.sh` (`--extract` when the rename must reach still-asm callers).
-      **Before renaming, inspect committed C callers** for `func_<addr>` (S247). The extraction
-      only rewrites still-ASM refs via `undefined_syms_auto`; a fn called from a committed C TU by its
-      auto `func_<addr>` name will `undefined reference`-fail the link after the rename. If any C
-      caller exists, migrate it to the new name in the same commit or keep the auto name
-      (a getter/predicate over a generic global read across unrelated subsystems is usually best left
-      auto-named — a domain-guess is likely wrong; S247 kept `func_800959F8`).
-      A rename reaching a still-asm caller has two failure modes at the gate make, both handled in
-      `docs/workflow/loop.md ## Conventions` under the curated-rename bullet: a stale parent `.o`
-      linking against the old
-      name, and a splat gap relic whose `.s` will not regenerate at all.
-   b. On `git commit`, stage the `make extract`-regenerated artifacts too (`undefined_syms_auto.txt`
-      and `mariogolf64.ld`): they change on a subseg flip or `symbol_addrs.txt` add and must travel
-      with the commit, or the regen bleeds into the next sprint's dirty tree (a `D_`-to-named
-      BOOT_GLOBALS regen left uncommitted surfaced as a stray diff at the next gate, S85 to S86).
-      `git status` should be clean after commit.
-   c. Append a standup line to `SPRINT.md`, and record the run's numbered "Suggested workflow
-      improvements" into the `SPRINT.md` buffer; apply these at `sprint-review` only, not
-      mid-sprint.
+   a. Add its curated name to `symbol_addrs.txt`, rename the body, and run
+      `tools/verify-rom.sh --extract` when the rename must reach still-asm callers. Before renaming,
+      inspect committed C callers for `func_<addr>` (S247): extraction rewrites still-ASM references,
+      not C calls. Migrate any C caller in the same change or keep the auto name when a domain guess
+      is uncertain.
+   b. Let the supported extraction workflow regenerate artifacts such as `undefined_syms_auto.txt`
+      and `mariogolf64.ld`; stage those regenerated outputs with the subsegment or symbol change.
+      Never edit them by hand. The full-ROM verification catches link failures, including stale
+      callers and unrecoverable splat gap relics.
+   c. Keep task notes current enough to resume and distinguish banked work from measured carries.
 
 A function that locks below `0.97 percent`, needs the permuter, or hits a BSS-layout or alignment
 wall is a spike: note it, carry its file to `BACKLOG.md ## Carry-overs`, and move on. Hold the DoD
@@ -183,17 +170,14 @@ by disassembling PPL's byte-exact `-O3` build (S147). See
 `src/<seg>.c` file) banks only when its last
 `INCLUDE_ASM` stub is gone.
 
-**Empty-leaf auto-C: stub-count < fn-count (S228).** `make extract` emits a body-less `void
-f(void){}` directly (not an `INCLUDE_ASM` stub) for a 2-instr `jr ra; nop` leaf, so a freshly-opened
-pack's `INCLUDE_ASM` count is below its function count by the number of such empties (S228
-`func_800453E0.c`: 37 stubs for 40 fns — 3 empty leaves pre-C at scaffold time, free byte-matches). So
-the matched-fn count is `fn-count − remaining-INCLUDE_ASM`, not the stub-count delta, and the plan
-gate's "N stubs" figure is not the total-fn count. Grep `INCLUDE_ASM` for the true remaining work; count
-the empty auto-C leaves toward banked.
+**Empty-leaf auto-C: stub-count < fn-count (S228).** Extraction may emit a body-less `void
+f(void){}` directly (not an `INCLUDE_ASM` stub) for a 2-instr `jr ra; nop` leaf, so a newly extracted
+pack's stub count can be below its function count by the number of empty leaves (S228
+`func_800453E0.c`: 37 stubs for 40 fns — 3 empty leaves were already C). The matched-function count
+is `fn-count − remaining-INCLUDE_ASM`, not the stub-count delta. Grep `INCLUDE_ASM` for true remaining
+work and count empty auto-C leaves as matched.
 
-The context window auto-compacts as it fills, so do not stop early on budget concerns; save progress
-to `SPRINT.md` (standup line + suggestion buffer) as each function banks, so a fresh window resumes
-from it.
+Save concise task state as functions bank or become measured carries so a fresh session can resume.
 
 ## Oracles
 
@@ -206,13 +190,13 @@ asserted, only measured, and re-check layers stacked on top of it buy nothing.
 
 | Tool | Authoritative for | Known failure mode | Trusted when |
 | --- | --- | --- | --- |
-| `tools/verify-rom.sh [--extract]` | Whether a function or increment is banked. Full `make` plus SHA-1 against the `sha1:` key in `mariogolf64.yaml`. | None. It exists because a failed `make` leaves the previous `build/mariogolf64.z64` in place, so a bare `sha1sum` reads a stale green ROM. S111 burned a whole review that way, reporting a match across three commits that never built. | Always. The only bank gate. Never a hand-rolled `make ...; sha1sum`. |
-| `tools/cmpfn.sh <fn> [<obj>]` | The per-iteration instruction stream and the instruction count of each side. Reads the object directly, so it never goes stale after an incremental `make build/src/<tree>/<obj>.o`. | Normalizes register prefixes, `%hi`/`%lo`, immediates, splat `(0xX >> 16)` spellings, `move`/`li` aliases, SDK FP register names and external branch/jal targets, so a difference in any of those is invisible. Internal branch targets, the frame immediate and stack-slot displacements were normalised away until S260/S276/S296; all three are surfaced now, as `@Dp<n>`/`@Dm<n>`, `[frame rom=.. mine=..]` and `@F<dec>(sp)`. Its remaining blind spot is a scope limit, not a bug: it reads `.text`, so a byte-exact instruction stream can still ship a duplicate `.rodata` literal pool that shifts every following data symbol and reddens the gate build (S298, +0x40; check `objdump -s -j .rodata`), wrong float constants that its immediate normalisation hides (S299 -- a delta is a relocation only if `objdump -r` lists one, and `lui $at` carries both `%hi` and float halves), or a `%hi` that differs because an SDK macro took a physical address (S308 `gSPMatrix`/`OS_K0_TO_PHYSICAL`). Byte-diff the two ROMs to localise those. With no object it exits non-zero, but a `| grep -c '^[<>]'` pipeline prints `0` there, reading like a byte match; the header carries `rows=` instead (S318). A `bne ...,T` against `bne ...,@Dm6` pair is display, not divergence -- label side versus offset side -- and survives a byte match (every S319 bank ended there). | As an iteration oracle, on a rebuilt object. A cmpfn-clean function is not a bank. |
-| `mips-linux-gnu-objdump -dz` | Assembled ground truth: register allocation, instruction order, immediates, nop placement. | `-d` without `z` collapses runs of identical zero words to one `...` line, so a nop run under-counts. In an unlinked object `%hi`/`%lo` read `0x0`. | Any time, on a freshly built object. Always `-dz`; keep every line. |
-| `tools/asm-differ/diff.py <fn>` | The reloc-resolved view of the linked build against the ROM. | Reads `build/*.map`, which an incremental per-object build does not refresh, so it fails in both directions: byte-clean on a dual-base-split object, and five diff rows on a byte-exact function while a mismatching one showed zero. The same score twice after a real source edit means stale, not "no effect" -- deleting the `.o` does not clear it, only a relink does. With no fresh build it spills the whole segment. | Immediately after a full `make`, for the reloc-resolved view only. Never as a crack or bank verdict. |
-| `tools/decomp_loop.py --func` (`score`, `percent`) | The isolated per-function compile signal during Iterate. `score == 0` is a candidate. | A non-zero score with empty `top_mismatches` and `match_count == total_rows` is an isolation artifact at high percent, but a real pervasive near-miss at low percent. Five consecutive `compile_ok == False` means a broken seed. | During Iterate. Disambiguate the empty-`top_mismatches` case with `diff.py` right after a full `make`; if that diverges too, it is a genuine wall. |
-| byte-`cmp` of raw `.text` | The spot-check at score 0: in-tree object against the isolated one. | A mnemonic diff false-positives because KMC `as` and modern `as` encode `move dst,zero` differently while objdump renders both as `move`. Inline LO16 struct-field addends differ in the object and resolve identically at link. | At score 0 only, on raw `.text` bytes. An addend-only difference goes straight to the full make. |
-| decomp-permuter score | Nothing on its own. It searches; it does not decide. | Blind to internal branch targets: asm-differ normalizes a branch to a local label, so a pure back-edge residual scores zero falsely. It also tolerates an extra instruction, so a 475/474 candidate can outscore a correct 474/474 (S300). `import.py` aborts on a nested function definition, disabling the permuter for that whole TU. Use `./setup-permuter.sh --main <fn>`; it activates the venv for you. Calling `tools/decomp-permuter/import.py` directly dies on `ModuleNotFoundError: toml` under system python, so prefix `venv/bin/python3` if you must (S304 corrects the older "the wrapper exits 0 silently" note -- the wrapper works). | At `percent >= 0.97`, or at exact instruction count with a one-operand residual regardless of percent. Not on a multi-register permutation or an FP-schedule coin: those plateau, but a plateaued run's best candidate is still a lever (S287, see the escalation bullet). |
+| `tools/verify-rom.sh [--extract]` | Whether a function or increment is banked. Successful configured build plus SHA-1 against the value in `mariogolf64.yaml`. | A failed build must not leave a stale ROM that can be accepted; the verifier requires a successful build before hashing. | Always. The only bank gate. |
+| `tools/cmpfn.sh <fn> [<obj>]` | Per-iteration instruction stream and instruction counts. | Normalizes registers, immediates, aliases, and external targets; its output is not a byte comparison. | During iteration only. |
+| `mips-linux-gnu-objdump -dz` | Assembled ground truth: register allocation, instruction order, immediates, nop placement. | `-d` without `z` collapses runs of identical zero words; unlinked `%hi`/`%lo` read as zero. | On a freshly built object. |
+| `tools/asm-differ/diff.py <fn>` | Reloc-resolved view of a linked build against the ROM. | Reads link maps, which object-only builds do not refresh; stale maps may misrepresent residuals. | After a fresh full build, for reloc-resolved iteration evidence only. |
+| `tools/decomp_loop.py --func` (`score`, `percent`) | Isolated per-function compile signal. `score == 0` is a candidate. | Empty mismatch output can be an isolation artifact at high percent; repeated compile failures signal a broken seed. | During iteration, never as a bank verdict. |
+| byte-`cmp` of raw `.text` | Spot-check at score zero: in-tree object against isolated object. | Mnemonic diffs may disagree because assemblers encode equivalent instructions differently; relocation addends may resolve identically at link. | At score zero, before integration. |
+| decomp-permuter score | Nothing on its own. It searches; it does not decide. | Blind to internal branch targets: asm-differ normalizes a branch to a local label, so a pure back-edge residual can score zero falsely. It also tolerates an extra instruction. Use `./setup-permuter.sh <fn>` to import the isolated seed with the parent TU's configured flags; the wrapper selects the binary-tree Python and needs no Makefile or hand-patched compiler script. Nested GCC functions require `tools/permuter_import.sh` to remove unrelated nested-function parents. | At `percent >= 0.97`, or exact instruction count with a one-operand residual. Not a multi-register permutation or FP-schedule coin. |
 | gcc `-dL` (append to the file's real flags; writes `<file>.c.loop`) | Every `loop.c` decision: per-loop insn count, each biv's init value, per-movable `savings S (life L)` moved / not-desirable / `matches`, per-giv reduced or `not worth while, X vs Y`. | Whole-file; filter. Reports decisions, not a match. | Any hoisted-constant, biv or strength-reduced-address residual. Read `savings` and `lifetime` off it and compute loop.c:1631 or :3823; S297 estimated and was wrong twice. |
 | gcc `-dg` (`.greg`; `-dl` gives `.lreg`) | An allocno's hard-register conflicts and preferences, the `;; N regs to allocate` priority order, and the `;; Register dispositions` pseudo-to-hard-reg map. | Whole-file; filter on `;; Function <name>`. Gives the order, not the arithmetic behind it -- that is `allocno_report.py`. | Whenever a residual is register names only: the order plus the map turns it into a priority-order diff (S318). Also when the order already favours the allocno that lost (S312: `n` conflicted with `$v0`, no preference, so no rewrite reached the ROM's register). |
 | Ghidra MCP decompile | Shape and type reference at seed time. | Not authoritative; the `.s` is. Overlay vram repeats above `0x801F4A30`, so seed overlay functions by ROM offset or the splat `.s`, not by vram. | As a shape and type hint. `disassemble_function` equals the splat `.s`, so a small function does not need MCP at all. |
@@ -239,7 +223,7 @@ spanning two loops -- split it per loop before reading priorities (S316). Fix th
 re-count.
 
 Once the count is exact and the residual is registers, the next action is named:
-`venv/bin/python3 tools/allocno_report.py <src.c> <fn>` prints every allocno in
+`<binary>/venv/bin/python3 tools/allocno_report.py <src.c> <fn>` prints every allocno in
 `global.c allocno_compare` order with its `n_refs`, `live_length` and the computed
 `floor_log2(refs)*refs/live_length`, plus the `local-alloc` quantities by live length. Read the ROM's
 register order off the `.s` and find where the two orders diverge; the arithmetic then says which fix
@@ -254,7 +238,7 @@ class it was introduced for -- it is how you stop guessing.
 **Write and read a `docs/wip/<fn>.near-match.md` in two halves: what was measured (counts, frame,
 which registers and which ordering differ, what was built) and what was attributed to it (which
 pass, why).** Only the first half is evidence. Re-derive with
-`venv/bin/python3 tools/pick_target.py --refresh-residual <fn>`, then re-derive the attribution
+`<binary>/venv/bin/python3 tools/pick_target.py --refresh-residual <fn>`, then re-derive the attribution
 before acting on it: S264's "combine `nonzero_bits`, source-invariant" coin was `fold_range_test`,
 and S272 re-confirmed the wrong pass by re-testing the same three variants instead of the claim
 (S315). Its lever rows are conditional the same way -- each was measured against one shape, so
@@ -281,81 +265,44 @@ below).
   after. Case law: S257/S259 spliced between anchors that looked adjacent and were not (three stubs
   with their carry comments; two banked one-line siblings), S312 hit a line that also existed
   verbatim in a banked sibling, S315 a `sed -i` on `s32 flags[N];` that resized a sibling's array.
-- **Never `rm -rf` an `asm/nonmatchings/<seg>/<stem>/` directory (or bulk-delete its `.s`) to "force
-  a regen" (S271, hard rule).** splat's `c`-mode `make extract` does not reproduce every still-asm
-  stub: it leaves disassembly gaps at some curated / decompose-split function addresses, so those
-  `.s` are stale-persistent relics the build depends on — and `asm/nonmatchings/` is gitignored, so a
-  deleted relic is not recoverable with `git`. S271 `rm -rf`'d one directory chasing a stale-`.o`
-  link error and destroyed 7 stubs `make extract` would not regenerate. To refresh a stub, `Edit` it
-  or delete only the single `.s` you will then
-  re-verify — never a directory. If a relic is already lost, recover it with
-  `tools/recover_stub.sh <0xsubseg-off> <fn>...` (flips the subseg `c`->`asm` so splat disassembles
-  the full range, carves the byte-identical per-fn block back, flips to `c`); see
-  `docs/hazards.md#stale-persistent-nonmatchings-relic-recovery`.
+- **Do not remove an `asm/nonmatchings/<seg>/<stem>/` directory or bulk-delete `.s` files to force
+  extraction.** Splat may not reproduce every still-asm stub: disassembly gaps at curated or split
+  function addresses leave relics required by the build. These files are gitignored and cannot be
+  restored from Git. If one relic is lost, recover it with `tools/recover_stub.sh`; follow the
+  supported CMake extraction flow rather than attempting a destructive directory reset.
 - **Scratch dir** `nonmatchings/<func>/` (gitignored, shared with the permuter).
 - **Stop a background command with the harness. Never `pkill -f` on any pattern that appears in the
   command you are running (S289, recurred S301).** The pattern also matches the tool call's own shell
   wrapper, so the kill takes out the calling shell and every later step in that call silently does
   not run. No form of the pattern is safe, not even a bare tool name: use the harness's stop action.
-- **Python tools run via the venv:** `venv/bin/python3 tools/X.py` (system python lacks asm-differ
-  deps and is PEP-668-locked).
+- **Python tools** use the build's Python environment when dependencies are required:
+  `<binary>/venv/bin/python3`.
 - **Shared tool helpers** live in `tools/decomp_common.py` (venv re-exec, path constants, asm/symbol
   regexes, `emit`/`log`, `find_segment`, SDK-path config) and `tools/lib.sh` (shell wrappers).
-  `make test-tools` runs the `tests/tooling/` characterization suite (pytest); refactor tooling under
-  it, and use `REGEN_GOLDEN=1` to refresh golden snapshots after an intended behavior change.
 - **File-level matching.** A source file matches only when every function in it matches. Promoting a
   match replaces one `INCLUDE_ASM` stub with the C body. No md5 win until the last stub in a file is
   gone.
 - **`symbol_addrs.txt` is add-only; never delete an entry.** The agent may add maintainer-override
   entries: a function is `name = 0x<vram>; // type:func`; a data extern is `name = 0x<vram>;
-  // size:0x<n>` (no `type:func`). `reloc_addrs.txt` is never touched. `ghidra_symbols.txt` is owned
-  by `sync_decomp_names.py` (modify only via `make sync-names`, never hand-edit). The two name files
-  must stay disjoint: never add a `symbol_addrs.txt` entry for an address already in
-  `ghidra_symbols.txt` (splat errors on duplicates).
-- **yaml authority.** Agent-editable in `mariogolf64.yaml`: subseg flip/split/path-qualifier lines.
-  Leave the segment and memory-map structure, `mariogolf64.ld`, and segment boundaries unchanged.
-  Subseg flips, multi-file splits, and the `make extract` that regenerates the scaffold are gate
-  actions (or inline when a split is needed mid-flight).
-- **Game/overlay-code path convention (the classical endgame).** A flipped non-lib subseg is
-  pathed `<tree>/<stem>`: main-segment game code under `main/<stem>` (e.g. `main/func_80099490`),
-  overlay code under `overlay_<N>/<stem>` (e.g. `[0x1508E0, c, overlay_10/func_ovl10_801F4A40]` ->
-  `src/overlay_10/func_ovl10_801F4A40.c`), `<stem>` being the lead-fn placeholder (`func_<vram>`) (S148).
-  No per-tree `mk/*.mk` fragment is needed: the generic `mk/src.mk` rule (`%` spans slashes) builds
-  any `src/<tree>/%.c` with the default -O2 game profile (`C_PROFILE_CFLAGS = $(CFLAGS)`; the
-  `mk/lib*.mk` overrides are more-specific and win only for their own `src/lib*/` trees). So a brand-
-  new `src/overlay_<N>/` tree builds with zero mk edits for plain game code (but a DL TU needs the
-  F3DEX2 profile, and a boot/SDK-glue TU an -O0 override — the two mk exceptions below). Overlay vram
-  is reused across overlays (>=0x801F4A30 is ambiguous; see the Ghidra-map memory), so seed overlay
-  fns by ROM offset / the splat `.s`, not MCP-by-vram.
-  - **The `main` tree needs the F3DEX2 build profile for display-list code.** MG64 is F3DEX2
-    (gspF3DEX2.fifo), so a `src/main/` game TU that builds display lists needs `-DF3DEX_GBI_2` to get
-    the F3DEX2 GBI opcodes (`G_RDPHALF_1=0xE1`/`G_RDPHALF_2=0xF1`, not F3DEX `0xB4`/`0xB3`). This is a
-    standing profile (not a per-file override like -O0): `mk/main.mk` sets
-    `MAIN_CFLAGS = $(CFLAGS) -DF3DEX_GBI_2` and `$(BUILD_DIR)/$(SRC_DIR)/main/%.o: C_PROFILE_CFLAGS =
-    $(MAIN_CFLAGS)` (included after `mk/libmus.mk`, before `mk/src.mk`) (S151). Non-DL main/ code is
-    unaffected (the define only changes gbi.h/sptask.h consumers). See
-    `docs/hazards.md#display-lists` (the DL reconstruction workflow + the mask-narrowing lesson).
-  - **Exception: nusys/SDK-template main-segment code goes to its library tree, not `main/`.**
-    A main-segment subseg that is actually a game-embedded copy of an SDK file (the `idle=nuboot`
-    coddog tell on `nuboot.c`; a `nuSc*`/`nu*` template) is pathed under its library tree,
-    `libnusys/<file>` (not `main/<stem>`), so it sits with the rest of that library. The placement is
-    unchanged by this: libnusys subsegs already interleave the main segment by path qualifier, so the
-    carve is a yaml path-qualifier edit only (`[0x.., c, main/<stem>]` -> `[0x.., c, libnusys/<file>]`),
-    the `.text` stays at its vram. (`pick_target.py` could route the `idle=nuboot`/nusys-template tell
-    to the library path — a tracked follow-up; for now the gate applies this by reading the coddog
-    tag.) S149 carved `main/main` -> `libnusys/nuboot`.
-  - **A per-file -O0 override is the one mk edit a game/SDK-glue tree may need.** Most game/
-    overlay code is -O2 (above), but a boot/SDK-glue TU can be -O0 (the codegen tell: fp kept, no CSE,
-    unused-arg spill; see `docs/hazards.md#-o0-bootsdk-glue-file-profile`). Add a file-specific
-    override (`$(BUILD_DIR)/$(SRC_DIR)/<tree>/<file>.o: C_PROFILE_CFLAGS := $(subst -O2,-O0,$(CFLAGS))`),
-    never a `<tree>/%.o` pattern (the siblings stay -O2). S149 `libnusys/nuboot.o` overrode to -O0 in
-    `mk/libnusys.mk`, beating that fragment's `libnusys/%.o` -O2 pattern.
+- **Name-file ownership.** `reloc_addrs.txt` is never touched. `ghidra_symbols.txt` is generated by
+  the supported name-sync workflow; never hand-edit it. Keep the two name files disjoint so splat
+  does not encounter duplicate symbols.
+- **YAML authority.** Agent-editable `mariogolf64.yaml` changes are limited to subsegment
+  flip/split/path-qualifier lines. Leave segment and memory-map structure, `mariogolf64.ld`, and
+  segment boundaries unchanged. Use `tools/verify-rom.sh --extract` for supported extraction.
+- **Game/overlay paths and profiles.** A flipped non-library subsegment uses `<tree>/<stem>`:
+  main-segment game code under `main/<stem>`, overlay code under `overlay_<N>/<stem>`. The stem is
+  the lead-function placeholder (`func_<vram>`) (S148). Overlay VRAM is reused across overlays, so
+  identify a target by ROM offset or the extracted `.s`, not MCP lookup by VRAM.
+- Main display-list code uses the F3DEX2 profile (`-DF3DEX_GBI_2`); ordinary main code uses the
+  standard game profile. SDK-template code embedded in the main segment belongs under its library
+  tree (for example `libnusys/<file>`), not `main/`. A boot/SDK-glue file may require its own `-O0`
+  file override. These requirements live in `tools/build_profiles.json`; preserve the matching profile
+  rather than recreating legacy make-rule examples.
 - **`hasm` subsegments stay raw asm forever** (entry stub, `__muldi3` libkmc math module, RSP
-  microcode entries). The execution loop refuses these. The project sets `hasm_in_src_path: True`, so
-  a `hasm` `.s` lives under `src/<dir>/<stem>.s` (each `hasm` yaml line carries a `<dir>/<stem>` name
-  qualifier) and its object builds to `build/src/<dir>/<stem>.o` via a path-based pattern rule in the
-  `mk/*.mk` fragments (the top `Makefile` is a thin skeleton that `include`s them) that picks the
-  assembler by tree (KMC for `src/libultra/` and `src/libkmc/`, modern GAS for the rest).
+  microcode entries). Their source-layout qualifiers and assembler selection are controlled by
+  `mariogolf64.yaml` and the build configuration. Inspect the generated build configuration instead
+  of inferring object paths or assembler rules from legacy build files.
 - **Permuter** (`./run-permuter.sh`) runs only when asm-differ's `percent` is at least 0.97. Below
   that, iterate on C or reconsider whether the subseg should be `hasm`.
   - **But an exact instruction count plus a one-operand residual is a permuter target regardless of
@@ -406,33 +353,22 @@ below).
     {`), so no other function in that file can be imported either. Workaround: copy the TU with the
     nested-function parent deleted, place the copy inside the repo (import.py rejects a path outside
     the project root — "Can't find root dir of project!"), and import from that.
-  - **`setup-permuter.sh` resolves the C file by grepping for an `INCLUDE_ASM` stub, so it fails
-    silently (exit 0, no output) once the body is inlined as C.** Call
-    `venv/bin/python3 ./tools/decomp-permuter/import.py --settings permuter_settings_main.toml
-    <c-file> <asm-file>` directly instead. The import copies the source into `nonmatchings/<fn>/`, so
-    the tree can be reverted to `INCLUDE_ASM` (keeping the ROM green) immediately while the permuter
-    runs in the background.
+  - **Import without poisoning the matching tree.** `./setup-permuter.sh <fn>` uses an existing
+    `nonmatchings/<fn>/base.c` seed and derives the compiler profile from its source parent.
+    For a prepared copy or explicit assembly input, use
+    `python3 tools/rom_build.py import-permuter --source <parent.c> --input <candidate.c> --asm <target.s>`.
+    Generated workspaces retain that parent profile. Keep the root source on its matching stub
+    until the candidate is ready for the full-ROM gate.
 - **Decomp is authoritative for names** (per the Ghidra-workspace
   `docs/re/coordination/decomp_coordination.md`).
 - **Match finalization.** Follow the Finalize and Bank steps in the [execution loop](#execution-loop-inline).
   The [oracle table](#oracles) distinguishes the byte spot-check from the full-ROM gate.
-- **Clean-rebuild when an enabler edits a shared vendored header.** The build tracks no header deps,
-  so an incremental `make` recompiles only the file you touched, not the other consumers of a header
-  you changed. When a mirror or enabler edits a widely-included header (e.g.
-  `include/libultra/PR/os_version.h`), the banking SHA-1 must come from `make clean && make extract &&
-  make`, not an incremental build (`docs/hazards.md#clean-rebuild-after-shared-header-edit`).
-- **Clear every object after a curated rename, for the same reason.** The build tracks no
-  `INCLUDE_ASM` dep either, so `make extract` rewrites the `.s` of a still-asm caller with the new
-  name while its stale `.o` keeps the old undefined reference. The tell is a link error naming the
-  old symbol in a file you never edited, while `grep -rl` over `asm/` shows the new name in place:
-  the `.s` is fine, the object is stale. Delete by tree, not by guessed parent -- one rename has hit
-  several stale parents at once: `find build -path '*/src/<tree>/*.o' -delete`, or
-  `find build -name '*.o' -delete` (S270 single parent, S271 whole tree, S299 `func_8006AEA4` called
-  from `render_frame`).
-  - If the caller's `.s` does not pick up the new name on `make extract` at all, it is a splat
-    disassembly gap relic, not a stale object: `tools/recover_stub.sh 0x<parent_subseg_off>
-    <caller_fn>`, then `make extract && make`. Never `rm` it -- `asm/nonmatchings/` is gitignored, so
-    a deleted relic has no `git restore` (S281).
+- **Shared header edits.** CMake tracks compiler-discovered includes and rebuilds dependent objects.
+  Run `tools/verify-rom.sh`; extraction is not required for a header-only change. A stale dependent
+  is a dependency-graph defect to reproduce and fix, not a reason to routinely clean the tree.
+- **Curated renames.** Extraction publishes changed assembly and regenerates the link inputs.
+  Run `tools/verify-rom.sh --extract` after a curated metadata change. If an old reference survives,
+  inspect the generated assembly and dependency graph before deleting outputs.
 - **Library code under `src/libultra/`, `src/libkmc/`, `src/libnusys/`, `src/libnaudio/`,
   `src/libmus/`, and `src/mgu/` (plus the audio-lib include trees `include/libnaudio/`,
   `include/libnualstl/`, and `include/libmus/`) is clang-format-22 formatted** (stock Google with `SortIncludes: Never`; each dir carries a local
@@ -454,17 +390,14 @@ below).
   `include/libnaudio/`, `include/libnualstl/`, and `include/libmus/` were reworked to the Code
   Complete ch31/ch32 style on 2026-06-29; the prior "include trees stay verbatim/unformatted" default
   no longer holds for them). `SortIncludes: Never` is load-bearing: stock Google sorts `#include`s and
-  can break a byte-exact match. When an internal header shares a name with an existing one on the `-I` path (e.g.
-  the n_audio_sc `synthInternals.h` vs `include/libultra/internal/synthInternals.h`), the build
-  profile prepends `-I src/<lib>` so the vendored SC copy wins (`mk/libnaudio.mk`, S129). Add the new
-  tree's profile include dirs to `pick_target.py`'s `LIB_EXTRA_INCLUDE_DIRS`/`INCLUDE_DIRS` so its
-  band stops false-flagging `needs-header → blk`.
+  can break a byte-exact match. When an internal header shares a name with another on the include
+  path, make sure the per-source profile orders the intended vendored copy first. Keep
+  `tools/build_profiles.json` and candidate-ranking include-path assumptions aligned.
 - **Use ultra64.h types** in decomp C (`s32`/`u64`/`vu32`/`f32`/...) for every integer and float;
   these replace raw `int`/`long long`/`volatile unsigned long`.
-- **Prompt authoring.** Every prompt surface in this project (`AGENTS.md`, `CLAUDE.md`, `docs/*`,
-  `.agents/skills/*`, `.claude/commands/*`, and artifact templates) follows `docs/prompt-style.md`
-  when created or modified. Its conformance checklist is the gate to run before committing a
-  prompt-surface edit.
+- **Prompt authoring.** Project instructions follow the concise guidance in `docs/prompt-style.md`.
+  Root `AGENTS.md` is the sole always-loaded context; native Oh My Pi skill and command provide the
+  decomp workflow entry points.
 
 ### C naming (compact; full guide in `docs/coding-style.md`)
 

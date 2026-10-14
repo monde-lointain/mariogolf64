@@ -1,47 +1,56 @@
 ---
 type: Project Overview
 title: Mario Golf 64 decompilation
-description: Introduces the byte-exact Mario Golf 64 decompilation and routes contributors to setup and workflow documentation.
+description: Byte-exact US retail reconstruction with an owned toolchain, CMake build, and Oh My Pi workflow.
 ---
 
 # Mario Golf 64 decompilation
 
-Reconstructs the USA revision-0 Nintendo 64 game as readable C and assembly that rebuild to the
-original ROM. A successful build is not sufficient evidence of a match: the project match gate is
-[`tools/verify-rom.sh`](tools/verify-rom.sh), which checks build success before the ROM SHA-1.
+Reconstructs the US revision-0 Nintendo 64 game as C and assembly that rebuild to the original ROM.
+This Git monorepo contains the pinned MIPS compiler/binutils sources, extraction dependencies,
+and decompilation tools. CMake 3.30+ owns the build; no submodules or target-tool downloads are needed.
+
+Supply your own big-endian `baserom.z64`, then:
+
+```sh
+cmake --preset us
+tools/verify-rom.sh
+```
+
+The verifier requires a successful matching build before reading the authoritative ROM SHA-1.
+All generated tools, extraction outputs, objects, and the ROM live under `build/us/`.
+See [build prerequisites and commands](docs/build.md), including isolated nonmatching builds.
 
 ## Start here
 
-- [Build locally](docs/build.md) — prerequisites, extraction, verification, and WIP build isolation.
-- [Documentation index](docs/index.md) — choose a task, then load only its relevant reference.
-- [Agent workflow](docs/agent-workflow.md) — plan, execute, and review an approved decomp sprint.
-- [Tool reference](docs/tooling.md) — candidate selection, matching signals, and maintenance commands.
-- [Private CI container](docker/README.md) — maintainers only; the image contains the copyrighted ROM.
-
-The ROM is not distributed. Supply your own `baserom.z64`; keep it and any ROM-bearing container
-private. No current progress percentage is pinned here: candidate counts and matching results change
-with the source tree. Use the ranker and ROM gate for current evidence.
+- [Build and verify](docs/build.md) — source-built tools, offline Python environment, presets, and ROM gate.
+- [Dependency ownership](third_party/README.md) — immutable sources, wheel hashes, origins, and licenses.
+- [Agent workflow](docs/agent-workflow.md) — Oh My Pi `/decomp` and the native `mg64-decomp` skill.
+- [Documentation index](docs/index.md) — on-demand matching hazards, code-generation levers, and evidence.
+- [Tool reference](docs/tooling.md) — candidate selection and isolated matching signals.
+- [Private CI container](docker/README.md) — maintainers only; it contains the copyrighted ROM.
 
 ## Repository layout
 
 | Path | Purpose |
 | --- | --- |
-| `src/`, `include/` | Reconstructed game code and library sources/headers. |
-| `asm/`, `assets/` | Splat extraction outputs, including reference assembly. |
+| `src/`, `include/` | Reconstructed game and library source/header inputs. |
 | `mariogolf64.yaml`, `symbol_addrs.txt` | Segment layout and curated symbol placement. |
-| `mk/`, `Makefile` | Compiler profiles and ROM build rules. |
-| `tools/`, `tests/tooling/` | Decomp helpers and their characterization suite. |
-| `docs/` | The project's OKF v0.2 knowledge bundle. |
-
-Generated and low-level files have mutation restrictions; see the invariants in
-[AGENTS.md](AGENTS.md#invariants) or [CLAUDE.md](CLAUDE.md#invariants) before changing them.
-The [history guide](docs/history.md) distinguishes current procedures from sprint-time evidence.
+| `CMakeLists.txt`, `CMakePresets.json`, `cmake/` | Build graph and reproducible configure/build/test workflows. |
+| `third_party/` | Pinned source archives, offline Python distributions, and provenance. |
+| `tools/`, `tests/tooling/` | Ordinary vendored decomp tools, first-party helpers, and behavioral tests. |
+| `.omp/` | Native skill and thin user command; root `AGENTS.md` holds safety context. |
+| `build/us/work/`, `build/us/obj/` | Generated extraction/source shadow and objects; never source inputs. |
+| `docs/`, `BACKLOG.md`, `RETRO.md`, `VELOCITY.md` | Current guidance and retained historical evidence. |
 
 ## Contributing
 
-Start with the [coding and matching style](docs/coding-style.md) for C, or
-[prompt style](docs/prompt-style.md) for agent-facing documentation. Never commit a non-matching
-function. Sprint scope, process changes, and outward operations follow the approval contracts in the
-[sprint gates](docs/workflow/gates.md).
+Read [the invariants](AGENTS.md#invariants) before changing generated or low-level inputs.
+Never commit a non-matching function. Candidate experiments stay isolated until the full-ROM gate
+passes. Use [C coding and matching style](docs/coding-style.md) for source work and
+[prompt style](docs/prompt-style.md) for agent instructions. The [history guide](docs/history.md)
+distinguishes current procedures from sprint-time records.
 
-The project is licensed under [MIT](LICENSE). That license does not grant rights to Nintendo's ROM.
+The ROM is not distributed. Keep it, generated game assets, and any ROM-bearing container private.
+The root [MIT license](LICENSE) does not grant rights to Nintendo's ROM or replace
+[third-party licenses](third_party/README.md#licenses).

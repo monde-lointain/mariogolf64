@@ -2,6 +2,35 @@
 
 ## 2026-10-14
 
+### Monorepo and CMake modernization
+
+- **Ownership**: Imported asm-differ, decomp-permuter, and m2c as ordinary Git source; removed
+  submodule configuration. Added pinned compiler/binutils source archives and the complete
+  hash-locked offline Python wheelhouse with corresponding source distributions and license notices.
+- **Build**: Replaced the repository Make interface with CMake 3.30+ presets, source-built tools,
+  binary-tree extraction, output-tracked objects, include depfiles, and authoritative per-source
+  compiler profiles. Preserved the KMC/modern-assembler split and exact linker object order.
+- **Workflow**: Consolidated prompt entrypoints into the native Oh My Pi `mg64-decomp` skill and
+  `/decomp` command. Retired duplicated Claude/Codex prompts, prompt budgets/linting, legacy Make
+  fragments, and duplicate permuter profiles; retained reconstruction and sprint history.
+- **Integration**: Migrated ranker, diff, isolated compilation, permuter, optional reference builds,
+  CI, and container instructions to the configured binary-tree tools. Permuter imports inherit the
+  parent TU's profile and recognize CMake roots and GNU assembly section flags.
+- **ROM proof**: A source-only export, without old assembly/assets, tool binaries, submodules, or
+  Python environments, built the US retail ROM using CMake 3.30.9. The verifier reported SHA-1
+  `e2c4e7a905b29529b49a1619a401fe699224829b`; the working tree also passed with CMake 4.2.3.
+- **Behavior proof**: Header invalidation rebuilt dependent objects and retained the matching ROM.
+  A deliberate compiler error rejected an older matching ROM before hashing; a nonmatching
+  configuration was refused. Unchanged extraction preserved generated-file timestamps and avoided
+  object rebuilds. Real `rand` isolated compilation and permuter scoring both measured score zero.
+- **Checks**: The ROM CTest passed; 14 targeted compiler-profile, assembly-parser, decomp-loop,
+  and hazard-anchor tests passed; the tooling undefined-name check passed. Exercised ranking,
+  profile probing, allocno reporting, and native Oh My Pi command/skill discovery.
+- **Limits**: Docker and hosted CI configuration were updated but not executed. The private CI image
+  must be rebuilt. No full-suite-green claim replaces the historical tooling limitations below.
+
+### Earlier documentation restructuring
+
 - **Structure**: Established the OKF v0.2 [bundle index](index.md), workflow and reconstruction
   indexes, typed concept metadata, and explicit separation of current guidance from historical evidence.
 - **Discovery**: Separated [candidate/build hazards](hazard-index.md) from
