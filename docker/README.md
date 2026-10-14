@@ -52,3 +52,15 @@ docker run --rm -v "$PWD":/repo -w /repo mg64-ci-test bash -c \
   'cp /orig/baserom.z64 baserom.z64 && make setup && make extract && tools/verify-rom.sh'
 # expect: make OK + ROM SHA-1 MATCH ✓
 ```
+
+## Local checkout prerequisites
+
+Local builds use host `cpp` and system MIPS binutils for extracted assembly; C still uses
+KMC GCC 2.7.2 and KMC binutils 2.6. Install `binutils-mips-linux-gnu`, `cpp`, and `clang-format-23`,
+place the USA revision-0 ROM at `baserom.z64`, and initialize the recorded submodules.
+On uv-managed machines, create `venv` with `uv venv --seed venv`, install
+`tools/requirements.txt` with `uv pip install --python venv/bin/python3 -r tools/requirements.txt`,
+and download the legacy compiler with `make -C tools`.
+Run `make extract`, then `tools/verify-rom.sh`; stop on failure rather than trusting an old ROM.
+For missing generated assembly stubs, use
+`docs/hazards.md#stale-persistent-nonmatchings-relic-recovery`.

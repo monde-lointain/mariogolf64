@@ -45,12 +45,13 @@ AS      := $(MIPS_BINUTILS_PREFIX)as
 LD      := $(MIPS_BINUTILS_PREFIX)ld
 OBJCOPY := $(MIPS_BINUTILS_PREFIX)objcopy
 STRIP   := $(MIPS_BINUTILS_PREFIX)strip
-CPP     := $(MIPS_BINUTILS_PREFIX)cpp
+# Assembly preprocessing uses host cpp; target defines are passed explicitly below.
+CPP     := cpp
 
 # Fail early and clearly if the asm preprocessor is missing, rather than leaving
 # pipefail to catch the empty-pipe case later.
 ifeq (,$(shell command -v $(CPP) 2>/dev/null))
-$(error $(CPP) not found; install it, e.g. `sudo apt install cpp-mips-linux-gnu`)
+$(error $(CPP) not found; install it, e.g. `sudo apt install cpp`)
 endif
 
 # KMC_PREFIX is overridable for a relocated toolchain. COMPILER_PATH points GCC at

@@ -12,14 +12,14 @@ FROM ubuntu:24.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Build deps. gcc-mips-linux-gnu supplies mips-linux-gnu-cpp (the Makefile gate-
-# checks it); binutils-mips-linux-gnu supplies as/ld/objcopy/strip; python3-venv
+# Build deps. Host cpp preprocesses extracted assembly; binutils-mips-linux-gnu
+# supplies as/ld/objcopy/strip; python3-venv
 # is needed by `make setup`'s `python3 -m venv`. wget+ca-certificates let
 # `make -C tools` download the KMC toolchain.
 RUN apt-get update && apt-get install -y --no-install-recommends \
         make git build-essential wget ca-certificates \
         python3 python3-venv python3-pip \
-        binutils-mips-linux-gnu gcc-mips-linux-gnu \
+        binutils-mips-linux-gnu cpp \
     && rm -rf /var/lib/apt/lists/*
 
 # Build context = repo root; baserom.z64 must be present there (gitignored).
