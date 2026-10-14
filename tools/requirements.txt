@@ -17,5 +17,11 @@ watchdog
 levenshtein
 cxxfilt
 
+# m2c (tools/m2c submodule).
+graphviz~=0.20.1
+
+# decomp-permuter (tools/decomp-permuter submodule); networking is optional.
+toml
+
 # Characterization test suite for the decomp tooling (`make test-tools`).
 pytest
