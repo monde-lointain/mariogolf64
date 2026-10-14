@@ -1,0 +1,194 @@
+[
+  {
+    "name": "colorama",
+    "version": "0.4.6",
+    "file": "colorama-0.4.6.tar.gz",
+    "url": "https://files.pythonhosted.org/packages/d8/53/6f443c9a4a8358a93a6792e2acffb9d9d5cb0a5cfd8802644b7b1c9a02e4/colorama-0.4.6.tar.gz",
+    "sha256": "08695f5cb7ed6e0531a20572697297273c47b8cae5a63ffc6d6ed5c201be6e44",
+    "license": ""
+  },
+  {
+    "name": "crunch64",
+    "version": "0.6.2",
+    "file": "crunch64-0.6.2.tar.gz",
+    "url": "https://files.pythonhosted.org/packages/b6/27/71519d4d0af2248488ae54348a0899544bc1856c925953d77edfadf08fd9/crunch64-0.6.2.tar.gz",
+    "sha256": "cccaed12d61173c17de9630c51f5825c67be171ffba6d714852d6b669f67a611",
+    "license": null
+  },
+  {
+    "name": "cxxfilt",
+    "version": "0.3.0",
+    "file": "cxxfilt-0.3.0.tar.gz",
+    "url": "https://files.pythonhosted.org/packages/d7/dc/71ac606f7dfa71d49e3dc126b49b18daefaf6bd953078858af30fde40702/cxxfilt-0.3.0.tar.gz",
+    "sha256": "7df6464ba5e8efbf0d8974c0b2c78b32546676f06059a83515dbdfa559b34214",
+    "license": "BSD"
+  },
+  {
+    "name": "graphviz",
+    "version": "0.20.3",
+    "file": "graphviz-0.20.3.zip",
+    "url": "https://files.pythonhosted.org/packages/fa/83/5a40d19b8347f017e417710907f824915fba411a9befd092e52746b63e9f/graphviz-0.20.3.zip",
+    "sha256": "09d6bc81e6a9fa392e7ba52135a9d49f1ed62526f96499325930e87ca1b5925d",
+    "license": "MIT"
+  },
+  {
+    "name": "iniconfig",
+    "version": "2.3.1",
+    "file": "iniconfig-2.3.1.tar.gz",
+    "url": "https://files.pythonhosted.org/packages/01/e1/2069291243c926a2ff1cd706c7f3eeb9b62144bf60f77c9fb9ff2fb26bd3/iniconfig-2.3.1.tar.gz",
+    "sha256": "67f4b9c50da0dedf52af349e7749a80a9057a5031199791b906c3bb3ae878960",
+    "license": "MIT"
+  },
+  {
+    "name": "intervaltree",
+    "version": "3.1.0",
+    "file": "intervaltree-3.1.0.tar.gz",
+    "url": "https://files.pythonhosted.org/packages/50/fb/396d568039d21344639db96d940d40eb62befe704ef849b27949ded5c3bb/intervaltree-3.1.0.tar.gz",
+    "sha256": "902b1b88936918f9b2a19e0e5eb7ccb430ae45cde4f39ea4b36932920d33952d",
+    "license": "Apache License, Version 2.0"
+  },
+  {
+    "name": "levenshtein",
+    "version": "0.27.5",
+    "file": "levenshtein-0.27.5.tar.gz",
+    "url": "https://files.pythonhosted.org/packages/81/ab/d55fdebfdee7605df174913708d44f75dfec0ec5e4e5fd8e978bb88897eb/levenshtein-0.27.5.tar.gz",
+    "sha256": "22021caf5867a46fae5ab927bbdcb430599d7e5ee3898449cbbe430ff07b7d08",
+    "license": "GPL-2.0-or-later"
+  },
+  {
+    "name": "n64img",
+    "version": "0.3.3",
+    "file": "n64img-0.3.3.tar.gz",
+    "url": "https://files.pythonhosted.org/packages/da/48/c733985b64b9c4512b3fb35679eceae662461596c3cd1576851eb8bc6223/n64img-0.3.3.tar.gz",
+    "sha256": "488b37916eb4a943231eaf49ce9052f7d6f96f7c90712ef3aeaaaef49e3bbf12",
+    "license": "MIT"
+  },
+  {
+    "name": "packaging",
+    "version": "26.3",
+    "file": "packaging-26.3.tar.gz",
+    "url": "https://files.pythonhosted.org/packages/7d/fa/3944b40b07da9ce895c0e6303a5ab7d53da063554f534556b134a54d6093/packaging-26.3.tar.gz",
+    "sha256": "94edc256424af38762eb31306eed28beb9f0efc50a8837492c9d6fd6004aed79",
+    "license": "Apache-2.0 OR BSD-2-Clause"
+  },
+  {
+    "name": "pluggy",
+    "version": "1.6.0",
+    "file": "pluggy-1.6.0.tar.gz",
+    "url": "https://files.pythonhosted.org/packages/f9/e2/3e91f31a7d2b083fe6ef3fa267035b518369d9511ffab804f839851d2779/pluggy-1.6.0.tar.gz",
+    "sha256": "7dcc130b76258d33b90f61b658791dede3486c3e6bfb003ee5c9bfb396dd22f3",
+    "license": "MIT"
+  },
+  {
+    "name": "pygfxd",
+    "version": "1.0.5",
+    "file": "pygfxd-1.0.5.tar.gz",
+    "url": "https://files.pythonhosted.org/packages/17/94/98ab685e4f62c39db84c2c5fed714e1c04bcbd934ccf35e231a5219946a7/pygfxd-1.0.5.tar.gz",
+    "sha256": "b31f5f862dccc2e0faa605cc16cd63a22feb3244c07a2063037421fcd3f67145",
+    "license": null
+  },
+  {
+    "name": "pygments",
+    "version": "2.21.0",
+    "file": "pygments-2.21.0.tar.gz",
+    "url": "https://files.pythonhosted.org/packages/49/2e/ced460408999b33da6b31b0021b0f37d329e202d4169aeb164493778f25b/pygments-2.21.0.tar.gz",
+    "sha256": "610ca751c9bc2492b38eb9a38a7fbc93edbbb2d7182edaf34e66ae493dee5c8c",
+    "license": "BSD-2-Clause"
+  },
+  {
+    "name": "pylibyaml",
+    "version": "0.1.0",
+    "file": "pylibyaml-0.1.0.tar.gz",
+    "url": "https://files.pythonhosted.org/packages/c9/1a/3ae773a0d4cc0b787d1b7307786c666de0729df2c4159ec964e8ba45d06d/pylibyaml-0.1.0.tar.gz",
+    "sha256": "3b58dea061903c04689e35fab63ec149f7cf5e82f0808bd3425fb3ab3950623e",
+    "license": ""
+  },
+  {
+    "name": "pypng",
+    "version": "0.20220715.0",
+    "file": "pypng-0.20220715.0.tar.gz",
+    "url": "https://files.pythonhosted.org/packages/93/cd/112f092ec27cca83e0516de0a3368dbd9128c187fb6b52aaaa7cde39c96d/pypng-0.20220715.0.tar.gz",
+    "sha256": "739c433ba96f078315de54c0db975aee537cbc3e1d0ae4ed9aab0ca1e427e2c1",
+    "license": "MIT"
+  },
+  {
+    "name": "pytest",
+    "version": "9.1.1",
+    "file": "pytest-9.1.1.tar.gz",
+    "url": "https://files.pythonhosted.org/packages/e4/47/b9efed96c114afcfa3c9d3fe98a76a1d14c74a9e266d397cf6eb64be5e01/pytest-9.1.1.tar.gz",
+    "sha256": "1088fbde8f2b49d95a549a195707afa7a76a3ce9bcadc26b6d71f0ffda5fe313",
+    "license": "MIT"
+  },
+  {
+    "name": "pyyaml",
+    "version": "6.0.3",
+    "file": "pyyaml-6.0.3.tar.gz",
+    "url": "https://files.pythonhosted.org/packages/05/8e/961c0007c59b8dd7729d542c61a4d537767a59645b82a0b521206e1e25c2/pyyaml-6.0.3.tar.gz",
+    "sha256": "d76623373421df22fb4cf8817020cbb7ef15c725b9d5e45f17e189bfc384190f",
+    "license": "MIT"
+  },
+  {
+    "name": "rabbitizer",
+    "version": "1.14.3",
+    "file": "rabbitizer-1.14.3.tar.gz",
+    "url": "https://files.pythonhosted.org/packages/7d/33/7b9dc071085e07a4c80fab75830a20de42498fffe8ae2780952fefd14178/rabbitizer-1.14.3.tar.gz",
+    "sha256": "5b830818713634ecf5debceb7519072e456f76fc61f93e4627b9d955f8b8c5f9",
+    "license": null
+  },
+  {
+    "name": "rapidfuzz",
+    "version": "3.14.6",
+    "file": "rapidfuzz-3.14.6.tar.gz",
+    "url": "https://files.pythonhosted.org/packages/18/97/226c43b7b5d957bc3840ed52ea99eed261f99834c4619be7a4742cbaeafa/rapidfuzz-3.14.6.tar.gz",
+    "sha256": "e13a8160d017b499ec7a2fa9d0ce1ae2e7377080815785819f966fb235d4eb60",
+    "license": "MIT"
+  },
+  {
+    "name": "sortedcontainers",
+    "version": "2.4.0",
+    "file": "sortedcontainers-2.4.0.tar.gz",
+    "url": "https://files.pythonhosted.org/packages/e8/c4/ba2f8066cceb6f23394729afe52f3bf7adec04bf9ed2c820b39e19299111/sortedcontainers-2.4.0.tar.gz",
+    "sha256": "25caa5a06cc30b6b83d11423433f65d1f9d76c4c6a0c90e3379eaa43b9bfdb88",
+    "license": "Apache 2.0"
+  },
+  {
+    "name": "spimdisasm",
+    "version": "1.39.3",
+    "file": "spimdisasm-1.39.3.tar.gz",
+    "url": "https://files.pythonhosted.org/packages/ea/9f/548b1239e4340763baa4030d2227df7f4b18ac4328c384e1a157d60274b7/spimdisasm-1.39.3.tar.gz",
+    "sha256": "c2c9f67678d511672b5a8c91cb5c26177b00f6f4cbaaacd3acba162e746609fd",
+    "license": "MIT License\n        \n        Copyright (c) 2022 Decompollaborate\n        \n        Permission is hereby granted, free of charge, to any person obtaining a copy\n        of this software and associated documentation files (the \"Software\"), to deal\n        in the Software without restriction, including without limitation the rights\n        to use, copy, modify, merge, publish, distribute, sublicense, and/or sell\n        copies of the Software, and to permit persons to whom the Software is\n        furnished to do so, subject to the following conditions:\n        \n        The above copyright notice and this permission notice shall be included in all\n        copies or substantial portions of the Software.\n        \n        THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\n        IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\n        FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\n        AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\n        LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\n        OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE\n        SOFTWARE.\n        "
+  },
+  {
+    "name": "splat64",
+    "version": "0.37.1",
+    "file": "splat64-0.37.1.tar.gz",
+    "url": "https://files.pythonhosted.org/packages/76/90/6ccf2d179abd52cc6de8ca1b79a767badceaa93b1f106f839803bfeb7d98/splat64-0.37.1.tar.gz",
+    "sha256": "9b0d619cb5a075d5d3ee3703a2d97a9c05426dd220afcd1505a478176af51838",
+    "license": "MIT License\n        \n        Copyright (c) 2021 Ethan Roseman\n        \n        Permission is hereby granted, free of charge, to any person obtaining a copy\n        of this software and associated documentation files (the \"Software\"), to deal\n        in the Software without restriction, including without limitation the rights\n        to use, copy, modify, merge, publish, distribute, sublicense, and/or sell\n        copies of the Software, and to permit persons to whom the Software is\n        furnished to do so, subject to the following conditions:\n        \n        The above copyright notice and this permission notice shall be included in all\n        copies or substantial portions of the Software.\n        \n        THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\n        IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\n        FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\n        AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\n        LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\n        OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE\n        SOFTWARE."
+  },
+  {
+    "name": "toml",
+    "version": "0.10.2",
+    "file": "toml-0.10.2.tar.gz",
+    "url": "https://files.pythonhosted.org/packages/be/ba/1f744cdc819428fc6b5084ec34d9b30660f6f9daaf70eead706e3203ec3c/toml-0.10.2.tar.gz",
+    "sha256": "b3bda1d108d5dd99f4a20d24d9c348e91c4db7ab1b749200bded2f839ccbe68f",
+    "license": "MIT"
+  },
+  {
+    "name": "tqdm",
+    "version": "4.67.1",
+    "file": "tqdm-4.67.1.tar.gz",
+    "url": "https://files.pythonhosted.org/packages/a8/4b/29b4ef32e036bb34e4ab51796dd745cdba7ed47ad142a9f4a1eb8e0c744d/tqdm-4.67.1.tar.gz",
+    "sha256": "f8aef9c52c08c13a65f30ea34f4e5aac3fd1a34959879d7e59e63027286627f2",
+    "license": "MPL-2.0 AND MIT"
+  },
+  {
+    "name": "watchdog",
+    "version": "6.0.0",
+    "file": "watchdog-6.0.0.tar.gz",
+    "url": "https://files.pythonhosted.org/packages/db/7d/7f3d619e951c88ed75c6037b246ddcf2d322812ee8ea189be89511721d54/watchdog-6.0.0.tar.gz",
+    "sha256": "9ddf7c82fda3ae8e24decda1338ede66e1c99883db93711d8fb941eaa2d8c282",
+    "license": "Apache-2.0"
+  }
+]
