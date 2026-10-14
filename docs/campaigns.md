@@ -52,6 +52,15 @@ risk/coupling tags; default selection asks `pick_target.py --loose-stubs <segmen
 shortlist before reference ranking or similarity sorting; final `-n` limits the queue after shard
 assignment and optional `--by-similarity` sorting. Set `--pool-size >= -n > 0`.
 
+Agent queues must obey the skill's [main-completion gate](../.omp/skills/mg64-decomp/SKILL.md#main-before-overlays):
+validate YAML `main` membership for every target, including explicit labels and resumed queues,
+before execution. Do not replace blocked main work with overlays. The default `--loose-stubs main`
+pool scans `src/main/` only; it omits main-bank library hosts and unflipped whole-assembly
+subsegments. An empty pool is not main completion. Expand discovery with
+`pick_target.py --segment main --include-stuck -n 12` and
+`pick_target.py --loose-stubs main --all -n 12`, inspect remaining YAML main hosts, and queue
+eligible main labels explicitly when they are outside the default pool.
+
 `--reference-root` may be repeated. `--shard i/N` uses stable ROM SHA-1 + bank + ROM offset identity,
 not mutable labels or similarity, and partitions analysis queues only. JSON includes each target's
 provenance, references, budget, shard, and `banked: false`; queue authority remains unbanked. A

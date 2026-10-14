@@ -2,6 +2,18 @@
 
 ## 2026-10-14
 
+- **Main-first milestone**: Made completion of the YAML `main` bank, including linked libraries,
+  a gate before overlay selection, queue execution, dispatch, or integration. The native skill
+  owns the completion criteria; root instructions, campaign guidance, fan-out, and discovery
+  commands now carry that scope. Empty fresh queues and carried/coupled blockers do not unlock
+  overlays; intentional assembly and raw data remain outside C-decompilation backlog.
+- **Proof**: Exercised main-range ranking, carry-inclusive and library-scoped ranking, all-class
+  main-path stub discovery, file closure, and read-only campaign preparation. The campaign emitted
+  one main-bank target and no overlay targets. Checked 102 concept frontmatters, recursive indexes,
+  source paths, native skill metadata, and 616 local links/exact fragments; the only reported link
+  issue was the unchanged `BACKLOG.md` self-link to `#multi-register-allocno-permutation`.
+  All 115 frozen hazard anchors passed. No ROM source or tooling behavior changed; no bank claimed.
+
 - **Structure**: Refactored discovery against OKF v0.2: removed concept frontmatter from the nested
   workflow index, grouped reconstruction notes by symbol/address, and made this update log a flat
   date-grouped list. The repository entry guide now routes to canonical setup and workflow concepts.

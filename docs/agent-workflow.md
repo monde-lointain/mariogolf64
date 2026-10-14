@@ -19,6 +19,10 @@ The ROM SHA-1 against `baserom.z64` is the only match authority; the skill uses
 [`tools/verify-rom.sh`](../tools/verify-rom.sh) as the bank gate. Keep candidate experiments isolated
 and serialize access to the shared build tree and Ghidra MCP.
 
+The current milestone is complete main-bank decompilation before overlays. The skill's
+[main-completion gate](../.omp/skills/mg64-decomp/SKILL.md#main-before-overlays) covers linked libraries,
+carried work, campaign queues, and delegated analysis; a fresh shortlist is not a completion check.
+
 ## Where to read
 
 | Need | Read |

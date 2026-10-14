@@ -29,9 +29,9 @@ isolated objects are iteration signals, not banking gates.
 
 | Need | Command |
 | --- | --- |
-| Whole-tree candidate ranking | `uv run --locked python tools/pick_target.py -n 12` |
-| Segment-range candidates | `uv run --locked python tools/pick_target.py --segment main -n 12` |
-| Library/path/name substring | `uv run --locked python tools/pick_target.py --lib libultra -n 12` |
+| Main-bank candidate ranking (current milestone) | `uv run --locked python tools/pick_target.py --segment main -n 12` |
+| Main-bank candidates including carries | `uv run --locked python tools/pick_target.py --segment main --include-stuck -n 12` |
+| Main-bank library/path/name substring | `uv run --locked python tools/pick_target.py --segment main --lib libultra -n 12` |
 | Leaves in already-C files | `uv run --locked python tools/pick_target.py --loose-stubs main` |
 | Include carried/nested/intrinsic leaves | `uv run --locked python tools/pick_target.py --loose-stubs main --all` |
 | Host-file closure ranking | `uv run --locked python tools/pick_target.py --file-close main` |
@@ -46,6 +46,11 @@ sets the maximum remaining stubs per host. Inspect a bounded shortlist before ex
 `--segment` filters by VRAM range; `--lib` is a substring filter, not an equivalent segment selector.
 Whole-subsegment ranking and loose-stub ranking answer different questions. A `fresh` classification
 is a ceiling, not evidence that a leaf will match easily.
+
+Agent selection follows the [main-completion gate](../.omp/skills/mg64-decomp/SKILL.md#main-before-overlays).
+`--loose-stubs main` and `--file-close main` scan the `src/main/` path, not all YAML main-bank
+hosts. Check linked libraries and whole-assembly subsegments too; an empty shortlist does not
+authorize overlay work.
 
 `--carried-check` flags names from backlog carry-overs and WIP filenames, including scoping notes.
 Read the note before treating the classification as a terminal wall. `--nested-check` identifies

@@ -9,11 +9,34 @@ Use this workflow for function selection, classical decompilation, upstream mirr
 
 Use the configured Python interpreter `uv run --locked python`; the default binary tree is `build/us`.
 
+## Main before overlays
+
+Complete the `main` code segment in `mariogolf64.yaml` before selecting, queuing, dispatching,
+or integrating overlay decompilation. Scope by YAML bank membership, not a `src/main/` path or
+function-name prefix: linked library code in `main` is part of this milestone. Preserve existing
+overlay carries without advancing them. Read-only overlay references may inform a main target;
+they do not make the overlay a work target.
+
+Main is complete only when its YAML subsegments contain no remaining decompilation `asm`
+subsegments, all of its C hosts (including library paths) have zero `INCLUDE_ASM` stubs, and
+`tools/verify-rom.sh` succeeds on that integrated source state. Intentional `hasm` sources and
+raw data subsegments are not C-decompilation backlog. Audit YAML and live sources before
+declaring completion; ranker output is not a completeness oracle.
+
+An empty fresh shortlist, deadline, carried wall, nested coupling, or pool/rodata blocker does
+not permit switching to overlays. Expand main discovery to carried and coupled work, inspect
+whole-subsegment and library hosts, and retain measured blockers in existing WIP/backlog notes.
+If no main target is actionable, report the specific blocker rather than filling the queue
+with overlays. Once the gate passes, select overlay work using exact bank and ROM provenance.
+
 ## Select
 
-1. Rank candidates with `uv run --locked python tools/pick_target.py -n 12`; use `--lib`, `--segment`, or `--loose-stubs` to scope. Read only the selected candidate's backlog/WIP evidence. Check carried walls and nested children before pricing hand-selected leaves (`--carried-check`, `--nested-check`). Inspect its assembly and source comments; ranker signals are not proof of tractability.
+1. Rank main candidates with `uv run --locked python tools/pick_target.py --segment main -n 12`; combine `--lib` with `--segment main` for library scope. Use `--loose-stubs main` and `--file-close main` for game-host leaves and closure, not a whole-bank inventory. Read only the selected candidate's backlog/WIP evidence. Check carried walls and nested children before pricing hand-selected leaves (`--carried-check`, `--nested-check`). Inspect its assembly and source comments; ranker signals are not proof of tractability.
    `--lib` filters substrings, not segment ranges. Size leaves from their assembly headers, not adjacent VRAM deltas. Re-derive carried signatures, declarations, instruction counts, and residuals from current evidence; a prior compiler-pass verdict is a hypothesis.
    Bound discovery with `-n`; loose-stub mode also supports `--json`. Prefer a demonstrated sibling/upstream/source lever over a historical bank-rate forecast.
+   If fresh work runs out, use `--segment main --include-stuck -n 12` and
+   `--loose-stubs main --all -n 12`, then inspect remaining YAML main hosts, including libraries.
+   `--loose-stubs main` and `--file-close main` scan `src/main/`, not every host in the main bank.
    Use [reference discovery](../../../docs/tooling.md#references-and-native-campaigns) when a sibling
    implementation could supply a source shape. Read its C and assembly, compare types/callees,
    and recheck its hashes before reuse. Similarity and source presence do not establish a bank.
@@ -28,6 +51,10 @@ Use the configured Python interpreter `uv run --locked python`; the default bina
 For a campaign request, prepare a bounded queue with the [campaign CLI](../../../docs/tooling.md#references-and-native-campaigns).
 Keep the native session as the integration owner; execute targets serially and use native `task`
 only for independent reasoning. Shards divide analysis queues, not permission to run shared builds.
+
+Apply the [main-completion gate](#main-before-overlays) to every queue entry, including explicit
+`--func` labels and resumed queues. Validate YAML bank membership before execution; a campaign's
+default `--loose-stubs main` pool covers game-host leaves, not the complete main-bank backlog.
 
 - Prefer upstream mirrors first. An opt-in m2c prepass can seed and measure untouched candidates
   before spending agent effort; it never overwrites carries or edits matching source.

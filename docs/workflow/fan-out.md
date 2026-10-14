@@ -14,6 +14,12 @@ or the user requests parallel work. Scope the functions and carried evidence bef
 choosing slices. Routine selection, small leaves, and ROM-verifier questions do not
 need another agent. Parallelize reasoning, not the shared compiler or database.
 
+Until the [main-completion gate](../../.omp/skills/mg64-decomp/SKILL.md#main-before-overlays)
+passes, every decompilation slice must target the YAML `main` bank, including its linked libraries.
+Put that bank scope and the overlay exclusion in shared `context`; workers must not substitute
+an overlay when a main target is blocked. The parent validates bank membership before dispatch
+and integration. Read-only overlay reference analysis may support a named main target.
+
 ## Dispatch contract
 
 Use the active native `task` schema; do not copy its prompt, add role wrappers, or

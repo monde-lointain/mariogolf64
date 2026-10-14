@@ -11,6 +11,9 @@ decompilation workflow; consult [documentation navigation](docs/index.md) for on
 
 ## Invariants
 
+- Complete the YAML `main` segment, including its linked libraries, before selecting or dispatching
+  overlay decompilation. The [native skill's main-completion gate](.omp/skills/mg64-decomp/SKILL.md#main-before-overlays)
+  defines scope and completion; an empty shortlist or a carried wall does not unlock overlays.
 - `tools/verify-rom.sh` is the sole bank authority. Never treat an isolated compile, object diff, or
   direct hash as a bank verdict.
 - Never commit a non-matching function. Keep unfinished candidates isolated under `nonmatchings/`.
