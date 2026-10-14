@@ -16,16 +16,30 @@ This file holds only the *ordering rationale*, *enabler items* (gate actions), a
 
 ### Current main-bank evidence — 2026-10-14
 
+- Banked five more routines in `src/libmus/player_fx.c`: `func_8009CF98`,
+  `func_8009D004`, `func_8009D274`, `func_8009D2C4`, and `ChangeCustomEffect`
+  (1,232 bytes total). These cover indexed initialization, synth construction,
+  effect-slot allocation, reusable effect storage, and active-preset switching.
+  The existing `REVERB_MEM` layout preserves allocator scheduling; its field-offset
+  relocations explain the isolated allocator's score of 60 rather than zero
+  (`nonmatchings/func_8009D2C4/measurements/950ceae29e997007aa7ffa8e8365717aa553f36a6bd415ec0c445ce7052b273c.json`).
+  The other four isolated candidates scored zero. All five integrated function
+  sizes and non-relocation instruction bytes agree with their isolated objects.
+  `tools/verify-rom.sh` succeeded with ROM SHA-1
+  `e2c4e7a905b29529b49a1619a401fe699224829b`, resolving the relocation differences.
+  Main-bank stubs decreased from 268 to 263; this host retains four:
+  `CustomInit`, `func_8009D40C`, `func_8009D6EC`, and `func_8009D774`.
+  No YAML, symbol-address, or overlay source changes were needed.
 - Banked `func_8009D7E8`, `func_8009D800`, `func_8009D820`, and `func_8009D864`
   in `src/libmus/player_fx.c`: default/indexed preset selection and signed maximum
   section-count/delay-length scans over the null-terminated preset table.
   YAML ROM `0x78330` now has a C host using the existing `libmus` profile; nine
-  routines retain `INCLUDE_ASM`, and shared preset data remains in its original bank.
+  routines then retained `INCLUDE_ASM`, and shared preset data remains in its original bank.
   All four isolated comparisons scored zero; integrated disassembly preserved their
   instructions, branch encodings, and relocations. `tools/verify-rom.sh` succeeded:
   `e2c4e7a905b29529b49a1619a401fe699224829b`.
 - The linked-library backlog is not exhausted: the old Epic 1 completion label below
-  does not cover these nine remaining bundled-synth routines. Path-only loose-stub discovery
+  does not cover the four remaining bundled-synth routines. Path-only loose-stub discovery
   then reported 259 stubs and excluded this library host; the workflow refinement now follows
   YAML membership instead. No overlay work was advanced.
 - Reopened `func_8005E380` under its current `main` profile. The clean typed candidate
