@@ -679,6 +679,11 @@ def main() -> None:
     parser.add_argument("--func", required=True, help="func_XXXXXXXX placeholder")
     parser.add_argument("--parent", help="Path to parent src/<seg>.c for m2ctx")
     parser.add_argument(
+        "--ghidra",
+        action="store_true",
+        help="Fetch fresh typed context from the local database before seeding (service must be running)",
+    )
+    parser.add_argument(
         "--no-rodata", action="store_true", help="Skip rodata slicing (debug)"
     )
     args = parser.parse_args()
@@ -700,6 +705,34 @@ def main() -> None:
 
     target_asm = slice_target_asm(placeholder, seg_stem, out_dir)
     log("[seed] target.s written")
+    if args.ghidra:
+        # ROM provenance disambiguates overlay VRAM and database-only placeholder names.
+        entry = re.search(
+            rf"(?m)^\s*glabel\s+{re.escape(placeholder)}\s*\n\s*/\*\s*([0-9A-Fa-f]+)\s+([0-9A-Fa-f]{{8}})\s",
+            safe_read_text(ASM_DIR / f"{seg_stem}.s"),
+        )
+        if entry is None:
+            fail("target assembly has no ROM/VRAM provenance for Ghidra context")
+        context = subprocess.run(
+            [
+                sys.executable,
+                str(SCRIPT_DIR / "ghidra.py"),
+                "context",
+                "--func",
+                "0x" + entry.group(2),
+                "--rom",
+                "0x" + entry.group(1),
+                "--output",
+                str(out_dir),
+            ],
+            cwd=ROOT_DIR,
+            capture_output=True,
+            text=True,
+        )
+        if context.stderr:
+            log(context.stderr.rstrip())
+        if context.returncode:
+            fail("Ghidra context export failed: " + context.stdout.strip())
 
     rodata_path, missing_rodata, pointer_labels = slice_rodata_phase(
         target_asm, out_dir, args.no_rodata
@@ -720,9 +753,8 @@ def main() -> None:
         else:
             has_ctx = run_m2ctx(parent_path, ctx_path)
 
-    # m2ctx: Ghidra-typed struct context (agent-written ghidra_ctx.c, if present).
-    # This is `#include "common.h"` + RE'd struct defs + game externs — the half
-    # that lets m2c type the accesses instead of emitting raw offsets.
+    # Preprocess existing or freshly exported Ghidra types for m2c.
+    # Exported context is standalone; agent-maintained context may include common.h.
     ghidra_ctx_src = out_dir / "ghidra_ctx.c"
     ctx_ghidra_path = out_dir / "ctx_ghidra.c"
     has_ghidra_ctx = False
@@ -750,9 +782,8 @@ def main() -> None:
                 f"[seed] parent externs: {len(externs)}  sibling INCLUDE_ASM: {len(sibling_asm_names)}"
             )
 
-    # Ghidra body (written by slash command, not this script). Trust it only if
-    # it is not a degenerate `_NON_MATCHING`/return-const shell; otherwise the
-    # seed routes the agent to the inlined asm ground truth.
+    # Ghidra body is a shape reference, exported live or supplied by the agent.
+    # Reject degenerate `_NON_MATCHING`/return-const shells and use asm ground truth.
     ghidra_path = out_dir / "ghidra.c"
     ghidra_present = ghidra_path.exists()
     ghidra_degenerate = ghidra_present and is_degenerate_ghidra_body(

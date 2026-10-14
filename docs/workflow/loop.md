@@ -20,8 +20,8 @@ select/iterate/bank/review workflow. Consult [fan-out guidance](fan-out.md) when
 This project decompiles Mario Golf 64 (N64) one function at a time. Tooling includes splat (file
 splitting), KMC GCC 2.7.2 (configured by the build system), m2c (seed-body generation), asm-differ
 (library mode), decomp-permuter (escalation), the Ghidra MCP bridge (decompile and struct/symbol
-lookup; every call passes `program="baserom.z64"`), and coddog (see
-`docs/hazards.md#coddog-cross-ref`).
+lookup; every call passes an exact program such as `main` or `overlay_8`; see the
+[headless Ghidra guide](../ghidra.md)), and coddog (see `docs/hazards.md#coddog-cross-ref`).
 
 Use the [documentation index](../index.md) to select hazards, source levers, C style, or
 prompt-authoring guidance. [AGENTS.md](../../AGENTS.md) is the sole always-loaded project context.
@@ -60,13 +60,13 @@ inline at seed time where it adds value. For each target function:
    - **Seed** `nonmatchings/<func>/base.c` with the combined m2c-body + Ghidra-typed-context seed.
      m2c translates the asm into the compiled seed body, typed by a Ghidra-MCP struct context; the
      Ghidra decompile drops to a shape/type reference and the asm stays the sole authority (see
-     `docs/hazards.md#decompile-vs-asm-authority`). Fetch three things from Ghidra MCP: the asm
-     (`disassemble_function`), the decompile (write it to `nonmatchings/<func>/ghidra.c`), and the
-     RE'd struct defs plus signatures. Write the context to `nonmatchings/<func>/ghidra_ctx.c` as
-     `#include "common.h"` (OS structs + `os*`/nusys externs), the RE'd struct defs, and best-guess
-     `extern`s for the pack's game callees and globals. Then run
-     `uv run --locked python tools/seed_c.py --func <placeholder> --parent src/<seg>.c`, which
-     drives vendored `tools/m2c` (`mips-gcc-c`) with the Ghidra struct context and parent types.
+     `docs/hazards.md#decompile-vs-asm-authority`). With the local service running, add `--ghidra`
+     to `uv run --locked python tools/seed_c.py --func <placeholder> --parent src/<seg>.c`.
+     It exports live `ghidra.c`, standalone transitive `ghidra_ctx.c`, and ROM/type provenance
+     before driving vendored `tools/m2c` (`mips-gcc-c`). See
+     [context export](../ghidra.md#agent-access-and-context) for direct CLI/MCP access and exact
+     bank selectors. Parent context is optional; omit it when its partial types conflict with
+     the live context. Without `--ghidra`, existing candidate context remains usable offline.
      Ghidra often has not named a game-specific control struct; check sibling decompilations as well
      as the Ghidra database. m2c preserves rodata strings as `extern D_<addr>` references, ideal for
      a partial one-TU without a carve. Rename m2c synthetics and reconcile its extern preamble with
@@ -81,8 +81,8 @@ inline at seed time where it adds value. For each target function:
        pointer return with a variable index wants stepwise pointer arith (`p = base + a*K; return p +
        b*K2;`), not a flat `a*K + base + b*K2` (GCC reassociates the flat form; see
        `docs/hazards.md#loop-weight-and-live-length-regalloc-steering` Axis 6).
-     - **Provenance.** The recipe's context is `common.h` plus the RE'd struct plus game externs,
-       whether the struct comes from a sibling decomp or the Ghidra db (S191 `get_table_entry.c`).
+     - **Provenance.** Generated context records source confidence and ROM/bank identity in
+       `ghidra.json`. Check partial/conflicting structures against the defining C TU and assembly.
      - **Asm-first seed fast-path.** For a small function whose `.s` supplies enough shape and type
        evidence, hand-translate into `nonmatchings/<func>/base.c` and use the same isolated iteration
        and bank steps below. Ghidra and m2c are optional inputs, not prerequisite ceremonies.
@@ -183,7 +183,7 @@ asserted, only measured, and re-check layers stacked on top of it buy nothing.
 | decomp-permuter score | Nothing on its own. It searches; it does not decide. | Blind to internal branch targets: asm-differ normalizes a branch to a local label, so a pure back-edge residual can score zero falsely. It also tolerates an extra instruction. Use `./setup-permuter.sh <fn>` to import the isolated seed with the parent TU's configured flags; the wrapper selects the uv-managed project Python and needs no Makefile or hand-patched compiler script. Nested GCC functions require `tools/permuter_import.sh` to remove unrelated nested-function parents. | At `percent >= 0.97`, or exact instruction count with a one-operand residual. Not a multi-register permutation or FP-schedule coin. |
 | gcc `-dL` (append to the file's real flags; writes `<file>.c.loop`) | Every `loop.c` decision: per-loop insn count, each biv's init value, per-movable `savings S (life L)` moved / not-desirable / `matches`, per-giv reduced or `not worth while, X vs Y`. | Whole-file; filter. Reports decisions, not a match. | Any hoisted-constant, biv or strength-reduced-address residual. Read `savings` and `lifetime` off it and compute loop.c:1631 or :3823; S297 estimated and was wrong twice. |
 | gcc `-dg` (`.greg`; `-dl` gives `.lreg`) | An allocno's hard-register conflicts and preferences, the `;; N regs to allocate` priority order, and the `;; Register dispositions` pseudo-to-hard-reg map. | Whole-file; filter on `;; Function <name>`. Gives the order, not the arithmetic behind it -- that is `allocno_report.py`. | Whenever a residual is register names only: the order plus the map turns it into a priority-order diff (S318). Also when the order already favours the allocno that lost (S312: `n` conflicted with `$v0`, no preference, so no rewrite reached the ROM's register). |
-| Ghidra MCP decompile | Shape and type reference at seed time. | Not authoritative; the `.s` is. Overlay vram repeats above `0x801F4A30`, so seed overlay functions by ROM offset or the splat `.s`, not by vram. | As a shape and type hint. `disassemble_function` equals the splat `.s`, so a small function does not need MCP at all. |
+| Ghidra MCP decompile | Shape and type reference at seed time. | Not authoritative; the `.s` is. Overlay VRAM repeats above `0x801F4A30`; select the exact bank program and corroborate ROM provenance. Stock FP ABI inference and source-local partial types can be wrong. | As a shape and type hint. For small functions, the extracted `.s` may already supply everything needed. |
 | `tools/dl_decode.py <fn>.s` (+ `tools/rdp_word.py`, `tools/combine_word.py`) | A display-list emitter's packet stream, in list order. A big emitter precomputes one `Gfx *` per packet and spills most of them, so `.s` order and list order differ by up to 40 packets (S303 `func_8002CDA8`). The word decoders turn a `<w0>/<w1>` pair into RDP fields / `gDPSetCombineLERP` args. | Constant-propagation only: a word built from a runtime value prints symbolically, and it cannot say which composite macro produced a block. Settle both on the host: `gcc -m32 -DF3DEX_GBI_2 -D_LANGUAGE_C -I include -I include/libultra -I include/libultra/PR` with local `_SHIFTL`/`_SHIFTR` and `G_ON`/`G_OFF` -- and pass `p++`, not `p`, since a composite macro re-evaluates `pkt` once per packet. | Before writing C for a DL emitter. |
 | mnemonic histogram, `.s` against a fresh object (`grep -oE '  [a-z0-9.]+ '` piped to `sort \| uniq -c`, and its `objdump -dz` twin) | Whether a residual is structural or a permutation, in two calls and no build. | A multiset: says nothing about *where*. Normalise the alias pairs (`addu`/`move`, `li`/`addiu`) or it reports false deltas. | Before reading any `cmpfn` hunk. It found both S304 classes `cmpfn` normalisation hid: a branch-form divergence read as "pure allocation", and a `lui` +1 / `addiu` -1 naming an address-CSE defect behind a 491-row diff. |
 | `head -1 asm/nonmatchings/<seg>/<f>/<f>.s` | The ROM-side byte size (`nonmatching <f>, 0x<size>`); instructions = size/4. | Sizing a leaf from adjacent-vram deltas is wrong in a multi-function pack, because curated-named functions interleave the `func_<vram>` ones. | Always, for both the instruction-count target and plan-gate sizing. |
@@ -256,15 +256,16 @@ below).
 - **`symbol_addrs.txt` is add-only; never delete an entry.** The agent may add maintainer-override
   entries: a function is `name = 0x<vram>; // type:func`; a data extern is `name = 0x<vram>;
 - **Name-file ownership.** `reloc_addrs.txt` is never touched. `ghidra_symbols.txt` is generated by
-  the supported name-sync workflow; never hand-edit it. Keep the two name files disjoint so splat
-  does not encounter duplicate symbols.
+  the supported name-sync workflow; never hand-edit it. The current
+  [proposal-only sync](../ghidra.md#maintenance-names-and-backups) does not rewrite either file.
+  Keep the two name files disjoint so splat does not encounter duplicate symbols.
 - **YAML authority.** Agent-editable `mariogolf64.yaml` changes are limited to subsegment
   flip/split/path-qualifier lines. Leave segment and memory-map structure, `mariogolf64.ld`, and
   segment boundaries unchanged. Use `tools/verify-rom.sh --extract` for supported extraction.
 - **Game/overlay paths and profiles.** A flipped non-library subsegment uses `<tree>/<stem>`:
   main-segment game code under `main/<stem>`, overlay code under `overlay_<N>/<stem>`. The stem is
   the lead-function placeholder (`func_<vram>`) (S148). Overlay VRAM is reused across overlays, so
-  identify a target by ROM offset or the extracted `.s`, not MCP lookup by VRAM.
+  identify a target by ROM offset/extracted `.s`, or an exact MCP bank program plus VRAM.
 - Main display-list code uses the F3DEX2 profile (`-DF3DEX_GBI_2`); ordinary main code uses the
   standard game profile. SDK-template code embedded in the main segment belongs under its library
   tree (for example `libnusys/<file>`), not `main/`. A boot/SDK-glue file may require its own `-O0`
@@ -330,8 +331,8 @@ below).
     `python3 tools/rom_build.py import-permuter --source <parent.c> --input <candidate.c> --asm <target.s>`.
     Generated workspaces retain that parent profile. Keep the root source on its matching stub
     until the candidate is ready for the full-ROM gate.
-- **Decomp is authoritative for names** (per the Ghidra-workspace
-  `docs/re/coordination/decomp_coordination.md`).
+- **Decomp is authoritative for names.** Follow the
+  [project-local naming workflow](../ghidra.md#maintenance-names-and-backups), not an external workspace.
 - **Match finalization.** Follow the Finalize and Bank steps in the [execution loop](#execution-loop-inline).
   The [oracle table](#oracles) distinguishes the byte spot-check from the full-ROM gate.
 - **Shared header edits.** CMake tracks compiler-discovered includes and rebuilds dependent objects.

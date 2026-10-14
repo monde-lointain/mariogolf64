@@ -90,8 +90,8 @@ tags
 # Persistent undo
 [._]*.un~
 
-# Ghidra scripts (local only)
-ghidra/
+# Local Ghidra databases, runtime state, and legacy workspace
+/ghidra/
 
 # Local Claude Code MCP config (machine-specific Ghidra port pin)
 .mcp.json

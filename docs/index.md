@@ -6,6 +6,7 @@ okf_version: "0.2"
 
 - [Local build and verification](build.md) — Sets up the local toolchain, extracts the supported ROM, and distinguishes matching builds from WIP artifacts.
 - [Decomp tooling entrypoints](tooling.md) — Selects the existing command for candidate discovery, matching iteration, and documentation maintenance.
+- [Persistent headless Ghidra analysis](ghidra.md) — Creates and operates the private bank-aware database, curated MCP bridge, and live seed context.
 - [Mario Golf 64 decomp workflow](agent-workflow.md) — Routes to the native decomp skill and on-demand technical references.
 - [Workflow phases](workflow/index.md) — Links to candidate selection, execution details, and fan-out guidance.
 

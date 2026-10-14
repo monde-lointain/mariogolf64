@@ -45,6 +45,7 @@ parent-coupled leaves. Both commands exit nonzero when they find their respectiv
 | Need | Entry point | Read first |
 | --- | --- | --- |
 | Generate a seed scaffold | `uv run --locked python tools/seed_c.py --func <fn> --parent src/<seg>.c` | [Execution details](workflow/loop.md#execution-loop-inline) |
+| Fetch live Ghidra context before seeding | Add `--ghidra` to `seed_c.py`; the local service must be running | [Headless Ghidra](ghidra.md#agent-access-and-context) |
 | Compile and diff a seed | `uv run --locked python tools/decomp_loop.py --func <fn>` | [Oracles](workflow/loop.md#oracles) |
 | Select an isolation profile | `decomp_loop.py --profile auto` uses the parent TU; explicit profiles include every key in `tools/build_profiles.json` | [Build profiles](../tools/build_profiles.json) |
 | Import a permuter case | `./setup-permuter.sh <fn>` uses the isolated seed when present and the parent TU's exact flags | [Permuter playbook](hazards.md#permuter-setup-for-kmc-toolchain-mirrors) |

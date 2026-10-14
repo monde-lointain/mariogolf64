@@ -31,6 +31,7 @@ See [build prerequisites and commands](docs/build.md), including isolated nonmat
 - [Native decomp skill](.omp/skills/mg64-decomp/SKILL.md) — Oh My Pi `/decomp` selects, iterates, banks, and reviews.
 - [Documentation index](docs/index.md) — on-demand matching hazards, code-generation levers, and evidence.
 - [Tool reference](docs/tooling.md) — candidate selection and isolated matching signals.
+- [Headless Ghidra](docs/ghidra.md) — persistent bank-aware analysis, scoped MCP, and live seed context.
 - [Private CI container](docker/README.md) — maintainers only; it contains the copyrighted ROM.
 
 ## Repository layout

@@ -79,8 +79,8 @@ cmake --build build/us --target clean
 ```
 
 A single-object or isolated compile is an iteration signal, not a ROM match. Run the verifier after
-integrating a candidate. `sync-names` requires the optional Ghidra script configured through
-`MG64_GHIDRA_SYNC_SCRIPT`; name synchronization is not part of ROM compilation.
+integrating a candidate. Optional [headless Ghidra analysis](ghidra.md) has separate lifecycle
+targets and a proposal-only `sync-names`; neither is part of ROM compilation.
 
 ## Nonmatching and custom binary trees
 

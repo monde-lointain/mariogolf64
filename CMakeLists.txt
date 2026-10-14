@@ -56,12 +56,21 @@ if(BUILD_TESTING)
         RESOURCE_LOCK mg64_rom_build LABELS tooling)
 endif()
 
-set(MG64_GHIDRA_SYNC_SCRIPT "" CACHE FILEPATH "Optional Ghidra sync_decomp_names.py script")
+foreach(command IN ITEMS init refresh start stop status)
+    add_custom_target(ghidra-${command}
+        COMMAND "${CMAKE_COMMAND}" -E env "MG64_BUILD_DIR=${PROJECT_BINARY_DIR}"
+            "UV_PROJECT_ENVIRONMENT=${PROJECT_SOURCE_DIR}/.venv"
+            "${MG64_UV}" run --locked --project "${PROJECT_SOURCE_DIR}"
+            python "${PROJECT_SOURCE_DIR}/tools/ghidra.py" ${command}
+        WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}" USES_TERMINAL VERBATIM)
+endforeach()
+add_dependencies(ghidra-init extract)
 add_custom_target(sync-names
-    COMMAND "${MG64_PYTHON}" "${MG64_GHIDRA_SYNC_SCRIPT}" --export-to-decomp
-        --decomp-root "${PROJECT_SOURCE_DIR}" --write-in-place
-    USES_TERMINAL VERBATIM)
-add_dependencies(sync-names mg64_python)
+    COMMAND "${CMAKE_COMMAND}" -E env "MG64_BUILD_DIR=${PROJECT_BINARY_DIR}"
+        "UV_PROJECT_ENVIRONMENT=${PROJECT_SOURCE_DIR}/.venv"
+        "${MG64_UV}" run --locked --project "${PROJECT_SOURCE_DIR}"
+        python "${PROJECT_SOURCE_DIR}/tools/ghidra.py" sync-names
+    WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}" USES_TERMINAL VERBATIM)
 foreach(sweep IN ITEMS coddog-sweep coddog-sweep-nusys coddog-sweep-audio)
     set(sweep_env "${CMAKE_COMMAND}" -E env "MG64_BUILD_DIR=${PROJECT_BINARY_DIR}")
     if(sweep STREQUAL "coddog-sweep")

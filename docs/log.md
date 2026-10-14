@@ -2,6 +2,28 @@
 
 ## 2026-10-14
 
+### Persistent bank-aware Ghidra database
+
+- **Database**: Created private `private/ghidra/mariogolf64.gpr` with 17 programs: resident
+  entry/main plus one resident-backed program per code overlay. YAML supplies byte maps and BSS;
+  extracted assembly supplies function boundaries and ROM provenance. Source-profile preprocessing
+  imports SDK/game types and signatures; ambiguous legacy overlay names remain unassigned.
+- **Tooling**: Added reproducible init/refresh, serialized headless lifecycle, private archives,
+  proposal-only name sync, live transitive C context, and a curated exact-program MCP proxy.
+  `seed_c.py --ghidra` resolves the selected assembly's ROM/VRAM before feeding context to m2c.
+  CMake exposes separate analysis targets; the local MCP configuration launches the project bridge.
+- **Guidance**: Added [the canonical Ghidra guide](ghidra.md), replaced obsolete external-workspace
+  program/script assumptions, and documented source conflicts, FP ABI limits, and conservative
+  symbol ownership. Generic N64/Zelda loaders do not replace YAML's overlay layout; no extension
+  was needed for the CPU workflow.
+- **Proof**: Full 17-program refresh completed with zero source-import diagnostics. Real MCP stdio
+  read distinct ROM bytes at shared VRAM in overlays 3/8; bank-specific annotation edits survived
+  save/restart. Exported structure/callback/string contexts passed host C syntax checks; an isolated
+  live-context seed produced an m2c body with inferred register arguments. Native `.gar` archival
+  and CMake init/start/status/name-proposal targets ran. Tooling: 126 passed, two skipped; affected
+  Ruff checks passed. `tools/verify-rom.sh` reported SHA-1 match
+  `e2c4e7a905b29529b49a1619a401fe699224829b`.
+
 ### Repository and native-agent cleanup
 
 - **Removed**: Obsolete local `tools/cc` binaries, legacy `venv`, and empty `mk/` directory
