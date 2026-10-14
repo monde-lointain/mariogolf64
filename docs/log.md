@@ -2,6 +2,38 @@
 
 ## 2026-10-14
 
+### Streamlined agent decompilation workflow
+
+- **Research**: Parallel deep dives compared Oh My Pi's native task/skill/artifact lifecycle,
+  REA's bounded evidence contracts, The Ghidra Book chapters 8/13/19/20, Eilam's
+  Decompilation chapter, and legacy-code/refactoring notes. Kept native delegation and
+  the existing bank-aware database; added no provider stack, project agents, or orchestration wrappers.
+- **Guidance**: The skill owns procedure; `workflow/loop.md` now owns technical decisions and
+  oracle limits (378 to 155 lines). Removed repeated sprint narratives and arbitrary failure
+  counts while preserving hazard anchors, carries, compiler-profile fidelity, and serialized
+  resource ownership. Corrected integration-before-object-comparison ordering and made
+  worker proposals explicitly unmeasured until the parent compiles them.
+- **Tooling**: Loose-stub ranking now applies `-n` after filtering and supports JSON records.
+  Replaced repeated historical advisories with current classification guidance. Reference
+  assembly/pseudocode remain separate artifacts rather than duplicate seed blocks; removed
+  the obsolete `asm_inlined` result field. m2c failures retain stdout as well as stderr diagnostics.
+- **Compatibility**: Actual loop smoke exposed a missing asm-differ `ref_file`, omitted raw
+  opcode columns, and mismatch detection using nonexistent formatter cell keys. Updated the
+  comparison contract and removed unnecessary table/formatter serialization. Regression tests
+  exercise real immediate/register changes, deleted delay slots, filtered limits, and context errors.
+- **Proof**: Tooling: 129 passed, two skipped. Real `rand` seed compiled at its libkmc profile
+  after normal extern refinement: score zero, 13 matching rows; changing its delay-slot mask
+  produced score 5 and the exact operand diagnostic. A compact seed with separate reference
+  artifacts compiled to return 7 without changing those artifacts. `--loose-stubs main --all -n 3`
+  shrank from 259 candidates/27,264 bytes to three candidates/561 bytes; JSON returned the same
+  shortlist. Checked 106 documentation files' metadata, 119 local links/fragments over 15 active
+  surfaces, two index scopes, native skill metadata, and all 115 frozen hazard anchors.
+  `tools/verify-rom.sh` passed: `e2c4e7a905b29529b49a1619a401fe699224829b`.
+- **LSP**: Native rediscovery loaded the already-installed BasedPyright and Ruff from `.venv`;
+  references and diagnostics ran without adding project configuration or dependencies.
+- **Scope**: No matching C, headers, YAML, pinned vendors, or historical reconstruction evidence
+  changed. Live Ghidra export and permuter execution were unchanged and were not exercised here.
+
 ### Persistent bank-aware Ghidra database
 
 - **Database**: Created private `private/ghidra/mariogolf64.gpr` with 17 programs: resident

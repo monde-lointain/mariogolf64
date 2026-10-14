@@ -32,6 +32,41 @@ def _no_live_nusys_map(monkeypatch):
     monkeypatch.setenv("AUDIO_PINS", "/nonexistent/audio_pins.tsv")
 
 
+@pytest.mark.parametrize(
+    ("include_all", "expected"),
+    [(False, "func_80002000"), (True, "func_80001000")],
+)
+def test_loose_stub_limit_applies_after_filtering(
+    monkeypatch, capsys, include_all, expected
+):
+    import sys
+
+    pt = load_tool("pick_target")
+    stubs = [
+        {
+            "fn": name,
+            "file": "src/main/host.c",
+            "size": size,
+            "carried": carried,
+            "nested": False,
+        }
+        for name, size, carried in [
+            ("func_80001000", 8, True),
+            ("func_80002000", 16, False),
+            ("func_80003000", 24, False),
+        ]
+    ]
+    monkeypatch.setattr(pt, "loose_stubs", lambda segment: stubs)
+    argv = ["pick_target.py", "--loose-stubs", "main", "--json", "-n", "1"]
+    if include_all:
+        argv.append("--all")
+    monkeypatch.setattr(sys, "argv", argv)
+    with pytest.raises(SystemExit) as exit_info:
+        pt.main()
+    assert exit_info.value.code == 0
+    assert [row["fn"] for row in json.loads(capsys.readouterr().out)] == [expected]
+
+
 def test_vendorable_tu_missing_defines(tmp_path, monkeypatch):
     """S57 retro #1: the asm-mirror needs-define pre-check (vendorable_tu_missing_defines).
 

@@ -13,6 +13,7 @@ Use the configured Python interpreter `uv run --locked python`; the default bina
 
 1. Rank candidates with `uv run --locked python tools/pick_target.py -n 12`; use `--lib`, `--segment`, or `--loose-stubs` to scope. Read only the selected candidate's backlog/WIP evidence. Check carried walls and nested children before pricing hand-selected leaves (`--carried-check`, `--nested-check`). Inspect its assembly and source comments; ranker signals are not proof of tractability.
    `--lib` filters substrings, not segment ranges. Size leaves from their assembly headers, not adjacent VRAM deltas. Re-derive carried signatures, declarations, instruction counts, and residuals from current evidence; a prior compiler-pass verdict is a hypothesis.
+   Bound discovery with `-n`; loose-stub mode also supports `--json`. Prefer a demonstrated sibling/upstream/source lever over a historical bank-rate forecast.
 2. Route hazards through [the hazard index](../../../docs/hazard-index.md), then read the selected playbook. Consult [C coding style](../../../docs/coding-style.md) for source conventions.
 3. Resolve the source subsegment in `mariogolf64.yaml`. Change only explicitly required subsegment flip/split/path lines; never edit generated extraction outputs by hand. Preserve `INCLUDE_ASM` for unbanked functions. Do not change C, headers, or YAML unless the task requires that source change.
    A compiler jump table couples source and rodata: carve it only when the C switch regenerates its symbol.
@@ -22,9 +23,10 @@ Use the configured Python interpreter `uv run --locked python`; the default bina
 ## Iterate
 
 - For an upstream mirror, copy the pinned upstream source and required headers, then validate with `tools/verify-rom.sh`. Check names, calls, data references, and routed hazards before treating it as a clean mirror.
-- For classical work, read the function's extracted assembly as ground truth. Use Ghidra decompilation and types only as shape/context evidence. Seed `nonmatchings/<func>/base.c` with `uv run --locked python tools/seed_c.py --func <func> --parent src/<seg>.c`, then iterate with `uv run --locked python tools/decomp_loop.py --func <func>`. Inspect the measured residual and re-derive its class from a fresh object before choosing a source lever.
-  Add `--ghidra` to fetch live context from the running [bank-aware database](../../../docs/ghidra.md#agent-access-and-context); the seed resolves ROM/VRAM from source assembly. Omit `--parent` when its partial types conflict. Ghidra is optional, never a bank gate.
-- A score of zero is only a candidate: byte-compare the isolated and in-tree `.text`, then inline the body, remove its stub, format, and run the full ROM verifier. Escalate to the permuter at `percent >= 0.97`, or exact instruction count with a single-operand residual; carry a measured, documented near-match rather than claiming a match.
+- For classical work, read the function's extracted assembly as ground truth. Use Ghidra decompilation and types only as shape/context evidence. Seed `nonmatchings/<func>/base.c` with `uv run --locked python tools/seed_c.py --func <func> --parent src/<seg>.c`, then iterate with `uv run --locked python tools/decomp_loop.py --func <func>`. Small asm-first leaves can be translated directly into the isolated candidate.
+  Read `target.s` and optional `ghidra.c` separately; the editable seed does not duplicate them. Check `body_source` and refine fallback bodies, prototypes, and types against assembly. Add `--ghidra` only when fresh [bank-aware context](../../../docs/ghidra.md#agent-access-and-context) resolves a question; omit `--parent` when its partial types conflict.
+- Fix compile diagnostics before retrying. Classify a fresh residual as structure/count, registers, or ordering; change a named [source lever](../../../docs/levers.md) and re-measure. Escalate to the permuter at `percent >= 0.97`, or exact instruction count with a single-operand residual. A wall verdict belongs to its measured base, not permanently to the function.
+- Score zero starts provisional integration: inline the body, remove its stub, format, build the host object, and spot-check the target function against the isolated object. Then run the full ROM verifier. Compare the same function, not whole multi-function `.text` sections; [oracle limits](../../../docs/workflow/loop.md#oracles) explain relocation and normalization caveats. If integration fails, restore the matching stub/source and keep the candidate isolated.
 - Preserve profile fidelity. Isolated compilation must use the same per-source profile and flags as the ROM build; use `tools/rom_build.py` and the authoritative `tools/build_profiles.json` rather than hand-assembled compiler commands. Never infer a matching result from an isolated compile alone.
 
 ## Bank
@@ -34,6 +36,8 @@ A function is banked only after `tools/verify-rom.sh` exits successfully. Do not
 ## Review and resume
 
 Review the banked source and verifier result, and distinguish verified matches from carried candidates. Count functions as well as remaining stubs: extraction may already emit empty leaves as C. Preserve backlog carry-overs and technical evidence; update task-specific notes as required. On resume, reconcile the current task state with committed changes and the tracked backlog before continuing.
+
+Persist only enough state to reproduce: target ROM/bank/host, exact candidate and profile, measurement command and residual, verifier outcome or unbanked status, rejected hypotheses tied to that base, and the next experiment. Workers' native artifacts serve session communication; existing WIP/backlog notes serve durable evidence. Do not create parallel resume ledgers or reread complete sprint history.
 
 ## Domain references
 

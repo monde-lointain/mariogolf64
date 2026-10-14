@@ -1058,7 +1058,12 @@ def main():
         help="vram-range segment filter (e.g. `main`), distinct from the --lib substring; "
         f"segments: {', '.join(sorted(SEGMENT_RANGES))}",
     )
-    ap.add_argument("-n", type=int, default=20, help="max rows (default 20)")
+    ap.add_argument(
+        "-n",
+        type=int,
+        default=20,
+        help="max candidate rows; with --file-close, max stubs per host (default 20)",
+    )
     ap.add_argument(
         "--include-stuck", action="store_true", help="include BACKLOG carry-overs"
     )
@@ -1091,13 +1096,13 @@ def main():
         metavar="SEG",
         help="Enumerate still-INCLUDE_ASM stubs inside ALREADY-`c` files of src/SEG/, smallest-first, "
         "each tagged fresh / CARRIED-WALL / NESTED-CHILD / INTRINSIC-HASM. Surfaces fresh individual "
-        "leaves the whole-subseg pack ranker misses (S273). Default hides carried+nested+intrinsic; "
-        "--all shows every stub.",
+        "leaves the whole-subseg pack ranker misses. Default hides carried+nested+intrinsic; "
+        "--all includes those classes. -n bounds output; --json emits candidate records.",
     )
     ap.add_argument(
         "--all",
         action="store_true",
-        help="with --loose-stubs, list every stub (incl. carried-wall/nested/intrinsic-hasm), not just fresh ones.",
+        help="with --loose-stubs, include carried-wall/nested/intrinsic-hasm, not just fresh candidates.",
     )
     ap.add_argument(
         "--file-close",
@@ -1189,7 +1194,12 @@ def main():
                 and not s.get("pool_blocked")
             )
 
-        shown = stubs if args.all else [s for s in stubs if _is_fresh(s)]
+        eligible = stubs if args.all else [s for s in stubs if _is_fresh(s)]
+        shown = eligible[: args.n]
+        n_fresh = sum(1 for s in stubs if _is_fresh(s))
+        if args.json:
+            print(json.dumps(shown, indent=1))
+            raise SystemExit(0 if n_fresh else 1)
         print(f"{'size':>6} {'status':20} {'func':28} file")
         for s in shown:
             if s["carried"]:
@@ -1227,76 +1237,19 @@ def main():
             # risk here (S311 func_80095DE0, 611 instr / 39 jal / one target, banked on build 2).
             sc = f"  single-callee:{s['single_callee']}" if s.get("single_callee") else ""
             print(f"{sz:>6} {status:20} {s['fn']:28} {s['file']}{twin}{fpc}{sc}{strs}")
-        n_fresh = sum(1 for s in stubs if _is_fresh(s))
         print(
-            f"# {len(stubs)} stubs in src/{args.loose_stubs}/: {n_fresh} fresh, "
-            f"{sum(s['carried'] for s in stubs)} carried-wall, "
+            f"# {len(shown)}/{len(eligible)} eligible shown; {len(stubs)} stubs in src/{args.loose_stubs}/: "
+            f"{n_fresh} fresh, {sum(s['carried'] for s in stubs)} carried-wall, "
             f"{sum(s['nested'] for s in stubs)} nested, "
             f"{sum(bool(s.get('intrinsic')) for s in stubs)} intrinsic-hasm, "
-            f"{sum(bool(s.get('pool_blocked')) for s in stubs)} pool-blocked "
-            f"(block-move template in an uncarved pool; banks when the pool-owning siblings do, S300), "
-            f"{sum(s.get('wall_class') == 'jtbl-dispatch' for s in stubs)} jtbl-dispatch "
-            f"({sum(s.get('jtbl_carve') == 'jtbl-carveable' for s in stubs)} carveable and counted "
-            f"in fresh, {sum(s.get('jtbl_carve') == 'jtbl-carve-blocked' for s in stubs)} "
-            f"alignment-blocked, "
-            f"{sum(str(s.get('jtbl_carve', '')).startswith('pool-cohort') for s in stubs)} "
-            f"pool-cohort, "
-            f"{sum(str(s.get('jtbl_carve', '')).startswith('carve-pool-blocked') for s in stubs)} "
-            f"carve-pool-blocked (host carve precedes the table with asm-owned rodata in the gap; "
-            f"banks when those owners are C, S310), S307), "
-            f"{sum(s.get('wall_class') == 'dl-emitter' for s in stubs)} dl-emitter "
-            f"(pricing tag, counted in fresh; wall framing retired S294 after 7/7 banked), "
-            f"{sum(bool(s.get('dl_twin')) for s in stubs)} in dl-twin groups, "
-            f"FP by consumer: {sum(s.get('fp_class') == 'fp-coord' for s in stubs)} fp-coord "
-            f"(converted out, cheap), "
-            f"{sum(s.get('fp_class') == 'fp-sched' for s in stubs)} fp-sched, "
-            f"{sum(s.get('fp_class') == 'fp-mixed' for s in stubs)} fp-mixed (advisory, S295)"
+            f"{sum(bool(s.get('pool_blocked')) for s in stubs)} pool-blocked, "
+            f"{sum(s.get('wall_class') == 'jtbl-dispatch' for s in stubs)} jtbl-dispatch, "
+            f"{sum(s.get('wall_class') == 'dl-emitter' for s in stubs)} dl-emitter"
         )
-        if args.loose_stubs == "main":
-            # S280 plateau advisory: `fresh` here is a CEILING, not a clean pool -- the
-            # FP-scheduler / value-select-branch-likely / register-allocation (coloring OR the
-            # nested-fn arg-pointer "pressure") walls are NOT .s-detectable and read `fresh`, then
-            # wall at attempt. Measured flagged-fresh bank-rate: S273 3/3, S274 2/4, S279 1/3,
-            # S280 0/2 (unaided). NB the S280 walls were NOT terminal: a PO-directed compiler-source
-            # fan-out cracked both fully-RE'd exact-count carries. So for UNAIDED smallest-first,
-            # prefer a FRESH non-main pack; for a fully-RE'd exact-count / structural carry, a
-            # gcc-2.7.2 fan-out slice out-yields another smallest-first main continuation.
-            # S286 family-locality clause: the plateau is measured over UNRELATED fresh leaves. A
-            # fresh leaf that is a structural sibling of an already-banked fn in the same file is
-            # not plateau-bound -- the banked sibling supplies the types, externs, frame shape and
-            # most of the body. S285 3/3 and S286 3/3, both the func_80095A10.c camera family.
-            print(
-                "# ADVISORY (main plateau, S280): `fresh` is a CEILING not a clean pool "
-                "(FP-sched / value-select / register-alloc walls read fresh). Unaided main "
-                "bank-rate is low (S273 3/3 -> S280 0/2); prefer a FRESH non-main pack for "
-                "smallest-first, OR a compiler-source fan-out on a fully-RE'd exact-count carry "
-                "(cracked both S280 carries). EXCEPTION (S286): a fresh leaf that is a structural "
-                "sibling of an already-banked fn in the SAME file is not plateau-bound "
-                "(S285 3/3, S286 3/3, both func_80095A10.c; S287 3/3 in func_80059BA0.c). "
-                "EXCEPTION (S287): a heavy-FP leaf whose rodata constants match fdlibm is a "
-                "TRANSCRIPTION, not a wall -- func_80059BA0.c is the game's embedded libm "
-                "(fabsf/atanf/atan2f banked; func_80059BC0 = acosf by its pS0-pS5/qS1-qS4 "
-                "coefficients). Check the constants before pricing a heavy-FP main leaf. "
-                "MEASURE FP the right way (S290): count FP MNEMONICS "
-                "(lwc1|swc1|mtc1|mfc1|<op>.s|<op>.d|cvt.|c.<cc>.s|bc1) in the `.s`, never "
-                "`grep '$f[0-9]'` -- the register grep returns 0 on a heavily-FP function here and "
-                "prices it as a clean integer leaf, the opposite of its class. "
-                "S290 dropped func_8005D3B8 on that corrected count (36 swc1 / 31 lwc1 / "
-                "22 cvt.s.w over two game float tables, not an fdlibm pool). "
-                "But the COUNT is not the class (S295): read the `fp-coord`/`fp-sched`/`fp-mixed` "
-                "column, which classifies by what consumes the floats. S295 priced func_800880A0 "
-                "(fp=31) as its designated drop and it banked byte-exact on the first build -- all "
-                "31 mnemonics were 10.2 coordinate conversion in a composite emitter. More "
-                "generally, the tells filter CLASSES, not difficulty within a class: both leaves "
-                "that cost iterations that sprint read clean on every tell the ranker has. "
-                "POOL STATE (S305): main's fresh vein is spent -- one row remains "
-                "(draw_terrain_aim_grid, 0x1514, the largest in the dl-emitter class). The "
-                "smallest-first choice inside this segment is gone, so the next main slice is a "
-                "deliberate pick between that one big row and a characterised carry, and the "
-                "sibling-locality exception above is the only thing that still prices a main leaf "
-                "cheaply. S305 itself: the two fresh rows it took banked 1/2, the miss reaching "
-                "968/974 with the ROM's frame on a scheduler placement."
-            )
+        print(
+            "# fresh is a classification, not a matching forecast; "
+            "see docs/workflow/loop.md#candidate-pricing."
+        )
         raise SystemExit(0 if n_fresh else 1)
 
     if args.refresh_residual:

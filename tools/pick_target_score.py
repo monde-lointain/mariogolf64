@@ -239,7 +239,7 @@ def carried_wall_names():
     doc or the BACKLOG carry block. `carry_over_names()` alone misses the wip-doc-only walls (a
     wall characterized at discovery into `docs/wip/` but never parked into BACKLOG). This union
     is the authoritative "already-characterized" set; surface it at the plan gate via
-    `pick_target.py --carried-check <fn>...`. See docs/agent-workflow.md ## Definition of Ready."""
+    `pick_target.py --carried-check <fn>...`. See .omp/skills/mg64-decomp/SKILL.md ## Select."""
     names = set(carry_over_names())
     if os.path.isdir(_WIP_DIR):
         for fname in os.listdir(_WIP_DIR):

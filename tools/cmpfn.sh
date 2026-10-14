@@ -3,7 +3,7 @@
 #
 # Usage: tools/cmpfn.sh [--mnemonics] <func> [<object>]
 #   tools/cmpfn.sh func_80088890
-#   tools/cmpfn.sh func_80088890 build/src/main/func_80080220.o
+#   tools/cmpfn.sh func_80088890 build/us/obj/src/main/func_80080220.o
 #   tools/cmpfn.sh --mnemonics func_8005C038
 #
 # `--mnemonics` diffs the OPCODE stream only, dropping every operand. Use it when the counts differ
@@ -14,11 +14,10 @@
 # are spilled and reloaded" in one command). It is strictly a localiser: a body that is clean here
 # can still differ in every operand, so read the normal diff before believing anything.
 #
-# Why this exists (S258): `tools/asm-differ/diff.py` reads `build/*.map`, which an incremental
-# per-object build does not refresh, so mid-iteration it goes STALE in BOTH directions (see
-# `docs/agent-workflow.md` and the memory `subagent-diff-crack-not-a-bank`). This reads the object
-# directly, so it never lies about the code you just compiled. It is an ITERATION oracle only —
-# every bank still gates on `tools/verify-rom.sh` (full-make ROM SHA-1).
+# Linked asm-differ reads link maps that object-only builds do not refresh.
+# This comparator reads a freshly built object directly, but its normalization can
+# hide operands and addresses; see docs/workflow/loop.md#oracles. It is an iteration
+# signal only: every bank gates on tools/verify-rom.sh (configured build + ROM SHA-1).
 #
 # Both sides are normalised so that only real differences show: `$` register prefixes, `%hi/%lo`
 # relocations, immediates, `(0xX >> 16)` / `(0xX & 0xFFFF)` splat spellings, `addu rX,rY,zero` vs

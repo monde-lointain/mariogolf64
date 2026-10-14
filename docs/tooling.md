@@ -32,6 +32,11 @@ isolated objects are iteration signals, not banking gates.
 | Prior reconstruction evidence | `uv run --locked python tools/pick_target.py --carried-check <fn>...` |
 | Nested-function coupling | `uv run --locked python tools/pick_target.py --nested-check <fn>...` |
 
+`-n` bounds whole-tree and loose-stub candidate rows (default 20); filtering happens before
+the limit. `--all` includes hidden loose-stub classes, not unlimited output. Add `--json` to
+either ranking mode for candidate records without prose. In `--file-close`, `-n` instead
+sets the maximum remaining stubs per host. Inspect a bounded shortlist before expanding.
+
 `--segment` filters by VRAM range; `--lib` is a substring filter, not an equivalent segment selector.
 Whole-subsegment ranking and loose-stub ranking answer different questions. A `fresh` classification
 is a ceiling, not evidence that a leaf will match easily.
@@ -52,10 +57,12 @@ parent-coupled leaves. Both commands exit nonzero when they find their respectiv
 | Run or score an imported case | `./run-permuter.sh <fn>` / `./score-permuter.sh <fn>` | [Permuter playbook](hazards.md#permuter-setup-for-kmc-toolchain-mirrors) |
 | Bank after integration | `tools/verify-rom.sh` | [Execution details](workflow/loop.md#execution-loop-inline) |
 
-The candidate scaffold lives under `nonmatchings/<fn>/`; do not confuse it with the whole-ROM
-WIP build tree. Use the [hazard lookup](hazard-index.md) for candidate/build risks,
-[residual lookup](hazard-symptoms.md) for observed mismatches, and [source levers](levers.md) for a
-named transformation. [WIP evidence](wip/index.md) records prior constraints and ruled-out levers.
+The editable candidate lives under `nonmatchings/<fn>/base.c`; assembly (`target.s`) and optional
+Ghidra pseudocode remain separate reference artifacts. The seed JSON reports `body_source` and
+artifact paths, not duplicated inline assembly. Do not confuse candidates with the whole-ROM WIP
+build tree. Use the [hazard lookup](hazard-index.md), [residual lookup](hazard-symptoms.md), and
+[source levers](levers.md) for the measured question. [WIP evidence](wip/index.md) records prior
+constraints and ruled-out hypotheses, conditional on their measured base.
 
 The authoritative object build interface is `uv run --locked python tools/rom_build.py build --object <object-path>`.
 Compile profiles are defined by `tools/build_profiles.json`; use the same source-specific profile for
@@ -67,6 +74,11 @@ isolated iteration as the ROM build.
 - `uv run --locked python tools/hazard_anchors.py check` — frozen hazard-anchor integrity.
 - [Fingerprint sweeps](../tools/coddog/README.md) — optional local reference builds; maps are
   gitignored and depend on local artifacts, not a fresh-checkout requirement.
+
+Oh My Pi discovers BasedPyright and Ruff from the locked `.venv`; no project LSP wrapper is
+required. If the session predates environment installation, reload native LSP discovery.
+Use references/definitions for Python tooling changes. Python type intelligence does not
+model KMC GCC's C extensions or prove target code generation.
 
 Keep MCP, builds, layout changes, and source edits serial. See
 [documentation conventions](documentation.md) before reorganizing an instruction surface.

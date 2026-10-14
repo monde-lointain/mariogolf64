@@ -1,11 +1,9 @@
 #!/usr/bin/env python3
 """Per-function compile + diff loop for Mario Golf 64.
 
-Mirrors decomp.me's KMC GCC compile + asm-differ flow exactly:
-  - Single-step `gcc -c -G0 -mgp32 -mfp32 ...` compile of nonmatchings/<func>/base.c
-  - objdump the candidate (current.o) and the canonical reference (build/asm/<seg>.o)
-  - Drive asm-differ as a Python library (mirrors decomp.me's
-    backend/coreapp/diff_wrapper.py)
+Compiles nonmatchings/<func>/base.c through rom_build with the parent TU's
+configured KMC profile, then compares its object with the assembly reference
+using asm-differ. Scores guide iteration; tools/verify-rom.sh alone banks work.
 
 Stdout: one JSON object (the agent parses this).
 Stderr: human-readable progress messages.
@@ -16,6 +14,7 @@ from __future__ import annotations
 import os
 import sys
 from pathlib import Path
+from typing import NoReturn
 
 import decomp_common as dc
 from rom_build import PROFILES, compile_source, profile_flags, profile_name, tool_path
@@ -47,7 +46,7 @@ ASMDIFF_DIR = SCRIPT_DIR / "asm-differ"
 OBJDUMP = os.environ.get("OBJDUMP", tool_path("objdump"))
 
 
-def fail(error: str, code: int = 1, extra: dict | None = None) -> None:
+def fail(error: str, code: int = 1, extra: dict | None = None) -> NoReturn:
     payload = {"compile_ok": False, "error": error}
     if extra:
         payload.update(extra)
@@ -56,12 +55,9 @@ def fail(error: str, code: int = 1, extra: dict | None = None) -> None:
 
 
 def asmdiff_available() -> None:
-    """Verify the asm-differ submodule is initialized."""
+    """Verify the vendored asm-differ source is present."""
     if not (ASMDIFF_DIR / "diff.py").exists():
-        fail(
-            f"asm-differ not initialized at {ASMDIFF_DIR}. "
-            "Run `git submodule update --init tools/asm-differ`."
-        )
+        fail(f"vendored asm-differ source missing: {ASMDIFF_DIR / 'diff.py'}")
 
 
 def resolve_placeholder(name: str) -> str:
@@ -71,8 +67,7 @@ def resolve_placeholder(name: str) -> str:
     appears in symbol_addrs.txt / ghidra_symbols.txt. Splat uses the
     curated name verbatim in asm output (`glabel rand`, not
     `glabel func_800B3220`), so for curated inputs we return the name
-    unchanged after confirming it is known. Does NOT call Ghidra MCP;
-    that's the slash command's job upstream.
+    unchanged after confirming it is known. Does NOT call Ghidra MCP.
     """
     if PLACEHOLDER_RE.match(name):
         return name
@@ -89,9 +84,8 @@ def resolve_placeholder(name: str) -> str:
     fail(
         f"could not resolve '{name}' to a known function; not present in "
         f"{[str(f) for f in SYMBOL_FILES]} and not in placeholder form. "
-        "Run the execution loop (which queries Ghidra MCP) or pass the placeholder directly."
+        "Use a name in the extracted assembly and project symbol files."
     )
-    raise SystemExit(1)  # unreachable; for type checker
 
 
 def ensure_reference_object(seg_stem: str) -> Path:
@@ -242,20 +236,15 @@ def compile_candidate(
 def objdump_function(obj_path: Path, placeholder: str) -> str:
     """objdump one function from `obj_path` (raw text).
 
-    Flags mirror decomp.me / asm-differ's expected objdump input:
-      -drz                  disassemble, show raw, intermix zeroes
-      -m mips:4300          force the N64 CPU (objects carry no arch tag)
-      --no-show-raw-insn    drop opcode hex so asm-differ keys on mnemonics
-      --disassemble-zeroes  keep `.word 0` padding (don't collapse runs)
-      --reloc               emit relocations so symbol refs are comparable
-      --disassemble=<fn>    only the target function
+    Keep raw instruction words: asm-differ's MIPS parser expects address, opcode,
+    mnemonic, and operands in objdump's tab-separated columns. Relocations carry
+    symbol references; -z keeps zero-word padding.
     """
     cmd = [
         OBJDUMP,
         "-drz",
         "-m",
         "mips:4300",
-        "--no-show-raw-insn",
         "--disassemble-zeroes",
         "--reloc",
         f"--disassemble={placeholder}",
@@ -268,7 +257,7 @@ def objdump_function(obj_path: Path, placeholder: str) -> str:
 
 
 def run_asm_differ(base_dump: str, my_dump: str) -> dict:
-    """Drive asm-differ's library API. Returns the raw PythonFormatter dict."""
+    """Return score and plain residual rows from asm-differ's comparison."""
     sys.path.insert(0, str(ASMDIFF_DIR))
     import diff as asm_differ  # type: ignore[import-not-found]
 
@@ -278,6 +267,7 @@ def run_asm_differ(base_dump: str, my_dump: str) -> dict:
         # Build/objdump options (mirroring decomp.me's diff_wrapper.create_config)
         diff_obj=True,
         file="",
+        ref_file=None,
         make=False,
         source_old_binutils=True,
         diff_section=".text",
@@ -306,64 +296,44 @@ def run_asm_differ(base_dump: str, my_dump: str) -> dict:
     base_lines = asm_differ.process(base_processed, config)
     my_lines = asm_differ.process(my_processed, config)
     diff_output = asm_differ.do_diff(base_lines, my_lines, config)
-    table = asm_differ.align_diffs(diff_output, diff_output, config)
-    return config.formatter.raw(table)
+    return {
+        "current_score": diff_output.score,
+        "max_score": diff_output.max_score,
+        "rows": [
+            {
+                "is_match": row.boring,
+                "base_text": row.base.plain() if row.base else "",
+                "current_text": row.fmt2.plain(),
+            }
+            for row in diff_output.lines
+        ],
+    }
 
 
 def score_diff(raw: dict, max_mismatches: int = 5) -> dict:
-    """Distill the asm-differ raw dict into a structured score + top mismatches.
-
-    asm-differ already computes `current_score` (0 = perfect) and `max_score`
-    in the raw PythonFormatter dict; mirror those directly. Rows are compared
-    by `row["key"]` (canonical pre-normalized form) — when base/current keys
-    match, the instructions are equivalent modulo whitespace.
-    """
-    rows = raw.get("rows", [])
+    """Distill asm-differ's own score and row identity into bounded diagnostics."""
+    rows = raw["rows"]
     total = len(rows)
     match_count = 0
     mismatches: list[dict] = []
     for idx, row in enumerate(rows):
-        base = row.get("base") or {}
-        current = row.get("current") or {}
-        if not base and not current:
-            continue
-        # asm-differ marks identity via matching `key` on both sides.
-        is_match = (
-            bool(base) and bool(current) and (base.get("key") == current.get("key"))
-        )
-        if is_match:
+        if row["is_match"]:
             match_count += 1
         elif len(mismatches) < max_mismatches:
-
-            def _flat(d):
-                t = d.get("text", []) if isinstance(d, dict) else []
-                if isinstance(t, list):
-                    return "".join(
-                        seg.get("text", "") if isinstance(seg, dict) else str(seg)
-                        for seg in t
-                    )
-                return str(t)
-
             mismatches.append(
                 {
                     "row_idx": idx,
-                    "base_text": _flat(base),
-                    "current_text": _flat(current),
+                    "base_text": row["base_text"],
+                    "current_text": row["current_text"],
                 }
             )
-    current_score = int(raw.get("current_score", -1))
-    max_score = int(raw.get("max_score", 0))
-    # Prefer asm-differ's own score; fall back to row-counting if unavailable.
-    if current_score >= 0:
-        score = current_score
-        percent = (
-            1.0 - (current_score / max_score)
-            if max_score > 0
-            else (1.0 if total else 0.0)
-        )
-    else:
-        score = 0 if (total > 0 and match_count == total) else (total - match_count)
-        percent = (match_count / total) if total else 0.0
+    score = int(raw["current_score"])
+    max_score = int(raw["max_score"])
+    percent = (
+        1.0 - (score / max_score)
+        if max_score > 0
+        else (1.0 if total else 0.0)
+    )
     return {
         "score": score,
         "percent": percent,

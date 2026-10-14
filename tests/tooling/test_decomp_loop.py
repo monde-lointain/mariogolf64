@@ -9,50 +9,31 @@ from conftest import load_tool
 dl = load_tool("decomp_loop")
 
 
-# --- score_diff (pure) ----------------------------------------------------
-
-
-def _row(key_base, key_cur, text="insn"):
-    mk = lambda k: {"key": k, "text": [{"text": text}]} if k is not None else {}
-    return {"base": mk(key_base), "current": mk(key_cur)}
-
-
-def test_score_diff_perfect_match_uses_current_score():
-    raw = {
-        "rows": [_row("a", "a"), _row("b", "b")],
-        "current_score": 0,
-        "max_score": 8,
-    }
-    out = dl.score_diff(raw)
-    assert out["score"] == 0
-    assert out["percent"] == 1.0
-    assert out["total_rows"] == 2
-    assert out["match_count"] == 2
-    assert out["top_mismatches"] == []
-
-
-def test_score_diff_mismatch_reports_score_and_top():
-    raw = {
-        "rows": [_row("a", "a"), _row("b", "x", text="bad")],
-        "current_score": 4,
-        "max_score": 8,
-    }
-    out = dl.score_diff(raw, max_mismatches=5)
-    assert out["score"] == 4
-    assert out["percent"] == pytest.approx(0.5)
-    assert out["match_count"] == 1
-    assert len(out["top_mismatches"]) == 1
-    assert out["top_mismatches"][0]["row_idx"] == 1
-
-
-def test_score_diff_respects_max_mismatches():
-    raw = {
-        "rows": [_row("a", "x"), _row("b", "y"), _row("c", "z")],
-        "current_score": 9,
-        "max_score": 12,
-    }
-    out = dl.score_diff(raw, max_mismatches=0)
-    assert out["top_mismatches"] == []
+@pytest.mark.parametrize(
+    "replacement",
+    [
+        "   4:\t30427ffe\tandi\tv0,v0,0x7ffe\n",
+        "   4:\t30437fff\tandi\tv1,v0,0x7fff\n",
+        "",
+    ],
+)
+def test_real_differ_reports_operand_changes_and_deleted_delay_slot(replacement):
+    header = (
+        "\nexample.o:     file format elf32-tradbigmips\n"
+        "\nDisassembly of section .text:\n"
+        "\n00000000 <example>:\n"
+        "   0:\t03e00008\tjr\tra\n"
+    )
+    delay_slot = "   4:\t30427fff\tandi\tv0,v0,0x7fff\n"
+    same = dl.score_diff(dl.run_asm_differ(header + delay_slot, header + delay_slot))
+    raw = dl.run_asm_differ(header + delay_slot, header + replacement)
+    changed = dl.score_diff(raw)
+    assert same["score"] == 0
+    assert same["match_count"] == 2
+    assert changed["score"] > 0
+    assert changed["match_count"] == 1
+    assert "andi" in changed["top_mismatches"][0]["base_text"]
+    assert dl.score_diff(raw, max_mismatches=0)["top_mismatches"] == []
 
 
 # --- detect_needs_fastmath / resolve_profile (pure) -----------------------

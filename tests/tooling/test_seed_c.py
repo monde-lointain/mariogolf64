@@ -9,6 +9,16 @@ from conftest import load_tool
 seed = load_tool("seed_c")
 
 
+def test_m2c_context_failure_preserves_source_diagnostic(tmp_path):
+    target = tmp_path / "target.s"
+    target.write_text("glabel broken\n    jr $ra\n    nop\n")
+    context = tmp_path / "context.c"
+    context.write_text("int value;\nthis is invalid;\n")
+    output = tmp_path / "m2c.c"
+    assert seed.run_m2c(target, [context], None, output) is False
+    assert "this is invalid;" in output.read_text()
+
+
 # --- is_degenerate_ghidra_body -------------------------------------------
 
 

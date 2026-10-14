@@ -12,15 +12,13 @@ Pipeline:
   3. extract_functions slice of <placeholder> from asm/<seg>.s -> target.s
   4. (best-effort) rodata slicing from asm/data/*.{rodata,data}.s -> target.rodata.s
   5. m2c -t mips-gcc-c [--context ...] target.s [target.rodata.s] -> m2c.c
-  6. Read nonmatchings/<func>/ghidra.c if the slash command wrote one
-  7. Stitch base.c: <ultra64.h> + DLIST_HINT + externs + ghidra/asm reference
-     blocks + m2c body
+  6. Read optional ghidra.c shape/type evidence (exported with --ghidra or supplied offline)
+  7. Stitch base.c: <ultra64.h> + externs + evidence paths + m2c body
 
-The Ghidra MCP fetch is the slash command's responsibility, not this script's.
-The agent writes `ghidra.c` (the decompile, for shape/types) and, optionally,
-`ghidra_ctx.c` (`#include "common.h"` + RE'd struct defs + game externs) so m2c
-types the accesses. When m2c fails, base.c falls back to the sanitized Ghidra
-body, else a TODO stub.
+Use --ghidra to export fresh bank-aware context before seeding. Without it,
+existing ghidra.c and ghidra_ctx.c remain usable offline. Reference assembly and
+pseudocode stay in their own artifacts, not duplicated inside the editable seed.
+When m2c fails, base.c falls back to the sanitized Ghidra body, else a TODO stub.
 
 Stdout: one JSON object describing what was produced.
 Stderr: human-readable progress.
@@ -269,12 +267,12 @@ def run_m2c(
         cmd += [str(rodata)]
     proc = subprocess.run(cmd, cwd=ROOT_DIR, capture_output=True, text=True)
     if proc.returncode != 0:
-        log(f"[seed] m2c failed (rc={proc.returncode}); m2c.c will be a stub")
-        log(f"[seed] stderr: {capture_stderr(proc)}")
-        out_path.write_text(
-            f"/* m2c failed; stderr:\n{capture_stderr(proc, 2000)}\n*/\n",
-            encoding="utf-8",
+        log(f"[seed] m2c failed (rc={proc.returncode}); preserving diagnostics in m2c.c")
+        diagnostic = proc.stdout + (
+            f"\n/* stderr:\n{proc.stderr}\n*/\n" if proc.stderr else ""
         )
+        log(f"[seed] diagnostic: {diagnostic[:2000].strip()}")
+        out_path.write_text(diagnostic, encoding="utf-8")
         return False
     out_path.write_text(proc.stdout, encoding="utf-8")
     return True
@@ -416,7 +414,7 @@ def sanitize_ghidra_body(text: str, placeholder: str) -> str:
 # imprecise: a cached `_NON_MATCHING` body, an empty body, or a bare `return
 # <const>;` shell. Per docs/hazards.md#decompile-vs-asm-authority the asm is the
 # sole authority for these (S11/S152/S156), so the seed routes the agent to the
-# inlined asm block instead of trusting the pseudocode. Deliberately conservative
+# target.s instead of trusting the pseudocode. Deliberately conservative
 # (clear tells only) so a legitimately terse accessor is not false-flagged.
 RETURN_CONST_RE = re.compile(r"^return\s*(?:0[xX][0-9A-Fa-f]+|-?\d+)?\s*;$")
 
@@ -552,7 +550,7 @@ class BaseCSpec:
 
 
 def stitch_base_c(spec: BaseCSpec) -> Path:
-    """Assemble base.c per Section 4 step 6 of the plan."""
+    """Assemble an editable seed, referring to separate analysis artifacts."""
     out_dir = spec.out_dir
     placeholder = spec.placeholder
     externs = spec.externs
@@ -601,55 +599,22 @@ def stitch_base_c(spec: BaseCSpec) -> Path:
                 lines.append(e)
         lines.append("")
 
-    # Ghidra decompile reference. Shape/type reference only, never compiled: the
-    # m2c body below is the seed. A degenerate `_NON_MATCHING` decompile is
-    # suppressed (it is actively wrong, not merely imprecise) rather than shown.
-    # See docs/hazards.md#decompile-vs-asm-authority.
+    # Keep complete evidence in its original artifact; do not duplicate it in C.
+    if target_s_path is not None:
+        lines.append(f"// Assembly ground truth: {target_s_path.name}")
     if ghidra_path.exists():
-        lines.append(
-            "/* === Ghidra decompile (shape/type reference; do not compile) === */"
-        )
         if degenerate:
-            lines.append(
-                "// Suppressed: _NON_MATCHING/degenerate decompile — untrustworthy."
-            )
-            lines.append("// Types below come from the m2c body and the externs above.")
+            lines.append("// ghidra.c is degenerate; use assembly, not its pseudocode.")
         else:
-            lines.append("#if 0")
-            for gl in safe_read_text(ghidra_path).splitlines():
-                lines.append(gl)
-            lines.append("#endif")
-        lines.append(
-            "/* === end Ghidra decompile ====================================== */"
-        )
-        lines.append("")
-
-    # Asm ground truth. The `.s` slice (disassemble_function's equal) is the sole
-    # authority; both the m2c body and the Ghidra decompile can be silently wrong.
-    # Embed it inline so the agent verifies the seed against it.
-    # See docs/hazards.md#decompile-vs-asm-authority.
-    if target_s_path is not None and target_s_path.exists():
-        lines.append(
-            "/* === asm ground truth (translate from THIS; the decompile can be"
-        )
-        lines.append(
-            "       silently wrong) ============================================= */"
-        )
-        lines.append("#if 0")
-        for al in safe_read_text(target_s_path).splitlines():
-            lines.append(al)
-        lines.append("#endif")
-        lines.append(
-            "/* === end asm ground truth ====================================== */"
-        )
-        lines.append("")
+            lines.append("// Shape/type reference only: ghidra.c")
+    lines.append("")
 
     lines.append("// === Function body (SEED — edit during Iterate) ==============")
     if m2c_ok and m2c_path.exists():
         # m2c is the primary seed body: it translated the asm, typed by the
         # Ghidra struct context. Rename its temp_*/local_*/arg_* synthetics and
-        # reconcile its extern preamble against the concrete externs above per
-        # docs/coding-style.md, then verify against the asm block.
+        # reconcile its extern preamble against concrete declarations during
+        # iteration; compare against target.s.
         lines.append("// m2c seed: rename synthetics + reconcile the extern preamble.")
         for ml in safe_read_text(m2c_path).splitlines():
             lines.append(ml)
@@ -663,7 +628,7 @@ def stitch_base_c(spec: BaseCSpec) -> Path:
         lines.append(
             f"// TODO: no m2c seed and no trustworthy decompile for {placeholder} —"
         )
-        lines.append("// translate from the asm ground-truth block above.")
+        lines.append("// translate from target.s.")
         lines.append(f"void {placeholder}(void) {{")
         lines.append("    /* unimplemented */")
         lines.append("}")
@@ -853,7 +818,6 @@ def main() -> None:
             "ghidra_c_expected": str(ghidra_path.relative_to(ROOT_DIR)),
             "ghidra_c_present": ghidra_present,
             "ghidra_body_degenerate": ghidra_degenerate,
-            "asm_inlined": target_asm.exists(),
             "extern_count": len(externs),
             "sibling_asm_count": len(sibling_asm_names),
         }
