@@ -6,6 +6,21 @@ description: "Records the S260 goto-loop reconstruction's exact instruction coun
 
 # collect_keyframe_events_at near-match (S260) — 54/54, ONE BRANCH-OFFSET BIT
 
+## Fresh measurement (2026-10-15)
+
+**UNBANKED:** the documented goto shape was reconstructed with the canonical
+`CharacterState`, `KeyframeTrack`, and `KfEntry` layouts. It scores **5**,
+54 instructions, with the same `fff2` versus retail `fff1` branch target.
+The current source/measurement pair is
+`nonmatchings/collect_keyframe_events_at/measurements/a84128b53364e978e07fca159c3bba5dc4e52e1c8cd59c580765cfec4529ef02.{c,json}`.
+Wrapping the top load in `do { } while (0)`, with or without an empty `if (1)`
+block before it, produces the identical object. Those ineffective scopes were
+removed. Object SHA-256:
+`283342b2cc3218b1d68dba7501ff470df190cc7efb833cdf88567bdabb1c5162`.
+The next experiment still needs to prevent reload skipping without changing
+the two annulled advance slots; no source-impossibility claim follows from
+these two failed boundary experiments.
+
 `src/main/func_80054900.c`. The S213 verdict (`#base-register-vs-displacement` +
 `#indexed-vs-pointer-loop-strength-reduction`: "loop.c strength_reduce builds a 2nd giv for the
 tag/pad byte loads, splitting `e+=4` into two pointer bumps -> defeats reorg optimize_skip") is

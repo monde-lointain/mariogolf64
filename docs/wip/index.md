@@ -90,7 +90,7 @@
 - [func_800958D8 near-match (S248)](func_800958D8.near-match.md) — Records the scissor emitter's S250 linked-byte match, refuting the earlier relocation-scoring wall without claiming a ROM bank.
 - [func_800985B4 (src/main/func_80095A10.c) — jtbl trailing-4-align carve WALL](func_800985B4.near-match.md) — Documents the jump-table carve wall caused by trailing four-byte alignment in the S258 function.
 - [func_80098C6C — carried abs-input coalescing residual](func_80098C6C.near-match.md) — Records the unbanked 13-instruction pure-C candidate with retail scheduling and only two abs-input operand differences.
-- [func_80098CD8 near-match (TERMINAL uniform reg-rotation; exact-count 38/38)](func_80098CD8.near-match.md) — Documents the exact-count S248 carry whose uniform register rotation remains a terminal residual.
+- [func_80098CD8 — carried byte mapper with a store-boundary improvement](func_80098CD8.near-match.md) — Records the 38-instruction mapper's refreshed score 105 and remaining register-allocation residual after introducing a pure-C store scope.
 - [func_800990D0 — near-match (CARRY)](func_800990D0.near-match.md) — Records the base-28 password generator's S276 exact-count carry with residuals confined to five loop preheaders.
 
 # Named functions (G–R)
