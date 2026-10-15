@@ -1850,7 +1850,44 @@ s8 func_8005DE40(void) { return ((s8*)func_8005AF50())[0x2B]; }
 
 void func_8005DE60(void) { func_8005DF54(func_8005AF50(), 1); }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80059BA0", func_8005DE88);
+extern u8 D_801323E5;
+extern u8 D_800C1FFC;
+
+void func_8005DE88(s8* state, s32 restore, s32 enabled) {
+  s8* flags = state + 0x28;
+  if (restore == 0) {
+    u8* saved = &D_801323E5;
+    *saved = 0;
+    if (enabled > 0) {
+      if (state[0x28] != 0) {
+        *saved = 1;
+      }
+      if (state[0x29] != 0) {
+        *saved |= 2;
+        D_800C1FFC = *saved;
+      }
+      if (state[0x2B] != 0) {
+        *saved |= 4;
+      }
+    }
+  } else {
+    if (D_801323E5 & 1) {
+      state[0x28] = 1;
+    } else {
+      state[0x28] = 0;
+    }
+    if (D_801323E5 & 2) {
+      flags[1] = 1;
+    } else {
+      flags[1] = 0;
+    }
+    if (D_801323E5 & 4) {
+      flags[3] = 1;
+    } else {
+      flags[3] = 0;
+    }
+  }
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80059BA0", func_8005DF54);
 

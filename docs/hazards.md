@@ -7652,8 +7652,16 @@ Corrupts the whole region on `make extract` — even already-banked siblings sta
 `D_<addr>` from new C:** `grep D_<region> build/mariogolf64.map | grep -v NON_MATCHING` — if the mapped
 address != the symbol name, the region is a shifted `.NON_MATCHING` carve; do not C-reference it until
 the data section is properly carved/placed (see [#defines-data] / [#data-rodata-carve]). Cleanly-placed
-globals show `.NON_MATCHING` at the same address as the real symbol (safe). This is the data-carve
-enabler that blocks `func_8005DE88` (logic fully decoded; carried pending the carve).
+globals show `.NON_MATCHING` at the same address as the real symbol (safe). This was the data-carve
+blocker for `func_8005DE88`.
+
+**2026-10-15 resolution:** the live map now places both `D_801323E5` and
+`D_800C1FFC` at their named addresses. The direct byte-pointer reconstruction
+scored zero under main + host fast-math
+(`nonmatchings/func_8005DE88/measurements/2c926a8a933a559e8c0cdfece2b8f5ac5bff22310a840b5ce880d46417de3c3a.json`).
+The integrated range retained the separate `state + 0x28` and saved-byte roots.
+`tools/verify-rom.sh` passed with SHA-1
+`e2c4e7a905b29529b49a1619a401fe699224829b`; the function is banked.
 
 **Refinement — a new-named offset-0 absolute alias at the true address does win (S213, 3 fns banked
 into a shifted region).** The S210 "absolute does not win" is specifically about re-using the shifted
