@@ -96,10 +96,13 @@ still needs its entry test, `if (n != 0)` (S306).
 - **cross-jump-merge-point-before-store** -- the delay-slot filler names the pre-reorg order; a merge
   point at the argument move, not the store, means each arm held its own copy of the trailing calls;
   duplicate them per arm (S286).
-- **jump-c-store-flag-conversions** -- jump.c:1139-1250 makes a two-value select branchless and
-  re-fires every pre-reload pass, so no spelling escapes it and a ROM `andi; bnez` or `beq` plus two
-  `li` reads terminal. Only escape: a `CODE_LABEL` between assignment and test, so the value is born
-  a block earlier (S310).
+- **jump-c-store-flag-conversions** -- jump.c:993-1250 can turn a two-value select into
+  a flag computation; predicate spelling alone does not defeat the CFG-based rewrite.
+  A `CODE_LABEL` between assignment and test can separate the value's birth block (S310).
+  Alternatively, route earlier true cases and the final bit test to one positive-return
+  block: its false-path assignment/jump then does not reach that positive block, defeating
+  the destination gate at jump.c:1037-1042. This preserves `andi; bnez; li 1; move 0`
+  in the verified [func_8006C8CC resolution](wip/func_8006C8CC.near-match.md).
 - **gcc272-fold-range-test-slti-merge** -- adjacent `slti` tests fold to `(u32)(x-lo) < span`; a
   per-test goto defeats the merge when the ROM keeps both.
 

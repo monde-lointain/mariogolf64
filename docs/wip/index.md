@@ -48,7 +48,7 @@
 # Functions at 0x8006
 
 - [func_8006BC80 — CRACKED (0/474 words, match candidate)](func_8006BC80.near-match.md) — Records the hole-banner emitter's 474-instruction isolated candidate with zero unexplained word differences, not a verified ROM bank.
-- [func_8006C8CC near-match (CARRY, S239)](func_8006C8CC.near-match.md) — Records the predicate's S239 single-bit-test fold: GCC replaces the final branch with a shift.
+- [func_8006C8CC — banked via shared positive-return label](func_8006C8CC.near-match.md) — Records the verified 19-instruction match and the shared-return CFG that defeats jump.c's conditional-assignment conversion.
 - [func_8006D164 near-match (S240 carry)](func_8006D164.near-match.md) — Records the four-row halfword-copy loop's S240 coupled invariant-hoist and register-rotation residual.
 - [func_8006D214 — near-match (base-register-vs-displacement wall; sibling of func_8006D38C)](func_8006D214.near-match.md) — Documents the fixed-point MAX search and its base-register-versus-displacement residual, shared with func_8006D38C.
 - [func_8006D38C — near-match (base-register-vs-displacement wall)](func_8006D38C.near-match.md) — Records the base-register-versus-displacement wall in the sibling reconstruction to func_8006D214.

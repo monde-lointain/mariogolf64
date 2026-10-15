@@ -651,7 +651,18 @@ void stamp_circle_ring_alpha(u32* grid, s32 cx, s32 cy, s32 r) {
   }
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_8006A2C0", func_8006C8CC);
+/* Shared return labels preserve the branch-shaped bit test; separate early
+ * returns let jump.c fold the last test into a shift. */
+s32 func_8006C8CC(void* state) {
+  if (D_800C4010 == 0) goto yes;
+  if (D_800C4014 != 0) goto yes;
+  if (D_800C4018 >= 0) goto no;
+  if (*(u16*)((u8*)state + 4) & 0x8000) goto yes;
+no:
+  return 0;
+yes:
+  return 1;
+}
 
 extern Gfx D_800C3FC0[];
 extern s8 g_debug_mode_enabled;
