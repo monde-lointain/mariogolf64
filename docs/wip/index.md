@@ -61,7 +61,7 @@
 - [func_80073F24 near-match (S243)](func_80073F24.near-match.md) — Records the glyph-string emitter's shared S243 schedule-order coin: the compiler defers the atlas calculation behind display-list stores after post-increment solves the store-giv wall.
 - [func_80074230 near-match (S243)](func_80074230.near-match.md) — Documents the glyph emitter's solved store-giv form and shared S243 scheduler tie-break that still orders atlas work after stores.
 - [func_80074500 near-match (S243)](func_80074500.near-match.md) — Records the shared S243 scheduler-order residual after the post-increment idiom solves the glyph emitter's store-giv wall.
-- [func_80074E5C — near-match carry (0.5463)](func_80074E5C.near-match.md) — Records a string-centering carry with a byte-identical computation and a seven-instruction setup-block residual.
+- [func_80074E5C — carried input-copy/CSE residual](func_80074E5C.near-match.md) — Records refreshed 40- and 39-instruction candidates and the CSE substitution that removes the required incoming-argument copy.
 - [func_80075E48 (src/main/func_80071370.c) — unrolled raw-DL-word emitter CARRY class](func_80075E48.near-match.md) — Characterizes the unrolled raw-display-list-word emitter as a carried reconstruction class.
 - [func_80076138 — near-match carry (S242)](func_80076138.near-match.md) — Records the sprite-draw loop's S242 string-pointer/index register swap and entry-copy live-range diagnosis.
 - [func_8007624C near-match (S246 carry)](func_8007624C.near-match.md) — Records the two-pass drop-shadow glyph emitter's S246 raw-packet allocation and scheduling residual.
