@@ -7,17 +7,17 @@ extern s32 D_800C7304;
 extern s32 D_800C730C;
 
 extern s32 scenario_state_id;
-extern s32 D_801B6098;
+extern s32 round_hole_index;
 extern s32 scenario_mode_id;
 extern s32 D_801B609C;
-extern s32 D_801B608C;
+extern s32 game_mode;
 extern s32 putter_mode_flag;
 extern s32 wind_magnitude;
 extern s16 wind_angle_bam;
 extern u32 D_800BA9FC;
 extern s16 g_scenery_wind_angle_b;
 extern s16 g_scenery_wind_angle_a;
-extern s32 D_801B6090;
+extern s32 active_player_count;
 
 extern void flag_set(s32);
 extern void func_80069FBC(void);
@@ -40,10 +40,10 @@ extern ScissorRect D_801B7F30;
  * then run the sub-init calls and select framebuffer 2. */
 void init_scenario_state(void) {
   memset(&scenario_state_id, 0, 0x44);
-  D_801B6098 = 9;
+  round_hole_index = 9;
   scenario_mode_id = 0;
   D_801B609C = 0;
-  D_801B608C = 0xC;
+  game_mode = 0xC;
   putter_mode_flag = 0;
   wind_magnitude = (rand() & 0x3F) * 6000;
   wind_angle_bam = rand();
@@ -51,7 +51,7 @@ void init_scenario_state(void) {
   g_scenery_wind_angle_b = 0x1000;
   g_scenery_wind_angle_a = 0x6000;
   flag_set(7);
-  D_801B6090 = 1;
+  active_player_count = 1;
   func_80069FBC();
   func_80069F38();
   set_color_framebuffer_count(2);
@@ -91,7 +91,7 @@ extern f32 D_800C691C;
 extern u8 D_800C6014[];
 extern u32 D_800FE3D4;
 extern s32 D_801B557C;
-extern s32 func_80051FCC(void);
+extern s32 get_current_course_id(void);
 
 typedef struct {
   u8 prim_r;
@@ -125,7 +125,7 @@ void emit_lens_flare_dl(Gfx** gfxp) {
   s32 d;
 
   gfx = *gfxp;
-  n = func_80051FCC();
+  n = get_current_course_id();
   m = putter_mode_flag;
 
   gDPPipeSync(gfx++);
@@ -310,9 +310,9 @@ extern char D_80105118[];
 
 extern s32 flag_is_set(s32 flag);
 extern void check_and_print_grid(char* str, s32 col, s32 row);
-extern s32 func_80051FCC(void);
-extern u32 func_8005062C(u16 index, void* out);
-extern void func_800506D4(void* data, void* slot);
+extern s32 get_current_course_id(void);
+extern u32 get_rom_asset_allocation_size(u16 index, void* out);
+extern void load_rom_asset_payload(void* data, void* slot);
 extern void func_8002A97C(s32 arg0, s32 arg1);
 
 /* Debug fog/light editor page, one frame. Steps the row/column cursor from the
@@ -352,7 +352,7 @@ s32 run_fog_debug_editor(void) {
   check_and_print_grid(" ", D_800C6CE4 * 4 + 14, D_800C6CE8 + 5);
   /* Same three-statement spelling as the sibling emitter above: the `tod` load
    * and the `n << 8` shift are statements of their own, ahead of `q`. */
-  n = func_80051FCC();
+  n = get_current_course_id();
   m = putter_mode_flag;
   tod = sky_time_of_day_idx;
   D_800E3980 = &((FogPreset(*)[8])D_800C6014)[n][(m << 2) + tod];
@@ -511,8 +511,8 @@ s32 run_fog_debug_editor(void) {
   } while (i != 4);
 
   if (refresh) {
-    func_8005062C(D_800C6C52[func_80051FCC() * 2], spvar);
-    func_800506D4(course_panorama_ptr, spvar);
+    get_rom_asset_allocation_size(D_800C6C52[get_current_course_id() * 2], spvar);
+    load_rom_asset_payload(course_panorama_ptr, spvar);
 
     i = 0;
     do {

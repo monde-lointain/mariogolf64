@@ -1,12 +1,12 @@
 #include "common.h"
 
-extern s32 D_801B608C;
-extern s32 D_801B6098;
+extern s32 game_mode;
+extern s32 round_hole_index;
 extern s32 scenario_mode_id;
-extern u8 D_800C1B28[];
+extern u8 scenario_course_ids[];
 extern s8 g_terrain_vtx_xform_mode;
 
-s32 func_80051E90(s32 course, s32 hole) {
+s32 get_hole_camera_distance(s32 course, s32 hole) {
   switch (course) {
     case 0:
       if (hole == 10) {
@@ -93,9 +93,9 @@ s32 func_80051E90(s32 course, s32 hole) {
   return 200;
 }
 
-s32 func_80051FCC(void) {
-  if (D_801B608C == 9) {
-    return D_800C1B28[scenario_mode_id * 12 + D_801B6098 * 2];
+s32 get_current_course_id(void) {
+  if (game_mode == 9) {
+    return scenario_course_ids[scenario_mode_id * 12 + round_hole_index * 2];
   }
   if (g_terrain_vtx_xform_mode != 0) {
     return ((scenario_mode_id - 6) / 3 & 1) | 6;

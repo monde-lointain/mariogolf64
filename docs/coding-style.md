@@ -43,6 +43,8 @@ conflict with the match.
 
 - Keep variables local and their live ranges short where the ROM permits; both scope and lifetime can
   affect register allocation.
+- GCC 2.7.2 requires C89 declaration placement. Narrow declarations into existing control-flow
+  bodies where matching permits; do not add standalone scope blocks solely to hide locals.
 - Initialize values at the point required by the target output; do not move declarations or
   initialization mechanically.
 - Use project types from `ultra64.h` (`s32`, `u64`, `vu32`, `f32`, and related types) where appropriate.
@@ -73,6 +75,12 @@ Write control flow that is clear and defined, then compare it with the target. E
 `switch`, loop, and boolean-expression forms can compile differently; branch shape, loop form, and
 join points are code-generation choices here. Preserve required conditions and behavior, and consult
 [Source levers](levers.md) before changing structure to chase a particular instruction sequence.
+
+Prefer measured structured alternatives over blanket claims that a `goto` is mandatory. The safe
+magnitude helpers match with ordered, nested exit tests in `while (1)`, and the CRC bit loop matches
+as a counted `for` with its counter declared at function scope. Conversely, decoder dispatch edges,
+one-shot loop notes, shared scratch values, and score-comparison exits can still determine allocation
+or branch layout. Retain a non-idiomatic form only with a nearby explanation of the measured constraint.
 
 ## Defensive programming
 

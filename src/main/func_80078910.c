@@ -21,10 +21,10 @@ typedef struct {
 
 extern Particle particle_array[40];
 
-extern u32 func_8005062C(u16 index, void* out);
+extern u32 get_rom_asset_allocation_size(u16 index, void* out);
 extern void* heap3_alloc(u32 need);
 extern void heap3_free(void** payload_ptr);
-extern void func_800506D4(void* arg0, void* arg1);
+extern void load_rom_asset_payload(void* arg0, void* arg1);
 extern s32 D_800C53B8;
 extern void* D_800E1DBC;
 extern void* D_800E1DB4;
@@ -70,30 +70,30 @@ void func_800789C8(void) {
   func_80078910();
   if (D_800C53B8 == 0) {
     D_800C53B8 = 1;
-    D_800E1DBC = heap3_alloc(func_8005062C(0x6B5, spvar));
-    func_800506D4(D_800E1DBC, spvar);
-    D_800E1DB4 = heap3_alloc(func_8005062C(0x6B5, spvar));
-    func_800506D4(D_800E1DB4, spvar);
-    D_800E1DB8 = heap3_alloc(func_8005062C(0x6B8, spvar));
-    func_800506D4(D_800E1DB8, spvar);
-    D_800E1DA0 = heap3_alloc(func_8005062C(0x6B0, spvar));
-    func_800506D4(D_800E1DA0, spvar);
-    D_800E1DA4 = heap3_alloc(func_8005062C(0x8EC, spvar));
-    func_800506D4(D_800E1DA4, spvar);
-    D_800E1DA8 = heap3_alloc(func_8005062C(0x6B2, spvar));
-    func_800506D4(D_800E1DA8, spvar);
-    D_800E1DAC = heap3_alloc(func_8005062C(0x6C0, spvar));
-    func_800506D4(D_800E1DAC, spvar);
-    D_800E1DB0 = heap3_alloc(func_8005062C(0x6C1, spvar));
-    func_800506D4(D_800E1DB0, spvar);
-    D_800E1DC0 = heap3_alloc(func_8005062C(0x71D, spvar));
-    func_800506D4(D_800E1DC0, spvar);
-    D_800E1DC4 = heap3_alloc(func_8005062C(0x6C2, spvar));
-    func_800506D4(D_800E1DC4, spvar);
-    D_800E1DC8 = heap3_alloc(func_8005062C(0x69E, spvar));
-    func_800506D4(D_800E1DC8, spvar);
-    D_800E1DCC = heap3_alloc(func_8005062C(0x93B, spvar));
-    func_800506D4(D_800E1DCC, spvar);
+    D_800E1DBC = heap3_alloc(get_rom_asset_allocation_size(0x6B5, spvar));
+    load_rom_asset_payload(D_800E1DBC, spvar);
+    D_800E1DB4 = heap3_alloc(get_rom_asset_allocation_size(0x6B5, spvar));
+    load_rom_asset_payload(D_800E1DB4, spvar);
+    D_800E1DB8 = heap3_alloc(get_rom_asset_allocation_size(0x6B8, spvar));
+    load_rom_asset_payload(D_800E1DB8, spvar);
+    D_800E1DA0 = heap3_alloc(get_rom_asset_allocation_size(0x6B0, spvar));
+    load_rom_asset_payload(D_800E1DA0, spvar);
+    D_800E1DA4 = heap3_alloc(get_rom_asset_allocation_size(0x8EC, spvar));
+    load_rom_asset_payload(D_800E1DA4, spvar);
+    D_800E1DA8 = heap3_alloc(get_rom_asset_allocation_size(0x6B2, spvar));
+    load_rom_asset_payload(D_800E1DA8, spvar);
+    D_800E1DAC = heap3_alloc(get_rom_asset_allocation_size(0x6C0, spvar));
+    load_rom_asset_payload(D_800E1DAC, spvar);
+    D_800E1DB0 = heap3_alloc(get_rom_asset_allocation_size(0x6C1, spvar));
+    load_rom_asset_payload(D_800E1DB0, spvar);
+    D_800E1DC0 = heap3_alloc(get_rom_asset_allocation_size(0x71D, spvar));
+    load_rom_asset_payload(D_800E1DC0, spvar);
+    D_800E1DC4 = heap3_alloc(get_rom_asset_allocation_size(0x6C2, spvar));
+    load_rom_asset_payload(D_800E1DC4, spvar);
+    D_800E1DC8 = heap3_alloc(get_rom_asset_allocation_size(0x69E, spvar));
+    load_rom_asset_payload(D_800E1DC8, spvar);
+    D_800E1DCC = heap3_alloc(get_rom_asset_allocation_size(0x93B, spvar));
+    load_rom_asset_payload(D_800E1DCC, spvar);
   }
 }
 
@@ -115,16 +115,16 @@ void reload_scene_assets(s8* arg0) {
   u8 sp10[0x20];
   s32 i;
 
-  func_8005062C(0x6B5, sp10);
-  func_800506D4(D_800E1DB4, sp10);
-  func_8005062C(0x6B8, sp10);
-  func_800506D4(D_800E1DB8, sp10);
-  func_8005062C(0x6B0, sp10);
-  func_800506D4(D_800E1DA0, sp10);
-  func_8005062C(0x6B2, sp10);
-  func_800506D4(D_800E1DA8, sp10);
-  func_8005062C(0x6C0, sp10);
-  func_800506D4(D_800E1DAC, sp10);
+  get_rom_asset_allocation_size(0x6B5, sp10);
+  load_rom_asset_payload(D_800E1DB4, sp10);
+  get_rom_asset_allocation_size(0x6B8, sp10);
+  load_rom_asset_payload(D_800E1DB8, sp10);
+  get_rom_asset_allocation_size(0x6B0, sp10);
+  load_rom_asset_payload(D_800E1DA0, sp10);
+  get_rom_asset_allocation_size(0x6B2, sp10);
+  load_rom_asset_payload(D_800E1DA8, sp10);
+  get_rom_asset_allocation_size(0x6C0, sp10);
+  load_rom_asset_payload(D_800E1DAC, sp10);
 
   i = 0;
   do {
@@ -136,8 +136,8 @@ void reload_scene_assets(s8* arg0) {
 
   if (arg0[0xA3] == 23) {
     D_800C52B0 = 1;
-    func_8005062C(0x6B6, sp10);
-    func_800506D4(D_800E1DBC, sp10);
+    get_rom_asset_allocation_size(0x6B6, sp10);
+    load_rom_asset_payload(D_800E1DBC, sp10);
   } else {
     switch (get_table_entry(active_terrain_index)->id) {
       case 0:
@@ -146,29 +146,29 @@ void reload_scene_assets(s8* arg0) {
       case 15:
       case 17:
         D_800C52B0 = 2;
-        func_8005062C(0x6B6, sp10);
-        func_800506D4(D_800E1DBC, sp10);
+        get_rom_asset_allocation_size(0x6B6, sp10);
+        load_rom_asset_payload(D_800E1DBC, sp10);
         break;
       case 3:
       case 4:
       case 5:
       case 19:
         D_800C52B0 = 4;
-        func_8005062C(0x6B8, sp10);
-        func_800506D4(D_800E1DBC, sp10);
+        get_rom_asset_allocation_size(0x6B8, sp10);
+        load_rom_asset_payload(D_800E1DBC, sp10);
         break;
       case 6:
       case 18:
         D_800C52B0 = 3;
-        func_8005062C(0x6B5, sp10);
-        func_800506D4(D_800E1DBC, sp10);
+        get_rom_asset_allocation_size(0x6B5, sp10);
+        load_rom_asset_payload(D_800E1DBC, sp10);
         break;
       case 7:
       case 8:
       case 9:
         D_800C52B0 = 6;
-        func_8005062C(0x6B5, sp10);
-        func_800506D4(D_800E1DBC, sp10);
+        get_rom_asset_allocation_size(0x6B5, sp10);
+        load_rom_asset_payload(D_800E1DBC, sp10);
         break;
       default:
         D_800C52B0 = 0;
@@ -459,17 +459,17 @@ extern s32 D_800C5448;
 extern void* D_800FF4CC;
 extern void* D_801EFFA8;
 extern void* D_801B8BB8;
-extern u32 func_8005062C(u16 index, void* out);
+extern u32 get_rom_asset_allocation_size(u16 index, void* out);
 extern void* heap3_alloc(u32 need);
-extern void func_800506D4(void* arg0, void* arg1);
+extern void load_rom_asset_payload(void* arg0, void* arg1);
 extern void func_8007E7B8(void);
 
 void func_8007E234(s32 arg) {
   u8 spvar[0x20];
 
   if (arg == 2) {
-    D_800FF4CC = heap3_alloc(func_8005062C(0x6BC, spvar));
-    func_800506D4(D_800FF4CC, spvar);
+    D_800FF4CC = heap3_alloc(get_rom_asset_allocation_size(0x6BC, spvar));
+    load_rom_asset_payload(D_800FF4CC, spvar);
     D_801EFFA8 = heap3_alloc(0x900);
     D_801B8BB8 = heap3_alloc(0x380);
     func_8007E7B8();

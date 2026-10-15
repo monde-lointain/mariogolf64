@@ -1,8 +1,8 @@
 #include "common.h"
 
-extern u32 func_8005062C(u16 index, void* out);
+extern u32 get_rom_asset_allocation_size(u16 index, void* out);
 extern void* heap3_alloc(u32 need);
-extern void func_800506D4(void* dst, void* desc);
+extern void load_rom_asset_payload(void* dst, void* desc);
 extern void nuPiReadRom(u32 rom_addr, void* buf_ptr, u32 size);
 extern void heap3_free(void** payload_ptr);
 extern void func_800718C4(void);
@@ -20,9 +20,9 @@ extern void* D_800E1C44;
 extern u16* D_800E1C48[];
 extern u32 D_80104FD0;
 
-/* Allocates + loads the HUD/glyph asset set: 7 tagged assets via
- * func_8005062C size-lookup + heap3_alloc + func_800506D4 load, then two
- * raw-ROM images (D_151CD40 w*h+8, D_151CD50 size-prefixed) via nuPiReadRom. */
+/* Load seven tagged HUD/glyph assets through get_rom_asset_allocation_size,
+ * heap3_alloc, and load_rom_asset_payload, then two raw-ROM images:
+ * D_151CD40 (w*h+8) and D_151CD50 (size-prefixed). */
 void load_hud_glyph_assets(void) {
   u8 spvar[0x20];
   void* headerBuf;
@@ -30,20 +30,20 @@ void load_hud_glyph_assets(void) {
   s32 height;
   s32 size2;
 
-  D_8012F4E0 = heap3_alloc(func_8005062C(0x4B2, spvar));
-  func_800506D4(D_8012F4E0, spvar);
-  D_800E1C30 = heap3_alloc(func_8005062C(0x4B3, spvar));
-  func_800506D4(D_800E1C30, spvar);
-  D_800E1C34 = heap3_alloc(func_8005062C(0x4B5, spvar));
-  func_800506D4(D_800E1C34, spvar);
-  D_800E1C38 = heap3_alloc(func_8005062C(0x4B6, spvar));
-  func_800506D4(D_800E1C38, spvar);
-  D_800E1C4C = heap3_alloc(func_8005062C(0x4B0, spvar));
-  func_800506D4(D_800E1C4C, spvar);
-  D_800E1C3C = heap3_alloc(func_8005062C(0x4B9, spvar));
-  func_800506D4(D_800E1C3C, spvar);
-  D_800E1C40 = heap3_alloc(func_8005062C(0x4B8, spvar));
-  func_800506D4(D_800E1C40, spvar);
+  D_8012F4E0 = heap3_alloc(get_rom_asset_allocation_size(0x4B2, spvar));
+  load_rom_asset_payload(D_8012F4E0, spvar);
+  D_800E1C30 = heap3_alloc(get_rom_asset_allocation_size(0x4B3, spvar));
+  load_rom_asset_payload(D_800E1C30, spvar);
+  D_800E1C34 = heap3_alloc(get_rom_asset_allocation_size(0x4B5, spvar));
+  load_rom_asset_payload(D_800E1C34, spvar);
+  D_800E1C38 = heap3_alloc(get_rom_asset_allocation_size(0x4B6, spvar));
+  load_rom_asset_payload(D_800E1C38, spvar);
+  D_800E1C4C = heap3_alloc(get_rom_asset_allocation_size(0x4B0, spvar));
+  load_rom_asset_payload(D_800E1C4C, spvar);
+  D_800E1C3C = heap3_alloc(get_rom_asset_allocation_size(0x4B9, spvar));
+  load_rom_asset_payload(D_800E1C3C, spvar);
+  D_800E1C40 = heap3_alloc(get_rom_asset_allocation_size(0x4B8, spvar));
+  load_rom_asset_payload(D_800E1C40, spvar);
 
   headerBuf = heap3_alloc(8);
   nuPiReadRom((u32)D_151CD40, headerBuf, 8);

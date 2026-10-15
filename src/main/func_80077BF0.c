@@ -37,8 +37,8 @@ extern u16 D_800C4698[];
 
 extern void heap3_free(void** payload_ptr);
 extern void* heap3_alloc(u32 need);
-extern u32 func_8005062C(u16 arg0, void* arg1);
-extern void func_800506D4(void* arg0, void* arg1);
+extern u32 get_rom_asset_allocation_size(u16 arg0, void* arg1);
+extern void load_rom_asset_payload(void* arg0, void* arg1);
 
 void func_80077BF0(void) {
   D_80105148 = 150;
@@ -62,8 +62,8 @@ void func_80077C18(s32 arg0) {
   s32 base;
   s32 n;
 
-  D_800FE338 = heap3_alloc(func_8005062C(D_800C4698[arg0 % 8], sp10));
-  func_800506D4(D_800FE338, sp10);
+  D_800FE338 = heap3_alloc(get_rom_asset_allocation_size(D_800C4698[arg0 % 8], sp10));
+  load_rom_asset_payload(D_800FE338, sp10);
 
   alpha = 0xFF;
   groupCount = 1;

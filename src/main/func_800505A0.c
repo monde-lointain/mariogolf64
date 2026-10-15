@@ -1,60 +1,66 @@
 #include "common.h"
 
 typedef struct {
-  /* 0x0 */ u32 start;
-  /* 0x4 */ u32 size;
-  /* 0x8 */ u32 pos;
-  /* 0xC */ u32 end;
+  /* ROM address consumed by the next read. */
+  u32 read_address;
+  /* Stored ROM asset size, including its header. */
+  u32 size;
+  /* Initial address in a directory slot; mode byte in the header slot. */
+  u32 metadata;
+  /* Exclusive end of the ROM data range. */
+  u32 end_address;
 } RomLoadSlot; /* 0x10 */
 
-extern s32 D_8012D3A8;
+extern s32 current_rom_asset_index;
 
-extern const char D_800CCB9C[];
-extern const char D_800CCBAC[];
+extern const char ROM_READ_TRUNCATED_FORMAT[];
+extern const char ROM_ASSET_OPEN_FORMAT[];
 
 extern s32 flag_is_set(s32 flag);
 extern void osSyncPrintf(const char*, ...);
 extern void nuPiReadRom(u32 rom_addr, void* buf_ptr, u32 size);
-extern void func_800504E8(s32 index, RomLoadSlot* slot);
-extern u32 func_80050598(RomLoadSlot* slot);
+extern void open_rom_asset_slot(s32 asset_index, RomLoadSlot* slot);
+extern u32 get_rom_load_slot_size(RomLoadSlot* slot);
 extern void func_80050710(void* data, RomLoadSlot* slot);
 extern void func_80050914(void* data, RomLoadSlot* slot);
 
-void func_800505A0(void* dst, u32 size, RomLoadSlot* slot) {
-  if (slot->end < slot->start + size) {
-    size = slot->end - slot->start;
-    osSyncPrintf(D_800CCB9C, D_8012D3A8);
+void read_rom_load_slot(void* destination, u32 requested_size,
+                        RomLoadSlot* slot) {
+  if (slot->end_address < slot->read_address + requested_size) {
+    requested_size = slot->end_address - slot->read_address;
+    osSyncPrintf(ROM_READ_TRUNCATED_FORMAT, current_rom_asset_index);
   }
 
-  nuPiReadRom(slot->start, dst, (size + 1) & ~1);
-  slot->start += size;
+  nuPiReadRom(slot->read_address, destination, (requested_size + 1) & ~1);
+  slot->read_address += requested_size;
 }
 
-u32 func_8005062C(u16 index, void* out) {
+u32 get_rom_asset_allocation_size(u16 asset_index, void* output_slots) {
   u8 scratch_storage[0x80];
-  u8* scratch = (u8*)(((u32)scratch_storage + 0xF) & ~0xF);
-  RomLoadSlot* slot;
-  u32 value;
+  u8* aligned_header = (u8*)(((u32)scratch_storage + 0xF) & ~0xF);
+  RomLoadSlot* payload_slot;
+  u32 allocation_size;
 
   if (flag_is_set(0x49)) {
-    osSyncPrintf(D_800CCBAC, index);
+    osSyncPrintf(ROM_ASSET_OPEN_FORMAT, asset_index);
   }
 
-  slot = (RomLoadSlot*)((u8*)out + 0x10);
-  func_800504E8(index, slot);
-  ((RomLoadSlot*)out)->end = func_80050598(slot);
-  func_800505A0(scratch, 4, slot);
-  ((RomLoadSlot*)out)->pos = scratch[0];
+  payload_slot = (RomLoadSlot*)output_slots + 1;
+  open_rom_asset_slot(asset_index, payload_slot);
+  ((RomLoadSlot*)output_slots)->end_address =
+      get_rom_load_slot_size(payload_slot);
+  read_rom_load_slot(aligned_header, 4, payload_slot);
+  ((RomLoadSlot*)output_slots)->metadata = aligned_header[0];
 
-  value = *(u32*)scratch & 0xFFFFFF;
-  *(u32*)scratch = value;
-  return value;
+  allocation_size = *(u32*)aligned_header & 0xFFFFFF;
+  *(u32*)aligned_header = allocation_size;
+  return allocation_size;
 }
 
-void func_800506D4(void* data, RomLoadSlot* slot) {
-  if (slot->pos == 1) {
-    func_80050710(data, slot);
+void load_rom_asset_payload(void* destination, RomLoadSlot* header_slot) {
+  if (header_slot->metadata == 1) {
+    func_80050710(destination, header_slot);
   } else {
-    func_80050914(data, slot);
+    func_80050914(destination, header_slot);
   }
 }

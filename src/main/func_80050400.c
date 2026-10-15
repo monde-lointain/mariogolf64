@@ -1,87 +1,85 @@
 #include "common.h"
 
 typedef struct {
-  /* 0x0 */ u32 start;
-  /* 0x4 */ u32 size;
-  /* 0x8 */ u32 pos;
-  /* 0xC */ u32 end;
+  /* ROM address consumed by the next read. */
+  u32 read_address;
+  /* Stored ROM asset size, including its header. */
+  u32 size;
+  /* Initial address in a directory slot; mode byte in the header slot. */
+  u32 metadata;
+  /* Exclusive end of the ROM data range. */
+  u32 end_address;
 } RomLoadSlot; /* 0x10 */
 
-extern RomLoadSlot D_800DE8A0[2];
+extern RomLoadSlot rom_load_slots[2];
 
 extern void osSyncPrintf(const char*, ...);
-extern const char D_800CCB70[];
-extern const char D_800CCB7C[];
+extern const char ROM_SLOT_UNAVAILABLE_FORMAT[];
+extern const char ROM_SLOT_ERROR_FORMAT[];
 
-void func_80050400(void) {
-  s32 i;
-  u8* slot;
+void reset_rom_load_slots(void) {
+  s32 slot_index;
+  RomLoadSlot* slot;
 
-  i = 0;
-  slot = (u8*)D_800DE8A0;
-  do {
-    *(s32*)slot = 0;
-    i += 1;
-    slot += 0x10;
-  } while (i != 2);
+  slot_index = 0;
+  slot = rom_load_slots;
+  for (; slot_index != 2; slot_index++, slot++) {
+    slot->read_address = 0;
+  }
 }
 
-extern u8 D_E473F0[];
-extern s32 D_8012D3A8;
+extern u8 rom_asset_directory[];
+extern s32 current_rom_asset_index;
 
-/* Read the size/offset directory entry for `index` from the D_E473F0 ROM table
- * (8 bytes/entry) into 16-byte-aligned DMA scratch, then fill the load slot:
- * start=pos=base+offset, size, end=start+size. Records index to D_8012D3A8.
- * `size_val` caches the size read so the D_8012D3A8 store schedules between the
- * end and size stores (matches ROM). */
-void func_80050428(s32 index, RomLoadSlot* slot) {
-  u8 offset_buf[0x40];
-  u8 size_buf[0x40];
-  u32 rom_offset = index * 8;
-  u8* offset_aligned = (u8*)(((u32)(&offset_buf[0xF])) & (~0xF));
-  u8* size_aligned = (u8*)(((u32)(&size_buf[0xF])) & (~0xF));
-  u32 size_val;
+/* Read the asset directory's size and relative data offset through aligned
+ * scratch buffers, then initialize a ROM read slot. */
+void initialize_rom_load_slot(s32 asset_index, RomLoadSlot* slot) {
+  u8 offset_storage[0x40];
+  u8 size_storage[0x40];
+  u32 directory_offset = asset_index * 8;
+  u8* aligned_offset = (u8*)(((u32)&offset_storage[0xF]) & ~0xF);
+  u8* aligned_size = (u8*)(((u32)&size_storage[0xF]) & ~0xF);
+  u32 asset_size;
 
-  nuPiReadRom((u32)(D_E473F0 + rom_offset), size_aligned, 4);
-  nuPiReadRom((u32)(rom_offset + (D_E473F0 + 4)), offset_aligned, 4);
-  slot->pos = (u32)(D_E473F0 + (*((u32*)offset_aligned)));
-  slot->start = slot->pos;
-  slot->end = slot->pos + (*((u32*)size_aligned));
-  size_val = *((u32*)size_aligned);
-  D_8012D3A8 = index;
-  slot->size = size_val;
+  nuPiReadRom((u32)(rom_asset_directory + directory_offset), aligned_size, 4);
+  nuPiReadRom((u32)(rom_asset_directory + directory_offset + 4), aligned_offset,
+              4);
+  slot->metadata = (u32)(rom_asset_directory + *(u32*)aligned_offset);
+  slot->read_address = slot->metadata;
+  slot->end_address = slot->metadata + *(u32*)aligned_size;
+  asset_size = *(u32*)aligned_size;
+  current_rom_asset_index = asset_index;
+  slot->size = asset_size;
 }
 
-void func_800504E8(s32 index, RomLoadSlot* slot) { func_80050428(index, slot); }
+void open_rom_asset_slot(s32 asset_index, RomLoadSlot* slot) {
+  initialize_rom_load_slot(asset_index, slot);
+}
 
-RomLoadSlot* func_80050504(s32 index) {
-  s32 count;
-  u8* slot_ptr;
+RomLoadSlot* acquire_rom_load_slot(s32 asset_index) {
+  s32 slot_index;
+  RomLoadSlot* slot;
 
-  count = 0;
-  slot_ptr = (u8*)D_800DE8A0;
-  while (1) {
-    RomLoadSlot* slot = (RomLoadSlot*)slot_ptr;
-    count += 1;
-    if (slot->start == 0) {
-      func_80050428(index, slot);
+  slot_index = 0;
+  slot = rom_load_slots;
+  while (slot_index != 2) {
+    slot_index++;
+    if (slot->read_address == 0) {
+      initialize_rom_load_slot(asset_index, slot);
       return slot;
     }
-    if (count == 2) {
-      break;
-    }
-    slot_ptr += 0x10;
+    slot++;
   }
 
-  osSyncPrintf(D_800CCB70, index);
-  osSyncPrintf(D_800CCB7C, index);
+  osSyncPrintf(ROM_SLOT_UNAVAILABLE_FORMAT, asset_index);
+  osSyncPrintf(ROM_SLOT_ERROR_FORMAT, asset_index);
   return NULL;
 }
 
-void func_80050588(RomLoadSlot* slot) {
-  slot->end = 0;
-  slot->pos = 0;
-  slot->start = 0;
+void release_rom_load_slot(RomLoadSlot* slot) {
+  slot->end_address = 0;
+  slot->metadata = 0;
+  slot->read_address = 0;
 }
 
-u32 func_80050598(RomLoadSlot* slot) { return slot->size; }
+u32 get_rom_load_slot_size(RomLoadSlot* slot) { return slot->size; }

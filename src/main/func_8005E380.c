@@ -7,7 +7,7 @@ typedef struct FaultFlagLabel {
 } FaultFlagLabel;
 
 extern s32 D_800C2C14;
-extern char D_800FF428[];
+extern char thread_context_report_buffer[];
 extern const char D_800D11D8[];
 extern const char D_800D11E4[];
 extern const char D_800D11E8[];
@@ -15,12 +15,12 @@ extern const char D_800D11EC[];
 extern const char D_800D11F0[];
 
 extern void func_8004D580(char* str, s32 x, s32 y);
-extern void func_8005E360(void);
+extern void print_thread_context_buffer(void);
 
 /*
  * func_8005E380: OSThread fault register/flag dump printer (game reimpl of the
  * SDK __osDumpThreadContext idea, output via the game text renderer
- * func_8005E360 / func_8004D580 instead of osSyncPrintf). CARRIED S205 (CSE
+ * print_thread_context_buffer / func_8004D580 instead of osSyncPrintf). CARRIED S205 (CSE
  * base-canon wall).
  *
  * FULLY REVERSE-ENGINEERED, semantically exact, 100% structural (535/535 asm
@@ -75,11 +75,11 @@ void func_8005EAD4(u32 flags, const char* name, FaultFlagLabel* labels) {
   u32 mask;
   s32 first;
 
-  sprintf(D_800FF428, D_800D11D8, name, flags);
-  func_8005E360();
+  sprintf(thread_context_report_buffer, D_800D11D8, name, flags);
+  print_thread_context_buffer();
   first = TRUE;
-  sprintf(D_800FF428, D_800D11E4);
-  func_8005E360();
+  sprintf(thread_context_report_buffer, D_800D11E4);
+  print_thread_context_buffer();
 
   mask = labels->mask;
   if (mask != 0) {
@@ -88,13 +88,13 @@ void func_8005EAD4(u32 flags, const char* name, FaultFlagLabel* labels) {
         if (first) {
           first = FALSE;
         } else {
-          sprintf(D_800FF428, D_800D11E8);
-          func_8005E360();
+          sprintf(thread_context_report_buffer, D_800D11E8);
+          print_thread_context_buffer();
         }
 
-        sprintf(D_800FF428, D_800D11EC, labels->label);
-        func_8005E360();
-        func_8004D580(D_800FF428, 3, D_800C2C14++);
+        sprintf(thread_context_report_buffer, D_800D11EC, labels->label);
+        print_thread_context_buffer();
+        func_8004D580(thread_context_report_buffer, 3, D_800C2C14++);
       }
 
       labels++;
@@ -102,6 +102,6 @@ void func_8005EAD4(u32 flags, const char* name, FaultFlagLabel* labels) {
     } while (mask != 0);
   }
 
-  sprintf(D_800FF428, D_800D11F0);
-  func_8005E360();
+  sprintf(thread_context_report_buffer, D_800D11F0);
+  print_thread_context_buffer();
 }

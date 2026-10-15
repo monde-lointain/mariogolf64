@@ -1,40 +1,45 @@
 #include "common.h"
 
 typedef struct {
-  f32 x, y, z;
+  f32 x;
+  f32 y;
+  f32 z;
 } Vec3f;
 
-extern Vec3f D_80105B6C;
-extern Vec3f D_80105F30;
-extern Vec3f D_800E1C50[];
-extern f32 D_800E1CB0[];
-extern s32 D_800E1CD0;
+extern Vec3f vector_reference_first;
+extern Vec3f vector_reference_second;
+extern Vec3f vector_position_buffer[];
+extern f32 vector_value_buffer[];
+extern s32 vector_buffer_count;
 extern u16 D_800FBDA6[];
-extern u8 D_800D1850[];
+extern u8 VECTOR_POSITION_FORMAT[];
 
-void func_80076500(Vec3f* a0, Vec3f* a1) {
-  a0->x = D_80105B6C.x;
-  a0->y = D_80105B6C.y;
-  a0->z = D_80105B6C.z;
-  a1->x = D_80105F30.x;
-  a1->y = D_80105F30.y;
-  a1->z = D_80105F30.z;
+void copy_reference_vectors(Vec3f* first_destination,
+                            Vec3f* second_destination) {
+  first_destination->x = vector_reference_first.x;
+  first_destination->y = vector_reference_first.y;
+  first_destination->z = vector_reference_first.z;
+  second_destination->x = vector_reference_second.x;
+  second_destination->y = vector_reference_second.y;
+  second_destination->z = vector_reference_second.z;
 }
 
-void func_8007654C(void) { D_800E1CD0 = 0; }
+void reset_vector_samples(void) { vector_buffer_count = 0; }
 
-void func_80076558(Vec3f* a0, f32 a1) {
-  s32 i = D_800E1CD0;
+void append_vector_sample(Vec3f* position, f32 value) {
+  s32 point_index = vector_buffer_count;
 
-  if (i < 8) {
-    D_800E1C50[i].x = a0->x;
-    D_800E1C50[i].y = a0->y;
-    D_800E1C50[i].z = a0->z;
-    D_800E1CB0[i] = a1;
+  if (point_index < 8) {
+    vector_position_buffer[point_index].x = position->x;
+    vector_position_buffer[point_index].y = position->y;
+    vector_position_buffer[point_index].z = position->z;
+    vector_value_buffer[point_index] = value;
     if (D_800FBDA6[0] & 4) {
-      osSyncPrintf((const char*)D_800D1850, (f64)D_800E1C50[i].x,
-                   (f64)D_800E1C50[i].y, (f64)D_800E1C50[i].z);
+      osSyncPrintf((const char*)VECTOR_POSITION_FORMAT,
+                   (f64)vector_position_buffer[point_index].x,
+                   (f64)vector_position_buffer[point_index].y,
+                   (f64)vector_position_buffer[point_index].z);
     }
-    D_800E1CD0 = D_800E1CD0 + 1;
+    vector_buffer_count = vector_buffer_count + 1;
   }
 }

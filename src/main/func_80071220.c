@@ -1,76 +1,73 @@
 #include "common.h"
 
 extern u8* func_8005AF50(void);
-extern s32 func_80052220(void);
+extern s32 get_round_last_hole(void);
 extern s32 func_8006CD50(s32, s32);
-extern void func_800680FC(s32, s32, s32, s32);
+extern u8 roster_sort_and_rank(s32, s32, s32, s32);
 extern void func_8005DF54(u8*, s32);
 
 extern s32 scenario_mode_id;
-extern s32 D_801B608C;
-extern s32 D_801B60B4;
+extern s32 game_mode;
+extern s32 roster_random_seed;
 
-/* stride-6 sentinel table walked from D_801B7118: a signed tag at +0 (the
-   -1 terminator) and an unsigned flag byte at +5 (asm loads lb @0, lbu @5). */
 typedef struct {
-  /* 0x0 */ s8 tag;
-  /* 0x1 */ u8 pad[4];
-  /* 0x5 */ u8 flags;
-} Entry; /* 0x6 */
-extern Entry D_801B7118[];
+  s8 id;
+  u8 padding[4];
+  u8 rank;
+} RankedRosterEntry;
+extern RankedRosterEntry ranked_roster_ids[];
 
-/* array of 0x74-byte per-scenario records at the game-state base + 0xE98 */
 typedef struct {
-  /* 0x00 */ u8 pad[0x30];
-  /* 0x30 */ s32 unk30;
-  /* 0x34 */ s32 unk34;
-  /* 0x38 */ s32 unk38;
-  /* 0x3C */ u8 rest[0x74 - 0x3C];
-} ScenarioRec; /* 0x74 */
+  u8 padding[0x30];
+  s32 third_place_achieved;
+  s32 second_place_achieved;
+  s32 first_place_achieved;
+  u8 remaining[0x74 - 0x3C];
+} ScenarioRecord;
 
-void func_80071220(void) {
-  ScenarioRec* rec = (ScenarioRec*)(func_8005AF50() + 0xE98) + scenario_mode_id;
-  s32 set = 0;
+void save_scenario_roster_rank(void) {
+  ScenarioRecord* scenario_record =
+      (ScenarioRecord*)(func_8005AF50() + 0xE98) + scenario_mode_id;
+  s32 has_podium_finish = 0;
 
-  if (D_801B608C == 5) {
-    s32 first = func_80052220() + 1;
-    s32 second = func_80052220();
-    s32 ret = func_8006CD50(second + 1, 0);
+  if (game_mode == 5) {
+    s32 hole_limit = get_round_last_hole() + 1;
+    s32 last_hole_index = get_round_last_hole();
+    s32 initial_score = func_8006CD50(last_hole_index + 1, 0);
 
-    func_800680FC(first, 0, ret, D_801B60B4);
-
+    roster_sort_and_rank(hole_limit, 0, initial_score, roster_random_seed);
     {
-      Entry* table = D_801B7118;
-      s32 i;
-      s32 sel = 4;
-      s32* dst;
+      RankedRosterEntry* roster_entries = ranked_roster_ids;
+      s32 roster_index;
+      s32 selected_rank = 4;
+      s32* placement_achievement;
 
-      for (i = 0; i != 0x1e; i++) {
-        if (table[i].tag == -1) {
-          sel = table[i].flags & 0x7f;
+      for (roster_index = 0; roster_index != 0x1E; roster_index++) {
+        if (roster_entries[roster_index].id == -1) {
+          selected_rank = roster_entries[roster_index].rank & 0x7F;
           break;
         }
       }
 
-      switch (sel) {
+      switch (selected_rank) {
         case 1:
-          dst = &rec->unk38;
-          set = 1;
+          placement_achievement = &scenario_record->first_place_achieved;
+          has_podium_finish = 1;
           break;
         case 2:
-          dst = &rec->unk34;
-          set = 1;
+          placement_achievement = &scenario_record->second_place_achieved;
+          has_podium_finish = 1;
           break;
         case 3:
-          dst = &rec->unk30;
-          set = 1;
+          placement_achievement = &scenario_record->third_place_achieved;
+          has_podium_finish = 1;
           break;
         default:
-          dst = &rec->unk30;
+          placement_achievement = &scenario_record->third_place_achieved;
           break;
       }
-      if (set) {
-        *dst = 1;
+      if (has_podium_finish) {
+        *placement_achievement = 1;
       }
     }
 

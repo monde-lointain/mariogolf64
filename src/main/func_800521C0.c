@@ -1,18 +1,20 @@
 #include "common.h"
 
 extern s32 flag_is_set(s32 flag);
-extern s32 D_801B60AC;
+extern s32 round_hole_flags;
 
-s32 func_800521C0(void) { return -((D_801B60AC & 2) != 0) & 9; }
+s32 get_round_first_hole(void) { return (round_hole_flags & 2) ? 9 : 0; }
 
-s32 func_800521DC(void) {
+s32 get_round_hole_count(void) {
   if (flag_is_set(0x3D)) {
     return 2;
   }
-  if (D_801B60AC & 6) {
+  if (round_hole_flags & 6) {
     return 9;
   }
-  return 0x12;
+  return 18;
 }
 
-s32 func_80052220(void) { return func_800521C0() + func_800521DC() - 1; }
+s32 get_round_last_hole(void) {
+  return get_round_first_hole() + get_round_hole_count() - 1;
+}

@@ -9,7 +9,7 @@ extern s32 D_800B680C;
 extern s32 D_800B6810;
 extern s32 D_800B6818;
 extern s32 D_801B552C;
-extern s32 D_801B608C;
+extern s32 game_mode;
 extern s32 D_800BB038;
 
 extern s32 D_800BB020;
@@ -320,7 +320,7 @@ void func_80032520(void) {
 s32 func_80032658(void) { return D_800BB03C == 0; }
 
 void func_80032668(void) {
-  u32 v = D_801B608C;
+  u32 v = game_mode;
   s32 r;
 
   D_800BB03C = 1;

@@ -47,8 +47,8 @@ extern void convert_and_pack_floats_to_fixed(f32 matrix[4][4],
                                              Mtx* fixed_matrix);
 extern void* heap3_alloc(u32 size);
 extern void heap3_free(void** payload);
-extern u32 func_8005062C(u16 asset_id, void* load_slots);
-extern void func_800506D4(void* destination, RomLoadSlot* load_slots);
+extern u32 get_rom_asset_allocation_size(u16 asset_id, void* load_slots);
+extern void load_rom_asset_payload(void* destination, RomLoadSlot* load_slots);
 extern void mtx_from_rts(f32 matrix[4][4], f32 rotation[3], f32 translation[3],
                          f32 scale[3]);
 
@@ -56,19 +56,19 @@ void load_pin_render_assets(void) {
   RomLoadSlot load_slots[2];
 
   pin_marker_near_texture =
-      heap3_alloc(func_8005062C(PIN_MARKER_NEAR_ASSET_ID, load_slots));
-  func_800506D4(pin_marker_near_texture, load_slots);
+      heap3_alloc(get_rom_asset_allocation_size(PIN_MARKER_NEAR_ASSET_ID, load_slots));
+  load_rom_asset_payload(pin_marker_near_texture, load_slots);
 
   pin_marker_far_texture =
-      heap3_alloc(func_8005062C(PIN_MARKER_FAR_ASSET_ID, load_slots));
-  func_800506D4(pin_marker_far_texture, load_slots);
+      heap3_alloc(get_rom_asset_allocation_size(PIN_MARKER_FAR_ASSET_ID, load_slots));
+  load_rom_asset_payload(pin_marker_far_texture, load_slots);
 
   pin_assembly_texture =
-      heap3_alloc(func_8005062C(PIN_ASSEMBLY_ASSET_ID, load_slots));
-  func_800506D4(pin_assembly_texture, load_slots);
+      heap3_alloc(get_rom_asset_allocation_size(PIN_ASSEMBLY_ASSET_ID, load_slots));
+  load_rom_asset_payload(pin_assembly_texture, load_slots);
 
-  pin_wind_texture = heap3_alloc(func_8005062C(PIN_WIND_ASSET_ID, load_slots));
-  func_800506D4(pin_wind_texture, load_slots);
+  pin_wind_texture = heap3_alloc(get_rom_asset_allocation_size(PIN_WIND_ASSET_ID, load_slots));
+  load_rom_asset_payload(pin_wind_texture, load_slots);
 }
 
 void free_pin_render_assets(void) {

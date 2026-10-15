@@ -1,222 +1,236 @@
 #include "common.h"
 
 typedef struct {
-  /* 0x0 */ s8 f0;
-  /* 0x1 */ s8 pad[3];
-} Hf0; /* stride 0x4, based at D_800C3604 */
+  s8 value;
+  s8 padding[3];
+} RosterScoreAdjustment;
 
 typedef struct {
-  /* 0x0 */ s8 f3;
-  /* 0x1 */ s8 pad[3];
-} Hf3; /* stride 0x4, based at D_800C3607 */
+  s8 value;
+  s8 padding[3];
+} RosterHoleAdjustment;
 
 typedef struct {
-  /* 0x0 */ s8 id;
-  /* 0x1 */ s8 pad0;
-  /* 0x2 */ s16 pad1;
-  /* 0x4 */ s16 pad2;
-} Eid; /* stride 0x6, align 2, based at D_801B7118 */
+  s8 id;
+  s8 padding0;
+  s16 padding1;
+  s16 padding2;
+} RankedRosterEntry;
 
 typedef struct {
-  /* 0x0 */ s16 score;
-  /* 0x2 */ s8 pad[4];
-} Esc; /* stride 0x6, based at D_801B711A */
+  s16 score;
+  s8 padding[4];
+} ScoredRosterEntry;
 
 typedef struct {
-  /* 0x0 */ s8 hole;
-  /* 0x1 */ s8 pad[5];
-} Eho; /* stride 0x6, based at D_801B711C */
+  s8 hole;
+  s8 padding[5];
+} RosterHoleEntry;
 
 typedef struct {
-  /* 0x0 */ u8 rank;
-  /* 0x1 */ s8 pad[5];
-} Erank; /* stride 0x6, based at D_801B711D */
+  u8 rank;
+  s8 padding[5];
+} RosterRankEntry;
 
 extern s32 scenario_mode_id;
-extern s32 D_800C3600;
-extern Hf0 D_800C3604[];
-extern Hf3 D_800C3607[];
-extern char D_800C3678[];
-extern f64 D_800D1370;
-extern s16 D_80132CB0[];
-extern Eid D_801B7118[];
-extern Esc D_801B711A[];
-extern Eho D_801B711C[];
-extern Erank D_801B711D[];
-extern char D_801B71D0[];
+extern s32 roster_rng_state;
+extern RosterScoreAdjustment roster_score_adjustments[];
+extern RosterHoleAdjustment roster_hole_adjustments[];
+extern char roster_name_table[];
+extern f64 roster_radians_per_hole;
+extern s16 roster_name_indices[];
+extern RankedRosterEntry ranked_roster_ids[];
+extern ScoredRosterEntry ranked_roster_scores[];
+extern RosterHoleEntry ranked_roster_holes[];
+extern RosterRankEntry ranked_roster_ranks[];
+extern char player_records[];
 
 extern f64 sin(f64);
 extern s32 strcmp(const char*, const char*);
 extern void rank_scores_descending(s32* keys, s32* order, s32 count);
 
-s32 func_80067D4C(void);
-void func_80068308(void);
+s32 roster_next_random_value(void);
+void initialize_roster_name_indices(void);
 
-void func_80067D40(s32 arg0) { D_800C3600 = arg0; }
+void roster_set_random_seed(s32 seed) { roster_rng_state = seed; }
 
-s32 func_80067D4C(void) {
-  D_800C3600 = D_800C3600 * 0x5D588B65 + 1;
-  return D_800C3600;
+s32 roster_next_random_value(void) {
+  roster_rng_state = roster_rng_state * 0x5D588B65 + 1;
+  return roster_rng_state;
 }
 
-s32 func_80067D74(s32 arg0, s32 arg1, s32 start, s32 end, s32 arg4) {
-  s32 hi;
-  s32 i;
-  s32 mod3;
-  s32 factor;
+/* The legacy return register and fifth argument are unused by the caller.
+ * Retain the scalar return type: void lets GCC fill a retail nop delay slot. */
+s32 roster_generate_scores(s32 initial_hole, s32 hole_adjustment,
+                           s32 start_entry, s32 end_entry,
+                           s32 unused_player_score) {
+  s32 high_bit;
+  s32 entry_index;
+  s32 score_curve_kind;
+  s32 score_wave_amplitude;
   s32 hole;
-  s32 scoreDelta;
-  f64 rad;
-  s32 val;
-  if (arg0 > 0x12) {
-    arg0 = 0x12;
+  s32 score_delta;
+  f64 radians_per_hole;
+  s32 score;
+
+  if (initial_hole > 0x12) {
+    initial_hole = 0x12;
   }
-  i = start;
-  if (i < end) {
-    hi = (u32)arg1 >> 31;
-    rad = D_800D1370;
-    do {
-      mod3 = i % 3;
-      factor = i % 10;
+  entry_index = start_entry;
+  if (entry_index < end_entry) {
+    high_bit = (u32)hole_adjustment >> 31;
+    radians_per_hole = roster_radians_per_hole;
+    for (; entry_index < end_entry; entry_index++) {
+      score_curve_kind = entry_index % 3;
+      score_wave_amplitude = entry_index % 10;
       if (scenario_mode_id < 2) {
-        factor = 0xD - factor;
-        if (factor > 9) {
-          factor = 9;
+        score_wave_amplitude = 0xD - score_wave_amplitude;
+        if (score_wave_amplitude > 9) {
+          score_wave_amplitude = 9;
         }
       }
       {
-        s32 f = D_800C3607[i - 1].f3;
-        s32 carry = hi;
-        carry |= arg1 >= i;
-        hole = arg0 + (f + carry);
+        s32 prior_hole_adjustment =
+            roster_hole_adjustments[entry_index - 1].value;
+        s32 carry = high_bit;
+        carry |= hole_adjustment >= entry_index;
+        hole = initial_hole + (prior_hole_adjustment + carry);
       }
       if (hole > 0x12) {
         hole = 0x12;
       }
-      scoreDelta = D_800C3604[i - 1].f0 - scenario_mode_id * 2;
+      score_delta = roster_score_adjustments[entry_index - 1].value -
+                    scenario_mode_id * 2;
       {
-        s32 a = (s32)((u32)func_80067D4C() >> 28 & 5) - 2;
-        s32 b = (s32)((u32)func_80067D4C() >> 28 & 5) - 2;
-        scoreDelta += (a + b) / 2;
+        s32 first_random_adjustment =
+            (s32)((u32)roster_next_random_value() >> 28 & 5) - 2;
+        s32 second_random_adjustment =
+            (s32)((u32)roster_next_random_value() >> 28 & 5) - 2;
+        score_delta += (first_random_adjustment + second_random_adjustment) / 2;
       }
       if (hole == 0x12) {
-        s32 lo = scenario_mode_id * -2 + 1;
-        if (scoreDelta <= lo) {
-          scoreDelta = lo;
+        s32 minimum_final_hole_score = scenario_mode_id * -2 + 1;
+        if (score_delta <= minimum_final_hole_score) {
+          score_delta = minimum_final_hole_score;
         }
       }
-      if (scoreDelta < -0x12) {
-        scoreDelta = -0x12;
-      } else if (scoreDelta > 0x12) {
-        scoreDelta = 0x12;
+      if (score_delta < -0x12) {
+        score_delta = -0x12;
+      } else if (score_delta > 0x12) {
+        score_delta = 0x12;
       }
-      switch (mod3) {
+      switch (score_curve_kind) {
         case 0:
-          val = (scoreDelta * hole) / 18;
+          score = (score_delta * hole) / 18;
           break;
         case 1:
-          val = (s32)((f64)((scoreDelta * hole) / 18) +
-                      sin((f64)hole * rad) * (f64)factor);
+          score = (s32)((f64)((score_delta * hole) / 18) +
+                        sin((f64)hole * radians_per_hole) *
+                            (f64)score_wave_amplitude);
           break;
         case 2:
-          val = (s32)((f64)((scoreDelta * hole) / 18) -
-                      sin((f64)hole * rad) * (f64)factor);
+          score = (s32)((f64)((score_delta * hole) / 18) -
+                        sin((f64)hole * radians_per_hole) *
+                            (f64)score_wave_amplitude);
           break;
       }
-      D_801B7118[i].id = i - 1;
-      D_801B711A[i].score = val;
-      D_801B711C[i].hole = hole;
-      i++;
-    } while (i < end);
+      ranked_roster_ids[entry_index].id = entry_index - 1;
+      ranked_roster_scores[entry_index].score = score;
+      ranked_roster_holes[entry_index].hole = hole;
+    }
   }
 }
 
-u8 func_800680FC(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
-  s32 keys[30];
-  s32 order[30];
-  Eid saved[30];
-  s32 i;
-  s32 j;
-  u8 result;
+u8 roster_sort_and_rank(s32 initial_hole, s32 hole_adjustment,
+                        s32 initial_score, s32 random_seed) {
+  s32 sort_keys[30];
+  s32 sorted_indices[30];
+  RankedRosterEntry original_entries[30];
+  s32 entry_index;
+  s32 prior_entry_index;
+  u8 player_rank;
 
-  result = 1;
-  func_80067D40(arg3);
-  func_80067D74(arg0, arg1, 1, 30, arg2);
-  func_80068308();
+  player_rank = 1;
+  roster_set_random_seed(random_seed);
+  roster_generate_scores(initial_hole, hole_adjustment, 1, 30, initial_score);
+  initialize_roster_name_indices();
 
-  D_801B711A[0].score = arg2;
-  D_801B7118[0].id = -1;
-  D_801B711C[0].hole = arg0;
-  for (i = 0; i < 30; i++) {
-    keys[i] = -D_801B711A[i].score;
+  ranked_roster_scores[0].score = initial_score;
+  ranked_roster_ids[0].id = -1;
+  ranked_roster_holes[0].hole = initial_hole;
+  for (entry_index = 0; entry_index < 30; entry_index++) {
+    sort_keys[entry_index] = -ranked_roster_scores[entry_index].score;
   }
-  rank_scores_descending(keys, order, 30);
-  for (i = 0; i < 30; i++) {
-    saved[i] = D_801B7118[i];
+  rank_scores_descending(sort_keys, sorted_indices, 30);
+  for (entry_index = 0; entry_index < 30; entry_index++) {
+    original_entries[entry_index] = ranked_roster_ids[entry_index];
   }
-  for (i = 0; i < 30; i++) {
-    D_801B7118[i] = saved[order[i]];
+  for (entry_index = 0; entry_index < 30; entry_index++) {
+    ranked_roster_ids[entry_index] =
+        original_entries[sorted_indices[entry_index]];
   }
 
-  for (i = 0; i < 30; i++) {
+  for (entry_index = 0; entry_index < 30; entry_index++) {
     u8 rank = 1;
-    u8 flag = 0;
-    j = 0;
-    if (j < i) {
-      Erank* rp = D_801B711D;
-      do {
-        if (D_801B711A[i].score > D_801B711A[j].score) {
+    u8 tie_flag = 0;
+    prior_entry_index = 0;
+    if (prior_entry_index < entry_index) {
+      RosterRankEntry* prior_ranks = ranked_roster_ranks;
+      for (; prior_entry_index < entry_index; prior_entry_index++) {
+        if (ranked_roster_scores[entry_index].score >
+            ranked_roster_scores[prior_entry_index].score) {
           rank++;
         } else {
-          flag = 0x80;
-          rp[j].rank |= 0x80;
+          tie_flag = 0x80;
+          prior_ranks[prior_entry_index].rank |= 0x80;
         }
-        j++;
-      } while (j < i);
-    }
-    D_801B711D[i].rank = flag | rank;
-    if (D_801B7118[i].id == -1) {
-      result = flag | rank;
-    }
-  }
-  return result;
-}
-
-void func_80068308(void) {
-  s16* p;
-  s16* limit;
-  char* names;
-  s32 lo;
-  s32 i;
-  s32 idx;
-  s32 found;
-  s32 pl;
-  s16* base;
-  s32 sc;
-
-  sc = scenario_mode_id;
-  i = 0x1C;
-  idx = 0x1C;
-  found = 0;
-  names = D_800C3678;
-  base = D_80132CB0;
-  p = base + 0x1C;
-  limit = base + 1;
-  lo = (sc + 1) * 30 - 2;
-  for (; i >= 0; i--) {
-    if (!found) {
-      if (strcmp(D_801B71D0, (char*)((lo - idx) * 13 + (s32)names)) == 0) {
-        found = 1;
-        idx--;
       }
     }
-    pl = p < limit;
-    if (found & pl) {
-      *p = (sc + 1) * 30 - 1;
-    } else {
-      *p = lo - idx;
-      idx--;
+    ranked_roster_ranks[entry_index].rank = tie_flag | rank;
+    if (ranked_roster_ids[entry_index].id == -1) {
+      player_rank = tie_flag | rank;
     }
-    p--;
+  }
+  return player_rank;
+}
+
+void initialize_roster_name_indices(void) {
+  s16* name_index_cursor;
+  s16* name_index_limit;
+  char* roster_names;
+  s32 last_roster_name_index;
+  s32 remaining_names;
+  s32 course_index;
+  s32 player_name_found;
+  s32 is_before_limit;
+  s16* name_indices;
+  s32 scenario;
+
+  scenario = scenario_mode_id;
+  course_index = 0x1C;
+  remaining_names = 0x1C;
+  player_name_found = 0;
+  roster_names = roster_name_table;
+  name_indices = roster_name_indices;
+  name_index_cursor = name_indices + 0x1C;
+  name_index_limit = name_indices + 1;
+  last_roster_name_index = (scenario + 1) * 30 - 2;
+  for (; course_index >= 0; course_index--) {
+    if (!player_name_found) {
+      if (strcmp(player_records,
+                 (char*)((last_roster_name_index - remaining_names) * 13 +
+                         (s32)roster_names)) == 0) {
+        player_name_found = 1;
+        remaining_names--;
+      }
+    }
+    is_before_limit = name_index_cursor < name_index_limit;
+    if (player_name_found & is_before_limit) {
+      *name_index_cursor = (scenario + 1) * 30 - 1;
+    } else {
+      *name_index_cursor = last_roster_name_index - remaining_names;
+      remaining_names--;
+    }
+    name_index_cursor--;
   }
 }

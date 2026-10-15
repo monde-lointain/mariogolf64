@@ -1,577 +1,537 @@
 #include "common.h"
 
+/* Preserve the observed target offsets and the two distinct destination roles.
+ */
 typedef struct {
-  /* 0x00 */ u8* src_cur;
-  /* 0x04 */ u8* dst_start;
-  /* 0x08 */ u8* dst_cur;
-  /* 0x0C */ u8* dst_alt;
-  /* 0x10 */ u8* src_end;
-  /* 0x14 */ u16 flags;
-  /* 0x16 */ u16 unk16;
-  /* 0x18 */ s32 ring; /* 2 KiB control ring, extended decoder only */
-  /* 0x1C */ u16 ring_idx;
-  /* 0x1E */ u16 run;
-  /* 0x20 */ u16 hist_idx;
-  /* 0x24 */ s32 hist_base; /* 256-entry halfword history window */
+  /* 0x00 */ u8* source_cursor;
+  /* 0x04 */ u8* output_start;
+  /* 0x08 */ u8* carry_buffer_start;
+  /* 0x0C */ u8* output_cursor;
+  /* 0x10 */ u8* source_end;
+  /* 0x14 */ u16 window_flags;
+  /* 0x16 */ u16 unknown_16;
+  /* 0x18 */ s32 ring_buffer_base;
+  /* 0x1C */ u16 ring_index;
+  /* 0x1E */ u16 run_remaining;
+  /* 0x20 */ u16 history_index;
+  /* 0x24 */ s32 history_buffer_base;
 } LzDecompressState;
 
-/* The extended decoder's frame-local window record (the ROM keeps it in the
- * 0x0..0xF span of its -0x18 frame: halfword run, word hist_base, halfword
- * hist_idx, pointer out). */
+/* Frame-local history state; its ROM-sized layout is retained. */
 typedef struct {
-  /* 0x0 */ u16 run;
-  /* 0x4 */ s32 hist_base;
-  /* 0x8 */ u16 hist_idx;
-  /* 0xC */ u16* out;
+  /* 0x0 */ u16 run_remaining;
+  /* 0x4 */ s32 history_buffer_base;
+  /* 0x8 */ u16 history_index;
+  /* 0xC */ u16* output;
 } LzHistoryState;
 
 extern OSPiHandle* nuPiCartHandle;
 
 /*
- * Streaming LZ decompressor over a sliding pair of 4 KiB DMA windows
- * (called by lz_decompress_dma below, once per filled window).
- *
- * CONTROL-FLOW NOTE: the gotos here are load-bearing for the byte-exact KMC
- * GCC 2.7.2 -O2 match and cannot be replaced with structured loops. Proven
- * against the compiler source
- * (docs/hazards.md#pervasive-regalloc-classical-main):
- *   - The outer dispatch is a goto-loop on purpose. A structured for(;;)/while
- *     emits NOTE_INSN_LOOP_BEG (stmt.c expand_start_loop), which (a) raises
- * every outer value's register-allocation loop-depth weight by one (flow.c
- *     reg_n_refs += loop_depth -> global.c allocno priority), repermuting hard
- *     registers, and (b) makes loop.c run invariant-motion + induction-variable
- *     strength reduction, adding ~5 instructions. A goto-loop emits no note, so
- *     the optimizer leaves it alone.
- *   - The forward gotos (skip_flush, decode, done) fix the out-of-line block
- *     placement and branch polarity; GCC 2.7.2 has no basic-block reorder pass,
- *     so physical layout follows source order and only a goto+label can put a
- *     block where control does not structurally fall through.
+ * Streaming LZ decompressor over a sliding pair of 4 KiB DMA windows.
+ * Separate dispatch edges preserve retail branch placement; paired raw copies
+ * preserve load/store scheduling and overlapping-copy behavior.
  */
 s32 lz_decompress_simple(LzDecompressState* state) {
-  u16 flags_raw;
-  u16 w0;
-  u16 w1;
-  u16* dst;
-  u32 bits;
-  u16* tail_dst;
+  u16 window_flags;
+  u16 current_word;
+  u16 next_word;
+  u16* output_cursor;
+  u32 bit_accumulator;
+  u16* carry_cursor;
   u16* copy_end;
-  u16* src_ahead;
-  u16* copy_dst;
-  u16* src;
-  u16* src_end;
-  u16* ref_src;
+  u16* lookahead_cursor;
+  u16* copy_cursor;
+  u16* source_cursor;
+  u16* source_end;
+  u16* reference_cursor;
   u16 token;
-  u32 is_final;
+  u32 is_nonfinal_window;
 
-  if (state->flags & 1) {
-    /* Continuation window: skip the 2-halfword block header. */
-    src = (u16*)state->src_cur;
-    src += 2;
-    dst = (u16*)state->dst_start;
+  if (state->window_flags & 1) {
+    /* The first window skips the two-halfword stream header. */
+    source_cursor = (u16*)state->source_cursor;
+    source_cursor += 2;
+    output_cursor = (u16*)state->output_start;
   } else {
-    src = (u16*)state->src_cur;
-    dst = (u16*)state->dst_alt;
+    source_cursor = (u16*)state->source_cursor;
+    output_cursor = (u16*)state->output_cursor;
   }
-  flags_raw = state->flags;
-  src_end = (u16*)state->src_end;
-  src_ahead = src + 0xf;
-  is_final = ((flags_raw >> 1) ^ 1) & 1;
+  window_flags = state->window_flags;
+  source_end = (u16*)state->source_end;
+  lookahead_cursor = source_cursor + 0xF;
+  is_nonfinal_window = ((window_flags >> 1) ^ 1) & 1;
 
 dispatch:
-  if (src < (src_end + (-0x10))) {
-    goto skip_flush;
+  if (source_cursor >= (source_end + (-0x10))) {
+    if (is_nonfinal_window != 0) {
+      /* Carry unread input backward into the current DMA buffer. */
+      carry_cursor = (u16*)state->carry_buffer_start;
+      while (source_cursor < source_end) {
+        source_end = source_end + (-1);
+        carry_cursor = carry_cursor + (-1);
+        *carry_cursor = *source_end;
+      }
+      state->source_cursor = (u8*)carry_cursor;
+      state->output_cursor = (u8*)output_cursor;
+      return -1;
+    }
   }
-  if (is_final == 0) {
-    goto skip_flush;
-  }
-  /* Near the window end and not the final block: flush the unconsumed tail
-   * backwards into the carry buffer and ask the caller for more input. */
-  tail_dst = (u16*)state->dst_cur;
-  while (src < src_end) {
-    src_end = src_end + (-1);
-    tail_dst = tail_dst + (-1);
-    *tail_dst = *src_end;
-  }
-  state->src_cur = (u8*)tail_dst;
-  state->dst_alt = (u8*)dst;
-  return -1;
 
-skip_flush:
-  bits = *src;
-  src_ahead = src_ahead + 1;
-  src = src + 1;
-  if (bits != 0) {
+  bit_accumulator = *source_cursor;
+  lookahead_cursor = lookahead_cursor + 1;
+  source_cursor = source_cursor + 1;
+  if (bit_accumulator != 0) {
     goto decode;
   }
-  /* Control word 0: copy a raw run of 16 halfwords. The paired w0/w1
-   * temporaries and the src_ahead[-n] addressing reproduce the compiler's
-   * load/store pairing. */
-  w0 = *src;
-  w1 = src_ahead[-0xe];
-  *dst = w0;
-  w0 = src_ahead[-0xd];
-  dst[1] = w1;
-  w1 = src_ahead[-0xc];
-  dst[2] = w0;
-  w0 = src_ahead[-0xb];
-  dst[3] = w1;
-  w1 = src_ahead[-0xa];
-  dst[4] = w0;
-  w0 = src_ahead[-9];
-  dst[5] = w1;
-  w1 = src_ahead[-8];
-  dst[6] = w0;
-  w0 = src_ahead[-7];
-  dst[7] = w1;
-  w1 = src_ahead[-6];
-  dst[8] = w0;
-  w0 = src_ahead[-5];
-  dst[9] = w1;
-  w1 = src_ahead[-4];
-  dst[10] = w0;
-  w0 = src_ahead[-3];
-  dst[0xb] = w1;
-  w1 = src_ahead[-2];
-  dst[0xc] = w0;
-  w0 = src_ahead[-1];
-  dst[0xd] = w1;
-  w1 = *src_ahead;
-  src = src + 0x10;
-  src_ahead = src_ahead + 0x10;
-  dst[0xe] = w0;
-  dst[0xf] = w1;
-  dst = dst + 0x10;
+  /* Preserve the paired load/store sequence for a raw 16-halfword block. */
+  current_word = *source_cursor;
+  next_word = lookahead_cursor[-0xe];
+  *output_cursor = current_word;
+  current_word = lookahead_cursor[-0xd];
+  output_cursor[1] = next_word;
+  next_word = lookahead_cursor[-0xc];
+  output_cursor[2] = current_word;
+  current_word = lookahead_cursor[-0xb];
+  output_cursor[3] = next_word;
+  next_word = lookahead_cursor[-0xa];
+  output_cursor[4] = current_word;
+  current_word = lookahead_cursor[-9];
+  output_cursor[5] = next_word;
+  next_word = lookahead_cursor[-8];
+  output_cursor[6] = current_word;
+  current_word = lookahead_cursor[-7];
+  output_cursor[7] = next_word;
+  next_word = lookahead_cursor[-6];
+  output_cursor[8] = current_word;
+  current_word = lookahead_cursor[-5];
+  output_cursor[9] = next_word;
+  next_word = lookahead_cursor[-4];
+  output_cursor[10] = current_word;
+  current_word = lookahead_cursor[-3];
+  output_cursor[0xb] = next_word;
+  next_word = lookahead_cursor[-2];
+  output_cursor[0xc] = current_word;
+  current_word = lookahead_cursor[-1];
+  output_cursor[0xd] = next_word;
+  next_word = *lookahead_cursor;
+  source_cursor = source_cursor + 0x10;
+  lookahead_cursor = lookahead_cursor + 0x10;
+  output_cursor[0xe] = current_word;
+  output_cursor[0xf] = next_word;
+  output_cursor = output_cursor + 0x10;
   goto dispatch;
 
 done:
-  return (s32)dst - (s32)state->dst_start;
+  return (s32)output_cursor - (s32)state->output_start;
 
 decode:
-  /* Compressed token stream: `bits` is a bit accumulator with a 0x8000 sentinel
-   * marking when the low 16 bits are exhausted. */
-  bits <<= 0x10;
-  bits |= 0x8000;
-  do {
-    while (0 <= ((s32)bits)) {
-      /* Top bit clear: emit one literal halfword. */
-      src_ahead = src_ahead + 1;
-      w0 = *src;
-      src = src + 1;
-      bits = bits << 1;
-      *dst = w0;
-      dst = dst + 1;
+  /* The 0x8000 sentinel marks exhaustion of this control word. */
+  bit_accumulator <<= 0x10;
+  bit_accumulator |= 0x8000;
+  while (1) {
+    while (0 <= ((s32)bit_accumulator)) {
+      /* A clear bit emits one literal halfword. */
+      lookahead_cursor = lookahead_cursor + 1;
+      current_word = *source_cursor;
+      source_cursor = source_cursor + 1;
+      bit_accumulator = bit_accumulator << 1;
+      *output_cursor = current_word;
+      output_cursor = output_cursor + 1;
     }
 
-    bits = bits << 1;
-    if (bits == 0) {
+    bit_accumulator = bit_accumulator << 1;
+    if (bit_accumulator == 0) {
       goto dispatch;
     }
-    token = *src;
-    src_ahead = src_ahead + 1;
-    src = src + 1;
+    token = *source_cursor;
+    lookahead_cursor = lookahead_cursor + 1;
+    source_cursor = source_cursor + 1;
     if (token == 0) {
       goto done;
     }
-    /* Back-reference: distance = token>>5 halfwords, length = (token&0x1f)+2.
-     */
-    ref_src = (u16*)(((s32)dst) - ((token >> 5) << 1));
-    copy_end = dst + ((token & 0x1f) + 2);
-    w0 = *ref_src;
-    ref_src = ref_src + 1;
-    copy_dst = dst + 1;
-    *dst = w0;
+    /* Back-reference distance is in halfwords; forward copy permits overlap. */
+    reference_cursor = output_cursor - (token >> 5);
+    copy_end = output_cursor + ((token & 0x1f) + 2);
+    current_word = *reference_cursor;
+    reference_cursor = reference_cursor + 1;
+    copy_cursor = output_cursor + 1;
+    *output_cursor = current_word;
     do {
-      *copy_dst = *ref_src;
-      copy_dst = copy_dst + 1;
-      ref_src = ref_src + 1;
-    } while (copy_dst != copy_end);
-    dst = copy_dst;
-  } while (1);
+      *copy_cursor = *reference_cursor;
+      copy_cursor = copy_cursor + 1;
+      reference_cursor = reference_cursor + 1;
+    } while (copy_cursor != copy_end);
+    output_cursor = copy_cursor;
+  }
 }
 
-/* Emits `run` halfwords from the history ring, either back-referenced by a
- * negative byte offset or forward from the output cursor itself. Each emitted
- * halfword also pushes the value it overwrites into the ring. */
-static inline void lz_expand(LzHistoryState* q, s16 off, u32 run) {
-  u16 v;
-  u32 hi;
-  u16* o;
+/* Emit a run through the circular history window or forward from output. */
+static inline void lz_expand(LzHistoryState* history, s16 history_offset,
+                             u32 run_length) {
+  u16 history_value;
+  u32 history_slot;
+  u16* output_cursor;
   u16 next_run;
 
-  if (off < 0) {
-    if (run != 0) {
+  if (history_offset < 0) {
+    if (run_length != 0) {
       do {
-        v = *((u16*)((((((u32)q->hist_idx) + off) & 0xff) * 2) + q->hist_base));
-        hi = q->hist_idx;
-        q->hist_idx = q->hist_idx + 1;
-        *((u16*)((hi * 2) + q->hist_base)) = *q->out;
-        q->hist_idx = q->hist_idx & 0xff;
-        o = q->out;
-        q->out = o + 1;
-        *o = v;
-        q->run = q->run - 1;
-      } while (q->run != 0);
+        history_value = *(
+            (u16*)((((((u32)history->history_index) + history_offset) & 0xff) *
+                    2) +
+                   history->history_buffer_base));
+        history_slot = history->history_index;
+        history->history_index = history->history_index + 1;
+        *((u16*)((history_slot * 2) + history->history_buffer_base)) =
+            *history->output;
+        history->history_index = history->history_index & 0xff;
+        output_cursor = history->output;
+        history->output = output_cursor + 1;
+        *output_cursor = history_value;
+        history->run_remaining = history->run_remaining - 1;
+      } while (history->run_remaining != 0);
     }
-  } else if (run != 0) {
+  } else if (run_length != 0) {
     do {
-      hi = q->hist_idx;
-      q->hist_idx = q->hist_idx + 1;
-      *((u16*)((hi * 2) + q->hist_base)) = *q->out;
-      q->hist_idx = q->hist_idx & 0xff;
-      *q->out = q->out[off];
-      q->out = q->out + 1;
-      next_run = q->run - 1;
-      q->run = next_run;
+      history_slot = history->history_index;
+      history->history_index = history->history_index + 1;
+      *((u16*)((history_slot * 2) + history->history_buffer_base)) =
+          *history->output;
+      history->history_index = history->history_index & 0xff;
+      *history->output = history->output[history_offset];
+      history->output = history->output + 1;
+      next_run = history->run_remaining - 1;
+      history->run_remaining = next_run;
     } while (next_run != 0);
   }
 }
 
 /*
- * The extended (ring-buffered) decoder: same bit-accumulator stream as
- * lz_decompress_simple above, but every emitted halfword also passes through a
- * 2 KiB control ring and a 256-entry history window, so a token can back-
- * reference either.
+ * The extended decoder routes each control halfword through a 2 KiB ring and
+ * a 256-halfword history window.
  *
- * CONTROL-FLOW NOTE: the gotos are load-bearing here for the same reason they
- * are in lz_decompress_simple (see the note above that function).
- *
- * ALLOCATION NOTE, PART 1 -- per-block temporaries. Every scratch value here is
- * declared once but written in exactly one basic block, because GCC 2.7.2
- * allocates a pseudo live in a single block in local-alloc (which runs first
- * and takes the low scratch registers in priority order) and one live in
- * several blocks in global-alloc (which runs after and works around the local
- * choices). So the entry block, the literal-emit block and the back-reference
- * block each carry their own run / ring-slot / next-index temporaries: sharing
- * one variable across two of them merges the quantities and permutes their
- * registers.
- *
- * ALLOCATION NOTE, PART 2 -- the bare `do { ... } while (0)` wrappers below
- * emit no instruction. GCC 2.7.2 weights a pseudo's reference count by loop
- * depth (flow.c), and both allocation passes rank by floor_log2(n_refs) *
- * n_refs / live_length (global.c allocno_compare, local-alloc.c qty_compare),
- * so a wrapper multiplies the references of exactly what it encloses and
- * nothing else. Each one below is placed to move one allocno past another and
- * reproduce the ROM's register order; see
- * docs/wip/lz_decompress_extended.near-match.md for which allocno each moves.
- *
- * ALLOCATION NOTE, PART 3 -- the empty `__asm__ __volatile__("")` in the entry
- * block assembles to nothing and ends a scheduling region, which pins the
- * `dst_alt` load ahead of the three window-state loads that follow it. Without
- * it the scheduler sinks that load three slots, which is the whole difference
- * between this stream and the ROM's.
+ * Keep per-block scratch values distinct, along with the entry scheduling
+ * barrier and no-op loop wrappers: they are present in the measured ROM form.
  */
 s32 lz_decompress_extended(LzDecompressState* state) {
-  u16* src;
-  u16* end;
-  s32 ring;
-  s32 is_final;
-  u32 bits;
-  u32 ridx;
-  u16 flags;
-  u16 ctrl;
-  u32 word;
-  u32 zx;
-  u32 count;
-  s32 off;
-  u32 ring_pos;
-  u32 ho;
-  u32 run;
-  u16 tmp;
-  u16* out0;
-  u16* init_out;
-  u16* dst;
-  u16 hist_idx;
-  u16 lit_run;
-  u16 ref_run;
-  u32 lit_slot_off;
-  u32 ref_slot_off;
-  u32 ref_slot;
-  u32 lit_slot;
-  u32 lit_next_ridx;
-  u16 entry_run;
-  u16* entry_out;
-  u16* save_out;
-  u16 save_run;
-  u16 save_hist_idx;
-  u32 next_ridx;
-  s32 hist_base;
-  s32 entry_hist_base;
-  LzHistoryState st;
-  LzHistoryState* q;
-  u32 marker;
+  u16* source_cursor;
+  u16* source_end;
+  s32 ring_buffer_base;
+  s32 is_nonfinal_window;
+  u32 bit_accumulator;
+  u32 ring_index;
+  u16 window_flags;
+  u16 control_word;
+  u32 reference_word;
+  u32 zero_extended_word;
+  u32 reference_count;
+  s32 history_offset;
+  u32 ring_slot_index;
+  u32 history_slot_index;
+  u32 run_length;
+  /* This shared scratch keeps the retail allocation across token paths. */
+  u16 word_scratch;
+  u16* output_slot;
+  u16* initial_output;
+  u16* carry_cursor;
+  u16 history_index;
+  u16 literal_run;
+  u16 reference_run;
+  u32 literal_slot_offset;
+  u32 reference_slot_offset;
+  u32 reference_slot;
+  u32 literal_slot;
+  u32 literal_next_ring_index;
+  u16 initial_run_remaining;
+  u16* initial_output_cursor;
+  u16* saved_output_cursor;
+  u16 saved_run_remaining;
+  u16 saved_history_index;
+  u32 next_ring_index;
+  s32 history_buffer_base;
+  s32 entry_history_buffer_base;
+  LzHistoryState history;
+  LzHistoryState* history_state;
+  u32 run_marker;
 
-  flags = state->flags;
-  end = (u16*)state->src_end;
-  is_final = ((flags >> 1) ^ 1) & 1;
-  if ((flags & 1) != 0) {
-    /* Continuation window: skip the 2-halfword block header and restart the
-     * ring and history from empty. */
-    src = (u16*)state->src_cur;
-    src = src + 2;
-    ring = state->ring;
-    init_out = (u16*)state->dst_start;
-    hist_base = state->hist_base;
-    ridx = 0;
-    bits = 0x80000000;
-    st.hist_idx = 0;
-    st.run = 0;
-    st.out = init_out;
-    st.hist_base = hist_base;
+  window_flags = state->window_flags;
+  source_end = (u16*)state->source_end;
+  is_nonfinal_window = ((window_flags >> 1) ^ 1) & 1;
+  if ((window_flags & 1) != 0) {
+    /* The first window skips its header and resets both histories. */
+    source_cursor = (u16*)state->source_cursor;
+    source_cursor = source_cursor + 2;
+    ring_buffer_base = state->ring_buffer_base;
+    initial_output = (u16*)state->output_start;
+    history_buffer_base = state->history_buffer_base;
+    ring_index = 0;
+    bit_accumulator = 0x80000000;
+    history.history_index = 0;
+    history.run_remaining = 0;
+    history.output = initial_output;
+    history.history_buffer_base = history_buffer_base;
     goto decode_entry;
   }
-  entry_out = (u16*)state->dst_alt;
+  initial_output_cursor = (u16*)state->output_cursor;
   __asm__ __volatile__("");
-  src = (u16*)state->src_cur;
-  ring = state->ring;
-  ridx = state->ring_idx;
-  hist_idx = state->hist_idx;
-  entry_run = state->run;
-  entry_hist_base = state->hist_base;
+  source_cursor = (u16*)state->source_cursor;
+  ring_buffer_base = state->ring_buffer_base;
+  ring_index = state->ring_index;
+  history_index = state->history_index;
+  initial_run_remaining = state->run_remaining;
+  entry_history_buffer_base = state->history_buffer_base;
   do {
     do {
-      st.out = entry_out;
+      history.output = initial_output_cursor;
     } while (0);
   } while (0);
   do {
-    st.hist_idx = hist_idx;
+    history.history_index = history_index;
   } while (0);
-  do {
-    st.run = entry_run;
-  } while (0);
-  st.hist_base = entry_hist_base;
+  history.run_remaining = initial_run_remaining;
+  history.history_buffer_base = entry_history_buffer_base;
 
 dispatch:
-  if (src < (end + (-0x10))) {
+  if (source_cursor < (source_end + (-0x10))) {
     goto read_word;
   }
-  if (is_final == 0) {
+  if (is_nonfinal_window == 0) {
     goto read_word;
   }
-  /* Near the window end and not the final block: flush the unconsumed tail
-   * backwards into the carry buffer, save the ring/history cursors and ask the
-   * caller for more input. */
-  dst = (u16*)state->dst_cur;
-  while (src < end) {
+  /* Carry unread input backward and save the ring/history cursors. */
+  carry_cursor = (u16*)state->carry_buffer_start;
+  while (source_cursor < source_end) {
     do {
-      end = end + (-1);
-      dst = dst + (-1);
-      *dst = *end;
+      source_end = source_end + (-1);
+      carry_cursor = carry_cursor + (-1);
+      *carry_cursor = *source_end;
     } while (0);
   }
-  save_out = st.out;
-  save_run = st.run;
-  save_hist_idx = st.hist_idx;
-  state->src_cur = (u8*)dst;
-  state->ring_idx = ridx;
-  state->dst_alt = (u8*)save_out;
-  state->run = save_run;
-  state->hist_idx = save_hist_idx;
+  saved_output_cursor = history.output;
+  saved_run_remaining = history.run_remaining;
+  saved_history_index = history.history_index;
+  state->source_cursor = (u8*)carry_cursor;
+  state->ring_index = ring_index;
+  state->output_cursor = (u8*)saved_output_cursor;
+  state->run_remaining = saved_run_remaining;
+  state->history_index = saved_history_index;
   return -1;
 
 done:
-  return ((s32)st.out) - (s32)state->dst_start;
+  return ((s32)history.output) - (s32)state->output_start;
 
 read_word:
-  bits = *src;
-  bits = bits << 0x10;
-  bits = bits | 0x8000;
-  src = src + 1;
+  bit_accumulator = *source_cursor;
+  bit_accumulator = bit_accumulator << 0x10;
+  bit_accumulator = bit_accumulator | 0x8000;
+  source_cursor = source_cursor + 1;
 
 decode_entry:
-  q = &st;
-  marker = 0x8000;
+  history_state = &history;
+  run_marker = 0x8000;
 
 decode_top:
   do {
-    if ((-1) < ((s32)bits)) {
+    if ((-1) < ((s32)bit_accumulator)) {
       do {
-        /* Top bit clear: one literal halfword, pushed through the control
-         * ring. */
-        ctrl = *src;
-        src = src + 1;
-        lit_next_ridx = ridx + 1;
-        lit_slot_off = ridx * 2;
-        lit_run = st.run;
-        ridx = lit_next_ridx & 0x7ff;
-        lit_slot = lit_slot_off + ring;
-        *((u16*)lit_slot) = ctrl;
-        if (lit_run == 0) {
-          run = (ctrl & 0xff) + 1;
-          st.run = run;
-          tmp = ctrl & 0xff00;
-          if (tmp != marker) {
+        /* Literal control halfword: append to the ring before interpretation.
+         */
+        control_word = *source_cursor;
+        source_cursor = source_cursor + 1;
+        literal_next_ring_index = ring_index + 1;
+        literal_slot_offset = ring_index * 2;
+        literal_run = history.run_remaining;
+        ring_index = literal_next_ring_index & 0x7ff;
+        literal_slot = literal_slot_offset + ring_buffer_base;
+        *((u16*)literal_slot) = control_word;
+        if (literal_run == 0) {
+          run_length = (control_word & 0xff) + 1;
+          history.run_remaining = run_length;
+          word_scratch = control_word & 0xff00;
+          if (word_scratch != run_marker) {
             do {
-              off = ((s32)(((u32)(ctrl & 0xff00)) << 0x10)) >> 0x18;
-              lz_expand(q, off, run);
+              history_offset =
+                  ((s32)(((u32)(control_word & 0xff00)) << 0x10)) >> 0x18;
+              lz_expand(history_state, history_offset, run_length);
             } while (0);
           }
         } else {
-          ho = st.hist_idx;
-          st.hist_idx = st.hist_idx + 1;
-          tmp = *st.out;
-          st.hist_idx = st.hist_idx & 0xff;
-          out0 = st.out;
-          st.out = out0 + 1;
-          *((u16*)((ho * 2) + st.hist_base)) = tmp;
-          *out0 = ctrl;
-          st.run = st.run - 1;
+          history_slot_index = history.history_index;
+          history.history_index = history.history_index + 1;
+          word_scratch = *history.output;
+          history.history_index = history.history_index & 0xff;
+          output_slot = history.output;
+          history.output = output_slot + 1;
+          *((u16*)((history_slot_index * 2) + history.history_buffer_base)) =
+              word_scratch;
+          *output_slot = control_word;
+          history.run_remaining = history.run_remaining - 1;
         }
-        bits = bits << 1;
-      } while ((-1) < ((s32)bits));
+        bit_accumulator = bit_accumulator << 1;
+      } while ((-1) < ((s32)bit_accumulator));
     }
   } while (0);
 
   do {
-    bits = bits << 1;
+    bit_accumulator = bit_accumulator << 1;
   } while (0);
-  if (bits == 0) {
+  if (bit_accumulator == 0) {
     goto dispatch;
   }
-  word = *src;
-  src = src + 1;
+  reference_word = *source_cursor;
+  source_cursor = source_cursor + 1;
   do {
-    zx = (u16)word;
+    zero_extended_word = (u16)reference_word;
     do {
-      if (zx == 0) {
+      if (zero_extended_word == 0) {
         goto done;
       }
     } while (0);
   } while (0);
-  /* Back-reference into the control ring: distance = word>>5 entries,
-   * length = (word&0x1f)+1. */
+  /* Ring back-reference distance is in control-ring entries. */
   do {
-    count = word & 0x1f;
+    reference_count = reference_word & 0x1f;
     do {
       do {
         do {
-          word = zx >> 5;
+          reference_word = zero_extended_word >> 5;
         } while (0);
       } while (0);
     } while (0);
-    count = count + 1;
-    do {
-      ring_pos = ridx & 0xffff;
-      next_ridx = ridx + 1;
-      ridx = next_ridx & 0x7ff;
-      ctrl = *((u16*)((((ring_pos - word) & 0x7ff) * 2) + ring));
-      ref_run = st.run;
-      ref_slot_off = ring_pos * 2;
-      ref_slot = ref_slot_off + ring;
-      *((u16*)ref_slot) = ctrl;
-      if (ref_run == 0) {
-        run = (ctrl & 0xff) + 1;
-        st.run = run;
-        if ((ctrl & 0xff00) != marker) {
+    reference_count = reference_count + 1;
+    while (1) {
+      ring_slot_index = ring_index & 0xffff;
+      next_ring_index = ring_index + 1;
+      ring_index = next_ring_index & 0x7ff;
+      control_word =
+          *((u16*)((((ring_slot_index - reference_word) & 0x7ff) * 2) +
+                   ring_buffer_base));
+      reference_run = history.run_remaining;
+      reference_slot_offset = ring_slot_index * 2;
+      reference_slot = reference_slot_offset + ring_buffer_base;
+      *((u16*)reference_slot) = control_word;
+      if (reference_run == 0) {
+        run_length = (control_word & 0xff) + 1;
+        history.run_remaining = run_length;
+        if ((control_word & 0xff00) != run_marker) {
           do {
-            off = ((s32)(((u32)(ctrl & 0xff00)) << 0x10)) >> 0x18;
-            lz_expand(q, off, run);
+            history_offset =
+                ((s32)(((u32)(control_word & 0xff00)) << 0x10)) >> 0x18;
+            lz_expand(history_state, history_offset, run_length);
           } while (0);
         }
       } else {
-        ho = st.hist_idx;
-        st.hist_idx = st.hist_idx + 1;
-        tmp = *st.out;
-        st.hist_idx = st.hist_idx & 0xff;
-        out0 = st.out;
-        st.out = out0 + 1;
-        *((u16*)((ho * 2) + st.hist_base)) = tmp;
-        *out0 = ctrl;
-        st.run = st.run - 1;
+        history_slot_index = history.history_index;
+        history.history_index = history.history_index + 1;
+        word_scratch = *history.output;
+        history.history_index = history.history_index & 0xff;
+        output_slot = history.output;
+        history.output = output_slot + 1;
+        *((u16*)((history_slot_index * 2) + history.history_buffer_base)) =
+            word_scratch;
+        *output_slot = control_word;
+        history.run_remaining = history.run_remaining - 1;
       }
-      if (count == 0) {
+      if (reference_count == 0) {
         break;
       }
-      count = count - 1;
-    } while (1);
+      reference_count = reference_count - 1;
+    }
   } while (0);
   goto decode_top;
 }
 
-s32 lz_decompress_dma(u32 romAddr, void* dest, u32 length) {
-  OSIoMesg mesg[2];
-  OSMesgQueue queue;
-  OSMesg mesgBuf[2];
+/* Stream compressed ROM bytes through the simple decoder's double DMA window.
+ */
+s32 lz_decompress_dma(u32 rom_address, void* destination, u32 remaining_bytes) {
+  OSIoMesg dma_messages[2];
+  OSMesgQueue dma_queue;
+  OSMesg message_buffer[2];
   LzDecompressState state;
-  u8 buf0store[4160];
-  u8 buf1store[4160];
-  void* bufs[2];
-  OSMesg* msgArr;
+  u8 first_buffer_storage[4160];
+  u8 second_buffer_storage[4160];
+  void* buffers[2];
+  OSMesg* message_array;
 
-  s32 recvCount = 0;
-  u32 bufIdx = 0;
-  s32 inFlight = 0;
-  u32 recvIdx = 0;
-  u8* buf0 = (u8*)((((u32)buf0store + 0xF) & ~0xF) + 0x20);
-  u8* buf1 = (u8*)((((u32)buf1store + 0xF) & ~0xF) + 0x20);
+  s32 received_count = 0;
+  u32 next_dma_buffer = 0;
+  s32 in_flight_count = 0;
+  u32 receive_index = 0;
+  u8* first_buffer = (u8*)((((u32)first_buffer_storage + 0xF) & ~0xF) + 0x20);
+  u8* second_buffer = (u8*)((((u32)second_buffer_storage + 0xF) & ~0xF) + 0x20);
 
-  bufs[0] = buf0;
-  bufs[1] = buf1;
-  state.src_cur = buf0;
-  state.dst_cur = buf1;
-  state.flags = 1;
-  state.dst_start = (u8*)dest;
-  osCreateMesgQueue(&queue, mesgBuf, 2);
-  msgArr = mesgBuf;
+  buffers[0] = first_buffer;
+  buffers[1] = second_buffer;
+  state.source_cursor = first_buffer;
+  state.carry_buffer_start = second_buffer;
+  state.window_flags = 1;
+  state.output_start = (u8*)destination;
+  osCreateMesgQueue(&dma_queue, message_buffer, 2);
+  message_array = message_buffer;
 
   for (;;) {
-    u32 otherIdx;
+    u32 other_buffer_index;
 
-    if (length != 0) {
-      u32 nbytes = length;
-      OSIoMesg* iomsg;
-      void* dram;
+    if (remaining_bytes != 0) {
+      u32 dma_size = remaining_bytes;
+      OSIoMesg* dma_message;
+      void* dram_address;
 
-      if (nbytes > 0x1000) {
-        nbytes = 0x1000;
+      if (dma_size > 0x1000) {
+        dma_size = 0x1000;
       }
-      iomsg = &mesg[bufIdx];
-      iomsg->hdr.pri = 0;
-      iomsg->hdr.retQueue = &queue;
-      dram = bufs[bufIdx];
-      length -= nbytes;
-      iomsg->devAddr = romAddr;
-      romAddr += nbytes;
-      iomsg->size = nbytes;
-      iomsg->dramAddr = dram;
-      inFlight++;
-      osInvalDCache(bufs[bufIdx], nbytes);
-      bufIdx ^= 1;
-      osEPiStartDma(nuPiCartHandle, iomsg, OS_READ);
+      dma_message = &dma_messages[next_dma_buffer];
+      dma_message->hdr.pri = 0;
+      dma_message->hdr.retQueue = &dma_queue;
+      dram_address = buffers[next_dma_buffer];
+      remaining_bytes -= dma_size;
+      dma_message->devAddr = rom_address;
+      rom_address += dma_size;
+      dma_message->size = dma_size;
+      dma_message->dramAddr = dram_address;
+      in_flight_count++;
+      osInvalDCache(buffers[next_dma_buffer], dma_size);
+      next_dma_buffer ^= 1;
+      osEPiStartDma(nuPiCartHandle, dma_message, OS_READ);
     }
 
-    if (osRecvMesg(&queue, msgArr + recvIdx, OS_MESG_NOBLOCK) != -1) {
-      recvIdx ^= 1;
-      recvCount++;
-      inFlight--;
+    if (osRecvMesg(&dma_queue, message_array + receive_index,
+                   OS_MESG_NOBLOCK) != -1) {
+      receive_index ^= 1;
+      received_count++;
+      in_flight_count--;
     }
 
-    if (recvCount == 0) {
-      if (inFlight == 2 || length == 0) {
-        osRecvMesg(&queue, msgArr + recvIdx, OS_MESG_BLOCK);
-        recvIdx ^= 1;
-        recvCount = 1;
-        inFlight--;
+    if (received_count == 0) {
+      if (in_flight_count == 2 || remaining_bytes == 0) {
+        osRecvMesg(&dma_queue, message_array + receive_index, OS_MESG_BLOCK);
+        receive_index ^= 1;
+        received_count = 1;
+        in_flight_count--;
       }
-      if (recvCount == 0) {
+      if (received_count == 0) {
         continue;
       }
     }
 
-    otherIdx = recvIdx ^ 1;
-    osInvalDCache(bufs[otherIdx], mesg[otherIdx].size);
-    state.dst_cur = bufs[recvIdx];
-    state.src_end = (u8*)bufs[otherIdx] + 0x1000;
-    if (inFlight == 0 && length == 0) {
-      state.flags |= 2;
+    other_buffer_index = receive_index ^ 1;
+    osInvalDCache(buffers[other_buffer_index],
+                  dma_messages[other_buffer_index].size);
+    state.carry_buffer_start = buffers[receive_index];
+    state.source_end = (u8*)buffers[other_buffer_index] + 0x1000;
+    if (in_flight_count == 0 && remaining_bytes == 0) {
+      state.window_flags |= 2;
     }
     {
       s32 result = lz_decompress_simple(&state);
-      recvCount--;
+
+      received_count--;
       if (result >= 0) {
-        osWritebackDCache(dest, result);
+        osWritebackDCache(destination, result);
         return result;
       }
-      state.flags &= 0xFFFE;
+      state.window_flags &= 0xFFFE;
     }
   }
 }

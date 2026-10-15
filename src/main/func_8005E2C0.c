@@ -1,33 +1,36 @@
 #include "common.h"
 
-extern OSMesgQueue D_800E1270;
-extern OSThread* D_800DF0B0;
+extern OSMesgQueue fault_event_queue;
+extern OSThread* current_faulted_thread;
 extern s32 D_800DF0B4;
-extern const char D_800D0AE4[];
-extern const char D_800D0AF8[];
-extern const char D_800FF428[];
+extern const char FAULT_MONITOR_WAIT_MESSAGE[];
+extern const char FAULT_MONITOR_EVENT_MESSAGE[];
+extern const char thread_context_report_buffer[];
 
 extern OSThread* __osGetCurrFaultedThread(void);
-extern void play_sound_effect(s32 arg0, s32 arg1, s32 arg2);
+extern void play_sound_effect(s32 sound_id, s32 channel, s32 volume);
 extern void func_8005E380(OSThread* thread);
 
-void func_8005E2C0(void) { volatile u8 unused[0x18]; }
+/* Preserve the existing empty body and volatile frame reservation. */
+void fault_monitor_noop(void) { volatile u8 reserved_frame[0x18]; }
 
-void func_8005E2CC(void) {
-  OSMesg msg;
-
-  osSetEventMesg(12, &D_800E1270, (OSMesg)0x10);
+void monitor_thread_faults(void) {
+  osSetEventMesg(OS_EVENT_FAULT, &fault_event_queue, (OSMesg)0x10);
   D_800DF0B4 = 0;
-  while (TRUE) {
-    osSyncPrintf(D_800D0AE4);
-    osRecvMesg(&D_800E1270, &msg, OS_MESG_BLOCK);
-    osSyncPrintf(D_800D0AF8);
-    D_800DF0B0 = __osGetCurrFaultedThread();
-    if (D_800DF0B0 != NULL) {
+  while (1) {
+    OSMesg event_message;
+
+    osSyncPrintf(FAULT_MONITOR_WAIT_MESSAGE);
+    osRecvMesg(&fault_event_queue, &event_message, OS_MESG_BLOCK);
+    osSyncPrintf(FAULT_MONITOR_EVENT_MESSAGE);
+    current_faulted_thread = __osGetCurrFaultedThread();
+    if (current_faulted_thread != NULL) {
       play_sound_effect(0x30, 0xB, 0x7F);
-      func_8005E380(D_800DF0B0);
+      func_8005E380(current_faulted_thread);
     }
   }
 }
 
-void func_8005E360(void) { osSyncPrintf(D_800FF428); }
+void print_thread_context_buffer(void) {
+  osSyncPrintf(thread_context_report_buffer);
+}

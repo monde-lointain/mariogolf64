@@ -2,13 +2,13 @@
 
 extern u8* func_8005AF50(void);
 extern void func_8005DF54(u8* save, s32 arg1);
-extern s32 func_80099490(void);
+extern void initialize_save_sram(void);
 
 void func_ovl8_801F5780(void) {
   u8* save = func_8005AF50();
   s32 i;
   u8* row;
-  func_80099490();
+  initialize_save_sram();
   func_8005DF54(save, 0);
   i = 0;
   {

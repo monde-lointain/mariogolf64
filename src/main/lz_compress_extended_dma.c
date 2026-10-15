@@ -11,7 +11,7 @@ extern s32 scenario_mode_id;
  * a bare scalar survives CSE and forwards. See
  * docs/hazards.md#mem-in-struct-scheduling-lever.
  */
-extern s32 D_801B6098[];
+extern s32 round_hole_index[];
 extern const char D_800D1380[]; /* "putter%d:course%d:hole%d\n" */
 extern u32 D_800C3FA0;          /* LCG scratch-RNG state */
 
@@ -24,8 +24,8 @@ extern s32 overlay_id_from_segment(s32);
 extern void unload_overlay(s32);
 extern s32 load_overlay(s32);
 extern void load_hole_terrain_assets(s32, s32);
-extern s32 func_80051FCC(void);
-extern s32 func_80052070(void);
+extern s32 get_current_course_id(void);
+extern s32 get_current_hole_index(void);
 extern void func_8004D148(void);
 
 /* In-TU siblings still carried as INCLUDE_ASM (forward decls for the call
@@ -93,9 +93,9 @@ void func_800690C0(void) {
   s32 temp_s0;
 
   osSyncPrintf(D_800D1380, g_terrain_vtx_xform_mode, scenario_mode_id,
-               D_801B6098[0]);
-  temp_s0 = func_80051FCC();
-  load_hole_terrain_assets(temp_s0, func_80052070());
+               round_hole_index[0]);
+  temp_s0 = get_current_course_id();
+  load_hole_terrain_assets(temp_s0, get_current_hole_index());
   func_80068F98();
 }
 
@@ -144,8 +144,8 @@ void func_80069BCC(void) {
   func_8005F1C8();
   osSyncPrintf(D_800D13B4);
   func_80032E88();
-  D_80105B20[D_801B6098[0]] = 0;
-  if (D_801B6098[0] == 0) {
+  D_80105B20[round_hole_index[0]] = 0;
+  if (round_hole_index[0] == 0) {
     D_801B60B0 = 0;
     for (i = 0; i != 0x12; i++) {
       D_80105B20[i] = 0;

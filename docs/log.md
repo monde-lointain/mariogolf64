@@ -2,6 +2,34 @@
 
 ## 2026-10-14
 
+- **Main-bank readability pass**: Read Code Complete Chapters 7, 10–16, 31, and 32,
+  then reviewed all 68 functions in the 17 requested source files with six parallel
+  proposal-writing workers and serialized integration. Added semantic names for
+  49 routines and 52 data/diagnostic symbols, migrated committed C references,
+  and let extraction regenerate assembly references. The physical ROM directory
+  has an absolute symbol declaration plus its linker definition in `extern_syms.txt`.
+  YAML, layouts, compiler profiles, numeric operations, DMA behavior, and GBI
+  command order are unchanged.
+  - Replaced loader byte strides with typed slots, made slot reset and roster/color
+    traversals counted loops, removed magnitude/CRC and audio-callback gotos, and
+    simplified the simple decoder's boundary checks and halfword back-reference.
+    Made endless token loops explicit and removed a redundant decoder one-shot loop.
+  - Narrowed score, scheduler, fault-message, and color-update locals into existing
+    blocks; added no scope-only braces. Named podium-achievement fields and retained
+    NuSystem/libmus interfaces, correcting the pre-NMI counter's callback type and
+    the SRAM wrapper's caller return declarations. Unified the 17 files with
+    clang-format 23.1.3 and updated interface comments.
+  - Retained measured exceptions: decoder dispatches, remaining allocation-shaping
+    one-shot loops and shared halfword scratch; the score-comparison exit; the
+    selector argument forwarded to the global-state course lookup; and the roster
+    generator's unused legacy return register. Splitting decoder scratch changed
+    18 instruction bytes; a direct score return changed branch polarity/delay-slot
+    placement. These are documented constraints, not permission to preserve
+    unmeasured low-level shapes.
+  - **Proof**: Profile-faithful isolated comparisons guided each structural change.
+    After formatting and integration, `tools/verify-rom.sh` built the retail ROM
+    and reported SHA-1 match `e2c4e7a905b29529b49a1619a401fe699224829b`.
+
 - **Wipe-box readability**: Read every guideline in Code Complete Chapters 7,
   10–16, 31, and 32 and reviewed all three routines in `src/main/func_800500E0.c`.
   Named animation states, transition timing, fixed-point units, rectangle bounds,

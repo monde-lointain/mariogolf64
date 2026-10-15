@@ -7,8 +7,8 @@ typedef struct {
   /* 0xC */ u32 end;
 } RomLoadSlot; /* 0x10 */
 
-extern u32 func_8005062C(u16 index, RomLoadSlot* slot);
-extern void func_800506D4(void* data, RomLoadSlot* slot);
+extern u32 get_rom_asset_allocation_size(u16 index, RomLoadSlot* slot);
+extern void load_rom_asset_payload(void* data, RomLoadSlot* slot);
 
 /* Destination the caller preallocated for asset 0x6EF; its first six bytes are
  * the image header, big-endian width at +2 and height at +4. */
@@ -30,8 +30,8 @@ void func_ovl15_801FB400(u8* image) {
   u32 height;
 
   D_ovl15_801FBBE0 = image;
-  func_8005062C(0x6EF, slot);
-  func_800506D4(D_ovl15_801FBBE0, slot);
+  get_rom_asset_allocation_size(0x6EF, slot);
+  load_rom_asset_payload(D_ovl15_801FBBE0, slot);
 
   width = (D_ovl15_801FBBE0[2] << 8) | D_ovl15_801FBBE0[3];
   height = (D_ovl15_801FBBE0[4] << 8) | D_ovl15_801FBBE0[5];

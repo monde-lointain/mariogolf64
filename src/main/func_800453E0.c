@@ -522,16 +522,16 @@ INCLUDE_ASM("asm/nonmatchings/main/func_800453E0", func_80047E9C);
 
 extern void func_800934CC(s32 arg0);
 extern void play_bgm_by_id(s32 id, s32 flag);
-extern s32 func_80052220(void);
-extern s32 func_8005244C(s32 arg0, s32 arg1);
+extern s32 get_round_last_hole(void);
+extern s32 get_match_play_result(s32 arg0, s32 arg1);
 extern s8 rumble_disable_flag;
 extern s8 D_801061B8;
 extern s8 D_801061C0;
 extern s8 D_801061C3;
-extern s32 D_801B6090;
-extern s32 D_801B6098;
+extern s32 active_player_count;
+extern s32 round_hole_index;
 extern f32 D_801B5580;
-extern s32 D_801B608C;
+extern s32 game_mode;
 extern s8 g_terrain_vtx_xform_mode;
 extern s32 D_800BE694;
 extern s32 D_801B7F70;
@@ -583,7 +583,7 @@ void func_8004876C(void) {
   func_800719A0(0, 0, -1, 1, 1, 0, 0, 0, 0, 0);
 }
 
-extern s32 D_801B608C;
+extern s32 game_mode;
 extern s32 D_800BE694;
 extern s32 D_801B7F70;
 extern s32 putting_meter_level;
@@ -598,7 +598,7 @@ void func_800487E4(void) {
   D_801B7F70 = 0;
   putting_meter_level = 0;
   D_801B557C = 0;
-  if (D_801B608C == 7) {
+  if (game_mode == 7) {
     return;
   }
   if (g_terrain_vtx_xform_mode != 0) {

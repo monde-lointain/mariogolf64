@@ -1,188 +1,205 @@
 #include "common.h"
 
 extern s32 scenario_mode_id;
-extern u32 D_801B608C;
-extern s32 D_801B6090[];
-extern s32 D_801B6098;
-extern s8 D_801B71F3;
-extern s8 D_801B71F6;
-extern s8 D_801B71F9;
-extern s8 D_801B71FB;
+extern u32 game_mode;
+extern s32 active_player_count[];
+extern s32 round_hole_index;
+extern s8 player_base_scores[];
+extern s8 player_hole_status[];
+extern s8 player_handicaps[];
+extern s8 player_hole_scores[];
 extern s32 D_801B60A0[];
-extern s32 func_8005244C(s32 arg0, s32 arg1);
-extern s32 func_800521C0(void);
-extern s32 func_800521DC(void);
-extern s8 D_800C1435[];
-extern s32 func_80051FCC(s32 mode);
-extern void rank_scores_descending(s32* src, s32* dst, s32 count);
-extern s32 func_80052264(s32 arg0, s32 arg1, s32 arg2);
+extern s32 get_match_play_result(s32 player_a, s32 player_b);
+extern s32 get_round_first_hole(void);
+extern s32 get_round_hole_count(void);
+extern s8 hole_handicap_ranks[];
+/* The retail caller forwards its selector in a0 even though the lookup uses
+ * global state. Dropping that argument changes this caller's allocation. */
+extern s32 get_current_course_id(s32 course_id);
+extern void rank_scores_descending(s32* scores, s32* player_order, s32 count);
+extern s32 calculate_hole_handicap_adjustment(s32 course_id, s32 hole_index,
+                                              s32 score);
 
-s32 func_80052250(void) { return scenario_mode_id == 0xC; }
+s32 is_special_course_active(void) { return scenario_mode_id == 0xC; }
 
-s32 func_80052264(s32 arg0, s32 arg1, s32 arg2) {
-  return -arg2 / 18 -
-         (arg2 % 18 >= D_800C1435[func_80051FCC(arg0) * 200 + arg1 * 10]);
+s32 calculate_hole_handicap_adjustment(s32 course_id, s32 hole_index,
+                                       s32 score) {
+  return -score / 18 -
+         (score % 18 >=
+          hole_handicap_ranks[get_current_course_id(course_id) * 200 +
+                              hole_index * 10]);
 }
 
-s32 func_80052324(s32 arg0) {
-  return (&D_801B71F3)[arg0 * 0xB8] + func_80052264(scenario_mode_id,
-                                                    D_801B6098,
-                                                    (&D_801B71F9)[arg0 * 0xB8]);
+s32 calculate_player_adjusted_score(s32 player_index) {
+  return player_base_scores[player_index * 0xB8] +
+         calculate_hole_handicap_adjustment(
+             scenario_mode_id, round_hole_index,
+             player_handicaps[player_index * 0xB8]);
 }
 
-void func_80052384(void) {
-  s32 buf[36];
-  s32* bufp = buf;
-  s32 count = 18;
-  s32 base;
-  s32 idx;
-  s32 i;
+void initialize_hole_handicap_ranks(void) {
+  s32 scores_and_order[36];
+  s32* score_order = scores_and_order;
+  s32 rank_count = 18;
+  s32 course_offset;
+  s32 table_offset;
+  s32 hole_index;
 
-  for (base = 0; base < 1600; base += 200) {
-    for (i = 0; i < 18; i++) {
-      idx = base + i * 10;
-      bufp[i] = D_800C1435[idx];
+  for (course_offset = 0; course_offset < 1600; course_offset += 200) {
+    for (hole_index = 0; hole_index < 18; hole_index++) {
+      table_offset = course_offset + hole_index * 10;
+      score_order[hole_index] = hole_handicap_ranks[table_offset];
     }
-    rank_scores_descending(buf, &buf[18], 18);
-    for (i = 0, idx = base; i < 18; i++) {
-      s32 slot = bufp[18 + i] * 10 + idx;
-      D_800C1435[slot] = count - i;
+    rank_scores_descending(scores_and_order, &scores_and_order[18], 18);
+    for (hole_index = 0, table_offset = course_offset; hole_index < 18;
+         hole_index++) {
+      s32 rank_offset = score_order[18 + hole_index] * 10 + table_offset;
+      hole_handicap_ranks[rank_offset] = rank_count - hole_index;
     }
   }
 }
 
-s32 func_8005244C(s32 arg0, s32 arg1) {
-  s32 total;
-  s32 limit;
-  s32 diff;
-  s32 mag;
-  s32 span;
-  s32 first;
-  s32 val0;
-  s32 val1;
-  s32 i;
+s32 get_match_play_result(s32 player_a, s32 player_b) {
+  s32 score_span;
+  s32 remaining_holes;
+  s32 score_difference;
+  s32 score_difference_magnitude;
+  s32 difference_magnitude;
+  s32 first_difference_magnitude;
+  s32 hole_index;
 
-  total = func_800521C0() + func_800521DC();
-  diff = 0;
+  score_span = get_round_first_hole() + get_round_hole_count();
+  score_difference = 0;
 
   if (D_801B60A0[0] != 0) {
     return 3;
   }
 
-  limit = total - D_801B6098 - 1;
-  i = func_800521C0();
-  if (i < D_801B6098) {
-    s32 count;
+  remaining_holes = score_span - round_hole_index - 1;
+  hole_index = get_round_first_hole();
+  if (hole_index < round_hole_index) {
+    s32 final_hole;
 
     do {
-      s32 idx0 = arg0 * 184 + i * 2;
-      s32 idx1 = arg1 * 184 + i * 2;
+      s32 player_a_score;
+      s32 player_b_score;
+      s32 player_a_offset = player_a * 184 + hole_index * 2;
+      s32 player_b_offset = player_b * 184 + hole_index * 2;
 
-      count = D_801B60A0[-2];
-      val0 = (&D_801B71FB)[idx0];
-      val1 = (&D_801B71FB)[idx1];
-      if (val0 < val1) {
-        diff++;
+      final_hole = D_801B60A0[-2];
+      player_a_score = player_hole_scores[player_a_offset];
+      player_b_score = player_hole_scores[player_b_offset];
+      if (player_a_score < player_b_score) {
+        score_difference++;
       } else {
-        diff -= (val1 < val0);
+        score_difference -= (player_b_score < player_a_score);
       }
-      i++;
-    } while (i < count);
+      hole_index++;
+    } while (hole_index < final_hole);
   }
 
-  first = diff;
-  if (first < 0) {
-    first = -first;
+  first_difference_magnitude = score_difference;
+  if (first_difference_magnitude < 0) {
+    first_difference_magnitude = -first_difference_magnitude;
   }
-  if (first == limit + 1) {
-    if (diff < 0) {
+  if (first_difference_magnitude == remaining_holes + 1) {
+    if (score_difference < 0) {
       return 2;
     }
     return 1;
   }
-  span = diff;
-  if (span < 0) {
-    span = -span;
+  difference_magnitude = score_difference;
+  if (difference_magnitude < 0) {
+    difference_magnitude = -difference_magnitude;
   }
-  if (limit + 1 < span) {
+  if (remaining_holes + 1 < difference_magnitude) {
     return -1;
   }
-  mag = diff;
-  if (mag < 0) {
-    mag = -mag;
+  score_difference_magnitude = score_difference;
+  if (score_difference_magnitude < 0) {
+    score_difference_magnitude = -score_difference_magnitude;
   }
-  if (mag == limit) {
-    if (limit == 0) {
+  if (score_difference_magnitude == remaining_holes) {
+    if (remaining_holes == 0) {
       return 3;
     }
   }
   return 0;
 }
 
-s32 func_800525C4(s32 arg0, s32 arg1) {
-  s32 total;
-  s32 limit;
-  s32 diff;
-  s32 mag;
-  s32 val0;
-  s32 val1;
-  s32 i;
-  s32* flag = D_801B60A0;
-  s32* cfg;
-  s32* cfg2;
+s32 get_handicap_match_play_result(s32 player_a, s32 player_b) {
+  s32 score_span;
+  s32 remaining_holes;
+  s32 score_difference;
+  s32 difference_magnitude;
+  s32 player_a_score;
+  s32 player_b_score;
+  s32 hole_index;
+  s32* tournament_state = D_801B60A0;
+  s32* tournament_config;
+  s32* tournament_config_for_scores;
 
-  total = func_800521C0() + func_800521DC();
-  diff = 0;
+  score_span = get_round_first_hole() + get_round_hole_count();
+  score_difference = 0;
 
-  if (flag[0] != 0) {
-    i = func_800521C0();
-    if (i >= D_801B6098) {
+  if (tournament_state[0] != 0) {
+    hole_index = get_round_first_hole();
+    if (hole_index >= round_hole_index) {
       return 0;
     }
-    cfg = flag - 3;
+    tournament_config = tournament_state - 3;
     do {
-      s32 base0 = arg0 * 184;
-      s32 base1 = arg1 * 184;
-      s32 idx0 = base0 + i * 2;
-      s32 idx1 = base1 + i * 2;
+      s32 player_a_base = player_a * 184;
+      s32 player_b_base = player_b * 184;
+      s32 player_a_offset = player_a_base + hole_index * 2;
+      s32 player_b_offset = player_b_base + hole_index * 2;
 
-      val0 =
-          (&D_801B71FB)[idx0] + func_80052264(cfg[0], i, (&D_801B71F9)[base0]);
-      val1 =
-          (&D_801B71FB)[idx1] + func_80052264(cfg[0], i, (&D_801B71F9)[base1]);
-      if (val0 < val1) {
+      player_a_score =
+          player_hole_scores[player_a_offset] +
+          calculate_hole_handicap_adjustment(tournament_config[0], hole_index,
+                                             player_handicaps[player_a_base]);
+      player_b_score =
+          player_hole_scores[player_b_offset] +
+          calculate_hole_handicap_adjustment(tournament_config[0], hole_index,
+                                             player_handicaps[player_b_base]);
+      if (player_a_score < player_b_score) {
         return 1;
       }
-      if (val1 < val0) {
+      if (player_b_score < player_a_score) {
         return 2;
       }
-      i++;
-    } while (i < cfg[1]);
+      hole_index++;
+    } while (hole_index < tournament_config[1]);
     return 0;
   }
 
-  limit = total - D_801B6098 - 1;
-  i = func_800521C0();
-  if (i < D_801B6098) {
-    cfg2 = flag - 3;
+  remaining_holes = score_span - round_hole_index - 1;
+  hole_index = get_round_first_hole();
+  if (hole_index < round_hole_index) {
+    tournament_config_for_scores = tournament_state - 3;
     do {
-      s32 base0 = arg0 * 184;
-      s32 base1 = arg1 * 184;
-      s32 idx0 = base0 + i * 2;
-      s32 idx1 = base1 + i * 2;
+      s32 player_a_base = player_a * 184;
+      s32 player_b_base = player_b * 184;
+      s32 player_a_offset = player_a_base + hole_index * 2;
+      s32 player_b_offset = player_b_base + hole_index * 2;
 
-      val0 =
-          (&D_801B71FB)[idx0] + func_80052264(cfg2[0], i, (&D_801B71F9)[base0]);
-      val1 =
-          (&D_801B71FB)[idx1] + func_80052264(cfg2[0], i, (&D_801B71F9)[base1]);
-      diff += (val0 < val1);
-      diff -= (val1 < val0);
-      i++;
-    } while (i < cfg2[1]);
+      player_a_score = player_hole_scores[player_a_offset] +
+                       calculate_hole_handicap_adjustment(
+                           tournament_config_for_scores[0], hole_index,
+                           player_handicaps[player_a_base]);
+      player_b_score = player_hole_scores[player_b_offset] +
+                       calculate_hole_handicap_adjustment(
+                           tournament_config_for_scores[0], hole_index,
+                           player_handicaps[player_b_base]);
+      score_difference += (player_a_score < player_b_score);
+      score_difference -= (player_b_score < player_a_score);
+      hole_index++;
+    } while (hole_index < tournament_config_for_scores[1]);
   }
-  mag = (diff < 0) ? -diff : diff;
-  if (limit + 1 < mag) {
-    if (diff > 0) {
+  difference_magnitude =
+      (score_difference < 0) ? -score_difference : score_difference;
+  if (remaining_holes + 1 < difference_magnitude) {
+    if (score_difference > 0) {
       return 1;
     }
     return 2;
@@ -190,47 +207,56 @@ s32 func_800525C4(s32 arg0, s32 arg1) {
   return 0;
 }
 
-s32 func_80052834(s32 arg0, s32 arg1) {
-  s32 rank;
-  s32 row;
+s32 compare_player_hole_results(s32 player_a, s32 player_b) {
+  s32 comparison_result;
+  s32 player_record_offset;
 
-  row = arg0 * 184;
-  if ((&D_801B71F6)[row] == 0) {
-    row = arg1 * 184;
-    if ((&D_801B71F6)[row] == 0) {
+  player_record_offset = player_a * 184;
+  if (player_hole_status[player_record_offset] == 0) {
+    player_record_offset = player_b * 184;
+    if (player_hole_status[player_record_offset] == 0) {
+      /* A direct return changes the retail branch polarity and delay slot. */
       goto undecided;
     }
   } else {
-    row = arg1 * 184;
-    if ((&D_801B71F6)[row] != 0) {
-      if (func_80052324(arg0) < func_80052324(arg1)) {
+    player_record_offset = player_b * 184;
+    if (player_hole_status[player_record_offset] != 0) {
+      if (calculate_player_adjusted_score(player_a) <
+          calculate_player_adjusted_score(player_b)) {
         return 1;
       }
-      return (func_80052324(arg1) >= func_80052324(arg0)) ? 3 : 2;
+      return (calculate_player_adjusted_score(player_b) >=
+              calculate_player_adjusted_score(player_a))
+                 ? 3
+                 : 2;
     }
-    if (func_80052324(arg0) < func_80052324(arg1) + 1) {
+    if (calculate_player_adjusted_score(player_a) <
+        calculate_player_adjusted_score(player_b) + 1) {
       return 1;
     }
   }
 
-  row = arg1 * 184;
-  if ((&D_801B71F6)[row] != 0 &&
-      func_80052324(arg1) < func_80052324(arg0) + 1) {
+  player_record_offset = player_b * 184;
+  if (player_hole_status[player_record_offset] != 0 &&
+      calculate_player_adjusted_score(player_b) <
+          calculate_player_adjusted_score(player_a) + 1) {
     return 2;
   }
 
-  rank = func_8005244C(arg0, arg1);
-  if (rank == 1) {
-    row = arg0 * 184;
-    if ((&D_801B71F6)[row] != 0 &&
-        func_80052324(arg0) <= func_80052324(arg1) + 1) {
+  comparison_result = get_match_play_result(player_a, player_b);
+  if (comparison_result == 1) {
+    player_record_offset = player_a * 184;
+    if (player_hole_status[player_record_offset] != 0 &&
+        calculate_player_adjusted_score(player_a) <=
+            calculate_player_adjusted_score(player_b) + 1) {
       return 3;
     }
   }
-  if (rank == 2) {
-    row = arg1 * 184;
-    if ((&D_801B71F6)[row] != 0 &&
-        func_80052324(arg1) <= func_80052324(arg0) + 1) {
+  if (comparison_result == 2) {
+    player_record_offset = player_b * 184;
+    if (player_hole_status[player_record_offset] != 0 &&
+        calculate_player_adjusted_score(player_b) <=
+            calculate_player_adjusted_score(player_a) + 1) {
       return 3;
     }
   }
@@ -238,148 +264,157 @@ undecided:
   return 0;
 }
 
-s32 func_80052A68(s8* out) {
-  s8 marks[4];
-  s32 min;
-  s32 best;
-  s32 ties;
-  s32 cnt3;
-  s32 ok;
-  s32 i;
+s32 resolve_hole_winners(s8* player_marks) {
+  s8 local_marks[4];
+  s32 minimum_score;
+  s32 best_player;
+  s32 tie_count;
+  s32 status_three_count;
+  s32 can_resolve;
+  s32 player;
 
-  min = 0x40000000;
-  best = -1;
-  ok = 0;
-  ties = 0;
-  cnt3 = 0;
+  minimum_score = 0x40000000;
+  best_player = -1;
+  can_resolve = 0;
+  tie_count = 0;
+  status_three_count = 0;
 
-  if (out == NULL) {
-    out = marks;
+  if (player_marks == NULL) {
+    player_marks = local_marks;
   }
 
-  for (i = 0; i < D_801B6090[0]; i++) {
-    s32 row = i * 184;
+  for (player = 0; player < active_player_count[0]; player++) {
+    s32 player_record_offset = player * 184;
 
-    if ((&D_801B71F6)[row] == 1) {
-      if (func_80052324(i) < min) {
-        min = func_80052324(i);
-        best = i;
-        ties = 0;
+    if (player_hole_status[player_record_offset] == 1) {
+      if (calculate_player_adjusted_score(player) < minimum_score) {
+        minimum_score = calculate_player_adjusted_score(player);
+        best_player = player;
+        tie_count = 0;
       } else {
-        ties += (min == func_80052324(i));
+        tie_count += (minimum_score == calculate_player_adjusted_score(player));
       }
     } else {
-      cnt3 += ((&D_801B71F6)[row] == 3);
+      status_three_count += (player_hole_status[player_record_offset] == 3);
     }
   }
 
-  if (best == -1) {
-    for (i = 0; i < D_801B6090[0]; i++) {
-      out[i] = 0;
+  if (best_player == -1) {
+    for (player = 0; player < active_player_count[0]; player++) {
+      player_marks[player] = 0;
     }
-    if (cnt3 == D_801B6090[0]) {
+    if (status_three_count == active_player_count[0]) {
       return 2;
     }
-    return ok;
+    return can_resolve;
   }
 
-  ok = 1;
-  for (i = 0; i < D_801B6090[0]; i++) {
-    s32 row = i * 184;
+  can_resolve = 1;
+  for (player = 0; player < active_player_count[0]; player++) {
+    s32 player_record_offset = player * 184;
 
-    out[i] = 0;
-    if ((&D_801B71F6)[row] == 0) {
-      if (func_80052324(i) >= min) {
-        out[i] = 2;
-      } else if (func_80052324(i) < min - 1) {
-        ok = 0;
+    player_marks[player] = 0;
+    if (player_hole_status[player_record_offset] == 0) {
+      if (calculate_player_adjusted_score(player) >= minimum_score) {
+        player_marks[player] = 2;
+      } else if (calculate_player_adjusted_score(player) < minimum_score - 1) {
+        can_resolve = 0;
       } else {
-        ok = ties ? ok : 0;
+        can_resolve = tie_count ? can_resolve : 0;
       }
-    } else if (min < func_80052324(i)) {
-      out[i] = 2;
-    } else if ((&D_801B71F6)[row] >= 2) {
-      out[i] = 2;
+    } else if (minimum_score < calculate_player_adjusted_score(player)) {
+      player_marks[player] = 2;
+    } else if (player_hole_status[player_record_offset] >= 2) {
+      player_marks[player] = 2;
     }
   }
 
-  if (ok == 0) {
+  if (can_resolve == 0) {
     return 0;
   }
-  if (ties > 0) {
+  if (tie_count > 0) {
     return 2;
   }
 
-  for (i = 0; i < D_801B6090[0]; i++) {
-    s32 row = i * 184;
+  for (player = 0; player < active_player_count[0]; player++) {
+    s32 player_record_offset = player * 184;
 
-    if ((&D_801B71F6)[row] == 1 && func_80052324(i) == min) {
-      out[i] = 1;
+    if (player_hole_status[player_record_offset] == 1 &&
+        calculate_player_adjusted_score(player) == minimum_score) {
+      player_marks[player] = 1;
     }
   }
   return 1;
 }
 
-s32 func_80052CF0(s32 arg0) {
+s32 get_player_hole_result(s32 player) {
   s32 result;
-  s32 opp;
-  s32 min;
-  s32 any;
-  s32 i;
+  s32 opponent;
+  s32 minimum_score;
+  s32 any_finished_player;
+  s32 player_index;
 
   result = 3;
 
-  switch (D_801B608C) {
+  switch (game_mode) {
     case 2:
     case 4:
-      opp = arg0 ^ 1;
-      if (func_80052324(arg0) == func_80052324(opp) - 1 &&
-          (&D_801B71F6)[opp * 184] != 0) {
+      opponent = player ^ 1;
+      if (calculate_player_adjusted_score(player) ==
+              calculate_player_adjusted_score(opponent) - 1 &&
+          player_hole_status[opponent * 184] != 0) {
         result = 4;
-        if (func_8005244C(arg0, opp) == 1) {
+        if (get_match_play_result(player, opponent) == 1) {
           result = 2;
         }
         break;
       }
-      if (func_80052324(arg0) < func_80052324(opp)) {
-        result = (func_8005244C(arg0, opp) == 3) * 2;
+      if (calculate_player_adjusted_score(player) <
+          calculate_player_adjusted_score(opponent)) {
+        result = (get_match_play_result(player, opponent) == 3) * 2;
         break;
       }
-      if (func_80052324(arg0) >= func_80052324(opp) + 1) {
+      if (calculate_player_adjusted_score(player) >=
+          calculate_player_adjusted_score(opponent) + 1) {
         break;
       }
-      if ((&D_801B71F6)[opp * 184] == 1) {
+      if (player_hole_status[opponent * 184] == 1) {
         break;
       }
-      if (func_8005244C(arg0, opp) == 1) {
+      if (get_match_play_result(player, opponent) == 1) {
         result = 2;
       }
       break;
 
     case 10:
     case 11:
-      any = 0;
-      min = 0x40000000;
+      any_finished_player = 0;
+      minimum_score = 0x40000000;
       result = 0;
-      for (i = 0; i < D_801B6090[0]; i++) {
-        s32 row = i * 184;
+      for (player_index = 0; player_index < active_player_count[0];
+           player_index++) {
+        s32 player_record_offset = player_index * 184;
 
-        if ((&D_801B71F6)[row] == 1) {
-          any = 1;
-          if (func_80052324(i) < min) {
-            min = func_80052324(i);
+        if (player_hole_status[player_record_offset] == 1) {
+          any_finished_player = 1;
+          if (calculate_player_adjusted_score(player_index) < minimum_score) {
+            minimum_score = calculate_player_adjusted_score(player_index);
           }
         }
       }
-      for (i = 0; i < D_801B6090[0]; i++) {
-        s32 row = i * 184;
+      for (player_index = 0; player_index < active_player_count[0];
+           player_index++) {
+        s32 player_record_offset = player_index * 184;
 
-        if (i != arg0 && (&D_801B71F6)[row] == 0) {
-          if (func_80052324(i) < func_80052324(arg0)) {
+        if (player_index != player &&
+            player_hole_status[player_record_offset] == 0) {
+          if (calculate_player_adjusted_score(player_index) <
+              calculate_player_adjusted_score(player)) {
             result = 3;
             break;
           }
-          if (func_80052324(i) == func_80052324(arg0)) {
+          if (calculate_player_adjusted_score(player_index) ==
+              calculate_player_adjusted_score(player)) {
             result = 1;
           }
         }
@@ -387,11 +422,11 @@ s32 func_80052CF0(s32 arg0) {
       if (result == 3) {
         break;
       }
-      if (any != 0) {
-        if (func_80052324(arg0) + 1 == min) {
+      if (any_finished_player != 0) {
+        if (calculate_player_adjusted_score(player) + 1 == minimum_score) {
           result = 1;
         }
-        if (func_80052324(arg0) + 1 >= min) {
+        if (calculate_player_adjusted_score(player) + 1 >= minimum_score) {
           return result;
         }
       }

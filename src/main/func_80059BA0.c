@@ -16,7 +16,7 @@ extern u8 D_801B9410;
 extern u8 D_800C2BD4;
 extern s32 current_game_mode;
 extern u8 D_8012F720[];
-extern s32 D_801B6098;
+extern s32 round_hole_index;
 extern s32 scenario_mode_id;
 extern u8 D_8012D400[];
 extern u32 D_8012F724;
@@ -54,15 +54,15 @@ extern u8 D_800FF4C0;
 extern u8 D_80105268;
 extern u8 D_800FBE08[];
 extern u8 D_801323B8;
-extern s32 D_801B60AC;
+extern s32 round_hole_flags;
 extern u8 D_801323D0;
-extern s32 D_801B608C;
+extern s32 game_mode;
 extern u8 D_801B5634;
 extern u8 D_800C2BD5;
 
 u8* func_8005AF74(void);
 void func_8005DF54(u8*, s32);
-s32 func_80099490(void);
+void initialize_save_sram(void);
 void flag_clear(s32);
 void func_8005D9A0(void);
 
@@ -401,11 +401,11 @@ extern void* D_800FC6A0;
 extern void* D_801B69EC;
 
 extern void* heap3_alloc(u32 need);
-extern u32 func_8005062C(u16 index, void* out);
-extern void func_800506D4(void* data, RomLoadSlot* slot);
-extern void func_800504E8(s32 index, RomLoadSlot* slot);
-extern u32 func_80050598(RomLoadSlot* slot);
-extern void func_800505A0(void* dst, u32 size, RomLoadSlot* slot);
+extern u32 get_rom_asset_allocation_size(u16 index, void* out);
+extern void load_rom_asset_payload(void* data, RomLoadSlot* slot);
+extern void open_rom_asset_slot(s32 index, RomLoadSlot* slot);
+extern u32 get_rom_load_slot_size(RomLoadSlot* slot);
+extern void read_rom_load_slot(void* dst, u32 size, RomLoadSlot* slot);
 extern u8* func_8005AF50(void);
 extern void func_8002A97C(s32 arg0, s32 arg1);
 extern void set_color_framebuffer_count(u32 buffer_count);
@@ -427,14 +427,13 @@ extern u16 D_800C28B0;
 /* Allocates and loads every ROM asset the course scene needs, in one pass.
  *
  * Two asset APIs alternate throughout. The three-call block
- * (func_8005062C / heap3_alloc / func_800506D4) sizes an asset by id, takes a
- * heap block for it and reads it in; the five-call block
- * (func_800504E8 / func_80050598 / heap3_alloc / func_800505A0) does the same
- * through a pre-opened RomLoadSlot. func_8005ACF8 below releases these in the
- * same order.
+ * (get_rom_asset_allocation_size / heap3_alloc / load_rom_asset_payload)
+ * sizes an asset by id, takes a heap block and reads it in. The raw-slot path
+ * uses open_rom_asset_slot / get_rom_load_slot_size / heap3_alloc /
+ * read_rom_load_slot. func_8005ACF8 releases these in the same order.
  *
- * Several func_8005062C results are deliberately discarded: those buffers have
- * a fixed size (0x70A8, 0xFA0, 0x125C) and the call only opens the slot. */
+ * Several allocation-size results are deliberately discarded: those buffers
+ * have fixed sizes (0x70A8, 0xFA0, 0x125C), and the query only opens the slot. */
 void load_course_assets(void) {
   RomLoadSlot slot_a[2];
   RomLoadSlot slot_b[2];
@@ -457,138 +456,138 @@ void load_course_assets(void) {
     return;
   }
 
-  D_801F4A20 = heap3_alloc(func_8005062C(0x51E, slot_a));
-  func_800506D4(D_801F4A20, slot_a);
-  D_8012D3AC = heap3_alloc(func_8005062C(0x721, slot_a));
-  func_800506D4(D_8012D3AC, slot_a);
-  D_800FF420[0] = heap3_alloc(func_8005062C(0x520, slot_a));
-  func_800506D4(D_800FF420[0], slot_a);
-  D_800FF420[1] = heap3_alloc(func_8005062C(0x520, slot_a));
-  func_800506D4(D_800FF420[1], slot_a);
-  D_801B60D0 = heap3_alloc(func_8005062C(0x521, slot_a));
-  func_800506D4(D_801B60D0, slot_a);
+  D_801F4A20 = heap3_alloc(get_rom_asset_allocation_size(0x51E, slot_a));
+  load_rom_asset_payload(D_801F4A20, slot_a);
+  D_8012D3AC = heap3_alloc(get_rom_asset_allocation_size(0x721, slot_a));
+  load_rom_asset_payload(D_8012D3AC, slot_a);
+  D_800FF420[0] = heap3_alloc(get_rom_asset_allocation_size(0x520, slot_a));
+  load_rom_asset_payload(D_800FF420[0], slot_a);
+  D_800FF420[1] = heap3_alloc(get_rom_asset_allocation_size(0x520, slot_a));
+  load_rom_asset_payload(D_800FF420[1], slot_a);
+  D_801B60D0 = heap3_alloc(get_rom_asset_allocation_size(0x521, slot_a));
+  load_rom_asset_payload(D_801B60D0, slot_a);
 
   D_8012D420[0] = heap3_alloc(0x70A8);
   D_801B5CD0[0] = heap3_alloc(0x70A8);
   D_8012D420[1] = heap3_alloc(0x70A8);
   D_801B5CD0[1] = heap3_alloc(0x70A8);
   asset_id_a = &D_800C2014;
-  func_8005062C(*asset_id_a, slot_a);
-  func_800506D4(D_8012D420[0], slot_a);
-  func_8005062C(*asset_id_a, slot_a);
-  func_800506D4(D_8012D420[1], slot_a);
+  get_rom_asset_allocation_size(*asset_id_a, slot_a);
+  load_rom_asset_payload(D_8012D420[0], slot_a);
+  get_rom_asset_allocation_size(*asset_id_a, slot_a);
+  load_rom_asset_payload(D_8012D420[1], slot_a);
   if (current_game_mode == 5) {
-    func_8005062C(0x528, slot_a);
-    func_800506D4(D_801B5CD0[0], slot_a);
-    func_8005062C(0x528, slot_a);
-    func_800506D4(D_801B5CD0[1], slot_a);
+    get_rom_asset_allocation_size(0x528, slot_a);
+    load_rom_asset_payload(D_801B5CD0[0], slot_a);
+    get_rom_asset_allocation_size(0x528, slot_a);
+    load_rom_asset_payload(D_801B5CD0[1], slot_a);
   } else {
-    func_8005062C(D_800C2016, slot_a);
-    func_800506D4(D_801B5CD0[0], slot_a);
-    func_8005062C(D_800C2016, slot_a);
-    func_800506D4(D_801B5CD0[1], slot_a);
+    get_rom_asset_allocation_size(D_800C2016, slot_a);
+    load_rom_asset_payload(D_801B5CD0[0], slot_a);
+    get_rom_asset_allocation_size(D_800C2016, slot_a);
+    load_rom_asset_payload(D_801B5CD0[1], slot_a);
   }
 
   asset_id_b = &D_800C2028;
-  D_801052BC[0] = heap3_alloc(func_8005062C(*asset_id_b, slot_a));
-  func_800506D4(D_801052BC[0], slot_a);
-  D_801052BC[1] = heap3_alloc(func_8005062C(*asset_id_b, slot_a));
-  func_800506D4(D_801052BC[1], slot_a);
+  D_801052BC[0] = heap3_alloc(get_rom_asset_allocation_size(*asset_id_b, slot_a));
+  load_rom_asset_payload(D_801052BC[0], slot_a);
+  D_801052BC[1] = heap3_alloc(get_rom_asset_allocation_size(*asset_id_b, slot_a));
+  load_rom_asset_payload(D_801052BC[1], slot_a);
 
   off = 0;
   for (i = 0; i != 7; i++) {
     if (current_game_mode == 5) {
       u8* row = (u8*)D_800C20E0[D_80105B68];
-      size = func_8005062C(*(u16*)(i * 2 + row), slot_a);
+      size = get_rom_asset_allocation_size(*(u16*)(i * 2 + row), slot_a);
     } else {
-      size = func_8005062C(D_800C2064[i], slot_a);
+      size = get_rom_asset_allocation_size(D_800C2064[i], slot_a);
     }
     D_801049A0[i] = heap3_alloc(size);
-    func_800506D4(D_801049A0[i], slot_a);
+    load_rom_asset_payload(D_801049A0[i], slot_a);
     if (current_game_mode == 5) {
       u8* row = (u8*)D_800C20E0[D_80105B68];
-      size = func_8005062C(*(u16*)(i * 2 + row), slot_a);
+      size = get_rom_asset_allocation_size(*(u16*)(i * 2 + row), slot_a);
     } else {
-      size = func_8005062C(D_800C2064[i], slot_a);
+      size = get_rom_asset_allocation_size(D_800C2064[i], slot_a);
     }
     D_8012F4B0[i] = heap3_alloc(size);
-    func_800506D4(D_8012F4B0[i], slot_a);
+    load_rom_asset_payload(D_8012F4B0[i], slot_a);
   }
 
   for (i = 0; i != 2; i++) {
-    func_800504E8(D_800C20D4[i], slot_b);
-    size = func_80050598(slot_b);
+    open_rom_asset_slot(D_800C20D4[i], slot_b);
+    size = get_rom_load_slot_size(slot_b);
     D_801052C4[i] = heap3_alloc(size);
-    func_800505A0(D_801052C4[i], size, slot_b);
+    read_rom_load_slot(D_801052C4[i], size, slot_b);
   }
 
   asset_id_c = &D_800C21B8;
-  func_8005062C(*asset_id_c, slot_a);
+  get_rom_asset_allocation_size(*asset_id_c, slot_a);
   D_800FBDFC[0] = heap3_alloc(0xFA0);
-  func_800506D4(D_800FBDFC[0], slot_a);
-  func_8005062C(*asset_id_c, slot_a);
+  load_rom_asset_payload(D_800FBDFC[0], slot_a);
+  get_rom_asset_allocation_size(*asset_id_c, slot_a);
   D_800FBDFC[1] = heap3_alloc(0xFA0);
-  func_800506D4(D_800FBDFC[1], slot_a);
+  load_rom_asset_payload(D_800FBDFC[1], slot_a);
 
   for (i = 0; i != 2; i++) {
-    func_8005062C(D_800C21B8, slot_a);
+    get_rom_asset_allocation_size(D_800C21B8, slot_a);
     D_800FF4C4[i] = heap3_alloc(0x125C);
-    func_800506D4(D_800FF4C4[i], slot_a);
+    load_rom_asset_payload(D_800FF4C4[i], slot_a);
   }
 
   for (i = 0; i != 5; i++) {
-    D_801B93E0[i] = heap3_alloc(func_8005062C(0x720, slot_a));
-    func_800506D4(D_801B93E0[i], slot_a);
+    D_801B93E0[i] = heap3_alloc(get_rom_asset_allocation_size(0x720, slot_a));
+    load_rom_asset_payload(D_801B93E0[i], slot_a);
   }
 
-  size = func_8005062C(0x623, slot_a);
+  size = get_rom_asset_allocation_size(0x623, slot_a);
   D_8010526C[0] = heap3_alloc(size);
   D_8010526C[1] = heap3_alloc(size);
   D_800FF180[0] = heap3_alloc(size);
   D_800FF180[1] = heap3_alloc(size);
-  func_800506D4(D_8010526C[0], slot_a);
-  D_80106100 = heap3_alloc(func_8005062C(0x65D, slot_a));
-  func_800506D4(D_80106100, slot_a);
-  D_800FC898 = heap3_alloc(func_8005062C(0x663, slot_a));
-  func_800506D4(D_800FC898, slot_a);
+  load_rom_asset_payload(D_8010526C[0], slot_a);
+  D_80106100 = heap3_alloc(get_rom_asset_allocation_size(0x65D, slot_a));
+  load_rom_asset_payload(D_80106100, slot_a);
+  D_800FC898 = heap3_alloc(get_rom_asset_allocation_size(0x663, slot_a));
+  load_rom_asset_payload(D_800FC898, slot_a);
 
   for (i = 0; i != 18; i++) {
     off = i * 16;
     tile_palette_table[i] =
-        heap3_alloc(func_8005062C(*(u16*)((u8*)D_800C2650 + off), slot_a));
-    func_800506D4(tile_palette_table[i], slot_a);
+        heap3_alloc(get_rom_asset_allocation_size(*(u16*)((u8*)D_800C2650 + off), slot_a));
+    load_rom_asset_payload(tile_palette_table[i], slot_a);
   }
 
   for (i = 0; i != 18; i++) {
     off = i * 8;
-    func_800504E8(*(s16*)((u8*)D_800C2590 + off), slot_b);
-    size = func_80050598(slot_b);
+    open_rom_asset_slot(*(s16*)((u8*)D_800C2590 + off), slot_b);
+    size = get_rom_load_slot_size(slot_b);
     tile_texture_table[i] = heap3_alloc(size);
-    func_800505A0(tile_texture_table[i], size, slot_b);
+    read_rom_load_slot(tile_texture_table[i], size, slot_b);
   }
 
   for (i = 0; i != 3; i++) {
-    func_800504E8(D_800C2278[i], slot_b);
-    size = func_80050598(slot_b);
+    open_rom_asset_slot(D_800C2278[i], slot_b);
+    size = get_rom_load_slot_size(slot_b);
     D_800FBE38[i] = heap3_alloc(size);
-    func_800505A0(D_800FBE38[i], size, slot_b);
+    read_rom_load_slot(D_800FBE38[i], size, slot_b);
   }
 
   asset_id_d = &D_800C28B0;
-  D_800FBE30[0] = heap3_alloc(func_8005062C(*asset_id_d, slot_a) * 2);
-  func_800506D4(D_800FBE30[0], slot_a);
-  D_800FBE30[1] = heap3_alloc(func_8005062C(*asset_id_d, slot_a) * 2);
-  func_800506D4(D_800FBE30[1], slot_a);
-  D_800FC6A0 = heap3_alloc(func_8005062C(0x6F7, slot_a) * 2);
-  func_800506D4(D_800FC6A0, slot_a);
-  D_801B69EC = heap3_alloc(func_8005062C(0x709, slot_a));
-  func_800506D4(D_801B69EC, slot_a);
+  D_800FBE30[0] = heap3_alloc(get_rom_asset_allocation_size(*asset_id_d, slot_a) * 2);
+  load_rom_asset_payload(D_800FBE30[0], slot_a);
+  D_800FBE30[1] = heap3_alloc(get_rom_asset_allocation_size(*asset_id_d, slot_a) * 2);
+  load_rom_asset_payload(D_800FBE30[1], slot_a);
+  D_800FC6A0 = heap3_alloc(get_rom_asset_allocation_size(0x6F7, slot_a) * 2);
+  load_rom_asset_payload(D_800FC6A0, slot_a);
+  D_801B69EC = heap3_alloc(get_rom_asset_allocation_size(0x709, slot_a));
+  load_rom_asset_payload(D_801B69EC, slot_a);
 
   play_bgm_by_id(0x27, 0);
   set_color_framebuffer_count(3);
   func_8002A97C(4, 0);
   D_801323D0 = 6;
-  func_80099490();
+  initialize_save_sram();
   func_8005DF54(save, 0);
 }
 
@@ -687,7 +686,7 @@ void func_8005AF80(void) {
 
 void func_8005B03C(void) {
   u8* temp = func_8005AF50();
-  func_80099490();
+  initialize_save_sram();
   func_8005DF54(temp, 0);
 }
 
@@ -882,13 +881,13 @@ typedef struct {
   u8 pad9C[4];
 } ContinueSlot; /* 0xA0 */
 
-extern RecB8 D_801B71D0[];
+extern RecB8 player_records[];
 extern Rec68 D_800FEDD8[];
 extern RecB8 D_8012FB60[];
 extern RecB8 D_8012FAA8[];
 extern RecB8 D_8012F938[];
 extern s32 scenario_state_id;
-extern s32 D_801B6090;
+extern s32 active_player_count;
 extern s8 D_801B60B8;
 extern s32 camera_position_x;
 extern void flag_set(s32 flag);
@@ -913,7 +912,7 @@ s32 transfer_mode_continue_slot(s32 restore) {
   s32 mode;
   s32 i;
 
-  switch (D_801B608C) {
+  switch (game_mode) {
     case 0:
     case 6:
     case 10:
@@ -938,15 +937,15 @@ s32 transfer_mode_continue_slot(s32 restore) {
   }
 
   if (restore == 0) {
-    if (count < D_801B6090) {
+    if (count < active_player_count) {
       osSyncPrintf(D_800D0944);
       return -1;
     }
     bad = 0;
-    count = D_801B6090;
+    count = active_player_count;
     slot->valid = 0;
     for (i = 0; i < count; i++) {
-      recs[i] = D_801B71D0[i];
+      recs[i] = player_records[i];
       switch (recs[i].data[3]) {
         case 0:
         case 2:
@@ -981,7 +980,7 @@ s32 transfer_mode_continue_slot(s32 restore) {
       }
       count = slot->state.data[2];
       for (i = 0; i < count; i++) {
-        D_801B71D0[i] = recs[i];
+        player_records[i] = recs[i];
         D_800FEDD8[i] = modes[i];
       }
       *(Rec44*)&scenario_state_id = slot->state;
@@ -1021,12 +1020,12 @@ s32 transfer_continue_slot(s32 id, s32 restore) {
   s32 i;
 
   if (restore == 0) {
-    if (count < D_801B6090) {
+    if (count < active_player_count) {
       osSyncPrintf(D_800D0944);
       return -1;
     }
     bad = 0;
-    count = D_801B6090;
+    count = active_player_count;
     slot->valid = 0;
     for (i = restore; i < count; i++) {
       recs[i] = D_8012D0C8[i];
@@ -1066,7 +1065,7 @@ s32 transfer_continue_slot(s32 id, s32 restore) {
       }
       count = slot->state.data[2];
       for (i = 0; i < count; i++) {
-        D_801B71D0[i] = recs[i];
+        player_records[i] = recs[i];
       }
       *(Rec44*)&scenario_state_id = slot->state;
       scenario_state_id = 1;
@@ -1216,11 +1215,11 @@ extern void func_8005CA48(void);
 extern s32 func_8005C4B4(void);
 extern s32 func_8005C5B4(void);
 extern s32 func_8005C614(void);
-extern u32 func_8005062C(u16 index, void* out);
-extern void func_800506D4(void* data, RomLoadSlot* slot);
-extern void func_800504E8(s32 index, RomLoadSlot* slot);
-extern u32 func_80050598(RomLoadSlot* slot);
-extern void func_800505A0(void* dst, u32 size, RomLoadSlot* slot);
+extern u32 get_rom_asset_allocation_size(u16 index, void* out);
+extern void load_rom_asset_payload(void* data, RomLoadSlot* slot);
+extern void open_rom_asset_slot(s32 index, RomLoadSlot* slot);
+extern u32 get_rom_load_slot_size(RomLoadSlot* slot);
+extern void read_rom_load_slot(void* dst, u32 size, RomLoadSlot* slot);
 
 /* Builds the character-select roster grid D_800C28E4[3][7] from its template
  * tables, patches it against the unlock state, then loads the four selected
@@ -1330,12 +1329,12 @@ void build_roster_grid(s32 arg0, u8 arg1) {
       off = i * 0x16;
       arg0 = *(s16*)((u8*)D_800FE3D8 + off);
       wide = arg0 * 16;
-      func_8005062C(*(u16*)((u8*)D_800C2650 + wide), buf_a);
-      func_800506D4(D_8012D468[i], &buf_a[0]);
+      get_rom_asset_allocation_size(*(u16*)((u8*)D_800C2650 + wide), buf_a);
+      load_rom_asset_payload(D_8012D468[i], &buf_a[0]);
       narrow = arg0 * 8;
-      func_800504E8(*(s16*)((u8*)D_800C2590 + narrow), &buf_b);
-      size = func_80050598(&buf_b);
-      func_800505A0(D_80105BB0[i], size, &buf_b);
+      open_rom_asset_slot(*(s16*)((u8*)D_800C2590 + narrow), &buf_b);
+      size = get_rom_load_slot_size(&buf_b);
+      read_rom_load_slot(D_80105BB0[i], size, &buf_b);
     }
   }
 }
@@ -1527,7 +1526,7 @@ void func_8005D0D8(void) {
 
 void func_8005D1E4(void) {
   u8* p = func_8005AF74();
-  p[0x2E] = D_801B6098;
+  p[0x2E] = round_hole_index;
   p[0x2F] = scenario_mode_id;
 }
 
@@ -1664,7 +1663,7 @@ void func_8005D9A0(void) {
     D_800FBE08[i] = 0;
   } while (++i != 4);
   D_801323B8 = 3;
-  D_801B60AC = 0;
+  round_hole_flags = 0;
   D_801323D0 = 6;
   D_801052E8 = 0;
   D_800C2BD4 = 0;
@@ -1678,7 +1677,7 @@ void func_8005DAD4(void) {
 }
 
 void func_8005DAFC(void) {
-  switch (D_801B608C) {
+  switch (game_mode) {
     case 5:
       D_800FF4C0 = 2;
       D_80105268 = 0;

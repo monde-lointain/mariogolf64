@@ -37,8 +37,8 @@ extern void* D_800E1C0C;
 extern void* heap3_alloc(u32 need);
 extern void heap3_free(void** payload_ptr);
 extern void func_80050DA0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
-extern u32 func_8005062C(u16 index, void* out);
-extern void func_800506D4(void* data, void* slot);
+extern u32 get_rom_asset_allocation_size(u16 index, void* out);
+extern void load_rom_asset_payload(void* data, void* slot);
 void func_8006B54C(void);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_8006A2C0", func_8006A2C0);
@@ -142,16 +142,16 @@ void load_texture_block(Gfx** pgfx, u32 timg, s32 fmt, s32 siz, s32 width,
 void func_8006ACD8(void) {
   u8 sp10[0x20];
 
-  D_800E1C04 = heap3_alloc(func_8005062C(0x63F, sp10));
-  func_800506D4(D_800E1C04, sp10);
+  D_800E1C04 = heap3_alloc(get_rom_asset_allocation_size(0x63F, sp10));
+  load_rom_asset_payload(D_800E1C04, sp10);
   func_8006B54C();
 }
 
 void func_8006AD1C(s32 arg0) {
   u8 sp10[0x20];
 
-  func_8005062C(*(u16*)&D_800C4026[(arg0 % 14) * 4], sp10);
-  func_800506D4(D_800E1C04, sp10);
+  get_rom_asset_allocation_size(*(u16*)&D_800C4026[(arg0 % 14) * 4], sp10);
+  load_rom_asset_payload(D_800E1C04, sp10);
 }
 
 void func_8006AD88(void) { D_800C4020 = 0; }
@@ -319,10 +319,10 @@ INCLUDE_ASM("asm/nonmatchings/main/func_8006A2C0", func_8006B5D8);
 void func_8006B980(void) {
   u8 sp10[0x20];
 
-  D_800E1C08 = heap3_alloc(func_8005062C(0x70B, sp10));
-  func_800506D4(D_800E1C08, sp10);
-  D_800E1C0C = heap3_alloc(func_8005062C(0x70C, sp10));
-  func_800506D4(D_800E1C0C, sp10);
+  D_800E1C08 = heap3_alloc(get_rom_asset_allocation_size(0x70B, sp10));
+  load_rom_asset_payload(D_800E1C08, sp10);
+  D_800E1C0C = heap3_alloc(get_rom_asset_allocation_size(0x70C, sp10));
+  load_rom_asset_payload(D_800E1C0C, sp10);
 }
 
 void func_8006B9E4(void) {
@@ -515,8 +515,8 @@ void func_8006C3E8(void) {
   u8 sp10[0x20];
 
   if (D_800C4010 == 0) {
-    D_800E1C00 = heap3_alloc(func_8005062C(0x955, sp10));
-    func_800506D4(D_800E1C00, sp10);
+    D_800E1C00 = heap3_alloc(get_rom_asset_allocation_size(0x955, sp10));
+    load_rom_asset_payload(D_800E1C00, sp10);
   }
   D_800C4010 = 1;
   D_800C4014 = 0;
@@ -761,16 +761,16 @@ void update_and_draw_iris_wipe(Gfx** pgfx) {
 
 INCLUDE_ASM("asm/nonmatchings/main/func_8006A2C0", func_8006CD50);
 
-extern s32 D_801B6090[];
+extern s32 active_player_count[];
 extern u16 D_80106230[];
-extern s8 D_801B71F6[];
-extern s8 D_801B71FB[];
+extern s8 player_hole_status[];
+extern s8 player_hole_scores[];
 extern s8 D_801050BC[];
 extern s8 D_801050BD;
 extern s8 D_801050BE;
 extern char D_800D1450[];
 
-extern s32 func_800521C0(void);
+extern s32 get_round_first_hole(void);
 
 /* Builds and prints the debug flag grid. Three variable choices are
  * load-bearing for register allocation, not style: the clear loop counts in
@@ -790,14 +790,14 @@ void func_8006CE88(s32 arg0) {
   s32 last;
   s32 counter;
 
-  for (col = 0; col != D_801B6090[0]; col++) {
+  for (col = 0; col != active_player_count[0]; col++) {
     D_80106230[col] = 0;
   }
 
   hasZero = 0;
-  for (i = 0; i != D_801B6090[0]; i++) {
+  for (i = 0; i != active_player_count[0]; i++) {
     s32 off = i * 0xB8;
-    if (*(s8*)((u8*)D_801B71F6 + off) == 0) {
+    if (*(s8*)((u8*)player_hole_status + off) == 0) {
       hasZero = 1;
     }
   }
@@ -808,15 +808,15 @@ void func_8006CE88(s32 arg0) {
   D_801050BE = 0;
 
   counter = 1;
-  col = func_800521C0();
+  col = get_round_first_hole();
   {
     for (; col < arg0; col++) {
       last = -1;
-      for (i = 0; i != D_801B6090[0]; i++) {
+      for (i = 0; i != active_player_count[0]; i++) {
         s32 off = col * 2 + i * 0xB8;
-        if (*(s8*)((u8*)D_801B71FB + off) != 0) {
+        if (*(s8*)((u8*)player_hole_scores + off) != 0) {
           last = i;
-          *(s8*)((u8*)D_801B71FB + off) = counter;
+          *(s8*)((u8*)player_hole_scores + off) = counter;
         }
       }
       if (col == arg0 - 1) {
@@ -1050,7 +1050,7 @@ void accumulate_mode_stats(void) {
     sat = 1;
   }
 
-  D_801B71F6[0] = 0;
+  player_hole_status[0] = 0;
   v = func_8006CD50(0x12, 0);
   if (v < *(s32*)(rec + 0x04)) {
     *(s32*)(rec + 0x04) = v;
@@ -1070,7 +1070,7 @@ void accumulate_mode_stats(void) {
 
   sum = 0;
   for (off = 0; off != 0x24; off += 2) {
-    sum += (s8) * (u8*)((u8*)D_801B71FB + off);
+    sum += (s8) * (u8*)((u8*)player_hole_scores + off);
   }
   sum += *(s32*)(rec + 0x08);
   if (sat == 1) {
@@ -1131,7 +1131,7 @@ void accumulate_mode_stats(void) {
   for (i = 0; i != 0x12; i++) {
     off = i * 2;
     p = &cfg[i * 10];
-    if (*(s8*)((u8*)D_801B71FB + off) <= p[0x14]) {
+    if (*(s8*)((u8*)player_hole_scores + off) <= p[0x14]) {
       x = *(s32*)(rec + 0x20);
       if (x <= 0x7FFFFFFE) {
         *(s32*)(rec + 0x20) = x + 1;
@@ -1147,7 +1147,7 @@ void accumulate_mode_stats(void) {
 
     off = i * 2;
     p = &cfg[i * 10];
-    d = *(s8*)((u8*)D_801B71FB + off) - *(s8*)((u8*)D_801B71FC + off);
+    d = *(s8*)((u8*)player_hole_scores + off) - *(s8*)((u8*)D_801B71FC + off);
     if (p[0x14] - d >= 2) {
       x = *(s32*)(rec + 0x24);
       if (x <= 0x7FFFFFFE) {
