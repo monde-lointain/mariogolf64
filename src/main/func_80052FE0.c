@@ -10,7 +10,6 @@ extern u8 D_800CCC84[];
 extern s32 g_frame_counter;
 extern s32 D_800C1DEC;
 extern ClubShot* get_club_param(u32 id);
-extern void func_8005470C(void* cs, f32 mtx[4][4]);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80052FE0", func_80052FE0);
 
@@ -224,7 +223,22 @@ s32 func_800544B4(s32 arg0, s32 arg1) {
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80052FE0", func_80054550);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80052FE0", func_8005470C);
+extern f64 D_800D0498;
+
+void func_8005470C(CharacterState* cs, f32 out[4][4]) {
+  f32 translation[4][4];
+  f32 rotation[4][4];
+
+  guTranslateF(translation, cs->position.x * (1.0f / 1024.0f),
+               cs->position.y * (1.0f / 1024.0f),
+               cs->position.z * (1.0f / 1024.0f));
+  guRotateRPYF(rotation, 180 - (s32)(cs->rotation.x * D_800D0498),
+               (s32)(cs->rotation.y * D_800D0498),
+               (s32)(cs->rotation.z * D_800D0498));
+  guMtxCatF(rotation, translation, translation);
+  guScaleF(rotation, cs->scale.x, cs->scale.y, cs->scale.z);
+  guMtxCatF(rotation, translation, out);
+}
 
 s32 func_8005483C(s32 arg0, s32 arg1, Vec3f* out) {
   f32 mtx[4][4];
