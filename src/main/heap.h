@@ -27,7 +27,7 @@ typedef struct HeapBlock {
   /* 0x08 */ struct HeapBlock* next;
   /* 0x0C */ struct HeapBlock* prev;
   /* 0x10 */ s32 total_free;   /* head only: free bytes across the slot */
-  /* 0x14 */ s32 largest_free; /* head only: largest free block in the slot */
+  /* 0x14 */ s32 largest_free; /* head only: largest free block, or unknown */
 } HeapBlock;                   /* 0x18; on a non-head block the payload begins
                                 * at total_free (offset HEAP_HEADER_SIZE) */
 
@@ -44,5 +44,18 @@ extern HeapBlock heap_slots[];
 
 /* Best-fit search sentinel: no fitting block found yet ("+infinity"). */
 #define HEAP_MINSIZE_NONE 0x7FFFFFFF
+
+/* The largest-free cache has not been calculated since initialization. */
+#define HEAP_LARGEST_FREE_UNKNOWN (-1)
+
+/* Slot indices must identify an existing heap_slots element. Initialize a slot
+ * before registering regions; registration does not allocate the backing memory.
+ * Regions must be writable, suitably aligned, non-overlapping, and large enough
+ * for a block header. region_end is the exclusive bound of the same region. */
+void heap_init(s32 slot_index);
+void heap_add_region(s32 slot_index, HeapBlock* region_start, void* region_end);
+
+/* Cached free bytes, including free-block headers, not total heap capacity. */
+s32 heap_get_total_free(s32 slot_index);
 
 #endif /* HEAP_H */

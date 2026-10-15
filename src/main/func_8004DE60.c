@@ -176,7 +176,7 @@ void heap3_init(s32 with_expansion_pak) {
     heap3_add_region((HeapBlock*)EXPANSION_HEAP_START,
                      (void*)EXPANSION_HEAP_END);
   }
-  heap_slots[3].largest_free = -1;
+  heap_slots[3].largest_free = HEAP_LARGEST_FREE_UNKNOWN;
 }
 
 s32 heap3_get_total(void) { return heap_slots[3].total_free; }

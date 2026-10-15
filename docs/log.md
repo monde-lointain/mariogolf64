@@ -2,6 +2,22 @@
 
 ## 2026-10-14
 
+- **Heap-slot readability**: Reviewed every guideline in Code Complete Chapters 7,
+  10–16, 31, and 32 against all three routines in `src/main/func_8004DD70.c`.
+  Named slot indices, region bounds, the constant region byte count, and the list
+  sentinel; renamed `heap_get_total` to `heap_get_total_free` with an add-only
+  authoritative symbol. Centralized the three declarations and region preconditions
+  in `heap.h`, replacing the scenery reset's local declaration. Named the unknown
+  largest-free cache value and reused it in both heap initializers. Retained typed
+  member access and the matching mixed indexed/pointer stores; no loops or jumps
+  are needed. Formatted the target with `clang-format-23`. A 32-bit host smoke of
+  the real three routines passed all four slots, two reset/register cycles, three
+  region sizes (16/64/120 bytes), circular links, free-byte totals, unchanged
+  largest-free cache, payload preservation, and slot isolation. Isolated and
+  integrated instruction streams and relocations agree; `tools/verify-rom.sh`
+  passed with retail SHA-1 `e2c4e7a905b29529b49a1619a401fe699224829b`.
+  YAML and compiler profiles are unchanged.
+
 - **Pin-rendering readability**: Applied the C-relevant guidelines from Code Complete
   Chapters 7, 10–16, 31, and 32 to all six routines in `src/main/func_8003E400.c`.
   Named resource loading/freeing, marker-matrix construction, one-render suppression,

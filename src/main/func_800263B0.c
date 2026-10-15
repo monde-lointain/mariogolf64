@@ -1,5 +1,7 @@
 #include "common.h"
 
+#include "heap.h"
+
 #define SCENERY_SPRITE_COUNT 46
 #define SCENERY_HEAP_SLOT 1
 
@@ -12,8 +14,6 @@ typedef struct ScenerySpriteDescriptor {
 extern const char SCENERY_RESET_MESSAGE[];
 extern ScenerySpriteDescriptor g_scenery_sprites[SCENERY_SPRITE_COUNT];
 extern s8 g_scenery_heap_ready;
-
-void heap_init(s32 slot);
 
 /* Discard cached textures and empty their heap. A caller must register a heap
  * region again before scenery rendering can resume. */

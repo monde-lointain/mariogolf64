@@ -800,3 +800,6 @@ active_terrain_index = 0x800FBE70; // size:0x4
 scenario_state_id = 0x801B6088; // size:0x4
 view_camera_eye_x = 0x801B54EC; // size:0x4 segment:main
 view_camera_eye_z = 0x801B54F4; // size:0x4
+
+// Slot-wide free-byte query; disambiguate free space from heap capacity.
+heap_get_total_free = 0x8004DE44; // type:func rom:0x29244 segment:main
