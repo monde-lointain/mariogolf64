@@ -16,7 +16,38 @@ This file holds only the *ordering rationale*, *enabler items* (gate actions), a
 
 ### Current main-bank evidence — 2026-10-15
 
-- Banked five functions (760 bytes), with `tools/verify-rom.sh` succeeding on the
+- Banked five additional main functions (1,124 bytes); main-bank `INCLUDE_ASM`
+  inventory decreased from 244 to 239. `tools/verify-rom.sh` succeeded on the
+  integrated source: `e2c4e7a905b29529b49a1619a401fe699224829b`.
+  No YAML, symbol, compiler-profile, or overlay changes.
+  - `src/main/bgm_load_song_from_rom.c`: `func_8005F290` (124 bytes),
+    `func_8005FB58` (352 bytes), and `gen_terrain_detail_texture` (216 bytes).
+    The club-mask loop resolves the previous prologue/call-order carry by
+    initializing its local cursors directly and keeping the pointer-returning call,
+    field access, and mask call in one expression. The event dispatcher uses a
+    guarded scan with a block-local bound and preserves eight bytes of local stack
+    space. The detail texture keeps independent row, column, linear-index, and
+    pixel cursors, reproducing the two-loop structure without a register workaround.
+  - `src/main/func_8006F1A0.c`: `func_8006F300` (260 bytes) and
+    `func_8006F534` (172 bytes). Both reproduce the Transfer Pak SDK calls using
+    the existing NuSystem declarations; the discovery routine uses `NUContPakFile`
+    and the ROM's switch/diagnostic paths.
+  All five isolated comparisons scored zero under their hosts' `main` profiles.
+  Fresh integrated `objdump -drz` ranges agree with the isolated objects:
+  31, 88, 54, 65, and 43 instructions respectively, with identical relocation
+  entries and function-relative local-jump targets. Target assembly and isolated
+  objects are retained under each function's `nonmatchings/` directory.
+- The deferred `func_8005FCB8` was reconstructed and measured, but not integrated.
+  Its live `INCLUDE_ASM` remains. The latest `main`-profile measurement is
+  `nonmatchings/func_8005FCB8/measurements/735ab2969411ae270af7eb7250b6ebe7c9f3e136ec489dddecf347d69f3c201b.json`
+  (score 2562, 78.10%). The candidate folds the ROM's held
+  `&rumble_disable_flag` base into separate relocations, omits its `$s1` save,
+  and merges the first two scan-result tails. Next experiments must address
+  shared-state base materialization and result-join structure; this is not a
+  terminal-wall verdict. Refresh with
+  `uv run --locked python tools/decomp_loop.py --func func_8005FCB8`.
+
+- The preceding increment banked five functions (760 bytes), with `tools/verify-rom.sh` succeeding on the
   integrated source: `e2c4e7a905b29529b49a1619a401fe699224829b`.
   Main-bank `INCLUDE_ASM` inventory decreased from 249 to 244. No YAML, symbol,
   compiler-profile, or overlay changes.
@@ -40,14 +71,13 @@ This file holds only the *ordering rationale*, *enabler items* (gate actions), a
   were checked against the isolated objects, accounting for same-TU call and
   internal-jump relocations. Saved objects and target assembly remain beneath
   each function's `nonmatchings/` directory.
-- Unbanked probes remain isolated under their original main host:
-  `func_8005F290` has exact instruction count but prologue/call scheduling
-  differences (latest score 603); `func_80060190` remains score 915 after
-  guarded-block variants. Its retained RTL and jump dumps show the jump pass
-  converting the terminal `game_mode == 9` constant diamond to a mask/select.
-  Neither probe changes its live `INCLUDE_ASM`. Next levers must address
-  initialization/call-result emission for the former and the actual jump-pass
-  conversion gate for the latter, not repeat the tested block wrappers.
+- `func_80060190` remains isolated and unbanked at score 915 after guarded-block
+  variants. Its retained RTL and jump dumps show the jump pass converting the
+  terminal `game_mode == 9` constant diamond to a mask/select. Its live
+  `INCLUDE_ASM` remains. The conversion gate is in
+  `build/us/vendor/kmc-gcc/src/mg64_kmc_gcc/jump.c:993-1174`; a shared-result
+  phi alone does not obviously invalidate its assignment/join conditions.
+  A new experiment must target that gate, not repeat the tested block wrappers.
 
 
 ### Current main-bank evidence — 2026-10-14
