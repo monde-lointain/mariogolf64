@@ -4943,19 +4943,17 @@ by `/sprint-plan`:
 - **(S270 RE-OPEN — 2 of 4 remaining banked; file NOT md5-candidate; 2 carried walls)**
   `src/main/func_8004D190.c` (main-segment text-grid render pack; already-`c`). S270 re-opened the 4
   documented S182 carries and banked the 2 DL emitters (`emit_text_glyph_dl_preamble` = func_8004D190,
-  `render_text_grid` = func_8004D7B8) via a DL-reconstruction subagent + gbi pointer macros. **2 stubs
-  remain, both regalloc walls (gcc-2.7.2 fan-out done, do NOT re-grind blindly):**
-  - `func_8004D4B8` (0xC8) — ADVANCED near-crack, NOT terminal. S182 dead-frame + 4-reg-perm SOLVED
-    (`str[row]` live-index pressure reproduces the phantom 8B frame; explicit idx2/base temps + t2=0-first
-    match all 6 regs). Residual = exactly 2 scheduler-slot MOVE words, one provably terminal (`move
-    t2,zero` scheduled mid-atomic-`c/32`-division-BB), permuter-exhausted ~27k iters/3 seeds @base 270.
-    New base.c + full analysis in `docs/wip/func_8004D4B8.near-match.c.txt`. Re-attempt ONLY with a
-    materially different scheduler-ORDER mechanism for the 2 words; the frame+regs are done.
+  `render_text_grid` = func_8004D7B8) via a DL-reconstruction subagent + gbi pointer macros.
+  **One stub now remains** after the 2026-10-15 glyph-copy bank:
+  - `func_8004D4B8` (0xC8) — **BANKED 2026-10-15**. Explicit division-bias
+    splitting and initialization loop notes resolve the former two-word
+    scheduler residual; 50/50 instructions and full-ROM match. See the current
+    resolution in `docs/wip/func_8004D4B8.near-match.c.txt`.
   - `func_8004D5F0` (0x1A4) — TERMINAL, retired-with-citation. global.c:790-823 `set_preferences`
     copy-coalesce + cse.c sign-extend CSE; ROM keeps 2 non-coalesced copies of `c` (6 s-regs) that any
     faithful C coalesces (5 s-regs, strictly more optimal). Not source-reachable, not flag-gated
     (profile-probe NEGATIVE), permuter-plateaued. `docs/wip/func_8004D5F0.near-match.c.txt`. Do NOT
-    re-open. ROM green off extracted asm. `--carried-check` flags both.
+    re-open without a new source lever. ROM verification passes; the live stub remains.
 
 - **(S234+S235 pack, refreshed 2026-10-15 — 12 of 17 banked; 5 live stubs)**
   `src/main/func_8006F1A0.c` (main-segment `[0x4A5A0]`, game stat/score pack over a fixed-stride array

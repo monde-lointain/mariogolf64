@@ -57,13 +57,51 @@ void emit_text_glyph_dl_preamble(Gfx** dlp) {
 }
 #undef EMIT
 
-/* func_8004D4B8: string -> glyph-tile blit. CARRIED, ADVANCED (S270): the S182
- * dead-frame + 4-register-perm wall is SOLVED (str[row] indexing reproduces the
- * phantom 8B frame; explicit idx2/base temps + t2=0-first match all 6 regs).
- * Residual = a 2-word scheduler-slot coin (a `move t2,zero` scheduled
- * mid-atomic- c/32-division-BB, permuter-exhausted). Not byte-exact. Near-match
- * + root cause in docs/wip/func_8004D4B8.near-match.c.txt. */
-INCLUDE_ASM("asm/nonmatchings/main/func_8004D190", func_8004D4B8);
+void func_8004D4B8(char* str, s32 count, u16* out) {
+  s32 row;
+  for (row = 0; row < count; row++) {
+    s32 c = str[row];
+    s32 destination_row, glyph_offset, tile_row;
+    s32 glyph_column;
+    if (c == 0) {
+      return;
+    }
+    if (c < 0x20) {
+      c = 0x20;
+    }
+    if (c > 0x7A) {
+      c = 0x20;
+    }
+    c -= 0x20;
+    glyph_column = (c & 0x1F) << 1;
+    /* Split the signed division so the row initialization stays at its join. */
+    if (c < 0) {
+      c += 31;
+    }
+    do {
+      tile_row = 0;
+    } while (0);
+    glyph_offset = glyph_column | ((c >> 5) << 9);
+    destination_row = row;
+    do {
+      s32 destination_offset;
+      s32 source_offset;
+      s32 half;
+      /* The loop note preserves initialization before the two index copies. */
+      do {
+        half = 0;
+      } while (0);
+      destination_offset = destination_row * 2;
+      source_offset = glyph_offset;
+      for (; half < 2; half++) {
+        out[destination_offset + half] = D_800BE6E0[source_offset + half];
+      }
+      glyph_offset += 0x40;
+      tile_row++;
+      destination_row += count;
+    } while (tile_row < 8);
+  }
+}
 
 void func_8004D5F0(s32 c, s32 x, s32 y);
 

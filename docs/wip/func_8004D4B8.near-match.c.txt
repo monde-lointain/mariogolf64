@@ -1,72 +1,28 @@
-// func_8004D4B8 (0x8004D4B8, src/main/func_8004D190.c) — S270 ADVANCED near-crack
-// #dead-frame-reload-artifact-regalloc-wall  ->  now a 2-WORD SCHEDULER-SLOT COIN
+// func_8004D4B8 (main, ROM 0x288B8, VRAM 0x8004D4B8) — BANKED 2026-10-15
+// Host: src/main/func_8004D190.c; profile: main, unchanged.
 //
-// String -> glyph-tile blit: for each char of str (up to `count` rows), copy an
-// 8-row x 2-halfword glyph tile from the D_800BE6E0 glyph LUT into the `out` tilemap,
-// indexing by a bitfield ((idx&0x1F)<<1)|((idx/32)<<9), idx = clamped(char)-0x20.
+// Copies up to count characters into eight rows of two-halfword glyph tiles.
+// NUL stops the scan; signed characters outside 0x20..0x7A map to space.
 //
-// S270 PROGRESS (gcc-2.7.2 compiler-source fan-out, wallcrack):
-//   The S182 "irreproducible dead frame + 4-register permutation" wall is SOLVED.
-//   - The dead 8-byte frame IS reproducible: it is a register-pressure artifact, not a
-//     source-unreachable coin. Indexing the string as str[row] (keeping row AND str both
-//     live) instead of str++ forces local-alloc to reserve the phantom 8B slot.
-//   - ALL 6 registers now match the ROM (t0=rowcopy, t1=bitfield, t2=counter, t3=basecopy,
-//     t4=idx2). Levers: str[row] indexing + explicit `s32 idx2=t0*2; s32 base=t1;` (controls
-//     local-alloc qty birth-order, qty_compare priority = floor_log2(nref)*nref*size/livelen,
-//     local-alloc.c:~1750) + `t2=0` as the FIRST init.
-//   Profile-probe: NEGATIVE. Swept -g/-O1/-fno-omit-frame-pointer/-fno-schedule-insns[2]/
-//   -fno-delayed-branch/-fno-strength-reduce/-fno-expensive-optimizations/-fno-*cse*/... ;
-//   only -fno-omit-frame-pointer made an 8B frame but with `sw s8,0(sp);move s8,sp` fp-setup
-//   the ROM lacks. So NOT a compiler-flag artifact.
+// The former terminal scheduler verdict was too broad. Recovering the old
+// source refreshed at score 150 / 0.97, not the historical score 270.
+// Splitting the signed c/32 calculation into its conditional +31 bias and
+// arithmetic shift creates the required join before the tile-row initializer.
+// A separate glyph-column local avoids keeping that partial value in the
+// glyph-offset register. One-shot scopes around the tile-row and inner-half
+// initializations preserve the retail scheduling boundaries and allocation.
+// Keep str[row], the destination-row copy, and the source-offset copy: they
+// preserve the dead eight-byte frame and the two inner induction variables.
 //
-// RESIDUAL (2 instructions, permuter-confirmed unreachable ~27k iters/3 seeds, min@base 270):
-//   1. `move t2,zero` (counter init): ROM schedules it at .L8004D500 = the JOIN block of the
-//      signed-`c/32` bgez sign-bias (between `addiu v1,0x1F` and `sra v0,v1,5`). My build emits
-//      it in the pre-division block. This slot is INTERIOR to the atomic `c/32` sub-expression;
-//      no C statement boundary can target it (hi-split of the division = worse; comma-operator
-//      injection = no effect, the independent move floats to its LUID slot). TERMINAL CORE.
-//   2. `move a3,zero` (inner-loop init): ROM emits before idx2/base; mine after. Coupled to the
-//      regalloc (every reorder that moves it flips a register).
+// Final editable candidate: nonmatchings/func_8004D4B8/base.c
+// Measurement: nonmatchings/func_8004D4B8/measurements/
+//   608c86c3e62c02da98356cc9eeefa102af26d8d15ab8a545fc41979c2c1026d5.json
+// Command: uv run --locked python tools/decomp_loop.py --func func_8004D4B8
+// Result: score 0, 50/50 instructions. Saved target.s and provisional.o remain
+// beside the candidate. The integrated range has identical words/relocations.
 //
-// VERDICT: near-crack, NOT byte-exact. Materially past S182 (frame + all registers solved);
-//   residual is a 2-word scheduler-slot coin, one provably a mid-atomic-expression-BB placement.
-//   Retry only with a materially different scheduler-order mechanism; the permuter is exhausted.
-//
-// Best near-match source (S270; frame + all 6 registers exact, 2-word scheduler residual):
-
-extern u16 D_800BE6E0[];
-
-void func_8004D4B8(char* str, s32 count, u16* out) {
-    s32 row;
-
-    for (row = 0; row < count; row++) {
-        s32 c = str[row];
-        s32 t0, t1, t2;
-
-        if (c == 0) {
-            return;
-        }
-        if (c < 0x20) {
-            c = 0x20;
-        }
-        if (c > 0x7A) {
-            c = 0x20;
-        }
-        c -= 0x20;
-        t2 = 0;
-        t1 = ((c & 0x1F) << 1) | ((c / 32) << 9);
-        t0 = row;
-        do {
-            s32 idx2 = t0 * 2;
-            s32 base = t1;
-            s32 a3;
-
-            for (a3 = 0; a3 < 2; a3++) {
-                out[idx2 + a3] = D_800BE6E0[base + a3];
-            }
-            t1 += 0x40;
-            t2++;
-            t0 += count;
-        } while (t2 < 8);
-    }
-}
+// tools/verify-rom.sh passes with all five new main functions integrated:
+// e2c4e7a905b29529b49a1619a401fe699224829b.
+// A throwaway 32-bit host harness exercised all 256 byte values, counts 0..16,
+// NUL termination, clamping, every tile row, and untouched output cells.
+// No asm barrier, compiler-profile change, or permuter run was required.
