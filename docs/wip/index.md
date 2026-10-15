@@ -34,7 +34,7 @@
 
 - [func_8005244C — near-match (S316, CARRIED at 93/94)](func_8005244C.near-match.md) — Records the S316 comparison carry whose sole instruction-count residual is an entry-guard delay slot filled instead of left empty.
 - [func_80056060 — CARRIED (39/39, 20 diff rows; callee-saved priority inversion)](func_80056060.near-match.md) — Documents the 39/39 near-match with 20 differing rows attributed to a callee-saved register-priority inversion.
-- [func_800564F0 + func_80055738 — PROVEN reorg delay-slot WALL (S213)](func_800564F0-func_80055738.delay-slot-wall.md) — Records the S213 proof that the paired functions' remaining mismatch is a reorg delay-slot wall.
+- [func_800564F0 + func_80055738 — carried guard delay-slot residual](func_800564F0-func_80055738.delay-slot-wall.md) — Retains the historical paired diagnosis and a fresh compiler-source investigation of func_800564F0.
 - [func_80059BA0 — near-match (CARRIED, terminal sched2 potential-hazard coin)](func_80059BA0.near-match.md) — Documents the carried scheduler-II potential-hazard residual and the evidence against treating it as a fresh crack.
 - [func_8005B0B4 — near-match (CARRIED, S263 value-select-branch-likely)](func_8005B0B4.near-match.md) — Records the S263 carried value-select versus branch-likely residual for func_8005B0B4.
 - [func_8005C038 -- record-table insert (S289 carry, 268/264)](func_8005C038.near-match.md) — Re-derives the five-argument record-table insert and records its S289 268/264-instruction carry.
