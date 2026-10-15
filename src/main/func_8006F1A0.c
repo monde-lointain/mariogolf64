@@ -1,4 +1,5 @@
 #include "common.h"
+#include <nusys.h>
 
 extern s32 D_800FE4A8;
 extern s32 D_800C42D4;
@@ -14,6 +15,9 @@ extern s32 D_800FE4B4;
 extern s32 D_800FE4B8;
 extern s32 D_800FEC00;
 extern char D_800D1540[];
+extern s32 D_80105218;
+extern u32 controller_handle_array[];
+extern char D_800D14C0[], D_800D14D0[], D_800D14E0[], D_800D14F4[];
 
 void func_8006F1A0(s32 arg0, s32 arg1) {
   s32 off = arg0 * 140;
@@ -64,7 +68,30 @@ void func_8006F2E8(void) { D_800C42D4 = 0; }
 
 s32 func_8006F2F4(void) { return D_800C42D4; }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_8006F1A0", func_8006F300);
+void func_8006F300(void) {
+  NUContPakFile handle;
+  s32 i;
+  nuContGBPakMgrInit();
+  D_800FE4A8 = 0;
+  for (i = 0; i < D_80105218; i++) {
+    switch (nuContGBPakOpen(&handle, controller_handle_array[i])) {
+      case 0:
+        osSyncPrintf(D_800D14C0, i);
+        D_800FE4A8 = 1;
+        break;
+      case 1:
+        osSyncPrintf(D_800D14D0, i);
+        break;
+      case 11:
+        osSyncPrintf(D_800D14E0, i);
+        break;
+      default:
+        osSyncPrintf(D_800D14F4, i);
+        break;
+    }
+  }
+  nuContGBPakMgrRemove();
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_8006F1A0", func_8006F404);
 
@@ -75,7 +102,17 @@ void func_8006F50C(void) {
   osSyncPrintf(D_800D1540);
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_8006F1A0", func_8006F534);
+void func_8006F534(void) {
+  nuContGBPakMgrInit();
+  nuContGBPakGetStatus(NULL, NULL);
+  nuContGBPakPower(NULL, 1);
+  nuContGBPakReadWrite(NULL, 1, 0, NULL, 0x20);
+  nuContGBPakCheckConnector(NULL, NULL);
+  nuContGBPakReadID(NULL, NULL, NULL);
+  nuContGBPakReadWrite(NULL, 0, 0, NULL, 0);
+  nuContGBPakFread(NULL, 0, NULL, 0);
+  nuContGBPakFwrite(NULL, 0, NULL, 0);
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_8006F1A0", func_8006F5E0);
 
