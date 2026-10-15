@@ -769,3 +769,14 @@ set_color_framebuffer_count = 0x800292FC; // type:func segment:main
 g_auxiliary_framebuffer = 0x800B67A0; // size:0x4
 g_next_framebuffer_indices = 0x800B67A4; // size:0x1
 g_reserved_framebuffer_index = 0x800B67A7; // size:0x1
+
+// Per-frame viewport setup and framebuffer-clear display-list builders.
+append_viewport_setup = 0x800328E0; // type:func segment:main
+setup_frame_viewport = 0x800329B8; // type:func segment:main
+set_clear_color = 0x800329D8; // type:func segment:main
+clear_playfield = 0x800329F4; // type:func segment:main
+append_framebuffer_clear = 0x80032B78; // type:func segment:main
+clear_framebuffers = 0x80032E34; // type:func segment:main
+frame_viewports = 0x800B7790; // size:0x60
+rdp_setup_dl = 0x800B77F0; // size:0x30
+rsp_setup_dl = 0x800B7820; // size:0x20

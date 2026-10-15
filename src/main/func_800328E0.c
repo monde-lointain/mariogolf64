@@ -1,55 +1,72 @@
 #include "common.h"
 
-/* Display-list builders for the per-frame RCP viewport/scissor setup and the
- * full-screen fill clears. func_800328E0 emits the segment/viewport preamble
- * and splices the camera matrices in; func_800329F4 clears the play field to
- * the RGB held in clear_color (set by func_800329D8); func_80032B78 clears the
- * color/Z framebuffers with a mode selector. func_800329B8/func_80032E34 are
- * the &glistp wrappers. */
+/* Per-frame viewport setup and framebuffer clears. The append_* builders
+ * advance a caller-owned display-list cursor; the other builders use glistp.
+ * Keep the retail command order, including repeated pipeline syncs. */
+
+enum {
+  FRAMEBUFFER_WIDTH = 320,
+  FRAMEBUFFER_HEIGHT = 240,
+  FRAMEBUFFER_ADDRESS_ALIGNMENT = 8,
+  PLAYFIELD_INSET = 8,
+  COLOR_CLEAR_SCANLINES = 1,
+  COLOR_CLEAR_RECTANGLE = 2
+};
+
+#define OPAQUE_BLACK_FILL_COLOR \
+  ((GPACK_RGBA5551(0, 0, 0, 1) << 16) | GPACK_RGBA5551(0, 0, 0, 1))
+#define DEPTH_CLEAR_FILL_COLOR \
+  (((u32)GPACK_ZDZ(G_MAXFBZ, 0) << 16) | GPACK_ZDZ(G_MAXFBZ, 0))
 
 typedef struct {
-  s32 r, g, b;
+  s32 red;
+  s32 green;
+  s32 blue;
 } Color;
 
+/* Shared command cursor used by the frame renderer. */
 extern Gfx* glistp;
 
-extern Vp D_800B7790[];
-extern Gfx D_800B77F0[];
-extern Gfx D_800B7820[];
+extern Vp frame_viewports[];
+extern Gfx rdp_setup_dl[];
+extern Gfx rsp_setup_dl[];
+/* Shared RGB state set by set_clear_color and consumed by clear_playfield. */
 extern Color clear_color;
 
 extern u16* nuGfxZBuffer;
 extern u16* nuGfxCfb_ptr;
 
 extern void set_camera_matrices_fixed(s32, s32, Vp*);
-extern u32 osVirtualToPhysical(void*);
 
-void func_800328E0(s32 arg0, Gfx** glistp) {
-  Gfx* gfx = *glistp;
+/* viewport_index selects an existing frame_viewports entry. The caller must
+ * provide writable command space through display_list_cursor. */
+void append_viewport_setup(s32 viewport_index, Gfx** display_list_cursor) {
+  Gfx* next_command = *display_list_cursor;
 
-  gDPPipeSync(gfx++);
-  gSPSegment(gfx++, 0, 0);
-  gSPViewport(gfx++, &D_800B7790[arg0]);
-  set_camera_matrices_fixed(0, 0, &D_800B7790[arg0]);
-  gSPDisplayList(gfx++, D_800B7820);
-  gSPDisplayList(gfx++, D_800B77F0);
-  gDPPipeSync(gfx++);
-  *glistp = gfx;
+  gDPPipeSync(next_command++);
+  gSPSegment(next_command++, 0, 0);
+  gSPViewport(next_command++, &frame_viewports[viewport_index]);
+  set_camera_matrices_fixed(0, 0, &frame_viewports[viewport_index]);
+  gSPDisplayList(next_command++, rsp_setup_dl);
+  gSPDisplayList(next_command++, rdp_setup_dl);
+  gDPPipeSync(next_command++);
+  *display_list_cursor = next_command;
 }
 
-void func_800329B8(s32 arg0) { func_800328E0(arg0, &glistp); }
-
-void func_800329D8(s32 arg0, s32 arg1, s32 arg2) {
-  clear_color.r = arg0;
-  clear_color.g = arg1;
-  clear_color.b = arg2;
+void setup_frame_viewport(s32 viewport_index) {
+  append_viewport_setup(viewport_index, &glistp);
 }
 
-/* Clear the play field to clear_color. Uses the global glistp++ idiom
- * (SGI/nusys gfxClearCfb style); sourcing the fill color from the clear_color
- * struct members pins the color loads after the command stores (they may-alias
- * the *glistp writes), matching the ROM's deferred load schedule. */
-void func_800329F4(void) {
+void set_clear_color(s32 red, s32 green, s32 blue) {
+  clear_color.red = red;
+  clear_color.green = green;
+  clear_color.blue = blue;
+}
+
+/* Keep the RGB channels in a struct and pack them in the command argument.
+ * Their aliasing with command stores preserves the retail color-load schedule;
+ * caching the packed color or the global cursor changes generated code. */
+void clear_playfield(void) {
   gDPPipeSync(glistp++);
   gDPSetRenderMode(glistp++, G_RM_NOOP, G_RM_NOOP2);
   gDPPipeSync(glistp++);
@@ -57,10 +74,14 @@ void func_800329F4(void) {
   gDPSetCycleType(glistp++, G_CYC_FILL);
   gDPSetFillColor(
       glistp++,
-      (GPACK_RGBA5551(clear_color.r, clear_color.g, clear_color.b, 1) << 16 |
-       GPACK_RGBA5551(clear_color.r, clear_color.g, clear_color.b, 1)));
+      ((GPACK_RGBA5551(clear_color.red, clear_color.green, clear_color.blue, 1)
+        << 16) |
+       GPACK_RGBA5551(clear_color.red, clear_color.green, clear_color.blue,
+                      1)));
   gDPPipeSync(glistp++);
-  gDPFillRectangle(glistp++, 8, 8, 311, 231);
+  gDPFillRectangle(glistp++, PLAYFIELD_INSET, PLAYFIELD_INSET,
+                   FRAMEBUFFER_WIDTH - PLAYFIELD_INSET - 1,
+                   FRAMEBUFFER_HEIGHT - PLAYFIELD_INSET - 1);
   gDPPipeSync(glistp++);
   gDPPipeSync(glistp++);
   gDPPipeSync(glistp++);
@@ -68,44 +89,57 @@ void func_800329F4(void) {
   gDPPipeSync(glistp++);
 }
 
-void func_80032B78(s32 arg0, Gfx** glistp) {
-  Gfx* gfx = *glistp;
-  s32 i;
-  u32 zbuf = OS_K0_TO_PHYSICAL(nuGfxZBuffer) & ~7;
+/* Always clear depth; clear color to opaque black only for the named modes.
+ * Other mode values leave color unchanged. Advance the caller-owned cursor,
+ * which must have room for the setup, clear commands, and cycle restoration. */
+void append_framebuffer_clear(s32 color_clear_mode, Gfx** display_list_cursor) {
+  Gfx* next_command = *display_list_cursor;
+  u32 depth_buffer_address =
+      OS_K0_TO_PHYSICAL(nuGfxZBuffer) & ~(FRAMEBUFFER_ADDRESS_ALIGNMENT - 1);
 
-  gDPPipeSync(gfx++);
-  gDPSetScissor(gfx++, G_SC_NON_INTERLACE, 0, 0, 320, 240);
-  gDPSetDepthImage(gfx++, zbuf);
-  gDPPipeSync(gfx++);
-  gDPSetRenderMode(gfx++, G_RM_NOOP, G_RM_NOOP2);
-  gDPPipeSync(gfx++);
-  gDPPipeSync(gfx++);
-  gDPSetCycleType(gfx++, G_CYC_FILL);
-  gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 320, zbuf);
-  gDPSetFillColor(gfx++, 0xFFFCFFFC);
-  gDPFillRectangle(gfx++, 0, 0, 319, 239);
-  gDPPipeSync(gfx++);
-  gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 320,
-                   osVirtualToPhysical(nuGfxCfb_ptr) & ~7);
+  gDPPipeSync(next_command++);
+  gDPSetScissor(next_command++, G_SC_NON_INTERLACE, 0, 0, FRAMEBUFFER_WIDTH,
+                FRAMEBUFFER_HEIGHT);
+  gDPSetDepthImage(next_command++, depth_buffer_address);
+  gDPPipeSync(next_command++);
+  gDPSetRenderMode(next_command++, G_RM_NOOP, G_RM_NOOP2);
+  gDPPipeSync(next_command++);
+  gDPPipeSync(next_command++);
+  gDPSetCycleType(next_command++, G_CYC_FILL);
+  gDPSetColorImage(next_command++, G_IM_FMT_RGBA, G_IM_SIZ_16b,
+                   FRAMEBUFFER_WIDTH, depth_buffer_address);
+  gDPSetFillColor(next_command++, DEPTH_CLEAR_FILL_COLOR);
+  gDPFillRectangle(next_command++, 0, 0, FRAMEBUFFER_WIDTH - 1,
+                   FRAMEBUFFER_HEIGHT - 1);
+  gDPPipeSync(next_command++);
+  gDPSetColorImage(
+      next_command++, G_IM_FMT_RGBA, G_IM_SIZ_16b, FRAMEBUFFER_WIDTH,
+      osVirtualToPhysical(nuGfxCfb_ptr) & ~(FRAMEBUFFER_ADDRESS_ALIGNMENT - 1));
 
-  if (arg0 == 1) {
-    for (i = 0; i < 239; i++) {
-      gDPSetFillColor(gfx++, 0x00010001);
-      gDPFillRectangle(gfx++, 0, i, 319, i);
+  if (color_clear_mode == COLOR_CLEAR_SCANLINES) {
+    s32 row;
+
+    /* The retail scanline path leaves the final framebuffer row untouched. */
+    for (row = 0; row < FRAMEBUFFER_HEIGHT - 1; row++) {
+      gDPSetFillColor(next_command++, OPAQUE_BLACK_FILL_COLOR);
+      gDPFillRectangle(next_command++, 0, row, FRAMEBUFFER_WIDTH - 1, row);
     }
-    gDPPipeSync(gfx++);
-  } else if (arg0 == 2) {
-    gDPSetFillColor(gfx++, 0x00010001);
-    gDPPipeSync(gfx++);
-    gDPFillRectangle(gfx++, 0, 0, 319, 239);
-    gDPPipeSync(gfx++);
+    gDPPipeSync(next_command++);
+  } else if (color_clear_mode == COLOR_CLEAR_RECTANGLE) {
+    gDPSetFillColor(next_command++, OPAQUE_BLACK_FILL_COLOR);
+    gDPPipeSync(next_command++);
+    gDPFillRectangle(next_command++, 0, 0, FRAMEBUFFER_WIDTH - 1,
+                     FRAMEBUFFER_HEIGHT - 1);
+    gDPPipeSync(next_command++);
   }
 
-  gDPPipeSync(gfx++);
-  gDPPipeSync(gfx++);
-  gDPSetCycleType(gfx++, G_CYC_1CYCLE);
-  gDPPipeSync(gfx++);
-  *glistp = gfx;
+  gDPPipeSync(next_command++);
+  gDPPipeSync(next_command++);
+  gDPSetCycleType(next_command++, G_CYC_1CYCLE);
+  gDPPipeSync(next_command++);
+  *display_list_cursor = next_command;
 }
 
-void func_80032E34(s32 arg0) { func_80032B78(arg0, &glistp); }
+void clear_framebuffers(s32 color_clear_mode) {
+  append_framebuffer_clear(color_clear_mode, &glistp);
+}

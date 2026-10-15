@@ -3535,7 +3535,15 @@ into a running `Gfx*` cursor. Decode + reconstruct, do not hand-transcribe:
 **RCP-init / framebuffer-clear idiom + the `& ~7` game-mod (3rd main-seg DL TU, S179).** The
 `gfxRCPInit` / `gfxClearCfb` reference is `~/development/n64/n64demos/nusys/*/src/main/graphic.c`
 (nu2/nu3/nuxbus). Match it against a viewport/segment/camera-preamble + scissor/depth+color-image +
-fill-clear pack (S179 DCE0 pack `func_800328E0`):
+fill-clear pack (`src/main/func_800328E0.c`, S179 DCE0 pack):
+
+The current routine names are `append_viewport_setup` / `setup_frame_viewport`,
+`set_clear_color`, `clear_playfield`, and `append_framebuffer_clear` / `clear_framebuffers`.
+The append builders update the caller-owned cursor; their wrappers use global `glistp`.
+`COLOR_CLEAR_SCANLINES` emits rows **0 through 238**, not row 239;
+`COLOR_CLEAR_RECTANGLE` covers the full framebuffer. Other mode values still clear depth
+but leave color untouched. Keep this distinction when changing loop bounds or mode tests.
+
 - **Fill color = double-`GPACK_RGBA5551`.** `gDPSetFillColor(gfx++, (GPACK_RGBA5551(r,g,b,1) << 16 |
   GPACK_RGBA5551(r,g,b,1)))` — the demo idiom (game fills substitute RGB globals/args for the demo's
   literal `0,0,0`). Z clear uses `GPACK_ZDZ(G_MAXFBZ,0)` the same way.
@@ -3544,11 +3552,13 @@ fill-clear pack (S179 DCE0 pack `func_800328E0`):
 - **The `& ~7` (8-byte align, `and $reg,-8`) on the physical address is game-specific, not
   auto-inserted.** The demo has no `& ~7`; MG64's `gDPSetColorImage`/`gDPSetDepthImage` args need it
   byte-exact (`OS_K0_TO_PHYSICAL(nuGfxZBuffer) & ~7`, `osVirtualToPhysical(nuGfxCfb_ptr) & ~7`) — S179
-  `func_80032B78` matched with it (dropping it is 4 insns short). gSetImage stores the arg raw, so the
-  mask lives in the source.
+  `append_framebuffer_clear` (formerly `func_80032B78`) matched with it (dropping it is 4 insns short).
+  The current source spells the mask as `~(FRAMEBUFFER_ADDRESS_ALIGNMENT - 1)`.
+  gSetImage stores the arg raw, so the mask lives in the source.
 - **Idiom split determines matchability:** a helper taking `Gfx **glistp` (`Gfx *gfx = *glistp; …
-  gDPxxx(gfx++); *glistp = gfx;`) matches cleanly (func_800328E0/func_80032B78 — the `*glistp` deref is
-  a param-pointer, not a symbol-load). A fn using the global `glistp++` directly (13 stores of the
+  gDPxxx(gfx++); *glistp = gfx;`) matches cleanly (`append_viewport_setup` / `append_framebuffer_clear` —
+  the `*glistp` deref is a param-pointer, not a symbol-load). A fn using the global `glistp++` directly
+  (13 stores of the
   `%lo(glistp)` symbol, 1 load) whose fill color is computed from global vars is the
   **scheduler-load-pair wall** (S179 carry `func_800329F4`): GCC 2.7.2's sched1 hoists the color
   global symbol-load into glistp's 2-cycle load-latency shadow, where the ROM defers the color load to
@@ -3560,7 +3570,7 @@ fill-clear pack (S179 DCE0 pack `func_800328E0`):
     `LAUNCH_PRIORITY` (0x7f000001) "birthing-insn" boost (`sched.c:3902`/2543; `priority()` early-returns
     at 1435 so it never decays; `rank_for_schedule` keys priority first at 2395, so it dominates — not a
     tie-break) floats it backward on the load-use latency to the shadow. **Retype the RGB triple as one
-    `Color {s32 r,g,b;}` struct** (or `s32[3]`): the loads become `mem/s`, may-alias the `*glistp`
+    `Color {s32 red, green, blue;}` struct** (or `s32[3]`): the loads become `mem/s`, may-alias the `*glistp`
     writes, and are not ready until those stores are placed → absent from the ready set when the shadow
     opens → the constant `lui`s fill it = the ROM's deferred schedule. Regalloc is 100% downstream of
     the schedule (leaf, no `$s` regs), so this snaps the whole 77/97 permutation exact. **Second
