@@ -481,7 +481,7 @@ void emit_hole_banner_dl(Gfx** pgfx) {
   i = 0;
   gp = &gfx;
   off = 8;
-  do {
+  for (; i != 2; i++) {
     yc = 0;
     if (D_800C4124 == 1) {
       hgt = span;
@@ -500,8 +500,7 @@ void emit_hole_banner_dl(Gfx** pgfx) {
     func_8006A2C0(gp, (0xA0 - halfw) << 2, (y - hgt) << 2, (halfw + 0xA0) << 2,
                   y << 2, 0, 0, 0, 0x20000 / halfw, 0x8000 / hgt);
     off += 0x1000;
-    i++;
-  } while (i != 2);
+  }
 
   if (D_800C4124 == 1) {
     s32 unused[2];
@@ -754,13 +753,11 @@ void update_and_draw_iris_wipe(Gfx** pgfx) {
 
   if (D_800C4014 == 0) {
     if (D_800C4018 > 0) {
-      i = 0;
-      do {
+      for (i = 0; i != 8; i++) {
         stamp_circle_ring_alpha((u32*)((u8*)D_800E1C00 + 8), 0x4C, 0x70,
                                 D_800C4018);
         D_800C4018--;
-        i++;
-      } while (i != 8);
+      }
       if (D_800C4018 == 0x60) {
         func_80050DA0(0x65, 2, 0x28, 0x14, 0x7F);
       }
@@ -775,13 +772,11 @@ void update_and_draw_iris_wipe(Gfx** pgfx) {
     if (D_800C4018 < 0) {
       D_800C4018++;
     } else if (D_800C4018 < 0x90) {
-      i = 0;
-      do {
+      for (i = 0; i != 12; i++) {
         stamp_circle_ring_alpha((u32*)((u8*)D_800E1C00 + 8), 0x4C, 0x70,
                                 D_800C4018);
         D_800C4018++;
-        i++;
-      } while (i != 12);
+      }
       if (D_800C4018 == 0x30) {
         func_80050DA0(0x64, 2, 0x28, 0x14, 0x7F);
       }
@@ -808,8 +803,7 @@ void update_and_draw_iris_wipe(Gfx** pgfx) {
   gDPPipeSync(gfx++);
   gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
 
-  i = 0;
-  do {
+  for (i = 0; i != 0x26; i++) {
     h = (i == 0x25) ? 2 : 6;
     lry = h + 8;
     gDPLoadTextureTile(gfx++, ((u32)D_800E1C00 + 8 + i * 0xE40) & ~7,
@@ -817,8 +811,7 @@ void update_and_draw_iris_wipe(Gfx** pgfx) {
                        0, 0, 0, 0, 0, 0);
     func_8006A2C0(&gfx, 8 << 2, (i * 6 + 8) << 2, 312 << 2, (i * 6 + lry) << 2,
                   0, 0, 0, 0x400, 0x400);
-    i++;
-  } while (i != 0x26);
+  }
 
   *pgfx = gfx;
 }

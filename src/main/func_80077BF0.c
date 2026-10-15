@@ -85,29 +85,26 @@ void func_80077C18(s32 arg0) {
     row = 0;
     if (rows != 0) {
       base = 0;
-      do {
+      for (; row != rows; row++) {
         col = 0;
         if (cols != 0) {
           n = base;
           src = g->source;
-          do {
+          for (; col != cols; col++) {
             if (*(col + n + src->source_grid) == 0) {
               g->particle_count++;
             }
-            col++;
-          } while (col != cols);
+          }
         }
         base += cols;
-        row++;
-      } while (row != rows);
+      }
     }
     g->particles = heap3_alloc(g->particle_count * 0x98);
     row = 0;
     if (g->particle_count != 0) {
-      do {
+      for (; row != g->particle_count; row++) {
         g->particles[row].unknown_94 = 0;
-        row++;
-      } while (row != g->particle_count);
+      }
     }
   }
   D_800C4664 = 1;
@@ -120,10 +117,9 @@ void func_80077DEC(void) {
     i = 0;
     heap3_free((void**)&D_800FE338);
     if (D_800C4660 != 0) {
-      do {
+      for (; i != D_800C4660; i++) {
         heap3_free((void**)&D_80105140[i].particles);
-        i++;
-      } while (i != D_800C4660);
+      }
     }
   }
   D_800C4664 = 0;

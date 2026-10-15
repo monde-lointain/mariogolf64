@@ -88,12 +88,11 @@ void func_8004DAF4(u8* str) {
     if (c == '\r' || c == '\n') {
       s32 n = 40;
       D_800DC6D0 = ((D_800DC6D0 / 40) * 40 + 40) % 4800;
-      do {
+      for (; n != 0; n--) {
         s32 pos = D_800DC6D0;
         D_800DC6D0 = pos + 1;
         D_800DB410[pos] = ' ';
-        n--;
-      } while (n != 0);
+      }
       D_800DC6D0 -= 40;
     } else {
       s32 pos = D_800DC6D0;

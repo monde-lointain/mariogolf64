@@ -79,8 +79,9 @@ void init_overlay_manager(void) {
   for (entry_index = 0; (u32)entry_index < OVERLAY_COUNT; entry_index++) {
     if (g_overlay_descriptors[entry_index].segment_ids[0] != SEGMENT_LIST_END) {
       s8* segment_ids = g_overlay_descriptors[entry_index].segment_ids;
-      u32 segment_index = 0;
-      do {
+      u32 segment_index;
+      for (segment_index = 0;
+           segment_ids[segment_index] != SEGMENT_LIST_END; segment_index++) {
         if (g_segment_overlay_indices[segment_ids[segment_index]] !=
                 SEGMENT_LIST_END &&
             !flag_is_set(FLAG_SUPPRESS_OVERLAY_MESSAGES)) {
@@ -88,8 +89,7 @@ void init_overlay_manager(void) {
           osSyncPrintf((const char*)gspF3DEX2_fifoDataEnd);
         }
         g_segment_overlay_indices[segment_ids[segment_index]] = entry_index;
-        segment_index++;
-      } while (segment_ids[segment_index] != SEGMENT_LIST_END);
+      }
     }
   }
 

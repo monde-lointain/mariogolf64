@@ -34,14 +34,14 @@ f32 func_800779A8(f32 x, f32* arg1, f32* arg2, f32* arg3) {
   }
   lo = 0;
   hi = 0xA;
-  do {
+  while (lo < hi) {
     mid = (lo + hi) / 2;
     if (arg1[mid] < x) {
       lo = mid + 1;
     } else {
       hi = mid;
     }
-  } while (lo < hi);
+  }
   lo -= (lo > 0);
   base = arg1[lo];
   r1 = arg3[lo + 1];

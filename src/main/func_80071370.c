@@ -337,10 +337,10 @@ s32 func_80073BF0(u8* str) {
   s32 len = 0;
 
   if (str[0] != 0) {
-    do {
+    while (str[0] != 0) {
       str++;
       len++;
-    } while (str[0] != 0);
+    }
   }
   return len;
 }
@@ -528,7 +528,7 @@ void func_80074D0C(Gfx** dl, s16 x, s16 y, u8* str) {
   gDPPipeSync(gfx++);
   c = *str;
   if (c != 0) {
-    do {
+    while (c != 0) {
       s32 ch = c & 0xff;
       s32 idx;
       s32 quot;
@@ -549,7 +549,7 @@ void func_80074D0C(Gfx** dl, s16 x, s16 y, u8* str) {
       }
       str++;
       c = *str;
-    } while (c != 0);
+    }
   }
   gDPPipeSync(gfx++);
   *dl = gfx;
@@ -567,21 +567,21 @@ void func_80074EFC(Gfx** dl, s16 x, s16 y, u8* str) {
   count = 0;
   if (*str != 0) {
     p = str;
-    do {
+    while (*p != 0) {
       p++;
       count++;
-    } while (*p != 0);
+    }
   }
   c = *str;
   x -= count * 3;
   if (c != 0) {
-    do {
+    while (c != 0) {
       gSPTextureRectangle(gfx++, x << 2, y << 2, (x + 7) << 2, (y + 8) << 2, 0,
                           (c - 0x27) << 8, 0x300, 1 << 10, 1 << 10);
       str++;
       c = *str;
       x += 6;
-    } while (c != 0);
+    }
   }
   gDPPipeSync(gfx++);
   *dl = gfx;
@@ -594,7 +594,7 @@ void func_80075010(Gfx** dl, s16 x, s16 y, u8* str) {
   gDPPipeSync(gfx++);
   c = *str;
   if (c != 0) {
-    do {
+    while (c != 0) {
       s32 idx = c - 0x20;
       s32 quot = idx / 31;
       s32 rem = idx % 31;
@@ -603,7 +603,7 @@ void func_80075010(Gfx** dl, s16 x, s16 y, u8* str) {
       str++;
       c = *str;
       x += 7;
-    } while (c != 0);
+    }
   }
   gDPPipeSync(gfx++);
   *dl = gfx;

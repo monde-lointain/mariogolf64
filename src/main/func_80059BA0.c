@@ -623,12 +623,10 @@ void func_8005ACF8(void) {
   D_800C1FF0 = -1;
   heap3_free(&D_801F4A20);
   heap3_free(&D_8012D3AC);
-  i = 0;
-  do {
+  for (i = 0; i != 7; i++) {
     heap3_free(&D_801049A0[i]);
     heap3_free(&D_8012F4B0[i]);
-    i++;
-  } while (i != 7);
+  }
   heap3_free(&D_801052C4[0]);
   heap3_free(&D_801052C4[1]);
   heap3_free(&D_800FF420[0]);
@@ -642,37 +640,27 @@ void func_8005ACF8(void) {
   heap3_free(&D_801052BC[1]);
   heap3_free(&D_800FBDFC[0]);
   heap3_free(&D_800FBDFC[1]);
-  i = 0;
-  do {
+  for (i = 0; i != 2; i++) {
     heap3_free(&D_800FF4C4[i]);
-    i++;
-  } while (i != 2);
-  i = 0;
-  do {
+  }
+  for (i = 0; i != 3; i++) {
     heap3_free(&D_800FBE38[i]);
-    i++;
-  } while (i != 3);
-  i = 0;
-  do {
+  }
+  for (i = 0; i != 5; i++) {
     heap3_free(&D_801B93E0[i]);
-    i++;
-  } while (i != 5);
+  }
   heap3_free(&D_8010526C[0]);
   heap3_free(&D_8010526C[1]);
   heap3_free(&D_800FF180[0]);
   heap3_free(&D_800FF180[1]);
   heap3_free(&D_80106100);
   heap3_free(&D_800FC898);
-  i = 0;
-  do {
+  for (i = 0; i != 18; i++) {
     heap3_free(&tile_palette_table[i]);
-    i++;
-  } while (i != 18);
-  i = 0;
-  do {
+  }
+  for (i = 0; i != 18; i++) {
     heap3_free(&tile_texture_table[i]);
-    i++;
-  } while (i != 18);
+  }
   heap3_free(&D_800FBE30[0]);
   heap3_free(&D_800FBE30[1]);
   heap3_free(&D_800FC6A0);
@@ -694,19 +682,16 @@ void func_8005AF80(void) {
   s8 j;
   memset(base, 0, 0x2A78);
   *(s32*)base = 0x12345678;
-  i = 0;
-  do {
+  for (i = 0; i != 6; i++) {
     s32* row;
     j = 0;
     /* (s32)base drops REG_POINTER so the addu keeps i*12 as rs (addu v0,v0,s0),
      * matching the ROM's commutative operand order. */
     row = (s32*)(i * 12 + (s32)base + 0xDC0);
-    do {
+    for (; j != 3; j++) {
       row[j] = -1;
-      j++;
-    } while (j != 3);
-    i++;
-  } while (i != 6);
+    }
+  }
   func_8005DF54(base, 1);
 }
 

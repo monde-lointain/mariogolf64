@@ -34,15 +34,15 @@ void func_80065D5C(f32 a[4][4], f32 b[4][4], f32 dst[4][4]) {
   s32 j;
 
   i = 0;
-  do {
+  while (i != 4) {
     j = 0;
-    do {
+    while (j != 4) {
       dst[i][j] = a[i][0] * b[0][j] + a[i][1] * b[1][j] + a[i][2] * b[2][j] +
                   a[i][3] * b[3][j];
       j++;
-    } while (j != 4);
+    }
     i++;
-  } while (i != 4);
+  }
 }
 
 /* Game-embedded guMtxF2L variant (a second copy; the canonical guMtxF2L lives

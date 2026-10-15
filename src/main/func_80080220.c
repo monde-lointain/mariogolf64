@@ -1551,16 +1551,14 @@ void emit_ball_offscreen_indicator(Gfx** gfxp) {
     gSPMatrix(gfx++, &D_E2090[sky_panel_bank_index],
               G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
     gSPVertex(gfx++, D_800C5BF0, 32, 0);
-    i = 0;
-    do {
+    for (i = 0; i != 4; i++) {
       gSP2Triangles(gfx++, i * 8, i * 8 + 1, i * 8 + 2, 0, i * 8, i * 8 + 2,
                     i * 8 + 3, 0);
       gSP2Triangles(gfx++, i * 8 + 1, i * 8 + 4, i * 8 + 5, 0, i * 8 + 1,
                     i * 8 + 5, i * 8 + 2, 0);
       gSP2Triangles(gfx++, i * 8 + 4, i * 8 + 6, i * 8 + 7, 0, i * 8 + 4,
                     i * 8 + 7, i * 8 + 5, 0);
-      i++;
-    } while (i != 4);
+    }
   } else {
     D_800C5E14++;
     if (D_800C5E14 == 4) {
@@ -1598,12 +1596,10 @@ void emit_ball_offscreen_indicator(Gfx** gfxp) {
                            G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK,
                            G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(gfx++);
-    i = 0;
-    do {
+    for (i = 0; i != 2; i++) {
       gSP2Triangles(gfx++, i * 4, i * 4 + 1, i * 4 + 2, 0, i * 4, i * 4 + 2,
                     i * 4 + 3, 0);
-      i++;
-    } while (i != 2);
+    }
 
     gDPPipeSync(gfx++);
     gDPLoadTextureBlock_4b(gfx++, ((u32)D_8012D3C0 + 0x1580) & ~7, G_IM_FMT_I,
@@ -1611,12 +1607,10 @@ void emit_ball_offscreen_indicator(Gfx** gfxp) {
                            G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK,
                            G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(gfx++);
-    i = 0;
-    do {
+    for (i = 0; i != 2; i++) {
       gSP2Triangles(gfx++, i * 4, i * 4 + 1, i * 4 + 2, 0, i * 4, i * 4 + 2,
                     i * 4 + 3, 0);
-      i++;
-    } while (i != 2);
+    }
     gDPPipeSync(gfx++);
   }
 

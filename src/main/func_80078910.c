@@ -122,10 +122,9 @@ void reload_scene_assets(s8* arg0) {
   get_rom_asset_allocation_size(0x6C0, &sp10);
   load_rom_asset_payload(D_800E1DAC, &sp10);
 
-  i = 0;
-  do {
+  for (i = 0; i != 40; i++) {
     (particle_array + i)->effect_kind = -1;
-  } while (++i != 40);
+  }
 
   D_800FC8B8 =
       (s32)(f32)get_interpolated_terrain_height_wrapper(D_800FBE64, target_z);
@@ -175,11 +174,11 @@ void reload_scene_assets(s8* arg0) {
 }
 
 void func_80078D94(void) {
-  s32 i = 0;
+  s32 i;
 
-  do {
+  for (i = 0; i != 40; i++) {
     (particle_array + i)->effect_kind = -1;
-  } while (++i != 40);
+  }
 }
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80078910", func_80078DC0);
@@ -195,8 +194,7 @@ void func_80079358(s32 arg0, s32 arg1) {
     D_800FC8B8 = (s32)(f32)get_interpolated_terrain_height_wrapper(
         (s32)(spawn_position.x * 1024.0f), (s32)(spawn_position.z * 1024.0f));
 
-    i = 0;
-    do {
+    for (i = 0; i != 40; i++) {
       Particle* p = &particle_array[i];
 
       if (p->effect_kind == -1) {
@@ -218,7 +216,7 @@ void func_80079358(s32 arg0, s32 arg1) {
         p->position.z = z;
         break;
       }
-    } while (++i != 40);
+    }
   }
 }
 
@@ -230,9 +228,9 @@ INCLUDE_ASM("asm/nonmatchings/main/func_80078910", func_8007955C);
 INCLUDE_ASM("asm/nonmatchings/main/func_80078910", func_800796F8);
 
 void func_80079940(s32* arg0) {
-  s32 i = 0;
+  s32 i;
 
-  do {
+  for (i = 0; i != 40; i++) {
     Particle* p = &particle_array[i];
 
     if (p->effect_kind == -1) {
@@ -254,7 +252,7 @@ void func_80079940(s32* arg0) {
       p->position.z = z;
       break;
     }
-  } while (++i != 40);
+  }
 }
 
 extern f64 D_800D1988;
@@ -273,7 +271,7 @@ void func_80079A08(s32 arg0, s32 arg1) {
     free_slot = -1;
     one = 1;
     grav = D_800D1988;
-    do {
+    for (; i != 40; i++) {
       Particle* p = &particle_array[i];
 
       if (p->effect_kind == free_slot) {
@@ -297,7 +295,7 @@ void func_80079A08(s32 arg0, s32 arg1) {
         p->velocity.y = w;
         break;
       }
-    } while (++i != 40);
+    }
   }
 }
 

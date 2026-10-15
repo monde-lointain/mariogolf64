@@ -416,10 +416,10 @@ void gen_terrain_detail_texture(s32 range, s32 minimum) {
   s32 row = 0;
   s32 column;
   u8* pixel;
-  do {
+  while (row < 32) {
     column = 0;
     pixel = &g_terrain_detail_texture[index];
-    do {
+    while (column < 32) {
       s32 value = rand() % range + minimum;
       if (value >= 256) {
         value = 255;
@@ -427,9 +427,9 @@ void gen_terrain_detail_texture(s32 range, s32 minimum) {
       *pixel++ = value;
       column++;
       index++;
-    } while (column < 32);
+    }
     row++;
-  } while (row < 32);
+  }
 }
 
 void setup_terrain_detail_default(void) {

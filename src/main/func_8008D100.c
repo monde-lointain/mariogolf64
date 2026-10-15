@@ -464,10 +464,8 @@ s32 run_fog_debug_editor(void) {
     g_fog_presetB_color_r[4] = 0;
   }
 
-  i = 0;
-  do {
-    j = 0;
-    do {
+  for (i = 0; i != 4; i++) {
+    for (j = 0; j != 3; j++) {
       D_800C69CC[i][0].rgb[j] = D_800E3980->color_set_t[j];
       D_800C69CC[i][1].rgb[j] = D_800E3980->color_set_b[j];
       D_800C69CC[i][2].rgb[j] = D_800E3980->color_set_b[j];
@@ -482,17 +480,14 @@ s32 run_fog_debug_editor(void) {
       D_800C69CC[i][7].rgb[j] = quarter;
       D_800C69CC[i][8].rgb[j] = half;
       D_800C69CC[i][9].rgb[j] = half;
-      j++;
-    } while (j != 3);
-    i++;
-  } while (i != 4);
+    }
+  }
 
   if (refresh) {
     get_rom_asset_allocation_size(D_800C6C52[get_current_course_id() * 2], &asset);
     load_rom_asset_payload(course_panorama_ptr, &asset);
 
-    i = 0;
-    do {
+    for (i = 0; i != 0x100; i++) {
       texel = ((u16*)course_panorama_ptr)[i + 4];
       red = texel >> 11;
       green = (texel >> 6) & 0x1F;
@@ -528,8 +523,7 @@ s32 run_fog_debug_editor(void) {
       }
       ((u16*)course_panorama_ptr)[i + 4] =
           (red << 11) | (green << 6) | (blue << 1) | alpha;
-      i++;
-    } while (i != 0x100);
+    }
   }
 
   check_and_print_grid("   T   B   C   BG  FOG", 13, 11);

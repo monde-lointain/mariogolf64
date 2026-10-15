@@ -798,11 +798,10 @@ const u8 polychara_alive_msg[0x34] =
 void func_800577DC(s32 index, void* arg1) {
   u32 aligned = ((u32)arg1 + 0xFFF) & 0xFFFFF000;
   if (D_801F43F0[index].resource_index != -1) {
-    s32 j = 0;
-    do {
+    s32 j;
+    for (j = 0; j < 10; j++) {
       osSyncPrintf((const char*)polychara_alive_msg, index);
-      j += 1;
-    } while (j < 10);
+    }
   } else {
     s32 i;
     D_801F43F0[index].segment_data = (void*)aligned;

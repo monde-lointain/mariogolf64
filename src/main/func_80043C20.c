@@ -88,30 +88,24 @@ void func_80043C64(void) {
   }
   sprintf(line, D_800CC388);
   func_80043C20((u8*)line);
-  club = 0;
-  do {
+  for (club = 0; club < 0xFC; club++) {
     cs = &D_800BB258[club];
     sprintf(line, D_800CC3EC, cs->distances[0], cs->distances[1], cs->distances[2], cs->unknown_28,
             cs->unknown_2A, cs->unknown_2C);
-    club++;
     func_80043C20((u8*)line);
-  } while (club < 0xFC);
+  }
   sprintf(line, D_800CC40C);
   func_80043C20((u8*)line);
   func_80043C20((u8*)D_800CC454);
-  category = 0;
-  do {
+  for (category = 0; category < 3; category++) {
     func_80043C20((u8*)D_800CC474);
-    power = 1;
-    do {
+    for (power = 1; power < 0x1F; power++) {
       sprintf(line, D_800CC478,
               predict_shot_distance_variant((power << 8) / 30, category));
       func_80043C20((u8*)line);
-      power++;
-    } while (power < 0x1F);
+    }
     func_80043C20((u8*)D_800CC480);
-    category++;
-  } while (category < 3);
+  }
   func_80043C20((u8*)D_800CC484);
   line[0] = 0x1A;
   line[1] = 0;
@@ -140,7 +134,7 @@ void func_80044254(s32 arg0, ShotInput* arg1) {
   i = 0;
   hundred = 100;
   club = arg0 * 0xE;
-  do {
+  for (; i < 0xE; i += 1) {
     cs = get_club_param(club);
     temp = arg1->clubs[i].target_distance;
     cs->target_distance = temp;
@@ -193,8 +187,7 @@ void func_80044254(s32 arg0, ShotInput* arg1) {
     g_terrain_vtx_xform_mode = 0;
     predict_shot_distance(club);
     club += 1;
-    i += 1;
-  } while (i < 0xE);
+  }
 }
 
 // func_80044470 is a GCC nested function of func_800444B8 (static chain in

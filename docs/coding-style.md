@@ -109,6 +109,11 @@ Write control flow that is clear and defined, then compare it with the target. E
 join points are code-generation choices here. Preserve required conditions and behavior, and consult
 [Source levers](levers.md) before changing structure to chase a particular instruction sequence.
 
+For simple fixed-count traversals, prefer a `for` loop; for scans with a natural entry
+condition, prefer `while`. Keep a post-tested `do` loop when the body must run once or
+when moving its test changes the verified ROM bytes. A one-shot `do { ... } while (0)`
+may likewise be intentional compiler shaping, not a redundant scope.
+
 Prefer measured structured alternatives over blanket claims that a `goto` is mandatory. The safe
 magnitude helpers match with ordered, nested exit tests in `while (1)`, and the CRC bit loop matches
 as a counted `for` with its counter declared at function scope. Conversely, decoder dispatch edges,

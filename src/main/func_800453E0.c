@@ -204,11 +204,9 @@ init_loop:
     goto init_loop;
   }
 
-  i = 0;
-  do {
+  for (i = 0; i != 5; i++) {
     swap_entries(i, rand() % 10);
-    i++;
-  } while (i != 5);
+  }
   return -1;
 
 draw:
