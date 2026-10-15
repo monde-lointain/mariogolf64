@@ -803,3 +803,10 @@ view_camera_eye_z = 0x801B54F4; // size:0x4
 
 // Slot-wide free-byte query; disambiguate free space from heap capacity.
 heap_get_total_free = 0x8004DE44; // type:func rom:0x29244 segment:main
+
+// Caller-owned horizontal wipe boxes and their per-frame render queue.
+advance_and_draw_wipe_box = 0x800500E0; // type:func segment:main
+queue_wipe_box = 0x80050274; // type:func segment:main
+draw_queued_wipe_boxes = 0x8005029C; // type:func segment:main
+queued_wipe_box_count = 0x800C0E50; // size:0x4
+queued_wipe_boxes = 0x80132370; // size:0x28

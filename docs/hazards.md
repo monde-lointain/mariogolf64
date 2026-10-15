@@ -3502,7 +3502,8 @@ into a running `Gfx*` cursor. Decode + reconstruct, do not hand-transcribe:
   supplies the advance. The post-increment form (write via the old pointer then advance) matches the
   ROM's base+offset-write-then-spill-advance codegen; a hand pre-store-then-advance form
   (`gfx->words.w0=..; gfx++`) emits an extra pointer `addiu` at each call/return boundary. So build with
-  `gDPxxx(gfx++)` and cache `Gfx *gfx = *glistp; …; *glistp = gfx;` (the func_800500E0/func_8005029C idiom).
+  `gDPxxx(gfx++)` and cache `Gfx *gfx = *display_list; …; *display_list = gfx;`
+  (the `advance_and_draw_wipe_box` idiom).
 - **gfxdis.f3dex2 -f does fold the texture-load composites** (corrects the "gfxdis does not fold" note
   above): `gfxdis.f3dex2 -f <binfile-of-BE-u32-words>` emits `gsDPLoadTextureBlock`/`gsDPLoadMultiBlock`
   folded from the 7-primitive settimg/settile/loadsync/loadblock/pipesync/settile/settilesize run. The
@@ -4479,8 +4480,9 @@ shift/body block emitted before the test, a guard `j` to the bottom, `beql` wher
 `beq`, and/or the `j` back-edge targets the constant-load block instead of the test). This is a
 loop-form codegen mismatch, not a C-logic bug — do not iterate the condition expression or reach for
 the permuter. Confirm the direction against a matched sibling: a single-condition ROM loop that is
-inverted (guard + bottom test, e.g. `func_8005029C`'s `for(i != count)`, S151) proves inversion is the
-compiler default, not a flag; a top-tested multi-`||` ROM loop that is not inverted is the goto case.
+inverted (guard + bottom test, e.g. `draw_queued_wipe_boxes`'s equality-terminated `for`, S151)
+proves inversion is the compiler default, not a flag; a top-tested multi-`||` ROM loop that is not
+inverted is the goto case.
 Pairs with `#double-sqrt-fast-math` (both were the same range-scaling fns).
 
 **The reversal corollary (a distinct loop.c pass).** `expand_end_loop` inverts (above); a

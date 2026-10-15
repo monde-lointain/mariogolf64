@@ -2,6 +2,25 @@
 
 ## 2026-10-14
 
+- **Wipe-box readability**: Read every guideline in Code Complete Chapters 7,
+  10–16, 31, and 32 and reviewed all three routines in `src/main/func_800500E0.c`.
+  Named animation states, transition timing, fixed-point units, rectangle bounds,
+  color channels, queue data, arguments, and the advance/draw, enqueue, and
+  queued-draw routines. Added authoritative symbols; extraction migrated assembly
+  callers and queue definitions. Retained the short counted `for`, typed array
+  indexing, four-frame wrap even while open, signed half-width truncation, and
+  display-list command order. No standalone scope blocks were added: the retail
+  C89 compiler requires declarations before statements, with assignments kept by
+  use. Moving the cursor load below the early returns changed scheduling and
+  registers; its entry-time initialization remains documented. Formatted with
+  `clang-format-23`. A 32-bit smoke of the real routines passed 1,560 checks:
+  112 state/frame/geometry combinations and six draw cycles each at queue sizes
+  0, 1, and 10, including exact packet words, animation transitions, queue
+  consumption, structure layout, and untouched buffer boundaries. Isolated
+  instruction words and relocation targets agree with the baseline. Final
+  `tools/verify-rom.sh` passed with retail SHA-1
+  `e2c4e7a905b29529b49a1619a401fe699224829b`; YAML and compiler profiles are unchanged.
+
 - **Heap-slot readability**: Reviewed every guideline in Code Complete Chapters 7,
   10–16, 31, and 32 against all three routines in `src/main/func_8004DD70.c`.
   Named slot indices, region bounds, the constant region byte count, and the list
