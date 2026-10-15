@@ -108,13 +108,6 @@ This file holds only the *ordering rationale*, *enabler items* (gate actions), a
   were checked against the isolated objects, accounting for same-TU call and
   internal-jump relocations. Saved objects and target assembly remain beneath
   each function's `nonmatchings/` directory.
-- `func_80060190` remains isolated and unbanked at score 915 after guarded-block
-  variants. Its retained RTL and jump dumps show the jump pass converting the
-  terminal `game_mode == 9` constant diamond to a mask/select. Its live
-  `INCLUDE_ASM` remains. The conversion gate is in
-  `build/us/vendor/kmc-gcc/src/mg64_kmc_gcc/jump.c:993-1174`; a shared-result
-  phi alone does not obviously invalidate its assignment/join conditions.
-  A new experiment must target that gate, not repeat the tested block wrappers.
 
 
 ### Current main-bank evidence — 2026-10-14

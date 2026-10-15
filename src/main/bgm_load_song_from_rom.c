@@ -356,7 +356,43 @@ void func_80060128(s32 arg0) {
   D_80104F90 = fields->unknown_02[5];
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/bgm_load_song_from_rom", func_80060190);
+extern s8 D_800BAA04;
+
+s32 func_80060190(s32 score) {
+  s32 difference = score - D_800BAA04;
+  s32 result;
+  s32 mode;
+
+  if (score == 1) {
+    result = 0x80;
+  } else {
+    switch (difference) {
+      case -3:
+        result = 0x81;
+        break;
+      case -2:
+        result = 0x82;
+        break;
+      case -1:
+        result = 0x83;
+        break;
+      case 0:
+        mode = game_mode;
+        if (mode != 9) {
+          goto zero;
+        }
+        result = 0x84;
+        break;
+      default:
+        goto zero;
+    }
+  }
+  goto done;
+zero:
+  result = 0;
+done:
+  return result;
+}
 
 void func_80060210(GameModeRecord* arg0) {
   D_800FEDD8[0] = *arg0;
