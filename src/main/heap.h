@@ -5,8 +5,8 @@
 
 /* Interrupt-guarded best-fit heap, split into independent slots.
  *
- * Each slot owns a circular doubly-linked free list of HeapBlock nodes. The
- * array element heap_slots[i] is that slot's list head: a sentinel whose `next`
+ * Each slot owns a circular doubly-linked list of allocated and free blocks.
+ * The array element heap_slots[i] is that slot's list head: a sentinel whose `next`
  * and `prev` chain the real blocks, and whose `total_free` / `largest_free`
  * fields cache slot-wide statistics (they carry no meaning on a non-head
  * block).
@@ -19,7 +19,20 @@
  * There are two families of operations: the slot-indexed ones (heap_init,
  * heap_alloc, ... take a slot index) and specialized wrappers for slot 3
  * (heap3_init, heap3_alloc, ...), which the game hot path calls without an
- * index. */
+ * index.
+ *
+ * Allocation sizes count usable payload bytes. The header-inclusive aligned
+ * size must fit in a positive s32; allocation does not clear the payload.
+ * Freeing takes the address of the caller's pointer and clears it on success.
+ * That address must be non-NULL, and a non-NULL payload must be a live allocation
+ * from the same slot: these routines do not validate ownership or state tags.
+ *
+ * largest_free is marked unknown at initialization. Allocation updates it from
+ * fitting blocks and the selected block's remainder, ignoring undersized free
+ * blocks; failure can therefore cache zero while free bytes remain. Freeing
+ * leaves the cache unchanged. heap_get_largest_free returns this cache as-is;
+ * heap3_get_largest_free scans the dynamic heap to refresh it.
+ */
 
 typedef struct HeapBlock {
   /* 0x00 */ s32 size;  /* byte length of this block, header included */
@@ -33,8 +46,8 @@ typedef struct HeapBlock {
 
 extern HeapBlock heap_slots[];
 
-/* `state` values. IN_USE is a fixed sentinel, not a boolean: it also guards
- * against freeing a wild or already-freed pointer. */
+/* `state` values. IN_USE marks an allocated block; it is not a boolean and
+ * heap_free/heap3_free do not check it before releasing a block. */
 #define HEAP_BLOCK_HEAD (-1)         /* list-head sentinel */
 #define HEAP_BLOCK_FREE 0            /* a free block */
 #define HEAP_BLOCK_IN_USE 0x12345678 /* an allocated block */
