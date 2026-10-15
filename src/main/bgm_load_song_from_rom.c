@@ -83,6 +83,18 @@ extern s32 D_800C306C;
 extern s32 scenario_state_id[];
 extern s32 D_800C30A8;
 extern s32 D_800C30AC;
+extern void* get_club_param(u32 id);
+extern s32 func_80044A8C(s32 category);
+extern s8 D_800FBDB8;
+extern s8 player_base_scores[];
+extern s32 D_801B71DC[];
+extern s8 rumble_disable_flag;
+extern s32 get_course_hole_primary_flag(s32 course_id, s32 hole_index);
+extern s32 get_course_hole_secondary_flag(s32 course_id, s32 hole_index);
+extern s32 func_8006D1FC(void);
+extern s32 func_8006DF84(void);
+extern void func_8020FFEC(s32 event);
+extern s32 func_8020FFD8(void);
 
 void bgm_load_song_from_rom(u32 rom_addr, s32 size) {
   nuPiReadRom(rom_addr, (void*)g_bgm_song_buffer, size + (size & 1));
@@ -155,7 +167,18 @@ s32 func_8005F248(s32 arg0) {
   return (x << 8) / 30;
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/bgm_load_song_from_rom", func_8005F290);
+s32 func_8005F290(s32 unused, s16* input, u8* output) {
+  s32 i = 0;
+  u8* enabled = output;
+  s16* clubs = input;
+  for (; i < 14;) {
+    *enabled =
+        (*(s32*)((u8*)get_club_param(*clubs++) + 8) & func_80044A8C(1)) != 0;
+    enabled++;
+    i++;
+  }
+  return 14;
+}
 
 s32 func_8005F30C(s32 x, s32 z) {
   s32 height = get_lowest_height_at_position(x, z);
@@ -264,7 +287,47 @@ void func_8005F838(s32 arg0) {
 
 INCLUDE_ASM("asm/nonmatchings/main/bgm_load_song_from_rom", func_8005F964);
 
-INCLUDE_ASM("asm/nonmatchings/main/bgm_load_song_from_rom", func_8005FB58);
+void func_8005FB58(void) {
+  /* Preserve the ROM's eight bytes of local stack space. */
+  s32 unused[2];
+  s32 i;
+  if (D_800FBDB8 == 0) {
+    i = 0;
+    if (active_player_count > 0) {
+      s32 count = active_player_count;
+      do {
+        s32 offset = i * 0xB8;
+        s32 mode;
+        if (player_base_scores[offset] == 0) {
+          break;
+        }
+        mode = *(s32*)((u8*)D_801B71DC + offset);
+        if ((mode != 0x11) & (mode != 0x14)) {
+          break;
+        }
+        i++;
+      } while (i < count);
+    }
+    if (rumble_disable_flag == 0 && i == active_player_count) {
+      if (get_course_hole_primary_flag(scenario_mode_id, round_hole_index) &&
+          func_8006D1FC() != -1) {
+        func_8020FFEC(0xC);
+      }
+      if (get_course_hole_secondary_flag(scenario_mode_id, round_hole_index) &&
+          func_8006D1FC() != -1) {
+        func_8020FFEC(0xD);
+      }
+      if (game_mode == 5 && func_8006DF84()) {
+        func_8020FFEC(0xE);
+      }
+      D_800FBDB8 = 0x3C;
+    }
+  } else {
+    if (func_8020FFD8()) {
+      D_800FBDB8 = -1;
+    }
+  }
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/bgm_load_song_from_rom", func_8005FCB8);
 
@@ -351,8 +414,26 @@ INCLUDE_ASM("asm/nonmatchings/main/bgm_load_song_from_rom", func_800604F4);
 
 INCLUDE_ASM("asm/nonmatchings/main/bgm_load_song_from_rom", func_800605EC);
 
-INCLUDE_ASM("asm/nonmatchings/main/bgm_load_song_from_rom",
-            gen_terrain_detail_texture);
+void gen_terrain_detail_texture(s32 range, s32 minimum) {
+  s32 index = 0;
+  s32 row = 0;
+  s32 column;
+  u8* pixel;
+  do {
+    column = 0;
+    pixel = &g_terrain_detail_texture[index];
+    do {
+      s32 value = rand() % range + minimum;
+      if (value >= 256) {
+        value = 255;
+      }
+      *pixel++ = value;
+      column++;
+      index++;
+    } while (column < 32);
+    row++;
+  } while (row < 32);
+}
 
 void setup_terrain_detail_default(void) {
   if (D_800B67C4 != 0) {
