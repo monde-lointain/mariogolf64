@@ -5033,6 +5033,38 @@ by `/sprint-plan`:
   dedicated DL sprint. Shared type model (CylField*/SceneryTransform/SceneryMtxPair alias structs) is
   in the .c head for the emitters to reuse.
 
+- **(2026-10-15 main animation continuation — four additional functions banked)**
+  `src/main/func_80054900.c`, YAML main at ROM `0x2FD00`. Banked
+  `func_80054900` / `func_80054938` (14/145 instructions) and
+  `func_80054B7C` / `func_80054BC0` (17/152 instructions) as real nested pairs.
+  The historical unprofiled-tail classification below did not establish a wall.
+  - `nonmatchings/func_80054938/base.c`: shared `goto done` keeps the result
+    in its ROM callee-saved register; materialize the table base before computing
+    its row offset to reproduce all arithmetic/registers. The unused nested
+    length helper reproduces the static-chain spill with no stand-in or UB.
+    Host `-ffast-math` is required for its bare square root. Final measurement:
+    `e45b2fd4201c5cc7db187fcbc23b58b5e4e075d66a987543ed1ca81320d7c208`.
+  - `nonmatchings/func_80054BC0/base.c`: declare `values[5]` after the nested
+    appender definition so the captured cursors precede the row array on stack.
+    Final measurement under the host fast-math profile:
+    `8e422339628a6e011bff2a267ef7ffb4d1de123d0e8b3b8e239fa5b36e4ffbc6`.
+    The single rodata carve now spans `0xABAE0..0xABC40`; retain migrated
+    diagnostics in unbanked siblings, define only the otherwise missing constants,
+    and absorb the old four-byte gap with the merged section's natural padding.
+  - Both pairs' isolated and freshly built ranges agree. `tools/verify-rom.sh`
+    passes with SHA-1 `e2c4e7a905b29529b49a1619a401fe699224829b`.
+    A throwaway 32-bit UBSan harness passed 624 checks across these four functions
+    and `func_80029B08`, including all 18 generated rows and append saturation.
+  - **Nine live stubs remain.** `animation_play` is still unbanked:
+    `nonmatchings/animation_play/base.c`, main plus the host fast-math override,
+    measurement `0f2d61cb1e8f0073cdc005f058bbd900d8ca6057526eceed1345f971d34583a8`,
+    score 225, 79/79 instructions after section padding is excluded.
+    Typed state fields plus base-before-offset formation fix the initial track
+    access. Residual is the final part-table root/load placement and associated
+    `$v1/$a0` lifetime; moving that read before the end-frame store enables CSE
+    across the prior region and worsens the result. Next experiment: isolate the
+    end-frame/part-table alias dependency without merging those earlier loads.
+
 - **(S213 MIXED-PARTIAL — carried; 28 of 48 banked)** `src/main/func_80054900.c` (main-segment
   `[0x2FD00]` character-animation pack). Subseg `[0x2FD00, c, main/func_80054900]` flipped; 28 banked
   byte-exact (S211 +20; S212 +5; **S213 +3 via a compiler-source dive**: `lookup_animation_by_id`

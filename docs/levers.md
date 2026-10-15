@@ -51,6 +51,9 @@ still needs its entry test, `if (n != 0)` (S306).
   `expand_decl`, an address-taken scalar only at the first `&x` and after every function-scope
   aggregate, so reserve part in a block opened after it (S296); slot order is ascending pseudo
   number (`reload1.c`).
+  A nested definition also allocates its captured scalars: in `func_80054BC0`,
+  declaring `values[5]` after that definition puts the captured cursors at
+  chain offsets `0x100/0x104` and the row at `0x108`, banking both parent and child.
 - **fp-arg-registers-are-a-signature** -- ROM values in `$f12`/`$f14` where the build has `$f0`/`$f2`
   mean the callee takes FP args the `extern` omits (S286).
 

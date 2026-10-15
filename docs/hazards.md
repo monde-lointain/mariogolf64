@@ -1760,6 +1760,14 @@ the carve's end and the next 8-aligned pool is non-zero, that gap is its own sub
 `main/func_80054900` carved 16 bytes of `gdSPDefLights2` constants at `0xABC2C` with the lone 4-byte
 `D_800D083C` word as the middle subseg and the `0xABC40` `.double` pool after it.
 
+**Merged-carve update (2026-10-15).** Banking `func_80054BC0` extends that same
+host's carve to `0xABAE0..0xABC40`: the switch emits its five-entry jump table,
+unbanked `INCLUDE_ASM` siblings emit their migrated diagnostics, and C supplies
+the remaining named constants. Do not define a sibling's migrated strings a
+second time in C. The merged section now has eight-byte alignment, so its natural
+four-byte zero tail supplies `D_800D083C`; remove the old gap subsegment rather
+than linking it again. The full-ROM verifier passed with the merged layout.
+
 ---
 
 ## Named aggregate local extra block move

@@ -31,18 +31,192 @@ extern f32 D_801B5500;
 extern u8 polychara_buf[];
 extern u8 polychara_state[];
 extern u8 polychara_seg_ptr[];
-extern u8 polychara_alive_msg[];
+extern const u8 polychara_alive_msg[];
 extern u8 polychara_assert_cond[];
 extern u8 polychara_assert_file[];
 extern void __assert(const char* cond, const char* file, s32 line);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80054900", func_80054900);
+extern s32 func_80054550(s32 id, s32 tag, f32* position);
+extern void check_and_print_grid(char* text, s32 column, s32 row);
+extern s32 D_800D04A0[][5];
+extern char D_800D0608[], D_800D0618[], D_800D061C[];
+extern f32 sqrtf(f32 value);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80054900", func_80054938);
+s32 func_80054938(s32 id, s32 mode, s32 direct, s32 variant) {
+  f32 position[3];
+  char line[0x80];
+  u8* cs;
+  s32 column;
+  s32 tag = 3;
+  s32 result;
+  f32 magnitude;
+  s32 selected;
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80054900", func_80054B7C);
+  /* This unused nested helper retains the ROM's static-chain spill. The TU's
+   * fast-math profile emits the bare sqrt.s rather than a NaN fallback call. */
+  f32 func_80054900(f32 x, f32 y, f32 z) {
+    return sqrtf(x * x + y * y + z * z);
+  }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80054900", func_80054BC0);
+  cs = get_character_state(id);
+  column = 0;
+  if (!direct) {
+    selected = func_800544B4(id, mode);
+  } else {
+    selected = mode;
+  }
+  switch (selected) {
+    case 0:
+      result = 0x3600;
+      tag = 3;
+      column = (variant == 2) * 4;
+      break;
+    case 1:
+      result = 0x2400;
+      tag = 4;
+      column = 1;
+      break;
+    case 2:
+      result = 0x2400;
+      tag = 5;
+      column = 2;
+      break;
+    case 3:
+      result = 0x1800;
+      tag = 6;
+      column = 3;
+      break;
+  }
+  if (!flag_is_set(0x36) && cs != NULL) {
+    s32 index = *(s32*)(cs + 8);
+    if (index >= 0) {
+      index %= 36;
+      if (index < 18) {
+        /* Base-before-offset preserves the ROM's arithmetic register lifetimes.
+         */
+        u8* base = (u8*)D_800D04A0;
+        s32 offset = index * 20;
+        s32* row = (s32*)(base + offset);
+        result = row[column];
+        goto done;
+      }
+    }
+  }
+  if (func_80054550(id, tag, position) == 0) {
+    sprintf(line, D_800D0608, position[0], position[1], position[2]);
+    check_and_print_grid(line, 2, 13);
+    magnitude = position[2] * 1228.8f;
+    if (magnitude < 0.0f) {
+      magnitude = -magnitude;
+    }
+    result = magnitude;
+    osSyncPrintf(D_800D0618);
+  } else {
+    osSyncPrintf(D_800D061C);
+  }
+done:
+  return result;
+}
+
+extern void* heap3_alloc(s32 size);
+extern void heap3_free(void* ptr);
+extern void func_80028110(void* data, s32 size);
+extern void load_character_model(s32 id, s32 model, s32 arg2);
+extern void func_800562F4(s32 id, f32 value);
+extern void animation_play(s32 id, s32 animation);
+extern void func_80056264(s32 id);
+extern s32 clear_animation_slot(s32 id);
+extern char D_800D0644[], D_800D06B4[], D_800D06B8[], D_800D06D0[],
+    D_800D06D4[];
+
+void func_80054BC0(void) {
+  char line[0x100];
+  u8* buf_pos;
+  u8* buf_end;
+  u8* buf_start;
+  s32 model;
+  s32 column;
+  s32 animation;
+  s32 kind;
+
+  void func_80054B7C(u8 * s) {
+    for (;;) {
+      u8 c = *s++;
+      if (c == 0) {
+        break;
+      }
+      if (buf_pos < buf_end) {
+        *buf_pos++ = c;
+      }
+    }
+  }
+
+  /* The nested definition allocates its captured pointers before this array. */
+  s32 values[5];
+  buf_start = heap3_alloc(0x8000);
+  buf_pos = buf_start;
+  buf_end = buf_start + 0x8000;
+  if (buf_start == NULL) {
+    __assert(polychara_assert_cond, polychara_assert_file, 0x5F5);
+  }
+  sprintf(line, D_800D0644);
+  func_80054B7C((u8*)line);
+  model = 0;
+  do {
+    load_character_model(0, model, 0);
+    D_800C1DEC = *(s32*)polychara_state;
+    for (column = 0; column < 5; column++) {
+      switch ((u32)column) {
+        case 0:
+          animation = 0;
+          kind = 0;
+          break;
+        case 1:
+          animation = 3;
+          kind = 1;
+          break;
+        case 2:
+          animation = 6;
+          kind = 2;
+          break;
+        case 3:
+          animation = 9;
+          kind = 3;
+          break;
+        case 4:
+          animation = 2;
+          kind = 0;
+          break;
+      }
+      func_800562F4(0, 0.0f);
+      animation_play(0, animation);
+      if (column < 4) {
+        func_80056264(0);
+      }
+      animation_step(0);
+      values[column] = func_80054938(0, kind, 1, 1);
+    }
+    osSyncPrintf(D_800D06B4);
+    sprintf(line, D_800D06B8, values[0], values[1], values[2], values[3],
+            values[4]);
+    osSyncPrintf(line);
+    func_80054B7C((u8*)line);
+    clear_animation_slot(0);
+    model++;
+  } while (model < 18);
+  sprintf(line, D_800D06D0);
+  func_80054B7C((u8*)line);
+  line[0] = 0x1A;
+  line[1] = 0;
+  func_80054B7C((u8*)line);
+  sprintf(line, D_800D06D4);
+  func_80028110(line, buf_pos - buf_start);
+  heap3_free(&buf_start);
+}
+
+/* The four-byte-ended jump table and later constants share one rodata carve;
+ * unbanked siblings retain their own generated diagnostic strings. */
+const char D_800D06F4[0x18] = "TA %d : FRAME %d    ";
 
 void func_80054E20(void) {
   if (flag_is_set(0x36)) {
@@ -641,6 +815,8 @@ s32 func_80056520(s32 id) {
 }
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80054900", animation_step);
+const u32 D_800D07E8 = 0x3FF00000;
+const u32 D_800D07EC = 0;
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80054900", func_800568CC);
 
@@ -654,6 +830,8 @@ void animation_tick_all_players(void) {
 }
 
 s32 func_800577D0(void) { return 0x23680; }
+const u8 polychara_alive_msg[0x34] =
+    "Polychara %d still alive. You can't change buffer.\n";
 
 void func_800577DC(s32 index, void* arg1) {
   u32 aligned = ((u32)arg1 + 0xFFF) & 0xFFFFF000;
