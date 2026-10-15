@@ -328,38 +328,27 @@ extern s32 camera_position_y;
 extern s32 D_800BE63C;
 extern s32 D_800BE664;
 
-/* func_8004683C: CARRIED at 23/23 EXACT (S260). Body below is byte-exact apart
- * from ONE register decision -- ROM {ret=v0, scratch=v1/a0}, build
- * {ret=a2, scratch=v1/v0}, which also costs ROM's `nop` in the third guard's
- * delay slot (a2 lets the build sink the D_800BE664 lui there):
- *
- *   s32 ret = 0; s32 bound;
- *   if (arg0 < 0x1E00) {
- *     bound = camera_position_y - 0x1A400;
- *     if (bound < arg1) {
- *       bound = 0x4AFFF;
- *       ret = bound >= D_800BE63C && (D_800BE664 & 2) != 0;
- *     }
- *   }
- *   return ret;
- *
- * Two S259/S260 levers already applied: the trailing `(x & 2) != 0` must be the
- * last term of an && CHAIN (a standalone store-flag takes do_store_flag's
- * pow2 path -> srl+andi, where the ROM has andi+sltu), and `bound` is REUSED
- * for the 0x4AFFF limit so the anti-dependency emits the `li` BEFORE the
- * D_800BE63C load (matching the ROM's delay-slot lui).
- *
- * Residual root-caused (S260): `ret` spans basic blocks, so it is a GLOBAL
- * allocno while every guard temp is a single-block LOCAL one. local-alloc runs
- * first, and MIPS defines no REG_ALLOC_ORDER, so find_free_reg
- * (local-alloc.c:2156) scans regno-ascending and hands $2 to the first temp.
- * global.c then masks the return copy's own preference for $2
- * (AND_COMPL_HARD_REG_SET (hard_reg_preferences[allocno], used), global.c:1037)
- * and `ret` lands on the first register above the live-in argument regs, a2.
- * Bisect: the same && chain with only TWO terms DOES keep the return value in
- * v0, so the ROM's build had fewer competing local quantities here, not a
- * different lever. Permuter: 934k iterations, base 170, best 150, no crack. */
-INCLUDE_ASM("asm/nonmatchings/main/func_800453E0", func_8004683C);
+s32 func_8004683C(s32 arg0, s32 arg1) {
+  s32 result = 0;
+  s32 bound;
+  if (arg0 < 0x1E00) {
+    bound = camera_position_y;
+    arg0 = -0x1A400;
+    bound += arg0;
+    bound = bound < arg1;
+    if (bound) {
+      bound = 0x4AFFF;
+      arg0 = D_800BE63C;
+      bound = bound < arg0;
+      result = !bound && (D_800BE664 & 2) != 0;
+    }
+  }
+  /* Keep both scratch variables live past the join so CSE uses them for the
+   * guard comparisons. Later passes eliminate this return-copy chain. */
+  arg0 = result;
+  bound = arg0;
+  return bound;
+}
 
 extern s32* D_800DAF4C;
 extern s32 D_800BE640;

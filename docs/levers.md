@@ -35,6 +35,14 @@ still needs its entry test, `if (n != 0)` (S306).
   the ROM passes a parameter on to a call (S314). **Equal `refs` and `live_length` ends this family:
   birth order decides, so the lever is emission order** (S313). Playbook and `.greg` method:
   `#loop-weight-and-live-length-regalloc-steering`.
+- **post-join-cse-canonical-lifetime** -- CSE chooses a pseudo as a quantity's canonical register
+  when its lifetime extends outside the current CSE block (`cse.c:830-857`); a following copy can
+  then retarget the preceding producer (`cse.c:7440-7476`). A real post-join return-copy chain
+  through scratch variables can keep their comparison results on global pseudos before later
+  passes remove the copies. This removes local-before-global hard-register conflicts that
+  priority weights cannot override. Verify `.cse`, `.lreg`, and `.greg`, not just the final score:
+  [func_8004683C](wip/func_8004683C.near-match.md#resolution-post-join-cse-lifetimes) banked this way,
+  preserving `$v0` for the result without extra instructions.
 - **aggregate-copy-scratch-clobbers** -- a struct/array copy is one `movstrsi_internal` whose four
   `match_scratch` temps take the lowest free `d` registers there, so anything live across it
   conflicts with all four; its `la` temp names the set's top (S313).
