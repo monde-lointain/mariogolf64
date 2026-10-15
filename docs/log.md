@@ -2,6 +2,26 @@
 
 ## 2026-10-15
 
+- **Five main-segment decompilation banks**: Banked `func_80054900`,
+  `func_80054938`, `func_80054B7C`, `func_80054BC0`, and `func_80029B08`
+  (348 instructions, 1,392 bytes). The two animation pairs use real GCC nested
+  definitions, including the unused length helper's static-chain spill.
+  Captured-pointer allocation before the row-array declaration fixes the debug
+  dump's frame; base-before-offset formation and a shared return fix the distance
+  selector. The diagnostic delay loop needs an equality-counted bound.
+  - Extended the animation host's single rodata carve to `0xABAE0..0xABC40`;
+    unbanked siblings retain generated diagnostic strings, while source owns
+    remaining constants. Natural eight-byte section padding replaces the former
+    four-byte gap subsegment. Added the ROM-required `-ffast-math` host override.
+  - Isolated comparisons and freshly built function ranges agree. The full-ROM
+    verifier passes with SHA-1 `e2c4e7a905b29529b49a1619a401fe699224829b`.
+    A throwaway 32-bit UBSan harness passed 624 checks covering numerical and
+    selection paths, bounded appends, all 18 generated table rows, and the
+    diagnostic loop's first output. No emulator run was performed.
+  - `animation_play` remains isolated at 79/79 instructions, score 225, with a
+    part-table load-order/register residual. Nine animation-host stubs and six
+    vector-host stubs remain. Overlay source and symbol files are unchanged.
+
 - **Main guard-wrapper decompilation**: Banked `func_800564F0` and `func_80055738`
   in `src/main/func_80054900.c` (128 bytes total). Non-void fall-through
   declarations preserve the empty null-guard delay slots without extra return

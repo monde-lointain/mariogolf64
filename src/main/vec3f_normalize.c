@@ -44,7 +44,16 @@ void flag_clear_all(void) {
   }
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/vec3f_normalize", func_80029B08);
+extern char D_800CA1B8[];
+
+void func_80029B08(void) {
+  s32 count;
+  for (;;) {
+    for (count = 0; count != 100000000; count++) {
+    }
+    osSyncPrintf(D_800CA1B8, 100000000);
+  }
+}
 
 extern s32 func_800577D0(void);
 extern void func_800577DC(s32 index, void* arg1);

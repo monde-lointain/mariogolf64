@@ -4802,7 +4802,7 @@ by `/sprint-plan`:
   — S289 `func_80096C04`), and the TU's `-ffast-math` override in `mk/main.mk` (S289), which applies
   to anything added to the file and under which all 15 banked functions are verified invariant.
 
-- **(S271 pack, refreshed 2026-10-15 — 11 of 18 banked; 7 live stubs)**
+- **(S271 pack, refreshed 2026-10-15 — 12 of 18 banked; 6 live stubs)**
   `src/main/vec3f_normalize.c` remains in YAML main at ROM `0x4D00`.
   S271 banked the six bit-flag/cfb functions; subsequent source also contains
   `func_80029B58`, `pause_audio`, and `func_80029EEC`.
@@ -4826,7 +4826,16 @@ by `/sprint-plan`:
   and the parent matched all 118 instructions/relocation destinations after section-placement
   normalization. `tools/verify-rom.sh` passed with SHA-1
   `e2c4e7a905b29529b49a1619a401fe699224829b`. No YAML, symbol, or overlay changes.
-  **Remaining:** `vec3f_normalize`, `func_80029B08`, `func_80029C00`, `mainproc`,
+  **Additional bank 2026-10-15:** `func_80029B08`, the endless diagnostic thread
+  with an empty 100,000,000-count inner loop. `count != 100000000` reproduces
+  the ROM's equality branch and delay-slot increment; `<` emits an extra signed
+  comparison and changes the held bound. Candidate `nonmatchings/func_80029B08/base.c`,
+  profile `main`, score 0, measurement
+  `20b5bcd53279540425c4065602800a1b08c35415ebca15fc2c28f0b58ef71584`.
+  Fresh host range matches all 20 instructions after relocation interpretation;
+  full-ROM verifier passes. The 32-bit UBSan smoke reaches the first print with
+  the ROM format and count.
+  **Remaining:** `vec3f_normalize`, `func_80029C00`, `mainproc`,
   `func_8002A144`, `func_8002A310`, and `game_draw_callback`.
   For `mainproc` (=nuboot), consider the `libnusys/` path qualifier per the
   nusys-template convention when attempted. The mixed FP/DL/nusys pack remains open;
