@@ -186,8 +186,49 @@ void func_80029F6C(NUContData* input, s32 unused, s32 index) {
   *(s16*)((u8*)D_800FF518 + index * 6) = repeat;
 }
 
+typedef struct {
+  u16 buttons;
+  u16 held;
+  u16 pressed;
+  u16 previous;
+  u16 repeated;
+  u16 repeat_count;
+  s8 stick_x;
+  s8 stick_y;
+} ControllerState;
+
+extern u8 D_801052B8;
+extern NUContData debug_menu_pad_buttons_a[];
+extern NUContData D_800FEDA8[];
+extern NUContData D_801060E0[];
+extern ControllerState D_800FBDC0[];
+extern void func_8002A144(NUContData* input, ControllerState* state);
+
 INCLUDE_ASM("asm/nonmatchings/main/vec3f_normalize", func_8002A144);
 
-INCLUDE_ASM("asm/nonmatchings/main/vec3f_normalize", func_8002A310);
+void func_8002A310(void) {
+  s32 count = 0;
+  s32 port = 0;
+  ControllerState* state = D_800FBDC0;
+  NUContData* previous = D_801060E0;
+  NUContData* processed = D_800FED18;
+  NUContData* raw_previous = D_800FEDA8;
+  NUContData* raw = debug_menu_pad_buttons_a;
+  for (; port < 4; port++) {
+    if ((D_801052B8 >> port) & 1) {
+      *raw_previous = *raw;
+      *previous = *processed;
+      nuContDataGetEx(raw, port);
+      func_80029F6C(raw, (s32)previous, count);
+      func_8002A144(raw, state);
+      state++;
+      previous++;
+      processed++;
+      raw_previous++;
+      raw++;
+      count++;
+    }
+  }
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/vec3f_normalize", game_draw_callback);
