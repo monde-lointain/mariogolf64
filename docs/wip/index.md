@@ -81,6 +81,7 @@
 - [func_800842C0 — chain-USED GCC nested function (glistp via static chain in $v0)](func_800842C0.near-match.md) — Records reconstruction evidence and matching constraints for func_800842C0.
 - [func_80087CB0 near-match (S257, deepened S258) — aim-cursor sprite DL emitter](func_80087CB0.near-match.md) — Records reconstruction evidence and matching constraints for func_80087CB0.
 - [func_80088A90 near-match (S254 carry, re-cracked S258)](func_80088A90.near-match.md) — Records reconstruction evidence and matching constraints for func_80088A90.
+- [func_80089094 — open HUD renderer reconstruction](func_80089094.near-match.md) — Isolated main-bank candidate, verified F3DEX2 packet regions, and the remaining structural residual.
 - [func_8008DDDC (0x388/904B) — near-match carry (S249)](func_8008DDDC.near-match.md) — Records reconstruction evidence and matching constraints for func_8008DDDC.
 - [func_8008E164 (lerp_s32) is a GCC nested function (S248 finding)](func_8008E164.nested.md) — Records reconstruction evidence and matching constraints for func_8008E164.
 - [func_8009232C -- near-match carry (S302)](func_8009232C.near-match.md) — Records reconstruction evidence and matching constraints for func_8009232C.
