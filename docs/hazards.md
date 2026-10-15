@@ -7773,26 +7773,26 @@ not a branch-likely annul, and it fires even when neither arm is a bare sentinel
 `func_80042DF4` and `get_direct_grid_vertex` on this; the guard-clause form was 1 insn short and
 inverted. Kin to the S214 statement-order/delay-slot levers.
 
-**Reconfirm — a const-value select `(x==K) ? 1 : 0` is branchless and source-invariant; it does not
-inherit the p?field:sentinel fix (S231, 3 walls).** Distinguish the two: the fixable case (above) selects
-a pointer-dereferenced field vs a sentinel (`p->field` vs sent) — the two definitions live in separate
-BBs, so the single-return-temp form defeats the annul. But a select between two compile-time constants
-(`return (D_x == 9) ? 0x84 : 0;` / `if(D_x!=9) return 0; return 1;`) always if-converts to branchless
-`xori/sltiu` (or `sltiu/negu/andi`), regardless of `==`/`!=` polarity, early-return, `&&`, or
-single-return-temp — GCC computes `(x==K)*CONST` because both arms are cheap immediates with no
-side-effect anchor. When the ROM branches on such a select (`li v0,K; bne x,v0,exit; move v0,zero;
-li v0,CONST`) it is a genuine wall: **the whole enclosing structure can match** (S231 `func_80060190`'s
-4-case switch tree and `func_800604F4`'s mode==5 search-loop + call chain both matched byte-exact) with
-only the const-select case body diverging. The const-select carries remain unbanked;
-the permuter does not flip if-conversion (it permutes registers/scheduling, not branch-vs-arithmetic).
+**Historical const-select diagnosis (S231), superseded by shared-return CFGs.**
+An isolated `(x == K) ? CONST : 0` or a two-arm local result can if-convert to
+`xori/sltiu` or `sltiu/negu/andi`; reversing the predicate or wrapping its
+assignment does not necessarily change the jump pass's assignment/join gate.
+This was not a source-impossibility proof for `func_80060190` or
+`func_800604F4`: both banked on 2026-10-15 under their unchanged host profile.
+The former routes a failing mode comparison and the switch default to one
+out-of-line zero assignment, with a separate loaded-mode local; the latter
+shares the positive return between the match-play character check and the
+roster scan. Both keep the ROM's constant-select branches. In the roster scan,
+forming `entry = &ranked_roster_ids[i]` inside the loop also places its hoisted
+base after the loop constants. No permuter or assembly barrier was needed.
 
 **The positive clamp is source-reachable (2026-10-15).** `func_8005F30C` banked with
 `do { positive = limit > 0; } while (0); height = limit & -positive;`.
 Separating the predicate from the mask preserves `slt/negu/and` under the unchanged main
 profile instead of the `nor/sra/and` produced by the ordinary `(x > 0) ? x : 0`.
-Its isolated score is zero and the full-ROM verifier passed. This does not solve the
-`func_80060190` constant-select diamond: guarded-block variants still score 915 there,
-with the conversion visible between the retained RTL and jump dumps.
+Its isolated score is zero and the full-ROM verifier passed. The selector
+diamonds require the distinct shared-return CFG described above, not this
+positive-mask spelling.
 
 **Extends to a single-bit / sign deciding term — `(x & bit) ? 1 : 0` folds to `lhu;srl` (S239 wall,
 `func_8006C8CC`).** A predicate whose terminal condition returns bool off a single-bit mask or a sign

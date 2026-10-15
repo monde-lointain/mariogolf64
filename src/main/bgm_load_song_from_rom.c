@@ -443,7 +443,63 @@ void func_80060434(void) {
   }
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/bgm_load_song_from_rom", func_800604F4);
+typedef struct {
+  s8 id;
+  u8 unknown_01[4];
+  u8 rank;
+} RankedRosterEntry;
+
+extern RankedRosterEntry ranked_roster_ids[];
+extern s32 roster_random_seed;
+extern s32 get_handicap_match_play_result(s32 player_a, s32 player_b);
+extern s32 get_round_first_hole(void);
+extern s32 get_round_hole_count(void);
+extern s32 func_8006CD50(s32 hole_limit, s32 player);
+extern u8 roster_sort_and_rank(s32 initial_hole, s32 hole_adjustment,
+                               s32 initial_score, s32 random_seed);
+
+s32 func_800604F4(void) {
+  s32 mode = game_mode;
+  s32 first_hole;
+  s32 i;
+  RankedRosterEntry* entry;
+
+  /* Both successful paths share this return; a terminal constant select would
+   * otherwise collapse the match-play character check into arithmetic. */
+  if (mode == 4) {
+    if (get_handicap_match_play_result(0, 1) != 1) {
+      goto no;
+    }
+    if (player_records[1].character_index != 12) {
+      goto no;
+    }
+    goto yes;
+  }
+  if (mode != 5) {
+    goto no;
+  }
+  if ((u32)(scenario_mode_id - 4) >= 2) {
+    goto no;
+  }
+  first_hole = get_round_first_hole();
+  roster_sort_and_rank(18, 0,
+                       func_8006CD50(first_hole + get_round_hole_count(), 0),
+                       roster_random_seed);
+  i = 0;
+  do {
+    entry = &ranked_roster_ids[i];
+    if (entry->id == -1) {
+      if ((entry->rank & 0x7F) == 1) {
+        goto yes;
+      }
+    }
+    i++;
+  } while (i != 30);
+no:
+  return 0;
+yes:
+  return 1;
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/bgm_load_song_from_rom", func_800605EC);
 
