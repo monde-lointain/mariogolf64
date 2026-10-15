@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
 """Generate `nonmatchings/<func>/base.c` for the execution loop.
 
-The seed is a combined m2c-body + Ghidra-typed-context seed: m2c translates the
-asm into the compiled body, typed by a Ghidra-MCP struct context, and the Ghidra
-decompile drops to a shape/type reference. See
-docs/hazards.md#decompile-vs-asm-authority.
+Assembly supplies the m2c body; optional parent/Ghidra context supplies type
+hypotheses. Ghidra pseudocode is a fallback hypothesis, not source authority.
+See docs/workflow/loop.md#execution-loop-inline.
 
 Pipeline:
   1. (--parent) m2ctx.py <parent.c> -> ctx.c          (parent type context)
@@ -18,7 +17,7 @@ Pipeline:
 Use --ghidra to export fresh bank-aware context before seeding. Without it,
 existing ghidra.c and ghidra_ctx.c remain usable offline. Reference assembly and
 pseudocode stay in their own artifacts, not duplicated inside the editable seed.
-When m2c fails, base.c falls back to the sanitized Ghidra body, else a TODO stub.
+If neither translator supplies a usable body, retain diagnostics and fail without writing base.c.
 
 Stdout: one JSON object describing what was produced.
 Stderr: human-readable progress.
@@ -567,12 +566,6 @@ def stitch_base_c(spec: BaseCSpec) -> Path:
     lines.append("// Edit freely; this is a seed, not the final answer.")
     lines.append("")
     lines.append("#include <ultra64.h>")
-    lines.append(
-        "// DLIST_HINT: if this function builds/walks Gfx*, add `#include <PR/gbi.h>`"
-    )
-    lines.append(
-        "//             and run gfxdis on any static dlists in target.rodata.s."
-    )
     lines.append("")
 
     if missing_rodata:
@@ -625,13 +618,10 @@ def stitch_base_c(spec: BaseCSpec) -> Path:
         )
         lines.append(sanitize_ghidra_body(safe_read_text(ghidra_path), placeholder).rstrip())
     else:
-        lines.append(
-            f"// TODO: no m2c seed and no trustworthy decompile for {placeholder} —"
+        fail(
+            f"no recovered body for {placeholder}; inspect {out_dir / 'm2c.c'} "
+            f"and {out_dir / 'target.s'}; base.c was not written"
         )
-        lines.append("// translate from target.s.")
-        lines.append(f"void {placeholder}(void) {{")
-        lines.append("    /* unimplemented */")
-        lines.append("}")
     lines.append("")
 
     out_path = out_dir / "base.c"
@@ -785,13 +775,7 @@ def main() -> None:
         )
     )
 
-    # Which artifact the emitted body came from (mirrors stitch_base_c's chain).
-    if m2c_ok:
-        body_source = "m2c"
-    elif ghidra_present and not ghidra_degenerate:
-        body_source = "ghidra"
-    else:
-        body_source = "stub"
+    body_source = "m2c" if m2c_ok else "ghidra"
     log(f"[seed] {base_path.relative_to(ROOT_DIR)} written (body: {body_source})")
 
     emit(

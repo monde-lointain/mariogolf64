@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
+import pytest
 from conftest import load_tool
 
 seed = load_tool("seed_c")
@@ -17,6 +19,45 @@ def test_m2c_context_failure_preserves_source_diagnostic(tmp_path):
     output = tmp_path / "m2c.c"
     assert seed.run_m2c(target, [context], None, output) is False
     assert "this is invalid;" in output.read_text()
+
+
+@pytest.mark.parametrize("existing_candidate", [False, True])
+@pytest.mark.parametrize("degenerate_ghidra", [False, True])
+def test_failed_recovery_never_writes_an_empty_candidate(
+    tmp_path, capsys, existing_candidate, degenerate_ghidra
+):
+    candidate = tmp_path / "base.c"
+    original = "int candidate(int value) { return value + 7; }\n"
+    if existing_candidate:
+        candidate.write_text(original)
+    diagnostic = tmp_path / "m2c.c"
+    diagnostic.write_text("Cannot find branch target .Lmissing\n")
+    ghidra = tmp_path / "ghidra.c"
+    if degenerate_ghidra:
+        ghidra.write_text("int candidate(void) { return 0; }\n")
+
+    with pytest.raises(SystemExit) as error:
+        seed.stitch_base_c(
+            seed.BaseCSpec(
+                out_dir=tmp_path,
+                placeholder="candidate",
+                externs=[],
+                sibling_asm_names=[],
+                auto_externs=[],
+                m2c_path=diagnostic,
+                ghidra_path=ghidra,
+                missing_rodata=[],
+                ghidra_degenerate=degenerate_ghidra,
+            )
+        )
+
+    assert error.value.code == 1
+    assert json.loads(capsys.readouterr().out)["ok"] is False
+    if existing_candidate:
+        assert candidate.read_text() == original
+    else:
+        assert not candidate.exists()
+    assert diagnostic.read_text() == "Cannot find branch target .Lmissing\n"
 
 
 # --- is_degenerate_ghidra_body -------------------------------------------
