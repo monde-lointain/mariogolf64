@@ -12,14 +12,16 @@ description: "Records the S260 goto-loop reconstruction's exact instruction coun
 `CharacterState`, `KeyframeTrack`, and `KfEntry` layouts. It scores **5**,
 54 instructions, with the same `fff2` versus retail `fff1` branch target.
 The current source/measurement pair is
-`nonmatchings/collect_keyframe_events_at/measurements/a84128b53364e978e07fca159c3bba5dc4e52e1c8cd59c580765cfec4529ef02.{c,json}`.
+`nonmatchings/collect_keyframe_events_at/measurements/b772458871e9d6a946bb31d98fd18b142b95b225f762cc3ec59df0c097a6e689.{c,json}`.
 Wrapping the top load in `do { } while (0)`, with or without an empty `if (1)`
 block before it, produces the identical object. Those ineffective scopes were
 removed. Object SHA-256:
 `283342b2cc3218b1d68dba7501ff470df190cc7efb833cdf88567bdabb1c5162`.
-The next experiment still needs to prevent reload skipping without changing
-the two annulled advance slots; no source-impossibility claim follows from
-these two failed boundary experiments.
+A one-shot scope around the bottom sentinel load, an unused `&&loop`
+expression, and an inverted sentinel exit were also byte-identical (score 5);
+the retained source removes those ineffective variations. The next experiment
+still needs to prevent reload skipping without changing the two annulled
+advance slots; these failed forms do not prove source impossibility.
 
 `src/main/func_80054900.c`. The S213 verdict (`#base-register-vs-displacement` +
 `#indexed-vs-pointer-loop-strength-reduction`: "loop.c strength_reduce builds a 2nd giv for the
