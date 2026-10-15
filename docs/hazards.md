@@ -4915,6 +4915,15 @@ name the pass), but must report it as a terminal characterization, not a bank ca
 `func_80098C6C` was byte-exact 13/13 only with two such barriers and was carried as pure C (terminal).
 Re-ask the PO if a future match hinges on one; do not bank it silently.
 
+**Pure-C boundary counterexample (2026-10-15):** `func_80059BA0` banked by putting
+only the mask initialization inside three `do { ... } while (0)` scopes, after
+the float-to-bits transfer. Loop notes restore instruction order; selective
+weighting restores mask/bits allocation. No asm barrier or profile change is
+needed. The same zero-initialization boundary restores all 13 instructions and
+retail ordering in `func_80098C6C`; it remains unbanked at score 10 because its
+abs input/output coalesce. Do not transfer the historical one-instruction
+deficit or a scheduler-impossibility assertion to that newer measured source.
+
 **Step 0 — re-derive the residual from a fresh build before trusting a carry doc (S282/S268).** A
 carried-wall doc's stated count and residual class are both hypotheses. Run
 `uv run --locked python tools/decomp_loop.py --func <fn>` to retain a fresh source/measurement
