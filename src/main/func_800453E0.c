@@ -653,7 +653,34 @@ INCLUDE_ASM("asm/nonmatchings/main/func_800453E0", func_8004B474);
 
 void func_8004C510(s32 arg0) { D_800BE68C = arg0; }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_800453E0", func_8004C51C);
+extern f32 D_801B54F8;
+extern f32 view_camera_eye_x;
+extern f32 D_801B5500;
+extern f32 view_camera_eye_z;
+extern f64 D_800CCA80;
+extern f64 D_800CCA88;
+
+void func_8004C51C(s32* base, s32* first, s32* second) {
+  f32 dx = D_801B54F8 - view_camera_eye_x;
+  f32 dz = D_801B5500 - view_camera_eye_z;
+  f32 angle;
+  f32 angle_plus;
+  f32 angle_minus;
+  f64 half_pi;
+  if ((s32)dx != 0 || (s32)dz != 0) {
+    angle = (f32)(D_800CCA80 - (f64)atan2f(dx, dz));
+  } else {
+    angle = 0.0f;
+  }
+  /* Cache the shared pool value across the trig calls and output stores. */
+  half_pi = D_800CCA88;
+  angle_plus = (f32)((f64)angle + half_pi);
+  first[0] = (s32)(-sinf(angle_plus) * 153600.0f) + base[0];
+  first[2] = (s32)(cosf(angle_plus) * 153600.0f) + base[2];
+  angle_minus = (f32)((f64)angle - half_pi);
+  second[0] = (s32)(-sinf(angle_minus) * 153600.0f) + base[0];
+  second[2] = (s32)(cosf(angle_minus) * 153600.0f) + base[2];
+}
 
 void func_8004C6A8(void) {}
 
