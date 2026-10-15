@@ -1,4 +1,4 @@
-#include "common.h"
+#include "terrain.h"
 
 extern s32 D_800BE62C;
 extern u8 D_800BE6D8;
@@ -20,24 +20,6 @@ extern s32 D_800DAEF8;
 extern s32 D_800DAF00;
 extern s32 D_80132CF0;
 extern s32 D_80250AEC;
-
-/* Terrain attribute lookup table entry (mirrors src/main/get_table_entry.c). */
-typedef struct {
-  /* 0x00 */ u32 id;
-  /* 0x04 */ char* name_ptr;
-  /* 0x08 */ u8 traction_drag;
-  /* 0x09 */ u8 traction_grip;
-  /* 0x0A */ u8 slope_roughness;
-  /* 0x0B */ u8 pad_0b;
-  /* 0x0C */ s16 bounce_a;
-  /* 0x0E */ s16 bounce_b;
-  /* 0x10 */ u32 param;
-  /* 0x14 */ u8 flag_a;
-  /* 0x15 */ u8 flag_b;
-  /* 0x16 */ u8 flag_c;
-  /* 0x17 */ u8 penalty_class;
-  /* 0x18 */ u32 sound_id;
-} TerrainAttrEntry;
 
 /* Lie probe record: the ball's world position plus the terrain index and the
  * mirror flag the slope samplers below use. func_80045A9C reads the same
@@ -181,7 +163,9 @@ s16 calc_slope_uphill_pitch(SlopeProbe* p, u16* heading) {
   return (s16)(atan2((f64)(front - back), 9216.0) * 10430.37806021874);
 }
 
-void* func_80045A9C(s32* arg0) { return func_80040E3C(arg0[4], arg0[6]); }
+void* func_80045A9C(SlopeProbe* probe) {
+  return func_80040E3C(probe->x, probe->z);
+}
 
 s32 func_80045AC0(void) { return D_800BE62C == 4; }
 

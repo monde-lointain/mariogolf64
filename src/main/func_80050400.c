@@ -1,15 +1,5 @@
 #include "common.h"
-
-typedef struct {
-  /* ROM address consumed by the next read. */
-  u32 read_address;
-  /* Stored ROM asset size, including its header. */
-  u32 size;
-  /* Initial address in a directory slot; mode byte in the header slot. */
-  u32 metadata;
-  /* Exclusive end of the ROM data range. */
-  u32 end_address;
-} RomLoadSlot; /* 0x10 */
+#include "rom_asset.h"
 
 extern RomLoadSlot rom_load_slots[2];
 
@@ -44,9 +34,9 @@ void initialize_rom_load_slot(s32 asset_index, RomLoadSlot* slot) {
   nuPiReadRom((u32)(rom_asset_directory + directory_offset), aligned_size, 4);
   nuPiReadRom((u32)(rom_asset_directory + directory_offset + 4), aligned_offset,
               4);
-  slot->metadata = (u32)(rom_asset_directory + *(u32*)aligned_offset);
-  slot->read_address = slot->metadata;
-  slot->end_address = slot->metadata + *(u32*)aligned_size;
+  slot->start_address = (u32)(rom_asset_directory + *(u32*)aligned_offset);
+  slot->read_address = slot->start_address;
+  slot->end_address = slot->start_address + *(u32*)aligned_size;
   asset_size = *(u32*)aligned_size;
   current_rom_asset_index = asset_index;
   slot->size = asset_size;
@@ -78,7 +68,7 @@ RomLoadSlot* acquire_rom_load_slot(s32 asset_index) {
 
 void release_rom_load_slot(RomLoadSlot* slot) {
   slot->end_address = 0;
-  slot->metadata = 0;
+  slot->start_address = 0;
   slot->read_address = 0;
 }
 

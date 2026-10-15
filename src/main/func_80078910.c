@@ -1,30 +1,28 @@
 #include "common.h"
+#include "animation.h"
+#include "rom_asset.h"
+#include "terrain.h"
 
 typedef struct {
-  f32 unk_00;
-  f32 unk_04;
-  f32 unk_08;
-  s32 unk_0C;
-  f32 unk_10;
-  s32 unk_14;
-  u8 pad_18[0x10];
-  f32 unk_28;
-  f32 unk_2C;
-  f32 unk_30;
-  f32 unk_34;
-  s16 unk_38;
-  s8 unk_3A;
-  s8 unk_3B;
-  s8 unk_3C;
-  u8 pad_3D[0x3];
+  Vec3f position; /* 0x00 */
+  Vec3f velocity; /* 0x0C */
+  u8 reserved_18[0x10];
+  f32 opacity;
+  f32 opacity_step;
+  f32 size;
+  f32 size_step;
+  s16 unknown_38;
+  s8 effect_kind; /* -1 marks an unused slot */
+  s8 unknown_3B;
+  s8 matrix_index;
+  u8 reserved_3D[0x3];
 } Particle; /* size 0x40 */
 
 extern Particle particle_array[40];
 
-extern u32 get_rom_asset_allocation_size(u16 index, void* out);
 extern void* heap3_alloc(u32 need);
 extern void heap3_free(void** payload_ptr);
-extern void load_rom_asset_payload(void* arg0, void* arg1);
+
 extern s32 D_800C53B8;
 extern void* D_800E1DBC;
 extern void* D_800E1DB4;
@@ -68,70 +66,65 @@ void func_80078910(void) {
 }
 
 void func_800789C8(void) {
-  u8 spvar[0x20];
+  RomAssetLoad spvar;
 
   func_80078910();
   if (D_800C53B8 == 0) {
     D_800C53B8 = 1;
-    D_800E1DBC = heap3_alloc(get_rom_asset_allocation_size(0x6B5, spvar));
-    load_rom_asset_payload(D_800E1DBC, spvar);
-    D_800E1DB4 = heap3_alloc(get_rom_asset_allocation_size(0x6B5, spvar));
-    load_rom_asset_payload(D_800E1DB4, spvar);
-    D_800E1DB8 = heap3_alloc(get_rom_asset_allocation_size(0x6B8, spvar));
-    load_rom_asset_payload(D_800E1DB8, spvar);
-    D_800E1DA0 = heap3_alloc(get_rom_asset_allocation_size(0x6B0, spvar));
-    load_rom_asset_payload(D_800E1DA0, spvar);
-    D_800E1DA4 = heap3_alloc(get_rom_asset_allocation_size(0x8EC, spvar));
-    load_rom_asset_payload(D_800E1DA4, spvar);
-    D_800E1DA8 = heap3_alloc(get_rom_asset_allocation_size(0x6B2, spvar));
-    load_rom_asset_payload(D_800E1DA8, spvar);
-    D_800E1DAC = heap3_alloc(get_rom_asset_allocation_size(0x6C0, spvar));
-    load_rom_asset_payload(D_800E1DAC, spvar);
-    D_800E1DB0 = heap3_alloc(get_rom_asset_allocation_size(0x6C1, spvar));
-    load_rom_asset_payload(D_800E1DB0, spvar);
-    D_800E1DC0 = heap3_alloc(get_rom_asset_allocation_size(0x71D, spvar));
-    load_rom_asset_payload(D_800E1DC0, spvar);
-    D_800E1DC4 = heap3_alloc(get_rom_asset_allocation_size(0x6C2, spvar));
-    load_rom_asset_payload(D_800E1DC4, spvar);
-    D_800E1DC8 = heap3_alloc(get_rom_asset_allocation_size(0x69E, spvar));
-    load_rom_asset_payload(D_800E1DC8, spvar);
-    D_800E1DCC = heap3_alloc(get_rom_asset_allocation_size(0x93B, spvar));
-    load_rom_asset_payload(D_800E1DCC, spvar);
+    D_800E1DBC = heap3_alloc(get_rom_asset_allocation_size(0x6B5, &spvar));
+    load_rom_asset_payload(D_800E1DBC, &spvar);
+    D_800E1DB4 = heap3_alloc(get_rom_asset_allocation_size(0x6B5, &spvar));
+    load_rom_asset_payload(D_800E1DB4, &spvar);
+    D_800E1DB8 = heap3_alloc(get_rom_asset_allocation_size(0x6B8, &spvar));
+    load_rom_asset_payload(D_800E1DB8, &spvar);
+    D_800E1DA0 = heap3_alloc(get_rom_asset_allocation_size(0x6B0, &spvar));
+    load_rom_asset_payload(D_800E1DA0, &spvar);
+    D_800E1DA4 = heap3_alloc(get_rom_asset_allocation_size(0x8EC, &spvar));
+    load_rom_asset_payload(D_800E1DA4, &spvar);
+    D_800E1DA8 = heap3_alloc(get_rom_asset_allocation_size(0x6B2, &spvar));
+    load_rom_asset_payload(D_800E1DA8, &spvar);
+    D_800E1DAC = heap3_alloc(get_rom_asset_allocation_size(0x6C0, &spvar));
+    load_rom_asset_payload(D_800E1DAC, &spvar);
+    D_800E1DB0 = heap3_alloc(get_rom_asset_allocation_size(0x6C1, &spvar));
+    load_rom_asset_payload(D_800E1DB0, &spvar);
+    D_800E1DC0 = heap3_alloc(get_rom_asset_allocation_size(0x71D, &spvar));
+    load_rom_asset_payload(D_800E1DC0, &spvar);
+    D_800E1DC4 = heap3_alloc(get_rom_asset_allocation_size(0x6C2, &spvar));
+    load_rom_asset_payload(D_800E1DC4, &spvar);
+    D_800E1DC8 = heap3_alloc(get_rom_asset_allocation_size(0x69E, &spvar));
+    load_rom_asset_payload(D_800E1DC8, &spvar);
+    D_800E1DCC = heap3_alloc(get_rom_asset_allocation_size(0x93B, &spvar));
+    load_rom_asset_payload(D_800E1DCC, &spvar);
   }
 }
-
-typedef struct {
-  /* 0x00 */ u32 id;
-} TerrainAttrEntry;
 
 extern s32 D_800FBE64;
 extern u32 target_z;
 extern s32 active_terrain_index;
 extern s32 D_800C52B0;
 extern s32 D_800FC8B8;
-extern TerrainAttrEntry* get_table_entry(u32 idx);
-extern s32 func_8005483C(s32 arg0, s32 arg1, f32* out);
+
 extern void func_80216B10(void);
 extern s32 get_interpolated_terrain_height_wrapper(s32 x, s32 z);
 
 void reload_scene_assets(s8* arg0) {
-  u8 sp10[0x20];
+  RomAssetLoad sp10;
   s32 i;
 
-  get_rom_asset_allocation_size(0x6B5, sp10);
-  load_rom_asset_payload(D_800E1DB4, sp10);
-  get_rom_asset_allocation_size(0x6B8, sp10);
-  load_rom_asset_payload(D_800E1DB8, sp10);
-  get_rom_asset_allocation_size(0x6B0, sp10);
-  load_rom_asset_payload(D_800E1DA0, sp10);
-  get_rom_asset_allocation_size(0x6B2, sp10);
-  load_rom_asset_payload(D_800E1DA8, sp10);
-  get_rom_asset_allocation_size(0x6C0, sp10);
-  load_rom_asset_payload(D_800E1DAC, sp10);
+  get_rom_asset_allocation_size(0x6B5, &sp10);
+  load_rom_asset_payload(D_800E1DB4, &sp10);
+  get_rom_asset_allocation_size(0x6B8, &sp10);
+  load_rom_asset_payload(D_800E1DB8, &sp10);
+  get_rom_asset_allocation_size(0x6B0, &sp10);
+  load_rom_asset_payload(D_800E1DA0, &sp10);
+  get_rom_asset_allocation_size(0x6B2, &sp10);
+  load_rom_asset_payload(D_800E1DA8, &sp10);
+  get_rom_asset_allocation_size(0x6C0, &sp10);
+  load_rom_asset_payload(D_800E1DAC, &sp10);
 
   i = 0;
   do {
-    (particle_array + i)->unk_3A = -1;
+    (particle_array + i)->effect_kind = -1;
   } while (++i != 40);
 
   D_800FC8B8 =
@@ -139,8 +132,8 @@ void reload_scene_assets(s8* arg0) {
 
   if (arg0[0xA3] == 23) {
     D_800C52B0 = 1;
-    get_rom_asset_allocation_size(0x6B6, sp10);
-    load_rom_asset_payload(D_800E1DBC, sp10);
+    get_rom_asset_allocation_size(0x6B6, &sp10);
+    load_rom_asset_payload(D_800E1DBC, &sp10);
   } else {
     switch (get_table_entry(active_terrain_index)->id) {
       case 0:
@@ -149,29 +142,29 @@ void reload_scene_assets(s8* arg0) {
       case 15:
       case 17:
         D_800C52B0 = 2;
-        get_rom_asset_allocation_size(0x6B6, sp10);
-        load_rom_asset_payload(D_800E1DBC, sp10);
+        get_rom_asset_allocation_size(0x6B6, &sp10);
+        load_rom_asset_payload(D_800E1DBC, &sp10);
         break;
       case 3:
       case 4:
       case 5:
       case 19:
         D_800C52B0 = 4;
-        get_rom_asset_allocation_size(0x6B8, sp10);
-        load_rom_asset_payload(D_800E1DBC, sp10);
+        get_rom_asset_allocation_size(0x6B8, &sp10);
+        load_rom_asset_payload(D_800E1DBC, &sp10);
         break;
       case 6:
       case 18:
         D_800C52B0 = 3;
-        get_rom_asset_allocation_size(0x6B5, sp10);
-        load_rom_asset_payload(D_800E1DBC, sp10);
+        get_rom_asset_allocation_size(0x6B5, &sp10);
+        load_rom_asset_payload(D_800E1DBC, &sp10);
         break;
       case 7:
       case 8:
       case 9:
         D_800C52B0 = 6;
-        get_rom_asset_allocation_size(0x6B5, sp10);
-        load_rom_asset_payload(D_800E1DBC, sp10);
+        get_rom_asset_allocation_size(0x6B5, &sp10);
+        load_rom_asset_payload(D_800E1DBC, &sp10);
         break;
       default:
         D_800C52B0 = 0;
@@ -185,7 +178,7 @@ void func_80078D94(void) {
   s32 i = 0;
 
   do {
-    (particle_array + i)->unk_3A = -1;
+    (particle_array + i)->effect_kind = -1;
   } while (++i != 40);
 }
 
@@ -195,34 +188,34 @@ INCLUDE_ASM("asm/nonmatchings/main/func_80078910", func_80078FA8);
 
 void func_80079358(s32 arg0, s32 arg1) {
   s32 sp10[28]; /* reserved stack (unaccessed in this fn) */
-  f32 sp80[4];
+  Vec3f spawn_position;
   s32 i;
 
-  if (func_8005483C(arg0, arg1, sp80) == 0) {
+  if (func_8005483C(arg0, arg1, &spawn_position) == 0) {
     D_800FC8B8 = (s32)(f32)get_interpolated_terrain_height_wrapper(
-        (s32)(sp80[0] * 1024.0f), (s32)(sp80[2] * 1024.0f));
+        (s32)(spawn_position.x * 1024.0f), (s32)(spawn_position.z * 1024.0f));
 
     i = 0;
     do {
       Particle* p = &particle_array[i];
 
-      if (p->unk_3A == -1) {
+      if (p->effect_kind == -1) {
         f32 z;
 
-        p->unk_00 = sp80[0] + (guRandom() % 3072 - 1536) * (1.0f / 1024.0f);
-        p->unk_04 = sp80[1] + (guRandom() % 3072 - 1536) * (1.0f / 1024.0f);
-        z = sp80[2] + (guRandom() % 3072 - 1536) * (1.0f / 1024.0f);
-        p->unk_0C = 0;
-        p->unk_14 = 0;
-        p->unk_38 = 0;
-        p->unk_3B = 0;
-        p->unk_10 = 0.002558593638241291f;
-        p->unk_28 = 255.0f;
-        p->unk_2C = -4.0f;
-        p->unk_30 = 6.0f;
-        p->unk_34 = -0.2f;
-        p->unk_3A = 8;
-        p->unk_08 = z;
+        p->position.x = spawn_position.x + (guRandom() % 3072 - 1536) * (1.0f / 1024.0f);
+        p->position.y = spawn_position.y + (guRandom() % 3072 - 1536) * (1.0f / 1024.0f);
+        z = spawn_position.z + (guRandom() % 3072 - 1536) * (1.0f / 1024.0f);
+        p->velocity.x = 0.0f;
+        p->velocity.z = 0.0f;
+        p->unknown_38 = 0;
+        p->unknown_3B = 0;
+        p->velocity.y = 0.002558593638241291f;
+        p->opacity = 255.0f;
+        p->opacity_step = -4.0f;
+        p->size = 6.0f;
+        p->size_step = -0.2f;
+        p->effect_kind = 8;
+        p->position.z = z;
         break;
       }
     } while (++i != 40);
@@ -242,23 +235,23 @@ void func_80079940(s32* arg0) {
   do {
     Particle* p = &particle_array[i];
 
-    if (p->unk_3A == -1) {
+    if (p->effect_kind == -1) {
       f32 z;
 
-      p->unk_00 = arg0[0] * (1.0f / 1024.0f);
-      p->unk_04 = arg0[1] * (1.0f / 1024.0f);
+      p->position.x = arg0[0] * (1.0f / 1024.0f);
+      p->position.y = arg0[1] * (1.0f / 1024.0f);
       z = arg0[2] * (1.0f / 1024.0f);
-      p->unk_0C = 0;
-      p->unk_10 = 0.002558593638241291f;
-      p->unk_14 = 0;
-      p->unk_38 = 0;
-      p->unk_28 = 255.0f;
-      p->unk_2C = -4.0f;
-      p->unk_30 = 24.0f;
-      p->unk_34 = -0.2f;
-      p->unk_3A = 8;
-      p->unk_3B = 0;
-      p->unk_08 = z;
+      p->velocity.x = 0.0f;
+      p->velocity.y = 0.002558593638241291f;
+      p->velocity.z = 0.0f;
+      p->unknown_38 = 0;
+      p->opacity = 255.0f;
+      p->opacity_step = -4.0f;
+      p->size = 24.0f;
+      p->size_step = -0.2f;
+      p->effect_kind = 8;
+      p->unknown_3B = 0;
+      p->position.z = z;
       break;
     }
   } while (++i != 40);
@@ -268,12 +261,12 @@ extern f64 D_800D1988;
 
 void func_80079A08(s32 arg0, s32 arg1) {
   s32 sp10[28]; /* reserved stack (unaccessed in this fn) */
-  f32 sp80[4];
+  Vec3f spawn_position;
   s32 i;
   s32 one;
   s32 free_slot;
 
-  if (func_8005483C(arg0, arg1, sp80) == 0) {
+  if (func_8005483C(arg0, arg1, &spawn_position) == 0) {
     f64 grav;
 
     i = 0;
@@ -283,25 +276,25 @@ void func_80079A08(s32 arg0, s32 arg1) {
     do {
       Particle* p = &particle_array[i];
 
-      if (p->unk_3A == free_slot) {
+      if (p->effect_kind == free_slot) {
         f32 w;
         f32 z;
 
-        p->unk_00 = sp80[0];
-        p->unk_04 = sp80[1];
-        z = sp80[2];
+        p->position.x = spawn_position.x;
+        p->position.y = spawn_position.y;
+        z = spawn_position.z;
         w = (f32)((f64)one * grav);
-        p->unk_0C = 0;
-        p->unk_14 = 0;
-        p->unk_38 = 0;
-        p->unk_28 = 230.0f;
-        p->unk_2C = -2.0f;
-        p->unk_30 = 2.0f;
-        p->unk_34 = 0.02f;
-        p->unk_3A = 14;
-        p->unk_3B = 0;
-        p->unk_08 = z;
-        p->unk_10 = w;
+        p->velocity.x = 0.0f;
+        p->velocity.z = 0.0f;
+        p->unknown_38 = 0;
+        p->opacity = 230.0f;
+        p->opacity_step = -2.0f;
+        p->size = 2.0f;
+        p->size_step = 0.02f;
+        p->effect_kind = 14;
+        p->unknown_3B = 0;
+        p->position.z = z;
+        p->velocity.y = w;
         break;
       }
     } while (++i != 40);
@@ -345,9 +338,9 @@ INCLUDE_ASM("asm/nonmatchings/main/func_80078910", func_8007B994);
 INCLUDE_ASM("asm/nonmatchings/main/func_80078910", func_8007C5D8);
 
 typedef struct {
-  f32 unk_00;
-  u8 pad_04[0x4];
-  s32 unk_08;
+  f32 world_x;
+  u8 reserved_04[0x4];
+  s32 world_z;
 } ScreenMarker;
 
 extern s32 D_800FC8B8;
@@ -358,8 +351,8 @@ void func_8007CF10(Gfx** pgfx, ScreenMarker* m) {
   s32 screen[6];
   s32 z;
 
-  z = project_point_to_screen(m->unk_00, (f32)D_800FC8B8 * (1.0f / 1024.0f),
-                              m->unk_08, screen);
+  z = project_point_to_screen(m->world_x, (f32)D_800FC8B8 * (1.0f / 1024.0f),
+                              m->world_z, screen);
   if ((f32)z < -3.0f && (f32)z > -60.0f) {
     gDPPipeSync(gfx++);
     gDPPipeSync(gfx++);
@@ -388,8 +381,8 @@ void func_8007DE9C(Gfx** pgfx, Particle* p) {
   Gfx* gfx = *pgfx;
 
   gDPPipeSync(gfx++);
-  gDPSetPrimColor(gfx++, 0, 0, 0xE6, 0xE6, 0xE6, (u32)p->unk_28);
-  gSPMatrix(gfx++, &D_FD8F0[p->unk_3C], G_MTX_PUSH);
+  gDPSetPrimColor(gfx++, 0, 0, 0xE6, 0xE6, 0xE6, (u32)p->opacity);
+  gSPMatrix(gfx++, &D_FD8F0[p->matrix_index], G_MTX_PUSH);
   gSPVertex(gfx++, D_800C5338, 4, 0);
   gDPPipeSync(gfx++);
   gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
@@ -404,8 +397,8 @@ void func_8007DFD0(Gfx** pgfx, Particle* p) {
   Gfx* gfx = *pgfx;
 
   gDPPipeSync(gfx++);
-  gDPSetPrimColor(gfx++, 0, 0, 0xE6, 0xE6, 0xE6, (u32)p->unk_28);
-  gSPMatrix(gfx++, &D_FD8F0[p->unk_3C], G_MTX_PUSH);
+  gDPSetPrimColor(gfx++, 0, 0, 0xE6, 0xE6, 0xE6, (u32)p->opacity);
+  gSPMatrix(gfx++, &D_FD8F0[p->matrix_index], G_MTX_PUSH);
   gSPVertex(gfx++, D_800C5378, 4, 0);
   gDPPipeSync(gfx++);
   gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
@@ -462,17 +455,15 @@ extern s32 D_800C5448;
 extern void* D_800FF4CC;
 extern void* D_801EFFA8;
 extern void* D_801B8BB8;
-extern u32 get_rom_asset_allocation_size(u16 index, void* out);
-extern void* heap3_alloc(u32 need);
-extern void load_rom_asset_payload(void* arg0, void* arg1);
+
 extern void func_8007E7B8(void);
 
 void func_8007E234(s32 arg) {
-  u8 spvar[0x20];
+  RomAssetLoad spvar;
 
   if (arg == 2) {
-    D_800FF4CC = heap3_alloc(get_rom_asset_allocation_size(0x6BC, spvar));
-    load_rom_asset_payload(D_800FF4CC, spvar);
+    D_800FF4CC = heap3_alloc(get_rom_asset_allocation_size(0x6BC, &spvar));
+    load_rom_asset_payload(D_800FF4CC, &spvar);
     D_801EFFA8 = heap3_alloc(0x900);
     D_801B8BB8 = heap3_alloc(0x380);
     func_8007E7B8();
@@ -520,24 +511,23 @@ void project_delta_to_radius_150(void) {
 INCLUDE_ASM("asm/nonmatchings/main/func_80078910", func_8007E438);
 
 typedef struct {
-  f32 unk_00; /* world x */
-  f32 unk_04; /* world y (terrain height) */
-  f32 unk_08; /* world z */
-  u8 pad_0C[0xC];
-  s8 unk_18;
+  Vec3f position; /* y is sampled terrain height */
+  u8 reserved_0C[0xC];
+  s8 unknown_18;
 } TerrainScatterPoint;
 
 extern s32 rand(void);
 
 void randomize_terrain_scatter_point(TerrainScatterPoint* p) {
-  p->unk_00 =
+  p->position.x =
       (f32)((rand() % 500 - 250) * 1536) * (1.0f / 1024.0f) + (f32)D_800FF418;
-  p->unk_08 =
+  p->position.z =
       (f32)((rand() % 500 - 250) * 1536) * (1.0f / 1024.0f) + (f32)D_800FF41C;
-  p->unk_04 = (f32)get_interpolated_terrain_height_wrapper(
-                  (s32)(p->unk_00 * 1024.0f), (s32)(p->unk_08 * 1024.0f)) *
-              (1.0f / 1024.0f);
-  p->unk_18 = 0;
+  p->position.y = (f32)get_interpolated_terrain_height_wrapper(
+                          (s32)(p->position.x * 1024.0f),
+                          (s32)(p->position.z * 1024.0f)) *
+                      (1.0f / 1024.0f);
+  p->unknown_18 = 0;
 }
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80078910", func_8007E7B8);
@@ -547,15 +537,15 @@ INCLUDE_ASM("asm/nonmatchings/main/func_80078910", func_8007E980);
 INCLUDE_ASM("asm/nonmatchings/main/func_80078910", func_8007EF0C);
 
 void func_8007FE44(s32 value) {
-  u8 descriptor[0x20];
+  RomAssetLoad descriptor;
 
   D_800C5458 = value;
   D_800C545C = 1;
   D_800C5460 = 0;
-  get_rom_asset_allocation_size(0x663, descriptor);
-  load_rom_asset_payload(D_800E1DB4, descriptor);
-  get_rom_asset_allocation_size(0x689, descriptor);
-  load_rom_asset_payload(D_800E1DB8, descriptor);
+  get_rom_asset_allocation_size(0x663, &descriptor);
+  load_rom_asset_payload(D_800E1DB4, &descriptor);
+  get_rom_asset_allocation_size(0x689, &descriptor);
+  load_rom_asset_payload(D_800E1DB8, &descriptor);
 }
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80078910", func_8007FEAC);

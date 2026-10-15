@@ -1,9 +1,9 @@
 #include "common.h"
+#include "fog.h"
 
 extern s32 putter_mode_flag;
 extern s32 D_800BA9FC;
 extern u8 D_800C41CC[];
-extern u8 D_800C6014[];
 extern s32 D_800E1C10;
 extern s32 D_800E1C14;
 extern u8 D_800E1C18;
@@ -20,12 +20,12 @@ extern Vtx fog_filter_vertices[];
 
 void update_putter_color_tables(void) {
   s32 table_index;
-  u8* record;
-  u8* final_record;
+  FogPreset* record;
+  FogPreset* final_record;
 
   D_800E1C10 = 0;
   D_800E1C14 = 0;
-  record = &D_800C6014[(putter_mode_flag * 3 + D_800BA9FC) * 0x100];
+  record = &D_800C6014[putter_mode_flag * 3 + D_800BA9FC][0];
   for (table_index = 0; table_index != 4; table_index++) {
     s32 record_index;
     s32 record_offset;
@@ -33,7 +33,6 @@ void update_putter_color_tables(void) {
     u8* upper_color_table;
     u8* destination;
     u8* upper_destination;
-    u8* channel_record;
     f32 color_scale;
 
     record_offset = 0x40 + table_index * 0x10;
@@ -45,21 +44,22 @@ void update_putter_color_tables(void) {
     destination = color_table + record_offset;
     for (; record_index != 3; record_index++) {
       final_record = record;
-      channel_record = final_record + record_index;
       *destination =
-          (s32)((f32)(channel_record[4] + channel_record[7]) * color_scale);
+          (s32)((f32)(final_record->color_set_t[record_index] +
+                       final_record->color_set_b[record_index]) * color_scale);
       destination++;
       *upper_destination =
-          (s32)((f32)(channel_record[4] + channel_record[7]) * color_scale);
+          (s32)((f32)(final_record->color_set_t[record_index] +
+                       final_record->color_set_b[record_index]) * color_scale);
       upper_destination++;
     }
   }
-  D_800E1C1B = (s32)((f32)(final_record[4] + final_record[7]) * 0.35f);
-  D_800E1C1C = (s32)((f32)(final_record[5] + final_record[8]) * 0.35f);
-  D_800E1C1D = (s32)((f32)(final_record[6] + final_record[9]) * 0.35f);
-  D_800E1C18 = (u32)((f64)final_record[0xA] * 0.8);
-  D_800E1C19 = (u32)((f64)final_record[0xB] * 0.8);
-  D_800E1C1A = (u32)((f64)final_record[0xC] * 0.8);
+  D_800E1C1B = (s32)((f32)(final_record->color_set_t[0] + final_record->color_set_b[0]) * 0.35f);
+  D_800E1C1C = (s32)((f32)(final_record->color_set_t[1] + final_record->color_set_b[1]) * 0.35f);
+  D_800E1C1D = (s32)((f32)(final_record->color_set_t[2] + final_record->color_set_b[2]) * 0.35f);
+  D_800E1C18 = (u32)((f64)final_record->color_set_c[0] * 0.8);
+  D_800E1C19 = (u32)((f64)final_record->color_set_c[1] * 0.8);
+  D_800E1C1A = (u32)((f64)final_record->color_set_c[2] * 0.8);
 }
 
 void fog_filter_noop(void) {}

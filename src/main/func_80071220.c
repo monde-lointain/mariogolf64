@@ -1,4 +1,5 @@
 #include "common.h"
+#include "session.h"
 
 extern u8* func_8005AF50(void);
 extern s32 get_round_last_hole(void);
@@ -17,17 +18,10 @@ typedef struct {
 } RankedRosterEntry;
 extern RankedRosterEntry ranked_roster_ids[];
 
-typedef struct {
-  u8 padding[0x30];
-  s32 third_place_achieved;
-  s32 second_place_achieved;
-  s32 first_place_achieved;
-  u8 remaining[0x74 - 0x3C];
-} ScenarioRecord;
 
 void save_scenario_roster_rank(void) {
-  ScenarioRecord* scenario_record =
-      (ScenarioRecord*)(func_8005AF50() + 0xE98) + scenario_mode_id;
+  ScenarioStatistics* scenario_record =
+      (ScenarioStatistics*)(func_8005AF50() + 0xE98) + scenario_mode_id;
   s32 has_podium_finish = 0;
 
   if (game_mode == 5) {

@@ -3,11 +3,18 @@
 
 extern s32 D_800FE4A8;
 extern s32 D_800C42D4;
-extern u8 D_800FF1E8[];
-extern u8 D_800FF1E9[];
-extern s32 D_800FF210[];
-extern s32 D_800FF21C[];
-extern s32 D_800FF220[];
+/* D_800FF1E9/210/21C/220 are fields within these four records. */
+typedef struct {
+  /* 0x00 */ u8 is_active;
+  /* 0x01 */ u8 unknown_01[0x27];
+  /* 0x28 */ s32 score_total;
+  /* 0x2C */ u8 unknown_2C[8];
+  /* 0x34 */ s32 unknown_34;
+  /* 0x38 */ s32 unknown_38;
+  /* 0x3C */ u8 unknown_3C[0x50];
+} PlayerResultRecord; /* 0x8C */
+
+extern PlayerResultRecord D_800FF1E8[4];
 extern s32 D_800FE450[];
 extern s32 D_800FE4AC;
 extern s32 D_800FE4B0;
@@ -22,18 +29,17 @@ extern s32 D_8012D3B0[];
 extern char D_800D150C[], D_800D151C[], D_800D152C[];
 
 void func_8006F1A0(s32 arg0, s32 arg1) {
-  s32 off = arg0 * 140;
-  *(s32*)((u8*)D_800FF210 + off) += arg1;
-  if (*(s32*)((u8*)D_800FF210 + off) >= 10000) {
-    *(s32*)((u8*)D_800FF210 + off) = 9999;
+  D_800FF1E8[arg0].score_total += arg1;
+  if (D_800FF1E8[arg0].score_total >= 10000) {
+    D_800FF1E8[arg0].score_total = 9999;
   }
 }
 
 s32 func_8006F1F0(void) { return D_800FE4A8; }
 
-s32 func_8006F1FC(s32 arg0) { return D_800FF1E8[arg0 * 140] == 1; }
+s32 func_8006F1FC(s32 arg0) { return D_800FF1E8[arg0].is_active == 1; }
 
-u8* func_8006F228(s32 arg0) { return &D_800FF1E9[arg0 * 140]; }
+u8* func_8006F228(s32 arg0) { return D_800FF1E8[arg0].unknown_01; }
 
 void func_8006F24C(s32 arg0) {
   s32 i;
@@ -50,10 +56,9 @@ void func_8006F24C(s32 arg0) {
     bound = 4;
     p = fe + 471;
     do {
-      s32 off = i * 140;
-      *(u8*)((u8*)D_800FF1E8 + off) = 0;
-      *(s32*)((u8*)D_800FF21C + off) = val;
-      *(s32*)((u8*)D_800FF220 + off) = val;
+      D_800FF1E8[i].is_active = 0;
+      D_800FF1E8[i].unknown_34 = val;
+      D_800FF1E8[i].unknown_38 = val;
       *p++ = val;
       i++;
     } while (i != bound);

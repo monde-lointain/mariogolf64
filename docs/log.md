@@ -2,6 +2,28 @@
 
 ## 2026-10-15
 
+- **Main-bank structure recovery and cross-file reconciliation**: Parallel implementors read
+  Code Complete Chapter 11 before preparing isolated proposals; live integration, source edits,
+  compiler experiments, and ROM builds remained serialized. Audited the 58 main C hosts and
+  established shared animation, club, controller, fog, ROM-asset, session, terrain, and vector
+  layouts, with private HUD, particle, scenery-transform, result, and save-region records kept
+  in their translation units.
+  - Replaced manual member offsets with named fields and typed arrays; reconciled interior labels
+    with their enclosing storage. Corrected cross-consumer interpretations: character-indexed
+    statistics, sprite indices rather than active flags, live club shots rather than distance
+    presets, and compressed-load envelopes rather than duplicate read slots. Unproven fields
+    retain offset-based unknown names.
+  - GCC 2.7.2 source and original/current disassembly identified aggregate-address sharing,
+    scalar alias classification, and induction ordering as matching constraints. The few required
+    member-rooted scalar views/address projections retain named layouts instead of separate
+    synthetic storage.
+  - `tools/verify-rom.sh` passes with SHA-1
+    `e2c4e7a905b29529b49a1619a401fe699224829b`. Fresh 32-bit smoke runs pass 113 layout/member
+    checks across 19 recovered record types and 46 runtime checks exercising actual controller
+    transitions, signed scoring, winner resolution, and ROM-slot lifecycle functions.
+    No emulator run was performed. YAML, symbol files, compiler profiles, overlay sources, and
+    upstream library mirrors are unchanged.
+
 - **Five main camera-family banks**: Replaced the stubs for `func_80095A10`,
   `func_8009676C`, `func_800977E0`, `func_80097A08`, and `func_80097E30` in
   `src/main/func_80095A10.c` (469 instructions / 1,876 bytes). Ordinary clamped

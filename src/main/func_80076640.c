@@ -1,8 +1,5 @@
 #include "common.h"
-
-typedef struct {
-  f32 x, y, z;
-} Vec3f;
+#include "vector.h"
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80076640", func_80076640);
 

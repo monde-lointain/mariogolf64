@@ -1,4 +1,6 @@
 #include "common.h"
+#include "session.h"
+#include "club.h"
 #include <nusys.h>
 #include <nualstl.h>
 
@@ -8,12 +10,12 @@ extern void func_80407D64(void);
 extern s32 get_lowest_height_at_position(s32 x, s32 z);
 extern s32 D_800FBE68;
 
-extern void transfer_mode_continue_slot(s32 restore);
+extern s32 transfer_mode_continue_slot(s32 restore);
 extern void func_80216B74(s32 arg0);
 extern s32 flag_is_set(s32 flag);
 extern void func_8005F360(void);
 extern void func_8005F4AC(void);
-extern void func_80060210(void* arg0);
+extern void func_80060210(GameModeRecord* arg0);
 extern void initialize_hole_handicap_ranks(void);
 extern void init_per_player_state(void);
 extern void init_sky_panels(void);
@@ -38,19 +40,13 @@ extern s32 D_800C3088;
 extern s32 D_800C308C;
 extern s32 D_800C3090;
 
-typedef struct {
-  u32 data[0x1A];
-} GolfModeRecord;
-typedef struct {
-  u32 data[0x11];
-} Rec44;
-typedef struct {
-  u32 data[0x2E];
-} RecB8;
-extern u32 D_801B55F0;
-extern RecB8 player_records[];
-extern RecB8 D_8012D0C8[];
-extern u8 D_800FED40[];
+extern ScenarioState D_801B55F0;
+extern GameModeRecord D_800FEDD8[];
+extern CourseSelectionRecord D_80105F40[];
+extern ScenarioState scenario_state_id;
+extern PlayerState player_records[];
+extern PlayerState D_8012D0C8[];
+extern GameModeRecord D_800FED40[];
 extern s8 D_800FEE10;
 extern s8 D_800FEE11;
 extern s8 D_801B60B8;
@@ -69,8 +65,6 @@ extern const char D_800D1238[];
 extern u32 D_800C2FF4;
 extern const char D_800D1220[];
 extern s8 g_terrain_vtx_xform_mode;
-extern u8 D_800FEDD8[][8];
-extern u8 D_80105F40[][8];
 extern u16 D_80104F78;
 extern s32 D_80104F7C;
 extern s32 D_80104F80;
@@ -80,14 +74,11 @@ extern s32 D_80104F8C;
 extern s32 D_80104F90;
 extern s32 D_800C306C;
 /* State, game mode, player count, and scenario mode share this word block. */
-extern s32 scenario_state_id[];
+/* scenario_state_id is the first field of the 0x44-byte snapshot above. */
 extern s32 D_800C30A8;
 extern s32 D_800C30AC;
-extern void* get_club_param(u32 id);
 extern s32 func_80044A8C(s32 category);
 extern s8 D_800FBDB8;
-extern s8 player_base_scores[];
-extern s32 D_801B71DC[];
 extern s8 rumble_disable_flag;
 extern s32 get_course_hole_primary_flag(s32 course_id, s32 hole_index);
 extern s32 get_course_hole_secondary_flag(s32 course_id, s32 hole_index);
@@ -175,7 +166,7 @@ s32 func_8005F290(s32 unused, s16* input, u8* output) {
   s16* clubs = input;
   for (; i < 14;) {
     *enabled =
-        (*(s32*)((u8*)get_club_param(*clubs++) + 8) & func_80044A8C(1)) != 0;
+        (get_club_param(*clubs++)->flags & func_80044A8C(1)) != 0;
     enabled++;
     i++;
   }
@@ -207,7 +198,7 @@ void func_8005F360(void) {
       D_801B609C = 0;
       flags = (flag_is_set(0x30) << 1) + flag_is_set(0x31) + 1;
       active_player_count = flags;
-      *(s32*)scenario_state_id = 0;
+      scenario_state_id.state_id = 0;
       game_mode = 0;
       break;
     case 1:
@@ -215,7 +206,7 @@ void func_8005F360(void) {
       round_hole_index = 0;
       D_801B609C = 0;
       active_player_count = flags;
-      *(s32*)scenario_state_id = 0;
+      scenario_state_id.state_id = 0;
       game_mode = 3;
       break;
     case 2:
@@ -223,7 +214,7 @@ void func_8005F360(void) {
       round_hole_index = 0;
       D_801B609C = 0;
       active_player_count = flags;
-      *(s32*)scenario_state_id = 0;
+      scenario_state_id.state_id = 0;
       game_mode = flags;
       /* The original case deliberately falls through to the default setup. */
     default:
@@ -231,20 +222,22 @@ void func_8005F360(void) {
       scenario_mode_id = 0;
       round_hole_index = 0;
       D_801B609C = 0;
-      *(s32*)scenario_state_id = 0;
+      scenario_state_id.state_id = 0;
       game_mode = 10;
       break;
   }
 }
 
 void func_8005F4AC(void) {
-  *(s32*)((u8*)scenario_state_id + 12) = 0;
+  /* A byte view preserves the retail scalar-alias barrier at this store. */
+  u8* mode_id = (u8*)&scenario_state_id.scenario_mode_id;
+  *(s32*)mode_id = 0;
   active_player_count = 1;
   round_hole_index = 0;
   D_801B609C = 0;
-  scenario_state_id[0] = 11;
+  scenario_state_id.state_id = 11;
   if (flag_is_set(0x35)) {
-    scenario_state_id[1] = 9;
+    scenario_state_id.game_mode = 9;
   } else {
     game_mode = 0;
   }
@@ -266,7 +259,7 @@ void func_8005F838(s32 arg0) {
     func_80060210(D_800FED40);
     D_801B609C = 0;
     active_player_count = 1;
-    *(s32*)scenario_state_id = 0;
+    scenario_state_id.state_id = 0;
     game_mode = 0;
     scenario_mode_id = D_800FEE10;
     round_hole_index = D_800FEE11;
@@ -298,13 +291,12 @@ void func_8005FB58(void) {
     if (active_player_count > 0) {
       s32 count = active_player_count;
       do {
-        s32 offset = i * 0xB8;
-        s32 mode;
-        if (player_base_scores[offset] == 0) {
+        s32 state_code;
+        if (player_records[i].base_score == 0) {
           break;
         }
-        mode = *(s32*)((u8*)D_801B71DC + offset);
-        if ((mode != 0x11) & (mode != 0x14)) {
+        state_code = player_records[i].state_code;
+        if ((state_code != 0x11) & (state_code != 0x14)) {
           break;
         }
         i++;
@@ -335,50 +327,53 @@ INCLUDE_ASM("asm/nonmatchings/main/bgm_load_song_from_rom", func_8005FCB8);
 
 INCLUDE_ASM("asm/nonmatchings/main/bgm_load_song_from_rom", func_8005FE8C);
 
+/* The selector advances eight bytes through auxiliary entries, not whole records. */
 void func_800600C0(s32 arg0) {
-  u8(*rows)[8] = D_800FEDD8;
-  u8* p = rows[arg0];
+  ModeAuxFields* rows = (ModeAuxFields*)D_800FEDD8;
+  GameModeRecord* record = (GameModeRecord*)&rows[arg0];
+  ModeAuxFields* fields = &record->mode_aux_fields[0];
 
-  D_80104F78 = *(u16*)(p + 0x44);
-  D_80104F7C = *(s8*)(p + 0x46);
-  D_80104F80 = *(s8*)(p + 0x47);
-  D_80104F84 = *(s8*)(p + 0x48);
-  D_80104F88 = *(s8*)(p + 0x49);
-  D_80104F8C = *(s8*)(p + 0x4A);
-  D_80104F90 = *(s8*)(p + 0x4B);
+  D_80104F78 = fields->unknown_00;
+  D_80104F7C = fields->unknown_02[0];
+  D_80104F80 = fields->unknown_02[1];
+  D_80104F84 = fields->unknown_02[2];
+  D_80104F88 = fields->unknown_02[3];
+  D_80104F8C = fields->unknown_02[4];
+  D_80104F90 = fields->unknown_02[5];
 }
 
 void func_80060128(s32 arg0) {
-  u8(*rows)[8] = D_80105F40;
-  u8* p = rows[arg0];
+  ModeAuxFields* rows = (ModeAuxFields*)D_80105F40;
+  CourseSelectionRecord* record = (CourseSelectionRecord*)&rows[arg0];
+  ModeAuxFields* fields = &record->mode_aux_fields[0];
 
-  D_80104F78 = *(u16*)(p + 0x40);
-  D_80104F7C = *(s8*)(p + 0x42);
-  D_80104F80 = *(s8*)(p + 0x43);
-  D_80104F84 = *(s8*)(p + 0x44);
-  D_80104F88 = *(s8*)(p + 0x45);
-  D_80104F8C = *(s8*)(p + 0x46);
-  D_80104F90 = *(s8*)(p + 0x47);
+  D_80104F78 = fields->unknown_00;
+  D_80104F7C = fields->unknown_02[0];
+  D_80104F80 = fields->unknown_02[1];
+  D_80104F84 = fields->unknown_02[2];
+  D_80104F88 = fields->unknown_02[3];
+  D_80104F8C = fields->unknown_02[4];
+  D_80104F90 = fields->unknown_02[5];
 }
 
 INCLUDE_ASM("asm/nonmatchings/main/bgm_load_song_from_rom", func_80060190);
 
-void func_80060210(void* arg0) {
-  *(GolfModeRecord*)D_800FEDD8 = *(GolfModeRecord*)arg0;
-  game_mode = *(s32*)((u8*)arg0 + 0x34);
-  scenario_mode_id = *(s8*)((u8*)arg0 + 0x38);
-  round_hole_index = *(s8*)((u8*)arg0 + 0x39);
-  D_800FE330 = *((u8*)arg0 + 0x3E);
+void func_80060210(GameModeRecord* arg0) {
+  D_800FEDD8[0] = *arg0;
+  game_mode = arg0->game_mode;
+  scenario_mode_id = arg0->scenario_mode_id;
+  round_hole_index = arg0->round_hole_index;
+  D_800FE330 = arg0->unknown_3E;
   init_per_player_state();
   osSyncPrintf(D_800D1254);
 }
 
-void func_800602B4(GolfModeRecord* arg0) {
-  *(GolfModeRecord*)D_80105F40 = *arg0;
+void func_800602B4(CourseSelectionRecord* arg0) {
+  D_80105F40[0] = *arg0;
   game_mode = 9;
-  scenario_mode_id = *(s8*)((u8*)arg0 + 0x34);
-  round_hole_index = *(s8*)((u8*)arg0 + 0x35);
-  D_800FE330 = *((u8*)arg0 + 0x3A);
+  scenario_mode_id = arg0->scenario_mode_id;
+  round_hole_index = arg0->round_hole_index;
+  D_800FE330 = arg0->unknown_3A;
   init_per_player_state();
 }
 
@@ -388,7 +383,7 @@ void func_80060358(void) {
   D_800C306C = 0;
   transfer_mode_continue_slot(0);
   func_80216B74(0);
-  *(s32*)scenario_state_id = 7;
+  scenario_state_id.state_id = 7;
   D_800C30A8 = 3;
   D_800C30AC = 9;
 }
@@ -406,7 +401,7 @@ s32 func_800603A8(void) {
 void func_80060434(void) {
   s32 i;
 
-  *(Rec44*)&D_801B55F0 = *(Rec44*)&scenario_state_id;
+  D_801B55F0 = scenario_state_id;
   for (i = 0; i < 4; i++) {
     D_8012D0C8[i] = player_records[i];
   }

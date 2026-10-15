@@ -1,15 +1,5 @@
 #include "common.h"
-
-typedef struct {
-  /* ROM address consumed by the next read. */
-  u32 read_address;
-  /* Stored ROM asset size, including its header. */
-  u32 size;
-  /* Initial address in a directory slot; mode byte in the header slot. */
-  u32 metadata;
-  /* Exclusive end of the ROM data range. */
-  u32 end_address;
-} RomLoadSlot; /* 0x10 */
+#include "rom_asset.h"
 
 extern s32 current_rom_asset_index;
 
@@ -21,8 +11,8 @@ extern void osSyncPrintf(const char*, ...);
 extern void nuPiReadRom(u32 rom_addr, void* buf_ptr, u32 size);
 extern void open_rom_asset_slot(s32 asset_index, RomLoadSlot* slot);
 extern u32 get_rom_load_slot_size(RomLoadSlot* slot);
-extern void func_80050710(void* data, RomLoadSlot* slot);
-extern void func_80050914(void* data, RomLoadSlot* slot);
+extern void func_80050710(void* data, RomAssetLoad* asset);
+extern void func_80050914(void* data, RomAssetLoad* asset);
 
 void read_rom_load_slot(void* destination, u32 requested_size,
                         RomLoadSlot* slot) {
@@ -35,7 +25,7 @@ void read_rom_load_slot(void* destination, u32 requested_size,
   slot->read_address += requested_size;
 }
 
-u32 get_rom_asset_allocation_size(u16 asset_index, void* output_slots) {
+u32 get_rom_asset_allocation_size(u16 asset_index, RomAssetLoad* asset) {
   u8 scratch_storage[0x80];
   u8* aligned_header = (u8*)(((u32)scratch_storage + 0xF) & ~0xF);
   RomLoadSlot* payload_slot;
@@ -45,22 +35,21 @@ u32 get_rom_asset_allocation_size(u16 asset_index, void* output_slots) {
     osSyncPrintf(ROM_ASSET_OPEN_FORMAT, asset_index);
   }
 
-  payload_slot = (RomLoadSlot*)output_slots + 1;
+  payload_slot = &asset->payload;
   open_rom_asset_slot(asset_index, payload_slot);
-  ((RomLoadSlot*)output_slots)->end_address =
-      get_rom_load_slot_size(payload_slot);
+  asset->stored_size = get_rom_load_slot_size(payload_slot);
   read_rom_load_slot(aligned_header, 4, payload_slot);
-  ((RomLoadSlot*)output_slots)->metadata = aligned_header[0];
+  asset->compression_mode = aligned_header[0];
 
   allocation_size = *(u32*)aligned_header & 0xFFFFFF;
   *(u32*)aligned_header = allocation_size;
   return allocation_size;
 }
 
-void load_rom_asset_payload(void* destination, RomLoadSlot* header_slot) {
-  if (header_slot->metadata == 1) {
-    func_80050710(destination, header_slot);
+void load_rom_asset_payload(void* destination, RomAssetLoad* asset) {
+  if (asset->compression_mode == 1) {
+    func_80050710(destination, asset);
   } else {
-    func_80050914(destination, header_slot);
+    func_80050914(destination, asset);
   }
 }

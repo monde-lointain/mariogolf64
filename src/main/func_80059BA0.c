@@ -1,10 +1,23 @@
 #include "common.h"
+#include "session.h"
+#include "club.h"
+#include "rom_asset.h"
 
 typedef struct {
-  s32 unk_00[26];
-} Struct80131510;
+  /* 0x00 */ s32 unknown_00[11];
+  /* 0x2C */ s8 unknown_2C;
+  /* 0x2D */ u8 unknown_2D[7];
+  /* 0x34 */ u8 unknown_34;
+  /* 0x35 */ u8 unknown_35;
+  /* 0x36 */ u8 validation_flags;
+  /* 0x37 */ u8 character_index;
+  /* 0x38 */ u8 unknown_38;
+  /* 0x39 */ u8 asset_variant;
+  /* 0x3A */ u8 flags;
+  /* 0x3B */ u8 unknown_3B[0x2D];
+} SupershotRecord;
 
-extern Struct80131510 D_80131510[];
+extern SupershotRecord D_80131510[];
 extern u8 D_801323A0[];
 extern s8 D_80105DC1;
 extern s8 D_80105DC2;
@@ -380,11 +393,21 @@ f32 atanf(f32 x) {
 }
 
 typedef struct {
-  /* 0x0 */ u32 start;
-  /* 0x4 */ u32 size;
-  /* 0x8 */ u32 pos;
-  /* 0xC */ u32 end;
-} RomLoadSlot; /* 0x10 */
+  /* 0x00 */ u16 asset_index;
+  /* 0x02 */ u8 unknown_02[0xE];
+} RomAssetIndexEntry; /* 0x10 */
+
+typedef struct {
+  /* 0x00 */ s16 asset_index;
+  /* 0x02 */ u8 unknown_02[6];
+} RomSlotIndexEntry; /* 0x08 */
+typedef struct {
+  /* 0x00 */ s16 roster_character_index;
+  /* 0x02 */ s16 unknown_02[3];
+  /* 0x08 */ char name[12];
+  /* 0x14 */ u8 unknown_14;
+  /* 0x15 */ u8 unknown_15;
+} PlayerRosterEntry; /* 0x16 */
 
 extern void heap3_free(void** payload_ptr);
 extern s8 D_800C1FF0;
@@ -413,8 +436,6 @@ extern void* D_800FC6A0;
 extern void* D_801B69EC;
 
 extern void* heap3_alloc(u32 need);
-extern u32 get_rom_asset_allocation_size(u16 index, void* out);
-extern void load_rom_asset_payload(void* data, RomLoadSlot* slot);
 extern void open_rom_asset_slot(s32 index, RomLoadSlot* slot);
 extern u32 get_rom_load_slot_size(RomLoadSlot* slot);
 extern void read_rom_load_slot(void* dst, u32 size, RomLoadSlot* slot);
@@ -432,8 +453,8 @@ extern u16 D_800C20E0[][12];
 extern s16 D_800C20D4[];
 extern u16 D_800C21B8;
 extern s16 D_800C2278[];
-extern u16 D_800C2650[];
-extern s16 D_800C2590[];
+extern RomAssetIndexEntry D_800C2650[];
+extern RomSlotIndexEntry D_800C2590[];
 extern u16 D_800C28B0;
 
 /* Allocates and loads every ROM asset the course scene needs, in one pass.
@@ -447,7 +468,7 @@ extern u16 D_800C28B0;
  * Several allocation-size results are deliberately discarded: those buffers
  * have fixed sizes (0x70A8, 0xFA0, 0x125C), and the query only opens the slot. */
 void load_course_assets(void) {
-  RomLoadSlot slot_a[2];
+  RomAssetLoad slot_a;
   RomLoadSlot slot_b[2];
   u8* save;
   /* Four separate pointers, not one reused local: each id global is read twice
@@ -459,7 +480,6 @@ void load_course_assets(void) {
   u16* asset_id_c;
   u16* asset_id_d;
   s32 i;
-  s32 off;
   u32 size;
 
   save = func_8005AF50();
@@ -468,62 +488,59 @@ void load_course_assets(void) {
     return;
   }
 
-  D_801F4A20 = heap3_alloc(get_rom_asset_allocation_size(0x51E, slot_a));
-  load_rom_asset_payload(D_801F4A20, slot_a);
-  D_8012D3AC = heap3_alloc(get_rom_asset_allocation_size(0x721, slot_a));
-  load_rom_asset_payload(D_8012D3AC, slot_a);
-  D_800FF420[0] = heap3_alloc(get_rom_asset_allocation_size(0x520, slot_a));
-  load_rom_asset_payload(D_800FF420[0], slot_a);
-  D_800FF420[1] = heap3_alloc(get_rom_asset_allocation_size(0x520, slot_a));
-  load_rom_asset_payload(D_800FF420[1], slot_a);
-  D_801B60D0 = heap3_alloc(get_rom_asset_allocation_size(0x521, slot_a));
-  load_rom_asset_payload(D_801B60D0, slot_a);
+  D_801F4A20 = heap3_alloc(get_rom_asset_allocation_size(0x51E, &slot_a));
+  load_rom_asset_payload(D_801F4A20, &slot_a);
+  D_8012D3AC = heap3_alloc(get_rom_asset_allocation_size(0x721, &slot_a));
+  load_rom_asset_payload(D_8012D3AC, &slot_a);
+  D_800FF420[0] = heap3_alloc(get_rom_asset_allocation_size(0x520, &slot_a));
+  load_rom_asset_payload(D_800FF420[0], &slot_a);
+  D_800FF420[1] = heap3_alloc(get_rom_asset_allocation_size(0x520, &slot_a));
+  load_rom_asset_payload(D_800FF420[1], &slot_a);
+  D_801B60D0 = heap3_alloc(get_rom_asset_allocation_size(0x521, &slot_a));
+  load_rom_asset_payload(D_801B60D0, &slot_a);
 
   D_8012D420[0] = heap3_alloc(0x70A8);
   D_801B5CD0[0] = heap3_alloc(0x70A8);
   D_8012D420[1] = heap3_alloc(0x70A8);
   D_801B5CD0[1] = heap3_alloc(0x70A8);
   asset_id_a = &D_800C2014;
-  get_rom_asset_allocation_size(*asset_id_a, slot_a);
-  load_rom_asset_payload(D_8012D420[0], slot_a);
-  get_rom_asset_allocation_size(*asset_id_a, slot_a);
-  load_rom_asset_payload(D_8012D420[1], slot_a);
+  get_rom_asset_allocation_size(*asset_id_a, &slot_a);
+  load_rom_asset_payload(D_8012D420[0], &slot_a);
+  get_rom_asset_allocation_size(*asset_id_a, &slot_a);
+  load_rom_asset_payload(D_8012D420[1], &slot_a);
   if (current_game_mode == 5) {
-    get_rom_asset_allocation_size(0x528, slot_a);
-    load_rom_asset_payload(D_801B5CD0[0], slot_a);
-    get_rom_asset_allocation_size(0x528, slot_a);
-    load_rom_asset_payload(D_801B5CD0[1], slot_a);
+    get_rom_asset_allocation_size(0x528, &slot_a);
+    load_rom_asset_payload(D_801B5CD0[0], &slot_a);
+    get_rom_asset_allocation_size(0x528, &slot_a);
+    load_rom_asset_payload(D_801B5CD0[1], &slot_a);
   } else {
-    get_rom_asset_allocation_size(D_800C2016, slot_a);
-    load_rom_asset_payload(D_801B5CD0[0], slot_a);
-    get_rom_asset_allocation_size(D_800C2016, slot_a);
-    load_rom_asset_payload(D_801B5CD0[1], slot_a);
+    get_rom_asset_allocation_size(D_800C2016, &slot_a);
+    load_rom_asset_payload(D_801B5CD0[0], &slot_a);
+    get_rom_asset_allocation_size(D_800C2016, &slot_a);
+    load_rom_asset_payload(D_801B5CD0[1], &slot_a);
   }
 
   asset_id_b = &D_800C2028;
-  D_801052BC[0] = heap3_alloc(get_rom_asset_allocation_size(*asset_id_b, slot_a));
-  load_rom_asset_payload(D_801052BC[0], slot_a);
-  D_801052BC[1] = heap3_alloc(get_rom_asset_allocation_size(*asset_id_b, slot_a));
-  load_rom_asset_payload(D_801052BC[1], slot_a);
+  D_801052BC[0] = heap3_alloc(get_rom_asset_allocation_size(*asset_id_b, &slot_a));
+  load_rom_asset_payload(D_801052BC[0], &slot_a);
+  D_801052BC[1] = heap3_alloc(get_rom_asset_allocation_size(*asset_id_b, &slot_a));
+  load_rom_asset_payload(D_801052BC[1], &slot_a);
 
-  off = 0;
   for (i = 0; i != 7; i++) {
     if (current_game_mode == 5) {
-      u8* row = (u8*)D_800C20E0[D_80105B68];
-      size = get_rom_asset_allocation_size(*(u16*)(i * 2 + row), slot_a);
+      size = get_rom_asset_allocation_size(D_800C20E0[D_80105B68][i], &slot_a);
     } else {
-      size = get_rom_asset_allocation_size(D_800C2064[i], slot_a);
+      size = get_rom_asset_allocation_size(D_800C2064[i], &slot_a);
     }
     D_801049A0[i] = heap3_alloc(size);
-    load_rom_asset_payload(D_801049A0[i], slot_a);
+    load_rom_asset_payload(D_801049A0[i], &slot_a);
     if (current_game_mode == 5) {
-      u8* row = (u8*)D_800C20E0[D_80105B68];
-      size = get_rom_asset_allocation_size(*(u16*)(i * 2 + row), slot_a);
+      size = get_rom_asset_allocation_size(D_800C20E0[D_80105B68][i], &slot_a);
     } else {
-      size = get_rom_asset_allocation_size(D_800C2064[i], slot_a);
+      size = get_rom_asset_allocation_size(D_800C2064[i], &slot_a);
     }
     D_8012F4B0[i] = heap3_alloc(size);
-    load_rom_asset_payload(D_8012F4B0[i], slot_a);
+    load_rom_asset_payload(D_8012F4B0[i], &slot_a);
   }
 
   for (i = 0; i != 2; i++) {
@@ -534,45 +551,43 @@ void load_course_assets(void) {
   }
 
   asset_id_c = &D_800C21B8;
-  get_rom_asset_allocation_size(*asset_id_c, slot_a);
+  get_rom_asset_allocation_size(*asset_id_c, &slot_a);
   D_800FBDFC[0] = heap3_alloc(0xFA0);
-  load_rom_asset_payload(D_800FBDFC[0], slot_a);
-  get_rom_asset_allocation_size(*asset_id_c, slot_a);
+  load_rom_asset_payload(D_800FBDFC[0], &slot_a);
+  get_rom_asset_allocation_size(*asset_id_c, &slot_a);
   D_800FBDFC[1] = heap3_alloc(0xFA0);
-  load_rom_asset_payload(D_800FBDFC[1], slot_a);
+  load_rom_asset_payload(D_800FBDFC[1], &slot_a);
 
   for (i = 0; i != 2; i++) {
-    get_rom_asset_allocation_size(D_800C21B8, slot_a);
+    get_rom_asset_allocation_size(D_800C21B8, &slot_a);
     D_800FF4C4[i] = heap3_alloc(0x125C);
-    load_rom_asset_payload(D_800FF4C4[i], slot_a);
+    load_rom_asset_payload(D_800FF4C4[i], &slot_a);
   }
 
   for (i = 0; i != 5; i++) {
-    D_801B93E0[i] = heap3_alloc(get_rom_asset_allocation_size(0x720, slot_a));
-    load_rom_asset_payload(D_801B93E0[i], slot_a);
+    D_801B93E0[i] = heap3_alloc(get_rom_asset_allocation_size(0x720, &slot_a));
+    load_rom_asset_payload(D_801B93E0[i], &slot_a);
   }
 
-  size = get_rom_asset_allocation_size(0x623, slot_a);
+  size = get_rom_asset_allocation_size(0x623, &slot_a);
   D_8010526C[0] = heap3_alloc(size);
   D_8010526C[1] = heap3_alloc(size);
   D_800FF180[0] = heap3_alloc(size);
   D_800FF180[1] = heap3_alloc(size);
-  load_rom_asset_payload(D_8010526C[0], slot_a);
-  D_80106100 = heap3_alloc(get_rom_asset_allocation_size(0x65D, slot_a));
-  load_rom_asset_payload(D_80106100, slot_a);
-  D_800FC898 = heap3_alloc(get_rom_asset_allocation_size(0x663, slot_a));
-  load_rom_asset_payload(D_800FC898, slot_a);
+  load_rom_asset_payload(D_8010526C[0], &slot_a);
+  D_80106100 = heap3_alloc(get_rom_asset_allocation_size(0x65D, &slot_a));
+  load_rom_asset_payload(D_80106100, &slot_a);
+  D_800FC898 = heap3_alloc(get_rom_asset_allocation_size(0x663, &slot_a));
+  load_rom_asset_payload(D_800FC898, &slot_a);
 
   for (i = 0; i != 18; i++) {
-    off = i * 16;
     tile_palette_table[i] =
-        heap3_alloc(get_rom_asset_allocation_size(*(u16*)((u8*)D_800C2650 + off), slot_a));
-    load_rom_asset_payload(tile_palette_table[i], slot_a);
+        heap3_alloc(get_rom_asset_allocation_size(D_800C2650[i].asset_index, &slot_a));
+    load_rom_asset_payload(tile_palette_table[i], &slot_a);
   }
 
   for (i = 0; i != 18; i++) {
-    off = i * 8;
-    open_rom_asset_slot(*(s16*)((u8*)D_800C2590 + off), slot_b);
+    open_rom_asset_slot(D_800C2590[i].asset_index, slot_b);
     size = get_rom_load_slot_size(slot_b);
     tile_texture_table[i] = heap3_alloc(size);
     read_rom_load_slot(tile_texture_table[i], size, slot_b);
@@ -586,15 +601,14 @@ void load_course_assets(void) {
   }
 
   asset_id_d = &D_800C28B0;
-  D_800FBE30[0] = heap3_alloc(get_rom_asset_allocation_size(*asset_id_d, slot_a) * 2);
-  load_rom_asset_payload(D_800FBE30[0], slot_a);
-  D_800FBE30[1] = heap3_alloc(get_rom_asset_allocation_size(*asset_id_d, slot_a) * 2);
-  load_rom_asset_payload(D_800FBE30[1], slot_a);
-  D_800FC6A0 = heap3_alloc(get_rom_asset_allocation_size(0x6F7, slot_a) * 2);
-  load_rom_asset_payload(D_800FC6A0, slot_a);
-  D_801B69EC = heap3_alloc(get_rom_asset_allocation_size(0x709, slot_a));
-  load_rom_asset_payload(D_801B69EC, slot_a);
-
+  D_800FBE30[0] = heap3_alloc(get_rom_asset_allocation_size(*asset_id_d, &slot_a) * 2);
+  load_rom_asset_payload(D_800FBE30[0], &slot_a);
+  D_800FBE30[1] = heap3_alloc(get_rom_asset_allocation_size(*asset_id_d, &slot_a) * 2);
+  load_rom_asset_payload(D_800FBE30[1], &slot_a);
+  D_800FC6A0 = heap3_alloc(get_rom_asset_allocation_size(0x6F7, &slot_a) * 2);
+  load_rom_asset_payload(D_800FC6A0, &slot_a);
+  D_801B69EC = heap3_alloc(get_rom_asset_allocation_size(0x709, &slot_a));
+  load_rom_asset_payload(D_801B69EC, &slot_a);
   play_bgm_by_id(0x27, 0);
   set_color_framebuffer_count(3);
   func_8002A97C(4, 0);
@@ -717,8 +731,8 @@ s32 func_8005B070(s32 arg0) {
 
 s32 func_8005B0A0(s32 arg0) { return D_800C2B28[arg0]; }
 
-s32 func_8005B0B4(Struct80131510* record) {
-  u32 flags = ((u8*)record)[0x3A];
+s32 func_8005B0B4(SupershotRecord* record) {
+  u32 flags = record->flags;
   s32 result = 0;
   s32 value;
   s32 selector = flags & 0xF;
@@ -731,7 +745,7 @@ s32 func_8005B0B4(Struct80131510* record) {
           do {
             do {
               do {
-                value = ((s8*)record)[0x2C];
+                value = record->unknown_2C;
               } while (0);
             } while (0);
           } while (0);
@@ -797,19 +811,19 @@ void rank_scores_descending(s32* scores, s32* order, s32 count) {
   }
 }
 
-void func_8005B28C(s32 idx, Struct80131510* src) {
+void func_8005B28C(s32 idx, SupershotRecord* src) {
   D_80131510[idx] = *src;
   func_8005DF54(func_8005AF50(), 1);
 }
 
-/* D_80130CF0 is the four-category leaderboard, 4 blocks of 5 Struct80131510
+/* D_80130CF0 is the four-category leaderboard, 4 blocks of 5 SupershotRecord
  * records; the block base comes from the low nibble of the record's flag byte
  * at 0x3A, whose high bit gates the whole insert. D_80131510 is the record
  * immediately past it. rank_scores_descending ranks `scores` into the index
  * permutation `order`. Byte 0x3A is read twice, once signed for the high-bit
  * test and once unsigned for the nibble, which is what the ROM's `lb`/`lbu`
  * pair shows. */
-extern Struct80131510 D_80130CF0[];
+extern SupershotRecord D_80130CF0[];
 extern char D_800D0904[]; /* "Checking SuperShot" */
 extern char D_800D0918[]; /* "1:prior=%d:" */
 extern char D_800D0924[]; /* "2" */
@@ -817,10 +831,10 @@ extern char D_800D0928[]; /* "\n" */
 extern void osSyncPrintf(const char*, ...);
 void rank_scores_descending(s32* scores, s32* order, s32 count);
 
-void insert_supershot_record(Struct80131510* entry) {
+void insert_supershot_record(SupershotRecord* entry) {
   s32 scores[20];
   s32 order[20];
-  Struct80131510 records[20];
+  SupershotRecord records[20];
   s32 base;
   s32 best;
   s32 min;
@@ -834,10 +848,10 @@ void insert_supershot_record(Struct80131510* entry) {
   s32 count = 5;
   s32 i;
   s32 n;
-  Struct80131510* board;
+  SupershotRecord* board;
 
   osSyncPrintf(D_800D0904);
-  if (*(s8*)((u8*)entry + 0x3A) & 0x80) {
+  if ((s8)entry->flags & 0x80) {
     base = func_8005B0B4(entry);
     board = D_80130CF0;
     min = 0x40000000;
@@ -846,7 +860,7 @@ void insert_supershot_record(Struct80131510* entry) {
      * give the `case 3` / default leaf the ROM's `bne`, with the default value
      * in the delay slot. Ascending order emits the same four instructions with
      * the two arms swapped. */
-    switch (*(u8*)((u8*)entry + 0x3A) & 0xF) {
+    switch (entry->flags & 0xF) {
       default:
         first = 15;
         break;
@@ -906,43 +920,58 @@ void insert_supershot_record(Struct80131510* entry) {
 }
 
 typedef struct {
-  u32 data[0xD];
-} Rec34;
-typedef struct {
-  u32 data[0x11];
-} Rec44;
-typedef struct {
-  u32 data[0x7];
-} Rec1C;
-typedef struct {
-  u32 data[0x1A];
-} Rec68;
-typedef struct {
-  u32 data[0x2E];
-} RecB8;
+  /* 0x00 */ u32 unknown_00[0x7];
+} MiscSnapshot; /* 0x1C */
 
-/* One continue slot: the saved copy of the global match state. `state` mirrors
- * the 0x44 block at scenario_state_id (whose word 2 is the player count), `camera`
- * the 0x34 block at camera_position_x and `misc` the 0x1C block at
- * D_800FF4D0. The per-player records live in a sibling array. */
+/* One continue slot: snapshots of the camera, scenario, and miscellaneous
+ * live state, plus the per-player records in a sibling array. */
 typedef struct {
-  s32 valid;    /* 0x00 */
-  s32 unk_04;   /* 0x04 */
-  Rec34 camera; /* 0x08 */
-  Rec44 state;  /* 0x3C */
-  Rec1C misc;   /* 0x80 */
+  s32 valid;             /* 0x00 */
+  s32 unknown_04;        /* 0x04 */
+  CameraSnapshot camera; /* 0x08 */
+  ScenarioState state; /* 0x3C */
+  MiscSnapshot misc;     /* 0x80 */
   u8 pad9C[4];
 } ContinueSlot; /* 0xA0 */
 
-extern RecB8 player_records[];
-extern Rec68 D_800FEDD8[];
-extern RecB8 D_8012FB60[];
-extern RecB8 D_8012FAA8[];
-extern RecB8 D_8012F938[];
-extern s32 scenario_state_id;
+/* The three continue headers immediately precede their four-player copies. */
+typedef struct {
+  ContinueSlot slots[3];
+  PlayerState players[3][4];
+} SaveContinueData; /* 0xA80, at SRAM offset 0x1FF8 */
+
+/* Projection from the SRAM base; the preceding save regions are not modeled here. */
+typedef struct {
+  u8 unknown_00[0x1FF8];
+  SaveContinueData continue_data;
+} SaveContinueView;
+typedef struct {
+  /* 0x00 */ PlayerState players[4];
+  /* 0x2E0 */ u8 unknown_2E0[0xD0];
+  /* 0x3B0 */ GameModeRecord mode_records[4];
+} SessionStorage4; /* 0x550 */
+
+typedef struct {
+  /* 0x00 */ PlayerState players[1];
+  /* 0x0B8 */ u8 unknown_B8[0x348];
+  /* 0x400 */ GameModeRecord mode_records[1];
+} SessionStorage1; /* 0x468 */
+
+typedef struct {
+  /* 0x00 */ PlayerState players[2];
+  /* 0x170 */ u8 unknown_170[0x398];
+  /* 0x508 */ GameModeRecord mode_records[2];
+} SessionStorage2; /* 0x5D8 */
+
+extern PlayerState player_records[];
+extern GameModeRecord D_800FEDD8[];
+extern SessionStorage4 D_8012FB60;
+extern SessionStorage1 D_8012FAA8;
+extern SessionStorage2 D_8012F938;
+extern ScenarioState scenario_state_id;
 extern s32 active_player_count;
 extern s8 D_801B60B8;
-extern s32 camera_position_x;
+extern CameraSnapshot camera_position_x;
 extern void flag_set(s32 flag);
 extern void func_8005DF54(u8* save, s32 arg1);
 extern const char D_800D092C[];
@@ -957,8 +986,8 @@ extern const char D_800D0970[];
  * bytes before it all come off the one base symbol. Modes with no continue
  * block fall through with a zero count. Returns -1 on failure, 0 otherwise. */
 s32 transfer_mode_continue_slot(s32 restore) {
-  RecB8* recs;
-  Rec68* modes;
+  PlayerState* recs;
+  GameModeRecord* modes;
   ContinueSlot* slot;
   s32 count = 0;
   s32 bad;
@@ -969,22 +998,22 @@ s32 transfer_mode_continue_slot(s32 restore) {
     case 0:
     case 6:
     case 10:
-      recs = D_8012FB60;
-      modes = (Rec68*)((u8*)D_8012FB60 + 0x3B0);
-      slot = (ContinueSlot*)((u8*)D_8012FB60 - 0x2C8);
+      recs = D_8012FB60.players;
+      modes = D_8012FB60.mode_records;
+      slot = (ContinueSlot*)((u8*)&D_8012FB60 - 0x2C8);
       count = 4;
       break;
     case 5:
-      recs = D_8012FAA8;
-      modes = (Rec68*)((u8*)D_8012FAA8 + 0x400);
-      slot = (ContinueSlot*)((u8*)D_8012FAA8 - 0x2B0);
+      recs = D_8012FAA8.players;
+      modes = D_8012FAA8.mode_records;
+      slot = (ContinueSlot*)((u8*)&D_8012FAA8 - 0x2B0);
       osSyncPrintf(D_800D092C);
       count = 1;
       break;
     case 4:
-      recs = D_8012F938;
-      modes = (Rec68*)((u8*)D_8012F938 + 0x508);
-      slot = (ContinueSlot*)((u8*)D_8012F938 - 0x1E0);
+      recs = D_8012F938.players;
+      modes = D_8012F938.mode_records;
+      slot = (ContinueSlot*)((u8*)&D_8012F938 - 0x1E0);
       count = 2;
       break;
   }
@@ -999,12 +1028,12 @@ s32 transfer_mode_continue_slot(s32 restore) {
     slot->valid = 0;
     for (i = 0; i < count; i++) {
       recs[i] = player_records[i];
-      switch (recs[i].data[3]) {
+      switch (recs[i].state_code) {
         case 0:
         case 2:
         case 3:
         case 21:
-          recs[i].data[3] = 0;
+          recs[i].state_code = 0;
           break;
         case 17:
         case 20:
@@ -1016,8 +1045,8 @@ s32 transfer_mode_continue_slot(s32 restore) {
       }
       modes[i] = D_800FEDD8[i];
     }
-    slot->state = *(Rec44*)&scenario_state_id;
-    slot->camera = *(Rec34*)&camera_position_x;
+    slot->state = scenario_state_id;
+    slot->camera = camera_position_x;
     if (bad == 0) {
       mode = 1;
       slot->valid = mode;
@@ -1027,19 +1056,19 @@ s32 transfer_mode_continue_slot(s32 restore) {
   } else {
     mode = 2;
     if (slot->valid == 1) {
-      if (count < (s32)slot->state.data[2]) {
+      if (count < slot->state.active_player_count) {
         osSyncPrintf(D_800D0944);
         return -1;
       }
-      count = slot->state.data[2];
+      count = slot->state.active_player_count;
       for (i = 0; i < count; i++) {
         player_records[i] = recs[i];
         D_800FEDD8[i] = modes[i];
       }
-      *(Rec44*)&scenario_state_id = slot->state;
-      scenario_state_id = 1;
+      scenario_state_id = slot->state;
+      scenario_state_id.state_id = 1;
       flag_set(0x1E);
-      *(Rec34*)&camera_position_x = slot->camera;
+      camera_position_x = slot->camera;
     }
     mode = 2;
     D_801B60B8 = mode;
@@ -1048,10 +1077,10 @@ s32 transfer_mode_continue_slot(s32 restore) {
   return 0;
 }
 
-extern RecB8 D_801318F8[][4];
-extern RecB8 D_8012D0C8[];
-extern u32 D_801B55F0;
-extern u32 D_800FF4D0;
+extern PlayerState D_801318F8[][4];
+extern PlayerState D_8012D0C8[];
+extern ScenarioState D_801B55F0;
+extern MiscSnapshot D_800FF4D0;
 
 /* Saves the live match state into continue slot `id` (restore == 0), or
  * restores that slot back over the live state. The three continue slots sit
@@ -1065,7 +1094,7 @@ extern u32 D_800FF4D0;
  * inner if, not at the end of its body: that is what colours it $v0 rather than
  * $a0 (S309, found by the permuter at exact instruction count). */
 s32 transfer_continue_slot(s32 id, s32 restore) {
-  RecB8* recs = D_801318F8[id];
+  PlayerState* recs = D_801318F8[id];
   ContinueSlot* slot = &((ContinueSlot*)((u8*)D_801318F8 - 0x1E0))[id];
   s32 count = 4;
   s32 bad;
@@ -1082,12 +1111,12 @@ s32 transfer_continue_slot(s32 id, s32 restore) {
     slot->valid = 0;
     for (i = restore; i < count; i++) {
       recs[i] = D_8012D0C8[i];
-      switch (recs[i].data[3]) {
+      switch (recs[i].state_code) {
         case 0:
         case 2:
         case 3:
         case 21:
-          recs[i].data[3] = 0;
+          recs[i].state_code = 0;
           break;
         case 17:
         case 20:
@@ -1098,12 +1127,12 @@ s32 transfer_continue_slot(s32 id, s32 restore) {
           break;
       }
     }
-    slot->state = *(Rec44*)&D_801B55F0;
-    if (((s8*)slot)[0x79] < 0x63) {
-      ((s8*)slot)[0x79]++;
+    slot->state = D_801B55F0;
+    if (slot->state.continue_count < 0x63) {
+      slot->state.continue_count++;
     }
-    slot->camera = *(Rec34*)&camera_position_x;
-    slot->misc = *(Rec1C*)&D_800FF4D0;
+    slot->camera = camera_position_x;
+    slot->misc = D_800FF4D0;
     if (bad != 0) {
       return -1;
     }
@@ -1112,19 +1141,19 @@ s32 transfer_continue_slot(s32 id, s32 restore) {
   } else {
     mode = 2;
     if (slot->valid == 1) {
-      if (count < (s32)slot->state.data[2]) {
+      if (count < slot->state.active_player_count) {
         osSyncPrintf(D_800D0944);
         return -1;
       }
-      count = slot->state.data[2];
+      count = slot->state.active_player_count;
       for (i = 0; i < count; i++) {
         player_records[i] = recs[i];
       }
-      *(Rec44*)&scenario_state_id = slot->state;
-      scenario_state_id = 1;
+      scenario_state_id = slot->state;
+      scenario_state_id.state_id = 1;
       flag_set(0x1E);
-      *(Rec34*)&camera_position_x = slot->camera;
-      *(Rec1C*)&D_800FF4D0 = slot->misc;
+      camera_position_x = slot->camera;
+      D_800FF4D0 = slot->misc;
     }
     mode = 2;
     D_801B60B8 = mode;
@@ -1258,9 +1287,9 @@ extern s16 D_800C293C[3][7];
 extern s16 g_abRosterUnlockOrder[];
 extern s16 g_abRosterUnlockFlags[];
 extern s16 D_800C29B8[10][2];
-extern u16 D_800C2650[];
-extern s16 D_800C2590[];
-extern s16 D_800FE3D8[];
+extern RomAssetIndexEntry D_800C2650[];
+extern RomSlotIndexEntry D_800C2590[];
+extern PlayerRosterEntry D_800FE3D8[];
 extern void* D_8012D468[];
 extern void* D_80105BB0[];
 extern s32 flag_is_set(s32 flag);
@@ -1268,22 +1297,20 @@ extern void func_8005CA48(void);
 extern s32 func_8005C4B4(void);
 extern s32 func_8005C5B4(void);
 extern s32 func_8005C614(void);
-extern u32 get_rom_asset_allocation_size(u16 index, void* out);
-extern void load_rom_asset_payload(void* data, RomLoadSlot* slot);
 extern void open_rom_asset_slot(s32 index, RomLoadSlot* slot);
 extern u32 get_rom_load_slot_size(RomLoadSlot* slot);
 extern void read_rom_load_slot(void* dst, u32 size, RomLoadSlot* slot);
 
 /* Builds the character-select roster grid D_800C28E4[3][7] from its template
  * tables, patches it against the unlock state, then loads the four selected
- * characters' assets through the standard five-call RomLoadSlot block.
+ * characters' assets through the asset-load and raw-slot APIs.
  *
  * The variable reuse below is deliberate and load-bearing: the ROM keeps arg0,
  * the unlock-scan counter and the asset index in one register, and reads the
  * unlock flag into the same register as the scan counter. Giving any of them
  * its own local permutes the whole allocation. */
 void build_roster_grid(s32 arg0, u8 arg1) {
-  RomLoadSlot buf_a[2];
+  RomAssetLoad buf_a;
   RomLoadSlot buf_b;
   u8* stats;
   s32 row;
@@ -1291,9 +1318,6 @@ void build_roster_grid(s32 arg0, u8 arg1) {
   s32 i;
   s32 k;
   u32 size;
-  s32 off;
-  s32 wide;
-  s32 narrow;
 
   stats = func_8005AF50();
   row = 0;
@@ -1379,13 +1403,10 @@ void build_roster_grid(s32 arg0, u8 arg1) {
   for (i = 0; i != 4; i++) {
     k = g_abRosterUnlockFlags[i];
     if (k >= 0) {
-      off = i * 0x16;
-      arg0 = *(s16*)((u8*)D_800FE3D8 + off);
-      wide = arg0 * 16;
-      get_rom_asset_allocation_size(*(u16*)((u8*)D_800C2650 + wide), buf_a);
-      load_rom_asset_payload(D_8012D468[i], &buf_a[0]);
-      narrow = arg0 * 8;
-      open_rom_asset_slot(*(s16*)((u8*)D_800C2590 + narrow), &buf_b);
+      arg0 = D_800FE3D8[i].roster_character_index;
+      get_rom_asset_allocation_size(D_800C2650[arg0].asset_index, &buf_a);
+      load_rom_asset_payload(D_8012D468[i], &buf_a);
+      open_rom_asset_slot(D_800C2590[arg0].asset_index, &buf_b);
       size = get_rom_load_slot_size(&buf_b);
       read_rom_load_slot(D_80105BB0[i], size, &buf_b);
     }
@@ -1421,29 +1442,10 @@ in_range:
   return ((s32)((u16)D_800C28E4[row][col] << 16)) >> 31;
 }
 
-typedef struct {
-  /* 0x00 */ s32 active;
-  /* 0x04 */ s8 pad04[0x3C - 0x04];
-  /* 0x3C */ s32 unk_3C;
-  /* 0x40 */ s32 sel;
-  /* 0x44 */ s32 count;
-  /* 0x48 */ s32 unk_48;
-  /* 0x4C */ s32 unk_4C;
-  /* 0x50 */ s8 pad50[0x76 - 0x50];
-  /* 0x76 */ s8 f76;
-  /* 0x77 */ s8 pad77[0xA0 - 0x77];
-} Cf78Section;
 
-typedef struct {
-  /* 0x00 */ s8 pad00[0x1D];
-  /* 0x1D */ u8 f1D;
-  /* 0x1E */ s8 pad1E[0x7B - 0x1E];
-  /* 0x7B */ u8 f7B;
-  /* 0x7C */ s8 pad7C[0xB8 - 0x7C];
-} Cf78Row;
 
 void func_8005CF78(void) {
-  u8* base = func_8005AF50();
+  SaveContinueView* saved = (SaveContinueView*)func_8005AF50();
   s32 flags[3];
   s32 k;
 
@@ -1455,12 +1457,12 @@ void func_8005CF78(void) {
 
   k = 0;
   do {
-    if (*(s32*)(base + k * 0xA0 + 0x1FF8) != 0) {
-      Cf78Section* sect = (Cf78Section*)(base + 0x1FF8 + k * 0xA0);
-      s32* a3 = &sect->unk_3C;
+    if (saved->continue_data.slots[k].valid != 0) {
+      ContinueSlot* sect = &saved->continue_data.slots[k];
+      ScenarioState* state = &sect->state;
 
-      if (sect->f76 == 0) {
-        switch (sect->sel) {
+      if (state->unknown_3A == 0) {
+        switch (state->game_mode) {
           case 0:
           case 2:
           case 4:
@@ -1473,24 +1475,24 @@ void func_8005CF78(void) {
             break;
         }
       }
-      if ((u32)(a3[2] - 1) >= 4U) {
+      if ((u32)(state->active_player_count - 1) >= 4U) {
         flags[k] = 1;
       }
-      if ((u32)a3[3] >= 0xCU) {
+      if ((u32)state->scenario_mode_id >= 0xCU) {
         flags[k] = 1;
       }
-      if ((u32)a3[4] >= 0x12U) {
+      if ((u32)state->round_hole_index >= 0x12U) {
         flags[k] = 1;
       }
       {
         s32 i = 0;
-        Cf78Row* rows;
-        while (i != a3[2]) {
-          rows = (Cf78Row*)(base + 0x21D8 + k * 0x2E0);
-          if (rows[i].f1D >= 0x12) {
+        PlayerState* rows;
+        while (i != state->active_player_count) {
+          rows = saved->continue_data.players[k];
+          if ((u8)rows[i].character_index >= 0x12) {
             flags[k] = 1;
           }
-          if (rows[i].f7B >= 0x4) {
+          if (rows[i].asset_variant >= 0x4) {
             flags[k] = 1;
           }
           i++;
@@ -1503,7 +1505,7 @@ void func_8005CF78(void) {
   k = 0;
   do {
     if (flags[k] == 1) {
-      *(s32*)(base + k * 0xA0 + 0x1FF8) = 0;
+      saved->continue_data.slots[k].valid = 0;
     }
     k++;
   } while (k != 3);
@@ -1529,7 +1531,7 @@ void func_8005D0D8(void) {
 
   i = 0;
   do {
-    u8* p = base + (0x1DF0 + i * 0x68);
+    SupershotRecord* record = &((SupershotRecord*)(base + 0x1DF0))[i];
     s8 b;
     s8 lo;
     do {
@@ -1537,7 +1539,7 @@ void func_8005D0D8(void) {
         do {
           do {
             do {
-              b = *(s8*)(p + 0x36);
+              b = (s8)record->validation_flags;
             } while (0);
           } while (0);
         } while (0);
@@ -1552,27 +1554,27 @@ void func_8005D0D8(void) {
         flags[i] = 1;
       }
     }
-    if (p[0x37] >= 0x12) {
+    if (record->character_index >= 0x12) {
       flags[i] = 1;
     }
-    if (p[0x39] >= 4) {
+    if (record->asset_variant >= 4) {
       flags[i] = 1;
     }
-    if (p[0x34] >= 6) {
+    if (record->unknown_34 >= 6) {
       flags[i] = 1;
     }
-    if (p[0x35] >= 6) {
+    if (record->unknown_35 >= 6) {
       flags[i] = 1;
     }
   } while (++i != 5);
 
   i = 0;
   do {
-    u8* p = base + (0x1DF0 + i * 0x68);
+    SupershotRecord* record = &((SupershotRecord*)(base + 0x1DF0))[i];
     if (flags[i] == 1) {
-      s32 v = p[0x36];
+      s32 v = record->validation_flags;
       v ^= -0x80;
-      p[0x36] = v;
+      record->validation_flags = v;
     }
   } while (++i != 5);
 }
@@ -1650,7 +1652,8 @@ s32 func_8005D308(void) {
  * register, where the ROM rematerializes it inline each iteration. The
  * do {} while (0) is a loop note that reweights the refs inside it, which is
  * what colours `end` below `row` and above the counter ($a1/$a2 as the ROM has
- * them); without it the counter outranks `end` and the two swap. */
+ * them); without it the counter outranks `end` and the two swap. Member-rooted
+ * scalar stores also retain the separate address roots instead of caching a slot. */
 void clear_player_slots(void) {
   s32 i;
   s32 n;
@@ -1663,23 +1666,23 @@ void clear_player_slots(void) {
   do {
     n = 12;
     off = 0;
-    row = (u8*)D_800FE3D8 + 8;
+    row = (u8*)D_800FE3D8[0].name;
   loop:
     p = row;
     end = (u8*)(n + (s32)row);
-    *(s16*)((u8*)D_800FE3D8 + off) = 0;
-    *(s16*)((u8*)D_800FE3D8 + off + 2) = 0;
-    *(s16*)((u8*)D_800FE3D8 + off + 4) = 0;
-    *(s16*)((u8*)D_800FE3D8 + off + 6) = 0;
+    *(s16*)((u8*)&D_800FE3D8[0].roster_character_index + off) = 0;
+    *(s16*)((u8*)&D_800FE3D8[0].unknown_02[0] + off) = 0;
+    *(s16*)((u8*)&D_800FE3D8[0].unknown_02[1] + off) = 0;
+    *(s16*)((u8*)&D_800FE3D8[0].unknown_02[2] + off) = 0;
     do {
       *p = 0;
       p++;
     } while (p != end);
   } while (0);
-  *((u8*)D_800FE3D8 + off + 0x14) = 0;
-  off += 0x16;
+  *(&D_800FE3D8[0].unknown_14 + off) = 0;
+  off += sizeof(PlayerRosterEntry);
   i++;
-  row += 0x16;
+  row += sizeof(PlayerRosterEntry);
   if (i != 4) {
     goto loop;
   }
@@ -1904,10 +1907,7 @@ s32 func_8005DFE8(u8* buf, s32 flag_arg) {
 }
 
 extern u8 D_801B5588[];
-extern u32 D_800C2BE4;
-extern u32 D_800C2BE8;
-extern u32 D_800C2BEC;
-extern s32 func_80028110(u32 addr, s32 len);
+extern s32 func_80028110(char* path, s32 len);
 
 s32 func_8005E180(u8* buf, s32 save_flag) {
   u8 raw[0xC0];
@@ -1916,7 +1916,6 @@ s32 func_8005E180(u8* buf, s32 save_flag) {
   s32 j;
   s32 flag;
   u16 crc;
-  s32 off;
 
   for (j = 0; j < 0x20; j++) {
     u8* dst = buf + j;
@@ -1925,22 +1924,20 @@ s32 func_8005E180(u8* buf, s32 save_flag) {
   crc = crc16_ccitt(buf, 0x2A78);
   i = 0;
   flag = save_flag & 0xFF;
-  off = 0;
   do {
     s32 r = rand();
     stat[0] = r;
     stat[1] = r;
     stat[1] = stat[1] ^ crc;
     if (flag == 0) {
-      if (func_80028110(*(u32*)((u8*)&D_800C2BE0 + off), 0x2A78) == 0) {
-        func_80028110(*(u32*)((u8*)&D_800C2BE4 + off), 4);
+      if (func_80028110(D_800C2BE0[i].data_file, 0x2A78) == 0) {
+        func_80028110(D_800C2BE0[i].checksum_file, 4);
       }
     } else {
-      nuPiReadWriteSram(*(u32*)((u8*)&D_800C2BE8 + off), buf, 0x2A78, 1);
-      nuPiReadWriteSram(*(u32*)((u8*)&D_800C2BEC + off), stat, 4, 1);
+      nuPiReadWriteSram(D_800C2BE0[i].data_address, buf, 0x2A78, 1);
+      nuPiReadWriteSram(D_800C2BE0[i].checksum_address, stat, 4, 1);
     }
     i++;
-    off += 0x10;
   } while (i < 2);
   return 1;
 }

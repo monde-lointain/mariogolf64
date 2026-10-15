@@ -10,17 +10,17 @@ typedef struct {
   /* 0x10 */ u8* source_end;
   /* 0x14 */ u16 window_flags;
   /* 0x16 */ u16 unknown_16;
-  /* 0x18 */ s32 ring_buffer_base;
+  /* 0x18 */ u16* control_ring;
   /* 0x1C */ u16 ring_index;
   /* 0x1E */ u16 run_remaining;
   /* 0x20 */ u16 history_index;
-  /* 0x24 */ s32 history_buffer_base;
+  /* 0x24 */ u16* history_buffer;
 } LzDecompressState;
 
 /* Frame-local history state; its ROM-sized layout is retained. */
 typedef struct {
   /* 0x0 */ u16 run_remaining;
-  /* 0x4 */ s32 history_buffer_base;
+  /* 0x4 */ u16* history_buffer;
   /* 0x8 */ u16 history_index;
   /* 0xC */ u16* output;
 } LzHistoryState;
@@ -177,13 +177,10 @@ static inline void lz_expand(LzHistoryState* history, s16 history_offset,
   if (history_offset < 0) {
     if (run_length != 0) {
       do {
-        history_value = *(
-            (u16*)((((((u32)history->history_index) + history_offset) & 0xff) *
-                    2) +
-                   history->history_buffer_base));
+        history_value = history->history_buffer[((u32)history->history_index + history_offset) & 0xff];
         history_slot = history->history_index;
         history->history_index = history->history_index + 1;
-        *((u16*)((history_slot * 2) + history->history_buffer_base)) =
+        history->history_buffer[history_slot] =
             *history->output;
         history->history_index = history->history_index & 0xff;
         output_cursor = history->output;
@@ -196,7 +193,7 @@ static inline void lz_expand(LzHistoryState* history, s16 history_offset,
     do {
       history_slot = history->history_index;
       history->history_index = history->history_index + 1;
-      *((u16*)((history_slot * 2) + history->history_buffer_base)) =
+      history->history_buffer[history_slot] =
           *history->output;
       history->history_index = history->history_index & 0xff;
       *history->output = history->output[history_offset];
@@ -217,7 +214,7 @@ static inline void lz_expand(LzHistoryState* history, s16 history_offset,
 s32 lz_decompress_extended(LzDecompressState* state) {
   u16* source_cursor;
   u16* source_end;
-  s32 ring_buffer_base;
+  u16* control_ring;
   s32 is_nonfinal_window;
   u32 bit_accumulator;
   u32 ring_index;
@@ -239,9 +236,9 @@ s32 lz_decompress_extended(LzDecompressState* state) {
   u16 literal_run;
   u16 reference_run;
   u32 literal_slot_offset;
-  u32 reference_slot_offset;
-  u32 reference_slot;
-  u32 literal_slot;
+  u32 reference_slot_index;
+  u16* reference_slot;
+  u16* literal_slot;
   u32 literal_next_ring_index;
   u16 initial_run_remaining;
   u16* initial_output_cursor;
@@ -249,8 +246,8 @@ s32 lz_decompress_extended(LzDecompressState* state) {
   u16 saved_run_remaining;
   u16 saved_history_index;
   u32 next_ring_index;
-  s32 history_buffer_base;
-  s32 entry_history_buffer_base;
+  u16* history_buffer;
+  u16* entry_history_buffer;
   LzHistoryState history;
   LzHistoryState* history_state;
   u32 run_marker;
@@ -262,25 +259,25 @@ s32 lz_decompress_extended(LzDecompressState* state) {
     /* The first window skips its header and resets both histories. */
     source_cursor = (u16*)state->source_cursor;
     source_cursor = source_cursor + 2;
-    ring_buffer_base = state->ring_buffer_base;
+    control_ring = state->control_ring;
     initial_output = (u16*)state->output_start;
-    history_buffer_base = state->history_buffer_base;
+    history_buffer = state->history_buffer;
     ring_index = 0;
     bit_accumulator = 0x80000000;
     history.history_index = 0;
     history.run_remaining = 0;
     history.output = initial_output;
-    history.history_buffer_base = history_buffer_base;
+    history.history_buffer = history_buffer;
     goto decode_entry;
   }
   initial_output_cursor = (u16*)state->output_cursor;
   __asm__ __volatile__("");
   source_cursor = (u16*)state->source_cursor;
-  ring_buffer_base = state->ring_buffer_base;
+  control_ring = state->control_ring;
   ring_index = state->ring_index;
   history_index = state->history_index;
   initial_run_remaining = state->run_remaining;
-  entry_history_buffer_base = state->history_buffer_base;
+  entry_history_buffer = state->history_buffer;
   do {
     do {
       history.output = initial_output_cursor;
@@ -290,7 +287,7 @@ s32 lz_decompress_extended(LzDecompressState* state) {
     history.history_index = history_index;
   } while (0);
   history.run_remaining = initial_run_remaining;
-  history.history_buffer_base = entry_history_buffer_base;
+  history.history_buffer = entry_history_buffer;
 
 dispatch:
   if (source_cursor < (source_end + (-0x10))) {
@@ -340,11 +337,11 @@ decode_top:
         control_word = *source_cursor;
         source_cursor = source_cursor + 1;
         literal_next_ring_index = ring_index + 1;
-        literal_slot_offset = ring_index * 2;
+        literal_slot_offset = ring_index * sizeof(*control_ring);
         literal_run = history.run_remaining;
         ring_index = literal_next_ring_index & 0x7ff;
-        literal_slot = literal_slot_offset + ring_buffer_base;
-        *((u16*)literal_slot) = control_word;
+        literal_slot = (u16*)(literal_slot_offset + (u32)control_ring);
+        *literal_slot = control_word;
         if (literal_run == 0) {
           run_length = (control_word & 0xff) + 1;
           history.run_remaining = run_length;
@@ -363,7 +360,7 @@ decode_top:
           history.history_index = history.history_index & 0xff;
           output_slot = history.output;
           history.output = output_slot + 1;
-          *((u16*)((history_slot_index * 2) + history.history_buffer_base)) =
+          history.history_buffer[history_slot_index] =
               word_scratch;
           *output_slot = control_word;
           history.run_remaining = history.run_remaining - 1;
@@ -405,12 +402,11 @@ decode_top:
       next_ring_index = ring_index + 1;
       ring_index = next_ring_index & 0x7ff;
       control_word =
-          *((u16*)((((ring_slot_index - reference_word) & 0x7ff) * 2) +
-                   ring_buffer_base));
+          control_ring[(ring_slot_index - reference_word) & 0x7ff];
       reference_run = history.run_remaining;
-      reference_slot_offset = ring_slot_index * 2;
-      reference_slot = reference_slot_offset + ring_buffer_base;
-      *((u16*)reference_slot) = control_word;
+      reference_slot_index = ring_slot_index * sizeof(*control_ring);
+      reference_slot = (u16*)(reference_slot_index + (u32)control_ring);
+      *reference_slot = control_word;
       if (reference_run == 0) {
         run_length = (control_word & 0xff) + 1;
         history.run_remaining = run_length;
@@ -428,7 +424,7 @@ decode_top:
         history.history_index = history.history_index & 0xff;
         output_slot = history.output;
         history.output = output_slot + 1;
-        *((u16*)((history_slot_index * 2) + history.history_buffer_base)) =
+        history.history_buffer[history_slot_index] =
             word_scratch;
         *output_slot = control_word;
         history.run_remaining = history.run_remaining - 1;

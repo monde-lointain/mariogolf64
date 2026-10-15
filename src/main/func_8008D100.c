@@ -1,4 +1,7 @@
 #include "common.h"
+#include "fog.h"
+#include "rom_asset.h"
+#include "session.h"
 
 extern u32 sky_panel_cycle_mode_sel;
 extern s32 D_800C5EE4;
@@ -6,7 +9,6 @@ extern u16* D_800C5EE0;
 extern s32 D_800C7304;
 extern s32 D_800C730C;
 
-extern s32 scenario_state_id;
 extern s32 round_hole_index;
 extern s32 scenario_mode_id;
 extern s32 D_801B609C;
@@ -39,7 +41,7 @@ extern ScissorRect D_801B7F30;
  * (wind magnitude = (rand() & 0x3F) * 6000, wind angle from a second rand),
  * then run the sub-init calls and select framebuffer 2. */
 void init_scenario_state(void) {
-  memset(&scenario_state_id, 0, 0x44);
+  memset(&scenario_state_id, 0, sizeof(scenario_state_id));
   round_hole_index = 9;
   scenario_mode_id = 0;
   D_801B609C = 0;
@@ -65,12 +67,10 @@ INCLUDE_ASM("asm/nonmatchings/main/func_8008D100", func_8008D1DC);
  * primitive and environment colour and its own radius, all sharing one 64x64
  * 8-bit intensity texture under a (PRIM - ENV) * TEXEL0 + ENV combine.
  *
- * Nothing is emitted unless the sun is on screen (the nine early returns) and
- * the fade term `s`, which falls off with the sun's distance from the centre
- * and is capped by the per-scenario limit at `e->field_0x14->field_0x18`, is at
- * least 8. `s` doubles as the primitive alpha and scales every sprite's radius.
+ * The lens-flare fields occupy the same 0x20-byte FogPreset record used by the
+ * debug editor. Its course row and mode/time slot select the record directly.
  *
- * Three spellings below are load-bearing:
+ * Two spellings below are load-bearing:
  *   - `D_800C5F24` / `D_800C5F2C` are subscripted arrays, not scalars, so their
  *     loads conflict with the MEM_IN_STRUCT_P stores through `Gfx *` and stay
  *     inside the sprite loop. As plain scalars loop.c hoists them and the
@@ -79,16 +79,11 @@ INCLUDE_ASM("asm/nonmatchings/main/func_8008D100", func_8008D1DC);
  *     pseudos are numbered ahead of the pipe-sync packets that precede them.
  *     reload1.c hands out spill slots in ascending pseudo number, and the ROM's
  *     Gfx* slots run 0x2C, 0x3C, 0x34, 0x54, 0x4C -- each pair inverted.
- *   - `tod` and `n << 8` are statements of their own, in that order, ahead of
- *     the `q` address. That fixes the emission order of the three independent
- *     computations feeding the entry address: the scheduler front-loads the
- *     `tod` load, and the two shifts then follow in source order.
  */
 extern s32 sky_time_of_day_idx;
 extern f32 D_800C5F24[];
 extern f32 D_800C5F2C[];
 extern f32 D_800C691C;
-extern u8 D_800C6014[];
 extern u32 D_800FE3D4;
 extern s32 D_801B557C;
 extern s32 get_current_course_id(void);
@@ -110,16 +105,16 @@ extern FlarePoint D_800C6920[];
 
 void emit_lens_flare_dl(Gfx** gfxp) {
   Gfx* gfx;
-  u8* e;
-  u8* q;
   f32 dx;
   f32 dy;
   f32 s;
   f32 px;
   f32 py;
-  s32 n;
-  s32 m;
+  FogPreset* e;
+  u8* q;
   s32 tod;
+  s32 m;
+  s32 n;
   s32 i;
   s32 w;
   s32 d;
@@ -137,9 +132,9 @@ void emit_lens_flare_dl(Gfx** gfxp) {
 
   tod = sky_time_of_day_idx;
   n = n << 8;
-  q = D_800C6014 + (((m << 2) + tod) << 5);
-  e = (u8*)(n + (u32)q);
-  if (e[0x11] == 0) {
+  q = (u8*)D_800C6014 + (((m << 2) + tod) << 5);
+  e = (FogPreset*)(n + (u32)q);
+  if (e->lens_flare_enabled == 0) {
     return;
   }
 
@@ -183,8 +178,8 @@ void emit_lens_flare_dl(Gfx** gfxp) {
   if (s < 8.0f) {
     return;
   }
-  if (*(f32*)(*(u32*)(e + 0x14) + 0x18) < s) {
-    s = *(f32*)(*(u32*)(e + 0x14) + 0x18);
+  if (e->flare_cap->flare_alpha_max < s) {
+    s = e->flare_cap->flare_alpha_max;
   }
 
   gDPPipeSync(gfx++);
@@ -276,29 +271,15 @@ s32 lerp_s32(s32 a0, s32 a1, f32 t) {
 INCLUDE_ASM("asm/nonmatchings/main/func_8008D100",
             per_hole_skybox_palette_load);
 
-/* One editable fog/light preset. The three-entry colour arrays are the page's
- * three columns; `a` has a fourth entry because row 3 also edits the blend
- * percentage at 0x10. */
-typedef struct {
-  /* 0x00 */ s32 cc;
-  /* 0x04 */ u8 r[3];
-  /* 0x07 */ u8 g[3];
-  /* 0x0A */ u8 b[3];
-  /* 0x0D */ u8 a[4];
-  /* 0x11 */ u8 unk11[0x0F];
-} FogPreset; /* 0x20 */
-
-/* [time-of-day set][putter mode * 4 + sky slot] */
-/* The preset table itself is `u8 D_800C6014[]` (declared above, and indexed the
- * same way by the sibling emitter). */
+/* The lens-flare emitter and debug editor use distinct fields of the same
+ * 0x20-byte FogPreset table record. */
 /* The preset the page currently edits; re-derived from the selectors below on
  * every frame. */
 extern FogPreset* D_800E3980;
 extern s32 D_800C6CE4; /* cursor row: 0=R 1=G 2=B 3=A 4=fog preset B */
 extern s32 D_800C6CE8; /* cursor column within the row */
-/* Four copies of ten 16-byte light records; only each record's first three
- * bytes (its RGB triple) are rebuilt here. */
-extern u8 D_800C69CC[4][10][0x10];
+/* Four copies of ten 16-byte light records; only each record's RGB triple is
+ * rebuilt here. Their shared layout is declared in fog.h. */
 extern u16 D_800C6C52[];
 /* One five-word record: R, G, B, z-min, z-max. ghidra_symbols.txt names each
  * word separately, so the array carries the first word's name. */
@@ -311,8 +292,6 @@ extern char D_80105118[];
 extern s32 flag_is_set(s32 flag);
 extern void check_and_print_grid(char* str, s32 col, s32 row);
 extern s32 get_current_course_id(void);
-extern u32 get_rom_asset_allocation_size(u16 index, void* out);
-extern void load_rom_asset_payload(void* data, void* slot);
 extern void func_8002A97C(s32 arg0, s32 arg1);
 
 /* Debug fog/light editor page, one frame. Steps the row/column cursor from the
@@ -325,8 +304,7 @@ extern void func_8002A97C(s32 arg0, s32 arg1);
  * Returns 1 when the page ran and 0 when its debug flag is clear; the caller
  * skips the normal sky update on a 1. */
 s32 run_fog_debug_editor(void) {
-  u8 spvar[0x20];
-  u8* q;
+  RomAssetLoad asset;
   s32 refresh;
   s32 n;
   s32 m;
@@ -350,12 +328,11 @@ s32 run_fog_debug_editor(void) {
   }
 
   check_and_print_grid(" ", D_800C6CE4 * 4 + 14, D_800C6CE8 + 5);
-  /* Same three-statement spelling as the sibling emitter above: the `tod` load
-   * and the `n << 8` shift are statements of their own, ahead of `q`. */
+  /* Select the same table record used by the lens-flare emitter. */
   n = get_current_course_id();
   m = putter_mode_flag;
   tod = sky_time_of_day_idx;
-  D_800E3980 = &((FogPreset(*)[8])D_800C6014)[n][(m << 2) + tod];
+  D_800E3980 = &D_800C6014[n][(m << 2) + tod];
 
   if (debug_menu_pad_buttons_c & 0x202) {
     if (D_800C6CE4 > 0) {
@@ -393,29 +370,29 @@ s32 run_fog_debug_editor(void) {
   if (D_800FBDCE & 0x8000) {
     switch (D_800C6CE4) {
       case 0:
-        D_800E3980->r[D_800C6CE8] += 4;
-        D_800E3980->r[D_800C6CE8] %= 0x100;
+        D_800E3980->color_set_t[D_800C6CE8] += 4;
+        D_800E3980->color_set_t[D_800C6CE8] %= 0x100;
         break;
       case 1:
-        D_800E3980->g[D_800C6CE8] += 4;
-        D_800E3980->g[D_800C6CE8] %= 0x100;
+        D_800E3980->color_set_b[D_800C6CE8] += 4;
+        D_800E3980->color_set_b[D_800C6CE8] %= 0x100;
         break;
       case 2:
-        D_800E3980->b[D_800C6CE8] += 4;
-        D_800E3980->b[D_800C6CE8] %= 0x100;
+        D_800E3980->color_set_c[D_800C6CE8] += 4;
+        D_800E3980->color_set_c[D_800C6CE8] %= 0x100;
         break;
       case 3:
-        D_800E3980->a[D_800C6CE8] += 1;
+        D_800E3980->color_set_bg_and_blend[D_800C6CE8] += 1;
         refresh = 1;
         if (D_800C6CE8 == 3) {
-          if (D_800E3980->a[3] == 0x65) {
-            D_800E3980->a[3] = 0;
+          if (D_800E3980->color_set_bg_and_blend[3] == 0x65) {
+            D_800E3980->color_set_bg_and_blend[3] = 0;
           }
-          if (D_800E3980->a[D_800C6CE8] >= 0x66) {
-            D_800E3980->a[D_800C6CE8] = 0x64;
+          if (D_800E3980->color_set_bg_and_blend[D_800C6CE8] >= 0x66) {
+            D_800E3980->color_set_bg_and_blend[D_800C6CE8] = 0x64;
           }
         } else {
-          D_800E3980->a[D_800C6CE8] &= 0x1F;
+          D_800E3980->color_set_bg_and_blend[D_800C6CE8] &= 0x1F;
         }
         break;
       case 4:
@@ -425,29 +402,29 @@ s32 run_fog_debug_editor(void) {
   } else if (D_800FBDCE & 0x4000) {
     switch (D_800C6CE4) {
       case 0:
-        D_800E3980->r[D_800C6CE8] -= 4;
-        D_800E3980->r[D_800C6CE8] %= 0x100;
+        D_800E3980->color_set_t[D_800C6CE8] -= 4;
+        D_800E3980->color_set_t[D_800C6CE8] %= 0x100;
         break;
       case 1:
-        D_800E3980->g[D_800C6CE8] -= 4;
-        D_800E3980->g[D_800C6CE8] %= 0x100;
+        D_800E3980->color_set_b[D_800C6CE8] -= 4;
+        D_800E3980->color_set_b[D_800C6CE8] %= 0x100;
         break;
       case 2:
-        D_800E3980->b[D_800C6CE8] -= 4;
-        D_800E3980->b[D_800C6CE8] %= 0x100;
+        D_800E3980->color_set_c[D_800C6CE8] -= 4;
+        D_800E3980->color_set_c[D_800C6CE8] %= 0x100;
         break;
       case 3:
-        D_800E3980->a[D_800C6CE8] -= 1;
+        D_800E3980->color_set_bg_and_blend[D_800C6CE8] -= 1;
         refresh = 1;
         if (D_800C6CE8 == 3) {
-          if (D_800E3980->a[3] == 0x65) {
-            D_800E3980->a[3] = 0;
+          if (D_800E3980->color_set_bg_and_blend[3] == 0x65) {
+            D_800E3980->color_set_bg_and_blend[3] = 0;
           }
-          if (D_800E3980->a[D_800C6CE8] >= 0x66) {
-            D_800E3980->a[D_800C6CE8] = 0x64;
+          if (D_800E3980->color_set_bg_and_blend[D_800C6CE8] >= 0x66) {
+            D_800E3980->color_set_bg_and_blend[D_800C6CE8] = 0x64;
           }
         } else {
-          D_800E3980->a[D_800C6CE8] &= 0x1F;
+          D_800E3980->color_set_bg_and_blend[D_800C6CE8] &= 0x1F;
         }
         break;
       case 4:
@@ -491,28 +468,28 @@ s32 run_fog_debug_editor(void) {
   do {
     j = 0;
     do {
-      D_800C69CC[i][0][j] = D_800E3980->r[j];
-      D_800C69CC[i][1][j] = D_800E3980->g[j];
-      D_800C69CC[i][2][j] = D_800E3980->g[j];
-      D_800C69CC[i][3][j] = D_800E3980->r[j];
-      D_800C69CC[i][4][j] = D_800E3980->r[j];
-      sum = D_800E3980->r[j] + D_800E3980->g[j];
+      D_800C69CC[i][0].rgb[j] = D_800E3980->color_set_t[j];
+      D_800C69CC[i][1].rgb[j] = D_800E3980->color_set_b[j];
+      D_800C69CC[i][2].rgb[j] = D_800E3980->color_set_b[j];
+      D_800C69CC[i][3].rgb[j] = D_800E3980->color_set_t[j];
+      D_800C69CC[i][4].rgb[j] = D_800E3980->color_set_t[j];
+      sum = D_800E3980->color_set_t[j] + D_800E3980->color_set_b[j];
       tod = (s32)((f32)sum * 0.5f);
-      half = (s32)((f32)(D_800E3980->r[j] + 63) * 0.5f);
+      half = (s32)((f32)(D_800E3980->color_set_t[j] + 63) * 0.5f);
       quarter = (s32)((f32)(tod + 63) * 0.5f);
-      D_800C69CC[i][5][j] = half;
-      D_800C69CC[i][6][j] = quarter;
-      D_800C69CC[i][7][j] = quarter;
-      D_800C69CC[i][8][j] = half;
-      D_800C69CC[i][9][j] = half;
+      D_800C69CC[i][5].rgb[j] = half;
+      D_800C69CC[i][6].rgb[j] = quarter;
+      D_800C69CC[i][7].rgb[j] = quarter;
+      D_800C69CC[i][8].rgb[j] = half;
+      D_800C69CC[i][9].rgb[j] = half;
       j++;
     } while (j != 3);
     i++;
   } while (i != 4);
 
   if (refresh) {
-    get_rom_asset_allocation_size(D_800C6C52[get_current_course_id() * 2], spvar);
-    load_rom_asset_payload(course_panorama_ptr, spvar);
+    get_rom_asset_allocation_size(D_800C6C52[get_current_course_id() * 2], &asset);
+    load_rom_asset_payload(course_panorama_ptr, &asset);
 
     i = 0;
     do {
@@ -522,14 +499,14 @@ s32 run_fog_debug_editor(void) {
       blue = (texel >> 1) & 0x1F;
       alpha = ((u16*)course_panorama_ptr)[i + 4] & 1;
       if (alpha == 0) {
-        red = (D_800E3980->g[0] * 5 + D_800E3980->r[0]) / 48;
-        green = (D_800E3980->g[1] * 5 + D_800E3980->r[1]) / 48;
-        blue = (D_800E3980->g[2] * 5 + D_800E3980->r[2]) / 48;
+        red = (D_800E3980->color_set_b[0] * 5 + D_800E3980->color_set_t[0]) / 48;
+        green = (D_800E3980->color_set_b[1] * 5 + D_800E3980->color_set_t[1]) / 48;
+        blue = (D_800E3980->color_set_b[2] * 5 + D_800E3980->color_set_t[2]) / 48;
       } else {
-        weight = 100 - D_800E3980->a[3];
-        red = (red * weight + D_800E3980->a[0] * D_800E3980->a[3]) / 100;
-        green = (green * weight + D_800E3980->a[1] * D_800E3980->a[3]) / 100;
-        blue = (blue * weight + D_800E3980->a[2] * D_800E3980->a[3]) / 100;
+        weight = 100 - D_800E3980->color_set_bg_and_blend[3];
+        red = (red * weight + D_800E3980->color_set_bg_and_blend[0] * D_800E3980->color_set_bg_and_blend[3]) / 100;
+        green = (green * weight + D_800E3980->color_set_bg_and_blend[1] * D_800E3980->color_set_bg_and_blend[3]) / 100;
+        blue = (blue * weight + D_800E3980->color_set_bg_and_blend[2] * D_800E3980->color_set_bg_and_blend[3]) / 100;
       }
       if (red < 0) {
         red = 0;
@@ -556,19 +533,19 @@ s32 run_fog_debug_editor(void) {
   }
 
   check_and_print_grid("   T   B   C   BG  FOG", 13, 11);
-  sprintf(D_80105118, "R: %3d %3d %3d %3d %4d  ", D_800E3980->r[0],
-          D_800E3980->g[0], D_800E3980->b[0], D_800E3980->a[0],
+  sprintf(D_80105118, "R: %3d %3d %3d %3d %4d  ", D_800E3980->color_set_t[0],
+          D_800E3980->color_set_b[0], D_800E3980->color_set_c[0], D_800E3980->color_set_bg_and_blend[0],
           g_fog_presetB_color_r[0]);
   check_and_print_grid(D_80105118, 13, 12);
-  sprintf(D_80105118, "G: %3d %3d %3d %3d %4d  ", D_800E3980->r[1],
-          D_800E3980->g[1], D_800E3980->b[1], D_800E3980->a[1],
+  sprintf(D_80105118, "G: %3d %3d %3d %3d %4d  ", D_800E3980->color_set_t[1],
+          D_800E3980->color_set_b[1], D_800E3980->color_set_c[1], D_800E3980->color_set_bg_and_blend[1],
           g_fog_presetB_color_r[1]);
   check_and_print_grid(D_80105118, 13, 13);
-  sprintf(D_80105118, "B: %3d %3d %3d %3d %4d  ", D_800E3980->r[2],
-          D_800E3980->g[2], D_800E3980->b[2], D_800E3980->a[2],
+  sprintf(D_80105118, "B: %3d %3d %3d %3d %4d  ", D_800E3980->color_set_t[2],
+          D_800E3980->color_set_b[2], D_800E3980->color_set_c[2], D_800E3980->color_set_bg_and_blend[2],
           g_fog_presetB_color_r[2]);
   check_and_print_grid(D_80105118, 13, 14);
-  sprintf(D_80105118, "A:             %3d %4d  ", D_800E3980->a[3],
+  sprintf(D_80105118, "A:             %3d %4d  ", D_800E3980->color_set_bg_and_blend[3],
           g_fog_presetB_color_r[3]);
   check_and_print_grid(D_80105118, 13, 15);
   sprintf(D_80105118, "CC:%d               %4d  ", D_800E3980->cc,

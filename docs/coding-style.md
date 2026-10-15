@@ -69,6 +69,39 @@ Use the existing project structures and interfaces. New abstractions are useful 
 ownership or remove duplication, but avoid changing data layout, symbol visibility, or access
 patterns in a matched region without confirming the emitted result.
 
+### Recovered main-bank layouts
+
+Keep cross-file contracts in their existing owner header; keep genuinely private records in their
+translation unit. These headers describe observed target layouts, not host-native serialized data:
+
+| Header | Shared records |
+| --- | --- |
+| [`animation.h`](../src/main/animation.h) | Character state, model-resource prefix, keyframe tracks, texture-animation records |
+| [`club.h`](../src/main/club.h) | Live `ClubShot` and separate `ClubDistancePreset` table rows |
+| [`controller.h`](../src/main/controller.h) | Processed controller state and six-byte repeat slots |
+| [`fog.h`](../src/main/fog.h) | Fog/color presets, light records, lens-flare-cap prefix |
+| [`rom_asset.h`](../src/main/rom_asset.h) | ROM read cursor and its enclosing compressed-asset load record |
+| [`session.h`](../src/main/session.h) | Player/scenario state, saved mode records, per-scenario statistics |
+| [`terrain.h`](../src/main/terrain.h) | Terrain attributes and scenery collision cylinders |
+| [`vector.h`](../src/main/vector.h) | Shared `Vec3f` position, rotation, scale, and velocity values |
+
+Name fields from multiple consumers, preserving target width, signedness, units, and sentinel values.
+Use `unknown_XX` for an unestablished meaning instead of promoting a plausible guess. In particular,
+the statistics buckets select characters, not holes; a scenery cylinder's sprite index is not a
+boolean active flag; and a ROM asset's decode envelope is not a second interchangeable read slot.
+
+Interior linker labels do not imply independent allocations. For example, the player score/status
+labels belong to `PlayerState`, `polychara_state` names `CharacterState.resource_index`, and the sky
+position/texture-coordinate labels belong to the same `Vtx` array. Prefer the enclosing record or
+actual member array when it matches.
+
+GCC 2.7.2 distinguishes component accesses, scalar pointer views, and address roots. A measured
+exception may therefore use a scalar walk rooted at `&records[0].member`, or an explicitly documented
+address projection, while retaining the canonical record definition and its stride. Preserve the
+required induction/control shape; do not introduce duplicate padded types or pretend an interior
+label owns separate storage just to recover codegen. Isolated comparisons guide iteration;
+`tools/verify-rom.sh` remains the bank authority.
+
 ## Control flow
 
 Write control flow that is clear and defined, then compare it with the target. Equivalent `if`,

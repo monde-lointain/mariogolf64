@@ -1,15 +1,24 @@
-#include "common.h"
+#include "terrain.h"
 
 extern s32 get_dominant_terrain_attribute(s32, s32, s32);
 extern s32 get_interpolated_terrain_height(s32, s32);
 extern void load_hole_terrain_assets(void);
-extern void* get_table_entry(u32);
+extern TerrainAttrEntry* get_table_entry(u32);
 extern s16* get_direct_grid_vertex(s32, s32);
 extern s16 g_terrain_grid_verts[];
-extern s32 resolve_club_terrain_mask(s32, void*);
 
+/* Grid vertex, 0x10-byte stride. */
 typedef struct {
-  s16 unk[8];
+  /* 0x00 */ s16 x;
+  /* 0x02 */ s16 height;
+  /* 0x04 */ s16 z;
+  /* 0x06 */ s16 vertex_flags;
+  /* 0x08 */ s16 texture_s;
+  /* 0x0A */ s16 texture_t;
+  /* 0x0C */ u8 color_r;
+  /* 0x0D */ u8 color_g;
+  /* 0x0E */ u8 color_b;
+  /* 0x0F */ u8 color_a;
 } GridVertex;
 
 /* get_tile_attribute: minimap-color -> tile-attribute lookup. Clamp x to
@@ -33,16 +42,10 @@ typedef struct {
 INCLUDE_ASM("asm/nonmatchings/main/get_tile_attribute", get_tile_attribute);
 
 typedef struct {
-  s8 r, g, b, unk;
+  s8 r, g, b, alpha;
 } ColorEntry;
 
 extern ColorEntry D_800BB040[];
-/* ci8_to_rgba5551 reads the palette columns via per-field offset-0 symbols so
- * GCC re-materializes %hi/%lo per load (matches the ROM); stride 4 = sizeof
- * ColorEntry, indexed by palette_idx*4. */
-extern s8 D_800BB041[];
-extern s8 D_800BB042[];
-extern s8 D_800BB043[];
 
 s32 find_closest_palette_index(s32 color) {
   s32 best_dist;
@@ -116,28 +119,30 @@ s32 ci8_to_rgba5551(s32 index) {
       palette_idx = 10;
       break;
   }
-  palette_idx <<= 2;
+  /* Member-rooted scalar walks retain the retail separate address roots. */
+  palette_idx *= sizeof(ColorEntry);
   {
-    s32 r = ((s8*)D_800BB040)[palette_idx];
-    s32 g = D_800BB041[palette_idx];
-    s32 b = D_800BB042[palette_idx];
-    return (r << 11) | (g << 6) | (b << 1) | D_800BB043[palette_idx];
+    s32 r = *(&D_800BB040[0].r + palette_idx);
+    s32 g = *(&D_800BB040[0].g + palette_idx);
+    s32 b = *(&D_800BB040[0].b + palette_idx);
+    return (r << 11) | (g << 6) | (b << 1) | *(&D_800BB040[0].alpha + palette_idx);
   }
 }
 
 INCLUDE_ASM("asm/nonmatchings/main/get_tile_attribute", func_800402F4);
 
-void load_club_offset_pair(s8* club, s32* state, s32* out) {
-  s32 mask = resolve_club_terrain_mask(1, club);
+void load_club_offset_pair(TerrainAttrEntry* terrain, s32* state,
+                           s32* out) {
+  s32 mask = resolve_club_terrain_mask(1, terrain);
   if (state[2] & mask) {
-    out[0] = club[8];
-    out[1] = club[9];
+    out[0] = (s8)terrain->traction_drag;
+    out[1] = (s8)terrain->traction_grip;
   } else {
-    out[0] = club[8] - club[0xA];
+    out[0] = (s8)terrain->traction_drag - (s8)terrain->slope_roughness;
     if (out[0] < 5) {
       out[0] = 5;
     }
-    out[1] = club[9] - club[0xA];
+    out[1] = (s8)terrain->traction_grip - (s8)terrain->slope_roughness;
     if (out[1] < 5) {
       out[1] = 5;
     }
@@ -189,35 +194,35 @@ s32 func_80041058(s32 x, s32 unused, s32 z) {
 }
 
 void average_grid_vertices(s16* a, s16* b, s16* out) {
-  u8* ab = (u8*)a;
-  u8* bb = (u8*)b;
-  u8* ob = (u8*)out;
-  out[0] = (a[0] + b[0]) / 2;
-  out[1] = (a[1] + b[1]) / 2;
-  out[2] = (a[2] + b[2]) / 2;
-  out[3] = 0;
-  out[4] = (a[4] + b[4]) / 2;
-  out[5] = (a[5] + b[5]) / 2;
-  ob[0xC] = (ab[0xC] + bb[0xC]) / 2;
-  ob[0xD] = (ab[0xD] + bb[0xD]) / 2;
-  ob[0xE] = (ab[0xE] + bb[0xE]) / 2;
-  ob[0xF] = (ab[0xF] + bb[0xF]) / 2;
+  GridVertex* av = (GridVertex*)a;
+  GridVertex* bv = (GridVertex*)b;
+  GridVertex* ov = (GridVertex*)out;
+  ov->x = (av->x + bv->x) / 2;
+  ov->height = (av->height + bv->height) / 2;
+  ov->z = (av->z + bv->z) / 2;
+  ov->vertex_flags = 0;
+  ov->texture_s = (av->texture_s + bv->texture_s) / 2;
+  ov->texture_t = (av->texture_t + bv->texture_t) / 2;
+  ov->color_r = (av->color_r + bv->color_r) / 2;
+  ov->color_g = (av->color_g + bv->color_g) / 2;
+  ov->color_b = (av->color_b + bv->color_b) / 2;
+  ov->color_a = (av->color_a + bv->color_a) / 2;
 }
 
 void lerp_grid_vertices(s16* a, s16* b, s16* out, s32 t) {
-  u8* ab = (u8*)a;
-  u8* bb = (u8*)b;
-  u8* ob = (u8*)out;
-  out[0] = (a[0] * (16 - t) + b[0] * t) / 16;
-  out[1] = (a[1] * (16 - t) + b[1] * t) / 16;
-  out[2] = (a[2] * (16 - t) + b[2] * t) / 16;
-  out[3] = 0;
-  out[4] = (a[4] * (16 - t) + b[4] * t) / 16;
-  out[5] = (a[5] * (16 - t) + b[5] * t) / 16;
-  ob[0xC] = (ab[0xC] * (16 - t) + bb[0xC] * t) / 16;
-  ob[0xD] = (ab[0xD] * (16 - t) + bb[0xD] * t) / 16;
-  ob[0xE] = (ab[0xE] * (16 - t) + bb[0xE] * t) / 16;
-  ob[0xF] = (ab[0xF] * (16 - t) + bb[0xF] * t) / 16;
+  GridVertex* av = (GridVertex*)a;
+  GridVertex* bv = (GridVertex*)b;
+  GridVertex* ov = (GridVertex*)out;
+  ov->x = (av->x * (16 - t) + bv->x * t) / 16;
+  ov->height = (av->height * (16 - t) + bv->height * t) / 16;
+  ov->z = (av->z * (16 - t) + bv->z * t) / 16;
+  ov->vertex_flags = 0;
+  ov->texture_s = (av->texture_s * (16 - t) + bv->texture_s * t) / 16;
+  ov->texture_t = (av->texture_t * (16 - t) + bv->texture_t * t) / 16;
+  ov->color_r = (av->color_r * (16 - t) + bv->color_r * t) / 16;
+  ov->color_g = (av->color_g * (16 - t) + bv->color_g * t) / 16;
+  ov->color_b = (av->color_b * (16 - t) + bv->color_b * t) / 16;
+  ov->color_a = (av->color_a * (16 - t) + bv->color_a * t) / 16;
 }
 
 s16* get_direct_grid_vertex(s32 col, s32 row) {
@@ -235,32 +240,32 @@ s16* get_direct_grid_vertex(s32 col, s32 row) {
 s16 func_800413A0(s32 x, s32 z) { return get_direct_grid_vertex(x, z)[1]; }
 
 void init_grid_vertex(s32 col, s32 row, s32 height, s32 color) {
-  s16* vtx = get_direct_grid_vertex(col, row);
-  vtx[0] = col << 8;
-  vtx[2] = row << 8;
-  vtx[1] = height & 0xFFFE;
-  vtx[3] = 0;
-  vtx[4] = (col << 10) + 0x20;
-  vtx[5] = (row << 10) + 0x20;
+  GridVertex* vtx = (GridVertex*)get_direct_grid_vertex(col, row);
+  vtx->x = col << 8;
+  vtx->z = row << 8;
+  vtx->height = height & 0xFFFE;
+  vtx->vertex_flags = 0;
+  vtx->texture_s = (col << 10) + 0x20;
+  vtx->texture_t = (row << 10) + 0x20;
   if (row == 0x20) {
-    vtx[5] = 0x7FFF;
+    vtx->texture_t = 0x7FFF;
   }
-  ((u8*)vtx)[0xC] = color;
-  ((u8*)vtx)[0xD] = color;
-  ((u8*)vtx)[0xE] = color;
-  ((u8*)vtx)[0xF] = 0xFF;
+  vtx->color_r = color;
+  vtx->color_g = color;
+  vtx->color_b = color;
+  vtx->color_a = 0xFF;
 }
 
 void func_80041464(s32 x, s32 z, s32 value) {
-  s16* vtx = get_direct_grid_vertex(x, z);
-  vtx[1] = value & 0xFFFE;
+  GridVertex* vtx = (GridVertex*)get_direct_grid_vertex(x, z);
+  vtx->height = value & 0xFFFE;
 }
 
 void func_80041490(s32 x, s32 z, s32 value) {
-  u8* vtx = (u8*)get_direct_grid_vertex(x, z);
-  vtx[0xC] = value;
-  vtx[0xD] = value;
-  vtx[0xE] = value;
+  GridVertex* vtx = (GridVertex*)get_direct_grid_vertex(x, z);
+  vtx->color_r = value;
+  vtx->color_g = value;
+  vtx->color_b = value;
 }
 
 void set_direct_grid_vertex(s32 col, s32 row, GridVertex* src) {
@@ -269,17 +274,7 @@ void set_direct_grid_vertex(s32 col, s32 row, GridVertex* src) {
 }
 
 typedef struct {
-  s8 pad0[2];
-  s16 attr; /* 0x2 */
-  s8 pad4[8];
-  s8 c; /* 0xC */
-  s8 d; /* 0xD */
-  s8 e; /* 0xE */
-  s8 f; /* 0xF */
-} TileEntry;
-
-typedef struct {
-  TileEntry sub[16];
+  GridVertex vertices[16];
 } Tile;
 
 extern s32 g_terrain_tile_lod_selector[];
@@ -290,7 +285,7 @@ extern u8 D_800BA9B4[];
 
 /* Odd grid coordinates use the subdivided tiles. The far row/column select
  * the preceding tile's edge vertex; even coordinates use the direct grid.
- * Scratch reuse keeps the coordinate/address chains in the ROM's registers. */
+ * Coordinate/address scratch reuse preserves the retail scheduling. */
 s16* get_terrain_vertex_pointer(u32 col, u32 row) {
   if ((col | row) & 1) {
     u32 row_hi, row_lo, col_hi, col_lo;
@@ -310,15 +305,15 @@ s16* get_terrain_vertex_pointer(u32 col, u32 row) {
     }
     row_hi <<= 3;
     row_hi += col_hi;
-    row_hi <<= 8;
+    row_hi *= sizeof(Tile);
     col = (u32)D_800BA9B0;
-    col_hi = row_lo << 3;
+    col_hi = row_lo * sizeof(D_800BA9B0[0]);
     col_hi += col;
     col_hi += col_lo;
     col_hi = *(u8*)col_hi;
-    col = (u32)D_80185220;
+    col = (u32)&D_80185220[0].vertices[0];
     row_hi += col;
-    col_hi <<= 4;
+    col_hi *= sizeof(GridVertex);
     return (s16*)(row_hi + col_hi);
   }
   return get_direct_grid_vertex(col >> 1, row >> 1);
@@ -328,8 +323,8 @@ s16* get_terrain_vertex_pointer(u32 col, u32 row) {
   {                                                  \
     sel = g_terrain_tile_lod_selector[(tile) * 640]; \
     if (sel >= 0) {                                  \
-      tb = (u8*)D_80185220 + (sel << 8);             \
-      dst = (GridVertex*)(tb + ((k) << 4));          \
+      Tile* tile_record = &D_80185220[sel];          \
+      dst = tile_record->vertices + (k);             \
       *dst = *src;                                   \
     }                                                \
   }
@@ -337,7 +332,6 @@ s16* get_terrain_vertex_pointer(u32 col, u32 row) {
 s32 set_lod_grid_vertex(s32 col, s32 row, GridVertex* src) {
   s32 tile;
   s32 sel;
-  u8* tb;
   GridVertex* dst;
 
   if ((col | row) & 1) {
@@ -374,7 +368,7 @@ s32 set_lod_grid_vertex(s32 col, s32 row, GridVertex* src) {
 s32 set_lod_tile_attribute(s32 x, s32 z, s32 attr, s32 val) {
   s32 row;
   s32 sel;
-  TileEntry* p;
+  GridVertex* p;
 
   if ((x | z) & 1) {
     if ((z < 0x40) & (x < 0x20)) {
@@ -382,9 +376,9 @@ s32 set_lod_tile_attribute(s32 x, s32 z, s32 attr, s32 val) {
       sel = g_terrain_tile_lod_selector[row * 640];
       if (sel >= 0) {
         Tile* t = &D_80185220[sel];
-        p = &t->sub[D_800BA9B0[z & 3][x & 3]];
-        p->attr = attr;
-        p->c = p->d = p->e = val;
+        p = &t->vertices[D_800BA9B0[z & 3][x & 3]];
+        p->height = attr;
+        p->color_r = p->color_g = p->color_b = val;
       }
     }
     if (x & 1) {
@@ -395,9 +389,9 @@ s32 set_lod_tile_attribute(s32 x, s32 z, s32 attr, s32 val) {
           sel = g_terrain_tile_lod_selector[row * 640];
           if (sel >= 0) {
             Tile* t = &D_80185220[sel];
-            p = &t->sub[D_800BA9D0[x & 3]];
-            p->attr = attr;
-            p->c = p->d = p->e = val;
+            p = &t->vertices[D_800BA9D0[x & 3]];
+            p->height = attr;
+            p->color_r = p->color_g = p->color_b = val;
           }
         }
       }
@@ -411,9 +405,9 @@ s32 set_lod_tile_attribute(s32 x, s32 z, s32 attr, s32 val) {
           sel = g_terrain_tile_lod_selector[row * 640];
           if (sel >= 0) {
             Tile* t = &D_80185220[sel];
-            p = &t->sub[D_800BA9B4[(z & 3) * 8]];
-            p->attr = attr;
-            p->c = p->d = p->e = val;
+            p = &t->vertices[D_800BA9B4[(z & 3) * 8]];
+            p->height = attr;
+            p->color_r = p->color_g = p->color_b = val;
           }
         }
       }
@@ -570,19 +564,7 @@ INCLUDE_ASM("asm/nonmatchings/main/get_tile_attribute", func_800425C8);
 
 s32 func_80042720(void) { return (u32)&load_hole_terrain_assets > 0x803FFFFFU; }
 
-typedef struct {
-  s16 val;
-  s8 pad[0xE];
-} CylFieldS16;
-
-typedef struct {
-  s8 val;
-  s8 pad[0xF];
-} CylFieldS8;
-
-extern CylFieldS16 collision_cylinders[];
-extern CylFieldS16 D_800FBEA4[];
-extern CylFieldS8 D_800FBEA6[];
+extern SceneryCylinder collision_cylinders[];
 
 void mark_scenery_collision_cells(void) {
   s32 mark = 0xF801;
@@ -594,11 +576,11 @@ void mark_scenery_collision_cells(void) {
     s32 sx, sz;
     s32 block;
 
-    if (D_800FBEA6[i].val < 0) {
+    if (collision_cylinders[i].sprite_index < 0) {
       continue;
     }
-    gx = collision_cylinders[i].val / 16;
-    gz = D_800FBEA4[i].val / 16;
+    gx = collision_cylinders[i].x / 16;
+    gz = collision_cylinders[i].z / 16;
     block = (((u32)gx >> 5) + ((u32)gz >> 5) * 8) * 2560;
     sx = gx & 0x1F;
     sz = gz & 0x1F;

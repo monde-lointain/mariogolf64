@@ -1,5 +1,9 @@
 #include "common.h"
 
+#include "animation.h"
+#include "terrain.h"
+#include "vector.h"
+
 extern s32 D_800E4C5C;
 extern s8 D_800E4CC8;
 /* The best candidate position found so far: three consecutive words, and one
@@ -21,27 +25,8 @@ extern Light D_800C73B0[3];
 
 extern s32 D_800E4CA4;
 
-/* One scenery collision cylinder record. The sibling decomp in
- * src/main/func_80026400.c models these as parallel per-field arrays so each
- * field materialises its own symbol; here a single walking record is the right
- * view, because the ROM keeps one base register and reaches every field by
- * displacement. */
-typedef struct {
-  /* 0x00 */ s16 x;
-  /* 0x02 */ s16 unk_02;
-  /* 0x04 */ s16 z;
-  /* 0x06 */ s8 unk_06[6];
-  /* 0x0C */ u16 radius;
-  /* 0x0E */ s8 unk_0E[2];
-} CollisionCyl; /* 0x10 */
-
-extern CollisionCyl collision_cylinders[];
-
-typedef struct {
-  /* 0x00 */ f32 x;
-  /* 0x04 */ f32 y;
-  /* 0x08 */ f32 z;
-} Vec3f; /* 0x0C */
+/* Scenery cylinder records share their canonical layout with terrain code. */
+extern SceneryCylinder collision_cylinders[];
 
 /* The camera record the shot-view builders fill in: the eye position followed
  * by the point it looks at. func_80095A68 takes both, so the two vectors are
@@ -62,13 +47,11 @@ extern f64 D_800D1EC8;
 extern f64 D_800D1ED0;
 
 extern s32 func_80056494(s32 arg0, s32 arg1);
-extern u8* get_character_state(s32 id);
 extern s32 flag_is_set(s32 flag);
 extern f32 func_80095A10(f32 near, f32 far, f32 t);
 extern void func_80095A68(GolfCamera* cam, Vec3f* at, f32 arg2, s32 arg3);
 extern void func_8009676C(GolfCamera* cam);
 extern void func_80079358(s32 player, s32 arg1);
-extern void func_8005483C(s32 player, s32 arg1, Vec3f* out);
 extern void play_sound_effect(s32 sfx, s32 arg1, s32 arg2);
 extern s32 get_interpolated_terrain_height_wrapper(s32 x, s32 z);
 extern u32 calculate_hypotenuse_safe(s32 x, s32 y);
@@ -497,7 +480,7 @@ void func_800967F4(s32 player, GolfCamera* cam) {
   f32 unused[16];
   Vec3f dir;
   Vec3f base;
-  u8* cs;
+  CharacterState* cs;
   f32 follow_dist;
   f32 ground;
   f32 len;
@@ -554,13 +537,13 @@ void func_800967F4(s32 player, GolfCamera* cam) {
   cam->at.x = pos.x;
   cam->at.y = pos.y;
   cam->at.z = pos.z;
-  cam->eye.x = pos.x + cosf(-*(f32*)(cs + 0x48) - 1.57079637f) * follow_dist *
+  cam->eye.x = pos.x + cosf(-cs->rotation.y - 1.57079637f) * follow_dist *
                            (1.0f / 1024.0f);
   cam->eye.y = pos.y + -1.5f;
   if (D_800E4C54 == 14) {
     cam->eye.y = pos.y + -7.5f;
   }
-  cam->eye.z = pos.z + sinf(-*(f32*)(cs + 0x48) - 1.57079637f) * follow_dist *
+  cam->eye.z = pos.z + sinf(-cs->rotation.y - 1.57079637f) * follow_dist *
                            (1.0f / 1024.0f);
   func_8009676C(cam);
   func_80095A68(cam, &cam->at, 0.1f, 3);
@@ -578,7 +561,7 @@ void func_800967F4(s32 player, GolfCamera* cam) {
 void func_80096C04(s32 player, GolfCamera* cam) {
   Vec3f pos;
   f32 unused[16];
-  u8* cs;
+  CharacterState* cs;
   f32 follow_dist;
   f32 ground;
 
@@ -614,9 +597,9 @@ void func_80096C04(s32 player, GolfCamera* cam) {
   cam->at.x = pos.x;
   cam->at.y = pos.y;
   cam->at.z = pos.z;
-  cam->eye.x = pos.x + cosf(-*(f32*)(cs + 0x48) - 1.57079637f) * follow_dist *
+  cam->eye.x = pos.x + cosf(-cs->rotation.y - 1.57079637f) * follow_dist *
                            (1.0f / 1024.0f);
-  cam->eye.z = pos.z + sinf(-*(f32*)(cs + 0x48) - 1.57079637f) * follow_dist *
+  cam->eye.z = pos.z + sinf(-cs->rotation.y - 1.57079637f) * follow_dist *
                            (1.0f / 1024.0f);
   switch (D_800E4C54) {
     case 12:
@@ -645,7 +628,7 @@ void func_80096C04(s32 player, GolfCamera* cam) {
 void func_80096F44(s32 player, GolfCamera* cam) {
   Vec3f pos;
   f32 unused[16];
-  u8* cs;
+  CharacterState* cs;
   f32 follow_dist;
   f32 ground;
   f32 aim;
@@ -667,10 +650,10 @@ void func_80096F44(s32 player, GolfCamera* cam) {
   cam->at.x = pos.x;
   cam->at.y = pos.y;
   cam->at.z = pos.z;
-  cam->eye.x = pos.x + cosf(-*(f32*)(cs + 0x48) - 1.57079637f) * follow_dist *
+  cam->eye.x = pos.x + cosf(-cs->rotation.y - 1.57079637f) * follow_dist *
                            (1.0f / 1024.0f);
   cam->eye.y = pos.y;
-  cam->eye.z = pos.z + sinf(-*(f32*)(cs + 0x48) - 1.57079637f) * follow_dist *
+  cam->eye.z = pos.z + sinf(-cs->rotation.y - 1.57079637f) * follow_dist *
                            (1.0f / 1024.0f);
   func_8009676C(cam);
   func_80095A68(cam, &cam->at, 0.1f, 3);
@@ -706,7 +689,7 @@ void func_80096F44(s32 player, GolfCamera* cam) {
 void func_80097218(s32 player, GolfCamera* cam) {
   Vec3f pos;
   f32 unused[16];
-  u8* cs;
+  CharacterState* cs;
   f32 follow_dist;
   f32 ground;
 
@@ -731,14 +714,14 @@ void func_80097218(s32 player, GolfCamera* cam) {
   cam->at.x = pos.x;
   cam->at.y = pos.y;
   cam->at.z = pos.z;
-  cam->eye.x = pos.x + cosf(-*(f32*)(cs + 0x48) - 1.57079637f) * follow_dist *
+  cam->eye.x = pos.x + cosf(-cs->rotation.y - 1.57079637f) * follow_dist *
                            (1.0f / 1024.0f);
   if (D_800E4C54 == 15) {
     cam->eye.y = pos.y;
   } else {
     cam->eye.y = pos.y + -15.0f;
   }
-  cam->eye.z = pos.z + sinf(-*(f32*)(cs + 0x48) - 1.57079637f) * follow_dist *
+  cam->eye.z = pos.z + sinf(-cs->rotation.y - 1.57079637f) * follow_dist *
                            (1.0f / 1024.0f);
   func_8009676C(cam);
   func_80095A68(cam, &cam->at, 0.1f, 3);
@@ -760,7 +743,7 @@ void func_80097218(s32 player, GolfCamera* cam) {
 void func_800974D8(s32 player, GolfCamera* cam) {
   Vec3f pos;
   f32 unused[16];
-  u8* cs;
+  CharacterState* cs;
   f32 follow_dist;
   f32 ground;
 
@@ -785,9 +768,9 @@ void func_800974D8(s32 player, GolfCamera* cam) {
   cam->at.x = pos.x;
   cam->at.y = pos.y;
   cam->at.z = pos.z;
-  cam->eye.x = pos.x + cosf(-*(f32*)(cs + 0x48) - 1.57079637f) * follow_dist *
+  cam->eye.x = pos.x + cosf(-cs->rotation.y - 1.57079637f) * follow_dist *
                            (1.0f / 1024.0f);
-  cam->eye.z = pos.z + sinf(-*(f32*)(cs + 0x48) - 1.57079637f) * follow_dist *
+  cam->eye.z = pos.z + sinf(-cs->rotation.y - 1.57079637f) * follow_dist *
                            (1.0f / 1024.0f);
 
   /* The 0.1 aim pass is spelled out in both the mode-12 arm and the default arm
@@ -829,7 +812,7 @@ void func_800974D8(s32 player, GolfCamera* cam) {
 void func_800977E0(s32 player, GolfCamera* cam) {
   Vec3f pos;
   f32 unused[16];
-  u8* cs;
+  CharacterState* cs;
   f32 follow_dist;
   f32 ground;
 
@@ -847,10 +830,10 @@ void func_800977E0(s32 player, GolfCamera* cam) {
   cam->at.x = pos.x;
   cam->at.y = pos.y;
   cam->at.z = pos.z;
-  cam->eye.x = pos.x + cosf(-*(f32*)(cs + 0x48) - 1.57079637f) * follow_dist *
+  cam->eye.x = pos.x + cosf(-cs->rotation.y - 1.57079637f) * follow_dist *
                            (1.0f / 1024.0f);
   cam->eye.y = pos.y + -7.5f;
-  cam->eye.z = pos.z + sinf(-*(f32*)(cs + 0x48) - 1.57079637f) * follow_dist *
+  cam->eye.z = pos.z + sinf(-cs->rotation.y - 1.57079637f) * follow_dist *
                            (1.0f / 1024.0f);
   func_8009676C(cam);
   func_80095A68(cam, &cam->at, 0.1f, 3);
@@ -863,7 +846,7 @@ void func_800977E0(s32 player, GolfCamera* cam) {
 void func_80097A08(s32 player, GolfCamera* cam) {
   Vec3f pos;
   f32 unused[16];
-  u8* cs;
+  CharacterState* cs;
   f32 follow_dist;
   f32 ground;
 
@@ -880,10 +863,10 @@ void func_80097A08(s32 player, GolfCamera* cam) {
   cam->at.x = pos.x;
   cam->at.y = pos.y;
   cam->at.z = pos.z;
-  cam->eye.x = pos.x + cosf(-*(f32*)(cs + 0x48) - 1.57079637f) * follow_dist *
+  cam->eye.x = pos.x + cosf(-cs->rotation.y - 1.57079637f) * follow_dist *
                            (1.0f / 1024.0f);
   cam->eye.y = pos.y + 1.5f;
-  cam->eye.z = pos.z + sinf(-*(f32*)(cs + 0x48) - 1.57079637f) * follow_dist *
+  cam->eye.z = pos.z + sinf(-cs->rotation.y - 1.57079637f) * follow_dist *
                            (1.0f / 1024.0f);
   func_8009676C(cam);
   func_80095A68(cam, &cam->at, 0.08f, 3);
@@ -898,7 +881,7 @@ INCLUDE_ASM("asm/nonmatchings/main/func_80095A10", func_80097C18);
 void func_80097E30(s32 player, GolfCamera* cam) {
   Vec3f pos;
   f32 unused[16];
-  u8* cs;
+  CharacterState* cs;
   f32 follow_dist;
   f32 ground;
 
@@ -918,10 +901,10 @@ void func_80097E30(s32 player, GolfCamera* cam) {
   cam->at.x = pos.x;
   cam->at.y = pos.y;
   cam->at.z = pos.z;
-  cam->eye.x = pos.x + cosf(-*(f32*)(cs + 0x48) - 1.57079637f) * follow_dist *
+  cam->eye.x = pos.x + cosf(-cs->rotation.y - 1.57079637f) * follow_dist *
                            (1.0f / 1024.0f);
   cam->eye.y = pos.y + 1.5f;
-  cam->eye.z = pos.z + sinf(-*(f32*)(cs + 0x48) - 1.57079637f) * follow_dist *
+  cam->eye.z = pos.z + sinf(-cs->rotation.y - 1.57079637f) * follow_dist *
                            (1.0f / 1024.0f);
   func_8009676C(cam);
   func_80095A68(cam, &cam->at, 0.1f, 3);
@@ -934,7 +917,7 @@ void func_80097E30(s32 player, GolfCamera* cam) {
 void func_8009806C(s32 player, GolfCamera* cam) {
   Vec3f pos;
   f32 unused[16];
-  u8* cs;
+  CharacterState* cs;
   f32 follow_dist;
   f32 ground;
 
@@ -960,10 +943,10 @@ void func_8009806C(s32 player, GolfCamera* cam) {
   cam->at.x = pos.x;
   cam->at.y = pos.y;
   cam->at.z = pos.z;
-  cam->eye.x = pos.x + cosf(-*(f32*)(cs + 0x48) - 1.57079637f) * follow_dist *
+  cam->eye.x = pos.x + cosf(-cs->rotation.y - 1.57079637f) * follow_dist *
                            (1.0f / 1024.0f);
   cam->eye.y = pos.y + 1.5f;
-  cam->eye.z = pos.z + sinf(-*(f32*)(cs + 0x48) - 1.57079637f) * follow_dist *
+  cam->eye.z = pos.z + sinf(-cs->rotation.y - 1.57079637f) * follow_dist *
                            (1.0f / 1024.0f);
   func_8009676C(cam);
   func_80095A68(cam, &cam->at, 0.1f, 3);
@@ -977,7 +960,7 @@ void func_8009806C(s32 player, GolfCamera* cam) {
 void func_80098310(s32 player, GolfCamera* cam) {
   Vec3f pos;
   f32 unused[16];
-  u8* cs;
+  CharacterState* cs;
   f32 follow_dist;
   f32 swing;
   f32 ground;
@@ -1005,10 +988,10 @@ void func_80098310(s32 player, GolfCamera* cam) {
     swing = 0.0f;
   }
 
-  cam->eye.x = pos.x + cosf(swing - *(f32*)(cs + 0x48) - 1.57079637f) *
+  cam->eye.x = pos.x + cosf(swing - cs->rotation.y - 1.57079637f) *
                            follow_dist * (1.0f / 1024.0f);
   cam->eye.y = pos.y + 1.5f;
-  cam->eye.z = pos.z + sinf(swing - *(f32*)(cs + 0x48) - 1.57079637f) *
+  cam->eye.z = pos.z + sinf(swing - cs->rotation.y - 1.57079637f) *
                            follow_dist * (1.0f / 1024.0f);
   func_8009676C(cam);
   func_80095A68(cam, &cam->at, 0.3f, 3);
@@ -1069,7 +1052,7 @@ s32 func_80098758(s32* pos) {
   if (D_800E4CC8 == 0) {
     blocked = 0;
     for (i = 0; i < 0x80; i++) {
-      CollisionCyl* cyl = &collision_cylinders[i];
+      SceneryCylinder* cyl = &collision_cylinders[i];
       distance = calculate_hypotenuse_safe((cyl->x << 10) - pos[0],
                                            (cyl->z << 10) - pos[2]);
       distance -= cyl->radius << 10;

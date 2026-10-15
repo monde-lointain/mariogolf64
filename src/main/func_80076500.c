@@ -1,10 +1,5 @@
 #include "common.h"
-
-typedef struct {
-  f32 x;
-  f32 y;
-  f32 z;
-} Vec3f;
+#include "vector.h"
 
 extern Vec3f vector_reference_first;
 extern Vec3f vector_reference_second;

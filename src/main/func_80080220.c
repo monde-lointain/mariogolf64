@@ -1,4 +1,20 @@
 #include "common.h"
+#include "club.h"
+#include "session.h"
+#include "rom_asset.h"
+#include "terrain.h"
+#include "vector.h"
+
+typedef struct {
+  s32 x;
+  s32 y;
+  s32 depth;
+} EffectScreenPosition; /* 0x0C */
+
+/* D_800E3374 and D_800E3378 alias y and z within these records. */
+extern Vec3f D_800E3370[128];
+/* D_800E2D74 and D_800E2D78 alias y and depth within these records. */
+extern EffectScreenPosition D_800E2D70[128];
 
 extern u32 sky_panel_bank_index;
 extern void free_pin_render_assets(void);
@@ -24,9 +40,7 @@ extern void func_8008085C(void);
 extern void func_8008C658(void);
 extern s32 effect_spawn_pos[];
 extern s32 D_800C5AA8;
-extern f32 D_800E3370;
-extern f32 D_800E3374;
-extern f32 D_800E3378;
+
 extern s32 flag_is_set(s32 flag);
 extern void check_and_print_grid(char* str, s32 col, s32 row);
 extern u16 debug_menu_pad_buttons_c;
@@ -34,15 +48,6 @@ extern s32 D_800C5AD0;
 extern char D_80105118[];
 extern char D_800D1B70[];
 
-typedef struct {
-  /* 0x0 */ u32 start;
-  /* 0x4 */ u32 size;
-  /* 0x8 */ u32 pos;
-  /* 0xC */ u32 end;
-} RomLoadSlot; /* 0x10 */
-
-extern u32 get_rom_asset_allocation_size(u16 index, void* out);
-extern void load_rom_asset_payload(void* data, RomLoadSlot* slot);
 extern void open_rom_asset_slot(s32 index, RomLoadSlot* slot);
 extern u32 get_rom_load_slot_size(RomLoadSlot* slot);
 extern void read_rom_load_slot(void* dst, u32 size, RomLoadSlot* slot);
@@ -50,10 +55,9 @@ extern u16 D_800C547C[];
 extern s16 D_800C54A0[];
 extern void* D_801B55E0[];
 extern void* D_801321C8[];
-extern s16 D_800C54EA[];
-extern s16 D_800C54F2[];
-extern s16 D_800C56AA[];
-extern s16 D_800C56B2[];
+/* D_800C54F2 and D_800C56B2 alias tc[0] at +8; D_800C56AA starts
+ * 28 vertices into this 42-record span. */
+extern Vtx D_800C54EA[42];
 extern void func_8003E004(void);
 extern void per_hole_skybox_palette_load(void);
 
@@ -61,12 +65,13 @@ void init_sky_panels(void) {
   s32 i;
 
   sky_panel_bank_index = 0;
+  /* Field-relative scalar views preserve the retail address-root lowering. */
   for (i = 0; i != 14; i++) {
-    s32 off = i * 0x10;
-    *(s16*)((u8*)D_800C54F2 + off) =
-        (*(s16*)((u8*)D_800C54EA + off) / 10 + 0x10) << 5;
-    *(s16*)((u8*)D_800C56B2 + off) =
-        (*(s16*)((u8*)D_800C56AA + off) / 10 + 0x10) << 5;
+    s32 off = i * sizeof(Vtx);
+    *(s16*)((u8*)&D_800C54EA[0].v.tc[0] + off) =
+        (*(s16*)((u8*)&D_800C54EA[0].v.ob[0] + off) / 10 + 0x10) << 5;
+    *(s16*)((u8*)&D_800C54EA[28].v.tc[0] + off) =
+        (*(s16*)((u8*)&D_800C54EA[28].v.ob[0] + off) / 10 + 0x10) << 5;
   }
   func_8003E004();
   per_hole_skybox_palette_load();
@@ -103,12 +108,12 @@ void init_sky_panels(void) {
 INCLUDE_ASM("asm/nonmatchings/main/func_80080220",
             init_sky_pool_and_world_state);
 void func_80080564(s32 arg0, s32 arg1, s32 arg2) {
-  RomLoadSlot buf_a[2];
+  RomAssetLoad buf_a;
   RomLoadSlot buf_b;
   u32 size;
 
-  get_rom_asset_allocation_size(D_800C547C[arg1] + 9, buf_a);
-  load_rom_asset_payload(D_801B55E0[arg0], &buf_a[0]);
+  get_rom_asset_allocation_size(D_800C547C[arg1] + 9, &buf_a);
+  load_rom_asset_payload(D_801B55E0[arg0], &buf_a);
   open_rom_asset_slot(D_800C54A0[arg1] + arg2, &buf_b);
   size = get_rom_load_slot_size(&buf_b);
   read_rom_load_slot(D_801321C8[arg0], size, &buf_b);
@@ -194,7 +199,7 @@ extern void* D_800E2178;
 extern void* D_80105214;
 
 void func_8008085C(void) {
-  RomLoadSlot slot[2];
+  RomAssetLoad slot;
   u32 size;
 
   D_800C59E0 = 2;
@@ -205,95 +210,95 @@ void func_8008085C(void) {
   func_8020E740();
   func_8021E5F4();
 
-  size = get_rom_asset_allocation_size(0x541, slot);
+  size = get_rom_asset_allocation_size(0x541, &slot);
   D_801B55DC = heap3_alloc(size);
-  load_rom_asset_payload(D_801B55DC, slot);
+  load_rom_asset_payload(D_801B55DC, &slot);
 
-  size = get_rom_asset_allocation_size(0x5A4, slot);
+  size = get_rom_asset_allocation_size(0x5A4, &slot);
   D_800E2188 = heap3_alloc(size);
-  load_rom_asset_payload(D_800E2188, slot);
+  load_rom_asset_payload(D_800E2188, &slot);
 
-  size = get_rom_asset_allocation_size(0x5E3, slot);
+  size = get_rom_asset_allocation_size(0x5E3, &slot);
   D_80132360 = heap3_alloc(size);
-  load_rom_asset_payload(D_80132360, slot);
+  load_rom_asset_payload(D_80132360, &slot);
 
-  size = get_rom_asset_allocation_size(0x972, slot);
+  size = get_rom_asset_allocation_size(0x972, &slot);
   D_800FED0C = heap3_alloc(size);
-  load_rom_asset_payload(D_800FED0C, slot);
+  load_rom_asset_payload(D_800FED0C, &slot);
 
-  size = get_rom_asset_allocation_size(0x93C, slot);
+  size = get_rom_asset_allocation_size(0x93C, &slot);
   D_800FF4F0 = heap3_alloc(size);
-  load_rom_asset_payload(D_800FF4F0, slot);
+  load_rom_asset_payload(D_800FF4F0, &slot);
 
-  size = get_rom_asset_allocation_size(0x4DB, slot);
+  size = get_rom_asset_allocation_size(0x4DB, &slot);
   D_8012D428 = heap3_alloc(size);
-  load_rom_asset_payload(D_8012D428, slot);
+  load_rom_asset_payload(D_8012D428, &slot);
 
-  size = get_rom_asset_allocation_size(0x4C3, slot);
+  size = get_rom_asset_allocation_size(0x4C3, &slot);
   D_801B7EE0 = heap3_alloc(size);
-  load_rom_asset_payload(D_801B7EE0, slot);
+  load_rom_asset_payload(D_801B7EE0, &slot);
 
   D_800C59D8 = -1;
-  size = get_rom_asset_allocation_size(0x4E3, slot);
+  size = get_rom_asset_allocation_size(0x4E3, &slot);
   D_800E2140 = heap3_alloc(size);
-  load_rom_asset_payload(D_800E2140, slot);
+  load_rom_asset_payload(D_800E2140, &slot);
 
   D_800E2144[0] = heap3_alloc(0x128);
   D_800E2144[1] = heap3_alloc(0x128);
   D_800C59DC = -1;
   D_800E2138 = heap3_alloc(0x1208);
 
-  size = get_rom_asset_allocation_size(0x648, slot);
+  size = get_rom_asset_allocation_size(0x648, &slot);
   D_800E2158[0] = heap3_alloc(size);
-  load_rom_asset_payload(D_800E2158[0], slot);
+  load_rom_asset_payload(D_800E2158[0], &slot);
 
-  size = get_rom_asset_allocation_size(0x563, slot);
+  size = get_rom_asset_allocation_size(0x563, &slot);
   D_800E214C[0] = heap3_alloc(size);
-  load_rom_asset_payload(D_800E214C[0], slot);
+  load_rom_asset_payload(D_800E214C[0], &slot);
 
-  size = get_rom_asset_allocation_size(0x564, slot);
+  size = get_rom_asset_allocation_size(0x564, &slot);
   D_800E214C[1] = heap3_alloc(size);
-  load_rom_asset_payload(D_800E214C[1], slot);
+  load_rom_asset_payload(D_800E214C[1], &slot);
 
-  size = get_rom_asset_allocation_size(0x562, slot);
+  size = get_rom_asset_allocation_size(0x562, &slot);
   D_800E214C[2] = heap3_alloc(size);
-  load_rom_asset_payload(D_800E214C[2], slot);
+  load_rom_asset_payload(D_800E214C[2], &slot);
 
-  size = get_rom_asset_allocation_size(0x57C, slot);
+  size = get_rom_asset_allocation_size(0x57C, &slot);
   D_800E2184 = heap3_alloc(size);
-  load_rom_asset_payload(D_800E2184, slot);
+  load_rom_asset_payload(D_800E2184, &slot);
 
-  size = get_rom_asset_allocation_size(0x97B, slot);
+  size = get_rom_asset_allocation_size(0x97B, &slot);
   D_800E2164 = heap3_alloc(size);
-  load_rom_asset_payload(D_800E2164, slot);
+  load_rom_asset_payload(D_800E2164, &slot);
 
-  size = get_rom_asset_allocation_size(0x725, slot);
+  size = get_rom_asset_allocation_size(0x725, &slot);
   D_800E2168 = heap3_alloc(size);
-  load_rom_asset_payload(D_800E2168, slot);
+  load_rom_asset_payload(D_800E2168, &slot);
 
-  size = get_rom_asset_allocation_size(0x568, slot);
+  size = get_rom_asset_allocation_size(0x568, &slot);
   D_800E216C = heap3_alloc(size);
-  load_rom_asset_payload(D_800E216C, slot);
+  load_rom_asset_payload(D_800E216C, &slot);
 
-  size = get_rom_asset_allocation_size(0x56B, slot);
+  size = get_rom_asset_allocation_size(0x56B, &slot);
   D_800E2170 = heap3_alloc(size);
-  load_rom_asset_payload(D_800E2170, slot);
+  load_rom_asset_payload(D_800E2170, &slot);
 
-  size = get_rom_asset_allocation_size(0x56A, slot);
+  size = get_rom_asset_allocation_size(0x56A, &slot);
   D_800E2174 = heap3_alloc(size);
-  load_rom_asset_payload(D_800E2174, slot);
+  load_rom_asset_payload(D_800E2174, &slot);
 
-  size = get_rom_asset_allocation_size(0x569, slot);
+  size = get_rom_asset_allocation_size(0x569, &slot);
   D_800E217C = heap3_alloc(size);
-  load_rom_asset_payload(D_800E217C, slot);
+  load_rom_asset_payload(D_800E217C, &slot);
 
-  size = get_rom_asset_allocation_size(0x723, slot);
+  size = get_rom_asset_allocation_size(0x723, &slot);
   D_800E2178 = heap3_alloc(size);
-  load_rom_asset_payload(D_800E2178, slot);
+  load_rom_asset_payload(D_800E2178, &slot);
 
-  size = get_rom_asset_allocation_size(0x724, slot);
+  size = get_rom_asset_allocation_size(0x724, &slot);
   D_80105214 = heap3_alloc(size);
-  load_rom_asset_payload(D_80105214, slot);
+  load_rom_asset_payload(D_80105214, &slot);
 
   func_80077C18(get_current_course_id());
 }
@@ -407,29 +412,29 @@ extern void func_80078D94(void);
 
 void load_course_scenery_assets(void) {
   RomLoadSlot slot_b;
-  RomLoadSlot slot[2];
+  RomAssetLoad slot;
   u32 size;
   s32 i;
 
-  size = get_rom_asset_allocation_size(0x4BA, slot);
+  size = get_rom_asset_allocation_size(0x4BA, &slot);
   course_panorama_ptr = heap3_alloc(size);
-  load_rom_asset_payload(course_panorama_ptr, slot);
+  load_rom_asset_payload(course_panorama_ptr, &slot);
 
-  size = get_rom_asset_allocation_size(0x4D4, slot);
+  size = get_rom_asset_allocation_size(0x4D4, &slot);
   D_800FBE0C = heap3_alloc(size);
-  load_rom_asset_payload(D_800FBE0C, slot);
+  load_rom_asset_payload(D_800FBE0C, &slot);
 
-  size = get_rom_asset_allocation_size(D_800C54CC, slot);
+  size = get_rom_asset_allocation_size(D_800C54CC, &slot);
   D_800E21C0 = heap3_alloc(size);
-  load_rom_asset_payload(D_800E21C0, slot);
+  load_rom_asset_payload(D_800E21C0, &slot);
 
-  size = get_rom_asset_allocation_size(0x567, slot);
+  size = get_rom_asset_allocation_size(0x567, &slot);
   D_800E2180 = heap3_alloc(size);
-  load_rom_asset_payload(D_800E2180, slot);
+  load_rom_asset_payload(D_800E2180, &slot);
 
-  size = get_rom_asset_allocation_size(0x722, slot);
+  size = get_rom_asset_allocation_size(0x722, &slot);
   D_800E2160 = heap3_alloc(size);
-  load_rom_asset_payload(D_800E2160, slot);
+  load_rom_asset_payload(D_800E2160, &slot);
 
   D_800FE3D4 = heap3_alloc(0x1000);
   build_radial_falloff_texture(D_800FE3D4, 0x40, 0x40, 0x3E);
@@ -447,18 +452,18 @@ void load_course_scenery_assets(void) {
 
   sky_cloud_texture_ptr = heap3_alloc(0x1000);
 
-  size = get_rom_asset_allocation_size(0x4D7, slot);
+  size = get_rom_asset_allocation_size(0x4D7, &slot);
   fog_filter_texture_primary = heap3_alloc(size);
-  load_rom_asset_payload(fog_filter_texture_primary, slot);
+  load_rom_asset_payload(fog_filter_texture_primary, &slot);
 
-  size = get_rom_asset_allocation_size(0x4D9, slot);
+  size = get_rom_asset_allocation_size(0x4D9, &slot);
   fog_filter_texture_secondary = heap3_alloc(size);
-  load_rom_asset_payload(fog_filter_texture_secondary, slot);
+  load_rom_asset_payload(fog_filter_texture_secondary, &slot);
 
   for (i = 0; i != 4; i++) {
-    size = get_rom_asset_allocation_size(D_800C547C[i] + 9, slot);
+    size = get_rom_asset_allocation_size(D_800C547C[i] + 9, &slot);
     D_801B55E0[i] = heap3_alloc(size);
-    load_rom_asset_payload(D_801B55E0[i], slot);
+    load_rom_asset_payload(D_801B55E0[i], &slot);
     open_rom_asset_slot(D_800C54A0[i], &slot_b);
     size = get_rom_load_slot_size(&slot_b);
     D_801321C8[i] = heap3_alloc(size);
@@ -476,14 +481,7 @@ INCLUDE_ASM("asm/nonmatchings/main/func_80080220", func_8008156C);
 
 extern s32 wind_magnitude;
 
-/* Scrolls all 14 sky panels of the active bank by the wind, then wraps.
- * The goto loops are load-bearing: gcc-2.7.2's loop.c only strength-reduces
- * loops it discovers through NOTE_INSN_LOOP_BEG, which a structured for/while
- * emits and a goto loop does not. Every structured spelling folds the two
- * `%hi(D_800C54F2)+off` re-materialisations per iteration into one walking
- * pointer, which is 4 instrs/iteration SHORT of the ROM. The two separate
- * `countN` bound variables are load-bearing too: one shared bound spans both
- * loops, which raises its allocno priority and swaps it with `delta`. */
+/* Scroll the 14 panel texture coordinates in the selected 28-vertex bank. */
 void scroll_sky_panels_by_wind(void) {
   s32 delta = wind_magnitude / 8192;
   s32 count1;
@@ -495,7 +493,8 @@ void scroll_sky_panels_by_wind(void) {
   i = 0;
   count1 = 14;
 loop1:
-  *(u16*)((u8*)D_800C54F2 + off) += delta;
+  ((Vtx*)((u8*)D_800C54EA + off))->v.tc[0] =
+      (s16)((u16)((Vtx*)((u8*)D_800C54EA + off))->v.tc[0] + delta);
   i++;
   off += 0x10;
   if (i != count1) {
@@ -503,13 +502,14 @@ loop1:
   }
 
   off = sky_panel_bank_index * 448;
-  if (*(s16*)((u8*)D_800C54F2 + off) < 0x4001) {
+  if (((Vtx*)((u8*)D_800C54EA + off))->v.tc[0] < 0x4001) {
     return;
   }
   i = 0;
   count2 = 14;
 loop2:
-  *(u16*)((u8*)D_800C54F2 + off) -= 0x2000;
+  ((Vtx*)((u8*)D_800C54EA + off))->v.tc[0] =
+      (s16)((u16)((Vtx*)((u8*)D_800C54EA + off))->v.tc[0] - 0x2000);
   i++;
   off += 0x10;
   if (i != count2) {
@@ -517,12 +517,6 @@ loop2:
   }
 }
 
-typedef struct {
-  /* 0x0 */ u32 id;
-  /* 0x4 */ char* name_ptr;
-} TerrainAttrEntry;
-
-extern TerrainAttrEntry* get_table_entry(u32 idx);
 extern void func_8007515C(s32, s32, s32, s32, s32, s32);
 extern void func_8020FFEC(s32);
 extern void func_800326FC(s32, s32, s32, s32);
@@ -747,14 +741,12 @@ INCLUDE_ASM("asm/nonmatchings/main/func_80080220", draw_terrain_aim_grid);
 
 void func_80083A48(void) {
   s32 i;
-  s32 off;
 
   D_800C5AA8 = 0;
   for (i = 0; i != 128; i++) {
-    off = i * 0xC;
-    *(f32*)((u8*)&D_800E3370 + off) = effect_spawn_pos[0] * (1.0f / 1024.0f);
-    *(f32*)((u8*)&D_800E3374 + off) = effect_spawn_pos[1] * (1.0f / 1024.0f);
-    *(f32*)((u8*)&D_800E3378 + off) = effect_spawn_pos[2] * (1.0f / 1024.0f);
+    D_800E3370[i].x = effect_spawn_pos[0] * (1.0f / 1024.0f);
+    D_800E3370[i].y = effect_spawn_pos[1] * (1.0f / 1024.0f);
+    D_800E3370[i].z = effect_spawn_pos[2] * (1.0f / 1024.0f);
   }
 }
 
@@ -766,13 +758,6 @@ extern s8 D_801061CF;
 extern s32 D_800BE69C;
 /* View scale: biases the sampled height and the projected depth. */
 extern s32 D_800BA700;
-/* 128 * {s32 x, s32 y, s32 z} of projected screen positions. The three fields
- * are spelled as three symbols, not one array: with one symbol loop.c combines
- * the (i+1) accesses into one address giv, where the ROM keeps a %hi/%lo per
- * field. See the header comment. */
-extern s32 D_800E2D70;
-extern s32 D_800E2D74;
-extern s32 D_800E2D78;
 /* The 4-vertex quad the trail re-points per segment. */
 extern Vtx D_800C5A60[];
 /* The identity matrix this emitter installs, and its segment-0 alias. */
@@ -802,34 +787,14 @@ extern f32 sqrtf(f32);
  * `proj` is the caller's matrix bank; the emitter restores the caller's
  * projection from `proj[7]` and pops its own modelview on the way out.
  *
- * Notes on the shape of this body:
- * - The first two loop guards repeat the five increments instead of jumping to
- *   the shared tail. That is not style: it gives the `off2` biv three increment
- *   insns, and loop.c:3804 subtracts `add_cost * bl->biv_count` from each giv's
- *   benefit, which drives the three combined (i+1) address givs to benefit <= 0
- *   and leaves all seven accesses as the ROM's %hi/addu/%lo. With one increment
- *   site they reduce to pointers and the body is 12 insns short. The third
- *   guard must NOT repeat them, or its tail fails to cross-jump.
- * - The RGBA word is spelled inline in each gSPModifyVertex argument. gcc
- *   evaluates the macro's `val` after the w0 store, so the `i / 4` division's
- *   bgez lands BETWEEN the first command's two stores; that is what forces the
- *   ROM to hold the first slot's address in its own register.
- * - `dx`/`dy` are reused for the scaled deltas rather than given new temps, so
- *   the two `mul.s` write in place, and the truncations stay inline in the
- *   XYSCREEN arguments where the ROM computes them.
- * - `i = 0;` runs BEFORE the three pointer inits. Both are 21-ref allocnos and
- *   global.c:587 ranks them by live length; the ROM order needs `py` to be the
- *   shorter of the pair.
- * - `none` and the hoisted `h` exist to place the -1 constant and the
- *   D_800BA700 load at the ROM's scheduling positions.
- * - `slot2` is the last four bytes of the function. The 12 preamble commands
- *   outrun the register file, so reload spills three of the gbi macros' `_g`
- *   temporaries, and reload1.c:657 hands out stack slots in ASCENDING pseudo
- *   number. Expansion order numbers the second pipesync's `_g` below the cycle
- *   type's, which puts them at 0x3C/0x44; the ROM has them the other way round.
- *   Naming the third command's packet as a declared local gives it a low
- *   (pre-macro) pseudo number, so it takes 0x3C and the pipesync takes 0x44.
- *   Nothing else in the body changes.
+ * World and projected samples are typed arrays of complete 0x0C records. The
+ * former D_800E3374/D_800E3378 and D_800E2D74/D_800E2D78 labels name interior
+ * y/z and y/depth fields, respectively. Member-rooted scalar cursors retain
+ * GCC 2.7.2's original induction and alias behavior; cached record pointers do not.
+ *
+ * Keep the display-list command sequence and Gfx argument expressions in their
+ * original order. In particular, the RGBA values stay inline in each
+ * gSPModifyVertex argument, and `slot2` remains the third preamble packet.
  */
 void emit_ball_trail_dl(Gfx** gfxp, Mtx* proj) {
   s32 screen[6];
@@ -837,16 +802,13 @@ void emit_ball_trail_dl(Gfx** gfxp, Mtx* proj) {
   /* See the header comment: this exists for its pseudo number. */
   Gfx* slot2;
   s32 mode = D_800C5AAC;
-  /* Loop 2 (project): z-field cursor, source/destination byte offsets. */
   s32* zp;
-  /* Main loop (emit): the three field cursors for sample i. */
   s32* px;
   s32* py;
   s32* pz;
   s32 off;
   s32 srcoff;
   s32 dstoff;
-  /* Byte offset of sample i + 1. Deliberately NOT strength-reduced. */
   s32 off2;
   s32 none;
   s32 h;
@@ -869,10 +831,12 @@ void emit_ball_trail_dl(Gfx** gfxp, Mtx* proj) {
       D_800C5AA8 = 0;
     }
     off = D_800C5AA8 * 0xC;
-    *(f32*)((u8*)&D_800E3370 + off) = effect_spawn_pos[0] * (1.0f / 1024.0f);
-    *(f32*)((u8*)&D_800E3374 + off) =
+    *(f32*)((u8*)&D_800E3370[0].x + off) =
+        effect_spawn_pos[0] * (1.0f / 1024.0f);
+    *(f32*)((u8*)&D_800E3370[0].y + off) =
         effect_spawn_pos[1] * (1.0f / 1024.0f) - D_800BA700 * 0.27f;
-    *(f32*)((u8*)&D_800E3378 + off) = effect_spawn_pos[2] * (1.0f / 1024.0f);
+    *(f32*)((u8*)&D_800E3370[0].z + off) =
+        effect_spawn_pos[2] * (1.0f / 1024.0f);
   }
 
   if (D_800BE69C == 1) {
@@ -881,7 +845,7 @@ void emit_ball_trail_dl(Gfx** gfxp, Mtx* proj) {
 
   none = -1;
   idx = D_800C5AA8;
-  zp = &D_800E2D78;
+  zp = &D_800E2D70[0].depth;
   dstoff = 0;
   srcoff = idx * 0xC;
   do {
@@ -889,14 +853,15 @@ void emit_ball_trail_dl(Gfx** gfxp, Mtx* proj) {
       srcoff = 0x5F4;
       idx = 0x7F;
     }
-    if (project_point_to_screen(*(f32*)((u8*)&D_800E3370 + srcoff),
-                                *(f32*)((u8*)&D_800E3374 + srcoff),
-                                *(f32*)((u8*)&D_800E3378 + srcoff),
-                                screen) < 0) {
-      *(s32*)((u8*)&D_800E2D70 + dstoff) = screen[0] << 2;
+    if (project_point_to_screen(
+            *(f32*)((u8*)&D_800E3370[0].x + srcoff),
+            *(f32*)((u8*)&D_800E3370[0].y + srcoff),
+            *(f32*)((u8*)&D_800E3370[0].z + srcoff), screen) < 0) {
+      *(s32*)((u8*)&D_800E2D70[0].x + dstoff) = screen[0] << 2;
       h = D_800BA700;
-      *(s32*)((u8*)&D_800E2D74 + dstoff) = screen[1] << 2;
-      *zp = (s32)((f32)screen[2] - *(f32*)&screen[5] * (f32)(h * 7));
+      *(s32*)((u8*)&D_800E2D70[0].y + dstoff) = screen[1] << 2;
+      *zp = (s32)((f32)screen[2] -
+                  *(f32*)&screen[5] * (f32)(h * 7));
     } else {
       *zp = none;
     }
@@ -904,7 +869,7 @@ void emit_ball_trail_dl(Gfx** gfxp, Mtx* proj) {
     dstoff += 0xC;
     srcoff -= 0xC;
     idx--;
-  } while (zp != &D_800E2D78 + 0x180);
+  } while (zp != &D_800E2D70[0].depth + 0x180);
 
   guMtxIdent(D_800E1E90);
 
@@ -932,7 +897,7 @@ void emit_ball_trail_dl(Gfx** gfxp, Mtx* proj) {
   gSPVertex(gfx++, D_800C5A60, 4, 0);
 
   i = 0;
-  py = &D_800E2D74;
+  py = &D_800E2D70[0].y;
   px = py - 1;
   pz = py + 1;
   off2 = 0xC;
@@ -940,7 +905,7 @@ void emit_ball_trail_dl(Gfx** gfxp, Mtx* proj) {
     if (*pz == -1) {
       goto next;
     }
-    if (*(s32*)((u8*)&D_800E2D78 + off2) == -1) {
+    if (*(s32*)((u8*)&D_800E2D70[0].depth + off2) == -1) {
       py += 3;
       px += 3;
       pz += 3;
@@ -948,8 +913,8 @@ void emit_ball_trail_dl(Gfx** gfxp, Mtx* proj) {
       i++;
       continue;
     }
-    dx = (f32)(*px - *(s32*)((u8*)&D_800E2D70 + off2));
-    dy = (f32)(*py - *(s32*)((u8*)&D_800E2D74 + off2));
+    dx = (f32)(*px - *(s32*)((u8*)&D_800E2D70[0].x + off2));
+    dy = (f32)(*py - *(s32*)((u8*)&D_800E2D70[0].y + off2));
     if ((dx == 0.0f) & (dy == 0.0f)) {
       py += 3;
       px += 3;
@@ -975,11 +940,11 @@ void emit_ball_trail_dl(Gfx** gfxp, Mtx* proj) {
     gSPModifyVertex(gfx++, 1, G_MWO_POINT_XYSCREEN,
                     ((*px - (s32)dy) << 16) + (*py + (s32)dx));
     gSPModifyVertex(gfx++, 2, G_MWO_POINT_XYSCREEN,
-                    ((*(s32*)((u8*)&D_800E2D70 + off2) + (s32)dy) << 16) +
-                        (*(s32*)((u8*)&D_800E2D74 + off2) - (s32)dx));
+                    ((*(s32*)((u8*)&D_800E2D70[0].x + off2) + (s32)dy) << 16) +
+                        (*(s32*)((u8*)&D_800E2D70[0].y + off2) - (s32)dx));
     gSPModifyVertex(gfx++, 3, G_MWO_POINT_XYSCREEN,
-                    ((*(s32*)((u8*)&D_800E2D70 + off2) - (s32)dy) << 16) +
-                        (*(s32*)((u8*)&D_800E2D74 + off2) + (s32)dx));
+                    ((*(s32*)((u8*)&D_800E2D70[0].x + off2) - (s32)dy) << 16) +
+                        (*(s32*)((u8*)&D_800E2D70[0].y + off2) + (s32)dx));
     gSP2Triangles(gfx++, 1, 0, 2, 0, 1, 2, 3, 0);
   next:
     py += 3;
@@ -1204,13 +1169,6 @@ extern const f64 D_800D1B80; /* 2 * pi */
 extern const f64 D_800D1B88; /* pi, the second arrow's own entry */
 extern const f64 D_800D1B90; /* 2 * pi, likewise */
 
-/* Only the asset id at 0x2E is read out of the club record here. */
-typedef struct {
-  /* 0x00 */ u8 pad00[0x2E];
-  /* 0x2E */ u16 asset_id;
-} ClubAsset;
-
-extern ClubAsset* get_club_param(u32 id);
 extern void convert_and_pack_floats_to_fixed(f32 mf[4][4], Mtx* m);
 extern void func_802199EC(Gfx** gfxp, s32 x, s32 y, s32 arg3);
 extern void func_8021FC20(Gfx** gfxp);
@@ -1222,7 +1180,7 @@ void emit_club_and_power_hud_dl(Gfx** gfxp) {
   f32 model[4][4];
   f32 unusedB[18];
   Gfx* gfx;
-  ClubAsset* club;
+  ClubShot* club;
 
   gfx = *gfxp;
 
@@ -1269,17 +1227,17 @@ void emit_club_and_power_hud_dl(Gfx** gfxp) {
   }
 
   if (D_801061C2 != 0 && D_800BE69C == 0) {
-    RomLoadSlot buf[2];
+    RomAssetLoad buf;
     f32 angle;
 
     club = get_club_param(D_801B7222[active_player_idx][active_club_id]);
     if (club->asset_id != D_800C59D8) {
       D_800C59D8 = club->asset_id;
-      get_rom_asset_allocation_size(club->asset_id, buf);
-      load_rom_asset_payload(D_800E2140, buf);
+      get_rom_asset_allocation_size(club->asset_id, &buf);
+      load_rom_asset_payload(D_800E2140, &buf);
       D_800C5474 ^= 1;
-      get_rom_asset_allocation_size(D_800C5AD4[active_club_id], buf);
-      load_rom_asset_payload(D_800E2144[D_800C5474], buf);
+      get_rom_asset_allocation_size(D_800C5AD4[active_club_id], &buf);
+      load_rom_asset_payload(D_800E2144[D_800C5474], &buf);
     }
 
     angle = D_80106238 * 9.58738019e-05f;
@@ -1439,8 +1397,7 @@ void func_8008658C(void) {
 extern f32 D_800C5DF0;
 extern s32 D_800C5DF4;
 extern s8 D_8010623F;
-extern char player_records[];
-extern s32 func_80213C78(char* record);
+extern s32 func_80213C78(PlayerState* record);
 extern void func_80050DA0(s32, s32, s32, s32, s32);
 
 void func_8008679C(s32 arg) {
@@ -1449,7 +1406,7 @@ void func_8008679C(s32 arg) {
     return;
   }
   if (arg == 0) {
-    s32 result = func_80213C78(&player_records[D_8010623F * 0xB8]);
+    s32 result = func_80213C78(&player_records[D_8010623F]);
     if ((result != 0xA) & (result != 2)) {
       func_80050DA0(0x70, 0xE, 0x40, 0x1E, 0x7F);
     } else {
@@ -1509,7 +1466,7 @@ extern f32 sinf(f32);
 void emit_ball_offscreen_indicator(Gfx** gfxp) {
   f32 mf[4][4];
   s32 screen[6];
-  RomLoadSlot buf[2];
+  RomAssetLoad buf;
   Gfx* gfx;
   f32* rot;
   f32* pos;
@@ -1536,7 +1493,7 @@ void emit_ball_offscreen_indicator(Gfx** gfxp) {
     return;
   }
 
-  kind = func_80213C78(&player_records[D_8010623F * 0xB8]);
+  kind = func_80213C78(&player_records[D_8010623F]);
   if ((kind != 0xA) & (kind != 2)) {
     scale = sinf(D_800C5DF0) * 0.5f;
     D_800E2128 = 0.0f;
@@ -1609,8 +1566,8 @@ void emit_ball_offscreen_indicator(Gfx** gfxp) {
     if (D_800C5E14 == 4) {
       D_800C5E10 = (D_800C5E10 + 1) % 6;
       D_800C5E14 = 0;
-      get_rom_asset_allocation_size(D_800C5DFA[D_800C5E10 * 2], buf);
-      load_rom_asset_payload(D_8012D3C0 + (D_800C5E18 * 0xC08 + 0x970), buf);
+      get_rom_asset_allocation_size(D_800C5DFA[D_800C5E10 * 2], &buf);
+      load_rom_asset_payload(D_8012D3C0 + (D_800C5E18 * 0xC08 + 0x970), &buf);
       D_800C5E18 ^= 1;
     }
 
@@ -1784,7 +1741,7 @@ extern u16 D_800C5E2A[];
  * overlaps the icon's tail.
  */
 void draw_animated_status_icon(Gfx** gfxp, s32 mode) {
-  RomLoadSlot slot[2];
+  RomAssetLoad slot;
   Gfx* gfx = *gfxp;
   s32 caption;
 
@@ -1801,8 +1758,8 @@ void draw_animated_status_icon(Gfx** gfxp, s32 mode) {
     if (D_800C5E48 == 4) {
       D_800C5E48 = 0;
       D_800C5E4C = (D_800C5E4C + 1) % 8;
-      get_rom_asset_allocation_size(D_800C5E2A[D_800C5E4C * 2], slot);
-      load_rom_asset_payload(D_800E2158[D_800C5E60], slot);
+      get_rom_asset_allocation_size(D_800C5E2A[D_800C5E4C * 2], &slot);
+      load_rom_asset_payload(D_800E2158[D_800C5E60], &slot);
     }
 
     gDPPipeSync(gfx++);
@@ -2002,7 +1959,7 @@ extern s32 get_course_hole_secondary_flag(s32 mode, s32 arg1);
 extern s32 get_match_play_result(s32 arg0, s32 arg1);
 
 void func_8008C520(void) {
-  RomLoadSlot slot[2];
+  RomAssetLoad slot;
   u32 size;
   s32 id;
 
@@ -2017,9 +1974,9 @@ void func_8008C520(void) {
   }
   goto slot2;
 alloc1:
-  size = get_rom_asset_allocation_size(id, slot);
+  size = get_rom_asset_allocation_size(id, &slot);
   D_800E3970 = heap3_alloc(size);
-  load_rom_asset_payload(D_800E3970, slot);
+  load_rom_asset_payload(D_800E3970, &slot);
   D_800C5ED8 |= 1;
 slot2:
   if ((game_mode == 2) | (game_mode == 4)) {
@@ -2032,9 +1989,9 @@ slot2:
       }
       id = 0x8FC;
     }
-    size = get_rom_asset_allocation_size(id, slot);
+    size = get_rom_asset_allocation_size(id, &slot);
     D_800E3974 = heap3_alloc(size);
-    load_rom_asset_payload(D_800E3974, slot);
+    load_rom_asset_payload(D_800E3974, &slot);
     D_800C5ED8 |= 2;
   }
 }

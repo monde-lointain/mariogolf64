@@ -1,14 +1,8 @@
-#include "common.h"
+#include "club.h"
 
-typedef struct {
-  u8 pad00[8];
-  u32 flags;    // 0x08
-  s16 power_a;  // 0x0C
-} ClubParam;
+extern ClubDistancePreset D_800CABD0[];
 
-extern u8 D_800CABD0[];
-
-u8* func_80043AF0(s32 index) { return &D_800CABD0[index * 24]; }
+ClubDistancePreset* func_80043AF0(s32 index) { return &D_800CABD0[index]; }
 
 void func_80043B0C(void) {}
 
@@ -27,7 +21,7 @@ void func_80043B0C(void) {}
 // case is a load, which cannot ride a branch-likely delay slot, so it must be
 // declared LAST and fall through into the shared return. Do not "simplify" this
 // to a switch/if-else.
-s32 get_club_meter_extent(ClubParam* club, s32 category) {
+s32 get_club_meter_extent(ClubShot* club, s32 category) {
   s32 extent = 0;
 
   if (club->flags & 1) {
@@ -50,13 +44,13 @@ s32 get_club_meter_extent(ClubParam* club, s32 category) {
     if (category == 2) goto normal_curve;
     goto end;
   normal_meter1:
-    extent = (s32)((f32)club->power_a * 1.1f);
+    extent = (s32)((f32)club->target_distance * 1.1f);
     goto end;
   normal_curve:
     extent = 60;
     goto end;
   normal_meter2:
-    extent = club->power_a;
+    extent = club->target_distance;
     goto end;
   }
 end:
@@ -68,7 +62,7 @@ end:
 // value a single allocno that conflicts with $v0 instead of coalescing into it,
 // so the int/float chain runs in $a0 and matches the ROM. gcc tail-merges the
 // two arms back into one factor-select + one multiply.
-s32 get_club_meter_units(ClubParam* club, s32 category) {
+s32 get_club_meter_units(ClubShot* club, s32 category) {
   s32 units = get_club_meter_extent(club, category);
 
   if (club->flags & 1) {

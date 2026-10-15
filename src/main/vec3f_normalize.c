@@ -1,4 +1,5 @@
 #include "common.h"
+#include "controller.h"
 #include <nusys.h>
 
 extern u8 D_801052F8[];
@@ -111,10 +112,9 @@ s32 func_80029EEC(s32 arg0, s32 arg1, u32 arg2, u32 arg3) {
 }
 
 extern NUContData D_800FED18[];
-extern s16 D_800FF518[];
-extern s8 D_800FF51A[];
-extern s8 D_800FF51B[];
-extern u16 D_800FF51C[];
+/* The direction and button symbols alias fields in each six-byte slot. */
+
+extern ControllerRepeatState D_800FF518[];
 
 void func_80029F6C(NUContData* input, s32 unused, s32 index) {
   /* The unused static chain and its spill belong to the nested helper at
@@ -140,36 +140,37 @@ void func_80029F6C(NUContData* input, s32 unused, s32 index) {
     return result;
   }
 
-  s32 offset = index * 6;
-  s32 repeat = *(s16*)((u8*)D_800FF518 + offset);
+  /* Field-relative walks retain the retail scalar aliasing and address roots. */
+  s32 offset = index * sizeof(ControllerRepeatState);
+  s32 repeat = *(s16*)((u8*)&D_800FF518[0].repeat_count + offset);
   NUContData* output = &D_800FED18[index];
   s32 repeat_offset;
   s32 buttons;
 
   output->stick_x = clamp_stick(input->stick_x);
   output->stick_y = clamp_stick(input->stick_y);
-  *(s8*)((u8*)D_800FF51A + offset) =
-      func_80029EEC(input->stick_x, *(s8*)((u8*)D_800FF51A + offset), 56, 20);
-  *(s8*)((u8*)D_800FF51B + offset) =
-      func_80029EEC(input->stick_y, *(s8*)((u8*)D_800FF51B + offset), 56, 20);
+  *((s8*)&D_800FF518[0].horizontal_direction + offset) =
+      func_80029EEC(input->stick_x, *((s8*)&D_800FF518[0].horizontal_direction + offset), 56, 20);
+  *((s8*)&D_800FF518[0].vertical_direction + offset) =
+      func_80029EEC(input->stick_y, *((s8*)&D_800FF518[0].vertical_direction + offset), 56, 20);
   output->button = input->button;
-  if (*(s8*)((u8*)D_800FF51A + offset) == 1) {
+  if (*((s8*)&D_800FF518[0].horizontal_direction + offset) == 1) {
     output->button |= 0x100;
-  } else if (*(s8*)((u8*)D_800FF51A + offset) == -1) {
+  } else if (*((s8*)&D_800FF518[0].horizontal_direction + offset) == -1) {
     output->button |= 0x200;
   }
-  if (*(s8*)((u8*)D_800FF51B + index * 6) == 1) {
+  if (*((s8*)&D_800FF518[0].vertical_direction + index * sizeof(ControllerRepeatState)) == 1) {
     output->button |= 0x800;
-  } else if (*(s8*)((u8*)D_800FF51B + index * 6) == -1) {
+  } else if (*((s8*)&D_800FF518[0].vertical_direction + index * sizeof(ControllerRepeatState)) == -1) {
     output->button |= 0x400;
   }
   /* Keep this offset's lifetime ahead of the trigger copy for register
    * allocation. */
-  repeat_offset = index * 6;
+  repeat_offset = index * sizeof(ControllerRepeatState);
   output->trigger = input->trigger;
   buttons = output->button;
-  if (buttons == *(u16*)((u8*)D_800FF51C + repeat_offset)) {
-    *(u16*)((u8*)D_800FF51C + repeat_offset) = buttons;
+  if (buttons == *(u16*)((u8*)&D_800FF518[0].previous_buttons + repeat_offset)) {
+    *(u16*)((u8*)&D_800FF518[0].previous_buttons + repeat_offset) = buttons;
     if (repeat >= 16) {
       repeat = 15;
     }
@@ -181,21 +182,11 @@ void func_80029F6C(NUContData* input, s32 unused, s32 index) {
     }
   } else {
     repeat = 15;
-    *(u16*)((u8*)D_800FF51C + index * 6) = buttons;
+    *(u16*)((u8*)&D_800FF518[0].previous_buttons + index * sizeof(ControllerRepeatState)) = buttons;
   }
-  *(s16*)((u8*)D_800FF518 + index * 6) = repeat;
+  *(s16*)((u8*)&D_800FF518[0].repeat_count + index * sizeof(ControllerRepeatState)) = repeat;
 }
 
-typedef struct {
-  u16 buttons;
-  u16 held;
-  u16 pressed;
-  u16 previous;
-  u16 repeated;
-  u16 repeat_count;
-  s8 stick_x;
-  s8 stick_y;
-} ControllerState;
 
 extern u8 D_801052B8;
 extern NUContData debug_menu_pad_buttons_a[];

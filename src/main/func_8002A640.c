@@ -187,7 +187,12 @@ INCLUDE_ASM("asm/nonmatchings/main/func_8002A640",
 
 void func_8002BD9C(Gfx** gfxp) {}
 
-void setup_view_by_camera_mode(u8* arg0, s32 arg1) {
+typedef struct {
+  /* 0x000 */ u8 unknown_000[0x1C0];
+  /* 0x1C0 */ Mtx projection_matrix;
+} ViewMatrixBlock; /* 0x200 */
+
+void setup_view_by_camera_mode(ViewMatrixBlock* matrix_block, s32 arg1) {
   if (D_800B680C == 0) {
     init_rdp_and_draw_sky_background(&glistp, arg1);
   } else {
@@ -201,7 +206,7 @@ void setup_view_by_camera_mode(u8* arg0, s32 arg1) {
     func_8002BD9C(&glistp);
   }
   gSPPopMatrix(glistp++, G_MTX_MODELVIEW);
-  gSPMatrix(glistp++, (Mtx*)(arg0 + 0x1C0),
+  gSPMatrix(glistp++, &matrix_block->projection_matrix,
             G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
   return;
 check3:

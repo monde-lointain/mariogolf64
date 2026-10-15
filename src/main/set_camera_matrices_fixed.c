@@ -3,10 +3,7 @@
 /* Camera matrices live in .bss as two Mtx4f (float[4][4]): proj @ 0x800E16B0,
    view @ 0x800E16F0. These view-matrix col-2 entries (view_matrix[i][2]) are
    the camera-space depth row. */
-extern f32 D_800E16F8; /* view_matrix[0][2] */
-extern f32 D_800E1708; /* view_matrix[1][2] */
-extern f32 D_800E1718; /* view_matrix[2][2] */
-extern f32 D_800E1728; /* view_matrix[3][2] */
+extern f32 view_matrix[4][4];
 
 INCLUDE_ASM("asm/nonmatchings/main/set_camera_matrices_fixed",
             set_camera_matrices_fixed);
@@ -18,7 +15,8 @@ INCLUDE_ASM("asm/nonmatchings/main/set_camera_matrices_fixed",
             frustum_cull_point_with_radius);
 
 s32 project_point_view_depth(f32 x, f32 y, f32 z) {
-  return (s32)(D_800E16F8 * x + D_800E1708 * y + D_800E1718 * z + D_800E1728);
+  return (s32)(view_matrix[0][2] * x + view_matrix[1][2] * y +
+               view_matrix[2][2] * z + view_matrix[3][2]);
 }
 
 INCLUDE_ASM("asm/nonmatchings/main/set_camera_matrices_fixed",

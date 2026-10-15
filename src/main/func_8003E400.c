@@ -1,4 +1,6 @@
-#include "common.h"
+#include "terrain.h"
+#include "rom_asset.h"
+#include "session.h"
 
 /* Preserve the retail approximation rather than substituting a different pi. */
 #define PIN_MARKER_YAW_OFFSET 3.14f
@@ -13,13 +15,6 @@ enum {
   PIN_HIDDEN_TERRAIN_ID = 11
 };
 
-typedef struct {
-  u32 start;
-  u32 size;
-  u32 pos;
-  u32 end;
-} RomLoadSlot;
-
 extern s8 pin_flag_suppressed;
 extern s8 pin_assembly_suppressed;
 extern s32 active_terrain_index;
@@ -28,7 +23,6 @@ extern void* pin_marker_far_texture;
 extern void* pin_marker_near_texture;
 extern void* pin_assembly_texture;
 extern Mtx pin_marker_matrices[][PIN_MARKER_BUFFER_COUNT];
-extern s32 scenario_state_id;
 extern f32 view_camera_eye_z;
 extern s32 camera_position_x;
 extern s32 camera_position_y;
@@ -37,38 +31,32 @@ extern f32 view_camera_eye_x;
 extern s8 g_terrain_vtx_xform_mode;
 extern void* pin_wind_texture;
 
-typedef struct {
-  /* 0x00 */ u32 id;
-} TerrainAttrEntry;
-
 extern TerrainAttrEntry* get_table_entry(u32 index);
 extern double atan2(double y, double x);
 extern void convert_and_pack_floats_to_fixed(f32 matrix[4][4],
                                              Mtx* fixed_matrix);
 extern void* heap3_alloc(u32 size);
 extern void heap3_free(void** payload);
-extern u32 get_rom_asset_allocation_size(u16 asset_id, void* load_slots);
-extern void load_rom_asset_payload(void* destination, RomLoadSlot* load_slots);
 extern void mtx_from_rts(f32 matrix[4][4], f32 rotation[3], f32 translation[3],
                          f32 scale[3]);
 
 void load_pin_render_assets(void) {
-  RomLoadSlot load_slots[2];
+  RomAssetLoad asset;
 
   pin_marker_near_texture =
-      heap3_alloc(get_rom_asset_allocation_size(PIN_MARKER_NEAR_ASSET_ID, load_slots));
-  load_rom_asset_payload(pin_marker_near_texture, load_slots);
+      heap3_alloc(get_rom_asset_allocation_size(PIN_MARKER_NEAR_ASSET_ID, &asset));
+  load_rom_asset_payload(pin_marker_near_texture, &asset);
 
   pin_marker_far_texture =
-      heap3_alloc(get_rom_asset_allocation_size(PIN_MARKER_FAR_ASSET_ID, load_slots));
-  load_rom_asset_payload(pin_marker_far_texture, load_slots);
+      heap3_alloc(get_rom_asset_allocation_size(PIN_MARKER_FAR_ASSET_ID, &asset));
+  load_rom_asset_payload(pin_marker_far_texture, &asset);
 
   pin_assembly_texture =
-      heap3_alloc(get_rom_asset_allocation_size(PIN_ASSEMBLY_ASSET_ID, load_slots));
-  load_rom_asset_payload(pin_assembly_texture, load_slots);
+      heap3_alloc(get_rom_asset_allocation_size(PIN_ASSEMBLY_ASSET_ID, &asset));
+  load_rom_asset_payload(pin_assembly_texture, &asset);
 
-  pin_wind_texture = heap3_alloc(get_rom_asset_allocation_size(PIN_WIND_ASSET_ID, load_slots));
-  load_rom_asset_payload(pin_wind_texture, load_slots);
+  pin_wind_texture = heap3_alloc(get_rom_asset_allocation_size(PIN_WIND_ASSET_ID, &asset));
+  load_rom_asset_payload(pin_wind_texture, &asset);
 }
 
 void free_pin_render_assets(void) {
@@ -120,7 +108,7 @@ s32 should_draw_pin_flag(void) {
     return 0;
   }
 
-  if (scenario_state_id != 6 && scenario_state_id != 7) {
+  if (scenario_state_id.state_id != 6 && scenario_state_id.state_id != 7) {
     return 1;
   }
 

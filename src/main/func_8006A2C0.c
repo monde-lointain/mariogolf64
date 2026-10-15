@@ -1,4 +1,11 @@
 #include "common.h"
+#include "controller.h"
+#include "session.h"
+#include "club.h"
+#include "rom_asset.h"
+
+/* D_801B71F3 is the record base; status, handicap, hole scores, and the
+ * second byte of each hole slot alias offsets +3, +6, +8, and +9. */
 
 extern s32 D_800C4010;
 extern s32 D_800C4014;
@@ -10,7 +17,14 @@ extern s32 D_800C4060;
 extern s32 D_800C4064;
 extern s32 D_800C4068;
 extern s32 D_800C0E60;
-extern u8 D_800C406C[];
+/* The dialog renderer displays this text and maps its two choices to results. */
+typedef struct {
+  /* 0x00 */ s32 text_run_index;
+  /* 0x04 */ s32 initial_choice_index;
+  /* 0x08 */ s32 choice_results[2];
+} DialogDefinition; /* 0x10 */
+
+extern DialogDefinition D_800C406C[];
 extern s32 D_800C411C;
 extern s32 D_800C4120;
 extern s32 D_800C4124;
@@ -37,8 +51,6 @@ extern void* D_800E1C0C;
 extern void* heap3_alloc(u32 need);
 extern void heap3_free(void** payload_ptr);
 extern void func_80050DA0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
-extern u32 get_rom_asset_allocation_size(u16 index, void* out);
-extern void load_rom_asset_payload(void* data, void* slot);
 void func_8006B54C(void);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_8006A2C0", func_8006A2C0);
@@ -140,18 +152,18 @@ void load_texture_block(Gfx** pgfx, u32 timg, s32 fmt, s32 siz, s32 width,
 }
 
 void func_8006ACD8(void) {
-  u8 sp10[0x20];
+  RomAssetLoad asset;
 
-  D_800E1C04 = heap3_alloc(get_rom_asset_allocation_size(0x63F, sp10));
-  load_rom_asset_payload(D_800E1C04, sp10);
+  D_800E1C04 = heap3_alloc(get_rom_asset_allocation_size(0x63F, &asset));
+  load_rom_asset_payload(D_800E1C04, &asset);
   func_8006B54C();
 }
 
 void func_8006AD1C(s32 arg0) {
-  u8 sp10[0x20];
+  RomAssetLoad asset;
 
-  get_rom_asset_allocation_size(*(u16*)&D_800C4026[(arg0 % 14) * 4], sp10);
-  load_rom_asset_payload(D_800E1C04, sp10);
+  get_rom_asset_allocation_size(*(u16*)&D_800C4026[(arg0 % 14) * 4], &asset);
+  load_rom_asset_payload(D_800E1C04, &asset);
 }
 
 void func_8006AD88(void) { D_800C4020 = 0; }
@@ -317,12 +329,12 @@ void func_8006B5A0(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
 INCLUDE_ASM("asm/nonmatchings/main/func_8006A2C0", func_8006B5D8);
 
 void func_8006B980(void) {
-  u8 sp10[0x20];
+  RomAssetLoad asset;
 
-  D_800E1C08 = heap3_alloc(get_rom_asset_allocation_size(0x70B, sp10));
-  load_rom_asset_payload(D_800E1C08, sp10);
-  D_800E1C0C = heap3_alloc(get_rom_asset_allocation_size(0x70C, sp10));
-  load_rom_asset_payload(D_800E1C0C, sp10);
+  D_800E1C08 = heap3_alloc(get_rom_asset_allocation_size(0x70B, &asset));
+  load_rom_asset_payload(D_800E1C08, &asset);
+  D_800E1C0C = heap3_alloc(get_rom_asset_allocation_size(0x70C, &asset));
+  load_rom_asset_payload(D_800E1C0C, &asset);
 }
 
 void func_8006B9E4(void) {
@@ -333,17 +345,17 @@ void func_8006B9E4(void) {
 s32 func_8006BA10(void) { return !~D_800C4124; }
 
 void func_8006BA24(s32 arg0) {
-  u8* e;
+  DialogDefinition* dialog;
   s32 t;
 
   if (arg0 == -1) {
     return;
   }
-  e = D_800C406C + arg0 * 16;
+  dialog = &D_800C406C[arg0];
   D_800C4120 = 0;
   D_800C411C = arg0;
   func_8006B980();
-  t = *(s32*)(e + 4);
+  t = dialog->initial_choice_index;
   D_800C4124 = 0;
   D_800C4128 = t;
   play_sound_effect(0x64, D_800C0E60, 0x64);
@@ -367,7 +379,7 @@ extern void func_8006A2C0(Gfx** pgfx, s32 ulx, s32 uly, s32 lrx, s32 lry,
 void emit_hole_banner_dl(Gfx** pgfx) {
   Gfx* gfx;
   Gfx** gp;
-  u8* entry;
+  DialogDefinition* entry;
   s32 sp38;
   s32 sp3C;
   s32 span;
@@ -388,12 +400,12 @@ void emit_hole_banner_dl(Gfx** pgfx) {
   s32 y;
 
   gfx = *pgfx;
-  entry = D_800C406C + D_800C411C * 16;
+  entry = &D_800C406C[D_800C411C];
   if (D_800C4124 == -1) {
     return;
   }
 
-  func_8007399C(*(s32*)entry, 0xC, &sp38, &sp3C, 0);
+  func_8007399C(entry->text_run_index, 0xC, &sp38, &sp3C, 0);
   span = sp3C + 0x18;
   if (span < 0x30) {
     span = 0x30;
@@ -512,11 +524,11 @@ void emit_hole_banner_dl(Gfx** pgfx) {
 }
 
 void func_8006C3E8(void) {
-  u8 sp10[0x20];
+  RomAssetLoad asset;
 
   if (D_800C4010 == 0) {
-    D_800E1C00 = heap3_alloc(get_rom_asset_allocation_size(0x955, sp10));
-    load_rom_asset_payload(D_800E1C00, sp10);
+    D_800E1C00 = heap3_alloc(get_rom_asset_allocation_size(0x955, &asset));
+    load_rom_asset_payload(D_800E1C00, &asset);
   }
   D_800C4010 = 1;
   D_800C4014 = 0;
@@ -653,11 +665,11 @@ void stamp_circle_ring_alpha(u32* grid, s32 cx, s32 cy, s32 r) {
 
 /* Shared return labels preserve the branch-shaped bit test; separate early
  * returns let jump.c fold the last test into a shift. */
-s32 func_8006C8CC(void* state) {
+s32 func_8006C8CC(ControllerState* state) {
   if (D_800C4010 == 0) goto yes;
   if (D_800C4014 != 0) goto yes;
   if (D_800C4018 >= 0) goto no;
-  if (*(u16*)((u8*)state + 4) & 0x8000) goto yes;
+  if (state->pressed & 0x8000) goto yes;
 no:
   return 0;
 yes:
@@ -774,8 +786,6 @@ INCLUDE_ASM("asm/nonmatchings/main/func_8006A2C0", func_8006CD50);
 
 extern s32 active_player_count[];
 extern u16 D_80106230[];
-extern s8 player_hole_status[];
-extern s8 player_hole_scores[];
 extern s8 D_801050BC[];
 extern s8 D_801050BD;
 extern s8 D_801050BE;
@@ -807,8 +817,7 @@ void func_8006CE88(s32 arg0) {
 
   hasZero = 0;
   for (i = 0; i != active_player_count[0]; i++) {
-    s32 off = i * 0xB8;
-    if (*(s8*)((u8*)player_hole_status + off) == 0) {
+    if (player_records[i].hole_status == 0) {
       hasZero = 1;
     }
   }
@@ -824,10 +833,9 @@ void func_8006CE88(s32 arg0) {
     for (; col < arg0; col++) {
       last = -1;
       for (i = 0; i != active_player_count[0]; i++) {
-        s32 off = col * 2 + i * 0xB8;
-        if (*(s8*)((u8*)player_hole_scores + off) != 0) {
+        if (player_records[i].hole_scores[col].score != 0) {
           last = i;
-          *(s8*)((u8*)player_hole_scores + off) = counter;
+          player_records[i].hole_scores[col].score = counter;
         }
       }
       if (col == arg0 - 1) {
@@ -994,161 +1002,152 @@ void func_8006D4DC(void) { D_800C4144 = -1; }
 
 INCLUDE_ASM("asm/nonmatchings/main/func_8006A2C0", func_8006D4EC);
 
-extern s8 D_801B71ED[];
-extern s8 D_801B71FC[];
 extern s8 D_800C1420[];
 extern s32 func_8006CD50(s32 arg0, s32 arg1);
 extern void func_8005DE60(void);
 
 /**
- * Folds the finished round into the running per-mode statistics record
- * (`base + scenario_mode_id * 116 + 0xE98`, zero-initialised on first use).
+ * Folds the finished round into the 0x74-byte per-mode record at
+ * func_8005AF50() + scenario_mode_id * 116 + 0xE98. Its sample count stops
+ * incrementing at 9999; subsequent totals decay by 9999/10000. The explicit
+ * ScenarioStatistics layout names observed fields and leaves uncertain
+ * counters/totals as unknown_<offset>.
  *
- * The record keeps a sample counter that saturates at 9999; once saturated
- * every running total is scaled by 9999/10000 each round, so the record decays
- * into a moving average instead of overflowing. Fields: 0x00 sample count,
- * 0x04 best value (clamped at -54), 0x08 and 0x1C per-hole totals, 0x0C a
- * high-water mark, 0x10/0x14 a weighted average and its sample count, 0x18 and
- * 0x28/0x2C saturating totals, 0x20/0x24 hole tallies against the course table,
- * 0x3C[18] per-hole bests and 0x60[18] per-hole played flags.
- *
- * Four spellings are load-bearing for codegen, not style. The loops count in
- * `i` and derive `off`/`p` from it so loop.c creates them as induction
- * variables, whose initialisers it then emits after the hoisted constants as
- * the ROM has them (an explicit `off += 2` IV inverts that order). The
- * `(s8) * (u8*)` and `(s16) * (u16*)` casts reproduce the ROM's unsigned load
- * plus sign-extend pair where a plain signed load would be one instruction
- * shorter. `D_801B71ED[0]` is re-read at each use because the intervening
- * stores invalidate it, and the flag store spells its address
- * `rec + D_801B71ED[0] + 0x60` so the record base stays the first addend.
+ * RoundPlayerRecord is based at player_records. The symbol map places
+ * player_hole_status at +3, player_handicaps at +6, player_hole_scores at +8,
+ * and D_801B71FC at +9, the second byte of each two-byte hole slot. Accesses
+ * use the enclosing record's members rather than treating these aliases as
+ * separate arrays.
  */
 void accumulate_mode_stats(void) {
   u8* rec;
+  ScenarioStatistics* stats;
   s32* g;
   s8* cfg;
   s8* p;
   s32 sat;
   s64 v;
   s64 sum;
-  s32 hole;
+  s32 character;
   s32 off;
   s32 i;
   s32 n;
   s32 x;
 
   rec = func_8005AF50() + (scenario_mode_id * 116 + 0xE98);
+  stats = (ScenarioStatistics*)rec;
   g = &D_800FF4D0;
   cfg = &D_800C1420[scenario_mode_id * 200];
 
-  if (*(s32*)(rec + 0x00) <= 0) {
-    *(s32*)(rec + 0x00) = 0;
-    *(s32*)(rec + 0x04) = 0x7FFFFFFF;
-    *(s32*)(rec + 0x08) = 0;
-    *(s32*)(rec + 0x0C) = 0;
-    *(s32*)(rec + 0x10) = 0;
-    *(s32*)(rec + 0x14) = 0;
-    *(s32*)(rec + 0x18) = 0;
-    *(s32*)(rec + 0x1C) = 0;
-    *(s32*)(rec + 0x20) = 0;
-    *(s32*)(rec + 0x24) = 0;
-    *(s32*)(rec + 0x28) = 0;
-    *(s32*)(rec + 0x2C) = 0;
+  if (stats->sample_count <= 0) {
+    stats->sample_count = 0;
+    stats->best_round_score = 0x7FFFFFFF;
+    stats->hole_score_total = 0;
+    stats->high_water_mark = 0;
+    stats->weighted_average = 0;
+    stats->average_sample_count = 0;
+    stats->unknown_18 = 0;
+    stats->unknown_1C = 0;
+    stats->unknown_counter_20 = 0;
+    stats->unknown_counter_24 = 0;
+    stats->unknown_28 = 0;
+    stats->unknown_2C = 0;
   }
-  if (*(s32*)(rec + 0x00) < 9999) {
+  if (stats->sample_count < 9999) {
     sat = 0;
-    *(s32*)(rec + 0x00) = *(s32*)(rec + 0x00) + 1;
+    stats->sample_count = stats->sample_count + 1;
   } else {
     sat = 1;
   }
 
-  player_hole_status[0] = 0;
+  player_records[0].hole_status = 0;
   v = func_8006CD50(0x12, 0);
-  if (v < *(s32*)(rec + 0x04)) {
-    *(s32*)(rec + 0x04) = v;
+  if (v < stats->best_round_score) {
+    stats->best_round_score = v;
   }
-  if (*(s32*)(rec + 0x04) < -0x36) {
-    *(s32*)(rec + 0x04) = -0x36;
+  if (stats->best_round_score < -0x36) {
+    stats->best_round_score = -0x36;
   }
-  hole = D_801B71ED[0];
-  if (v < (s16) * (u16*)(rec + 0x3C + hole * 2)) {
-    *(s16*)(rec + 0x3C + hole * 2) = v;
-    *(u8*)(rec + D_801B71ED[0] + 0x60) = 1;
-    hole = D_801B71ED[0];
-    if (*(s16*)(rec + 0x3C + hole * 2) < -0x36) {
-      *(s16*)(rec + 0x3C + hole * 2) = -0x36;
+  character = player_records[0].character_index;
+  if (v < (s16)(u16)stats->best_round_score_by_character[character]) {
+    stats->best_round_score_by_character[character] = v;
+    stats->character_has_record[player_records[0].character_index] = 1;
+    character = player_records[0].character_index;
+    if (stats->best_round_score_by_character[character] < -0x36) {
+      stats->best_round_score_by_character[character] = -0x36;
     }
   }
 
   sum = 0;
-  for (off = 0; off != 0x24; off += 2) {
-    sum += (s8) * (u8*)((u8*)player_hole_scores + off);
+  for (off = 0; off != sizeof(player_records[0].hole_scores); off += sizeof(PlayerHoleScore)) {
+    sum += (s8) * (u8*)((u8*)&player_records[0].hole_scores[0].score + off);
   }
-  sum += *(s32*)(rec + 0x08);
+  sum += stats->hole_score_total;
   if (sat == 1) {
     sum = sum * 9999 / 10000;
   }
   if (sum > 0x7FFFFFFF) {
     sum = 0x7FFFFFFF;
   }
-  *(s32*)(rec + 0x08) = sum;
-  if (*(s32*)(rec + 0x0C) < g[3]) {
-    *(s32*)(rec + 0x0C) = g[3];
+  stats->hole_score_total = sum;
+  if (stats->high_water_mark < g[3]) {
+    stats->high_water_mark = g[3];
   }
 
-  n = *(s32*)(rec + 0x14);
+  n = stats->average_sample_count;
   if (n == 0) {
     if (g[5] == 0) {
-      *(s32*)(rec + 0x10) = 0;
+      stats->weighted_average = 0;
     } else if (g[5] > 0) {
-      *(s32*)(rec + 0x10) = g[4] / g[5];
-      *(s32*)(rec + 0x14) = 1;
+      stats->weighted_average = g[4] / g[5];
+      stats->average_sample_count = 1;
     } else {
-      *(s32*)(rec + 0x10) = 0;
+      stats->weighted_average = 0;
     }
   } else if (g[5] > 0) {
-    *(s32*)(rec + 0x10) = (*(s32*)(rec + 0x10) * n + g[4]) / (n + g[5]);
-    *(s32*)(rec + 0x14) = *(s32*)(rec + 0x14) + g[5];
+    stats->weighted_average = (stats->weighted_average * n + g[4]) / (n + g[5]);
+    stats->average_sample_count = stats->average_sample_count + g[5];
   }
 
-  x = *(s32*)(rec + 0x18) + g[2];
+  x = stats->unknown_18 + g[2];
   if (x > 0x7FFFFFFF) {
-    *(s32*)(rec + 0x18) = 0x7FFFFFFF;
+    stats->unknown_18 = 0x7FFFFFFF;
   } else {
-    *(s32*)(rec + 0x18) = x;
+    stats->unknown_18 = x;
   }
   if (sat == 1) {
-    *(s32*)(rec + 0x18) = *(s32*)(rec + 0x18) * 9999 / 10000;
+    stats->unknown_18 = stats->unknown_18 * 9999 / 10000;
   }
 
   sum = 0;
   for (i = 0; i != 0x12; i++) {
     s32 b;
 
-    off = i * 2;
-    b = (s8) * (u8*)((u8*)D_801B71FC + off);
+    off = i * sizeof(PlayerHoleScore);
+    b = (s8) * (u8*)((u8*)&player_records[0].hole_scores[0].unknown_01 + off);
     if (b != -1) {
       sum += b;
     }
   }
-  sum += *(s32*)(rec + 0x1C);
+  sum += stats->unknown_1C;
   if (sat == 1) {
     sum = sum * 9999 / 10000;
   }
   if (sum > 0x7FFFFFFF) {
     sum = 0x7FFFFFFF;
   }
-  *(s32*)(rec + 0x1C) = sum;
+  stats->unknown_1C = sum;
 
   for (i = 0; i != 0x12; i++) {
-    off = i * 2;
+    off = i * sizeof(PlayerHoleScore);
     p = &cfg[i * 10];
-    if (*(s8*)((u8*)player_hole_scores + off) <= p[0x14]) {
-      x = *(s32*)(rec + 0x20);
+    if (*(s8*)((u8*)&player_records[0].hole_scores[0].score + off) <= p[0x14]) {
+      x = stats->unknown_counter_20;
       if (x <= 0x7FFFFFFE) {
-        *(s32*)(rec + 0x20) = x + 1;
+        stats->unknown_counter_20 = x + 1;
       }
       if (sat == 1) {
-        *(s32*)(rec + 0x20) = *(s32*)(rec + 0x20) * 9999 / 10000;
+        stats->unknown_counter_20 = stats->unknown_counter_20 * 9999 / 10000;
       }
     }
   }
@@ -1156,31 +1155,31 @@ void accumulate_mode_stats(void) {
   for (i = 0; i != 0x12; i++) {
     s32 d;
 
-    off = i * 2;
+    off = i * sizeof(PlayerHoleScore);
     p = &cfg[i * 10];
-    d = *(s8*)((u8*)player_hole_scores + off) - *(s8*)((u8*)D_801B71FC + off);
+    d = *(s8*)((u8*)&player_records[0].hole_scores[0].score + off) - *(s8*)((u8*)&player_records[0].hole_scores[0].unknown_01 + off);
     if (p[0x14] - d >= 2) {
-      x = *(s32*)(rec + 0x24);
+      x = stats->unknown_counter_24;
       if (x <= 0x7FFFFFFE) {
-        *(s32*)(rec + 0x24) = x + 1;
+        stats->unknown_counter_24 = x + 1;
       }
       if (sat == 1) {
-        *(s32*)(rec + 0x24) = *(s32*)(rec + 0x24) * 9999 / 10000;
+        stats->unknown_counter_24 = stats->unknown_counter_24 * 9999 / 10000;
       }
     }
   }
 
-  x = *(s32*)(rec + 0x28) + g[0];
+  x = stats->unknown_28 + g[0];
   if (x > 0x7FFFFFFF) {
-    *(s32*)(rec + 0x28) = 0x7FFFFFFF;
+    stats->unknown_28 = 0x7FFFFFFF;
   } else {
-    *(s32*)(rec + 0x28) = x;
+    stats->unknown_28 = x;
   }
-  x = *(s32*)(rec + 0x2C) + g[1];
+  x = stats->unknown_2C + g[1];
   if (x > 0x7FFFFFFF) {
-    *(s32*)(rec + 0x2C) = 0x7FFFFFFF;
+    stats->unknown_2C = 0x7FFFFFFF;
   } else {
-    *(s32*)(rec + 0x2C) = x;
+    stats->unknown_2C = x;
   }
   func_8005DE60();
 }
@@ -1188,12 +1187,16 @@ void accumulate_mode_stats(void) {
 void func_8006DDCC(void) {
   u8* p = func_8005AF50();
   s32 v;
+  ScenarioStatistics* stats;
+  s32* high_water_mark;
 
   D_800FF4D0 = 0;
   D_800FF4D4 = 0;
   D_800FF4D8 = 0;
   D_800FF4E4 = 0;
-  v = *(s32*)(p + scenario_mode_id * 116 + 0xEA4);
+  stats = (ScenarioStatistics*)(p + (scenario_mode_id * sizeof(ScenarioStatistics) + 0xE98));
+  high_water_mark = &stats->high_water_mark;
+  v = *high_water_mark;
   D_800FF4E0 = 0;
   D_800FF4E8 = 0;
   D_800FF4DC = v;
@@ -1202,12 +1205,16 @@ void func_8006DDCC(void) {
 void func_8006DE44(void) {
   u8* p = func_8005AF50();
   s32 v;
+  ScenarioStatistics* stats;
+  s32* high_water_mark;
 
   D_800FF4D0 = 0;
   D_800FF4D4 = 0;
   D_800FF4D8 = 0;
   D_800FF4E4 = 0;
-  v = *(s32*)(p + scenario_mode_id * 116 + 0xEA4);
+  stats = (ScenarioStatistics*)(p + (scenario_mode_id * sizeof(ScenarioStatistics) + 0xE98));
+  high_water_mark = &stats->high_water_mark;
+  v = *high_water_mark;
   D_800FF4E8 = 0;
   D_800FF4DC = v;
 }
@@ -1216,18 +1223,19 @@ INCLUDE_ASM("asm/nonmatchings/main/func_8006A2C0", func_8006DEB4);
 
 extern s32 D_801B7250;
 extern s32 D_801B7270;
-extern void* get_shot_data(void);
 
 s32 func_8006DF84(void) {
   s32* base = &D_800FF4D0;
   s32 pending;
   s16 field;
-  void* shot;
+  ClubShot* shot;
+  s16* shot_field;
 
   shot = get_shot_data();
   pending = D_801B7250;
   D_801B7270 = pending;
-  field = *(s16*)((u8*)shot + 0x16);
+  shot_field = &shot->unknown_16;
+  field = *shot_field;
   if (field != 0) {
     goto clear;
   }

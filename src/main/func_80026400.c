@@ -1,6 +1,7 @@
 #include "common.h"
 
 #include "heap.h"
+#include "terrain.h"
 
 extern char D_800CA0E0[];
 extern char D_800CA0F0[];
@@ -17,45 +18,15 @@ extern void heap3_free(void** payload_ptr);
 
 void reset_scenery_billboards(void);
 
-/* Scenery collision cylinders: parallel global arrays, one record per 0x10
- * bytes. Each field carries a distinct symbol (collision_cylinders,
- * D_800FBEA2/A4/A6/AA/AC/AE); model each as its own 0x10-stride array so the
- * shared record index materialises each symbol with addend 0. */
-typedef struct {
-  /* 0x00 */ s16 val;
-  /* 0x02 */ s8 pad[0xE];
-} CylFieldS16; /* 0x10 */
-
-typedef struct {
-  /* 0x00 */ u16 val;
-  /* 0x02 */ s8 pad[0xE];
-} CylFieldU16; /* 0x10 */
-
-typedef struct {
-  /* 0x00 */ s8 val;
-  /* 0x01 */ s8 pad[0xF];
-} CylFieldS8; /* 0x10 */
-
 typedef struct {
   /* 0x00 */ s32 depth;
-  /* 0x04 */ s8 pad[0x84];
+  /* 0x04 */ s8 unknown_04[4];
+  /* 0x08 */ Mtx translate;
+  /* 0x48 */ Mtx scale;
 } SceneryTransform; /* 0x88 */
 
-typedef struct {
-  /* 0x00 */ Mtx translate;
-  /* 0x40 */ Mtx scale;
-  /* 0x80 */ s8 pad[8];
-} SceneryMtxPair; /* 0x88 */
-
-extern CylFieldS16 collision_cylinders[]; /* 0x800FBEA0 : x */
-extern CylFieldS16 D_800FBEA2[];          /* y / stored terrain height */
-extern CylFieldS16 D_800FBEA4[];          /* z */
-extern CylFieldS8 D_800FBEA6[];           /* active flag */
-extern CylFieldS16 D_800FBEAA[];          /* cull flag (stored) */
-extern CylFieldU16 D_800FBEAC[];          /* scale x */
-extern CylFieldU16 D_800FBEAE[];          /* scale y */
+extern SceneryCylinder collision_cylinders[];       /* 0x800FBEA0 */
 extern SceneryTransform g_scenery_transform_pool[]; /* 0x801EFFD0 */
-extern SceneryMtxPair D_801EFFD8[];                 /* 0x801EFFD8 (pool + 8) */
 extern u16 g_scenery_sort_indices[0x80];            /* 0x800B6570 */
 extern s8 g_terrain_vtx_xform_mode;
 
@@ -100,16 +71,16 @@ void update_scenery_cylinder_transforms(void) {
   }
 
   for (i = 0; i < 0x80; i++) {
-    if (D_800FBEA6[i].val < 0) {
+    if (collision_cylinders[i].sprite_index < 0) {
       continue;
     }
-    x = (f32)collision_cylinders[i].val;
-    z = (f32)D_800FBEA4[i].val;
+    x = (f32)collision_cylinders[i].x;
+    z = (f32)collision_cylinders[i].z;
     if (g_terrain_vtx_xform_mode == 0 && (((x <= 256.0f) | (z <= 256.0f)) ||
                                           ((3840.0f <= x) | (7936.0f <= z)))) {
-      D_800FBEAA[i].val = 1;
+      collision_cylinders[i].cull_state = 1;
     } else {
-      D_800FBEAA[i].val = 0;
+      collision_cylinders[i].cull_state = 0;
     }
     h = get_interpolated_terrain_height_wrapper((s32)(x * 1024.0f),
                                                 (s32)(z * 1024.0f));
@@ -118,10 +89,11 @@ void update_scenery_cylinder_transforms(void) {
     }
     h >>= 10;
     hf = (f32)h;
-    D_800FBEA2[i].val = (s16)hf;
-    guTranslate(&D_801EFFD8[i].translate, x, hf, z);
-    guScale(&D_801EFFD8[i].scale, (f32)D_800FBEAC[i].val,
-            (f32)D_800FBEAE[i].val, 1.0f);
+    collision_cylinders[i].terrain_y = (s16)hf;
+    guTranslate(&g_scenery_transform_pool[i].translate, x, hf, z);
+    guScale(&g_scenery_transform_pool[i].scale,
+            (f32)collision_cylinders[i].radius,
+            (f32)collision_cylinders[i].scale_y, 1.0f);
   }
 }
 
@@ -133,12 +105,12 @@ void project_sort_scenery_cylinders(void) {
   u16 key;
 
   for (i = 0; i != 0x80; i++) {
-    if (D_800FBEA6[i].val < 0) {
+    if (collision_cylinders[i].sprite_index < 0) {
       g_scenery_transform_pool[i].depth = 0x40000000;
     } else {
       g_scenery_transform_pool[i].depth = project_point_view_depth(
-          (f32)collision_cylinders[i].val, (f32)D_800FBEA2[i].val,
-          (f32)D_800FBEA4[i].val);
+          (f32)collision_cylinders[i].x, (f32)collision_cylinders[i].terrain_y,
+          (f32)collision_cylinders[i].z);
     }
   }
 

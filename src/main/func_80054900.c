@@ -1,19 +1,13 @@
-#include "common.h"
+#include "animation.h"
 
 extern s32 flag_is_set(s32 flag);
 extern s32 find_keyframe_offset_by_tag(s32 id, s32 track, s32 tag);
 extern void func_80054BC0(void);
-extern u8* get_character_state(s32 id);
 extern void* func_80056060(s32 id);
 extern void animation_step(s32 index);
 extern void func_800543A4(void);
 extern void func_800577DC(s32 index, void* arg1);
 
-typedef struct {
-  s32 unk_00;
-  u8 unk_04[0x188];
-} AnimSlot;
-extern AnimSlot D_801F4424[];
 extern s16 D_800FBE48;
 extern void func_800453E0(void* a, void* b, void* c);
 extern s32 get_interpolated_terrain_height_wrapper(s32 x, s32 z);
@@ -28,9 +22,6 @@ extern f32 view_camera_eye_z;
 extern f32 D_801B54F8;
 extern f32 D_801B54FC;
 extern f32 D_801B5500;
-extern u8 polychara_buf[];
-extern u8 polychara_state[];
-extern u8 polychara_seg_ptr[];
 extern const u8 polychara_alive_msg[];
 extern u8 polychara_assert_cond[];
 extern u8 polychara_assert_file[];
@@ -45,7 +36,7 @@ extern f32 sqrtf(f32 value);
 s32 func_80054938(s32 id, s32 mode, s32 direct, s32 variant) {
   f32 position[3];
   char line[0x80];
-  u8* cs;
+  CharacterState* cs;
   s32 column;
   s32 tag = 3;
   s32 result;
@@ -88,7 +79,7 @@ s32 func_80054938(s32 id, s32 mode, s32 direct, s32 variant) {
       break;
   }
   if (!flag_is_set(0x36) && cs != NULL) {
-    s32 index = *(s32*)(cs + 8);
+    s32 index = cs->resource_index;
     if (index >= 0) {
       index %= 36;
       if (index < 18) {
@@ -164,7 +155,7 @@ void func_80054BC0(void) {
   model = 0;
   do {
     load_character_model(0, model, 0);
-    D_800C1DEC = *(s32*)polychara_state;
+    D_800C1DEC = D_801F43F0[0].resource_index;
     for (column = 0; column < 5; column++) {
       switch ((u32)column) {
         case 0:
@@ -225,10 +216,10 @@ void func_80054E20(void) {
 }
 
 void func_80054E4C(s32 arg0, s32 arg1) {
-  u8* cs = get_character_state(arg0);
+  CharacterState* cs = get_character_state(arg0);
   if (cs != NULL) {
     s32 mode;
-    D_800C1DEC = *(s32*)(cs + 8);
+    D_800C1DEC = cs->resource_index;
     switch (func_800544B4(arg0, arg1)) {
       case 0:
         mode = 0;
@@ -247,19 +238,12 @@ void func_80054E4C(s32 arg0, s32 arg1) {
         break;
     }
     kSetMultiTLB(0, 0, 0x20, 0x2000000,
-                  osVirtualToPhysical(*(void**)(cs + 4)));
+                  osVirtualToPhysical(cs->segment_data));
     func_800543DC(arg0, mode);
   }
 }
 
-/* One keyframe of an animation track: a signed offset value plus the tag that
- * selects it. Entries are packed 4 bytes apart and the list ends at val == -1.
- */
-typedef struct {
-  s16 val;
-  u8 tag;
-  u8 pad;
-} KfEntry;
+/* KfEntry and KeyframeTrack layouts are shared in animation.h. */
 
 /* collect_keyframe_events_at: CARRIED at 54/54, ONE BIT off (S260). The whole
  * body is byte-identical to the ROM -- same registers, same annulled `bnel` and
@@ -269,17 +253,15 @@ typedef struct {
  * the same register and gcc redirects the edge over the redundant re-load.
  * Reproduce with (KfEntry as below, same shape as find_keyframe_offset_by_tag):
  *
- *   u8* cs = get_character_state(id); s32 count; KfEntry *e, *q; s32 off,
- *   sentinel, v, w; u8 *tracks, *p;
- *   count = 0;                       // AFTER the call: crossing it makes it
- * callee-saved if (cs == NULL) goto done; if (track >= *(s32*)(cs + 0x1C)) goto
- * done; tracks = *(u8**)(*(u8**)cs + 0x14); off = track * 12; e =
- * *(KfEntry**)(off + (u32)tracks); if (e == NULL) goto done; if (e->val == -1)
- * goto done;     // literal here, local `sentinel` in the loop sentinel = -1; q
- * = e; p = out;   // q = e keeps the ROM's `move v1,a0` loop: v = q->val; // v
- * and w must be SEPARATE locals if (v != want) goto advance; if (count >= 0x10)
- * goto advance; p[0] = q->tag; p[1] = q->pad; count++; p += 2; advance: q++; w
- * = q->val; if (w != sentinel) goto loop; done: return count;
+ *   CharacterState* cs = get_character_state(id);
+ *   count = 0;  // AFTER the call, to keep it caller-saved.
+ *   if (cs == NULL) goto done;
+ *   if (track >= cs->keyframe_track_count) goto done;
+ *   KeyframeTrack* tracks = cs->model_resource->keyframe_tracks;
+ *   KfEntry* e = tracks[track].entries;
+ *   if (e == NULL || e->value == -1) goto done;
+ *   q = e; p = out;
+ *   ... read q->value/tag/reserved_03; advance q and test its -1 sentinel ...
  *
  * Tried for the back edge: raw `*(s16*)q` on either side (MEM_IN_STRUCT_P is
  * not part of the identity test), separate v/w locals, and reading the sentinel
@@ -302,25 +284,25 @@ INCLUDE_ASM("asm/nonmatchings/main/func_80054900", collect_keyframe_events_at);
  * loop's own -1 needs its own local because a goto loop de-hoists a literal. */
 s32 find_keyframe_offset_by_tag(s32 id, s32 track, s32 tag) {
   s32 result = -1;
-  u8* cs = get_character_state(id);
+  CharacterState* cs = get_character_state(id);
   KfEntry* e;
   s32 off;
   s32 sentinel;
-  u8* tracks;
+  KeyframeTrack* tracks;
 
   if (cs == NULL) {
     goto done;
   }
-  if (track >= *(s32*)(cs + 0x1C)) {
+  if (track >= cs->keyframe_track_count) {
     goto done;
   }
-  tracks = *(u8**)(*(u8**)cs + 0x14);
-  off = track * 12;
-  e = *(KfEntry**)(off + (u32)tracks);
+  tracks = cs->model_resource->keyframe_tracks;
+  off = track * sizeof(KeyframeTrack);
+  e = *(KfEntry**)(off + (u32)&tracks[0].entries);
   if (e == NULL) {
     goto done;
   }
-  if (e->val == result) {
+  if (e->value == result) {
     goto done;
   }
   sentinel = -1;
@@ -329,11 +311,11 @@ loop:
   if (e->tag != tag) {
     goto advance;
   }
-  result = e->val - *(s16*)(off + (u32) * (u8**)(*(u8**)cs + 0x14) + 4);
+  result = e->value - *(s16*)(off + (u32)&cs->model_resource->keyframe_tracks[0].base_offset);
   goto done;
 advance:
   e++;
-  if (e->val != sentinel) {
+  if (e->value != sentinel) {
     goto loop;
   }
 done:
@@ -344,60 +326,26 @@ s32 func_800550B8(s32 arg0) { return find_keyframe_offset_by_tag(arg0, 2, 6); }
 
 /* One entry of a character model's texture table: an RGBA16 image plus the
  * texel dimensions the tile has to be re-declared with each frame. */
-typedef struct {
-  void* image;
-  u8 width;
-  u8 height;
-  u8 pad06[2];
-} TextureDesc;
 
 /* One step of a face's texture animation: the frame count at which it becomes
  * current, plus the texture and the s/t triple to bind from there on. The walk
  * takes the last keyframe whose threshold the slot's frame counter has reached,
  * so the list is scanned in full rather than stopped at the first hit. */
-typedef struct {
-  s16 threshold;
-  s16 textureIndex;
-  u16 texS[3];
-  u16 texT[3];
-} TexKeyframe;
 
 /* One binding of a model face to an animation slot. `slot` selects the entry of
  * the character's slot table that drives it; the keyframe list is what the
  * per-frame path steps through, and is unused on the reset path. */
-typedef struct {
-  s16 keyframeCount;
-  s16 slot;
-  TexKeyframe* keyframes;
-} FaceTexAnim;
 
 /* One entry of the character's animation play order: which slot to advance and
  * how many frames it runs for. A negative slot ends the list. */
-typedef struct {
-  s16 slot;
-  s16 length;
-} AnimTexOrder;
 
-/* The 0x20 animation slots live at `cs + 0x88`, 8 bytes apart, each holding a
- * frame counter at +0x88 and a state byte at +0x8C off the slot's own base --
- * the same spelling `activate_texture_anim_slot` uses. */
-#define ANIM_SLOT_FRAME 0x88
-#define ANIM_SLOT_STATE 0x8C
-#define ANIM_SLOT_COUNT 0x20
+/* Each texture slot is 8 bytes and there are 0x20 per character. */
+#define TEXTURE_ANIM_SLOT_COUNT 0x20
 
 /* A model face whose texture is animated: the segmented addresses of its three
  * vertices and of its own display list, the slots that drive it, the index of
  * the texture to bind, and the s/t pair to write into each of the three
  * vertices. */
-typedef struct {
-  u32 verts;
-  u32 dl;
-  FaceTexAnim* anims;
-  s16 animCount;
-  s16 textureIndex;
-  u16 texS[3];
-  u16 texT[3];
-} TexturedFace;
 
 #define FACE_VERTEX_COUNT 3
 #define SEGMENT_OFFSET_MASK 0xFFFFFF
@@ -411,7 +359,7 @@ typedef struct {
  * addresses resolved against the character's current segment table entry. */
 void update_vertex_texture_coords(s32 id) {
   f32 unused[16];
-  u8* cs;
+  CharacterState* cs;
   TexturedFace* face;
   TextureDesc* texture;
   Gfx* gfx;
@@ -427,29 +375,29 @@ void update_vertex_texture_coords(s32 id) {
   if (cs == NULL) {
     return;
   }
-  kSetMultiTLB(0, 0, 0x20, 0x2000000, osVirtualToPhysical(*(void**)(cs + 4)));
+  kSetMultiTLB(0, 0, 0x20, 0x2000000, osVirtualToPhysical(cs->segment_data));
 
   /* The face list is NULL-terminated, so the fetch belongs in the condition: it
    * is then the loop test that gcc rotates to the bottom of the body, which is
    * what keeps the character-state re-read inside the walk. */
-  while ((face = (*(TexturedFace***)(*(u8**)cs + 0x24))[faceIndex]) != NULL) {
-    texture = *(TextureDesc**)(*(u8**)cs + 0x28);
-    if (face->textureIndex >= 0) {
-      texture += face->textureIndex;
+  while ((face = cs->model_resource->textured_face_table[faceIndex]) != NULL) {
+    texture = cs->model_resource->texture_table;
+    if (face->texture_index >= 0) {
+      texture += face->texture_index;
     }
-    gfx = (Gfx*)(((face->dl + 0x10) & SEGMENT_OFFSET_MASK) +
-                 ((u32*)(cs + 0x20))[*(s32*)(cs + 0x30)]);
+    gfx = (Gfx*)(((face->display_list + 0x10) & SEGMENT_OFFSET_MASK) +
+                 cs->segment_bases[cs->segment_index]);
     gDPLoadTextureBlock(gfx++, (u32)texture->image & ~7, G_IM_FMT_RGBA,
                         G_IM_SIZ_16b, texture->width, texture->height, 0,
                         G_TX_CLAMP, G_TX_CLAMP, FACE_TEXTURE_MASK,
                         FACE_TEXTURE_MASK, G_TX_NOLOD, G_TX_NOLOD);
 
     for (stepIndex = 0; stepIndex < FACE_VERTEX_COUNT; stepIndex++) {
-      Vtx* vertex = (Vtx*)(((stepIndex * sizeof(Vtx) + face->verts) &
+      Vtx* vertex = (Vtx*)(((stepIndex * sizeof(Vtx) + face->vertices) &
                             SEGMENT_OFFSET_MASK) +
-                           ((u32*)(cs + 0x20))[*(s32*)(cs + 0x30)]);
-      vertex->v.tc[0] = face->texS[stepIndex];
-      vertex->v.tc[1] = face->texT[stepIndex];
+                           cs->segment_bases[cs->segment_index]);
+      vertex->v.tc[0] = face->tex_s[stepIndex];
+      vertex->v.tc[1] = face->tex_t[stepIndex];
     }
     faceIndex++;
   }
@@ -463,11 +411,10 @@ void update_vertex_texture_coords(s32 id) {
  * to state 3 once it reaches the length its play-order entry declares. */
 void update_vertex_texture_coords_per_frame(s32 id) {
   f32 unused[16];
-  u8* cs;
+  CharacterState* cs;
   TexturedFace* face;
   TextureDesc* texture;
   FaceTexAnim* anim;
-  u8* slot;
   Gfx* gfx;
   s32 faceIndex;
   s32 animIndex;
@@ -500,71 +447,87 @@ void update_vertex_texture_coords_per_frame(s32 id) {
     f32 unused2[31];
     (void)unused2;
   }
-  kSetMultiTLB(0, 0, 0x20, 0x2000000, osVirtualToPhysical(*(void**)(cs + 4)));
+  kSetMultiTLB(0, 0, 0x20, 0x2000000, osVirtualToPhysical(cs->segment_data));
 
-  while ((face = (*(TexturedFace***)(*(u8**)cs + 0x24))[faceIndex]) != NULL) {
-    for (animIndex = 0; animIndex < face->animCount; animIndex++) {
-      u8* bound;
-      anim = face->anims + animIndex;
-      bound = cs + anim->slot * 8;
-      if (*(s8*)(bound + ANIM_SLOT_STATE) == 0) {
+  while ((face = cs->model_resource->textured_face_table[faceIndex]) != NULL) {
+    for (animIndex = 0; animIndex < face->animation_count; animIndex++) {
+      /* Keep the slot displacement in the load, not the address root. */
+      CharacterState* slot_view;
+      s8* bound_state;
+      s32* bound_frame;
+      anim = face->animations + animIndex;
+      slot_view = (CharacterState*)((u8*)cs + anim->slot_index * sizeof(TextureAnimSlot));
+      bound_state = (s8*)&slot_view->texture_slots[0].state;
+      bound_frame = &slot_view->texture_slots[0].frame;
+      if (*bound_state == 0) {
         continue;
       }
-      frame = *(s32*)(bound + ANIM_SLOT_FRAME);
+      frame = *bound_frame;
 
-      for (keyframeIndex = 0; keyframeIndex < anim->keyframeCount;
+      for (keyframeIndex = 0; keyframeIndex < anim->keyframe_count;
            keyframeIndex++) {
         TexKeyframe* keyframe = anim->keyframes + keyframeIndex;
         if (frame < keyframe->threshold) {
           continue;
         }
 
-        gfx = (Gfx*)(((face->dl + 0x10) & SEGMENT_OFFSET_MASK) +
-                     ((u32*)(cs + 0x20))[*(s32*)(cs + 0x30)]);
-        texture = *(TextureDesc**)(*(u8**)cs + 0x28) + keyframe->textureIndex;
+        gfx = (Gfx*)(((face->display_list + 0x10) & SEGMENT_OFFSET_MASK) +
+                     cs->segment_bases[cs->segment_index]);
+        texture = cs->model_resource->texture_table + keyframe->texture_index;
         gDPLoadTextureBlock(gfx++, (u32)texture->image & ~7, G_IM_FMT_RGBA,
                             G_IM_SIZ_16b, texture->width, texture->height, 0,
                             G_TX_CLAMP, G_TX_CLAMP, FACE_TEXTURE_MASK,
                             FACE_TEXTURE_MASK, G_TX_NOLOD, G_TX_NOLOD);
 
         for (stepIndex = 0; stepIndex < FACE_VERTEX_COUNT; stepIndex++) {
-          Vtx* vertex = (Vtx*)(((stepIndex * sizeof(Vtx) + face->verts) &
+          Vtx* vertex = (Vtx*)(((stepIndex * sizeof(Vtx) + face->vertices) &
                                 SEGMENT_OFFSET_MASK) +
-                               ((u32*)(cs + 0x20))[*(s32*)(cs + 0x30)]);
-          vertex->v.tc[0] = keyframe->texS[stepIndex];
-          vertex->v.tc[1] = keyframe->texT[stepIndex];
+                               cs->segment_bases[cs->segment_index]);
+          vertex->v.tc[0] = keyframe->tex_s[stepIndex];
+          vertex->v.tc[1] = keyframe->tex_t[stepIndex];
         }
       }
     }
     faceIndex++;
   }
-  for (stepIndex = 0; stepIndex < ANIM_SLOT_COUNT; stepIndex++) {
-    slotIndex = (*(AnimTexOrder**)(*(u8**)cs + 0x20))[stepIndex].slot;
+  for (stepIndex = 0; stepIndex < TEXTURE_ANIM_SLOT_COUNT; stepIndex++) {
+    CharacterState* slot_view;
+    s8* slot_state;
+    s32* slot_frame;
+    slotIndex = cs->model_resource->texture_animation_order[stepIndex]
+                    .slot_index;
     if (slotIndex < 0) {
       break;
     }
-    slot = cs + slotIndex * 8;
-    state = *(s8*)(slot + ANIM_SLOT_STATE);
-    hold = slot[ANIM_SLOT_STATE];
+    slot_view = (CharacterState*)((u8*)cs + slotIndex * sizeof(TextureAnimSlot));
+    slot_state = (s8*)&slot_view->texture_slots[0].state;
+    slot_frame = &slot_view->texture_slots[0].frame;
+    state = *slot_state;
+    hold = *(u8*)slot_state;
     if (state >= 4) {
-      counter = *(s32*)(slot + ANIM_SLOT_FRAME) + 1;
-      *(s32*)(slot + ANIM_SLOT_FRAME) = counter;
-      if (counter < (*(AnimTexOrder**)(*(u8**)cs + 0x20))[stepIndex].length) {
+      counter = *slot_frame + 1;
+      *slot_frame = counter;
+      if (counter < cs->model_resource->texture_animation_order[stepIndex]
+                        .frame_length) {
         continue;
       }
-      *(s8*)(slot + ANIM_SLOT_STATE) = 3;
+      *slot_state = 3;
       /* The state store above aliases the frame-resident `cs`, so both arms
        * re-read it; spelling the base out re-derives it rather than reusing the
        * pointer the loop head already built. */
       if (slotIndex == 0) {
-        *(s32*)(cs + ANIM_SLOT_FRAME) = 0;
+        s32* first_frame = &cs->texture_slots[0].frame;
+        *first_frame = 0;
       } else {
-        u8* reslot = cs + slotIndex * 8;
-        *(s32*)(reslot + ANIM_SLOT_FRAME) =
-            (*(AnimTexOrder**)(*(u8**)cs + 0x20))[stepIndex].length;
+        CharacterState* reslot_view =
+            (CharacterState*)((u8*)cs + slotIndex * sizeof(TextureAnimSlot));
+        s32* reslot_frame = &reslot_view->texture_slots[0].frame;
+        *reslot_frame =
+            cs->model_resource->texture_animation_order[stepIndex]
+                .frame_length;
       }
     } else if (state != 0) {
-      *(s8*)(slot + ANIM_SLOT_STATE) = hold - 1;
+      *slot_state = hold - 1;
     }
   }
 }
@@ -572,35 +535,34 @@ void update_vertex_texture_coords_per_frame(s32 id) {
 /* The non-void fall-through keeps the guard delay slot empty; callers ignore
  * the unspecified result. */
 s32 func_80055738(s32 id, s32 slot, s32 frame) {
-  u8* cs = get_character_state(id);
+  CharacterState* cs = get_character_state(id);
   if (cs != NULL) {
-    u8* p = cs + slot * 8;
-    *(s32*)(p + 0x88) = frame;
-    p[0x8C] = 3;
+    cs->texture_slots[slot].frame = frame;
+    cs->texture_slots[slot].state = 3;
   }
 }
 
 void func_80055788(s32 id) {
-  u8* base = get_character_state(id);
+  CharacterState* base = get_character_state(id);
   s32 i = 0x1F;
-  u8* p = base + 0xF8;
+  /* This is an address projection, not another CharacterState record. */
+  CharacterState* p = (CharacterState*)((u8*)base + 31 * sizeof(TextureAnimSlot));
   for (; i >= 0; i--) {
-    p[0x8C] = 0;
-    p -= 8;
+    p->texture_slots[0].state = 0;
+    p = (CharacterState*)((u8*)p - sizeof(TextureAnimSlot));
   }
 }
 
 void activate_texture_anim_slot(s32 id, s32 slot) {
-  u8* cs = get_character_state(id);
+  CharacterState* cs = get_character_state(id);
   if (slot >= 0x20) {
     __assert((const char*)polychara_assert_cond,
              (const char*)polychara_assert_file, 0x7A4);
   }
   if (cs != NULL) {
     u8 val = 4;
-    u8* p = cs + slot * 8;
-    *(u8*)(p + 0x8c) = val;
-    *(s32*)(p + 0x88) = 0;
+    cs->texture_slots[slot].state = val;
+    cs->texture_slots[slot].frame = 0;
   }
 }
 
@@ -610,7 +572,7 @@ void activate_texture_anim_slot(s32 id, s32 slot) {
  * address resolve with `update_vertex_texture_coords`. */
 void reset_face_textures_for_anim_slot(s32 id, s32 slot) {
   f32 unused[16];
-  u8* cs;
+  CharacterState* cs;
   TexturedFace* face;
   TextureDesc* texture;
   Gfx* gfx;
@@ -624,30 +586,30 @@ void reset_face_textures_for_anim_slot(s32 id, s32 slot) {
   if (cs == NULL) {
     return;
   }
-  kSetMultiTLB(0, 0, 0x20, 0x2000000, osVirtualToPhysical(*(void**)(cs + 4)));
+  kSetMultiTLB(0, 0, 0x20, 0x2000000, osVirtualToPhysical(cs->segment_data));
 
-  while ((face = (*(TexturedFace***)(*(u8**)cs + 0x24))[faceIndex]) != NULL) {
-    texture = *(TextureDesc**)(*(u8**)cs + 0x28) + face->textureIndex;
+  while ((face = cs->model_resource->textured_face_table[faceIndex]) != NULL) {
+    texture = cs->model_resource->texture_table + face->texture_index;
 
-    for (animIndex = 0; animIndex < face->animCount; animIndex++) {
-      FaceTexAnim* anim = face->anims + animIndex;
-      if (anim->slot != slot) {
+    for (animIndex = 0; animIndex < face->animation_count; animIndex++) {
+      FaceTexAnim* anim = face->animations + animIndex;
+      if (anim->slot_index != slot) {
         continue;
       }
 
-      gfx = (Gfx*)(((face->dl + 0x10) & SEGMENT_OFFSET_MASK) +
-                   ((u32*)(cs + 0x20))[*(s32*)(cs + 0x30)]);
+      gfx = (Gfx*)(((face->display_list + 0x10) & SEGMENT_OFFSET_MASK) +
+                   cs->segment_bases[cs->segment_index]);
       gDPLoadTextureBlock(gfx++, (u32)texture->image & ~7, G_IM_FMT_RGBA,
                           G_IM_SIZ_16b, texture->width, texture->height, 0,
                           G_TX_CLAMP, G_TX_CLAMP, FACE_TEXTURE_MASK,
                           FACE_TEXTURE_MASK, G_TX_NOLOD, G_TX_NOLOD);
 
       for (stepIndex = 0; stepIndex < FACE_VERTEX_COUNT; stepIndex++) {
-        Vtx* vertex = (Vtx*)(((stepIndex * sizeof(Vtx) + face->verts) &
+        Vtx* vertex = (Vtx*)(((stepIndex * sizeof(Vtx) + face->vertices) &
                               SEGMENT_OFFSET_MASK) +
-                             ((u32*)(cs + 0x20))[*(s32*)(cs + 0x30)]);
-        vertex->v.tc[0] = face->texS[stepIndex];
-        vertex->v.tc[1] = face->texT[stepIndex];
+                             cs->segment_bases[cs->segment_index]);
+        vertex->v.tc[0] = face->tex_s[stepIndex];
+        vertex->v.tc[1] = face->tex_t[stepIndex];
       }
     }
     faceIndex++;
@@ -657,17 +619,17 @@ void reset_face_textures_for_anim_slot(s32 id, s32 slot) {
 INCLUDE_ASM("asm/nonmatchings/main/func_80054900", load_character_model);
 
 s32 lookup_animation_by_id(s32 id, s32 target) {
-  u8* cs = get_character_state(id);
+  CharacterState* cs = get_character_state(id);
   s32 result = 0;
   if (cs != NULL) {
-    u8* e = *(u8**)(*(u8**)cs + 0x14);
+    KeyframeTrack* e = cs->model_resource->keyframe_tracks;
     s32 idx = 0;
-    while (*(s32*)e != 0) {
-      if (*(u8*)(e + 0x8) == target) {
+    while (e->entries != NULL) {
+      if (e->animation_id == target) {
         result = idx;
         goto done;
       }
-      e += 0xC;
+      e++;
       idx++;
     }
   }
@@ -680,78 +642,78 @@ INCLUDE_ASM("asm/nonmatchings/main/func_80054900", func_80056060);
 INCLUDE_ASM("asm/nonmatchings/main/func_80054900", animation_play);
 
 void func_80056238(s32 id, u8 value) {
-  u8* cs = get_character_state(id);
+  CharacterState* cs = get_character_state(id);
   if (cs != NULL) {
-    cs[0x85] = value;
+    cs->unknown_85 = value;
   }
 }
 
 void func_80056264(s32 id) {
-  u8* cs = get_character_state(id);
+  CharacterState* cs = get_character_state(id);
   if (cs != NULL) {
-    *(f32*)(cs + 0x10) = (f32) * (s32*)(cs + 0x18);
+    cs->current_frame = (f32)cs->frame_count;
   }
 }
 
 void seek_current_frame_by(s32 id, s32 delta) {
-  u8* cs = get_character_state(id);
+  CharacterState* cs = get_character_state(id);
   if (cs != NULL) {
-    f32 newval = *(f32*)(cs + 0x10) + (f32)delta;
-    f32 limit = (f32) * (s32*)(cs + 0x18);
-    *(f32*)(cs + 0x10) = newval;
+    f32 newval = cs->current_frame + (f32)delta;
+    f32 limit = (f32)cs->frame_count;
+    cs->current_frame = newval;
     if (limit <= newval) {
-      *(f32*)(cs + 0x10) = limit;
+      cs->current_frame = limit;
     }
   }
 }
 
 void func_800562F4(s32 id, f32 value) {
-  u8* cs = get_character_state(id);
+  CharacterState* cs = get_character_state(id);
   if (cs != NULL) {
-    *(f32*)(cs + 0x5C) = value;
+    cs->unknown_5C = value;
   }
 }
 
 void func_80056324(s32 id, u8 value) {
-  u8* cs = get_character_state(id);
+  CharacterState* cs = get_character_state(id);
   if (cs != NULL) {
-    cs[0x83] = value;
+    cs->unknown_83 = value;
   }
 }
 
 void func_80056350(s32 id, u8 value) {
-  u8* cs = get_character_state(id);
+  CharacterState* cs = get_character_state(id);
   if (cs != NULL) {
-    cs[0x84] = value;
+    cs->unknown_84 = value;
   }
 }
 
 void func_8005637C(s32 id, u8 value) {
-  u8* cs = get_character_state(id);
+  CharacterState* cs = get_character_state(id);
   if (cs != NULL) {
-    cs[0x60] = value;
+    cs->unknown_60 = value;
   }
 }
 
 void set_anim_flag_82(s32 id, u8 value) {
-  u8* cs = get_character_state(id);
+  CharacterState* cs = get_character_state(id);
   if (cs != NULL) {
-    cs[0x82] = value;
+    cs->unknown_82 = value;
   }
 }
 
 void set_anim_speed_byte(s32 id, u8 value) {
-  u8* cs = get_character_state(id);
+  CharacterState* cs = get_character_state(id);
   if (cs != NULL) {
-    cs[0x61] = value;
+    cs->unknown_61 = value;
   }
 }
 
 s32 func_80056400(s32 id) {
-  u8* cs = get_character_state(id);
+  CharacterState* cs = get_character_state(id);
   s32 result = -1;
   if (cs != NULL) {
-    result = *(s32*)(cs + 0x18);
+    result = cs->frame_count;
   }
   return result;
 }
@@ -790,26 +752,26 @@ s32 func_80056494(s32 id) {
 }
 
 void set_extra_flag_0(s32 id, u8 value) {
-  u8* cs = get_character_state(id);
+  CharacterState* cs = get_character_state(id);
   if (cs != NULL) {
-    cs[0x188] = value;
+    cs->unknown_188[0] = value;
   }
 }
 
 /* The non-void fall-through keeps the guard delay slot empty; callers ignore
  * the unspecified result. */
 s32 func_800564F0(s32 id) {
-  u8* cs = get_character_state(id);
+  CharacterState* cs = get_character_state(id);
   if (cs != NULL) {
-    cs[0x189] = 1;
+    cs->unknown_188[1] = 1;
   }
 }
 
 s32 func_80056520(s32 id) {
-  u8* cs = get_character_state(id);
+  CharacterState* cs = get_character_state(id);
   s32 result = -1;
   if (cs != NULL) {
-    result = (s32) * (f32*)(cs + 0x10);
+    result = (s32)cs->current_frame;
   }
   return result;
 }
@@ -835,8 +797,7 @@ const u8 polychara_alive_msg[0x34] =
 
 void func_800577DC(s32 index, void* arg1) {
   u32 aligned = ((u32)arg1 + 0xFFF) & 0xFFFFF000;
-  s32 stride = index * 0x18C;
-  if (*(s32*)(polychara_state + stride) != -1) {
+  if (D_801F43F0[index].resource_index != -1) {
     s32 j = 0;
     do {
       osSyncPrintf((const char*)polychara_alive_msg, index);
@@ -844,13 +805,10 @@ void func_800577DC(s32 index, void* arg1) {
     } while (j < 10);
   } else {
     s32 i;
-    s32* p;
-    *(u32*)(polychara_buf + stride) = aligned;
-    i = 0;
-    p = (s32*)(polychara_seg_ptr + stride);
-    for (; i < 3; i++) {
-      *p = *(s32*)(polychara_buf + stride) + 0x20000 + i * 0x780;
-      p++;
+    D_801F43F0[index].segment_data = (void*)aligned;
+    for (i = 0; i < 3; i++) {
+      D_801F43F0[index].segment_bases[i] =
+          (u32)D_801F43F0[index].segment_data + 0x20000 + i * 0x780;
     }
   }
 }
@@ -859,7 +817,7 @@ void func_800578AC(void) {
   s32 i;
   func_800543A4();
   for (i = 0; i < 4; i++) {
-    D_801F4424[i].unk_00 = -4;
+    D_801F43F0[i].last_update_frame = -4;
     func_800577DC(i, (void*)0x8030F800);
   }
 }
@@ -935,51 +893,54 @@ void build_scenery_light_sets(void) {
 INCLUDE_ASM("asm/nonmatchings/main/func_80054900", func_80057FFC);
 
 void func_80058ACC(s32 id) {
-  u8* cs = get_character_state(id);
+  CharacterState* cs = get_character_state(id);
   if (cs != NULL) {
     s32 angle;
-    func_800453E0(cs + 0x38, cs + 0x44, cs + 0x50);
+    func_800453E0(&cs->position.x, &cs->rotation.x, &cs->scale.x);
     angle = -D_800FBE48;
-    *(f32*)(cs + 0x48) = (f32)(u16)angle * 9.5873802e-05f;
+    cs->rotation.y = (f32)(u16)angle * 9.5873802e-05f;
   }
 }
 
 void func_80058B34(s32 id) {
-  u8* cs = get_character_state(id);
+  CharacterState* cs = get_character_state(id);
   if (cs != NULL) {
-    func_800989EC(cs + 0x38, cs + 0x44, cs + 0x50);
-    D_801B54F8 = *(f32*)(cs + 0x38) * (1.0f / 1024.0f);
-    D_801B54FC = (*(f32*)(cs + 0x3C) - 15360.0f) * (1.0f / 1024.0f);
-    D_801B5500 = *(f32*)(cs + 0x40) * (1.0f / 1024.0f);
+    f32* position_x = &cs->position.x;
+    f32* position_y = &cs->position.y;
+    f32* position_z = &cs->position.z;
+    f32* heading = &cs->rotation.y;
+    func_800989EC(&cs->position.x, &cs->rotation.x, &cs->scale.x);
+    D_801B54F8 = *position_x * (1.0f / 1024.0f);
+    D_801B54FC = (*position_y - 15360.0f) * (1.0f / 1024.0f);
+    D_801B5500 = *position_z * (1.0f / 1024.0f);
     view_camera_eye_x =
-        (*(f32*)(cs + 0x38) +
-         cosf(-*(f32*)(cs + 0x48) - 1.57079637f) * 61440.0f) *
+        (*position_x + cosf(-*heading - 1.57079637f) * 61440.0f) *
         (1.0f / 1024.0f);
-    D_801B54F0 = (*(f32*)(cs + 0x3C) - 15360.0f) * (1.0f / 1024.0f);
-    view_camera_eye_z = (*(f32*)(cs + 0x40) +
-                  sinf(-*(f32*)(cs + 0x48) - 1.57079637f) * 61440.0f) *
-                 (1.0f / 1024.0f);
+    D_801B54F0 = (*position_y - 15360.0f) * (1.0f / 1024.0f);
+    view_camera_eye_z = (*position_z +
+                         sinf(-*heading - 1.57079637f) * 61440.0f) *
+                        (1.0f / 1024.0f);
   }
 }
 
 void func_80058C58(s32 id, s32* arg1, f32 arg2) {
-  u8* cs = get_character_state(id);
+  CharacterState* cs = get_character_state(id);
   if (cs != NULL) {
     s32 h;
     f32 t38;
     f32 t2;
-    *(f32*)(cs + 0x38) = (f32)arg1[0];
-    t38 = *(volatile f32*)(cs + 0x38);
+    cs->position.x = (f32)arg1[0];
+    t38 = *(volatile f32*)&cs->position.x;
     t2 = (f32)arg1[2];
-    *(f32*)(cs + 0x40) = t2;
+    cs->position.z = t2;
     h = get_interpolated_terrain_height_wrapper((s32)t38, (s32)t2);
-    *(f32*)(cs + 0x3C) = (f32)h;
-    *(f32*)(cs + 0x44) = 0.0f;
-    *(f32*)(cs + 0x4C) = 0.0f;
-    *(f32*)(cs + 0x48) = -arg2;
-    *(f32*)(cs + 0x50) = 1.0f;
-    *(f32*)(cs + 0x54) = 1.0f;
-    *(f32*)(cs + 0x58) = 1.0f;
+    cs->position.y = (f32)h;
+    cs->rotation.x = 0.0f;
+    cs->rotation.z = 0.0f;
+    cs->rotation.y = -arg2;
+    cs->scale.x = 1.0f;
+    cs->scale.y = 1.0f;
+    cs->scale.z = 1.0f;
   }
 }
 

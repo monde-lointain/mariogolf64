@@ -1,8 +1,7 @@
 #include "common.h"
+#include "rom_asset.h"
 
-extern u32 get_rom_asset_allocation_size(u16 index, void* out);
 extern void* heap3_alloc(u32 need);
-extern void load_rom_asset_payload(void* dst, void* desc);
 extern void nuPiReadRom(u32 rom_addr, void* buf_ptr, u32 size);
 extern void heap3_free(void** payload_ptr);
 extern void func_800718C4(void);
@@ -24,26 +23,26 @@ extern u32 D_80104FD0;
  * heap3_alloc, and load_rom_asset_payload, then two raw-ROM images:
  * D_151CD40 (w*h+8) and D_151CD50 (size-prefixed). */
 void load_hud_glyph_assets(void) {
-  u8 spvar[0x20];
+  RomAssetLoad asset;
   void* headerBuf;
   s32 width;
   s32 height;
   s32 size2;
 
-  D_8012F4E0 = heap3_alloc(get_rom_asset_allocation_size(0x4B2, spvar));
-  load_rom_asset_payload(D_8012F4E0, spvar);
-  D_800E1C30 = heap3_alloc(get_rom_asset_allocation_size(0x4B3, spvar));
-  load_rom_asset_payload(D_800E1C30, spvar);
-  D_800E1C34 = heap3_alloc(get_rom_asset_allocation_size(0x4B5, spvar));
-  load_rom_asset_payload(D_800E1C34, spvar);
-  D_800E1C38 = heap3_alloc(get_rom_asset_allocation_size(0x4B6, spvar));
-  load_rom_asset_payload(D_800E1C38, spvar);
-  D_800E1C4C = heap3_alloc(get_rom_asset_allocation_size(0x4B0, spvar));
-  load_rom_asset_payload(D_800E1C4C, spvar);
-  D_800E1C3C = heap3_alloc(get_rom_asset_allocation_size(0x4B9, spvar));
-  load_rom_asset_payload(D_800E1C3C, spvar);
-  D_800E1C40 = heap3_alloc(get_rom_asset_allocation_size(0x4B8, spvar));
-  load_rom_asset_payload(D_800E1C40, spvar);
+  D_8012F4E0 = heap3_alloc(get_rom_asset_allocation_size(0x4B2, &asset));
+  load_rom_asset_payload(D_8012F4E0, &asset);
+  D_800E1C30 = heap3_alloc(get_rom_asset_allocation_size(0x4B3, &asset));
+  load_rom_asset_payload(D_800E1C30, &asset);
+  D_800E1C34 = heap3_alloc(get_rom_asset_allocation_size(0x4B5, &asset));
+  load_rom_asset_payload(D_800E1C34, &asset);
+  D_800E1C38 = heap3_alloc(get_rom_asset_allocation_size(0x4B6, &asset));
+  load_rom_asset_payload(D_800E1C38, &asset);
+  D_800E1C4C = heap3_alloc(get_rom_asset_allocation_size(0x4B0, &asset));
+  load_rom_asset_payload(D_800E1C4C, &asset);
+  D_800E1C3C = heap3_alloc(get_rom_asset_allocation_size(0x4B9, &asset));
+  load_rom_asset_payload(D_800E1C3C, &asset);
+  D_800E1C40 = heap3_alloc(get_rom_asset_allocation_size(0x4B8, &asset));
+  load_rom_asset_payload(D_800E1C40, &asset);
 
   headerBuf = heap3_alloc(8);
   nuPiReadRom((u32)D_151CD40, headerBuf, 8);
@@ -75,11 +74,22 @@ void func_800715A0(void) {
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80071370", func_80071608);
 
-extern s32 D_8012F524;
+typedef struct {
+  /* 0x00 */ s32 screen_x;
+  /* 0x04 */ s32 screen_y;
+  /* 0x08 */ s32 glyph_size;
+  /* 0x0C */ s32 visible_glyph_count;
+  /* 0x10 */ s32 flags;
+  /* 0x14 */ s32 glyph_run_id;
+  /* 0x18 */ u8 red;
+  /* 0x19 */ u8 green;
+  /* 0x1A */ u8 blue;
+  /* 0x1B */ u8 alpha;
+  /* 0x1C */ s32 unknown_1C[4];
+} HudTextEntry; /* 0x2C */
+extern HudTextEntry D_8012F510[];
 
-/* Inits field 0x14 (D_8012F524) of all 12 elements of the 0x2C-stride struct
- * array at D_8012F510 to -1. The variable bound/val + do-while + in-loop
- * byte-offset giv are load-bearing for the v0/v1 allocno order (S236). */
+/* Initialize the glyph run index of each of the 12 entries. */
 void func_800718C4(void) {
   s32 i;
   s32 bound;
@@ -89,8 +99,7 @@ void func_800718C4(void) {
   val = -1;
   bound = 12;
   do {
-    s32 off = i * 0x2C;
-    *(s32*)((u8*)&D_8012F524 + off) = val;
+    D_8012F510[i].glyph_run_id = val;
     i++;
   } while (i != bound);
 }
@@ -105,17 +114,11 @@ void func_800718F4(u8 r, u8 g, u8 b, s32 idx) {
   (&D_8010CFAA)[idx * 3] = b;
 }
 
-extern s32 D_8012F52C;
-
-/* 2D setter D_8012F52C[idx][j] = val (field 0x1C of the 0x2C struct array at
- * D_8012F510, viewed as s32[][11]). Pre-computing the row byte-offset and the
- * u8* base into separate temps slips j*4 ahead of the pointer-forming add
- * (expr.c binop expands op0 fully first), and the u8* cast forces the full base
- * materialize instead of the %lo fold (S236). */
+/* Entry offset 0x1C contains four words through the 0x2C stride boundary.
+ * The original D_8012F52C symbol is the same interior location as
+ * D_8012F510[0].unknown_1C[0]; the selector extent is unknown, so do not clamp. */
 void func_80071924(s32 val, s32 idx, s32 j) {
-  s32 io = idx * 0x2C;
-  u8* b = (u8*)&D_8012F52C;
-  *(s32*)(b + io + j * 4) = val;
+  D_8012F510[idx].unknown_1C[j] = val;
 }
 
 extern u8 D_801321B0;
@@ -145,39 +148,26 @@ INCLUDE_ASM("asm/nonmatchings/main/func_80071370", func_800719A0);
 extern void func_80071608(Gfx** dl);
 extern void func_80072A08(Gfx** dl, s32 i);
 extern void func_80071CE4(Gfx** dl, s32 i);
-extern s32 D_8012F518;
-extern s32 D_8012F520;
-extern u8 D_8012F528;
-extern u8 D_8012F529;
-extern u8 D_8012F52A;
-extern u8 D_8012F52B;
 
-/* Emits a per-entry gDPSetPrimColor (opcode 0xFA) + sub-emitter DL for the
- * 12-element 0x2C-stride table at D_8012F510, skipping entries whose unk_14==-1
- * or unk_10&0x20. dl is post-incremented (dl++) into the ROM's store-giv.
- * Computing the row byte-offset as `i * 0x2C` inside the loop (rather than a
- * separate off biv) is load-bearing: it orders the hoisted-invariant vs
- * biv-init emission so the prologue register init/save block schedules to match
- * (same i*0x2C idiom as func_800718C4). */
+/* D_8012F5xx names are interior symbols for this same 0x2C-stride table:
+ * 514=+4, 518=+8, 51C=+0xC, 520=+0x10, 524=+0x14, 528..52B=+0x18..1B,
+ * and 52C=+0x1C. Use the enclosing record to keep these fields together. */
 void emit_hud_table_prim_dl(Gfx** cursor) {
   Gfx* dl;
   s32 i;
-  s32 off;
 
   dl = *cursor;
   func_80071608(&dl);
   for (i = 0; i != 12; i++) {
-    off = i * 0x2C;
-    if (*(s32*)((u8*)&D_8012F524 + off) == -1) {
+    if (D_8012F510[i].glyph_run_id == -1) {
       continue;
     }
-    if (*(s32*)((u8*)&D_8012F520 + off) & 0x20) {
+    if (D_8012F510[i].flags & 0x20) {
       continue;
     }
-    gDPSetPrimColor(dl++, 0, 0, *((u8*)&D_8012F528 + off),
-                    *((u8*)&D_8012F529 + off), *((u8*)&D_8012F52A + off),
-                    *((u8*)&D_8012F52B + off));
-    if (*(s32*)((u8*)&D_8012F518 + off) == 0xA) {
+    gDPSetPrimColor(dl++, 0, 0, D_8012F510[i].red, D_8012F510[i].green,
+                    D_8012F510[i].blue, D_8012F510[i].alpha);
+    if (D_8012F510[i].glyph_size == 0xA) {
       func_80072A08(&dl, i);
     } else {
       func_80071CE4(&dl, i);
@@ -186,29 +176,30 @@ void emit_hud_table_prim_dl(Gfx** cursor) {
   *cursor = dl;
 }
 
-extern s32 D_8012F51C;
-
-void func_80071C74(s32 idx) { *(s32*)((u8*)&D_8012F51C + idx * 0x2C) = 0xFF; }
-
-typedef struct {
-  u8 pad0[0xC];
-  s32 unk_0C;
-  s32 unk_10;
-  s32 unk_14;
-  u8 pad18[0x14];
-} Elem2F510; /* stride 0x2C */
-
-extern Elem2F510 D_8012F510[];
-extern u16* D_800E1C48[];
+void func_80071C74(s32 idx) {
+  D_8012F510[idx].visible_glyph_count = 0xFF;
+}
 
 s32 func_80071C9C(s32 idx) {
-  Elem2F510* e = &D_8012F510[idx];
-  s32 t = e->unk_14;
+  HudTextEntry* entry = &D_8012F510[idx];
+  s32 glyph_run_id = entry->glyph_run_id;
   u16* base = D_800E1C48[0];
-  s32 v = e->unk_0C;
+  s32 visible_glyph_count = entry->visible_glyph_count;
 
-  return v >= (s32)base[t * 2 + 3];
+  return visible_glyph_count >= (s32)base[glyph_run_id * 2 + 3];
 }
+
+/* D_800FF573 aliases the signed tag byte at D_800FF530 + 0x43. */
+typedef struct {
+  Mtx mtx;     /* 0x00 */
+  u16 glyph;   /* 0x40 */
+  u8 size;     /* 0x42 */
+  s8 tag;      /* 0x43 */
+  u8 flags;    /* 0x44 */
+  u8 pad[3];   /* 0x45 */
+} GlyphSprite; /* 0x48 */
+
+extern GlyphSprite D_800FF530[];
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80071370", func_80071CE4);
 
@@ -618,16 +609,11 @@ void func_80075010(Gfx** dl, s16 x, s16 y, u8* str) {
   *dl = gfx;
 }
 
-extern u8 D_800FF573;
-
-/* Inits byte field (D_800FF573) of all 300 elements of a 0x48-stride array to
- * -1. The s8* store keeps the QImode const at -1 (li a1,-1); the in-loop
- * byte-offset giv under do-while rematerializes %hi each iter (S236). */
+/* D_800FF573 aliases the signed tag byte at D_800FF530 + 0x43. */
 void func_8007512C(void) {
   s32 i = 0;
   do {
-    s32 off = i * 0x48;
-    *(s8*)((u8*)&D_800FF573 + off) = -1;
+    D_800FF530[i].tag = -1;
   } while (++i != 300);
 }
 
@@ -636,16 +622,6 @@ INCLUDE_ASM("asm/nonmatchings/main/func_80071370", func_8007515C);
 extern void func_8007399C(s32 id, s32 size, s32* out_width, s32* out_height,
                           s32 player);
 
-typedef struct {
-  Mtx mtx;     /* 0x00 */
-  u16 glyph;   /* 0x40 */
-  u8 size;     /* 0x42 */
-  s8 tag;      /* 0x43 */
-  u8 flags;    /* 0x44 */
-  u8 pad[3];   /* 0x45 */
-} GlyphSprite; /* 0x48 */
-
-extern GlyphSprite D_800FF530[];
 extern u8 D_800FBE18[];
 
 /* Lays out the glyph run `runId` as up-to-`count` translated sprite records
