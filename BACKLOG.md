@@ -6897,9 +6897,11 @@ by `/sprint-plan`:
   `D_801050BC[k]` not an explicit `s8*` ptr (`global.c:594-601` ref-count steals $s1). Residual = 3
   clusters of pure allocno coloring below the 0.97 gate; source levers exhausted, only a boosted permuter
   accepting the sub-gate start remains. `docs/wip/func_8006CE88.near-match.md`; 2 levers folded into
-  `docs/hazards.md#base-register-vs-displacement`). **Deferred (same wall combo, not attempted):** the
-  residual mid-logic tail `func_8006D4EC`/`DFF0` (base-register + search-loop + `bnel` combo,
-  S224-pattern-confirmed). **S240 wall-prediction CORRECTION:** `func_8006AD1C` was deferred here
+  `docs/hazards.md#base-register-vs-displacement`). **Deferred at S240:**
+  `func_8006D4EC` is now **BANKED 2026-10-15**, using canonical scenario
+  addressing and separate reset/scan loop forms; the nested `DFF0` carry belongs
+  to `func_8006E210`, not this dispatcher. **S240 wall-prediction CORRECTION:**
+  `func_8006AD1C` was deferred here
   as a `0x92492493` `#local-alloc-qty-permutation` wall (func_80098CD8 kin) — WRONG: it BANKED first-build
   S240 as a plain signed `% 14` table-index leaf (`*(u16*)&D_800C4026[(arg0%14)*4]` byte-offset-cast u16
   load; the 0x92492493 magic is just the /14 div, no permutation). A deferred-wall prediction from a magic

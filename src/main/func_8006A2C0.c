@@ -1034,7 +1034,83 @@ INCLUDE_ASM("asm/nonmatchings/main/func_8006A2C0", func_8006D214);
 INCLUDE_ASM("asm/nonmatchings/main/func_8006A2C0", func_8006D38C);
 void func_8006D4DC(void) { D_800C4144 = -1; }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_8006A2C0", func_8006D4EC);
+extern s32 get_course_hole_primary_flag(s32 course, s32 hole);
+extern s32 get_course_hole_secondary_flag(s32 course, s32 hole);
+extern void func_8006D214(void);
+extern void func_8006D38C(void);
+/* The two per-player result words at +0x80/+0x84 are still unnamed.
+ * Byte-offset scans preserve the retail index walk; the sentinel reset loops
+ * above them instead advance a field pointer and re-read the live count. */
+
+void func_8006D4EC(s32 mode) {
+  s32 hole = scenario_state_id.round_hole_index;
+  s32 i;
+  s32 ready;
+  s32 count;
+  s32* status;
+  s32 offset;
+  s32 sentinel;
+  if (D_800C413C != 0) {
+    return;
+  }
+  if (get_course_hole_primary_flag(scenario_mode_id, hole)) {
+    if (mode == 1) {
+      for (i = 0; i != scenario_state_id.active_player_count; i++) {
+        status = (s32*)((u8*)player_records + i * sizeof(PlayerState) + 0x80);
+        if (*status == -2) {
+          *status = -1;
+        }
+      }
+    }
+    ready = 0;
+    i = 0;
+    if (scenario_state_id.active_player_count != 0) {
+      sentinel = -2;
+      count = scenario_state_id.active_player_count;
+      offset = 0;
+    primary_scan:
+      ready += *(s32*)((u8*)player_records + offset + 0x80) != sentinel;
+      offset += sizeof(PlayerState);
+      i++;
+      if (i != count) {
+        goto primary_scan;
+      }
+    }
+    if (ready == scenario_state_id.active_player_count) {
+      func_8006D214();
+      D_800C413C = 1;
+    }
+  } else if (get_course_hole_secondary_flag(scenario_mode_id, hole)) {
+    if (mode == 1) {
+      for (i = 0; i != scenario_state_id.active_player_count; i++) {
+        status = (s32*)((u8*)player_records + i * sizeof(PlayerState) + 0x84);
+        if (*status == -2) {
+          *status = -1;
+        }
+      }
+    }
+    ready = 0;
+    i = 0;
+    if (scenario_state_id.active_player_count != 0) {
+      sentinel = -2;
+      count = scenario_state_id.active_player_count;
+      offset = 0;
+    secondary_scan:
+      ready += *(s32*)((u8*)player_records + offset + 0x84) != sentinel;
+      offset += sizeof(PlayerState);
+      i++;
+      if (i != count) {
+        goto secondary_scan;
+      }
+    }
+    if (ready == scenario_state_id.active_player_count) {
+      func_8006D38C();
+      D_800C413C = 1;
+    }
+  } else {
+    D_800C4144 = -1;
+  }
+}
 
 extern s8 D_800C1420[];
 extern s32 func_8006CD50(s32 arg0, s32 arg1);
