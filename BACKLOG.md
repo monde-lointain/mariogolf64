@@ -16,6 +16,52 @@ This file holds only the *ordering rationale*, *enabler items* (gate actions), a
 
 ### Current main-bank evidence — 2026-10-15
 
+- Banked `func_8004D4B8`, `func_80068F98`, `func_8004C51C`,
+  `func_80054550`, and `func_8006D4EC` (455 instructions / 1,820 bytes).
+  Main stubs decreased 198 → 193. `tools/verify-rom.sh` passes with
+  SHA-1 `e2c4e7a905b29529b49a1619a401fe699224829b`.
+  - The glyph copier's former scheduler wall falls to an explicit signed-division
+    join, separate column scratch, and one-shot initialization boundaries.
+    See `docs/wip/func_8004D4B8.near-match.c.txt` for the measured resolution.
+  - The terrain-vector scaler matches directly as a three-component traversal
+    with two indexed inner loops and an array-backed scale vector. The old
+    unmeasured FP-wall classification and 83-instruction count were wrong:
+    the assembly header establishes 74 instructions.
+  - The camera-offset helper needs the two explicit `atan2f` deltas and a cached
+    shared half-pi double across the trig calls and output stores. No pool carve.
+  - The attachment-point helper uses the canonical character/resource prefix,
+    a private 0x14-byte point record, signed-short matrix indices, and two `Mtx`
+    buffers. An outer nonempty-table guard plus a top-tested search preserves
+    both exit paths; increment the index cursor after the matrix call. Both
+    failure paths assign a shared float zero before their join. Migrated the
+    local callers and wrapper from integer-address to `f32*` parameters.
+  - The score dispatcher uses `ScenarioState` for related count/hole addresses
+    and byte projections of the still-unnamed player result words at +0x80/+0x84.
+    Structured reset loops re-read the live count; goto scans retain the byte
+    index and explicit preheader sentinel. Copy the scan bound after its guard.
+    Its score 110 is relocation naming, not a source residual: the isolated
+    linked words agree after accounting for the section's four-byte alignment
+    shift, and the integrated ROM gate passes.
+  - Candidates, saved targets, provisional objects, and source/profile
+    measurements remain under `nonmatchings/<function>/`. Final measurement IDs,
+    in the function order above:
+    `608c86c3e62c02da98356cc9eeefa102af26d8d15ab8a545fc41979c2c1026d5`,
+    `25892c643b9a0ea49e08d71adcba2b6cd06a7588050c83296bceb242ab434cf9`,
+    `e07b8fb499aa8f6ba5ed66817e43cf815775d45ed4a5ecc92463b7315d4aa023`,
+    `08220e01fc0c044f8c990716f30d85e15666c1fe425dde021fd592810ac9e2d6`,
+    `1314f3e72d3cf68f78ade32e7e352bc95023e368cc1baa6cac27d05f120438bd`.
+  - A throwaway 32-bit host harness exercised all five integrated bodies:
+    5,168,656 checks, zero failures. Covered byte/clamp/NUL glyph boundaries,
+    disabled/enabled signed vector scaling, camera-offset geometry, missing
+    character/attachment paths and 200 transforms through actual fixed-matrix
+    routines, and exhaustive result-word combinations for 0..4 players across
+    mode/flag/completion states. UBSan covered the bodies; shift checks alone
+    were disabled in the unchanged matrix-packing dependencies. Dependency
+    state/flag results were injected. No emulator run.
+  - No YAML, symbol, compiler-profile, library, or overlay changes. Historical
+    carry predictions for these five names below are superseded; none of their
+    hosts is fully decompiled.
+
 - Banked `func_80047CAC`, `get_tile_attribute`, `func_8005470C`,
   `func_80060190`, and `func_800604F4` (276 instructions / 1,104 bytes).
   Main stubs decreased 203 → 198. The final `tools/verify-rom.sh` gate passed:
