@@ -1219,10 +1219,41 @@ void func_8006DE44(void) {
   D_800FF4DC = v;
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_8006A2C0", func_8006DEB4);
+extern s8 D_801B726C;
+extern s8 D_800BAA04;
+extern s32 D_801B7270;
+
+void func_8006DEB4(void) {
+  s32* counts;
+  volatile s32* pending;
+
+  func_8005AF50();
+  counts = &D_800FF4D0;
+  if (D_801B726C != 0) {
+    if (player_records[0].base_score <= D_800BAA04) {
+      counts[0]++;
+    } else {
+      D_800FF4D4++;
+    }
+  }
+  /* Retail takes three distinct snapshots of the pending result. */
+  pending = &D_801B7270;
+  if (*pending >= 0) {
+    counts[2]++;
+    {
+      s32 value = *pending;
+      if (counts[3] < value) {
+        counts[3] = value;
+      }
+    }
+    if (counts[6] == 1) {
+      counts[5]++;
+      counts[4] += *pending;
+    }
+  }
+}
 
 extern s32 D_801B7250;
-extern s32 D_801B7270;
 
 s32 func_8006DF84(void) {
   s32* base = &D_800FF4D0;

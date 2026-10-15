@@ -7297,6 +7297,17 @@ two-operand compare, not a `return DEFAULT` tail.
 **Provenance.** S224 ADF8 (banked), DEB4 (levers landed load-order+polarity+p=a1; residual was the
 separate `#base-register-vs-displacement` wall on a different access chain).
 
+**2026-10-15 resolution:** `func_8006DEB4` is banked. A local
+`volatile s32* pending = &D_801B7270` preserves the three retail snapshots;
+bind the middle snapshot to a local before the high-water comparison so its
+conditional store does not read a fourth time. This also recovers the full
+base materialization and register assignment. The isolated candidate scored zero
+(`nonmatchings/func_8006DEB4/measurements/b76f292c0814e4cc466e81c38e6d07f76733d6451955ab2b54aeb958053ef00e.json`).
+Integration uses canonical `player_records[0].base_score` rather than its interior
+label; the relocation resolves to the same byte. The host range was inspected,
+and `tools/verify-rom.sh` passed with ROM SHA-1
+`e2c4e7a905b29529b49a1619a401fe699224829b`.
+
 ## switch tight merged-default (shared case-0/default label + case-1 last)
 
 **Symptom (S209 `func_8005D218` / `func_8005D2E4`).** A 2-value switch (`(x==1)?A:B`) should compile to
