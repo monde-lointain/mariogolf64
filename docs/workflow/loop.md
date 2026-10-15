@@ -57,6 +57,10 @@ against assembly before interpreting its score:
   setup/delay slots and return uses. A prologue or stale callsite register is insufficient.
   An unused formal can still require a caller argument; report unresolved types instead of
   inventing `(void)` or a return type.
+  Before declaring a custom ABI, check whether incoming `$v0` is a GCC static chain:
+  a child may only spill it, while the caller sets `$v0 = sp + K` before the call
+  **or in its delay slot**. Recover that parent/child unit as nested C, not a fake
+  pointer parameter; see [the nested-function playbook](../hazards.md#nested-function-static-chain-spill).
 - Check load/store width, signedness, byte offsets, and stride before introducing typed
   pointers/aggregates. A decompiler's mutable global cursor is not an immutable packet base.
   Generated externs and source-local partial types remain hypotheses.
@@ -68,6 +72,9 @@ against assembly before interpreting its score:
 Use the smallest correct parent/type context. Fetch [live Ghidra context](../ghidra.md#agent-access-and-context)
 only to answer an unresolved question; a small asm-first leaf needs neither Ghidra nor m2c.
 Keep pseudocode and assembly in their own artifacts; do not overwrite a measured carry to reseed it.
+If m2c rejects an existing GNU nested definition in the parent context, that is a
+translator limitation, not a target blocker. Recover the selected body from assembly
+with minimal declarations; do not edit generated context or fetch Ghidra merely to retry.
 
 ### Measurement
 
@@ -78,6 +85,10 @@ At score zero, integrate provisionally, build the host object, and spot-check th
 function against the isolated candidate before the full-ROM gate; the in-tree candidate
 cannot be compared before it has been integrated. Do not compare an entire multi-function
 TU's `.text` with a one-function seed. Failed integration remains unbanked.
+Extraction may remove the target `.s` once its stub is gone, and nested children have
+compiler-local names. Do not retry `cmpfn.sh` or rebuild to recover those names:
+use the saved target assembly and fresh `objdump -drz` function ranges/relocations.
+Use the configured objdump from `build-tools.json`; no additional ELF library is required.
 
 The loop emits `measurement_path` for successful and failed compiles. Old source/score pairs
 are not overwritten; edits detected during measurement invalidate attribution. Header/context

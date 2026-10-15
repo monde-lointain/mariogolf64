@@ -35,11 +35,13 @@ with overlays. Once the gate passes, select overlay work using exact bank and RO
    and individual C-host leaves with `--loose-stubs main -n 12`. Loose-stub and `--file-close main`
    discovery follow YAML bank membership, including linked libraries; neither inventories unflipped
    assembly packs. `--lib` is a substring filter, not bank scope.
-   Inspect assembly and source comments before pricing. Size leaves from their assembly headers,
-   not adjacent VRAM deltas. Check individual carried/nested status before selecting pack members;
-   a carried leader does not classify every sibling (`--carried-check`, `--nested-check`).
-   Read only the selected target's WIP/backlog evidence. Reopen a carry for a named new source lever
-   or changed evidence, not its age or a file-closure reward. Confirm the cited source exists,
+   Start from live ranker rows, not the WIP index: confirm the named `INCLUDE_ASM` and YAML
+   host before opening its note. Banked/renamed notes are reference evidence, not backlog.
+   Inspect assembly and source comments; size leaves from assembly headers, not VRAM deltas.
+   Check each selected member's carry and coupling evidence together
+   (`--carried-check <fn> --nested-check <fn>`); a carried leader does not classify its siblings.
+   Read only that target's WIP/backlog evidence. Reopen a carry for a named new source lever
+   or changed evidence, not its age or file-closure reward; confirm the cited source exists,
    then [refresh its measurement](../../../docs/workflow/loop.md#measurement).
    If the fresh shortlist is empty, run `--segment main --include-stuck -n 12` and
    `--loose-stubs main --all -n 12` independently; discovery may exit 1 for an empty fresh pool.
@@ -88,10 +90,12 @@ default `--loose-stubs main` pool includes library C hosts but not unflipped ass
   change one named [source lever](../../../docs/levers.md) and remeasure. Use the
   [permuter eligibility rule](../../../docs/workflow/loop.md#permuter-eligibility), not score alone.
   A wall verdict belongs to its measured base, not permanently to the function.
-- Score zero starts provisional integration: inline the body, remove its stub, format with an
-  available clang-format binary (versioned names are valid), build the host object, and
-  [spot-check the same function](../../../docs/workflow/loop.md#oracles) before the full ROM gate.
-  If integration fails, restore the matching stub/source and keep the candidate isolated.
+- Score zero starts provisional integration: preserve the isolated object and target assembly,
+  inline the body, remove its stub, format the changed range with an available clang-format
+  binary (versioned names are valid), and build the host object. [Spot-check the same
+  function ranges](../../../docs/workflow/loop.md#oracles), including any nested children,
+  before the full ROM gate. If integration fails, restore the matching stub/source and
+  keep the candidate isolated.
 - Use `tools/rom_build.py` and `tools/build_profiles.json` for the parent TU's exact profile.
   [Measurement records](../../../docs/workflow/loop.md#measurement) retain source/diagnostic pairs;
   source, profile, header, or context changes require a fresh measurement.

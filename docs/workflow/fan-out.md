@@ -22,8 +22,9 @@ and integration. Read-only overlay reference analysis may support a named main t
 Use the active native `task` schema and bundled agent roles, not copied prompts or project
 role wrappers. Put shared bank/resource constraints and target identity in `context`; each
 slice gets one unresolved question, the evidence needed to answer it, and a concrete return.
-Include the exact measured source/profile and relevant assembly or dump paths; workers do
-not inherit the parent conversation. Partition evidence, not duplicate whole-function dives.
+Validate the live stub/host before dispatch; include the measured source/profile and
+assembly/dump paths plus any coupled parent/child boundary. Workers do not inherit the
+parent conversation. Partition evidence, not duplicate whole-function dives.
 
 **The parent owns candidate/source edits, compiles, builds, Ghidra MCP, YAML changes,
 integration, formatting, and ROM verification.** Workers return proposals. They do
