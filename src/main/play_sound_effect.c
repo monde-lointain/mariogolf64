@@ -21,10 +21,105 @@ extern s32 D_800C1140[];
 extern s32 D_800C1144[];
 extern s32 D_800C1148[];
 extern s32 D_800C114C[];
+extern s32 flag_is_set(s32 flag);
+extern u32 spawn_object_simple(int number);
+extern s32 D_800C0E60;
+extern f32 D_800C0EEC[];
+extern u32 D_800C0F30[];
+extern s32 D_800C0F70[];
+void update_indexed_slot_at_0xCB_atomic(s32 index, s32 reverb);
+void update_indexed_slot_at_0x60_atomic(s32 index, f32 offset);
 
-INCLUDE_ASM("asm/nonmatchings/main/play_sound_effect", play_sound_effect);
+void play_sound_effect(s32 sfx, s32 channel, s32 volume) {
+  OSIntMask mask;
+  s32 i;
+  if (flag_is_set(0x9C)) {
+    return;
+  }
+  mask = osSetIntMask(OS_IM_NONE);
+  D_800C0EEC[channel] = (f32)volume;
+  if (sfx < 0x215) {
+    if (object_id_table[channel] != -1) {
+      MusHandleStop(object_id_table[channel], 0);
+      object_id_table[channel] = spawn_object_simple(sfx);
+      D_800C0F30[channel] = object_id_table[channel];
+      MusHandleSetVolume(object_id_table[channel], volume);
+      MusHandleSetFreqOffset(object_id_table[channel], 0.0f);
+      MusHandleSetPan(object_id_table[channel], 0x7F);
+    }
+    if (D_800C0E60 == channel) {
+      D_800C0E60 = channel ^ 1;
+    }
+  }
+  osSetIntMask(mask);
+  if (sfx < 0x215) {
+    for (i = 0; i != 0x22; i++) {
+      if (D_800C0F70[i] == sfx) {
+        break;
+      }
+    }
+    if (i < 0x22) {
+      if (D_800C0F70[i] == 0x9A) {
+        update_indexed_slot_at_0xCB_atomic(channel, 0);
+      } else {
+        update_indexed_slot_at_0xCB_atomic(channel, 6);
+      }
+      update_indexed_slot_at_0x60_atomic(channel, 0.0f);
+    } else {
+      if (sfx == 0x5A) {
+        update_indexed_slot_at_0xCB_atomic(channel, 6);
+      } else {
+        update_indexed_slot_at_0xCB_atomic(channel, 2);
+      }
+    }
+  }
+}
 
-INCLUDE_ASM("asm/nonmatchings/main/play_sound_effect", func_80050DA0);
+void func_80050DA0(s32 sfx, s32 channel, s32 volume, s32 reverb, s32 pan) {
+  OSIntMask mask;
+  s32 i;
+  if (flag_is_set(0x9C)) {
+    return;
+  }
+  mask = osSetIntMask(OS_IM_NONE);
+  D_800C0EEC[channel] = (f32)volume;
+  if (sfx < 0x215) {
+    if (object_id_table[channel] != -1) {
+      MusHandleStop(object_id_table[channel], 0);
+      MusHandleSetReverb(object_id_table[channel], reverb);
+    }
+    object_id_table[channel] = spawn_object_simple(sfx);
+    D_800C0F30[channel] = object_id_table[channel];
+    MusHandleSetFreqOffset(object_id_table[channel], 0.0f);
+    MusHandleSetVolume(object_id_table[channel], volume);
+    MusHandleSetPan(object_id_table[channel], pan);
+    if (D_800C0E60 == channel) {
+      D_800C0E60 = channel ^ 1;
+    }
+  }
+  osSetIntMask(mask);
+  if (sfx < 0x215) {
+    for (i = 0; i != 0x22; i++) {
+      if (D_800C0F70[i] == sfx) {
+        break;
+      }
+    }
+    if (i < 0x22) {
+      if (D_800C0F70[i] == 0x9A) {
+        update_indexed_slot_at_0xCB_atomic(channel, 0);
+      } else {
+        update_indexed_slot_at_0xCB_atomic(channel, 6);
+      }
+      update_indexed_slot_at_0x60_atomic(channel, 0.0f);
+    } else {
+      if (sfx == 0x5A) {
+        update_indexed_slot_at_0xCB_atomic(channel, 6);
+      } else {
+        update_indexed_slot_at_0xCB_atomic(channel, 2);
+      }
+    }
+  }
+}
 
 void update_object_group_by_id(s32 index) {
   OSIntMask mask = osSetIntMask(OS_IM_NONE);

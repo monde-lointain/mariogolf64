@@ -102,7 +102,9 @@ void bgm_load_song_from_rom(u32 rom_addr, s32 size) {
 
 void func_8005F0BC(s32 size) { D_800C2FF4 = (u32)__MusIntMemMalloc(size); }
 
-void spawn_object_simple(int number) { try_spawn_global_object(number); }
+musHandle spawn_object_simple(int number) {
+  return try_spawn_global_object(number);
+}
 
 void func_8005F0FC(int number, int volume, int pan, int restartflag,
                    int priority) {
