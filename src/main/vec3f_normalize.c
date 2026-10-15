@@ -1,4 +1,5 @@
 #include "common.h"
+#include <nusys.h>
 
 extern u8 D_801052F8[];
 extern u16* D_800B67D8[];
@@ -81,9 +82,81 @@ s32 func_80029EEC(s32 arg0, s32 arg1, u32 arg2, u32 arg3) {
   return 0;
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/vec3f_normalize", func_80029F28);
+extern NUContData D_800FED18[];
+extern s16 D_800FF518[];
+extern s8 D_800FF51A[];
+extern s8 D_800FF51B[];
+extern u16 D_800FF51C[];
 
-INCLUDE_ASM("asm/nonmatchings/main/vec3f_normalize", func_80029F6C);
+void func_80029F6C(NUContData* input, s32 unused, s32 index) {
+  /* The unused static chain and its spill belong to the nested helper at
+   * 80029F28. */
+  s32 clamp_stick(s32 value) {
+    s32 result;
+    s32 absolute = value;
+    s32 magnitude;
+    if (value < 0) {
+      absolute = -value;
+    }
+    magnitude = absolute;
+    if (magnitude < 16) {
+      return 0;
+    }
+    if (magnitude > 64) {
+      magnitude = 64;
+    }
+    result = magnitude;
+    if (value < 0) {
+      result = -result;
+    }
+    return result;
+  }
+
+  s32 offset = index * 6;
+  s32 repeat = *(s16*)((u8*)D_800FF518 + offset);
+  NUContData* output = &D_800FED18[index];
+  s32 repeat_offset;
+  s32 buttons;
+
+  output->stick_x = clamp_stick(input->stick_x);
+  output->stick_y = clamp_stick(input->stick_y);
+  *(s8*)((u8*)D_800FF51A + offset) =
+      func_80029EEC(input->stick_x, *(s8*)((u8*)D_800FF51A + offset), 56, 20);
+  *(s8*)((u8*)D_800FF51B + offset) =
+      func_80029EEC(input->stick_y, *(s8*)((u8*)D_800FF51B + offset), 56, 20);
+  output->button = input->button;
+  if (*(s8*)((u8*)D_800FF51A + offset) == 1) {
+    output->button |= 0x100;
+  } else if (*(s8*)((u8*)D_800FF51A + offset) == -1) {
+    output->button |= 0x200;
+  }
+  if (*(s8*)((u8*)D_800FF51B + index * 6) == 1) {
+    output->button |= 0x800;
+  } else if (*(s8*)((u8*)D_800FF51B + index * 6) == -1) {
+    output->button |= 0x400;
+  }
+  /* Keep this offset's lifetime ahead of the trigger copy for register
+   * allocation. */
+  repeat_offset = index * 6;
+  output->trigger = input->trigger;
+  buttons = output->button;
+  if (buttons == *(u16*)((u8*)D_800FF51C + repeat_offset)) {
+    *(u16*)((u8*)D_800FF51C + repeat_offset) = buttons;
+    if (repeat >= 16) {
+      repeat = 15;
+    }
+    if (repeat == 0) {
+      repeat = 3;
+    } else {
+      repeat--;
+      output->button = 0;
+    }
+  } else {
+    repeat = 15;
+    *(u16*)((u8*)D_800FF51C + index * 6) = buttons;
+  }
+  *(s16*)((u8*)D_800FF518 + index * 6) = repeat;
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/vec3f_normalize", func_8002A144);
 

@@ -4736,18 +4736,35 @@ by `/sprint-plan`:
   — S289 `func_80096C04`), and the TU's `-ffast-math` override in `mk/main.mk` (S289), which applies
   to anything added to the file and under which all 15 banked functions are verified invariant.
 
-- **(S271 OPEN — 6 of 18 banked; file NOT md5-candidate; 12-stub partial pack)**
-  `src/main/vec3f_normalize.c` (main-segment subseg `[0x4D00]`, flipped `c` at the S271 gate — the last
-  never-flipped fresh main vein, asm since ~S61). S271 banked the `D_801052F8` bit-flag module +
-  cfb wrapper: `flag_is_set`, `flag_set`, `flag_clear`, `flag_toggle`, `flag_clear_all`, `func_800299D0`
-  (all asm-first fast-path, no permuter). **12 CARRIED** (ROM green off the 6 banked, shared TU rodata
-  extern, no carve): the pack tail — `mainproc` (=nuboot, ~188i game main-loop; **consider the
-  `libnusys/` path-qualifier per the nusys-template convention when attempted**), `vec3f_normalize`
-  (S158 FP class, the guNormalize-substitute game fn), `game_draw_callback`, and the big fns
-  `func_80029F6C`/`func_8002A144`/`func_8002A310` (~130-188i) + the smaller `func_80029B08`/`B58`/`BD8`/
-  `C00`/`EEC`/`F28`. **Retry:** a later FP/DL/nusys-path sprint; NOT a smallest-first clean-leaf vein
-  (mixed nuboot-template + FP + game logic). `func_80029A30`/`func_80029A6C` were `--carried-check`
-  false-positives (caller-evict cross-ref in another wall's prose, not real walls) — banked clean.
+- **(S271 pack, refreshed 2026-10-15 — 11 of 18 banked; 7 live stubs)**
+  `src/main/vec3f_normalize.c` remains in YAML main at ROM `0x4D00`.
+  S271 banked the six bit-flag/cfb functions; subsequent source also contains
+  `func_80029B58`, `pause_audio`, and `func_80029EEC`.
+  **Banked 2026-10-15:** `func_80029F6C` (ROM `0x536C`, 118 instructions) and its
+  nested helper `func_80029F28` (ROM `0x5328`, 17 instructions), 540 bytes together.
+  The parent clamps stick axes, synthesizes direction buttons with hysteresis, and
+  applies button repeat. `NUContData` supplies the verified 8-byte input/output layout;
+  the separate repeat/direction globals use a 6-byte stride.
+  Recover the helper as nested C: its unused incoming `$v0` spill and both caller
+  `sp + 0x10` chain setups match without ABI stand-ins. Separate absolute/magnitude
+  locals plus a late-born result preserve the helper's 17 instructions.
+  Byte-offset casts avoid full-address CSE in the state accesses. For the final
+  comparison, compute `repeat_offset` before the trigger copy; moving it after the
+  button load swaps `$v1`/`$a0` (score 40). Recompute the else-store offset inline
+  rather than carrying the comparison local through both arms, which adds a copy.
+  Reproducer: `uv run --locked python tools/decomp_loop.py --func func_80029F6C`,
+  profile `main`, candidate `nonmatchings/func_80029F6C/base.c`, score 0:
+  `measurements/5ad82c38630e8d7cbd55e6c14d50cac772d568f1b6553dec385f1c488e930c0e.{c,json}`.
+  Saved isolated object: `nonmatchings/func_80029F6C/isolated-match.o`.
+  Formatted host build passed; integrated helper matched all 17 raw instruction words,
+  and the parent matched all 118 instructions/relocation destinations after section-placement
+  normalization. `tools/verify-rom.sh` passed with SHA-1
+  `e2c4e7a905b29529b49a1619a401fe699224829b`. No YAML, symbol, or overlay changes.
+  **Remaining:** `vec3f_normalize`, `func_80029B08`, `func_80029C00`, `mainproc`,
+  `func_8002A144`, `func_8002A310`, and `game_draw_callback`.
+  For `mainproc` (=nuboot), consider the `libnusys/` path qualifier per the
+  nusys-template convention when attempted. The mixed FP/DL/nusys pack remains open;
+  a carry classification alone does not establish a measured compiler wall.
 - **(S271 TOOLING DEBT — pre-existing, surfaced not introduced)** `tests/tooling` has accumulated
   failures independent of S271's work: the `pick_target` goldens (`pick_target_table.txt`,
   `pick_target.json`, `pick_target_coddog.json`, `libultra_match.txt`) are STALE since S241 (~30
