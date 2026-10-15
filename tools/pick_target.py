@@ -1138,6 +1138,8 @@ def main():
                 status = s["wall_class"].upper()
             else:
                 status = "fresh"
+            if s["carried"] and s["nested"]:
+                status += "+NESTED"
             sz = "?" if s["size"] is None else str(s["size"])
             # A dl-twin is a bank-order signal, not a wall: an equal DL command-word multiset means
             # the same body shape, so banking either one makes the other a near-mechanical replay
@@ -1171,6 +1173,7 @@ def main():
         )
         raise SystemExit(0 if n_fresh else 1)
 
+    any_risk = False
     if args.carried_check:
         walls = carried_wall_names()
         any_wall = False
@@ -1178,7 +1181,7 @@ def main():
             hit = fn in walls
             any_wall = any_wall or hit
             print(f"{'CARRIED-WALL' if hit else 'fresh':13} {fn}")
-        raise SystemExit(1 if any_wall else 0)
+        any_risk = any_wall
 
     if args.nested_check:
         any_nested = False
@@ -1200,7 +1203,10 @@ def main():
                 if parents:
                     note = "  nested-parent:" + ",".join(parents)
             print(f"{label:13} {fn}{note}")
-        raise SystemExit(1 if any_nested else 0)
+        any_risk = any_risk or any_nested
+
+    if args.carried_check or args.nested_check:
+        raise SystemExit(1 if any_risk else 0)
 
     rows = build_rows(args, Indexes.build(), carry_over_names())
     if args.json:

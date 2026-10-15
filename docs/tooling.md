@@ -54,11 +54,16 @@ Agent selection follows the [main-completion gate](../.omp/skills/mg64-decomp/SK
 and nested source directories, not arbitrary files under `src/main/`. They omit assembly packs;
 inspect those with whole-subsegment ranking. An empty shortlist does not authorize overlay work.
 
-`--carried-check` flags names from backlog carry-overs and WIP filenames, including scoping notes.
-Read the note before treating the classification as a terminal wall. `--nested-check` identifies
-parent-coupled leaves. Both commands exit nonzero when they find their respective risk.
-A carried pack leader does not classify its other members; inspect member assembly and run the
-individual checks before reopening a carry. Carry age and file closure are not new source leverage.
+`--carried-check` flags backlog names and WIP filenames, not verified compiler walls.
+Confirm a live stub before reading its note; banked/renamed evidence is not active backlog.
+Combine `--carried-check <fn>... --nested-check <fn>...` to report both checks in one
+invocation (exit 1 if either finds a risk). Nested detection includes unused-chain spills
+and caller setup in `jal` delay slots; confirm both sides' assembly before reconstructing.
+These are assembly heuristics, not proven nesting or a bank verdict: a spill-only
+child must spill incoming `$v0`, and caller setup must still be live at the call.
+Loose-stub text preserves `CARRIED-WALL+NESTED` when both apply; JSON retains independent fields.
+A carried pack leader does not classify its siblings. Reopen a carry for a named new
+source lever or changed evidence, not carry age or file closure.
 
 ## Iterate a function
 

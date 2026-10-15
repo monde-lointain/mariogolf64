@@ -1532,3 +1532,82 @@ def test_body_divergence_suppressed_on_single_coddog_artifact_jal():
     ]
     pt._append_coddog_aux(hz, [])
     assert len(bd(hz)) == 2
+
+
+def _write_nested_asm(root, name, instructions):
+    path = root / "nonmatchings/main/host" / f"{name}.s"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(
+        f"glabel {name}\n"
+        + "".join(
+            f"/* {i * 4:X} {0x80001000 + i * 4:08X} 00000000 */ {insn}\n"
+            for i, insn in enumerate(instructions)
+        )
+        + f"endlabel {name}\n"
+    )
+
+
+@pytest.mark.parametrize("computed_first", [False, True])
+def test_nested_child_distinguishes_incoming_from_computed_v0(
+    tmp_path, monkeypatch, computed_first
+):
+    score = load_tool("pick_target_score")
+    monkeypatch.setattr(score, "_ASM_ROOT", str(tmp_path))
+    instructions = ["addiu $sp, $sp, -0x8"]
+    if computed_first:
+        instructions.append("lui $v0, 0x800C")
+    instructions += ["sw $v0, 0x0($sp)", "jr $ra", "addiu $sp, $sp, 0x8"]
+    _write_nested_asm(tmp_path, "child", instructions)
+    assert score.nested_child_tell("child") is not computed_first
+
+
+@pytest.mark.parametrize(
+    ("call_body", "expected"),
+    [
+        (["jal child", "addiu $v0, $sp, 0x10"], True),
+        (["addiu $v0, $sp, 0x10", "jal child", "nop"], True),
+        (["addiu $v0, $sp, 0x10", "lw $v0, 0x0($sp)", "jal child", "nop"], False),
+        (["addiu $v0, $sp, 0x10", "jal other", "nop", "jal child", "nop"], False),
+        (["jal child", "addiu $a0, $sp, 0x10"], False),
+    ],
+)
+def test_nested_callers_require_live_chain_at_call(
+    tmp_path, monkeypatch, call_body, expected
+):
+    score = load_tool("pick_target_score")
+    monkeypatch.setattr(score, "_ASM_ROOT", str(tmp_path))
+    _write_nested_asm(tmp_path, "parent", ["addiu $sp, $sp, -0x30"] + call_body)
+    assert ("parent" in score.nested_parents_of("child")) is expected
+    # The "other" call in one negative child case still makes this a nested parent.
+    assert score.nested_parent_tell("parent") is (expected or "jal other" in call_body)
+
+
+def test_combined_gates_report_carry_and_nested_parent(tmp_path, monkeypatch, capsys):
+    import sys
+
+    pt = load_tool("pick_target")
+    globals_ = pt.nested_child_tell.__globals__
+    monkeypatch.setitem(globals_, "_ASM_ROOT", str(tmp_path))
+    monkeypatch.setitem(globals_, "_WIP_DIR", str(tmp_path / "wip"))
+    monkeypatch.setitem(globals_, "BACKLOG", str(tmp_path / "missing-backlog"))
+    (tmp_path / "wip").mkdir()
+    (tmp_path / "wip/child.near-match.md").write_text("Measured carry.\n")
+    _write_nested_asm(
+        tmp_path, "child",
+        ["addiu $sp, $sp, -0x8", "sw $v0, 0x0($sp)", "jr $ra", "nop"],
+    )
+    _write_nested_asm(
+        tmp_path, "parent",
+        ["addiu $sp, $sp, -0x30", "jal child", "addiu $v0, $sp, 0x10"],
+    )
+    monkeypatch.setattr(
+        sys, "argv",
+        ["pick_target.py", "--carried-check", "child", "--nested-check", "child"],
+    )
+    with pytest.raises(SystemExit) as result:
+        pt.main()
+    assert result.value.code == 1
+    output = capsys.readouterr().out
+    assert "CARRIED-WALL" in output
+    assert "NESTED-CHILD" in output
+    assert "nested-parent:parent" in output

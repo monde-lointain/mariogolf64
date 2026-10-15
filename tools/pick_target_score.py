@@ -282,24 +282,12 @@ def _find_asm_s(fn):
 
 
 def nested_child_tell(fn):
-    """Heuristic DoR check: does <fn> look like a GCC nested function whose argument is homed via
-    the static chain in $v0 (STATIC_CHAIN_REGNUM = $2), rather than a standalone leaf?
+    """Recognize an incoming static-chain spill, including a chain-unused child.
 
-    A standalone leaf receives its first arg in $a0 and never reads an incoming $v0 (v0 is
-    caller-saved / the return register, not an argument slot). A nested child's prologue instead
-    spills the incoming static chain and copies it to a working register:
-        sw   $v0, K($sp)            (dead spill of the chain — even a chain that goes unused)
-        addu $<reg>, $v0, $zero     (copy the incoming chain into a saved/arg reg)
-    Both appear within the first few prologue instructions. Such a leaf is NOT standalone-bankable:
-    it banks as a nested function inside its (often still-asm) parent, so the plan gate must price
-    it coupled-to-parent (a carry), not as a fresh smallest-first leaf.
-
-    Returns True on the tell. Reads only <fn>'s own `.s` (cheap). The confirming caller tell
-    (`addiu $v0,$sp,K` in the jal delay slot = address of a parent local) is left to a manual
-    disasm. See docs/hazards.md#nested-function-static-chain-spill and the memories
-    nested-function-banks-the-parent-too / func-80041e8c-v0-arg-convention-wall (S269 flagged
-    func_8002BE78 -> draw_ground_shadow_decals and func_8002DAC0 -> render_frame; S279 widened the
-    scan window after it MISSED func_8007A40C / func_8007A10C, whose chain-home sits ~15 insns in)."""
+    A copied chain retains the existing prologue tell. Without a copy, the spill
+    must be the first mention of $v0: spilling a locally computed return value is
+    not evidence of nesting. Confirm the caller's chain setup before reconstruction.
+    """
     path = _find_asm_s(fn)
     if not path:
         return False
@@ -311,14 +299,38 @@ def nested_child_tell(fn):
         if _JAL_RE.search(insn):
             end = i + 2  # include the branch delay slot
             break
-    prologue = "\n".join(insns[:end])
-    return bool(_V0_SPILL_RE.search(prologue) and _V0_COPY_RE.search(prologue))
+    prologue = insns[:end]
+    if not any(_V0_SPILL_RE.search(insn) for insn in prologue):
+        return False
+    if any(_V0_COPY_RE.search(insn) for insn in prologue):
+        return True
+    first_v0 = next((insn for insn in prologue if "$v0" in insn), "")
+    return bool(_V0_SPILL_RE.search(first_v0))
 
 
 _FRAME_ALLOC_RE = re.compile(r"\baddiu\b\s+\$sp,\s*\$sp,\s*-(0x[0-9A-Fa-f]+)")
 _ARGP_RE = re.compile(r"\baddiu\b\s+\$(s[0-7]|fp),\s*\$sp,\s*(0x[0-9A-Fa-f]+)")
 # `addiu $v0,$sp,K` = STATIC_CHAIN_REGNUM loaded with the address of a caller local (S310).
 _CHAIN_SETUP_RE = re.compile(r"\baddiu\b\s+\$v0,\s*\$sp,\s*(?:0x)?[0-9A-Fa-f]+")
+
+
+def _static_chain_callees(insns):
+    """Find direct calls with a nearby live chain setup, including the delay slot."""
+    callees = set()
+    for i, insn in enumerate(insns):
+        call = re.search(r"\bjal\b\s+(\w+)", insn)
+        if not call:
+            continue
+        if i + 1 < len(insns) and _CHAIN_SETUP_RE.search(insns[i + 1]):
+            callees.add(call.group(1))
+            continue
+        for previous in reversed(insns[max(0, i - 3):i]):
+            if _CHAIN_SETUP_RE.search(previous):
+                callees.add(call.group(1))
+                break
+            if _JAL_RE.search(previous) or "$v0" in previous:
+                break
+    return callees
 
 
 def nested_parent_tell(fn):
@@ -360,37 +372,18 @@ def nested_parent_tell(fn):
         m = _ARGP_RE.search(insn)
         if m and int(m.group(2), 16) == frame_val:
             return True
-    # Second tell (S310): the function SETS UP a static chain for a callee. A plain function never
-    # computes `addiu $v0,$sp,K` before a `jal` -- $v0 is the return register, not an argument slot
-    # -- so that pair is gcc handing STATIC_CHAIN_REGNUM ($2) to a nested child, and the caller is
-    # therefore the nested PARENT. The S280 arg-pointer tell above misses this shape entirely: it
-    # keys on `addiu $sreg,$sp,<framesize>`, which only appears when the child reads the parent's
-    # own incoming PARAMETERS, and `func_8006E210` takes none (its chain is `addiu $v0,$sp,0x10`,
-    # the frame origin, so the child can reach the two shared loop counters). S310 wrote the whole
-    # parent body before discovering the coupling; this tell is one grep over the leaf's own `.s`.
-    for i, insn in enumerate(insns):
-        if not _CHAIN_SETUP_RE.search(insn):
-            continue
-        # The chain must still be live at the call: gcc emits it within a few insns of the `jal`,
-        # usually in its delay slot or just before it.
-        for follow in insns[i + 1 : i + 4]:
-            if _JAL_RE.search(follow):
-                return True
-    return False
+    return bool(_static_chain_callees(insns))
 
 
 def nested_parents_of(fn):
-    """Names of the still-asm functions that pass <fn> a static chain: every `.s` with a `jal <fn>`
-    within a few instructions of an `addiu $v0,$sp,K`. Sorted, may be empty.
+    """Find callers that set up <fn>'s static chain, including jal delay slots.
 
-    A nested child banks INSIDE its parent, so knowing the parent is what turns a `NESTED` verdict
-    into a price. Scans `asm/nonmatchings/**` (a relic `.s` for an already-banked caller can show up
-    here; check the caller is still `INCLUDE_ASM` before pricing)."""
+    Extracted assembly may outlive its stub; confirm live source before pricing.
+    """
     import glob
 
     hits = []
     root = os.path.join(_ASM_ROOT, "nonmatchings")
-    jal_re = re.compile(r"\bjal\b\s+" + re.escape(fn) + r"\b")
     for path in glob.glob(os.path.join(root, "**", "*.s"), recursive=True):
         name = os.path.splitext(os.path.basename(path))[0]
         if name == fn:
@@ -400,15 +393,9 @@ def nested_parents_of(fn):
                 text = f.read()
         except OSError:
             continue
-        if not jal_re.search(text):
-            continue
         insns = _ASM_INSN_RE.findall(text)
-        for i, insn in enumerate(insns):
-            if not _CHAIN_SETUP_RE.search(insn):
-                continue
-            if any(jal_re.search(x) for x in insns[i + 1 : i + 4]):
-                hits.append(name)
-                break
+        if fn in _static_chain_callees(insns):
+            hits.append(name)
     return sorted(set(hits))
 
 
