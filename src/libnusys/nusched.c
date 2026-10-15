@@ -33,7 +33,7 @@ extern vs32 D_800B678C;   // perf: a swap occurred, latch retrace time
 extern vu32 D_8012F4D4;   // retrace count when the current gfx task started
 extern void* D_800B6784;  // the in-flight gfx task (for the swap timer), or NULL
 extern vu32 D_800B6788;   // perf double-buffer index
-extern s8 D_800B67C0;     // gate for the frame-0x36 display-off step
+extern s8 g_debug_mode_enabled;     // gate for the frame-0x36 display-off step
 extern u32 D_800B6790;    // game TV-type code (1=MPAL 2=PAL 3=NTSC 4=other)
 // clang-format on
 extern u64 nuScStack[NU_SC_STACK_SIZE / sizeof(u64)];
@@ -194,7 +194,7 @@ void nuScEventHandler(void) {
           if (D_800B6784 != NULL) {
             if (frame == 0x20) {
               osViSwapBuffer(*(void**)((u8*)D_800B6784 + 0xc));
-            } else if (frame == 0x36 && D_800B67C0 == 0) {
+            } else if (frame == 0x36 && g_debug_mode_enabled == 0) {
               nuGfxDisplayOff();
               D_800B6784 = NULL;
             }

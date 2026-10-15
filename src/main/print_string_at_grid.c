@@ -1,7 +1,7 @@
 #include "common.h"
 
 extern u8 flag;
-extern s8 D_800B67C0;
+extern s8 g_debug_mode_enabled;
 extern s32 D_800BFEE8;
 extern u8 D_800DAF60[];
 extern u8 D_800DB410[];
@@ -33,7 +33,7 @@ void print_string_at_grid(char* str, s32 col, s32 row) {
 }
 
 void check_and_print_grid(char* str, s32 col, s32 row) {
-  if (D_800B67C0 != 0) {
+  if (g_debug_mode_enabled != 0) {
     print_string_at_grid(str, col, row);
   }
 }

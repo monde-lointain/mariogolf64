@@ -2,6 +2,20 @@
 
 ## 2026-10-14
 
+- **Overlay-manager readability**: Applied the C-relevant guidelines from Code Complete
+  Chapters 5–19 to all nine routines in `src/main/func_80025D30.c`. Named the descriptor
+  fields, state, diagnostics, constants, arguments, and routines; migrated compiled callers
+  and added authoritative symbol names. Replaced the segment pointer walk with indexed
+  access and narrowed scratch scopes without changing layout, cache/callback ordering,
+  unsigned frame-age arithmetic, or retail error behavior.
+  Separate initialization-loop counters changed KMC registers; separate decoded-index
+  locals in the load/unload paths changed instructions. Retained and documented those
+  matching forms. Array-base symbol extents preserve separately referenced interior
+  symbols. All nine isolated instruction streams matched after relocation normalization;
+  integrated `tools/verify-rom.sh` passed with retail SHA-1
+  `e2c4e7a905b29529b49a1619a401fe699224829b`. YAML, compiler profiles, and overlay
+  implementations are unchanged.
+
 - **Main decompilation**: Banked `get_terrain_vertex_pointer` (`0x80041524`, 40 instructions)
   in `src/main/get_tile_attribute.c`. Shared coordinate/address scratch chains resolved
   the carried register permutation and column-select branch-likely residual without

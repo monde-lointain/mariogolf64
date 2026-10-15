@@ -1037,7 +1037,7 @@ extern Light D_800C5AC0;
 /* Spelled as arrays so the MEMs carry MEM_IN_STRUCT_P; see the header comment.
  */
 extern s8 D_800FC861[];
-extern s32 D_800B67F0;
+extern s32 g_frame_counter;
 extern s32 D_8012CFE4[];
 extern Gfx D_80222400[];
 /* This TU's double pool, shared with the still-asm siblings. Referenced rather
@@ -1140,7 +1140,7 @@ void emit_wind_indicator_dl(Gfx** gfxp, f32 x, f32 y) {
   gSPLight(gfx++, (u8*)&D_800C5AC0 - 8, 2);
 
   if (D_800FC861[0] != 0) {
-    D_8012CFE4[0] = D_800B67F0;
+    D_8012CFE4[0] = g_frame_counter;
     gSPDisplayList(gfx++, D_80222400);
   }
 

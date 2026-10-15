@@ -20,9 +20,9 @@ extern OSThread D_800E1A50;
 extern u8 D_8025D350;
 
 /* Overlay swap + game callees referenced by this TU. */
-extern s32 func_80025D78(s32);
+extern s32 overlay_id_from_segment(s32);
 extern void unload_overlay(s32);
-extern void load_overlay(s32);
+extern s32 load_overlay(s32);
 extern void load_hole_terrain_assets(s32, s32);
 extern s32 func_80051FCC(void);
 extern s32 func_80052070(void);
@@ -166,8 +166,8 @@ INCLUDE_ASM("asm/nonmatchings/main/lz_compress_extended_dma", func_80069D08);
 void func_80069F28(void) { g_terrain_enable_gate = 1; }
 
 void func_80069F38(void) {
-  unload_overlay(func_80025D78(8));
-  load_overlay(func_80025D78(6));
+  unload_overlay(overlay_id_from_segment(8));
+  load_overlay(overlay_id_from_segment(6));
   osCreateThread(&D_800E1A50, 0xA, func_80069D08, NULL, &D_8025D350, 0x14);
   osStartThread(&D_800E1A50);
   g_terrain_enable_gate = 0;

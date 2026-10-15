@@ -654,7 +654,7 @@ void stamp_circle_ring_alpha(u32* grid, s32 cx, s32 cy, s32 r) {
 INCLUDE_ASM("asm/nonmatchings/main/func_8006A2C0", func_8006C8CC);
 
 extern Gfx D_800C3FC0[];
-extern s8 D_800B67C0;
+extern s8 g_debug_mode_enabled;
 extern char D_80105118[];
 extern char D_800D1448[];
 
@@ -729,7 +729,7 @@ void update_and_draw_iris_wipe(Gfx** pgfx) {
     }
   }
 
-  if (D_800B67C0 != 0) {
+  if (g_debug_mode_enabled != 0) {
     sprintf(D_80105118, D_800D1448, D_800C4018);
     check_and_print_grid(D_80105118, 0x14, 5);
   }

@@ -9,7 +9,7 @@ extern u8 D_800CCC50[];
 extern u8 D_800CCC84[];
 extern u8 D_801F43F0[];
 extern u8 D_801F4424[];
-extern s32 D_800B67F0;
+extern s32 g_frame_counter;
 extern s32 D_800C1DEC;
 extern void* get_club_param(u32 id);
 extern void func_8005470C(void* cs, f32 mtx[4][4]);
@@ -112,7 +112,7 @@ s32 clear_animation_slot(s32 index) {
 }
 
 /* func_800542A0: returns 1 if (u32)index >= 4, or the per-record sentinel
- * polychara_state[index*0x18C] != -1, or (u32)(D_800B67F0 -
+ * polychara_state[index*0x18C] != -1, or (u32)(g_frame_counter -
  * D_801F4424[index*0x18C]) < 2; else 0. The single short-circuit `||` store is
  * load-bearing: a two-branch `if(c1) r=1; else if(c2) r=1;` emits two r=1
  * stores, giving the accumulator pseudo 4 refs; global.c's allocno priority
@@ -128,7 +128,7 @@ s32 func_800542A0(s32 index) {
   }
   r = 0;
   if (*(s32*)&polychara_state[index * 0x18C] != -1 ||
-      (u32)(D_800B67F0 - *(s32*)&D_801F4424[index * 0x18C]) < 2) {
+      (u32)(g_frame_counter - *(s32*)&D_801F4424[index * 0x18C]) < 2) {
     r = 1;
   }
   return r;
