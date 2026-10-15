@@ -172,7 +172,45 @@ s32 func_8005F30C(s32 x, s32 z) {
   return height;
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/bgm_load_song_from_rom", func_8005F360);
+void func_8005F360(void) {
+  s32 flags = (flag_is_set(0x33) << 1) + flag_is_set(0x34);
+
+  switch (flags) {
+    case 0:
+      scenario_mode_id = 0;
+      round_hole_index = 0;
+      D_801B609C = 0;
+      flags = (flag_is_set(0x30) << 1) + flag_is_set(0x31) + 1;
+      active_player_count = flags;
+      *(s32*)scenario_state_id = 0;
+      game_mode = 0;
+      break;
+    case 1:
+      scenario_mode_id = 0;
+      round_hole_index = 0;
+      D_801B609C = 0;
+      active_player_count = flags;
+      *(s32*)scenario_state_id = 0;
+      game_mode = 3;
+      break;
+    case 2:
+      scenario_mode_id = 0;
+      round_hole_index = 0;
+      D_801B609C = 0;
+      active_player_count = flags;
+      *(s32*)scenario_state_id = 0;
+      game_mode = flags;
+      /* The original case deliberately falls through to the default setup. */
+    default:
+      active_player_count = 3;
+      scenario_mode_id = 0;
+      round_hole_index = 0;
+      D_801B609C = 0;
+      *(s32*)scenario_state_id = 0;
+      game_mode = 10;
+      break;
+  }
+}
 
 void func_8005F4AC(void) {
   *(s32*)((u8*)scenario_state_id + 12) = 0;
