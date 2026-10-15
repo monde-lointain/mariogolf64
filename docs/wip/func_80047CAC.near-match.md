@@ -6,6 +6,21 @@ description: "Documents the three-global FP interpolation stepper's scheduler co
 
 # func_80047CAC — pure-FP interpolation stepper (FP scheduler coin, near-match)
 
+## Refreshed candidate (2026-10-15)
+
+**UNBANKED:** the host keeps its stub. The current isolated source computes
+three deltas before applying their factors and uses the exact upward-rounded
+middle constant `19.6500015f`. Under the host's `main` + fast-math profile it
+scores **2195 / 0.53297872**:
+`nonmatchings/func_80047CAC/measurements/4e025b81d84f63e999adf8ad42f81f5ed96159460a7456108653f2dd71fde6bc.{json,c}`.
+This source does not reproduce the historical near-match schedule; do not
+transfer the old single-nop verdict to it. A next experiment should split
+constant materialization from arithmetic with explicit locals and inspect
+quantity lifetimes before adding loop-note boundaries. The independent
+`func_80047DBC` threshold-boundary bank proves that a scheduler-only terminal
+claim needs more than the old expression-order experiments.
+
+
 **Status:** fully RE'd behavior, near-match. Two independent residuals: an FP block-local
 scheduler coin (mine 1 instr SHORTER than ROM = ROM lost a hazard-fill coin, S233 terminal class)
 and a 1-ULP float constant. CARRIED S274.

@@ -5538,6 +5538,15 @@ by `/sprint-plan`:
     priority + a folded dead guard via DCE; permuter 800→575 plateau, 195/196), `func_800451E4` (const-1 CSE +
     allocno tiebreak + reorg delay-slot, 136/139), `predict_shot_distance_variant` (pseudo82=`&D_800BB4FC` claims
     `$s0`, pushes category; mine 3 instrs SHORTER — its nested `lerp_int` child is byte-exact, banks with parent).
+    The refreshed `predict_shot_distance_variant` candidate (2026-10-15) instead
+    scores 3041 / 0.84243523 under the current main profile:
+    `nonmatchings/predict_shot_distance_variant/measurements/4bfc33b58a0579c5f5812e7dab887b7c8c3477571e37a060cc946f80bff24e3a.{c,json}`.
+    Reusing the category parameter as the simulation counter preserves its
+    initial `$s0` home and later category copy; a scalar projection of the
+    canonical club keeps the distance-slot displacement. It remains unbanked
+    with scheduling/allocation and count differences. Next inspect the base
+    address lifetime across `get_club_meter_extent` and the abs/threshold phase,
+    rather than reusing the historical terminal verdict for this different base.
   - Near-match seeds remain isolated in `nonmatchings/<fn>/base.c`; the quality
     helper is no longer a retry target. The prediction parents remain coupled
     to their nested children. No cross-repo name sync.
