@@ -4924,6 +4924,16 @@ retail ordering in `func_80098C6C`; it remains unbanked at score 10 because its
 abs input/output coalesce. Do not transfer the historical one-instruction
 deficit or a scheduler-impossibility assertion to that newer measured source.
 
+**Call-contract counterexample (2026-10-15):** `func_80048CF8` is banked,
+not the S158 pervasive-FP wall described by its former source comment.
+Compute both float deltas before the integer nonzero guard and pass them
+explicitly to the banked `atan2f(f32, f32)`. This reproduces the argument FPR
+homes, conversion scratch register, and second subtraction in the branch delay
+slot without allocation tricks. The isolated score is zero
+(`nonmatchings/func_80048CF8/measurements/86960a4c348d2a8ca3e6710caea9ebfa71b982e77a61f3f16650ef1bfa70a09e.json`);
+the integrated host range agrees, and `tools/verify-rom.sh` passed with retail
+SHA-1 `e2c4e7a905b29529b49a1619a401fe699224829b`.
+
 **Step 0 — re-derive the residual from a fresh build before trusting a carry doc (S282/S268).** A
 carried-wall doc's stated count and residual class are both hypotheses. Run
 `uv run --locked python tools/decomp_loop.py --func <fn>` to retain a fresh source/measurement

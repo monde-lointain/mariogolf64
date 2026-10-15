@@ -587,14 +587,19 @@ void func_800487E4(void) {
 
 INCLUDE_ASM("asm/nonmatchings/main/func_800453E0", func_8004887C);
 
-/* func_80048CF8: CARRIED (near-match). Logic fully RE'd:
- *   if ((s32)(D_800DAF30 - D_800DAF24) != 0 || (s32)(D_800DAF38 - D_800DAF2C)
- * != 0) D_800BE654 = D_800CC860 - atan2f();   // f64 D_800CC860, f32
- * result Wall = #pervasive-regalloc-classical-main (S158 FP class): ROM homes
- * the FP temps in $f12/$f2/$f4 + eager-schedules the 2nd sub into the 1st bnez
- * delay slot; gcc-2.7.2 allocates $f0/$f2 and reorders the load block. No
- * source lever. */
-INCLUDE_ASM("asm/nonmatchings/main/func_800453E0", func_80048CF8);
+extern f32 D_800DAF24;
+extern f32 D_800DAF2C;
+extern f32 D_800BE654;
+extern f64 D_800CC860;
+extern f32 atan2f(f32 y, f32 x);
+
+void func_80048CF8(void) {
+  f32 dx = D_800DAF30 - D_800DAF24;
+  f32 dz = D_800DAF38 - D_800DAF2C;
+  if ((s32)dx != 0 || (s32)dz != 0) {
+    D_800BE654 = D_800CC860 - atan2f(dx, dz);
+  }
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_800453E0", func_80048D7C);
 
