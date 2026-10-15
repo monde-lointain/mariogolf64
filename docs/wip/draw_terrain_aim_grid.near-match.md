@@ -1,7 +1,7 @@
 ---
 type: "Reconstruction Note"
 title: "draw_terrain_aim_grid — near-match (S306)"
-description: "Records reconstruction evidence and matching constraints for draw_terrain_aim_grid."
+description: "Tracks the 1,349-instruction terrain-grid display-list reconstruction, with exact instruction count and structure but a 0x10 frame-size residual."
 ---
 
 # draw_terrain_aim_grid — near-match (S306)

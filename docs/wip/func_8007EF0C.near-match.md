@@ -1,7 +1,7 @@
 ---
 type: "Reconstruction Note"
 title: "func_8007EF0C — near-match (S305, re-opened S306)"
-description: "Records reconstruction evidence and matching constraints for func_8007EF0C."
+description: "Records the S306 texture-rectangle divide-placement residual, including filled hazard slots and a missing spill pair."
 ---
 
 # func_8007EF0C — near-match (S305, re-opened S306)

@@ -1,7 +1,7 @@
 ---
 type: "Reconstruction Note"
 title: "func_8006C8CC near-match (CARRY, S239)"
-description: "Records reconstruction evidence and matching constraints for func_8006C8CC."
+description: "Records the predicate's S239 single-bit-test fold: GCC replaces the final branch with a shift."
 ---
 
 # func_8006C8CC near-match (CARRY, S239)

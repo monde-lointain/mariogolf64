@@ -1,7 +1,7 @@
 ---
 type: "Reconstruction Note"
 title: "emit_lens_flare_dl (func_8008D3F4) -- BANKED S302"
-description: "Records reconstruction evidence and matching constraints for emit_lens_flare_dl."
+description: "Records the S302 full-ROM match for the lens-flare display-list emitter and its reconstruction evidence."
 ---
 
 # `emit_lens_flare_dl` (`func_8008D3F4`) -- BANKED S302

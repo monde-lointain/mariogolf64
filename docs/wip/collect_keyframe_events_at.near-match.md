@@ -1,7 +1,7 @@
 ---
 type: "Reconstruction Note"
 title: "collect_keyframe_events_at near-match (S260) — 54/54, ONE BRANCH-OFFSET BIT"
-description: "Records reconstruction evidence and matching constraints for collect_keyframe_events_at."
+description: "Records the S260 goto-loop reconstruction's exact instruction count and remaining branch-offset bit after retiring the strength-reduction diagnosis."
 ---
 
 # collect_keyframe_events_at near-match (S260) — 54/54, ONE BRANCH-OFFSET BIT

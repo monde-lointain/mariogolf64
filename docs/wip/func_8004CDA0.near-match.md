@@ -1,7 +1,7 @@
 ---
 type: "Reconstruction Note"
 title: "func_8004CDA0 — cloud-buffer blend driver (near-match, S263)"
-description: "Records reconstruction evidence and matching constraints for func_8004CDA0."
+description: "Records the cloud-buffer blend driver's S263 register-allocation residual and collapsed register-preserving copies."
 ---
 
 # func_8004CDA0 — cloud-buffer blend driver (near-match, S263)

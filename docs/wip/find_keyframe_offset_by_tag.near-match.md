@@ -1,7 +1,7 @@
 ---
 type: "Reconstruction Note"
 title: "find_keyframe_offset_by_tag near-match (base-register caching + regalloc perm)"
-description: "Records reconstruction evidence and matching constraints for find_keyframe_offset_by_tag."
+description: "Records the decoded keyframe-by-tag search and its base-register-caching and callee-saved register-allocation residual."
 ---
 
 # find_keyframe_offset_by_tag near-match (base-register caching + regalloc perm)

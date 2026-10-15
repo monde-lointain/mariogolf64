@@ -1,7 +1,7 @@
 ---
 type: "Reconstruction Note"
 title: "init_sky_pool_and_world_state near-match (S256 carry, rebuilt S258)"
-description: "Records reconstruction evidence and matching constraints for init_sky_pool_and_world_state."
+description: "Records the sky-grid initializer's S258 exact-count register permutation and two-instruction initialization swap."
 ---
 
 # init_sky_pool_and_world_state near-match (S256 carry, rebuilt S258)

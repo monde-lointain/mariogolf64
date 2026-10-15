@@ -1,7 +1,7 @@
 ---
 type: "Reconstruction Note"
 title: "func_8008DDDC (0x388/904B) — near-match carry (S249)"
-description: "Records reconstruction evidence and matching constraints for func_8008DDDC."
+description: "Records the fog/material keyframe blender's S249 constant/address placement and resulting saved-register permutation."
 ---
 
 # func_8008DDDC (0x388/904B) — near-match carry (S249)

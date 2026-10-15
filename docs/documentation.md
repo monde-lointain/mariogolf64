@@ -22,12 +22,26 @@ skills and commands retain their native invocation contracts. Vendored tools, vi
 generated output, and dependency documentation are not bundle concepts. Links may leave the bundle
 to reference implementation or evidence.
 
+## Reading contract
+
+Follow one route: [bundle index](index.md) → task, flag, or residual lookup → selected concept
+or heading. For a known function, use the [evidence index](wip/index.md) instead of reading
+sprint history. Index descriptions should expose the decision, residual, or resolution that
+distinguishes each destination; repeating its filename or saying only “reconstruction evidence”
+does not help a reader choose.
+
+Keep indexes as listings. Put procedures in concepts and link to their owner rather than copying
+commands or policy into every entry point. The [workflow index](workflow/index.md) links directly
+to the native skill; there is no separate prose copy of that workflow.
+
 ## Concept metadata
 
 Every `.md` file in the bundle except reserved `index.md` and `log.md` files begins with parseable
 YAML frontmatter containing a nonempty string `type`. Use a descriptive `title` and a one-sentence
 `description` that the directory index can reuse. A concept answers one coherent question; split
 unrelated operational detail rather than growing another command catalog or workflow copy.
+Update the containing index's description whenever the concept's summary changes. A historical
+note's summary describes its recorded evidence, not a new verification of its status.
 
 ```yaml
 ---
@@ -40,9 +54,10 @@ sources:
 ---
 ```
 
-`sources` names actual evidence. Trust fields such as `verified`, `generated`, and `status` are
-optional: omit them rather than inventing authorship, timestamps, or verification. Reconstruction
-notes are evidence at the time of their sprint, not promises about today's source state.
+`sources` names actual evidence: a concrete artifact/URI or an explicitly described source scope,
+not an invented file. Trust fields such as `verified`, `generated`, and `status` are optional:
+omit them rather than inventing authorship, timestamps, or verification. Reconstruction notes are
+evidence at the time of their sprint, not promises about today's source state.
 
 `index.md` contains grouped Markdown links and short descriptions, not concept frontmatter or
 procedures. Every immediate child concept and child directory must be discoverable there. Only
@@ -50,6 +65,12 @@ the bundle-root index may declare `okf_version: "0.2"`; nested indexes have no f
 `log.md` has no frontmatter: it is a flat list of updates under ISO `YYYY-MM-DD` date headings,
 newest first. Existing sprint records retain their names and frozen bodies; they are typed
 concepts outside the bundle, not OKF `log.md` files.
+
+These index-coverage, descriptive-summary, and live-link checks are project maintenance rules,
+not additional OKF conformance requirements. OKF v0.2 requires typed concept frontmatter and the
+reserved-file structures; it permits omitted indexes, unknown types/keys, and broken links.
+Use relative links here so repository-browser navigation works. OKF also supports paths beginning
+with `/`, but interprets those relative to the bundle root, not the repository root.
 
 ## Authority and discovery
 
@@ -80,8 +101,11 @@ Before delivering a documentation change:
 1. Parse every concept's frontmatter; require a nonempty string `type`. Check that the native skill
    still has its required `name` and `description`, without imposing OKF metadata on the command.
 2. Check reserved index/log structure and immediate-child index coverage at every bundle directory.
-3. Resolve local Markdown links, exact heading fragments, and local `sources` paths. Include root
-   guides and the skill when checking links into or out of the bundle.
+3. Resolve live local Markdown links, exact heading fragments, and concrete local `sources` paths.
+   Include root guides and the skill when checking links into or out of the bundle. Preserve
+   historical shorthand citations and retired filenames in frozen evidence; report those separately
+   rather than treating them as current navigation. Parse inline code before stripping HTML from
+   heading text: a token such as `family-of:<banked-fn>` contributes `banked-fn` to its heading slug.
 4. Run `uv run --locked python tools/hazard_anchors.py check` for the frozen hazard-anchor contract.
    This is not a general Markdown link checker: it also accepts unique prefix citations that do
    not navigate to actual headings.

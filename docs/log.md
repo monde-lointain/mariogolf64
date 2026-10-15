@@ -2,6 +2,28 @@
 
 ## 2026-10-14
 
+- **Progressive-discovery OKF refinement**: Audited the bundle against OKF v0.2 and current
+  implementation. Consolidated workflow navigation in the [workflow index](workflow/index.md)
+  and native skill, removing the redundant prose navigation guide; the tooling overview now
+  routes campaign commands to their [single owner](campaigns.md).
+  - Replaced boilerplate reconstruction summaries with discriminating residual, coupling,
+    resolution, or interpretation evidence. All 88 note descriptions now match their containing
+    indexes; summaries distinguish superseded diagnoses, linked-object evidence, and ROM banks.
+  - Corrected isolated-build examples to inherit parent-TU profiles, documented extraction
+    prerequisites for reference discovery, and clarified explicit clean and container-mount
+    side effects. The [maintenance reference](documentation.md) distinguishes OKF conformance
+    from stricter local discovery/link rules.
+  - **Proof**: Validated 107 bundle Markdown files (102 concepts, four indexes, one log),
+    directory coverage, 632 local links, and 32 local provenance paths; all live routes resolve.
+    Exercised workflow, evidence, and hazard reading paths. The hazard guard passed all 115 frozen
+    citations. Verified all 88 reconstruction bodies, the three root sprint records, and the
+    hazard reference remain unchanged; one historical BACKLOG shorthand self-link is retained.
+    Actual read-only reference lookup returned advisory results; campaign preparation returned
+    an empty main queue with 1,013 available C references. CLI help also confirmed the documented
+    campaign, reference, profile-source, and Ghidra interfaces. Commit review restored the build
+    task list after finding stray patch text; a follow-up scan found no remaining patch syntax.
+  - **Scope**: Documentation only; no ROM build, Ghidra service, or container was started.
+
 - **Main-bank readability pass**: Read Code Complete Chapters 7, 10–16, 31, and 32,
   then reviewed all 68 functions in the 17 requested source files with six parallel
   proposal-writing workers and serialized integration. Added semantic names for

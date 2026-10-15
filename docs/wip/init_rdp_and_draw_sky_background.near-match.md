@@ -1,7 +1,7 @@
 ---
 type: "Reconstruction Note"
 title: "init_rdp_and_draw_sky_background — 286/286, exact instruction multiset, pure order residual"
-description: "Records reconstruction evidence and matching constraints for init_rdp_and_draw_sky_background."
+description: "Records the 286-instruction reconstruction whose instruction multiset matches and whose residual is ordering only."
 ---
 
 # init_rdp_and_draw_sky_background — 286/286, exact instruction multiset, pure order residual

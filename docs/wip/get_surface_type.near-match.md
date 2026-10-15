@@ -1,7 +1,7 @@
 ---
 type: "Reconstruction Note"
 title: "get_surface_type (0x80039F7C) — near-match carry (S233)"
-description: "Records reconstruction evidence and matching constraints for get_surface_type."
+description: "Records the terrain-surface lookup's S233 constant-15 register-assignment residual."
 ---
 
 # get_surface_type (0x80039F7C) — near-match carry (S233)

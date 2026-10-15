@@ -1,7 +1,7 @@
 ---
 type: "Banked Evidence"
 title: "func_8005CEE0 — near-match (CARRIED, load-order + regalloc scheduling coin)"
-description: "Records the matching resolution and prior reconstruction evidence for func_8005CEE0."
+description: "Records the S315 bank after typed table indexing removed the load-order and register-coloring coupling in the lookup leaf."
 ---
 
 # func_8005CEE0 — near-match (CARRIED, load-order + regalloc scheduling coin)

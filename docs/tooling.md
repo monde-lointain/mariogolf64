@@ -92,24 +92,10 @@ a hand-assembled compiler command.
 ## References and native campaigns
 
 For reference lookup, queue preparation, campaign scheduling, or deadlines, use the
-[campaign and reference guide](campaigns.md). The overview here preserves this discovery
-anchor for existing links; it does not own campaign execution policy.
-
-| Need | Command |
-| --- | --- |
-| Advisory C references for a target | `uv run --locked python tools/decomp_references.py --func <fn> -n 3` |
-| Include another checkout | Add repeatable `--reference-root <checkout>` |
-| Prepare a native `/decomp` queue | `uv run --locked python tools/decomp_campaign.py --segment main --pool-size 60 -n 12 --by-similarity` |
-| Select exact labels | `decomp_campaign.py --func <fn> --func <other> -n 2` |
-| Partition an analysis queue | Add `--shard 1/4`; shared operations remain serialized |
-| Run an isolated m2c prepass | Add `--prepass --seconds 1800` |
-| Bound a command and descendants | `uv run --locked python tools/decomp_budget.py --seconds 600 --reserve 120 -- <command> <args>...` |
-
-Reference scores and queue records are advisory; neither source presence nor a provisional
-zero banks code. The native [decomp skill](../.omp/skills/mg64-decomp/SKILL.md#campaigns)
-owns execution, and only the parent owns shared builds, MCP, and source integration. See
-[campaign guide](campaigns.md) for selection defaults, provenance, prepass exclusions,
-deadline semantics, and read-only examples.
+[campaign and reference guide](campaigns.md) for commands, operational prerequisites, and policy.
+Reference scores and queue records are advisory; neither source presence nor a provisional zero
+banks code. The native [decomp skill](../.omp/skills/mg64-decomp/SKILL.md#campaigns) owns execution,
+and only the parent owns shared builds, MCP, and source integration.
 
 ## Maintain tooling and docs
 

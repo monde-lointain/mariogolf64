@@ -90,9 +90,13 @@ includes, and embedded binary inputs. The linker follows Splat's configured obje
 ```sh
 uv run --locked python tools/rom_build.py build --object src/main/vec3f_normalize.o
 uv run --locked python tools/rom_build.py compile --source nonmatchings/<func>/base.c \
-  --output nonmatchings/<func>/current.o --profile main --nonmatching
-cmake --build build/us --target clean
+  --output nonmatchings/<func>/current.o --profile-source src/<seg>.c --nonmatching
 ```
+
+For isolated compilation, `--profile-source` selects the parent translation unit's effective
+profile, including per-file overrides. `--profile` instead forces a named profile. To discard
+generated outputs and rebuild from scratch, use `cmake --build build/us --target clean` explicitly;
+cleaning is not part of routine iteration.
 
 A single-object or isolated compile is an iteration signal, not a ROM match; verify after
 integrating a candidate. Optional [headless Ghidra analysis](ghidra.md) has separate lifecycle

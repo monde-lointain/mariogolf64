@@ -1,7 +1,7 @@
 ---
 type: "Reconstruction Note"
 title: "func_8002DAC0 - GCC nested function of render_frame (carry, not a wall)"
-description: "Records reconstruction evidence and matching constraints for func_8002DAC0."
+description: "Records a GCC nested render-frame child that reads its parent's static chain and must be banked in the parent translation unit."
 ---
 
 # func_8002DAC0 - GCC nested function of render_frame (carry, not a wall)

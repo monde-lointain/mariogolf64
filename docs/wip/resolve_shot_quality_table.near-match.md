@@ -1,7 +1,7 @@
 ---
 type: "Reconstruction Note"
 title: "resolve_shot_quality_table — near-match (S185, structurally complete, 3-instr irreducible residual)"
-description: "Records reconstruction evidence and matching constraints for resolve_shot_quality_table."
+description: "Documents the structurally complete S185 near-match and its three-instruction residual."
 ---
 
 # resolve_shot_quality_table — near-match (S185, structurally complete, 3-instr irreducible residual)

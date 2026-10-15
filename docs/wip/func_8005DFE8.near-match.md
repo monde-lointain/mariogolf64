@@ -1,7 +1,7 @@
 ---
 type: "Reconstruction Note"
 title: "func_8005DFE8 — SRAM load/verify, CARRIED (S292 re-open; 102/102, 36 diff rows)"
-description: "Records reconstruction evidence and matching constraints for func_8005DFE8."
+description: "Records the S292-reopened SRAM load/verify carry, with 102 instructions and 36 differing rows."
 ---
 
 # func_8005DFE8 — SRAM load/verify, CARRIED (S292 re-open; 102/102, 36 diff rows)

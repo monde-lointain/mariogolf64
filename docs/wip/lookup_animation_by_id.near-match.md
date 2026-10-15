@@ -1,7 +1,7 @@
 ---
 type: "Reconstruction Note"
 title: "lookup_animation_by_id (0x80055FFC) — SOLVED / BANKED S213"
-description: "Records reconstruction evidence and matching constraints for lookup_animation_by_id."
+description: "Records the S213 solved and banked animation lookup together with its retained reconstruction evidence."
 ---
 
 # lookup_animation_by_id (0x80055FFC) — SOLVED / BANKED S213

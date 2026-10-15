@@ -1,7 +1,7 @@
 ---
 type: "Reconstruction Note"
 title: "func_8002CDA8 reconstruction scoping (S303, re-opened S304)"
-description: "Records reconstruction evidence and matching constraints for func_8002CDA8."
+description: "Scopes the reconstructed 838-instruction function's exact-count register-allocation residual and its carried-wall detector classification."
 ---
 
 # `func_8002CDA8` reconstruction scoping (S303, re-opened S304)

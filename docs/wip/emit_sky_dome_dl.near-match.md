@@ -1,7 +1,7 @@
 ---
 type: "Reconstruction Note"
 title: "emit_sky_dome_dl — S297 carry (299/299 count, register permutation; was 297/299, 272/299 at S296)"
-description: "Records reconstruction evidence and matching constraints for emit_sky_dome_dl."
+description: "Documents the exact-count sky-dome emitter carry whose remaining register permutation is traced to an unresolved allocator gate."
 ---
 
 # emit_sky_dome_dl — S297 carry (299/299 count, register permutation; was 297/299, 272/299 at S296)

@@ -1,7 +1,7 @@
 ---
 type: "Reconstruction Note"
 title: "func_80047CAC — pure-FP interpolation stepper (FP scheduler coin, near-match)"
-description: "Records reconstruction evidence and matching constraints for func_80047CAC."
+description: "Documents the three-global FP interpolation stepper's scheduler coin and one-ULP constant residual."
 ---
 
 # func_80047CAC — pure-FP interpolation stepper (FP scheduler coin, near-match)

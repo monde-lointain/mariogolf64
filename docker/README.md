@@ -25,8 +25,9 @@ Python analysis job is ROM-free and advisory.
 
 ## One-time / on-dep-change: build and push the image
 
-Run from the **repo root** (the build context), with `baserom.z64` present there.
-
+Run from the **repo root** (the build context), with `baserom.z64` present there and Docker
+installed with an available daemon. The Dockerfile copies this file into the image at
+`/orig/baserom.z64`; verify its SHA-1 against the required revision before building.
 ```sh
 # Compare this input SHA-1 with the top-level sha1 in mariogolf64.yaml:
 sha1sum baserom.z64
@@ -61,7 +62,9 @@ reference; a missing image or credential fails at container pull, before checkou
 
 ## Local end-to-end test (optional)
 
-Reproduce the workflow steps before pushing:
+Reproduce the workflow steps before pushing. The Docker daemon must be available. Because the
+repository is bind-mounted at `/repo`, the `cp` below writes the image ROM to the host checkout's
+`baserom.z64`, replacing any existing file there:
 
 ```sh
 docker build -f docker/Dockerfile -t mg64-ci-test .

@@ -33,6 +33,10 @@ not a matching percentage, difficulty estimate, or trust signal. A source-presen
 conservative discovery, not proof the checkout passes the ROM verifier. Inspect its C, conditional
 compilation, dependencies and hashes; remeasure reused code in the current checkout.
 
+Both reference lookup and campaign preparation require the active checkout's extracted assembly;
+configure/extract first using the [build guide](build.md). Any `--reference-root` checkout must
+declare the same ROM SHA-1 and provide its own extracted assembly.
+
 Safe read-only examples:
 
 ```sh

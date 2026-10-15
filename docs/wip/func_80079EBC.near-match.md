@@ -1,7 +1,7 @@
 ---
 type: "Reconstruction Note"
 title: "func_80079EBC — shared-literal-pool partial-bank carry (S279)"
-description: "Records reconstruction evidence and matching constraints for func_80079EBC."
+description: "Documents the partial-bank carry blocked by a shared literal pool."
 ---
 
 # func_80079EBC — shared-literal-pool partial-bank carry (S279)

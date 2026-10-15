@@ -1,7 +1,7 @@
 ---
 type: "Reconstruction Note"
 title: "func_80047DBC — near-match carry (terminal sched.c const-load-vs-fabs coin)"
-description: "Records reconstruction evidence and matching constraints for func_80047DBC."
+description: "Records the three-axis FP snap-to-target lerp whose body matches with scheduling disabled but has a real-profile nop residual."
 ---
 
 # func_80047DBC — near-match carry (terminal sched.c const-load-vs-fabs coin)

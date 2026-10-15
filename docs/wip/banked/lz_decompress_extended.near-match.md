@@ -1,7 +1,7 @@
 ---
 type: "Banked Evidence"
 title: "lz_decompress_extended — BANKED S320 (872e322)"
-description: "Records the matching resolution and prior reconstruction evidence for lz_decompress_extended."
+description: "Records the S320 ROM-verified 282/282 decompressor resolution and its earlier S166–S318 carry history."
 ---
 
 # lz_decompress_extended — BANKED S320 (872e322)
