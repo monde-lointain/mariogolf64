@@ -72,7 +72,7 @@ extern u16* nuGfxZBuffer;
 /* Sky layer, blitted into the z-buffer scratch surface. */
 extern u32 D_800B6814;
 /* Horizon layer, blitted over the sky into the current colour buffer. */
-extern u16* D_800B67A0;
+extern u16* g_auxiliary_framebuffer;
 
 /**
  * Composites the two sky layers in copy-cycle mode. Each pass re-blits the
@@ -148,8 +148,9 @@ void emit_sky_horizon_compositor_dl(Gfx** gfxp) {
     for (i = 0; i != 38; i++) {
       lines = (i != 37) ? 6 : 2;
 
-      gDPSetTextureImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 320,
-                         ((u32)D_800B67A0 + i * (320 * 2 * 6)) & ~7);
+      gDPSetTextureImage(
+          gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 320,
+          ((u32)g_auxiliary_framebuffer + i * (320 * 2 * 6)) & ~7);
       gDPSetTile(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 76, 0, G_TX_LOADTILE, 0, 0,
                  0, 0, 0, 0, 0);
       gDPLoadSync(gfx++);

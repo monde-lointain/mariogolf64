@@ -22,7 +22,7 @@ extern s32 D_801B6090;
 extern void flag_set(s32);
 extern void func_80069FBC(void);
 extern void func_80069F38(void);
-extern void cfb_set_num(u32);
+extern void set_color_framebuffer_count(u32 buffer_count);
 
 extern Gfx* glistp;
 
@@ -54,7 +54,7 @@ void init_scenario_state(void) {
   D_801B6090 = 1;
   func_80069FBC();
   func_80069F38();
-  cfb_set_num(2);
+  set_color_framebuffer_count(2);
 }
 
 INCLUDE_ASM("asm/nonmatchings/main/func_8008D100", func_8008D1DC);
@@ -576,7 +576,7 @@ s32 run_fog_debug_editor(void) {
   check_and_print_grid(D_80105118, 13, 16);
   quarter = D_800C6CE8 + 12;
   check_and_print_grid(">", D_800C6CE4 * 4 + 15, quarter);
-  cfb_set_num(3);
+  set_color_framebuffer_count(3);
   func_8002A97C(4, 0);
   return 1;
 }

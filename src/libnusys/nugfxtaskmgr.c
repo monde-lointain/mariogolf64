@@ -4,9 +4,9 @@
  * throttles buffer swaps, and exposes nuGfxTaskStart for the app to submit a
  * display list. The externs are the game's relocated copies of the stock nusys
  * statics/globals (task ring, head pointer, manager thread + its stack, queue +
- * its buffer, end/swap message constants). Two have no stock equivalent and
- * stay generic: D_800D8980 (a swap-pacing retrace counter) and D_800B67A4 (a
- * CFB-index advance table replacing stock's modulo).
+ * its buffer, end/swap message constants). The game also uses a swap-pacing
+ * retrace counter and a framebuffer-successor table in place of stock modulo
+ * rotation.
  */
 
 #include <nusys.h>
@@ -22,9 +22,9 @@ extern OSMesg
     nuGfxTaskMgrMesgBuf[NU_GFX_TASKMGR_MESGS];  // manager queue buffer
 extern OSMesgQueue nuGfxTaskMgrMesgQ;           // manager completion queue
 extern u16 beforeFlag;  // previous task's flags (XBUS carry)
-// Game-custom (no stock nusys equivalent), kept generic:
+// Game-custom state with no stock NuSystem equivalent.
 extern u32 D_800D8980;   // retrace count of the last swap
-extern u8 D_800B67A4[];  // CFB index advance table
+extern u8 g_next_framebuffer_indices[];
 
 /*
  * Manager thread body: drains the completion queue, retiring finished tasks and
@@ -167,7 +167,7 @@ void nuGfxTaskStart(Gfx* gfxList_ptr, u32 gfxListSize, u32 ucode, u32 flag) {
   // color framebuffer so drawing moves off the buffer about to be displayed.
   if (flag & NU_SC_SWAPBUFFER) {
     nuGfxTask_ptr->msg = (OSMesg)&swapBufMsg;
-    nuGfxCfbCounter = D_800B67A4[nuGfxCfbCounter];
+    nuGfxCfbCounter = g_next_framebuffer_indices[nuGfxCfbCounter];
     nuGfxCfb_ptr = nuGfxCfb[nuGfxCfbCounter];
   } else {
     nuGfxTask_ptr->msg = (OSMesg)&taskDoneMsg;

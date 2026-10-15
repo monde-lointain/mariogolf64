@@ -762,3 +762,10 @@ reset_scenery_billboards = 0x800263B0; // type:func
 g_scenery_sprites = 0x800B6284; // size:0x4
 g_scenery_heap_ready = 0x800B6564; // size:0x1
 SCENERY_RESET_MESSAGE = 0x800CA0D0;
+
+// Game-owned framebuffer ring; NuSystem's public symbol names stay unchanged.
+initialize_color_framebuffers = 0x80029250; // type:func segment:main
+set_color_framebuffer_count = 0x800292FC; // type:func segment:main
+g_auxiliary_framebuffer = 0x800B67A0; // size:0x4
+g_next_framebuffer_indices = 0x800B67A4; // size:0x1
+g_reserved_framebuffer_index = 0x800B67A7; // size:0x1

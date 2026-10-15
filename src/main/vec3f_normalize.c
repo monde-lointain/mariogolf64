@@ -1,14 +1,14 @@
 #include "common.h"
 
 extern u8 D_801052F8[];
-extern u32 D_800B67D8;
-extern void cfb_setup(void* framebuf, s32 num);
+extern u16* D_800B67D8[];
+extern void initialize_color_framebuffers(u16** framebuffers, u32 buffer_count);
 extern void func_8006F4F0(void);
 extern u8 g_mus_audio_paused;
 
 INCLUDE_ASM("asm/nonmatchings/main/vec3f_normalize", vec3f_normalize);
 
-void func_800299D0(void) { cfb_setup(&D_800B67D8, 3); }
+void func_800299D0(void) { initialize_color_framebuffers(D_800B67D8, 3); }
 
 s32 flag_is_set(s32 flag) {
   if ((u32)flag >= 0x100) {

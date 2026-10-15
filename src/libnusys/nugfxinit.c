@@ -10,13 +10,9 @@
 #include <nusys.h>
 #undef nuGfxInit
 
-// Configures the color framebuffer setup; called with the framebuffer array
-// block below and the buffer count 3 (triple-buffered).
-extern void cfb_setup(void*, s32);
-
-// Used as the configuration block passed to cfb_setup (holds the frame buffer
-// pointer array).
-extern u32 D_800B6688;
+// Initializes the game's framebuffer ring in triple-buffered mode.
+extern void initialize_color_framebuffers(u16** framebuffers, u32 buffer_count);
+extern u16* D_800B6688[];
 
 // Used as the default microcode descriptor wired into the task manager below.
 extern u32 D_800B6680;
@@ -34,7 +30,7 @@ void nuGfxInit(void) {
 
   // Start the retrace/PRE_NMI graphics thread and configure its buffers.
   nuGfxThreadStart();
-  cfb_setup(&D_800B6688, 3);
+  initialize_color_framebuffers(D_800B6688, 3);
 
   // Z-buffer is placed at a fixed RDRAM address; install the default swap
   // callback.

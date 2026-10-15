@@ -408,7 +408,7 @@ extern u32 func_80050598(RomLoadSlot* slot);
 extern void func_800505A0(void* dst, u32 size, RomLoadSlot* slot);
 extern u8* func_8005AF50(void);
 extern void func_8002A97C(s32 arg0, s32 arg1);
-extern void cfb_set_num(u32 num);
+extern void set_color_framebuffer_count(u32 buffer_count);
 extern void play_bgm_by_id(s32 id, s32 flag);
 
 extern char D_800D08F0[];
@@ -585,7 +585,7 @@ void load_course_assets(void) {
   func_800506D4(D_801B69EC, slot_a);
 
   play_bgm_by_id(0x27, 0);
-  cfb_set_num(3);
+  set_color_framebuffer_count(3);
   func_8002A97C(4, 0);
   D_801323D0 = 6;
   func_80099490();
