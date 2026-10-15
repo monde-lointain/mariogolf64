@@ -926,7 +926,32 @@ void emit_glyph_sprite_dl(Gfx** dl, s32 tag) {
   *dl = gfx;
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80071370", func_80075E48);
+void func_80075E48(Gfx** gfxp) {
+  Gfx* gfx = *gfxp;
+  gDPPipeSync(gfx++);
+  gDPPipeSync(gfx++);
+  gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+  gDPPipeSync(gfx++);
+  gDPSetRenderMode(gfx++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
+  gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+  gDPPipeSync(gfx++);
+  gDPSetAlphaCompare(gfx++, G_AC_NONE);
+  gDPSetBlendColor(gfx++, 0, 0, 0, 1);
+  gDPPipeSync(gfx++);
+  gDPSetTexturePersp(gfx++, G_TP_PERSP);
+  gDPPipeSync(gfx++);
+  gDPSetTextureFilter(gfx++, G_TF_POINT);
+  gDPPipeSync(gfx++);
+  gDPSetAlphaDither(gfx++, G_AD_DISABLE);
+  gDPPipeSync(gfx++);
+  gDPSetTextureLUT(gfx++, G_TT_NONE);
+  gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
+  gDPPipeSync(gfx++);
+  gDPSetCombineLERP(gfx++, K5, K5, 0, PRIMITIVE, 0, 0, 0, TEXEL0, K5, K5, 0,
+                    PRIMITIVE, 0, 0, 0, TEXEL0);
+  gDPPipeSync(gfx++);
+  *gfxp = gfx;
+}
 
 s32 func_800760CC(s32 arg0) {
   u8 c = arg0 & 0xFF;
