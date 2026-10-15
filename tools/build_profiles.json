@@ -11,6 +11,7 @@
   },
   "file_overrides": {
     "src/libnusys/nuboot.c": {"profile": "default", "optimization": "-O0"},
+    "src/main/vec3f_normalize.c": {"append_flags": ["-ffast-math"]},
     "src/main/func_8006A000.c": {"append_flags": ["-ffast-math"]},
     "src/main/func_80078910.c": {"append_flags": ["-ffast-math"]},
     "src/main/func_80080220.c": {"append_flags": ["-ffast-math"]},

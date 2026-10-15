@@ -7,7 +7,26 @@ extern void initialize_color_framebuffers(u16** framebuffers, u32 buffer_count);
 extern void func_8006F4F0(void);
 extern u8 g_mus_audio_paused;
 
-INCLUDE_ASM("asm/nonmatchings/main/vec3f_normalize", vec3f_normalize);
+extern char D_800CA1A8[];
+extern f32 sqrtf(f32);
+
+void vec3f_normalize(f32* x, f32* y, f32* z) {
+  f32 vx = *x;
+  f32 vy = *y;
+  f32 vz = *z;
+  f32 length = vx * vx + vy * vy + vz * vz;
+  if (length < 0.0f) {
+    osSyncPrintf(D_800CA1A8);
+    *x = 0.0f;
+    *y = 1.0f;
+    *z = 0.0f;
+  } else {
+    length = 1.0f / sqrtf(length);
+    *x = vx * length;
+    *y = vy * length;
+    *z = vz * length;
+  }
+}
 
 void func_800299D0(void) { initialize_color_framebuffers(D_800B67D8, 3); }
 
