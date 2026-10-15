@@ -4,9 +4,51 @@ INCLUDE_ASM("asm/nonmatchings/main/raycast_terrain", raycast_terrain);
 
 INCLUDE_ASM("asm/nonmatchings/main/raycast_terrain", raycast_terrain_floor);
 
-/* get_surface_type: near-match carry (score 450, #local-alloc-qty-permutation).
-   See docs/wip/get_surface_type.near-match.md. */
-INCLUDE_ASM("asm/nonmatchings/main/raycast_terrain", get_surface_type);
+extern u8 D_800BA6B0[];
+extern s8 D_800B7DB0[];
+extern s32 flag_is_set(s32);
+
+s32 get_surface_type(s32 tile, f32 x, f32 z) {
+  s32 cx;
+  s32 cz;
+  s32 type;
+  s8* col;
+  s32 edge;
+  cx = (s32)(x * 16.0f);
+  cz = (s32)(z * 16.0f);
+  if (cx < 0) {
+    cx = 0;
+  } else if (cx >= 16) {
+    cx = 15;
+  }
+  if (cz < 0) {
+    cz = 0;
+  } else if (cz >= 16) {
+    cz = 15;
+  }
+  /* Materialize the edge before the selector load; its live range preserves
+   * the incoming tile copy and the target's load-delay scheduling. */
+  do {
+    edge = 15;
+  } while (0);
+  col = D_800B7DB0 + (D_800BA6B0[tile & 0x3F] << 8);
+  cz = edge - cz;
+  type = col[(cz << 4) | cx];
+  type = type - 0x30;
+  if (type < 0) {
+    type = 0;
+  }
+  if (type >= 16) {
+    type = 15;
+  }
+  if (type == 3) {
+    type = 0;
+  }
+  if (flag_is_set(10)) {
+    type = 1;
+  }
+  return type;
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/raycast_terrain",
             check_line_cylinder_collision);
@@ -99,8 +141,42 @@ INCLUDE_ASM("asm/nonmatchings/main/raycast_terrain", resolve_wall_collision);
 INCLUDE_ASM("asm/nonmatchings/main/raycast_terrain",
             raycast_find_closest_triangle);
 
-/* func_8003DE80: near-match carry (score 350, #local-alloc-qty-permutation,
-   constant-15 reg). Sibling of get_surface_type; S233 compiler-source dive
-   confirmed no-lever (mips.md:153-155 R4000 load-latency scheduler coin).
-   See docs/wip/func_8003DE80.near-match.md. */
-INCLUDE_ASM("asm/nonmatchings/main/raycast_terrain", func_8003DE80);
+s32 func_8003DE80(s32 tile, f32 x, f32 z) {
+  s32 cx;
+  s32 cz;
+  s32 count;
+  s8* col;
+  s32 edge;
+  cx = (s32)(x * 16.0f);
+  cz = (s32)(z * 16.0f);
+  if (cx < 0) {
+    cx = 0;
+  } else if (cx >= 16) {
+    cx = 15;
+  }
+  if (cz < 0) {
+    cz = 0;
+  } else if (cz >= 16) {
+    cz = 15;
+  }
+  /* As above, keep the edge load before the column selector and row flip. */
+  do {
+    edge = 15;
+  } while (0);
+  col = D_800B7DB0 + (D_800BA6B0[tile & 0x3F] << 8);
+  cz = edge - cz;
+  count = (col[(cz << 4) | cx] != 0x30) << 2;
+  if (cz > 0) {
+    count += col[((cz - 1) << 4) | cx] != 0x30;
+  }
+  if (cz < 15) {
+    count += col[((cz + 1) << 4) | cx] != 0x30;
+  }
+  if (cx > 0) {
+    count += col[(cz << 4) | (cx - 1)] != 0x30;
+  }
+  if (cx < 15) {
+    count += col[(cz << 4) | (cx + 1)] != 0x30;
+  }
+  return count;
+}

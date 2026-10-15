@@ -1,10 +1,30 @@
 ---
 type: "Reconstruction Note"
-title: "get_surface_type (0x80039F7C) — near-match carry (S233)"
-description: "Records the terrain-surface lookup's S233 constant-15 register-assignment residual."
+title: "get_surface_type — banked with early edge materialization"
+description: "Records the verified loop-note resolution of the constant-15 scheduling and incoming-tile copy residual."
 ---
 
-# get_surface_type (0x80039F7C) — near-match carry (S233)
+# get_surface_type — banked with early edge materialization
+
+## Verified resolution (2026-10-15)
+
+**BANKED:** YAML `main`, ROM `0x1537C`, VRAM `0x80039F7C`,
+`src/main/raycast_terrain.c`. The full-ROM verifier exited zero with SHA-1
+`e2c4e7a905b29529b49a1619a401fe699224829b`.
+
+Assign `edge = 15` inside `do { ... } while (0)` after the coordinate clamps,
+before computing the column pointer; subtract it from `cz` after the selector
+load. This restores `li a0,15` before `andi/lbu`, so the incoming tile copy
+survives and the subtraction fills the target load-delay window. No compiler
+flag or asm change is needed. All 63 isolated and integrated instructions match.
+
+Source/measurement:
+`nonmatchings/get_surface_type/measurements/39f2793f08469050f4eeda19a81f3ea9d9133c8befe8c8c991d6a8a78491a215.{c,json}`.
+A throwaway 32-bit UBSan smoke exercised coordinate clamping, all 64 selectors,
+masked high tile bits, signed cell decoding, type clamping/remapping, and flag 10.
+
+## Historical carry (superseded)
+
 
 Pack: `src/main/raycast_terrain.c` (fresh 13-fn main collision pack).
 Status: **structurally complete, score 450 in-tree** (`tools/asm-differ/diff.py get_surface_type`).
