@@ -21,25 +21,48 @@ typedef struct {
   /* 0x0F */ u8 color_a;
 } GridVertex;
 
-/* get_tile_attribute: minimap-color -> tile-attribute lookup. Clamp x to
- * [0,0xFF], z to [0,0x1FF]; coarse-map D_800BAC0C[tx + tz*16] (s16, tx=x/16,
- * tz=z/16). >=0 returns the attr directly, ==-1 returns -1, and a negative
- * (!= -1) entry indexes a nibble-packed sub-tile map D_80191620[(x&0xF)>>1 +
- * (z&0xF)*8 + (attr&0x7FFF)*128] (odd x -> low nibble, even x -> high nibble).
- * Body fully solved (see git history / this comment) but carried as
- * INCLUDE_ASM: NEAR-MATCH WALL (S216). Everything matches except GCC bakes a
- * spurious -0x10
- * (-8 halfword) in-place addend onto the D_800BAC0C ref (mine lh -0x5404 vs
- * target lh -0x53f4) regardless of index form (1D `[tx+tz*16]`, `[tz*16+tx]`,
- * 2D `[tz][tx]`, explicit byte-offset `(u8*)base + tx*2 + tz*32`, or local
- * `s16 *cmap`), while the index VALUE (tx*2 + tz*32) is identical to target.
- * The reloc is R_MIPS_HI16/LO16 vs D_800BAC0C but the LO16 immediate carries
- * -0x10; a local pointer instead fully materializes base+index (lh 0(reg)),
- * also non-matching. Also: target computes tx<<1 early (branch delay slot) and
- * duplicates the sub-tile block per parity branch; mine schedules differently.
- * Needs a GCC-source dive on the phantom -0x10 addend fold (kin to
- * #flowing-bss-plus-n-address-diff but data-ref addend, not bss). */
-INCLUDE_ASM("asm/nonmatchings/main/get_tile_attribute", get_tile_attribute);
+extern s16 D_800BAC0C[];
+extern u8 D_80191620[];
+
+/* Negative coarse entries select a nibble-packed 16x16 sub-tile map. */
+s32 get_tile_attribute(s32 x, s32 z) {
+  s32 col;
+  s32 row;
+  s32 attribute;
+  s32 result;
+  s32 byte_offset;
+
+  if (x < 0) {
+    x = 0;
+  } else if (x >= 256) {
+    x = 255;
+  }
+  if (z < 0) {
+    z = 0;
+  } else if (z >= 512) {
+    z = 511;
+  }
+  col = (x / 16) * 2;
+  row = (z / 16) * 32;
+  byte_offset = col + row;
+  attribute = *(s16*)((u8*)D_800BAC0C + byte_offset);
+  if (attribute == -1) {
+    return -1;
+  }
+  if (attribute >= 0) {
+    return attribute;
+  }
+  if (x & 1) {
+    s32 offset = ((x & 15) >> 1) + ((z & 15) << 3);
+    offset += (attribute & 0x7FFF) << 7;
+    result = D_80191620[offset] & 15;
+  } else {
+    s32 offset = ((x & 15) >> 1) + ((z & 15) << 3);
+    offset += (attribute & 0x7FFF) << 7;
+    result = D_80191620[offset] >> 4;
+  }
+  return result;
+}
 
 typedef struct {
   s8 r, g, b, alpha;
