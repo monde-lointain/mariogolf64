@@ -134,7 +134,7 @@ HAZARD_WRONG_GHIDRA_NAME = (
 # macro NAME (e.g. os_motor.h `#define osMotorStop(x) __osMotorAccess(...)`) while the upstream defines
 # the macro's RHS (`__osMotorAccess`) at that vram. Bank under the correct (RHS) name via a
 # symbol_addrs maintainer-override (a `rom:<off>` qualifier dodges splat's same-rom+segment dup error;
-# symbol_addrs is read first so it wins the reference) — NOT the destructive `sync-names` target.
+# extraction loads maintainer entries last for Splat 0.50's last-wins resolution) — NOT `sync-names`.
 # Detail `<ghidra_name>-><correct_name>@<header>`. See docs/hazards.md#wrong-ghidra-name-override
 HAZARD_CODDOG_PARTIAL = (
     "coddog-partial"  # coddog matched >=2 DISTINCT per-fn TWIN files to ONE

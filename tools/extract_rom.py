@@ -121,6 +121,7 @@ def main() -> None:
         staging = Path(temporary)
         shutil.copytree(ROOT / "src", staging / "src")
         options = config["options"]
+        # Splat 0.50 resolves overlaps last-wins; maintainer overrides load last.
         options.update(base_path=str(staging), target_path=str(args.rom.resolve()),
                        elf_path=str(build_dir() / "mariogolf64.elf"), build_path=str(build_dir() / "obj"),
                        src_path="src", asm_path="asm", asset_path="assets",
@@ -128,7 +129,7 @@ def main() -> None:
                        undefined_funcs_auto_path=str(staging / "undefined_funcs_auto.txt"),
                        undefined_syms_auto_path=str(staging / "undefined_syms_auto.txt"),
                        extensions_path=str(ROOT / options["extensions_path"]),
-                       symbol_addrs_path=[str(ROOT / p) for p in options["symbol_addrs_path"]],
+                       symbol_addrs_path=[str(ROOT / p) for p in reversed(options["symbol_addrs_path"])],
                        reloc_addrs_path=[str(ROOT / p) for p in options["reloc_addrs_path"]],
                        create_c_files=False, create_asm_dependencies=False)
         split(config, staging / "extraction.yaml")

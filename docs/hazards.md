@@ -3112,9 +3112,9 @@ the same as a macro alias even though no `pick_target.py` flag fires.
    same_segment` test) fires only when a same-vram symbol shares both rom and segment; a bare entry has
    rom=None (== the ghidra entry's None) + same segment → clash. The qualifier makes
    `have_same_rom_addresses` False → no clash.
-2. `symbol_addrs.txt` is loaded first (splat `initialize`, before `ghidra_symbols.txt`), so the
-   override wins the reference: both the scaffolded `INCLUDE_ASM` stub and the still-asm callers' relocs
-   resolve to `<correct_name>`. (The link also runs `--allow-multiple-definition` as a safety net.)
+2. `tools/extract_rom.py` reverses the configured symbol-file priority order before invoking
+   Splat 0.50, whose overlap resolution is last-wins. Maintainer entries therefore load after legacy
+   Ghidra entries, so C bodies and still-asm callers use the same authoritative name.
 3. Name the mirror body `<correct_name>` (verbatim, since it is the real upstream name). No `#undef` needed:
    the body never contains the macro-name token, so the alias macro is inert (this is why
    `#header-renames-symbol` does not apply: the curated name is the macro's rhs).
