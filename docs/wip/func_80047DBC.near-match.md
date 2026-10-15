@@ -1,10 +1,30 @@
 ---
 type: "Reconstruction Note"
-title: "func_80047DBC — near-match carry (terminal sched.c const-load-vs-fabs coin)"
-description: "Records the three-axis FP snap-to-target lerp whose body matches with scheduling disabled but has a real-profile nop residual."
+title: "func_80047DBC — banked with a threshold loop-note boundary"
+description: "Records the verified resolution of the abs/threshold scheduling residual."
 ---
 
-# func_80047DBC — near-match carry (terminal sched.c const-load-vs-fabs coin)
+# func_80047DBC — banked with a threshold loop-note boundary
+
+## Verified resolution (2026-10-15)
+
+**BANKED:** YAML `main`, ROM `0x231BC`, VRAM `0x80047DBC`,
+`src/main/func_800453E0.c`. The full-ROM verifier exited zero with SHA-1
+`e2c4e7a905b29529b49a1619a401fe699224829b`.
+
+Compute the first absolute difference, then assign `threshold = 1.0f` inside
+`do { ... } while (0)`. Reuse that threshold for the other axes. This retains
+the target's `abs.s; lui; mtc1; nop; c.lt.s`, without asm or profile changes.
+The current host profile includes fast-math. All 56 isolated and integrated
+instructions match.
+
+Source/measurement:
+`nonmatchings/func_80047DBC/measurements/826f42899a8732f7383b8b63c029b938b4f4c46f8dd5c3a762b6085202bd859d.{c,json}`.
+The throwaway 32-bit UBSan smoke exercised all 343 combinations of three
+axis differences, including exactly ±1 and values beyond the threshold.
+
+## Historical carry (superseded)
+
 
 **Status:** CARRY. Body CONFIRMED CORRECT (byte-exact under `-fno-schedule-insns
 -fno-schedule-insns2`; off by exactly one gas nop under the real -O2 profile).

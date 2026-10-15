@@ -463,31 +463,35 @@ void func_80047D68(void) {
   D_800DAF38 = D_800DAEF4 * (1.0f / 1024.0f);
 }
 
-/* CARRY (terminal sched.c wall). Body is CONFIRMED CORRECT -- byte-exact under
- * `-fno-schedule-insns -fno-schedule-insns2`, off by exactly one gas nop under
- * the real profile:
- *   void func_80047DBC(f32* arg0) {
- *     f32* p = &D_800DAF24; f32 d;
- *     d = arg0[0] - *p;        if (fabsf(d) > 1.0f) *p += d * 0.2f;
- *     d = arg0[1] - D_800DAF28; if (fabsf(d) > 1.0f) D_800DAF28 += d * 0.2f;
- *     d = arg0[2] - D_800DAF2C; if (fabsf(d) > 1.0f) D_800DAF2C += d * 0.2f;
- *   }
- * The `f32* p` (pointer for the FIRST global, direct names for 2/3) reproduces
- * the ROM's held-$v0 base for block 0 vs inline %hi/%lo for blocks 1/2 exactly.
- * The ONLY divergence: gcc's sched.c places the 1.0f `li.s` BEFORE the `abs.s`
- * that feeds the same compare, so gas fills the mtc1->c.lt.s hazard slot with
- * abs.s and emits no nop -- the ROM keeps the nop (abs.s scheduled first).
- * Root cause (invariant): insn_cost (sched.c:1362) gives the 1.0f load
- * (movsf_internal1 alt3, type "load", mips.md:153) ready-delay 3 vs abssf2
- * (type "fabs", mips.md:226) ready-delay 2, so the const is always ready one
- * clock later and emitted one slot earlier; LUID/source-order is only a
- * same-clock tiebreak, never reached. Verified source-invariant (6 spellings,
- * -ffast-math) and cpu-invariant (9 -mcpu/-mips builds). NOT permuter-eligible
- * (1 instr short, no priority tie). The identical lerp triple recurs in
- * func_80048D7C @0x8004A144 (0.5f/0.1f) with the same order -- a crack banks
- * both. Only untried mechanism: a C shape putting the 1.0f in a different basic
- * block from the compare. See docs/wip/func_80047DBC.near-match.md. */
-INCLUDE_ASM("asm/nonmatchings/main/func_800453E0", func_80047DBC);
+extern f32 D_800DAF24;
+extern f32 D_800DAF28;
+extern f32 D_800DAF2C;
+extern f32 fabsf(f32);
+
+void func_80047DBC(f32* input) {
+  f32* x = &D_800DAF24;
+  f32 difference;
+  f32 absolute;
+  f32 threshold;
+  difference = input[0] - *x;
+  absolute = fabsf(difference);
+  /* Keep the threshold load after abs, including the target's COP1 hazard slot.
+   */
+  do {
+    threshold = 1.0f;
+  } while (0);
+  if (absolute > threshold) {
+    *x += difference * 0.2f;
+  }
+  difference = input[1] - D_800DAF28;
+  if (fabsf(difference) > threshold) {
+    D_800DAF28 += difference * 0.2f;
+  }
+  difference = input[2] - D_800DAF2C;
+  if (fabsf(difference) > threshold) {
+    D_800DAF2C += difference * 0.2f;
+  }
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_800453E0", func_80047E9C);
 
@@ -585,8 +589,6 @@ void func_800487E4(void) {
 
 INCLUDE_ASM("asm/nonmatchings/main/func_800453E0", func_8004887C);
 
-extern f32 D_800DAF24;
-extern f32 D_800DAF2C;
 extern f32 D_800BE654;
 extern f64 D_800CC860;
 extern f32 atan2f(f32 y, f32 x);
