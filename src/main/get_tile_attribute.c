@@ -417,7 +417,37 @@ s32 set_lod_tile_attribute(s32 x, s32 z, s32 attr, s32 val) {
   }
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/get_tile_attribute", func_80041AA8);
+extern f32 g_terrain_tile_radius[];
+extern u8 g_terrain_tile_cache[];
+extern void func_80041D44(void);
+
+void func_80041AA8(void) {
+  s32 tile;
+  s32 col;
+  s32 row;
+  s32 grid_col;
+  s32 grid_row;
+  u8* cache;
+
+  for (tile = 0; tile < 0x80; tile++) {
+    cache = g_terrain_tile_cache + tile * 0xA00;
+    g_terrain_tile_radius[tile] = 1.0f;
+    *(s32*)(cache + 0x994) = 1;
+    *(s32*)(cache + 0x9A4) = -1;
+    *(s16*)(cache + 0x990) = 0;
+    for (col = 0; col < 0x20; col++) {
+      for (row = 0; row < 0x20; row++) {
+        ((s16*)cache)[col * 0x20 + row] = 0x7C1;
+      }
+    }
+  }
+  for (grid_row = 0; grid_row < 0x21; grid_row++) {
+    for (grid_col = 0; grid_col < 0x11; grid_col++) {
+      init_grid_vertex(grid_col, grid_row, 0, 0x80);
+    }
+  }
+  func_80041D44();
+}
 
 void func_80041B98(GridVertex* out, s32 tx, s32 tz) {
   s16* grid[9];
