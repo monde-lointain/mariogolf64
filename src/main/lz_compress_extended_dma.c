@@ -87,7 +87,35 @@ void func_80068F4C(s32 arg0, u32 seed) {
   rng_next();
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/lz_compress_extended_dma", func_80068F98);
+extern s32 D_80105E10[][3];
+extern f32 D_80254C88[];
+extern f32 D_80254C8C;
+extern f32 D_80254C90;
+
+void func_80068F98(void) {
+  s32 component;
+  s32 i;
+  if (g_terrain_vtx_xform_mode == 0) {
+    return;
+  }
+  D_80254C88[0] = 0.25f;
+  D_80254C8C = 0.25f;
+  D_80254C90 = 0.125f;
+  for (component = 0; component < 3; component++) {
+    for (i = 0; i < 4; i++) {
+      D_80105E10[i][component] =
+          (f32)D_80105E10[i][component] * D_80254C88[component];
+      D_80105E10[i + 4][component] =
+          (f32)D_80105E10[i + 4][component] * D_80254C88[component];
+    }
+    for (i = 0; i < 8; i++) {
+      D_80105E10[i + 8][component] =
+          (f32)D_80105E10[i + 8][component] * D_80254C88[component];
+      D_80105E10[i + 16][component] =
+          (f32)D_80105E10[i + 16][component] * D_80254C88[component];
+    }
+  }
+}
 
 void func_800690C0(void) {
   s32 temp_s0;

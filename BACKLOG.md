@@ -5518,13 +5518,12 @@ by `/sprint-plan`:
   (main-segment `[0x440A0]` terrain/hole-loader pack — NOT pure LZ; the lead-fn name misleads). Subseg
   `[0x440A0, c, main/lz_compress_extended_dma]` flipped; all fns `func_` (no `symbol_addrs` adds). S186
   banked 10 (5 call-glue + nested-RNG triple `func_80068F4C`+`func_80068F00/F18` + `func_8006955C` switch
-  + `func_80069BCC` via `#mem-in-struct-scheduling-lever`). **5 CARRIED, all WALL-class** (no rodata carve
-  — the shared TU rodata is referenced extern; ROM green off the 10 banked; seeds via the S186 m2c+RE'd-
-  struct recipe):
-  - `func_80068F98` (0x80068F98, 83 insns) — FP nested-loop vec3-component scaler (3× outer × two inner
-    loops, `cvt.s.w`/`mul.s`/`trunc.w.s`, 4 running pointers + scale-array [0.25/0.25/0.125] index; scale
-    consts via `lui`+`mtc1`, no FP-pool rodata). `#pervasive-regalloc-classical-main` / S158 FP class; not
-    attempted deeply. Called by the banked `func_800690C0`.
+  + `func_80069BCC` via `#mem-in-struct-scheduling-lever`). **Four stubs now remain**
+  after the 2026-10-15 scale-helper bank. The shared TU rodata stays extern;
+  the old blanket FP-wall prediction was not a measurement:
+  - `func_80068F98` — **BANKED 2026-10-15**, 74 instructions, main profile.
+    Plain indexed component loops reproduce all four vector-array walks and
+    the scale-vector re-reads. No FP pool, profile change, or allocation search.
   - `func_80069124` (0x80069124, 294) + `func_800695F8` (0x800695F8, 414) — the big compression-core fns;
     not attempted (large). `func_800695F8` calls the banked `func_80068F4C`; `func_80069124` is called by
     the banked `func_8006955C`/`func_80069CE4`.
