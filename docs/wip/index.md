@@ -40,7 +40,7 @@
 - [func_8005C038 -- record-table insert (S289 carry, 268/264)](func_8005C038.near-match.md) — Records reconstruction evidence and matching constraints for func_8005C038.
 - [func_8005CA48 -- near-match, carried (S288)](func_8005CA48.near-match.md) — Records reconstruction evidence and matching constraints for func_8005CA48.
 - [func_8005CF78 — CARRIED (large jtbl-dispatch 3-level loop; deferred, not a proven wall)](func_8005CF78.near-match.md) — Records reconstruction evidence and matching constraints for func_8005CF78.
-- [func_8005D0D8 near-match (S264, re-derived S272, advanced S315)](func_8005D0D8.near-match.md) — Records reconstruction evidence and matching constraints for func_8005D0D8.
+- [func_8005D0D8 — banked via selective loop weighting](func_8005D0D8.near-match.md) — Verified match, compiler allocation/scheduling evidence, and historical reconstruction hypotheses.
 - [func_8005D334 near-match (S210 compiler-source dive)](func_8005D334.near-match.md) — Records reconstruction evidence and matching constraints for func_8005D334.
 - [func_8005DF54 — non-ABI $s2-arg wall (TERMINAL)](func_8005DF54.near-match.md) — Records reconstruction evidence and matching constraints for func_8005DF54.
 - [func_8005DFE8 — SRAM load/verify, CARRIED (S292 re-open; 102/102, 36 diff rows)](func_8005DFE8.near-match.md) — Records reconstruction evidence and matching constraints for func_8005DFE8.

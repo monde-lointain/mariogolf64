@@ -1457,13 +1457,73 @@ void func_8005CF78(void) {
   } while (k != 3);
 }
 
-/* func_8005D0D8: validates the 5 game-state entries at base + 0x1DF0, stride
- * 0x68, and toggles bit 7 of byte 0x36 on every entry that fails. CARRIED at
- * 67/67 with the ROM's exact -0x38 frame; the residual is a three-register
- * rotation (i, the flags giv, the entry pointer). Body in
- * nonmatchings/func_8005D0D8/base.c, analysis in
- * docs/wip/func_8005D0D8.near-match.md. */
-INCLUDE_ASM("asm/nonmatchings/main/func_80059BA0", func_8005D0D8);
+/* Validate the five saved entries and toggle bit 7 for each invalid entry. */
+void func_8005D0D8(void) {
+  s32 flags[5];
+  u8* base = func_8005AF50();
+  s32 i;
+
+  /* These single-pass scopes preserve the original loop-weight allocation. */
+  do {
+    do {
+      do {
+        i = 0;
+        do {
+          flags[i] = 0;
+        } while (++i != 5);
+      } while (0);
+    } while (0);
+  } while (0);
+
+  i = 0;
+  do {
+    u8* p = base + (0x1DF0 + i * 0x68);
+    s8 b;
+    s8 lo;
+    do {
+      do {
+        do {
+          do {
+            do {
+              b = *(s8*)(p + 0x36);
+            } while (0);
+          } while (0);
+        } while (0);
+      } while (0);
+    } while (0);
+    lo = b;
+    if (b & 0x80) {
+      lo &= 0xF;
+      if (lo >= 5) {
+        flags[i] = 1;
+      } else if (lo < 0) {
+        flags[i] = 1;
+      }
+    }
+    if (p[0x37] >= 0x12) {
+      flags[i] = 1;
+    }
+    if (p[0x39] >= 4) {
+      flags[i] = 1;
+    }
+    if (p[0x34] >= 6) {
+      flags[i] = 1;
+    }
+    if (p[0x35] >= 6) {
+      flags[i] = 1;
+    }
+  } while (++i != 5);
+
+  i = 0;
+  do {
+    u8* p = base + (0x1DF0 + i * 0x68);
+    if (flags[i] == 1) {
+      s32 v = p[0x36];
+      v ^= -0x80;
+      p[0x36] = v;
+    }
+  } while (++i != 5);
+}
 
 void func_8005D1E4(void) {
   u8* p = func_8005AF74();
