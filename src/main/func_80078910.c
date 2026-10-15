@@ -37,6 +37,9 @@ extern void* D_800E1DB0;
 extern void* D_800E1DC0;
 extern void* D_800E1DC4;
 extern void* D_800E1DC8;
+extern s32 D_800C5458;
+extern s32 D_800C545C;
+extern s32 D_800C5460;
 extern void* D_800E1DCC;
 extern f32 view_camera_eye_x;
 extern f32 view_camera_eye_z;
@@ -543,6 +546,16 @@ INCLUDE_ASM("asm/nonmatchings/main/func_80078910", func_8007E980);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80078910", func_8007EF0C);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80078910", func_8007FE44);
+void func_8007FE44(s32 value) {
+  u8 descriptor[0x20];
+
+  D_800C5458 = value;
+  D_800C545C = 1;
+  D_800C5460 = 0;
+  get_rom_asset_allocation_size(0x663, descriptor);
+  load_rom_asset_payload(D_800E1DB4, descriptor);
+  get_rom_asset_allocation_size(0x689, descriptor);
+  load_rom_asset_payload(D_800E1DB8, descriptor);
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80078910", func_8007FEAC);
