@@ -1798,10 +1798,59 @@ INCLUDE_ASM("asm/nonmatchings/main/func_80059BA0", func_8005DE88);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80059BA0", func_8005DF54);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80059BA0", func_8005DFE8);
+typedef struct {
+  char* data_file;
+  char* checksum_file;
+  u32 data_address;
+  u32 checksum_address;
+} SaveBank;
+
+extern SaveBank D_800C2BE0[];
+extern s32 func_80028204(char*, s32*);
+
+s32 func_8005DFE8(u8* buf, s32 flag_arg) {
+  u8 raw[0xD0];
+  s32 status6[2];
+  s32* status3 = (s32*)(((u32)(raw + 0x90) + 0xF) & ~0xF);
+  s32 magic_bad = 0;
+  u8* data;
+  s32 read_failed;
+  s32 tries = 0;
+  s32 flag = flag_arg & 0xFF;
+
+  do {
+    if (flag == 0) {
+      read_failed = func_80028204(D_800C2BE0[tries].data_file, status6) != 0;
+      if (read_failed) goto fail;
+      if (status6[0] != 0x2A78) goto fail;
+      if (func_80028204(D_800C2BE0[tries].checksum_file, status6) != 0)
+        goto fail;
+      if (status6[0] != 4) goto fail;
+    } else {
+      nuPiReadWriteSram(D_800C2BE0[tries].data_address, buf, 0x2A78, 0);
+      nuPiReadWriteSram(D_800C2BE0[tries].checksum_address, status3, 4, 0);
+    }
+    data = buf;
+    if (*(s32*)data != 0x12345678) {
+      magic_bad++;
+      goto fail;
+    }
+    {
+      u16* halves = (u16*)status3;
+      u16 x = halves[1] ^ halves[0];
+      u16 crc = crc16_ccitt(data, 0x2A78);
+      if ((x & 0xFFFF) == (crc & 0xFFFF)) break;
+    }
+  fail:
+    tries++;
+  } while (tries < 2);
+  if (tries == 0) return 1;
+  if (tries == 1) return 2;
+  func_8005AF80();
+  return (magic_bad == 2) ? -2 : -1;
+}
 
 extern u8 D_801B5588[];
-extern u32 D_800C2BE0;
 extern u32 D_800C2BE4;
 extern u32 D_800C2BE8;
 extern u32 D_800C2BEC;

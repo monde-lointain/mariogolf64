@@ -43,7 +43,7 @@
 - [func_8005D0D8 — banked via selective loop weighting](func_8005D0D8.near-match.md) — Explains how selective loop weighting resolved the function and records its verified bank and allocation evidence.
 - [func_8005D334 near-match (S210 compiler-source dive)](func_8005D334.near-match.md) — Records the four-slot reset loop's S210 register-pressure residual after structural matching.
 - [func_8005DF54 — non-ABI $s2-arg wall (TERMINAL)](func_8005DF54.near-match.md) — Documents the terminal non-ABI `$s2` argument mismatch that prevents a faithful standalone C match.
-- [func_8005DFE8 — SRAM load/verify, CARRIED (S292 re-open; 102/102, 36 diff rows)](func_8005DFE8.near-match.md) — Records the S292-reopened SRAM load/verify carry, with 102 instructions and 36 differing rows.
+- [func_8005DFE8 — banked SRAM load/verify](func_8005DFE8.near-match.md) — Records the verified indexed-bank reconstruction and temporary-variable matching lever.
 
 # Functions at 0x8006
 

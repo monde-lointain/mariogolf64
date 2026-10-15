@@ -1,10 +1,40 @@
 ---
 type: "Reconstruction Note"
-title: "func_8005DFE8 — SRAM load/verify, CARRIED (S292 re-open; 102/102, 36 diff rows)"
-description: "Records the S292-reopened SRAM load/verify carry, with 102 instructions and 36 differing rows."
+title: "func_8005DFE8 — banked SRAM load/verify"
+description: "Records the verified indexed-bank reconstruction and temporary-variable resolution of the SRAM load/verify carry."
 ---
 
-# func_8005DFE8 — SRAM load/verify, CARRIED (S292 re-open; 102/102, 36 diff rows)
+# func_8005DFE8 — banked SRAM load/verify
+
+## Verified resolution (2026-10-15)
+
+**BANKED:** `src/main/func_80059BA0.c`, YAML `main`, ROM `0x393E8`, VRAM
+`0x8005DFE8`. `tools/verify-rom.sh` exited zero with
+`CMake build OK + ROM SHA-1 MATCH (e2c4e7a905b29529b49a1619a401fe699224829b)`.
+
+Recover the four globals as fields of a `SaveBank[2]` rooted at `D_800C2BE0`.
+Indexing by `tries` generates the offset induction variable and places its
+initialization after the hoisted values. The fresh indexed baseline scored 255.
+A bounded permuter search found the remaining source lever: name the first
+read's boolean result before its guard, and reuse a `data = buf` local for
+the magic check and CRC call. These are faithful temporaries, not added work.
+
+The final isolated score is 30 solely for six adjacent-symbol relocation rows:
+`D_800C2BE0 + 4/8/12` versus `D_800C2BE4/BE8/BEC`. All 102 instructions are
+present; isolated/integrated non-relocated words match. The full-ROM gate
+resolves those aliases and establishes the bank. Preserve the aligned scratch
+pointer into `raw + 0x90`; the historical listing's plain `raw` points 0x90
+bytes earlier and did not reproduce the claimed stack layout.
+
+Reproduce with `uv run --locked python tools/decomp_loop.py --func func_8005DFE8`
+while its assembly reference remains available. The retained isolated source is
+`nonmatchings/func_8005DFE8/base.c`; the search proposal is
+`nonmatchings/func_8005DFE8-2/output-30-1/source.c`.
+Immutable measurement/source pair:
+`nonmatchings/func_8005DFE8/measurements/0fe02c003f0a16c1cf5544cf27adb867fe9f7c809188a5474f807ab9fc907d95.{json,c}`.
+
+The sections below preserve the historical carry and rejected hypotheses;
+their residual/verdict is superseded by the verified reconstruction above.
 
 `src/main/func_80059BA0.c`, 0x198 / 102 instructions, jal=6, fp=0. Counterpart to the S265-banked
 `func_8005E180` (SRAM save); shares the `D_800C2BE0/BE4/BE8/BEC` bank-address globals (0x10-strided,
