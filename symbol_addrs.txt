@@ -755,3 +755,10 @@ OVERLAY_LOAD_COMPLETE_MESSAGE = 0x800CA030;
 OVERLAY_LOAD_FAILED_MESSAGE = 0x800CA05C;
 OVERLAY_UNLOADED_MESSAGE = 0x800CA084;
 OVERLAY_INACTIVE_MODULE_MESSAGE = 0x800CA09C;
+
+// Scenery billboard reset and its state. Keep the descriptor's interior field
+// symbols available to the assembly renderer by limiting the array-base extent.
+reset_scenery_billboards = 0x800263B0; // type:func
+g_scenery_sprites = 0x800B6284; // size:0x4
+g_scenery_heap_ready = 0x800B6564; // size:0x1
+SCENERY_RESET_MESSAGE = 0x800CA0D0;

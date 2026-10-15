@@ -2,6 +2,18 @@
 
 ## 2026-10-14
 
+- **Scenery billboard reset readability**: Reviewed Code Complete Chapters 7, 10–16,
+  31, and 32 and refactored the sole routine in `src/main/func_800263B0.c` as
+  `reset_scenery_billboards`. Replaced byte-offset casts and the `do-while` with
+  typed descriptor member access and a counted `for`; named the sprite count, heap
+  slot, diagnostic, array, and readiness flag. Migrated all three compiled calls
+  and added authoritative symbols while preserving the renderer's interior symbols.
+  Kept the loop index local to the short routine without a standalone scope block.
+  A 32-bit host smoke using the real reset and `heap_init` confirmed all 46 pointers
+  clear, metadata and other heaps remain unchanged, and repeated resets work from
+  readiness states 1, 0, and -1. Final `tools/verify-rom.sh` passed with retail SHA-1
+  `e2c4e7a905b29529b49a1619a401fe699224829b`; YAML and compiler profiles are unchanged.
+
 - **Overlay-manager readability**: Applied the C-relevant guidelines from Code Complete
   Chapters 5–19 to all nine routines in `src/main/func_80025D30.c`. Named the descriptor
   fields, state, diagnostics, constants, arguments, and routines; migrated compiled callers

@@ -12,7 +12,7 @@ extern s32 D_800C5ED8;
 extern void* D_800E3970;
 extern void* D_800E3974;
 extern void heap3_free(void** payload_ptr);
-extern void func_800263B0(void);
+extern void reset_scenery_billboards(void);
 extern void func_8007E2B0(void);
 extern void func_80216B74(s32 arg0);
 extern void func_80080C4C(void);
@@ -373,7 +373,7 @@ void func_80080DCC(void) {
 
 void func_80080E14(void) {
   if (D_800C59E0 != 0) {
-    func_800263B0();
+    reset_scenery_billboards();
     heap3_free((void**)&D_800C5470);
     func_8007E2B0();
     func_80216B74(1);

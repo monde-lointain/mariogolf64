@@ -10,12 +10,12 @@ extern char D_800CA14C[];
 extern char D_800CA164[];
 extern HeapBlock* D_800B6568;
 extern void* D_800B656C;
-extern s8 D_800B6564;
+extern s8 g_scenery_heap_ready;
 
 extern void* heap3_alloc(s32 size);
 extern void heap3_free(void** payload_ptr);
 
-void func_800263B0(void);
+void reset_scenery_billboards(void);
 
 /* Scenery collision cylinders: parallel global arrays, one record per 0x10
  * bytes. Each field carries a distinct symbol (collision_cylinders,
@@ -63,27 +63,27 @@ extern s32 project_point_view_depth(f32 x, f32 y, f32 z);
 extern s32 get_interpolated_terrain_height_wrapper(s32 x, s32 z);
 
 /* Register the region [block, block+size) as slot-1 heap and mark slot-1 ready.
- * `end` is computed after both calls so the add lands in func_800263B0's delay
+ * `end` is computed after both calls so the add lands in the reset call's delay
  * slot (the compiler saves `size` in a callee-saved reg across osSyncPrintf).
  */
 void func_80026400(u8* block, s32 size) {
   void* end;
 
   osSyncPrintf(D_800CA0E0);
-  func_800263B0();
+  reset_scenery_billboards();
   end = block + size;
   D_800B6568 = (HeapBlock*)block;
   D_800B656C = end;
   heap_add_region(1, (HeapBlock*)block, end);
-  D_800B6564 = 1;
+  g_scenery_heap_ready = 1;
 }
 
 /* Re-register the previously recorded slot-1 region and mark slot-1 ready. */
 void func_8002646C(void) {
   osSyncPrintf(D_800CA0F0);
-  func_800263B0();
+  reset_scenery_billboards();
   heap_add_region(1, D_800B6568, D_800B656C);
-  D_800B6564 = 1;
+  g_scenery_heap_ready = 1;
 }
 
 /* Rebuild the per-cylinder translate+scale matrix pair from the terrain and set
