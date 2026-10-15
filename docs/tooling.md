@@ -62,7 +62,7 @@ individual checks before reopening a carry. Carry age and file closure are not n
 
 | Need | Entry point | Read first |
 | --- | --- | --- |
-| Generate a seed scaffold | `uv run --locked python tools/seed_c.py --func <fn> --parent src/<seg>.c` | [Execution details](workflow/loop.md#execution-loop-inline) |
+| Recover an isolated seed body | `uv run --locked python tools/seed_c.py --func <fn> --parent src/<seg>.c` | [Source-recovery gate](workflow/loop.md#source-recovery) |
 | Fetch live Ghidra context before seeding | Add `--ghidra` to `seed_c.py`; the local service must be running | [Headless Ghidra](ghidra.md#agent-access-and-context) |
 | Compile and diff a seed | `uv run --locked python tools/decomp_loop.py --func <fn>` | [Oracles](workflow/loop.md#oracles) |
 | Select an isolation profile | `decomp_loop.py --profile auto` uses the parent TU; explicit profiles include every key in `tools/build_profiles.json` | [Build profiles](../tools/build_profiles.json) |
@@ -71,8 +71,9 @@ individual checks before reopening a carry. Carry age and file closure are not n
 | Bank after integration | `tools/verify-rom.sh` | [Execution details](workflow/loop.md#execution-loop-inline) |
 
 The editable candidate lives under `nonmatchings/<fn>/base.c`; assembly (`target.s`) and optional
-Ghidra pseudocode remain separate reference artifacts. The seed JSON reports `body_source` and
-artifact paths, not duplicated inline assembly. Do not confuse candidates with the whole-ROM WIP
+Ghidra pseudocode remain separate reference artifacts. Successful seed JSON reports `body_source`
+and artifact paths; failed body recovery leaves diagnostics, not an empty candidate.
+Do not confuse candidates with the whole-ROM WIP
 build tree. Use the [hazard lookup](hazard-index.md), [residual lookup](hazard-symptoms.md), and
 [source levers](levers.md) for the measured question. [WIP evidence](wip/index.md) records prior
 constraints and ruled-out hypotheses, conditional on their measured base.

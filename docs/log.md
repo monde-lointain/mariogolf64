@@ -2,6 +2,30 @@
 
 ## 2026-10-14
 
+- **Seed recovery and workflow cleanup**: Four parallel read-only deep dives compared this
+  session with REA provider/evidence contracts, Snowboard Kids bootstrap/workspace practices,
+  native Oh My Pi task delivery, and the Ghidra/Eilam books' interface and type-recovery methods.
+  Kept the existing tools, native tasks, measurement/source pairs, and sole ROM banking gate.
+- **Tooling**: Assembly slicing now preserves splat `jlabel` switch destinations. Failed body
+  recovery retains diagnostics and exits nonzero without creating an empty `base.c` or replacing
+  an existing candidate. Removed the blank-function fallback and stale generated display-list hints.
+  Replaced exact-formatting characterizations with control-flow/boundary regression coverage;
+  added failed-recovery candidate-preservation coverage.
+- **Guidance**: One source-recovery gate now covers intact control flow, whole-callee/caller
+  signature evidence, access widths/strides, and F3DEX2 packet-word/cursor checks before score
+  interpretation. The skill, tool catalog, hazard section, and worker handoffs link to it.
+  Removed copied task-delivery mechanics, the arbitrary analysis-angle cap, historical wall-class
+  summaries/case-law routing, and duplicate carry/naming guidance from active workflow references.
+  Frozen hazard headings, main-first scope, shared-resource ownership, and compiler profiles remain.
+- **Proof**: Reproduced the real renderer's missing-label failure before the fix; its intact
+  extracted slice now generates an m2c body. A temporary real seed CLI switch executed correctly
+  for inputs 0, 1, 2, and -1. Real failed-recovery CLI runs retained diagnostics, preserved an
+  existing candidate, and created no empty candidate. Smoke workspaces were removed automatically;
+  the carried renderer was untouched. Tooling suite: 150 passed, two skipped. Changed Python files
+  pass Ruff; all 115 frozen hazard anchors resolve. Checked 103 concept frontmatters, four
+  recursive indexes, native skill metadata, and 604 local links/fragments with no findings.
+  No game source/YAML edits, ROM build, live Ghidra mutation, or new bank is claimed for this refinement.
+
 - **Workflow refinement**: Five parallel read-only deep dives compared the session's evidence with
   REA readiness/tool-design contracts, Snowboard Kids selection/workspaces, native Oh My Pi task
   delivery, Ghidra Book chapters 6/19/20, Eilam's decompilation discussion, and the local

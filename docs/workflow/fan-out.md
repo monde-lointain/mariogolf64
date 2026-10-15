@@ -2,9 +2,6 @@
 type: Workflow
 title: Subagent fan-out
 description: Defines independent analysis slices, serialized measurement ownership, and compact evidence returns using native Oh My Pi tasks.
-sources:
-  - resource: ../../RETRO.md
-    title: Historical sprint evidence cited as case law
 ---
 
 # Subagent fan-out
@@ -23,9 +20,10 @@ and integration. Read-only overlay reference analysis may support a named main t
 ## Dispatch contract
 
 Use the active native `task` schema and bundled agent roles, not copied prompts or project
-role wrappers. Batch independent reasoning slices; supply the exact bank/ROM target, parent
-resource ownership, narrow evidence paths, and one unresolved question per slice. At most two
-analysis angles per function. Workers do not inherit the parent conversation.
+role wrappers. Put shared bank/resource constraints and background in `context`; each task
+gets a self-contained target, narrow evidence paths, and one unresolved question. Partition
+independent evidence, not duplicate whole-function investigations. Workers do not inherit
+the parent conversation.
 
 **The parent owns candidate/source edits, compiles, builds, Ghidra MCP, YAML changes,
 integration, formatting, and ROM verification.** Workers return proposals. They do
@@ -41,10 +39,6 @@ merging it; workers return reference identity/hashes and a source hypothesis, no
 The parent rechecks that evidence before measuring or integrating it.
 
 
-Use native result delivery; send messages only for new evidence or steering, not routine check-ins.
-Keep working after dispatch and wait only when blocked. Native task artifacts carry proposals;
-do not create a handoff/result ledger per worker.
-
 ### Return evidence
 
 Return the best proposed candidate/patch, required types/externs/helpers, and its next
@@ -52,7 +46,8 @@ measurable prediction. Distinguish explicitly:
 
 - **Observed:** exact target bank/ROM offset and source/assembly locations. Cite existing
   measurement/context artifacts rather than copying their scores, flags, or full type context.
-  When used, name the relevant signature/type source and its uncertainty.
+  Signature/layout proposals must satisfy the [source-recovery gate](loop.md#source-recovery);
+  a prologue-only or stale-register inference is not a recovered call contract.
 - **Hypothesis:** one source lever, predicted instruction change, and what would disprove it.
   Uncompiled proposals are unmeasured.
 - **Integration risks:** relocations, rodata/pool ownership, conflicting declarations, nested
@@ -67,30 +62,11 @@ or accept fabricated scores to fill a return template. Only the parent's
 [ROM verifier](loop.md#oracles) can authorize banking; native task completion is not
 match evidence. Durable carries belong in the existing WIP note, not agent transcripts.
 
-## What a fan-out is worth
+## Accepting a proposal
 
-A useful result is either a measured improvement or a supported hypothesis that narrows
-further work—not a promise that every slice cracks. Before accepting a wall verdict:
+Accept a source lever and a falsifiable prediction, not the worker's confidence or completion
+status. The parent applies [source eligibility](loop.md#permuter-eligibility) and
+[residual diagnosis](loop.md#residual-diagnosis) to the measured base before interpreting a
+compiler-pass or wall claim. Preserve one reproducible carry in the existing WIP note;
+native agent artifacts are transient communication, not a second durable ledger.
 
-1. Reach exact instruction count before arguing allocation/pressure; materialize values
-   the ROM hoists or defers and rule out nested static-chain spills.
-2. Ask what the verdict did **not** measure. Showing one instruction cannot move does
-   not prove the unwanted hoist cannot be removed.
-3. Treat cited compiler passes as revisable hypotheses. A new control-flow structure can
-   bypass the pass; re-evaluate inherited carries when a new structural lever appears.
-4. Re-measure the changed base before reusing rejected levers or eligibility scores.
-
-## Wall classes a fan-out commonly returns
-
-Route the measured residual through [residual lookup](../hazard-symptoms.md), then read
-only its playbook. Common carry classes include base-register/displacement,
-indexed-versus-pointer strength reduction, branch-likely value selection, and local
-allocation permutations. Delay-slot liveness and cross-jump tail structure have useful
-source levers; a class label alone never proves a wall. See [source levers](../levers.md).
-
-## Case law
-
-[RETRO.md](../../RETRO.md) retains the original measurements and reasoning. Relevant
-sprints: 232–233 (fan-out outcomes), 260 (bypassing a cited pass), 272 (exact count before
-pressure), 300 (the unmeasured side of a wall claim), and 318 (permuter-derived levers).
-Read only the cited excerpt; historical verdicts are not current policy.

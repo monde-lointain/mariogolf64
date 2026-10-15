@@ -49,7 +49,7 @@ with overlays. Once the gate passes, select overlay work using exact bank and RO
 3. Resolve the source subsegment in `mariogolf64.yaml`. Change only explicitly required subsegment flip/split/path lines; never edit generated extraction outputs by hand. Preserve `INCLUDE_ASM` for unbanked functions. Do not change C, headers, or YAML unless the task requires that source change.
    A compiler jump table couples source and rodata: carve it only when the C switch regenerates its symbol.
 4. Keep candidate experiments isolated under `nonmatchings/<func>/`; do not run concurrent builds. The build tree and Ghidra MCP are shared resources: serialize access to both.
-   Work inline by default. Delegate only independent analysis that justifies separate contexts; the parent serializes candidate compiles, builds, MCP, and source integration. Use the native `task` contract and [fan-out guidance](../../../docs/workflow/fan-out.md), not a copied dispatch prompt.
+   For delegated analysis, use the [fan-out ownership and evidence contract](../../../docs/workflow/fan-out.md).
 
 ## Campaigns
 
@@ -78,9 +78,9 @@ default `--loose-stubs main` pool includes library C hosts but not unflipped ass
 - For classical work, read extracted assembly first. Translate a small clear leaf directly into
   `nonmatchings/<func>/base.c`; do not generate a seed or request Ghidra merely to fill the directory.
   When body/context recovery helps, use `uv run --locked python tools/seed_c.py --func <func> --parent src/<seg>.c`.
-  Read `target.s` and optional `ghidra.c` separately. Reconcile `body_source`, externs, prototypes,
-  and types with assembly; omit conflicting parent context. Add `--ghidra` only to resolve a specific
-  question with fresh [bank-aware context](../../../docs/ghidra.md#agent-access-and-context).
+  Apply the [source-recovery gate](../../../docs/workflow/loop.md#source-recovery) to generated
+  control flow, call contracts, data accesses, and display-list packets before chasing a score.
+  Add `--ghidra` only for an unresolved context question.
   Measure with `uv run --locked python tools/decomp_loop.py --func <func>`.
 - Fix diagnostics before retrying. Classify the residual as structure/count, registers, or ordering;
   change one named [source lever](../../../docs/levers.md) and remeasure. Use the

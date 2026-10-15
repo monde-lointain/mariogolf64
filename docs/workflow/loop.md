@@ -43,15 +43,33 @@ Follow the [skill](../../.omp/skills/mg64-decomp/SKILL.md#iterate), using the
 | `current.o` | Fresh isolated compile; iteration evidence only. |
 | `measurements/<hash>.json`, `measurements/<hash>.c` | Immutable observed score/diagnostic paired with its measured source; includes target-dump, profile and toolchain identities. Unbanked. |
 
-`seed_c.py` reports `body_source`: `m2c`, `ghidra`, or `stub`. A fallback body needs
-assembly translation, not confidence from successful compilation. Refine synthetic
-names, extern types, and callee prototypes before promotion. Generated fallback
-externs are guesses; implicit-int calls change scheduling and register allocation.
+### Source recovery
 
-Use `--ghidra` only when live context resolves a question. Without it, exported context
-works offline. Parent context is optional: a huge or conflicting partial type context
-can break m2c; prefer the smallest correct context. A small asm-first leaf needs neither
-Ghidra nor m2c. See [decompiler limits](../hazards.md#decompile-vs-asm-authority).
+`seed_c.py` reports `body_source` as `m2c` or `ghidra` when a translator supplies a body.
+If neither does, it exits nonzero, retains assembly/diagnostics, and does not write `base.c`.
+Success means recovered text, not valid C or matching behavior. Reconcile the affected region
+against assembly before interpreting its score:
+
+- Preserve branch and switch destinations; check stack-output buffers and variadic argument
+  binding. Fix translation errors rather than compiling an empty or simplified substitute.
+- Prefer a banked callee definition. Otherwise trace incoming argument registers through the
+  whole callee before clobber, including forwarded arguments, and corroborate explicit caller
+  setup/delay slots and return uses. A prologue or stale callsite register is insufficient.
+  An unused formal can still require a caller argument; report unresolved types instead of
+  inventing `(void)` or a return type.
+- Check load/store width, signedness, byte offsets, and stride before introducing typed
+  pointers/aggregates. A decompiler's mutable global cursor is not an immutable packet base.
+  Generated externs and source-local partial types remain hypotheses.
+- For display lists, decode packet order and recover the SDK composite macros first. Execute
+  a throwaway host harness against this repository's F3DEX2 `gbi.h`, comparing emitted words
+  **and cursor advancement** with ROM-derived packets, including relevant clipping/branch
+  boundaries. A better isolated score cannot validate a macro's semantics.
+
+Use the smallest correct parent/type context. Fetch [live Ghidra context](../ghidra.md#agent-access-and-context)
+only to answer an unresolved question; a small asm-first leaf needs neither Ghidra nor m2c.
+Keep pseudocode and assembly in their own artifacts; do not overwrite a measured carry to reseed it.
+
+### Measurement
 
 On a compile failure, read and fix the diagnostic before another compile. On a residual,
 change one evidence-backed source lever and measure it against the same profile. Do not
@@ -173,17 +191,6 @@ paths; [C style](../coding-style.md) owns naming and formatting. In addition:
   verifier, not routine clean builds; stale dependents indicate a dependency defect.
 - A file is complete when its last `INCLUDE_ASM` is gone. Empty auto-C leaves can make
   function count exceed initial stub count; count both when reporting progress.
-- Keep a carry self-contained and reproducible: exact source variant, all required
-  types/helpers, parent/profile, command, counts/frame/residual, and artifact paths.
-  Separate observations from attribution in `docs/wip/<fn>.near-match.md`. Reproduce
-  using the same measurement method; do not manufacture historical measurements.
-- Keep matching sources on stubs when carrying unfinished candidates. Import the
-  isolated seed with the parent profile; nested GCC parents need the supported
-  permuter import path, not a temporary nonmatching root source.
-- Stop background commands through the harness-owned job, not pattern-based process
-  killing. Shared resources remain serialized by the parent.
-
-### C naming (compact; full guide in `docs/coding-style.md`)
-
-Use the [C naming guide](../coding-style.md#c-naming-conventions); upstream mirrors
-retain their names. Rename m2c synthetics only when matching permits.
+- Keep matching sources on stubs when carrying unfinished candidates. Use the skill's
+  [review/resume contract](../../.omp/skills/mg64-decomp/SKILL.md#review-and-resume) for durable
+  evidence and the [permuter rules](#permuter-eligibility) before importing a candidate.

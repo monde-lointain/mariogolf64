@@ -2280,14 +2280,11 @@ tooling follow-up in `BACKLOG.md`; until it lands, run the recipe by hand — it
 ## Decompile-vs-asm authority
 
 **Rule:** The asm (`disassemble_function`) is ground truth, not the Ghidra decompile. The decompiler
-can be silently wrong on classical leaves. The standard classical seed is the combined m2c-body +
-Ghidra-typed-context seed: m2c translates the asm into the compiled seed body, typed by a Ghidra-MCP
-struct context (`ghidra_ctx.c`); the decompile is a shape/type reference only, never the body. Verify
-the m2c seed against the asm block, since m2c can also be silently wrong.
-
-**Seed roles.** `tools/seed_c.py` writes `base.c` with the m2c output as the compiled body, the
-decompile as a `#if 0` reference (suppressed when degenerate), and the asm as the labeled authority.
-Its JSON `body_source` is `m2c`, or `ghidra`/`stub` when m2c fails.
+can be silently wrong on classical leaves; m2c output can be wrong too. Use the
+[source-recovery gate](workflow/loop.md#source-recovery) to reconcile generated control flow,
+signatures, layouts, and packet semantics with intact assembly before interpreting scores.
+Optional Ghidra context/pseudocode supplies hypotheses, not source authority. Seed artifacts,
+fallback/error behavior, and body provenance are owned by that gate rather than duplicated here.
 
 **Provenance:** S11 (Ghidra rendered `func_800AB600`'s return as `return 0` when the asm returns
 `(status>>8)&1`).
