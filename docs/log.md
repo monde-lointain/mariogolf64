@@ -2,6 +2,35 @@
 
 ## 2026-10-15
 
+- **Five more main functions banked**: `func_80047CAC`, `get_tile_attribute`,
+  `func_8005470C`, `func_80060190`, and `func_800604F4`
+  (276 instructions / 1,104 bytes). Main stubs decrease 203 → 198.
+  - The interpolation stepper uses a shared scaled-coordinate scratch and an
+    empty scheduling boundary before its smoothing constant, separating
+    instruction order from reference weighting. The exact middle constant is
+    `19.6500015f`. The terrain lookup uses explicit byte offsets and distinct
+    attribute/result locals; the historical phantom-addend wall does not recur.
+  - The character transform matches directly using `CharacterState`, the
+    existing double coefficient, and five SDK matrix calls. Removed its obsolete
+    `void*` declaration. Shared zero/positive return destinations recover both
+    selector diamonds. The roster predicate uses the real second player's
+    character field and masks the rank tie bit.
+  - Four isolated comparisons score zero; `func_800604F4` scores 10 only for
+    `player_records + 0xD5` versus its interior `D_801B72A5` relocation.
+    Fresh integrated ranges agree with retail instructions and resolved targets.
+    `tools/verify-rom.sh` passes on the final five-function state with SHA-1
+    `e2c4e7a905b29529b49a1619a401fe699224829b`.
+  - A throwaway 32-bit UBSan harness extracted all five integrated bodies and
+    passed 404,568 checks: float interpolation, terrain clamps/nibble parity,
+    signed score categories, roster bounds/tie ranks, and 1,200 transform
+    scenarios using the repository's actual matrix routines. External roster
+    results were injected at dependency boundaries; no emulator run.
+    YAML, symbols, compiler profiles, library mirrors, and overlays are unchanged.
+  - Retained unbanked carries separately: the byte mapper improves from score
+    225 to 105 with a store scope; the collector remains at its branch-target
+    residual (score 5), and the abs helper retains its input coalescing residual
+    (score 10). Their live stubs remain.
+
 - **Five carried main functions banked with loop-note scheduling boundaries**:
   `resolve_shot_quality_table`, `func_80047DBC`, `func_80079EBC`,
   `get_surface_type`, and `func_8003DE80` (457 instructions / 1,828 bytes).

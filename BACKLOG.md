@@ -16,6 +16,33 @@ This file holds only the *ordering rationale*, *enabler items* (gate actions), a
 
 ### Current main-bank evidence — 2026-10-15
 
+- Banked `func_80047CAC`, `get_tile_attribute`, `func_8005470C`,
+  `func_80060190`, and `func_800604F4` (276 instructions / 1,104 bytes).
+  Main stubs decreased 203 → 198. The final `tools/verify-rom.sh` gate passed:
+  `e2c4e7a905b29529b49a1619a401fe699224829b`. A throwaway 32-bit UBSan
+  harness exercised the five integrated bodies with 404,568 checks, including
+  1,200 transforms through actual matrix routines; roster dependency results
+  were injected. No emulator run, YAML, symbol, compiler-profile, library, or
+  overlay change.
+  - An empty boundary before, rather than around, the interpolation smoothing
+    assignment preserves scheduling without perturbing reference weighting.
+    Shared scaled scratch plus separate raw/constant quantities recover its FPRs.
+  - Explicit byte offsets and separate attribute/result locals match the terrain
+    lookup; its historical phantom `-0x10` relocation does not recur.
+    The character transform matches directly with canonical `CharacterState`.
+  - Shared zero and positive return destinations defeat the two selector
+    diamonds' conditional-assignment conversion. The roster scan's body-local
+    entry address gives the required invariant-hoist order.
+  - Four isolated scores are zero; the roster predicate's score 10 is solely
+    `player_records + 0xD5` versus the interior `D_801B72A5` relocation.
+    Saved targets and provisional objects remain under `nonmatchings/<function>/`.
+    Historical wall/carry claims for these five names below are superseded.
+  - Unbanked: `func_80098CD8` now scores 105/38 instructions with a store scope,
+    versus the refreshed baseline 225. `collect_keyframe_events_at` still scores
+    5/54 instructions for its reload-skipping branch target; loop/empty-block
+    boundaries do not fix it. `func_80098C6C` remains at score 10/13 instructions
+    with abs-input coalescing. Their live stubs and individual notes remain.
+
 - Banked `resolve_shot_quality_table`, `func_80047DBC`, `func_80079EBC`,
   `get_surface_type`, and `func_8003DE80` (457 instructions / 1,828 bytes).
   Main stubs decreased 208 → 203. The final `tools/verify-rom.sh` gate passed:
