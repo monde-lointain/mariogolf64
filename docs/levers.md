@@ -43,6 +43,15 @@ still needs its entry test, `if (n != 0)` (S306).
   priority weights cannot override. Verify `.cse`, `.lreg`, and `.greg`, not just the final score:
   [func_8004683C](wip/func_8004683C.near-match.md#resolution-post-join-cse-lifetimes) banked this way,
   preserving `$v0` for the result without extra instructions.
+- **byte-output-locality-and-edge-reuse** -- in `func_80065E6C`, shared
+  byte-output locals became three global quantities conflicting with `$v0`.
+  Per-case `u8` locals remove those allocnos and retain the batched float-to-int
+  conversions; per-case `s32` locals instead interleave stores and add hazard
+  nops. For the remaining integer-edge permutation, load the second vertex's
+  x into the `dx1` scratch while forming `dx2`, then subtract the first x
+  in place. Separate subtraction temporaries are not allocation-equivalent.
+  The banked example and `shared-output`/`matched` `.lreg`/`.greg` dumps live
+  under `nonmatchings/func_80065E6C/`; the full-ROM gate passes.
 - **aggregate-copy-scratch-clobbers** -- a struct/array copy is one `movstrsi_internal` whose four
   `match_scratch` temps take the lowest free `d` registers there, so anything live across it
   conflicts with all four; its `la` temp names the set's top (S313).

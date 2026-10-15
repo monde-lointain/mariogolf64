@@ -16,6 +16,61 @@ This file holds only the *ordering rationale*, *enabler items* (gate actions), a
 
 ### Current main-bank evidence — 2026-10-15
 
+- Banked `mtx_from_rts`, `frustum_cull_point_with_radius`,
+  `compute_triangle_plane`, `func_8003AC80`, and `func_80065E6C`
+  (628 instructions / 2,512 bytes). Main C-host stubs decreased **193 → 188**.
+  `tools/verify-rom.sh` passes on the integrated sources:
+  `e2c4e7a905b29529b49a1619a401fe699224829b`.
+  - The RTS matrix matches with natural row-store order. Frustum culling needs
+    separate coordinate/depth stages, in-place depth subtraction, and direct
+    per-arm rejection returns rather than materialized boolean temporaries.
+    Its isolated score 110 consists only of the view-matrix interior-symbol
+    aliases; the full ROM and integrated function words match.
+  - Both plane helpers preserve integer edge differences before converting
+    their cross product to floats. Load the first y and second z before
+    subtracting the base coordinates to retain the retail load order.
+    The terrain helper gates its degenerate-triangle diagnostic; the raycast
+    copy calls the existing debug-print wrapper unconditionally.
+  - The vertex-normal helper uses per-case `u8` output temporaries. Shared
+    output locals created three global allocation quantities conflicting
+    with `$v0`; case-local `s32` values instead interleaved conversions/stores.
+    Reuse the loaded second vertex's x coordinate as `dx1` before subtracting
+    the first vertex's x. This removes the remaining edge-register permutation.
+    `nonmatchings/func_80065E6C/{shared-output,matched}.{lreg,greg}` retain
+    the compiler evidence; `local-alloc.c:1578-1622` in the supplied GCC
+    checkout defines the reference/lifetime priority and quantity-number tie.
+  - Added required `-ffast-math` overrides for these three hosts in
+    `tools/build_profiles.json`: `get_tile_attribute.c`, `raycast_terrain.c`,
+    and `set_camera_matrices_fixed.c`. Their new normalizers contain retail
+    bare `sqrt.s`; ordinary compilation called `sqrtf` and changed the frames.
+    All five isolated/integrated ranges and relocation targets agree under
+    the final profiles. No YAML, symbol, library, or overlay source changes.
+  - A throwaway 32-bit UBSan harness exercised the five integrated bodies:
+    **1,476,896 checks, zero failures**. Covered independent RTS composition,
+    all frustum outcomes and fractional-depth/radius boundaries, transformed
+    view matrices, plane equations and degenerate fallbacks/debug gating,
+    and normal selection modes with preservation of unrelated vertex bytes.
+    No emulator run. The harness and temporary binaries were removed.
+  - Final measurements under `nonmatchings/<function>/measurements/`, in
+    the function order above:
+    `03fe95cdcb8989efe2ced2a2df5131a8ae2b0ab0e8b06835d4d796a202016f32`,
+    `ca6dbcbca7f50ecc68b74b7025ee049fc45794eb6073b99f734d9674030506ad`,
+    `0b80b5c2d6fc5d3711079cc8010e04f0aec9e04124ac94f27d09ddc3cc7e5f5a`,
+    `42d2df2892cdc912dd50099deef393f8a60e0c92e3b3d788ecf744e4fdc22c3b`,
+    `f4f3b01084a072b1bdc7841442926db76478b67723d5fed3b92f24d8776b40cf`.
+  - Still isolated/unbanked in the camera host: `project_point_to_screen`
+    scores 220 (one extra tail nop plus abs/trunc allocation, besides
+    projection-matrix aliases), `func_80065A1C` scores 430 (five saved FPRs
+    and frame `0x48`, versus six and `0x50`), and the volatile-output
+    diagnostic for `func_80065898` scores 3050. Fresh final-profile
+    measurements respectively:
+    `0941f262339093f46e8ff0abce1a3dc49820e648e751ecd6aa8748a09d65cd97`,
+    `11c3eac7f869c9aef6fce6688020853a1a9a0d6e98e118f3b28710389d13997d`,
+    `4c74ebfb6c588a7b2633a00737bdb6e317a83f8a708232f43744ba177c6d00a1`.
+    Keep their live stubs. Next levers concern tail quantity formation,
+    rotation-product lifetimes, and selective output access/aliasing;
+    these measurements do not prove a source wall.
+
 - Banked `func_8004D4B8`, `func_80068F98`, `func_8004C51C`,
   `func_80054550`, and `func_8006D4EC` (455 instructions / 1,820 bytes).
   Main stubs decreased 198 → 193. `tools/verify-rom.sh` passes with

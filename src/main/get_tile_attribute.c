@@ -779,7 +779,56 @@ s32 func_800432E4(s16* a, s16* b) {
 
 INCLUDE_ASM("asm/nonmatchings/main/get_tile_attribute", func_8004333C);
 
-INCLUDE_ASM("asm/nonmatchings/main/get_tile_attribute", compute_triangle_plane);
+extern f32 sqrtf(f32);
+extern s8 g_debug_mode_enabled;
+extern char D_800CABB8[];
+
+s32 compute_triangle_plane(s16* triangle, f32* plane) {
+  s32 dy1 = triangle[6];
+  s32 dz2 = triangle[10];
+  s32 dy2;
+  s32 dz1;
+  s32 dx1;
+  s32 dx2;
+  f32 nx;
+  f32 ny;
+  f32 nz;
+  f32 length;
+  f32 offset;
+  f32 reciprocal;
+
+  dy1 -= triangle[5];
+  dz2 -= triangle[8];
+  dy2 = triangle[7] - triangle[5];
+  dz1 = triangle[9] - triangle[8];
+  dx1 = triangle[3] - triangle[2];
+  dx2 = triangle[4] - triangle[2];
+  nx = dy1 * dz2 - dy2 * dz1;
+  ny = -dx1 * dz2 + dx2 * dz1;
+  nz = -dy1 * dx2 + dy2 * dx1;
+  length = sqrtf(nx * nx + ny * ny + nz * nz);
+  offset = -(nx * triangle[2] + ny * triangle[5] + nz * triangle[8]);
+
+  if (length == 0.0f) {
+    if (g_debug_mode_enabled != 0) {
+      check_and_print_grid(D_800CABB8, 3, 15);
+    }
+    plane[0] = 0.0f;
+    plane[1] = 1.0f;
+    plane[2] = 0.0f;
+    plane[3] = 0.0f;
+    plane[4] = 1.0f;
+    return -1;
+  }
+  if (ny < 0.0f) length = -length;
+  reciprocal = 1.0f / length;
+  plane[0] = nx * reciprocal;
+  plane[1] = ny * reciprocal;
+  plane[2] = nz * reciprocal;
+  plane[3] = offset * reciprocal;
+  plane[4] = 1.0f;
+  return 0;
+}
 
 s32 get_interpolated_terrain_height(s32 x, s32 z) {
   s16 tri[11];
