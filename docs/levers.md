@@ -78,6 +78,14 @@ still needs its entry test, `if (n != 0)` (S306).
   reaching past a call to annul the next branch (S288); round a region it multiplies that region's
   `n_refs` only, one allocno per edit; step two after locality
   (S292/S318/S320, `#pervasive-regalloc-classical-main`).
+  It is also a real scheduling boundary: GCC 2.7.2 `sched.c:2053-2080` adds
+  dependencies around loop-begin/end notes even inside one basic block, preserving
+  loop-depth reference accounting. This banked the abs/threshold ordering in
+  `func_80047DBC`, early `15` materialization in `get_surface_type` / `func_8003DE80`,
+  and the extern-double load/count/store ordering in `func_80079EBC`.
+  `resolve_shot_quality_table` additionally needs its digit subtraction to reuse the
+  result scratch through clamping and return; a separate local digit coalesces
+  differently even with the correct scheduling boundary.
 - **global-reread-vs-cse**, absorbing defeat-global-base-cse and per-region-cse-slot-base -- a
   scalar-global store does not constrain a later load through a pointer parameter
   (`true_dependence`, `sched.c:817`), so the load hoists. `extern s32 G[]` read as `G[0]`, a

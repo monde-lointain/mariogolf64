@@ -16,6 +16,22 @@ This file holds only the *ordering rationale*, *enabler items* (gate actions), a
 
 ### Current main-bank evidence — 2026-10-15
 
+- Banked `resolve_shot_quality_table`, `func_80047DBC`, `func_80079EBC`,
+  `get_surface_type`, and `func_8003DE80` (457 instructions / 1,828 bytes).
+  Main stubs decreased 208 → 203. The final `tools/verify-rom.sh` gate passed:
+  `e2c4e7a905b29529b49a1619a401fe699224829b`; 47,077 throwaway 32-bit UBSan
+  checks exercised all five integrated bodies. No emulator run.
+  - GCC 2.7.2 `sched.c:2053-2080` explicitly prevents motion across loop notes,
+    including within one basic block. One-shot C loops reproduce the old
+    abs/threshold, early-15, and extern-pool-load schedules. The quality helper
+    also reuses its subtraction/result scratch through clamping and return.
+  - The quality-table rodata sibling now owns `0xA7930..0xA7B60`; the particle
+    spawn still reads the shared double extern. No symbol, compiler-profile,
+    library, or overlay changes. The terminal/coupling verdicts for these five
+    names in historical sprint entries below are superseded; their WIP notes
+    now record verified resolutions.
+
+
 - Banked five camera-family functions in `src/main/func_80095A10.c`:
   `func_80095A10`, `func_8009676C`, `func_800977E0`, `func_80097A08`, and
   `func_80097E30` (469 instructions / 1,876 bytes). Main-bank stubs decreased
@@ -4963,12 +4979,12 @@ by `/sprint-plan`:
   `src/main/raycast_terrain.c` (main-segment `[0x142B0]`, collision/geometry/raycast pack). Flipped
   to `c` at the S233 gate. **2 fns C:** `get_triangle_normal_dominant_axis` (integer cross-product,
   byte-exact first build) + `clamp_min_distance_from_target` (FP-store-scheduling wall CRACKED via
-  gcc-source fan-out: `cam[2]` varying-address memory-dep lever, `sched.c:834`). **2 TERMINAL
-  no-lever carries** (S233 compiler-source fan-out, do NOT re-grind): `get_surface_type` (450) +
-  `func_8003DE80` (350) — a shared constant-15 block-LOCAL scheduler coin (`mips.md:153-155` R4000
-  load-latency; the build is 1 instr SHORTER than the ROM; `#local-alloc-qty-permutation`, S232
-  `global.c` ref-count lever inapplicable; assembler ruled out). See
-  `docs/wip/{get_surface_type,func_8003DE80}.near-match.md`. **9 stubs remain, un-attempted — the
+  gcc-source fan-out: `cam[2]` varying-address memory-dep lever, `sched.c:834`).
+  **2026-10-15: both former constant-15 carries are BANKED.** `get_surface_type`
+  (63 instructions) and `func_8003DE80` (81) use a one-shot edge assignment before
+  the selector load and a deferred row flip. Their former source-impossibility
+  verdict is superseded; see `docs/wip/{get_surface_type,func_8003DE80}.near-match.md`.
+  **9 stubs remain — the
   larger FP/collision TAIL** (S224 productivity cliff, expect walls): `func_8003AC80` (464B, 35 FP),
   `check_line_cylinder_collision` (868B), `raycast_find_closest_triangle` (1428B),
   `calculate_camera_attraction_vector` (1716B), `find_collision_triangle` (1844B),
@@ -5507,16 +5523,12 @@ by `/sprint-plan`:
   `[0x1F020, c, main/func_80043C20]` flipped; `ClubShot` (0x34) + `ShotInput` structs defined; all names
   pre-curated (no `symbol_addrs` adds). S184 banked 13 (getters/wrappers + 2 nested pairs). **S185 banked
   `resolve_club_terrain_mask`** (+1, jtbl_800CC530 `.rodata` carve at `[0xA7930, .rodata, main/func_80043C20]`
-  0x60 + cross-jump switch-funnel fix; see RETRO S185). **7 CARRIED now, two DoD-blocker classes:**
-  - **`resolve_shot_quality_table` — STRUCTURAL-COMPLETE near-free retry (carve SOLVED, sched-irreducible).**
-    109/109 insns, only a 3-instr v0/v1 load-schedule residual proven irreducible by the S185 sched.c
-    subagent (`#register-reuse-nudge` load-use-interlock variant; permuter useless). **Retry checklist
-    (near-free):** (1) restore the saved near-match `docs/wip/func_80043C20.resolve_shot_quality.near-match.c.txt`
-    + the 0x230 carve `[0xA7930, .rodata, main/func_80043C20]`(over jtbl530+23 tables+jtbl700), `[0xA7B60, rodata]`;
-    (2) all refs placed (get_table_entry; digit tables are TU-local `static const char[16]`, NOT extern/2D —
-    see `#rodata-sibling-yaml-pattern` interleaved-partial-TU); (3) no recover-externs/symbol adds; (4) classical;
-    (5) `docs/wip/resolve_shot_quality_table.near-match.md` + decomp.me scratch `dZACn`. Only closes with a NEW
-    faithful reg-pressure idiom that allocates `power`→`$v0`; else stays a documented irreducible carry.
+  0x60 + cross-jump switch-funnel fix; see RETRO S185). **6 CARRIED now:**
+  - **2026-10-15: `resolve_shot_quality_table` BANKED.** The 109-instruction
+    helper uses a shared result scratch and one-shot power-load boundary; its
+    digit tables and switch now extend the existing carve to `0xA7B60`.
+    The S185 three-instruction impossibility claim is superseded.
+    See `docs/wip/resolve_shot_quality_table.near-match.md`.
   - **`predict_shot_distance` — NOT ATTEMPTED (S181 abs-coalescing class + f64 carve + nested child).** f64
     rodata literal `D_800CC508` via `ldc1` (carve, interleaved with strings — see the S185 layout notes) +
     fresh-reg `abs.s $fv1,$fs1` = the `#abs-coalescing-reg-swap` fresh-reg LAW single-use+dying-hard-reg
@@ -5526,9 +5538,9 @@ by `/sprint-plan`:
     priority + a folded dead guard via DCE; permuter 800→575 plateau, 195/196), `func_800451E4` (const-1 CSE +
     allocno tiebreak + reorg delay-slot, 136/139), `predict_shot_distance_variant` (pseudo82=`&D_800BB4FC` claims
     `$s0`, pushes category; mine 3 instrs SHORTER — its nested `lerp_int` child is byte-exact, banks with parent).
-  - Near-match seeds in `nonmatchings/<fn>/base.c`. **Retry:** the `resolve_shot_quality_table` near-free replay
-    (carve done) OR a permuter/`#cross-project-matched-corpus-mining` increment (the 3 regalloc fns + the FP-pair
-    parents). No cross-repo name sync.
+  - Near-match seeds remain isolated in `nonmatchings/<fn>/base.c`; the quality
+    helper is no longer a retry target. The prediction parents remain coupled
+    to their nested children. No cross-repo name sync.
 - **(S183 MIXED-PARTIAL — carried; 8 of 9 banked; the "definitive pervasive-regalloc TU" verdict is
   RETIRED, S314 + S316)** `src/main/func_80052250.c` (main-segment `[0x2D650]` game-code pack).
   Eight functions are banked byte-exact (two at S183, three at S314, three at S316). **ONE
@@ -6747,13 +6759,11 @@ by `/sprint-plan`:
   dead-frame free-slot scan + signed `guRandom` jitter + terrain-height side effect; no rodata, first
   build, auto-named). **Two NEW carries, both byte-exact bodies blocked STRUCTURALLY (not compiler
   walls):**
-  - `func_80079EBC` — 148/148 isolation, **SHARED-LITERAL-POOL partial-bank blocker**: its tail `0.04`
-    is a gcc pool double (`D_800D19E0`) sharing a pool with still-asm siblings (`D_800D19E8`=0.2,
-    `D_800D19F0`, `jtbl_800D1990` all `%hi`-ref'd from asm/53D10.s). Literal form dups the pool (+0x10
-    flowing shift); extern form flips a source-invariant `count++` sched.c coin (CONST_DOUBLE vs MEM
-    cost). Banks only when the pool-owning siblings also go C. `docs/wip/func_80079EBC.near-match.md`,
-    memory [[shared-literal-pool-partial-bank-blocker]], `docs/hazards.md#rodata-sibling-yaml-pattern`
-    (S279 sub-case). **Unlock slice = the jtbl_800D1990 owner + 0.2/0.049 users (still-asm siblings).**
+  - **2026-10-15: `func_80079EBC` BANKED**, retaining the extern `D_800D19E0`
+    shared pool. Splitting the random fraction/double load and adding two
+    loop-note boundaries preserves all 148 instructions without a carve.
+    See `docs/wip/func_80079EBC.near-match.md`; the earlier claim that its
+    pool-owning siblings must bank first is superseded.
   - `func_8007C5D8` (S300) — 590/590 isolation, frame exact, all-SDK-macro — the **SAME pool blocker,
     second instance in this host**, and a different mechanism: not an FP literal but a local array
     initializer (`s32 tbl[7] = {2,1,0,0,1,1,2}`), which gcc block-moves from a rodata template at
@@ -6765,8 +6775,9 @@ by `/sprint-plan`:
     (extern reference drops the stack copy, 575/590 at frame -0x48; hand element copy 598/590). Text
     split blocked: the boundary is 0x579D8, 8-aligned not 16. Body preserved at
     `nonmatchings/func_8007C5D8/base.c`, verdict `docs/wip/func_8007C5D8.near-match.md`. Now tagged
-    `POOL-BLOCKED` by `pick_target.py --loose-stubs`. **Same unlock slice as `func_80079EBC`: bank the
-    pool-owning still-asm siblings of this host.** At bank time it also needs
+    `POOL-BLOCKED` by `pick_target.py --loose-stubs`. **Its aggregate-template
+    unlock still requires the pool-owning siblings; the FP-extern escape that
+    banked `func_80079EBC` does not supply this stack copy.** At bank time it also needs
     `project_point_to_screen` prototyped `(f32, f32, f32, s32*)` and `ScreenMarker.unk_08` retyped
     `f32` — both verified free (ROM green with them applied and the stub still in place).
   - `func_8007A40C` (+ twin `func_8007A10C`) — **GCC NESTED functions inside `func_8007A6C8`** (0x98C),

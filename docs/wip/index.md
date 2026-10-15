@@ -16,7 +16,7 @@
 - [func_8002CDA8 reconstruction scoping (S303, re-opened S304)](func_8002CDA8.scoping.md) — Scopes the reconstructed 838-instruction function's exact-count register-allocation residual and its carried-wall detector classification.
 - [func_8002DAC0 - GCC nested function of render_frame (carry, not a wall)](func_8002DAC0.near-match.md) — Records a GCC nested render-frame child that reads its parent's static chain and must be banked in the parent translation unit.
 - [func_800318A8 — banked frame-copy display-list builder](func_800318A8.near-match.md) — Records the verified SDK macros, cursor-first initialization, and 15-packet smoke check.
-- [func_8003DE80 (0x8003DE80) — near-match carry (S233)](func_8003DE80.near-match.md) — Records a terrain-grid neighborhood score blocked by the same constant-15 scheduler/register-allocation coin as `get_surface_type`.
+- [func_8003DE80 — banked with an early edge and deferred row flip](func_8003DE80.near-match.md) — Records the verified neighborhood-score resolution using the surface lookup's loop-note boundary.
 - [func_8003E004 — near-match (S204 -> S235 -> S318, CARRIED)](func_8003E004.near-match.md) — Records the wind-indicator vertex generator's S318 exact-count carry and remaining preheader, angle-chain, and register-order residuals.
 - [func_800415C4 near-match (get_tile_attribute.c, S218)](func_800415C4.near-match.md) — Records the S281 byte-exact bank as set_lod_grid_vertex, superseding the S218 register-allocation diagnosis.
 - [func_80041878 near-match (get_tile_attribute.c, S218)](func_80041878.near-match.md) — Records the S281 byte-exact bank as set_lod_tile_attribute, superseding the S218 register-allocation diagnosis.
@@ -24,7 +24,7 @@
 - [func_80046604 near-match (S262)](func_80046604.near-match.md) — Records the club/terrain sound dispatcher’s S262 branch-scheduling residual in the kind-1/2 arm.
 - [func_8004683C — banked via post-join CSE lifetimes](func_8004683C.near-match.md) — Records the verified 23-instruction bank and return-copy chain that removes the local scratch conflict with `$v0`.
 - [func_80047CAC — pure-FP interpolation stepper (FP scheduler coin, near-match)](func_80047CAC.near-match.md) — Documents the three-global FP interpolation stepper's scheduler coin and one-ULP constant residual.
-- [func_80047DBC — near-match carry (terminal sched.c const-load-vs-fabs coin)](func_80047DBC.near-match.md) — Records the three-axis FP snap-to-target lerp whose body matches with scheduling disabled but has a real-profile nop residual.
+- [func_80047DBC — banked with a threshold loop-note boundary](func_80047DBC.near-match.md) — Records the verified resolution of the abs/threshold scheduling residual.
 - [func_800484F8 — start-BGM-for-game-state (near-match, S263)](func_800484F8.near-match.md) — Tracks the game-state BGM initializer's 99/102 near-match, including the default-path branch-likely and shared-value register residuals.
 - [func_8004C958 — recursive diamond-square cloud generator (near-match, S263)](func_8004C958.near-match.md) — Records the recursive cloud generator's S263 spill-pressure residual: faithful C emits fewer instructions than the ROM.
 - [func_8004CDA0 — cloud-buffer blend driver (near-match, S263)](func_8004CDA0.near-match.md) — Records the cloud-buffer blend driver's S263 register-allocation residual and collapsed register-preserving copies.
@@ -70,7 +70,7 @@
 - [func_80077AD4 near-match (S206 carry)](func_80077AD4.near-match.md) — Documents cubic finite-difference interpolation whose ROM computes each polynomial term separately rather than in Horner form.
 - [func_80077C18 near-match](func_80077C18.near-match.md) — Records the particle-group initializer's S187 inner grid-scan allocation residual at exact instruction count.
 - [func_8007955C near-match (S244 carry)](func_8007955C.near-match.md) — Records the particle spawner's S244 schedule-order residual, superseding its predicted register-allocation wall.
-- [func_80079EBC — shared-literal-pool partial-bank carry (S279)](func_80079EBC.near-match.md) — Documents the partial-bank carry blocked by a shared literal pool.
+- [func_80079EBC — banked while retaining the shared literal pool](func_80079EBC.near-match.md) — Records the verified extern-pool particle spawn and its two loop-note scheduling boundaries.
 - [func_8007A40C (+ func_8007A10C) — GCC nested-function carry (S279)](func_8007A40C.near-match.md) — Records the GCC nested-function carry for func_8007A40C and its sibling func_8007A10C.
 - [func_8007C5D8 — byte-exact body, blocked by the TU's shared literal pool](func_8007C5D8.near-match.md) — Documents the byte-exact function body whose bank is blocked by the translation unit's shared literal pool.
 - [func_8007EF0C — near-match (S305, re-opened S306)](func_8007EF0C.near-match.md) — Records the S306 texture-rectangle divide-placement residual, including filled hazard slots and a missing spill pair.
@@ -95,11 +95,11 @@
 
 # Named functions (G–R)
 
-- [get_surface_type (0x80039F7C) — near-match carry (S233)](get_surface_type.near-match.md) — Records the terrain-surface lookup's S233 constant-15 register-assignment residual.
+- [get_surface_type — banked with early edge materialization](get_surface_type.near-match.md) — Records the verified loop-note resolution of the constant-15 scheduling and incoming-tile copy residual.
 - [get_terrain_vertex_pointer — banked via shared scratch chains](get_terrain_vertex_pointer.near-match.md) — Records the verified match and register-reuse lever for get_terrain_vertex_pointer.
 - [init_rdp_and_draw_sky_background — 286/286, exact instruction multiset, pure order residual](init_rdp_and_draw_sky_background.near-match.md) — Records the 286-instruction reconstruction whose instruction multiset matches and whose residual is ordering only.
 - [init_sky_pool_and_world_state near-match (S256 carry, rebuilt S258)](init_sky_pool_and_world_state.near-match.md) — Records the sky-grid initializer's S258 exact-count register permutation and two-instruction initialization swap.
-- [resolve_shot_quality_table — near-match (S185, structurally complete, 3-instr irreducible residual)](resolve_shot_quality_table.near-match.md) — Documents the structurally complete S185 near-match and its three-instruction residual.
+- [resolve_shot_quality_table — banked with a result-scratch lifetime and loop-note boundary](resolve_shot_quality_table.near-match.md) — Records the verified resolution of the former digit/power scheduling and allocation residual.
 
 # Recorded resolutions
 

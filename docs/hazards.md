@@ -1547,30 +1547,28 @@ is a tracked ranker follow-up (see `BACKLOG.md`). Extends the S169 partial-one-t
 f64 literals forces the carve and atomicity, whereas extern-referenced shared rodata does not — but an
 `li.d` pool cannot be extern-referenced, so this coupling is unavoidable.
 
-**Shared-with-still-asm literal pool: neither carve nor extern banks a partial-file leaf (S279).** The
-S278 note above assumes the pool-contributing siblings can all go C in one increment (the pool then
-carves atomically). When they cannot — the pool doubles are shared with still-ASM siblings (e.g.
-`D_800D19E8`=0.2 / `D_800D19F0` + a `jtbl_` still `%hi`-referenced from `asm/<seg>.s`) — a byte-exact FP
-leaf using one double from that pool is blocked both ways:
+**Shared-with-still-asm literal pool: test extern scheduling boundaries before pricing a carve (S279,
+resolved 2026-10-15).** Shared doubles can prevent a literal-emitting partial bank while still
+allowing a source-level extern reference. Historical `func_80079EBC` evidence distinguishes:
 - **Literal** (`+ 0.04`): gcc appends a new pool word to the leaf's `.o` .rodata while the extracted
   `D_` still exists -> duplicate -> the whole following .rodata/.data/.bss flows +0x10 (16-aligned
   double). Full-make ROM-SHA-1 miss on every later data symbol (a `+0x10` on unrelated globals; see
   `#short-text-shifts-flowing-bss`). Caught only by the orchestrator full-make gate — the isolated
   per-fn cmpfn reports the leaf byte-exact (it does not link the shared segment).
 - **Extern** (`+ D_sym`, plain or `const`): no duplicate, no shift, .text otherwise byte-identical, but
-  a source-invariant `sched.c` coin flips. A `CONST_DOUBLE` pool ref is unchanging + cheap so it
-  schedules early, keeping a cheap ready `addiu` (a `count++`) behind it; an extern `MEM` carries a
-  load cost so it schedules later and the ready `addiu` fills the slot ahead of the `ldc1`. `extern
-  const f64` does not restore the CONST_DOUBLE flag in gcc-2.7.2; `++count` preinc / statement reorder
-  do not move it. The permuter is the non-payoff shape (a 1-insn schedule coin).
+  a scheduling difference can move a ready `count++` ahead of the `ldc1`. A `CONST_DOUBLE`
+  pool reference is unchanging and cheap; an extern `MEM` carries load cost. `extern const f64`,
+  preincrement spelling, and statement reorder did not fix the old source. That is not a
+  source-invariance proof: loop-note boundaries constrain this scheduler separately.
 
-So a leaf like this banks only when the pool-owning still-asm siblings are also decompiled in the same
-increment (then the literal form reproduces the ROM schedule without duplicating). Until then carry it
-with the byte-exact body documented (`docs/wip/<fn>.near-match.md`). S279 `func_80079EBC` (148/148
-isolation, 0.04 = `D_800D19E0`). The ranker follow-up extends the `rodata-coupled` tell above: also flag
-a fresh FP leaf whose `ldc1/lwc1 %hi(D_x)` pool double is `%hi`-referenced from the still-asm segment
-blob (shared, not co-C-able) as partial-bank-blocked, distinct from the co-C-able carve-coupled case.
-See the memory `shared-literal-pool-partial-bank-blocker`.
+`func_80079EBC` now banks with the existing `D_800D19E0` pool, leaving its asm-owned siblings
+untouched. Split the random fraction and extern double load, put an empty `do {} while (0)`
+after the load, then increment the count. A second one-shot loop around the zero store to
+`unknown_3B` keeps that store ahead of the double addition. All 148 instructions and the full
+ROM match. Wrapping the increment itself reweights the count and swaps saved registers.
+See [the verified source and rejected variant](wip/func_80079EBC.near-match.md).
+Actual pool-layout coupling still requires atomic carves; an extern-load schedule residual alone
+does not. See the memory `shared-literal-pool-partial-bank-blocker`.
 **Generic-subseg-bound carve = exact extent, no split.** When a carve start or end coincides
 with an existing generic `[off, (ro)data]` subseg boundary, that generic subseg's opposite boundary
 is the exact carve extent: the linker already split the section there, so the carve is a 1-line
@@ -7420,28 +7418,21 @@ per-field automatically. The lerp's `16 - t` CSEs to one `subu` reused across al
 its texcoord compute cluster — see [#local-alloc-qty-permutation](#local-alloc-qty-permutation-1-basic-block-reg-swap-permuter-appropriate) (the
 extractable-reorder + permuter-plumbing notes).
 
-**A block-local constant materialized to hide a load-latency = a build-better-than-ROM scheduler coin,
-terminal (S233 `get_surface_type` 450 / `func_8003DE80` 350, gcc-source fan-out).** A pair of sibling
-tile-grid fns (`(int)(coord*16)` clamp → `col=D_800B7DB0+(D_800BA6B0[tile&0x3F]<<8)` → `15-cz` index)
-each locked on a single divergence: the ROM materializes the `15` of `15-cz` early (`li v1,0xf` before
-the table `andi`/`lbu`), my build late (`li v0,0xf` after) — my build is 1 instruction shorter. Root
-cause traced end-to-end: the R4000 `load` function-unit has ready-delay 3 (`config/mips/mips.md`
-:153-155), so the pre-reload scheduler front-loads the `lbu D_800BA6B0[...]` to hide that latency and
-fills the load-delay window with the independent `li 15`/`subu` chain → `li 15` lands after the load.
-`rank_for_schedule` (`sched.c`:2385-2430) gives the `andi` and the `li 15` equal priority, so the tie
-falls to load-latency stall logic → the latency-optimal order. Then `local-alloc.c` gives the late
-const-15 `$v0` (lowest free), so the `tile` param (a `global.c` cross-block allocno with an `$a0`
-copy-preference) coalesces into `$a0` with no conflict → the ROM's `move v1,a0` is elided. The ROM lost
-the scheduler coin (its `li 15` is early → 15 lives across the load → local-alloc must pick a non-`$v0`
-reg → tile's `$a0`-pref conflicts → `move v1,a0` survives). **This is not source-leverable and not the
-S209 `global.c` ref-count/live-length lever** — the const-15 is a block-local quantity handled by
-`local-alloc.c`, which never enters the `global.c` allocno sort, so raising its "ref count" (the S232
-`||`-single-store trick) does nothing. ~35 faithful-C variants floored at 316/345; `-fno-schedule-insns`
-is worse (confirms the ROM used the scheduler). **Recognize the tell — a structurally-complete near-match
-whose only diff is a constant/temp materialized one slot later than the ROM and your build is 1 instr
-shorter — as this terminal "latency-coin" sub-case and carry it without a permuter run or a fan-out**
-(0-crack class; the S233 permuter reached 310, never 0). Cross-ref the multi-BB `global.c` analog above
-and [#value-select-if-else-vs-branch-likely].
+**Early block-local constants can be source-reachable despite a load-latency residual.**
+The S233 `get_surface_type` / `func_8003DE80` terminal verdict is superseded: both passed the
+full-ROM gate on 2026-10-15. Their selector load had been scheduled before the `15` used for the
+row flip, shortening the constant's lifetime and, in `get_surface_type`, eliminating the incoming
+tile copy. Changing expression order or global allocation weights did not fix that old source.
+
+Assign `edge = 15` inside `do { ... } while (0)` after the coordinate clamps, before the
+column-selector expression. Compute `col` before `cz = edge - cz`. The loop notes prohibit
+instructions crossing the boundary (`sched.c:2053-2080`), restoring early constant materialization
+and the subtraction in the selector's load shadow. `get_surface_type` matches 63 instructions
+with `edge` in `$a0`; `func_8003DE80` matches 81 with `edge` in `$v1`.
+Putting the latter's row flip before the selector still leaves three differing rows.
+This is a scheduling-boundary lever, not a global-priority trick or compiler-profile exception.
+See [surface lookup evidence](wip/get_surface_type.near-match.md) and
+[neighborhood-score evidence](wip/func_8003DE80.near-match.md).
 
 ## base-register-vs-displacement (full symbol/base materialized vs %lo-in-displacement)
 
@@ -7992,9 +7983,9 @@ overshoots (598/590) because it does not reduce to gcc's batched block move. A t
 give the leaf its own carve needs a 16-aligned subseg boundary, which the function start rarely is.
 `pick_target.py --loose-stubs` now tags such a stub `POOL-BLOCKED` and excludes it from `fresh`
 (`pool_blocked_tell`, `tools/pick_target_score.py`): a `%hi(D_<addr>)` into an `asm/data/*.rodata.s`
-blob followed by three or more `lw`/`sw` pairs to `sp`. The tag's scope limit is deliberate and worth
-knowing: it catches the block-move shape only, so the FP-literal variant (S279 `func_80079EBC` in the
-same host, where referencing the constant extern instead perturbs a sched coin) still reads clean.
+blob followed by three or more `lw`/`sw` pairs to `sp`. The tag's scope limit is deliberate:
+it catches the block-move shape only. The FP-literal variant (`func_80079EBC` in the same host)
+instead needed extern-load scheduling boundaries and is now banked; see its reconstruction note.
 
 Provenance: S298 (`emit_wind_indicator_dl`, a +0x40 shift behind a 251/251 byte-exact body; two red
 gate builds, one per half of this section), S300 (`func_8007C5D8`, the array-initializer variant and

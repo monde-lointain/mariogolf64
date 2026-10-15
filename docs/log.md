@@ -2,6 +2,32 @@
 
 ## 2026-10-15
 
+- **Five carried main functions banked with loop-note scheduling boundaries**:
+  `resolve_shot_quality_table`, `func_80047DBC`, `func_80079EBC`,
+  `get_surface_type`, and `func_8003DE80` (457 instructions / 1,828 bytes).
+  Main stubs decrease 208 → 203.
+  - Compiler inspection at `mips-gcc-2.7.2/sched.c:2053-2080` confirms that loop
+    notes prohibit cross-boundary scheduling inside one basic block. One-shot
+    C loops recover the abs/threshold order, early edge constants, and shared
+    double load/count/store order without asm or compiler-profile changes.
+    The quality helper additionally needs a result scratch live through
+    clamping and return to preserve the byte-load/subtract/power-load registers.
+  - Extended the quality host's rodata sibling from `0xA7930` through `0xA7B60`
+    for its 23 individual digit tables and regenerated jump table. The particle
+    spawn retains the existing extern double pool, signed random remainders,
+    three-slot limit, and canonical particle layout.
+  - Four isolated comparisons score zero; the quality helper's score 5 is only
+    a local-label spelling difference, with the same `1040003d` branch encoding.
+    Fresh integrated ranges preserve instruction words and relocation identities.
+    `tools/verify-rom.sh` passes with ROM SHA-1
+    `e2c4e7a905b29529b49a1619a401fe699224829b`.
+  - A throwaway 32-bit UBSan harness of all five integrated bodies passed
+    47,077 checks covering quality categories/clamps, grid edges and selectors,
+    threshold boundaries, particle allocation limits, random order/signedness,
+    and untouched state. No emulator run. Symbol files, compiler profiles,
+    library mirrors, and overlay sources are unchanged. Updated the resolved
+    carry notes, backlog, hazard guidance, and source-lever index.
+
 - **Five carried main functions banked**: Replaced `INCLUDE_ASM` for
   `func_8006DEB4`, `func_8005DE88`, `func_80048CF8`, `func_80067A60`, and
   `func_80051D8C` (218 instructions / 872 bytes). Main stubs decrease 218 → 213.
