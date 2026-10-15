@@ -913,3 +913,6 @@ ROM_SLOT_UNAVAILABLE_FORMAT = 0x800CCB70;
 ROM_SLOT_ERROR_FORMAT = 0x800CCB7C;
 ROM_READ_TRUNCATED_FORMAT = 0x800CCB9C;
 ROM_ASSET_OPEN_FORMAT = 0x800CCBAC;
+// Pointer-bank end and following wave-table start share a ROM boundary.
+audio_wave_bank_rom_end = 0x18BE00; // absolute:True
+audio_wave_table_rom_start = 0x18BE00; // absolute:True

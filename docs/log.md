@@ -2,6 +2,33 @@
 
 ## 2026-10-15
 
+- **Five carried main functions banked**: Replaced `INCLUDE_ASM` for
+  `func_8006DEB4`, `func_8005DE88`, `func_80048CF8`, `func_80067A60`, and
+  `func_80051D8C` (218 instructions / 872 bytes). Main stubs decrease 218 → 213.
+  - Preserved three pending-result snapshots in the statistics update; the save
+    flag helper's formerly shifted globals now resolve at their named addresses.
+    Explicit `atan2f(dx, dz)` arguments recover the angle helper's FPR homes and
+    delay slot. Branch-local sound calls plus separate table-base/row indexing
+    recover the sound selector's argument copies and address order.
+  - The audio initializer distinguishes the pointer-bank end from the following
+    wave-table start at ROM `0x18BE00`. The ROM headers identify `PtrTablesV2` at
+    `0x171790` and `WaveTables` at `0x18BE00`; `load_audio_wave_bank` passes the latter
+    to `MusPtrBankInitialize`. Added the two semantic boundary symbols and explicit
+    PI-ROM linker bindings, following `rom_asset_directory`'s existing convention.
+    Used the libmus header instead of six incompatible local API declarations.
+  - Four isolated comparisons score zero. The audio candidate scores 10 solely
+    for the new bank-end relocation name
+    (`nonmatchings/func_80051D8C/measurements/ddc8b43269ea4c2f16cb7f79a285a64c7d5a398c82c8889a39a30515f2b5b5b4.json`);
+    the final source also names the wave-table start. Fresh integrated function
+    ranges preserve retail instructions and resolve both boundaries to `0x18BE00`.
+    `tools/verify-rom.sh` passed after every bank, including the final state:
+    SHA-1 `e2c4e7a905b29529b49a1619a401fe699224829b`.
+  - A throwaway 32-bit UBSan harness extracted the five integrated bodies and
+    passed 3,482 checks covering statistics branches, flag save/restore, angle
+    guards, sound-table selection, and audio initialization state/order.
+    No emulator run was performed. YAML, compiler profiles, and overlay sources
+    are unchanged.
+
 - **Main-bank structure recovery and cross-file reconciliation**: Parallel implementors read
   Code Complete Chapter 11 before preparing isolated proposals; live integration, source edits,
   compiler experiments, and ROM builds remained serialized. Audited the 58 main C hosts and

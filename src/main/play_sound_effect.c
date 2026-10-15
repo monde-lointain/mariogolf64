@@ -1,16 +1,12 @@
 #include "common.h"
+#include <nusys.h>
+#include <nualstl.h>
 
 extern u32 g_bgm_current_id;
 extern u32 g_bgm_pending_action;
 extern u32 g_bgm_action_delay;
 extern u32 g_bgm_active_handle;
 extern u32 object_id_table[];
-extern s32 MusHandleStop(u32 handle, s32 speed);
-extern s32 MusHandleSetVolume(u32 handle, s32 volume);
-extern s32 MusHandleSetPan(u32 handle, s32 pan);
-extern s32 MusHandleSetReverb(u32 handle, s32 reverb);
-extern s32 MusHandleSetTempo(u32 handle, s32 tempo);
-extern s32 MusHandleSetFreqOffset(u32 handle, f32 offset);
 extern const char D_800CCC14[];
 extern const char D_800CCC20[];
 extern s32 D_800C0EAC[];
@@ -243,14 +239,43 @@ s32 func_80051BFC(void) { return g_bgm_current_id; }
 
 INCLUDE_ASM("asm/nonmatchings/main/play_sound_effect", play_bgm_by_id);
 
-// CARRY (S230): CSE-double-materialization + loop-regalloc near-match. Target
-// loads D_18BE00 into TWO regs (separate materializations for the
-// size-subtraction operand and the 3rd arg); my build CSE-forwards one load (4
-// instr short, flows .bss). Int-casts on the subtraction operands do not defeat
-// the CSE. Loop then diverges on register assignment (i-counter + dual running
-// pointers). No source lever splits the shared address load; permuter-candidate
-// (percent high).
-INCLUDE_ASM("asm/nonmatchings/main/play_sound_effect", func_80051D8C);
+extern u8 D_171790[];
+extern u8 audio_wave_table_rom_start[];
+extern u8 audio_wave_bank_rom_end[];
+extern u8 D_D9B9C0[];
+extern u8 D_D9F450[];
+extern void audio_system_boot(musConfig* config);
+extern void load_audio_wave_bank(u32 rom_address, s32 size, void* wave_bank);
+extern void func_8005F11C(u32 rom_address, s32 size);
+extern s32 ChangeCustomEffect(s32 index);
+
+void func_80051D8C(void) {
+  s32 i;
+  u32* object;
+  s32* effect;
+
+  audio_system_boot(NULL);
+  g_bgm_pending_action = 0;
+  g_bgm_active_handle = -1;
+  g_bgm_current_id = -1;
+  /* The pointer-bank end and wave-table start are distinct linker roots,
+   * despite sharing the same ROM address. */
+  load_audio_wave_bank((u32)D_171790,
+                      (u32)audio_wave_bank_rom_end - (u32)D_171790,
+                      audio_wave_table_rom_start);
+  func_8005F11C((u32)D_D9B9C0, (u32)D_D9F450 - (u32)D_D9B9C0);
+  i = 0;
+  effect = D_800C0EAC;
+  object = object_id_table;
+  do {
+    *object = 0;
+    *effect = 0;
+    effect++;
+    i++;
+    object++;
+  } while (i < 16);
+  ChangeCustomEffect(5);
+}
 
 void alSynNew(ALSynth* s, ALSynConfig* config) { osSyncPrintf(D_800CCC14); }
 
