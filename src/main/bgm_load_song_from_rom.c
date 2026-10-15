@@ -79,7 +79,8 @@ extern s32 D_80104F88;
 extern s32 D_80104F8C;
 extern s32 D_80104F90;
 extern s32 D_800C306C;
-extern s32 scenario_state_id;
+/* State, game mode, player count, and scenario mode share this word block. */
+extern s32 scenario_state_id[];
 extern s32 D_800C30A8;
 extern s32 D_800C30AC;
 
@@ -173,7 +174,18 @@ s32 func_8005F30C(s32 x, s32 z) {
 
 INCLUDE_ASM("asm/nonmatchings/main/bgm_load_song_from_rom", func_8005F360);
 
-INCLUDE_ASM("asm/nonmatchings/main/bgm_load_song_from_rom", func_8005F4AC);
+void func_8005F4AC(void) {
+  *(s32*)((u8*)scenario_state_id + 12) = 0;
+  active_player_count = 1;
+  round_hole_index = 0;
+  D_801B609C = 0;
+  scenario_state_id[0] = 11;
+  if (flag_is_set(0x35)) {
+    scenario_state_id[1] = 9;
+  } else {
+    game_mode = 0;
+  }
+}
 
 void func_8005F518(s32 arg0, char* arg1) {
   sprintf(arg1, D_800D1238, arg0 + 1);
@@ -191,7 +203,7 @@ void func_8005F838(s32 arg0) {
     func_80060210(D_800FED40);
     D_801B609C = 0;
     active_player_count = 1;
-    scenario_state_id = 0;
+    *(s32*)scenario_state_id = 0;
     game_mode = 0;
     scenario_mode_id = D_800FEE10;
     round_hole_index = D_800FEE11;
@@ -273,7 +285,7 @@ void func_80060358(void) {
   D_800C306C = 0;
   transfer_mode_continue_slot(0);
   func_80216B74(0);
-  scenario_state_id = 7;
+  *(s32*)scenario_state_id = 7;
   D_800C30A8 = 3;
   D_800C30AC = 9;
 }
