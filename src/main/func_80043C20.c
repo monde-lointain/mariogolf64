@@ -315,7 +315,117 @@ s32 func_80044A8C(s32 arg0) {
   return resolve_club_terrain_mask(arg0, get_table_entry(active_terrain_index));
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80043C20", resolve_shot_quality_table);
+s32 resolve_shot_quality_table(s32 arg0, s32 arg1, s32 arg2) {
+  /* Keep the 16-byte tables independent: merging rows changes address folding. */
+  static const char q00[16] = "3444444555555";
+  static const char q01[16] = "5555555555555";
+  static const char q02[16] = "3334444445555";
+  static const char q03[16] = "4444555555555";
+  static const char q04[16] = "2333344444455";
+  static const char q05[16] = "3344445555555";
+  static const char q06[16] = "1222333344445";
+  static const char q07[16] = "2333334444455";
+  static const char q08[16] = "1223333444455";
+  static const char q09[16] = "2233344445555";
+  static const char q10[16] = "1112223334445";
+  static const char q11[16] = "2222333444455";
+  static const char q12[16] = "1111222233334";
+  static const char q13[16] = "1112222333344";
+  static const char q14[16] = "1112223333445";
+  static const char q15[16] = "2223333444455";
+  static const char q16[16] = "1111122222334";
+  static const char q17[16] = "1112223333444";
+  static const char q18[16] = "1111111222223";
+  static const char q19[16] = "1111112223334";
+  static const char q20[16] = "1112223333344";
+  static const char q21[16] = "2223333333444";
+  static const char q22[16] = "3333333333333";
+  const char* p1;
+  const char* p2;
+  s32 idx = *(s32*)get_table_entry(arg1);
+  s32 club_index;
+  s32 v;
+
+  switch (idx) {
+    case 0x16:
+      p1 = q00;
+      p2 = q01;
+      break;
+    case 0:
+    case 0xC:
+    case 0xF:
+      p1 = q02;
+      p2 = q03;
+      break;
+    case 1:
+    case 0x11:
+      p1 = q04;
+      p2 = q05;
+      break;
+    case 2:
+      p1 = q06;
+      p2 = q07;
+      break;
+    case 3:
+    case 0x10:
+    case 0x12:
+      p1 = q08;
+      p2 = q09;
+      break;
+    case 4:
+      p1 = q10;
+      p2 = q11;
+      break;
+    case 0x13:
+    case 0x17:
+      p1 = q12;
+      p2 = q13;
+      break;
+    case 6:
+      p1 = q14;
+      p2 = q15;
+      break;
+    case 7:
+      p1 = q16;
+      p2 = q17;
+      break;
+    case 8:
+      p1 = q18;
+      p2 = q19;
+      break;
+    case 0xE:
+      p1 = q20;
+      p2 = q21;
+      break;
+    default:
+      p1 = q22;
+      p2 = p1;
+      break;
+  }
+
+  club_index = *(s16*)((u8*)arg0 + 0x16);
+  if (club_index != 0xD) {
+    const char* addr = (arg2 == 2) ? &p2[club_index] : &p1[club_index];
+    s32 power;
+    s32 raw = (u8)*addr;
+    v = raw - 0x30;
+    /* Reuse the return scratch, and keep the power load after digit decoding. */
+    do {
+      power = *(s16*)((u8*)arg0 + 0x14);
+    } while (0);
+    v = (v * power + 0x32) / 100;
+    if (v < 1) {
+      v = 1;
+    }
+    if (v < 6) {
+      return v;
+    }
+    v = 5;
+  } else {
+    v = 0;
+  }
+  return v;
+}
 
 void func_80044C7C(s32 arg0, s32 arg1, s32* out, s32 arg3) {
   s32 n = resolve_shot_quality_table(arg0, arg1, arg3);

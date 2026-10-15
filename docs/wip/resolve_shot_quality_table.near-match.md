@@ -1,10 +1,35 @@
 ---
 type: "Reconstruction Note"
-title: "resolve_shot_quality_table — near-match (S185, structurally complete, 3-instr irreducible residual)"
-description: "Documents the structurally complete S185 near-match and its three-instruction residual."
+title: "resolve_shot_quality_table — banked with a result-scratch lifetime and loop-note boundary"
+description: "Records the verified resolution of the former digit/power scheduling and allocation residual."
 ---
 
-# resolve_shot_quality_table — near-match (S185, structurally complete, 3-instr irreducible residual)
+# resolve_shot_quality_table — banked with a result-scratch lifetime and loop-note boundary
+
+## Verified resolution (2026-10-15)
+
+**BANKED:** YAML `main`, ROM `0x1FEC8`, VRAM `0x80044AC8`,
+`src/main/func_80043C20.c`. `tools/verify-rom.sh` exited zero:
+`CMake build OK + ROM SHA-1 MATCH (e2c4e7a905b29529b49a1619a401fe699224829b)`.
+
+The old source-only impossibility claim below is superseded. Load the digit into
+a block-local `raw`, assign `v = raw - 0x30`, and reuse `v` through multiplication,
+clamping, and the shared return. Put only the power load inside
+`do { ... } while (0)`. The boundary preserves load/subtract/load order; the
+result scratch makes subtraction write `$v1` while the byte and power loads
+reuse `$v0`. A separate short-lived `digit` instead coalesces the byte load and
+subtraction or swaps their registers.
+
+Fresh isolated source/measurement:
+`nonmatchings/resolve_shot_quality_table/measurements/954d47c617b06debadbf2e41384eaadeeb3a991c0527e4cdcfb808e561d1dfa6.{c,json}`.
+All 109 instructions reproduce; the isolated score of 5 is a local-label spelling
+difference on the range-check branch, whose actual encoding is `1040003d` in both
+objects. Integrated disassembly preserves that branch and the arithmetic.
+The YAML rodata sibling now extends from `0xA7930` to `0xA7B60`, owning the
+23 individual 16-byte digit tables and the regenerated switch table.
+
+## Historical carry (superseded)
+
 
 `src/main/func_80043C20.c` @ 0x80044AC8 (109 insns, 0x1B4). **STRUCTURALLY COMPLETE (109/109 insns);
 only a 2-instruction schedule swap + the mult operand order differ** (v0/v1). Full near-match body in
