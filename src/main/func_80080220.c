@@ -1,7 +1,7 @@
 #include "common.h"
 
 extern u32 sky_panel_bank_index;
-extern void func_8003E4B4(void);
+extern void free_pin_render_assets(void);
 extern void* heap3_alloc(s32 size);
 extern void func_80026400(u8* block, s32 size);
 extern s32 D_800E2190[];
@@ -402,7 +402,7 @@ extern s16 D_801B7F36;
 extern s32 D_800E21BC;
 extern void build_radial_falloff_texture(void* buf, s32 w, s32 h, s32 fmt);
 extern void func_8006ACD8(void);
-extern void func_8003E400(void);
+extern void load_pin_render_assets(void);
 extern void func_80078D94(void);
 
 void load_course_scenery_assets(void) {
@@ -466,11 +466,11 @@ void load_course_scenery_assets(void) {
   }
 
   func_8006ACD8();
-  func_8003E400();
+  load_pin_render_assets();
   func_80078D94();
 }
 
-void func_80081550(void) { func_8003E4B4(); }
+void func_80081550(void) { free_pin_render_assets(); }
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80080220", func_8008156C);
 
@@ -1019,9 +1019,9 @@ INCLUDE_ASM("asm/nonmatchings/main/func_80080220", func_800842C0);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80080220", func_80084468);
 
-extern f32 per_view_camera_state;
+extern f32 view_camera_eye_x;
 extern f32 D_801B54F0;
-extern f32 D_801B54F4;
+extern f32 view_camera_eye_z;
 extern f32 D_801B54F8;
 extern f32 D_801B54FC;
 extern f32 D_801B5500;
@@ -1102,9 +1102,9 @@ void emit_wind_indicator_dl(Gfx** gfxp, f32 x, f32 y) {
   Gfx* gfx = *gfxp;
   f32* wind = &wind_dir_angle_rad;
 
-  look[0] = D_801B54F8 - per_view_camera_state;
+  look[0] = D_801B54F8 - view_camera_eye_x;
   look[1] = D_801B54FC - D_801B54F0;
-  look[2] = D_801B5500 - D_801B54F4;
+  look[2] = D_801B5500 - view_camera_eye_z;
 
   rot[0] = atan2(look[1], sqrtf(look[0] * look[0] + look[2] * look[2])) +
            D_800D1B30 + D_800D1B38;
@@ -1183,7 +1183,7 @@ extern u16 D_800C5AD4[];
 extern u8 D_80106240[];
 extern s32 D_800C54C8[];
 extern s32 D_800C5474;
-extern u32 D_800FBE70;
+extern u32 active_terrain_index;
 extern s16 D_801B7222[][92];
 extern s32 active_player_idx;
 extern s32 active_club_id;
@@ -1254,7 +1254,7 @@ void emit_club_and_power_hud_dl(Gfx** gfxp) {
       }
     }
   } else if (wind_magnitude != 0 && D_801061BF != 0) {
-    if (get_table_entry(D_800FBE70)->id != 11 && D_800BE69C == 0) {
+    if (get_table_entry(active_terrain_index)->id != 11 && D_800BE69C == 0) {
       emit_wind_indicator_dl(&gfx, (f32)D_800C54C8[0] + 100.0f, 76.0f);
     }
   }

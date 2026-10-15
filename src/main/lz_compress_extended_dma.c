@@ -56,7 +56,7 @@ extern void func_80032E88(void);
 extern const char D_800D139C[];
 extern const char D_800D13A8[];
 extern const char D_800D13B4[];
-extern s32 D_800FBE70;
+extern s32 active_terrain_index;
 extern s32 D_801B60B0;
 extern s32 D_80105B20[];
 extern s32 D_80104E70[];
@@ -137,7 +137,7 @@ void func_80069BCC(void) {
     }
   }
   func_8005F964();
-  D_800FBE70 = 0;
+  active_terrain_index = 0;
   osSyncPrintf(D_800D139C);
   init_sky_panels();
   osSyncPrintf(D_800D13A8);

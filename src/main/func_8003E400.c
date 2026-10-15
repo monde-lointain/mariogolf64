@@ -1,95 +1,126 @@
 #include "common.h"
 
-extern s8 D_800BA9A8;
-extern s8 D_800BA9A9;
-extern s32 D_800FBE70;
-extern s32 D_800B7780;
-extern void* D_800DAD00;
-extern void* D_800DAD04;
-extern void* D_800DAD08;
-extern Mtx D_800DAD10[];
-extern s32 D_801B6088;
-extern f32 D_801B54F4;
+/* Preserve the retail approximation rather than substituting a different pi. */
+#define PIN_MARKER_YAW_OFFSET 3.14f
+#define PIN_MARKER_SCALE 0.1f
+
+enum {
+  PIN_MARKER_NEAR_ASSET_ID = 0x4CA,
+  PIN_MARKER_FAR_ASSET_ID = 0x4C9,
+  PIN_ASSEMBLY_ASSET_ID = 0x703,
+  PIN_WIND_ASSET_ID = 0x704,
+  PIN_MARKER_BUFFER_COUNT = 2,
+  PIN_HIDDEN_TERRAIN_ID = 11
+};
+
+typedef struct {
+  u32 start;
+  u32 size;
+  u32 pos;
+  u32 end;
+} RomLoadSlot;
+
+extern s8 pin_flag_suppressed;
+extern s8 pin_assembly_suppressed;
+extern s32 active_terrain_index;
+extern s32 render_buffer_index;
+extern void* pin_marker_far_texture;
+extern void* pin_marker_near_texture;
+extern void* pin_assembly_texture;
+extern Mtx pin_marker_matrices[][PIN_MARKER_BUFFER_COUNT];
+extern s32 scenario_state_id;
+extern f32 view_camera_eye_z;
 extern s32 camera_position_x;
 extern s32 camera_position_y;
 extern s32 camera_position_z;
-extern f32 per_view_camera_state;
+extern f32 view_camera_eye_x;
 extern s8 g_terrain_vtx_xform_mode;
-extern void* wind_dl_buffer_addr;
+extern void* pin_wind_texture;
 
 typedef struct {
   /* 0x00 */ u32 id;
 } TerrainAttrEntry;
 
-extern TerrainAttrEntry* get_table_entry(u32 idx);
+extern TerrainAttrEntry* get_table_entry(u32 index);
 extern double atan2(double y, double x);
-extern void convert_and_pack_floats_to_fixed(f32 mf[4][4], Mtx* m);
-extern void* heap3_alloc(u32 need);
-extern void heap3_free(void** payload_ptr);
-extern u32 func_8005062C(u16 index, void* out);
-extern void func_800506D4(void* data, void* slot);
-extern void mtx_from_rts(f32 mf[4][4], f32 rotate[3], f32 translate[3],
+extern void convert_and_pack_floats_to_fixed(f32 matrix[4][4],
+                                             Mtx* fixed_matrix);
+extern void* heap3_alloc(u32 size);
+extern void heap3_free(void** payload);
+extern u32 func_8005062C(u16 asset_id, void* load_slots);
+extern void func_800506D4(void* destination, RomLoadSlot* load_slots);
+extern void mtx_from_rts(f32 matrix[4][4], f32 rotation[3], f32 translation[3],
                          f32 scale[3]);
 
-void func_8003E400(void) {
-  u8 sp10[0x20];
+void load_pin_render_assets(void) {
+  RomLoadSlot load_slots[2];
 
-  D_800DAD04 = heap3_alloc(func_8005062C(0x4CA, sp10));
-  func_800506D4(D_800DAD04, sp10);
-  D_800DAD00 = heap3_alloc(func_8005062C(0x4C9, sp10));
-  func_800506D4(D_800DAD00, sp10);
-  D_800DAD08 = heap3_alloc(func_8005062C(0x703, sp10));
-  func_800506D4(D_800DAD08, sp10);
-  wind_dl_buffer_addr = heap3_alloc(func_8005062C(0x704, sp10));
-  func_800506D4(wind_dl_buffer_addr, sp10);
+  pin_marker_near_texture =
+      heap3_alloc(func_8005062C(PIN_MARKER_NEAR_ASSET_ID, load_slots));
+  func_800506D4(pin_marker_near_texture, load_slots);
+
+  pin_marker_far_texture =
+      heap3_alloc(func_8005062C(PIN_MARKER_FAR_ASSET_ID, load_slots));
+  func_800506D4(pin_marker_far_texture, load_slots);
+
+  pin_assembly_texture =
+      heap3_alloc(func_8005062C(PIN_ASSEMBLY_ASSET_ID, load_slots));
+  func_800506D4(pin_assembly_texture, load_slots);
+
+  pin_wind_texture = heap3_alloc(func_8005062C(PIN_WIND_ASSET_ID, load_slots));
+  func_800506D4(pin_wind_texture, load_slots);
 }
 
-void func_8003E4B4(void) {
-  heap3_free(&D_800DAD00);
-  heap3_free(&D_800DAD04);
-  heap3_free(&D_800DAD08);
-  heap3_free(&wind_dl_buffer_addr);
+void free_pin_render_assets(void) {
+  heap3_free(&pin_marker_far_texture);
+  heap3_free(&pin_marker_near_texture);
+  heap3_free(&pin_assembly_texture);
+  heap3_free(&pin_wind_texture);
 }
 
-void build_pin_or_cup_matrix_for_dad10(s32 arg0) {
-  s32 arg = arg0;
-  s32* camera_x_ptr = &camera_position_x;
-  f32 translate[3];
-  f32 rotate[3];
+void build_pin_marker_matrix(s32 view_index) {
+  /* Keep the address live across atan2 to preserve the retail reload sequence.
+   */
+  s32* camera_x = &camera_position_x;
+  const f32 fixed_to_world = 1.0f / 1024.0f;
+  f32 facing_angle =
+      atan2((f32)*camera_x * fixed_to_world - view_camera_eye_x,
+            (f32)camera_position_z * fixed_to_world - view_camera_eye_z);
+
+  /* GCC 2.7.2 requires these arrays before the first statement. */
+  f32 translation[3];
+  f32 rotation[3];
   f32 scale[3];
-  f32 mf[4][4];
-  Mtx* dst;
-  f32 k = 0.0009765625f;
-  f32 angle;
+  f32 matrix[4][4];
 
-  angle = atan2((f32)*camera_x_ptr * k - per_view_camera_state,
-                (f32)camera_position_z * k - D_801B54F4);
+  translation[0] = (f32)*camera_x * fixed_to_world;
+  translation[1] = (f32)camera_position_y * fixed_to_world;
+  translation[2] = (f32)camera_position_z * fixed_to_world;
 
-  translate[0] = (f32)*camera_x_ptr * k;
-  translate[1] = (f32)camera_position_y * k;
-  translate[2] = (f32)camera_position_z * k;
-  rotate[0] = 0.0f;
-  rotate[1] = angle + 3.14f;
-  rotate[2] = 0.0f;
-  scale[0] = 0.1f;
-  scale[1] = 0.1f;
-  scale[2] = 0.1f;
-  mtx_from_rts(mf, rotate, translate, scale);
-  arg <<= 7;
-  dst = (Mtx*)((u8*)D_800DAD10 + (D_800B7780 << 6));
-  convert_and_pack_floats_to_fixed(mf, (Mtx*)((u8*)arg + (u32)dst));
+  rotation[0] = 0.0f;
+  rotation[1] = facing_angle + PIN_MARKER_YAW_OFFSET;
+  rotation[2] = 0.0f;
+
+  scale[0] = PIN_MARKER_SCALE;
+  scale[1] = PIN_MARKER_SCALE;
+  scale[2] = PIN_MARKER_SCALE;
+  mtx_from_rts(matrix, rotation, translation, scale);
+
+  convert_and_pack_floats_to_fixed(
+      matrix, &pin_marker_matrices[view_index][render_buffer_index]);
 }
 
-void func_8003E628(void) { D_800BA9A8 = 1; }
+/* The renderer consumes each suppression request on its next invocation. */
+void suppress_pin_flag_once(void) { pin_flag_suppressed = 1; }
 
-void func_8003E638(void) { D_800BA9A9 = 1; }
+void suppress_pin_assembly_once(void) { pin_assembly_suppressed = 1; }
 
-s32 func_8003E648(void) {
-  if (D_800BA9A8 != 0 || D_800BA9A9 != 0) {
+s32 should_draw_pin_flag(void) {
+  if (pin_flag_suppressed != 0 || pin_assembly_suppressed != 0) {
     return 0;
   }
 
-  if ((u32)(D_801B6088 - 6) >= 2) {
+  if (scenario_state_id != 6 && scenario_state_id != 7) {
     return 1;
   }
 
@@ -97,5 +128,5 @@ s32 func_8003E648(void) {
     return 1;
   }
 
-  return get_table_entry(D_800FBE70)->id != 0xB;
+  return get_table_entry(active_terrain_index)->id != PIN_HIDDEN_TERRAIN_ID;
 }

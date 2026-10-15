@@ -6,7 +6,7 @@ extern u16* D_800C5EE0;
 extern s32 D_800C7304;
 extern s32 D_800C730C;
 
-extern s32 D_801B6088;
+extern s32 scenario_state_id;
 extern s32 D_801B6098;
 extern s32 scenario_mode_id;
 extern s32 D_801B609C;
@@ -39,7 +39,7 @@ extern ScissorRect D_801B7F30;
  * (wind magnitude = (rand() & 0x3F) * 6000, wind angle from a second rand),
  * then run the sub-init calls and select framebuffer 2. */
 void init_scenario_state(void) {
-  memset(&D_801B6088, 0, 0x44);
+  memset(&scenario_state_id, 0, 0x44);
   D_801B6098 = 9;
   scenario_mode_id = 0;
   D_801B609C = 0;

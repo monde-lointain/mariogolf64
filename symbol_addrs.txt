@@ -780,3 +780,23 @@ clear_framebuffers = 0x80032E34; // type:func segment:main
 frame_viewports = 0x800B7790; // size:0x60
 rdp_setup_dl = 0x800B77F0; // size:0x30
 rsp_setup_dl = 0x800B7820; // size:0x20
+
+// Pin render resources, per-view marker matrices, and one-render suppression.
+load_pin_render_assets = 0x8003E400; // type:func segment:main
+free_pin_render_assets = 0x8003E4B4; // type:func segment:main
+build_pin_marker_matrix = 0x8003E4F8; // type:func rom:0x198F8 segment:main
+suppress_pin_flag_once = 0x8003E628; // type:func segment:main
+suppress_pin_assembly_once = 0x8003E638; // type:func segment:main
+should_draw_pin_flag = 0x8003E648; // type:func segment:main
+pin_flag_suppressed = 0x800BA9A8; // size:0x1
+pin_assembly_suppressed = 0x800BA9A9; // size:0x1
+pin_marker_far_texture = 0x800DAD00; // size:0x4
+pin_marker_near_texture = 0x800DAD04; // size:0x4
+pin_assembly_texture = 0x800DAD08; // size:0x4
+pin_wind_texture = 0x800DAD0C; // size:0x4 segment:main
+pin_marker_matrices = 0x800DAD10;
+render_buffer_index = 0x800B7780; // size:0x4
+active_terrain_index = 0x800FBE70; // size:0x4
+scenario_state_id = 0x801B6088; // size:0x4
+view_camera_eye_x = 0x801B54EC; // size:0x4 segment:main
+view_camera_eye_z = 0x801B54F4; // size:0x4

@@ -2,6 +2,26 @@
 
 ## 2026-10-14
 
+- **Pin-rendering readability**: Applied the C-relevant guidelines from Code Complete
+  Chapters 7, 10–16, 31, and 32 to all six routines in `src/main/func_8003E400.c`.
+  Named resource loading/freeing, marker-matrix construction, one-render suppression,
+  and the visibility predicate; migrated compiled C references and added authoritative
+  symbols. Replaced raw metadata bytes with the existing `RomLoadSlot[2]` layout,
+  byte-offset matrix arithmetic with `[view_index][render_buffer_index]`, and the
+  unsigned range trick with explicit comparisons against states 6 and 7.
+  Named assets, state, arguments, locals, and constants; retained load/free order,
+  guard short-circuiting, and the retail `3.14f` approximation. GCC 2.7.2 requires
+  declarations before statements, and the camera-X address must remain live across
+  `atan2` for matching reloads. KMC assembly input paths and identifier spelling also
+  affected leading padding in a caller; `active_terrain_index` preserves its layout.
+  Corrected extraction's symbol-input order for Splat 0.50's last-wins resolution,
+  so maintainer names override legacy Ghidra names without linker shims or edits to
+  generated symbols. A 32-bit host smoke of the real six bodies, with dependency
+  probes, passed two load/free cycles, independent setters, 864 visibility/lookup
+  cases, and six matrix destinations with untouched neighbors. The ROM-build tooling
+  suite passed all 10 tests; `tools/verify-rom.sh` passed with retail SHA-1
+  `e2c4e7a905b29529b49a1619a401fe699224829b`. YAML and compiler profiles are unchanged.
+
 - **Scenery billboard reset readability**: Reviewed Code Complete Chapters 7, 10–16,
   31, and 32 and refactored the sole routine in `src/main/func_800263B0.c` as
   `reset_scenery_billboards`. Replaced byte-offset casts and the `do-while` with

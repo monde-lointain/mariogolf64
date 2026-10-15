@@ -284,7 +284,8 @@ INCLUDE_ASM("asm/nonmatchings/main/func_800453E0", func_80045CE0);
  * one over). Club/terrain sound-effect dispatch:
  *
  *   club  = get_club_param(*(s16*)(D_801B7222 + D_80250B54*0xB8 +
- * D_80250B40*2)); entry = get_table_entry(D_800FBE70);   // club held in $s0
+ * D_80250B40*2)); entry = get_table_entry(active_terrain_index);
+ * // club held in $s0
  * across this call, kind  = *(s16*)((u8*)club + 0x24);     // read AFTER so $s0
  * reuses to entry if (kind == 0) { if (D_80250B58 == 0 && D_80250B34 != 0) {
  * play_sound_effect(0x50,2,0x7F); func_80213D70(0); } else { id = *(s32*)entry;

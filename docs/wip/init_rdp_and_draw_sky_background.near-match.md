@@ -60,8 +60,8 @@ Getting this backwards (iteration 1) costs more than the slot numbers: with `mf`
 keeps `&mf` in `$s0` across both calls and emits `addiu $s0,$sp,N` + two `move $a0,$s0` where the
 ROM rematerialises `addiu $a0,$sp,0x10` twice — 287 instructions. Fixing the declaration order
 alone took it to 286 and removed the `$s0` web. The banked sibling
-`build_pin_or_cup_matrix_for_dad10` in `src/main/func_8003E400.c` **does** keep `&mf` in `$s0` and
-matches, so the `move` is not a defect of the idiom — it is a consequence of where `mf` sits.
+`build_pin_marker_matrix` in `src/main/func_8003E400.c` **does** keep `&matrix` in `$s0` and
+matches, so the `move` is not a defect of the idiom — it is a consequence of where the matrix sits.
 
 **Semantics.** `arg1` is a viewport record: `0x1C`/`0x20` origin, `0x24`/`0x28` size, `0x40` a flag
 set when the yaw wraps. The yaw advance is `step = M_PI / (f64)D_800B6810`, and the half-turn nudge

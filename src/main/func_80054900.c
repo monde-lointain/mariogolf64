@@ -22,9 +22,9 @@ extern void func_800543DC(s32 arg0, s32 arg1);
 extern s32 kSetMultiTLB(s32 a, s32 b, s32 c, s32 d, u32 phys);
 extern s32 D_800C1DEC;
 extern void func_800989EC(void* a, void* b, void* c);
-extern f32 per_view_camera_state;
+extern f32 view_camera_eye_x;
 extern f32 D_801B54F0;
-extern f32 D_801B54F4;
+extern f32 view_camera_eye_z;
 extern f32 D_801B54F8;
 extern f32 D_801B54FC;
 extern f32 D_801B5500;
@@ -671,7 +671,7 @@ void func_800578AC(void) {
 }
 
 extern u32 D_800BA9FC;
-extern s32 D_800B7780;
+extern s32 render_buffer_index;
 extern u16 g_scenery_wind_angle_a;
 extern u16 g_scenery_wind_angle_b;
 extern s32 D_800C1F90;
@@ -686,7 +686,7 @@ extern f32 cosf(f32);
  * angles. Both angles are u16 binary angles, so 2*pi/65536 converts them to
  * radians; the direction vector is the unit vector of (yaw, pitch) scaled to
  * the s8 range. D_800C1EA0 takes the course-tinted set and D_800C1E50 a fixed
- * one, both indexed by D_800B7780. */
+ * one, both indexed by render_buffer_index. */
 void build_scenery_light_sets(void) {
   u8 amb[3];
   u8 col[3];
@@ -730,10 +730,10 @@ void build_scenery_light_sets(void) {
    * constructor into a temporary and then block-moves it into the local, so
    * each set costs one extra 40-byte copy and 0x28 of frame. Assigning the
    * constructor straight to the array element leaves the ROM's single copy. */
-  D_800C1EA0[D_800B7780] = (Lights2)gdSPDefLights2(
+  D_800C1EA0[render_buffer_index] = (Lights2)gdSPDefLights2(
       amb[0], amb[1], amb[2], col[0], col[1], col[2], dir[0], dir[1], dir[2],
       col[0], col[1], col[2], D_800C1F90, D_800C1F94, D_800C1F98);
-  D_800C1E50[D_800B7780] = (Lights2)gdSPDefLights2(
+  D_800C1E50[render_buffer_index] = (Lights2)gdSPDefLights2(
       100, 100, 100, 0x9B, 0x78, 0x78, dir[0], dir[1], dir[2], 0x96, 0x96, 0x96,
       D_800C1F90, D_800C1F94, D_800C1F98);
 }
@@ -757,12 +757,12 @@ void func_80058B34(s32 id) {
     D_801B54F8 = *(f32*)(cs + 0x38) * (1.0f / 1024.0f);
     D_801B54FC = (*(f32*)(cs + 0x3C) - 15360.0f) * (1.0f / 1024.0f);
     D_801B5500 = *(f32*)(cs + 0x40) * (1.0f / 1024.0f);
-    per_view_camera_state =
+    view_camera_eye_x =
         (*(f32*)(cs + 0x38) +
          cosf(-*(f32*)(cs + 0x48) - 1.57079637f) * 61440.0f) *
         (1.0f / 1024.0f);
     D_801B54F0 = (*(f32*)(cs + 0x3C) - 15360.0f) * (1.0f / 1024.0f);
-    D_801B54F4 = (*(f32*)(cs + 0x40) +
+    view_camera_eye_z = (*(f32*)(cs + 0x40) +
                   sinf(-*(f32*)(cs + 0x48) - 1.57079637f) * 61440.0f) *
                  (1.0f / 1024.0f);
   }

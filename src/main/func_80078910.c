@@ -38,8 +38,8 @@ extern void* D_800E1DC0;
 extern void* D_800E1DC4;
 extern void* D_800E1DC8;
 extern void* D_800E1DCC;
-extern f32 per_view_camera_state;
-extern f32 D_801B54F4;
+extern f32 view_camera_eye_x;
+extern f32 view_camera_eye_z;
 extern f32 D_801B54F8;
 extern f32 D_801B5500;
 extern s32 D_800FF418;
@@ -103,7 +103,7 @@ typedef struct {
 
 extern s32 D_800FBE64;
 extern u32 target_z;
-extern s32 D_800FBE70;
+extern s32 active_terrain_index;
 extern s32 D_800C52B0;
 extern s32 D_800FC8B8;
 extern TerrainAttrEntry* get_table_entry(u32 idx);
@@ -139,7 +139,7 @@ void reload_scene_assets(s8* arg0) {
     func_8005062C(0x6B6, sp10);
     func_800506D4(D_800E1DBC, sp10);
   } else {
-    switch (get_table_entry(D_800FBE70)->id) {
+    switch (get_table_entry(active_terrain_index)->id) {
       case 0:
       case 1:
       case 2:
@@ -495,8 +495,8 @@ void func_8007E2B0(void) {
 }
 
 void project_delta_to_radius_150(void) {
-  s32 dx = (s32)(D_801B54F8 - per_view_camera_state);
-  s32 dy = (s32)(D_801B5500 - D_801B54F4);
+  s32 dx = (s32)(D_801B54F8 - view_camera_eye_x);
+  s32 dy = (s32)(D_801B5500 - view_camera_eye_z);
   f32 scale = sqrtf((f32)(dx * dx + dy * dy));
 
   D_800FF418 = dx;
@@ -509,9 +509,9 @@ void project_delta_to_radius_150(void) {
   }
   {
     s32* p = &D_800FF418;
-    *p = (s32)((f32)*p * scale + per_view_camera_state);
+    *p = (s32)((f32)*p * scale + view_camera_eye_x);
   }
-  D_800FF41C = (s32)((f32)D_800FF41C * scale + D_801B54F4);
+  D_800FF41C = (s32)((f32)D_800FF41C * scale + view_camera_eye_z);
 }
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80078910", func_8007E438);

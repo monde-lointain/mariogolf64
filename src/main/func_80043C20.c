@@ -31,7 +31,7 @@ extern s16 D_801B7222[][92];
 extern s32 active_player_idx;
 extern s32 active_club_id;
 extern s32 active_meter_category;
-extern void* D_800FBE70;
+extern void* active_terrain_index;
 
 extern s32 flag_is_set(s32 flag);
 extern s32 get_club_meter_extent(void* club, s32 category);
@@ -347,7 +347,7 @@ s32 resolve_club_terrain_mask(s32 arg0, void* arg1) {
 }
 
 s32 func_80044A8C(s32 arg0) {
-  return resolve_club_terrain_mask(arg0, get_table_entry(D_800FBE70));
+  return resolve_club_terrain_mask(arg0, get_table_entry(active_terrain_index));
 }
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80043C20", resolve_shot_quality_table);

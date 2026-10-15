@@ -77,7 +77,7 @@ extern s32 D_80104F88;
 extern s32 D_80104F8C;
 extern s32 D_80104F90;
 extern s32 D_800C306C;
-extern s32 D_801B6088;
+extern s32 scenario_state_id;
 extern s32 D_800C30A8;
 extern s32 D_800C30AC;
 
@@ -176,7 +176,7 @@ void func_8005F838(s32 arg0) {
     func_80060210(D_800FED40);
     D_801B609C = 0;
     D_801B6090 = 1;
-    D_801B6088 = 0;
+    scenario_state_id = 0;
     D_801B608C = 0;
     scenario_mode_id = D_800FEE10;
     D_801B6098 = D_800FEE11;
@@ -258,7 +258,7 @@ void func_80060358(void) {
   D_800C306C = 0;
   transfer_mode_continue_slot(0);
   func_80216B74(0);
-  D_801B6088 = 7;
+  scenario_state_id = 7;
   D_800C30A8 = 3;
   D_800C30AC = 9;
 }
@@ -276,7 +276,7 @@ s32 func_800603A8(void) {
 void func_80060434(void) {
   s32 i;
 
-  *(Rec44*)&D_801B55F0 = *(Rec44*)&D_801B6088;
+  *(Rec44*)&D_801B55F0 = *(Rec44*)&scenario_state_id;
   for (i = 0; i < 4; i++) {
     D_8012D0C8[i] = D_801B71D0[i];
   }

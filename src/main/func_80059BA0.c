@@ -870,7 +870,7 @@ typedef struct {
 } RecB8;
 
 /* One continue slot: the saved copy of the global match state. `state` mirrors
- * the 0x44 block at D_801B6088 (whose word 2 is the player count), `camera`
+ * the 0x44 block at scenario_state_id (whose word 2 is the player count), `camera`
  * the 0x34 block at camera_position_x and `misc` the 0x1C block at
  * D_800FF4D0. The per-player records live in a sibling array. */
 typedef struct {
@@ -887,7 +887,7 @@ extern Rec68 D_800FEDD8[];
 extern RecB8 D_8012FB60[];
 extern RecB8 D_8012FAA8[];
 extern RecB8 D_8012F938[];
-extern s32 D_801B6088;
+extern s32 scenario_state_id;
 extern s32 D_801B6090;
 extern s8 D_801B60B8;
 extern s32 camera_position_x;
@@ -964,7 +964,7 @@ s32 transfer_mode_continue_slot(s32 restore) {
       }
       modes[i] = D_800FEDD8[i];
     }
-    slot->state = *(Rec44*)&D_801B6088;
+    slot->state = *(Rec44*)&scenario_state_id;
     slot->camera = *(Rec34*)&camera_position_x;
     if (bad == 0) {
       mode = 1;
@@ -984,8 +984,8 @@ s32 transfer_mode_continue_slot(s32 restore) {
         D_801B71D0[i] = recs[i];
         D_800FEDD8[i] = modes[i];
       }
-      *(Rec44*)&D_801B6088 = slot->state;
-      D_801B6088 = 1;
+      *(Rec44*)&scenario_state_id = slot->state;
+      scenario_state_id = 1;
       flag_set(0x1E);
       *(Rec34*)&camera_position_x = slot->camera;
     }
@@ -1068,8 +1068,8 @@ s32 transfer_continue_slot(s32 id, s32 restore) {
       for (i = 0; i < count; i++) {
         D_801B71D0[i] = recs[i];
       }
-      *(Rec44*)&D_801B6088 = slot->state;
-      D_801B6088 = 1;
+      *(Rec44*)&scenario_state_id = slot->state;
+      scenario_state_id = 1;
       flag_set(0x1E);
       *(Rec34*)&camera_position_x = slot->camera;
       *(Rec1C*)&D_800FF4D0 = slot->misc;
