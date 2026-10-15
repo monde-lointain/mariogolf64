@@ -66,16 +66,28 @@ void initialize_save_sram(void);
 void flag_clear(s32);
 void func_8005D9A0(void);
 
-/* func_80059BA0: fabsf(arg0) via union bit-clear of the sign bit (0x7FFFFFFF).
- * NEAR-MATCH, CARRIED (terminal sched2 coin). The faithful body
- *   union{f32 f;s32 i;}x; x.f=arg0; x.i&=0x7FFFFFFF; arg0=x.f; return arg0;
- * yields the exact 8 insns + identical regalloc, but gcc's post-reload
- * scheduler (schedule_select, sched.c:2650) front-loads the independent `li`
- * ahead of `mfc1` to fill the mov.s->mfc1 FP-load-coproc hazard slot:
- *   mine: mov.s $f0,$f12; li; mfc1; ori; and; mtc1
- *   ROM : mov.s $f0,$f12; mfc1; li; ori; and; mtc1
- * See docs/wip/func_80059BA0.near-match.md. */
-INCLUDE_ASM("asm/nonmatchings/main/func_80059BA0", func_80059BA0);
+f32 func_80059BA0(f32 value) {
+  union {
+    f32 f;
+    s32 bits;
+  } x;
+  s32 bits;
+  s32 mask;
+  x.f = value;
+  bits = x.bits;
+  /* Loop notes keep the mask after the bit transfer; three scopes give the
+   * mask priority over the transferred bits without emitting instructions. */
+  do {
+    do {
+      do {
+        mask = 0x7FFFFFFF;
+      } while (0);
+    } while (0);
+  } while (0);
+  x.bits = bits & mask;
+  value = x.f;
+  return value;
+}
 
 /* fdlibm single-precision acos. It reduces to the same rational approximation
  * asin(x) = x + x*x^2*R(x^2), R = P/Q, that fdlibm's asinf uses, which is why
