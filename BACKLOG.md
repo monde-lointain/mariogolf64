@@ -4802,7 +4802,7 @@ by `/sprint-plan`:
   — S289 `func_80096C04`), and the TU's `-ffast-math` override in `mk/main.mk` (S289), which applies
   to anything added to the file and under which all 15 banked functions are verified invariant.
 
-- **(S271 pack, refreshed 2026-10-15 — 12 of 18 banked; 6 live stubs)**
+- **(S271 pack, refreshed 2026-10-15 — 14 of 18 banked; 4 live stubs)**
   `src/main/vec3f_normalize.c` remains in YAML main at ROM `0x4D00`.
   S271 banked the six bit-flag/cfb functions; subsequent source also contains
   `func_80029B58`, `pause_audio`, and `func_80029EEC`.
@@ -4835,8 +4835,40 @@ by `/sprint-plan`:
   Fresh host range matches all 20 instructions after relocation interpretation;
   full-ROM verifier passes. The 32-bit UBSan smoke reaches the first print with
   the ROM format and count.
-  **Remaining:** `vec3f_normalize`, `func_80029C00`, `mainproc`,
-  `func_8002A144`, `func_8002A310`, and `game_draw_callback`.
+  **Two more banks 2026-10-15:** `vec3f_normalize` (ROM `0x4D00`, 52 instructions,
+  208 bytes) and `func_8002A310` (ROM `0x5710`, 73 instructions, 292 bytes).
+  Reusing `length` for the reciprocal magnitude removes the normalization leaf's
+  `$f0`/`$f4` allocation residual (score 65 → 0). Its bare `sqrt.s` requires the
+  new per-file `-ffast-math` override in `tools/build_profiles.json`; the complete
+  host remains ROM-exact. Polling uses `NUContData` aggregate copies and walking
+  pointers: physical ports advance on every iteration, but **all storage pointers
+  and the processed index advance only for connected ports**.
+  Exact-profile source/measurement pairs under each function's `nonmatchings/` directory:
+  `vec3f_normalize/measurements/5f977562b95aa0eb06e645084568da977c5414088a129b63ba71b5ad6bfeed01.{c,json}`
+  and `func_8002A310/measurements/0a4f4d4b49c31b43b76808f08a99bed99fcdc5d1ef28a8015dbb50e9e5f5ca4d.{c,json}`.
+  `target.s` and `isolated-match.o` are retained beside each candidate.
+  Integrated ranges match all 52/73 instructions and relocation destinations.
+  The five-function session's full-ROM verifier passed with SHA-1
+  `e2c4e7a905b29529b49a1619a401fe699224829b` (also see sound and rumble entries).
+  A throwaway 32-bit UBSan executable exercised finite normalization, the original
+  zero-vector NaNs, zero connected ports, and sparse physical ports 1/3 with dense
+  snapshot/history slots. No YAML, symbol, or overlay source changes.
+  **Unbanked reconstructions:** `game_draw_callback` remains on its stub, score 630,
+  126/130 actual instructions. GCC combines the two task-spool threshold branches;
+  all later instructions match after placement normalization. Direct guards,
+  switch spelling, duplicate per-arm `bgm_tick` calls, and a one-shot loop retain
+  that merge; an inline predicate is worse (990). Pure guard source is restored at
+  `nonmatchings/game_draw_callback/base.c`, exact-profile measurement
+  `27c293ace0e72f5568d6182c92fec7b2c6bd6b1c689bfd9ee726ce52d38eb009`.
+  Next experiment must change the threshold CFG without merging the two branch
+  tests; this is not a demonstrated terminal wall.
+  `func_8002A144`'s first volatile-record reconstruction is 125/115 actual
+  instructions, score 6815; it is not integration-ready. Candidate and exact-profile
+  measurement remain at `nonmatchings/func_8002A144/base.c` and
+  `measurements/cd525272178a9781c36adbafb8f15ed131021e6d0e3081b0a56ed5b0d084f850.{c,json}`.
+  Next: recover selective field volatility and source temporaries instead of
+  treating the entire record as volatile; reconcile the repeated tail loads first.
+  **Remaining:** `func_80029C00`, `mainproc`, `func_8002A144`, and `game_draw_callback`.
   For `mainproc` (=nuboot), consider the `libnusys/` path qualifier per the
   nusys-template convention when attempted. The mixed FP/DL/nusys pack remains open;
   a carry classification alone does not establish a measured compiler wall.
@@ -4867,20 +4899,30 @@ by `/sprint-plan`:
     (profile-probe NEGATIVE), permuter-plateaued. `docs/wip/func_8004D5F0.near-match.c.txt`. Do NOT
     re-open. ROM green off extracted asm. `--carried-check` flags both.
 
-- **(S234+S235 MIXED-PARTIAL — carried; 9 of 17 banked, file NOT md5-candidate)**
+- **(S234+S235 pack, refreshed 2026-10-15 — 12 of 17 banked; 5 live stubs)**
   `src/main/func_8006F1A0.c` (main-segment `[0x4A5A0]`, game stat/score pack over a fixed-stride array
-  + rumble/GBPak glue). Flipped to `c` at the S234 gate. **9 fns C:** S234 banked 7 first-build
+  + rumble/GBPak glue). Flipped to `c` at the S234 gate. **Original 9 fns C:** S234 banked 7 first-build
   (`func_8006F1F0`/`func_8006F2F4` getters, `func_8006F2E8` setter, `func_8006F1FC` predicate,
   `func_8006F4F0`/`func_8006F50C` rumble+printf wrappers, `func_8006F228` address-return); **S235 cracked
   the 2 S234 carries via compiler-source fan-out:** `func_8006F1A0` (`#base-register-vs-displacement`
   RMW, score 220→0 via the `(u8*)`+byte-offset cast defeating the address-CSE) + `func_8006F24C`
   (`#indexed-vs-pointer-loop-strength-reduction` REFUTED — in-tree byte-0 via byte-offset shared giv +
-  bare-base DEST_REG ptr giv + do-while; see `docs/hazards.md#base-register-vs-displacement`). **8 stubs
-  remain, un-attempted — the jal-dispatch + stride-array-loop tail** (S224 wall-class, expect walls, but
-  now byte-offset-cast-attemptable): `func_8006F300` (nuContGBPak init dispatcher, 5 jal + s0-s3 +
-  switch-cascade + printf), `func_8006F404` (59i jal4), `func_8006F534` (43i jal9), `func_8006F5E0`
-  (85i jal6), `func_8006F734`, `func_8006FE88`, `func_800708B4` (198i), `func_80070BCC`. `coddog-mirror:
-  llcvt.c` = STRUCTURAL false-positive (game code, not `__ll_*`). ROM green off extracted asm.
+  bare-base DEST_REG ptr giv + do-while; see `docs/hazards.md#base-register-vs-displacement`).
+  Subsequent source banks include `func_8006F300` and `func_8006F534`.
+  **Banked 2026-10-15:** `func_8006F404`, ROM `0x4A804`, 59 instructions / 236 bytes,
+  first measured build score 0. Preserve `i != D_80105218` and the ordered status
+  tests 1 / 11 / 4: their shared diagnostic/zero-store path produces the ROM's
+  annulled default availability store. Candidate `nonmatchings/func_8006F404/base.c`,
+  profile `main`, source/measurement pair
+  `measurements/c8bc29cd9458a5111f97e5c51ed81e944e7713aec2a96fa652e42bc6f6977b0a.{c,json}`.
+  Saved `target.s` and `isolated-match.o`; formatted integrated range matches all
+  59 instructions and relocation destinations, and `tools/verify-rom.sh` passes
+  the five-function session's full ROM. A throwaway 32-bit UBSan smoke covers
+  zero controllers (GBPak initialization still runs), all three failure statuses,
+  and success/availability across four controller handles.
+  **Remaining:** `func_8006F5E0`, `func_8006F734`, `func_8006FE88`, `func_800708B4`,
+  and `func_80070BCC`. The prior broad carry classification is not a measured wall
+  for these unattempted tails. `coddog-mirror:llcvt.c` remains a structural false-positive.
 
 - **(S235 TERMINAL/RE-FRAMED carries — 2 single-fn main-segment walls, do NOT re-grind blindly)**
   `func_8003E004` (`src/main/func_8003DFD0.c`, wind-vertex generator): S204 move_movables DFmode-hoist
@@ -4922,20 +4964,52 @@ by `/sprint-plan`:
   mid-logic fns are likely wall-class, but S232 proved that tail crack-worthy — a fresh compiler-source
   fan-out is the recommended slice over abandonment. ROM green off extracted asm.
 
-- **(S230 MIXED-PARTIAL — carried; 20 of 26 banked)** `src/main/play_sound_effect.c` (main-segment
+- **(S230 pack, refreshed 2026-10-15 — 22 of 26 banked; 4 live stubs)** `src/main/play_sound_effect.c` (main-segment
   `[0x2BFF0]`, band `libnusys`, sound/bgm pack). Subseg `[0x2BFF0, c, main/play_sound_effect]` flipped;
-  **20 fns C** (S230 +19 hand-matched + 1 free auto-C `__freeParam`: 5 leaves, 2 game printf debug-stubs
+  **Original 20 fns C** (S230 +19 hand-matched + 1 free auto-C `__freeParam`: 5 leaves, 2 game printf debug-stubs
   `alSynNew`/`alSynDelete`, 12 `osSetIntMask`-guarded `MusHandle*` wrappers, `func_80051164` struct-array
-  writer). **6 stubs remain**, ROM green off extracted asm, NOT md5-candidate. **1 CARRY (S230, in-file
+  writer). **4 stubs remain**, file not complete. **1 prior CARRY (S230, in-file
   note, permuter-candidate):** `func_80051D8C` (`#cse-double-materialization` + loop-regalloc — ROM
   materializes `D_18BE00` into two regs (size-operand + 3rd arg), build CSE-forwards one, 4 instr short +
-  flows `.bss`; int-casts don't split the shared address load). **5 DEFERRED mid-logic/FP tail (not
-  attempted, per S224 — defer wall-class tail to a fresh pack):** `play_sound_effect` (108i lead,
-  MusHandle+atomic dispatch), `func_80050DA0` (114i dispatcher), `func_80051210` (346i), `bgm_tick`
-  (138i FP), `play_bgm_by_id` (97i, 14-branch, 6 bgm globals). NOTE: the `coddog-mirror:nucontgbpakmgr.c
-  @99.99` + static-name-collision tags on this pack were a STRUCTURAL false-positive (0 fns were
-  nucontgbpakmgr mirrors), and the `alSynNew=synthesizer` upstream tags were NAME-only false-matches
-  (stub bodies) — treat the whole pack CLASSICAL/mixed on retry.
+  flows `.bss`; int-casts don't split the shared address load).
+  **Banked 2026-10-15:** `play_sound_effect` (ROM `0x2BFF0`, 108 instructions /
+  432 bytes) and `func_80050DA0` (ROM `0x2C1A0`, 114 instructions / 456 bytes).
+  The 34-entry sound lookup requires `i != 0x22`, not `<`, for the held-bound
+  `bne` and exact allocation (playback score 675 → 0). Reload
+  `object_id_table[channel]` for each setter rather than caching its handle.
+  In the five-argument function, argument 4 is reverb on the old handle and
+  argument 5 is pan on the new one. The three-argument function does not spawn
+  when the old handle is -1; the five-argument function does.
+  `spawn_object_simple` in `src/main/bgm_load_song_from_rom.c` now returns its
+  actual `musHandle`, matching these consumers and `try_spawn_global_object`;
+  the wrapper's emitted bytes remain ROM-exact, and it is not counted as a new bank.
+  Candidates are `nonmatchings/play_sound_effect/base.c` and
+  `nonmatchings/func_80050DA0/base.c`, profile `main`; source/measurement pairs:
+  `play_sound_effect/measurements/fba7e6835633d937c30688c7b94d0635bc4853194cec9c270e11942dd49f4755.{c,json}`,
+  `func_80050DA0/measurements/26d9dd65f8561dbb0cd153e0d4515f39cc52e608a052f05c4f2d868fd4411d6c.{c,json}`.
+  Each candidate retains `target.s` and `isolated-match.o`. Integrated ranges
+  match 108/114 instructions and relocation destinations; the five-function,
+  **1624-byte** session passes `tools/verify-rom.sh` with SHA-1
+  `e2c4e7a905b29529b49a1619a401fe699224829b`.
+  A throwaway 32-bit UBSan smoke covers suppression, the `0x215` boundary,
+  missing handles, first/last lookup entries, reverb cases, fifth-argument pan,
+  and interrupt restoration. No permanent tests or harness files were added.
+  **New unbanked carry:** `play_bgm_by_id`, ROM `0x2D008`, remains a stub.
+  `nonmatchings/play_bgm_by_id/base.c` is 93/97 actual instructions, score 665,
+  measurement `470af6100fccb34725348587cc2283009f0439f378f0b3ebbe8ae93cdcee405b`.
+  Byte-offset table casts recover the held base but CSE shares one address where
+  the ROM has two oppositely ordered `addu`s. A local mode selection becomes
+  `sltiu`, not the ROM's branch; duplicating the two constant-argument calls
+  recovers that branch but grows the dead frame from `0x20` to `0x28`.
+  Parameter scratch reuse worsens allocation; an empty one-shot loop does not
+  prevent the selection fold. Next: source argument-evaluation/address shape and
+  a branch-preserving mode-selection form without that frame cost. No terminal
+  verdict or ROM bank is claimed for this candidate.
+  **Remaining:** `func_80051210`, `bgm_tick` (still unattempted), `play_bgm_by_id`,
+  and the prior `func_80051D8C` carry.
+  The `coddog-mirror:nucontgbpakmgr.c@99.99` / static-name-collision tags are
+  structural false-positives; `alSynNew=synthesizer` was a name-only false-match
+  (stub body). Treat this pack as classical, not a NuSystem mirror.
 
 - **(S228 MIXED-PARTIAL — carried; 16 of 40 banked)** `src/main/func_800453E0.c` (main-segment
   `[0x207E0]` golf-physics/slope pack). Subseg `[0x207E0, c, main/func_800453E0]` flipped; **16 fns C**
