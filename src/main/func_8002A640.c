@@ -1,4 +1,5 @@
 #include "common.h"
+#include <nusys.h>
 
 extern s32 D_800BB03C;
 extern s32 D_800B7770;
@@ -289,7 +290,42 @@ void copy_previous_frame_to_cfb(Gfx** gfxp) {
   *gfxp = gfx;
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_8002A640", func_800318A8);
+extern s32 render_buffer_index;
+extern Gfx D_801B94A0[];
+extern u32 D_800B7738;
+extern void append_viewport_setup(s32, Gfx**);
+extern void append_framebuffer_clear(s32, Gfx**);
+
+void func_800318A8(void) {
+  Gfx* gfx = (Gfx*)((u8*)D_801B94A0 + render_buffer_index * 0x1B580);
+  Gfx* base = gfx;
+  s32 i = 0;
+  do {
+    append_viewport_setup(render_buffer_index, &gfx);
+    append_framebuffer_clear(0, &gfx);
+    gDPPipeSync(gfx++);
+    gDPSetScissor(gfx++, G_SC_NON_INTERLACE, 0, 0, 320, 240);
+    copy_previous_frame_to_cfb(&gfx);
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+    gDPPipeSync(gfx++);
+    gDPSetPrimColor(gfx++, 0, 0, 0, 0, 16, 64);
+    gDPSetCombineLERP(gfx++, CENTER, K5, PRIMITIVE, COMBINED_ALPHA, 0, 0, 0,
+                      PRIMITIVE, CENTER, K5, PRIMITIVE, COMBINED_ALPHA, 0, 0, 0,
+                      PRIMITIVE);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
+    gSPTextureRectangle(gfx++, 0, 0, 320 << 2, 240 << 2, G_TX_RENDERTILE, 0, 0,
+                        1 << 10, 1 << 10);
+    gDPFullSync(gfx++);
+    gSPEndDisplayList(gfx++);
+    nuGfxTaskStart(base, (gfx - base) * sizeof(Gfx), 0, 1);
+    D_800B7738 = (osGetTime() << 6) / 3000;
+    i++;
+  } while (i != 1);
+  render_buffer_index ^= 1;
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_8002A640", func_80031AF4);
 
