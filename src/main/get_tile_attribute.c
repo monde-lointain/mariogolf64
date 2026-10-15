@@ -268,9 +268,6 @@ void set_direct_grid_vertex(s32 col, s32 row, GridVertex* src) {
   *dst = *src;
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/get_tile_attribute",
-            get_terrain_vertex_pointer);
-
 typedef struct {
   s8 pad0[2];
   s16 attr; /* 0x2 */
@@ -290,6 +287,42 @@ extern Tile D_80185220[];
 extern u8 D_800BA9B0[][8];
 extern u8 D_800BA9D0[];
 extern u8 D_800BA9B4[];
+
+/* Odd grid coordinates use the subdivided tiles. The far row/column select
+ * the preceding tile's edge vertex; even coordinates use the direct grid.
+ * Scratch reuse keeps the coordinate/address chains in the ROM's registers. */
+s16* get_terrain_vertex_pointer(u32 col, u32 row) {
+  if ((col | row) & 1) {
+    u32 row_hi, row_lo, col_hi, col_lo;
+    if (row == 0x40) {
+      row_hi = 0xF;
+      row_lo = 4;
+    } else {
+      row_hi = row >> 2;
+      row_lo = row & 3;
+    }
+    if (col == 0x20) {
+      col_hi = 7;
+      col_lo = 4;
+    } else {
+      col_hi = col >> 2;
+      col_lo = col & 3;
+    }
+    row_hi <<= 3;
+    row_hi += col_hi;
+    row_hi <<= 8;
+    col = (u32)D_800BA9B0;
+    col_hi = row_lo << 3;
+    col_hi += col;
+    col_hi += col_lo;
+    col_hi = *(u8*)col_hi;
+    col = (u32)D_80185220;
+    row_hi += col;
+    col_hi <<= 4;
+    return (s16*)(row_hi + col_hi);
+  }
+  return get_direct_grid_vertex(col >> 1, row >> 1);
+}
 
 #define PUT_LOD(tile, k)                             \
   {                                                  \
@@ -494,7 +527,6 @@ s32 func_80042E40(s32 ax, s32 ay, s32 bx, s32 by, s32 cx, s32 cy) {
 extern s8 g_terrain_vtx_xform_mode;
 extern s8 D_800BB0EC[];
 extern char D_800CAB9C[];
-extern s16* get_terrain_vertex_pointer(s32 col, s32 row);
 extern void check_and_print_grid(char* str, s32 col, s32 row);
 
 /* detect_terrain_collision: 4x4-cell quad->2-triangle point location; fills the

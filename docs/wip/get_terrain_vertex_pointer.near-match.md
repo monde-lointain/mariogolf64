@@ -1,65 +1,56 @@
 ---
 type: "Reconstruction Note"
-title: "get_terrain_vertex_pointer — value-select + tail register-permutation (EXACT-COUNT near-match)"
-description: "Records reconstruction evidence and matching constraints for get_terrain_vertex_pointer."
+title: "get_terrain_vertex_pointer — banked via shared scratch chains"
+description: "Records the verified match and register-reuse lever for get_terrain_vertex_pointer."
 ---
 
-# get_terrain_vertex_pointer — value-select + tail register-permutation (EXACT-COUNT near-match)
+# get_terrain_vertex_pointer — banked via shared scratch chains
 
-**Status:** fully RE'd, 40/40 instruction count, byte-exact except a tail register permutation
-+ one `bne`/`bnel` annul coin. Permuter-class (exact-count residual). CARRIED S274.
+## Verified state — 2026-10-14
 
-## Semantics (verified from .s, 0xA0 / 40 instr)
-```c
-s16* get_terrain_vertex_pointer(u32 col, u32 row) {
-  if ((col | row) & 1) {
-    u32 rowHi, rowLo, colHi, colLo;
-    s32 bigIdx; u8* rowp;
-    if (row == 0x40) { rowHi = 0xF; rowLo = 4; }
-    else            { rowHi = row >> 2; rowLo = row & 3; }
-    if (col == 0x20) { colHi = 7; colLo = 4; }
-    else            { colHi = col >> 2; colLo = col & 3; }
-    bigIdx = (rowHi * 8 + colHi) << 8;
-    rowp = &D_800BA9B0[rowLo * 8];
-    return (s16*)(D_80185220 + bigIdx + (rowp[colLo] << 4));
-  }
-  return get_direct_grid_vertex(col >> 1, row >> 1);
-}
-```
-This C is CORRECT in behavior and reaches exact count.
+- ROM: US revision 0, SHA-1 `e2c4e7a905b29529b49a1619a401fe699224829b`.
+- Bank: YAML `main`; ROM offset `0x1C924`, VRAM `0x80041524`.
+- Host: `src/main/get_tile_attribute.c`; the assembly stub is replaced by C.
+- Size: `0xA0`, 40 instructions; the parent's configured `main` profile is unchanged.
+- Candidate: `nonmatchings/get_terrain_vertex_pointer/base.c`.
+- Measurement: `measurements/010f910df4fc8221fd0d60403ec42ff3e0f6d6485bcbe0427c187e558c059590.json`
+  under that candidate directory, score zero and 40/40 aligned rows.
+- Commands: `uv run --locked python tools/decomp_loop.py --func get_terrain_vertex_pointer`,
+  `uv run --locked python tools/rom_build.py build --object src/main/get_tile_attribute.o`,
+  then function-scoped `objdump -drz` on both objects and `tools/verify-rom.sh`.
+- The integrated object reproduced all instruction/register/branch offsets after accounting
+  for section-relative jump relocations and the same-TU callee relocation.
+- `tools/verify-rom.sh` succeeded: build OK and full-ROM SHA-1 match.
 
-## Levers already applied (each removed real diffs)
-- `u32` params -> ROM's `srl` (logical) shifts on row/col, not `sra`. Load-bearing.
-- Left-assoc `D_80185220 + bigIdx + tableterm` -> ROM grouping `(base+bigIdx)+tableterm`.
-- `rowp = &D_800BA9B0[rowLo*8]; rowp[colLo]` -> forces ROM's FULL-base materialization
-  (`lui;addiu;addu;addu;lbu 0`) instead of the %lo-fold-into-load (`lui;addu;lbu %lo`).
+## Semantics
 
-## Residual (the wall)
-1. **Register permutation in the tail.** ROM: `colHi`->$v0 (reuses the `li v0,0x20` compare
-   reg), `bigIdx`->$v1 (reuses `rowHi`'s reg after consumption). My build: `colHi`->$a3,
-   `bigIdx`->$a0. Global allocno assignment; the ROM's tight reuse of the compare register for
-   `colHi` is the crux and drives the cascade.
-2. **`bne` vs `bnel` on the col select.** ROM annuls the col-select delay slot
-   (`bnel a0,v0; srl v0` annulled); row select is plain `bne a1,v0; srl v1` non-annulled. Both
-   selects are source-identical; the annul is a reorg.c coin coupled to residual (1) — colHi
-   reusing $v0 (live into the fall-through's `li v0,7`) is what makes reorg annul. Fix (1) and
-   (2) very likely resolves with it.
+Even column/row coordinates delegate to `get_direct_grid_vertex(col >> 1, row >> 1)`.
+Odd coordinates select an 8-column tile grid with 4-cell subdivisions. Row `0x40`
+uses tile row 15 and subdivision row 4; column `0x20` uses tile column 7 and
+subdivision column 4. The byte lookup at `D_800BA9B0` selects a 16-byte vertex
+within the 256-byte tile at `D_80185220`.
 
-Class: value-select-if-else-vs-branch-likely + local/global-alloc register permutation. Not
-source-steerable by the levers tried (decl-order reshuffles did not move colHi into $v0).
+## Lever and retired carry verdict
 
-## Next action = PERMUTER — LOW-EV (multi-register permutation, not the payoff shape)
-Correction to the S274 record: the permuter was NEVER blocked. The documented main-segment command
-(agent-workflow.md ## Execution loop, permuter bullet) is, with the candidate C above inlined:
-`uv run --locked python ./tools/decomp-permuter/import.py --settings permuter_settings_main.toml
-src/main/get_tile_attribute.c asm/nonmatchings/main/get_tile_attribute/get_terrain_vertex_pointer.s`
-then revert the src to INCLUDE_ASM (import copies into nonmatchings/) and `run-permuter.sh
-get_terrain_vertex_pointer`. S274 wrongly ran BARE `import.py` (no `--settings`), which defaulted to
-the KMC-mirror `permuter_settings.toml` (`-I include`, no `<PR/*.h>`) and mis-read as "blocked".
-`setup-permuter.sh --main` also silently no-ops here (it greps for an INCLUDE_ASM stub — use the
-direct import.py call above).
+The reconstructed separate-temporary baseline compiled to score 820, not the historical
+score 3060. It had the target's 40 instructions but used `a3` for `col_hi` and
+`a0` for the tile offset, with a plain `bne` instead of the target's `bnel`.
 
-CAVEAT: this residual is a MULTI-register tail permutation + a branch-annul coin, which is the
-NON-payoff permuter shape (agent-workflow.md: exact-count-plus-ONE-operand pays; multi-register
-permutations plateau — S258 3-of-4 plateaued). So this is a LOW-EV attempt, not a likely bank.
-40/40 exact-count; base.c compiled clean via decomp_loop (score 3060, 44/46 rows).
+The allocation dumps showed local scratch quantities taking `v0` before the global
+coordinate quantities; declaration-order changes could not remove those conflicts.
+The fix is reuse, not a compiler-profile change or a scheduling barrier:
+
+1. Reuse `col_hi` for the lookup result. This alone reached score 345 and restored
+   the column-select register and branch-likely instruction.
+2. Split tile arithmetic into `row_hi <<= 3; row_hi += col_hi; row_hi <<= 8`.
+3. Reuse `col` for both table base addresses, `row_hi` for the tile address, and
+   `col_hi` for the lookup-address, byte-load and vertex-offset chain.
+
+The complete scratch chains eliminated the remaining local/global register conflicts
+and reached score zero. Sharing just the comparison constants, extending just the tile
+offset lifetime, and wrapping only the tile calculation in `do {} while (0)` did not
+match. No permuter or Ghidra mutation was needed.
+
+The earlier exact-count register-permutation carry and permuter-only recommendation
+are retired. The banked source retains unsigned shifts, endpoint selects, full table
+base materialization, and the ROM's addition grouping.

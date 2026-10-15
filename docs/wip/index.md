@@ -96,7 +96,7 @@
 # Named functions (G–R)
 
 - [get_surface_type (0x80039F7C) — near-match carry (S233)](get_surface_type.near-match.md) — Records reconstruction evidence and matching constraints for get_surface_type.
-- [get_terrain_vertex_pointer — value-select + tail register-permutation (EXACT-COUNT near-match)](get_terrain_vertex_pointer.near-match.md) — Records reconstruction evidence and matching constraints for get_terrain_vertex_pointer.
+- [get_terrain_vertex_pointer — banked via shared scratch chains](get_terrain_vertex_pointer.near-match.md) — Verified full-ROM match and the register-reuse lever that retired its carry.
 - [init_rdp_and_draw_sky_background — 286/286, exact instruction multiset, pure order residual](init_rdp_and_draw_sky_background.near-match.md) — Records reconstruction evidence and matching constraints for init_rdp_and_draw_sky_background.
 - [init_sky_pool_and_world_state near-match (S256 carry, rebuilt S258)](init_sky_pool_and_world_state.near-match.md) — Records reconstruction evidence and matching constraints for init_sky_pool_and_world_state.
 - [resolve_shot_quality_table — near-match (S185, structurally complete, 3-instr irreducible residual)](resolve_shot_quality_table.near-match.md) — Records reconstruction evidence and matching constraints for resolve_shot_quality_table.

@@ -2,6 +2,13 @@
 
 ## 2026-10-14
 
+- **Main decompilation**: Banked `get_terrain_vertex_pointer` (`0x80041524`, 40 instructions)
+  in `src/main/get_tile_attribute.c`. Shared coordinate/address scratch chains resolved
+  the carried register permutation and column-select branch-likely residual without
+  profile changes, inline assembly, or a permuter. Isolated score zero, integrated
+  relocation-aware function spot-check, and `tools/verify-rom.sh` full-ROM SHA-1 match.
+  Updated its reconstruction note and index; YAML and overlays are unchanged.
+
 - **Carry/agent workflow refinement**: Four parallel read-only dives inspected REA's
   `reverse-engineer-anything` skill/evidence workflow, Snowboard Kids' candidate/near-match tools
   and task-runner, Oh My Pi's native task/skill implementation, and relevant chapters of both
