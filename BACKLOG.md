@@ -16,6 +16,27 @@ This file holds only the *ordering rationale*, *enabler items* (gate actions), a
 
 ### Current main-bank evidence — 2026-10-15
 
+- Banked five camera-family functions in `src/main/func_80095A10.c`:
+  `func_80095A10`, `func_8009676C`, `func_800977E0`, `func_80097A08`, and
+  `func_80097E30` (469 instructions / 1,876 bytes). Main-bank stubs decreased
+  from 229 to 224; this host has eight remaining stubs. The full-ROM verifier
+  passed with SHA-1 `e2c4e7a905b29529b49a1619a401fe699224829b`.
+  All five isolated comparisons scored zero under the existing host profile;
+  fresh integrated function words and relocation targets agree with the saved
+  `provisional.o` objects and `target.s` ranges in `nonmatchings/<function>/`.
+  A throwaway 32-bit UBSan smoke of the integrated bodies passed 10,837 checks,
+  including 1,200 camera scenarios. No emulator run, YAML, symbol, compiler-profile,
+  or overlay source change. The S289 blanket camera-wall classification below
+  was too broad: the existing sibling source shape and scratch frame suffice.
+  `func_80095A68` remains isolated: its current volatile-scalar diagnostic scores
+  3280 (69.06%), retained in measurement
+  `0cfda1292c50375cbd2f1431a0bb17b783d0d823d4ecefbe763ca8c5540d0142`.
+  Array/member state views interleave initialization correctly but retain two
+  extra global-address registers across calls (score 2927); scalar views hoist
+  loads/stores. Next lever: recover addressable scalar access without retaining
+  those bases. Refresh the candidate after the parent-TU integration; none of
+  these diagnostics establishes a compiler wall.
+
 - Banked five additional main functions (1,124 bytes); main-bank `INCLUDE_ASM`
   inventory decreased from 244 to 239. `tools/verify-rom.sh` succeeded on the
   integrated source: `e2c4e7a905b29529b49a1619a401fe699224829b`.
@@ -4790,17 +4811,18 @@ by `/sprint-plan`:
   found by hand. **Do not re-price it on its branch-likely tell** — S287 and S288 both gate-rejected
   it on that tell and S289 disproved it.
 
-- **(S289 NEAR-FREE RETRY — the camera vein is CLOSED; this entry supersedes the S286 one)**
-  `src/main/func_80095A10.c`. S285, S286 and S289 banked 3+3+2 here; **14 stubs remain and none is
-  fresh** — every one is `CARRIED-WALL`, `JTBL-DISPATCH` (`func_80095DE0`, 0x98C), or one of the 2
-  S282 terminal carries (`func_80098CD8`, `func_80098C6C`). Do not plan this file as a
-  smallest-first slice again: the next work here is a jtbl-carve slice or a wall re-open, priced
-  accordingly. **Carry the family knowledge, which is durable:** `Vec3f`/`GolfCamera`, the
-  `CollisionCyl` record, the `f32 unused[16]` dead frame, `(1.0f/1024.0f)` terrain scale,
-  `pos.y + -C` for a ROM `add.s` with a negative constant, `D_800C73B0[2]` as the aimed third
-  `Light`, per-dispatch branch-layout choice (compare-chain vs `switch`, both appear in one function
-  — S289 `func_80096C04`), and the TU's `-ffast-math` override in `mk/main.mk` (S289), which applies
-  to anything added to the file and under which all 15 banked functions are verified invariant.
+- **Camera family, refreshed 2026-10-15:** `src/main/func_80095A10.c`,
+  YAML main ROM `0x70E10`, has **eight live stubs** after the five banks recorded
+  in the current evidence above. The earlier S289 claim that this entire family
+  required a wall escalation is disproved by profile-faithful source and ROM
+  verification. Reuse `Vec3f`/`GolfCamera`, the `f32 unused[16]` scratch frame,
+  `(1.0f / 1024.0f)` terrain scaling, and `pos.y + -C` for negative `add.s`.
+  The remaining stubs are `func_80095A68`, `func_80097C18`, `func_800985B4`,
+  `func_800989EC`, `func_80098C6C`, `func_80098CD8`, `func_80098E48`, and
+  `func_800990D0`. Preserve their individual aliasing, rodata, caller, or
+  measured scheduling/allocation evidence; a carried tag is not a proof that
+  the banked sibling shape cannot apply. The host's existing `-ffast-math`
+  override is unchanged.
 
 - **(S271 pack, refreshed 2026-10-15 — 14 of 18 banked; 4 live stubs)**
   `src/main/vec3f_normalize.c` remains in YAML main at ROM `0x4D00`.
@@ -6852,32 +6874,12 @@ by `/sprint-plan`:
   the getter/setter/dispatch leaves are banked, the residual concentrates on base-register /
   loop-strength-reduction / branch-likely no-source-lever classes → route to a fresh pack or an
   escalation slice (compiler-source fan-out / corpus-mining), not another smallest-first continuation.
-- **Open (S220→S285, in-progress mixed-partial, NOT a spike):** `src/main/func_80095A10.c` (31-fn main-seg
-  `none` pack, subseg 0x70E10; float-clamp/state system). 12 banked (7 S220 + 1 S221 `func_80098D70` + 1
-  S222 `func_80095C10` DL builder + 3 S285: `func_8009806C` / `func_80098310` sibling shot-view camera
-  builders and `func_80098758` the terrain-flatness position scorer), 19 stubs remain. The ranker
-  re-surfaces it as a c-stub continuation smallest-first. **S285 evidence for the next continuation:**
-  the two camera builders came out of the asm-first fast path with one lever each, so the FP-heavy
-  reputation of this file is not uniform. `func_80097A08` (0x210), `func_80097C18` (0x218) and
-  `func_80097E30` (0x23C) each call three of the same family callees
-  (`get_character_state` / `func_8009676C` / `func_80095A68`) that the two banked builders do, so they
-  are the same shape and the cheapest remaining vein here; `func_800985B4` (0x198) is a lighter
-  variant with one such call.
-  **Remaining tail (carries):** `func_80098C6C` (S222 near-match, `fabsf(D_800E4C7C)==0.0f` 13-instr leaf)
-  — `#local-alloc-qty-permutation` + scheduler tie-break on the 4 FP-setup instrs, source-invariant (5
-  shapes tried), below 0.97 = permuter N/A; `docs/wip/func_80098C6C.near-match.md`. `func_80098CD8` (the
-  other half of the `#signed-divide-const %28` pair, magic `0x92492493`) — **S221 permuter-confirmed
-  `#local-alloc-qty-permutation` wall (366k iters, best 270); PO flagged for a dedicated
-  `#cross-project-matched-corpus-mining` escalation** (a matched fn with the same two-giv byte-map + `%K`
-  idiom), NOT a plain permuter retry; see `docs/wip/func_80098CD8.near-match.md`. `func_80098E48` (162-instr
-  `%28` divide-dispatcher, same idiom family, S222-assessed probable regalloc wall — divide-dispatcher
-  sprint, not smallest-first). FP tail
-  `func_80095A68`/`func_800977E0`/`func_80097A08`/`func_80097C18`/`func_80097E30`/`func_8009676C`/…
-  (S158-class); `func_800989EC` caller-evict (cross-TU inline into src/main/func_80054900.c). File
-  md5-candidate only when all 31 bank. **S221 lesson (clean A/B on one file):** `func_80098D70`'s CSE
-  extended-basic-block residual CRACKED via the permuter (`#cse-ebb-barrier-loop-reload` empty-`if(1){}`
-  barrier + `i-K` split), but `func_80098CD8`'s scheduler register-coloring tie-break did NOT — same idiom,
-  opposite permuter tractability. Disambiguate the residual class before budgeting permuter time.
+- **Open camera pack, refreshed 2026-10-15:** `src/main/func_80095A10.c`
+  remains partial with eight stubs. See the current main-bank evidence and the
+  refreshed camera-family carry entry above for the five new ROM banks and
+  remaining source levers. Retain the specific reconstruction notes for
+  `func_80098C6C`, `func_80098CD8`, and `func_800990D0`; the old whole-family
+  FP-wall label no longer describes the measured state.
 - **Ranker follow-up (tracked, S220, note-only, no code change).** The `func_80095A10` pack confirmed a
   fresh main-seg pack's trivial-leaf vein banks cheap under smallest-first per-fn mixed banking with
   extern-global refs (no rodata carve). No ranker change needed; recorded as a banking-behavior anchor.

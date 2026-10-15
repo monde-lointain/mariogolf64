@@ -2,6 +2,21 @@
 
 ## 2026-10-15
 
+- **Five main camera-family banks**: Replaced the stubs for `func_80095A10`,
+  `func_8009676C`, `func_800977E0`, `func_80097A08`, and `func_80097E30` in
+  `src/main/func_80095A10.c` (469 instructions / 1,876 bytes). Ordinary clamped
+  interpolation and terrain-height limiting match directly; the three shot-view
+  builders reuse the banked siblings' source shape and required scratch frame.
+  All five isolated comparisons score zero, and freshly built host ranges agree
+  in instruction words and resolved relocation targets. `tools/verify-rom.sh`
+  passes with SHA-1 `e2c4e7a905b29529b49a1619a401fe699224829b`.
+  A throwaway 32-bit UBSan harness of the integrated bodies passes 10,837 checks,
+  including interpolation boundaries, terrain clamps, and 1,200 camera scenarios.
+  Main stubs decrease 229 → 224; this host retains eight. Updated stale camera
+  carry guidance.
+  YAML, symbols, compiler profiles, and overlay sources are unchanged.
+  No emulator run was performed.
+
 - **Five main-segment decompilation banks**: Banked `func_80054900`,
   `func_80054938`, `func_80054B7C`, `func_80054BC0`, and `func_80029B08`
   (348 instructions, 1,392 bytes). The two animation pairs use real GCC nested
