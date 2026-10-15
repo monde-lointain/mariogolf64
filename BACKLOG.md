@@ -6984,3 +6984,17 @@ by `/sprint-plan`:
   **The vein, smallest-first from here** (re-verified `fresh` at the S302 review): `func_8008534C`
   (3148 B, fp-mixed), `emit_ball_offscreen_indicator` (3188 B, fp-sched), `func_8002CDA8` (3352 B,
   fp=0), `func_8007EF0C` (3896 B, fp-mixed), `draw_terrain_aim_grid` (5396 B, fp-mixed).
+
+- **Main continuation (five ROM-banked functions):** `func_8006F5E0` (load
+  selected menu image and reset UI state), `func_800708B4` (I4 texture
+  rectangle), `func_80041AA8` (terrain cache initialization),
+  `func_80070BCC` (20 clipped CI8/TLUT rectangles), and `func_8006BA94`
+  (dialog choice state machine) now replace their `INCLUDE_ASM` stubs. Each
+  isolated source matched its complete instruction range; the integrated ROM
+  passed `tools/verify-rom.sh` at SHA-1
+  `e2c4e7a905b29529b49a1619a401fe699224829b`. Earlier remaining-stub
+  inventories above are historical; `func_8006F734` and `func_8006FE88`
+  remain unbanked in `src/main/func_8006F1A0.c`. `func_80052FE0` also remains
+  unbanked: its isolated `nonmatchings/func_80052FE0/base.c` scores 1105,
+  with 69 candidate versus 71 target instructions. Do not integrate without
+  an exact match and ROM verification.

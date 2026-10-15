@@ -31,6 +31,7 @@ extern s32 D_800C4124;
 extern s32 D_800C4128;
 extern s32 D_800C4144;
 extern void play_sound_effect(s32 sfx, s32 arg1, s32 arg2);
+extern void func_800719A0(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 extern s32 D_800FF4B0;
 extern s32 D_800FF4B4;
 extern s32 D_800FF4B8;
@@ -361,7 +362,47 @@ void func_8006BA24(s32 arg0) {
   play_sound_effect(0x64, D_800C0E60, 0x64);
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_8006A2C0", func_8006BA94);
+s32 func_8006BA94(ControllerState* input) {
+  DialogDefinition* dialog = &D_800C406C[D_800C411C];
+  s32 mode = D_800C4124;
+  if (mode == 1) {
+    func_800719A0(0xA0, 0x6C, dialog->text_run_index, 1,
+                  0, 0x10, 0x5F, 0x3F, 0xFF, 0xFF);
+    if (input->pressed == 0x8000) {
+      s32 sound;
+      s32 volume;
+      D_800C4124 = 2;
+      if ((u32)dialog->choice_results[D_800C4128] < 2) {
+        sound = 0x3B;
+        volume = 0xF;
+      } else {
+        volume = D_800C0E60;
+        sound = 0x5D;
+      }
+      play_sound_effect(sound, volume, 0x64);
+      return -1;
+    }
+    if (input->pressed == 0x4000) {
+      D_800C4128 = 1;
+      D_800C4124 = 2;
+      play_sound_effect(0x5D, D_800C0E60, 0x64);
+      return -1;
+    }
+    if (input->repeated & 0x300) {
+      D_800C4128 ^= 1;
+      play_sound_effect(0x5C, D_800C0E60, 0x64);
+    }
+  } else if (mode == 2) {
+    D_800C4124 = 3;
+    play_sound_effect(0x65, D_800C0E60, 0x64);
+    func_800719A0(0, 0, -1, 1, 0, 1, 0, 0, 0, 0);
+  } else if (mode == 4) {
+    D_800C4124 = -1;
+    func_8006B9E4();
+    return dialog->choice_results[D_800C4128];
+  }
+  return -1;
+}
 
 extern f32 D_800C412C;
 extern const f64 D_800D1440; /* 20 degrees in radians */
