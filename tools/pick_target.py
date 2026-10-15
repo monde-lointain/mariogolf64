@@ -13,7 +13,6 @@ including linked libraries. These modes complement, rather than replace, pack di
 import argparse
 import dataclasses
 import json
-import os
 
 # BUILD_VERSION config + version-conditional stripping (shared by the C-side and asm-TU scanners),
 # extracted to a leaf. _build_version_ord / _strip_inactive_version_branches plus the 3 PP/version
@@ -939,58 +938,6 @@ def _build_row(off, typ, path, size, args, idx, carried, _libultra_band_start):
     return score_row(cand, st.hazards, carried)
 
 
-def _refresh_residual(fns):
-    """Rebuild each carried seed through rom_build, then re-derive its residual."""
-    import glob
-    import subprocess
-
-    from rom_build import compile_source, profile_flags
-    src = os.path.join(ROOT, "src")
-    rc = 0
-    for fn in fns:
-        cfile = None
-        for cpath in glob.glob(os.path.join(src, "*", "*.c")):
-            try:
-                with open(cpath) as f:
-                    if fn in _STUB_FN_RE.findall(f.read()):
-                        cfile = cpath
-                        break
-            except OSError:
-                continue
-        if cfile is None:
-            print(f"?? {fn}: no INCLUDE_ASM stub in src/*/*.c")
-            rc = 1
-            continue
-        tree = os.path.relpath(cfile, src).split(os.sep)[0]
-        profile = tree if tree in {"main", "libkmc", "libultra"} else "default"
-        seed = os.path.join(ROOT, "nonmatchings", fn, "base.c")
-        if not os.path.exists(seed):
-            print(f"!! {fn} [{tree}]: no nonmatchings/{fn}/base.c seed — seed it first")
-            rc = 1
-            continue
-        obj = os.path.join(ROOT, "nonmatchings", fn, "current.o")
-        try:
-            compile_source(
-                seed,
-                obj,
-                profile=profile,
-                nonmatching=True,
-                fastmath="-ffast-math" in profile_flags(cfile, profile=profile),
-            )
-        except subprocess.CalledProcessError as exc:
-            print(f"!! {fn} [{tree}]: build failed:\n{str(exc)[-400:]}")
-            rc = 1
-            continue
-        c = subprocess.run(
-            ["tools/cmpfn.sh", fn, obj], cwd=ROOT, capture_output=True, text=True
-        )
-        lines = c.stdout.splitlines()
-        head = lines[0] if lines else "(cmpfn: no output)"
-        ndiff = sum(1 for line in lines if line[:1] in "<>")
-        print(f"{fn} [{tree}]: {head}  diffs={ndiff}")
-    return rc
-
-
 def build_rows(args, idx, carried):
     subs = parse_subsegs()
     # The lowest-rom `libultra/` subseg = the start of the libultra code band. A libultra-source
@@ -1066,14 +1013,6 @@ def main():
         help="DoR gate: for each FUNC report NESTED-CHILD (its .s prologue spills an incoming $v0 "
         "static chain = a GCC nested function, banks with its parent, not standalone) vs standalone. "
         "Use on the smallest leaves of a fresh classical pack before committing them.",
-    )
-    ap.add_argument(
-        "--refresh-residual",
-        nargs="+",
-        metavar="FUNC",
-        help="Rebuild each nonmatchings/FUNC/base.c using its source-specific compiler profile "
-        "and run tools/cmpfn.sh to print fresh instruction and diff-row counts. "
-        "Requires an existing base.c; carried counts and residual classes are hypotheses.",
     )
     ap.add_argument(
         "--loose-stubs",
@@ -1231,9 +1170,6 @@ def main():
             "see docs/workflow/loop.md#candidate-pricing."
         )
         raise SystemExit(0 if n_fresh else 1)
-
-    if args.refresh_residual:
-        raise SystemExit(_refresh_residual(args.refresh_residual))
 
     if args.carried_check:
         walls = carried_wall_names()

@@ -4897,8 +4897,8 @@ Re-ask the PO if a future match hinges on one; do not bank it silently.
 
 **Step 0 — re-derive the residual from a fresh build before trusting a carry doc (S282/S268).** A
 carried-wall doc's stated count and residual class are both hypotheses. Run
-`uv run --locked python tools/pick_target.py --refresh-residual <fn>` (rebuilds the isolated object + cmpfn's
-it) as the first action of any re-open. S282 `func_80098CD8` carried "exact 38/38 pure scheduler" but a
+`uv run --locked python tools/decomp_loop.py --func <fn>` to retain a fresh source/measurement
+pair before interpreting the residual. S282 `func_80098CD8` carried "exact 38/38 pure scheduler" but a
 fresh build of the faithful C was 40 (a redundant `andi` + a `move`); the exact-38 form needed a specific
 `u32 b=src[i]` + `(s32)b` spelling, after which the residual was a uniform reg rotation, not the
 documented tie-break.

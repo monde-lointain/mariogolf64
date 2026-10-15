@@ -42,6 +42,8 @@ isolated objects are iteration signals, not banking gates.
 the limit. `--all` includes hidden loose-stub classes, not unlimited output. Add `--json` to
 either ranking mode for candidate records without prose. In `--file-close`, `-n` instead
 sets the maximum remaining stubs per host. Inspect a bounded shortlist before expanding.
+Discovery can exit 1 when no fresh candidates exist, even when `--all` prints carries;
+run independent discovery modes separately rather than chaining them with `&&`.
 
 `--segment` filters by VRAM range; `--lib` is a substring filter, not an equivalent segment selector.
 Whole-subsegment ranking and loose-stub ranking answer different questions. A `fresh` classification
@@ -64,7 +66,7 @@ individual checks before reopening a carry. Carry age and file closure are not n
 | --- | --- | --- |
 | Recover an isolated seed body | `uv run --locked python tools/seed_c.py --func <fn> --parent src/<seg>.c` | [Source-recovery gate](workflow/loop.md#source-recovery) |
 | Fetch live Ghidra context before seeding | Add `--ghidra` to `seed_c.py`; the local service must be running | [Headless Ghidra](ghidra.md#agent-access-and-context) |
-| Compile and diff a seed | `uv run --locked python tools/decomp_loop.py --func <fn>` | [Oracles](workflow/loop.md#oracles) |
+| Compile/diff a seed or refresh a carry | `uv run --locked python tools/decomp_loop.py --func <fn>` | [Measurement and carry recovery](workflow/loop.md#measurement) |
 | Select an isolation profile | `decomp_loop.py --profile auto` uses the parent TU; explicit profiles include every key in `tools/build_profiles.json` | [Build profiles](../tools/build_profiles.json) |
 | Import a permuter case | `./setup-permuter.sh <fn>` uses the isolated seed when present and the parent TU's exact flags | [Permuter playbook](hazards.md#permuter-setup-for-kmc-toolchain-mirrors) |
 | Run or score an imported case | `./run-permuter.sh <fn>` / `./score-permuter.sh <fn>` | [Permuter playbook](hazards.md#permuter-setup-for-kmc-toolchain-mirrors) |
@@ -82,8 +84,10 @@ seeding and Ghidra are optional context recovery, not prerequisites. Search elig
 by the [loop reference](workflow/loop.md#permuter-eligibility).
 
 The authoritative object build interface is `uv run --locked python tools/rom_build.py build --object <object-path>`.
-Compile profiles are defined by `tools/build_profiles.json`; use the same source-specific profile for
-isolated iteration as the ROM build.
+Use the parent TU's profile from `tools/build_profiles.json` for isolated compilation too.
+For pass diagnostics, use the existing `rom_build.py compile --profile-source` interface
+described in [compiler-source escalation](workflow/loop.md#compiler-source-escalation), not
+a hand-assembled compiler command.
 
 ## References and native campaigns
 

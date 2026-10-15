@@ -2,6 +2,35 @@
 
 ## 2026-10-14
 
+- **Carry/agent workflow refinement**: Four parallel read-only dives inspected REA's
+  `reverse-engineer-anything` skill/evidence workflow, Snowboard Kids' candidate/near-match tools
+  and task-runner, Oh My Pi's native task/skill implementation, and relevant chapters of both
+  local RE/Ghidra books. Kept the thin `/decomp` command, native tasks, optional Ghidra,
+  content-addressed measurements, and parent-only shared-resource ownership.
+- **Removal and consolidation**: Removed `pick_target.py --refresh-residual` and its duplicate
+  shallow host scan/manual compiler-profile path; fresh carry measurements now use
+  `decomp_loop.py --func`. Migrated the live hazard citation without changing frozen headings.
+  Carry recovery checks the cited source/snapshot before measuring. Removed duplicate fan-out
+  acceptance prose and made research findings independent of candidate/patch templates.
+- **Evidence handoffs and diagnostics**: Worker finals must preserve the requested findings after
+  steering. Dispatch names the measured base/profile and relevant dumps. Documented existing
+  profile-aware scheduling diagnostics, root dump-file placement, and function-scoped
+  relocation-aware object comparison after target assembly disappears on integration.
+  Discovery modes run independently because an all-carried pool can still exit 1.
+  Replaced the stale Make/delete-object recipe in `cmpfn.sh` with the authoritative build CLI.
+- **Smoke proof**: Canonical `decomp_loop.py` reproduced `func_8005D0D8` at score zero with
+  67/67 rows, the main host profile, fast-math, and a retained source/measurement pair.
+  Both carry-inclusive discovery modes ran; the removed option exits 2 with no shim.
+  The documented `rom_build.py --profile-source ... --extra-flag=-dSRd` command produced all
+  three scheduling dumps; temporary assembly/dumps were removed. Tooling suite: 150 passed,
+  two skipped. Shell syntax and all 115 frozen hazard anchors passed. Function-scoped objdump
+  compared 67 instructions per object; only the expected same-callee relocation field differed.
+  Checked 103 concept frontmatters, four indexes, 628 local links/fragments and 27 local source
+  paths. The unchanged historical `BACKLOG.md` fragment remains the sole navigation finding.
+  Ruff retains the existing import-order finding; language diagnostics retain an unrelated
+  optional-value comparison error. This refinement changed no game source, YAML, compiler
+  profile, or ROM banking authority and did not run an additional ROM build.
+
 - **Seed recovery and workflow cleanup**: Four parallel read-only deep dives compared this
   session with REA provider/evidence contracts, Snowboard Kids bootstrap/workspace practices,
   native Oh My Pi task delivery, and the Ghidra/Eilam books' interface and type-recovery methods.

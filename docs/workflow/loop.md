@@ -84,10 +84,16 @@ are not overwritten; edits detected during measurement invalidate attribution. H
 inputs are not archived, so the record's limitations require regeneration and a fresh measurement
 on resume. Use it as evidence in the existing WIP note, not a second task ledger.
 
+For a carry, confirm the live stub, parent TU, and cited source before compiling. If `base.c`
+is missing or differs from the cited measurement, recover its immutable `.c` snapshot and
+regenerate the required context; do not overwrite a different live candidate. If no snapshot
+survives, reconstruct the documented source against assembly and establish a new baseline.
+Refresh with `uv run --locked python tools/decomp_loop.py --func <fn>`; a note's score or
+compiler-wall verdict does not transfer to a different base.
+
 For bounded queues, cross-checkout references, an isolated m2c prepass, and deadlines, use the
 [campaign guide](../campaigns.md). Its output remains iteration evidence; the native skill owns
 execution and the parent retains shared-resource ownership.
-
 
 ## Candidate pricing
 
@@ -121,13 +127,14 @@ uses `-n` as its maximum stubs per host, not a candidate-row limit.
 | --- | --- |
 | `verify-rom.sh [--extract] [--build-dir <path>]` | Successful configured build plus ROM SHA-1. Requires build success before hashing, so a stale ROM cannot pass after build failure. |
 | `decomp_loop.py` score/percent | Isolated compile signal. Zero is a candidate, not proof; normalized labels/addresses can hide byte differences. `--score-only` deliberately omits mismatch details. |
-| `cmpfn.sh <fn> [<obj>]` | Instruction stream and counts; normalization can hide operands and addresses. Never a byte comparison. |
-| Fresh `objdump -drz` and `objdump -r` | Registers, ordering, nops, actual relocations. Keep `z`: collapsed zero runs undercount. Unlinked `%hi`/`%lo` values alone do not identify the relocated address. |
+| `cmpfn.sh <fn> [<obj>]` | Instruction stream/counts while extracted target assembly exists; extraction may remove it after integration. Normalization is not byte proof. |
+| Fresh `objdump -drz --disassemble=<fn> <obj>` and `objdump -r` | Use on both isolated and integrated objects after the host build. Keep `z` for nops; interpret actual relocation targets/addends, not raw unlinked call fields. |
 | Linked asm-differ view | Relocation-resolved iteration evidence after a fresh full build. Object-only builds do not refresh link maps. |
 | Function-byte spot-check | Isolated versus integrated code-generation diagnostic at score zero. Compare the same function/range, not whole TUs; relocation addends and assembler encodings require interpretation. Full-ROM verification resolves link/layout effects. |
 | decomp-permuter | Search, not acceptance. Apply [source/residual eligibility](#permuter-eligibility) before import. Internal branch targets can normalize to a false zero; inspect real encodings. |
 | GCC `-dL` (`.loop`) | Loop hoist, induction, strength-reduction decisions. Read measured savings/lifetime/counts rather than estimate them; filter the whole-file dump. |
 | GCC `-dg` (`.greg`), `-dl` (`.lreg`), `allocno_report.py` | Allocation order, conflicts, preferences, dispositions, and priority arithmetic. Interpret only after structural/count deficits are fixed. |
+| GCC `-dS` (`.sched`), `-dR` (`.sched2`), `-dd` (`.dbr`) | Identify the first pass where ordering differs; inspect dependency links and ready lists, not just final assembly. |
 | Ghidra pseudocode/types | Revisable shape/type hypotheses. Select the exact bank plus ROM provenance because overlay VRAM repeats; FP ABI and source-local partial types may be wrong. |
 | `dl_decode.py`, `rdp_word.py`, `combine_word.py`, `gbi_match.py` | Packet/list order and SDK macro fields. Instruction order can differ from packet order; runtime words remain symbolic. Composite macros must be checked with `p++`, not `p`, because they reevaluate `pkt`. |
 | Assembly header size and mnemonic histograms | Header bytes divided by four give ROM instruction count; adjacent VRAM deltas do not. Normalize aliases. Histograms identify structural deltas but cannot locate them alone. |
@@ -170,6 +177,28 @@ Use [source levers](../levers.md) for measured transformations. A compiler-pass 
 explains a hypothesis, not impossibility: ask what its experiment did not measure.
 A new structure can bypass the previously cited pass. Re-measure after structural
 changes before reusing a rejected lever or an old permuter-eligibility verdict.
+
+### Compiler-source escalation
+
+Escalate the measured residual, not the whole function. Supply a reproducing source/profile,
+the differing instruction window, and a question for the responsible pass: allocation,
+scheduling/reorg, or assembler encoding/hazards. Parallel read-only slices use the
+[fan-out contract](fan-out.md); the parent produces any missing diagnostics serially.
+
+Use the existing profile-aware compiler interface for dumps, choosing only the relevant flags:
+
+```sh
+uv run --locked python tools/rom_build.py compile \
+  --source nonmatchings/<fn>/base.c --output nonmatchings/<fn>/diagnostic.s \
+  --profile-source src/<host>.c --nonmatching --assembly-only --extra-flag=-dSRd
+```
+
+KMC GCC writes dumps named after the input basename in the repository root, not beside
+`--output`. Preserve the relevant before/after evidence or a reproducible command in the
+existing WIP note, then remove only the temporary files you created. A compiler-source
+explanation needs the corresponding dump evidence before it becomes a measured mechanism;
+failure of one source form does not establish impossibility for every equivalent form.
+
 
 ## Conventions (every-sprint)
 

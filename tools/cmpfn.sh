@@ -51,7 +51,7 @@
 # This remains an ITERATION oracle only — every bank still gates on `tools/verify-rom.sh`.
 #
 # The object is auto-resolved from the function's segment when not given. Rebuild it first:
-#   find build -name '<obj>.o' -delete && make build/src/<tree>/<obj>.o
+#   uv run --locked python tools/rom_build.py build --object src/<tree>/<stem>.o
 
 set -euo pipefail
 source "$(dirname "$0")/lib.sh"

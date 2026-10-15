@@ -39,9 +39,11 @@ with overlays. Once the gate passes, select overlay work using exact bank and RO
    not adjacent VRAM deltas. Check individual carried/nested status before selecting pack members;
    a carried leader does not classify every sibling (`--carried-check`, `--nested-check`).
    Read only the selected target's WIP/backlog evidence. Reopen a carry for a named new source lever
-   or changed evidence, not its age or a file-closure reward; rederive its signature and residual.
-   If the fresh shortlist is empty, use `--segment main --include-stuck -n 12` and
-   `--loose-stubs main --all -n 12`. An empty shortlist is not completion.
+   or changed evidence, not its age or a file-closure reward. Confirm the cited source exists,
+   then [refresh its measurement](../../../docs/workflow/loop.md#measurement).
+   If the fresh shortlist is empty, run `--segment main --include-stuck -n 12` and
+   `--loose-stubs main --all -n 12` independently; discovery may exit 1 for an empty fresh pool.
+   An empty shortlist is not completion.
    Prefer demonstrated sibling/upstream leverage. Use [reference discovery](../../../docs/tooling.md#references-and-native-campaigns)
    when it can supply a source shape; inspect C, assembly, types/callees, and hashes before reuse.
    Similarity and source presence do not establish a bank.
@@ -86,11 +88,13 @@ default `--loose-stubs main` pool includes library C hosts but not unflipped ass
   change one named [source lever](../../../docs/levers.md) and remeasure. Use the
   [permuter eligibility rule](../../../docs/workflow/loop.md#permuter-eligibility), not score alone.
   A wall verdict belongs to its measured base, not permanently to the function.
-- Score zero starts provisional integration: inline the body, remove its stub, format with an available clang-format binary (versioned names are valid), build the host object, and spot-check the target function against the isolated object. Then run the full ROM verifier. Compare the same function, not whole multi-function `.text` sections; [oracle limits](../../../docs/workflow/loop.md#oracles) explain relocation and normalization caveats. If integration fails, restore the matching stub/source and keep the candidate isolated.
-- Preserve profile fidelity. Isolated compilation must use the same per-source profile and flags as the ROM build; use `tools/rom_build.py` and the authoritative `tools/build_profiles.json` rather than hand-assembled compiler commands. Never infer a matching result from an isolated compile alone.
-  The loop retains content-addressed measurement/source pairs under the candidate's `measurements/`
-  directory. Cite these from existing WIP notes rather than transcribing scores or creating a second
-  ledger. Changes to source, profile, headers, or context require a fresh measurement.
+- Score zero starts provisional integration: inline the body, remove its stub, format with an
+  available clang-format binary (versioned names are valid), build the host object, and
+  [spot-check the same function](../../../docs/workflow/loop.md#oracles) before the full ROM gate.
+  If integration fails, restore the matching stub/source and keep the candidate isolated.
+- Use `tools/rom_build.py` and `tools/build_profiles.json` for the parent TU's exact profile.
+  [Measurement records](../../../docs/workflow/loop.md#measurement) retain source/diagnostic pairs;
+  source, profile, header, or context changes require a fresh measurement.
 
 ## Bank
 
