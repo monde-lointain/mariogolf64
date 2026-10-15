@@ -95,10 +95,13 @@ still needs its entry test, `if (n != 0)` (S306).
 - **else-arm-return-vs-then-arm** -- for a far early return the else-arm form yields a plain `bc1t`
   (`jump.c:1737` cannot invert across a set-retval), and merges it into a *shared* error epilogue
   (S309); keep the final `return 0` last.
-- **nonvoid-return-blocks-fallthrough-delay-steal** -- an unfilled delay slot on any branch whose
-  target is the function's return block means the ROM fn returns `s32` (`reorg.c:3375/4274`),
-  including a compiler-generated `switch` range check (S311). Diagnostic: `rom=N+1 mine=N` whose only
-  mnemonic delta is `nop`, every later row shifted by one.
+- **nonvoid-return-blocks-fallthrough-delay-steal** -- an unfilled delay slot on a branch whose
+  target is the function's return block can require a non-void declaration (`reorg.c:3375/4274`),
+  including a compiler-generated `switch` range check (S311). A function whose result is ignored
+  can fall through without an explicit return: this preserves return-register liveness without
+  emitting a return-value copy. Both [guard wrappers](wip/func_800564F0-func_80055738.delay-slot-wall.md)
+  banked with this form. Diagnostic: `rom=N+1 mine=N` whose only mnemonic delta is `nop`,
+  every later row shifted by one. Never consume a value from the fall-through form.
 - **and-equals-zero-not-negated-and** -- `if (!(a & b))` De Morgans into a branch per operand plus
   `or`; `(a & b) == 0` keeps the value-selects and the `and`, which ROM `bc1t`+`and`+`bnez` means.
 - **cross-jump-merge-point-before-store** -- the delay-slot filler names the pre-reorg order; a merge

@@ -7794,31 +7794,24 @@ guard `beqz`'s (non-annulled) delay slot only when that instruction is safe to e
 - Body-first dereferences the guarded pointer (`lwc1 $f0,0x10(v0)` / `lw v0,0(v0)`) — would fault at
   the near-null address on the taken path, so reorg cannot steal it and correctly leaves the `nop`.
   These match for free (S211 `func_80056264`, `seek_current_frame_by`, `func_80056520`).
-- Body-first is pointer-independent (`li CONST`, `sll index*K`) — safe on both paths, so reorg steals
-  it into the delay slot. The ROM's reference build did not (a reorg-heuristic/patchlevel divergence),
-  leaving `nop`. **Faithful C cannot make a safe op unsafe**, so this is a hard near-match.
+- Body-first is pointer-independent (`li CONST`, `sll index*K`) — safe on both paths in a void
+  function, so reorg can steal it into the delay slot. A different return contract can keep its
+  destination live at the branch target and prevent the fill.
 
-**What fails.** `if`, `if/else`, early-return, and hoisting the independent op before the guard all
-fail to suppress the fill (early-hoist trades the fill for a `move v1,v0` reg-swap, worse). Contrast the
-store-a-variable case (`func_80056238` `cs[0x85]=arg1`): its body-first `sb arg,OFF(v0)` derefs the
-pointer, so it correctly emits `bnel`+store-in-delay and matches. Escalation:
-[#cross-project-matched-corpus-mining] for a KMC-2.7.2 sibling, or a `reorg.c fill_simple_delay_slots`
-patchlevel probe; carry otherwise.
+**Resolved pair (2026-10-15).** `func_800564F0` and `func_80055738` both bank as `s32` functions
+that fall off the end without an explicit `return`. This keeps `$v0` live for delay-slot filling
+without generating a return-value copy. Their results must not be consumed; neither has committed
+C callers or separate declarations. The isolated candidates match 12/12 and 20/20 instructions,
+the integrated host preserves those words/relocations, and `tools/verify-rom.sh` passes.
+See the [paired reconstruction evidence](wip/func_800564F0-func_80055738.delay-slot-wall.md).
 
-**Refined mechanism + proven-wall verdict (S213 compiler-source dive, gcc-2.7.2 `reorg.c`).** The fill
-is done by `fill_slots_from_thread` (reorg.c:3374), not `fill_simple_delay_slots` (which gates on
-`target==0` at reorg.c:3056 and so never fills a labelled condjump). The slot stays `nop` iff the
-block's first insn hits one of: (a) its dest reg is live at the branch target/join (e.g. it is the
-function's return value — a non-void return), (b) `may_trap_p` (a load/deref/trapping op — the old
-"derefs the guarded pointer" rule is just this special case, and it is any trap, not specifically the
-guard pointer), or (c) `own_fallthrough==0` (a `CODE_LABEL` heads the block: a second predecessor).
-Otherwise reorg steals the first insn (slot filled, block shortens by one, branch offset −1). A **void,
-single-predecessor** guard block whose first emitted insn **materializes a constant** (`li`/`sll` into a
-scratch reg dead at the void return) is therefore a hard wall: `func_800564F0` (`cs[0x189]=1`) and
-`func_80055738` (`sll v0,s0,3` address) both fill and no byte-preserving C flips (a)/(b)/(c) without
-adding an epilogue insn (non-void), changing the store to a load, or adding control flow. Two
-independent proofs (this + the `-S` oracle) → the ROM's `nop` needs a different RTL context at
-delay-fill time, not a source rewrite. Carry, permuter-proof.
+**Mechanism and limits.** `fill_slots_from_thread` (`reorg.c:3374`) cannot steal the block's first
+instruction when its destination is live at the branch target, when `may_trap_p` applies, or when
+the fall-through thread has another predecessor. The old S213 diagnosis correctly identified
+return-register liveness but incorrectly assumed every non-void source form adds an instruction.
+Its explicit-return probes did add instructions; the non-void fall-through does not. Ordinary
+void `if`, early-return, and hoisted-constant spellings do not address that liveness constraint.
+Parameter stores can keep the slot empty for a different reason: the store may trap.
 
 **Corollary fill lever — to match a target that fills the delay with a constant (S213
 `activate_texture_anim_slot`, banked).** When the ROM steals a constant into the guard-`beqz` delay

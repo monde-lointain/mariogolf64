@@ -395,7 +395,16 @@ void update_vertex_texture_coords_per_frame(s32 id) {
   }
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80054900", func_80055738);
+/* The non-void fall-through keeps the guard delay slot empty; callers ignore
+ * the unspecified result. */
+s32 func_80055738(s32 id, s32 slot, s32 frame) {
+  u8* cs = get_character_state(id);
+  if (cs != NULL) {
+    u8* p = cs + slot * 8;
+    *(s32*)(p + 0x88) = frame;
+    p[0x8C] = 3;
+  }
+}
 
 void func_80055788(s32 id) {
   u8* base = get_character_state(id);
@@ -613,7 +622,14 @@ void set_extra_flag_0(s32 id, u8 value) {
   }
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80054900", func_800564F0);
+/* The non-void fall-through keeps the guard delay slot empty; callers ignore
+ * the unspecified result. */
+s32 func_800564F0(s32 id) {
+  u8* cs = get_character_state(id);
+  if (cs != NULL) {
+    cs[0x189] = 1;
+  }
+}
 
 s32 func_80056520(s32 id) {
   u8* cs = get_character_state(id);

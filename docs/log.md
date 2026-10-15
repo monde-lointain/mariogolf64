@@ -1,5 +1,18 @@
 # Documentation update log
 
+## 2026-10-15
+
+- **Main guard-wrapper decompilation**: Banked `func_800564F0` and `func_80055738`
+  in `src/main/func_80054900.c` (128 bytes total). Non-void fall-through
+  declarations preserve the empty null-guard delay slots without extra return
+  instructions, disproving the historical paired source-wall claim. Updated the
+  reconstruction note, evidence index, source lever, and hazard guidance.
+  Isolated comparisons match 12/12 and 20/20 instructions; freshly built host
+  ranges preserve instruction words and call relocations. A throwaway sanitized
+  host harness passed 20 null/non-null and full-state checks. `tools/verify-rom.sh`
+  passes with ROM SHA-1 `e2c4e7a905b29529b49a1619a401fe699224829b`.
+  YAML, compiler profiles, and overlay sources are unchanged.
+
 ## 2026-10-14
 
 - **Progressive-discovery OKF refinement**: Audited the bundle against OKF v0.2 and current
