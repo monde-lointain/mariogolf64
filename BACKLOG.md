@@ -14,6 +14,42 @@ This file holds only the *ordering rationale*, *enabler items* (gate actions), a
 
 ## Active phase / epic
 
+### Current main-bank evidence — 2026-10-15
+
+- Banked five functions (760 bytes), with `tools/verify-rom.sh` succeeding on the
+  integrated source: `e2c4e7a905b29529b49a1619a401fe699224829b`.
+  Main-bank `INCLUDE_ASM` inventory decreased from 249 to 244. No YAML, symbol,
+  compiler-profile, or overlay changes.
+  - `src/main/bgm_load_song_from_rom.c`: `func_8005F30C` (84 bytes),
+    `func_8005F360` (332 bytes), and `func_8005F4AC` (108 bytes).
+    The clamp uses `do { positive = limit > 0; } while (0)` before
+    `limit & -positive`, preserving the ROM's `slt/negu/and` rather than
+    `nor/sra/and`. The dispatch keeps paired flag calls in one expression and
+    preserves case 2's fall-through. The scenario initializer uses a word-array
+    view rooted at `scenario_state_id`; its scalar first store retains ordering,
+    while array-element stores retain the held base and negative displacements.
+    Its isolated score 10 is only `scenario_state_id + 12` versus
+    `scenario_mode_id` relocation spelling; the ROM gate resolves those addresses.
+  - `src/main/func_80078910.c`: `func_8007FE44` (104 bytes), reconstructed from
+    assembly using the existing descriptor-buffer asset reload pattern. It needs
+    no rename: the old caller-eviction tag was not a C reconstruction blocker.
+  - `src/main/func_800660A0.c`: `update_rumble_intensity_table` (132 bytes).
+    An extra `do/while (0)` around the inner fill loop resolves the old three-
+    register rotation; `n + (s32)row` preserves bound-add operand order.
+  Four isolated comparisons scored zero. All five integrated function ranges
+  were checked against the isolated objects, accounting for same-TU call and
+  internal-jump relocations. Saved objects and target assembly remain beneath
+  each function's `nonmatchings/` directory.
+- Unbanked probes remain isolated under their original main host:
+  `func_8005F290` has exact instruction count but prologue/call scheduling
+  differences (latest score 603); `func_80060190` remains score 915 after
+  guarded-block variants. Its retained RTL and jump dumps show the jump pass
+  converting the terminal `game_mode == 9` constant diamond to a mask/select.
+  Neither probe changes its live `INCLUDE_ASM`. Next levers must address
+  initialization/call-result emission for the former and the actual jump-pass
+  conversion gate for the latter, not repeat the tested block wrappers.
+
+
 ### Current main-bank evidence — 2026-10-14
 
 - Completed `src/libmus/player_fx.c`: banked its last four routines, `CustomInit`,

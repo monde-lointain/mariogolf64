@@ -11,6 +11,10 @@ extern s16 D_8018D23C;
 extern s16 D_8018D248;
 extern s16 D_8018D24A;
 extern s16 D_8018D24C;
+extern void func_800674B8(void);
+extern s32 func_80067730(void);
+extern s8 D_801B60B8;
+extern u8 D_801B7248[];
 
 void update_rumble_intensity_table(void);
 
@@ -38,7 +42,35 @@ void func_800676B0(void) {
 
 INCLUDE_ASM("asm/nonmatchings/main/func_800660A0", func_80067730);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_800660A0",
-            update_rumble_intensity_table);
+void update_rumble_intensity_table(void) {
+  s32 n;
+  u8* row;
+  u8* p;
+  s32 i;
+
+  func_800674B8();
+  n = func_80067730();
+  if (n >= 3) {
+    n = 3;
+  }
+  i = 0;
+  if (D_801B60B8 != 2) {
+    row = D_801B7248;
+  loop_outer:
+    /* The extra loop scope preserves the inner bounds' allocation priority. */
+    do {
+      p = row;
+      do {
+        *p = ((s32)p < n + (s32)row);
+        p++;
+      } while ((s32)p < (s32)(row + 3));
+    } while (0);
+    i++;
+    row += 0xB8;
+    if (i < 4) {
+      goto loop_outer;
+    }
+  }
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_800660A0", func_80067A60);
