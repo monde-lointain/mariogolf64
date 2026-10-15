@@ -1,68 +1,53 @@
 ---
 type: "Reconstruction Note"
-title: "func_80047CAC — pure-FP interpolation stepper (FP scheduler coin, near-match)"
-description: "Documents the three-global FP interpolation stepper's scheduler coin and one-ULP constant residual."
+title: "func_80047CAC — banked with shared FP scratch and an unweighted boundary"
+description: "Records the verified 47-instruction interpolation stepper and the separate lifetime, scheduling, and reference-weight levers that recover it."
 ---
 
-# func_80047CAC — pure-FP interpolation stepper (FP scheduler coin, near-match)
+# func_80047CAC — banked with shared FP scratch and an unweighted boundary
 
-## Refreshed candidate (2026-10-15)
+**BANKED, 2026-10-15:** `tools/verify-rom.sh` succeeds on the integrated source,
+ROM SHA-1 `e2c4e7a905b29529b49a1619a401fe699224829b`.
+Main bank, ROM `0x230AC`, VRAM `0x80047CAC`, host
+`src/main/func_800453E0.c`; unchanged `main` profile with its existing fast-math
+override. The function has 47 instructions / `0xBC` bytes.
 
-**UNBANKED:** the host keeps its stub. The current isolated source computes
-three deltas before applying their factors and uses the exact upward-rounded
-middle constant `19.6500015f`. Under the host's `main` + fast-math profile it
-scores **2195 / 0.53297872**:
-`nonmatchings/func_80047CAC/measurements/4e025b81d84f63e999adf8ad42f81f5ed96159460a7456108653f2dd71fde6bc.{json,c}`.
-This source does not reproduce the historical near-match schedule; do not
-transfer the old single-nop verdict to it. A next experiment should split
-constant materialization from arithmetic with explicit locals and inspect
-quantity lifetimes before adding loop-note boundaries. The independent
-`func_80047DBC` threshold-boundary bank proves that a scheduler-only terminal
-claim needs more than the old expression-order experiments.
+## Resolution
 
+- Keep independent old-coordinate and delta locals, but reuse one `scaled`
+  scratch for the three scaled/offset coordinates. This preserves the ROM's
+  `$f14` quantity rather than coalescing each multiply into its input/delta.
+- Keep the raw inputs, half factor, final Z delta, conversion factor, and
+  smoothing factor as separate quantities. Reusing one variable across these
+  disjoint lifetimes pushes it into global allocation and permutes the FPRs.
+- Put an **empty** `do { } while (0)` after the final input scaling and before
+  `smoothing = 0.2f`. The loop notes constrain scheduling without weighting the
+  constant assignment. Enclosing that assignment instead preserves the 47-word
+  schedule but scores 105 with a register permutation; moving it outside the
+  empty boundary scores zero and retains both retail `mtc1` hazard nops.
+- Read/write X through `f32* position_x = &D_800DAF30`. This preserves its held
+  address without changing the global's scalar declaration or sibling bodies.
+- `19.6500015f` reproduces the ROM's `0x419D3334` middle constant. `19.65f`
+  rounds one ULP lower to `0x419D3333`.
 
-**Status:** fully RE'd behavior, near-match. Two independent residuals: an FP block-local
-scheduler coin (mine 1 instr SHORTER than ROM = ROM lost a hazard-fill coin, S233 terminal class)
-and a 1-ULP float constant. CARRIED S274.
+## Evidence
 
-## Semantics (verified from .s, 0xBC / 47 instr, 0 jal)
-Three lerp-style updates to float globals from s32 inputs scaled by 1/1024:
-```c
-void func_80047CAC(void) {
-  D_800DAF30 += ((f32)D_800DAEEC * (1.0f/1024.0f) - D_800DAF30) * 0.2f;
-  D_800DAF34 += ((f32)D_800DAEF0 * (1.0f/1024.0f) - K - D_800DAF34) * 0.5f;
-  D_800DAF38 += ((f32)D_800DAEF4 * (1.0f/1024.0f) - D_800DAF38) * 0.2f;
-}
-```
-Behavior is correct (both the sequential and the batched diff-then-scale spelling compile to the
-same schedule). Externs already typed in func_800453E0.c.
+`uv run --locked python tools/decomp_loop.py --func func_80047CAC` scores zero,
+47/47 matching rows. The final scalar-owner source and measurement are:
 
-## Residual 1 — the middle constant K is 1 ULP off
-`19.65f` compiles to `0x419D3333` (19.64999962). ROM has `0x419D3334` (19.65000153). Use a literal
-that rounds up, e.g. `19.6500015f` / `19.650002f` -> `0x419D3334`. (Original was likely
-19.6500015f, not a clean 19.65.)
+`nonmatchings/func_80047CAC/measurements/44ca27d8ccdc2bc16a0997b3de6884c48c6ec1708a41e6c5015779deeb9d127e.{c,json}`.
 
-## Residual 2 — FP scheduler coin (the wall)
-Mine = 46 instr, ROM = 47. ROM emits TWO `mtc1;nop` hazard bubbles (after the 19.65 mtc1 AND
-after the 0.2 `0x3E4CCCCD` mtc1). Mine fills the second bubble with an independent `lwc1`
-(loads D_800DAF34 right after the 0.2 mtc1), so mine is strictly tighter by one nop.
-Root: ROM keeps `1/1024` and `0.2` in the SAME FPR (reuses `$f8/ft2` across the two phases,
-since 1/1024 dies before 0.2 is needed); mine splits them ($f0 for 1/1024, $f8 for 0.2), which
-frees the scheduler to hoist the 0.2 load early and fill the hazard. To match, D_800DAF34 must be
-loaded EARLY (like ROM, before the 0.2 mtc1) so it is not available as the filler -> nop appears.
-Tried: sequential `+=` form and batched diff-then-scale form -> identical 46-instr schedule; decl
-reorder did not move the D_800DAF34 load. This is a block-local FP scheduler/regalloc coin
-(mips.md hazard fill), the S233 "ROM lost a coin, mine is 1 shorter" terminal class — not
-global.c ref-count steerable.
+Object SHA-256:
+`2ae66f76b334c0956519e7f070f9c0a7173061aa874f54db473a6eaf843764f7`.
+The formatted host was built through `tools/rom_build.py`; its fresh
+`objdump -drz` function range preserves the instructions and relocations.
+`target.s` and `provisional.o` are retained in the candidate directory.
 
-## Next action
-Fix the constant (`19.6500015f`) first. Then PERMUTER — but LOW-EV. Correction to the S274 record:
-the permuter was NEVER blocked. Documented main command (with the C inlined):
-`uv run --locked python ./tools/decomp-permuter/import.py --settings permuter_settings_main.toml
-src/main/func_800453E0.c asm/nonmatchings/main/func_800453E0/func_80047CAC.s`, then revert src to
-INCLUDE_ASM and `run-permuter.sh func_80047CAC`. S274 wrongly ran BARE `import.py` (no `--settings`)
-and mis-read the KMC-mirror include failure as "blocked" — see [[get_terrain_vertex_pointer]].
-CAVEAT: mine is 1 instr SHORTER (S233 class) — the schedule coin needs the ROM's constant-register
-reuse, which the permuter reaches only by luck. FP-schedule reorder is a NON-payoff shape (not
-exact-count-plus-one-operand); expect a plateau. Likely a genuine terminal FP-scheduler carry.
-Isolated base.c compiled clean via `decomp_loop` (score 6240, 47/50 rows).
+A throwaway 32-bit UBSan harness extracted the integrated body and passed
+12,000 bitwise float-result checks over 4,000 input/state combinations. It is
+native host evidence, not an emulator run.
+
+The earlier three-delta source scored 2195 under the same effective profile
+(`measurements/4e025b81d84f63e999adf8ad42f81f5ed96159460a7456108653f2dd71fde6bc.{c,json}`).
+The historical scheduler-impossibility and permuter recommendations are superseded
+by this pure-C, full-ROM-verified resolution.

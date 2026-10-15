@@ -86,6 +86,10 @@ still needs its entry test, `if (n != 0)` (S306).
   `resolve_shot_quality_table` additionally needs its digit subtraction to reuse the
   result scratch through clamping and return; a separate local digit coalesces
   differently even with the correct scheduling boundary.
+  `func_80047CAC` needs an empty boundary **before**, not around, its smoothing
+  assignment: both forms preserve the retail hazard nops, but enclosing the
+  assignment changes its reference weight and FPR allocation. Shared scaled
+  scratch and separate raw-input/constant quantities recover the remaining FPRs.
 - **global-reread-vs-cse**, absorbing defeat-global-base-cse and per-region-cse-slot-base -- a
   scalar-global store does not constrain a later load through a pointer parameter
   (`true_dependence`, `sched.c:817`), so the load hoists. `extern s32 G[]` read as `G[0]`, a

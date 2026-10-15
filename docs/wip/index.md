@@ -23,7 +23,7 @@
 - [func_80042318 (src/main/get_tile_attribute.c) — reorg delay-slot coin near-match](func_80042318.near-match.md) — Records the menu/HUD input handler's 171/172-instruction carry and its two remaining reorg delay-slot decisions.
 - [func_80046604 near-match (S262)](func_80046604.near-match.md) — Records the club/terrain sound dispatcher’s S262 branch-scheduling residual in the kind-1/2 arm.
 - [func_8004683C — banked via post-join CSE lifetimes](func_8004683C.near-match.md) — Records the verified 23-instruction bank and return-copy chain that removes the local scratch conflict with `$v0`.
-- [func_80047CAC — pure-FP interpolation stepper (FP scheduler coin, near-match)](func_80047CAC.near-match.md) — Documents the three-global FP interpolation stepper's scheduler coin and one-ULP constant residual.
+- [func_80047CAC — banked with shared FP scratch and an unweighted boundary](func_80047CAC.near-match.md) — Records the verified 47-instruction interpolation stepper and its separate lifetime, scheduling, and reference-weight levers.
 - [func_80047DBC — banked with a threshold loop-note boundary](func_80047DBC.near-match.md) — Records the verified resolution of the abs/threshold scheduling residual.
 - [func_800484F8 — start-BGM-for-game-state (near-match, S263)](func_800484F8.near-match.md) — Tracks the game-state BGM initializer's 99/102 near-match, including the default-path branch-likely and shared-value register residuals.
 - [func_8004C958 — recursive diamond-square cloud generator (near-match, S263)](func_8004C958.near-match.md) — Records the recursive cloud generator's S263 spill-pressure residual: faithful C emits fewer instructions than the ROM.

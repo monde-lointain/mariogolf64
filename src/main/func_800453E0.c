@@ -455,7 +455,51 @@ void func_80047B34(f32 arg0) {
   }
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_800453E0", func_80047CAC);
+void func_80047CAC(void) {
+  f32 raw_x;
+  f32 raw_y;
+  f32 raw_z;
+  f32 half;
+  f32 dz;
+  f32 scaled;
+  f32 old_x;
+  f32 old_y;
+  f32 old_z;
+  f32 dx;
+  f32 dy;
+  f32 factor;
+  f32 smoothing;
+  f32* position_x = &D_800DAF30;
+
+  factor = 1.0f / 1024.0f;
+  raw_x = (f32)D_800DAEEC;
+  scaled = raw_x * factor;
+  old_x = *position_x;
+  raw_y = (f32)D_800DAEF0 * factor;
+  dx = scaled - old_x;
+  scaled = raw_y - 19.6500015f;
+  old_y = D_800DAF34;
+  raw_z = (f32)D_800DAEF4;
+  dy = scaled - old_y;
+  scaled = raw_z * factor;
+  /* Keep the constant's scheduling boundary without increasing its reference
+   * weight; the same scaled scratch spans all three coordinate calculations. */
+  do {
+  } while (0);
+  smoothing = 0.2f;
+  dx *= smoothing;
+  half = 0.5f;
+  old_z = D_800DAF38;
+  dy *= half;
+  dz = scaled - old_z;
+  old_x += dx;
+  dz *= smoothing;
+  old_y += dy;
+  old_z += dz;
+  *position_x = old_x;
+  D_800DAF34 = old_y;
+  D_800DAF38 = old_z;
+}
 
 void func_80047D68(void) {
   D_800DAF30 = D_800DAEEC * (1.0f / 1024.0f);
