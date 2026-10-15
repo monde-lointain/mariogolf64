@@ -7746,9 +7746,16 @@ single-return-temp — GCC computes `(x==K)*CONST` because both arms are cheap i
 side-effect anchor. When the ROM branches on such a select (`li v0,K; bne x,v0,exit; move v0,zero;
 li v0,CONST`) it is a genuine wall: **the whole enclosing structure can match** (S231 `func_80060190`'s
 4-case switch tree and `func_800604F4`'s mode==5 search-loop + call chain both matched byte-exact) with
-Only the const-select case body diverging. Also `(x>0)?x:0` clamp: GCC always picks the `~x>>31` sign-
-trick (`nor/sra/and`), never the ROM's `slt/negu/and` — `func_8005F30C` byte-exact but for that idiom.
-Carry these; the permuter does not flip if-conversion (it permutes regs/scheduling, not branch-vs-arith).
+only the const-select case body diverging. The const-select carries remain unbanked;
+the permuter does not flip if-conversion (it permutes registers/scheduling, not branch-vs-arithmetic).
+
+**The positive clamp is source-reachable (2026-10-15).** `func_8005F30C` banked with
+`do { positive = limit > 0; } while (0); height = limit & -positive;`.
+Separating the predicate from the mask preserves `slt/negu/and` under the unchanged main
+profile instead of the `nor/sra/and` produced by the ordinary `(x > 0) ? x : 0`.
+Its isolated score is zero and the full-ROM verifier passed. This does not solve the
+`func_80060190` constant-select diamond: guarded-block variants still score 915 there,
+with the conversion visible between the retained RTL and jump dumps.
 
 **Extends to a single-bit / sign deciding term — `(x & bit) ? 1 : 0` folds to `lhu;srl` (S239 wall,
 `func_8006C8CC`).** A predicate whose terminal condition returns bool off a single-bit mask or a sign

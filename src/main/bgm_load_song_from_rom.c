@@ -5,6 +5,8 @@
 extern musHandle try_spawn_global_object(int number);
 extern void gen_terrain_detail_texture(s32 arg0, s32 arg1);
 extern void func_80407D64(void);
+extern s32 get_lowest_height_at_position(s32 x, s32 z);
+extern s32 D_800FBE68;
 
 extern void transfer_mode_continue_slot(s32 restore);
 extern void func_80216B74(s32 arg0);
@@ -154,7 +156,20 @@ s32 func_8005F248(s32 arg0) {
 
 INCLUDE_ASM("asm/nonmatchings/main/bgm_load_song_from_rom", func_8005F290);
 
-INCLUDE_ASM("asm/nonmatchings/main/bgm_load_song_from_rom", func_8005F30C);
+s32 func_8005F30C(s32 x, s32 z) {
+  s32 height = get_lowest_height_at_position(x, z);
+
+  if ((g_terrain_vtx_xform_mode == 0) & (height > 0)) {
+    s32 limit = D_800FBE68;
+    s32 positive;
+    /* Keep the predicate separate from the mask to preserve slt/negu/and. */
+    do {
+      positive = limit > 0;
+    } while (0);
+    height = limit & -positive;
+  }
+  return height;
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/bgm_load_song_from_rom", func_8005F360);
 
