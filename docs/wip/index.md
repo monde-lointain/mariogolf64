@@ -36,7 +36,7 @@
 - [func_80056060 — CARRIED (39/39, 20 diff rows; callee-saved priority inversion)](func_80056060.near-match.md) — Documents the 39/39 near-match with 20 differing rows attributed to a callee-saved register-priority inversion.
 - [func_800564F0 + func_80055738 — banked non-void fall-through guards](func_800564F0-func_80055738.delay-slot-wall.md) — Records the non-void fall-through source lever that resolves both guard delay slots and passes full-ROM verification.
 - [func_80059BA0 — banked via loop-note scheduling and mask weighting](func_80059BA0.near-match.md) — Records the verified eight-instruction pure-C resolution of the former scheduler carry.
-- [func_8005B0B4 — near-match (CARRIED, S263 value-select-branch-likely)](func_8005B0B4.near-match.md) — Records the S263 carried value-select versus branch-likely residual for func_8005B0B4.
+- [func_8005B0B4 — banked selector switch](func_8005B0B4.near-match.md) — Records the verified case order and selective weighting that recover the retail registers and branch-likely slots.
 - [func_8005C038 -- record-table insert (S289 carry, 268/264)](func_8005C038.near-match.md) — Re-derives the five-argument record-table insert and records its S289 268/264-instruction carry.
 - [func_8005CA48 -- near-match, carried (S288)](func_8005CA48.near-match.md) — Records the S288 active-player reset/profile loader reconstruction and its two-instruction excess.
 - [func_8005CF78 — CARRIED (large jtbl-dispatch 3-level loop; deferred, not a proven wall)](func_8005CF78.near-match.md) — Records a carried three-level jump-table loop whose deferred residual is not classified as a proven wall.

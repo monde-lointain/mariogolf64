@@ -7903,13 +7903,13 @@ call-free function). Still true from S268: the permuter alone plateaus here, bec
 source structure and does not permute hard registers; see `docs/levers.md` (permuter at exact count
 residual). A matched-corpus sibling that pins the seed remains a fallback, not the only lever.
 
-**Note the distinction from a 1-register role fix.** A single wrong register (e.g. a default-return
-sentinel in `s1` vs `a1`) is often a real source lever ([#default-return-var-must-init-after-the-call],
-`docs/levers.md` (cross call live range callee saved lever)). It is a *permutation of 3+ caller-saved regs with the
-count already matched* that is terminal. Before ruling terminal, first apply the ordinary role levers
-(accumulator-early via delay-slot steering, out-of-line handler, callee-saved init-after-call); S268
-`func_8005B0B4` shed an accumulator-role and a delay-slot-fill divergence to those levers, leaving
-only the irreducible 3-register permutation.
+**Measured main-bank example (2026-10-15):** `func_8005B0B4` now banks in pure C.
+Seven loop-note scopes around its signed value load and three around its
+case-2 result calculation recover `$v1/$a0/$a1/$a2` for result/value/selector/flags.
+The switch's source case order `3, 2, 0, 1` and case-0 positive guard then resolve
+the remaining branch direction and two extra instructions. Its former
+"irreducible three-register permutation" was not source-invariant; see
+`docs/wip/func_8005B0B4.near-match.md` for measurements and the full-ROM gate.
 
 ## duplicate-literal-pool-shared-rodata (a byte-exact body that still reddens the gate)
 

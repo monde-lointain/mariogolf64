@@ -717,13 +717,55 @@ s32 func_8005B070(s32 arg0) {
 
 s32 func_8005B0A0(s32 arg0) { return D_800C2B28[arg0]; }
 
-/* func_8005B0B4: selector (flags&0xF) dispatch -> strength value. NEAR-MATCH
- * 37/39 (faithful body in nonmatchings/func_8005B0B4/base.c). Residual = S263
- * value-select-branch-likely: ROM emits the const early-returns as `beql
- * sel,K,end` with the value in the annulled delay slot; gcc-from-C branches
- * away + `j;li`. Terminal / permuter-denied. See
- * docs/wip/func_8005B0B4.near-match.md. */
-INCLUDE_ASM("asm/nonmatchings/main/func_80059BA0", func_8005B0B4);
+s32 func_8005B0B4(Struct80131510* record) {
+  u32 flags = ((u8*)record)[0x3A];
+  s32 result = 0;
+  s32 value;
+  s32 selector = flags & 0xF;
+  /* Weight the signed value load and the case-2 result separately so the
+   * result/value/selector occupy v1/a0/a1, preserving the annulled slots. */
+  do {
+    do {
+      do {
+        do {
+          do {
+            do {
+              do {
+                value = ((s8*)record)[0x2C];
+              } while (0);
+            } while (0);
+          } while (0);
+        } while (0);
+      } while (0);
+    } while (0);
+  } while (0);
+  if (flags & 0x80) {
+    switch (selector) {
+      case 3:
+        result = flags & 0x40 ? 60 : 50;
+        break;
+      case 2:
+        do {
+          do {
+            do {
+              result = flags & 0x40 ? 70 : 60;
+              if (value < 5) result += 10;
+            } while (0);
+          } while (0);
+        } while (0);
+        break;
+      case 0:
+        result = 90;
+        if (value >= 4) result = 100;
+        break;
+      case 1:
+        result = 100;
+        break;
+    }
+  }
+  selector = result;
+  return selector;
+}
 
 void rank_scores_descending(s32* scores, s32* order, s32 count) {
   s32 keys[count];
@@ -773,7 +815,6 @@ extern char D_800D0918[]; /* "1:prior=%d:" */
 extern char D_800D0924[]; /* "2" */
 extern char D_800D0928[]; /* "\n" */
 extern void osSyncPrintf(const char*, ...);
-s32 func_8005B0B4(Struct80131510*);
 void rank_scores_descending(s32* scores, s32* order, s32 count);
 
 void insert_supershot_record(Struct80131510* entry) {
