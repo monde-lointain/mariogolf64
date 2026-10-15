@@ -459,9 +459,108 @@ void func_80041B98(GridVertex* out, s32 tx, s32 tz) {
 
 INCLUDE_ASM("asm/nonmatchings/main/get_tile_attribute", func_80041D44);
 
-INCLUDE_ASM("asm/nonmatchings/main/get_tile_attribute", func_80041E8C);
+extern s32 D_800BB080;
+extern s32 D_800BB084;
+extern s32 D_800BB088;
+extern u16 D_800FED18;
+extern char D_800CAA7C[];
+extern char D_800CAA84[];
+extern char D_800CAA8C[];
+extern char D_800CAA94[];
+extern char D_801B5588[];
+extern char D_8012F4E8[];
+extern void clear_text_grid(void);
+extern void check_and_print_grid(char* str, s32 col, s32 row);
+extern void set_flag_based_on_param(s32 value);
+extern s32 flag_is_set(s32 flag);
+extern void flag_set(s32 flag);
+extern void flag_clear(s32 flag);
 
-INCLUDE_ASM("asm/nonmatchings/main/get_tile_attribute", func_80041EC0);
+/* Debug flag-grid viewer. Nesting preserves the retail helper's static chain
+ * and places its body at 0x80041E8C, immediately before this parent. */
+void func_80041EC0(void) {
+  char buffer[16];
+  s32 row;
+  s32 bit;
+  s32 column;
+  u16 buttons;
+
+  s32 selected_flag(void) {
+    return ((D_800BB080 + D_800BB088) << 4) + D_800BB084;
+  }
+
+  clear_text_grid();
+  check_and_print_grid(D_800CAA7C, 3, 4);
+  check_and_print_grid(D_801B5588, 8, 4);
+  check_and_print_grid(D_800CAA84, 3, 5);
+  check_and_print_grid(D_8012F4E8, 8, 5);
+  for (row = 0; row < 8; row++) {
+    sprintf(buffer, D_800CAA8C, row + D_800BB080);
+    check_and_print_grid(buffer, 3, row + 14);
+    for (bit = 0, column = 6; bit < 16; bit++, column += 2) {
+      if (row == 0) {
+        sprintf(buffer, D_800CAA94, bit);
+        check_and_print_grid(buffer, column, 12);
+      }
+      sprintf(buffer, D_800CAA94, flag_is_set(((row + D_800BB080) << 4) + bit));
+      if (row == D_800BB088 && bit == D_800BB084) {
+        set_flag_based_on_param(1);
+      }
+      check_and_print_grid(buffer, column, row + 14);
+    }
+  }
+  buttons = D_800FED18;
+  if (buttons & 0x100) {
+    D_800BB084++;
+  }
+  if (buttons & 0x200) {
+    D_800BB084--;
+  }
+  if (D_800BB084 < 0) {
+    D_800BB084 = 15;
+    D_800BB088--;
+  }
+  if (D_800BB084 >= 16) {
+    D_800BB084 = 0;
+    D_800BB088++;
+  }
+  if (buttons & 0x800) {
+    D_800BB088--;
+  }
+  if (buttons & 0x400) {
+    D_800BB088++;
+  }
+  if (buttons & 0x10) {
+    D_800BB080 += 8;
+  }
+  if (buttons & 0x20) {
+    D_800BB080 -= 8;
+  }
+  while (1) {
+    s32 cursor_row = D_800BB088;
+    if (cursor_row < 0) {
+      D_800BB088 = cursor_row + 1;
+      D_800BB080--;
+    } else if (cursor_row >= 8) {
+      D_800BB088 = cursor_row - 1;
+      D_800BB080++;
+    } else {
+      break;
+    }
+  }
+  if (D_800BB080 > 8) {
+    D_800BB080 = 8;
+  }
+  if (D_800BB080 < 0) {
+    D_800BB080 = 0;
+  }
+  if (D_800FED18 & 0x8000) {
+    flag_set(selected_flag());
+  }
+  if (D_800FED18 & 0x4000) {
+    flag_clear(selected_flag());
+  }
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/get_tile_attribute", func_80042228);
 

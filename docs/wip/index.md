@@ -20,7 +20,6 @@
 - [func_8003E004 — near-match (S204 -> S235 -> S318, CARRIED)](func_8003E004.near-match.md) — Records the wind-indicator vertex generator's S318 exact-count carry and remaining preheader, angle-chain, and register-order residuals.
 - [func_800415C4 near-match (get_tile_attribute.c, S218)](func_800415C4.near-match.md) — Records the S281 byte-exact bank as set_lod_grid_vertex, superseding the S218 register-allocation diagnosis.
 - [func_80041878 near-match (get_tile_attribute.c, S218)](func_80041878.near-match.md) — Records the S281 byte-exact bank as set_lod_tile_attribute, superseding the S218 register-allocation diagnosis.
-- [func_80041EC0 near-match (get_tile_attribute.c, S218)](func_80041EC0.near-match.md) — Documents the 216/218-instruction near-match blocked by a callee's non-o32 $v0 argument convention, not source shape.
 - [func_80042318 (src/main/get_tile_attribute.c) — reorg delay-slot coin near-match](func_80042318.near-match.md) — Records the menu/HUD input handler's 171/172-instruction carry and its two remaining reorg delay-slot decisions.
 - [func_80046604 near-match (S262)](func_80046604.near-match.md) — Records the club/terrain sound dispatcher’s S262 branch-scheduling residual in the kind-1/2 arm.
 - [func_80047CAC — pure-FP interpolation stepper (FP scheduler coin, near-match)](func_80047CAC.near-match.md) — Documents the three-global FP interpolation stepper's scheduler coin and one-ULP constant residual.

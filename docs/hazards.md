@@ -6606,6 +6606,12 @@ cluster A's `0x295E0` split over-reached by one fn — the child was carried.) `
 a `static-chain-callee` (a fn whose caller does `addiu v0,sp,K` before its `jal`) is a tracked
 follow-up.
 
+**Flag-grid confirmation (2026-10-14).** `func_80041E8C` is a chain-unused child of
+`func_80041EC0`, not the custom `$v0`-argument wall recorded in S218. Writing its
+global-only selected-flag calculation as a nested function reproduced the child's
+13 instructions and both caller chain setups; the 218-instruction parent and child
+passed `tools/verify-rom.sh`. See [banked evidence](wip/banked/func_80041EC0.near-match.md).
+
 **Chain-unused orphan variant + standalone byte-repro (S248).** When the child reads no parent
 variable, the chain is homed (`sw $v0,0(sp)`) but never reloaded — a pure dead spill. If the parent
 also inlined its call(s) to the child, GCC still emits the out-of-line body, but zero `jal`/
@@ -6622,13 +6628,13 @@ to prove the nested origin. S248 `func_8008E164`/`lerp_s32` is such an orphan (b
 
 **Chain-used variant masquerades as a `$v0`-arg wall (S248).** When the child does read a parent
 variable, it reloads the chain and dereferences it — the body opens `move a0,v0` / `lw x,K($v0)`,
-looking exactly like the `#func-80041e8c-v0-arg-convention-wall` (arg in `$v0`). The discriminator is
+looking like a custom argument in `$v0`. The discriminator is
 the same caller tell: a `addiu $v0,$sp,K` (address of a parent local = the static chain) persisting
 into the `jal`'s live range. If present, it is a chain-used nested function, not a terminal `$v0`-arg
 wall — it is crackable once the parent's TU is decompiled and the child is written nested (accessing
 `sp+K` as the parent local). S248 re-priced `func_80092E10` (parent spans `0x800930xx..0x80093470`,
 callers set `addiu $v0,$sp,0x10`) from "$v0-arg wall" to this crackable class. So before declaring a
-`$v0`-first-access leaf a `#func-80041e8c-v0-arg-convention-wall`, read its callers for the
+`$v0`-first-access leaf a custom-ABI wall, read its callers for the
 `addiu $v0,$sp,K` static-chain setup.
 
 **Callee-side tell + pre-classify the whole pack at seed time (S191).** You do not need the caller to
