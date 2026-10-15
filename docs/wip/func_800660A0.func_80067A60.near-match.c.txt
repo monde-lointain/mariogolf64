@@ -1,9 +1,15 @@
-// func_80067A60 @ 0x80067A60 (40i) — STRUCTURAL-COMPLETE near-match (build 37i, MORE optimal than ROM).
-// Structure matches: early mask, dup address calc per branch, signed lh, per-branch arg1+=4,
-// shared jal + arg4-store in jal delay. Residual +3: ROM has a REDUNDANT mask save/restore
-// (move t1,a3 / move a3,t1 — a3 is never clobbered, a GCC coalescing artifact) + ROM does NOT
-// fold %lo into the else-branch lh (keeps addiu base separate). Build reproduces neither (it is
-// tighter). 'mine more optimal than target' regalloc wall -> permuter --main / cross-corpus.
+// func_80067A60 @ 0x80067A60 (40 instructions) — BANKED 2026-10-15.
+// The former shared-call reconstruction below was three instructions short.
+// Branch-local func_80050DA0 calls preserve the retail reverb save/restore;
+// a separate rows=TABLE; row=rows[bank] statement pair in EACH arm preserves
+// base-before-index materialization. Canonical matching source:
+// src/main/func_800660A0.c.
+// Isolated score 0, main profile:
+// nonmatchings/func_80067A60/measurements/750765481d297d3d6beb053d011441e0a34726fac8c8526ba21b659bab1eed1a.json
+// Integrated host range inspected; tools/verify-rom.sh passed, SHA-1
+// e2c4e7a905b29529b49a1619a401fe699224829b.
+//
+// Historical nonmatching source (not the banked implementation):
 void func_80067A60(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
   s16* p;
   s32 val;

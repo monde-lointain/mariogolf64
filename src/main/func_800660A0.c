@@ -73,4 +73,20 @@ void update_rumble_intensity_table(void) {
   }
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_800660A0", func_80067A60);
+extern s16 D_800C3130[][34];
+extern void func_80050DA0(s32 sfx, s32 channel, s32 volume, s32 reverb, s32 pan);
+
+void func_80067A60(s32 bank, s32 channel, s32 entry, s32 volume, s32 pan) {
+  s32 reverb = -(bank != 3) & 0x14;
+  /* Separate call sites preserve the retail argument copies. The base/index
+   * split keeps each table address materialized before its row offset. */
+  if (volume == -1) {
+    s16 (*rows)[34] = D_800C3130;
+    s16* row = rows[bank];
+    func_80050DA0(row[entry], channel + 4, row[entry + 1], reverb, pan);
+  } else {
+    s16 (*rows)[34] = D_800C3130;
+    s16* row = rows[bank];
+    func_80050DA0(row[entry], channel + 4, volume, reverb, pan);
+  }
+}
