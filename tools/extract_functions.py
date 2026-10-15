@@ -12,12 +12,10 @@ from decomp_common import GLABEL_RE
 
 def format_line(line: str) -> str | None:
     """Format a single line, returning None if it should be skipped."""
-    stripped = line.strip()
-
-    # Label line (e.g., "  .L80099F64:")
-    label_match = re.match(r"^\s*(\.L\w+):\s*$", line)
+    # Keep both ordinary branch labels and splat's jump-table destinations.
+    label_match = re.match(r"^\s*(?:jlabel\s+(\S+)|(\.L\w+):)\s*$", line)
     if label_match:
-        return f"{label_match.group(1)}:"
+        return f"{label_match.group(1) or label_match.group(2)}:"
 
     # Instruction line with comment (e.g., "    /* 75354 80099F54 14800003 */  bnez       $a0, .L80099F64")
     instr_match = re.match(r"^\s*/\*[^*]*\*/\s+(\S+)\s*(.*)?$", line)
