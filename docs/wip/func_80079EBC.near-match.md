@@ -1,10 +1,36 @@
 ---
 type: "Reconstruction Note"
-title: "func_80079EBC — shared-literal-pool partial-bank carry (S279)"
-description: "Documents the partial-bank carry blocked by a shared literal pool."
+title: "func_80079EBC — banked while retaining the shared literal pool"
+description: "Records the verified extern-pool particle spawn and its two loop-note scheduling boundaries."
 ---
 
-# func_80079EBC — shared-literal-pool partial-bank carry (S279)
+# func_80079EBC — banked while retaining the shared literal pool
+
+## Verified resolution (2026-10-15)
+
+**BANKED:** YAML `main`, ROM `0x552BC`, VRAM `0x80079EBC`,
+`src/main/func_80078910.c`. `tools/verify-rom.sh` exited zero with SHA-1
+`e2c4e7a905b29529b49a1619a401fe699224829b`.
+
+Keep `D_800D19E0` extern; no pool carve or literal duplication is necessary.
+Split the random size-step contribution and double offset into locals. An
+empty one-shot loop after loading the offset prevents `count++` moving before
+the pool load. Put the zero store to `unknown_3B` inside a second one-shot loop
+before the final addition. Together these retain the exact 148-instruction
+schedule and original register assignments. Wrapping `count++` itself instead
+changes its reference weight and swaps the count/index registers.
+
+Source/measurement:
+`nonmatchings/func_80079EBC/measurements/f6255ac33d9fd1ccd754ba44562bdc6b7e1cf9c638acd074de1519ceb14adb9d.{c,json}`.
+Integrated words and relocation identities agree. The signed random remainders
+use explicit `(s32)guRandom()` casts with the existing unsigned SDK prototype.
+The position global is a three-word array; `reload_scene_assets` uses element
+zero with unchanged instructions. A throwaway 32-bit UBSan smoke covered
+zero through five free slots, the three-particle limit, occupied-slot
+preservation, random-call order, negative random values, and untouched fields.
+
+## Historical carry (superseded)
+
 
 ## Verdict
 Body is fully RE'd and BYTE-EXACT (S279 gccB, 148/148 in isolation). NOT bankable in the current

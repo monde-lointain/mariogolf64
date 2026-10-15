@@ -98,7 +98,7 @@ void func_800789C8(void) {
   }
 }
 
-extern s32 D_800FBE64;
+extern s32 D_800FBE64[3];
 extern u32 target_z;
 extern s32 active_terrain_index;
 extern s32 D_800C52B0;
@@ -126,8 +126,8 @@ void reload_scene_assets(s8* arg0) {
     (particle_array + i)->effect_kind = -1;
   }
 
-  D_800FC8B8 =
-      (s32)(f32)get_interpolated_terrain_height_wrapper(D_800FBE64, target_z);
+  D_800FC8B8 = (s32)(f32)get_interpolated_terrain_height_wrapper(D_800FBE64[0],
+                                                                 target_z);
 
   if (arg0[0xA3] == 23) {
     D_800C52B0 = 1;
@@ -301,17 +301,47 @@ void func_80079A08(s32 arg0, s32 arg1) {
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80078910", spawn_terrain_effect);
 
-/* func_80079EBC: particle-spawn (3 particles at D_800FBE64 with per-axis
- * jitter). Fully RE'd BYTE-EXACT body (S279 gccB, 148/148 in isolation), but
- * BLOCKED in this partial bank: it needs the TU's shared FP literal pool (0.04
- * at D_800D19E0, alongside 0.2/0.049 + jtbl_800D1990) which is still owned by
- * still-asm siblings in asm/53D10.s. Emitting the 0.04 as a C literal
- * duplicates the pool (+0x10 flowing-rodata shift); referencing it extern
- * avoids the shift but perturbs a source-invariant count++ sched.c coin
- * (CONST_DOUBLE vs MEM cost: with the extern MEM the addiu $s2 hoists one slot
- * ahead of the ldc1). Banks once the pool-owning siblings are also C. See
- * docs/wip/func_80079EBC.near-match.md. */
-INCLUDE_ASM("asm/nonmatchings/main/func_80078910", func_80079EBC);
+extern f64 D_800D19E0;
+
+void func_80079EBC(void) {
+  s32 i;
+  s32 count;
+  Particle* p;
+  count = 0;
+  for (i = 0; i != 40; i++) {
+    p = &particle_array[i];
+    if (p->effect_kind == -1) {
+      f32 size_step;
+      f64 offset;
+      p->position.x = (f32)D_800FBE64[0] * (1.0f / 1024.0f);
+      p->position.y = ((f32)D_800FBE64[1] - 15360.0f) * (1.0f / 1024.0f);
+      p->position.z = (f32)D_800FBE64[2] * (1.0f / 1024.0f);
+      p->velocity.x = 0;
+      p->velocity.y =
+          ((f32)count * 0.3f + 0.1f + (f32)((s32)guRandom() % 10) * 0.01f) *
+          -1.5f;
+      p->velocity.z = 0;
+      p->opacity = 255.0f;
+      p->opacity_step = -1.0f;
+      p->size = (f32)((s32)guRandom() % 30) * 0.1f + 1.0f;
+      size_step = (f32)((s32)guRandom() % 10) * 0.001f;
+      offset = D_800D19E0;
+      /* Retain the shared pool; these boundaries preserve its load and the
+       * byte store of zero ahead of the final double-precision addition. */
+      do {
+      } while (0);
+      count++;
+      do {
+        p->unknown_3B = 0;
+      } while (0);
+      p->size_step = size_step + offset;
+      p->effect_kind = 0x10;
+      if (count == 3) {
+        break;
+      }
+    }
+  }
+}
 
 /* func_8007A10C + func_8007A40C: GCC NESTED functions defined inside
  * func_8007A6C8 (static chain in $v0 = STATIC_CHAIN_REGNUM, mips.h:1310).
