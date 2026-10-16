@@ -22,7 +22,7 @@ typedef struct {
   s32 red;
   s32 green;
   s32 blue;
-} Color;
+} ClearColor;
 
 /* Shared command cursor used by the frame renderer. */
 extern Gfx* glistp;
@@ -31,7 +31,7 @@ extern Vp frame_viewports[];
 extern Gfx rdp_setup_dl[];
 extern Gfx rsp_setup_dl[];
 /* Shared RGB state set by set_clear_color and consumed by clear_playfield. */
-extern Color clear_color;
+extern ClearColor clear_color;
 
 extern u16* nuGfxZBuffer;
 extern u16* nuGfxCfb_ptr;
@@ -42,11 +42,12 @@ extern void set_camera_matrices_fixed(s32, s32, Vp*);
  * provide writable command space through display_list_cursor. */
 void append_viewport_setup(s32 viewport_index, Gfx** display_list_cursor) {
   Gfx* next_command = *display_list_cursor;
+  Vp* viewport = &frame_viewports[viewport_index];
 
   gDPPipeSync(next_command++);
   gSPSegment(next_command++, 0, 0);
-  gSPViewport(next_command++, &frame_viewports[viewport_index]);
-  set_camera_matrices_fixed(0, 0, &frame_viewports[viewport_index]);
+  gSPViewport(next_command++, viewport);
+  set_camera_matrices_fixed(0, 0, viewport);
   gSPDisplayList(next_command++, rsp_setup_dl);
   gSPDisplayList(next_command++, rdp_setup_dl);
   gDPPipeSync(next_command++);
@@ -117,12 +118,13 @@ void append_framebuffer_clear(s32 color_clear_mode, Gfx** display_list_cursor) {
       osVirtualToPhysical(nuGfxCfb_ptr) & ~(FRAMEBUFFER_ADDRESS_ALIGNMENT - 1));
 
   if (color_clear_mode == COLOR_CLEAR_SCANLINES) {
-    s32 row;
+    s32 scanline;
 
     /* The retail scanline path leaves the final framebuffer row untouched. */
-    for (row = 0; row < FRAMEBUFFER_HEIGHT - 1; row++) {
+    for (scanline = 0; scanline < FRAMEBUFFER_HEIGHT - 1; scanline++) {
       gDPSetFillColor(next_command++, OPAQUE_BLACK_FILL_COLOR);
-      gDPFillRectangle(next_command++, 0, row, FRAMEBUFFER_WIDTH - 1, row);
+      gDPFillRectangle(next_command++, 0, scanline, FRAMEBUFFER_WIDTH - 1,
+                       scanline);
     }
     gDPPipeSync(next_command++);
   } else if (color_clear_mode == COLOR_CLEAR_RECTANGLE) {
