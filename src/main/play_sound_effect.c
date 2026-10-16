@@ -308,7 +308,7 @@ extern u8 D_D9B9C0[];
 extern u8 D_D9F450[];
 extern void audio_system_boot(musConfig* config);
 extern void load_audio_wave_bank(u32 rom_address, s32 size, void* wave_bank);
-extern void func_8005F11C(u32 rom_address, s32 size);
+extern void load_sound_effect_bank_from_rom(u32 rom_address, s32 size);
 extern s32 ChangeCustomEffect(s32 index);
 
 void func_80051D8C(void) {
@@ -325,7 +325,7 @@ void func_80051D8C(void) {
   load_audio_wave_bank((u32)D_171790,
                       (u32)audio_wave_bank_rom_end - (u32)D_171790,
                       audio_wave_table_rom_start);
-  func_8005F11C((u32)D_D9B9C0, (u32)D_D9F450 - (u32)D_D9B9C0);
+  load_sound_effect_bank_from_rom((u32)D_D9B9C0, (u32)D_D9F450 - (u32)D_D9B9C0);
   i = 0;
   effect = D_800C0EAC;
   object = object_id_table;

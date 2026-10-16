@@ -322,6 +322,25 @@ nuAuStlSchedDoTask = 0x8005EF88; // type:func
 // Refined names for the BGM helpers in the mixed audio_mgr.c subsegment.
 bgm_allocate_song_buffer = 0x8005F048; // rom:0x3A448 type:func
 bgm_start_current_song = 0x8005F06C; // rom:0x3A46C type:func
+allocate_sound_effect_bank_buffer = 0x8005F0BC; // type:func
+start_sound_effect = 0x8005F0FC; // type:func
+load_sound_effect_bank_from_rom = 0x8005F11C; // type:func
+get_reflected_phase = 0x8005F224; // type:func
+scale_reflected_phase = 0x8005F248; // type:func
+populate_terrain_club_availability = 0x8005F290; // type:func
+get_terrain_height_at_position = 0x8005F30C; // type:func
+initialize_game_mode_from_flags = 0x8005F360; // type:func
+format_hole_number = 0x8005F518; // type:func
+initialize_game_setup = 0x8005F838; // type:func
+load_game_mode_auxiliary_fields = 0x800600C0; // type:func
+load_course_selection_auxiliary_fields = 0x80060128; // type:func
+get_hole_score_result_code = 0x80060190; // type:func
+load_game_mode_record = 0x80060210; // type:func
+load_course_selection_record = 0x800602B4; // type:func
+get_mode_flags_mask = 0x800603A8; // type:func
+save_scenario_state_snapshot = 0x80060434; // type:func
+copy_two_double_values = 0x800627F8; // type:func
+exclude_terrain_tiles_near_position = 0x8006280C; // type:func
 // nuaustlmgr.c file-scope data/bss, drop-def externs (S128)
 nuAuTaskStop = 0x800C2FFC; // size:0x1
 nuAuPreNMI = 0x800C2FFD; // size:0x1

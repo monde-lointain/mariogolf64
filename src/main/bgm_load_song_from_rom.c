@@ -4,7 +4,7 @@
 #include <nusys.h>
 #include <nualstl.h>
 
-extern musHandle try_spawn_global_object(int number);
+extern musHandle try_spawn_global_object(int object_id);
 extern void gen_terrain_detail_texture(s32 arg0, s32 arg1);
 extern void func_80407D64(void);
 extern s32 get_lowest_height_at_position(s32 x, s32 z);
@@ -13,9 +13,9 @@ extern s32 D_800FBE68;
 extern s32 transfer_mode_continue_slot(s32 restore);
 extern void func_80216B74(s32 arg0);
 extern s32 flag_is_set(s32 flag);
-extern void func_8005F360(void);
+extern void initialize_game_mode_from_flags(void);
 extern void func_8005F4AC(void);
-extern void func_80060210(GameModeRecord* arg0);
+extern void load_game_mode_record(GameModeRecord* arg0);
 extern void initialize_hole_handicap_ranks(void);
 extern void init_per_player_state(void);
 extern void init_sky_panels(void);
@@ -85,28 +85,31 @@ extern s32 func_8006DF84(void);
 extern void func_8020FFEC(s32 event);
 extern s32 func_8020FFD8(void);
 
-void bgm_load_song_from_rom(u32 rom_addr, s32 size) {
-  nuPiReadRom(rom_addr, (void*)g_bgm_song_buffer, size + (size & 1));
+void bgm_load_song_from_rom(u32 rom_address, s32 byte_count) {
+  nuPiReadRom(rom_address, (void*)g_bgm_song_buffer,
+              byte_count + (byte_count & 1));
 }
 
-void func_8005F0BC(s32 size) { D_800C2FF4 = (u32)__MusIntMemMalloc(size); }
-
-musHandle spawn_object_simple(int number) {
-  return try_spawn_global_object(number);
+void allocate_sound_effect_bank_buffer(s32 buffer_size) {
+  D_800C2FF4 = (u32)__MusIntMemMalloc(buffer_size);
 }
 
-void func_8005F0FC(int number, int volume, int pan, int restartflag,
-                   int priority) {
-  MusStartEffect2(number, volume, pan, restartflag, priority);
+musHandle spawn_object_simple(int object_id) {
+  return try_spawn_global_object(object_id);
 }
 
-void func_8005F11C(u32 rom_addr, s32 size) {
-  s32 rounded = (size & 1) + size;
+void start_sound_effect(int effect_id, int volume, int pan, int restart_flag,
+                        int priority) {
+  MusStartEffect2(effect_id, volume, pan, restart_flag, priority);
+}
 
-  if ((u32)rounded >= 0x4001) {
+void load_sound_effect_bank_from_rom(u32 rom_address, s32 bank_size) {
+  s32 padded_size = (bank_size & 1) + bank_size;
+
+  if ((u32)padded_size >= 0x4001) {
     osSyncPrintf(D_800D1220);
   }
-  nuPiReadRom(rom_addr, (void*)D_800C2FF4, rounded);
+  nuPiReadRom(rom_address, (void*)D_800C2FF4, padded_size);
   MusFxBankInitialize((void*)D_800C2FF4);
 }
 
@@ -135,7 +138,7 @@ void func_8005F1C8(void) {
   D_800C3080 = 0;
 }
 
-s32 func_8005F224(void) {
+s32 get_reflected_phase(void) {
   s32 phase_value = D_800FBE88;
 
   if (phase_value >= 0x1F) {
@@ -144,45 +147,46 @@ s32 func_8005F224(void) {
   return phase_value;
 }
 
-s32 func_8005F248(s32 value) {
-  s32 reflected_value;
+s32 scale_reflected_phase(s32 phase) {
+  s32 reflected_phase;
 
-  if (value < 0x1F) {
-    reflected_value = value;
+  if (phase < 0x1F) {
+    reflected_phase = phase;
   } else {
-    reflected_value = 0x3C - value;
+    reflected_phase = 0x3C - phase;
   }
-  if (reflected_value < 0) {
-    reflected_value = 0;
+  if (reflected_phase < 0) {
+    reflected_phase = 0;
   }
-  return (reflected_value << 8) / 30;
+  return (reflected_phase << 8) / 30;
 }
 
-s32 func_8005F290(s32 unused, s16* club_ids, u8* enabled_clubs) {
+s32 populate_terrain_club_availability(s32 unused, s16* club_ids,
+                                       u8* enabled_club_slots) {
   s32 club_index;
 
   for (club_index = 0; club_index < 14; club_index++) {
-    enabled_clubs[club_index] =
+    enabled_club_slots[club_index] =
         (get_club_param(club_ids[club_index])->flags &
          resolve_active_terrain_club_mask(1)) != 0;
   }
   return 14;
 }
 
-s32 func_8005F30C(s32 x, s32 z) {
-  s32 height = get_lowest_height_at_position(x, z);
+s32 get_terrain_height_at_position(s32 x_coordinate, s32 z_coordinate) {
+  s32 height = get_lowest_height_at_position(x_coordinate, z_coordinate);
 
   if ((g_terrain_vtx_xform_mode == 0) & (height > 0)) {
-    s32 limit = D_800FBE68;
-    s32 positive;
+    s32 height_limit = D_800FBE68;
+    s32 has_positive_limit;
     /* Keep the predicate separate from the mask to preserve slt/negu/and. */
-    positive = limit > 0;
-    height = limit & -positive;
+    has_positive_limit = height_limit > 0;
+    height = height_limit & -has_positive_limit;
   }
   return height;
 }
 
-void func_8005F360(void) {
+void initialize_game_mode_from_flags(void) {
   s32 mode_flags = (flag_is_set(0x33) << 1) + flag_is_set(0x34);
 
   switch (mode_flags) {
@@ -237,20 +241,20 @@ void func_8005F4AC(void) {
   }
 }
 
-void func_8005F518(s32 value, char* output_buffer) {
-  sprintf(output_buffer, D_800D1238, value + 1);
+void format_hole_number(s32 hole_index, char* output_buffer) {
+  sprintf(output_buffer, D_800D1238, hole_index + 1);
 }
 
 INCLUDE_ASM("asm/nonmatchings/main/bgm_load_song_from_rom",
             init_per_player_state);
 
-void func_8005F838(s32 setup_mode) {
+void initialize_game_setup(s32 setup_mode) {
   if (setup_mode == 1) {
-    func_8005F360();
+    initialize_game_mode_from_flags();
   } else if (setup_mode == 0) {
     func_8005F4AC();
   } else if (setup_mode == 2) {
-    func_80060210(D_800FED40);
+    load_game_mode_record(D_800FED40);
     D_801B609C = 0;
     active_player_count = 1;
     scenario_state_id.state_id = 0;
@@ -324,7 +328,7 @@ INCLUDE_ASM("asm/nonmatchings/main/bgm_load_song_from_rom", func_8005FE8C);
 /* The selector advances eight bytes through auxiliary entries, not whole records.
  * These are address projections: direct array indexing folds the member offset
  * into the base and changes the retail instruction order. */
-void func_800600C0(s32 mode_selector_index) {
+void load_game_mode_auxiliary_fields(s32 mode_selector_index) {
   ModeAuxFields* mode_aux_rows = (ModeAuxFields*)D_800FEDD8;
   GameModeRecord* mode_record = (GameModeRecord*)&mode_aux_rows[mode_selector_index];
   ModeAuxFields* auxiliary_fields = &mode_record->mode_aux_fields[0];
@@ -338,7 +342,7 @@ void func_800600C0(s32 mode_selector_index) {
   D_80104F90 = auxiliary_fields->unknown_02[5];
 }
 
-void func_80060128(s32 course_selector_index) {
+void load_course_selection_auxiliary_fields(s32 course_selector_index) {
   ModeAuxFields* course_aux_rows = (ModeAuxFields*)D_80105F40;
   CourseSelectionRecord* course_record =
       (CourseSelectionRecord*)&course_aux_rows[course_selector_index];
@@ -354,12 +358,12 @@ void func_80060128(s32 course_selector_index) {
 }
 
 
-s32 func_80060190(s32 score) {
-  s32 score_difference = score - hole_environment.unknown_2C;
+s32 get_hole_score_result_code(s32 hole_score) {
+  s32 score_difference = hole_score - hole_environment.unknown_2C;
   s32 score_code;
   s32 current_game_mode;
 
-  if (score == 1) {
+  if (hole_score == 1) {
     score_code = 0x80;
   } else {
     switch (score_difference) {
@@ -391,7 +395,7 @@ done:
   return score_code;
 }
 
-void func_80060210(GameModeRecord* mode_record) {
+void load_game_mode_record(GameModeRecord* mode_record) {
   D_800FEDD8[0] = *mode_record;
   game_mode = mode_record->game_mode;
   scenario_mode_id = mode_record->scenario_mode_id;
@@ -401,7 +405,7 @@ void func_80060210(GameModeRecord* mode_record) {
   osSyncPrintf(D_800D1254);
 }
 
-void func_800602B4(CourseSelectionRecord* course_record) {
+void load_course_selection_record(CourseSelectionRecord* course_record) {
   D_80105F40[0] = *course_record;
   game_mode = 9;
   scenario_mode_id = course_record->scenario_mode_id;
@@ -421,7 +425,7 @@ void func_80060358(void) {
   D_800C30AC = 9;
 }
 
-s32 func_800603A8(void) {
+s32 get_mode_flags_mask(void) {
   s32 mode_flag_0x82 = flag_is_set(0x82);
   s32 mode_flag_0x83 = flag_is_set(0x83);
   s32 mode_flag_0x84 = flag_is_set(0x84);
@@ -432,7 +436,7 @@ s32 func_800603A8(void) {
          (mode_flag_0x84 << 2) | (mode_flag_0x85 << 1) | mode_flag_0x86;
 }
 
-void func_80060434(void) {
+void save_scenario_state_snapshot(void) {
   s32 player_index;
 
   D_801B55F0 = scenario_state_id;
@@ -501,7 +505,7 @@ yes:
 
 INCLUDE_ASM("asm/nonmatchings/main/bgm_load_song_from_rom", func_800605EC);
 
-void gen_terrain_detail_texture(s32 range, s32 minimum) {
+void gen_terrain_detail_texture(s32 random_value_range, s32 minimum_value) {
   s32 texture_index = 0;
   s32 texture_row = 0;
   s32 texture_column;
@@ -512,7 +516,7 @@ void gen_terrain_detail_texture(s32 range, s32 minimum) {
     texture_column = 0;
     texture_pixel = &g_terrain_detail_texture[texture_index];
     while (texture_column < 32) {
-      s32 pixel_value = rand() % range + minimum;
+      s32 pixel_value = rand() % random_value_range + minimum_value;
       if (pixel_value >= 256) {
         pixel_value = 255;
       }
@@ -534,12 +538,12 @@ void setup_terrain_detail_default(void) {
 INCLUDE_ASM("asm/nonmatchings/main/bgm_load_song_from_rom",
             emit_per_phase_fog_state);
 
-void func_800627F8(f64* source_values, f64* destination_values) {
+void copy_two_double_values(f64* source_values, f64* destination_values) {
   destination_values[0] = source_values[0];
   destination_values[1] = source_values[1];
 }
 
-void func_8006280C(s32 x_coordinate, s32 z_coordinate) {
+void exclude_terrain_tiles_near_position(s32 x_coordinate, s32 z_coordinate) {
   s32 tile_x, tile_z;
   s32 x_offset, z_offset;
 
