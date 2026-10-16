@@ -27,7 +27,7 @@ typedef struct {
   /* 0x09 */ u8 green;
   /* 0x0A */ u8 blue;
   /* 0x0B */ u8 alpha;
-  /* 0x0C */ WipeBoxState state;
+  /* 0x0C */ WipeBoxState transition_state;
   /* Cycles through 0..3 while visible, including when fully open. */
   /* 0x10 */ s32 transition_frame;
 } WipeBox; /* 0x14 */
@@ -41,67 +41,68 @@ extern WipeBox* queued_wipe_boxes[WIPE_BOX_QUEUE_CAPACITY];
 /* Advance a box with a frame in 0..3 and append its visible rectangle to the
  * valid display_list cursor. Closed boxes neither advance nor append commands.
  */
-void advance_and_draw_wipe_box(Gfx** display_list, WipeBox* box) {
+void advance_and_draw_wipe_box(Gfx** display_list, WipeBox* wipe_box) {
   /* The entry-time cursor load is required for the retail instruction order. */
-  Gfx* gfx = *display_list;
-  s32 half_width;
-  s32 pixels_per_frame;
-  s32 edge_offset;
-  u16 draw_left;
-  s16 draw_right;
+  Gfx* display_list_cursor = *display_list;
+  s32 half_box_width;
+  s32 edge_pixels_per_frame;
+  s32 edge_inset;
+  u16 visible_left;
+  s16 visible_right;
 
-  if (box->state == WIPE_BOX_CLOSED) {
+  if (wipe_box->transition_state == WIPE_BOX_CLOSED) {
     return;
   }
-  box->transition_frame += 1;
-  if (box->transition_frame == WIPE_BOX_TRANSITION_FRAMES) {
-    box->transition_frame = 0;
-    if (box->state == WIPE_BOX_CLOSING) {
-      box->state = WIPE_BOX_CLOSED;
+  wipe_box->transition_frame += 1;
+  if (wipe_box->transition_frame == WIPE_BOX_TRANSITION_FRAMES) {
+    wipe_box->transition_frame = 0;
+    if (wipe_box->transition_state == WIPE_BOX_CLOSING) {
+      wipe_box->transition_state = WIPE_BOX_CLOSED;
       return;
     }
-    if (box->state == WIPE_BOX_OPENING) {
-      box->state = WIPE_BOX_OPEN;
+    if (wipe_box->transition_state == WIPE_BOX_OPENING) {
+      wipe_box->transition_state = WIPE_BOX_OPEN;
     }
   }
 
   /* Preserve the retail edge widths and signed half-width truncation. */
-  half_width = (box->right - box->left) / 2;
-  pixels_per_frame = (s16)half_width / WIPE_BOX_TRANSITION_FRAMES;
-  edge_offset = pixels_per_frame * box->transition_frame;
-  if (box->state == WIPE_BOX_CLOSING) {
-    draw_left = box->left + edge_offset;
-    draw_right = box->right - edge_offset;
-  } else if (box->state == WIPE_BOX_OPENING) {
-    draw_left = box->left + half_width - edge_offset;
-    draw_right = edge_offset + (box->left + half_width);
+  half_box_width = (wipe_box->right - wipe_box->left) / 2;
+  edge_pixels_per_frame = (s16)half_box_width / WIPE_BOX_TRANSITION_FRAMES;
+  edge_inset = edge_pixels_per_frame * wipe_box->transition_frame;
+  if (wipe_box->transition_state == WIPE_BOX_CLOSING) {
+    visible_left = wipe_box->left + edge_inset;
+    visible_right = wipe_box->right - edge_inset;
+  } else if (wipe_box->transition_state == WIPE_BOX_OPENING) {
+    visible_left = wipe_box->left + half_box_width - edge_inset;
+    visible_right = edge_inset + (wipe_box->left + half_box_width);
   } else {
-    draw_left = box->left;
-    draw_right = box->right;
+    visible_left = wipe_box->left;
+    visible_right = wipe_box->right;
   }
 
-  gDPSetPrimColor(gfx++, 0, 0, box->red, box->green, box->blue, box->alpha);
-  gSPTextureRectangle(gfx++, draw_left << WIPE_BOX_SCREEN_FRAC_BITS,
-                      box->top << WIPE_BOX_SCREEN_FRAC_BITS,
-                      draw_right << WIPE_BOX_SCREEN_FRAC_BITS,
-                      box->bottom << WIPE_BOX_SCREEN_FRAC_BITS, G_TX_RENDERTILE,
+  gDPSetPrimColor(display_list_cursor++, 0, 0, wipe_box->red, wipe_box->green,
+                  wipe_box->blue, wipe_box->alpha);
+  gSPTextureRectangle(display_list_cursor++, visible_left << WIPE_BOX_SCREEN_FRAC_BITS,
+                      wipe_box->top << WIPE_BOX_SCREEN_FRAC_BITS,
+                      visible_right << WIPE_BOX_SCREEN_FRAC_BITS,
+                      wipe_box->bottom << WIPE_BOX_SCREEN_FRAC_BITS, G_TX_RENDERTILE,
                       0, 0, WIPE_BOX_TEXTURE_STEP_ONE,
                       WIPE_BOX_TEXTURE_STEP_ONE);
-  *display_list = gfx;
+  *display_list = display_list_cursor;
 }
 
 /* Queue a non-null box that remains valid through drawing. The caller must
  * leave room in the ten-entry queue and requeue the box for subsequent frames.
  */
-void queue_wipe_box(WipeBox* box) {
-  queued_wipe_boxes[queued_wipe_box_count] = box;
+void queue_wipe_box(WipeBox* wipe_box) {
+  queued_wipe_boxes[queued_wipe_box_count] = wipe_box;
   queued_wipe_box_count += 1;
 }
 
 /* Append the shared primitive-color setup, advance/draw queued boxes in order,
  * and empty the queue. Keep the retail synchronization commands in order. */
 void draw_queued_wipe_boxes(void) {
-  u32 box_index;
+  u32 wipe_box_index;
 
   gDPPipeSync(glistp++);
   gDPPipeSync(glistp++);
@@ -113,8 +114,8 @@ void draw_queued_wipe_boxes(void) {
   gDPSetCombineMode(glistp++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
   gDPPipeSync(glistp++);
 
-  for (box_index = 0; box_index != queued_wipe_box_count; box_index++) {
-    advance_and_draw_wipe_box(&glistp, queued_wipe_boxes[box_index]);
+  for (wipe_box_index = 0; wipe_box_index != queued_wipe_box_count; wipe_box_index++) {
+    advance_and_draw_wipe_box(&glistp, queued_wipe_boxes[wipe_box_index]);
   }
   queued_wipe_box_count = 0;
 }
