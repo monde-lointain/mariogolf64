@@ -14,7 +14,7 @@ void nuAuStlSchedDoTask(musTask* audio_task);
 
 extern musSched nuAuStlSchedFunc;
 
-s32 nuAuStlMgrInit(musConfig* audio_config) {
+s32 nuAuStlMgrInit(musConfig* audio_configuration) {
   nuAuTaskStop = NU_AU_TASK_RUN;
 
   nuAuTask.msg = 0;
@@ -32,7 +32,7 @@ s32 nuAuStlMgrInit(musConfig* audio_config) {
   nuAuTask.list.t.yield_data_size = 0;
 
   MusSetScheduler(&nuAuStlSchedFunc);
-  return MusInitialize(audio_config);
+  return MusInitialize(audio_configuration);
 }
 
 void nuAuStlSchedInstall(void) {
