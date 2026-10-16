@@ -11,7 +11,42 @@ extern s32 g_frame_counter;
 extern s32 D_800C1DEC;
 extern ClubShot* get_club_param(u32 id);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80052FE0", func_80052FE0);
+extern u8 D_800C1D28[][3];
+extern Gfx D_800C1D48[][2];
+extern Gfx D_800C1CD8[];
+extern Gfx D_800C1CF0[];
+extern s32 putter_mode_flag;
+
+void func_80052FE0(s32 alpha) {
+  s32 i;
+  Gfx* dl = &D_800C1D48[0][0];
+
+  for (i = 0; i != 10; i++) {
+    gDPSetEnvColor(dl++, D_800C1D28[i][0], D_800C1D28[i][1], D_800C1D28[i][2],
+                   alpha);
+    gSPEndDisplayList(dl++);
+  }
+  dl = D_800C1CD8;
+  /* The shared packet stores tail-merge after selecting the render mode. */
+  if ((alpha & 0xFF) == 0xFF) {
+    gDPPipeSync(dl++);
+    gDPSetRenderMode(dl++, G_RM_PASS, G_RM_AA_ZB_OPA_SURF2);
+  } else {
+    gDPPipeSync(dl++);
+    /* Retail translucent materials still write depth. */
+    gDPSetRenderMode(dl++, G_RM_PASS, G_RM_AA_ZB_XLU_SURF2 | Z_UPD);
+  }
+  dl = D_800C1CF0;
+  if (putter_mode_flag) {
+    gDPSetCombineLERP(dl++, PRIMITIVE, 0, SHADE, COMBINED_ALPHA, ENVIRONMENT, 0,
+                      SHADE, 0, PRIMITIVE, 0, SHADE, COMBINED_ALPHA,
+                      ENVIRONMENT, 0, SHADE, 0);
+  } else {
+    gDPSetCombineLERP(dl++, PRIMITIVE, 0, SHADE, COMBINED_ALPHA, ENVIRONMENT, 0,
+                      SHADE, 0, ENVIRONMENT, COMBINED, TEXEL0, COMBINED, 0, 0,
+                      0, COMBINED);
+  }
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80052FE0", func_800530FC);
 
