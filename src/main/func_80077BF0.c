@@ -42,14 +42,14 @@ extern u16 D_800C4698[];
 extern void heap3_free(void** payload_ptr);
 extern void* heap3_alloc(u32 need);
 
-void func_80077BF0(void) {
+void start_spark_animation(void) {
   D_80105140[0].animation_timer = 150;
   D_80105140[0].animation_enabled = 1;
 }
 
-void func_80077C0C(void) { D_80105140[0].animation_enabled = 0; }
+void stop_spark_animation(void) { D_80105140[0].animation_enabled = 0; }
 
-void func_80077C18(s32 asset_index) {
+void load_spark_effect(s32 asset_index) {
   RomAssetLoad asset;
   SparkGroup* group;
   SparkSrc* source;
@@ -113,7 +113,7 @@ void func_80077C18(s32 asset_index) {
   D_800C4664 = 1;
 }
 
-void func_80077DEC(void) {
+void free_spark_effect(void) {
   s32 i;
 
   if (D_800C4664 == 1) {

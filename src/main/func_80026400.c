@@ -37,7 +37,7 @@ extern s32 get_interpolated_terrain_height_wrapper(s32 x, s32 z);
  * `end` is computed after both calls so the add lands in the reset call's delay
  * slot (the compiler saves `size` in a callee-saved reg across osSyncPrintf).
  */
-void func_80026400(u8* block, s32 size) {
+void register_scenery_heap_region(u8* block, s32 size) {
   void* end;
 
   osSyncPrintf(D_800CA0E0);

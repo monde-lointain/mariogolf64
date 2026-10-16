@@ -300,7 +300,7 @@ INCLUDE_ASM("asm/nonmatchings/main/func_800453E0", func_80045CE0);
  */
 INCLUDE_ASM("asm/nonmatchings/main/func_800453E0", func_80046604);
 
-s32 func_800467DC(s32 bound) {
+s32 random_bounded_index(s32 bound) {
   if (bound == 0) {
     bound = 1;
   }

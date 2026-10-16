@@ -323,7 +323,7 @@ void func_8006B5A0(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
 
 INCLUDE_ASM("asm/nonmatchings/main/func_8006A2C0", func_8006B5D8);
 
-void func_8006B980(void) {
+void load_dialog_choice_assets(void) {
   RomAssetLoad asset;
 
   D_800E1C08 = heap3_alloc(get_rom_asset_allocation_size(0x70B, &asset));
@@ -332,7 +332,7 @@ void func_8006B980(void) {
   load_rom_asset_payload(D_800E1C0C, &asset);
 }
 
-void func_8006B9E4(void) {
+void free_dialog_choice_assets(void) {
   heap3_free(&D_800E1C08);
   heap3_free(&D_800E1C0C);
 }
@@ -349,7 +349,7 @@ void func_8006BA24(s32 dialog_index) {
   dialog = &D_800C406C[dialog_index];
   D_800C4120 = 0;
   D_800C411C = dialog_index;
-  func_8006B980();
+  load_dialog_choice_assets();
   initial_choice_index = dialog->initial_choice_index;
   D_800C4124 = 0;
   D_800C4128 = initial_choice_index;
@@ -392,7 +392,7 @@ s32 func_8006BA94(ControllerState* input) {
     func_800719A0(0, 0, -1, 1, 0, 1, 0, 0, 0, 0);
   } else if (mode == 4) {
     D_800C4124 = -1;
-    func_8006B9E4();
+    free_dialog_choice_assets();
     return dialog->choice_results[D_800C4128];
   }
   return -1;

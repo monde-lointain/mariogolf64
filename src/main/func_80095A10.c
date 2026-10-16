@@ -48,7 +48,7 @@ extern f64 D_800D1ED0;
 
 extern s32 func_80056494(s32 arg0, s32 arg1);
 extern s32 flag_is_set(s32 flag);
-extern f32 func_80095A10(f32 near, f32 far, f32 t);
+extern f32 clamped_lerp_f32(f32 near, f32 far, f32 t);
 extern void func_80095A68(GolfCamera* cam, Vec3f* at, f32 arg2, s32 arg3);
 extern void func_8009676C(GolfCamera* cam);
 extern void func_80079358(s32 player, s32 arg1);
@@ -61,7 +61,7 @@ extern void func_80078DC0(s32 arg0, s32 arg1);
 extern void set_anim_flag_82(s32 id, u8 value);
 extern f32 sqrtf(f32 x);
 
-f32 func_80095A10(f32 near, f32 far, f32 t) {
+f32 clamped_lerp_f32(f32 near, f32 far, f32 t) {
   if (t < 0.0f) {
     t = 0.0f;
   }
@@ -488,9 +488,9 @@ void func_800967F4(s32 player, GolfCamera* cam) {
 
   cs = get_character_state(player);
   if (D_800E4C54 == 14) {
-    follow_dist = func_80095A10(107520.0f, 30720.0f, D_800C73A0 * 0.025f);
+    follow_dist = clamped_lerp_f32(107520.0f, 30720.0f, D_800C73A0 * 0.025f);
   } else {
-    follow_dist = func_80095A10(107520.0f, 38400.0f, D_800C73A0 * 0.025f);
+    follow_dist = clamped_lerp_f32(107520.0f, 38400.0f, D_800C73A0 * 0.025f);
   }
 
   if (D_800E4C54 == 12) {
@@ -567,11 +567,11 @@ void func_80096C04(s32 player, GolfCamera* cam) {
 
   cs = get_character_state(player);
   if (D_800E4C54 == 12) {
-    follow_dist = func_80095A10(107520.0f, 46080.0f, D_800C73A0 * 0.025f);
+    follow_dist = clamped_lerp_f32(107520.0f, 46080.0f, D_800C73A0 * 0.025f);
   } else if (D_800E4C54 == 13) {
-    follow_dist = func_80095A10(107520.0f, 23040.0f, D_800C73A0 * 0.025f);
+    follow_dist = clamped_lerp_f32(107520.0f, 23040.0f, D_800C73A0 * 0.025f);
   } else {
-    follow_dist = func_80095A10(92160.0f, 38400.0f, D_800C73A0 * 0.025f);
+    follow_dist = clamped_lerp_f32(92160.0f, 38400.0f, D_800C73A0 * 0.025f);
   }
 
   if (D_800E4C54 == 12) {
@@ -636,7 +636,7 @@ void func_80096F44(s32 player, GolfCamera* cam) {
   f32 dz;
 
   cs = get_character_state(player);
-  follow_dist = func_80095A10(61440.0f, 30720.0f, D_800C73A0 * 0.0125f);
+  follow_dist = clamped_lerp_f32(61440.0f, 30720.0f, D_800C73A0 * 0.0125f);
 
   func_8005483C(player, 1, &pos);
   ground = (get_interpolated_terrain_height_wrapper((s32)(pos.x * 1024.0f),
@@ -694,7 +694,7 @@ void func_80097218(s32 player, GolfCamera* cam) {
   f32 ground;
 
   cs = get_character_state(player);
-  follow_dist = func_80095A10(107520.0f, 30720.0f, D_800C73A0 * 0.025f);
+  follow_dist = clamped_lerp_f32(107520.0f, 30720.0f, D_800C73A0 * 0.025f);
 
   if (D_800E4C54 == 12) {
     if (D_800C73A0 % 3 == 0) {
@@ -748,7 +748,7 @@ void func_800974D8(s32 player, GolfCamera* cam) {
   f32 ground;
 
   cs = get_character_state(player);
-  follow_dist = func_80095A10(107520.0f, 30720.0f, D_800C73A0 * 0.025f);
+  follow_dist = clamped_lerp_f32(107520.0f, 30720.0f, D_800C73A0 * 0.025f);
 
   if (D_800E4C54 == 15) {
     if (D_800C73A0 == 10 || D_800C73A0 == 24 || D_800C73A0 == 33) {
@@ -817,7 +817,7 @@ void func_800977E0(s32 player, GolfCamera* cam) {
   f32 ground;
 
   cs = get_character_state(player);
-  follow_dist = func_80095A10(107520.0f, 30720.0f, D_800C73A0 * 0.025f);
+  follow_dist = clamped_lerp_f32(107520.0f, 30720.0f, D_800C73A0 * 0.025f);
   func_8005483C(player, 1, &pos);
   ground = (get_interpolated_terrain_height_wrapper((s32)(pos.x * 1024.0f),
                                                     (s32)(pos.z * 1024.0f)) -
@@ -851,7 +851,7 @@ void func_80097A08(s32 player, GolfCamera* cam) {
   f32 ground;
 
   cs = get_character_state(player);
-  follow_dist = func_80095A10(76800.0f, 30720.0f, D_800C73A0 * 0.025f);
+  follow_dist = clamped_lerp_f32(76800.0f, 30720.0f, D_800C73A0 * 0.025f);
   func_8005483C(player, 1, &pos);
   ground = (get_interpolated_terrain_height_wrapper((s32)(pos.x * 1024.0f),
                                                     (s32)(pos.z * 1024.0f)) -
@@ -884,7 +884,7 @@ void func_80097C18(s32 player, GolfCamera* cam) {
   f32 ground;
 
   cs = get_character_state(player);
-  follow_dist = func_80095A10(76800.0f, 30720.0f, D_800C73A0 * 0.025f);
+  follow_dist = clamped_lerp_f32(76800.0f, 30720.0f, D_800C73A0 * 0.025f);
   func_8005483C(player, 1, &pos);
   ground = (get_interpolated_terrain_height_wrapper((s32)(pos.x * 1024.0f),
                                                     (s32)(pos.z * 1024.0f)) -
@@ -917,7 +917,7 @@ void func_80097E30(s32 player, GolfCamera* cam) {
   f32 ground;
 
   cs = get_character_state(player);
-  follow_dist = func_80095A10(76800.0f, 30720.0f, D_800C73A0 * 0.025f);
+  follow_dist = clamped_lerp_f32(76800.0f, 30720.0f, D_800C73A0 * 0.025f);
   func_8005483C(player, 1, &pos);
   ground = (get_interpolated_terrain_height_wrapper((s32)(pos.x * 1024.0f),
                                                     (s32)(pos.z * 1024.0f)) -
@@ -953,7 +953,7 @@ void func_8009806C(s32 player, GolfCamera* cam) {
   f32 ground;
 
   cs = get_character_state(player);
-  follow_dist = func_80095A10(76800.0f, 46080.0f, D_800C73A0 * 0.025f);
+  follow_dist = clamped_lerp_f32(76800.0f, 46080.0f, D_800C73A0 * 0.025f);
 
   if (D_800E4C54 == 12) {
     if (D_800C73A0 >= 15 && D_800C73A0 <= 51) {
@@ -997,7 +997,7 @@ void func_80098310(s32 player, GolfCamera* cam) {
   f32 ground;
 
   cs = get_character_state(player);
-  follow_dist = func_80095A10(76800.0f, 30720.0f, D_800C73A0 * 0.025f);
+  follow_dist = clamped_lerp_f32(76800.0f, 30720.0f, D_800C73A0 * 0.025f);
   swing = (D_800C73A0 - D_800E4C58) * 0.049087387f;
   if (swing > 0.0f) {
     swing = 0.0f;

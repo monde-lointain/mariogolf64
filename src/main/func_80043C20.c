@@ -118,7 +118,7 @@ INCLUDE_ASM("asm/nonmatchings/main/func_80043C20", lerp_int_v2);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80043C20", predict_shot_distance);
 
-void func_80044254(s32 club_set_index, ShotInput* shot_input) {
+void apply_shot_input_to_club_parameters(s32 club_set_index, ShotInput* shot_input) {
   s32 club_index;
   s32 club_id;
   ClubShot* club_data;
@@ -313,7 +313,7 @@ s32 resolve_club_terrain_mask(s32 arg0, TerrainAttrEntry* arg1) {
   return r;
 }
 
-s32 func_80044A8C(s32 arg0) {
+s32 resolve_active_terrain_club_mask(s32 arg0) {
   return resolve_club_terrain_mask(arg0, get_table_entry(active_terrain_index));
 }
 
@@ -452,7 +452,7 @@ void func_80044FDC(void) {
       s32* base = alt - 1;
       for (club = active_club_id + 1; club < 0x10; club++) {
         if (player_records[base[0]].club_ids[club] != -1) {
-          if (D_800BB258[player_records[base[0]].club_ids[club]].flags & func_80044A8C(0)) {
+          if (D_800BB258[player_records[base[0]].club_ids[club]].flags & resolve_active_terrain_club_mask(0)) {
             base[-7] = club;
             play_sound_effect(0x5B, 0xF, 0x7F);
             return;
@@ -463,7 +463,7 @@ void func_80044FDC(void) {
       s32* base = alt - 1;
       for (club = active_club_id - 1; club >= 0; club--) {
         if (player_records[base[0]].club_ids[club] != -1) {
-          if (D_800BB258[player_records[base[0]].club_ids[club]].flags & func_80044A8C(0)) {
+          if (D_800BB258[player_records[base[0]].club_ids[club]].flags & resolve_active_terrain_club_mask(0)) {
             base[-7] = club;
             play_sound_effect(0x5B, 0xF, 0x7F);
             return;

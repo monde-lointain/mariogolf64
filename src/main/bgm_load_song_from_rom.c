@@ -75,7 +75,7 @@ extern s32 D_800C306C;
 /* scenario_state_id is the first field of the 0x44-byte snapshot above. */
 extern s32 D_800C30A8;
 extern s32 D_800C30AC;
-extern s32 func_80044A8C(s32 category);
+extern s32 resolve_active_terrain_club_mask(s32 category);
 extern s8 D_800FBDB8;
 extern s8 rumble_disable_flag;
 extern s32 get_course_hole_primary_flag(s32 course_id, s32 hole_index);
@@ -164,7 +164,7 @@ s32 func_8005F290(s32 unused, s16* input, u8* output) {
   s16* clubs = input;
   for (; i < 14;) {
     *enabled =
-        (get_club_param(*clubs++)->flags & func_80044A8C(1)) != 0;
+        (get_club_param(*clubs++)->flags & resolve_active_terrain_club_mask(1)) != 0;
     enabled++;
     i++;
   }

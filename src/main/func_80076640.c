@@ -3,7 +3,7 @@
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80076640", func_80076640);
 
-void func_80076778(f32 mf[4][4], Vec3f* in, Vec3f* out) {
+void transform_point_by_matrix(f32 mf[4][4], Vec3f* in, Vec3f* out) {
   f32 x = in->x;
   f32 y = in->y;
   f32 z = in->z;

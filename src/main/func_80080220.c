@@ -19,7 +19,7 @@ extern EffectScreenPosition D_800E2D70[128];
 extern u32 sky_panel_bank_index;
 extern void free_pin_render_assets(void);
 extern void* heap3_alloc(s32 size);
-extern void func_80026400(u8* block, s32 size);
+extern void register_scenery_heap_region(u8* block, s32 size);
 extern s32 D_800E2190[];
 extern s32 D_800E21A8[];
 extern s32 D_800C59E0;
@@ -173,7 +173,7 @@ extern void func_80216EDC(void);
 extern void func_8020E740(void);
 extern void func_8021E5F4(void);
 extern s32 get_current_course_id(void);
-extern void func_80077C18(s32 arg0);
+extern void load_spark_effect(s32 asset_index);
 extern s32 D_800C59D8;
 extern s32 D_800C59DC;
 extern void* D_801B55DC;
@@ -300,7 +300,7 @@ void func_8008085C(void) {
   D_80105214 = heap3_alloc(size);
   load_rom_asset_payload(D_80105214, &slot);
 
-  func_80077C18(get_current_course_id());
+  load_spark_effect(get_current_course_id());
 }
 
 extern void func_80078910(void);
@@ -308,7 +308,7 @@ extern void func_8020D784(void);
 extern void func_80216F8C(void);
 extern void func_8020E78C(void);
 extern void func_8021E6B8(void);
-extern void func_80077DEC(void);
+extern void free_spark_effect(void);
 extern void* D_801B55DC;
 extern void* D_800E2188;
 extern void* D_80132360;
@@ -363,7 +363,7 @@ void func_80080C4C(void) {
     heap3_free(&D_800E217C);
     heap3_free(&D_800E2178);
     heap3_free(&D_80105214);
-    func_80077DEC();
+    free_spark_effect();
   }
 }
 
@@ -371,7 +371,7 @@ void func_80080DCC(void) {
   s32 unused[8];
   if (D_800C59E0 == 0) {
     D_800C5470 = heap3_alloc(0x7118);
-    func_80026400(D_800C5470, 0x7118);
+    register_scenery_heap_region(D_800C5470, 0x7118);
     D_800C59E0 = 1;
   }
 }

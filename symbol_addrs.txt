@@ -916,3 +916,15 @@ ROM_ASSET_OPEN_FORMAT = 0x800CCBAC;
 // Pointer-bank end and following wave-table start share a ROM boundary.
 audio_wave_bank_rom_end = 0x18BE00; // absolute:True
 audio_wave_table_rom_start = 0x18BE00; // absolute:True
+register_scenery_heap_region = 0x80026400; // type:func
+random_bounded_index = 0x800467DC; // type:func
+clamped_lerp_f32 = 0x80095A10; // type:func
+load_dialog_choice_assets = 0x8006B980; // type:func
+free_dialog_choice_assets = 0x8006B9E4; // type:func
+apply_shot_input_to_club_parameters = 0x80044254; // type:func
+resolve_active_terrain_club_mask = 0x80044A8C; // type:func
+transform_point_by_matrix = 0x80076778; // type:func
+start_spark_animation = 0x80077BF0; // type:func
+stop_spark_animation = 0x80077C0C; // type:func
+load_spark_effect = 0x80077C18; // type:func
+free_spark_effect = 0x80077DEC; // type:func
