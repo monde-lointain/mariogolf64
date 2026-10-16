@@ -12,16 +12,18 @@ extern void play_sound_effect(s32 sound_id, s32 channel, s32 volume);
 extern void func_8005E380(OSThread* thread);
 
 /* Preserve the existing empty body and volatile frame reservation. */
-void fault_monitor_noop(void) { volatile u8 reserved_frame[0x18]; }
+void fault_monitor_noop(void) {
+  volatile u8 reserved_frame[0x18];
+}
 
 void monitor_thread_faults(void) {
   osSetEventMesg(OS_EVENT_FAULT, &fault_event_queue, (OSMesg)0x10);
   D_800DF0B4 = 0;
   while (1) {
-    OSMesg event_message;
+    OSMesg fault_event_message;
 
     osSyncPrintf(FAULT_MONITOR_WAIT_MESSAGE);
-    osRecvMesg(&fault_event_queue, &event_message, OS_MESG_BLOCK);
+    osRecvMesg(&fault_event_queue, &fault_event_message, OS_MESG_BLOCK);
     osSyncPrintf(FAULT_MONITOR_EVENT_MESSAGE);
     current_faulted_thread = __osGetCurrFaultedThread();
     if (current_faulted_thread != NULL) {
