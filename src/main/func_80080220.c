@@ -1627,6 +1627,7 @@ extern f32 sqrtf(f32);
 void func_80087BE4(s32 x, s32 y) {
   f32 dist;
 
+  /* The target sets dist to zero on either path; keep this matched branch. */
   if (x == 0 && y == 0) {
     dist = sqrtf((f32)(x * x + y * y));
   } else {
