@@ -306,8 +306,8 @@ extern u8 audio_wave_table_rom_start[];
 extern u8 audio_wave_bank_rom_end[];
 extern u8 D_D9B9C0[];
 extern u8 D_D9F450[];
-extern void audio_system_boot(musConfig* config);
-extern void load_audio_wave_bank(u32 rom_address, s32 size, void* wave_bank);
+extern void audio_system_boot(musConfig* requested_config);
+extern void load_audio_wave_bank(u32 wave_bank_rom_address, s32 wave_bank_size, void* wave_bank_table);
 extern void load_sound_effect_bank_from_rom(u32 rom_address, s32 size);
 extern s32 ChangeCustomEffect(s32 index);
 
