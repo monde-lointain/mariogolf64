@@ -1,4 +1,8 @@
 #include "common.h"
+#define SCENARIO_HOLE_INDEX_STRIDE 12
+#define HOLE_SELECTION_BYTE_STRIDE 2
+#define COURSE_HOLE_FLAGS_BYTE_STRIDE 200
+#define COURSE_HOLE_FLAG_BYTE_STRIDE 10
 
 extern s32 scenario_mode_id;
 extern s8 g_terrain_vtx_xform_mode;
@@ -10,7 +14,8 @@ extern u8 course_hole_flags[];
 
 s32 get_current_hole_index(void) {
   if (game_mode == 9) {
-    return scenario_hole_indices[scenario_mode_id * 12 + round_hole_index * 2];
+    return scenario_hole_indices[scenario_mode_id * SCENARIO_HOLE_INDEX_STRIDE +
+                                 round_hole_index * HOLE_SELECTION_BYTE_STRIDE];
   }
   if (scenario_mode_id >= 12) {
     return 0;
@@ -32,12 +37,16 @@ s32 get_course_hole_primary_flag(s32 course_id, s32 hole_index) {
   if (g_debug_mode_enabled != 0 && hole_index == 0) {
     return 1;
   }
-  return course_hole_flags[course_id * 200 + hole_index * 10] & 1;
+  return course_hole_flags[course_id * COURSE_HOLE_FLAGS_BYTE_STRIDE +
+                           hole_index * COURSE_HOLE_FLAG_BYTE_STRIDE] &
+         1;
 }
 
 s32 get_course_hole_secondary_flag(s32 course_id, s32 hole_index) {
   if (g_terrain_vtx_xform_mode != 0) {
     return 0;
   }
-  return course_hole_flags[course_id * 200 + hole_index * 10] & 2;
+  return course_hole_flags[course_id * COURSE_HOLE_FLAGS_BYTE_STRIDE +
+                           hole_index * COURSE_HOLE_FLAG_BYTE_STRIDE] &
+         2;
 }
