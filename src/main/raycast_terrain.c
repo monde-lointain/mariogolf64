@@ -1,4 +1,5 @@
 #include "common.h"
+#include "session.h"
 
 INCLUDE_ASM("asm/nonmatchings/main/raycast_terrain", raycast_terrain);
 
@@ -60,8 +61,6 @@ typedef struct {
   s32 z;     /* 0x20 */
 } RaycastTarget;
 
-extern s32 camera_position_x;
-extern s32 camera_position_z;
 extern s32 calculate_hypotenuse_safe(s32 dx, s32 dz);
 extern void vec3f_normalize(f32* x, f32* y, f32* z);
 
@@ -70,18 +69,18 @@ void clamp_min_distance_from_target(RaycastTarget* target) {
   f32 dir_y;
   f32 dir_z;
   s32 dist;
-  s32* cam = &camera_position_x;
+  s32* pin = &hole_environment.pin_position.x;
 
-  dist = calculate_hypotenuse_safe(cam[0] - target->x,
-                                   camera_position_z - target->z);
+  dist = calculate_hypotenuse_safe(pin[0] - target->x,
+                                   hole_environment.pin_position.z - target->z);
   if ((f32)dist < 614.4f) {
     if (dist != 0) {
       dir_y = 0.0f;
-      dir_x = (f32)(target->x - cam[0]);
-      dir_z = (f32)(target->z - camera_position_z);
+      dir_x = (f32)(target->x - pin[0]);
+      dir_z = (f32)(target->z - hole_environment.pin_position.z);
       vec3f_normalize(&dir_x, &dir_y, &dir_z);
-      target->x = (s32)(dir_x * 614.4f + (f32)cam[0]);
-      target->z = (s32)(dir_z * 614.4f + (f32)cam[2]);
+      target->x = (s32)(dir_x * 614.4f + (f32)pin[0]);
+      target->z = (s32)(dir_z * 614.4f + (f32)pin[2]);
     }
   }
 }

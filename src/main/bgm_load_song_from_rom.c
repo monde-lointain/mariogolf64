@@ -47,8 +47,6 @@ extern ScenarioState scenario_state_id;
 extern PlayerState player_records[];
 extern PlayerState D_8012D0C8[];
 extern GameModeRecord D_800FED40[];
-extern s8 D_800FEE10;
-extern s8 D_800FEE11;
 extern s8 D_801B60B8;
 extern s8 D_801B72A6;
 extern s32 active_player_count;
@@ -261,8 +259,8 @@ void func_8005F838(s32 arg0) {
     active_player_count = 1;
     scenario_state_id.state_id = 0;
     game_mode = 0;
-    scenario_mode_id = D_800FEE10;
-    round_hole_index = D_800FEE11;
+    scenario_mode_id = D_800FEDD8[0].scenario_mode_id;
+    round_hole_index = D_800FEDD8[0].round_hole_index;
   }
 
   initialize_hole_handicap_ranks();
@@ -327,7 +325,9 @@ INCLUDE_ASM("asm/nonmatchings/main/bgm_load_song_from_rom", func_8005FCB8);
 
 INCLUDE_ASM("asm/nonmatchings/main/bgm_load_song_from_rom", func_8005FE8C);
 
-/* The selector advances eight bytes through auxiliary entries, not whole records. */
+/* The selector advances eight bytes through auxiliary entries, not whole records.
+ * These are address projections: direct array indexing folds the member offset
+ * into the base and changes the retail instruction order. */
 void func_800600C0(s32 arg0) {
   ModeAuxFields* rows = (ModeAuxFields*)D_800FEDD8;
   GameModeRecord* record = (GameModeRecord*)&rows[arg0];
@@ -356,10 +356,9 @@ void func_80060128(s32 arg0) {
   D_80104F90 = fields->unknown_02[5];
 }
 
-extern s8 D_800BAA04;
 
 s32 func_80060190(s32 score) {
-  s32 difference = score - D_800BAA04;
+  s32 difference = score - hole_environment.unknown_2C;
   s32 result;
   s32 mode;
 

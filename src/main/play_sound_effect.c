@@ -2,6 +2,19 @@
 #include <nusys.h>
 #include <nualstl.h>
 
+typedef struct {
+  u16 delay_frames[18];
+} SoundDelayRow; /* 0x24 */
+
+/* One deferred request per player; -1 frames_until_playback means no request. */
+typedef struct {
+  /* 0x00 */ s32 sound_bank_index;
+  /* 0x04 */ s32 frames_until_playback;
+  /* 0x08 */ s32 parameter_index;
+  /* 0x0C */ s32 volume;
+  /* 0x10 */ s32 pan;
+} PendingPlayerSound; /* 0x14 */
+
 extern u32 g_bgm_current_id;
 extern u32 g_bgm_pending_action;
 extern u32 g_bgm_action_delay;
@@ -10,13 +23,9 @@ extern u32 object_id_table[];
 extern const char D_800CCC14[];
 extern const char D_800CCC20[];
 extern s32 D_800C0EAC[];
-extern u16 D_800C0FF8[];
+extern SoundDelayRow D_800C0FF8[7];
 extern s32 D_800C10F4[];
-extern s32 D_800C113C[];
-extern s32 D_800C1140[];
-extern s32 D_800C1144[];
-extern s32 D_800C1148[];
-extern s32 D_800C114C[];
+extern PendingPlayerSound D_800C113C[4];
 extern s32 flag_is_set(s32 flag);
 extern u32 spawn_object_simple(int number);
 extern s32 D_800C0E60;
@@ -159,21 +168,23 @@ void func_80051100(s32 index, s32 tempo) {
   osSetIntMask(mask);
 }
 
-void func_80051164(s32 a0, s32 a1, s32 a2, s32 a3, s32 arg5) {
-  s32 idx = a1 * 5;
-  u16* arr = D_800C0FF8;
-  u16* r = arr + a2 * 18;
-  s32 val = r[a0];
-  D_800C113C[idx] = a0;
-  D_800C1144[idx] = a2;
-  D_800C1148[idx] = a3;
-  D_800C1140[idx] = val;
-  D_800C114C[idx] = arg5;
+void func_80051164(s32 sound_bank_index, s32 player_index, s32 parameter_index,
+                  s32 volume, s32 pan) {
+  /* Separate member roots preserve retail scalar aliasing and address lowering. */
+  s32 byte_offset = player_index * sizeof(PendingPlayerSound);
+  u16* delays = D_800C0FF8[0].delay_frames;
+  u16* delay_row = delays + parameter_index * (sizeof(SoundDelayRow) / sizeof(u16));
+  s32 delay_frames = delay_row[sound_bank_index];
+  *(s32*)(byte_offset + (u32)&D_800C113C[0].sound_bank_index) = sound_bank_index;
+  *(s32*)(byte_offset + (u32)&D_800C113C[0].parameter_index) = parameter_index;
+  *(s32*)(byte_offset + (u32)&D_800C113C[0].volume) = volume;
+  *(s32*)(byte_offset + (u32)&D_800C113C[0].frames_until_playback) = delay_frames;
+  *(s32*)(byte_offset + (u32)&D_800C113C[0].pan) = pan;
 }
 
 void func_800511D8(s32 col, s32 row) {
-  u16* arr = D_800C0FF8;
-  u16* row_p = arr + row * 18;
+  u16* delays = D_800C0FF8[0].delay_frames;
+  u16* row_p = delays + row * (sizeof(SoundDelayRow) / sizeof(u16));
   D_800C10F4[col] = row_p[col];
 }
 

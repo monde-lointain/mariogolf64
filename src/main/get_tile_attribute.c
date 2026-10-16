@@ -187,8 +187,6 @@ void* func_80040E3C(s32 x, s32 z) {
   return get_table_entry(query_terrain_at_position(x, z));
 }
 
-extern u16 D_80132D4A[];
-
 u16 get_terrain_type(s32 x, s32 z) {
   s32 gx, gz;
   s32 sx, sz;
@@ -203,10 +201,11 @@ u16 get_terrain_type(s32 x, s32 z) {
   }
   gx = x / 0x4000;
   gz = z / 0x4000;
-  block = (((u32)gx >> 5) + ((u32)gz >> 5) * 8) * 2560;
+  block = (((u32)gx >> 5) + ((u32)gz >> 5) * 8) * sizeof(TerrainTileCache);
   sx = gx & 0x1F;
   sz = gz & 0x1F;
-  base = D_80132D4A;
+  /* Preserve the retail member-rooted scalar address and 36-halfword stride. */
+  base = &g_terrain_tile_cache[0].colors[1][1];
   return *(u16*)((u8*)(base + (sx + sz * 36)) + block) | 1;
 }
 
@@ -300,7 +299,6 @@ typedef struct {
   GridVertex vertices[16];
 } Tile;
 
-extern s32 g_terrain_tile_lod_selector[];
 extern Tile D_80185220[];
 extern u8 D_800BA9B0[][8];
 extern u8 D_800BA9D0[];
@@ -344,7 +342,7 @@ s16* get_terrain_vertex_pointer(u32 col, u32 row) {
 
 #define PUT_LOD(tile, k)                             \
   {                                                  \
-    sel = g_terrain_tile_lod_selector[(tile) * 640]; \
+    sel = g_terrain_tile_cache[tile].lod_tile_index; \
     if (sel >= 0) {                                  \
       Tile* tile_record = &D_80185220[sel];          \
       dst = tile_record->vertices + (k);             \
@@ -396,7 +394,7 @@ s32 set_lod_tile_attribute(s32 x, s32 z, s32 attr, s32 val) {
   if ((x | z) & 1) {
     if ((z < 0x40) & (x < 0x20)) {
       row = (z / 4) * 8 + x / 4;
-      sel = g_terrain_tile_lod_selector[row * 640];
+      sel = g_terrain_tile_cache[row].lod_tile_index;
       if (sel >= 0) {
         Tile* t = &D_80185220[sel];
         p = &t->vertices[D_800BA9B0[z & 3][x & 3]];
@@ -409,7 +407,7 @@ s32 set_lod_tile_attribute(s32 x, s32 z, s32 attr, s32 val) {
         s32 zt = z / 4;
         if (zt > 0) {
           row = (zt - 1) * 8 + x / 4;
-          sel = g_terrain_tile_lod_selector[row * 640];
+          sel = g_terrain_tile_cache[row].lod_tile_index;
           if (sel >= 0) {
             Tile* t = &D_80185220[sel];
             p = &t->vertices[D_800BA9D0[x & 3]];
@@ -425,7 +423,7 @@ s32 set_lod_tile_attribute(s32 x, s32 z, s32 attr, s32 val) {
         if (xt > 0) {
           s32 base = (z / 4) * 8 - 1;
           row = base + xt;
-          sel = g_terrain_tile_lod_selector[row * 640];
+          sel = g_terrain_tile_cache[row].lod_tile_index;
           if (sel >= 0) {
             Tile* t = &D_80185220[sel];
             p = &t->vertices[D_800BA9B4[(z & 3) * 8]];
@@ -441,7 +439,6 @@ s32 set_lod_tile_attribute(s32 x, s32 z, s32 attr, s32 val) {
 }
 
 extern f32 g_terrain_tile_radius[];
-extern u8 g_terrain_tile_cache[];
 extern void func_80041D44(void);
 
 void func_80041AA8(void) {
@@ -450,17 +447,18 @@ void func_80041AA8(void) {
   s32 row;
   s32 grid_col;
   s32 grid_row;
-  u8* cache;
+  TerrainTileCache* cache;
 
   for (tile = 0; tile < 0x80; tile++) {
-    cache = g_terrain_tile_cache + tile * 0xA00;
+    cache = &g_terrain_tile_cache[tile];
     g_terrain_tile_radius[tile] = 1.0f;
-    *(s32*)(cache + 0x994) = 1;
-    *(s32*)(cache + 0x9A4) = -1;
-    *(s16*)(cache + 0x990) = 0;
+    cache->cull_state = 1;
+    cache->lod_tile_index = -1;
+    cache->unknown_990 = 0;
     for (col = 0; col < 0x20; col++) {
       for (row = 0; row < 0x20; row++) {
-        ((s16*)cache)[col * 0x20 + row] = 0x7C1;
+        /* Retail fills only the first 1024 halfwords, not the full grid. */
+        ((u16*)cache->colors)[col * 0x20 + row] = 0x7C1;
       }
     }
   }
@@ -621,7 +619,7 @@ extern SceneryCylinder collision_cylinders[];
 
 void mark_scenery_collision_cells(void) {
   s32 mark = 0xF801;
-  u16* base = D_80132D4A;
+  u16* base = &g_terrain_tile_cache[0].colors[1][1];
   s32 i;
 
   for (i = 0; i < 128; i++) {
@@ -634,7 +632,7 @@ void mark_scenery_collision_cells(void) {
     }
     gx = collision_cylinders[i].x / 16;
     gz = collision_cylinders[i].z / 16;
-    block = (((u32)gx >> 5) + ((u32)gz >> 5) * 8) * 2560;
+    block = (((u32)gx >> 5) + ((u32)gz >> 5) * 8) * sizeof(TerrainTileCache);
     sx = gx & 0x1F;
     sz = gz & 0x1F;
     *(u16*)((u8*)(base + (sx + sz * 36)) + block) = mark;

@@ -13,7 +13,7 @@ typedef struct {
   f32 size_step;
   s16 unknown_38;
   s8 effect_kind; /* -1 marks an unused slot */
-  s8 unknown_3B;
+  s8 effect_frame;
   s8 matrix_index;
   u8 reserved_3D[0x3];
 } Particle; /* size 0x40 */
@@ -206,7 +206,7 @@ void func_80079358(s32 arg0, s32 arg1) {
         p->velocity.x = 0.0f;
         p->velocity.z = 0.0f;
         p->unknown_38 = 0;
-        p->unknown_3B = 0;
+        p->effect_frame = 0;
         p->velocity.y = 0.002558593638241291f;
         p->opacity = 255.0f;
         p->opacity_step = -4.0f;
@@ -248,7 +248,7 @@ void func_80079940(s32* arg0) {
       p->size = 24.0f;
       p->size_step = -0.2f;
       p->effect_kind = 8;
-      p->unknown_3B = 0;
+      p->effect_frame = 0;
       p->position.z = z;
       break;
     }
@@ -290,7 +290,7 @@ void func_80079A08(s32 arg0, s32 arg1) {
         p->size = 2.0f;
         p->size_step = 0.02f;
         p->effect_kind = 14;
-        p->unknown_3B = 0;
+        p->effect_frame = 0;
         p->position.z = z;
         p->velocity.y = w;
         break;
@@ -332,7 +332,7 @@ void func_80079EBC(void) {
       } while (0);
       count++;
       do {
-        p->unknown_3B = 0;
+        p->effect_frame = 0;
       } while (0);
       p->size_step = size_step + offset;
       p->effect_kind = 0x10;
@@ -365,22 +365,16 @@ INCLUDE_ASM("asm/nonmatchings/main/func_80078910", func_8007B994);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80078910", func_8007C5D8);
 
-typedef struct {
-  f32 world_x;
-  u8 reserved_04[0x4];
-  s32 world_z;
-} ScreenMarker;
-
 extern s32 D_800FC8B8;
-extern s32 project_point_to_screen(f32, f32, s32, s32*);
 
-void func_8007CF10(Gfx** pgfx, ScreenMarker* m) {
+void func_8007CF10(Gfx** pgfx, Particle* particle) {
   Gfx* gfx = *pgfx;
-  s32 screen[6];
+  ScreenProjection screen;
   s32 z;
 
-  z = project_point_to_screen(m->world_x, (f32)D_800FC8B8 * (1.0f / 1024.0f),
-                              m->world_z, screen);
+  z = project_point_to_screen(particle->position.x,
+                              (f32)D_800FC8B8 * (1.0f / 1024.0f),
+                              particle->position.z, &screen);
   if ((f32)z < -3.0f && (f32)z > -60.0f) {
     gDPPipeSync(gfx++);
     gDPPipeSync(gfx++);
@@ -388,8 +382,8 @@ void func_8007CF10(Gfx** pgfx, ScreenMarker* m) {
     gDPSetCombineMode(gfx++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
     gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, 0x3F);
     gDPPipeSync(gfx++);
-    gSPScisTextureRectangle(gfx++, (screen[0] - 1) << 2, (screen[1] - 1) << 2,
-                            (screen[0] + 1) << 2, (screen[1] + 1) << 2,
+    gSPScisTextureRectangle(gfx++, (screen.x - 1) << 2, (screen.y - 1) << 2,
+                            (screen.x + 1) << 2, (screen.y + 1) << 2,
                             G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10);
     gDPPipeSync(gfx++);
   }

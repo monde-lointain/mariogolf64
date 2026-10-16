@@ -27,10 +27,10 @@ typedef struct FogPreset {
   /* 0x1E */ s16 fog_z_max;
 } FogPreset; /* 0x20 */
 
-typedef struct FogLightRecord {
+typedef struct FogColorRecord {
   /* 0x00 */ u8 rgb[3];
   /* 0x03 */ u8 unknown_03[0x0D];
-} FogLightRecord; /* 0x10 */
+} FogColorRecord; /* 0x10 */
 
 /* D_800C6014 spans nine 0x100-byte outer rows (0x900 bytes in the map), each
  * containing eight 0x20-byte records. Call sites select the outer row by
@@ -38,6 +38,6 @@ typedef struct FogLightRecord {
  * D_800C6A1C (+0x50) and sky_strip_params (+0x274) name interior aliases, not
  * independent allocations. */
 extern FogPreset D_800C6014[9][8];
-extern FogLightRecord D_800C69CC[4][10];
+extern FogColorRecord D_800C69CC[4][10];
 
 #endif /* FOG_H */

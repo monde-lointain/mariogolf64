@@ -76,14 +76,14 @@ translation unit. These headers describe observed target layouts, not host-nativ
 
 | Header | Shared records |
 | --- | --- |
-| [`animation.h`](../src/main/animation.h) | Character state, model-resource prefix, keyframe tracks, texture-animation records |
-| [`club.h`](../src/main/club.h) | Live `ClubShot` and separate `ClubDistancePreset` table rows |
+| [`animation.h`](../src/main/animation.h) | Character state, model-resource prefix, attachment points, frame ranges, texture-animation records |
+| [`club.h`](../src/main/club.h) | Live `ClubShot`, its quality scaling and club index, and separate distance-preset rows |
 | [`controller.h`](../src/main/controller.h) | Processed controller state and six-byte repeat slots |
-| [`fog.h`](../src/main/fog.h) | Fog/color presets, light records, lens-flare-cap prefix |
+| [`fog.h`](../src/main/fog.h) | Fog/color presets, `FogColorRecord` palette entries, lens-flare-cap prefix |
 | [`rom_asset.h`](../src/main/rom_asset.h) | ROM read cursor and its enclosing compressed-asset load record |
-| [`session.h`](../src/main/session.h) | Player/scenario state, saved mode records, per-scenario statistics |
-| [`terrain.h`](../src/main/terrain.h) | Terrain attributes and scenery collision cylinders |
-| [`vector.h`](../src/main/vector.h) | Shared `Vec3f` position, rotation, scale, and velocity values |
+| [`session.h`](../src/main/session.h) | Player/scenario state, hole environment, per-round accumulators, saved mode records, per-scenario statistics |
+| [`terrain.h`](../src/main/terrain.h) | Terrain attributes, scenery collision cylinders, and `TerrainTileCache` color/culling records |
+| [`vector.h`](../src/main/vector.h) | Shared `Vec3f`/`Vec3i` values and the mixed integer/float `ScreenProjection` output |
 
 Name fields from multiple consumers, preserving target width, signedness, units, and sentinel values.
 Use `unknown_XX` for an unestablished meaning instead of promoting a plausible guess. In particular,
@@ -94,6 +94,30 @@ Interior linker labels do not imply independent allocations. For example, the pl
 labels belong to `PlayerState`, `polychara_state` names `CharacterState.resource_index`, and the sky
 position/texture-coordinate labels belong to the same `Vtx` array. Prefer the enclosing record or
 actual member array when it matches.
+
+`camera_position_x` is the retail linker root of `HoleEnvironmentState`, not a camera scalar.
+The C identifier `hole_environment` keeps that linker binding while exposing the pin position,
+wind, and putter-related fields. Do not confuse these fixed-point pin coordinates with the actual
+`view_camera_eye_*` floats. Saved mode and continue records contain the same environment layout.
+The seven consecutive words at `D_800FF4D0` form `RoundStatistics`; unknown result units stay unknown.
+
+Use address, extent, stride, and consumers together when choosing a root. `D_801B7222` denotes
+`player_records[0].club_ids[0]`, `g_terrain_tile_lod_selector` denotes
+`g_terrain_tile_cache[0].lod_tile_index`, and `D_80105148`/`D_80105165` denote the first spark group's
+timer/enabled members. Scalar scenario names can remain intentional linker views of `ScenarioState`;
+they are not independent allocations. Preserve documented array and negative-index address roots.
+CPU matrix pointers and segment-0 RSP references are different address forms, even for the same
+physical storage; adjacency alone does not justify merging separately consumed quads or matrices.
+
+`CharacterState.end_frame` is the absolute upper frame bound, not a frame count; a keyframe track
+stores `start_frame` and `frame_span`. `ScreenProjection.depth_step` measures the projected-depth
+change for one camera-space unit, rather than just integer quantization error. Its third input
+coordinate is a float even though the o32 ABI transports its bits in an integer argument register.
+
+The terrain cache has a 34-by-36 RGBA5551 grid; the interior label at +0x4A denotes `colors[1][1]`.
+Retail initialization fills only its first 1024 halfwords. Preserve that partial fill, not an
+inferred full-grid clear. Deferred player sounds are private `PendingPlayerSound` records in
+`play_sound_effect.c`; their five interior labels are not independent arrays.
 
 GCC 2.7.2 distinguishes component accesses, scalar pointer views, and address roots. A measured
 exception may therefore use a scalar walk rooted at `&records[0].member`, or an explicitly documented

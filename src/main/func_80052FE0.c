@@ -221,15 +221,6 @@ s32 func_800544B4(s32 arg0, s32 arg1) {
   return result;
 }
 
-typedef struct {
-  s16* matrix_indices;
-  f32 x;
-  f32 y;
-  f32 z;
-  s16 tag;
-  u8 unknown_12[2];
-} ModelAttachmentPoint; /* 0x14 */
-
 s32 func_80054550(s32 id, s32 tag, f32* position) {
   CharacterState* cs = get_character_state(id);
   ModelAttachmentPoint* point;
@@ -240,7 +231,7 @@ s32 func_80054550(s32 id, s32 tag, f32* position) {
   f32 zero;
   if (cs != NULL) {
     kSetMultiTLB(0, 0, 0x20, 0x02000000, osVirtualToPhysical(cs->segment_data));
-    point = *(ModelAttachmentPoint**)cs->model_resource->unknown_18;
+    point = cs->model_resource->attachment_points;
     if (point->matrix_indices != NULL) {
       while (point->matrix_indices != NULL) {
         if (point->tag == tag) {
@@ -254,11 +245,12 @@ s32 func_80054550(s32 id, s32 tag, f32* position) {
       indices = point->matrix_indices;
       guMtxIdent(&chain);
       while (*indices != -1) {
-        guMtxCatL(&((Mtx*)cs->unknown_2C)[(s16)(u16)*indices], &chain, &chain);
+        guMtxCatL(&cs->bone_matrices[(s16)(u16)*indices], &chain, &chain);
         indices++;
       }
       guMtxIdent(&translation);
-      guTranslate(&translation, point->x, point->y, point->z);
+      guTranslate(&translation, point->position.x, point->position.y,
+                  point->position.z);
       guMtxCatL(&translation, &chain, &chain);
       guMtxXFML(&chain, 0.0f, 0.0f, 0.0f, &position[0], &position[1],
                 &position[2]);

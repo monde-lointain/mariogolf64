@@ -1,4 +1,5 @@
 #include "terrain.h"
+#include "club.h"
 
 /* Per-shot init scratch record, 0xB8 stride, base @ D_800B7868. */
 typedef struct {
@@ -21,7 +22,6 @@ extern u8 D_800B7C08[];
 extern u8 D_800B7C2E[];
 
 extern s32 rand(void);
-extern s32 resolve_shot_quality_table(s32, s32, s32);
 
 TerrainAttrEntry* get_table_entry(u32 idx) {
   u32 i = (idx < 0x1BU) ? idx : 0;
@@ -59,11 +59,11 @@ INCLUDE_ASM("asm/nonmatchings/main/get_table_entry",
 
 INCLUDE_ASM("asm/nonmatchings/main/get_table_entry", update_ball_physics);
 
-u8* func_80037E50(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
+u8* func_80037E50(ClubShot* club, s32 arg1, s32 arg2, s32 arg3) {
   s32 quality;
   u8* p;
 
-  quality = resolve_shot_quality_table(arg0, arg1, arg2) - 1;
+  quality = resolve_shot_quality_table(club, arg1, arg2) - 1;
   quality = quality & ((s32)~quality >> 0x1F);
   if (quality >= 6) {
     quality = 5;

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "session.h"
 
 /* Terrain/hole-loader module state. */
 extern s32 g_terrain_enable_gate;
@@ -37,16 +38,12 @@ extern void func_80069BCC(void);
 extern void func_80069D08(void*);
 
 /* func_8006955C deps (mode-select dispatch). */
-extern u32 D_800BA9FC;
 extern s32 D_800BB0E8;
 extern void func_80253234(s32);
 extern void func_80253270(void);
 extern void build_scenery_light_sets(void);
 
 /* func_80069BCC deps (camera + terrain-array reset). */
-extern s32 camera_position_x;
-extern s32 camera_position_y;
-extern s32 camera_position_z;
 extern s32 get_interpolated_terrain_height_wrapper(s32, s32);
 extern s32 flag_is_set(s32);
 extern void func_8005F964(void);
@@ -133,7 +130,7 @@ void func_8006955C(void) {
   s32 mode;
 
   D_800BB0E8 = 1;
-  switch (D_800BA9FC) {
+  switch (hole_environment.unknown_24) {
     case 0:
       mode = 2;
       break;
@@ -158,8 +155,8 @@ INCLUDE_ASM("asm/nonmatchings/main/lz_compress_extended_dma", func_800695F8);
 void func_80069BCC(void) {
   s32 i;
 
-  camera_position_y = get_interpolated_terrain_height_wrapper(
-      camera_position_x, camera_position_z);
+  hole_environment.pin_position.y = get_interpolated_terrain_height_wrapper(
+      hole_environment.pin_position.x, hole_environment.pin_position.z);
   if (flag_is_set(0x43)) {
     for (;;) {
     }

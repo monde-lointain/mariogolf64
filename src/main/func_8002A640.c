@@ -296,13 +296,13 @@ void copy_previous_frame_to_cfb(Gfx** gfxp) {
 }
 
 extern s32 render_buffer_index;
-extern Gfx D_801B94A0[];
+extern Gfx D_801B94A0[2][0x36B0];
 extern u32 D_800B7738;
 extern void append_viewport_setup(s32, Gfx**);
 extern void append_framebuffer_clear(s32, Gfx**);
 
 void func_800318A8(void) {
-  Gfx* gfx = (Gfx*)((u8*)D_801B94A0 + render_buffer_index * 0x1B580);
+  Gfx* gfx = D_801B94A0[render_buffer_index];
   Gfx* base = gfx;
   s32 i = 0;
   do {

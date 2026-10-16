@@ -2,6 +2,7 @@
 #define SESSION_H
 
 #include "common.h"
+#include "vector.h"
 
 /* Live player state and its saved copies have the same 0xB8-byte layout.
  * player_base_scores/status/handicaps/hole_scores are interior linker labels,
@@ -28,7 +29,14 @@ typedef struct {
   /* 0x52 */ s16 club_ids[16];
   /* 0x72 */ u8 unknown_72[9];
   /* 0x7B */ u8 asset_variant;
-  /* 0x7C */ u8 unknown_7C[0x3C];
+  /* 0x7C */ u8 unknown_7C[4];
+  /* 0x80 */ s32 unknown_80; /* -2 pending, -1 no result */
+  /* 0x84 */ s32 unknown_84; /* -2 pending, -1 no result */
+  /* 0x88 */ u8 unknown_88[0x14];
+  /* 0x9C */ s8 unknown_9C;
+  /* 0x9D */ u8 unknown_9D[3];
+  /* 0xA0 */ s32 pending_result;
+  /* 0xA4 */ u8 unknown_A4[0x14];
 } PlayerState; /* 0xB8 */
 
 /* The live 0x44-byte scenario block is also copied into continue slots. */
@@ -46,18 +54,43 @@ typedef struct {
   /* 0x30 */ u8 unknown_30;
   /* 0x31 */ s8 rumble_disabled;
   /* 0x32 */ u8 unknown_32[8];
-  /* 0x3A */ s8 unknown_3A;
+  /* 0x3A */ s8 terrain_transform_mode; /* g_terrain_vtx_xform_mode interior label */
   /* 0x3B */ u8 unknown_3B[2];
   /* 0x3D */ s8 continue_count;
   /* 0x3E */ u8 unknown_3E[6];
 } ScenarioState; /* 0x44 */
 
+/* Live hole target, wind, and rendering environment; copied into saved modes. */
 typedef struct {
-  /* 0x00 */ s32 x;
-  /* 0x04 */ s32 y;
-  /* 0x08 */ s32 z;
-  /* 0x0C */ u32 unknown_0C[10];
-} CameraSnapshot; /* 0x34 */
+  /* 0x00 */ Vec3i pin_position; /* game-space coordinates, 1024 units per world unit */
+  /* 0x0C */ u32 unknown_0C[3];
+  /* 0x18 */ s32 wind_magnitude;
+  /* 0x1C */ s16 wind_angle_bam;
+  /* 0x1E */ u8 unknown_1E[2];
+  /* 0x20 */ s32 putter_mode;
+  /* 0x24 */ u32 unknown_24;
+  /* 0x28 */ s16 scenery_wind_angles[2];
+  /* 0x2C */ s8 unknown_2C;
+  /* 0x2D */ u8 unknown_2D[7];
+} HoleEnvironmentState; /* 0x34 */
+
+/* Keep the retail linker label; its historical name describes neither the
+ * pin position nor the enclosing environment record accurately. */
+extern HoleEnvironmentState hole_environment __asm__("camera_position_x");
+
+/* Per-round accumulators saved with the live session. Result units remain
+ * unknown; include_in_average selects the subset accumulated at +0x10/+0x14. */
+typedef struct {
+  /* 0x00 */ s32 unknown_00;
+  /* 0x04 */ s32 unknown_04;
+  /* 0x08 */ s32 result_count;
+  /* 0x0C */ s32 result_max;
+  /* 0x10 */ s32 result_total;
+  /* 0x14 */ s32 average_sample_count;
+  /* 0x18 */ s32 include_in_average;
+} RoundStatistics; /* 0x1C */
+
+extern RoundStatistics D_800FF4D0;
 
 typedef struct {
   u16 unknown_00;
@@ -65,7 +98,7 @@ typedef struct {
 } ModeAuxFields; /* 0x08 */
 
 typedef struct {
-  /* 0x00 */ u8 unknown_00[0x34];
+  /* 0x00 */ HoleEnvironmentState environment;
   /* 0x34 */ s32 game_mode;
   /* 0x38 */ s8 scenario_mode_id;
   /* 0x39 */ s8 round_hole_index;
@@ -77,7 +110,7 @@ typedef struct {
 } GameModeRecord; /* 0x68 */
 
 typedef struct {
-  /* 0x00 */ u32 unknown_00[13];
+  /* 0x00 */ HoleEnvironmentState environment;
   /* 0x34 */ s8 scenario_mode_id;
   /* 0x35 */ s8 round_hole_index;
   /* 0x36 */ u8 unknown_36[4];

@@ -904,18 +904,15 @@ void insert_supershot_record(SupershotRecord* entry) {
   osSyncPrintf(D_800D0928);
 }
 
-typedef struct {
-  /* 0x00 */ u32 unknown_00[0x7];
-} MiscSnapshot; /* 0x1C */
 
-/* One continue slot: snapshots of the camera, scenario, and miscellaneous
- * live state, plus the per-player records in a sibling array. */
+/* One continue slot: snapshots of the hole environment, scenario, and round
+ * statistics, plus the per-player records in a sibling array. */
 typedef struct {
   s32 valid;             /* 0x00 */
   s32 unknown_04;        /* 0x04 */
-  CameraSnapshot camera; /* 0x08 */
+  HoleEnvironmentState environment; /* 0x08 */
   ScenarioState state; /* 0x3C */
-  MiscSnapshot misc;     /* 0x80 */
+  RoundStatistics round_statistics; /* 0x80 */
   u8 pad9C[4];
 } ContinueSlot; /* 0xA0 */
 
@@ -956,7 +953,6 @@ extern SessionStorage2 D_8012F938;
 extern ScenarioState scenario_state_id;
 extern s32 active_player_count;
 extern s8 D_801B60B8;
-extern CameraSnapshot camera_position_x;
 extern void flag_set(s32 flag);
 extern void func_8005DF54(u8* save, s32 arg1);
 extern const char D_800D092C[];
@@ -1031,7 +1027,7 @@ s32 transfer_mode_continue_slot(s32 restore) {
       modes[i] = D_800FEDD8[i];
     }
     slot->state = scenario_state_id;
-    slot->camera = camera_position_x;
+    slot->environment = hole_environment;
     if (bad == 0) {
       mode = 1;
       slot->valid = mode;
@@ -1053,7 +1049,7 @@ s32 transfer_mode_continue_slot(s32 restore) {
       scenario_state_id = slot->state;
       scenario_state_id.state_id = 1;
       flag_set(0x1E);
-      camera_position_x = slot->camera;
+      hole_environment = slot->environment;
     }
     mode = 2;
     D_801B60B8 = mode;
@@ -1065,7 +1061,6 @@ s32 transfer_mode_continue_slot(s32 restore) {
 extern PlayerState D_801318F8[][4];
 extern PlayerState D_8012D0C8[];
 extern ScenarioState D_801B55F0;
-extern MiscSnapshot D_800FF4D0;
 
 /* Saves the live match state into continue slot `id` (restore == 0), or
  * restores that slot back over the live state. The three continue slots sit
@@ -1116,8 +1111,8 @@ s32 transfer_continue_slot(s32 id, s32 restore) {
     if (slot->state.continue_count < 0x63) {
       slot->state.continue_count++;
     }
-    slot->camera = camera_position_x;
-    slot->misc = D_800FF4D0;
+    slot->environment = hole_environment;
+    slot->round_statistics = D_800FF4D0;
     if (bad != 0) {
       return -1;
     }
@@ -1137,8 +1132,8 @@ s32 transfer_continue_slot(s32 id, s32 restore) {
       scenario_state_id = slot->state;
       scenario_state_id.state_id = 1;
       flag_set(0x1E);
-      camera_position_x = slot->camera;
-      D_800FF4D0 = slot->misc;
+      hole_environment = slot->environment;
+      D_800FF4D0 = slot->round_statistics;
     }
     mode = 2;
     D_801B60B8 = mode;
@@ -1446,7 +1441,7 @@ void func_8005CF78(void) {
       ContinueSlot* sect = &saved->continue_data.slots[k];
       ScenarioState* state = &sect->state;
 
-      if (state->unknown_3A == 0) {
+      if (state->terrain_transform_mode == 0) {
         switch (state->game_mode) {
           case 0:
           case 2:

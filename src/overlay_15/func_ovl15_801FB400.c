@@ -1,14 +1,4 @@
-#include "common.h"
-
-typedef struct {
-  /* 0x0 */ u32 start;
-  /* 0x4 */ u32 size;
-  /* 0x8 */ u32 pos;
-  /* 0xC */ u32 end;
-} RomLoadSlot; /* 0x10 */
-
-extern u32 get_rom_asset_allocation_size(u16 index, RomLoadSlot* slot);
-extern void load_rom_asset_payload(void* data, RomLoadSlot* slot);
+#include "../main/rom_asset.h"
 
 /* Destination the caller preallocated for asset 0x6EF; its first six bytes are
  * the image header, big-endian width at +2 and height at +4. */
@@ -25,13 +15,13 @@ extern Vtx D_ovl15_801FBBE8[4];
  * assignments below are grouped by vertex attribute rather than by vertex,
  * which is the order the ROM emits. */
 void func_ovl15_801FB400(u8* image) {
-  RomLoadSlot slot[2];
+  RomAssetLoad slot;
   u32 width;
   u32 height;
 
   D_ovl15_801FBBE0 = image;
-  get_rom_asset_allocation_size(0x6EF, slot);
-  load_rom_asset_payload(D_ovl15_801FBBE0, slot);
+  get_rom_asset_allocation_size(0x6EF, &slot);
+  load_rom_asset_payload(D_ovl15_801FBBE0, &slot);
 
   width = (D_ovl15_801FBBE0[2] << 8) | D_ovl15_801FBBE0[3];
   height = (D_ovl15_801FBBE0[4] << 8) | D_ovl15_801FBBE0[5];

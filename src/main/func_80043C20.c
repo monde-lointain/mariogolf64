@@ -1,10 +1,10 @@
 #include "club.h"
 #include "terrain.h"
+#include "session.h"
 
 extern ClubShot D_800BB258[];
 extern ClubShot club_param_fallback;
 extern s8 D_800BE5E8[];
-extern s16 D_801B7222[][92];
 extern s32 active_player_idx;
 extern s32 active_club_id;
 extern s32 active_meter_category;
@@ -50,7 +50,6 @@ extern char D_800CC454[], D_800CC474[], D_800CC478[], D_800CC480[],
     D_800CC484[], D_800CC488[];
 
 s32 resolve_club_terrain_mask(s32 arg0, TerrainAttrEntry* arg1);
-s32 resolve_shot_quality_table(s32 arg0, s32 arg1, s32 arg2);
 void predict_shot_distance(s32 index);
 void func_80043C64(void);
 
@@ -165,9 +164,9 @@ void func_80044254(s32 arg0, ShotInput* arg1) {
     }
     temp_v1_2 = arg1->unknown_1E;
     if ((u32)((temp_v1_2 + 4) & 0xFF) >= 9U) {
-      cs->unknown_14 = hundred;
+      cs->quality_scale_percent = hundred;
     } else {
-      cs->unknown_14 = D_800BE5E0[(s8)temp_v1_2];
+      cs->quality_scale_percent = D_800BE5E0[(s8)temp_v1_2];
     }
     cs->unknown_00 = 0x6E - (arg1->unknown_1F * 9);
     temp_v0_4 = arg1->unknown_1D;
@@ -243,7 +242,7 @@ ClubShot* get_club_param(u32 id) {
 }
 
 ClubShot* get_shot_data(void) {
-  return &D_800BB258[D_801B7222[active_player_idx][active_club_id]];
+  return &D_800BB258[player_records[active_player_idx].club_ids[active_club_id]];
 }
 
 s32 get_shot_param(void) {
@@ -315,7 +314,7 @@ s32 func_80044A8C(s32 arg0) {
   return resolve_club_terrain_mask(arg0, get_table_entry(active_terrain_index));
 }
 
-s32 resolve_shot_quality_table(s32 arg0, s32 arg1, s32 arg2) {
+s32 resolve_shot_quality_table(ClubShot* club, s32 arg1, s32 arg2) {
   /* Keep the 16-byte tables independent: merging rows changes address folding. */
   static const char q00[16] = "3444444555555";
   static const char q01[16] = "5555555555555";
@@ -403,7 +402,7 @@ s32 resolve_shot_quality_table(s32 arg0, s32 arg1, s32 arg2) {
       break;
   }
 
-  club_index = *(s16*)((u8*)arg0 + 0x16);
+  club_index = club->club_index;
   if (club_index != 0xD) {
     const char* addr = (arg2 == 2) ? &p2[club_index] : &p1[club_index];
     s32 power;
@@ -411,7 +410,7 @@ s32 resolve_shot_quality_table(s32 arg0, s32 arg1, s32 arg2) {
     v = raw - 0x30;
     /* Reuse the return scratch, and keep the power load after digit decoding. */
     do {
-      power = *(s16*)((u8*)arg0 + 0x14);
+      power = club->quality_scale_percent;
     } while (0);
     v = (v * power + 0x32) / 100;
     if (v < 1) {
@@ -427,8 +426,8 @@ s32 resolve_shot_quality_table(s32 arg0, s32 arg1, s32 arg2) {
   return v;
 }
 
-void func_80044C7C(s32 arg0, s32 arg1, s32* out, s32 arg3) {
-  s32 n = resolve_shot_quality_table(arg0, arg1, arg3);
+void func_80044C7C(ClubShot* club, s32 arg1, s32* out, s32 arg3) {
+  s32 n = resolve_shot_quality_table(club, arg1, arg3);
   if (n > 0) {
     out[0] = n * 2 - 1;
     out[1] = n - 1;
@@ -452,8 +451,8 @@ void func_80044FDC(void) {
     if (flags & 0x400) {
       s32* base = alt - 1;
       for (club = active_club_id + 1; club < 0x10; club++) {
-        if (D_801B7222[base[0]][club] != -1) {
-          if (D_800BB258[D_801B7222[base[0]][club]].flags & func_80044A8C(0)) {
+        if (player_records[base[0]].club_ids[club] != -1) {
+          if (D_800BB258[player_records[base[0]].club_ids[club]].flags & func_80044A8C(0)) {
             base[-7] = club;
             play_sound_effect(0x5B, 0xF, 0x7F);
             return;
@@ -463,8 +462,8 @@ void func_80044FDC(void) {
     } else if (flags & 0x800) {
       s32* base = alt - 1;
       for (club = active_club_id - 1; club >= 0; club--) {
-        if (D_801B7222[base[0]][club] != -1) {
-          if (D_800BB258[D_801B7222[base[0]][club]].flags & func_80044A8C(0)) {
+        if (player_records[base[0]].club_ids[club] != -1) {
+          if (D_800BB258[player_records[base[0]].club_ids[club]].flags & func_80044A8C(0)) {
             base[-7] = club;
             play_sound_effect(0x5B, 0xF, 0x7F);
             return;

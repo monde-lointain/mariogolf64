@@ -11,25 +11,28 @@ typedef struct {
 } SparkSrc;
 
 typedef struct {
-  /* 0x00 */ u8 unk00[0x94];
-  /* 0x94 */ s16 unknown_94;
-  /* 0x96 */ u8 unk96[2];
+  /* 0x00 */ u8 unknown_00[0x80];
+  /* 0x80 */ f32 position_x;
+  /* 0x84 */ f32 position_y;
+  /* 0x88 */ f32 velocity_x;
+  /* 0x8C */ f32 velocity_y;
+  /* 0x90 */ u8 unknown_90[4];
+  /* 0x94 */ s16 frames_remaining;
+  /* 0x96 */ u8 unknown_96[2];
 } SparkParticle; /* 0x98 */
 
 typedef struct {
   /* 0x00 */ SparkParticle* particles;
   /* 0x04 */ s32 particle_count;
-  /* 0x08 */ s32 unk08;
+  /* 0x08 */ s32 animation_timer;
   /* 0x0C */ s32 unk0C;
   /* 0x10 */ u8 unk10[0x14];
   /* 0x24 */ u8 unk24;
-  /* 0x25 */ u8 unk25;
+  /* 0x25 */ u8 animation_enabled;
   /* 0x26 */ u8 unk26[2];
   /* 0x28 */ SparkSrc* source;
 } SparkGroup; /* 0x2C */
 
-extern s32 D_80105148;
-extern u8 D_80105165;
 extern s32 D_800C4660;
 extern s32 D_800C4664;
 extern SparkSrc* D_800FE338;
@@ -40,11 +43,11 @@ extern void heap3_free(void** payload_ptr);
 extern void* heap3_alloc(u32 need);
 
 void func_80077BF0(void) {
-  D_80105148 = 150;
-  D_80105165 = 1;
+  D_80105140[0].animation_timer = 150;
+  D_80105140[0].animation_enabled = 1;
 }
 
-void func_80077C0C(void) { D_80105165 = 0; }
+void func_80077C0C(void) { D_80105140[0].animation_enabled = 0; }
 
 void func_80077C18(s32 arg0) {
   RomAssetLoad asset;
@@ -69,8 +72,8 @@ void func_80077C18(s32 arg0) {
   val8 = 0x9F;
   for (i = 0; i != groupCount; i++) {
     D_80105140[i].unk24 = 0;
-    D_80105140[i].unk25 = 0;
-    D_80105140[i].unk08 = val8;
+    D_80105140[i].animation_enabled = 0;
+    D_80105140[i].animation_timer = val8;
     val8 -= 0x32;
     D_80105140[i].unk0C = alpha;
     D_80105140[i].particle_count = 0;
@@ -103,7 +106,7 @@ void func_80077C18(s32 arg0) {
     row = 0;
     if (g->particle_count != 0) {
       for (; row != g->particle_count; row++) {
-        g->particles[row].unknown_94 = 0;
+        g->particles[row].frames_remaining = 0;
       }
     }
   }

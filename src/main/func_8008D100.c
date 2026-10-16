@@ -13,12 +13,6 @@ extern s32 round_hole_index;
 extern s32 scenario_mode_id;
 extern s32 D_801B609C;
 extern s32 game_mode;
-extern s32 putter_mode_flag;
-extern s32 wind_magnitude;
-extern s16 wind_angle_bam;
-extern u32 D_800BA9FC;
-extern s16 g_scenery_wind_angle_b;
-extern s16 g_scenery_wind_angle_a;
 extern s32 active_player_count;
 
 extern void flag_set(s32);
@@ -46,12 +40,12 @@ void init_scenario_state(void) {
   scenario_mode_id = 0;
   D_801B609C = 0;
   game_mode = 0xC;
-  putter_mode_flag = 0;
-  wind_magnitude = (rand() & 0x3F) * 6000;
-  wind_angle_bam = rand();
-  D_800BA9FC = 6;
-  g_scenery_wind_angle_b = 0x1000;
-  g_scenery_wind_angle_a = 0x6000;
+  hole_environment.putter_mode = 0;
+  hole_environment.wind_magnitude = (rand() & 0x3F) * 6000;
+  hole_environment.wind_angle_bam = rand();
+  hole_environment.unknown_24 = 6;
+  hole_environment.scenery_wind_angles[1] = 0x1000;
+  hole_environment.scenery_wind_angles[0] = 0x6000;
   flag_set(7);
   active_player_count = 1;
   func_80069FBC();
@@ -121,7 +115,7 @@ void emit_lens_flare_dl(Gfx** gfxp) {
 
   gfx = *gfxp;
   n = get_current_course_id();
-  m = putter_mode_flag;
+  m = hole_environment.putter_mode;
 
   gDPPipeSync(gfx++);
   gDPPipeSync(gfx++);
@@ -330,7 +324,7 @@ s32 run_fog_debug_editor(void) {
   check_and_print_grid(" ", D_800C6CE4 * 4 + 14, D_800C6CE8 + 5);
   /* Select the same table record used by the lens-flare emitter. */
   n = get_current_course_id();
-  m = putter_mode_flag;
+  m = hole_environment.putter_mode;
   tod = sky_time_of_day_idx;
   D_800E3980 = &D_800C6014[n][(m << 2) + tod];
 

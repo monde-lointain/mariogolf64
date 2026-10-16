@@ -1,9 +1,10 @@
 #include "animation.h"
+#include "session.h"
 
 extern s32 flag_is_set(s32 flag);
 extern s32 find_keyframe_offset_by_tag(s32 id, s32 track, s32 tag);
 extern void func_80054BC0(void);
-extern void* func_80056060(s32 id);
+extern KeyframeTrack* func_80056060(s32 id);
 extern void animation_step(s32 index);
 extern void func_800543A4(void);
 extern void func_800577DC(s32 index, void* arg1);
@@ -311,7 +312,7 @@ loop:
   if (e->tag != tag) {
     goto advance;
   }
-  result = e->value - *(s16*)(off + (u32)&cs->model_resource->keyframe_tracks[0].base_offset);
+  result = e->value - *(s16*)(off + (u32)&cs->model_resource->keyframe_tracks[0].start_frame);
   goto done;
 advance:
   e++;
@@ -644,14 +645,14 @@ INCLUDE_ASM("asm/nonmatchings/main/func_80054900", animation_play);
 void func_80056238(s32 id, u8 value) {
   CharacterState* cs = get_character_state(id);
   if (cs != NULL) {
-    cs->unknown_85 = value;
+    cs->auto_slot_zero_enabled = value;
   }
 }
 
 void func_80056264(s32 id) {
   CharacterState* cs = get_character_state(id);
   if (cs != NULL) {
-    cs->current_frame = (f32)cs->frame_count;
+    cs->current_frame = (f32)cs->end_frame;
   }
 }
 
@@ -659,7 +660,7 @@ void seek_current_frame_by(s32 id, s32 delta) {
   CharacterState* cs = get_character_state(id);
   if (cs != NULL) {
     f32 newval = cs->current_frame + (f32)delta;
-    f32 limit = (f32)cs->frame_count;
+    f32 limit = (f32)cs->end_frame;
     cs->current_frame = newval;
     if (limit <= newval) {
       cs->current_frame = limit;
@@ -670,21 +671,21 @@ void seek_current_frame_by(s32 id, s32 delta) {
 void func_800562F4(s32 id, f32 value) {
   CharacterState* cs = get_character_state(id);
   if (cs != NULL) {
-    cs->unknown_5C = value;
+    cs->frame_step = value;
   }
 }
 
 void func_80056324(s32 id, u8 value) {
   CharacterState* cs = get_character_state(id);
   if (cs != NULL) {
-    cs->unknown_83 = value;
+    cs->loop_enabled = value;
   }
 }
 
 void func_80056350(s32 id, u8 value) {
   CharacterState* cs = get_character_state(id);
   if (cs != NULL) {
-    cs->unknown_84 = value;
+    cs->next_animation_id = value;
   }
 }
 
@@ -713,40 +714,40 @@ s32 func_80056400(s32 id) {
   CharacterState* cs = get_character_state(id);
   s32 result = -1;
   if (cs != NULL) {
-    result = cs->frame_count;
+    result = cs->end_frame;
   }
   return result;
 }
 
 s32 func_8005642C(s32 id) {
-  void* p = func_80056060(id);
+  KeyframeTrack* p = func_80056060(id);
   s32 result;
   if (p == NULL) {
     result = -1;
   } else {
-    result = *(s16*)((u8*)p + 4) + *(s16*)((u8*)p + 6);
+    result = p->start_frame + p->frame_span;
   }
   return result;
 }
 
 s32 func_80056464(s32 id) {
-  void* p = func_80056060(id);
+  KeyframeTrack* p = func_80056060(id);
   s32 result;
   if (p == NULL) {
     result = -1;
   } else {
-    result = *(s16*)((u8*)p + 4);
+    result = p->start_frame;
   }
   return result;
 }
 
 s32 func_80056494(s32 id) {
-  void* p = func_80056060(id);
+  KeyframeTrack* p = func_80056060(id);
   s32 result;
   if (p == NULL) {
     result = -1;
   } else {
-    result = *(s16*)((u8*)p + 6);
+    result = p->frame_span;
   }
   return result;
 }
@@ -821,10 +822,7 @@ void func_800578AC(void) {
   }
 }
 
-extern u32 D_800BA9FC;
 extern s32 render_buffer_index;
-extern u16 g_scenery_wind_angle_a;
-extern u16 g_scenery_wind_angle_b;
 extern s32 D_800C1F90;
 extern s32 D_800C1F94;
 extern s32 D_800C1F98;
@@ -848,8 +846,8 @@ void build_scenery_light_sets(void) {
   /* Two separate range tests, not `9 <= x && x < 11`: fold_range_test merges
    * the adjacent sltis into one `(u32)(x - 9) < 2`, where the ROM keeps both.
    */
-  if (D_800BA9FC < 11) {
-    if (D_800BA9FC < 9) {
+  if (hole_environment.unknown_24 < 11) {
+    if (hole_environment.unknown_24 < 9) {
       goto dull;
     }
     amb[0] = 0x78;
@@ -871,8 +869,8 @@ void build_scenery_light_sets(void) {
     col[2] = 0x6E;
   }
 
-  pitch = g_scenery_wind_angle_b * 9.58737992e-05f;
-  yaw = g_scenery_wind_angle_a * 9.58737992e-05f;
+  pitch = (u16)hole_environment.scenery_wind_angles[1] * 9.58737992e-05f;
+  yaw = (u16)hole_environment.scenery_wind_angles[0] * 9.58737992e-05f;
   dir[0] = -sinf(pitch) * cosf(yaw) * 127.0f;
   dir[1] = -cosf(pitch) * 127.0f;
   dir[2] = -sinf(pitch) * sinf(yaw) * 127.0f;

@@ -2,6 +2,7 @@
 #define TERRAIN_H
 
 #include "common.h"
+#include "vector.h"
 
 /* Terrain attribute table entry: 0x1C-byte records, 27 entries. */
 typedef struct {
@@ -33,6 +34,19 @@ typedef struct {
   /* 0x0C */ u16 radius;
   /* 0x0E */ u16 scale_y;
 } SceneryCylinder; /* 0x10 */
+
+/* The 34x36 RGBA5551 grid ends at +0x990. D_80132D4A is colors[1][1]. */
+typedef struct {
+  /* 0x000 */ u16 colors[34][36];
+  /* 0x990 */ s16 unknown_990;
+  /* 0x992 */ u8 unknown_992[2];
+  /* 0x994 */ s32 cull_state;
+  /* 0x998 */ Vec3f position;
+  /* 0x9A4 */ s32 lod_tile_index; /* -1 selects the direct grid */
+  /* 0x9A8 */ u8 unknown_9A8[0x58];
+} TerrainTileCache; /* 0xA00 */
+
+extern TerrainTileCache g_terrain_tile_cache[];
 
 TerrainAttrEntry* get_table_entry(u32 index);
 s32 resolve_club_terrain_mask(s32 mode, TerrainAttrEntry* terrain);

@@ -24,9 +24,6 @@ extern void* pin_marker_near_texture;
 extern void* pin_assembly_texture;
 extern Mtx pin_marker_matrices[][PIN_MARKER_BUFFER_COUNT];
 extern f32 view_camera_eye_z;
-extern s32 camera_position_x;
-extern s32 camera_position_y;
-extern s32 camera_position_z;
 extern f32 view_camera_eye_x;
 extern s8 g_terrain_vtx_xform_mode;
 extern void* pin_wind_texture;
@@ -69,11 +66,11 @@ void free_pin_render_assets(void) {
 void build_pin_marker_matrix(s32 view_index) {
   /* Keep the address live across atan2 to preserve the retail reload sequence.
    */
-  s32* camera_x = &camera_position_x;
+  s32* pin_x = &hole_environment.pin_position.x;
   const f32 fixed_to_world = 1.0f / 1024.0f;
   f32 facing_angle =
-      atan2((f32)*camera_x * fixed_to_world - view_camera_eye_x,
-            (f32)camera_position_z * fixed_to_world - view_camera_eye_z);
+      atan2((f32)*pin_x * fixed_to_world - view_camera_eye_x,
+            (f32)hole_environment.pin_position.z * fixed_to_world - view_camera_eye_z);
 
   /* GCC 2.7.2 requires these arrays before the first statement. */
   f32 translation[3];
@@ -81,9 +78,9 @@ void build_pin_marker_matrix(s32 view_index) {
   f32 scale[3];
   f32 matrix[4][4];
 
-  translation[0] = (f32)*camera_x * fixed_to_world;
-  translation[1] = (f32)camera_position_y * fixed_to_world;
-  translation[2] = (f32)camera_position_z * fixed_to_world;
+  translation[0] = (f32)*pin_x * fixed_to_world;
+  translation[1] = (f32)hole_environment.pin_position.y * fixed_to_world;
+  translation[2] = (f32)hole_environment.pin_position.z * fixed_to_world;
 
   rotation[0] = 0.0f;
   rotation[1] = facing_angle + PIN_MARKER_YAW_OFFSET;

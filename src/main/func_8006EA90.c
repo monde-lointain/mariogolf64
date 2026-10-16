@@ -1,8 +1,7 @@
 #include "common.h"
 #include "fog.h"
+#include "session.h"
 
-extern s32 putter_mode_flag;
-extern s32 D_800BA9FC;
 extern u8 D_800C41CC[];
 extern s32 D_800E1C10;
 extern s32 D_800E1C14;
@@ -25,7 +24,8 @@ void update_putter_color_tables(void) {
 
   D_800E1C10 = 0;
   D_800E1C14 = 0;
-  record = &D_800C6014[putter_mode_flag * 3 + D_800BA9FC][0];
+  record = &D_800C6014[hole_environment.putter_mode * 3 +
+                       (s32)hole_environment.unknown_24][0];
   for (table_index = 0; table_index != 4; table_index++) {
     s32 record_index;
     s32 record_offset;

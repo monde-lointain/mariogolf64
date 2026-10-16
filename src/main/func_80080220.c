@@ -479,11 +479,10 @@ void func_80081550(void) { free_pin_render_assets(); }
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80080220", func_8008156C);
 
-extern s32 wind_magnitude;
 
 /* Scroll the 14 panel texture coordinates in the selected 28-vertex bank. */
 void scroll_sky_panels_by_wind(void) {
-  s32 delta = wind_magnitude / 8192;
+  s32 delta = hole_environment.wind_magnitude / 8192;
   s32 count1;
   s32 count2;
   s32 off;
@@ -574,8 +573,6 @@ void func_80081D4C(s32 arg) {
   }
 }
 
-extern s32 camera_position_x;
-extern s32 camera_position_z;
 extern s8 g_terrain_vtx_xform_mode;
 extern s32 D_80104AE8[];
 extern Vtx D_800C5A18[];
@@ -628,8 +625,8 @@ void emit_rest_distance_panel_dl(Gfx** gfxp) {
       func_8007515C(0, 0xC, 0, 0, 8, (s32)ent->name_ptr);
     }
     if (D_800C5A10 == 1 && is_special_course_active() == 0) {
-      dist = func_8003DFD0(effect_spawn_pos[0] - camera_position_x,
-                           D_80104AE8[0] - camera_position_z);
+      dist = func_8003DFD0(effect_spawn_pos[0] - hole_environment.pin_position.x,
+                           D_80104AE8[0] - hole_environment.pin_position.z);
       if (g_terrain_vtx_xform_mode != 0 || ent->id == 0xB) {
         s32 metres = (s32)((f32)(dist * 300) * 7.119878e-05f);
 
@@ -763,7 +760,6 @@ extern Vtx D_800C5A60[];
 /* The identity matrix this emitter installs, and its segment-0 alias. */
 extern Mtx D_800E1E90[];
 extern Mtx D_E1E90[];
-extern s32 project_point_to_screen(f32, f32, f32, s32*);
 extern f32 sqrtf(f32);
 
 /**
@@ -797,7 +793,7 @@ extern f32 sqrtf(f32);
  * gSPModifyVertex argument, and `slot2` remains the third preamble packet.
  */
 void emit_ball_trail_dl(Gfx** gfxp, Mtx* proj) {
-  s32 screen[6];
+  ScreenProjection screen;
   Gfx* gfx = *gfxp;
   /* See the header comment: this exists for its pseudo number. */
   Gfx* slot2;
@@ -856,12 +852,11 @@ void emit_ball_trail_dl(Gfx** gfxp, Mtx* proj) {
     if (project_point_to_screen(
             *(f32*)((u8*)&D_800E3370[0].x + srcoff),
             *(f32*)((u8*)&D_800E3370[0].y + srcoff),
-            *(f32*)((u8*)&D_800E3370[0].z + srcoff), screen) < 0) {
-      *(s32*)((u8*)&D_800E2D70[0].x + dstoff) = screen[0] << 2;
+            *(f32*)((u8*)&D_800E3370[0].z + srcoff), &screen) < 0) {
+      *(s32*)((u8*)&D_800E2D70[0].x + dstoff) = screen.x << 2;
       h = D_800BA700;
-      *(s32*)((u8*)&D_800E2D70[0].y + dstoff) = screen[1] << 2;
-      *zp = (s32)((f32)screen[2] -
-                  *(f32*)&screen[5] * (f32)(h * 7));
+      *(s32*)((u8*)&D_800E2D70[0].y + dstoff) = screen.y << 2;
+      *zp = (s32)((f32)screen.depth - screen.depth_step * (f32)(h * 7));
     } else {
       *zp = none;
     }
@@ -1149,7 +1144,6 @@ extern u8 D_80106240[];
 extern s32 D_800C54C8[];
 extern s32 D_800C5474;
 extern u32 active_terrain_index;
-extern s16 D_801B7222[][92];
 extern s32 active_player_idx;
 extern s32 active_club_id;
 extern f32 D_8022D67C;
@@ -1211,7 +1205,7 @@ void emit_club_and_power_hud_dl(Gfx** gfxp) {
                       0x40);
       }
     }
-  } else if (wind_magnitude != 0 && D_801061BF != 0) {
+  } else if (hole_environment.wind_magnitude != 0 && D_801061BF != 0) {
     if (get_table_entry(active_terrain_index)->id != 11 && D_800BE69C == 0) {
       emit_wind_indicator_dl(&gfx, (f32)D_800C54C8[0] + 100.0f, 76.0f);
     }
@@ -1230,7 +1224,7 @@ void emit_club_and_power_hud_dl(Gfx** gfxp) {
     RomAssetLoad buf;
     f32 angle;
 
-    club = get_club_param(D_801B7222[active_player_idx][active_club_id]);
+    club = get_club_param(player_records[active_player_idx].club_ids[active_club_id]);
     if (club->asset_id != D_800C59D8) {
       D_800C59D8 = club->asset_id;
       get_rom_asset_allocation_size(club->asset_id, &buf);
@@ -1465,7 +1459,7 @@ extern f32 sinf(f32);
  */
 void emit_ball_offscreen_indicator(Gfx** gfxp) {
   f32 mf[4][4];
-  s32 screen[6];
+  ScreenProjection screen;
   RomAssetLoad buf;
   Gfx* gfx;
   f32* rot;
@@ -1489,7 +1483,7 @@ void emit_ball_offscreen_indicator(Gfx** gfxp) {
   if (project_point_to_screen(effect_spawn_pos[0] * (1.0f / 1024.0f),
                               effect_spawn_pos[1] * (1.0f / 1024.0f),
                               effect_spawn_pos[2] * (1.0f / 1024.0f),
-                              screen) >= 0) {
+                              &screen) >= 0) {
     return;
   }
 
@@ -1512,8 +1506,8 @@ void emit_ball_offscreen_indicator(Gfx** gfxp) {
   sc[0] = scale;
   D_800E2120 = scale;
   D_800E2124 = scale;
-  pos[0] = (f32)(screen[0] - 0xA0);
-  D_800E2114 = (f32)(-screen[1] + 0x78);
+  pos[0] = (f32)(screen.x - 0xA0);
+  D_800E2114 = (f32)(-screen.y + 0x78);
   D_800E2118 = -100.0f;
   mtx_from_rts(mf, rot, pos, sc);
   convert_and_pack_floats_to_fixed(mf, &D_800E2090[sky_panel_bank_index]);

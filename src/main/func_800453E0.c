@@ -1,4 +1,5 @@
 #include "terrain.h"
+#include "session.h"
 
 extern s32 D_800BE62C;
 extern u8 D_800BE6D8;
@@ -306,7 +307,6 @@ s32 func_800467DC(s32 arg0) {
   return (guRandom() >> 2) % arg0;
 }
 
-extern s32 camera_position_y;
 extern s32 D_800BE63C;
 extern s32 D_800BE664;
 
@@ -314,7 +314,7 @@ s32 func_8004683C(s32 arg0, s32 arg1) {
   s32 result = 0;
   s32 bound;
   if (arg0 < 0x1E00) {
-    bound = camera_position_y;
+    bound = hole_environment.pin_position.y;
     arg0 = -0x1A400;
     bound += arg0;
     bound = bound < arg1;
@@ -608,7 +608,6 @@ extern s32 D_801B7F70;
 extern s32 putting_meter_level;
 extern s32 D_801B557C;
 extern s8 g_terrain_vtx_xform_mode;
-extern s32 wind_magnitude;
 extern s32 flag_is_set(s32 flag);
 extern void func_80216130(s32 arg0);
 
@@ -624,7 +623,7 @@ void func_800487E4(void) {
     return;
   }
   if (!flag_is_set(0x48)) {
-    if (wind_magnitude / 0x10000 < 6) {
+    if (hole_environment.wind_magnitude / 0x10000 < 6) {
       return;
     }
   }

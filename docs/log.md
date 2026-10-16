@@ -2,6 +2,32 @@
 
 ## 2026-10-15
 
+- **Extended structure recovery and interior-symbol reconciliation**: Eight parallel implementors
+  read Code Complete Chapter 11 before inspecting the 58 main C hosts; two additional alias-audit
+  scouts read the same chapter. Source integration, compiler experiments, and ROM builds remained
+  serialized.
+  - Recovered model attachment points and bone-matrix pointers, animation frame ranges and update
+    controls, the mixed integer/float projection output, club-quality scaling and club indices,
+    spark motion/lifetime fields, deferred player-sound records, and the 34-by-36 terrain color grid.
+    Corrected the grid's interior alias and preserved retail's partial 1024-halfword initialization.
+  - The overlap audit identified the former `CameraSnapshot` as `HoleEnvironmentState`: the fixed-point
+    pin position shares its 0x34-byte storage with wind and putter-related state. Migrated all live C
+    consumers to the canonical record while preserving its retail `camera_position_x` linker binding.
+    Continue and saved-mode records now describe that same environment, not a camera snapshot.
+  - Unified the seven-word round accumulator as `RoundStatistics`; modeled the player's pending-result
+    field, used the actual player club array, recovered `TerrainTileCache.lod_tile_index`, and replaced
+    the spark timer/enabled and saved-mode scalar aliases with member accesses. Kept unproved meanings
+    unknown and kept CPU/RSP address forms distinct. Existing matching-sensitive scalar projections
+    remain explicitly rooted in canonical members instead of duplicate padded records.
+  - The already-decompiled overlay-15 asset caller now uses `RomAssetLoad`, replacing its misleading
+    pair of read slots. No new overlay functions were selected or decompiled; no stubs were removed.
+  - `tools/verify-rom.sh` passes with SHA-1 `e2c4e7a905b29529b49a1619a401fe699224829b`.
+    A throwaway 32-bit UBSan smoke run passed 5,834 layout and runtime checks, exercising animation,
+    deferred sounds, terrain color/LOD accesses, spark controls, shot quality, and round-result state.
+    The two live candidates affected by shared-header changes compile under their parent profiles;
+    immutable measurement snapshots remain untouched. No emulator run. YAML, symbol files, compiler
+    profiles, and upstream library mirrors are unchanged.
+
 - **Five more main functions banked**: `func_80047CAC`, `get_tile_attribute`,
   `func_8005470C`, `func_80060190`, and `func_800604F4`
   (276 instructions / 1,104 bytes). Main stubs decrease 203 → 198.

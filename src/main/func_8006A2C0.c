@@ -35,13 +35,6 @@ extern void func_800719A0(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 extern s32 D_800FF4B0;
 extern s32 D_800FF4B4;
 extern s32 D_800FF4B8;
-extern s32 D_800FF4D0;
-extern s32 D_800FF4D4;
-extern s32 D_800FF4D8;
-extern s32 D_800FF4DC;
-extern s32 D_800FF4E0;
-extern s32 D_800FF4E4;
-extern s32 D_800FF4E8;
 extern s32 scenario_mode_id;
 extern u8* func_8005AF50(void);
 extern void* D_800E1C00;
@@ -1038,9 +1031,8 @@ extern s32 get_course_hole_primary_flag(s32 course, s32 hole);
 extern s32 get_course_hole_secondary_flag(s32 course, s32 hole);
 extern void func_8006D214(void);
 extern void func_8006D38C(void);
-/* The two per-player result words at +0x80/+0x84 are still unnamed.
- * Byte-offset scans preserve the retail index walk; the sentinel reset loops
- * above them instead advance a field pointer and re-read the live count. */
+/* -2 marks a pending per-player result; mode 1 converts it to -1.
+ * Field-rooted byte scans retain the retail induction and aliasing shape. */
 
 void func_8006D4EC(s32 mode) {
   s32 hole = scenario_state_id.round_hole_index;
@@ -1056,7 +1048,7 @@ void func_8006D4EC(s32 mode) {
   if (get_course_hole_primary_flag(scenario_mode_id, hole)) {
     if (mode == 1) {
       for (i = 0; i != scenario_state_id.active_player_count; i++) {
-        status = (s32*)((u8*)player_records + i * sizeof(PlayerState) + 0x80);
+        status = &player_records[i].unknown_80;
         if (*status == -2) {
           *status = -1;
         }
@@ -1069,7 +1061,7 @@ void func_8006D4EC(s32 mode) {
       count = scenario_state_id.active_player_count;
       offset = 0;
     primary_scan:
-      ready += *(s32*)((u8*)player_records + offset + 0x80) != sentinel;
+      ready += *(s32*)((u8*)&player_records[0].unknown_80 + offset) != sentinel;
       offset += sizeof(PlayerState);
       i++;
       if (i != count) {
@@ -1083,7 +1075,7 @@ void func_8006D4EC(s32 mode) {
   } else if (get_course_hole_secondary_flag(scenario_mode_id, hole)) {
     if (mode == 1) {
       for (i = 0; i != scenario_state_id.active_player_count; i++) {
-        status = (s32*)((u8*)player_records + i * sizeof(PlayerState) + 0x84);
+        status = &player_records[i].unknown_84;
         if (*status == -2) {
           *status = -1;
         }
@@ -1096,7 +1088,7 @@ void func_8006D4EC(s32 mode) {
       count = scenario_state_id.active_player_count;
       offset = 0;
     secondary_scan:
-      ready += *(s32*)((u8*)player_records + offset + 0x84) != sentinel;
+      ready += *(s32*)((u8*)&player_records[0].unknown_84 + offset) != sentinel;
       offset += sizeof(PlayerState);
       i++;
       if (i != count) {
@@ -1123,11 +1115,9 @@ extern void func_8005DE60(void);
  * ScenarioStatistics layout names observed fields and leaves uncertain
  * counters/totals as unknown_<offset>.
  *
- * RoundPlayerRecord is based at player_records. The symbol map places
- * player_hole_status at +3, player_handicaps at +6, player_hole_scores at +8,
- * and D_801B71FC at +9, the second byte of each two-byte hole slot. Accesses
- * use the enclosing record's members rather than treating these aliases as
- * separate arrays.
+ * PlayerState owns the score/status aliases: hole_status at +0x26, handicap
+ * at +0x29, hole_scores at +0x2B, and the second byte of each hole score at
+ * +0x2C. Accesses use the enclosing record's members, not separate arrays.
  */
 void accumulate_mode_stats(void) {
   u8* rec;
@@ -1146,7 +1136,7 @@ void accumulate_mode_stats(void) {
 
   rec = func_8005AF50() + (scenario_mode_id * 116 + 0xE98);
   stats = (ScenarioStatistics*)rec;
-  g = &D_800FF4D0;
+  g = &D_800FF4D0.unknown_00;
   cfg = &D_800C1420[scenario_mode_id * 200];
 
   if (stats->sample_count <= 0) {
@@ -1300,16 +1290,16 @@ void func_8006DDCC(void) {
   ScenarioStatistics* stats;
   s32* high_water_mark;
 
-  D_800FF4D0 = 0;
-  D_800FF4D4 = 0;
-  D_800FF4D8 = 0;
-  D_800FF4E4 = 0;
+  D_800FF4D0.unknown_00 = 0;
+  D_800FF4D0.unknown_04 = 0;
+  D_800FF4D0.result_count = 0;
+  D_800FF4D0.average_sample_count = 0;
   stats = (ScenarioStatistics*)(p + (scenario_mode_id * sizeof(ScenarioStatistics) + 0xE98));
   high_water_mark = &stats->high_water_mark;
   v = *high_water_mark;
-  D_800FF4E0 = 0;
-  D_800FF4E8 = 0;
-  D_800FF4DC = v;
+  D_800FF4D0.result_total = 0;
+  D_800FF4D0.include_in_average = 0;
+  D_800FF4D0.result_max = v;
 }
 
 void func_8006DE44(void) {
@@ -1318,36 +1308,33 @@ void func_8006DE44(void) {
   ScenarioStatistics* stats;
   s32* high_water_mark;
 
-  D_800FF4D0 = 0;
-  D_800FF4D4 = 0;
-  D_800FF4D8 = 0;
-  D_800FF4E4 = 0;
+  D_800FF4D0.unknown_00 = 0;
+  D_800FF4D0.unknown_04 = 0;
+  D_800FF4D0.result_count = 0;
+  D_800FF4D0.average_sample_count = 0;
   stats = (ScenarioStatistics*)(p + (scenario_mode_id * sizeof(ScenarioStatistics) + 0xE98));
   high_water_mark = &stats->high_water_mark;
   v = *high_water_mark;
-  D_800FF4E8 = 0;
-  D_800FF4DC = v;
+  D_800FF4D0.include_in_average = 0;
+  D_800FF4D0.result_max = v;
 }
 
-extern s8 D_801B726C;
-extern s8 D_800BAA04;
-extern s32 D_801B7270;
 
 void func_8006DEB4(void) {
   s32* counts;
   volatile s32* pending;
 
   func_8005AF50();
-  counts = &D_800FF4D0;
-  if (D_801B726C != 0) {
-    if (player_records[0].base_score <= D_800BAA04) {
+  counts = &D_800FF4D0.unknown_00;
+  if (player_records[0].unknown_9C != 0) {
+    if (player_records[0].base_score <= hole_environment.unknown_2C) {
       counts[0]++;
     } else {
-      D_800FF4D4++;
+      D_800FF4D0.unknown_04++;
     }
   }
   /* Retail takes three distinct snapshots of the pending result. */
-  pending = &D_801B7270;
+  pending = &player_records[0].pending_result;
   if (*pending >= 0) {
     counts[2]++;
     {
@@ -1363,31 +1350,30 @@ void func_8006DEB4(void) {
   }
 }
 
-extern s32 D_801B7250;
 
 s32 func_8006DF84(void) {
-  s32* base = &D_800FF4D0;
+  s32* base = &D_800FF4D0.unknown_00;
   s32 pending;
   s16 field;
   ClubShot* shot;
   s16* shot_field;
 
   shot = get_shot_data();
-  pending = D_801B7250;
-  D_801B7270 = pending;
-  shot_field = &shot->unknown_16;
+  pending = player_records[0].unknown_80;
+  player_records[0].pending_result = pending;
+  shot_field = &shot->club_index;
   field = *shot_field;
   if (field != 0) {
     goto clear;
   }
   if (pending > 0) {
-    D_800FF4E8 = 1;
+    D_800FF4D0.include_in_average = 1;
     goto done;
   }
 clear:
   base[6] = 0;
 done:
-  return D_801B7270 > base[3];
+  return player_records[0].pending_result > base[3];
 }
 
 /* func_8006E210 + func_8006DFF0: CARRY (S310). Both reach the ROM's exact
