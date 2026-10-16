@@ -78,19 +78,14 @@ void func_8004D4B8(char* str, s32 count, u16* out) {
     if (c < 0) {
       c += 31;
     }
-    do {
-      tile_row = 0;
-    } while (0);
+    tile_row = 0;
     glyph_offset = glyph_column | ((c >> 5) << 9);
     destination_row = row;
     do {
       s32 destination_offset;
       s32 source_offset;
       s32 half;
-      /* The loop note preserves initialization before the two index copies. */
-      do {
-        half = 0;
-      } while (0);
+      half = 0;
       destination_offset = destination_row * 2;
       source_offset = glyph_offset;
       for (; half < 2; half++) {

@@ -120,9 +120,7 @@ void emit_lens_flare_dl(Gfx** gfxp) {
   gDPPipeSync(gfx++);
   gDPPipeSync(gfx++);
   gDPSetCycleType(gfx++, G_CYC_1CYCLE);
-  do {
-    gDPPipeSync(gfx++);
-  } while (0);
+  gDPPipeSync(gfx++);
 
   tod = sky_time_of_day_idx;
   n = n << 8;

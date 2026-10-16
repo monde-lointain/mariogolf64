@@ -482,10 +482,7 @@ void func_80047CAC(void) {
   raw_z = (f32)D_800DAEF4;
   dy = scaled - old_y;
   scaled = raw_z * factor;
-  /* Keep the constant's scheduling boundary without increasing its reference
-   * weight; the same scaled scratch spans all three coordinate calculations. */
-  do {
-  } while (0);
+  /* The same scaled scratch spans all three coordinate calculations. */
   smoothing = 0.2f;
   dx *= smoothing;
   half = 0.5f;

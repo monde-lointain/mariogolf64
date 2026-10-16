@@ -83,22 +83,26 @@ still needs its entry test, `if (n != 0)` (S306).
   `s32 tmp` split forces a load interleave (sched is bottom-up) and moving a statement earlier
   shortens a qty's live length; both permuter-proof. Source order is not always the knob
   (S305: a `div` moved three ways, byte-identical object).
-- **do-while-zero-lever** -- emits nothing. Empty it ends the preceding block, so `reorg` stops
-  reaching past a call to annul the next branch (S288); round a region it multiplies that region's
-  `n_refs` only, one allocno per edit; step two after locality
-  (S292/S318/S320, `#pervasive-regalloc-classical-main`).
-  It is also a real scheduling boundary: GCC 2.7.2 `sched.c:2053-2080` adds
-  dependencies around loop-begin/end notes even inside one basic block, preserving
-  loop-depth reference accounting. This banked the abs/threshold ordering in
-  `func_80047DBC`, early `15` materialization in `get_surface_type` / `func_8003DE80`,
-  and the extern-double load/count/store ordering in `func_80079EBC`.
-  `resolve_shot_quality_table` additionally needs its digit subtraction to reuse the
-  result scratch through clamping and return; a separate local digit coalesces
-  differently even with the correct scheduling boundary.
-  `func_80047CAC` needs an empty boundary **before**, not around, its smoothing
-  assignment: both forms preserve the retail hazard nops, but enclosing the
-  assignment changes its reference weight and FPR allocation. Shared scaled
-  scratch and separate raw-input/constant quantities recover the remaining FPRs.
+- **do-while-zero-lever** -- a one-shot loop can disappear from machine code while
+  retaining `NOTE_INSN_LOOP_BEG/END` in RTL. These notes are not basic-block delimiters:
+  `sched.c:2053-2080` fences the next instruction against previous register uses/sets and flushes
+  pending dependencies. Independently, `flow.c:2067/2711` weights pseudo references by the current
+  loop depth. Compare `.flow`, `.sched`, `.lreg`, `.greg`, `.sched2`, and `.dbr` to distinguish
+  allocation from scheduling; do not attribute the whole effect to `reorg`.
+  The abs/threshold order in `func_80047DBC`, early edge constants in `get_surface_type` /
+  `func_8003DE80`, and extern-double/count/store order in `func_80079EBC` still need their notes.
+- **real-scratch-anti-dependency** -- reuse an existing load scratch when its old value has been
+  consumed and the required target instructions reuse that register. In `resolve_shot_quality_table`,
+  decode the table byte from `raw` into result `v`, then overwrite `raw` with the club's signed
+  quality scale. `sched.c:1714-1718` preserves the write-after-read/output dependencies. The measured
+  `.sched` has the power load depend on the digit subtraction through `REG_DEP_ANTI` on the same
+  pseudo; this retains `lbu; subtract; lh` and removes the one-shot wrapper with a verified ROM match.
+  Preserve the scratch's width and the result's lifetime through clamping and return.
+- **pre-combine-accounting-is-not-a-match** -- `combine.c:52-59` documents incomplete updates of
+  `reg_live_length` and `reg_n_refs`. Equivalent arithmetic can therefore change allocation even if
+  later optimized. A banner experiment deriving its right edge from its left edge restored the
+  height/width allocation without a loop note, but changed the edge instructions. Treat restored
+  coloring as diagnostic progress, not proof that the source is bankable.
 - **global-reread-vs-cse**, absorbing defeat-global-base-cse and per-region-cse-slot-base -- a
   scalar-global store does not constrain a later load through a pointer parameter
   (`true_dependence`, `sched.c:817`), so the load hoists. `extern s32 G[]` read as `G[0]`, a

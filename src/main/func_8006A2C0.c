@@ -584,8 +584,8 @@ void func_8006C450(void) {
  * cx counts u32 pixel pairs and cy counts rows of 152 pairs; every stamp also
  * repeats one row down, so the visible step is a 2x2 pixel block.
  *
- * The empty do/while and the loop-scoped t are codegen shaping, not logic: they
- * set the register-allocation order this function's asm depends on.
+ * The set-path loop note and the loop-scoped t preserve the measured
+ * register-allocation order; flattening both clamp paths changes it.
  */
 void stamp_circle_ring_alpha(u32* grid, s32 cx, s32 cy, s32 r) {
   s32 i;
@@ -601,16 +601,14 @@ void stamp_circle_ring_alpha(u32* grid, s32 cx, s32 cy, s32 r) {
     while (i <= j) {
       s32 t;
 
-      do {
-        cj = j;
-        ci = i;
-        if (cj > 0x4B) {
-          cj = 0x4B;
-        }
-        if (ci > 0x6F) {
-          ci = 0x6F;
-        }
-      } while (0);
+      cj = j;
+      ci = i;
+      if (cj > 0x4B) {
+        cj = 0x4B;
+      }
+      if (ci > 0x6F) {
+        ci = 0x6F;
+      }
       grid[(cy + ci) * 152 + (cx + cj)] &= ~0x10001;
       grid[(cy - ci) * 152 + (cx + cj)] &= ~0x10001;
       grid[(cy + ci) * 152 + (cx + cj) + 152] &= ~0x10001;

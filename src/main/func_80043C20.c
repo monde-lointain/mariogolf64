@@ -405,14 +405,11 @@ s32 resolve_shot_quality_table(ClubShot* club, s32 arg1, s32 arg2) {
   club_index = club->club_index;
   if (club_index != 0xD) {
     const char* addr = (arg2 == 2) ? &p2[club_index] : &p1[club_index];
-    s32 power;
     s32 raw = (u8)*addr;
     v = raw - 0x30;
-    /* Reuse the return scratch, and keep the power load after digit decoding. */
-    do {
-      power = club->quality_scale_percent;
-    } while (0);
-    v = (v * power + 0x32) / 100;
+    /* Reuse raw for power so digit decoding precedes the power load. */
+    raw = club->quality_scale_percent;
+    v = (v * raw + 0x32) / 100;
     if (v < 1) {
       v = 1;
     }

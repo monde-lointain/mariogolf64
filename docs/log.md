@@ -2,6 +2,57 @@
 
 ## 2026-10-15
 
+- **Compiler-source loop-note investigation**: Four parallel read-only reviewers inspected the
+  requested GCC 2.7.2 and binutils 2.6 trees. The inspected `sched.c`, `flow.c`, `reorg.c`, and
+  `tc-mips.c` match the pinned build's vendor copies by SHA-256. Compiler experiments and source
+  integration remained serialized; each hypothesis was measured before advancing to another.
+  - Tested nine technique families with 19 exact-profile source variants: union/scratch lifetimes,
+    compare-owned constants, loop induction/bounds, real loop-entry guards, one-use call arguments,
+    pre-combine rectangle arithmetic, per-branch decoder scratch, field-width coalescing, and actual
+    scratch anti-dependencies.
+  - Removed the remaining wrapper in `resolve_shot_quality_table`: the table byte and subsequent
+    signed power load now reuse `raw`, while decoded/result value `v` retains its existing lifetime.
+    The scheduling dump shows `REG_DEP_ANTI` from the power load to digit decoding on their shared
+    pseudo, preserving `lbu; subtract; lh` without an artificial loop note. Main's one-shot wrappers
+    decrease 36 → 35.
+  - Distinguished mechanisms: loop notes fence scheduling without delimiting basic blocks;
+    `flow.c` weights references by loop depth; both local and global allocation rank quantities by
+    references and lifetime before their numeric tie-breakers. Call-free local allocation is not
+    simply birth order. GCC owns the scheduling/slot decisions; GAS only handles local hazards and
+    limited adjacent branch swapping.
+  - The closest nonmatching banner experiment restores height/width coloring through meaningful
+    rectangle arithmetic but still changes the right-edge instructions. Guarded leaderboard loops
+    add a branch or reduce the stack frame from 2,352 to 2,344 bytes. Decoder scratch/width changes
+    still alter inlined-helper register allocation. None of these candidates was integrated.
+  - `tools/verify-rom.sh` passes with USA retail SHA-1
+    `e2c4e7a905b29529b49a1619a401fe699224829b`.
+    A throwaway 32-bit UBSan quality-helper smoke run passed 2,462,223 checks covering table/default
+    selection, club indices, signed scaling, rounding, clamps, and unchanged input records.
+    No emulator run. Compiler/assembler sources, profiles, YAML, symbols, and overlays are unchanged.
+
+- **Main-bank one-shot-loop cleanup**: Three parallel read-only reviewers inspected the 59
+  `do { ... } while (0)` loops in 11 `src/main/` hosts against Code Complete chapters 10–17.
+  Candidate edits, compiler measurements, source integration, formatting, and ROM builds remained
+  serialized.
+  - Removed 23 wrappers across eight hosts. Flattened straight-line initialization and clamp code,
+    removed redundant empty boundaries, and reduced the absolute-value helper's nested notes from
+    three to two. The supershot scorer now returns its result directly instead of repurposing its
+    selector, allowing all ten of its one-shot wrappers to disappear.
+  - Kept the `acosf` representation scratch in its existing positive-input branch and the `atan2f`
+    sign-transfer scratch in its case scope. Preserved union access, arithmetic, real loops,
+    decoder dispatch edges, and data layouts; removed or corrected obsolete loop-note comments.
+  - Retained 36 measured code-generation constraints. In particular, the leaderboard insertion
+    boundary, saved-entry validation notes, and player-slot clear note remain: their removal changes
+    scheduling, allocation, or function size. Decoder and circle-clamp reductions were measured
+    cumulatively rather than assuming individually safe removals compose.
+  - `tools/verify-rom.sh` passes with USA retail SHA-1
+    `e2c4e7a905b29529b49a1619a401fe699224829b`.
+    A throwaway 32-bit UBSan smoke run passed 16,985,961 checks over nine before/after function pairs:
+    score categories and signed-byte boundaries, float representation transfers and math edges,
+    glyph output and terminators, interpolation, circle alpha/color preservation, and extended-LZ
+    literals, ring back-references, and nonfinal-window carry state. No emulator run.
+    YAML, symbol files, compiler profiles, library mirrors, and overlay sources are unchanged.
+
 - **Extended structure recovery and interior-symbol reconciliation**: Eight parallel implementors
   read Code Complete Chapter 11 before inspecting the 58 main C hosts; two additional alias-audit
   scouts read the same chapter. Source integration, compiler experiments, and ROM builds remained

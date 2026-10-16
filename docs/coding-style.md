@@ -144,6 +144,12 @@ as a counted `for` with its counter declared at function scope. Conversely, deco
 one-shot loop notes, shared scratch values, and score-comparison exits can still determine allocation
 or branch layout. Retain a non-idiomatic form only with a nearby explanation of the measured constraint.
 
+For one-shot-loop cleanup, prefer straight-line statements over substitute `if (1)` blocks or
+new compiler barriers. Keep C89 union-transfer scratch in existing branch/case scopes where
+possible, and return the result directly rather than reusing a selector as a return scratch when
+that preserves matching. Compare complete translation units, including downstream functions,
+before running the full ROM gate; a partial assembly view can miss allocation or size changes.
+
 ## Defensive programming
 
 Keep behavior defined and preserve the target's boundary behavior. Add checks, assertions, or error

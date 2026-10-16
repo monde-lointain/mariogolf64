@@ -209,7 +209,7 @@ static inline void lz_expand(LzHistoryState* history, s16 history_offset,
  * a 256-halfword history window.
  *
  * Keep per-block scratch values distinct, along with the entry scheduling
- * barrier and no-op loop wrappers: they are present in the measured ROM form.
+ * barrier and the remaining loop notes: flattening them changes ROM codegen.
  */
 s32 lz_decompress_extended(LzDecompressState* state) {
   u16* source_cursor;
@@ -283,9 +283,7 @@ s32 lz_decompress_extended(LzDecompressState* state) {
       history.output = initial_output_cursor;
     } while (0);
   } while (0);
-  do {
-    history.history_index = history_index;
-  } while (0);
+  history.history_index = history_index;
   history.run_remaining = initial_run_remaining;
   history.history_buffer = entry_history_buffer;
 
@@ -380,11 +378,9 @@ decode_top:
   source_cursor = source_cursor + 1;
   do {
     zero_extended_word = (u16)reference_word;
-    do {
-      if (zero_extended_word == 0) {
-        goto done;
-      }
-    } while (0);
+    if (zero_extended_word == 0) {
+      goto done;
+    }
   } while (0);
   /* Ring back-reference distance is in control-ring entries. */
   do {

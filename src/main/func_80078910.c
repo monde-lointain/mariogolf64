@@ -326,10 +326,8 @@ void func_80079EBC(void) {
       p->size = (f32)((s32)guRandom() % 30) * 0.1f + 1.0f;
       size_step = (f32)((s32)guRandom() % 10) * 0.001f;
       offset = D_800D19E0;
-      /* Retain the shared pool; these boundaries preserve its load and the
-       * byte store of zero ahead of the final double-precision addition. */
-      do {
-      } while (0);
+      /* Retain the shared pool and keep the byte store of zero ahead of the
+       * final double-precision addition. */
       count++;
       do {
         p->effect_frame = 0;

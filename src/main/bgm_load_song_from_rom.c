@@ -178,9 +178,7 @@ s32 func_8005F30C(s32 x, s32 z) {
     s32 limit = D_800FBE68;
     s32 positive;
     /* Keep the predicate separate from the mask to preserve slt/negu/and. */
-    do {
-      positive = limit > 0;
-    } while (0);
+    positive = limit > 0;
     height = limit & -positive;
   }
   return height;

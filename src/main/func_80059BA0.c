@@ -88,13 +88,11 @@ f32 func_80059BA0(f32 value) {
   s32 mask;
   x.f = value;
   bits = x.bits;
-  /* Loop notes keep the mask after the bit transfer; three scopes give the
-   * mask priority over the transferred bits without emitting instructions. */
+  /* Two loop notes keep the mask after the bit transfer and give it allocation
+   * priority over the transferred bits without emitting instructions. */
   do {
     do {
-      do {
-        mask = 0x7FFFFFFF;
-      } while (0);
+      mask = 0x7FFFFFFF;
     } while (0);
   } while (0);
   x.bits = bits & mask;
@@ -171,25 +169,17 @@ f32 acosf(f32 x) {
     w = r * s - PIO2_LO;
     return PI - 2.0f * (s + w);
   } else { /* x > 0.5 */
+    union {
+      f32 f;
+      s32 i;
+    } gf_u;
     z = (1.0f - x) * 0.5f;
     s = sqrtf(z);
     df = s;
-    do {
-      union {
-        f32 f;
-        s32 i;
-      } gf_u;
-      gf_u.f = df;
-      idf = gf_u.i;
-    } while (0);
-    do {
-      union {
-        f32 f;
-        s32 i;
-      } gf_u;
-      gf_u.i = idf & 0xFFFFF000;
-      df = gf_u.f;
-    } while (0);
+    gf_u.f = df;
+    idf = gf_u.i;
+    gf_u.i = idf & 0xFFFFF000;
+    df = gf_u.f;
     c = (z - df * df) / (s + df);
     p = z * (PS0 + z * (PS1 + z * (PS2 + z * (PS3 + z * (PS4 + z * PS5)))));
     q = 1.0f + z * (QS1 + z * (QS2 + z * (QS3 + z * QS4)));
@@ -296,17 +286,16 @@ f32 atan2f(f32 y, f32 x) {
   switch (m) {
     case 0:
       return z; /* atan(+, +) */
-    case 1:
-      do {
-        union {
-          f32 f;
-          s32 i;
-        } gf_u;
-        gf_u.f = z;
-        gf_u.i ^= 0x80000000;
-        z = gf_u.f;
-      } while (0);
+    case 1: {
+      union {
+        f32 f;
+        s32 i;
+      } gf_u;
+      gf_u.f = z;
+      gf_u.i ^= 0x80000000;
+      z = gf_u.f;
       return z; /* atan(-, +) */
+    }
     case 2:
       return 3.1415925f - (z - 1.50995788e-07f); /* atan(+, -) */
     default:                                     /* case 3 */
@@ -721,37 +710,15 @@ s32 func_8005B0B4(SupershotRecord* record) {
   s32 result = 0;
   s32 value;
   s32 selector = flags & 0xF;
-  /* Weight the signed value load and the case-2 result separately so the
-   * result/value/selector occupy v1/a0/a1, preserving the annulled slots. */
-  do {
-    do {
-      do {
-        do {
-          do {
-            do {
-              do {
-                value = record->unknown_2C;
-              } while (0);
-            } while (0);
-          } while (0);
-        } while (0);
-      } while (0);
-    } while (0);
-  } while (0);
+  value = record->unknown_2C;
   if (flags & 0x80) {
     switch (selector) {
       case 3:
         result = flags & 0x40 ? 60 : 50;
         break;
       case 2:
-        do {
-          do {
-            do {
-              result = flags & 0x40 ? 70 : 60;
-              if (value < 5) result += 10;
-            } while (0);
-          } while (0);
-        } while (0);
+        result = flags & 0x40 ? 70 : 60;
+        if (value < 5) result += 10;
         break;
       case 0:
         result = 90;
@@ -762,8 +729,7 @@ s32 func_8005B0B4(SupershotRecord* record) {
         break;
     }
   }
-  selector = result;
-  return selector;
+  return result;
 }
 
 void rank_scores_descending(s32* scores, s32* order, s32 count) {
