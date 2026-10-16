@@ -107,6 +107,28 @@ Reference scores and queue records are advisory; neither source presence nor a p
 banks code. The native [decomp skill](../.omp/skills/mg64-decomp/SKILL.md#campaigns) owns execution,
 and only the parent owns shared builds, MCP, and source integration.
 
+## Review main C sources with omp
+
+`uv run --locked python tools/review_main.py --dry-run` previews one fresh omp session
+for each direct `src/main/*.c` file, in filename order. Omit `--dry-run` to execute the
+reviews with the embedded Code Complete prompt (Chapters 7, 10–16, 31 and 32).
+
+Sessions run serially in the repository root because source edits, symbol updates,
+builds and Ghidra share state. Do not run multiple launchers or other modifying agents
+alongside this command. The prompt asks each session to commit its work; repository
+matching and symbol-edit constraints still apply.
+
+The launcher uses `omp --print --session-dir` with closed stdin and inherited output.
+An explicit session directory prevents configured auto-resume from reusing a prior
+conversation. Sessions are saved under `scratchpad/omp-main-review/<file-stem>/`;
+re-running starts fresh sessions rather than skipping previous files. The first
+nonzero omp exit stops dispatch and is returned by the launcher.
+
+Use `--omp /path/to/omp` to select an executable, `--model <selector>` to override
+omp's configured model, or `--session-dir <directory>` to change the session parent.
+The chapter notes, walkthrough and contribution guide paths in the prompt must be
+accessible to the spawned sessions.
+
 ## Maintain tooling and docs
 
 - `uv run --locked pytest tests/tooling` (or `ctest --preset tooling` after configure) — tooling tests.
