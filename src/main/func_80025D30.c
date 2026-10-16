@@ -68,34 +68,38 @@ s32 overlay_id_from_segment(s32 segment_id) {
 
 void init_overlay_manager(void) {
   /* Sharing the traversal index keeps KMC's retail register allocation. */
-  s32 entry_index;
+  s32 traversal_index;
 
-  for (entry_index = 0; entry_index < SEGMENT_COUNT; entry_index++) {
-    g_segment_overlay_indices[entry_index] = SEGMENT_LIST_END;
-    g_segment_is_loaded[entry_index] = 0;
-    g_segment_last_used_frame[entry_index] = SEGMENT_UNUSED_FRAME;
+  for (traversal_index = 0; traversal_index < SEGMENT_COUNT;
+       traversal_index++) {
+    g_segment_overlay_indices[traversal_index] = SEGMENT_LIST_END;
+    g_segment_is_loaded[traversal_index] = 0;
+    g_segment_last_used_frame[traversal_index] = SEGMENT_UNUSED_FRAME;
   }
 
-  for (entry_index = 0; (u32)entry_index < OVERLAY_COUNT; entry_index++) {
-    if (g_overlay_descriptors[entry_index].segment_ids[0] != SEGMENT_LIST_END) {
-      s8* segment_ids = g_overlay_descriptors[entry_index].segment_ids;
-      u32 segment_index;
-      for (segment_index = 0;
-           segment_ids[segment_index] != SEGMENT_LIST_END; segment_index++) {
-        if (g_segment_overlay_indices[segment_ids[segment_index]] !=
-                SEGMENT_LIST_END &&
-            !flag_is_set(FLAG_SUPPRESS_OVERLAY_MESSAGES)) {
-          /* This diagnostic starts at the microcode data's end address. */
-          osSyncPrintf((const char*)gspF3DEX2_fifoDataEnd);
-        }
-        g_segment_overlay_indices[segment_ids[segment_index]] = entry_index;
+  for (traversal_index = 0; (u32)traversal_index < OVERLAY_COUNT;
+       traversal_index++) {
+    s8* segment_id_list = g_overlay_descriptors[traversal_index].segment_ids;
+    u32 segment_index;
+
+    segment_index = 0;
+    while (segment_id_list[segment_index] != SEGMENT_LIST_END) {
+      if (g_segment_overlay_indices[segment_id_list[segment_index]] !=
+              SEGMENT_LIST_END &&
+          !flag_is_set(FLAG_SUPPRESS_OVERLAY_MESSAGES)) {
+        /* This diagnostic starts at the microcode data's end address. */
+        osSyncPrintf((const char*)gspF3DEX2_fifoDataEnd);
       }
+      g_segment_overlay_indices[segment_id_list[segment_index]] =
+          traversal_index;
+      segment_index++;
     }
   }
 
-  for (entry_index = 0; entry_index < SEGMENT_COUNT; entry_index++) {
-    if (g_segment_overlay_indices[entry_index] == SEGMENT_LIST_END) {
-      g_segment_is_loaded[entry_index] = 1;
+  for (traversal_index = 0; traversal_index < SEGMENT_COUNT;
+       traversal_index++) {
+    if (g_segment_overlay_indices[traversal_index] == SEGMENT_LIST_END) {
+      g_segment_is_loaded[traversal_index] = 1;
     }
   }
 }
@@ -140,11 +144,13 @@ s32 can_load_overlay(s32 overlay_id) {
       return 0;
     }
     {
-      s8* segment_ids = g_overlay_descriptors[other_overlay_index].segment_ids;
+      s8* segment_id_list =
+          g_overlay_descriptors[other_overlay_index].segment_ids;
       u32 segment_index;
-      for (segment_index = 0; segment_ids[segment_index] != SEGMENT_LIST_END;
-           segment_index++) {
-        s8 segment_id = segment_ids[segment_index];
+
+      segment_index = 0;
+      while (segment_id_list[segment_index] != SEGMENT_LIST_END) {
+        s8 segment_id = segment_id_list[segment_index];
         if (g_frame_counter - g_segment_last_used_frame[segment_id] <
             SEGMENT_REUSE_DELAY) {
           if (!flag_is_set(FLAG_SUPPRESS_OVERLAY_MESSAGES)) {
@@ -153,6 +159,7 @@ s32 can_load_overlay(s32 overlay_id) {
           }
           return 0;
         }
+        segment_index++;
       }
     }
   }
@@ -161,8 +168,9 @@ s32 can_load_overlay(s32 overlay_id) {
 
 s32 load_overlay(s32 overlay_id) {
   if (can_load_overlay(overlay_id) != 0) {
-    OverlayDescriptor* overlay;
-    s8* segment_ids;
+    OverlayDescriptor* descriptor;
+    s8* segment_id_list;
+    u32 segment_index;
 
     /* Reuse the argument for the decoded index to preserve KMC codegen. */
     overlay_id = overlay_index_from_id(overlay_id);
@@ -170,27 +178,28 @@ s32 load_overlay(s32 overlay_id) {
       osSyncPrintf(OVERLAY_LOAD_START_MESSAGE, overlay_id);
     }
 
-    overlay = &g_overlay_descriptors[overlay_id];
-    segment_ids = overlay->segment_ids;
+    descriptor = &g_overlay_descriptors[overlay_id];
+    segment_id_list = descriptor->segment_ids;
     /* Publish ROM/BSS changes to the caches before running overlay code. */
     osWritebackDCacheAll();
-    nuPiReadRom(overlay->rom_start, (void*)overlay->ram_start,
-                overlay->rom_end - overlay->rom_start);
-    bzero((void*)overlay->bss_start, overlay->bss_end - overlay->bss_start);
-    osWritebackDCache((void*)overlay->bss_start, overlay->bss_end - overlay->bss_start);
-    osInvalICache((void*)overlay->ram_start, overlay->ram_end - overlay->ram_start);
-    if (overlay->initialize != NULL) {
-      overlay->initialize();
+    nuPiReadRom(descriptor->rom_start, (void*)descriptor->ram_start,
+                descriptor->rom_end - descriptor->rom_start);
+    bzero((void*)descriptor->bss_start,
+          descriptor->bss_end - descriptor->bss_start);
+    osWritebackDCache((void*)descriptor->bss_start,
+                      descriptor->bss_end - descriptor->bss_start);
+    osInvalICache((void*)descriptor->ram_start,
+                  descriptor->ram_end - descriptor->ram_start);
+    if (descriptor->initialize != NULL) {
+      descriptor->initialize();
     }
-    if (segment_ids[0] != SEGMENT_LIST_END) {
-      u32 segment_index;
-      for (segment_index = 0; segment_ids[segment_index] != SEGMENT_LIST_END;
-           segment_index++) {
-        s8 segment_id = segment_ids[segment_index];
-        g_segment_is_loaded[segment_id] = 1;
-      }
+    segment_index = 0;
+    while (segment_id_list[segment_index] != SEGMENT_LIST_END) {
+      s8 segment_id = segment_id_list[segment_index];
+      g_segment_is_loaded[segment_id] = 1;
+      segment_index++;
     }
-    overlay->is_loaded = 1;
+    descriptor->is_loaded = 1;
     if (!flag_is_set(FLAG_SUPPRESS_OVERLAY_MESSAGES)) {
       osSyncPrintf(OVERLAY_LOAD_COMPLETE_MESSAGE, overlay_id);
     }
@@ -204,37 +213,40 @@ s32 load_overlay(s32 overlay_id) {
 }
 
 void unload_overlay(s32 overlay_id) {
-  OverlayDescriptor* overlay;
-  s8* segment_ids;
+  OverlayDescriptor* descriptor;
+  s8* segment_id_list;
+  u32 segment_index;
 
   /* A separate decoded-index local adds a register move and delay-slot nop. */
   overlay_id = overlay_index_from_id(overlay_id);
-  overlay = &g_overlay_descriptors[overlay_id];
-  if (overlay->is_loaded == 0) {
+  descriptor = &g_overlay_descriptors[overlay_id];
+  if (descriptor->is_loaded == 0) {
     return;
   }
-  if (overlay->finalize != NULL) {
-    overlay->finalize();
+  if (descriptor->finalize != NULL) {
+    descriptor->finalize();
   }
-  segment_ids = overlay->segment_ids;
-  overlay->is_loaded = 0;
+  segment_id_list = descriptor->segment_ids;
+  descriptor->is_loaded = 0;
   if (!flag_is_set(FLAG_SUPPRESS_OVERLAY_MESSAGES)) {
     osSyncPrintf(OVERLAY_UNLOADED_MESSAGE, overlay_id);
   }
-  if (segment_ids[0] != SEGMENT_LIST_END) {
-    u32 segment_index;
-    for (segment_index = 0; segment_ids[segment_index] != SEGMENT_LIST_END;
-         segment_index++) {
-      s8 segment_id = segment_ids[segment_index];
-      g_segment_is_loaded[segment_id] = 0;
-    }
+  segment_index = 0;
+  while (segment_id_list[segment_index] != SEGMENT_LIST_END) {
+    s8 segment_id = segment_id_list[segment_index];
+    g_segment_is_loaded[segment_id] = 0;
+    segment_index++;
   }
   osWritebackDCacheAll();
   if (g_debug_mode_enabled != 0) {
-    if (osVirtualToPhysical((void*)overlay->ram_start) <= BASE_RDRAM_LAST_ADDRESS) {
-      bzero((void*)overlay->ram_start, overlay->ram_end - overlay->ram_start);
-      osWritebackDCache((void*)overlay->ram_start, overlay->ram_end - overlay->ram_start);
-      osInvalICache((void*)overlay->ram_start, overlay->ram_end - overlay->ram_start);
+    if (osVirtualToPhysical((void*)descriptor->ram_start) <=
+        BASE_RDRAM_LAST_ADDRESS) {
+      bzero((void*)descriptor->ram_start,
+            descriptor->ram_end - descriptor->ram_start);
+      osWritebackDCache((void*)descriptor->ram_start,
+                        descriptor->ram_end - descriptor->ram_start);
+      osInvalICache((void*)descriptor->ram_start,
+                    descriptor->ram_end - descriptor->ram_start);
     }
   }
 }
