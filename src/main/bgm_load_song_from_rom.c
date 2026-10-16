@@ -144,18 +144,18 @@ s32 func_8005F224(void) {
   return temp;
 }
 
-s32 func_8005F248(s32 arg0) {
-  s32 x;
+s32 func_8005F248(s32 value) {
+  s32 reflected_value;
 
-  if (arg0 < 0x1F) {
-    x = arg0;
+  if (value < 0x1F) {
+    reflected_value = value;
   } else {
-    x = 0x3C - arg0;
+    reflected_value = 0x3C - value;
   }
-  if (x < 0) {
-    x = 0;
+  if (reflected_value < 0) {
+    reflected_value = 0;
   }
-  return (x << 8) / 30;
+  return (reflected_value << 8) / 30;
 }
 
 s32 func_8005F290(s32 unused, s16* input, u8* output) {
@@ -239,19 +239,19 @@ void func_8005F4AC(void) {
   }
 }
 
-void func_8005F518(s32 arg0, char* arg1) {
-  sprintf(arg1, D_800D1238, arg0 + 1);
+void func_8005F518(s32 value, char* buffer) {
+  sprintf(buffer, D_800D1238, value + 1);
 }
 
 INCLUDE_ASM("asm/nonmatchings/main/bgm_load_song_from_rom",
             init_per_player_state);
 
-void func_8005F838(s32 arg0) {
-  if (arg0 == 1) {
+void func_8005F838(s32 mode) {
+  if (mode == 1) {
     func_8005F360();
-  } else if (arg0 == 0) {
+  } else if (mode == 0) {
     func_8005F4AC();
-  } else if (arg0 == 2) {
+  } else if (mode == 2) {
     func_80060210(D_800FED40);
     D_801B609C = 0;
     active_player_count = 1;
@@ -269,7 +269,7 @@ void func_8005F838(s32 arg0) {
     D_801B72A6 = 1;
   }
   setup_terrain_detail_default();
-  if (arg0 != 3) {
+  if (mode != 3) {
     init_sky_panels();
   }
   func_80054E20();
@@ -326,9 +326,9 @@ INCLUDE_ASM("asm/nonmatchings/main/bgm_load_song_from_rom", func_8005FE8C);
 /* The selector advances eight bytes through auxiliary entries, not whole records.
  * These are address projections: direct array indexing folds the member offset
  * into the base and changes the retail instruction order. */
-void func_800600C0(s32 arg0) {
+void func_800600C0(s32 index) {
   ModeAuxFields* rows = (ModeAuxFields*)D_800FEDD8;
-  GameModeRecord* record = (GameModeRecord*)&rows[arg0];
+  GameModeRecord* record = (GameModeRecord*)&rows[index];
   ModeAuxFields* fields = &record->mode_aux_fields[0];
 
   D_80104F78 = fields->unknown_00;
@@ -340,9 +340,9 @@ void func_800600C0(s32 arg0) {
   D_80104F90 = fields->unknown_02[5];
 }
 
-void func_80060128(s32 arg0) {
+void func_80060128(s32 index) {
   ModeAuxFields* rows = (ModeAuxFields*)D_80105F40;
-  CourseSelectionRecord* record = (CourseSelectionRecord*)&rows[arg0];
+  CourseSelectionRecord* record = (CourseSelectionRecord*)&rows[index];
   ModeAuxFields* fields = &record->mode_aux_fields[0];
 
   D_80104F78 = fields->unknown_00;

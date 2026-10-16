@@ -154,10 +154,10 @@ void func_8006ACD8(void) {
   func_8006B54C();
 }
 
-void func_8006AD1C(s32 arg0) {
+void func_8006AD1C(s32 table_index) {
   RomAssetLoad asset;
 
-  get_rom_asset_allocation_size(*(u16*)&D_800C4026[(arg0 % 14) * 4], &asset);
+  get_rom_asset_allocation_size(*(u16*)&D_800C4026[(table_index % 14) * 4], &asset);
   load_rom_asset_payload(D_800E1C04, &asset);
 }
 
@@ -339,20 +339,20 @@ void func_8006B9E4(void) {
 
 s32 func_8006BA10(void) { return !~D_800C4124; }
 
-void func_8006BA24(s32 arg0) {
+void func_8006BA24(s32 dialog_index) {
   DialogDefinition* dialog;
-  s32 t;
+  s32 initial_choice_index;
 
-  if (arg0 == -1) {
+  if (dialog_index == -1) {
     return;
   }
-  dialog = &D_800C406C[arg0];
+  dialog = &D_800C406C[dialog_index];
   D_800C4120 = 0;
-  D_800C411C = arg0;
+  D_800C411C = dialog_index;
   func_8006B980();
-  t = dialog->initial_choice_index;
+  initial_choice_index = dialog->initial_choice_index;
   D_800C4124 = 0;
-  D_800C4128 = t;
+  D_800C4128 = initial_choice_index;
   play_sound_effect(0x64, D_800C0E60, 0x64);
 }
 
@@ -415,8 +415,8 @@ void emit_hole_banner_dl(Gfx** pgfx) {
   Gfx* gfx;
   Gfx** gp;
   DialogDefinition* entry;
-  s32 sp38;
-  s32 sp3C;
+  s32 text_width;
+  s32 text_height;
   s32 span;
   s32 i;
   s32 off;
@@ -440,8 +440,8 @@ void emit_hole_banner_dl(Gfx** pgfx) {
     return;
   }
 
-  func_8007399C(entry->text_run_index, 0xC, &sp38, &sp3C, 0);
-  span = sp3C + 0x18;
+  func_8007399C(entry->text_run_index, 0xC, &text_width, &text_height, 0);
+  span = text_height + 0x18;
   if (span < 0x30) {
     span = 0x30;
   }

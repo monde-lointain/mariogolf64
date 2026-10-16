@@ -132,10 +132,10 @@ INCLUDE_ASM("asm/nonmatchings/main/func_80026400", draw_scenery_opaque_pass);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80026400", draw_scenery_alpha_pass);
 
-/* Duplicate `str` (length rounded up to a word, capped at 0xFF) into a fresh
- * slot-3 buffer with a 4-word header, then release both. Returns a status code:
- * 1 if `tag` is 0, 2 if `str` is empty, 3 if the rounded length is too large,
- * 0 on success. */
+/* Copy the word-rounded `str` bytes into a slot-3 buffer and allocate a
+ * separate 4-byte header. That header word is overwritten with 0xA, then the
+ * rounded length, then `tag`. Returns: 1 if `tag` is 0, 2 if `str` is empty,
+ * 3 if the rounded length is too large, 0 on success. */
 s32 func_80028110(char* str, s32 tag) {
   s32 len;
   void* hdr;
@@ -166,10 +166,11 @@ s32 func_80028110(char* str, s32 tag) {
   return 0;
 }
 
-/* Sibling of func_80028110 with a read-back check: duplicate `str` into a
- * slot-3 buffer with a header marked 0xB, and if the stored length reads back
- * as zero clear `*out` and log. Returns 2 if `str` is empty, 3 if too large,
- * else 1. */
+/* Sibling of func_80028110: copies the word-rounded `str` bytes into a slot-3
+ * buffer and allocates a separate 4-byte header. It writes 0xB, then
+ * overwrites that word with the rounded length; if the stored length reads
+ * back as zero, clears `*out` and logs. Returns 2 if `str` is empty, 3 if too
+ * large, else 1. */
 s32 func_80028204(char* str, s32* out) {
   s32 len;
   void* hdr;

@@ -107,16 +107,16 @@ void init_sky_panels(void) {
  */
 INCLUDE_ASM("asm/nonmatchings/main/func_80080220",
             init_sky_pool_and_world_state);
-void func_80080564(s32 arg0, s32 arg1, s32 arg2) {
-  RomAssetLoad buf_a;
-  RomLoadSlot buf_b;
+void func_80080564(s32 buffer_index, s32 asset_index, s32 rom_slot_offset) {
+  RomAssetLoad asset_load;
+  RomLoadSlot rom_slot;
   u32 size;
 
-  get_rom_asset_allocation_size(D_800C547C[arg1] + 9, &buf_a);
-  load_rom_asset_payload(D_801B55E0[arg0], &buf_a);
-  open_rom_asset_slot(D_800C54A0[arg1] + arg2, &buf_b);
-  size = get_rom_load_slot_size(&buf_b);
-  read_rom_load_slot(D_801321C8[arg0], size, &buf_b);
+  get_rom_asset_allocation_size(D_800C547C[asset_index] + 9, &asset_load);
+  load_rom_asset_payload(D_801B55E0[buffer_index], &asset_load);
+  open_rom_asset_slot(D_800C54A0[asset_index] + rom_slot_offset, &rom_slot);
+  size = get_rom_load_slot_size(&rom_slot);
+  read_rom_load_slot(D_801321C8[buffer_index], size, &rom_slot);
 }
 
 void func_8008060C(void) {
@@ -528,27 +528,27 @@ extern s32 D_801B7F78;
 extern s32 D_801B7F7C;
 extern char D_800D1AD0[];
 
-void func_80081D4C(s32 arg) {
-  s32 state;
+void func_80081D4C(s32 event_state) {
+  s32 previous_state;
 
   D_800C5A14 = 0;
-  if (arg == -1) {
-    D_800C5A10 = arg;
+  if (event_state == -1) {
+    D_800C5A10 = event_state;
     func_8007515C(0, -1, 0, 0, 0, 0);
     func_8007515C(1, -1, 0, 0, 0, 0);
     func_8020FFEC(-1);
     return;
   }
-  state = D_800C5A10;
-  if (state != -1) {
+  previous_state = D_800C5A10;
+  if (previous_state != -1) {
     return;
   }
-  D_800C5A10 = arg;
+  D_800C5A10 = event_state;
   switch (get_table_entry(D_80104B6B)->id) {
     case 0xD:
       D_801B7F70 = 1;
       D_801B7F78 = 0x4D;
-      D_800C5A10 = state;
+      D_800C5A10 = previous_state;
       D_801B7F7C = 0x65;
       func_800326FC(0xA0, 0x80, 0x80, 0x80);
       func_8004C510(0x3C);
@@ -1394,12 +1394,12 @@ extern s8 D_8010623F;
 extern s32 func_80213C78(PlayerState* record);
 extern void func_80050DA0(s32, s32, s32, s32, s32);
 
-void func_8008679C(s32 arg) {
-  if (arg == -1) {
+void func_8008679C(s32 mode) {
+  if (mode == -1) {
     D_800C5DF0 = -1.0f;
     return;
   }
-  if (arg == 0) {
+  if (mode == 0) {
     s32 result = func_80213C78(&player_records[D_8010623F]);
     if ((result != 0xA) & (result != 2)) {
       func_80050DA0(0x70, 0xE, 0x40, 0x1E, 0x7F);
@@ -1407,7 +1407,7 @@ void func_8008679C(s32 arg) {
       func_80050DA0(0x71, 0xE, 0x60, 0x1E, 0x7F);
     }
   }
-  D_800C5DF4 = arg;
+  D_800C5DF4 = mode;
   D_800C5DF0 = 0.0f;
 }
 

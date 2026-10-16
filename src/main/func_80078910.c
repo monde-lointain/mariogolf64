@@ -479,17 +479,17 @@ extern void* D_801B8BB8;
 
 extern void func_8007E7B8(void);
 
-void func_8007E234(s32 arg) {
-  RomAssetLoad spvar;
+void func_8007E234(s32 mode) {
+  RomAssetLoad asset_load;
 
-  if (arg == 2) {
-    D_800FF4CC = heap3_alloc(get_rom_asset_allocation_size(0x6BC, &spvar));
-    load_rom_asset_payload(D_800FF4CC, &spvar);
+  if (mode == 2) {
+    D_800FF4CC = heap3_alloc(get_rom_asset_allocation_size(0x6BC, &asset_load));
+    load_rom_asset_payload(D_800FF4CC, &asset_load);
     D_801EFFA8 = heap3_alloc(0x900);
     D_801B8BB8 = heap3_alloc(0x380);
     func_8007E7B8();
   }
-  D_800C5448 = arg;
+  D_800C5448 = mode;
 }
 
 extern s32 D_800C5448;

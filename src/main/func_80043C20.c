@@ -118,74 +118,75 @@ INCLUDE_ASM("asm/nonmatchings/main/func_80043C20", lerp_int_v2);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80043C20", predict_shot_distance);
 
-void func_80044254(s32 arg0, ShotInput* arg1) {
-  s32 i;
-  s32 club;
-  ClubShot* cs;
-  u16 temp;
-  s32 var_v1;
-  s16 temp_v0_2;
-  s32 hundred;
-  u8 temp_v0_3;
-  u8 temp_v1_2;
-  u8 temp_v0_4;
+void func_80044254(s32 club_set_index, ShotInput* shot_input) {
+  s32 club_index;
+  s32 club_id;
+  ClubShot* club_data;
+  u16 target_distance;
+  s32 launch_angle_scaled;
+  s16 launch_angle_degrees;
+  s32 percent_100;
+  u8 unknown_05_value;
+  u8 unknown_1E_value;
+  u8 unknown_1D_value;
 
-  i = 0;
-  hundred = 100;
-  club = arg0 * 0xE;
-  for (; i < 0xE; i += 1) {
-    cs = get_club_param(club);
-    temp = arg1->clubs[i].target_distance;
-    cs->target_distance = temp;
-    if ((s16)temp >= 0x191) {
-      cs->target_distance = 0x190;
+  club_index = 0;
+  percent_100 = 100;
+  club_id = club_set_index * 0xE;
+  for (; club_index < 0xE; club_index += 1) {
+    club_data = get_club_param(club_id);
+    target_distance = shot_input->clubs[club_index].target_distance;
+    club_data->target_distance = target_distance;
+    if ((s16)target_distance >= 0x191) {
+      club_data->target_distance = 0x190;
     }
-    osSyncPrintf(D_800CC510, cs->target_distance);
-    var_v1 = arg1->clubs[i].launch_angle_bam * 0x168;
-    if (var_v1 < 0) {
-      var_v1 += 0xFFFF;
+    osSyncPrintf(D_800CC510, club_data->target_distance);
+    launch_angle_scaled = shot_input->clubs[club_index].launch_angle_bam * 0x168;
+    if (launch_angle_scaled < 0) {
+      launch_angle_scaled += 0xFFFF;
     }
-    temp_v0_2 = (s8)arg1->launch_angle_offset + (var_v1 >> 0x10);
-    cs->launch_angle_degrees = -temp_v0_2;
-    osSyncPrintf(D_800CC520, (s16)-temp_v0_2);
-    if (cs->launch_angle_degrees >= -6) {
-      cs->launch_angle_degrees = -7;
+    launch_angle_degrees =
+        (s8)shot_input->launch_angle_offset + (launch_angle_scaled >> 0x10);
+    club_data->launch_angle_degrees = -launch_angle_degrees;
+    osSyncPrintf(D_800CC520, (s16)-launch_angle_degrees);
+    if (club_data->launch_angle_degrees >= -6) {
+      club_data->launch_angle_degrees = -7;
     }
-    if (cs->launch_angle_degrees < -0x2D) {
-      cs->launch_angle_degrees = -0x2D;
+    if (club_data->launch_angle_degrees < -0x2D) {
+      club_data->launch_angle_degrees = -0x2D;
     }
-    temp_v0_3 = arg1->clubs[i].unknown_05;
-    cs->unknown_26 = (s8)temp_v0_3;
-    if (cs->unknown_26 >= 0x65) {
-      cs->unknown_26 = hundred;
+    unknown_05_value = shot_input->clubs[club_index].unknown_05;
+    club_data->unknown_26 = (s8)unknown_05_value;
+    if (club_data->unknown_26 >= 0x65) {
+      club_data->unknown_26 = percent_100;
     }
-    if (cs->unknown_26 < -0x64) {
-      cs->unknown_26 = -0x64;
+    if (club_data->unknown_26 < -0x64) {
+      club_data->unknown_26 = -0x64;
     }
-    temp_v1_2 = arg1->unknown_1E;
-    if ((u32)((temp_v1_2 + 4) & 0xFF) >= 9U) {
-      cs->quality_scale_percent = hundred;
+    unknown_1E_value = shot_input->unknown_1E;
+    if ((u32)((unknown_1E_value + 4) & 0xFF) >= 9U) {
+      club_data->quality_scale_percent = percent_100;
     } else {
-      cs->quality_scale_percent = D_800BE5E0[(s8)temp_v1_2];
+      club_data->quality_scale_percent = D_800BE5E0[(s8)unknown_1E_value];
     }
-    cs->unknown_00 = 0x6E - (arg1->unknown_1F * 9);
-    temp_v0_4 = arg1->unknown_1D;
-    cs->unknown_30 = temp_v0_4;
-    if ((s8)temp_v0_4 < -4) {
-      cs->unknown_30 = -4;
+    club_data->unknown_00 = 0x6E - (shot_input->unknown_1F * 9);
+    unknown_1D_value = shot_input->unknown_1D;
+    club_data->unknown_30 = unknown_1D_value;
+    if ((s8)unknown_1D_value < -4) {
+      club_data->unknown_30 = -4;
     }
-    if (cs->unknown_30 >= 5) {
-      cs->unknown_30 = 4;
+    if (club_data->unknown_30 >= 5) {
+      club_data->unknown_30 = 4;
     }
-    if (cs->unknown_00 >= 0x92) {
-      cs->unknown_00 = 0x91;
+    if (club_data->unknown_00 >= 0x92) {
+      club_data->unknown_00 = 0x91;
     }
-    if (cs->unknown_00 < 0x46) {
-      cs->unknown_00 = 0x46;
+    if (club_data->unknown_00 < 0x46) {
+      club_data->unknown_00 = 0x46;
     }
     g_terrain_vtx_xform_mode = 0;
-    predict_shot_distance(club);
-    club += 1;
+    predict_shot_distance(club_id);
+    club_id += 1;
   }
 }
 
@@ -229,7 +230,9 @@ INCLUDE_ASM("asm/nonmatchings/main/func_80043C20", lerp_int);
 INCLUDE_ASM("asm/nonmatchings/main/func_80043C20",
             predict_shot_distance_variant);
 
-s32 get_club_distance_slot(ClubShot* c, s32 i) { return c->distances[i]; }
+s32 get_club_distance_slot(ClubShot* club, s32 distance_index) {
+  return club->distances[distance_index];
+}
 
 ClubShot* get_club_param(u32 id) {
   ClubShot* result;

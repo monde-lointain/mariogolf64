@@ -158,7 +158,7 @@ void update_indexed_slot_at_0xCB_atomic(s32 index, s32 reverb) {
   osSetIntMask(mask);
 }
 
-void func_800510EC(s32 idx, s32 val) { D_800C0EAC[idx] = val; }
+void func_800510EC(s32 index, s32 value) { D_800C0EAC[index] = value; }
 
 void func_80051100(s32 index, s32 tempo) {
   OSIntMask mask = osSetIntMask(OS_IM_NONE);

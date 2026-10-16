@@ -115,12 +115,12 @@ void func_80068F98(void) {
 }
 
 void func_800690C0(void) {
-  s32 temp_s0;
+  s32 course_id;
 
   osSyncPrintf(D_800D1380, g_terrain_vtx_xform_mode, scenario_mode_id,
                round_hole_index[0]);
-  temp_s0 = get_current_course_id();
-  load_hole_terrain_assets(temp_s0, get_current_hole_index());
+  course_id = get_current_course_id();
+  load_hole_terrain_assets(course_id, get_current_hole_index());
   func_80068F98();
 }
 

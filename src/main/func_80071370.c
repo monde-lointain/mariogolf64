@@ -117,8 +117,8 @@ void func_800718F4(u8 r, u8 g, u8 b, s32 idx) {
 /* Entry offset 0x1C contains four words through the 0x2C stride boundary.
  * The original D_8012F52C symbol is the same interior location as
  * D_8012F510[0].unknown_1C[0]; the selector extent is unknown, so do not clamp. */
-void func_80071924(s32 val, s32 idx, s32 j) {
-  D_8012F510[idx].unknown_1C[j] = val;
+void func_80071924(s32 value, s32 entry_index, s32 word_index) {
+  D_8012F510[entry_index].unknown_1C[word_index] = value;
 }
 
 extern u8 D_801321B0;
@@ -209,12 +209,12 @@ void emit_hud_table_prim_dl(Gfx** cursor) {
   *cursor = dl;
 }
 
-void func_80071C74(s32 idx) {
-  D_8012F510[idx].visible_glyph_count = 0xFF;
+void func_80071C74(s32 entry_index) {
+  D_8012F510[entry_index].visible_glyph_count = 0xFF;
 }
 
-s32 func_80071C9C(s32 idx) {
-  HudTextEntry* entry = &D_8012F510[idx];
+s32 func_80071C9C(s32 entry_index) {
+  HudTextEntry* entry = &D_8012F510[entry_index];
   s32 glyph_run_id = entry->glyph_run_id;
   u16* base = D_800E1C48[0];
   s32 visible_glyph_count = entry->visible_glyph_count;
@@ -659,7 +659,8 @@ extern u8 D_800FBE18[];
  * owned by `tag`, centred on (x, y): each free record (tag == -1) gets a
  * guTranslate matrix at the running pen position, the glyph code and the
  * owner tag. `size == -1` instead releases every record this tag owns.
- * Returns the run's half-extents packed as (width << 16) | height. */
+ * Returns the run's half-extents packed as (width << 16) | height on the draw
+ * path; the release path returns without a value. */
 s32 place_glyph_sprite_run(s32 tag, s32 size, s32 x, s32 y, s32 runId) {
   s32 w;
   s32 h;

@@ -174,12 +174,12 @@ extern s8 D_800DAEE0[];
 extern s32 D_800BE6A0;
 extern s32 rand(void);
 
-/* Shuffle-bag draw. arg0 == 0 reshuffles: fill 0..9 then 5 random swaps, return
- * -1. Otherwise draw the next entry, and reshuffle once the bag runs out.
+/* Shuffle-bag draw. `draw_next == 0` reshuffles: fill 0..9 then 5 random swaps,
+ * return -1. Otherwise draw the next entry, and reshuffle once the bag runs out.
  * func_80045AD4 is a GCC NESTED function: it homes the static chain in $v0
  * (`addiu sp,-8; sw $v0,0(sp)`) without ever reading it, and the caller sets
  * the chain with `addiu $v0,$sp,0x10` before the jal. */
-s32 next_shuffled_index(s32 arg0) {
+s32 next_shuffled_index(s32 draw_next) {
   void swap_entries(s32 i, s32 j) {
     u8 t = D_800DAEE0[j];
     s32 u = D_800DAEE0[i];
@@ -191,7 +191,7 @@ s32 next_shuffled_index(s32 arg0) {
   s32 count;
   s32 val;
 
-  if (arg0 != 0) {
+  if (draw_next != 0) {
     goto draw;
   }
 
@@ -300,11 +300,11 @@ INCLUDE_ASM("asm/nonmatchings/main/func_800453E0", func_80045CE0);
  */
 INCLUDE_ASM("asm/nonmatchings/main/func_800453E0", func_80046604);
 
-s32 func_800467DC(s32 arg0) {
-  if (arg0 == 0) {
-    arg0 = 1;
+s32 func_800467DC(s32 bound) {
+  if (bound == 0) {
+    bound = 1;
   }
-  return (guRandom() >> 2) % arg0;
+  return (guRandom() >> 2) % bound;
 }
 
 extern s32 D_800BE63C;

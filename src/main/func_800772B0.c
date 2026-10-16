@@ -28,7 +28,6 @@ f32 func_800779A8(f32 x, f32* arg1, f32* arg2, f32* arg3) {
   while (arg1[10] < x) {
     x -= step;
   }
-  lo = 0;
   while (x < arg1[0]) {
     x += step;
   }

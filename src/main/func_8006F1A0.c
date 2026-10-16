@@ -29,18 +29,18 @@ extern char D_800D14C0[], D_800D14D0[], D_800D14E0[], D_800D14F4[];
 extern s32 D_8012D3B0[];
 extern char D_800D150C[], D_800D151C[], D_800D152C[];
 
-void func_8006F1A0(s32 arg0, s32 arg1) {
-  D_800FF1E8[arg0].score_total += arg1;
-  if (D_800FF1E8[arg0].score_total >= 10000) {
-    D_800FF1E8[arg0].score_total = 9999;
+void func_8006F1A0(s32 player_index, s32 score_delta) {
+  D_800FF1E8[player_index].score_total += score_delta;
+  if (D_800FF1E8[player_index].score_total >= 10000) {
+    D_800FF1E8[player_index].score_total = 9999;
   }
 }
 
 s32 func_8006F1F0(void) { return D_800FE4A8; }
 
-s32 func_8006F1FC(s32 arg0) { return D_800FF1E8[arg0].is_active == 1; }
+s32 func_8006F1FC(s32 player_index) { return D_800FF1E8[player_index].is_active == 1; }
 
-u8* func_8006F228(s32 arg0) { return D_800FF1E8[arg0].unknown_01; }
+u8* func_8006F228(s32 player_index) { return D_800FF1E8[player_index].unknown_01; }
 
 void func_8006F24C(s32 arg0) {
   s32 i;
