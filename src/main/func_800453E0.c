@@ -684,9 +684,101 @@ void func_8004C6B0(void) {}
 
 void func_8004C6B8(void) {}
 
-INCLUDE_ASM("asm/nonmatchings/main/func_800453E0", func_8004C6C0);
+typedef struct {
+  s16 x;
+  s16 height;
+  s16 z;
+  s16 flags;
+  s16 texture_s;
+  s16 texture_t;
+  u8 color_r;
+  u8 color_g;
+  u8 color_b;
+  u8 color_a;
+} TargetGridVertex;
 
+extern TargetGridVertex D_8018D228[];
+extern u8 D_8018D258[];
+extern u8 D_8018D25A[];
+extern u8 D_8018D25C[];
+extern u8 D_8018D25E[];
+extern u8 D_8018D260[];
+extern u8 D_8018D262[];
+extern void update_rumble_intensity_table(void);
 extern f32 sqrtf(f32);
+
+void func_8004C6C0(u8* texture_pixels, s32 falloff_mode) {
+  enum {
+    TEXTURE_SIZE = 0x20,
+    BASE_INTENSITY = 0xD2,
+    INNER_RADIUS_LIMIT = 0x11,
+    INNER_FALLOFF_LIMIT = 0x19,
+    INNER_FALLOFF_START = 0x10,
+    OUTER_FALLOFF_START = 0x18,
+  };
+  s32 column_extent = TEXTURE_SIZE;
+  s32 row_extent = TEXTURE_SIZE;
+  s32 maximum_integer_radius = TEXTURE_SIZE - 1;
+  s32 row_index;
+  s32 column_index;
+  s32 pixel_index = 0;
+  s32 minimum_integer_radius;
+
+  if (falloff_mode == 0) {
+    for (row_index = 0; row_index != row_extent; row_index++) {
+      for (column_index = 0; column_index != column_extent; column_index++) {
+        s32 column_offset = column_index - column_extent;
+        s32 row_offset = row_index - row_extent;
+        f32 radial_distance =
+            sqrtf((f32)(row_offset * row_offset +
+                        column_offset * column_offset));
+        s32 integer_radius = (s32)radial_distance;
+        s32 pixel_intensity;
+
+        if (integer_radius < INNER_RADIUS_LIMIT) {
+          pixel_intensity = BASE_INTENSITY;
+        } else if (integer_radius < INNER_FALLOFF_LIMIT) {
+          pixel_intensity =
+              BASE_INTENSITY - (integer_radius - INNER_FALLOFF_START) * 26;
+        } else if (integer_radius < TEXTURE_SIZE) {
+          pixel_intensity = (integer_radius - OUTER_FALLOFF_START) * 16;
+        } else {
+          pixel_intensity = 0;
+        }
+        texture_pixels[pixel_index] = pixel_intensity;
+        pixel_index++;
+      }
+    }
+  } else {
+    row_index = 0;
+    minimum_integer_radius = 0x0F;
+    for (; row_index != row_extent; row_index++) {
+      for (column_index = 0; column_index != column_extent; column_index++) {
+        s32 column_offset = column_index - column_extent;
+        s32 row_offset = row_index - row_extent;
+        f32 radial_distance =
+            sqrtf((f32)(row_offset * row_offset +
+                        column_offset * column_offset));
+        s32 integer_radius = (s32)radial_distance;
+        s32 pixel_intensity;
+
+        if (integer_radius <= minimum_integer_radius) {
+          pixel_intensity = BASE_INTENSITY;
+        } else if (integer_radius <= maximum_integer_radius) {
+          s32 falloff_steps =
+              (s32)(radial_distance - (f32)minimum_integer_radius);
+
+          pixel_intensity = BASE_INTENSITY - falloff_steps * 12;
+        } else {
+          pixel_intensity = 0;
+        }
+        texture_pixels[pixel_index] = pixel_intensity;
+        pixel_index++;
+      }
+    }
+  }
+}
+
 
 /* Fills a w*h byte grid with a radial intensity ramp measured from the corner
  * (w, h): dead zone under 5, a linear ramp 10..255 over 5..54, a short 255..39
