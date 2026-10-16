@@ -165,6 +165,26 @@ bridge. Stop the service before opening the same database in the GUI or copying 
 CMake also provides `ghidra-refresh`, `ghidra-stop`, and `ghidra-status`; analysis is never part of
 the ROM target or bank gate.
 
+### Recovering after a checkout move
+
+The manifest and each program's `MG64` options record absolute paths. After moving a checkout,
+keep its existing `.gpr` and `.rep` together and run `refresh` from the new location before
+starting the bridge. Refresh rewrites the manifest path in every program as well as its source
+snapshot ID; it does not require recreating the analysis database.
+
+If the MCP checkout also moved, set `MG64_GHIDRA_MCP_ROOT` to its new directory (or pass
+`--mcp-root` before the CLI subcommand). For MCP clients, put that environment override in the
+`ghidra` server's `env` object in `.mcp.json`, update the absolute project/script paths, and reload
+the client. An `Installed MCP JAR not found` startup error identifies a stale or incomplete MCP
+installation path, not a missing ROM database.
+
+```sh
+export MG64_GHIDRA_MCP_ROOT=/absolute/path/to/ghidra-mcp
+uv run --locked python tools/ghidra.py refresh
+uv run --locked python tools/ghidra.py start
+uv run --locked python tools/ghidra.py status
+```
+
 ## Extension decision and limits
 
 No N64 extension is required for this CPU workflow. The [N64LoaderWV loader](https://github.com/zeroKilo/N64LoaderWV)

@@ -343,6 +343,7 @@ public class Mg64Project {
                             if (symbol != null && symbol.getSource() == SourceType.IMPORTED && symbol.getSymbolType() == SymbolType.LABEL) symbol.delete();
                         }
                         symbols(program, included);
+                        program.getOptions("MG64").setString("Manifest", directory.resolve("manifest.json").toString());
                         program.getOptions("MG64").setString("Manifest ID", text(manifest, "manifest_id"));
                     } finally { program.endTransaction(tx, true); }
                     included.add("sdk");
