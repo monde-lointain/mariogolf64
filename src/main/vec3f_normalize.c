@@ -296,4 +296,77 @@ void func_8002A310(void) {
   }
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/vec3f_normalize", game_draw_callback);
+extern s32 D_800B67F4;
+extern s8 D_800B6800;
+extern s8 D_800B67EC;
+extern volatile u8 D_800B67C8;
+extern volatile s32 g_frame_counter;
+extern s32 D_800B67E8;
+extern s32 D_800B67E4;
+extern s32 D_800B67D0;
+extern void func_800318A8(void);
+extern void bgm_tick(void);
+extern void func_80031AF4(void);
+extern void render_frame(void);
+extern void func_80032520(void);
+
+void game_draw_callback(u32 task_count) {
+  s32 frames;
+  if (nuScPreNMIFlag & 1) {
+    D_800B67F4 ^= 1;
+    if (D_800B67F4 == 0) {
+      func_800318A8();
+    }
+  } else {
+    D_800B67F4 ^= 1;
+    if (D_800B67F4 == 0) {
+      /* Keep the two admission paths distinct before their shared work. */
+      if (D_800B6800) {
+        if ((s32)task_count < 4) {
+          goto process_frame;
+        }
+        goto defer_frame;
+      }
+      if ((s32)task_count >= 2) {
+        goto defer_frame;
+      }
+    process_frame:
+      bgm_tick();
+      if (D_800B67EC < 2) {
+        func_8002A310();
+        if (D_800B67C8 != 2) {
+          func_80031AF4();
+          render_frame();
+          func_80032520();
+          if (D_800B67C8 == 1 && (D_800FED18[0].button & 0xC030) == 0xC030) {
+            D_800B67C8 = 2;
+          }
+        }
+        g_frame_counter++;
+        D_800B67E8++;
+        if (D_800B67EC == 1) {
+          D_800B67EC = 2;
+        }
+      } else {
+        func_8002A310();
+        if (D_800FED18[1].trigger & 0x200) {
+          D_800B67EC = 1;
+        }
+        if (D_800B67EC != 1 && (D_800FED18[1].trigger & 0x100)) {
+          D_800B67EC = 0;
+        }
+      }
+      goto count_frame;
+    defer_frame:
+      D_800B67F4 ^= 1;
+    }
+  count_frame:
+    D_800B67E4++;
+    if (D_800B67E4 >= 60) {
+      frames = D_800B67E8;
+      D_800B67E4 = 0;
+      D_800B67E8 = 0;
+      D_800B67D0 = frames;
+    }
+  }
+}
