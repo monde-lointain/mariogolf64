@@ -502,7 +502,44 @@ void func_80041B98(GridVertex* out, s32 tx, s32 tz) {
   average_grid_vertices(grid[5], grid[7], (s16*)&out[15]);
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/get_tile_attribute", func_80041D44);
+extern s32 g_terrain_tile_lod_selector[];
+extern f32 D_80133698[];
+extern f32 D_8013369C[];
+extern f32 D_801336A0[];
+
+void func_80041D44(void)
+{
+  s32 tile = 0;
+  s32 row = 0;
+  s32 col;
+  s32 offset;
+  s32 new_var;
+  s16 *vertex;
+  do
+  {
+    for (col = 0; col < 8; col++)
+    {
+      GridVertex *out;
+      s32 *selector;
+      offset = tile * (sizeof(TerrainTileCache));
+      ;
+      new_var = offset;
+      out = (*(&D_80185220[tile])).vertices;
+      *((s32 *) (((u8 *) g_terrain_tile_lod_selector) + offset)) = tile;
+      vertex = get_direct_grid_vertex((col * 2) + 1, (row * 2) + 1);
+      *((f32 *) (((u8 *) D_80133698) + new_var)) = vertex[0];
+      *((f32 *) (((u8 *) D_8013369C) + new_var)) = vertex[1];
+      *((f32 *) (((u8 *) D_801336A0) + new_var)) = vertex[2];
+      if ((*((s32 *) (((u8 *) g_terrain_tile_lod_selector) + offset))) >= 0)
+      {
+        func_80041B98(out, col, row);
+      }
+      tile++;
+    }
+
+  }
+  while ((++row) < 16);
+}
 
 extern s32 D_800BB080;
 extern s32 D_800BB084;
