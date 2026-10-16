@@ -10,11 +10,11 @@ extern OSMesg nuAuRtnMesgBuf;
 /* These callbacks are referenced by the libmus scheduler table. */
 void nuAuStlSchedInstall(void);
 void nuAuStlSchedWaitFrame(void);
-void nuAuStlSchedDoTask(musTask* task);
+void nuAuStlSchedDoTask(musTask* audio_task);
 
 extern musSched nuAuStlSchedFunc;
 
-s32 nuAuStlMgrInit(musConfig* config) {
+s32 nuAuStlMgrInit(musConfig* audio_config) {
   nuAuTaskStop = NU_AU_TASK_RUN;
 
   nuAuTask.msg = 0;
@@ -32,7 +32,7 @@ s32 nuAuStlMgrInit(musConfig* config) {
   nuAuTask.list.t.yield_data_size = 0;
 
   MusSetScheduler(&nuAuStlSchedFunc);
-  return MusInitialize(config);
+  return MusInitialize(audio_config);
 }
 
 void nuAuStlSchedInstall(void) {
@@ -44,10 +44,10 @@ void nuAuStlSchedInstall(void) {
 /* Block for retrace, servicing any pre-NMI notifications received first. */
 void nuAuStlSchedWaitFrame(void) {
   while (1) {
-    NUScMsg* message_type;
+    NUScMsg* scheduler_message;
 
-    osRecvMesg(&nuAuMesgQ, (OSMesg*)&message_type, OS_MESG_BLOCK);
-    switch (*message_type) {
+    osRecvMesg(&nuAuMesgQ, (OSMesg*)&scheduler_message, OS_MESG_BLOCK);
+    switch (*scheduler_message) {
       case NU_SC_RETRACE_MSG:
         return;
       case NU_SC_PRENMI_MSG:
@@ -63,12 +63,12 @@ void nuAuStlSchedWaitFrame(void) {
 }
 
 /* Task storage remains owned by libmus until the scheduler acknowledges it. */
-void nuAuStlSchedDoTask(musTask* task) {
+void nuAuStlSchedDoTask(musTask* audio_task) {
   if (nuAuTaskStop == NU_AU_TASK_RUN) {
-    nuAuTask.list.t.data_ptr = task->data;
-    nuAuTask.list.t.data_size = task->data_size;
-    nuAuTask.list.t.ucode = (u64*)task->ucode;
-    nuAuTask.list.t.ucode_data = (u64*)task->ucode_data;
+    nuAuTask.list.t.data_ptr = audio_task->data;
+    nuAuTask.list.t.data_size = audio_task->data_size;
+    nuAuTask.list.t.ucode = (u64*)audio_task->ucode;
+    nuAuTask.list.t.ucode_data = (u64*)audio_task->ucode_data;
     osSendMesg(&nusched.audioRequestMQ, (OSMesg*)&nuAuTask, OS_MESG_BLOCK);
     osRecvMesg(&nuAuRtnMesgQ, NULL, OS_MESG_BLOCK);
   }
@@ -80,12 +80,12 @@ void nuAuStlSchedDoTask(musTask* task) {
 }
 
 extern u32 g_bgm_song_buffer;
-extern void* __MusIntMemMalloc(s32 size);
+extern void* __MusIntMemMalloc(s32 allocation_size);
 
-void bgm_alloc_song_buffer(s32 size) {
-  g_bgm_song_buffer = (u32)__MusIntMemMalloc(size);
+void bgm_allocate_song_buffer(s32 song_buffer_size) {
+  g_bgm_song_buffer = (u32)__MusIntMemMalloc(song_buffer_size);
 }
 
-musHandle bgm_start_current(void) {
+musHandle bgm_start_current_song(void) {
   return MusStartSong((void*)g_bgm_song_buffer);
 }

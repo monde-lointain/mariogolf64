@@ -319,6 +319,9 @@ nuAuStlMgrInit = 0x8005EDD0; // rom:0x3A1D0 type:func
 nuAuStlSchedInstall = 0x8005EE94; // type:func
 nuAuStlSchedWaitFrame = 0x8005EEF8; // type:func
 nuAuStlSchedDoTask = 0x8005EF88; // type:func
+// Refined names for the BGM helpers in the mixed audio_mgr.c subsegment.
+bgm_allocate_song_buffer = 0x8005F048; // rom:0x3A448 type:func
+bgm_start_current_song = 0x8005F06C; // rom:0x3A46C type:func
 // nuaustlmgr.c file-scope data/bss, drop-def externs (S128)
 nuAuTaskStop = 0x800C2FFC; // size:0x1
 nuAuPreNMI = 0x800C2FFD; // size:0x1

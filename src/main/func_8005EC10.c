@@ -9,7 +9,7 @@ extern const char WAVE_BANK_BYTE_FORMAT[];
 extern const char WAVE_BANK_LINE_SEPARATOR[];
 
 extern void* __MusIntMemMalloc(s32 size);
-extern void bgm_alloc_song_buffer(s32 size);
+extern void bgm_allocate_song_buffer(s32 song_buffer_size);
 extern void func_8005F0BC(s32 size);
 
 void handle_audio_scheduler_message(NUScMsg message_type, u32 frame_count);
@@ -62,7 +62,7 @@ void audio_system_boot(musConfig* config) {
   }
 
   nuAuStlMgrInit(config);
-  bgm_alloc_song_buffer(0xC000);
+  bgm_allocate_song_buffer(0xC000);
   func_8005F0BC(0x4000);
   set_audio_pre_nmi_callback(handle_audio_scheduler_message);
 }

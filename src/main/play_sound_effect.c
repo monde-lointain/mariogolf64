@@ -32,7 +32,7 @@ extern s32 g_bgm_pending_flags;
 extern const char D_800CCC08[];
 extern s32 func_8005DE00(void);
 extern void bgm_load_song_from_rom(u32 rom_addr, s32 size);
-extern musHandle bgm_start_current(void);
+extern musHandle bgm_start_current_song(void);
 extern u8 D_800C1FFC;
 extern u32 D_800C0F2C;
 extern void func_8009B0DC(int mode);
@@ -292,7 +292,7 @@ void play_bgm_by_id(s32 id, s32 flags) {
   bgm_load_song_from_rom(D_800C11B0[id * 2],
                          D_800C11B0[id * 2 + 1] - D_800C11B0[id * 2]);
   MusSetMasterVolume(2, 12000);
-  g_bgm_active_handle = bgm_start_current();
+  g_bgm_active_handle = bgm_start_current_song();
   D_800C0F2C = g_bgm_active_handle;
   if (D_800C1FFC & 2) {
     func_8009B0DC(0);
