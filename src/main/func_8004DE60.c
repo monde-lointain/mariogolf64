@@ -37,7 +37,7 @@ void* heap_alloc(s32 slot_index, u32 size_bytes) {
   OSIntMask previous_interrupt_mask;
   u32 largest_free_bytes;
   HeapBlock* slot_head;
-  HeapBlock* block;
+  HeapBlock* current_block;
 
   /* KMC's return-address builtin reads the frame rather than the saved $ra. */
   __asm__ __volatile__("addu %0, $31, $0" : "=r"(caller_address));
@@ -48,10 +48,11 @@ void* heap_alloc(s32 slot_index, u32 size_bytes) {
                ~(HEAP_ALIGN - 1);
   best_fit_size_bytes = HEAP_MINSIZE_NONE;
   best_fit = NULL;
-  block = slot_head->next;
-  while (block != slot_head) {
-    if (block->state == HEAP_BLOCK_FREE && (u32)block->size >= size_bytes) {
-      const u32 block_size_bytes = block->size;
+  current_block = slot_head->next;
+  while (current_block != slot_head) {
+    if (current_block->state == HEAP_BLOCK_FREE &&
+        (u32)current_block->size >= size_bytes) {
+      const u32 block_size_bytes = current_block->size;
 
       if (block_size_bytes < best_fit_size_bytes) {
         /* Bitwise & preserves the ROM's branchless instruction schedule. */
@@ -63,12 +64,12 @@ void* heap_alloc(s32 slot_index, u32 size_bytes) {
         if (largest_free_bytes < best_fit_size_bytes - size_bytes) {
           largest_free_bytes = best_fit_size_bytes - size_bytes;
         }
-        best_fit = block;
+        best_fit = current_block;
       } else if (largest_free_bytes < block_size_bytes) {
         largest_free_bytes = block_size_bytes;
       }
     }
-    block = block->next;
+    current_block = current_block->next;
   }
   heap_slots[slot_index].largest_free = largest_free_bytes;
 
@@ -107,26 +108,27 @@ void* heap_alloc(s32 slot_index, u32 size_bytes) {
  */
 void heap_free(s32 slot_index, void** payload_address) {
   OSIntMask previous_interrupt_mask = osSetIntMask(OS_IM_NONE);
-  void* payload = *payload_address;
-  HeapBlock* block;
+  void* allocation_payload = *payload_address;
+  HeapBlock* released_block;
   HeapBlock* coalesced_block;
 
-  if (payload == NULL) {
+  if (allocation_payload == NULL) {
     osSetIntMask(previous_interrupt_mask);
     osSyncPrintf(heap_msg_free_null);
     return;
   }
 
-  block = (HeapBlock*)((u8*)payload - HEAP_HEADER_SIZE);
-  heap_slots[slot_index].total_free += block->size;
-  coalesced_block = block;
+  released_block = (HeapBlock*)((u8*)allocation_payload - HEAP_HEADER_SIZE);
+  heap_slots[slot_index].total_free += released_block->size;
+  coalesced_block = released_block;
   /* List neighbors can belong to separate RAM regions: check adjacency. */
-  if (block->prev->state == HEAP_BLOCK_FREE &&
-      (HeapBlock*)((u8*)block->prev + block->prev->size) == block) {
-    block->next->prev = block->prev;
-    block->prev->next = block->next;
-    block->prev->size += block->size;
-    coalesced_block = block->prev;
+  if (released_block->prev->state == HEAP_BLOCK_FREE &&
+      (HeapBlock*)((u8*)released_block->prev + released_block->prev->size) ==
+          released_block) {
+    released_block->next->prev = released_block->prev;
+    released_block->prev->next = released_block->next;
+    released_block->prev->size += released_block->size;
+    coalesced_block = released_block->prev;
   }
   if (coalesced_block->next->state == HEAP_BLOCK_FREE &&
       (HeapBlock*)((u8*)coalesced_block + coalesced_block->size) ==
@@ -187,15 +189,15 @@ s32 heap3_get_total(void) {
 
 /* Recompute the dynamic heap's largest free block, including its header. */
 s32 heap3_get_largest_free(void) {
-  const HeapBlock* block = heap_slots[DYNAMIC_HEAP_SLOT].next;
+  const HeapBlock* current_block = heap_slots[DYNAMIC_HEAP_SLOT].next;
   u32 largest_free_bytes = 0;
 
-  while (block != &heap_slots[DYNAMIC_HEAP_SLOT]) {
-    if (block->state == HEAP_BLOCK_FREE &&
-        largest_free_bytes < (u32)block->size) {
-      largest_free_bytes = block->size;
+  while (current_block != &heap_slots[DYNAMIC_HEAP_SLOT]) {
+    if (current_block->state == HEAP_BLOCK_FREE &&
+        largest_free_bytes < (u32)current_block->size) {
+      largest_free_bytes = current_block->size;
     }
-    block = block->next;
+    current_block = current_block->next;
   }
   heap_slots[DYNAMIC_HEAP_SLOT].largest_free = largest_free_bytes;
   return largest_free_bytes;
@@ -210,7 +212,7 @@ void* heap3_alloc(u32 size_bytes) {
   HeapBlock* best_fit;
   OSIntMask previous_interrupt_mask;
   u32 largest_free_bytes;
-  HeapBlock* block;
+  HeapBlock* current_block;
 
   __asm__ __volatile__("addu %0, $31, $0" : "=r"(caller_address));
   largest_free_bytes = 0;
@@ -219,10 +221,11 @@ void* heap3_alloc(u32 size_bytes) {
                ~(HEAP_ALIGN - 1);
   best_fit_size_bytes = HEAP_MINSIZE_NONE;
   best_fit = NULL;
-  block = heap_slots[DYNAMIC_HEAP_SLOT].next;
-  while (block != &heap_slots[DYNAMIC_HEAP_SLOT]) {
-    if (block->state == HEAP_BLOCK_FREE && (u32)block->size >= size_bytes) {
-      const u32 block_size_bytes = block->size;
+  current_block = heap_slots[DYNAMIC_HEAP_SLOT].next;
+  while (current_block != &heap_slots[DYNAMIC_HEAP_SLOT]) {
+    if (current_block->state == HEAP_BLOCK_FREE &&
+        (u32)current_block->size >= size_bytes) {
+      const u32 block_size_bytes = current_block->size;
 
       if (block_size_bytes < best_fit_size_bytes) {
         /* Bitwise &, as in heap_alloc, is required for matching. */
@@ -234,12 +237,12 @@ void* heap3_alloc(u32 size_bytes) {
         if (largest_free_bytes < best_fit_size_bytes - size_bytes) {
           largest_free_bytes = best_fit_size_bytes - size_bytes;
         }
-        best_fit = block;
+        best_fit = current_block;
       } else if (largest_free_bytes < block_size_bytes) {
         largest_free_bytes = block_size_bytes;
       }
     }
-    block = block->next;
+    current_block = current_block->next;
   }
   heap3_largest_free = largest_free_bytes;
 
@@ -276,28 +279,29 @@ void* heap3_alloc(u32 size_bytes) {
 void heap3_free(void** payload_address) {
   u32 caller_address;
   OSIntMask previous_interrupt_mask;
-  void* payload;
-  HeapBlock* block;
+  void* allocation_payload;
+  HeapBlock* released_block;
   HeapBlock* coalesced_block;
 
   __asm__ __volatile__("addu %0, $31, $0" : "=r"(caller_address));
   previous_interrupt_mask = osSetIntMask(OS_IM_NONE);
-  payload = *payload_address;
-  if (payload == NULL) {
+  allocation_payload = *payload_address;
+  if (allocation_payload == NULL) {
     osSetIntMask(previous_interrupt_mask);
     osSyncPrintf(heap3_msg_free_null, caller_address);
     return;
   }
 
-  block = (HeapBlock*)((u8*)payload - HEAP_HEADER_SIZE);
-  heap3_total_free += block->size;
-  coalesced_block = block;
-  if (block->prev->state == HEAP_BLOCK_FREE &&
-      (HeapBlock*)((u8*)block->prev + block->prev->size) == block) {
-    block->next->prev = block->prev;
-    block->prev->next = block->next;
-    block->prev->size += block->size;
-    coalesced_block = block->prev;
+  released_block = (HeapBlock*)((u8*)allocation_payload - HEAP_HEADER_SIZE);
+  heap3_total_free += released_block->size;
+  coalesced_block = released_block;
+  if (released_block->prev->state == HEAP_BLOCK_FREE &&
+      (HeapBlock*)((u8*)released_block->prev + released_block->prev->size) ==
+          released_block) {
+    released_block->next->prev = released_block->prev;
+    released_block->prev->next = released_block->next;
+    released_block->prev->size += released_block->size;
+    coalesced_block = released_block->prev;
   }
   if (coalesced_block->next->state == HEAP_BLOCK_FREE &&
       (HeapBlock*)((u8*)coalesced_block + coalesced_block->size) ==
