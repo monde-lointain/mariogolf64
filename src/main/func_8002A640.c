@@ -36,28 +36,28 @@ extern u32 D_800B7750;
 /* The cfb the current call is drawing into, saved for the next call to read. */
 extern u32 D_800B7754;
 
-void init_rdp_and_draw_sky_background(Gfx** gfxp, s32 arg1);
-void func_8002A9C4(Gfx** gfxp, s32 arg1);
+void init_rdp_and_draw_sky_background(Gfx** gfxp, s32 view_state_address);
+void func_8002A9C4(Gfx** gfxp, s32 view_state_address);
 void emit_sky_horizon_compositor_dl(Gfx** gfxp);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_8002A640", func_8002A640);
 
-void func_8002A90C(Mtx* matrix, f32 x, f32 y, f32 z) {
-  Mtx translation;
-  guTranslate(&translation, x, y, z);
-  guMtxCatL(matrix, &translation, matrix);
+void func_8002A90C(Mtx* matrix, f32 translate_x, f32 translate_y, f32 translate_z) {
+  Mtx translation_matrix;
+  guTranslate(&translation_matrix, translate_x, translate_y, translate_z);
+  guMtxCatL(matrix, &translation_matrix, matrix);
 }
 
-void func_8002A944(Mtx* matrix, f32 x, f32 y, f32 z) {
-  Mtx scale;
-  guScale(&scale, x, y, z);
-  guMtxCatL(matrix, &scale, matrix);
+void func_8002A944(Mtx* matrix, f32 scale_x, f32 scale_y, f32 scale_z) {
+  Mtx scale_matrix;
+  guScale(&scale_matrix, scale_x, scale_y, scale_z);
+  guMtxCatL(matrix, &scale_matrix, matrix);
 }
 
-void func_8002A97C(s32 arg0, s32 arg1) {
-  D_800B680C = arg0;
-  D_800B6810 = arg1;
-  if (arg0 == 4) {
+void func_8002A97C(s32 sky_mode, s32 blend_countdown) {
+  D_800B680C = sky_mode;
+  D_800B6810 = blend_countdown;
+  if (sky_mode == 4) {
     D_801B552C = 1;
     D_800B6818 = -0x280;
   } else {
@@ -192,23 +192,26 @@ typedef struct {
   /* 0x1C0 */ Mtx projection_matrix;
 } ViewMatrixBlock; /* 0x200 */
 
-void setup_view_by_camera_mode(ViewMatrixBlock* matrix_block, s32 arg1) {
+void setup_view_by_camera_mode(ViewMatrixBlock* matrix_block, s32 view_state_address) {
   if (D_800B680C == 0) {
-    init_rdp_and_draw_sky_background(&glistp, arg1);
+    init_rdp_and_draw_sky_background(&glistp, view_state_address);
   } else {
     if (D_800B680C == 2) {
-      func_8002A9C4(&glistp, arg1);
+      func_8002A9C4(&glistp, view_state_address);
       return;
     }
     if (D_800B680C != 1) {
+      /* Preserve the retail branch around projection setup. */
       goto check3;
     }
     func_8002BD9C(&glistp);
   }
+
   gSPPopMatrix(glistp++, G_MTX_MODELVIEW);
   gSPMatrix(glistp++, &matrix_block->projection_matrix,
             G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
   return;
+
 check3:
   if (D_800B680C == 3) {
     emit_sky_horizon_compositor_dl(&glistp);
@@ -302,33 +305,36 @@ extern void append_viewport_setup(s32, Gfx**);
 extern void append_framebuffer_clear(s32, Gfx**);
 
 void func_800318A8(void) {
-  Gfx* gfx = D_801B94A0[render_buffer_index];
-  Gfx* base = gfx;
-  s32 i = 0;
+  Gfx* display_list = D_801B94A0[render_buffer_index];
+  Gfx* display_list_start = display_list;
+  s32 iteration = 0;
+
+  /* Preserve the matched one-iteration loop shape. */
   do {
-    append_viewport_setup(render_buffer_index, &gfx);
-    append_framebuffer_clear(0, &gfx);
-    gDPPipeSync(gfx++);
-    gDPSetScissor(gfx++, G_SC_NON_INTERLACE, 0, 0, 320, 240);
-    copy_previous_frame_to_cfb(&gfx);
-    gDPPipeSync(gfx++);
-    gDPPipeSync(gfx++);
-    gDPSetCycleType(gfx++, G_CYC_1CYCLE);
-    gDPPipeSync(gfx++);
-    gDPSetPrimColor(gfx++, 0, 0, 0, 0, 16, 64);
-    gDPSetCombineLERP(gfx++, CENTER, K5, PRIMITIVE, COMBINED_ALPHA, 0, 0, 0,
-                      PRIMITIVE, CENTER, K5, PRIMITIVE, COMBINED_ALPHA, 0, 0, 0,
-                      PRIMITIVE);
-    gDPPipeSync(gfx++);
-    gDPSetRenderMode(gfx++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
-    gSPTextureRectangle(gfx++, 0, 0, 320 << 2, 240 << 2, G_TX_RENDERTILE, 0, 0,
-                        1 << 10, 1 << 10);
-    gDPFullSync(gfx++);
-    gSPEndDisplayList(gfx++);
-    nuGfxTaskStart(base, (gfx - base) * sizeof(Gfx), 0, 1);
+    append_viewport_setup(render_buffer_index, &display_list);
+    append_framebuffer_clear(0, &display_list);
+    gDPPipeSync(display_list++);
+    gDPSetScissor(display_list++, G_SC_NON_INTERLACE, 0, 0, 320, 240);
+    copy_previous_frame_to_cfb(&display_list);
+    gDPPipeSync(display_list++);
+    gDPPipeSync(display_list++);
+    gDPSetCycleType(display_list++, G_CYC_1CYCLE);
+    gDPPipeSync(display_list++);
+    gDPSetPrimColor(display_list++, 0, 0, 0, 0, 16, 64);
+    gDPSetCombineLERP(display_list++, CENTER, K5, PRIMITIVE, COMBINED_ALPHA, 0, 0,
+                      0, PRIMITIVE, CENTER, K5, PRIMITIVE, COMBINED_ALPHA, 0, 0,
+                      0, PRIMITIVE);
+    gDPPipeSync(display_list++);
+    gDPSetRenderMode(display_list++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
+    gSPTextureRectangle(display_list++, 0, 0, 320 << 2, 240 << 2, G_TX_RENDERTILE,
+                        0, 0, 1 << 10, 1 << 10);
+    gDPFullSync(display_list++);
+    gSPEndDisplayList(display_list++);
+    nuGfxTaskStart(display_list_start,
+                   (display_list - display_list_start) * sizeof(Gfx), 0, 1);
     D_800B7738 = (osGetTime() << 6) / 3000;
-    i++;
-  } while (i != 1);
+    iteration++;
+  } while (iteration != 1);
   render_buffer_index ^= 1;
 }
 
@@ -361,23 +367,23 @@ void func_80032520(void) {
 s32 func_80032658(void) { return D_800BB03C == 0; }
 
 void func_80032668(void) {
-  u32 v = game_mode;
-  s32 r;
+  u32 current_game_mode = game_mode;
+  s32 target_overlay_segment;
 
   D_800BB03C = 1;
-  switch (v) {
+  switch (current_game_mode) {
     case 3:
     case 9:
-      r = 0x15;
+      target_overlay_segment = 0x15;
       break;
     case 11:
-      r = 0x1A;
+      target_overlay_segment = 0x1A;
       break;
     default:
-      r = 5;
+      target_overlay_segment = 5;
       break;
   }
-  D_800BB038 = r;
+  D_800BB038 = target_overlay_segment;
 }
 
 void unload_active_overlay(void) {
@@ -385,11 +391,12 @@ void unload_active_overlay(void) {
   D_800BB03C = -1;
 }
 
-void func_800326FC(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
-  D_800B7778 = arg2;
-  D_800B777C = arg3;
-  D_800B7770 = arg0;
-  D_800B7774 = arg1;
+void func_800326FC(s32 origin_x, s32 origin_y, s32 horizontal_offset_per_level,
+                   s32 vertical_offset_per_level) {
+  D_800B7778 = horizontal_offset_per_level;
+  D_800B777C = vertical_offset_per_level;
+  D_800B7770 = origin_x;
+  D_800B7774 = origin_y;
 }
 
 extern s32 putting_meter_level;
@@ -404,40 +411,40 @@ extern f32 D_801B5578;
 extern void func_80050DA0(s32, s32, s32, s32, s32);
 
 void update_putting_meter(void) {
-  s32* mode = &D_801B7F70;
-  s32 state = *mode;
-  s32 x;
-  s32 y;
-  s32 x8;
+  s32* meter_state_pointer = &D_801B7F70;
+  s32 meter_state = *meter_state_pointer;
+  s32 horizontal_offset;
+  s32 vertical_offset;
+  s32 horizontal_offset_eighths;
 
-  if (state == 1) {
-    if (putting_meter_level == state) {
+  if (meter_state == 1) {
+    if (putting_meter_level == meter_state) {
       func_80050DA0(0x64, D_800C0E60, 0x3F, 0x1E, 0x7F);
     }
-    D_801B557C = state;
+    D_801B557C = meter_state;
     putting_meter_level = putting_meter_level + 1;
     if (putting_meter_level >= 8) {
       putting_meter_level = 8;
-      *mode = 0;
+      *meter_state_pointer = 0;
     }
-  } else if (state == 2) {
+  } else if (meter_state == 2) {
     if (putting_meter_level == 7) {
       func_80050DA0(0x65, D_800C0E60, 0x3F, 0x1E, 0x7F);
     }
     putting_meter_level = putting_meter_level - 1;
     if (putting_meter_level <= 0) {
       putting_meter_level = 0;
-      *mode = 0;
+      *meter_state_pointer = 0;
       D_801B557C = 0;
     }
   }
 
-  x = putting_meter_level * D_800B7778;
-  x8 = x / 8;
-  y = putting_meter_level * D_800B777C;
-  D_801B5560 = x8;
-  D_801B5564 = y / 8;
-  D_801B5558 = D_800B7770 - x / 16;
-  D_801B555C = D_800B7774 - y / 16;
+  horizontal_offset = putting_meter_level * D_800B7778;
+  horizontal_offset_eighths = horizontal_offset / 8;
+  vertical_offset = putting_meter_level * D_800B777C;
+  D_801B5560 = horizontal_offset_eighths;
+  D_801B5564 = vertical_offset / 8;
+  D_801B5558 = D_800B7770 - horizontal_offset / 16;
+  D_801B555C = D_800B7774 - vertical_offset / 16;
   D_801B5578 = 0.9f;
 }
