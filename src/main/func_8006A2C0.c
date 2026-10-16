@@ -808,7 +808,28 @@ void update_and_draw_iris_wipe(Gfx** pgfx) {
   *pgfx = gfx;
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_8006A2C0", func_8006CD50);
+extern s32 get_round_first_hole(void);
+extern s8 D_800C1420[];
+extern s32 get_current_course_id(void);
+extern s32 round_hole_index;
+extern s32 calculate_hole_handicap_adjustment(s32 course_id, s32 hole_index,
+                                              s32 score);
+
+s32 func_8006CD50(s32 hole_limit, s32 player) {
+  s32 total = 0;
+  s8* course = &D_800C1420[get_current_course_id() * 200];
+  s32 i;
+  if (round_hole_index == hole_limit) {
+    hole_limit += player_records[player].hole_status != 0;
+  }
+  for (i = get_round_first_hole(); i < hole_limit; i++) {
+    s32 adjustment = calculate_hole_handicap_adjustment(
+        scenario_mode_id, i, player_records[player].handicap);
+    total += player_records[player].hole_scores[i].score - course[i * 10 + 20] +
+             adjustment;
+  }
+  return total;
+}
 
 extern s32 active_player_count[];
 extern u16 D_80106230[];
@@ -817,7 +838,6 @@ extern s8 D_801050BD;
 extern s8 D_801050BE;
 extern char D_800D1450[];
 
-extern s32 get_round_first_hole(void);
 
 /* Builds and prints the debug flag grid. Three variable choices are
  * load-bearing for register allocation, not style: the clear loop counts in
@@ -1103,8 +1123,6 @@ void func_8006D4EC(s32 mode) {
   }
 }
 
-extern s8 D_800C1420[];
-extern s32 func_8006CD50(s32 arg0, s32 arg1);
 extern void func_8005DE60(void);
 
 /**
