@@ -6,83 +6,83 @@ extern s32 scenario_mode_id;
 extern u8 scenario_course_ids[];
 extern s8 g_terrain_vtx_xform_mode;
 
-s32 get_hole_camera_distance(s32 course, s32 hole) {
-  switch (course) {
+s32 get_hole_camera_distance(s32 course_id, s32 hole_index) {
+  switch (course_id) {
     case 0:
-      if (hole == 10) {
+      if (hole_index == 10) {
         return 400;
       }
-      if (hole == 16) {
+      if (hole_index == 16) {
         return 400;
       }
       break;
     case 1:
-      if (hole == 1) {
+      if (hole_index == 1) {
         return 400;
       }
-      if (hole == 5) {
+      if (hole_index == 5) {
         return 600;
       }
-      if (hole == 7) {
+      if (hole_index == 7) {
         return 150;
       }
-      if (hole == 16) {
+      if (hole_index == 16) {
         return 300;
       }
       break;
     case 2:
-      if (hole == 2) {
+      if (hole_index == 2) {
         return 300;
       }
-      if (hole == 12) {
+      if (hole_index == 12) {
         return 600;
       }
-      if (hole == 16) {
+      if (hole_index == 16) {
         return 550;
       }
       break;
     case 3:
-      if (hole == 2) {
+      if (hole_index == 2) {
         return 300;
       }
-      if (hole == 4) {
+      if (hole_index == 4) {
         return 1000;
       }
-      if (hole == 9) {
+      if (hole_index == 9) {
         return 700;
       }
-      if (hole == 10) {
+      if (hole_index == 10) {
         return 400;
       }
-      if (hole == 11) {
+      if (hole_index == 11) {
         return 450;
       }
-      if (hole == 12) {
+      if (hole_index == 12) {
         return 400;
       }
-      if (hole == 13) {
+      if (hole_index == 13) {
         return 600;
       }
-      if (hole == 16) {
+      if (hole_index == 16) {
         return 900;
       }
       break;
     case 4:
-      if (hole == 10) {
+      if (hole_index == 10) {
         return 400;
       }
-      if (hole == 15) {
+      if (hole_index == 15) {
         return 300;
       }
       break;
     case 5:
-      if (hole == 15) {
+      if (hole_index == 15) {
         return 400;
       }
-      if (hole == 16) {
+      if (hole_index == 16) {
         return 700;
       }
-      if (hole == 17) {
+      if (hole_index == 17) {
         return 400;
       }
       break;
