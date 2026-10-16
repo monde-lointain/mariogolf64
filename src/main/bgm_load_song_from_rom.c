@@ -282,7 +282,7 @@ INCLUDE_ASM("asm/nonmatchings/main/bgm_load_song_from_rom", func_8005F964);
 
 void func_8005FB58(void) {
   /* Preserve the ROM's eight bytes of local stack space. */
-  s32 unused[2];
+  s32 stack_reserve[2];
   s32 player_index;
   if (D_800FBDB8 == 0) {
     player_index = 0;
@@ -544,8 +544,10 @@ void copy_two_double_values(f64* source_values, f64* destination_values) {
 }
 
 void exclude_terrain_tiles_near_position(s32 x_coordinate, s32 z_coordinate) {
-  s32 tile_x, tile_z;
-  s32 x_offset, z_offset;
+  s32 tile_x;
+  s32 tile_z;
+  s32 x_offset;
+  s32 z_offset;
 
   if (g_terrain_vtx_xform_mode != 0) {
     return;
