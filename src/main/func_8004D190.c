@@ -57,55 +57,59 @@ void emit_text_glyph_dl_preamble(Gfx** dlp) {
 }
 #undef EMIT
 
-void func_8004D4B8(char* str, s32 count, u16* out) {
-  s32 row;
-  for (row = 0; row < count; row++) {
-    s32 c = str[row];
-    s32 destination_row, glyph_offset, tile_row;
-    s32 glyph_column;
-    if (c == 0) {
+void func_8004D4B8(char* source_text, s32 glyph_count, u16* destination) {
+  s32 character_index;
+  for (character_index = 0; character_index < glyph_count; character_index++) {
+    s32 character_code = source_text[character_index];
+    s32 destination_tile_row;
+    s32 source_glyph_offset;
+    s32 glyph_row;
+    s32 glyph_column_offset;
+    if (character_code == 0) {
       return;
     }
-    if (c < 0x20) {
-      c = 0x20;
+    if (character_code < 0x20) {
+      character_code = 0x20;
     }
-    if (c > 0x7A) {
-      c = 0x20;
+    if (character_code > 0x7A) {
+      character_code = 0x20;
     }
-    c -= 0x20;
-    glyph_column = (c & 0x1F) << 1;
+    character_code -= 0x20;
+    glyph_column_offset = (character_code & 0x1F) << 1;
     /* Split the signed division so the row initialization stays at its join. */
-    if (c < 0) {
-      c += 31;
+    if (character_code < 0) {
+      character_code += 31;
     }
-    tile_row = 0;
-    glyph_offset = glyph_column | ((c >> 5) << 9);
-    destination_row = row;
+    glyph_row = 0;
+    source_glyph_offset =
+        glyph_column_offset | ((character_code >> 5) << 9);
+    destination_tile_row = character_index;
     do {
-      s32 destination_offset;
-      s32 source_offset;
-      s32 half;
-      half = 0;
-      destination_offset = destination_row * 2;
-      source_offset = glyph_offset;
-      for (; half < 2; half++) {
-        out[destination_offset + half] = D_800BE6E0[source_offset + half];
+      s32 destination_word_offset;
+      s32 source_word_offset;
+      s32 word_index;
+      word_index = 0;
+      destination_word_offset = destination_tile_row * 2;
+      source_word_offset = source_glyph_offset;
+      for (; word_index < 2; word_index++) {
+        destination[destination_word_offset + word_index] =
+            D_800BE6E0[source_word_offset + word_index];
       }
-      glyph_offset += 0x40;
-      tile_row++;
-      destination_row += count;
-    } while (tile_row < 8);
+      source_glyph_offset += 0x40;
+      glyph_row++;
+      destination_tile_row += glyph_count;
+    } while (glyph_row < 8);
   }
 }
 
-void func_8004D5F0(s32 c, s32 x, s32 y);
+void func_8004D5F0(s32 character_code, s32 column, s32 row);
 
-void func_8004D580(char* str, s32 x, s32 y) {
-  print_string_at_grid(str, x, y);
-  while (*str != 0) {
-    func_8004D5F0(*str, x, y);
-    str++;
-    x++;
+void func_8004D580(char* text, s32 column, s32 row) {
+  print_string_at_grid(text, column, row);
+  while (*text != 0) {
+    func_8004D5F0(*text, column, row);
+    text++;
+    column++;
   }
 }
 
@@ -119,11 +123,11 @@ void func_8004D580(char* str, s32 x, s32 y) {
 INCLUDE_ASM("asm/nonmatchings/main/func_8004D190", func_8004D5F0);
 
 void clear_text_grid(void) {
-  s32 i = 0x4AF;
-  u8* p = &D_800DAF60[0x4AF];
+  s32 byte_index = 0x4AF;
+  u8* grid_byte = &D_800DAF60[0x4AF];
 
-  for (; i >= 0; i--) {
-    *p-- = 0;
+  for (; byte_index >= 0; byte_index--) {
+    *grid_byte-- = 0;
   }
 }
 
@@ -132,22 +136,22 @@ extern s32 flag_is_set(s32);
 /* render_text_grid: renders the 30x40 D_800DAF60 text grid as a 3-doubleword
  * gSPTextureRectangle per non-space cell (8x8 px cell, glyph = (c&0x7F)-0x20),
  * toggling prim colour white<->red on the c&0x80 attribute bit. Runs after the
- * emit_text_glyph_dl_preamble preamble, gated by !flag_is_set(0x1D). idx/prevhi
- * are declared and zero-inited before the calls so they land in the
- * callee-saved s1/s0 the ROM uses; testing `prevhi` (not `hi`) in the colour
- * branch matches the ROM's reuse of s0. */
+ * emit_text_glyph_dl_preamble preamble, gated by !flag_is_set(0x1D). The grid
+ * index and previous attribute are initialized before the calls so they land
+ * in the callee-saved s1/s0 the ROM uses; testing previous_attribute (not
+ * character_attribute) in the colour branch matches the ROM's reuse of s0. */
 void render_text_grid(Gfx** chain) {
   Gfx* dl;
   s32 row;
   s32 col;
-  s32 prevhi;
-  s32 idx;
-  s32 c;
-  s32 gi;
-  s32 hi;
+  s32 previous_attribute;
+  s32 grid_index;
+  s32 character_code;
+  s32 glyph_index;
+  s32 character_attribute;
 
-  idx = 0;
-  prevhi = 0;
+  grid_index = 0;
+  previous_attribute = 0;
   emit_text_glyph_dl_preamble(chain);
   if (flag_is_set(0x1D)) {
     return;
@@ -160,14 +164,14 @@ void render_text_grid(Gfx** chain) {
 
   for (row = 0; row < 30; row++) {
     for (col = 0; col < 40; col++) {
-      c = D_800DAF60[idx];
-      if ((u8)c >= 0x21) {
-        gi = (c & 0x7F) - 0x20;
-        hi = c & 0x80;
-        if (hi != prevhi) {
-          prevhi = hi;
+      character_code = D_800DAF60[grid_index];
+      if ((u8)character_code >= 0x21) {
+        glyph_index = (character_code & 0x7F) - 0x20;
+        character_attribute = character_code & 0x80;
+        if (character_attribute != previous_attribute) {
+          previous_attribute = character_attribute;
           gDPPipeSync(dl++);
-          if (prevhi != 0) {
+          if (previous_attribute != 0) {
             gDPSetPrimColor(dl++, 0, 0, 255, 0, 0, 255);
           } else {
             gDPSetPrimColor(dl++, 0, 0, 255, 255, 255, 255);
@@ -175,10 +179,10 @@ void render_text_grid(Gfx** chain) {
           gDPPipeSync(dl++);
         }
         gSPTextureRectangle(dl++, col << 5, row << 5, (col + 1) << 5,
-                            (row + 1) << 5, 0, (gi & 0x1F) << 8,
-                            (gi << 3) & 0xFF00, 1 << 10, 1 << 10);
+                            (row + 1) << 5, 0, (glyph_index & 0x1F) << 8,
+                            (glyph_index << 3) & 0xFF00, 1 << 10, 1 << 10);
       }
-      idx++;
+      grid_index++;
     }
   }
 
