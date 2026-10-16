@@ -8,8 +8,8 @@ extern s32 D_800BB030;
 
 extern void func_8009226C(s32 arg0);
 extern void play_sound_effect(s32 arg0, s32 arg1, s32 arg2);
-extern void func_800719A0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4,
-                          s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9);
+extern void func_800719A0(s32 x, s32 y, s32 run, s32 size, s32 index, s32 flags,
+                          u8 red, u8 green, u8 blue, u8 alpha);
 
 void func_ovl10_801F4A40(void) {
   if (D_800FBDC4 & 0x9000) {

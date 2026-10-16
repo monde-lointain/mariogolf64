@@ -143,7 +143,40 @@ void func_80071954(u8* src) {
   D_801321C3 = 0;
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80071370", func_800719A0);
+extern void func_8007399C(s32 id, s32 size, s32* out_width, s32* out_height,
+                          s32 player);
+/* Member-rooted scalar views preserve the retail per-field address lowering. */
+void func_800719A0(s32 x, s32 y, s32 run, s32 size, s32 index, s32 flags,
+                   u8 red, u8 green, u8 blue, u8 alpha) {
+  s32 width;
+  s32 height;
+  s32 offset;
+  s32 w;
+  s32 h;
+  if (run != -1) {
+    width = 0;
+    height = 0;
+    if (flags & 0x10) {
+      func_8007399C(run, 12, &width, &height, index);
+    }
+    offset = index * sizeof(HudTextEntry);
+    w = width;
+    h = height;
+    *((u8*)&D_8012F510[0].red + offset) = red;
+    *((u8*)&D_8012F510[0].green + offset) = green;
+    *((u8*)&D_8012F510[0].blue + offset) = blue;
+    *((u8*)&D_8012F510[0].alpha + offset) = alpha;
+    *(s32*)((u8*)&D_8012F510[0].glyph_size + offset) = size;
+    *(s32*)((u8*)&D_8012F510[0].flags + offset) = flags;
+    *(s32*)((u8*)&D_8012F510[0].screen_x + offset) = x - w / 2;
+    *(s32*)((u8*)&D_8012F510[0].screen_y + offset) = y - h / 2;
+    if (*(s32*)((u8*)&D_8012F510[0].glyph_run_id + offset) != run) {
+      *(s32*)((u8*)&D_8012F510[0].visible_glyph_count + offset) = 0;
+    }
+  }
+  *(s32*)((u8*)&D_8012F510[0].glyph_run_id + index * sizeof(HudTextEntry)) =
+      run;
+}
 
 extern void func_80071608(Gfx** dl);
 extern void func_80072A08(Gfx** dl, s32 i);
@@ -619,8 +652,6 @@ void func_8007512C(void) {
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80071370", func_8007515C);
 
-extern void func_8007399C(s32 id, s32 size, s32* out_width, s32* out_height,
-                          s32 player);
 
 extern u8 D_800FBE18[];
 

@@ -31,7 +31,8 @@ extern s32 D_800C4124;
 extern s32 D_800C4128;
 extern s32 D_800C4144;
 extern void play_sound_effect(s32 sfx, s32 arg1, s32 arg2);
-extern void func_800719A0(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+extern void func_800719A0(s32 x, s32 y, s32 run, s32 size, s32 index, s32 flags,
+                          u8 red, u8 green, u8 blue, u8 alpha);
 extern s32 D_800FF4B0;
 extern s32 D_800FF4B4;
 extern s32 D_800FF4B8;

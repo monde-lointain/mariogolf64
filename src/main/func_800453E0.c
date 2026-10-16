@@ -15,8 +15,8 @@ extern f32 D_800DAF38;
 extern int guRandom(void);
 extern void* func_80040E3C(s32 x, s32 z);
 extern void func_8004CDA0(void);
-extern void func_800719A0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4,
-                          s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9);
+extern void func_800719A0(s32 x, s32 y, s32 run, s32 size, s32 index, s32 flags,
+                          u8 red, u8 green, u8 blue, u8 alpha);
 extern s32 D_800DAEF8;
 extern s32 D_800DAF00;
 extern s32 D_80132CF0;
