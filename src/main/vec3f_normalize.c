@@ -93,7 +93,29 @@ void pause_audio(void) {
   g_mus_audio_paused = 1;
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/vec3f_normalize", func_80029C00);
+
+__asm__(
+    ".section .text\n"
+    ".set noat\n"
+    ".set noreorder\n"
+    ".globl clear_fpc_csr\n"
+    "clear_fpc_csr:\n"
+    "cfc1 $4, $31\n"
+    "nop\n"
+    "lui $5, 0x0FFF\n"
+    "ori $5, $5, 0xE0FF\n"
+    "and $4, $4, $5\n"
+    "addiu $5, $0, -0xF81\n"
+    "and $4, $4, $5\n"
+    "addiu $5, $0, 0\n"
+    "or $4, $4, $5\n"
+    "ctc1 $4, $31\n"
+    "nop\n"
+    "jr $31\n"
+    "nop\n"
+    ".set reorder\n"
+    ".set at\n"
+);
 
 INCLUDE_ASM("asm/nonmatchings/main/vec3f_normalize", mainproc);
 

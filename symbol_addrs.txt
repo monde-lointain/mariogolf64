@@ -941,6 +941,7 @@ ROM_ASSET_OPEN_FORMAT = 0x800CCBAC;
 // Pointer-bank end and following wave-table start share a ROM boundary.
 audio_wave_bank_rom_end = 0x18BE00; // absolute:True
 audio_wave_table_rom_start = 0x18BE00; // absolute:True
+clear_fpc_csr = 0x80029C00; // type:func segment:main
 register_scenery_heap_region = 0x80026400; // type:func
 reregister_scenery_heap_region = 0x8002646C; // type:func segment:main
 validate_heap_string = 0x80028110; // type:func segment:main
