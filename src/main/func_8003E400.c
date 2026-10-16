@@ -38,22 +38,23 @@ extern void mtx_from_rts(f32 matrix[4][4], f32 rotation[3], f32 translation[3],
                          f32 scale[3]);
 
 void load_pin_render_assets(void) {
-  RomAssetLoad asset;
+  RomAssetLoad rom_asset_load;
 
-  pin_marker_near_texture =
-      heap3_alloc(get_rom_asset_allocation_size(PIN_MARKER_NEAR_ASSET_ID, &asset));
-  load_rom_asset_payload(pin_marker_near_texture, &asset);
+  pin_marker_near_texture = heap3_alloc(
+      get_rom_asset_allocation_size(PIN_MARKER_NEAR_ASSET_ID, &rom_asset_load));
+  load_rom_asset_payload(pin_marker_near_texture, &rom_asset_load);
 
-  pin_marker_far_texture =
-      heap3_alloc(get_rom_asset_allocation_size(PIN_MARKER_FAR_ASSET_ID, &asset));
-  load_rom_asset_payload(pin_marker_far_texture, &asset);
+  pin_marker_far_texture = heap3_alloc(
+      get_rom_asset_allocation_size(PIN_MARKER_FAR_ASSET_ID, &rom_asset_load));
+  load_rom_asset_payload(pin_marker_far_texture, &rom_asset_load);
 
-  pin_assembly_texture =
-      heap3_alloc(get_rom_asset_allocation_size(PIN_ASSEMBLY_ASSET_ID, &asset));
-  load_rom_asset_payload(pin_assembly_texture, &asset);
+  pin_assembly_texture = heap3_alloc(
+      get_rom_asset_allocation_size(PIN_ASSEMBLY_ASSET_ID, &rom_asset_load));
+  load_rom_asset_payload(pin_assembly_texture, &rom_asset_load);
 
-  pin_wind_texture = heap3_alloc(get_rom_asset_allocation_size(PIN_WIND_ASSET_ID, &asset));
-  load_rom_asset_payload(pin_wind_texture, &asset);
+  pin_wind_texture = heap3_alloc(
+      get_rom_asset_allocation_size(PIN_WIND_ASSET_ID, &rom_asset_load));
+  load_rom_asset_payload(pin_wind_texture, &rom_asset_load);
 }
 
 void free_pin_render_assets(void) {
@@ -66,10 +67,10 @@ void free_pin_render_assets(void) {
 void build_pin_marker_matrix(s32 view_index) {
   /* Keep the address live across atan2 to preserve the retail reload sequence.
    */
-  s32* pin_x = &hole_environment.pin_position.x;
+  s32* pin_position_x = &hole_environment.pin_position.x;
   const f32 fixed_to_world = 1.0f / 1024.0f;
   f32 facing_angle =
-      atan2((f32)*pin_x * fixed_to_world - view_camera_eye_x,
+      atan2((f32)*pin_position_x * fixed_to_world - view_camera_eye_x,
             (f32)hole_environment.pin_position.z * fixed_to_world - view_camera_eye_z);
 
   /* GCC 2.7.2 requires these arrays before the first statement. */
@@ -78,7 +79,7 @@ void build_pin_marker_matrix(s32 view_index) {
   f32 scale[3];
   f32 matrix[4][4];
 
-  translation[0] = (f32)*pin_x * fixed_to_world;
+  translation[0] = (f32)*pin_position_x * fixed_to_world;
   translation[1] = (f32)hole_environment.pin_position.y * fixed_to_world;
   translation[2] = (f32)hole_environment.pin_position.z * fixed_to_world;
 
@@ -96,9 +97,13 @@ void build_pin_marker_matrix(s32 view_index) {
 }
 
 /* The renderer consumes each suppression request on its next invocation. */
-void suppress_pin_flag_once(void) { pin_flag_suppressed = 1; }
+void suppress_pin_flag_once(void) {
+  pin_flag_suppressed = 1;
+}
 
-void suppress_pin_assembly_once(void) { pin_assembly_suppressed = 1; }
+void suppress_pin_assembly_once(void) {
+  pin_assembly_suppressed = 1;
+}
 
 s32 should_draw_pin_flag(void) {
   if (pin_flag_suppressed != 0 || pin_assembly_suppressed != 0) {
