@@ -640,7 +640,55 @@ done:
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80054900", func_80056060);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80054900", animation_play);
+typedef struct {
+  s16 unknown_00;
+  u8 unknown_02[0x1E];
+  s16 unknown_20;
+  s16 unknown_22;
+  s16 unknown_24;
+  s16 unknown_26;
+  s16 unknown_28;
+  s16 unknown_2A;
+  s16 unknown_2C;
+  s16 unknown_2E;
+  u8 unknown_30[4];
+} AnimationPartState; /* 0x34 */
+
+void animation_play(s32 id, s32 animation) {
+  CharacterState* cs = get_character_state(id);
+  KeyframeTrack* tracks;
+  s32 index;
+  AnimationPartState* parts;
+  if (cs != NULL) {
+    kSetMultiTLB(0, 0, 0x20, 0x2000000, osVirtualToPhysical(cs->segment_data));
+    index = lookup_animation_by_id(id, animation);
+    cs->keyframe_track_index = index;
+    tracks = cs->model_resource->keyframe_tracks;
+    if (tracks[index].entries == NULL) {
+      cs->keyframe_track_index = 0;
+    }
+    cs->current_frame =
+        (f32)(cs->start_frame =
+                  cs->model_resource->keyframe_tracks[cs->keyframe_track_index]
+                      .start_frame);
+    cs->end_frame =
+        cs->start_frame +
+        cs->model_resource->keyframe_tracks[cs->keyframe_track_index]
+            .frame_span;
+    /* The model's part-list pointer is read-only; the pointed-to state is not.
+     */
+    parts = *(AnimationPartState* const*)cs->model_resource->unknown_1C;
+    while (parts->unknown_00 != -1) {
+      parts->unknown_22 = -1;
+      parts->unknown_20 = -1;
+      parts->unknown_28 = -1;
+      parts->unknown_26 = -1;
+      parts->unknown_2E = -1;
+      parts->unknown_2C = -1;
+      parts++;
+    }
+  }
+}
 
 void func_80056238(s32 id, u8 value) {
   CharacterState* cs = get_character_state(id);

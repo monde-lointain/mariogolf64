@@ -109,6 +109,14 @@ still needs its entry test, `if (n != 0)` (S306).
   neighbour read at a known displacement, or a `*(s32 *)` cast on a `u8 *` byte offset restores the
   re-read (the cast is terminal where a param-base folds); the inverses are a preheader local, and a
   per-site `T *p = &SYM;` never reused (S289, S301).
+- **fixed-metadata-pointer-read** -- distinguish a read-only pointer stored in
+  model metadata (`T* const*`) from pointers to read-only payload (`const T**`).
+  In GCC 2.7.2, `expr.c:4540-4585` marks the qualified indirect read unchanging;
+  `sched.c:817-839` then lets it cross an unrelated mutable-state store.
+  `animation_play` scores 225 with the ordinary part-list pointer read and 0
+  with the qualified read; its typed 0x34-byte payload remains writable and the
+  full ROM gate passes. Use only where the metadata pointer is genuinely fixed
+  across the intervening writes, not as a generic alias-barrier suppression.
 - **two-argument-call-temp-split** -- when both arguments of a call cross another call, compute them
   into temps first; as one expression gcc evaluates argument 0 fully and holds it across the call.
 
