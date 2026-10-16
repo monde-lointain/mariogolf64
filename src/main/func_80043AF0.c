@@ -2,18 +2,18 @@
 
 extern ClubDistancePreset D_800CABD0[];
 
-ClubDistancePreset* func_80043AF0(s32 index) { return &D_800CABD0[index]; }
+ClubDistancePreset* func_80043AF0(s32 clubIndex) { return &D_800CABD0[clubIndex]; }
 
 void func_80043B0C(void) {}
 
 // Meter extent (yards) for the active club and category selector
 // (0 = first meter, 1 = second meter, 2 = power-curve kind).
 //
-// The category dispatch is written as `if (category == K) goto ...;` to a set
+// The category dispatch is written as `if (meterCategory == K) goto ...;` to a set
 // of out-of-line body labels, NOT as a switch or if/else chain. This is
 // REQUIRED to match the original object byte-for-byte: KMC gcc 2.7.2 lowers a
-// structured `if (category == 2) extent = 30;` (extent provably 0, all-constant
-// arm) to a BRANCHLESS `mask & 30`, and every if/else/switch idiom branches
+// structured `if (meterCategory == 2) extentYards = 30;` (extentYards provably
+// 0, all-constant arm) to a BRANCHLESS `mask & 30`, and every if/else/switch idiom
 // AROUND the body (leaving it inline). The ROM instead branches TOWARD each
 // body with a branch-likely `beql`, which gcc only emits when the then-clause
 // is a bare jump (jump.c "condjump over an unconditional jump" -> invert to
@@ -21,54 +21,54 @@ void func_80043B0C(void) {}
 // case is a load, which cannot ride a branch-likely delay slot, so it must be
 // declared LAST and fall through into the shared return. Do not "simplify" this
 // to a switch/if-else.
-s32 get_club_meter_extent(ClubShot* club, s32 category) {
-  s32 extent = 0;
+s32 get_club_meter_extent(ClubShot* clubShot, s32 meterCategory) {
+  s32 extentYards = 0;
 
-  if (club->flags & 1) {
-    if (category == 1) goto putter_meter2;
-    if (category == 0) goto putter_meter1;
-    if (category == 2) goto putter_curve;
+  if (clubShot->flags & 1) {
+    if (meterCategory == 1) goto putter_meter2;
+    if (meterCategory == 0) goto putter_meter1;
+    if (meterCategory == 2) goto putter_curve;
     goto end;
   putter_meter2:
-    extent = 100;
+    extentYards = 100;
     goto end;
   putter_meter1:
-    extent = 200;
+    extentYards = 200;
     goto end;
   putter_curve:
-    extent = 30;
+    extentYards = 30;
     goto end;
   } else {
-    if (category == 1) goto normal_meter2;
-    if (category == 0) goto normal_meter1;
-    if (category == 2) goto normal_curve;
+    if (meterCategory == 1) goto normal_meter2;
+    if (meterCategory == 0) goto normal_meter1;
+    if (meterCategory == 2) goto normal_curve;
     goto end;
   normal_meter1:
-    extent = (s32)((f32)club->target_distance * 1.1f);
+    extentYards = (s32)((f32)clubShot->target_distance * 1.1f);
     goto end;
   normal_curve:
-    extent = 60;
+    extentYards = 60;
     goto end;
   normal_meter2:
-    extent = club->target_distance;
+    extentYards = clubShot->target_distance;
     goto end;
   }
 end:
-  return extent;
+  return extentYards;
 }
 
 // Meter extent converted to game-space units (per-yard factor differs for
-// putter). One reused `units` assigned in both arms is deliberate: it makes the
+// putter). One reused `meterUnits` assigned in both arms is deliberate: it makes the
 // value a single allocno that conflicts with $v0 instead of coalescing into it,
 // so the int/float chain runs in $a0 and matches the ROM. gcc tail-merges the
 // two arms back into one factor-select + one multiply.
-s32 get_club_meter_units(ClubShot* club, s32 category) {
-  s32 units = get_club_meter_extent(club, category);
+s32 get_club_meter_units(ClubShot* clubShot, s32 meterCategory) {
+  s32 meterUnits = get_club_meter_extent(clubShot, meterCategory);
 
-  if (club->flags & 1) {
-    units = (s32)((f32)units * 4681.728f);
+  if (clubShot->flags & 1) {
+    meterUnits = (s32)((f32)meterUnits * 4681.728f);
   } else {
-    units = (s32)((f32)units * 14045.184f);
+    meterUnits = (s32)((f32)meterUnits * 14045.184f);
   }
-  return units;
+  return meterUnits;
 }

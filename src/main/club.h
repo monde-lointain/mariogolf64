@@ -34,9 +34,9 @@ typedef struct {
 
 ClubShot* get_club_param(u32 id);
 ClubShot* get_shot_data(void);
-ClubDistancePreset* func_80043AF0(s32 index);
-s32 get_club_meter_extent(ClubShot* club, s32 category);
-s32 get_club_meter_units(ClubShot* club, s32 category);
+ClubDistancePreset* func_80043AF0(s32 clubIndex);
+s32 get_club_meter_extent(ClubShot* clubShot, s32 meterCategory);
+s32 get_club_meter_units(ClubShot* clubShot, s32 meterCategory);
 s32 resolve_shot_quality_table(ClubShot* club, s32 terrain, s32 category);
 
 #endif /* CLUB_H */
