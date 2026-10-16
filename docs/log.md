@@ -2,6 +2,14 @@
 
 ## 2026-10-15
 
+- **clangd navigation**: Added a repository-local omp override for `clangd-23` and
+  an editor-only compilation database generated from the existing KMC profiles.
+  CMake configure regenerates it; standalone setup requires no ROM or target toolchain.
+  Removed duplicated fixed/per-library editor flags and documented background indexing,
+  regeneration and unsupported GNU nested functions/KMC lvalue casts.
+  Verified CMake configure, seven frontend profile regressions, cross-file definition
+  lookup and 34 `osCreateMesgQueue` references through omp's live clangd server.
+
 - **Agent-based decomp workflow refinement**: Five parallel read-only deep dives
   compared REA's seed-first investigation, Snowboard Kids' matching queues, native
   Oh My Pi task/context contracts, the Ghidra book (chapters 7/8/19/20), and Eilam's

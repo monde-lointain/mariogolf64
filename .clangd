@@ -1,39 +1,4 @@
-# Base flags live in compile_flags.txt (repo root) so relative -I resolve against the root.
-# This file adds only editor profile deltas; build truth is tools/build_profiles.json.
-If:
-  PathMatch: src/libultra/.*
+# Editor commands come from tools/clangd_config.py and tools/build_profiles.json.
+# Run: uv run --locked python tools/clangd_config.py (also run by CMake configure).
 CompileFlags:
-  Add:
-    - -fsigned-char
-    - -Iinclude/libultra/compiler/gcc
-    - -Iinclude/libultra/PR
-    - -DBUILD_VERSION=VERSION_J
-    - -DF3DEX_GBI_2
----
-If:
-  PathMatch: src/libnusys/.*
-CompileFlags:
-  Add:
-    - -DUSE_EPI
----
-If:
-  PathMatch: src/libnaudio/.*
-CompileFlags:
-  Add:
-    - -Isrc/libnaudio
-    - -Iinclude/libnaudio
-    - -Iinclude/libultra/PR
-    - -DN_MICRO=1
----
-If:
-  PathMatch: src/libmus/.*
-CompileFlags:
-  Add:
-    - -Isrc/libmus
-    - -Iinclude/libmus/PR
-    - -Iinclude/libmus
-    - -Iinclude/libnualstl
-    - -Iinclude/libnaudio
-    - -Iinclude/libultra/PR
-    - -DSUPPORT_NAUDIO
-    - -U_FINALROM
+  CompilationDatabase: .

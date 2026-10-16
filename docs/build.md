@@ -9,6 +9,10 @@ sources:
     title: Supported configure, build, test, and workflow presets
   - resource: ../cmake/Rom.cmake
     title: ROM extraction, compile, link, and build targets
+  - resource: ../tools/clangd_config.py
+    title: Editor-only compilation database generator
+  - resource: ../.omp/lsp.json
+    title: Repository-local Oh My Pi language server selection
   - resource: ../tools/verify-rom.sh
     title: Stable ROM verification entrypoint
 ---
@@ -25,6 +29,7 @@ The supported input is US revision 0 (`NMFE`) in big-endian `.z64` format. Suppl
 - [Build tools, extract, or build one object](#task-specific-builds)
 - [Compiler profiles and incremental work](#compiler-profiles-and-incremental-work)
 - [Iterate on nonmatching code](#nonmatching-and-custom-binary-trees)
+- [Enable clangd navigation](#clangd-navigation)
 - [Run tooling checks](#tooling-checks)
 
 ## Bootstrap prerequisites
@@ -117,6 +122,44 @@ For another binary tree, configure it with `cmake -S . -B <binary> -G Ninja`, th
 `MG64_BUILD_DIR=<binary>` for first-party Python/shell tools and pass
 `tools/verify-rom.sh --build-dir <binary>`. Keep machine-specific choices in ignored
 `CMakeUserPresets.json`, not the project presets.
+
+## clangd navigation
+
+Install `clangd-23` on `PATH`. From the repository root, generate the editor database:
+
+```sh
+uv run --locked python tools/clangd_config.py
+clangd-23 --check=src/main/get_table_entry.c
+```
+
+This standalone setup needs neither a ROM nor a built KMC toolchain. `cmake --preset us`
+also regenerates the root `compile_commands.json` during configuration. Rerun the generator
+after adding/removing C files or changing compiler profiles; CMake tracks profile changes.
+The database contains every `src/**/*.c` translation unit, not generated `build/**/work/src`
+copies or isolated `nonmatchings/` candidates. Headers borrow a source command from clangd.
+The database contains checkout-specific absolute paths and is ignored, as is `.cache/clangd/`.
+
+`tools/clangd_config.py` reuses `rom_build.profile_flags()` for include ordering, defines,
+signedness, optimization and file overrides. It translates KMC's architecture/ABI spellings
+to Clang flags and adds the big-endian MIPS target, GNU89 and `-nostdlibinc` so host libc
+headers do not replace the N64 SDK. These commands are for parsing only; ROM builds still
+use KMC. Do not use `CMAKE_EXPORT_COMPILE_COMMANDS`: ROM compilation uses custom commands.
+The old `compile_flags.txt` and per-library `.clangd` deltas are replaced by this one profile-derived
+database. A fixed flags database can parse an opened file but cannot enumerate translation
+units for background indexing.
+
+Oh My Pi reads `.omp/lsp.json`, which selects `clangd-23` and inherits its built-in clangd
+arguments, file types and root markers. Start omp at the repository root. If the session
+predates setup, invoke its `lsp` tool with `{"action":"reload","file":"*"}` to refresh
+discovery. Definition/reference requests start the server; workspace queries need background
+indexing to finish. Other editors can launch `clangd-23` with `--background-index` against
+the same root database and `.clangd`.
+
+Clang diagnostics are advisory, not a KMC compile or ROM-match verdict. Clang does not support
+GNU nested functions (for example `src/main/vec3f_normalize.c`) or KMC lvalue casts (for example
+`src/libkmc/memset.c`). Those diagnostics remain visible and can limit navigation in affected
+functions. Assembly-only `INCLUDE_ASM` bodies are not C definitions in the index. Do not
+rewrite matching code or apply clang-tidy fixes just to quiet the language server.
 
 ## Tooling checks
 

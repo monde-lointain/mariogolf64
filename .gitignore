@@ -6,6 +6,8 @@ __pycache__/
 # Disposable tooling caches
 .pytest_cache/
 .ruff_cache/
+.cache/clangd/
+/compile_commands.json
 
 # Environments
 .env

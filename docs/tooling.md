@@ -118,6 +118,9 @@ Oh My Pi discovers BasedPyright and Ruff from the locked `.venv`; no project LSP
 is required. If the session predates environment installation, reload native LSP discovery.
 Use references/definitions for Python tooling changes. Python type intelligence does not
 model KMC GCC's C extensions or prove target code generation.
+For C definitions, references and workspace indexing, use the profile-derived
+[clangd setup](build.md#clangd-navigation). `.omp/lsp.json` selects `clangd-23`;
+the editor database is separate from KMC object generation.
 
 Keep MCP, builds, layout changes, and source edits serial. See
 [documentation conventions](documentation.md) before reorganizing an instruction surface.

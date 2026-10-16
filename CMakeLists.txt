@@ -21,6 +21,16 @@ endif()
 add_subdirectory(third_party)
 include(cmake/Rom.cmake)
 
+# ROM objects use custom KMC commands, so CMAKE_EXPORT_COMPILE_COMMANDS cannot
+# describe them. Generate Clang parsing commands separately, without invoking KMC.
+execute_process(COMMAND "${CMAKE_COMMAND}" -E env "UV_PROJECT_ENVIRONMENT=${PROJECT_SOURCE_DIR}/.venv"
+    "${MG64_UV}" run --locked --project "${PROJECT_SOURCE_DIR}"
+    python "${PROJECT_SOURCE_DIR}/tools/clangd_config.py"
+    COMMAND_ERROR_IS_FATAL ANY)
+set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS
+    "${PROJECT_SOURCE_DIR}/tools/clangd_config.py" "${PROJECT_SOURCE_DIR}/tools/rom_build.py"
+    "${PROJECT_SOURCE_DIR}/tools/build_profiles.json")
+
 # Machine-readable host-tool locations are also consumed by isolated compile,
 # diff, permuter, and ranker tooling. No second set of compiler paths or flags.
 set(tools_json "{}")
