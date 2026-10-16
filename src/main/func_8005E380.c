@@ -71,35 +71,35 @@ extern void print_thread_context_buffer(void);
  */
 INCLUDE_ASM("asm/nonmatchings/main/func_8005E380", func_8005E380);
 
-void func_8005EAD4(u32 flags, const char* name, FaultFlagLabel* labels) {
-  u32 mask;
-  s32 first;
+void func_8005EAD4(u32 register_value, const char* register_name, FaultFlagLabel* label_entry) {
+  u32 flag_mask;
+  s32 is_first_match;
 
-  sprintf(thread_context_report_buffer, D_800D11D8, name, flags);
+  sprintf(thread_context_report_buffer, D_800D11D8, register_name, register_value);
   print_thread_context_buffer();
-  first = TRUE;
+  is_first_match = TRUE;
   sprintf(thread_context_report_buffer, D_800D11E4);
   print_thread_context_buffer();
 
-  mask = labels->mask;
-  if (mask != 0) {
+  flag_mask = label_entry->mask;
+  if (flag_mask != 0) {
     do {
-      if ((flags & mask) == labels->value) {
-        if (first) {
-          first = FALSE;
+      if ((register_value & flag_mask) == label_entry->value) {
+        if (is_first_match) {
+          is_first_match = FALSE;
         } else {
           sprintf(thread_context_report_buffer, D_800D11E8);
           print_thread_context_buffer();
         }
 
-        sprintf(thread_context_report_buffer, D_800D11EC, labels->label);
+        sprintf(thread_context_report_buffer, D_800D11EC, label_entry->label);
         print_thread_context_buffer();
         func_8004D580(thread_context_report_buffer, 3, D_800C2C14++);
       }
 
-      labels++;
-      mask = labels->mask;
-    } while (mask != 0);
+      label_entry++;
+      flag_mask = label_entry->mask;
+    } while (flag_mask != 0);
   }
 
   sprintf(thread_context_report_buffer, D_800D11F0);
