@@ -182,7 +182,6 @@ def compile_source(source: str | Path, output: str | Path, profile: str | None =
     finally:
         if not assembly_only:
             assembly.unlink(missing_ok=True)
-        temporary.unlink(missing_ok=True)
 
 
 ALIGN = [f"--set-section-alignment={s}=4" for s in (".text", ".data", ".rodata", ".bss")]
