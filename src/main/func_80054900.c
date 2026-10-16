@@ -216,12 +216,12 @@ void func_80054E20(void) {
   }
 }
 
-void func_80054E4C(s32 arg0, s32 arg1) {
-  CharacterState* cs = get_character_state(arg0);
+void func_80054E4C(s32 character_id, s32 animation_mode) {
+  CharacterState* cs = get_character_state(character_id);
   if (cs != NULL) {
     s32 mode;
     D_800C1DEC = cs->resource_index;
-    switch (func_800544B4(arg0, arg1)) {
+    switch (func_800544B4(character_id, animation_mode)) {
       case 0:
         mode = 0;
         break;
@@ -240,7 +240,7 @@ void func_80054E4C(s32 arg0, s32 arg1) {
     }
     kSetMultiTLB(0, 0, 0x20, 0x2000000,
                   osVirtualToPhysical(cs->segment_data));
-    func_800543DC(arg0, mode);
+    func_800543DC(character_id, mode);
   }
 }
 
@@ -323,7 +323,9 @@ done:
   return result;
 }
 
-s32 func_800550B8(s32 arg0) { return find_keyframe_offset_by_tag(arg0, 2, 6); }
+s32 func_800550B8(s32 character_id) {
+  return find_keyframe_offset_by_tag(character_id, 2, 6);
+}
 
 /* One entry of a character model's texture table: an RGBA16 image plus the
  * texel dimensions the tile has to be re-declared with each frame. */
@@ -619,19 +621,19 @@ void reset_face_textures_for_anim_slot(s32 id, s32 slot) {
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80054900", load_character_model);
 
-s32 lookup_animation_by_id(s32 id, s32 target) {
-  CharacterState* cs = get_character_state(id);
+s32 lookup_animation_by_id(s32 character_id, s32 animation_id) {
+  CharacterState* cs = get_character_state(character_id);
   s32 result = 0;
   if (cs != NULL) {
-    KeyframeTrack* e = cs->model_resource->keyframe_tracks;
-    s32 idx = 0;
-    while (e->entries != NULL) {
-      if (e->animation_id == target) {
-        result = idx;
+    KeyframeTrack* track = cs->model_resource->keyframe_tracks;
+    s32 track_index = 0;
+    while (track->entries != NULL) {
+      if (track->animation_id == animation_id) {
+        result = track_index;
         goto done;
       }
-      e++;
-      idx++;
+      track++;
+      track_index++;
     }
   }
 done:
@@ -844,19 +846,20 @@ s32 func_800577D0(void) { return 0x23680; }
 const u8 polychara_alive_msg[0x34] =
     "Polychara %d still alive. You can't change buffer.\n";
 
-void func_800577DC(s32 index, void* arg1) {
-  u32 aligned = ((u32)arg1 + 0xFFF) & 0xFFFFF000;
-  if (D_801F43F0[index].resource_index != -1) {
-    s32 j;
-    for (j = 0; j < 10; j++) {
-      osSyncPrintf((const char*)polychara_alive_msg, index);
+void func_800577DC(s32 character_index, void* segment_address) {
+  u32 aligned = ((u32)segment_address + 0xFFF) & 0xFFFFF000;
+  if (D_801F43F0[character_index].resource_index != -1) {
+    s32 print_index;
+    for (print_index = 0; print_index < 10; print_index++) {
+      osSyncPrintf((const char*)polychara_alive_msg, character_index);
     }
   } else {
-    s32 i;
-    D_801F43F0[index].segment_data = (void*)aligned;
-    for (i = 0; i < 3; i++) {
-      D_801F43F0[index].segment_bases[i] =
-          (u32)D_801F43F0[index].segment_data + 0x20000 + i * 0x780;
+    s32 segment_index;
+    D_801F43F0[character_index].segment_data = (void*)aligned;
+    for (segment_index = 0; segment_index < 3; segment_index++) {
+      D_801F43F0[character_index].segment_bases[segment_index] =
+          (u32)D_801F43F0[character_index].segment_data + 0x20000 +
+          segment_index * 0x780;
     }
   }
 }
@@ -968,21 +971,22 @@ void func_80058B34(s32 id) {
   }
 }
 
-void func_80058C58(s32 id, s32* arg1, f32 arg2) {
-  CharacterState* cs = get_character_state(id);
+void func_80058C58(s32 character_id, s32* position, f32 heading) {
+  CharacterState* cs = get_character_state(character_id);
   if (cs != NULL) {
-    s32 h;
-    f32 t38;
-    f32 t2;
-    cs->position.x = (f32)arg1[0];
-    t38 = *(volatile f32*)&cs->position.x;
-    t2 = (f32)arg1[2];
-    cs->position.z = t2;
-    h = get_interpolated_terrain_height_wrapper((s32)t38, (s32)t2);
-    cs->position.y = (f32)h;
+    s32 terrain_height;
+    f32 position_x;
+    f32 position_z;
+    cs->position.x = (f32)position[0];
+    position_x = *(volatile f32*)&cs->position.x;
+    position_z = (f32)position[2];
+    cs->position.z = position_z;
+    terrain_height =
+        get_interpolated_terrain_height_wrapper((s32)position_x, (s32)position_z);
+    cs->position.y = (f32)terrain_height;
     cs->rotation.x = 0.0f;
     cs->rotation.z = 0.0f;
-    cs->rotation.y = -arg2;
+    cs->rotation.y = -heading;
     cs->scale.x = 1.0f;
     cs->scale.y = 1.0f;
     cs->scale.z = 1.0f;
