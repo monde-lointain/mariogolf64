@@ -1845,7 +1845,7 @@ typedef struct {
 } SaveBank;
 
 extern SaveBank D_800C2BE0[];
-extern s32 func_80028204(char*, s32*);
+extern s32 validate_heap_string_with_output(char*, s32*);
 
 s32 func_8005DFE8(u8* buf, s32 flag_arg) {
   u8 raw[0xD0];
@@ -1859,10 +1859,10 @@ s32 func_8005DFE8(u8* buf, s32 flag_arg) {
 
   do {
     if (flag == 0) {
-      read_failed = func_80028204(D_800C2BE0[tries].data_file, status6) != 0;
+      read_failed = validate_heap_string_with_output(D_800C2BE0[tries].data_file, status6) != 0;
       if (read_failed) goto fail;
       if (status6[0] != 0x2A78) goto fail;
-      if (func_80028204(D_800C2BE0[tries].checksum_file, status6) != 0)
+      if (validate_heap_string_with_output(D_800C2BE0[tries].checksum_file, status6) != 0)
         goto fail;
       if (status6[0] != 4) goto fail;
     } else {
@@ -1890,7 +1890,7 @@ s32 func_8005DFE8(u8* buf, s32 flag_arg) {
 }
 
 extern u8 D_801B5588[];
-extern s32 func_80028110(char* path, s32 len);
+extern s32 validate_heap_string(char* path, s32 len);
 
 s32 func_8005E180(u8* buf, s32 save_flag) {
   u8 raw[0xC0];
@@ -1913,8 +1913,8 @@ s32 func_8005E180(u8* buf, s32 save_flag) {
     stat[1] = r;
     stat[1] = stat[1] ^ crc;
     if (flag == 0) {
-      if (func_80028110(D_800C2BE0[i].data_file, 0x2A78) == 0) {
-        func_80028110(D_800C2BE0[i].checksum_file, 4);
+      if (validate_heap_string(D_800C2BE0[i].data_file, 0x2A78) == 0) {
+        validate_heap_string(D_800C2BE0[i].checksum_file, 4);
       }
     } else {
       nuPiReadWriteSram(D_800C2BE0[i].data_address, buf, 0x2A78, 1);

@@ -29,11 +29,30 @@ typedef struct {
   /* 0x02 */ s16 terrain_y;
   /* 0x04 */ s16 z;
   /* 0x06 */ s8 sprite_index;
-  /* 0x07 */ u8 unknown_07[3];
-  /* 0x0A */ s16 cull_state;
+  /* 0x07 */ u8 billboard_vertex_set_index;
+  /* 0x08 */ u8 unknown_08[2];
+  /* 0x0A */ u16 cull_state;
   /* 0x0C */ u16 radius;
   /* 0x0E */ u16 scale_y;
 } SceneryCylinder; /* 0x10 */
+
+enum {
+  SCENERY_CYLINDER_COUNT = 0x80,
+  SCENERY_SPRITE_COUNT = 46,
+  SCENERY_HEAP_SLOT = 1
+};
+
+/* Texture metadata and the decoded-texture cache used by scenery billboards. */
+typedef struct {
+  /* 0x00 */ s32 asset_index;
+  /* 0x04 */ s16 storage_mode; /* mode 2 is loaded lazily by the billboard path */
+  /* 0x06 */ s16 width;
+  /* 0x08 */ s16 height;
+  /* 0x0A */ u8 unknown_0A[2];
+  /* 0x0C */ void* decoded_texture;
+} ScenerySpriteDescriptor; /* 0x10 */
+
+extern ScenerySpriteDescriptor g_scenery_sprites[SCENERY_SPRITE_COUNT];
 
 /* The 34x36 RGBA5551 grid ends at +0x990. D_80132D4A is colors[1][1]. */
 typedef struct {

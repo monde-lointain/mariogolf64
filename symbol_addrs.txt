@@ -778,6 +778,9 @@ OVERLAY_LOAD_FAILED_MESSAGE = 0x800CA05C;
 OVERLAY_UNLOADED_MESSAGE = 0x800CA084;
 OVERLAY_INACTIVE_MODULE_MESSAGE = 0x800CA09C;
 
+// Mutable billboard vertices and the sprite texture selected by the last draw.
+g_scenery_billboard_vertices = 0x800B6200; // size:0x80
+g_last_billboard_sprite_id = 0x800B6280; // size:0x4
 // Scenery billboard reset and its state. Keep the descriptor's interior field
 // symbols available to the assembly renderer by limiting the array-base extent.
 reset_scenery_billboards = 0x800263B0; // type:func
@@ -939,6 +942,9 @@ ROM_ASSET_OPEN_FORMAT = 0x800CCBAC;
 audio_wave_bank_rom_end = 0x18BE00; // absolute:True
 audio_wave_table_rom_start = 0x18BE00; // absolute:True
 register_scenery_heap_region = 0x80026400; // type:func
+reregister_scenery_heap_region = 0x8002646C; // type:func segment:main
+validate_heap_string = 0x80028110; // type:func segment:main
+validate_heap_string_with_output = 0x80028204; // type:func segment:main
 random_bounded_index = 0x800467DC; // type:func
 clamped_lerp_f32 = 0x80095A10; // type:func
 load_dialog_choice_assets = 0x8006B980; // type:func

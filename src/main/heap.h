@@ -68,6 +68,8 @@ extern HeapBlock heap_slots[];
 void heap_init(s32 slot_index);
 void heap_add_region(s32 slot_index, HeapBlock* region_start, void* region_end);
 
+void* heap_alloc(s32 slot_index, u32 size_bytes);
+
 /* Cached free bytes, including free-block headers, not total heap capacity. */
 s32 heap_get_total_free(s32 slot_index);
 

@@ -146,7 +146,7 @@ extern s32 putter_mode_flag;
 extern void play_sound_effect(s32 sfx, s32 channel, s32 volume);
 extern f32 D_80106190;
 extern void update_object_group_by_id(s32 group);
-extern void func_8002646C(void);
+extern void reregister_scenery_heap_region(void);
 extern s32 get_current_course_id(void);
 extern s32 get_standard_course_hole_index(void);
 extern s32 get_current_hole_index(void);
@@ -169,7 +169,7 @@ void func_80080688(void) {
   } else {
     update_object_group_by_id(9);
   }
-  func_8002646C();
+  reregister_scenery_heap_region();
   course = get_current_course_id();
   get_rom_asset_allocation_size(
       D_800C54CC[course] + get_standard_course_hole_index(), &asset);

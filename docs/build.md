@@ -107,6 +107,10 @@ A single-object or isolated compile is an iteration signal, not a ROM match; ver
 integrating a candidate. Optional [headless Ghidra analysis](ghidra.md) has separate lifecycle
 targets and a proposal-only `sync-names`; neither is part of ROM compilation. The
 [tool reference](tooling.md) covers Python-tool entrypoints.
+The scenery billboard emitters remain assembly-backed: unfinished C candidates are retained
+locally under `nonmatchings/scenery_billboard/`. Terrain cleanup experiments under
+`nonmatchings/terrain_cleanup/` are likewise excluded from the matching build.
+
 
 ## Nonmatching and custom binary trees
 

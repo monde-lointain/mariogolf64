@@ -112,7 +112,7 @@ done:
 
 extern void* heap3_alloc(s32 size);
 extern void heap3_free(void* ptr);
-extern void func_80028110(void* data, s32 size);
+extern void validate_heap_string(void* data, s32 size);
 extern void load_character_model(s32 id, s32 model, s32 arg2);
 extern void func_800562F4(s32 id, f32 value);
 extern void animation_play(s32 id, s32 animation);
@@ -202,7 +202,7 @@ void func_80054BC0(void) {
   line[1] = 0;
   func_80054B7C((u8*)line);
   sprintf(line, D_800D06D4);
-  func_80028110(line, buf_pos - buf_start);
+  validate_heap_string(line, buf_pos - buf_start);
   heap3_free(&buf_start);
 }
 
