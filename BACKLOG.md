@@ -16,6 +16,75 @@ This file holds only the *ordering rationale*, *enabler items* (gate actions), a
 
 ### Current main-bank evidence — 2026-10-15
 
+- Continuation: banked five main functions: `func_8002A144` (115 instructions),
+  `play_bgm_by_id` (97), `func_80080688` (117), `game_draw_callback` (130),
+  and `func_80052FE0` (71): **530 instructions / 2,120 bytes;
+  183 → 178 main C-host stubs**.
+  Each integrated source state passed `tools/verify-rom.sh` with
+  SHA-1 `e2c4e7a905b29529b49a1619a401fe699224829b`.
+  - The apparent extraction blocker was a misread diagnostic: the full build
+    and verifier succeeded without changing Splat, symbols, or YAML.
+  - BGM selection uses scalar start/end ROM-address pairs and separate
+    constant-argument pan-mode calls that GCC tail-merges. The condition helper
+    `func_8005DE00` returns the sign-extended byte as `s32`, matching its caller's
+    full-register test without redundant narrowing.
+  - The old `func_80080688` `idx * 210` wall conflated two different calls:
+    hole index contributes `hole * 10`, course index contributes `course * 200`.
+    `CourseDefinition` in `session.h` now models the 20-byte name and eighteen
+    10-byte hole records, including their signed par byte. Existing name and
+    score consumers retain the same verified accesses.
+  - The callback keeps accepted and deferred task-count paths distinct with
+    a forward `process_frame` join; a shared negative guard let GCC merge
+    the thresholds. `D_800FED26` is `D_800FED18[1].trigger`, not a separate
+    allocation. Volatile frame-counter increment already emits the retail
+    reread; adding an explicit discarded read is two instructions too long.
+  - `func_80052FE0` uses SDK environment-color/end-list packets and `dl++`
+    traversal, not the old raw-word candidate. Duplicate pipe-sync/render-mode
+    arms tail-merge into the retail selection/store order. Its translucent
+    mode is `G_RM_PASS | G_RM_AA_ZB_XLU_SURF2 | Z_UPD`.
+    The exact 71-instruction object has only confirmed interior-label
+    residuals: palette +1/+2, list base -4, and packet word +4/+12.
+  - Final isolated source/measurement pairs, in function order above, live at
+    `nonmatchings/<function>/measurements/<hash>.{json,c}`:
+    `9b7f62ce7227e25355a86186a4597816f2182ad1101c053b9a719c949e6a823f`,
+    `7e96e5f1f42f282f8ea5c0fca3da57f39cc36cd12ec17dcf4414617ad4535083`,
+    `a736fc36cc9ea2cc725b560db321a825cd4753cf21fc104c5b23857da838b111`,
+    `3ff952d4299b4ee7bd02e1a94c5c811e3f65b9f9f2337c0a0d71a292bd05357f`,
+    `206609d4247701136d4a99b962e5c85611e733f6852071a76c68c097a94eca9e`.
+    Scores 10/10/60 for the last three are linker-view names, not codegen
+    deficits; integrated function ranges and the ROM gate resolve them.
+  - Throwaway 32-bit UBSan smokes of integrated bodies passed **3,402,533
+    checks**: signed stick/dead-zone and repeat boundaries; callback queue
+    limits, PreNMI, pause and debug transitions; BGM stop/queue/replace/start
+    precedence and ID clamping; distinct course/hole indexing, par-specific
+    assets and mode latches; SDK packet words, sentinels and cursor advancement.
+    No emulator run. No YAML, symbol, compiler-profile, or overlay edits.
+  - Still unbanked, with live stubs preserved:
+    - `mainproc`: 174 instructions, score 20; only the `s1 = -1` and `s2 = 2`
+      load order differs. Best source restored and freshly measured:
+      `nonmatchings/mainproc/measurements/cd2cb82f0f61028b1d0ff4599f6f32fbb7466280f911a62359b49731d21abddf.{json,c}`.
+      Volatile startup state retains the separate tests; `#undef nuGfxInit`
+      selects the actual retail initializer rather than the EX2 header macro.
+      Direct initializer order scores 25 with correct order but swapped colors;
+      its `.flow/.greg/.sched2` dumps describe
+      `ba3698838a0cf776857943e967141dcee3825405dd774926ce8f83a8c99be93d`,
+      not the retained source. Stopped/debug priorities are 1071/1111 from
+      equal three-reference quantities with 28/27-insn live lengths.
+      One-shot initialization/condition scopes changed weighting or added code;
+      byte casts and a derived delay argument also grew code. A bounded
+      15,080-iteration search retained score 20; expiry is not a wall verdict.
+      Next: obtain inverse-order flow/scheduling dumps and separate pseudo birth
+      order from final constant-load placement without barriers or dead uses.
+    - `init_terrain_vertex_texcoords`: score 500; best whole-vertex copy and
+      quotient/remainder candidate restored and freshly measured:
+      `nonmatchings/init_terrain_vertex_texcoords/measurements/fa83cdd063fc16af6630da873e1fda4ea63b11a1d4f8bab759580ea575d8d0c1.{json,c}`.
+      Direct quotient computation removes two required words (score 930);
+      explicit input locals and parity scratch reuse scored 710, and a
+      compound remainder update scored 800. Next: inspect copy canonicalization
+      and first-channel branch formation; do not transfer those scores to a
+      different source shape.
+
+
 - Banked five more main functions: `func_800451E4`, `func_800719A0`,
   `func_8006CD50`, `func_8007E7B8`, and `animation_play`
   (**498 instructions / 1,992 bytes; 188 → 183 C-host stubs**).
