@@ -611,7 +611,76 @@ INCLUDE_ASM("asm/nonmatchings/main/get_tile_attribute", func_80042228);
 
 INCLUDE_ASM("asm/nonmatchings/main/get_tile_attribute", func_80042318);
 
-INCLUDE_ASM("asm/nonmatchings/main/get_tile_attribute", func_800425C8);
+extern GridVertex D_8018D228[];
+extern u8 D_8018D258[];
+extern u8 D_8018D25A[];
+extern u8 D_8018D25C[];
+extern u8 D_8018D25E[];
+extern u8 D_8018D260[];
+extern u8 D_8018D262[];
+
+void func_800425C8(void) {
+  s32 min_bound = 0x20000000;
+  s32 max_bound = -0x20000000;
+  s32 bounds[7];
+  s32 vertex;
+  GridVertex* row;
+  s32 row_offset;
+
+  row_offset = 0;
+  row = D_8018D228;
+  do {
+    register GridVertex* point __asm__("$4");
+
+    vertex = 0;
+    point = row;
+    bounds[2] = min_bound;
+    bounds[1] = min_bound;
+    bounds[0] = min_bound;
+    bounds[6] = max_bound;
+    bounds[5] = max_bound;
+    bounds[4] = max_bound;
+    do {
+      s16 x = point->x;
+      if (x < bounds[0]) {
+        bounds[0] = x;
+      }
+      x = point->x;
+      if (bounds[4] < x) {
+        bounds[4] = x;
+      }
+      x = point->height;
+      if (x < bounds[1]) {
+        bounds[1] = x;
+      }
+      x = point->height;
+      if (bounds[5] < x) {
+        bounds[5] = x;
+      }
+      x = point->z;
+      if (x < bounds[2]) {
+        bounds[2] = x;
+      }
+      x = point->z;
+      if (bounds[6] < x) {
+        bounds[6] = x;
+      }
+      point->texture_s = point->x;
+      point->texture_t = point->z;
+      point++;
+      vertex++;
+    } while (vertex < 3);
+    *(s16*)(D_8018D258 + row_offset) = bounds[0];
+    *(s16*)(D_8018D25C + row_offset) = bounds[1];
+    *(s16*)(D_8018D260 + row_offset) = bounds[2];
+    *(s16*)(D_8018D25A + row_offset) = bounds[4];
+    *(s16*)(D_8018D25E + row_offset) = bounds[5];
+    *(s16*)(D_8018D262 + row_offset) = bounds[6];
+    row_offset += 0x60;
+    row += 6;
+  } while (row_offset < 0x3C00);
+  update_rumble_intensity_table();
+}
 
 s32 func_80042720(void) { return (u32)&load_hole_terrain_assets > 0x803FFFFFU; }
 

@@ -1126,7 +1126,26 @@ void func_800989C4(s32* arg0) {
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80095A10", func_800989EC);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80095A10", func_80098C6C);
+extern f32 D_800E4C7C;
+extern f32 fabsf(f32);
+
+s32 func_80098C6C(void) {
+  register f32 input __asm__("$f4");
+  register f32 absolute __asm__("$f2");
+  register f32 zero __asm__("$f0");
+  s32 result;
+
+  input = D_800E4C7C;
+  absolute = fabsf(input);
+  __asm__ volatile("" : "=f"(absolute) : "0"(absolute));
+  zero = 0.0f;
+  if (absolute == zero) {
+    result = 1;
+  } else {
+    result = 0;
+  }
+  return result;
+}
 
 s32 func_80098CA0(s32 arg0) {
   u16 temp;

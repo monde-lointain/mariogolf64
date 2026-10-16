@@ -4,7 +4,6 @@
 extern s32 flag_is_set(s32 flag);
 extern s32 find_keyframe_offset_by_tag(s32 id, s32 track, s32 tag);
 extern void func_80054BC0(void);
-extern KeyframeTrack* func_80056060(s32 id);
 extern void animation_step(s32 index);
 extern void func_800543A4(void);
 extern void func_800577DC(s32 index, void* arg1);
@@ -640,7 +639,29 @@ done:
   return result;
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80054900", func_80056060);
+/* Legacy callers pass one argument; this body also consumes incoming a1. */
+KeyframeTrack* func_80056060(character_id, animation_id)
+s32 character_id;
+s32 animation_id;
+{
+    register s32 character __asm__("$18") = character_id;
+    register s32 animation __asm__("$16") = animation_id;
+    CharacterState* state;
+    KeyframeTrack* track;
+    KeyframeTrack* tracks;
+    s32 index;
+
+    state = get_character_state(character);
+    if (state != NULL) {
+        kSetMultiTLB(0, 0, 0x20, 0x02000000,
+                     osVirtualToPhysical(state->segment_data));
+        index = lookup_animation_by_id(character, animation);
+        tracks = state->model_resource->keyframe_tracks;
+        track = (KeyframeTrack*)(index * 12 + (s32)tracks);
+        return (KeyframeTrack*)((s32)track & -(track->entries != NULL));
+    }
+    return NULL;
+}
 
 typedef struct {
   s16 unknown_00;
