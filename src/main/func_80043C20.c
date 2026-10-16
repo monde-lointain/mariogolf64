@@ -471,4 +471,61 @@ void func_80044FDC(void) {
   }
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80043C20", func_800451E4);
+extern s32 D_800FBE64;
+extern s32 target_z;
+extern s8 D_800FBE9C;
+extern s32 func_8003DFD0(s32 x, s32 z);
+
+void func_800451E4(void) {
+  ClubShot* shot = get_shot_data();
+  s32 distance =
+      (s32)((f32)func_8003DFD0(D_800FBE64 - hole_environment.pin_position.x,
+                               target_z - hole_environment.pin_position.z) *
+            0.00007119878137f);
+  if ((D_800FED18[active_player_idx_alt * 4] & 0x4000) && func_8021EA48()) {
+    s32 far;
+    if (shot->flags & 1) {
+      if (active_meter_category == 1) {
+        active_meter_category = 0;
+      } else if (active_meter_category == 0) {
+        active_meter_category = 2;
+      } else {
+        active_meter_category = 1;
+      }
+      play_sound_effect(0x5B, 15, 127);
+      /* Materialize the threshold before the comparison: a direct > test emits
+       * slti/xori instead of the retail li/slt pair. */
+    } else if ((far = 60, far = far < distance)) {
+      if (active_meter_category == 1) {
+        if (D_800FBE9C == 0) {
+          play_sound_effect(0x5E, 15, 127);
+        } else {
+          active_meter_category = 0;
+          play_sound_effect(0x5B, 15, 127);
+        }
+      } else {
+        active_meter_category = 1;
+        play_sound_effect(0x5B, 15, 127);
+      }
+    } else {
+      play_sound_effect(0x5B, 15, 127);
+      if (active_meter_category == 1) {
+        active_meter_category = 2;
+      } else {
+        active_meter_category = 1;
+      }
+    }
+  }
+  if (!(shot->flags & 1)) {
+    s32* category = &active_meter_category;
+    if ((*category == 0) & (distance <= 60)) {
+      *category = 1;
+    }
+    if ((*category == 2) & (distance > 60)) {
+      *category = 1;
+    }
+    if (*category == 0 && D_800FBE9C == 0) {
+      *category = 1;
+    }
+  }
+}
