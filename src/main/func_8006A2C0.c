@@ -874,28 +874,26 @@ void func_8006CE88(s32 arg0) {
 
   counter = 1;
   col = get_round_first_hole();
-  {
-    for (; col < arg0; col++) {
-      last = -1;
-      for (i = 0; i != active_player_count[0]; i++) {
-        if (player_records[i].hole_scores[col].score != 0) {
-          last = i;
-          player_records[i].hole_scores[col].score = counter;
-        }
+  for (; col < arg0; col++) {
+    last = -1;
+    for (i = 0; i != active_player_count[0]; i++) {
+      if (player_records[i].hole_scores[col].score != 0) {
+        last = i;
+        player_records[i].hole_scores[col].score = counter;
       }
-      if (col == arg0 - 1) {
-        D_801050BC[0] = counter - 1;
-        D_801050BC[1] = counter;
-      }
-      if (last == -1) {
-        counter++;
-        D_801050BC[2] = counter - 1;
-      } else {
-        hasZero = last;
-        D_80106230[hasZero] += counter;
-        counter = 1;
-        D_801050BC[2] = 0;
-      }
+    }
+    if (col == arg0 - 1) {
+      D_801050BC[0] = counter - 1;
+      D_801050BC[1] = counter;
+    }
+    if (last == -1) {
+      counter++;
+      D_801050BC[2] = counter - 1;
+    } else {
+      hasZero = last;
+      D_80106230[hasZero] += counter;
+      counter = 1;
+      D_801050BC[2] = 0;
     }
   }
 
