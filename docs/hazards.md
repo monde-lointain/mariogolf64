@@ -4550,7 +4550,7 @@ since 2.7.2 runs no `while`→do-while condition-copy pass — (ii) makes the bo
 at 1208) annuls the advance into the `bnel` inline compare, with the found block inline between compare
 and advance. The earlier "no single idiom yields both un-rotated-head and conditional-annul, so it's a
 wall" was a wrong framing, not a real wall. (Keep the frame-fix from
-[#default-return-var-must-init-after-call]: init `result=0` after the call.)
+[#default-return-var must init after the call](#default-return-var-must-init-after-the-call-caller-saved-sentinel-frame-lever): init `result=0` after the call.)
 
 **Provenance:** established: S152 (`vector_magnitude_safe` / `calculate_hypotenuse_safe` range-scaling
 loops, shared with `#double-sqrt-fast-math`); reversal corollary: S154 (the `check_dbra_loop`
