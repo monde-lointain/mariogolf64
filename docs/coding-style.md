@@ -81,7 +81,7 @@ translation unit. These headers describe observed target layouts, not host-nativ
 | [`controller.h`](../src/main/controller.h) | Processed controller state and six-byte repeat slots |
 | [`fog.h`](../src/main/fog.h) | Fog/color presets, `FogColorRecord` palette entries, lens-flare-cap prefix |
 | [`rom_asset.h`](../src/main/rom_asset.h) | ROM read cursor and its enclosing compressed-asset load record |
-| [`session.h`](../src/main/session.h) | Player/scenario state, hole environment, per-round accumulators, saved mode records, per-scenario statistics |
+| [`session.h`](../src/main/session.h) | Player/scenario state, hole environment, round accumulators, saved mode records, course names and 18-hole par records, per-scenario statistics |
 | [`terrain.h`](../src/main/terrain.h) | Terrain attributes, scenery collision cylinders, and `TerrainTileCache` color/culling records |
 | [`vector.h`](../src/main/vector.h) | Shared `Vec3f`/`Vec3i` values and the mixed integer/float `ScreenProjection` output |
 

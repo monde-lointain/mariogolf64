@@ -809,7 +809,6 @@ void update_and_draw_iris_wipe(Gfx** pgfx) {
 }
 
 extern s32 get_round_first_hole(void);
-extern s8 D_800C1420[];
 extern s32 get_current_course_id(void);
 extern s32 round_hole_index;
 extern s32 calculate_hole_handicap_adjustment(s32 course_id, s32 hole_index,
@@ -817,7 +816,7 @@ extern s32 calculate_hole_handicap_adjustment(s32 course_id, s32 hole_index,
 
 s32 func_8006CD50(s32 hole_limit, s32 player) {
   s32 total = 0;
-  s8* course = &D_800C1420[get_current_course_id() * 200];
+  s8* course = (s8*)&D_800C1420[get_current_course_id()];
   s32 i;
   if (round_hole_index == hole_limit) {
     hole_limit += player_records[player].hole_status != 0;
@@ -1154,7 +1153,7 @@ void accumulate_mode_stats(void) {
   rec = func_8005AF50() + (scenario_mode_id * 116 + 0xE98);
   stats = (ScenarioStatistics*)rec;
   g = &D_800FF4D0.unknown_00;
-  cfg = &D_800C1420[scenario_mode_id * 200];
+  cfg = (s8*)&D_800C1420[scenario_mode_id];
 
   if (stats->sample_count <= 0) {
     stats->sample_count = 0;

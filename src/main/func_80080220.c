@@ -141,30 +141,69 @@ check_init:
   }
 }
 
-/* func_80080688: CARRY (S255 stretch, near-match — body fully RE'd, NOT
- * banked). Club/shot setup glue: func_8007E2B0/func_8007E234(2); if
- * putter_mode_flag==1 play_sound_effect(0,9,0x64)+D_80106190=100.0f else
- * update_object_group_by_id(9); func_8002646C; get_current_course_id;
- * idx=get_standard_course_hole_index(); load the D_800C54CC[idx]+idx asset;
- * get_current_hole_index; idx=get_current_course_id();
- * terrain=D_800C1434[idx*210]; switch(terrain)
- * selects asset 0x565, 0x566, or 0x567 through the shared slot, then
- * load_rom_asset_payload. If D_800C59E0==2, func_80080C4C(); game_mode dispatch
- * (==9/==3 set D_800C59E4=1 + func_802418B8(0/1) once; else func_8008C520()).
- * TERMINAL RESIDUAL: the `idx*210` index multiply. ROM synthesizes it as an
- * ADD-only two-chain (idx*10 + idx*200, idx held in both s0 and v0); gcc-2.7.2
- * synth_mult here emits the SHORTER subtract-based form (`sll v0,3; subu; subu;
- * sll`) in EVERY source spelling (idx*210, idx*10+idx*200, byte-offset cast) —
- * it folds/re-synthesizes to the subu form, 5 instrs shorter, cascading the
- * tail
- * + a few delay-slot fills. Compiler-internal multiply synthesis, not source-
- * leverable; percent below the 0.97 permuter gate and
- * instruction-count-changing (permuter cannot add the missing words).
- * Escalation = gcc-2.7.2 synth_mult source dive (why the ROM avoided the
- * subtract for *210 — likely an rtx_cost / config difference) OR corpus-mine a
- * matched *210 struct-stride sibling.
- */
-INCLUDE_ASM("asm/nonmatchings/main/func_80080220", func_80080688);
+extern void func_8007E234(s32 mode);
+extern s32 putter_mode_flag;
+extern void play_sound_effect(s32 sfx, s32 channel, s32 volume);
+extern f32 D_80106190;
+extern void update_object_group_by_id(s32 group);
+extern void func_8002646C(void);
+extern s32 get_current_course_id(void);
+extern s32 get_standard_course_hole_index(void);
+extern s32 get_current_hole_index(void);
+extern u16 D_800C54CC[];
+extern void* D_800E21C0;
+extern void* D_800E2180;
+extern void func_802418B8(s32 mode);
+extern void func_8008C520(void);
+
+void func_80080688(void) {
+  RomAssetLoad asset;
+  s32 course;
+  s32 hole;
+
+  func_8007E2B0();
+  func_8007E234(2);
+  if (putter_mode_flag == 1) {
+    play_sound_effect(0, 9, 100);
+    D_80106190 = 100.0f;
+  } else {
+    update_object_group_by_id(9);
+  }
+  func_8002646C();
+  course = get_current_course_id();
+  get_rom_asset_allocation_size(
+      D_800C54CC[course] + get_standard_course_hole_index(), &asset);
+  load_rom_asset_payload(D_800E21C0, &asset);
+  hole = get_current_hole_index();
+  switch (D_800C1420[get_current_course_id()].holes[hole].par) {
+    case 3:
+      get_rom_asset_allocation_size(0x565, &asset);
+      break;
+    case 4:
+      get_rom_asset_allocation_size(0x566, &asset);
+      break;
+    case 5:
+      get_rom_asset_allocation_size(0x567, &asset);
+      break;
+  }
+  load_rom_asset_payload(D_800E2180, &asset);
+  if (D_800C59E0 == 2) {
+    func_80080C4C();
+  }
+  if (game_mode == 9) {
+    if (D_800C59E4 == 0) {
+      D_800C59E4 = 1;
+      func_802418B8(0);
+    }
+  } else if (game_mode == 3) {
+    if (D_800C59E4 == 0) {
+      D_800C59E4 = 1;
+      func_802418B8(1);
+    }
+  } else {
+    func_8008C520();
+  }
+}
 
 extern void func_801FD624(void);
 extern void func_800789C8(void);
@@ -172,7 +211,6 @@ extern void func_8020D6F0(void);
 extern void func_80216EDC(void);
 extern void func_8020E740(void);
 extern void func_8021E5F4(void);
-extern s32 get_current_course_id(void);
 extern void load_spark_effect(s32 asset_index);
 extern s32 D_800C59D8;
 extern s32 D_800C59DC;
@@ -393,13 +431,10 @@ INCLUDE_ASM("asm/nonmatchings/main/func_80080220", func_80080E7C);
 extern void* course_panorama_ptr;
 extern void* sky_cloud_texture_ptr;
 extern void* D_800FBE0C;
-extern void* D_800E21C0;
-extern void* D_800E2180;
 extern void* D_800E2160;
 extern void* D_800FE3D4;
 extern void* fog_filter_texture_primary;
 extern void* fog_filter_texture_secondary;
-extern u16 D_800C54CC;
 extern s16 D_801B7F30;
 extern s16 D_801B7F32;
 extern s16 D_801B7F34;
@@ -424,7 +459,7 @@ void load_course_scenery_assets(void) {
   D_800FBE0C = heap3_alloc(size);
   load_rom_asset_payload(D_800FBE0C, &slot);
 
-  size = get_rom_asset_allocation_size(D_800C54CC, &slot);
+  size = get_rom_asset_allocation_size(D_800C54CC[0], &slot);
   D_800E21C0 = heap3_alloc(size);
   load_rom_asset_payload(D_800E21C0, &slot);
 
@@ -2005,7 +2040,6 @@ extern s32 D_801B60B0;
 extern char D_800D1C84[];
 extern char D_800D1CD0[];
 extern char D_800D1CD4[];
-extern char D_800C1420[];
 extern s32 D_800C2AD8[];
 extern s32 D_800C2B00[];
 extern s32 func_80242418(void);
@@ -2047,8 +2081,8 @@ void func_8008CD30(Gfx** chain) {
         emit_glyph_sheet_preamble_dl(&dl, 0);
         gDPSetPrimColor(dl++, 0, 0, 255, 0, 0, 255);
         gDPSetEnvColor(dl++, 255, 255, 0, 255);
-        sprintf(D_80105118, D_800D1CD0, &D_800C1420[get_current_course_id() * 0xC8]);
-        sprintf(D_80105118, D_800D1CD0, &D_800C1420[get_current_course_id() * 0xC8]);
+        sprintf(D_80105118, D_800D1CD0, D_800C1420[get_current_course_id()].name);
+        sprintf(D_80105118, D_800D1CD0, D_800C1420[get_current_course_id()].name);
         func_8007624C(&dl, 0xA0, 0x20, D_80105118,
                       D_800C2AD8[scenario_mode_id[0]],
                       D_800C2B00[scenario_mode_id[0]], 0x10);

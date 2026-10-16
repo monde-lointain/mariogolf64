@@ -120,6 +120,18 @@ typedef struct {
   /* 0x60 */ u8 unknown_60[8];
 } CourseSelectionRecord; /* 0x68 */
 
+typedef struct {
+  /* 0x00 */ s8 par;
+  /* 0x01 */ u8 unknown_01[9];
+} CourseHoleDefinition; /* 0x0A */
+
+typedef struct {
+  /* 0x00 */ char name[20];
+  /* 0x14 */ CourseHoleDefinition holes[18];
+} CourseDefinition; /* 0xC8 */
+
+extern CourseDefinition D_800C1420[];
+
 /* SRAM statistics at save + 0xE98, indexed by scenario mode. The podium
  * fields and round totals belong to this same record, not the player array. */
 typedef struct {
