@@ -48,7 +48,7 @@ Common options precede the subcommand:
 
 - `--ghidra-home <installation>` or `MG64_GHIDRA_HOME`: explicit installation override. Otherwise
   reuse the completed database's installation, then discover under `~/.local/opt/ghidra/`.
-- `--mcp-root <checkout>` or `MG64_GHIDRA_MCP_ROOT`: defaults to `~/projects/tools/ghidra-mcp`.
+- `--mcp-root <checkout>` or `MG64_GHIDRA_MCP_ROOT`: defaults to `~/tools/ghidra-mcp`.
 - `--state-dir <directory>`: defaults to this checkout's `private/ghidra`.
 - `--port <port>` or `MG64_GHIDRA_PORT`: defaults to loopback port 8089.
 

@@ -23,6 +23,16 @@ The supported input is US revision 0 (`NMFE`) in big-endian `.z64` format. Suppl
 `baserom.z64` at the repository root. The authoritative SHA-1 is in `mariogolf64.yaml`;
 `tools/verify-rom.sh` is the ROM match gate. The ROM and extracted game assets are not distributed.
 
+## Checkout relocation
+
+This checkout now lives at `~/projects/retro/n64/mariogolf64`; shared tool
+checkouts are under `~/tools`. The pre-relocation `.venv` is preserved as
+`venv.bak`, and `uv sync --locked` recreated `.venv` for the new location.
+The old CMake tree is preserved as `build/us.pre-relocation`; it retains
+former checkout paths and must not be reused without reconfiguration.
+Generated compile databases likewise contain checkout-specific absolute paths
+and must be regenerated before reuse.
+
 ## Choose a task
 
 - [Bootstrap and full ROM verification](#configure-build-and-verify)

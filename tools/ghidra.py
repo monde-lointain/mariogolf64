@@ -934,7 +934,7 @@ def main():
         type=Path,
         default=Path(
             os.environ.get(
-                "MG64_GHIDRA_MCP_ROOT", str(Path.home() / "projects/tools/ghidra-mcp")
+                "MG64_GHIDRA_MCP_ROOT", str(Path.home() / "tools/ghidra-mcp")
             )
         ),
     )
