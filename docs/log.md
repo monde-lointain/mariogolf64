@@ -2,6 +2,29 @@
 
 ## 2026-10-15
 
+- **Five additional main banks**: `func_800451E4`, `func_800719A0`,
+  `func_8006CD50`, `func_8007E7B8`, and `animation_play` replace 498 instructions /
+  1,992 bytes of assembly. Main C-host stubs decrease 188 → 183.
+  - Recovered meter-category transitions, HUD entry setup, round-score totals,
+    wind-pool initialization and typed animation part-state resets. Corrected
+    the HUD caller declarations; the only overlay edit is its existing prototype.
+  - Source levers: threshold scratch materialization, post-offset dimension
+    copies, in-place signed fixed-point truncation, and a const-qualified read of
+    the fixed model part-list pointer. The latter resolves the old 79-instruction
+    animation scheduling carry without const-qualifying mutable part state.
+  - Inspected the user-supplied GCC 2.7.2 CSE/expansion/scheduler sources and used
+    read-only parallel compiler analysis. All source edits and builds serialized.
+    No compiler/profile, YAML or symbol changes.
+  - Each bank passed `tools/verify-rom.sh`, including the final integrated state:
+    `e2c4e7a905b29529b49a1619a401fe699224829b`.
+    A throwaway 32-bit UBSan smoke passed 19,704 checks across all five bodies,
+    including boundary transitions, signed arithmetic, sentinel termination and
+    preservation of unrelated records/bytes. No emulator run.
+  - Refreshed BACKLOG measurements for isolated audio, camera, terrain, particle
+    and player-state carries. Nonmatching bodies remain isolated; their live
+    `INCLUDE_ASM` stubs are unchanged. Retired stale caller-eviction claims for
+    the three newly banked standalone helpers.
+
 - **Compiler-source loop-note investigation**: Four parallel read-only reviewers inspected the
   requested GCC 2.7.2 and binutils 2.6 trees. The inspected `sched.c`, `flow.c`, `reorg.c`, and
   `tc-mips.c` match the pinned build's vendor copies by SHA-256. Compiler experiments and source

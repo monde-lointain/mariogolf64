@@ -16,6 +16,78 @@ This file holds only the *ordering rationale*, *enabler items* (gate actions), a
 
 ### Current main-bank evidence — 2026-10-15
 
+- Banked five more main functions: `func_800451E4`, `func_800719A0`,
+  `func_8006CD50`, `func_8007E7B8`, and `animation_play`
+  (**498 instructions / 1,992 bytes; 188 → 183 C-host stubs**).
+  Each integration passed `tools/verify-rom.sh`; final USA retail SHA-1:
+  `e2c4e7a905b29529b49a1619a401fe699224829b`.
+  - Meter-category selection needs an explicitly materialized threshold scratch
+    for the retail `li/slt`, rather than the shorter immediate comparison.
+    HUD entry setup copies measured width/height after forming the record offset.
+    Corrected its existing C caller declarations, including the overlay-10
+    declaration only; no overlay target was selected.
+  - Round-score accumulation uses canonical `PlayerState` fields and course par
+    bytes. The old HUD/score/particle caller-eviction labels were stale: their
+    live callers do not prevent these standalone banks.
+  - Wind-pool initialization uses the canonical hole environment, explicit
+    negative-input rounding before the fixed-point shift, and typed 0x30/0x1C
+    pool records. Its second loop writes the nine-state cycle and unit scale.
+  - `animation_play` now has a typed 0x34-byte part-state walk. Read the fixed
+    model metadata's pointer through `AnimationPartState* const*`, not a pointer
+    to const part state: GCC then schedules that load before the runtime
+    end-frame store. Ordinary reads scored 225; the qualified read matches 79/79.
+    `expr.c:4540–4585` and `sched.c:817–839` in the supplied GCC tree explain
+    the read-only-memory exemption. The mutable part records remain writable.
+  - Isolated scores 10/100/30/20 for the first four functions are only interior
+    relocation names; integrated function ranges and full ROMs match. Final
+    measurements, in the five-function order above:
+    `2ec6ac52c1d8c2e1a0d4b1a7710733dc791e300bd5b8fbfc9911f91b0c9375b6`,
+    `15755a6898afc47a380f7d16ed695aa7f81e1159becf4040dd02f35840ae8fd3`,
+    `32e7aa7ec1bfcc23fdc86736adcd1cbf1b301aee87a0619b8b19818e948c5700`,
+    `ead493ad45498272b626c64f5b3a7325f59bbca2123c56f405bcdbaf0a353c86`,
+    `46b98f1b924a814f51789e43fb144001e03356f9b485840d3ca83ec3d3288806`.
+  - A throwaway 32-bit UBSan smoke passed **19,704 checks**: meter transitions
+    around distance 60 and locked modes; HUD centering, visibility reset and
+    disable preservation; score limits/current-hole inclusion and signed values;
+    wind truncation, angle wrapping and pool initialization; animation selection,
+    missing state, frame extremes, part sentinels and unrelated-byte preservation.
+    No emulator run. YAML, symbols and compiler profiles are unchanged.
+  - Unbanked candidates retain their live stubs and exact-profile source/JSON
+    snapshots under `nonmatchings/<function>/measurements/`:
+    - `play_bgm_by_id`: score 140, frame 0x20; one shared address versus two
+      retail additions. Constant-call duplication now preserves the branch
+      without growing the frame. See refreshed audio carry below.
+    - `bgm_tick`: score 855,
+      `c6603babfa5237a43282cb1287f5fa1d7c53e7d66b52543f7afe79d4b35c0dda`.
+      Fade-loop arithmetic matches; request-delay address folding, debug-load
+      order and interrupt-mask/stop scheduling remain. A future bank also needs
+      the unsigned-float conversion constant's required rodata split; none made.
+    - `func_80098C6C`: score 10,
+      `4353eae7b66fdf3df4e97e5c56ffdc95b870dc867d52d358ffbad7ca0056b13e`.
+      Input/output still share `$f2`, where retail loads input in `$f4`.
+      Double promotion/narrowing did not change the object; original base restored.
+    - `func_80041D44`: score 535,
+      `cd29654a500e36fab122233ef713826e9631eb8fa55f5971810fbd17785715a6`.
+      Member views retain canonical 0xA00 cache stride. GCC hoists the selector
+      root, not the retail tile root. A goto outer loop swaps that choice but
+      changes allocation; a real do loop, pointer/integer base spelling and
+      one-shot destination assignment do not resolve it. Inspect `.loop` next.
+    - `func_8007E438`: score 1140,
+      `c58cc12e4643985b6f2ba2d8f750474f9e254a130f758942915ee3c96971ad66`.
+      First 103 instructions match; final coordinate/metadata scheduling and
+      FPR quantities remain. Four array-root reads and two scalar wind-component
+      reads preserve distinct alias behavior; typed versus flat position
+      accesses alone are byte-identical. Compiler dumps retain the earlier base.
+    - `func_8005FCB8`: score 2515,
+      `2e557b252377e748414d35474faa461c2408f4c396af494acdf4b7461c92868f`.
+      Canonical player-field scans recover semantics; saved-register/frame and
+      branch-tail merging differ. No new wall verdict.
+    - `init_per_player_state`: score 4255,
+      `c29485fd6d1bec0da01d5cab4cdbfba004cb6dadeb2f4f1fb9795f1ff036c911`.
+      Extra saved register and frame 0x30 versus 0x28. Its isolated caller uses
+      `update_rng_seed`'s observed `$v0`, unlike the current void declaration;
+      resolve that contract before any integration.
+
 - Banked `mtx_from_rts`, `frustum_cull_point_with_radius`,
   `compute_triangle_plane`, `func_8003AC80`, and `func_80065E6C`
   (628 instructions / 2,512 bytes). Main C-host stubs decreased **193 → 188**.
@@ -5152,18 +5224,19 @@ by `/sprint-plan`:
   missing handles, first/last lookup entries, reverb cases, fifth-argument pan,
   and interrupt restoration. No permanent tests or harness files were added.
   **New unbanked carry:** `play_bgm_by_id`, ROM `0x2D008`, remains a stub.
-  `nonmatchings/play_bgm_by_id/base.c` is 93/97 actual instructions, score 665,
-  measurement `470af6100fccb34725348587cc2283009f0439f378f0b3ebbe8ae93cdcee405b`.
-  Byte-offset table casts recover the held base but CSE shares one address where
-  the ROM has two oppositely ordered `addu`s. A local mode selection becomes
-  `sltiu`, not the ROM's branch; duplicating the two constant-argument calls
-  recovers that branch but grows the dead frame from `0x20` to `0x28`.
-  Parameter scratch reuse worsens allocation; an empty one-shot loop does not
-  prevent the selection fold. Next: source argument-evaluation/address shape and
-  a branch-preserving mode-selection form without that frame cost. No terminal
-  verdict or ROM bank is claimed for this candidate.
-  **Remaining:** `func_80051210`, `bgm_tick` (still unattempted), `play_bgm_by_id`,
-  and the prior `func_80051D8C` carry.
+  Refreshed `nonmatchings/play_bgm_by_id/base.c`: score 140, one instruction
+  short of retail's 97; measurement
+  `8dd1eeaa19793ff663e087d8ff3c100435c2b04f47e55c6138ee000a76d46d50`.
+  A typed ROM-range record plus byte-offset start read recovers the frame 0x20.
+  Duplicated constant-argument calls now preserve the final branch without
+  growing that frame; the old frame-cost verdict is retired. Residual:
+  `cse.c:exp_equiv_p` commutes and shares the two range addresses, where retail
+  has two oppositely ordered additions. Widening either the data or address
+  intermediate grows the frame to 0x30 and worsens allocation; restored the
+  measured 140 base. Next: a real distinct pre-combine address quantity, not
+  unsequenced call-argument assignments (which would introduce C UB).
+  **Remaining:** `func_80051210`, `bgm_tick` (now measured; see current main
+  evidence), `play_bgm_by_id`, and the prior `func_80051D8C` carry.
   The `coddog-mirror:nucontgbpakmgr.c@99.99` / static-name-collision tags are
   structural false-positives; `alSynNew=synthesizer` was a name-only false-match
   (stub body). Treat this pack as classical, not a NuSystem mirror.
@@ -5295,15 +5368,11 @@ by `/sprint-plan`:
     passes with SHA-1 `e2c4e7a905b29529b49a1619a401fe699224829b`.
     A throwaway 32-bit UBSan harness passed 624 checks across these four functions
     and `func_80029B08`, including all 18 generated rows and append saturation.
-  - **Nine live stubs remain.** `animation_play` is still unbanked:
-    `nonmatchings/animation_play/base.c`, main plus the host fast-math override,
-    measurement `0f2d61cb1e8f0073cdc005f058bbd900d8ca6057526eceed1345f971d34583a8`,
-    score 225, 79/79 instructions after section padding is excluded.
-    Typed state fields plus base-before-offset formation fix the initial track
-    access. Residual is the final part-table root/load placement and associated
-    `$v1/$a0` lifetime; moving that read before the end-frame store enables CSE
-    across the prior region and worsens the result. Next experiment: isolate the
-    end-frame/part-table alias dependency without merging those earlier loads.
+  - **Eight live stubs remain.** `animation_play` is now **BANKED 2026-10-15**:
+    the model part-list pointer's const-qualified read removes the end-frame
+    alias barrier. Typed 0x34-byte part states match 79/79 instructions, and
+    `tools/verify-rom.sh` passes. See current main-bank evidence for its final
+    measurement and behavior smoke; the old score-225 carry is resolved.
 
 - **(S213 MIXED-PARTIAL — carried; 28 of 48 banked)** `src/main/func_80054900.c` (main-segment
   `[0x2FD00]` character-animation pack). Subseg `[0x2FD00, c, main/func_80054900]` flipped; 28 banked
@@ -6807,8 +6876,9 @@ by `/sprint-plan`:
   **Deferred (wall-class):** the 748xx triplet remainder (`func_800747B0`/`func_80074840`/`func_800748D0`
   — now their helper `func_800738BC` is banked, so they lose the div-round unknown; re-price next visit);
   then the 140i+ mid-logic (`func_80072A08` 698i, `func_80071CE4` 841i, `func_8007580C` 399i) + FP fns
-  (`func_800754BC`/`func_8007515C`); `func_800719A0` = caller-evict (inlined into
-  src/overlay_10/func_ovl10_801F4A40.c, skip). File md5-candidate only when all 39 bank. S237 lesson:
+  (`func_800754BC`/`func_8007515C`); `func_800719A0` is **BANKED 2026-10-15**.
+  Its overlay caller only needed a corrected declaration, not eviction or
+  overlay decompilation. File md5-candidate only when all 39 bank. S237 lesson:
   a plateaued/wall-sensitive tail (S224) is still a BANK slice for its known-playbook leaves (jtbl,
   glyph-classify) — fan-out sorts crack-vs-terminal-carry rather than pure characterization.
   **S242 UPDATE: banked `func_80074EFC` + `func_80075010` + `func_80074D0C` (glyph/text DL-emitter family,
@@ -6875,8 +6945,9 @@ by `/sprint-plan`:
   now also covers `func_8007955C` (per the S243 follow-up).
   **Remaining deferred (re-price, NOT confirmed walls):** `func_8007D19C`/`func_8007DB08` (jal0) +
   `func_8007FEAC` (jal8) mid-logic; FP cluster `func_8007B054`/`func_8007A6C8`/`func_8007E980`;
-  `draw_character_shadow` (DL/shadow); `func_8007B994` (785i state machine); `func_8007E7B8` +
-  `func_8007FE44` = caller-evict (skip). Still ~22 stubs; file md5-candidate only when all bank.
+  `draw_character_shadow` (DL/shadow); `func_8007B994` (785i state machine).
+  `func_8007E7B8` is **BANKED 2026-10-15**; `func_8007FE44` is also already C.
+  Neither remains a caller-eviction carry. File md5-candidate only when all bank.
   **S225 levers (landed in hazards.md):** `#counter-up-pointer-giv-fill-loop` and
   `#callee-prototype-is-load-bearing`. **S226 lesson:** a low-FP DL-emitter vein is TRACTABLE via stock
   gbi macros (not wall-class). **S244:** the FP particle-spawn vein is ALSO tractable (2 banked) — the
@@ -7008,8 +7079,10 @@ by `/sprint-plan`:
   load; the 0x92492493 magic is just the /14 div, no permutation). A deferred-wall prediction from a magic
   constant is a HYPOTHESIS — verify by seeding, not by the tell. The large DL builder `func_8006B5D8` (F3DEX2 `#display-lists` — use the S239
   `gDP*(gfx++)` MACRO form, NOT raw `gfx[i].words` indexing which diverges to base+displacement);
-  `func_8006BA94` (492B sfx/menu dispatch), the big A2C0/A5E4/A84C/BC80/C484/C918/D6D0/E210. `func_8006CD50` = caller-evict (inlined into src/main/func_80071220.c, skip). File
-  md5-candidate only when all 45 bank. **S223→S224 lesson (productivity cliff):** a fresh `none`
+  `func_8006BA94` (492B sfx/menu dispatch), the big A2C0/A5E4/A84C/BC80/C484/C918/D6D0/E210.
+  `func_8006CD50` is **BANKED 2026-10-15**; the prior caller-eviction claim
+  did not describe its live C caller. File md5-candidate only when all 45 bank.
+  **S223→S224 lesson (productivity cliff):** a fresh `none`
   pack's tiny+small vein banks FAR cheaper (+19 S223) than its mid-logic tail (+1 S224, 3 walls); once
   the getter/setter/dispatch leaves are banked, the residual concentrates on base-register /
   loop-strength-reduction / branch-likely no-source-lever classes → route to a fresh pack or an
