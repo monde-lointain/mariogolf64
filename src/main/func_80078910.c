@@ -2,6 +2,7 @@
 #include "animation.h"
 #include "rom_asset.h"
 #include "terrain.h"
+#include "session.h"
 
 typedef struct {
   Vec3f position; /* 0x00 */
@@ -528,11 +529,28 @@ void project_delta_to_radius_150(void) {
   D_800FF41C = (s32)((f32)D_800FF41C * scale + view_camera_eye_z);
 }
 
+typedef struct {
+  Vec3f position;
+  Vec3f target_position;
+  s32 unknown_18;
+  f32 unknown_1C;
+  u8 unknown_20[0xA];
+  s16 unknown_2A;
+  s8 unknown_2C;
+  u8 unknown_2D;
+  u8 unknown_2E[2];
+} WindParticle; /* 0x30 */
+
+extern void func_8007E438(WindParticle* p);
+
 INCLUDE_ASM("asm/nonmatchings/main/func_80078910", func_8007E438);
 
 typedef struct {
   Vec3f position; /* y is sampled terrain height */
-  u8 reserved_0C[0xC];
+  f32 unknown_0C;
+  u8 unknown_10[6];
+  s8 unknown_16;
+  u8 unknown_17;
   s8 unknown_18;
 } TerrainScatterPoint;
 
@@ -550,7 +568,51 @@ void randomize_terrain_scatter_point(TerrainScatterPoint* p) {
   p->unknown_18 = 0;
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80078910", func_8007E7B8);
+extern s32 D_80104AC0;
+extern f32 D_801049FC;
+extern f32 D_800FE380;
+/* Member-sized views retain the separate retail address roots of this step. */
+extern f32 D_80104F44[];
+extern f32 D_80104F48[];
+extern f32 D_80104F4C[];
+extern f32 cosf(f32 angle);
+extern f32 sinf(f32 angle);
+
+void func_8007E7B8(void) {
+  s32 wind = hole_environment.wind_magnitude;
+  f32 angle;
+  f32 strength;
+  s32 i;
+  D_80104AC0 = 0;
+  angle = (u16)hole_environment.wind_angle_bam * 0.000095873802f;
+  /* Keep signed truncation in the input scratch before converting to float. */
+  if (wind < 0) {
+    wind += 0xFFFF;
+  }
+  strength = (f32)(wind >> 16);
+  strength *= 0.1f;
+  D_801049FC = cosf(angle) * strength;
+  D_800FE380 = sinf(angle) * strength;
+  D_80104F48[0] = 60.0f;
+  D_80104F44[0] = D_801049FC * 60.0f;
+  D_80104F4C[0] = D_800FE380 * 60.0f;
+  project_delta_to_radius_150();
+  for (i = 0; i != 48; i++) {
+    func_8007E438((WindParticle*)D_801EFFA8 + i);
+    ((WindParticle*)D_801EFFA8)[i].unknown_2A = 0;
+  }
+  i = 0;
+  strength = 1.0f;
+  for (; i != 32; i++) {
+    TerrainScatterPoint* point;
+    randomize_terrain_scatter_point((TerrainScatterPoint*)D_801B8BB8 + i);
+    point = (TerrainScatterPoint*)(i * sizeof(TerrainScatterPoint) +
+                                   (u32)D_801B8BB8);
+    point->unknown_16 = i % 9 - 1;
+    point->unknown_0C = strength;
+    ((TerrainScatterPoint*)D_801B8BB8)[i].unknown_17 = 0;
+  }
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80078910", func_8007E980);
 
