@@ -26,6 +26,16 @@ extern s32 D_800C0EAC[];
 extern SoundDelayRow D_800C0FF8[7];
 extern s32 D_800C10F4[];
 extern PendingPlayerSound D_800C113C[4];
+extern u32 D_800C11B0[];
+extern s32 g_bgm_pending_id;
+extern s32 g_bgm_pending_flags;
+extern const char D_800CCC08[];
+extern s32 func_8005DE00(void);
+extern void bgm_load_song_from_rom(u32 rom_addr, s32 size);
+extern musHandle bgm_start_current(void);
+extern u8 D_800C1FFC;
+extern u32 D_800C0F2C;
+extern void func_8009B0DC(int mode);
 extern s32 flag_is_set(s32 flag);
 extern u32 spawn_object_simple(int number);
 extern s32 D_800C0E60;
@@ -248,7 +258,48 @@ void func_80051B9C(f32 offset) {
 
 s32 func_80051BFC(void) { return g_bgm_current_id; }
 
-INCLUDE_ASM("asm/nonmatchings/main/play_sound_effect", play_bgm_by_id);
+void play_bgm_by_id(s32 id, s32 flags) {
+  if (flag_is_set(0x9D)) {
+    return;
+  }
+  if (func_8005DE00() && (flags & 0x10)) {
+    bgm_request_stop();
+    return;
+  }
+  if (g_bgm_active_handle != -1) {
+    if (!(flags & 0x80) && g_bgm_current_id == id) {
+      return;
+    }
+    g_bgm_pending_action = 1;
+    g_bgm_pending_id = id;
+    g_bgm_pending_flags = flags;
+    g_bgm_action_delay = 2;
+    return;
+  }
+  if (g_bgm_pending_action == 1) {
+    g_bgm_pending_id = id;
+    g_bgm_pending_flags = flags;
+    return;
+  }
+  osSyncPrintf(D_800CCC08, id);
+  if (func_8005DE00() && (flags & 0x10)) {
+    return;
+  }
+  g_bgm_current_id = id;
+  if (id >= 51) {
+    id = 50;
+  }
+  bgm_load_song_from_rom(D_800C11B0[id * 2],
+                         D_800C11B0[id * 2 + 1] - D_800C11B0[id * 2]);
+  MusSetMasterVolume(2, 12000);
+  g_bgm_active_handle = bgm_start_current();
+  D_800C0F2C = g_bgm_active_handle;
+  if (D_800C1FFC & 2) {
+    func_8009B0DC(0);
+  } else {
+    func_8009B0DC(1);
+  }
+}
 
 extern u8 D_171790[];
 extern u8 audio_wave_table_rom_start[];

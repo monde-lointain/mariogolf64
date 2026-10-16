@@ -1788,7 +1788,7 @@ void func_8005DDAC(void) {
   current_game_mode = 0xC;
 }
 
-s8 func_8005DE00(void) { return ((s8*)func_8005AF50())[0x28]; }
+s32 func_8005DE00(void) { return ((s8*)func_8005AF50())[0x28]; }
 
 s8 func_8005DE20(void) { return ((s8*)func_8005AF50())[0x29]; }
 
