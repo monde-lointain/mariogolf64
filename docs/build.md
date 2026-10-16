@@ -98,6 +98,10 @@ include ordering, character signedness, defines, and per-file overrides. KMC GCC
 for KMC GAS; modern GAS is restricted to extracted assembly and the entry stub. KMC encodings and
 section padding affect matching.
 
+The `src/main/get_tile_attribute.c` override requires `-ffast-math`: without it,
+`compute_triangle_plane` gains a NaN-check/`sqrtf` fallback, and the host's net text growth
+shifts subsequent main code and data by `0x40`, breaking the full-ROM SHA-1.
+
 CMake tracks extraction byproducts and generated objects. Depfiles include C headers, assembler
 includes, and embedded binary inputs. The linker follows Splat's configured object order.
 `<build-dir>/build-tools.json` (normally `build/us/build-tools.json`) publishes actual tool paths.
