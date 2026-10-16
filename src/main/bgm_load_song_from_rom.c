@@ -111,14 +111,14 @@ void func_8005F11C(u32 rom_addr, s32 size) {
 }
 
 s32 func_8005F180(void) {
-  s32 r = 0;
+  s32 is_mode_flag_set = 0;
 
   if (flag_is_set(0x32)) {
-    r = 1;
+    is_mode_flag_set = 1;
   } else if (flag_is_set(0x9B)) {
-    r = 1;
+    is_mode_flag_set = 1;
   }
-  return r;
+  return is_mode_flag_set;
 }
 
 void func_8005F1C8(void) {
@@ -136,12 +136,12 @@ void func_8005F1C8(void) {
 }
 
 s32 func_8005F224(void) {
-  s32 temp = D_800FBE88;
+  s32 phase_value = D_800FBE88;
 
-  if (temp >= 0x1F) {
-    temp = 0x3C - temp;
+  if (phase_value >= 0x1F) {
+    phase_value = 0x3C - phase_value;
   }
-  return temp;
+  return phase_value;
 }
 
 s32 func_8005F248(s32 value) {
@@ -158,15 +158,13 @@ s32 func_8005F248(s32 value) {
   return (reflected_value << 8) / 30;
 }
 
-s32 func_8005F290(s32 unused, s16* input, u8* output) {
-  s32 i = 0;
-  u8* enabled = output;
-  s16* clubs = input;
-  for (; i < 14;) {
-    *enabled =
-        (get_club_param(*clubs++)->flags & resolve_active_terrain_club_mask(1)) != 0;
-    enabled++;
-    i++;
+s32 func_8005F290(s32 unused, s16* club_ids, u8* enabled_clubs) {
+  s32 club_index;
+
+  for (club_index = 0; club_index < 14; club_index++) {
+    enabled_clubs[club_index] =
+        (get_club_param(club_ids[club_index])->flags &
+         resolve_active_terrain_club_mask(1)) != 0;
   }
   return 14;
 }
@@ -185,15 +183,15 @@ s32 func_8005F30C(s32 x, s32 z) {
 }
 
 void func_8005F360(void) {
-  s32 flags = (flag_is_set(0x33) << 1) + flag_is_set(0x34);
+  s32 mode_flags = (flag_is_set(0x33) << 1) + flag_is_set(0x34);
 
-  switch (flags) {
+  switch (mode_flags) {
     case 0:
       scenario_mode_id = 0;
       round_hole_index = 0;
       D_801B609C = 0;
-      flags = (flag_is_set(0x30) << 1) + flag_is_set(0x31) + 1;
-      active_player_count = flags;
+      mode_flags = (flag_is_set(0x30) << 1) + flag_is_set(0x31) + 1;
+      active_player_count = mode_flags;
       scenario_state_id.state_id = 0;
       game_mode = 0;
       break;
@@ -201,7 +199,7 @@ void func_8005F360(void) {
       scenario_mode_id = 0;
       round_hole_index = 0;
       D_801B609C = 0;
-      active_player_count = flags;
+      active_player_count = mode_flags;
       scenario_state_id.state_id = 0;
       game_mode = 3;
       break;
@@ -209,9 +207,9 @@ void func_8005F360(void) {
       scenario_mode_id = 0;
       round_hole_index = 0;
       D_801B609C = 0;
-      active_player_count = flags;
+      active_player_count = mode_flags;
       scenario_state_id.state_id = 0;
-      game_mode = flags;
+      game_mode = mode_flags;
       /* The original case deliberately falls through to the default setup. */
     default:
       active_player_count = 3;
@@ -226,8 +224,8 @@ void func_8005F360(void) {
 
 void func_8005F4AC(void) {
   /* A byte view preserves the retail scalar-alias barrier at this store. */
-  u8* mode_id = (u8*)&scenario_state_id.scenario_mode_id;
-  *(s32*)mode_id = 0;
+  u8* scenario_mode_id_bytes = (u8*)&scenario_state_id.scenario_mode_id;
+  *(s32*)scenario_mode_id_bytes = 0;
   active_player_count = 1;
   round_hole_index = 0;
   D_801B609C = 0;
@@ -239,19 +237,19 @@ void func_8005F4AC(void) {
   }
 }
 
-void func_8005F518(s32 value, char* buffer) {
-  sprintf(buffer, D_800D1238, value + 1);
+void func_8005F518(s32 value, char* output_buffer) {
+  sprintf(output_buffer, D_800D1238, value + 1);
 }
 
 INCLUDE_ASM("asm/nonmatchings/main/bgm_load_song_from_rom",
             init_per_player_state);
 
-void func_8005F838(s32 mode) {
-  if (mode == 1) {
+void func_8005F838(s32 setup_mode) {
+  if (setup_mode == 1) {
     func_8005F360();
-  } else if (mode == 0) {
+  } else if (setup_mode == 0) {
     func_8005F4AC();
-  } else if (mode == 2) {
+  } else if (setup_mode == 2) {
     func_80060210(D_800FED40);
     D_801B609C = 0;
     active_player_count = 1;
@@ -269,7 +267,7 @@ void func_8005F838(s32 mode) {
     D_801B72A6 = 1;
   }
   setup_terrain_detail_default();
-  if (mode != 3) {
+  if (setup_mode != 3) {
     init_sky_panels();
   }
   func_80054E20();
@@ -281,24 +279,24 @@ INCLUDE_ASM("asm/nonmatchings/main/bgm_load_song_from_rom", func_8005F964);
 void func_8005FB58(void) {
   /* Preserve the ROM's eight bytes of local stack space. */
   s32 unused[2];
-  s32 i;
+  s32 player_index;
   if (D_800FBDB8 == 0) {
-    i = 0;
+    player_index = 0;
     if (active_player_count > 0) {
-      s32 count = active_player_count;
+      s32 players_to_check = active_player_count;
       do {
-        s32 state_code;
-        if (player_records[i].base_score == 0) {
+        s32 player_state_code;
+        if (player_records[player_index].base_score == 0) {
           break;
         }
-        state_code = player_records[i].state_code;
-        if ((state_code != 0x11) & (state_code != 0x14)) {
+        player_state_code = player_records[player_index].state_code;
+        if ((player_state_code != 0x11) & (player_state_code != 0x14)) {
           break;
         }
-        i++;
-      } while (i < count);
+        player_index++;
+      } while (player_index < players_to_check);
     }
-    if (rumble_disable_flag == 0 && i == active_player_count) {
+    if (rumble_disable_flag == 0 && player_index == active_player_count) {
       if (get_course_hole_primary_flag(scenario_mode_id, round_hole_index) &&
           func_8006D1FC() != -1) {
         func_8020FFEC(0xC);
@@ -326,91 +324,93 @@ INCLUDE_ASM("asm/nonmatchings/main/bgm_load_song_from_rom", func_8005FE8C);
 /* The selector advances eight bytes through auxiliary entries, not whole records.
  * These are address projections: direct array indexing folds the member offset
  * into the base and changes the retail instruction order. */
-void func_800600C0(s32 index) {
-  ModeAuxFields* rows = (ModeAuxFields*)D_800FEDD8;
-  GameModeRecord* record = (GameModeRecord*)&rows[index];
-  ModeAuxFields* fields = &record->mode_aux_fields[0];
+void func_800600C0(s32 mode_selector_index) {
+  ModeAuxFields* mode_aux_rows = (ModeAuxFields*)D_800FEDD8;
+  GameModeRecord* mode_record = (GameModeRecord*)&mode_aux_rows[mode_selector_index];
+  ModeAuxFields* auxiliary_fields = &mode_record->mode_aux_fields[0];
 
-  D_80104F78 = fields->unknown_00;
-  D_80104F7C = fields->unknown_02[0];
-  D_80104F80 = fields->unknown_02[1];
-  D_80104F84 = fields->unknown_02[2];
-  D_80104F88 = fields->unknown_02[3];
-  D_80104F8C = fields->unknown_02[4];
-  D_80104F90 = fields->unknown_02[5];
+  D_80104F78 = auxiliary_fields->unknown_00;
+  D_80104F7C = auxiliary_fields->unknown_02[0];
+  D_80104F80 = auxiliary_fields->unknown_02[1];
+  D_80104F84 = auxiliary_fields->unknown_02[2];
+  D_80104F88 = auxiliary_fields->unknown_02[3];
+  D_80104F8C = auxiliary_fields->unknown_02[4];
+  D_80104F90 = auxiliary_fields->unknown_02[5];
 }
 
-void func_80060128(s32 index) {
-  ModeAuxFields* rows = (ModeAuxFields*)D_80105F40;
-  CourseSelectionRecord* record = (CourseSelectionRecord*)&rows[index];
-  ModeAuxFields* fields = &record->mode_aux_fields[0];
+void func_80060128(s32 course_selector_index) {
+  ModeAuxFields* course_aux_rows = (ModeAuxFields*)D_80105F40;
+  CourseSelectionRecord* course_record =
+      (CourseSelectionRecord*)&course_aux_rows[course_selector_index];
+  ModeAuxFields* auxiliary_fields = &course_record->mode_aux_fields[0];
 
-  D_80104F78 = fields->unknown_00;
-  D_80104F7C = fields->unknown_02[0];
-  D_80104F80 = fields->unknown_02[1];
-  D_80104F84 = fields->unknown_02[2];
-  D_80104F88 = fields->unknown_02[3];
-  D_80104F8C = fields->unknown_02[4];
-  D_80104F90 = fields->unknown_02[5];
+  D_80104F78 = auxiliary_fields->unknown_00;
+  D_80104F7C = auxiliary_fields->unknown_02[0];
+  D_80104F80 = auxiliary_fields->unknown_02[1];
+  D_80104F84 = auxiliary_fields->unknown_02[2];
+  D_80104F88 = auxiliary_fields->unknown_02[3];
+  D_80104F8C = auxiliary_fields->unknown_02[4];
+  D_80104F90 = auxiliary_fields->unknown_02[5];
 }
 
 
 s32 func_80060190(s32 score) {
-  s32 difference = score - hole_environment.unknown_2C;
-  s32 result;
-  s32 mode;
+  s32 score_difference = score - hole_environment.unknown_2C;
+  s32 score_code;
+  s32 current_game_mode;
 
   if (score == 1) {
-    result = 0x80;
+    score_code = 0x80;
   } else {
-    switch (difference) {
+    switch (score_difference) {
       case -3:
-        result = 0x81;
+        score_code = 0x81;
         break;
       case -2:
-        result = 0x82;
+        score_code = 0x82;
         break;
       case -1:
-        result = 0x83;
+        score_code = 0x83;
         break;
       case 0:
-        mode = game_mode;
-        if (mode != 9) {
+        current_game_mode = game_mode;
+        if (current_game_mode != 9) {
           goto zero;
         }
-        result = 0x84;
+        score_code = 0x84;
         break;
       default:
         goto zero;
     }
   }
+  /* These shared exits preserve the ROM's branch layout. */
   goto done;
 zero:
-  result = 0;
+  score_code = 0;
 done:
-  return result;
+  return score_code;
 }
 
-void func_80060210(GameModeRecord* arg0) {
-  D_800FEDD8[0] = *arg0;
-  game_mode = arg0->game_mode;
-  scenario_mode_id = arg0->scenario_mode_id;
-  round_hole_index = arg0->round_hole_index;
-  D_800FE330 = arg0->unknown_3E;
+void func_80060210(GameModeRecord* mode_record) {
+  D_800FEDD8[0] = *mode_record;
+  game_mode = mode_record->game_mode;
+  scenario_mode_id = mode_record->scenario_mode_id;
+  round_hole_index = mode_record->round_hole_index;
+  D_800FE330 = mode_record->unknown_3E;
   init_per_player_state();
   osSyncPrintf(D_800D1254);
 }
 
-void func_800602B4(CourseSelectionRecord* arg0) {
-  D_80105F40[0] = *arg0;
+void func_800602B4(CourseSelectionRecord* course_record) {
+  D_80105F40[0] = *course_record;
   game_mode = 9;
-  scenario_mode_id = arg0->scenario_mode_id;
-  round_hole_index = arg0->round_hole_index;
-  D_800FE330 = arg0->unknown_3A;
+  scenario_mode_id = course_record->scenario_mode_id;
+  round_hole_index = course_record->round_hole_index;
+  D_800FE330 = course_record->unknown_3A;
   init_per_player_state();
 }
 
-void func_8006034C(u8 arg0) { D_800C30A4 = arg0; }
+void func_8006034C(u8 value) { D_800C30A4 = value; }
 
 void func_80060358(void) {
   D_800C306C = 0;
@@ -422,21 +422,22 @@ void func_80060358(void) {
 }
 
 s32 func_800603A8(void) {
-  s32 f82 = flag_is_set(0x82);
-  s32 f83 = flag_is_set(0x83);
-  s32 f84 = flag_is_set(0x84);
-  s32 f85 = flag_is_set(0x85);
-  s32 f86 = flag_is_set(0x86);
+  s32 mode_flag_0x82 = flag_is_set(0x82);
+  s32 mode_flag_0x83 = flag_is_set(0x83);
+  s32 mode_flag_0x84 = flag_is_set(0x84);
+  s32 mode_flag_0x85 = flag_is_set(0x85);
+  s32 mode_flag_0x86 = flag_is_set(0x86);
 
-  return (f82 << 4) | (f83 << 3) | (f84 << 2) | (f85 << 1) | f86;
+  return (mode_flag_0x82 << 4) | (mode_flag_0x83 << 3) |
+         (mode_flag_0x84 << 2) | (mode_flag_0x85 << 1) | mode_flag_0x86;
 }
 
 void func_80060434(void) {
-  s32 i;
+  s32 player_index;
 
   D_801B55F0 = scenario_state_id;
-  for (i = 0; i < 4; i++) {
-    D_8012D0C8[i] = player_records[i];
+  for (player_index = 0; player_index < 4; player_index++) {
+    D_8012D0C8[player_index] = player_records[player_index];
   }
 }
 
@@ -456,14 +457,14 @@ extern u8 roster_sort_and_rank(s32 initial_hole, s32 hole_adjustment,
                                s32 initial_score, s32 random_seed);
 
 s32 func_800604F4(void) {
-  s32 mode = game_mode;
+  s32 current_game_mode = game_mode;
   s32 first_hole;
-  s32 i;
-  RankedRosterEntry* entry;
+  s32 roster_index;
+  RankedRosterEntry* roster_entry;
 
   /* Both successful paths share this return; a terminal constant select would
    * otherwise collapse the match-play character check into arithmetic. */
-  if (mode == 4) {
+  if (current_game_mode == 4) {
     if (get_handicap_match_play_result(0, 1) != 1) {
       goto no;
     }
@@ -472,7 +473,7 @@ s32 func_800604F4(void) {
     }
     goto yes;
   }
-  if (mode != 5) {
+  if (current_game_mode != 5) {
     goto no;
   }
   if ((u32)(scenario_mode_id - 4) >= 2) {
@@ -482,16 +483,16 @@ s32 func_800604F4(void) {
   roster_sort_and_rank(18, 0,
                        func_8006CD50(first_hole + get_round_hole_count(), 0),
                        roster_random_seed);
-  i = 0;
+  roster_index = 0;
   do {
-    entry = &ranked_roster_ids[i];
-    if (entry->id == -1) {
-      if ((entry->rank & 0x7F) == 1) {
+    roster_entry = &ranked_roster_ids[roster_index];
+    if (roster_entry->id == -1) {
+      if ((roster_entry->rank & 0x7F) == 1) {
         goto yes;
       }
     }
-    i++;
-  } while (i != 30);
+    roster_index++;
+  } while (roster_index != 30);
 no:
   return 0;
 yes:
@@ -501,23 +502,25 @@ yes:
 INCLUDE_ASM("asm/nonmatchings/main/bgm_load_song_from_rom", func_800605EC);
 
 void gen_terrain_detail_texture(s32 range, s32 minimum) {
-  s32 index = 0;
-  s32 row = 0;
-  s32 column;
-  u8* pixel;
-  while (row < 32) {
-    column = 0;
-    pixel = &g_terrain_detail_texture[index];
-    while (column < 32) {
-      s32 value = rand() % range + minimum;
-      if (value >= 256) {
-        value = 255;
+  s32 texture_index = 0;
+  s32 texture_row = 0;
+  s32 texture_column;
+  u8* texture_pixel;
+
+  /* The pointer/index traversal preserves the ROM's register allocation. */
+  while (texture_row < 32) {
+    texture_column = 0;
+    texture_pixel = &g_terrain_detail_texture[texture_index];
+    while (texture_column < 32) {
+      s32 pixel_value = rand() % range + minimum;
+      if (pixel_value >= 256) {
+        pixel_value = 255;
       }
-      *pixel++ = value;
-      column++;
-      index++;
+      *texture_pixel++ = pixel_value;
+      texture_column++;
+      texture_index++;
     }
-    row++;
+    texture_row++;
   }
 }
 
@@ -531,33 +534,33 @@ void setup_terrain_detail_default(void) {
 INCLUDE_ASM("asm/nonmatchings/main/bgm_load_song_from_rom",
             emit_per_phase_fog_state);
 
-void func_800627F8(f64* src, f64* dst) {
-  dst[0] = src[0];
-  dst[1] = src[1];
+void func_800627F8(f64* source_values, f64* destination_values) {
+  destination_values[0] = source_values[0];
+  destination_values[1] = source_values[1];
 }
 
-void func_8006280C(s32 arg0, s32 arg1) {
-  s32 tx, ty;
-  s32 dx, dy;
+void func_8006280C(s32 x_coordinate, s32 z_coordinate) {
+  s32 tile_x, tile_z;
+  s32 x_offset, z_offset;
 
   if (g_terrain_vtx_xform_mode != 0) {
     return;
   }
-  tx = (u32)arg0 >> 19;
-  ty = (u32)arg1 >> 19;
-  if ((u32)tx >= 8) {
+  tile_x = (u32)x_coordinate >> 19;
+  tile_z = (u32)z_coordinate >> 19;
+  if ((u32)tile_x >= 8) {
     return;
   }
-  if ((u32)ty >= 0x10) {
+  if ((u32)tile_z >= 0x10) {
     return;
   }
-  for (dy = -1; dy < 2; dy++) {
-    s32 yy = ty + dy;
-    for (dx = -1; dx < 2; dx++) {
-      s32 xx = tx + dx;
-      if ((u32)xx < 8) {
-        if ((u32)yy < 0x10) {
-          g_terrain_tile_cull_exclude[yy * 8 + xx] = 1;
+  for (z_offset = -1; z_offset < 2; z_offset++) {
+    s32 neighbor_z = tile_z + z_offset;
+    for (x_offset = -1; x_offset < 2; x_offset++) {
+      s32 neighbor_x = tile_x + x_offset;
+      if ((u32)neighbor_x < 8) {
+        if ((u32)neighbor_z < 0x10) {
+          g_terrain_tile_cull_exclude[neighbor_z * 8 + neighbor_x] = 1;
         }
       }
     }
