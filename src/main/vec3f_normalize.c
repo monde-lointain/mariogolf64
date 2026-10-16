@@ -195,7 +195,81 @@ extern NUContData D_801060E0[];
 extern ControllerState D_800FBDC0[];
 extern void func_8002A144(NUContData* input, ControllerState* state);
 
-INCLUDE_ASM("asm/nonmatchings/main/vec3f_normalize", func_8002A144);
+void func_8002A144(NUContData* input, ControllerState* state) {
+  s32 repeat = state->repeat_count;
+  state->buttons = input->button;
+  state->stick_x = input->stick_x;
+  state->stick_y = input->stick_y;
+  if (state->stick_x < 0) {
+    state->stick_x += 16;
+    if (state->stick_x > 0) {
+      state->stick_x = 0;
+    } else {
+      if (state->stick_x < -44) {
+        state->stick_x = -44;
+      }
+      if (state->stick_x < -30) {
+        state->buttons |= 0x200;
+      }
+    }
+  } else {
+    state->stick_x -= 16;
+    if (state->stick_x < 0) {
+      state->stick_x = 0;
+    } else {
+      if (state->stick_x > 44) {
+        state->stick_x = 44;
+      }
+      if (state->stick_x > 30) {
+        state->buttons |= 0x100;
+      }
+    }
+  }
+  if (state->stick_y < 0) {
+    state->stick_y += 16;
+    if (state->stick_y > 0) {
+      state->stick_y = 0;
+    } else {
+      if (state->stick_y < -44) {
+        state->stick_y = -44;
+      }
+      if (state->stick_y < -30) {
+        state->buttons |= 0x400;
+      }
+    }
+  } else {
+    state->stick_y -= 16;
+    if (state->stick_y < 0) {
+      state->stick_y = 0;
+    } else {
+      if (state->stick_y > 44) {
+        state->stick_y = 44;
+      }
+      if (state->stick_y > 30) {
+        state->buttons |= 0x800;
+      }
+    }
+  }
+  state->pressed = (state->previous ^ input->button) & input->button;
+  state->repeated = state->buttons;
+  if (state->buttons == state->previous) {
+    if (repeat >= 16) {
+      repeat = 15;
+    }
+    if (repeat == 0) {
+      repeat = 3;
+    } else {
+      repeat--;
+      state->repeated = 0;
+    }
+  } else {
+    repeat = 15;
+  }
+  state->repeat_count = repeat;
+  state->previous = state->buttons;
+  state->held = state->buttons;
+  state->buttons = input->button;
+}
 
 void func_8002A310(void) {
   s32 count = 0;
