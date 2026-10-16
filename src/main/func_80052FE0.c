@@ -197,44 +197,45 @@ void func_800543A4(void) {
  * merges them into one `li v0,-1` block and reorg fills its delay slot; the ROM
  * instead reuses the post-loop compare's v0=-1 with a bare-epilogue jump + nop.
  * The goto makes the post-loop tail no longer a mergeable twin, matching. */
-s32 func_800543DC(s32 arg0, s32 arg1) {
-  CharacterState* cs = get_character_state(arg0);
-  s32 i;
+s32 func_800543DC(s32 character_index, s32 animation_index) {
+  CharacterState* character = get_character_state(character_index);
+  s32 display_list_index;
 
-  if (cs == NULL) {
+  if (character == NULL) {
     goto neg;
   }
-  i = 0;
-  if (arg1 == -1) {
-    cs->model_resource->display_list[0] = 0xDF000000;
-    cs->model_resource->display_list[1] = 0;
+  display_list_index = 0;
+  if (animation_index == -1) {
+    character->model_resource->display_list[0] = 0xDF000000;
+    character->model_resource->display_list[1] = 0;
     return 0;
   }
-  while (i < arg1) {
-    if (cs->model_resource->animation_display_lists[i] == -1) {
+  while (display_list_index < animation_index) {
+    if (character->model_resource->animation_display_lists[display_list_index] == -1) {
       goto neg;
     }
-    i++;
+    display_list_index++;
   }
-  if (cs->model_resource->animation_display_lists[i] == -1) {
+  if (character->model_resource->animation_display_lists[display_list_index] == -1) {
     return -1;
   }
-  cs->model_resource->display_list[0] = 0xDE000000;
-  cs->model_resource->display_list[1] = cs->model_resource->animation_display_lists[i];
+  character->model_resource->display_list[0] = 0xDE000000;
+  character->model_resource->display_list[1] =
+      character->model_resource->animation_display_lists[display_list_index];
   return 0;
 neg:
   return -1;
 }
 
-s32 func_800544B4(s32 arg0, s32 arg1) {
-  CharacterState* cs;
+s32 func_800544B4(s32 character_index, s32 club_id) {
+  CharacterState* character;
   s16 kind;
   s32 result = -1;
 
-  cs = get_character_state(arg0);
-  if (cs != NULL) {
-    D_800C1DEC = cs->resource_index;
-    kind = get_club_param(arg1)->kind;
+  character = get_character_state(character_index);
+  if (character != NULL) {
+    D_800C1DEC = character->resource_index;
+    kind = get_club_param(club_id)->kind;
     switch (kind) {
       case 0:
         result = 0;
@@ -324,25 +325,25 @@ void func_8005470C(CharacterState* cs, f32 out[4][4]) {
   guMtxCatF(rotation, translation, out);
 }
 
-s32 func_8005483C(s32 arg0, s32 arg1, Vec3f* out) {
+s32 func_8005483C(s32 character_index, s32 attachment_tag, Vec3f* out) {
   f32 mtx[4][4];
   f32 pos[3];
   f32 zero;
-  s32 idx;
+  s32 result;
 
-  idx = func_80054550(arg0, arg1, pos);
-  if (idx < 0) {
+  result = func_80054550(character_index, attachment_tag, pos);
+  if (result < 0) {
     zero = 0.0f;
     out->z = zero;
     out->y = zero;
     out->x = zero;
   } else {
-    func_8005470C(get_character_state(arg0), mtx);
+    func_8005470C(get_character_state(character_index), mtx);
     guMtxXFMF(mtx, pos[0], pos[1], pos[2], &out->x, &out->y, &out->z);
   }
-  return idx;
+  return result;
 }
 
-s32 func_800548DC(s32 arg0, f32* position) {
-  return func_80054550(arg0, 2, position);
+s32 func_800548DC(s32 character_index, f32* position) {
+  return func_80054550(character_index, 2, position);
 }
