@@ -6,58 +6,54 @@ description: Defines independent analysis slices, serialized measurement ownersh
 
 # Subagent fan-out
 
-Work inline unless two or more independent analysis slices justify separate contexts,
-or the user requests parallel work. Scope the functions and carried evidence before
-choosing slices. Routine selection, small leaves, and ROM-verifier questions do not
-need another agent. Parallelize reasoning, not the shared compiler or database.
+Work inline unless the user requests parallel work or independent questions need separate
+contexts. Scope targets and evidence first; parallelize reasoning, not shared execution.
+Use the live native `task` schema and agent catalog rather than copied role prompts or wrappers.
 
 Until the [main-completion gate](../../.omp/skills/mg64-decomp/SKILL.md#main-before-overlays)
-passes, every decompilation slice must target the YAML `main` bank, including its linked libraries.
-Put that bank scope and the overlay exclusion in shared `context`; workers must not substitute
-an overlay when a main target is blocked. The parent validates bank membership before dispatch
-and integration. Read-only overlay reference analysis may support a named main target.
+passes, decompilation slices target the YAML `main` bank, including linked libraries.
+The parent validates live stub/host and bank membership before dispatch and integration.
+Read-only overlay references may support a named main target, not replace blocked main work.
 
 ## Dispatch contract
 
-Use the active native `task` schema and bundled agent roles, not copied prompts or project
-role wrappers. Put shared bank/resource constraints and target identity in `context`; each
-slice gets one unresolved question, the evidence needed to answer it, and a concrete return.
-Validate the live stub/host before dispatch; include the measured source/profile and
-assembly/dump paths plus any coupled parent/child boundary. Workers do not inherit the
-parent conversation. Partition evidence, not duplicate whole-function dives.
-
 **The parent owns candidate/source edits, compiles, builds, Ghidra MCP, YAML changes,
-integration, formatting, and ROM verification.** Workers return proposals. They do
-not run checks, use MCP, launch permuters, or edit shared sources. General harness
-advice to delegate investigation plus editing does not override this matching-resource
-contract. The parent measures proposals serially with the ROM source profile and sends
-back only the diagnostic needed for the next analysis.
+integration, formatting and ROM verification.** Workers return proposals; they do not
+run checks, use MCP, launch permuters or edit shared sources. This matching-resource
+contract takes precedence over generic investigate-and-edit delegation advice.
 
-Campaign shards divide analysis queues, not execution ownership. Reference research uses
-[existing discovery](../campaigns.md); source presence or similarity is not a match.
+Put shared bank/resource constraints in batch `context`. For each decompilation
+residual question, provide only the evidence needed to distinguish remaining causes:
+
+- The immutable measurement `.json`/`.c` pair, parent TU/profile and target assembly.
+  Mutable `base.c` and old dumps are not a reproducible pair.
+- The first differing instruction region, relevant compiler dump and dump-producing
+  command, tied to that measured source/profile. Unknown dump provenance is missing
+  evidence; the parent supplies or regenerates diagnostics serially.
+- Already-rejected levers and their measured effect or invalidating reason. A worker
+  proposing one again must identify what changed in its assumptions or source shape.
+- One unresolved question and the observation that would settle it. If evidence is
+  insufficient, request that observation instead of inventing a patch or a wall verdict.
+
+Campaign shards divide analysis queues, not execution ownership. Reference lookup uses
+[existing discovery](../campaigns.md); source presence or similarity is not match proof.
 
 ### Return evidence
 
-Return the requested findings with file/line or artifact citations and explicit unknowns.
-Steering updates the evidence; it does not replace the assignment. The final response must
-still contain the complete requested result, not only an acknowledgement or progress update.
+- **Observed:** cite the inspected source/assembly/dump and distinguish fact, inference
+  and unavailable evidence. Signatures/layouts satisfy the [source-recovery gate](loop.md#source-recovery),
+  including widths, offsets, stride and caller/callee dataflow.
+- **Proposed:** give one faithful source lever, required types and a falsifiable
+  instruction-level prediction. Apply [source eligibility](loop.md#permuter-eligibility)
+  before suggesting an experiment: invalid offsets or unsequenced argument assignments
+  cannot test equivalent code generation.
+  Reference research returns supported conclusions and limits, not a candidate to fill a template.
+- **Limits:** name unresolved contracts, coupling and missing observations. For reference
+  research, mark each requested root inspected, unavailable or not inspected; a failed
+  search is not proof that an implementation does not exist.
 
-- **Observed:** inspected target/reference identity and relevant evidence. Cite the existing
-  measurement/source pair instead of copying its full context. Signature/layout conclusions
-  must satisfy the [source-recovery gate](loop.md#source-recovery).
-- **Proposed:** for a decompilation slice, give the source lever or patch, required types, and
-  a falsifiable instruction-level prediction. For research, give the supported conclusion
-  and its limits; do not invent a candidate or experiment to fill a template.
-- **Risks:** unresolved contracts, relocation/pool/nested coupling, and
-  [source eligibility](loop.md#permuter-eligibility), where relevant.
-
-For reference research, report each explicitly requested root as inspected, unavailable, or not
-inspected; never silently substitute a similarly named checkout. Missing coverage is not evidence
-that a source or implementation does not exist.
-
-A read-only worker cannot report a fresh compile or score. The parent measures proposals
-against the cited base under the ROM source profile, then applies
-[source eligibility](loop.md#permuter-eligibility) and [residual diagnosis](loop.md#residual-diagnosis).
-A compiler citation or completed agent task is not match proof. Keep reproducible carries in
-the existing WIP note; native messages and task artifacts support coordination, not a second ledger.
-
+A read-only worker cannot claim a fresh compile or score. The parent measures accepted
+proposals against the cited base under the ROM source profile; an agent completion or
+compiler citation is not match proof. Keep the selected base and rejected hypotheses
+in existing WIP/BACKLOG evidence, not another ledger. Native task artifacts are coordination,
+not durable bank authority.

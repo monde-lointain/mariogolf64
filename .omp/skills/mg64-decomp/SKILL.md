@@ -40,9 +40,11 @@ with overlays. Once the gate passes, select overlay work using exact bank and RO
    Inspect assembly and source comments; size leaves from assembly headers, not VRAM deltas.
    Check each selected member's carry and coupling evidence together
    (`--carried-check <fn> --nested-check <fn>`); a carried leader does not classify its siblings.
-   Read only that target's WIP/backlog evidence. Reopen a carry for a named new source lever
-   or changed evidence, not its age or file-closure reward; confirm the cited source exists,
-   then [refresh its measurement](../../../docs/workflow/loop.md#measurement).
+   `CARRIED-WALL` identifies a function-specific WIP note, not impossibility.
+   `BACKLOG-ONLY` is advisory prose evidence and does not hide a C-host leaf.
+   Read only that target's evidence; a caller reference is not an inlining verdict.
+   Reopen a characterized carry for a named new lever or changed evidence, not age
+   or file closure, then [refresh its measurement](../../../docs/workflow/loop.md#measurement).
    If the fresh shortlist is empty, run `--segment main --include-stuck -n 12` and
    `--loose-stubs main --all -n 12` independently; discovery may exit 1 for an empty fresh pool.
    An empty shortlist is not completion.
@@ -90,7 +92,8 @@ default `--loose-stubs main` pool includes library C hosts but not unflipped ass
   change one named [source lever](../../../docs/levers.md) and remeasure. Use the
   [permuter eligibility rule](../../../docs/workflow/loop.md#permuter-eligibility), not score alone.
   A wall verdict belongs to its measured base, not permanently to the function.
-- Score zero starts provisional integration: preserve the isolated object and target assembly,
+- Score zero, or exact code generation with only confirmed linker-alias residuals,
+  starts provisional integration. Preserve the isolated object and target assembly,
   inline the body, remove its stub, format the changed range with an available clang-format
   binary (versioned names are valid), and build the host object. [Spot-check the same
   function ranges](../../../docs/workflow/loop.md#oracles), including any nested children,

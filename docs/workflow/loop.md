@@ -82,9 +82,11 @@ On a compile failure, read and fix the diagnostic before another compile. On a r
 change one evidence-backed source lever and measure it against the same profile. Do not
 repeat unchanged failures or stop solely because an arbitrary retry count was reached.
 At score zero, integrate provisionally, build the host object, and spot-check the target
-function against the isolated candidate before the full-ROM gate; the in-tree candidate
-cannot be compared before it has been integrated. Do not compare an entire multi-function
-TU's `.text` with a one-function seed. Failed integration remains unbanked.
+function against the isolated candidate before the full-ROM gate. Exact instructions,
+registers and counts with only linker-view naming differences can take the same path
+after confirming the relocation targets/addends; do not distort canonical types just
+to force the isolated score to zero. Compare the same function, not an entire
+multi-function TU against a one-function seed. Failed integration remains unbanked.
 Extraction may remove the target `.s` once its stub is gone, and nested children have
 compiler-local names. Do not retry `cmpfn.sh` or rebuild to recover those names:
 use the saved target assembly and fresh `objdump -drz` function ranges/relocations.
@@ -102,6 +104,12 @@ survives, reconstruct the documented source against assembly and establish a new
 Refresh with `uv run --locked python tools/decomp_loop.py --func <fn>`; a note's score or
 compiler-wall verdict does not transfer to a different base.
 
+Before pausing or switching targets, leave `base.c` at the best faithful,
+integration-eligible source and cite its immutable measurement, residual and next
+experiment in the existing note. Preserve a different live candidate before restoring
+a snapshot; never reset someone else's work. A lower score from an invalid prototype,
+omitted operation or diagnostic-only qualifier is not a better base.
+
 For bounded queues, cross-checkout references, an isolated m2c prepass, and deadlines, use the
 [campaign guide](../campaigns.md). Its output remains iteration evidence; the native skill owns
 execution and the parent retains shared-resource ownership.
@@ -113,6 +121,10 @@ FP scheduling, value selection, and allocation walls may lack assembly-detectabl
 Prefer demonstrated leverage: a banked sibling's shape/types, a pinned upstream mirror,
 or a measured carry for which a new structural transformation targets the cited pass.
 Check carried and nested evidence before choosing hand-mined leaves.
+Backlog prose mentions are advisory (`backlogged`), not per-leaf wall evidence.
+Function-specific WIP notes set `carried` and exclude a leaf from the default pool.
+The absence of a WIP note does not mean unattempted or easy: inspect the named
+BACKLOG evidence. Caller references require contract/inlining checks, not automatic eviction.
 
 - A `dl-emitter` is a reconstruction task, not automatically a wall. Equal command-word
   multisets (`dl-twin`) suggest useful bank order, not identical source.
@@ -191,10 +203,11 @@ changes before reusing a rejected lever or an old permuter-eligibility verdict.
 
 ### Compiler-source escalation
 
-Escalate the measured residual, not the whole function. Supply a reproducing source/profile,
-the differing instruction window, and a question for the responsible pass: allocation,
-scheduling/reorg, or assembler encoding/hazards. Parallel read-only slices use the
-[fan-out contract](fan-out.md); the parent produces any missing diagnostics serially.
+Escalate one measured residual, not the whole function. Use the
+[fan-out evidence contract](fan-out.md#dispatch-contract): a source/measurement pair,
+the differing instruction window, relevant pass dump and already-rejected levers.
+Ask what observation distinguishes the remaining causes; if the responsible pass
+is unknown, locate it before claiming a mechanism. The parent produces diagnostics serially.
 
 Use the existing profile-aware compiler interface for dumps, choosing only the relevant flags:
 
@@ -205,10 +218,13 @@ uv run --locked python tools/rom_build.py compile \
 ```
 
 KMC GCC writes dumps named after the input basename in the repository root, not beside
-`--output`. Preserve the relevant before/after evidence or a reproducible command in the
-existing WIP note, then remove only the temporary files you created. A compiler-source
-explanation needs the corresponding dump evidence before it becomes a measured mechanism;
-failure of one source form does not establish impossibility for every equivalent form.
+`--output`. Before another compile, move only your generated dumps into the candidate's
+existing evidence directory and associate their paths and exact command with the measured
+source/profile. A dump made before a source/context change describes that old base,
+not today's `base.c`; hand workers the matching immutable source snapshot. Remove only
+temporary files you created. A compiler citation needs the responsible dump and a
+falsifiable instruction-level prediction before it becomes a measured mechanism.
+Failure of one source form does not prove impossibility for equivalent forms.
 
 
 ## Conventions (every-sprint)

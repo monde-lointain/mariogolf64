@@ -52,9 +52,11 @@ Queue preparation does not compile or integrate code unless `--prepass` is suppl
 (`--shard 1/1`), and a per-candidate operation budget of 1800 seconds (`--seconds`). Segment and
 explicit-label selection are mutually exclusive. Repeated `--func` selects exact labels and retains
 risk/coupling tags; default selection asks `pick_target.py --loose-stubs <segment> -n <pool-size>
---json`, so it starts from that ranker's eligible (fresh) shortlist. The pool-size bounds the
-shortlist before reference ranking or similarity sorting; final `-n` limits the queue after shard
-assignment and optional `--by-similarity` sorting. Set `--pool-size >= -n > 0`.
+--json`, so it starts from that ranker's eligible shortlist. Backlog-only mentions
+remain eligible; `carried` identifies function-specific WIP evidence and `backlogged`
+retains the separate prose advisory. The pool-size bounds the shortlist before reference
+ranking or similarity sorting; final `-n` limits the queue after shard assignment
+and optional `--by-similarity` sorting. Set `--pool-size >= -n > 0`.
 
 Agent queues must obey the skill's [main-completion gate](../.omp/skills/mg64-decomp/SKILL.md#main-before-overlays):
 validate YAML `main` membership for every target, including explicit labels and resumed queues,

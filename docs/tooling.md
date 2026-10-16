@@ -54,16 +54,21 @@ Agent selection follows the [main-completion gate](../.omp/skills/mg64-decomp/SK
 and nested source directories, not arbitrary files under `src/main/`. They omit assembly packs;
 inspect those with whole-subsegment ranking. An empty shortlist does not authorize overlay work.
 
-`--carried-check` flags backlog names and WIP filenames, not verified compiler walls.
+`--carried-check` distinguishes `CARRIED-WALL` (a function-specific WIP filename)
+from `BACKLOG-ONLY` (a conservative prose mention). Neither proves impossibility.
+Backlog-only leaves remain eligible; inspect their actual evidence before retrying.
+Whole-pack parking still uses the broad BACKLOG list. Ignored local measurements do
+not control discovery, so the same checkout inputs give the same classifications.
+
 Confirm a live stub before reading its note; banked/renamed evidence is not active backlog.
-Combine `--carried-check <fn>... --nested-check <fn>...` to report both checks in one
-invocation (exit 1 if either finds a risk). Nested detection includes unused-chain spills
-and caller setup in `jal` delay slots; confirm both sides' assembly before reconstructing.
-These are assembly heuristics, not proven nesting or a bank verdict: a spill-only
-child must spill incoming `$v0`, and caller setup must still be live at the call.
-Loose-stub text preserves `CARRIED-WALL+NESTED` when both apply; JSON retains independent fields.
-A carried pack leader does not classify its siblings. Reopen a carry for a named new
-source lever or changed evidence, not carry age or file closure.
+Combine `--carried-check <fn>... --nested-check <fn>...` to report both checks:
+exit 1 for a WIP carry or nested risk, not for backlog-only mentions. Nested detection
+includes unused-chain spills and caller setup in `jal` delay slots; confirm both
+sides' assembly. A spill-only child must spill incoming `$v0`, and caller setup must
+still be live at the call. Loose-stub JSON retains independent `carried`,
+`backlogged`, and `nested` fields; text preserves `CARRIED-WALL+NESTED` when both apply.
+A carried pack leader does not classify its siblings. Reopen a characterized carry
+for a named new source lever or changed evidence, not age or file closure.
 
 ## Iterate a function
 

@@ -170,12 +170,15 @@ def main() -> None:
             from decomp_loop import find_profile_source
             from pick_target_score import (
                 carried_wall_names,
+                carry_over_names,
                 intrinsic_stub_tell,
                 jtbl_carve_tell,
                 nested_tell,
                 pool_blocked_tell,
             )
 
+            walls = carried_wall_names()
+            backlogged = carry_over_names()
             for candidate in candidates:
                 function = find_function(functions, candidate["fn"])
                 parent = find_profile_source(function.name, function.segment)
@@ -186,7 +189,8 @@ def main() -> None:
                         else None,
                         "nested": nested_tell(function.name),
                         "intrinsic": intrinsic_stub_tell(function.name),
-                        "carried": function.name in carried_wall_names(),
+                        "carried": function.name in walls,
+                        "backlogged": function.name in backlogged,
                         "pool_blocked": pool_blocked_tell(function.name),
                         "jtbl_carve": jtbl_carve_tell(
                             function.name, str(parent.relative_to(dc.ROOT_DIR))

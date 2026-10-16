@@ -158,22 +158,13 @@ def seed_points(size, upstream, band, nfns, hazards, blocked):
     return snap_fib(base)
 
 def carry_over_names():
-    """Function names genuinely PARKED in BACKLOG.md ## Carry-overs (de-ranked from the
-    default ranker; build_rows skips a row whose primary is in here unless --include-stuck).
+    """Backlog-mentioned symbols used to park whole assembly packs.
 
-    A parked carry-over is correctly absent from `pick_target` output BY DESIGN — retrieve it
-    with `--include-stuck` or by reading the BACKLOG (e.g. pimgr is found via the carry-over, not
-    the ranker, and that is the intended path, not a filter bug).
-
-    Two scope guards narrow an over-scoop, where every backticked prose token (a macro `STACK`, a
-    name-dropped banked callee, a tool name) was carried — so a *still-asm* primary could be
-    silently dropped just by being prose-mentioned:
-      (1) stop at the first historical `- **Sprint NN: … BANKED` paragraph — that append-only
-          banked-sprint archive lives under the same heading but is NOT parked work; and
-      (2) keep only tokens that are real symbols (placed in a name file, or a `func_<vram>`
-          placeholder) — drops macro/tool/keyword noise.
-    A genuine parked leader (osMotorStop, osCreateScheduler) still de-ranks; the archive's
-    name-drops of still-asm functions no longer do."""
+    This deliberately broad prose scan is not function-specific wall evidence.
+    Stop before the historical sprint archive and retain only real symbols.
+    Individual C-host leaves use WIP notes for exclusion and expose these
+    backlog mentions separately for review.
+    """
     names = set()
     if not os.path.exists(BACKLOG):
         return names
@@ -190,40 +181,16 @@ def carry_over_names():
     )  # guard (1): bound the live region
     if archive:
         region = region[: archive.start()]
-    # Guard (3, S288): excise any bullet whose lead line carries the explicit `NEAR-FREE RETRY`
-    # label. Such an entry parks a READY next slice ("not blocked"), so the functions it names are
-    # recommendations, not walls -- S287 parked `func_80059BC0` that way, having just IDENTIFIED it
-    # as fdlibm acosf, and S288 banked it first-build while `--carried-check` still read CARRIED-WALL.
-    # This is not the lead-line/subject heuristic the S271 note below bars: it keys on an
-    # author-supplied marker, not on inferring a bullet's subject from its prose. A genuine wall named
-    # inside such a bullet is unaffected, because a characterized wall owns a `docs/wip/<fn>.*.md`
-    # note and `carried_wall_names()` unions that in.
+    # Explicit retry and next-target lists do not park whole packs.
     region = re.sub(
         r"(?ms)^- \*\*\([^)]*NEAR-FREE RETRY.*?(?=^- \*\*|\Z)", "", region
     )
-    # Guard (4, S296): excise the `**The vein, smallest-first from here**` paragraph of a
-    # state-of-the-pool bullet. That paragraph is the sprint's list of what to attempt NEXT, so every
-    # name in it is a recommendation; scooping it made each sprint mark its own next targets as walls.
-    # S293/S294/S295 each wrote one, and by this gate all 15 names they list read CARRIED-WALL with no
-    # `docs/wip/<fn>.*.md`, no attempt, and no prose claiming a wall -- `--loose-stubs main` reported 2
-    # fresh where ~15 were actionable. It had already cost S295 a leaf: it declined `emit_sky_dome_dl`
-    # citing `--carried-check`, which was echoing S294's own recommendation of that leaf back at it.
-    # Same shape as guard (3): keys on an author-supplied marker, not on inferring a bullet's subject,
-    # so the S271 note below still holds. A genuine wall named only inside such a paragraph is
-    # unaffected -- a characterized wall owns a wip doc, which `carried_wall_names()` unions in.
     region = re.sub(
         r"(?ms)\*\*The vein, smallest-first.*?(?=^\s*\*\*|^- \*\*|\Z)", "", region
     )
-    placed = placed_symbols()  # guard (2): real symbols only (names file ∪ func_<vram>)
-    # NOTE (S271): this scan deliberately OVER-scoops toward false-POSITIVE. A `func_<vram>` named
-    # only as a mid-prose callee of another wall ("... via `func_X`/`func_Y` ...") de-ranks even
-    # though it is not itself parked (S271 func_80029A30/func_80029A6C were flagged CARRIED-WALL this
-    # way, yet were trivial fresh glue). That is the SAFE direction: a false-positive costs one asm
-    # read to clear, while a false-negative re-surfaces a known wall as a fresh leaf (the 8x-recurring
-    # miss this tool exists to prevent). Do NOT tighten with a lead-line/subject heuristic — it un-parks
-    # genuine carries documented only on continuation/prose lines (func_8003E004, func_80050710) and,
-    # for a carry with no wip doc, turns --carried-check into a false-negative. Clear a suspected
-    # false-positive by reading the .s, per the DoR.
+    placed = placed_symbols()  # Known symbols or func_<vram> placeholders only.
+    # Preserve continuation-line carries for whole-pack selection; a mention
+    # alone must not exclude a loose stub or establish compiler impossibility.
     for tok in re.findall(r"`([A-Za-z_]\w+)`", region):
         if tok in placed or _FUNC_TOKEN_RE.fullmatch(tok):
             names.add(tok)
@@ -234,17 +201,12 @@ _WIP_FUNC_RE = re.compile(r"func_[0-9A-Fa-f]{8}")
 
 
 def carried_wall_names():
-    """Union of the BACKLOG ## Carry-overs parked names (carry_over_names) AND every function
-    that owns a `docs/wip/<fn>.*.md` near-match / wall note.
+    """Functions named by existing per-function WIP notes, not BACKLOG prose.
 
-    The DoR "is this leaf a documented wall?" check. Recurred 8x through S268: a hand-mined leaf
-    from an already-`c` PARTIAL pack reads "fresh" (the ranker is c-continuation-blind and only
-    emits `blk`/asm-flip rows for such a segment) yet is a carried wall recorded ONLY in a wip
-    doc or the BACKLOG carry block. `carry_over_names()` alone misses the wip-doc-only walls (a
-    wall characterized at discovery into `docs/wip/` but never parked into BACKLOG). This union
-    is the authoritative "already-characterized" set; surface it at the plan gate via
-    `pick_target.py --carried-check <fn>...`. See .omp/skills/mg64-decomp/SKILL.md ## Select."""
-    names = set(carry_over_names())
+    A note records characterization, not proof that matching is impossible.
+    Paired notes retain both members; curated names retain their file stem.
+    """
+    names = set()
     if os.path.isdir(_WIP_DIR):
         for fname in os.listdir(_WIP_DIR):
             if not fname.endswith(".md"):
@@ -1010,6 +972,7 @@ def loose_stubs(seg):
         hosts.add(os.path.join(ROOT, "src", bank.get("dir", ""), name + ".c"))
 
     walls = carried_wall_names()
+    backlogged = carry_over_names()
     out = []
     for cpath in sorted(hosts):
         try:
@@ -1025,6 +988,7 @@ def loose_stubs(seg):
                     "size": _stub_size(fn),
                     "file": rel,
                     "carried": fn in walls,
+                    "backlogged": fn in backlogged,
                     "nested": nested_tell(fn),
                     "intrinsic": intrinsic_stub_tell(fn),
                     "wall_class": wall_class_tell(fn),

@@ -67,6 +67,63 @@ def test_loose_stub_limit_applies_after_filtering(
     assert [row["fn"] for row in json.loads(capsys.readouterr().out)] == [expected]
 
 
+@pytest.mark.parametrize("include_all", [False, True])
+def test_backlog_mentions_do_not_hide_loose_stubs(
+    tmp_path, monkeypatch, capsys, include_all
+):
+    import sys
+
+    score = load_tool("pick_target_score")
+    monkeypatch.setattr(score, "ROOT", str(tmp_path))
+    monkeypatch.setattr(score, "BACKLOG", str(tmp_path / "BACKLOG.md"))
+    monkeypatch.setattr(score, "_WIP_DIR", str(tmp_path / "docs/wip"))
+    monkeypatch.setattr(score, "_ASM_ROOT", str(tmp_path / "asm"))
+    (tmp_path / "mariogolf64.yaml").write_text(
+        "segments:\n- name: main\n  type: code\n"
+        "  subsegments:\n  - [0x10, c, main/host]\n"
+    )
+    (tmp_path / "BACKLOG.md").write_text(
+        "## Carry-overs\n- **Open pack:** `func_80001000` calls `func_80003000`.\n"
+    )
+    notes = tmp_path / "docs/wip"
+    notes.mkdir(parents=True)
+    (notes / "func_80002000.near-match.md").write_text("Measured carry.\n")
+    source = tmp_path / "src/main/host.c"
+    source.parent.mkdir(parents=True)
+    functions = ["func_80001000", "func_80002000", "func_80003000"]
+    source.write_text(
+        "".join(f'INCLUDE_ASM("asm/main/host", {fn});\n' for fn in functions)
+    )
+    for fn in functions:
+        body = (
+            "addiu $sp, $sp, -0x8\nsw $v0, 0x0($sp)\njr $ra\nnop\n"
+            if fn == functions[2]
+            else "jr $ra\nnop\n"
+        )
+        _write_nested_asm(tmp_path / "asm", fn, body.splitlines())
+
+    pt = load_tool("pick_target")
+    monkeypatch.setattr(pt, "loose_stubs", score.loose_stubs)
+    argv = ["pick_target.py", "--loose-stubs", "main", "--json"]
+    if include_all:
+        argv.append("--all")
+    monkeypatch.setattr(sys, "argv", argv)
+    with pytest.raises(SystemExit) as result:
+        pt.main()
+    assert result.value.code == 0
+    rows = {row["fn"]: row for row in json.loads(capsys.readouterr().out)}
+    assert set(rows) == set(functions if include_all else functions[:1])
+    assert rows[functions[0]]["carried"] is False
+    assert rows[functions[0]]["backlogged"] is True
+    if include_all:
+        assert rows[functions[1]]["carried"] is True
+        assert rows[functions[2]]["carried"] is False
+        assert rows[functions[2]]["backlogged"] is True
+        assert rows[functions[2]]["nested"] is True
+    # Whole-pack parking remains independent of individual-stub eligibility.
+    assert score.carry_over_names() == {functions[0], functions[2]}
+
+
 def test_loose_stubs_follow_yaml_bank_hosts(tmp_path, monkeypatch, capsys):
     import sys
 
@@ -1589,20 +1646,33 @@ def test_combined_gates_report_carry_and_nested_parent(tmp_path, monkeypatch, ca
     globals_ = pt.nested_child_tell.__globals__
     monkeypatch.setitem(globals_, "_ASM_ROOT", str(tmp_path))
     monkeypatch.setitem(globals_, "_WIP_DIR", str(tmp_path / "wip"))
-    monkeypatch.setitem(globals_, "BACKLOG", str(tmp_path / "missing-backlog"))
+    monkeypatch.setitem(globals_, "BACKLOG", str(tmp_path / "BACKLOG.md"))
+    (tmp_path / "BACKLOG.md").write_text(
+        "## Carry-overs\n- **Open pack:** try `func_80001000` next.\n"
+    )
     (tmp_path / "wip").mkdir()
     (tmp_path / "wip/child.near-match.md").write_text("Measured carry.\n")
     _write_nested_asm(
-        tmp_path, "child",
+        tmp_path,
+        "child",
         ["addiu $sp, $sp, -0x8", "sw $v0, 0x0($sp)", "jr $ra", "nop"],
     )
     _write_nested_asm(
-        tmp_path, "parent",
+        tmp_path,
+        "parent",
         ["addiu $sp, $sp, -0x30", "jal child", "addiu $v0, $sp, 0x10"],
     )
     monkeypatch.setattr(
-        sys, "argv",
-        ["pick_target.py", "--carried-check", "child", "--nested-check", "child"],
+        sys,
+        "argv",
+        [
+            "pick_target.py",
+            "--carried-check",
+            "child",
+            "func_80001000",
+            "--nested-check",
+            "child",
+        ],
     )
     with pytest.raises(SystemExit) as result:
         pt.main()
@@ -1611,3 +1681,11 @@ def test_combined_gates_report_carry_and_nested_parent(tmp_path, monkeypatch, ca
     assert "CARRIED-WALL" in output
     assert "NESTED-CHILD" in output
     assert "nested-parent:parent" in output
+    assert "BACKLOG-ONLY" in output
+    monkeypatch.setattr(
+        sys, "argv", ["pick_target.py", "--carried-check", "func_80001000"]
+    )
+    with pytest.raises(SystemExit) as advisory:
+        pt.main()
+    assert advisory.value.code == 0
+    assert capsys.readouterr().out.split() == ["BACKLOG-ONLY", "func_80001000"]

@@ -1003,8 +1003,8 @@ def main():
         "--carried-check",
         nargs="+",
         metavar="FUNC",
-        help="DoR gate: for each FUNC report CARRIED-WALL (owns a docs/wip note or a BACKLOG "
-        "carry-over entry) vs fresh. Use before committing a hand-mined partial-pack leaf.",
+        help="Report function-specific WIP evidence (CARRIED-WALL), advisory BACKLOG-only "
+        "mentions, or fresh. Only WIP carries set this check's nonzero status.",
     )
     ap.add_argument(
         "--nested-check",
@@ -1068,6 +1068,8 @@ def main():
                 tags = []
                 if m["carried"]:
                     tags.append("CARRIED-WALL")
+                elif m.get("backlogged"):
+                    tags.append("BACKLOG-ONLY")
                 if m["nested"]:
                     tags.append("NESTED-CHILD")
                 if m.get("intrinsic"):
@@ -1137,7 +1139,7 @@ def main():
                 # dl-emitter: counts as fresh, tagged for pricing only (S294).
                 status = s["wall_class"].upper()
             else:
-                status = "fresh"
+                status = "BACKLOG-ONLY" if s.get("backlogged") else "fresh"
             if s["carried"] and s["nested"]:
                 status += "+NESTED"
             sz = "?" if s["size"] is None else str(s["size"])
@@ -1157,10 +1159,18 @@ def main():
             # glue over a single (usually already-`c`) helper, so a high jal count is not size-like
             # risk here (S311 func_80095DE0, 611 instr / 39 jal / one target, banked on build 2).
             sc = f"  single-callee:{s['single_callee']}" if s.get("single_callee") else ""
-            print(f"{sz:>6} {status:20} {s['fn']:28} {s['file']}{twin}{fpc}{sc}{strs}")
+            backlog = (
+                "  backlog-only"
+                if s.get("backlogged") and not s["carried"] and status != "BACKLOG-ONLY"
+                else ""
+            )
+            print(
+                f"{sz:>6} {status:20} {s['fn']:28} {s['file']}{backlog}{twin}{fpc}{sc}{strs}"
+            )
         print(
             f"# {len(shown)}/{len(eligible)} eligible shown; {len(stubs)} stubs in YAML bank {args.loose_stubs}: "
             f"{n_fresh} fresh, {sum(s['carried'] for s in stubs)} carried-wall, "
+            f"{sum(bool(s.get('backlogged')) and not s['carried'] for s in stubs)} backlog-only, "
             f"{sum(s['nested'] for s in stubs)} nested, "
             f"{sum(bool(s.get('intrinsic')) for s in stubs)} intrinsic-hasm, "
             f"{sum(bool(s.get('pool_blocked')) for s in stubs)} pool-blocked, "
@@ -1176,11 +1186,19 @@ def main():
     any_risk = False
     if args.carried_check:
         walls = carried_wall_names()
+        backlogged = carry_over_names()
         any_wall = False
         for fn in args.carried_check:
             hit = fn in walls
             any_wall = any_wall or hit
-            print(f"{'CARRIED-WALL' if hit else 'fresh':13} {fn}")
+            status = (
+                "CARRIED-WALL"
+                if hit
+                else "BACKLOG-ONLY"
+                if fn in backlogged
+                else "fresh"
+            )
+            print(f"{status:13} {fn}")
         any_risk = any_wall
 
     if args.nested_check:

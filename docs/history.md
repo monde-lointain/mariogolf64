@@ -44,8 +44,9 @@ recorded-resolution archive, not another acceptance gate. Inspect the current st
 reproduce a measurement before reusing its conclusions; only the ROM verifier authorizes banking.
 
 Filenames are executable discovery inputs, not just document organization. `carried_wall_names()`
-unions `BACKLOG.md` carry-overs with **immediate** `docs/wip/*.md` filename stems; it does not recurse
-into `banked/`. Separate residual heuristics read the exact `docs/wip/<fn>.near-match.md` path.
+uses **immediate** `docs/wip/*.md` filename stems; it does not recurse into `banked/`.
+BACKLOG mentions remain separate advisory evidence for leaves and parking inputs for whole packs.
+Separate residual heuristics read the exact `docs/wip/<fn>.near-match.md` path.
 Do not rename or relocate a note merely to improve navigation: regroup its index entry instead.
 A scoping or nested-function note is not necessarily a terminal wall.
 

@@ -2,6 +2,34 @@
 
 ## 2026-10-15
 
+- **Agent-based decomp workflow refinement**: Five parallel read-only deep dives
+  compared REA's seed-first investigation, Snowboard Kids' matching queues, native
+  Oh My Pi task/context contracts, the Ghidra book (chapters 7/8/19/20), and Eilam's
+  recovery/optimization guidance. Selected book claims were checked in the originals.
+  - Separated function-specific WIP characterization from broad BACKLOG prose in
+    loose-stub discovery, carry checks and campaign records. `BACKLOG-ONLY` remains
+    visible but does not silently exclude a leaf. Whole-pack parking, YAML bank
+    membership, nested/pool checks and the full-ROM bank authority are unchanged.
+  - On the same 183 live main stubs, carried classification drops 180 → 47;
+    133 backlog-only advisories remain visible and 103 leaves satisfy the existing
+    eligibility filter. These are not newly banked functions or a difficulty forecast.
+  - Removed the old per-leaf BACKLOG union and historical justification for safe
+    false positives rather than adding another prose-exclusion heuristic. Ignored
+    local candidate/measurement presence does not affect discovery.
+  - Tightened native handoffs to the immutable measured base, dump-producing command,
+    differing region and rejected levers. Workers ask for missing observations
+    instead of proposing unsupported patches. Retained existing resource ownership;
+    no new roles, runner wrappers or evidence ledgers.
+  - Clarified best-base restoration, dump/source pairing and provisional integration
+    of confirmed linker-alias-only residuals. Neither a compiler citation nor a low
+    isolated score replaces source eligibility, integration checks or ROM verification.
+  - Regression fixtures failed before the classification fix and pass afterward.
+    The tooling suite passes with two skips. Actual ranker, combined carry/nested,
+    file-closure and default/explicit campaign CLIs exercise the new behavior.
+    Ruff reports the existing `pick_target.py:13` import-order diagnostic, also
+    reproduced against HEAD; no unrelated import reformat was applied.
+    Game sources, compiler profiles, YAML and symbol files are unchanged.
+
 - **Five additional main banks**: `func_800451E4`, `func_800719A0`,
   `func_8006CD50`, `func_8007E7B8`, and `animation_play` replace 498 instructions /
   1,992 bytes of assembly. Main C-host stubs decrease 188 → 183.
