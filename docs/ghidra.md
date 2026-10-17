@@ -112,7 +112,7 @@ exporter. The curated stdio bridge does not expose scripting, but another local 
 It binds to loopback; do not publish the port. Existing `GHIDRA_MCP_AUTH_TOKEN` is forwarded.
 Cross-process request locks serialize bridge/CLI access, and project/ROM/source identity is checked
 before live forwarding. Reconnect bridges after a refresh. Keep builds, MCP requests, and source/
-YAML changes serial as required by [the project invariants](../AGENTS.md#invariants).
+YAML changes serial as required by [the project invariants](../.omp/RULES.md).
 
 Export candidate context without invoking the MCP client:
 

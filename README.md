@@ -30,13 +30,13 @@ Supply your own big-endian US revision-0 `baserom.z64`; the ROM is not distribut
 | `CMakeLists.txt`, `CMakePresets.json`, `cmake/` | Build graph and reproducible configure/build/test workflows. |
 | `third_party/` | Pinned native source archives and vendored-tool provenance. |
 | `tools/`, `tests/tooling/` | Ordinary vendored decomp tools, first-party helpers, and behavioral tests. |
-| `.omp/` | Native skill and thin user command; root `AGENTS.md` holds safety context. |
+| `.omp/` | Native skill, thin user command, and `RULES.md` project invariants (sticky, forwarded to subagents). |
 | `build/us/work/`, `build/us/obj/` | Generated extraction/source shadow and objects; never source inputs. |
 | `docs/`, `BACKLOG.md`, `RETRO.md`, `VELOCITY.md` | Current guidance and retained historical evidence. |
 
 ## Contributing
 
-Read [the invariants](AGENTS.md#invariants) before changing generated or low-level inputs.
+Read [the invariants](.omp/RULES.md) before changing generated or low-level inputs.
 Never commit a non-matching function. Candidate experiments stay isolated until the full-ROM gate
 passes. Use [C coding and matching style](docs/coding-style.md) for source work and
 [prompt style](docs/prompt-style.md) for agent instructions. The [history guide](docs/history.md)

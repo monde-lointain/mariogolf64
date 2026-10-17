@@ -21,6 +21,8 @@ Read-only overlay references may support a named main target, not replace blocke
 integration, formatting and ROM verification.** Workers return proposals; they do not
 run checks, use MCP, launch permuters or edit shared sources. This matching-resource
 contract takes precedence over generic investigate-and-edit delegation advice.
+Task subagents inherit the [project invariants](../../.omp/RULES.md) and the skill catalog but
+not `AGENTS.md` or this conversation, so batch `context` carries the target, files and evidence.
 
 Put shared bank/resource constraints in batch `context`. For each decompilation
 residual question, provide only the evidence needed to distinguish remaining causes:

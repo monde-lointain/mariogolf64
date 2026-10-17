@@ -230,7 +230,7 @@ Failure of one source form does not prove impossibility for equivalent forms.
 
 ## Conventions (every-sprint)
 
-[AGENTS.md](../../AGENTS.md) owns immutable source/generated-file boundaries.
+[The project invariants](../../.omp/RULES.md) own immutable source/generated-file boundaries.
 [Build profiles](../build.md#compiler-profiles-and-incremental-work) own flags and
 paths; [C style](../coding-style.md) owns naming and formatting. In addition:
 

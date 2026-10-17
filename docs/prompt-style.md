@@ -6,7 +6,7 @@ description: Authoring rules for concise, checkable project instructions.
 
 # Prompt style (on-demand reference)
 
-Use this guide when editing agent-facing instructions such as `AGENTS.md`, the Oh My Pi skill and
+Use this guide when editing agent-facing instructions such as `AGENTS.md`, `.omp/RULES.md`, the Oh My Pi skill and
 command, or shared workflow references. It governs prompt wording; use the
 [native decomp skill](../.omp/skills/mg64-decomp/SKILL.md) for execution and
 [C coding style](coding-style.md) for source conventions.
