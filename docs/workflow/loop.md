@@ -242,7 +242,9 @@ paths; [C style](../coding-style.md) owns naming and formatting. In addition:
   `SortIncludes: Never`; formatting does not authorize changing mirror logic.
 - A compiler-generated jump table couples C and rodata: carve only when the switch
   regenerates its symbol. Check emitted pools, actual relocations, duplicate data,
-  and nested-function coupling before integration.
+  and nested-function coupling before integration. Compare the host object's
+  `.rodata` size (`objdump -h`, padded to its section alignment) with the carved
+  extent: a tail pad that overlaps the next assembly-owned constant moves every later symbol.
 - Curated renames migrate C callers explicitly; extraction only rewrites assembly.
   Use `--extract` for metadata/layout changes. Header-only changes need the ROM
   verifier, not routine clean builds; stale dependents indicate a dependency defect.

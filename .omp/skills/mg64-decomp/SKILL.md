@@ -1,13 +1,16 @@
 ---
 name: mg64-decomp
-description: Select, decompile, iterate, bank, and review Mario Golf 64 functions while preserving matching, source-edit, profile, and shared-resource constraints.
+description: Mario Golf 64 decompilation — select, match, permute, bank, and review functions.
 ---
 
 # Mario Golf 64 decomp workflow
 
-Use this workflow for function selection, classical decompilation, upstream mirrors, bank decisions, and review. The ROM SHA-1 against `baserom.z64` is the only bank authority: `tools/verify-rom.sh` must succeed. All other comparisons are iteration signals.
+Use this workflow for function selection, classical decompilation, upstream mirrors, bank decisions,
+and review. The ROM SHA-1 against `baserom.z64` is the only bank authority: `tools/verify-rom.sh`
+must succeed. All other comparisons are iteration signals. The invariants in
+[.omp/RULES.md](../../RULES.md) apply throughout.
 
-Use the configured Python interpreter `uv run --locked python`; the default binary tree is `build/us`.
+Run Python tools as `uv run --locked python tools/<tool>.py`; the default binary tree is `build/us`.
 
 ## Main before overlays
 
@@ -31,91 +34,81 @@ with overlays. Once the gate passes, select overlay work using exact bank and RO
 
 ## Select
 
-1. Rank whole main packs with `uv run --locked python tools/pick_target.py --segment main -n 12`
-   and individual C-host leaves with `--loose-stubs main -n 12`. Loose-stub and `--file-close main`
-   discovery follow YAML bank membership, including linked libraries; neither inventories unflipped
-   assembly packs. `--lib` is a substring filter, not bank scope.
-   Start from live ranker rows, not the WIP index: confirm the named `INCLUDE_ASM` and YAML
-   host before opening its note. Banked/renamed notes are reference evidence, not backlog.
-   Inspect assembly and source comments; size leaves from assembly headers, not VRAM deltas.
-   Check each selected member's carry and coupling evidence together
-   (`--carried-check <fn> --nested-check <fn>`); a carried leader does not classify its siblings.
-   `CARRIED-WALL` identifies a function-specific WIP note, not impossibility.
-   `BACKLOG-ONLY` is advisory prose evidence and does not hide a C-host leaf.
-   Read only that target's evidence; a caller reference is not an inlining verdict.
-   Reopen a characterized carry for a named new lever or changed evidence, not age
-   or file closure, then [refresh its measurement](../../../docs/workflow/loop.md#measurement).
-   If the fresh shortlist is empty, run `--segment main --include-stuck -n 12` and
-   `--loose-stubs main --all -n 12` independently; discovery may exit 1 for an empty fresh pool.
-   An empty shortlist is not completion.
-   Prefer demonstrated sibling/upstream leverage. Use [reference discovery](../../../docs/tooling.md#references-and-native-campaigns)
-   when it can supply a source shape; inspect C, assembly, types/callees, and hashes before reuse.
-   Similarity and source presence do not establish a bank.
-2. Route hazards through [the hazard index](../../../docs/hazard-index.md), then read the selected playbook. Consult [C coding style](../../../docs/coding-style.md) for source conventions.
-3. Resolve the source subsegment in `mariogolf64.yaml`. Change only explicitly required subsegment flip/split/path lines; never edit generated extraction outputs by hand. Preserve `INCLUDE_ASM` for unbanked functions. Do not change C, headers, or YAML unless the task requires that source change.
-   A compiler jump table couples source and rodata: carve it only when the C switch regenerates its symbol.
-4. Keep candidate experiments isolated under `nonmatchings/<func>/`; do not run concurrent builds. The build tree and Ghidra MCP are shared resources: serialize access to both.
-   For delegated analysis, use the [fan-out ownership and evidence contract](../../../docs/workflow/fan-out.md).
+1. Rank with the [discovery commands](../../../docs/tooling.md#discover-an-increment): whole main
+   packs (`pick_target.py --segment main -n 12`) and C-host leaves (`--loose-stubs main -n 12`).
+   An empty fresh shortlist is not completion: rerun with `--include-stuck` and `--loose-stubs main --all`.
+   Start from live ranker rows, not the WIP index: confirm the named `INCLUDE_ASM` and YAML host
+   before opening a note. Size leaves from assembly headers, not VRAM deltas.
+   Check every selected member with `--carried-check <fn> --nested-check <fn>`. `CARRIED-WALL`
+   names a function-specific WIP note, not impossibility; reopen a carry only for a named new lever
+   or changed evidence, then [refresh its measurement](../../../docs/workflow/loop.md#measurement).
+   Prefer demonstrated sibling/upstream leverage ([reference discovery](../../../docs/campaigns.md));
+   similarity and source presence do not establish a bank.
+2. Route hazards through [the hazard index](../../../docs/hazard-index.md), then read only the selected
+   playbook section. Consult [C coding style](../../../docs/coding-style.md) for source conventions.
+3. Resolve the source subsegment in `mariogolf64.yaml`. Change only required flip/split/path lines.
+   Preserve `INCLUDE_ASM` for unbanked functions. A compiler jump table couples source and rodata:
+   carve it only when the C switch regenerates its symbol, and only where the host object's
+   `.rodata` (`objdump -h`; KMC pads it to its 8-byte alignment) ends exactly at the carve boundary —
+   a tail pad that overlaps the next assembly-owned constant shifts the whole image
+   ([rodata alignment split](../../../docs/hazards.md#decomposed-one-tu-rodata-alignment-split-a-counter-case-to-the-8-point-decompose-gate)).
+4. Keep candidate experiments isolated under `nonmatchings/<func>/`. For delegated analysis, use the
+   [fan-out ownership and evidence contract](../../../docs/workflow/fan-out.md).
 
 ## Campaigns
 
-For a campaign request, prepare a bounded queue with the [campaign CLI](../../../docs/tooling.md#references-and-native-campaigns).
-Keep the native session as the integration owner; execute targets serially and use native `task`
-only for independent reasoning. Shards divide analysis queues, not permission to run shared builds.
-
-Apply the [main-completion gate](#main-before-overlays) to every queue entry, including explicit
-`--func` labels and resumed queues. Validate YAML bank membership before execution; a campaign's
-default `--loose-stubs main` pool includes library C hosts but not unflipped assembly packs.
-
-- Prefer upstream mirrors first. An opt-in m2c prepass can seed and measure untouched candidates
-  before spending agent effort; it never overwrites carries or edits matching source.
-- Treat each queue identity as ROM SHA-1 + bank + ROM offset. Revalidate the live stub and target
-  before starting; changed reference lists, names, or ranking are not completion.
-- Start the candidate's absolute deadline when it acquires execution ownership, not while queued.
-  Pass `MG64_DEADLINE_UNIX` to bounded commands and retain inspection time. Stop launching
-  expensive experiments when the reserve is exhausted; deadline expiry is not a source-wall verdict.
-- Review provisional zeroes using the ordinary integration and bank gates. If an attempt expires
-  or fails, retain its isolated artifacts and measured residual; never reset unrelated work or commit
-  automatically. Continue to the next independent target only after shared resources are released.
+For a campaign request, prepare a bounded queue with the [campaign CLI](../../../docs/campaigns.md)
+and keep this session as the integration owner: execute targets serially, apply the main-completion
+gate to every queue entry, and use native `task` only for independent reasoning. Queue identity,
+deadline, and prepass rules live in that reference.
 
 ## Iterate
 
-- For an upstream mirror, copy the pinned upstream source and required headers, then validate with `tools/verify-rom.sh`. Check names, calls, data references, and routed hazards before treating it as a clean mirror.
+- For an upstream mirror, copy the pinned upstream source and required headers, then validate with
+  `tools/verify-rom.sh`. Check names, calls, data references, and routed hazards first.
 - For classical work, read extracted assembly first. Translate a small clear leaf directly into
-  `nonmatchings/<func>/base.c`; do not generate a seed or request Ghidra merely to fill the directory.
-  When body/context recovery helps, use `uv run --locked python tools/seed_c.py --func <func> --parent src/<seg>.c`.
-  Apply the [source-recovery gate](../../../docs/workflow/loop.md#source-recovery) to generated
-  control flow, call contracts, data accesses, and display-list packets before chasing a score.
-  Add `--ghidra` only for an unresolved context question.
-  Measure with `uv run --locked python tools/decomp_loop.py --func <func>`.
-- Fix diagnostics before retrying. Classify the residual as structure/count, registers, or ordering;
-  change one named [source lever](../../../docs/levers.md) and remeasure. Use the
-  [permuter eligibility rule](../../../docs/workflow/loop.md#permuter-eligibility), not score alone.
-  A wall verdict belongs to its measured base, not permanently to the function.
-- Score zero, or exact code generation with only confirmed linker-alias residuals,
-  starts provisional integration. Preserve the isolated object and target assembly,
-  inline the body, remove its stub, format the changed range with an available clang-format
-  binary (versioned names are valid), and build the host object. [Spot-check the same
-  function ranges](../../../docs/workflow/loop.md#oracles), including any nested children,
-  before the full ROM gate. If integration fails, restore the matching stub/source and
-  keep the candidate isolated.
+  `nonmatchings/<func>/base.c`. When body/context recovery helps, use
+  `tools/seed_c.py --func <func> --parent src/<seg>.c` and apply the
+  [source-recovery gate](../../../docs/workflow/loop.md#source-recovery) before chasing a score;
+  add `--ghidra` only for an unresolved context question. Measure with `tools/decomp_loop.py --func <func>`.
+- Fix diagnostics before retrying. Classify the residual as structure/count, registers, or ordering
+  and change one named [source lever](../../../docs/levers.md). For a register-only residual, read the
+  allocator's numbers first (`tools/allocno_report.py nonmatchings/<func>/base.c <func>`) and name the
+  reference count or live length that must move. Use the
+  [permuter eligibility rule](../../../docs/workflow/loop.md#permuter-eligibility), not score alone;
+  `run-permuter.sh` drives the newest imported case. A wall verdict belongs to its measured base.
+- Score zero, or exact code generation with only confirmed linker-alias residuals, starts provisional
+  integration: inline the body, remove its stub, format the changed range with clang-format, build the
+  host object, and [spot-check the same function ranges](../../../docs/workflow/loop.md#oracles)
+  before the full ROM gate. If integration fails, restore the stub and keep the candidate isolated.
 - Use `tools/rom_build.py` and `tools/build_profiles.json` for the parent TU's exact profile.
   [Measurement records](../../../docs/workflow/loop.md#measurement) retain source/diagnostic pairs;
   source, profile, header, or context changes require a fresh measurement.
 
 ## Bank
 
-A function is banked only after `tools/verify-rom.sh` exits successfully. Do not substitute a direct hash, object comparison, or incremental diff for this full-ROM oracle. Before renaming a function, check committed C callers and update them with the rename. Stage source inputs only; generated extraction artifacts stay ignored in the binary tree. A file is complete only when all its `INCLUDE_ASM` stubs are gone. Keep unfinished work isolated and describe measured residuals in `docs/wip/<func>.near-match.md`.
+A function is banked only after `tools/verify-rom.sh` exits successfully. It prints one verdict line
+and logs the build to `build/us/verify-rom.log`; a mismatch names the first differing ROM offset.
+An offset far from the candidate (the entry stub or another translation unit) with a clean function
+diff means a layout shift: compare section sizes in `build/us/mariogolf64.map` before touching code.
+Before renaming a function, update committed C callers. Stage source inputs only. A file is complete
+only when all its `INCLUDE_ASM` stubs are gone. Keep unfinished work isolated and describe measured
+residuals in `docs/wip/<func>.near-match.md`.
 
 ## Review and resume
 
-Review the banked source and verifier result, and distinguish verified matches from carried candidates. Count functions as well as remaining stubs: extraction may already emit empty leaves as C. Preserve backlog carry-overs and technical evidence; update task-specific notes as required. On resume, reconcile the current task state with committed changes and the tracked backlog before continuing.
+Review the banked source and verifier result, and distinguish verified matches from carried
+candidates. Count functions as well as remaining stubs: extraction may already emit empty leaves as C.
+On resume, reconcile the current task state with committed changes and the tracked backlog first.
 
-Persist only enough state to reproduce: target ROM/bank/host, exact candidate and profile, measurement command and residual, verifier outcome or unbanked status, rejected hypotheses tied to that base, and the next experiment. Workers' native artifacts serve session communication; existing WIP/backlog notes serve durable evidence. Do not create parallel resume ledgers or reread complete sprint history.
+Persist only enough state to reproduce: target ROM/bank/host, exact candidate and profile,
+measurement command and residual, verifier outcome or unbanked status, rejected hypotheses tied to
+that base, and the next experiment. Existing WIP/backlog notes serve durable evidence; record the
+current state, not a session narrative. Do not create parallel resume ledgers or reread complete
+sprint history.
 
 ## Domain references
 
 - [Execution details and tool authority](../../../docs/workflow/loop.md)
 - [Candidate and symptom routing](../../../docs/index.md)
-- [Subagent isolation and fan-out](../../../docs/workflow/fan-out.md)
 - [Build profiles and verification](../../../docs/build.md)
