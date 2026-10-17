@@ -1,5 +1,34 @@
 # Documentation update log
 
+## 2026-10-16
+
+- **Session-driven workflow refinement**: Six read-only deep dives (Snowboard Kids' agent
+  workflow, REA's agent RE toolkit, the Oh My Pi loaders, the Ghidra and reverse-engineering
+  books, legacy-code/testing notes, and a repository audit) were checked against the defects a
+  real bank session hit; only existing tools and surfaces changed.
+  - Invariants moved from `AGENTS.md` to `.omp/RULES.md`: Oh My Pi strips `AGENTS.md` from task
+    subagents but forwards rules, and `RULES.md` stays applied after compaction. Dead filenames
+    were dropped and one resume rule added (in-flight work names function, host and measurement).
+    `AGENTS.md` keeps only routing; the skill's duplicated ranker and campaign prose now links to
+    `tooling.md`/`campaigns.md`, and `/decomp` gained a description and argument hint.
+  - `verify-rom.sh` logs the build to `<binary>/verify-rom.log` and prints one verdict line, the
+    failing build lines, or the first differing ROM offset (`--verbose` streams). Exit codes and
+    the success line are unchanged; the CTest gate is unaffected.
+  - Permuter wrappers act on the newest `nonmatchings/<fn>[-N]` case (the alphabetical first hit
+    ran a stale case), match `<fn>` exactly, keep a caller's `-j`, and report the budget. The
+    inlined-function resolver rejects declarations (an `extern` in `nuboot.c` had selected the
+    `-O0` libnusys profile for `mainproc`); `permuter_import.sh` uses the same resolver.
+  - `decomp_loop.py --score-only` reports an explicit `mismatch_detail` marker instead of an
+    empty mismatch list; `cmpfn.sh` explains the post-integration objdump comparison.
+  - Carve guidance now checks the host object's padded `.rodata` against the carved extent (the
+    `func_800402F4` layout shift). Hazards prose that stated Make-era mechanisms (`mk/*.mk`,
+    `permuter_settings*.toml`, `make sync-names`, `docs/agent-workflow.md`) as current rules now
+    names `tools/build_profiles.json`, `tools/rom_build.py`, and CMake targets; the manual
+    permuter-scaffold recipes are retired. Headings and frozen anchors are unchanged.
+  - Verified: quiet gate success, link-failure and mismatch paths (first offset `0x1007`), newest
+    permuter case selection, resolver fallback, 115 frozen anchors, and the tooling suite. The
+    anchor scanner now skips `site-packages`, which a local virtualenv copy had polluted.
+
 ## 2026-10-15
 
 - **clangd navigation**: Added a repository-local omp override for `clangd-23` and
