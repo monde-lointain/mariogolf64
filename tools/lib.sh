@@ -22,7 +22,7 @@ mg_activate_venv() {
     mg_build_dir
     local root
     root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-    UV_PROJECT_ENVIRONMENT="$root/.venv" uv sync --locked --project "$root" || exit $?
+    UV_PROJECT_ENVIRONMENT="$root/.venv" uv sync --quiet --locked --project "$root" || exit $?
     # shellcheck disable=SC1091
     source "$root/.venv/bin/activate"
 }
@@ -38,18 +38,21 @@ print(tool_path(sys.argv[1]))
 PY
 }
 
-# Resolve the nonmatchings/<func>* scratch dir into PERMUTER_DIR; abort if absent.
+# Resolve the newest nonmatchings/<func>[-N] permuter workspace into PERMUTER_DIR; abort if absent.
 mg_find_permuter_dir() {
-    local func="$1" d
-    # Prefer a dir that actually holds a permuter workspace (compile.sh): import.py suffixes to
-    # `<func>-2` when `nonmatchings/<func>/` already exists as a decomp_loop SEED dir (base.c +
-    # current.o, NO compile.sh). A bare name+`head -1` grabs the seed dir alphabetically and
-    # run-permuter fails "Missing file compile.sh" (S190). Match by the compile.sh marker first.
+    local func="$1" d newest=0 mtime
+    # Only a dir with compile.sh is a permuter workspace: import.py suffixes `-N` when
+    # `nonmatchings/<func>/` is already a decomp_loop seed dir (base.c + current.o). Every
+    # re-import adds another `-N`, so pick the most recently imported one; the old alphabetical
+    # first-hit silently ran a stale case. Match `<func>` and `<func>-<digits>` exactly so a
+    # shorter name (lerp_int) never claims a longer one's workspace (lerp_int_v2).
     PERMUTER_DIR=""
-    for d in $(find nonmatchings -maxdepth 1 -type d -name "${func}*" | sort); do
-        if [ -f "$d/compile.sh" ]; then
+    for d in "nonmatchings/${func}" nonmatchings/"${func}"-[0-9]*; do
+        [ -f "$d/compile.sh" ] || continue
+        mtime=$(stat -c %Y "$d/compile.sh")
+        if [ "$mtime" -ge "$newest" ]; then
+            newest=$mtime
             PERMUTER_DIR="$d"
-            break
         fi
     done
     if [ -z "$PERMUTER_DIR" ]; then
@@ -77,13 +80,20 @@ mg_resolve_c_asm() {
         asm_dir=$(echo "$asm_line" | sed 's/.*INCLUDE_ASM("\([^"]*\)".*/\1/')
         ASM_FILE="$MG_BUILD_DIR/work/${asm_dir}/${func}.s"
     else
-        # A carried partial one-TU may already contain the target's C body.
-        C_FILE=$(grep -rlE "^[A-Za-z_][A-Za-z0-9_* ]*[ *]${func}\(" src/ 2>/dev/null | head -1 || true)
+        # A carried partial one-TU may already contain the target's C body. Require a definition:
+        # an `extern f(...);` declaration elsewhere (nuboot.c declares mainproc) selected the
+        # wrong translation unit and therefore the wrong compiler profile.
+        C_FILE=$(grep -rnE "^[A-Za-z_][A-Za-z0-9_* ]*[ *]${func}\([^;]*$" src/ 2>/dev/null \
+            | grep -v ':extern ' | head -1 | cut -d: -f1 || true)
         if [ -z "$C_FILE" ]; then
             echo "Error: no INCLUDE_ASM stub AND no C definition found for ${func} in src/" >&2
             exit 1
         fi
         ASM_FILE=$(find "$MG_BUILD_DIR/work/asm/nonmatchings" -name "${func}.s" 2>/dev/null | head -1 || true)
+        # Extraction stops emitting a stub's .s once its body is C; seed_c.py's snapshot remains.
+        if [ -z "$ASM_FILE" ] && [ -f "nonmatchings/${func}/target.s" ]; then
+            ASM_FILE="nonmatchings/${func}/target.s"
+        fi
     fi
     if [ -z "$ASM_FILE" ] || [ ! -f "$ASM_FILE" ]; then
         echo "Error: Assembly file not found for ${func}: ${ASM_FILE:-<none>}" >&2

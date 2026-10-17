@@ -9,9 +9,9 @@
 # definition. One nested function anywhere in the TU disables the permuter for EVERY function in
 # that file — and `import.py` does not stop, it prints "Syntax error in base.c ... Proceeding
 # anyway" and imports a broken parse, so the failure is silent until the run produces nothing.
-# `docs/workflow/loop.md` describes the workaround (copy the TU with the nested-function parents
-# deleted, keep the copy inside the project root because import.py rejects an outside path); this
-# script performs it.
+# Use this instead of `./setup-permuter.sh` only when no isolated `nonmatchings/<func>/base.c` exists
+# and the host TU contains nested functions: it copies the TU with the nested-function parents
+# deleted (inside the project root, because import.py rejects an outside path) and imports that.
 #
 # The copy goes to `nonmatchings/permsrc/<stem>.c`, which is gitignored along with the rest of
 # `nonmatchings/`. Only the target function's body matters to the permuter, so deleting unrelated
@@ -23,8 +23,6 @@
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
-BUILD_DIR="${MG64_BUILD_DIR:-build/us}"
-if [[ "$BUILD_DIR" != /* ]]; then BUILD_DIR="$PWD/$BUILD_DIR"; fi
 source tools/lib.sh
 mg_activate_venv
 PYTHON="$PWD/.venv/bin/python3"
@@ -35,19 +33,12 @@ if [[ -z $FUNC ]]; then
     exit 1
 fi
 
-C_FILE=${2:-}
-if [[ -z $C_FILE ]]; then
-    C_FILE=$(grep -rl "^[A-Za-z_].*\b${FUNC}\b" src --include='*.c' | head -1 || true)
-fi
-if [[ -z $C_FILE || ! -f $C_FILE ]]; then
-    echo "permuter_import: cannot find the C file defining ${FUNC}; pass it explicitly" >&2
-    exit 1
-fi
-
-ASM_ROOT="$BUILD_DIR/work/asm"
-ASM_FILE=$(find "$ASM_ROOT/nonmatchings" -name "${FUNC}.s" | head -1 || true)
-if [[ -z $ASM_FILE ]]; then
-    echo "permuter_import: no asm/nonmatchings/**/${FUNC}.s" >&2
+# The shared resolver (tools/lib.sh) finds the defining TU and the target assembly; a declaration
+# elsewhere does not select the wrong file.
+mg_resolve_c_asm "$FUNC"
+C_FILE=${2:-$C_FILE}
+if [[ ! -f $C_FILE ]]; then
+    echo "permuter_import: $C_FILE does not exist" >&2
     exit 1
 fi
 

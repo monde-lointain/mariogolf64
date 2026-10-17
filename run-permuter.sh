@@ -20,12 +20,17 @@ shift
 
 mg_find_permuter_dir "$FUNC_NAME"
 
-THREADS=$(($(nproc) - 1))
-if [ "$THREADS" -lt 1 ]; then
-    THREADS=1
+# Default to all-but-one core unless the caller chose `-j`; passing both made the permuter's
+# argparse silently keep the last one.
+JOBS=()
+if [[ " $* " != *" -j "* && " $* " != *" -j"[0-9]* ]]; then
+    THREADS=$(($(nproc) - 1))
+    [ "$THREADS" -ge 1 ] || THREADS=1
+    JOBS=(-j "$THREADS")
 fi
+BUDGET="${MG64_PERMUTER_SECONDS:-600}"
 
-echo "Running bounded permuter on $PERMUTER_DIR"
+echo "Running bounded permuter on $PERMUTER_DIR (budget ${BUDGET}s; set MG64_PERMUTER_SECONDS to change)"
 
-python tools/decomp_budget.py --seconds "${MG64_PERMUTER_SECONDS:-600}" --reserve 120 -- \
-    ./tools/decomp-permuter/permuter.py "$PERMUTER_DIR" -j "$THREADS" "$@"
+python tools/decomp_budget.py --seconds "$BUDGET" --reserve 120 -- \
+    ./tools/decomp-permuter/permuter.py "$PERMUTER_DIR" "${JOBS[@]}" "$@"

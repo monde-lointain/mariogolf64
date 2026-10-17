@@ -57,7 +57,6 @@ asm_extracted/
 
 # Permuter + execution-loop scratch dirs
 nonmatchings/
-permuter_settings.toml
 
 # Session working scratch (kill-durable bases, permuter logs, mechanism proofs;
 # see docs/hazards.md#pervasive-regalloc-classical-main scratchpad/best_<fn>.c convention)
