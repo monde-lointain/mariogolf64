@@ -162,8 +162,9 @@ still needs its entry test, `if (n != 0)` (S306).
   same question (S320).
 - **division-codegen** -- no cross-block CSE, so an inline `K / x` in a branching macro emits one
   `div` per using block; one ROM `div` means a variable. `x % K` before `x / K` emits the ROM's
-  non-coalesced `move`; division first coalesces. Under `-ffast-math` (`mk/main.mk`) `x * C1 / C2`
-  folds to one `mul.s`, so a ROM `mul.s`+`div.s` pair needs a non-constant divisor (S305, S306).
+  non-coalesced `move`; division first coalesces. Under `-ffast-math` (per-file `file_overrides` in
+  `tools/build_profiles.json`) `x * C1 / C2` folds to one `mul.s`, so a ROM `mul.s`+`div.s` pair
+  needs a non-constant divisor (S305, S306).
 - **fold-associate-constant-side** -- `GLOBAL + (elem + CONST)` reproduces `addiu rX, globreg, C`;
   the natural spelling reassociates onto the element.
 - **narrow-type-spelling** -- `(f32)(u16)(x + 0x8000)` shortens to HImode and CSE folds it to one

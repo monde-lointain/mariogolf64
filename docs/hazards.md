@@ -318,8 +318,9 @@ the in-tree `-D_FINALROM` profile, with no body change. MG64's game/libultra is 
 Cflags), but the 3rd-party Software Creations libmus library object was built non-finalrom, so
 `OSScTask` (`sched.h`) carries its `#ifndef _FINALROM` trailing `startTime`+`totalTime` (2× `OSTime` =
 0x10) that the finalrom build drops. `aud_sched.c`'s `__OsSchedDoTask` declares an `OSScTask` on the
-stack, so the 16 B size delta surfaced as a 5-byte SHA-miss. Fix: per-library profile undef in
-`mk/libmus.mk` (`-U_FINALROM`); the game/libultra stays finalrom (e.g. `src/libultra/sched/sched.c`
+stack, so the 16 B size delta surfaced as a 5-byte SHA-miss. Fix: per-library profile undef in the
+`libmus` profile of `tools/build_profiles.json` (`-U_FINALROM`); the game/libultra stays finalrom
+(e.g. `src/libultra/sched/sched.c`
 matched with the smaller `OSScTask`), and no other libmus file is `_FINALROM`-sensitive (the remaining
 conditionals are `OS_NUM_EVENTS` macros + an `alParseAbiCL` proto, not codegen), so the banked siblings
 re-match on a full rebuild (`rm build/src/<lib>/*.o` — the build tracks no flag deps).
@@ -375,7 +376,7 @@ falls back to plain `hasm`.
    - **Internal-header include rewrite (the one verbatim deviation).** ultralib `.s` TUs include
      their internal headers bare (`#include "threadasm.h"`, `"exceptasm.h"`) because in ultralib they
      sit next to the `.s` in `src/<dir>/`. The project keeps those headers under
-     `include/libultra/internal/`, which the `LIBULTRA_ASFLAGS` `-I` set reaches only via
+     `include/libultra/internal/`, which the ultralib asm `-I` set reaches only via
      `-I include/libultra`, so rewrite each bare internal-header include to `internal/<h>`
      (`"threadasm.h"` becomes `"internal/threadasm.h"`). The public-prefixed includes (`PR/…`,
      `sys/…`) already resolve and stay as-is. This is the only allowed edit to the vendored `.s`; it
@@ -395,13 +396,12 @@ falls back to plain `hasm`.
    `mips-linux-gnu as`.** This is the load-bearing step: KMC `as` pads each function's `.text` up to
    its 16-byte ROM slot, so the verbatim 0xC TU lands as the 0x10 the ROM expects. Modern `as` emits
    the bare 0xC and every following subseg shifts, breaking the SHA-1 (the entire failure mode
-   before the toolchain switch). `mk/libultra.mk` carries this as `LIBULTRA_ASFLAGS` plus a path-based
-   pattern rule `build/src/libultra/%.o: src/libultra/%.s` that assembles every `.s` under
-   `src/libultra/` with `$(CC) $(LIBULTRA_ASFLAGS)` plus the section-alignment `objcopy` (the
-   more-specific pattern wins over the generic `src/%.s` modern-GAS rule; the project sets
+   before the toolchain switch). `tools/rom_build.py` assembles every `.s` under `src/libultra/` with
+   the KMC assembler plus the section-alignment `objcopy` (the project sets
    `hasm_in_src_path: True`, see step 4). There is nothing to add per TU: dropping the `.s` under
    `src/libultra/<dir>/` plus qualifying the yaml line (step 4) is the whole extension, with no
-   build-file edit. (This mirrors how `LIBULTRA_CFLAGS` mirrors ultralib's C profile.)
+   build-file edit. (This mirrors how the `libultra` profile in `tools/build_profiles.json` mirrors
+   ultralib's C profile.)
 4. **Flip the subseg `asm` to `hasm` and add the `<dir>/<stem>` name qualifier** in `mariogolf64.yaml`
    (e.g. `[0x86790, hasm, libultra/os/getcount]`), so the project's `hasm_in_src_path: True` resolves
    the `.s` to `src/libultra/<dir>/<stem>.s` and its object to `build/src/libultra/<dir>/<stem>.o`.
@@ -519,12 +519,11 @@ falls back to plain `hasm`.
 
 **KMC-as sub-lane (libkmc soft-float / 64-bit math TUs).** libkmc's hand-asm TUs (`mmuldi3.s`
 `__muldi3`; `mcvtld.s` `__fixdfdi`/`__fixunsdfdi`+`__floatdidf`) are not ultralib `LEAF`/`XLEAF` TUs
-and do not assemble under `LIBULTRA_ASFLAGS`. They use KMC register conventions (`move dst,zero`
+and do not assemble under the ultralib asm profile. They use KMC register conventions (`move dst,zero`
 → `addu` encoding) and must be assembled with the KMC assembler `$(KMC_AS)`, the same toolchain
-the in-tree disassembly-reassembly path uses. `mk/libkmc.mk` carries these under a **path-based pattern
-rule** `build/src/libkmc/%.o: src/libkmc/%.s` (separate from the ultralib `src/libultra/%.o` rule,
-which hard-codes the `LIBULTRA_ASFLAGS` profile): `$(KMC_AS) -EB -mips2 -I src/libkmc -o $@.tmp $<;
-cp $@.tmp $@; rm $@.tmp` (no objcopy; the 16-byte-slot pad happens inside KMC `as`).
+the in-tree disassembly-reassembly path uses. `tools/rom_build.py` assembles these under `src/libkmc/`
+with `$(KMC_AS) -EB -mips2 -I src/libkmc` (separate from the `src/libultra/` path, which uses the
+ultralib assembler profile; no objcopy — the 16-byte-slot pad happens inside KMC `as`).
 `pick_target.py` flags it `intrinsic-likely:<tu>.s(kmc-as)` so the
 gate reaches for the KMC-as recipe, not the ultralib one: the libkmc analog of the ultralib
 `intrinsic-likely:<tu>.s`. It fires when an asm-only primary the pure-shim + privileged tests
@@ -1309,7 +1308,7 @@ statements (`n_aInterleave(ptr++); n_aSaveBuffer(...);`), not a TU. Three rules:
   `.c`.
 
 These files also branch on `N_MICRO`, an n_audio_sc-wide define: see `#needs-define` (the
-`-DN_MICRO=1` `LIBNAUDIO_CFLAGS` pin), the same class as the `-DF3DEX_GBI_2` libultra pin.
+`-DN_MICRO=1` `libnaudio`-profile pin), the same class as the `-DF3DEX_GBI_2` libultra pin.
 
 **Provenance:** vendorable annotation: S54 (the `(vendorable)` tag + `needs-copy` pts, retiring the
 "blk that's a 1pt cp" re-diagnosis; sprintf `xstdio.h`/`string.h`); band precedents: S49 (`guint.h`),
@@ -1335,7 +1334,8 @@ types: a resolvable-but-wrong-library include passes the grep and the gate build
 a verbatim libkmc mirror). Vendor the libultra std header verbatim from
 `ultralib/include/compiler/gcc/` (KMC GCC 2.7.2 → the `gcc` variant) to
 `include/libultra/compiler/gcc/`, and prepend `-I include/libultra/compiler/gcc` to
-`LIBULTRA_CFLAGS` only. Verify per-file with `tools/cc/gcc -M -nostdinc <profile -I set> src/…`: the
+the `libultra` profile (`tools/build_profiles.json`) only. Verify per-file with
+`tools/cc/gcc -M -nostdinc <profile -I set> src/…`: the
 libultra source must resolve to `include/libultra/compiler/gcc/stdlib.h`, the libkmc source still to
 `include/libkmc/stdlib.h`.
 
@@ -1369,10 +1369,10 @@ same compiler at the wrong level produces a byte mismatch.
 **Trigger:** A libkmc match locking at ~0.9 across every C rewrite (suspect scheduler-level); a
 libultra match locking at ~0.9 with unexpected register usage or wrong delay-slot instructions.
 
-**Procedure:** `mk/libkmc.mk` and `mk/libultra.mk` carve `LIBKMC_CFLAGS := $(subst -O2,-O,$(CFLAGS))` and
-`LIBULTRA_CFLAGS := $(subst -O2,-O3,$(CFLAGS)) -fsigned-char -DBUILD_VERSION=VERSION_J`, each via a
-specificity-winning pattern rule. `decomp_loop.py` auto-applies the right profile when a matching
-`src/libkmc/<basename>.c` or `src/libultra/<relpath>.c` exists. If a match locks at ~0.9, verify the
+**Procedure:** `tools/build_profiles.json` selects the `libkmc` (`-O`) or `libultra`
+(`-O3 -fsigned-char -DBUILD_VERSION=VERSION_J`) profile. `decomp_loop.py` auto-applies the right
+profile when a matching `src/libkmc/<basename>.c` or `src/libultra/<relpath>.c` exists. If a match
+locks at ~0.9, verify the
 loop is using the correct profile (compile `base.c` with `-O` directly, or pass `LIBULTRA=1` /
 `--profile libultra`) before iterating further on the C.
 
@@ -1385,7 +1385,7 @@ band default).
 
 **Rule:** This ROM's libultra was compiled with signed `char` (`-fsigned-char`), a ROM-proven
 deviation from ultralib's documented VERSION_J profile (gcc.mk adds `-funsigned-char` for D–J). The
-band default `LIBULTRA_CFLAGS` therefore carries `-fsigned-char`. Most libultra C is
+band default `libultra` profile therefore carries `-fsigned-char`. Most libultra C is
 char-signedness-*ambiguous* (matches under either flag), so this only ever surfaces on a file whose
 codegen actually depends on `char` signedness.
 
@@ -1400,9 +1400,9 @@ compiler's free choice for a `!= 0` test).
 1. The band default is already `-fsigned-char`, so a new libultra mirror compiles signed with no
    action. If a mirror SHA-misses with the `lbu/andi` vs `lb/sll-sra` signature, you have the inverse
    case (a TU that wants the *opposite* signedness).
-2. Per-file override mechanism (add in `mk/libultra.mk`; the explicit-target var beats the `libultra/%.o` pattern):
-   `$(BUILD_DIR)/$(SRC_DIR)/libultra/<rel>.o: C_PROFILE_CFLAGS = $(subst -fsigned-char,-funsigned-char,$(LIBULTRA_CFLAGS))`
-   (or the reverse subst). Append-and-last-wins also works since gcc takes the final `-f*-char`.
+2. Per-file override mechanism (add a `src/libultra/<rel>.c` entry to `file_overrides` in
+   `tools/build_profiles.json`, e.g. `append_flags: ["-funsigned-char"]` with
+   `remove_flags: ["-fsigned-char"]`, or the reverse).
 3. To re-settle the band default after several such files, run `make clean && make` with the global
    flag flipped and compare the ROM SHA-1: the authoritative test (a clean rebuild under
    `-fsigned-char` reproduced the baserom exactly, proving the global default, not a per-file patch).
@@ -1906,7 +1906,8 @@ need ground truth.
   IO_WRITE literal addresses, proceed directly to `make` + ROM SHA-1 without C iteration.
 
 `include/macro.inc` had its `.internal _MACRO_INC_GUARD` line removed so KMC `as` parses it cleanly.
-`permuter_settings.toml` mirrors the build's `src/%` pipeline (`mk/src.mk`).
+The permuter settings are generated per import by `tools/rom_build.py` from `tools/permuter.toml.in`,
+mirroring the build's compile pipeline.
 
 **Provenance:** S39 (struct-field reloc addend encoding).
 
@@ -2805,8 +2806,8 @@ upstream, so the planned verbatim cp failed first build, banked classical via #g
 
 **Rule:** A libultra/SDK source can be statically linked into the game (not the libultra code
 band): its subseg sits at a low rom/vram, and the build compiles it with the game `CFLAGS` (-O2),
-**not** `LIBULTRA_CFLAGS` (-O3 via `$(subst -O2,-O3,…)`). The build selects the profile by src path
-prefix (the `mk/lib*.mk` `C_PROFILE_CFLAGS` overrides): only `src/libultra/%` and `src/libkmc/%`
+**not** the `libultra` profile (-O3). The build selects the profile by `src/` path
+prefix (`tools/build_profiles.json` `profiles`): only `src/libultra/%` and `src/libkmc/%`
 get the lib profiles; everything else is -O2. So a
 game-embedded SDK mirror placed under `src/libultra/` compiles at the wrong -O3 → `-finline-functions`
 inlines its small callees (the ROM, at -O2, keeps the `jal`s). Symptom: a verbatim mirror where a
@@ -2936,10 +2937,12 @@ define set, the leaf is not a clean flip: defer, or handle the define at the gat
 The n_audio_sc upstream Makefile builds the whole library with `-DN_MICRO=1` (the "micro" command
 stream). Files that branch on it (`n_save.c`, `n_resample.c`, `n_reverb.c`, `n_env.c`, `n_load.c`,
 `n_synthesizer.c`) emit the micro path; with no define they take the longer non-micro path and
-SHA-miss. The fix is a library-wide pin: `-DN_MICRO=1` in `LIBNAUDIO_CFLAGS` (`mk/libnaudio.mk`), the
-same standing-pin pattern as `-DF3DEX_GBI_2`. The setter mirrors (`n_syn*.c`) have no N_MICRO branch,
-so the pin is byte-neutral for them. `pick_target` parses `LIBNAUDIO_CFLAGS` into the libnaudio
-active-define set, so N_MICRO reads as satisfied and a libnaudio mirror does not false-flag
+SHA-miss. The fix is a library-wide pin: `-DN_MICRO=1` in the `libnaudio` profile
+(`tools/build_profiles.json`), the same standing-pin pattern as `-DF3DEX_GBI_2`. The setter mirrors
+(`n_syn*.c`) have no N_MICRO branch,
+so the pin is byte-neutral for them. `pick_target` derives the libnaudio active-define set from the
+resolved profiles (`tools/build_profiles.json`), so N_MICRO reads as satisfied and a libnaudio mirror
+does not false-flag
 `needs-define:N_MICRO`. The first miss surfaced at the full-make ROM SHA-1 (`n_save.c` built the
 4-command non-micro path vs the target's 2 commands), invisible to the gate stub — the same
 late-surface class as the GBI sub-case below. See `#needs-header` for the paired `.inc.c`
@@ -2962,8 +2965,9 @@ whose value is GBI-microcode-guarded, used inside an otherwise-verbatim body. `P
 ```
 
 ultralib builds `libgultra_rom` with a global default `GBIDEFINE := -DF3DEX_GBI`. MG64 runs the
-F3DEX2 microcode, so the project pins `-DF3DEX_GBI_2` in `LIBULTRA_CFLAGS` (`mk/libultra.mk`). With no
-GBI define the macro silently takes the `#else` value. The standing pin resolves this for every
+F3DEX2 microcode, so the project pins `-DF3DEX_GBI_2` in the `libultra` profile
+(`tools/build_profiles.json`). With no GBI define the macro silently takes the `#else` value. The
+standing pin resolves this for every
 libultra mirror; it is documented here because the failure mode is invisible to every gate check.
 
 **The tell (`sptask.c`):** the mirror compiles and links clean (all symbols resolve), but the
@@ -2980,7 +2984,7 @@ whole-body divergence is a different (version / cast / char-signedness) class.
 
 **Pre-flag:** `pick_target.py` flags `needs-define:<GBI def>` when a candidate's body uses a
 GBI-value-guarded macro and no guard define is active for the lib (`gbi_value_guard_needs_define`,
-keyed off the parsed `LIBULTRA_CFLAGS` define set). Dormant while `-DF3DEX_GBI_2` stands, by design.
+keyed off the parsed `libultra`-profile define set). Dormant while `-DF3DEX_GBI_2` stands, by design.
 
 **Provenance:** S83 (`sptask.c`'s `OS_YIELD_DATA_SIZE` immediate proved the standing `-DF3DEX_GBI_2`
 pin over the `#else` value).
@@ -3090,7 +3094,7 @@ VERSION_J build defines at 0x800AE380 is `__osMotorAccess` (verified in `build/J
 (correct), so the still-asm callers' relocs (`jal osMotorStop`) and the C object (`__osMotorAccess`)
 disagree → `undefined reference`.
 
-**Why not `make sync-names`:** the canonical fix (rename in Ghidra → sync) is a full
+**Why not the `sync-names` target:** the canonical fix (rename in Ghidra → sync) is a full
 `--export-to-decomp --write-in-place` regen, still destructive (~250-symbol Ghidra↔decomp drift).
 And you can't hand-edit `ghidra_symbols.txt` (sync-owned) nor naively add the correct name
 to `symbol_addrs.txt` (same vram already in ghidra_symbols → splat dup error).
@@ -3163,16 +3167,18 @@ S144 (`aud_thread.c`, `MICROCODE_CODE`).
 
 ## make sync-names eviction recovery
 
-**Rule:** Running `make sync-names` mid-sprint can evict symbols from `ghidra_symbols.txt` (Ghidra
-lacks a curated name → it vanishes; or a function was renamed → old spelling disappears). In-flight C
-referencing the old symbol then fails to link. Prevention: `make sync-names` is gate-only.
+**Rule:** Running the `sync-names` target (`cmake --build build/us --target sync-names`) mid-sprint can
+evict symbols from `ghidra_symbols.txt` (Ghidra lacks a curated name → it vanishes; or a function was
+renamed → old spelling disappears). In-flight C referencing the old symbol then fails to link.
+Prevention: the `sync-names` target is gate-only.
 
-**Trigger:** `make` fails with `undefined reference to <sym>` for a symbol that was in
-`ghidra_symbols.txt` before the sprint, and `make sync-names` ran mid-sprint.
+**Trigger:** a build (`cmake --build build/us`) fails with `undefined reference to <sym>` for a symbol
+that was in `ghidra_symbols.txt` before the sprint, and the `sync-names` target ran mid-sprint.
 
 **Procedure:** Add the missing symbol to `symbol_addrs.txt` as a data extern
-(`<name> = 0x<ADDR>; // size:0x<n>`, add-only, disjoint), then `make extract && make`. This restores
-it via the splat-side file.
+(`<name> = 0x<ADDR>; // size:0x<n>`, add-only, disjoint), then re-extract and rebuild
+(`cmake --build build/us --target extract` then `cmake --build build/us`). This restores it via the
+splat-side file.
 
 ---
 
@@ -3249,7 +3255,8 @@ fell back to full-build objdump diff.
 enabler when naming a coddog / upstream-mirror leader) makes `make extract` rename that symbol in the
 scaffold. Any already-banked C file that hard-codes the old `func_<vram>` name (an `extern` decl +
 call) then fails to link with `undefined reference to func_<vram>`. Same class as
-`#stale-top-level-asm-label-sync`, but reaching the gate via a symbol add rather than `make sync-names`.
+`#stale-top-level-asm-label-sync`, but reaching the gate via a symbol add rather than the `sync-names`
+target.
 
 **Pre-flag:** `pick_target.py` flags `caller-evict:<func_vram>@<file>[;…]`; it walks `src/`
 for every un-named member a banked C file references by name (INCLUDE_ASM stub lines excluded). When
@@ -3316,7 +3323,7 @@ this for 6 `bgm_load_song_from_rom` functions (`init_per_player_state`, `gen_ter
 `find_file_boundaries`, nor removing the curated name changes it — the gap is address-range, not name.
 
 **Prevention:** never `rm -rf` a `nonmatchings/<stem>/` dir or bulk-delete its `.s` to force a regen
-(see `docs/agent-workflow.md ## Conventions`, the hard rule). Refresh a stub by `Edit` or by deleting
+(see `.omp/RULES.md`, the hard rule). Refresh a stub by `Edit` or by deleting
 Only the single `.s` you will immediately re-verify.
 
 **Recovery:** `tools/recover_stub.sh <0xSUBSEG_OFFSET> <fn> [<fn>...]`. It flips the subseg `c`->`asm`
@@ -3360,7 +3367,8 @@ has no macro — e.g. `func_8007624C`'s `>>2`-quantized colour, where the macro'
 
 **Rule:** MG64 uses F3DEX2 microcode (gspF3DEX2.fifo 2.08). Include `<PR/gbi.h>` when the target
 manipulates `Gfx*`. **A `src/main/` (or `src/overlay_*/`) game TU that builds display lists needs the
-F3DEX2 build profile** (`mk/main.mk`: `MAIN_CFLAGS = $(CFLAGS) -DF3DEX_GBI_2`) — `-DF3DEX_GBI_2`
+F3DEX2 build profile** (the `main` profile in `tools/build_profiles.json` adds `-DF3DEX_GBI_2`) —
+`-DF3DEX_GBI_2`
 selects the F3DEX2 GBI opcodes in `PR/gbi.h` (`G_RDPHALF_1=0xE1`/`G_RDPHALF_2=0xF1`, vs the F3DEX
 `0xB4`/`0xB3`). Without it the RSP-command opcodes are wrong; the RDP commands (PipeSync/SetCombine/
 SetOtherMode) are ucode-independent so they match either way. This updates the "main/ needs zero
@@ -3370,8 +3378,9 @@ opcodes read `0xB4`/`0xB3` (a false diff, looks like a body bug). Pass `--profil
 now-live main/F3DEX2 profile, alongside its libkmc/libultra detectors) for any macro-based main/ DL
 fn; that adds `-DF3DEX_GBI_2` so the gDP macros expand to the F3DEX2 `0xE2..`/`0xE1`/`0xF1` opcodes.
 **Raw-literal DL words are define-independent** (a `gfx->words.w0 = 0xE7000000` store is the same byte
-value under either ucode), so a raw-word seed needs no profile — only macro seeds do. `setup-permuter.sh
---main` / `permuter_settings_main.toml` carry the same define for the permuter (S190).
+value under either ucode), so a raw-word seed needs no profile — only macro seeds do.
+`./setup-permuter.sh <fn>` carries the same define automatically for the permuter (it applies the
+parent TU's `main` profile; S190).
 
 **Grep the SDK `gbi.h` for a composite macro before hand-reconstructing any DL command sequence
 (S257).** `gfxdis.f3dex2` names the composite in its own output (it printed
@@ -3529,7 +3538,7 @@ into a running `Gfx*` cursor. Decode + reconstruct, do not hand-transcribe:
     the block with `gfxdis.f3dex2 -x -w <hexwords>`, verify each `w0`/`w1` against `PR/gbi.h` by hand
     (`G_MTX_PUSH=0x01` under F3DEX2, `gDma2p` idx encoding, `gSPVertex`/`gSP2Triangles` index packing),
     then write the stock `gDPxxx(gfx++)` / `gSPxxx(gfx++)` calls directly and gate on full-make ROM-SHA-1
-    (macro seeds need `-DF3DEX_GBI_2`, standing in `mk/main.mk`; `decomp_loop --profile main`). S226
+    (macro seeds need `-DF3DEX_GBI_2`, the `main` profile in `tools/build_profiles.json`; `decomp_loop --profile main`). S226
     banked three such emitters (`func_8007DE9C`/`func_8007DFD0` twins + `func_8007CF10`) this way — 2
     first-build, 1 one-iteration — the raw-word blob was unnecessary. Keep the raw-then-refine recipe
     for emitters with a word that won't decode (dynamic address, unfolded composite).
@@ -4261,11 +4270,10 @@ iterate the C or reach for the permuter. Pin the level with the profile-probe
 (only same-TU section-relative reloc reps may differ, e.g. `.text+0x6c` vs the `idle` symbol, which
 link identically).
 
-**Procedure:** add a file-specific mk override (a file target is more specific than the tree
-pattern, so it wins): `$(BUILD_DIR)/$(SRC_DIR)/<tree>/<file>.o: C_PROFILE_CFLAGS := $(subst
--O2,-O0,$(CFLAGS))`, placed in the tree's `mk/<lib>.mk` (or a new fragment `include`d after
-`mk/src.mk`). Never a `<tree>/%.o` pattern — the sibling TUs in the same tree stay -O2/-O3. S149
-`nuboot.o` overrode to -O0 in `mk/libnusys.mk`, beating the `libnusys/%.o` -O2 pattern; `idle` was
+**Procedure:** add a per-file override to `file_overrides` in `tools/build_profiles.json` (e.g.
+`"src/<tree>/<file>.c": {"optimization": "-O0"}`). Never a tree-wide profile — the sibling TUs in
+the same tree stay -O2/-O3. S149
+`nuboot.o` overrode to -O0, beating the `libnusys` -O2 default; `idle` was
 byte-exact at -O0 (53 instrs).
 
 **Provenance:** S149 (nusys boot file `nuboot.c` = `nuBoot` + `idle` at -O0; the per-file mk override
@@ -4284,7 +4292,8 @@ stream + reloc-symbol lines) per function — pinning the matching flags in seco
 **Gotchas baked into the tool:** assemble the target with modern GAS
 (`mips-linux-gnu-as -I include`), not `cpp -P | as` (cpp silently empties `.text` and the pipe
 "succeeds") and not KMC `as` (rejects `.set gp=64`); the candidate uses the KMC `gcc -S` + KMC `as`
-pipeline (`mk/src.mk`). Both objdumped with `mips-linux-gnu-objdump`, so the unresolved relocs (zeroed
+pipeline (`tools/rom_build.py`). Both objdumped with `mips-linux-gnu-objdump`, so the unresolved
+relocs (zeroed
 fields) compare directly. Normalizer note: POSIX awk has no `\s` — use `[[:space:]]` (the `\s` bug made
 the first comparison match only reloc lines and read as false 0-diffs). Pairs with
 `#-o0-bootsdk-glue-file-profile`.
@@ -4394,9 +4403,9 @@ guarded form (extra frame + `c.eq`/`bc1t` + `jal` fallback) — e.g. `build/src/
 (libultra -O3, no -ffast-math) shows `sqrt.s` immediately followed by `c.eq.s`/`bc1t`, the reference
 guarded shape.
 
-**Procedure:** add a file-specific mk override (a file target beats the tree `%.o` pattern):
-`$(BUILD_DIR)/$(SRC_DIR)/main/<file>.o: C_PROFILE_CFLAGS := $(MAIN_CFLAGS) -ffast-math` in
-`mk/main.mk`. Declare the prototype in the TU (`double sqrt(double);` or `extern f32 sqrtf(f32);`); a
+**Procedure:** add a per-file override to `file_overrides` in `tools/build_profiles.json` (e.g.
+`"src/main/<file>.c": {"append_flags": ["-ffast-math"]}`). Declare the prototype in the TU
+(`double sqrt(double);` or `extern f32 sqrtf(f32);`); a
 matching redeclaration keeps the builtin, and no `#pragma intrinsic` is needed. Never a `main/%.o`
 pattern — the sibling main/ TUs keep the plain profile (`mgu/mtxutil`'s float math matched without
 `-ffast-math`, so it is per-file like the `#-o0-bootsdk-glue-file-profile` override). `-ffast-math` is
@@ -4562,11 +4571,11 @@ search-loop terminator-condition framing: S213 (`lookup_animation_by_id`, byte-e
 
 **Rule:** when the 8-point decompose gate splits a one-tu into N `.c`/`.o` files, the last piece's
 `.rodata` can be followed in memory by the next TU's higher-aligned constant (a `.double`, an
-8-aligned jumptable). The build force-4-aligns every asm `.rodata` section (`OBJCOPY_ALIGN :=
---set-section-alignment .rodata=4 ...` in `Makefile`, plus `ASFLAGS --no-pad-sections`), so the
-asm-sourced next-TU rodata cannot self-8-align at the `.o` boundary: it lands right after the split
-piece's rodata (which ends 4/8 bytes short of the boundary) and every downstream data symbol shifts.
-The C `.o` recipe (`mk/src.mk`, KMC `as`) does not get that objcopy, so a C `.o`'s rodata keeps its
+8-aligned jumptable). The build force-4-aligns every asm `.rodata` section
+(`objcopy --set-section-alignment .rodata=4` in `tools/rom_build.py`, plus `--no-pad-sections` for the
+modern-GAS path), so the asm-sourced next-TU rodata cannot self-8-align at the `.o` boundary: it
+lands right after the split piece's rodata (which ends 4/8 bytes short of the boundary) and every downstream data symbol shifts.
+The C `.o` recipe (`tools/rom_build.py`, KMC `as`) does not get that objcopy, so a C `.o`'s rodata keeps its
 natural (higher) alignment.
 
 **Tell:** clean per-function match (isolated diff shows only relocations), full-make SHA-miss, and
@@ -4699,7 +4708,7 @@ defeats the peel but flips `lh`→`lhu` and grows the loop; peeking `q[1].val` b
 also fixes the edge but costs the annulled `bnel`/`beql` delay slots (the advance handler stops being
 the single foldable `q++`). The residual is a pure internal back-edge target bit, so the permuter
 cannot score it (asm-differ is blind to internal branch targets — see the permuter rules in
-`docs/agent-workflow.md`); gate on `objdump`/ROM-SHA-1, never the permuter. See the memory
+`.omp/RULES.md`); gate on `objdump`/ROM-SHA-1, never the permuter. See the memory
 `same-field-sentinel-loop-peels-top-load`.
 
 ## indexed-vs-pointer loop (strength-reduction preheader ordering)
@@ -6021,20 +6030,11 @@ asm-first fast-path miss-recovery fails with `no glabel found`. Workaround: manu
 reloc-hi/lo diffs there are the [isolated-compile caveat](#isolated-compile-caveat); gate on the
 full-make SHA). A `--target-s <path>` arg for `decomp_loop` is a tracked tooling follow-up.
 
-**Permuter workaround for a flipped-subseg fn (S171).** The same post-flip gap breaks
-`setup-permuter.sh` two ways: `mg_resolve_c_asm` can't find an `INCLUDE_ASM(…, <fn>)` line once the fn
-is inlined C, and `import.py`'s default preprocess set is bare `-I include` (misses
-`include/libultra`, so `PR/ultratypes.h` fails). Hand-build the scaffold in
-`nonmatchings/<fn>/`: (1) copy an existing main-seg `compile.sh` (e.g. `nonmatchings/func_80076640/`)
-and `sed` the func name — it carries the full profile `-mips3 -G 0 -O2 -I include -I include/libultra
--I include/libultra/internal -I include/lib{kmc,nusys,mus,nualstl,naudio} -DF3DEX_GBI_2 -D_FINALROM`;
-(2) write `settings.toml` (`func_name`, `compiler_type = "gcc"`); (3) `cpp -P -undef base.c.raw … <same
--I set> -DPERMUTER …` to a self-contained `base.c` (the permuter's own preprocess is bare, so it
-must be pre-expanded); (4) `cp build/src/<seg>/<file>.o nonmatchings/<fn>/target.o` — the current
-INCLUDE_ASM build object holds the real target bytes for that fn. Then `./run-permuter.sh <fn>`
-(`mg_find_permuter_dir` globs `nonmatchings/<fn>*`, so it finds the hand-built dir). This is how S171
-scaffolded `print_string_at_grid` + `func_8004DC44` after their flip. Same tracked tooling follow-up
-(teach `decomp_loop`/`setup-permuter` to search `asm/nonmatchings/**` + derive the main-seg `-I` set).
+**Permuter setup for a flipped-subseg fn (S171).** `./setup-permuter.sh <fn>` now handles an already-inlined
+function: when no `INCLUDE_ASM` stub remains, `mg_resolve_c_asm` falls back to the C definition in
+`src/`, finds the function's `asm/nonmatchings/**` `.s`, and applies the parent TU's exact `-I` set and
+compiler profile (from `tools/build_profiles.json`) — no hand-built scaffold or direct `import.py`
+invocation.
 
 ## struct-array-of-BSS direct-index vs base-pointer var
 
@@ -6394,7 +6394,7 @@ code at `-O1` (MP1/MP2/MP3) or `-O2` (drmario64/sbk2/MG64); the discriminator fo
 within a single `-O` level, so the O1-vs-O2 default is not a confound. `papermario` game code is **gcc
 2.8.1** (same egcs/local-alloc lineage, one minor version off) -- mechanism-informative but not
 authoritative; its 2.7.2 `os/*` libultra is `-O3` and typically has no float-abs. Confirm each
-project's compiler from its `Makefile`/`permuter_settings.toml`/`configure` before trusting a hit.
+project's compiler from its `Makefile`/`configure` (or its permuter settings) before trusting a hit.
 
 **Method (fan out one agent per project).** Give each a shared context file (the exact target-vs-mine
 asm, the pattern signature, the relevance gate) and have it: (1) confirm the compiler+version+flags;
@@ -6861,7 +6861,7 @@ ruled out is the residual a genuine qty-priority permutation for the permuter be
 **Do not hand-iterate the source for a genuine qty permutation.** GCC's pre-alloc scheduler normalizes qty
 births, so decl-order, expression-association, and pointer-hoist rewrites mostly don't move a real
 permutation (S204: 5 source levers, zero movement). This is exactly the local-allocation space the decomp-permuter explores —
-run it (`setup-permuter.sh --main`, then `run-permuter.sh <fn> --stop-on-zero`). S204 found score 0 at
+run it (`./setup-permuter.sh <fn>`, then `run-permuter.sh <fn> --stop-on-zero`). S204 found score 0 at
 iteration ~14250. Two winning shapes the permuter surfaces here recur:
 - **Reference a global inline, not via a pointer local** (`(u32)(D_E473F0 + x)`, not `u8* base =
   D_E473F0; base + x`). The `base` copy creates an extra qty that shifts the priority tie-breaks; the
@@ -6893,15 +6893,10 @@ the permuter's type/shift noise) — the clean reorder usually reproduces the ma
 source. So "permuter-appropriate below 0.97" extends to a small multi-BB fn with a byte-exact store order
 + a compute-cluster reg permutation.
 
-**Permuter plumbing gotcha (S217).** `setup-permuter.sh --main <fn>` aborts silently (its
-`mg_resolve_c_asm` sets an empty `C_FILE` under `set -u`) once the fn has been inlined as C in
-`src/<seg>.c` — the resolver expects the `INCLUDE_ASM` stub still present. Do not restore the stub just to
-set up the permuter. Instead drive `import.py` directly on the seeded scratch + the build-generated asm:
-`./tools/decomp-permuter/import.py --settings permuter_settings_main.toml nonmatchings/<fn>/base.c
-asm/nonmatchings/<seg>/<fn>/<fn>.s` (seed `base.c` first with a minimal compilable preamble; use the
-`asm/nonmatchings/.../<fn>.s` splat file, not the `seed_c.py` `target.s` — the latter lacks the modern-GAS
-`.set` header and fails to assemble). Then run
-`./tools/decomp-permuter/permuter.py nonmatchings/<fn>-N -j <threads> --best-only --stop-on-zero`.
+**Permuter setup for an inlined fn (S217).** `./setup-permuter.sh <fn>` resolves an already-inlined
+function — when the `INCLUDE_ASM` stub is gone, `mg_resolve_c_asm` falls back to the defining C file
+in `src/` — and applies the parent TU's profile and `-I` set automatically, so no hand-built scaffold,
+`--main` flag, or direct `import.py` invocation is needed.
 
 **Multi-BB analog — `global.c`, not `local-alloc.c` (S209 `func_8005C458`).** A fn with a nested loop
 has multiple basic blocks, so its cross-BB pseudos are allocated by `global.c` (allocnos), the
@@ -7068,7 +7063,7 @@ a pervasive base-register + uniform-displacement-offset diff on every field acce
 `decomp_loop` shows `match_count == total_rows`, `top_mismatches == []`, yet a low percent (S205: 0.48)
 — looks like the `#io_write/io_read`/isolated-compile artifact, but the in-tree `diff.py` confirms it
 is a real pervasive near-miss (see the isolation-caveat note in
-`docs/agent-workflow.md ## Execution loop`).
+`.omp/RULES.md`).
 
 **Root cause (gcc-2.7.2, confirmed by exhaustive bisect).** CSE (`cse.c` `fold_rtx` /
 `simplify_plus_minus` address canonicalization) always canonicalizes `(plus (plus param C) off)` to
