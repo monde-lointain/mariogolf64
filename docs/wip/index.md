@@ -48,6 +48,7 @@
 
 # Functions at 0x8006
 
+- [func_80065A1C — frame/prologue exact, pre-call product liveness lever confirmed](func_80065A1C.near-match.md) — Records the angle-to-matrix builder whose `$f30` callee-saved register was recovered by forming the `m->4` product before the final trig call, with the `-dg` dump citation.
 - [func_8006BC80 — CRACKED (0/474 words, match candidate)](func_8006BC80.near-match.md) — Records the hole-banner emitter's 474-instruction isolated candidate with zero unexplained word differences, not a verified ROM bank.
 - [func_8006C8CC — banked via shared positive-return label](func_8006C8CC.near-match.md) — Records the verified 19-instruction match and the shared-return CFG that defeats jump.c's conditional-assignment conversion.
 - [func_8006D164 near-match (S240 carry)](func_8006D164.near-match.md) — Records the four-row halfword-copy loop's S240 coupled invariant-hoist and register-rotation residual.
@@ -100,6 +101,7 @@
 - [get_terrain_vertex_pointer — banked via shared scratch chains](get_terrain_vertex_pointer.near-match.md) — Records the verified match and register-reuse lever for get_terrain_vertex_pointer.
 - [init_rdp_and_draw_sky_background — 286/286, exact instruction multiset, pure order residual](init_rdp_and_draw_sky_background.near-match.md) — Records the 286-instruction reconstruction whose instruction multiset matches and whose residual is ordering only.
 - [init_sky_pool_and_world_state near-match (S256 carry, rebuilt S258)](init_sky_pool_and_world_state.near-match.md) — Records the sky-grid initializer's S258 exact-count register permutation and two-instruction initialization swap.
+- [mainproc near-match — 170/174, global-alloc priority tie](mainproc.near-match.md) — Records the main loop's near-exact reconstruction with the `allocno_report.py` priority table for the `debug_mode`/loop-sentinel `s0`/`s2` exchange.
 - [resolve_shot_quality_table — banked with a result-scratch lifetime and loop-note boundary](resolve_shot_quality_table.near-match.md) — Records the verified resolution of the former digit/power scheduling and allocation residual.
 
 # Recorded resolutions
