@@ -77,6 +77,8 @@ checks a ROM hash, so an older matching ROM cannot pass.
 
 `cmake --workflow --preset verify` runs configure, build, then the ROM CTest gate. The verifier
 also configures an unconfigured binary tree, so `tools/verify-rom.sh` works as the first command.
+It writes the build output to `<binary>/verify-rom.log` and prints only the verdict, the failing
+build lines, or the first differing ROM offset; `--verbose` streams the build instead.
 
 ## Task-specific builds
 

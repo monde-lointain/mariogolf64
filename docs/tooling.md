@@ -77,6 +77,7 @@ for a named new source lever or changed evidence, not age or file closure.
 | Recover an isolated seed body | `uv run --locked python tools/seed_c.py --func <fn> --parent src/<seg>.c` | [Source-recovery gate](workflow/loop.md#source-recovery) |
 | Fetch live Ghidra context before seeding | Add `--ghidra` to `seed_c.py`; the local service must be running | [Headless Ghidra](ghidra.md#agent-access-and-context) |
 | Compile/diff a seed or refresh a carry | `uv run --locked python tools/decomp_loop.py --func <fn>` | [Measurement and carry recovery](workflow/loop.md#measurement) |
+| Localize a residual | `tools/cmpfn.sh <fn>` (instruction stream/count), `tools/seg_diff.py <fn>` (count deficit by region), `tools/allocno_report.py nonmatchings/<fn>/base.c <fn>` (register-allocation priorities) | [Oracles](workflow/loop.md#oracles) |
 | Select an isolation profile | `decomp_loop.py --profile auto` uses the parent TU; explicit profiles include every key in `tools/build_profiles.json` | [Build profiles](../tools/build_profiles.json) |
 | Import a permuter case | `./setup-permuter.sh <fn>` uses the isolated seed when present and the parent TU's exact flags; an inlined function resolves to its defining C file | [Permuter playbook](hazards.md#permuter-setup-for-kmc-toolchain-mirrors) |
 | Import without an isolated seed from a TU with nested functions | `tools/permuter_import.sh <fn>` copies the TU minus nested-function parents (pycparser cannot parse them) and imports that | [Permuter playbook](hazards.md#permuter-setup-for-kmc-toolchain-mirrors) |

@@ -102,7 +102,9 @@ if [ -z "$ASM_FILE" ]; then
     fi
 fi
 if [ -z "$ASM_FILE" ]; then
-    echo "$0: no asm/nonmatchings/**/${FUNC}.s (is the function already banked?)" >&2
+    echo "$0: no extracted ${FUNC}.s: extraction stops emitting a stub once its body is C." >&2
+    echo "  Compare instead: objdump -drz --disassemble=${FUNC} on the reference and candidate objects" >&2
+    echo "  (reference: build/us/obj/asm/<seg>.o before inlining; snapshot: nonmatchings/${FUNC}/target.s)." >&2
     exit 1
 fi
 

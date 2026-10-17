@@ -443,6 +443,10 @@ def main() -> None:
 
     raw = run_asm_differ(base_dump, my_dump)
     scored = score_diff(raw, max_mismatches=0 if args.score_only else 5)
+    if args.score_only:
+        # An empty list reads as "no differences"; say the detail was skipped instead.
+        del scored["top_mismatches"]
+        scored["mismatch_detail"] = "suppressed by --score-only; rerun without it to list rows"
     log(f"[diff] score={scored['score']} percent={scored['percent']:.4f}")
 
     outcome = {

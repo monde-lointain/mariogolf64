@@ -3,4 +3,4 @@
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 export UV_PROJECT_ENVIRONMENT="$ROOT/.venv"
-exec uv run --locked --project "$ROOT" python "$ROOT/tools/verify_rom.py" "$@"
+exec uv run --quiet --locked --project "$ROOT" python "$ROOT/tools/verify_rom.py" "$@"

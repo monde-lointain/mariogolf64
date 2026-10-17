@@ -148,9 +148,9 @@ uses `-n` as its maximum stubs per host, not a candidate-row limit.
 
 | Tool/evidence | Use and limit |
 | --- | --- |
-| `verify-rom.sh [--extract] [--build-dir <path>]` | Successful configured build plus ROM SHA-1. Requires build success before hashing, so a stale ROM cannot pass after build failure. |
-| `decomp_loop.py` score/percent | Isolated compile signal. Zero is a candidate, not proof; normalized labels/addresses can hide byte differences. `--score-only` deliberately omits mismatch details. |
-| `cmpfn.sh <fn> [<obj>]` | Instruction stream/counts while extracted target assembly exists; extraction may remove it after integration. Normalization is not byte proof. |
+| `verify-rom.sh [--extract] [--build-dir <path>] [--verbose]` | Successful configured build plus ROM SHA-1. Requires build success before hashing, so a stale ROM cannot pass after build failure. Prints one verdict line and logs the build to `<build-dir>/verify-rom.log`; a failed build prints its error lines, a mismatch the first differing ROM offset. An offset outside the changed function with a clean function diff is a layout shift (section size/alignment), not a code residual. |
+| `decomp_loop.py` score/percent | Isolated compile signal. Zero is a candidate, not proof; normalized labels/addresses can hide byte differences, and an integrated body can match where its isolated seed scored nonzero. `--score-only` replaces mismatch rows with an explicit `mismatch_detail` marker. |
+| `cmpfn.sh <fn> [<obj>]` | Instruction stream/counts, with position-relative internal branch targets, while extracted target assembly exists; extraction stops emitting it after integration (then use `objdump` on both objects). Normalization is not byte proof. |
 | Fresh `objdump -drz --disassemble=<fn> <obj>` and `objdump -r` | Use on both isolated and integrated objects after the host build. Keep `z` for nops; interpret actual relocation targets/addends, not raw unlinked call fields. |
 | Linked asm-differ view | Relocation-resolved iteration evidence after a fresh full build. Object-only builds do not refresh link maps. |
 | Function-byte spot-check | Isolated versus integrated code-generation diagnostic at score zero. Compare the same function/range, not whole TUs; relocation addends and assembler encodings require interpretation. Full-ROM verification resolves link/layout effects. |
@@ -162,9 +162,10 @@ uses `-n` as its maximum stubs per host, not a candidate-row limit.
 | `dl_decode.py`, `rdp_word.py`, `combine_word.py`, `gbi_match.py` | Packet/list order and SDK macro fields. Instruction order can differ from packet order; runtime words remain symbolic. Composite macros must be checked with `p++`, not `p`, because they reevaluate `pkt`. |
 | Assembly header size and mnemonic histograms | Header bytes divided by four give ROM instruction count; adjacent VRAM deltas do not. Normalize aliases. Histograms identify structural deltas but cannot locate them alone. |
 
-A nonzero score with no displayed mismatch is not proof of a source wall: check whether
-`--score-only` suppressed detail, inspect fresh instruction counts and real operands,
-and distinguish isolation/relocation differences from code-generation differences.
+A nonzero score with no displayed mismatch is not proof of a source wall: check for the
+`--score-only` marker, inspect fresh instruction counts and real operands (an internal
+branch-target difference scores as matched), and distinguish isolation/relocation
+differences from code-generation differences.
 
 ### Permuter eligibility
 
