@@ -4584,6 +4584,19 @@ than `extern D_xxxx[]` refs into the generic asm blob (see
 (gated by `ld_align_segment_vram_end: False`), so it cannot force an intra-section pad. Weigh
 rodata-alignment adjacency before decomposing a one-tu at the plan gate.
 
+**Mirror case: a C-owned *prefix* whose section tail pad overlaps the next asm-owned constant
+(S323 `func_800402F4`, `main/get_tile_attribute`).** Banking one function in an otherwise-asm TU
+carves only its jump table, and the KMC `as`-padded C `.rodata` (0x54 real bytes + 4 pad to the
+8-byte section alignment) then overlaps the immediately following asm-owned string
+(`D_800CA984 = "ratio %f,%x"`), which pushes every later data symbol by 4 and, after the next
+16-alignment point, by 0x10 — the entry stub's `%lo(nuContNum)` shifts first (ROM 0x8010c2d0 vs
+build 0x8010c2e0). Tell: per-function isolated diff is byte-clean, `mariogolf64.map` shows the C
+object's `.rodata` 4 bytes larger than the carved extent, and the built ROM hashes identically
+whatever the body is. Extending the carve so splat migrates the neighbouring string into the
+referencing stub fixes the layout but makes splat emit that function's case labels as *local* `.L…`
+(instead of `jlabel`), so the raw rodata blob's `.word .L<addr>` entries no longer link. See
+`docs/wip/func_800402F4.near-match.md` for the measured table and the three rejected fixes.
+
 ## capturing $ra (return address) as a call argument
 
 **Rule:** a ROM function that logs its caller's PC does `addu aN, $ra, $0` (copy the return-address
