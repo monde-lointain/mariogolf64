@@ -954,3 +954,4 @@ start_spark_animation = 0x80077BF0; // type:func
 stop_spark_animation = 0x80077C0C; // type:func
 load_spark_effect = 0x80077C18; // type:func
 free_spark_effect = 0x80077DEC; // type:func
+load_hole_terrain_assets = 0x802504E8; // type:func segment:overlay_4
