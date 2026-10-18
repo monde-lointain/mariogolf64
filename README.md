@@ -1,47 +1,112 @@
----
-type: Project Overview
-title: Mario Golf 64 decompilation
-description: Byte-exact US retail reconstruction with an owned toolchain, CMake build, and Oh My Pi workflow.
----
+Mario Golf 64
+=============
 
-# Mario Golf 64 decompilation
+A matching decompilation of [Mario Golf](https://en.wikipedia.org/wiki/Mario_Golf_(video_game)) for Nintendo 64 (North America, revision 0).
 
-Reconstructs the US revision-0 Nintendo 64 game as C and assembly that rebuild to the original ROM.
-The repository owns its pinned MIPS compiler/binutils sources and vendored decompilation tools.
-Supply your own big-endian US revision-0 `baserom.z64`; the ROM is not distributed.
+**This repository does not contain any game assets or assembly whatsoever. An existing copy of the game is required. This project is not a port, to PC or any other platform. It takes a Nintendo 64 rom, extracts assets from it, and combines them with C code we reverse-engineered from the rom, to produce an identical rom. It is explicitly a non-goal for this project to be used for any commercial purpose.**
 
-## Start here
+## Cloning
 
-- [Build and verify](docs/build.md#bootstrap-prerequisites) — Host prerequisites, locked Python setup, CMake presets, and the authoritative ROM acceptance gate.
-- [Documentation index](docs/index.md) — Choose an operational task, matching diagnosis, or reconstruction note before reading its detail.
-- [Decomp workflow](docs/workflow/index.md) — Native Oh My Pi skill, execution decisions, and independent analysis.
+Clone this repository, including its submodules:
 
-## Maintainer references
+```
+git clone --recurse-submodules -j8 https://github.com/monde-lointain/mariogolf64.git
+```
 
-- [Dependency ownership](third_party/README.md) — Pinned native sources, Python lockfile, origins, and licenses.
-- [Private CI container](docker/README.md) — ROM-bearing image and CI maintenance; never publish it.
+## Dependencies
 
-## Repository layout
+The build is verified on Linux (x86-64).
 
-| Path | Purpose |
+System packages:
+
+* make
+* git
+* python3 (with venv)
+* cpp (the host C preprocessor)
+* curl and tar (toolchain download)
+* binutils-mips-linux-gnu
+* clang-format-23 / clang-tidy-23 (optional, for `make format` and `make tidy`)
+
+On Debian/Ubuntu:
+```sh
+sudo apt install make git python3 python3-venv cpp curl binutils-mips-linux-gnu
+```
+
+Download the KMC GCC 2.7.2 / binutils 2.6 toolchain into `tools/gcc_kmc` and install the git
+pre-commit hook:
+
+```bash
+make setup
+```
+
+Install the Python dependencies (Splat, asm-differ, the permuter, m2c) in a virtual environment:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+python3 -m pip install -r requirements.txt
+```
+
+`.envrc` activates the environment automatically with direnv. The Makefile also uses
+`.venv/bin/python3` when it exists.
+
+## Building
+
+Place your ROM in the repository root as `baserom.z64`:
+
+| Version | Filename | SHA1 |
+| --- | --- | --- |
+| North America (rev 0) | `baserom.z64` | `e2c4e7a905b29529b49a1619a401fe699224829b` |
+
+Build and verify the ROM:
+
+```bash
+./tools/build-and-verify.sh
+```
+
+The output is `build/mariogolf64.z64`. A successful build prints the output path followed by `OK`,
+confirming that its SHA1 matches the original ROM.
+
+For incremental builds, extract once, then run make:
+
+```bash
+make extract
+make -j8
+```
+
+Other targets:
+
+| Target | Purpose |
 | --- | --- |
-| `src/`, `include/` | Reconstructed game and library source/header inputs. |
-| `mariogolf64.yaml`, `symbol_addrs.txt` | Segment layout and curated symbol placement. |
-| `CMakeLists.txt`, `CMakePresets.json`, `cmake/` | Build graph and reproducible configure/build/test workflows. |
-| `third_party/` | Pinned native source archives and vendored-tool provenance. |
-| `tools/`, `tests/tooling/` | Ordinary vendored decomp tools, first-party helpers, and behavioral tests. |
-| `.omp/` | Native skill, thin user command, and `RULES.md` project invariants (sticky, forwarded to subagents). |
-| `build/us/work/`, `build/us/obj/` | Generated extraction/source shadow and objects; never source inputs. |
-| `docs/`, `BACKLOG.md`, `RETRO.md`, `VELOCITY.md` | Current guidance and retained historical evidence. |
+| `make nonmatching` | Build without the SHA1 check (applies the N64 CRC). Add `NON_MATCHING=1` to compile `#ifdef NON_MATCHING` bodies. |
+| `make -s print-cflags SRC=src/main/<file>.c` | Print the exact compiler profile used for a C file. |
+| `make format` / `make format-check` | Format project sources under `src/` with clang-format 23. |
+| `make tidy` | Run clang-tidy 23 diagnostics (advisory). |
+| `make diff-line` | Write a byte diff of the built and base ROM to `romdiff`. |
+| `make clean` | Remove `build/` and all extracted output. |
 
-## Contributing
+## Decompiling
 
-Read [the invariants](.omp/RULES.md) before changing generated or low-level inputs.
-Never commit a non-matching function. Candidate experiments stay isolated until the full-ROM gate
-passes. Use [C coding and matching style](docs/coding-style.md) for source work and
-[prompt style](docs/prompt-style.md) for agent instructions. The [history guide](docs/history.md)
-distinguishes current procedures from sprint-time records.
+The agent-driven workflow follows the Snowboard Kids decompilation projects:
 
-The ROM is not distributed. Keep it, generated game assets, and any ROM-bearing container private.
-The root [MIT license](LICENSE) does not grant rights to Nintendo's ROM or replace
-[third-party licenses](third_party/README.md#licenses).
+- [CLAUDE.md](CLAUDE.md) (also `AGENTS.md`, `GEMINI.md`) holds the project instructions for agents.
+  `.claude/` holds the skills and tool-use hooks; `.codex`, `.agents`, and `.gemini` point at it.
+- `./tools/claude --bootstrap-only <function>` creates `nonmatchings/<function>/` with the target
+  assembly, an m2c starting point, and `build.sh`, which compiles a candidate with the owning file's
+  compiler profile and scores it against the target. Without `--bootstrap-only` it launches the
+  agent CLI (`--codex` for Codex) inside the environment.
+- `timeout 300s ./tools/permuter --source-file nonmatchings/<function>/base_N.c <function>` runs
+  [decomp-permuter](https://github.com/simonlindholm/decomp-permuter) with the same profile.
+- `python3 tools/asm-differ/diff.py --no-pager <function>` diffs a function in the built ROM.
+- `python3 tools/score_functions.py asm/nonmatchings` ranks unmatched functions;
+  `python3 tools/project_status.py` reports progress.
+- [task-runner/](task-runner) holds [nigel](https://github.com/cdlewis/nigel) tasks
+  (`nigel --list`, `nigel decompile-similar`). Nigel refuses to start with uncommitted changes
+  (no `reset_command` is configured), so commit or stash your work before running a task.
+
+Generic KMC GCC matching knowledge lives in [DECOMPILATION_LEARNINGS.md](DECOMPILATION_LEARNINGS.md).
+
+## License
+
+The [MIT license](LICENSE) covers first-party work, not Nintendo's ROM or the third-party tools in
+`tools/`.
