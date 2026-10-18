@@ -526,15 +526,17 @@ segments:
       - [0x115D80, data]
       - { start: 0x11BA50, type: bss, vram: 0x80231AD0 }
 
-  # Gap (unknown overlay) - references external data at 0x8040XXXX
+  # Gap (unknown overlay). Its absolute J targets and data references place it
+  # at 0x80400000.
   - name: overlay_gap
     type: code
     start: 0x11BA50
-    vram: 0x80451A50
+    vram: 0x80400000
     exclusive_ram_id: ovlgap
     symbol_name_format: ovlgap_$VRAM
     subsegments:
       - [0x11BA50, asm]
+      - [0x127FD0, data]
 
   # Overlay 4
   - name: overlay_4
