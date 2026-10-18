@@ -1,2 +1,4 @@
----
 BasedOnStyle: Google
+# Splat scans INCLUDE_ASM/INCLUDE_RODATA names; a wrapped argument hides the
+# function from extraction.
+WhitespaceSensitiveMacros: [INCLUDE_ASM, INCLUDE_RODATA]
