@@ -1,35 +1,16 @@
----
-type: Playbook
-title: Private CI build container
-description: Builds and publishes the private ROM-bearing image used by trusted CI build jobs.
-sources:
-  - resource: Dockerfile
-    title: Container dependencies and ROM location
-  - resource: ../.github/workflows/build.yml
-    title: CI permissions and job conditions
----
-
 # CI build container
 
 The [Build workflow](../.github/workflows/build.yml) uses a private container with the copyrighted
 ROM at `/orig/baserom.z64`. Keep the image private. Its build job runs only for same-repository
-pushes and PRs, not fork PRs: PR-controlled scripts could otherwise exfiltrate the ROM. The separate
-Python analysis job is ROM-free and advisory.
-
-## Choose a task
-
-- [Build and publish the private image](#one-time--on-dep-change-build-and-push-the-image)
-- [Configure CI access](#one-time-repo-secret-for-ci-pull)
-- [Test locally](#local-end-to-end-test-optional)
-- [Set up a local build](../docs/build.md)
+pushes and PRs, not fork PRs: PR-controlled scripts could otherwise exfiltrate the ROM.
 
 ## One-time / on-dep-change: build and push the image
 
 Run from the **repo root** (the build context), with `baserom.z64` present there and Docker
 installed with an available daemon. The Dockerfile copies this file into the image at
-`/orig/baserom.z64`; verify its SHA-1 against the required revision before building.
+`/orig/baserom.z64`; verify its SHA-1 against `mariogolf64.sha1` before building.
+
 ```sh
-# Compare this input SHA-1 with the top-level sha1 in mariogolf64.yaml:
 sha1sum baserom.z64
 
 docker build -f docker/Dockerfile -t ghcr.io/monde-lointain/mariogolf64-build:main .
@@ -55,21 +36,17 @@ Add a repo secret **`GHCR_PAT`** = a classic PAT with `read:packages`. The
 workflow uses it to pull the private image. (A personal-account private package
 usually cannot be pulled with the default `GITHUB_TOKEN`, hence the PAT.)
 
-## Sequencing
-
-Push the image and add the `GHCR_PAT` secret before enabling or updating the workflow's image
-reference; a missing image or credential fails at container pull, before checkout.
-
 ## Local end-to-end test (optional)
 
-Reproduce the workflow steps before pushing. The Docker daemon must be available. Because the
-repository is bind-mounted at `/repo`, the `cp` below writes the image ROM to the host checkout's
-`baserom.z64`, replacing any existing file there:
+Reproduce the workflow steps before pushing. Because the repository is bind-mounted at `/repo`,
+the `cp` below writes the image ROM to the host checkout's `baserom.z64`, replacing any existing
+file there:
 
 ```sh
 docker build -f docker/Dockerfile -t mg64-ci-test .
 docker run --rm -v "$PWD":/repo -w /repo mg64-ci-test bash -c \
-  'cp /orig/baserom.z64 baserom.z64 && cmake --preset us && tools/verify-rom.sh'
-# expect: CMake build OK + ROM SHA-1 MATCH
+  'cp /orig/baserom.z64 baserom.z64 && make -C tools &&
+   python3 -m venv /tmp/venv && /tmp/venv/bin/pip install -r requirements.txt &&
+   PATH=/tmp/venv/bin:$PATH ./tools/build-and-verify.sh'
+# expect: build/mariogolf64.z64: OK
 ```
-
