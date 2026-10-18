@@ -1,1 +1,0 @@
---target sh4-shc-c --function test_one

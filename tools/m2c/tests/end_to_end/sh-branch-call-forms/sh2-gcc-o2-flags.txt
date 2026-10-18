@@ -1,1 +1,0 @@
---context context.c --target sh2-gcc-c --function test_if_nonzero --function test_if_greater --function test_loop --function test_call

@@ -1,1 +1,0 @@
---context context.c --target sh2-gcc-c -f test_storel_predec -f test_loadb_predec -f test_loadw_predec
